@@ -65,9 +65,9 @@ namespace Trident {
 					case ImageFormat::R8G8B8_UNORM: {
 						const qoi_rgb* data = pointer_cast<const qoi_rgb*>(&descriptor.data[0]);
 
-						qoi_rgb texelCache[64]{};
-						qoi_rgb previousTexel = {0, 0, 0};
-						qoi_index previousTexelHash = rgbHash(previousTexel);
+						qoi_rgba texelCache[64]{};
+						qoi_rgba previousTexel = {0, 0, 0, 255};
+						qoi_index previousTexelHash = rgbaHash(previousTexel);
 						uint8 runLength = 0;
 						uint32 texelIndex = 0;
 
@@ -76,13 +76,17 @@ namespace Trident {
 								for (uint32 x = 0; x < descriptor.extent.width; x += 1, texelIndex += 1) {
 									texelCache[previousTexelHash.index] = previousTexel;
 
-									const qoi_rgb texel = data[texelIndex];
-									const qoi_index texelHash = rgbHash(texel);
+									const qoi_rgb rgbTexel = data[texelIndex];
+									const qoi_rgba texel = {rgbTexel.r, rgbTexel.g, rgbTexel.b, 255};
+									const qoi_index texelHash = rgbaHash(texel);
 
 									if (texelHash.index == previousTexelHash.index && runLength != 62) {
-										runLength += 1;
+										// The hash is cheap to compare but can still give false positives.
+										if (texel == previousTexel) {
+											runLength += 1;
 
-										continue;
+											continue;
+										}
 									}
 
 									if (runLength > 0) {
@@ -104,7 +108,7 @@ namespace Trident {
 									}
 									else {
 										outputByteStream.write<uint8>(0b11111110);
-										outputByteStream.write<qoi_rgb>(texel);
+										outputByteStream.write<qoi_rgb>(rgbTexel);
 									}
 
 									previousTexel = texel;
@@ -141,9 +145,12 @@ namespace Trident {
 									const qoi_index texelHash = rgbaHash(texel);
 
 									if (texelHash.index == previousTexelHash.index && runLength != 62) {
-										runLength += 1;
+										// The hash is cheap to compare but can still give false positives.
+										if (texel == previousTexel) {
+											runLength += 1;
 
-										continue;
+											continue;
+										}
 									}
 
 									if (runLength > 0) {

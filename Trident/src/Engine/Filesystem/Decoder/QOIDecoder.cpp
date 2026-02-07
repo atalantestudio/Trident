@@ -69,7 +69,6 @@ namespace Trident {
 	void Filesystem::QOIDecoderContentOnly(ByteStream<StreamOperation::READ>& stream, sequence<uint8>& data, uint8 channelCount, uint64 maxIterationCount) {
 		qoi_rgba previousTexel = {0, 0, 0, 255};
 		qoi_rgba texelCache[64]{};
-
 		uint64 dataOffset = 0;
 		uint64 iterationIndex = 0;
 
@@ -81,17 +80,17 @@ namespace Trident {
 
 				stream.jump(1);
 
-				if (tag == 0b11111110) {
+				if (tag == 0b11111111) {
+					const qoi_rgba texel = stream.read<qoi_rgba>();
+
+					previousTexel = texel;
+				}
+				else {
 					const qoi_rgb texel = stream.read<qoi_rgb>();
 
 					previousTexel.r = texel.r;
 					previousTexel.g = texel.g;
 					previousTexel.b = texel.b;
-				}
-				else {
-					const qoi_rgba texel = stream.read<qoi_rgba>();
-
-					previousTexel = texel;
 				}
 
 				std::copy_n(pointer_cast<const uint8*>(&previousTexel), channelCount, &data[dataOffset]);

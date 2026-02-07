@@ -84,13 +84,6 @@ namespace Trident {
 		uint8 tag : 2;
 	};
 
-	inline qoi_index rgbHash(qoi_rgb p) {
-		qoi_index index;
-		index.index = (p.r * 3 + p.g * 5 + p.b * 7) % 64;
-
-		return index;
-	}
-
 	inline qoi_index rgbaHash(qoi_rgba p) {
 		qoi_index index;
 		index.index = (p.r * 3 + p.g * 5 + p.b * 7 + p.a * 11) % 64;
