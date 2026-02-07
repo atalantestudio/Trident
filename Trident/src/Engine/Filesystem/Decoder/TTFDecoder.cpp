@@ -352,7 +352,6 @@ namespace Trident {
 		} */
 	}
 
-	// Returns true if the provided file has a valid TTF signature.
 	template<>
 	bool Filesystem::validateSignature<FileFormat::TTF>(const ByteStream<StreamOperation::READ>& stream) {
 		if (stream.getRemainingSize() < sizeof(uint32)) {

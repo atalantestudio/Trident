@@ -37,7 +37,7 @@ namespace Trident {
 			inline void jump() {
 				const uint8 codePointByteSize = extractCodePointByteSize();
 
-				ENGINE_ASSERT(byteOffset + codePointByteSize <= byteSize, "Attempted to jump [] bytes, but only [] were remaining.", codePointByteSize, byteSize - byteOffset);
+				ENGINE_ASSERT(byteOffset + codePointByteSize <= byteSize, "Attempted to jump [] byte(s), but only [] were remaining.", codePointByteSize, byteSize - byteOffset);
 
 				byteOffset += codePointByteSize;
 			}
@@ -53,7 +53,7 @@ namespace Trident {
 			inline uint32 peek() const {
 				const uint8 codePointByteSize = extractCodePointByteSize();
 
-				ENGINE_ASSERT(byteOffset + codePointByteSize <= byteSize, "Attempted to peek [] bytes, but only [] were remaining.", codePointByteSize, byteSize - byteOffset);
+				ENGINE_ASSERT(byteOffset + codePointByteSize <= byteSize, "Attempted to peek [] byte(s), but only [] were remaining.", codePointByteSize, byteSize - byteOffset);
 
 				const uint32 codePoint = extractCodePoint(codePointByteSize);
 
@@ -67,7 +67,7 @@ namespace Trident {
 			inline uint32 read() {
 				const uint8 codePointByteSize = extractCodePointByteSize();
 
-				ENGINE_ASSERT(byteOffset + codePointByteSize <= byteSize, "Attempted to read [] bytes, but only [] were remaining.", codePointByteSize, byteSize - byteOffset);
+				ENGINE_ASSERT(byteOffset + codePointByteSize <= byteSize, "Attempted to read [] byte(s), but only [] were remaining.", codePointByteSize, byteSize - byteOffset);
 
 				const uint32 codePoint = extractCodePoint(codePointByteSize);
 

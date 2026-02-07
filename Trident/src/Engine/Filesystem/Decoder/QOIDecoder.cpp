@@ -8,13 +8,25 @@
 
 namespace Trident {
 	template<>
-	File<FileFormat::QOI> Filesystem::decode<FileFormat::QOI>(const sequence<uint8>& data) {
-		File<FileFormat::QOI> file;
+	bool Filesystem::validateSignature<FileFormat::QOI>(const ByteStream<StreamOperation::READ>& stream) {
+		if (stream.getRemainingSize() < sizeof(uint32)) {
+			return false;
+		}
 
+		const uint32 magic = stream.peek<uint32>(true);
+
+		return magic == STRING_TO_BIG_ENDIAN_UINT32("qoif");
+	}
+
+	template<>
+	File<FileFormat::QOI> Filesystem::decode<FileFormat::QOI>(const sequence<uint8>& data) {
 		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-		ENGINE_ASSERT(stream.read<uint32>(true) == STRING_TO_BIG_ENDIAN_UINT32("qoif"), "Invalid QOI file signature.");
+		ENGINE_ASSERT(validateSignature<FileFormat::QOI>(stream), "Invalid QOI signature.");
 
+		stream.jump(sizeof(uint32));
+
+		File<FileFormat::QOI> file{};
 		file.extent.width = stream.read<uint32>(true);
 		file.extent.height = stream.read<uint32>(true);
 		file.extent.depth = 1;
@@ -22,18 +34,21 @@ namespace Trident {
 		const uint8 channelCount = stream.read<uint8>();
 
 		switch (channelCount) {
-			case 3:
+			case 3: {
 				file.format = ImageFormat::R8G8B8_UNORM;
 
 				break;
-			case 4:
+			}
+			case 4: {
 				file.format = ImageFormat::R8G8B8A8_UNORM;
 
 				break;
-			default:
+			}
+			default: {
 				ENGINE_ASSERT(false, "Unhandled channel count ([]).", static_cast<sint32>(channelCount));
 
 				break;
+			}
 		}
 
 		const uint8 colorSpace = stream.read<uint8>();
@@ -66,16 +81,17 @@ namespace Trident {
 
 				stream.jump(1);
 
-				const qoi_rgba texel = stream.peek<qoi_rgba>();
+				if (tag == 0b11111110) {
+					const qoi_rgb texel = stream.read<qoi_rgb>();
 
-				previousTexel.r = texel.r;
-				previousTexel.g = texel.g;
-				previousTexel.b = texel.b;
+					previousTexel.r = texel.r;
+					previousTexel.g = texel.g;
+					previousTexel.b = texel.b;
+				}
+				else {
+					const qoi_rgba texel = stream.read<qoi_rgba>();
 
-				stream.jump(tag - 251);
-
-				if (tag == 0b11111111) {
-					previousTexel.a = texel.a;
+					previousTexel = texel;
 				}
 
 				std::copy_n(pointer_cast<const uint8*>(&previousTexel), channelCount, &data[dataOffset]);
@@ -138,10 +154,13 @@ namespace Trident {
 
 						const uint8 runLength = (tag & 0b00111111) + 1;
 
-						for (uint8 runOffset = 0; runOffset < runLength; runOffset += 1) {
+						uint8 runOffset = 0;
+
+						while (runOffset < runLength) {
 							std::copy_n(pointer_cast<const uint8*>(&previousTexel), channelCount, &data[dataOffset]);
 
 							dataOffset += channelCount;
+							runOffset += 1;
 						}
 
 						iterationIndex += 1;

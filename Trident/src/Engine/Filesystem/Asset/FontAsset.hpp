@@ -14,6 +14,8 @@ namespace Trident {
 		std::unordered_map<uint16, uint32> unicodeMap;
 	};
 
+	// TODO: FontAssetHeader structure.
+
 	class FontAsset : public Asset {
 		public:
 			explicit FontAsset(const FontAssetDescriptor& descriptor) :

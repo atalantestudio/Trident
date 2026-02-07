@@ -5,6 +5,7 @@
 
 #include "Engine/API/Event/Window/WindowCloseEvent.hpp"
 #include "Engine/API/Event/Window/WindowResizeEvent.hpp"
+#include "Engine/API/Process/Process.hpp"
 #include "Engine/API/SharedMemory/SharedMemory.hpp"
 #include "Engine/API/Synchronization/Mutex.hpp"
 #include "Engine/API/Timer/HighResolutionTimer.hpp"
@@ -13,7 +14,6 @@
 #include "Engine/Application/ProjectDescriptor.hpp"
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 #include "Engine/Layer/LayerStack.hpp"
-#include "Engine/Process/Process.hpp"
 
 int main(int argc, char** argv);
 

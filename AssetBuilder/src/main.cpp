@@ -7,6 +7,7 @@
 
 #include "Process/BuildFontProcess.hpp"
 #include "Process/BuildGeometryProcess.hpp"
+#include "Process/BuildImageAssetProcess.hpp"
 #include "Process/BuildShaderModuleProcess.hpp"
 
 namespace Trident {
@@ -17,9 +18,16 @@ namespace Trident {
 			{
 				setConsoleArguments(argumentCount, argumentValues);
 
-				registerProcess<BuildFontProcess>();
 				registerProcess<BuildGeometryProcess>();
+				registerProcess<BuildImageAssetProcess>();
 				registerProcess<BuildShaderModuleProcess>();
+
+				// NOTE: Font assets depend on image assets.
+				registerProcess<BuildFontProcess>();
+			}
+
+			~AssetBuilderApplication() override {
+				ENGINE_INFO("Done building assets.");
 			}
 	};
 

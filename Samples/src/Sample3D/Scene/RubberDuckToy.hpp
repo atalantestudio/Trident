@@ -41,10 +41,14 @@ namespace Trident {
 
 		MaterialReference pbrMaterialReference{};
 		pbrMaterialReference.materialIndex = pbrMaterialIndex;
-		pbrMaterialReference.descriptorImagePaths = {
-			"Asset/Image/rubber_duck_toy_1k/textures/rubber_duck_toy_arm_1k.png",
-			"Asset/Image/rubber_duck_toy_1k/textures/rubber_duck_toy_diff_1k.png",
-			"Asset/Image/rubber_duck_toy_1k/textures/rubber_duck_toy_nor_gl_1k.png",
+		pbrMaterialReference.descriptorImageAssetPaths = {
+			// TODO: Generate assets in the correct subdirectory.
+			// "rubber_duck_toy_1k/textures/rubber_duck_toy_arm_1k",
+			// "rubber_duck_toy_1k/textures/rubber_duck_toy_diff_1k",
+			// "rubber_duck_toy_1k/textures/rubber_duck_toy_nor_gl_1k",
+			"rubber_duck_toy_arm_1k",
+			"rubber_duck_toy_diff_1k",
+			"rubber_duck_toy_nor_gl_1k",
 		};
 
 		const uint32 pbrMaterialReferenceIndex = scene.registerMaterialReference(pbrMaterialReference);

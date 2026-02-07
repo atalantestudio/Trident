@@ -28,7 +28,7 @@ namespace Trident {
 			T peek(bool swapEndianness = false) const {
 				const uint64 remainingByteSize = getRemainingSize();
 
-				ENGINE_ASSERT(sizeof(T) <= remainingByteSize, "Attempted to peek [] bytes, but only [] were remaining.", sizeof(T), remainingByteSize);
+				ENGINE_ASSERT(sizeof(T) <= remainingByteSize, "Attempted to peek [] byte(s), but only [] were remaining.", sizeof(T), remainingByteSize);
 
 				T value = *pointer_cast<const T*>(data + byteOffset);
 
@@ -81,7 +81,7 @@ namespace Trident {
 			void write(T value, bool swapEndianness = false) {
 				const uint64 remainingByteSize = getRemainingSize();
 
-				ENGINE_ASSERT(sizeof(T) <= remainingByteSize, "Attempted to write [] bytes, but only [] were remaining.", sizeof(T), remainingByteSize);
+				ENGINE_ASSERT(sizeof(T) <= remainingByteSize, "Attempted to write [] byte(s), but only [] were remaining.", sizeof(T), remainingByteSize);
 
 				if (swapEndianness) {
 					*pointer_cast<T*>(&data[byteOffset]) = byteswap<T>(value);

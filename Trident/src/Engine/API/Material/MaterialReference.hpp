@@ -6,6 +6,6 @@
 namespace Trident {
 	struct MaterialReference {
 		uint32 materialIndex;
-		sequence<sequence<char8>> descriptorImagePaths;
+		sequence<sequence<char8>> descriptorImageAssetPaths;
 	};
 }

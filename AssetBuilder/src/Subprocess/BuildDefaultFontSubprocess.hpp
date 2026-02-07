@@ -3,7 +3,9 @@
 
 #pragma once
 
-#include "BuildGlyphMapImageSubprocess.hpp"
+#include "Engine/API/Process/Process.hpp"
+
+#include "Process/BuildImageAssetProcess.hpp"
 
 namespace Trident {
 	class BuildDefaultFontSubprocess {
@@ -174,24 +176,24 @@ namespace Trident {
 				const sequence<uint8> buffer = Filesystem::openByteBuffer("../Trident/src/Asset/Image/quiver.png");
 				const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(buffer);
 
-				ENGINE_ASSERT(file.format == ImageFormat::R8G8B8A8_UNORM, "The default font must be created from an RGBA PNG.");
-				ENGINE_ASSERT(file.extent.depth == 1, "The default font file must not have depth.");
+				ENGINE_ASSERT(file.format == ImageFormat::R8G8B8A8_UNORM, "The default font bitmap must have RGBA format.");
+				ENGINE_ASSERT(file.extent.depth == 1, "The default font bitmap must have a depth of 1.");
 
-				sequence<uint8> data(file.data.count() / 4);
+				ImageAssetDescriptor imageAssetDescriptor{};
+				imageAssetDescriptor.format = ImageFormat::R8_UNORM;
+				imageAssetDescriptor.extent = file.extent;
+				imageAssetDescriptor.mipLevelCount = 1;
+				imageAssetDescriptor.layerCount = 1;
+				imageAssetDescriptor.data = sequence<uint8>(file.data.count() / 4);
 
-				convert<ImageFormat::R8G8B8A8_UNORM, ImageFormat::R8_UNORM>(file.data, &data[0], data.count());
+				convert<ImageFormat::R8G8B8A8_UNORM, ImageFormat::R8_UNORM>(file.data, &imageAssetDescriptor.data[0], imageAssetDescriptor.data.count());
 
-				ImageAssetDescriptor glyphMapImageAssetDescriptor{};
-				glyphMapImageAssetDescriptor.format = ImageFormat::R8_UNORM;
-				glyphMapImageAssetDescriptor.extent = file.extent;
-				glyphMapImageAssetDescriptor.mipLevelCount = 1;
-				glyphMapImageAssetDescriptor.layerCount = 1;
-				glyphMapImageAssetDescriptor.data = data;
+				BuildImageAssetProcess::encodeImageAsset(assetOutputPath, "DefaultFont", imageAssetDescriptor);
 
 				FontAssetDescriptor fontAssetDescriptor{};
 				fontAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
 				fontAssetDescriptor.version = {1, 0, 0};
-				fontAssetDescriptor.glyphMapImage = createRef<ImageAsset>(glyphMapImageAssetDescriptor);
+				fontAssetDescriptor.glyphMapImage = nullptr;
 				fontAssetDescriptor.lineHeight = ASCENT - DESCENT + LINE_GAP;
 				fontAssetDescriptor.glyphs = sequence<Glyph>(144);
 
@@ -225,15 +227,11 @@ namespace Trident {
 					(sizeof(svec2<float32>) * 2 + sizeof(uint16) * 3 + sizeof(sint16) * 2) * glyphCount +
 					(sizeof(uint16) + sizeof(uint32)) * fontAssetDescriptor.unicodeMap.size();
 
-				uint32 glyphMapImageAssetIdentifier;
-
-				const BuildGlyphMapImageSubprocess buildGlyphMapImageSubprocess(assetOutputPath, "DefaultFont", fontAssetDescriptor.glyphMapImage, glyphMapImageAssetIdentifier);
-
 				ByteStream<StreamOperation::WRITE> outputByteStream(outputSize, Endianness::LITTLE_ENDIAN);
-				outputByteStream.write<AssetSignature>(AssetSignature::TFO);
+				outputByteStream.write<AssetSignature>(AssetSignature::FONT_ASSET);
 				outputByteStream.write<uint32>(fontAssetDescriptor.identifier);
-				outputByteStream.write<VersionNumber>({0, 0, 0});
-				outputByteStream.write<uint32>(glyphMapImageAssetIdentifier);
+				outputByteStream.write<VersionNumber>({1, 0, 0});
+				outputByteStream.write<uint32>(imageAssetDescriptor.identifier);
 				outputByteStream.write<sint16>(ASCENT);
 				outputByteStream.write<sint16>(DESCENT);
 				outputByteStream.write<sint16>(LINE_GAP);
@@ -287,7 +285,7 @@ namespace Trident {
 				Writer writer = Filesystem::openWriter(outputPath);
 				writer.write(outputByteStream.data, outputByteStream.size);
 
-				ENGINE_INFO("Generated default font asset \"[]\" (ID: []).", outputPath, fontAssetDescriptor.identifier);
+				ENGINE_INFO("Generated default (bitmap) font asset \"[]\" (ID: []).", outputPath, fontAssetDescriptor.identifier);
 			}
 	};
 }

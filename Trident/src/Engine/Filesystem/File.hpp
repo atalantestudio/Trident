@@ -30,7 +30,20 @@ namespace Trident {
 		sequence<uint8> data;
 	};
 
-	// NOTE: This chunk doesn't contain the tag.
+	struct qoi_rgb {
+		uint8 r;
+		uint8 g;
+		uint8 b;
+
+		bool operator ==(qoi_rgb other) const {
+			return (
+				r == other.r &&
+				g == other.g &&
+				b == other.b
+			);
+		}
+	};
+
 	struct qoi_rgba {
 		uint8 r;
 		uint8 g;
@@ -71,7 +84,14 @@ namespace Trident {
 		uint8 tag : 2;
 	};
 
-	static qoi_index rgbaHash(qoi_rgba p) {
+	inline qoi_index rgbHash(qoi_rgb p) {
+		qoi_index index;
+		index.index = (p.r * 3 + p.g * 5 + p.b * 7) % 64;
+
+		return index;
+	}
+
+	inline qoi_index rgbaHash(qoi_rgba p) {
 		qoi_index index;
 		index.index = (p.r * 3 + p.g * 5 + p.b * 7 + p.a * 11) % 64;
 

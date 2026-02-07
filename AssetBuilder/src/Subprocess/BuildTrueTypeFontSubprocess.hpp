@@ -3,14 +3,16 @@
 
 #pragma once
 
-#include "BuildGlyphMapImageSubprocess.hpp"
-#include "../Process/GenerateSDFGlyphMapProcess.hpp"
+#include "Process/BuildImageAssetProcess.hpp"
+#include "Process/GenerateSDFGlyphMapProcess.hpp"
 
 namespace Trident {
 	class BuildTrueTypeFontSubprocess {
 		public:
 			explicit BuildTrueTypeFontSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::filesystem::path& assetOutputPath) {
 				const sequence<char8> path = directoryEntry.path().string();
+				const std::string assetNameString = directoryEntry.path().stem().string();
+				const view<char8> assetName(&assetNameString[0], assetNameString.size());
 				const sequence<uint8> inputData = Filesystem::openByteBuffer(path);
 				const ByteStream<StreamOperation::READ> inputByteStream(&inputData[0], inputData.count(), Endianness::BIG_ENDIAN);
 
@@ -22,26 +24,26 @@ namespace Trident {
 
 				const File<FileFormat::TTF> file = Filesystem::decode<FileFormat::TTF>(inputData);
 
-				FontAssetDescriptor fontAssetDescriptor{};
-				fontAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
-				fontAssetDescriptor.version = {1, 0, 0};
-				fontAssetDescriptor.lineHeight = file.ascent - file.descent + file.lineGap;
-				fontAssetDescriptor.unicodeMap = file.unicodeMap;
-
 				SDFGlyphMap sdfGlyphMap;
 
 				GenerateSDFGlyphMapProcess(file, sdfGlyphMap);
 
+				ImageAssetDescriptor imageAssetDescriptor{};
+				imageAssetDescriptor.format = ImageFormat::R8_UNORM;
+				imageAssetDescriptor.extent = {sdfGlyphMap.extent.width, sdfGlyphMap.extent.height, 1};
+				imageAssetDescriptor.mipLevelCount = 1;
+				imageAssetDescriptor.layerCount = 1;
+				imageAssetDescriptor.data = sdfGlyphMap.data;
+
+				BuildImageAssetProcess::encodeImageAsset(assetOutputPath, assetName, imageAssetDescriptor);
+
+				FontAssetDescriptor fontAssetDescriptor{};
+				fontAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
+				fontAssetDescriptor.version = {1, 0, 0};
+				fontAssetDescriptor.glyphMapImage = nullptr;
+				fontAssetDescriptor.lineHeight = file.ascent - file.descent + file.lineGap;
 				fontAssetDescriptor.glyphs = sdfGlyphMap.glyphs;
-
-				ImageAssetDescriptor glyphMapImageAssetDescriptor{};
-				glyphMapImageAssetDescriptor.format = ImageFormat::R8_UNORM;
-				glyphMapImageAssetDescriptor.extent = {sdfGlyphMap.extent.width, sdfGlyphMap.extent.height, 1};
-				glyphMapImageAssetDescriptor.mipLevelCount = 1;
-				glyphMapImageAssetDescriptor.layerCount = 1;
-				glyphMapImageAssetDescriptor.data = sdfGlyphMap.data;
-
-				fontAssetDescriptor.glyphMapImage = createRef<ImageAsset>(glyphMapImageAssetDescriptor);
+				fontAssetDescriptor.unicodeMap = file.unicodeMap;
 
 				const uint32 glyphCount = static_cast<uint32>(fontAssetDescriptor.glyphs.count());
 				const uint64 outputSize =
@@ -49,18 +51,11 @@ namespace Trident {
 					(sizeof(svec2<float32>) * 2 + sizeof(uint16) * 3 + sizeof(sint16) * 2) * glyphCount +
 					(sizeof(uint16) + sizeof(uint32)) * file.unicodeMap.size();
 
-				uint32 glyphMapImageAssetIdentifier;
-
-				const std::string assetNameString = directoryEntry.path().stem().string();
-				const view<char8> assetName(&assetNameString[0], assetNameString.size());
-
-				BuildGlyphMapImageSubprocess(assetOutputPath, assetName, fontAssetDescriptor.glyphMapImage, glyphMapImageAssetIdentifier);
-
 				ByteStream<StreamOperation::WRITE> outputByteStream(outputSize, Endianness::LITTLE_ENDIAN);
-				outputByteStream.write<AssetSignature>(AssetSignature::TFO);
+				outputByteStream.write<AssetSignature>(AssetSignature::FONT_ASSET);
 				outputByteStream.write<uint32>(fontAssetDescriptor.identifier);
-				outputByteStream.write<VersionNumber>({0, 0, 0});
-				outputByteStream.write<uint32>(glyphMapImageAssetIdentifier);
+				outputByteStream.write<VersionNumber>({1, 0, 0});
+				outputByteStream.write<uint32>(imageAssetDescriptor.identifier);
 				outputByteStream.write<sint16>(file.ascent);
 				outputByteStream.write<sint16>(file.descent);
 				outputByteStream.write<sint16>(file.lineGap);
@@ -115,7 +110,7 @@ namespace Trident {
 				Writer writer = Filesystem::openWriter(outputPath);
 				writer.write(outputByteStream.data, outputByteStream.size);
 
-				ENGINE_INFO("Generated font asset \"[]\" (ID: []).", outputPath, fontAssetDescriptor.identifier);
+				ENGINE_INFO("Generated True-Type font asset \"[]\" (ID: []).", outputPath, fontAssetDescriptor.identifier);
 			}
 	};
 }

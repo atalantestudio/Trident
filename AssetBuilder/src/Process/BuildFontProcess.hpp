@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/Process/Process.hpp"
+#include "Engine/API/Process/Process.hpp"
 
 #include "Subprocess/BuildDefaultFontSubprocess.hpp"
 #include "Subprocess/BuildTrueTypeFontSubprocess.hpp"
@@ -21,7 +21,7 @@ namespace Trident {
 				const std::filesystem::path assetOutputPath = rootOutputPath / "Asset/";
 				const std::filesystem::recursive_directory_iterator fontDirectoryIterator(rootInputPath / "Asset/Font");
 
-				BuildDefaultFontSubprocess defaultFontSubprocess(assetOutputPath);
+				BuildDefaultFontSubprocess _(assetOutputPath);
 
 				for (const std::filesystem::directory_entry& directoryEntry : fontDirectoryIterator) {
 					if (directoryEntry.is_directory()) {

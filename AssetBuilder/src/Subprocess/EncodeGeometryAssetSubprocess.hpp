@@ -8,7 +8,7 @@
 #include "Engine/Filesystem/File/FBXFile.hpp"
 
 namespace Trident {
-	// TODO: Assert that FBX nodes exist before using them.
+	// TODO: Ensure that FBX nodes exist before using them.
 	static void EncodeGeometryAssetSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::filesystem::path& assetOutputPath) {
 		const sequence<char8> path = directoryEntry.path().string();
 		const sequence<uint8> inputData = Filesystem::openByteBuffer(path);
@@ -50,8 +50,8 @@ namespace Trident {
 
 					indexCount += 3;
 
-					// A negative index means it's the last index in the current polygon.
 					if (thirdIndex < 0) {
+						// A negative index means it's the last index in the current polygon.
 						polygonOffset += triangleOffset + 2;
 
 						break;
@@ -310,7 +310,7 @@ namespace Trident {
 		const uint64 totalIndexByteCount = static_cast<uint64>(ceil(indexCount * (vertexPositionIndexBitCount + vertexNormalIndexBitCount + vertexTextureCoordinateIndexBitCount) / 8.0f));
 
 		const uint64 outputSize =
-			Asset::HEADER_SIZE +
+			sizeof(AssetHeader) +
 			5 * sizeof(uint32) +
 			vertexPositionComponents.count() * sizeof(float32) +
 			vertexNormalComponents.count() * sizeof(float32) +
@@ -318,9 +318,9 @@ namespace Trident {
 			totalIndexByteCount;
 
 		ByteStream<StreamOperation::WRITE> byteStream(outputSize, Endianness::LITTLE_ENDIAN);
-		byteStream.write<AssetSignature>(AssetSignature::TGE);
+		byteStream.write<AssetSignature>(AssetSignature::GEOMETRY_ASSET);
 		byteStream.write<uint32>(geometryAssetIdentifier);
-		byteStream.write<VersionNumber>({0, 0, 0});
+		byteStream.write<VersionNumber>({1, 0, 0});
 		byteStream.write<uint32>(clusterCount);
 		byteStream.write<uint32>(vertexPositionCount);
 

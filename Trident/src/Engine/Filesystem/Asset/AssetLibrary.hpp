@@ -116,9 +116,11 @@ namespace Trident {
 
 				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.read<AssetSignature>() != AssetSignature::TFO) {
+				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::FONT_ASSET) {
 					return;
 				}
+
+				byteStream.jump(sizeof(AssetSignature));
 
 				const ref<FontAsset> fontAsset = decodeFontAsset(byteStream);
 				const uint32 fontAssetIndex = static_cast<uint32>(assets.size());
@@ -135,9 +137,11 @@ namespace Trident {
 
 				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.read<AssetSignature>() != AssetSignature::TGE) {
+				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::GEOMETRY_ASSET) {
 					return;
 				}
+
+				byteStream.jump(sizeof(AssetSignature));
 
 				const ref<GeometryAsset> geometryAsset = Filesystem::decodeAsset<GeometryAsset>(byteStream);
 				const uint32 geometryAssetIndex = static_cast<uint32>(assets.size());
@@ -154,7 +158,7 @@ namespace Trident {
 
 				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.read<AssetSignature>() != AssetSignature::TIM) {
+				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::IMAGE_ASSET) {
 					return;
 				}
 
@@ -173,9 +177,11 @@ namespace Trident {
 
 				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.read<AssetSignature>() != AssetSignature::TSM) {
+				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::SHADER_MODULE_ASSET) {
 					return;
 				}
+
+				byteStream.jump(sizeof(AssetSignature));
 
 				const ref<ShaderModuleAsset> shaderModuleAsset = decodeShaderModuleAsset(byteStream);
 				const uint32 shaderModuleAssetIndex = static_cast<uint32>(assets.size());
@@ -284,13 +290,17 @@ namespace Trident {
 			}
 
 			ref<ImageAsset> decodeImageAsset(ByteStream<StreamOperation::READ>& byteStream) const {
+				const ImageAssetHeader& imageAssetHeader = *pointer_cast<const ImageAssetHeader*>(byteStream.getBytePosition());
+
+				byteStream.jump(sizeof(imageAssetHeader));
+
 				ImageAssetDescriptor imageAssetDescriptor{};
-				imageAssetDescriptor.identifier = byteStream.read<uint32>();
-				imageAssetDescriptor.version = byteStream.read<VersionNumber>();
-				imageAssetDescriptor.format = static_cast<ImageFormat>(byteStream.read<uint32>());
-				imageAssetDescriptor.extent = byteStream.read<Extent3D>();
-				imageAssetDescriptor.mipLevelCount = byteStream.read<uint32>();
-				imageAssetDescriptor.layerCount = byteStream.read<uint32>();
+				imageAssetDescriptor.identifier = imageAssetHeader.identifier;
+				imageAssetDescriptor.version = imageAssetHeader.version;
+				imageAssetDescriptor.format = static_cast<ImageFormat>(imageAssetHeader.format);
+				imageAssetDescriptor.extent = imageAssetHeader.extent;
+				imageAssetDescriptor.mipLevelCount = imageAssetHeader.mipLevelCount;
+				imageAssetDescriptor.layerCount = imageAssetHeader.layerCount;
 
 				const uint8 channelCount = getChannelCount(imageAssetDescriptor.format);
 

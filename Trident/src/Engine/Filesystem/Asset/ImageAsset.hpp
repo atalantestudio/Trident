@@ -25,7 +25,14 @@ namespace Trident {
 		sequence<uint8> data;
 	};
 
-	// An image stored in CPU memory (as opposed to Image).
+	struct ImageAssetHeader : public AssetHeader {
+		uint32 format;
+		Extent3D extent;
+		uint32 mipLevelCount;
+		uint32 layerCount;
+	};
+
+	// An image stored in CPU memory.
 	class ImageAsset : public Asset {
 		public:
 			explicit ImageAsset(const ImageAssetDescriptor& descriptor) :

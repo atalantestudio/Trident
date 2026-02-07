@@ -21,6 +21,8 @@ namespace Trident {
 		sequence<uint32> vertexTextureCoordinateIndices;
 	};
 
+	// TODO: GeometryAssetHeader structure.
+
 	class GeometryAsset : public Asset {
 		public:
 			explicit GeometryAsset(const GeometryAssetDescriptor& descriptor) :

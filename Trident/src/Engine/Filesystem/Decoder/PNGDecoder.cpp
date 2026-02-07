@@ -54,15 +54,25 @@ namespace Trident {
 	static constexpr Filter FILTERS[] = {None, Sub, Up, Average, Paeth};
 
 	template<>
-	File<FileFormat::PNG> Filesystem::decode(const sequence<uint8>& data) {
-		File<FileFormat::PNG> file;
+	bool Filesystem::validateSignature<FileFormat::PNG>(const ByteStream<StreamOperation::READ>& stream) {
+		if (stream.getRemainingSize() < sizeof(uint64)) {
+			return false;
+		}
 
+		const uint64 magic = stream.peek<uint64>();
+
+		return magic == 0x89504e470d0a1a0a;
+	}
+
+	template<>
+	File<FileFormat::PNG> Filesystem::decode(const sequence<uint8>& data) {
 		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::BIG_ENDIAN);
 
-		const uint64 signature = stream.read<uint64>();
+		ENGINE_ASSERT(validateSignature<FileFormat::PNG>(stream), "Invalid PNG signature.");
 
-		ENGINE_ASSERT(signature == 0x89504E470D0A1A0A, "Invalid PNG file signature.");
+		stream.jump(sizeof(uint64));
 
+		File<FileFormat::PNG> file{};
 		uint64 compressedDataSize = 0;
 		uint8 channelCount = 0;
 		uint8 bitDepth;

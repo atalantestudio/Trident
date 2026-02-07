@@ -435,12 +435,10 @@ namespace Trident {
 					sequence<char8> name;
 				#endif
 
+				sequence<ref<ImageAsset>> imageAssets(scene->getMaterialReferenceCount());
+
 				uint32 materialIndex = 0;
-				uint32 imageFileIndex = 0;
-
-				// TODO: Use assets instead.
-				sequence<File<FileFormat::PNG>> imageFiles(scene->getMaterialReferenceCount());
-
+				uint32 imageAssetIndex = 0;
 				uint64 imageStagingBufferSize = 0;
 
 				while (materialIndex < materials.count()) {
@@ -489,13 +487,12 @@ namespace Trident {
 
 						while (materialReferenceIndex < materialReferences.count()) {
 							const MaterialReference& materialReference = materialReferences[materialReferenceIndex];
-							const sequence<uint8> buffer = Filesystem::openByteBuffer(materialReference.descriptorImagePaths[descriptorSetLayoutBindingIndex]);
 
-							imageFiles[imageFileIndex] = Filesystem::decode<FileFormat::PNG>(buffer);
+							imageAssets[imageAssetIndex] = getLayer()->getApplication()->getAssetLibrary()->findImageAsset(materialReference.descriptorImageAssetPaths[descriptorSetLayoutBindingIndex]);
 
-							imageStagingBufferSize += imageFiles[imageFileIndex].data.count();
+							imageStagingBufferSize += imageAssets[imageAssetIndex]->getData().count();
 
-							imageFileIndex += 1;
+							imageAssetIndex += 1;
 							materialReferenceIndex += 1;
 						}
 

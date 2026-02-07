@@ -5,9 +5,9 @@
 
 namespace Trident {
 	enum class AssetSignature : uint32 {
-		TFO = 0x491b9ec5,
-		TGE = 0xc13057a5,
-		TIM = 0x513f8fd2,
-		TSM = 0x3c4f90c5,
+		FONT_ASSET = 0x491b9ec5,
+		GEOMETRY_ASSET = 0xc13057a5,
+		IMAGE_ASSET = 0x513f8fd2,
+		SHADER_MODULE_ASSET = 0x3c4f90c5,
 	};
 }

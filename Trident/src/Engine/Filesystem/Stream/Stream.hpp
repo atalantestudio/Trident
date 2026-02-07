@@ -91,7 +91,7 @@ namespace Trident {
 			void jump(uint64 byteCount) {
 				const uint64 remainingByteSize = getRemainingSize();
 
-				ENGINE_ASSERT(byteCount <= remainingByteSize, "Attempted to jump [] bytes, but only [] were remaining.", byteCount, remainingByteSize);
+				ENGINE_ASSERT(byteCount <= remainingByteSize, "Attempted to jump [] byte(s), but only [] were remaining.", byteCount, remainingByteSize);
 
 				byteOffset += byteCount;
 			}

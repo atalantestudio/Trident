@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/Process/Process.hpp"
+#include "Engine/API/Process/Process.hpp"
 
 #include "tsl/AST/ASTDebugger.hpp"
 #include "tsl/compile.hpp"
@@ -36,9 +36,7 @@ namespace Trident {
 				const view<char8> astPath = view<char8>(&astPathString[0], astPathString.size());
 
 				tsl::ASTDebugger(astPath, context);
-
 				tsl::ShaderModuleAssetDescriptor glslDescriptor{};
-
 				tsl::GLSLGenerator(context, glslDescriptor);
 
 				{
@@ -68,9 +66,9 @@ namespace Trident {
 				const uint32 entryPointCount = static_cast<uint32>(shaderModuleAssetDescriptor.glslEntryPointActivationOffsets.size());
 
 				ByteStream<StreamOperation::WRITE> outputByteStream(outputSize, Endianness::LITTLE_ENDIAN);
-				outputByteStream.write<AssetSignature>(AssetSignature::TSM);
+				outputByteStream.write<AssetSignature>(AssetSignature::SHADER_MODULE_ASSET);
 				outputByteStream.write<uint32>(shaderModuleAssetDescriptor.identifier);
-				outputByteStream.write<VersionNumber>({0, 0, 0});
+				outputByteStream.write<VersionNumber>({1, 0, 0});
 				outputByteStream.write<uint32>(static_cast<uint32>(shaderModuleAssetDescriptor.glslCode.count()));
 
 				for (const char8 character : shaderModuleAssetDescriptor.glslCode) {

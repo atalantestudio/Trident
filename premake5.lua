@@ -151,10 +151,6 @@ project "Samples"
 		"MKDIR %[bin/" .. outputdir .. "/%{prj.name}/Asset/Image]",
 		"MKDIR %[bin/" .. outputdir .. "/%{prj.name}/Asset/Shader]",
 		"MKDIR %[bin/" .. outputdir .. "/%{prj.name}/Trace]",
-
-		-- TODO: The original image resources are copied while standalone image assets are not handled.
-		"{COPYDIR} Asset/Image/** %[bin/" .. outputdir .. "/%{prj.name}/Asset/Image/**]",
-
 		"IF EXIST Asset/Shader {COPYDIR} Asset/Shader %[bin/" .. outputdir .. "/%{prj.name}/Asset/Shader]",
 		"IF EXIST %[%{prj.name}.tpr] {COPYFILE} %[%{prj.name}.tpr] %[bin/" .. outputdir .. "/%{prj.name}/%{prj.name}.tpr]",
 	}

@@ -11,6 +11,8 @@ namespace Trident {
 		std::unordered_map<sequence<char8>, uint32> glslEntryPointActivationOffsets;
 	};
 
+	// TODO: ShaderModuleAssetHeader structure.
+
 	class ShaderModuleAsset : public Asset {
 		public:
 			explicit ShaderModuleAsset(const ShaderModuleAssetDescriptor& descriptor) :

@@ -31,7 +31,7 @@ namespace Trident {
 			void render(ref<CommandEncoder> commandEncoder) const override {
 				BeginRenderPassDescriptor beginRenderPassDescriptor{};
 				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
-				beginRenderPassDescriptor.clearValues = {{1.0f, 1.0f, 1.0f, 1.0f}};
+				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
 
 				const Extent2D swapchainExtent = getSwapchain()->getExtent();
 				const float32 width = static_cast<float32>(swapchainExtent.width);
