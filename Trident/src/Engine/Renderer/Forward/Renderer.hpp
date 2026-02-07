@@ -11,10 +11,12 @@ namespace Trident {
 		private:
 			struct Camera {
 				mat4x4<float32> projectionView;
+				vec3<float32> position;
 			};
 
 			struct Instance {
 				mat4x4<float32> transform;
+				mat3x3<float32> normal;
 			};
 
 		public:
@@ -193,6 +195,7 @@ namespace Trident {
 					while (materialReferenceIndex < materialReferences.count()) {
 						commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialIndex], 1, {materialDescriptorSets[materialReferenceIndex]});
 
+						// TODO: One material reference can be used by multiple instances.
 						const uint32 instanceIndex = scene->getInstanceIndex(materialReferenceIndex);
 						const RigidBody3D& instance = instances[instanceIndex];
 						const ref<Geometry3D> geometry = geometries[instance.geometryIndex];
@@ -219,11 +222,20 @@ namespace Trident {
 			}
 
 			void updateTransform(Entity entity) {
-				instanceMappedRange[entity].transform = scene->getInstances()[entity].transform;
+				Instance& instance = instanceMappedRange[entity];
+				instance.transform = scene->getInstances()[entity].transform;
+				instance.normal = transpose(inverse(mat3x3<float32>(
+					instance.transform[0][0], instance.transform[0][1], instance.transform[0][2],
+					instance.transform[1][0], instance.transform[1][1], instance.transform[1][2],
+					instance.transform[2][0], instance.transform[2][1], instance.transform[2][2]
+				)));
 			}
 
 			void updateCamera() {
-				cameraMappedRange->projectionView = getCameraController<PerspectiveCamera>().getCamera().getProjectionView();
+				const PerspectiveCamera& camera = getCameraController<PerspectiveCamera>().getCamera();
+
+				cameraMappedRange->projectionView = camera.getProjectionView();
+				cameraMappedRange->position = camera.getPosition();
 			}
 
 		private:
@@ -327,7 +339,7 @@ namespace Trident {
 				DescriptorSetLayoutBinding cameraBinding{};
 				cameraBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
 				cameraBinding.descriptorCount = 1;
-				cameraBinding.shaderStages = ShaderStage::VERTEX;
+				cameraBinding.shaderStages = ShaderStage::VERTEX | ShaderStage::FRAGMENT;
 
 				DescriptorSetLayoutBinding vertexPositionComponentBinding{};
 				vertexPositionComponentBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
@@ -401,6 +413,7 @@ namespace Trident {
 
 				VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
 				instanceInputBinding.registerAttribute<mat4x4<float32>>();
+				instanceInputBinding.registerAttribute<mat3x3<float32>>();
 
 				ShaderModuleDescriptor materialVertexShaderModuleDescriptor{};
 				materialVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;

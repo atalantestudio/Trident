@@ -4,16 +4,20 @@
 struct VertexInput {
 	uint vertexIndex : SV_VertexID;
 	float4x4 transform : VERTEX_INPUT_ATTRIBUTE0;
+	float3x3 normal : VERTEX_INPUT_ATTRIBUTE4;
 };
 
 struct VertexOutput {
 	float4 position : SV_Position;
 	float3 normal : VERTEX_OUTPUT_ATTRIBUTE1;
 	float2 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE2;
+	float3 surface : VERTEX_OUTPUT_ATTRIBUTE3;
+	float3x3 instanceNormal : VERTEX_OUTPUT_ATTRIBUTE4;
 };
 
 struct Camera {
 	float4x4 projectionView;
+	float3 position;
 };
 
 cbuffer Camera : register(b0) {
@@ -54,6 +58,8 @@ VertexOutput main(VertexInput input) {
 	output.normal = normal;
 	output.textureCoordinate = textureCoordinate;
 	output.textureCoordinate.y = 1.0 - output.textureCoordinate.y;
+	output.surface = position.rgb;
+	output.instanceNormal = input.normal;
 
 	return output;
 }
