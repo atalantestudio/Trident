@@ -34,6 +34,8 @@ namespace Trident {
 
 				cameraBuffer = createCameraBuffer();
 				cameraMappedRange = cameraBuffer->map<Camera>(0, cameraBuffer->getSize());
+
+				imageSampler = createImageSampler();
 			}
 
 			void postSetScene() override {
@@ -170,19 +172,23 @@ namespace Trident {
 				beginRenderPassDescriptor.clearValues = {swapchainClearValue, depthStencilClearValue};
 
 				uint32 materialIndex = 0;
+				uint32 materialReferenceIndex;
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
-				commandEncoder->bindVertexBuffer(0, instanceBuffer, 0, sizeof(Instance));
+
+				// TODO(GL): Allow the vertex buffer to be bound before setting a render pipeline.
+				// commandEncoder->bindVertexBuffer(0, instanceBuffer, 0, sizeof(Instance));
 
 				while (materialIndex < materials.count()) {
 					commandEncoder->bindRenderPipeline(materialPipelines[materialIndex]);
+					commandEncoder->bindVertexBuffer(0, instanceBuffer, 0, sizeof(Instance));
 					commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialIndex], 0, {vertexDescriptorSet});
 
 					const view<MaterialReference> materialReferences = scene->getMaterialReferences(materialIndex);
 
-					uint32 materialReferenceIndex = 0;
+					materialReferenceIndex = 0;
 
 					while (materialReferenceIndex < materialReferences.count()) {
 						commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialIndex], 1, {materialDescriptorSets[materialReferenceIndex]});
@@ -377,13 +383,19 @@ namespace Trident {
 			}
 
 			void createMaterialObjects() {
+				// TODO: Use a larger extent, e.g. 4096 * 4096 * 1.
+				static constexpr Extent3D IMAGE_EXTENT = {1024, 1024, 1};
+
 				const view<Material> materials = scene->getMaterials();
+
+				// Each material has N bindings. 1 image asset is specified per binding for each material reference.
+				sequence<sequence<sequence<ref<ImageAsset>>>> materialImageAssets(materials.count());
 
 				materialDescriptorSetLayouts = sequence<ref<DescriptorSetLayout>>(materials.count());
 				materialDescriptorSets = sequence<ref<DescriptorSet>>(materials.count());
 				materialPipelineLayouts = sequence<ref<PipelineLayout>>(materials.count());
 				materialPipelines = sequence<ref<RenderPipeline>>(materials.count());
-				materialDescriptorSetLayoutBindingImages = sequence<sequence<ref<Image>>>(materials.count());
+				materialImages = sequence<sequence<ref<Image>>>(materials.count());
 
 				PipelineLayoutDescriptor materialPipelineLayoutDescriptor{};
 
@@ -423,22 +435,21 @@ namespace Trident {
 				ImageDescriptor materialDescriptorSetLayoutBindingImageDescriptor{};
 				materialDescriptorSetLayoutBindingImageDescriptor.type = ImageType::TEXTURE_2D;
 				materialDescriptorSetLayoutBindingImageDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
-				materialDescriptorSetLayoutBindingImageDescriptor.extent.width = 4096;
-				materialDescriptorSetLayoutBindingImageDescriptor.extent.height = 4096;
-				materialDescriptorSetLayoutBindingImageDescriptor.extent.depth = 1;
+				materialDescriptorSetLayoutBindingImageDescriptor.extent = IMAGE_EXTENT;
 				materialDescriptorSetLayoutBindingImageDescriptor.mipLevelCount = 1;
 				materialDescriptorSetLayoutBindingImageDescriptor.sampleCount = 1;
-				materialDescriptorSetLayoutBindingImageDescriptor.usage = ImageUsage::STORAGE;
+				materialDescriptorSetLayoutBindingImageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
 				materialDescriptorSetLayoutBindingImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
 				#if defined(BUILD_MODE_DEBUG)
 					sequence<char8> name;
 				#endif
 
-				sequence<ref<ImageAsset>> imageAssets(scene->getMaterialReferenceCount());
-
 				uint32 materialIndex = 0;
-				uint32 imageAssetIndex = 0;
+				uint32 bindingIndex = 0;
+				uint32 materialBindingCount = 0;
+				uint32 materialReferenceIndex = 0;
+				uint32 imageCopyRegionCount = 0;
 				uint64 imageStagingBufferSize = 0;
 
 				while (materialIndex < materials.count()) {
@@ -458,7 +469,7 @@ namespace Trident {
 
 					materialDescriptorSetLayouts[materialIndex] = createDescriptorSetLayout(material.descriptorSetLayoutBindings);
 
-					materialPipelineLayoutDescriptor.descriptorSetLayouts = {vertexDescriptorSetLayout/* , materialDescriptorSetLayouts[materialIndex] */};
+					materialPipelineLayoutDescriptor.descriptorSetLayouts = {vertexDescriptorSetLayout, materialDescriptorSetLayouts[materialIndex]};
 
 					materialPipelineLayouts[materialIndex] = createPipelineLayout(materialPipelineLayoutDescriptor);
 
@@ -467,36 +478,44 @@ namespace Trident {
 
 					materialPipelines[materialIndex] = createRenderPipeline(materialPipelineDescriptor);
 
-					sequence<ref<Image>>& bindingImages = materialDescriptorSetLayoutBindingImages[materialIndex];
+					materialImageAssets[materialIndex] = sequence<sequence<ref<ImageAsset>>>(material.descriptorSetLayoutBindings.count());
+					materialImages[materialIndex] = sequence<ref<Image>>(material.descriptorSetLayoutBindings.count());
 
-					bindingImages = sequence<ref<Image>>(material.descriptorSetLayoutBindings.count());
+					bindingIndex = 0;
 
-					uint32 descriptorSetLayoutBindingIndex = 0;
+					while (bindingIndex < material.descriptorSetLayoutBindings.count()) {
+						const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = material.descriptorSetLayoutBindings[bindingIndex];
 
-					while (descriptorSetLayoutBindingIndex < material.descriptorSetLayoutBindings.count()) {
-						const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = material.descriptorSetLayoutBindings[descriptorSetLayoutBindingIndex];
-
-						DEBUG_ASSERT(descriptorSetLayoutBinding.descriptorType == DescriptorType::READ_ONLY_STORAGE_IMAGE);
+						DEBUG_ASSERT(descriptorSetLayoutBinding.descriptorType == DescriptorType::COMBINED_IMAGE_SAMPLER);
 						DEBUG_ASSERT(descriptorSetLayoutBinding.shaderStages == ShaderStage::FRAGMENT);
 
 						materialDescriptorSetLayoutBindingImageDescriptor.layerCount = descriptorSetLayoutBinding.descriptorCount;
 
-						bindingImages[descriptorSetLayoutBindingIndex] = createImage(materialDescriptorSetLayoutBindingImageDescriptor);
+						#if defined(BUILD_MODE_DEBUG)
+							name = Logger::format("Material [], binding []", materialIndex, bindingIndex);
 
-						uint32 materialReferenceIndex = 0;
+							SET_DEBUG_NAME(materialDescriptorSetLayoutBindingImageDescriptor, name);
+						#endif
+
+						materialImages[materialIndex][bindingIndex] = createImage(materialDescriptorSetLayoutBindingImageDescriptor);
+						materialImageAssets[materialIndex][bindingIndex] = sequence<ref<ImageAsset>>(materialReferences.count());
+
+						materialReferenceIndex = 0;
 
 						while (materialReferenceIndex < materialReferences.count()) {
 							const MaterialReference& materialReference = materialReferences[materialReferenceIndex];
+							const ref<ImageAsset> imageAsset = getLayer()->getApplication()->getAssetLibrary()->findImageAsset(materialReference.descriptorImageAssetPaths[bindingIndex]);
 
-							imageAssets[imageAssetIndex] = getLayer()->getApplication()->getAssetLibrary()->findImageAsset(materialReference.descriptorImageAssetPaths[descriptorSetLayoutBindingIndex]);
+							materialImageAssets[materialIndex][bindingIndex][materialReferenceIndex] = imageAsset;
 
-							imageStagingBufferSize += imageAssets[imageAssetIndex]->getData().count();
+							imageStagingBufferSize += imageAsset->getExtent().width * imageAsset->getExtent().height * imageAsset->getExtent().depth * imageAsset->getLayerCount() * 4;
 
-							imageAssetIndex += 1;
+							imageCopyRegionCount += 1;
 							materialReferenceIndex += 1;
 						}
 
-						descriptorSetLayoutBindingIndex += 1;
+						bindingIndex += 1;
+						materialBindingCount += 1;
 					}
 
 					materialIndex += 1;
@@ -506,7 +525,112 @@ namespace Trident {
 
 				const ref<Buffer> imageStagingBuffer = createStagingBuffer(imageStagingBufferSize);
 
-				BREAKPOINT();
+				uint8* imageMappedRange = imageStagingBuffer->map<uint8>(0, imageStagingBuffer->getSize());
+				uint64 imageMappedRangeOffset = 0;
+				uint32 materialReferenceBindingImageIndex = 0;
+
+				materialReferenceBindingImageViews = sequence<ref<ImageView>>(imageCopyRegionCount);
+
+				sequence<BufferImageCopyRegion> imageCopyRegions(imageCopyRegionCount);
+				sequence<DescriptorImage> descriptorImages(imageCopyRegionCount);
+				sequence<WriteDescriptorSet> writeDescriptorSets(materialBindingCount);
+
+				materialIndex = 0;
+				materialBindingCount = 0;
+
+				ImageViewDescriptor materialReferenceBindingImageViewDescriptor{};
+				materialReferenceBindingImageViewDescriptor.mipLevelOffset = 0;
+				materialReferenceBindingImageViewDescriptor.mipLevelCount = 1;
+				materialReferenceBindingImageViewDescriptor.layerCount = 1;
+
+				CommandBufferDescriptor commandBufferDescriptor{};
+				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+				SET_DEBUG_NAME(commandBufferDescriptor, "Write layered images");
+
+				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
+				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder(commandBufferDescriptor);
+
+				commandEncoder->begin();
+
+				while (materialIndex < materials.count()) {
+					const Material& material = materials[materialIndex];
+					const view<MaterialReference> materialReferences = scene->getMaterialReferences(materialIndex);
+
+					bindingIndex = 0;
+
+					while (bindingIndex < material.descriptorSetLayoutBindings.count()) {
+						const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = material.descriptorSetLayoutBindings[bindingIndex];
+						const ref<Image> image = materialImages[materialIndex][bindingIndex];
+						const view<DescriptorImage> bindingDescriptorImages(&descriptorImages[materialReferenceBindingImageIndex], materialReferences.count());
+
+						sequence<BufferImageCopyRegion> imageCopyRegions(materialReferences.count());
+
+						materialReferenceIndex = 0;
+
+						while (materialReferenceIndex < materialReferences.count()) {
+							const ref<ImageAsset> imageAsset = materialImageAssets[materialIndex][bindingIndex][materialReferenceIndex];
+
+							DEBUG_ASSERT(imageAsset->getFormat() == ImageFormat::R8G8B8_UNORM);
+
+							sequence<uint8> data(imageAsset->getExtent().width * imageAsset->getExtent().height * imageAsset->getExtent().depth * imageAsset->getLayerCount() * 4);
+
+							convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(imageAsset->getData(), &data[0], data.count());
+
+							std::copy(data.begin(), data.end(), &imageMappedRange[imageMappedRangeOffset]);
+
+							BufferImageCopyRegion& imageCopyRegion = imageCopyRegions[materialReferenceIndex];
+							imageCopyRegion.bufferOffset = imageMappedRangeOffset;
+							imageCopyRegion.imageOffsetX = 0;
+							imageCopyRegion.imageOffsetY = 0;
+							imageCopyRegion.imageOffsetZ = 0;
+							imageCopyRegion.imageExtent = imageAsset->getExtent();
+							imageCopyRegion.imageMipLevel = 0;
+							imageCopyRegion.imageLayerOffset = materialReferenceIndex;
+							imageCopyRegion.imageLayerCount = 1;
+
+							materialReferenceBindingImageViewDescriptor.layerOffset = materialReferenceIndex;
+
+							#if defined(BUILD_MODE_DEBUG)
+								name = Logger::format("Material [], binding [], reference []", materialIndex, bindingIndex, materialReferenceIndex);
+
+								SET_DEBUG_NAME(materialReferenceBindingImageViewDescriptor, name);
+							#endif
+
+							materialReferenceBindingImageViews[materialReferenceBindingImageIndex] = image->createView(materialReferenceBindingImageViewDescriptor);
+
+							DescriptorImage& descriptorImage = descriptorImages[materialReferenceBindingImageIndex];
+							descriptorImage.imageView = materialReferenceBindingImageViews[materialReferenceBindingImageIndex];
+							descriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
+							descriptorImage.sampler = imageSampler;
+
+							imageMappedRangeOffset += data.count();
+							materialReferenceIndex += 1;
+							materialReferenceBindingImageIndex += 1;
+						}
+
+						WriteDescriptorSet& writeDescriptorSet = writeDescriptorSets[bindingIndex];
+						writeDescriptorSet.descriptorSet = materialDescriptorSets[materialIndex];
+						writeDescriptorSet.bindingIndex = bindingIndex;
+						writeDescriptorSet.descriptorImages = bindingDescriptorImages;
+
+						commandEncoder->setImageMemoryBarrier(image, ImageLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+						commandEncoder->copyBufferToImage(imageStagingBuffer, image, imageCopyRegions);
+						commandEncoder->setImageMemoryBarrier(image, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+
+						bindingIndex += 1;
+						materialBindingCount += 1;
+					}
+
+					materialIndex += 1;
+				}
+
+				imageStagingBuffer->unmap();
+
+				queue->submit({commandEncoder->end()}, nullptr, nullptr, nullptr);
+				queue->waitIdle();
+
+				getDevice()->updateDescriptorSets(writeDescriptorSets);
 			}
 
 			ref<Buffer> createCameraBuffer() const {
@@ -519,6 +643,14 @@ namespace Trident {
 				SET_DEBUG_NAME(cameraBufferDescriptor, "Camera");
 
 				return createBuffer(cameraBufferDescriptor);
+			}
+
+			ref<Sampler> createImageSampler() const {
+				SamplerDescriptor samplerDescriptor{};
+				samplerDescriptor.magFilter = SamplerFilter::LINEAR;
+				samplerDescriptor.minFilter = SamplerFilter::LINEAR;
+
+				return createSampler(samplerDescriptor);
 			}
 
 			void updateDescriptorSets(uint64 vertexPositionComponentBufferSize, uint64 vertexPositionIndexBufferSize, uint64 vertexNormalComponentBufferSize, uint64 vertexNormalIndexBufferSize, uint64 vertexTextureCoordinateComponentBufferSize, uint64 vertexTextureCoordinateIndexBufferSize) const {
@@ -624,12 +756,13 @@ namespace Trident {
 			ref<Buffer> instanceBuffer;
 			ref<Buffer> cameraBuffer;
 
-			// 1 layered image per material descriptor binding.
-			sequence<sequence<ref<Image>>> materialDescriptorSetLayoutBindingImages;
-
 			ref<Image> depthStencilImage;
+			sequence<sequence<ref<Image>>> materialImages;
 
 			ref<ImageView> depthStencilImageView;
+			sequence<ref<ImageView>> materialReferenceBindingImageViews;
+
+			ref<Sampler> imageSampler;
 
 			Camera* cameraMappedRange = nullptr;
 			Instance* instanceMappedRange = nullptr;

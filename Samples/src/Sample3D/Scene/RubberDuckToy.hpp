@@ -15,17 +15,17 @@ namespace Trident {
 		const uint32 geometryIndex = scene.registerGeometry(geometry);
 
 		DescriptorSetLayoutBinding armBinding{};
-		armBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE;
+		armBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
 		armBinding.descriptorCount = 1;
 		armBinding.shaderStages = ShaderStage::FRAGMENT;
 
 		DescriptorSetLayoutBinding diffuseBinding{};
-		diffuseBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE;
+		diffuseBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
 		diffuseBinding.descriptorCount = 1;
 		diffuseBinding.shaderStages = ShaderStage::FRAGMENT;
 
 		DescriptorSetLayoutBinding normalBinding{};
-		normalBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE;
+		normalBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
 		normalBinding.descriptorCount = 1;
 		normalBinding.shaderStages = ShaderStage::FRAGMENT;
 

@@ -15,8 +15,6 @@ namespace Trident {
 
 		public:
 			ID3D12RootSignature* rootSignature;
-
-			// TODO: Replace by an offset into the descriptor table.
-			bool samplerDescriptorTable;
+			UINT samplerDescriptorTableRootParameterIndex = max<UINT>();
 	};
 }

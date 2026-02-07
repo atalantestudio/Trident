@@ -5,8 +5,8 @@
 
 namespace Trident {
 	enum class FrontFace : uint8 {
-		CLOCKWISE = 0,
-		COUNTER_CLOCKWISE = 1,
+		CLOCKWISE,
+		COUNTER_CLOCKWISE,
 
 		count,
 	};

@@ -64,4 +64,5 @@ void main() {
 
 	vertexOutput.normal = normal;
 	vertexOutput.textureCoordinate = textureCoordinate;
+	vertexOutput.textureCoordinate.y = 1.0 - vertexOutput.textureCoordinate.y;
 }

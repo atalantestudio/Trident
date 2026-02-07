@@ -28,7 +28,7 @@ namespace Trident {
 		uint32 bindingIndex;
 
 		// NOTE: Either fill the descriptor buffers or the descriptor images.
-		sequence<DescriptorBuffer> descriptorBuffers;
-		sequence<DescriptorImage> descriptorImages;
+		view<DescriptorBuffer> descriptorBuffers;
+		view<DescriptorImage> descriptorImages;
 	};
 }

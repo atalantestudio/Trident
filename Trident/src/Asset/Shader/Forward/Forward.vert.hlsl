@@ -16,16 +16,16 @@ struct Camera {
 	float4x4 projectionView;
 };
 
-cbuffer Camera {
+cbuffer Camera : register(b0) {
 	Camera camera;
 }
 
-ByteAddressBuffer vertexPositionComponentBuffer;
-ByteAddressBuffer vertexPositionIndexBuffer;
-ByteAddressBuffer vertexNormalComponentBuffer;
-ByteAddressBuffer vertexNormalIndexBuffer;
-ByteAddressBuffer vertexTextureCoordinateComponentBuffer;
-ByteAddressBuffer vertexTextureCoordinateIndexBuffer;
+ByteAddressBuffer vertexPositionComponentBuffer : register(t0);
+ByteAddressBuffer vertexPositionIndexBuffer : register(t1);
+ByteAddressBuffer vertexNormalComponentBuffer : register(t2);
+ByteAddressBuffer vertexNormalIndexBuffer : register(t3);
+ByteAddressBuffer vertexTextureCoordinateComponentBuffer : register(t4);
+ByteAddressBuffer vertexTextureCoordinateIndexBuffer : register(t5);
 
 VertexOutput main(VertexInput input) {
 	uint positionIndex = vertexPositionIndexBuffer.Load(input.vertexIndex * 4);
@@ -53,6 +53,7 @@ VertexOutput main(VertexInput input) {
 	output.position = mul(mul(camera.projectionView, input.transform), float4(position, 1.0));
 	output.normal = normal;
 	output.textureCoordinate = textureCoordinate;
+	output.textureCoordinate.y = 1.0 - output.textureCoordinate.y;
 
 	return output;
 }

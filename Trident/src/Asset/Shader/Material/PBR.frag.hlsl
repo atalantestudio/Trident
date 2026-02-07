@@ -11,13 +11,17 @@ struct FragmentOutput {
 	float4 color : SV_Target;
 };
 
-Texture2D<float4> ambientOcclusionRoughnessMetallicTexture;
-Texture2D<float4> diffuseTexture;
-Texture2D<float4> normalTexture;
+Texture2D<float4> ambientOcclusionRoughnessMetallicTexture : register(t6);
+Texture2D<float4> diffuseTexture : register(t7);
+Texture2D<float4> normalTexture : register(t8);
+
+SamplerState ambientOcclusionRoughnessMetallicSamplerState : register(s0);
+SamplerState diffuseSamplerState : register(s1);
+SamplerState normalSamplerState : register(s2);
 
 FragmentOutput main(FragmentInput input) {
 	FragmentOutput output;
-	output.color = float4(input.textureCoordinate, 0.0, 1.0);
+	output.color = diffuseTexture.Sample(diffuseSamplerState, input.textureCoordinate);
 
 	return output;
 }

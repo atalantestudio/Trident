@@ -160,7 +160,7 @@ namespace Trident {
 		commandList->SetGraphicsRootSignature(pipeline->pipelineLayout->rootSignature);
 		commandList->IASetPrimitiveTopology(pipeline->primitiveTopology);
 
-		samplerDescriptorTable = pipeline->pipelineLayout->samplerDescriptorTable;
+		samplerDescriptorTableRootParameterIndex = pipeline->pipelineLayout->samplerDescriptorTableRootParameterIndex;
 
 		computePipelineBound = false;
 		commandCount += 1;
@@ -187,9 +187,9 @@ namespace Trident {
 				rootParameterIndex += 1;
 			}
 
-			if (samplerDescriptorTable) {
+			if (samplerDescriptorTableRootParameterIndex != max<UINT>()) {
 				// Bind sampler descriptor table to the last root parameter.
-				commandList->SetComputeRootDescriptorTable(descriptorSetIndexOffset + rootParameterIndex, samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+				commandList->SetComputeRootDescriptorTable(samplerDescriptorTableRootParameterIndex, samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 			}
 		}
 		else {
@@ -204,9 +204,9 @@ namespace Trident {
 				rootParameterIndex += 1;
 			}
 
-			if (samplerDescriptorTable) {
+			if (samplerDescriptorTableRootParameterIndex != max<UINT>()) {
 				// Bind sampler descriptor table to the last root parameter.
-				commandList->SetGraphicsRootDescriptorTable(descriptorSetIndexOffset + rootParameterIndex, samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+				commandList->SetGraphicsRootDescriptorTable(samplerDescriptorTableRootParameterIndex, samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 			}
 		}
 
@@ -582,7 +582,7 @@ namespace Trident {
 		framebuffer = nullptr;
 		subpassIndex = 0;
 		presentRenderTargetIndex = max<UINT>();
-		samplerDescriptorTable = false;
+		samplerDescriptorTableRootParameterIndex = max<UINT>();
 	}
 
 	void DX12::CommandEncoder::bindIndexBuffer(ref<Trident::Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
