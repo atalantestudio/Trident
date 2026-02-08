@@ -88,7 +88,7 @@ float Smith(float3 normal, float3 viewDirection, float3 lightDirection, float ro
 }
 
 float3 FresnelSchlick(float angle, float3 baseReflectivity) {
-	return baseReflectivity + (1.0 - baseReflectivity) * pow(clamp(1.0 - angle, 0.0, 1.0), 5);
+	return baseReflectivity + (1.0 - baseReflectivity) * pow(clamp(1.0 - angle, 0.0, 1.0), 5.0);
 }
 
 FragmentOutput main(FragmentInput input) {

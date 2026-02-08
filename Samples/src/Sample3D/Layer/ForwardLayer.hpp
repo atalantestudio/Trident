@@ -7,7 +7,7 @@
 #include "Engine/Layer/Layer.hpp"
 #include "Engine/Renderer/Forward/Renderer.hpp"
 
-#include "../Scene/RubberDuckToy.hpp"
+#include "../Scene/Lemons.hpp"
 
 namespace Trident {
 	class Sample3DLayer : public Layer {

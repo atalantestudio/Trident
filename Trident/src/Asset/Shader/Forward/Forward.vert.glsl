@@ -4,9 +4,11 @@
 // Distributed under the GNU GPL v3 License.
 
 layout(location = 0) in mat4x4 transform;
+layout(location = 4) in mat3x3 instanceNormal;
 
 layout(set = 0, binding = 0) uniform readonly Camera {
 	mat4x4 projectionView;
+	vec3 position;
 } camera;
 
 layout(set = 0, binding = 1) buffer readonly VertexPositionComponent {
@@ -36,6 +38,8 @@ layout(set = 0, binding = 6) buffer readonly VertexTextureCoordinateIndex {
 out VertexOutput {
 	layout(location = 0) vec3 normal;
 	layout(location = 1) vec2 textureCoordinate;
+	layout(location = 2) vec3 surface;
+	layout(location = 3) mat3x3 instanceNormal;
 } vertexOutput;
 
 void main() {
@@ -60,9 +64,13 @@ void main() {
 		vertexTextureCoordinateComponentBuffer[textureCoordinateIndex * 2u + 1u]
 	);
 
-	gl_Position = camera.projectionView * transform * vec4(position, 1.0);
+	vec4 surface = transform * vec4(position, 1.0);
+
+	gl_Position = camera.projectionView * surface;
 
 	vertexOutput.normal = normal;
 	vertexOutput.textureCoordinate = textureCoordinate;
 	vertexOutput.textureCoordinate.y = 1.0 - vertexOutput.textureCoordinate.y;
+	vertexOutput.surface = surface.xyz;
+	vertexOutput.instanceNormal = instanceNormal;
 }

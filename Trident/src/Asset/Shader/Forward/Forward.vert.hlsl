@@ -53,12 +53,14 @@ VertexOutput main(VertexInput input) {
 		asfloat(vertexTextureCoordinateComponentBuffer.Load((textureCoordinateIndex * 2 + 1) * 4))
 	);
 
+	float4 surface = mul(input.transform, float4(position, 1.0));
+
 	VertexOutput output;
-	output.position = mul(mul(camera.projectionView, input.transform), float4(position, 1.0));
+	output.position = mul(camera.projectionView, surface);
 	output.normal = normal;
 	output.textureCoordinate = textureCoordinate;
 	output.textureCoordinate.y = 1.0 - output.textureCoordinate.y;
-	output.surface = position.rgb;
+	output.surface = surface.xyz;
 	output.instanceNormal = input.normal;
 
 	return output;

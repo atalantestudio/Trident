@@ -158,11 +158,6 @@ namespace Trident {
 				const Extent2D swapchainExtent = getSwapchain()->getExtent();
 				const float32 width = static_cast<float32>(swapchainExtent.width);
 				const float32 height = static_cast<float32>(swapchainExtent.height);
-
-				const view<ref<Geometry3D>> geometries = scene->getGeometries();
-				const view<Material> materials = scene->getMaterials();
-				const view<RigidBody3D> instances = scene->getInstances();
-
 				const ClearValue swapchainClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
 
 				ClearValue depthStencilClearValue{};
@@ -173,9 +168,6 @@ namespace Trident {
 				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
 				beginRenderPassDescriptor.clearValues = {swapchainClearValue, depthStencilClearValue};
 
-				uint32 materialIndex = 0;
-				uint32 materialReferenceIndex;
-
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
@@ -183,31 +175,26 @@ namespace Trident {
 				// TODO(GL): Allow the vertex buffer to be bound before setting a render pipeline.
 				// commandEncoder->bindVertexBuffer(0, instanceBuffer, 0, sizeof(Instance));
 
-				while (materialIndex < materials.count()) {
-					commandEncoder->bindRenderPipeline(materialPipelines[materialIndex]);
+				const view<ref<Geometry3D>> geometries = scene->getGeometries();
+				const view<Material> materials = scene->getMaterials();
+				const view<MaterialReference> materialReferences = scene->getFlatMaterialReferences();
+				const view<RigidBody3D> instances = scene->getInstances();
+
+				uint32 instanceIndex = 0;
+
+				while (instanceIndex < instances.count()) {
+					const RigidBody3D& instance = instances[instanceIndex];
+					const ref<Geometry3D> geometry = geometries[instance.geometryIndex];
+					const MaterialReference& materialReference = materialReferences[instance.materialReferenceIndex];
+					const uint32 vertexCount = static_cast<uint32>(geometry->getVertexPositionIndices().count());
+					const uint32 indexOffset = scene->getVertexPositionIndexOffset(instance.geometryIndex);
+
+					commandEncoder->bindRenderPipeline(materialPipelines[materialReference.materialIndex]);
 					commandEncoder->bindVertexBuffer(0, instanceBuffer, 0, sizeof(Instance));
-					commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialIndex], 0, {vertexDescriptorSet});
+					commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialReference.materialIndex], 0, {vertexDescriptorSet, materialDescriptorSets[instance.materialReferenceIndex]});
+					commandEncoder->draw(vertexCount, 1, indexOffset, instanceIndex);
 
-					const view<MaterialReference> materialReferences = scene->getMaterialReferences(materialIndex);
-
-					materialReferenceIndex = 0;
-
-					while (materialReferenceIndex < materialReferences.count()) {
-						commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialIndex], 1, {materialDescriptorSets[materialReferenceIndex]});
-
-						// TODO: One material reference can be used by multiple instances.
-						const uint32 instanceIndex = scene->getInstanceIndex(materialReferenceIndex);
-						const RigidBody3D& instance = instances[instanceIndex];
-						const ref<Geometry3D> geometry = geometries[instance.geometryIndex];
-						const uint32 vertexCount = static_cast<uint32>(geometry->getVertexPositionIndices().count());
-						const uint32 indexOffset = scene->getVertexPositionIndexOffset(instance.geometryIndex);
-
-						commandEncoder->draw(vertexCount, 1, indexOffset, instanceIndex);
-
-						materialReferenceIndex += 1;
-					}
-
-					materialIndex += 1;
+					instanceIndex += 1;
 				}
 
 				commandEncoder->endRenderPass();
