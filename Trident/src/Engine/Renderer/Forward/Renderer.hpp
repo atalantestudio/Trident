@@ -23,7 +23,10 @@ namespace Trident {
 			void build() override {
 				_createRenderPass();
 
+				colorImage = createColorImage();
 				depthStencilImage = createDepthStencilImage();
+
+				colorImageView = createColorImageView();
 				depthStencilImageView = createDepthStencilImageView();
 
 				createFramebuffers();
@@ -158,7 +161,7 @@ namespace Trident {
 				const Extent2D swapchainExtent = getSwapchain()->getExtent();
 				const float32 width = static_cast<float32>(swapchainExtent.width);
 				const float32 height = static_cast<float32>(swapchainExtent.height);
-				const ClearValue swapchainClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
+				const ClearValue colorClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
 
 				ClearValue depthStencilClearValue{};
 				depthStencilClearValue.depth = 1.0f;
@@ -166,7 +169,7 @@ namespace Trident {
 
 				BeginRenderPassDescriptor beginRenderPassDescriptor{};
 				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
-				beginRenderPassDescriptor.clearValues = {swapchainClearValue, depthStencilClearValue};
+				beginRenderPassDescriptor.clearValues = {colorClearValue, depthStencilClearValue, colorClearValue};
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
@@ -201,7 +204,10 @@ namespace Trident {
 			}
 
 			void resize(WindowResizeEvent& event) override {
+				colorImage = createColorImage();
 				depthStencilImage = createDepthStencilImage();
+
+				colorImageView = createColorImageView();
 				depthStencilImageView = createDepthStencilImageView();
 
 				createFramebuffers();
@@ -227,16 +233,18 @@ namespace Trident {
 
 		private:
 			void _createRenderPass() {
-				Attachment swapchainAttachment{};
-				swapchainAttachment.format = getSurface()->getFormat();
-				swapchainAttachment.sampleCount = 1;
-				swapchainAttachment.loadOperation = LoadOperation::CLEAR;
-				swapchainAttachment.storeOperation = StoreOperation::UNDEFINED;
-				swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
+				static constexpr uint32 SAMPLE_COUNT = 4;
+
+				Attachment colorAttachment{};
+				colorAttachment.format = getSurface()->getFormat();
+				colorAttachment.sampleCount = SAMPLE_COUNT;
+				colorAttachment.loadOperation = LoadOperation::CLEAR;
+				colorAttachment.storeOperation = StoreOperation::UNDEFINED;
+				colorAttachment.finalLayout = ImageLayout::PRESENT_SRC;
 
 				Attachment depthStencilAttachment{};
 				depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
-				depthStencilAttachment.sampleCount = 1;
+				depthStencilAttachment.sampleCount = SAMPLE_COUNT;
 				depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
 				depthStencilAttachment.storeOperation = StoreOperation::UNDEFINED;
 				depthStencilAttachment.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
@@ -254,10 +262,7 @@ namespace Trident {
 				subpassDescriptor.depthStencilAttachmentReference = depthStencilAttachmentReference;
 
 				RenderPassDescriptor renderPassDescriptor{};
-				renderPassDescriptor.attachments = {
-					swapchainAttachment,
-					depthStencilAttachment,
-				};
+				renderPassDescriptor.attachments = {colorAttachment, depthStencilAttachment};
 				renderPassDescriptor.subpasses = {createSubpass(subpassDescriptor)};
 
 				renderPass = createRenderPass(renderPassDescriptor);
@@ -270,7 +275,7 @@ namespace Trident {
 
 				FramebufferDescriptor framebufferDescriptor{};
 				framebufferDescriptor.renderPass = renderPass;
-				framebufferDescriptor.imageViews = {nullptr, depthStencilImageView};
+				framebufferDescriptor.imageViews = {colorImageView, depthStencilImageView, nullptr};
 				framebufferDescriptor.extent = swapchain->getExtent();
 
 				#if defined(BUILD_MODE_DEBUG)
@@ -286,12 +291,28 @@ namespace Trident {
 						SET_DEBUG_NAME(framebufferDescriptor, name);
 					#endif
 
-					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
+					framebufferDescriptor.imageViews[2] = swapchain->getImageView(framebufferIndex);
 
 					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
 
 					framebufferIndex += 1;
 				}
+			}
+
+			ref<Image> createColorImage() const {
+				const Extent2D extent = getSwapchain()->getExtent();
+
+				AttachmentImageDescriptor colorAttachmentImageDescriptor{};
+				colorAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
+				colorAttachmentImageDescriptor.extent.width = extent.width;
+				colorAttachmentImageDescriptor.extent.height = extent.height;
+				colorAttachmentImageDescriptor.extent.depth = 1;
+				colorAttachmentImageDescriptor.mipLevelCount = 1;
+				colorAttachmentImageDescriptor.layerCount = 1;
+
+				SET_DEBUG_NAME(colorAttachmentImageDescriptor, "Color (multisampled)");
+
+				return renderPass->createColorAttachmentImage(colorAttachmentImageDescriptor, 0);
 			}
 
 			ref<Image> createDepthStencilImage() const {
@@ -308,6 +329,18 @@ namespace Trident {
 				SET_DEBUG_NAME(depthStencilAttachmentImageDescriptor, "Depth stencil");
 
 				return renderPass->createDepthStencilAttachmentImage(depthStencilAttachmentImageDescriptor, 0);
+			}
+
+			ref<ImageView> createColorImageView() const {
+				ImageViewDescriptor colorImageView{};
+				colorImageView.mipLevelOffset = 0;
+				colorImageView.mipLevelCount = 1;
+				colorImageView.layerOffset = 0;
+				colorImageView.layerCount = 1;
+
+				SET_DEBUG_NAME(colorImageView, "Color (multisampled)");
+
+				return colorImage->createView(colorImageView);
 			}
 
 			ref<ImageView> createDepthStencilImageView() const {
@@ -773,9 +806,11 @@ namespace Trident {
 			ref<Buffer> instanceBuffer;
 			ref<Buffer> cameraBuffer;
 
+			ref<Image> colorImage;
 			ref<Image> depthStencilImage;
 			sequence<sequence<ref<Image>>> materialImages;
 
+			ref<ImageView> colorImageView;
 			ref<ImageView> depthStencilImageView;
 			sequence<ref<ImageView>> materialReferenceBindingImageViews;
 

@@ -35,12 +35,14 @@ namespace Trident {
 							continue;
 						}
 
+						// TODO: There is no need for each attachment to have a sampleCount member.
 						ENGINE_ASSERT(rasterizationSampleCount == attachment.sampleCount, "All color and depth/stencil attachments in a subpass must have the same sample count.");
 					}
 
 					if (subpass->getDepthStencilAttachmentReference().index != AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
 						const AttachmentReference& depthStencilAttachmentReference = subpass->getDepthStencilAttachmentReference();
 
+						// TODO: There is no need for each attachment to have a sampleCount member.
 						ENGINE_ASSERT(rasterizationSampleCount == attachments[depthStencilAttachmentReference.index].sampleCount, "All color and depth/stencil attachments in a subpass must have the same sample count.");
 
 						attachmentReferenceCount += 1;
