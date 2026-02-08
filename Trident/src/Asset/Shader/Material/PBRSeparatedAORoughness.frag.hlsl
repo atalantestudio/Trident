@@ -3,10 +3,9 @@
 
 struct FragmentInput {
 	float4 position : SV_Position;
-	float3 normal : VERTEX_OUTPUT_ATTRIBUTE1;
+	float3 surface : VERTEX_OUTPUT_ATTRIBUTE1;
 	float2 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE2;
-	float3 surface : VERTEX_OUTPUT_ATTRIBUTE3;
-	float3x3 instanceNormal : VERTEX_OUTPUT_ATTRIBUTE4;
+	float3x3 TBN : VERTEX_OUTPUT_ATTRIBUTE3;
 };
 
 struct FragmentOutput {
@@ -44,10 +43,10 @@ cbuffer Camera : register(b0) {
 	Camera camera;
 }
 
-Texture2D<float4> aoTexture : register(t6);
-Texture2D<float4> roughnessTexture : register(t7);
-Texture2D<float4> diffuseTexture : register(t8);
-Texture2D<float4> normalTexture : register(t9);
+Texture2D<float4> aoTexture : register(t7);
+Texture2D<float4> roughnessTexture : register(t8);
+Texture2D<float4> diffuseTexture : register(t9);
+Texture2D<float4> normalTexture : register(t10);
 
 SamplerState aoSamplerState : register(s0);
 SamplerState roughnessSamplerState : register(s1);
@@ -95,7 +94,7 @@ float3 FresnelSchlick(float angle, float3 baseReflectivity) {
 
 FragmentOutput main(FragmentInput input) {
 	float3 diffuse = pow(diffuseTexture.Sample(diffuseSamplerState, input.textureCoordinate).rgb, float3(2.2, 2.2, 2.2));
-	float3 normal = normalize(mul(input.instanceNormal, input.normal));
+	float3 normal = normalize(mul(input.TBN, normalTexture.Sample(normalSamplerState, input.textureCoordinate).xyz * 2.0 - 1.0));
 	float ao = aoTexture.Sample(aoSamplerState, input.textureCoordinate).r;
 	float roughness = roughnessTexture.Sample(roughnessSamplerState, input.textureCoordinate).r;
 	float metallic = 0.0;

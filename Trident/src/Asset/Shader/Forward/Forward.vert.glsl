@@ -35,14 +35,18 @@ layout(set = 0, binding = 6) buffer readonly VertexTextureCoordinateIndex {
 	uint vertexTextureCoordinateIndexBuffer[];
 };
 
+layout(set = 0, binding = 7) buffer readonly VertexTangentComponent {
+	float vertexTangentComponentBuffer[];
+};
+
 out VertexOutput {
-	layout(location = 0) vec3 normal;
+	layout(location = 0) vec3 surface;
 	layout(location = 1) vec2 textureCoordinate;
-	layout(location = 2) vec3 surface;
-	layout(location = 3) mat3x3 instanceNormal;
+	layout(location = 2) mat3x3 TBN;
 } vertexOutput;
 
 void main() {
+	uint triangleIndex = uint(gl_VertexIndex) / 3u;
 	uint positionIndex = vertexPositionIndexBuffer[gl_VertexIndex];
 	uint normalIndex = vertexNormalIndexBuffer[gl_VertexIndex];
 	uint textureCoordinateIndex = vertexTextureCoordinateIndexBuffer[gl_VertexIndex];
@@ -64,13 +68,23 @@ void main() {
 		vertexTextureCoordinateComponentBuffer[textureCoordinateIndex * 2u + 1u]
 	);
 
+	vec3 tangent = vec3(
+		vertexTangentComponentBuffer[triangleIndex * 3u + 0u],
+		vertexTangentComponentBuffer[triangleIndex * 3u + 1u],
+		vertexTangentComponentBuffer[triangleIndex * 3u + 2u]
+	);
+
 	vec4 surface = transform * vec4(position, 1.0);
+
+	vec3 N = normalize(instanceNormal * normal);
+	vec3 T = normalize(instanceNormal * tangent);
+	vec3 B = cross(N, T);
 
 	gl_Position = camera.projectionView * surface;
 
-	vertexOutput.normal = normal;
-	vertexOutput.textureCoordinate = textureCoordinate;
-	vertexOutput.textureCoordinate.y = 1.0 - vertexOutput.textureCoordinate.y;
 	vertexOutput.surface = surface.xyz;
-	vertexOutput.instanceNormal = instanceNormal;
+	vertexOutput.textureCoordinate = vec2(textureCoordinate.x, 1.0 - textureCoordinate.y);
+
+	// NOTE: GLSL doesn't require the TBN matrix to be transposed.
+	vertexOutput.TBN = mat3x3(T, B, N);
 }

@@ -9,10 +9,9 @@ struct VertexInput {
 
 struct VertexOutput {
 	float4 position : SV_Position;
-	float3 normal : VERTEX_OUTPUT_ATTRIBUTE1;
+	float3 surface : VERTEX_OUTPUT_ATTRIBUTE1;
 	float2 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE2;
-	float3 surface : VERTEX_OUTPUT_ATTRIBUTE3;
-	float3x3 instanceNormal : VERTEX_OUTPUT_ATTRIBUTE4;
+	float3x3 TBN : VERTEX_OUTPUT_ATTRIBUTE3;
 };
 
 struct Camera {
@@ -30,8 +29,10 @@ ByteAddressBuffer vertexNormalComponentBuffer : register(t2);
 ByteAddressBuffer vertexNormalIndexBuffer : register(t3);
 ByteAddressBuffer vertexTextureCoordinateComponentBuffer : register(t4);
 ByteAddressBuffer vertexTextureCoordinateIndexBuffer : register(t5);
+ByteAddressBuffer vertexTangentComponentBuffer : register(t6);
 
 VertexOutput main(VertexInput input) {
+	uint triangleIndex = input.vertexIndex / 3;
 	uint positionIndex = vertexPositionIndexBuffer.Load(input.vertexIndex * 4);
 	uint normalIndex = vertexNormalIndexBuffer.Load(input.vertexIndex * 4);
 	uint textureCoordinateIndex = vertexTextureCoordinateIndexBuffer.Load(input.vertexIndex * 4);
@@ -53,15 +54,23 @@ VertexOutput main(VertexInput input) {
 		asfloat(vertexTextureCoordinateComponentBuffer.Load((textureCoordinateIndex * 2 + 1) * 4))
 	);
 
+	float3 tangent = float3(
+		asfloat(vertexTangentComponentBuffer.Load((triangleIndex * 3 + 0) * 4)),
+		asfloat(vertexTangentComponentBuffer.Load((triangleIndex * 3 + 1) * 4)),
+		asfloat(vertexTangentComponentBuffer.Load((triangleIndex * 3 + 2) * 4))
+	);
+
 	float4 surface = mul(input.transform, float4(position, 1.0));
+
+	float3 N = normalize(mul(input.normal, normal));
+	float3 T = normalize(mul(input.normal, tangent));
+	float3 B = cross(N, T);
 
 	VertexOutput output;
 	output.position = mul(camera.projectionView, surface);
-	output.normal = normal;
-	output.textureCoordinate = textureCoordinate;
-	output.textureCoordinate.y = 1.0 - output.textureCoordinate.y;
 	output.surface = surface.xyz;
-	output.instanceNormal = input.normal;
+	output.textureCoordinate = float2(textureCoordinate.x, 1.0 - textureCoordinate.y);
+	output.TBN = transpose(float3x3(T, B, N));
 
 	return output;
 }

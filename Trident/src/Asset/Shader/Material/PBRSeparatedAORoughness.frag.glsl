@@ -6,10 +6,9 @@
 precision mediump float;
 
 in FragmentInput {
-	layout(location = 0) vec3 normal;
+	layout(location = 0) vec3 surface;
 	layout(location = 1) vec2 textureCoordinate;
-	layout(location = 2) vec3 surface;
-	layout(location = 3) mat3x3 instanceNormal;
+	layout(location = 2) mat3x3 TBN;
 } fragmentInput;
 
 struct Light {
@@ -79,7 +78,7 @@ vec3 FresnelSchlick(float angle, vec3 baseReflectivity) {
 
 void main() {
 	vec3 diffuse = pow(texture(diffuseTexture, fragmentInput.textureCoordinate).rgb, vec3(2.2, 2.2, 2.2));
-	vec3 normal = normalize(fragmentInput.instanceNormal * fragmentInput.normal);
+	vec3 normal = normalize(fragmentInput.TBN * (texture(normalTexture, fragmentInput.textureCoordinate).xyz * 2.0 - 1.0));
 	float ao = texture(aoTexture, fragmentInput.textureCoordinate).r;
 	float roughness = texture(roughnessTexture, fragmentInput.textureCoordinate).r;
 	float metallic = 0.0;

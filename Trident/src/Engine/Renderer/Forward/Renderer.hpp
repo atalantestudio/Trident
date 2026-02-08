@@ -61,6 +61,7 @@ namespace Trident {
 				uint64 vertexNormalIndexBufferSize = 0;
 				uint64 vertexTextureCoordinateComponentBufferSize = 0;
 				uint64 vertexTextureCoordinateIndexBufferSize = 0;
+				uint64 vertexTangentComponentBufferSize = 0;
 
 				for (const ref<Geometry3D> geometry : geometries) {
 					vertexPositionComponentBufferSize += sizeof(float32) * geometry->getVertexPositionComponents().count();
@@ -69,6 +70,7 @@ namespace Trident {
 					vertexNormalIndexBufferSize += sizeof(uint32) * geometry->getVertexNormalIndices().count();
 					vertexTextureCoordinateComponentBufferSize += sizeof(float32) * geometry->getVertexTextureCoordinateComponents().count();
 					vertexTextureCoordinateIndexBufferSize += sizeof(uint32) * geometry->getVertexTextureCoordinateIndices().count();
+					vertexTangentComponentBufferSize += sizeof(float32) * geometry->getVertexTangentComponents().count();
 				}
 
 				const uint64 minStorageBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
@@ -79,15 +81,9 @@ namespace Trident {
 				vertexNormalIndexBufferSize = ceil(vertexNormalIndexBufferSize, minStorageBufferOffsetAlignment);
 				vertexTextureCoordinateComponentBufferSize = ceil(vertexTextureCoordinateComponentBufferSize, minStorageBufferOffsetAlignment);
 				vertexTextureCoordinateIndexBufferSize = ceil(vertexTextureCoordinateIndexBufferSize, minStorageBufferOffsetAlignment);
+				vertexTangentComponentBufferSize = ceil(vertexTangentComponentBufferSize, minStorageBufferOffsetAlignment);
 
-				const ref<Buffer> vertexStagingBuffer = createStagingBuffer(
-					vertexPositionComponentBufferSize +
-					vertexPositionIndexBufferSize +
-					vertexNormalComponentBufferSize +
-					vertexNormalIndexBufferSize +
-					vertexTextureCoordinateComponentBufferSize +
-					vertexTextureCoordinateIndexBufferSize
-				);
+				const ref<Buffer> vertexStagingBuffer = createStagingBuffer(vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize + vertexNormalIndexBufferSize + vertexTextureCoordinateComponentBufferSize + vertexTextureCoordinateIndexBufferSize + vertexTangentComponentBufferSize);
 
 				uint8* mappedRange = vertexStagingBuffer->map<uint8>(0, vertexStagingBuffer->getSize());
 				float32* vertexPositionComponentMappedRange = pointer_cast<float32*>(mappedRange);
@@ -96,6 +92,7 @@ namespace Trident {
 				uint32* vertexNormalIndexMappedRange = pointer_cast<uint32*>(mappedRange + vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize);
 				float32* vertexTextureCoordinateComponentMappedRange = pointer_cast<float32*>(mappedRange + vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize + vertexNormalIndexBufferSize);
 				uint32* vertexTextureCoordinateIndexMappedRange = pointer_cast<uint32*>(mappedRange + vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize + vertexNormalIndexBufferSize + vertexTextureCoordinateComponentBufferSize);
+				float32* vertexTangentComponentMappedRange = pointer_cast<float32*>(mappedRange + vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize + vertexNormalIndexBufferSize + vertexTextureCoordinateComponentBufferSize + vertexTextureCoordinateIndexBufferSize);
 
 				for (const ref<Geometry3D> geometry : geometries) {
 					const view<float32> vertexPositionComponents = geometry->getVertexPositionComponents();
@@ -104,6 +101,7 @@ namespace Trident {
 					const view<uint32> vertexNormalIndices = geometry->getVertexNormalIndices();
 					const view<float32> vertexTextureCoordinateComponents = geometry->getVertexTextureCoordinateComponents();
 					const view<uint32> vertexTextureCoordinateIndices = geometry->getVertexTextureCoordinateIndices();
+					const view<float32> vertexTangentComponents = geometry->getVertexTangentComponents();
 
 					std::copy(vertexPositionComponents.begin(), vertexPositionComponents.end(), vertexPositionComponentMappedRange);
 					std::copy(vertexPositionIndices.begin(), vertexPositionIndices.end(), vertexPositionIndexMappedRange);
@@ -111,6 +109,7 @@ namespace Trident {
 					std::copy(vertexNormalIndices.begin(), vertexNormalIndices.end(), vertexNormalIndexMappedRange);
 					std::copy(vertexTextureCoordinateComponents.begin(), vertexTextureCoordinateComponents.end(), vertexTextureCoordinateComponentMappedRange);
 					std::copy(vertexTextureCoordinateIndices.begin(), vertexTextureCoordinateIndices.end(), vertexTextureCoordinateIndexMappedRange);
+					std::copy(vertexTangentComponents.begin(), vertexTangentComponents.end(), vertexTangentComponentMappedRange);
 
 					vertexPositionComponentMappedRange += vertexPositionComponents.count();
 					vertexPositionIndexMappedRange += vertexPositionIndices.count();
@@ -118,6 +117,7 @@ namespace Trident {
 					vertexNormalIndexMappedRange += vertexNormalIndices.count();
 					vertexTextureCoordinateComponentMappedRange += vertexTextureCoordinateComponents.count();
 					vertexTextureCoordinateIndexMappedRange += vertexTextureCoordinateIndices.count();
+					vertexTangentComponentMappedRange += vertexTangentComponents.count();
 				}
 
 				vertexStagingBuffer->unmap();
@@ -151,7 +151,7 @@ namespace Trident {
 				queue->submit({commandEncoder->end()}, nullptr, nullptr, nullptr);
 				queue->waitIdle();
 
-				updateDescriptorSets(vertexPositionComponentBufferSize, vertexPositionIndexBufferSize, vertexNormalComponentBufferSize, vertexNormalIndexBufferSize, vertexTextureCoordinateComponentBufferSize, vertexTextureCoordinateIndexBufferSize);
+				updateDescriptorSets(vertexPositionComponentBufferSize, vertexPositionIndexBufferSize, vertexNormalComponentBufferSize, vertexNormalIndexBufferSize, vertexTextureCoordinateComponentBufferSize, vertexTextureCoordinateIndexBufferSize, vertexTangentComponentBufferSize);
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
@@ -358,6 +358,11 @@ namespace Trident {
 				vertexTextureCoordinateIndexBinding.descriptorCount = 1;
 				vertexTextureCoordinateIndexBinding.shaderStages = ShaderStage::VERTEX;
 
+				DescriptorSetLayoutBinding vertexTangentComponentBinding{};
+				vertexTangentComponentBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
+				vertexTangentComponentBinding.descriptorCount = 1;
+				vertexTangentComponentBinding.shaderStages = ShaderStage::VERTEX;
+
 				return createDescriptorSetLayout({
 					cameraBinding,
 					vertexPositionComponentBinding,
@@ -366,6 +371,7 @@ namespace Trident {
 					vertexNormalIndexBinding,
 					vertexTextureCoordinateComponentBinding,
 					vertexTextureCoordinateIndexBinding,
+					vertexTangentComponentBinding,
 				});
 			}
 
@@ -653,7 +659,7 @@ namespace Trident {
 				return createSampler(samplerDescriptor);
 			}
 
-			void updateDescriptorSets(uint64 vertexPositionComponentBufferSize, uint64 vertexPositionIndexBufferSize, uint64 vertexNormalComponentBufferSize, uint64 vertexNormalIndexBufferSize, uint64 vertexTextureCoordinateComponentBufferSize, uint64 vertexTextureCoordinateIndexBufferSize) const {
+			void updateDescriptorSets(uint64 vertexPositionComponentBufferSize, uint64 vertexPositionIndexBufferSize, uint64 vertexNormalComponentBufferSize, uint64 vertexNormalIndexBufferSize, uint64 vertexTextureCoordinateComponentBufferSize, uint64 vertexTextureCoordinateIndexBufferSize, uint64 vertexTangentComponentBufferSize) const {
 				DescriptorBuffer cameraDescriptorBuffer{};
 				cameraDescriptorBuffer.buffer = cameraBuffer;
 				cameraDescriptorBuffer.offset = 0;
@@ -688,6 +694,11 @@ namespace Trident {
 				vertexTextureCoordinateIndexDescriptorBuffer.buffer = vertexBuffer;
 				vertexTextureCoordinateIndexDescriptorBuffer.offset = vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize + vertexNormalIndexBufferSize + vertexTextureCoordinateComponentBufferSize;
 				vertexTextureCoordinateIndexDescriptorBuffer.size = vertexTextureCoordinateIndexBufferSize;
+
+				DescriptorBuffer vertexTangentComponentDescriptorBuffer{};
+				vertexTangentComponentDescriptorBuffer.buffer = vertexBuffer;
+				vertexTangentComponentDescriptorBuffer.offset = vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize + vertexNormalIndexBufferSize + vertexTextureCoordinateComponentBufferSize + vertexTextureCoordinateIndexBufferSize;
+				vertexTangentComponentDescriptorBuffer.size = vertexTangentComponentBufferSize;
 
 				WriteDescriptorSet cameraWriteDescriptorSet{};
 				cameraWriteDescriptorSet.descriptorSet = vertexDescriptorSet;
@@ -724,6 +735,11 @@ namespace Trident {
 				vertexTextureCoordinateIndexWriteDescriptorSet.bindingIndex = 6;
 				vertexTextureCoordinateIndexWriteDescriptorSet.descriptorBuffers = {vertexTextureCoordinateIndexDescriptorBuffer};
 
+				WriteDescriptorSet vertexTangentComponentWriteDescriptorSet{};
+				vertexTangentComponentWriteDescriptorSet.descriptorSet = vertexDescriptorSet;
+				vertexTangentComponentWriteDescriptorSet.bindingIndex = 7;
+				vertexTangentComponentWriteDescriptorSet.descriptorBuffers = {vertexTangentComponentDescriptorBuffer};
+
 				getDevice()->updateDescriptorSets({
 					cameraWriteDescriptorSet,
 					vertexPositionComponentWriteDescriptorSet,
@@ -732,6 +748,7 @@ namespace Trident {
 					vertexNormalIndexWriteDescriptorSet,
 					vertexTextureCoordinateComponentWriteDescriptorSet,
 					vertexTextureCoordinateIndexWriteDescriptorSet,
+					vertexTangentComponentWriteDescriptorSet,
 				});
 			}
 
