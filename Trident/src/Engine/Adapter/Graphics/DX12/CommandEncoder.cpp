@@ -502,7 +502,7 @@ namespace Trident {
 
 				DX12::Image* resolveImage = presentImage;
 
-				presentImageView = std::static_pointer_cast<DX12::ImageView>(framebuffer->imageViews[subpass->getResolveAttachmentReferenceCount() + presentRenderTargetIndex]);
+				presentImageView = std::static_pointer_cast<DX12::ImageView>(framebuffer->imageViews[subpass->getResolveAttachmentReferenceCount() + (subpass->hasDepthStencilAttachmentReference() ? 1 : 0) + presentRenderTargetIndex]);
 				presentImage = static_cast<DX12::Image*>(presentImageView->getImage());
 
 				D3D12_RESOURCE_BARRIER resourceBarriers[2];
