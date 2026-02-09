@@ -14,104 +14,82 @@
 namespace Trident {
 	class AssetLibrary {
 		public:
-			// https://en.wikipedia.org/wiki/Ostrich_algorithm
+			/// Creates and returns a unique asset identifier.
+			/// See https://en.wikipedia.org/wiki/Ostrich_algorithm.
 			static uint32 createAssetIdentifier() {
 				return random<uint32>(min<uint32>(), max<uint32>());
 			}
 
-		public:
-			bool isLoaded(uint32 assetIdentifier) const {
-				for (uint32 assetIndex = 0; assetIndex < assets.size(); assetIndex += 1) {
-					if (assets[assetIndex]->identifier == assetIdentifier) {
-						return true;
-					}
-				}
-
-				return false;
-			}
-
-			void loadAssets() {
-				std::filesystem::recursive_directory_iterator assetIterator;
-
-				assetIterator = std::filesystem::recursive_directory_iterator(std::filesystem::current_path() / "Asset/Geometry");
-
-				for (const std::filesystem::directory_entry& assetEntry : assetIterator) {
-					if (assetEntry.is_directory()) {
-						continue;
-					}
-
-					loadGeometryAsset(assetEntry);
-				}
-
-				assetIterator = std::filesystem::recursive_directory_iterator(std::filesystem::current_path() / "Asset/Image");
-
-				for (const std::filesystem::directory_entry& assetEntry : assetIterator) {
-					if (assetEntry.is_directory()) {
-						continue;
-					}
-
-					loadImageAsset(assetEntry);
-				}
-
-				assetIterator = std::filesystem::recursive_directory_iterator(std::filesystem::current_path() / "Asset/Font");
-
-				for (const std::filesystem::directory_entry& assetEntry : assetIterator) {
-					if (assetEntry.is_directory()) {
-						continue;
-					}
-
-					loadFontAsset(assetEntry);
-				}
-
-				assetIterator = std::filesystem::recursive_directory_iterator(std::filesystem::current_path() / "Asset/Shader");
-
-				for (const std::filesystem::directory_entry& assetEntry : assetIterator) {
-					if (assetEntry.is_directory()) {
-						continue;
-					}
-
-					loadShaderModuleAsset(assetEntry);
-				}
-			}
-
-			ref<Asset> findAsset(uint32 identifier) const {
-				const auto iterator = assetIdentifierToAssetIndex.find(identifier);
-
-				ENGINE_ASSERT(iterator != assetIdentifierToAssetIndex.end(), "No asset exists with the provided identifier.");
-				ENGINE_ASSERT(iterator->second < assets.size(), "The found asset index is overflowing.");
-
-				return assets[iterator->second];
-			}
-
-			ref<FontAsset> findFontAsset(view<char8> stem) const {
-				return findAssetByStem<FontAsset>(fontAssetStemToAssetIndex, stem);
-			}
-
-			ref<GeometryAsset> findGeometryAsset(view<char8> stem) const {
-				return findAssetByStem<GeometryAsset>(geometryAssetStemToAssetIndex, stem);
-			}
-
-			ref<ImageAsset> findImageAsset(view<char8> stem) const {
-				return findAssetByStem<ImageAsset>(imageAssetStemToAssetIndex, stem);
-			}
-
-			ref<ShaderModuleAsset> findShaderModuleAsset(view<char8> stem) const {
-				return findAssetByStem<ShaderModuleAsset>(shaderModuleAssetStemToAssetIndex, stem);
-			}
-
 		private:
-			template<typename AssetType>
-			ref<AssetType> findAssetByStem(const std::unordered_map<std::string, uint32>& assetStemToAssetIndex, view<char8> stem) const {
-				const auto iterator = assetStemToAssetIndex.find(std::string(&stem[0], stem.count()));
+			static std::filesystem::path getAbsolutePath(view<char8> base, view<char8> relativePath, view<char8> extension) {
+				sequence<char8> path(relativePath.count() + extension.count());
 
-				ENGINE_ASSERT(iterator != assetStemToAssetIndex.end(), "Asset \"[]\" not found.", stem);
-				ENGINE_ASSERT(iterator->second < assets.size(), "The found asset index is overflowing.");
+				std::copy(relativePath.begin(), relativePath.end(), &path[0]);
+				std::copy(extension.begin(), extension.end(), &path[relativePath.count()]);
+
+				return std::filesystem::path(base.begin(), base.end()) / std::filesystem::path(path.begin(), path.end());
+			}
+
+		public:
+			template<typename AssetType>
+			ref<AssetType> getAsset(uint32 identifier, view<char8> path) {
+				auto iterator = assetIdentifierToIndex.find(identifier);
+
+				if (iterator == assetIdentifierToIndex.end()) {
+					loadAsset<AssetType>(path);
+
+					iterator = assetIdentifierToIndex.find(identifier);
+				}
 
 				return std::static_pointer_cast<AssetType>(assets[iterator->second]);
 			}
 
-			void loadFontAsset(const std::filesystem::directory_entry& assetEntry) {
-				const sequence<char8> assetPath = assetEntry.path().string();
+			template<typename AssetType>
+			ref<AssetType> getAsset(view<char8> path) {
+				const std::unordered_map<sequence<char8>, uint32>& assetPathToIndexMap = getAssetPathToIndexMap<AssetType>();
+
+				auto iterator = assetPathToIndexMap.find(path);
+
+				if (iterator == assetPathToIndexMap.end()) {
+					loadAsset<AssetType>(path);
+
+					iterator = assetPathToIndexMap.find(path);
+				}
+
+				return std::static_pointer_cast<AssetType>(assets[iterator->second]);
+			}
+
+		private:
+			template<typename AssetType>
+			const std::unordered_map<sequence<char8>, uint32>& getAssetPathToIndexMap() const;
+
+			template<>
+			const std::unordered_map<sequence<char8>, uint32>& getAssetPathToIndexMap<FontAsset>() const {
+				return fontAssetPathToIndex;
+			}
+
+			template<>
+			const std::unordered_map<sequence<char8>, uint32>& getAssetPathToIndexMap<GeometryAsset>() const {
+				return geometryAssetPathToIndex;
+			}
+
+			template<>
+			const std::unordered_map<sequence<char8>, uint32>& getAssetPathToIndexMap<ImageAsset>() const {
+				return imageAssetPathToIndex;
+			}
+
+			template<>
+			const std::unordered_map<sequence<char8>, uint32>& getAssetPathToIndexMap<ShaderModuleAsset>() const {
+				return shaderModuleAssetPathToIndex;
+			}
+
+			template<typename AssetType>
+			void loadAsset(view<char8> path);
+
+			template<>
+			void loadAsset<FontAsset>(view<char8> path) {
+				const std::filesystem::path absolutePath = getAbsolutePath("Asset/Font", path, ".tfo");
+				const sequence<char8> assetPath = absolutePath.string();
 				const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
 
 				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
@@ -122,17 +100,19 @@ namespace Trident {
 
 				byteStream.jump(sizeof(AssetSignature));
 
-				const ref<FontAsset> fontAsset = decodeFontAsset(byteStream);
+				const ref<FontAsset> fontAsset = decodeFontAsset(path, byteStream);
 				const uint32 fontAssetIndex = static_cast<uint32>(assets.size());
-				const std::string stem = assetEntry.path().stem().string();
+				const sequence<char8> stem = absolutePath.stem().string();
 
-				assetIdentifierToAssetIndex.insert({fontAsset->identifier, fontAssetIndex});
-				fontAssetStemToAssetIndex.insert({stem, fontAssetIndex});
+				assetIdentifierToIndex.insert({fontAsset->identifier, fontAssetIndex});
+				fontAssetPathToIndex.insert({stem, fontAssetIndex});
 				assets.emplace_back(fontAsset);
 			}
 
-			void loadGeometryAsset(const std::filesystem::directory_entry& assetEntry) {
-				const sequence<char8> assetPath = assetEntry.path().string();
+			template<>
+			void loadAsset<GeometryAsset>(view<char8> path) {
+				const std::filesystem::path absolutePath = getAbsolutePath("Asset/Geometry", path, ".tge");
+				const sequence<char8> assetPath = absolutePath.string();
 				const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
 
 				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
@@ -145,15 +125,17 @@ namespace Trident {
 
 				const ref<GeometryAsset> geometryAsset = Filesystem::decodeAsset<GeometryAsset>(byteStream);
 				const uint32 geometryAssetIndex = static_cast<uint32>(assets.size());
-				const std::string stem = assetEntry.path().stem().string();
+				const sequence<char8> stem = absolutePath.stem().string();
 
-				assetIdentifierToAssetIndex.insert({geometryAsset->identifier, geometryAssetIndex});
-				geometryAssetStemToAssetIndex.insert({stem, geometryAssetIndex});
+				assetIdentifierToIndex.insert({geometryAsset->identifier, geometryAssetIndex});
+				geometryAssetPathToIndex.insert({stem, geometryAssetIndex});
 				assets.emplace_back(geometryAsset);
 			}
 
-			void loadImageAsset(const std::filesystem::directory_entry& assetEntry) {
-				const sequence<char8> assetPath = assetEntry.path().string();
+			template<>
+			void loadAsset<ImageAsset>(view<char8> path) {
+				const std::filesystem::path absolutePath = getAbsolutePath("Asset/Image", path, ".tia");
+				const sequence<char8> assetPath = absolutePath.string();
 				const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
 
 				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
@@ -164,15 +146,17 @@ namespace Trident {
 
 				const ref<ImageAsset> imageAsset = decodeImageAsset(byteStream);
 				const uint32 imageAssetIndex = static_cast<uint32>(assets.size());
-				const std::string stem = assetEntry.path().stem().string();
+				const sequence<char8> stem = absolutePath.stem().string();
 
-				assetIdentifierToAssetIndex.insert({imageAsset->identifier, imageAssetIndex});
-				imageAssetStemToAssetIndex.insert({stem, imageAssetIndex});
+				assetIdentifierToIndex.insert({imageAsset->identifier, imageAssetIndex});
+				imageAssetPathToIndex.insert({stem, imageAssetIndex});
 				assets.emplace_back(imageAsset);
 			}
 
-			void loadShaderModuleAsset(const std::filesystem::directory_entry& assetEntry) {
-				const sequence<char8> assetPath = assetEntry.path().string();
+			template<>
+			void loadAsset<ShaderModuleAsset>(view<char8> path) {
+				const std::filesystem::path absolutePath = getAbsolutePath("Asset/Shader", path, ".tsm");
+				const sequence<char8> assetPath = absolutePath.string();
 				const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
 
 				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
@@ -185,21 +169,21 @@ namespace Trident {
 
 				const ref<ShaderModuleAsset> shaderModuleAsset = decodeShaderModuleAsset(byteStream);
 				const uint32 shaderModuleAssetIndex = static_cast<uint32>(assets.size());
-				const std::string stem = assetEntry.path().stem().string();
+				const sequence<char8> stem = absolutePath.stem().string();
 
-				assetIdentifierToAssetIndex.insert({shaderModuleAsset->identifier, shaderModuleAssetIndex});
-				shaderModuleAssetStemToAssetIndex.insert({stem, shaderModuleAssetIndex});
+				assetIdentifierToIndex.insert({shaderModuleAsset->identifier, shaderModuleAssetIndex});
+				shaderModuleAssetPathToIndex.insert({stem, shaderModuleAssetIndex});
 				assets.emplace_back(shaderModuleAsset);
 			}
 
-			ref<FontAsset> decodeFontAsset(ByteStream<StreamOperation::READ>& byteStream) const {
+			ref<FontAsset> decodeFontAsset(view<char8> path, ByteStream<StreamOperation::READ>& byteStream) {
 				FontAssetDescriptor fontAssetDescriptor{};
 				fontAssetDescriptor.identifier = byteStream.read<uint32>();
 				fontAssetDescriptor.version = byteStream.read<VersionNumber>();
 
 				const uint32 glyphMapImageAssetIdentifier = byteStream.read<uint32>();
 
-				fontAssetDescriptor.glyphMapImage = std::static_pointer_cast<ImageAsset>(findAsset(glyphMapImageAssetIdentifier));
+				fontAssetDescriptor.glyphMapImage = getAsset<ImageAsset>(glyphMapImageAssetIdentifier, path);
 
 				const sint16 ascent = byteStream.read<sint16>();
 				const sint16 descent = byteStream.read<sint16>();
@@ -332,10 +316,10 @@ namespace Trident {
 
 		private:
 			std::vector<ref<Asset>> assets;
-			std::unordered_map<uint32, uint32> assetIdentifierToAssetIndex;
-			std::unordered_map<std::string, uint32> fontAssetStemToAssetIndex;
-			std::unordered_map<std::string, uint32> geometryAssetStemToAssetIndex;
-			std::unordered_map<std::string, uint32> imageAssetStemToAssetIndex;
-			std::unordered_map<std::string, uint32> shaderModuleAssetStemToAssetIndex;
+			std::unordered_map<uint32, uint32> assetIdentifierToIndex;
+			std::unordered_map<sequence<char8>, uint32> fontAssetPathToIndex;
+			std::unordered_map<sequence<char8>, uint32> geometryAssetPathToIndex;
+			std::unordered_map<sequence<char8>, uint32> imageAssetPathToIndex;
+			std::unordered_map<sequence<char8>, uint32> shaderModuleAssetPathToIndex;
 	};
 }

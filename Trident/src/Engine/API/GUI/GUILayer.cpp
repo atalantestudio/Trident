@@ -26,18 +26,11 @@ namespace Trident {
 		textureArrayFlushed = true;
 	}
 
-	// TODO
-	/* void GUILayer::postConstruct() {
-		renderer.flushTextureArrayStagingBuffer();
-
-		textureArrayFlushed = true;
-	} */
-
 	FontID GUILayer::loadFontAsset(view<char8> assetName) {
 		ENGINE_ASSERT(fontCount < MAX_FONT_COUNT, "Too many fonts loaded.");
 		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
 
-		const ref<FontAsset> fontAsset = getApplication()->getAssetLibrary()->findFontAsset(assetName);
+		const ref<FontAsset> fontAsset = getApplication()->getAssetLibrary()->getAsset<FontAsset>(assetName);
 
 		fonts[fontCount].fontAsset = fontAsset;
 
@@ -57,7 +50,7 @@ namespace Trident {
 	FontID GUILayer::loadImageAsset(view<char8> assetName) {
 		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
 
-		const ref<ImageAsset> imageAsset = getApplication()->getAssetLibrary()->findImageAsset(assetName);
+		const ref<ImageAsset> imageAsset = getApplication()->getAssetLibrary()->getAsset<ImageAsset>(assetName);
 
 		TextureArrayLayer imageLayer{};
 		imageLayer.width = imageAsset->getExtent().width;

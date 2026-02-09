@@ -76,7 +76,7 @@ namespace Trident {
 			}
 
 			void loadImageAsset() {
-				const ref<ImageAsset> imageAsset = getLayer()->getApplication()->getAssetLibrary()->findImageAsset(IMAGE_ASSET_NAME);
+				const ref<ImageAsset> imageAsset = getLayer()->getApplication()->getAssetLibrary()->getAsset<ImageAsset>(IMAGE_ASSET_NAME);
 
 				ImageFormat imageFormat = imageAsset->getFormat();
 

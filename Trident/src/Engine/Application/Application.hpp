@@ -47,7 +47,7 @@ namespace Trident {
 
 			const Window* getWindow() const;
 
-			const AssetLibrary* getAssetLibrary() const;
+			AssetLibrary* getAssetLibrary() const;
 
 			void postConstruct();
 

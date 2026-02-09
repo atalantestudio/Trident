@@ -19,7 +19,7 @@ namespace Trident {
 				renderer.setLayer(this);
 				renderer.build();
 
-				scene = createScene(*getApplication()->getAssetLibrary());
+				scene = createScene(getApplication()->getAssetLibrary());
 
 				renderer.setScene(&scene);
 

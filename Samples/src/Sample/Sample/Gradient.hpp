@@ -83,8 +83,8 @@ namespace Trident {
 				ref<ShaderModule> vertexShaderModule;
 
 				if (getGraphicsApi() == GraphicsAPI::GL) {
-					const AssetLibrary* assetLibrary = getLayer()->getApplication()->getAssetLibrary();
-					const ref<ShaderModuleAsset> vertexShaderModuleAsset = assetLibrary->findShaderModuleAsset("Screen");
+					AssetLibrary* assetLibrary = getLayer()->getApplication()->getAssetLibrary();
+					const ref<ShaderModuleAsset> vertexShaderModuleAsset = assetLibrary->getAsset<ShaderModuleAsset>("Screen");
 
 					vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, vertexShaderModuleAsset);
 				}

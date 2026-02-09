@@ -108,10 +108,7 @@ namespace Trident {
 		Renderer::initialize(projectDescriptor, *window, *properties);
 
 		if (projectType == ProjectType::MAIN) {
-			ENGINE_INFO("Loading assets.");
-
 			assetLibrary = new AssetLibrary();
-			assetLibrary->loadAssets();
 		}
 	}
 
@@ -172,7 +169,7 @@ namespace Trident {
 		return window;
 	}
 
-	const AssetLibrary* Application::getAssetLibrary() const {
+	AssetLibrary* Application::getAssetLibrary() const {
 		return assetLibrary;
 	}
 

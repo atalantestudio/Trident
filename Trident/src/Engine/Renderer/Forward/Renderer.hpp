@@ -543,7 +543,7 @@ namespace Trident {
 
 						while (materialReferenceIndex < materialReferences.count()) {
 							const MaterialReference& materialReference = materialReferences[materialReferenceIndex];
-							const ref<ImageAsset> imageAsset = getLayer()->getApplication()->getAssetLibrary()->findImageAsset(materialReference.descriptorImageAssetPaths[bindingIndex]);
+							const ref<ImageAsset> imageAsset = getLayer()->getApplication()->getAssetLibrary()->getAsset<ImageAsset>(materialReference.descriptorImageAssetPaths[bindingIndex]);
 
 							materialImageAssets[materialIndex][bindingIndex][materialReferenceIndex] = imageAsset;
 

@@ -6,11 +6,11 @@
 #include "Engine/API/Scene/Scene3D.hpp"
 
 namespace Trident {
-	static Scene3D createScene(const AssetLibrary& assetLibrary) {
+	static Scene3D createScene(AssetLibrary* assetLibrary) {
 		Scene3D scene;
 
-		const ref<GeometryAsset> lemonGeometryAsset = assetLibrary.findGeometryAsset("lemon");
-		const ref<GeometryAsset> stoolGeometryAsset = assetLibrary.findGeometryAsset("folding_wooden_stool");
+		const ref<GeometryAsset> lemonGeometryAsset = assetLibrary->getAsset<GeometryAsset>("lemon");
+		const ref<GeometryAsset> stoolGeometryAsset = assetLibrary->getAsset<GeometryAsset>("folding_wooden_stool");
 
 		const ref<Geometry3D> lemonGeometry = createRef<Geometry3D>(lemonGeometryAsset);
 		const ref<Geometry3D> stoolGeometry = createRef<Geometry3D>(stoolGeometryAsset);
