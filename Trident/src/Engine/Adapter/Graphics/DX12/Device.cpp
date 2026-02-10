@@ -84,6 +84,30 @@ namespace Trident {
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to query info queue interface.");
 
+			static constexpr UINT DENY_MESSAGE_ID_COUNT = 2;
+			static D3D12_MESSAGE_ID DENY_MESSAGE_IDS[DENY_MESSAGE_ID_COUNT] = {
+				D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE,
+				D3D12_MESSAGE_ID_CLEARDEPTHSTENCILVIEW_MISMATCHINGCLEARVALUE,
+			};
+
+			D3D12_INFO_QUEUE_FILTER infoQueueFilter{};
+			infoQueueFilter.AllowList.NumCategories = 0;
+			infoQueueFilter.AllowList.pCategoryList = nullptr;
+			infoQueueFilter.AllowList.NumSeverities = 0;
+			infoQueueFilter.AllowList.pSeverityList = nullptr;
+			infoQueueFilter.AllowList.NumIDs = 0;
+			infoQueueFilter.AllowList.pIDList = nullptr;
+			infoQueueFilter.DenyList.NumCategories = 0;
+			infoQueueFilter.DenyList.pCategoryList = nullptr;
+			infoQueueFilter.DenyList.NumSeverities = 0;
+			infoQueueFilter.DenyList.pSeverityList = nullptr;
+			infoQueueFilter.DenyList.NumIDs = DENY_MESSAGE_ID_COUNT;
+			infoQueueFilter.DenyList.pIDList = DENY_MESSAGE_IDS;
+
+			result = infoQueue->AddStorageFilterEntries(&infoQueueFilter);
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to add storage filter entries.");
+
 			result = infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set severity breakpoint.");
