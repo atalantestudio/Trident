@@ -34,11 +34,13 @@ namespace Trident {
 	// Toggle Vulkan graphics adapter.
 	#define ENABLE_VK_ADAPTER
 
-	// Toggle debug messages from the graphics API.
-	#define DEBUG_ENABLE_MESSENGER
+	#if defined(BUILD_MODE_DEBUG)
+		// Toggle debug messages from the graphics API.
+		#define DEBUG_ENABLE_MESSENGER
 
-	// Toggle validation layers for graphics APIs that support them.
-	#define DEBUG_ENABLE_VALIDATION_LAYERS
+		// Toggle validation layers for graphics APIs that support them.
+		#define DEBUG_ENABLE_VALIDATION_LAYERS
+	#endif
 
 	// If enabled, glyphs with a single contour are checked to ensure that the contour is clockwise.
 	// If not, a warning is outputted and the contour's winding order is inverted.

@@ -8,7 +8,7 @@
 namespace Trident {
 	class DefaultProcess : public Process {
 		public:
-			sint32 main(const sequence<void*>& arguments) override {
+			sint32 main(view<void*> arguments) override {
 				return 0;
 			}
 	};

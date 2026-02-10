@@ -15,7 +15,7 @@ namespace Trident {
 		HRESULT result;
 		UINT flags = 0;
 
-		#if defined(BUILD_MODE_DEBUG)
+		#if defined(DEBUG_ENABLE_MESSENGER)
 			ID3D12Debug* debug;
 
 			result = D3D12GetDebugInterface(IID_PPV_ARGS(&debug));
