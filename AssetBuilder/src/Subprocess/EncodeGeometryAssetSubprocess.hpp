@@ -149,6 +149,44 @@ namespace Trident {
 						vertexNormalComponents[vertexNormalIndexOffset + 2] = normal[2];
 					}
 				}
+				else if (ReferenceInformationType == "IndexToDirect") {
+					const FBXNode* NormalsIndexNode = file.searchNodeRecursive(LayerElementNormalNode->NestedList, "NormalsIndex");
+
+					DEBUG_ASSERT(NormalsIndexNode->PropertyList[0]->TypeCode == FBXPropertyTypeCode::i);
+
+					const ref<FBXArrayProperty<sint32>> NormalsIndexProperty = std::static_pointer_cast<FBXArrayProperty<sint32>>(NormalsIndexNode->PropertyList[0]);
+
+					vertexNormalComponents = NormalsProperty->Contents;
+					vertexNormalIndices = sequence<uint32>(vertexPositionIndices.count());
+
+					uint32 polygonOffset = 0;
+					uint32 indexOffset = 0;
+
+					// TODO: This section is similar to the index count section above; maybe try merging the two.
+					while (polygonOffset < NormalsIndexProperty->Contents.count()) {
+						uint32 triangleOffset = 0;
+
+						while (triangleOffset < NormalsIndexProperty->Contents.count() - polygonOffset) {
+							const sint32 indexC = PolygonVertexIndexProperty->Contents[polygonOffset + triangleOffset + 2];
+
+							vertexNormalIndices[indexOffset + 0] = NormalsIndexProperty->Contents[polygonOffset];
+							vertexNormalIndices[indexOffset + 1] = NormalsIndexProperty->Contents[polygonOffset + triangleOffset + 1];
+							vertexNormalIndices[indexOffset + 2] = NormalsIndexProperty->Contents[polygonOffset + triangleOffset + 2];
+
+							indexOffset += 3;
+
+							if (indexC < 0) {
+								polygonOffset += triangleOffset + 2;
+
+								break;
+							}
+
+							triangleOffset += 1;
+						}
+
+						polygonOffset += 1;
+					}
+				}
 				else {
 					ENGINE_ERROR("Encountered unhandled ReferenceInformationType value \"[]\".", ReferenceInformationType);
 					ABORT();
