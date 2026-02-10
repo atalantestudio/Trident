@@ -23,12 +23,11 @@ namespace Trident {
 			static constexpr uint32 TEXTURE_ARRAY_IMAGE_HEIGHT = 512;
 			static constexpr uint32 VERTEX_BUFFER_SIZE = 6 * sizeof(Vertex);
 			static constexpr uint32 INSTANCE_BUFFER_SIZE = 4 * sizeof(Instance);
-
-			static constexpr char8* ASSET_PATHS[] = {
-				"Asset/Image/Baboon.png",
-				"Asset/Image/Cameraman.png",
-				"Asset/Image/Lenna.png",
-				"Asset/Image/Pepper.png",
+			static constexpr view<char8> IMAGE_ASSET_PATHS[] = {
+				"Baboon",
+				"Cameraman",
+				"Lenna",
+				"Pepper",
 			};
 
 		public:
@@ -134,28 +133,35 @@ namespace Trident {
 			}
 
 			void loadAssets() {
-				sequence<File<FileFormat::PNG>> assets(ASSET_COUNT);
+				sequence<ref<ImageAsset>> imageAssets(ASSET_COUNT);
+				AssetLibrary* assetLibrary = getLayer()->getApplication()->getAssetLibrary();
 				uint64 textureArrayImageSize = 0;
+				uint32 assetIndex = 0;
 
-				for (uint32 assetIndex = 0; assetIndex < assets.count(); assetIndex += 1) {
-					const sequence<uint8> assetBuffer = Filesystem::openByteBuffer(ASSET_PATHS[assetIndex]);
+				while (assetIndex < ASSET_COUNT) {
+					const ref<ImageAsset> imageAsset = assetLibrary->getAsset<ImageAsset>(IMAGE_ASSET_PATHS[assetIndex]);
 
-					File<FileFormat::PNG>& asset = assets[assetIndex];
-					asset = Filesystem::decode<FileFormat::PNG>(assetBuffer);
+					textureArrayImageSize += imageAsset->getData().count();
 
-					textureArrayImageSize += asset.data.count();
+					imageAssets[assetIndex] = imageAsset;
+
+					assetIndex += 1;
 				}
 
 				const ref<Buffer> textureArrayImageStagingBuffer = createStagingBuffer(textureArrayImageSize);
 
 				uint8* textureArrayImageStagingBufferMappedRange = textureArrayImageStagingBuffer->map<uint8>(0, textureArrayImageStagingBuffer->getSize());
 
-				for (uint32 assetIndex = 0; assetIndex < assets.count(); assetIndex += 1) {
-					const File<FileFormat::PNG>& asset = assets[assetIndex];
+				assetIndex = 0;
 
-					std::copy(asset.data.begin(), asset.data.end(), textureArrayImageStagingBufferMappedRange);
+				while (assetIndex < ASSET_COUNT) {
+					const ref<ImageAsset> imageAsset = imageAssets[assetIndex];
 
-					textureArrayImageStagingBufferMappedRange += asset.data.count();
+					std::copy(imageAsset->getData().begin(), imageAsset->getData().end(), textureArrayImageStagingBufferMappedRange);
+
+					textureArrayImageStagingBufferMappedRange += imageAsset->getData().count();
+
+					assetIndex += 1;
 				}
 
 				textureArrayImageStagingBuffer->unmap();
@@ -168,7 +174,7 @@ namespace Trident {
 				bufferImageCopyRegion.imageExtent = textureArrayImage->getExtent();
 				bufferImageCopyRegion.imageMipLevel = 0;
 				bufferImageCopyRegion.imageLayerOffset = 0;
-				bufferImageCopyRegion.imageLayerCount = static_cast<uint32>(assets.count());
+				bufferImageCopyRegion.imageLayerCount = static_cast<uint32>(imageAssets.count());
 
 				CommandBufferDescriptor commandBufferDescriptor{};
 				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;

@@ -8,7 +8,7 @@
 namespace Trident {
 	class SampleRenderer : public Renderer {
 		private:
-			static constexpr view<char8> IMAGE_PATH = "Asset/Image/Zelda.png";
+			static constexpr view<char8> IMAGE_PATH = "../../../Samples/Asset/Image/Zelda.png";
 
 		public:
 			void build() override {

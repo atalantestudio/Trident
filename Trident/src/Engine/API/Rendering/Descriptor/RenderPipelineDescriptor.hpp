@@ -17,7 +17,8 @@
 
 namespace Trident {
 	struct ColorBlendState {
-		view<ColorBlendAttachment> attachments;
+		// TODO: Use a view instead.
+		sequence<ColorBlendAttachment> attachments;
 	};
 
 	struct DepthStencilState {

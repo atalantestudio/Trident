@@ -7,7 +7,7 @@
 #include "Engine/API/Rendering/BlendFactor.hpp"
 
 namespace Trident::DX12 {
-	D3D12_BLEND getBlendFactor(BlendFactor blendFactor) {
+	inline D3D12_BLEND getBlendFactor(BlendFactor blendFactor) {
 		switch (blendFactor) {
 			case BlendFactor::ZERO: return D3D12_BLEND_ZERO;
 			case BlendFactor::ONE: return D3D12_BLEND_ONE;
@@ -31,7 +31,7 @@ namespace Trident::DX12 {
 			default: {
 				ADAPTER_ASSERT(false, "Undefined blend factor.");
 
-				return D3D12_BLEND_ZERO;
+				return static_cast<D3D12_BLEND>(0);
 			}
 		}
 	}

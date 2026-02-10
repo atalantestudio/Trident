@@ -21,12 +21,11 @@ namespace Trident {
 			static constexpr uint32 ASSET_COUNT = 4;
 			static constexpr uint32 VERTEX_BUFFER_SIZE = 6 * sizeof(Vertex);
 			static constexpr uint32 INSTANCE_BUFFER_SIZE = 4 * sizeof(Instance);
-
-			static constexpr char8* ASSET_PATHS[] = {
-				"Asset/Image/Baboon.png",
-				"Asset/Image/Cameraman.png",
-				"Asset/Image/Lenna.png",
-				"Asset/Image/Pepper.png",
+			static constexpr view<char8> IMAGE_ASSET_PATHS[] = {
+				"Baboon",
+				"Cameraman",
+				"Lenna",
+				"Pepper",
 			};
 
 		public:
@@ -100,7 +99,7 @@ namespace Trident {
 				images = sequence<ref<Image>>(ASSET_COUNT);
 				imageViews = sequence<ref<ImageView>>(ASSET_COUNT);
 
-				sequence<File<FileFormat::PNG>> assets(ASSET_COUNT);
+				sequence<ref<ImageAsset>> imageAssets(ASSET_COUNT);
 
 				uint64 stagingBufferSize = 0;
 
@@ -123,28 +122,30 @@ namespace Trident {
 
 				SET_DEBUG_NAME(imageViewDescriptor, "Array texture");
 
-				for (uint32 assetIndex = 0; assetIndex < assets.count(); assetIndex += 1) {
-					const sequence<uint8> assetBuffer = Filesystem::openByteBuffer(ASSET_PATHS[assetIndex]);
+				AssetLibrary* assetLibrary = getLayer()->getApplication()->getAssetLibrary();
+				uint32 imageAssetIndex = 0;
 
-					File<FileFormat::PNG>& asset = assets[assetIndex];
-					asset = Filesystem::decode<FileFormat::PNG>(assetBuffer);
+				while (imageAssetIndex < imageAssets.count()) {
+					const ref<ImageAsset> imageAsset = assetLibrary->getAsset<ImageAsset>(IMAGE_ASSET_PATHS[imageAssetIndex]);
 
-					stagingBufferSize += asset.data.count();
+					stagingBufferSize += imageAsset->getData().count();
+					imageDescriptor.extent = imageAsset->getExtent();
 
-					imageDescriptor.extent = asset.extent;
+					images[imageAssetIndex] = createImage(imageDescriptor);
+					imageViews[imageAssetIndex] = images[imageAssetIndex]->createView(imageViewDescriptor);
+					imageAssets[imageAssetIndex] = imageAsset;
 
-					images[assetIndex] = createImage(imageDescriptor);
-					imageViews[assetIndex] = images[assetIndex]->createView(imageViewDescriptor);
+					imageAssetIndex += 1;
 				}
 
 				const ref<Buffer> stagingBuffer = createStagingBuffer(stagingBufferSize);
 
 				uint8* stagingBufferMappedRange = stagingBuffer->map<uint8>(0, stagingBuffer->getSize());
 
-				for (const File<FileFormat::PNG>& asset : assets) {
-					std::copy(asset.data.begin(), asset.data.end(), stagingBufferMappedRange);
+				for (const ref<ImageAsset> imageAsset : imageAssets) {
+					std::copy(imageAsset->getData().begin(), imageAsset->getData().end(), stagingBufferMappedRange);
 
-					stagingBufferMappedRange += asset.data.count();
+					stagingBufferMappedRange += imageAsset->getData().count();
 				}
 
 				stagingBuffer->unmap();
@@ -168,8 +169,10 @@ namespace Trident {
 
 				commandEncoder->begin();
 
-				for (uint32 assetIndex = 0; assetIndex < assets.count(); assetIndex += 1) {
-					const ref<Image> image = images[assetIndex];
+				imageAssetIndex = 0;
+
+				while (imageAssetIndex < ASSET_COUNT) {
+					const ref<Image> image = images[imageAssetIndex];
 
 					bufferImageCopyRegion.imageExtent = image->getExtent();
 
@@ -177,7 +180,9 @@ namespace Trident {
 					commandEncoder->copyBufferToImage(stagingBuffer, image, {bufferImageCopyRegion});
 					commandEncoder->setImageMemoryBarrier(image, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
-					bufferImageCopyRegion.bufferOffset += assets[assetIndex].data.count();
+					bufferImageCopyRegion.bufferOffset += imageAssets[imageAssetIndex]->getData().count();
+
+					imageAssetIndex += 1;
 				}
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
