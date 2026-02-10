@@ -3,11 +3,14 @@
 
 #pragma once
 
-#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
-	#define VK_USE_PLATFORM_WIN32_KHR
-#endif
+#include <vulkan/vk_platform.h>
+#include <vulkan/vulkan_core.h>
 
-#include <vulkan/vulkan.h>
+#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
+	#include <vulkan/vulkan_win32.h>
+#else
+	#error "Unsupported operating system.'
+#endif
 
 #if defined(BUILD_MODE_DEBUG)
 	#include <vulkan/vk_enum_string_helper.h>
