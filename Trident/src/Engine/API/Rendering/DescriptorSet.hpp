@@ -27,7 +27,8 @@ namespace Trident {
 		ref<DescriptorSet> descriptorSet;
 		uint32 bindingIndex;
 
-		// NOTE: Either fill the descriptor buffers or the descriptor images.
+		// Either fill the descriptor buffers or the descriptor images.
+		// TODO: Wrap in an union.
 		view<DescriptorBuffer> descriptorBuffers;
 		view<DescriptorImage> descriptorImages;
 	};
