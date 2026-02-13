@@ -19,8 +19,8 @@ namespace Trident {
 
 		SET_DEBUG_NAME(outputFragmentShaderModuleDescriptor, "Output fragment");
 
-		ColorBlendAttachment swapchainColorBlendAttachment{};
-		swapchainColorBlendAttachment.blend = false;
+		ColorBlendAttachment outputColorBlendAttachment{};
+		outputColorBlendAttachment.blend = false;
 
 		RenderPipelineDescriptor outputPipelineDescriptor{};
 		outputPipelineDescriptor.pipelineLayout = outputPipelineLayout;
@@ -32,7 +32,7 @@ namespace Trident {
 		outputPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		outputPipelineDescriptor.lineWidth = 1.0f;
 		outputPipelineDescriptor.minSampleShading = 0.0f;
-		outputPipelineDescriptor.colorBlendState.attachments = {swapchainColorBlendAttachment};
+		outputPipelineDescriptor.colorBlendState.attachments = {outputColorBlendAttachment};
 		outputPipelineDescriptor.depthStencilState.depthTest = false;
 		outputPipelineDescriptor.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT;
 		outputPipelineDescriptor.renderPass = presentRenderPass;
