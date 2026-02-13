@@ -3,7 +3,7 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 
 struct Camera {
 	mat4x4 projectionView;
@@ -13,24 +13,62 @@ struct Camera {
 	vec3 position;
 };
 
+struct Cluster {
+	uint instanceIndex;
+};
+
+struct Instance {
+	mat4x4 transform;
+	uint geometryIndex;
+	uint materialIndex;
+	uint materialReferenceIndex;
+	int clusterOffset;
+};
+
+const uint TRIANGLE_INDEX_BIT_COUNT = 7;
+
 layout(set = 0, binding = 0) uniform readonly CameraBuffer {
 	Camera camera;
 };
 
-layout(set = 0, binding = 1, r8) uniform readonly image2D materialIndexImage;
+layout(set = 0, binding = 1, r32ui) uniform readonly uimage2D visibilityImage;
 
-layout(set = 0, binding = 2) buffer writeonly MaterialCount {
+layout(set = 0, binding = 2) buffer readonly ClusterBuffer {
+	Cluster clusterBuffer[];
+};
+
+layout(set = 0, binding = 3) buffer readonly InstanceBuffer {
+	Instance instanceBuffer[];
+};
+
+layout(set = 0, binding = 4) buffer writeonly MaterialCount {
 	uint materialCountBuffer[];
 };
 
-void main() {
-	uvec2 position = gl_GlobalInvocationID.xy;
+uint fetchInstanceIndex(uint clusterIndex) {
+	return clusterBuffer[clusterIndex].instanceIndex;
+}
 
-	if (position.x >= camera.viewport.x || position.y >= camera.viewport.y) {
+uint fetchMaterialIndex(uint instanceIndex) {
+	return instanceBuffer[instanceIndex].materialIndex;
+}
+
+void main() {
+	uvec2 globalInvocationIndex = gl_GlobalInvocationID.xy;
+
+	if (globalInvocationIndex.x >= camera.viewport.x || globalInvocationIndex.y >= camera.viewport.y) {
 		return;
 	}
 
-	uint materialIndex = uint(imageLoad(materialIndexImage, ivec2(position)).r);
+	uint visibility = uint(imageLoad(visibilityImage, ivec2(globalInvocationIndex)).r);
+	uint materialIndex = 0;
+
+	if (visibility > 0) {
+		uint clusterIndex = (visibility >> TRIANGLE_INDEX_BIT_COUNT) - 1;
+		uint instanceIndex = fetchInstanceIndex(clusterIndex);
+
+		materialIndex = fetchMaterialIndex(instanceIndex);
+	}
 
 	atomicAdd(materialCountBuffer[materialIndex], 1);
 }

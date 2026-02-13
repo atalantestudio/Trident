@@ -129,9 +129,8 @@ namespace Trident {
 			ClusteredInstance& clusteredInstance = clusteredScene.instances[instanceIndex];
 			clusteredInstance.transform = instance.transform;
 			clusteredInstance.geometryIndex = instance.geometryIndex;
-
-			// TODO: Pack material index + material reference index?
-			clusteredInstance.materialIndex = instance.materialReferenceIndex;
+			clusteredInstance.materialIndex = scene.getFlatMaterialReferences()[instance.materialReferenceIndex].materialIndex;
+			clusteredInstance.materialReferenceIndex = instance.materialReferenceIndex;
 
 			clusteredInstance.clusterOffset = clusteredGeometry.clusterOffset - clusterOffset;
 

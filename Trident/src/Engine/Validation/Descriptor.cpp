@@ -91,11 +91,11 @@ namespace Trident {
 						ENGINE_ERROR("descriptor.clearValues.count must be greater than or equal to the number of attachments in descriptor.framebuffer.renderPass.");
 					}
 
-					if (descriptor.clearValues.count() > renderPass->getAttachmentReferenceCount()) {
+					/* if (descriptor.clearValues.count() > renderPass->getAttachmentReferenceCount()) {
 						errorCount += 1;
 
 						ENGINE_ERROR("descriptor.clearValues.count must be smaller than the number of attachment references in descriptor.framebuffer.renderPass.");
-					}
+					} */
 				}
 			}
 

@@ -29,6 +29,7 @@ struct Instance {
 	mat4x4 transform;
 	uint geometryIndex;
 	uint materialIndex;
+	uint materialReferenceIndex;
 	int clusterOffset;
 };
 

@@ -13,6 +13,7 @@ struct Instance {
 	float4x4 transform;
 	uint geometryIndex;
 	uint materialIndex;
+	uint materialReferenceIndex;
 	int clusterOffset;
 };
 
@@ -29,7 +30,6 @@ struct VertexInput {
 struct VertexOutput {
 	float4 position : SV_Position;
 	nointerpolation uint visibility : VERTEX_OUTPUT_ATTRIBUTE1;
-	nointerpolation uint materialIndex : VERTEX_OUTPUT_ATTRIBUTE2;
 };
 
 static const uint CLUSTER_TRIANGLE_COUNT = 128;
@@ -69,7 +69,8 @@ Instance fetchInstance(uint instanceIndex) {
 	));
 	instance.geometryIndex = instanceBuffer.Load(instanceIndex * stride + 64);
 	instance.materialIndex = instanceBuffer.Load(instanceIndex * stride + 68);
-	instance.clusterOffset = asint(instanceBuffer.Load(instanceIndex * stride + 72));
+	instance.materialReferenceIndex = instanceBuffer.Load(instanceIndex * stride + 72);
+	instance.clusterOffset = asint(instanceBuffer.Load(instanceIndex * stride + 76));
 
 	return instance;
 }
@@ -110,7 +111,6 @@ VertexOutput main(VertexInput input) {
 	VertexOutput output;
 	output.position = mul(camera.projectionView, mul(instance.transform, float4(vertex, 1.0)));
 	output.visibility = ((clusterIndex + 1) << TRIANGLE_INDEX_BIT_COUNT) | triangleIndex;
-	output.materialIndex = instance.materialIndex;
 
 	return output;
 }

@@ -1,23 +1,14 @@
-#version 440
+#version 320 es
 
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 in VertexOutput {
 	layout(location = 0) flat uint visibility;
-	layout(location = 1) flat uint materialIndex;
 } vertexOutput;
-
-layout(set = 3, binding = 0) buffer writeonly MaterialCountBuffer {
-	uint materialCountBuffer[];
-};
 
 layout(location = 0) out uint visibility;
 
 void main() {
 	visibility = vertexOutput.visibility;
-
-	// TODO(debug-only): Remove +1.
-	// TODO: Move to a new MaterialCount pipeline.
-	atomicAdd(materialCountBuffer[vertexOutput.materialIndex + 1], 1);
 }

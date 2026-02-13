@@ -10,7 +10,7 @@ namespace Trident {
 		BufferDescriptor materialCountBufferDescriptor{};
 		materialCountBufferDescriptor.size = sizeof(uint32) * scene->materials.count();
 		materialCountBufferDescriptor.usage = BufferUsage::READ_WRITE_STORAGE;
-		materialCountBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+		materialCountBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		materialCountBufferDescriptor.persistent = false;
 
 		SET_DEBUG_NAME(materialCountBufferDescriptor, "Material count");

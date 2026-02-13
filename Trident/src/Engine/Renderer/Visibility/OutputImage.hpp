@@ -9,21 +9,18 @@ namespace Trident {
 	ref<Image> VisibilityRenderer::createOutputImage() const {
 		const Extent2D extent = getSwapchain()->getExtent();
 
-		ImageDescriptor outputImageDescriptor{};
-		outputImageDescriptor.type = ImageType::TEXTURE_2D;
-		outputImageDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
-		outputImageDescriptor.extent.width = extent.width;
-		outputImageDescriptor.extent.height = extent.height;
-		outputImageDescriptor.extent.depth = 1;
-		outputImageDescriptor.mipLevelCount = 1;
-		outputImageDescriptor.layerCount = 1;
-		outputImageDescriptor.sampleCount = 1;
-		outputImageDescriptor.usage = ImageUsage::STORAGE;
-		outputImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
+		AttachmentImageDescriptor outputAttachmentImageDescriptor{};
+		outputAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
+		outputAttachmentImageDescriptor.extent.width = extent.width;
+		outputAttachmentImageDescriptor.extent.height = extent.height;
+		outputAttachmentImageDescriptor.extent.depth = 1;
+		outputAttachmentImageDescriptor.mipLevelCount = 1;
+		outputAttachmentImageDescriptor.layerCount = 1;
+		outputAttachmentImageDescriptor.additionalUsage = ImageUsage::STORAGE;
 
-		SET_DEBUG_NAME(outputImageDescriptor, "Output");
+		SET_DEBUG_NAME(outputAttachmentImageDescriptor, "Output");
 
-		return createImage(outputImageDescriptor);
+		return visibilityRenderPass->createColorAttachmentImage(outputAttachmentImageDescriptor, 1);
 	}
 
 	ref<ImageView> VisibilityRenderer::createOutputImageView() {

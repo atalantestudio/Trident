@@ -11,7 +11,7 @@ namespace Trident {
 
 		FramebufferDescriptor visibilityFramebufferDescriptor{};
 		visibilityFramebufferDescriptor.renderPass = visibilityRenderPass;
-		visibilityFramebufferDescriptor.imageViews = {visibilityImageView, depthStencilImageView};
+		visibilityFramebufferDescriptor.imageViews = {visibilityImageView, outputImageView, depthStencilImageView};
 		visibilityFramebufferDescriptor.extent = swapchain->getExtent();
 
 		SET_DEBUG_NAME(visibilityFramebufferDescriptor, "Visibility");

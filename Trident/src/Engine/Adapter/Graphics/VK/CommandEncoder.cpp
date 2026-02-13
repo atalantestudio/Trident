@@ -3,6 +3,7 @@
 
 #include "pch.hpp"
 
+#include "Engine/Adapter/Graphics/VK/AccessFlags.hpp"
 #include "Engine/Adapter/Graphics/VK/Buffer.hpp"
 #include "Engine/Adapter/Graphics/VK/CommandBuffer.hpp"
 #include "Engine/Adapter/Graphics/VK/CommandBufferUsage.hpp"
@@ -232,6 +233,43 @@ namespace Trident {
 
 	void VK::CommandEncoder::nextSubpass() {
 		vkCmdNextSubpass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
+
+		commandCount += 1;
+	}
+
+	void VK::CommandEncoder::insertBufferMemoryBarriers(view<BufferMemoryBarrier> barriers) {
+		sequence<VkBufferMemoryBarrier> bufferMemoryBarriers(barriers.count());
+		index barrierIndex = 0;
+
+		while (barrierIndex < barriers.count()) {
+			const BufferMemoryBarrier& barrier = barriers[barrierIndex];
+
+			VkBufferMemoryBarrier& bufferMemoryBarrier = bufferMemoryBarriers[barrierIndex];
+			bufferMemoryBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+			bufferMemoryBarrier.pNext = nullptr;
+			bufferMemoryBarrier.srcAccessMask = getAccessFlags(barrier.sourceAccess);
+			bufferMemoryBarrier.dstAccessMask = getAccessFlags(barrier.destinationAccess);
+			bufferMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			bufferMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			bufferMemoryBarrier.buffer = std::static_pointer_cast<VK::Buffer>(barrier.buffer)->buffer;
+			bufferMemoryBarrier.offset = barrier.offset;
+			bufferMemoryBarrier.size = barrier.size;
+
+			barrierIndex += 1;
+		}
+
+		vkCmdPipelineBarrier(
+			commandBuffer,
+			VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+			VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+			0,
+			0,
+			nullptr,
+			static_cast<uint32>(bufferMemoryBarriers.count()),
+			&bufferMemoryBarriers[0],
+			0,
+			nullptr
+		);
 
 		commandCount += 1;
 	}

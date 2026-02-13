@@ -13,14 +13,12 @@ namespace Trident {
 
 		SET_DEBUG_NAME(materialOffsetShaderModuleDescriptor, "Material offset");
 
-		const ref<ShaderModule> materialOffsetShaderModule = loadInternalShaderModule(materialOffsetShaderModuleDescriptor, "Visibility/MaterialOffset.comp");
+		ComputePipelineDescriptor materialOffsetPipelineDescriptor{};
+		materialOffsetPipelineDescriptor.pipelineLayout = materialOffsetPipelineLayout;
+		materialOffsetPipelineDescriptor.computeShaderModule = loadInternalShaderModule(materialOffsetShaderModuleDescriptor, "Visibility/MaterialOffset.comp");
 
-		ComputePipelineDescriptor materialOffsetComputePipelineDescriptor{};
-		materialOffsetComputePipelineDescriptor.pipelineLayout = materialOffsetPipelineLayout;
-		materialOffsetComputePipelineDescriptor.computeShaderModule = materialOffsetShaderModule;
+		SET_DEBUG_NAME(materialOffsetPipelineDescriptor, "Material offset");
 
-		SET_DEBUG_NAME(materialOffsetComputePipelineDescriptor, "Material offset");
-
-		return createComputePipeline(materialOffsetComputePipelineDescriptor);
+		return createComputePipeline(materialOffsetPipelineDescriptor);
 	}
 }

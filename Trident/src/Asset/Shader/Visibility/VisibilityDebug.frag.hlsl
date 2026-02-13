@@ -32,6 +32,7 @@ struct Instance {
 	float4x4 transform;
 	uint geometryIndex;
 	uint materialIndex;
+	uint materialReferenceIndex;
 	int clusterOffset;
 };
 
@@ -135,7 +136,8 @@ Instance fetchInstance(uint instanceIndex) {
 	));
 	instance.geometryIndex = instanceBuffer.Load(instanceIndex * stride + 64);
 	instance.materialIndex = instanceBuffer.Load(instanceIndex * stride + 68);
-	instance.clusterOffset = asint(instanceBuffer.Load(instanceIndex * stride + 72));
+	instance.materialReferenceIndex = instanceBuffer.Load(instanceIndex * stride + 72);
+	instance.clusterOffset = asint(instanceBuffer.Load(instanceIndex * stride + 76));
 
 	return instance;
 }

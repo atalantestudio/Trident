@@ -6,6 +6,7 @@
 #include "Engine/API/Rendering/Buffer.hpp"
 #include "Engine/API/Rendering/BufferCopyRegion.hpp"
 #include "Engine/API/Rendering/BufferImageCopyRegion.hpp"
+#include "Engine/API/Rendering/BufferMemoryBarrier.hpp"
 #include "Engine/API/Rendering/CommandBuffer.hpp"
 #include "Engine/API/Rendering/ComputePipeline.hpp"
 #include "Engine/API/Rendering/Descriptor/BeginRenderPassDescriptor.hpp"
@@ -58,6 +59,9 @@ namespace Trident {
 			virtual void dispatchIndirect(ref<Buffer> buffer, uint64 bufferOffset) = 0;
 
 			virtual void nextSubpass() = 0;
+
+			// TODO: Merge memory barriers, buffer memory barriers and image memory barriers into a single method.
+			virtual void insertBufferMemoryBarriers(view<BufferMemoryBarrier> barriers) = 0;
 
 			virtual void setImageMemoryBarrier(ref<Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) = 0;
 

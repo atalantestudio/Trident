@@ -30,5 +30,5 @@ void main() {
 	uint packedCoordinate = materialCoordinateBuffer[index];
 	uvec2 coordinate = uvec2(packedCoordinate >> 16, packedCoordinate & uint(0xffff));
 
-	imageStore(outputImage, ivec2(coordinate), vec4(1.0, 0.2, 0.0, 1.0));
+	// imageStore(outputImage, ivec2(coordinate), vec4(1.0, 0.2, 0.0, 1.0));
 }

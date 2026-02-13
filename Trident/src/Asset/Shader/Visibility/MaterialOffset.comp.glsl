@@ -22,10 +22,13 @@ void main() {
 	uint sum = 0;
 
 	// TODO: Get current material count.
-	uint materialCount = 2;
+	const uint materialCount = 2;
 
 	while (materialIndex < materialCount) {
 		uint count = materialCountBuffer[materialIndex];
+
+		// Reset material count.
+		materialCountBuffer[materialIndex] = 0;
 
 		// TODO: Rewrite as a parallel prefix sum.
 		materialOffsetBuffer[materialIndex] = sum;
@@ -35,9 +38,6 @@ void main() {
 		materialIndirectBuffer[materialIndex * 3 + 2] = 1;
 
 		sum += count;
-
-		// Reset material count.
-		materialCountBuffer[materialIndex] = 0;
 
 		materialIndex += 1;
 	}

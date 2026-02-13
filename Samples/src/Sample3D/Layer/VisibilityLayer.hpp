@@ -27,6 +27,10 @@ namespace Trident {
 				cameraController.setAspectRatio(getApplication()->getWindow()->getAspectRatio());
 				cameraController.updateProjection();
 
+				// TODO: The projection-view matrix doesn't seem to be correct on the first frame.
+				cameraController.getCamera().updateView();
+				cameraController.getCamera().updateProjectionView();
+
 				renderer.setCameraController<PerspectiveCamera>(&cameraController);
 			}
 

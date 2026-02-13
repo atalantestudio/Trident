@@ -12,7 +12,7 @@ namespace Trident {
 		writeVisibilityAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 
 		AttachmentReference writeDepthStencilAttachmentReference{};
-		writeDepthStencilAttachmentReference.index = 1;
+		writeDepthStencilAttachmentReference.index = 2;
 		writeDepthStencilAttachmentReference.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 		SubpassDescriptor visibilitySubpassDescriptor{};
@@ -32,6 +32,13 @@ namespace Trident {
 		visibilityAttachment.storeOperation = StoreOperation::UNDEFINED;
 		visibilityAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 
+		Attachment outputAttachment{};
+		outputAttachment.format = ImageFormat::R8G8B8A8_UNORM;
+		outputAttachment.sampleCount = 1;
+		outputAttachment.loadOperation = LoadOperation::CLEAR;
+		outputAttachment.storeOperation = StoreOperation::UNDEFINED;
+		outputAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+
 		Attachment depthStencilAttachment{};
 		depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
 		depthStencilAttachment.sampleCount = 1;
@@ -40,7 +47,7 @@ namespace Trident {
 		depthStencilAttachment.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 		RenderPassDescriptor renderPassDescriptor{};
-		renderPassDescriptor.attachments = {visibilityAttachment, depthStencilAttachment};
+		renderPassDescriptor.attachments = {visibilityAttachment, outputAttachment, depthStencilAttachment};
 		renderPassDescriptor.subpasses = {visibilitySubpass};
 		renderPassDescriptor.subpassDependencies = {};
 
