@@ -615,7 +615,7 @@ namespace Trident {
 				if (descriptor.subpassIndex >= descriptor.renderPass->getSubpassCount()) {
 					errorCount += 1;
 
-					ENGINE_ERROR("descriptor.subpassIndex must be lesser than the number of subpasses in descriptor.renderPass.");
+					ENGINE_ERROR("descriptor.subpassIndex must be less than the number of subpasses in descriptor.renderPass.");
 				}
 				else {
 					const ref<Subpass> subpass = descriptor.renderPass->getSubpass(descriptor.subpassIndex);
