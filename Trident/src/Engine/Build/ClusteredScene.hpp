@@ -24,8 +24,6 @@ namespace Trident {
 		sequence<uint32> vertexTextureCoordinateIndices;
 
 		sequence<Material> materials;
-
-		// TODO: Use sequence<MaterialReference>.
-		sequence<std::vector<MaterialReference>> materialReferences;
+		sequence<sequence<MaterialReference>> materialReferences;
 	};
 }

@@ -6,7 +6,7 @@
 #include "Engine/Renderer/Visibility/Renderer.hpp"
 
 namespace Trident {
-	ref<RenderPipeline> VisibilityRenderer::createDebugPipeline() const {
+	/* ref<RenderPipeline> VisibilityRenderer::createDebugPipeline() const {
 		ShaderModuleDescriptor debugVertexShaderModuleDescriptor{};
 		debugVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		debugVertexShaderModuleDescriptor.entryPoint = "main";
@@ -35,11 +35,11 @@ namespace Trident {
 		debugPipelineDescriptor.colorBlendState.attachments = {swapchainColorBlendAttachment};
 		debugPipelineDescriptor.depthStencilState.depthTest = false;
 		debugPipelineDescriptor.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT;
-		debugPipelineDescriptor.renderPass = renderPass;
-		debugPipelineDescriptor.subpassIndex = DEBUG_SUBPASS_INDEX;
+		debugPipelineDescriptor.renderPass = presentRenderPass;
+		debugPipelineDescriptor.subpassIndex = 1;
 
 		SET_DEBUG_NAME(debugPipelineDescriptor, "Debug");
 
 		return createRenderPipeline(debugPipelineDescriptor);
-	}
+	} */
 }

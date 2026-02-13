@@ -35,8 +35,8 @@ namespace Trident {
 		outputPipelineDescriptor.colorBlendState.attachments = {swapchainColorBlendAttachment};
 		outputPipelineDescriptor.depthStencilState.depthTest = false;
 		outputPipelineDescriptor.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT;
-		outputPipelineDescriptor.renderPass = renderPass;
-		outputPipelineDescriptor.subpassIndex = OUTPUT_SUBPASS_INDEX;
+		outputPipelineDescriptor.renderPass = presentRenderPass;
+		outputPipelineDescriptor.subpassIndex = 0;
 
 		SET_DEBUG_NAME(outputPipelineDescriptor, "Output");
 

@@ -25,14 +25,16 @@ void main() {
 	uint materialCount = 2;
 
 	while (materialIndex < materialCount) {
+		uint count = materialCountBuffer[materialIndex];
+
 		// TODO: Rewrite as a parallel prefix sum.
 		materialOffsetBuffer[materialIndex] = sum;
 
-		materialIndirectBuffer[materialIndex + 0] = materialCount / 256;
-		materialIndirectBuffer[materialIndex + 1] = 1;
-		materialIndirectBuffer[materialIndex + 2] = 1;
+		materialIndirectBuffer[materialIndex * 3 + 0] = uint(ceil(float(count) / 256.0));
+		materialIndirectBuffer[materialIndex * 3 + 1] = 1;
+		materialIndirectBuffer[materialIndex * 3 + 2] = 1;
 
-		sum += materialCountBuffer[materialIndex];
+		sum += count;
 
 		// Reset material count.
 		materialCountBuffer[materialIndex] = 0;

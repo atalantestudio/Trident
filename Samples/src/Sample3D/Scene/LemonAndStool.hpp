@@ -9,7 +9,7 @@ namespace Trident {
 	static Scene3D createScene(AssetLibrary* assetLibrary) {
 		Scene3D scene;
 
-		const ref<GeometryAsset> lemonGeometryAsset = assetLibrary->getAsset<GeometryAsset>("lemon");
+		const ref<GeometryAsset> lemonGeometryAsset = assetLibrary->getAsset<GeometryAsset>("lemon_1k");
 		const ref<GeometryAsset> stoolGeometryAsset = assetLibrary->getAsset<GeometryAsset>("folding_wooden_stool");
 
 		const ref<Geometry3D> lemonGeometry = createRef<Geometry3D>(lemonGeometryAsset);
@@ -18,43 +18,40 @@ namespace Trident {
 		const uint32 lemonGeometryIndex = scene.registerGeometry(lemonGeometry);
 		const uint32 stoolGeometryIndex = scene.registerGeometry(stoolGeometry);
 
-		MaterialPipelineDescriptor defaultMaterialPipelineDescriptor{};
-		defaultMaterialPipelineDescriptor.shaderModulePath = "Visibility/Material/Default";
-		defaultMaterialPipelineDescriptor.descriptorSetLayoutBindings = {};
+		Material defaultMaterial{};
+		defaultMaterial.shaderModulePath = "Visibility/Material/Default";
+		defaultMaterial.descriptorSetLayoutBindings = {};
 
-		MaterialDescriptor defaultMaterialDescriptor{};
-		defaultMaterialDescriptor.pipelineIndex = scene.registerMaterialPipeline(defaultMaterialPipelineDescriptor);
-		defaultMaterialDescriptor.writeDescriptorSets = {};
+		Material testMaterial{};
+		testMaterial.shaderModulePath = "Visibility/Material/Test";
+		testMaterial.descriptorSetLayoutBindings = {};
 
-		const uint32 defaultMaterialIndex = scene.registerMaterial(defaultMaterialDescriptor);
+		const uint32 defaultMaterialIndex = scene.registerMaterial(defaultMaterial);
+		const uint32 testMaterialIndex = scene.registerMaterial(testMaterial);
 
-		MaterialPipelineDescriptor testMaterialPipelineDescriptor{};
-		testMaterialPipelineDescriptor.shaderModulePath = "Visibility/Material/Test";
-		testMaterialPipelineDescriptor.descriptorSetLayoutBindings = {};
+		MaterialReference testMaterialReference{};
+		testMaterialReference.materialIndex = testMaterialIndex;
+		testMaterialReference.descriptorImageAssetPaths = {};
 
-		MaterialDescriptor testMaterialDescriptor{};
-		testMaterialDescriptor.pipelineIndex = scene.registerMaterialPipeline(testMaterialPipelineDescriptor);
-		testMaterialDescriptor.writeDescriptorSets = {};
-
-		const uint32 testMaterialIndex = scene.registerMaterial(testMaterialDescriptor);
+		const uint32 testMaterialReferenceIndex = scene.registerMaterialReference(testMaterialReference);
 
 		InstanceDescriptor lemon1InstanceDescriptor{};
 		lemon1InstanceDescriptor.position = {-0.1_m, 0.0_m, 0.3_m};
 		lemon1InstanceDescriptor.rotation = {0.0_rad, 0.0_rad, 0.0_rad};
 		lemon1InstanceDescriptor.geometryIndex = lemonGeometryIndex;
-		lemon1InstanceDescriptor.materialIndex = testMaterialIndex;
+		lemon1InstanceDescriptor.materialReferenceIndex = testMaterialReferenceIndex;
 
 		InstanceDescriptor lemon2InstanceDescriptor{};
 		lemon2InstanceDescriptor.position = {0.0_m, 0.0_m, 0.3_m};
 		lemon2InstanceDescriptor.rotation = {0.0_rad, 0.0_rad, 0.0_rad};
 		lemon2InstanceDescriptor.geometryIndex = lemonGeometryIndex;
-		lemon2InstanceDescriptor.materialIndex = testMaterialIndex;
+		lemon2InstanceDescriptor.materialReferenceIndex = testMaterialReferenceIndex;
 
 		InstanceDescriptor stoolInstanceDescriptor{};
 		stoolInstanceDescriptor.position = {0.5_m, -0.225_m, 1.0_m};
 		stoolInstanceDescriptor.rotation = {pi<float32>() * 0.5f, 0.3_rad, 0.0_rad};
 		stoolInstanceDescriptor.geometryIndex = stoolGeometryIndex;
-		stoolInstanceDescriptor.materialIndex = testMaterialIndex;
+		stoolInstanceDescriptor.materialReferenceIndex = testMaterialReferenceIndex;
 
 		scene.registerInstance(lemon1InstanceDescriptor);
 		scene.registerInstance(lemon2InstanceDescriptor);

@@ -23,8 +23,12 @@ layout(set = 0, binding = 1) buffer readonly MaterialCoordinateBuffer {
 
 layout(set = 0, binding = 2, rgba8) uniform writeonly image2D outputImage;
 
-layout(set = 0, binding = 3, r8) uniform readonly image2D visibilityImage;
+layout(set = 0, binding = 3, r32ui) uniform readonly uimage2D visibilityImage;
 
 void main() {
-	// TODO
+	uint index = gl_GlobalInvocationID.x;
+	uint packedCoordinate = materialCoordinateBuffer[index];
+	uvec2 coordinate = uvec2(packedCoordinate >> 16, packedCoordinate & uint(0xffff));
+
+	imageStore(outputImage, ivec2(coordinate), vec4(1.0, 0.2, 0.0, 1.0));
 }

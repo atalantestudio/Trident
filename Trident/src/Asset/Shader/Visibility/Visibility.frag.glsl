@@ -17,5 +17,7 @@ layout(location = 0) out uint visibility;
 void main() {
 	visibility = vertexOutput.visibility;
 
-	atomicAdd(materialCountBuffer[vertexOutput.materialIndex], 1);
+	// TODO(debug-only): Remove +1.
+	// TODO: Move to a new MaterialCount pipeline.
+	atomicAdd(materialCountBuffer[vertexOutput.materialIndex + 1], 1);
 }

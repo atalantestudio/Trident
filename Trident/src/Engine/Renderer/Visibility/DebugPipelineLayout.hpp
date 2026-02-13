@@ -6,7 +6,7 @@
 #include "Engine/Renderer/Visibility/Renderer.hpp"
 
 namespace Trident {
-	ref<PipelineLayout> VisibilityRenderer::createDebugPipelineLayout() const {
+	/* ref<PipelineLayout> VisibilityRenderer::createDebugPipelineLayout() const {
 		PipelineLayoutDescriptor debugPipelineLayoutDescriptor{};
 		debugPipelineLayoutDescriptor.descriptorSetLayouts = {
 			debugDescriptorSetLayout,
@@ -17,5 +17,5 @@ namespace Trident {
 		SET_DEBUG_NAME(debugPipelineLayoutDescriptor, "Debug");
 
 		return createPipelineLayout(debugPipelineLayoutDescriptor);
-	}
+	} */
 }

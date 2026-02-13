@@ -14,14 +14,16 @@ void main() {
 	materialCountBuffer.GetDimensions(materialCount);
 
 	while (materialIndex < materialCount) {
+		uint count = materialCountBuffer.Load(materialIndex * 4);
+
 		// TODO: Rewrite as a parallel prefix sum.
 		materialOffsetBuffer.Store(materialIndex * 4, sum);
 
-		materialIndirectBuffer.Store(materialIndex * 12 + 0, materialCount / 256);
-		materialIndirectBuffer.Store(materialIndex * 12 + 4, 1);
-		materialIndirectBuffer.Store(materialIndex * 12 + 8, 1);
+		materialIndirectBuffer.Store((materialIndex * 3 + 0) * 4, uint(ceil(float(count) / 256.0)));
+		materialIndirectBuffer.Store((materialIndex * 3 + 1) * 4, 1);
+		materialIndirectBuffer.Store((materialIndex * 3 + 2) * 4, 1);
 
-		sum += materialCountBuffer.Load(materialIndex * 4);
+		sum += count;
 
 		// Reset material count.
 		materialCountBuffer.Store(materialIndex * 4, 0);

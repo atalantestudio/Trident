@@ -30,7 +30,7 @@ layout(set = 0, binding = 0) uniform readonly CameraBuffer {
 	Camera camera;
 };
 
-layout(set = 0, binding = 1, r8) uniform readonly image2D visibilityImage;
+layout(set = 0, binding = 1, r32ui) uniform readonly uimage2D visibilityImage;
 
 layout(set = 0, binding = 2) buffer readonly ClusterBuffer {
 	Cluster clusterBuffer[];
@@ -70,7 +70,8 @@ void main() {
 		uint clusterIndex = (visibility >> TRIANGLE_INDEX_BIT_COUNT) - 1;
 		uint instanceIndex = fetchInstanceIndex(clusterIndex);
 
-		materialIndex = fetchMaterialIndex(instanceIndex);
+		// TODO(debug-only): Remove +1.
+		materialIndex = fetchMaterialIndex(instanceIndex) + 1;
 	}
 
 	uint materialOffset = atomicAdd(materialOffsetBuffer[materialIndex], 1);

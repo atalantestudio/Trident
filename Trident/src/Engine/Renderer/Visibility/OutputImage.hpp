@@ -11,7 +11,7 @@ namespace Trident {
 
 		ImageDescriptor outputImageDescriptor{};
 		outputImageDescriptor.type = ImageType::TEXTURE_2D;
-		outputImageDescriptor.format = getSurface()->getFormat();
+		outputImageDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
 		outputImageDescriptor.extent.width = extent.width;
 		outputImageDescriptor.extent.height = extent.height;
 		outputImageDescriptor.extent.depth = 1;

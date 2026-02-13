@@ -7,7 +7,7 @@
 
 #include "Engine/entry_point.hpp"
 
-#include "Layer/ForwardLayer.hpp"
+#include "Layer/VisibilityLayer.hpp"
 
 namespace Trident {
 	class Sample3DApplication : public Application {

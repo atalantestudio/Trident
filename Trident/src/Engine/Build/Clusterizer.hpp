@@ -17,10 +17,22 @@ namespace Trident {
 		ClusteredScene clusteredScene{};
 		clusteredScene.geometries = sequence<ClusteredGeometry>(scene.getGeometryCount());
 		clusteredScene.materials = sequence<Material>(scene.getMaterialCount());
-		clusteredScene.materialReferences = sequence<std::vector<MaterialReference>>(scene.getMaterialCount());
+		clusteredScene.materialReferences = sequence<sequence<MaterialReference>>(scene.getMaterialCount());
 
 		std::copy_n(scene.getMaterials().begin(), clusteredScene.materials.count(), &clusteredScene.materials[0]);
-		std::copy_n(scene.getAllMaterialReferences().begin(), clusteredScene.materialReferences.count(), &clusteredScene.materialReferences[0]);
+
+		uint32 materialIndex = 0;
+
+		while (materialIndex < scene.getMaterialCount()) {
+			const view<MaterialReference> inputReferences = scene.getMaterialReferences(materialIndex);
+
+			sequence<MaterialReference>& outputReferences = clusteredScene.materialReferences[materialIndex];
+			outputReferences = sequence<MaterialReference>(inputReferences.count());
+
+			std::copy(inputReferences.begin(), inputReferences.end(), &outputReferences[0]);
+
+			materialIndex += 1;
+		}
 
 		const view<ref<Geometry3D>> geometries = scene.getGeometries();
 		const view<RigidBody3D> instances = scene.getInstances();

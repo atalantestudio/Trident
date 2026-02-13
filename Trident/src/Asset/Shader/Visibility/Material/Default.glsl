@@ -23,7 +23,7 @@ layout(set = 0, binding = 1) buffer readonly MaterialCoordinateBuffer {
 
 layout(set = 0, binding = 2, rgba8) uniform writeonly image2D outputImage;
 
-layout(set = 0, binding = 3, r8) uniform readonly image2D visibilityImage;
+layout(set = 0, binding = 3, r32ui) uniform readonly uimage2D visibilityImage;
 
 void main() {
 	uint index = gl_GlobalInvocationID.x;

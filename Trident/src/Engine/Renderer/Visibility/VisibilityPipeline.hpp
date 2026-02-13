@@ -26,9 +26,6 @@ namespace Trident {
 		visibilityPipelineDescriptor.pipelineLayout = visibilityPipelineLayout;
 
 		#if defined(GL_SOURCE_FROM_SPIRV)
-			// TODO: Write OpenGL shaders.
-			ENGINE_ERROR_UNIMPLEMENTED();
-
 			if (Renderer::getGraphicsApi() == GraphicsAPI::GL) {
 				visibilityPipelineDescriptor.vertexShaderModule = loadInternalShaderModule(visibilityVertexShaderModuleDescriptor, "Visibility/VisibilityGL.vert");
 				visibilityPipelineDescriptor.fragmentShaderModule = loadInternalShaderModule(visibilityFragmentShaderModuleDescriptor, "Visibility/VisibilityGL.frag");
@@ -52,8 +49,8 @@ namespace Trident {
 		visibilityPipelineDescriptor.depthStencilState.depthWrite = true;
 		visibilityPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::LESS;
 		visibilityPipelineDescriptor.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT;
-		visibilityPipelineDescriptor.renderPass = renderPass;
-		visibilityPipelineDescriptor.subpassIndex = VISIBILITY_SUBPASS_INDEX;
+		visibilityPipelineDescriptor.renderPass = visibilityRenderPass;
+		visibilityPipelineDescriptor.subpassIndex = 0;
 
 		SET_DEBUG_NAME(visibilityPipelineDescriptor, "Visibility");
 

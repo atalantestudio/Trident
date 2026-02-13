@@ -24,15 +24,6 @@ namespace Trident {
 				uint32 clusterCount;
 			};
 
-		private:
-			static constexpr uint32 SWAPCHAIN_ATTACHMENT_INDEX = 0;
-			static constexpr uint32 VISIBILITY_ATTACHMENT_INDEX = 1;
-			static constexpr uint32 DEPTH_STENCIL_ATTACHMENT_INDEX = 2;
-
-			static constexpr uint32 VISIBILITY_SUBPASS_INDEX = 0;
-			static constexpr uint32 OUTPUT_SUBPASS_INDEX = 1;
-			static constexpr uint32 DEBUG_SUBPASS_INDEX = 2;
-
 		public:
 			void build() override;
 
@@ -55,23 +46,19 @@ namespace Trident {
 			void onEvent(Event& event) override;
 
 		private:
-			ref<RenderPass> _createRenderPass() const;
+			ref<RenderPass> createVisibilityRenderPass() const;
+			ref<RenderPass> createPresentRenderPass() const;
 
 			void createFrameResources();
 
 			ref<Subpass> createVisibilitySubpass() const;
-			ref<Subpass> createOutputSubpass() const;
-			ref<Subpass> createDebugSubpass() const;
+			ref<Subpass> createPresentSubpass() const;
+			// ref<Subpass> createDebugPresentSubpass() const;
 
-			ref<Image> createVisibilityImage() const;
-			ref<Image> createOutputImage() const;
-			ref<Image> createDepthStencilImage() const;
+			ref<Framebuffer> createVisibilityFramebuffer() const;
+			void createPresentFramebuffers();
 
-			ref<ImageView> createVisibilityImageView();
-			ref<ImageView> createOutputImageView();
-			ref<ImageView> createDepthStencilImageView();
-
-			void recreateFramebuffers();
+			void createMaterialObjects();
 
 			ref<DescriptorSetLayout> createCameraDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createClusterDescriptorSetLayout() const;
@@ -86,16 +73,14 @@ namespace Trident {
 			ref<PipelineLayout> createVisibilityPipelineLayout() const;
 			ref<PipelineLayout> createMaterialOffsetPipelineLayout() const;
 			ref<PipelineLayout> createMaterialCoordinatePipelineLayout() const;
-			void createMaterialPipelineLayouts();
 			ref<PipelineLayout> createOutputPipelineLayout() const;
-			ref<PipelineLayout> createDebugPipelineLayout() const;
+			// ref<PipelineLayout> createDebugPipelineLayout() const;
 
 			ref<RenderPipeline> createVisibilityPipeline() const;
 			ref<ComputePipeline> createMaterialOffsetPipeline() const;
 			ref<ComputePipeline> createMaterialCoordinatePipeline() const;
-			void createMaterialPipelines();
 			ref<RenderPipeline> createOutputPipeline() const;
-			ref<RenderPipeline> createDebugPipeline() const;
+			// ref<RenderPipeline> createDebugPipeline() const;
 
 			ref<Buffer> createVisibilityIndirectBuffer() const;
 			ref<Buffer> createCameraBuffer() const;
@@ -112,6 +97,16 @@ namespace Trident {
 			ref<Buffer> createMaterialOffsetBuffer() const;
 			ref<Buffer> createMaterialIndirectBuffer() const;
 			ref<Buffer> createMaterialCoordinateBuffer() const;
+
+			ref<Image> createVisibilityImage() const;
+			ref<Image> createOutputImage() const;
+			ref<Image> createDepthStencilImage() const;
+
+			ref<ImageView> createVisibilityImageView();
+			ref<ImageView> createOutputImageView();
+			ref<ImageView> createDepthStencilImageView();
+
+			ref<Sampler> createMaterialImageSampler() const;
 
 			void allocateDescriptorSets();
 
@@ -132,9 +127,11 @@ namespace Trident {
 			bool onWindowResize(WindowResizeEvent& event);
 
 		private:
-			ref<RenderPass> renderPass;
+			ref<RenderPass> visibilityRenderPass;
+			ref<RenderPass> presentRenderPass;
 
-			sequence<ref<Framebuffer>> framebuffers;
+			ref<Framebuffer> visibilityFramebuffer;
+			sequence<ref<Framebuffer>> presentFramebuffers;
 
 			ref<DescriptorSetLayout> cameraDescriptorSetLayout;
 			ref<DescriptorSetLayout> clusterDescriptorSetLayout;
@@ -143,6 +140,7 @@ namespace Trident {
 			ref<DescriptorSetLayout> materialOffsetDescriptorSetLayout;
 			ref<DescriptorSetLayout> materialCoordinateDescriptorSetLayout;
 			ref<DescriptorSetLayout> materialBaseDescriptorSetLayout;
+			sequence<ref<DescriptorSetLayout>> materialDescriptorSetLayouts;
 			ref<DescriptorSetLayout> outputDescriptorSetLayout;
 			ref<DescriptorSetLayout> debugDescriptorSetLayout;
 
@@ -153,6 +151,7 @@ namespace Trident {
 			ref<DescriptorSet> materialOffsetDescriptorSet;
 			ref<DescriptorSet> materialCoordinateDescriptorSet;
 			ref<DescriptorSet> materialBaseDescriptorSet;
+			sequence<ref<DescriptorSet>> materialDescriptorSets;
 			ref<DescriptorSet> outputDescriptorSet;
 			ref<DescriptorSet> debugDescriptorSet;
 
@@ -161,14 +160,14 @@ namespace Trident {
 			ref<PipelineLayout> materialCoordinatePipelineLayout;
 			sequence<ref<PipelineLayout>> materialPipelineLayouts;
 			ref<PipelineLayout> outputPipelineLayout;
-			ref<PipelineLayout> debugPipelineLayout;
+			// ref<PipelineLayout> debugPipelineLayout;
 
 			ref<RenderPipeline> visibilityPipeline;
 			ref<ComputePipeline> materialOffsetPipeline;
 			ref<ComputePipeline> materialCoordinatePipeline;
 			sequence<ref<ComputePipeline>> materialPipelines;
 			ref<RenderPipeline> outputPipeline;
-			ref<RenderPipeline> debugPipeline;
+			// ref<RenderPipeline> debugPipeline;
 
 			ref<Buffer> visibilityIndirectBuffer;
 			ref<Buffer> cameraBuffer;
@@ -196,12 +195,16 @@ namespace Trident {
 			ref<Buffer> materialCoordinateBuffer;
 
 			ref<Image> visibilityImage;
+			sequence<sequence<ref<Image>>> materialImages;
 			ref<Image> outputImage;
 			ref<Image> depthStencilImage;
 
 			ref<ImageView> visibilityImageView;
+			sequence<ref<ImageView>> materialReferenceBindingImageViews;
 			ref<ImageView> outputImageView;
 			ref<ImageView> depthStencilImageView;
+
+			ref<Sampler> materialImageSampler;
 
 			Camera* cameraMappedRange;
 			ClusteredInstance* instanceMappedRange;
