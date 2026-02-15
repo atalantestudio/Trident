@@ -75,7 +75,7 @@ void main() {
 	}
 
 	uint materialOffset = atomicAdd(materialOffsetBuffer[materialIndex], 1);
-	uint packedCoordinate = (gl_GlobalInvocationID.x << 16) | gl_GlobalInvocationID.y;
+	uint packedCoordinate = (globalInvocationIndex.x << 16) | globalInvocationIndex.y;
 
 	materialCoordinateBuffer[materialOffset] = packedCoordinate;
 }

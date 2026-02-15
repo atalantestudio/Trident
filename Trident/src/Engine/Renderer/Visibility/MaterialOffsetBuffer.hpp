@@ -10,7 +10,7 @@ namespace Trident {
 		BufferDescriptor materialOffsetBufferDescriptor{};
 		materialOffsetBufferDescriptor.size = sizeof(uint32) * scene->materials.count();
 		materialOffsetBufferDescriptor.usage = BufferUsage::READ_WRITE_STORAGE;
-		materialOffsetBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
+		materialOffsetBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 		materialOffsetBufferDescriptor.persistent = false;
 
 		SET_DEBUG_NAME(materialOffsetBufferDescriptor, "Material offset");

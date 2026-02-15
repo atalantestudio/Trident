@@ -13,22 +13,30 @@ struct Camera {
 	vec3 position;
 };
 
+const uint MATERIAL_INDEX = 1;
+
 layout(set = 0, binding = 0) uniform readonly CameraBuffer {
 	Camera camera;
 };
 
-layout(set = 0, binding = 1) buffer readonly MaterialCoordinateBuffer {
+layout(set = 0, binding = 1) buffer readonly MaterialOffsetBuffer {
+	uint materialOffsetBuffer[];
+};
+
+layout(set = 0, binding = 2) buffer readonly MaterialCoordinateBuffer {
 	uint materialCoordinateBuffer[];
 };
 
-layout(set = 0, binding = 2, rgba8) uniform writeonly image2D outputImage;
+layout(set = 0, binding = 3, rgba8) uniform writeonly image2D outputImage;
 
-layout(set = 0, binding = 3, r32ui) uniform readonly uimage2D visibilityImage;
+layout(set = 0, binding = 4, r32ui) uniform readonly uimage2D visibilityImage;
 
 void main() {
-	uint index = gl_GlobalInvocationID.x;
-	uint packedCoordinate = materialCoordinateBuffer[index];
-	uvec2 coordinate = uvec2(packedCoordinate >> 16, packedCoordinate & uint(0xffff));
+	uint globalInvocationIndex = gl_GlobalInvocationID.x;
+	uint pixelIndex = materialOffsetBuffer[MATERIAL_INDEX - 1] + globalInvocationIndex;
+	uint packedCoordinate = materialCoordinateBuffer[pixelIndex];
+	uvec2 coordinate = uvec2(packedCoordinate >> 16, packedCoordinate & 0xffffu);
 
-	// imageStore(outputImage, ivec2(coordinate), vec4(1.0, 0.2, 0.0, 1.0));
+	// TODO
+	imageStore(outputImage, ivec2(coordinate), vec4(1.0, 0.2, 0.0, 1.0));
 }

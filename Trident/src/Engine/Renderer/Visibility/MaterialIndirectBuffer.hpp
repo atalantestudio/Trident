@@ -10,7 +10,7 @@ namespace Trident {
 		BufferDescriptor materialIndirectBufferDescriptor{};
 		materialIndirectBufferDescriptor.size = sizeof(DispatchIndirectCommand) * scene->materials.count();
 		materialIndirectBufferDescriptor.usage = BufferUsage::READ_WRITE_STORAGE | BufferUsage::INDIRECT;
-		materialIndirectBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
+		materialIndirectBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 		materialIndirectBufferDescriptor.persistent = false;
 
 		SET_DEBUG_NAME(materialIndirectBufferDescriptor, "Material indirect");

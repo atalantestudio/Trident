@@ -115,23 +115,6 @@ namespace Trident {
 	}
 
 	void VisibilityRenderer::render(ref<CommandEncoder> commandEncoder) const {
-		static int i = 0;
-		static uint32* a;
-		static uint32* b;
-		static DispatchIndirectCommand* c;
-		static uint32* d;
-
-		if (i == 1) {
-			a = materialCountBuffer->map<uint32>(0, materialCountBuffer->getSize());
-			b = materialOffsetBuffer->map<uint32>(0, materialOffsetBuffer->getSize());
-			c = materialIndirectBuffer->map<DispatchIndirectCommand>(0, materialIndirectBuffer->getSize());
-			d = materialCoordinateBuffer->map<uint32>(0, materialCoordinateBuffer->getSize());
-		}
-
-		if (i > 0) {
-			BREAKPOINT();
-		}
-
 		const Extent2D extent = getSwapchain()->getExtent();
 		const float32 width = static_cast<float32>(extent.width);
 		const float32 height = static_cast<float32>(extent.height);
@@ -174,40 +157,15 @@ namespace Trident {
 			commandEncoder->bindDescriptorSets(materialCountPipelineLayout, 0, {materialCountDescriptorSet});
 			commandEncoder->dispatch(groupCountX, groupCountY, 1);
 
-			BufferMemoryBarrier bufferMemoryBarrier{};
-			bufferMemoryBarrier.buffer = materialCountBuffer;
-			bufferMemoryBarrier.offset = 0;
-			bufferMemoryBarrier.size = materialCountBuffer->getSize();
-			bufferMemoryBarrier.sourceAccess = Access::SHADER_WRITE;
-			bufferMemoryBarrier.destinationAccess = Access::SHADER_READ | Access::SHADER_WRITE;
-
-			commandEncoder->insertBufferMemoryBarriers({bufferMemoryBarrier});
-
 			// Get the material pixel offsets with a prefix sum and write indirect arguments for each material pipeline.
 			commandEncoder->bindComputePipeline(materialOffsetPipeline);
 			commandEncoder->bindDescriptorSets(materialOffsetPipelineLayout, 0, {materialOffsetDescriptorSet});
 			commandEncoder->dispatch(1, 1, 1);
 
-			bufferMemoryBarrier.buffer = materialOffsetBuffer;
-			bufferMemoryBarrier.offset = 0;
-			bufferMemoryBarrier.size = materialOffsetBuffer->getSize();
-			bufferMemoryBarrier.sourceAccess = Access::SHADER_WRITE;
-			bufferMemoryBarrier.destinationAccess = Access::SHADER_WRITE;
-
-			commandEncoder->insertBufferMemoryBarriers({bufferMemoryBarrier});
-
 			// Re-order the pixels per material index.
 			commandEncoder->bindComputePipeline(materialCoordinatePipeline);
 			commandEncoder->bindDescriptorSets(materialCoordinatePipelineLayout, 0, {materialCoordinateDescriptorSet});
 			commandEncoder->dispatch(groupCountX, groupCountY, 1);
-
-			bufferMemoryBarrier.buffer = materialCoordinateBuffer;
-			bufferMemoryBarrier.offset = 0;
-			bufferMemoryBarrier.size = materialCoordinateBuffer->getSize();
-			bufferMemoryBarrier.sourceAccess = Access::SHADER_WRITE;
-			bufferMemoryBarrier.destinationAccess = Access::SHADER_WRITE;
-
-			commandEncoder->insertBufferMemoryBarriers({bufferMemoryBarrier});
 
 			uint32 materialIndex = 0;
 
@@ -221,8 +179,6 @@ namespace Trident {
 				materialIndex += 1;
 			}
 		}
-
-		commandEncoder->setImageMemoryBarrier(outputImage, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
 		// Present render pass
 		{
@@ -249,8 +205,6 @@ namespace Trident {
 
 			commandEncoder->endRenderPass();
 		}
-
-		i += 1;
 	}
 
 	void VisibilityRenderer::resize(WindowResizeEvent& event) {
@@ -826,14 +780,19 @@ namespace Trident {
 		materialBaseCameraWriteDescriptorSet.bindingIndex = 0;
 		materialBaseCameraWriteDescriptorSet.descriptorBuffers = {cameraDescriptorBuffer};
 
+		WriteDescriptorSet materialBaseOffsetWriteDescriptorSet{};
+		materialBaseOffsetWriteDescriptorSet.descriptorSet = materialBaseDescriptorSet;
+		materialBaseOffsetWriteDescriptorSet.bindingIndex = 1;
+		materialBaseOffsetWriteDescriptorSet.descriptorBuffers = {materialOffsetDescriptorBuffer};
+
 		WriteDescriptorSet materialBaseClusterWriteDescriptorSet{};
 		materialBaseClusterWriteDescriptorSet.descriptorSet = materialBaseDescriptorSet;
-		materialBaseClusterWriteDescriptorSet.bindingIndex = 4;
+		materialBaseClusterWriteDescriptorSet.bindingIndex = 5;
 		materialBaseClusterWriteDescriptorSet.descriptorBuffers = {clusterDescriptorBuffer};
 
 		WriteDescriptorSet materialBaseInstanceWriteDescriptorSet{};
 		materialBaseInstanceWriteDescriptorSet.descriptorSet = materialBaseDescriptorSet;
-		materialBaseInstanceWriteDescriptorSet.bindingIndex = 5;
+		materialBaseInstanceWriteDescriptorSet.bindingIndex = 6;
 		materialBaseInstanceWriteDescriptorSet.descriptorBuffers = {instanceDescriptorBuffer};
 
 		getDevice()->updateDescriptorSets({
@@ -869,6 +828,7 @@ namespace Trident {
 			materialCoordinateMaterialOffsetWriteDescriptorSet,
 
 			materialBaseCameraWriteDescriptorSet,
+			materialBaseOffsetWriteDescriptorSet,
 			materialBaseClusterWriteDescriptorSet,
 			materialBaseInstanceWriteDescriptorSet,
 		});
@@ -905,24 +865,24 @@ namespace Trident {
 		materialCoordinateVisibilityWriteDescriptorSet.bindingIndex = 1;
 		materialCoordinateVisibilityWriteDescriptorSet.descriptorImages = {visibilityDescriptorImage};
 
-		WriteDescriptorSet materialCoordinateMaterialCoordinateWriteDescriptorSet{};
-		materialCoordinateMaterialCoordinateWriteDescriptorSet.descriptorSet = materialCoordinateDescriptorSet;
-		materialCoordinateMaterialCoordinateWriteDescriptorSet.bindingIndex = 5;
-		materialCoordinateMaterialCoordinateWriteDescriptorSet.descriptorBuffers = {materialCoordinateDescriptorBuffer};
+		WriteDescriptorSet materialCoordinateCoordinateWriteDescriptorSet{};
+		materialCoordinateCoordinateWriteDescriptorSet.descriptorSet = materialCoordinateDescriptorSet;
+		materialCoordinateCoordinateWriteDescriptorSet.bindingIndex = 5;
+		materialCoordinateCoordinateWriteDescriptorSet.descriptorBuffers = {materialCoordinateDescriptorBuffer};
 
-		WriteDescriptorSet materialBaseMaterialCoordinateWriteDescriptorSet{};
-		materialBaseMaterialCoordinateWriteDescriptorSet.descriptorSet = materialBaseDescriptorSet;
-		materialBaseMaterialCoordinateWriteDescriptorSet.bindingIndex = 1;
-		materialBaseMaterialCoordinateWriteDescriptorSet.descriptorBuffers = {materialCoordinateDescriptorBuffer};
+		WriteDescriptorSet materialBaseCoordinateWriteDescriptorSet{};
+		materialBaseCoordinateWriteDescriptorSet.descriptorSet = materialBaseDescriptorSet;
+		materialBaseCoordinateWriteDescriptorSet.bindingIndex = 2;
+		materialBaseCoordinateWriteDescriptorSet.descriptorBuffers = {materialCoordinateDescriptorBuffer};
 
 		WriteDescriptorSet materialBaseOutputWriteDescriptorSet{};
 		materialBaseOutputWriteDescriptorSet.descriptorSet = materialBaseDescriptorSet;
-		materialBaseOutputWriteDescriptorSet.bindingIndex = 2;
+		materialBaseOutputWriteDescriptorSet.bindingIndex = 3;
 		materialBaseOutputWriteDescriptorSet.descriptorImages = {outputDescriptorImage};
 
 		WriteDescriptorSet materialBaseVisibilityWriteDescriptorSet{};
 		materialBaseVisibilityWriteDescriptorSet.descriptorSet = materialBaseDescriptorSet;
-		materialBaseVisibilityWriteDescriptorSet.bindingIndex = 3;
+		materialBaseVisibilityWriteDescriptorSet.bindingIndex = 4;
 		materialBaseVisibilityWriteDescriptorSet.descriptorImages = {visibilityDescriptorImage};
 
 		WriteDescriptorSet outputWriteDescriptorSet{};
@@ -944,9 +904,9 @@ namespace Trident {
 			materialCountVisibilityWriteDescriptorSet,
 
 			materialCoordinateVisibilityWriteDescriptorSet,
-			materialCoordinateMaterialCoordinateWriteDescriptorSet,
+			materialCoordinateCoordinateWriteDescriptorSet,
 
-			materialBaseMaterialCoordinateWriteDescriptorSet,
+			materialBaseCoordinateWriteDescriptorSet,
 			materialBaseOutputWriteDescriptorSet,
 			materialBaseVisibilityWriteDescriptorSet,
 

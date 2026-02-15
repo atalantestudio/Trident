@@ -17,18 +17,17 @@ layout(set = 0, binding = 0) uniform readonly CameraBuffer {
 	Camera camera;
 };
 
-layout(set = 0, binding = 1) buffer readonly MaterialCoordinateBuffer {
+layout(set = 0, binding = 2) buffer readonly MaterialCoordinateBuffer {
 	uint materialCoordinateBuffer[];
 };
 
-layout(set = 0, binding = 2, rgba8) uniform writeonly image2D outputImage;
-
-layout(set = 0, binding = 3, r32ui) uniform readonly uimage2D visibilityImage;
+layout(set = 0, binding = 3, rgba8) uniform writeonly image2D outputImage;
 
 void main() {
-	uint index = gl_GlobalInvocationID.x;
-	uint packedCoordinate = materialCoordinateBuffer[index];
-	uvec2 coordinate = uvec2(packedCoordinate >> 16, packedCoordinate & uint(0xffff));
+	uint globalInvocationIndex = gl_GlobalInvocationID.x;
+	uint packedCoordinate = materialCoordinateBuffer[globalInvocationIndex];
+	uvec2 coordinate = uvec2(packedCoordinate >> 16, packedCoordinate & 0xffffu);
 
+	// TODO
 	imageStore(outputImage, ivec2(coordinate), vec4(1.0, 1.0, 1.0, 1.0));
 }
