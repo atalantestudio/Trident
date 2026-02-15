@@ -157,6 +157,15 @@ namespace Trident {
 			commandEncoder->bindDescriptorSets(materialCountPipelineLayout, 0, {materialCountDescriptorSet});
 			commandEncoder->dispatch(groupCountX, groupCountY, 1);
 
+			BufferMemoryBarrier bufferMemoryBarrier{};
+			bufferMemoryBarrier.buffer = materialCountBuffer;
+			bufferMemoryBarrier.offset = 0;
+			bufferMemoryBarrier.size = materialCountBuffer->getSize();
+			bufferMemoryBarrier.sourceAccess = Access::SHADER_WRITE;
+			bufferMemoryBarrier.destinationAccess = Access::SHADER_READ | Access::SHADER_WRITE;
+
+			commandEncoder->insertBufferMemoryBarriers({bufferMemoryBarrier});
+
 			// Get the material pixel offsets with a prefix sum and write indirect arguments for each material pipeline.
 			commandEncoder->bindComputePipeline(materialOffsetPipeline);
 			commandEncoder->bindDescriptorSets(materialOffsetPipelineLayout, 0, {materialOffsetDescriptorSet});
