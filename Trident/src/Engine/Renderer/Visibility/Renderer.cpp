@@ -176,6 +176,14 @@ namespace Trident {
 			commandEncoder->bindDescriptorSets(materialCoordinatePipelineLayout, 0, {materialCoordinateDescriptorSet});
 			commandEncoder->dispatch(groupCountX, groupCountY, 1);
 
+			bufferMemoryBarrier.buffer = materialOffsetBuffer;
+			bufferMemoryBarrier.offset = 0;
+			bufferMemoryBarrier.size = materialOffsetBuffer->getSize();
+			bufferMemoryBarrier.sourceAccess = Access::SHADER_WRITE;
+			bufferMemoryBarrier.destinationAccess = Access::SHADER_READ;
+
+			commandEncoder->insertBufferMemoryBarriers({bufferMemoryBarrier});
+
 			uint32 materialIndex = 0;
 
 			while (materialIndex < scene->materials.count()) {
