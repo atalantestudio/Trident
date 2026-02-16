@@ -90,13 +90,11 @@ namespace Trident {
 			sequence<ref<Framebuffer>> framebuffers;
 
 			ref<DescriptorSetLayout> subcomponentDescriptorSetLayout;
-			ref<DescriptorSetLayout> glyphSubcomponentDescriptorSetLayout;
 
 			ref<DescriptorSet> subcomponentDescriptorSet;
 			ref<DescriptorSet> glyphSubcomponentDescriptorSet;
 
 			ref<PipelineLayout> subcomponentPipelineLayout;
-			ref<PipelineLayout> glyphSubcomponentPipelineLayout;
 
 			ref<RenderPipeline> subcomponentRenderPipeline;
 			ref<RenderPipeline> glyphSubcomponentRenderPipeline;
@@ -120,7 +118,7 @@ namespace Trident {
 			GUIGlyphSubcomponent* glyphSubcomponentBufferMappedRange = nullptr;
 			uint8* textureArrayStagingBufferMappedRange = nullptr;
 
-			std::array<Extent2D, TEXTURE_ARRAY_MAX_LAYER_COUNT> textureArrayLayerExtents;
+			Extent2D textureArrayLayerExtents[TEXTURE_ARRAY_MAX_LAYER_COUNT];
 
 			uint32 subcomponentCount = 0;
 			uint32 glyphSubcomponentCount = 0;

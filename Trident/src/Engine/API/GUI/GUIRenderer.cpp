@@ -32,7 +32,6 @@ namespace Trident {
 		copyBuffers();
 
 		createSubcomponentPipelineLayout();
-		createGlyphSubcomponentPipelineLayout();
 
 		createSubcomponentRenderPipeline();
 		createGlyphSubcomponentRenderPipeline();
@@ -42,7 +41,7 @@ namespace Trident {
 	}
 
 	Extent2D GUIRenderer::getTextureArrayLayerExtent(uint32 layerIndex) const {
-		ENGINE_ASSERT(layerIndex < textureArrayLayerCount, "Layer index overflow.");
+		DEBUG_ASSERT(layerIndex < textureArrayLayerCount);
 
 		return textureArrayLayerExtents[layerIndex];
 	}
@@ -52,43 +51,43 @@ namespace Trident {
 
 		textureArrayStagingBuffer->unmap();
 
-		sequence<BufferImageCopyRegion> bufferImageCopyRegions(textureArrayLayerCount);
+		sequence<BufferImageCopyRegion> copyRegions(textureArrayLayerCount);
 		uint64 bufferOffset = 0;
+		uint32 layerIndex = 0;
 
-		for (uint32 layerIndex = 0; layerIndex < textureArrayLayerCount; layerIndex += 1) {
-			const Extent2D extent = textureArrayLayerExtents[layerIndex];
+		while (layerIndex < textureArrayLayerCount) {
+			const Extent2D& extent = textureArrayLayerExtents[layerIndex];
 
-			BufferImageCopyRegion& bufferImageCopyRegion = bufferImageCopyRegions[layerIndex];
-			bufferImageCopyRegion.bufferOffset = bufferOffset;
-			bufferImageCopyRegion.imageOffsetX = 0;
-			bufferImageCopyRegion.imageOffsetY = 0;
-			bufferImageCopyRegion.imageOffsetZ = 0;
-			bufferImageCopyRegion.imageExtent.width = extent.width;
-			bufferImageCopyRegion.imageExtent.height = extent.height;
-			bufferImageCopyRegion.imageExtent.depth = 1;
-			bufferImageCopyRegion.imageMipLevel = 0;
-			bufferImageCopyRegion.imageLayerOffset = layerIndex;
-			bufferImageCopyRegion.imageLayerCount = 1;
+			BufferImageCopyRegion& copyRegion = copyRegions[layerIndex];
+			copyRegion.bufferOffset = bufferOffset;
+			copyRegion.imageOffsetX = 0;
+			copyRegion.imageOffsetY = 0;
+			copyRegion.imageOffsetZ = 0;
+			copyRegion.imageExtent.width = extent.width;
+			copyRegion.imageExtent.height = extent.height;
+			copyRegion.imageExtent.depth = 1;
+			copyRegion.imageMipLevel = 0;
+			copyRegion.imageLayerOffset = layerIndex;
+			copyRegion.imageLayerCount = 1;
 
-			bufferOffset += extent.width * extent.height * TEXTURE_ARRAY_LAYER_BPP;
+			bufferOffset += extent.width * extent.height * getChannelCount(ImageFormat::R8G8B8A8_UNORM);
+			layerIndex += 1;
 		}
 
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-		SET_DEBUG_NAME(commandBufferDescriptor, "Texture array copy command buffer");
+		SET_DEBUG_NAME(commandBufferDescriptor, "Copy texture array layers");
 
 		const ref<Queue> graphicsQueue = getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
 		const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder(commandBufferDescriptor);
 
 		commandEncoder->begin();
 		commandEncoder->setImageMemoryBarrier(textureArrayImage, ImageLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
-		commandEncoder->copyBufferToImage(textureArrayStagingBuffer, textureArrayImage, bufferImageCopyRegions);
+		commandEncoder->copyBufferToImage(textureArrayStagingBuffer, textureArrayImage, copyRegions);
 		commandEncoder->setImageMemoryBarrier(textureArrayImage, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
-		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-		graphicsQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
+		graphicsQueue->submit({commandEncoder->end()}, nullptr, nullptr, nullptr);
 		graphicsQueue->waitIdle();
 
 		textureArrayStagingBuffer.~shared_ptr();
@@ -96,16 +95,15 @@ namespace Trident {
 
 	uint32 GUIRenderer::registerTextureArrayLayer(const TextureArrayLayer& layer) {
 		ENGINE_ASSERT(textureArrayLayerCount + 1 <= TEXTURE_ARRAY_MAX_LAYER_COUNT, "Too many client-side images.");
-		ENGINE_ASSERT(layer.width <= TEXTURE_ARRAY_MAX_WIDTH, "Image width ([]) is larger than the maximum width ([]).", layer.width, TEXTURE_ARRAY_MAX_WIDTH);
-		ENGINE_ASSERT(layer.height <= TEXTURE_ARRAY_MAX_HEIGHT, "Image height ([]) is larger than the maximum height ([]).", layer.height, TEXTURE_ARRAY_MAX_HEIGHT);
+		ENGINE_ASSERT(layer.extent.width <= TEXTURE_ARRAY_MAX_WIDTH, "Image width ([]) is larger than the maximum width ([]).", layer.extent.width, TEXTURE_ARRAY_MAX_WIDTH);
+		ENGINE_ASSERT(layer.extent.height <= TEXTURE_ARRAY_MAX_HEIGHT, "Image height ([]) is larger than the maximum height ([]).", layer.extent.height, TEXTURE_ARRAY_MAX_HEIGHT);
 
 		const uint32 layerIndex = textureArrayLayerCount;
 
 		std::copy(layer.data.begin(), layer.data.end(), textureArrayStagingBufferMappedRange);
 
 		textureArrayStagingBufferMappedRange += layer.data.count();
-		textureArrayLayerExtents[textureArrayLayerCount].width = layer.width;
-		textureArrayLayerExtents[textureArrayLayerCount].height = layer.height;
+		textureArrayLayerExtents[textureArrayLayerCount] = layer.extent;
 		textureArrayLayerCount += 1;
 
 		return layerIndex;
@@ -307,18 +305,12 @@ namespace Trident {
 		cameraBinding.descriptorCount = 1;
 		cameraBinding.shaderStages = ShaderStage::VERTEX;
 
-		DescriptorSetLayoutBinding nearestTextureArrayBinding{};
-		nearestTextureArrayBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-		nearestTextureArrayBinding.descriptorCount = 1;
-		nearestTextureArrayBinding.shaderStages = ShaderStage::FRAGMENT;
+		DescriptorSetLayoutBinding textureArrayBinding{};
+		textureArrayBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
+		textureArrayBinding.descriptorCount = 1;
+		textureArrayBinding.shaderStages = ShaderStage::FRAGMENT;
 
-		DescriptorSetLayoutBinding linearTextureArrayBinding{};
-		linearTextureArrayBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-		linearTextureArrayBinding.descriptorCount = 1;
-		linearTextureArrayBinding.shaderStages = ShaderStage::FRAGMENT;
-
-		subcomponentDescriptorSetLayout = createDescriptorSetLayout({cameraBinding, nearestTextureArrayBinding});
-		glyphSubcomponentDescriptorSetLayout = createDescriptorSetLayout({cameraBinding, linearTextureArrayBinding});
+		subcomponentDescriptorSetLayout = createDescriptorSetLayout({cameraBinding, textureArrayBinding});
 	}
 
 	void GUIRenderer::createSubcomponentPipelineLayout() {
@@ -330,28 +322,19 @@ namespace Trident {
 		subcomponentPipelineLayout = createPipelineLayout(subcomponentPipelineLayoutDescriptor);
 	}
 
-	void GUIRenderer::createGlyphSubcomponentPipelineLayout() {
-		PipelineLayoutDescriptor glyphSubcomponentPipelineLayoutDescriptor{};
-		glyphSubcomponentPipelineLayoutDescriptor.descriptorSetLayouts = {glyphSubcomponentDescriptorSetLayout};
-
-		SET_DEBUG_NAME(glyphSubcomponentPipelineLayoutDescriptor, "Glyph subcomponent");
-
-		glyphSubcomponentPipelineLayout = createPipelineLayout(glyphSubcomponentPipelineLayoutDescriptor);
-	}
-
 	void GUIRenderer::createSubcomponentRenderPipeline() {
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 		vertexInputBinding.registerAttribute<vec4<float32>>(); // Vertex position and texture coordinate
 
 		VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-		instanceInputBinding.registerAttribute<vec4<float32>>(); // Bounds
+		// instanceInputBinding.registerAttribute<vec4<float32>>(); // Bounds
 		instanceInputBinding.registerAttribute<mat3x3<float32>>(); // World transform
 		instanceInputBinding.registerAttribute<mat3x3<float32>>(); // Texture transform
 		instanceInputBinding.registerAttribute<vec4<float32>>(); // Color
-		instanceInputBinding.registerAttribute<vec4<float32>>(); // Outline color
+		// instanceInputBinding.registerAttribute<vec4<float32>>(); // Outline color
 		instanceInputBinding.registerAttribute<uint32>(); // Texture array layer index
-		instanceInputBinding.registerAttribute<float32>(); // Outline size
-		instanceInputBinding.registerAttribute<float32>(); // Border radius
+		// instanceInputBinding.registerAttribute<float32>(); // Outline size
+		// instanceInputBinding.registerAttribute<float32>(); // Border radius
 
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -402,8 +385,8 @@ namespace Trident {
 		VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
 		instanceInputBinding.registerAttribute<mat3x3<float32>>(); // World transform
 		instanceInputBinding.registerAttribute<mat3x3<float32>>(); // Texture transform
-		instanceInputBinding.registerAttribute<uint32>(); // Layer index
 		instanceInputBinding.registerAttribute<vec4<float32>>(); // Color
+		instanceInputBinding.registerAttribute<uint32>(); // Layer index
 		instanceInputBinding.registerAttribute<float32>(); // Font size
 
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
@@ -427,7 +410,7 @@ namespace Trident {
 		colorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 
 		RenderPipelineDescriptor glyphSubcomponentRenderPipelineDescriptor{};
-		glyphSubcomponentRenderPipelineDescriptor.pipelineLayout = glyphSubcomponentPipelineLayout;
+		glyphSubcomponentRenderPipelineDescriptor.pipelineLayout = subcomponentPipelineLayout;
 		glyphSubcomponentRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
 		glyphSubcomponentRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
 		glyphSubcomponentRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
@@ -449,7 +432,7 @@ namespace Trident {
 	}
 
 	void GUIRenderer::allocateDescriptorSets() {
-		const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({subcomponentDescriptorSetLayout, glyphSubcomponentDescriptorSetLayout});
+		const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({subcomponentDescriptorSetLayout, subcomponentDescriptorSetLayout});
 
 		subcomponentDescriptorSet = descriptorSets[0];
 		glyphSubcomponentDescriptorSet = descriptorSets[1];
@@ -471,12 +454,10 @@ namespace Trident {
 		vertexMappedRange[3].textureCoordinate = {0.0f, 1.0f};
 
 		uint16* indexMappedRange = pointer_cast<uint16*>(mappedRange + VERTEX_BUFFER_SIZE);
-		indexMappedRange[0] = 0;
-		indexMappedRange[1] = 1;
-		indexMappedRange[2] = 2;
-		indexMappedRange[3] = 0;
-		indexMappedRange[4] = 2;
-		indexMappedRange[5] = 3;
+
+		static constexpr uint16 INDICES[] = {0, 1, 2, 0, 2, 3};
+
+		std::copy_n(INDICES, INDEX_BUFFER_SIZE, indexMappedRange);
 
 		stagingBuffer->unmap();
 
@@ -493,7 +474,7 @@ namespace Trident {
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-		SET_DEBUG_NAME(commandBufferDescriptor, "Buffer copy command buffer");
+		SET_DEBUG_NAME(commandBufferDescriptor, "Copy buffers");
 
 		const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
 		const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
@@ -529,32 +510,33 @@ namespace Trident {
 		subcomponentCameraWriteDescriptorSet.bindingIndex = 0;
 		subcomponentCameraWriteDescriptorSet.descriptorBuffers = {cameraDescriptorBuffer};
 
-		WriteDescriptorSet subcomponentNearestTextureArrayWriteDescriptorSet{};
-		subcomponentNearestTextureArrayWriteDescriptorSet.descriptorSet = subcomponentDescriptorSet;
-		subcomponentNearestTextureArrayWriteDescriptorSet.bindingIndex = 1;
-		subcomponentNearestTextureArrayWriteDescriptorSet.descriptorImages = {nearestTextureArrayDescriptorImage};
+		WriteDescriptorSet subcomponentTextureArrayWriteDescriptorSet{};
+		subcomponentTextureArrayWriteDescriptorSet.descriptorSet = subcomponentDescriptorSet;
+		subcomponentTextureArrayWriteDescriptorSet.bindingIndex = 1;
+		subcomponentTextureArrayWriteDescriptorSet.descriptorImages = {nearestTextureArrayDescriptorImage};
 
 		WriteDescriptorSet glyphSubcomponentCameraWriteDescriptorSet{};
 		glyphSubcomponentCameraWriteDescriptorSet.descriptorSet = glyphSubcomponentDescriptorSet;
 		glyphSubcomponentCameraWriteDescriptorSet.bindingIndex = 0;
 		glyphSubcomponentCameraWriteDescriptorSet.descriptorBuffers = {cameraDescriptorBuffer};
 
-		WriteDescriptorSet glyphSubcomponentLinearTextureArrayWriteDescriptorSet{};
-		glyphSubcomponentLinearTextureArrayWriteDescriptorSet.descriptorSet = glyphSubcomponentDescriptorSet;
-		glyphSubcomponentLinearTextureArrayWriteDescriptorSet.bindingIndex = 1;
-		glyphSubcomponentLinearTextureArrayWriteDescriptorSet.descriptorImages = {linearTextureArrayDescriptorImage};
+		WriteDescriptorSet glyphSubcomponentTextureArrayWriteDescriptorSet{};
+		glyphSubcomponentTextureArrayWriteDescriptorSet.descriptorSet = glyphSubcomponentDescriptorSet;
+		glyphSubcomponentTextureArrayWriteDescriptorSet.bindingIndex = 1;
+		glyphSubcomponentTextureArrayWriteDescriptorSet.descriptorImages = {linearTextureArrayDescriptorImage};
 
 		getDevice()->updateDescriptorSets({
 			subcomponentCameraWriteDescriptorSet,
-			subcomponentNearestTextureArrayWriteDescriptorSet,
+			subcomponentTextureArrayWriteDescriptorSet,
 			glyphSubcomponentCameraWriteDescriptorSet,
-			glyphSubcomponentLinearTextureArrayWriteDescriptorSet,
+			glyphSubcomponentTextureArrayWriteDescriptorSet,
 		});
 	}
 
 	void GUIRenderer::updateCameraProjection() const {
 		const Extent2D swapchainExtent = getSwapchain()->getExtent();
 
+		// TODO: lyah::mat<3, 3, float32>::orthographic
 		cameraBufferMappedRange->projection = {
 			 2.0f / swapchainExtent.width,  0.0f,                           0.0f,
 			 0.0f,                         -2.0f / swapchainExtent.height,  0.0f,
@@ -595,7 +577,7 @@ namespace Trident {
 
 		if (glyphSubcomponentCount > 0) {
 			commandEncoder->bindRenderPipeline(glyphSubcomponentRenderPipeline);
-			commandEncoder->bindDescriptorSets(glyphSubcomponentPipelineLayout, 0, {glyphSubcomponentDescriptorSet});
+			commandEncoder->bindDescriptorSets(subcomponentPipelineLayout, 0, {glyphSubcomponentDescriptorSet});
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 			commandEncoder->bindVertexBuffer(1, glyphSubcomponentBuffer, 0, sizeof(GUIGlyphSubcomponent));
 			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
@@ -607,7 +589,6 @@ namespace Trident {
 
 	void GUIRenderer::resize(WindowResizeEvent& event) {
 		recreateFramebuffers();
-
 		updateCameraProjection();
 	}
 

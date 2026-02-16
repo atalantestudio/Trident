@@ -5,8 +5,7 @@
 
 namespace Trident {
 	struct TextureArrayLayer {
-		uint32 width;
-		uint32 height;
+		Extent2D extent;
 		sequence<uint8> data;
 	};
 }

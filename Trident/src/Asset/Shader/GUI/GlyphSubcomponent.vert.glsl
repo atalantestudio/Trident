@@ -6,8 +6,8 @@
 layout(location = 0) in vec4 vertexAndTextureCoordinate;
 layout(location = 1) in mat3x3 worldTransform;
 layout(location = 4) in mat3x3 textureTransform;
-layout(location = 7) in uint layerIndex;
-layout(location = 8) in vec4 color;
+layout(location = 7) in vec4 color;
+layout(location = 8) in uint textureArrayLayerIndex;
 layout(location = 9) in float fontSize;
 
 layout(set = 0, binding = 0) uniform Camera {
@@ -15,8 +15,8 @@ layout(set = 0, binding = 0) uniform Camera {
 } camera;
 
 out VertexOutput {
-	layout(location = 0) vec3 textureCoordinate;
-	layout(location = 1) flat vec4 color;
+	layout(location = 0) flat vec4 color;
+	layout(location = 1) vec3 textureCoordinate;
 	layout(location = 2) flat float fontSize;
 } vertexOutput;
 
@@ -26,8 +26,8 @@ void main() {
 
 	gl_Position = vec4(camera.projection * worldTransform * vertex, 1.0);
 
-	vertexOutput.textureCoordinate = textureTransform * textureCoordinate;
-	vertexOutput.textureCoordinate.z = float(layerIndex);
 	vertexOutput.color = color;
+	vertexOutput.textureCoordinate = textureTransform * textureCoordinate;
+	vertexOutput.textureCoordinate.z = float(textureArrayLayerIndex);
 	vertexOutput.fontSize = fontSize;
 }

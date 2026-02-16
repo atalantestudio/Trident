@@ -13,8 +13,7 @@ namespace Trident {
 		renderer.build();
 
 		TextureArrayLayer defaultImageLayer;
-		defaultImageLayer.width = 1;
-		defaultImageLayer.height = 1;
+		defaultImageLayer.extent = {1, 1};
 		defaultImageLayer.data = {255, 255, 255, 255};
 
 		renderer.registerTextureArrayLayer(defaultImageLayer);
@@ -31,13 +30,27 @@ namespace Trident {
 		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
 
 		const ref<FontAsset> fontAsset = getApplication()->getAssetLibrary()->getAsset<FontAsset>(assetName);
+		const ref<ImageAsset> glyphMapImageAsset = fontAsset->getGlyphMapImage();
 
 		fonts[fontCount].fontAsset = fontAsset;
 
 		TextureArrayLayer glyphMapImageLayer{};
-		glyphMapImageLayer.width = fontAsset->getGlyphMapImage()->getExtent().width;
-		glyphMapImageLayer.height = fontAsset->getGlyphMapImage()->getExtent().height;
-		glyphMapImageLayer.data = fontAsset->getGlyphMapImage()->getData();
+		glyphMapImageLayer.extent.width = glyphMapImageAsset->getExtent().width;
+		glyphMapImageLayer.extent.height = glyphMapImageAsset->getExtent().height;
+		glyphMapImageLayer.data = sequence<uint8>(glyphMapImageLayer.extent.width * glyphMapImageLayer.extent.height * getChannelCount(ImageFormat::R8G8B8A8_UNORM));
+
+		if (glyphMapImageAsset->getFormat() == ImageFormat::R8_UNORM) {
+			convert<ImageFormat::R8_UNORM, ImageFormat::R8G8B8A8_UNORM>(glyphMapImageAsset->getData(), &glyphMapImageLayer.data[0], glyphMapImageLayer.data.count());
+		}
+		else if (glyphMapImageAsset->getFormat() == ImageFormat::R8G8B8_UNORM) {
+			convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(glyphMapImageAsset->getData(), &glyphMapImageLayer.data[0], glyphMapImageLayer.data.count());
+		}
+		else if (glyphMapImageAsset->getFormat() == ImageFormat::R8G8B8A8_UNORM) {
+			std::copy(glyphMapImageAsset->getData().begin(), glyphMapImageAsset->getData().end(), &glyphMapImageLayer.data[0]);
+		}
+		else {
+			ENGINE_ERROR_UNSUPPORTED();
+		}
 
 		const FontID fontId = fontCount;
 
@@ -47,15 +60,28 @@ namespace Trident {
 		return fontId;
 	}
 
-	FontID GUILayer::loadImageAsset(view<char8> assetName) {
+	ImageID GUILayer::loadImageAsset(view<char8> assetName) {
 		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
 
 		const ref<ImageAsset> imageAsset = getApplication()->getAssetLibrary()->getAsset<ImageAsset>(assetName);
 
 		TextureArrayLayer imageLayer{};
-		imageLayer.width = imageAsset->getExtent().width;
-		imageLayer.height = imageAsset->getExtent().height;
-		imageLayer.data = imageAsset->getData();
+		imageLayer.extent.width = imageAsset->getExtent().width;
+		imageLayer.extent.height = imageAsset->getExtent().height;
+		imageLayer.data = sequence<uint8>(imageLayer.extent.width * imageLayer.extent.height * getChannelCount(ImageFormat::R8G8B8A8_UNORM));
+
+		if (imageAsset->getFormat() == ImageFormat::R8_UNORM) {
+			convert<ImageFormat::R8_UNORM, ImageFormat::R8G8B8A8_UNORM>(imageAsset->getData(), &imageLayer.data[0], imageLayer.data.count());
+		}
+		else if (imageAsset->getFormat() == ImageFormat::R8G8B8_UNORM) {
+			convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(imageAsset->getData(), &imageLayer.data[0], imageLayer.data.count());
+		}
+		else if (imageAsset->getFormat() == ImageFormat::R8G8B8A8_UNORM) {
+			std::copy(imageAsset->getData().begin(), imageAsset->getData().end(), &imageLayer.data[0]);
+		}
+		else {
+			ENGINE_ERROR_UNSUPPORTED();
+		}
 
 		return renderer.registerTextureArrayLayer(imageLayer);
 	}
@@ -67,9 +93,22 @@ namespace Trident {
 		const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(data);
 
 		TextureArrayLayer imageLayer{};
-		imageLayer.width = file.extent.width;
-		imageLayer.height = file.extent.height;
-		imageLayer.data = file.data;
+		imageLayer.extent.width = file.extent.width;
+		imageLayer.extent.height = file.extent.height;
+		imageLayer.data = sequence<uint8>(imageLayer.extent.width * imageLayer.extent.height * getChannelCount(ImageFormat::R8G8B8A8_UNORM));
+
+		if (file.format == ImageFormat::R8_UNORM) {
+			convert<ImageFormat::R8_UNORM, ImageFormat::R8G8B8A8_UNORM>(file.data, &imageLayer.data[0], imageLayer.data.count());
+		}
+		else if (file.format == ImageFormat::R8G8B8_UNORM) {
+			convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(file.data, &imageLayer.data[0], imageLayer.data.count());
+		}
+		else if (file.format == ImageFormat::R8G8B8A8_UNORM) {
+			std::copy(file.data.begin(), file.data.end(), &imageLayer.data[0]);
+		}
+		else {
+			ENGINE_ERROR_UNSUPPORTED();
+		}
 
 		return renderer.registerTextureArrayLayer(imageLayer);
 	}
@@ -99,7 +138,7 @@ namespace Trident {
 			if (component.textComponent) {
 				GUIGlyphSubcomponent defaultGlyphSubcomponent{};
 				defaultGlyphSubcomponent.color = component.color.value;
-				defaultGlyphSubcomponent.layerIndex = fonts[component.font].glyphMapImageId;
+				defaultGlyphSubcomponent.textureArrayLayerIndex = fonts[component.font].glyphMapImageId;
 				defaultGlyphSubcomponent.fontSize = component.fontSize;
 
 				const vec2<float32> origin = {component.origin.x, component.origin.y};
@@ -739,8 +778,8 @@ namespace Trident {
 		bool flushBeforeNewLine = false;
 
 		GUIGlyphSubcomponent defaultGlyphSubcomponent{};
-		defaultGlyphSubcomponent.layerIndex = fontData.glyphMapImageId;
 		defaultGlyphSubcomponent.color = textComponent.color.value;
+		defaultGlyphSubcomponent.textureArrayLayerIndex = fontData.glyphMapImageId;
 		defaultGlyphSubcomponent.fontSize = textComponent.fontSize;
 
 		uint32 codePoint;
@@ -1032,18 +1071,18 @@ namespace Trident {
 		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(imageId);
 
 		GUISubcomponent subcomponent{};
-		subcomponent.minBounds = {decimalOrigin[0], decimalOrigin[1]};
-		subcomponent.maxBounds = {decimalOrigin[0] + decimalSize[0], decimalOrigin[1] + decimalSize[1]};
+		// subcomponent.minBounds = {decimalOrigin[0], decimalOrigin[1]};
+		// subcomponent.maxBounds = {decimalOrigin[0] + decimalSize[0], decimalOrigin[1] + decimalSize[1]};
 		subcomponent.worldTransform = mat3x3<float32>::scaling(decimalSize) * mat3x3<float32>::translation(decimalOrigin);
 		subcomponent.textureTransform = mat3x3<float32>::scaling({
 			static_cast<float32>(imageExtent.width) / renderer.TEXTURE_ARRAY_MAX_WIDTH,
 			static_cast<float32>(imageExtent.height) / renderer.TEXTURE_ARRAY_MAX_HEIGHT,
 		});
-		subcomponent.layerIndex = imageId;
 		subcomponent.color = color.value;
-		subcomponent.outlineSize = outlineSize;
-		subcomponent.outlineColor = outlineColor.value;
-		subcomponent.borderRadius = borderRadius;
+		subcomponent.textureArrayLayerIndex = imageId;
+		// subcomponent.outlineSize = outlineSize;
+		// subcomponent.outlineColor = outlineColor.value;
+		// subcomponent.borderRadius = borderRadius;
 
 		renderer.registerSubcomponent(subcomponent);
 	}

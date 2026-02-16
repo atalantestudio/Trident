@@ -3,8 +3,8 @@
 
 struct VertexOutput {
 	float4 position : SV_Position;
-	float3 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE1;
-	nointerpolation float4 color : VERTEX_OUTPUT_ATTRIBUTE2;
+	nointerpolation float4 color : VERTEX_OUTPUT_ATTRIBUTE1;
+	float3 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE2;
 	nointerpolation float fontSize : VERTEX_OUTPUT_ATTRIBUTE3;
 };
 
