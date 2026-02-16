@@ -184,7 +184,6 @@ vec3 Material(uvec2 screenCoordinate) {
 		vec3 p = ray.origin + ray.direction * (atmosphereHit.t0 + EPSILON);
 
 		if (earthHit.t0 < FLT_MAX) {
-			// p = ray.origin + ray.direction * earthHit.t0;
 			dstThroughAtmosphere = atmosphereHit.t1;
 		}
 
