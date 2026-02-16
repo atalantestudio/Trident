@@ -51,5 +51,5 @@ void main() {
 
 	fragment = fragmentInput.outlineColor * content * outlineSize + fragmentInput.color * texture(textureArray, fragmentInput.textureCoordinate); // * content; */
 
-	fragment = fragmentInput.color * texture(textureArray, vec3(fragmentInput.textureCoordinate.xy, 2.0));
+	fragment = fragmentInput.color * texture(textureArray, fragmentInput.textureCoordinate);
 }
