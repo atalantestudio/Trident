@@ -10,7 +10,7 @@ namespace Trident {
 		const Extent2D swapchainExtent = getSwapchain()->getExtent();
 
 		BufferDescriptor materialCoordinateBufferDescriptor{};
-		materialCoordinateBufferDescriptor.size = swapchainExtent.width * swapchainExtent.height;
+		materialCoordinateBufferDescriptor.size = sizeof(uint32) * swapchainExtent.width * swapchainExtent.height;
 		materialCoordinateBufferDescriptor.usage = BufferUsage::READ_WRITE_STORAGE;
 		materialCoordinateBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 		materialCoordinateBufferDescriptor.persistent = false;

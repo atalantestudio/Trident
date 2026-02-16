@@ -21,6 +21,7 @@ struct Instance {
 	mat4x4 transform;
 	uint geometryIndex;
 	uint materialIndex;
+	uint materialReferenceIndex;
 	int clusterOffset;
 };
 
@@ -57,25 +58,24 @@ uint fetchMaterialIndex(uint instanceIndex) {
 }
 
 void main() {
-	uvec2 position = gl_GlobalInvocationID.xy;
+	uvec2 globalInvocationIndex = gl_GlobalInvocationID.xy;
 
-	if (position.x >= camera.viewport.x || position.y >= camera.viewport.y) {
+	if (globalInvocationIndex.x >= camera.viewport.x || globalInvocationIndex.y >= camera.viewport.y) {
 		return;
 	}
 
-	uint visibility = uint(imageLoad(visibilityImage, ivec2(position)).r);
+	uint visibility = uint(imageLoad(visibilityImage, ivec2(globalInvocationIndex)).r);
 	uint materialIndex = 0;
 
 	if (visibility > 0) {
 		uint clusterIndex = (visibility >> TRIANGLE_INDEX_BIT_COUNT) - 1;
 		uint instanceIndex = fetchInstanceIndex(clusterIndex);
 
-		// TODO(debug-only): Remove +1.
-		materialIndex = fetchMaterialIndex(instanceIndex) + 1;
+		materialIndex = fetchMaterialIndex(instanceIndex);
 	}
 
 	uint materialOffset = atomicAdd(materialOffsetBuffer[materialIndex], 1);
-	uint packedCoordinate = (gl_GlobalInvocationID.x << 16) | gl_GlobalInvocationID.y;
+	uint packedCoordinate = (globalInvocationIndex.x << 16) | globalInvocationIndex.y;
 
 	materialCoordinateBuffer[materialOffset] = packedCoordinate;
 }

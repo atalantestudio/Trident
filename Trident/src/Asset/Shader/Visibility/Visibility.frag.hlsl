@@ -1,18 +1,18 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-struct VertexOutput {
+struct FragmentInput {
 	float4 position : SV_Position;
 	nointerpolation uint visibility : VERTEX_OUTPUT_ATTRIBUTE1;
-	nointerpolation uint materialIndex : VERTEX_OUTPUT_ATTRIBUTE2;
 };
 
-RWByteAddressBuffer materialCountBuffer : register(u1);
+struct FragmentOutput {
+	uint visibility : SV_Target;
+};
 
-uint main(VertexOutput input) : SV_Target {
-	uint _;
+FragmentOutput main(FragmentInput input) {
+	FragmentOutput output;
+	output.visibility = input.visibility;
 
-	materialCountBuffer.InterlockedAdd(input.materialIndex * 4, 1, _);
-
-	return input.visibility;
+	return output;
 }

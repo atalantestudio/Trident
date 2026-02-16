@@ -12,7 +12,6 @@ namespace Trident {
 			cameraDescriptorSetLayout,
 			clusterDescriptorSetLayout,
 			instanceDescriptorSetLayout,
-			visibilityMaterialCountDescriptorSetLayout,
 		};
 
 		SET_DEBUG_NAME(visibilityPipelineLayoutDescriptor, "Visibility");

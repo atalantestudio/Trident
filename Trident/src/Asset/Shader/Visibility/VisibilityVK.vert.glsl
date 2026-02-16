@@ -20,6 +20,7 @@ struct Instance {
 	mat4x4 transform;
 	uint geometryIndex;
 	uint materialIndex;
+	uint materialReferenceIndex;
 	int clusterOffset;
 };
 
@@ -49,7 +50,6 @@ layout(set = 2, binding = 1) buffer readonly GeometryBuffer {
 
 out VertexOutput {
 	layout(location = 0) flat uint visibility;
-	layout(location = 1) flat uint materialIndex;
 } vertexOutput;
 
 vec3 fetchVertexPosition(uint index, Geometry geometry) {
@@ -78,5 +78,4 @@ void main() {
 	gl_Position = camera.projectionView * instance.transform * vec4(vertex, 1.0);
 
 	vertexOutput.visibility = ((clusterIndex + 1) << TRIANGLE_INDEX_BIT_COUNT) | triangleIndex;
-	vertexOutput.materialIndex = instance.materialIndex;
 }

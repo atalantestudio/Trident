@@ -7,17 +7,12 @@
 
 namespace Trident {
 	ref<Subpass> VisibilityRenderer::createPresentSubpass() const {
-		/* AttachmentReference readOutputAttachmentReference{};
-		readOutputAttachmentReference.index = 1;
-		readOutputAttachmentReference.layout = ImageLayout::SHADER_READ_ONLY_OPTIMAL; */
-
 		AttachmentReference writeSwapchainAttachmentReference{};
 		writeSwapchainAttachmentReference.index = 0;
 		writeSwapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 
 		SubpassDescriptor presentSubpassDescriptor{};
 		presentSubpassDescriptor.colorAttachmentReferences = {writeSwapchainAttachmentReference};
-		presentSubpassDescriptor.inputAttachmentReferences = {/* readOutputAttachmentReference */};
 
 		return createSubpass(presentSubpassDescriptor);
 	}
@@ -55,15 +50,8 @@ namespace Trident {
 		swapchainAttachment.storeOperation = StoreOperation::STORE;
 		swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
 
-		/* Attachment outputAttachment{};
-		outputAttachment.format = getSurface()->getFormat();
-		outputAttachment.sampleCount = 1;
-		outputAttachment.loadOperation = LoadOperation::CLEAR;
-		outputAttachment.storeOperation = StoreOperation::UNDEFINED;
-		outputAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL; */
-
 		RenderPassDescriptor renderPassDescriptor{};
-		renderPassDescriptor.attachments = {swapchainAttachment/*, outputAttachment */};
+		renderPassDescriptor.attachments = {swapchainAttachment};
 		renderPassDescriptor.subpasses = {presentSubpass/*, debugPresentSubpass */};
 		renderPassDescriptor.subpassDependencies = {};
 

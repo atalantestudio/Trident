@@ -12,7 +12,7 @@
 namespace Trident {
 	class Sample3DLayer : public Layer {
 		private:
-			static constexpr float32 MOVEMENT_SPEED = 0.5f;
+			static constexpr float32 MOVEMENT_SPEED = 1.5f;
 
 		public:
 			void build() override {
@@ -26,6 +26,10 @@ namespace Trident {
 
 				cameraController.setAspectRatio(getApplication()->getWindow()->getAspectRatio());
 				cameraController.updateProjection();
+
+				// TODO: The projection-view matrix doesn't seem to be correct on the first frame.
+				cameraController.getCamera().updateView();
+				cameraController.getCamera().updateProjectionView();
 
 				renderer.setCameraController<PerspectiveCamera>(&cameraController);
 			}

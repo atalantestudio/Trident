@@ -12,6 +12,11 @@ namespace Trident {
 		viewBinding.descriptorCount = 1;
 		viewBinding.shaderStages = ShaderStage::COMPUTE;
 
+		DescriptorSetLayoutBinding materialOffsetBinding{};
+		materialOffsetBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
+		materialOffsetBinding.descriptorCount = 1;
+		materialOffsetBinding.shaderStages = ShaderStage::COMPUTE;
+
 		DescriptorSetLayoutBinding materialCoordinateBinding{};
 		materialCoordinateBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
 		materialCoordinateBinding.descriptorCount = 1;
@@ -39,6 +44,7 @@ namespace Trident {
 
 		return createDescriptorSetLayout({
 			viewBinding,
+			materialOffsetBinding,
 			materialCoordinateBinding,
 			outputBinding,
 			visibilityBinding,

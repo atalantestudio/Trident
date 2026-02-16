@@ -7,12 +7,12 @@
 
 namespace Trident {
 	ref<Image> VisibilityRenderer::createVisibilityImage() const {
-		const Extent2D swapchainExtent = getSwapchain()->getExtent();
+		const Extent2D extent = getSwapchain()->getExtent();
 
 		AttachmentImageDescriptor visibilityAttachmentImageDescriptor{};
 		visibilityAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
-		visibilityAttachmentImageDescriptor.extent.width = swapchainExtent.width;
-		visibilityAttachmentImageDescriptor.extent.height = swapchainExtent.height;
+		visibilityAttachmentImageDescriptor.extent.width = extent.width;
+		visibilityAttachmentImageDescriptor.extent.height = extent.height;
 		visibilityAttachmentImageDescriptor.extent.depth = 1;
 		visibilityAttachmentImageDescriptor.mipLevelCount = 1;
 		visibilityAttachmentImageDescriptor.layerCount = 1;
