@@ -75,7 +75,6 @@ namespace Trident {
 				properties->VerticalSync = getProperty<bool>("VerticalSync");
 			}
 
-		private:
 			template<typename T>
 			T getProperty(view<char8> propertyName) {
 				reader->seekg(std::ios::beg);

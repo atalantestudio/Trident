@@ -13,6 +13,7 @@
 #include "Engine/Application/ApplicationProperties.hpp"
 #include "Engine/Application/ProjectDescriptor.hpp"
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
+#include "Engine/Filesystem/File/PropertyFile.hpp"
 #include "Engine/Layer/LayerStack.hpp"
 
 int main(int argc, char** argv);
@@ -120,6 +121,9 @@ namespace Trident {
 				uint8 instanceCount;
 			};
 
+		protected:
+			PropertyFile* propertyFile = nullptr;
+
 		private:
 			ApplicationProperties* properties = nullptr;
 			ProjectType projectType;
@@ -135,6 +139,7 @@ namespace Trident {
 
 			sequence<void*> consoleArguments;
 
+			Reader propertyFileReader;
 			AssetLibrary* assetLibrary = nullptr;
 
 			uint32 frameIndex = 0;

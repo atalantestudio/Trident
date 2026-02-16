@@ -8,7 +8,6 @@
 #include "Engine/API/Event/Mouse/MouseUpEvent.hpp"
 #include "Engine/API/Event/Mouse/MouseWheelEvent.hpp"
 #include "Engine/Application/Application.hpp"
-#include "Engine/Filesystem/File/PropertyFile.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
@@ -64,7 +63,7 @@ namespace Trident {
 		const sequence<char8> propertyFilePath = Logger::format("[]\\[].tpr", projectRootDirectory.string(), projectRootDirectory.filename().string());
 
 		// Try to open the property file located at "[PROJECT_ROOT_DIRECTORY]/[PROJECT_NAME].tpr".
-		Reader propertyFileReader = Filesystem::openReader(propertyFilePath);
+		propertyFileReader = Filesystem::openReader(propertyFilePath);
 
 		if (!propertyFileReader.fileExists()) {
 			ENGINE_WARNING("Could not find property file \"[]\".", propertyFilePath);
@@ -83,8 +82,8 @@ namespace Trident {
 		propertyFileReader = Filesystem::openReader(propertyFilePath);
 
 		// TODO: Detect if the properties are invalid due to the file not being found.
-		PropertyFile propertyFile(propertyFileReader);
-		propertyFile.readProperties(properties);
+		propertyFile = new PropertyFile(propertyFileReader);
+		propertyFile->readProperties(properties);
 
 		WindowDescriptor windowDescriptor{};
 		windowDescriptor.name = formatWindowName(projectDescriptor.name, sharedMemoryData->instanceCount);
@@ -116,6 +115,8 @@ namespace Trident {
 		for (const ref<Layer> layer : layerStack) {
 			layer.~shared_ptr();
 		}
+
+		delete propertyFile;
 
 		lastLayerInput.swapchainImageView.~shared_ptr();
 		lastLayerInput.swapchainImage.~shared_ptr();
