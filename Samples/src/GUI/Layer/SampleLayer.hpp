@@ -11,7 +11,7 @@ namespace Trident {
 				fontRegular = loadFontAsset("test-regular");
 				fontRegularItalic = loadFontAsset("test-regular-italic");
 
-				image = loadImage("Asset/Image/Cameraman.png");
+				image = loadImageAsset("Cameraman");
 
 				containerStyle.size = {1280_px, 720_px};
 				containerStyle.padding = {12_px, 12_px};

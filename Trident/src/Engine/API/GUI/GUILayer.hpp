@@ -53,10 +53,6 @@ namespace Trident {
 			FontID loadFontAsset(view<char8> assetName);
 			ImageID loadImageAsset(view<char8> assetName);
 
-			// Loads a PNG image and returns its identifier.
-			// TODO(deprecated)
-			ImageID loadImage(view<char8> path);
-
 		public:
 			void openComponent(const ContainerStyle& style);
 

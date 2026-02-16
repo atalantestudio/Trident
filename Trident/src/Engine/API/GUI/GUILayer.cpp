@@ -86,33 +86,6 @@ namespace Trident {
 		return renderer.registerTextureArrayLayer(imageLayer);
 	}
 
-	ImageID GUILayer::loadImage(view<char8> path) {
-		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
-
-		const sequence<uint8> data = Filesystem::openByteBuffer(path);
-		const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(data);
-
-		TextureArrayLayer imageLayer{};
-		imageLayer.extent.width = file.extent.width;
-		imageLayer.extent.height = file.extent.height;
-		imageLayer.data = sequence<uint8>(imageLayer.extent.width * imageLayer.extent.height * getChannelCount(ImageFormat::R8G8B8A8_UNORM));
-
-		if (file.format == ImageFormat::R8_UNORM) {
-			convert<ImageFormat::R8_UNORM, ImageFormat::R8G8B8A8_UNORM>(file.data, &imageLayer.data[0], imageLayer.data.count());
-		}
-		else if (file.format == ImageFormat::R8G8B8_UNORM) {
-			convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(file.data, &imageLayer.data[0], imageLayer.data.count());
-		}
-		else if (file.format == ImageFormat::R8G8B8A8_UNORM) {
-			std::copy(file.data.begin(), file.data.end(), &imageLayer.data[0]);
-		}
-		else {
-			ENGINE_ERROR_UNSUPPORTED();
-		}
-
-		return renderer.registerTextureArrayLayer(imageLayer);
-	}
-
 	void GUILayer::preRender() {
 		components.clear();
 		openComponentIndices.clear();
