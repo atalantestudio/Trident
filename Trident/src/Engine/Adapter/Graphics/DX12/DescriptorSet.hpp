@@ -13,10 +13,12 @@ namespace Trident {
 				DescriptorType descriptorType;
 				UINT descriptorCount;
 				D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandleOffset;
+				D3D12_CPU_DESCRIPTOR_HANDLE samplerDescriptorHandleOffset;
 			};
 
 		public:
 			sequence<DescriptorSetBinding> bindings;
 			UINT64 viewDescriptorHandleOffset;
+			UINT64 samplerDescriptorHandleOffset;
 	};
 }

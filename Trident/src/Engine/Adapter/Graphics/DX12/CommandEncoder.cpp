@@ -188,8 +188,21 @@ namespace Trident {
 			}
 
 			if (samplerDescriptorTableRootParameterIndex != max<UINT>()) {
-				// Bind sampler descriptor table to the last root parameter.
-				commandList->SetComputeRootDescriptorTable(samplerDescriptorTableRootParameterIndex, samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+				UINT64 samplerDescriptorHandleOffset = 0;
+
+				rootParameterIndex = 0;
+
+				while (rootParameterIndex < descriptorSets.count()) {
+					const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSets[rootParameterIndex]);
+
+					samplerDescriptorHandleOffset = max(samplerDescriptorHandleOffset, descriptorSet->samplerDescriptorHandleOffset);
+					rootParameterIndex += 1;
+				}
+
+				D3D12_GPU_DESCRIPTOR_HANDLE descriptorOffset = samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+				descriptorOffset.ptr += samplerDescriptorHandleOffset * device.memoryAllocator->samplerDescriptorHandleIncrementSize;
+
+				commandList->SetComputeRootDescriptorTable(samplerDescriptorTableRootParameterIndex, descriptorOffset);
 			}
 		}
 		else {
@@ -205,8 +218,21 @@ namespace Trident {
 			}
 
 			if (samplerDescriptorTableRootParameterIndex != max<UINT>()) {
-				// Bind sampler descriptor table to the last root parameter.
-				commandList->SetGraphicsRootDescriptorTable(samplerDescriptorTableRootParameterIndex, samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+				UINT64 samplerDescriptorHandleOffset = 0;
+
+				rootParameterIndex = 0;
+
+				while (rootParameterIndex < descriptorSets.count()) {
+					const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSets[rootParameterIndex]);
+
+					samplerDescriptorHandleOffset = max(samplerDescriptorHandleOffset, descriptorSet->samplerDescriptorHandleOffset);
+					rootParameterIndex += 1;
+				}
+
+				D3D12_GPU_DESCRIPTOR_HANDLE descriptorOffset = samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+				descriptorOffset.ptr += samplerDescriptorHandleOffset * device.memoryAllocator->samplerDescriptorHandleIncrementSize;
+
+				commandList->SetGraphicsRootDescriptorTable(samplerDescriptorTableRootParameterIndex, descriptorOffset);
 			}
 		}
 

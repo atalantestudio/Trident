@@ -156,6 +156,7 @@ namespace Trident {
 			ref<DX12::DescriptorSet> descriptorSet = createRef<DX12::DescriptorSet>();
 			descriptorSet->bindings = sequence<DX12::DescriptorSet::DescriptorSetBinding>(descriptorSetLayout->bindings.count());
 			descriptorSet->viewDescriptorHandleOffset = static_cast<UINT64>(memoryAllocator->getCurrentViewDescriptorHeapAllocation().descriptorOffset);
+			descriptorSet->samplerDescriptorHandleOffset = static_cast<UINT64>(memoryAllocator->getCurrentSamplerDescriptorHeapAllocation().descriptorOffset);
 
 			UINT bindingIndex = 0;
 
@@ -166,6 +167,11 @@ namespace Trident {
 				descriptorSetBinding.descriptorType = binding.descriptorType;
 				descriptorSetBinding.descriptorCount = binding.descriptorCount;
 				descriptorSetBinding.viewDescriptorHandleOffset = memoryAllocator->allocateView(binding.descriptorCount);
+
+				if (isSamplerDescriptorType(binding.descriptorType)) {
+					// TODO: The binding might not define the samplers.
+					descriptorSetBinding.samplerDescriptorHandleOffset = memoryAllocator->allocateSampler(binding.descriptorCount);
+				}
 
 				bindingIndex += 1;
 			}
@@ -199,6 +205,7 @@ namespace Trident {
 			const DX12::DescriptorSet::DescriptorSetBinding& binding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
 
 			D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = binding.viewDescriptorHandleOffset;
+			D3D12_CPU_DESCRIPTOR_HANDLE samplerDescriptorHandle = binding.samplerDescriptorHandleOffset;
 
 			switch (binding.descriptorType) {
 				case DescriptorType::COMBINED_IMAGE_SAMPLER: {
@@ -206,9 +213,10 @@ namespace Trident {
 						const ref<DX12::Sampler> sampler = std::static_pointer_cast<DX12::Sampler>(descriptorImage.sampler);
 
 						memoryAllocator->writeImage(viewDescriptorHandle, descriptorImage);
-						memoryAllocator->allocateSampler(&sampler->samplerDescriptor);
+						memoryAllocator->writeSampler(samplerDescriptorHandle, &sampler->samplerDescriptor);
 
 						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
 					}
 
 					break;
@@ -218,6 +226,7 @@ namespace Trident {
 						memoryAllocator->writeImage(viewDescriptorHandle, descriptorImage);
 
 						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
 					}
 
 					break;
@@ -227,6 +236,7 @@ namespace Trident {
 						memoryAllocator->writeReadWriteStorageImage(viewDescriptorHandle, descriptorImage);
 
 						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
 					}
 
 					break;
@@ -236,6 +246,7 @@ namespace Trident {
 						memoryAllocator->writeUniformBuffer(viewDescriptorHandle, descriptorBuffer);
 
 						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
 					}
 
 					break;
@@ -245,6 +256,7 @@ namespace Trident {
 						memoryAllocator->writeReadOnlyStorageBuffer(viewDescriptorHandle, descriptorBuffer);
 
 						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
 					}
 
 					break;
@@ -254,6 +266,7 @@ namespace Trident {
 						memoryAllocator->writeReadWriteStorageBuffer(viewDescriptorHandle, descriptorBuffer);
 
 						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
 					}
 
 					break;
@@ -263,6 +276,7 @@ namespace Trident {
 						memoryAllocator->writeInputAttachment(viewDescriptorHandle, descriptorImage);
 
 						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
 					}
 
 					break;

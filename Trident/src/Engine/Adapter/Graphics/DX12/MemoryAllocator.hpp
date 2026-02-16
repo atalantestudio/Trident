@@ -33,8 +33,15 @@ namespace Trident {
 
 			~MemoryAllocator();
 
+			DX12::DescriptorHeapAllocation& getCurrentViewDescriptorHeapAllocation();
+			DX12::DescriptorHeapAllocation& getCurrentSamplerDescriptorHeapAllocation();
+
 			// Reserves space for a sequence of CBV/SRV/UAV handles.
 			D3D12_CPU_DESCRIPTOR_HANDLE allocateView(UINT descriptorCount);
+
+			D3D12_CPU_DESCRIPTOR_HANDLE allocateSampler(UINT descriptorCount);
+			D3D12_CPU_DESCRIPTOR_HANDLE allocateRenderTargetView(ID3D12Resource* resource, const D3D12_RENDER_TARGET_VIEW_DESC* descriptor);
+			D3D12_CPU_DESCRIPTOR_HANDLE allocateDepthStencilView(ID3D12Resource* resource, const D3D12_DEPTH_STENCIL_VIEW_DESC* descriptor);
 
 			void writeImage(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorImage& descriptorImage) const;
 			void writeReadWriteStorageImage(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorImage& descriptorImage) const;
@@ -42,13 +49,7 @@ namespace Trident {
 			void writeReadOnlyStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorBuffer& descriptorBuffer) const;
 			void writeReadWriteStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorBuffer& descriptorBuffer) const;
 			void writeInputAttachment(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorImage& descriptorImage) const;
-
-			D3D12_CPU_DESCRIPTOR_HANDLE allocateSampler(const D3D12_SAMPLER_DESC* descriptor);
-			D3D12_CPU_DESCRIPTOR_HANDLE allocateRenderTargetView(ID3D12Resource* resource, const D3D12_RENDER_TARGET_VIEW_DESC* descriptor);
-			D3D12_CPU_DESCRIPTOR_HANDLE allocateDepthStencilView(ID3D12Resource* resource, const D3D12_DEPTH_STENCIL_VIEW_DESC* descriptor);
-
-			DX12::DescriptorHeapAllocation& getCurrentViewDescriptorHeapAllocation();
-			DX12::DescriptorHeapAllocation& getCurrentSamplerDescriptorHeapAllocation();
+			void writeSampler(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const D3D12_SAMPLER_DESC* descriptor) const;
 
 		private:
 			void createViewDescriptorHeapAllocation();

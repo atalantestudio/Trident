@@ -29,6 +29,34 @@ namespace Trident {
 		}
 	}
 
+	DX12::DescriptorHeapAllocation& DX12::MemoryAllocator::getCurrentViewDescriptorHeapAllocation() {
+		if (currentViewDescriptorHeapAllocationIndex >= descriptorHeapAllocations.size()) {
+			createViewDescriptorHeapAllocation();
+		}
+
+		const DX12::DescriptorHeapAllocation& descriptorHeapAllocation = descriptorHeapAllocations[currentViewDescriptorHeapAllocationIndex];
+
+		if (descriptorHeapAllocation.descriptorOffset == descriptorHeapAllocation.descriptorCount) {
+			createViewDescriptorHeapAllocation();
+		}
+
+		return descriptorHeapAllocations[currentViewDescriptorHeapAllocationIndex];
+	}
+
+	DX12::DescriptorHeapAllocation& DX12::MemoryAllocator::getCurrentSamplerDescriptorHeapAllocation() {
+		if (currentSamplerDescriptorHeapAllocationIndex >= descriptorHeapAllocations.size()) {
+			createSamplerDescriptorHeapAllocation();
+		}
+
+		const DX12::DescriptorHeapAllocation& descriptorHeapAllocation = descriptorHeapAllocations[currentSamplerDescriptorHeapAllocationIndex];
+
+		if (descriptorHeapAllocation.descriptorOffset == descriptorHeapAllocation.descriptorCount) {
+			createSamplerDescriptorHeapAllocation();
+		}
+
+		return descriptorHeapAllocations[currentSamplerDescriptorHeapAllocationIndex];
+	}
+
 	D3D12_CPU_DESCRIPTOR_HANDLE DX12::MemoryAllocator::allocateView(UINT descriptorCount) {
 		DX12::DescriptorHeapAllocation& descriptorHeapAllocation = getCurrentViewDescriptorHeapAllocation();
 
@@ -38,6 +66,45 @@ namespace Trident {
 		ADAPTER_ASSERT(descriptorHeapAllocation.descriptorOffset + descriptorCount < descriptorHeapAllocation.descriptorCount, "Not enough space to reserve for view descriptor handles.");
 
 		descriptorHeapAllocation.descriptorOffset += descriptorCount;
+
+		return descriptorHandle;
+	}
+
+	D3D12_CPU_DESCRIPTOR_HANDLE DX12::MemoryAllocator::allocateSampler(UINT descriptorCount) {
+		DX12::DescriptorHeapAllocation& descriptorHeapAllocation = getCurrentSamplerDescriptorHeapAllocation();
+
+		D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle = descriptorHeapAllocation.descriptorHeap->GetCPUDescriptorHandleForHeapStart();
+		descriptorHandle.ptr += descriptorHeapAllocation.descriptorOffset * samplerDescriptorHandleIncrementSize;
+
+		ADAPTER_ASSERT(descriptorHeapAllocation.descriptorOffset + descriptorCount < descriptorHeapAllocation.descriptorCount, "Not enough space to reserve for sampler descriptor handles.");
+
+		descriptorHeapAllocation.descriptorOffset += descriptorCount;
+
+		return descriptorHandle;
+	}
+
+	D3D12_CPU_DESCRIPTOR_HANDLE DX12::MemoryAllocator::allocateRenderTargetView(ID3D12Resource* resource, const D3D12_RENDER_TARGET_VIEW_DESC* descriptor) {
+		DX12::DescriptorHeapAllocation& descriptorHeapAllocation = getCurrentRenderTargetViewDescriptorHeapAllocation();
+
+		D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle = descriptorHeapAllocation.descriptorHeap->GetCPUDescriptorHandleForHeapStart();
+		descriptorHandle.ptr += descriptorHeapAllocation.descriptorOffset * renderTargetViewDescriptorHandleIncrementSize;
+
+		device.device->CreateRenderTargetView(resource, descriptor, descriptorHandle);
+
+		descriptorHeapAllocation.descriptorOffset += 1;
+
+		return descriptorHandle;
+	}
+
+	D3D12_CPU_DESCRIPTOR_HANDLE DX12::MemoryAllocator::allocateDepthStencilView(ID3D12Resource* resource, const D3D12_DEPTH_STENCIL_VIEW_DESC* descriptor) {
+		DX12::DescriptorHeapAllocation& descriptorHeapAllocation = getCurrentDepthStencilViewDescriptorHeapAllocation();
+
+		D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle = descriptorHeapAllocation.descriptorHeap->GetCPUDescriptorHandleForHeapStart();
+		descriptorHandle.ptr += descriptorHeapAllocation.descriptorOffset * depthStencilViewDescriptorHandleIncrementSize;
+
+		device.device->CreateDepthStencilView(resource, descriptor, descriptorHandle);
+
+		descriptorHeapAllocation.descriptorOffset += 1;
 
 		return descriptorHandle;
 	}
@@ -176,43 +243,8 @@ namespace Trident {
 		device.device->CreateShaderResourceView(image->resource, &shaderResourceViewDescriptor, descriptorHandle);
 	}
 
-	D3D12_CPU_DESCRIPTOR_HANDLE DX12::MemoryAllocator::allocateSampler(const D3D12_SAMPLER_DESC* descriptor) {
-		DX12::DescriptorHeapAllocation& descriptorHeapAllocation = getCurrentSamplerDescriptorHeapAllocation();
-
-		D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle = descriptorHeapAllocation.descriptorHeap->GetCPUDescriptorHandleForHeapStart();
-		descriptorHandle.ptr += descriptorHeapAllocation.descriptorOffset * samplerDescriptorHandleIncrementSize;
-
+	void DX12::MemoryAllocator::writeSampler(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const D3D12_SAMPLER_DESC* descriptor) const {
 		device.device->CreateSampler(descriptor, descriptorHandle);
-
-		descriptorHeapAllocation.descriptorOffset += 1;
-
-		return descriptorHandle;
-	}
-
-	D3D12_CPU_DESCRIPTOR_HANDLE DX12::MemoryAllocator::allocateRenderTargetView(ID3D12Resource* resource, const D3D12_RENDER_TARGET_VIEW_DESC* descriptor) {
-		DX12::DescriptorHeapAllocation& descriptorHeapAllocation = getCurrentRenderTargetViewDescriptorHeapAllocation();
-
-		D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle = descriptorHeapAllocation.descriptorHeap->GetCPUDescriptorHandleForHeapStart();
-		descriptorHandle.ptr += descriptorHeapAllocation.descriptorOffset * renderTargetViewDescriptorHandleIncrementSize;
-
-		device.device->CreateRenderTargetView(resource, descriptor, descriptorHandle);
-
-		descriptorHeapAllocation.descriptorOffset += 1;
-
-		return descriptorHandle;
-	}
-
-	D3D12_CPU_DESCRIPTOR_HANDLE DX12::MemoryAllocator::allocateDepthStencilView(ID3D12Resource* resource, const D3D12_DEPTH_STENCIL_VIEW_DESC* descriptor) {
-		DX12::DescriptorHeapAllocation& descriptorHeapAllocation = getCurrentDepthStencilViewDescriptorHeapAllocation();
-
-		D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle = descriptorHeapAllocation.descriptorHeap->GetCPUDescriptorHandleForHeapStart();
-		descriptorHandle.ptr += descriptorHeapAllocation.descriptorOffset * depthStencilViewDescriptorHandleIncrementSize;
-
-		device.device->CreateDepthStencilView(resource, descriptor, descriptorHandle);
-
-		descriptorHeapAllocation.descriptorOffset += 1;
-
-		return descriptorHandle;
 	}
 
 	void DX12::MemoryAllocator::createViewDescriptorHeapAllocation() {
@@ -293,34 +325,6 @@ namespace Trident {
 		descriptorHeapAllocations.emplace_back(descriptorHeapAllocation);
 
 		currentDepthStencilViewDescriptorHeapAllocationIndex = static_cast<UINT>(descriptorHeapAllocations.size() - 1);
-	}
-
-	DX12::DescriptorHeapAllocation& DX12::MemoryAllocator::getCurrentViewDescriptorHeapAllocation() {
-		if (currentViewDescriptorHeapAllocationIndex >= descriptorHeapAllocations.size()) {
-			createViewDescriptorHeapAllocation();
-		}
-
-		const DX12::DescriptorHeapAllocation& descriptorHeapAllocation = descriptorHeapAllocations[currentViewDescriptorHeapAllocationIndex];
-
-		if (descriptorHeapAllocation.descriptorOffset == descriptorHeapAllocation.descriptorCount) {
-			createViewDescriptorHeapAllocation();
-		}
-
-		return descriptorHeapAllocations[currentViewDescriptorHeapAllocationIndex];
-	}
-
-	DX12::DescriptorHeapAllocation& DX12::MemoryAllocator::getCurrentSamplerDescriptorHeapAllocation() {
-		if (currentSamplerDescriptorHeapAllocationIndex >= descriptorHeapAllocations.size()) {
-			createSamplerDescriptorHeapAllocation();
-		}
-
-		const DX12::DescriptorHeapAllocation& descriptorHeapAllocation = descriptorHeapAllocations[currentSamplerDescriptorHeapAllocationIndex];
-
-		if (descriptorHeapAllocation.descriptorOffset == descriptorHeapAllocation.descriptorCount) {
-			createSamplerDescriptorHeapAllocation();
-		}
-
-		return descriptorHeapAllocations[currentSamplerDescriptorHeapAllocationIndex];
 	}
 
 	DX12::DescriptorHeapAllocation& DX12::MemoryAllocator::getCurrentRenderTargetViewDescriptorHeapAllocation() {

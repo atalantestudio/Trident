@@ -35,4 +35,10 @@ namespace Trident {
 
 		return descriptorType <= lastImageDescriptorType;
 	}
+
+	static bool isSamplerDescriptorType(DescriptorType descriptorType) {
+		DEBUG_ASSERT(descriptorType < DescriptorType::count);
+
+		return descriptorType == DescriptorType::COMBINED_IMAGE_SAMPLER;
+	}
 }
