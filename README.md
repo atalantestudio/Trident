@@ -75,7 +75,7 @@ The engine features several `CompileShaders.bat` scripts that compile a batch of
 
 Then, run the project. The property file will automatically be created, and you should see a window open with the selected sample.
 
-You can change the runtime application by editing `RUNTIME_APPLICATION` in [Samples/src/main.cpp](https://github.com/atalantestudio/Trident/blob/main/Samples/src/main.cpp).
+If not, create the `SampleGroup` property in the .tpr file and try again.
 
 
 
