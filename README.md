@@ -121,6 +121,7 @@ Below is the list of supported properties and their available values.
 | `WindowWidth` | Any unsigned integer |
 | `WindowHeight` | Any unsigned integer |
 | `VerticalSync` | 0 or 1 |
+| `SampleGroup` | "GUI", "Physics2D", "Process", "Sample" or "Sample3D" (only used in the Samples project) |
 
 
 

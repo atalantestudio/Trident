@@ -6,7 +6,7 @@
 #include "Trident.hpp"
 
 namespace Trident {
-	class DefaultProcess : public Process {
+	class SampleProcess : public Process {
 		public:
 			sint32 main(view<void*> arguments) override {
 				return 0;

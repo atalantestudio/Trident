@@ -5,7 +5,7 @@
 
 #include "Engine/Layer/Layer.hpp"
 
-#include "../Sample/ImageAsset.hpp"
+#include "Sample/ImageAsset.hpp"
 
 namespace Trident {
 	class SampleLayer : public Layer {

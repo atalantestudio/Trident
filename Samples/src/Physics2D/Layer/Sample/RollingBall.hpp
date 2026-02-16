@@ -6,7 +6,7 @@
 #include "../BaseLayer.hpp"
 
 namespace Trident {
-	class SampleLayer : public BaseLayer {
+	class SamplePhysics2DLayer : public BaseLayer {
 		public:
 			void build() override {
 				const ref<CircleGeometry2D> circleGeometry = CircleGeometry2D::unitCircle(32);

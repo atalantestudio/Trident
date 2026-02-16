@@ -6,7 +6,7 @@
 #include "Engine/API/GUI/Theme/Default/Button.hpp"
 
 namespace Trident {
-	class SampleLayer : public GUILayer {
+	class SampleGUILayer : public GUILayer {
 		public:
 			void registerAssets() override {
 				listContainerStyle.size = {FIT, FIT};

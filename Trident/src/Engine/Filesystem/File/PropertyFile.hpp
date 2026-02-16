@@ -3,7 +3,9 @@
 
 #pragma once
 
+#include "Engine/API/Graphics/GraphicsAPI.hpp"
 #include "Engine/Filesystem/Reader.hpp"
+#include "Engine/SampleGroup.hpp"
 
 namespace Trident {
 	class PropertyFile final {
@@ -52,6 +54,34 @@ namespace Trident {
 				ENGINE_ASSERT(false, "Invalid value \"[]\" for property \"[]\".", valueString, propertyName);
 
 				return static_cast<GraphicsAPI>(0);
+			}
+
+			// TODO(debug-only): Only used in the Samples project.
+			template<>
+			static SampleGroup parseValueString(view<char8> valueString, view<char8> propertyName) {
+				if (valueString == "GUI") {
+					return SampleGroup::GUI;
+				}
+
+				if (valueString == "Physics2D") {
+					return SampleGroup::PHYSICS_2D;
+				}
+
+				if (valueString == "Process") {
+					return SampleGroup::PROCESS;
+				}
+
+				if (valueString == "Sample") {
+					return SampleGroup::SAMPLE;
+				}
+
+				if (valueString == "Sample3D") {
+					return SampleGroup::SAMPLE_3D;
+				}
+
+				ENGINE_ASSERT(false, "Invalid value \"[]\" for property \"[]\".", valueString, propertyName);
+
+				return static_cast<SampleGroup>(0);
 			}
 
 		public:
