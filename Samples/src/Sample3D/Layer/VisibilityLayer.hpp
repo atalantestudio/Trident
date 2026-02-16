@@ -12,7 +12,7 @@
 namespace Trident {
 	class Sample3DLayer : public Layer {
 		private:
-			static constexpr float32 MOVEMENT_SPEED = 0.5f;
+			static constexpr float32 MOVEMENT_SPEED = 1.5f;
 
 		public:
 			void build() override {
