@@ -39,9 +39,8 @@ layout(location = 0) out vec4 fragment;
 float TrowbridgeReitzGGX(vec3 normal, vec3 halfway, float roughness) {
 	float a = roughness * roughness;
 	float a2 = a * a;
-	float dotProduct = max(dot(normal, halfway), 0.0);
+	float dotProduct = max(0.0, dot(normal, halfway));
 	float dotProduct2 = dotProduct * dotProduct;
-
 	float numerator = a2;
 
 	float denominator = dotProduct2 * (a2 - 1.0) + 1.0;
@@ -62,9 +61,8 @@ float SchlickGGX(float angle, float roughness) {
 }
 
 float Smith(vec3 normal, vec3 viewDirection, vec3 lightDirection, float roughness) {
-	float viewAngle = max(dot(normal, viewDirection), 0.0);
-	float lightAngle = max(dot(normal, lightDirection), 0.0);
-
+	float viewAngle = max(0.0, dot(normal, viewDirection));
+	float lightAngle = max(0.0, dot(normal, lightDirection));
 	float ggx1 = SchlickGGX(viewAngle, roughness);
 	float ggx2 = SchlickGGX(lightAngle, roughness);
 
@@ -93,16 +91,16 @@ void main() {
 
 		vec3 surfaceToLightDirection = normalize(light.position - surface);
 		vec3 surfaceHalfway = normalize(surfaceToViewDirection + surfaceToLightDirection);
-		float distance = length(light.position - surface);
+		float lightSurfaceDistance = length(light.position - surface);
 
 		// Attenuate using (physically correct) inverse-square law.
-		float attenuation = 1.0 / (distance * distance);
+		float attenuation = 1.0 / (lightSurfaceDistance * lightSurfaceDistance);
 
 		vec3 radiance = light.color * attenuation;
 
 		float NDF = TrowbridgeReitzGGX(normal, surfaceHalfway, roughness);
 		float G = Smith(normal, surfaceToViewDirection, surfaceToLightDirection, roughness);
-		vec3 F = FresnelSchlick(max(dot(surfaceHalfway, surfaceToViewDirection), 0.0), baseReflectivity);
+		vec3 F = FresnelSchlick(max(0.0, dot(surfaceHalfway, surfaceToViewDirection)), baseReflectivity);
 
 		vec3 kS = F;
 		vec3 kD = 1.0 - kS;
@@ -111,10 +109,9 @@ void main() {
 		kD *= 1.0 - metallic;
 
 		vec3 numerator = NDF * G * F;
-		float denominator = 4.0 * max(dot(normal, surfaceToViewDirection), 0.0) * max(dot(normal, surfaceToLightDirection), 0.0) + DENOMINATOR_TOLERANCE;
+		float denominator = 4.0 * max(0.0, dot(normal, surfaceToViewDirection)) * max(0.0, dot(normal, surfaceToLightDirection)) + DENOMINATOR_TOLERANCE;
 		vec3 specular = numerator / denominator;
-
-		float angle = max(dot(normal, surfaceToLightDirection), 0.0);
+		float angle = max(0.0, dot(normal, surfaceToLightDirection));
 
 		L += (kD * diffuse / PI + specular) * radiance * angle;
 
@@ -125,7 +122,7 @@ void main() {
 
 	// Apply HDR.
 	color = color / (color + 1.0);
-	color = pow(color, vec3(1.0, 1.0, 1.0) / 2.2);
+	color = pow(color, vec3(1.0 / 2.2));
 
 	fragment = vec4(color, 1.0);
 }
