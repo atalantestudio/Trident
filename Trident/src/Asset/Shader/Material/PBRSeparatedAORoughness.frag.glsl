@@ -3,7 +3,8 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-precision mediump float;
+// TODO: "lowp" or "mediump" precision cause specular artifacts on integrated GPUs.
+precision highp float;
 
 in FragmentInput {
 	layout(location = 0) vec3 surface;
