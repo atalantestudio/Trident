@@ -3,6 +3,7 @@
 
 #include "pch.hpp"
 
+#include "Engine/Adapter/Graphics/GL/Barrier.hpp"
 #include "Engine/Adapter/Graphics/GL/Command/BeginRenderPassCommand.hpp"
 #include "Engine/Adapter/Graphics/GL/Command/BindComputePipelineCommand.hpp"
 #include "Engine/Adapter/Graphics/GL/Command/BindDescriptorSetsCommand.hpp"
@@ -119,6 +120,22 @@ namespace Trident {
 		ADAPTER_ASSERT(subpassIndex < renderPass->getSubpassCount(), "All subpasses have been executed.");
 
 		commands.emplace_back(createRef<GL::NextSubpassCommand>(framebuffer, renderPass->getSubpass(subpassIndex)));
+	}
+
+	void GL::CommandEncoder::insertBufferMemoryBarriers(view<BufferMemoryBarrier> barriers) {
+		uint32 barrierIndex = 0;
+
+		while (barrierIndex < barriers.count()) {
+			const GLbitfield barrier = getBarrier(barriers[barrierIndex].destinationAccess);
+
+			barrierIndex += 1;
+
+			if (barrier == 0) {
+				continue;
+			}
+
+			commands.emplace_back(createRef<GL::SetImageMemoryBarrierCommand>(barrier));
+		}
 	}
 
 	void GL::CommandEncoder::setImageMemoryBarrier(ref<Trident::Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {

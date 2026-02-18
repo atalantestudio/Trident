@@ -3,6 +3,7 @@
 
 #include "pch.hpp"
 
+#include "Engine/Adapter/Graphics/DX12/BarrierAccess.hpp"
 #include "Engine/Adapter/Graphics/DX12/Buffer.hpp"
 #include "Engine/Adapter/Graphics/DX12/CommandBuffer.hpp"
 #include "Engine/Adapter/Graphics/DX12/CommandEncoder.hpp"
@@ -371,6 +372,36 @@ namespace Trident {
 		subpassIndex += 1;
 
 		setRenderTargets();
+
+		commandCount += 1;
+	}
+
+	void DX12::CommandEncoder::insertBufferMemoryBarriers(view<BufferMemoryBarrier> barriers) {
+		sequence<D3D12_BUFFER_BARRIER> bufferBarriers(barriers.count());
+
+		UINT bufferBarrierCount = 0;
+
+		while (bufferBarrierCount < barriers.count()) {
+			const BufferMemoryBarrier& bufferMemoryBarrier = barriers[bufferBarrierCount];
+
+			D3D12_BUFFER_BARRIER& bufferBarrier = bufferBarriers[bufferBarrierCount];
+			bufferBarrier.SyncBefore = D3D12_BARRIER_SYNC_ALL;
+			bufferBarrier.SyncAfter = D3D12_BARRIER_SYNC_ALL;
+			bufferBarrier.AccessBefore = getBarrierAccess(bufferMemoryBarrier.sourceAccess);
+			bufferBarrier.AccessAfter = getBarrierAccess(bufferMemoryBarrier.destinationAccess);
+			bufferBarrier.pResource = std::static_pointer_cast<DX12::Buffer>(bufferMemoryBarrier.buffer)->resource;
+			bufferBarrier.Offset = bufferMemoryBarrier.offset;
+			bufferBarrier.Size = bufferMemoryBarrier.size;
+
+			bufferBarrierCount += 1;
+		}
+
+		D3D12_BARRIER_GROUP barrierGroup{};
+		barrierGroup.Type = D3D12_BARRIER_TYPE_BUFFER;
+		barrierGroup.NumBarriers = bufferBarrierCount;
+		barrierGroup.pBufferBarriers = &bufferBarriers[0];
+
+		commandList->Barrier(1, &barrierGroup);
 
 		commandCount += 1;
 	}

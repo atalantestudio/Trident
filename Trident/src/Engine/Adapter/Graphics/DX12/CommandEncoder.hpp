@@ -38,7 +38,7 @@ namespace Trident {
 
 			void nextSubpass() final override;
 
-			void insertBufferMemoryBarriers(view<BufferMemoryBarrier> barriers) final override {}
+			void insertBufferMemoryBarriers(view<BufferMemoryBarrier> barriers) final override;
 
 			void setImageMemoryBarrier(ref<Trident::Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) final override;
 
@@ -69,7 +69,7 @@ namespace Trident {
 
 		private:
 			const DX12::Device& device;
-			ID3D12GraphicsCommandList* commandList;
+			ID3D12GraphicsCommandList7* commandList;
 			ID3D12CommandAllocator* commandAllocator;
 			CommandBufferUsage usage;
 			UINT commandCount = 0;

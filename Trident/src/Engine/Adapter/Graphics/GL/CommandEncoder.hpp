@@ -40,7 +40,7 @@ namespace Trident {
 
 			void nextSubpass() final override;
 
-			void insertBufferMemoryBarriers(view<BufferMemoryBarrier> barriers) final override {}
+			void insertBufferMemoryBarriers(view<BufferMemoryBarrier> barriers) final override;
 
 			void setImageMemoryBarrier(ref<Trident::Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) final override;
 
