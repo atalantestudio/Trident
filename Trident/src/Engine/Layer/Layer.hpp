@@ -27,7 +27,7 @@ namespace Trident {
 
 			virtual void preRender();
 
-			virtual void render(float64 remainingFrameTime, ref<CommandEncoder> commandEncoder) const;
+			virtual void render(ref<CommandEncoder> commandEncoder, float64 remainingFrameTime) const;
 
 			virtual void postRender();
 

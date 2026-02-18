@@ -21,7 +21,7 @@ namespace Trident {
 
 	void Layer::preRender() {}
 
-	void Layer::render(float64 remainingFrameTime, ref<CommandEncoder> commandEncoder) const {}
+	void Layer::render(ref<CommandEncoder> commandEncoder, float64 remainingFrameTime) const {}
 
 	void Layer::postRender() {}
 

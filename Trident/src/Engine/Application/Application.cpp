@@ -296,7 +296,7 @@ namespace Trident {
 
 		for (const ref<Layer> layer : layerStack) {
 			layer->preRender();
-			layer->render(remainingFrameTime, commandEncoder);
+			layer->render(commandEncoder, remainingFrameTime);
 			layer->postRender();
 		}
 

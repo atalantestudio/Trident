@@ -138,7 +138,7 @@ namespace Trident {
 		}
 	}
 
-	void GUILayer::render(float64 remainingFrameTime, ref<CommandEncoder> commandEncoder) const {
+	void GUILayer::render(ref<CommandEncoder> commandEncoder, float64 remainingFrameTime) const {
 		renderer.render(commandEncoder);
 	}
 

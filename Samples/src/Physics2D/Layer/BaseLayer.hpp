@@ -27,7 +27,7 @@ namespace Trident {
 
 			void preRender() override;
 
-			void render(float64 remainingFrameTime, ref<CommandEncoder> commandEncoder) const override;
+			void render(ref<CommandEncoder> commandEncoder, float64 remainingFrameTime) const override;
 
 			void onEvent(Event& event) override;
 

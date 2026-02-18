@@ -98,7 +98,7 @@ namespace Trident {
 		#endif
 	}
 
-	void BaseLayer::render(float64 remainingFrameTime, ref<CommandEncoder> commandEncoder) const {
+	void BaseLayer::render(ref<CommandEncoder> commandEncoder, float64 remainingFrameTime) const {
 		renderer.render(commandEncoder);
 	}
 

@@ -40,7 +40,7 @@ namespace Trident {
 
 			void preRender() final override;
 
-			void render(float64 remainingFrameTime, ref<CommandEncoder> commandEncoder) const final override;
+			void render(ref<CommandEncoder> commandEncoder, float64 remainingFrameTime) const final override;
 
 			void postRender() final override;
 
