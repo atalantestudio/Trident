@@ -17,6 +17,14 @@ namespace Trident::VK {
 			accessFlags |= VK_ACCESS_SHADER_WRITE_BIT;
 		}
 
+		if (access & Access::TRANSFER_READ) {
+			accessFlags |= VK_ACCESS_TRANSFER_READ_BIT;
+		}
+
+		if (access & Access::TRANSFER_WRITE) {
+			accessFlags |= VK_ACCESS_TRANSFER_WRITE_BIT;
+		}
+
 		return accessFlags;
 	}
 }

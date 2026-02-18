@@ -35,6 +35,17 @@ If both creation and last update dates are provided, the Date field will indicat
 | *ZLIB Compressed Data Format Specification version 3.3* | Peter Deutsch<br />Jean-loup Gailly | May 1996 | [Website](https://datatracker.ietf.org/doc/html/rfc1950) |
 | *DEFLATE Compressed Data Format Specification version 1.3* | Peter Deutsch | May 1996 | [Website](https://datatracker.ietf.org/doc/html/rfc1951) |
 
+## Compute
+
+### Prefix sum
+
+| Title | Author(s) | Date | Links |
+| - | - | - | - |
+| *Prefix Sum* | Shi Yan | - | [Article](https://shi-yan.github.io/webgpuunleashed/Compute/prefix_sum.html) |
+| *Single-Pass Parallel Prefix Scan with Decoupled Look-back* | Duane Merrill<br />Michael Garland | March 2016 | [Paper](https://research.nvidia.com/sites/default/files/pubs/2016-03_Single-pass-Parallel-Prefix/nvr-2016-002.pdf) |
+| *vello/tests/shader/prefix.comp* | Raph Levian | November 14, 2021 | [Code](https://github.com/linebender/vello/blob/custom-hal-archive-with-shaders/tests/shader/prefix.comp) |
+| *The Problem With Procedural Generation* | Acerola | November 30, 2024 | [Video](https://www.youtube.com/watch?v=_4DtmRcTbhk&t=600s) |
+
 ## C++
 
 | Title | Author(s) | Date | Links |

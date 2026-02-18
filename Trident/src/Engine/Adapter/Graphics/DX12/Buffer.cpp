@@ -86,7 +86,6 @@ namespace Trident {
 
 	void* DX12::Buffer::getMappedRange(uint64 offset, uint64 size) const {
 		HRESULT result;
-
 		void* mappedRange;
 
 		result = resource->Map(0, nullptr, &mappedRange);

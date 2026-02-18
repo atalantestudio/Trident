@@ -7,6 +7,8 @@
 
 #include "Engine/entry_point.hpp"
 
+#include "Compute/PrefixSum.hpp"
+
 #include "GUI/Demo1.hpp"
 #include "GUI/Demo2.hpp"
 #include "GUI/Demo3.hpp"
@@ -45,7 +47,12 @@ namespace Trident {
 				const view<char8> SampleGroupNameProperty = propertyFile->getProperty<view<char8>>("SampleGroupName");
 				const view<char8> SampleNameProperty = propertyFile->getProperty<view<char8>>("SampleName");
 
-				if (SampleGroupNameProperty == "GUI") {
+				if (SampleGroupNameProperty == "Compute") {
+					if (SampleNameProperty == "PrefixSum") {
+						registerProcess<ComputePrefixSumProcess>();
+					}
+				}
+				else if (SampleGroupNameProperty == "GUI") {
 					if (SampleNameProperty == "Demo1") {
 						registerLayer<GUIDemo1Layer>();
 					}

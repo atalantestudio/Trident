@@ -36,7 +36,7 @@ namespace Trident {
 	void Renderer::initialize(const ProjectDescriptor& projectDescriptor, const Window& window, const ApplicationProperties& properties) {
 		switch (properties.GraphicsAPI) {
 			case GraphicsAPI::CPU: {
-				ENGINE_ERROR_UNSUPPORTED();
+				ENGINE_ERROR_UNIMPLEMENTED();
 
 				break;
 			}
