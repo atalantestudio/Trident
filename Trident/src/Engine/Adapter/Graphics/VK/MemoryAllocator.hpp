@@ -82,7 +82,7 @@ namespace Trident {
 			// Allocated buffer and image memory allocations.
 			static std::vector<VK::MemoryAllocation> memoryAllocations;
 
-			// TODO: Try Merging with currentImageMemoryAllocationIndices.
+			// TODO: Try merging with currentImageMemoryAllocationIndices.
 			// Indices of the currently active buffer memory allocations per memory type.
 			static sequence<uint32> currentBufferMemoryAllocationIndices;
 

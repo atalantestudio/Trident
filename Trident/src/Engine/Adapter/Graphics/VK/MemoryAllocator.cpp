@@ -208,7 +208,7 @@ namespace Trident {
 				// TODO: Expose vkFlushMappedMemoryRanges to the graphics adapter.
 				ADAPTER_WARNING("Non-coherent memory must be manually flushed.");
 
-				/*VkMappedMemoryRange mappedMemoryRange{};
+				/* VkMappedMemoryRange mappedMemoryRange{};
 				mappedMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
 				mappedMemoryRange.pNext = nullptr;
 				mappedMemoryRange.memory = memoryAllocation.memory;
@@ -218,7 +218,7 @@ namespace Trident {
 				// Manually flush the mapped range.
 				const VkResult result = vkFlushMappedMemoryRanges(device, 1, &mappedMemoryRange);
 
-				ADAPTER_ASSERT(result == VK_SUCCESS, "Could not flush mapped memory range ([]).", string_VkResult(result));*/
+				ADAPTER_ASSERT(result == VK_SUCCESS, "Could not flush mapped memory range ([]).", string_VkResult(result)); */
 			}
 
 			vkUnmapMemory(device, memoryAllocation.memory);
