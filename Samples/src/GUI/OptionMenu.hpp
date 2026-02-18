@@ -24,6 +24,10 @@ namespace Trident {
 				listItemDescriptionStyle.fontSize = 17.6_px * 1.1f;
 
 				listItems = sequence<Button>(LIST_ITEM_COUNT);
+
+				for (Button& button : listItems) {
+					button.innerStyle.size[0] = 300_px;
+				}
 			}
 
 			void GUI() override {

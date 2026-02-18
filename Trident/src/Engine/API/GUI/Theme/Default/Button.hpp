@@ -61,10 +61,12 @@ namespace Trident {
 				innerStyle.color = 0x0a0a0aff;
 			}
 
-		private:
-			ContainerStyle style;
+		public:
 			ContainerStyle innerStyle;
+			ContainerStyle style;
 			EventListeners eventListeners;
+
+		private:
 			bool mouseDown = false;
 			bool hovered = false;
 	};

@@ -85,9 +85,8 @@ namespace Trident {
 			bool onMouseUp(MouseUpEvent& event);
 			bool onWindowResize(WindowResizeEvent& event);
 
-			uint32 calculateTextPreferredWidth(UTF8Stream& stream, const TextStyle& textStyle) const;
-
-			uint32 calculateTextMinimumWidth(UTF8Stream& stream, const TextStyle& textStyle) const;
+			float32 calculateTextPreferredWidth(UTF8Stream& stream, const TextStyle& textStyle) const;
+			float32 calculateTextMinimumWidth(UTF8Stream& stream, const TextStyle& textStyle) const;
 
 		public:
 			// Shrink towards the layout direction.

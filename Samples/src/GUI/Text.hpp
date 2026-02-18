@@ -16,6 +16,7 @@ namespace Trident {
 				itemStyle.size = {FIT, FIT};
 				itemStyle.anchorPoint = AnchorPoint::VCENTER;
 				itemStyle.layoutDirection = HORIZONTAL;
+				itemStyle.layoutSpacing = 8_px;
 				itemStyle.color = 0x000000ff;
 
 				itemLabelStyle.color = 0xa5a5a5ff;
