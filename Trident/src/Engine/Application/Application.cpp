@@ -53,37 +53,7 @@ namespace Trident {
 			return;
 		}
 
-		// Open/create the project's property file.
-		// A project shouldn't be forced to use a window, so the property file is loaded first.
-		// TODO: When a setting is changed in the game menu, the property file is replaced with an updated version.
-		// TODO: When the user edits the property file at runtime, the application verifies that the new values are valid before using them.
-		//       If a property is invalid, the application emits a warning, but continues to use the current value.
-		const std::filesystem::path projectRootDirectory = Filesystem::getProjectRootDirectory();
-
-		const sequence<char8> propertyFilePath = Logger::format("[]\\[].tpr", projectRootDirectory.string(), projectRootDirectory.filename().string());
-
-		// Try to open the property file located at "[PROJECT_ROOT_DIRECTORY]/[PROJECT_NAME].tpr".
-		propertyFileReader = Filesystem::openReader(propertyFilePath);
-
-		if (!propertyFileReader.fileExists()) {
-			ENGINE_WARNING("Could not find property file \"[]\".", propertyFilePath);
-
-			// If the property file cannot be found, create a new one with default values.
-			Writer propertyFileWriter = Filesystem::openWriter(propertyFilePath);
-
-			const view<char8> defaultFileData = PropertyFile::getDefaultFileData();
-
-			propertyFileWriter.write(pointer_cast<const uint8*>(&defaultFileData[0]), defaultFileData.count());
-
-			ENGINE_INFO("Created new property file with default values.");
-		}
-
-		properties = new ApplicationProperties();
-		propertyFileReader = Filesystem::openReader(propertyFilePath);
-
-		// TODO: Detect if the properties are invalid due to the file not being found.
-		propertyFile = new PropertyFile(propertyFileReader);
-		propertyFile->readProperties(properties);
+		initializePropertyFile();
 
 		WindowDescriptor windowDescriptor{};
 		windowDescriptor.name = formatWindowName(projectDescriptor.name, sharedMemoryData->instanceCount);
@@ -109,6 +79,49 @@ namespace Trident {
 		if (projectType == ProjectType::MAIN) {
 			assetLibrary = new AssetLibrary();
 		}
+	}
+
+	void Application::initializePropertyFile() {
+		// Open/create the project's property file.
+		// A project shouldn't be forced to use a window, so the property file is loaded first.
+		// TODO: When a setting is changed in the game menu, the property file is replaced with an updated version.
+		// TODO: When the user edits the property file at runtime, the application verifies that the new values are valid before using them.
+		//       If a property is invalid, the application emits a warning, but continues to use the current value.
+		const std::filesystem::path projectRootDirectory = Filesystem::getProjectRootDirectory();
+
+		const sequence<char8> propertyFilePath = Logger::format("[]\\[].tpr", projectRootDirectory.string(), projectRootDirectory.filename().string());
+
+		// Try to open the property file located at "[PROJECT_ROOT_DIRECTORY]/[PROJECT_NAME].tpr".
+		Reader propertyFileReader = Filesystem::openReader(propertyFilePath);
+
+		if (!propertyFileReader.fileExists()) {
+			ENGINE_WARNING("Could not find property file \"[]\".", propertyFilePath);
+
+			// If the property file cannot be found, create a new one with default values.
+			Writer propertyFileWriter = Filesystem::openWriter(propertyFilePath);
+
+			const view<char8> defaultFileData = PropertyFile::getDefaultFileData();
+
+			propertyFileWriter.write(pointer_cast<const uint8*>(&defaultFileData[0]), defaultFileData.count());
+
+			ENGINE_INFO("Created new property file with default values.");
+		}
+
+		properties = new ApplicationProperties();
+		propertyFileReader = Filesystem::openReader(propertyFilePath);
+
+		ENGINE_ASSERT(propertyFileReader.fileExists(), "Could not find property file \"[]\".", propertyFilePath);
+
+		propertyFileReader.seekg(std::ios::end);
+
+		const index propertyFileSize = propertyFileReader.tellg();
+
+		propertyFileReader.seekg(std::ios::beg);
+
+		const sequence<uint8> propertyFileData = propertyFileReader.read(propertyFileSize);
+
+		propertyFile = new PropertyFile(*pointer_cast<const sequence<char8>*>(&propertyFileData));
+		propertyFile->readProperties(properties);
 	}
 
 	Application::~Application() {

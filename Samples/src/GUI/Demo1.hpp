@@ -4,7 +4,7 @@
 #pragma once
 
 namespace Trident {
-	class SampleGUILayer : public GUILayer {
+	class GUIDemo1Layer : public GUILayer {
 		public:
 			void GUI() override {
 				ContainerStyle blue{};

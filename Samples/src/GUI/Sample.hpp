@@ -4,7 +4,7 @@
 #pragma once
 
 namespace Trident {
-	class SampleGUILayer : public GUILayer {
+	class GUISampleLayer : public GUILayer {
 		public:
 			void registerAssets() override {
 				fontBold = loadFontAsset("test-bold");

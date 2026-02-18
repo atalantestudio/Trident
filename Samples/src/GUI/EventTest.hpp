@@ -6,7 +6,7 @@
 #include "Engine/API/GUI/Theme/Default/Button.hpp"
 
 namespace Trident {
-	class SampleGUILayer : public GUILayer {
+	class GUIEventTestLayer : public GUILayer {
 		public:
 			void registerAssets() override {
 				windowStyle.size = {EXPAND, EXPAND};

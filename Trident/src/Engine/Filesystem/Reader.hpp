@@ -6,13 +6,11 @@
 namespace Trident {
 	class Reader {
 		public:
-			Reader() = default;
-
 			explicit Reader(view<char8> path) :
 				stream(&path[0])
 			{}
 
-			Reader& operator =(Reader& reader) {
+			Reader& operator=(Reader& reader) {
 				stream.swap(reader.getStream());
 
 				return *this;

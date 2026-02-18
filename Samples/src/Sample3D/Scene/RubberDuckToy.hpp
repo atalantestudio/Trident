@@ -7,7 +7,7 @@
 #include "Engine/API/Scene/Scene3D.hpp"
 
 namespace Trident {
-	static Scene3D createScene(AssetLibrary* assetLibrary) {
+	Scene3D createRubberDuckToyScene(AssetLibrary* assetLibrary) {
 		Scene3D scene;
 
 		const ref<GeometryAsset> geometryAsset = assetLibrary->getAsset<GeometryAsset>("rubber_duck_toy_1k");

@@ -7,7 +7,7 @@
 #include "Engine/API/Scene/Scene3D.hpp"
 
 namespace Trident {
-	static Scene3D createScene(AssetLibrary* assetLibrary) {
+	Scene3D createBoxScene(AssetLibrary* assetLibrary) {
 		Scene3D scene;
 
 		const vec3<float32> size = {1.0_m, 1.0_m, 1.0_m};

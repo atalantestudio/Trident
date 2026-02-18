@@ -5,7 +5,6 @@
 
 #include "Engine/API/Graphics/GraphicsAPI.hpp"
 #include "Engine/Filesystem/Reader.hpp"
-#include "Engine/SampleGroup.hpp"
 
 namespace Trident {
 	class PropertyFile final {
@@ -56,45 +55,13 @@ namespace Trident {
 				return static_cast<GraphicsAPI>(0);
 			}
 
-			// TODO(debug-only): Only used in the Samples project.
-			template<>
-			static SampleGroup parseValueString(view<char8> valueString, view<char8> propertyName) {
-				if (valueString == "GUI") {
-					return SampleGroup::GUI;
-				}
-
-				if (valueString == "Physics2D") {
-					return SampleGroup::PHYSICS_2D;
-				}
-
-				if (valueString == "Process") {
-					return SampleGroup::PROCESS;
-				}
-
-				if (valueString == "Sample") {
-					return SampleGroup::SAMPLE;
-				}
-
-				if (valueString == "Sample3D") {
-					return SampleGroup::SAMPLE_3D;
-				}
-
-				ENGINE_ASSERT(false, "Invalid value \"[]\" for property \"[]\".", valueString, propertyName);
-
-				return static_cast<SampleGroup>(0);
-			}
-
 		public:
-			explicit PropertyFile(Reader& reader) :
-				reader(&reader)
-			{
-				size = reader.tellg();
-
-				reader.seekg(std::ios::beg);
-			}
+			explicit PropertyFile(const sequence<char8>& data) :
+				data(data)
+			{}
 
 			uint64 getSize() const {
-				return size;
+				return data.count();
 			}
 
 			void readProperties(ApplicationProperties* properties) {
@@ -107,26 +74,29 @@ namespace Trident {
 
 			template<typename T>
 			T getProperty(view<char8> propertyName) {
-				reader->seekg(std::ios::beg);
+				const view<char8> lines = data;
 
-				std::string line;
-				std::size_t propertyNameOffset;
+				index previousOffset = 0;
+				index offset = 0;
 
-				while (std::getline(reader->getStream(), line)) {
-					propertyNameOffset = line.find(propertyName);
+				while (offset < lines.count()) {
+					offset = lines.find('\n', previousOffset);
 
-					if (propertyNameOffset == std::string::npos) {
-						continue;
+					const view<char8> line(&lines[previousOffset], offset - previousOffset);
+					const index propertyNameOffset = line.find(propertyName, 0);
+
+					if (propertyNameOffset < line.count()) {
+						const index valueStartOffset = line.find(':', propertyNameOffset) + 1;
+
+						ENGINE_ASSERT(valueStartOffset < line.count(), "The property file is corrupted.");
+
+						const view<char8> value(&line[valueStartOffset], line.count() - valueStartOffset);
+
+						return parseValueString<T>(trim(value), propertyName);
 					}
 
-					const std::size_t valueStartOffset = line.find(':', propertyNameOffset) + 1;
-
-					ENGINE_ASSERT(valueStartOffset != std::string::npos, "The property file is corrupted.");
-
-					const view<char8> value(&line[valueStartOffset], line.size() - valueStartOffset);
-					const view<char8> trimmedValue = trim(value);
-
-					return parseValueString<T>(trimmedValue, propertyName);
+					offset += 1;
+					previousOffset = offset;
 				}
 
 				ENGINE_ASSERT(false, "Could not find the value for \"[]\" in the property file.", propertyName);
@@ -134,11 +104,43 @@ namespace Trident {
 				return static_cast<T>(-1);
 			}
 
-		public:
-			std::unordered_map<std::string, std::vector<uint8>> propertyMap;
+			template<>
+			view<char8> getProperty(view<char8> propertyName) {
+				const view<char8> lines = data;
+
+				index previousOffset = 0;
+				index offset = 0;
+
+				while (offset < lines.count()) {
+					offset = lines.find('\n', previousOffset);
+
+					const view<char8> line(&lines[previousOffset], offset - previousOffset);
+
+					// TODO
+					// A false positive is returned if the line contains a word that matches the start of the property name,
+					// (e.g. "SampleGroup" vs. "Sample").
+					const index propertyNameOffset = line.find(propertyName, 0);
+
+					if (propertyNameOffset < line.count()) {
+						const index valueStartOffset = line.find(':', propertyNameOffset) + 1;
+
+						ENGINE_ASSERT(valueStartOffset < line.count(), "The property file is corrupted.");
+
+						const view<char8> value(&line[valueStartOffset], line.count() - valueStartOffset);
+
+						return trim(value);
+					}
+
+					offset += 1;
+					previousOffset = offset;
+				}
+
+				ENGINE_ASSERT(false, "Could not find the value for \"[]\" in the property file.", propertyName);
+
+				return "";
+			}
 
 		private:
-			Reader* reader;
-			std::streampos size;
+			sequence<char8> data;
 	};
 }

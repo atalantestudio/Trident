@@ -6,7 +6,7 @@
 #include "../BaseLayer.hpp"
 
 namespace Trident {
-	class SamplePhysics2DLayer : public BaseLayer {
+	class Physics2DPolygonsLayer : public BaseLayer {
 		public:
 			void build() override {
 				ConvexHullGeometry2DDescriptor polygonGeometryDescriptor;

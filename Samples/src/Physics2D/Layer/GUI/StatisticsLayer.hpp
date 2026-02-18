@@ -4,7 +4,7 @@
 #pragma once
 
 namespace Trident {
-	class SamplePhysics2DGUILayer : public GUILayer {
+	class Physics2DGUIStatisticsLayer : public GUILayer {
 		private:
 			static constexpr uint32 FRAME_DELAY = 165;
 

@@ -6,7 +6,7 @@
 #include "../BaseLayer.hpp"
 
 namespace Trident {
-	class SamplePhysics2DLayer : public BaseLayer {
+	class Physics2DSlidingBoxesLayer : public BaseLayer {
 		public:
 			void build() override {
 				const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();

@@ -10,7 +10,7 @@
 #include "../Scene/Lemons.hpp"
 
 namespace Trident {
-	class Sample3DLayer : public Layer {
+	class Sample3DForwardLayer : public Layer {
 		private:
 			static constexpr float32 MOVEMENT_SPEED = 0.5f;
 
@@ -19,7 +19,7 @@ namespace Trident {
 				renderer.setLayer(this);
 				renderer.build();
 
-				scene = createScene(getApplication()->getAssetLibrary());
+				scene = createLemonsScene(getApplication()->getAssetLibrary());
 
 				renderer.setScene(&scene);
 

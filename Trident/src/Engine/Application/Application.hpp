@@ -32,6 +32,8 @@ namespace Trident {
 
 			virtual ~Application();
 
+			void initializePropertyFile();
+
 			const sequence<void*>& getConsoleArguments() const;
 
 			void setConsoleArguments(uint32 argumentCount, char8** argumentValues);
@@ -139,7 +141,6 @@ namespace Trident {
 
 			sequence<void*> consoleArguments;
 
-			Reader propertyFileReader;
 			AssetLibrary* assetLibrary = nullptr;
 
 			uint32 frameIndex = 0;

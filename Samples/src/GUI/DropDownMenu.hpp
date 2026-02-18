@@ -4,7 +4,7 @@
 #pragma once
 
 namespace Trident {
-	class SampleGUILayer : public GUILayer {
+	class GUIDropDownMenuLayer : public GUILayer {
 		public:
 			void registerAssets() override {
 				font = loadFontAsset("test-regular");

@@ -7,7 +7,7 @@
 #include "Engine/API/Scene/Scene3D.hpp"
 
 namespace Trident {
-	static Scene3D createScene(AssetLibrary* assetLibrary) {
+	Scene3D createWallScene(AssetLibrary* assetLibrary) {
 		Scene3D scene;
 
 		Geometry3DDescriptor geometryDescriptor{};

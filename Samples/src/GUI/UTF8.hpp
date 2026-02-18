@@ -4,7 +4,7 @@
 #pragma once
 
 namespace Trident {
-	class SampleGUILayer : public GUILayer {
+	class GUIUTF8Layer : public GUILayer {
 		public:
 			void registerAssets() override {
 				textStyle.color = 0xffffffff;

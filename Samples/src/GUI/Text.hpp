@@ -4,7 +4,7 @@
 #pragma once
 
 namespace Trident {
-	class SampleGUILayer : public GUILayer {
+	class GUITextLayer : public GUILayer {
 		public:
 			void registerAssets() override {
 				listStyle.size = {FIT, FIT};

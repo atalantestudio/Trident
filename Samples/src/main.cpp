@@ -7,33 +7,33 @@
 
 #include "Engine/entry_point.hpp"
 
-// #include "GUI/DemoLayer1.hpp"
-// #include "GUI/DemoLayer2.hpp"
-// #include "GUI/DemoLayer3.hpp"
-// #include "GUI/DropDownMenuLayer.hpp"
-// #include "GUI/EventTestLayer.hpp"
-// #include "GUI/OptionMenu.hpp"
-// #include "GUI/SampleLayer.hpp"
+#include "GUI/Demo1.hpp"
+#include "GUI/Demo2.hpp"
+#include "GUI/Demo3.hpp"
+#include "GUI/DropDownMenu.hpp"
+#include "GUI/EventTest.hpp"
+#include "GUI/OptionMenu.hpp"
+#include "GUI/Sample.hpp"
 #include "GUI/Text.hpp"
-// #include "GUI/UTF8.hpp"
+#include "GUI/UTF8.hpp"
 
 #include "Physics2D/Layer/Sample/Boxes.hpp"
-// #include "Physics2D/Layer/Sample/Circles.hpp"
-// #include "Physics2D/Layer/Sample/Dominos.hpp"
-// #include "Physics2D/Layer/Sample/Empty.hpp"
-// #include "Physics2D/Layer/Sample/Polygons.hpp"
-// #include "Physics2D/Layer/Sample/Pyramid.hpp"
-// #include "Physics2D/Layer/Sample/RollingBall.hpp"
-// #include "Physics2D/Layer/Sample/SlidingBoxes.hpp"
-// #include "Physics2D/Layer/Sample/Stacking.hpp"
-// #include "Physics2D/Layer/Sample/Swing.hpp"
+#include "Physics2D/Layer/Sample/Circles.hpp"
+#include "Physics2D/Layer/Sample/Dominos.hpp"
+#include "Physics2D/Layer/Sample/Empty.hpp"
+#include "Physics2D/Layer/Sample/Polygons.hpp"
+#include "Physics2D/Layer/Sample/Pyramid.hpp"
+#include "Physics2D/Layer/Sample/RollingBall.hpp"
+#include "Physics2D/Layer/Sample/SlidingBoxes.hpp"
+#include "Physics2D/Layer/Sample/Stacking.hpp"
+#include "Physics2D/Layer/Sample/Swing.hpp"
 // #include "Physics2D/Layer/GUI/StatisticsLayer.hpp"
 
-#include "Process/DefaultProcess.hpp"
+#include "Process/Default.hpp"
 
 #include "Sample/SampleLayer.hpp"
 
-// #include "Sample3D/Layer/ForwardLayer.hpp"
+#include "Sample3D/Layer/ForwardLayer.hpp"
 #include "Sample3D/Layer/VisibilityLayer.hpp"
 
 namespace Trident {
@@ -42,19 +42,87 @@ namespace Trident {
 			explicit SampleApplication(const ProjectDescriptor& projectDescriptor) :
 				Application(projectDescriptor)
 			{
-				const SampleGroup SampleGroupProperty = propertyFile->getProperty<SampleGroup>("SampleGroup");
+				const view<char8> SampleGroupNameProperty = propertyFile->getProperty<view<char8>>("SampleGroupName");
+				const view<char8> SampleNameProperty = propertyFile->getProperty<view<char8>>("SampleName");
 
-				switch (SampleGroupProperty) {
-					case SampleGroup::GUI: registerLayer<SampleGUILayer>(); break;
-					case SampleGroup::PHYSICS_2D: {
-						registerLayer<SamplePhysics2DLayer>();
-						// registerLayer<SamplePhysics2DGUILayer>();
-
-						break;
+				if (SampleGroupNameProperty == "GUI") {
+					if (SampleNameProperty == "Demo1") {
+						registerLayer<GUIDemo1Layer>();
 					}
-					case SampleGroup::PROCESS: registerProcess<SampleProcess>(); break;
-					case SampleGroup::SAMPLE: registerLayer<SampleLayer>(); break;
-					case SampleGroup::SAMPLE_3D: registerLayer<Sample3DLayer>(); break;
+					else if (SampleNameProperty == "Demo2") {
+						registerLayer<GUIDemo2Layer>();
+					}
+					else if (SampleNameProperty == "Demo3") {
+						registerLayer<GUIDemo3Layer>();
+					}
+					else if (SampleNameProperty == "DropDownMenu") {
+						registerLayer<GUIDropDownMenuLayer>();
+					}
+					else if (SampleNameProperty == "EventTest") {
+						registerLayer<GUIEventTestLayer>();
+					}
+					else if (SampleNameProperty == "OptionMenu") {
+						registerLayer<GUIOptionMenuLayer>();
+					}
+					else if (SampleNameProperty == "Sample") {
+						registerLayer<GUISampleLayer>();
+					}
+					else if (SampleNameProperty == "Text") {
+						registerLayer<GUITextLayer>();
+					}
+					else if (SampleNameProperty == "UTF8") {
+						registerLayer<GUIUTF8Layer>();
+					}
+				}
+				else if (SampleGroupNameProperty == "Physics2D") {
+					if (SampleNameProperty == "Boxes") {
+						registerLayer<Physics2DBoxesLayer>();
+					}
+					else if (SampleNameProperty == "Circles") {
+						registerLayer<Physics2DCirclesLayer>();
+					}
+					else if (SampleNameProperty == "Dominos") {
+						registerLayer<Physics2DDominosLayer>();
+					}
+					else if (SampleNameProperty == "Empty") {
+						registerLayer<Physics2DEmptyLayer>();
+					}
+					else if (SampleNameProperty == "Polygons") {
+						registerLayer<Physics2DPolygonsLayer>();
+					}
+					else if (SampleNameProperty == "Pyramid") {
+						registerLayer<Physics2DPyramidLayer>();
+					}
+					else if (SampleNameProperty == "RollingBall") {
+						registerLayer<Physics2DRollingBallLayer>();
+					}
+					else if (SampleNameProperty == "SlidingBoxes") {
+						registerLayer<Physics2DSlidingBoxesLayer>();
+					}
+					else if (SampleNameProperty == "Stacking") {
+						registerLayer<Physics2DStackingLayer>();
+					}
+					else if (SampleNameProperty == "Swing") {
+						registerLayer<Physics2DSwingLayer>();
+					}
+
+					// registerLayer<Physics2DGUIStatisticsLayer>();
+				}
+				else if (SampleGroupNameProperty == "Process") {
+					if (SampleNameProperty == "Default") {
+						registerProcess<ProcessDefaultProcess>();
+					}
+				}
+				else if (SampleGroupNameProperty == "Sample") {
+					registerLayer<SampleLayer>();
+				}
+				else if (SampleGroupNameProperty == "Sample3D") {
+					if (SampleNameProperty == "Forward") {
+						registerLayer<Sample3DForwardLayer>();
+					}
+					else if (SampleNameProperty == "Visibility") {
+						registerLayer<Sample3DVisibilityLayer>();
+					}
 				}
 			}
 	};

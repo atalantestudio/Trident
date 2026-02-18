@@ -6,7 +6,7 @@
 #include "Engine/API/Scene/Scene3D.hpp"
 
 namespace Trident {
-	static Scene3D createScene(AssetLibrary* assetLibrary) {
+	Scene3D createSuzanneScene(AssetLibrary* assetLibrary) {
 		Scene3D scene;
 
 		const ref<GeometryAsset> geometryAsset = assetLibrary->getAsset<GeometryAsset>("suzanne");

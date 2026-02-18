@@ -10,7 +10,7 @@
 #include "../Scene/LemonAndStool.hpp"
 
 namespace Trident {
-	class Sample3DLayer : public Layer {
+	class Sample3DVisibilityLayer : public Layer {
 		private:
 			static constexpr float32 MOVEMENT_SPEED = 1.5f;
 
@@ -19,7 +19,7 @@ namespace Trident {
 				renderer.setLayer(this);
 				renderer.build();
 
-				scene = createScene(getApplication()->getAssetLibrary());
+				scene = createLemonsAndStoolScene(getApplication()->getAssetLibrary());
 				clusteredScene = clusterizeScene(scene);
 
 				renderer.setScene(&clusteredScene);
