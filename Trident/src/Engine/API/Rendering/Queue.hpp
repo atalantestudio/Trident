@@ -18,13 +18,18 @@ namespace Trident {
 			virtual ref<CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const = 0;
 
 			/// Executes the provided command buffers.
+			virtual void submit(view<ref<CommandBuffer>> commandBuffers) const = 0;
+
+			/// Executes the provided command buffers.
 			virtual void submit(
 				/// The command buffers to execute.
 				view<ref<CommandBuffer>> commandBuffers,
 
+				/// (Optional)
 				/// Must be waited on before submitting the command buffers.
 				ref<Semaphore> waitSemaphore,
 
+				/// (Optional)
 				/// Will be signaled once the command buffers have finished executing.
 				ref<Semaphore> signalSemaphore,
 

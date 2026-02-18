@@ -234,7 +234,7 @@ namespace Trident {
 
 		imageStagingBuffer->unmap();
 
-		queue->submit({commandEncoder->end()}, nullptr, nullptr, nullptr);
+		queue->submit({commandEncoder->end()});
 		queue->waitIdle();
 
 		device->updateDescriptorSets(writeDescriptorSets);

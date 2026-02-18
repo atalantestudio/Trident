@@ -87,7 +87,7 @@ namespace Trident {
 		commandEncoder->copyBufferToImage(textureArrayStagingBuffer, textureArrayImage, copyRegions);
 		commandEncoder->setImageMemoryBarrier(textureArrayImage, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
-		graphicsQueue->submit({commandEncoder->end()}, nullptr, nullptr, nullptr);
+		graphicsQueue->submit({commandEncoder->end()});
 		graphicsQueue->waitIdle();
 
 		textureArrayStagingBuffer.~shared_ptr();
@@ -485,7 +485,7 @@ namespace Trident {
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-		transferQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
+		transferQueue->submit({commandBuffer});
 		transferQueue->waitIdle();
 	}
 

@@ -138,7 +138,7 @@ namespace Trident {
 
 				commandEncoder->copyBufferToBuffer(elementStartBuffer, elementStartStagingBuffer, {elementStartCopyRegion});
 
-				queue->submit({commandEncoder->end()}, nullptr, nullptr, nullptr);
+				queue->submit({commandEncoder->end()});
 				queue->waitIdle();
 
 				const uint32* elementStartMappedRange = elementStartStagingBuffer->map<uint32>(0, elementStartBuffer->getSize());

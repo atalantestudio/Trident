@@ -133,7 +133,7 @@ namespace Trident {
 		commandEncoder->setImageMemoryBarrier(glyphImage, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 		commandEncoder->setImageMemoryBarrier(glyphMapImage, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
-		computeQueue->submit({commandEncoder->end()}, nullptr, nullptr, nullptr);
+		computeQueue->submit({commandEncoder->end()});
 		computeQueue->waitIdle();
 
 		FenceDescriptor writeBufferFenceDescriptor{};
@@ -271,7 +271,7 @@ namespace Trident {
 		commandEncoder->setImageMemoryBarrier(glyphMapImage, ImageLayout::TRANSFER_SRC_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 		commandEncoder->copyImageToBuffer(glyphMapImage, glyphMapStagingBuffer, {glyphMapBufferImageCopyRegion});
 
-		computeQueue->submit({commandEncoder->end()}, nullptr, nullptr, nullptr);
+		computeQueue->submit({commandEncoder->end()});
 		computeQueue->waitIdle();
 
 		output.data = sequence<uint8>(glyphMapStagingBuffer->getSize());

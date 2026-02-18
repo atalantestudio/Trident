@@ -149,7 +149,7 @@ namespace Trident {
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-				graphicsQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
+				graphicsQueue->submit({commandBuffer});
 				graphicsQueue->waitIdle();
 			}
 
@@ -353,7 +353,7 @@ namespace Trident {
 				ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
 				// TODO: Create one-time submit overload (without semaphores/fence).
-				queue->submit({commandBuffer}, nullptr, nullptr, nullptr);
+				queue->submit({commandBuffer});
 
 				queue->waitIdle();
 			}

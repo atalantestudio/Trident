@@ -13,6 +13,7 @@ namespace Trident {
 
 			ref<Trident::CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const final override;
 
+			void submit(view<ref<Trident::CommandBuffer>> commandBuffers) const final override;
 			void submit(view<ref<Trident::CommandBuffer>> commandBuffers, ref<Trident::Semaphore> waitSemaphore, ref<Trident::Semaphore> signalSemaphore, ref<Trident::Fence> fence) const final override;
 
 			PresentStatus present(view<ref<Trident::Swapchain>> swapchains, view<uint32> presentableImageIndices, ref<Trident::Semaphore> waitSemaphore) const final override;

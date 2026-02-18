@@ -151,7 +151,7 @@ namespace Trident {
 				commandEncoder->begin();
 				commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, {vertexBufferCopyRegion});
 
-				queue->submit({commandEncoder->end()}, nullptr, nullptr, nullptr);
+				queue->submit({commandEncoder->end()});
 				queue->waitIdle();
 
 				updateDescriptorSets(vertexPositionComponentBufferSize, vertexPositionIndexBufferSize, vertexNormalComponentBufferSize, vertexNormalIndexBufferSize, vertexTextureCoordinateComponentBufferSize, vertexTextureCoordinateIndexBufferSize, vertexTangentComponentBufferSize);
@@ -666,7 +666,7 @@ namespace Trident {
 
 				imageStagingBuffer->unmap();
 
-				queue->submit({commandEncoder->end()}, nullptr, nullptr, nullptr);
+				queue->submit({commandEncoder->end()});
 				queue->waitIdle();
 
 				getDevice()->updateDescriptorSets(writeDescriptorSets);

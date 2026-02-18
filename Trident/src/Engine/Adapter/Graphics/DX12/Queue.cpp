@@ -51,10 +51,27 @@ namespace Trident {
 		return createRef<DX12::CommandEncoder>(descriptor, device, commandPool);
 	}
 
-	void DX12::Queue::submit(view<ref<Trident::CommandBuffer>> commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<Trident::Fence> fence) const {
+	void DX12::Queue::submit(view<ref<Trident::CommandBuffer>> commandBuffers) const {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
 		sequence<ID3D12CommandList*> commandLists(commandBuffers.count());
 		UINT commandListIndex = 0;
+
+		while (commandListIndex < commandLists.count()) {
+			commandLists[commandListIndex] = std::static_pointer_cast<DX12::CommandBuffer>(commandBuffers[commandListIndex])->commandList;
+
+			commandListIndex += 1;
+		}
+
+		commandQueue->ExecuteCommandLists(static_cast<UINT>(commandLists.count()), &commandLists[0]);
+	}
+
+	void DX12::Queue::submit(view<ref<Trident::CommandBuffer>> commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<Trident::Fence> fence) const {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
 		HRESULT result;
+		sequence<ID3D12CommandList*> commandLists(commandBuffers.count());
+		UINT commandListIndex = 0;
 
 		while (commandListIndex < commandLists.count()) {
 			commandLists[commandListIndex] = std::static_pointer_cast<DX12::CommandBuffer>(commandBuffers[commandListIndex])->commandList;
@@ -64,21 +81,21 @@ namespace Trident {
 
 		commandQueue->ExecuteCommandLists(static_cast<UINT>(commandLists.count()), &commandLists[0]);
 
-		if (fence != nullptr) {
-			const ref<DX12::Fence> _fence = std::static_pointer_cast<DX12::Fence>(fence);
+		DEBUG_ASSERT(fence != nullptr);
 
-			result = commandQueue->Signal(_fence->fence, 1);
+		const ref<DX12::Fence> _fence = std::static_pointer_cast<DX12::Fence>(fence);
 
-			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to add signal to fence.");
+		result = commandQueue->Signal(_fence->fence, 1);
 
-			result = _fence->fence->SetEventOnCompletion(1, completionEvent);
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to add signal to fence.");
 
-			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set event on fence completion.");
+		result = _fence->fence->SetEventOnCompletion(1, completionEvent);
 
-			const DWORD code = WaitForSingleObject(completionEvent, INFINITE);
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set event on fence completion.");
 
-			WIN32_ASSERT(code == WAIT_OBJECT_0);
-		}
+		const DWORD code = WaitForSingleObject(completionEvent, INFINITE);
+
+		WIN32_ASSERT(code == WAIT_OBJECT_0);
 	}
 
 	PresentStatus DX12::Queue::present(view<ref<Trident::Swapchain>> swapchains, view<uint32> presentableImageIndices, ref<Semaphore> waitSemaphore) const {

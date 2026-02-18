@@ -19,7 +19,21 @@ namespace Trident {
 		return createRef<GL::CommandEncoder>(descriptor, device);
 	}
 
+	void GL::Queue::submit(view<ref<Trident::CommandBuffer>> commandBuffers) const {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		for (const ref<Trident::CommandBuffer> commandBuffer : commandBuffers) {
+			const ref<GL::CommandBuffer> glCommandBuffer = std::static_pointer_cast<GL::CommandBuffer>(commandBuffer);
+
+			for (const ref<GL::Command> command : glCommandBuffer->commands) {
+				command->execute();
+			}
+		}
+	}
+
 	void GL::Queue::submit(view<ref<Trident::CommandBuffer>> commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<Trident::Fence> fence) const {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
 		for (const ref<Trident::CommandBuffer> commandBuffer : commandBuffers) {
 			const ref<GL::CommandBuffer> glCommandBuffer = std::static_pointer_cast<GL::CommandBuffer>(commandBuffer);
 
@@ -28,9 +42,9 @@ namespace Trident {
 			}
 		}
 
-		if (fence != nullptr) {
-			device.waitForFence(fence);
-		}
+		DEBUG_ASSERT(fence != nullptr);
+
+		device.waitForFence(fence);
 	}
 
 	PresentStatus GL::Queue::present(view<ref<Trident::Swapchain>> swapchains, view<uint32> presentableImageIndices, ref<Semaphore> waitSemaphore) const {

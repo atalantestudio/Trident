@@ -26,6 +26,34 @@ namespace Trident {
 		return createRef<VK::CommandEncoder>(descriptor, device, commandPool);
 	}
 
+	void VK::Queue::submit(view<ref<Trident::CommandBuffer>> commandBuffers) const {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		sequence<VkCommandBuffer> vkCommandBuffers(commandBuffers.count());
+		uint32 commandBufferIndex = 0;
+
+		while (commandBufferIndex < commandBuffers.count()) {
+			vkCommandBuffers[commandBufferIndex] = std::static_pointer_cast<VK::CommandBuffer>(commandBuffers[commandBufferIndex])->commandBuffer;
+
+			commandBufferIndex += 1;
+		}
+
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		submitInfo.pNext = nullptr;
+		submitInfo.waitSemaphoreCount = 0;
+		submitInfo.pWaitSemaphores = nullptr;
+		submitInfo.pWaitDstStageMask = nullptr;
+		submitInfo.commandBufferCount = static_cast<uint32>(vkCommandBuffers.count());
+		submitInfo.pCommandBuffers = &vkCommandBuffers[0];
+		submitInfo.signalSemaphoreCount = 0;
+		submitInfo.pSignalSemaphores = nullptr;
+
+		const VkResult result = vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
+
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to submit queue ([]).", string_VkResult(result));
+	}
+
 	void VK::Queue::submit(view<ref<Trident::CommandBuffer>> commandBuffers, ref<Trident::Semaphore> waitSemaphore, ref<Trident::Semaphore> signalSemaphore, ref<Trident::Fence> fence) const {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
@@ -33,9 +61,12 @@ namespace Trident {
 		const VkPipelineStageFlags waitDstStageMask = std::static_pointer_cast<VK::CommandBuffer>(commandBuffers[0])->pipelineStageFlags;
 
 		sequence<VkCommandBuffer> vkCommandBuffers(commandBuffers.count());
+		uint32 commandBufferIndex = 0;
 
-		for (uint32 commandBufferIndex = 0; commandBufferIndex < commandBuffers.count(); commandBufferIndex += 1) {
+		while (commandBufferIndex < commandBuffers.count()) {
 			vkCommandBuffers[commandBufferIndex] = std::static_pointer_cast<VK::CommandBuffer>(commandBuffers[commandBufferIndex])->commandBuffer;
+
+			commandBufferIndex += 1;
 		}
 
 		VkSubmitInfo submitInfo{};
@@ -65,13 +96,9 @@ namespace Trident {
 			submitInfo.pSignalSemaphores = &std::static_pointer_cast<VK::Semaphore>(signalSemaphore)->semaphore;
 		}
 
-		VkFence vkFence = VK_NULL_HANDLE;
+		DEBUG_ASSERT(fence != nullptr);
 
-		if (fence != nullptr) {
-			vkFence = std::static_pointer_cast<VK::Fence>(fence)->fence;
-		}
-
-		const VkResult result = vkQueueSubmit(queue, 1, &submitInfo, vkFence);
+		const VkResult result = vkQueueSubmit(queue, 1, &submitInfo, std::static_pointer_cast<VK::Fence>(fence)->fence);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to submit queue ([]).", string_VkResult(result));
 	}
