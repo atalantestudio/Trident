@@ -9,7 +9,7 @@
 namespace Trident {
 	class DX12::PhysicalDevice final : public Trident::PhysicalDevice {
 		public:
-			explicit PhysicalDevice(const DX12::Instance& instance);
+			explicit PhysicalDevice(const Trident::GraphicsAdapter* adapter, IDXGIAdapter* dxgiAdapter);
 
 		private:
 			void setLimits();

@@ -17,7 +17,6 @@
 #include "Engine/Adapter/Graphics/VK/Sampler.hpp"
 #include "Engine/Adapter/Graphics/VK/Semaphore.hpp"
 #include "Engine/Adapter/Graphics/VK/ShaderModule.hpp"
-#include "Engine/Adapter/Graphics/VK/Surface.hpp"
 #include "Engine/Adapter/Graphics/VK/Swapchain.hpp"
 
 namespace Trident {
@@ -28,7 +27,7 @@ namespace Trident {
 	};
 
 	// NOTE: ~3Mb in Release mode.
-	VK::Device::Device(const VK::PhysicalDevice& physicalDevice, const VK::Surface& surface) :
+	VK::Device::Device(const VK::PhysicalDevice& physicalDevice) :
 		physicalDevice(physicalDevice)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);

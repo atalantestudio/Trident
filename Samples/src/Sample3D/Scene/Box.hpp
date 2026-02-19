@@ -31,7 +31,7 @@ namespace Trident {
 
 		const uint32 testMaterialReferenceIndex = scene.registerMaterialReference(testMaterialReference);
 
-		InstanceDescriptor instanceDescriptor{};
+		SceneInstanceDescriptor instanceDescriptor{};
 		instanceDescriptor.position = {0.0_m, 0.0_m, 0.0_m};
 		instanceDescriptor.rotation = {0.0_rad, 0.0_rad, 0.0_rad};
 		instanceDescriptor.geometryIndex = geometryIndex;

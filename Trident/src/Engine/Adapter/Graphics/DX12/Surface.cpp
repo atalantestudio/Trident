@@ -7,8 +7,8 @@
 #include "Engine/Adapter/Window/Win32/base.hpp"
 
 namespace Trident {
-	DX12::Surface::Surface(const Window& window) :
-		window(pointer_cast<const Win32WindowData*>(window.data)->hWnd)
+	DX12::Surface::Surface(const DX12::Instance* instance, const Window* window) :
+		window(static_cast<const Win32WindowData*>(window->data)->hWnd)
 	{}
 
 	ImageFormat DX12::Surface::getFormat() const {

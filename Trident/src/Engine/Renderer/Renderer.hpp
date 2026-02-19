@@ -16,9 +16,7 @@ namespace Trident {
 		public:
 			static GraphicsAPI getGraphicsApi();
 
-			static void initialize(const ProjectDescriptor& projectDescriptor, const Window& window, const ApplicationProperties& properties);
-
-			static void deinitialize();
+			static void initialize(const GraphicsAdapter* adapter, const ProjectDescriptor& projectDescriptor, const Window& window, const ApplicationProperties& properties);
 
 		public:
 			virtual void build() = 0;
@@ -32,7 +30,7 @@ namespace Trident {
 		public:
 			static ref<Buffer> createBuffer(const BufferDescriptor& descriptor);
 
-			// Creates and returns a staging buffer.
+			/// Creates and returns a buffer suitable for memory transfers from the CPU to the GPU.
 			// `size` is in bytes.
 			// If `persistent` is true, the buffer will stay mapped until it is destroyed.
 			static ref<Buffer> createStagingBuffer(uint64 size, bool persistent = false);
@@ -59,17 +57,9 @@ namespace Trident {
 
 			static ref<Subpass> createSubpass(const SubpassDescriptor& descriptor);
 
-			static ref<Semaphore> getAcquireNextImageSemaphore(uint32 frameInFlightIndex);
-
-			static ref<CommandEncoder> getCommandEncoder(uint32 frameInFlightIndex);
-
 			static ref<Device> getDevice();
 
-			static ref<Semaphore> getFinishedRenderSemaphore(uint32 frameInFlightIndex);
-
-			static ref<Fence> getFlightFence(uint32 frameInFlightIndex);
-
-			static uint32 getImageIndex();
+			static uint32 getSwapchainImageIndex();
 
 			static ref<Surface> getSurface();
 
@@ -83,8 +73,6 @@ namespace Trident {
 			// TODO: Deprecate.
 			static ref<ShaderModule> loadInternalShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> path);
 
-			static void setImageIndex(uint32 imageIndex);
-
 		public:
 			void setLayer(const Layer* layer) {
 				this->layer = layer;
@@ -96,16 +84,8 @@ namespace Trident {
 			}
 
 		private:
-			static GraphicsAPI graphicsApi;
-			static scope<GraphicsAdapter> adapter;
-			static uint32 imageIndex;
-			static ref<Swapchain> swapchain;
-			static sequence<ref<CommandEncoder>> commandEncoders;
-			static sequence<ref<Fence>> flightFences;
-			static sequence<ref<Semaphore>> acquireNextImageSemaphores;
-			static sequence<ref<Semaphore>> finishedRenderSemaphores;
+			static const GraphicsAdapter* adapter;
 
-		private:
 			const Layer* layer;
 	};
 }

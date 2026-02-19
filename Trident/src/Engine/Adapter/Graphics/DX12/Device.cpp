@@ -42,7 +42,8 @@ namespace Trident {
 		}
 	#endif
 
-	DX12::Device::Device(const DX12::Instance& instance, const DX12::PhysicalDevice& physicalDevice) :
+	DX12::Device::Device(const Trident::GraphicsAdapter* adapter, const DX12::PhysicalDevice* physicalDevice) :
+		Trident::Device(adapter),
 		physicalDevice(physicalDevice)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
@@ -50,11 +51,12 @@ namespace Trident {
 		HRESULT result = -1;
 
 		#ifndef PREFER_SOFTWARE_ADAPTER
-			result = D3D12CreateDevice(physicalDevice.adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device));
+			result = D3D12CreateDevice(physicalDevice->adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device));
 		#endif
 
 		if (FAILED(result)) {
-			#ifndef PREFER_SOFTWARE_ADAPTER
+			// TODO: Restore.
+			/* #ifndef PREFER_SOFTWARE_ADAPTER
 				ADAPTER_WARNING("Failed to create device using the primary display adapter. Falling back to a WARP adapter.");
 			#endif
 
@@ -64,11 +66,11 @@ namespace Trident {
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to enumerate WARP adapter.");
 
-			result = D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device));
+			result = D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device)); */
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create device using the WARP adapter.");
 
-			adapter->Release();
+			// adapter->Release();
 		}
 
 		queues[0] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_DIRECT);
@@ -184,7 +186,7 @@ namespace Trident {
 	}
 
 	ref<PhysicalDevice> DX12::Device::getPhysicalDevice() const {
-		return createRef<DX12::PhysicalDevice>(physicalDevice);
+		return createRef<DX12::PhysicalDevice>(*physicalDevice);
 	}
 
 	ref<Trident::Queue> DX12::Device::getQueue(QueueFamilyCapability queueFamilyCapability) const {

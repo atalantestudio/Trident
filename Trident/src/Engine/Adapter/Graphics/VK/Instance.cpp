@@ -65,11 +65,11 @@ namespace Trident {
 	#endif
 
 	// NOTE: ~25Mb in Release mode.
-	VK::Instance::Instance(const ProjectDescriptor& projectDescriptor, const ApplicationProperties& properties) :
+	VK::Instance::Instance(const InstanceDescriptor& descriptor) :
 		#if defined(DEBUG_ENABLE_MESSENGER)
 			debugUtilsMessengerCreateInfo{},
 		#endif
-		preferIntegratedGpu(properties.PreferIntegratedGPU)
+		preferIntegratedGpu(descriptor.preferIntegratedGpu)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
@@ -94,8 +94,8 @@ namespace Trident {
 
 		VkApplicationInfo applicationInfo{};
 		applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-		applicationInfo.pApplicationName = &projectDescriptor.name[0];
-		applicationInfo.applicationVersion = VK_MAKE_API_VERSION(0, projectDescriptor.version.major, projectDescriptor.version.minor, projectDescriptor.version.patch);
+		applicationInfo.pApplicationName = &descriptor.projectName[0];
+		applicationInfo.applicationVersion = VK_MAKE_API_VERSION(0, descriptor.projectVersion.major, descriptor.projectVersion.minor, descriptor.projectVersion.patch);
 		applicationInfo.pEngineName = ENGINE_NAME;
 		applicationInfo.engineVersion = VK_MAKE_API_VERSION(0, ENGINE_VERSION_MAJOR, ENGINE_VERSION_MINOR, ENGINE_VERSION_PATCH);
 		applicationInfo.apiVersion = VK_API_VERSION_1_0;

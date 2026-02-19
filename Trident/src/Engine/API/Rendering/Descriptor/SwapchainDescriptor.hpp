@@ -3,9 +3,12 @@
 
 #pragma once
 
+#include "Engine/API/Rendering/Surface.hpp"
+
 namespace Trident {
 	struct SwapchainDescriptor {
+		ref<Surface> surface;
 		Extent2D extent;
-		bool vSync;
+		bool verticalSync;
 	};
 }

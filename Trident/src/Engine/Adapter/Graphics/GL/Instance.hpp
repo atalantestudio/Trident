@@ -23,8 +23,6 @@ namespace Trident {
 
 			void* getProcedure(view<char8> procedureName) const;
 
-			void makeCurrent() const;
-
 			void setSwapInterval(sint32 interval) const;
 
 			void swapBuffers() const;

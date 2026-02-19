@@ -17,7 +17,7 @@ namespace Trident {
 			#endif
 
 		public:
-			explicit Device(const DX12::Instance& instance, const DX12::PhysicalDevice& physicalDevice);
+			explicit Device(const Trident::GraphicsAdapter* adapter, const DX12::PhysicalDevice* physicalDevice);
 
 			~Device() final override;
 
@@ -46,7 +46,7 @@ namespace Trident {
 		private:
 			ref<Trident::Queue> queues[3];
 			HANDLE waitEvent;
-			const DX12::PhysicalDevice& physicalDevice;
+			const DX12::PhysicalDevice* physicalDevice;
 
 			#if defined(DEBUG_ENABLE_MESSENGER)
 				ID3D12InfoQueue1* infoQueue;

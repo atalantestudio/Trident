@@ -52,7 +52,7 @@ namespace Trident {
 
 		ADAPTER_INFO("Swapchain format is []/[].", string_VkFormat(surfaceFormat.format), string_VkColorSpaceKHR(surfaceFormat.colorSpace));
 
-		const VkPresentModeKHR presentMode = surface.selectPresentMode(descriptor.vSync);
+		const VkPresentModeKHR presentMode = surface.selectPresentMode(descriptor.verticalSync);
 
 		ADAPTER_INFO("Swapchain present mode is [].", string_VkPresentModeKHR(presentMode));
 

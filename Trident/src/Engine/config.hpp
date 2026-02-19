@@ -20,7 +20,8 @@ namespace Trident {
 	#endif
 
 	// Toggle OpenGL graphics adapter.
-	#define ENABLE_GL_ADAPTER
+	// TODO: Restore.
+	// #define ENABLE_GL_ADAPTER
 
 	// Whether to prioritize integrated GPUs over discrete GPUs when using the OpenGL graphics adapter.
 	// 
@@ -32,7 +33,8 @@ namespace Trident {
 	#define GL_SOURCE_FROM_SPIRV
 
 	// Toggle Vulkan graphics adapter.
-	#define ENABLE_VK_ADAPTER
+	// TODO: Restore.
+	// #define ENABLE_VK_ADAPTER
 
 	#if defined(BUILD_MODE_DEBUG)
 		// Toggle debug messages from the graphics API.

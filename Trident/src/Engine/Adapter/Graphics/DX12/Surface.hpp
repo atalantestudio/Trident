@@ -9,7 +9,7 @@
 namespace Trident {
 	class DX12::Surface final : public Trident::Surface {
 		public:
-			explicit Surface(const Window& window);
+			explicit Surface(const DX12::Instance* instance, const Window* window);
 
 			ImageFormat getFormat() const final override;
 

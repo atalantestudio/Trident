@@ -23,7 +23,7 @@ namespace Trident {
 			#endif
 
 		public:
-			explicit Instance(const ProjectDescriptor& projectDescriptor, const ApplicationProperties& properties);
+			explicit Instance(const InstanceDescriptor& descriptor);
 
 			~Instance() final override;
 

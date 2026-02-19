@@ -28,8 +28,6 @@ namespace Trident {
 		}
 
 		instance = createRef<GL::Instance>(window);
-		instance->makeCurrent();
-
 		surface = createRef<GL::Surface>();
 
 		loadProcedures();

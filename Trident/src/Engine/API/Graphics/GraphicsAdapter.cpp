@@ -5,6 +5,128 @@
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
+#include "Engine/Adapter/Graphics/DX12/GraphicsAdapter.hpp"
+// #include "Engine/Adapter/Graphics/GL/bindAdapter.hpp"
+// #include "Engine/Adapter/Graphics/VK/bindAdapter.hpp"
+
+#include "Engine/API/Rendering/Instance.hpp"
+
 namespace Trident {
 	ConsoleLogger GraphicsAdapter::logger(std::cout, LogLevel::ALL, "");
+
+	GraphicsAdapter::GraphicsAdapter(const ApplicationProperties& properties) :
+		api(api)
+	{
+		DEBUG_ASSERT(properties.GraphicsAPI < GraphicsAPI::count);
+
+		static constexpr BindAdapterImplementation BIND_ADAPTER_IMPLEMENTATIONS[static_cast<index>(GraphicsAPI::count)] = {
+			DX12::bindAdapter,
+			// GL::bindAdapter,
+			nullptr,
+			// VK::bindAdapter,
+			nullptr,
+		};
+
+		BIND_ADAPTER_IMPLEMENTATIONS[static_cast<index>(properties.GraphicsAPI)](this);
+	}
+
+	GraphicsAPI GraphicsAdapter::getApi() const {
+		return api;
+	}
+
+	ref<Buffer> GraphicsAdapter::createBuffer(const BufferDescriptor& descriptor) const {
+		DEBUG_DESCRIPTOR_GUARD(descriptor);
+
+		return createBufferImplementation(descriptor);
+	}
+
+	ref<ComputePipeline> GraphicsAdapter::createComputePipeline(const ComputePipelineDescriptor& descriptor) const {
+		DEBUG_DESCRIPTOR_GUARD(descriptor);
+
+		return createComputePipelineImplementation(descriptor);
+	}
+
+	ref<DescriptorSetLayout> GraphicsAdapter::createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const {
+		return createDescriptorSetLayoutImplementation(bindings);
+	}
+
+	ref<Device> GraphicsAdapter::createDevice(const PhysicalDevice* physicalDevice) const {
+		return createDeviceImplementation(this, physicalDevice);
+	}
+
+	ref<Fence> GraphicsAdapter::createFence(const FenceDescriptor& descriptor) const {
+		DEBUG_DESCRIPTOR_GUARD(descriptor);
+
+		return createFenceImplementation(descriptor);
+	}
+
+	ref<Framebuffer> GraphicsAdapter::createFramebuffer(const FramebufferDescriptor& descriptor) const {
+		DEBUG_DESCRIPTOR_GUARD(descriptor);
+
+		return createFramebufferImplementation(descriptor);
+	}
+
+	ref<Image> GraphicsAdapter::createImage(const ImageDescriptor& descriptor) const {
+		DEBUG_DESCRIPTOR_GUARD(descriptor);
+
+		return createImageImplementation(descriptor);
+	}
+
+	ref<Instance> GraphicsAdapter::createInstance(const InstanceDescriptor& descriptor) const {
+		DEBUG_DESCRIPTOR_GUARD(descriptor);
+
+		return createInstanceImplementation(this, descriptor);
+	}
+
+	ref<PipelineLayout> GraphicsAdapter::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
+		DEBUG_DESCRIPTOR_GUARD(descriptor);
+
+		return createPipelineLayoutImplementation(descriptor);
+	}
+
+	ref<RenderPass> GraphicsAdapter::createRenderPass(const RenderPassDescriptor& descriptor) const {
+		DEBUG_DESCRIPTOR_GUARD(descriptor);
+
+		return createRenderPassImplementation(descriptor);
+	}
+
+	ref<RenderPipeline> GraphicsAdapter::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
+		DEBUG_DESCRIPTOR_GUARD(descriptor);
+
+		return createRenderPipelineImplementation(descriptor);
+	}
+
+	ref<Sampler> GraphicsAdapter::createSampler(const SamplerDescriptor& descriptor) const {
+		DEBUG_DESCRIPTOR_GUARD(descriptor);
+
+		return createSamplerImplementation(descriptor);
+	}
+
+	ref<Semaphore> GraphicsAdapter::createSemaphore() const {
+		return createSemaphoreImplementation();
+	}
+
+	ref<ShaderModule> GraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) const {
+		DEBUG_DESCRIPTOR_GUARD(descriptor);
+
+		return createShaderModuleFromAssetImplementation(descriptor, asset);
+	}
+
+	ref<ShaderModule> GraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) const {
+		DEBUG_DESCRIPTOR_GUARD(descriptor);
+
+		return createShaderModuleFromPathImplementation(descriptor, code);
+	}
+
+	ref<Surface> GraphicsAdapter::createSurface(const Instance* instance, const Window* window) const {
+		return createSurfaceImplementation(instance, window);
+	}
+
+	ref<Swapchain> GraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor, const Device* device) const {
+		return createSwapchainImplementation(descriptor, device);
+	}
+
+	ref<PhysicalDevice> GraphicsAdapter::selectPhysicalDevice(const Instance* instance, bool preferIntegratedGpu) const {
+		return selectPhysicalDeviceImplementation(this, instance, preferIntegratedGpu);
+	}
 }

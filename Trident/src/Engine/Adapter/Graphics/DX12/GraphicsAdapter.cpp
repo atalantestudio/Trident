@@ -17,11 +17,11 @@
 
 namespace Trident {
 	DX12::GraphicsAdapter::GraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window, const ApplicationProperties& properties) :
-		Trident::GraphicsAdapter(window)
+		Trident::GraphicsAdapter(properties)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		logger = ConsoleLogger(std::cout, LogLevel::ALL, "DIRECTX 12");
+		/* logger = ConsoleLogger(std::cout, LogLevel::ALL, "DIRECTX 12");
 
 		instance = createRef<DX12::Instance>(properties);
 		surface = createRef<DX12::Surface>(window);
@@ -29,7 +29,7 @@ namespace Trident {
 		device = createRef<DX12::Device>(*instance, *physicalDevice);
 		memoryAllocator = createRef<DX12::MemoryAllocator>(*device);
 
-		device->setMemoryAllocator(memoryAllocator);
+		device->setMemoryAllocator(memoryAllocator); */
 	}
 
 	ref<Buffer> DX12::GraphicsAdapter::createBuffer(const BufferDescriptor& descriptor) const {
@@ -96,5 +96,32 @@ namespace Trident {
 
 	ref<Surface> DX12::GraphicsAdapter::getSurface() const {
 		return surface;
+	}
+
+	void DX12::bindAdapter(Trident::GraphicsAdapter* adapter) {
+		adapter->logger = ConsoleLogger(std::cout, LogLevel::ALL, "DIRECTX 12");
+
+		adapter->createDeviceImplementation = DX12::createDevice;
+		adapter->createInstanceImplementation = DX12::createInstance;
+		adapter->createSurfaceImplementation = DX12::createSurface;
+		adapter->selectPhysicalDeviceImplementation = DX12::selectPhysicalDevice;
+	}
+
+	ref<Trident::Device> DX12::createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice) {
+		return createRef<DX12::Device>(adapter, static_cast<const DX12::PhysicalDevice*>(physicalDevice));
+	}
+
+	ref<Trident::Instance> DX12::createInstance(const Trident::GraphicsAdapter* adapter, const InstanceDescriptor& descriptor) {
+		return createRef<DX12::Instance>(adapter, descriptor);
+	}
+
+	ref<Trident::Surface> DX12::createSurface(const Trident::Instance* instance, const Window* window) {
+		return createRef<DX12::Surface>(static_cast<const DX12::Instance*>(instance), window);
+	}
+
+	ref<Trident::PhysicalDevice> DX12::selectPhysicalDevice(const Trident::GraphicsAdapter* adapter, const Trident::Instance* instance, bool preferIntegratedGpu) {
+		IDXGIAdapter* dxgiAdapter = static_cast<const DX12::Instance*>(instance)->selectAdapter(preferIntegratedGpu);
+
+		return createRef<DX12::PhysicalDevice>(adapter, dxgiAdapter);
 	}
 }

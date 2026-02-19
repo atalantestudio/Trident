@@ -14,19 +14,19 @@ namespace Trident {
 	// If a value is either invalid or not supported at runtime,
 	// the engine will fall-back to a default value without modifying the property file.
 	struct ApplicationProperties {
-		// Graphics API to use.
+		/// The graphics API to use.
 		GraphicsAPI GraphicsAPI;
 
-		// Whether to choose integrated GPUs over discrete GPUs.
+		/// Whether to prefer integrated GPUs over discrete GPUs (if possible).
 		bool PreferIntegratedGPU;
 
-		// Width of the window's client area, in pixels.
+		/// Width of the window's client area in pixels.
 		uint32 WindowWidth;
 
-		// Height of the window's client area, in pixels.
+		/// Height of the window's client area in pixels.
 		uint32 WindowHeight;
 
-		// Whether to enable vertical synchronization (V-Sync).
+		/// Whether to enable vertical synchronization (V-Sync).
 		bool VerticalSync;
 	};
 }

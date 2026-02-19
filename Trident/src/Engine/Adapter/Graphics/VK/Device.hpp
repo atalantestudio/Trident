@@ -8,7 +8,7 @@
 namespace Trident {
 	class VK::Device final : public Trident::Device {
 		public:
-			explicit Device(const VK::PhysicalDevice& physicalDevice, const VK::Surface& surface);
+			explicit Device(const VK::PhysicalDevice& physicalDevice);
 
 			~Device() final override;
 

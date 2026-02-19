@@ -7,12 +7,13 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	DX12::PhysicalDevice::PhysicalDevice(const DX12::Instance& instance) :
-		adapter(instance.selectAdapter())
+	DX12::PhysicalDevice::PhysicalDevice(const Trident::GraphicsAdapter* adapter, IDXGIAdapter* dxgiAdapter) :
+		Trident::PhysicalDevice(adapter),
+		adapter(dxgiAdapter)
 	{
 		DXGI_ADAPTER_DESC adapterDescriptor;
 
-		const HRESULT result = adapter->GetDesc(&adapterDescriptor);
+		const HRESULT result = dxgiAdapter->GetDesc(&adapterDescriptor);
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to get adapter descriptor.");
 

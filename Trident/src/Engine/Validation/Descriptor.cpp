@@ -375,6 +375,13 @@ namespace Trident {
 			ENGINE_ASSERT(errorCount == 0, "Image view descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 		}
 
+		void DescriptorGuard(const InstanceDescriptor& descriptor) {
+			uint32 warningCount = 0;
+			uint32 errorCount = 0;
+
+			ENGINE_ASSERT(errorCount == 0, "Instance descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
+		}
+
 		void DescriptorGuard(const PipelineLayoutDescriptor& descriptor) {
 			uint32 warningCount = 0;
 			uint32 errorCount = 0;
@@ -742,12 +749,6 @@ namespace Trident {
 		void DescriptorGuard(const SwapchainDescriptor& descriptor) {
 			uint32 warningCount = 0;
 			uint32 errorCount = 0;
-
-			if (descriptor.vSync != true && descriptor.vSync != false) {
-				errorCount += 1;
-
-				ENGINE_ERROR("descriptor.vSync must be either true or false.");
-			}
 
 			if (descriptor.extent.width == 0) {
 				errorCount += 1;

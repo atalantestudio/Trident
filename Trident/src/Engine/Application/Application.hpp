@@ -5,16 +5,17 @@
 
 #include "Engine/API/Event/Window/WindowCloseEvent.hpp"
 #include "Engine/API/Event/Window/WindowResizeEvent.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/API/Process/Process.hpp"
 #include "Engine/API/SharedMemory/SharedMemory.hpp"
 #include "Engine/API/Synchronization/Mutex.hpp"
 #include "Engine/API/Timer/HighResolutionTimer.hpp"
 #include "Engine/API/Window/Window.hpp"
 #include "Engine/Application/ApplicationProperties.hpp"
+#include "Engine/Application/LayerCompositor.hpp"
 #include "Engine/Application/ProjectDescriptor.hpp"
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 #include "Engine/Filesystem/File/PropertyFile.hpp"
-#include "Engine/Layer/LayerStack.hpp"
 
 int main(int argc, char** argv);
 
@@ -33,6 +34,10 @@ namespace Trident {
 			virtual ~Application();
 
 			void initializePropertyFile();
+
+			void initializeWindow(const ProjectDescriptor& projectDescriptor);
+
+			void initializeGraphicsAdapter(const ProjectDescriptor& projectDescriptor);
 
 			const sequence<void*>& getConsoleArguments() const;
 
@@ -66,7 +71,7 @@ namespace Trident {
 				layer->setApplication(this);
 				layer->build();
 
-				layerStack.pushLayer(layer);
+				layerCompositor->layers.emplace_back(layer);
 			}
 
 			template<typename ProcessType>
@@ -130,12 +135,14 @@ namespace Trident {
 			ApplicationProperties* properties = nullptr;
 			ProjectType projectType;
 
+			GraphicsAdapter* graphicsAdapter;
+			LayerCompositor* layerCompositor;
+
 			scope<Mutex> mutex;
 			scope<SharedMemory> sharedMemory;
 			SharedMemoryData* sharedMemoryData = nullptr;
 			HighResolutionTimer timer;
 			Window* window = nullptr;
-			LayerStack layerStack;
 			LayerInput lastLayerInput;
 			std::vector<ref<Process>> processes;
 

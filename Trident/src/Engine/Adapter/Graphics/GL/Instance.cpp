@@ -99,6 +99,10 @@ namespace Trident {
 		hGLRC = wglCreateContextAttribsARB(hDC, nullptr, attribList);
 
 		WIN32_ASSERT(hGLRC != nullptr);
+
+		result = wglMakeCurrent(hDC, hGLRC);
+
+		WIN32_ASSERT(result == TRUE);
 	}
 
 	GL::Instance::~Instance() {
@@ -123,14 +127,6 @@ namespace Trident {
 		}
 
 		return procedure;
-	}
-
-	void GL::Instance::makeCurrent() const {
-		BOOL result;
-		
-		result = wglMakeCurrent(hDC, hGLRC);
-
-		WIN32_ASSERT(result == TRUE);
 	}
 
 	void GL::Instance::setSwapInterval(sint32 interval) const {

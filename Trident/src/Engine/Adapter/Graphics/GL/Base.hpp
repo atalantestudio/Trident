@@ -67,4 +67,9 @@ namespace Trident::GL {
 	class ShaderModule;
 	class Surface;
 	class Swapchain;
+
+	void bindAdapter(GraphicsAdapter* adapter) {
+		// TODO
+		BREAKPOINT();
+	}
 }

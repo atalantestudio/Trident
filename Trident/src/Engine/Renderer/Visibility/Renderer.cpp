@@ -202,7 +202,7 @@ namespace Trident {
 			const ClearValue swapchainClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
 
 			BeginRenderPassDescriptor beginRenderPassDescriptor{};
-			beginRenderPassDescriptor.framebuffer = presentFramebuffers[getImageIndex()];
+			beginRenderPassDescriptor.framebuffer = presentFramebuffers[getSwapchainImageIndex()];
 			beginRenderPassDescriptor.clearValues = {swapchainClearValue};
 
 			commandEncoder->beginRenderPass(beginRenderPassDescriptor);

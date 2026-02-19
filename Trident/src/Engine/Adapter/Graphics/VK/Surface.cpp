@@ -8,9 +8,9 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	VK::Surface::Surface(const Window& window, const VK::Instance& instance) :
-		window(window),
-		instance(instance)
+	VK::Surface::Surface(const VK::Instance& instance, const Window& window) :
+		instance(instance),
+		window(window)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
@@ -92,7 +92,7 @@ namespace Trident {
 		return selectedFormat;
 	}
 
-	VkPresentModeKHR VK::Surface::selectPresentMode(bool vSync) const {
+	VkPresentModeKHR VK::Surface::selectPresentMode(bool verticalSync) const {
 		uint32 presentModeCount = 0;
 		VkResult result;
 
@@ -106,7 +106,7 @@ namespace Trident {
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to get surface present modes ([]).", string_VkResult(result));
 
-		if (!vSync) {
+		if (!verticalSync) {
 			// Try to find IMMEDIATE.
 			for (const VkPresentModeKHR presentMode : presentModes) {
 				if (presentMode == VK_PRESENT_MODE_IMMEDIATE_KHR) {

@@ -7,8 +7,8 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	DX12::Instance::Instance(const ApplicationProperties& properties) :
-		preferIntegratedGpu(properties.PreferIntegratedGPU)
+	DX12::Instance::Instance(const Trident::GraphicsAdapter* adapter, const InstanceDescriptor& descriptor) :
+		Trident::Instance(adapter)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
@@ -37,7 +37,7 @@ namespace Trident {
 		factory->Release();
 	}
 
-	IDXGIAdapter* DX12::Instance::selectAdapter() const {
+	IDXGIAdapter* DX12::Instance::selectAdapter(bool preferIntegratedGpu) const {
 		HRESULT result;
 		UINT adapterIndex = 0;
 		UINT bestAdapterScore = 0;
@@ -71,7 +71,7 @@ namespace Trident {
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to get adapter descriptor.");
 
-			const uint32 adapterScore = calculateAdapterScore(adapterDescriptor);
+			const uint32 adapterScore = calculateAdapterScore(adapterDescriptor, preferIntegratedGpu);
 
 			if (adapterScore > bestAdapterScore) {
 				bestAdapterScore = adapterScore;
@@ -94,7 +94,7 @@ namespace Trident {
 		return std::wstring(adapterDescriptor.Description).find(L"UHD Graphics", 0) != std::string::npos;
 	}
 
-	uint32 DX12::Instance::calculateAdapterScore(const DXGI_ADAPTER_DESC& adapterDescriptor) const {
+	uint32 DX12::Instance::calculateAdapterScore(const DXGI_ADAPTER_DESC& adapterDescriptor, bool preferIntegratedGpu) const {
 		uint32 score = 1;
 
 		if (isIntegratedAdapter(adapterDescriptor)) {

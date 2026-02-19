@@ -39,7 +39,7 @@ namespace Trident {
 
 		surface = createRef<VK::Surface>(window, *instance);
 		physicalDevice = createRef<VK::PhysicalDevice>(instance->selectPhysicalDevice());
-		device = createRef<VK::Device>(*physicalDevice, *surface);
+		device = createRef<VK::Device>(*physicalDevice);
 
 		surface->setPhysicalDevice(*physicalDevice);
 		surface->checkPresentQueueFamilyIndex(physicalDevice->graphicsQueueFamilyIndex);
@@ -47,9 +47,9 @@ namespace Trident {
 		MemoryAllocator::initialize(*physicalDevice);
 	}
 
-	VK::GraphicsAdapter::~GraphicsAdapter() {
+	/* VK::GraphicsAdapter::~GraphicsAdapter() {
 		MemoryAllocator::destroy();
-	}
+	} */
 
 	ref<Buffer> VK::GraphicsAdapter::createBuffer(const BufferDescriptor& descriptor) const {
 		return createRef<VK::Buffer>(descriptor, *device);

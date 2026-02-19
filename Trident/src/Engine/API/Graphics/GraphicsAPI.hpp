@@ -5,12 +5,11 @@
 
 namespace Trident {
 	enum class GraphicsAPI : uint8 {
-		// NOTE: Not supported.
-		CPU,
-
 		DX12,
 		GL,
 		VK,
+
+		count,
 	};
 
 	// TODO: Implement.

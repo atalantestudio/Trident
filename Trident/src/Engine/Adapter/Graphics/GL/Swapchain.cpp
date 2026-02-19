@@ -31,7 +31,7 @@ namespace Trident {
 
 		extent = descriptor.extent;
 
-		instance.setSwapInterval(static_cast<sint32>(descriptor.vSync));
+		instance.setSwapInterval(static_cast<sint32>(descriptor.verticalSync));
 
 		ImageDescriptor imageDescriptor{};
 		imageDescriptor.type = ImageType::TEXTURE_2D;

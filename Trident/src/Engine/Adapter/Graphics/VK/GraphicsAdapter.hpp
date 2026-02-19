@@ -15,7 +15,7 @@ namespace Trident {
 		public:
 			explicit GraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window, const ApplicationProperties& properties);
 
-			~GraphicsAdapter() final override;
+			// ~GraphicsAdapter() final override;
 
 			ref<Trident::Buffer> createBuffer(const BufferDescriptor& descriptor) const final override;
 

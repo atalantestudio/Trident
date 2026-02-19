@@ -11,7 +11,7 @@
 namespace Trident {
 	class VK::Surface final : public Trident::Surface {
 		public:
-			explicit Surface(const Window& window, const VK::Instance& instance);
+			explicit Surface(const VK::Instance& instance, const Window& window);
 
 			~Surface() final override;
 
@@ -23,7 +23,7 @@ namespace Trident {
 
 			VkSurfaceFormatKHR selectFormat() const;
 
-			VkPresentModeKHR selectPresentMode(bool vSync) const;
+			VkPresentModeKHR selectPresentMode(bool verticalSync) const;
 
 			VkSurfaceCapabilitiesKHR getCapabilities() const;
 

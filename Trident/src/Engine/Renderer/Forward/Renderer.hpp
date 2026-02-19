@@ -168,7 +168,7 @@ namespace Trident {
 				depthStencilClearValue.stencil = 0;
 
 				BeginRenderPassDescriptor beginRenderPassDescriptor{};
-				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
+				beginRenderPassDescriptor.framebuffer = framebuffers[getSwapchainImageIndex()];
 				beginRenderPassDescriptor.clearValues = {colorClearValue, depthStencilClearValue, colorClearValue};
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);

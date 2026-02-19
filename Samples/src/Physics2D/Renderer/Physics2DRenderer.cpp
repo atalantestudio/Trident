@@ -594,11 +594,6 @@ namespace Trident {
 		ref<ShaderModule> vertexShaderModule;
 
 		switch (getGraphicsApi()) {
-			case GraphicsAPI::CPU: {
-				ENGINE_ERROR_UNSUPPORTED();
-
-				break;
-			}
 			case GraphicsAPI::DX12: {
 				ENGINE_ERROR_UNIMPLEMENTED();
 
@@ -667,11 +662,6 @@ namespace Trident {
 		ref<ShaderModule> vertexShaderModule;
 
 		switch (getGraphicsApi()) {
-			case GraphicsAPI::CPU: {
-				ENGINE_ERROR_UNSUPPORTED();
-
-				break;
-			}
 			case GraphicsAPI::DX12: {
 				ENGINE_ERROR_UNIMPLEMENTED();
 
@@ -737,11 +727,6 @@ namespace Trident {
 		ref<ShaderModule> vertexShaderModule;
 
 		switch (getGraphicsApi()) {
-			case GraphicsAPI::CPU: {
-				ENGINE_ERROR_UNSUPPORTED();
-
-				break;
-			}
 			case GraphicsAPI::DX12: {
 				ENGINE_ERROR_UNIMPLEMENTED();
 
@@ -1200,7 +1185,7 @@ namespace Trident {
 		depthStencilClearValue.stencil = 0;
 
 		BeginRenderPassDescriptor beginRenderPassDescriptor{};
-		beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
+		beginRenderPassDescriptor.framebuffer = framebuffers[getSwapchainImageIndex()];
 		beginRenderPassDescriptor.clearValues = {colorClearValue, depthStencilClearValue, colorClearValue};
 
 		const Extent2D swapchainExtent = getSwapchain()->getExtent();
