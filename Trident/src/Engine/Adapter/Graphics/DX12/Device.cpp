@@ -44,6 +44,7 @@ namespace Trident {
 
 	DX12::Device::Device(const Trident::GraphicsAdapter* adapter, const DX12::PhysicalDevice* physicalDevice) :
 		Trident::Device(adapter),
+		factory(physicalDevice->factory),
 		physicalDevice(physicalDevice)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
@@ -55,22 +56,21 @@ namespace Trident {
 		#endif
 
 		if (FAILED(result)) {
-			// TODO: Restore.
-			/* #ifndef PREFER_SOFTWARE_ADAPTER
+			#ifndef PREFER_SOFTWARE_ADAPTER
 				ADAPTER_WARNING("Failed to create device using the primary display adapter. Falling back to a WARP adapter.");
 			#endif
 
 			IDXGIAdapter* adapter;
 
-			result = instance.factory->EnumWarpAdapter(IID_PPV_ARGS(&adapter));
+			result = factory->EnumWarpAdapter(IID_PPV_ARGS(&adapter));
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to enumerate WARP adapter.");
 
-			result = D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device)); */
+			result = D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device));
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create device using the WARP adapter.");
 
-			// adapter->Release();
+			adapter->Release();
 		}
 
 		queues[0] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_DIRECT);
@@ -149,6 +149,8 @@ namespace Trident {
 	}
 
 	sequence<ref<DescriptorSet>> DX12::Device::allocateDescriptorSets(view<ref<DescriptorSetLayout>> descriptorSetLayouts) {
+		const ref<DX12::MemoryAllocator> memoryAllocator = std::static_pointer_cast<DX12::MemoryAllocator>(getMemoryAllocator());
+
 		sequence<ref<Trident::DescriptorSet>> descriptorSets(descriptorSetLayouts.count());
 		UINT descriptorSetIndex = 0;
 
@@ -201,6 +203,8 @@ namespace Trident {
 
 	void DX12::Device::updateDescriptorSets(view<WriteDescriptorSet> writeDescriptorSets) const {
 		DEBUG_DESCRIPTOR_GUARD(writeDescriptorSets);
+
+		const ref<DX12::MemoryAllocator> memoryAllocator = std::static_pointer_cast<DX12::MemoryAllocator>(getMemoryAllocator());
 
 		for (const WriteDescriptorSet& writeDescriptorSet : writeDescriptorSets) {
 			const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(writeDescriptorSet.descriptorSet);
@@ -308,9 +312,5 @@ namespace Trident {
 		for (const ref<Trident::Queue> queue : queues) {
 			queue->waitIdle();
 		}
-	}
-
-	void DX12::Device::setMemoryAllocator(ref<DX12::MemoryAllocator> memoryAllocator) {
-		this->memoryAllocator = memoryAllocator;
 	}
 }

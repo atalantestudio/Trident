@@ -6,6 +6,7 @@
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
 #include "Engine/Adapter/Graphics/DX12/Sampler.hpp"
 #include "Engine/API/Rendering/DescriptorSet.hpp"
+#include "Engine/API/Rendering/MemoryAllocator.hpp"
 
 namespace Trident {
 	struct DX12::DescriptorHeapAllocation {
@@ -16,7 +17,7 @@ namespace Trident {
 		UINT descriptorOffset;
 	};
 
-	class DX12::MemoryAllocator {
+	class DX12::MemoryAllocator : public Trident::MemoryAllocator {
 		private:
 			static constexpr UINT UNDEFINED_ALLOCATION_INDEX = max<UINT>();
 
@@ -29,7 +30,7 @@ namespace Trident {
 			static constexpr UINT maxDepthStencilViewDescriptorCountPerAllocation = 16;
 
 		public:
-			explicit MemoryAllocator(const DX12::Device& device);
+			explicit MemoryAllocator(const DX12::Device* device);
 
 			~MemoryAllocator();
 
@@ -67,7 +68,7 @@ namespace Trident {
 			UINT depthStencilViewDescriptorHandleIncrementSize;
 
 		private:
-			const DX12::Device& device;
+			const DX12::Device* device;
 
 			std::vector<DX12::DescriptorHeapAllocation> descriptorHeapAllocations;
 

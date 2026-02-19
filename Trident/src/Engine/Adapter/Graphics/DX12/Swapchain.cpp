@@ -10,18 +10,16 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	DX12::Swapchain::Swapchain(const SwapchainDescriptor& descriptor, const DX12::Instance& instance, const DX12::Surface& surface, const DX12::Device& device, ref<DX12::MemoryAllocator> memoryAllocator) :
+	DX12::Swapchain::Swapchain(const SwapchainDescriptor& descriptor, const DX12::Device* device) :
 		Trident::Swapchain(descriptor),
-		instance(instance),
-		surface(surface),
-		device(device),
-		memoryAllocator(memoryAllocator)
+		surface(std::static_pointer_cast<DX12::Surface>(descriptor.surface).get()),
+		device(device)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		recreate(descriptor);
 
-		const HRESULT result = instance.factory->MakeWindowAssociation(surface.window, DXGI_MWA_NO_ALT_ENTER);
+		const HRESULT result = device->factory->MakeWindowAssociation(surface->window, DXGI_MWA_NO_ALT_ENTER);
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to make window association.");
 	}
@@ -60,7 +58,7 @@ namespace Trident {
 		DXGI_SWAP_CHAIN_DESC1 swapchainDescriptor{};
 		swapchainDescriptor.Width = descriptor.extent.width;
 		swapchainDescriptor.Height = descriptor.extent.height;
-		swapchainDescriptor.Format = getImageFormat(surface.getFormat());
+		swapchainDescriptor.Format = getImageFormat(surface->getFormat());
 		swapchainDescriptor.Stereo = false;
 		swapchainDescriptor.SampleDesc.Count = 1;
 		swapchainDescriptor.SampleDesc.Quality = 0;
@@ -71,11 +69,11 @@ namespace Trident {
 		swapchainDescriptor.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 		swapchainDescriptor.Flags = 0;
 
-		const ref<DX12::Queue> graphicsQueue = std::static_pointer_cast<DX12::Queue>(device.getQueue(QueueFamilyCapability::GRAPHICS));
+		const ref<DX12::Queue> graphicsQueue = std::static_pointer_cast<DX12::Queue>(device->getQueue(QueueFamilyCapability::GRAPHICS));
 
 		IDXGISwapChain1* swapChain1;
 
-		result = instance.factory->CreateSwapChainForHwnd(graphicsQueue->commandQueue, surface.window, &swapchainDescriptor, nullptr, nullptr, &swapChain1);
+		result = device->factory->CreateSwapChainForHwnd(graphicsQueue->commandQueue, surface->window, &swapchainDescriptor, nullptr, nullptr, &swapChain1);
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create swapchain.");
 
@@ -91,7 +89,7 @@ namespace Trident {
 		UINT imageIndex = 0;
 
 		while (imageIndex < imageCount) {
-			images[imageIndex] = createRef<DX12::Image>(device, *this, imageIndex, memoryAllocator);
+			images[imageIndex] = createRef<DX12::Image>(device, this, imageIndex);
 
 			imageIndex += 1;
 		}

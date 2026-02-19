@@ -10,7 +10,7 @@
 namespace Trident {
 	class DX12::ImageView final : public Trident::ImageView {
 		public:
-			explicit ImageView(const ImageViewDescriptor& descriptor, Trident::Image* image, ref<DX12::MemoryAllocator> memoryAllocator);
+			explicit ImageView(const ImageViewDescriptor& descriptor, Trident::Image* image, const DX12::Device* device);
 
 		private:
 			void createSwapchainRenderTargetView(const DX12::Image* image, ref<DX12::MemoryAllocator> memoryAllocator);

@@ -5,7 +5,6 @@
 
 #include "Engine/Adapter/Graphics/DX12/Fence.hpp"
 #include "Engine/Adapter/Graphics/DX12/Instance.hpp"
-#include "Engine/Adapter/Graphics/DX12/MemoryAllocator.hpp"
 #include "Engine/Adapter/Graphics/DX12/PhysicalDevice.hpp"
 #include "Engine/API/Rendering/Device.hpp"
 
@@ -37,11 +36,9 @@ namespace Trident {
 
 			void waitIdle() const final override;
 
-			void setMemoryAllocator(ref<DX12::MemoryAllocator> memoryAllocator);
-
 		public:
+			IDXGIFactory4* factory;
 			ID3D12Device* device;
-			ref<DX12::MemoryAllocator> memoryAllocator;
 
 		private:
 			ref<Trident::Queue> queues[3];

@@ -20,14 +20,14 @@
 #include "Engine/Validation/Descriptor.hpp"
 
 namespace Trident {
-	const GraphicsAdapter* Renderer::adapter;
+	const LayerCompositor* Renderer::layerCompositor;
 
 	GraphicsAPI Renderer::getGraphicsApi() {
-		return adapter->getApi();
+		return layerCompositor->adapter->getApi();
 	}
 
-	void Renderer::initialize(const GraphicsAdapter* adapter, const ProjectDescriptor& projectDescriptor, const Window& window, const ApplicationProperties& properties) {
-		Renderer::adapter = adapter;
+	void Renderer::initialize(const LayerCompositor* layerCompositor) {
+		Renderer::layerCompositor = layerCompositor;
 	}
 
 	void Renderer::resize(WindowResizeEvent& event) {}
@@ -35,7 +35,7 @@ namespace Trident {
 	void Renderer::onEvent(Event& event) {}
 
 	ref<Buffer> Renderer::createBuffer(const BufferDescriptor& descriptor) {
-		return adapter->createBuffer(descriptor);
+		return layerCompositor->device->createBuffer(descriptor);
 	}
 
 	ref<Buffer> Renderer::createStagingBuffer(uint64 size, bool persistent) {
@@ -51,43 +51,43 @@ namespace Trident {
 	}
 
 	ref<ComputePipeline> Renderer::createComputePipeline(const ComputePipelineDescriptor& descriptor) {
-		return adapter->createComputePipeline(descriptor);
+		return layerCompositor->device->createComputePipeline(descriptor);
 	}
 
 	ref<DescriptorSetLayout> Renderer::createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) {
-		return adapter->createDescriptorSetLayout(bindings);
+		return layerCompositor->device->createDescriptorSetLayout(bindings);
 	}
 
 	ref<Fence> Renderer::createFence(const FenceDescriptor& descriptor) {
-		return adapter->createFence(descriptor);
+		return layerCompositor->adapter->createFence(descriptor);
 	}
 
 	ref<Framebuffer> Renderer::createFramebuffer(const FramebufferDescriptor& descriptor) {
-		return adapter->createFramebuffer(descriptor);
+		return layerCompositor->adapter->createFramebuffer(descriptor);
 	}
 
 	ref<Image> Renderer::createImage(const ImageDescriptor& descriptor) {
-		return adapter->createImage(descriptor);
+		return layerCompositor->adapter->createImage(descriptor);
 	}
 
 	ref<PipelineLayout> Renderer::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) {
-		return adapter->createPipelineLayout(descriptor);
+		return layerCompositor->device->createPipelineLayout(descriptor);
 	}
 
 	ref<RenderPass> Renderer::createRenderPass(const RenderPassDescriptor& descriptor) {
-		return adapter->createRenderPass(descriptor);
+		return layerCompositor->adapter->createRenderPass(descriptor);
 	}
 
 	ref<RenderPipeline> Renderer::createRenderPipeline(const RenderPipelineDescriptor& descriptor) {
-		return adapter->createRenderPipeline(descriptor);
+		return layerCompositor->adapter->createRenderPipeline(descriptor);
 	}
 
 	ref<Sampler> Renderer::createSampler(const SamplerDescriptor& descriptor) {
-		return adapter->createSampler(descriptor);
+		return layerCompositor->adapter->createSampler(descriptor);
 	}
 
 	ref<Semaphore> Renderer::createSemaphore() {
-		return adapter->createSemaphore();
+		return layerCompositor->adapter->createSemaphore();
 	}
 
 	ref<Subpass> Renderer::createSubpass(const SubpassDescriptor& descriptor) {
@@ -95,42 +95,30 @@ namespace Trident {
 	}
 
 	ref<Device> Renderer::getDevice() {
-		ENGINE_ERROR_UNIMPLEMENTED();
-
-		return nullptr;
-		// return adapter->getDevice();
+		return layerCompositor->device;
 	}
 
 	uint32 Renderer::getSwapchainImageIndex() {
-		ENGINE_ERROR_UNIMPLEMENTED();
-
-		return 0;
-		// return adapter->getSwapchainImageIndex();
+		return layerCompositor->swapchainImageIndex;
 	}
 
 	ref<Surface> Renderer::getSurface() {
-		ENGINE_ERROR_UNIMPLEMENTED();
-
-		return nullptr;
-		// return adapter->getSurface();
+		return layerCompositor->surface;
 	}
 
 	ref<Swapchain> Renderer::getSwapchain() {
-		ENGINE_ERROR_UNIMPLEMENTED();
-
-		return nullptr;
-		// return adapter->getSwapchain();
+		return layerCompositor->swapchain;
 	}
 
 	ref<ShaderModule> Renderer::loadShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) {
-		return adapter->createShaderModule(descriptor, asset);
+		return layerCompositor->device->createShaderModule(descriptor, asset);
 	}
 
 	ref<ShaderModule> Renderer::loadShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> path) {
 		std::string pathString = "Asset/Shader/";
 		pathString += path;
 
-		switch (adapter->getApi()) {
+		switch (layerCompositor->adapter->getApi()) {
 			case GraphicsAPI::DX12: {
 				pathString += ".hlsl";
 
@@ -161,7 +149,7 @@ namespace Trident {
 
 		const sequence<char8> code = Filesystem::openTextBuffer(&path[0]);
 
-		return adapter->createShaderModule(descriptor, view<char8>(&code[0], code.count()));
+		return layerCompositor->device->createShaderModule(descriptor, view<char8>(&code[0], code.count()));
 	}
 
 	ref<ShaderModule> Renderer::loadInternalShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> path) {

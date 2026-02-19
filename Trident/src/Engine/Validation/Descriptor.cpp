@@ -240,7 +240,7 @@ namespace Trident {
 		}
 
 		void DescriptorGuard(const ImageDescriptor& descriptor) {
-			const PhysicalDeviceLimits& limits = Renderer::getDevice()->getPhysicalDevice()->getLimits();
+			// const PhysicalDeviceLimits& limits = Renderer::getDevice()->getPhysicalDevice()->getLimits();
 
 			uint32 warningCount = 0;
 			uint32 errorCount = 0;
@@ -269,11 +269,11 @@ namespace Trident {
 				ENGINE_ERROR("descriptor.extent.width must not be 0.");
 			}
 
-			if (descriptor.extent.width > max(limits.maxImageDimension1D, max(limits.maxImageDimension2D, limits.maxImageDimension3D))) {
+			/* if (descriptor.extent.width > max(limits.maxImageDimension1D, max(limits.maxImageDimension2D, limits.maxImageDimension3D))) {
 				errorCount += 1;
 
 				ENGINE_ERROR("descriptor.extent.width must be less than the maximum dimension for 1D, 2D or 3D images.");
-			}
+			} */
 
 			if (descriptor.extent.height == 0) {
 				errorCount += 1;
@@ -281,11 +281,11 @@ namespace Trident {
 				ENGINE_ERROR("descriptor.extent.height must not be 0.");
 			}
 
-			if (descriptor.extent.height > max(limits.maxImageDimension2D, limits.maxImageDimension3D)) {
+			/* if (descriptor.extent.height > max(limits.maxImageDimension2D, limits.maxImageDimension3D)) {
 				errorCount += 1;
 
 				ENGINE_ERROR("descriptor.extent.height must be less than the maximum dimension for 2D or 3D images.");
-			}
+			} */
 
 			if (descriptor.extent.depth == 0) {
 				errorCount += 1;
@@ -293,11 +293,11 @@ namespace Trident {
 				ENGINE_ERROR("descriptor.extent.depth must not be 0.");
 			}
 
-			if (descriptor.extent.depth > limits.maxImageDimension3D) {
+			/* if (descriptor.extent.depth > limits.maxImageDimension3D) {
 				errorCount += 1;
 
 				ENGINE_ERROR("descriptor.extent.depth must be less than the maximum dimension for 3D images.");
-			}
+			} */
 
 			if (descriptor.mipLevelCount == 0) {
 				errorCount += 1;
@@ -317,11 +317,11 @@ namespace Trident {
 				ENGINE_ERROR("descriptor.layerCount must not be 0.");
 			}
 
-			if (descriptor.layerCount > limits.maxImageLayerCount) {
+			/* if (descriptor.layerCount > limits.maxImageLayerCount) {
 				errorCount += 1;
 
 				ENGINE_ERROR("descriptor.layerCount must be less than the maximum layer count.");
-			}
+			} */
 
 			if (!validateSampleCount(descriptor.sampleCount)) {
 				errorCount += 1;

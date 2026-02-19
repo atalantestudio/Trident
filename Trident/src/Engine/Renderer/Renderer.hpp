@@ -6,7 +6,6 @@
 #include "Engine/API/Event/Window/WindowResizeEvent.hpp"
 #include "Engine/API/Rendering/CommandEncoder.hpp"
 #include "Engine/API/Rendering/Descriptor/PipelineLayoutDescriptor.hpp"
-#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/API/Graphics/GraphicsAPI.hpp"
 #include "Engine/API/Window/Window.hpp"
 #include "Engine/Application/Application.hpp"
@@ -16,7 +15,7 @@ namespace Trident {
 		public:
 			static GraphicsAPI getGraphicsApi();
 
-			static void initialize(const GraphicsAdapter* adapter, const ProjectDescriptor& projectDescriptor, const Window& window, const ApplicationProperties& properties);
+			static void initialize(const LayerCompositor* layerCompositor);
 
 		public:
 			virtual void build() = 0;
@@ -84,7 +83,7 @@ namespace Trident {
 			}
 
 		private:
-			static const GraphicsAdapter* adapter;
+			static const LayerCompositor* layerCompositor;
 
 			const Layer* layer;
 	};

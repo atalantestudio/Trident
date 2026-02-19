@@ -9,7 +9,7 @@
 namespace Trident {
 	class DX12::PipelineLayout final : public Trident::PipelineLayout {
 		public:
-			explicit PipelineLayout(const PipelineLayoutDescriptor& descriptor, const DX12::Device& device);
+			explicit PipelineLayout(const PipelineLayoutDescriptor& descriptor, const DX12::Device* device);
 
 			~PipelineLayout() final override;
 

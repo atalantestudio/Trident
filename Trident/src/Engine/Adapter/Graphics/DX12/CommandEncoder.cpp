@@ -168,8 +168,10 @@ namespace Trident {
 	}
 
 	void DX12::CommandEncoder::bindDescriptorSets(ref<Trident::PipelineLayout> pipelineLayout, uint32 descriptorSetIndexOffset, view<ref<Trident::DescriptorSet>> descriptorSets) {
-		ID3D12DescriptorHeap* viewDescriptorHeap = device.memoryAllocator->getCurrentViewDescriptorHeapAllocation().descriptorHeap;
-		ID3D12DescriptorHeap* samplerDescriptorHeap = device.memoryAllocator->getCurrentSamplerDescriptorHeapAllocation().descriptorHeap;
+		const ref<DX12::MemoryAllocator> memoryAllocator = std::static_pointer_cast<DX12::MemoryAllocator>(device.getMemoryAllocator());
+
+		ID3D12DescriptorHeap* viewDescriptorHeap = memoryAllocator->getCurrentViewDescriptorHeapAllocation().descriptorHeap;
+		ID3D12DescriptorHeap* samplerDescriptorHeap = memoryAllocator->getCurrentSamplerDescriptorHeapAllocation().descriptorHeap;
 		ID3D12DescriptorHeap* descriptorHeaps[2] = {viewDescriptorHeap, samplerDescriptorHeap};
 
 		commandList->SetDescriptorHeaps(2, &descriptorHeaps[0]);
@@ -181,7 +183,7 @@ namespace Trident {
 				const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSets[rootParameterIndex]);
 
 				D3D12_GPU_DESCRIPTOR_HANDLE descriptorOffset = viewDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
-				descriptorOffset.ptr += descriptorSet->viewDescriptorHandleOffset * device.memoryAllocator->viewDescriptorHandleIncrementSize;
+				descriptorOffset.ptr += descriptorSet->viewDescriptorHandleOffset * memoryAllocator->viewDescriptorHandleIncrementSize;
 
 				commandList->SetComputeRootDescriptorTable(descriptorSetIndexOffset + rootParameterIndex, descriptorOffset);
 
@@ -201,7 +203,7 @@ namespace Trident {
 				}
 
 				D3D12_GPU_DESCRIPTOR_HANDLE descriptorOffset = samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
-				descriptorOffset.ptr += samplerDescriptorHandleOffset * device.memoryAllocator->samplerDescriptorHandleIncrementSize;
+				descriptorOffset.ptr += samplerDescriptorHandleOffset * memoryAllocator->samplerDescriptorHandleIncrementSize;
 
 				commandList->SetComputeRootDescriptorTable(samplerDescriptorTableRootParameterIndex, descriptorOffset);
 			}
@@ -211,7 +213,7 @@ namespace Trident {
 				const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSets[rootParameterIndex]);
 
 				D3D12_GPU_DESCRIPTOR_HANDLE descriptorOffset = viewDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
-				descriptorOffset.ptr += descriptorSet->viewDescriptorHandleOffset * device.memoryAllocator->viewDescriptorHandleIncrementSize;
+				descriptorOffset.ptr += descriptorSet->viewDescriptorHandleOffset * memoryAllocator->viewDescriptorHandleIncrementSize;
 
 				commandList->SetGraphicsRootDescriptorTable(descriptorSetIndexOffset + rootParameterIndex, descriptorOffset);
 
@@ -231,7 +233,7 @@ namespace Trident {
 				}
 
 				D3D12_GPU_DESCRIPTOR_HANDLE descriptorOffset = samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
-				descriptorOffset.ptr += samplerDescriptorHandleOffset * device.memoryAllocator->samplerDescriptorHandleIncrementSize;
+				descriptorOffset.ptr += samplerDescriptorHandleOffset * memoryAllocator->samplerDescriptorHandleIncrementSize;
 
 				commandList->SetGraphicsRootDescriptorTable(samplerDescriptorTableRootParameterIndex, descriptorOffset);
 			}

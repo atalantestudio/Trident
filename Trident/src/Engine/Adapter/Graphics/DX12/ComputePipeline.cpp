@@ -9,7 +9,7 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	DX12::ComputePipeline::ComputePipeline(const ComputePipelineDescriptor& descriptor, const DX12::Device& device) :
+	DX12::ComputePipeline::ComputePipeline(const ComputePipelineDescriptor& descriptor, const DX12::Device* device) :
 		Trident::ComputePipeline(descriptor),
 		pipelineLayout(std::static_pointer_cast<DX12::PipelineLayout>(descriptor.pipelineLayout))
 	{
@@ -26,7 +26,7 @@ namespace Trident {
 		computePipelineStateDescriptor.CachedPSO.CachedBlobSizeInBytes = 0;
 		computePipelineStateDescriptor.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
-		result = device.device->CreateComputePipelineState(&computePipelineStateDescriptor, IID_PPV_ARGS(&pipelineState));
+		result = device->device->CreateComputePipelineState(&computePipelineStateDescriptor, IID_PPV_ARGS(&pipelineState));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create compute pipeline state.");
 

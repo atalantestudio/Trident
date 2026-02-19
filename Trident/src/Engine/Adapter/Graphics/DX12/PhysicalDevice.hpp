@@ -9,12 +9,15 @@
 namespace Trident {
 	class DX12::PhysicalDevice final : public Trident::PhysicalDevice {
 		public:
-			explicit PhysicalDevice(const Trident::GraphicsAdapter* adapter, IDXGIAdapter* dxgiAdapter);
+			explicit PhysicalDevice(const Trident::GraphicsAdapter* adapter, const DX12::Instance* instance, IDXGIAdapter* dxgiAdapter);
 
 		private:
 			void setLimits();
 
 		public:
 			IDXGIAdapter* adapter;
+
+			// Used when creating a swapchain from this physical device.
+			IDXGIFactory4* factory;
 	};
 }

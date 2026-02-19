@@ -10,19 +10,20 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	DX12::MemoryAllocator::MemoryAllocator(const DX12::Device& device) :
+	DX12::MemoryAllocator::MemoryAllocator(const DX12::Device* device) :
+		Trident::MemoryAllocator(),
 		device(device)
 	{
-		viewDescriptorHandleIncrementSize = device.device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		samplerDescriptorHandleIncrementSize = device.device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-		renderTargetViewDescriptorHandleIncrementSize = device.device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-		depthStencilViewDescriptorHandleIncrementSize = device.device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+		viewDescriptorHandleIncrementSize = device->device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		samplerDescriptorHandleIncrementSize = device->device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+		renderTargetViewDescriptorHandleIncrementSize = device->device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+		depthStencilViewDescriptorHandleIncrementSize = device->device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 	}
 
 	DX12::MemoryAllocator::~MemoryAllocator() {
 		INT descriptorHeapAllocationIndex = static_cast<INT>(descriptorHeapAllocations.size()) - 1;
 
-		while (descriptorHeapAllocationIndex >= descriptorHeapAllocations.size()) {
+		while (descriptorHeapAllocationIndex >= static_cast<INT>(descriptorHeapAllocations.size())) {
 			descriptorHeapAllocations[descriptorHeapAllocationIndex].descriptorHeap->Release();
 
 			descriptorHeapAllocationIndex -= 1;
@@ -89,7 +90,7 @@ namespace Trident {
 		D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle = descriptorHeapAllocation.descriptorHeap->GetCPUDescriptorHandleForHeapStart();
 		descriptorHandle.ptr += descriptorHeapAllocation.descriptorOffset * renderTargetViewDescriptorHandleIncrementSize;
 
-		device.device->CreateRenderTargetView(resource, descriptor, descriptorHandle);
+		device->device->CreateRenderTargetView(resource, descriptor, descriptorHandle);
 
 		descriptorHeapAllocation.descriptorOffset += 1;
 
@@ -102,7 +103,7 @@ namespace Trident {
 		D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle = descriptorHeapAllocation.descriptorHeap->GetCPUDescriptorHandleForHeapStart();
 		descriptorHandle.ptr += descriptorHeapAllocation.descriptorOffset * depthStencilViewDescriptorHandleIncrementSize;
 
-		device.device->CreateDepthStencilView(resource, descriptor, descriptorHandle);
+		device->device->CreateDepthStencilView(resource, descriptor, descriptorHandle);
 
 		descriptorHeapAllocation.descriptorOffset += 1;
 
@@ -136,7 +137,7 @@ namespace Trident {
 			shaderResourceViewDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
 		}
 
-		device.device->CreateShaderResourceView(image->resource, &shaderResourceViewDescriptor, descriptorHandle);
+		device->device->CreateShaderResourceView(image->resource, &shaderResourceViewDescriptor, descriptorHandle);
 	}
 
 	void DX12::MemoryAllocator::writeReadWriteStorageImage(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorImage& descriptorImage) const {
@@ -160,7 +161,7 @@ namespace Trident {
 			unorderedAccessViewDescriptor.Texture2D.PlaneSlice = 0;
 		}
 
-		device.device->CreateUnorderedAccessView(image->resource, nullptr, &unorderedAccessViewDescriptor, descriptorHandle);
+		device->device->CreateUnorderedAccessView(image->resource, nullptr, &unorderedAccessViewDescriptor, descriptorHandle);
 	}
 
 	void DX12::MemoryAllocator::writeUniformBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorBuffer& descriptorBuffer) const {
@@ -170,7 +171,7 @@ namespace Trident {
 		constantBufferViewDescriptor.BufferLocation = buffer->resource->GetGPUVirtualAddress() + descriptorBuffer.offset;
 		constantBufferViewDescriptor.SizeInBytes = static_cast<UINT>(descriptorBuffer.size);
 
-		device.device->CreateConstantBufferView(&constantBufferViewDescriptor, descriptorHandle);
+		device->device->CreateConstantBufferView(&constantBufferViewDescriptor, descriptorHandle);
 	}
 
 	void DX12::MemoryAllocator::writeReadOnlyStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorBuffer& descriptorBuffer) const {
@@ -185,7 +186,7 @@ namespace Trident {
 		shaderResourceViewDescriptor.Buffer.StructureByteStride = 1;
 		shaderResourceViewDescriptor.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 
-		device.device->CreateShaderResourceView(buffer->resource, &shaderResourceViewDescriptor, descriptorHandle);
+		device->device->CreateShaderResourceView(buffer->resource, &shaderResourceViewDescriptor, descriptorHandle);
 	}
 
 	void DX12::MemoryAllocator::writeReadWriteStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorBuffer& descriptorBuffer) const {
@@ -200,7 +201,7 @@ namespace Trident {
 		unorderedAccessViewDescriptor.Buffer.CounterOffsetInBytes = 0;
 		unorderedAccessViewDescriptor.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
 
-		device.device->CreateUnorderedAccessView(buffer->resource, nullptr, &unorderedAccessViewDescriptor, descriptorHandle);
+		device->device->CreateUnorderedAccessView(buffer->resource, nullptr, &unorderedAccessViewDescriptor, descriptorHandle);
 	}
 
 	void DX12::MemoryAllocator::writeInputAttachment(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorImage& descriptorImage) const {
@@ -240,11 +241,11 @@ namespace Trident {
 			shaderResourceViewDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
 		}
 
-		device.device->CreateShaderResourceView(image->resource, &shaderResourceViewDescriptor, descriptorHandle);
+		device->device->CreateShaderResourceView(image->resource, &shaderResourceViewDescriptor, descriptorHandle);
 	}
 
 	void DX12::MemoryAllocator::writeSampler(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const D3D12_SAMPLER_DESC* descriptor) const {
-		device.device->CreateSampler(descriptor, descriptorHandle);
+		device->device->CreateSampler(descriptor, descriptorHandle);
 	}
 
 	void DX12::MemoryAllocator::createViewDescriptorHeapAllocation() {
@@ -258,7 +259,7 @@ namespace Trident {
 		descriptorHeapDescriptor.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		descriptorHeapDescriptor.NodeMask = 0;
 
-		const HRESULT result = device.device->CreateDescriptorHeap(&descriptorHeapDescriptor, IID_PPV_ARGS(&descriptorHeapAllocation.descriptorHeap));
+		const HRESULT result = device->device->CreateDescriptorHeap(&descriptorHeapDescriptor, IID_PPV_ARGS(&descriptorHeapAllocation.descriptorHeap));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create view descriptor heap.");
 
@@ -278,7 +279,7 @@ namespace Trident {
 		descriptorHeapDescriptor.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		descriptorHeapDescriptor.NodeMask = 0;
 
-		const HRESULT result = device.device->CreateDescriptorHeap(&descriptorHeapDescriptor, IID_PPV_ARGS(&descriptorHeapAllocation.descriptorHeap));
+		const HRESULT result = device->device->CreateDescriptorHeap(&descriptorHeapDescriptor, IID_PPV_ARGS(&descriptorHeapAllocation.descriptorHeap));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create sampler descriptor heap.");
 
@@ -298,7 +299,7 @@ namespace Trident {
 		descriptorHeapDescriptor.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 		descriptorHeapDescriptor.NodeMask = 0;
 
-		const HRESULT result = device.device->CreateDescriptorHeap(&descriptorHeapDescriptor, IID_PPV_ARGS(&descriptorHeapAllocation.descriptorHeap));
+		const HRESULT result = device->device->CreateDescriptorHeap(&descriptorHeapDescriptor, IID_PPV_ARGS(&descriptorHeapAllocation.descriptorHeap));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create render target view descriptor heap.");
 
@@ -318,7 +319,7 @@ namespace Trident {
 		descriptorHeapDescriptor.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 		descriptorHeapDescriptor.NodeMask = 0;
 
-		const HRESULT result = device.device->CreateDescriptorHeap(&descriptorHeapDescriptor, IID_PPV_ARGS(&descriptorHeapAllocation.descriptorHeap));
+		const HRESULT result = device->device->CreateDescriptorHeap(&descriptorHeapDescriptor, IID_PPV_ARGS(&descriptorHeapAllocation.descriptorHeap));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create depth stencil view descriptor heap.");
 

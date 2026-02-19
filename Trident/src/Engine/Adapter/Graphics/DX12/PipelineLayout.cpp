@@ -9,7 +9,7 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	DX12::PipelineLayout::PipelineLayout(const PipelineLayoutDescriptor& descriptor, const DX12::Device& device) :
+	DX12::PipelineLayout::PipelineLayout(const PipelineLayoutDescriptor& descriptor, const DX12::Device* device) :
 		Trident::PipelineLayout(descriptor)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
@@ -236,7 +236,7 @@ namespace Trident {
 			#endif
 		}
 
-		result = device.device->CreateRootSignature(0, blob->GetBufferPointer(), blob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
+		result = device->device->CreateRootSignature(0, blob->GetBufferPointer(), blob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create root signature.");
 

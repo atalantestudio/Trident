@@ -33,12 +33,11 @@ namespace Trident {
 		return imageDescriptor;
 	}
 
-	DX12::Image::Image(const ImageDescriptor& descriptor, const DX12::Device& device, ref<DX12::MemoryAllocator> memoryAllocator) :
+	DX12::Image::Image(const ImageDescriptor& descriptor, const DX12::Device* device) :
 		Trident::Image(descriptor),
 		resourceState(getImageResourceState(descriptor.usage, layout, getSampleCount())),
 		usage(descriptor.usage),
-		device(device),
-		memoryAllocator(memoryAllocator)
+		device(device)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
@@ -85,7 +84,7 @@ namespace Trident {
 			optimizedClearValuePointer = &optimizedClearValue;
 		}
 
-		result = device.device->CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, resourceState, optimizedClearValuePointer, IID_PPV_ARGS(&resource));
+		result = device->device->CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, resourceState, optimizedClearValuePointer, IID_PPV_ARGS(&resource));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create committed image resource.");
 
@@ -102,18 +101,17 @@ namespace Trident {
 		#endif
 	}
 
-	DX12::Image::Image(const DX12::Device& device, const DX12::Swapchain& swapchain, UINT index, ref<DX12::MemoryAllocator> memoryAllocator) :
-		Trident::Image(createSwapchainImageDescriptor(swapchain.getExtent(), index)),
+	DX12::Image::Image(const DX12::Device* device, const DX12::Swapchain* swapchain, UINT index) :
+		Trident::Image(createSwapchainImageDescriptor(swapchain->getExtent(), index)),
 		resourceState(D3D12_RESOURCE_STATE_PRESENT),
 		usage(static_cast<ImageUsage>(0)),
-		device(device),
-		memoryAllocator(memoryAllocator)
+		device(device)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		HRESULT result;
 
-		result = swapchain.swapChain->GetBuffer(index, IID_PPV_ARGS(&resource));
+		result = swapchain->swapChain->GetBuffer(index, IID_PPV_ARGS(&resource));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to get buffer for render target view.");
 
@@ -134,6 +132,6 @@ namespace Trident {
 	}
 
 	ref<Trident::ImageView> DX12::Image::createViewInternal(const ImageViewDescriptor& descriptor, Trident::Image* image) {
-		return createRef<DX12::ImageView>(descriptor, image, memoryAllocator);
+		return createRef<DX12::ImageView>(descriptor, image, device);
 	}
 }

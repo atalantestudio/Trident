@@ -39,6 +39,7 @@ namespace Trident {
 	class Image;
 	class ImageView;
 	class Instance;
+	class MemoryAllocator;
 	class PipelineLayout;
 	class PhysicalDevice;
 	class RenderPass;

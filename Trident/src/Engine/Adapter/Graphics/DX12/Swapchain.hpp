@@ -5,15 +5,13 @@
 
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
 #include "Engine/Adapter/Graphics/DX12/Image.hpp"
-#include "Engine/Adapter/Graphics/DX12/Instance.hpp"
-#include "Engine/Adapter/Graphics/DX12/MemoryAllocator.hpp"
 #include "Engine/Adapter/Graphics/DX12/Surface.hpp"
 #include "Engine/API/Rendering/Swapchain.hpp"
 
 namespace Trident {
 	class DX12::Swapchain final : public Trident::Swapchain {
 		public:
-			explicit Swapchain(const SwapchainDescriptor& descriptor, const DX12::Instance& instance, const DX12::Surface& surface, const DX12::Device& device, ref<DX12::MemoryAllocator> memoryAllocator);
+			explicit Swapchain(const SwapchainDescriptor& descriptor, const DX12::Device* device);
 
 			~Swapchain() final override;
 
@@ -29,9 +27,7 @@ namespace Trident {
 			UINT imageCount = 3;
 
 		private:
-			const DX12::Instance& instance;
-			const DX12::Surface& surface;
-			const DX12::Device& device;
-			ref<DX12::MemoryAllocator> memoryAllocator;
+			const DX12::Surface* surface;
+			const DX12::Device* device;
 	};
 }

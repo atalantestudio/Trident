@@ -9,7 +9,7 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	DX12::Buffer::Buffer(const BufferDescriptor& descriptor, const DX12::Device& device) :
+	DX12::Buffer::Buffer(const BufferDescriptor& descriptor, const DX12::Device* device) :
 		Trident::Buffer(descriptor)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
@@ -53,7 +53,7 @@ namespace Trident {
 			initialResourceStates = D3D12_RESOURCE_STATE_COPY_DEST;
 		}
 
-		result = device.device->CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, initialResourceStates, nullptr, IID_PPV_ARGS(&resource));
+		result = device->device->CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, initialResourceStates, nullptr, IID_PPV_ARGS(&resource));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create committed buffer resource.");
 

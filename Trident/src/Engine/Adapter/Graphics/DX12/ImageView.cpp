@@ -8,10 +8,11 @@
 #include "Engine/Adapter/Graphics/DX12/ResourceDimension.hpp"
 
 namespace Trident {
-	DX12::ImageView::ImageView(const ImageViewDescriptor& descriptor, Trident::Image* image, ref<DX12::MemoryAllocator> memoryAllocator) :
+	DX12::ImageView::ImageView(const ImageViewDescriptor& descriptor, Trident::Image* image, const DX12::Device* device) :
 		Trident::ImageView(descriptor, image)
 	{
 		const DX12::Image* _image = static_cast<const DX12::Image*>(image);
+		const ref<DX12::MemoryAllocator> memoryAllocator = std::static_pointer_cast<DX12::MemoryAllocator>(device->getMemoryAllocator());
 
 		if (_image->usage == 0) {
 			createSwapchainRenderTargetView(_image, memoryAllocator);

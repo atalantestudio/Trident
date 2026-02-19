@@ -15,7 +15,7 @@ namespace Trident {
 	ConsoleLogger GraphicsAdapter::logger(std::cout, LogLevel::ALL, "");
 
 	GraphicsAdapter::GraphicsAdapter(const ApplicationProperties& properties) :
-		api(api)
+		api(properties.GraphicsAPI)
 	{
 		DEBUG_ASSERT(properties.GraphicsAPI < GraphicsAPI::count);
 
@@ -34,24 +34,27 @@ namespace Trident {
 		return api;
 	}
 
-	ref<Buffer> GraphicsAdapter::createBuffer(const BufferDescriptor& descriptor) const {
+	ref<Buffer> GraphicsAdapter::createBuffer(const BufferDescriptor& descriptor, const Device* device) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
-		return createBufferImplementation(descriptor);
+		return createBufferImplementation(descriptor, device);
 	}
 
-	ref<ComputePipeline> GraphicsAdapter::createComputePipeline(const ComputePipelineDescriptor& descriptor) const {
+	ref<ComputePipeline> GraphicsAdapter::createComputePipeline(const ComputePipelineDescriptor& descriptor, const Device* device) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
-		return createComputePipelineImplementation(descriptor);
+		return createComputePipelineImplementation(descriptor, device);
 	}
 
-	ref<DescriptorSetLayout> GraphicsAdapter::createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const {
-		return createDescriptorSetLayoutImplementation(bindings);
+	ref<DescriptorSetLayout> GraphicsAdapter::createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings, const Device* device) const {
+		return createDescriptorSetLayoutImplementation(bindings, device);
 	}
 
 	ref<Device> GraphicsAdapter::createDevice(const PhysicalDevice* physicalDevice) const {
-		return createDeviceImplementation(this, physicalDevice);
+		ref<Device> device = createDeviceImplementation(this, physicalDevice);
+		device->memoryAllocator = createMemoryAllocatorImplementation(device.get());
+
+		return device;
 	}
 
 	ref<Fence> GraphicsAdapter::createFence(const FenceDescriptor& descriptor) const {
@@ -78,10 +81,10 @@ namespace Trident {
 		return createInstanceImplementation(this, descriptor);
 	}
 
-	ref<PipelineLayout> GraphicsAdapter::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
+	ref<PipelineLayout> GraphicsAdapter::createPipelineLayout(const PipelineLayoutDescriptor& descriptor, const Device* device) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
-		return createPipelineLayoutImplementation(descriptor);
+		return createPipelineLayoutImplementation(descriptor, device);
 	}
 
 	ref<RenderPass> GraphicsAdapter::createRenderPass(const RenderPassDescriptor& descriptor) const {
@@ -106,16 +109,16 @@ namespace Trident {
 		return createSemaphoreImplementation();
 	}
 
-	ref<ShaderModule> GraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) const {
+	ref<ShaderModule> GraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset, const Device* device) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
-		return createShaderModuleFromAssetImplementation(descriptor, asset);
+		return createShaderModuleFromAssetImplementation(descriptor, asset, device);
 	}
 
-	ref<ShaderModule> GraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) const {
+	ref<ShaderModule> GraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code, const Device* device) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
-		return createShaderModuleFromPathImplementation(descriptor, code);
+		return createShaderModuleFromCodeImplementation(descriptor, code, device);
 	}
 
 	ref<Surface> GraphicsAdapter::createSurface(const Instance* instance, const Window* window) const {

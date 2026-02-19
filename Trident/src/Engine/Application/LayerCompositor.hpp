@@ -35,11 +35,8 @@ namespace Trident {
 				instanceDescriptor.projectVersion = projectDescriptor.version;
 
 				instance = adapter->createInstance(instanceDescriptor);
-
 				surface = instance->createSurface(window);
-
 				physicalDevice = instance->selectPhysicalDevice(applicationProperties.PreferIntegratedGPU);
-
 				device = physicalDevice->createDevice();
 
 				const ref<Queue> graphicsQueue = device->getQueue(QueueFamilyCapability::GRAPHICS);
@@ -52,7 +49,7 @@ namespace Trident {
 
 				swapchain = device->createSwapchain(swapchainDescriptor);
 
-				commandEncoders = sequence<ref<CommandEncoder>>(MAX_FRAMES_IN_FLIGHT);
+				/* commandEncoders = sequence<ref<CommandEncoder>>(MAX_FRAMES_IN_FLIGHT);
 				acquiredNextImageSemaphores = sequence<ref<Semaphore>>(MAX_FRAMES_IN_FLIGHT);
 				finishedExecutionSemaphores = sequence<ref<Semaphore>>(MAX_FRAMES_IN_FLIGHT);
 				inFlightFences = sequence<ref<Fence>>(MAX_FRAMES_IN_FLIGHT);
@@ -89,11 +86,11 @@ namespace Trident {
 					inFlightFences[frameInFlightIndex] = adapter->createFence(inFlightFenceDescriptor);
 
 					frameInFlightIndex += 1;
-				}
+				} */
 			}
 
 			~LayerCompositor() {
-				uint32 frameInFlightIndex = 0;
+				/* uint32 frameInFlightIndex = 0;
 
 				while (frameInFlightIndex < MAX_FRAMES_IN_FLIGHT) {
 					finishedExecutionSemaphores[frameInFlightIndex].~shared_ptr();
@@ -107,7 +104,7 @@ namespace Trident {
 				commandEncoders = sequence<ref<CommandEncoder>>();
 				inFlightFences = sequence<ref<Fence>>();
 				acquiredNextImageSemaphores = sequence<ref<Semaphore>>();
-				finishedExecutionSemaphores = sequence<ref<Semaphore>>();
+				finishedExecutionSemaphores = sequence<ref<Semaphore>>(); */
 
 				swapchain.~shared_ptr();
 			}
@@ -159,23 +156,23 @@ namespace Trident {
 			}
 
 		public:
+			const GraphicsAdapter* adapter;
+
+			ref<Surface> surface;
+			ref<Device> device;
+			ref<Swapchain> swapchain;
+
+			uint32 swapchainImageIndex = 0;
+
 			std::vector<ref<Layer>> layers;
 
 		private:
 			const Window* window;
-			const GraphicsAdapter* adapter;
 
 			ref<Instance> instance;
-
-			ref<Surface> surface;
-
 			ref<PhysicalDevice> physicalDevice;
 
-			ref<Device> device;
-
-			ref<Swapchain> swapchain;
 			bool verticalSync;
-			uint32 swapchainImageIndex = 0;
 
 			sequence<ref<CommandEncoder>> commandEncoders;
 			sequence<ref<Semaphore>> acquiredNextImageSemaphores;

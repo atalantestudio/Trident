@@ -133,7 +133,7 @@ namespace Trident {
 		graphicsAdapter = new GraphicsAdapter(*properties);
 		layerCompositor = new LayerCompositor(window, graphicsAdapter, projectDescriptor, *properties);
 
-		// Renderer::initialize(graphicsAdapter.get(), projectDescriptor, *window, *properties);
+		Renderer::initialize(layerCompositor);
 	}
 
 	Application::~Application() {

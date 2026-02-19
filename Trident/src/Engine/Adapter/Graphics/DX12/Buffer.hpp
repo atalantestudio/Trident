@@ -9,7 +9,7 @@
 namespace Trident {
 	class DX12::Buffer final : public Trident::Buffer {
 		public:
-			explicit Buffer(const BufferDescriptor& descriptor, const DX12::Device& device);
+			explicit Buffer(const BufferDescriptor& descriptor, const DX12::Device* device);
 
 			~Buffer() final override;
 

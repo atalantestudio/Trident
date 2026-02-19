@@ -14,27 +14,24 @@ namespace Trident {
 
 	typedef void (*BindAdapterImplementation)(GraphicsAdapter* adapter);
 
-	typedef ref<Buffer> (*CreateBufferImplementation)(const BufferDescriptor& descriptor);
-	typedef ref<ComputePipeline> (*CreateComputePipelineImplementation)(const ComputePipelineDescriptor& descriptor);
-
-	// TODO: Use a view of DescriptorSetLayoutBinding instead.
-	typedef ref<DescriptorSetLayout> (*CreateDescriptorSetLayoutImplementation)(const sequence<DescriptorSetLayoutBinding>& bindings);
-
+	typedef ref<Buffer> (*CreateBufferImplementation)(const BufferDescriptor& descriptor, const Device* device);
+	typedef ref<ComputePipeline> (*CreateComputePipelineImplementation)(const ComputePipelineDescriptor& descriptor, const Device* device);
+	typedef ref<DescriptorSetLayout> (*CreateDescriptorSetLayoutImplementation)(const sequence<DescriptorSetLayoutBinding>& bindings, const Device* device);
 	typedef ref<Device> (*CreateDeviceImplementation)(const Trident::GraphicsAdapter* adapter, const PhysicalDevice* physicalDevice);
-
 	typedef ref<Fence> (*CreateFenceImplementation)(const FenceDescriptor& descriptor);
 	typedef ref<Framebuffer> (*CreateFramebufferImplementation)(const FramebufferDescriptor& descriptor);
 	typedef ref<Image> (*CreateImageImplementation)(const ImageDescriptor& descriptor);
 	typedef ref<Instance> (*CreateInstanceImplementation)(const GraphicsAdapter* adapter, const InstanceDescriptor& instanceDescriptor);
-	typedef ref<PipelineLayout> (*CreatePipelineLayoutImplementation)(const PipelineLayoutDescriptor& descriptor);
+	typedef ref<MemoryAllocator> (*CreateMemoryAllocatorImplementation)(const Device* device);
+	typedef ref<PipelineLayout> (*CreatePipelineLayoutImplementation)(const PipelineLayoutDescriptor& descriptor, const Device* device);
 	typedef ref<RenderPass> (*CreateRenderPassImplementation)(const RenderPassDescriptor& descriptor);
 	typedef ref<RenderPipeline> (*CreateRenderPipelineImplementation)(const RenderPipelineDescriptor& descriptor);
 	typedef ref<Sampler> (*CreateSamplerImplementation)(const SamplerDescriptor& descriptor);
 	typedef ref<Semaphore> (*CreateSemaphoreImplementation)();
-	typedef ref<ShaderModule> (*CreateShaderModuleFromAssetImplementation)(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset);
+	typedef ref<ShaderModule> (*CreateShaderModuleFromAssetImplementation)(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset, const Device* device);
 
 	// TODO: Deprecate (replace with CreateShaderModuleFromAssetImplementation).
-	typedef ref<ShaderModule> (*CreateShaderModuleFromPathImplementation)(const ShaderModuleDescriptor& descriptor, view<char8> code);
+	typedef ref<ShaderModule> (*CreateShaderModuleFromCodeImplementation)(const ShaderModuleDescriptor& descriptor, view<char8> code, const Device* device);
 
 	typedef ref<Surface> (*CreateSurfaceImplementation)(const Instance* instance, const Window* window);
 	typedef ref<Swapchain> (*CreateSwapchainImplementation)(const SwapchainDescriptor& descriptor, const Device* device);
@@ -49,11 +46,11 @@ namespace Trident {
 
 			GraphicsAPI getApi() const;
 
-			ref<Buffer> createBuffer(const BufferDescriptor& descriptor) const;
+			ref<Buffer> createBuffer(const BufferDescriptor& descriptor, const Device* device) const;
 
-			ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor) const;
+			ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor, const Device* device) const;
 
-			ref<DescriptorSetLayout> createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const;
+			ref<DescriptorSetLayout> createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings, const Device* device) const;
 
 			ref<Device> createDevice(const PhysicalDevice* physicalDevice) const;
 
@@ -65,7 +62,7 @@ namespace Trident {
 
 			ref<Instance> createInstance(const InstanceDescriptor& descriptor) const;
 
-			ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const;
+			ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor, const Device* device) const;
 
 			ref<RenderPass> createRenderPass(const RenderPassDescriptor& descriptor) const;
 
@@ -75,10 +72,8 @@ namespace Trident {
 
 			ref<Semaphore> createSemaphore() const;
 
-			ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) const;
-
-			// TODO: Deprecate (replace with CreateShaderModuleFromAssetProcedure).
-			ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) const;
+			ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset, const Device* device) const;
+			ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code, const Device* device) const;
 
 			ref<Surface> createSurface(const Instance* instance, const Window* window) const;
 
@@ -96,13 +91,14 @@ namespace Trident {
 			CreateFramebufferImplementation createFramebufferImplementation;
 			CreateImageImplementation createImageImplementation;
 			CreateInstanceImplementation createInstanceImplementation;
+			CreateMemoryAllocatorImplementation createMemoryAllocatorImplementation;
 			CreatePipelineLayoutImplementation createPipelineLayoutImplementation;
 			CreateRenderPassImplementation createRenderPassImplementation;
 			CreateRenderPipelineImplementation createRenderPipelineImplementation;
 			CreateSamplerImplementation createSamplerImplementation;
 			CreateSemaphoreImplementation createSemaphoreImplementation;
 			CreateShaderModuleFromAssetImplementation createShaderModuleFromAssetImplementation;
-			CreateShaderModuleFromPathImplementation createShaderModuleFromPathImplementation;
+			CreateShaderModuleFromCodeImplementation createShaderModuleFromCodeImplementation;
 			CreateSurfaceImplementation createSurfaceImplementation;
 			CreateSwapchainImplementation createSwapchainImplementation;
 			SelectPhysicalDeviceImplementation selectPhysicalDeviceImplementation;

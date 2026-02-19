@@ -15,7 +15,9 @@ namespace Trident {
 			virtual ~Queue() = default;
 
 			/// Creates and returns a command encoder with the capabilities of the queue.
+			// TODO
 			virtual ref<CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const = 0;
+			// ref<CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const;
 
 			/// Executes the provided command buffers.
 			virtual void submit(view<ref<CommandBuffer>> commandBuffers) const = 0;
@@ -52,5 +54,9 @@ namespace Trident {
 
 			/// Waits until the queue reaches an idle state.
 			virtual void waitIdle() const = 0;
+
+		private:
+			// TODO
+			// const GraphicsAdapter* adapter;
 	};
 }

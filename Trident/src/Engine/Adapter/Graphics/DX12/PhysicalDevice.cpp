@@ -7,9 +7,10 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	DX12::PhysicalDevice::PhysicalDevice(const Trident::GraphicsAdapter* adapter, IDXGIAdapter* dxgiAdapter) :
+	DX12::PhysicalDevice::PhysicalDevice(const Trident::GraphicsAdapter* adapter, const DX12::Instance* instance, IDXGIAdapter* dxgiAdapter) :
 		Trident::PhysicalDevice(adapter),
-		adapter(dxgiAdapter)
+		adapter(dxgiAdapter),
+		factory(instance->factory)
 	{
 		DXGI_ADAPTER_DESC adapterDescriptor;
 
