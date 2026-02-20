@@ -16,13 +16,19 @@ namespace Trident {
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		HRESULT result;
+
 		D3D12_COMMAND_QUEUE_DESC commandQueueDescriptor{};
 		commandQueueDescriptor.Type = commandListType;
 		commandQueueDescriptor.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
 		commandQueueDescriptor.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 		commandQueueDescriptor.NodeMask = 0;
 
-		const HRESULT result = device.device->CreateCommandQueue(&commandQueueDescriptor, IID_PPV_ARGS(&commandQueue));
+		{
+			PROFILE_SCOPE("CreateCommandQueue");
+
+			result = device.device->CreateCommandQueue(&commandQueueDescriptor, IID_PPV_ARGS(&commandQueue));
+		}
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command queue.");
 

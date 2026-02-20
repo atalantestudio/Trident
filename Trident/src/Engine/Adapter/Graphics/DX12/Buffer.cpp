@@ -57,7 +57,11 @@ namespace Trident {
 			initialResourceStates = D3D12_RESOURCE_STATE_COPY_DEST;
 		}
 
-		result = _device->device->CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, initialResourceStates, nullptr, IID_PPV_ARGS(&buffer->resource));
+		{
+			PROFILE_SCOPE("CreateCommittedResource (buffer)");
+
+			result = _device->device->CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, initialResourceStates, nullptr, IID_PPV_ARGS(&buffer->resource));
+		}
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create committed buffer resource.");
 

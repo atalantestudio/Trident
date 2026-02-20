@@ -52,7 +52,11 @@ namespace Trident {
 		HRESULT result = -1;
 
 		#ifndef PREFER_SOFTWARE_ADAPTER
-			result = D3D12CreateDevice(physicalDevice->adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device));
+			{
+				PROFILE_SCOPE("D3D12CreateDevice");
+
+				result = D3D12CreateDevice(physicalDevice->adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device));
+			}
 		#endif
 
 		if (FAILED(result)) {
@@ -66,7 +70,11 @@ namespace Trident {
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to enumerate WARP adapter.");
 
-			result = D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device));
+			{
+				PROFILE_SCOPE("D3D12CreateDevice (WARP adapter)");
+
+				result = D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device));
+			}
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create device using the WARP adapter.");
 

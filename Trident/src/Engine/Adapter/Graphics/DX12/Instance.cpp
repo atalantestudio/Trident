@@ -28,7 +28,11 @@ namespace Trident {
 			flags |= DXGI_CREATE_FACTORY_DEBUG;
 		#endif
 
-		result = CreateDXGIFactory2(flags, IID_PPV_ARGS(&factory));
+		{
+			PROFILE_SCOPE("CreateDXGIFactory2");
+
+			result = CreateDXGIFactory2(flags, IID_PPV_ARGS(&factory));
+		}
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create factory.");
 	}

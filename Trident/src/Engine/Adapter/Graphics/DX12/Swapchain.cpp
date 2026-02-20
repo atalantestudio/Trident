@@ -17,9 +17,15 @@ namespace Trident {
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		HRESULT result;
+
 		recreate(descriptor);
 
-		const HRESULT result = device->factory->MakeWindowAssociation(surface->window, DXGI_MWA_NO_ALT_ENTER);
+		{
+			PROFILE_SCOPE("MakeWindowAssociation");
+
+			result = device->factory->MakeWindowAssociation(surface->window, DXGI_MWA_NO_ALT_ENTER);
+		}
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to make window association.");
 	}
@@ -73,7 +79,11 @@ namespace Trident {
 
 		IDXGISwapChain1* swapChain1;
 
-		result = device->factory->CreateSwapChainForHwnd(graphicsQueue->commandQueue, surface->window, &swapchainDescriptor, nullptr, nullptr, &swapChain1);
+		{
+			PROFILE_SCOPE("CreateSwapChainForHwnd");
+
+			result = device->factory->CreateSwapChainForHwnd(graphicsQueue->commandQueue, surface->window, &swapchainDescriptor, nullptr, nullptr, &swapChain1);
+		}
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create swapchain.");
 
