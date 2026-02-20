@@ -3,61 +3,45 @@
 
 #pragma once
 
-#include "Engine/API/Graphics/GraphicsAdapter.hpp"
+#include "Engine/API/Graphics/Base.hpp"
+
 #include "Engine/API/Rendering/Access.hpp"
 #include "Engine/API/Rendering/BufferUsage.hpp"
 #include "Engine/API/Rendering/Descriptor/BufferDescriptor.hpp"
-#include "Engine/Validation/Descriptor.hpp"
 
 namespace Trident {
 	class Buffer {
 		public:
-			~Buffer() {
-				// adapter->destroyBuffer(this);
-			}
+			~Buffer();
 
 			/// Returns the size in bytes of the buffer.
-			uint64 getSize() const {
-				return size;
-			}
+			uint64 getSize() const;
 
 			/// Returns the current buffer usage flags.
-			BufferUsage getUsage() const {
-				return usage;
-			}
+			BufferUsage getUsage() const;
 
 			/// Returns the current buffer access flags.
-			Access getAccess() const {
-				return access;
-			}
+			Access getAccess() const;
 
-			void* map(uint64 offset, uint64 size) const {
-				return adapter->mapBuffer(pointer_cast<const Buffer*>(this), offset, size);
-			}
+			void* map(uint64 offset, uint64 size) const;
 
 			/// Unmaps the buffer.
-			void unmap() const {
-				adapter->unmapBuffer(this);
-			}
+			void unmap() const;
 
 		protected:
-			explicit Buffer(const GraphicsAdapter* adapter, const BufferDescriptor& descriptor) :
-				adapter(adapter),
-				size(descriptor.size),
-				usage(descriptor.usage),
-				access{}
-			{
-				// adapter->createBuffer(this, descriptor);
-			}
+			explicit Buffer(const Device* device, const BufferDescriptor& descriptor);
 
 		protected:
 			uint64 size;
+
 			// TODO: Add memory suballocation.
+
+			// TODO: These members will be updated at runtime.
 			BufferUsage usage;
-			Access access;
+			Access access = Access::NONE;
 
 		private:
-			const GraphicsAdapter* adapter;
+			const Device* device;
 	};
 
 	template<typename ElementType>
@@ -65,7 +49,7 @@ namespace Trident {
 		public:
 			/// Maps a range of the buffer to host memory.
 			/// The offset and size must be provided in bytes.
-			ElementType* map(uint64 offset, uint64 size) const {
+			inline ElementType* map(uint64 offset, uint64 size) const {
 				return static_cast<ElementType*>(Buffer::map(offset, size));
 			}
 	};

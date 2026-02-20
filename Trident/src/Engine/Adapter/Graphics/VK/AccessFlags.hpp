@@ -7,6 +7,7 @@
 
 namespace Trident::VK {
 	inline VkAccessFlags getAccessFlags(Access access) {
+		// TODO: Use VK_ACCESS_NONE.
 		VkAccessFlags accessFlags{};
 
 		if (access & Access::SHADER_READ) {

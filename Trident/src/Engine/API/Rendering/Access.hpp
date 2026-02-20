@@ -5,6 +5,7 @@
 
 namespace Trident {
 	enum class Access : uint8 {
+		NONE = 0,
 		SHADER_READ = BIT(0),
 		SHADER_WRITE = BIT(1),
 		TRANSFER_READ = BIT(2),

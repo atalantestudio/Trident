@@ -31,7 +31,7 @@ namespace Trident {
 		adapter->createShaderModuleFromCodeImplementation = DX12::createShaderModuleFromCode;
 		adapter->createSurfaceImplementation = DX12::createSurface;
 		adapter->createSwapchainImplementation = DX12::createSwapchain;
-		// TODO: destroyBuffer
+		adapter->destroyBufferImplementation = DX12::destroyBuffer;
 		adapter->mapBufferImplementation = DX12::mapBuffer;
 		adapter->selectPhysicalDeviceImplementation = DX12::selectPhysicalDevice;
 		adapter->unmapBufferImplementation = DX12::unmapBuffer;

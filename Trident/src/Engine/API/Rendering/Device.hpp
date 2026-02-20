@@ -64,11 +64,23 @@ namespace Trident {
 				return adapter->createSwapchain(descriptor, this);
 			}
 
+			void destroyBuffer(const Buffer* buffer) const {
+				adapter->destroyBuffer(buffer, this);
+			}
+
+			void* mapBuffer(const Buffer* buffer, uint64 offset, uint64 size) const {
+				return adapter->mapBuffer(this, buffer, offset, size);
+			}
+
 			virtual ref<PhysicalDevice> getPhysicalDevice() const = 0;
 
 			virtual ref<Queue> getQueue(QueueFamilyCapability queueFamilyCapability) const = 0;
 
 			virtual void resetFence(ref<Fence> fence) const = 0;
+
+			void unmapBuffer(const Buffer* buffer) const {
+				return adapter->unmapBuffer(this, buffer);
+			}
 
 			virtual void updateDescriptorSets(view<WriteDescriptorSet> writeDescriptorSets) const = 0;
 

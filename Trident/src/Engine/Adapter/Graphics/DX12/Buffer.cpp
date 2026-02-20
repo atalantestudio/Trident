@@ -9,8 +9,8 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	DX12::Buffer::Buffer(const Trident::GraphicsAdapter* adapter, const BufferDescriptor& descriptor) :
-		Trident::Buffer(adapter, descriptor)
+	DX12::Buffer::Buffer(const Trident::Device* device, const BufferDescriptor& descriptor) :
+		Trident::Buffer(device, descriptor)
 	{
 		if (descriptor.usage & BufferUsage::UNIFORM) {
 			// NOTE: Constant buffer views need to be aligned to 256.
@@ -18,11 +18,11 @@ namespace Trident {
 		}
 	}
 
-	ref<Trident::Buffer> DX12::createBuffer(const Trident::GraphicsAdapter* adapter, const BufferDescriptor& descriptor, UINT stride, const Trident::Device* device) {
+	ref<Trident::Buffer> DX12::createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, UINT stride) {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
 		HRESULT result;
 
-		ref<DX12::Buffer> buffer = createRef<DX12::Buffer>(adapter, descriptor);
+		ref<DX12::Buffer> buffer = createRef<DX12::Buffer>(device, descriptor);
 		buffer->stride = stride;
 
 		D3D12_HEAP_PROPERTIES heapProperties{};
@@ -78,7 +78,7 @@ namespace Trident {
 		return buffer;
 	}
 
-	void DX12::destroyBuffer(const Trident::Buffer* buffer) {
+	void DX12::destroyBuffer(const Trident::Buffer* buffer, const Trident::Device* device) {
 		const DX12::Buffer* _buffer = static_cast<const DX12::Buffer*>(buffer);
 
 		_buffer->resource->Release();
@@ -88,7 +88,7 @@ namespace Trident {
 		}
 	}
 
-	void* DX12::mapBuffer(const Trident::Buffer* buffer, uint64 offset, uint64 size) {
+	void* DX12::mapBuffer(const Trident::Device* device, const Trident::Buffer* buffer, uint64 offset, uint64 size) {
 		const DX12::Buffer* _buffer = static_cast<const DX12::Buffer*>(buffer);
 		HRESULT result;
 		void* data;
@@ -105,7 +105,7 @@ namespace Trident {
 		return data;
 	}
 
-	void DX12::unmapBuffer(const Trident::Buffer* buffer) {
+	void DX12::unmapBuffer(const Trident::Device* device, const Trident::Buffer* buffer) {
 		const DX12::Buffer* _buffer = static_cast<const DX12::Buffer*>(buffer);
 
 		_buffer->resource->Unmap(0, nullptr);

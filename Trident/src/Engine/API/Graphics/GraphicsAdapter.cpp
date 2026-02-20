@@ -133,17 +133,21 @@ namespace Trident {
 		return createSwapchainImplementation(descriptor, device);
 	}
 
-	void* GraphicsAdapter::mapBuffer(const Buffer* buffer, uint64 size, uint64 offset) const {
+	void GraphicsAdapter::destroyBuffer(const Buffer* buffer, const Device* device) const {
+		destroyBufferImplementation(buffer, device);
+	}
+
+	void* GraphicsAdapter::mapBuffer(const Device* device, const Buffer* buffer, uint64 offset, uint64 size) const {
 		// TODO: Validate arguments.
 
-		return mapBufferImplementation(buffer, size, offset);
+		return mapBufferImplementation(device, buffer, offset, size);
 	}
 
 	ref<PhysicalDevice> GraphicsAdapter::selectPhysicalDevice(const Instance* instance, bool preferIntegratedGpu) const {
 		return selectPhysicalDeviceImplementation(this, instance, preferIntegratedGpu);
 	}
 
-	void GraphicsAdapter::unmapBuffer(const Buffer* buffer) const {
-		unmapBufferImplementation(buffer);
+	void GraphicsAdapter::unmapBuffer(const Device* device, const Buffer* buffer) const {
+		unmapBufferImplementation(device, buffer);
 	}
 }

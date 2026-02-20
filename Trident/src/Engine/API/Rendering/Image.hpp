@@ -19,34 +19,42 @@ namespace Trident {
 
 			virtual ~Image() = default;
 
+			/// Returns the type of the image.
 			ImageType getType() const {
 				return type;
 			}
 
+			/// Returns the format of the image.
 			ImageFormat getFormat() const {
 				return format;
 			}
 
+			/// Returns the 3-dimensional size of the image.
 			const Extent3D& getExtent() const {
 				return extent;
 			}
 
+			/// Returns the number of mip levels in the image.
 			uint32 getMipLevelCount() const {
 				return mipLevelCount;
 			}
 
+			/// Returns the number of layers in the image.
 			uint32 getLayerCount() const {
 				return layerCount;
 			}
 
+			/// Returns the number of samples in the image.
 			uint8 getSampleCount() const {
-				return sampleCount + 1;
+				return sampleCount;
 			}
 
+			/// Returns the current layout of the image.
 			ImageLayout getLayout() const {
 				return layout;
 			}
 
+			// TODO: Remove (don't expose to the client side).
 			void setLayout(ImageLayout layout) {
 				this->layout = layout;
 			}
@@ -62,7 +70,7 @@ namespace Trident {
 				extent(descriptor.extent),
 				mipLevelCount(descriptor.mipLevelCount),
 				layerCount(descriptor.layerCount),
-				sampleCount(descriptor.sampleCount - 1)
+				sampleCount(descriptor.sampleCount)
 			{
 				DEBUG_DESCRIPTOR_GUARD(descriptor);
 			}
@@ -75,10 +83,7 @@ namespace Trident {
 			Extent3D extent;
 			uint32 mipLevelCount;
 			uint32 layerCount;
-
-			// NOTE: Compressed value.
-			uint8 sampleCount : 6;
-
+			uint8 sampleCount;
 			ImageLayout layout = ImageLayout::UNDEFINED;
 	};
 }

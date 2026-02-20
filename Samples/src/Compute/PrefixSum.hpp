@@ -125,7 +125,7 @@ namespace Trident {
 				// TODO
 				BREAKPOINT();
 
-				BufferMemoryBarrier elementStartMemoryBarrier{};
+				/* BufferMemoryBarrier elementStartMemoryBarrier{};
 				elementStartMemoryBarrier.buffer = elementStartBuffer;
 				elementStartMemoryBarrier.offset = 0;
 				elementStartMemoryBarrier.size = elementStartBuffer->getSize();
@@ -168,7 +168,7 @@ namespace Trident {
 					elementIndex += 1;
 				}
 
-				std::cout << '\n';
+				std::cout << '\n'; */
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {}
