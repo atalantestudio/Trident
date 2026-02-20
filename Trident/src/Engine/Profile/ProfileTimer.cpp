@@ -7,7 +7,7 @@
 #include "Engine/Profile/ProfileTimer.hpp"
 
 namespace Trident {
-	ProfileTimer::ProfileTimer(const std::string& name) :
+	ProfileTimer::ProfileTimer(view<char8> name) :
 		event({
 			name,
 			std::this_thread::get_id(),

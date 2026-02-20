@@ -5,7 +5,7 @@
 
 namespace Trident {
 	struct ProfileEvent {
-		std::string name;
+		sequence<char8> name;
 		std::thread::id threadId;
 		sint64 start;
 		sint64 end;
