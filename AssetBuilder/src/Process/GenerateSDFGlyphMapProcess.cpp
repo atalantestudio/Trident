@@ -110,7 +110,7 @@ namespace Trident {
 		const ref<Buffer> fontStagingBuffer = Renderer::createStagingBuffer(sizeof(FontStorage));
 		const TrueTypeFont::FWord lineHeight = file.ascent - file.descent + file.lineGap;
 
-		FontStorage* fontStagingBufferMappedRange = fontStagingBuffer->map<FontStorage>(0, fontStagingBuffer->getSize());
+		FontStorage* fontStagingBufferMappedRange = static_cast<FontStorage*>(fontStagingBuffer->map(0, fontStagingBuffer->getSize()));
 		fontStagingBufferMappedRange->spreadFactor = spreadFactor;
 		fontStagingBufferMappedRange->outputGlyphSize = GLYPH_SUBIMAGE_DIMENSION;
 		fontStagingBufferMappedRange->lineHeight = static_cast<sint32>(lineHeight);
@@ -276,7 +276,7 @@ namespace Trident {
 
 		output.data = sequence<uint8>(glyphMapStagingBuffer->getSize());
 
-		const uint8* glyphMapMappedRange = glyphMapStagingBuffer->map<uint8>(0, glyphMapStagingBuffer->getSize());
+		const uint8* glyphMapMappedRange = static_cast<uint8*>(glyphMapStagingBuffer->map(0, glyphMapStagingBuffer->getSize()));
 
 		std::copy_n(glyphMapMappedRange, glyphMapStagingBuffer->getSize(), &output.data[0]);
 
@@ -303,8 +303,8 @@ namespace Trident {
 
 		SET_DEBUG_NAME(glyphBufferDescriptor, "Glyph");
 
-		glyphBuffer = Renderer::createBuffer(glyphBufferDescriptor);
-		glyphMappedRange = glyphBuffer->map<GlyphBuffer>(0, glyphBuffer->getSize());
+		glyphBuffer = Renderer::createBuffer2<GlyphBuffer>(glyphBufferDescriptor);
+		glyphMappedRange = glyphBuffer->map(0, glyphBuffer->getSize());
 	}
 
 	void GenerateSDFGlyphMapProcess::createGlyphOffsetBuffer() {
@@ -316,8 +316,8 @@ namespace Trident {
 
 		SET_DEBUG_NAME(glyphOffsetBufferDescriptor, "Glyph offset");
 
-		glyphOffsetBuffer = Renderer::createBuffer(glyphOffsetBufferDescriptor);
-		glyphOffsetMappedRange = glyphOffsetBuffer->map<uint32>(0, glyphOffsetBuffer->getSize());
+		glyphOffsetBuffer = Renderer::createBuffer2<uint32>(glyphOffsetBufferDescriptor);
+		glyphOffsetMappedRange = glyphOffsetBuffer->map(0, glyphOffsetBuffer->getSize());
 	}
 
 	void GenerateSDFGlyphMapProcess::createGlyphImage() {

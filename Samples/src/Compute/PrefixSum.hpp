@@ -56,7 +56,7 @@ namespace Trident {
 
 				SET_DEBUG_NAME(elementCountBufferDescriptor, "Element count");
 
-				const ref<Buffer> elementCountBuffer = createBuffer(elementCountBufferDescriptor);
+				const ref<Buffer2<uint32>> elementCountBuffer = createBuffer2<uint32>(elementCountBufferDescriptor);
 
 				BufferDescriptor elementStartBufferDescriptor{};
 				elementStartBufferDescriptor.size = sizeof(uint32) * ELEMENT_COUNT;
@@ -66,7 +66,7 @@ namespace Trident {
 
 				SET_DEBUG_NAME(elementStartBufferDescriptor, "Element start");
 
-				const ref<Buffer> elementStartBuffer = createBuffer(elementStartBufferDescriptor);
+				const ref<Buffer2<uint32>> elementStartBuffer = createBuffer2<uint32>(elementStartBufferDescriptor);
 
 				BufferDescriptor elementStartStagingBufferDescriptor{};
 				elementStartStagingBufferDescriptor.size = elementStartBuffer->getSize();
@@ -76,9 +76,9 @@ namespace Trident {
 
 				SET_DEBUG_NAME(elementStartStagingBufferDescriptor, "Element start staging");
 
-				const ref<Buffer> elementStartStagingBuffer = createBuffer(elementStartStagingBufferDescriptor);
+				const ref<Buffer2<uint32>> elementStartStagingBuffer = createBuffer2<uint32>(elementStartStagingBufferDescriptor);
 
-				uint32* elementCountMappedRange = elementCountBuffer->map<uint32>(0, elementCountBuffer->getSize());
+				uint32* elementCountMappedRange = elementCountBuffer->map(0, elementCountBuffer->getSize());
 
 				std::copy_n(ELEMENT_COUNTS, ELEMENT_COUNT, elementCountMappedRange);
 
@@ -122,6 +122,9 @@ namespace Trident {
 				commandEncoder->bindDescriptorSets(prefixSumPipelineLayout, 0, {prefixSumDescriptorSet});
 				commandEncoder->dispatch(1, 1, 1);
 
+				// TODO
+				BREAKPOINT();
+
 				BufferMemoryBarrier elementStartMemoryBarrier{};
 				elementStartMemoryBarrier.buffer = elementStartBuffer;
 				elementStartMemoryBarrier.offset = 0;
@@ -141,7 +144,7 @@ namespace Trident {
 				queue->submit({commandEncoder->end()});
 				queue->waitIdle();
 
-				const uint32* elementStartMappedRange = elementStartStagingBuffer->map<uint32>(0, elementStartBuffer->getSize());
+				const uint32* elementStartMappedRange = elementStartStagingBuffer->map(0, elementStartBuffer->getSize());
 
 				ENGINE_DEBUG("Element count buffer:");
 

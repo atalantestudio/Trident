@@ -31,11 +31,10 @@ namespace Trident {
 		adapter->createShaderModuleFromCodeImplementation = DX12::createShaderModuleFromCode;
 		adapter->createSurfaceImplementation = DX12::createSurface;
 		adapter->createSwapchainImplementation = DX12::createSwapchain;
+		// TODO: destroyBuffer
+		adapter->mapBufferImplementation = DX12::mapBuffer;
 		adapter->selectPhysicalDeviceImplementation = DX12::selectPhysicalDevice;
-	}
-
-	ref<Trident::Buffer> DX12::createBuffer(const BufferDescriptor& descriptor, const Trident::Device* device) {
-		return createRef<DX12::Buffer>(descriptor, static_cast<const DX12::Device*>(device));
+		adapter->unmapBufferImplementation = DX12::unmapBuffer;
 	}
 
 	ref<Trident::ComputePipeline> DX12::createComputePipeline(const ComputePipelineDescriptor& descriptor, const Trident::Device* device) {

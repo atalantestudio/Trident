@@ -9,17 +9,21 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	DX12::Buffer::Buffer(const BufferDescriptor& descriptor, const DX12::Device* device) :
-		Trident::Buffer(descriptor)
+	DX12::Buffer::Buffer(const Trident::GraphicsAdapter* adapter, const BufferDescriptor& descriptor) :
+		Trident::Buffer(adapter, descriptor)
 	{
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
 		if (descriptor.usage & BufferUsage::UNIFORM) {
 			// NOTE: Constant buffer views need to be aligned to 256.
 			size = (descriptor.size + D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1) & ~(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1);
 		}
+	}
 
+	ref<Trident::Buffer> DX12::createBuffer(const Trident::GraphicsAdapter* adapter, const BufferDescriptor& descriptor, UINT stride, const Trident::Device* device) {
+		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
 		HRESULT result;
+
+		ref<DX12::Buffer> buffer = createRef<DX12::Buffer>(adapter, descriptor);
+		buffer->stride = stride;
 
 		D3D12_HEAP_PROPERTIES heapProperties{};
 		heapProperties.Type = getHeapType(descriptor.memoryProperties);
@@ -31,7 +35,7 @@ namespace Trident {
 		D3D12_RESOURCE_DESC resourceDescriptor{};
 		resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
 		resourceDescriptor.Alignment = 0;
-		resourceDescriptor.Width = size;
+		resourceDescriptor.Width = buffer->getSize();
 		resourceDescriptor.Height = 1;
 		resourceDescriptor.DepthOrArraySize = 1;
 		resourceDescriptor.MipLevels = 1;
@@ -53,45 +57,57 @@ namespace Trident {
 			initialResourceStates = D3D12_RESOURCE_STATE_COPY_DEST;
 		}
 
-		result = device->device->CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, initialResourceStates, nullptr, IID_PPV_ARGS(&resource));
+		result = _device->device->CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, initialResourceStates, nullptr, IID_PPV_ARGS(&buffer->resource));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create committed buffer resource.");
 
-		heapType = heapProperties.Type;
+		buffer->heapType = heapProperties.Type;
 
 		#if defined(BUILD_MODE_DEBUG)
 			if (descriptor.name.count() > 0) {
 				const LPWSTR name = ConvertUTF8ToUTF16(&descriptor.name[0]);
 
-				result = resource->SetName(name);
+				result = buffer->resource->SetName(name);
 
 				ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set resource name.");
 
 				free(name);
 			}
 		#endif
+
+		return buffer;
 	}
 
-	DX12::Buffer::~Buffer() {
-		resource->Release();
+	void DX12::destroyBuffer(const Trident::Buffer* buffer) {
+		const DX12::Buffer* _buffer = static_cast<const DX12::Buffer*>(buffer);
 
-		if (commandSignature) {
-			commandSignature->Release();
+		_buffer->resource->Release();
+
+		if (_buffer->commandSignature) {
+			_buffer->commandSignature->Release();
 		}
 	}
 
-	void DX12::Buffer::unmap() const {
-		resource->Unmap(0, nullptr);
-	}
-
-	void* DX12::Buffer::getMappedRange(uint64 offset, uint64 size) const {
+	void* DX12::mapBuffer(const Trident::Buffer* buffer, uint64 offset, uint64 size) {
+		const DX12::Buffer* _buffer = static_cast<const DX12::Buffer*>(buffer);
 		HRESULT result;
-		void* mappedRange;
+		void* data;
 
-		result = resource->Map(0, nullptr, &mappedRange);
+		// TODO: Use offset and size.
+		result = _buffer->resource->Map(0, nullptr, &data);
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to map resource.");
 
-		return mappedRange;
+		// TODO
+		// "When ppData is not NULL, the pointer returned is never offset by any values in pReadRange."
+		// Manually offset the data?
+		// See https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12resource-map.
+		return data;
+	}
+
+	void DX12::unmapBuffer(const Trident::Buffer* buffer) {
+		const DX12::Buffer* _buffer = static_cast<const DX12::Buffer*>(buffer);
+
+		_buffer->resource->Unmap(0, nullptr);
 	}
 }

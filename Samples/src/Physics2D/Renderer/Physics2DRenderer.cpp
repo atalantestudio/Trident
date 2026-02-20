@@ -201,7 +201,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(vertexBufferDescriptor, "Vertex");
 
-		vertexBuffer = createBuffer(vertexBufferDescriptor);
+		vertexBuffer = createBuffer2<Vertex>(vertexBufferDescriptor);
 	}
 
 	void Physics2DRenderer::recreateInstanceBuffer(uint64 size) {
@@ -213,9 +213,9 @@ namespace Trident {
 
 		SET_DEBUG_NAME(instanceBufferDescriptor, "Instance");
 
-		instanceBuffer = createBuffer(instanceBufferDescriptor);
+		instanceBuffer = createBuffer2<Instance>(instanceBufferDescriptor);
 
-		instanceBufferMappedRange = instanceBuffer->map<Instance>(0, instanceBuffer->getSize());
+		instanceBufferMappedRange = instanceBuffer->map(0, instanceBuffer->getSize());
 	}
 
 	void Physics2DRenderer::recreateCenterOfMassBuffer(uint64 size) {
@@ -227,9 +227,9 @@ namespace Trident {
 
 		SET_DEBUG_NAME(centerOfMassBufferDescriptor, "Center of mass");
 
-		centerOfMassBuffer = createBuffer(centerOfMassBufferDescriptor);
+		centerOfMassBuffer = createBuffer2<CenterOfMass>(centerOfMassBufferDescriptor);
 
-		centerOfMassBufferMappedRange = centerOfMassBuffer->map<CenterOfMass>(0, centerOfMassBuffer->getSize());
+		centerOfMassBufferMappedRange = centerOfMassBuffer->map(0, centerOfMassBuffer->getSize());
 	}
 
 	void Physics2DRenderer::recreateIndexBuffer(uint64 size) {
@@ -252,9 +252,9 @@ namespace Trident {
 
 		SET_DEBUG_NAME(cameraBufferDescriptor, "Camera");
 
-		cameraBuffer = createBuffer(cameraBufferDescriptor);
+		cameraBuffer = createBuffer2<Camera>(cameraBufferDescriptor);
 
-		cameraBufferMappedRange = cameraBuffer->map<Camera>(0, cameraBuffer->getSize());
+		cameraBufferMappedRange = cameraBuffer->map(0, cameraBuffer->getSize());
 		cameraBufferMappedRange->zoomLevel = DEFAULT_ZOOM_LEVEL;
 	}
 
@@ -267,9 +267,9 @@ namespace Trident {
 
 		SET_DEBUG_NAME(viewBufferDescriptor, "View");
 
-		viewBuffer = createBuffer(viewBufferDescriptor);
+		viewBuffer = createBuffer2<View>(viewBufferDescriptor);
 
-		viewBufferMappedRange = viewBuffer->map<View>(0, viewBuffer->getSize());
+		viewBufferMappedRange = viewBuffer->map(0, viewBuffer->getSize());
 	}
 
 	void Physics2DRenderer::createPlaceholderBuffer() {
@@ -281,9 +281,9 @@ namespace Trident {
 
 		SET_DEBUG_NAME(placeholderBufferDescriptor, "Placeholder");
 
-		placeholderBuffer = createBuffer(placeholderBufferDescriptor);
+		placeholderBuffer = createBuffer2<Placeholder>(placeholderBufferDescriptor);
 
-		placeholderBufferMappedRange = placeholderBuffer->map<Placeholder>(0, placeholderBuffer->getSize());
+		placeholderBufferMappedRange = placeholderBuffer->map(0, placeholderBuffer->getSize());
 		placeholderBufferMappedRange->offset = {0.0f, 0.0f};
 	}
 
@@ -547,7 +547,7 @@ namespace Trident {
 		ColorBlendAttachment colorBlendAttachment{};
 		colorBlendAttachment.blend = false;
 
-		RenderPipelineDescriptor centerOfMassRenderPipelineDescriptor;
+		RenderPipelineDescriptor centerOfMassRenderPipelineDescriptor{};
 		centerOfMassRenderPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
 		centerOfMassRenderPipelineDescriptor.vertexInputBindings = {centerOfMassVertexInputBinding};
 		centerOfMassRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
@@ -840,7 +840,7 @@ namespace Trident {
 			ColorBlendAttachment colorBlendAttachment{};
 			colorBlendAttachment.blend = false;
 
-			RenderPipelineDescriptor vertexFeatureRenderPipelineDescriptor;
+			RenderPipelineDescriptor vertexFeatureRenderPipelineDescriptor{};
 			vertexFeatureRenderPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
 			vertexFeatureRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
 			vertexFeatureRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
@@ -884,7 +884,7 @@ namespace Trident {
 			ColorBlendAttachment colorBlendAttachment{};
 			colorBlendAttachment.blend = false;
 
-			RenderPipelineDescriptor edgeFeatureRenderPipelineDescriptor;
+			RenderPipelineDescriptor edgeFeatureRenderPipelineDescriptor{};
 			edgeFeatureRenderPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
 			edgeFeatureRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
 			edgeFeatureRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
@@ -976,7 +976,7 @@ namespace Trident {
 
 		const ref<Buffer> stagingBuffer = createStagingBuffer(vertexBufferSize + indexBufferSize + instanceBufferSize);
 
-		uint8* mappedRange = stagingBuffer->map<uint8>(0, stagingBuffer->getSize());
+		uint8* mappedRange = static_cast<uint8*>(stagingBuffer->map(0, stagingBuffer->getSize()));
 		Vertex* vertexMappedRange = pointer_cast<Vertex*>(mappedRange);
 		Instance* instanceMappedRange = pointer_cast<Instance*>(mappedRange + vertexBufferSize);
 		uint16* indexMappedRange = pointer_cast<uint16*>(mappedRange + vertexBufferSize + instanceBufferSize);

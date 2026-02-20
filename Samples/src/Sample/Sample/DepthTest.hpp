@@ -34,7 +34,7 @@ namespace Trident {
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
-				BeginRenderPassDescriptor beginRenderPassDescriptor;
+				BeginRenderPassDescriptor beginRenderPassDescriptor{};
 				beginRenderPassDescriptor.framebuffer = framebuffers[getSwapchainImageIndex()];
 				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 1.0f}};
 

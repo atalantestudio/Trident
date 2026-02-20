@@ -84,8 +84,8 @@ namespace Trident {
 			ref<RenderPipeline> createOutputPipeline() const;
 			// ref<RenderPipeline> createDebugPipeline() const;
 
-			ref<Buffer> createVisibilityIndirectBuffer() const;
-			ref<Buffer> createCameraBuffer() const;
+			ref<Buffer2<DrawIndirectCommand>> createVisibilityIndirectBuffer() const;
+			ref<Buffer2<Camera>> createCameraBuffer() const;
 			void createVertexPositionComponentBuffer();
 			void createVertexNormalComponentBuffer();
 			void createVertexTextureCoordinateComponentBuffer();
@@ -173,8 +173,8 @@ namespace Trident {
 			ref<RenderPipeline> outputPipeline;
 			// ref<RenderPipeline> debugPipeline;
 
-			ref<Buffer> visibilityIndirectBuffer;
-			ref<Buffer> cameraBuffer;
+			ref<Buffer2<DrawIndirectCommand>> visibilityIndirectBuffer;
+			ref<Buffer2<Camera>> cameraBuffer;
 			ref<Buffer> vertexPositionComponentBuffer;
 			ref<Buffer> vertexNormalComponentBuffer;
 			ref<Buffer> vertexTextureCoordinateComponentBuffer;
@@ -182,7 +182,7 @@ namespace Trident {
 			ref<Buffer> vertexNormalIndexBuffer;
 			ref<Buffer> vertexTextureCoordinateIndexBuffer;
 			ref<Buffer> clusterBuffer;
-			ref<Buffer> instanceBuffer;
+			ref<Buffer2<ClusteredInstance>> instanceBuffer;
 			ref<Buffer> geometryBuffer;
 
 			// Number of pixels used per material.

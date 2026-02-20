@@ -6,7 +6,7 @@
 #include "Engine/Renderer/Visibility/Renderer.hpp"
 
 namespace Trident {
-	ref<Buffer> VisibilityRenderer::createVisibilityIndirectBuffer() const {
+	ref<Buffer2<DrawIndirectCommand>> VisibilityRenderer::createVisibilityIndirectBuffer() const {
 		BufferDescriptor visibilityIndirectBufferDescriptor{};
 		visibilityIndirectBufferDescriptor.size = sizeof(DrawIndirectCommand);
 		visibilityIndirectBufferDescriptor.usage = BufferUsage::INDIRECT;
@@ -15,6 +15,6 @@ namespace Trident {
 
 		SET_DEBUG_NAME(visibilityIndirectBufferDescriptor, "Visibility indirect");
 
-		return createBuffer(visibilityIndirectBufferDescriptor);
+		return createBuffer2<DrawIndirectCommand>(visibilityIndirectBufferDescriptor);
 	}
 }

@@ -33,6 +33,11 @@ namespace Trident {
 				return adapter->createBuffer(descriptor, this);
 			}
 
+			template<typename ElementType>
+			ref<Buffer2<ElementType>> createBuffer2(const BufferDescriptor& descriptor) const {
+				return adapter->createBuffer2<ElementType>(descriptor, this);
+			}
+
 			ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor) const {
 				return adapter->createComputePipeline(descriptor, this);
 			}

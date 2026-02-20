@@ -63,8 +63,8 @@ namespace Trident {
 
 		private:
 			ref<Buffer> fontBuffer;
-			ref<Buffer> glyphBuffer;
-			ref<Buffer> glyphOffsetBuffer;
+			ref<Buffer2<GlyphBuffer>> glyphBuffer;
+			ref<Buffer2<uint32>> glyphOffsetBuffer;
 
 			ref<Image> glyphImage;
 			ref<Image> glyphMapImage;

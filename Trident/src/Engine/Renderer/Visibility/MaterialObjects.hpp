@@ -132,7 +132,7 @@ namespace Trident {
 
 		const ref<Buffer> imageStagingBuffer = createStagingBuffer(imageStagingBufferSize);
 
-		uint8* imageMappedRange = imageStagingBuffer->map<uint8>(0, imageStagingBuffer->getSize());
+		uint8* imageMappedRange = static_cast<uint8*>(imageStagingBuffer->map(0, imageStagingBuffer->getSize()));
 		uint64 imageMappedRangeOffset = 0;
 		uint32 materialReferenceBindingImageIndex = 0;
 

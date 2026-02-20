@@ -38,7 +38,7 @@ namespace Trident {
 				vertexDescriptorSet = descriptorSets[0];
 
 				cameraBuffer = createCameraBuffer();
-				cameraMappedRange = cameraBuffer->map<Camera>(0, cameraBuffer->getSize());
+				cameraMappedRange = cameraBuffer->map(0, cameraBuffer->getSize());
 
 				imageSampler = createImageSampler();
 			}
@@ -47,7 +47,7 @@ namespace Trident {
 				createMaterialObjects();
 
 				instanceBuffer = createInstanceBuffer();
-				instanceMappedRange = instanceBuffer->map<Instance>(0, instanceBuffer->getSize());
+				instanceMappedRange = instanceBuffer->map(0, instanceBuffer->getSize());
 
 				Entity entity = 0;
 
@@ -88,7 +88,7 @@ namespace Trident {
 
 				const ref<Buffer> vertexStagingBuffer = createStagingBuffer(vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize + vertexNormalIndexBufferSize + vertexTextureCoordinateComponentBufferSize + vertexTextureCoordinateIndexBufferSize + vertexTangentComponentBufferSize);
 
-				uint8* mappedRange = vertexStagingBuffer->map<uint8>(0, vertexStagingBuffer->getSize());
+				uint8* mappedRange = static_cast<uint8*>(vertexStagingBuffer->map(0, vertexStagingBuffer->getSize()));
 				float32* vertexPositionComponentMappedRange = pointer_cast<float32*>(mappedRange);
 				uint32* vertexPositionIndexMappedRange = pointer_cast<uint32*>(mappedRange + vertexPositionComponentBufferSize);
 				float32* vertexNormalComponentMappedRange = pointer_cast<float32*>(mappedRange + vertexPositionComponentBufferSize + vertexPositionIndexBufferSize);
@@ -408,7 +408,7 @@ namespace Trident {
 				});
 			}
 
-			ref<Buffer> createInstanceBuffer() const {
+			ref<Buffer2<Instance>> createInstanceBuffer() const {
 				BufferDescriptor instanceBufferDescriptor{};
 				instanceBufferDescriptor.size = sizeof(Instance) * scene->getInstanceCount();
 				instanceBufferDescriptor.usage = BufferUsage::VERTEX;
@@ -417,7 +417,7 @@ namespace Trident {
 
 				SET_DEBUG_NAME(instanceBufferDescriptor, "Instance");
 
-				return createBuffer(instanceBufferDescriptor);
+				return createBuffer2<Instance>(instanceBufferDescriptor);
 			}
 
 			void createMaterialObjects() {
@@ -564,7 +564,7 @@ namespace Trident {
 
 				const ref<Buffer> imageStagingBuffer = createStagingBuffer(imageStagingBufferSize);
 
-				uint8* imageMappedRange = imageStagingBuffer->map<uint8>(0, imageStagingBuffer->getSize());
+				uint8* imageMappedRange = static_cast<uint8*>(imageStagingBuffer->map(0, imageStagingBuffer->getSize()));
 				uint64 imageMappedRangeOffset = 0;
 				uint32 materialReferenceBindingImageIndex = 0;
 
@@ -672,7 +672,7 @@ namespace Trident {
 				getDevice()->updateDescriptorSets(writeDescriptorSets);
 			}
 
-			ref<Buffer> createCameraBuffer() const {
+			ref<Buffer2<Camera>> createCameraBuffer() const {
 				BufferDescriptor cameraBufferDescriptor{};
 				cameraBufferDescriptor.size = sizeof(Camera);
 				cameraBufferDescriptor.usage = BufferUsage::UNIFORM;
@@ -681,7 +681,7 @@ namespace Trident {
 
 				SET_DEBUG_NAME(cameraBufferDescriptor, "Camera");
 
-				return createBuffer(cameraBufferDescriptor);
+				return createBuffer2<Camera>(cameraBufferDescriptor);
 			}
 
 			ref<Sampler> createImageSampler() const {
@@ -803,8 +803,8 @@ namespace Trident {
 			sequence<ref<RenderPipeline>> materialPipelines;
 
 			ref<Buffer> vertexBuffer;
-			ref<Buffer> instanceBuffer;
-			ref<Buffer> cameraBuffer;
+			ref<Buffer2<Instance>> instanceBuffer;
+			ref<Buffer2<Camera>> cameraBuffer;
 
 			ref<Image> colorImage;
 			ref<Image> depthStencilImage;

@@ -78,7 +78,7 @@ namespace Trident {
 		visibilityIndirectBuffer = createVisibilityIndirectBuffer();
 
 		cameraBuffer = createCameraBuffer();
-		cameraMappedRange = cameraBuffer->map<Camera>(0, cameraBuffer->getSize());
+		cameraMappedRange = cameraBuffer->map(0, cameraBuffer->getSize());
 
 		materialImageSampler = createMaterialImageSampler();
 
@@ -367,9 +367,9 @@ namespace Trident {
 
 		SET_DEBUG_NAME(instanceBufferDescriptor, "Instance");
 
-		instanceBuffer = createBuffer(instanceBufferDescriptor);
+		instanceBuffer = createBuffer2<ClusteredInstance>(instanceBufferDescriptor);
 
-		instanceMappedRange = instanceBuffer->map<ClusteredInstance>(0, instanceBuffer->getSize());
+		instanceMappedRange = instanceBuffer->map(0, instanceBuffer->getSize());
 	}
 
 	void VisibilityRenderer::createGeometryBuffer() {
@@ -411,7 +411,7 @@ namespace Trident {
 
 	void VisibilityRenderer::fillSceneBuffers() const {
 		{
-			DrawIndirectCommand* visibilityIndirectMappedRange = visibilityIndirectBuffer->map<DrawIndirectCommand>(0, visibilityIndirectBuffer->getSize());
+			DrawIndirectCommand* visibilityIndirectMappedRange = visibilityIndirectBuffer->map(0, visibilityIndirectBuffer->getSize());
 			visibilityIndirectMappedRange->vertexCount = CLUSTER_INDEX_COUNT;
 			visibilityIndirectMappedRange->instanceCount = static_cast<uint32>(scene->clusters.count());
 			visibilityIndirectMappedRange->vertexOffset = 0;
@@ -432,7 +432,7 @@ namespace Trident {
 			geometryBuffer->getSize()
 		);
 
-		uint8* mappedRange = stagingBuffer->map<uint8>(0, stagingBuffer->getSize());
+		uint8* mappedRange = static_cast<uint8*>(stagingBuffer->map(0, stagingBuffer->getSize()));
 		uint64 sourceOffset = 0;
 
 		float32* vertexPositionComponentMappedRange = pointer_cast<float32*>(mappedRange + sourceOffset);

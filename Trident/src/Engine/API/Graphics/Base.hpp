@@ -27,6 +27,10 @@ namespace Trident {
 	struct Subpass;
 
 	class Buffer;
+
+	template<typename ElementType>
+	class Buffer2;
+
 	class CommandBuffer;
 	class CommandEncoder;
 	class ComputePipeline;

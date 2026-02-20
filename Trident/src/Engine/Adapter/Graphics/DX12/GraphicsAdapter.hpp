@@ -11,8 +11,6 @@
 namespace Trident::DX12 {
 	void bindAdapter(Trident::GraphicsAdapter* adapter);
 
-	ref<Trident::Buffer> createBuffer(const BufferDescriptor& descriptor, const Trident::Device* device);
-
 	ref<Trident::ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor, const Trident::Device* device);
 
 	ref<DescriptorSetLayout> createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings, const Trident::Device* device);

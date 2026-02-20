@@ -193,9 +193,9 @@ namespace Trident {
 				ref<RenderPipeline> edgeFeatureRenderPipeline;
 			#endif
 
-			ref<Buffer> cameraBuffer;
-			ref<Buffer> viewBuffer;
-			ref<Buffer> placeholderBuffer;
+			ref<Buffer2<Camera>> cameraBuffer;
+			ref<Buffer2<View>> viewBuffer;
+			ref<Buffer2<Placeholder>> placeholderBuffer;
 
 			#if defined(SHOW_DISTANCE)
 				ref<Buffer> closestPointBuffer;
@@ -206,9 +206,9 @@ namespace Trident {
 				ref<Buffer> edgeFeatureBuffer;
 			#endif
 
-			ref<Buffer> vertexBuffer;
-			ref<Buffer> instanceBuffer;
-			ref<Buffer> centerOfMassBuffer;
+			ref<Buffer2<Vertex>> vertexBuffer;
+			ref<Buffer2<Instance>> instanceBuffer;
+			ref<Buffer2<CenterOfMass>> centerOfMassBuffer;
 			ref<Buffer> indexBuffer;
 
 			Camera* cameraBufferMappedRange = nullptr;

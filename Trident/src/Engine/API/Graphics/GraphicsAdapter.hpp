@@ -8,16 +8,16 @@
 #include "Engine/Application/ApplicationProperties.hpp"
 #include "Engine/Application/ProjectDescriptor.hpp"
 #include "Engine/Filesystem/Asset/ShaderModuleAsset.hpp"
+#include "Engine/Validation/Descriptor.hpp"
 
 namespace Trident {
 	class Window;
 
 	typedef void (*BindAdapterImplementation)(GraphicsAdapter* adapter);
-
-	typedef ref<Buffer> (*CreateBufferImplementation)(const BufferDescriptor& descriptor, const Device* device);
+	typedef ref<Buffer> (*CreateBufferImplementation)(const GraphicsAdapter* adapter, const BufferDescriptor& descriptor, uint32 stride, const Device* device);
 	typedef ref<ComputePipeline> (*CreateComputePipelineImplementation)(const ComputePipelineDescriptor& descriptor, const Device* device);
 	typedef ref<DescriptorSetLayout> (*CreateDescriptorSetLayoutImplementation)(const sequence<DescriptorSetLayoutBinding>& bindings, const Device* device);
-	typedef ref<Device> (*CreateDeviceImplementation)(const Trident::GraphicsAdapter* adapter, const PhysicalDevice* physicalDevice);
+	typedef ref<Device> (*CreateDeviceImplementation)(const GraphicsAdapter* adapter, const PhysicalDevice* physicalDevice);
 	typedef ref<Fence> (*CreateFenceImplementation)(const FenceDescriptor& descriptor);
 	typedef ref<Framebuffer> (*CreateFramebufferImplementation)(const FramebufferDescriptor& descriptor);
 	typedef ref<Image> (*CreateImageImplementation)(const ImageDescriptor& descriptor);
@@ -35,7 +35,9 @@ namespace Trident {
 
 	typedef ref<Surface> (*CreateSurfaceImplementation)(const Instance* instance, const Window* window);
 	typedef ref<Swapchain> (*CreateSwapchainImplementation)(const SwapchainDescriptor& descriptor, const Device* device);
+	typedef void* (*MapBufferImplementation)(const Buffer* buffer, uint64 offset, uint64 size);
 	typedef ref<PhysicalDevice> (*SelectPhysicalDeviceImplementation)(const GraphicsAdapter* adapter, const Instance* instance, bool preferIntegratedGpu);
+	typedef void (*UnmapBufferImplementation)(const Buffer* buffer);
 
 	class GraphicsAdapter {
 		public:
@@ -47,6 +49,15 @@ namespace Trident {
 			GraphicsAPI getApi() const;
 
 			ref<Buffer> createBuffer(const BufferDescriptor& descriptor, const Device* device) const;
+
+			template<typename ElementType>
+			ref<Buffer2<ElementType>> createBuffer2(const BufferDescriptor& descriptor, const Device* device) const {
+				DEBUG_DESCRIPTOR_GUARD(descriptor);
+
+				ref<Buffer> buffer = createBufferImplementation(this, descriptor, static_cast<uint32>(sizeof(ElementType)), device);
+
+				return std::static_pointer_cast<Buffer2<ElementType>>(buffer);
+			}
 
 			ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor, const Device* device) const;
 
@@ -79,7 +90,11 @@ namespace Trident {
 
 			ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor, const Device* device) const;
 
+			void* mapBuffer(const Buffer* buffer, uint64 size, uint64 offset) const;
+
 			ref<PhysicalDevice> selectPhysicalDevice(const Instance* instance, bool preferIntegratedGpu) const;
+
+			void unmapBuffer(const Buffer* buffer) const;
 
 		// TODO: Do not expose to the client side.
 		public:
@@ -101,7 +116,9 @@ namespace Trident {
 			CreateShaderModuleFromCodeImplementation createShaderModuleFromCodeImplementation;
 			CreateSurfaceImplementation createSurfaceImplementation;
 			CreateSwapchainImplementation createSwapchainImplementation;
+			MapBufferImplementation mapBufferImplementation;
 			SelectPhysicalDeviceImplementation selectPhysicalDeviceImplementation;
+			UnmapBufferImplementation unmapBufferImplementation;
 
 		private:
 			GraphicsAPI api;

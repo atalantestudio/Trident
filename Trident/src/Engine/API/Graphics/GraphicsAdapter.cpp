@@ -37,7 +37,11 @@ namespace Trident {
 	ref<Buffer> GraphicsAdapter::createBuffer(const BufferDescriptor& descriptor, const Device* device) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
-		return createBufferImplementation(descriptor, device);
+		// TODO
+		BREAKPOINT();
+
+		return nullptr;
+		// return createBufferImplementation(descriptor, 1, device);
 	}
 
 	ref<ComputePipeline> GraphicsAdapter::createComputePipeline(const ComputePipelineDescriptor& descriptor, const Device* device) const {
@@ -129,7 +133,17 @@ namespace Trident {
 		return createSwapchainImplementation(descriptor, device);
 	}
 
+	void* GraphicsAdapter::mapBuffer(const Buffer* buffer, uint64 size, uint64 offset) const {
+		// TODO: Validate arguments.
+
+		return mapBufferImplementation(buffer, size, offset);
+	}
+
 	ref<PhysicalDevice> GraphicsAdapter::selectPhysicalDevice(const Instance* instance, bool preferIntegratedGpu) const {
 		return selectPhysicalDeviceImplementation(this, instance, preferIntegratedGpu);
+	}
+
+	void GraphicsAdapter::unmapBuffer(const Buffer* buffer) const {
+		unmapBufferImplementation(buffer);
 	}
 }

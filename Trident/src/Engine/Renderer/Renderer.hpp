@@ -29,6 +29,11 @@ namespace Trident {
 		public:
 			static ref<Buffer> createBuffer(const BufferDescriptor& descriptor);
 
+			template<typename ElementType>
+			static ref<Buffer2<ElementType>> createBuffer2(const BufferDescriptor& descriptor) {
+				return layerCompositor->device->createBuffer2<ElementType>(descriptor);
+			}
+
 			/// Creates and returns a buffer suitable for memory transfers from the CPU to the GPU.
 			// `size` is in bytes.
 			// If `persistent` is true, the buffer will stay mapped until it is destroyed.

@@ -262,8 +262,8 @@ namespace Trident {
 		// D3D12_HEAP_TYPE_UPLOAD heaps only allow CPU writes.
 		// The source and destination buffers are mapped to emulate a GPU copy command.
 		if (_destinationBuffer->heapType == D3D12_HEAP_TYPE_UPLOAD) {
-			const uint8* sourceMappedRange = sourceBuffer->map<uint8>(0, sourceBuffer->getSize());
-			uint8* destinationMappedRange = destinationBuffer->map<uint8>(0, destinationBuffer->getSize());
+			const uint8* sourceMappedRange = static_cast<const uint8*>(sourceBuffer->map(0, sourceBuffer->getSize()));
+			uint8* destinationMappedRange = static_cast<uint8*>(destinationBuffer->map(0, destinationBuffer->getSize()));
 
 			for (const BufferCopyRegion& copyRegion : copyRegions) {
 				std::copy_n(sourceMappedRange + copyRegion.sourceOffset, copyRegion.size, destinationMappedRange + copyRegion.destinationOffset);
@@ -339,7 +339,7 @@ namespace Trident {
 	}
 
 	void DX12::CommandEncoder::dispatchIndirect(ref<Trident::Buffer> buffer, uint64 bufferOffset) {
-		ADAPTER_ASSERT(buffer->usage & BufferUsage::INDIRECT, "The buffer is not an indirect buffer.");
+		ADAPTER_ASSERT(buffer->getUsage() & BufferUsage::INDIRECT, "The buffer is not an indirect buffer.");
 
 		const ref<DX12::Buffer> indirectBuffer = std::static_pointer_cast<DX12::Buffer>(buffer);
 
@@ -481,7 +481,7 @@ namespace Trident {
 	}
 
 	void DX12::CommandEncoder::drawIndirect(ref<Trident::Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
-		ADAPTER_ASSERT(buffer->usage & BufferUsage::INDIRECT, "The buffer is not an indirect buffer.");
+		ADAPTER_ASSERT(buffer->getUsage() & BufferUsage::INDIRECT, "The buffer is not an indirect buffer.");
 
 		const ref<DX12::Buffer> indirectBuffer = std::static_pointer_cast<DX12::Buffer>(buffer);
 
@@ -519,7 +519,7 @@ namespace Trident {
 	}
 
 	void DX12::CommandEncoder::drawIndexedIndirect(ref<Trident::Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
-		ADAPTER_ASSERT(buffer->usage & BufferUsage::INDIRECT, "The buffer is not an indirect buffer.");
+		ADAPTER_ASSERT(buffer->getUsage() & BufferUsage::INDIRECT, "The buffer is not an indirect buffer.");
 
 		const ref<DX12::Buffer> indirectBuffer = std::static_pointer_cast<DX12::Buffer>(buffer);
 

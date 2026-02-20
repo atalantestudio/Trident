@@ -39,7 +39,7 @@ namespace Trident {
 	}
 
 	ref<Buffer> Renderer::createStagingBuffer(uint64 size, bool persistent) {
-		BufferDescriptor stagingBufferDescriptor;
+		BufferDescriptor stagingBufferDescriptor{};
 		stagingBufferDescriptor.size = size;
 		stagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
 		stagingBufferDescriptor.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT;

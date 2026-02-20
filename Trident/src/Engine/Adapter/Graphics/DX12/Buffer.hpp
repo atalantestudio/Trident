@@ -9,17 +9,24 @@
 namespace Trident {
 	class DX12::Buffer final : public Trident::Buffer {
 		public:
-			explicit Buffer(const BufferDescriptor& descriptor, const DX12::Device* device);
-
-			~Buffer() final override;
-
-			void unmap() const final override;
-
-			void* getMappedRange(uint64 offset, uint64 size) const final override;
+			explicit Buffer(const Trident::GraphicsAdapter* adapter, const BufferDescriptor& descriptor);
 
 		public:
 			ID3D12Resource* resource;
 			ID3D12CommandSignature* commandSignature = nullptr;
 			D3D12_HEAP_TYPE heapType;
+
+			// TODO: Use.
+			UINT stride;
 	};
+
+	namespace DX12 {
+		ref<Trident::Buffer> createBuffer(const Trident::GraphicsAdapter* adapter, const BufferDescriptor& descriptor, UINT stride, const Trident::Device* device);
+
+		void destroyBuffer(const Trident::Buffer* buffer);
+
+		void* mapBuffer(const Trident::Buffer* buffer, uint64 offset, uint64 size);
+
+		void unmapBuffer(const Trident::Buffer* buffer);
+	}
 }

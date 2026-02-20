@@ -3,45 +3,70 @@
 
 #pragma once
 
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
+#include "Engine/API/Rendering/Access.hpp"
+#include "Engine/API/Rendering/BufferUsage.hpp"
 #include "Engine/API/Rendering/Descriptor/BufferDescriptor.hpp"
 #include "Engine/Validation/Descriptor.hpp"
 
 namespace Trident {
 	class Buffer {
 		public:
-			virtual ~Buffer() = default;
+			~Buffer() {
+				// adapter->destroyBuffer(this);
+			}
 
 			/// Returns the size in bytes of the buffer.
 			uint64 getSize() const {
 				return size;
 			}
 
-			/// Maps a range of the buffer to CPU memory.
-			/// The offset and size must be provided in bytes.
-			template<typename T>
-			T* map(uint64 offset, uint64 size) const {
-				return static_cast<T*>(getMappedRange(offset, size));
+			/// Returns the current buffer usage flags.
+			BufferUsage getUsage() const {
+				return usage;
+			}
+
+			/// Returns the current buffer access flags.
+			Access getAccess() const {
+				return access;
+			}
+
+			void* map(uint64 offset, uint64 size) const {
+				return adapter->mapBuffer(pointer_cast<const Buffer*>(this), offset, size);
 			}
 
 			/// Unmaps the buffer.
-			virtual void unmap() const = 0;
-
-		protected:
-			explicit Buffer(const BufferDescriptor& descriptor) :
-				size(descriptor.size),
-				usage(descriptor.usage)
-			{
-				DEBUG_DESCRIPTOR_GUARD(descriptor);
+			void unmap() const {
+				adapter->unmapBuffer(this);
 			}
 
-		private:
-			virtual void* getMappedRange(uint64 offset, uint64 size) const = 0;
-
-		public:
-			// NOTE: Only used for debug assertions.
-			BufferUsage usage;
+		protected:
+			explicit Buffer(const GraphicsAdapter* adapter, const BufferDescriptor& descriptor) :
+				adapter(adapter),
+				size(descriptor.size),
+				usage(descriptor.usage),
+				access{}
+			{
+				// adapter->createBuffer(this, descriptor);
+			}
 
 		protected:
 			uint64 size;
+			// TODO: Add memory suballocation.
+			BufferUsage usage;
+			Access access;
+
+		private:
+			const GraphicsAdapter* adapter;
+	};
+
+	template<typename ElementType>
+	class Buffer2 : public Buffer {
+		public:
+			/// Maps a range of the buffer to host memory.
+			/// The offset and size must be provided in bytes.
+			ElementType* map(uint64 offset, uint64 size) const {
+				return static_cast<ElementType*>(Buffer::map(offset, size));
+			}
 	};
 }

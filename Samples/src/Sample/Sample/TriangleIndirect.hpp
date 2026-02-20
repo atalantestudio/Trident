@@ -144,7 +144,7 @@ namespace Trident {
 
 				stagingBuffer->unmap();
 
-				BufferDescriptor vertexBufferDescriptor;
+				BufferDescriptor vertexBufferDescriptor{};
 				vertexBufferDescriptor.size = VERTEX_COUNT * sizeof(Vertex);
 				vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 				vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
