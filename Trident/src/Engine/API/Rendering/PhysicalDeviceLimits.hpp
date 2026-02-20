@@ -4,6 +4,7 @@
 #pragma once
 
 namespace Trident {
+	/// A report of the limits of a physical device.
 	struct PhysicalDeviceLimits {
 		// Granularity in bytes at which buffer/linear image resources and optimal image resources
 		// can be bound to adjacent offsets in the same device memory without aliasing.
@@ -64,11 +65,11 @@ namespace Trident {
 		float32 pointSizeGranularity;
 
 		/// The minimum required alignment for uniform buffers.
-		/// This value applies to the VkDescriptorBufferInfo::offset member.
+		/// This value applies to the `VkDescriptorBufferInfo::offset` member.
 		uint64 minUniformBufferOffsetAlignment;
 
 		/// The minimum required alignment for storage buffers.
-		/// This value applies to the VkDescriptorBufferInfo::offset member.
+		/// This value applies to the `VkDescriptorBufferInfo::offset` member.
 		uint64 minStorageBufferOffsetAlignment;
 	};
 }

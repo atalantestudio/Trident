@@ -14,6 +14,7 @@ namespace Trident {
 	class Window;
 
 	typedef void (*BindAdapterImplementation)(GraphicsAdapter* adapter);
+	typedef AcquireNextImageStatus (*AcquireNextImageImplementation)(const Swapchain* swapchain, const Semaphore* semaphore, uint32& imageIndex);
 	typedef ref<Buffer> (*CreateBufferImplementation)(const Device* device, const BufferDescriptor& descriptor, uint32 stride);
 	typedef ref<ComputePipeline> (*CreateComputePipelineImplementation)(const ComputePipelineDescriptor& descriptor, const Device* device);
 	typedef ref<DescriptorSetLayout> (*CreateDescriptorSetLayoutImplementation)(const sequence<DescriptorSetLayoutBinding>& bindings, const Device* device);
@@ -35,9 +36,10 @@ namespace Trident {
 
 	typedef ref<Surface> (*CreateSurfaceImplementation)(const Instance* instance, const Window* window);
 	typedef ref<Swapchain> (*CreateSwapchainImplementation)(const SwapchainDescriptor& descriptor, const Device* device);
-	typedef void (*DestroyBufferImplementation)(const Buffer* buffer, const Device* device);
+	typedef void (*DestroyBufferImplementation)(const Device* device, const Buffer* buffer);
+	typedef void (*DestroyInstanceImplementation)(const Instance* instance);
 	typedef void* (*MapBufferImplementation)(const Device* device, const Buffer* buffer, uint64 offset, uint64 size);
-	typedef ref<PhysicalDevice> (*SelectPhysicalDeviceImplementation)(const GraphicsAdapter* adapter, const Instance* instance, bool preferIntegratedGpu);
+	typedef ref<PhysicalDevice> (*SelectPhysicalDeviceImplementation)(const Instance* instance, bool preferIntegratedGpu);
 	typedef void (*UnmapBufferImplementation)(const Device* device, const Buffer* buffer);
 
 	class GraphicsAdapter {
@@ -91,7 +93,9 @@ namespace Trident {
 
 			ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor, const Device* device) const;
 
-			void destroyBuffer(const Buffer* buffer, const Device* device) const;
+			void destroyBuffer(const Device* device, const Buffer* buffer) const;
+
+			void destroyInstance(const Instance* instance) const;
 
 			void* mapBuffer(const Device* device, const Buffer* buffer, uint64 offset, uint64 size) const;
 
@@ -101,6 +105,7 @@ namespace Trident {
 
 		// TODO: Do not expose to the client side.
 		public:
+			AcquireNextImageImplementation acquireNextImageImplementation;
 			CreateBufferImplementation createBufferImplementation;
 			CreateComputePipelineImplementation createComputePipelineImplementation;
 			CreateDescriptorSetLayoutImplementation createDescriptorSetLayoutImplementation;
@@ -120,6 +125,7 @@ namespace Trident {
 			CreateSurfaceImplementation createSurfaceImplementation;
 			CreateSwapchainImplementation createSwapchainImplementation;
 			DestroyBufferImplementation destroyBufferImplementation;
+			DestroyInstanceImplementation destroyInstanceImplementation;
 			MapBufferImplementation mapBufferImplementation;
 			SelectPhysicalDeviceImplementation selectPhysicalDeviceImplementation;
 			UnmapBufferImplementation unmapBufferImplementation;

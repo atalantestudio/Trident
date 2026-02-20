@@ -10,14 +10,13 @@
 namespace Trident {
 	class PhysicalDevice {
 		public:
-			virtual ~PhysicalDevice() = default;
-
-			ref<Device> createDevice() const {
-				return adapter->createDevice(this);
-			}
-
 			const PhysicalDeviceLimits& getLimits() const {
 				return limits;
+			}
+
+			/// Creates and returns a logical device from this physical device.
+			ref<Device> createDevice() const {
+				return adapter->createDevice(this);
 			}
 
 		protected:
@@ -26,9 +25,8 @@ namespace Trident {
 			{}
 
 		protected:
-			PhysicalDeviceLimits limits;
-
-		private:
 			const GraphicsAdapter* adapter;
+
+			PhysicalDeviceLimits limits;
 	};
 }

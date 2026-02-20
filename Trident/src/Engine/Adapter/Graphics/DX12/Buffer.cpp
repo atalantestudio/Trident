@@ -82,7 +82,7 @@ namespace Trident {
 		return buffer;
 	}
 
-	void DX12::destroyBuffer(const Trident::Buffer* buffer, const Trident::Device* device) {
+	void DX12::destroyBuffer(const Trident::Device* device, const Trident::Buffer* buffer) {
 		const DX12::Buffer* _buffer = static_cast<const DX12::Buffer*>(buffer);
 
 		_buffer->resource->Release();

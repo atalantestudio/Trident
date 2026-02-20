@@ -11,8 +11,11 @@
 namespace Trident {
 	class Instance {
 		public:
-			virtual ~Instance() = default;
+			~Instance() {
+				adapter->destroyInstance(this);
+			}
 
+			// TODO: Use ref<Window> instead.
 			ref<Surface> createSurface(const Window* window) const {
 				return adapter->createSurface(this, window);
 			}
@@ -26,7 +29,8 @@ namespace Trident {
 				adapter(adapter)
 			{}
 
-		private:
+		public:
+			// TODO: This should be a protected member but selectPhysicalDevice implementation needs to access it.
 			const GraphicsAdapter* adapter;
 	};
 }

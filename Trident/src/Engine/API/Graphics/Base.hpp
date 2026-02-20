@@ -4,6 +4,8 @@
 #pragma once
 
 namespace Trident {
+	enum class AcquireNextImageStatus : uint8;
+
 	struct AttachmentImageDescriptor;
 	struct BeginRenderPassDescriptor;
 	struct BufferDescriptor;

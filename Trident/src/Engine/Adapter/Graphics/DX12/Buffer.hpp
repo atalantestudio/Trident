@@ -23,7 +23,7 @@ namespace Trident {
 	namespace DX12 {
 		ref<Trident::Buffer> createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, UINT stride);
 
-		void destroyBuffer(const Trident::Buffer* buffer, const Trident::Device* device);
+		void destroyBuffer(const Trident::Device* device, const Trident::Buffer* buffer);
 
 		void* mapBuffer(const Trident::Device* device, const Trident::Buffer* buffer, uint64 offset, uint64 size);
 

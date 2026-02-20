@@ -29,6 +29,7 @@ namespace Trident {
 
 			virtual sequence<ref<DescriptorSet>> allocateDescriptorSets(view<ref<DescriptorSetLayout>> descriptorSetLayouts) = 0;
 
+			// TODO: Deprecate (replace with createBuffer2).
 			ref<Buffer> createBuffer(const BufferDescriptor& descriptor) const {
 				return adapter->createBuffer(descriptor, this);
 			}
@@ -65,7 +66,7 @@ namespace Trident {
 			}
 
 			void destroyBuffer(const Buffer* buffer) const {
-				adapter->destroyBuffer(buffer, this);
+				adapter->destroyBuffer(this, buffer);
 			}
 
 			void* mapBuffer(const Buffer* buffer, uint64 offset, uint64 size) const {

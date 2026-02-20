@@ -17,8 +17,6 @@ namespace Trident::DX12 {
 
 	ref<Trident::Device> createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice);
 
-	ref<Trident::Instance> createInstance(const Trident::GraphicsAdapter* adapter, const InstanceDescriptor& descriptor);
-
 	ref<Trident::MemoryAllocator> createMemoryAllocator(const Trident::Device* device);
 
 	ref<Trident::PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor, const Trident::Device* device);
@@ -30,6 +28,4 @@ namespace Trident::DX12 {
 	ref<Trident::Surface> createSurface(const Trident::Instance* instance, const Window* window);
 
 	ref<Trident::Swapchain> createSwapchain(const SwapchainDescriptor& descriptor, const Trident::Device* device);
-
-	ref<Trident::PhysicalDevice> selectPhysicalDevice(const Trident::GraphicsAdapter* adapter, const Trident::Instance* instance, bool preferIntegratedGpu);
 }

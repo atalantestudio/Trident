@@ -32,6 +32,7 @@ namespace Trident {
 		adapter->createSurfaceImplementation = DX12::createSurface;
 		adapter->createSwapchainImplementation = DX12::createSwapchain;
 		adapter->destroyBufferImplementation = DX12::destroyBuffer;
+		adapter->destroyInstanceImplementation = DX12::destroyInstance;
 		adapter->mapBufferImplementation = DX12::mapBuffer;
 		adapter->selectPhysicalDeviceImplementation = DX12::selectPhysicalDevice;
 		adapter->unmapBufferImplementation = DX12::unmapBuffer;
@@ -47,10 +48,6 @@ namespace Trident {
 
 	ref<Trident::Device> DX12::createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice) {
 		return createRef<DX12::Device>(adapter, static_cast<const DX12::PhysicalDevice*>(physicalDevice));
-	}
-
-	ref<Trident::Instance> DX12::createInstance(const Trident::GraphicsAdapter* adapter, const InstanceDescriptor& descriptor) {
-		return createRef<DX12::Instance>(adapter, descriptor);
 	}
 
 	ref<Trident::MemoryAllocator> DX12::createMemoryAllocator(const Trident::Device* device) {
@@ -79,13 +76,5 @@ namespace Trident {
 
 	ref<Trident::Swapchain> DX12::createSwapchain(const SwapchainDescriptor& descriptor, const Trident::Device* device) {
 		return createRef<DX12::Swapchain>(descriptor, static_cast<const DX12::Device*>(device));
-	}
-
-	ref<Trident::PhysicalDevice> DX12::selectPhysicalDevice(const Trident::GraphicsAdapter* adapter, const Trident::Instance* instance, bool preferIntegratedGpu) {
-		const DX12::Instance* _instance = static_cast<const DX12::Instance*>(instance);
-
-		IDXGIAdapter* dxgiAdapter = _instance->selectAdapter(preferIntegratedGpu);
-
-		return createRef<DX12::PhysicalDevice>(adapter, _instance, dxgiAdapter);
 	}
 }

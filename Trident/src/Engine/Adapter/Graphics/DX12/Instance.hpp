@@ -8,18 +8,17 @@
 namespace Trident {
 	class DX12::Instance final : public Trident::Instance {
 		public:
-			explicit Instance(const Trident::GraphicsAdapter* adapter, const InstanceDescriptor& descriptor);
-
-			~Instance() final override;
-
-			IDXGIAdapter* selectAdapter(bool preferIntegratedGpu) const;
-
-		private:
-			bool isIntegratedAdapter(const DXGI_ADAPTER_DESC& adapterDescriptor) const;
-
-			uint32 calculateAdapterScore(const DXGI_ADAPTER_DESC& adapterDescriptor, bool preferIntegratedGpu) const;
+			explicit Instance(const Trident::GraphicsAdapter* adapter);
 
 		public:
 			IDXGIFactory4* factory;
 	};
+
+	namespace DX12 {
+		ref<Trident::Instance> createInstance(const Trident::GraphicsAdapter* adapter, const InstanceDescriptor& descriptor);
+
+		ref<Trident::PhysicalDevice> selectPhysicalDevice(const Trident::Instance* instance, bool preferIntegratedGpu);
+
+		void destroyInstance(const Trident::Instance* instance);
+	}
 }
