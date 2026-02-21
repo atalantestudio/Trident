@@ -161,7 +161,10 @@ namespace Trident {
 		rootComponent.size = {FIT, FIT};
 		rootComponent.padding = {0_px, 0_px};
 		rootComponent.anchorPoint = AnchorPoint::TOP | AnchorPoint::LEFT;
+
+		// TODO: Change to VERTICAL.
 		rootComponent.layoutDirection = HORIZONTAL;
+
 		rootComponent.layoutSpacing = 0_px;
 		rootComponent.color = 0xffffffff;
 		rootComponent.image = 0;
