@@ -13,8 +13,9 @@
 namespace Trident {
 	class Window;
 
-	typedef void (*BindAdapterImplementation)(GraphicsAdapter* adapter);
 	typedef AcquireNextImageStatus (*AcquireNextImageImplementation)(const Device* device, const Swapchain* swapchain, const Semaphore* semaphore, uint32& imageIndex);
+	typedef sequence<ref<DescriptorSet>> (*AllocateDescriptorSetsImplementation)(const Device* device, view<ref<DescriptorSetLayout>> descriptorSetLayouts);
+	typedef void (*BindAdapterImplementation)(GraphicsAdapter* adapter);
 	typedef ref<Buffer> (*CreateBufferImplementation)(const Device* device, const BufferDescriptor& descriptor, uint32 stride);
 	typedef ref<ComputePipeline> (*CreateComputePipelineImplementation)(const ComputePipelineDescriptor& descriptor, const Device* device);
 	typedef ref<DescriptorSetLayout> (*CreateDescriptorSetLayoutImplementation)(const sequence<DescriptorSetLayoutBinding>& bindings, const Device* device);
@@ -35,14 +36,19 @@ namespace Trident {
 	typedef ref<ShaderModule> (*CreateShaderModuleFromCodeImplementation)(const ShaderModuleDescriptor& descriptor, view<char8> code, const Device* device);
 
 	typedef ref<Surface> (*CreateSurfaceImplementation)(const Instance* instance, const Window* window);
-	typedef ref<Swapchain> (*CreateSwapchainImplementation)(const SwapchainDescriptor& descriptor, const Device* device);
+	typedef ref<Swapchain> (*CreateSwapchainImplementation)(const Device* device, const SwapchainDescriptor& descriptor);
 	typedef void (*DestroyBufferImplementation)(const Device* device, const Buffer* buffer);
 	typedef void (*DestroyDeviceImplementation)(const Device* device);
 	typedef void (*DestroyInstanceImplementation)(const Instance* instance);
+	typedef void (*DestroySurfaceImplementation)(const Instance* instance, const Surface* surface);
+	typedef void (*DestroySwapchainImplementation)(const Device* device, const Swapchain* swapchain);
+	typedef ref<Queue> (*GetQueueImplementation)(const Device* device, QueueFamilyCapability queueFamilyCapability);
+	typedef ImageFormat (*GetSurfaceFormatImplementation)(const Surface* surface);
 	typedef void* (*MapBufferImplementation)(const Device* device, const Buffer* buffer, uint64 offset, uint64 size);
 	typedef void (*ResetFenceImplementation)(const Device* device, const Fence* fence);
 	typedef ref<PhysicalDevice> (*SelectPhysicalDeviceImplementation)(const Instance* instance, bool preferIntegratedGpu);
 	typedef void (*UnmapBufferImplementation)(const Device* device, const Buffer* buffer);
+	typedef void (*UpdateDescriptorSetsImplementation)(const Device* device, view<WriteDescriptorSet> writeDescriptorSets);
 	typedef void (*WaitForFenceImplementation)(const Device* device, const Fence* fence);
 	typedef void (*WaitIdleImplementation)(const Device* device);
 
@@ -56,6 +62,8 @@ namespace Trident {
 			GraphicsAPI getApi() const;
 
 			AcquireNextImageStatus acquireNextImage(const Device* device, const Swapchain* swapchain, const Semaphore* semaphore, uint32& imageIndex) const;
+
+			sequence<ref<DescriptorSet>> allocateDescriptorSets(const Device* device, view<ref<DescriptorSetLayout>> descriptorSetLayouts) const;
 
 			ref<Buffer> createBuffer(const BufferDescriptor& descriptor, const Device* device) const;
 
@@ -97,13 +105,21 @@ namespace Trident {
 
 			ref<Surface> createSurface(const Instance* instance, const Window* window) const;
 
-			ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor, const Device* device) const;
+			ref<Swapchain> createSwapchain(const Device* device, const SwapchainDescriptor& descriptor) const;
 
 			void destroyBuffer(const Device* device, const Buffer* buffer) const;
 
 			void destroyDevice(const Device* device) const;
 
 			void destroyInstance(const Instance* instance) const;
+
+			void destroySurface(const Instance* instance, const Surface* surface) const;
+
+			void destroySwapchain(const Device* device, const Swapchain* swapchain) const;
+
+			ref<Queue> getQueue(const Device* device, QueueFamilyCapability queueFamilyCapability) const;
+
+			ImageFormat getSurfaceFormat(const Surface* surface) const;
 
 			void* mapBuffer(const Device* device, const Buffer* buffer, uint64 offset, uint64 size) const;
 
@@ -113,6 +129,8 @@ namespace Trident {
 
 			void unmapBuffer(const Device* device, const Buffer* buffer) const;
 
+			void updateDescriptorSets(const Device* device, view<WriteDescriptorSet> writeDescriptorSets) const;
+
 			void waitForFence(const Device* device, const Fence* fence) const;
 
 			void waitIdle(const Device* device) const;
@@ -120,6 +138,7 @@ namespace Trident {
 		// TODO: Do not expose to the client side.
 		public:
 			AcquireNextImageImplementation acquireNextImageImplementation;
+			AllocateDescriptorSetsImplementation allocateDescriptorSetsImplementation;
 			CreateBufferImplementation createBufferImplementation;
 			CreateComputePipelineImplementation createComputePipelineImplementation;
 			CreateDescriptorSetLayoutImplementation createDescriptorSetLayoutImplementation;
@@ -141,10 +160,15 @@ namespace Trident {
 			DestroyBufferImplementation destroyBufferImplementation;
 			DestroyDeviceImplementation destroyDeviceImplementation;
 			DestroyInstanceImplementation destroyInstanceImplementation;
+			DestroySurfaceImplementation destroySurfaceImplementation;
+			DestroySwapchainImplementation destroySwapchainImplementation;
+			GetQueueImplementation getQueueImplementation;
+			GetSurfaceFormatImplementation getSurfaceFormatImplementation;
 			MapBufferImplementation mapBufferImplementation;
 			ResetFenceImplementation resetFenceImplementation;
 			SelectPhysicalDeviceImplementation selectPhysicalDeviceImplementation;
 			UnmapBufferImplementation unmapBufferImplementation;
+			UpdateDescriptorSetsImplementation updateDescriptorSetsImplementation;
 			WaitForFenceImplementation waitForFenceImplementation;
 			WaitIdleImplementation waitIdleImplementation;
 

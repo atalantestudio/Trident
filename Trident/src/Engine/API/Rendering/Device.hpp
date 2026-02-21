@@ -21,16 +21,14 @@ namespace Trident {
 				adapter->destroyDevice(this);
 			}
 
-			ref<MemoryAllocator> getMemoryAllocator() const {
-				return memoryAllocator;
-			}
-
 			// Acquires the next available swapchain image and writes its index to imageIndex.
 			AcquireNextImageStatus acquireNextImage(ref<Swapchain> swapchain, ref<Semaphore> semaphore, uint32& imageIndex) const {
 				return adapter->acquireNextImage(this, swapchain.get(), semaphore.get(), imageIndex);
 			}
 
-			virtual sequence<ref<DescriptorSet>> allocateDescriptorSets(view<ref<DescriptorSetLayout>> descriptorSetLayouts) = 0;
+			sequence<ref<DescriptorSet>> allocateDescriptorSets(view<ref<DescriptorSetLayout>> descriptorSetLayouts) const {
+				return adapter->allocateDescriptorSets(this, descriptorSetLayouts);
+			}
 
 			// TODO: Deprecate (replace with createBuffer2).
 			ref<Buffer> createBuffer(const BufferDescriptor& descriptor) const {
@@ -65,20 +63,28 @@ namespace Trident {
 			}
 
 			ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) const {
-				return adapter->createSwapchain(descriptor, this);
+				return adapter->createSwapchain(this, descriptor);
 			}
 
 			void destroyBuffer(const Buffer* buffer) const {
 				adapter->destroyBuffer(this, buffer);
 			}
 
+			ref<MemoryAllocator> getMemoryAllocator() const {
+				return memoryAllocator;
+			}
+
+			ref<PhysicalDevice> getPhysicalDevice() const {
+				return physicalDevice;
+			}
+
+			ref<Queue> getQueue(QueueFamilyCapability queueFamilyCapability) const {
+				return adapter->getQueue(this, queueFamilyCapability);
+			}
+
 			void* mapBuffer(const Buffer* buffer, uint64 offset, uint64 size) const {
 				return adapter->mapBuffer(this, buffer, offset, size);
 			}
-
-			ref<PhysicalDevice> getPhysicalDevice() const;
-
-			virtual ref<Queue> getQueue(QueueFamilyCapability queueFamilyCapability) const = 0;
 
 			void resetFence(ref<Fence> fence) const {
 				adapter->resetFence(this, fence.get());
@@ -88,7 +94,9 @@ namespace Trident {
 				return adapter->unmapBuffer(this, buffer);
 			}
 
-			virtual void updateDescriptorSets(view<WriteDescriptorSet> writeDescriptorSets) const = 0;
+			void updateDescriptorSets(view<WriteDescriptorSet> writeDescriptorSets) const {
+				adapter->updateDescriptorSets(this, writeDescriptorSets);
+			}
 
 			void waitForFence(ref<Fence> fence) const {
 				adapter->waitForFence(this, fence.get());
@@ -103,12 +111,14 @@ namespace Trident {
 		protected:
 			explicit Device(const GraphicsAdapter* adapter, const PhysicalDevice* physicalDevice) :
 				adapter(adapter),
-				physicalDevice(physicalDevice)
+				physicalDevice(createRef<PhysicalDevice>(*physicalDevice))
 			{}
 
-		private:
+		public:
 			const GraphicsAdapter* adapter;
-			const PhysicalDevice* physicalDevice;
+
+		private:
+			ref<PhysicalDevice> physicalDevice;
 
 			// The memory allocator is automatically created by the adapter after the API creation of the device.
 			ref<MemoryAllocator> memoryAllocator;

@@ -5,6 +5,7 @@
 
 namespace Trident {
 	enum class AcquireNextImageStatus : uint8;
+	enum class QueueFamilyCapability : uint8;
 
 	struct AttachmentImageDescriptor;
 	struct BeginRenderPassDescriptor;
@@ -46,8 +47,9 @@ namespace Trident {
 	class ImageView;
 	class Instance;
 	class MemoryAllocator;
-	class PipelineLayout;
 	class PhysicalDevice;
+	class PipelineLayout;
+	class Queue;
 	class RenderPass;
 	class RenderPipeline;
 	class Sampler;

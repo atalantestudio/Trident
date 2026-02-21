@@ -17,10 +17,17 @@
 #include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
 
 namespace Trident {
+	namespace DX12 {
+		static ref<DescriptorSetLayout> createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings, const Trident::Device* device) {
+			return createRef<DescriptorSetLayout>(bindings);
+		}
+	}
+
 	void DX12::bindAdapter(Trident::GraphicsAdapter* adapter) {
 		adapter->logger = ConsoleLogger(std::cout, LogLevel::ALL, "DIRECTX 12");
 
 		adapter->acquireNextImageImplementation = DX12::acquireNextImage;
+		adapter->allocateDescriptorSetsImplementation = DX12::allocateDescriptorSets;
 		adapter->createBufferImplementation = DX12::createBuffer;
 		adapter->createComputePipelineImplementation = DX12::createComputePipeline;
 		adapter->createDescriptorSetLayoutImplementation = DX12::createDescriptorSetLayout;
@@ -35,20 +42,21 @@ namespace Trident {
 		adapter->destroyBufferImplementation = DX12::destroyBuffer;
 		adapter->destroyDeviceImplementation = DX12::destroyDevice;
 		adapter->destroyInstanceImplementation = DX12::destroyInstance;
+		adapter->destroySurfaceImplementation = DX12::destroySurface;
+		adapter->destroySwapchainImplementation = DX12::destroySwapchain;
+		adapter->getQueueImplementation = DX12::getQueue;
+		adapter->getSurfaceFormatImplementation = DX12::getSurfaceFormat;
 		adapter->mapBufferImplementation = DX12::mapBuffer;
 		adapter->resetFenceImplementation = DX12::resetFence;
 		adapter->selectPhysicalDeviceImplementation = DX12::selectPhysicalDevice;
 		adapter->unmapBufferImplementation = DX12::unmapBuffer;
+		adapter->updateDescriptorSetsImplementation = DX12::updateDescriptorSets;
 		adapter->waitForFenceImplementation = DX12::waitForFence;
 		adapter->waitIdleImplementation = DX12::waitIdle;
 	}
 
 	ref<Trident::ComputePipeline> DX12::createComputePipeline(const ComputePipelineDescriptor& descriptor, const Trident::Device* device) {
 		return createRef<DX12::ComputePipeline>(descriptor, static_cast<const DX12::Device*>(device));
-	}
-
-	ref<DescriptorSetLayout> DX12::createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings, const Trident::Device* device) {
-		return createRef<DescriptorSetLayout>(bindings);
 	}
 
 	ref<Trident::MemoryAllocator> DX12::createMemoryAllocator(const Trident::Device* device) {
@@ -67,13 +75,5 @@ namespace Trident {
 
 	ref<Trident::ShaderModule> DX12::createShaderModuleFromCode(const ShaderModuleDescriptor& descriptor, view<char8> code, const Trident::Device* device) {
 		return createRef<DX12::ShaderModule>(descriptor, code);
-	}
-
-	ref<Trident::Surface> DX12::createSurface(const Trident::Instance* instance, const Window* window) {
-		return createRef<DX12::Surface>(static_cast<const DX12::Instance*>(instance), window);
-	}
-
-	ref<Trident::Swapchain> DX12::createSwapchain(const SwapchainDescriptor& descriptor, const Trident::Device* device) {
-		return createRef<DX12::Swapchain>(descriptor, static_cast<const DX12::Device*>(device));
 	}
 }

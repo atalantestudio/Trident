@@ -23,6 +23,8 @@ namespace Trident {
 			/// Returns the current buffer access flags.
 			Access getAccess() const;
 
+			/// Maps a range of the buffer to host memory.
+			/// The offset and size must be provided in bytes.
 			void* map(uint64 offset, uint64 size) const;
 
 			/// Unmaps the buffer.

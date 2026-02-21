@@ -11,15 +11,12 @@
 namespace Trident {
 	class DX12::Swapchain final : public Trident::Swapchain {
 		public:
-			explicit Swapchain(const SwapchainDescriptor& descriptor, const DX12::Device* device);
-
-			~Swapchain() final override;
+			explicit Swapchain(const Trident::Device* device, const SwapchainDescriptor& descriptor);
 
 			uint32 getImageCount() const final override;
 
 			void update(const SwapchainDescriptor& descriptor) final override;
 
-		private:
 			void recreate(const SwapchainDescriptor& descriptor);
 
 		public:
@@ -28,6 +25,11 @@ namespace Trident {
 
 		private:
 			const DX12::Surface* surface;
-			const DX12::Device* device;
 	};
+
+	namespace DX12 {
+		ref<Trident::Swapchain> createSwapchain(const Trident::Device* device, const SwapchainDescriptor& descriptor);
+
+		void destroySwapchain(const Trident::Device* device, const Trident::Swapchain* swapchain);
+	}
 }

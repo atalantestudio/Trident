@@ -13,12 +13,6 @@ namespace Trident {
 		public:
 			explicit Device(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice);
 
-			sequence<ref<Trident::DescriptorSet>> allocateDescriptorSets(view<ref<DescriptorSetLayout>> descriptorSetLayouts) final override;
-
-			ref<Trident::Queue> getQueue(QueueFamilyCapability queueFamilyCapability) const final override;
-
-			void updateDescriptorSets(view<WriteDescriptorSet> writeDescriptorSets) const final override;
-
 		public:
 			IDXGIFactory4* factory;
 			ID3D12Device* device;
@@ -32,13 +26,19 @@ namespace Trident {
 	};
 
 	namespace DX12 {
+		AcquireNextImageStatus acquireNextImage(const Trident::Device* device, const Trident::Swapchain* swapchain, const Semaphore* semaphore, uint32& imageIndex);
+
+		sequence<ref<Trident::DescriptorSet>> allocateDescriptorSets(const Trident::Device* device, view<ref<DescriptorSetLayout>> descriptorSetLayouts);
+
 		ref<Trident::Device> createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice);
 
 		void destroyDevice(const Trident::Device* device);
 
-		AcquireNextImageStatus acquireNextImage(const Trident::Device* device, const Trident::Swapchain* swapchain, const Semaphore* semaphore, uint32& imageIndex);
+		ref<Trident::Queue> getQueue(const Trident::Device* device, QueueFamilyCapability queueFamilyCapability);
 
 		void resetFence(const Trident::Device* device, const Trident::Fence* fence);
+
+		void updateDescriptorSets(const Trident::Device* device, view<WriteDescriptorSet> writeDescriptorSets);
 
 		void waitForFence(const Trident::Device* device, const Trident::Fence* fence);
 

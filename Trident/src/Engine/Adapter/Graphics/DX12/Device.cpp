@@ -47,8 +47,16 @@ namespace Trident {
 		factory(static_cast<const DX12::PhysicalDevice*>(physicalDevice)->factory)
 	{}
 
-	sequence<ref<DescriptorSet>> DX12::Device::allocateDescriptorSets(view<ref<DescriptorSetLayout>> descriptorSetLayouts) {
-		const ref<DX12::MemoryAllocator> memoryAllocator = std::static_pointer_cast<DX12::MemoryAllocator>(getMemoryAllocator());
+	AcquireNextImageStatus DX12::acquireNextImage(const Trident::Device* device, const Trident::Swapchain* swapchain, const Semaphore* semaphore, uint32& imageIndex) {
+		const DX12::Swapchain* _swapchain = static_cast<const DX12::Swapchain*>(swapchain);
+
+		imageIndex = _swapchain->swapChain->GetCurrentBackBufferIndex();
+
+		return AcquireNextImageStatus::SUCCESS;
+	}
+
+	sequence<ref<Trident::DescriptorSet>> DX12::allocateDescriptorSets(const Trident::Device* device, view<ref<DescriptorSetLayout>> descriptorSetLayouts) {
+		const ref<DX12::MemoryAllocator> memoryAllocator = std::static_pointer_cast<DX12::MemoryAllocator>(device->getMemoryAllocator());
 
 		sequence<ref<Trident::DescriptorSet>> descriptorSets(descriptorSetLayouts.count());
 		UINT descriptorSetIndex = 0;
@@ -84,105 +92,6 @@ namespace Trident {
 		}
 
 		return descriptorSets;
-	}
-
-	ref<Trident::Queue> DX12::Device::getQueue(QueueFamilyCapability queueFamilyCapability) const {
-		return queues[static_cast<uint32>(queueFamilyCapability)];
-	}
-
-	void DX12::Device::updateDescriptorSets(view<WriteDescriptorSet> writeDescriptorSets) const {
-		DEBUG_DESCRIPTOR_GUARD(writeDescriptorSets);
-
-		const ref<DX12::MemoryAllocator> memoryAllocator = std::static_pointer_cast<DX12::MemoryAllocator>(getMemoryAllocator());
-
-		for (const WriteDescriptorSet& writeDescriptorSet : writeDescriptorSets) {
-			const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(writeDescriptorSet.descriptorSet);
-			const DX12::DescriptorSet::DescriptorSetBinding& binding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
-
-			D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = binding.viewDescriptorHandleOffset;
-			D3D12_CPU_DESCRIPTOR_HANDLE samplerDescriptorHandle = binding.samplerDescriptorHandleOffset;
-
-			switch (binding.descriptorType) {
-				case DescriptorType::COMBINED_IMAGE_SAMPLER: {
-					for (const DescriptorImage& descriptorImage : writeDescriptorSet.descriptorImages) {
-						const ref<DX12::Sampler> sampler = std::static_pointer_cast<DX12::Sampler>(descriptorImage.sampler);
-
-						memoryAllocator->writeImage(viewDescriptorHandle, descriptorImage);
-						memoryAllocator->writeSampler(samplerDescriptorHandle, &sampler->samplerDescriptor);
-
-						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-					}
-
-					break;
-				}
-				case DescriptorType::READ_ONLY_STORAGE_IMAGE: {
-					for (const DescriptorImage& descriptorImage : writeDescriptorSet.descriptorImages) {
-						memoryAllocator->writeImage(viewDescriptorHandle, descriptorImage);
-
-						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-					}
-
-					break;
-				}
-				case DescriptorType::STORAGE_IMAGE: {
-					for (const DescriptorImage& descriptorImage : writeDescriptorSet.descriptorImages) {
-						memoryAllocator->writeReadWriteStorageImage(viewDescriptorHandle, descriptorImage);
-
-						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-					}
-
-					break;
-				}
-				case DescriptorType::UNIFORM_BUFFER: {
-					for (const DescriptorBuffer& descriptorBuffer : writeDescriptorSet.descriptorBuffers) {
-						memoryAllocator->writeUniformBuffer(viewDescriptorHandle, descriptorBuffer);
-
-						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-					}
-
-					break;
-				}
-				case DescriptorType::READ_ONLY_STORAGE_BUFFER: {
-					for (const DescriptorBuffer& descriptorBuffer : writeDescriptorSet.descriptorBuffers) {
-						memoryAllocator->writeReadOnlyStorageBuffer(viewDescriptorHandle, descriptorBuffer);
-
-						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-					}
-
-					break;
-				}
-				case DescriptorType::READ_WRITE_STORAGE_BUFFER: {
-					for (const DescriptorBuffer& descriptorBuffer : writeDescriptorSet.descriptorBuffers) {
-						memoryAllocator->writeReadWriteStorageBuffer(viewDescriptorHandle, descriptorBuffer);
-
-						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-					}
-
-					break;
-				}
-				case DescriptorType::INPUT_ATTACHMENT: {
-					for (const DescriptorImage& descriptorImage : writeDescriptorSet.descriptorImages) {
-						memoryAllocator->writeInputAttachment(viewDescriptorHandle, descriptorImage);
-
-						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-					}
-
-					break;
-				}
-				default: {
-					ADAPTER_ASSERT(false, "Unsupported descriptor type.");
-
-					break;
-				}
-			}
-		}
 	}
 
 	ref<Trident::Device> DX12::createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice) {
@@ -294,12 +203,13 @@ namespace Trident {
 		_device->device->Release();
 	}
 
-	AcquireNextImageStatus DX12::acquireNextImage(const Trident::Device* device, const Trident::Swapchain* swapchain, const Semaphore* semaphore, uint32& imageIndex) {
-		const DX12::Swapchain* _swapchain = static_cast<const DX12::Swapchain*>(swapchain);
+	ref<Trident::Queue> DX12::getQueue(const Trident::Device* device, QueueFamilyCapability queueFamilyCapability) {
+		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
+		const uint32 queueIndex = static_cast<uint32>(queueFamilyCapability);
 
-		imageIndex = _swapchain->swapChain->GetCurrentBackBufferIndex();
+		ADAPTER_ASSERT(queueIndex < 3, "Invalid queue family capability.");
 
-		return AcquireNextImageStatus::SUCCESS;
+		return _device->queues[queueIndex];
 	}
 
 	void DX12::resetFence(const Trident::Device* device, const Trident::Fence* fence) {
@@ -309,6 +219,101 @@ namespace Trident {
 		result = _fence->fence->Signal(0);
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to reset fence.");
+	}
+
+	void DX12::updateDescriptorSets(const Trident::Device* device, view<WriteDescriptorSet> writeDescriptorSets) {
+		DEBUG_DESCRIPTOR_GUARD(writeDescriptorSets);
+
+		const ref<DX12::MemoryAllocator> memoryAllocator = std::static_pointer_cast<DX12::MemoryAllocator>(device->getMemoryAllocator());
+
+		for (const WriteDescriptorSet& writeDescriptorSet : writeDescriptorSets) {
+			const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(writeDescriptorSet.descriptorSet);
+			const DX12::DescriptorSet::DescriptorSetBinding& binding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
+
+			D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = binding.viewDescriptorHandleOffset;
+			D3D12_CPU_DESCRIPTOR_HANDLE samplerDescriptorHandle = binding.samplerDescriptorHandleOffset;
+
+			switch (binding.descriptorType) {
+				case DescriptorType::COMBINED_IMAGE_SAMPLER: {
+					for (const DescriptorImage& descriptorImage : writeDescriptorSet.descriptorImages) {
+						const ref<DX12::Sampler> sampler = std::static_pointer_cast<DX12::Sampler>(descriptorImage.sampler);
+
+						memoryAllocator->writeImage(viewDescriptorHandle, descriptorImage);
+						memoryAllocator->writeSampler(samplerDescriptorHandle, &sampler->samplerDescriptor);
+
+						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+					}
+
+					break;
+				}
+				case DescriptorType::READ_ONLY_STORAGE_IMAGE: {
+					for (const DescriptorImage& descriptorImage : writeDescriptorSet.descriptorImages) {
+						memoryAllocator->writeImage(viewDescriptorHandle, descriptorImage);
+
+						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+					}
+
+					break;
+				}
+				case DescriptorType::STORAGE_IMAGE: {
+					for (const DescriptorImage& descriptorImage : writeDescriptorSet.descriptorImages) {
+						memoryAllocator->writeReadWriteStorageImage(viewDescriptorHandle, descriptorImage);
+
+						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+					}
+
+					break;
+				}
+				case DescriptorType::UNIFORM_BUFFER: {
+					for (const DescriptorBuffer& descriptorBuffer : writeDescriptorSet.descriptorBuffers) {
+						memoryAllocator->writeUniformBuffer(viewDescriptorHandle, descriptorBuffer);
+
+						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+					}
+
+					break;
+				}
+				case DescriptorType::READ_ONLY_STORAGE_BUFFER: {
+					for (const DescriptorBuffer& descriptorBuffer : writeDescriptorSet.descriptorBuffers) {
+						memoryAllocator->writeReadOnlyStorageBuffer(viewDescriptorHandle, descriptorBuffer);
+
+						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+					}
+
+					break;
+				}
+				case DescriptorType::READ_WRITE_STORAGE_BUFFER: {
+					for (const DescriptorBuffer& descriptorBuffer : writeDescriptorSet.descriptorBuffers) {
+						memoryAllocator->writeReadWriteStorageBuffer(viewDescriptorHandle, descriptorBuffer);
+
+						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+					}
+
+					break;
+				}
+				case DescriptorType::INPUT_ATTACHMENT: {
+					for (const DescriptorImage& descriptorImage : writeDescriptorSet.descriptorImages) {
+						memoryAllocator->writeInputAttachment(viewDescriptorHandle, descriptorImage);
+
+						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+					}
+
+					break;
+				}
+				default: {
+					ADAPTER_ASSERT(false, "Unsupported descriptor type.");
+
+					break;
+				}
+			}
+		}
 	}
 
 	void DX12::waitForFence(const Trident::Device* device, const Trident::Fence* fence) {

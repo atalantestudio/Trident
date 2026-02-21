@@ -38,6 +38,10 @@ namespace Trident {
 		return acquireNextImageImplementation(device, swapchain, semaphore, imageIndex);
 	}
 
+	sequence<ref<DescriptorSet>> GraphicsAdapter::allocateDescriptorSets(const Device* device, view<ref<DescriptorSetLayout>> descriptorSetLayouts) const {
+		return allocateDescriptorSetsImplementation(device, descriptorSetLayouts);
+	}
+
 	ref<Buffer> GraphicsAdapter::createBuffer(const BufferDescriptor& descriptor, const Device* device) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
@@ -133,8 +137,8 @@ namespace Trident {
 		return createSurfaceImplementation(instance, window);
 	}
 
-	ref<Swapchain> GraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor, const Device* device) const {
-		return createSwapchainImplementation(descriptor, device);
+	ref<Swapchain> GraphicsAdapter::createSwapchain(const Device* device, const SwapchainDescriptor& descriptor) const {
+		return createSwapchainImplementation(device, descriptor);
 	}
 
 	void GraphicsAdapter::destroyBuffer(const Device* device, const Buffer* buffer) const {
@@ -147,6 +151,22 @@ namespace Trident {
 
 	void GraphicsAdapter::destroyInstance(const Instance* instance) const {
 		destroyInstanceImplementation(instance);
+	}
+
+	void GraphicsAdapter::destroySurface(const Instance* instance, const Surface* surface) const {
+		destroySurfaceImplementation(instance, surface);
+	}
+
+	void GraphicsAdapter::destroySwapchain(const Device* device, const Swapchain* swapchain) const {
+		destroySwapchainImplementation(device, swapchain);
+	}
+
+	ref<Queue> GraphicsAdapter::getQueue(const Device* device, QueueFamilyCapability queueFamilyCapability) const {
+		return getQueueImplementation(device, queueFamilyCapability);
+	}
+
+	ImageFormat GraphicsAdapter::getSurfaceFormat(const Surface* surface) const {
+		return getSurfaceFormatImplementation(surface);
 	}
 
 	void* GraphicsAdapter::mapBuffer(const Device* device, const Buffer* buffer, uint64 offset, uint64 size) const {
@@ -165,6 +185,10 @@ namespace Trident {
 
 	void GraphicsAdapter::unmapBuffer(const Device* device, const Buffer* buffer) const {
 		unmapBufferImplementation(device, buffer);
+	}
+
+	void GraphicsAdapter::updateDescriptorSets(const Device* device, view<WriteDescriptorSet> writeDescriptorSets) const {
+		updateDescriptorSetsImplementation(device, writeDescriptorSets);
 	}
 
 	void GraphicsAdapter::waitForFence(const Device* device, const Fence* fence) const {

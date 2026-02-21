@@ -11,7 +11,7 @@
 namespace Trident {
 	class Swapchain {
 		public:
-			virtual ~Swapchain() = default;
+			~Swapchain();
 
 			Extent2D getExtent() const {
 				return extent;
@@ -28,7 +28,8 @@ namespace Trident {
 			virtual void update(const SwapchainDescriptor& descriptor) = 0;
 
 		protected:
-			explicit Swapchain(const SwapchainDescriptor& descriptor) :
+			explicit Swapchain(const Device* device, const SwapchainDescriptor& descriptor) :
+				device(device),
 				extent(descriptor.extent)
 			{
 				DEBUG_DESCRIPTOR_GUARD(descriptor);
@@ -56,7 +57,11 @@ namespace Trident {
 			}
 
 		protected:
+			const Device* device;
+
 			Extent2D extent;
+
+		public:
 			sequence<ref<Image>> images;
 			sequence<ref<ImageView>> imageViews;
 	};
