@@ -3,9 +3,17 @@
 
 #pragma once
 
+#include "Engine/API/Rendering/Device.hpp"
+
 namespace Trident {
 	class CommandPool {
 		public:
-			virtual ~CommandPool() = default;
+			~CommandPool();
+
+		protected:
+			explicit CommandPool(const Device* device);
+
+		protected:
+			const Device* device;
 	};
 }

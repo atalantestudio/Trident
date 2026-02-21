@@ -17,6 +17,7 @@ namespace Trident {
 	typedef sequence<ref<DescriptorSet>> (*AllocateDescriptorSetsImplementation)(const Device* device, view<ref<DescriptorSetLayout>> descriptorSetLayouts);
 	typedef void (*BindAdapterImplementation)(GraphicsAdapter* adapter);
 	typedef ref<Buffer> (*CreateBufferImplementation)(const Device* device, const BufferDescriptor& descriptor, uint32 stride);
+	typedef ref<CommandPool> (*CreateCommandPoolImplementation)(const Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability);
 	typedef ref<ComputePipeline> (*CreateComputePipelineImplementation)(const ComputePipelineDescriptor& descriptor, const Device* device);
 	typedef ref<DescriptorSetLayout> (*CreateDescriptorSetLayoutImplementation)(const sequence<DescriptorSetLayoutBinding>& bindings, const Device* device);
 	typedef ref<Device> (*CreateDeviceImplementation)(const GraphicsAdapter* adapter, const PhysicalDevice* physicalDevice);
@@ -38,6 +39,7 @@ namespace Trident {
 	typedef ref<Surface> (*CreateSurfaceImplementation)(const Instance* instance, const Window* window);
 	typedef ref<Swapchain> (*CreateSwapchainImplementation)(const Device* device, const SwapchainDescriptor& descriptor);
 	typedef void (*DestroyBufferImplementation)(const Device* device, const Buffer* buffer);
+	typedef void (*DestroyCommandPoolImplementation)(const Device* device, const CommandPool* commandPool);
 	typedef void (*DestroyDeviceImplementation)(const Device* device);
 	typedef void (*DestroyFenceImplementation)(const Device* device, const Fence* fence);
 	typedef void (*DestroyFramebufferImplementation)(const Device* device, const Framebuffer* framebuffer);
@@ -79,6 +81,8 @@ namespace Trident {
 				return std::static_pointer_cast<Buffer2<ElementType>>(buffer);
 			}
 
+			ref<CommandPool> createCommandPool(const Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability) const;
+
 			ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor, const Device* device) const;
 
 			ref<DescriptorSetLayout> createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings, const Device* device) const;
@@ -111,6 +115,8 @@ namespace Trident {
 			ref<Swapchain> createSwapchain(const Device* device, const SwapchainDescriptor& descriptor) const;
 
 			void destroyBuffer(const Device* device, const Buffer* buffer) const;
+
+			void destroyCommandPool(const Device* device, const CommandPool* commandPool) const;
 
 			void destroyDevice(const Device* device) const;
 
@@ -149,6 +155,7 @@ namespace Trident {
 			AcquireNextImageImplementation acquireNextImageImplementation;
 			AllocateDescriptorSetsImplementation allocateDescriptorSetsImplementation;
 			CreateBufferImplementation createBufferImplementation;
+			CreateCommandPoolImplementation createCommandPoolImplementation;
 			CreateComputePipelineImplementation createComputePipelineImplementation;
 			CreateDescriptorSetLayoutImplementation createDescriptorSetLayoutImplementation;
 			CreateDeviceImplementation createDeviceImplementation;
@@ -167,6 +174,7 @@ namespace Trident {
 			CreateSurfaceImplementation createSurfaceImplementation;
 			CreateSwapchainImplementation createSwapchainImplementation;
 			DestroyBufferImplementation destroyBufferImplementation;
+			DestroyCommandPoolImplementation destroyCommandPoolImplementation;
 			DestroyDeviceImplementation destroyDeviceImplementation;
 			DestroyFenceImplementation destroyFenceImplementation;
 			DestroyFramebufferImplementation destroyFramebufferImplementation;

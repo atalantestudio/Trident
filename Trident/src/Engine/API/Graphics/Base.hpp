@@ -36,6 +36,7 @@ namespace Trident {
 
 	class CommandBuffer;
 	class CommandEncoder;
+	class CommandPool;
 	class ComputePipeline;
 	class DescriptorSet;
 	class DescriptorSetLayout;

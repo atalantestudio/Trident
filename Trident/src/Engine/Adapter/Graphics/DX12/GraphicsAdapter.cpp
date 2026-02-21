@@ -38,6 +38,7 @@ namespace Trident {
 		adapter->acquireNextImageImplementation = DX12::acquireNextImage;
 		adapter->allocateDescriptorSetsImplementation = DX12::allocateDescriptorSets;
 		adapter->createBufferImplementation = DX12::createBuffer;
+		adapter->createCommandPoolImplementation = DX12::createCommandPool;
 		adapter->createComputePipelineImplementation = DX12::createComputePipeline;
 		adapter->createDescriptorSetLayoutImplementation = DX12::createDescriptorSetLayout;
 		adapter->createDeviceImplementation = DX12::createDevice;
@@ -52,6 +53,7 @@ namespace Trident {
 		adapter->createSurfaceImplementation = DX12::createSurface;
 		adapter->createSwapchainImplementation = DX12::createSwapchain;
 		adapter->destroyBufferImplementation = DX12::destroyBuffer;
+		adapter->destroyCommandPoolImplementation = DX12::destroyCommandPool;
 		adapter->destroyDeviceImplementation = DX12::destroyDevice;
 		adapter->destroyFenceImplementation = DX12::destroyFence;
 		adapter->destroyFramebufferImplementation = DX12::destroyFramebuffer;

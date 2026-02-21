@@ -52,6 +52,10 @@ namespace Trident {
 		// return createBufferImplementation(descriptor, 1, device);
 	}
 
+	ref<CommandPool> GraphicsAdapter::createCommandPool(const Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability) const {
+		return createCommandPoolImplementation(device, queueFamilyIndex, queueFamilyCapability);
+	}
+
 	ref<ComputePipeline> GraphicsAdapter::createComputePipeline(const ComputePipelineDescriptor& descriptor, const Device* device) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
@@ -143,6 +147,10 @@ namespace Trident {
 
 	void GraphicsAdapter::destroyBuffer(const Device* device, const Buffer* buffer) const {
 		destroyBufferImplementation(device, buffer);
+	}
+
+	void GraphicsAdapter::destroyCommandPool(const Device* device, const CommandPool* commandPool) const {
+		destroyCommandPoolImplementation(device, commandPool);
 	}
 
 	void GraphicsAdapter::destroyDevice(const Device* device) const {

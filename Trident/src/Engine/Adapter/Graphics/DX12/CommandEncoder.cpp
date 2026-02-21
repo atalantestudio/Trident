@@ -36,7 +36,7 @@ namespace Trident {
 
 		commandAllocator = _commandPool->commandAllocator;
 
-		result = _device->device->CreateCommandList(0, _commandPool->type, commandAllocator, nullptr, IID_PPV_ARGS(&commandList));
+		result = _device->device->CreateCommandList(0, _commandPool->commandListType, commandAllocator, nullptr, IID_PPV_ARGS(&commandList));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command list.");
 

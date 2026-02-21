@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Engine/API/Rendering/Buffer.hpp"
+#include "Engine/API/Rendering/CommandPool.hpp"
 #include "Engine/API/Rendering/Device.hpp"
 #include "Engine/API/Rendering/PhysicalDevice.hpp"
 
@@ -43,6 +44,14 @@ namespace Trident {
 		BREAKPOINT();
 
 		// device->adapter->destroyCommandEncoder(device, commandPool, this);
+	}
+
+	CommandPool::CommandPool(const Device* device) :
+		device(device)
+	{}
+
+	CommandPool::~CommandPool() {
+		device->adapter->destroyCommandPool(device, this);
 	}
 
 	Fence::Fence(const Device* device) :

@@ -60,8 +60,6 @@ namespace Trident {
 
 		public:
 			const Device* device;
-
-			// TODO
-			// const CommandPool* commandPool;
+			const CommandPool* commandPool;
 	};
 }
