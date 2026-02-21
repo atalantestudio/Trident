@@ -5,6 +5,7 @@
 
 #include "Engine/API/Rendering/Buffer.hpp"
 #include "Engine/API/Rendering/Device.hpp"
+#include "Engine/API/Rendering/PhysicalDevice.hpp"
 // #include "Engine/API/Rendering/Queue.hpp"
 
 namespace Trident {
@@ -43,6 +44,10 @@ namespace Trident {
 	{
 		// TODO: ?
 		// adapter->createBuffer(this, descriptor);
+	}
+
+	ref<PhysicalDevice> Device::getPhysicalDevice() const {
+		return createRef<PhysicalDevice>(*physicalDevice);
 	}
 
 	// TODO

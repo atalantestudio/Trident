@@ -15,8 +15,6 @@ namespace Trident::DX12 {
 
 	ref<DescriptorSetLayout> createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings, const Trident::Device* device);
 
-	ref<Trident::Device> createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice);
-
 	ref<Trident::MemoryAllocator> createMemoryAllocator(const Trident::Device* device);
 
 	ref<Trident::PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor, const Trident::Device* device);

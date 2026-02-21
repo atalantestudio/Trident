@@ -34,6 +34,10 @@ namespace Trident {
 		return api;
 	}
 
+	AcquireNextImageStatus GraphicsAdapter::acquireNextImage(const Device* device, const Swapchain* swapchain, const Semaphore* semaphore, uint32& imageIndex) const {
+		return acquireNextImageImplementation(device, swapchain, semaphore, imageIndex);
+	}
+
 	ref<Buffer> GraphicsAdapter::createBuffer(const BufferDescriptor& descriptor, const Device* device) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
@@ -137,6 +141,10 @@ namespace Trident {
 		destroyBufferImplementation(device, buffer);
 	}
 
+	void GraphicsAdapter::destroyDevice(const Device* device) const {
+		destroyDeviceImplementation(device);
+	}
+
 	void GraphicsAdapter::destroyInstance(const Instance* instance) const {
 		destroyInstanceImplementation(instance);
 	}
@@ -147,11 +155,23 @@ namespace Trident {
 		return mapBufferImplementation(device, buffer, offset, size);
 	}
 
+	void GraphicsAdapter::resetFence(const Device* device, const Fence* fence) const {
+		resetFenceImplementation(device, fence);
+	}
+
 	ref<PhysicalDevice> GraphicsAdapter::selectPhysicalDevice(const Instance* instance, bool preferIntegratedGpu) const {
 		return selectPhysicalDeviceImplementation(instance, preferIntegratedGpu);
 	}
 
 	void GraphicsAdapter::unmapBuffer(const Device* device, const Buffer* buffer) const {
 		unmapBufferImplementation(device, buffer);
+	}
+
+	void GraphicsAdapter::waitForFence(const Device* device, const Fence* fence) const {
+		waitForFenceImplementation(device, fence);
+	}
+
+	void GraphicsAdapter::waitIdle(const Device* device) const {
+		waitIdleImplementation(device);
 	}
 }

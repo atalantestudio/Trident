@@ -10,7 +10,7 @@
 namespace Trident {
 	class DX12::CommandEncoder final : public Trident::CommandEncoder {
 		public:
-			explicit CommandEncoder(const CommandBufferDescriptor& descriptor, const DX12::Device& device, const DX12::CommandPool& commandPool);
+			explicit CommandEncoder(const CommandBufferDescriptor& descriptor, const DX12::Device* device, const DX12::CommandPool& commandPool);
 
 			~CommandEncoder() final override;
 
@@ -68,7 +68,7 @@ namespace Trident {
 			void setRenderTargets();
 
 		private:
-			const DX12::Device& device;
+			const DX12::Device* device;
 			ID3D12GraphicsCommandList7* commandList;
 			ID3D12CommandAllocator* commandAllocator;
 			CommandBufferUsage usage;

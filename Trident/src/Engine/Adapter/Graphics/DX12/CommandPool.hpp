@@ -9,7 +9,7 @@
 namespace Trident {
 	class DX12::CommandPool final : public Trident::CommandPool {
 		public:
-			explicit CommandPool(const DX12::Device& device, D3D12_COMMAND_LIST_TYPE type);
+			explicit CommandPool(const DX12::Device* device, D3D12_COMMAND_LIST_TYPE type);
 
 			~CommandPool() final override;
 

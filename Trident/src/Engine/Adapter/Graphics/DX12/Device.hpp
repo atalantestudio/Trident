@@ -10,44 +10,38 @@
 
 namespace Trident {
 	class DX12::Device final : public Trident::Device {
-		private:
-			#if defined(DEBUG_ENABLE_MESSENGER)
-				static void messageCallback(D3D12_MESSAGE_CATEGORY category, D3D12_MESSAGE_SEVERITY severity, D3D12_MESSAGE_ID id, LPCSTR description, void* context);
-			#endif
-
 		public:
-			explicit Device(const Trident::GraphicsAdapter* adapter, const DX12::PhysicalDevice* physicalDevice);
-
-			~Device() final override;
-
-			AcquireNextImageStatus acquireNextImage(ref<Trident::Swapchain> swapchain, ref<Semaphore> semaphore, uint32& imageIndex) const final override;
+			explicit Device(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice);
 
 			sequence<ref<Trident::DescriptorSet>> allocateDescriptorSets(view<ref<DescriptorSetLayout>> descriptorSetLayouts) final override;
 
-			ref<Trident::PhysicalDevice> getPhysicalDevice() const final override;
-
 			ref<Trident::Queue> getQueue(QueueFamilyCapability queueFamilyCapability) const final override;
 
-			void resetFence(ref<Trident::Fence> fence) const final override;
-
 			void updateDescriptorSets(view<WriteDescriptorSet> writeDescriptorSets) const final override;
-
-			void waitForFence(ref<Trident::Fence> fence) const final override;
-
-			void waitIdle() const final override;
 
 		public:
 			IDXGIFactory4* factory;
 			ID3D12Device* device;
-
-		private:
 			ref<Trident::Queue> queues[3];
 			HANDLE waitEvent;
-			const DX12::PhysicalDevice* physicalDevice;
 
 			#if defined(DEBUG_ENABLE_MESSENGER)
 				ID3D12InfoQueue1* infoQueue;
 				DWORD messageCallbackCookie;
 			#endif
 	};
+
+	namespace DX12 {
+		ref<Trident::Device> createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice);
+
+		void destroyDevice(const Trident::Device* device);
+
+		AcquireNextImageStatus acquireNextImage(const Trident::Device* device, const Trident::Swapchain* swapchain, const Semaphore* semaphore, uint32& imageIndex);
+
+		void resetFence(const Trident::Device* device, const Trident::Fence* fence);
+
+		void waitForFence(const Trident::Device* device, const Trident::Fence* fence);
+
+		void waitIdle(const Trident::Device* device);
+	}
 }

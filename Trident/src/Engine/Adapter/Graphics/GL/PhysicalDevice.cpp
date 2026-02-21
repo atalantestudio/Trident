@@ -53,8 +53,8 @@ namespace Trident {
 		glGetIntegerv(GL_MAX_VERTEX_ATTRIB_BINDINGS, pointer_cast<GLint*>(&limits.maxVertexInputBindingCount));
 		glGetIntegerv(GL_MAX_VERTEX_ATTRIB_STRIDE, pointer_cast<GLint*>(&limits.maxVertexInputBindingStride));
 		glGetFloatv(GL_SMOOTH_POINT_SIZE_GRANULARITY, &limits.pointSizeGranularity);
-		glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, pointer_cast<GLint*>(&limits.minUniformBufferOffsetAlignment));
 		glGetIntegerv(GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT, pointer_cast<GLint*>(&limits.minStorageBufferOffsetAlignment));
+		glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, pointer_cast<GLint*>(&limits.minUniformBufferOffsetAlignment));
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_6
 			GLint shaderBinaryFormatCount;

@@ -22,7 +22,7 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace Trident {
-	DX12::CommandEncoder::CommandEncoder(const CommandBufferDescriptor& descriptor, const DX12::Device& device, const DX12::CommandPool& commandPool) :
+	DX12::CommandEncoder::CommandEncoder(const CommandBufferDescriptor& descriptor, const DX12::Device* device, const DX12::CommandPool& commandPool) :
 		device(device),
 		commandAllocator(commandPool.commandAllocator),
 		usage(descriptor.usage)
@@ -33,7 +33,7 @@ namespace Trident {
 
 		HRESULT result;
 
-		result = device.device->CreateCommandList(0, commandPool.type, commandAllocator, nullptr, IID_PPV_ARGS(&commandList));
+		result = device->device->CreateCommandList(0, commandPool.type, commandAllocator, nullptr, IID_PPV_ARGS(&commandList));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command list.");
 
@@ -168,7 +168,7 @@ namespace Trident {
 	}
 
 	void DX12::CommandEncoder::bindDescriptorSets(ref<Trident::PipelineLayout> pipelineLayout, uint32 descriptorSetIndexOffset, view<ref<Trident::DescriptorSet>> descriptorSets) {
-		const ref<DX12::MemoryAllocator> memoryAllocator = std::static_pointer_cast<DX12::MemoryAllocator>(device.getMemoryAllocator());
+		const ref<DX12::MemoryAllocator> memoryAllocator = std::static_pointer_cast<DX12::MemoryAllocator>(device->getMemoryAllocator());
 
 		ID3D12DescriptorHeap* viewDescriptorHeap = memoryAllocator->getCurrentViewDescriptorHeapAllocation().descriptorHeap;
 		ID3D12DescriptorHeap* samplerDescriptorHeap = memoryAllocator->getCurrentSamplerDescriptorHeapAllocation().descriptorHeap;
@@ -353,7 +353,7 @@ namespace Trident {
 			commandSignatureDescriptor.pArgumentDescs = &indirectArgumentDescriptor;
 			commandSignatureDescriptor.NodeMask = 0;
 
-			const HRESULT result = device.device->CreateCommandSignature(&commandSignatureDescriptor, nullptr, IID_PPV_ARGS(&indirectBuffer->commandSignature));
+			const HRESULT result = device->device->CreateCommandSignature(&commandSignatureDescriptor, nullptr, IID_PPV_ARGS(&indirectBuffer->commandSignature));
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command signature.");
 		}
@@ -495,7 +495,7 @@ namespace Trident {
 			commandSignatureDescriptor.pArgumentDescs = &indirectArgumentDescriptor;
 			commandSignatureDescriptor.NodeMask = 0;
 
-			const HRESULT result = device.device->CreateCommandSignature(&commandSignatureDescriptor, nullptr, IID_PPV_ARGS(&indirectBuffer->commandSignature));
+			const HRESULT result = device->device->CreateCommandSignature(&commandSignatureDescriptor, nullptr, IID_PPV_ARGS(&indirectBuffer->commandSignature));
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command signature.");
 		}
@@ -533,7 +533,7 @@ namespace Trident {
 			commandSignatureDescriptor.pArgumentDescs = &indirectArgumentDescriptor;
 			commandSignatureDescriptor.NodeMask = 0;
 
-			const HRESULT result = device.device->CreateCommandSignature(&commandSignatureDescriptor, nullptr, IID_PPV_ARGS(&indirectBuffer->commandSignature));
+			const HRESULT result = device->device->CreateCommandSignature(&commandSignatureDescriptor, nullptr, IID_PPV_ARGS(&indirectBuffer->commandSignature));
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command signature.");
 		}

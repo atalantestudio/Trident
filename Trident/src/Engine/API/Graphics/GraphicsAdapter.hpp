@@ -14,7 +14,7 @@ namespace Trident {
 	class Window;
 
 	typedef void (*BindAdapterImplementation)(GraphicsAdapter* adapter);
-	typedef AcquireNextImageStatus (*AcquireNextImageImplementation)(const Swapchain* swapchain, const Semaphore* semaphore, uint32& imageIndex);
+	typedef AcquireNextImageStatus (*AcquireNextImageImplementation)(const Device* device, const Swapchain* swapchain, const Semaphore* semaphore, uint32& imageIndex);
 	typedef ref<Buffer> (*CreateBufferImplementation)(const Device* device, const BufferDescriptor& descriptor, uint32 stride);
 	typedef ref<ComputePipeline> (*CreateComputePipelineImplementation)(const ComputePipelineDescriptor& descriptor, const Device* device);
 	typedef ref<DescriptorSetLayout> (*CreateDescriptorSetLayoutImplementation)(const sequence<DescriptorSetLayoutBinding>& bindings, const Device* device);
@@ -37,10 +37,14 @@ namespace Trident {
 	typedef ref<Surface> (*CreateSurfaceImplementation)(const Instance* instance, const Window* window);
 	typedef ref<Swapchain> (*CreateSwapchainImplementation)(const SwapchainDescriptor& descriptor, const Device* device);
 	typedef void (*DestroyBufferImplementation)(const Device* device, const Buffer* buffer);
+	typedef void (*DestroyDeviceImplementation)(const Device* device);
 	typedef void (*DestroyInstanceImplementation)(const Instance* instance);
 	typedef void* (*MapBufferImplementation)(const Device* device, const Buffer* buffer, uint64 offset, uint64 size);
+	typedef void (*ResetFenceImplementation)(const Device* device, const Fence* fence);
 	typedef ref<PhysicalDevice> (*SelectPhysicalDeviceImplementation)(const Instance* instance, bool preferIntegratedGpu);
 	typedef void (*UnmapBufferImplementation)(const Device* device, const Buffer* buffer);
+	typedef void (*WaitForFenceImplementation)(const Device* device, const Fence* fence);
+	typedef void (*WaitIdleImplementation)(const Device* device);
 
 	class GraphicsAdapter {
 		public:
@@ -50,6 +54,8 @@ namespace Trident {
 			explicit GraphicsAdapter(const ApplicationProperties& properties);
 
 			GraphicsAPI getApi() const;
+
+			AcquireNextImageStatus acquireNextImage(const Device* device, const Swapchain* swapchain, const Semaphore* semaphore, uint32& imageIndex) const;
 
 			ref<Buffer> createBuffer(const BufferDescriptor& descriptor, const Device* device) const;
 
@@ -95,13 +101,21 @@ namespace Trident {
 
 			void destroyBuffer(const Device* device, const Buffer* buffer) const;
 
+			void destroyDevice(const Device* device) const;
+
 			void destroyInstance(const Instance* instance) const;
 
 			void* mapBuffer(const Device* device, const Buffer* buffer, uint64 offset, uint64 size) const;
 
+			void resetFence(const Device* device, const Fence* fence) const;
+
 			ref<PhysicalDevice> selectPhysicalDevice(const Instance* instance, bool preferIntegratedGpu) const;
 
 			void unmapBuffer(const Device* device, const Buffer* buffer) const;
+
+			void waitForFence(const Device* device, const Fence* fence) const;
+
+			void waitIdle(const Device* device) const;
 
 		// TODO: Do not expose to the client side.
 		public:
@@ -125,10 +139,14 @@ namespace Trident {
 			CreateSurfaceImplementation createSurfaceImplementation;
 			CreateSwapchainImplementation createSwapchainImplementation;
 			DestroyBufferImplementation destroyBufferImplementation;
+			DestroyDeviceImplementation destroyDeviceImplementation;
 			DestroyInstanceImplementation destroyInstanceImplementation;
 			MapBufferImplementation mapBufferImplementation;
+			ResetFenceImplementation resetFenceImplementation;
 			SelectPhysicalDeviceImplementation selectPhysicalDeviceImplementation;
 			UnmapBufferImplementation unmapBufferImplementation;
+			WaitForFenceImplementation waitForFenceImplementation;
+			WaitIdleImplementation waitIdleImplementation;
 
 		private:
 			GraphicsAPI api;

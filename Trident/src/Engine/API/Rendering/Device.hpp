@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Engine/API/Graphics/Base.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/API/Rendering/DescriptorSet.hpp"
 #include "Engine/API/Rendering/DescriptorSetLayout.hpp"
@@ -12,20 +13,22 @@
 #include "Engine/API/Rendering/Swapchain.hpp"
 
 namespace Trident {
-	class PhysicalDevice;
-
 	class Device {
 		friend class GraphicsAdapter;
 
 		public:
-			virtual ~Device() = default;
+			~Device() {
+				adapter->destroyDevice(this);
+			}
 
 			ref<MemoryAllocator> getMemoryAllocator() const {
 				return memoryAllocator;
 			}
 
 			// Acquires the next available swapchain image and writes its index to imageIndex.
-			virtual AcquireNextImageStatus acquireNextImage(ref<Swapchain> swapchain, ref<Semaphore> semaphore, uint32& imageIndex) const = 0;
+			AcquireNextImageStatus acquireNextImage(ref<Swapchain> swapchain, ref<Semaphore> semaphore, uint32& imageIndex) const {
+				return adapter->acquireNextImage(this, swapchain.get(), semaphore.get(), imageIndex);
+			}
 
 			virtual sequence<ref<DescriptorSet>> allocateDescriptorSets(view<ref<DescriptorSetLayout>> descriptorSetLayouts) = 0;
 
@@ -73,11 +76,13 @@ namespace Trident {
 				return adapter->mapBuffer(this, buffer, offset, size);
 			}
 
-			virtual ref<PhysicalDevice> getPhysicalDevice() const = 0;
+			ref<PhysicalDevice> getPhysicalDevice() const;
 
 			virtual ref<Queue> getQueue(QueueFamilyCapability queueFamilyCapability) const = 0;
 
-			virtual void resetFence(ref<Fence> fence) const = 0;
+			void resetFence(ref<Fence> fence) const {
+				adapter->resetFence(this, fence.get());
+			}
 
 			void unmapBuffer(const Buffer* buffer) const {
 				return adapter->unmapBuffer(this, buffer);
@@ -85,19 +90,25 @@ namespace Trident {
 
 			virtual void updateDescriptorSets(view<WriteDescriptorSet> writeDescriptorSets) const = 0;
 
-			virtual void waitForFence(ref<Fence> fence) const = 0;
+			void waitForFence(ref<Fence> fence) const {
+				adapter->waitForFence(this, fence.get());
+			}
 
 			// Waits until all queues created with the device reach an idle state.
 			// To wait on a particular queue, see `Queue::waitIdle`.
-			virtual void waitIdle() const = 0;
+			void waitIdle() const {
+				adapter->waitIdle(this);
+			}
 
 		protected:
-			explicit Device(const GraphicsAdapter* adapter) :
-				adapter(adapter)
+			explicit Device(const GraphicsAdapter* adapter, const PhysicalDevice* physicalDevice) :
+				adapter(adapter),
+				physicalDevice(physicalDevice)
 			{}
 
 		private:
 			const GraphicsAdapter* adapter;
+			const PhysicalDevice* physicalDevice;
 
 			// The memory allocator is automatically created by the adapter after the API creation of the device.
 			ref<MemoryAllocator> memoryAllocator;

@@ -10,7 +10,7 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	DX12::Queue::Queue(const DX12::Device& device, D3D12_COMMAND_LIST_TYPE commandListType) :
+	DX12::Queue::Queue(const DX12::Device* device, D3D12_COMMAND_LIST_TYPE commandListType) :
 		device(device),
 		commandPool(device, commandListType)
 	{
@@ -27,7 +27,7 @@ namespace Trident {
 		{
 			PROFILE_SCOPE("CreateCommandQueue");
 
-			result = device.device->CreateCommandQueue(&commandQueueDescriptor, IID_PPV_ARGS(&commandQueue));
+			result = device->device->CreateCommandQueue(&commandQueueDescriptor, IID_PPV_ARGS(&commandQueue));
 		}
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command queue.");

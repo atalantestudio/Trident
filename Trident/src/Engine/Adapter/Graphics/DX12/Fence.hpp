@@ -9,7 +9,7 @@
 namespace Trident {
 	class DX12::Fence final : public Trident::Fence {
 		public:
-			explicit Fence(const FenceDescriptor& descriptor, const DX12::Device& device);
+			explicit Fence(const FenceDescriptor& descriptor, const DX12::Device* device);
 
 			~Fence() final override;
 

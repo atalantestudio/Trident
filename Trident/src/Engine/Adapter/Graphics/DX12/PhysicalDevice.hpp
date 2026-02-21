@@ -16,4 +16,8 @@ namespace Trident {
 			// Used when creating a swapchain from this physical device.
 			IDXGIFactory4* factory;
 	};
+
+	namespace DX12 {
+		ref<Trident::PhysicalDevice> selectPhysicalDevice(const Trident::Instance* instance, bool preferIntegratedGpu);
+	}
 }

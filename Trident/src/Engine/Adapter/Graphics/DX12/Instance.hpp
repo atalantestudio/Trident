@@ -17,8 +17,6 @@ namespace Trident {
 	namespace DX12 {
 		ref<Trident::Instance> createInstance(const Trident::GraphicsAdapter* adapter, const InstanceDescriptor& descriptor);
 
-		ref<Trident::PhysicalDevice> selectPhysicalDevice(const Trident::Instance* instance, bool preferIntegratedGpu);
-
 		void destroyInstance(const Trident::Instance* instance);
 	}
 }

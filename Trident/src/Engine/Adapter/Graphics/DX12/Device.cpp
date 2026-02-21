@@ -15,7 +15,7 @@
 
 namespace Trident {
 	#if defined(DEBUG_ENABLE_MESSENGER)
-		void DX12::Device::messageCallback(D3D12_MESSAGE_CATEGORY category, D3D12_MESSAGE_SEVERITY severity, D3D12_MESSAGE_ID id, LPCSTR description, void* context) {
+		static void messageCallback(D3D12_MESSAGE_CATEGORY category, D3D12_MESSAGE_SEVERITY severity, D3D12_MESSAGE_ID id, LPCSTR description, void* context) {
 			switch (severity) {
 				case D3D12_MESSAGE_SEVERITY_CORRUPTION:
 				case D3D12_MESSAGE_SEVERITY_ERROR: {
@@ -42,119 +42,10 @@ namespace Trident {
 		}
 	#endif
 
-	DX12::Device::Device(const Trident::GraphicsAdapter* adapter, const DX12::PhysicalDevice* physicalDevice) :
-		Trident::Device(adapter),
-		factory(physicalDevice->factory),
-		physicalDevice(physicalDevice)
-	{
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		HRESULT result = -1;
-
-		#ifndef PREFER_SOFTWARE_ADAPTER
-			{
-				PROFILE_SCOPE("D3D12CreateDevice");
-
-				result = D3D12CreateDevice(physicalDevice->adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device));
-			}
-		#endif
-
-		if (FAILED(result)) {
-			#ifndef PREFER_SOFTWARE_ADAPTER
-				ADAPTER_WARNING("Failed to create device using the primary display adapter. Falling back to a WARP adapter.");
-			#endif
-
-			IDXGIAdapter* adapter;
-
-			result = factory->EnumWarpAdapter(IID_PPV_ARGS(&adapter));
-
-			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to enumerate WARP adapter.");
-
-			{
-				PROFILE_SCOPE("D3D12CreateDevice (WARP adapter)");
-
-				result = D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device));
-			}
-
-			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create device using the WARP adapter.");
-
-			adapter->Release();
-		}
-
-		queues[0] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_DIRECT);
-		queues[1] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_COMPUTE);
-		queues[2] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_COPY);
-
-		waitEvent = CreateEvent(nullptr, false, false, L"Wait event");
-
-		WIN32_ASSERT(waitEvent != nullptr);
-
-		#if defined(DEBUG_ENABLE_MESSENGER)
-			result = device->QueryInterface(IID_PPV_ARGS(&infoQueue));
-
-			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to query info queue interface.");
-
-			static constexpr UINT DENY_MESSAGE_ID_COUNT = 2;
-			static D3D12_MESSAGE_ID DENY_MESSAGE_IDS[DENY_MESSAGE_ID_COUNT] = {
-				D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE,
-				D3D12_MESSAGE_ID_CLEARDEPTHSTENCILVIEW_MISMATCHINGCLEARVALUE,
-			};
-
-			D3D12_INFO_QUEUE_FILTER infoQueueFilter{};
-			infoQueueFilter.AllowList.NumCategories = 0;
-			infoQueueFilter.AllowList.pCategoryList = nullptr;
-			infoQueueFilter.AllowList.NumSeverities = 0;
-			infoQueueFilter.AllowList.pSeverityList = nullptr;
-			infoQueueFilter.AllowList.NumIDs = 0;
-			infoQueueFilter.AllowList.pIDList = nullptr;
-			infoQueueFilter.DenyList.NumCategories = 0;
-			infoQueueFilter.DenyList.pCategoryList = nullptr;
-			infoQueueFilter.DenyList.NumSeverities = 0;
-			infoQueueFilter.DenyList.pSeverityList = nullptr;
-			infoQueueFilter.DenyList.NumIDs = DENY_MESSAGE_ID_COUNT;
-			infoQueueFilter.DenyList.pIDList = DENY_MESSAGE_IDS;
-
-			result = infoQueue->AddStorageFilterEntries(&infoQueueFilter);
-
-			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to add storage filter entries.");
-
-			result = infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
-
-			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set severity breakpoint.");
-
-			result = infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
-
-			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set severity breakpoint.");
-
-			result = infoQueue->RegisterMessageCallback(messageCallback, D3D12_MESSAGE_CALLBACK_FLAG_NONE, nullptr, &messageCallbackCookie);
-
-			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to register message callback.");
-		#endif
-	}
-
-	DX12::Device::~Device() {
-		HRESULT result;
-
-		result = CloseHandle(waitEvent);
-
-		WIN32_ASSERT(result != 0);
-
-		#if defined(DEBUG_ENABLE_MESSENGER)
-			result = infoQueue->UnregisterMessageCallback(messageCallbackCookie);
-
-			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to unregister message callback.");
-
-			infoQueue->Release();
-		#endif
-
-		device->Release();
-	}
-
-	AcquireNextImageStatus DX12::Device::acquireNextImage(ref<Trident::Swapchain> swapchain, ref<Semaphore> semaphore, uint32& imageIndex) const {
-		imageIndex = std::static_pointer_cast<DX12::Swapchain>(swapchain)->swapChain->GetCurrentBackBufferIndex();
-
-		return AcquireNextImageStatus::SUCCESS;
-	}
+	DX12::Device::Device(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice) :
+		Trident::Device(adapter, physicalDevice),
+		factory(static_cast<const DX12::PhysicalDevice*>(physicalDevice)->factory)
+	{}
 
 	sequence<ref<DescriptorSet>> DX12::Device::allocateDescriptorSets(view<ref<DescriptorSetLayout>> descriptorSetLayouts) {
 		const ref<DX12::MemoryAllocator> memoryAllocator = std::static_pointer_cast<DX12::MemoryAllocator>(getMemoryAllocator());
@@ -195,18 +86,8 @@ namespace Trident {
 		return descriptorSets;
 	}
 
-	ref<PhysicalDevice> DX12::Device::getPhysicalDevice() const {
-		return createRef<DX12::PhysicalDevice>(*physicalDevice);
-	}
-
 	ref<Trident::Queue> DX12::Device::getQueue(QueueFamilyCapability queueFamilyCapability) const {
 		return queues[static_cast<uint32>(queueFamilyCapability)];
-	}
-
-	void DX12::Device::resetFence(ref<Trident::Fence> fence) const {
-		const HRESULT result = std::static_pointer_cast<DX12::Fence>(fence)->fence->Signal(0);
-
-		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to reset fence.");
 	}
 
 	void DX12::Device::updateDescriptorSets(view<WriteDescriptorSet> writeDescriptorSets) const {
@@ -304,20 +185,150 @@ namespace Trident {
 		}
 	}
 
-	void DX12::Device::waitForFence(ref<Trident::Fence> fence) const {
+	ref<Trident::Device> DX12::createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const DX12::PhysicalDevice* _physicalDevice = static_cast<const DX12::PhysicalDevice*>(physicalDevice);
+		ref<DX12::Device> device = createRef<DX12::Device>(adapter, physicalDevice);
+		HRESULT result = -1;
+
+		#ifndef PREFER_SOFTWARE_ADAPTER
+			{
+				PROFILE_SCOPE("D3D12CreateDevice");
+
+				result = D3D12CreateDevice(_physicalDevice->adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device->device));
+			}
+		#endif
+
+		if (FAILED(result)) {
+			#ifndef PREFER_SOFTWARE_ADAPTER
+				ADAPTER_WARNING("Failed to create device using the primary display adapter. Falling back to a WARP adapter.");
+			#endif
+
+			IDXGIAdapter* adapter;
+
+			result = _physicalDevice->factory->EnumWarpAdapter(IID_PPV_ARGS(&adapter));
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to enumerate WARP adapter.");
+
+			{
+				PROFILE_SCOPE("D3D12CreateDevice (WARP adapter)");
+
+				result = D3D12CreateDevice(_physicalDevice->adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device->device));
+			}
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create device using the WARP adapter.");
+
+			adapter->Release();
+		}
+
+		device->queues[0] = createRef<DX12::Queue>(device.get(), D3D12_COMMAND_LIST_TYPE_DIRECT);
+		device->queues[1] = createRef<DX12::Queue>(device.get(), D3D12_COMMAND_LIST_TYPE_COMPUTE);
+		device->queues[2] = createRef<DX12::Queue>(device.get(), D3D12_COMMAND_LIST_TYPE_COPY);
+
+		device->waitEvent = CreateEvent(nullptr, false, false, L"Wait event");
+
+		WIN32_ASSERT(device->waitEvent != nullptr);
+
+		#if defined(DEBUG_ENABLE_MESSENGER)
+			result = device->device->QueryInterface(IID_PPV_ARGS(&device->infoQueue));
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to query info queue interface.");
+
+			static constexpr UINT DENY_MESSAGE_ID_COUNT = 2;
+			static D3D12_MESSAGE_ID DENY_MESSAGE_IDS[DENY_MESSAGE_ID_COUNT] = {
+				D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE,
+				D3D12_MESSAGE_ID_CLEARDEPTHSTENCILVIEW_MISMATCHINGCLEARVALUE,
+			};
+
+			D3D12_INFO_QUEUE_FILTER infoQueueFilter{};
+			infoQueueFilter.AllowList.NumCategories = 0;
+			infoQueueFilter.AllowList.pCategoryList = nullptr;
+			infoQueueFilter.AllowList.NumSeverities = 0;
+			infoQueueFilter.AllowList.pSeverityList = nullptr;
+			infoQueueFilter.AllowList.NumIDs = 0;
+			infoQueueFilter.AllowList.pIDList = nullptr;
+			infoQueueFilter.DenyList.NumCategories = 0;
+			infoQueueFilter.DenyList.pCategoryList = nullptr;
+			infoQueueFilter.DenyList.NumSeverities = 0;
+			infoQueueFilter.DenyList.pSeverityList = nullptr;
+			infoQueueFilter.DenyList.NumIDs = DENY_MESSAGE_ID_COUNT;
+			infoQueueFilter.DenyList.pIDList = DENY_MESSAGE_IDS;
+
+			result = device->infoQueue->AddStorageFilterEntries(&infoQueueFilter);
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to add storage filter entries.");
+
+			result = device->infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set severity breakpoint.");
+
+			result = device->infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set severity breakpoint.");
+
+			result = device->infoQueue->RegisterMessageCallback(messageCallback, D3D12_MESSAGE_CALLBACK_FLAG_NONE, nullptr, &device->messageCallbackCookie);
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to register message callback.");
+		#endif
+
+		return device;
+	}
+
+	void DX12::destroyDevice(const Trident::Device* device) {
+		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
 		HRESULT result;
 
-		result = std::static_pointer_cast<DX12::Fence>(fence)->fence->SetEventOnCompletion(1, waitEvent);
+		result = CloseHandle(_device->waitEvent);
+
+		WIN32_ASSERT(result != 0);
+
+		#if defined(DEBUG_ENABLE_MESSENGER)
+			result = _device->infoQueue->UnregisterMessageCallback(_device->messageCallbackCookie);
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to unregister message callback.");
+
+			_device->infoQueue->Release();
+		#endif
+
+		_device->device->Release();
+	}
+
+	AcquireNextImageStatus DX12::acquireNextImage(const Trident::Device* device, const Trident::Swapchain* swapchain, const Semaphore* semaphore, uint32& imageIndex) {
+		const DX12::Swapchain* _swapchain = static_cast<const DX12::Swapchain*>(swapchain);
+
+		imageIndex = _swapchain->swapChain->GetCurrentBackBufferIndex();
+
+		return AcquireNextImageStatus::SUCCESS;
+	}
+
+	void DX12::resetFence(const Trident::Device* device, const Trident::Fence* fence) {
+		const DX12::Fence* _fence = static_cast<const DX12::Fence*>(fence);
+		HRESULT result;
+
+		result = _fence->fence->Signal(0);
+
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to reset fence.");
+	}
+
+	void DX12::waitForFence(const Trident::Device* device, const Trident::Fence* fence) {
+		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
+		const DX12::Fence* _fence = static_cast<const DX12::Fence*>(fence);
+		HRESULT result;
+
+		result = _fence->fence->SetEventOnCompletion(1, _device->waitEvent);
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set event on fence completion.");
 
-		const DWORD code = WaitForSingleObject(waitEvent, INFINITE);
+		const DWORD code = WaitForSingleObject(_device->waitEvent, INFINITE);
 
 		WIN32_ASSERT(code == WAIT_OBJECT_0);
 	}
 
-	void DX12::Device::waitIdle() const {
-		for (const ref<Trident::Queue> queue : queues) {
+	void DX12::waitIdle(const Trident::Device* device) {
+		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
+
+		for (const ref<Trident::Queue> queue : _device->queues) {
 			queue->waitIdle();
 		}
 	}

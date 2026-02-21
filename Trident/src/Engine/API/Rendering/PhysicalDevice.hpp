@@ -4,7 +4,6 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/Device.hpp"
 #include "Engine/API/Rendering/PhysicalDeviceLimits.hpp"
 
 namespace Trident {

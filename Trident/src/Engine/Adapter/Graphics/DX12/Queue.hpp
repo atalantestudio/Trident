@@ -11,7 +11,7 @@
 namespace Trident {
 	class DX12::Queue final : public Trident::Queue {
 		public:
-			explicit Queue(const DX12::Device& device, D3D12_COMMAND_LIST_TYPE commandListType);
+			explicit Queue(const DX12::Device* device, D3D12_COMMAND_LIST_TYPE commandListType);
 
 			~Queue() final override;
 
@@ -29,7 +29,7 @@ namespace Trident {
 			DX12::CommandPool commandPool;
 
 		private:
-			const DX12::Device& device;
+			const DX12::Device* device;
 			ref<DX12::Fence> idleFence;
 			HANDLE completionEvent;
 	};
