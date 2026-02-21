@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Rendering/CommandEncoder.hpp"
+#include "Engine/API/Rendering/Device.hpp"
 #include "Engine/API/Rendering/Fence.hpp"
 #include "Engine/API/Rendering/Semaphore.hpp"
 #include "Engine/API/Rendering/Status.hpp"
@@ -12,18 +13,17 @@
 namespace Trident {
 	class Queue {
 		public:
-			virtual ~Queue() = default;
+			/// Releases the queue.
+			~Queue();
 
 			/// Creates and returns a command encoder with the capabilities of the queue.
-			// TODO
-			virtual ref<CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const = 0;
-			// ref<CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const;
+			ref<CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const;
 
 			/// Executes the provided command buffers.
-			virtual void submit(view<ref<CommandBuffer>> commandBuffers) const = 0;
+			void submit(view<ref<CommandBuffer>> commandBuffers) const;
 
 			/// Executes the provided command buffers.
-			virtual void submit(
+			void submit(
 				/// The command buffers to execute.
 				view<ref<CommandBuffer>> commandBuffers,
 
@@ -37,10 +37,10 @@ namespace Trident {
 
 				/// Will be signaled once the command buffers have finished executing.
 				ref<Fence> fence
-			) const = 0;
+			) const;
 
 			/// Presents the provided swapchains.
-			virtual PresentStatus present(
+			PresentStatus present(
 				/// The swapchains to present.
 				view<ref<Swapchain>> swapchains,
 
@@ -50,13 +50,18 @@ namespace Trident {
 
 				/// Must be waited on before presenting the swapchains.
 				ref<Semaphore> waitSemaphore
-			) const = 0;
+			) const;
 
 			/// Waits until the queue reaches an idle state.
-			virtual void waitIdle() const = 0;
+			void waitIdle() const;
 
-		private:
+		protected:
+			explicit Queue(const Device* device);
+
+		public:
+			const Device* device;
+
 			// TODO
-			// const GraphicsAdapter* adapter;
+			// const CommandPool* commandPool;
 	};
 }

@@ -59,11 +59,11 @@ namespace Trident {
 	}
 
 	ref<Fence> Renderer::createFence(const FenceDescriptor& descriptor) {
-		return layerCompositor->adapter->createFence(descriptor);
+		return layerCompositor->device->createFence(descriptor);
 	}
 
 	ref<Framebuffer> Renderer::createFramebuffer(const FramebufferDescriptor& descriptor) {
-		return layerCompositor->adapter->createFramebuffer(descriptor);
+		return layerCompositor->device->createFramebuffer(descriptor);
 	}
 
 	ref<Image> Renderer::createImage(const ImageDescriptor& descriptor) {
@@ -75,7 +75,7 @@ namespace Trident {
 	}
 
 	ref<RenderPass> Renderer::createRenderPass(const RenderPassDescriptor& descriptor) {
-		return layerCompositor->adapter->createRenderPass(descriptor);
+		return layerCompositor->device->createRenderPass(descriptor);
 	}
 
 	ref<RenderPipeline> Renderer::createRenderPipeline(const RenderPipelineDescriptor& descriptor) {

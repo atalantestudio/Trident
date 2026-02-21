@@ -13,8 +13,6 @@ namespace Trident::DX12 {
 
 	ref<Trident::ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor, const Trident::Device* device);
 
-	ref<Trident::MemoryAllocator> createMemoryAllocator(const Trident::Device* device);
-
 	ref<Trident::PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor, const Trident::Device* device);
 
 	ref<Trident::ShaderModule> createShaderModuleFromAsset(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset, const Trident::Device* device);

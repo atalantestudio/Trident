@@ -20,7 +20,7 @@
 namespace Trident {
 	class CommandEncoder {
 		public:
-			virtual ~CommandEncoder() = default;
+			~CommandEncoder();
 
 			virtual void begin() const = 0;
 
@@ -112,6 +112,12 @@ namespace Trident {
 
 		protected:
 			virtual void bindIndexBuffer(ref<Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) = 0;
+
+		protected:
+			explicit CommandEncoder(const Device* device);
+
+		public:
+			const Device* device;
 	};
 
 	template void CommandEncoder::bindIndexBuffer<uint16>(ref<Buffer> indexBuffer, uint64 offset);

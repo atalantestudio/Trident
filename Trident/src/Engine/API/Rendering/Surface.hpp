@@ -15,15 +15,11 @@ namespace Trident {
 				return format;
 			}
 
-			ref<Instance> getInstance() const {
-				return instance;
-			}
-
 		protected:
 			explicit Surface(const Instance* instance);
 
 		protected:
-			ref<Instance> instance;
+			const Instance* instance;
 			ImageFormat format;
 	};
 }

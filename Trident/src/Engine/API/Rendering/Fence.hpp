@@ -9,11 +9,12 @@
 namespace Trident {
 	class Fence {
 		public:
-			virtual ~Fence() = default;
+			~Fence();
 
 		protected:
-			explicit Fence(const FenceDescriptor& descriptor) {
-				DEBUG_DESCRIPTOR_GUARD(descriptor);
-			}
+			explicit Fence(const Device* device);
+
+		protected:
+			const Device* device;
 	};
 }

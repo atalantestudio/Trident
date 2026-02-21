@@ -20,13 +20,13 @@ namespace Trident {
 	typedef ref<ComputePipeline> (*CreateComputePipelineImplementation)(const ComputePipelineDescriptor& descriptor, const Device* device);
 	typedef ref<DescriptorSetLayout> (*CreateDescriptorSetLayoutImplementation)(const sequence<DescriptorSetLayoutBinding>& bindings, const Device* device);
 	typedef ref<Device> (*CreateDeviceImplementation)(const GraphicsAdapter* adapter, const PhysicalDevice* physicalDevice);
-	typedef ref<Fence> (*CreateFenceImplementation)(const FenceDescriptor& descriptor);
-	typedef ref<Framebuffer> (*CreateFramebufferImplementation)(const FramebufferDescriptor& descriptor);
+	typedef ref<Fence> (*CreateFenceImplementation)(const Device* device, const FenceDescriptor& descriptor);
+	typedef ref<Framebuffer> (*CreateFramebufferImplementation)(const Device* device, const FramebufferDescriptor& descriptor);
 	typedef ref<Image> (*CreateImageImplementation)(const ImageDescriptor& descriptor);
 	typedef ref<Instance> (*CreateInstanceImplementation)(const GraphicsAdapter* adapter, const InstanceDescriptor& instanceDescriptor);
 	typedef ref<MemoryAllocator> (*CreateMemoryAllocatorImplementation)(const Device* device);
 	typedef ref<PipelineLayout> (*CreatePipelineLayoutImplementation)(const PipelineLayoutDescriptor& descriptor, const Device* device);
-	typedef ref<RenderPass> (*CreateRenderPassImplementation)(const RenderPassDescriptor& descriptor);
+	typedef ref<RenderPass> (*CreateRenderPassImplementation)(const Device* device, const RenderPassDescriptor& descriptor);
 	typedef ref<RenderPipeline> (*CreateRenderPipelineImplementation)(const RenderPipelineDescriptor& descriptor);
 	typedef ref<Sampler> (*CreateSamplerImplementation)(const SamplerDescriptor& descriptor);
 	typedef ref<Semaphore> (*CreateSemaphoreImplementation)();
@@ -39,7 +39,10 @@ namespace Trident {
 	typedef ref<Swapchain> (*CreateSwapchainImplementation)(const Device* device, const SwapchainDescriptor& descriptor);
 	typedef void (*DestroyBufferImplementation)(const Device* device, const Buffer* buffer);
 	typedef void (*DestroyDeviceImplementation)(const Device* device);
+	typedef void (*DestroyFenceImplementation)(const Device* device, const Fence* fence);
+	typedef void (*DestroyFramebufferImplementation)(const Device* device, const Framebuffer* framebuffer);
 	typedef void (*DestroyInstanceImplementation)(const Instance* instance);
+	typedef void (*DestroyQueueImplementation)(const Queue* queue);
 	typedef void (*DestroySurfaceImplementation)(const Instance* instance, const Surface* surface);
 	typedef void (*DestroySwapchainImplementation)(const Device* device, const Swapchain* swapchain);
 	typedef ref<Queue> (*GetQueueImplementation)(const Device* device, QueueFamilyCapability queueFamilyCapability);
@@ -82,9 +85,9 @@ namespace Trident {
 
 			ref<Device> createDevice(const PhysicalDevice* physicalDevice) const;
 
-			ref<Fence> createFence(const FenceDescriptor& descriptor) const;
+			ref<Fence> createFence(const Device* device, const FenceDescriptor& descriptor) const;
 
-			ref<Framebuffer> createFramebuffer(const FramebufferDescriptor& descriptor) const;
+			ref<Framebuffer> createFramebuffer(const Device* device, const FramebufferDescriptor& descriptor) const;
 
 			ref<Image> createImage(const ImageDescriptor& descriptor) const;
 
@@ -92,7 +95,7 @@ namespace Trident {
 
 			ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor, const Device* device) const;
 
-			ref<RenderPass> createRenderPass(const RenderPassDescriptor& descriptor) const;
+			ref<RenderPass> createRenderPass(const Device* device, const RenderPassDescriptor& descriptor) const;
 
 			ref<RenderPipeline> createRenderPipeline(const RenderPipelineDescriptor& descriptor) const;
 
@@ -111,7 +114,13 @@ namespace Trident {
 
 			void destroyDevice(const Device* device) const;
 
+			void destroyFence(const Device* device, const Fence* fence) const;
+
+			void destroyFramebuffer(const Device* device, const Framebuffer* framebuffer) const;
+
 			void destroyInstance(const Instance* instance) const;
+
+			void destroyQueue(const Queue* queue) const;
 
 			void destroySurface(const Instance* instance, const Surface* surface) const;
 
@@ -159,7 +168,10 @@ namespace Trident {
 			CreateSwapchainImplementation createSwapchainImplementation;
 			DestroyBufferImplementation destroyBufferImplementation;
 			DestroyDeviceImplementation destroyDeviceImplementation;
+			DestroyFenceImplementation destroyFenceImplementation;
+			DestroyFramebufferImplementation destroyFramebufferImplementation;
 			DestroyInstanceImplementation destroyInstanceImplementation;
+			DestroyQueueImplementation destroyQueueImplementation;
 			DestroySurfaceImplementation destroySurfaceImplementation;
 			DestroySwapchainImplementation destroySwapchainImplementation;
 			GetQueueImplementation getQueueImplementation;

@@ -49,7 +49,7 @@ namespace Trident {
 
 				swapchain = device->createSwapchain(swapchainDescriptor);
 
-				/* commandEncoders = sequence<ref<CommandEncoder>>(MAX_FRAMES_IN_FLIGHT);
+				commandEncoders = sequence<ref<CommandEncoder>>(MAX_FRAMES_IN_FLIGHT);
 				acquiredNextImageSemaphores = sequence<ref<Semaphore>>(MAX_FRAMES_IN_FLIGHT);
 				finishedExecutionSemaphores = sequence<ref<Semaphore>>(MAX_FRAMES_IN_FLIGHT);
 				inFlightFences = sequence<ref<Fence>>(MAX_FRAMES_IN_FLIGHT);
@@ -83,10 +83,10 @@ namespace Trident {
 						SET_DEBUG_NAME(inFlightFenceDescriptor, name);
 					#endif
 
-					inFlightFences[frameInFlightIndex] = adapter->createFence(inFlightFenceDescriptor);
+					inFlightFences[frameInFlightIndex] = device->createFence(inFlightFenceDescriptor);
 
 					frameInFlightIndex += 1;
-				} */
+				}
 			}
 
 			~LayerCompositor() {
@@ -158,7 +158,9 @@ namespace Trident {
 		public:
 			const GraphicsAdapter* adapter;
 
+			ref<Instance> instance;
 			ref<Surface> surface;
+			ref<PhysicalDevice> physicalDevice;
 			ref<Device> device;
 			ref<Swapchain> swapchain;
 
@@ -168,9 +170,6 @@ namespace Trident {
 
 		private:
 			const Window* window;
-
-			ref<Instance> instance;
-			ref<PhysicalDevice> physicalDevice;
 
 			bool verticalSync;
 

@@ -124,9 +124,9 @@ namespace Trident {
 			}
 
 			void createBuffers() {
-				const ref<Buffer> vertexStagingBuffer = createStagingBuffer(VERTEX_COUNT * sizeof(Vertex));
+				const ref<Buffer2<Vertex>> vertexStagingBuffer = createStagingBuffer2<Vertex>(VERTEX_COUNT * sizeof(Vertex));
 
-				Vertex* vertexStagingBufferMappedRange = vertexStagingBuffer->map<Vertex>(0, vertexStagingBuffer->getSize());
+				Vertex* vertexStagingBufferMappedRange = vertexStagingBuffer->map(0, vertexStagingBuffer->getSize());
 				vertexStagingBufferMappedRange[0].position = {-0.5f, -0.5f};
 				vertexStagingBufferMappedRange[0].color = {1.0f, 0.0f, 0.0f};
 				vertexStagingBufferMappedRange[1].position = {0.0f, 0.5f};

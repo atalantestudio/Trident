@@ -8,8 +8,14 @@
 #include "Engine/API/Rendering/PhysicalDevice.hpp"
 
 namespace Trident {
+	Buffer::Buffer(const Device* device, const BufferDescriptor& descriptor) :
+		device(device),
+		size(descriptor.size),
+		usage(descriptor.usage)
+	{}
+
 	Buffer::~Buffer() {
-		device->destroyBuffer(this);
+		device->adapter->destroyBuffer(device, this);
 	}
 
 	uint64 Buffer::getSize() const {
@@ -32,19 +38,69 @@ namespace Trident {
 		device->unmapBuffer(this);
 	}
 
-	Buffer::Buffer(const Device* device, const BufferDescriptor& descriptor) :
-		device(device),
-		size(descriptor.size),
-		usage(descriptor.usage)
+	CommandEncoder::~CommandEncoder() {
+		// TODO
+		BREAKPOINT();
+
+		// device->adapter->destroyCommandEncoder(device, commandPool, this);
+	}
+
+	Fence::Fence(const Device* device) :
+		device(device)
 	{}
 
+	Fence::~Fence() {
+		device->adapter->destroyFence(device, this);
+	}
+
+	Framebuffer::~Framebuffer() {
+		device->adapter->destroyFramebuffer(device, this);
+	}
+
+	Queue::Queue(const Device* device) :
+		device(device)
+	{}
+
+	Queue::~Queue() {
+		device->adapter->destroyQueue(this);
+	}
+
+	ref<CommandEncoder> Queue::createCommandEncoder(const CommandBufferDescriptor& descriptor) const {
+		// TODO
+		BREAKPOINT();
+
+		return nullptr;
+	}
+
+	void Queue::submit(view<ref<CommandBuffer>> commandBuffers) const {
+		// TODO
+		BREAKPOINT();
+	}
+
+	void Queue::submit(view<ref<CommandBuffer>> commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<Fence> fence) const {
+		// TODO
+		BREAKPOINT();
+	}
+
+	PresentStatus Queue::present(view<ref<Swapchain>> swapchains, view<uint32> presentableImageIndices, ref<Semaphore> waitSemaphore) const {
+		// TODO
+		BREAKPOINT();
+
+		return PresentStatus::SUCCESS;
+	}
+
+	void Queue::waitIdle() const {
+		// TODO
+		BREAKPOINT();
+	}
+
 	Surface::Surface(const Instance* instance) :
-		instance(createRef<Instance>(*instance)),
+		instance(instance),
 		format(instance->adapter->getSurfaceFormat(this))
 	{}
 
 	Surface::~Surface() {
-		instance->adapter->destroySurface(instance.get(), this);
+		instance->adapter->destroySurface(instance, this);
 	}
 
 	Swapchain::~Swapchain() {

@@ -39,6 +39,20 @@ namespace Trident {
 			// If `persistent` is true, the buffer will stay mapped until it is destroyed.
 			static ref<Buffer> createStagingBuffer(uint64 size, bool persistent = false);
 
+			/// Creates and returns a buffer suitable for memory transfers from the CPU to the GPU.
+			template<typename ElementType>
+			static ref<Buffer2<ElementType>> createStagingBuffer2(uint64 size, bool persistent = false) {
+				BufferDescriptor stagingBufferDescriptor{};
+				stagingBufferDescriptor.size = size;
+				stagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
+				stagingBufferDescriptor.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT;
+				stagingBufferDescriptor.persistent = persistent;
+
+				SET_DEBUG_NAME(stagingBufferDescriptor, "Staging buffer");
+
+				return layerCompositor->device->createBuffer2<ElementType>(stagingBufferDescriptor);
+			}
+
 			static ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor);
 
 			static ref<DescriptorSetLayout> createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings);

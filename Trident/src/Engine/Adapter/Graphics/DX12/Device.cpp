@@ -131,9 +131,9 @@ namespace Trident {
 			adapter->Release();
 		}
 
-		device->queues[0] = createRef<DX12::Queue>(device.get(), D3D12_COMMAND_LIST_TYPE_DIRECT);
-		device->queues[1] = createRef<DX12::Queue>(device.get(), D3D12_COMMAND_LIST_TYPE_COMPUTE);
-		device->queues[2] = createRef<DX12::Queue>(device.get(), D3D12_COMMAND_LIST_TYPE_COPY);
+		device->queues[0] = createQueue(pointer_cast<const Trident::Device*>(device.get()), 0, QueueFamilyCapability::GRAPHICS);
+		device->queues[1] = createQueue(pointer_cast<const Trident::Device*>(device.get()), 1, QueueFamilyCapability::COMPUTE);
+		device->queues[2] = createQueue(pointer_cast<const Trident::Device*>(device.get()), 2, QueueFamilyCapability::TRANSFER);
 
 		device->waitEvent = CreateEvent(nullptr, false, false, L"Wait event");
 

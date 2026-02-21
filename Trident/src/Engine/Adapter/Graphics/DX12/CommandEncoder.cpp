@@ -22,18 +22,21 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace Trident {
-	DX12::CommandEncoder::CommandEncoder(const CommandBufferDescriptor& descriptor, const DX12::Device* device, const DX12::CommandPool& commandPool) :
-		device(device),
-		commandAllocator(commandPool.commandAllocator),
+	DX12::CommandEncoder::CommandEncoder(const Trident::Device* device, const Trident::CommandPool* commandPool, const CommandBufferDescriptor& descriptor) :
+		Trident::CommandEncoder(device),
 		usage(descriptor.usage)
 	{
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
 		ADAPTER_ASSERT(descriptor.usage != CommandBufferUsage::SIMULTANEOUS_USE, "SIMULTANEOUS_USE is not supported on command lists.");
 
+		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
+		const DX12::CommandPool* _commandPool = static_cast<const DX12::CommandPool*>(commandPool);
 		HRESULT result;
 
-		result = device->device->CreateCommandList(0, commandPool.type, commandAllocator, nullptr, IID_PPV_ARGS(&commandList));
+		commandAllocator = _commandPool->commandAllocator;
+
+		result = _device->device->CreateCommandList(0, _commandPool->type, commandAllocator, nullptr, IID_PPV_ARGS(&commandList));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command list.");
 
@@ -53,10 +56,6 @@ namespace Trident {
 		if (descriptor.usage == CommandBufferUsage::AUTO) {
 			end();
 		}
-	}
-
-	DX12::CommandEncoder::~CommandEncoder() {
-		commandList->Release();
 	}
 
 	void DX12::CommandEncoder::begin() const {}
@@ -341,6 +340,7 @@ namespace Trident {
 	void DX12::CommandEncoder::dispatchIndirect(ref<Trident::Buffer> buffer, uint64 bufferOffset) {
 		ADAPTER_ASSERT(buffer->getUsage() & BufferUsage::INDIRECT, "The buffer is not an indirect buffer.");
 
+		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
 		const ref<DX12::Buffer> indirectBuffer = std::static_pointer_cast<DX12::Buffer>(buffer);
 
 		if (!indirectBuffer->commandSignature) {
@@ -353,7 +353,7 @@ namespace Trident {
 			commandSignatureDescriptor.pArgumentDescs = &indirectArgumentDescriptor;
 			commandSignatureDescriptor.NodeMask = 0;
 
-			const HRESULT result = device->device->CreateCommandSignature(&commandSignatureDescriptor, nullptr, IID_PPV_ARGS(&indirectBuffer->commandSignature));
+			const HRESULT result = _device->device->CreateCommandSignature(&commandSignatureDescriptor, nullptr, IID_PPV_ARGS(&indirectBuffer->commandSignature));
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command signature.");
 		}
@@ -483,6 +483,7 @@ namespace Trident {
 	void DX12::CommandEncoder::drawIndirect(ref<Trident::Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
 		ADAPTER_ASSERT(buffer->getUsage() & BufferUsage::INDIRECT, "The buffer is not an indirect buffer.");
 
+		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
 		const ref<DX12::Buffer> indirectBuffer = std::static_pointer_cast<DX12::Buffer>(buffer);
 
 		if (!indirectBuffer->commandSignature) {
@@ -495,7 +496,7 @@ namespace Trident {
 			commandSignatureDescriptor.pArgumentDescs = &indirectArgumentDescriptor;
 			commandSignatureDescriptor.NodeMask = 0;
 
-			const HRESULT result = device->device->CreateCommandSignature(&commandSignatureDescriptor, nullptr, IID_PPV_ARGS(&indirectBuffer->commandSignature));
+			const HRESULT result = _device->device->CreateCommandSignature(&commandSignatureDescriptor, nullptr, IID_PPV_ARGS(&indirectBuffer->commandSignature));
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command signature.");
 		}
@@ -521,6 +522,7 @@ namespace Trident {
 	void DX12::CommandEncoder::drawIndexedIndirect(ref<Trident::Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
 		ADAPTER_ASSERT(buffer->getUsage() & BufferUsage::INDIRECT, "The buffer is not an indirect buffer.");
 
+		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
 		const ref<DX12::Buffer> indirectBuffer = std::static_pointer_cast<DX12::Buffer>(buffer);
 
 		if (!indirectBuffer->commandSignature) {
@@ -533,7 +535,7 @@ namespace Trident {
 			commandSignatureDescriptor.pArgumentDescs = &indirectArgumentDescriptor;
 			commandSignatureDescriptor.NodeMask = 0;
 
-			const HRESULT result = device->device->CreateCommandSignature(&commandSignatureDescriptor, nullptr, IID_PPV_ARGS(&indirectBuffer->commandSignature));
+			const HRESULT result = _device->device->CreateCommandSignature(&commandSignatureDescriptor, nullptr, IID_PPV_ARGS(&indirectBuffer->commandSignature));
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command signature.");
 		}
@@ -802,5 +804,18 @@ namespace Trident {
 		}
 
 		commandList->OMSetRenderTargets(renderTargetCount, &renderTargetViewHandles[0], false, depthStencilViewHandlePointer);
+	}
+
+	ref<Trident::CommandEncoder> DX12::createCommandEncoder(const Trident::Device* device, const Trident::CommandPool* commandPool, const CommandBufferDescriptor& descriptor) {
+		// TODO
+		BREAKPOINT();
+
+		return createRef<DX12::CommandEncoder>(device, commandPool, descriptor);
+	}
+
+	void DX12::destroyCommandEncoder(const Trident::Device* device, const Trident::CommandPool* commandPool, const Trident::CommandEncoder* commandEncoder) {
+		const DX12::CommandEncoder* _commandEncoder = static_cast<const DX12::CommandEncoder*>(commandEncoder);
+
+		_commandEncoder->commandList->Release();
 	}
 }

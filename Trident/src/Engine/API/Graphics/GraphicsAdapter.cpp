@@ -69,16 +69,16 @@ namespace Trident {
 		return device;
 	}
 
-	ref<Fence> GraphicsAdapter::createFence(const FenceDescriptor& descriptor) const {
+	ref<Fence> GraphicsAdapter::createFence(const Device* device, const FenceDescriptor& descriptor) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
-		return createFenceImplementation(descriptor);
+		return createFenceImplementation(device, descriptor);
 	}
 
-	ref<Framebuffer> GraphicsAdapter::createFramebuffer(const FramebufferDescriptor& descriptor) const {
+	ref<Framebuffer> GraphicsAdapter::createFramebuffer(const Device* device, const FramebufferDescriptor& descriptor) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
-		return createFramebufferImplementation(descriptor);
+		return createFramebufferImplementation(device, descriptor);
 	}
 
 	ref<Image> GraphicsAdapter::createImage(const ImageDescriptor& descriptor) const {
@@ -99,10 +99,10 @@ namespace Trident {
 		return createPipelineLayoutImplementation(descriptor, device);
 	}
 
-	ref<RenderPass> GraphicsAdapter::createRenderPass(const RenderPassDescriptor& descriptor) const {
+	ref<RenderPass> GraphicsAdapter::createRenderPass(const Device* device, const RenderPassDescriptor& descriptor) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
-		return createRenderPassImplementation(descriptor);
+		return createRenderPassImplementation(device, descriptor);
 	}
 
 	ref<RenderPipeline> GraphicsAdapter::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
@@ -149,8 +149,20 @@ namespace Trident {
 		destroyDeviceImplementation(device);
 	}
 
+	void GraphicsAdapter::destroyFence(const Device* device, const Fence* fence) const {
+		destroyFenceImplementation(device, fence);
+	}
+
+	void GraphicsAdapter::destroyFramebuffer(const Device* device, const Framebuffer* framebuffer) const {
+		destroyFramebufferImplementation(device, framebuffer);
+	}
+
 	void GraphicsAdapter::destroyInstance(const Instance* instance) const {
 		destroyInstanceImplementation(instance);
+	}
+
+	void GraphicsAdapter::destroyQueue(const Queue* queue) const {
+		destroyQueueImplementation(queue);
 	}
 
 	void GraphicsAdapter::destroySurface(const Instance* instance, const Surface* surface) const {

@@ -10,5 +10,7 @@ namespace Trident {
 		GRAPHICS,
 		COMPUTE,
 		TRANSFER,
+
+		count,
 	};
 }

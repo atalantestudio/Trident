@@ -49,8 +49,20 @@ namespace Trident {
 				return adapter->createDescriptorSetLayout(bindings, this);
 			}
 
+			ref<Fence> createFence(const FenceDescriptor& descriptor) const {
+				return adapter->createFence(this, descriptor);
+			}
+
+			ref<Framebuffer> createFramebuffer(const FramebufferDescriptor& descriptor) const {
+				return adapter->createFramebuffer(this, descriptor);
+			}
+
 			ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
 				return adapter->createPipelineLayout(descriptor, this);
+			}
+
+			ref<RenderPass> createRenderPass(const RenderPassDescriptor& descriptor) const {
+				return adapter->createRenderPass(this, descriptor);
 			}
 
 			ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) const {
@@ -64,10 +76,6 @@ namespace Trident {
 
 			ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) const {
 				return adapter->createSwapchain(this, descriptor);
-			}
-
-			void destroyBuffer(const Buffer* buffer) const {
-				adapter->destroyBuffer(this, buffer);
 			}
 
 			ref<MemoryAllocator> getMemoryAllocator() const {
