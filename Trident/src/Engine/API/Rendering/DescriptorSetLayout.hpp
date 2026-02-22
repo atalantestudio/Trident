@@ -15,13 +15,12 @@ namespace Trident {
 
 	class DescriptorSetLayout {
 		public:
-			explicit DescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& descriptorSetLayoutBindings) :
-				bindings(descriptorSetLayoutBindings)
-			{}
+			explicit DescriptorSetLayout(const Device* device, const sequence<DescriptorSetLayoutBinding>& descriptorSetLayoutBindings);
 
-			virtual ~DescriptorSetLayout() = default;
+			~DescriptorSetLayout();
 
 		public:
+			const Device* device;
 			sequence<DescriptorSetLayoutBinding> bindings;
 	};
 }

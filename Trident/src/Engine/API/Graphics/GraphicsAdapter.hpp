@@ -39,9 +39,9 @@ namespace Trident {
 
 			ref<CommandPool> createCommandPool(const Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability) const;
 
-			ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor, const Device* device) const;
+			ref<ComputePipeline> createComputePipeline(const Device* device, const ComputePipelineDescriptor& descriptor) const;
 
-			ref<DescriptorSetLayout> createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings, const Device* device) const;
+			ref<DescriptorSetLayout> createDescriptorSetLayout(const Device* device, const sequence<DescriptorSetLayoutBinding>& bindings) const;
 
 			ref<Device> createDevice(const PhysicalDevice* physicalDevice) const;
 
@@ -53,7 +53,7 @@ namespace Trident {
 
 			ref<Instance> createInstance(const InstanceDescriptor& descriptor) const;
 
-			ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor, const Device* device) const;
+			ref<PipelineLayout> createPipelineLayout(const Device* device, const PipelineLayoutDescriptor& descriptor) const;
 
 			ref<RenderPass> createRenderPass(const Device* device, const RenderPassDescriptor& descriptor) const;
 
@@ -63,8 +63,8 @@ namespace Trident {
 
 			ref<Semaphore> createSemaphore(const Device* device) const;
 
-			ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset, const Device* device) const;
-			ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code, const Device* device) const;
+			ref<ShaderModule> createShaderModule(const Device* device, const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) const;
+			ref<ShaderModule> createShaderModule(const Device* device, const ShaderModuleDescriptor& descriptor, view<char8> code) const;
 
 			ref<Surface> createSurface(const Instance* instance, const Window* window) const;
 
@@ -76,6 +76,10 @@ namespace Trident {
 
 			void destroyCommandPool(const Device* device, const CommandPool* commandPool) const;
 
+			void destroyComputePipeline(const Device* device, const ComputePipeline* computePipeline) const;
+
+			void destroyDescriptorSetLayout(const Device* device, const DescriptorSetLayout* descriptorSetLayout) const;
+
 			void destroyDevice(const Device* device) const;
 
 			void destroyFence(const Device* device, const Fence* fence) const;
@@ -86,9 +90,13 @@ namespace Trident {
 
 			void destroyInstance(const Instance* instance) const;
 
+			void destroyPipelineLayout(const Device* device, const PipelineLayout* pipelineLayout) const;
+
 			void destroyQueue(const Queue* queue) const;
 
 			void destroySemaphore(const Device* device, const Semaphore* semaphore) const;
+
+			void destroyShaderModule(const Device* device, const ShaderModule* shaderModule) const;
 
 			void destroySurface(const Instance* instance, const Surface* surface) const;
 
@@ -145,13 +153,17 @@ namespace Trident {
 			DestroyBufferImplementation destroyBufferImplementation;
 			DestroyCommandEncoderImplementation destroyCommandEncoderImplementation;
 			DestroyCommandPoolImplementation destroyCommandPoolImplementation;
+			DestroyComputePipelineImplementation destroyComputePipelineImplementation;
+			DestroyDescriptorSetLayoutImplementation destroyDescriptorSetLayoutImplementation;
 			DestroyDeviceImplementation destroyDeviceImplementation;
 			DestroyFenceImplementation destroyFenceImplementation;
 			DestroyFramebufferImplementation destroyFramebufferImplementation;
 			DestroyGraphicsPipelineImplementation destroyGraphicsPipelineImplementation;
 			DestroyInstanceImplementation destroyInstanceImplementation;
+			DestroyPipelineLayoutImplementation destroyPipelineLayoutImplementation;
 			DestroyQueueImplementation destroyQueueImplementation;
 			DestroySemaphoreImplementation destroySemaphoreImplementation;
+			DestroyShaderModuleImplementation destroyShaderModuleImplementation;
 			DestroySurfaceImplementation destroySurfaceImplementation;
 			DestroySwapchainImplementation destroySwapchainImplementation;
 			GetQueueImplementation getQueueImplementation;

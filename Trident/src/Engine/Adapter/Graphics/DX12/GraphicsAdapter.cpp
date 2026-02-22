@@ -6,22 +6,25 @@
 #include "Engine/Adapter/Graphics/DX12/Buffer.hpp"
 #include "Engine/Adapter/Graphics/DX12/CommandEncoder.hpp"
 #include "Engine/Adapter/Graphics/DX12/ComputePipeline.hpp"
+#include "Engine/Adapter/Graphics/DX12/Device.hpp"
 #include "Engine/Adapter/Graphics/DX12/Fence.hpp"
 #include "Engine/Adapter/Graphics/DX12/Framebuffer.hpp"
 #include "Engine/Adapter/Graphics/DX12/GraphicsAdapter.hpp"
 #include "Engine/Adapter/Graphics/DX12/GraphicsPipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/Image.hpp"
+#include "Engine/Adapter/Graphics/DX12/Instance.hpp"
 #include "Engine/Adapter/Graphics/DX12/MemoryAllocator.hpp"
 #include "Engine/Adapter/Graphics/DX12/PipelineLayout.hpp"
 #include "Engine/Adapter/Graphics/DX12/Queue.hpp"
 #include "Engine/Adapter/Graphics/DX12/Sampler.hpp"
 #include "Engine/Adapter/Graphics/DX12/ShaderModule.hpp"
+#include "Engine/Adapter/Graphics/DX12/Surface.hpp"
 #include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
 
 namespace Trident {
 	namespace DX12 {
-		static ref<DescriptorSetLayout> createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings, const Trident::Device* device) {
-			return createRef<DescriptorSetLayout>(bindings);
+		static ref<DescriptorSetLayout> createDescriptorSetLayout(const Trident::Device* device, const sequence<DescriptorSetLayoutBinding>& bindings) {
+			return createRef<DescriptorSetLayout>(device, bindings);
 		}
 
 		static ref<Trident::MemoryAllocator> createMemoryAllocator(const Trident::Device* device) {
@@ -31,6 +34,8 @@ namespace Trident {
 		static ref<Semaphore> createSemaphore(const Trident::Device* device) {
 			return createRef<Semaphore>(device);
 		}
+
+		static void destroyDescriptorSetLayout(const Trident::Device* device, const DescriptorSetLayout* descriptorSetLayout) {}
 
 		static void destroySemaphore(const Trident::Device* device, const Semaphore* semaphore) {}
 
@@ -58,20 +63,24 @@ namespace Trident {
 		adapter->createPipelineLayoutImplementation = DX12::createPipelineLayout;
 		adapter->createRenderPassImplementation = DX12::createRenderPass;
 		adapter->createSemaphoreImplementation = DX12::createSemaphore;
-		adapter->createShaderModuleFromAssetImplementation = DX12::createShaderModuleFromAsset;
-		adapter->createShaderModuleFromCodeImplementation = DX12::createShaderModuleFromCode;
+		adapter->createShaderModuleFromAssetImplementation = DX12::createShaderModule;
+		adapter->createShaderModuleFromCodeImplementation = DX12::createShaderModule;
 		adapter->createSurfaceImplementation = DX12::createSurface;
 		adapter->createSwapchainImplementation = DX12::createSwapchain;
 		adapter->destroyBufferImplementation = DX12::destroyBuffer;
 		adapter->destroyCommandEncoderImplementation = DX12::destroyCommandEncoder;
 		adapter->destroyCommandPoolImplementation = DX12::destroyCommandPool;
+		adapter->destroyComputePipelineImplementation = DX12::destroyComputePipeline;
+		adapter->destroyDescriptorSetLayoutImplementation = DX12::destroyDescriptorSetLayout;
 		adapter->destroyDeviceImplementation = DX12::destroyDevice;
 		adapter->destroyFenceImplementation = DX12::destroyFence;
 		adapter->destroyFramebufferImplementation = DX12::destroyFramebuffer;
 		adapter->destroyGraphicsPipelineImplementation = DX12::destroyGraphicsPipeline;
+		adapter->destroyPipelineLayoutImplementation = DX12::destroyPipelineLayout;
 		adapter->destroyInstanceImplementation = DX12::destroyInstance;
 		adapter->destroyQueueImplementation = DX12::destroyQueue;
 		adapter->destroySemaphoreImplementation = DX12::destroySemaphore;
+		adapter->destroyShaderModuleImplementation = DX12::destroyShaderModule;
 		adapter->destroySurfaceImplementation = DX12::destroySurface;
 		adapter->destroySwapchainImplementation = DX12::destroySwapchain;
 		adapter->getQueueImplementation = DX12::getQueue;
@@ -87,23 +96,5 @@ namespace Trident {
 		adapter->waitForFenceImplementation = DX12::waitForFence;
 		adapter->waitIdleDeviceImplementation = DX12::waitIdle;
 		adapter->waitIdleQueueImplementation = DX12::waitIdle;
-	}
-
-	ref<Trident::ComputePipeline> DX12::createComputePipeline(const ComputePipelineDescriptor& descriptor, const Trident::Device* device) {
-		return createRef<DX12::ComputePipeline>(descriptor, static_cast<const DX12::Device*>(device));
-	}
-
-	ref<Trident::PipelineLayout> DX12::createPipelineLayout(const PipelineLayoutDescriptor& descriptor, const Trident::Device* device) {
-		return createRef<DX12::PipelineLayout>(descriptor, static_cast<const DX12::Device*>(device));
-	}
-
-	ref<Trident::ShaderModule> DX12::createShaderModuleFromAsset(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset, const Trident::Device* device) {
-		ADAPTER_ASSERT(false, "Shader module assets are not supported by the DX12 adapter.");
-
-		return nullptr;
-	}
-
-	ref<Trident::ShaderModule> DX12::createShaderModuleFromCode(const ShaderModuleDescriptor& descriptor, view<char8> code, const Trident::Device* device) {
-		return createRef<DX12::ShaderModule>(descriptor, code);
 	}
 }

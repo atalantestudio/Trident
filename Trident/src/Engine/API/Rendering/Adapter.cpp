@@ -7,6 +7,8 @@
 #include "Engine/API/Rendering/CommandPool.hpp"
 #include "Engine/API/Rendering/Device.hpp"
 #include "Engine/API/Rendering/PhysicalDevice.hpp"
+#include "Engine/API/Rendering/PipelineLayout.hpp"
+#include "Engine/API/Rendering/ShaderModule.hpp"
 
 namespace Trident {
 	Buffer::Buffer(const Device* device, const BufferDescriptor& descriptor) :
@@ -56,6 +58,23 @@ namespace Trident {
 		device->adapter->destroyCommandPool(device, this);
 	}
 
+	ComputePipeline::ComputePipeline(const Device* device) :
+		device(device)
+	{}
+
+	ComputePipeline::~ComputePipeline() {
+		device->adapter->destroyComputePipeline(device, this);
+	}
+
+	DescriptorSetLayout::DescriptorSetLayout(const Device* device, const sequence<DescriptorSetLayoutBinding>& bindings) :
+		device(device),
+		bindings(bindings)
+	{}
+
+	DescriptorSetLayout::~DescriptorSetLayout() {
+		device->adapter->destroyDescriptorSetLayout(device, this);
+	}
+
 	Fence::Fence(const Device* device) :
 		device(device)
 	{}
@@ -74,6 +93,14 @@ namespace Trident {
 
 	GraphicsPipeline::~GraphicsPipeline() {
 		device->adapter->destroyGraphicsPipeline(device, this);
+	}
+
+	PipelineLayout::PipelineLayout(const Device* device) :
+		device(device)
+	{}
+
+	PipelineLayout::~PipelineLayout() {
+		device->adapter->destroyPipelineLayout(device, this);
 	}
 
 	Queue::Queue(const Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability) :
@@ -111,6 +138,14 @@ namespace Trident {
 
 	Semaphore::~Semaphore() {
 		device->adapter->destroySemaphore(device, this);
+	}
+
+	ShaderModule::ShaderModule(const Device* device) :
+		device(device)
+	{}
+
+	ShaderModule::~ShaderModule() {
+		device->adapter->destroyShaderModule(device, this);
 	}
 
 	Surface::Surface(const Instance* instance) :

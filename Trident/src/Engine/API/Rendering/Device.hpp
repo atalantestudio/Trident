@@ -41,12 +41,12 @@ namespace Trident {
 			}
 
 			ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor) const {
-				return adapter->createComputePipeline(descriptor, this);
+				return adapter->createComputePipeline(this, descriptor);
 			}
 
 			// TODO: Use view<DescriptorSetLayoutBinding> instead.
 			ref<DescriptorSetLayout> createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const {
-				return adapter->createDescriptorSetLayout(bindings, this);
+				return adapter->createDescriptorSetLayout(this, bindings);
 			}
 
 			ref<Fence> createFence(const FenceDescriptor& descriptor) const {
@@ -62,7 +62,7 @@ namespace Trident {
 			}
 
 			ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
-				return adapter->createPipelineLayout(descriptor, this);
+				return adapter->createPipelineLayout(this, descriptor);
 			}
 
 			ref<RenderPass> createRenderPass(const RenderPassDescriptor& descriptor) const {
@@ -74,12 +74,12 @@ namespace Trident {
 			}
 
 			ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) const {
-				return adapter->createShaderModule(descriptor, asset, this);
+				return adapter->createShaderModule(this, descriptor, asset);
 			}
 
 			// TODO: Deprecate (replace with the asset overload above).
 			ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) const {
-				return adapter->createShaderModule(descriptor, code, this);
+				return adapter->createShaderModule(this, descriptor, code);
 			}
 
 			ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) const {

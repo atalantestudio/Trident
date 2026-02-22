@@ -9,10 +9,12 @@
 namespace Trident {
 	class PipelineLayout {
 		public:
-			explicit PipelineLayout(const PipelineLayoutDescriptor& descriptor) {
-				DEBUG_DESCRIPTOR_GUARD(descriptor);
-			}
+			~PipelineLayout();
 
-			virtual ~PipelineLayout() = default;
+		protected:
+			explicit PipelineLayout(const Device* device);
+
+		public:
+			const Device* device;
 	};
 }

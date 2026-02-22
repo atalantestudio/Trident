@@ -10,12 +10,16 @@
 namespace Trident {
 	class DX12::ComputePipeline final : public Trident::ComputePipeline {
 		public:
-			explicit ComputePipeline(const ComputePipelineDescriptor& descriptor, const DX12::Device* device);
-
-			~ComputePipeline() final override;
+			explicit ComputePipeline(const Trident::Device* device);
 
 		public:
 			ID3D12PipelineState* pipelineState;
 			ref<DX12::PipelineLayout> pipelineLayout;
 	};
+
+	namespace DX12 {
+		ref<Trident::ComputePipeline> createComputePipeline(const Trident::Device* device, const ComputePipelineDescriptor& descriptor);
+
+		void destroyComputePipeline(const Trident::Device* device, const Trident::ComputePipeline* computePipeline);
+	}
 }

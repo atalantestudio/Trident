@@ -9,8 +9,10 @@
 // #include "Engine/Adapter/Graphics/GL/bindAdapter.hpp"
 // #include "Engine/Adapter/Graphics/VK/bindAdapter.hpp"
 
+#include "Engine/API/Rendering/Device.hpp"
 #include "Engine/API/Rendering/Instance.hpp"
 
+// TODO: Restore descriptor validation.
 namespace Trident {
 	ConsoleLogger GraphicsAdapter::logger(std::cout, LogLevel::ALL, "");
 
@@ -60,14 +62,14 @@ namespace Trident {
 		return createCommandPoolImplementation(device, queueFamilyIndex, queueFamilyCapability);
 	}
 
-	ref<ComputePipeline> GraphicsAdapter::createComputePipeline(const ComputePipelineDescriptor& descriptor, const Device* device) const {
+	ref<ComputePipeline> GraphicsAdapter::createComputePipeline(const Device* device, const ComputePipelineDescriptor& descriptor) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
-		return createComputePipelineImplementation(descriptor, device);
+		return createComputePipelineImplementation(device, descriptor);
 	}
 
-	ref<DescriptorSetLayout> GraphicsAdapter::createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings, const Device* device) const {
-		return createDescriptorSetLayoutImplementation(bindings, device);
+	ref<DescriptorSetLayout> GraphicsAdapter::createDescriptorSetLayout(const Device* device, const sequence<DescriptorSetLayoutBinding>& bindings) const {
+		return createDescriptorSetLayoutImplementation(device, bindings);
 	}
 
 	ref<Device> GraphicsAdapter::createDevice(const PhysicalDevice* physicalDevice) const {
@@ -101,10 +103,10 @@ namespace Trident {
 		return createInstanceImplementation(this, descriptor);
 	}
 
-	ref<PipelineLayout> GraphicsAdapter::createPipelineLayout(const PipelineLayoutDescriptor& descriptor, const Device* device) const {
+	ref<PipelineLayout> GraphicsAdapter::createPipelineLayout(const Device* device, const PipelineLayoutDescriptor& descriptor) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
-		return createPipelineLayoutImplementation(descriptor, device);
+		return createPipelineLayoutImplementation(device, descriptor);
 	}
 
 	ref<RenderPass> GraphicsAdapter::createRenderPass(const Device* device, const RenderPassDescriptor& descriptor) const {
@@ -129,16 +131,16 @@ namespace Trident {
 		return createSemaphoreImplementation(device);
 	}
 
-	ref<ShaderModule> GraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset, const Device* device) const {
+	ref<ShaderModule> GraphicsAdapter::createShaderModule(const Device* device, const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
-		return createShaderModuleFromAssetImplementation(descriptor, asset, device);
+		return createShaderModuleFromAssetImplementation(device, descriptor, asset);
 	}
 
-	ref<ShaderModule> GraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code, const Device* device) const {
+	ref<ShaderModule> GraphicsAdapter::createShaderModule(const Device* device, const ShaderModuleDescriptor& descriptor, view<char8> code) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
-		return createShaderModuleFromCodeImplementation(descriptor, code, device);
+		return createShaderModuleFromCodeImplementation(device, descriptor, code);
 	}
 
 	ref<Surface> GraphicsAdapter::createSurface(const Instance* instance, const Window* window) const {
@@ -161,6 +163,14 @@ namespace Trident {
 		destroyCommandPoolImplementation(device, commandPool);
 	}
 
+	void GraphicsAdapter::destroyComputePipeline(const Device* device, const ComputePipeline* computePipeline) const {
+		destroyComputePipelineImplementation(device, computePipeline);
+	}
+
+	void GraphicsAdapter::destroyDescriptorSetLayout(const Device* device, const DescriptorSetLayout* descriptorSetLayout) const {
+		destroyDescriptorSetLayoutImplementation(device, descriptorSetLayout);
+	}
+
 	void GraphicsAdapter::destroyDevice(const Device* device) const {
 		destroyDeviceImplementation(device);
 	}
@@ -181,12 +191,20 @@ namespace Trident {
 		destroyInstanceImplementation(instance);
 	}
 
+	void GraphicsAdapter::destroyPipelineLayout(const Device* device, const PipelineLayout* pipelineLayout) const {
+		destroyPipelineLayoutImplementation(device, pipelineLayout);
+	}
+
 	void GraphicsAdapter::destroyQueue(const Queue* queue) const {
 		destroyQueueImplementation(queue);
 	}
 
 	void GraphicsAdapter::destroySemaphore(const Device* device, const Semaphore* semaphore) const {
 		destroySemaphoreImplementation(device, semaphore);
+	}
+
+	void GraphicsAdapter::destroyShaderModule(const Device* device, const ShaderModule* shaderModule) const {
+		destroyShaderModuleImplementation(device, shaderModule);
 	}
 
 	void GraphicsAdapter::destroySurface(const Instance* instance, const Surface* surface) const {
