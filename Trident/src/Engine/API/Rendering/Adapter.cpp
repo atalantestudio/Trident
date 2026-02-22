@@ -50,6 +50,106 @@ namespace Trident {
 		device->adapter->destroyCommandEncoder(device, commandPool, this);
 	}
 
+	void CommandEncoder::begin() const {
+		device->adapter->begin(this);
+	}
+
+	void CommandEncoder::beginRenderPass(const BeginRenderPassDescriptor& descriptor) {
+		device->adapter->beginRenderPass(this, descriptor);
+	}
+
+	void CommandEncoder::bindComputePipeline(ref<ComputePipeline> computePipeline) {
+		device->adapter->bindComputePipeline(this, computePipeline);
+	}
+
+	void CommandEncoder::bindDescriptorSets(ref<PipelineLayout> pipelineLayout, uint32 descriptorSetIndexOffset, view<ref<DescriptorSet>> descriptorSets) {
+		device->adapter->bindDescriptorSets(this, pipelineLayout, descriptorSetIndexOffset, descriptorSets);
+	}
+
+	void CommandEncoder::bindGraphicsPipeline(ref<GraphicsPipeline> graphicsPipeline) {
+		device->adapter->bindGraphicsPipeline(this, graphicsPipeline);
+	}
+
+	void CommandEncoder::bindIndexBuffer(ref<Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
+		device->adapter->bindIndexBuffer(this, indexBuffer, offset, indexTypeSize);
+	}
+
+	void CommandEncoder::bindVertexBuffer(uint32 bindingIndex, ref<Buffer> vertexBuffer, uint64 offset, uint32 stride) {
+		device->adapter->bindVertexBuffer(this, bindingIndex, vertexBuffer, offset, stride);
+	}
+
+	void CommandEncoder::copyBufferToBuffer(ref<Buffer> sourceBuffer, ref<Buffer> destinationBuffer, view<BufferCopyRegion> copyRegions) {
+		device->adapter->copyBufferToBuffer(this, sourceBuffer, destinationBuffer, copyRegions);
+	}
+
+	void CommandEncoder::copyBufferToImage(ref<Buffer> sourceBuffer, ref<Image> destinationImage, view<BufferImageCopyRegion> copyRegions) {
+		device->adapter->copyBufferToImage(this, sourceBuffer, destinationImage, copyRegions);
+	}
+
+	void CommandEncoder::copyImageToBuffer(ref<Image> sourceImage, ref<Buffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) {
+		device->adapter->copyImageToBuffer(this, sourceImage, destinationBuffer, copyRegions);
+	}
+
+	void CommandEncoder::dispatch(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) {
+		device->adapter->dispatch(this, groupCountX, groupCountY, groupCountZ);
+	}
+
+	void CommandEncoder::dispatchIndirect(ref<Buffer> buffer, uint64 bufferOffset) {
+		device->adapter->dispatchIndirect(this, buffer, bufferOffset);
+	}
+
+	void CommandEncoder::draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset, uint32 instanceOffset) {
+		device->adapter->draw(this, vertexCount, instanceCount, vertexOffset, instanceOffset);
+	}
+
+	void CommandEncoder::drawIndirect(ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
+		device->adapter->drawIndirect(this, buffer, bufferOffset, drawCount, stride);
+	}
+
+	void CommandEncoder::drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset, sint32 indexBias, uint32 instanceOffset) {
+		device->adapter->drawIndexed(this, indexCount, instanceCount, indexOffset, indexBias, instanceOffset);
+	}
+
+	void CommandEncoder::drawIndexedIndirect(ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
+		device->adapter->drawIndexedIndirect(this, buffer, bufferOffset, drawCount, stride);
+	}
+
+	ref<CommandBuffer> CommandEncoder::end() const {
+		return device->adapter->end(this);
+	}
+
+	void CommandEncoder::endRenderPass() {
+		device->adapter->endRenderPass(this);
+	}
+
+	void CommandEncoder::nextSubpass() {
+		device->adapter->nextSubpass(this);
+	}
+
+	void CommandEncoder::insertBufferMemoryBarriers(view<BufferMemoryBarrier> barriers) {
+		device->adapter->insertBufferMemoryBarriers(this, barriers);
+	}
+
+	void CommandEncoder::reset() {
+		device->adapter->reset(this);
+	}
+
+	void CommandEncoder::setImageMemoryBarrier(ref<Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
+		device->adapter->setImageMemoryBarrier(this, image, newLayout, sourceStage, destinationStage);
+	}
+
+	void CommandEncoder::setLineWidth(float32 lineWidth) {
+		device->adapter->setLineWidth(this, lineWidth);
+	}
+
+	void CommandEncoder::setScissor(sint32 xOffset, sint32 yOffset, Extent2D extent) {
+		device->adapter->setScissor(this, xOffset, yOffset, extent);
+	}
+
+	void CommandEncoder::setViewport(vec2<float32> origin, vec2<float32> size, float32 minDepth, float32 maxDepth) {
+		device->adapter->setViewport(this, origin, size, minDepth, maxDepth);
+	}
+
 	CommandPool::CommandPool(const Device* device) :
 		device(device)
 	{}

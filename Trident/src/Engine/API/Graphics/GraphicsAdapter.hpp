@@ -24,6 +24,26 @@ namespace Trident {
 
 			sequence<ref<DescriptorSet>> allocateDescriptorSets(const Device* device, view<ref<DescriptorSetLayout>> descriptorSetLayouts) const;
 
+			void begin(const CommandEncoder* commandEncoder) const;
+
+			void beginRenderPass(CommandEncoder* commandEncoder, const BeginRenderPassDescriptor& descriptor) const;
+
+			void bindComputePipeline(CommandEncoder* commandEncoder, ref<ComputePipeline> computePipeline) const;
+
+			void bindDescriptorSets(CommandEncoder* commandEncoder, ref<PipelineLayout> pipelineLayout, uint32 descriptorSetIndexOffset, view<ref<DescriptorSet>> descriptorSets) const;
+
+			void bindGraphicsPipeline(CommandEncoder* commandEncoder, ref<GraphicsPipeline> graphicsPipeline) const;
+
+			void bindIndexBuffer(CommandEncoder* commandEncoder, ref<Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) const;
+
+			void bindVertexBuffer(CommandEncoder* commandEncoder, uint32 bindingIndex, ref<Buffer> vertexBuffer, uint64 offset, uint32 stride) const;
+
+			void copyBufferToBuffer(CommandEncoder* commandEncoder, ref<Buffer> sourceBuffer, ref<Buffer> destinationBuffer, view<BufferCopyRegion> copyRegions) const;
+
+			void copyBufferToImage(CommandEncoder* commandEncoder, ref<Buffer> sourceBuffer, ref<Image> destinationImage, view<BufferImageCopyRegion> copyRegions) const;
+
+			void copyImageToBuffer(CommandEncoder* commandEncoder, ref<Image> sourceImage, ref<Buffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) const;
+
 			ref<Buffer> createBuffer(const BufferDescriptor& descriptor, const Device* device) const;
 
 			template<typename ElementType>
@@ -102,17 +122,47 @@ namespace Trident {
 
 			void destroySwapchain(const Device* device, const Swapchain* swapchain) const;
 
+			void dispatch(CommandEncoder* commandEncoder, uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) const;
+
+			void dispatchIndirect(CommandEncoder* commandEncoder, ref<Buffer> buffer, uint64 bufferOffset) const;
+
+			void draw(CommandEncoder* commandEncoder, uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset, uint32 instanceOffset) const;
+
+			void drawIndirect(CommandEncoder* commandEncoder, ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) const;
+
+			void drawIndexed(CommandEncoder* commandEncoder, uint32 indexCount, uint32 instanceCount, uint32 indexOffset, sint32 indexBias, uint32 instanceOffset) const;
+
+			void drawIndexedIndirect(CommandEncoder* commandEncoder, ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) const;
+
+			ref<CommandBuffer> end(const CommandEncoder* commandEncoder) const;
+
+			void endRenderPass(CommandEncoder* commandEncoder) const;
+
 			ref<Queue> getQueue(const Device* device, QueueFamilyCapability queueFamilyCapability) const;
 
 			ImageFormat getSurfaceFormat(const Surface* surface) const;
 
+			void insertBufferMemoryBarriers(CommandEncoder* commandEncoder, view<BufferMemoryBarrier> barriers) const;
+
 			void* mapBuffer(const Device* device, const Buffer* buffer, uint64 offset, uint64 size) const;
 
+			void nextSubpass(CommandEncoder* commandEncoder) const;
+
 			PresentStatus present(const Queue* queue, view<ref<Swapchain>> swapchains, view<uint32> presentableImageIndices, ref<Semaphore> waitSemaphore) const;
+
+			void reset(CommandEncoder* commandEncoder) const;
 
 			void resetFence(const Device* device, const Fence* fence) const;
 
 			ref<PhysicalDevice> selectPhysicalDevice(const Instance* instance, bool preferIntegratedGpu) const;
+
+			void setImageMemoryBarrier(CommandEncoder* commandEncoder, ref<Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) const;
+
+			void setLineWidth(CommandEncoder* commandEncoder, float32 lineWidth) const;
+
+			void setScissor(CommandEncoder* commandEncoder, sint32 xOffset, sint32 yOffset, Extent2D extent) const;
+
+			void setViewport(CommandEncoder* commandEncoder, vec2<float32> origin, vec2<float32> size, float32 minDepth, float32 maxDepth) const;
 
 			void submit(const Queue* queue, view<ref<CommandBuffer>> commandBuffers) const;
 			void submit(const Queue* queue, view<ref<CommandBuffer>> commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<Fence> fence) const;
@@ -130,6 +180,16 @@ namespace Trident {
 		public:
 			AcquireNextImageImplementation acquireNextImageImplementation;
 			AllocateDescriptorSetsImplementation allocateDescriptorSetsImplementation;
+			BeginImplementation beginImplementation;
+			BeginRenderPassImplementation beginRenderPassImplementation;
+			BindComputePipelineImplementation bindComputePipelineImplementation;
+			BindDescriptorSetsImplementation bindDescriptorSetsImplementation;
+			BindGraphicsPipelineImplementation bindGraphicsPipelineImplementation;
+			BindIndexBufferImplementation bindIndexBufferImplementation;
+			BindVertexBufferImplementation bindVertexBufferImplementation;
+			CopyBufferToBufferImplementation copyBufferToBufferImplementation;
+			CopyBufferToImageImplementation copyBufferToImageImplementation;
+			CopyImageToBufferImplementation copyImageToBufferImplementation;
 			CreateBufferImplementation createBufferImplementation;
 			CreateCommandEncoderImplementation createCommandEncoderImplementation;
 			CreateCommandPoolImplementation createCommandPoolImplementation;
@@ -166,12 +226,27 @@ namespace Trident {
 			DestroyShaderModuleImplementation destroyShaderModuleImplementation;
 			DestroySurfaceImplementation destroySurfaceImplementation;
 			DestroySwapchainImplementation destroySwapchainImplementation;
+			DispatchImplementation dispatchImplementation;
+			DispatchIndirectImplementation dispatchIndirectImplementation;
+			DrawImplementation drawImplementation;
+			DrawIndirectImplementation drawIndirectImplementation;
+			DrawIndexedImplementation drawIndexedImplementation;
+			DrawIndexedIndirectImplementation drawIndexedIndirectImplementation;
+			EndImplementation endImplementation;
+			EndRenderPassImplementation endRenderPassImplementation;
 			GetQueueImplementation getQueueImplementation;
 			GetSurfaceFormatImplementation getSurfaceFormatImplementation;
+			InsertBufferMemoryBarriersImplementation insertBufferMemoryBarriersImplementation;
 			MapBufferImplementation mapBufferImplementation;
+			NextSubpassImplementation nextSubpassImplementation;
 			PresentImplementation presentImplementation;
+			ResetImplementation resetImplementation;
 			ResetFenceImplementation resetFenceImplementation;
 			SelectPhysicalDeviceImplementation selectPhysicalDeviceImplementation;
+			SetImageMemoryBarrierImplementation setImageMemoryBarrierImplementation;
+			SetLineWidthImplementation setLineWidthImplementation;
+			SetScissorImplementation setScissorImplementation;
+			SetViewportImplementation setViewportImplementation;
 			SubmitImplementation submitImplementation;
 			Submit2Implementation submit2Implementation;
 			UnmapBufferImplementation unmapBufferImplementation;

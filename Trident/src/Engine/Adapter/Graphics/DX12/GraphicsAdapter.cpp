@@ -21,34 +21,41 @@
 #include "Engine/Adapter/Graphics/DX12/Surface.hpp"
 #include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
 
-namespace Trident {
-	namespace DX12 {
-		static ref<DescriptorSetLayout> createDescriptorSetLayout(const Trident::Device* device, const sequence<DescriptorSetLayoutBinding>& bindings) {
-			return createRef<DescriptorSetLayout>(device, bindings);
-		}
-
-		static ref<Trident::MemoryAllocator> createMemoryAllocator(const Trident::Device* device) {
-			return createRef<DX12::MemoryAllocator>(static_cast<const DX12::Device*>(device));
-		}
-
-		static ref<Semaphore> createSemaphore(const Trident::Device* device) {
-			return createRef<Semaphore>(device);
-		}
-
-		static void destroyDescriptorSetLayout(const Trident::Device* device, const DescriptorSetLayout* descriptorSetLayout) {}
-
-		static void destroySemaphore(const Trident::Device* device, const Semaphore* semaphore) {}
-
-		static ref<RenderPass> createRenderPass(const Trident::Device* device, const RenderPassDescriptor& descriptor) {
-			return createRef<RenderPass>(descriptor);
-		}
+namespace Trident::DX12 {
+	static ref<DescriptorSetLayout> createDescriptorSetLayout(const Trident::Device* device, const sequence<DescriptorSetLayoutBinding>& bindings) {
+		return createRef<DescriptorSetLayout>(device, bindings);
 	}
 
-	void DX12::bindAdapter(Trident::GraphicsAdapter* adapter) {
+	static ref<Trident::MemoryAllocator> createMemoryAllocator(const Trident::Device* device) {
+		return createRef<DX12::MemoryAllocator>(static_cast<const DX12::Device*>(device));
+	}
+
+	static ref<Semaphore> createSemaphore(const Trident::Device* device) {
+		return createRef<Semaphore>(device);
+	}
+
+	static void destroyDescriptorSetLayout(const Trident::Device* device, const DescriptorSetLayout* descriptorSetLayout) {}
+
+	static void destroySemaphore(const Trident::Device* device, const Semaphore* semaphore) {}
+
+	static ref<RenderPass> createRenderPass(const Trident::Device* device, const RenderPassDescriptor& descriptor) {
+		return createRef<RenderPass>(descriptor);
+	}
+
+	void bindAdapter(Trident::GraphicsAdapter* adapter) {
 		adapter->logger = ConsoleLogger(std::cout, LogLevel::ALL, "DIRECTX 12");
 
 		adapter->acquireNextImageImplementation = DX12::acquireNextImage;
 		adapter->allocateDescriptorSetsImplementation = DX12::allocateDescriptorSets;
+		adapter->beginImplementation = DX12::begin;
+		adapter->beginRenderPassImplementation = DX12::beginRenderPass;
+		adapter->bindComputePipelineImplementation = DX12::bindComputePipeline;
+		adapter->bindDescriptorSetsImplementation = DX12::bindDescriptorSets;
+		adapter->bindGraphicsPipelineImplementation = DX12::bindGraphicsPipeline;
+		adapter->bindIndexBufferImplementation = DX12::bindIndexBuffer;
+		adapter->bindVertexBufferImplementation = DX12::bindVertexBuffer;
+		adapter->copyBufferToBufferImplementation = DX12::copyBufferToBuffer;
+		adapter->copyBufferToImageImplementation = DX12::copyBufferToImage;
 		adapter->createBufferImplementation = DX12::createBuffer;
 		adapter->createCommandEncoderImplementation = DX12::createCommandEncoder;
 		adapter->createCommandPoolImplementation = DX12::createCommandPool;
@@ -83,12 +90,27 @@ namespace Trident {
 		adapter->destroyShaderModuleImplementation = DX12::destroyShaderModule;
 		adapter->destroySurfaceImplementation = DX12::destroySurface;
 		adapter->destroySwapchainImplementation = DX12::destroySwapchain;
+		adapter->dispatchImplementation = DX12::dispatch;
+		adapter->dispatchIndirectImplementation = DX12::dispatchIndirect;
+		adapter->drawImplementation = DX12::draw;
+		adapter->drawIndirectImplementation = DX12::drawIndirect;
+		adapter->drawIndexedImplementation = DX12::drawIndexed;
+		adapter->drawIndexedIndirectImplementation = DX12::drawIndexedIndirect;
+		adapter->endImplementation = DX12::end;
+		adapter->endRenderPassImplementation = DX12::endRenderPass;
 		adapter->getQueueImplementation = DX12::getQueue;
 		adapter->getSurfaceFormatImplementation = DX12::getSurfaceFormat;
+		adapter->insertBufferMemoryBarriersImplementation = DX12::insertBufferMemoryBarriers;
 		adapter->mapBufferImplementation = DX12::mapBuffer;
+		adapter->nextSubpassImplementation = DX12::nextSubpass;
 		adapter->presentImplementation = DX12::present;
+		adapter->resetImplementation = DX12::reset;
 		adapter->resetFenceImplementation = DX12::resetFence;
 		adapter->selectPhysicalDeviceImplementation = DX12::selectPhysicalDevice;
+		adapter->setImageMemoryBarrierImplementation = DX12::setImageMemoryBarrier;
+		adapter->setLineWidthImplementation = DX12::setLineWidth;
+		adapter->setScissorImplementation = DX12::setScissor;
+		adapter->setViewportImplementation = DX12::setViewport;
 		adapter->submitImplementation = DX12::submit;
 		adapter->submit2Implementation = DX12::submit;
 		adapter->unmapBufferImplementation = DX12::unmapBuffer;
