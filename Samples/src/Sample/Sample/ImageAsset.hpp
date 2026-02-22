@@ -97,9 +97,9 @@ namespace Trident {
 					}
 				}
 
-				const ref<Buffer> imageStagingBuffer = createStagingBuffer(imageAsset->getExtent().width * imageAsset->getExtent().height * imageAsset->getExtent().depth * imageAsset->getLayerCount() * getChannelCount(imageFormat));
+				const ref<Buffer2<uint8>> imageStagingBuffer = createStagingBuffer2<uint8>(imageAsset->getExtent().width * imageAsset->getExtent().height * imageAsset->getExtent().depth * imageAsset->getLayerCount() * getChannelCount(imageFormat));
 
-				uint8* imageStagingBufferMappedRange = static_cast<uint8*>(imageStagingBuffer->map(0, imageStagingBuffer->getSize()));
+				uint8* imageStagingBufferMappedRange = imageStagingBuffer->map(0, imageStagingBuffer->getSize());
 
 				if (imageAsset->getFormat() == ImageFormat::R8G8B8_UNORM) {
 					convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(imageAsset->getData(), imageStagingBufferMappedRange, imageStagingBuffer->getSize());

@@ -20,7 +20,12 @@ namespace Trident {
 	static uint32 calculateAdapterScore(const DXGI_ADAPTER_DESC& adapterDescriptor, bool preferIntegratedGpu) {
 		uint32 score = 1;
 
-		score += isIntegratedAdapter(adapterDescriptor) && !preferIntegratedGpu;
+		if (isIntegratedAdapter(adapterDescriptor) && preferIntegratedGpu) {
+			score += 1;
+		}
+		else if (!isIntegratedAdapter(adapterDescriptor) && !preferIntegratedGpu) {
+			score += 1;
+		}
 
 		return score;
 	}

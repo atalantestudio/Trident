@@ -148,9 +148,9 @@ namespace Trident {
 					assetIndex += 1;
 				}
 
-				const ref<Buffer> textureArrayImageStagingBuffer = createStagingBuffer(textureArrayImageSize);
+				const ref<Buffer2<uint8>> textureArrayImageStagingBuffer = createStagingBuffer2<uint8>(textureArrayImageSize);
 
-				uint8* textureArrayImageStagingBufferMappedRange = textureArrayImageStagingBuffer->map<uint8>(0, textureArrayImageStagingBuffer->getSize());
+				uint8* textureArrayImageStagingBufferMappedRange = textureArrayImageStagingBuffer->map(0, textureArrayImageStagingBuffer->getSize());
 
 				assetIndex = 0;
 
@@ -321,9 +321,9 @@ namespace Trident {
 			}
 
 			void createVertexAndInstanceBuffers() {
-				const ref<Buffer> stagingBuffer = createStagingBuffer(VERTEX_BUFFER_SIZE + INSTANCE_BUFFER_SIZE);
+				const ref<Buffer2<uint8>> stagingBuffer = createStagingBuffer2<uint8>(VERTEX_BUFFER_SIZE + INSTANCE_BUFFER_SIZE);
 
-				uint8* stagingBufferMappedRange = stagingBuffer->map<uint8>(0, stagingBuffer->getSize());
+				uint8* stagingBufferMappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
 
 				Vertex* vertexStagingBufferMappedRange = pointer_cast<Vertex*>(stagingBufferMappedRange);
 				vertexStagingBufferMappedRange[0].position = {-0.5f,  0.5f};
@@ -359,8 +359,8 @@ namespace Trident {
 
 				SET_DEBUG_NAME(instanceBufferDescriptor, "Instance buffer");
 
-				vertexBuffer = createBuffer(vertexBufferDescriptor);
-				instanceBuffer = createBuffer(instanceBufferDescriptor);
+				vertexBuffer = createBuffer2<Vertex>(vertexBufferDescriptor);
+				instanceBuffer = createBuffer2<Instance>(instanceBufferDescriptor);
 
 				BufferCopyRegion vertexBufferCopyRegion{};
 				vertexBufferCopyRegion.sourceOffset = 0;
@@ -400,7 +400,7 @@ namespace Trident {
 			ref<DescriptorSet> textureArrayDescriptorSet;
 			ref<PipelineLayout> pipelineLayout;
 			ref<GraphicsPipeline> graphicsPipeline;
-			ref<Buffer> vertexBuffer;
-			ref<Buffer> instanceBuffer;
+			ref<Buffer2<Vertex>> vertexBuffer;
+			ref<Buffer2<Instance>> instanceBuffer;
 	};
 }

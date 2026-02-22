@@ -122,10 +122,7 @@ namespace Trident {
 				commandEncoder->bindDescriptorSets(prefixSumPipelineLayout, 0, {prefixSumDescriptorSet});
 				commandEncoder->dispatch(1, 1, 1);
 
-				// TODO
-				BREAKPOINT();
-
-				/* BufferMemoryBarrier elementStartMemoryBarrier{};
+				BufferMemoryBarrier elementStartMemoryBarrier{};
 				elementStartMemoryBarrier.buffer = elementStartBuffer;
 				elementStartMemoryBarrier.offset = 0;
 				elementStartMemoryBarrier.size = elementStartBuffer->getSize();
@@ -168,7 +165,7 @@ namespace Trident {
 					elementIndex += 1;
 				}
 
-				std::cout << '\n'; */
+				std::cout << '\n';
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {}
