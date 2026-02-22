@@ -5,6 +5,7 @@
 
 #include "Engine/API/Event/Window/WindowResizeEvent.hpp"
 #include "Engine/API/Rendering/CommandEncoder.hpp"
+#include "Engine/API/Rendering/Descriptor/GraphicsPipelineDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/PipelineLayoutDescriptor.hpp"
 #include "Engine/API/Graphics/GraphicsAPI.hpp"
 #include "Engine/API/Window/Window.hpp"
@@ -67,7 +68,7 @@ namespace Trident {
 
 			static ref<RenderPass> createRenderPass(const RenderPassDescriptor& descriptor);
 
-			static ref<RenderPipeline> createRenderPipeline(const RenderPipelineDescriptor& descriptor);
+			static ref<GraphicsPipeline> createGraphicsPipeline(const GraphicsPipelineDescriptor& descriptor);
 
 			static ref<Sampler> createSampler(const SamplerDescriptor& descriptor);
 

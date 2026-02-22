@@ -137,7 +137,7 @@ namespace Trident {
 			commandEncoder->setScissor(0, 0, extent);
 
 			// Write pixel visibility and count per material.
-			commandEncoder->bindRenderPipeline(visibilityPipeline);
+			commandEncoder->bindGraphicsPipeline(visibilityPipeline);
 			commandEncoder->bindDescriptorSets(visibilityPipelineLayout, 0, {cameraDescriptorSet, clusterDescriptorSet, instanceDescriptorSet});
 			commandEncoder->drawIndirect(visibilityIndirectBuffer, 0, 1, 0);
 
@@ -211,11 +211,11 @@ namespace Trident {
 
 			#if 1
 				// Present the output image.
-				commandEncoder->bindRenderPipeline(outputPipeline);
+				commandEncoder->bindGraphicsPipeline(outputPipeline);
 				commandEncoder->bindDescriptorSets(outputPipelineLayout, 0, {outputDescriptorSet});
 				commandEncoder->draw(3, 1, 0, 0);
 			#else
-				commandEncoder->bindRenderPipeline(debugPipeline);
+				commandEncoder->bindGraphicsPipeline(debugPipeline);
 				commandEncoder->bindDescriptorSets(debugPipelineLayout, 0, {debugDescriptorSet, clusterDescriptorSet, instanceDescriptorSet});
 				commandEncoder->draw(3, 1, 0, 0);
 			#endif

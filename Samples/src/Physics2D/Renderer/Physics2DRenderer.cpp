@@ -44,21 +44,21 @@ namespace Trident {
 		createCameraViewPipelineLayout();
 		createPlaceholderPipelineLayout();
 
-		createGridRenderPipeline();
-		createFillRenderPipeline();
-		createStrokeRenderPipeline();
-		createCenterOfMassRenderPipeline();
-		createPlaceholderFillRenderPipeline();
-		createPlaceholderStrokeRenderPipeline();
-		createPlaceholderCenterOfMassRenderPipeline();
+		createGridGraphicsPipeline();
+		createFillGraphicsPipeline();
+		createStrokeGraphicsPipeline();
+		createCenterOfMassGraphicsPipeline();
+		createPlaceholderFillGraphicsPipeline();
+		createPlaceholderStrokeGraphicsPipeline();
+		createPlaceholderCenterOfMassGraphicsPipeline();
 
 		#if defined(SHOW_DISTANCE)
-			createDistanceRenderPipeline();
+			createDistanceGraphicsPipeline();
 		#endif
 
 		#if defined(SHOW_FEATURES)
-			createVertexFeatureRenderPipeline();
-			createEdgeFeatureRenderPipeline();
+			createVertexFeatureGraphicsPipeline();
+			createEdgeFeatureGraphicsPipeline();
 		#endif
 
 		updateCameraProjection();
@@ -374,7 +374,7 @@ namespace Trident {
 		placeholderPipelineLayout = createPipelineLayout(placeholderPipelineLayoutDescriptor);
 	}
 
-	void Physics2DRenderer::createGridRenderPipeline() {
+	void Physics2DRenderer::createGridGraphicsPipeline() {
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";
@@ -393,30 +393,30 @@ namespace Trident {
 		ColorBlendAttachment colorBlendAttachment{};
 		colorBlendAttachment.blend = false;
 
-		RenderPipelineDescriptor gridRenderPipelineDescriptor{};
-		gridRenderPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
-		gridRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-		gridRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-		gridRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-		gridRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-		gridRenderPipelineDescriptor.cullMode = CullMode::BACK;
-		gridRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-		gridRenderPipelineDescriptor.lineWidth = 1.0f;
-		gridRenderPipelineDescriptor.minSampleShading = 0.0f;
-		gridRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-		gridRenderPipelineDescriptor.depthStencilState.depthTest = false;
-		gridRenderPipelineDescriptor.depthStencilState.depthWrite = false;
-		gridRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::NEVER;
-		gridRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-		gridRenderPipelineDescriptor.renderPass = renderPass;
-		gridRenderPipelineDescriptor.subpassIndex = 0;
+		GraphicsPipelineDescriptor gridGraphicsPipelineDescriptor{};
+		gridGraphicsPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
+		gridGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+		gridGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+		gridGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+		gridGraphicsPipelineDescriptor.polygonMode = PolygonMode::FILL;
+		gridGraphicsPipelineDescriptor.cullMode = CullMode::BACK;
+		gridGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		gridGraphicsPipelineDescriptor.lineWidth = 1.0f;
+		gridGraphicsPipelineDescriptor.minSampleShading = 0.0f;
+		gridGraphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+		gridGraphicsPipelineDescriptor.depthStencilState.depthTest = false;
+		gridGraphicsPipelineDescriptor.depthStencilState.depthWrite = false;
+		gridGraphicsPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::NEVER;
+		gridGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+		gridGraphicsPipelineDescriptor.renderPass = renderPass;
+		gridGraphicsPipelineDescriptor.subpassIndex = 0;
 
-		SET_DEBUG_NAME(gridRenderPipelineDescriptor, "Grid");
+		SET_DEBUG_NAME(gridGraphicsPipelineDescriptor, "Grid");
 
-		gridRenderPipeline = createRenderPipeline(gridRenderPipelineDescriptor);
+		gridGraphicsPipeline = createGraphicsPipeline(gridGraphicsPipelineDescriptor);
 	}
 
-	void Physics2DRenderer::createFillRenderPipeline() {
+	void Physics2DRenderer::createFillGraphicsPipeline() {
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 		vertexInputBinding.registerAttribute<svec2<float32>>("");
 
@@ -446,31 +446,31 @@ namespace Trident {
 		colorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
 		colorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 
-		RenderPipelineDescriptor fillRenderPipelineDescriptor{};
-		fillRenderPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
-		fillRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
-		fillRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-		fillRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-		fillRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-		fillRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-		fillRenderPipelineDescriptor.cullMode = CullMode::BACK;
-		fillRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-		fillRenderPipelineDescriptor.lineWidth = 1.0f;
-		fillRenderPipelineDescriptor.minSampleShading = 0.0f;
-		fillRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-		fillRenderPipelineDescriptor.depthStencilState.depthTest = true;
-		fillRenderPipelineDescriptor.depthStencilState.depthWrite = true;
-		fillRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
-		fillRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-		fillRenderPipelineDescriptor.renderPass = renderPass;
-		fillRenderPipelineDescriptor.subpassIndex = 0;
+		GraphicsPipelineDescriptor fillGraphicsPipelineDescriptor{};
+		fillGraphicsPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
+		fillGraphicsPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
+		fillGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+		fillGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+		fillGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+		fillGraphicsPipelineDescriptor.polygonMode = PolygonMode::FILL;
+		fillGraphicsPipelineDescriptor.cullMode = CullMode::BACK;
+		fillGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		fillGraphicsPipelineDescriptor.lineWidth = 1.0f;
+		fillGraphicsPipelineDescriptor.minSampleShading = 0.0f;
+		fillGraphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+		fillGraphicsPipelineDescriptor.depthStencilState.depthTest = true;
+		fillGraphicsPipelineDescriptor.depthStencilState.depthWrite = true;
+		fillGraphicsPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
+		fillGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+		fillGraphicsPipelineDescriptor.renderPass = renderPass;
+		fillGraphicsPipelineDescriptor.subpassIndex = 0;
 
-		SET_DEBUG_NAME(fillRenderPipelineDescriptor, "Fill");
+		SET_DEBUG_NAME(fillGraphicsPipelineDescriptor, "Fill");
 
-		fillRenderPipeline = createRenderPipeline(fillRenderPipelineDescriptor);
+		fillGraphicsPipeline = createGraphicsPipeline(fillGraphicsPipelineDescriptor);
 	}
 
-	void Physics2DRenderer::createStrokeRenderPipeline() {
+	void Physics2DRenderer::createStrokeGraphicsPipeline() {
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 		vertexInputBinding.registerAttribute<svec2<float32>>("");
 
@@ -501,31 +501,31 @@ namespace Trident {
 		colorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
 		colorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 
-		RenderPipelineDescriptor strokeRenderPipelineDescriptor{};
-		strokeRenderPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
-		strokeRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
-		strokeRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-		strokeRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-		strokeRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_STRIP;
-		strokeRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
-		strokeRenderPipelineDescriptor.cullMode = CullMode::BACK;
-		strokeRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-		strokeRenderPipelineDescriptor.lineWidth = 1.0f;
-		strokeRenderPipelineDescriptor.minSampleShading = 0.0f;
-		strokeRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-		strokeRenderPipelineDescriptor.depthStencilState.depthTest = true;
-		strokeRenderPipelineDescriptor.depthStencilState.depthWrite = true;
-		strokeRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
-		strokeRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR | DynamicState::LINE_WIDTH;
-		strokeRenderPipelineDescriptor.renderPass = renderPass;
-		strokeRenderPipelineDescriptor.subpassIndex = 0;
+		GraphicsPipelineDescriptor strokeGraphicsPipelineDescriptor{};
+		strokeGraphicsPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
+		strokeGraphicsPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
+		strokeGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+		strokeGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+		strokeGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_STRIP;
+		strokeGraphicsPipelineDescriptor.polygonMode = PolygonMode::LINE;
+		strokeGraphicsPipelineDescriptor.cullMode = CullMode::BACK;
+		strokeGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		strokeGraphicsPipelineDescriptor.lineWidth = 1.0f;
+		strokeGraphicsPipelineDescriptor.minSampleShading = 0.0f;
+		strokeGraphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+		strokeGraphicsPipelineDescriptor.depthStencilState.depthTest = true;
+		strokeGraphicsPipelineDescriptor.depthStencilState.depthWrite = true;
+		strokeGraphicsPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
+		strokeGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR | DynamicState::LINE_WIDTH;
+		strokeGraphicsPipelineDescriptor.renderPass = renderPass;
+		strokeGraphicsPipelineDescriptor.subpassIndex = 0;
 
-		SET_DEBUG_NAME(strokeRenderPipelineDescriptor, "Stroke");
+		SET_DEBUG_NAME(strokeGraphicsPipelineDescriptor, "Stroke");
 
-		strokeRenderPipeline = createRenderPipeline(strokeRenderPipelineDescriptor);
+		strokeGraphicsPipeline = createGraphicsPipeline(strokeGraphicsPipelineDescriptor);
 	}
 
-	void Physics2DRenderer::createCenterOfMassRenderPipeline() {
+	void Physics2DRenderer::createCenterOfMassGraphicsPipeline() {
 		VertexInputBinding centerOfMassVertexInputBinding(InputRate::VERTEX);
 		centerOfMassVertexInputBinding.registerAttribute<vec3<float32>>("");
 
@@ -547,31 +547,31 @@ namespace Trident {
 		ColorBlendAttachment colorBlendAttachment{};
 		colorBlendAttachment.blend = false;
 
-		RenderPipelineDescriptor centerOfMassRenderPipelineDescriptor{};
-		centerOfMassRenderPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
-		centerOfMassRenderPipelineDescriptor.vertexInputBindings = {centerOfMassVertexInputBinding};
-		centerOfMassRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-		centerOfMassRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-		centerOfMassRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::POINT_LIST;
-		centerOfMassRenderPipelineDescriptor.polygonMode = PolygonMode::POINT;
-		centerOfMassRenderPipelineDescriptor.cullMode = CullMode::BACK;
-		centerOfMassRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-		centerOfMassRenderPipelineDescriptor.lineWidth = 1.0f;
-		centerOfMassRenderPipelineDescriptor.minSampleShading = 1.0f;
-		centerOfMassRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-		centerOfMassRenderPipelineDescriptor.depthStencilState.depthTest = true;
-		centerOfMassRenderPipelineDescriptor.depthStencilState.depthWrite = true;
-		centerOfMassRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
-		centerOfMassRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-		centerOfMassRenderPipelineDescriptor.renderPass = renderPass;
-		centerOfMassRenderPipelineDescriptor.subpassIndex = 0;
+		GraphicsPipelineDescriptor centerOfMassGraphicsPipelineDescriptor{};
+		centerOfMassGraphicsPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
+		centerOfMassGraphicsPipelineDescriptor.vertexInputBindings = {centerOfMassVertexInputBinding};
+		centerOfMassGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+		centerOfMassGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+		centerOfMassGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::POINT_LIST;
+		centerOfMassGraphicsPipelineDescriptor.polygonMode = PolygonMode::POINT;
+		centerOfMassGraphicsPipelineDescriptor.cullMode = CullMode::BACK;
+		centerOfMassGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		centerOfMassGraphicsPipelineDescriptor.lineWidth = 1.0f;
+		centerOfMassGraphicsPipelineDescriptor.minSampleShading = 1.0f;
+		centerOfMassGraphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+		centerOfMassGraphicsPipelineDescriptor.depthStencilState.depthTest = true;
+		centerOfMassGraphicsPipelineDescriptor.depthStencilState.depthWrite = true;
+		centerOfMassGraphicsPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
+		centerOfMassGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+		centerOfMassGraphicsPipelineDescriptor.renderPass = renderPass;
+		centerOfMassGraphicsPipelineDescriptor.subpassIndex = 0;
 
-		SET_DEBUG_NAME(centerOfMassRenderPipelineDescriptor, "Center of mass");
+		SET_DEBUG_NAME(centerOfMassGraphicsPipelineDescriptor, "Center of mass");
 
-		centerOfMassRenderPipeline = createRenderPipeline(centerOfMassRenderPipelineDescriptor);
+		centerOfMassGraphicsPipeline = createGraphicsPipeline(centerOfMassGraphicsPipelineDescriptor);
 	}
 
-	void Physics2DRenderer::createPlaceholderFillRenderPipeline() {
+	void Physics2DRenderer::createPlaceholderFillGraphicsPipeline() {
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 		vertexInputBinding.registerAttribute<svec2<float32>>("");
 
@@ -618,29 +618,29 @@ namespace Trident {
 		colorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
 		colorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 
-		RenderPipelineDescriptor placeholderFillRenderPipelineDescriptor{};
-		placeholderFillRenderPipelineDescriptor.pipelineLayout = placeholderPipelineLayout;
-		placeholderFillRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
-		placeholderFillRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-		placeholderFillRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-		placeholderFillRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-		placeholderFillRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-		placeholderFillRenderPipelineDescriptor.cullMode = CullMode::BACK;
-		placeholderFillRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-		placeholderFillRenderPipelineDescriptor.lineWidth = 1.0f;
-		placeholderFillRenderPipelineDescriptor.minSampleShading = 0.0f;
-		placeholderFillRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-		placeholderFillRenderPipelineDescriptor.depthStencilState.depthTest = false;
-		placeholderFillRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-		placeholderFillRenderPipelineDescriptor.renderPass = renderPass;
-		placeholderFillRenderPipelineDescriptor.subpassIndex = 0;
+		GraphicsPipelineDescriptor placeholderFillGraphicsPipelineDescriptor{};
+		placeholderFillGraphicsPipelineDescriptor.pipelineLayout = placeholderPipelineLayout;
+		placeholderFillGraphicsPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
+		placeholderFillGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+		placeholderFillGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+		placeholderFillGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+		placeholderFillGraphicsPipelineDescriptor.polygonMode = PolygonMode::FILL;
+		placeholderFillGraphicsPipelineDescriptor.cullMode = CullMode::BACK;
+		placeholderFillGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		placeholderFillGraphicsPipelineDescriptor.lineWidth = 1.0f;
+		placeholderFillGraphicsPipelineDescriptor.minSampleShading = 0.0f;
+		placeholderFillGraphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+		placeholderFillGraphicsPipelineDescriptor.depthStencilState.depthTest = false;
+		placeholderFillGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+		placeholderFillGraphicsPipelineDescriptor.renderPass = renderPass;
+		placeholderFillGraphicsPipelineDescriptor.subpassIndex = 0;
 
-		SET_DEBUG_NAME(placeholderFillRenderPipelineDescriptor, "Placeholder fill");
+		SET_DEBUG_NAME(placeholderFillGraphicsPipelineDescriptor, "Placeholder fill");
 
-		placeholderFillRenderPipeline = createRenderPipeline(placeholderFillRenderPipelineDescriptor);
+		placeholderFillGraphicsPipeline = createGraphicsPipeline(placeholderFillGraphicsPipelineDescriptor);
 	}
 
-	void Physics2DRenderer::createPlaceholderStrokeRenderPipeline() {
+	void Physics2DRenderer::createPlaceholderStrokeGraphicsPipeline() {
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 		vertexInputBinding.registerAttribute<svec2<float32>>("");
 
@@ -686,29 +686,29 @@ namespace Trident {
 		colorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
 		colorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 
-		RenderPipelineDescriptor placeholderStrokeRenderPipelineDescriptor{};
-		placeholderStrokeRenderPipelineDescriptor.pipelineLayout = placeholderPipelineLayout;
-		placeholderStrokeRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
-		placeholderStrokeRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-		placeholderStrokeRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-		placeholderStrokeRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_STRIP;
-		placeholderStrokeRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
-		placeholderStrokeRenderPipelineDescriptor.cullMode = CullMode::BACK;
-		placeholderStrokeRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-		placeholderStrokeRenderPipelineDescriptor.lineWidth = 1.0f;
-		placeholderStrokeRenderPipelineDescriptor.minSampleShading = 0.0f;
-		placeholderStrokeRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-		placeholderStrokeRenderPipelineDescriptor.depthStencilState.depthTest = false;
-		placeholderStrokeRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-		placeholderStrokeRenderPipelineDescriptor.renderPass = renderPass;
-		placeholderStrokeRenderPipelineDescriptor.subpassIndex = 0;
+		GraphicsPipelineDescriptor placeholderStrokeGraphicsPipelineDescriptor{};
+		placeholderStrokeGraphicsPipelineDescriptor.pipelineLayout = placeholderPipelineLayout;
+		placeholderStrokeGraphicsPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
+		placeholderStrokeGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+		placeholderStrokeGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+		placeholderStrokeGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_STRIP;
+		placeholderStrokeGraphicsPipelineDescriptor.polygonMode = PolygonMode::LINE;
+		placeholderStrokeGraphicsPipelineDescriptor.cullMode = CullMode::BACK;
+		placeholderStrokeGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		placeholderStrokeGraphicsPipelineDescriptor.lineWidth = 1.0f;
+		placeholderStrokeGraphicsPipelineDescriptor.minSampleShading = 0.0f;
+		placeholderStrokeGraphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+		placeholderStrokeGraphicsPipelineDescriptor.depthStencilState.depthTest = false;
+		placeholderStrokeGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+		placeholderStrokeGraphicsPipelineDescriptor.renderPass = renderPass;
+		placeholderStrokeGraphicsPipelineDescriptor.subpassIndex = 0;
 
-		SET_DEBUG_NAME(placeholderStrokeRenderPipelineDescriptor, "Placeholder stroke");
+		SET_DEBUG_NAME(placeholderStrokeGraphicsPipelineDescriptor, "Placeholder stroke");
 
-		placeholderStrokeRenderPipeline = createRenderPipeline(placeholderStrokeRenderPipelineDescriptor);
+		placeholderStrokeGraphicsPipeline = createGraphicsPipeline(placeholderStrokeGraphicsPipelineDescriptor);
 	}
 
-	void Physics2DRenderer::createPlaceholderCenterOfMassRenderPipeline() {
+	void Physics2DRenderer::createPlaceholderCenterOfMassGraphicsPipeline() {
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 		vertexInputBinding.registerAttribute<svec2<float32>>("");
 
@@ -749,30 +749,30 @@ namespace Trident {
 		ColorBlendAttachment colorBlendAttachment{};
 		colorBlendAttachment.blend = false;
 
-		RenderPipelineDescriptor placeholderCenterOfMassRenderPipelineDescriptor{};
-		placeholderCenterOfMassRenderPipelineDescriptor.pipelineLayout = placeholderPipelineLayout;
-		placeholderCenterOfMassRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
-		placeholderCenterOfMassRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-		placeholderCenterOfMassRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-		placeholderCenterOfMassRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::POINT_LIST;
-		placeholderCenterOfMassRenderPipelineDescriptor.polygonMode = PolygonMode::POINT;
-		placeholderCenterOfMassRenderPipelineDescriptor.cullMode = CullMode::BACK;
-		placeholderCenterOfMassRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-		placeholderCenterOfMassRenderPipelineDescriptor.lineWidth = 1.0f;
-		placeholderCenterOfMassRenderPipelineDescriptor.minSampleShading = 1.0f;
-		placeholderCenterOfMassRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-		placeholderCenterOfMassRenderPipelineDescriptor.depthStencilState.depthTest = false;
-		placeholderCenterOfMassRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-		placeholderCenterOfMassRenderPipelineDescriptor.renderPass = renderPass;
-		placeholderCenterOfMassRenderPipelineDescriptor.subpassIndex = 0;
+		GraphicsPipelineDescriptor placeholderCenterOfMassGraphicsPipelineDescriptor{};
+		placeholderCenterOfMassGraphicsPipelineDescriptor.pipelineLayout = placeholderPipelineLayout;
+		placeholderCenterOfMassGraphicsPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
+		placeholderCenterOfMassGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+		placeholderCenterOfMassGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+		placeholderCenterOfMassGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::POINT_LIST;
+		placeholderCenterOfMassGraphicsPipelineDescriptor.polygonMode = PolygonMode::POINT;
+		placeholderCenterOfMassGraphicsPipelineDescriptor.cullMode = CullMode::BACK;
+		placeholderCenterOfMassGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		placeholderCenterOfMassGraphicsPipelineDescriptor.lineWidth = 1.0f;
+		placeholderCenterOfMassGraphicsPipelineDescriptor.minSampleShading = 1.0f;
+		placeholderCenterOfMassGraphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+		placeholderCenterOfMassGraphicsPipelineDescriptor.depthStencilState.depthTest = false;
+		placeholderCenterOfMassGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+		placeholderCenterOfMassGraphicsPipelineDescriptor.renderPass = renderPass;
+		placeholderCenterOfMassGraphicsPipelineDescriptor.subpassIndex = 0;
 
-		SET_DEBUG_NAME(placeholderCenterOfMassRenderPipelineDescriptor, "Placeholder center of mass");
+		SET_DEBUG_NAME(placeholderCenterOfMassGraphicsPipelineDescriptor, "Placeholder center of mass");
 
-		placeholderCenterOfMassRenderPipeline = createRenderPipeline(placeholderCenterOfMassRenderPipelineDescriptor);
+		placeholderCenterOfMassGraphicsPipeline = createGraphicsPipeline(placeholderCenterOfMassGraphicsPipelineDescriptor);
 	}
 
 	#if defined(SHOW_DISTANCE)
-		void Physics2DRenderer::createDistanceRenderPipeline() {
+		void Physics2DRenderer::createDistanceGraphicsPipeline() {
 			VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 			vertexInputBinding.registerAttribute<svec2<float32>>();
 
@@ -794,31 +794,31 @@ namespace Trident {
 			ColorBlendAttachment colorBlendAttachment{};
 			colorBlendAttachment.blend = false;
 
-			RenderPipelineDescriptor distanceRenderPipelineDescriptor{};
-			distanceRenderPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
-			distanceRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
-			distanceRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-			distanceRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-			distanceRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_LIST;
-			distanceRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
-			distanceRenderPipelineDescriptor.cullMode = CullMode::BACK;
-			distanceRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-			distanceRenderPipelineDescriptor.lineWidth = 1.0f;
-			distanceRenderPipelineDescriptor.minSampleShading = 0.0f;
-			distanceRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-			distanceRenderPipelineDescriptor.depthStencilState.depthTest = false;
-			distanceRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-			distanceRenderPipelineDescriptor.renderPass = renderPass;
-			distanceRenderPipelineDescriptor.subpassIndex = 0;
+			GraphicsPipelineDescriptor distanceGraphicsPipelineDescriptor{};
+			distanceGraphicsPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
+			distanceGraphicsPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
+			distanceGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+			distanceGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+			distanceGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_LIST;
+			distanceGraphicsPipelineDescriptor.polygonMode = PolygonMode::LINE;
+			distanceGraphicsPipelineDescriptor.cullMode = CullMode::BACK;
+			distanceGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+			distanceGraphicsPipelineDescriptor.lineWidth = 1.0f;
+			distanceGraphicsPipelineDescriptor.minSampleShading = 0.0f;
+			distanceGraphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+			distanceGraphicsPipelineDescriptor.depthStencilState.depthTest = false;
+			distanceGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+			distanceGraphicsPipelineDescriptor.renderPass = renderPass;
+			distanceGraphicsPipelineDescriptor.subpassIndex = 0;
 
-			SET_DEBUG_NAME(distanceRenderPipelineDescriptor, "Distance");
+			SET_DEBUG_NAME(distanceGraphicsPipelineDescriptor, "Distance");
 
-			distanceRenderPipeline = createRenderPipeline(distanceRenderPipelineDescriptor);
+			distanceGraphicsPipeline = createGraphicsPipeline(distanceGraphicsPipelineDescriptor);
 		}
 	#endif
 
 	#if defined(SHOW_FEATURES)
-		void Physics2DRenderer::createVertexFeatureRenderPipeline() {
+		void Physics2DRenderer::createVertexFeatureGraphicsPipeline() {
 			VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 			vertexInputBinding.registerAttribute<svec2<float32>>();
 
@@ -840,29 +840,29 @@ namespace Trident {
 			ColorBlendAttachment colorBlendAttachment{};
 			colorBlendAttachment.blend = false;
 
-			RenderPipelineDescriptor vertexFeatureRenderPipelineDescriptor{};
-			vertexFeatureRenderPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
-			vertexFeatureRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
-			vertexFeatureRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-			vertexFeatureRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-			vertexFeatureRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::POINT_LIST;
-			vertexFeatureRenderPipelineDescriptor.polygonMode = PolygonMode::POINT;
-			vertexFeatureRenderPipelineDescriptor.cullMode = CullMode::BACK;
-			vertexFeatureRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-			vertexFeatureRenderPipelineDescriptor.lineWidth = 1.0f;
-			vertexFeatureRenderPipelineDescriptor.minSampleShading = 1.0f;
-			vertexFeatureRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-			vertexFeatureRenderPipelineDescriptor.depthStencilState.depthTest = false;
-			vertexFeatureRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-			vertexFeatureRenderPipelineDescriptor.renderPass = renderPass;
-			vertexFeatureRenderPipelineDescriptor.subpassIndex = 0;
+			GraphicsPipelineDescriptor vertexFeatureGraphicsPipelineDescriptor{};
+			vertexFeatureGraphicsPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
+			vertexFeatureGraphicsPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
+			vertexFeatureGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+			vertexFeatureGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+			vertexFeatureGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::POINT_LIST;
+			vertexFeatureGraphicsPipelineDescriptor.polygonMode = PolygonMode::POINT;
+			vertexFeatureGraphicsPipelineDescriptor.cullMode = CullMode::BACK;
+			vertexFeatureGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+			vertexFeatureGraphicsPipelineDescriptor.lineWidth = 1.0f;
+			vertexFeatureGraphicsPipelineDescriptor.minSampleShading = 1.0f;
+			vertexFeatureGraphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+			vertexFeatureGraphicsPipelineDescriptor.depthStencilState.depthTest = false;
+			vertexFeatureGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+			vertexFeatureGraphicsPipelineDescriptor.renderPass = renderPass;
+			vertexFeatureGraphicsPipelineDescriptor.subpassIndex = 0;
 
-			SET_DEBUG_NAME(vertexFeatureRenderPipelineDescriptor, "Vertex feature");
+			SET_DEBUG_NAME(vertexFeatureGraphicsPipelineDescriptor, "Vertex feature");
 
-			vertexFeatureRenderPipeline = createRenderPipeline(vertexFeatureRenderPipelineDescriptor);
+			vertexFeatureGraphicsPipeline = createGraphicsPipeline(vertexFeatureGraphicsPipelineDescriptor);
 		}
 
-		void Physics2DRenderer::createEdgeFeatureRenderPipeline() {
+		void Physics2DRenderer::createEdgeFeatureGraphicsPipeline() {
 			VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 			vertexInputBinding.registerAttribute<svec2<float32>>();
 
@@ -884,26 +884,26 @@ namespace Trident {
 			ColorBlendAttachment colorBlendAttachment{};
 			colorBlendAttachment.blend = false;
 
-			RenderPipelineDescriptor edgeFeatureRenderPipelineDescriptor{};
-			edgeFeatureRenderPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
-			edgeFeatureRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
-			edgeFeatureRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-			edgeFeatureRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-			edgeFeatureRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_LIST;
-			edgeFeatureRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
-			edgeFeatureRenderPipelineDescriptor.cullMode = CullMode::BACK;
-			edgeFeatureRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-			edgeFeatureRenderPipelineDescriptor.lineWidth = 3.0f;
-			edgeFeatureRenderPipelineDescriptor.minSampleShading = 0.0f;
-			edgeFeatureRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-			edgeFeatureRenderPipelineDescriptor.depthStencilState.depthTest = false;
-			edgeFeatureRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-			edgeFeatureRenderPipelineDescriptor.renderPass = renderPass;
-			edgeFeatureRenderPipelineDescriptor.subpassIndex = 0;
+			GraphicsPipelineDescriptor edgeFeatureGraphicsPipelineDescriptor{};
+			edgeFeatureGraphicsPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
+			edgeFeatureGraphicsPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
+			edgeFeatureGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+			edgeFeatureGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+			edgeFeatureGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_LIST;
+			edgeFeatureGraphicsPipelineDescriptor.polygonMode = PolygonMode::LINE;
+			edgeFeatureGraphicsPipelineDescriptor.cullMode = CullMode::BACK;
+			edgeFeatureGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+			edgeFeatureGraphicsPipelineDescriptor.lineWidth = 3.0f;
+			edgeFeatureGraphicsPipelineDescriptor.minSampleShading = 0.0f;
+			edgeFeatureGraphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+			edgeFeatureGraphicsPipelineDescriptor.depthStencilState.depthTest = false;
+			edgeFeatureGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+			edgeFeatureGraphicsPipelineDescriptor.renderPass = renderPass;
+			edgeFeatureGraphicsPipelineDescriptor.subpassIndex = 0;
 
-			SET_DEBUG_NAME(edgeFeatureRenderPipelineDescriptor, "Edge feature");
+			SET_DEBUG_NAME(edgeFeatureGraphicsPipelineDescriptor, "Edge feature");
 
-			edgeFeatureRenderPipeline = createRenderPipeline(edgeFeatureRenderPipelineDescriptor);
+			edgeFeatureGraphicsPipeline = createGraphicsPipeline(edgeFeatureGraphicsPipelineDescriptor);
 		}
 	#endif
 
@@ -1215,13 +1215,13 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::renderGrid(ref<CommandEncoder> commandEncoder) const {
-		commandEncoder->bindRenderPipeline(gridRenderPipeline);
+		commandEncoder->bindGraphicsPipeline(gridGraphicsPipeline);
 		commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, {cameraViewDescriptorSet});
 		commandEncoder->draw(3, 1, 0, 0);
 	}
 
 	void Physics2DRenderer::renderScene(ref<CommandEncoder> commandEncoder) const {
-		commandEncoder->bindRenderPipeline(fillRenderPipeline);
+		commandEncoder->bindGraphicsPipeline(fillGraphicsPipeline);
 		commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, {cameraViewDescriptorSet});
 		commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 
@@ -1246,7 +1246,7 @@ namespace Trident {
 			indexOffset += indexCount;
 		}
 
-		commandEncoder->bindRenderPipeline(strokeRenderPipeline);
+		commandEncoder->bindGraphicsPipeline(strokeGraphicsPipeline);
 		commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, {cameraViewDescriptorSet});
 
 		instanceIndex = 0;
@@ -1274,7 +1274,7 @@ namespace Trident {
 
 		updateCentersOfMass();
 
-		commandEncoder->bindRenderPipeline(centerOfMassRenderPipeline);
+		commandEncoder->bindGraphicsPipeline(centerOfMassGraphicsPipeline);
 		commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, {cameraViewDescriptorSet});
 		commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, 0, sizeof(CenterOfMass));
 		commandEncoder->draw(instanceCount, 1, 0, 0);
@@ -1295,19 +1295,19 @@ namespace Trident {
 
 		const ref<Geometry2D> geometry = scene->getGeometry(selectedInstanceIndex);
 
-		commandEncoder->bindRenderPipeline(placeholderCenterOfMassRenderPipeline);
+		commandEncoder->bindGraphicsPipeline(placeholderCenterOfMassGraphicsPipeline);
 		commandEncoder->bindDescriptorSets(placeholderPipelineLayout, 0, {cameraViewDescriptorSet, placeholderDescriptorSet});
 		commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, selectedInstanceIndex * sizeof(CenterOfMass), sizeof(CenterOfMass));
 		commandEncoder->draw(1, 1, 0, 0);
 
-		commandEncoder->bindRenderPipeline(placeholderFillRenderPipeline);
+		commandEncoder->bindGraphicsPipeline(placeholderFillGraphicsPipeline);
 		commandEncoder->bindDescriptorSets(placeholderPipelineLayout, 0, {cameraViewDescriptorSet, placeholderDescriptorSet});
 		commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(Vertex), sizeof(Vertex));
 		commandEncoder->bindVertexBuffer(1, instanceBuffer, selectedInstanceIndex * sizeof(Instance), sizeof(Instance));
 		commandEncoder->drawIndexed(geometry->getIndexCount(), 1, 0, 0, 0);
 
-		commandEncoder->bindRenderPipeline(placeholderStrokeRenderPipeline);
+		commandEncoder->bindGraphicsPipeline(placeholderStrokeGraphicsPipeline);
 		commandEncoder->bindDescriptorSets(placeholderPipelineLayout, 0, {cameraViewDescriptorSet, placeholderDescriptorSet});
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(Vertex), sizeof(Vertex));
 		commandEncoder->bindVertexBuffer(1, instanceBuffer, selectedInstanceIndex * sizeof(Instance), sizeof(Instance));
@@ -1316,7 +1316,7 @@ namespace Trident {
 
 	#if defined(SHOW_DISTANCE)
 		void Physics2DRenderer::renderDistance(ref<CommandEncoder> commandEncoder) const {
-			commandEncoder->bindRenderPipeline(distanceRenderPipeline);
+			commandEncoder->bindGraphicsPipeline(distanceGraphicsPipeline);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, {cameraViewDescriptorSet});
 			commandEncoder->bindVertexBuffer(0, closestPointBuffer, 0, sizeof(Vertex));
 			commandEncoder->draw(2, 1, 0, 0);
@@ -1326,14 +1326,14 @@ namespace Trident {
 	#if defined(SHOW_FEATURES)
 		void Physics2DRenderer::renderFeatures(ref<CommandEncoder> commandEncoder) const {
 			if (vertexFeatureCount > 0) {
-				commandEncoder->bindRenderPipeline(vertexFeatureRenderPipeline);
+				commandEncoder->bindGraphicsPipeline(vertexFeatureGraphicsPipeline);
 				commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, {cameraViewDescriptorSet});
 				commandEncoder->bindVertexBuffer(0, vertexFeatureBuffer, 0, sizeof(Vertex));
 				commandEncoder->draw(vertexFeatureCount, 1, 0, 0);
 			}
 
 			if (edgeFeatureCount > 0) {
-				commandEncoder->bindRenderPipeline(edgeFeatureRenderPipeline);
+				commandEncoder->bindGraphicsPipeline(edgeFeatureGraphicsPipeline);
 				commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, {cameraViewDescriptorSet});
 				commandEncoder->bindVertexBuffer(0, edgeFeatureBuffer, 0, sizeof(Vertex));
 				commandEncoder->draw(edgeFeatureCount * 2, 1, 0, 0);

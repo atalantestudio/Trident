@@ -78,8 +78,8 @@ namespace Trident {
 		return layerCompositor->device->createRenderPass(descriptor);
 	}
 
-	ref<RenderPipeline> Renderer::createRenderPipeline(const RenderPipelineDescriptor& descriptor) {
-		return layerCompositor->adapter->createRenderPipeline(descriptor);
+	ref<GraphicsPipeline> Renderer::createGraphicsPipeline(const GraphicsPipelineDescriptor& descriptor) {
+		return layerCompositor->device->createGraphicsPipeline(descriptor);
 	}
 
 	ref<Sampler> Renderer::createSampler(const SamplerDescriptor& descriptor) {
@@ -87,7 +87,7 @@ namespace Trident {
 	}
 
 	ref<Semaphore> Renderer::createSemaphore() {
-		return layerCompositor->adapter->createSemaphore();
+		return layerCompositor->device->createSemaphore();
 	}
 
 	ref<Subpass> Renderer::createSubpass(const SubpassDescriptor& descriptor) {

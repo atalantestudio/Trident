@@ -11,8 +11,8 @@
 #include "Engine/Adapter/Graphics/DX12/DescriptorSet.hpp"
 #include "Engine/Adapter/Graphics/DX12/Format.hpp"
 #include "Engine/Adapter/Graphics/DX12/Framebuffer.hpp"
+#include "Engine/Adapter/Graphics/DX12/GraphicsPipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/ImageView.hpp"
-#include "Engine/Adapter/Graphics/DX12/RenderPipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/ResourceState.hpp"
 #include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
@@ -121,8 +121,8 @@ namespace Trident {
 		commandCount += 1;
 	}
 
-	void DX12::CommandEncoder::bindRenderPipeline(ref<Trident::RenderPipeline> renderPipeline) {
-		const ref<DX12::RenderPipeline> pipeline = std::static_pointer_cast<DX12::RenderPipeline>(renderPipeline);
+	void DX12::CommandEncoder::bindGraphicsPipeline(ref<Trident::GraphicsPipeline> graphicsPipeline) {
+		const ref<DX12::GraphicsPipeline> pipeline = std::static_pointer_cast<DX12::GraphicsPipeline>(graphicsPipeline);
 
 		commandList->SetPipelineState(pipeline->pipelineState);
 		commandList->SetGraphicsRootSignature(pipeline->pipelineLayout->rootSignature);

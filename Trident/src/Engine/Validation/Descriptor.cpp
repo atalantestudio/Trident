@@ -468,7 +468,7 @@ namespace Trident {
 			ENGINE_ASSERT(errorCount == 0, "Render pass descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 		}
 
-		void DescriptorGuard(const RenderPipelineDescriptor& descriptor) {
+		void DescriptorGuard(const GraphicsPipelineDescriptor& descriptor) {
 			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 

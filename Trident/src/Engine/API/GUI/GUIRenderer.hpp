@@ -73,8 +73,8 @@ namespace Trident {
 			void createDescriptorSetLayouts();
 			void createSubcomponentPipelineLayout();
 			void createGlyphSubcomponentPipelineLayout();
-			void createSubcomponentRenderPipeline();
-			void createGlyphSubcomponentRenderPipeline();
+			void createSubcomponentGraphicsPipeline();
+			void createGlyphSubcomponentGraphicsPipeline();
 
 			void allocateDescriptorSets();
 
@@ -96,8 +96,8 @@ namespace Trident {
 
 			ref<PipelineLayout> subcomponentPipelineLayout;
 
-			ref<RenderPipeline> subcomponentRenderPipeline;
-			ref<RenderPipeline> glyphSubcomponentRenderPipeline;
+			ref<GraphicsPipeline> subcomponentGraphicsPipeline;
+			ref<GraphicsPipeline> glyphSubcomponentGraphicsPipeline;
 
 			ref<Buffer2<Camera>> cameraBuffer;
 			ref<Buffer2<Vertex>> vertexBuffer;

@@ -13,6 +13,7 @@
 #include "Engine/Adapter/Graphics/VK/DescriptorSet.hpp"
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/Adapter/Graphics/VK/Framebuffer.hpp"
+#include "Engine/Adapter/Graphics/VK/GraphicsPipeline.hpp"
 #include "Engine/Adapter/Graphics/VK/Image.hpp"
 #include "Engine/Adapter/Graphics/VK/ImageLayout.hpp"
 #include "Engine/Adapter/Graphics/VK/IndexType.hpp"
@@ -20,7 +21,6 @@
 #include "Engine/Adapter/Graphics/VK/PipelineLayout.hpp"
 #include "Engine/Adapter/Graphics/VK/PipelineStage.hpp"
 #include "Engine/Adapter/Graphics/VK/RenderPass.hpp"
-#include "Engine/Adapter/Graphics/VK/RenderPipeline.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
@@ -132,8 +132,8 @@ namespace Trident {
 		commandCount += 1;
 	}
 
-	void VK::CommandEncoder::bindRenderPipeline(ref<Trident::RenderPipeline> renderPipeline) {
-		pipeline = std::dynamic_pointer_cast<VK::Pipeline>(renderPipeline);
+	void VK::CommandEncoder::bindGraphicsPipeline(ref<Trident::GraphicsPipeline> graphicsPipeline) {
+		pipeline = std::dynamic_pointer_cast<VK::Pipeline>(graphicsPipeline);
 
 		vkCmdBindPipeline(commandBuffer, pipeline->bindPoint, pipeline->pipeline);
 

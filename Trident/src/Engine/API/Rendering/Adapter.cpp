@@ -68,6 +68,14 @@ namespace Trident {
 		device->adapter->destroyFramebuffer(device, this);
 	}
 
+	GraphicsPipeline::GraphicsPipeline(const Device* device) :
+		device(device)
+	{}
+
+	GraphicsPipeline::~GraphicsPipeline() {
+		device->adapter->destroyGraphicsPipeline(device, this);
+	}
+
 	Queue::Queue(const Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability) :
 		device(device),
 		commandPool(device->adapter->createCommandPool(device, queueFamilyIndex, queueFamilyCapability))
@@ -82,25 +90,27 @@ namespace Trident {
 	}
 
 	void Queue::submit(view<ref<CommandBuffer>> commandBuffers) const {
-		// TODO
-		BREAKPOINT();
+		device->adapter->submit(this, commandBuffers);
 	}
 
 	void Queue::submit(view<ref<CommandBuffer>> commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<Fence> fence) const {
-		// TODO
-		BREAKPOINT();
+		device->adapter->submit(this, commandBuffers, waitSemaphore, signalSemaphore, fence);
 	}
 
 	PresentStatus Queue::present(view<ref<Swapchain>> swapchains, view<uint32> presentableImageIndices, ref<Semaphore> waitSemaphore) const {
-		// TODO
-		BREAKPOINT();
-
-		return PresentStatus::SUCCESS;
+		return device->adapter->present(this, swapchains, presentableImageIndices, waitSemaphore);
 	}
 
 	void Queue::waitIdle() const {
-		// TODO
-		BREAKPOINT();
+		device->adapter->waitIdle(this);
+	}
+
+	Semaphore::Semaphore(const Device* device) :
+		device(device)
+	{}
+
+	Semaphore::~Semaphore() {
+		device->adapter->destroySemaphore(device, this);
 	}
 
 	Surface::Surface(const Instance* instance) :

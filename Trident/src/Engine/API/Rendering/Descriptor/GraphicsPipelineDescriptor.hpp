@@ -26,7 +26,7 @@ namespace Trident {
 		CompareOperation compareOperation;
 	};
 
-	struct RenderPipelineDescriptor {
+	struct GraphicsPipelineDescriptor {
 		ref<PipelineLayout> pipelineLayout;
 		sequence<VertexInputBinding> vertexInputBindings;
 		ref<ShaderModule> vertexShaderModule;

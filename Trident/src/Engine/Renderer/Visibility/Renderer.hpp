@@ -77,12 +77,12 @@ namespace Trident {
 			ref<PipelineLayout> createOutputPipelineLayout() const;
 			// ref<PipelineLayout> createDebugPipelineLayout() const;
 
-			ref<RenderPipeline> createVisibilityPipeline() const;
+			ref<GraphicsPipeline> createVisibilityPipeline() const;
 			ref<ComputePipeline> createMaterialCountPipeline() const;
 			ref<ComputePipeline> createMaterialOffsetPipeline() const;
 			ref<ComputePipeline> createMaterialCoordinatePipeline() const;
-			ref<RenderPipeline> createOutputPipeline() const;
-			// ref<RenderPipeline> createDebugPipeline() const;
+			ref<GraphicsPipeline> createOutputPipeline() const;
+			// ref<GraphicsPipeline> createDebugPipeline() const;
 
 			ref<Buffer2<DrawIndirectCommand>> createVisibilityIndirectBuffer() const;
 			ref<Buffer2<Camera>> createCameraBuffer() const;
@@ -165,13 +165,13 @@ namespace Trident {
 			ref<PipelineLayout> outputPipelineLayout;
 			// ref<PipelineLayout> debugPipelineLayout;
 
-			ref<RenderPipeline> visibilityPipeline;
+			ref<GraphicsPipeline> visibilityPipeline;
 			ref<ComputePipeline> materialCountPipeline;
 			ref<ComputePipeline> materialOffsetPipeline;
 			ref<ComputePipeline> materialCoordinatePipeline;
 			sequence<ref<ComputePipeline>> materialPipelines;
-			ref<RenderPipeline> outputPipeline;
-			// ref<RenderPipeline> debugPipeline;
+			ref<GraphicsPipeline> outputPipeline;
+			// ref<GraphicsPipeline> debugPipeline;
 
 			ref<Buffer2<DrawIndirectCommand>> visibilityIndirectBuffer;
 			ref<Buffer2<Camera>> cameraBuffer;

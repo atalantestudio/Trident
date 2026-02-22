@@ -4,58 +4,58 @@
 #pragma once
 
 #include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
-#include "Engine/Adapter/Graphics/GL/RenderPipeline.hpp"
+#include "Engine/Adapter/Graphics/GL/GraphicsPipeline.hpp"
 
 namespace Trident {
-	class GL::BindRenderPipelineCommand final : public GL::Command {
+	class GL::BindGraphicsPipelineCommand final : public GL::Command {
 		public:
-			explicit BindRenderPipelineCommand(ref<GL::RenderPipeline> renderPipeline) :
-				renderPipeline(renderPipeline)
+			explicit BindGraphicsPipelineCommand(ref<GL::GraphicsPipeline> graphicsPipeline) :
+				graphicsPipeline(graphicsPipeline)
 			{}
 
 			void execute() const final override {
-				DEBUG_ASSERT(renderPipeline->minSampleShading >= 0.0f && renderPipeline->minSampleShading <= 1.0f);
+				DEBUG_ASSERT(graphicsPipeline->minSampleShading >= 0.0f && graphicsPipeline->minSampleShading <= 1.0f);
 
 				#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-					glBindVertexArray(renderPipeline->vertexArray);
+					glBindVertexArray(graphicsPipeline->vertexArray);
 				#else
 					ENGINE_ERROR_UNSUPPORTED();
 				#endif
 
-				glUseProgram(renderPipeline->program);
-				glFrontFace(renderPipeline->frontFace);
+				glUseProgram(graphicsPipeline->program);
+				glFrontFace(graphicsPipeline->frontFace);
 
-				if (renderPipeline->polygonModeFace != GL_NONE) {
-					glPolygonMode(GL_FRONT_AND_BACK, renderPipeline->polygonMode);
+				if (graphicsPipeline->polygonModeFace != GL_NONE) {
+					glPolygonMode(GL_FRONT_AND_BACK, graphicsPipeline->polygonMode);
 				}
 
-				if (renderPipeline->polygonMode == GL_POINT) {
+				if (graphicsPipeline->polygonMode == GL_POINT) {
 					glEnable(GL_PROGRAM_POINT_SIZE);
 				}
 				else {
 					glDisable(GL_PROGRAM_POINT_SIZE);
 				}
 
-				if (renderPipeline->cullMode != 0) {
+				if (graphicsPipeline->cullMode != 0) {
 					glEnable(GL_CULL_FACE);
-					glCullFace(renderPipeline->cullMode);
+					glCullFace(graphicsPipeline->cullMode);
 				}
 				else {
 					glDisable(GL_CULL_FACE);
 				}
 
-				if (!renderPipeline->dynamicLineWidth) {
-					glLineWidth(renderPipeline->lineWidth);
+				if (!graphicsPipeline->dynamicLineWidth) {
+					glLineWidth(graphicsPipeline->lineWidth);
 				}
 
-				if (renderPipeline->multisample) {
+				if (graphicsPipeline->multisample) {
 					glEnable(GL_MULTISAMPLE);
 
-					if (renderPipeline->minSampleShading != 0.0f) {
+					if (graphicsPipeline->minSampleShading != 0.0f) {
 						glEnable(GL_SAMPLE_SHADING);
 
 						#if OPENGL_VERSION >= OPENGL_VERSION_4_0
-							glMinSampleShading(renderPipeline->minSampleShading);
+							glMinSampleShading(graphicsPipeline->minSampleShading);
 						#else
 							ENGINE_ERROR_UNSUPPORTED();
 						#endif
@@ -68,8 +68,8 @@ namespace Trident {
 					glDisable(GL_MULTISAMPLE);
 				}
 
-				for (uint32 drawBufferIndex = 0; drawBufferIndex < renderPipeline->drawBuffers.count(); drawBufferIndex += 1) {
-					const GL::RenderPipeline::DrawBuffer& drawBuffer = renderPipeline->drawBuffers[drawBufferIndex];
+				for (uint32 drawBufferIndex = 0; drawBufferIndex < graphicsPipeline->drawBuffers.count(); drawBufferIndex += 1) {
+					const GL::GraphicsPipeline::DrawBuffer& drawBuffer = graphicsPipeline->drawBuffers[drawBufferIndex];
 
 					if (drawBuffer.blend) {
 						#if OPENGL_VERSION >= OPENGL_VERSION_3_0
@@ -93,10 +93,10 @@ namespace Trident {
 					}
 				}
 
-				if (renderPipeline->depthTest) {
+				if (graphicsPipeline->depthTest) {
 					glEnable(GL_DEPTH_TEST);
-					glDepthMask(renderPipeline->depthWrite);
-					glDepthFunc(renderPipeline->depthFunc);
+					glDepthMask(graphicsPipeline->depthWrite);
+					glDepthFunc(graphicsPipeline->depthFunc);
 				}
 				else {
 					glDisable(GL_DEPTH_TEST);
@@ -106,6 +106,6 @@ namespace Trident {
 			}
 
 		private:
-			ref<GL::RenderPipeline> renderPipeline;
+			ref<GL::GraphicsPipeline> graphicsPipeline;
 	};
 }

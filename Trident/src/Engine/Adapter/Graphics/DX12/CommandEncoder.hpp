@@ -18,7 +18,7 @@ namespace Trident {
 
 			void bindComputePipeline(ref<Trident::ComputePipeline> computePipeline) final override;
 
-			void bindRenderPipeline(ref<Trident::RenderPipeline> renderPipeline) final override;
+			void bindGraphicsPipeline(ref<Trident::GraphicsPipeline> graphicsPipeline) final override;
 
 			void bindDescriptorSets(ref<Trident::PipelineLayout> pipelineLayout, uint32 descriptorSetIndexOffset, view<ref<Trident::DescriptorSet>> descriptorSets) final override;
 

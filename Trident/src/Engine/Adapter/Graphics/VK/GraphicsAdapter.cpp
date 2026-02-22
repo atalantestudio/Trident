@@ -10,11 +10,11 @@
 #include "Engine/Adapter/Graphics/VK/Fence.hpp"
 #include "Engine/Adapter/Graphics/VK/Framebuffer.hpp"
 #include "Engine/Adapter/Graphics/VK/GraphicsAdapter.hpp"
+#include "Engine/Adapter/Graphics/VK/GraphicsPipeline.hpp"
 #include "Engine/Adapter/Graphics/VK/Image.hpp"
 #include "Engine/Adapter/Graphics/VK/MemoryAllocator.hpp"
 #include "Engine/Adapter/Graphics/VK/PipelineLayout.hpp"
 #include "Engine/Adapter/Graphics/VK/RenderPass.hpp"
-#include "Engine/Adapter/Graphics/VK/RenderPipeline.hpp"
 #include "Engine/Adapter/Graphics/VK/Sampler.hpp"
 #include "Engine/Adapter/Graphics/VK/Semaphore.hpp"
 #include "Engine/Adapter/Graphics/VK/ShaderModule.hpp"
@@ -83,8 +83,8 @@ namespace Trident {
 		return createRef<VK::RenderPass>(descriptor, *surface, *device);
 	}
 
-	ref<RenderPipeline> VK::GraphicsAdapter::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
-		return createRef<VK::RenderPipeline>(descriptor, *device);
+	ref<GraphicsPipeline> VK::GraphicsAdapter::createGraphicsPipeline(const GraphicsPipelineDescriptor& descriptor) const {
+		return createRef<VK::GraphicsPipeline>(descriptor, *device);
 	}
 
 	ref<Sampler> VK::GraphicsAdapter::createSampler(const SamplerDescriptor& descriptor) const {

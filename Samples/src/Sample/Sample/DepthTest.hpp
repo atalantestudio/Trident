@@ -29,7 +29,7 @@ namespace Trident {
 				recreateDepthStencilImageView();
 				recreateFramebuffers();
 
-				setupRenderPipeline();
+				setupGraphicsPipeline();
 				createBuffers();
 			}
 
@@ -43,7 +43,7 @@ namespace Trident {
 				const float32 height = static_cast<float32>(swapchainExtent.height);
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
-				commandEncoder->bindRenderPipeline(renderPipeline);
+				commandEncoder->bindGraphicsPipeline(graphicsPipeline);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
@@ -158,7 +158,7 @@ namespace Trident {
 				}
 			}
 
-			void setupRenderPipeline() {
+			void setupGraphicsPipeline() {
 				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
 
 				SET_DEBUG_NAME(pipelineLayoutDescriptor, "Pipeline layout");
@@ -189,28 +189,28 @@ namespace Trident {
 				ColorBlendAttachment colorBlendAttachment{};
 				colorBlendAttachment.blend = false;
 
-				RenderPipelineDescriptor renderPipelineDescriptor{};
-				renderPipelineDescriptor.pipelineLayout = pipelineLayout;
-				renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
-				renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-				renderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-				renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-				renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-				renderPipelineDescriptor.cullMode = CullMode::BACK;
-				renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-				renderPipelineDescriptor.lineWidth = 1.0f;
-				renderPipelineDescriptor.minSampleShading = 0.0f;
-				renderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-				renderPipelineDescriptor.depthStencilState.depthTest = true;
-				renderPipelineDescriptor.depthStencilState.depthWrite = true;
-				renderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
-				renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-				renderPipelineDescriptor.renderPass = renderPass;
-				renderPipelineDescriptor.subpassIndex = 0;
+				GraphicsPipelineDescriptor graphicsPipelineDescriptor{};
+				graphicsPipelineDescriptor.pipelineLayout = pipelineLayout;
+				graphicsPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
+				graphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+				graphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+				graphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+				graphicsPipelineDescriptor.polygonMode = PolygonMode::FILL;
+				graphicsPipelineDescriptor.cullMode = CullMode::BACK;
+				graphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+				graphicsPipelineDescriptor.lineWidth = 1.0f;
+				graphicsPipelineDescriptor.minSampleShading = 0.0f;
+				graphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+				graphicsPipelineDescriptor.depthStencilState.depthTest = true;
+				graphicsPipelineDescriptor.depthStencilState.depthWrite = true;
+				graphicsPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
+				graphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+				graphicsPipelineDescriptor.renderPass = renderPass;
+				graphicsPipelineDescriptor.subpassIndex = 0;
 
-				SET_DEBUG_NAME(renderPipelineDescriptor, "Render pipeline");
+				SET_DEBUG_NAME(graphicsPipelineDescriptor, "Render pipeline");
 
-				renderPipeline = createRenderPipeline(renderPipelineDescriptor);
+				graphicsPipeline = createGraphicsPipeline(graphicsPipelineDescriptor);
 			}
 
 			void createBuffers() {
@@ -282,7 +282,7 @@ namespace Trident {
 			ref<Image> depthStencilImage;
 			ref<ImageView> depthStencilImageView;
 			sequence<ref<Framebuffer>> framebuffers;
-			ref<RenderPipeline> renderPipeline;
+			ref<GraphicsPipeline> graphicsPipeline;
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> instanceBuffer;
 	};

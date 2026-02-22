@@ -114,21 +114,21 @@ namespace Trident {
 			void createPlaceholderDescriptorSetLayout();
 			void createCameraViewPipelineLayout();
 			void createPlaceholderPipelineLayout();
-			void createGridRenderPipeline();
-			void createFillRenderPipeline();
-			void createStrokeRenderPipeline();
-			void createCenterOfMassRenderPipeline();
-			void createPlaceholderFillRenderPipeline();
-			void createPlaceholderStrokeRenderPipeline();
-			void createPlaceholderCenterOfMassRenderPipeline();
+			void createGridGraphicsPipeline();
+			void createFillGraphicsPipeline();
+			void createStrokeGraphicsPipeline();
+			void createCenterOfMassGraphicsPipeline();
+			void createPlaceholderFillGraphicsPipeline();
+			void createPlaceholderStrokeGraphicsPipeline();
+			void createPlaceholderCenterOfMassGraphicsPipeline();
 
 			#if defined(SHOW_DISTANCE)
-				void createDistanceRenderPipeline();
+				void createDistanceGraphicsPipeline();
 			#endif
 
 			#if defined(SHOW_FEATURES)
-				void createVertexFeatureRenderPipeline();
-				void createEdgeFeatureRenderPipeline();
+				void createVertexFeatureGraphicsPipeline();
+				void createEdgeFeatureGraphicsPipeline();
 			#endif
 
 			void allocateDescriptorSets();
@@ -176,21 +176,21 @@ namespace Trident {
 			ref<PipelineLayout> cameraViewPipelineLayout;
 			ref<PipelineLayout> placeholderPipelineLayout;
 
-			ref<RenderPipeline> gridRenderPipeline;
-			ref<RenderPipeline> fillRenderPipeline;
-			ref<RenderPipeline> strokeRenderPipeline;
-			ref<RenderPipeline> centerOfMassRenderPipeline;
-			ref<RenderPipeline> placeholderFillRenderPipeline;
-			ref<RenderPipeline> placeholderStrokeRenderPipeline;
-			ref<RenderPipeline> placeholderCenterOfMassRenderPipeline;
+			ref<GraphicsPipeline> gridGraphicsPipeline;
+			ref<GraphicsPipeline> fillGraphicsPipeline;
+			ref<GraphicsPipeline> strokeGraphicsPipeline;
+			ref<GraphicsPipeline> centerOfMassGraphicsPipeline;
+			ref<GraphicsPipeline> placeholderFillGraphicsPipeline;
+			ref<GraphicsPipeline> placeholderStrokeGraphicsPipeline;
+			ref<GraphicsPipeline> placeholderCenterOfMassGraphicsPipeline;
 
 			#if defined(SHOW_DISTANCE)
-				ref<RenderPipeline> distanceRenderPipeline;
+				ref<GraphicsPipeline> distanceGraphicsPipeline;
 			#endif
 
 			#if defined(SHOW_FEATURES)
-				ref<RenderPipeline> vertexFeatureRenderPipeline;
-				ref<RenderPipeline> edgeFeatureRenderPipeline;
+				ref<GraphicsPipeline> vertexFeatureGraphicsPipeline;
+				ref<GraphicsPipeline> edgeFeatureGraphicsPipeline;
 			#endif
 
 			ref<Buffer2<Camera>> cameraBuffer;

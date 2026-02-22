@@ -8,7 +8,7 @@
 #include "Engine/Adapter/Graphics/GL/Command/BindComputePipelineCommand.hpp"
 #include "Engine/Adapter/Graphics/GL/Command/BindDescriptorSetsCommand.hpp"
 #include "Engine/Adapter/Graphics/GL/Command/BindIndexBufferCommand.hpp"
-#include "Engine/Adapter/Graphics/GL/Command/BindRenderPipelineCommand.hpp"
+#include "Engine/Adapter/Graphics/GL/Command/BindGraphicsPipelineCommand.hpp"
 #include "Engine/Adapter/Graphics/GL/Command/BindVertexBufferCommand.hpp"
 #include "Engine/Adapter/Graphics/GL/Command/CopyBufferToBufferCommand.hpp"
 #include "Engine/Adapter/Graphics/GL/Command/CopyBufferToImageCommand.hpp"
@@ -55,12 +55,12 @@ namespace Trident {
 		commands.emplace_back(createRef<GL::BindComputePipelineCommand>(this->computePipeline));
 	}
 
-	void GL::CommandEncoder::bindRenderPipeline(ref<Trident::RenderPipeline> renderPipeline) {
-		this->renderPipeline = std::static_pointer_cast<GL::RenderPipeline>(renderPipeline);
+	void GL::CommandEncoder::bindGraphicsPipeline(ref<Trident::GraphicsPipeline> graphicsPipeline) {
+		this->graphicsPipeline = std::static_pointer_cast<GL::GraphicsPipeline>(graphicsPipeline);
 
-		ADAPTER_ASSERT(this->renderPipeline->subpassIndex == subpassIndex, "The pipeline must be associated to the current subpass.");
+		ADAPTER_ASSERT(this->graphicsPipeline->subpassIndex == subpassIndex, "The pipeline must be associated to the current subpass.");
 
-		commands.emplace_back(createRef<GL::BindRenderPipelineCommand>(this->renderPipeline));
+		commands.emplace_back(createRef<GL::BindGraphicsPipelineCommand>(this->graphicsPipeline));
 	}
 
 	void GL::CommandEncoder::bindDescriptorSets(ref<PipelineLayout> pipelineLayout, uint32 descriptorSetIndexOffset, view<ref<Trident::DescriptorSet>> descriptorSets) {
@@ -70,7 +70,7 @@ namespace Trident {
 
 	void GL::CommandEncoder::bindVertexBuffer(uint32 bindingIndex, ref<Trident::Buffer> vertexBuffer, uint64 offset, uint32 stride) {
 		commands.emplace_back(createRef<GL::BindVertexBufferCommand>(
-			renderPipeline->vertexArray,
+			graphicsPipeline->vertexArray,
 			bindingIndex,
 			std::static_pointer_cast<GL::Buffer>(vertexBuffer)->buffer,
 			offset,
@@ -172,7 +172,7 @@ namespace Trident {
 
 	void GL::CommandEncoder::draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset, uint32 instanceOffset) {
 		commands.emplace_back(createRef<GL::DrawCommand>(
-			renderPipeline->primitiveTopology,
+			graphicsPipeline->primitiveTopology,
 			vertexOffset,
 			vertexCount,
 			instanceCount,
@@ -185,7 +185,7 @@ namespace Trident {
 		ADAPTER_ASSERT(drawCount > 0, "A DrawIndirect command must result in at least 1 draw call.");
 
 		commands.emplace_back(createRef<GL::DrawIndirectCommand>(
-			renderPipeline->primitiveTopology,
+			graphicsPipeline->primitiveTopology,
 			std::static_pointer_cast<GL::Buffer>(buffer)->buffer,
 			(const GLubyte*) bufferOffset,
 			drawCount,
@@ -197,7 +197,7 @@ namespace Trident {
 		const uint64 indices = this->indexOffset + indexOffset * indexTypeSize;
 
 		commands.emplace_back(createRef<GL::DrawIndexedCommand>(
-			renderPipeline->primitiveTopology,
+			graphicsPipeline->primitiveTopology,
 			indexCount,
 			indexType,
 			(const GLvoid*) indices,
@@ -212,7 +212,7 @@ namespace Trident {
 		ADAPTER_ASSERT(drawCount > 0, "A DrawIndirect command must result in at least 1 draw call.");
 
 		commands.emplace_back(createRef<GL::DrawIndexedIndirectCommand>(
-			renderPipeline->primitiveTopology,
+			graphicsPipeline->primitiveTopology,
 			indexType,
 			std::static_pointer_cast<GL::Buffer>(buffer)->buffer,
 			(const GLubyte*) bufferOffset,
@@ -235,7 +235,7 @@ namespace Trident {
 		renderPass = nullptr;
 		subpassIndex = 0;
 		computePipeline = nullptr;
-		renderPipeline = nullptr;
+		graphicsPipeline = nullptr;
 		indexOffset = 0;
 		indexType = 0;
 		indexTypeSize = 0;
@@ -247,7 +247,7 @@ namespace Trident {
 		this->indexTypeSize = indexTypeSize;
 
 		commands.emplace_back(createRef<GL::BindIndexBufferCommand>(
-			renderPipeline->vertexArray,
+			graphicsPipeline->vertexArray,
 			std::static_pointer_cast<GL::Buffer>(indexBuffer)->buffer
 		));
 	}

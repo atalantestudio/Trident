@@ -26,6 +26,7 @@ namespace Trident::DX12 {
 	class Fence;
 	class Framebuffer;
 	class GraphicsAdapter;
+	class GraphicsPipeline;
 	class Image;
 	class ImageView;
 	class Instance;
@@ -33,7 +34,6 @@ namespace Trident::DX12 {
 	class PhysicalDevice;
 	class PipelineLayout;
 	class Queue;
-	class RenderPipeline;
 	class Sampler;
 	class ShaderModule;
 	class Surface;

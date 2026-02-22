@@ -8,9 +8,9 @@
 #include "Engine/Adapter/Graphics/GL/Fence.hpp"
 #include "Engine/Adapter/Graphics/GL/Framebuffer.hpp"
 #include "Engine/Adapter/Graphics/GL/GraphicsAdapter.hpp"
+#include "Engine/Adapter/Graphics/GL/GraphicsPipeline.hpp"
 #include "Engine/Adapter/Graphics/GL/Image.hpp"
 #include "Engine/Adapter/Graphics/GL/RenderPass.hpp"
-#include "Engine/Adapter/Graphics/GL/RenderPipeline.hpp"
 #include "Engine/Adapter/Graphics/GL/Sampler.hpp"
 #include "Engine/Adapter/Graphics/GL/ShaderModule.hpp"
 #include "Engine/Adapter/Graphics/GL/Swapchain.hpp"
@@ -80,8 +80,8 @@ namespace Trident {
 		return createRef<GL::RenderPass>(descriptor);
 	}
 
-	ref<RenderPipeline> GL::GraphicsAdapter::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
-		return createRef<GL::RenderPipeline>(descriptor);
+	ref<GraphicsPipeline> GL::GraphicsAdapter::createGraphicsPipeline(const GraphicsPipelineDescriptor& descriptor) const {
+		return createRef<GL::GraphicsPipeline>(descriptor);
 	}
 
 	ref<Sampler> GL::GraphicsAdapter::createSampler(const SamplerDescriptor& descriptor) const {

@@ -7,19 +7,19 @@
 #include "Engine/Adapter/Graphics/VK/CullMode.hpp"
 #include "Engine/Adapter/Graphics/VK/DynamicState.hpp"
 #include "Engine/Adapter/Graphics/VK/FrontFace.hpp"
+#include "Engine/Adapter/Graphics/VK/GraphicsPipeline.hpp"
 #include "Engine/Adapter/Graphics/VK/InputRate.hpp"
 #include "Engine/Adapter/Graphics/VK/PipelineLayout.hpp"
 #include "Engine/Adapter/Graphics/VK/PolygonMode.hpp"
 #include "Engine/Adapter/Graphics/VK/PrimitiveTopology.hpp"
 #include "Engine/Adapter/Graphics/VK/RenderPass.hpp"
-#include "Engine/Adapter/Graphics/VK/RenderPipeline.hpp"
 #include "Engine/Adapter/Graphics/VK/ShaderModule.hpp"
 #include "Engine/Adapter/Graphics/VK/VertexInputAttributeType.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	VK::RenderPipeline::RenderPipeline(const RenderPipelineDescriptor& descriptor, const VK::Device& device) :
-		Trident::RenderPipeline(descriptor),
+	VK::GraphicsPipeline::GraphicsPipeline(const GraphicsPipelineDescriptor& descriptor, const VK::Device& device) :
+		Trident::GraphicsPipeline(descriptor),
 		VK::Pipeline(VK_PIPELINE_BIND_POINT_GRAPHICS),
 		device(device)
 	{
@@ -260,7 +260,7 @@ namespace Trident {
 		#endif
 	}
 
-	VK::RenderPipeline::~RenderPipeline() {
+	VK::GraphicsPipeline::~GraphicsPipeline() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		vkDestroyPipeline(device.device, pipeline, nullptr);

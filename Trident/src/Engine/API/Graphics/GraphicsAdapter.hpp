@@ -11,54 +11,6 @@
 #include "Engine/Validation/Descriptor.hpp"
 
 namespace Trident {
-	class Window;
-
-	typedef AcquireNextImageStatus (*AcquireNextImageImplementation)(const Device* device, const Swapchain* swapchain, const Semaphore* semaphore, uint32& imageIndex);
-	typedef sequence<ref<DescriptorSet>> (*AllocateDescriptorSetsImplementation)(const Device* device, view<ref<DescriptorSetLayout>> descriptorSetLayouts);
-	typedef void (*BindAdapterImplementation)(GraphicsAdapter* adapter);
-	typedef ref<Buffer> (*CreateBufferImplementation)(const Device* device, const BufferDescriptor& descriptor, uint32 stride);
-	typedef ref<CommandEncoder> (*CreateCommandEncoderImplementation)(const Device* device, const CommandPool* commandPool, const CommandBufferDescriptor& descriptor);
-	typedef ref<CommandPool> (*CreateCommandPoolImplementation)(const Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability);
-	typedef ref<ComputePipeline> (*CreateComputePipelineImplementation)(const ComputePipelineDescriptor& descriptor, const Device* device);
-	typedef ref<DescriptorSetLayout> (*CreateDescriptorSetLayoutImplementation)(const sequence<DescriptorSetLayoutBinding>& bindings, const Device* device);
-	typedef ref<Device> (*CreateDeviceImplementation)(const GraphicsAdapter* adapter, const PhysicalDevice* physicalDevice);
-	typedef ref<Fence> (*CreateFenceImplementation)(const Device* device, const FenceDescriptor& descriptor);
-	typedef ref<Framebuffer> (*CreateFramebufferImplementation)(const Device* device, const FramebufferDescriptor& descriptor);
-	typedef ref<Image> (*CreateImageImplementation)(const ImageDescriptor& descriptor);
-	typedef ref<Instance> (*CreateInstanceImplementation)(const GraphicsAdapter* adapter, const InstanceDescriptor& instanceDescriptor);
-	typedef ref<MemoryAllocator> (*CreateMemoryAllocatorImplementation)(const Device* device);
-	typedef ref<PipelineLayout> (*CreatePipelineLayoutImplementation)(const PipelineLayoutDescriptor& descriptor, const Device* device);
-	typedef ref<RenderPass> (*CreateRenderPassImplementation)(const Device* device, const RenderPassDescriptor& descriptor);
-	typedef ref<RenderPipeline> (*CreateRenderPipelineImplementation)(const RenderPipelineDescriptor& descriptor);
-	typedef ref<Sampler> (*CreateSamplerImplementation)(const SamplerDescriptor& descriptor);
-	typedef ref<Semaphore> (*CreateSemaphoreImplementation)();
-	typedef ref<ShaderModule> (*CreateShaderModuleFromAssetImplementation)(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset, const Device* device);
-
-	// TODO: Deprecate (replace with CreateShaderModuleFromAssetImplementation).
-	typedef ref<ShaderModule> (*CreateShaderModuleFromCodeImplementation)(const ShaderModuleDescriptor& descriptor, view<char8> code, const Device* device);
-
-	typedef ref<Surface> (*CreateSurfaceImplementation)(const Instance* instance, const Window* window);
-	typedef ref<Swapchain> (*CreateSwapchainImplementation)(const Device* device, const SwapchainDescriptor& descriptor);
-	typedef void (*DestroyBufferImplementation)(const Device* device, const Buffer* buffer);
-	typedef void (*DestroyCommandEncoderImplementation)(const Device* device, const CommandPool* commandPool, const CommandEncoder* commandEncoder);
-	typedef void (*DestroyCommandPoolImplementation)(const Device* device, const CommandPool* commandPool);
-	typedef void (*DestroyDeviceImplementation)(const Device* device);
-	typedef void (*DestroyFenceImplementation)(const Device* device, const Fence* fence);
-	typedef void (*DestroyFramebufferImplementation)(const Device* device, const Framebuffer* framebuffer);
-	typedef void (*DestroyInstanceImplementation)(const Instance* instance);
-	typedef void (*DestroyQueueImplementation)(const Queue* queue);
-	typedef void (*DestroySurfaceImplementation)(const Instance* instance, const Surface* surface);
-	typedef void (*DestroySwapchainImplementation)(const Device* device, const Swapchain* swapchain);
-	typedef ref<Queue> (*GetQueueImplementation)(const Device* device, QueueFamilyCapability queueFamilyCapability);
-	typedef ImageFormat (*GetSurfaceFormatImplementation)(const Surface* surface);
-	typedef void* (*MapBufferImplementation)(const Device* device, const Buffer* buffer, uint64 offset, uint64 size);
-	typedef void (*ResetFenceImplementation)(const Device* device, const Fence* fence);
-	typedef ref<PhysicalDevice> (*SelectPhysicalDeviceImplementation)(const Instance* instance, bool preferIntegratedGpu);
-	typedef void (*UnmapBufferImplementation)(const Device* device, const Buffer* buffer);
-	typedef void (*UpdateDescriptorSetsImplementation)(const Device* device, view<WriteDescriptorSet> writeDescriptorSets);
-	typedef void (*WaitForFenceImplementation)(const Device* device, const Fence* fence);
-	typedef void (*WaitIdleImplementation)(const Device* device);
-
 	class GraphicsAdapter {
 		public:
 			static ConsoleLogger logger;
@@ -105,11 +57,11 @@ namespace Trident {
 
 			ref<RenderPass> createRenderPass(const Device* device, const RenderPassDescriptor& descriptor) const;
 
-			ref<RenderPipeline> createRenderPipeline(const RenderPipelineDescriptor& descriptor) const;
+			ref<GraphicsPipeline> createGraphicsPipeline(const Device* device, const GraphicsPipelineDescriptor& descriptor) const;
 
 			ref<Sampler> createSampler(const SamplerDescriptor& descriptor) const;
 
-			ref<Semaphore> createSemaphore() const;
+			ref<Semaphore> createSemaphore(const Device* device) const;
 
 			ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset, const Device* device) const;
 			ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code, const Device* device) const;
@@ -130,9 +82,13 @@ namespace Trident {
 
 			void destroyFramebuffer(const Device* device, const Framebuffer* framebuffer) const;
 
+			void destroyGraphicsPipeline(const Device* device, const GraphicsPipeline* graphicsPipeline) const;
+
 			void destroyInstance(const Instance* instance) const;
 
 			void destroyQueue(const Queue* queue) const;
+
+			void destroySemaphore(const Device* device, const Semaphore* semaphore) const;
 
 			void destroySurface(const Instance* instance, const Surface* surface) const;
 
@@ -144,9 +100,14 @@ namespace Trident {
 
 			void* mapBuffer(const Device* device, const Buffer* buffer, uint64 offset, uint64 size) const;
 
+			PresentStatus present(const Queue* queue, view<ref<Swapchain>> swapchains, view<uint32> presentableImageIndices, ref<Semaphore> waitSemaphore) const;
+
 			void resetFence(const Device* device, const Fence* fence) const;
 
 			ref<PhysicalDevice> selectPhysicalDevice(const Instance* instance, bool preferIntegratedGpu) const;
+
+			void submit(const Queue* queue, view<ref<CommandBuffer>> commandBuffers) const;
+			void submit(const Queue* queue, view<ref<CommandBuffer>> commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<Fence> fence) const;
 
 			void unmapBuffer(const Device* device, const Buffer* buffer) const;
 
@@ -155,6 +116,7 @@ namespace Trident {
 			void waitForFence(const Device* device, const Fence* fence) const;
 
 			void waitIdle(const Device* device) const;
+			void waitIdle(const Queue* queue) const;
 
 		// TODO: Do not expose to the client side.
 		public:
@@ -173,7 +135,7 @@ namespace Trident {
 			CreateMemoryAllocatorImplementation createMemoryAllocatorImplementation;
 			CreatePipelineLayoutImplementation createPipelineLayoutImplementation;
 			CreateRenderPassImplementation createRenderPassImplementation;
-			CreateRenderPipelineImplementation createRenderPipelineImplementation;
+			CreateGraphicsPipelineImplementation createGraphicsPipelineImplementation;
 			CreateSamplerImplementation createSamplerImplementation;
 			CreateSemaphoreImplementation createSemaphoreImplementation;
 			CreateShaderModuleFromAssetImplementation createShaderModuleFromAssetImplementation;
@@ -186,19 +148,25 @@ namespace Trident {
 			DestroyDeviceImplementation destroyDeviceImplementation;
 			DestroyFenceImplementation destroyFenceImplementation;
 			DestroyFramebufferImplementation destroyFramebufferImplementation;
+			DestroyGraphicsPipelineImplementation destroyGraphicsPipelineImplementation;
 			DestroyInstanceImplementation destroyInstanceImplementation;
 			DestroyQueueImplementation destroyQueueImplementation;
+			DestroySemaphoreImplementation destroySemaphoreImplementation;
 			DestroySurfaceImplementation destroySurfaceImplementation;
 			DestroySwapchainImplementation destroySwapchainImplementation;
 			GetQueueImplementation getQueueImplementation;
 			GetSurfaceFormatImplementation getSurfaceFormatImplementation;
 			MapBufferImplementation mapBufferImplementation;
+			PresentImplementation presentImplementation;
 			ResetFenceImplementation resetFenceImplementation;
 			SelectPhysicalDeviceImplementation selectPhysicalDeviceImplementation;
+			SubmitImplementation submitImplementation;
+			Submit2Implementation submit2Implementation;
 			UnmapBufferImplementation unmapBufferImplementation;
 			UpdateDescriptorSetsImplementation updateDescriptorSetsImplementation;
 			WaitForFenceImplementation waitForFenceImplementation;
-			WaitIdleImplementation waitIdleImplementation;
+			WaitIdleDeviceImplementation waitIdleDeviceImplementation;
+			WaitIdleQueueImplementation waitIdleQueueImplementation;
 
 		private:
 			GraphicsAPI api;

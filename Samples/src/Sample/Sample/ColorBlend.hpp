@@ -25,7 +25,7 @@ namespace Trident {
 			void build() override {
 				setupRenderPass();
 				recreateFramebuffers();
-				setupRenderPipeline();
+				setupGraphicsPipeline();
 				createBuffers();
 			}
 
@@ -41,7 +41,7 @@ namespace Trident {
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
-				commandEncoder->bindRenderPipeline(renderPipeline);
+				commandEncoder->bindGraphicsPipeline(graphicsPipeline);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 
 				for (uint32 instanceIndex = 0; instanceIndex < INSTANCE_COUNT; instanceIndex += 1) {
@@ -112,7 +112,7 @@ namespace Trident {
 				}
 			}
 
-			void setupRenderPipeline() {
+			void setupGraphicsPipeline() {
 				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
 
 				SET_DEBUG_NAME(pipelineLayoutDescriptor, "Pipeline layout");
@@ -145,26 +145,26 @@ namespace Trident {
 				colorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
 				colorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 
-				RenderPipelineDescriptor renderPipelineDescriptor{};
-				renderPipelineDescriptor.pipelineLayout = pipelineLayout;
-				renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
-				renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-				renderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-				renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-				renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-				renderPipelineDescriptor.cullMode = CullMode::BACK;
-				renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-				renderPipelineDescriptor.lineWidth = 1.0f;
-				renderPipelineDescriptor.minSampleShading = 0.0f;
-				renderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-				renderPipelineDescriptor.depthStencilState.depthTest = false;
-				renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-				renderPipelineDescriptor.renderPass = renderPass;
-				renderPipelineDescriptor.subpassIndex = 0;
+				GraphicsPipelineDescriptor graphicsPipelineDescriptor{};
+				graphicsPipelineDescriptor.pipelineLayout = pipelineLayout;
+				graphicsPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
+				graphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+				graphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+				graphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+				graphicsPipelineDescriptor.polygonMode = PolygonMode::FILL;
+				graphicsPipelineDescriptor.cullMode = CullMode::BACK;
+				graphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+				graphicsPipelineDescriptor.lineWidth = 1.0f;
+				graphicsPipelineDescriptor.minSampleShading = 0.0f;
+				graphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+				graphicsPipelineDescriptor.depthStencilState.depthTest = false;
+				graphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+				graphicsPipelineDescriptor.renderPass = renderPass;
+				graphicsPipelineDescriptor.subpassIndex = 0;
 
-				SET_DEBUG_NAME(renderPipelineDescriptor, "Render pipeline");
+				SET_DEBUG_NAME(graphicsPipelineDescriptor, "Render pipeline");
 
-				renderPipeline = createRenderPipeline(renderPipelineDescriptor);
+				graphicsPipeline = createGraphicsPipeline(graphicsPipelineDescriptor);
 			}
 
 			void createBuffers() {
@@ -234,7 +234,7 @@ namespace Trident {
 		private:
 			ref<RenderPass> renderPass;
 			sequence<ref<Framebuffer>> framebuffers;
-			ref<RenderPipeline> renderPipeline;
+			ref<GraphicsPipeline> graphicsPipeline;
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> instanceBuffer;
 	};

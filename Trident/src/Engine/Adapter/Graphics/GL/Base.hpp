@@ -28,7 +28,7 @@ namespace Trident::GL {
 	class BindComputePipelineCommand;
 	class BindDescriptorSetsCommand;
 	class BindIndexBufferCommand;
-	class BindRenderPipelineCommand;
+	class BindGraphicsPipelineCommand;
 	class BindVertexBufferCommand;
 	class Command;
 	class CopyBufferToBufferCommand;
@@ -56,13 +56,13 @@ namespace Trident::GL {
 	class Fence;
 	class Framebuffer;
 	class GraphicsAdapter;
+	class GraphicsPipeline;
 	class Image;
 	class ImageView;
 	class Instance;
 	class PhysicalDevice;
 	class Queue;
 	class RenderPass;
-	class RenderPipeline;
 	class Sampler;
 	class ShaderModule;
 	class Surface;

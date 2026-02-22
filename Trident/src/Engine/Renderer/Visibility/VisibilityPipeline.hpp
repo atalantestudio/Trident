@@ -6,7 +6,7 @@
 #include "Engine/Renderer/Visibility/Renderer.hpp"
 
 namespace Trident {
-	ref<RenderPipeline> VisibilityRenderer::createVisibilityPipeline() const {
+	ref<GraphicsPipeline> VisibilityRenderer::createVisibilityPipeline() const {
 		ShaderModuleDescriptor visibilityVertexShaderModuleDescriptor{};
 		visibilityVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		visibilityVertexShaderModuleDescriptor.entryPoint = "main";
@@ -22,7 +22,7 @@ namespace Trident {
 		ColorBlendAttachment visibilityColorBlendAttachment{};
 		visibilityColorBlendAttachment.blend = false;
 
-		RenderPipelineDescriptor visibilityPipelineDescriptor{};
+		GraphicsPipelineDescriptor visibilityPipelineDescriptor{};
 		visibilityPipelineDescriptor.pipelineLayout = visibilityPipelineLayout;
 
 		#if defined(GL_SOURCE_FROM_SPIRV)
@@ -54,6 +54,6 @@ namespace Trident {
 
 		SET_DEBUG_NAME(visibilityPipelineDescriptor, "Visibility");
 
-		return createRenderPipeline(visibilityPipelineDescriptor);
+		return createGraphicsPipeline(visibilityPipelineDescriptor);
 	}
 }

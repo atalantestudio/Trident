@@ -124,7 +124,7 @@ namespace Trident {
 		WIN32_ASSERT(code == WAIT_OBJECT_0);
 	}
 
-	void DX12::waitIdleQueue(const Trident::Queue* queue) {
+	void DX12::waitIdle(const Trident::Queue* queue) {
 		const DX12::Queue* _queue = static_cast<const DX12::Queue*>(queue);
 		const DX12::Fence* idleFence = static_cast<const DX12::Fence*>(_queue->idleFence.get());
 		HRESULT result;

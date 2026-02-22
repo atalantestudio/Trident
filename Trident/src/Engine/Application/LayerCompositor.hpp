@@ -74,8 +74,8 @@ namespace Trident {
 					#endif
 
 					commandEncoders[frameInFlightIndex] = graphicsQueue->createCommandEncoder(inFlightCommandBufferDescriptor);
-					acquiredNextImageSemaphores[frameInFlightIndex] = adapter->createSemaphore();
-					finishedExecutionSemaphores[frameInFlightIndex] = adapter->createSemaphore();
+					acquiredNextImageSemaphores[frameInFlightIndex] = device->createSemaphore();
+					finishedExecutionSemaphores[frameInFlightIndex] = device->createSemaphore();
 
 					#if defined(BUILD_MODE_DEBUG)
 						name = Logger::format("In flight fence []", frameInFlightIndex);

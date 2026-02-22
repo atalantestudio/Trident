@@ -7,8 +7,8 @@
 #include "Engine/Adapter/Graphics/GL/ComputePipeline.hpp"
 #include "Engine/Adapter/Graphics/GL/Device.hpp"
 #include "Engine/Adapter/Graphics/GL/Framebuffer.hpp"
+#include "Engine/Adapter/Graphics/GL/GraphicsPipeline.hpp"
 #include "Engine/Adapter/Graphics/GL/RenderPass.hpp"
-#include "Engine/Adapter/Graphics/GL/RenderPipeline.hpp"
 #include "Engine/API/Rendering/CommandEncoder.hpp"
 
 namespace Trident {
@@ -22,7 +22,7 @@ namespace Trident {
 
 			void bindComputePipeline(ref<Trident::ComputePipeline> computePipeline) final override;
 
-			void bindRenderPipeline(ref<Trident::RenderPipeline> renderPipeline) final override;
+			void bindGraphicsPipeline(ref<Trident::GraphicsPipeline> graphicsPipeline) final override;
 
 			void bindDescriptorSets(ref<PipelineLayout> pipelineLayout, uint32 descriptorSetIndexOffset, view<ref<Trident::DescriptorSet>> descriptorSets) final override;
 
@@ -73,7 +73,7 @@ namespace Trident {
 			uint32 subpassIndex = 0;
 			std::vector<ref<GL::Command>> commands;
 			ref<GL::ComputePipeline> computePipeline = nullptr;
-			ref<GL::RenderPipeline> renderPipeline = nullptr;
+			ref<GL::GraphicsPipeline> graphicsPipeline = nullptr;
 			GLuint indexOffset = 0;
 			GLenum indexType = 0;
 			GLsizei indexTypeSize = 0;

@@ -192,7 +192,7 @@ namespace Trident {
 					const uint32 vertexCount = static_cast<uint32>(geometry->getVertexPositionIndices().count());
 					const uint32 indexOffset = scene->getVertexPositionIndexOffset(instance.geometryIndex);
 
-					commandEncoder->bindRenderPipeline(materialPipelines[materialReference.materialIndex]);
+					commandEncoder->bindGraphicsPipeline(materialPipelines[materialReference.materialIndex]);
 					commandEncoder->bindVertexBuffer(0, instanceBuffer, 0, sizeof(Instance));
 					commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialReference.materialIndex], 0, {vertexDescriptorSet, materialDescriptorSets[instance.materialReferenceIndex]});
 					commandEncoder->draw(vertexCount, 1, indexOffset, instanceIndex);
@@ -432,7 +432,7 @@ namespace Trident {
 				materialDescriptorSetLayouts = sequence<ref<DescriptorSetLayout>>(materials.count());
 				materialDescriptorSets = sequence<ref<DescriptorSet>>(materials.count());
 				materialPipelineLayouts = sequence<ref<PipelineLayout>>(materials.count());
-				materialPipelines = sequence<ref<RenderPipeline>>(materials.count());
+				materialPipelines = sequence<ref<GraphicsPipeline>>(materials.count());
 				materialImages = sequence<sequence<ref<Image>>>(materials.count());
 
 				PipelineLayoutDescriptor materialPipelineLayoutDescriptor{};
@@ -454,7 +454,7 @@ namespace Trident {
 				ColorBlendAttachment colorBlendAttachment{};
 				colorBlendAttachment.blend = false;
 
-				RenderPipelineDescriptor materialPipelineDescriptor{};
+				GraphicsPipelineDescriptor materialPipelineDescriptor{};
 				materialPipelineDescriptor.vertexInputBindings = {instanceInputBinding};
 				materialPipelineDescriptor.vertexShaderModule = loadInternalShaderModule(materialVertexShaderModuleDescriptor, "Forward/Forward.vert");
 				materialPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
@@ -515,7 +515,7 @@ namespace Trident {
 					materialPipelineDescriptor.pipelineLayout = materialPipelineLayouts[materialIndex];
 					materialPipelineDescriptor.fragmentShaderModule = loadInternalShaderModule(materialFragmentShaderModuleDescriptor, material.shaderModulePath);
 
-					materialPipelines[materialIndex] = createRenderPipeline(materialPipelineDescriptor);
+					materialPipelines[materialIndex] = createGraphicsPipeline(materialPipelineDescriptor);
 
 					materialImageAssets[materialIndex] = sequence<sequence<ref<ImageAsset>>>(material.descriptorSetLayoutBindings.count());
 					materialImages[materialIndex] = sequence<ref<Image>>(material.descriptorSetLayoutBindings.count());
@@ -800,7 +800,7 @@ namespace Trident {
 
 			sequence<ref<PipelineLayout>> materialPipelineLayouts;
 
-			sequence<ref<RenderPipeline>> materialPipelines;
+			sequence<ref<GraphicsPipeline>> materialPipelines;
 
 			ref<Buffer> vertexBuffer;
 			ref<Buffer2<Instance>> instanceBuffer;

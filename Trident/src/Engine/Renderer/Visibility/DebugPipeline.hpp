@@ -6,7 +6,7 @@
 #include "Engine/Renderer/Visibility/Renderer.hpp"
 
 namespace Trident {
-	/* ref<RenderPipeline> VisibilityRenderer::createDebugPipeline() const {
+	/* ref<GraphicsPipeline> VisibilityRenderer::createDebugPipeline() const {
 		ShaderModuleDescriptor debugVertexShaderModuleDescriptor{};
 		debugVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		debugVertexShaderModuleDescriptor.entryPoint = "main";
@@ -22,7 +22,7 @@ namespace Trident {
 		ColorBlendAttachment swapchainColorBlendAttachment{};
 		swapchainColorBlendAttachment.blend = false;
 
-		RenderPipelineDescriptor debugPipelineDescriptor{};
+		GraphicsPipelineDescriptor debugPipelineDescriptor{};
 		debugPipelineDescriptor.pipelineLayout = debugPipelineLayout;
 		debugPipelineDescriptor.vertexShaderModule = loadInternalShaderModule(debugVertexShaderModuleDescriptor, "Visibility/VisibilityDebug.vert");
 		debugPipelineDescriptor.fragmentShaderModule = loadInternalShaderModule(debugFragmentShaderModuleDescriptor, "Visibility/VisibilityDebug.frag");
@@ -40,6 +40,6 @@ namespace Trident {
 
 		SET_DEBUG_NAME(debugPipelineDescriptor, "Debug");
 
-		return createRenderPipeline(debugPipelineDescriptor);
+		return createGraphicsPipeline(debugPipelineDescriptor);
 	} */
 }

@@ -57,12 +57,20 @@ namespace Trident {
 				return adapter->createFramebuffer(this, descriptor);
 			}
 
+			ref<GraphicsPipeline> createGraphicsPipeline(const GraphicsPipelineDescriptor& descriptor) const {
+				return adapter->createGraphicsPipeline(this, descriptor);
+			}
+
 			ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
 				return adapter->createPipelineLayout(descriptor, this);
 			}
 
 			ref<RenderPass> createRenderPass(const RenderPassDescriptor& descriptor) const {
 				return adapter->createRenderPass(this, descriptor);
+			}
+
+			ref<Semaphore> createSemaphore() const {
+				return adapter->createSemaphore(this);
 			}
 
 			ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) const {

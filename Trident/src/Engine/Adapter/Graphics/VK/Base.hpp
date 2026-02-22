@@ -40,6 +40,7 @@ namespace Trident::VK {
 	class Fence;
 	class Framebuffer;
 	class GraphicsAdapter;
+	class GraphicsPipeline;
 	class Image;
 	class ImageView;
 	class Instance;
@@ -49,7 +50,6 @@ namespace Trident::VK {
 	class PipelineLayout;
 	class Queue;
 	class RenderPass;
-	class RenderPipeline;
 	class Sampler;
 	class Semaphore;
 	class ShaderModule;

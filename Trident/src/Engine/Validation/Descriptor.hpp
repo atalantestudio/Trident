@@ -22,7 +22,7 @@ namespace Trident {
 		void DescriptorGuard(const InstanceDescriptor& descriptor);
 		void DescriptorGuard(const PipelineLayoutDescriptor& descriptor);
 		void DescriptorGuard(const RenderPassDescriptor& descriptor);
-		void DescriptorGuard(const RenderPipelineDescriptor& descriptor);
+		void DescriptorGuard(const GraphicsPipelineDescriptor& descriptor);
 		void DescriptorGuard(const SamplerDescriptor& descriptor);
 		void DescriptorGuard(const ShaderModuleDescriptor& descriptor);
 		void DescriptorGuard(const SubpassDescriptor& descriptor);

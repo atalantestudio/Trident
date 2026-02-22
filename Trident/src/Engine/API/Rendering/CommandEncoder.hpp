@@ -12,10 +12,10 @@
 #include "Engine/API/Rendering/Descriptor/BeginRenderPassDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/CommandBufferDescriptor.hpp"
 #include "Engine/API/Rendering/DescriptorSet.hpp"
+#include "Engine/API/Rendering/GraphicsPipeline.hpp"
 #include "Engine/API/Rendering/Image.hpp"
 #include "Engine/API/Rendering/ImageLayout.hpp"
 #include "Engine/API/Rendering/PipelineStage.hpp"
-#include "Engine/API/Rendering/RenderPipeline.hpp"
 
 namespace Trident {
 	class CommandEncoder {
@@ -26,11 +26,11 @@ namespace Trident {
 
 			virtual void beginRenderPass(const BeginRenderPassDescriptor& descriptor) = 0;
 
-			// TODO: Either merge bindComputePipeline and bindRenderPipeline,
+			// TODO: Either merge bindComputePipeline and bindGraphicsPipeline,
 			// or implement RenderPassCommandEncoder and ComputePassCommandEncoder.
 			virtual void bindComputePipeline(ref<ComputePipeline> computePipeline) = 0;
 
-			virtual void bindRenderPipeline(ref<RenderPipeline> renderPipeline) = 0;
+			virtual void bindGraphicsPipeline(ref<GraphicsPipeline> graphicsPipeline) = 0;
 
 			/// Binds descriptor sets to the command buffer.
 			/// 

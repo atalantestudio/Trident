@@ -28,13 +28,13 @@ namespace Trident {
 
 			ref<Trident::Framebuffer> createFramebuffer(const FramebufferDescriptor& descriptor) const final override;
 
+			ref<Trident::GraphicsPipeline> createGraphicsPipeline(const GraphicsPipelineDescriptor& descriptor) const final override;
+
 			ref<Trident::Image> createImage(const ImageDescriptor& descriptor) const final override;
 
 			ref<Trident::PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const final override;
 
 			ref<Trident::RenderPass> createRenderPass(const RenderPassDescriptor& descriptor) const final override;
-
-			ref<Trident::RenderPipeline> createRenderPipeline(const RenderPipelineDescriptor& descriptor) const final override;
 
 			ref<Trident::Sampler> createSampler(const SamplerDescriptor& descriptor) const final override;
 

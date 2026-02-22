@@ -7,17 +7,17 @@
 #include "Engine/Adapter/Graphics/GL/CompareOperation.hpp"
 #include "Engine/Adapter/Graphics/GL/CullMode.hpp"
 #include "Engine/Adapter/Graphics/GL/FrontFace.hpp"
+#include "Engine/Adapter/Graphics/GL/GraphicsPipeline.hpp"
 #include "Engine/Adapter/Graphics/GL/PolygonMode.hpp"
 #include "Engine/Adapter/Graphics/GL/PrimitiveTopology.hpp"
 #include "Engine/Adapter/Graphics/GL/RenderPass.hpp"
-#include "Engine/Adapter/Graphics/GL/RenderPipeline.hpp"
 #include "Engine/Adapter/Graphics/GL/ShaderModule.hpp"
 #include "Engine/Adapter/Graphics/GL/VertexInputAttributeType.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	GL::RenderPipeline::RenderPipeline(const RenderPipelineDescriptor& descriptor) :
-		Trident::RenderPipeline(descriptor),
+	GL::GraphicsPipeline::GraphicsPipeline(const GraphicsPipelineDescriptor& descriptor) :
+		Trident::GraphicsPipeline(descriptor),
 		program(glCreateProgram()),
 		primitiveTopology(getPrimitiveTopology(descriptor.primitiveTopology)),
 		frontFace(getFrontFace(descriptor.frontFace)),
@@ -178,7 +178,7 @@ namespace Trident {
 		#endif
 	}
 
-	GL::RenderPipeline::~RenderPipeline() {
+	GL::GraphicsPipeline::~GraphicsPipeline() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		glDeleteProgram(program);

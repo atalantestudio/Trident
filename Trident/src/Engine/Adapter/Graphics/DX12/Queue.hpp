@@ -29,6 +29,6 @@ namespace Trident {
 		void submit(const Trident::Queue* queue, view<ref<Trident::CommandBuffer>> commandBuffers);
 		void submit(const Trident::Queue* queue, view<ref<Trident::CommandBuffer>> commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<Trident::Fence> fence);
 
-		void waitIdleQueue(const Trident::Queue* queue);
+		void waitIdle(const Trident::Queue* queue);
 	}
 }

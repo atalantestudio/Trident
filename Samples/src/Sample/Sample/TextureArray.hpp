@@ -48,7 +48,7 @@ namespace Trident {
 				updateTextureArrayImageDescriptorSet();
 
 				setupPipelineLayout();
-				setupRenderPipeline();
+				setupGraphicsPipeline();
 
 				createVertexAndInstanceBuffers();
 			}
@@ -65,7 +65,7 @@ namespace Trident {
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
-				commandEncoder->bindRenderPipeline(renderPipeline);
+				commandEncoder->bindGraphicsPipeline(graphicsPipeline);
 				commandEncoder->bindDescriptorSets(pipelineLayout, 0, {textureArrayDescriptorSet});
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(svec2<float32>));
 				commandEncoder->bindVertexBuffer(1, instanceBuffer, 0, sizeof(Instance));
@@ -272,7 +272,7 @@ namespace Trident {
 				pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 			}
 
-			void setupRenderPipeline() {
+			void setupGraphicsPipeline() {
 				VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 				vertexInputBinding.registerAttribute<svec2<float32>>();
 
@@ -298,26 +298,26 @@ namespace Trident {
 				ColorBlendAttachment colorBlendAttachment{};
 				colorBlendAttachment.blend = false;
 
-				RenderPipelineDescriptor renderPipelineDescriptor{};
-				renderPipelineDescriptor.pipelineLayout = pipelineLayout;
-				renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
-				renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-				renderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-				renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-				renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-				renderPipelineDescriptor.cullMode = CullMode::BACK;
-				renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-				renderPipelineDescriptor.lineWidth = 1.0f;
-				renderPipelineDescriptor.minSampleShading = 0.0f;
-				renderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-				renderPipelineDescriptor.depthStencilState.depthTest = false;
-				renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-				renderPipelineDescriptor.renderPass = renderPass;
-				renderPipelineDescriptor.subpassIndex = 0;
+				GraphicsPipelineDescriptor graphicsPipelineDescriptor{};
+				graphicsPipelineDescriptor.pipelineLayout = pipelineLayout;
+				graphicsPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
+				graphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+				graphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+				graphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+				graphicsPipelineDescriptor.polygonMode = PolygonMode::FILL;
+				graphicsPipelineDescriptor.cullMode = CullMode::BACK;
+				graphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+				graphicsPipelineDescriptor.lineWidth = 1.0f;
+				graphicsPipelineDescriptor.minSampleShading = 0.0f;
+				graphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+				graphicsPipelineDescriptor.depthStencilState.depthTest = false;
+				graphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+				graphicsPipelineDescriptor.renderPass = renderPass;
+				graphicsPipelineDescriptor.subpassIndex = 0;
 
-				SET_DEBUG_NAME(renderPipelineDescriptor, "Render pipeline");
+				SET_DEBUG_NAME(graphicsPipelineDescriptor, "Render pipeline");
 
-				renderPipeline = createRenderPipeline(renderPipelineDescriptor);
+				graphicsPipeline = createGraphicsPipeline(graphicsPipelineDescriptor);
 			}
 
 			void createVertexAndInstanceBuffers() {
@@ -399,7 +399,7 @@ namespace Trident {
 			ref<DescriptorSetLayout> textureArrayDescriptorSetLayout;
 			ref<DescriptorSet> textureArrayDescriptorSet;
 			ref<PipelineLayout> pipelineLayout;
-			ref<RenderPipeline> renderPipeline;
+			ref<GraphicsPipeline> graphicsPipeline;
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> instanceBuffer;
 	};

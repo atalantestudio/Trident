@@ -113,10 +113,10 @@ namespace Trident {
 		return createRenderPassImplementation(device, descriptor);
 	}
 
-	ref<RenderPipeline> GraphicsAdapter::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
+	ref<GraphicsPipeline> GraphicsAdapter::createGraphicsPipeline(const Device* device, const GraphicsPipelineDescriptor& descriptor) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
-		return createRenderPipelineImplementation(descriptor);
+		return createGraphicsPipelineImplementation(device, descriptor);
 	}
 
 	ref<Sampler> GraphicsAdapter::createSampler(const SamplerDescriptor& descriptor) const {
@@ -125,8 +125,8 @@ namespace Trident {
 		return createSamplerImplementation(descriptor);
 	}
 
-	ref<Semaphore> GraphicsAdapter::createSemaphore() const {
-		return createSemaphoreImplementation();
+	ref<Semaphore> GraphicsAdapter::createSemaphore(const Device* device) const {
+		return createSemaphoreImplementation(device);
 	}
 
 	ref<ShaderModule> GraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset, const Device* device) const {
@@ -173,12 +173,20 @@ namespace Trident {
 		destroyFramebufferImplementation(device, framebuffer);
 	}
 
+	void GraphicsAdapter::destroyGraphicsPipeline(const Device* device, const GraphicsPipeline* graphicsPipeline) const {
+		destroyGraphicsPipelineImplementation(device, graphicsPipeline);
+	}
+
 	void GraphicsAdapter::destroyInstance(const Instance* instance) const {
 		destroyInstanceImplementation(instance);
 	}
 
 	void GraphicsAdapter::destroyQueue(const Queue* queue) const {
 		destroyQueueImplementation(queue);
+	}
+
+	void GraphicsAdapter::destroySemaphore(const Device* device, const Semaphore* semaphore) const {
+		destroySemaphoreImplementation(device, semaphore);
 	}
 
 	void GraphicsAdapter::destroySurface(const Instance* instance, const Surface* surface) const {
@@ -198,9 +206,11 @@ namespace Trident {
 	}
 
 	void* GraphicsAdapter::mapBuffer(const Device* device, const Buffer* buffer, uint64 offset, uint64 size) const {
-		// TODO: Validate arguments.
-
 		return mapBufferImplementation(device, buffer, offset, size);
+	}
+
+	PresentStatus GraphicsAdapter::present(const Queue* queue, view<ref<Swapchain>> swapchains, view<uint32> presentableImageIndices, ref<Semaphore> waitSemaphore) const {
+		return presentImplementation(queue, swapchains, presentableImageIndices, waitSemaphore);
 	}
 
 	void GraphicsAdapter::resetFence(const Device* device, const Fence* fence) const {
@@ -209,6 +219,14 @@ namespace Trident {
 
 	ref<PhysicalDevice> GraphicsAdapter::selectPhysicalDevice(const Instance* instance, bool preferIntegratedGpu) const {
 		return selectPhysicalDeviceImplementation(instance, preferIntegratedGpu);
+	}
+
+	void GraphicsAdapter::submit(const Queue* queue, view<ref<CommandBuffer>> commandBuffers) const {
+		submitImplementation(queue, commandBuffers);
+	}
+
+	void GraphicsAdapter::submit(const Queue* queue, view<ref<CommandBuffer>> commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<Fence> fence) const {
+		submit2Implementation(queue, commandBuffers, waitSemaphore, signalSemaphore, fence);
 	}
 
 	void GraphicsAdapter::unmapBuffer(const Device* device, const Buffer* buffer) const {
@@ -224,6 +242,10 @@ namespace Trident {
 	}
 
 	void GraphicsAdapter::waitIdle(const Device* device) const {
-		waitIdleImplementation(device);
+		waitIdleDeviceImplementation(device);
+	}
+
+	void GraphicsAdapter::waitIdle(const Queue* queue) const {
+		waitIdleQueueImplementation(queue);
 	}
 }

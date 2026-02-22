@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/RenderPipeline.hpp"
+#include "Engine/API/Rendering/GraphicsPipeline.hpp"
 
 namespace Trident {
-	class GL::RenderPipeline final : public Trident::RenderPipeline {
+	class GL::GraphicsPipeline final : public Trident::GraphicsPipeline {
 		public:
 			struct DrawBuffer {
 				GLboolean blend;
@@ -15,9 +15,9 @@ namespace Trident {
 			};
 
 		public:
-			explicit RenderPipeline(const RenderPipelineDescriptor& descriptor);
+			explicit GraphicsPipeline(const GraphicsPipelineDescriptor& descriptor);
 
-			~RenderPipeline() final override;
+			~GraphicsPipeline() final override;
 
 		public:
 			const GLuint program;

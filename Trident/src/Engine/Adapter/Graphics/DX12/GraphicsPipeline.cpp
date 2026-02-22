@@ -7,33 +7,38 @@
 #include "Engine/Adapter/Graphics/DX12/CullMode.hpp"
 #include "Engine/Adapter/Graphics/DX12/FillMode.hpp"
 #include "Engine/Adapter/Graphics/DX12/Format.hpp"
+#include "Engine/Adapter/Graphics/DX12/GraphicsPipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/PipelineLayout.hpp"
 #include "Engine/Adapter/Graphics/DX12/PrimitiveTopology.hpp"
 #include "Engine/Adapter/Graphics/DX12/PrimitiveTopologyType.hpp"
-#include "Engine/Adapter/Graphics/DX12/RenderPipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/ShaderModule.hpp"
 #include "Engine/Adapter/Graphics/DX12/VertexInputAttributeType.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
+#include "Engine/API/Rendering/Descriptor/GraphicsPipelineDescriptor.hpp"
 
 namespace Trident {
-	DX12::RenderPipeline::RenderPipeline(const RenderPipelineDescriptor& descriptor, const DX12::Device& device) :
-		Trident::RenderPipeline(descriptor),
-		pipelineLayout(std::static_pointer_cast<DX12::PipelineLayout>(descriptor.pipelineLayout)),
-		primitiveTopology(getPrimitiveTopology(descriptor.primitiveTopology))
-	{
+	DX12::GraphicsPipeline::GraphicsPipeline(const Trident::Device* device) :
+		Trident::GraphicsPipeline(device)
+	{}
+
+	ref<Trident::GraphicsPipeline> DX12::createGraphicsPipeline(const Trident::Device* device, const GraphicsPipelineDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		HRESULT result;
-
+		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
 		const ref<Subpass> subpass = descriptor.renderPass->getSubpass(descriptor.subpassIndex);
 		const ref<DX12::ShaderModule> vertexShaderModule = std::static_pointer_cast<DX12::ShaderModule>(descriptor.vertexShaderModule);
 		const ref<DX12::ShaderModule> fragmentShaderModule = std::static_pointer_cast<DX12::ShaderModule>(descriptor.fragmentShaderModule);
+		HRESULT result;
+
+		ref<DX12::GraphicsPipeline> graphicsPipeline = createRef<DX12::GraphicsPipeline>(device);
+		graphicsPipeline->pipelineLayout = std::static_pointer_cast<DX12::PipelineLayout>(descriptor.pipelineLayout);
+		graphicsPipeline->primitiveTopology = getPrimitiveTopology(descriptor.primitiveTopology);
 
 		ADAPTER_ASSERT(subpass->getColorAttachmentReferenceCount() <= 8, "Too many color attachment references.");
 		ADAPTER_ASSERT(descriptor.colorBlendState.attachments.count() <= 8, "Too many color blend attachments.");
 
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDescriptor{};
-		graphicsPipelineStateDescriptor.pRootSignature = pipelineLayout->rootSignature;
+		graphicsPipelineStateDescriptor.pRootSignature = graphicsPipeline->pipelineLayout->rootSignature;
 		graphicsPipelineStateDescriptor.VS.pShaderBytecode = vertexShaderModule->blob->GetBufferPointer();
 		graphicsPipelineStateDescriptor.VS.BytecodeLength = vertexShaderModule->blob->GetBufferSize();
 		graphicsPipelineStateDescriptor.PS.pShaderBytecode = fragmentShaderModule->blob->GetBufferPointer();
@@ -179,7 +184,7 @@ namespace Trident {
 		graphicsPipelineStateDescriptor.CachedPSO.CachedBlobSizeInBytes = 0;
 		graphicsPipelineStateDescriptor.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
-		result = device.device->CreateGraphicsPipelineState(&graphicsPipelineStateDescriptor, IID_PPV_ARGS(&pipelineState));
+		result = _device->device->CreateGraphicsPipelineState(&graphicsPipelineStateDescriptor, IID_PPV_ARGS(&graphicsPipeline->pipelineState));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create graphics pipeline state.");
 
@@ -187,16 +192,20 @@ namespace Trident {
 			if (descriptor.name.count() > 0) {
 				const LPWSTR name = ConvertUTF8ToUTF16(&descriptor.name[0]);
 
-				result = pipelineState->SetName(name);
+				result = graphicsPipeline->pipelineState->SetName(name);
 
 				ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set pipeline state name.");
 
 				free(name);
 			}
 		#endif
+
+		return graphicsPipeline;
 	}
 
-	DX12::RenderPipeline::~RenderPipeline() {
-		pipelineState->Release();
+	void DX12::destroyGraphicsPipeline(const Trident::Device* device, const Trident::GraphicsPipeline* graphicsPipeline) {
+		const DX12::GraphicsPipeline* _graphicsPipeline = static_cast<const DX12::GraphicsPipeline*>(graphicsPipeline);
+
+		_graphicsPipeline->pipelineState->Release();
 	}
 }
