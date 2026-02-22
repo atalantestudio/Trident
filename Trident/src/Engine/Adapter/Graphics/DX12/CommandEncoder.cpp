@@ -22,41 +22,9 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace Trident {
-	DX12::CommandEncoder::CommandEncoder(const Trident::Device* device, const Trident::CommandPool* commandPool, const CommandBufferDescriptor& descriptor) :
-		Trident::CommandEncoder(device),
-		usage(descriptor.usage)
-	{
-		DEBUG_DESCRIPTOR_GUARD(descriptor);
-
-		ADAPTER_ASSERT(descriptor.usage != CommandBufferUsage::SIMULTANEOUS_USE, "SIMULTANEOUS_USE is not supported on command lists.");
-
-		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
-		const DX12::CommandPool* _commandPool = static_cast<const DX12::CommandPool*>(commandPool);
-		HRESULT result;
-
-		commandAllocator = _commandPool->commandAllocator;
-
-		result = _device->device->CreateCommandList(0, _commandPool->commandListType, commandAllocator, nullptr, IID_PPV_ARGS(&commandList));
-
-		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command list.");
-
-		#if defined(BUILD_MODE_DEBUG)
-			if (descriptor.name.count() > 0) {
-				const LPWSTR name = ConvertUTF8ToUTF16(&descriptor.name[0]);
-
-				result = commandList->SetName(name);
-
-				ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set command list name.");
-
-				free(name);
-			}
-		#endif
-
-		// Only 1 open command encoder at a time.
-		if (descriptor.usage == CommandBufferUsage::AUTO) {
-			end();
-		}
-	}
+	DX12::CommandEncoder::CommandEncoder(const Trident::Device* device, const Trident::CommandPool* commandPool) :
+		Trident::CommandEncoder(device, commandPool)
+	{}
 
 	void DX12::CommandEncoder::begin() const {}
 
@@ -807,10 +775,40 @@ namespace Trident {
 	}
 
 	ref<Trident::CommandEncoder> DX12::createCommandEncoder(const Trident::Device* device, const Trident::CommandPool* commandPool, const CommandBufferDescriptor& descriptor) {
-		// TODO
-		BREAKPOINT();
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		return createRef<DX12::CommandEncoder>(device, commandPool, descriptor);
+		DEBUG_DESCRIPTOR_GUARD(descriptor);
+
+		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
+		const DX12::CommandPool* _commandPool = static_cast<const DX12::CommandPool*>(commandPool);
+		HRESULT result;
+
+		ref<DX12::CommandEncoder> commandEncoder = createRef<DX12::CommandEncoder>(device, commandPool);
+		commandEncoder->commandAllocator = _commandPool->commandAllocator;
+		commandEncoder->usage = descriptor.usage;
+
+		result = _device->device->CreateCommandList(0, _commandPool->commandListType, _commandPool->commandAllocator, nullptr, IID_PPV_ARGS(&commandEncoder->commandList));
+
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command list.");
+
+		#if defined(BUILD_MODE_DEBUG)
+			if (descriptor.name.count() > 0) {
+				const LPWSTR name = ConvertUTF8ToUTF16(&descriptor.name[0]);
+
+				result = commandEncoder->commandList->SetName(name);
+
+				ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set command list name.");
+
+				free(name);
+			}
+		#endif
+
+		// Only 1 open command encoder at a time.
+		if (descriptor.usage == CommandBufferUsage::AUTO) {
+			commandEncoder->end();
+		}
+
+		return commandEncoder;
 	}
 
 	void DX12::destroyCommandEncoder(const Trident::Device* device, const Trident::CommandPool* commandPool, const Trident::CommandEncoder* commandEncoder) {

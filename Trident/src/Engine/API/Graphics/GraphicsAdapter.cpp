@@ -52,6 +52,10 @@ namespace Trident {
 		// return createBufferImplementation(descriptor, 1, device);
 	}
 
+	ref<CommandEncoder> GraphicsAdapter::createCommandEncoder(const Device* device, const CommandPool* commandPool, const CommandBufferDescriptor& descriptor) const {
+		return createCommandEncoderImplementation(device, commandPool, descriptor);
+	}
+
 	ref<CommandPool> GraphicsAdapter::createCommandPool(const Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability) const {
 		return createCommandPoolImplementation(device, queueFamilyIndex, queueFamilyCapability);
 	}
@@ -147,6 +151,10 @@ namespace Trident {
 
 	void GraphicsAdapter::destroyBuffer(const Device* device, const Buffer* buffer) const {
 		destroyBufferImplementation(device, buffer);
+	}
+
+	void GraphicsAdapter::destroyCommandEncoder(const Device* device, const CommandPool* commandPool, const CommandEncoder* commandEncoder) const {
+		destroyCommandEncoderImplementation(device, commandPool, commandEncoder);
 	}
 
 	void GraphicsAdapter::destroyCommandPool(const Device* device, const CommandPool* commandPool) const {

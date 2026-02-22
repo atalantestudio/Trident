@@ -114,10 +114,11 @@ namespace Trident {
 			virtual void bindIndexBuffer(ref<Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) = 0;
 
 		protected:
-			explicit CommandEncoder(const Device* device);
+			explicit CommandEncoder(const Device* device, const CommandPool* commandPool);
 
 		public:
 			const Device* device;
+			const CommandPool* commandPool;
 	};
 
 	template void CommandEncoder::bindIndexBuffer<uint16>(ref<Buffer> indexBuffer, uint64 offset);

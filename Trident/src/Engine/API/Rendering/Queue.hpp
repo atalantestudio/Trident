@@ -56,10 +56,10 @@ namespace Trident {
 			void waitIdle() const;
 
 		protected:
-			explicit Queue(const Device* device);
+			explicit Queue(const Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability);
 
 		public:
 			const Device* device;
-			const CommandPool* commandPool;
+			ref<CommandPool> commandPool;
 	};
 }

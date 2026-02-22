@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/DX12/Buffer.hpp"
+#include "Engine/Adapter/Graphics/DX12/CommandEncoder.hpp"
 #include "Engine/Adapter/Graphics/DX12/ComputePipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/Fence.hpp"
 #include "Engine/Adapter/Graphics/DX12/Framebuffer.hpp"
@@ -38,6 +39,7 @@ namespace Trident {
 		adapter->acquireNextImageImplementation = DX12::acquireNextImage;
 		adapter->allocateDescriptorSetsImplementation = DX12::allocateDescriptorSets;
 		adapter->createBufferImplementation = DX12::createBuffer;
+		adapter->createCommandEncoderImplementation = DX12::createCommandEncoder;
 		adapter->createCommandPoolImplementation = DX12::createCommandPool;
 		adapter->createComputePipelineImplementation = DX12::createComputePipeline;
 		adapter->createDescriptorSetLayoutImplementation = DX12::createDescriptorSetLayout;
@@ -53,6 +55,7 @@ namespace Trident {
 		adapter->createSurfaceImplementation = DX12::createSurface;
 		adapter->createSwapchainImplementation = DX12::createSwapchain;
 		adapter->destroyBufferImplementation = DX12::destroyBuffer;
+		adapter->destroyCommandEncoderImplementation = DX12::destroyCommandEncoder;
 		adapter->destroyCommandPoolImplementation = DX12::destroyCommandPool;
 		adapter->destroyDeviceImplementation = DX12::destroyDevice;
 		adapter->destroyFenceImplementation = DX12::destroyFence;

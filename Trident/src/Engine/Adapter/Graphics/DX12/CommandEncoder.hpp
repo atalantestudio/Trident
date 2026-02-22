@@ -10,7 +10,7 @@
 namespace Trident {
 	class DX12::CommandEncoder final : public Trident::CommandEncoder {
 		public:
-			explicit CommandEncoder(const Trident::Device* device, const Trident::CommandPool* commandPool, const CommandBufferDescriptor& descriptor);
+			explicit CommandEncoder(const Trident::Device* device, const Trident::CommandPool* commandPool);
 
 			void begin() const final override;
 

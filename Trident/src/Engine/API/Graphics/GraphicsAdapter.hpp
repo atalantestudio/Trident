@@ -17,6 +17,7 @@ namespace Trident {
 	typedef sequence<ref<DescriptorSet>> (*AllocateDescriptorSetsImplementation)(const Device* device, view<ref<DescriptorSetLayout>> descriptorSetLayouts);
 	typedef void (*BindAdapterImplementation)(GraphicsAdapter* adapter);
 	typedef ref<Buffer> (*CreateBufferImplementation)(const Device* device, const BufferDescriptor& descriptor, uint32 stride);
+	typedef ref<CommandEncoder> (*CreateCommandEncoderImplementation)(const Device* device, const CommandPool* commandPool, const CommandBufferDescriptor& descriptor);
 	typedef ref<CommandPool> (*CreateCommandPoolImplementation)(const Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability);
 	typedef ref<ComputePipeline> (*CreateComputePipelineImplementation)(const ComputePipelineDescriptor& descriptor, const Device* device);
 	typedef ref<DescriptorSetLayout> (*CreateDescriptorSetLayoutImplementation)(const sequence<DescriptorSetLayoutBinding>& bindings, const Device* device);
@@ -39,6 +40,7 @@ namespace Trident {
 	typedef ref<Surface> (*CreateSurfaceImplementation)(const Instance* instance, const Window* window);
 	typedef ref<Swapchain> (*CreateSwapchainImplementation)(const Device* device, const SwapchainDescriptor& descriptor);
 	typedef void (*DestroyBufferImplementation)(const Device* device, const Buffer* buffer);
+	typedef void (*DestroyCommandEncoderImplementation)(const Device* device, const CommandPool* commandPool, const CommandEncoder* commandEncoder);
 	typedef void (*DestroyCommandPoolImplementation)(const Device* device, const CommandPool* commandPool);
 	typedef void (*DestroyDeviceImplementation)(const Device* device);
 	typedef void (*DestroyFenceImplementation)(const Device* device, const Fence* fence);
@@ -81,6 +83,8 @@ namespace Trident {
 				return std::static_pointer_cast<Buffer2<ElementType>>(buffer);
 			}
 
+			ref<CommandEncoder> createCommandEncoder(const Device* device, const CommandPool* commandPool, const CommandBufferDescriptor& descriptor) const;
+
 			ref<CommandPool> createCommandPool(const Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability) const;
 
 			ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor, const Device* device) const;
@@ -115,6 +119,8 @@ namespace Trident {
 			ref<Swapchain> createSwapchain(const Device* device, const SwapchainDescriptor& descriptor) const;
 
 			void destroyBuffer(const Device* device, const Buffer* buffer) const;
+
+			void destroyCommandEncoder(const Device* device, const CommandPool* commandPool, const CommandEncoder* commandEncoder) const;
 
 			void destroyCommandPool(const Device* device, const CommandPool* commandPool) const;
 
@@ -155,6 +161,7 @@ namespace Trident {
 			AcquireNextImageImplementation acquireNextImageImplementation;
 			AllocateDescriptorSetsImplementation allocateDescriptorSetsImplementation;
 			CreateBufferImplementation createBufferImplementation;
+			CreateCommandEncoderImplementation createCommandEncoderImplementation;
 			CreateCommandPoolImplementation createCommandPoolImplementation;
 			CreateComputePipelineImplementation createComputePipelineImplementation;
 			CreateDescriptorSetLayoutImplementation createDescriptorSetLayoutImplementation;
@@ -174,6 +181,7 @@ namespace Trident {
 			CreateSurfaceImplementation createSurfaceImplementation;
 			CreateSwapchainImplementation createSwapchainImplementation;
 			DestroyBufferImplementation destroyBufferImplementation;
+			DestroyCommandEncoderImplementation destroyCommandEncoderImplementation;
 			DestroyCommandPoolImplementation destroyCommandPoolImplementation;
 			DestroyDeviceImplementation destroyDeviceImplementation;
 			DestroyFenceImplementation destroyFenceImplementation;

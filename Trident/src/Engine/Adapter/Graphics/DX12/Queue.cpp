@@ -11,21 +11,19 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	DX12::Queue::Queue(const DX12::Device* device, D3D12_COMMAND_LIST_TYPE commandListType) :
-		Trident::Queue(device),
-		commandPool(device, commandListType)
+	DX12::Queue::Queue(const DX12::Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability) :
+		Trident::Queue(device, queueFamilyIndex, queueFamilyCapability)
 	{}
 
 	ref<Trident::Queue> DX12::createQueue(const Trident::Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
-		const D3D12_COMMAND_LIST_TYPE commandListType = getCommandListType(queueFamilyCapability);
-		ref<DX12::Queue> queue = createRef<DX12::Queue>(_device, commandListType);
+		ref<DX12::Queue> queue = createRef<DX12::Queue>(_device, queueFamilyIndex, queueFamilyCapability);
 		HRESULT result;
 
 		D3D12_COMMAND_QUEUE_DESC commandQueueDescriptor{};
-		commandQueueDescriptor.Type = commandListType;
+		commandQueueDescriptor.Type = getCommandListType(queueFamilyCapability);
 		commandQueueDescriptor.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
 		commandQueueDescriptor.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 		commandQueueDescriptor.NodeMask = 0;

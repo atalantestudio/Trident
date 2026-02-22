@@ -32,18 +32,20 @@ namespace Trident {
 	}
 
 	void* Buffer::map(uint64 offset, uint64 size) const {
-		return device->mapBuffer(this, offset, size);
+		return device->adapter->mapBuffer(device, this, offset, size);
 	}
 
 	void Buffer::unmap() const {
-		device->unmapBuffer(this);
+		device->adapter->unmapBuffer(device, this);
 	}
 
-	CommandEncoder::~CommandEncoder() {
-		// TODO
-		BREAKPOINT();
+	CommandEncoder::CommandEncoder(const Device* device, const CommandPool* commandPool) :
+		device(device),
+		commandPool(commandPool)
+	{}
 
-		// device->adapter->destroyCommandEncoder(device, commandPool, this);
+	CommandEncoder::~CommandEncoder() {
+		device->adapter->destroyCommandEncoder(device, commandPool, this);
 	}
 
 	CommandPool::CommandPool(const Device* device) :
@@ -66,8 +68,9 @@ namespace Trident {
 		device->adapter->destroyFramebuffer(device, this);
 	}
 
-	Queue::Queue(const Device* device) :
-		device(device)
+	Queue::Queue(const Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability) :
+		device(device),
+		commandPool(device->adapter->createCommandPool(device, queueFamilyIndex, queueFamilyCapability))
 	{}
 
 	Queue::~Queue() {
@@ -75,10 +78,7 @@ namespace Trident {
 	}
 
 	ref<CommandEncoder> Queue::createCommandEncoder(const CommandBufferDescriptor& descriptor) const {
-		// TODO
-		BREAKPOINT();
-
-		return nullptr;
+		return device->adapter->createCommandEncoder(device, commandPool.get(), descriptor);
 	}
 
 	void Queue::submit(view<ref<CommandBuffer>> commandBuffers) const {

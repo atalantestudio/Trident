@@ -11,11 +11,10 @@
 namespace Trident {
 	class DX12::Queue final : public Trident::Queue {
 		public:
-			explicit Queue(const DX12::Device* device, D3D12_COMMAND_LIST_TYPE commandListType);
+			explicit Queue(const DX12::Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability);
 
 		public:
 			ID3D12CommandQueue* commandQueue;
-			DX12::CommandPool commandPool;
 			ref<Trident::Fence> idleFence;
 			HANDLE completionEvent;
 	};

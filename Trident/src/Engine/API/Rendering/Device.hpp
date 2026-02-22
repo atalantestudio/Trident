@@ -90,16 +90,8 @@ namespace Trident {
 				return adapter->getQueue(this, queueFamilyCapability);
 			}
 
-			void* mapBuffer(const Buffer* buffer, uint64 offset, uint64 size) const {
-				return adapter->mapBuffer(this, buffer, offset, size);
-			}
-
 			void resetFence(ref<Fence> fence) const {
 				adapter->resetFence(this, fence.get());
-			}
-
-			void unmapBuffer(const Buffer* buffer) const {
-				return adapter->unmapBuffer(this, buffer);
 			}
 
 			void updateDescriptorSets(view<WriteDescriptorSet> writeDescriptorSets) const {
