@@ -49,8 +49,10 @@ namespace Trident {
 
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
 		const ref<DX12::Surface> surface = std::static_pointer_cast<DX12::Surface>(descriptor.surface);
-		DX12::Swapchain* _swapchain = static_cast<DX12::Swapchain*>(swapchain);
 		HRESULT result;
+
+		DX12::Swapchain* _swapchain = static_cast<DX12::Swapchain*>(swapchain);
+		_swapchain->syncInterval = static_cast<UINT>(descriptor.verticalSync);
 
 		swapchain->imageCount = descriptor.imageCount;
 		swapchain->extent = descriptor.extent;

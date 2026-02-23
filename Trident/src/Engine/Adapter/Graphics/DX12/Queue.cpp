@@ -66,8 +66,9 @@ namespace Trident {
 		HRESULT result;
 
 		for (const ref<Trident::Swapchain> swapchain : swapchains) {
-			// TODO: Set correct swap interval.
-			result = std::static_pointer_cast<DX12::Swapchain>(swapchain)->swapChain->Present(1, 0);
+			const ref<DX12::Swapchain> _swapchain = std::static_pointer_cast<DX12::Swapchain>(swapchain);
+
+			result = _swapchain->swapChain->Present(_swapchain->syncInterval, 0);
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to present.");
 		}

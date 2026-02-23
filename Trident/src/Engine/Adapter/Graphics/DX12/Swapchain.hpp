@@ -15,6 +15,7 @@ namespace Trident {
 
 		public:
 			IDXGISwapChain3* swapChain;
+			UINT syncInterval;
 
 		private:
 			const DX12::Surface* surface;
