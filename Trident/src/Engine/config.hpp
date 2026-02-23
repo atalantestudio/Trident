@@ -77,4 +77,10 @@ namespace Trident {
 			#error "SPIR-V shaders cannot be used below OpenGL 4.6."
 		#endif
 	#endif
+
+	#if defined(BUILD_MODE_DEBUG)
+		#if defined(ENABLE_DX12_ADAPTER)
+			#define DEBUG_DX12_REPORT_LIVE_OBJECTS
+		#endif
+	#endif
 }

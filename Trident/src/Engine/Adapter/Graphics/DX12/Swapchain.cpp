@@ -99,6 +99,7 @@ namespace Trident {
 
 		swapchain->recreate(descriptor);
 
+		// TODO: Move to Surface.
 		{
 			PROFILE_SCOPE("MakeWindowAssociation");
 

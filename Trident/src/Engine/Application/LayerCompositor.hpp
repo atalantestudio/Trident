@@ -89,26 +89,6 @@ namespace Trident {
 				}
 			}
 
-			~LayerCompositor() {
-				uint32 frameInFlightIndex = 0;
-
-				while (frameInFlightIndex < MAX_FRAMES_IN_FLIGHT) {
-					finishedExecutionSemaphores[frameInFlightIndex].~shared_ptr();
-					acquiredNextImageSemaphores[frameInFlightIndex].~shared_ptr();
-					inFlightFences[frameInFlightIndex].~shared_ptr();
-					commandEncoders[frameInFlightIndex].~shared_ptr();
-
-					frameInFlightIndex += 1;
-				}
-
-				commandEncoders = sequence<ref<CommandEncoder>>();
-				inFlightFences = sequence<ref<Fence>>();
-				acquiredNextImageSemaphores = sequence<ref<Semaphore>>();
-				finishedExecutionSemaphores = sequence<ref<Semaphore>>();
-
-				swapchain.~shared_ptr();
-			}
-
 			PresentStatus render(uint32 frameInFlightIndex, float64 remainingFrameTime) {
 				PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
@@ -158,24 +138,29 @@ namespace Trident {
 		public:
 			const GraphicsAdapter* adapter;
 
+		private:
+			const Window* window;
+
+		public:
 			ref<Instance> instance;
 			ref<Surface> surface;
 			ref<PhysicalDevice> physicalDevice;
 			ref<Device> device;
 			ref<Swapchain> swapchain;
 
-			uint32 swapchainImageIndex = 0;
-
-			std::vector<ref<Layer>> layers;
-
 		private:
-			const Window* window;
-
-			bool verticalSync;
-
 			sequence<ref<CommandEncoder>> commandEncoders;
 			sequence<ref<Semaphore>> acquiredNextImageSemaphores;
 			sequence<ref<Semaphore>> finishedExecutionSemaphores;
 			sequence<ref<Fence>> inFlightFences;
+
+		public:
+			uint32 swapchainImageIndex = 0;
+
+		private:
+			bool verticalSync;
+
+		public:
+			std::vector<ref<Layer>> layers;
 	};
 }

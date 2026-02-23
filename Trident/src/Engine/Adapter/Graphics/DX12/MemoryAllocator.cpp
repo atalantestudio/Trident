@@ -20,10 +20,10 @@ namespace Trident {
 		depthStencilViewDescriptorHandleIncrementSize = device->device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 	}
 
-	DX12::MemoryAllocator::~MemoryAllocator() {
+	void DX12::MemoryAllocator::destroyDescriptorHeaps() {
 		INT descriptorHeapAllocationIndex = static_cast<INT>(descriptorHeapAllocations.size()) - 1;
 
-		while (descriptorHeapAllocationIndex >= static_cast<INT>(descriptorHeapAllocations.size())) {
+		while (descriptorHeapAllocationIndex >= 0) {
 			descriptorHeapAllocations[descriptorHeapAllocationIndex].descriptorHeap->Release();
 
 			descriptorHeapAllocationIndex -= 1;

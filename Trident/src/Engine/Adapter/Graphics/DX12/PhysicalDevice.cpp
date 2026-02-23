@@ -46,8 +46,9 @@ namespace Trident {
 		UINT bestAdapterScore = 0;
 		UINT bestAdapterIndex = 0;
 		IDXGIAdapter* adapter;
-		std::vector<IDXGIAdapter*> adapters;
 		DXGI_ADAPTER_DESC adapterDescriptor;
+
+		ADAPTER_INFO("Available adapters:");
 
 		while (true) {
 			result = _instance->factory->EnumAdapters(adapterIndex, &adapter);
@@ -56,19 +57,7 @@ namespace Trident {
 				break;
 			}
 
-			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to enumerate adapters.");
-
-			adapters.emplace_back(adapter);
-
-			adapterIndex += 1;
-		}
-
-		adapterIndex = 0;
-
-		ADAPTER_INFO("Available adapters:");
-
-		while (adapterIndex < adapters.size()) {
-			IDXGIAdapter* adapter = adapters[adapterIndex];
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to enumerate adapter.");
 
 			result = adapter->GetDesc(&adapterDescriptor);
 
@@ -87,10 +76,14 @@ namespace Trident {
 
 			delete[] description;
 
+			adapter->Release();
+
 			adapterIndex += 1;
 		}
 
-		adapter = adapters[bestAdapterIndex];
+		result = _instance->factory->EnumAdapters(bestAdapterIndex, &adapter);
+
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to enumerate adapter.");
 
 		result = adapter->GetDesc(&adapterDescriptor);
 

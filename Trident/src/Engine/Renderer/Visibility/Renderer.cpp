@@ -420,7 +420,7 @@ namespace Trident {
 			visibilityIndirectBuffer->unmap();
 		}
 
-		const ref<Buffer> stagingBuffer = createStagingBuffer(
+		const ref<Buffer2<uint8>> stagingBuffer = createStagingBuffer2<uint8>(
 			vertexPositionComponentBuffer->getSize() +
 			vertexNormalComponentBuffer->getSize() +
 			vertexTextureCoordinateComponentBuffer->getSize() +
@@ -432,7 +432,7 @@ namespace Trident {
 			geometryBuffer->getSize()
 		);
 
-		uint8* mappedRange = static_cast<uint8*>(stagingBuffer->map(0, stagingBuffer->getSize()));
+		uint8* mappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
 		uint64 sourceOffset = 0;
 
 		float32* vertexPositionComponentMappedRange = pointer_cast<float32*>(mappedRange + sourceOffset);

@@ -104,7 +104,7 @@ namespace Trident {
 			ref<Buffer2<uint16>> indexBuffer;
 			ref<Buffer2<GUISubcomponent>> subcomponentBuffer;
 			ref<Buffer2<GUIGlyphSubcomponent>> glyphSubcomponentBuffer;
-			ref<Buffer> textureArrayStagingBuffer;
+			ref<Buffer2<uint8>> textureArrayStagingBuffer;
 
 			ref<Image> textureArrayImage;
 

@@ -186,7 +186,11 @@ namespace Trident {
 
 	void DX12::destroyDevice(const Trident::Device* device) {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
+		const ref<DX12::MemoryAllocator> memoryAllocator = std::static_pointer_cast<DX12::MemoryAllocator>(device->getMemoryAllocator());
+
 		HRESULT result;
+
+		memoryAllocator->destroyDescriptorHeaps();
 
 		result = CloseHandle(_device->waitEvent);
 
@@ -198,6 +202,28 @@ namespace Trident {
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to unregister message callback.");
 
 			_device->infoQueue->Release();
+		#endif
+
+		#if defined(DEBUG_DX12_REPORT_LIVE_OBJECTS)
+			typedef HRESULT (*DXGIGetDebugInterfaceProc)(REFIID riid, void** ppDebug);
+
+			IDXGIDebug* debug;
+
+			const HMODULE hModule = GetModuleHandle(L"Dxgidebug.dll");
+
+			WIN32_ASSERT(hModule != NULL);
+
+			const DXGIGetDebugInterfaceProc DXGIGetDebugInterface = pointer_cast<DXGIGetDebugInterfaceProc>(GetProcAddress(hModule, "DXGIGetDebugInterface"));
+
+			WIN32_ASSERT(DXGIGetDebugInterface != NULL);
+
+			result = DXGIGetDebugInterface(IID_PPV_ARGS(&debug));
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to query debug interface.");
+
+			result = debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_DETAIL);
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to report live objects.");
 		#endif
 
 		_device->device->Release();

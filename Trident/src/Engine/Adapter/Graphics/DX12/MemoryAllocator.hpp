@@ -32,7 +32,7 @@ namespace Trident {
 		public:
 			explicit MemoryAllocator(const DX12::Device* device);
 
-			~MemoryAllocator();
+			void destroyDescriptorHeaps();
 
 			DX12::DescriptorHeapAllocation& getCurrentViewDescriptorHeapAllocation();
 			DX12::DescriptorHeapAllocation& getCurrentSamplerDescriptorHeapAllocation();

@@ -248,9 +248,9 @@ namespace Trident {
 	}
 
 	void GUIRenderer::createTextureArrayStagingBuffer() {
-		textureArrayStagingBuffer = createStagingBuffer(TEXTURE_ARRAY_MAX_WIDTH * TEXTURE_ARRAY_MAX_HEIGHT * TEXTURE_ARRAY_MAX_LAYER_COUNT * TEXTURE_ARRAY_LAYER_BPP);
+		textureArrayStagingBuffer = createStagingBuffer2<uint8>(TEXTURE_ARRAY_MAX_WIDTH * TEXTURE_ARRAY_MAX_HEIGHT * TEXTURE_ARRAY_MAX_LAYER_COUNT * TEXTURE_ARRAY_LAYER_BPP);
 
-		textureArrayStagingBufferMappedRange = static_cast<uint8*>(textureArrayStagingBuffer->map(0, textureArrayStagingBuffer->getSize()));
+		textureArrayStagingBufferMappedRange = textureArrayStagingBuffer->map(0, textureArrayStagingBuffer->getSize());
 	}
 
 	void GUIRenderer::createTextureArrayImage() {
@@ -439,9 +439,9 @@ namespace Trident {
 	}
 
 	void GUIRenderer::copyBuffers() const {
-		const ref<Buffer> stagingBuffer = createStagingBuffer(VERTEX_BUFFER_SIZE + INDEX_BUFFER_SIZE);
+		const ref<Buffer2<uint8>> stagingBuffer = createStagingBuffer2<uint8>(VERTEX_BUFFER_SIZE + INDEX_BUFFER_SIZE);
 
-		uint8* mappedRange = static_cast<uint8*>(stagingBuffer->map(0, stagingBuffer->getSize()));
+		uint8* mappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
 
 		Vertex* vertexMappedRange = pointer_cast<Vertex*>(mappedRange);
 		vertexMappedRange[0].position = {0.0f, 0.0f};

@@ -252,7 +252,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(glyphMapStagingBufferDescriptor, "Glyph map staging buffer");
 
-		const ref<Buffer> glyphMapStagingBuffer = Renderer::createBuffer(glyphMapStagingBufferDescriptor);
+		const ref<Buffer2<uint8>> glyphMapStagingBuffer = Renderer::createBuffer2<uint8>(glyphMapStagingBufferDescriptor);
 
 		BufferImageCopyRegion glyphMapBufferImageCopyRegion{};
 		glyphMapBufferImageCopyRegion.bufferOffset = 0;
@@ -276,7 +276,7 @@ namespace Trident {
 
 		output.data = sequence<uint8>(glyphMapStagingBuffer->getSize());
 
-		const uint8* glyphMapMappedRange = static_cast<uint8*>(glyphMapStagingBuffer->map(0, glyphMapStagingBuffer->getSize()));
+		const uint8* glyphMapMappedRange = glyphMapStagingBuffer->map(0, glyphMapStagingBuffer->getSize());
 
 		std::copy_n(glyphMapMappedRange, glyphMapStagingBuffer->getSize(), &output.data[0]);
 

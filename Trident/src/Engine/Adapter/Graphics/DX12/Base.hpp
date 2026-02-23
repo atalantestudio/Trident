@@ -7,11 +7,18 @@
 #include <d3dcommon.h>
 #include <D3Dcompiler.h>
 #include <dxgi1_6.h>
-#include <wrl.h>
+
+#if defined(DEBUG_DX12_REPORT_LIVE_OBJECTS)
+	#include <dxgidebug.h>
+#endif
 
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "dxgi.lib")
+
+#if defined(DEBUG_DX12_REPORT_LIVE_OBJECTS)
+	#pragma comment(lib, "dxguid.lib")
+#endif
 
 namespace Trident::DX12 {
 	struct DescriptorHeapAllocation;

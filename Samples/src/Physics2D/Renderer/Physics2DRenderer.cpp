@@ -974,9 +974,9 @@ namespace Trident {
 		const uint64 instanceBufferSize = instanceCount * sizeof(Instance);
 		const uint64 indexBufferSize = indexCount * sizeof(uint16);
 
-		const ref<Buffer> stagingBuffer = createStagingBuffer(vertexBufferSize + indexBufferSize + instanceBufferSize);
+		const ref<Buffer2<uint8>> stagingBuffer = createStagingBuffer2<uint8>(vertexBufferSize + indexBufferSize + instanceBufferSize);
 
-		uint8* mappedRange = static_cast<uint8*>(stagingBuffer->map(0, stagingBuffer->getSize()));
+		uint8* mappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
 		Vertex* vertexMappedRange = pointer_cast<Vertex*>(mappedRange);
 		Instance* instanceMappedRange = pointer_cast<Instance*>(mappedRange + vertexBufferSize);
 		uint16* indexMappedRange = pointer_cast<uint16*>(mappedRange + vertexBufferSize + instanceBufferSize);

@@ -86,9 +86,9 @@ namespace Trident {
 				vertexTextureCoordinateIndexBufferSize = ceil(vertexTextureCoordinateIndexBufferSize, minStorageBufferOffsetAlignment);
 				vertexTangentComponentBufferSize = ceil(vertexTangentComponentBufferSize, minStorageBufferOffsetAlignment);
 
-				const ref<Buffer> vertexStagingBuffer = createStagingBuffer(vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize + vertexNormalIndexBufferSize + vertexTextureCoordinateComponentBufferSize + vertexTextureCoordinateIndexBufferSize + vertexTangentComponentBufferSize);
+				const ref<Buffer2<uint8>> vertexStagingBuffer = createStagingBuffer2<uint8>(vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize + vertexNormalIndexBufferSize + vertexTextureCoordinateComponentBufferSize + vertexTextureCoordinateIndexBufferSize + vertexTangentComponentBufferSize);
 
-				uint8* mappedRange = static_cast<uint8*>(vertexStagingBuffer->map(0, vertexStagingBuffer->getSize()));
+				uint8* mappedRange = vertexStagingBuffer->map(0, vertexStagingBuffer->getSize());
 				float32* vertexPositionComponentMappedRange = pointer_cast<float32*>(mappedRange);
 				uint32* vertexPositionIndexMappedRange = pointer_cast<uint32*>(mappedRange + vertexPositionComponentBufferSize);
 				float32* vertexNormalComponentMappedRange = pointer_cast<float32*>(mappedRange + vertexPositionComponentBufferSize + vertexPositionIndexBufferSize);
@@ -562,9 +562,9 @@ namespace Trident {
 
 				materialDescriptorSets = getDevice()->allocateDescriptorSets(materialDescriptorSetLayouts);
 
-				const ref<Buffer> imageStagingBuffer = createStagingBuffer(imageStagingBufferSize);
+				const ref<Buffer2<uint8>> imageStagingBuffer = createStagingBuffer2<uint8>(imageStagingBufferSize);
 
-				uint8* imageMappedRange = static_cast<uint8*>(imageStagingBuffer->map(0, imageStagingBuffer->getSize()));
+				uint8* imageMappedRange = imageStagingBuffer->map(0, imageStagingBuffer->getSize());
 				uint64 imageMappedRangeOffset = 0;
 				uint32 materialReferenceBindingImageIndex = 0;
 
