@@ -15,33 +15,45 @@ namespace Trident {
 		surface(static_cast<const DX12::Surface*>(descriptor.surface.get()))
 	{}
 
-	uint32 DX12::Swapchain::getImageCount() const {
-		return imageCount;
-	}
-
-	void DX12::Swapchain::update(const SwapchainDescriptor& descriptor) {
+	ref<Trident::Swapchain> DX12::createSwapchain(const Trident::Device* device, const SwapchainDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		for (const ref<Trident::ImageView> imageView : imageViews) {
+		ref<DX12::Swapchain> swapchain = createRef<DX12::Swapchain>(device, descriptor);
+
+		updateSwapchain(device, swapchain.get(), descriptor);
+
+		return swapchain;
+	}
+
+	void DX12::destroySwapchain(const Trident::Device* device, const Trident::Swapchain* swapchain) {
+		const DX12::Swapchain* _swapchain = static_cast<const DX12::Swapchain*>(swapchain);
+
+		for (const ref<Trident::ImageView> imageView : _swapchain->imageViews) {
 			imageView.~shared_ptr();
 		}
 
-		for (const ref<Trident::Image> image : images) {
+		for (const ref<Trident::Image> image : _swapchain->images) {
 			image.~shared_ptr();
 		}
 
-		swapChain->Release();
-
-		recreate(descriptor);
+		_swapchain->swapChain->Release();
 	}
 
-	void DX12::Swapchain::recreate(const SwapchainDescriptor& descriptor) {
-		DEBUG_DESCRIPTOR_GUARD(descriptor);
+	void DX12::recreateSwapchain(const Trident::Device* device, Trident::Swapchain* swapchain, const SwapchainDescriptor& descriptor) {
+		destroySwapchain(device, swapchain);
+		updateSwapchain(device, swapchain, descriptor);
+	}
+
+	void DX12::updateSwapchain(const Trident::Device* device, Trident::Swapchain* swapchain, const SwapchainDescriptor& descriptor) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
+		const ref<DX12::Surface> surface = std::static_pointer_cast<DX12::Surface>(descriptor.surface);
+		DX12::Swapchain* _swapchain = static_cast<DX12::Swapchain*>(swapchain);
 		HRESULT result;
 
-		extent = descriptor.extent;
+		swapchain->imageCount = descriptor.imageCount;
+		swapchain->extent = descriptor.extent;
 
 		DXGI_SWAP_CHAIN_DESC1 swapchainDescriptor{};
 		swapchainDescriptor.Width = descriptor.extent.width;
@@ -51,7 +63,7 @@ namespace Trident {
 		swapchainDescriptor.SampleDesc.Count = 1;
 		swapchainDescriptor.SampleDesc.Quality = 0;
 		swapchainDescriptor.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		swapchainDescriptor.BufferCount = imageCount;
+		swapchainDescriptor.BufferCount = swapchain->imageCount;
 		swapchainDescriptor.Scaling = DXGI_SCALING_STRETCH;
 		swapchainDescriptor.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 		swapchainDescriptor.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
@@ -69,59 +81,23 @@ namespace Trident {
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create swapchain.");
 
-		result = swapChain1->QueryInterface(&swapChain);
+		result = swapChain1->QueryInterface(&_swapchain->swapChain);
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to query swapchain interface.");
 
 		swapChain1->Release();
 
-		images = sequence<ref<Trident::Image>>(imageCount);
-		imageViews = sequence<ref<Trident::ImageView>>(imageCount);
+		swapchain->images = sequence<ref<Trident::Image>>(swapchain->imageCount);
+		swapchain->imageViews = sequence<ref<Trident::ImageView>>(swapchain->imageCount);
 
 		UINT imageIndex = 0;
 
-		while (imageIndex < imageCount) {
-			images[imageIndex] = createImage(device, this, imageIndex);
+		while (imageIndex < swapchain->imageCount) {
+			swapchain->images[imageIndex] = createImage(device, _swapchain, imageIndex);
 
 			imageIndex += 1;
 		}
 
-		createImageViews();
-	}
-
-	ref<Trident::Swapchain> DX12::createSwapchain(const Trident::Device* device, const SwapchainDescriptor& descriptor) {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
-		ref<DX12::Surface> surface = std::static_pointer_cast<DX12::Surface>(descriptor.surface);
-		ref<DX12::Swapchain> swapchain = createRef<DX12::Swapchain>(device, descriptor);
-		HRESULT result;
-
-		swapchain->recreate(descriptor);
-
-		// TODO: Move to Surface.
-		{
-			PROFILE_SCOPE("MakeWindowAssociation");
-
-			result = _device->factory->MakeWindowAssociation(surface->window, DXGI_MWA_NO_ALT_ENTER);
-		}
-
-		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to make window association.");
-
-		return swapchain;
-	}
-
-	void DX12::destroySwapchain(const Trident::Device* device, const Trident::Swapchain* swapchain) {
-		const DX12::Swapchain* _swapchain = static_cast<const DX12::Swapchain*>(swapchain);
-
-		for (const ref<Trident::ImageView> imageView : _swapchain->imageViews) {
-			imageView.~shared_ptr();
-		}
-
-		for (const ref<Trident::Image> image : _swapchain->images) {
-			image.~shared_ptr();
-		}
-
-		_swapchain->swapChain->Release();
+		swapchain->createImageViews();
 	}
 }

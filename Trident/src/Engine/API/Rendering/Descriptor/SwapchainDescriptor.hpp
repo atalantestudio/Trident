@@ -8,6 +8,7 @@
 namespace Trident {
 	struct SwapchainDescriptor {
 		ref<Surface> surface;
+		uint32 imageCount;
 		Extent2D extent;
 		bool verticalSync;
 	};

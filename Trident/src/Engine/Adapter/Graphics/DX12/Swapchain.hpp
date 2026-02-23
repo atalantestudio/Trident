@@ -13,15 +13,8 @@ namespace Trident {
 		public:
 			explicit Swapchain(const Trident::Device* device, const SwapchainDescriptor& descriptor);
 
-			uint32 getImageCount() const final override;
-
-			void update(const SwapchainDescriptor& descriptor) final override;
-
-			void recreate(const SwapchainDescriptor& descriptor);
-
 		public:
 			IDXGISwapChain3* swapChain;
-			UINT imageCount = 3;
 
 		private:
 			const DX12::Surface* surface;
@@ -31,5 +24,9 @@ namespace Trident {
 		ref<Trident::Swapchain> createSwapchain(const Trident::Device* device, const SwapchainDescriptor& descriptor);
 
 		void destroySwapchain(const Trident::Device* device, const Trident::Swapchain* swapchain);
+
+		void recreateSwapchain(const Trident::Device* device, Trident::Swapchain* swapchain, const SwapchainDescriptor& descriptor);
+
+		void updateSwapchain(const Trident::Device* device, Trident::Swapchain* swapchain, const SwapchainDescriptor& descriptor);
 	}
 }

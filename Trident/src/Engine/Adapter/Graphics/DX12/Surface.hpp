@@ -9,7 +9,7 @@
 namespace Trident {
 	class DX12::Surface final : public Trident::Surface {
 		public:
-			explicit Surface(const Trident::Instance* instance, HWND window);
+			explicit Surface(const Trident::Instance* instance);
 
 		public:
 			HWND window;

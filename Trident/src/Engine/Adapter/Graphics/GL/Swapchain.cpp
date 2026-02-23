@@ -20,10 +20,6 @@ namespace Trident {
 		update(descriptor);
 	}
 
-	uint32 GL::Swapchain::getImageCount() const {
-		return 1;
-	}
-
 	void GL::Swapchain::update(const SwapchainDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 

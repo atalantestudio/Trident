@@ -370,6 +370,10 @@ namespace Trident {
 		updateDescriptorSetsImplementation(device, writeDescriptorSets);
 	}
 
+	void GraphicsAdapter::updateSwapchain(const Device* device, Swapchain* swapchain, const SwapchainDescriptor& descriptor) const {
+		updateSwapchainImplementation(device, swapchain, descriptor);
+	}
+
 	void GraphicsAdapter::waitForFence(const Device* device, const Fence* fence) const {
 		waitForFenceImplementation(device, fence);
 	}

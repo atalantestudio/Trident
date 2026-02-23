@@ -151,6 +151,7 @@ namespace Trident {
 	typedef void (*Submit2Implementation)(const Queue* queue, view<ref<CommandBuffer>> commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<Fence> fence);
 	typedef void (*UnmapBufferImplementation)(const Device* device, const Buffer* buffer);
 	typedef void (*UpdateDescriptorSetsImplementation)(const Device* device, view<WriteDescriptorSet> writeDescriptorSets);
+	typedef void (*UpdateSwapchainImplementation)(const Device* device, Swapchain* swapchain, const SwapchainDescriptor& descriptor);
 	typedef void (*WaitForFenceImplementation)(const Device* device, const Fence* fence);
 	typedef void (*WaitIdleDeviceImplementation)(const Device* device);
 	typedef void (*WaitIdleQueueImplementation)(const Queue* queue);

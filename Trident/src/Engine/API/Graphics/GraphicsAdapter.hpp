@@ -179,6 +179,8 @@ namespace Trident {
 
 			void updateDescriptorSets(const Device* device, view<WriteDescriptorSet> writeDescriptorSets) const;
 
+			void updateSwapchain(const Device* device, Swapchain* swapchain, const SwapchainDescriptor& descriptor) const;
+
 			void waitForFence(const Device* device, const Fence* fence) const;
 
 			void waitIdle(const Device* device) const;
@@ -263,6 +265,7 @@ namespace Trident {
 			Submit2Implementation submit2Implementation;
 			UnmapBufferImplementation unmapBufferImplementation;
 			UpdateDescriptorSetsImplementation updateDescriptorSetsImplementation;
+			UpdateSwapchainImplementation updateSwapchainImplementation;
 			WaitForFenceImplementation waitForFenceImplementation;
 			WaitIdleDeviceImplementation waitIdleDeviceImplementation;
 			WaitIdleQueueImplementation waitIdleQueueImplementation;

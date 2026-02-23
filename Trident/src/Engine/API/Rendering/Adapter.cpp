@@ -346,7 +346,30 @@ namespace Trident {
 		instance->adapter->destroySurface(instance, this);
 	}
 
+	Swapchain::Swapchain(const Device* device, const SwapchainDescriptor& descriptor) :
+		device(device),
+		extent(descriptor.extent)
+	{}
+
 	Swapchain::~Swapchain() {
 		device->adapter->destroySwapchain(device, this);
+	}
+
+	Extent2D Swapchain::getExtent() const {
+		return extent;
+	}
+
+	uint32 Swapchain::getImageCount() const {
+		return imageCount;
+	}
+
+	ref<ImageView> Swapchain::getImageView(uint32 index) const {
+		ENGINE_ASSERT(index < imageViews.count(), "Image view index overflow.");
+
+		return imageViews[index];
+	}
+
+	void Swapchain::update(const SwapchainDescriptor& descriptor) {
+		device->adapter->updateSwapchain(device, this, descriptor);
 	}
 }

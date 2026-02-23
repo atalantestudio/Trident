@@ -532,6 +532,7 @@ namespace Trident {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(commandEncoder->device);
 		const ref<DX12::Buffer> indirectBuffer = std::static_pointer_cast<DX12::Buffer>(buffer);
 
+		// TODO: Create command signature when creating the buffer.
 		if (!indirectBuffer->commandSignature) {
 			HRESULT result;
 
@@ -544,7 +545,6 @@ namespace Trident {
 			commandSignatureDescriptor.pArgumentDescs = &indirectArgumentDescriptor;
 			commandSignatureDescriptor.NodeMask = 0;
 
-			// TODO: Create command signature when creating the buffer.
 			result = _device->device->CreateCommandSignature(&commandSignatureDescriptor, nullptr, IID_PPV_ARGS(&indirectBuffer->commandSignature));
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command signature.");
@@ -577,6 +577,7 @@ namespace Trident {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(commandEncoder->device);
 		const ref<DX12::Buffer> indirectBuffer = std::static_pointer_cast<DX12::Buffer>(buffer);
 
+		// TODO: Create command signature when creating the buffer.
 		if (!indirectBuffer->commandSignature) {
 			D3D12_INDIRECT_ARGUMENT_DESC indirectArgumentDescriptor{};
 			indirectArgumentDescriptor.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW;
@@ -587,7 +588,6 @@ namespace Trident {
 			commandSignatureDescriptor.pArgumentDescs = &indirectArgumentDescriptor;
 			commandSignatureDescriptor.NodeMask = 0;
 
-			// TODO: Create command signature when creating the buffer.
 			const HRESULT result = _device->device->CreateCommandSignature(&commandSignatureDescriptor, nullptr, IID_PPV_ARGS(&indirectBuffer->commandSignature));
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command signature.");
@@ -620,6 +620,7 @@ namespace Trident {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(commandEncoder->device);
 		const ref<DX12::Buffer> indirectBuffer = std::static_pointer_cast<DX12::Buffer>(buffer);
 
+		// TODO: Create command signature when creating the buffer.
 		if (!indirectBuffer->commandSignature) {
 			D3D12_INDIRECT_ARGUMENT_DESC indirectArgumentDescriptor{};
 			indirectArgumentDescriptor.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
@@ -630,7 +631,6 @@ namespace Trident {
 			commandSignatureDescriptor.pArgumentDescs = &indirectArgumentDescriptor;
 			commandSignatureDescriptor.NodeMask = 0;
 
-			// TODO: Create command signature when creating the buffer.
 			const HRESULT result = _device->device->CreateCommandSignature(&commandSignatureDescriptor, nullptr, IID_PPV_ARGS(&indirectBuffer->commandSignature));
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command signature.");

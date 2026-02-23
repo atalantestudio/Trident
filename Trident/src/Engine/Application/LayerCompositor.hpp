@@ -43,6 +43,7 @@ namespace Trident {
 
 				SwapchainDescriptor swapchainDescriptor{};
 				swapchainDescriptor.surface = surface;
+				swapchainDescriptor.imageCount = MAX_FRAMES_IN_FLIGHT;
 				swapchainDescriptor.extent.width = window->getSize()[0];
 				swapchainDescriptor.extent.height = window->getSize()[1];
 				swapchainDescriptor.verticalSync = verticalSync;
@@ -128,6 +129,7 @@ namespace Trident {
 
 				SwapchainDescriptor swapchainDescriptor{};
 				swapchainDescriptor.surface = surface;
+				swapchainDescriptor.imageCount = MAX_FRAMES_IN_FLIGHT;
 				swapchainDescriptor.extent.width = window->getSize()[0];
 				swapchainDescriptor.extent.height = window->getSize()[1];
 				swapchainDescriptor.verticalSync = verticalSync;

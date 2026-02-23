@@ -122,6 +122,7 @@ namespace Trident::DX12 {
 		adapter->submit2Implementation = DX12::submit;
 		adapter->unmapBufferImplementation = DX12::unmapBuffer;
 		adapter->updateDescriptorSetsImplementation = DX12::updateDescriptorSets;
+		adapter->updateSwapchainImplementation = DX12::recreateSwapchain;
 		adapter->waitForFenceImplementation = DX12::waitForFence;
 		adapter->waitIdleDeviceImplementation = DX12::waitIdle;
 		adapter->waitIdleQueueImplementation = DX12::waitIdle;

@@ -3,17 +3,31 @@
 
 #include "pch.hpp"
 
+#include "Engine/Adapter/Graphics/DX12/Instance.hpp"
 #include "Engine/Adapter/Graphics/DX12/Surface.hpp"
 #include "Engine/Adapter/Window/Win32/base.hpp"
 
 namespace Trident {
-	DX12::Surface::Surface(const Trident::Instance* instance, HWND window) :
-		Trident::Surface(instance),
-		window(window)
+	DX12::Surface::Surface(const Trident::Instance* instance) :
+		Trident::Surface(instance)
 	{}
 
 	ref<Trident::Surface> DX12::createSurface(const Trident::Instance* instance, const Window* window) {
-		return createRef<DX12::Surface>(instance, static_cast<const Win32WindowData*>(window->data)->hWnd);
+		const DX12::Instance* _instance = static_cast<const DX12::Instance*>(instance);
+		HRESULT result;
+
+		ref<DX12::Surface> surface = createRef<DX12::Surface>(instance);
+		surface->window = static_cast<const Win32WindowData*>(window->data)->hWnd;
+
+		{
+			PROFILE_SCOPE("MakeWindowAssociation");
+
+			result = _instance->factory->MakeWindowAssociation(surface->window, DXGI_MWA_NO_ALT_ENTER);
+		}
+
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to make window association.");
+
+		return surface;
 	}
 
 	void DX12::destroySurface(const Trident::Instance* instance, const Trident::Surface* surface) {}

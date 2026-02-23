@@ -28,10 +28,6 @@ namespace Trident {
 		vkDestroySwapchainKHR(device.device, swapchain, nullptr);
 	}
 
-	uint32 VK::Swapchain::getImageCount() const {
-		return imageCount;
-	}
-
 	void VK::Swapchain::update(const SwapchainDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 

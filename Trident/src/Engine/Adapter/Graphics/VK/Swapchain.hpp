@@ -15,8 +15,6 @@ namespace Trident {
 
 			~Swapchain() final override;
 
-			uint32 getImageCount() const final override;
-
 			void update(const SwapchainDescriptor& descriptor) final override;
 
 		private:
@@ -28,6 +26,5 @@ namespace Trident {
 		private:
 			const VK::Surface& surface;
 			const VK::Device& device;
-			uint32 imageCount = 0;
 	};
 }

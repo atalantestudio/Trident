@@ -12,8 +12,6 @@ namespace Trident {
 		public:
 			explicit Swapchain(const SwapchainDescriptor& descriptor, const GL::Instance& instance, const GL::Surface& surface);
 
-			uint32 getImageCount() const final override;
-
 			void update(const SwapchainDescriptor& descriptor) final override;
 
 		private:
