@@ -32,12 +32,12 @@ namespace Trident {
 
 			// TODO: Deprecate (replace with createBuffer2).
 			ref<Buffer> createBuffer(const BufferDescriptor& descriptor) const {
-				return adapter->createBuffer(descriptor, this);
+				return adapter->createBuffer(this, descriptor);
 			}
 
 			template<typename ElementType>
 			ref<Buffer2<ElementType>> createBuffer2(const BufferDescriptor& descriptor) const {
-				return adapter->createBuffer2<ElementType>(descriptor, this);
+				return adapter->createBuffer2<ElementType>(this, descriptor);
 			}
 
 			ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor) const {
@@ -61,12 +61,20 @@ namespace Trident {
 				return adapter->createGraphicsPipeline(this, descriptor);
 			}
 
+			ref<Image> createImage(const ImageDescriptor& descriptor) const {
+				return adapter->createImage(this, descriptor);
+			}
+
 			ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
 				return adapter->createPipelineLayout(this, descriptor);
 			}
 
 			ref<RenderPass> createRenderPass(const RenderPassDescriptor& descriptor) const {
 				return adapter->createRenderPass(this, descriptor);
+			}
+
+			ref<Sampler> createSampler(const SamplerDescriptor& descriptor) const {
+				return adapter->createSampler(this, descriptor);
 			}
 
 			ref<Semaphore> createSemaphore() const {

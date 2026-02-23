@@ -84,7 +84,7 @@ namespace Trident {
 		copyImageToBufferImplementation(commandEncoder, sourceImage, destinationBuffer, copyRegions);
 	}
 
-	ref<Buffer> GraphicsAdapter::createBuffer(const BufferDescriptor& descriptor, const Device* device) const {
+	ref<Buffer> GraphicsAdapter::createBuffer(const Device* device, const BufferDescriptor& descriptor) const {
 		// TODO: Replace with createBuffer2.
 		ENGINE_ERROR_UNIMPLEMENTED();
 
@@ -128,10 +128,16 @@ namespace Trident {
 		return createFramebufferImplementation(device, descriptor);
 	}
 
-	ref<Image> GraphicsAdapter::createImage(const ImageDescriptor& descriptor) const {
+	ref<Image> GraphicsAdapter::createImage(const Device* device, const ImageDescriptor& descriptor) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
-		return createImageImplementation(descriptor);
+		return createImageImplementation(device, descriptor);
+	}
+
+	ref<ImageView> GraphicsAdapter::createImageView(const Device* device, Image* image, const ImageViewDescriptor& descriptor) const {
+		DEBUG_DESCRIPTOR_GUARD(descriptor, image);
+
+		return createImageViewImplementation(device, image, descriptor);
 	}
 
 	ref<Instance> GraphicsAdapter::createInstance(const InstanceDescriptor& descriptor) const {
@@ -158,10 +164,10 @@ namespace Trident {
 		return createGraphicsPipelineImplementation(device, descriptor);
 	}
 
-	ref<Sampler> GraphicsAdapter::createSampler(const SamplerDescriptor& descriptor) const {
+	ref<Sampler> GraphicsAdapter::createSampler(const Device* device, const SamplerDescriptor& descriptor) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
-		return createSamplerImplementation(descriptor);
+		return createSamplerImplementation(device, descriptor);
 	}
 
 	ref<Semaphore> GraphicsAdapter::createSemaphore(const Device* device) const {
@@ -224,6 +230,14 @@ namespace Trident {
 		destroyGraphicsPipelineImplementation(device, graphicsPipeline);
 	}
 
+	void GraphicsAdapter::destroyImage(const Device* device, const Image* image) const {
+		destroyImageImplementation(device, image);
+	}
+
+	void GraphicsAdapter::destroyImageView(const Device* device, const ImageView* imageView) const {
+		destroyImageViewImplementation(device, imageView);
+	}
+
 	void GraphicsAdapter::destroyInstance(const Instance* instance) const {
 		destroyInstanceImplementation(instance);
 	}
@@ -234,6 +248,10 @@ namespace Trident {
 
 	void GraphicsAdapter::destroyQueue(const Queue* queue) const {
 		destroyQueueImplementation(queue);
+	}
+
+	void GraphicsAdapter::destroySampler(const Device* device, const Sampler* sampler) const {
+		destroySamplerImplementation(device, sampler);
 	}
 
 	void GraphicsAdapter::destroySemaphore(const Device* device, const Semaphore* semaphore) const {

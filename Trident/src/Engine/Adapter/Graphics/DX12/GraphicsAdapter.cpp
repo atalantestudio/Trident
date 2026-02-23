@@ -12,6 +12,7 @@
 #include "Engine/Adapter/Graphics/DX12/GraphicsAdapter.hpp"
 #include "Engine/Adapter/Graphics/DX12/GraphicsPipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/Image.hpp"
+#include "Engine/Adapter/Graphics/DX12/ImageView.hpp"
 #include "Engine/Adapter/Graphics/DX12/Instance.hpp"
 #include "Engine/Adapter/Graphics/DX12/MemoryAllocator.hpp"
 #include "Engine/Adapter/Graphics/DX12/PipelineLayout.hpp"
@@ -65,10 +66,13 @@ namespace Trident::DX12 {
 		adapter->createFenceImplementation = DX12::createFence;
 		adapter->createFramebufferImplementation = DX12::createFramebuffer;
 		adapter->createGraphicsPipelineImplementation = DX12::createGraphicsPipeline;
+		adapter->createImageImplementation = DX12::createImage;
+		adapter->createImageViewImplementation = DX12::createImageView;
 		adapter->createInstanceImplementation = DX12::createInstance;
 		adapter->createMemoryAllocatorImplementation = DX12::createMemoryAllocator;
 		adapter->createPipelineLayoutImplementation = DX12::createPipelineLayout;
 		adapter->createRenderPassImplementation = DX12::createRenderPass;
+		adapter->createSamplerImplementation = DX12::createSampler;
 		adapter->createSemaphoreImplementation = DX12::createSemaphore;
 		adapter->createShaderModuleFromAssetImplementation = DX12::createShaderModule;
 		adapter->createShaderModuleFromCodeImplementation = DX12::createShaderModule;
@@ -84,8 +88,11 @@ namespace Trident::DX12 {
 		adapter->destroyFramebufferImplementation = DX12::destroyFramebuffer;
 		adapter->destroyGraphicsPipelineImplementation = DX12::destroyGraphicsPipeline;
 		adapter->destroyPipelineLayoutImplementation = DX12::destroyPipelineLayout;
+		adapter->destroyImageImplementation = DX12::destroyImage;
+		adapter->destroyImageViewImplementation = DX12::destroyImageView;
 		adapter->destroyInstanceImplementation = DX12::destroyInstance;
 		adapter->destroyQueueImplementation = DX12::destroyQueue;
+		adapter->destroySamplerImplementation = DX12::destroySampler;
 		adapter->destroySemaphoreImplementation = DX12::destroySemaphore;
 		adapter->destroyShaderModuleImplementation = DX12::destroyShaderModule;
 		adapter->destroySurfaceImplementation = DX12::destroySurface;

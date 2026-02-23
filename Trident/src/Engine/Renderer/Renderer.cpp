@@ -67,7 +67,7 @@ namespace Trident {
 	}
 
 	ref<Image> Renderer::createImage(const ImageDescriptor& descriptor) {
-		return layerCompositor->adapter->createImage(descriptor);
+		return layerCompositor->device->createImage(descriptor);
 	}
 
 	ref<PipelineLayout> Renderer::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) {
@@ -83,7 +83,7 @@ namespace Trident {
 	}
 
 	ref<Sampler> Renderer::createSampler(const SamplerDescriptor& descriptor) {
-		return layerCompositor->adapter->createSampler(descriptor);
+		return layerCompositor->device->createSampler(descriptor);
 	}
 
 	ref<Semaphore> Renderer::createSemaphore() {

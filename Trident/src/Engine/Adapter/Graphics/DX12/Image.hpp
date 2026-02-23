@@ -3,32 +3,23 @@
 
 #pragma once
 
-#include "Engine/Adapter/Graphics/DX12/Device.hpp"
-#include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
 #include "Engine/API/Rendering/Image.hpp"
 
 namespace Trident {
 	class DX12::Image final : public Trident::Image {
-		private:
-			static ImageDescriptor createSwapchainImageDescriptor(Extent2D extent, UINT index);
-
 		public:
-			explicit Image(const ImageDescriptor& descriptor, const DX12::Device* device);
-
-			// NOTE: Render Target View constructor
-			explicit Image(const DX12::Device* device, const DX12::Swapchain* swapchain, UINT index);
-
-			~Image() final override;
-
-		protected:
-			ref<Trident::ImageView> createViewInternal(const ImageViewDescriptor& descriptor, Trident::Image* image) final override;
+			explicit Image(const Trident::Device* device, const ImageDescriptor& descriptor);
 
 		public:
 			ID3D12Resource* resource;
 			D3D12_RESOURCE_STATES resourceState;
 			ImageUsage usage;
-
-		private:
-			const DX12::Device* device;
 	};
+
+	namespace DX12 {
+		ref<Trident::Image> createImage(const Trident::Device* device, const ImageDescriptor& descriptor);
+		ref<Trident::Image> createImage(const Trident::Device* device, const DX12::Swapchain* swapchain, UINT index);
+
+		void destroyImage(const Trident::Device* device, const Trident::Image* image);
+	}
 }

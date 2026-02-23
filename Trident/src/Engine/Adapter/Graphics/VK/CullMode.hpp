@@ -14,7 +14,7 @@ namespace Trident::VK {
 			VK_CULL_MODE_BACK_BIT,
 		};
 
-		ADAPTER_ASSERT(cullMode < CullMode::count, "Invalid cull mode.");		
+		ADAPTER_ASSERT(cullMode < CullMode::count, "Invalid cull mode.");
 
 		return CULL_MODES[static_cast<uint8>(cullMode)];
 	}

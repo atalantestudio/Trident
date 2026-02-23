@@ -240,7 +240,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(indexBufferDescriptor, "Index");
 
-		indexBuffer = createBuffer(indexBufferDescriptor);		
+		indexBuffer = createBuffer(indexBufferDescriptor);
 	}
 
 	void Physics2DRenderer::createCameraBuffer() {

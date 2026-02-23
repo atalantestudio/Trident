@@ -147,7 +147,7 @@ namespace Trident {
 
 		commands.emplace_back(createRef<GL::SetImageMemoryBarrierCommand>(barrier));
 
-		image->setLayout(newLayout);
+		image->layout = newLayout;
 	}
 
 	void GL::CommandEncoder::setLineWidth(float32 lineWidth) {

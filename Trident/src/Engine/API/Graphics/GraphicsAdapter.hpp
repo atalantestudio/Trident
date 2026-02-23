@@ -44,10 +44,10 @@ namespace Trident {
 
 			void copyImageToBuffer(CommandEncoder* commandEncoder, ref<Image> sourceImage, ref<Buffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) const;
 
-			ref<Buffer> createBuffer(const BufferDescriptor& descriptor, const Device* device) const;
+			ref<Buffer> createBuffer(const Device* device, const BufferDescriptor& descriptor) const;
 
 			template<typename ElementType>
-			ref<Buffer2<ElementType>> createBuffer2(const BufferDescriptor& descriptor, const Device* device) const {
+			ref<Buffer2<ElementType>> createBuffer2(const Device* device, const BufferDescriptor& descriptor) const {
 				DEBUG_DESCRIPTOR_GUARD(descriptor);
 
 				ref<Buffer> buffer = createBufferImplementation(device, descriptor, static_cast<uint32>(sizeof(ElementType)));
@@ -69,7 +69,9 @@ namespace Trident {
 
 			ref<Framebuffer> createFramebuffer(const Device* device, const FramebufferDescriptor& descriptor) const;
 
-			ref<Image> createImage(const ImageDescriptor& descriptor) const;
+			ref<Image> createImage(const Device* device, const ImageDescriptor& descriptor) const;
+
+			ref<ImageView> createImageView(const Device* device, Image* image, const ImageViewDescriptor& descriptor) const;
 
 			ref<Instance> createInstance(const InstanceDescriptor& descriptor) const;
 
@@ -79,7 +81,7 @@ namespace Trident {
 
 			ref<GraphicsPipeline> createGraphicsPipeline(const Device* device, const GraphicsPipelineDescriptor& descriptor) const;
 
-			ref<Sampler> createSampler(const SamplerDescriptor& descriptor) const;
+			ref<Sampler> createSampler(const Device* device, const SamplerDescriptor& descriptor) const;
 
 			ref<Semaphore> createSemaphore(const Device* device) const;
 
@@ -108,11 +110,17 @@ namespace Trident {
 
 			void destroyGraphicsPipeline(const Device* device, const GraphicsPipeline* graphicsPipeline) const;
 
+			void destroyImage(const Device* device, const Image* image) const;
+
+			void destroyImageView(const Device* device, const ImageView* imageView) const;
+
 			void destroyInstance(const Instance* instance) const;
 
 			void destroyPipelineLayout(const Device* device, const PipelineLayout* pipelineLayout) const;
 
 			void destroyQueue(const Queue* queue) const;
+
+			void destroySampler(const Device* device, const Sampler* sampler) const;
 
 			void destroySemaphore(const Device* device, const Semaphore* semaphore) const;
 
@@ -199,6 +207,7 @@ namespace Trident {
 			CreateFenceImplementation createFenceImplementation;
 			CreateFramebufferImplementation createFramebufferImplementation;
 			CreateImageImplementation createImageImplementation;
+			CreateImageViewImplementation createImageViewImplementation;
 			CreateInstanceImplementation createInstanceImplementation;
 			CreateMemoryAllocatorImplementation createMemoryAllocatorImplementation;
 			CreatePipelineLayoutImplementation createPipelineLayoutImplementation;
@@ -219,9 +228,12 @@ namespace Trident {
 			DestroyFenceImplementation destroyFenceImplementation;
 			DestroyFramebufferImplementation destroyFramebufferImplementation;
 			DestroyGraphicsPipelineImplementation destroyGraphicsPipelineImplementation;
+			DestroyImageImplementation destroyImageImplementation;
+			DestroyImageViewImplementation destroyImageViewImplementation;
 			DestroyInstanceImplementation destroyInstanceImplementation;
 			DestroyPipelineLayoutImplementation destroyPipelineLayoutImplementation;
 			DestroyQueueImplementation destroyQueueImplementation;
+			DestroySamplerImplementation destroySamplerImplementation;
 			DestroySemaphoreImplementation destroySemaphoreImplementation;
 			DestroyShaderModuleImplementation destroyShaderModuleImplementation;
 			DestroySurfaceImplementation destroySurfaceImplementation;

@@ -310,7 +310,7 @@ BarycentricDerivatives computeBarycentricDerivatives(Triangle _triangle, Instanc
 	ddySum *= -viewport2.y;
 
 	derivatives.ddx = (derivatives.lambda * interpInvW + derivatives.ddx) / (interpInvW + ddxSum) - derivatives.lambda;
-	derivatives.ddy = (derivatives.lambda * interpInvW + derivatives.ddy) / (interpInvW + ddySum) - derivatives.lambda;  
+	derivatives.ddy = (derivatives.lambda * interpInvW + derivatives.ddy) / (interpInvW + ddySum) - derivatives.lambda;
 
 	return derivatives;
 }

@@ -11,9 +11,11 @@
 #include "Engine/Adapter/Graphics/DX12/ResourceDimension.hpp"
 #include "Engine/Adapter/Graphics/DX12/ResourceFlags.hpp"
 #include "Engine/Adapter/Graphics/DX12/ResourceState.hpp"
+#include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
+#include "Engine/API/Rendering/Descriptor/ImageDescriptor.hpp"
 
 namespace Trident {
-	ImageDescriptor DX12::Image::createSwapchainImageDescriptor(Extent2D extent, UINT index) {
+	static ImageDescriptor createSwapchainImageDescriptor(Extent2D extent, UINT index) {
 		ImageDescriptor imageDescriptor{};
 		imageDescriptor.extent.width = extent.width;
 		imageDescriptor.extent.height = extent.height;
@@ -28,20 +30,22 @@ namespace Trident {
 		imageDescriptor.usage = static_cast<ImageUsage>(0);
 		imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
-		SET_DEBUG_NAME(imageDescriptor, Logger::format("Swapchin image []", index));
-
 		return imageDescriptor;
 	}
 
-	DX12::Image::Image(const ImageDescriptor& descriptor, const DX12::Device* device) :
-		Trident::Image(descriptor),
-		resourceState(getImageResourceState(descriptor.usage, layout, getSampleCount())),
-		usage(descriptor.usage),
-		device(device)
-	{
+	DX12::Image::Image(const Trident::Device* device, const ImageDescriptor& descriptor) :
+		Trident::Image(device, descriptor)
+	{}
+
+	ref<Trident::Image> DX12::createImage(const Trident::Device* device, const ImageDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
 		HRESULT result;
+
+		ref<DX12::Image> image = createRef<DX12::Image>(device, descriptor);
+		image->resourceState = getImageResourceState(descriptor.usage, image->layout, image->sampleCount);
+		image->usage = descriptor.usage;
 
 		D3D12_HEAP_PROPERTIES heapProperties{};
 		heapProperties.Type = getHeapType(descriptor.memoryProperties);
@@ -84,7 +88,7 @@ namespace Trident {
 			optimizedClearValuePointer = &optimizedClearValue;
 		}
 
-		result = device->device->CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, resourceState, optimizedClearValuePointer, IID_PPV_ARGS(&resource));
+		result = _device->device->CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, image->resourceState, optimizedClearValuePointer, IID_PPV_ARGS(&image->resource));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create committed image resource.");
 
@@ -92,26 +96,32 @@ namespace Trident {
 			if (descriptor.name.count() > 0) {
 				const LPWSTR name = ConvertUTF8ToUTF16(&descriptor.name[0]);
 
-				result = resource->SetName(name);
+				result = image->resource->SetName(name);
 
 				ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set resource name.");
 
 				free(name);
 			}
 		#endif
+
+		return image;
 	}
 
-	DX12::Image::Image(const DX12::Device* device, const DX12::Swapchain* swapchain, UINT index) :
-		Trident::Image(createSwapchainImageDescriptor(swapchain->getExtent(), index)),
-		resourceState(D3D12_RESOURCE_STATE_PRESENT),
-		usage(static_cast<ImageUsage>(0)),
-		device(device)
-	{
+	ref<Trident::Image> DX12::createImage(const Trident::Device* device, const DX12::Swapchain* swapchain, UINT index) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		const DX12::Swapchain* _swapchain = static_cast<const DX12::Swapchain*>(swapchain);
 		HRESULT result;
 
-		result = swapchain->swapChain->GetBuffer(index, IID_PPV_ARGS(&resource));
+		ImageDescriptor descriptor = createSwapchainImageDescriptor(_swapchain->getExtent(), index);
+
+		SET_DEBUG_NAME(descriptor, Logger::format("Swapchain image []", index));
+
+		ref<DX12::Image> image = createRef<DX12::Image>(device, descriptor);
+		image->resourceState = D3D12_RESOURCE_STATE_PRESENT;
+		image->usage = static_cast<ImageUsage>(0);
+
+		result = _swapchain->swapChain->GetBuffer(index, IID_PPV_ARGS(&image->resource));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to get buffer for render target view.");
 
@@ -119,19 +129,19 @@ namespace Trident {
 			const sequence<char8> descriptorName = Logger::format("Swapchain image []", index);
 			const LPWSTR name = ConvertUTF8ToUTF16(&descriptorName[0]);
 
-			result = resource->SetName(name);
+			result = image->resource->SetName(name);
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set name on image resource.");
 
 			free(name);
 		#endif
+
+		return image;
 	}
 
-	DX12::Image::~Image() {
-		resource->Release();
-	}
+	void DX12::destroyImage(const Trident::Device* device, const Trident::Image* image) {
+		const DX12::Image* _image = static_cast<const DX12::Image*>(image);
 
-	ref<Trident::ImageView> DX12::Image::createViewInternal(const ImageViewDescriptor& descriptor, Trident::Image* image) {
-		return createRef<DX12::ImageView>(descriptor, image, device);
+		_image->resource->Release();
 	}
 }

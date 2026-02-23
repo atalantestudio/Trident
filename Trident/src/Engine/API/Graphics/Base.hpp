@@ -8,6 +8,7 @@
 namespace Trident {
 	enum class AcquireNextImageStatus : uint8;
 	enum class ImageLayout : uint8;
+	enum class ImageType : uint8;
 	enum class PipelineStage : uint8;
 	enum class PresentStatus : uint8;
 	enum class QueueFamilyCapability : uint8;
@@ -90,13 +91,14 @@ namespace Trident {
 	typedef ref<Device> (*CreateDeviceImplementation)(const GraphicsAdapter* adapter, const PhysicalDevice* physicalDevice);
 	typedef ref<Fence> (*CreateFenceImplementation)(const Device* device, const FenceDescriptor& descriptor);
 	typedef ref<Framebuffer> (*CreateFramebufferImplementation)(const Device* device, const FramebufferDescriptor& descriptor);
-	typedef ref<Image> (*CreateImageImplementation)(const ImageDescriptor& descriptor);
+	typedef ref<Image> (*CreateImageImplementation)(const Device* device, const ImageDescriptor& descriptor);
+	typedef ref<ImageView> (*CreateImageViewImplementation)(const Device* device, Image* image, const ImageViewDescriptor& descriptor);
 	typedef ref<Instance> (*CreateInstanceImplementation)(const GraphicsAdapter* adapter, const InstanceDescriptor& instanceDescriptor);
 	typedef ref<MemoryAllocator> (*CreateMemoryAllocatorImplementation)(const Device* device);
 	typedef ref<PipelineLayout> (*CreatePipelineLayoutImplementation)(const Device* device, const PipelineLayoutDescriptor& descriptor);
 	typedef ref<RenderPass> (*CreateRenderPassImplementation)(const Device* device, const RenderPassDescriptor& descriptor);
 	typedef ref<GraphicsPipeline> (*CreateGraphicsPipelineImplementation)(const Device* device, const GraphicsPipelineDescriptor& descriptor);
-	typedef ref<Sampler> (*CreateSamplerImplementation)(const SamplerDescriptor& descriptor);
+	typedef ref<Sampler> (*CreateSamplerImplementation)(const Device* device, const SamplerDescriptor& descriptor);
 	typedef ref<Semaphore> (*CreateSemaphoreImplementation)(const Device* device);
 	typedef ref<ShaderModule> (*CreateShaderModuleFromAssetImplementation)(const Device* device, const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset);
 
@@ -114,9 +116,12 @@ namespace Trident {
 	typedef void (*DestroyFenceImplementation)(const Device* device, const Fence* fence);
 	typedef void (*DestroyFramebufferImplementation)(const Device* device, const Framebuffer* framebuffer);
 	typedef void (*DestroyGraphicsPipelineImplementation)(const Device* device, const GraphicsPipeline* graphicsPipeline);
+	typedef void (*DestroyImageImplementation)(const Device* device, const Image* image);
+	typedef void (*DestroyImageViewImplementation)(const Device* device, const ImageView* imageView);
 	typedef void (*DestroyInstanceImplementation)(const Instance* instance);
 	typedef void (*DestroyPipelineLayoutImplementation)(const Device* device, const PipelineLayout* pipelineLayout);
 	typedef void (*DestroyQueueImplementation)(const Queue* queue);
+	typedef void (*DestroySamplerImplementation)(const Device* device, const Sampler* sampler);
 	typedef void (*DestroySemaphoreImplementation)(const Device* device, const Semaphore* semaphore);
 	typedef void (*DestroyShaderModuleImplementation)(const Device* device, const ShaderModule* shaderModule);
 	typedef void (*DestroySurfaceImplementation)(const Instance* instance, const Surface* surface);

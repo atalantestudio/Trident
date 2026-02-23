@@ -239,7 +239,7 @@ namespace Trident {
 						const ref<DX12::Sampler> sampler = std::static_pointer_cast<DX12::Sampler>(descriptorImage.sampler);
 
 						memoryAllocator->writeImage(viewDescriptorHandle, descriptorImage);
-						memoryAllocator->writeSampler(samplerDescriptorHandle, &sampler->samplerDescriptor);
+						memoryAllocator->writeSampler(samplerDescriptorHandle, &sampler->descriptor);
 
 						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
 						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;

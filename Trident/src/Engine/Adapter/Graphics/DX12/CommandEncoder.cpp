@@ -816,7 +816,7 @@ namespace Trident {
 
 		_commandEncoder->commandList->ResourceBarrier(1, &resourceBarrier);
 
-		image->setLayout(newLayout);
+		image->layout = newLayout;
 
 		_commandEncoder->commandCount += 1;
 	}

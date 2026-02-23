@@ -513,7 +513,7 @@ namespace Trident {
 		uint16 regOffset = 0;
 
 		/* TODO: Add reg<C, T> to lyah.
-		
+
 		while (regOffset < regCount * 8) {
 			const lyah::reg<8, uint16> current(&glyphOffsets[regOffset]);
 			const lyah::reg<8, uint16> next(&glyphOffsets[regOffset + 1]);

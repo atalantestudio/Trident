@@ -6,6 +6,7 @@
 #include "Engine/API/Rendering/Buffer.hpp"
 #include "Engine/API/Rendering/CommandPool.hpp"
 #include "Engine/API/Rendering/Device.hpp"
+#include "Engine/API/Rendering/ImageView.hpp"
 #include "Engine/API/Rendering/PhysicalDevice.hpp"
 #include "Engine/API/Rendering/PipelineLayout.hpp"
 #include "Engine/API/Rendering/ShaderModule.hpp"
@@ -195,6 +196,86 @@ namespace Trident {
 		device->adapter->destroyGraphicsPipeline(device, this);
 	}
 
+	Image::Image(const Device* device, const ImageDescriptor& descriptor) :
+		device(device),
+		type(descriptor.type),
+		format(descriptor.format),
+		extent(descriptor.extent),
+		mipLevelCount(descriptor.mipLevelCount),
+		layerCount(descriptor.layerCount),
+		sampleCount(descriptor.sampleCount),
+		layout(ImageLayout::UNDEFINED)
+	{}
+
+	Image::~Image() {
+		device->adapter->destroyImage(device, this);
+	}
+
+	ImageType Image::getType() const {
+		return type;
+	}
+
+	ImageFormat Image::getFormat() const {
+		return format;
+	}
+
+	const Extent3D& Image::getExtent() const {
+		return extent;
+	}
+
+	uint32 Image::getMipLevelCount() const {
+		return mipLevelCount;
+	}
+
+	uint32 Image::getLayerCount() const {
+		return layerCount;
+	}
+
+	uint8 Image::getSampleCount() const {
+		return sampleCount;
+	}
+
+	ImageLayout Image::getLayout() const {
+		return layout;
+	}
+
+	ref<ImageView> Image::createView(const ImageViewDescriptor& descriptor) {
+		return device->adapter->createImageView(device, this, descriptor);
+	}
+
+	ImageView::ImageView(const Device* device, Image* image, const ImageViewDescriptor& descriptor) :
+		device(device),
+		image(image),
+		mipLevelOffset(descriptor.mipLevelOffset),
+		mipLevelCount(descriptor.mipLevelCount),
+		layerOffset(descriptor.layerOffset),
+		layerCount(descriptor.layerCount)
+	{}
+
+	ImageView::~ImageView() {
+		device->adapter->destroyImageView(device, this);
+	}
+
+	Image* ImageView::getImage() {
+		return image;
+	}
+
+	uint32 ImageView::getMipLevelOffset() const {
+		return mipLevelOffset;
+	}
+
+	uint32 ImageView::getMipLevelCount() const {
+		return mipLevelCount;
+	}
+
+	uint32 ImageView::getLayerOffset() const {
+		return layerOffset;
+	}
+
+	uint32 ImageView::getLayerCount() const {
+		return layerCount;
+	}
+
 	PipelineLayout::PipelineLayout(const Device* device) :
 		device(device)
 	{}
@@ -230,6 +311,14 @@ namespace Trident {
 
 	void Queue::waitIdle() const {
 		device->adapter->waitIdle(this);
+	}
+
+	Sampler::Sampler(const Device* device) :
+		device(device)
+	{}
+
+	Sampler::~Sampler() {
+		device->adapter->destroySampler(device, this);
 	}
 
 	Semaphore::Semaphore(const Device* device) :

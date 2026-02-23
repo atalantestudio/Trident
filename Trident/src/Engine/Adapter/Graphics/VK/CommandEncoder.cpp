@@ -306,7 +306,7 @@ namespace Trident {
 			&imageMemoryBarrier
 		);
 
-		image->setLayout(newLayout);
+		image->layout = newLayout;
 
 		commandCount += 1;
 	}

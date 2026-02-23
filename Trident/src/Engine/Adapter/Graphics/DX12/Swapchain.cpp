@@ -81,7 +81,7 @@ namespace Trident {
 		UINT imageIndex = 0;
 
 		while (imageIndex < imageCount) {
-			images[imageIndex] = createRef<DX12::Image>(_device, this, imageIndex);
+			images[imageIndex] = createImage(device, this, imageIndex);
 
 			imageIndex += 1;
 		}

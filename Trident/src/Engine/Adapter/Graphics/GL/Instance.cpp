@@ -107,7 +107,7 @@ namespace Trident {
 
 	GL::Instance::~Instance() {
 		BOOL result;
-		
+
 		result = wglMakeCurrent(hDC, nullptr);
 
 		WIN32_ASSERT(result == TRUE);

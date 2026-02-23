@@ -277,7 +277,7 @@ namespace Trident {
 		textureArrayImageViewDescriptor.mipLevelCount = 1;
 		textureArrayImageViewDescriptor.layerOffset = 0;
 		textureArrayImageViewDescriptor.layerCount = textureArrayImage->getLayerCount();
-		
+
 		SET_DEBUG_NAME(textureArrayImageViewDescriptor, "Texture array");
 
 		textureArrayImageView = textureArrayImage->createView(textureArrayImageViewDescriptor);
