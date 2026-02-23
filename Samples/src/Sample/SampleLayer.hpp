@@ -5,7 +5,7 @@
 
 #include "Engine/Layer/Layer.hpp"
 
-#include "Sample/Triangle.hpp"
+#include "Sample/ArrayTexture.hpp"
 
 namespace Trident {
 	class SampleLayer : public Layer {

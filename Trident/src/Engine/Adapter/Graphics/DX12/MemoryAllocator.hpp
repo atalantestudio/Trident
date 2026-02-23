@@ -25,7 +25,7 @@ namespace Trident {
 			// Only one descriptor heap of each type can be bound at a time.
 			// See https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-setdescriptorheaps. 
 			static constexpr UINT maxViewDescriptorCountPerAllocation = 64;
-			static constexpr UINT maxSamplerDescriptorCountPerAllocation = 64;
+			static constexpr UINT maxSamplerDescriptorCountPerAllocation = 16;
 			static constexpr UINT maxRenderTargetViewDescriptorCountPerAllocation = 16;
 			static constexpr UINT maxDepthStencilViewDescriptorCountPerAllocation = 16;
 
@@ -38,9 +38,11 @@ namespace Trident {
 			DX12::DescriptorHeapAllocation& getCurrentSamplerDescriptorHeapAllocation();
 
 			// Reserves space for a sequence of CBV/SRV/UAV handles.
-			D3D12_CPU_DESCRIPTOR_HANDLE allocateView(UINT descriptorCount);
+			D3D12_CPU_DESCRIPTOR_HANDLE allocateViewDescriptors(UINT descriptorCount);
 
-			D3D12_CPU_DESCRIPTOR_HANDLE allocateSampler(UINT descriptorCount);
+			// Reserves space for a sequence of sampler handles.
+			D3D12_CPU_DESCRIPTOR_HANDLE allocateSamplerDescriptors(UINT descriptorCount);
+
 			D3D12_CPU_DESCRIPTOR_HANDLE allocateRenderTargetView(ID3D12Resource* resource, const D3D12_RENDER_TARGET_VIEW_DESC* descriptor);
 			D3D12_CPU_DESCRIPTOR_HANDLE allocateDepthStencilView(ID3D12Resource* resource, const D3D12_DEPTH_STENCIL_VIEW_DESC* descriptor);
 

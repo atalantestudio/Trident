@@ -58,26 +58,26 @@ namespace Trident {
 		return descriptorHeapAllocations[currentSamplerDescriptorHeapAllocationIndex];
 	}
 
-	D3D12_CPU_DESCRIPTOR_HANDLE DX12::MemoryAllocator::allocateView(UINT descriptorCount) {
+	D3D12_CPU_DESCRIPTOR_HANDLE DX12::MemoryAllocator::allocateViewDescriptors(UINT descriptorCount) {
 		DX12::DescriptorHeapAllocation& descriptorHeapAllocation = getCurrentViewDescriptorHeapAllocation();
 
 		D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle = descriptorHeapAllocation.descriptorHeap->GetCPUDescriptorHandleForHeapStart();
 		descriptorHandle.ptr += descriptorHeapAllocation.descriptorOffset * viewDescriptorHandleIncrementSize;
 
-		ADAPTER_ASSERT(descriptorHeapAllocation.descriptorOffset + descriptorCount < descriptorHeapAllocation.descriptorCount, "Not enough space to reserve for view descriptor handles.");
+		ADAPTER_ASSERT(descriptorHeapAllocation.descriptorOffset + descriptorCount < descriptorHeapAllocation.descriptorCount, "Not enough space to reserve for [] view descriptor(s).", descriptorCount);
 
 		descriptorHeapAllocation.descriptorOffset += descriptorCount;
 
 		return descriptorHandle;
 	}
 
-	D3D12_CPU_DESCRIPTOR_HANDLE DX12::MemoryAllocator::allocateSampler(UINT descriptorCount) {
+	D3D12_CPU_DESCRIPTOR_HANDLE DX12::MemoryAllocator::allocateSamplerDescriptors(UINT descriptorCount) {
 		DX12::DescriptorHeapAllocation& descriptorHeapAllocation = getCurrentSamplerDescriptorHeapAllocation();
 
 		D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle = descriptorHeapAllocation.descriptorHeap->GetCPUDescriptorHandleForHeapStart();
 		descriptorHandle.ptr += descriptorHeapAllocation.descriptorOffset * samplerDescriptorHandleIncrementSize;
 
-		ADAPTER_ASSERT(descriptorHeapAllocation.descriptorOffset + descriptorCount < descriptorHeapAllocation.descriptorCount, "Not enough space to reserve for sampler descriptor handles.");
+		ADAPTER_ASSERT(descriptorHeapAllocation.descriptorOffset + descriptorCount < descriptorHeapAllocation.descriptorCount, "Not enough space to reserve for [] sampler descriptor(s).", descriptorCount);
 
 		descriptorHeapAllocation.descriptorOffset += descriptorCount;
 

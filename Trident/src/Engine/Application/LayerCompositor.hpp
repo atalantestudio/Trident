@@ -90,7 +90,7 @@ namespace Trident {
 			}
 
 			~LayerCompositor() {
-				/* uint32 frameInFlightIndex = 0;
+				uint32 frameInFlightIndex = 0;
 
 				while (frameInFlightIndex < MAX_FRAMES_IN_FLIGHT) {
 					finishedExecutionSemaphores[frameInFlightIndex].~shared_ptr();
@@ -104,7 +104,7 @@ namespace Trident {
 				commandEncoders = sequence<ref<CommandEncoder>>();
 				inFlightFences = sequence<ref<Fence>>();
 				acquiredNextImageSemaphores = sequence<ref<Semaphore>>();
-				finishedExecutionSemaphores = sequence<ref<Semaphore>>(); */
+				finishedExecutionSemaphores = sequence<ref<Semaphore>>();
 
 				swapchain.~shared_ptr();
 			}

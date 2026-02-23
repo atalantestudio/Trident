@@ -77,11 +77,11 @@ namespace Trident {
 				DX12::DescriptorSet::DescriptorSetBinding& descriptorSetBinding = descriptorSet->bindings[bindingIndex];
 				descriptorSetBinding.descriptorType = binding.descriptorType;
 				descriptorSetBinding.descriptorCount = binding.descriptorCount;
-				descriptorSetBinding.viewDescriptorHandleOffset = memoryAllocator->allocateView(binding.descriptorCount);
+				descriptorSetBinding.viewDescriptorHandleOffset = memoryAllocator->allocateViewDescriptors(binding.descriptorCount);
 
 				if (isSamplerDescriptorType(binding.descriptorType)) {
 					// TODO: The binding might not define the samplers.
-					descriptorSetBinding.samplerDescriptorHandleOffset = memoryAllocator->allocateSampler(binding.descriptorCount);
+					descriptorSetBinding.samplerDescriptorHandleOffset = memoryAllocator->allocateSamplerDescriptors(binding.descriptorCount);
 				}
 
 				bindingIndex += 1;
@@ -242,7 +242,7 @@ namespace Trident {
 						memoryAllocator->writeSampler(samplerDescriptorHandle, &sampler->descriptor);
 
 						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+						samplerDescriptorHandle.ptr += memoryAllocator->samplerDescriptorHandleIncrementSize;
 					}
 
 					break;
@@ -252,7 +252,7 @@ namespace Trident {
 						memoryAllocator->writeImage(viewDescriptorHandle, descriptorImage);
 
 						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+						samplerDescriptorHandle.ptr += memoryAllocator->samplerDescriptorHandleIncrementSize;
 					}
 
 					break;
@@ -262,7 +262,7 @@ namespace Trident {
 						memoryAllocator->writeReadWriteStorageImage(viewDescriptorHandle, descriptorImage);
 
 						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+						samplerDescriptorHandle.ptr += memoryAllocator->samplerDescriptorHandleIncrementSize;
 					}
 
 					break;
@@ -272,7 +272,7 @@ namespace Trident {
 						memoryAllocator->writeUniformBuffer(viewDescriptorHandle, descriptorBuffer);
 
 						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+						samplerDescriptorHandle.ptr += memoryAllocator->samplerDescriptorHandleIncrementSize;
 					}
 
 					break;
@@ -282,7 +282,7 @@ namespace Trident {
 						memoryAllocator->writeReadOnlyStorageBuffer(viewDescriptorHandle, descriptorBuffer);
 
 						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+						samplerDescriptorHandle.ptr += memoryAllocator->samplerDescriptorHandleIncrementSize;
 					}
 
 					break;
@@ -292,7 +292,7 @@ namespace Trident {
 						memoryAllocator->writeReadWriteStorageBuffer(viewDescriptorHandle, descriptorBuffer);
 
 						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+						samplerDescriptorHandle.ptr += memoryAllocator->samplerDescriptorHandleIncrementSize;
 					}
 
 					break;
@@ -302,7 +302,7 @@ namespace Trident {
 						memoryAllocator->writeInputAttachment(viewDescriptorHandle, descriptorImage);
 
 						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-						samplerDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+						samplerDescriptorHandle.ptr += memoryAllocator->samplerDescriptorHandleIncrementSize;
 					}
 
 					break;
