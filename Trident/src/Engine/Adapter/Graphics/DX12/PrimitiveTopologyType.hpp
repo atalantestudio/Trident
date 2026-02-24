@@ -7,28 +7,19 @@
 #include "Engine/API/Rendering/PrimitiveTopology.hpp"
 
 namespace Trident::DX12 {
-	D3D12_PRIMITIVE_TOPOLOGY_TYPE getPrimitiveTopologyType(PrimitiveTopology primitiveTopology) {
-		switch (primitiveTopology) {
-			case PrimitiveTopology::POINT_LIST: return D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
-			case PrimitiveTopology::LINE_LIST: return D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
-			case PrimitiveTopology::LINE_STRIP: {
-				ADAPTER_ASSERT(false, "LINE_STRIP primitive topology is not supported.");
+	inline D3D12_PRIMITIVE_TOPOLOGY_TYPE getPrimitiveTopologyType(PrimitiveTopology primitiveTopology) {
+		static constexpr D3D12_PRIMITIVE_TOPOLOGY_TYPE PRIMITIVE_TOPOLOGY_TYPES[] = {
+			D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT,
+			D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE,
+			D3D12_PRIMITIVE_TOPOLOGY_TYPE_UNDEFINED,
+			D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE,
+			D3D12_PRIMITIVE_TOPOLOGY_TYPE_UNDEFINED,
+		};
 
-				return D3D12_PRIMITIVE_TOPOLOGY_TYPE_UNDEFINED;
-			}
-			case PrimitiveTopology::TRIANGLE_LIST: {
-				return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-			}
-			case PrimitiveTopology::TRIANGLE_STRIP: {
-				ADAPTER_ASSERT(false, "TRIANGLE_STRIP primitive topology is not supported.");
+		ADAPTER_ASSERT(primitiveTopology < PrimitiveTopology::count, "Invalid primitive topology.");
+		ADAPTER_ASSERT(primitiveTopology != PrimitiveTopology::LINE_STRIP, "PrimitiveTopology::LINE_STRIP is not supported.");
+		ADAPTER_ASSERT(primitiveTopology != PrimitiveTopology::TRIANGLE_STRIP, "PrimitiveTopology::TRIANGLE_STRIP is not supported.");
 
-				return D3D12_PRIMITIVE_TOPOLOGY_TYPE_UNDEFINED;
-			}
-			default: {
-				ADAPTER_ASSERT(false, "Undefined primitive topology.");
-
-				return D3D12_PRIMITIVE_TOPOLOGY_TYPE_UNDEFINED;
-			}
-		}
+		return PRIMITIVE_TOPOLOGY_TYPES[static_cast<uint32>(primitiveTopology)];
 	}
 }

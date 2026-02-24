@@ -17,6 +17,6 @@ namespace Trident::DX12 {
 		ADAPTER_ASSERT(polygonMode < PolygonMode::count, "Invalid polygon mode.");
 		ADAPTER_ASSERT(polygonMode != PolygonMode::POINT, "PolygonMode::POINT is not supported.");
 
-		return FILL_MODES[static_cast<uint8>(polygonMode)];
+		return FILL_MODES[static_cast<uint32>(polygonMode)];
 	}
 }

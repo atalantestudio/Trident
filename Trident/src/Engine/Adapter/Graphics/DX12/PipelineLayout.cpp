@@ -3,7 +3,6 @@
 
 #include "pch.hpp"
 
-#include "Engine/Adapter/Graphics/DX12/DescriptorRangeType.hpp"
 #include "Engine/Adapter/Graphics/DX12/PipelineLayout.hpp"
 #include "Engine/Adapter/Graphics/DX12/ShaderVisibility.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"

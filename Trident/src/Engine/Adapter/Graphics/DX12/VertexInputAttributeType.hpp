@@ -7,7 +7,7 @@
 #include "Engine/API/Rendering/VertexInputAttributeType.hpp"
 
 namespace Trident::DX12 {
-	DXGI_FORMAT getVertexInputAttributeType(VertexInputAttributeType vertexInputAttributeType) {
+	inline DXGI_FORMAT getVertexInputAttributeType(VertexInputAttributeType vertexInputAttributeType) {
 		static constexpr DXGI_FORMAT VERTEX_INPUT_ATTRIBUTE_TYPES[] = {
 			DXGI_FORMAT_R8_SINT,
 			DXGI_FORMAT_R8_UINT,
@@ -27,9 +27,11 @@ namespace Trident::DX12 {
 			DXGI_FORMAT_UNKNOWN,
 		};
 
-		const DXGI_FORMAT type = VERTEX_INPUT_ATTRIBUTE_TYPES[static_cast<uint8>(vertexInputAttributeType)];
+		ADAPTER_ASSERT(vertexInputAttributeType < VertexInputAttributeType::count, "Invalid vertex attribute type.");
 
-		ADAPTER_ASSERT(type != DXGI_FORMAT_UNKNOWN, "Undefined vertex attribute type.");
+		const DXGI_FORMAT type = VERTEX_INPUT_ATTRIBUTE_TYPES[static_cast<uint32>(vertexInputAttributeType)];
+
+		ADAPTER_ASSERT(type != DXGI_FORMAT_UNKNOWN, "Unsupported vertex attribute type.");
 
 		return type;
 	}
