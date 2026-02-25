@@ -5,12 +5,11 @@
 
 namespace Trident {
 	enum class PointerType : uint8 {
-		// The platform-dependent default cursor.
-		// Typically an arrow.
+		/// The platform-dependent default cursor (usually an arrow).
 		DEFAULT,
 
-		// Indicates that the hovered element can be interacted with.
-		// Typically an image of a pointing hand.
+		/// Indicates that the hovered element can be interacted with.
+		/// Usually an image of a pointing hand.
 		INTERACTIVE,
 	};
 }
