@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Engine/API/Rendering/Descriptor/ComputePipelineDescriptor.hpp"
 #include "Engine/API/Rendering/Device.hpp"
 
 namespace Trident {

@@ -7,11 +7,13 @@
 
 namespace Trident::VK {
 	inline VkFrontFace getFrontFace(FrontFace frontFace) {
-		static constexpr VkFrontFace vkFrontFaces[] = {
+		static constexpr VkFrontFace FRONT_FACES[] = {
 			VK_FRONT_FACE_CLOCKWISE,
 			VK_FRONT_FACE_COUNTER_CLOCKWISE,
 		};
 
-		return vkFrontFaces[static_cast<uint8>(frontFace)];
+		ADAPTER_ASSERT(frontFace < FrontFace::count, "Invalid front face.");
+
+		return FRONT_FACES[static_cast<uint32>(frontFace)];
 	}
 }

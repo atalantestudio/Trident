@@ -8,14 +8,15 @@
 namespace Trident {
 	class VK::Framebuffer final : public Trident::Framebuffer {
 		public:
-			explicit Framebuffer(const FramebufferDescriptor& descriptor, const VK::Device& device);
-
-			~Framebuffer() final override;
+			explicit Framebuffer(const Trident::Device* device, const FramebufferDescriptor& descriptor);
 
 		public:
 			VkFramebuffer framebuffer;
-
-		private:
-			const VK::Device& device;
 	};
+
+	namespace VK {
+		ref<Trident::Framebuffer> createFramebuffer(const Trident::Device* device, const FramebufferDescriptor& descriptor);
+
+		void destroyFramebuffer(const Trident::Device* device, const Trident::Framebuffer* framebuffer);
+	}
 }

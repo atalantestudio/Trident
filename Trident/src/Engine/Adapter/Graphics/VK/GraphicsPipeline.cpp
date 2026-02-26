@@ -18,24 +18,28 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	VK::GraphicsPipeline::GraphicsPipeline(const GraphicsPipelineDescriptor& descriptor, const VK::Device& device) :
-		Trident::GraphicsPipeline(descriptor),
-		VK::Pipeline(VK_PIPELINE_BIND_POINT_GRAPHICS),
-		device(device)
-	{
+	VK::GraphicsPipeline::GraphicsPipeline(const Trident::Device* device) :
+		Trident::GraphicsPipeline(device)
+	{}
+
+	ref<Trident::GraphicsPipeline> VK::createGraphicsPipeline(const Trident::Device* device, const GraphicsPipelineDescriptor& descriptor) {
+		static constexpr VkSampleMask SAMPLE_MASK = max<VkSampleMask>();
+
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		static constexpr VkSampleMask sampleMask = max<VkSampleMask>();
-
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		const ref<Subpass> subpass = descriptor.renderPass->getSubpass(descriptor.subpassIndex);
 		const ref<VK::RenderPass> renderPass = std::static_pointer_cast<VK::RenderPass>(descriptor.renderPass);
+
+		ref<VK::GraphicsPipeline> graphicsPipeline = createRef<VK::GraphicsPipeline>(device);
 
 		VkResult result;
 		std::vector<VkVertexInputBindingDescription> vertexInputBindingDescriptions;
 		std::vector<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;
 		uint32 location = 0;
+		uint32 vertexInputBindingIndex = 0;;
 
-		for (uint32 vertexInputBindingIndex = 0; vertexInputBindingIndex < descriptor.vertexInputBindings.count(); vertexInputBindingIndex += 1) {
+		while (vertexInputBindingIndex < descriptor.vertexInputBindings.count()) {
 			const VertexInputBinding& vertexInputBinding = descriptor.vertexInputBindings[vertexInputBindingIndex];
 
 			VkVertexInputBindingDescription vertexInputBindingDescription{};
@@ -58,6 +62,7 @@ namespace Trident {
 			}
 
 			vertexInputBindingDescriptions.emplace_back(vertexInputBindingDescription);
+			vertexInputBindingIndex += 1;
 		}
 
 		VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo{};
@@ -128,7 +133,7 @@ namespace Trident {
 			multisampleStateCreateInfo.minSampleShading = descriptor.minSampleShading;
 		}
 
-		multisampleStateCreateInfo.pSampleMask = &sampleMask;
+		multisampleStateCreateInfo.pSampleMask = &SAMPLE_MASK;
 		multisampleStateCreateInfo.alphaToCoverageEnable = VK_FALSE;
 		multisampleStateCreateInfo.alphaToOneEnable = VK_FALSE;
 
@@ -240,7 +245,7 @@ namespace Trident {
 		graphicsPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 		graphicsPipelineCreateInfo.basePipelineIndex = -1;
 
-		result = vkCreateGraphicsPipelines(device.device, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &pipeline);
+		result = _device->vkCreateGraphicsPipelines(_device->device, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &graphicsPipeline->pipeline);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create graphics pipeline ([]).", string_VkResult(result));
 
@@ -250,19 +255,24 @@ namespace Trident {
 				debugUtilsObjectNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
 				debugUtilsObjectNameInfo.pNext = nullptr;
 				debugUtilsObjectNameInfo.objectType = VK_OBJECT_TYPE_PIPELINE;
-				debugUtilsObjectNameInfo.objectHandle = (uint64) pipeline;
+				debugUtilsObjectNameInfo.objectHandle = (uint64) graphicsPipeline->pipeline;
 				debugUtilsObjectNameInfo.pObjectName = &descriptor.name[0];
 
-				result = vkSetDebugUtilsObjectNameEXT(device.device, &debugUtilsObjectNameInfo);
+				result = _device->vkSetDebugUtilsObjectNameEXT(_device->device, &debugUtilsObjectNameInfo);
 
 				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to set object name ([]).", string_VkResult(result));
 			}
 		#endif
+
+		return graphicsPipeline;
 	}
 
-	VK::GraphicsPipeline::~GraphicsPipeline() {
+	void VK::destroyGraphicsPipeline(const Trident::Device* device, const Trident::GraphicsPipeline* graphicsPipeline) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		vkDestroyPipeline(device.device, pipeline, nullptr);
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		const VK::GraphicsPipeline* _graphicsPipeline = static_cast<const VK::GraphicsPipeline*>(graphicsPipeline);
+
+		_device->vkDestroyPipeline(_device->device, _graphicsPipeline->pipeline, nullptr);
 	}
 }

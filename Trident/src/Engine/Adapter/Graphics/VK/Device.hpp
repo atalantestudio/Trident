@@ -8,44 +8,65 @@
 namespace Trident {
 	class VK::Device final : public Trident::Device {
 		public:
-			explicit Device(const VK::PhysicalDevice& physicalDevice);
-
-			~Device() final override;
-
-			AcquireNextImageStatus acquireNextImage(ref<Trident::Swapchain> swapchain, ref<Trident::Semaphore> semaphore, uint32& imageIndex) const final override;
-
-			sequence<ref<Trident::DescriptorSet>> allocateDescriptorSets(view<ref<Trident::DescriptorSetLayout>> descriptorSetLayouts) final override;
-
-			ref<Trident::PhysicalDevice> getPhysicalDevice() const final override;
-
-			ref<Trident::Queue> getQueue(QueueFamilyCapability queueFamilyCapability) const final override;
-
-			void resetFence(ref<Trident::Fence> fence) const final override;
-
-			void updateDescriptorSets(view<WriteDescriptorSet> writeDescriptorSets) const final override;
-
-			void waitForFence(ref<Trident::Fence> fence) const final override;
-
-			void waitIdle() const final override;
-
-		private:
-			static const sequence<const char8*> ENABLED_EXTENSION_NAMES;
+			explicit Device(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice);
 
 		public:
 			VkDevice device;
-
-		private:
-			const VK::PhysicalDevice& physicalDevice;
-			VkPhysicalDeviceMemoryProperties memoryProperties;
-			std::vector<VkDescriptorPool> descriptorPools;
 			ref<VK::Queue> queues[3];
 
-		public:
+			// TODO: Move in VK::MemoryAllocator.
+			std::vector<VkDescriptorPool> descriptorPools;
+
+			PFN_vkAcquireNextImageKHR vkAcquireNextImageKHR;
+			PFN_vkAllocateDescriptorSets vkAllocateDescriptorSets;
 			PFN_vkCreateBuffer vkCreateBuffer;
+			PFN_vkCreateCommandPool vkCreateCommandPool;
+			PFN_vkCreateComputePipelines vkCreateComputePipelines;
 			PFN_vkCreateDescriptorSetLayout vkCreateDescriptorSetLayout;
+			PFN_vkCreateFence vkCreateFence;
+			PFN_vkCreateFramebuffer vkCreateFramebuffer;
+			PFN_vkCreateGraphicsPipelines vkCreateGraphicsPipelines;
 			PFN_vkCreateSemaphore vkCreateSemaphore;
 			PFN_vkDestroyBuffer vkDestroyBuffer;
+			PFN_vkDestroyCommandPool vkDestroyCommandPool;
+			PFN_vkDestroyDescriptorPool vkDestroyDescriptorPool;
 			PFN_vkDestroyDescriptorSetLayout vkDestroyDescriptorSetLayout;
+
+			// TODO
+			PFN_vkDestroyDevice vkDestroyDevice;
+
+			PFN_vkDestroyFence vkDestroyFence;
+			PFN_vkDestroyFramebuffer vkDestroyFramebuffer;
+			PFN_vkDestroyPipeline vkDestroyPipeline;
 			PFN_vkDestroySemaphore vkDestroySemaphore;
+			PFN_vkDeviceWaitIdle vkDeviceWaitIdle;
+			PFN_vkGetBufferMemoryRequirements vkGetBufferMemoryRequirements;
+			PFN_vkResetFences vkResetFences;
+			PFN_vkUpdateDescriptorSets vkUpdateDescriptorSets;
+			PFN_vkWaitForFences vkWaitForFences;
+
+			#if defined(BUILD_MODE_DEBUG)
+				PFN_vkSetDebugUtilsObjectNameEXT vkSetDebugUtilsObjectNameEXT;
+			#endif
 	};
+
+	namespace VK {
+		AcquireNextImageStatus acquireNextImage(const Trident::Device* device, const Trident::Swapchain* swapchain, const Semaphore* semaphore, uint32& imageIndex);
+
+		sequence<ref<Trident::DescriptorSet>> allocateDescriptorSets(const Trident::Device* device, view<ref<DescriptorSetLayout>> descriptorSetLayouts);
+
+		ref<Trident::Device> createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice);
+
+		void destroyDevice(const Trident::Device* device);
+
+		ref<Trident::Queue> getQueue(const Trident::Device* device, QueueFamilyCapability queueFamilyCapability);
+
+		void resetFence(const Trident::Device* device, const Trident::Fence* fence);
+
+		void updateDescriptorSets(const Trident::Device* device, view<WriteDescriptorSet> writeDescriptorSets);
+
+		void waitForFence(const Trident::Device* device, const Trident::Fence* fence);
+
+		void waitIdle(const Trident::Device* device);
+	}
 }

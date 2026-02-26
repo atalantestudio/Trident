@@ -9,15 +9,25 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	VK::Framebuffer::Framebuffer(const FramebufferDescriptor& descriptor, const VK::Device& device) :
-		Trident::Framebuffer(descriptor),
-		device(device)
-	{
-		VkResult result;
-		sequence<VkImageView> imageViews(descriptor.imageViews.count());
+	VK::Framebuffer::Framebuffer(const Trident::Device* device, const FramebufferDescriptor& descriptor) :
+		Trident::Framebuffer(device, descriptor)
+	{}
 
-		for (uint32 attachmentImageViewIndex = 0; attachmentImageViewIndex < descriptor.imageViews.count(); attachmentImageViewIndex += 1) {
+	ref<Trident::Framebuffer> VK::createFramebuffer(const Trident::Device* device, const FramebufferDescriptor& descriptor) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		VkResult result;
+
+		ref<VK::Framebuffer> framebuffer = createRef<VK::Framebuffer>(device, descriptor);
+
+		sequence<VkImageView> imageViews(descriptor.imageViews.count());
+		uint32 attachmentImageViewIndex = 0;
+
+		while (attachmentImageViewIndex < descriptor.imageViews.count()) {
 			imageViews[attachmentImageViewIndex] = std::static_pointer_cast<VK::ImageView>(descriptor.imageViews[attachmentImageViewIndex])->imageView;
+
+			attachmentImageViewIndex += 1;
 		}
 
 		VkFramebufferCreateInfo framebufferCreateInfo{};
@@ -31,7 +41,7 @@ namespace Trident {
 		framebufferCreateInfo.height = descriptor.extent.height;
 		framebufferCreateInfo.layers = 1;
 
-		result = vkCreateFramebuffer(device.device, &framebufferCreateInfo, nullptr, &framebuffer);
+		result = _device->vkCreateFramebuffer(_device->device, &framebufferCreateInfo, nullptr, &framebuffer->framebuffer);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create framebuffer ([]).", string_VkResult(result));
 
@@ -41,17 +51,24 @@ namespace Trident {
 				debugUtilsObjectNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
 				debugUtilsObjectNameInfo.pNext = nullptr;
 				debugUtilsObjectNameInfo.objectType = VK_OBJECT_TYPE_FRAMEBUFFER;
-				debugUtilsObjectNameInfo.objectHandle = (uint64) framebuffer;
+				debugUtilsObjectNameInfo.objectHandle = (uint64) framebuffer->framebuffer;
 				debugUtilsObjectNameInfo.pObjectName = &descriptor.name[0];
 
-				result = vkSetDebugUtilsObjectNameEXT(device.device, &debugUtilsObjectNameInfo);
+				result = vkSetDebugUtilsObjectNameEXT(_device->device, &debugUtilsObjectNameInfo);
 
 				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to set object name ([]).", string_VkResult(result));
 			}
 		#endif
+
+		return framebuffer;
 	}
 
-	VK::Framebuffer::~Framebuffer() {
-		vkDestroyFramebuffer(device.device, framebuffer, nullptr);
+	void VK::destroyFramebuffer(const Trident::Device* device, const Trident::Framebuffer* framebuffer) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		const VK::Framebuffer* _framebuffer = static_cast<const VK::Framebuffer*>(framebuffer);
+
+		_device->vkDestroyFramebuffer(_device->device, _framebuffer->framebuffer, nullptr);
 	}
 }

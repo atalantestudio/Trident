@@ -7,13 +7,17 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	VK::Fence::Fence(const FenceDescriptor& descriptor, const VK::Device& device) :
-		Trident::Fence(descriptor),
-		device(device)
-	{
+	VK::Fence::Fence(const Trident::Device* device) :
+		Trident::Fence(device)
+	{}
+
+	ref<Trident::Fence> VK::createFence(const Trident::Device* device, const FenceDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		VkResult result;
+
+		ref<VK::Fence> fence = createRef<VK::Fence>(device);
 
 		VkFenceCreateInfo fenceCreateInfo{};
 		fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
@@ -24,7 +28,7 @@ namespace Trident {
 			fenceCreateInfo.flags |= VK_FENCE_CREATE_SIGNALED_BIT;
 		}
 
-		result = vkCreateFence(device.device, &fenceCreateInfo, nullptr, &fence);
+		result = _device->vkCreateFence(_device->device, &fenceCreateInfo, nullptr, &fence->fence);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create fence ([]).", string_VkResult(result));
 
@@ -34,19 +38,24 @@ namespace Trident {
 				debugUtilsObjectNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
 				debugUtilsObjectNameInfo.pNext = nullptr;
 				debugUtilsObjectNameInfo.objectType = VK_OBJECT_TYPE_FENCE;
-				debugUtilsObjectNameInfo.objectHandle = (uint64) fence;
+				debugUtilsObjectNameInfo.objectHandle = (uint64) fence->fence;
 				debugUtilsObjectNameInfo.pObjectName = &descriptor.name[0];
 
-				result = vkSetDebugUtilsObjectNameEXT(device.device, &debugUtilsObjectNameInfo);
+				result = vkSetDebugUtilsObjectNameEXT(_device->device, &debugUtilsObjectNameInfo);
 
 				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to set object name ([]).", string_VkResult(result));
 			}
 		#endif
+
+		return fence;
 	}
 
-	VK::Fence::~Fence() {
+	void VK::destroyFence(const Trident::Device* device, const Trident::Fence* fence) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		vkDestroyFence(device.device, fence, nullptr);
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		const VK::Fence* _fence = static_cast<const VK::Fence*>(fence);
+
+		_device->vkDestroyFence(_device->device, _fence->fence, nullptr);
 	}
 }

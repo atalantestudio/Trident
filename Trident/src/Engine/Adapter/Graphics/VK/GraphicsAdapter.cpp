@@ -20,21 +20,9 @@
 #include "Engine/Adapter/Graphics/VK/ShaderModule.hpp"
 #include "Engine/Adapter/Graphics/VK/Swapchain.hpp"
 
-namespace Trident {
+namespace Trident::VK {
 	static ref<Trident::MemoryAllocator> createMemoryAllocator(const Trident::Device* device) {
 		return createRef<VK::MemoryAllocator>(static_cast<const VK::Device*>(device));
-	}
-
-	static ref<Semaphore> createSemaphore(const Trident::Device* device) {
-		return createRef<Semaphore>(device);
-	}
-
-	static void destroyDescriptorSetLayout(const Trident::Device* device, const DescriptorSetLayout* descriptorSetLayout) {}
-
-	static void destroySemaphore(const Trident::Device* device, const Semaphore* semaphore) {}
-
-	static ref<RenderPass> createRenderPass(const Trident::Device* device, const RenderPassDescriptor& descriptor) {
-		return createRef<RenderPass>(descriptor);
 	}
 
 	void bindAdapter(Trident::GraphicsAdapter* adapter) {
@@ -164,86 +152,86 @@ namespace Trident {
 
 		adapter->logger = ConsoleLogger(std::cout, LogLevel::ALL, "DIRECTX 12");
 
-		// adapter->acquireNextImageImplementation = VK::acquireNextImage;
-		// adapter->allocateDescriptorSetsImplementation = VK::allocateDescriptorSets;
-		// adapter->beginImplementation = VK::begin;
-		// adapter->beginRenderPassImplementation = VK::beginRenderPass;
-		// adapter->bindComputePipelineImplementation = VK::bindComputePipeline;
-		// adapter->bindDescriptorSetsImplementation = VK::bindDescriptorSets;
-		// adapter->bindGraphicsPipelineImplementation = VK::bindGraphicsPipeline;
-		// adapter->bindIndexBufferImplementation = VK::bindIndexBuffer;
-		// adapter->bindVertexBufferImplementation = VK::bindVertexBuffer;
-		// adapter->copyBufferToBufferImplementation = VK::copyBufferToBuffer;
-		// adapter->copyBufferToImageImplementation = VK::copyBufferToImage;
-		// adapter->createBufferImplementation = VK::createBuffer;
-		// adapter->createCommandEncoderImplementation = VK::createCommandEncoder;
-		// adapter->createCommandPoolImplementation = VK::createCommandPool;
-		// adapter->createComputePipelineImplementation = VK::createComputePipeline;
+		adapter->acquireNextImageImplementation = VK::acquireNextImage;
+		adapter->allocateDescriptorSetsImplementation = VK::allocateDescriptorSets;
+		adapter->beginImplementation = VK::begin;
+		adapter->beginRenderPassImplementation = VK::beginRenderPass;
+		adapter->bindComputePipelineImplementation = VK::bindComputePipeline;
+		adapter->bindDescriptorSetsImplementation = VK::bindDescriptorSets;
+		adapter->bindGraphicsPipelineImplementation = VK::bindGraphicsPipeline;
+		adapter->bindIndexBufferImplementation = VK::bindIndexBuffer;
+		adapter->bindVertexBufferImplementation = VK::bindVertexBuffer;
+		adapter->copyBufferToBufferImplementation = VK::copyBufferToBuffer;
+		adapter->copyBufferToImageImplementation = VK::copyBufferToImage;
+		adapter->createBufferImplementation = VK::createBuffer;
+		adapter->createCommandEncoderImplementation = VK::createCommandEncoder;
+		adapter->createCommandPoolImplementation = VK::createCommandPool;
+		adapter->createComputePipelineImplementation = VK::createComputePipeline;
 		adapter->createDescriptorSetLayoutImplementation = VK::createDescriptorSetLayout;
-		// adapter->createDeviceImplementation = VK::createDevice;
-		// adapter->createFenceImplementation = VK::createFence;
-		// adapter->createFramebufferImplementation = VK::createFramebuffer;
-		// adapter->createGraphicsPipelineImplementation = VK::createGraphicsPipeline;
-		// adapter->createImageImplementation = VK::createImage;
-		// adapter->createImageViewImplementation = VK::createImageView;
-		// adapter->createInstanceImplementation = VK::createInstance;
-		// adapter->createMemoryAllocatorImplementation = VK::createMemoryAllocator;
-		// adapter->createPipelineLayoutImplementation = VK::createPipelineLayout;
-		// adapter->createRenderPassImplementation = VK::createRenderPass;
-		// adapter->createSamplerImplementation = VK::createSampler;
+		adapter->createDeviceImplementation = VK::createDevice;
+		adapter->createFenceImplementation = VK::createFence;
+		adapter->createFramebufferImplementation = VK::createFramebuffer;
+		adapter->createGraphicsPipelineImplementation = VK::createGraphicsPipeline;
+		adapter->createImageImplementation = VK::createImage;
+		adapter->createImageViewImplementation = VK::createImageView;
+		adapter->createInstanceImplementation = VK::createInstance;
+		adapter->createMemoryAllocatorImplementation = VK::createMemoryAllocator;
+		adapter->createPipelineLayoutImplementation = VK::createPipelineLayout;
+		adapter->createRenderPassImplementation = VK::createRenderPass;
+		adapter->createSamplerImplementation = VK::createSampler;
 		adapter->createSemaphoreImplementation = VK::createSemaphore;
-		// adapter->createShaderModuleFromAssetImplementation = VK::createShaderModule;
-		// adapter->createShaderModuleFromCodeImplementation = VK::createShaderModule;
-		// adapter->createSurfaceImplementation = VK::createSurface;
-		// adapter->createSwapchainImplementation = VK::createSwapchain;
-		// adapter->destroyBufferImplementation = VK::destroyBuffer;
-		// adapter->destroyCommandEncoderImplementation = VK::destroyCommandEncoder;
-		// adapter->destroyCommandPoolImplementation = VK::destroyCommandPool;
-		// adapter->destroyComputePipelineImplementation = VK::destroyComputePipeline;
+		adapter->createShaderModuleFromAssetImplementation = VK::createShaderModule;
+		adapter->createShaderModuleFromCodeImplementation = VK::createShaderModule;
+		adapter->createSurfaceImplementation = VK::createSurface;
+		adapter->createSwapchainImplementation = VK::createSwapchain;
+		adapter->destroyBufferImplementation = VK::destroyBuffer;
+		adapter->destroyCommandEncoderImplementation = VK::destroyCommandEncoder;
+		adapter->destroyCommandPoolImplementation = VK::destroyCommandPool;
+		adapter->destroyComputePipelineImplementation = VK::destroyComputePipeline;
 		adapter->destroyDescriptorSetLayoutImplementation = VK::destroyDescriptorSetLayout;
-		// adapter->destroyDeviceImplementation = VK::destroyDevice;
-		// adapter->destroyFenceImplementation = VK::destroyFence;
-		// adapter->destroyFramebufferImplementation = VK::destroyFramebuffer;
-		// adapter->destroyGraphicsPipelineImplementation = VK::destroyGraphicsPipeline;
-		// adapter->destroyPipelineLayoutImplementation = VK::destroyPipelineLayout;
-		// adapter->destroyImageImplementation = VK::destroyImage;
-		// adapter->destroyImageViewImplementation = VK::destroyImageView;
-		// adapter->destroyInstanceImplementation = VK::destroyInstance;
-		// adapter->destroyQueueImplementation = VK::destroyQueue;
-		// adapter->destroySamplerImplementation = VK::destroySampler;
+		adapter->destroyDeviceImplementation = VK::destroyDevice;
+		adapter->destroyFenceImplementation = VK::destroyFence;
+		adapter->destroyFramebufferImplementation = VK::destroyFramebuffer;
+		adapter->destroyGraphicsPipelineImplementation = VK::destroyGraphicsPipeline;
+		adapter->destroyPipelineLayoutImplementation = VK::destroyPipelineLayout;
+		adapter->destroyImageImplementation = VK::destroyImage;
+		adapter->destroyImageViewImplementation = VK::destroyImageView;
+		adapter->destroyInstanceImplementation = VK::destroyInstance;
+		adapter->destroyQueueImplementation = VK::destroyQueue;
+		adapter->destroySamplerImplementation = VK::destroySampler;
 		adapter->destroySemaphoreImplementation = VK::destroySemaphore;
-		// adapter->destroyShaderModuleImplementation = VK::destroyShaderModule;
-		// adapter->destroySurfaceImplementation = VK::destroySurface;
-		// adapter->destroySwapchainImplementation = VK::destroySwapchain;
-		// adapter->dispatchImplementation = VK::dispatch;
-		// adapter->dispatchIndirectImplementation = VK::dispatchIndirect;
-		// adapter->drawImplementation = VK::draw;
-		// adapter->drawIndirectImplementation = VK::drawIndirect;
-		// adapter->drawIndexedImplementation = VK::drawIndexed;
-		// adapter->drawIndexedIndirectImplementation = VK::drawIndexedIndirect;
-		// adapter->endImplementation = VK::end;
-		// adapter->endRenderPassImplementation = VK::endRenderPass;
-		// adapter->getQueueImplementation = VK::getQueue;
-		// adapter->getSurfaceFormatImplementation = VK::getSurfaceFormat;
-		// adapter->insertBufferMemoryBarriersImplementation = VK::insertBufferMemoryBarriers;
-		// adapter->mapBufferImplementation = VK::mapBuffer;
-		// adapter->nextSubpassImplementation = VK::nextSubpass;
-		// adapter->presentImplementation = VK::present;
-		// adapter->resetImplementation = VK::reset;
-		// adapter->resetFenceImplementation = VK::resetFence;
-		// adapter->selectPhysicalDeviceImplementation = VK::selectPhysicalDevice;
-		// adapter->setImageMemoryBarrierImplementation = VK::setImageMemoryBarrier;
-		// adapter->setLineWidthImplementation = VK::setLineWidth;
-		// adapter->setScissorImplementation = VK::setScissor;
-		// adapter->setViewportImplementation = VK::setViewport;
-		// adapter->submitImplementation = VK::submit;
-		// adapter->submit2Implementation = VK::submit;
-		// adapter->unmapBufferImplementation = VK::unmapBuffer;
-		// adapter->updateDescriptorSetsImplementation = VK::updateDescriptorSets;
-		// adapter->updateSwapchainImplementation = VK::recreateSwapchain;
-		// adapter->waitForFenceImplementation = VK::waitForFence;
-		// adapter->waitIdleDeviceImplementation = VK::waitIdle;
-		// adapter->waitIdleQueueImplementation = VK::waitIdle;
+		adapter->destroyShaderModuleImplementation = VK::destroyShaderModule;
+		adapter->destroySurfaceImplementation = VK::destroySurface;
+		adapter->destroySwapchainImplementation = VK::destroySwapchain;
+		adapter->dispatchImplementation = VK::dispatch;
+		adapter->dispatchIndirectImplementation = VK::dispatchIndirect;
+		adapter->drawImplementation = VK::draw;
+		adapter->drawIndirectImplementation = VK::drawIndirect;
+		adapter->drawIndexedImplementation = VK::drawIndexed;
+		adapter->drawIndexedIndirectImplementation = VK::drawIndexedIndirect;
+		adapter->endImplementation = VK::end;
+		adapter->endRenderPassImplementation = VK::endRenderPass;
+		adapter->getQueueImplementation = VK::getQueue;
+		adapter->getSurfaceFormatImplementation = VK::getSurfaceFormat;
+		adapter->insertBufferMemoryBarriersImplementation = VK::insertBufferMemoryBarriers;
+		adapter->mapBufferImplementation = VK::mapBuffer;
+		adapter->nextSubpassImplementation = VK::nextSubpass;
+		adapter->presentImplementation = VK::present;
+		adapter->resetImplementation = VK::reset;
+		adapter->resetFenceImplementation = VK::resetFence;
+		adapter->selectPhysicalDeviceImplementation = VK::selectPhysicalDevice;
+		adapter->setImageMemoryBarrierImplementation = VK::setImageMemoryBarrier;
+		adapter->setLineWidthImplementation = VK::setLineWidth;
+		adapter->setScissorImplementation = VK::setScissor;
+		adapter->setViewportImplementation = VK::setViewport;
+		adapter->submitImplementation = VK::submit;
+		adapter->submit2Implementation = VK::submit;
+		adapter->unmapBufferImplementation = VK::unmapBuffer;
+		adapter->updateDescriptorSetsImplementation = VK::updateDescriptorSets;
+		adapter->updateSwapchainImplementation = VK::recreateSwapchain;
+		adapter->waitForFenceImplementation = VK::waitForFence;
+		adapter->waitIdleDeviceImplementation = VK::waitIdle;
+		adapter->waitIdleQueueImplementation = VK::waitIdle;
 	}
 
 	/* VK::GraphicsAdapter::GraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window, const ApplicationProperties& properties) :

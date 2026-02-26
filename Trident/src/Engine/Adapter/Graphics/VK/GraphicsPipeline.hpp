@@ -8,13 +8,18 @@
 #include "Engine/API/Rendering/GraphicsPipeline.hpp"
 
 namespace Trident {
-	class VK::GraphicsPipeline final : public VK::Pipeline, public Trident::GraphicsPipeline {
+	class VK::GraphicsPipeline final : public Trident::GraphicsPipeline {
 		public:
-			explicit GraphicsPipeline(const GraphicsPipelineDescriptor& descriptor, const VK::Device& device);
+			explicit GraphicsPipeline(const Trident::Device* device);
 
-			~GraphicsPipeline() final override;
-
-		private:
-			const VK::Device& device;
+		public:
+			VkPipeline pipeline;
+			// VkPipelineBindPoint bindPoint;
 	};
+
+	namespace VK {
+		ref<Trident::GraphicsPipeline> createGraphicsPipeline(const Trident::Device* device, const GraphicsPipelineDescriptor& descriptor);
+
+		void destroyGraphicsPipeline(const Trident::Device* device, const Trident::GraphicsPipeline* graphicsPipeline);
+	}
 }

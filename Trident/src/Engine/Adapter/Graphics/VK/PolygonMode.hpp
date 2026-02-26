@@ -7,12 +7,14 @@
 
 namespace Trident::VK {
 	inline VkPolygonMode getPolygonMode(PolygonMode polygonMode) {
-		static constexpr VkPolygonMode vkPolygonModes[] = {
+		static constexpr VkPolygonMode POLYGON_MODES[] = {
 			VK_POLYGON_MODE_POINT,
 			VK_POLYGON_MODE_LINE,
 			VK_POLYGON_MODE_FILL,
 		};
 
-		return vkPolygonModes[static_cast<uint8>(polygonMode)];
+		ADAPTER_ASSERT(polygonMode < PolygonMode::count, "Invalid polygon mode.");
+
+		return POLYGON_MODES[static_cast<uint32>(polygonMode)];
 	}
 }

@@ -27,7 +27,7 @@ namespace Trident {
 		bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 		bufferCreateInfo.pNext = nullptr;
 		bufferCreateInfo.flags = 0;
-		bufferCreateInfo.size = size;
+		bufferCreateInfo.size = buffer->getSize();
 		bufferCreateInfo.usage = getBufferUsageFlagBits(descriptor.usage);
 		bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		bufferCreateInfo.queueFamilyIndexCount = 0;
@@ -36,14 +36,14 @@ namespace Trident {
 		{
 			PROFILE_SCOPE("vkCreateBuffer");
 
-			result = vkCreateBuffer(_device->device, &bufferCreateInfo, nullptr, &buffer->buffer);
+			result = _device->vkCreateBuffer(_device->device, &bufferCreateInfo, nullptr, &buffer->buffer);
 		}
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create buffer ([]).", string_VkResult(result));
 
 		VkMemoryRequirements memoryRequirements;
 
-		vkGetBufferMemoryRequirements(_device->device, buffer->buffer, &memoryRequirements);
+		_device->vkGetBufferMemoryRequirements(_device->device, buffer->buffer, &memoryRequirements);
 
 		VkMemoryPropertyFlags memoryPropertyFlags = static_cast<VkMemoryPropertyFlags>(descriptor.memoryProperties);
 		uint32 memoryTypeIndex = MemoryAllocator::findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
@@ -64,7 +64,7 @@ namespace Trident {
 
 		ADAPTER_ASSERT(memoryTypeIndex != UNDEFINED_MEMORY_TYPE_INDEX, "Undefined memory type index.");
 
-		memorySuballocation = MemoryAllocator::suballocateBuffer(_device->device, buffer->buffer, memoryTypeIndex, memoryRequirements);
+		buffer->memorySuballocation = MemoryAllocator::suballocateBuffer(_device->device, buffer->buffer, memoryTypeIndex, memoryRequirements);
 
 		#if defined(BUILD_MODE_DEBUG)
 			if (descriptor.name.count() > 0) {
@@ -75,7 +75,7 @@ namespace Trident {
 				debugUtilsObjectNameInfo.objectHandle = (uint64) buffer->buffer;
 				debugUtilsObjectNameInfo.pObjectName = &descriptor.name[0];
 
-				result = vkSetDebugUtilsObjectNameEXT(_device->device, &debugUtilsObjectNameInfo);
+				result = _device->vkSetDebugUtilsObjectNameEXT(_device->device, &debugUtilsObjectNameInfo);
 
 				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to set object name ([]).", string_VkResult(result));
 			}
@@ -90,7 +90,7 @@ namespace Trident {
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		const VK::Buffer* _buffer = static_cast<const VK::Buffer*>(buffer);
 
-		vkDestroyBuffer(_device->device, _buffer->buffer, nullptr);
+		_device->vkDestroyBuffer(_device->device, _buffer->buffer, nullptr);
 
 		MemoryAllocator::freeSuballocation(_device->device, _buffer->memorySuballocation.allocationIndex);
 	}

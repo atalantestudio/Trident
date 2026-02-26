@@ -7,10 +7,12 @@
 
 namespace Trident::VK {
 	inline VkImageType getImageType(ImageType imageType) {
-		static constexpr VkImageType vkImageTypes[] = {
+		static constexpr VkImageType IMAGE_TYPES[] = {
 			VK_IMAGE_TYPE_2D,
 		};
 
-		return vkImageTypes[static_cast<uint8>(imageType)];
+		ADAPTER_ASSERT(imageType < ImageType::count, "Invalid image type.");
+
+		return IMAGE_TYPES[static_cast<uint32>(imageType)];
 	}
 }

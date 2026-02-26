@@ -3,6 +3,7 @@
 
 #include "pch.hpp"
 
+#include "Engine/Adapter/Graphics/VK/AcquireNextImageStatus.hpp"
 #include "Engine/Adapter/Graphics/VK/Buffer.hpp"
 #include "Engine/Adapter/Graphics/VK/CommandBuffer.hpp"
 #include "Engine/Adapter/Graphics/VK/DescriptorSet.hpp"
@@ -20,124 +21,42 @@
 #include "Engine/Adapter/Graphics/VK/Swapchain.hpp"
 
 namespace Trident {
-	// TODO: Client-side extension request.
-	const sequence<const char8*> VK::Device::ENABLED_EXTENSION_NAMES = {
-		VK_KHR_MAINTENANCE_1_EXTENSION_NAME,
-		VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-	};
+	VK::Device::Device(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice) :
+		Trident::Device(adapter, physicalDevice)
+	{}
 
-	// NOTE: ~3Mb in Release mode.
-	VK::Device::Device(const VK::PhysicalDevice& physicalDevice) :
-		physicalDevice(physicalDevice)
-	{
+	AcquireNextImageStatus VK::acquireNextImage(const Trident::Device* device, const Trident::Swapchain* swapchain, const Semaphore* semaphore, uint32& imageIndex) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		// TODO: Replace with sequence<T>.
-		std::vector<uint32> queueFamilyIndices = {
-			physicalDevice.graphicsQueueFamilyIndex,
-			physicalDevice.computeQueueFamilyIndex,
-			physicalDevice.transferQueueFamilyIndex,
-		};
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		const VK::Swapchain* _swapchain = static_cast<const VK::Swapchain*>(swapchain);
+		const VK::Semaphore* _semaphore = static_cast<const VK::Semaphore*>(semaphore);
+		VkResult result;
 
-		std::sort(queueFamilyIndices.begin(), queueFamilyIndices.end());
-
-		queueFamilyIndices.erase(std::unique(queueFamilyIndices.begin(), queueFamilyIndices.end()), queueFamilyIndices.end());
-
-		sequence<VkDeviceQueueCreateInfo> deviceQueueCreateInfos(queueFamilyIndices.size());
-
-		static constexpr float32 DEFAULT_QUEUE_PRIORITY = 1.0f;
-
-		for (uint32 queueFamilyIndexIndex = 0; queueFamilyIndexIndex < queueFamilyIndices.size(); queueFamilyIndexIndex += 1) {
-			VkDeviceQueueCreateInfo deviceQueueCreateInfo{};
-			deviceQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-			deviceQueueCreateInfo.pNext = nullptr;
-			deviceQueueCreateInfo.flags = 0;
-			deviceQueueCreateInfo.queueFamilyIndex = queueFamilyIndices[queueFamilyIndexIndex];
-			deviceQueueCreateInfo.queueCount = 1;
-			deviceQueueCreateInfo.pQueuePriorities = &DEFAULT_QUEUE_PRIORITY;
-
-			deviceQueueCreateInfos[queueFamilyIndexIndex] = deviceQueueCreateInfo;
-		}
-
-		VkDeviceCreateInfo deviceCreateInfo{};
-		deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-		deviceCreateInfo.pNext = nullptr;
-		deviceCreateInfo.flags = 0;
-		deviceCreateInfo.queueCreateInfoCount = static_cast<uint32>(deviceQueueCreateInfos.count());
-		deviceCreateInfo.pQueueCreateInfos = &deviceQueueCreateInfos[0];
-		deviceCreateInfo.enabledExtensionCount = static_cast<uint32>(ENABLED_EXTENSION_NAMES.count());
-		deviceCreateInfo.ppEnabledExtensionNames = &ENABLED_EXTENSION_NAMES[0];
-		deviceCreateInfo.pEnabledFeatures = &physicalDevice.features;
-
-		const VkResult result = vkCreateDevice(physicalDevice.physicalDevice, &deviceCreateInfo, nullptr, &device);
-
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create device ([]).", string_VkResult(result));
-
-		queues[0] = createRef<VK::Queue>(*this, physicalDevice.graphicsQueueFamilyIndex);
-		queues[1] = createRef<VK::Queue>(*this, physicalDevice.computeQueueFamilyIndex);
-		queues[2] = createRef<VK::Queue>(*this, physicalDevice.transferQueueFamilyIndex);
-
-		vkGetPhysicalDeviceMemoryProperties(physicalDevice.physicalDevice, &memoryProperties);
-	}
-
-	VK::Device::~Device() {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		// Destroy the command pools before the device.
-		for (const ref<VK::Queue> queue : queues) {
-			queue.~shared_ptr();
-		}
-
-		for (const VkDescriptorPool descriptorPool : descriptorPools) {
-			vkDestroyDescriptorPool(device, descriptorPool, nullptr);
-		}
-
-		vkDestroyDevice(device, nullptr);
-	}
-
-	ref<PhysicalDevice> VK::Device::getPhysicalDevice() const {
-		return createRef<VK::PhysicalDevice>(physicalDevice);
-	}
-
-	ref<Queue> VK::Device::getQueue(QueueFamilyCapability queueFamilyCapability) const {
-		return queues[static_cast<uint32>(queueFamilyCapability)];
-	}
-
-	AcquireNextImageStatus VK::Device::acquireNextImage(ref<Trident::Swapchain> swapchain, ref<Trident::Semaphore> semaphore, uint32& imageIndex) const {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		const VkResult result = vkAcquireNextImageKHR(
-			device,
-			std::static_pointer_cast<VK::Swapchain>(swapchain)->swapchain,
+		result = _device->vkAcquireNextImageKHR(
+			_device->device,
+			_swapchain->swapchain,
 			max<uint64>(),
-			std::static_pointer_cast<VK::Semaphore>(semaphore)->semaphore,
+			_semaphore->semaphore,
 			VK_NULL_HANDLE,
 			&imageIndex
 		);
 
-		switch (result) {
-			case VK_SUCCESS:
-				return AcquireNextImageStatus::SUCCESS;
-			case VK_SUBOPTIMAL_KHR:
-				return AcquireNextImageStatus::SUBOPTIMAL;
-			case VK_ERROR_OUT_OF_DATE_KHR:
-				return AcquireNextImageStatus::ERROR_OUT_OF_DATE;
-			default:
-				ADAPTER_ASSERT(false, "Unhandled status.");
-
-				return AcquireNextImageStatus::ERROR_UNHANDLED;
-		}
+		return fromResult(result);
 	}
 
-	sequence<ref<DescriptorSet>> VK::Device::allocateDescriptorSets(view<ref<Trident::DescriptorSetLayout>> descriptorSetLayouts) {
-		VkResult result;
+	sequence<ref<Trident::DescriptorSet>> VK::allocateDescriptorSets(const Trident::Device* device, view<ref<DescriptorSetLayout>> descriptorSetLayouts) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		const uint32 descriptorSetCount = static_cast<uint32>(descriptorSetLayouts.count());
 
 		sequence<VkDescriptorSetLayout> vkDescriptorSetLayouts(descriptorSetCount);
 		sequence<uint32> descriptorCountPerType(static_cast<uint32>(DescriptorType::count));
+		uint32 descriptorSetLayoutIndex = 0;
+		VkResult result;
 
-		for (uint32 descriptorSetLayoutIndex = 0; descriptorSetLayoutIndex < descriptorSetLayouts.count(); descriptorSetLayoutIndex += 1) {
+		while (descriptorSetLayoutIndex < descriptorSetLayouts.count()) {
 			const ref<Trident::DescriptorSetLayout> descriptorSetLayout = descriptorSetLayouts[descriptorSetLayoutIndex];
 
 			for (const DescriptorSetLayoutBinding descriptorSetLayoutBinding : descriptorSetLayout->bindings) {
@@ -145,6 +64,8 @@ namespace Trident {
 			}
 
 			vkDescriptorSetLayouts[descriptorSetLayoutIndex] = std::static_pointer_cast<VK::DescriptorSetLayout>(descriptorSetLayout)->descriptorSetLayout;
+
+			descriptorSetLayoutIndex += 1;
 		}
 
 		uint32 descriptorPoolSizeCount = 0;
@@ -157,8 +78,13 @@ namespace Trident {
 
 		sequence<VkDescriptorPoolSize> vkDescriptorPoolSizes(descriptorPoolSizeCount);
 
-		for (uint32 descriptorPoolSizeIndex = 0, descriptorType = 0; descriptorType < descriptorCountPerType.count(); descriptorType += 1) {
+		uint32 descriptorPoolSizeIndex = 0;
+		uint32 descriptorType = 0;
+
+		while (descriptorType < descriptorCountPerType.count()) {
 			if (descriptorCountPerType[descriptorType] == 0) {
+				descriptorType += 1;
+
 				continue;
 			}
 
@@ -167,6 +93,7 @@ namespace Trident {
 			vkDescriptorPoolSize.descriptorCount = descriptorCountPerType[descriptorType];
 
 			descriptorPoolSizeIndex += 1;
+			descriptorType += 1;
 		}
 
 		VkDescriptorPoolCreateInfo descriptorPoolCreateInfo{};
@@ -179,11 +106,11 @@ namespace Trident {
 
 		VkDescriptorPool descriptorPool;
 
-		result = vkCreateDescriptorPool(device, &descriptorPoolCreateInfo, nullptr, &descriptorPool);
+		result = vkCreateDescriptorPool(_device->device, &descriptorPoolCreateInfo, nullptr, &descriptorPool);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create descriptor pool ([]).", string_VkResult(result));
 
-		descriptorPools.emplace_back(descriptorPool);
+		_device->descriptorPools.emplace_back(descriptorPool);
 
 		VkDescriptorSetAllocateInfo descriptorSetAllocateInfo{};
 		descriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -194,40 +121,146 @@ namespace Trident {
 
 		sequence<VkDescriptorSet> vkDescriptorSets(descriptorSetCount);
 
-		result = vkAllocateDescriptorSets(device, &descriptorSetAllocateInfo, &vkDescriptorSets[0]);
+		result = _device->vkAllocateDescriptorSets(_device->device, &descriptorSetAllocateInfo, &vkDescriptorSets[0]);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to allocate descriptor sets ([]).", string_VkResult(result));
 
 		sequence<ref<Trident::DescriptorSet>> descriptorSets(descriptorSetLayouts.count());
+		uint32 descriptorSetIndex = 0;
+		uint32 descriptorSetBindingIndex;
 
-		for (uint32 descriptorSetIndex = 0; descriptorSetIndex < descriptorSets.count(); descriptorSetIndex += 1) {
+		while (descriptorSetIndex < descriptorSets.count()) {
 			const ref<Trident::DescriptorSetLayout> descriptorSetLayout = descriptorSetLayouts[descriptorSetIndex];
 			const ref<VK::DescriptorSet> descriptorSet = createRef<VK::DescriptorSet>(vkDescriptorSets[descriptorSetIndex]);
 
 			descriptorSet->bindings = sequence<VK::DescriptorSet::DescriptorSetBinding>(descriptorSetLayout->bindings.count());
+			descriptorSetBindingIndex = 0;
 
-			for (uint32 descriptorSetBindingIndex = 0; descriptorSetBindingIndex < descriptorSet->bindings.count(); descriptorSetBindingIndex += 1) {
+			while (descriptorSetBindingIndex < descriptorSet->bindings.count()) {
 				const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = descriptorSetLayout->bindings[descriptorSetBindingIndex];
 
 				VK::DescriptorSet::DescriptorSetBinding& vkDescriptorSetBinding = descriptorSet->bindings[descriptorSetBindingIndex];
 				vkDescriptorSetBinding.descriptorType = descriptorSetLayoutBinding.descriptorType;
+
+				descriptorSetBindingIndex += 1;
 			}
 
 			descriptorSets[descriptorSetIndex] = descriptorSet;
+			descriptorSetIndex += 1;
 		}
 
 		return descriptorSets;
 	}
 
-	void VK::Device::resetFence(ref<Trident::Fence> fence) const {
-		const VkResult result = vkResetFences(device, 1, &std::static_pointer_cast<VK::Fence>(fence)->fence);
+	ref<Trident::Device> VK::createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice) {
+		static constexpr float32 DEFAULT_QUEUE_PRIORITY = 1.0f;
+
+		// TODO: Expose to the client side.
+		static const view<const char8*> ENABLED_EXTENSION_NAMES = {
+			VK_KHR_MAINTENANCE_1_EXTENSION_NAME,
+			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+		};
+
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const VK::PhysicalDevice* _physicalDevice = static_cast<const VK::PhysicalDevice*>(physicalDevice);
+		VkResult result;
+
+		ref<VK::Device> device = createRef<VK::Device>(adapter, physicalDevice);
+
+		// TODO: Replace with sequence<T>.
+		std::vector<uint32> queueFamilyIndices = {
+			physicalDevice->graphicsQueueFamilyIndex,
+			physicalDevice->computeQueueFamilyIndex,
+			physicalDevice->transferQueueFamilyIndex,
+		};
+
+		std::sort(queueFamilyIndices.begin(), queueFamilyIndices.end());
+
+		queueFamilyIndices.erase(std::unique(queueFamilyIndices.begin(), queueFamilyIndices.end()), queueFamilyIndices.end());
+
+		sequence<VkDeviceQueueCreateInfo> deviceQueueCreateInfos(queueFamilyIndices.size());
+
+		uint32 queueFamilyIndexIndex = 0;
+
+		while (queueFamilyIndexIndex < queueFamilyIndices.size()) {
+			VkDeviceQueueCreateInfo deviceQueueCreateInfo{};
+			deviceQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+			deviceQueueCreateInfo.pNext = nullptr;
+			deviceQueueCreateInfo.flags = 0;
+			deviceQueueCreateInfo.queueFamilyIndex = queueFamilyIndices[queueFamilyIndexIndex];
+			deviceQueueCreateInfo.queueCount = 1;
+			deviceQueueCreateInfo.pQueuePriorities = &DEFAULT_QUEUE_PRIORITY;
+
+			deviceQueueCreateInfos[queueFamilyIndexIndex] = deviceQueueCreateInfo;
+
+			queueFamilyIndexIndex += 1;
+		}
+
+		VkDeviceCreateInfo deviceCreateInfo{};
+		deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+		deviceCreateInfo.pNext = nullptr;
+		deviceCreateInfo.flags = 0;
+		deviceCreateInfo.queueCreateInfoCount = static_cast<uint32>(deviceQueueCreateInfos.count());
+		deviceCreateInfo.pQueueCreateInfos = &deviceQueueCreateInfos[0];
+		deviceCreateInfo.enabledExtensionCount = static_cast<uint32>(ENABLED_EXTENSION_NAMES.count());
+		deviceCreateInfo.ppEnabledExtensionNames = &ENABLED_EXTENSION_NAMES[0];
+		deviceCreateInfo.pEnabledFeatures = &_physicalDevice->features;
+
+		result = vkCreateDevice(_physicalDevice->physicalDevice, &deviceCreateInfo, nullptr, &device->device);
+
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create device ([]).", string_VkResult(result));
+
+		device->queues[0] = createRef<VK::Queue>(device.get(), physicalDevice->graphicsQueueFamilyIndex);
+		device->queues[1] = createRef<VK::Queue>(device.get(), physicalDevice->computeQueueFamilyIndex);
+		device->queues[2] = createRef<VK::Queue>(device.get(), physicalDevice->transferQueueFamilyIndex);
+
+		// TODO: Get device procedure addresses using vkGetProcAddress.
+		BREAKPOINT();
+
+		return device;
+	}
+
+	void VK::destroyDevice(const Trident::Device* device) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+
+		for (const ref<VK::Queue> queue : _device->queues) {
+			queue.~shared_ptr();
+		}
+
+		for (const VkDescriptorPool descriptorPool : _device->descriptorPools) {
+			_device->vkDestroyDescriptorPool(_device->device, descriptorPool, nullptr);
+		}
+
+		_device->vkDestroyDevice(_device->device, nullptr);
+	}
+
+	ref<Trident::Queue> VK::getQueue(const Trident::Device* device, QueueFamilyCapability queueFamilyCapability) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+
+		return _device->queues[static_cast<uint32>(queueFamilyCapability)];
+	}
+
+	void VK::resetFence(const Trident::Device* device, const Trident::Fence* fence) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		const VK::Fence* _fence = static_cast<const VK::Fence*>(fence);
+		VkResult result;
+
+		result = _device->vkResetFences(_device->device, 1, _fence->fence);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to reset fence ([]).", string_VkResult(result));
 	}
 
-	void VK::Device::updateDescriptorSets(view<WriteDescriptorSet> writeDescriptorSets) const {
-		DEBUG_DESCRIPTOR_GUARD(writeDescriptorSets);
+	void VK::updateDescriptorSets(const Trident::Device* device, view<WriteDescriptorSet> writeDescriptorSets) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		uint64 descriptorBufferInfoCount = 0;
 		uint64 descriptorImageInfoCount = 0;
 
@@ -321,17 +354,28 @@ namespace Trident {
 			writeDescriptorSetIndex += 1;
 		}
 
-		vkUpdateDescriptorSets(device, static_cast<uint32>(vkWriteDescriptorSets.count()), &vkWriteDescriptorSets[0], 0, nullptr);
+		_device->vkUpdateDescriptorSets(_device->device, static_cast<uint32>(vkWriteDescriptorSets.count()), &vkWriteDescriptorSets[0], 0, nullptr);
 	}
 
-	void VK::Device::waitForFence(ref<Trident::Fence> fence) const {
-		const VkResult result = vkWaitForFences(device, 1, &std::static_pointer_cast<VK::Fence>(fence)->fence, VK_TRUE, max<uint64>());
+	void VK::waitForFence(const Trident::Device* device, const Trident::Fence* fence) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		const VK::Fence* _fence = static_cast<const VK::Fence*>(fence);
+		VkResult result;
+
+		result = _device->vkWaitForFences(_device->device, 1, _fence->fence, VK_TRUE, max<uint64>());
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to wait for fence ([]).", string_VkResult(result));
 	}
 
-	void VK::Device::waitIdle() const {
-		const VkResult result = vkDeviceWaitIdle(device);
+	void VK::waitIdle(const Trident::Device* device) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		VkResult result;
+
+		result = _device->vkDeviceWaitIdle(_device->device);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to wait for device idle state ([]).", string_VkResult(result));
 	}

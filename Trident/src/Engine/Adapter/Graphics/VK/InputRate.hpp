@@ -7,11 +7,13 @@
 
 namespace Trident::VK {
 	inline VkVertexInputRate getVertexInputRate(InputRate inputRate) {
-		static constexpr VkVertexInputRate vkVertexInputRates[] = {
+		static constexpr VkVertexInputRate VERTEX_INPUT_RATES[] = {
 			VK_VERTEX_INPUT_RATE_VERTEX,
 			VK_VERTEX_INPUT_RATE_INSTANCE,
 		};
 
-		return vkVertexInputRates[static_cast<uint8>(inputRate)];
+		ADAPTER_ASSERT(inputRate < InputRate::count, "Invalid input rate.");
+
+		return VERTEX_INPUT_RATES[static_cast<uint32>(inputRate)];
 	}
 }
