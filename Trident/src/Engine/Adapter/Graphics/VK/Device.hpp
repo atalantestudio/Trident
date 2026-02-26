@@ -39,5 +39,13 @@ namespace Trident {
 			VkPhysicalDeviceMemoryProperties memoryProperties;
 			std::vector<VkDescriptorPool> descriptorPools;
 			ref<VK::Queue> queues[3];
+
+		public:
+			PFN_vkCreateBuffer vkCreateBuffer;
+			PFN_vkCreateDescriptorSetLayout vkCreateDescriptorSetLayout;
+			PFN_vkCreateSemaphore vkCreateSemaphore;
+			PFN_vkDestroyBuffer vkDestroyBuffer;
+			PFN_vkDestroyDescriptorSetLayout vkDestroyDescriptorSetLayout;
+			PFN_vkDestroySemaphore vkDestroySemaphore;
 	};
 }

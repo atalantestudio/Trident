@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "Engine/Adapter/Graphics/DX12/Device.hpp"
 #include "Engine/API/Rendering/Buffer.hpp"
 
 namespace Trident {

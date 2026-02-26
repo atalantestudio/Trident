@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/DX12/Buffer.hpp"
+#include "Engine/Adapter/Graphics/DX12/Device.hpp"
 #include "Engine/Adapter/Graphics/DX12/HeapType.hpp"
 #include "Engine/Adapter/Graphics/DX12/ResourceState.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"

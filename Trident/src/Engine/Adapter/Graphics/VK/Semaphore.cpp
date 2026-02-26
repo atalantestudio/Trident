@@ -3,28 +3,40 @@
 
 #include "pch.hpp"
 
+#include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/Adapter/Graphics/VK/Semaphore.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	VK::Semaphore::Semaphore(const VK::Device& device) :
-		device(device)
-	{
+	VK::Semaphore::Semaphore(const Trident::Device* device) :
+		Trident::Semaphore(device)
+	{}
+
+	ref<Trident::Semaphore> VK::createSemaphore(const Trident::Device* device) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		ref<VK::Semaphore> semaphore = createRef<VK::Semaphore>(device);
+		VkResult result;
 
 		VkSemaphoreCreateInfo semaphoreCreateInfo{};
 		semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 		semaphoreCreateInfo.pNext = nullptr;
 		semaphoreCreateInfo.flags = 0;
 
-		const VkResult result = vkCreateSemaphore(device.device, &semaphoreCreateInfo, nullptr, &semaphore);
+		result = vkCreateSemaphore(_device->device, &semaphoreCreateInfo, nullptr, &semaphore->semaphore);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create semaphore ([]).", string_VkResult(result));
+
+		return semaphore;
 	}
 
-	VK::Semaphore::~Semaphore() {
+	void VK::destroySemaphore(const Trident::Device* device, const Trident::Semaphore* semaphore) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		vkDestroySemaphore(device.device, semaphore, nullptr);
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		const VK::Semaphore* _semaphore = static_cast<const VK::Semaphore*>(semaphore);
+
+		_device->vkDestroySemaphore(_device->device, _semaphore->semaphore, nullptr);
 	}
 }

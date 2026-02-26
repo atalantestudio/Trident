@@ -33,8 +33,7 @@ namespace Trident {
 	#define GL_SOURCE_FROM_SPIRV
 
 	// Toggle Vulkan graphics adapter.
-	// TODO: Restore.
-	// #define ENABLE_VK_ADAPTER
+	#define ENABLE_VK_ADAPTER
 
 	#if defined(BUILD_MODE_DEBUG)
 		// Toggle debug messages from the graphics API.

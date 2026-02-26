@@ -45,10 +45,8 @@ project "Trident"
 
 	removefiles {
 		"%{prj.name}/src/Engine/Adapter/Graphics/DX12/**.cpp",
-		"%{prj.name}/src/Engine/Adapter/Graphics/GL/**.cpp",
-		"%{prj.name}/src/Engine/Adapter/Graphics/VK/**.cpp",
+		"%{prj.name}/src/Engine/Adapter/Graphics/GL/**.cpp", -- TODO(graphics-api-update)
 		"%{prj.name}/src/Engine/Adapter/Window/Win32/**.cpp",
-
 		"%{prj.name}/vendor/tsl/tsl/tslc.cpp",
 	}
 
@@ -72,12 +70,6 @@ project "Trident"
 		files {
 			"%{prj.name}/src/Engine/Adapter/Graphics/DX12/**.cpp",
 			"%{prj.name}/src/Engine/Adapter/Window/Win32/**.cpp",
-		}
-
-		links {
-			-- "d3d12.lib",
-			-- "d3dcompiler.lib",
-			-- "dxgi.lib",
 		}
 
 	filter "configurations:Debug"

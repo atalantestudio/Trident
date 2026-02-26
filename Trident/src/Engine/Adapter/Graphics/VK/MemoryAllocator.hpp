@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Engine/API/Rendering/MemoryAllocator.hpp"
+
 namespace Trident {
 	#define UNDEFINED_MEMORY_TYPE_INDEX max<uint32>()
 	#define UNDEFINED_MEMORY_ALLOCATION_INDEX max<uint32>()
@@ -37,7 +39,7 @@ namespace Trident {
 		VkDeviceSize size;
 	};
 
-	class VK::MemoryAllocator {
+	class VK::MemoryAllocator : public Trident::MemoryAllocator {
 		public:
 			static void initialize(const VK::PhysicalDevice& physicalDevice);
 

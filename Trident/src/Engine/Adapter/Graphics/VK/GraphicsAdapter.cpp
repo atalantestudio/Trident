@@ -21,126 +21,24 @@
 #include "Engine/Adapter/Graphics/VK/Swapchain.hpp"
 
 namespace Trident {
-	VK::GraphicsAdapter::GraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window, const ApplicationProperties& properties) :
-		Trident::GraphicsAdapter(window),
-		vulkan1Library(Platform::openLibrary("vulkan-1.dll"))
-	{
-		logger = ConsoleLogger(std::cout, LogLevel::ALL, "VULKAN");
-
-		loadBaseProcedures();
-
-		instance = createRef<VK::Instance>(projectDescriptor, properties);
-
-		loadInstanceProcedures();
-
-		#if defined(DEBUG_ENABLE_MESSENGER)
-			instance->createDebugUtilsMessenger();
-		#endif
-
-		surface = createRef<VK::Surface>(window, *instance);
-		physicalDevice = createRef<VK::PhysicalDevice>(instance->selectPhysicalDevice());
-		device = createRef<VK::Device>(*physicalDevice);
-
-		surface->setPhysicalDevice(*physicalDevice);
-		surface->checkPresentQueueFamilyIndex(physicalDevice->graphicsQueueFamilyIndex);
-
-		MemoryAllocator::initialize(*physicalDevice);
+	static ref<Trident::MemoryAllocator> createMemoryAllocator(const Trident::Device* device) {
+		return createRef<VK::MemoryAllocator>(static_cast<const VK::Device*>(device));
 	}
 
-	/* VK::GraphicsAdapter::~GraphicsAdapter() {
-		MemoryAllocator::destroy();
-	} */
-
-	ref<Buffer> VK::GraphicsAdapter::createBuffer(const BufferDescriptor& descriptor) const {
-		return createRef<VK::Buffer>(descriptor, *device);
+	static ref<Semaphore> createSemaphore(const Trident::Device* device) {
+		return createRef<Semaphore>(device);
 	}
 
-	ref<ComputePipeline> VK::GraphicsAdapter::createComputePipeline(const ComputePipelineDescriptor& descriptor) const {
-		return createRef<VK::ComputePipeline>(descriptor, *device);
+	static void destroyDescriptorSetLayout(const Trident::Device* device, const DescriptorSetLayout* descriptorSetLayout) {}
+
+	static void destroySemaphore(const Trident::Device* device, const Semaphore* semaphore) {}
+
+	static ref<RenderPass> createRenderPass(const Trident::Device* device, const RenderPassDescriptor& descriptor) {
+		return createRef<RenderPass>(descriptor);
 	}
 
-	ref<DescriptorSetLayout> VK::GraphicsAdapter::createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const {
-		return createRef<VK::DescriptorSetLayout>(bindings, *device);
-	}
-
-	ref<Fence> VK::GraphicsAdapter::createFence(const FenceDescriptor& descriptor) const {
-		return createRef<VK::Fence>(descriptor, *device);
-	}
-
-	ref<Framebuffer> VK::GraphicsAdapter::createFramebuffer(const FramebufferDescriptor& descriptor) const {
-		return createRef<VK::Framebuffer>(descriptor, *device);
-	}
-
-	ref<Image> VK::GraphicsAdapter::createImage(const ImageDescriptor& descriptor) const {
-		return createRef<VK::Image>(descriptor, *device);
-	}
-
-	ref<PipelineLayout> VK::GraphicsAdapter::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
-		return createRef<VK::PipelineLayout>(descriptor, *device);
-	}
-
-	ref<RenderPass> VK::GraphicsAdapter::createRenderPass(const RenderPassDescriptor& descriptor) const {
-		return createRef<VK::RenderPass>(descriptor, *surface, *device);
-	}
-
-	ref<GraphicsPipeline> VK::GraphicsAdapter::createGraphicsPipeline(const GraphicsPipelineDescriptor& descriptor) const {
-		return createRef<VK::GraphicsPipeline>(descriptor, *device);
-	}
-
-	ref<Sampler> VK::GraphicsAdapter::createSampler(const SamplerDescriptor& descriptor) const {
-		return createRef<VK::Sampler>(descriptor, *device);
-	}
-
-	ref<Semaphore> VK::GraphicsAdapter::createSemaphore() const {
-		return createRef<VK::Semaphore>(*device);
-	}
-
-	ref<ShaderModule> VK::GraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) const {
-		// TODO: Add support for SPIR-V shader module assets.
-		ENGINE_ERROR_UNIMPLEMENTED();
-
-		return nullptr;
-	}
-
-	ref<ShaderModule> VK::GraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) const {
-		return createRef<VK::ShaderModule>(descriptor, code, *device);
-	}
-
-	ref<Swapchain> VK::GraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor) const {
-		return createRef<VK::Swapchain>(descriptor, *surface, *device);
-	}
-
-	ref<Device> VK::GraphicsAdapter::getDevice() const {
-		return device;
-	}
-
-	ref<Surface> VK::GraphicsAdapter::getSurface() const {
-		return surface;
-	}
-
-	void* VK::GraphicsAdapter::getProcedure(VkInstance instance, view<char8> procedureName) const {
-		static const PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = pointer_cast<PFN_vkGetInstanceProcAddr>(vulkan1Library.getProcedure("vkGetInstanceProcAddr"));
-
-		const PFN_vkVoidFunction procedure = vkGetInstanceProcAddr(instance, &procedureName[0]);
-
-		ADAPTER_ASSERT(procedure != nullptr, "Cannot find address for procedure \"[]\".", procedureName);
-
-		return procedure;
-	}
-
-	void VK::GraphicsAdapter::loadBaseProcedures() const {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		#define LOAD_PROCEDURE(procedure) procedure = static_cast<decltype(procedure)>(getProcedure(nullptr, #procedure))
-
-		LOAD_PROCEDURE(vkCreateInstance);
-		LOAD_PROCEDURE(vkEnumerateInstanceLayerProperties);
-
-		#undef LOAD_PROCEDURE
-	}
-
-	void VK::GraphicsAdapter::loadInstanceProcedures() const {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+	void bindAdapter(Trident::GraphicsAdapter* adapter) {
+		/* PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		#define LOAD_PROCEDURE(procedure) procedure = static_cast<decltype(procedure)>(getProcedure(instance->instance, #procedure))
 
@@ -262,6 +160,207 @@ namespace Trident {
 			LOAD_PROCEDURE(vkQueuePresentKHR);
 		#endif
 
-		#undef LOAD_PROCEDURE
+		#undef LOAD_PROCEDURE */
+
+		adapter->logger = ConsoleLogger(std::cout, LogLevel::ALL, "DIRECTX 12");
+
+		// adapter->acquireNextImageImplementation = VK::acquireNextImage;
+		// adapter->allocateDescriptorSetsImplementation = VK::allocateDescriptorSets;
+		// adapter->beginImplementation = VK::begin;
+		// adapter->beginRenderPassImplementation = VK::beginRenderPass;
+		// adapter->bindComputePipelineImplementation = VK::bindComputePipeline;
+		// adapter->bindDescriptorSetsImplementation = VK::bindDescriptorSets;
+		// adapter->bindGraphicsPipelineImplementation = VK::bindGraphicsPipeline;
+		// adapter->bindIndexBufferImplementation = VK::bindIndexBuffer;
+		// adapter->bindVertexBufferImplementation = VK::bindVertexBuffer;
+		// adapter->copyBufferToBufferImplementation = VK::copyBufferToBuffer;
+		// adapter->copyBufferToImageImplementation = VK::copyBufferToImage;
+		// adapter->createBufferImplementation = VK::createBuffer;
+		// adapter->createCommandEncoderImplementation = VK::createCommandEncoder;
+		// adapter->createCommandPoolImplementation = VK::createCommandPool;
+		// adapter->createComputePipelineImplementation = VK::createComputePipeline;
+		adapter->createDescriptorSetLayoutImplementation = VK::createDescriptorSetLayout;
+		// adapter->createDeviceImplementation = VK::createDevice;
+		// adapter->createFenceImplementation = VK::createFence;
+		// adapter->createFramebufferImplementation = VK::createFramebuffer;
+		// adapter->createGraphicsPipelineImplementation = VK::createGraphicsPipeline;
+		// adapter->createImageImplementation = VK::createImage;
+		// adapter->createImageViewImplementation = VK::createImageView;
+		// adapter->createInstanceImplementation = VK::createInstance;
+		// adapter->createMemoryAllocatorImplementation = VK::createMemoryAllocator;
+		// adapter->createPipelineLayoutImplementation = VK::createPipelineLayout;
+		// adapter->createRenderPassImplementation = VK::createRenderPass;
+		// adapter->createSamplerImplementation = VK::createSampler;
+		adapter->createSemaphoreImplementation = VK::createSemaphore;
+		// adapter->createShaderModuleFromAssetImplementation = VK::createShaderModule;
+		// adapter->createShaderModuleFromCodeImplementation = VK::createShaderModule;
+		// adapter->createSurfaceImplementation = VK::createSurface;
+		// adapter->createSwapchainImplementation = VK::createSwapchain;
+		// adapter->destroyBufferImplementation = VK::destroyBuffer;
+		// adapter->destroyCommandEncoderImplementation = VK::destroyCommandEncoder;
+		// adapter->destroyCommandPoolImplementation = VK::destroyCommandPool;
+		// adapter->destroyComputePipelineImplementation = VK::destroyComputePipeline;
+		adapter->destroyDescriptorSetLayoutImplementation = VK::destroyDescriptorSetLayout;
+		// adapter->destroyDeviceImplementation = VK::destroyDevice;
+		// adapter->destroyFenceImplementation = VK::destroyFence;
+		// adapter->destroyFramebufferImplementation = VK::destroyFramebuffer;
+		// adapter->destroyGraphicsPipelineImplementation = VK::destroyGraphicsPipeline;
+		// adapter->destroyPipelineLayoutImplementation = VK::destroyPipelineLayout;
+		// adapter->destroyImageImplementation = VK::destroyImage;
+		// adapter->destroyImageViewImplementation = VK::destroyImageView;
+		// adapter->destroyInstanceImplementation = VK::destroyInstance;
+		// adapter->destroyQueueImplementation = VK::destroyQueue;
+		// adapter->destroySamplerImplementation = VK::destroySampler;
+		adapter->destroySemaphoreImplementation = VK::destroySemaphore;
+		// adapter->destroyShaderModuleImplementation = VK::destroyShaderModule;
+		// adapter->destroySurfaceImplementation = VK::destroySurface;
+		// adapter->destroySwapchainImplementation = VK::destroySwapchain;
+		// adapter->dispatchImplementation = VK::dispatch;
+		// adapter->dispatchIndirectImplementation = VK::dispatchIndirect;
+		// adapter->drawImplementation = VK::draw;
+		// adapter->drawIndirectImplementation = VK::drawIndirect;
+		// adapter->drawIndexedImplementation = VK::drawIndexed;
+		// adapter->drawIndexedIndirectImplementation = VK::drawIndexedIndirect;
+		// adapter->endImplementation = VK::end;
+		// adapter->endRenderPassImplementation = VK::endRenderPass;
+		// adapter->getQueueImplementation = VK::getQueue;
+		// adapter->getSurfaceFormatImplementation = VK::getSurfaceFormat;
+		// adapter->insertBufferMemoryBarriersImplementation = VK::insertBufferMemoryBarriers;
+		// adapter->mapBufferImplementation = VK::mapBuffer;
+		// adapter->nextSubpassImplementation = VK::nextSubpass;
+		// adapter->presentImplementation = VK::present;
+		// adapter->resetImplementation = VK::reset;
+		// adapter->resetFenceImplementation = VK::resetFence;
+		// adapter->selectPhysicalDeviceImplementation = VK::selectPhysicalDevice;
+		// adapter->setImageMemoryBarrierImplementation = VK::setImageMemoryBarrier;
+		// adapter->setLineWidthImplementation = VK::setLineWidth;
+		// adapter->setScissorImplementation = VK::setScissor;
+		// adapter->setViewportImplementation = VK::setViewport;
+		// adapter->submitImplementation = VK::submit;
+		// adapter->submit2Implementation = VK::submit;
+		// adapter->unmapBufferImplementation = VK::unmapBuffer;
+		// adapter->updateDescriptorSetsImplementation = VK::updateDescriptorSets;
+		// adapter->updateSwapchainImplementation = VK::recreateSwapchain;
+		// adapter->waitForFenceImplementation = VK::waitForFence;
+		// adapter->waitIdleDeviceImplementation = VK::waitIdle;
+		// adapter->waitIdleQueueImplementation = VK::waitIdle;
 	}
+
+	/* VK::GraphicsAdapter::GraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window, const ApplicationProperties& properties) :
+		Trident::GraphicsAdapter(window),
+		vulkan1Library(Platform::openLibrary("vulkan-1.dll"))
+	{
+		logger = ConsoleLogger(std::cout, LogLevel::ALL, "VULKAN");
+
+		loadBaseProcedures();
+
+		instance = createRef<VK::Instance>(projectDescriptor, properties);
+
+		loadInstanceProcedures();
+
+		#if defined(DEBUG_ENABLE_MESSENGER)
+			instance->createDebugUtilsMessenger();
+		#endif
+
+		surface = createRef<VK::Surface>(window, *instance);
+		physicalDevice = createRef<VK::PhysicalDevice>(instance->selectPhysicalDevice());
+		device = createRef<VK::Device>(*physicalDevice);
+
+		surface->setPhysicalDevice(*physicalDevice);
+		surface->checkPresentQueueFamilyIndex(physicalDevice->graphicsQueueFamilyIndex);
+
+		MemoryAllocator::initialize(*physicalDevice);
+	}
+
+	VK::GraphicsAdapter::~GraphicsAdapter() {
+		MemoryAllocator::destroy();
+	}
+
+	ref<Buffer> VK::GraphicsAdapter::createBuffer(const BufferDescriptor& descriptor) const {
+		return createRef<VK::Buffer>(descriptor, *device);
+	}
+
+	ref<ComputePipeline> VK::GraphicsAdapter::createComputePipeline(const ComputePipelineDescriptor& descriptor) const {
+		return createRef<VK::ComputePipeline>(descriptor, *device);
+	}
+
+	ref<DescriptorSetLayout> VK::GraphicsAdapter::createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const {
+		return createRef<VK::DescriptorSetLayout>(bindings, *device);
+	}
+
+	ref<Fence> VK::GraphicsAdapter::createFence(const FenceDescriptor& descriptor) const {
+		return createRef<VK::Fence>(descriptor, *device);
+	}
+
+	ref<Framebuffer> VK::GraphicsAdapter::createFramebuffer(const FramebufferDescriptor& descriptor) const {
+		return createRef<VK::Framebuffer>(descriptor, *device);
+	}
+
+	ref<Image> VK::GraphicsAdapter::createImage(const ImageDescriptor& descriptor) const {
+		return createRef<VK::Image>(descriptor, *device);
+	}
+
+	ref<PipelineLayout> VK::GraphicsAdapter::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
+		return createRef<VK::PipelineLayout>(descriptor, *device);
+	}
+
+	ref<RenderPass> VK::GraphicsAdapter::createRenderPass(const RenderPassDescriptor& descriptor) const {
+		return createRef<VK::RenderPass>(descriptor, *surface, *device);
+	}
+
+	ref<GraphicsPipeline> VK::GraphicsAdapter::createGraphicsPipeline(const GraphicsPipelineDescriptor& descriptor) const {
+		return createRef<VK::GraphicsPipeline>(descriptor, *device);
+	}
+
+	ref<Sampler> VK::GraphicsAdapter::createSampler(const SamplerDescriptor& descriptor) const {
+		return createRef<VK::Sampler>(descriptor, *device);
+	}
+
+	ref<Semaphore> VK::GraphicsAdapter::createSemaphore() const {
+		return createRef<VK::Semaphore>(*device);
+	}
+
+	ref<ShaderModule> VK::GraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) const {
+		// TODO: Add support for SPIR-V shader module assets.
+		ENGINE_ERROR_UNIMPLEMENTED();
+
+		return nullptr;
+	}
+
+	ref<ShaderModule> VK::GraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) const {
+		return createRef<VK::ShaderModule>(descriptor, code, *device);
+	}
+
+	ref<Swapchain> VK::GraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor) const {
+		return createRef<VK::Swapchain>(descriptor, *surface, *device);
+	}
+
+	ref<Device> VK::GraphicsAdapter::getDevice() const {
+		return device;
+	}
+
+	ref<Surface> VK::GraphicsAdapter::getSurface() const {
+		return surface;
+	}
+
+	void* VK::GraphicsAdapter::getProcedure(VkInstance instance, view<char8> procedureName) const {
+		static const PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = pointer_cast<PFN_vkGetInstanceProcAddr>(vulkan1Library.getProcedure("vkGetInstanceProcAddr"));
+
+		const PFN_vkVoidFunction procedure = vkGetInstanceProcAddr(instance, &procedureName[0]);
+
+		ADAPTER_ASSERT(procedure != nullptr, "Cannot find address for procedure \"[]\".", procedureName);
+
+		return procedure;
+	}
+
+	void VK::GraphicsAdapter::loadBaseProcedures() const {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		#define LOAD_PROCEDURE(procedure) procedure = static_cast<decltype(procedure)>(getProcedure(nullptr, #procedure))
+
+		LOAD_PROCEDURE(vkCreateInstance);
+		LOAD_PROCEDURE(vkEnumerateInstanceLayerProperties);
+
+		#undef LOAD_PROCEDURE
+	} */
 }
