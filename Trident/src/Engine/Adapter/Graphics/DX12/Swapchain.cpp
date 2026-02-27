@@ -6,13 +6,13 @@
 #include "Engine/Adapter/Graphics/DX12/Format.hpp"
 #include "Engine/Adapter/Graphics/DX12/Image.hpp"
 #include "Engine/Adapter/Graphics/DX12/Queue.hpp"
+#include "Engine/Adapter/Graphics/DX12/Surface.hpp"
 #include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
 	DX12::Swapchain::Swapchain(const Trident::Device* device, const SwapchainDescriptor& descriptor) :
-		Trident::Swapchain(device, descriptor),
-		surface(static_cast<const DX12::Surface*>(descriptor.surface.get()))
+		Trident::Swapchain(device, descriptor)
 	{}
 
 	ref<Trident::Swapchain> DX12::createSwapchain(const Trident::Device* device, const SwapchainDescriptor& descriptor) {

@@ -14,7 +14,6 @@ namespace Trident {
 
 		public:
 			VkPipeline pipeline;
-			// VkPipelineBindPoint bindPoint;
 	};
 
 	namespace VK {

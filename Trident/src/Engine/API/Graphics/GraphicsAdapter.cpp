@@ -186,8 +186,8 @@ namespace Trident {
 		return createShaderModuleFromCodeImplementation(device, descriptor, code);
 	}
 
-	ref<Surface> GraphicsAdapter::createSurface(const Instance* instance, const Window* window) const {
-		return createSurfaceImplementation(instance, window);
+	ref<Surface> GraphicsAdapter::createSurface(const Instance* instance, ref<PhysicalDevice> physicalDevice, const Window* window) const {
+		return createSurfaceImplementation(instance, physicalDevice, window);
 	}
 
 	ref<Swapchain> GraphicsAdapter::createSwapchain(const Device* device, const SwapchainDescriptor& descriptor) const {
@@ -304,10 +304,6 @@ namespace Trident {
 
 	ref<Queue> GraphicsAdapter::getQueue(const Device* device, QueueFamilyCapability queueFamilyCapability) const {
 		return getQueueImplementation(device, queueFamilyCapability);
-	}
-
-	ImageFormat GraphicsAdapter::getSurfaceFormat(const Surface* surface) const {
-		return getSurfaceFormatImplementation(surface);
 	}
 
 	void GraphicsAdapter::insertBufferMemoryBarriers(CommandEncoder* commandEncoder, view<BufferMemoryBarrier> barriers) const {

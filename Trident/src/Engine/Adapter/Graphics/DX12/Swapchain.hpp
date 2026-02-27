@@ -5,7 +5,6 @@
 
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
 #include "Engine/Adapter/Graphics/DX12/Image.hpp"
-#include "Engine/Adapter/Graphics/DX12/Surface.hpp"
 #include "Engine/API/Rendering/Swapchain.hpp"
 
 namespace Trident {
@@ -16,9 +15,6 @@ namespace Trident {
 		public:
 			IDXGISwapChain3* swapChain;
 			UINT syncInterval;
-
-		private:
-			const DX12::Surface* surface;
 	};
 
 	namespace DX12 {

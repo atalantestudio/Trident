@@ -24,393 +24,7 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	VK::CommandEncoder::CommandEncoder(const CommandBufferDescriptor& descriptor, const VK::Device& device, const VK::CommandPool& commandPool) :
-		device(device),
-		commandPool(commandPool),
-		commandBufferUsageFlag(getCommandBufferUsageFlag(descriptor.usage)),
-		limits(std::dynamic_pointer_cast<VK::PhysicalDevice>(device.getPhysicalDevice())->getLimits())
-	{
-		DEBUG_DESCRIPTOR_GUARD(descriptor);
-
-		VkResult result;
-
-		VkCommandBufferAllocateInfo commandBufferAllocateInfo{};
-		commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		commandBufferAllocateInfo.pNext = nullptr;
-		commandBufferAllocateInfo.commandPool = commandPool.commandPool;
-		commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		commandBufferAllocateInfo.commandBufferCount = 1;
-
-		result = vkAllocateCommandBuffers(device.device, &commandBufferAllocateInfo, &commandBuffer);
-
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create command buffer ([]).", string_VkResult(result));
-
-		#if defined(BUILD_MODE_DEBUG)
-			if (descriptor.name.count() > 0) {
-				VkDebugUtilsObjectNameInfoEXT debugUtilsObjectNameInfo{};
-				debugUtilsObjectNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
-				debugUtilsObjectNameInfo.pNext = nullptr;
-				debugUtilsObjectNameInfo.objectType = VK_OBJECT_TYPE_COMMAND_BUFFER;
-				debugUtilsObjectNameInfo.objectHandle = (uint64) commandBuffer;
-				debugUtilsObjectNameInfo.pObjectName = &descriptor.name[0];
-
-				result = vkSetDebugUtilsObjectNameEXT(device.device, &debugUtilsObjectNameInfo);
-
-				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to set object name ([]).", string_VkResult(result));
-			}
-		#endif
-	}
-
-	VK::CommandEncoder::~CommandEncoder() {
-		vkFreeCommandBuffers(device.device, commandPool.commandPool, 1, &commandBuffer);
-	}
-
-	void VK::CommandEncoder::begin() const {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		VkCommandBufferBeginInfo commandBufferBeginInfo{};
-		commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		commandBufferBeginInfo.pNext = nullptr;
-		commandBufferBeginInfo.flags = commandBufferUsageFlag;
-		commandBufferBeginInfo.pInheritanceInfo = nullptr;
-
-		const VkResult result = vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
-
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to begin command buffer ([]).", string_VkResult(result));
-	}
-
-	void VK::CommandEncoder::beginRenderPass(const BeginRenderPassDescriptor& descriptor) {
-		DEBUG_DESCRIPTOR_GUARD(descriptor);
-
-		const ref<VK::Framebuffer> framebuffer = std::static_pointer_cast<VK::Framebuffer>(descriptor.framebuffer);
-		const ref<VK::RenderPass> renderPass = std::static_pointer_cast<VK::RenderPass>(framebuffer->getRenderPass());
-
-		sequence<VkClearValue> clearValues(descriptor.clearValues.count());
-
-		// TODO: Refactor clear values.
-		for (uint64 clearValueIndex = 0; clearValueIndex < clearValues.count(); clearValueIndex += 1) {
-			if (descriptor.clearValues[clearValueIndex].depth != 0.0f || descriptor.clearValues[clearValueIndex].stencil != 0) {
-				clearValues[clearValueIndex].depthStencil.depth = descriptor.clearValues[clearValueIndex].depth;
-				clearValues[clearValueIndex].depthStencil.stencil = descriptor.clearValues[clearValueIndex].stencil;
-
-				continue;
-			}
-
-			clearValues[clearValueIndex].color.float32[0] = descriptor.clearValues[clearValueIndex].color[0];
-			clearValues[clearValueIndex].color.float32[1] = descriptor.clearValues[clearValueIndex].color[1];
-			clearValues[clearValueIndex].color.float32[2] = descriptor.clearValues[clearValueIndex].color[2];
-			clearValues[clearValueIndex].color.float32[3] = descriptor.clearValues[clearValueIndex].color[3];
-		}
-
-		VkRenderPassBeginInfo renderPassBeginInfo{};
-		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassBeginInfo.pNext = nullptr;
-		renderPassBeginInfo.renderPass = renderPass->renderPass;
-		renderPassBeginInfo.framebuffer = framebuffer->framebuffer;
-		renderPassBeginInfo.renderArea.offset.x = 0;
-		renderPassBeginInfo.renderArea.offset.y = 0;
-		renderPassBeginInfo.renderArea.extent = *pointer_cast<const VkExtent2D*>(&framebuffer->getExtent());
-		renderPassBeginInfo.clearValueCount = static_cast<uint32>(clearValues.count());
-
-		if (clearValues.count() == 0) {
-			renderPassBeginInfo.pClearValues = nullptr;
-		}
-		else {
-			renderPassBeginInfo.pClearValues = &clearValues[0];
-		}
-
-		vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-		commandCount += 1;
-	}
-
-	void VK::CommandEncoder::bindComputePipeline(ref<Trident::ComputePipeline> computePipeline) {
-		pipeline = std::dynamic_pointer_cast<VK::Pipeline>(computePipeline);
-
-		vkCmdBindPipeline(commandBuffer, pipeline->bindPoint, pipeline->pipeline);
-
-		commandCount += 1;
-	}
-
-	void VK::CommandEncoder::bindGraphicsPipeline(ref<Trident::GraphicsPipeline> graphicsPipeline) {
-		pipeline = std::dynamic_pointer_cast<VK::Pipeline>(graphicsPipeline);
-
-		vkCmdBindPipeline(commandBuffer, pipeline->bindPoint, pipeline->pipeline);
-
-		commandCount += 1;
-	}
-
-	void VK::CommandEncoder::bindDescriptorSets(ref<Trident::PipelineLayout> pipelineLayout, uint32 descriptorSetIndexOffset, view<ref<Trident::DescriptorSet>> descriptorSets) {
-		sequence<VkDescriptorSet> vkDescriptorSets(descriptorSets.count());
-
-		for (uint32 descriptorSetIndex = 0; descriptorSetIndex < descriptorSets.count(); descriptorSetIndex += 1) {
-			vkDescriptorSets[descriptorSetIndex] = std::static_pointer_cast<VK::DescriptorSet>(descriptorSets[descriptorSetIndex])->descriptorSet;
-		}
-
-		vkCmdBindDescriptorSets(
-			commandBuffer,
-			pipeline->bindPoint,
-			std::static_pointer_cast<VK::PipelineLayout>(pipelineLayout)->pipelineLayout,
-			descriptorSetIndexOffset,
-			static_cast<uint32>(vkDescriptorSets.count()),
-			&vkDescriptorSets[0],
-			0,
-			nullptr
-		);
-
-		commandCount += 1;
-	}
-
-	void VK::CommandEncoder::bindVertexBuffer(uint32 bindingIndex, ref<Trident::Buffer> vertexBuffer, uint64 offset, uint32 stride) {
-		vkCmdBindVertexBuffers(
-			commandBuffer,
-			bindingIndex,
-			1,
-			&std::static_pointer_cast<VK::Buffer>(vertexBuffer)->buffer,
-			&offset
-		);
-
-		commandCount += 1;
-	}
-
-	void VK::CommandEncoder::copyBufferToBuffer(ref<Trident::Buffer> sourceBuffer, ref<Trident::Buffer> destinationBuffer, view<BufferCopyRegion> copyRegions) {
-		vkCmdCopyBuffer(
-			commandBuffer,
-			std::static_pointer_cast<VK::Buffer>(sourceBuffer)->buffer,
-			std::static_pointer_cast<VK::Buffer>(destinationBuffer)->buffer,
-			static_cast<uint32>(copyRegions.count()),
-			pointer_cast<const VkBufferCopy*>(&copyRegions[0])
-		);
-
-		commandCount += 1;
-	}
-
-	void VK::CommandEncoder::copyBufferToImage(ref<Trident::Buffer> sourceBuffer, ref<Trident::Image> destinationImage, view<BufferImageCopyRegion> copyRegions) {
-		const sequence<VkBufferImageCopy> bufferImageCopies = parseBufferImageCopyRegions(copyRegions);
-
-		vkCmdCopyBufferToImage(
-			commandBuffer,
-			std::static_pointer_cast<VK::Buffer>(sourceBuffer)->buffer,
-			std::static_pointer_cast<VK::Image>(destinationImage)->image,
-			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			static_cast<uint32>(bufferImageCopies.count()),
-			&bufferImageCopies[0]
-		);
-
-		commandCount += 1;
-	}
-
-	void VK::CommandEncoder::copyImageToBuffer(ref<Trident::Image> sourceImage, ref<Trident::Buffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) {
-		const sequence<VkBufferImageCopy> bufferImageCopies = parseBufferImageCopyRegions(copyRegions);
-
-		vkCmdCopyImageToBuffer(
-			commandBuffer,
-			std::static_pointer_cast<VK::Image>(sourceImage)->image,
-			VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-			std::static_pointer_cast<VK::Buffer>(destinationBuffer)->buffer,
-			static_cast<uint32>(bufferImageCopies.count()),
-			&bufferImageCopies[0]
-		);
-
-		commandCount += 1;
-	}
-
-	void VK::CommandEncoder::dispatch(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) {
-		ADAPTER_ASSERT(groupCountX <= limits.maxComputeWorkgroupCount[0], "Group count in the X axis must not exceed [].", limits.maxComputeWorkgroupCount[0]);
-		ADAPTER_ASSERT(groupCountY <= limits.maxComputeWorkgroupCount[1], "Group count in the Y axis must not exceed [].", limits.maxComputeWorkgroupCount[1]);
-		ADAPTER_ASSERT(groupCountZ <= limits.maxComputeWorkgroupCount[2], "Group count in the Z axis must not exceed [].", limits.maxComputeWorkgroupCount[2]);
-
-		vkCmdDispatch(commandBuffer, groupCountX, groupCountY, groupCountZ);
-
-		commandCount += 1;
-	}
-
-	void VK::CommandEncoder::dispatchIndirect(ref<Trident::Buffer> buffer, uint64 bufferOffset) {
-		vkCmdDispatchIndirect(commandBuffer, std::static_pointer_cast<VK::Buffer>(buffer)->buffer, bufferOffset);
-
-		commandCount += 1;
-	}
-
-	void VK::CommandEncoder::nextSubpass() {
-		vkCmdNextSubpass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
-
-		commandCount += 1;
-	}
-
-	void VK::CommandEncoder::insertBufferMemoryBarriers(view<BufferMemoryBarrier> barriers) {
-		sequence<VkBufferMemoryBarrier> bufferMemoryBarriers(barriers.count());
-		index barrierIndex = 0;
-
-		while (barrierIndex < barriers.count()) {
-			const BufferMemoryBarrier& barrier = barriers[barrierIndex];
-
-			VkBufferMemoryBarrier& bufferMemoryBarrier = bufferMemoryBarriers[barrierIndex];
-			bufferMemoryBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
-			bufferMemoryBarrier.pNext = nullptr;
-			bufferMemoryBarrier.srcAccessMask = getAccessFlags(barrier.sourceAccess);
-			bufferMemoryBarrier.dstAccessMask = getAccessFlags(barrier.destinationAccess);
-			bufferMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			bufferMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			bufferMemoryBarrier.buffer = std::static_pointer_cast<VK::Buffer>(barrier.buffer)->buffer;
-			bufferMemoryBarrier.offset = barrier.offset;
-			bufferMemoryBarrier.size = barrier.size;
-
-			barrierIndex += 1;
-		}
-
-		vkCmdPipelineBarrier(
-			commandBuffer,
-			VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-			VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-			0,
-			0,
-			nullptr,
-			static_cast<uint32>(bufferMemoryBarriers.count()),
-			&bufferMemoryBarriers[0],
-			0,
-			nullptr
-		);
-
-		commandCount += 1;
-	}
-
-	void VK::CommandEncoder::setImageMemoryBarrier(ref<Trident::Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
-		const ref<VK::Image> vkImage = std::static_pointer_cast<VK::Image>(image);
-
-		VkImageMemoryBarrier imageMemoryBarrier{};
-		imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-		imageMemoryBarrier.pNext = nullptr;
-		imageMemoryBarrier.srcAccessMask = getAccessFlags(image->getLayout());
-		imageMemoryBarrier.dstAccessMask = getAccessFlags(newLayout);
-		imageMemoryBarrier.oldLayout = getImageLayout(image->getLayout());
-		imageMemoryBarrier.newLayout = getImageLayout(newLayout);
-		imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		imageMemoryBarrier.image = vkImage->image;
-		imageMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		imageMemoryBarrier.subresourceRange.baseMipLevel = 0;
-		imageMemoryBarrier.subresourceRange.levelCount = image->getMipLevelCount();
-		imageMemoryBarrier.subresourceRange.baseArrayLayer = 0;
-		imageMemoryBarrier.subresourceRange.layerCount = image->getLayerCount();
-
-		vkCmdPipelineBarrier(
-			commandBuffer,
-			getPipelineStageFlagBits(sourceStage),
-			getPipelineStageFlagBits(destinationStage),
-			0,
-			0,
-			nullptr,
-			0,
-			nullptr,
-			1,
-			&imageMemoryBarrier
-		);
-
-		image->layout = newLayout;
-
-		commandCount += 1;
-	}
-
-	void VK::CommandEncoder::setLineWidth(float32 lineWidth) {
-		vkCmdSetLineWidth(commandBuffer, lineWidth);
-
-		commandCount += 1;
-	}
-
-	void VK::CommandEncoder::setScissor(sint32 xOffset, sint32 yOffset, Extent2D extent) {
-		VkRect2D scissor{};
-		scissor.offset.x = xOffset;
-		scissor.offset.y = yOffset;
-		scissor.extent = *pointer_cast<const VkExtent2D*>(&extent);
-
-		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-
-		commandCount += 1;
-	}
-
-	void VK::CommandEncoder::setViewport(vec2<float32> origin, vec2<float32> size, float32 minDepth, float32 maxDepth) {
-		VkViewport viewport{};
-		viewport.x = origin[0];
-		viewport.y = origin[1];
-		viewport.width = size[0];
-		viewport.height = size[1];
-		viewport.minDepth = minDepth;
-		viewport.maxDepth = maxDepth;
-
-		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-
-		commandCount += 1;
-	}
-
-	void VK::CommandEncoder::draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset, uint32 instanceOffset) {
-		vkCmdDraw(commandBuffer, vertexCount, instanceCount, vertexOffset, instanceOffset);
-
-		commandCount += 1;
-	}
-
-	void VK::CommandEncoder::drawIndirect(ref<Trident::Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
-		vkCmdDrawIndirect(commandBuffer, std::static_pointer_cast<VK::Buffer>(buffer)->buffer, bufferOffset, drawCount, stride);
-
-		commandCount += 1;
-	}
-
-	void VK::CommandEncoder::drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset, sint32 indexBias, uint32 instanceOffset) {
-		vkCmdDrawIndexed(commandBuffer, indexCount, instanceCount, indexOffset, indexBias, instanceOffset);
-
-		commandCount += 1;
-	}
-
-	void VK::CommandEncoder::drawIndexedIndirect(ref<Trident::Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
-		vkCmdDrawIndexedIndirect(commandBuffer, std::static_pointer_cast<VK::Buffer>(buffer)->buffer, bufferOffset, drawCount, stride);
-
-		commandCount += 1;
-	}
-
-	void VK::CommandEncoder::endRenderPass() {
-		vkCmdEndRenderPass(commandBuffer);
-
-		commandCount += 1;
-	}
-
-	ref<CommandBuffer> VK::CommandEncoder::end() const {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		const VkResult result = vkEndCommandBuffer(commandBuffer);
-
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to end command buffer ([]).", string_VkResult(result));
-
-		VkPipelineStageFlags pipelineStageFlags = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-
-		if (commandBufferUsageFlag & VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT) {
-			pipelineStageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		}
-
-		return createRef<VK::CommandBuffer>(commandBuffer, pipelineStageFlags, commandCount);
-	}
-
-	void VK::CommandEncoder::reset() {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		const VkResult result = vkResetCommandBuffer(commandBuffer, 0);
-
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to reset command buffer ([]).", string_VkResult(result));
-
-		commandCount = 0;
-		pipeline = nullptr;
-	}
-
-	void VK::CommandEncoder::bindIndexBuffer(ref<Trident::Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
-		vkCmdBindIndexBuffer(
-			commandBuffer,
-			std::static_pointer_cast<VK::Buffer>(indexBuffer)->buffer,
-			offset,
-			getIndexType(indexTypeSize)
-		);
-
-		commandCount += 1;
-	}
-
-	sequence<VkBufferImageCopy> VK::CommandEncoder::parseBufferImageCopyRegions(view<BufferImageCopyRegion> copyRegions) {
+	static sequence<VkBufferImageCopy> parseBufferImageCopyRegions(view<BufferImageCopyRegion> copyRegions) {
 		sequence<VkBufferImageCopy> bufferImageCopies(copyRegions.count());
 		uint32 bufferImageCopyIndex = 0;
 
@@ -434,5 +48,501 @@ namespace Trident {
 		}
 
 		return bufferImageCopies;
+	}
+
+	VK::CommandEncoder::CommandEncoder(const Trident::Device* device, const Trident::CommandPool* commandPool) :
+		Trident::CommandEncoder(device, commandPool)
+	{}
+
+	void VK::begin(const Trident::CommandEncoder* commandEncoder) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const VK::CommandEncoder* _commandEncoder = static_cast<const VK::CommandEncoder*>(commandEncoder);
+		VkResult result;
+
+		VkCommandBufferBeginInfo commandBufferBeginInfo{};
+		commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		commandBufferBeginInfo.pNext = nullptr;
+		commandBufferBeginInfo.flags = _commandEncoder->commandBufferUsageFlag;
+		commandBufferBeginInfo.pInheritanceInfo = nullptr;
+
+		// TODO: Store vkBeginCommandBuffer in VK::Instance.
+		result = vkBeginCommandBuffer(_commandEncoder->commandBuffer, &commandBufferBeginInfo);
+
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to begin command buffer ([]).", string_VkResult(result));
+	}
+
+	void VK::beginRenderPass(Trident::CommandEncoder* commandEncoder, const BeginRenderPassDescriptor& descriptor) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
+		const ref<VK::Framebuffer> framebuffer = std::static_pointer_cast<VK::Framebuffer>(descriptor.framebuffer);
+
+		sequence<VkClearValue> clearValues(descriptor.clearValues.count());
+		uint64 clearValueIndex = 0;
+
+		while (clearValueIndex < clearValues.count()) {
+			VkClearValue& vkClearValue = clearValues[clearValueIndex];
+			const ClearValue& clearValue = descriptor.clearValues[clearValueIndex];
+
+			clearValueIndex += 1;
+
+			if (clearValue.depth != 0.0f || clearValue.stencil != 0) {
+				vkClearValue.depthStencil.depth = clearValue.depth;
+				vkClearValue.depthStencil.stencil = clearValue.stencil;
+
+				continue;
+			}
+
+			vkClearValue.color.float32[0] = clearValue.color[0];
+			vkClearValue.color.float32[1] = clearValue.color[1];
+			vkClearValue.color.float32[2] = clearValue.color[2];
+			vkClearValue.color.float32[3] = clearValue.color[3];
+		}
+
+		VkRenderPassBeginInfo renderPassBeginInfo{};
+		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderPassBeginInfo.pNext = nullptr;
+		renderPassBeginInfo.renderPass = std::static_pointer_cast<VK::RenderPass>(framebuffer->getRenderPass())->renderPass;
+		renderPassBeginInfo.framebuffer = framebuffer->framebuffer;
+		renderPassBeginInfo.renderArea.offset.x = 0;
+		renderPassBeginInfo.renderArea.offset.y = 0;
+		renderPassBeginInfo.renderArea.extent = *pointer_cast<const VkExtent2D*>(&framebuffer->getExtent());
+		renderPassBeginInfo.clearValueCount = static_cast<uint32>(clearValues.count());
+
+		if (clearValues.count() == 0) {
+			renderPassBeginInfo.pClearValues = nullptr;
+		}
+		else {
+			renderPassBeginInfo.pClearValues = &clearValues[0];
+		}
+
+		vkCmdBeginRenderPass(_commandEncoder->commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		_commandEncoder->commandCount += 1;
+	}
+
+	void VK::bindComputePipeline(Trident::CommandEncoder* commandEncoder, ref<Trident::ComputePipeline> computePipeline) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
+		const ref<VK::ComputePipeline> _computePipeline = std::static_pointer_cast<VK::ComputePipeline>(computePipeline);
+
+		vkCmdBindPipeline(_commandEncoder->commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _computePipeline->pipeline);
+
+		_commandEncoder->pipelineBindPoint = VK_PIPELINE_BIND_POINT_COMPUTE;
+		_commandEncoder->commandCount += 1;
+	}
+
+	void VK::bindDescriptorSets(Trident::CommandEncoder* commandEncoder, ref<Trident::PipelineLayout> pipelineLayout, uint32 descriptorSetIndexOffset, view<ref<Trident::DescriptorSet>> descriptorSets) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
+		sequence<VkDescriptorSet> vkDescriptorSets(descriptorSets.count());
+		uint32 descriptorSetIndex = 0;
+
+		while (descriptorSetIndex < descriptorSets.count()) {
+			vkDescriptorSets[descriptorSetIndex] = std::static_pointer_cast<VK::DescriptorSet>(descriptorSets[descriptorSetIndex])->descriptorSet;
+
+			descriptorSetIndex += 1;
+		}
+
+		vkCmdBindDescriptorSets(
+			_commandEncoder->commandBuffer,
+			_commandEncoder->pipelineBindPoint,
+			std::static_pointer_cast<VK::PipelineLayout>(pipelineLayout)->pipelineLayout,
+			descriptorSetIndexOffset,
+			static_cast<uint32>(vkDescriptorSets.count()),
+			&vkDescriptorSets[0],
+			0,
+			nullptr
+		);
+
+		_commandEncoder->commandCount += 1;
+	}
+
+	void VK::bindGraphicsPipeline(Trident::CommandEncoder* commandEncoder, ref<Trident::GraphicsPipeline> graphicsPipeline) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
+		const ref<VK::GraphicsPipeline> _graphicsPipeline = std::static_pointer_cast<VK::GraphicsPipeline>(graphicsPipeline);
+
+		vkCmdBindPipeline(_commandEncoder->commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipeline->pipeline);
+
+		_commandEncoder->pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+		_commandEncoder->commandCount += 1;
+	}
+
+	void VK::bindIndexBuffer(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
+
+		vkCmdBindIndexBuffer(
+			_commandEncoder->commandBuffer,
+			std::static_pointer_cast<VK::Buffer>(indexBuffer)->buffer,
+			offset,
+			getIndexType(indexTypeSize)
+		);
+
+		_commandEncoder->commandCount += 1;
+	}
+
+	void VK::bindVertexBuffer(Trident::CommandEncoder* commandEncoder, uint32 bindingIndex, ref<Trident::Buffer> vertexBuffer, uint64 offset, uint32 stride) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
+
+		vkCmdBindVertexBuffers(
+			_commandEncoder->commandBuffer,
+			bindingIndex,
+			1,
+			&std::static_pointer_cast<VK::Buffer>(vertexBuffer)->buffer,
+			&offset
+		);
+
+		_commandEncoder->commandCount += 1;
+	}
+
+	void VK::copyBufferToBuffer(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> sourceBuffer, ref<Trident::Buffer> destinationBuffer, view<BufferCopyRegion> copyRegions) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
+
+		vkCmdCopyBuffer(
+			_commandEncoder->commandBuffer,
+			std::static_pointer_cast<VK::Buffer>(sourceBuffer)->buffer,
+			std::static_pointer_cast<VK::Buffer>(destinationBuffer)->buffer,
+			static_cast<uint32>(copyRegions.count()),
+			pointer_cast<const VkBufferCopy*>(&copyRegions[0])
+		);
+
+		_commandEncoder->commandCount += 1;
+	}
+
+	void VK::copyBufferToImage(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> sourceBuffer, ref<Trident::Image> destinationImage, view<BufferImageCopyRegion> copyRegions) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
+		const sequence<VkBufferImageCopy> bufferImageCopies = parseBufferImageCopyRegions(copyRegions);
+
+		vkCmdCopyBufferToImage(
+			_commandEncoder->commandBuffer,
+			std::static_pointer_cast<VK::Buffer>(sourceBuffer)->buffer,
+			std::static_pointer_cast<VK::Image>(destinationImage)->image,
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			static_cast<uint32>(bufferImageCopies.count()),
+			&bufferImageCopies[0]
+		);
+
+		_commandEncoder->commandCount += 1;
+	}
+
+	void VK::copyImageToBuffer(Trident::CommandEncoder* commandEncoder, ref<Trident::Image> sourceImage, ref<Trident::Buffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
+		const sequence<VkBufferImageCopy> bufferImageCopies = parseBufferImageCopyRegions(copyRegions);
+
+		vkCmdCopyImageToBuffer(
+			_commandEncoder->commandBuffer,
+			std::static_pointer_cast<VK::Image>(sourceImage)->image,
+			VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+			std::static_pointer_cast<VK::Buffer>(destinationBuffer)->buffer,
+			static_cast<uint32>(bufferImageCopies.count()),
+			&bufferImageCopies[0]
+		);
+
+		_commandEncoder->commandCount += 1;
+	}
+
+	ref<Trident::CommandEncoder> VK::createCommandEncoder(const Trident::Device* device, const Trident::CommandPool* commandPool, const CommandBufferDescriptor& descriptor) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		const VK::CommandPool* _commandPool = static_cast<const VK::CommandPool*>(commandPool);
+		VkResult result;
+
+		ref<VK::CommandEncoder> commandEncoder = createRef<VK::CommandEncoder>(device, commandPool);
+		commandEncoder->commandBufferUsageFlag = getCommandBufferUsageFlag(descriptor.usage);
+
+		VkCommandBufferAllocateInfo commandBufferAllocateInfo{};
+		commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		commandBufferAllocateInfo.pNext = nullptr;
+		commandBufferAllocateInfo.commandPool = _commandPool->commandPool;
+		commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		commandBufferAllocateInfo.commandBufferCount = 1;
+
+		result = _device->vkAllocateCommandBuffers(_device->device, &commandBufferAllocateInfo, &commandEncoder->commandBuffer);
+
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create command buffer ([]).", string_VkResult(result));
+
+		#if defined(BUILD_MODE_DEBUG)
+			if (descriptor.name.count() > 0) {
+				VkDebugUtilsObjectNameInfoEXT debugUtilsObjectNameInfo{};
+				debugUtilsObjectNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+				debugUtilsObjectNameInfo.pNext = nullptr;
+				debugUtilsObjectNameInfo.objectType = VK_OBJECT_TYPE_COMMAND_BUFFER;
+				debugUtilsObjectNameInfo.objectHandle = (uint64) commandEncoder->commandBuffer;
+				debugUtilsObjectNameInfo.pObjectName = &descriptor.name[0];
+
+				result = _device->vkSetDebugUtilsObjectNameEXT(_device->device, &debugUtilsObjectNameInfo);
+
+				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to set object name ([]).", string_VkResult(result));
+			}
+		#endif
+
+		return commandEncoder;
+	}
+
+	void VK::destroyCommandEncoder(const Trident::Device* device, const Trident::CommandPool* commandPool, const Trident::CommandEncoder* commandEncoder) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		const VK::CommandPool* _commandPool = static_cast<const VK::CommandPool*>(commandPool);
+		const VK::CommandEncoder* _commandEncoder = static_cast<const VK::CommandEncoder*>(commandEncoder);
+
+		_device->vkFreeCommandBuffers(_device->device, _commandPool->commandPool, 1, &_commandEncoder->commandBuffer);
+	}
+
+	void VK::dispatch(Trident::CommandEncoder* commandEncoder, uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
+
+		// TODO: Move in Trident::CommandEncoder::dispatch.
+		// ADAPTER_ASSERT(groupCountX <= limits.maxComputeWorkgroupCount[0], "Group count in the X axis must not exceed [].", limits.maxComputeWorkgroupCount[0]);
+		// ADAPTER_ASSERT(groupCountY <= limits.maxComputeWorkgroupCount[1], "Group count in the Y axis must not exceed [].", limits.maxComputeWorkgroupCount[1]);
+		// ADAPTER_ASSERT(groupCountZ <= limits.maxComputeWorkgroupCount[2], "Group count in the Z axis must not exceed [].", limits.maxComputeWorkgroupCount[2]);
+
+		vkCmdDispatch(_commandEncoder->commandBuffer, groupCountX, groupCountY, groupCountZ);
+
+		_commandEncoder->commandCount += 1;
+	}
+
+	void VK::dispatchIndirect(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> buffer, uint64 bufferOffset) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
+
+		vkCmdDispatchIndirect(_commandEncoder->commandBuffer, std::static_pointer_cast<VK::Buffer>(buffer)->buffer, bufferOffset);
+
+		_commandEncoder->commandCount += 1;
+	}
+
+	void VK::draw(Trident::CommandEncoder* commandEncoder, uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset, uint32 instanceOffset) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
+
+		vkCmdDraw(_commandEncoder->commandBuffer, vertexCount, instanceCount, vertexOffset, instanceOffset);
+
+		_commandEncoder->commandCount += 1;
+	}
+
+	void VK::drawIndexed(Trident::CommandEncoder* commandEncoder, uint32 indexCount, uint32 instanceCount, uint32 indexOffset, sint32 indexBias, uint32 instanceOffset) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
+
+		vkCmdDrawIndexed(_commandEncoder->commandBuffer, indexCount, instanceCount, indexOffset, indexBias, instanceOffset);
+
+		_commandEncoder->commandCount += 1;
+	}
+
+	void VK::drawIndexedIndirect(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
+
+		vkCmdDrawIndexedIndirect(_commandEncoder->commandBuffer, std::static_pointer_cast<VK::Buffer>(buffer)->buffer, bufferOffset, drawCount, stride);
+
+		_commandEncoder->commandCount += 1;
+	}
+
+	void VK::drawIndirect(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
+
+		vkCmdDrawIndirect(_commandEncoder->commandBuffer, std::static_pointer_cast<VK::Buffer>(buffer)->buffer, bufferOffset, drawCount, stride);
+
+		_commandEncoder->commandCount += 1;
+	}
+
+	ref<Trident::CommandBuffer> VK::end(const Trident::CommandEncoder* commandEncoder) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const VK::CommandEncoder* _commandEncoder = static_cast<const VK::CommandEncoder*>(commandEncoder);
+		VkResult result;
+
+		result = vkEndCommandBuffer(_commandEncoder->commandBuffer);
+
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to end command buffer ([]).", string_VkResult(result));
+
+		VkPipelineStageFlags pipelineStageFlags = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+
+		if (_commandEncoder->commandBufferUsageFlag & VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT) {
+			pipelineStageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		}
+
+		return createRef<VK::CommandBuffer>(_commandEncoder->commandBuffer, pipelineStageFlags, _commandEncoder->commandCount);
+	}
+
+	void VK::endRenderPass(Trident::CommandEncoder* commandEncoder) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
+
+		vkCmdEndRenderPass(_commandEncoder->commandBuffer);
+
+		_commandEncoder->commandCount += 1;
+	}
+
+	void VK::insertBufferMemoryBarriers(Trident::CommandEncoder* commandEncoder, view<BufferMemoryBarrier> barriers) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
+		sequence<VkBufferMemoryBarrier> bufferMemoryBarriers(barriers.count());
+		index barrierIndex = 0;
+
+		while (barrierIndex < barriers.count()) {
+			const BufferMemoryBarrier& barrier = barriers[barrierIndex];
+
+			VkBufferMemoryBarrier& bufferMemoryBarrier = bufferMemoryBarriers[barrierIndex];
+			bufferMemoryBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+			bufferMemoryBarrier.pNext = nullptr;
+			bufferMemoryBarrier.srcAccessMask = getAccessFlags(barrier.sourceAccess);
+			bufferMemoryBarrier.dstAccessMask = getAccessFlags(barrier.destinationAccess);
+			bufferMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			bufferMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			bufferMemoryBarrier.buffer = std::static_pointer_cast<VK::Buffer>(barrier.buffer)->buffer;
+			bufferMemoryBarrier.offset = barrier.offset;
+			bufferMemoryBarrier.size = barrier.size;
+
+			barrierIndex += 1;
+		}
+
+		vkCmdPipelineBarrier(
+			_commandEncoder->commandBuffer,
+			VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+			VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+			0,
+			0,
+			nullptr,
+			static_cast<uint32>(bufferMemoryBarriers.count()),
+			&bufferMemoryBarriers[0],
+			0,
+			nullptr
+		);
+
+		_commandEncoder->commandCount += 1;
+	}
+
+	void VK::nextSubpass(Trident::CommandEncoder* commandEncoder) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
+
+		vkCmdNextSubpass(_commandEncoder->commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
+
+		_commandEncoder->commandCount += 1;
+	}
+
+	void VK::reset(Trident::CommandEncoder* commandEncoder) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
+		VkResult result;
+
+		result = vkResetCommandBuffer(_commandEncoder->commandBuffer, 0);
+
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to reset command buffer ([]).", string_VkResult(result));
+
+		_commandEncoder->commandCount = 0;
+		_commandEncoder->pipelineBindPoint = VK_PIPELINE_BIND_POINT_MAX_ENUM;
+	}
+
+	void VK::setImageMemoryBarrier(Trident::CommandEncoder* commandEncoder, ref<Trident::Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
+		const ref<VK::Image> vkImage = std::static_pointer_cast<VK::Image>(image);
+
+		VkImageMemoryBarrier imageMemoryBarrier{};
+		imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+		imageMemoryBarrier.pNext = nullptr;
+		imageMemoryBarrier.srcAccessMask = getAccessFlags(image->getLayout());
+		imageMemoryBarrier.dstAccessMask = getAccessFlags(newLayout);
+		imageMemoryBarrier.oldLayout = getImageLayout(image->getLayout());
+		imageMemoryBarrier.newLayout = getImageLayout(newLayout);
+		imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		imageMemoryBarrier.image = vkImage->image;
+		imageMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		imageMemoryBarrier.subresourceRange.baseMipLevel = 0;
+		imageMemoryBarrier.subresourceRange.levelCount = image->getMipLevelCount();
+		imageMemoryBarrier.subresourceRange.baseArrayLayer = 0;
+		imageMemoryBarrier.subresourceRange.layerCount = image->getLayerCount();
+
+		vkCmdPipelineBarrier(
+			_commandEncoder->commandBuffer,
+			getPipelineStageFlagBits(sourceStage),
+			getPipelineStageFlagBits(destinationStage),
+			0,
+			0,
+			nullptr,
+			0,
+			nullptr,
+			1,
+			&imageMemoryBarrier
+		);
+
+		image->layout = newLayout;
+
+		_commandEncoder->commandCount += 1;
+	}
+
+	void VK::setLineWidth(Trident::CommandEncoder* commandEncoder, float32 lineWidth) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
+
+		vkCmdSetLineWidth(_commandEncoder->commandBuffer, lineWidth);
+
+		_commandEncoder->commandCount += 1;
+	}
+
+	void VK::setScissor(Trident::CommandEncoder* commandEncoder, sint32 xOffset, sint32 yOffset, Extent2D extent) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
+
+		VkRect2D scissor{};
+		scissor.offset.x = xOffset;
+		scissor.offset.y = yOffset;
+		scissor.extent = *pointer_cast<const VkExtent2D*>(&extent);
+
+		vkCmdSetScissor(_commandEncoder->commandBuffer, 0, 1, &scissor);
+
+		_commandEncoder->commandCount += 1;
+	}
+
+	void VK::setViewport(Trident::CommandEncoder* commandEncoder, vec2<float32> origin, vec2<float32> size, float32 minDepth, float32 maxDepth) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
+
+		VkViewport viewport{};
+		viewport.x = origin[0];
+		viewport.y = origin[1];
+		viewport.width = size[0];
+		viewport.height = size[1];
+		viewport.minDepth = minDepth;
+		viewport.maxDepth = maxDepth;
+
+		vkCmdSetViewport(_commandEncoder->commandBuffer, 0, 1, &viewport);
+
+		_commandEncoder->commandCount += 1;
 	}
 }

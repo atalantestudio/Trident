@@ -88,7 +88,7 @@ namespace Trident {
 			ref<ShaderModule> createShaderModule(const Device* device, const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) const;
 			ref<ShaderModule> createShaderModule(const Device* device, const ShaderModuleDescriptor& descriptor, view<char8> code) const;
 
-			ref<Surface> createSurface(const Instance* instance, const Window* window) const;
+			ref<Surface> createSurface(const Instance* instance, ref<PhysicalDevice> physicalDevice, const Window* window) const;
 
 			ref<Swapchain> createSwapchain(const Device* device, const SwapchainDescriptor& descriptor) const;
 
@@ -147,8 +147,6 @@ namespace Trident {
 			void endRenderPass(CommandEncoder* commandEncoder) const;
 
 			ref<Queue> getQueue(const Device* device, QueueFamilyCapability queueFamilyCapability) const;
-
-			ImageFormat getSurfaceFormat(const Surface* surface) const;
 
 			void insertBufferMemoryBarriers(CommandEncoder* commandEncoder, view<BufferMemoryBarrier> barriers) const;
 
@@ -249,7 +247,6 @@ namespace Trident {
 			EndImplementation endImplementation;
 			EndRenderPassImplementation endRenderPassImplementation;
 			GetQueueImplementation getQueueImplementation;
-			GetSurfaceFormatImplementation getSurfaceFormatImplementation;
 			InsertBufferMemoryBarriersImplementation insertBufferMemoryBarriersImplementation;
 			MapBufferImplementation mapBufferImplementation;
 			NextSubpassImplementation nextSubpassImplementation;

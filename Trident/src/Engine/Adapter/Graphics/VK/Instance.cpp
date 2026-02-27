@@ -7,29 +7,15 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
-		void VK::Instance::checkInstanceLayers() {
-			VkResult result;
-			uint32 layerPropertyCount;
-
-			result = vkEnumerateInstanceLayerProperties(&layerPropertyCount, nullptr);
-
-			ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to find the number of instance layer properties ([]).", string_VkResult(result));
-
-			std::vector<VkLayerProperties> layerProperties(layerPropertyCount);
-
-			result = vkEnumerateInstanceLayerProperties(&layerPropertyCount, layerProperties.data());
-
-			ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to enumerate instance layer properties ([]).", string_VkResult(result));
-
-			for (const VkLayerProperties& layerProperties : layerProperties) {
-				ADAPTER_INFO("- []", layerProperties.layerName);
-			}
-		}
-	#endif
+	// TODO: Expose to the client side.
+	static const view<const char8*> ENABLED_LAYER_NAMES = {
+		#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
+			"VK_LAYER_KHRONOS_validation",
+		#endif
+	};
 
 	#if defined(DEBUG_ENABLE_MESSENGER)
-		VkBool32 VK::Instance::debugUtilsMessengerUserCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
+		static VkBool32 debugUtilsMessengerUserCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
 			switch (messageSeverity) {
 				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT: {
 					ADAPTER_TRACE(pCallbackData->pMessage);
@@ -57,27 +43,38 @@ namespace Trident {
 		}
 	#endif
 
-	// TODO: Client-side validation layer request.
-	#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
-		const sequence<const char8*> VK::Instance::ENABLED_LAYER_NAMES = {
-			"VK_LAYER_KHRONOS_validation",
-		};
-	#endif
+	VK::Instance::Instance(const Trident::GraphicsAdapter* adapter) :
+		Trident::Instance(adapter)
+	{}
 
-	// NOTE: ~25Mb in Release mode.
-	VK::Instance::Instance(const InstanceDescriptor& descriptor) :
-		#if defined(DEBUG_ENABLE_MESSENGER)
-			debugUtilsMessengerCreateInfo{},
-		#endif
-		preferIntegratedGpu(descriptor.preferIntegratedGpu)
-	{
+	ref<Trident::Instance> VK::createInstance(const Trident::GraphicsAdapter* adapter, const InstanceDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		ref<VK::Instance> instance = createRef<VK::Instance>(adapter);
+		VkResult result;
+
 		#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
-			checkInstanceLayers();
+			{
+				uint32 layerPropertyCount;
+
+				result = vkEnumerateInstanceLayerProperties(&layerPropertyCount, nullptr);
+
+				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to find the number of instance layer properties ([]).", string_VkResult(result));
+
+				std::vector<VkLayerProperties> layerProperties(layerPropertyCount);
+
+				result = vkEnumerateInstanceLayerProperties(&layerPropertyCount, layerProperties.data());
+
+				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to enumerate instance layer properties ([]).", string_VkResult(result));
+
+				for (const VkLayerProperties& layerProperties : layerProperties) {
+					ADAPTER_INFO("- []", layerProperties.layerName);
+				}
+			}
 		#endif
 
 		#if defined(DEBUG_ENABLE_MESSENGER)
+			VkDebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfo{};
 			debugUtilsMessengerCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 			debugUtilsMessengerCreateInfo.messageSeverity =
 				VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
@@ -120,126 +117,43 @@ namespace Trident {
 			instanceCreateInfo.ppEnabledLayerNames = nullptr;
 		#endif
 
-		#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
-			enabledExtensionNames.emplace_back(VK_KHR_SURFACE_EXTENSION_NAME);
-			enabledExtensionNames.emplace_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
-		#endif
+		std::vector<const char8*> enabledExtensionNames;
 
 		#if defined(DEBUG_ENABLE_MESSENGER)
 			enabledExtensionNames.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 		#endif
 
+		enabledExtensionNames.emplace_back(VK_KHR_SURFACE_EXTENSION_NAME);
+
+		#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
+			enabledExtensionNames.emplace_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+		#endif
+
 		instanceCreateInfo.enabledExtensionCount = static_cast<uint32>(enabledExtensionNames.size());
 		instanceCreateInfo.ppEnabledExtensionNames = enabledExtensionNames.data();
 
-		VkResult result;
-
-		result = vkCreateInstance(&instanceCreateInfo, nullptr, &instance);
+		result = vkCreateInstance(&instanceCreateInfo, nullptr, &instance->instance);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create instance ([]).", string_VkResult(result));
-	}
-
-	VK::Instance::~Instance() {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		#if defined(DEBUG_ENABLE_MESSENGER)
-			vkDestroyDebugUtilsMessengerEXT(instance, debugUtilsMessenger, nullptr);
-		#endif
-
-		vkDestroyInstance(instance, nullptr);
-	}
-
-	#if defined(DEBUG_ENABLE_MESSENGER)
-		void VK::Instance::createDebugUtilsMessenger() {
-			const VkResult result = vkCreateDebugUtilsMessengerEXT(instance, &debugUtilsMessengerCreateInfo, nullptr, &debugUtilsMessenger);
+			result = instance->vkCreateDebugUtilsMessengerEXT(instance->instance, &debugUtilsMessengerCreateInfo, nullptr, &instance->debugUtilsMessenger);
 
 			ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create debug messenger ([]).", string_VkResult(result));
-		}
-	#endif
-
-	VkPhysicalDevice VK::Instance::selectPhysicalDevice() const {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		uint32 physicalDeviceCount;
-		VkResult result;
-
-		result = vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
-
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to find the number of physical devices ([]).", string_VkResult(result));
-		DEBUG_ASSERT(physicalDeviceCount > 0);
-
-		sequence<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
-
-		result = vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, &physicalDevices[0]);
-
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to enumerate physical devices ([]).", string_VkResult(result));
-
-		VkPhysicalDeviceProperties physicalDeviceProperties;
-		uint32 maxPhysicalDeviceScore = 0;
-		uint32 bestPhysicalDeviceIndex = 0;
-
-		#if defined(DEBUG_ENUMERATE_PHYSICAL_DEVICES)
-			std::string physicalDeviceType;
 		#endif
 
-		#if defined(DEBUG_ENUMERATE_PHYSICAL_DEVICES)
-			ADAPTER_INFO("Available physical devices:");
-		#endif
-
-		for (uint32 physicalDeviceIndex = 0; physicalDeviceIndex < physicalDevices.count(); physicalDeviceIndex += 1) {
-			const VkPhysicalDevice physicalDevice = physicalDevices[physicalDeviceIndex];
-
-			vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
-
-			const uint32 physicalDeviceScore = calculatePhysicalDeviceScore(physicalDeviceProperties);
-
-			if (physicalDeviceScore >= maxPhysicalDeviceScore) {
-				maxPhysicalDeviceScore = physicalDeviceScore;
-				bestPhysicalDeviceIndex = physicalDeviceIndex;
-			}
-
-			#if defined(DEBUG_ENUMERATE_PHYSICAL_DEVICES)
-				switch (physicalDeviceProperties.deviceType) {
-					case VK_PHYSICAL_DEVICE_TYPE_OTHER:
-						physicalDeviceType = "unknown type";
-
-						break;
-					case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
-						physicalDeviceType = "integrated GPU";
-
-						break;
-					case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
-						physicalDeviceType = "discrete GPU";
-
-						break;
-					case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
-						physicalDeviceType = "virtual GPU";
-
-						break;
-					case VK_PHYSICAL_DEVICE_TYPE_CPU:
-						physicalDeviceType = "CPU";
-
-						break;
-				}
-
-				ADAPTER_INFO("- [] ([])", physicalDeviceProperties.deviceName, physicalDeviceType);
-			#endif
-		}
-
-		ADAPTER_ASSERT(maxPhysicalDeviceScore > 0, "Could not select a suitable physical device.");
-
-		return physicalDevices[bestPhysicalDeviceIndex];
+		return instance;
 	}
 
-	uint32 VK::Instance::calculatePhysicalDeviceScore(const VkPhysicalDeviceProperties& physicalDeviceProperties) const {
-		if (physicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
-			return 1 + !preferIntegratedGpu;
-		}
+	void VK::destroyInstance(const Trident::Instance* instance) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		if (physicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU) {
-			return 1 + preferIntegratedGpu;
-		}
+		const VK::Instance* _instance = static_cast<const VK::Instance*>(instance);
 
-		return 0;
+		#if defined(DEBUG_ENABLE_MESSENGER)
+			_instance->vkDestroyDebugUtilsMessengerEXT(_instance->instance, _instance->debugUtilsMessenger, nullptr);
+		#endif
+
+		_instance->vkDestroyInstance(_instance->instance, nullptr);
 	}
 }

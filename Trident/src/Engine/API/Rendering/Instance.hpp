@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
+#include "Engine/API/Rendering/Descriptor/InstanceDescriptor.hpp"
 #include "Engine/API/Rendering/PhysicalDevice.hpp"
 #include "Engine/API/Rendering/Surface.hpp"
 #include "Engine/API/Window/Window.hpp"
@@ -16,8 +17,8 @@ namespace Trident {
 			}
 
 			// TODO: Use ref<Window> instead.
-			ref<Surface> createSurface(const Window* window) const {
-				return adapter->createSurface(this, window);
+			ref<Surface> createSurface(ref<PhysicalDevice> physicalDevice, const Window* window) const {
+				return adapter->createSurface(this, physicalDevice, window);
 			}
 
 			ref<PhysicalDevice> selectPhysicalDevice(bool preferIntegratedGpu) const {

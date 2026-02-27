@@ -6,7 +6,6 @@
 #include "Engine/Adapter/Graphics/VK/Buffer.hpp"
 #include "Engine/Adapter/Graphics/VK/BufferUsage.hpp"
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
-#include "Engine/Adapter/Graphics/VK/MemoryAllocator.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
@@ -21,7 +20,10 @@ namespace Trident {
 		VkResult result;
 
 		ref<VK::Buffer> buffer = createRef<VK::Buffer>(device, descriptor);
-		buffer->stride = stride;
+
+		// TODO: Set stride.
+		BREAKPOINT();
+		// buffer->stride = stride;
 
 		VkBufferCreateInfo bufferCreateInfo{};
 		bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;

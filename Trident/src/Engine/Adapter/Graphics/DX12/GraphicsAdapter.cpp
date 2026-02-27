@@ -106,7 +106,6 @@ namespace Trident::DX12 {
 		adapter->endImplementation = DX12::end;
 		adapter->endRenderPassImplementation = DX12::endRenderPass;
 		adapter->getQueueImplementation = DX12::getQueue;
-		adapter->getSurfaceFormatImplementation = DX12::getSurfaceFormat;
 		adapter->insertBufferMemoryBarriersImplementation = DX12::insertBufferMemoryBarriers;
 		adapter->mapBufferImplementation = DX12::mapBuffer;
 		adapter->nextSubpassImplementation = DX12::nextSubpass;

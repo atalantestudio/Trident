@@ -12,12 +12,6 @@ namespace Trident {
 		private:
 			static void enumerateQueueFamilyProperties(const sequence<VkQueueFamilyProperties>& queueFamilies);
 
-			static uint32 calculateGraphicsQueueFamilyScore(const VkQueueFamilyProperties& queueFamilyProperties);
-
-			static uint32 calculateComputeQueueFamilyScore(const VkQueueFamilyProperties& queueFamilyProperties);
-
-			static uint32 calculateTransferQueueFamilyScore(const VkQueueFamilyProperties& queueFamilyProperties);
-
 		public:
 			explicit PhysicalDevice(VkPhysicalDevice physicalDevice);
 

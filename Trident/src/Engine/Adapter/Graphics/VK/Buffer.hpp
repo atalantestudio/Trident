@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Engine/Adapter/Graphics/VK/MemoryAllocator.hpp"
 #include "Engine/API/Rendering/Buffer.hpp"
 
 namespace Trident {

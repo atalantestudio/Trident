@@ -18,6 +18,7 @@ namespace Trident {
 			std::vector<VkDescriptorPool> descriptorPools;
 
 			PFN_vkAcquireNextImageKHR vkAcquireNextImageKHR;
+			PFN_vkAllocateCommandBuffers vkAllocateCommandBuffers;
 			PFN_vkAllocateDescriptorSets vkAllocateDescriptorSets;
 			PFN_vkCreateBuffer vkCreateBuffer;
 			PFN_vkCreateCommandPool vkCreateCommandPool;
@@ -27,6 +28,7 @@ namespace Trident {
 			PFN_vkCreateFramebuffer vkCreateFramebuffer;
 			PFN_vkCreateGraphicsPipelines vkCreateGraphicsPipelines;
 			PFN_vkCreateSemaphore vkCreateSemaphore;
+			PFN_vkCreateSwapchainKHR vkCreateSwapchainKHR;
 			PFN_vkDestroyBuffer vkDestroyBuffer;
 			PFN_vkDestroyCommandPool vkDestroyCommandPool;
 			PFN_vkDestroyDescriptorPool vkDestroyDescriptorPool;
@@ -39,8 +41,11 @@ namespace Trident {
 			PFN_vkDestroyFramebuffer vkDestroyFramebuffer;
 			PFN_vkDestroyPipeline vkDestroyPipeline;
 			PFN_vkDestroySemaphore vkDestroySemaphore;
+			PFN_vkDestroySwapchainKHR vkDestroySwapchainKHR;
 			PFN_vkDeviceWaitIdle vkDeviceWaitIdle;
+			PFN_vkFreeCommandBuffers vkFreeCommandBuffers;
 			PFN_vkGetBufferMemoryRequirements vkGetBufferMemoryRequirements;
+			PFN_vkGetSwapchainImagesKHR vkGetSwapchainImagesKHR;
 			PFN_vkResetFences vkResetFences;
 			PFN_vkUpdateDescriptorSets vkUpdateDescriptorSets;
 			PFN_vkWaitForFences vkWaitForFences;

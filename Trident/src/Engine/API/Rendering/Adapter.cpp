@@ -338,8 +338,7 @@ namespace Trident {
 	}
 
 	Surface::Surface(const Instance* instance) :
-		instance(instance),
-		format(instance->adapter->getSurfaceFormat(this))
+		instance(instance)
 	{}
 
 	Surface::~Surface() {

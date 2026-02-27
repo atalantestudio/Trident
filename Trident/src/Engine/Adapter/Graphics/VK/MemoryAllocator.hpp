@@ -9,8 +9,8 @@ namespace Trident {
 	#define UNDEFINED_MEMORY_TYPE_INDEX max<uint32>()
 	#define UNDEFINED_MEMORY_ALLOCATION_INDEX max<uint32>()
 
-	// #define DEBUG_ENUMERATE_HEAPS
-	// #define DEBUG_ENUMERATE_TYPES
+	#define DEBUG_ENUMERATE_HEAPS
+	#define DEBUG_ENUMERATE_TYPES
 
 	struct VK::MemoryAllocation {
 		VkDeviceMemory memory;

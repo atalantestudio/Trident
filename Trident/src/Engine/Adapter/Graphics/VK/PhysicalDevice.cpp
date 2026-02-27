@@ -7,6 +7,45 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
+	static uint32 calculateGraphicsQueueFamilyScore(const VkQueueFamilyProperties& queueFamilyProperties) {
+		uint32 score = 0;
+
+		if (queueFamilyProperties.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+			score += 1;
+		}
+
+		return score;
+	}
+
+	static uint32 calculateComputeQueueFamilyScore(const VkQueueFamilyProperties& queueFamilyProperties) {
+		uint32 score = 0;
+
+		if (queueFamilyProperties.queueFlags & VK_QUEUE_COMPUTE_BIT) {
+			score += 1;
+		}
+
+		return score;
+	}
+
+	static uint32 calculateTransferQueueFamilyScore(const VkQueueFamilyProperties& queueFamilyProperties) {
+		uint32 score = 0;
+
+		if (queueFamilyProperties.queueFlags & VK_QUEUE_TRANSFER_BIT) {
+			score += 1;
+
+			if (!(queueFamilyProperties.queueFlags & VK_QUEUE_GRAPHICS_BIT || queueFamilyProperties.queueFlags & VK_QUEUE_COMPUTE_BIT)) {
+				// Prefer queues which don't support graphics or compute, so that transfers are non-blocking regarding other operations.
+				score += 1;
+			}
+		}
+		else if (queueFamilyProperties.queueFlags & VK_QUEUE_GRAPHICS_BIT || queueFamilyProperties.queueFlags & VK_QUEUE_COMPUTE_BIT) {
+			// Graphics and compute queues always support transfer operations.
+			score += 1;
+		}
+
+		return score;
+	}
+
 	static view<char8> formatPhysicalDeviceType(VkPhysicalDeviceType physicalDeviceType) {
 		switch (physicalDeviceType) {
 			case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU: return "(integrated GPU)";
@@ -32,41 +71,8 @@ namespace Trident {
 		}
 	}
 
-	uint32 VK::PhysicalDevice::calculateGraphicsQueueFamilyScore(const VkQueueFamilyProperties& queueFamilyProperties) {
-		if (queueFamilyProperties.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-			return 1;
-		}
-
-		return 0;
-	}
-
-	uint32 VK::PhysicalDevice::calculateComputeQueueFamilyScore(const VkQueueFamilyProperties& queueFamilyProperties) {
-		if (queueFamilyProperties.queueFlags & VK_QUEUE_COMPUTE_BIT) {
-			return 1;
-		}
-
-		return 0;
-	}
-
-	uint32 VK::PhysicalDevice::calculateTransferQueueFamilyScore(const VkQueueFamilyProperties& queueFamilyProperties) {
-		if (queueFamilyProperties.queueFlags & VK_QUEUE_TRANSFER_BIT) {
-			// Prefer queues which don't support graphics or compute, so that transfers are non-blocking regarding other operations.
-			if (!(queueFamilyProperties.queueFlags & VK_QUEUE_GRAPHICS_BIT) && !(queueFamilyProperties.queueFlags & VK_QUEUE_COMPUTE_BIT)) {
-				return 3;
-			}
-
-			return 2;
-		}
-
-		if (queueFamilyProperties.queueFlags & VK_QUEUE_GRAPHICS_BIT || queueFamilyProperties.queueFlags & VK_QUEUE_COMPUTE_BIT) {
-			return 1;
-		}
-
-		return 1;
-	}
-
 	VK::PhysicalDevice::PhysicalDevice(VkPhysicalDevice physicalDevice) :
-		physicalDevice(physicalDevice)
+		Trident::PhysicalDevice(physicalDevice)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
@@ -186,5 +192,91 @@ namespace Trident {
 		ADAPTER_ASSERT(maxGraphicsQueueFamilyScore > 0, "Failed to find a graphics queue family.");
 		ADAPTER_ASSERT(maxComputeQueueFamilyScore > 0, "Failed to find a compute queue family.");
 		ADAPTER_ASSERT(maxTransferQueueFamilyScore > 0, "Failed to find a transfer queue family.");
+	}
+
+	VkPhysicalDevice VK::Instance::selectPhysicalDevice() const {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		uint32 physicalDeviceCount;
+		VkResult result;
+
+		result = vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
+
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to find the number of physical devices ([]).", string_VkResult(result));
+		DEBUG_ASSERT(physicalDeviceCount > 0);
+
+		sequence<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
+
+		result = vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, &physicalDevices[0]);
+
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to enumerate physical devices ([]).", string_VkResult(result));
+
+		VkPhysicalDeviceProperties physicalDeviceProperties;
+		uint32 maxPhysicalDeviceScore = 0;
+		uint32 bestPhysicalDeviceIndex = 0;
+
+		#if defined(DEBUG_ENUMERATE_PHYSICAL_DEVICES)
+			std::string physicalDeviceType;
+		#endif
+
+		#if defined(DEBUG_ENUMERATE_PHYSICAL_DEVICES)
+			ADAPTER_INFO("Available physical devices:");
+		#endif
+
+		for (uint32 physicalDeviceIndex = 0; physicalDeviceIndex < physicalDevices.count(); physicalDeviceIndex += 1) {
+			const VkPhysicalDevice physicalDevice = physicalDevices[physicalDeviceIndex];
+
+			vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
+
+			const uint32 physicalDeviceScore = calculatePhysicalDeviceScore(physicalDeviceProperties);
+
+			if (physicalDeviceScore >= maxPhysicalDeviceScore) {
+				maxPhysicalDeviceScore = physicalDeviceScore;
+				bestPhysicalDeviceIndex = physicalDeviceIndex;
+			}
+
+			#if defined(DEBUG_ENUMERATE_PHYSICAL_DEVICES)
+				switch (physicalDeviceProperties.deviceType) {
+					case VK_PHYSICAL_DEVICE_TYPE_OTHER:
+						physicalDeviceType = "unknown type";
+
+						break;
+					case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
+						physicalDeviceType = "integrated GPU";
+
+						break;
+					case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
+						physicalDeviceType = "discrete GPU";
+
+						break;
+					case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
+						physicalDeviceType = "virtual GPU";
+
+						break;
+					case VK_PHYSICAL_DEVICE_TYPE_CPU:
+						physicalDeviceType = "CPU";
+
+						break;
+				}
+
+				ADAPTER_INFO("- [] ([])", physicalDeviceProperties.deviceName, physicalDeviceType);
+			#endif
+		}
+
+		ADAPTER_ASSERT(maxPhysicalDeviceScore > 0, "Could not select a suitable physical device.");
+
+		return physicalDevices[bestPhysicalDeviceIndex];
+	}
+
+	uint32 VK::Instance::calculatePhysicalDeviceScore(const VkPhysicalDeviceProperties& physicalDeviceProperties) const {
+		if (physicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
+			return 1 + !preferIntegratedGpu;
+		}
+
+		if (physicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU) {
+			return 1 + preferIntegratedGpu;
+		}
+
+		return 0;
 	}
 }

@@ -5,6 +5,7 @@
 
 #include "Engine/Adapter/Graphics/VK/Buffer.hpp"
 #include "Engine/Adapter/Graphics/VK/CommandEncoder.hpp"
+#include "Engine/Adapter/Graphics/VK/CommandPool.hpp"
 #include "Engine/Adapter/Graphics/VK/ComputePipeline.hpp"
 #include "Engine/Adapter/Graphics/VK/DescriptorSetLayout.hpp"
 #include "Engine/Adapter/Graphics/VK/Fence.hpp"
@@ -212,7 +213,6 @@ namespace Trident::VK {
 		adapter->endImplementation = VK::end;
 		adapter->endRenderPassImplementation = VK::endRenderPass;
 		adapter->getQueueImplementation = VK::getQueue;
-		adapter->getSurfaceFormatImplementation = VK::getSurfaceFormat;
 		adapter->insertBufferMemoryBarriersImplementation = VK::insertBufferMemoryBarriers;
 		adapter->mapBufferImplementation = VK::mapBuffer;
 		adapter->nextSubpassImplementation = VK::nextSubpass;

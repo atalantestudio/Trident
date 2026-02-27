@@ -570,41 +570,6 @@ namespace Trident {
 		_commandEncoder->commandCount += 1;
 	}
 
-	void DX12::drawIndirect(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
-		ADAPTER_ASSERT(buffer->getUsage() & BufferUsage::INDIRECT, "The buffer is not an indirect buffer.");
-
-		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
-		const DX12::Device* _device = static_cast<const DX12::Device*>(commandEncoder->device);
-		const ref<DX12::Buffer> indirectBuffer = std::static_pointer_cast<DX12::Buffer>(buffer);
-
-		// TODO: Create command signature when creating the buffer.
-		if (!indirectBuffer->commandSignature) {
-			D3D12_INDIRECT_ARGUMENT_DESC indirectArgumentDescriptor{};
-			indirectArgumentDescriptor.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW;
-
-			D3D12_COMMAND_SIGNATURE_DESC commandSignatureDescriptor{};
-			commandSignatureDescriptor.ByteStride = sizeof(DrawIndirectCommand);
-			commandSignatureDescriptor.NumArgumentDescs = drawCount;
-			commandSignatureDescriptor.pArgumentDescs = &indirectArgumentDescriptor;
-			commandSignatureDescriptor.NodeMask = 0;
-
-			const HRESULT result = _device->device->CreateCommandSignature(&commandSignatureDescriptor, nullptr, IID_PPV_ARGS(&indirectBuffer->commandSignature));
-
-			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command signature.");
-		}
-
-		_commandEncoder->commandList->ExecuteIndirect(
-			indirectBuffer->commandSignature,
-			drawCount,
-			indirectBuffer->resource,
-			bufferOffset,
-			nullptr,
-			0
-		);
-
-		_commandEncoder->commandCount += 1;
-	}
-
 	void DX12::drawIndexed(Trident::CommandEncoder* commandEncoder, uint32 indexCount, uint32 instanceCount, uint32 indexOffset, sint32 indexBias, uint32 instanceOffset) {
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 
@@ -627,6 +592,41 @@ namespace Trident {
 
 			D3D12_COMMAND_SIGNATURE_DESC commandSignatureDescriptor{};
 			commandSignatureDescriptor.ByteStride = sizeof(DrawIndexedIndirectCommand);
+			commandSignatureDescriptor.NumArgumentDescs = drawCount;
+			commandSignatureDescriptor.pArgumentDescs = &indirectArgumentDescriptor;
+			commandSignatureDescriptor.NodeMask = 0;
+
+			const HRESULT result = _device->device->CreateCommandSignature(&commandSignatureDescriptor, nullptr, IID_PPV_ARGS(&indirectBuffer->commandSignature));
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command signature.");
+		}
+
+		_commandEncoder->commandList->ExecuteIndirect(
+			indirectBuffer->commandSignature,
+			drawCount,
+			indirectBuffer->resource,
+			bufferOffset,
+			nullptr,
+			0
+		);
+
+		_commandEncoder->commandCount += 1;
+	}
+
+	void DX12::drawIndirect(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
+		ADAPTER_ASSERT(buffer->getUsage() & BufferUsage::INDIRECT, "The buffer is not an indirect buffer.");
+
+		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
+		const DX12::Device* _device = static_cast<const DX12::Device*>(commandEncoder->device);
+		const ref<DX12::Buffer> indirectBuffer = std::static_pointer_cast<DX12::Buffer>(buffer);
+
+		// TODO: Create command signature when creating the buffer.
+		if (!indirectBuffer->commandSignature) {
+			D3D12_INDIRECT_ARGUMENT_DESC indirectArgumentDescriptor{};
+			indirectArgumentDescriptor.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW;
+
+			D3D12_COMMAND_SIGNATURE_DESC commandSignatureDescriptor{};
+			commandSignatureDescriptor.ByteStride = sizeof(DrawIndirectCommand);
 			commandSignatureDescriptor.NumArgumentDescs = drawCount;
 			commandSignatureDescriptor.pArgumentDescs = &indirectArgumentDescriptor;
 			commandSignatureDescriptor.NodeMask = 0;

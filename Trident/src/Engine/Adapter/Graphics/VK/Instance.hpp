@@ -13,44 +13,32 @@
 
 namespace Trident {
 	class VK::Instance final : public Trident::Instance {
-		private:
-			#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
-				static void checkInstanceLayers();
-			#endif
-
-			#if defined(DEBUG_ENABLE_MESSENGER)
-				static VkBool32 debugUtilsMessengerUserCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
-			#endif
-
 		public:
-			explicit Instance(const InstanceDescriptor& descriptor);
-
-			~Instance() final override;
-
-			#if defined(DEBUG_ENABLE_MESSENGER)
-				void createDebugUtilsMessenger();
-			#endif
-
-			VkPhysicalDevice selectPhysicalDevice() const;
-
-		private:
-			uint32 calculatePhysicalDeviceScore(const VkPhysicalDeviceProperties& physicalDeviceProperties) const;
-
-		private:
-			#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
-				static const sequence<const char8*> ENABLED_LAYER_NAMES;
-			#endif
+			explicit Instance(const Trident::GraphicsAdapter* adapter);
 
 		public:
 			VkInstance instance;
 
-		private:
 			#if defined(DEBUG_ENABLE_MESSENGER)
-				VkDebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfo;
 				VkDebugUtilsMessengerEXT debugUtilsMessenger;
 			#endif
 
-			std::vector<const char8*> enabledExtensionNames;
-			bool preferIntegratedGpu;
+			PFN_vkDestroyInstance vkDestroyInstance;
+			PFN_vkDestroySurfaceKHR vkDestroySurfaceKHR;
+
+			#if defined(OPERATING_SYSTEM_WINDOWS)
+				PFN_vkCreateWin32SurfaceKHR vkCreateWin32SurfaceKHR;
+			#endif
+
+			#if defined(DEBUG_ENABLE_MESSENGER)
+				PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT;
+				PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT;
+			#endif
 	};
+
+	namespace VK {
+		ref<Trident::Instance> createInstance(const Trident::GraphicsAdapter* adapter, const InstanceDescriptor& descriptor);
+
+		void destroyInstance(const Trident::Instance* instance);
+	}
 }
