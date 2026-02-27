@@ -27,6 +27,10 @@ namespace Trident {
 			PFN_vkCreateFence vkCreateFence;
 			PFN_vkCreateFramebuffer vkCreateFramebuffer;
 			PFN_vkCreateGraphicsPipelines vkCreateGraphicsPipelines;
+			PFN_vkCreateImage vkCreateImage;
+			PFN_vkCreateImageView vkCreateImageView;
+			PFN_vkCreatePipelineLayout vkCreatePipelineLayout;
+			PFN_vkCreateSampler vkCreateSampler;
 			PFN_vkCreateSemaphore vkCreateSemaphore;
 			PFN_vkCreateSwapchainKHR vkCreateSwapchainKHR;
 			PFN_vkDestroyBuffer vkDestroyBuffer;
@@ -39,12 +43,17 @@ namespace Trident {
 
 			PFN_vkDestroyFence vkDestroyFence;
 			PFN_vkDestroyFramebuffer vkDestroyFramebuffer;
+			PFN_vkDestroyImage vkDestroyImage;
+			PFN_vkDestroyImageView vkDestroyImageView;
 			PFN_vkDestroyPipeline vkDestroyPipeline;
+			PFN_vkDestroyPipelineLayout vkDestroyPipelineLayout;
+			PFN_vkDestroySampler vkDestroySampler;
 			PFN_vkDestroySemaphore vkDestroySemaphore;
 			PFN_vkDestroySwapchainKHR vkDestroySwapchainKHR;
 			PFN_vkDeviceWaitIdle vkDeviceWaitIdle;
 			PFN_vkFreeCommandBuffers vkFreeCommandBuffers;
 			PFN_vkGetBufferMemoryRequirements vkGetBufferMemoryRequirements;
+			PFN_vkGetImageMemoryRequirements vkGetImageMemoryRequirements;
 			PFN_vkGetSwapchainImagesKHR vkGetSwapchainImagesKHR;
 			PFN_vkResetFences vkResetFences;
 			PFN_vkUpdateDescriptorSets vkUpdateDescriptorSets;

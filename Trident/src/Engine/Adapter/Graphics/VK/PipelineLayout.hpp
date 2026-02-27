@@ -9,14 +9,15 @@
 namespace Trident {
 	class VK::PipelineLayout final : public Trident::PipelineLayout {
 		public:
-			explicit PipelineLayout(const PipelineLayoutDescriptor& descriptor, const VK::Device& device);
-
-			~PipelineLayout() final override;
+			explicit PipelineLayout(const Trident::Device* device);
 
 		public:
 			VkPipelineLayout pipelineLayout;
-
-		private:
-			const VK::Device& device;
 	};
+
+	namespace VK {
+		ref<Trident::PipelineLayout> createPipelineLayout(const Trident::Device* device, const PipelineLayoutDescriptor& descriptor);
+
+		void destroyPipelineLayout(const Trident::Device* device, const Trident::PipelineLayout* pipelineLayout);
+	}
 }

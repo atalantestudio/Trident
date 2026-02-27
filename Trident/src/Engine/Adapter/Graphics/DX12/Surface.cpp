@@ -12,7 +12,7 @@ namespace Trident {
 		Trident::Surface(instance)
 	{}
 
-	ref<Trident::Surface> DX12::createSurface(const Trident::Instance* instance, const Window* window) {
+	ref<Trident::Surface> DX12::createSurface(const Trident::Instance* instance, ref<Trident::PhysicalDevice> physicalDevice, const Window* window) {
 		const DX12::Instance* _instance = static_cast<const DX12::Instance*>(instance);
 		HRESULT result;
 

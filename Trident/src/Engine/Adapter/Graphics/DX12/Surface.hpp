@@ -16,7 +16,7 @@ namespace Trident {
 	};
 
 	namespace DX12 {
-		ref<Trident::Surface> createSurface(const Trident::Instance* instance, const Window* window);
+		ref<Trident::Surface> createSurface(const Trident::Instance* instance, ref<Trident::PhysicalDevice> physicalDevice, const Window* window);
 
 		void destroySurface(const Trident::Instance* instance, const Trident::Surface* surface);
 	}

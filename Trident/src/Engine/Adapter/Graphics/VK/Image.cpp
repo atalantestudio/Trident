@@ -11,7 +11,7 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	ImageDescriptor VK::Image::createSwapchainImageDescriptor(Extent2D extent, uint32 index) {
+	static ImageDescriptor createSwapchainImageDescriptor(Extent2D extent) {
 		ImageDescriptor imageDescriptor{};
 		imageDescriptor.extent.width = extent.width;
 		imageDescriptor.extent.height = extent.height;
@@ -26,30 +26,36 @@ namespace Trident {
 		imageDescriptor.usage = static_cast<ImageUsage>(0);
 		imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
-		SET_DEBUG_NAME(imageDescriptor, Logger::format("Swapchain image []", index));
-
 		return imageDescriptor;
 	}
 
-	VK::Image::Image(const ImageDescriptor& descriptor, const VK::Device& device) :
-		Trident::Image(descriptor),
-		device(device),
-		swapchainImage(false),
-		type(getImageType(descriptor.type)),
-		format(VK::getFormat(descriptor.format))
-	{
+	VK::Image::Image(const Trident::Device* device, const ImageDescriptor& descriptor) :
+		Trident::Image(descriptor)
+	{}
+
+	ref<Trident::Image> VK::createImage(const Trident::Device* device, const ImageDescriptor& descriptor) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		VkResult result;
+
+		ref<VK::Image> image = createRef<VK::Image>(device, descriptor);
+		image->type = getImageType(descriptor.type);
+		image->format = getFormat(descriptor.format);
+		image->swapchainImage = false;
+
 		VkImageCreateInfo imageCreateInfo{};
 		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageCreateInfo.pNext = nullptr;
 		imageCreateInfo.flags = 0;
-		imageCreateInfo.imageType = type;
-		imageCreateInfo.format = format;
-		imageCreateInfo.extent.width = extent.width;
-		imageCreateInfo.extent.height = extent.height;
-		imageCreateInfo.extent.depth = extent.depth;
-		imageCreateInfo.mipLevels = mipLevelCount;
-		imageCreateInfo.arrayLayers = layerCount;
-		imageCreateInfo.samples = static_cast<VkSampleCountFlagBits>(getSampleCount());
+		imageCreateInfo.imageType = image->type;
+		imageCreateInfo.format = image->format;
+		imageCreateInfo.extent.width = descriptor.extent.width;
+		imageCreateInfo.extent.height = descriptor.extent.height;
+		imageCreateInfo.extent.depth = descriptor.extent.depth;
+		imageCreateInfo.mipLevels = descriptor.mipLevelCount;
+		imageCreateInfo.arrayLayers = descriptor.layerCount;
+		imageCreateInfo.samples = static_cast<VkSampleCountFlagBits>(descriptor.sampleCount);
 		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 		imageCreateInfo.usage = getImageUsageFlagBits(descriptor.usage);
 		imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -59,13 +65,13 @@ namespace Trident {
 		// initialLayout must either be VK_IMAGE_LAYOUT_UNDEFINED or VK_IMAGE_LAYOUT_PREINITIALIZED.
 		imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-		const VkResult result = vkCreateImage(device.device, &imageCreateInfo, nullptr, &image);
+		const VkResult result = _device->vkCreateImage(_device->device, &imageCreateInfo, nullptr, &image->image);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create image ([]).", string_VkResult(result));
 
 		VkMemoryRequirements memoryRequirements;
 
-		vkGetImageMemoryRequirements(device.device, image, &memoryRequirements);
+		_device->vkGetImageMemoryRequirements(_device->device, image->image, &memoryRequirements);
 
 		VkMemoryPropertyFlags memoryPropertyFlags = static_cast<VkMemoryPropertyFlags>(descriptor.memoryProperties);
 		uint32 memoryTypeIndex = MemoryAllocator::findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
@@ -93,33 +99,41 @@ namespace Trident {
 
 		ADAPTER_ASSERT(memoryTypeIndex != UNDEFINED_MEMORY_TYPE_INDEX, "Undefined memory type index.");
 
-		memorySuballocation = MemoryAllocator::suballocateImage(device.device, image, memoryTypeIndex, memoryRequirements);
+		image->memorySuballocation = MemoryAllocator::suballocateImage(_device->device, image->image, memoryTypeIndex, memoryRequirements);
+
+		return image;
 	}
 
-	VK::Image::Image(const VK::Device& device, VkImage image, VkFormat format, Extent2D extent, uint32 index) :
-		Trident::Image(createSwapchainImageDescriptor(extent, index)),
-		image(image),
-		device(device),
-		swapchainImage(true),
-		type(VK_IMAGE_TYPE_2D),
-		format(format)
-	{}
-
-	VK::Image::~Image() {
+	ref<Trident::Image> VK::createImage(const Trident::Device* device, VkImage image, VkFormat format, Extent2D extent, uint32 index) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		if (swapchainImage) {
+		ImageDescriptor descriptor = createSwapchainImageDescriptor(extent);
+
+		SET_DEBUG_NAME(descriptor, Logger::format("Swapchain image []", index));
+
+		ref<VK::Image> _image = createRef<VK::Image>(device, descriptor);
+		_image->image = image;
+		_image->type = VK_IMAGE_TYPE_2D;
+		_image->format = format;
+		_image->memorySuballocation = {};
+		_image->swapchainImage = true;
+
+		return _image;
+	}
+
+	void VK::destroyImage(const Trident::Device* device, const Trident::Image* image) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const VK::Image* _image = static_cast<const VK::Image*>(image);
+
+		if (_image->swapchainImage) {
 			return;
 		}
 
-		vkDestroyImage(device.device, image, nullptr);
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
 
-		MemoryAllocator::freeSuballocation(device.device, memorySuballocation.allocationIndex);
-	}
+		_device->vkDestroyImage(_device->device, _image->image, nullptr);
 
-	ref<ImageView> VK::Image::createViewInternal(const ImageViewDescriptor& descriptor, Trident::Image* image) {
-		DEBUG_DESCRIPTOR_GUARD(descriptor, image);
-
-		return createRef<VK::ImageView>(descriptor, image, device);
+		MemoryAllocator::freeSuballocation(_device->device, _image->memorySuballocation.allocationIndex);
 	}
 }

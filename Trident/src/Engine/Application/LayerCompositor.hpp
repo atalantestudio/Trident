@@ -35,8 +35,8 @@ namespace Trident {
 				instanceDescriptor.projectVersion = projectDescriptor.version;
 
 				instance = adapter->createInstance(instanceDescriptor);
-				surface = instance->createSurface(window);
 				physicalDevice = instance->selectPhysicalDevice(applicationProperties.PreferIntegratedGPU);
+				surface = instance->createSurface(physicalDevice, window);
 				device = physicalDevice->createDevice();
 
 				const ref<Queue> graphicsQueue = device->getQueue(QueueFamilyCapability::GRAPHICS);
@@ -145,8 +145,8 @@ namespace Trident {
 
 		public:
 			ref<Instance> instance;
-			ref<Surface> surface;
 			ref<PhysicalDevice> physicalDevice;
+			ref<Surface> surface;
 			ref<Device> device;
 			ref<Swapchain> swapchain;
 

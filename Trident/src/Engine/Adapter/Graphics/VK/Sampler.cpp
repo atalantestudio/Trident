@@ -8,40 +8,51 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	VK::Sampler::Sampler(const SamplerDescriptor& descriptor, const VK::Device& device) :
-        Trident::Sampler(descriptor),
-		device(device)
-	{
-        PROFILE_SCOPE(FUNCTION_SIGNATURE);
+	VK::Sampler::Sampler(const Trident::Device* device) :
+		Trident::Sampler(device)
+	{}
+
+	ref<Trident::Sampler> VK::createSampler(const Trident::Device* device, const SamplerDescriptor& descriptor) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		VkResult result;
+
+		ref<VK::Sampler> sampler = createRef<VK::Sampler>(device);
 
 		VkSamplerCreateInfo samplerCreateInfo{};
 		samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-        samplerCreateInfo.pNext = nullptr;
-        samplerCreateInfo.flags = 0;
-        samplerCreateInfo.magFilter = getFilter(descriptor.magFilter);
-        samplerCreateInfo.minFilter = getFilter(descriptor.minFilter);
-        samplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
-        samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        samplerCreateInfo.mipLodBias = 0.0f;
-        samplerCreateInfo.anisotropyEnable = VK_FALSE;
-        samplerCreateInfo.maxAnisotropy = 1.0f;
-        samplerCreateInfo.compareEnable = VK_FALSE;
-        samplerCreateInfo.compareOp = VK_COMPARE_OP_NEVER;
-        samplerCreateInfo.minLod = 0;
-        samplerCreateInfo.maxLod = 0;
-        samplerCreateInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-        samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;
+		samplerCreateInfo.pNext = nullptr;
+		samplerCreateInfo.flags = 0;
+		samplerCreateInfo.magFilter = getFilter(descriptor.magFilter);
+		samplerCreateInfo.minFilter = getFilter(descriptor.minFilter);
+		samplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+		samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerCreateInfo.mipLodBias = 0.0f;
+		samplerCreateInfo.anisotropyEnable = VK_FALSE;
+		samplerCreateInfo.maxAnisotropy = 1.0f;
+		samplerCreateInfo.compareEnable = VK_FALSE;
+		samplerCreateInfo.compareOp = VK_COMPARE_OP_NEVER;
+		samplerCreateInfo.minLod = 0;
+		samplerCreateInfo.maxLod = 0;
+		samplerCreateInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+		samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;
 
-        const VkResult result = vkCreateSampler(device.device, &samplerCreateInfo, nullptr, &sampler);
+		result = _device->vkCreateSampler(_device->device, &samplerCreateInfo, nullptr, &sampler->sampler);
 
-        ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create sampler ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create sampler ([]).", string_VkResult(result));
+
+		return sampler;
 	}
 
-	VK::Sampler::~Sampler() {
-        PROFILE_SCOPE(FUNCTION_SIGNATURE);
+	void VK::destroySampler(const Trident::Device* device, const Trident::Sampler* sampler) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		vkDestroySampler(device.device, sampler, nullptr);
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		const VK::Sampler* _sampler = static_cast<const VK::Sampler*>(sampler);
+
+		_device->vkDestroySampler(_device->device, _sampler->sampler, nullptr);
 	}
 }
