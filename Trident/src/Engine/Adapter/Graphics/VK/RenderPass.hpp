@@ -3,26 +3,21 @@
 
 #pragma once
 
-#include "Engine/Adapter/Graphics/VK/Device.hpp"
-#include "Engine/Adapter/Graphics/VK/Surface.hpp"
 #include "Engine/API/Rendering/RenderPass.hpp"
 
 namespace Trident {
 	class VK::RenderPass final : public Trident::RenderPass {
 		public:
-			explicit RenderPass(const RenderPassDescriptor& descriptor, const VK::Surface& surface, const VK::Device& device);
-
-			~RenderPass() final override;
-
-		private:
-			// Returns true if this attachment is a color attachment used in any subpass.
-			bool isColorAttachment(uint32 attachmentIndex) const;
+			explicit RenderPass(const Trident::Device* device, const RenderPassDescriptor& descriptor);
 
 		public:
 			VkRenderPass renderPass;
-			const VK::Surface& surface;
-
-		private:
-			const VK::Device& device;
+			VkExtent2D surfaceExtent;
 	};
+
+	namespace VK {
+		ref<Trident::RenderPass> createRenderPass(const Trident::Device* device, ref<Trident::Surface> surface, const RenderPassDescriptor& descriptor);
+
+		void destroyRenderPass(const Trident::Device* device, const Trident::RenderPass* renderPass);
+	}
 }

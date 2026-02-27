@@ -22,7 +22,7 @@ namespace Trident {
 
 			AcquireNextImageStatus acquireNextImage(const Device* device, const Swapchain* swapchain, const Semaphore* semaphore, uint32& imageIndex) const;
 
-			sequence<ref<DescriptorSet>> allocateDescriptorSets(const Device* device, view<ref<DescriptorSetLayout>> descriptorSetLayouts) const;
+			sequence<ref<DescriptorSet>> allocateDescriptorSets(Device* device, view<ref<DescriptorSetLayout>> descriptorSetLayouts) const;
 
 			void begin(const CommandEncoder* commandEncoder) const;
 
@@ -77,7 +77,7 @@ namespace Trident {
 
 			ref<PipelineLayout> createPipelineLayout(const Device* device, const PipelineLayoutDescriptor& descriptor) const;
 
-			ref<RenderPass> createRenderPass(const Device* device, const RenderPassDescriptor& descriptor) const;
+			ref<RenderPass> createRenderPass(const Device* device, ref<Surface> surface, const RenderPassDescriptor& descriptor) const;
 
 			ref<GraphicsPipeline> createGraphicsPipeline(const Device* device, const GraphicsPipelineDescriptor& descriptor) const;
 
@@ -119,6 +119,8 @@ namespace Trident {
 			void destroyPipelineLayout(const Device* device, const PipelineLayout* pipelineLayout) const;
 
 			void destroyQueue(const Queue* queue) const;
+
+			void destroyRenderPass(const Device* device, const RenderPass* renderPass) const;
 
 			void destroySampler(const Device* device, const Sampler* sampler) const;
 
@@ -233,6 +235,7 @@ namespace Trident {
 			DestroyInstanceImplementation destroyInstanceImplementation;
 			DestroyPipelineLayoutImplementation destroyPipelineLayoutImplementation;
 			DestroyQueueImplementation destroyQueueImplementation;
+			DestroyRenderPassImplementation destroyRenderPassImplementation;
 			DestroySamplerImplementation destroySamplerImplementation;
 			DestroySemaphoreImplementation destroySemaphoreImplementation;
 			DestroyShaderModuleImplementation destroyShaderModuleImplementation;

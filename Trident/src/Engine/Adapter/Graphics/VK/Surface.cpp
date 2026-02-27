@@ -48,7 +48,7 @@ namespace Trident {
 		Trident::Surface(instance)
 	{}
 
-	ref<Trident::Surface> VK::createSurface(const Trident::Instance* instance, ref<PhysicalDevice> physicalDevice, const Window* window) {
+	ref<Trident::Surface> VK::createSurface(const Trident::Instance* instance, ref<Trident::PhysicalDevice> physicalDevice, const Window* window) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VK::Instance* _instance = static_cast<const VK::Instance*>(instance);

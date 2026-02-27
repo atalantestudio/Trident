@@ -5,24 +5,15 @@
 
 #include "Engine/API/Rendering/PhysicalDevice.hpp"
 
-// #define DEBUG_ENUMERATE_DEVICE_EXTENSIONS
+#define DEBUG_ENUMERATE_DEVICE_EXTENSIONS
 
 namespace Trident {
 	class VK::PhysicalDevice final : public Trident::PhysicalDevice {
-		private:
-			static void enumerateQueueFamilyProperties(const sequence<VkQueueFamilyProperties>& queueFamilies);
-
 		public:
-			explicit PhysicalDevice(VkPhysicalDevice physicalDevice);
-
-		private:
-			void setLimits();
-
-			void selectQueueFamilyIndices();
+			explicit PhysicalDevice(const Trident::GraphicsAdapter* adapter);
 
 		public:
 			VkPhysicalDevice physicalDevice;
-			std::vector<const char8*> enabledExtensionNames;
 			uint32 graphicsQueueFamilyIndex;
 			uint32 computeQueueFamilyIndex;
 			uint32 transferQueueFamilyIndex;
@@ -30,4 +21,8 @@ namespace Trident {
 			VkPhysicalDeviceMemoryProperties memoryProperties;
 			VkPhysicalDeviceProperties properties;
 	};
+
+	namespace VK {
+		ref<Trident::PhysicalDevice> selectPhysicalDevice(const Trident::Instance* instance, bool preferIntegratedGpu);
+	}
 }

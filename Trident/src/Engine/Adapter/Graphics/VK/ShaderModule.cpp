@@ -8,13 +8,23 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	VK::ShaderModule::ShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code, const VK::Device& device) :
-		Trident::ShaderModule(descriptor),
-		device(device)
-	{
+	VK::ShaderModule::ShaderModule(const Trident::Device* device) :
+		Trident::ShaderModule(device)
+	{}
+
+	ref<Trident::ShaderModule> VK::createShaderModule(const Trident::Device* device, const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> shaderModuleAsset) {
+		ADAPTER_ASSERT(false, "Shader module assets are not supported by the Vulkan adapter.");
+
+		return nullptr;
+	}
+
+	ref<Trident::ShaderModule> VK::createShaderModule(const Trident::Device* device, const ShaderModuleDescriptor& descriptor, view<char8> code) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		VkResult result;
+
+		ref<VK::ShaderModule> shaderModule = createRef<VK::ShaderModule>(device);
 
 		VkShaderModuleCreateInfo shaderModuleCreateInfo{};
 		shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -23,7 +33,7 @@ namespace Trident {
 		shaderModuleCreateInfo.codeSize = code.count();
 		shaderModuleCreateInfo.pCode = pointer_cast<const uint32*>(&code[0]);
 
-		result = vkCreateShaderModule(device.device, &shaderModuleCreateInfo, nullptr, &createInfo.module);
+		result = _device->vkCreateShaderModule(_device->device, &shaderModuleCreateInfo, nullptr, &shaderModule->createInfo.module);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create shader module ([]).", string_VkResult(result));
 
@@ -33,26 +43,31 @@ namespace Trident {
 				debugUtilsObjectNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
 				debugUtilsObjectNameInfo.pNext = nullptr;
 				debugUtilsObjectNameInfo.objectType = VK_OBJECT_TYPE_SHADER_MODULE;
-				debugUtilsObjectNameInfo.objectHandle = (uint64) createInfo.module;
+				debugUtilsObjectNameInfo.objectHandle = (uint64) shaderModule->createInfo.module;
 				debugUtilsObjectNameInfo.pObjectName = &descriptor.name[0];
 
-				result = vkSetDebugUtilsObjectNameEXT(device.device, &debugUtilsObjectNameInfo);
+				result = vkSetDebugUtilsObjectNameEXT(_device->device, &debugUtilsObjectNameInfo);
 
 				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to set object name ([]).", string_VkResult(result));
 			}
 		#endif
 
-		createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		createInfo.pNext = nullptr;
-		createInfo.flags = 0;
-		createInfo.stage = getShaderStageFlagBits(descriptor.stage);
-		createInfo.pName = &descriptor.entryPoint[0];
-		createInfo.pSpecializationInfo = nullptr;
+		shaderModule->createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		shaderModule->createInfo.pNext = nullptr;
+		shaderModule->createInfo.flags = 0;
+		shaderModule->createInfo.stage = getShaderStageFlagBits(descriptor.stage);
+		shaderModule->createInfo.pName = &descriptor.entryPoint[0];
+		shaderModule->createInfo.pSpecializationInfo = nullptr;
+
+		return shaderModule;
 	}
 
-	VK::ShaderModule::~ShaderModule() {
+	void VK::destroyShaderModule(const Trident::Device* device, const Trident::ShaderModule* shaderModule) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		vkDestroyShaderModule(device.device, createInfo.module, nullptr);
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		const VK::ShaderModule* _shaderModule = static_cast<const VK::ShaderModule*>(shaderModule);
+
+		_device->vkDestroyShaderModule(_device->device, _shaderModule->createInfo.module, nullptr);
 	}
 }

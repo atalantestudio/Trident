@@ -12,7 +12,7 @@ namespace Trident {
 	{}
 
 	ref<Trident::ShaderModule> DX12::createShaderModule(const Trident::Device* device, const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> shaderModuleAsset) {
-		ADAPTER_ASSERT(false, "Shader module assets are not supported by the DX12 adapter.");
+		ADAPTER_ASSERT(false, "Shader module assets are not supported by the DirectX 12 adapter.");
 
 		return nullptr;
 	}

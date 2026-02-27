@@ -3,11 +3,12 @@
 
 #pragma once
 
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/API/Rendering/BlendFactor.hpp"
 
 namespace Trident::VK {
 	inline VkBlendFactor getBlendFactor(BlendFactor blendFactor) {
-		static constexpr BLEND_FACTORS[] = {
+		static constexpr VkBlendFactor BLEND_FACTORS[] = {
 			VK_BLEND_FACTOR_ZERO,
 			VK_BLEND_FACTOR_ONE,
 			VK_BLEND_FACTOR_SRC_COLOR,

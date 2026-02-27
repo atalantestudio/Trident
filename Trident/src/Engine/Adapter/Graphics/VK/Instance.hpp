@@ -25,6 +25,7 @@ namespace Trident {
 
 			PFN_vkDestroyInstance vkDestroyInstance;
 			PFN_vkDestroySurfaceKHR vkDestroySurfaceKHR;
+			PFN_vkEnumeratePhysicalDevices vkEnumeratePhysicalDevices;
 
 			#if defined(OPERATING_SYSTEM_WINDOWS)
 				PFN_vkCreateWin32SurfaceKHR vkCreateWin32SurfaceKHR;

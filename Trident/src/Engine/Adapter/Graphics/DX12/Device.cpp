@@ -55,7 +55,7 @@ namespace Trident {
 		return AcquireNextImageStatus::SUCCESS;
 	}
 
-	sequence<ref<Trident::DescriptorSet>> DX12::allocateDescriptorSets(const Trident::Device* device, view<ref<DescriptorSetLayout>> descriptorSetLayouts) {
+	sequence<ref<Trident::DescriptorSet>> DX12::allocateDescriptorSets(Trident::Device* device, view<ref<DescriptorSetLayout>> descriptorSetLayouts) {
 		const ref<DX12::MemoryAllocator> memoryAllocator = std::static_pointer_cast<DX12::MemoryAllocator>(device->getMemoryAllocator());
 
 		sequence<ref<Trident::DescriptorSet>> descriptorSets(descriptorSetLayouts.count());
@@ -131,9 +131,11 @@ namespace Trident {
 			adapter->Release();
 		}
 
-		device->queues[0] = createQueue(pointer_cast<const Trident::Device*>(device.get()), 0, QueueFamilyCapability::GRAPHICS);
-		device->queues[1] = createQueue(pointer_cast<const Trident::Device*>(device.get()), 1, QueueFamilyCapability::COMPUTE);
-		device->queues[2] = createQueue(pointer_cast<const Trident::Device*>(device.get()), 2, QueueFamilyCapability::TRANSFER);
+		const Trident::Device* _device = pointer_cast<const Trident::Device*>(device.get());
+
+		device->queues[0] = createQueue(_device, 0, QueueFamilyCapability::GRAPHICS);
+		device->queues[1] = createQueue(_device, 1, QueueFamilyCapability::COMPUTE);
+		device->queues[2] = createQueue(_device, 2, QueueFamilyCapability::TRANSFER);
 
 		device->waitEvent = CreateEvent(nullptr, false, false, L"Wait event");
 

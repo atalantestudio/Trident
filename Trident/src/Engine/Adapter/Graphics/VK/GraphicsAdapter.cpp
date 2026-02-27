@@ -13,17 +13,21 @@
 #include "Engine/Adapter/Graphics/VK/GraphicsAdapter.hpp"
 #include "Engine/Adapter/Graphics/VK/GraphicsPipeline.hpp"
 #include "Engine/Adapter/Graphics/VK/Image.hpp"
+#include "Engine/Adapter/Graphics/VK/ImageView.hpp"
+#include "Engine/Adapter/Graphics/VK/Instance.hpp"
 #include "Engine/Adapter/Graphics/VK/MemoryAllocator.hpp"
 #include "Engine/Adapter/Graphics/VK/PipelineLayout.hpp"
+#include "Engine/Adapter/Graphics/VK/Queue.hpp"
 #include "Engine/Adapter/Graphics/VK/RenderPass.hpp"
 #include "Engine/Adapter/Graphics/VK/Sampler.hpp"
 #include "Engine/Adapter/Graphics/VK/Semaphore.hpp"
 #include "Engine/Adapter/Graphics/VK/ShaderModule.hpp"
+#include "Engine/Adapter/Graphics/VK/Surface.hpp"
 #include "Engine/Adapter/Graphics/VK/Swapchain.hpp"
 
 namespace Trident::VK {
 	static ref<Trident::MemoryAllocator> createMemoryAllocator(const Trident::Device* device) {
-		return createRef<VK::MemoryAllocator>(static_cast<const VK::Device*>(device));
+		return createRef<VK::MemoryAllocator>(std::static_pointer_cast<VK::PhysicalDevice>(device->getPhysicalDevice()).get());
 	}
 
 	void bindAdapter(Trident::GraphicsAdapter* adapter) {
@@ -199,6 +203,7 @@ namespace Trident::VK {
 		adapter->destroyImageViewImplementation = VK::destroyImageView;
 		adapter->destroyInstanceImplementation = VK::destroyInstance;
 		adapter->destroyQueueImplementation = VK::destroyQueue;
+		adapter->destroyRenderPassImplementation = VK::destroyRenderPass;
 		adapter->destroySamplerImplementation = VK::destroySampler;
 		adapter->destroySemaphoreImplementation = VK::destroySemaphore;
 		adapter->destroyShaderModuleImplementation = VK::destroyShaderModule;

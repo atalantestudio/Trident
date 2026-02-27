@@ -22,7 +22,7 @@ namespace Trident {
 	};
 
 	namespace VK {
-		ref<Trident::Surface> createSurface(const Trident::Instance* instance, ref<PhysicalDevice> physicalDevice, const Window* window);
+		ref<Trident::Surface> createSurface(const Trident::Instance* instance, ref<Trident::PhysicalDevice> physicalDevice, const Window* window);
 
 		void destroySurface(const Trident::Instance* instance, const Trident::Surface* surface);
 	}

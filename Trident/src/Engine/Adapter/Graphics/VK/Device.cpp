@@ -3,7 +3,6 @@
 
 #include "pch.hpp"
 
-#include "Engine/Adapter/Graphics/VK/AcquireNextImageStatus.hpp"
 #include "Engine/Adapter/Graphics/VK/Buffer.hpp"
 #include "Engine/Adapter/Graphics/VK/CommandBuffer.hpp"
 #include "Engine/Adapter/Graphics/VK/DescriptorSet.hpp"
@@ -18,6 +17,7 @@
 #include "Engine/Adapter/Graphics/VK/Sampler.hpp"
 #include "Engine/Adapter/Graphics/VK/Semaphore.hpp"
 #include "Engine/Adapter/Graphics/VK/ShaderModule.hpp"
+#include "Engine/Adapter/Graphics/VK/Status.hpp"
 #include "Engine/Adapter/Graphics/VK/Swapchain.hpp"
 
 namespace Trident {
@@ -25,7 +25,7 @@ namespace Trident {
 		Trident::Device(adapter, physicalDevice)
 	{}
 
-	AcquireNextImageStatus VK::acquireNextImage(const Trident::Device* device, const Trident::Swapchain* swapchain, const Semaphore* semaphore, uint32& imageIndex) {
+	AcquireNextImageStatus VK::acquireNextImage(const Trident::Device* device, const Trident::Swapchain* swapchain, const Trident::Semaphore* semaphore, uint32& imageIndex) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
@@ -42,13 +42,13 @@ namespace Trident {
 			&imageIndex
 		);
 
-		return fromResult(result);
+		return acquireNextImageStatusFromResult(result);
 	}
 
-	sequence<ref<Trident::DescriptorSet>> VK::allocateDescriptorSets(const Trident::Device* device, view<ref<DescriptorSetLayout>> descriptorSetLayouts) {
+	sequence<ref<Trident::DescriptorSet>> VK::allocateDescriptorSets(Trident::Device* device, view<ref<Trident::DescriptorSetLayout>> descriptorSetLayouts) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		VK::Device* _device = static_cast<VK::Device*>(device);
 		const uint32 descriptorSetCount = static_cast<uint32>(descriptorSetLayouts.count());
 
 		sequence<VkDescriptorSetLayout> vkDescriptorSetLayouts(descriptorSetCount);
@@ -170,9 +170,9 @@ namespace Trident {
 
 		// TODO: Replace with sequence<T>.
 		std::vector<uint32> queueFamilyIndices = {
-			physicalDevice->graphicsQueueFamilyIndex,
-			physicalDevice->computeQueueFamilyIndex,
-			physicalDevice->transferQueueFamilyIndex,
+			_physicalDevice->graphicsQueueFamilyIndex,
+			_physicalDevice->computeQueueFamilyIndex,
+			_physicalDevice->transferQueueFamilyIndex,
 		};
 
 		std::sort(queueFamilyIndices.begin(), queueFamilyIndices.end());
@@ -211,9 +211,11 @@ namespace Trident {
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create device ([]).", string_VkResult(result));
 
-		device->queues[0] = createRef<VK::Queue>(device.get(), physicalDevice->graphicsQueueFamilyIndex);
-		device->queues[1] = createRef<VK::Queue>(device.get(), physicalDevice->computeQueueFamilyIndex);
-		device->queues[2] = createRef<VK::Queue>(device.get(), physicalDevice->transferQueueFamilyIndex);
+		const Trident::Device* _device = pointer_cast<const Trident::Device*>(device.get());
+
+		device->queues[0] = createQueue(_device, _physicalDevice->graphicsQueueFamilyIndex, QueueFamilyCapability::GRAPHICS);
+		device->queues[1] = createQueue(_device, _physicalDevice->computeQueueFamilyIndex, QueueFamilyCapability::COMPUTE);
+		device->queues[2] = createQueue(_device, _physicalDevice->transferQueueFamilyIndex, QueueFamilyCapability::TRANSFER);
 
 		// TODO: Get device procedure addresses using vkGetProcAddress.
 		BREAKPOINT();
@@ -226,7 +228,7 @@ namespace Trident {
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 
-		for (const ref<VK::Queue> queue : _device->queues) {
+		for (const ref<Trident::Queue> queue : _device->queues) {
 			queue.~shared_ptr();
 		}
 
@@ -252,7 +254,7 @@ namespace Trident {
 		const VK::Fence* _fence = static_cast<const VK::Fence*>(fence);
 		VkResult result;
 
-		result = _device->vkResetFences(_device->device, 1, _fence->fence);
+		result = _device->vkResetFences(_device->device, 1, &_fence->fence);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to reset fence ([]).", string_VkResult(result));
 	}
@@ -364,7 +366,7 @@ namespace Trident {
 		const VK::Fence* _fence = static_cast<const VK::Fence*>(fence);
 		VkResult result;
 
-		result = _device->vkWaitForFences(_device->device, 1, _fence->fence, VK_TRUE, max<uint64>());
+		result = _device->vkWaitForFences(_device->device, 1, &_fence->fence, VK_TRUE, max<uint64>());
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to wait for fence ([]).", string_VkResult(result));
 	}

@@ -72,7 +72,7 @@ namespace Trident {
 	typedef void (*BindAdapterImplementation)(GraphicsAdapter* adapter);
 
 	typedef AcquireNextImageStatus (*AcquireNextImageImplementation)(const Device* device, const Swapchain* swapchain, const Semaphore* semaphore, uint32& imageIndex);
-	typedef sequence<ref<DescriptorSet>> (*AllocateDescriptorSetsImplementation)(const Device* device, view<ref<DescriptorSetLayout>> descriptorSetLayouts);
+	typedef sequence<ref<DescriptorSet>> (*AllocateDescriptorSetsImplementation)(Device* device, view<ref<DescriptorSetLayout>> descriptorSetLayouts);
 	typedef void (*BeginImplementation)(const CommandEncoder* commandEncoder);
 	typedef void (*BeginRenderPassImplementation)(CommandEncoder* commandEncoder, const BeginRenderPassDescriptor& descriptor);
 	typedef void (*BindComputePipelineImplementation)(CommandEncoder* commandEncoder, ref<ComputePipeline> computePipeline);
@@ -96,7 +96,7 @@ namespace Trident {
 	typedef ref<Instance> (*CreateInstanceImplementation)(const GraphicsAdapter* adapter, const InstanceDescriptor& instanceDescriptor);
 	typedef ref<MemoryAllocator> (*CreateMemoryAllocatorImplementation)(const Device* device);
 	typedef ref<PipelineLayout> (*CreatePipelineLayoutImplementation)(const Device* device, const PipelineLayoutDescriptor& descriptor);
-	typedef ref<RenderPass> (*CreateRenderPassImplementation)(const Device* device, const RenderPassDescriptor& descriptor);
+	typedef ref<RenderPass> (*CreateRenderPassImplementation)(const Device* device, ref<Surface> surface, const RenderPassDescriptor& descriptor);
 	typedef ref<GraphicsPipeline> (*CreateGraphicsPipelineImplementation)(const Device* device, const GraphicsPipelineDescriptor& descriptor);
 	typedef ref<Sampler> (*CreateSamplerImplementation)(const Device* device, const SamplerDescriptor& descriptor);
 	typedef ref<Semaphore> (*CreateSemaphoreImplementation)(const Device* device);
@@ -121,6 +121,7 @@ namespace Trident {
 	typedef void (*DestroyInstanceImplementation)(const Instance* instance);
 	typedef void (*DestroyPipelineLayoutImplementation)(const Device* device, const PipelineLayout* pipelineLayout);
 	typedef void (*DestroyQueueImplementation)(const Queue* queue);
+	typedef void (*DestroyRenderPassImplementation)(const Device* device, const RenderPass* renderPass);
 	typedef void (*DestroySamplerImplementation)(const Device* device, const Sampler* sampler);
 	typedef void (*DestroySemaphoreImplementation)(const Device* device, const Semaphore* semaphore);
 	typedef void (*DestroyShaderModuleImplementation)(const Device* device, const ShaderModule* shaderModule);

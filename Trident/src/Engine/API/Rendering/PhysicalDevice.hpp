@@ -26,6 +26,7 @@ namespace Trident {
 		protected:
 			const GraphicsAdapter* adapter;
 
+		public:
 			PhysicalDeviceLimits limits;
 	};
 }

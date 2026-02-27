@@ -17,6 +17,7 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		const ref<VK::MemoryAllocator> memoryAllocator = std::static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
 		VkResult result;
 
 		ref<VK::Buffer> buffer = createRef<VK::Buffer>(device, descriptor);
@@ -48,25 +49,25 @@ namespace Trident {
 		_device->vkGetBufferMemoryRequirements(_device->device, buffer->buffer, &memoryRequirements);
 
 		VkMemoryPropertyFlags memoryPropertyFlags = static_cast<VkMemoryPropertyFlags>(descriptor.memoryProperties);
-		uint32 memoryTypeIndex = MemoryAllocator::findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
+		uint32 memoryTypeIndex = memoryAllocator->findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
 
 		if ((memoryPropertyFlags == (VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) && memoryTypeIndex == UNDEFINED_MEMORY_TYPE_INDEX) {
 			ADAPTER_WARNING("Failed to find DEVICE_LOCAL|HOST_VISIBLE memory for image. Falling back to HOST_VISIBLE|HOST_COHERENT memory.");
 
 			memoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-			memoryTypeIndex = MemoryAllocator::findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
+			memoryTypeIndex = memoryAllocator->findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
 		}
 
 		if ((memoryPropertyFlags == (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)) && memoryTypeIndex == UNDEFINED_MEMORY_TYPE_INDEX) {
 			ADAPTER_WARNING("Failed to find HOST_VISIBLE|HOST_COHERENT memory for image. Falling back to DEVICE_LOCAL memory.");
 
 			memoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-			memoryTypeIndex = MemoryAllocator::findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
+			memoryTypeIndex = memoryAllocator->findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
 		}
 
 		ADAPTER_ASSERT(memoryTypeIndex != UNDEFINED_MEMORY_TYPE_INDEX, "Undefined memory type index.");
 
-		buffer->memorySuballocation = MemoryAllocator::suballocateBuffer(_device->device, buffer->buffer, memoryTypeIndex, memoryRequirements);
+		buffer->memorySuballocation = memoryAllocator->suballocateBuffer(_device->device, buffer->buffer, memoryTypeIndex, memoryRequirements);
 
 		#if defined(BUILD_MODE_DEBUG)
 			if (descriptor.name.count() > 0) {
@@ -90,24 +91,27 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		const ref<VK::MemoryAllocator> memoryAllocator = std::static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
 		const VK::Buffer* _buffer = static_cast<const VK::Buffer*>(buffer);
 
 		_device->vkDestroyBuffer(_device->device, _buffer->buffer, nullptr);
 
-		MemoryAllocator::freeSuballocation(_device->device, _buffer->memorySuballocation.allocationIndex);
+		memoryAllocator->freeSuballocation(_device->device, _buffer->memorySuballocation.allocationIndex);
 	}
 
 	void* VK::mapBuffer(const Trident::Device* device, const Trident::Buffer* buffer, uint64 offset, uint64 size) {
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		const ref<VK::MemoryAllocator> memoryAllocator = std::static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
 		const VK::Buffer* _buffer = static_cast<const VK::Buffer*>(buffer);
 
-		return MemoryAllocator::mapSuballocation(_device->device, _buffer->memorySuballocation, offset, size);
+		return memoryAllocator->mapSuballocation(_device->device, _buffer->memorySuballocation, offset, size);
 	}
 
 	void VK::unmapBuffer(const Trident::Device* device, const Trident::Buffer* buffer) {
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		const ref<VK::MemoryAllocator> memoryAllocator = std::static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
 		const VK::Buffer* _buffer = static_cast<const VK::Buffer*>(buffer);
 
-		MemoryAllocator::unmapSuballocation(_device->device, _buffer->memorySuballocation.allocationIndex);
+		memoryAllocator->unmapSuballocation(_device->device, _buffer->memorySuballocation.allocationIndex);
 	}
 }

@@ -9,14 +9,16 @@
 namespace Trident {
 	class VK::ShaderModule final : public Trident::ShaderModule {
 		public:
-			explicit ShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code, const VK::Device& device);
-
-			~ShaderModule() final override;
+			explicit ShaderModule(const Trident::Device* device);
 
 		public:
 			VkPipelineShaderStageCreateInfo createInfo;
-
-		private:
-			const VK::Device& device;
 	};
+
+	namespace VK {
+		ref<Trident::ShaderModule> createShaderModule(const Trident::Device* device, const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> shaderModuleAsset);
+		ref<Trident::ShaderModule> createShaderModule(const Trident::Device* device, const ShaderModuleDescriptor& descriptor, view<char8> code);
+
+		void destroyShaderModule(const Trident::Device* device, const Trident::ShaderModule* shaderModule);
+	}
 }

@@ -31,6 +31,10 @@ namespace Trident::DX12 {
 		return createRef<DX12::MemoryAllocator>(static_cast<const DX12::Device*>(device));
 	}
 
+	static ref<RenderPass> createRenderPass(const Trident::Device* device, ref<Trident::Surface> surface, const RenderPassDescriptor& descriptor) {
+		return createRef<RenderPass>(device, descriptor);
+	}
+
 	static ref<Semaphore> createSemaphore(const Trident::Device* device) {
 		return createRef<Semaphore>(device);
 	}
@@ -39,9 +43,7 @@ namespace Trident::DX12 {
 
 	static void destroySemaphore(const Trident::Device* device, const Semaphore* semaphore) {}
 
-	static ref<RenderPass> createRenderPass(const Trident::Device* device, const RenderPassDescriptor& descriptor) {
-		return createRef<RenderPass>(descriptor);
-	}
+	static void destroyRenderPass(const Trident::Device* device, const RenderPass* renderPass) {}
 
 	void bindAdapter(Trident::GraphicsAdapter* adapter) {
 		adapter->logger = ConsoleLogger(std::cout, LogLevel::ALL, "DIRECTX 12");
@@ -92,6 +94,7 @@ namespace Trident::DX12 {
 		adapter->destroyImageViewImplementation = DX12::destroyImageView;
 		adapter->destroyInstanceImplementation = DX12::destroyInstance;
 		adapter->destroyQueueImplementation = DX12::destroyQueue;
+		adapter->destroyRenderPassImplementation = DX12::destroyRenderPass;
 		adapter->destroySamplerImplementation = DX12::destroySampler;
 		adapter->destroySemaphoreImplementation = DX12::destroySemaphore;
 		adapter->destroyShaderModuleImplementation = DX12::destroyShaderModule;

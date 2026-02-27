@@ -8,22 +8,38 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	const VK::PhysicalDevice* VK::MemoryAllocator::physicalDevice;
-	std::vector<VK::MemoryAllocation> VK::MemoryAllocator::memoryAllocations;
-	sequence<uint32> VK::MemoryAllocator::currentBufferMemoryAllocationIndices;
-	sequence<uint32> VK::MemoryAllocator::currentImageMemoryAllocationIndices;
-	std::vector<uint32> VK::MemoryAllocator::freeMemoryAllocationIndices;
+	#if defined(BUILD_MODE_DEBUG)
+		sequence<char8> VK::MemoryAllocator::formatSize(uint64 size) {
+			const float64 decimalSize = static_cast<float64>(size);
 
-	void VK::MemoryAllocator::initialize(const VK::PhysicalDevice& physicalDevice) {
-		VK::MemoryAllocator::physicalDevice = &physicalDevice;
+			if (size >= 1000000000000) {
+				return Logger::format("[]Tb", decimalSize / 1000000000000.0);
+			}
 
-		ADAPTER_DEBUG("Buffer image granularity: []", physicalDevice.properties.limits.bufferImageGranularity);
-		ADAPTER_DEBUG("Max. memory allocation count: []", physicalDevice.properties.limits.maxMemoryAllocationCount);
+			if (size >= 1000000000) {
+				return Logger::format("[]Gb", decimalSize / 1000000000.0);
+			}
 
-		currentBufferMemoryAllocationIndices = sequence<uint32>(physicalDevice.memoryProperties.memoryTypeCount);
+			if (size >= 1000000) {
+				return Logger::format("[]Mb", decimalSize / 1000000.0);
+			}
+
+			const std::string formattedSize = toString(decimalSize);
+
+			return sequence<char8>(&formattedSize[0], formattedSize.size());
+		}
+	#endif
+
+	VK::MemoryAllocator::MemoryAllocator(const VK::PhysicalDevice* physicalDevice) :
+		physicalDevice(physicalDevice)
+	{
+		ADAPTER_DEBUG("Buffer image granularity: []", physicalDevice->properties.limits.bufferImageGranularity);
+		ADAPTER_DEBUG("Max. memory allocation count: []", physicalDevice->properties.limits.maxMemoryAllocationCount);
+
+		currentBufferMemoryAllocationIndices = sequence<uint32>(physicalDevice->memoryProperties.memoryTypeCount);
 		std::fill(currentBufferMemoryAllocationIndices.begin(), currentBufferMemoryAllocationIndices.end(), UNDEFINED_MEMORY_ALLOCATION_INDEX);
 
-		currentImageMemoryAllocationIndices = sequence<uint32>(physicalDevice.memoryProperties.memoryTypeCount);
+		currentImageMemoryAllocationIndices = sequence<uint32>(physicalDevice->memoryProperties.memoryTypeCount);
 		std::fill(currentImageMemoryAllocationIndices.begin(), currentImageMemoryAllocationIndices.end(), UNDEFINED_MEMORY_ALLOCATION_INDEX);
 
 		#if defined(BUILD_MODE_DEBUG)
@@ -35,10 +51,6 @@ namespace Trident {
 				enumerateMemoryTypes();
 			#endif
 		#endif
-	}
-
-	void VK::MemoryAllocator::destroy() {
-		physicalDevice = nullptr;
 	}
 
 	#if defined(BUILD_MODE_DEBUG)
@@ -71,26 +83,6 @@ namespace Trident {
 					memoryType.heapIndex
 				);
 			}
-		}
-
-		sequence<char8> VK::MemoryAllocator::formatSize(uint64 size) {
-			const float64 decimalSize = static_cast<float64>(size);
-
-			if (size >= 1000000000000) {
-				return Logger::format("[]Tb", decimalSize / 1000000000000.0);
-			}
-
-			if (size >= 1000000000) {
-				return Logger::format("[]Gb", decimalSize / 1000000000.0);
-			}
-
-			if (size >= 1000000) {
-				return Logger::format("[]Mb", decimalSize / 1000000.0);
-			}
-
-			const std::string formattedSize = toString(decimalSize);
-
-			return sequence<char8>(&formattedSize[0], formattedSize.size());
 		}
 	#endif
 

@@ -12,7 +12,7 @@ namespace Trident {
 
 		public:
 			VkDevice device;
-			ref<VK::Queue> queues[3];
+			ref<Trident::Queue> queues[3];
 
 			// TODO: Move in VK::MemoryAllocator.
 			std::vector<VkDescriptorPool> descriptorPools;
@@ -30,8 +30,10 @@ namespace Trident {
 			PFN_vkCreateImage vkCreateImage;
 			PFN_vkCreateImageView vkCreateImageView;
 			PFN_vkCreatePipelineLayout vkCreatePipelineLayout;
+			PFN_vkCreateRenderPass vkCreateRenderPass;
 			PFN_vkCreateSampler vkCreateSampler;
 			PFN_vkCreateSemaphore vkCreateSemaphore;
+			PFN_vkCreateShaderModule vkCreateShaderModule;
 			PFN_vkCreateSwapchainKHR vkCreateSwapchainKHR;
 			PFN_vkDestroyBuffer vkDestroyBuffer;
 			PFN_vkDestroyCommandPool vkDestroyCommandPool;
@@ -47,11 +49,14 @@ namespace Trident {
 			PFN_vkDestroyImageView vkDestroyImageView;
 			PFN_vkDestroyPipeline vkDestroyPipeline;
 			PFN_vkDestroyPipelineLayout vkDestroyPipelineLayout;
+			PFN_vkDestroyRenderPass vkDestroyRenderPass;
 			PFN_vkDestroySampler vkDestroySampler;
 			PFN_vkDestroySemaphore vkDestroySemaphore;
+			PFN_vkDestroyShaderModule vkDestroyShaderModule;
 			PFN_vkDestroySwapchainKHR vkDestroySwapchainKHR;
 			PFN_vkDeviceWaitIdle vkDeviceWaitIdle;
 			PFN_vkFreeCommandBuffers vkFreeCommandBuffers;
+			PFN_vkGetDeviceQueue vkGetDeviceQueue;
 			PFN_vkGetBufferMemoryRequirements vkGetBufferMemoryRequirements;
 			PFN_vkGetImageMemoryRequirements vkGetImageMemoryRequirements;
 			PFN_vkGetSwapchainImagesKHR vkGetSwapchainImagesKHR;
@@ -65,9 +70,9 @@ namespace Trident {
 	};
 
 	namespace VK {
-		AcquireNextImageStatus acquireNextImage(const Trident::Device* device, const Trident::Swapchain* swapchain, const Semaphore* semaphore, uint32& imageIndex);
+		AcquireNextImageStatus acquireNextImage(const Trident::Device* device, const Trident::Swapchain* swapchain, const Trident::Semaphore* semaphore, uint32& imageIndex);
 
-		sequence<ref<Trident::DescriptorSet>> allocateDescriptorSets(const Trident::Device* device, view<ref<DescriptorSetLayout>> descriptorSetLayouts);
+		sequence<ref<Trident::DescriptorSet>> allocateDescriptorSets(Trident::Device* device, view<ref<Trident::DescriptorSetLayout>> descriptorSetLayouts);
 
 		ref<Trident::Device> createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice);
 

@@ -126,7 +126,7 @@ namespace Trident {
 		uint32 imageIndex = 0;
 
 		while (imageIndex < _swapchain->imageCount) {
-			swapchain->images[imageIndex] = createRef<VK::Image>(device, images[imageIndex], surface->format.format, _swapchain->extent, imageIndex);
+			swapchain->images[imageIndex] = createImage(device, images[imageIndex], surface->format.format, _swapchain->extent, imageIndex);
 
 			imageIndex += 1;
 		}

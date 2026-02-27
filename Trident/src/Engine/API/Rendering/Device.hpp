@@ -26,7 +26,7 @@ namespace Trident {
 				return adapter->acquireNextImage(this, swapchain.get(), semaphore.get(), imageIndex);
 			}
 
-			sequence<ref<DescriptorSet>> allocateDescriptorSets(view<ref<DescriptorSetLayout>> descriptorSetLayouts) const {
+			sequence<ref<DescriptorSet>> allocateDescriptorSets(view<ref<DescriptorSetLayout>> descriptorSetLayouts) {
 				return adapter->allocateDescriptorSets(this, descriptorSetLayouts);
 			}
 
@@ -69,8 +69,8 @@ namespace Trident {
 				return adapter->createPipelineLayout(this, descriptor);
 			}
 
-			ref<RenderPass> createRenderPass(const RenderPassDescriptor& descriptor) const {
-				return adapter->createRenderPass(this, descriptor);
+			ref<RenderPass> createRenderPass(ref<Surface> surface, const RenderPassDescriptor& descriptor) const {
+				return adapter->createRenderPass(this, surface, descriptor);
 			}
 
 			ref<Sampler> createSampler(const SamplerDescriptor& descriptor) const {

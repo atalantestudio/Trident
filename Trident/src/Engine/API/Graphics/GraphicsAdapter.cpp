@@ -40,7 +40,7 @@ namespace Trident {
 		return acquireNextImageImplementation(device, swapchain, semaphore, imageIndex);
 	}
 
-	sequence<ref<DescriptorSet>> GraphicsAdapter::allocateDescriptorSets(const Device* device, view<ref<DescriptorSetLayout>> descriptorSetLayouts) const {
+	sequence<ref<DescriptorSet>> GraphicsAdapter::allocateDescriptorSets(Device* device, view<ref<DescriptorSetLayout>> descriptorSetLayouts) const {
 		return allocateDescriptorSetsImplementation(device, descriptorSetLayouts);
 	}
 
@@ -152,10 +152,10 @@ namespace Trident {
 		return createPipelineLayoutImplementation(device, descriptor);
 	}
 
-	ref<RenderPass> GraphicsAdapter::createRenderPass(const Device* device, const RenderPassDescriptor& descriptor) const {
+	ref<RenderPass> GraphicsAdapter::createRenderPass(const Device* device, ref<Surface> surface, const RenderPassDescriptor& descriptor) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
-		return createRenderPassImplementation(device, descriptor);
+		return createRenderPassImplementation(device, surface, descriptor);
 	}
 
 	ref<GraphicsPipeline> GraphicsAdapter::createGraphicsPipeline(const Device* device, const GraphicsPipelineDescriptor& descriptor) const {
@@ -248,6 +248,10 @@ namespace Trident {
 
 	void GraphicsAdapter::destroyQueue(const Queue* queue) const {
 		destroyQueueImplementation(queue);
+	}
+
+	void GraphicsAdapter::destroyRenderPass(const Device* device, const RenderPass* renderPass) const {
+		destroyRenderPassImplementation(device, renderPass);
 	}
 
 	void GraphicsAdapter::destroySampler(const Device* device, const Sampler* sampler) const {

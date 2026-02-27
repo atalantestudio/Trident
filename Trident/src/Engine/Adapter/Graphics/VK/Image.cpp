@@ -30,13 +30,14 @@ namespace Trident {
 	}
 
 	VK::Image::Image(const Trident::Device* device, const ImageDescriptor& descriptor) :
-		Trident::Image(descriptor)
+		Trident::Image(device, descriptor)
 	{}
 
 	ref<Trident::Image> VK::createImage(const Trident::Device* device, const ImageDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		const ref<VK::MemoryAllocator> memoryAllocator = std::static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
 		VkResult result;
 
 		ref<VK::Image> image = createRef<VK::Image>(device, descriptor);
@@ -65,7 +66,7 @@ namespace Trident {
 		// initialLayout must either be VK_IMAGE_LAYOUT_UNDEFINED or VK_IMAGE_LAYOUT_PREINITIALIZED.
 		imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-		const VkResult result = _device->vkCreateImage(_device->device, &imageCreateInfo, nullptr, &image->image);
+		result = _device->vkCreateImage(_device->device, &imageCreateInfo, nullptr, &image->image);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create image ([]).", string_VkResult(result));
 
@@ -74,32 +75,32 @@ namespace Trident {
 		_device->vkGetImageMemoryRequirements(_device->device, image->image, &memoryRequirements);
 
 		VkMemoryPropertyFlags memoryPropertyFlags = static_cast<VkMemoryPropertyFlags>(descriptor.memoryProperties);
-		uint32 memoryTypeIndex = MemoryAllocator::findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
+		uint32 memoryTypeIndex = memoryAllocator->findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
 
 		if ((memoryPropertyFlags == (VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT)) && memoryTypeIndex == UNDEFINED_MEMORY_TYPE_INDEX) {
 			ADAPTER_WARNING("Failed to find DEVICE_LOCAL|LAZILY_ALLOCATED memory for image. Falling back to DEVICE_LOCAL|HOST_VISIBLE memory.");
 
 			memoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
-			memoryTypeIndex = MemoryAllocator::findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
+			memoryTypeIndex = memoryAllocator->findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
 		}
 
 		if ((memoryPropertyFlags == (VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) && memoryTypeIndex == UNDEFINED_MEMORY_TYPE_INDEX) {
 			ADAPTER_WARNING("Failed to find DEVICE_LOCAL|HOST_VISIBLE memory for image. Falling back to HOST_VISIBLE|HOST_COHERENT memory.");
 
 			memoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-			memoryTypeIndex = MemoryAllocator::findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
+			memoryTypeIndex = memoryAllocator->findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
 		}
 
 		if ((memoryPropertyFlags == (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)) && memoryTypeIndex == UNDEFINED_MEMORY_TYPE_INDEX) {
 			ADAPTER_WARNING("Failed to find DEVICE_LOCAL|HOST_VISIBLE memory for image. Falling back to DEVICE_LOCAL memory.");
 
 			memoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-			memoryTypeIndex = MemoryAllocator::findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
+			memoryTypeIndex = memoryAllocator->findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
 		}
 
 		ADAPTER_ASSERT(memoryTypeIndex != UNDEFINED_MEMORY_TYPE_INDEX, "Undefined memory type index.");
 
-		image->memorySuballocation = MemoryAllocator::suballocateImage(_device->device, image->image, memoryTypeIndex, memoryRequirements);
+		image->memorySuballocation = memoryAllocator->suballocateImage(_device->device, image->image, memoryTypeIndex, memoryRequirements);
 
 		return image;
 	}
@@ -131,9 +132,10 @@ namespace Trident {
 		}
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		const ref<VK::MemoryAllocator> memoryAllocator = std::static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
 
 		_device->vkDestroyImage(_device->device, _image->image, nullptr);
 
-		MemoryAllocator::freeSuballocation(_device->device, _image->memorySuballocation.allocationIndex);
+		memoryAllocator->freeSuballocation(_device->device, _image->memorySuballocation.allocationIndex);
 	}
 }

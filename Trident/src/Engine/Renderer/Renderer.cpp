@@ -75,7 +75,7 @@ namespace Trident {
 	}
 
 	ref<RenderPass> Renderer::createRenderPass(const RenderPassDescriptor& descriptor) {
-		return layerCompositor->device->createRenderPass(descriptor);
+		return layerCompositor->device->createRenderPass(layerCompositor->surface, descriptor);
 	}
 
 	ref<GraphicsPipeline> Renderer::createGraphicsPipeline(const GraphicsPipelineDescriptor& descriptor) {
