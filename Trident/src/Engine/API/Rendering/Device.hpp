@@ -99,7 +99,7 @@ namespace Trident {
 			}
 
 			ref<PhysicalDevice> getPhysicalDevice() const {
-				return physicalDevice;
+				return createRef<PhysicalDevice>(*physicalDevice);
 			}
 
 			ref<Queue> getQueue(QueueFamilyCapability queueFamilyCapability) const {
@@ -127,14 +127,12 @@ namespace Trident {
 		protected:
 			explicit Device(const GraphicsAdapter* adapter, const PhysicalDevice* physicalDevice) :
 				adapter(adapter),
-				physicalDevice(createRef<PhysicalDevice>(*physicalDevice))
+				physicalDevice(physicalDevice)
 			{}
 
 		public:
 			const GraphicsAdapter* adapter;
-
-		private:
-			ref<PhysicalDevice> physicalDevice;
+			const PhysicalDevice* physicalDevice;
 
 			// The memory allocator is automatically created by the adapter after the API creation of the device.
 			ref<MemoryAllocator> memoryAllocator;

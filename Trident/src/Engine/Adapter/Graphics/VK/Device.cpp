@@ -10,8 +10,10 @@
 #include "Engine/Adapter/Graphics/VK/DescriptorType.hpp"
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/Adapter/Graphics/VK/Fence.hpp"
+#include "Engine/Adapter/Graphics/VK/GraphicsAdapter.hpp"
 #include "Engine/Adapter/Graphics/VK/ImageLayout.hpp"
 #include "Engine/Adapter/Graphics/VK/ImageView.hpp"
+#include "Engine/Adapter/Graphics/VK/Instance.hpp"
 #include "Engine/Adapter/Graphics/VK/PhysicalDevice.hpp"
 #include "Engine/Adapter/Graphics/VK/Queue.hpp"
 #include "Engine/Adapter/Graphics/VK/Sampler.hpp"
@@ -24,6 +26,67 @@ namespace Trident {
 	VK::Device::Device(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice) :
 		Trident::Device(adapter, physicalDevice)
 	{}
+
+	void VK::Device::loadProcedures() {
+		#define LOAD_DEVICE_PROCEDURE(procedure) procedure = static_cast<decltype(procedure)>(loadDeviceProcedure(device, #procedure))
+
+		LOAD_DEVICE_PROCEDURE(vkAcquireNextImageKHR);
+		LOAD_DEVICE_PROCEDURE(vkAllocateCommandBuffers);
+		LOAD_DEVICE_PROCEDURE(vkAllocateDescriptorSets);
+		LOAD_DEVICE_PROCEDURE(vkAllocateMemory);
+		LOAD_DEVICE_PROCEDURE(vkBindBufferMemory);
+		LOAD_DEVICE_PROCEDURE(vkBindImageMemory);
+		LOAD_DEVICE_PROCEDURE(vkCreateBuffer);
+		LOAD_DEVICE_PROCEDURE(vkCreateCommandPool);
+		LOAD_DEVICE_PROCEDURE(vkCreateComputePipelines);
+		LOAD_DEVICE_PROCEDURE(vkCreateDescriptorPool);
+		LOAD_DEVICE_PROCEDURE(vkCreateDescriptorSetLayout);
+		LOAD_DEVICE_PROCEDURE(vkCreateFence);
+		LOAD_DEVICE_PROCEDURE(vkCreateFramebuffer);
+		LOAD_DEVICE_PROCEDURE(vkCreateGraphicsPipelines);
+		LOAD_DEVICE_PROCEDURE(vkCreateImage);
+		LOAD_DEVICE_PROCEDURE(vkCreateImageView);
+		LOAD_DEVICE_PROCEDURE(vkCreatePipelineLayout);
+		LOAD_DEVICE_PROCEDURE(vkCreateRenderPass);
+		LOAD_DEVICE_PROCEDURE(vkCreateSampler);
+		LOAD_DEVICE_PROCEDURE(vkCreateSemaphore);
+		LOAD_DEVICE_PROCEDURE(vkCreateShaderModule);
+		LOAD_DEVICE_PROCEDURE(vkCreateSwapchainKHR);
+		LOAD_DEVICE_PROCEDURE(vkDestroyBuffer);
+		LOAD_DEVICE_PROCEDURE(vkDestroyCommandPool);
+		LOAD_DEVICE_PROCEDURE(vkDestroyDescriptorPool);
+		LOAD_DEVICE_PROCEDURE(vkDestroyDescriptorSetLayout);
+		LOAD_DEVICE_PROCEDURE(vkDestroyFence);
+		LOAD_DEVICE_PROCEDURE(vkDestroyFramebuffer);
+		LOAD_DEVICE_PROCEDURE(vkDestroyImage);
+		LOAD_DEVICE_PROCEDURE(vkDestroyImageView);
+		LOAD_DEVICE_PROCEDURE(vkDestroyPipeline);
+		LOAD_DEVICE_PROCEDURE(vkDestroyPipelineLayout);
+		LOAD_DEVICE_PROCEDURE(vkDestroyRenderPass);
+		LOAD_DEVICE_PROCEDURE(vkDestroySampler);
+		LOAD_DEVICE_PROCEDURE(vkDestroySemaphore);
+		LOAD_DEVICE_PROCEDURE(vkDestroyShaderModule);
+		LOAD_DEVICE_PROCEDURE(vkDestroySwapchainKHR);
+		LOAD_DEVICE_PROCEDURE(vkDeviceWaitIdle);
+		LOAD_DEVICE_PROCEDURE(vkFreeCommandBuffers);
+		LOAD_DEVICE_PROCEDURE(vkFreeMemory);
+		LOAD_DEVICE_PROCEDURE(vkGetDeviceQueue);
+		LOAD_DEVICE_PROCEDURE(vkGetBufferMemoryRequirements);
+		LOAD_DEVICE_PROCEDURE(vkGetImageMemoryRequirements);
+		LOAD_DEVICE_PROCEDURE(vkGetSwapchainImagesKHR);
+		LOAD_DEVICE_PROCEDURE(vkMapMemory);
+		LOAD_DEVICE_PROCEDURE(vkResetFences);
+
+		#if defined(BUILD_MODE_DEBUG)
+			LOAD_DEVICE_PROCEDURE(vkSetDebugUtilsObjectNameEXT);
+		#endif
+
+		LOAD_DEVICE_PROCEDURE(vkUnmapMemory);
+		LOAD_DEVICE_PROCEDURE(vkUpdateDescriptorSets);
+		LOAD_DEVICE_PROCEDURE(vkWaitForFences);
+
+		#undef LOAD_DEVICE_PROCEDURE
+	}
 
 	AcquireNextImageStatus VK::acquireNextImage(const Trident::Device* device, const Trident::Swapchain* swapchain, const Trident::Semaphore* semaphore, uint32& imageIndex) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
@@ -106,7 +169,7 @@ namespace Trident {
 
 		VkDescriptorPool descriptorPool;
 
-		result = vkCreateDescriptorPool(_device->device, &descriptorPoolCreateInfo, nullptr, &descriptorPool);
+		result = _device->vkCreateDescriptorPool(_device->device, &descriptorPoolCreateInfo, nullptr, &descriptorPool);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create descriptor pool ([]).", string_VkResult(result));
 
@@ -207,9 +270,11 @@ namespace Trident {
 		deviceCreateInfo.ppEnabledExtensionNames = &ENABLED_EXTENSION_NAMES[0];
 		deviceCreateInfo.pEnabledFeatures = &_physicalDevice->features;
 
-		result = vkCreateDevice(_physicalDevice->physicalDevice, &deviceCreateInfo, nullptr, &device->device);
+		result = _physicalDevice->instance->vkCreateDevice(_physicalDevice->physicalDevice, &deviceCreateInfo, nullptr, &device->device);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create device ([]).", string_VkResult(result));
+
+		device->loadProcedures();
 
 		const Trident::Device* _device = pointer_cast<const Trident::Device*>(device.get());
 
@@ -217,14 +282,13 @@ namespace Trident {
 		device->queues[1] = createQueue(_device, _physicalDevice->computeQueueFamilyIndex, QueueFamilyCapability::COMPUTE);
 		device->queues[2] = createQueue(_device, _physicalDevice->transferQueueFamilyIndex, QueueFamilyCapability::TRANSFER);
 
-		// TODO: Get device procedure addresses using vkGetProcAddress.
-		BREAKPOINT();
-
 		return device;
 	}
 
 	void VK::destroyDevice(const Trident::Device* device) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		static const PFN_vkDestroyDevice vkDestroyDevice = static_cast<PFN_vkDestroyDevice>(loadDeviceProcedure(static_cast<const VK::Device*>(device)->device, "vkDestroyDevice"));
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 
@@ -236,7 +300,7 @@ namespace Trident {
 			_device->vkDestroyDescriptorPool(_device->device, descriptorPool, nullptr);
 		}
 
-		_device->vkDestroyDevice(_device->device, nullptr);
+		vkDestroyDevice(_device->device, nullptr);
 	}
 
 	ref<Trident::Queue> VK::getQueue(const Trident::Device* device, QueueFamilyCapability queueFamilyCapability) {

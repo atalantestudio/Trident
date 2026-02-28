@@ -27,7 +27,29 @@
 
 namespace Trident::VK {
 	static ref<Trident::MemoryAllocator> createMemoryAllocator(const Trident::Device* device) {
-		return createRef<VK::MemoryAllocator>(std::static_pointer_cast<VK::PhysicalDevice>(device->getPhysicalDevice()).get());
+		return createRef<VK::MemoryAllocator>(device);
+	}
+
+	void* loadInstanceProcedure(VkInstance instance, view<char8> name) {
+		static const PlatformLibrary library = Platform::openLibrary("vulkan-1.dll");
+		static const PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = pointer_cast<PFN_vkGetInstanceProcAddr>(library.getProcedure("vkGetInstanceProcAddr"));
+
+		const PFN_vkVoidFunction procedure = vkGetInstanceProcAddr(instance, &name[0]);
+
+		ADAPTER_ASSERT(procedure != nullptr, "Cannot find instance procedure \"[]\".", name);
+
+		return procedure;
+	}
+
+	void* loadDeviceProcedure(VkDevice device, view<char8> name) {
+		static const PlatformLibrary library = Platform::openLibrary("vulkan-1.dll");
+		static const PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr = pointer_cast<PFN_vkGetDeviceProcAddr>(library.getProcedure("vkGetDeviceProcAddr"));
+
+		const PFN_vkVoidFunction procedure = vkGetDeviceProcAddr(device, &name[0]);
+
+		ADAPTER_ASSERT(procedure != nullptr, "Cannot find device procedure \"[]\".", name);
+
+		return procedure;
 	}
 
 	void bindAdapter(Trident::GraphicsAdapter* adapter) {
@@ -155,7 +177,7 @@ namespace Trident::VK {
 
 		#undef LOAD_PROCEDURE */
 
-		adapter->logger = ConsoleLogger(std::cout, LogLevel::ALL, "DIRECTX 12");
+		adapter->logger = ConsoleLogger(std::cout, LogLevel::ALL, "VULKAN");
 
 		adapter->acquireNextImageImplementation = VK::acquireNextImage;
 		adapter->allocateDescriptorSetsImplementation = VK::allocateDescriptorSets;
@@ -168,6 +190,7 @@ namespace Trident::VK {
 		adapter->bindVertexBufferImplementation = VK::bindVertexBuffer;
 		adapter->copyBufferToBufferImplementation = VK::copyBufferToBuffer;
 		adapter->copyBufferToImageImplementation = VK::copyBufferToImage;
+		adapter->copyImageToBufferImplementation = VK::copyImageToBuffer;
 		adapter->createBufferImplementation = VK::createBuffer;
 		adapter->createCommandEncoderImplementation = VK::createCommandEncoder;
 		adapter->createCommandPoolImplementation = VK::createCommandPool;

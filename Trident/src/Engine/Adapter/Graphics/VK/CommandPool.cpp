@@ -8,7 +8,7 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	VK::CommandPool::CommandPool(const Trident::Device*) :
+	VK::CommandPool::CommandPool(const Trident::Device* device) :
 		Trident::CommandPool(device)
 	{}
 

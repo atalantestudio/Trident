@@ -16,6 +16,8 @@ namespace Trident {
 		public:
 			explicit Instance(const Trident::GraphicsAdapter* adapter);
 
+			void loadProcedures();
+
 		public:
 			VkInstance instance;
 
@@ -23,18 +25,23 @@ namespace Trident {
 				VkDebugUtilsMessengerEXT debugUtilsMessenger;
 			#endif
 
-			PFN_vkDestroyInstance vkDestroyInstance;
-			PFN_vkDestroySurfaceKHR vkDestroySurfaceKHR;
-			PFN_vkEnumeratePhysicalDevices vkEnumeratePhysicalDevices;
+			PFN_vkCreateDevice vkCreateDevice;
 
 			#if defined(OPERATING_SYSTEM_WINDOWS)
 				PFN_vkCreateWin32SurfaceKHR vkCreateWin32SurfaceKHR;
 			#endif
 
-			#if defined(DEBUG_ENABLE_MESSENGER)
-				PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT;
-				PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT;
-			#endif
+			PFN_vkDestroySurfaceKHR vkDestroySurfaceKHR;
+			PFN_vkEnumerateDeviceExtensionProperties vkEnumerateDeviceExtensionProperties;
+			PFN_vkEnumeratePhysicalDevices vkEnumeratePhysicalDevices;
+			PFN_vkGetPhysicalDeviceFeatures vkGetPhysicalDeviceFeatures;
+			PFN_vkGetPhysicalDeviceMemoryProperties vkGetPhysicalDeviceMemoryProperties;
+			PFN_vkGetPhysicalDeviceProperties vkGetPhysicalDeviceProperties;
+			PFN_vkGetPhysicalDeviceQueueFamilyProperties vkGetPhysicalDeviceQueueFamilyProperties;
+			PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR vkGetPhysicalDeviceSurfaceCapabilitiesKHR;
+			PFN_vkGetPhysicalDeviceSurfaceFormatsKHR vkGetPhysicalDeviceSurfaceFormatsKHR;
+			PFN_vkGetPhysicalDeviceSurfacePresentModesKHR vkGetPhysicalDeviceSurfacePresentModesKHR;
+			PFN_vkGetPhysicalDeviceSurfaceSupportKHR vkGetPhysicalDeviceSurfaceSupportKHR;
 	};
 
 	namespace VK {

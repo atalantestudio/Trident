@@ -10,6 +10,8 @@ namespace Trident {
 		public:
 			explicit Device(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice);
 
+			void loadProcedures();
+
 		public:
 			VkDevice device;
 			ref<Trident::Queue> queues[3];
@@ -20,9 +22,13 @@ namespace Trident {
 			PFN_vkAcquireNextImageKHR vkAcquireNextImageKHR;
 			PFN_vkAllocateCommandBuffers vkAllocateCommandBuffers;
 			PFN_vkAllocateDescriptorSets vkAllocateDescriptorSets;
+			PFN_vkAllocateMemory vkAllocateMemory;
+			PFN_vkBindBufferMemory vkBindBufferMemory;
+			PFN_vkBindImageMemory vkBindImageMemory;
 			PFN_vkCreateBuffer vkCreateBuffer;
 			PFN_vkCreateCommandPool vkCreateCommandPool;
 			PFN_vkCreateComputePipelines vkCreateComputePipelines;
+			PFN_vkCreateDescriptorPool vkCreateDescriptorPool;
 			PFN_vkCreateDescriptorSetLayout vkCreateDescriptorSetLayout;
 			PFN_vkCreateFence vkCreateFence;
 			PFN_vkCreateFramebuffer vkCreateFramebuffer;
@@ -39,10 +45,6 @@ namespace Trident {
 			PFN_vkDestroyCommandPool vkDestroyCommandPool;
 			PFN_vkDestroyDescriptorPool vkDestroyDescriptorPool;
 			PFN_vkDestroyDescriptorSetLayout vkDestroyDescriptorSetLayout;
-
-			// TODO
-			PFN_vkDestroyDevice vkDestroyDevice;
-
 			PFN_vkDestroyFence vkDestroyFence;
 			PFN_vkDestroyFramebuffer vkDestroyFramebuffer;
 			PFN_vkDestroyImage vkDestroyImage;
@@ -56,17 +58,21 @@ namespace Trident {
 			PFN_vkDestroySwapchainKHR vkDestroySwapchainKHR;
 			PFN_vkDeviceWaitIdle vkDeviceWaitIdle;
 			PFN_vkFreeCommandBuffers vkFreeCommandBuffers;
+			PFN_vkFreeMemory vkFreeMemory;
 			PFN_vkGetDeviceQueue vkGetDeviceQueue;
 			PFN_vkGetBufferMemoryRequirements vkGetBufferMemoryRequirements;
 			PFN_vkGetImageMemoryRequirements vkGetImageMemoryRequirements;
 			PFN_vkGetSwapchainImagesKHR vkGetSwapchainImagesKHR;
+			PFN_vkMapMemory vkMapMemory;
 			PFN_vkResetFences vkResetFences;
-			PFN_vkUpdateDescriptorSets vkUpdateDescriptorSets;
-			PFN_vkWaitForFences vkWaitForFences;
 
 			#if defined(BUILD_MODE_DEBUG)
 				PFN_vkSetDebugUtilsObjectNameEXT vkSetDebugUtilsObjectNameEXT;
 			#endif
+
+			PFN_vkUnmapMemory vkUnmapMemory;
+			PFN_vkUpdateDescriptorSets vkUpdateDescriptorSets;
+			PFN_vkWaitForFences vkWaitForFences;
 	};
 
 	namespace VK {

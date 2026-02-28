@@ -83,7 +83,7 @@ namespace Trident {
 				// Create resolve attachment description.
 				VkAttachmentDescription& resolveAttachmentDescription = attachmentDescriptions[renderPass->attachments.count() + resolveAttachmentIndex];
 				resolveAttachmentDescription.flags = 0;
-				resolveAttachmentDescription.format = _surface->format.format;
+				resolveAttachmentDescription.format = _surface->surfaceFormat.format;
 				resolveAttachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
 				resolveAttachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 				resolveAttachmentDescription.storeOp = attachmentDescription.storeOp;

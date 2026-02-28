@@ -13,6 +13,7 @@ namespace Trident {
 			explicit PhysicalDevice(const Trident::GraphicsAdapter* adapter);
 
 		public:
+			const VK::Instance* instance;
 			VkPhysicalDevice physicalDevice;
 			uint32 graphicsQueueFamilyIndex;
 			uint32 computeQueueFamilyIndex;

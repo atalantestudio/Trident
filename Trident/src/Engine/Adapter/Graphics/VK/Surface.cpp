@@ -76,7 +76,7 @@ namespace Trident {
 		{
 			VkBool32 supported;
 
-			result = vkGetPhysicalDeviceSurfaceSupportKHR(_physicalDevice->physicalDevice, _physicalDevice->graphicsQueueFamilyIndex, surface->surface, &supported);
+			result = _instance->vkGetPhysicalDeviceSurfaceSupportKHR(_physicalDevice->physicalDevice, _physicalDevice->graphicsQueueFamilyIndex, surface->surface, &supported);
 
 			ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to get physical device surface support ([]).", string_VkResult(result));
 			ADAPTER_ASSERT(supported == VK_TRUE, "The graphics queue family does not support this surface.");
@@ -84,7 +84,7 @@ namespace Trident {
 
 		// Query capabilities.
 		{
-			result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(_physicalDevice->physicalDevice, surface->surface, &surface->capabilities);
+			result = _instance->vkGetPhysicalDeviceSurfaceCapabilitiesKHR(_physicalDevice->physicalDevice, surface->surface, &surface->capabilities);
 
 			ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to get surface capabilities ([]).", string_VkResult(result));
 		}
@@ -93,30 +93,31 @@ namespace Trident {
 		{
 			uint32 surfaceFormatCount;
 
-			result = vkGetPhysicalDeviceSurfaceFormatsKHR(_physicalDevice->physicalDevice, surface->surface, &surfaceFormatCount, nullptr);
+			result = _instance->vkGetPhysicalDeviceSurfaceFormatsKHR(_physicalDevice->physicalDevice, surface->surface, &surfaceFormatCount, nullptr);
 
 			ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to get surface format count ([]).", string_VkResult(result));
 
 			sequence<VkSurfaceFormatKHR> surfaceFormats(surfaceFormatCount);
 
-			result = vkGetPhysicalDeviceSurfaceFormatsKHR(_physicalDevice->physicalDevice, surface->surface, &surfaceFormatCount, &surfaceFormats[0]);
+			result = _instance->vkGetPhysicalDeviceSurfaceFormatsKHR(_physicalDevice->physicalDevice, surface->surface, &surfaceFormatCount, &surfaceFormats[0]);
 
 			ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to get surface formats ([]).", string_VkResult(result));
 
-			surface->format = selectSurfaceFormat(surfaceFormats);
+			surface->surfaceFormat = selectSurfaceFormat(surfaceFormats);
+			surface->format = fromFormat(surface->surfaceFormat.format);
 		}
 
 		// Select present mode.
 		{
 			uint32 presentModeCount;
 
-			result = vkGetPhysicalDeviceSurfacePresentModesKHR(_physicalDevice->physicalDevice, surface->surface, &presentModeCount, nullptr);
+			result = _instance->vkGetPhysicalDeviceSurfacePresentModesKHR(_physicalDevice->physicalDevice, surface->surface, &presentModeCount, nullptr);
 
 			ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to get surface present mode count ([]).", string_VkResult(result));
 
 			sequence<VkPresentModeKHR> presentModes(presentModeCount);
 
-			result = vkGetPhysicalDeviceSurfacePresentModesKHR(_physicalDevice->physicalDevice, surface->surface, &presentModeCount, &presentModes[0]);
+			result = _instance->vkGetPhysicalDeviceSurfacePresentModesKHR(_physicalDevice->physicalDevice, surface->surface, &presentModeCount, &presentModes[0]);
 
 			ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to get surface present modes ([]).", string_VkResult(result));
 
@@ -124,7 +125,7 @@ namespace Trident {
 			surface->synchronizedPresentMode = selectPresentMode(presentModes, true);
 		}
 
-		ADAPTER_INFO("Surface format is []/[].", string_VkFormat(surface->format.format), string_VkColorSpaceKHR(surface->format.colorSpace));
+		ADAPTER_INFO("Surface format is []/[].", string_VkFormat(surface->surfaceFormat.format), string_VkColorSpaceKHR(surface->surfaceFormat.colorSpace));
 		ADAPTER_INFO("Surface present mode for immediate rendering is [].", string_VkPresentModeKHR(surface->immediatePresentMode));
 		ADAPTER_INFO("Surface present mode for V-Sync rendering is [].", string_VkPresentModeKHR(surface->synchronizedPresentMode));
 

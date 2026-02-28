@@ -23,6 +23,10 @@ namespace Trident {
 
 		if (queueFamilyProperties.queueFlags & VK_QUEUE_COMPUTE_BIT) {
 			score += 1;
+
+			if (!(queueFamilyProperties.queueFlags & VK_QUEUE_GRAPHICS_BIT)) {
+				score += 1;
+			}
 		}
 
 		return score;
@@ -111,6 +115,9 @@ namespace Trident {
 		uint32 physicalDeviceCount;
 		VkResult result;
 
+		ref<VK::PhysicalDevice> _physicalDevice = createRef<VK::PhysicalDevice>(instance->adapter);
+		_physicalDevice->instance = _instance;
+
 		result = _instance->vkEnumeratePhysicalDevices(_instance->instance, &physicalDeviceCount, nullptr);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to find the number of physical devices ([]).", string_VkResult(result));
@@ -134,7 +141,7 @@ namespace Trident {
 		while (physicalDeviceIndex < physicalDevices.count()) {
 			const VkPhysicalDevice physicalDevice = physicalDevices[physicalDeviceIndex];
 
-			vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
+			_instance->vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
 
 			const uint32 physicalDeviceScore = calculatePhysicalDeviceScore(physicalDeviceProperties, preferIntegratedGpu);
 
@@ -154,26 +161,25 @@ namespace Trident {
 
 		ADAPTER_ASSERT(maxPhysicalDeviceScore > 0, "Could not select a suitable physical device.");
 
-		ref<VK::PhysicalDevice> _physicalDevice = createRef<VK::PhysicalDevice>(instance->adapter);
 		_physicalDevice->physicalDevice = physicalDevices[bestPhysicalDeviceIndex];
 
-		vkGetPhysicalDeviceProperties(_physicalDevice->physicalDevice, &physicalDeviceProperties);
+		_instance->vkGetPhysicalDeviceProperties(_physicalDevice->physicalDevice, &_physicalDevice->properties);
 
-		const view<char8> physicalDeviceType = formatPhysicalDeviceType(physicalDeviceProperties.deviceType);
+		const view<char8> physicalDeviceType = formatPhysicalDeviceType(_physicalDevice->properties.deviceType);
 
-		ADAPTER_INFO("Using [] [].", physicalDeviceProperties.deviceName, physicalDeviceType);
+		ADAPTER_INFO("Using [] [].", _physicalDevice->properties.deviceName, physicalDeviceType);
 
 		// Select queue family indices.
 		{
 			uint32 queueFamilyCount;
 
-			vkGetPhysicalDeviceQueueFamilyProperties(_physicalDevice->physicalDevice, &queueFamilyCount, nullptr);
+			_instance->vkGetPhysicalDeviceQueueFamilyProperties(_physicalDevice->physicalDevice, &queueFamilyCount, nullptr);
 
 			ADAPTER_ASSERT(queueFamilyCount > 0, "Failed to find queues for this physical device.");
 
 			sequence<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
 
-			vkGetPhysicalDeviceQueueFamilyProperties(_physicalDevice->physicalDevice, &queueFamilyCount, &queueFamilies[0]);
+			_instance->vkGetPhysicalDeviceQueueFamilyProperties(_physicalDevice->physicalDevice, &queueFamilyCount, &queueFamilies[0]);
 
 			#if defined(BUILD_MODE_DEBUG)
 				enumerateQueueFamilyProperties(queueFamilies);
@@ -220,13 +226,13 @@ namespace Trident {
 
 		uint32 extensionPropertyCount = 0;
 
-		result = vkEnumerateDeviceExtensionProperties(_physicalDevice->physicalDevice, nullptr, &extensionPropertyCount, nullptr);
+		result = _instance->vkEnumerateDeviceExtensionProperties(_physicalDevice->physicalDevice, nullptr, &extensionPropertyCount, nullptr);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to find the number of device extension properties ([]).", string_VkResult(result));
 
 		sequence<VkExtensionProperties> extensionProperties(extensionPropertyCount);
 
-		result = vkEnumerateDeviceExtensionProperties(_physicalDevice->physicalDevice, nullptr, &extensionPropertyCount, &extensionProperties[0]);
+		result = _instance->vkEnumerateDeviceExtensionProperties(_physicalDevice->physicalDevice, nullptr, &extensionPropertyCount, &extensionProperties[0]);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to enumerate device extension properties ([]).", string_VkResult(result));
 
@@ -238,8 +244,8 @@ namespace Trident {
 			}
 		#endif
 
-		vkGetPhysicalDeviceFeatures(_physicalDevice->physicalDevice, &_physicalDevice->features);
-		vkGetPhysicalDeviceMemoryProperties(_physicalDevice->physicalDevice, &_physicalDevice->memoryProperties);
+		_instance->vkGetPhysicalDeviceFeatures(_physicalDevice->physicalDevice, &_physicalDevice->features);
+		_instance->vkGetPhysicalDeviceMemoryProperties(_physicalDevice->physicalDevice, &_physicalDevice->memoryProperties);
 
 		// Query limits.
 		{

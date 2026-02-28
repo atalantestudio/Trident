@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Rendering/MemoryAllocator.hpp"
+#include "Engine/API/Rendering/PhysicalDevice.hpp"
 
 namespace Trident {
 	#define UNDEFINED_MEMORY_TYPE_INDEX max<uint32>()
@@ -44,13 +45,8 @@ namespace Trident {
 			// Memory allocations have a default size of 16Mb.
 			static constexpr VkDeviceSize DEFAULT_MEMORY_ALLOCATION_SIZE = 16000000;
 
-		private:
-			#if defined(BUILD_MODE_DEBUG)
-				static sequence<char8> formatSize(uint64 size);
-			#endif
-
 		public:
-			explicit MemoryAllocator(const VK::PhysicalDevice* physicalDevice);
+			explicit MemoryAllocator(const Trident::Device* device);
 
 			#if defined(BUILD_MODE_DEBUG)
 				void enumerateMemoryHeaps();
@@ -61,25 +57,26 @@ namespace Trident {
 			// Finds a suitable memory type for the requirements, and returns its index.
 			uint32 findSuitableMemoryType(const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags memoryPropertyFlags);
 
-			VK::MemorySuballocation suballocateBuffer(VkDevice device, VkBuffer buffer, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements);
+			VK::MemorySuballocation suballocateBuffer(VkBuffer buffer, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements);
 
-			VK::MemorySuballocation suballocateImage(VkDevice device, VkImage image, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements);
+			VK::MemorySuballocation suballocateImage(VkImage image, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements);
 
-			void* mapSuballocation(VkDevice device, const VK::MemorySuballocation& memorySuballocation, VkDeviceSize offset, VkDeviceSize size);
+			void* mapSuballocation(const VK::MemorySuballocation& memorySuballocation, VkDeviceSize offset, VkDeviceSize size);
 
-			void unmapSuballocation(VkDevice device, uint32 memoryAllocationIndex);
+			void unmapSuballocation(uint32 memoryAllocationIndex);
 
-			void freeSuballocation(VkDevice device, uint32 memoryAllocationIndex);
+			void freeSuballocation(uint32 memoryAllocationIndex);
 
 		private:
 			// Creates a new memory allocation and returns its index.
-			uint32 createAllocation(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size);
+			uint32 createAllocation(uint32 memoryTypeIndex, VkDeviceSize size);
 
 			// Creates and returns a suballocation from a memory allocation.
 			// If isBuffer is false, the suballocation is done on image memory.
-			VK::MemorySuballocation suballocate(VkDevice device, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements, sequence<uint32>& currentMemoryAllocationIndices);
+			VK::MemorySuballocation suballocate(uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements, sequence<uint32>& currentMemoryAllocationIndices);
 
 		private:
+			const VK::Device* device;
 			const VK::PhysicalDevice* physicalDevice;
 
 			// Allocated buffer and image memory allocations.

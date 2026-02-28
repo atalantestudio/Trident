@@ -4,7 +4,7 @@
 #pragma once
 
 namespace Trident {
-	extern PFN_vkAllocateCommandBuffers vkAllocateCommandBuffers;
+	/* extern PFN_vkAllocateCommandBuffers vkAllocateCommandBuffers;
 	extern PFN_vkAllocateDescriptorSets vkAllocateDescriptorSets;
 	extern PFN_vkAllocateMemory vkAllocateMemory;
 	extern PFN_vkBeginCommandBuffer vkBeginCommandBuffer;
@@ -103,7 +103,7 @@ namespace Trident {
 	#endif
 
 	#if defined(DEBUG_ENABLE_MESSENGER)
-		extern PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT;
+		// extern PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT;
 		extern PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT;
 	#endif
 
@@ -125,5 +125,5 @@ namespace Trident {
 		extern PFN_vkDestroySwapchainKHR vkDestroySwapchainKHR;
 		extern PFN_vkGetSwapchainImagesKHR vkGetSwapchainImagesKHR;
 		extern PFN_vkQueuePresentKHR vkQueuePresentKHR;
-	#endif
+	#endif */
 }

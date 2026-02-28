@@ -11,7 +11,7 @@ namespace Trident {
 			explicit Swapchain(const Trident::Device* device, const SwapchainDescriptor& descriptor);
 
 		public:
-			VkSwapchainKHR swapchain;
+			VkSwapchainKHR swapchain = VK_NULL_HANDLE;
 	};
 
 	namespace VK {

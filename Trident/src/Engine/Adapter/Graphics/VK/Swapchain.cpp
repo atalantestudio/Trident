@@ -83,8 +83,8 @@ namespace Trident {
 		swapchainCreateInfo.flags = 0;
 		swapchainCreateInfo.surface = surface->surface;
 		swapchainCreateInfo.minImageCount = _swapchain->imageCount;
-		swapchainCreateInfo.imageFormat = surface->format.format;
-		swapchainCreateInfo.imageColorSpace = surface->format.colorSpace;
+		swapchainCreateInfo.imageFormat = surface->surfaceFormat.format;
+		swapchainCreateInfo.imageColorSpace = surface->surfaceFormat.colorSpace;
 		swapchainCreateInfo.imageExtent = *pointer_cast<const VkExtent2D*>(&_swapchain->extent);
 		swapchainCreateInfo.imageArrayLayers = 1;
 		swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
@@ -108,7 +108,9 @@ namespace Trident {
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create swapchain ([]).", string_VkResult(result));
 
-		_device->vkDestroySwapchainKHR(_device->device, oldSwapchain, nullptr);
+		if (oldSwapchain != VK_NULL_HANDLE) {
+			_device->vkDestroySwapchainKHR(_device->device, oldSwapchain, nullptr);
+		}
 
 		result = _device->vkGetSwapchainImagesKHR(_device->device, _swapchain->swapchain, &_swapchain->imageCount, nullptr);
 
@@ -126,7 +128,7 @@ namespace Trident {
 		uint32 imageIndex = 0;
 
 		while (imageIndex < _swapchain->imageCount) {
-			swapchain->images[imageIndex] = createImage(device, images[imageIndex], surface->format.format, _swapchain->extent, imageIndex);
+			swapchain->images[imageIndex] = createImage(device, images[imageIndex], surface->surfaceFormat.format, _swapchain->extent, imageIndex);
 
 			imageIndex += 1;
 		}

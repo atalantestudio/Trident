@@ -6,8 +6,8 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 #include "Engine/Adapter/Graphics/DX12/GraphicsAdapter.hpp"
-// #include "Engine/Adapter/Graphics/GL/bindAdapter.hpp"
-// #include "Engine/Adapter/Graphics/VK/bindAdapter.hpp"
+// #include "Engine/Adapter/Graphics/GL/GraphicsAdapter.hpp"
+#include "Engine/Adapter/Graphics/VK/GraphicsAdapter.hpp"
 
 #include "Engine/API/Rendering/Device.hpp"
 #include "Engine/API/Rendering/Instance.hpp"
@@ -23,10 +23,8 @@ namespace Trident {
 
 		static constexpr BindAdapterImplementation BIND_ADAPTER_IMPLEMENTATIONS[static_cast<index>(GraphicsAPI::count)] = {
 			DX12::bindAdapter,
-			// GL::bindAdapter,
-			nullptr,
-			// VK::bindAdapter,
-			nullptr,
+			nullptr, // GL::bindAdapter,
+			VK::bindAdapter,
 		};
 
 		BIND_ADAPTER_IMPLEMENTATIONS[static_cast<index>(properties.GraphicsAPI)](this);

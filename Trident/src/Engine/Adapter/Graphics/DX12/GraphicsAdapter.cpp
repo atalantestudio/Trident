@@ -59,6 +59,7 @@ namespace Trident::DX12 {
 		adapter->bindVertexBufferImplementation = DX12::bindVertexBuffer;
 		adapter->copyBufferToBufferImplementation = DX12::copyBufferToBuffer;
 		adapter->copyBufferToImageImplementation = DX12::copyBufferToImage;
+		adapter->copyImageToBufferImplementation = DX12::copyImageToBuffer;
 		adapter->createBufferImplementation = DX12::createBuffer;
 		adapter->createCommandEncoderImplementation = DX12::createCommandEncoder;
 		adapter->createCommandPoolImplementation = DX12::createCommandPool;

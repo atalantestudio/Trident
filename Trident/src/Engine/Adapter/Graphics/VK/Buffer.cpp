@@ -23,7 +23,6 @@ namespace Trident {
 		ref<VK::Buffer> buffer = createRef<VK::Buffer>(device, descriptor);
 
 		// TODO: Set stride.
-		BREAKPOINT();
 		// buffer->stride = stride;
 
 		VkBufferCreateInfo bufferCreateInfo{};
@@ -67,7 +66,7 @@ namespace Trident {
 
 		ADAPTER_ASSERT(memoryTypeIndex != UNDEFINED_MEMORY_TYPE_INDEX, "Undefined memory type index.");
 
-		buffer->memorySuballocation = memoryAllocator->suballocateBuffer(_device->device, buffer->buffer, memoryTypeIndex, memoryRequirements);
+		buffer->memorySuballocation = memoryAllocator->suballocateBuffer(buffer->buffer, memoryTypeIndex, memoryRequirements);
 
 		#if defined(BUILD_MODE_DEBUG)
 			if (descriptor.name.count() > 0) {
@@ -96,7 +95,7 @@ namespace Trident {
 
 		_device->vkDestroyBuffer(_device->device, _buffer->buffer, nullptr);
 
-		memoryAllocator->freeSuballocation(_device->device, _buffer->memorySuballocation.allocationIndex);
+		memoryAllocator->freeSuballocation(_buffer->memorySuballocation.allocationIndex);
 	}
 
 	void* VK::mapBuffer(const Trident::Device* device, const Trident::Buffer* buffer, uint64 offset, uint64 size) {
@@ -104,7 +103,7 @@ namespace Trident {
 		const ref<VK::MemoryAllocator> memoryAllocator = std::static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
 		const VK::Buffer* _buffer = static_cast<const VK::Buffer*>(buffer);
 
-		return memoryAllocator->mapSuballocation(_device->device, _buffer->memorySuballocation, offset, size);
+		return memoryAllocator->mapSuballocation(_buffer->memorySuballocation, offset, size);
 	}
 
 	void VK::unmapBuffer(const Trident::Device* device, const Trident::Buffer* buffer) {
@@ -112,6 +111,6 @@ namespace Trident {
 		const ref<VK::MemoryAllocator> memoryAllocator = std::static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
 		const VK::Buffer* _buffer = static_cast<const VK::Buffer*>(buffer);
 
-		memoryAllocator->unmapSuballocation(_device->device, _buffer->memorySuballocation.allocationIndex);
+		memoryAllocator->unmapSuballocation(_buffer->memorySuballocation.allocationIndex);
 	}
 }

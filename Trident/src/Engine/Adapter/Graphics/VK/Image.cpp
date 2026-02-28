@@ -100,7 +100,7 @@ namespace Trident {
 
 		ADAPTER_ASSERT(memoryTypeIndex != UNDEFINED_MEMORY_TYPE_INDEX, "Undefined memory type index.");
 
-		image->memorySuballocation = memoryAllocator->suballocateImage(_device->device, image->image, memoryTypeIndex, memoryRequirements);
+		image->memorySuballocation = memoryAllocator->suballocateImage(image->image, memoryTypeIndex, memoryRequirements);
 
 		return image;
 	}
@@ -136,6 +136,6 @@ namespace Trident {
 
 		_device->vkDestroyImage(_device->device, _image->image, nullptr);
 
-		memoryAllocator->freeSuballocation(_device->device, _image->memorySuballocation.allocationIndex);
+		memoryAllocator->freeSuballocation(_image->memorySuballocation.allocationIndex);
 	}
 }

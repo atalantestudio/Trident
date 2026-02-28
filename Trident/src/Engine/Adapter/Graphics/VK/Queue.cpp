@@ -7,6 +7,7 @@
 #include "Engine/Adapter/Graphics/VK/CommandEncoder.hpp"
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/Adapter/Graphics/VK/Fence.hpp"
+#include "Engine/Adapter/Graphics/VK/GraphicsAdapter.hpp"
 #include "Engine/Adapter/Graphics/VK/Queue.hpp"
 #include "Engine/Adapter/Graphics/VK/Semaphore.hpp"
 #include "Engine/Adapter/Graphics/VK/Status.hpp"
@@ -35,6 +36,8 @@ namespace Trident {
 
 	PresentStatus VK::present(const Trident::Queue* queue, view<ref<Trident::Swapchain>> swapchains, view<uint32> presentableImageIndices, ref<Trident::Semaphore> waitSemaphore) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		static const PFN_vkQueuePresentKHR vkQueuePresentKHR = static_cast<PFN_vkQueuePresentKHR>(loadDeviceProcedure(static_cast<const VK::Device*>(queue->device)->device, "vkQueuePresentKHR"));
 
 		const VK::Queue* _queue = static_cast<const VK::Queue*>(queue);
 		VkResult result;
@@ -69,6 +72,8 @@ namespace Trident {
 	void VK::submit(const Trident::Queue* queue, view<ref<Trident::CommandBuffer>> commandBuffers) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		static const PFN_vkQueueSubmit vkQueueSubmit = static_cast<PFN_vkQueueSubmit>(loadDeviceProcedure(static_cast<const VK::Device*>(queue->device)->device, "vkQueueSubmit"));
+
 		const VK::Queue* _queue = static_cast<const VK::Queue*>(queue);
 		VkResult result;
 
@@ -99,6 +104,8 @@ namespace Trident {
 
 	void VK::submit(const Trident::Queue* queue, view<ref<Trident::CommandBuffer>> commandBuffers, ref<Trident::Semaphore> waitSemaphore, ref<Trident::Semaphore> signalSemaphore, ref<Trident::Fence> fence) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		static const PFN_vkQueueSubmit vkQueueSubmit = static_cast<PFN_vkQueueSubmit>(loadDeviceProcedure(static_cast<const VK::Device*>(queue->device)->device, "vkQueueSubmit"));
 
 		const VK::Queue* _queue = static_cast<const VK::Queue*>(queue);
 		VkResult result;
@@ -151,6 +158,8 @@ namespace Trident {
 
 	void VK::waitIdle(const Trident::Queue* queue) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		static const PFN_vkQueueWaitIdle vkQueueWaitIdle = static_cast<PFN_vkQueueWaitIdle>(loadDeviceProcedure(static_cast<const VK::Device*>(queue->device)->device, "vkQueueWaitIdle"));
 
 		const VK::Queue* _queue = static_cast<const VK::Queue*>(queue);
 		VkResult result;

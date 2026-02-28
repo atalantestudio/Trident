@@ -3,6 +3,7 @@
 
 #include "pch.hpp"
 
+#include "Engine/Adapter/Graphics/VK/GraphicsAdapter.hpp"
 #include "Engine/Adapter/Graphics/VK/Instance.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
@@ -47,11 +48,41 @@ namespace Trident {
 		Trident::Instance(adapter)
 	{}
 
+	void VK::Instance::loadProcedures() {
+		#define LOAD_INSTANCE_PROCEDURE(procedure) procedure = static_cast<decltype(procedure)>(loadInstanceProcedure(instance, #procedure))
+
+		LOAD_INSTANCE_PROCEDURE(vkCreateDevice);
+
+		#if defined(OPERATING_SYSTEM_WINDOWS)
+			LOAD_INSTANCE_PROCEDURE(vkCreateWin32SurfaceKHR);
+		#endif
+
+		LOAD_INSTANCE_PROCEDURE(vkDestroySurfaceKHR);
+		LOAD_INSTANCE_PROCEDURE(vkEnumerateDeviceExtensionProperties);
+		LOAD_INSTANCE_PROCEDURE(vkEnumeratePhysicalDevices);
+		LOAD_INSTANCE_PROCEDURE(vkGetPhysicalDeviceFeatures);
+		LOAD_INSTANCE_PROCEDURE(vkGetPhysicalDeviceMemoryProperties);
+		LOAD_INSTANCE_PROCEDURE(vkGetPhysicalDeviceProperties);
+		LOAD_INSTANCE_PROCEDURE(vkGetPhysicalDeviceQueueFamilyProperties);
+		LOAD_INSTANCE_PROCEDURE(vkGetPhysicalDeviceSurfaceCapabilitiesKHR);
+		LOAD_INSTANCE_PROCEDURE(vkGetPhysicalDeviceSurfaceFormatsKHR);
+		LOAD_INSTANCE_PROCEDURE(vkGetPhysicalDeviceSurfacePresentModesKHR);
+		LOAD_INSTANCE_PROCEDURE(vkGetPhysicalDeviceSurfaceSupportKHR);
+
+		#undef LOAD_INSTANCE_PROCEDURE
+	}
+
 	ref<Trident::Instance> VK::createInstance(const Trident::GraphicsAdapter* adapter, const InstanceDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		ref<VK::Instance> instance = createRef<VK::Instance>(adapter);
 		VkResult result;
+
+		// Load instance procedures.
+		#define LOAD_PROCEDURE(instance, procedure) static_cast<decltype(procedure)>(loadInstanceProcedure(instance, #procedure))
+
+		static const PFN_vkCreateInstance vkCreateInstance = LOAD_PROCEDURE(nullptr, vkCreateInstance);
+		static const PFN_vkEnumerateInstanceLayerProperties vkEnumerateInstanceLayerProperties = LOAD_PROCEDURE(nullptr, vkEnumerateInstanceLayerProperties);
 
 		#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
 			{
@@ -137,10 +168,16 @@ namespace Trident {
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create instance ([]).", string_VkResult(result));
 
 		#if defined(DEBUG_ENABLE_MESSENGER)
-			result = instance->vkCreateDebugUtilsMessengerEXT(instance->instance, &debugUtilsMessengerCreateInfo, nullptr, &instance->debugUtilsMessenger);
+			const PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT = LOAD_PROCEDURE(instance->instance, vkCreateDebugUtilsMessengerEXT);
+
+			result = vkCreateDebugUtilsMessengerEXT(instance->instance, &debugUtilsMessengerCreateInfo, nullptr, &instance->debugUtilsMessenger);
 
 			ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create debug messenger ([]).", string_VkResult(result));
 		#endif
+
+		#undef LOAD_PROCEDURE
+
+		instance->loadProcedures();
 
 		return instance;
 	}
@@ -148,12 +185,16 @@ namespace Trident {
 	void VK::destroyInstance(const Trident::Instance* instance) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		static const PFN_vkDestroyInstance vkDestroyInstance = static_cast<PFN_vkDestroyInstance>(loadInstanceProcedure(static_cast<const VK::Instance*>(instance)->instance, "vkDestroyInstance"));
+
 		const VK::Instance* _instance = static_cast<const VK::Instance*>(instance);
 
 		#if defined(DEBUG_ENABLE_MESSENGER)
-			_instance->vkDestroyDebugUtilsMessengerEXT(_instance->instance, _instance->debugUtilsMessenger, nullptr);
+			static const PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = static_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(loadInstanceProcedure(static_cast<const VK::Instance*>(instance)->instance, "vkDestroyDebugUtilsMessengerEXT"));
+
+			vkDestroyDebugUtilsMessengerEXT(_instance->instance, _instance->debugUtilsMessenger, nullptr);
 		#endif
 
-		_instance->vkDestroyInstance(_instance->instance, nullptr);
+		vkDestroyInstance(_instance->instance, nullptr);
 	}
 }

@@ -16,7 +16,7 @@ namespace Trident {
 		public:
 			VkSurfaceKHR surface;
 			VkSurfaceCapabilitiesKHR capabilities;
-			VkSurfaceFormatKHR format;
+			VkSurfaceFormatKHR surfaceFormat;
 			VkPresentModeKHR immediatePresentMode;
 			VkPresentModeKHR synchronizedPresentMode;
 	};

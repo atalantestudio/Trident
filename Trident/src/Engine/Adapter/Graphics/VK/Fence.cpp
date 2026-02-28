@@ -41,7 +41,7 @@ namespace Trident {
 				debugUtilsObjectNameInfo.objectHandle = (uint64) fence->fence;
 				debugUtilsObjectNameInfo.pObjectName = &descriptor.name[0];
 
-				result = vkSetDebugUtilsObjectNameEXT(_device->device, &debugUtilsObjectNameInfo);
+				result = _device->vkSetDebugUtilsObjectNameEXT(_device->device, &debugUtilsObjectNameInfo);
 
 				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to set object name ([]).", string_VkResult(result));
 			}
