@@ -56,7 +56,7 @@ namespace Trident {
 
 				SET_DEBUG_NAME(elementCountBufferDescriptor, "Element count");
 
-				const ref<Buffer2<uint32>> elementCountBuffer = createBuffer2<uint32>(elementCountBufferDescriptor);
+				const ref<Buffer<uint32>> elementCountBuffer = createBuffer<uint32>(elementCountBufferDescriptor);
 
 				BufferDescriptor elementStartBufferDescriptor{};
 				elementStartBufferDescriptor.size = sizeof(uint32) * ELEMENT_COUNT;
@@ -66,7 +66,7 @@ namespace Trident {
 
 				SET_DEBUG_NAME(elementStartBufferDescriptor, "Element start");
 
-				const ref<Buffer2<uint32>> elementStartBuffer = createBuffer2<uint32>(elementStartBufferDescriptor);
+				const ref<Buffer<uint32>> elementStartBuffer = createBuffer<uint32>(elementStartBufferDescriptor);
 
 				BufferDescriptor elementStartStagingBufferDescriptor{};
 				elementStartStagingBufferDescriptor.size = elementStartBuffer->getSize();
@@ -76,7 +76,7 @@ namespace Trident {
 
 				SET_DEBUG_NAME(elementStartStagingBufferDescriptor, "Element start staging");
 
-				const ref<Buffer2<uint32>> elementStartStagingBuffer = createBuffer2<uint32>(elementStartStagingBufferDescriptor);
+				const ref<Buffer<uint32>> elementStartStagingBuffer = createBuffer<uint32>(elementStartStagingBufferDescriptor);
 
 				uint32* elementCountMappedRange = elementCountBuffer->map(0, elementCountBuffer->getSize());
 

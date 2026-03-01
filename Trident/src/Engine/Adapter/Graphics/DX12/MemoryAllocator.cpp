@@ -165,7 +165,7 @@ namespace Trident {
 	}
 
 	void DX12::MemoryAllocator::writeUniformBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorBuffer& descriptorBuffer) const {
-		const ref<DX12::Buffer> buffer = std::static_pointer_cast<DX12::Buffer>(descriptorBuffer.buffer);
+		const ref<DX12::BaseBuffer> buffer = std::static_pointer_cast<DX12::BaseBuffer>(descriptorBuffer.buffer);
 
 		D3D12_CONSTANT_BUFFER_VIEW_DESC constantBufferViewDescriptor{};
 		constantBufferViewDescriptor.BufferLocation = buffer->resource->GetGPUVirtualAddress() + descriptorBuffer.offset;
@@ -175,7 +175,7 @@ namespace Trident {
 	}
 
 	void DX12::MemoryAllocator::writeReadOnlyStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorBuffer& descriptorBuffer) const {
-		const ref<DX12::Buffer> buffer = std::static_pointer_cast<DX12::Buffer>(descriptorBuffer.buffer);
+		const ref<DX12::BaseBuffer> buffer = std::static_pointer_cast<DX12::BaseBuffer>(descriptorBuffer.buffer);
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDescriptor{};
 		shaderResourceViewDescriptor.Format = DXGI_FORMAT_UNKNOWN;
@@ -190,7 +190,7 @@ namespace Trident {
 	}
 
 	void DX12::MemoryAllocator::writeReadWriteStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorBuffer& descriptorBuffer) const {
-		const ref<DX12::Buffer> buffer = std::static_pointer_cast<DX12::Buffer>(descriptorBuffer.buffer);
+		const ref<DX12::BaseBuffer> buffer = std::static_pointer_cast<DX12::BaseBuffer>(descriptorBuffer.buffer);
 
 		D3D12_UNORDERED_ACCESS_VIEW_DESC unorderedAccessViewDescriptor{};
 		unorderedAccessViewDescriptor.Format = DXGI_FORMAT_UNKNOWN;

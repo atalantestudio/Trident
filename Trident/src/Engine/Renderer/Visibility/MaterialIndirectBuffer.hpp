@@ -6,7 +6,7 @@
 #include "Engine/Renderer/Visibility/Renderer.hpp"
 
 namespace Trident {
-	ref<Buffer2<DispatchIndirectCommand>> VisibilityRenderer::createMaterialIndirectBuffer() const {
+	ref<Buffer<DispatchIndirectCommand>> VisibilityRenderer::createMaterialIndirectBuffer() const {
 		BufferDescriptor materialIndirectBufferDescriptor{};
 		materialIndirectBufferDescriptor.size = sizeof(DispatchIndirectCommand) * scene->materials.count();
 		materialIndirectBufferDescriptor.usage = BufferUsage::READ_WRITE_STORAGE | BufferUsage::INDIRECT;
@@ -15,6 +15,6 @@ namespace Trident {
 
 		SET_DEBUG_NAME(materialIndirectBufferDescriptor, "Material indirect");
 
-		return createBuffer2<DispatchIndirectCommand>(materialIndirectBufferDescriptor);
+		return createBuffer<DispatchIndirectCommand>(materialIndirectBufferDescriptor);
 	}
 }

@@ -84,8 +84,8 @@ namespace Trident {
 			ref<GraphicsPipeline> createOutputPipeline() const;
 			// ref<GraphicsPipeline> createDebugPipeline() const;
 
-			ref<Buffer2<DrawIndirectCommand>> createVisibilityIndirectBuffer() const;
-			ref<Buffer2<Camera>> createCameraBuffer() const;
+			ref<Buffer<DrawIndirectCommand>> createVisibilityIndirectBuffer() const;
+			ref<Buffer<Camera>> createCameraBuffer() const;
 			void createVertexPositionComponentBuffer();
 			void createVertexNormalComponentBuffer();
 			void createVertexTextureCoordinateComponentBuffer();
@@ -95,10 +95,10 @@ namespace Trident {
 			void createClusterBuffer();
 			void createInstanceBuffer();
 			void createGeometryBuffer();
-			ref<Buffer2<uint32>> createMaterialCountBuffer() const;
-			ref<Buffer2<uint32>> createMaterialOffsetBuffer() const;
-			ref<Buffer2<DispatchIndirectCommand>> createMaterialIndirectBuffer() const;
-			ref<Buffer2<uint32>> createMaterialCoordinateBuffer() const;
+			ref<Buffer<uint32>> createMaterialCountBuffer() const;
+			ref<Buffer<uint32>> createMaterialOffsetBuffer() const;
+			ref<Buffer<DispatchIndirectCommand>> createMaterialIndirectBuffer() const;
+			ref<Buffer<uint32>> createMaterialCoordinateBuffer() const;
 
 			ref<Image> createVisibilityImage() const;
 			ref<Image> createOutputImage() const;
@@ -173,30 +173,30 @@ namespace Trident {
 			ref<GraphicsPipeline> outputPipeline;
 			// ref<GraphicsPipeline> debugPipeline;
 
-			ref<Buffer2<DrawIndirectCommand>> visibilityIndirectBuffer;
-			ref<Buffer2<Camera>> cameraBuffer;
-			ref<Buffer2<float32>> vertexPositionComponentBuffer;
-			ref<Buffer2<float32>> vertexNormalComponentBuffer;
-			ref<Buffer2<float32>> vertexTextureCoordinateComponentBuffer;
-			ref<Buffer2<uint32>> vertexPositionIndexBuffer;
-			ref<Buffer2<uint32>> vertexNormalIndexBuffer;
-			ref<Buffer2<uint32>> vertexTextureCoordinateIndexBuffer;
-			ref<Buffer2<Cluster>> clusterBuffer;
-			ref<Buffer2<ClusteredInstance>> instanceBuffer;
-			ref<Buffer2<Geometry>> geometryBuffer;
+			ref<Buffer<DrawIndirectCommand>> visibilityIndirectBuffer;
+			ref<Buffer<Camera>> cameraBuffer;
+			ref<Buffer<float32>> vertexPositionComponentBuffer;
+			ref<Buffer<float32>> vertexNormalComponentBuffer;
+			ref<Buffer<float32>> vertexTextureCoordinateComponentBuffer;
+			ref<Buffer<uint32>> vertexPositionIndexBuffer;
+			ref<Buffer<uint32>> vertexNormalIndexBuffer;
+			ref<Buffer<uint32>> vertexTextureCoordinateIndexBuffer;
+			ref<Buffer<Cluster>> clusterBuffer;
+			ref<Buffer<ClusteredInstance>> instanceBuffer;
+			ref<Buffer<Geometry>> geometryBuffer;
 
 			// Number of pixels used per material.
-			ref<Buffer2<uint32>> materialCountBuffer;
+			ref<Buffer<uint32>> materialCountBuffer;
 
 			// Offset of the first pixel used per material.
-			ref<Buffer2<uint32>> materialOffsetBuffer;
+			ref<Buffer<uint32>> materialOffsetBuffer;
 
 			// Indirect arguments for material pipelines.
-			ref<Buffer2<DispatchIndirectCommand>> materialIndirectBuffer;
+			ref<Buffer<DispatchIndirectCommand>> materialIndirectBuffer;
 
 			// Screen pixels sorted by material index.
 			// TODO: Use 1D image instead.
-			ref<Buffer2<uint32>> materialCoordinateBuffer;
+			ref<Buffer<uint32>> materialCoordinateBuffer;
 
 			ref<Image> visibilityImage;
 			sequence<sequence<ref<Image>>> materialImages;

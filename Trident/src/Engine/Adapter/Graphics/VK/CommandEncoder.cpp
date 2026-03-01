@@ -183,7 +183,7 @@ namespace Trident {
 		_commandEncoder->commandCount += 1;
 	}
 
-	void VK::bindIndexBuffer(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
+	void VK::bindIndexBuffer(Trident::CommandEncoder* commandEncoder, ref<Trident::BaseBuffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		static const PFN_vkCmdBindIndexBuffer vkCmdBindIndexBuffer = static_cast<PFN_vkCmdBindIndexBuffer>(loadDeviceProcedure(static_cast<const VK::Device*>(commandEncoder->device)->device, "vkCmdBindIndexBuffer"));
@@ -192,7 +192,7 @@ namespace Trident {
 
 		vkCmdBindIndexBuffer(
 			_commandEncoder->commandBuffer,
-			std::static_pointer_cast<VK::Buffer>(indexBuffer)->buffer,
+			std::static_pointer_cast<VK::BaseBuffer>(indexBuffer)->buffer,
 			offset,
 			getIndexType(indexTypeSize)
 		);
@@ -200,7 +200,7 @@ namespace Trident {
 		_commandEncoder->commandCount += 1;
 	}
 
-	void VK::bindVertexBuffer(Trident::CommandEncoder* commandEncoder, uint32 bindingIndex, ref<Trident::Buffer> vertexBuffer, uint64 offset, uint32 stride) {
+	void VK::bindVertexBuffer(Trident::CommandEncoder* commandEncoder, uint32 bindingIndex, ref<Trident::BaseBuffer> vertexBuffer, uint64 offset, uint32 stride) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		static const PFN_vkCmdBindVertexBuffers vkCmdBindVertexBuffers = static_cast<PFN_vkCmdBindVertexBuffers>(loadDeviceProcedure(static_cast<const VK::Device*>(commandEncoder->device)->device, "vkCmdBindVertexBuffers"));
@@ -211,14 +211,14 @@ namespace Trident {
 			_commandEncoder->commandBuffer,
 			bindingIndex,
 			1,
-			&std::static_pointer_cast<VK::Buffer>(vertexBuffer)->buffer,
+			&std::static_pointer_cast<VK::BaseBuffer>(vertexBuffer)->buffer,
 			&offset
 		);
 
 		_commandEncoder->commandCount += 1;
 	}
 
-	void VK::copyBufferToBuffer(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> sourceBuffer, ref<Trident::Buffer> destinationBuffer, view<BufferCopyRegion> copyRegions) {
+	void VK::copyBufferToBuffer(Trident::CommandEncoder* commandEncoder, ref<Trident::BaseBuffer> sourceBuffer, ref<Trident::BaseBuffer> destinationBuffer, view<BufferCopyRegion> copyRegions) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		static const PFN_vkCmdCopyBuffer vkCmdCopyBuffer = static_cast<PFN_vkCmdCopyBuffer>(loadDeviceProcedure(static_cast<const VK::Device*>(commandEncoder->device)->device, "vkCmdCopyBuffer"));
@@ -227,8 +227,8 @@ namespace Trident {
 
 		vkCmdCopyBuffer(
 			_commandEncoder->commandBuffer,
-			std::static_pointer_cast<VK::Buffer>(sourceBuffer)->buffer,
-			std::static_pointer_cast<VK::Buffer>(destinationBuffer)->buffer,
+			std::static_pointer_cast<VK::BaseBuffer>(sourceBuffer)->buffer,
+			std::static_pointer_cast<VK::BaseBuffer>(destinationBuffer)->buffer,
 			static_cast<uint32>(copyRegions.count()),
 			pointer_cast<const VkBufferCopy*>(&copyRegions[0])
 		);
@@ -236,7 +236,7 @@ namespace Trident {
 		_commandEncoder->commandCount += 1;
 	}
 
-	void VK::copyBufferToImage(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> sourceBuffer, ref<Trident::Image> destinationImage, view<BufferImageCopyRegion> copyRegions) {
+	void VK::copyBufferToImage(Trident::CommandEncoder* commandEncoder, ref<Trident::BaseBuffer> sourceBuffer, ref<Trident::Image> destinationImage, view<BufferImageCopyRegion> copyRegions) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		static const PFN_vkCmdCopyBufferToImage vkCmdCopyBufferToImage = static_cast<PFN_vkCmdCopyBufferToImage>(loadDeviceProcedure(static_cast<const VK::Device*>(commandEncoder->device)->device, "vkCmdCopyBufferToImage"));
@@ -246,7 +246,7 @@ namespace Trident {
 
 		vkCmdCopyBufferToImage(
 			_commandEncoder->commandBuffer,
-			std::static_pointer_cast<VK::Buffer>(sourceBuffer)->buffer,
+			std::static_pointer_cast<VK::BaseBuffer>(sourceBuffer)->buffer,
 			std::static_pointer_cast<VK::Image>(destinationImage)->image,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			static_cast<uint32>(bufferImageCopies.count()),
@@ -256,7 +256,7 @@ namespace Trident {
 		_commandEncoder->commandCount += 1;
 	}
 
-	void VK::copyImageToBuffer(Trident::CommandEncoder* commandEncoder, ref<Trident::Image> sourceImage, ref<Trident::Buffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) {
+	void VK::copyImageToBuffer(Trident::CommandEncoder* commandEncoder, ref<Trident::Image> sourceImage, ref<Trident::BaseBuffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		static const PFN_vkCmdCopyImageToBuffer vkCmdCopyImageToBuffer = static_cast<PFN_vkCmdCopyImageToBuffer>(loadDeviceProcedure(static_cast<const VK::Device*>(commandEncoder->device)->device, "vkCmdCopyImageToBuffer"));
@@ -268,7 +268,7 @@ namespace Trident {
 			_commandEncoder->commandBuffer,
 			std::static_pointer_cast<VK::Image>(sourceImage)->image,
 			VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-			std::static_pointer_cast<VK::Buffer>(destinationBuffer)->buffer,
+			std::static_pointer_cast<VK::BaseBuffer>(destinationBuffer)->buffer,
 			static_cast<uint32>(bufferImageCopies.count()),
 			&bufferImageCopies[0]
 		);
@@ -342,14 +342,14 @@ namespace Trident {
 		_commandEncoder->commandCount += 1;
 	}
 
-	void VK::dispatchIndirect(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> buffer, uint64 bufferOffset) {
+	void VK::dispatchIndirect(Trident::CommandEncoder* commandEncoder, ref<Trident::BaseBuffer> buffer, uint64 bufferOffset) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		static const PFN_vkCmdDispatchIndirect vkCmdDispatchIndirect = static_cast<PFN_vkCmdDispatchIndirect>(loadDeviceProcedure(static_cast<const VK::Device*>(commandEncoder->device)->device, "vkCmdDispatchIndirect"));
 
 		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
 
-		vkCmdDispatchIndirect(_commandEncoder->commandBuffer, std::static_pointer_cast<VK::Buffer>(buffer)->buffer, bufferOffset);
+		vkCmdDispatchIndirect(_commandEncoder->commandBuffer, std::static_pointer_cast<VK::BaseBuffer>(buffer)->buffer, bufferOffset);
 
 		_commandEncoder->commandCount += 1;
 	}
@@ -378,26 +378,26 @@ namespace Trident {
 		_commandEncoder->commandCount += 1;
 	}
 
-	void VK::drawIndexedIndirect(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
+	void VK::drawIndexedIndirect(Trident::CommandEncoder* commandEncoder, ref<Trident::BaseBuffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		static const PFN_vkCmdDrawIndexedIndirect vkCmdDrawIndexedIndirect = static_cast<PFN_vkCmdDrawIndexedIndirect>(loadDeviceProcedure(static_cast<const VK::Device*>(commandEncoder->device)->device, "vkCmdDrawIndexedIndirect"));
 
 		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
 
-		vkCmdDrawIndexedIndirect(_commandEncoder->commandBuffer, std::static_pointer_cast<VK::Buffer>(buffer)->buffer, bufferOffset, drawCount, stride);
+		vkCmdDrawIndexedIndirect(_commandEncoder->commandBuffer, std::static_pointer_cast<VK::BaseBuffer>(buffer)->buffer, bufferOffset, drawCount, stride);
 
 		_commandEncoder->commandCount += 1;
 	}
 
-	void VK::drawIndirect(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
+	void VK::drawIndirect(Trident::CommandEncoder* commandEncoder, ref<Trident::BaseBuffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		static const PFN_vkCmdDrawIndirect vkCmdDrawIndirect = static_cast<PFN_vkCmdDrawIndirect>(loadDeviceProcedure(static_cast<const VK::Device*>(commandEncoder->device)->device, "vkCmdDrawIndirect"));
 
 		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
 
-		vkCmdDrawIndirect(_commandEncoder->commandBuffer, std::static_pointer_cast<VK::Buffer>(buffer)->buffer, bufferOffset, drawCount, stride);
+		vkCmdDrawIndirect(_commandEncoder->commandBuffer, std::static_pointer_cast<VK::BaseBuffer>(buffer)->buffer, bufferOffset, drawCount, stride);
 
 		_commandEncoder->commandCount += 1;
 	}
@@ -454,7 +454,7 @@ namespace Trident {
 			bufferMemoryBarrier.dstAccessMask = getAccessFlags(barrier.destinationAccess);
 			bufferMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 			bufferMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			bufferMemoryBarrier.buffer = std::static_pointer_cast<VK::Buffer>(barrier.buffer)->buffer;
+			bufferMemoryBarrier.buffer = std::static_pointer_cast<VK::BaseBuffer>(barrier.buffer)->buffer;
 			bufferMemoryBarrier.offset = barrier.offset;
 			bufferMemoryBarrier.size = barrier.size;
 

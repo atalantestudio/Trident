@@ -62,31 +62,24 @@ namespace Trident {
 		bindGraphicsPipelineImplementation(commandEncoder, graphicsPipeline);
 	}
 
-	void GraphicsAdapter::bindIndexBuffer(CommandEncoder* commandEncoder, ref<Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) const {
+	void GraphicsAdapter::bindIndexBuffer(CommandEncoder* commandEncoder, ref<BaseBuffer> indexBuffer, uint64 offset, uint8 indexTypeSize) const {
 		bindIndexBufferImplementation(commandEncoder, indexBuffer, offset, indexTypeSize);
 	}
 
-	void GraphicsAdapter::bindVertexBuffer(CommandEncoder* commandEncoder, uint32 bindingIndex, ref<Buffer> vertexBuffer, uint64 offset, uint32 stride) const {
+	void GraphicsAdapter::bindVertexBuffer(CommandEncoder* commandEncoder, uint32 bindingIndex, ref<BaseBuffer> vertexBuffer, uint64 offset, uint32 stride) const {
 		bindVertexBufferImplementation(commandEncoder, bindingIndex, vertexBuffer, offset, stride);
 	}
 
-	void GraphicsAdapter::copyBufferToBuffer(CommandEncoder* commandEncoder, ref<Buffer> sourceBuffer, ref<Buffer> destinationBuffer, view<BufferCopyRegion> copyRegions) const {
+	void GraphicsAdapter::copyBufferToBuffer(CommandEncoder* commandEncoder, ref<BaseBuffer> sourceBuffer, ref<BaseBuffer> destinationBuffer, view<BufferCopyRegion> copyRegions) const {
 		copyBufferToBufferImplementation(commandEncoder, sourceBuffer, destinationBuffer, copyRegions);
 	}
 
-	void GraphicsAdapter::copyBufferToImage(CommandEncoder* commandEncoder, ref<Buffer> sourceBuffer, ref<Image> destinationImage, view<BufferImageCopyRegion> copyRegions) const {
+	void GraphicsAdapter::copyBufferToImage(CommandEncoder* commandEncoder, ref<BaseBuffer> sourceBuffer, ref<Image> destinationImage, view<BufferImageCopyRegion> copyRegions) const {
 		copyBufferToImageImplementation(commandEncoder, sourceBuffer, destinationImage, copyRegions);
 	}
 
-	void GraphicsAdapter::copyImageToBuffer(CommandEncoder* commandEncoder, ref<Image> sourceImage, ref<Buffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) const {
+	void GraphicsAdapter::copyImageToBuffer(CommandEncoder* commandEncoder, ref<Image> sourceImage, ref<BaseBuffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) const {
 		copyImageToBufferImplementation(commandEncoder, sourceImage, destinationBuffer, copyRegions);
-	}
-
-	ref<Buffer> GraphicsAdapter::createBuffer(const Device* device, const BufferDescriptor& descriptor) const {
-		// TODO: Replace with createBuffer2.
-		ENGINE_ERROR_UNIMPLEMENTED();
-
-		return nullptr;
 	}
 
 	ref<CommandEncoder> GraphicsAdapter::createCommandEncoder(const Device* device, const CommandPool* commandPool, const CommandBufferDescriptor& descriptor) const {
@@ -192,7 +185,7 @@ namespace Trident {
 		return createSwapchainImplementation(device, descriptor);
 	}
 
-	void GraphicsAdapter::destroyBuffer(const Device* device, const Buffer* buffer) const {
+	void GraphicsAdapter::destroyBuffer(const Device* device, const BaseBuffer* buffer) const {
 		destroyBufferImplementation(device, buffer);
 	}
 
@@ -276,7 +269,7 @@ namespace Trident {
 		dispatchImplementation(commandEncoder, groupCountX, groupCountY, groupCountZ);
 	}
 
-	void GraphicsAdapter::dispatchIndirect(CommandEncoder* commandEncoder, ref<Buffer> buffer, uint64 bufferOffset) const {
+	void GraphicsAdapter::dispatchIndirect(CommandEncoder* commandEncoder, ref<BaseBuffer> buffer, uint64 bufferOffset) const {
 		dispatchIndirectImplementation(commandEncoder, buffer, bufferOffset);
 	}
 
@@ -284,7 +277,7 @@ namespace Trident {
 		drawImplementation(commandEncoder, vertexCount, instanceCount, vertexOffset, instanceOffset);
 	}
 
-	void GraphicsAdapter::drawIndirect(CommandEncoder* commandEncoder, ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) const {
+	void GraphicsAdapter::drawIndirect(CommandEncoder* commandEncoder, ref<BaseBuffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) const {
 		drawIndirectImplementation(commandEncoder, buffer, bufferOffset, drawCount, stride);
 	}
 
@@ -292,7 +285,7 @@ namespace Trident {
 		drawIndexedImplementation(commandEncoder, indexCount, instanceCount, indexOffset, indexBias, instanceOffset);
 	}
 
-	void GraphicsAdapter::drawIndexedIndirect(CommandEncoder* commandEncoder, ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) const {
+	void GraphicsAdapter::drawIndexedIndirect(CommandEncoder* commandEncoder, ref<BaseBuffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) const {
 		drawIndexedIndirectImplementation(commandEncoder, buffer, bufferOffset, drawCount, stride);
 	}
 
@@ -312,7 +305,7 @@ namespace Trident {
 		insertBufferMemoryBarriersImplementation(commandEncoder, barriers);
 	}
 
-	void* GraphicsAdapter::mapBuffer(const Device* device, const Buffer* buffer, uint64 offset, uint64 size) const {
+	void* GraphicsAdapter::mapBuffer(const Device* device, const BaseBuffer* buffer, uint64 offset, uint64 size) const {
 		return mapBufferImplementation(device, buffer, offset, size);
 	}
 
@@ -360,7 +353,7 @@ namespace Trident {
 		submit2Implementation(queue, commandBuffers, waitSemaphore, signalSemaphore, fence);
 	}
 
-	void GraphicsAdapter::unmapBuffer(const Device* device, const Buffer* buffer) const {
+	void GraphicsAdapter::unmapBuffer(const Device* device, const BaseBuffer* buffer) const {
 		unmapBufferImplementation(device, buffer);
 	}
 

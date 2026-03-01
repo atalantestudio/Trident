@@ -201,7 +201,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(vertexBufferDescriptor, "Vertex");
 
-		vertexBuffer = createBuffer2<Vertex>(vertexBufferDescriptor);
+		vertexBuffer = createBuffer<Vertex>(vertexBufferDescriptor);
 	}
 
 	void Physics2DRenderer::recreateInstanceBuffer(uint64 size) {
@@ -213,7 +213,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(instanceBufferDescriptor, "Instance");
 
-		instanceBuffer = createBuffer2<Instance>(instanceBufferDescriptor);
+		instanceBuffer = createBuffer<Instance>(instanceBufferDescriptor);
 
 		instanceBufferMappedRange = instanceBuffer->map(0, instanceBuffer->getSize());
 	}
@@ -227,7 +227,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(centerOfMassBufferDescriptor, "Center of mass");
 
-		centerOfMassBuffer = createBuffer2<CenterOfMass>(centerOfMassBufferDescriptor);
+		centerOfMassBuffer = createBuffer<CenterOfMass>(centerOfMassBufferDescriptor);
 
 		centerOfMassBufferMappedRange = centerOfMassBuffer->map(0, centerOfMassBuffer->getSize());
 	}
@@ -240,7 +240,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(indexBufferDescriptor, "Index");
 
-		indexBuffer = createBuffer(indexBufferDescriptor);
+		indexBuffer = createBuffer<uint16>(indexBufferDescriptor);
 	}
 
 	void Physics2DRenderer::createCameraBuffer() {
@@ -252,7 +252,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(cameraBufferDescriptor, "Camera");
 
-		cameraBuffer = createBuffer2<Camera>(cameraBufferDescriptor);
+		cameraBuffer = createBuffer<Camera>(cameraBufferDescriptor);
 
 		cameraBufferMappedRange = cameraBuffer->map(0, cameraBuffer->getSize());
 		cameraBufferMappedRange->zoomLevel = DEFAULT_ZOOM_LEVEL;
@@ -267,7 +267,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(viewBufferDescriptor, "View");
 
-		viewBuffer = createBuffer2<View>(viewBufferDescriptor);
+		viewBuffer = createBuffer<View>(viewBufferDescriptor);
 
 		viewBufferMappedRange = viewBuffer->map(0, viewBuffer->getSize());
 	}
@@ -281,7 +281,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(placeholderBufferDescriptor, "Placeholder");
 
-		placeholderBuffer = createBuffer2<Placeholder>(placeholderBufferDescriptor);
+		placeholderBuffer = createBuffer<Placeholder>(placeholderBufferDescriptor);
 
 		placeholderBufferMappedRange = placeholderBuffer->map(0, placeholderBuffer->getSize());
 		placeholderBufferMappedRange->offset = {0.0f, 0.0f};
@@ -297,7 +297,7 @@ namespace Trident {
 
 			SET_DEBUG_NAME(closestPointBufferDescriptor, "Closest point");
 
-			closestPointBuffer = createBuffer(closestPointBufferDescriptor);
+			closestPointBuffer = createBuffer<Vertex>(closestPointBufferDescriptor);
 
 			closestPointBufferMappedRange = closestPointBuffer->map<Vertex>(0, closestPointBuffer->getSize());
 		}
@@ -313,7 +313,7 @@ namespace Trident {
 
 			SET_DEBUG_NAME(vertexFeatureBufferDescriptor, "Vertex feature");
 
-			vertexFeatureBuffer = createBuffer(vertexFeatureBufferDescriptor);
+			vertexFeatureBuffer = createBuffer<Vertex>(vertexFeatureBufferDescriptor);
 
 			vertexFeatureBufferMappedRange = vertexFeatureBuffer->map<Vertex>(0, vertexFeatureBuffer->getSize());
 		}
@@ -327,7 +327,7 @@ namespace Trident {
 
 			SET_DEBUG_NAME(edgeFeatureBufferDescriptor, "Edge feature");
 
-			edgeFeatureBuffer = createBuffer(edgeFeatureBufferDescriptor);
+			edgeFeatureBuffer = createBuffer<Vertex>(edgeFeatureBufferDescriptor);
 
 			edgeFeatureBufferMappedRange = edgeFeatureBuffer->map<Vertex>(0, edgeFeatureBuffer->getSize());
 		}
@@ -914,7 +914,7 @@ namespace Trident {
 		placeholderDescriptorSet = descriptorSets[1];
 	}
 
-	void Physics2DRenderer::copyBuffers(ref<Buffer> stagingBuffer) const {
+	void Physics2DRenderer::copyBuffers(ref<Buffer<uint8>> stagingBuffer) const {
 		BufferCopyRegion vertexBufferCopyRegion{};
 		vertexBufferCopyRegion.sourceOffset = 0;
 		vertexBufferCopyRegion.destinationOffset = 0;
@@ -974,7 +974,7 @@ namespace Trident {
 		const uint64 instanceBufferSize = instanceCount * sizeof(Instance);
 		const uint64 indexBufferSize = indexCount * sizeof(uint16);
 
-		const ref<Buffer2<uint8>> stagingBuffer = createStagingBuffer2<uint8>(vertexBufferSize + indexBufferSize + instanceBufferSize);
+		const ref<Buffer<uint8>> stagingBuffer = createStagingBuffer<uint8>(vertexBufferSize + indexBufferSize + instanceBufferSize);
 
 		uint8* mappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
 		Vertex* vertexMappedRange = pointer_cast<Vertex*>(mappedRange);

@@ -98,7 +98,7 @@ namespace Trident {
 					}
 				}
 
-				const ref<Buffer2<uint8>> imageStagingBuffer = createStagingBuffer2<uint8>(file.extent.width * file.extent.height * getChannelCount(imageFormat));
+				const ref<Buffer<uint8>> imageStagingBuffer = createStagingBuffer<uint8>(file.extent.width * file.extent.height * getChannelCount(imageFormat));
 
 				uint8* imageStagingBufferMappedRange = imageStagingBuffer->map(0, imageStagingBuffer->getSize());
 

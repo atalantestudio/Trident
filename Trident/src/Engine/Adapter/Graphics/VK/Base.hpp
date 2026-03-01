@@ -27,7 +27,7 @@ namespace Trident::VK {
 	struct MemoryAllocation;
 	struct MemorySuballocation;
 
-	class Buffer;
+	class BaseBuffer;
 	class CommandBuffer;
 	class CommandEncoder;
 	class CommandPool;

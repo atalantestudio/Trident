@@ -10,8 +10,8 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	DX12::Buffer::Buffer(const Trident::Device* device, const BufferDescriptor& descriptor) :
-		Trident::Buffer(device, descriptor)
+	DX12::BaseBuffer::BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor) :
+		Trident::BaseBuffer(device, descriptor)
 	{
 		if (descriptor.usage & BufferUsage::UNIFORM) {
 			// NOTE: Constant buffer views need to be aligned to 256.
@@ -19,11 +19,11 @@ namespace Trident {
 		}
 	}
 
-	ref<Trident::Buffer> DX12::createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, UINT stride) {
+	ref<Trident::BaseBuffer> DX12::createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, UINT stride) {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
 		HRESULT result;
 
-		ref<DX12::Buffer> buffer = createRef<DX12::Buffer>(device, descriptor);
+		ref<DX12::BaseBuffer> buffer = createRef<DX12::BaseBuffer>(device, descriptor);
 		buffer->stride = stride;
 
 		D3D12_HEAP_PROPERTIES heapProperties{};
@@ -83,8 +83,8 @@ namespace Trident {
 		return buffer;
 	}
 
-	void DX12::destroyBuffer(const Trident::Device* device, const Trident::Buffer* buffer) {
-		const DX12::Buffer* _buffer = static_cast<const DX12::Buffer*>(buffer);
+	void DX12::destroyBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer) {
+		const DX12::BaseBuffer* _buffer = static_cast<const DX12::BaseBuffer*>(buffer);
 
 		_buffer->resource->Release();
 
@@ -93,8 +93,8 @@ namespace Trident {
 		}
 	}
 
-	void* DX12::mapBuffer(const Trident::Device* device, const Trident::Buffer* buffer, uint64 offset, uint64 size) {
-		const DX12::Buffer* _buffer = static_cast<const DX12::Buffer*>(buffer);
+	void* DX12::mapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer, uint64 offset, uint64 size) {
+		const DX12::BaseBuffer* _buffer = static_cast<const DX12::BaseBuffer*>(buffer);
 		HRESULT result;
 		void* data;
 
@@ -110,8 +110,8 @@ namespace Trident {
 		return data;
 	}
 
-	void DX12::unmapBuffer(const Trident::Device* device, const Trident::Buffer* buffer) {
-		const DX12::Buffer* _buffer = static_cast<const DX12::Buffer*>(buffer);
+	void DX12::unmapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer) {
+		const DX12::BaseBuffer* _buffer = static_cast<const DX12::BaseBuffer*>(buffer);
 
 		_buffer->resource->Unmap(0, nullptr);
 	}

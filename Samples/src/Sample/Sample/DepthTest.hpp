@@ -214,7 +214,7 @@ namespace Trident {
 			}
 
 			void createBuffers() {
-				const ref<Buffer2<uint8>> stagingBuffer = createStagingBuffer2<uint8>(VERTEX_BUFFER_SIZE + INSTANCE_BUFFER_SIZE);
+				const ref<Buffer<uint8>> stagingBuffer = createStagingBuffer<uint8>(VERTEX_BUFFER_SIZE + INSTANCE_BUFFER_SIZE);
 
 				uint8* stagingBufferMappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
 
@@ -246,8 +246,8 @@ namespace Trident {
 
 				SET_DEBUG_NAME(instanceBufferDescriptor, "Instance buffer");
 
-				vertexBuffer = createBuffer2<Vertex>(vertexBufferDescriptor);
-				instanceBuffer = createBuffer2<Instance>(instanceBufferDescriptor);
+				vertexBuffer = createBuffer<Vertex>(vertexBufferDescriptor);
+				instanceBuffer = createBuffer<Instance>(instanceBufferDescriptor);
 
 				BufferCopyRegion vertexBufferCopyRegion{};
 				vertexBufferCopyRegion.sourceOffset = 0;
@@ -283,7 +283,7 @@ namespace Trident {
 			ref<ImageView> depthStencilImageView;
 			sequence<ref<Framebuffer>> framebuffers;
 			ref<GraphicsPipeline> graphicsPipeline;
-			ref<Buffer2<Vertex>> vertexBuffer;
-			ref<Buffer2<Instance>> instanceBuffer;
+			ref<Buffer<Vertex>> vertexBuffer;
+			ref<Buffer<Instance>> instanceBuffer;
 	};
 }

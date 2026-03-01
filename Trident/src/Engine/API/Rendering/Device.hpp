@@ -30,14 +30,9 @@ namespace Trident {
 				return adapter->allocateDescriptorSets(this, descriptorSetLayouts);
 			}
 
-			// TODO: Deprecate (replace with createBuffer2).
-			ref<Buffer> createBuffer(const BufferDescriptor& descriptor) const {
-				return adapter->createBuffer(this, descriptor);
-			}
-
 			template<typename ElementType>
-			ref<Buffer2<ElementType>> createBuffer2(const BufferDescriptor& descriptor) const {
-				return adapter->createBuffer2<ElementType>(this, descriptor);
+			ref<Buffer<ElementType>> createBuffer(const BufferDescriptor& descriptor) const {
+				return adapter->createBuffer<ElementType>(this, descriptor);
 			}
 
 			ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor) const {

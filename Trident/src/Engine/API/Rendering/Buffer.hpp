@@ -10,9 +10,9 @@
 #include "Engine/API/Rendering/Descriptor/BufferDescriptor.hpp"
 
 namespace Trident {
-	class Buffer {
+	class BaseBuffer {
 		public:
-			~Buffer();
+			~BaseBuffer();
 
 			/// Returns the size in bytes of the buffer.
 			uint64 getSize() const;
@@ -31,7 +31,7 @@ namespace Trident {
 			void unmap() const;
 
 		protected:
-			explicit Buffer(const Device* device, const BufferDescriptor& descriptor);
+			explicit BaseBuffer(const Device* device, const BufferDescriptor& descriptor);
 
 		protected:
 			uint64 size;
@@ -47,12 +47,12 @@ namespace Trident {
 	};
 
 	template<typename ElementType>
-	class Buffer2 : public Buffer {
+	class Buffer : public BaseBuffer {
 		public:
 			/// Maps a range of the buffer to host memory.
 			/// The offset and size must be provided in bytes.
 			inline ElementType* map(uint64 offset, uint64 size) const {
-				return static_cast<ElementType*>(Buffer::map(offset, size));
+				return static_cast<ElementType*>(BaseBuffer::map(offset, size));
 			}
 	};
 }

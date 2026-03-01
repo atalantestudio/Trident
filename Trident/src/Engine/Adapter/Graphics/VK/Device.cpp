@@ -380,7 +380,7 @@ namespace Trident {
 					const DescriptorBuffer& descriptorBuffer = writeDescriptorSet.descriptorBuffers[descriptorBufferIndex];
 
 					VkDescriptorBufferInfo& descriptorBufferInfo = descriptorBufferInfos[descriptorBufferInfoOffset + descriptorBufferIndex];
-					descriptorBufferInfo.buffer = std::static_pointer_cast<VK::Buffer>(descriptorBuffer.buffer)->buffer;
+					descriptorBufferInfo.buffer = std::static_pointer_cast<VK::BaseBuffer>(descriptorBuffer.buffer)->buffer;
 					descriptorBufferInfo.offset = descriptorBuffer.offset;
 					descriptorBufferInfo.range = descriptorBuffer.size;
 				}

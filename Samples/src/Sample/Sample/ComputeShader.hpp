@@ -196,7 +196,7 @@ namespace Trident {
 			}
 
 			void createBuffers() {
-				const ref<Buffer2<Vertex>> vertexStagingBuffer = createStagingBuffer2<Vertex>(VERTEX_COUNT * sizeof(Vertex));
+				const ref<Buffer<Vertex>> vertexStagingBuffer = createStagingBuffer<Vertex>(VERTEX_COUNT * sizeof(Vertex));
 
 				Vertex* vertexMappedRange = vertexStagingBuffer->map(0, vertexStagingBuffer->getSize());
 				vertexMappedRange[0].vertex = {-1.0f,  1.0f};
@@ -212,7 +212,7 @@ namespace Trident {
 
 				SET_DEBUG_NAME(vertexBufferDescriptor, "Vertex buffer");
 
-				vertexBuffer = createBuffer2<Vertex>(vertexBufferDescriptor);
+				vertexBuffer = createBuffer<Vertex>(vertexBufferDescriptor);
 
 				BufferCopyRegion vertexBufferCopyRegion{};
 				vertexBufferCopyRegion.sourceOffset = 0;
@@ -351,6 +351,6 @@ namespace Trident {
 			ref<DescriptorSet> imageDescriptorSet;
 			ref<PipelineLayout> pipelineLayout;
 			ref<GraphicsPipeline> graphicsPipeline;
-			ref<Buffer2<Vertex>> vertexBuffer;
+			ref<Buffer<Vertex>> vertexBuffer;
 	};
 }

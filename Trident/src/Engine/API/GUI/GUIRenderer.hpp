@@ -99,12 +99,12 @@ namespace Trident {
 			ref<GraphicsPipeline> subcomponentGraphicsPipeline;
 			ref<GraphicsPipeline> glyphSubcomponentGraphicsPipeline;
 
-			ref<Buffer2<Camera>> cameraBuffer;
-			ref<Buffer2<Vertex>> vertexBuffer;
-			ref<Buffer2<uint16>> indexBuffer;
-			ref<Buffer2<GUISubcomponent>> subcomponentBuffer;
-			ref<Buffer2<GUIGlyphSubcomponent>> glyphSubcomponentBuffer;
-			ref<Buffer2<uint8>> textureArrayStagingBuffer;
+			ref<Buffer<Camera>> cameraBuffer;
+			ref<Buffer<Vertex>> vertexBuffer;
+			ref<Buffer<uint16>> indexBuffer;
+			ref<Buffer<GUISubcomponent>> subcomponentBuffer;
+			ref<Buffer<GUIGlyphSubcomponent>> glyphSubcomponentBuffer;
+			ref<Buffer<uint8>> textureArrayStagingBuffer;
 
 			ref<Image> textureArrayImage;
 

@@ -124,7 +124,7 @@ namespace Trident {
 			}
 
 			void createBuffers() {
-				const ref<Buffer2<uint8>> stagingBuffer = createStagingBuffer2<uint8>(VERTEX_COUNT * sizeof(Vertex) + sizeof(DrawIndirectCommand));
+				const ref<Buffer<uint8>> stagingBuffer = createStagingBuffer<uint8>(VERTEX_COUNT * sizeof(Vertex) + sizeof(DrawIndirectCommand));
 
 				uint8* stagingBufferMappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
 
@@ -160,8 +160,8 @@ namespace Trident {
 
 				SET_DEBUG_NAME(indirectBufferDescriptor, "Indirect buffer");
 
-				vertexBuffer = createBuffer2<Vertex>(vertexBufferDescriptor);
-				indirectBuffer = createBuffer2<DrawIndirectCommand>(indirectBufferDescriptor);
+				vertexBuffer = createBuffer<Vertex>(vertexBufferDescriptor);
+				indirectBuffer = createBuffer<DrawIndirectCommand>(indirectBufferDescriptor);
 
 				BufferCopyRegion vertexBufferCopyRegion{};
 				vertexBufferCopyRegion.sourceOffset = 0;
@@ -226,7 +226,7 @@ namespace Trident {
 			ref<RenderPass> renderPass;
 			sequence<ref<Framebuffer>> framebuffers;
 			ref<GraphicsPipeline> graphicsPipeline;
-			ref<Buffer2<Vertex>> vertexBuffer;
-			ref<Buffer2<DrawIndirectCommand>> indirectBuffer;
+			ref<Buffer<Vertex>> vertexBuffer;
+			ref<Buffer<DrawIndirectCommand>> indirectBuffer;
 	};
 }

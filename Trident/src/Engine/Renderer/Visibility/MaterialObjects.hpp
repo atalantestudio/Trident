@@ -130,7 +130,7 @@ namespace Trident {
 
 		materialDescriptorSets = device->allocateDescriptorSets(materialDescriptorSetLayouts);
 
-		const ref<Buffer2<uint8>> imageStagingBuffer = createStagingBuffer2<uint8>(imageStagingBufferSize);
+		const ref<Buffer<uint8>> imageStagingBuffer = createStagingBuffer<uint8>(imageStagingBufferSize);
 
 		uint8* imageMappedRange = imageStagingBuffer->map(0, imageStagingBuffer->getSize());
 		uint64 imageMappedRangeOffset = 0;

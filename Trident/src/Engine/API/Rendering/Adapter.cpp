@@ -14,33 +14,33 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace Trident {
-	Buffer::Buffer(const Device* device, const BufferDescriptor& descriptor) :
+	BaseBuffer::BaseBuffer(const Device* device, const BufferDescriptor& descriptor) :
 		device(device),
 		size(descriptor.size),
 		usage(descriptor.usage)
 	{}
 
-	Buffer::~Buffer() {
+	BaseBuffer::~BaseBuffer() {
 		device->adapter->destroyBuffer(device, this);
 	}
 
-	uint64 Buffer::getSize() const {
+	uint64 BaseBuffer::getSize() const {
 		return size;
 	}
 
-	BufferUsage Buffer::getUsage() const {
+	BufferUsage BaseBuffer::getUsage() const {
 		return usage;
 	}
 
-	Access Buffer::getAccess() const {
+	Access BaseBuffer::getAccess() const {
 		return access;
 	}
 
-	void* Buffer::map(uint64 offset, uint64 size) const {
+	void* BaseBuffer::map(uint64 offset, uint64 size) const {
 		return device->adapter->mapBuffer(device, this, offset, size);
 	}
 
-	void Buffer::unmap() const {
+	void BaseBuffer::unmap() const {
 		device->adapter->unmapBuffer(device, this);
 	}
 
@@ -73,23 +73,23 @@ namespace Trident {
 		device->adapter->bindGraphicsPipeline(this, graphicsPipeline);
 	}
 
-	void CommandEncoder::bindIndexBuffer(ref<Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
+	void CommandEncoder::bindIndexBuffer(ref<BaseBuffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
 		device->adapter->bindIndexBuffer(this, indexBuffer, offset, indexTypeSize);
 	}
 
-	void CommandEncoder::bindVertexBuffer(uint32 bindingIndex, ref<Buffer> vertexBuffer, uint64 offset, uint32 stride) {
+	void CommandEncoder::bindVertexBuffer(uint32 bindingIndex, ref<BaseBuffer> vertexBuffer, uint64 offset, uint32 stride) {
 		device->adapter->bindVertexBuffer(this, bindingIndex, vertexBuffer, offset, stride);
 	}
 
-	void CommandEncoder::copyBufferToBuffer(ref<Buffer> sourceBuffer, ref<Buffer> destinationBuffer, view<BufferCopyRegion> copyRegions) {
+	void CommandEncoder::copyBufferToBuffer(ref<BaseBuffer> sourceBuffer, ref<BaseBuffer> destinationBuffer, view<BufferCopyRegion> copyRegions) {
 		device->adapter->copyBufferToBuffer(this, sourceBuffer, destinationBuffer, copyRegions);
 	}
 
-	void CommandEncoder::copyBufferToImage(ref<Buffer> sourceBuffer, ref<Image> destinationImage, view<BufferImageCopyRegion> copyRegions) {
+	void CommandEncoder::copyBufferToImage(ref<BaseBuffer> sourceBuffer, ref<Image> destinationImage, view<BufferImageCopyRegion> copyRegions) {
 		device->adapter->copyBufferToImage(this, sourceBuffer, destinationImage, copyRegions);
 	}
 
-	void CommandEncoder::copyImageToBuffer(ref<Image> sourceImage, ref<Buffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) {
+	void CommandEncoder::copyImageToBuffer(ref<Image> sourceImage, ref<BaseBuffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) {
 		device->adapter->copyImageToBuffer(this, sourceImage, destinationBuffer, copyRegions);
 	}
 
@@ -97,7 +97,7 @@ namespace Trident {
 		device->adapter->dispatch(this, groupCountX, groupCountY, groupCountZ);
 	}
 
-	void CommandEncoder::dispatchIndirect(ref<Buffer> buffer, uint64 bufferOffset) {
+	void CommandEncoder::dispatchIndirect(ref<BaseBuffer> buffer, uint64 bufferOffset) {
 		device->adapter->dispatchIndirect(this, buffer, bufferOffset);
 	}
 
@@ -105,7 +105,7 @@ namespace Trident {
 		device->adapter->draw(this, vertexCount, instanceCount, vertexOffset, instanceOffset);
 	}
 
-	void CommandEncoder::drawIndirect(ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
+	void CommandEncoder::drawIndirect(ref<BaseBuffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
 		device->adapter->drawIndirect(this, buffer, bufferOffset, drawCount, stride);
 	}
 
@@ -113,7 +113,7 @@ namespace Trident {
 		device->adapter->drawIndexed(this, indexCount, instanceCount, indexOffset, indexBias, instanceOffset);
 	}
 
-	void CommandEncoder::drawIndexedIndirect(ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
+	void CommandEncoder::drawIndexedIndirect(ref<BaseBuffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
 		device->adapter->drawIndexedIndirect(this, buffer, bufferOffset, drawCount, stride);
 	}
 

@@ -133,7 +133,7 @@ namespace Trident {
 
 			void allocateDescriptorSets();
 
-			void copyBuffers(ref<Buffer> stagingBuffer) const;
+			void copyBuffers(ref<Buffer<uint8>> stagingBuffer) const;
 
 			void updateCameraViewDescriptorSet() const;
 			void updatePlaceholderDescriptorSet() const;
@@ -193,23 +193,23 @@ namespace Trident {
 				ref<GraphicsPipeline> edgeFeatureGraphicsPipeline;
 			#endif
 
-			ref<Buffer2<Camera>> cameraBuffer;
-			ref<Buffer2<View>> viewBuffer;
-			ref<Buffer2<Placeholder>> placeholderBuffer;
+			ref<Buffer<Camera>> cameraBuffer;
+			ref<Buffer<View>> viewBuffer;
+			ref<Buffer<Placeholder>> placeholderBuffer;
 
 			#if defined(SHOW_DISTANCE)
-				ref<Buffer> closestPointBuffer;
+				ref<Buffer<Vertex>> closestPointBuffer;
 			#endif
 
 			#if defined(SHOW_FEATURES)
-				ref<Buffer> vertexFeatureBuffer;
-				ref<Buffer> edgeFeatureBuffer;
+				ref<Buffer<Vertex>> vertexFeatureBuffer;
+				ref<Buffer<Vertex>> edgeFeatureBuffer;
 			#endif
 
-			ref<Buffer2<Vertex>> vertexBuffer;
-			ref<Buffer2<Instance>> instanceBuffer;
-			ref<Buffer2<CenterOfMass>> centerOfMassBuffer;
-			ref<Buffer> indexBuffer;
+			ref<Buffer<Vertex>> vertexBuffer;
+			ref<Buffer<Instance>> instanceBuffer;
+			ref<Buffer<CenterOfMass>> centerOfMassBuffer;
+			ref<Buffer<uint16>> indexBuffer;
 
 			Camera* cameraBufferMappedRange = nullptr;
 			View* viewBufferMappedRange = nullptr;

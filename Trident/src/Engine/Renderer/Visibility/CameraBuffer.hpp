@@ -6,7 +6,7 @@
 #include "Engine/Renderer/Visibility/Renderer.hpp"
 
 namespace Trident {
-	ref<Buffer2<VisibilityRenderer::Camera>> VisibilityRenderer::createCameraBuffer() const {
+	ref<Buffer<VisibilityRenderer::Camera>> VisibilityRenderer::createCameraBuffer() const {
 		BufferDescriptor cameraBuffer{};
 		cameraBuffer.size = sizeof(Camera);
 		cameraBuffer.usage = BufferUsage::UNIFORM;
@@ -15,6 +15,6 @@ namespace Trident {
 
 		SET_DEBUG_NAME(cameraBuffer, "Camera");
 
-		return createBuffer2<Camera>(cameraBuffer);
+		return createBuffer<Camera>(cameraBuffer);
 	}
 }

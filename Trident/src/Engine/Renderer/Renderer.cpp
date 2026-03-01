@@ -34,22 +34,6 @@ namespace Trident {
 
 	void Renderer::onEvent(Event& event) {}
 
-	ref<Buffer> Renderer::createBuffer(const BufferDescriptor& descriptor) {
-		return layerCompositor->device->createBuffer(descriptor);
-	}
-
-	ref<Buffer> Renderer::createStagingBuffer(uint64 size, bool persistent) {
-		BufferDescriptor stagingBufferDescriptor{};
-		stagingBufferDescriptor.size = size;
-		stagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
-		stagingBufferDescriptor.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT;
-		stagingBufferDescriptor.persistent = persistent;
-
-		SET_DEBUG_NAME(stagingBufferDescriptor, "Staging buffer");
-
-		return createBuffer(stagingBufferDescriptor);
-	}
-
 	ref<ComputePipeline> Renderer::createComputePipeline(const ComputePipelineDescriptor& descriptor) {
 		return layerCompositor->device->createComputePipeline(descriptor);
 	}

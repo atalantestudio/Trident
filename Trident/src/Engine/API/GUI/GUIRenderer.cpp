@@ -192,7 +192,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(cameraBufferDescriptor, "Camera");
 
-		cameraBuffer = createBuffer2<Camera>(cameraBufferDescriptor);
+		cameraBuffer = createBuffer<Camera>(cameraBufferDescriptor);
 
 		cameraBufferMappedRange = cameraBuffer->map(0, cameraBuffer->getSize());
 	}
@@ -205,7 +205,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(vertexBufferDescriptor, "Vertex");
 
-		vertexBuffer = createBuffer2<Vertex>(vertexBufferDescriptor);
+		vertexBuffer = createBuffer<Vertex>(vertexBufferDescriptor);
 	}
 
 	void GUIRenderer::createIndexBuffer() {
@@ -216,7 +216,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(indexBufferDescriptor, "Index");
 
-		indexBuffer = createBuffer2<uint16>(indexBufferDescriptor);
+		indexBuffer = createBuffer<uint16>(indexBufferDescriptor);
 	}
 
 	void GUIRenderer::createSubcomponentBuffer() {
@@ -228,7 +228,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(subcomponentBufferDescriptor, "Subcomponent");
 
-		subcomponentBuffer = createBuffer2<GUISubcomponent>(subcomponentBufferDescriptor);
+		subcomponentBuffer = createBuffer<GUISubcomponent>(subcomponentBufferDescriptor);
 
 		subcomponentBufferMappedRange = subcomponentBuffer->map(0, subcomponentBuffer->getSize());
 	}
@@ -242,13 +242,13 @@ namespace Trident {
 
 		SET_DEBUG_NAME(glyphSubcomponentBufferDescriptor, "Glyph subcomponent");
 
-		glyphSubcomponentBuffer = createBuffer2<GUIGlyphSubcomponent>(glyphSubcomponentBufferDescriptor);
+		glyphSubcomponentBuffer = createBuffer<GUIGlyphSubcomponent>(glyphSubcomponentBufferDescriptor);
 
 		glyphSubcomponentBufferMappedRange = glyphSubcomponentBuffer->map(0, glyphSubcomponentBuffer->getSize());
 	}
 
 	void GUIRenderer::createTextureArrayStagingBuffer() {
-		textureArrayStagingBuffer = createStagingBuffer2<uint8>(TEXTURE_ARRAY_MAX_WIDTH * TEXTURE_ARRAY_MAX_HEIGHT * TEXTURE_ARRAY_MAX_LAYER_COUNT * TEXTURE_ARRAY_LAYER_BPP);
+		textureArrayStagingBuffer = createStagingBuffer<uint8>(TEXTURE_ARRAY_MAX_WIDTH * TEXTURE_ARRAY_MAX_HEIGHT * TEXTURE_ARRAY_MAX_LAYER_COUNT * TEXTURE_ARRAY_LAYER_BPP);
 
 		textureArrayStagingBufferMappedRange = textureArrayStagingBuffer->map(0, textureArrayStagingBuffer->getSize());
 	}
@@ -439,7 +439,7 @@ namespace Trident {
 	}
 
 	void GUIRenderer::copyBuffers() const {
-		const ref<Buffer2<uint8>> stagingBuffer = createStagingBuffer2<uint8>(VERTEX_BUFFER_SIZE + INDEX_BUFFER_SIZE);
+		const ref<Buffer<uint8>> stagingBuffer = createStagingBuffer<uint8>(VERTEX_BUFFER_SIZE + INDEX_BUFFER_SIZE);
 
 		uint8* mappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
 

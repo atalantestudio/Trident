@@ -31,21 +31,14 @@ namespace Trident {
 			virtual void onEvent(Event& event);
 
 		public:
-			static ref<Buffer> createBuffer(const BufferDescriptor& descriptor);
-
 			template<typename ElementType>
-			static ref<Buffer2<ElementType>> createBuffer2(const BufferDescriptor& descriptor) {
-				return layerCompositor->device->createBuffer2<ElementType>(descriptor);
+			static ref<Buffer<ElementType>> createBuffer(const BufferDescriptor& descriptor) {
+				return layerCompositor->device->createBuffer<ElementType>(descriptor);
 			}
 
 			/// Creates and returns a buffer suitable for memory transfers from the CPU to the GPU.
-			// `size` is in bytes.
-			// If `persistent` is true, the buffer will stay mapped until it is destroyed.
-			static ref<Buffer> createStagingBuffer(uint64 size, bool persistent = false);
-
-			/// Creates and returns a buffer suitable for memory transfers from the CPU to the GPU.
 			template<typename ElementType>
-			static ref<Buffer2<ElementType>> createStagingBuffer2(uint64 size, bool persistent = false) {
+			static ref<Buffer<ElementType>> createStagingBuffer(uint64 size, bool persistent = false) {
 				BufferDescriptor stagingBufferDescriptor{};
 				stagingBufferDescriptor.size = size;
 				stagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
@@ -54,7 +47,7 @@ namespace Trident {
 
 				SET_DEBUG_NAME(stagingBufferDescriptor, "Staging buffer");
 
-				return layerCompositor->device->createBuffer2<ElementType>(stagingBufferDescriptor);
+				return layerCompositor->device->createBuffer<ElementType>(stagingBufferDescriptor);
 			}
 
 			static ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor);

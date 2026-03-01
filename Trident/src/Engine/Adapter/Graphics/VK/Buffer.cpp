@@ -9,18 +9,18 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	VK::Buffer::Buffer(const Trident::Device* device, const BufferDescriptor& descriptor) :
-		Trident::Buffer(device, descriptor)
+	VK::BaseBuffer::BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor) :
+		Trident::BaseBuffer(device, descriptor)
 	{}
 
-	ref<Trident::Buffer> VK::createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, UINT stride) {
+	ref<Trident::BaseBuffer> VK::createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, UINT stride) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		const ref<VK::MemoryAllocator> memoryAllocator = std::static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
 		VkResult result;
 
-		ref<VK::Buffer> buffer = createRef<VK::Buffer>(device, descriptor);
+		ref<VK::BaseBuffer> buffer = createRef<VK::BaseBuffer>(device, descriptor);
 
 		// TODO: Set stride.
 		// buffer->stride = stride;
@@ -86,30 +86,30 @@ namespace Trident {
 		return buffer;
 	}
 
-	void VK::destroyBuffer(const Trident::Device* device, const Trident::Buffer* buffer) {
+	void VK::destroyBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		const ref<VK::MemoryAllocator> memoryAllocator = std::static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
-		const VK::Buffer* _buffer = static_cast<const VK::Buffer*>(buffer);
+		const VK::BaseBuffer* _buffer = static_cast<const VK::BaseBuffer*>(buffer);
 
 		_device->vkDestroyBuffer(_device->device, _buffer->buffer, nullptr);
 
 		memoryAllocator->freeSuballocation(_buffer->memorySuballocation.allocationIndex);
 	}
 
-	void* VK::mapBuffer(const Trident::Device* device, const Trident::Buffer* buffer, uint64 offset, uint64 size) {
+	void* VK::mapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer, uint64 offset, uint64 size) {
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		const ref<VK::MemoryAllocator> memoryAllocator = std::static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
-		const VK::Buffer* _buffer = static_cast<const VK::Buffer*>(buffer);
+		const VK::BaseBuffer* _buffer = static_cast<const VK::BaseBuffer*>(buffer);
 
 		return memoryAllocator->mapSuballocation(_buffer->memorySuballocation, offset, size);
 	}
 
-	void VK::unmapBuffer(const Trident::Device* device, const Trident::Buffer* buffer) {
+	void VK::unmapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer) {
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		const ref<VK::MemoryAllocator> memoryAllocator = std::static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
-		const VK::Buffer* _buffer = static_cast<const VK::Buffer*>(buffer);
+		const VK::BaseBuffer* _buffer = static_cast<const VK::BaseBuffer*>(buffer);
 
 		memoryAllocator->unmapSuballocation(_buffer->memorySuballocation.allocationIndex);
 	}

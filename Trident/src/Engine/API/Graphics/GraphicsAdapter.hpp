@@ -34,25 +34,23 @@ namespace Trident {
 
 			void bindGraphicsPipeline(CommandEncoder* commandEncoder, ref<GraphicsPipeline> graphicsPipeline) const;
 
-			void bindIndexBuffer(CommandEncoder* commandEncoder, ref<Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) const;
+			void bindIndexBuffer(CommandEncoder* commandEncoder, ref<BaseBuffer> indexBuffer, uint64 offset, uint8 indexTypeSize) const;
 
-			void bindVertexBuffer(CommandEncoder* commandEncoder, uint32 bindingIndex, ref<Buffer> vertexBuffer, uint64 offset, uint32 stride) const;
+			void bindVertexBuffer(CommandEncoder* commandEncoder, uint32 bindingIndex, ref<BaseBuffer> vertexBuffer, uint64 offset, uint32 stride) const;
 
-			void copyBufferToBuffer(CommandEncoder* commandEncoder, ref<Buffer> sourceBuffer, ref<Buffer> destinationBuffer, view<BufferCopyRegion> copyRegions) const;
+			void copyBufferToBuffer(CommandEncoder* commandEncoder, ref<BaseBuffer> sourceBuffer, ref<BaseBuffer> destinationBuffer, view<BufferCopyRegion> copyRegions) const;
 
-			void copyBufferToImage(CommandEncoder* commandEncoder, ref<Buffer> sourceBuffer, ref<Image> destinationImage, view<BufferImageCopyRegion> copyRegions) const;
+			void copyBufferToImage(CommandEncoder* commandEncoder, ref<BaseBuffer> sourceBuffer, ref<Image> destinationImage, view<BufferImageCopyRegion> copyRegions) const;
 
-			void copyImageToBuffer(CommandEncoder* commandEncoder, ref<Image> sourceImage, ref<Buffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) const;
-
-			ref<Buffer> createBuffer(const Device* device, const BufferDescriptor& descriptor) const;
+			void copyImageToBuffer(CommandEncoder* commandEncoder, ref<Image> sourceImage, ref<BaseBuffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) const;
 
 			template<typename ElementType>
-			ref<Buffer2<ElementType>> createBuffer2(const Device* device, const BufferDescriptor& descriptor) const {
+			ref<Buffer<ElementType>> createBuffer(const Device* device, const BufferDescriptor& descriptor) const {
 				DEBUG_DESCRIPTOR_GUARD(descriptor);
 
-				ref<Buffer> buffer = createBufferImplementation(device, descriptor, static_cast<uint32>(sizeof(ElementType)));
+				ref<BaseBuffer> buffer = createBufferImplementation(device, descriptor, static_cast<uint32>(sizeof(ElementType)));
 
-				return std::static_pointer_cast<Buffer2<ElementType>>(buffer);
+				return std::static_pointer_cast<Buffer<ElementType>>(buffer);
 			}
 
 			ref<CommandEncoder> createCommandEncoder(const Device* device, const CommandPool* commandPool, const CommandBufferDescriptor& descriptor) const;
@@ -92,7 +90,7 @@ namespace Trident {
 
 			ref<Swapchain> createSwapchain(const Device* device, const SwapchainDescriptor& descriptor) const;
 
-			void destroyBuffer(const Device* device, const Buffer* buffer) const;
+			void destroyBuffer(const Device* device, const BaseBuffer* buffer) const;
 
 			void destroyCommandEncoder(const Device* device, const CommandPool* commandPool, const CommandEncoder* commandEncoder) const;
 
@@ -134,15 +132,15 @@ namespace Trident {
 
 			void dispatch(CommandEncoder* commandEncoder, uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) const;
 
-			void dispatchIndirect(CommandEncoder* commandEncoder, ref<Buffer> buffer, uint64 bufferOffset) const;
+			void dispatchIndirect(CommandEncoder* commandEncoder, ref<BaseBuffer> buffer, uint64 bufferOffset) const;
 
 			void draw(CommandEncoder* commandEncoder, uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset, uint32 instanceOffset) const;
 
-			void drawIndirect(CommandEncoder* commandEncoder, ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) const;
+			void drawIndirect(CommandEncoder* commandEncoder, ref<BaseBuffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) const;
 
 			void drawIndexed(CommandEncoder* commandEncoder, uint32 indexCount, uint32 instanceCount, uint32 indexOffset, sint32 indexBias, uint32 instanceOffset) const;
 
-			void drawIndexedIndirect(CommandEncoder* commandEncoder, ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) const;
+			void drawIndexedIndirect(CommandEncoder* commandEncoder, ref<BaseBuffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) const;
 
 			ref<CommandBuffer> end(const CommandEncoder* commandEncoder) const;
 
@@ -152,7 +150,7 @@ namespace Trident {
 
 			void insertBufferMemoryBarriers(CommandEncoder* commandEncoder, view<BufferMemoryBarrier> barriers) const;
 
-			void* mapBuffer(const Device* device, const Buffer* buffer, uint64 offset, uint64 size) const;
+			void* mapBuffer(const Device* device, const BaseBuffer* buffer, uint64 offset, uint64 size) const;
 
 			void nextSubpass(CommandEncoder* commandEncoder) const;
 
@@ -175,7 +173,7 @@ namespace Trident {
 			void submit(const Queue* queue, view<ref<CommandBuffer>> commandBuffers) const;
 			void submit(const Queue* queue, view<ref<CommandBuffer>> commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<Fence> fence) const;
 
-			void unmapBuffer(const Device* device, const Buffer* buffer) const;
+			void unmapBuffer(const Device* device, const BaseBuffer* buffer) const;
 
 			void updateDescriptorSets(const Device* device, view<WriteDescriptorSet> writeDescriptorSets) const;
 

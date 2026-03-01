@@ -107,7 +107,7 @@ namespace Trident {
 
 		ref<CommandEncoder> commandEncoder;
 
-		const ref<Buffer2<FontStorage>> fontStagingBuffer = Renderer::createStagingBuffer2<FontStorage>(sizeof(FontStorage));
+		const ref<Buffer<FontStorage>> fontStagingBuffer = Renderer::createStagingBuffer<FontStorage>(sizeof(FontStorage));
 		const TrueTypeFont::FWord lineHeight = file.ascent - file.descent + file.lineGap;
 
 		FontStorage* fontStagingBufferMappedRange = fontStagingBuffer->map(0, fontStagingBuffer->getSize());
@@ -252,7 +252,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(glyphMapStagingBufferDescriptor, "Glyph map staging buffer");
 
-		const ref<Buffer2<uint8>> glyphMapStagingBuffer = Renderer::createBuffer2<uint8>(glyphMapStagingBufferDescriptor);
+		const ref<Buffer<uint8>> glyphMapStagingBuffer = Renderer::createBuffer<uint8>(glyphMapStagingBufferDescriptor);
 
 		BufferImageCopyRegion glyphMapBufferImageCopyRegion{};
 		glyphMapBufferImageCopyRegion.bufferOffset = 0;
@@ -291,7 +291,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(fontBufferDescriptor, "Font");
 
-		fontBuffer = Renderer::createBuffer2<FontStorage>(fontBufferDescriptor);
+		fontBuffer = Renderer::createBuffer<FontStorage>(fontBufferDescriptor);
 	}
 
 	void GenerateSDFGlyphMapProcess::createGlyphBuffer(uint64 size) {
@@ -303,7 +303,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(glyphBufferDescriptor, "Glyph");
 
-		glyphBuffer = Renderer::createBuffer2<GlyphBuffer>(glyphBufferDescriptor);
+		glyphBuffer = Renderer::createBuffer<GlyphBuffer>(glyphBufferDescriptor);
 		glyphMappedRange = glyphBuffer->map(0, glyphBuffer->getSize());
 	}
 
@@ -316,7 +316,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(glyphOffsetBufferDescriptor, "Glyph offset");
 
-		glyphOffsetBuffer = Renderer::createBuffer2<uint32>(glyphOffsetBufferDescriptor);
+		glyphOffsetBuffer = Renderer::createBuffer<uint32>(glyphOffsetBufferDescriptor);
 		glyphOffsetMappedRange = glyphOffsetBuffer->map(0, glyphOffsetBuffer->getSize());
 	}
 

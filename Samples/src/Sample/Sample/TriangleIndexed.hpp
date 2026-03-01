@@ -126,7 +126,7 @@ namespace Trident {
 			}
 
 			void createBuffers() {
-				const ref<Buffer2<uint8>> stagingBuffer = createStagingBuffer2<uint8>(VERTEX_COUNT * sizeof(Vertex) + INDEX_COUNT * sizeof(uint16));
+				const ref<Buffer<uint8>> stagingBuffer = createStagingBuffer<uint8>(VERTEX_COUNT * sizeof(Vertex) + INDEX_COUNT * sizeof(uint16));
 
 				uint8* stagingBufferMappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
 
@@ -161,8 +161,8 @@ namespace Trident {
 
 				SET_DEBUG_NAME(indexBufferDescriptor, "Index buffer");
 
-				vertexBuffer = createBuffer2<Vertex>(vertexBufferDescriptor);
-				indexBuffer = createBuffer2<uint16>(indexBufferDescriptor);
+				vertexBuffer = createBuffer<Vertex>(vertexBufferDescriptor);
+				indexBuffer = createBuffer<uint16>(indexBufferDescriptor);
 
 				BufferCopyRegion vertexBufferCopyRegion{};
 				vertexBufferCopyRegion.sourceOffset = 0;
@@ -227,7 +227,7 @@ namespace Trident {
 			ref<RenderPass> renderPass;
 			sequence<ref<Framebuffer>> framebuffers;
 			ref<GraphicsPipeline> graphicsPipeline;
-			ref<Buffer2<Vertex>> vertexBuffer;
-			ref<Buffer2<uint16>> indexBuffer;
+			ref<Buffer<Vertex>> vertexBuffer;
+			ref<Buffer<uint16>> indexBuffer;
 	};
 }

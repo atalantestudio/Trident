@@ -101,7 +101,7 @@ namespace Trident {
 				const sequence<uint8> buffer = Filesystem::openByteBuffer(IMAGE_PATH);
 				const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(buffer);
 
-				const ref<Buffer2<uint8>> imageStagingBuffer = createStagingBuffer2<uint8>(file.data.count());
+				const ref<Buffer<uint8>> imageStagingBuffer = createStagingBuffer<uint8>(file.data.count());
 
 				uint8* imageStagingBufferMappedRange = imageStagingBuffer->map(0, imageStagingBuffer->getSize());
 

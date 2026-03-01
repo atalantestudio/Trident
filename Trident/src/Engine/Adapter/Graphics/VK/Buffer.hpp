@@ -7,9 +7,9 @@
 #include "Engine/API/Rendering/Buffer.hpp"
 
 namespace Trident {
-	class VK::Buffer final : public Trident::Buffer {
+	class VK::BaseBuffer final : public Trident::BaseBuffer {
 		public:
-			explicit Buffer(const Trident::Device* device, const BufferDescriptor& descriptor);
+			explicit BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor);
 
 		public:
 			VkBuffer buffer;
@@ -17,12 +17,12 @@ namespace Trident {
 	};
 
 	namespace VK {
-		ref<Trident::Buffer> createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, UINT stride);
+		ref<Trident::BaseBuffer> createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, UINT stride);
 
-		void destroyBuffer(const Trident::Device* device, const Trident::Buffer* buffer);
+		void destroyBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer);
 
-		void* mapBuffer(const Trident::Device* device, const Trident::Buffer* buffer, uint64 offset, uint64 size);
+		void* mapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer, uint64 offset, uint64 size);
 
-		void unmapBuffer(const Trident::Device* device, const Trident::Buffer* buffer);
+		void unmapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer);
 	}
 }
