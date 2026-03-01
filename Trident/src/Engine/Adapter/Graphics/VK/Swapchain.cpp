@@ -53,9 +53,18 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		const VK::PhysicalDevice* physicalDevice = static_cast<const VK::PhysicalDevice*>(device->physicalDevice);
 		VK::Swapchain* _swapchain = static_cast<VK::Swapchain*>(swapchain);
 		const ref<VK::Surface> surface = std::static_pointer_cast<VK::Surface>(descriptor.surface);
+		const VK::Instance* instance = static_cast<const VK::Instance*>(surface->instance);
 		VkResult result;
+
+		// Query surface capabilities.
+		{
+			result = instance->vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice->physicalDevice, surface->surface, &surface->capabilities);
+
+			ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to get surface capabilities ([]).", string_VkResult(result));
+		}
 
 		_swapchain->imageCount = surface->capabilities.minImageCount + 1;
 
@@ -122,8 +131,8 @@ namespace Trident {
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to get swapchain images ([]).", string_VkResult(result));
 
-		swapchain->images = sequence<ref<Trident::Image>>(_swapchain->imageCount);
-		swapchain->imageViews = sequence<ref<Trident::ImageView>>(_swapchain->imageCount);
+		_swapchain->images = sequence<ref<Trident::Image>>(_swapchain->imageCount);
+		_swapchain->imageViews = sequence<ref<Trident::ImageView>>(_swapchain->imageCount);
 
 		uint32 imageIndex = 0;
 
@@ -133,6 +142,6 @@ namespace Trident {
 			imageIndex += 1;
 		}
 
-		swapchain->createImageViews();
+		_swapchain->createImageViews();
 	}
 }

@@ -28,8 +28,6 @@ namespace Trident {
 				}
 			}
 
-			ADAPTER_WARNING("Failed to find MAILBOX present mode. Reverting to FIFO.");
-
 			return VK_PRESENT_MODE_FIFO_KHR;
 		}
 
@@ -38,8 +36,6 @@ namespace Trident {
 				return presentMode;
 			}
 		}
-
-		ADAPTER_WARNING("Failed to find a matching IMMEDIATE present mode. Reverting to FIFO.");
 
 		return VK_PRESENT_MODE_FIFO_KHR;
 	}
@@ -80,13 +76,6 @@ namespace Trident {
 
 			ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to get physical device surface support ([]).", string_VkResult(result));
 			ADAPTER_ASSERT(supported == VK_TRUE, "The graphics queue family does not support this surface.");
-		}
-
-		// Query capabilities.
-		{
-			result = _instance->vkGetPhysicalDeviceSurfaceCapabilitiesKHR(_physicalDevice->physicalDevice, surface->surface, &surface->capabilities);
-
-			ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to get surface capabilities ([]).", string_VkResult(result));
 		}
 
 		// Select format.

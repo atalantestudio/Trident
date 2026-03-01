@@ -19,9 +19,7 @@ namespace Trident {
 			explicit Surface(const Instance* instance);
 
 		public:
-			ImageFormat format;
-
-		protected:
 			const Instance* instance;
+			ImageFormat format;
 	};
 }
