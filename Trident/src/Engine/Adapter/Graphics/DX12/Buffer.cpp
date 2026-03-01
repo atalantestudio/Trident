@@ -27,7 +27,7 @@ namespace Trident {
 		buffer->stride = stride;
 
 		D3D12_HEAP_PROPERTIES heapProperties{};
-		heapProperties.Type = getHeapType(descriptor.memoryProperties);
+		heapProperties.Type = getHeapType(descriptor.usage, descriptor.memoryProperties);
 		heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
 		heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
 		heapProperties.CreationNodeMask = 1;
