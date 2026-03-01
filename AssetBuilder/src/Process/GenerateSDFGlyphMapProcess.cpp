@@ -107,10 +107,10 @@ namespace Trident {
 
 		ref<CommandEncoder> commandEncoder;
 
-		const ref<Buffer> fontStagingBuffer = Renderer::createStagingBuffer(sizeof(FontStorage));
+		const ref<Buffer2<FontStorage>> fontStagingBuffer = Renderer::createStagingBuffer2<FontStorage>(sizeof(FontStorage));
 		const TrueTypeFont::FWord lineHeight = file.ascent - file.descent + file.lineGap;
 
-		FontStorage* fontStagingBufferMappedRange = static_cast<FontStorage*>(fontStagingBuffer->map(0, fontStagingBuffer->getSize()));
+		FontStorage* fontStagingBufferMappedRange = fontStagingBuffer->map(0, fontStagingBuffer->getSize());
 		fontStagingBufferMappedRange->spreadFactor = spreadFactor;
 		fontStagingBufferMappedRange->outputGlyphSize = GLYPH_SUBIMAGE_DIMENSION;
 		fontStagingBufferMappedRange->lineHeight = static_cast<sint32>(lineHeight);
@@ -291,7 +291,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(fontBufferDescriptor, "Font");
 
-		fontBuffer = Renderer::createBuffer(fontBufferDescriptor);
+		fontBuffer = Renderer::createBuffer2<FontStorage>(fontBufferDescriptor);
 	}
 
 	void GenerateSDFGlyphMapProcess::createGlyphBuffer(uint64 size) {

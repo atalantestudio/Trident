@@ -66,13 +66,6 @@ namespace Trident {
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		const VK::PipelineLayout* _pipelineLayout = static_cast<const VK::PipelineLayout*>(pipelineLayout);
 
-		// TODO: Only if the pool has been created with the VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT flag.
-		/* VkResult result;
-
-		result = vkFreeDescriptorSets(_device->device, descriptorPool, static_cast<uint32>(descriptorSets.count()), &descriptorSets[0]);
-
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to free descriptor sets ([]).", string_VkResult(result)); */
-
 		_device->vkDestroyPipelineLayout(_device->device, _pipelineLayout->pipelineLayout, nullptr);
 	}
 }

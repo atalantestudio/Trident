@@ -243,7 +243,6 @@ namespace Trident {
 		queueFamilyIndices.erase(std::unique(queueFamilyIndices.begin(), queueFamilyIndices.end()), queueFamilyIndices.end());
 
 		sequence<VkDeviceQueueCreateInfo> deviceQueueCreateInfos(queueFamilyIndices.size());
-
 		uint32 queueFamilyIndexIndex = 0;
 
 		while (queueFamilyIndexIndex < queueFamilyIndices.size()) {
@@ -295,6 +294,11 @@ namespace Trident {
 		for (const ref<Trident::Queue> queue : _device->queues) {
 			queue.~shared_ptr();
 		}
+
+		// TODO: Only if the pool has been created with the VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT flag.
+		/* result = vkFreeDescriptorSets(_device->device, descriptorPool, static_cast<uint32>(descriptorSets.count()), &descriptorSets[0]);
+
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to free descriptor sets ([]).", string_VkResult(result)); */
 
 		for (const VkDescriptorPool descriptorPool : _device->descriptorPools) {
 			_device->vkDestroyDescriptorPool(_device->device, descriptorPool, nullptr);

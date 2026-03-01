@@ -95,10 +95,10 @@ namespace Trident {
 			void createClusterBuffer();
 			void createInstanceBuffer();
 			void createGeometryBuffer();
-			ref<Buffer> createMaterialCountBuffer() const;
-			ref<Buffer> createMaterialOffsetBuffer() const;
-			ref<Buffer> createMaterialIndirectBuffer() const;
-			ref<Buffer> createMaterialCoordinateBuffer() const;
+			ref<Buffer2<uint32>> createMaterialCountBuffer() const;
+			ref<Buffer2<uint32>> createMaterialOffsetBuffer() const;
+			ref<Buffer2<DispatchIndirectCommand>> createMaterialIndirectBuffer() const;
+			ref<Buffer2<uint32>> createMaterialCoordinateBuffer() const;
 
 			ref<Image> createVisibilityImage() const;
 			ref<Image> createOutputImage() const;
@@ -175,28 +175,28 @@ namespace Trident {
 
 			ref<Buffer2<DrawIndirectCommand>> visibilityIndirectBuffer;
 			ref<Buffer2<Camera>> cameraBuffer;
-			ref<Buffer> vertexPositionComponentBuffer;
-			ref<Buffer> vertexNormalComponentBuffer;
-			ref<Buffer> vertexTextureCoordinateComponentBuffer;
-			ref<Buffer> vertexPositionIndexBuffer;
-			ref<Buffer> vertexNormalIndexBuffer;
-			ref<Buffer> vertexTextureCoordinateIndexBuffer;
-			ref<Buffer> clusterBuffer;
+			ref<Buffer2<float32>> vertexPositionComponentBuffer;
+			ref<Buffer2<float32>> vertexNormalComponentBuffer;
+			ref<Buffer2<float32>> vertexTextureCoordinateComponentBuffer;
+			ref<Buffer2<uint32>> vertexPositionIndexBuffer;
+			ref<Buffer2<uint32>> vertexNormalIndexBuffer;
+			ref<Buffer2<uint32>> vertexTextureCoordinateIndexBuffer;
+			ref<Buffer2<Cluster>> clusterBuffer;
 			ref<Buffer2<ClusteredInstance>> instanceBuffer;
-			ref<Buffer> geometryBuffer;
+			ref<Buffer2<Geometry>> geometryBuffer;
 
 			// Number of pixels used per material.
-			ref<Buffer> materialCountBuffer;
+			ref<Buffer2<uint32>> materialCountBuffer;
 
 			// Offset of the first pixel used per material.
-			ref<Buffer> materialOffsetBuffer;
+			ref<Buffer2<uint32>> materialOffsetBuffer;
 
 			// Indirect arguments for material pipelines.
-			ref<Buffer> materialIndirectBuffer;
+			ref<Buffer2<DispatchIndirectCommand>> materialIndirectBuffer;
 
 			// Screen pixels sorted by material index.
 			// TODO: Use 1D image instead.
-			ref<Buffer> materialCoordinateBuffer;
+			ref<Buffer2<uint32>> materialCoordinateBuffer;
 
 			ref<Image> visibilityImage;
 			sequence<sequence<ref<Image>>> materialImages;

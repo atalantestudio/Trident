@@ -6,7 +6,7 @@
 #include "Engine/Renderer/Visibility/Renderer.hpp"
 
 namespace Trident {
-	ref<Buffer> VisibilityRenderer::createMaterialOffsetBuffer() const {
+	ref<Buffer2<uint32>> VisibilityRenderer::createMaterialOffsetBuffer() const {
 		BufferDescriptor materialOffsetBufferDescriptor{};
 		materialOffsetBufferDescriptor.size = sizeof(uint32) * scene->materials.count();
 		materialOffsetBufferDescriptor.usage = BufferUsage::READ_WRITE_STORAGE;
@@ -15,6 +15,6 @@ namespace Trident {
 
 		SET_DEBUG_NAME(materialOffsetBufferDescriptor, "Material offset");
 
-		return createBuffer(materialOffsetBufferDescriptor);
+		return createBuffer2<uint32>(materialOffsetBufferDescriptor);
 	}
 }
