@@ -107,6 +107,7 @@ namespace Trident {
 
 				const AcquireNextImageStatus acquireNextImageStatus = device->acquireNextImage(swapchain, acquiredNextImageSemaphore, swapchainImageIndex);
 
+				// TODO: Trigger a resize if AcquireNextImageStatus is SUBOPTIMAL or ERROR_OUT_OF_DATE.
 				ENGINE_ASSERT(acquireNextImageStatus == AcquireNextImageStatus::SUBOPTIMAL || acquireNextImageStatus == AcquireNextImageStatus::SUCCESS, "Failed to acquire the next swapchain image.");
 
 				commandEncoder->reset();
