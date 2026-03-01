@@ -23,8 +23,6 @@
 	}
 #endif
 
-#include "Engine/Adapter/Graphics/VK/procedures.hpp"
-
 namespace Trident::VK {
 	struct MemoryAllocation;
 	struct MemorySuballocation;
