@@ -10,9 +10,8 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	GL::Queue::Queue(const GL::Instance& instance, const GL::Device& device) :
-		instance(instance),
-		device(device)
+	GL::Queue::Queue(const Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability) :
+		Trident::Queue(device, queueFamilyIndex, queueFamilyCapability)
 	{}
 
 	ref<CommandEncoder> GL::Queue::createCommandEncoder(const CommandBufferDescriptor& descriptor) const {
@@ -50,9 +49,17 @@ namespace Trident {
 	PresentStatus GL::Queue::present(view<ref<Trident::Swapchain>> swapchains, view<uint32> presentableImageIndices, ref<Semaphore> waitSemaphore) const {
 		ADAPTER_ASSERT(swapchains.count() == presentableImageIndices.count(), "There must be 1 presentable image index per swapchain.");
 
-		instance.swapBuffers();
+		#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
+			BOOL result;
 
-		return PresentStatus::SUCCESS;
+			result = SwapBuffers(hDC);
+
+			WIN32_ASSERT(result == TRUE);
+
+			return PresentStatus::SUCCESS;
+		#else
+			return PresentStatus::ERROR_UNHANDLED;
+		#endif
 	}
 
 	void GL::Queue::waitIdle() const {

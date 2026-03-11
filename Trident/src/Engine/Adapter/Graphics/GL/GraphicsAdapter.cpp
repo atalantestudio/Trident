@@ -16,16 +16,102 @@
 #include "Engine/Adapter/Graphics/GL/Swapchain.hpp"
 
 namespace Trident {
-	GL::GraphicsAdapter::GraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window, const ApplicationProperties& properties) :
+	void bindAdapter(Trident::GraphicsAdapter* adapter) {
+		adapter->logger = ConsoleLogger(std::cout, LogLevel::ALL, "OPENGL");
+
+		adapter->acquireNextImageImplementation = GL::acquireNextImage;
+		adapter->allocateDescriptorSetsImplementation = GL::allocateDescriptorSets;
+		adapter->beginImplementation = GL::begin;
+		adapter->beginRenderPassImplementation = GL::beginRenderPass;
+		adapter->bindComputePipelineImplementation = GL::bindComputePipeline;
+		adapter->bindDescriptorSetsImplementation = GL::bindDescriptorSets;
+		adapter->bindGraphicsPipelineImplementation = GL::bindGraphicsPipeline;
+		adapter->bindIndexBufferImplementation = GL::bindIndexBuffer;
+		adapter->bindVertexBufferImplementation = GL::bindVertexBuffer;
+		adapter->copyBufferToBufferImplementation = GL::copyBufferToBuffer;
+		adapter->copyBufferToImageImplementation = GL::copyBufferToImage;
+		adapter->copyImageToBufferImplementation = GL::copyImageToBuffer;
+		adapter->createBufferImplementation = GL::createBuffer;
+		adapter->createCommandEncoderImplementation = GL::createCommandEncoder;
+		adapter->createCommandPoolImplementation = GL::createCommandPool;
+		adapter->createComputePipelineImplementation = GL::createComputePipeline;
+		adapter->createDescriptorSetLayoutImplementation = GL::createDescriptorSetLayout;
+		adapter->createDeviceImplementation = GL::createDevice;
+		adapter->createFenceImplementation = GL::createFence;
+		adapter->createFramebufferImplementation = GL::createFramebuffer;
+		adapter->createGraphicsPipelineImplementation = GL::createGraphicsPipeline;
+		adapter->createImageImplementation = GL::createImage;
+		adapter->createImageViewImplementation = GL::createImageView;
+		adapter->createInstanceImplementation = GL::createInstance;
+		adapter->createMemoryAllocatorImplementation = GL::createMemoryAllocator;
+		adapter->createPipelineLayoutImplementation = GL::createPipelineLayout;
+		adapter->createRenderPassImplementation = GL::createRenderPass;
+		adapter->createSamplerImplementation = GL::createSampler;
+		adapter->createSemaphoreImplementation = GL::createSemaphore;
+		adapter->createShaderModuleFromAssetImplementation = GL::createShaderModule;
+		adapter->createShaderModuleFromCodeImplementation = GL::createShaderModule;
+		adapter->createSurfaceImplementation = GL::createSurface;
+		adapter->createSwapchainImplementation = GL::createSwapchain;
+		adapter->destroyBufferImplementation = GL::destroyBuffer;
+		adapter->destroyCommandEncoderImplementation = GL::destroyCommandEncoder;
+		adapter->destroyCommandPoolImplementation = GL::destroyCommandPool;
+		adapter->destroyComputePipelineImplementation = GL::destroyComputePipeline;
+		adapter->destroyDescriptorSetLayoutImplementation = GL::destroyDescriptorSetLayout;
+		adapter->destroyDeviceImplementation = GL::destroyDevice;
+		adapter->destroyFenceImplementation = GL::destroyFence;
+		adapter->destroyFramebufferImplementation = GL::destroyFramebuffer;
+		adapter->destroyGraphicsPipelineImplementation = GL::destroyGraphicsPipeline;
+		adapter->destroyPipelineLayoutImplementation = GL::destroyPipelineLayout;
+		adapter->destroyImageImplementation = GL::destroyImage;
+		adapter->destroyImageViewImplementation = GL::destroyImageView;
+		adapter->destroyInstanceImplementation = GL::destroyInstance;
+		adapter->destroyQueueImplementation = GL::destroyQueue;
+		adapter->destroyRenderPassImplementation = GL::destroyRenderPass;
+		adapter->destroySamplerImplementation = GL::destroySampler;
+		adapter->destroySemaphoreImplementation = GL::destroySemaphore;
+		adapter->destroyShaderModuleImplementation = GL::destroyShaderModule;
+		adapter->destroySurfaceImplementation = GL::destroySurface;
+		adapter->destroySwapchainImplementation = GL::destroySwapchain;
+		adapter->dispatchImplementation = GL::dispatch;
+		adapter->dispatchIndirectImplementation = GL::dispatchIndirect;
+		adapter->drawImplementation = GL::draw;
+		adapter->drawIndirectImplementation = GL::drawIndirect;
+		adapter->drawIndexedImplementation = GL::drawIndexed;
+		adapter->drawIndexedIndirectImplementation = GL::drawIndexedIndirect;
+		adapter->endImplementation = GL::end;
+		adapter->endRenderPassImplementation = GL::endRenderPass;
+		adapter->getQueueImplementation = GL::getQueue;
+		adapter->insertBufferMemoryBarriersImplementation = GL::insertBufferMemoryBarriers;
+		adapter->mapBufferImplementation = GL::mapBuffer;
+		adapter->nextSubpassImplementation = GL::nextSubpass;
+		adapter->presentImplementation = GL::present;
+		adapter->resetImplementation = GL::reset;
+		adapter->resetFenceImplementation = GL::resetFence;
+		adapter->selectPhysicalDeviceImplementation = GL::selectPhysicalDevice;
+		adapter->setImageMemoryBarrierImplementation = GL::setImageMemoryBarrier;
+		adapter->setLineWidthImplementation = GL::setLineWidth;
+		adapter->setScissorImplementation = GL::setScissor;
+		adapter->setViewportImplementation = GL::setViewport;
+		adapter->submitImplementation = GL::submit;
+		adapter->submit2Implementation = GL::submit;
+		adapter->unmapBufferImplementation = GL::unmapBuffer;
+		adapter->updateDescriptorSetsImplementation = GL::updateDescriptorSets;
+		adapter->updateSwapchainImplementation = GL::recreateSwapchain;
+		adapter->waitForFenceImplementation = GL::waitForFence;
+		adapter->waitIdleDeviceImplementation = GL::waitIdle;
+		adapter->waitIdleQueueImplementation = GL::waitIdle;
+	}
+
+	/* GL::GraphicsAdapter::GraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window, const ApplicationProperties& properties) :
 		Trident::GraphicsAdapter(window)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		logger = ConsoleLogger(std::cout, LogLevel::ALL, "OPENGL");
-
-		if (properties.PreferIntegratedGPU) {
-			logger.warning("GPU selection can only be done at compile-time. Please enable the GL_PREFER_INTEGRATED_GPU macro instead.");
-		}
+		#if defined(BUILD_MODE_DEBUG)
+			if (properties.PreferIntegratedGPU) {
+				logger.warning("GPU selection can only be done at compile-time. Please enable the GL_PREFER_INTEGRATED_GPU macro instead.");
+			}
+		#endif
 
 		instance = createRef<GL::Instance>(window);
 		surface = createRef<GL::Surface>();
@@ -410,5 +496,5 @@ namespace Trident {
 		#endif
 
 		#undef LOAD_PROCEDURE
-	}
+	} */
 }

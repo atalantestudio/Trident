@@ -11,7 +11,9 @@
 #include "Engine/Application/ApplicationProperties.hpp"
 
 namespace Trident {
-	class GL::GraphicsAdapter final : public Trident::GraphicsAdapter {
+	void bindAdapter(Trident::GraphicsAdapter* adapter);
+
+	/* class GL::GraphicsAdapter final : public Trident::GraphicsAdapter {
 		public:
 			static constexpr GLenum defaultFramebufferDrawBuffer = GL_FRONT_LEFT;
 
@@ -60,5 +62,5 @@ namespace Trident {
 			ref<GL::Instance> instance;
 			ref<GL::Device> device;
 			ref<GL::Surface> surface;
-	};
+	}; */
 }

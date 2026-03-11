@@ -8,6 +8,12 @@
 namespace Trident {
 	class GL::Surface final : public Trident::Surface {
 		public:
-			ImageFormat getFormat() const final override;
+			explicit Surface(const Trident::Instance* instance);
 	};
+
+	namespace GL {
+		ref<Trident::Surface> createSurface(const Trident::Instance* instance, ref<Trident::PhysicalDevice> physicalDevice, const Window* window);
+
+		void destroySurface(const Trident::Instance* instance, const Trident::Surface* surface);
+	}
 }

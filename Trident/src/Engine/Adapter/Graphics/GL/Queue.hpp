@@ -10,7 +10,7 @@
 namespace Trident {
 	class GL::Queue final : public Trident::Queue {
 		public:
-			explicit Queue(const GL::Instance& instance, const GL::Device& device);
+			explicit Queue(const Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability);
 
 			ref<Trident::CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const final override;
 
@@ -20,9 +20,5 @@ namespace Trident {
 			PresentStatus present(view<ref<Trident::Swapchain>> swapchains, view<uint32> presentableImageIndices, ref<Semaphore> waitSemaphore) const final override;
 
 			void waitIdle() const final override;
-
-		private:
-			const GL::Instance& instance;
-			const GL::Device& device;
 	};
 }

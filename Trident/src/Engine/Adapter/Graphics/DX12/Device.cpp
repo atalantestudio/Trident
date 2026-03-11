@@ -101,7 +101,7 @@ namespace Trident {
 		ref<DX12::Device> device = createRef<DX12::Device>(adapter, physicalDevice);
 		HRESULT result = -1;
 
-		#ifndef PREFER_SOFTWARE_ADAPTER
+		#if !defined(PREFER_SOFTWARE_ADAPTER)
 			{
 				PROFILE_SCOPE("D3D12CreateDevice");
 
@@ -110,7 +110,7 @@ namespace Trident {
 		#endif
 
 		if (FAILED(result)) {
-			#ifndef PREFER_SOFTWARE_ADAPTER
+			#if !defined(PREFER_SOFTWARE_ADAPTER)
 				ADAPTER_WARNING("Failed to create device using the primary display adapter. Falling back to a WARP adapter.");
 			#endif
 

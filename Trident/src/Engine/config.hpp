@@ -6,10 +6,6 @@
 #include "Engine/config_defines.hpp"
 
 namespace Trident {
-	// TODO: Implement setting.
-	// Prioritize selection of CPU graphics adapters.
-	// #define PREFER_SOFTWARE_ADAPTER
-
 	#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
 		// Toggle DirectX 12 graphics adapter.
 		#define ENABLE_DX12_ADAPTER
@@ -17,11 +13,13 @@ namespace Trident {
 		// If enabled, DX12 shaders will be sourced from SPIR-V binaries.
 		// If disabled, they will be sourced from HLSL strings.
 		#define DX12_SOURCE_FROM_SPIRV
+
+		// Prioritize CPU graphics adapters.
+		// #define DX12_PREFER_SOFTWARE_ADAPTER
 	#endif
 
 	// Toggle OpenGL graphics adapter.
-	// TODO: Restore.
-	// #define ENABLE_GL_ADAPTER
+	#define ENABLE_GL_ADAPTER
 
 	// Whether to prioritize integrated GPUs over discrete GPUs when using the OpenGL graphics adapter.
 	// 
@@ -50,10 +48,10 @@ namespace Trident {
 	// If enabled, OpenGL objects are cleanly unbound from their target after being used.
 	#define OPENGL_UNBIND_AFTER_USE
 
-	// Desired OpenGL version. Note that the runtime device might not have this version.
+	// Desired OpenGL version. Runtime support is not guaranteed.
 	#define OPENGL_VERSION OPENGL_VERSION_4_6
 
-	// Desired Vulkan version. Note that the runtime device might not have this version.
+	// Desired Vulkan version. Runtime support is not guaranteed.
 	#define VULKAN_VERSION VULKAN_VERSION_1_0
 
 	#if defined(BUILD_MODE_DEBUG)

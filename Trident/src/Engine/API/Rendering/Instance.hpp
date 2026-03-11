@@ -31,7 +31,7 @@ namespace Trident {
 			{}
 
 		public:
-			// TODO: This should be a protected member but selectPhysicalDevice implementation needs to access it.
+			// TODO: This should be a protected member.
 			const GraphicsAdapter* adapter;
 	};
 }

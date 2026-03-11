@@ -15,9 +15,9 @@
 	#include <GL/wglext.h>
 #endif
 
-#ifndef GL_SOURCE_FROM_SPIRV
+#if !defined(GL_SOURCE_FROM_SPIRV)
 	// TODO: Remove when TSL is ready.
-	// NOTE: <regex> is used for custom entrypoints within a GLSL shader.
+	// Used for custom entrypoints within a GLSL shader.
 	#include <regex>
 #endif
 
@@ -67,9 +67,4 @@ namespace Trident::GL {
 	class ShaderModule;
 	class Surface;
 	class Swapchain;
-
-	void bindAdapter(GraphicsAdapter* adapter) {
-		// TODO
-		BREAKPOINT();
-	}
 }

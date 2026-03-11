@@ -7,31 +7,31 @@
 #include "Engine/API/Window/Window.hpp"
 
 namespace Trident {
-	typedef WINGDIAPI HGLRC (WINAPI *PFNWGLCREATECONTEXTPROC)(HDC);
-	typedef WINGDIAPI BOOL (WINAPI *PFNWGLDELETECONTEXTPROC)(HGLRC);
-	typedef WINGDIAPI PROC (WINAPI *PFNWGLGETPROCADDRESSPROC)(LPCSTR);
-	typedef WINGDIAPI BOOL (WINAPI *PFNWGLMAKECURRENTPROC)(HDC, HGLRC);
+	typedef HGLRC (*PFNWGLCREATECONTEXTPROC)(HDC);
+	typedef BOOL (*PFNWGLDELETECONTEXTPROC)(HGLRC);
+	typedef PROC (*PFNWGLGETPROCADDRESSPROC)(LPCSTR);
+	typedef BOOL (*PFNWGLMAKECURRENTPROC)(HDC, HGLRC);
 
 	class GL::Instance final : public Trident::Instance {
 		private:
 			static void* getWglProcedure(view<char8> procedureName);
 
 		public:
-			explicit Instance(const Window& window);
-
-			~Instance() final override;
+			explicit Instance(const Trident::GraphicsAdapter* adapter);
 
 			void* getProcedure(view<char8> procedureName) const;
 
-			void setSwapInterval(sint32 interval) const;
-
-			void swapBuffers() const;
-
-		private:
-			HDC hDC;
-			HGLRC hGLRC;
+		public:
+			HDC deviceContext;
+			HGLRC glRenderingContext;
 			PFNWGLMAKECURRENTPROC wglMakeCurrent;
 			PFNWGLDELETECONTEXTPROC wglDeleteContext;
 			PFNWGLGETPROCADDRESSPROC wglGetProcAddress;
 	};
+
+	namespace GL {
+		ref<Trident::Instance> createInstance(const Trident::GraphicsAdapter* adapter, const InstanceDescriptor& descriptor);
+
+		void destroyInstance(const Trident::Instance* instance);
+	}
 }

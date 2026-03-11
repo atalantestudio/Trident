@@ -6,7 +6,7 @@
 #include "Engine/config.hpp"
 
 extern "C" {
-	#ifndef GL_PREFER_INTEGRATED_GPU
+	#if !defined(GL_PREFER_INTEGRATED_GPU)
 		// See https://gpuopen.com/learn/amdpowerxpressrequesthighperformance.
 		__declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 1;
 
