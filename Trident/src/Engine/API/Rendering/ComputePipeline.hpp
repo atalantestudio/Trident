@@ -4,16 +4,17 @@
 #pragma once
 
 #include "Engine/API/Rendering/Descriptor/ComputePipelineDescriptor.hpp"
-#include "Engine/Validation/Descriptor.hpp"
+#include "Engine/API/Rendering/Device.hpp"
 
 namespace Trident {
 	class ComputePipeline {
 		public:
-			virtual ~ComputePipeline() = default;
+			~ComputePipeline();
 
 		protected:
-			explicit ComputePipeline(const ComputePipelineDescriptor& descriptor) {
-				DEBUG_DESCRIPTOR_GUARD(descriptor);
-			}
+			explicit ComputePipeline(const Device* device);
+
+		public:
+			const Device* device;
 	};
 }

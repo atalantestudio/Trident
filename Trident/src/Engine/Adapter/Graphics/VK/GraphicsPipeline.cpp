@@ -7,35 +7,39 @@
 #include "Engine/Adapter/Graphics/VK/CullMode.hpp"
 #include "Engine/Adapter/Graphics/VK/DynamicState.hpp"
 #include "Engine/Adapter/Graphics/VK/FrontFace.hpp"
+#include "Engine/Adapter/Graphics/VK/GraphicsPipeline.hpp"
 #include "Engine/Adapter/Graphics/VK/InputRate.hpp"
 #include "Engine/Adapter/Graphics/VK/PipelineLayout.hpp"
 #include "Engine/Adapter/Graphics/VK/PolygonMode.hpp"
 #include "Engine/Adapter/Graphics/VK/PrimitiveTopology.hpp"
 #include "Engine/Adapter/Graphics/VK/RenderPass.hpp"
-#include "Engine/Adapter/Graphics/VK/RenderPipeline.hpp"
 #include "Engine/Adapter/Graphics/VK/ShaderModule.hpp"
 #include "Engine/Adapter/Graphics/VK/VertexInputAttributeType.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	VK::RenderPipeline::RenderPipeline(const RenderPipelineDescriptor& descriptor, const VK::Device& device) :
-		Trident::RenderPipeline(descriptor),
-		VK::Pipeline(VK_PIPELINE_BIND_POINT_GRAPHICS),
-		device(device)
-	{
+	VK::GraphicsPipeline::GraphicsPipeline(const Trident::Device* device) :
+		Trident::GraphicsPipeline(device)
+	{}
+
+	ref<Trident::GraphicsPipeline> VK::createGraphicsPipeline(const Trident::Device* device, const GraphicsPipelineDescriptor& descriptor) {
+		static constexpr VkSampleMask SAMPLE_MASK = max<VkSampleMask>();
+
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		static constexpr VkSampleMask sampleMask = max<VkSampleMask>();
-
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		const ref<Subpass> subpass = descriptor.renderPass->getSubpass(descriptor.subpassIndex);
 		const ref<VK::RenderPass> renderPass = std::static_pointer_cast<VK::RenderPass>(descriptor.renderPass);
+
+		ref<VK::GraphicsPipeline> graphicsPipeline = createRef<VK::GraphicsPipeline>(device);
 
 		VkResult result;
 		std::vector<VkVertexInputBindingDescription> vertexInputBindingDescriptions;
 		std::vector<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;
 		uint32 location = 0;
+		uint32 vertexInputBindingIndex = 0;;
 
-		for (uint32 vertexInputBindingIndex = 0; vertexInputBindingIndex < descriptor.vertexInputBindings.count(); vertexInputBindingIndex += 1) {
+		while (vertexInputBindingIndex < descriptor.vertexInputBindings.count()) {
 			const VertexInputBinding& vertexInputBinding = descriptor.vertexInputBindings[vertexInputBindingIndex];
 
 			VkVertexInputBindingDescription vertexInputBindingDescription{};
@@ -58,6 +62,7 @@ namespace Trident {
 			}
 
 			vertexInputBindingDescriptions.emplace_back(vertexInputBindingDescription);
+			vertexInputBindingIndex += 1;
 		}
 
 		VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo{};
@@ -79,15 +84,14 @@ namespace Trident {
 		VkViewport viewport{};
 		viewport.x = 0.0f;
 		viewport.y = 0.0f;
-		viewport.width = static_cast<float32>(renderPass->surface.window.getSize()[0]);
-		viewport.height = static_cast<float32>(renderPass->surface.window.getSize()[1]);
+		viewport.width = static_cast<float32>(renderPass->surfaceExtent.width);
+		viewport.height = static_cast<float32>(renderPass->surfaceExtent.height);
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 
 		VkRect2D scissor{};
 		scissor.offset = {0, 0};
-		scissor.extent.width = renderPass->surface.window.getSize()[0];
-		scissor.extent.height = renderPass->surface.window.getSize()[1];
+		scissor.extent = renderPass->surfaceExtent;
 
 		VkPipelineViewportStateCreateInfo viewportStateCreateInfo{};
 		viewportStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -128,7 +132,7 @@ namespace Trident {
 			multisampleStateCreateInfo.minSampleShading = descriptor.minSampleShading;
 		}
 
-		multisampleStateCreateInfo.pSampleMask = &sampleMask;
+		multisampleStateCreateInfo.pSampleMask = &SAMPLE_MASK;
 		multisampleStateCreateInfo.alphaToCoverageEnable = VK_FALSE;
 		multisampleStateCreateInfo.alphaToOneEnable = VK_FALSE;
 
@@ -240,7 +244,7 @@ namespace Trident {
 		graphicsPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 		graphicsPipelineCreateInfo.basePipelineIndex = -1;
 
-		result = vkCreateGraphicsPipelines(device.device, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &pipeline);
+		result = _device->vkCreateGraphicsPipelines(_device->device, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &graphicsPipeline->pipeline);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create graphics pipeline ([]).", string_VkResult(result));
 
@@ -250,19 +254,24 @@ namespace Trident {
 				debugUtilsObjectNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
 				debugUtilsObjectNameInfo.pNext = nullptr;
 				debugUtilsObjectNameInfo.objectType = VK_OBJECT_TYPE_PIPELINE;
-				debugUtilsObjectNameInfo.objectHandle = (uint64) pipeline;
+				debugUtilsObjectNameInfo.objectHandle = (uint64) graphicsPipeline->pipeline;
 				debugUtilsObjectNameInfo.pObjectName = &descriptor.name[0];
 
-				result = vkSetDebugUtilsObjectNameEXT(device.device, &debugUtilsObjectNameInfo);
+				result = _device->vkSetDebugUtilsObjectNameEXT(_device->device, &debugUtilsObjectNameInfo);
 
 				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to set object name ([]).", string_VkResult(result));
 			}
 		#endif
+
+		return graphicsPipeline;
 	}
 
-	VK::RenderPipeline::~RenderPipeline() {
+	void VK::destroyGraphicsPipeline(const Trident::Device* device, const Trident::GraphicsPipeline* graphicsPipeline) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		vkDestroyPipeline(device.device, pipeline, nullptr);
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		const VK::GraphicsPipeline* _graphicsPipeline = static_cast<const VK::GraphicsPipeline*>(graphicsPipeline);
+
+		_device->vkDestroyPipeline(_device->device, _graphicsPipeline->pipeline, nullptr);
 	}
 }

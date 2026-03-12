@@ -11,28 +11,19 @@
 namespace Trident {
 	class VK::Surface final : public Trident::Surface {
 		public:
-			explicit Surface(const Window& window, const VK::Instance& instance);
-
-			~Surface() final override;
-
-			void setPhysicalDevice(const VK::PhysicalDevice& physicalDevice);
-
-			virtual ImageFormat getFormat() const final override;
-
-			void checkPresentQueueFamilyIndex(uint32 graphicsQueueFamilyIndex);
-
-			VkSurfaceFormatKHR selectFormat() const;
-
-			VkPresentModeKHR selectPresentMode(bool vSync) const;
-
-			VkSurfaceCapabilitiesKHR getCapabilities() const;
+			explicit Surface(const Trident::Instance* instance);
 
 		public:
 			VkSurfaceKHR surface;
-			const Window& window;
-
-		private:
-			const VK::Instance& instance;
-			VkPhysicalDevice physicalDevice;
+			VkSurfaceCapabilitiesKHR capabilities;
+			VkSurfaceFormatKHR surfaceFormat;
+			VkPresentModeKHR immediatePresentMode;
+			VkPresentModeKHR synchronizedPresentMode;
 	};
+
+	namespace VK {
+		ref<Trident::Surface> createSurface(const Trident::Instance* instance, ref<Trident::PhysicalDevice> physicalDevice, const Window* window);
+
+		void destroySurface(const Trident::Instance* instance, const Trident::Surface* surface);
+	}
 }

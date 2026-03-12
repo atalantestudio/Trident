@@ -5,18 +5,20 @@
 
 namespace Trident {
 	enum class PipelineStage : uint8 {
-		ALL_COMMANDS = 0,
+		ALL_COMMANDS,
 
 		// From the Vulkan specification:
 		// VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT is equivalent to VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
 		// with VkAccessFlags set to 0 when specified in the second synchronization scope,
 		// but specifies no stage of execution when specified in the first scope.
 		// See https://registry.khronos.org/vulkan/specs/latest/man/html/VkPipelineStageFlagBits.html.
-		TOP = 1,
+		TOP,
 
-		TRANSFER = 2,
-		VERTEX_SHADER = 3,
-		FRAGMENT_SHADER = 4,
-		COMPUTE_SHADER = 5,
+		TRANSFER,
+		VERTEX_SHADER,
+		FRAGMENT_SHADER,
+		COMPUTE_SHADER,
+
+		count,
 	};
 }

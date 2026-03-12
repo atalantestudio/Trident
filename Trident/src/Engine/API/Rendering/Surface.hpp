@@ -4,12 +4,22 @@
 #pragma once
 
 #include "Engine/API/Rendering/ImageFormat.hpp"
+#include "Engine/API/Rendering/Instance.hpp"
 
 namespace Trident {
 	class Surface {
 		public:
-			virtual ~Surface() = default;
+			~Surface();
 
-			virtual ImageFormat getFormat() const = 0;
+			ImageFormat getFormat() const {
+				return format;
+			}
+
+		protected:
+			explicit Surface(const Instance* instance);
+
+		public:
+			const Instance* instance;
+			ImageFormat format;
 	};
 }

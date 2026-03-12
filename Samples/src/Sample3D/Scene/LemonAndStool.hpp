@@ -35,19 +35,19 @@ namespace Trident {
 
 		const uint32 testMaterialReferenceIndex = scene.registerMaterialReference(testMaterialReference);
 
-		InstanceDescriptor lemon1InstanceDescriptor{};
+		SceneInstanceDescriptor lemon1InstanceDescriptor{};
 		lemon1InstanceDescriptor.position = {-0.1_m, 0.0_m, 0.3_m};
 		lemon1InstanceDescriptor.rotation = {0.0_rad, 0.0_rad, 0.0_rad};
 		lemon1InstanceDescriptor.geometryIndex = lemonGeometryIndex;
 		lemon1InstanceDescriptor.materialReferenceIndex = testMaterialReferenceIndex;
 
-		InstanceDescriptor lemon2InstanceDescriptor{};
+		SceneInstanceDescriptor lemon2InstanceDescriptor{};
 		lemon2InstanceDescriptor.position = {0.0_m, 0.0_m, 0.3_m};
 		lemon2InstanceDescriptor.rotation = {0.0_rad, 0.0_rad, 0.0_rad};
 		lemon2InstanceDescriptor.geometryIndex = lemonGeometryIndex;
 		lemon2InstanceDescriptor.materialReferenceIndex = testMaterialReferenceIndex;
 
-		InstanceDescriptor stoolInstanceDescriptor{};
+		SceneInstanceDescriptor stoolInstanceDescriptor{};
 		stoolInstanceDescriptor.position = {0.5_m, -0.225_m, 1.0_m};
 		stoolInstanceDescriptor.rotation = {pi<float32>() * 0.5f, 0.3_rad, 0.0_rad};
 		stoolInstanceDescriptor.geometryIndex = stoolGeometryIndex;

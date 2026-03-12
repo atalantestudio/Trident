@@ -3,18 +3,21 @@
 
 #pragma once
 
-#include "Engine/Adapter/Graphics/DX12/Instance.hpp"
 #include "Engine/API/Rendering/PhysicalDevice.hpp"
 
 namespace Trident {
 	class DX12::PhysicalDevice final : public Trident::PhysicalDevice {
 		public:
-			explicit PhysicalDevice(const DX12::Instance& instance);
-
-		private:
-			void setLimits();
+			explicit PhysicalDevice(const Trident::GraphicsAdapter* adapter, IDXGIAdapter* dxgiAdapter, IDXGIFactory4* factory);
 
 		public:
 			IDXGIAdapter* adapter;
+
+			// Used when creating a swapchain from this physical device.
+			IDXGIFactory4* factory;
 	};
+
+	namespace DX12 {
+		ref<Trident::PhysicalDevice> selectPhysicalDevice(const Trident::Instance* instance, bool preferIntegratedGpu);
+	}
 }

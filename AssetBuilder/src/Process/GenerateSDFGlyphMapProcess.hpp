@@ -62,9 +62,9 @@ namespace Trident {
 			void updateDescriptorSets() const;
 
 		private:
-			ref<Buffer> fontBuffer;
-			ref<Buffer> glyphBuffer;
-			ref<Buffer> glyphOffsetBuffer;
+			ref<Buffer<FontStorage>> fontBuffer;
+			ref<Buffer<GlyphBuffer>> glyphBuffer;
+			ref<Buffer<uint32>> glyphOffsetBuffer;
 
 			ref<Image> glyphImage;
 			ref<Image> glyphMapImage;

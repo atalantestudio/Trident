@@ -6,7 +6,7 @@
 #include "Engine/Renderer/Visibility/Renderer.hpp"
 
 namespace Trident {
-	ref<Buffer> VisibilityRenderer::createMaterialCoordinateBuffer() const {
+	ref<Buffer<uint32>> VisibilityRenderer::createMaterialCoordinateBuffer() const {
 		const Extent2D swapchainExtent = getSwapchain()->getExtent();
 
 		BufferDescriptor materialCoordinateBufferDescriptor{};
@@ -17,6 +17,6 @@ namespace Trident {
 
 		SET_DEBUG_NAME(materialCoordinateBufferDescriptor, "Material coordinate");
 
-		return createBuffer(materialCoordinateBufferDescriptor);
+		return createBuffer<uint32>(materialCoordinateBufferDescriptor);
 	}
 }

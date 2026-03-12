@@ -4,26 +4,19 @@
 #pragma once
 
 #include "Engine/API/Rendering/Instance.hpp"
-#include "Engine/Application/ApplicationProperties.hpp"
 
 namespace Trident {
 	class DX12::Instance final : public Trident::Instance {
 		public:
-			explicit Instance(const ApplicationProperties& properties);
-
-			~Instance() final override;
-
-			IDXGIAdapter* selectAdapter() const;
-
-		private:
-			bool isIntegratedAdapter(const DXGI_ADAPTER_DESC& adapterDescriptor) const;
-
-			uint32 calculateAdapterScore(const DXGI_ADAPTER_DESC& adapterDescriptor) const;
+			explicit Instance(const Trident::GraphicsAdapter* adapter);
 
 		public:
 			IDXGIFactory4* factory;
-
-		private:
-			bool preferIntegratedGpu;
 	};
+
+	namespace DX12 {
+		ref<Trident::Instance> createInstance(const Trident::GraphicsAdapter* adapter, const InstanceDescriptor& descriptor);
+
+		void destroyInstance(const Trident::Instance* instance);
+	}
 }

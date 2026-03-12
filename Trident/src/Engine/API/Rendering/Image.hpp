@@ -3,82 +3,50 @@
 
 #pragma once
 
+#include "Engine/API/Graphics/Base.hpp"
 #include "Engine/API/Rendering/Descriptor/ImageDescriptor.hpp"
-#include "Engine/API/Rendering/ImageLayout.hpp"
-#include "Engine/Validation/Descriptor.hpp"
 
 namespace Trident {
-	class Image;
-	class ImageView;
-	struct ImageViewDescriptor;
-
-	// An image stored in GPU memory (as opposed to ImageAsset).
 	class Image {
 		public:
-			Image() {}
+			~Image();
 
-			virtual ~Image() = default;
+			/// Returns the type of the image.
+			ImageType getType() const;
 
-			ImageType getType() const {
-				return type;
-			}
+			/// Returns the format of the image.
+			ImageFormat getFormat() const;
 
-			ImageFormat getFormat() const {
-				return format;
-			}
+			/// Returns the 3-dimensional size of the image.
+			const Extent3D& getExtent() const;
 
-			const Extent3D& getExtent() const {
-				return extent;
-			}
+			/// Returns the number of mip levels in the image.
+			uint32 getMipLevelCount() const;
 
-			uint32 getMipLevelCount() const {
-				return mipLevelCount;
-			}
+			/// Returns the number of layers in the image.
+			uint32 getLayerCount() const;
 
-			uint32 getLayerCount() const {
-				return layerCount;
-			}
+			/// Returns the number of samples in the image.
+			uint8 getSampleCount() const;
 
-			uint8 getSampleCount() const {
-				return sampleCount + 1;
-			}
+			/// Returns the current layout of the image.
+			ImageLayout getLayout() const;
 
-			ImageLayout getLayout() const {
-				return layout;
-			}
-
-			void setLayout(ImageLayout layout) {
-				this->layout = layout;
-			}
-
-			ref<ImageView> createView(const ImageViewDescriptor& descriptor) {
-				return createViewInternal(descriptor, this);
-			}
+			ref<ImageView> createView(const ImageViewDescriptor& descriptor);
 
 		protected:
-			explicit Image(const ImageDescriptor& descriptor) :
-				type(descriptor.type),
-				format(descriptor.format),
-				extent(descriptor.extent),
-				mipLevelCount(descriptor.mipLevelCount),
-				layerCount(descriptor.layerCount),
-				sampleCount(descriptor.sampleCount - 1)
-			{
-				DEBUG_DESCRIPTOR_GUARD(descriptor);
-			}
+			explicit Image(const Device* device, const ImageDescriptor& descriptor);
 
-			virtual ref<ImageView> createViewInternal(const ImageViewDescriptor& descriptor, Image* image) = 0;
+		// TODO: Don't expose to the client side.
+		public:
+			const Device* device;
 
-		protected:
 			ImageType type;
 			ImageFormat format;
 			Extent3D extent;
 			uint32 mipLevelCount;
 			uint32 layerCount;
-
-			// NOTE: Compressed value.
-			uint8 sampleCount : 6;
-
-			ImageLayout layout = ImageLayout::UNDEFINED;
+			uint8 sampleCount;
+			ImageLayout layout;
 	};
 }

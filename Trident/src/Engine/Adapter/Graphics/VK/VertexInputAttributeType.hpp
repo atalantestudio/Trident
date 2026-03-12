@@ -7,7 +7,7 @@
 
 namespace Trident::VK {
 	inline VkFormat getFormat(VertexInputAttributeType vertexInputAttributeType) {
-		static constexpr VkFormat VERTEX_INPUT_ATTRIBUTE_TYPES[] = {
+		static constexpr VkFormat FORMATS[] = {
 			VK_FORMAT_R8_SINT,
 			VK_FORMAT_R8_UINT,
 			VK_FORMAT_R16_SINT,
@@ -26,6 +26,8 @@ namespace Trident::VK {
 			VK_FORMAT_R64G64B64A64_SFLOAT,
 		};
 
-		return VERTEX_INPUT_ATTRIBUTE_TYPES[static_cast<uint32>(vertexInputAttributeType)];
+		ADAPTER_ASSERT(vertexInputAttributeType < VertexInputAttributeType::count, "Invalid vertex input attribute type.");
+
+		return FORMATS[static_cast<uint32>(vertexInputAttributeType)];
 	}
 }

@@ -10,16 +10,45 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	GL::Queue::Queue(const GL::Instance& instance, const GL::Device& device) :
-		instance(instance),
-		device(device)
+	GL::Queue::Queue(const Trident::Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability) :
+		Trident::Queue(device, queueFamilyIndex, queueFamilyCapability)
 	{}
 
-	ref<CommandEncoder> GL::Queue::createCommandEncoder(const CommandBufferDescriptor& descriptor) const {
-		return createRef<GL::CommandEncoder>(descriptor, device);
+	ref<Trident::Queue> GL::createQueue(const Trident::Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		ref<GL::Queue> queue = createRef<GL::Queue>(device, queueFamilyIndex, queueFamilyCapability);
+
+		return queue;
 	}
 
-	void GL::Queue::submit(view<ref<Trident::CommandBuffer>> commandBuffers) const {
+	void GL::destroyQueue(const Trident::Queue* queue) {}
+
+	PresentStatus GL::present(const Trident::Queue* queue, view<ref<Trident::Swapchain>> swapchains, view<uint32> presentableImageIndices, ref<Trident::Semaphore> waitSemaphore) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		ADAPTER_ASSERT(swapchains.count() == presentableImageIndices.count(), "There must be 1 presentable image index per swapchain.");
+
+		#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
+			static const GL::PFNWGLGETCURRENTDCPROC wglGetCurrentDC = loadWglProcedure<GL::PFNWGLGETCURRENTDCPROC>("wglGetCurrentDC");
+
+			BOOL result;
+
+			static HDC deviceContext = wglGetCurrentDC();
+
+			WIN32_ASSERT(deviceContext != NULL);
+
+			result = SwapBuffers(deviceContext);
+
+			WIN32_ASSERT(result == TRUE);
+
+			return PresentStatus::SUCCESS;
+		#else
+			return PresentStatus::ERROR_UNHANDLED;
+		#endif
+	}
+
+	void GL::submit(const Trident::Queue* queue, view<ref<Trident::CommandBuffer>> commandBuffers) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		for (const ref<Trident::CommandBuffer> commandBuffer : commandBuffers) {
@@ -31,7 +60,7 @@ namespace Trident {
 		}
 	}
 
-	void GL::Queue::submit(view<ref<Trident::CommandBuffer>> commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<Trident::Fence> fence) const {
+	void GL::submit(const Trident::Queue* queue, view<ref<Trident::CommandBuffer>> commandBuffers, ref<Trident::Semaphore> waitSemaphore, ref<Trident::Semaphore> signalSemaphore, ref<Trident::Fence> fence) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		for (const ref<Trident::CommandBuffer> commandBuffer : commandBuffers) {
@@ -44,18 +73,12 @@ namespace Trident {
 
 		DEBUG_ASSERT(fence != nullptr);
 
-		device.waitForFence(fence);
+		queue->device->waitForFence(fence);
 	}
 
-	PresentStatus GL::Queue::present(view<ref<Trident::Swapchain>> swapchains, view<uint32> presentableImageIndices, ref<Semaphore> waitSemaphore) const {
-		ADAPTER_ASSERT(swapchains.count() == presentableImageIndices.count(), "There must be 1 presentable image index per swapchain.");
+	void GL::waitIdle(const Trident::Queue* queue) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		instance.swapBuffers();
-
-		return PresentStatus::SUCCESS;
-	}
-
-	void GL::Queue::waitIdle() const {
 		glFinish();
 	}
 }

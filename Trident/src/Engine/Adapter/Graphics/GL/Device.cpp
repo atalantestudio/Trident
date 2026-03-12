@@ -10,19 +10,21 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	GL::Device::Device(const GL::Instance& instance) :
-		physicalDevice(createRef<GL::PhysicalDevice>()),
-		queue(createRef<GL::Queue>(instance, *this))
+	GL::Device::Device(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice) :
+		Trident::Device(adapter, physicalDevice)
 	{}
 
-	AcquireNextImageStatus GL::Device::acquireNextImage(ref<Trident::Swapchain> swapchain, ref<Semaphore> semaphore, uint32& imageIndex) const {
-		// The buffering is handled by WGL.
+	AcquireNextImageStatus GL::acquireNextImage(const Trident::Device* device, const Trident::Swapchain* swapchain, const Trident::Semaphore* semaphore, uint32& imageIndex) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
 		imageIndex = 0;
 
 		return AcquireNextImageStatus::SUCCESS;
 	}
 
-	sequence<ref<Trident::DescriptorSet>> GL::Device::allocateDescriptorSets(view<ref<DescriptorSetLayout>> descriptorSetLayouts) {
+	sequence<ref<Trident::DescriptorSet>> GL::allocateDescriptorSets(Trident::Device* device, view<ref<Trident::DescriptorSetLayout>> descriptorSetLayouts) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
 		sequence<ref<Trident::DescriptorSet>> descriptorSets(descriptorSetLayouts.count());
 
 		for (uint32 descriptorSetIndex = 0; descriptorSetIndex < descriptorSets.count(); descriptorSetIndex += 1) {
@@ -54,20 +56,39 @@ namespace Trident {
 		return descriptorSets;
 	}
 
-	ref<PhysicalDevice> GL::Device::getPhysicalDevice() const {
-		return physicalDevice;
+	ref<Trident::Device> GL::createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		ref<GL::Device> device = createRef<GL::Device>(adapter, physicalDevice);
+		device->queue = createQueue(device.get(), 0, QueueFamilyCapability::GRAPHICS);
+
+		return device;
 	}
 
-	ref<Queue> GL::Device::getQueue(QueueFamilyCapability queueFamilyCapability) const {
-		return queue;
+	void GL::destroyDevice(const Trident::Device* device) {}
+
+	ref<Trident::Queue> GL::getQueue(const Trident::Device* device, QueueFamilyCapability queueFamilyCapability) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const GL::Device* _device = static_cast<const GL::Device*>(device);
+
+		return _device->queue;
 	}
 
-	void GL::Device::resetFence(ref<Trident::Fence> fence) const {
-		std::static_pointer_cast<GL::Fence>(fence)->reset();
+	void GL::resetFence(const Trident::Device* device, const Trident::Fence* fence) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const GL::Fence* _fence = static_cast<const GL::Fence*>(fence);
+
+		#if OPENGL_VERSION >= OPENGL_VERSION_3_2
+			glDeleteSync(_fence->sync);
+		#else
+			ENGINE_ERROR_UNSUPPORTED();
+		#endif
 	}
 
-	void GL::Device::updateDescriptorSets(view<WriteDescriptorSet> writeDescriptorSets) const {
-		DEBUG_DESCRIPTOR_GUARD(writeDescriptorSets);
+	void GL::updateDescriptorSets(const Trident::Device* device, view<WriteDescriptorSet> writeDescriptorSets) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		for (const WriteDescriptorSet& writeDescriptorSet : writeDescriptorSets) {
 			const ref<GL::DescriptorSet> descriptorSet = std::static_pointer_cast<GL::DescriptorSet>(writeDescriptorSet.descriptorSet);
@@ -77,25 +98,35 @@ namespace Trident {
 				DEBUG_ASSERT(writeDescriptorSet.descriptorBuffers.count() > 0);
 
 				std::copy(writeDescriptorSet.descriptorBuffers.begin(), writeDescriptorSet.descriptorBuffers.end(), descriptorSetBinding.descriptorBuffers.begin());
+
+				continue;
 			}
-			else if (isImageDescriptorType(descriptorSetBinding.descriptorType)) {
+
+			if (isImageDescriptorType(descriptorSetBinding.descriptorType)) {
 				DEBUG_ASSERT(writeDescriptorSet.descriptorImages.count() > 0);
 
 				std::copy(writeDescriptorSet.descriptorImages.begin(), writeDescriptorSet.descriptorImages.end(), descriptorSetBinding.descriptorImages.begin());
+
+				continue;
 			}
-			else {
-				ADAPTER_ASSERT(false, "The descriptor must either have a buffer type or an image type.");
-			}
+
+			ADAPTER_ASSERT(false, "The descriptor must either have a buffer type or an image type.");
 		}
 	}
 
-	void GL::Device::waitForFence(ref<Trident::Fence> fence) const {
+	void GL::waitForFence(const Trident::Device* device, Trident::Fence* fence) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
 		#if OPENGL_VERSION >= OPENGL_VERSION_3_2
-			const ref<GL::Fence> glFence = std::static_pointer_cast<GL::Fence>(fence);
+			// TODO: Remove const_cast.
+			GL::Fence* _fence = static_cast<GL::Fence*>(fence);
+			GLenum status;
 
-			glFence->create();
+			_fence->sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 
-			const GLenum status = glClientWaitSync(glFence->sync, GL_SYNC_FLUSH_COMMANDS_BIT, max<uint64>());
+			ADAPTER_ASSERT(_fence->sync != 0, "Failed to create fence.");
+
+			status = glClientWaitSync(_fence->sync, GL_SYNC_FLUSH_COMMANDS_BIT, max<GLuint64>());
 
 			DEBUG_ASSERT(status == GL_CONDITION_SATISFIED || status == GL_ALREADY_SIGNALED);
 		#else
@@ -103,7 +134,9 @@ namespace Trident {
 		#endif
 	}
 
-	void GL::Device::waitIdle() const {
+	void GL::waitIdle(const Trident::Device* device) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
 		glFinish();
 	}
 }

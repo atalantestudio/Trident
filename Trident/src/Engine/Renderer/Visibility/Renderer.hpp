@@ -77,15 +77,15 @@ namespace Trident {
 			ref<PipelineLayout> createOutputPipelineLayout() const;
 			// ref<PipelineLayout> createDebugPipelineLayout() const;
 
-			ref<RenderPipeline> createVisibilityPipeline() const;
+			ref<GraphicsPipeline> createVisibilityPipeline() const;
 			ref<ComputePipeline> createMaterialCountPipeline() const;
 			ref<ComputePipeline> createMaterialOffsetPipeline() const;
 			ref<ComputePipeline> createMaterialCoordinatePipeline() const;
-			ref<RenderPipeline> createOutputPipeline() const;
-			// ref<RenderPipeline> createDebugPipeline() const;
+			ref<GraphicsPipeline> createOutputPipeline() const;
+			// ref<GraphicsPipeline> createDebugPipeline() const;
 
-			ref<Buffer> createVisibilityIndirectBuffer() const;
-			ref<Buffer> createCameraBuffer() const;
+			ref<Buffer<DrawIndirectCommand>> createVisibilityIndirectBuffer() const;
+			ref<Buffer<Camera>> createCameraBuffer() const;
 			void createVertexPositionComponentBuffer();
 			void createVertexNormalComponentBuffer();
 			void createVertexTextureCoordinateComponentBuffer();
@@ -95,10 +95,10 @@ namespace Trident {
 			void createClusterBuffer();
 			void createInstanceBuffer();
 			void createGeometryBuffer();
-			ref<Buffer> createMaterialCountBuffer() const;
-			ref<Buffer> createMaterialOffsetBuffer() const;
-			ref<Buffer> createMaterialIndirectBuffer() const;
-			ref<Buffer> createMaterialCoordinateBuffer() const;
+			ref<Buffer<uint32>> createMaterialCountBuffer() const;
+			ref<Buffer<uint32>> createMaterialOffsetBuffer() const;
+			ref<Buffer<DispatchIndirectCommand>> createMaterialIndirectBuffer() const;
+			ref<Buffer<uint32>> createMaterialCoordinateBuffer() const;
 
 			ref<Image> createVisibilityImage() const;
 			ref<Image> createOutputImage() const;
@@ -165,38 +165,38 @@ namespace Trident {
 			ref<PipelineLayout> outputPipelineLayout;
 			// ref<PipelineLayout> debugPipelineLayout;
 
-			ref<RenderPipeline> visibilityPipeline;
+			ref<GraphicsPipeline> visibilityPipeline;
 			ref<ComputePipeline> materialCountPipeline;
 			ref<ComputePipeline> materialOffsetPipeline;
 			ref<ComputePipeline> materialCoordinatePipeline;
 			sequence<ref<ComputePipeline>> materialPipelines;
-			ref<RenderPipeline> outputPipeline;
-			// ref<RenderPipeline> debugPipeline;
+			ref<GraphicsPipeline> outputPipeline;
+			// ref<GraphicsPipeline> debugPipeline;
 
-			ref<Buffer> visibilityIndirectBuffer;
-			ref<Buffer> cameraBuffer;
-			ref<Buffer> vertexPositionComponentBuffer;
-			ref<Buffer> vertexNormalComponentBuffer;
-			ref<Buffer> vertexTextureCoordinateComponentBuffer;
-			ref<Buffer> vertexPositionIndexBuffer;
-			ref<Buffer> vertexNormalIndexBuffer;
-			ref<Buffer> vertexTextureCoordinateIndexBuffer;
-			ref<Buffer> clusterBuffer;
-			ref<Buffer> instanceBuffer;
-			ref<Buffer> geometryBuffer;
+			ref<Buffer<DrawIndirectCommand>> visibilityIndirectBuffer;
+			ref<Buffer<Camera>> cameraBuffer;
+			ref<Buffer<float32>> vertexPositionComponentBuffer;
+			ref<Buffer<float32>> vertexNormalComponentBuffer;
+			ref<Buffer<float32>> vertexTextureCoordinateComponentBuffer;
+			ref<Buffer<uint32>> vertexPositionIndexBuffer;
+			ref<Buffer<uint32>> vertexNormalIndexBuffer;
+			ref<Buffer<uint32>> vertexTextureCoordinateIndexBuffer;
+			ref<Buffer<Cluster>> clusterBuffer;
+			ref<Buffer<ClusteredInstance>> instanceBuffer;
+			ref<Buffer<Geometry>> geometryBuffer;
 
 			// Number of pixels used per material.
-			ref<Buffer> materialCountBuffer;
+			ref<Buffer<uint32>> materialCountBuffer;
 
 			// Offset of the first pixel used per material.
-			ref<Buffer> materialOffsetBuffer;
+			ref<Buffer<uint32>> materialOffsetBuffer;
 
 			// Indirect arguments for material pipelines.
-			ref<Buffer> materialIndirectBuffer;
+			ref<Buffer<DispatchIndirectCommand>> materialIndirectBuffer;
 
 			// Screen pixels sorted by material index.
 			// TODO: Use 1D image instead.
-			ref<Buffer> materialCoordinateBuffer;
+			ref<Buffer<uint32>> materialCoordinateBuffer;
 
 			ref<Image> visibilityImage;
 			sequence<sequence<ref<Image>>> materialImages;

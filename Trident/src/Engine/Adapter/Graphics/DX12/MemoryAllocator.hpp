@@ -6,6 +6,7 @@
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
 #include "Engine/Adapter/Graphics/DX12/Sampler.hpp"
 #include "Engine/API/Rendering/DescriptorSet.hpp"
+#include "Engine/API/Rendering/MemoryAllocator.hpp"
 
 namespace Trident {
 	struct DX12::DescriptorHeapAllocation {
@@ -16,7 +17,7 @@ namespace Trident {
 		UINT descriptorOffset;
 	};
 
-	class DX12::MemoryAllocator {
+	class DX12::MemoryAllocator : public Trident::MemoryAllocator {
 		private:
 			static constexpr UINT UNDEFINED_ALLOCATION_INDEX = max<UINT>();
 
@@ -24,22 +25,24 @@ namespace Trident {
 			// Only one descriptor heap of each type can be bound at a time.
 			// See https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-setdescriptorheaps. 
 			static constexpr UINT maxViewDescriptorCountPerAllocation = 64;
-			static constexpr UINT maxSamplerDescriptorCountPerAllocation = 64;
+			static constexpr UINT maxSamplerDescriptorCountPerAllocation = 16;
 			static constexpr UINT maxRenderTargetViewDescriptorCountPerAllocation = 16;
 			static constexpr UINT maxDepthStencilViewDescriptorCountPerAllocation = 16;
 
 		public:
-			explicit MemoryAllocator(const DX12::Device& device);
+			explicit MemoryAllocator(const DX12::Device* device);
 
-			~MemoryAllocator();
+			void destroyDescriptorHeaps();
 
 			DX12::DescriptorHeapAllocation& getCurrentViewDescriptorHeapAllocation();
 			DX12::DescriptorHeapAllocation& getCurrentSamplerDescriptorHeapAllocation();
 
 			// Reserves space for a sequence of CBV/SRV/UAV handles.
-			D3D12_CPU_DESCRIPTOR_HANDLE allocateView(UINT descriptorCount);
+			D3D12_CPU_DESCRIPTOR_HANDLE allocateViewDescriptors(UINT descriptorCount);
 
-			D3D12_CPU_DESCRIPTOR_HANDLE allocateSampler(UINT descriptorCount);
+			// Reserves space for a sequence of sampler handles.
+			D3D12_CPU_DESCRIPTOR_HANDLE allocateSamplerDescriptors(UINT descriptorCount);
+
 			D3D12_CPU_DESCRIPTOR_HANDLE allocateRenderTargetView(ID3D12Resource* resource, const D3D12_RENDER_TARGET_VIEW_DESC* descriptor);
 			D3D12_CPU_DESCRIPTOR_HANDLE allocateDepthStencilView(ID3D12Resource* resource, const D3D12_DEPTH_STENCIL_VIEW_DESC* descriptor);
 
@@ -67,7 +70,7 @@ namespace Trident {
 			UINT depthStencilViewDescriptorHandleIncrementSize;
 
 		private:
-			const DX12::Device& device;
+			const DX12::Device* device;
 
 			std::vector<DX12::DescriptorHeapAllocation> descriptorHeapAllocations;
 

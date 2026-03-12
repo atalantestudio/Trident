@@ -8,7 +8,7 @@
 
 namespace Trident::VK {
 	inline VkImageLayout getImageLayout(ImageLayout imageLayout) {
-		static constexpr VkImageLayout vkImageLayouts[] = {
+		static constexpr VkImageLayout IMAGE_LAYOUTS[] = {
 			VK_IMAGE_LAYOUT_UNDEFINED,
 			VK_IMAGE_LAYOUT_GENERAL,
 			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
@@ -20,13 +20,13 @@ namespace Trident::VK {
 			VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
 		};
 
-		return vkImageLayouts[static_cast<uint8>(imageLayout)];
+		ADAPTER_ASSERT(imageLayout < ImageLayout::count, "Invalid image layout.");
+
+		return IMAGE_LAYOUTS[static_cast<uint32>(imageLayout)];
 	}
 
 	inline VkAccessFlags getAccessFlags(ImageLayout imageLayout) {
-		ADAPTER_ASSERT(imageLayout != ImageLayout::PRESENT_SRC, "PRESENT_SRC cannot be used with access flags.");
-
-		static constexpr VkAccessFlags vkAccessFlags[] = {
+		static constexpr VkAccessFlags ACCESS_FLAGS[] = {
 			VK_ACCESS_NONE,
 			VK_ACCESS_NONE,
 			VK_ACCESS_COLOR_ATTACHMENT_READ_BIT,
@@ -38,6 +38,9 @@ namespace Trident::VK {
 			VK_ACCESS_NONE,
 		};
 
-		return vkAccessFlags[static_cast<uint8>(imageLayout)];
+		ADAPTER_ASSERT(imageLayout < ImageLayout::count, "Invalid image layout.");
+		ADAPTER_ASSERT(imageLayout != ImageLayout::PRESENT_SRC, "PRESENT_SRC cannot be used with access flags.");
+
+		return ACCESS_FLAGS[static_cast<uint32>(imageLayout)];
 	}
 }

@@ -17,9 +17,7 @@ namespace Trident {
 			stream << ",";
 		}
 
-		std::string name = event.name;
-
-		std::replace(name.begin(), name.end(), '"', '\'');
+		const sequence<char8> name = replace(event.name, "\"", "'");
 
 		stream << "{\"name\": \"" << name << "\",";
 		stream << "\"cat\": \"Scope\",";

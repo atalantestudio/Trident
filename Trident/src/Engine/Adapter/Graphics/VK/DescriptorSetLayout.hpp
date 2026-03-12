@@ -3,20 +3,21 @@
 
 #pragma once
 
-#include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/API/Rendering/DescriptorSetLayout.hpp"
+#include "Engine/API/Rendering/Device.hpp"
 
 namespace Trident {
 	class VK::DescriptorSetLayout final : public Trident::DescriptorSetLayout {
 		public:
-			explicit DescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& descriptorSetLayoutBindings, const VK::Device& device);
-
-			~DescriptorSetLayout() final override;
+			explicit DescriptorSetLayout(const Trident::Device* device, const sequence<DescriptorSetLayoutBinding>& bindings);
 
 		public:
 			VkDescriptorSetLayout descriptorSetLayout;
-
-		private:
-			const VK::Device& device;
 	};
+
+	namespace VK {
+		ref<Trident::DescriptorSetLayout> createDescriptorSetLayout(const Trident::Device* device, const sequence<DescriptorSetLayoutBinding>& bindings);
+
+		void destroyDescriptorSetLayout(const Trident::Device* device, const Trident::DescriptorSetLayout* descriptorSetLayout);
+	}
 }

@@ -25,12 +25,12 @@ namespace Trident {
 				updateImageDescriptorSet();
 
 				setupPipelineLayout();
-				setupRenderPipeline();
+				setupGraphicsPipeline();
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
 				BeginRenderPassDescriptor beginRenderPassDescriptor{};
-				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
+				beginRenderPassDescriptor.framebuffer = framebuffers[getSwapchainImageIndex()];
 				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
 
 				const Extent2D swapchainExtent = getSwapchain()->getExtent();
@@ -40,7 +40,7 @@ namespace Trident {
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
-				commandEncoder->bindRenderPipeline(renderPipeline);
+				commandEncoder->bindGraphicsPipeline(graphicsPipeline);
 				commandEncoder->bindDescriptorSets(pipelineLayout, 0, {imageDescriptorSet});
 				commandEncoder->draw(3, 1, 0, 0);
 				commandEncoder->endRenderPass();
@@ -98,9 +98,9 @@ namespace Trident {
 					}
 				}
 
-				const ref<Buffer> imageStagingBuffer = createStagingBuffer(file.extent.width * file.extent.height * getChannelCount(imageFormat));
+				const ref<Buffer<uint8>> imageStagingBuffer = createStagingBuffer<uint8>(file.extent.width * file.extent.height * getChannelCount(imageFormat));
 
-				uint8* imageStagingBufferMappedRange = imageStagingBuffer->map<uint8>(0, imageStagingBuffer->getSize());
+				uint8* imageStagingBufferMappedRange = imageStagingBuffer->map(0, imageStagingBuffer->getSize());
 
 				if (file.format == ImageFormat::R8G8B8_UNORM) {
 					convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(file.data, imageStagingBufferMappedRange, imageStagingBuffer->getSize());
@@ -243,7 +243,7 @@ namespace Trident {
 				pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 			}
 
-			void setupRenderPipeline() {
+			void setupGraphicsPipeline() {
 				ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 				vertexShaderModuleDescriptor.entryPoint = "main";
@@ -264,25 +264,25 @@ namespace Trident {
 				colorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
 				colorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 
-				RenderPipelineDescriptor renderPipelineDescriptor{};
-				renderPipelineDescriptor.pipelineLayout = pipelineLayout;
-				renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-				renderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-				renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-				renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-				renderPipelineDescriptor.cullMode = CullMode::BACK;
-				renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-				renderPipelineDescriptor.lineWidth = 1.0f;
-				renderPipelineDescriptor.minSampleShading = 0.0f;
-				renderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-				renderPipelineDescriptor.depthStencilState.depthTest = false;
-				renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-				renderPipelineDescriptor.renderPass = renderPass;
-				renderPipelineDescriptor.subpassIndex = 0;
+				GraphicsPipelineDescriptor graphicsPipelineDescriptor{};
+				graphicsPipelineDescriptor.pipelineLayout = pipelineLayout;
+				graphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+				graphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+				graphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+				graphicsPipelineDescriptor.polygonMode = PolygonMode::FILL;
+				graphicsPipelineDescriptor.cullMode = CullMode::BACK;
+				graphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+				graphicsPipelineDescriptor.lineWidth = 1.0f;
+				graphicsPipelineDescriptor.minSampleShading = 0.0f;
+				graphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+				graphicsPipelineDescriptor.depthStencilState.depthTest = false;
+				graphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+				graphicsPipelineDescriptor.renderPass = renderPass;
+				graphicsPipelineDescriptor.subpassIndex = 0;
 
-				SET_DEBUG_NAME(renderPipelineDescriptor, "Render pipeline");
+				SET_DEBUG_NAME(graphicsPipelineDescriptor, "Render pipeline");
 
-				renderPipeline = createRenderPipeline(renderPipelineDescriptor);
+				graphicsPipeline = createGraphicsPipeline(graphicsPipelineDescriptor);
 			}
 
 		private:
@@ -294,6 +294,6 @@ namespace Trident {
 			ref<DescriptorSetLayout> imageDescriptorSetLayout;
 			ref<DescriptorSet> imageDescriptorSet;
 			ref<PipelineLayout> pipelineLayout;
-			ref<RenderPipeline> renderPipeline;
+			ref<GraphicsPipeline> graphicsPipeline;
 	};
 }

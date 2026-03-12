@@ -10,16 +10,20 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	GL::Framebuffer::Framebuffer(const FramebufferDescriptor& descriptor) :
-		Trident::Framebuffer(descriptor)
-	{
+	GL::Framebuffer::Framebuffer(const Trident::Device* device, const FramebufferDescriptor& descriptor) :
+		Trident::Framebuffer(device, descriptor)
+	{}
+
+	ref<Trident::Framebuffer> GL::createFramebuffer(const Trident::Device* device, const FramebufferDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		ref<GL::Framebuffer> framebuffer = createRef<GL::Framebuffer>(device, descriptor);
+
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			glCreateFramebuffers(1, &framebuffer);
+			glCreateFramebuffers(1, &framebuffer->framebuffer);
 		#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
-			glGenFramebuffers(1, &framebuffer);
-			glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+			glGenFramebuffers(1, &framebuffer->framebuffer);
+			glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->framebuffer);
 		#else
 			ENGINE_ERROR_UNSUPPORTED();
 		#endif
@@ -83,7 +87,7 @@ namespace Trident {
 				case GL_TEXTURE_RECTANGLE:
 					#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 						glNamedFramebufferTexture(
-							framebuffer,
+							framebuffer->framebuffer,
 							attachment,
 							glImageView->texture,
 							imageView->getMipLevelOffset()
@@ -115,7 +119,7 @@ namespace Trident {
 			GLenum status = 0;
 
 			#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-				status = glCheckNamedFramebufferStatus(framebuffer, GL_FRAMEBUFFER);
+				status = glCheckNamedFramebufferStatus(framebuffer->framebuffer, GL_FRAMEBUFFER);
 			#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
 				status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 			#else
@@ -127,18 +131,24 @@ namespace Trident {
 
 		#if defined(BUILD_MODE_DEBUG)
 			if (descriptor.name.count() > 0) {
-				glObjectLabel(GL_FRAMEBUFFER, framebuffer, static_cast<GLsizei>(descriptor.name.count()), &descriptor.name[0]);
+				glObjectLabel(GL_FRAMEBUFFER, framebuffer->framebuffer, static_cast<GLsizei>(descriptor.name.count()), &descriptor.name[0]);
 			}
 		#endif
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_3_0 && defined(OPENGL_UNBIND_AFTER_USE)
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		#endif
+
+		return framebuffer;
 	}
 
-	GL::Framebuffer::~Framebuffer() {
+	void GL::destroyFramebuffer(const Trident::Device* device, const Trident::Framebuffer* framebuffer) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const GL::Framebuffer* _framebuffer = static_cast<const GL::Framebuffer*>(framebuffer);
+
 		#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-			glDeleteFramebuffers(1, &framebuffer);
+			glDeleteFramebuffers(1, &_framebuffer->framebuffer);
 		#else
 			ENGINE_ERROR_UNSUPPORTED();
 		#endif

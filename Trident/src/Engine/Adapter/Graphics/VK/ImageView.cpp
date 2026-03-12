@@ -10,13 +10,18 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	VK::ImageView::ImageView(const ImageViewDescriptor& descriptor, Trident::Image* image, const VK::Device& device) :
-		Trident::ImageView(descriptor, image),
-		device(device)
-	{
+	VK::ImageView::ImageView(const Trident::Device* device, Trident::Image* image, const ImageViewDescriptor& descriptor) :
+		Trident::ImageView(device, image, descriptor)
+	{}
+
+	ref<Trident::ImageView> VK::createImageView(const Trident::Device* device, Trident::Image* image, const ImageViewDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		const VK::Image* _image = static_cast<const VK::Image*>(image);
+		VkResult result;
+
+		ref<VK::ImageView> imageView = createRef<VK::ImageView>(device, image, descriptor);
 
 		VkImageViewCreateInfo imageViewCreateInfo{};
 		imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -48,14 +53,19 @@ namespace Trident {
 		imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
 		imageViewCreateInfo.subresourceRange.layerCount = image->getLayerCount();
 
-		const VkResult result = vkCreateImageView(device.device, &imageViewCreateInfo, nullptr, &imageView);
+		result = _device->vkCreateImageView(_device->device, &imageViewCreateInfo, nullptr, &imageView->imageView);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create image view ([]).", string_VkResult(result));
+
+		return imageView;
 	}
 
-	VK::ImageView::~ImageView() {
+	void VK::destroyImageView(const Trident::Device* device, const Trident::ImageView* imageView) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		vkDestroyImageView(device.device, imageView, nullptr);
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		const VK::ImageView* _imageView = static_cast<const VK::ImageView*>(imageView);
+
+		_device->vkDestroyImageView(_device->device, _imageView->imageView, nullptr);
 	}
 }

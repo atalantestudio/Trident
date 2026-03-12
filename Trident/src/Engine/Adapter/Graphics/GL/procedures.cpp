@@ -31,7 +31,7 @@ namespace Trident {
 	PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog;
 	PFNGLGETSHADERIVPROC glGetShaderiv;
 
-	#if BUILD_MODE_DEBUG
+	#if defined(BUILD_MODE_DEBUG)
 		PFNGLGETSTRINGPROC glGetString;
 	#endif
 

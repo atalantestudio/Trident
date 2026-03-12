@@ -33,8 +33,8 @@ namespace Trident {
 
 		createSubcomponentPipelineLayout();
 
-		createSubcomponentRenderPipeline();
-		createGlyphSubcomponentRenderPipeline();
+		createSubcomponentGraphicsPipeline();
+		createGlyphSubcomponentGraphicsPipeline();
 
 		updateDescriptorSets();
 		updateCameraProjection();
@@ -192,9 +192,9 @@ namespace Trident {
 
 		SET_DEBUG_NAME(cameraBufferDescriptor, "Camera");
 
-		cameraBuffer = createBuffer(cameraBufferDescriptor);
+		cameraBuffer = createBuffer<Camera>(cameraBufferDescriptor);
 
-		cameraBufferMappedRange = cameraBuffer->map<Camera>(0, cameraBuffer->getSize());
+		cameraBufferMappedRange = cameraBuffer->map(0, cameraBuffer->getSize());
 	}
 
 	void GUIRenderer::createVertexBuffer() {
@@ -205,7 +205,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(vertexBufferDescriptor, "Vertex");
 
-		vertexBuffer = createBuffer(vertexBufferDescriptor);
+		vertexBuffer = createBuffer<Vertex>(vertexBufferDescriptor);
 	}
 
 	void GUIRenderer::createIndexBuffer() {
@@ -216,7 +216,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(indexBufferDescriptor, "Index");
 
-		indexBuffer = createBuffer(indexBufferDescriptor);
+		indexBuffer = createBuffer<uint16>(indexBufferDescriptor);
 	}
 
 	void GUIRenderer::createSubcomponentBuffer() {
@@ -228,9 +228,9 @@ namespace Trident {
 
 		SET_DEBUG_NAME(subcomponentBufferDescriptor, "Subcomponent");
 
-		subcomponentBuffer = createBuffer(subcomponentBufferDescriptor);
+		subcomponentBuffer = createBuffer<GUISubcomponent>(subcomponentBufferDescriptor);
 
-		subcomponentBufferMappedRange = subcomponentBuffer->map<GUISubcomponent>(0, subcomponentBuffer->getSize());
+		subcomponentBufferMappedRange = subcomponentBuffer->map(0, subcomponentBuffer->getSize());
 	}
 
 	void GUIRenderer::createGlyphSubcomponentBuffer() {
@@ -242,15 +242,15 @@ namespace Trident {
 
 		SET_DEBUG_NAME(glyphSubcomponentBufferDescriptor, "Glyph subcomponent");
 
-		glyphSubcomponentBuffer = createBuffer(glyphSubcomponentBufferDescriptor);
+		glyphSubcomponentBuffer = createBuffer<GUIGlyphSubcomponent>(glyphSubcomponentBufferDescriptor);
 
-		glyphSubcomponentBufferMappedRange = glyphSubcomponentBuffer->map<GUIGlyphSubcomponent>(0, glyphSubcomponentBuffer->getSize());
+		glyphSubcomponentBufferMappedRange = glyphSubcomponentBuffer->map(0, glyphSubcomponentBuffer->getSize());
 	}
 
 	void GUIRenderer::createTextureArrayStagingBuffer() {
-		textureArrayStagingBuffer = createStagingBuffer(TEXTURE_ARRAY_MAX_WIDTH * TEXTURE_ARRAY_MAX_HEIGHT * TEXTURE_ARRAY_MAX_LAYER_COUNT * TEXTURE_ARRAY_LAYER_BPP);
+		textureArrayStagingBuffer = createStagingBuffer<uint8>(TEXTURE_ARRAY_MAX_WIDTH * TEXTURE_ARRAY_MAX_HEIGHT * TEXTURE_ARRAY_MAX_LAYER_COUNT * TEXTURE_ARRAY_LAYER_BPP);
 
-		textureArrayStagingBufferMappedRange = textureArrayStagingBuffer->map<uint8>(0, textureArrayStagingBuffer->getSize());
+		textureArrayStagingBufferMappedRange = textureArrayStagingBuffer->map(0, textureArrayStagingBuffer->getSize());
 	}
 
 	void GUIRenderer::createTextureArrayImage() {
@@ -277,7 +277,7 @@ namespace Trident {
 		textureArrayImageViewDescriptor.mipLevelCount = 1;
 		textureArrayImageViewDescriptor.layerOffset = 0;
 		textureArrayImageViewDescriptor.layerCount = textureArrayImage->getLayerCount();
-		
+
 		SET_DEBUG_NAME(textureArrayImageViewDescriptor, "Texture array");
 
 		textureArrayImageView = textureArrayImage->createView(textureArrayImageViewDescriptor);
@@ -322,7 +322,7 @@ namespace Trident {
 		subcomponentPipelineLayout = createPipelineLayout(subcomponentPipelineLayoutDescriptor);
 	}
 
-	void GUIRenderer::createSubcomponentRenderPipeline() {
+	void GUIRenderer::createSubcomponentGraphicsPipeline() {
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 		vertexInputBinding.registerAttribute<vec4<float32>>(); // Vertex position and texture coordinate
 
@@ -356,29 +356,29 @@ namespace Trident {
 		colorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
 		colorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 
-		RenderPipelineDescriptor subcomponentRenderPipelineDescriptor{};
-		subcomponentRenderPipelineDescriptor.pipelineLayout = subcomponentPipelineLayout;
-		subcomponentRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
-		subcomponentRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-		subcomponentRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-		subcomponentRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-		subcomponentRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-		subcomponentRenderPipelineDescriptor.cullMode = CullMode::BACK;
-		subcomponentRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-		subcomponentRenderPipelineDescriptor.lineWidth = 1.0f;
-		subcomponentRenderPipelineDescriptor.minSampleShading = 0.0f;
-		subcomponentRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-		subcomponentRenderPipelineDescriptor.depthStencilState.depthTest = false;
-		subcomponentRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-		subcomponentRenderPipelineDescriptor.renderPass = renderPass;
-		subcomponentRenderPipelineDescriptor.subpassIndex = 0;
+		GraphicsPipelineDescriptor subcomponentGraphicsPipelineDescriptor{};
+		subcomponentGraphicsPipelineDescriptor.pipelineLayout = subcomponentPipelineLayout;
+		subcomponentGraphicsPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
+		subcomponentGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+		subcomponentGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+		subcomponentGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+		subcomponentGraphicsPipelineDescriptor.polygonMode = PolygonMode::FILL;
+		subcomponentGraphicsPipelineDescriptor.cullMode = CullMode::BACK;
+		subcomponentGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		subcomponentGraphicsPipelineDescriptor.lineWidth = 1.0f;
+		subcomponentGraphicsPipelineDescriptor.minSampleShading = 0.0f;
+		subcomponentGraphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+		subcomponentGraphicsPipelineDescriptor.depthStencilState.depthTest = false;
+		subcomponentGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+		subcomponentGraphicsPipelineDescriptor.renderPass = renderPass;
+		subcomponentGraphicsPipelineDescriptor.subpassIndex = 0;
 
-		SET_DEBUG_NAME(subcomponentRenderPipelineDescriptor, "Subcomponent");
+		SET_DEBUG_NAME(subcomponentGraphicsPipelineDescriptor, "Subcomponent");
 
-		subcomponentRenderPipeline = createRenderPipeline(subcomponentRenderPipelineDescriptor);
+		subcomponentGraphicsPipeline = createGraphicsPipeline(subcomponentGraphicsPipelineDescriptor);
 	}
 
-	void GUIRenderer::createGlyphSubcomponentRenderPipeline() {
+	void GUIRenderer::createGlyphSubcomponentGraphicsPipeline() {
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 		vertexInputBinding.registerAttribute<vec4<float32>>(); // Vertex position and texture coordinate
 
@@ -409,26 +409,26 @@ namespace Trident {
 		colorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
 		colorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 
-		RenderPipelineDescriptor glyphSubcomponentRenderPipelineDescriptor{};
-		glyphSubcomponentRenderPipelineDescriptor.pipelineLayout = subcomponentPipelineLayout;
-		glyphSubcomponentRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
-		glyphSubcomponentRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-		glyphSubcomponentRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-		glyphSubcomponentRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-		glyphSubcomponentRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-		glyphSubcomponentRenderPipelineDescriptor.cullMode = CullMode::BACK;
-		glyphSubcomponentRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-		glyphSubcomponentRenderPipelineDescriptor.lineWidth = 1.0f;
-		glyphSubcomponentRenderPipelineDescriptor.minSampleShading = 0.0f;
-		glyphSubcomponentRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-		glyphSubcomponentRenderPipelineDescriptor.depthStencilState.depthTest = false;
-		glyphSubcomponentRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-		glyphSubcomponentRenderPipelineDescriptor.renderPass = renderPass;
-		glyphSubcomponentRenderPipelineDescriptor.subpassIndex = 0;
+		GraphicsPipelineDescriptor glyphSubcomponentGraphicsPipelineDescriptor{};
+		glyphSubcomponentGraphicsPipelineDescriptor.pipelineLayout = subcomponentPipelineLayout;
+		glyphSubcomponentGraphicsPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
+		glyphSubcomponentGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+		glyphSubcomponentGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+		glyphSubcomponentGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+		glyphSubcomponentGraphicsPipelineDescriptor.polygonMode = PolygonMode::FILL;
+		glyphSubcomponentGraphicsPipelineDescriptor.cullMode = CullMode::BACK;
+		glyphSubcomponentGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		glyphSubcomponentGraphicsPipelineDescriptor.lineWidth = 1.0f;
+		glyphSubcomponentGraphicsPipelineDescriptor.minSampleShading = 0.0f;
+		glyphSubcomponentGraphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+		glyphSubcomponentGraphicsPipelineDescriptor.depthStencilState.depthTest = false;
+		glyphSubcomponentGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+		glyphSubcomponentGraphicsPipelineDescriptor.renderPass = renderPass;
+		glyphSubcomponentGraphicsPipelineDescriptor.subpassIndex = 0;
 
-		SET_DEBUG_NAME(glyphSubcomponentRenderPipelineDescriptor, "Glyph subcomponent");
+		SET_DEBUG_NAME(glyphSubcomponentGraphicsPipelineDescriptor, "Glyph subcomponent");
 
-		glyphSubcomponentRenderPipeline = createRenderPipeline(glyphSubcomponentRenderPipelineDescriptor);
+		glyphSubcomponentGraphicsPipeline = createGraphicsPipeline(glyphSubcomponentGraphicsPipelineDescriptor);
 	}
 
 	void GUIRenderer::allocateDescriptorSets() {
@@ -439,9 +439,9 @@ namespace Trident {
 	}
 
 	void GUIRenderer::copyBuffers() const {
-		const ref<Buffer> stagingBuffer = createStagingBuffer(VERTEX_BUFFER_SIZE + INDEX_BUFFER_SIZE);
+		const ref<Buffer<uint8>> stagingBuffer = createStagingBuffer<uint8>(VERTEX_BUFFER_SIZE + INDEX_BUFFER_SIZE);
 
-		uint8* mappedRange = stagingBuffer->map<uint8>(0, stagingBuffer->getSize());
+		uint8* mappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
 
 		Vertex* vertexMappedRange = pointer_cast<Vertex*>(mappedRange);
 		vertexMappedRange[0].position = {0.0f, 0.0f};
@@ -555,7 +555,7 @@ namespace Trident {
 		}
 
 		BeginRenderPassDescriptor beginRenderPassDescriptor{};
-		beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
+		beginRenderPassDescriptor.framebuffer = framebuffers[getSwapchainImageIndex()];
 		beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 0.0f}};
 
 		const Extent2D swapchainExtent = getSwapchain()->getExtent();
@@ -567,7 +567,7 @@ namespace Trident {
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 
 		if (subcomponentCount > 0) {
-			commandEncoder->bindRenderPipeline(subcomponentRenderPipeline);
+			commandEncoder->bindGraphicsPipeline(subcomponentGraphicsPipeline);
 			commandEncoder->bindDescriptorSets(subcomponentPipelineLayout, 0, {subcomponentDescriptorSet});
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 			commandEncoder->bindVertexBuffer(1, subcomponentBuffer, 0, sizeof(GUISubcomponent));
@@ -576,7 +576,7 @@ namespace Trident {
 		}
 
 		if (glyphSubcomponentCount > 0) {
-			commandEncoder->bindRenderPipeline(glyphSubcomponentRenderPipeline);
+			commandEncoder->bindGraphicsPipeline(glyphSubcomponentGraphicsPipeline);
 			commandEncoder->bindDescriptorSets(subcomponentPipelineLayout, 0, {glyphSubcomponentDescriptorSet});
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 			commandEncoder->bindVertexBuffer(1, glyphSubcomponentBuffer, 0, sizeof(GUIGlyphSubcomponent));

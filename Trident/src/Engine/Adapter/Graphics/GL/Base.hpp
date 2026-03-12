@@ -15,20 +15,26 @@
 	#include <GL/wglext.h>
 #endif
 
-#ifndef GL_SOURCE_FROM_SPIRV
+#if !defined(GL_SOURCE_FROM_SPIRV)
 	// TODO: Remove when TSL is ready.
-	// NOTE: <regex> is used for custom entrypoints within a GLSL shader.
+	// Used for custom entrypoints within a GLSL shader.
 	#include <regex>
 #endif
 
 #include "Engine/Adapter/Graphics/GL/procedures.hpp"
 
 namespace Trident::GL {
+	typedef HGLRC (*PFNWGLCREATECONTEXTPROC)(HDC);
+	typedef BOOL (*PFNWGLDELETECONTEXTPROC)(HGLRC);
+	typedef HDC (*PFNWGLGETCURRENTDCPROC)();
+	typedef PROC (*PFNWGLGETPROCADDRESSPROC)(LPCSTR);
+	typedef BOOL (*PFNWGLMAKECURRENTPROC)(HDC, HGLRC);
+
 	class BeginRenderPassCommand;
 	class BindComputePipelineCommand;
 	class BindDescriptorSetsCommand;
 	class BindIndexBufferCommand;
-	class BindRenderPipelineCommand;
+	class BindGraphicsPipelineCommand;
 	class BindVertexBufferCommand;
 	class Command;
 	class CopyBufferToBufferCommand;
@@ -47,7 +53,7 @@ namespace Trident::GL {
 	class SetScissorCommand;
 	class SetViewportCommand;
 
-	class Buffer;
+	class BaseBuffer;
 	class CommandBuffer;
 	class CommandEncoder;
 	class ComputePipeline;
@@ -56,15 +62,40 @@ namespace Trident::GL {
 	class Fence;
 	class Framebuffer;
 	class GraphicsAdapter;
+	class GraphicsPipeline;
 	class Image;
 	class ImageView;
 	class Instance;
 	class PhysicalDevice;
 	class Queue;
 	class RenderPass;
-	class RenderPipeline;
 	class Sampler;
 	class ShaderModule;
 	class Surface;
 	class Swapchain;
+
+	#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
+		template<typename Procedure>
+		static Procedure loadWglProcedure(view<char8> procedureName) {
+			static const PlatformLibrary library = Platform::openLibrary("opengl32.dll");
+
+			return static_cast<Procedure>(library.loadProcedure(procedureName));
+		}
+	#endif
+
+	#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
+		template<typename Procedure>
+		static Procedure loadProcedure(view<char8> procedureName) {
+			static const GL::PFNWGLGETPROCADDRESSPROC wglGetProcAddress = loadWglProcedure<GL::PFNWGLGETPROCADDRESSPROC>("wglGetProcAddress");
+
+			const PROC procedure = wglGetProcAddress(&procedureName[0]);
+
+			// See https://wikis.khronos.org/opengl/Load_OpenGL_Functions.
+			if (procedure == NULL || procedure == (void*) -1 || procedure == (void*) 1 || procedure == (void*) 2 || procedure == (void*) 3) {
+				return loadWglProcedure<Procedure>(procedureName);
+			}
+
+			return pointer_cast<Procedure>(procedure);
+		}
+	#endif
 }

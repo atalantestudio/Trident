@@ -3,17 +3,20 @@
 
 #include "pch.hpp"
 
-#include "Engine/Adapter/Graphics/DX12/DescriptorRangeType.hpp"
 #include "Engine/Adapter/Graphics/DX12/PipelineLayout.hpp"
 #include "Engine/Adapter/Graphics/DX12/ShaderVisibility.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	DX12::PipelineLayout::PipelineLayout(const PipelineLayoutDescriptor& descriptor, const DX12::Device& device) :
-		Trident::PipelineLayout(descriptor)
-	{
+	DX12::PipelineLayout::PipelineLayout(const Trident::Device* device) :
+		Trident::PipelineLayout(device)
+	{}
+
+	ref<Trident::PipelineLayout> DX12::createPipelineLayout(const Trident::Device* device, const PipelineLayoutDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
+		ref<DX12::PipelineLayout> pipelineLayout = createRef<DX12::PipelineLayout>(device);
 		HRESULT result;
 
 		UINT rootParameterCount = 0;
@@ -46,7 +49,7 @@ namespace Trident {
 		const bool samplerDescriptorTable = samplerDescriptorRangeCount > 0;
 
 		if (samplerDescriptorTable) {
-			samplerDescriptorTableRootParameterIndex = rootParameterCount;
+			pipelineLayout->samplerDescriptorTableRootParameterIndex = rootParameterCount;
 			samplerDescriptorRangeOffset = viewDescriptorRangeCount;
 			rootParameterCount += 1;
 		}
@@ -191,7 +194,7 @@ namespace Trident {
 		}
 
 		if (samplerDescriptorTable) {
-			D3D12_ROOT_PARAMETER1& samplerRootParameter = rootParameters[samplerDescriptorTableRootParameterIndex];
+			D3D12_ROOT_PARAMETER1& samplerRootParameter = rootParameters[pipelineLayout->samplerDescriptorTableRootParameterIndex];
 			samplerRootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 			samplerRootParameter.DescriptorTable.NumDescriptorRanges = samplerDescriptorRangeCount;
 			samplerRootParameter.DescriptorTable.pDescriptorRanges = &descriptorRanges[viewDescriptorRangeCount];
@@ -236,7 +239,7 @@ namespace Trident {
 			#endif
 		}
 
-		result = device.device->CreateRootSignature(0, blob->GetBufferPointer(), blob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
+		result = _device->device->CreateRootSignature(0, blob->GetBufferPointer(), blob->GetBufferSize(), IID_PPV_ARGS(&pipelineLayout->rootSignature));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create root signature.");
 
@@ -244,7 +247,7 @@ namespace Trident {
 			if (descriptor.name.count() > 0) {
 				const LPWSTR name = ConvertUTF8ToUTF16(&descriptor.name[0]);
 
-				result = rootSignature->SetName(name);
+				result = pipelineLayout->rootSignature->SetName(name);
 
 				ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set root signature name.");
 
@@ -253,9 +256,13 @@ namespace Trident {
 		#endif
 
 		blob->Release();
+
+		return pipelineLayout;
 	}
 
-	DX12::PipelineLayout::~PipelineLayout() {
-		rootSignature->Release();
+	void DX12::destroyPipelineLayout(const Trident::Device* device, const Trident::PipelineLayout* pipelineLayout) {
+		const DX12::PipelineLayout* _pipelineLayout = static_cast<const DX12::PipelineLayout*>(pipelineLayout);
+
+		_pipelineLayout->rootSignature->Release();
 	}
 }

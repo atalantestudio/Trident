@@ -3,6 +3,9 @@
 
 #include "pch.hpp"
 
+// TODO
+#include "Engine/Adapter/Graphics/DX12/GraphicsAdapter.hpp"
+
 #include "Engine/API/Event/Mouse/MouseDownEvent.hpp"
 #include "Engine/API/Event/Mouse/MouseMoveEvent.hpp"
 #include "Engine/API/Event/Mouse/MouseUpEvent.hpp"
@@ -54,27 +57,8 @@ namespace Trident {
 		}
 
 		initializePropertyFile();
-
-		WindowDescriptor windowDescriptor{};
-		windowDescriptor.name = formatWindowName(projectDescriptor.name, sharedMemoryData->instanceCount);
-		windowDescriptor.size.width = properties->WindowWidth;
-		windowDescriptor.size.height = properties->WindowHeight;
-		windowDescriptor.keyDownEventListener = BIND(Application::propagateEventFrontToBack);
-		windowDescriptor.keyUpEventListener = BIND(Application::propagateEventFrontToBack);
-		windowDescriptor.mouseDownEventListener = BIND(Application::propagateEventFrontToBack);
-		windowDescriptor.mouseMoveEventListener = BIND(Application::propagateEventFrontToBack);
-		windowDescriptor.mouseUpEventListener = BIND(Application::propagateEventFrontToBack);
-		windowDescriptor.mouseWheelEventListener = BIND(Application::propagateEventFrontToBack);
-		windowDescriptor.windowCloseEventListener = BIND(Application::onWindowClose);
-		windowDescriptor.windowResizeEventListener = BIND(Application::onWindowResize);
-
-		sharedMemoryData->instanceCount += 1;
-
-		mutex->release();
-
-		window = new Window(windowDescriptor);
-
-		Renderer::initialize(projectDescriptor, *window, *properties);
+		initializeWindow(projectDescriptor);
+		initializeGraphicsAdapter(projectDescriptor);
 
 		if (projectType == ProjectType::MAIN) {
 			assetLibrary = new AssetLibrary();
@@ -124,8 +108,36 @@ namespace Trident {
 		propertyFile->readProperties(properties);
 	}
 
+	void Application::initializeWindow(const ProjectDescriptor& projectDescriptor) {
+		WindowDescriptor windowDescriptor{};
+		windowDescriptor.name = formatWindowName(projectDescriptor.name, sharedMemoryData->instanceCount);
+		windowDescriptor.size.width = properties->WindowWidth;
+		windowDescriptor.size.height = properties->WindowHeight;
+		windowDescriptor.keyDownEventListener = BIND(Application::propagateEventFrontToBack);
+		windowDescriptor.keyUpEventListener = BIND(Application::propagateEventFrontToBack);
+		windowDescriptor.mouseDownEventListener = BIND(Application::propagateEventFrontToBack);
+		windowDescriptor.mouseMoveEventListener = BIND(Application::propagateEventFrontToBack);
+		windowDescriptor.mouseUpEventListener = BIND(Application::propagateEventFrontToBack);
+		windowDescriptor.mouseWheelEventListener = BIND(Application::propagateEventFrontToBack);
+		windowDescriptor.windowCloseEventListener = BIND(Application::onWindowClose);
+		windowDescriptor.windowResizeEventListener = BIND(Application::onWindowResize);
+
+		sharedMemoryData->instanceCount += 1;
+
+		mutex->release();
+
+		window = new Window(windowDescriptor);
+	}
+
+	void Application::initializeGraphicsAdapter(const ProjectDescriptor& projectDescriptor) {
+		graphicsAdapter = new GraphicsAdapter(*properties);
+		layerCompositor = new LayerCompositor(window, graphicsAdapter, projectDescriptor, *properties);
+
+		Renderer::initialize(layerCompositor);
+	}
+
 	Application::~Application() {
-		for (const ref<Layer> layer : layerStack) {
+		for (const ref<Layer> layer : layerCompositor->layers) {
 			layer.~shared_ptr();
 		}
 
@@ -134,9 +146,8 @@ namespace Trident {
 		lastLayerInput.swapchainImageView.~shared_ptr();
 		lastLayerInput.swapchainImage.~shared_ptr();
 
-		layerStack.clear();
-
-		Renderer::deinitialize();
+		delete layerCompositor;
+		delete graphicsAdapter;
 
 		mutex->acquire();
 
@@ -158,7 +169,7 @@ namespace Trident {
 	}
 
 	bool Application::hasLayers() const {
-		return layerStack.hasLayers();
+		return layerCompositor->layers.size() > 0;
 	}
 
 	float64 Application::getCurrentFrameTime() const {
@@ -188,9 +199,9 @@ namespace Trident {
 	}
 
 	void Application::postConstruct() {
-		PROFILE_SCOPE("Application post-construct");
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		for (const ref<Layer> layer : layerStack) {
+		for (const ref<Layer> layer : layerCompositor->layers) {
 			layer->input = &lastLayerInput;
 
 			layer->postConstruct();
@@ -265,47 +276,13 @@ namespace Trident {
 	void Application::update(float64 deltaTime, float64 inverseDeltaTime) {
 		PROFILE_SCOPE("Application update/integrate");
 
-		for (const ref<Layer> layer : layerStack) {
+		for (const ref<Layer> layer : layerCompositor->layers) {
 			layer->update(static_cast<float32>(deltaTime), static_cast<float32>(inverseDeltaTime));
 		}
 	}
 
 	void Application::render(float64 remainingFrameTime) {
-		PROFILE_SCOPE("Application render");
-
-		const ref<Device> device = Renderer::getDevice();
-		const ref<Swapchain> swapchain = Renderer::getSwapchain();
-		const ref<Fence> flightFence = Renderer::getFlightFence(frameInFlightIndex);
-		const ref<Semaphore> acquireNextImageSemaphore = Renderer::getAcquireNextImageSemaphore(frameInFlightIndex);
-		const ref<Semaphore> finishedRenderSemaphore = Renderer::getFinishedRenderSemaphore(frameInFlightIndex);
-		const ref<CommandEncoder> commandEncoder = Renderer::getCommandEncoder(frameInFlightIndex);
-
-		device->waitForFence(flightFence);
-		device->resetFence(flightFence);
-
-		uint32 imageIndex;
-
-		const AcquireNextImageStatus acquireNextImageStatus = device->acquireNextImage(swapchain, acquireNextImageSemaphore, imageIndex);
-
-		ENGINE_ASSERT(acquireNextImageStatus == AcquireNextImageStatus::SUBOPTIMAL || acquireNextImageStatus == AcquireNextImageStatus::SUCCESS, "Failed to acquire the next swapchain image.");
-
-		Renderer::setImageIndex(imageIndex);
-
-		commandEncoder->reset();
-		commandEncoder->begin();
-
-		for (const ref<Layer> layer : layerStack) {
-			layer->preRender();
-			layer->render(commandEncoder, remainingFrameTime);
-			layer->postRender();
-		}
-
-		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-		const ref<Queue> graphicsQueue = device->getQueue(QueueFamilyCapability::GRAPHICS);
-
-		graphicsQueue->submit({commandBuffer}, acquireNextImageSemaphore, finishedRenderSemaphore, flightFence);
-
-		const PresentStatus presentStatus = graphicsQueue->present({swapchain}, {imageIndex}, finishedRenderSemaphore);
+		const PresentStatus presentStatus = layerCompositor->render(frameInFlightIndex, remainingFrameTime);
 
 		if (presentStatus == PresentStatus::ERROR_OUT_OF_DATE || presentStatus == PresentStatus::SUBOPTIMAL || windowResized) {
 			resize();
@@ -316,27 +293,15 @@ namespace Trident {
 		ENGINE_ASSERT(presentStatus == PresentStatus::SUCCESS, "Unhandled present status.");
 	}
 
-	// TODO: Handle resize events with layer superposition.
 	void Application::resize() {
 		windowResized = false;
 
-		window->waitMessage();
-
-		const ref<Device> device = Renderer::getDevice();
-
-		device->waitIdle();
-
-		WindowResizeEvent event(window->getSize()[0], window->getSize()[1]);
-
-		SwapchainDescriptor swapchainDescriptor;
-		swapchainDescriptor.extent.width = event.getWidth();
-		swapchainDescriptor.extent.height = event.getHeight();
-		swapchainDescriptor.vSync = properties->VerticalSync;
-
-		Renderer::getSwapchain()->update(swapchainDescriptor);
+		layerCompositor->resize();
 
 		lastLayerInput.swapchainImage = nullptr;
 		lastLayerInput.swapchainImageView = nullptr;
+
+		WindowResizeEvent event(window->getSize()[0], window->getSize()[1]);
 
 		// Propagate the event to the layer stack.
 		propagateEventBackToFront(event);
@@ -349,7 +314,7 @@ namespace Trident {
 	void Application::propagateEventFrontToBack(Event& event) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		for (std::vector<ref<Layer>>::const_reverse_iterator layerIterator = layerStack.rbegin(); layerIterator != layerStack.rend(); layerIterator += 1) {
+		for (std::vector<ref<Layer>>::const_reverse_iterator layerIterator = layerCompositor->layers.rbegin(); layerIterator != layerCompositor->layers.rend(); layerIterator += 1) {
 			if (event.handled) {
 				break;
 			}
@@ -361,7 +326,7 @@ namespace Trident {
 	void Application::propagateEventBackToFront(Event& event) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		for (std::vector<ref<Layer>>::const_iterator layerIterator = layerStack.begin(); layerIterator != layerStack.end(); layerIterator += 1) {
+		for (std::vector<ref<Layer>>::const_iterator layerIterator = layerCompositor->layers.begin(); layerIterator != layerCompositor->layers.end(); layerIterator += 1) {
 			// event.handled is ignored in back to front scenarios.
 			(*layerIterator)->onEvent(event);
 		}

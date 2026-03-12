@@ -7,11 +7,20 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	DX12::ShaderModule::ShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) :
-		Trident::ShaderModule(descriptor)
-	{
+	DX12::ShaderModule::ShaderModule(const Trident::Device* device) :
+		Trident::ShaderModule(device)
+	{}
+
+	ref<Trident::ShaderModule> DX12::createShaderModule(const Trident::Device* device, const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> shaderModuleAsset) {
+		ADAPTER_ASSERT(false, "Shader module assets are not supported by the DirectX 12 adapter.");
+
+		return nullptr;
+	}
+
+	ref<Trident::ShaderModule> DX12::createShaderModule(const Trident::Device* device, const ShaderModuleDescriptor& descriptor, view<char8> code) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		ref<DX12::ShaderModule> shaderModule = createRef<DX12::ShaderModule>(device);
 		HRESULT result;
 		UINT flags = 0;
 
@@ -57,7 +66,7 @@ namespace Trident {
 			target,
 			flags,
 			0,
-			&blob,
+			&shaderModule->blob,
 			#if defined(BUILD_MODE_DEBUG)
 				&errorBlob
 			#else
@@ -76,9 +85,13 @@ namespace Trident {
 		#else
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to compile shader.");
 		#endif
+
+		return shaderModule;
 	}
 
-	DX12::ShaderModule::~ShaderModule() {
-		blob->Release();
+	void DX12::destroyShaderModule(const Trident::Device* device, const Trident::ShaderModule* shaderModule) {
+		const DX12::ShaderModule* _shaderModule = static_cast<const DX12::ShaderModule*>(shaderModule);
+
+		_shaderModule->blob->Release();
 	}
 }

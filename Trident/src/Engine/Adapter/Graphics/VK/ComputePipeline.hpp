@@ -4,17 +4,20 @@
 #pragma once
 
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
-#include "Engine/Adapter/Graphics/VK/Pipeline.hpp"
 #include "Engine/API/Rendering/ComputePipeline.hpp"
 
 namespace Trident {
-	class VK::ComputePipeline final : public VK::Pipeline, public Trident::ComputePipeline {
+	class VK::ComputePipeline final : public Trident::ComputePipeline {
 		public:
-			explicit ComputePipeline(const ComputePipelineDescriptor& descriptor, const VK::Device& device);
+			explicit ComputePipeline(const Trident::Device* device);
 
-			~ComputePipeline() final override;
-
-		private:
-			const VK::Device& device;
+		public:
+			VkPipeline pipeline;
 	};
+
+	namespace VK {
+		ref<Trident::ComputePipeline> createComputePipeline(const Trident::Device* device, const ComputePipelineDescriptor& descriptor);
+
+		void destroyComputePipeline(const Trident::Device* device, const Trident::ComputePipeline* computePipeline);
+	}
 }

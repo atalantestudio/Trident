@@ -11,26 +11,29 @@
 namespace Trident {
 	class GL::Device final : public Trident::Device {
 		public:
-			explicit Device(const GL::Instance& instance);
+			explicit Device(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice);
 
-			AcquireNextImageStatus acquireNextImage(ref<Trident::Swapchain> swapchain, ref<Semaphore> semaphore, uint32& imageIndex) const final override;
-
-			sequence<ref<Trident::DescriptorSet>> allocateDescriptorSets(view<ref<DescriptorSetLayout>> descriptorSetLayouts) final override;
-
-			ref<Trident::PhysicalDevice> getPhysicalDevice() const final override;
-
-			ref<Trident::Queue> getQueue(QueueFamilyCapability queueFamilyCapability) const final override;
-
-			void resetFence(ref<Trident::Fence> fence) const final override;
-
-			void updateDescriptorSets(view<WriteDescriptorSet> writeDescriptorSets) const final override;
-
-			void waitForFence(ref<Trident::Fence> fence) const final override;
-
-			void waitIdle() const final override;
-
-		private:
-			ref<GL::PhysicalDevice> physicalDevice;
-			ref<GL::Queue> queue;
+		public:
+			ref<Trident::Queue> queue;
 	};
+
+	namespace GL {
+		AcquireNextImageStatus acquireNextImage(const Trident::Device* device, const Trident::Swapchain* swapchain, const Trident::Semaphore* semaphore, uint32& imageIndex);
+
+		sequence<ref<Trident::DescriptorSet>> allocateDescriptorSets(Trident::Device* device, view<ref<Trident::DescriptorSetLayout>> descriptorSetLayouts);
+
+		ref<Trident::Device> createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice);
+
+		void destroyDevice(const Trident::Device* device);
+
+		ref<Trident::Queue> getQueue(const Trident::Device* device, QueueFamilyCapability queueFamilyCapability);
+
+		void resetFence(const Trident::Device* device, const Trident::Fence* fence);
+
+		void updateDescriptorSets(const Trident::Device* device, view<WriteDescriptorSet> writeDescriptorSets);
+
+		void waitForFence(const Trident::Device* device, Trident::Fence* fence);
+
+		void waitIdle(const Trident::Device* device);
+	}
 }

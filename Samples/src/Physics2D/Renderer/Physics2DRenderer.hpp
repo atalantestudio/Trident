@@ -114,26 +114,26 @@ namespace Trident {
 			void createPlaceholderDescriptorSetLayout();
 			void createCameraViewPipelineLayout();
 			void createPlaceholderPipelineLayout();
-			void createGridRenderPipeline();
-			void createFillRenderPipeline();
-			void createStrokeRenderPipeline();
-			void createCenterOfMassRenderPipeline();
-			void createPlaceholderFillRenderPipeline();
-			void createPlaceholderStrokeRenderPipeline();
-			void createPlaceholderCenterOfMassRenderPipeline();
+			void createGridGraphicsPipeline();
+			void createFillGraphicsPipeline();
+			void createStrokeGraphicsPipeline();
+			void createCenterOfMassGraphicsPipeline();
+			void createPlaceholderFillGraphicsPipeline();
+			void createPlaceholderStrokeGraphicsPipeline();
+			void createPlaceholderCenterOfMassGraphicsPipeline();
 
 			#if defined(SHOW_DISTANCE)
-				void createDistanceRenderPipeline();
+				void createDistanceGraphicsPipeline();
 			#endif
 
 			#if defined(SHOW_FEATURES)
-				void createVertexFeatureRenderPipeline();
-				void createEdgeFeatureRenderPipeline();
+				void createVertexFeatureGraphicsPipeline();
+				void createEdgeFeatureGraphicsPipeline();
 			#endif
 
 			void allocateDescriptorSets();
 
-			void copyBuffers(ref<Buffer> stagingBuffer) const;
+			void copyBuffers(ref<Buffer<uint8>> stagingBuffer) const;
 
 			void updateCameraViewDescriptorSet() const;
 			void updatePlaceholderDescriptorSet() const;
@@ -176,40 +176,40 @@ namespace Trident {
 			ref<PipelineLayout> cameraViewPipelineLayout;
 			ref<PipelineLayout> placeholderPipelineLayout;
 
-			ref<RenderPipeline> gridRenderPipeline;
-			ref<RenderPipeline> fillRenderPipeline;
-			ref<RenderPipeline> strokeRenderPipeline;
-			ref<RenderPipeline> centerOfMassRenderPipeline;
-			ref<RenderPipeline> placeholderFillRenderPipeline;
-			ref<RenderPipeline> placeholderStrokeRenderPipeline;
-			ref<RenderPipeline> placeholderCenterOfMassRenderPipeline;
+			ref<GraphicsPipeline> gridGraphicsPipeline;
+			ref<GraphicsPipeline> fillGraphicsPipeline;
+			ref<GraphicsPipeline> strokeGraphicsPipeline;
+			ref<GraphicsPipeline> centerOfMassGraphicsPipeline;
+			ref<GraphicsPipeline> placeholderFillGraphicsPipeline;
+			ref<GraphicsPipeline> placeholderStrokeGraphicsPipeline;
+			ref<GraphicsPipeline> placeholderCenterOfMassGraphicsPipeline;
 
 			#if defined(SHOW_DISTANCE)
-				ref<RenderPipeline> distanceRenderPipeline;
+				ref<GraphicsPipeline> distanceGraphicsPipeline;
 			#endif
 
 			#if defined(SHOW_FEATURES)
-				ref<RenderPipeline> vertexFeatureRenderPipeline;
-				ref<RenderPipeline> edgeFeatureRenderPipeline;
+				ref<GraphicsPipeline> vertexFeatureGraphicsPipeline;
+				ref<GraphicsPipeline> edgeFeatureGraphicsPipeline;
 			#endif
 
-			ref<Buffer> cameraBuffer;
-			ref<Buffer> viewBuffer;
-			ref<Buffer> placeholderBuffer;
+			ref<Buffer<Camera>> cameraBuffer;
+			ref<Buffer<View>> viewBuffer;
+			ref<Buffer<Placeholder>> placeholderBuffer;
 
 			#if defined(SHOW_DISTANCE)
-				ref<Buffer> closestPointBuffer;
+				ref<Buffer<Vertex>> closestPointBuffer;
 			#endif
 
 			#if defined(SHOW_FEATURES)
-				ref<Buffer> vertexFeatureBuffer;
-				ref<Buffer> edgeFeatureBuffer;
+				ref<Buffer<Vertex>> vertexFeatureBuffer;
+				ref<Buffer<Vertex>> edgeFeatureBuffer;
 			#endif
 
-			ref<Buffer> vertexBuffer;
-			ref<Buffer> instanceBuffer;
-			ref<Buffer> centerOfMassBuffer;
-			ref<Buffer> indexBuffer;
+			ref<Buffer<Vertex>> vertexBuffer;
+			ref<Buffer<Instance>> instanceBuffer;
+			ref<Buffer<CenterOfMass>> centerOfMassBuffer;
+			ref<Buffer<uint16>> indexBuffer;
 
 			Camera* cameraBufferMappedRange = nullptr;
 			View* viewBufferMappedRange = nullptr;

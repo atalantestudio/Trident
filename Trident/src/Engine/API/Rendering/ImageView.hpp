@@ -3,48 +3,32 @@
 
 #pragma once
 
+#include "Engine/API/Graphics/Base.hpp"
 #include "Engine/API/Rendering/Descriptor/ImageViewDescriptor.hpp"
-#include "Engine/API/Rendering/Image.hpp"
-#include "Engine/Validation/Descriptor.hpp"
 
 namespace Trident {
 	class ImageView {
 		public:
-			virtual ~ImageView() = default;
+			~ImageView();
 
-			Image* getImage() {
-				return image;
-			}
+			Image* getImage();
 
-			uint32 getMipLevelOffset() const {
-				return mipLevelOffset;
-			}
+			uint32 getMipLevelOffset() const;
 
-			uint32 getMipLevelCount() const {
-				return mipLevelCount;
-			}
+			uint32 getMipLevelCount() const;
 
-			uint32 getLayerOffset() const {
-				return layerOffset;
-			}
+			uint32 getLayerOffset() const;
 
-			uint32 getLayerCount() const {
-				return layerCount;
-			}
+			uint32 getLayerCount() const;
 
 		protected:
-			explicit ImageView(const ImageViewDescriptor& descriptor, Image* image) :
-				image(image),
-				mipLevelOffset(descriptor.mipLevelOffset),
-				mipLevelCount(descriptor.mipLevelCount),
-				layerOffset(descriptor.layerOffset),
-				layerCount(descriptor.layerCount)
-			{
-				DEBUG_DESCRIPTOR_GUARD(descriptor, image);
-			}
+			explicit ImageView(const Device* device, Image* image, const ImageViewDescriptor& descriptor);
 
-		protected:
+		// TODO: Don't expose to the client side.
+		public:
+			const Device* device;
 			Image* image;
+
 			uint32 mipLevelOffset;
 			uint32 mipLevelCount;
 			uint32 layerOffset;

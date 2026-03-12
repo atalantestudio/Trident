@@ -9,7 +9,7 @@
 #include "Engine/API/Scene/Scene.hpp"
 
 namespace Trident {
-	struct InstanceDescriptor {
+	struct SceneInstanceDescriptor {
 		vec3<float32> position = {0.0_m, 0.0_m, 0.0_m};
 		vec3<float32> rotation = {0.0_rad, 0.0_rad, 0.0_rad};
 		vec3<float32> scale = {1.0f, 1.0f, 1.0f};
@@ -104,7 +104,7 @@ namespace Trident {
 				return geometryInstanceCount;
 			}
 
-			uint32 registerInstance(const InstanceDescriptor& descriptor) {
+			uint32 registerInstance(const SceneInstanceDescriptor& descriptor) {
 				DEBUG_ASSERT(descriptor.geometryIndex < geometryCount);
 				DEBUG_ASSERT(instanceCount < MAX_INSTANCE_COUNT);
 

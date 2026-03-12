@@ -78,7 +78,7 @@ namespace Trident {
 		visibilityIndirectBuffer = createVisibilityIndirectBuffer();
 
 		cameraBuffer = createCameraBuffer();
-		cameraMappedRange = cameraBuffer->map<Camera>(0, cameraBuffer->getSize());
+		cameraMappedRange = cameraBuffer->map(0, cameraBuffer->getSize());
 
 		materialImageSampler = createMaterialImageSampler();
 
@@ -137,7 +137,7 @@ namespace Trident {
 			commandEncoder->setScissor(0, 0, extent);
 
 			// Write pixel visibility and count per material.
-			commandEncoder->bindRenderPipeline(visibilityPipeline);
+			commandEncoder->bindGraphicsPipeline(visibilityPipeline);
 			commandEncoder->bindDescriptorSets(visibilityPipelineLayout, 0, {cameraDescriptorSet, clusterDescriptorSet, instanceDescriptorSet});
 			commandEncoder->drawIndirect(visibilityIndirectBuffer, 0, 1, 0);
 
@@ -202,7 +202,7 @@ namespace Trident {
 			const ClearValue swapchainClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
 
 			BeginRenderPassDescriptor beginRenderPassDescriptor{};
-			beginRenderPassDescriptor.framebuffer = presentFramebuffers[getImageIndex()];
+			beginRenderPassDescriptor.framebuffer = presentFramebuffers[getSwapchainImageIndex()];
 			beginRenderPassDescriptor.clearValues = {swapchainClearValue};
 
 			commandEncoder->beginRenderPass(beginRenderPassDescriptor);
@@ -211,11 +211,11 @@ namespace Trident {
 
 			#if 1
 				// Present the output image.
-				commandEncoder->bindRenderPipeline(outputPipeline);
+				commandEncoder->bindGraphicsPipeline(outputPipeline);
 				commandEncoder->bindDescriptorSets(outputPipelineLayout, 0, {outputDescriptorSet});
 				commandEncoder->draw(3, 1, 0, 0);
 			#else
-				commandEncoder->bindRenderPipeline(debugPipeline);
+				commandEncoder->bindGraphicsPipeline(debugPipeline);
 				commandEncoder->bindDescriptorSets(debugPipelineLayout, 0, {debugDescriptorSet, clusterDescriptorSet, instanceDescriptorSet});
 				commandEncoder->draw(3, 1, 0, 0);
 			#endif
@@ -275,7 +275,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(vertexPositionComponentBufferDescriptor, "Vertex position component");
 
-		vertexPositionComponentBuffer = createBuffer(vertexPositionComponentBufferDescriptor);
+		vertexPositionComponentBuffer = createBuffer<float32>(vertexPositionComponentBufferDescriptor);
 	}
 
 	void VisibilityRenderer::createVertexNormalComponentBuffer() {
@@ -288,7 +288,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(vertexNormalComponentBufferDescriptor, "Vertex normal component");
 
-		vertexNormalComponentBuffer = createBuffer(vertexNormalComponentBufferDescriptor);
+		vertexNormalComponentBuffer = createBuffer<float32>(vertexNormalComponentBufferDescriptor);
 	}
 
 	void VisibilityRenderer::createVertexTextureCoordinateComponentBuffer() {
@@ -301,7 +301,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(vertexTextureCoordinateComponentBufferDescriptor, "Vertex texture coordinate component");
 
-		vertexTextureCoordinateComponentBuffer = createBuffer(vertexTextureCoordinateComponentBufferDescriptor);
+		vertexTextureCoordinateComponentBuffer = createBuffer<float32>(vertexTextureCoordinateComponentBufferDescriptor);
 	}
 
 	void VisibilityRenderer::createVertexPositionIndexBuffer() {
@@ -314,7 +314,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(vertexPositionIndexBufferDescriptor, "Vertex position index");
 
-		vertexPositionIndexBuffer = createBuffer(vertexPositionIndexBufferDescriptor);
+		vertexPositionIndexBuffer = createBuffer<uint32>(vertexPositionIndexBufferDescriptor);
 	}
 
 	void VisibilityRenderer::createVertexNormalIndexBuffer() {
@@ -327,7 +327,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(vertexNormalIndexBufferDescriptor, "Vertex normal index");
 
-		vertexNormalIndexBuffer = createBuffer(vertexNormalIndexBufferDescriptor);
+		vertexNormalIndexBuffer = createBuffer<uint32>(vertexNormalIndexBufferDescriptor);
 	}
 
 	void VisibilityRenderer::createVertexTextureCoordinateIndexBuffer() {
@@ -340,7 +340,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(vertexTextureCoordinateIndexBufferDescriptor, "Vertex texture coordinate index");
 
-		vertexTextureCoordinateIndexBuffer = createBuffer(vertexTextureCoordinateIndexBufferDescriptor);
+		vertexTextureCoordinateIndexBuffer = createBuffer<uint32>(vertexTextureCoordinateIndexBufferDescriptor);
 	}
 
 	void VisibilityRenderer::createClusterBuffer() {
@@ -353,7 +353,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(clusterBufferDescriptor, "Cluster");
 
-		clusterBuffer = createBuffer(clusterBufferDescriptor);
+		clusterBuffer = createBuffer<Cluster>(clusterBufferDescriptor);
 	}
 
 	void VisibilityRenderer::createInstanceBuffer() {
@@ -367,9 +367,9 @@ namespace Trident {
 
 		SET_DEBUG_NAME(instanceBufferDescriptor, "Instance");
 
-		instanceBuffer = createBuffer(instanceBufferDescriptor);
+		instanceBuffer = createBuffer<ClusteredInstance>(instanceBufferDescriptor);
 
-		instanceMappedRange = instanceBuffer->map<ClusteredInstance>(0, instanceBuffer->getSize());
+		instanceMappedRange = instanceBuffer->map(0, instanceBuffer->getSize());
 	}
 
 	void VisibilityRenderer::createGeometryBuffer() {
@@ -382,7 +382,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(geometryBufferDescriptor, "Geometry");
 
-		geometryBuffer = createBuffer(geometryBufferDescriptor);
+		geometryBuffer = createBuffer<Geometry>(geometryBufferDescriptor);
 	}
 
 	void VisibilityRenderer::allocateDescriptorSets() {
@@ -411,7 +411,7 @@ namespace Trident {
 
 	void VisibilityRenderer::fillSceneBuffers() const {
 		{
-			DrawIndirectCommand* visibilityIndirectMappedRange = visibilityIndirectBuffer->map<DrawIndirectCommand>(0, visibilityIndirectBuffer->getSize());
+			DrawIndirectCommand* visibilityIndirectMappedRange = visibilityIndirectBuffer->map(0, visibilityIndirectBuffer->getSize());
 			visibilityIndirectMappedRange->vertexCount = CLUSTER_INDEX_COUNT;
 			visibilityIndirectMappedRange->instanceCount = static_cast<uint32>(scene->clusters.count());
 			visibilityIndirectMappedRange->vertexOffset = 0;
@@ -420,7 +420,7 @@ namespace Trident {
 			visibilityIndirectBuffer->unmap();
 		}
 
-		const ref<Buffer> stagingBuffer = createStagingBuffer(
+		const ref<Buffer<uint8>> stagingBuffer = createStagingBuffer<uint8>(
 			vertexPositionComponentBuffer->getSize() +
 			vertexNormalComponentBuffer->getSize() +
 			vertexTextureCoordinateComponentBuffer->getSize() +
@@ -432,7 +432,7 @@ namespace Trident {
 			geometryBuffer->getSize()
 		);
 
-		uint8* mappedRange = stagingBuffer->map<uint8>(0, stagingBuffer->getSize());
+		uint8* mappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
 		uint64 sourceOffset = 0;
 
 		float32* vertexPositionComponentMappedRange = pointer_cast<float32*>(mappedRange + sourceOffset);

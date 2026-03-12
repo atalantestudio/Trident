@@ -9,11 +9,12 @@
 namespace Trident {
 	class ShaderModule {
 		public:
-			virtual ~ShaderModule() = default;
+			~ShaderModule();
 
 		protected:
-			explicit ShaderModule(const ShaderModuleDescriptor& descriptor) {
-				DEBUG_DESCRIPTOR_GUARD(descriptor);
-			}
+			explicit ShaderModule(const Device* device);
+
+		public:
+			const Device* device;
 	};
 }

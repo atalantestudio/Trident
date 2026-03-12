@@ -220,7 +220,7 @@ namespace Trident {
 					const bool BFINAL = read<uint8>(1);
 
 					// BTYPE specifies how the data are compressed, as follows:
-					//  
+					// 
 					//    00 - no compression
 					//    01 - compressed with fixed Huffman codes
 					//    10 - compressed with dynamic Huffman codes

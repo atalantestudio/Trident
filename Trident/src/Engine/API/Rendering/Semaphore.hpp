@@ -6,6 +6,12 @@
 namespace Trident {
 	class Semaphore {
 		public:
-			virtual ~Semaphore() = default;
+			~Semaphore();
+
+		public:
+			explicit Semaphore(const Device* device);
+
+		protected:
+			const Device* device;
 	};
 }

@@ -11,26 +11,24 @@
 namespace Trident {
 	class DX12::Queue final : public Trident::Queue {
 		public:
-			explicit Queue(const DX12::Device& device, D3D12_COMMAND_LIST_TYPE commandListType);
-
-			~Queue() final override;
-
-			ref<Trident::CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const final override;
-
-			void submit(view<ref<Trident::CommandBuffer>> commandBuffers) const final override;
-			void submit(view<ref<Trident::CommandBuffer>> commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<Trident::Fence> fence) const final override;
-
-			PresentStatus present(view<ref<Trident::Swapchain>> swapchains, view<uint32> presentableImageIndices, ref<Semaphore> waitSemaphore) const final override;
-
-			void waitIdle() const final override;
+			explicit Queue(const DX12::Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability);
 
 		public:
 			ID3D12CommandQueue* commandQueue;
-			DX12::CommandPool commandPool;
-
-		private:
-			const DX12::Device& device;
-			ref<DX12::Fence> idleFence;
+			ref<Trident::Fence> idleFence;
 			HANDLE completionEvent;
 	};
+
+	namespace DX12 {
+		ref<Trident::Queue> createQueue(const Trident::Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability);
+
+		void destroyQueue(const Trident::Queue* queue);
+
+		PresentStatus present(const Trident::Queue* queue, view<ref<Trident::Swapchain>> swapchains, view<uint32> presentableImageIndices, ref<Semaphore> waitSemaphore);
+
+		void submit(const Trident::Queue* queue, view<ref<Trident::CommandBuffer>> commandBuffers);
+		void submit(const Trident::Queue* queue, view<ref<Trident::CommandBuffer>> commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<Trident::Fence> fence);
+
+		void waitIdle(const Trident::Queue* queue);
+	}
 }

@@ -20,237 +20,89 @@
 #include "Engine/Validation/Descriptor.hpp"
 
 namespace Trident {
-	GraphicsAPI Renderer::graphicsApi = GraphicsAPI::CPU;
-	scope<GraphicsAdapter> Renderer::adapter = nullptr;
-	uint32 Renderer::imageIndex = 0;
-	ref<Swapchain> Renderer::swapchain = nullptr;
-	sequence<ref<CommandEncoder>> Renderer::commandEncoders;
-	sequence<ref<Fence>> Renderer::flightFences;
-	sequence<ref<Semaphore>> Renderer::acquireNextImageSemaphores;
-	sequence<ref<Semaphore>> Renderer::finishedRenderSemaphores;
+	const LayerCompositor* Renderer::layerCompositor;
 
 	GraphicsAPI Renderer::getGraphicsApi() {
-		return graphicsApi;
+		return layerCompositor->adapter->getApi();
 	}
 
-	void Renderer::initialize(const ProjectDescriptor& projectDescriptor, const Window& window, const ApplicationProperties& properties) {
-		switch (properties.GraphicsAPI) {
-			case GraphicsAPI::CPU: {
-				ENGINE_ERROR_UNIMPLEMENTED();
-
-				break;
-			}
-			#if defined(ENABLE_DX12_ADAPTER)
-				case GraphicsAPI::DX12: {
-					ENGINE_INFO("Using DirectX 12 graphics adapter.");
-
-					adapter = createScope<DX12::GraphicsAdapter>(projectDescriptor, window, properties);
-
-					break;
-				}
-			#endif
-			#if defined(ENABLE_GL_ADAPTER)
-				case GraphicsAPI::GL: {
-					ENGINE_INFO("Using OpenGL [] graphics adapter.", OPENGL_VERSION);
-
-					adapter = createScope<GL::GraphicsAdapter>(projectDescriptor, window, properties);
-
-					break;
-				}
-			#endif
-			#if defined(ENABLE_VK_ADAPTER)
-				case GraphicsAPI::VK: {
-					ENGINE_INFO("Using Vulkan graphics adapter.");
-
-					adapter = createScope<VK::GraphicsAdapter>(projectDescriptor, window, properties);
-
-					break;
-				}
-			#endif
-		}
-
-		DEBUG_ASSERT(adapter != nullptr);
-
-		graphicsApi = properties.GraphicsAPI;
-
-		const ref<Queue> graphicsQueue = adapter->getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
-
-		SwapchainDescriptor swapchainDescriptor{};
-		swapchainDescriptor.extent.width = window.getSize()[0];
-		swapchainDescriptor.extent.height = window.getSize()[1];
-		swapchainDescriptor.vSync = properties.VerticalSync;
-
-		swapchain = adapter->createSwapchain(swapchainDescriptor);
-
-		commandEncoders = sequence<ref<CommandEncoder>>(Application::MAX_FRAMES_IN_FLIGHT);
-		flightFences = sequence<ref<Fence>>(Application::MAX_FRAMES_IN_FLIGHT);
-		acquireNextImageSemaphores = sequence<ref<Semaphore>>(Application::MAX_FRAMES_IN_FLIGHT);
-		finishedRenderSemaphores = sequence<ref<Semaphore>>(Application::MAX_FRAMES_IN_FLIGHT);
-
-		CommandBufferDescriptor inFlightCommandBufferDescriptor{};
-		inFlightCommandBufferDescriptor.usage = CommandBufferUsage::AUTO;
-
-		FenceDescriptor inFlightFenceDescriptor{};
-		inFlightFenceDescriptor.signaled = true;
-
-		uint32 frameInFlightIndex = 0;
-
-		#if defined(BUILD_MODE_DEBUG)
-			sequence<char8> name;
-		#endif
-
-		while (frameInFlightIndex < Application::MAX_FRAMES_IN_FLIGHT) {
-			#if defined(BUILD_MODE_DEBUG)
-				name = Logger::format("In flight command buffer []", frameInFlightIndex);
-
-				inFlightCommandBufferDescriptor.name = name;
-
-				commandEncoders[frameInFlightIndex] = graphicsQueue->createCommandEncoder(inFlightCommandBufferDescriptor);
-
-				name = Logger::format("In flight fence []", frameInFlightIndex);
-
-				inFlightFenceDescriptor.name = name;
-
-				flightFences[frameInFlightIndex] = adapter->createFence(inFlightFenceDescriptor);
-			#else
-				commandEncoders[frameInFlightIndex] = graphicsQueue->createCommandEncoder(inFlightCommandBufferDescriptor);
-				flightFences[frameInFlightIndex] = adapter->createFence(inFlightFenceDescriptor);
-			#endif
-
-			acquireNextImageSemaphores[frameInFlightIndex] = adapter->createSemaphore();
-			finishedRenderSemaphores[frameInFlightIndex] = adapter->createSemaphore();
-
-			frameInFlightIndex += 1;
-		}
-	}
-
-	void Renderer::deinitialize() {
-		uint32 frameInFlightIndex = 0;
-
-		while (frameInFlightIndex < Application::MAX_FRAMES_IN_FLIGHT) {
-			finishedRenderSemaphores[frameInFlightIndex].~shared_ptr();
-			acquireNextImageSemaphores[frameInFlightIndex].~shared_ptr();
-			flightFences[frameInFlightIndex].~shared_ptr();
-			commandEncoders[frameInFlightIndex].~shared_ptr();
-
-			frameInFlightIndex += 1;
-		}
-
-		commandEncoders = sequence<ref<CommandEncoder>>();
-		flightFences = sequence<ref<Fence>>();
-		acquireNextImageSemaphores = sequence<ref<Semaphore>>();
-		finishedRenderSemaphores = sequence<ref<Semaphore>>();
-
-		swapchain.~shared_ptr();
-
-		adapter->~GraphicsAdapter();
+	void Renderer::initialize(const LayerCompositor* layerCompositor) {
+		Renderer::layerCompositor = layerCompositor;
 	}
 
 	void Renderer::resize(WindowResizeEvent& event) {}
 
 	void Renderer::onEvent(Event& event) {}
 
-	ref<Buffer> Renderer::createBuffer(const BufferDescriptor& descriptor) {
-		return adapter->createBuffer(descriptor);
-	}
-
-	ref<Buffer> Renderer::createStagingBuffer(uint64 size, bool persistent) {
-		BufferDescriptor stagingBufferDescriptor;
-		stagingBufferDescriptor.size = size;
-		stagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
-		stagingBufferDescriptor.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT;
-		stagingBufferDescriptor.persistent = persistent;
-
-		SET_DEBUG_NAME(stagingBufferDescriptor, "Staging buffer");
-
-		return createBuffer(stagingBufferDescriptor);
-	}
-
 	ref<ComputePipeline> Renderer::createComputePipeline(const ComputePipelineDescriptor& descriptor) {
-		return adapter->createComputePipeline(descriptor);
+		return layerCompositor->device->createComputePipeline(descriptor);
 	}
 
 	ref<DescriptorSetLayout> Renderer::createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) {
-		return adapter->createDescriptorSetLayout(bindings);
+		return layerCompositor->device->createDescriptorSetLayout(bindings);
 	}
 
 	ref<Fence> Renderer::createFence(const FenceDescriptor& descriptor) {
-		return adapter->createFence(descriptor);
+		return layerCompositor->device->createFence(descriptor);
 	}
 
 	ref<Framebuffer> Renderer::createFramebuffer(const FramebufferDescriptor& descriptor) {
-		return adapter->createFramebuffer(descriptor);
+		return layerCompositor->device->createFramebuffer(descriptor);
 	}
 
 	ref<Image> Renderer::createImage(const ImageDescriptor& descriptor) {
-		return adapter->createImage(descriptor);
+		return layerCompositor->device->createImage(descriptor);
 	}
 
 	ref<PipelineLayout> Renderer::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) {
-		return adapter->createPipelineLayout(descriptor);
+		return layerCompositor->device->createPipelineLayout(descriptor);
 	}
 
 	ref<RenderPass> Renderer::createRenderPass(const RenderPassDescriptor& descriptor) {
-		return adapter->createRenderPass(descriptor);
+		return layerCompositor->device->createRenderPass(layerCompositor->surface, descriptor);
 	}
 
-	ref<RenderPipeline> Renderer::createRenderPipeline(const RenderPipelineDescriptor& descriptor) {
-		return adapter->createRenderPipeline(descriptor);
+	ref<GraphicsPipeline> Renderer::createGraphicsPipeline(const GraphicsPipelineDescriptor& descriptor) {
+		return layerCompositor->device->createGraphicsPipeline(descriptor);
 	}
 
 	ref<Sampler> Renderer::createSampler(const SamplerDescriptor& descriptor) {
-		return adapter->createSampler(descriptor);
+		return layerCompositor->device->createSampler(descriptor);
 	}
 
 	ref<Semaphore> Renderer::createSemaphore() {
-		return adapter->createSemaphore();
+		return layerCompositor->device->createSemaphore();
 	}
 
 	ref<Subpass> Renderer::createSubpass(const SubpassDescriptor& descriptor) {
 		return createRef<Subpass>(descriptor);
 	}
 
-	ref<Semaphore> Renderer::getAcquireNextImageSemaphore(uint32 frameInFlightIndex) {
-		return acquireNextImageSemaphores[frameInFlightIndex];
-	}
-
-	ref<CommandEncoder> Renderer::getCommandEncoder(uint32 frameInFlightIndex) {
-		return commandEncoders[frameInFlightIndex];
-	}
-
 	ref<Device> Renderer::getDevice() {
-		return adapter->getDevice();
+		return layerCompositor->device;
 	}
 
-	ref<Semaphore> Renderer::getFinishedRenderSemaphore(uint32 frameInFlightIndex) {
-		return finishedRenderSemaphores[frameInFlightIndex];
-	}
-
-	ref<Fence> Renderer::getFlightFence(uint32 frameInFlightIndex) {
-		return flightFences[frameInFlightIndex];
-	}
-
-	uint32 Renderer::getImageIndex() {
-		return imageIndex;
+	uint32 Renderer::getSwapchainImageIndex() {
+		return layerCompositor->swapchainImageIndex;
 	}
 
 	ref<Surface> Renderer::getSurface() {
-		return adapter->getSurface();
+		return layerCompositor->surface;
 	}
 
 	ref<Swapchain> Renderer::getSwapchain() {
-		return swapchain;
+		return layerCompositor->swapchain;
 	}
 
 	ref<ShaderModule> Renderer::loadShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) {
-		return adapter->createShaderModule(descriptor, asset);
+		return layerCompositor->device->createShaderModule(descriptor, asset);
 	}
 
 	ref<ShaderModule> Renderer::loadShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> path) {
 		std::string pathString = "Asset/Shader/";
 		pathString += path;
 
-		switch (graphicsApi) {
+		switch (layerCompositor->adapter->getApi()) {
 			case GraphicsAPI::DX12: {
 				pathString += ".hlsl";
 
@@ -281,14 +133,10 @@ namespace Trident {
 
 		const sequence<char8> code = Filesystem::openTextBuffer(&path[0]);
 
-		return adapter->createShaderModule(descriptor, view<char8>(&code[0], code.count()));
+		return layerCompositor->device->createShaderModule(descriptor, view<char8>(&code[0], code.count()));
 	}
 
 	ref<ShaderModule> Renderer::loadInternalShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> path) {
 		return loadShaderModule(descriptor, Logger::format("../../../../../Trident/src/Asset/Shader/[]", path));
-	}
-
-	void Renderer::setImageIndex(uint32 imageIndex) {
-		Renderer::imageIndex = imageIndex;
 	}
 }

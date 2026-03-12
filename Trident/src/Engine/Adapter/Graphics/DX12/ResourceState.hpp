@@ -22,7 +22,7 @@ namespace Trident::DX12 {
 	}
 
 	inline D3D12_RESOURCE_STATES getImageResourceState(ImageUsage usage, ImageLayout& layout, uint8 sampleCount) {
-		// TODO(debug-only)
+		// TODO: Restore.
 		return D3D12_RESOURCE_STATE_COMMON;
 
 		/* if (sampleCount > 1) {
@@ -63,21 +63,20 @@ namespace Trident::DX12 {
 	}
 
 	inline D3D12_RESOURCE_STATES getImageTransitionResourceState(ImageLayout imageLayout) {
-		switch (imageLayout) {
-			case ImageLayout::UNDEFINED: return D3D12_RESOURCE_STATE_COMMON;
-			case ImageLayout::GENERAL: return D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-			case ImageLayout::COLOR_ATTACHMENT_OPTIMAL: return D3D12_RESOURCE_STATE_RENDER_TARGET;
-			case ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL: return D3D12_RESOURCE_STATE_RENDER_TARGET | D3D12_RESOURCE_STATE_DEPTH_WRITE;
-			case ImageLayout::DEPTH_STENCIL_READ_ONLY_OPTIMAL: return D3D12_RESOURCE_STATE_DEPTH_READ;
-			case ImageLayout::SHADER_READ_ONLY_OPTIMAL: return D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE;
-			case ImageLayout::TRANSFER_SRC_OPTIMAL: return D3D12_RESOURCE_STATE_COPY_SOURCE;
-			case ImageLayout::TRANSFER_DST_OPTIMAL: return D3D12_RESOURCE_STATE_COPY_DEST;
-			case ImageLayout::PRESENT_SRC: return D3D12_RESOURCE_STATE_PRESENT;
-			default: {
-				ADAPTER_ASSERT(false, "Unknown image layout.");
+		static constexpr D3D12_RESOURCE_STATES RESOURCE_STATES[] = {
+			D3D12_RESOURCE_STATE_COMMON,
+			D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+			D3D12_RESOURCE_STATE_RENDER_TARGET,
+			D3D12_RESOURCE_STATE_RENDER_TARGET | D3D12_RESOURCE_STATE_DEPTH_WRITE,
+			D3D12_RESOURCE_STATE_DEPTH_READ,
+			D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE,
+			D3D12_RESOURCE_STATE_COPY_SOURCE,
+			D3D12_RESOURCE_STATE_COPY_DEST,
+			D3D12_RESOURCE_STATE_PRESENT,
+		};
 
-				return D3D12_RESOURCE_STATE_COMMON;
-			}
-		}
+		ADAPTER_ASSERT(imageLayout < ImageLayout::count, "Invalid image layout.");
+
+		return RESOURCE_STATES[static_cast<uint32>(imageLayout)];
 	}
 }

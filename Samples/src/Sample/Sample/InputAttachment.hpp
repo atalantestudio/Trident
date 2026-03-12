@@ -31,17 +31,17 @@ namespace Trident {
 				updateImageDescriptorSet();
 
 				createWriteImagePipelineLayout();
-				createWriteImageRenderPipeline();
+				createWriteImageGraphicsPipeline();
 
 				createReadImagePipelineLayout();
-				createReadImageRenderPipeline();
+				createReadImageGraphicsPipeline();
 
 				createVertexBuffer();
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
 				BeginRenderPassDescriptor beginRenderPassDescriptor{};
-				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
+				beginRenderPassDescriptor.framebuffer = framebuffers[getSwapchainImageIndex()];
 				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 1.0f}};
 
 				const Extent2D swapchainExtent = getSwapchain()->getExtent();
@@ -54,7 +54,7 @@ namespace Trident {
 
 				// Write image subpass.
 				{
-					commandEncoder->bindRenderPipeline(writeImageRenderPipeline);
+					commandEncoder->bindGraphicsPipeline(writeImageGraphicsPipeline);
 					commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 					commandEncoder->draw(3, 1, 0, 0);
 				}
@@ -63,7 +63,7 @@ namespace Trident {
 
 				// Read image subpass.
 				{
-					commandEncoder->bindRenderPipeline(readImageRenderPipeline);
+					commandEncoder->bindGraphicsPipeline(readImageGraphicsPipeline);
 					commandEncoder->bindDescriptorSets(readImagePipelineLayout, 0, {imageDescriptorSet});
 					commandEncoder->draw(3, 1, 0, 0);
 				}
@@ -220,7 +220,7 @@ namespace Trident {
 				writeImagePipelineLayout = createPipelineLayout(writeImagePipelineLayoutDescriptor);
 			}
 
-			void createWriteImageRenderPipeline() {
+			void createWriteImageGraphicsPipeline() {
 				VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 				vertexInputBinding.registerAttribute<svec2<float32>>();
 				vertexInputBinding.registerAttribute<vec3<float32>>();
@@ -243,26 +243,26 @@ namespace Trident {
 				ColorBlendAttachment colorBlendAttachment{};
 				colorBlendAttachment.blend = false;
 
-				RenderPipelineDescriptor writeImageRenderPipelineDescriptor{};
-				writeImageRenderPipelineDescriptor.pipelineLayout = writeImagePipelineLayout;
-				writeImageRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
-				writeImageRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-				writeImageRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-				writeImageRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-				writeImageRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-				writeImageRenderPipelineDescriptor.cullMode = CullMode::BACK;
-				writeImageRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-				writeImageRenderPipelineDescriptor.lineWidth = 1.0f;
-				writeImageRenderPipelineDescriptor.minSampleShading = 0.0f;
-				writeImageRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-				writeImageRenderPipelineDescriptor.depthStencilState.depthTest = false;
-				writeImageRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-				writeImageRenderPipelineDescriptor.renderPass = renderPass;
-				writeImageRenderPipelineDescriptor.subpassIndex = WRITE_IMAGE_SUBPASS_INDEX;
+				GraphicsPipelineDescriptor writeImageGraphicsPipelineDescriptor{};
+				writeImageGraphicsPipelineDescriptor.pipelineLayout = writeImagePipelineLayout;
+				writeImageGraphicsPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
+				writeImageGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+				writeImageGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+				writeImageGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+				writeImageGraphicsPipelineDescriptor.polygonMode = PolygonMode::FILL;
+				writeImageGraphicsPipelineDescriptor.cullMode = CullMode::BACK;
+				writeImageGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+				writeImageGraphicsPipelineDescriptor.lineWidth = 1.0f;
+				writeImageGraphicsPipelineDescriptor.minSampleShading = 0.0f;
+				writeImageGraphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+				writeImageGraphicsPipelineDescriptor.depthStencilState.depthTest = false;
+				writeImageGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+				writeImageGraphicsPipelineDescriptor.renderPass = renderPass;
+				writeImageGraphicsPipelineDescriptor.subpassIndex = WRITE_IMAGE_SUBPASS_INDEX;
 
-				SET_DEBUG_NAME(writeImageRenderPipelineDescriptor, "Image write");
+				SET_DEBUG_NAME(writeImageGraphicsPipelineDescriptor, "Image write");
 
-				writeImageRenderPipeline = createRenderPipeline(writeImageRenderPipelineDescriptor);
+				writeImageGraphicsPipeline = createGraphicsPipeline(writeImageGraphicsPipelineDescriptor);
 			}
 
 			void createReadImagePipelineLayout() {
@@ -274,7 +274,7 @@ namespace Trident {
 				readImagePipelineLayout = createPipelineLayout(readImagePipelineLayoutDescriptor);
 			}
 
-			void createReadImageRenderPipeline() {
+			void createReadImageGraphicsPipeline() {
 				ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 				vertexShaderModuleDescriptor.entryPoint = "main";
@@ -293,31 +293,31 @@ namespace Trident {
 				ColorBlendAttachment colorBlendAttachment{};
 				colorBlendAttachment.blend = false;
 
-				RenderPipelineDescriptor readImageRenderPipelineDescriptor{};
-				readImageRenderPipelineDescriptor.pipelineLayout = readImagePipelineLayout;
-				readImageRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-				readImageRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-				readImageRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-				readImageRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-				readImageRenderPipelineDescriptor.cullMode = CullMode::BACK;
-				readImageRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-				readImageRenderPipelineDescriptor.lineWidth = 1.0f;
-				readImageRenderPipelineDescriptor.minSampleShading = 0.0f;
-				readImageRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-				readImageRenderPipelineDescriptor.depthStencilState.depthTest = false;
-				readImageRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-				readImageRenderPipelineDescriptor.renderPass = renderPass;
-				readImageRenderPipelineDescriptor.subpassIndex = READ_IMAGE_SUBPASS_INDEX;
+				GraphicsPipelineDescriptor readImageGraphicsPipelineDescriptor{};
+				readImageGraphicsPipelineDescriptor.pipelineLayout = readImagePipelineLayout;
+				readImageGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+				readImageGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+				readImageGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+				readImageGraphicsPipelineDescriptor.polygonMode = PolygonMode::FILL;
+				readImageGraphicsPipelineDescriptor.cullMode = CullMode::BACK;
+				readImageGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+				readImageGraphicsPipelineDescriptor.lineWidth = 1.0f;
+				readImageGraphicsPipelineDescriptor.minSampleShading = 0.0f;
+				readImageGraphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+				readImageGraphicsPipelineDescriptor.depthStencilState.depthTest = false;
+				readImageGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+				readImageGraphicsPipelineDescriptor.renderPass = renderPass;
+				readImageGraphicsPipelineDescriptor.subpassIndex = READ_IMAGE_SUBPASS_INDEX;
 
-				SET_DEBUG_NAME(readImageRenderPipelineDescriptor, "Image read");
+				SET_DEBUG_NAME(readImageGraphicsPipelineDescriptor, "Image read");
 
-				readImageRenderPipeline = createRenderPipeline(readImageRenderPipelineDescriptor);
+				readImageGraphicsPipeline = createGraphicsPipeline(readImageGraphicsPipelineDescriptor);
 			}
 
 			void createVertexBuffer() {
-				const ref<Buffer> vertexStagingBuffer = createStagingBuffer(3 * sizeof(Vertex));
+				const ref<Buffer<Vertex>> vertexStagingBuffer = createStagingBuffer<Vertex>(3 * sizeof(Vertex));
 
-				Vertex* vertexStagingBufferMappedRange = vertexStagingBuffer->map<Vertex>(0, vertexStagingBuffer->getSize());
+				Vertex* vertexStagingBufferMappedRange = vertexStagingBuffer->map(0, vertexStagingBuffer->getSize());
 				vertexStagingBufferMappedRange[0].vertex = {-0.5f, -0.5f};
 				vertexStagingBufferMappedRange[0].color = {1.0f, 0.0f, 0.0f};
 				vertexStagingBufferMappedRange[1].vertex = {0.0f, 0.5f};
@@ -335,7 +335,7 @@ namespace Trident {
 
 				SET_DEBUG_NAME(vertexBufferDescriptor, "Vertex buffer");
 
-				vertexBuffer = createBuffer(vertexBufferDescriptor);
+				vertexBuffer = createBuffer<Vertex>(vertexBufferDescriptor);
 
 				BufferCopyRegion vertexBufferCopyRegion{};
 				vertexBufferCopyRegion.sourceOffset = 0;
@@ -368,8 +368,8 @@ namespace Trident {
 			ref<DescriptorSet> imageDescriptorSet;
 			ref<PipelineLayout> writeImagePipelineLayout;
 			ref<PipelineLayout> readImagePipelineLayout;
-			ref<RenderPipeline> writeImageRenderPipeline;
-			ref<RenderPipeline> readImageRenderPipeline;
-			ref<Buffer> vertexBuffer;
+			ref<GraphicsPipeline> writeImageGraphicsPipeline;
+			ref<GraphicsPipeline> readImageGraphicsPipeline;
+			ref<Buffer<Vertex>> vertexBuffer;
 	};
 }

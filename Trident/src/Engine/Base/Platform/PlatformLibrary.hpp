@@ -11,7 +11,7 @@ namespace Trident {
 			~PlatformLibrary();
 
 			// TODO: Template argument for procedure type?
-			void* getProcedure(view<char8> procedureName) const;
+			void* loadProcedure(view<char8> procedureName) const;
 
 		private:
 			void* data;

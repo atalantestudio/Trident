@@ -4,12 +4,13 @@
 #pragma once
 
 #include "Engine/API/Rendering/Descriptor/FramebufferDescriptor.hpp"
+#include "Engine/API/Rendering/Device.hpp"
 #include "Engine/Validation/Descriptor.hpp"
 
 namespace Trident {
 	class Framebuffer {
 		public:
-			virtual ~Framebuffer() = default;
+			~Framebuffer();
 
 			ref<RenderPass> getRenderPass() const {
 				return renderPass;
@@ -20,14 +21,14 @@ namespace Trident {
 			}
 
 		protected:
-			explicit Framebuffer(const FramebufferDescriptor& descriptor) :
+			explicit Framebuffer(const Device* device, const FramebufferDescriptor& descriptor) :
+				device(device),
 				renderPass(descriptor.renderPass),
 				extent(descriptor.extent)
-			{
-				DEBUG_DESCRIPTOR_GUARD(descriptor);
-			}
+			{}
 
 		protected:
+			const Device* device;
 			ref<RenderPass> renderPass;
 			Extent2D extent;
 	};

@@ -6,20 +6,13 @@
 #include "Engine/API/Rendering/Buffer.hpp"
 
 namespace Trident {
-	class GL::Buffer final : public Trident::Buffer {
+	class GL::BaseBuffer final : public Trident::BaseBuffer {
 		public:
-			explicit Buffer(const BufferDescriptor& descriptor);
-
-			~Buffer() final override;
-
-			void unmap() const final override;
-
-			void* getMappedRange(uint64 offset, uint64 size) const final override;
+			explicit BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor);
 
 		public:
 			GLuint buffer;
 
-		private:
 			#if OPENGL_VERSION < OPENGL_VERSION_4_5
 				const GLenum target;
 			#endif
@@ -27,4 +20,14 @@ namespace Trident {
 			GLbitfield storageAccessFlags = 0;
 			GLbitfield mapAccessFlags = 0;
 	};
+
+	namespace GL {
+		ref<Trident::BaseBuffer> createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, UINT stride);
+
+		void destroyBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer);
+
+		void* mapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer, uint64 offset, uint64 size);
+
+		void unmapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer);
+	}
 }

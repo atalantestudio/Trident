@@ -4,19 +4,23 @@
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/VK/ComputePipeline.hpp"
+#include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/Adapter/Graphics/VK/PipelineLayout.hpp"
 #include "Engine/Adapter/Graphics/VK/ShaderModule.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	VK::ComputePipeline::ComputePipeline(const ComputePipelineDescriptor& descriptor, const VK::Device& device) :
-		Trident::ComputePipeline(descriptor),
-		VK::Pipeline(VK_PIPELINE_BIND_POINT_COMPUTE),
-		device(device)
-	{
+	VK::ComputePipeline::ComputePipeline(const Trident::Device* device) :
+		Trident::ComputePipeline(device)
+	{}
+
+	ref<Trident::ComputePipeline> VK::createComputePipeline(const Trident::Device* device, const ComputePipelineDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		VkResult result;
+
+		ref<VK::ComputePipeline> computePipeline = createRef<VK::ComputePipeline>(device);
 
 		VkComputePipelineCreateInfo computePipelineCreateInfo{};
 		computePipelineCreateInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
@@ -27,7 +31,7 @@ namespace Trident {
 		computePipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 		computePipelineCreateInfo.basePipelineIndex = 0;
 
-		result = vkCreateComputePipelines(device.device, VK_NULL_HANDLE, 1, &computePipelineCreateInfo, nullptr, &pipeline);
+		result = _device->vkCreateComputePipelines(_device->device, VK_NULL_HANDLE, 1, &computePipelineCreateInfo, nullptr, &computePipeline->pipeline);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create compute pipeline ([]).", string_VkResult(result));
 
@@ -37,19 +41,24 @@ namespace Trident {
 				debugUtilsObjectNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
 				debugUtilsObjectNameInfo.pNext = nullptr;
 				debugUtilsObjectNameInfo.objectType = VK_OBJECT_TYPE_PIPELINE;
-				debugUtilsObjectNameInfo.objectHandle = (uint64) pipeline;
+				debugUtilsObjectNameInfo.objectHandle = (uint64) computePipeline->pipeline;
 				debugUtilsObjectNameInfo.pObjectName = &descriptor.name[0];
 
-				result = vkSetDebugUtilsObjectNameEXT(device.device, &debugUtilsObjectNameInfo);
+				result = _device->vkSetDebugUtilsObjectNameEXT(_device->device, &debugUtilsObjectNameInfo);
 
 				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to set object name ([]).", string_VkResult(result));
 			}
 		#endif
+
+		return computePipeline;
 	}
 
-	VK::ComputePipeline::~ComputePipeline() {
+	void VK::destroyComputePipeline(const Trident::Device* device, const Trident::ComputePipeline* computePipeline) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		vkDestroyPipeline(device.device, pipeline, nullptr);
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		const VK::ComputePipeline* _computePipeline = static_cast<const VK::ComputePipeline*>(computePipeline);
+
+		_device->vkDestroyPipeline(_device->device, _computePipeline->pipeline, nullptr);
 	}
 }

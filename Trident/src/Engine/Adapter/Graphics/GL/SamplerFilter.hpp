@@ -7,11 +7,11 @@
 
 namespace Trident::GL {
 	inline GLenum getFilter(SamplerFilter samplerFilter) {
-		static constexpr GLenum glFilters[] = {
+		static constexpr GLenum FILTERS[] = {
 			GL_NEAREST,
 			GL_LINEAR,
 		};
 
-		return glFilters[static_cast<uint8>(samplerFilter)];
+		return FILTERS[static_cast<uint32>(samplerFilter)];
 	}
 }

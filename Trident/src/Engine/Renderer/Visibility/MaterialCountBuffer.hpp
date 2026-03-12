@@ -6,7 +6,7 @@
 #include "Engine/Renderer/Visibility/Renderer.hpp"
 
 namespace Trident {
-	ref<Buffer> VisibilityRenderer::createMaterialCountBuffer() const {
+	ref<Buffer<uint32>> VisibilityRenderer::createMaterialCountBuffer() const {
 		BufferDescriptor materialCountBufferDescriptor{};
 		materialCountBufferDescriptor.size = sizeof(uint32) * scene->materials.count();
 		materialCountBufferDescriptor.usage = BufferUsage::READ_WRITE_STORAGE;
@@ -15,6 +15,6 @@ namespace Trident {
 
 		SET_DEBUG_NAME(materialCountBufferDescriptor, "Material count");
 
-		return createBuffer(materialCountBufferDescriptor);
+		return createBuffer<uint32>(materialCountBufferDescriptor);
 	}
 }

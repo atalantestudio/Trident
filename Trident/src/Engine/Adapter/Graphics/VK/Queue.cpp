@@ -7,27 +7,75 @@
 #include "Engine/Adapter/Graphics/VK/CommandEncoder.hpp"
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/Adapter/Graphics/VK/Fence.hpp"
+#include "Engine/Adapter/Graphics/VK/GraphicsAdapter.hpp"
 #include "Engine/Adapter/Graphics/VK/Queue.hpp"
 #include "Engine/Adapter/Graphics/VK/Semaphore.hpp"
+#include "Engine/Adapter/Graphics/VK/Status.hpp"
 #include "Engine/Adapter/Graphics/VK/Swapchain.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	VK::Queue::Queue(const VK::Device& device, uint32 queueFamilyIndex) :
-		device(device),
-		commandPool(device, queueFamilyIndex)
-	{
-		vkGetDeviceQueue(device.device, queueFamilyIndex, 0, &queue);
-	}
+	VK::Queue::Queue(const Trident::Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability) :
+		Trident::Queue(device, queueFamilyIndex, queueFamilyCapability)
+	{}
 
-	ref<CommandEncoder> VK::Queue::createCommandEncoder(const CommandBufferDescriptor& descriptor) const {
-		DEBUG_DESCRIPTOR_GUARD(descriptor);
-
-		return createRef<VK::CommandEncoder>(descriptor, device, commandPool);
-	}
-
-	void VK::Queue::submit(view<ref<Trident::CommandBuffer>> commandBuffers) const {
+	ref<Trident::Queue> VK::createQueue(const Trident::Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+
+		ref<VK::Queue> queue = createRef<VK::Queue>(device, queueFamilyIndex, queueFamilyCapability);
+		queue->commandPool = createCommandPool(device, queueFamilyIndex, queueFamilyCapability);
+
+		_device->vkGetDeviceQueue(_device->device, queueFamilyIndex, 0, &queue->queue);
+
+		return queue;
+	}
+
+	void VK::destroyQueue(const Trident::Queue* queue) {}
+
+	PresentStatus VK::present(const Trident::Queue* queue, view<ref<Trident::Swapchain>> swapchains, view<uint32> presentableImageIndices, ref<Trident::Semaphore> waitSemaphore) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		static const PFN_vkQueuePresentKHR vkQueuePresentKHR = static_cast<PFN_vkQueuePresentKHR>(loadDeviceProcedure(static_cast<const VK::Device*>(queue->device)->device, "vkQueuePresentKHR"));
+
+		const VK::Queue* _queue = static_cast<const VK::Queue*>(queue);
+		VkResult result;
+
+		// TODO: Move to the graphics adapter.
+		// ADAPTER_ASSERT(swapchains.count() == presentableImageIndices.count(), "There must be 1 presentable image index per swapchain.");
+
+		sequence<const VkSwapchainKHR*> vkSwapchains(swapchains.count());
+		uint64 swapchainIndex = 0;
+
+		while (swapchainIndex < vkSwapchains.count()) {
+			vkSwapchains[swapchainIndex] = &std::static_pointer_cast<VK::Swapchain>(swapchains[swapchainIndex])->swapchain;
+
+			swapchainIndex += 1;
+		}
+
+		VkPresentInfoKHR presentInfo{};
+		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+		presentInfo.pNext = nullptr;
+		presentInfo.waitSemaphoreCount = 1;
+		presentInfo.pWaitSemaphores = &std::static_pointer_cast<VK::Semaphore>(waitSemaphore)->semaphore;
+		presentInfo.swapchainCount = static_cast<uint32>(vkSwapchains.count());
+		presentInfo.pSwapchains = vkSwapchains[0];
+		presentInfo.pImageIndices = &presentableImageIndices[0];
+		presentInfo.pResults = nullptr;
+
+		result = vkQueuePresentKHR(_queue->queue, &presentInfo);
+
+		return presentStatusFromResult(result);
+	}
+
+	void VK::submit(const Trident::Queue* queue, view<ref<Trident::CommandBuffer>> commandBuffers) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		static const PFN_vkQueueSubmit vkQueueSubmit = static_cast<PFN_vkQueueSubmit>(loadDeviceProcedure(static_cast<const VK::Device*>(queue->device)->device, "vkQueueSubmit"));
+
+		const VK::Queue* _queue = static_cast<const VK::Queue*>(queue);
+		VkResult result;
 
 		sequence<VkCommandBuffer> vkCommandBuffers(commandBuffers.count());
 		uint32 commandBufferIndex = 0;
@@ -49,13 +97,18 @@ namespace Trident {
 		submitInfo.signalSemaphoreCount = 0;
 		submitInfo.pSignalSemaphores = nullptr;
 
-		const VkResult result = vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
+		result = vkQueueSubmit(_queue->queue, 1, &submitInfo, VK_NULL_HANDLE);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to submit queue ([]).", string_VkResult(result));
 	}
 
-	void VK::Queue::submit(view<ref<Trident::CommandBuffer>> commandBuffers, ref<Trident::Semaphore> waitSemaphore, ref<Trident::Semaphore> signalSemaphore, ref<Trident::Fence> fence) const {
+	void VK::submit(const Trident::Queue* queue, view<ref<Trident::CommandBuffer>> commandBuffers, ref<Trident::Semaphore> waitSemaphore, ref<Trident::Semaphore> signalSemaphore, ref<Trident::Fence> fence) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		static const PFN_vkQueueSubmit vkQueueSubmit = static_cast<PFN_vkQueueSubmit>(loadDeviceProcedure(static_cast<const VK::Device*>(queue->device)->device, "vkQueueSubmit"));
+
+		const VK::Queue* _queue = static_cast<const VK::Queue*>(queue);
+		VkResult result;
 
 		// TODO: One wait destination stage mask per wait semaphore, but the pipeline stage flags is stored into the command buffer.
 		const VkPipelineStageFlags waitDstStageMask = std::static_pointer_cast<VK::CommandBuffer>(commandBuffers[0])->pipelineStageFlags;
@@ -98,53 +151,20 @@ namespace Trident {
 
 		DEBUG_ASSERT(fence != nullptr);
 
-		const VkResult result = vkQueueSubmit(queue, 1, &submitInfo, std::static_pointer_cast<VK::Fence>(fence)->fence);
+		result = vkQueueSubmit(_queue->queue, 1, &submitInfo, std::static_pointer_cast<VK::Fence>(fence)->fence);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to submit queue ([]).", string_VkResult(result));
 	}
 
-	PresentStatus VK::Queue::present(view<ref<Trident::Swapchain>> swapchains, view<uint32> presentableImageIndices, ref<Trident::Semaphore> waitSemaphore) const {
+	void VK::waitIdle(const Trident::Queue* queue) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ADAPTER_ASSERT(swapchains.count() == presentableImageIndices.count(), "There must be 1 presentable image index per swapchain.");
+		static const PFN_vkQueueWaitIdle vkQueueWaitIdle = static_cast<PFN_vkQueueWaitIdle>(loadDeviceProcedure(static_cast<const VK::Device*>(queue->device)->device, "vkQueueWaitIdle"));
 
-		sequence<const VkSwapchainKHR*> vkSwapchains(swapchains.count());
+		const VK::Queue* _queue = static_cast<const VK::Queue*>(queue);
+		VkResult result;
 
-		for (uint64 swapchainIndex = 0; swapchainIndex < vkSwapchains.count(); swapchainIndex += 1) {
-			vkSwapchains[swapchainIndex] = &std::static_pointer_cast<VK::Swapchain>(swapchains[swapchainIndex])->swapchain;
-		}
-
-		VkPresentInfoKHR presentInfo{};
-		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-		presentInfo.pNext = nullptr;
-		presentInfo.waitSemaphoreCount = 1;
-		presentInfo.pWaitSemaphores = &std::static_pointer_cast<VK::Semaphore>(waitSemaphore)->semaphore;
-		presentInfo.swapchainCount = static_cast<uint32>(vkSwapchains.count());
-		presentInfo.pSwapchains = vkSwapchains[0];
-		presentInfo.pImageIndices = &presentableImageIndices[0];
-		presentInfo.pResults = nullptr;
-
-		const VkResult result = vkQueuePresentKHR(queue, &presentInfo);
-
-		if (result == VK_SUCCESS) {
-			return PresentStatus::SUCCESS;
-		}
-
-		if (result == VK_SUBOPTIMAL_KHR) {
-			return PresentStatus::SUBOPTIMAL;
-		}
-
-		if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-			return PresentStatus::ERROR_OUT_OF_DATE;
-		}
-
-		ADAPTER_ASSERT(false, "Unhandled result.");
-
-		return PresentStatus::ERROR_UNHANDLED;
-	}
-
-	void VK::Queue::waitIdle() const {
-		const VkResult result = vkQueueWaitIdle(queue);
+		result = vkQueueWaitIdle(_queue->queue);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to wait for queue idle state ([]).", string_VkResult(result));
 	}

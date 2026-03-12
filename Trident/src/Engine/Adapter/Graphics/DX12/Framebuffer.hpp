@@ -8,9 +8,15 @@
 namespace Trident {
 	class DX12::Framebuffer final : public Trident::Framebuffer {
 		public:
-			explicit Framebuffer(const FramebufferDescriptor& descriptor);
+			explicit Framebuffer(const Trident::Device* device, const FramebufferDescriptor& descriptor);
 
 		public:
 			sequence<ref<Trident::ImageView>> imageViews;
 	};
+
+	namespace DX12 {
+		ref<Trident::Framebuffer> createFramebuffer(const Trident::Device* device, const FramebufferDescriptor& descriptor);
+
+		void destroyFramebuffer(const Trident::Device* device, const Trident::Framebuffer* framebuffer);
+	}
 }

@@ -4,21 +4,27 @@
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/DX12/Instance.hpp"
-#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	DX12::Instance::Instance(const ApplicationProperties& properties) :
-		preferIntegratedGpu(properties.PreferIntegratedGPU)
-	{
+	DX12::Instance::Instance(const Trident::GraphicsAdapter* adapter) :
+		Trident::Instance(adapter)
+	{}
+
+	ref<Trident::Instance> DX12::createInstance(const Trident::GraphicsAdapter* adapter, const InstanceDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		ref<DX12::Instance> instance = createRef<DX12::Instance>(adapter);
 		HRESULT result;
 		UINT flags = 0;
 
 		#if defined(DEBUG_ENABLE_MESSENGER)
 			ID3D12Debug* debug;
 
-			result = D3D12GetDebugInterface(IID_PPV_ARGS(&debug));
+			{
+				PROFILE_SCOPE("D3D12GetDebugInterface");
+
+				result = D3D12GetDebugInterface(IID_PPV_ARGS(&debug));
+			}
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to get debug interface.");
 
@@ -28,82 +34,22 @@ namespace Trident {
 			flags |= DXGI_CREATE_FACTORY_DEBUG;
 		#endif
 
-		result = CreateDXGIFactory2(flags, IID_PPV_ARGS(&factory));
+		{
+			PROFILE_SCOPE("CreateDXGIFactory2");
+
+			result = CreateDXGIFactory2(flags, IID_PPV_ARGS(&instance->factory));
+		}
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create factory.");
+
+		return instance;
 	}
 
-	DX12::Instance::~Instance() {
-		factory->Release();
-	}
+	void DX12::destroyInstance(const Trident::Instance* instance) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-	IDXGIAdapter* DX12::Instance::selectAdapter() const {
-		HRESULT result;
-		UINT adapterIndex = 0;
-		UINT bestAdapterScore = 0;
-		UINT bestAdapterIndex = 0;
-		IDXGIAdapter* adapter;
-		std::vector<IDXGIAdapter*> adapters;
-		DXGI_ADAPTER_DESC adapterDescriptor;
+		const DX12::Instance* _instance = static_cast<const DX12::Instance*>(instance);
 
-		while (true) {
-			result = factory->EnumAdapters(adapterIndex, &adapter);
-
-			if (result == DXGI_ERROR_NOT_FOUND) {
-				break;
-			}
-
-			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to enumerate adapters.");
-
-			adapters.emplace_back(adapter);
-
-			adapterIndex += 1;
-		}
-
-		adapterIndex = 0;
-
-		ADAPTER_INFO("Available adapters:");
-
-		while (adapterIndex < adapters.size()) {
-			IDXGIAdapter* adapter = adapters[adapterIndex];
-
-			result = adapter->GetDesc(&adapterDescriptor);
-
-			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to get adapter descriptor.");
-
-			const uint32 adapterScore = calculateAdapterScore(adapterDescriptor);
-
-			if (adapterScore > bestAdapterScore) {
-				bestAdapterScore = adapterScore;
-				bestAdapterIndex = adapterIndex;
-			}
-
-			const LPCSTR description = ConvertUTF16ToUTF8(adapterDescriptor.Description);
-
-			ADAPTER_INFO("- []", description);
-
-			delete[] description;
-
-			adapterIndex += 1;
-		}
-
-		return adapters[bestAdapterIndex];
-	}
-
-	bool DX12::Instance::isIntegratedAdapter(const DXGI_ADAPTER_DESC& adapterDescriptor) const {
-		return std::wstring(adapterDescriptor.Description).find(L"UHD Graphics", 0) != std::string::npos;
-	}
-
-	uint32 DX12::Instance::calculateAdapterScore(const DXGI_ADAPTER_DESC& adapterDescriptor) const {
-		uint32 score = 1;
-
-		if (isIntegratedAdapter(adapterDescriptor)) {
-			score += preferIntegratedGpu;
-		}
-		else {
-			score += !preferIntegratedGpu;
-		}
-
-		return score;
+		_instance->factory->Release();
 	}
 }

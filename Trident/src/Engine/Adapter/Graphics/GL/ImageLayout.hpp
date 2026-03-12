@@ -8,9 +8,7 @@
 
 namespace Trident::GL {
 	inline GLbitfield getBarrier(ImageLayout imageLayout) {
-		ADAPTER_ASSERT(imageLayout != ImageLayout::PRESENT_SRC, "PRESENT_SRC cannot be used with access flags.");
-
-		static constexpr GLbitfield glBarriers[] = {
+		static constexpr GLbitfield BARRIERS[] = {
 			0,
 			0,
 			0,
@@ -22,6 +20,8 @@ namespace Trident::GL {
 			0,
 		};
 
-		return glBarriers[static_cast<uint8>(imageLayout)];
+		ADAPTER_ASSERT(imageLayout != ImageLayout::PRESENT_SRC, "PRESENT_SRC cannot be used with access flags.");
+
+		return BARRIERS[static_cast<uint32>(imageLayout)];
 	}
 }

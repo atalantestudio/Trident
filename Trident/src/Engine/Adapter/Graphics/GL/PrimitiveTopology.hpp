@@ -7,7 +7,7 @@
 
 namespace Trident::GL {
 	inline GLenum getPrimitiveTopology(PrimitiveTopology primitiveTopology) {
-		static constexpr GLenum glPrimitiveTopologies[] = {
+		static constexpr GLenum PRIMITIVE_TOPOLOGIES[] = {
 			GL_POINTS,
 			GL_LINES,
 			GL_LINE_STRIP,
@@ -15,6 +15,6 @@ namespace Trident::GL {
 			GL_TRIANGLE_STRIP,
 		};
 
-		return glPrimitiveTopologies[static_cast<uint8>(primitiveTopology)];
+		return PRIMITIVE_TOPOLOGIES[static_cast<uint32>(primitiveTopology)];
 	}
 }

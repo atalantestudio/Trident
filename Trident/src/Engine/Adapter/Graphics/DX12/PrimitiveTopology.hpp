@@ -7,18 +7,17 @@
 #include "Engine/API/Rendering/PrimitiveTopology.hpp"
 
 namespace Trident::DX12 {
-	D3D_PRIMITIVE_TOPOLOGY getPrimitiveTopology(PrimitiveTopology primitiveTopology) {
-		switch (primitiveTopology) {
-			case PrimitiveTopology::POINT_LIST: return D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
-			case PrimitiveTopology::LINE_LIST: return D3D_PRIMITIVE_TOPOLOGY_LINELIST;
-			case PrimitiveTopology::LINE_STRIP: return D3D_PRIMITIVE_TOPOLOGY_LINESTRIP;
-			case PrimitiveTopology::TRIANGLE_LIST: return D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-			case PrimitiveTopology::TRIANGLE_STRIP: return D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
-			default: {
-				ADAPTER_ASSERT(false, "Undefined primitive topology.");
+	inline D3D_PRIMITIVE_TOPOLOGY getPrimitiveTopology(PrimitiveTopology primitiveTopology) {
+		static constexpr D3D_PRIMITIVE_TOPOLOGY PRIMITIVE_TOPOLOGIES[] = {
+			D3D_PRIMITIVE_TOPOLOGY_POINTLIST,
+			D3D_PRIMITIVE_TOPOLOGY_LINELIST,
+			D3D_PRIMITIVE_TOPOLOGY_LINESTRIP,
+			D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
+			D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
+		};
 
-				return D3D_PRIMITIVE_TOPOLOGY_UNDEFINED;
-			}
-		}
+		ADAPTER_ASSERT(primitiveTopology < PrimitiveTopology::count, "Invalid primitive topology.");
+
+		return PRIMITIVE_TOPOLOGIES[static_cast<uint32>(primitiveTopology)];
 	}
 }

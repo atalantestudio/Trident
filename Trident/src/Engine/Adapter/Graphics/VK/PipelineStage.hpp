@@ -7,7 +7,7 @@
 
 namespace Trident::VK {
 	inline VkPipelineStageFlagBits getPipelineStageFlagBits(PipelineStage pipelineStage) {
-		static constexpr VkPipelineStageFlagBits vkPipelineStages[] = {
+		static constexpr VkPipelineStageFlagBits PIPELINE_STAGES[] = {
 			VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
 			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
 			VK_PIPELINE_STAGE_TRANSFER_BIT,
@@ -16,6 +16,8 @@ namespace Trident::VK {
 			VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
 		};
 
-		return vkPipelineStages[static_cast<uint8>(pipelineStage)];
+		ADAPTER_ASSERT(pipelineStage < PipelineStage::count, "Invalid pipeline stage.");
+
+		return PIPELINE_STAGES[static_cast<uint32>(pipelineStage)];
 	}
 }

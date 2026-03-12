@@ -7,11 +7,13 @@
 
 namespace Trident::VK {
 	inline VkFilter getFilter(SamplerFilter samplerFilter) {
-		static constexpr VkFilter vkFilters[] = {
+		static constexpr VkFilter FILTERS[] = {
 			VK_FILTER_NEAREST,
 			VK_FILTER_LINEAR,
 		};
 
-		return vkFilters[static_cast<uint8>(samplerFilter)];
+		ADAPTER_ASSERT(samplerFilter < SamplerFilter::count, "Invalid sampler filter.");
+
+		return FILTERS[static_cast<uint32>(samplerFilter)];
 	}
 }

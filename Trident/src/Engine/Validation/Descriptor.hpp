@@ -3,29 +3,11 @@
 
 #pragma once
 
+#include "Engine/API/Graphics/Base.hpp"
+
 namespace Trident {
 	#if defined(BUILD_MODE_DEBUG)
 		#define SET_DEBUG_NAME(descriptor, value) descriptor.name = value
-
-		class Image;
-
-		struct AttachmentImageDescriptor;
-		struct BeginRenderPassDescriptor;
-		struct BufferDescriptor;
-		struct CommandBufferDescriptor;
-		struct ComputePipelineDescriptor;
-		struct FramebufferDescriptor;
-		struct FenceDescriptor;
-		struct ImageDescriptor;
-		struct ImageViewDescriptor;
-		struct PipelineLayoutDescriptor;
-		struct RenderPassDescriptor;
-		struct RenderPipelineDescriptor;
-		struct SamplerDescriptor;
-		struct ShaderModuleDescriptor;
-		struct SubpassDescriptor;
-		struct SwapchainDescriptor;
-		struct WriteDescriptorSet;
 
 		// API descriptor validators for debug mode.
 		void DescriptorGuard(const AttachmentImageDescriptor& descriptor);
@@ -37,9 +19,10 @@ namespace Trident {
 		void DescriptorGuard(const FramebufferDescriptor& descriptor);
 		void DescriptorGuard(const ImageDescriptor& descriptor);
 		void DescriptorGuard(const ImageViewDescriptor& descriptor, Image* image);
+		void DescriptorGuard(const InstanceDescriptor& descriptor);
 		void DescriptorGuard(const PipelineLayoutDescriptor& descriptor);
 		void DescriptorGuard(const RenderPassDescriptor& descriptor);
-		void DescriptorGuard(const RenderPipelineDescriptor& descriptor);
+		void DescriptorGuard(const GraphicsPipelineDescriptor& descriptor);
 		void DescriptorGuard(const SamplerDescriptor& descriptor);
 		void DescriptorGuard(const ShaderModuleDescriptor& descriptor);
 		void DescriptorGuard(const SubpassDescriptor& descriptor);

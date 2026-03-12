@@ -7,21 +7,28 @@
 #include "Engine/Adapter/Graphics/DX12/Sampler.hpp"
 
 namespace Trident {
-	DX12::Sampler::Sampler(const SamplerDescriptor& descriptor) :
-		Trident::Sampler(descriptor)
-	{
-		samplerDescriptor.Filter = getFilter(descriptor.minFilter, descriptor.magFilter);
-		samplerDescriptor.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		samplerDescriptor.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		samplerDescriptor.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		samplerDescriptor.MipLODBias = 0.0f;
-		samplerDescriptor.MaxAnisotropy = 0;
-		samplerDescriptor.ComparisonFunc = D3D12_COMPARISON_FUNC_NONE;
-		samplerDescriptor.BorderColor[0] = 0.0f;
-		samplerDescriptor.BorderColor[1] = 0.0f;
-		samplerDescriptor.BorderColor[2] = 0.0f;
-		samplerDescriptor.BorderColor[3] = 1.0f;
-		samplerDescriptor.MinLOD = 0.0f;
-		samplerDescriptor.MaxLOD = max<FLOAT>();
+	DX12::Sampler::Sampler(const Trident::Device* device) :
+		Trident::Sampler(device)
+	{}
+
+	ref<Trident::Sampler> DX12::createSampler(const Trident::Device* device, const SamplerDescriptor& descriptor) {
+		ref<DX12::Sampler> sampler = createRef<DX12::Sampler>(device);
+		sampler->descriptor.Filter = getFilter(descriptor.minFilter, descriptor.magFilter);
+		sampler->descriptor.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+		sampler->descriptor.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+		sampler->descriptor.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+		sampler->descriptor.MipLODBias = 0.0f;
+		sampler->descriptor.MaxAnisotropy = 0;
+		sampler->descriptor.ComparisonFunc = D3D12_COMPARISON_FUNC_NONE;
+		sampler->descriptor.BorderColor[0] = 0.0f;
+		sampler->descriptor.BorderColor[1] = 0.0f;
+		sampler->descriptor.BorderColor[2] = 0.0f;
+		sampler->descriptor.BorderColor[3] = 1.0f;
+		sampler->descriptor.MinLOD = 0.0f;
+		sampler->descriptor.MaxLOD = max<FLOAT>();
+
+		return sampler;
 	}
+
+	void DX12::destroySampler(const Trident::Device* device, const Trident::Sampler* sampler) {}
 }

@@ -46,7 +46,7 @@
 #include "Engine/API/Rendering/DrawIndexedIndirectCommand.hpp"
 #include "Engine/API/Rendering/DrawIndirectCommand.hpp"
 #include "Engine/API/Rendering/Framebuffer.hpp"
-#include "Engine/API/Rendering/RenderPipeline.hpp"
+#include "Engine/API/Rendering/GraphicsPipeline.hpp"
 #include "Engine/API/Rendering/Swapchain.hpp"
 #include "Engine/API/Rendering/ShaderModule.hpp"
 #include "Engine/Renderer/Renderer.hpp"

@@ -3,31 +3,24 @@
 
 #pragma once
 
-#include "Engine/Adapter/Graphics/VK/Device.hpp"
-#include "Engine/Adapter/Graphics/VK/PhysicalDevice.hpp"
-#include "Engine/Adapter/Graphics/VK/Surface.hpp"
 #include "Engine/API/Rendering/Swapchain.hpp"
 
 namespace Trident {
 	class VK::Swapchain final : public Trident::Swapchain {
 		public:
-			explicit Swapchain(const SwapchainDescriptor& descriptor, const VK::Surface& surface, const VK::Device& device);
-
-			~Swapchain() final override;
-
-			uint32 getImageCount() const final override;
-
-			void update(const SwapchainDescriptor& descriptor) final override;
-
-		private:
-			void recreate(const SwapchainDescriptor& descriptor);
+			explicit Swapchain(const Trident::Device* device, const SwapchainDescriptor& descriptor);
 
 		public:
-			VkSwapchainKHR swapchain;
-
-		private:
-			const VK::Surface& surface;
-			const VK::Device& device;
-			uint32 imageCount = 0;
+			VkSwapchainKHR swapchain = VK_NULL_HANDLE;
 	};
+
+	namespace VK {
+		ref<Trident::Swapchain> createSwapchain(const Trident::Device* device, const SwapchainDescriptor& descriptor);
+
+		void destroySwapchain(const Trident::Device* device, const Trident::Swapchain* swapchain);
+
+		void recreateSwapchain(const Trident::Device* device, Trident::Swapchain* swapchain, const SwapchainDescriptor& descriptor);
+
+		void updateSwapchain(const Trident::Device* device, Trident::Swapchain* swapchain, const SwapchainDescriptor& descriptor);
+	}
 }

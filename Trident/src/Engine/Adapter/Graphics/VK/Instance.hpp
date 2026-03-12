@@ -13,44 +13,40 @@
 
 namespace Trident {
 	class VK::Instance final : public Trident::Instance {
-		private:
-			#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
-				static void checkInstanceLayers();
-			#endif
-
-			#if defined(DEBUG_ENABLE_MESSENGER)
-				static VkBool32 debugUtilsMessengerUserCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
-			#endif
-
 		public:
-			explicit Instance(const ProjectDescriptor& projectDescriptor, const ApplicationProperties& properties);
+			explicit Instance(const Trident::GraphicsAdapter* adapter);
 
-			~Instance() final override;
-
-			#if defined(DEBUG_ENABLE_MESSENGER)
-				void createDebugUtilsMessenger();
-			#endif
-
-			VkPhysicalDevice selectPhysicalDevice() const;
-
-		private:
-			uint32 calculatePhysicalDeviceScore(const VkPhysicalDeviceProperties& physicalDeviceProperties) const;
-
-		private:
-			#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
-				static const sequence<const char8*> ENABLED_LAYER_NAMES;
-			#endif
+			void loadProcedures();
 
 		public:
 			VkInstance instance;
 
-		private:
 			#if defined(DEBUG_ENABLE_MESSENGER)
-				VkDebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfo;
 				VkDebugUtilsMessengerEXT debugUtilsMessenger;
 			#endif
 
-			std::vector<const char8*> enabledExtensionNames;
-			bool preferIntegratedGpu;
+			PFN_vkCreateDevice vkCreateDevice;
+
+			#if defined(OPERATING_SYSTEM_WINDOWS)
+				PFN_vkCreateWin32SurfaceKHR vkCreateWin32SurfaceKHR;
+			#endif
+
+			PFN_vkDestroySurfaceKHR vkDestroySurfaceKHR;
+			PFN_vkEnumerateDeviceExtensionProperties vkEnumerateDeviceExtensionProperties;
+			PFN_vkEnumeratePhysicalDevices vkEnumeratePhysicalDevices;
+			PFN_vkGetPhysicalDeviceFeatures vkGetPhysicalDeviceFeatures;
+			PFN_vkGetPhysicalDeviceMemoryProperties vkGetPhysicalDeviceMemoryProperties;
+			PFN_vkGetPhysicalDeviceProperties vkGetPhysicalDeviceProperties;
+			PFN_vkGetPhysicalDeviceQueueFamilyProperties vkGetPhysicalDeviceQueueFamilyProperties;
+			PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR vkGetPhysicalDeviceSurfaceCapabilitiesKHR;
+			PFN_vkGetPhysicalDeviceSurfaceFormatsKHR vkGetPhysicalDeviceSurfaceFormatsKHR;
+			PFN_vkGetPhysicalDeviceSurfacePresentModesKHR vkGetPhysicalDeviceSurfacePresentModesKHR;
+			PFN_vkGetPhysicalDeviceSurfaceSupportKHR vkGetPhysicalDeviceSurfaceSupportKHR;
 	};
+
+	namespace VK {
+		ref<Trident::Instance> createInstance(const Trident::GraphicsAdapter* adapter, const InstanceDescriptor& descriptor);
+
+		void destroyInstance(const Trident::Instance* instance);
+	}
 }

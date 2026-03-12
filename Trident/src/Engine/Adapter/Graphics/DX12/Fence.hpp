@@ -3,17 +3,20 @@
 
 #pragma once
 
-#include "Engine/Adapter/Graphics/DX12/Device.hpp"
 #include "Engine/API/Rendering/Fence.hpp"
 
 namespace Trident {
 	class DX12::Fence final : public Trident::Fence {
 		public:
-			explicit Fence(const FenceDescriptor& descriptor, const DX12::Device& device);
-
-			~Fence() final override;
+			explicit Fence(const Trident::Device* device);
 
 		public:
 			ID3D12Fence* fence;
 	};
+
+	namespace DX12 {
+		ref<Trident::Fence> createFence(const Trident::Device* device, const FenceDescriptor& descriptor);
+
+		void destroyFence(const Trident::Device* device, const Trident::Fence* fence);
+	}
 }

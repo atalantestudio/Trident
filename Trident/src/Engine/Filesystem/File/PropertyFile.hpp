@@ -34,10 +34,6 @@ namespace Trident {
 
 			template<>
 			static GraphicsAPI parseValueString(view<char8> valueString, view<char8> propertyName) {
-				if (valueString == "CPU") {
-					return GraphicsAPI::CPU;
-				}
-
 				if (valueString == "DirectX12") {
 					return GraphicsAPI::DX12;
 				}

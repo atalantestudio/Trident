@@ -3,23 +3,29 @@
 
 #pragma once
 
-#include "Engine/Adapter/Graphics/DX12/Device.hpp"
 #include "Engine/API/Rendering/Buffer.hpp"
 
 namespace Trident {
-	class DX12::Buffer final : public Trident::Buffer {
+	class DX12::BaseBuffer final : public Trident::BaseBuffer {
 		public:
-			explicit Buffer(const BufferDescriptor& descriptor, const DX12::Device& device);
-
-			~Buffer() final override;
-
-			void unmap() const final override;
-
-			void* getMappedRange(uint64 offset, uint64 size) const final override;
+			explicit BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor);
 
 		public:
 			ID3D12Resource* resource;
 			ID3D12CommandSignature* commandSignature = nullptr;
 			D3D12_HEAP_TYPE heapType;
+
+			// TODO: Use.
+			UINT stride;
 	};
+
+	namespace DX12 {
+		ref<Trident::BaseBuffer> createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, UINT stride);
+
+		void destroyBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer);
+
+		void* mapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer, uint64 offset, uint64 size);
+
+		void unmapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer);
+	}
 }

@@ -11,29 +11,9 @@
 namespace Trident {
 	class Swapchain {
 		public:
-			virtual ~Swapchain() = default;
+			~Swapchain();
 
-			Extent2D getExtent() const {
-				return extent;
-			}
-
-			virtual uint32 getImageCount() const = 0;
-
-			ref<ImageView> getImageView(uint32 index) const {
-				ENGINE_ASSERT(index < imageViews.count(), "Image view index overflow.");
-
-				return imageViews[index];
-			}
-
-			virtual void update(const SwapchainDescriptor& descriptor) = 0;
-
-		protected:
-			explicit Swapchain(const SwapchainDescriptor& descriptor) :
-				extent(descriptor.extent)
-			{
-				DEBUG_DESCRIPTOR_GUARD(descriptor);
-			}
-
+			// TODO: Don't expose to the client side.
 			void createImageViews() {
 				ImageViewDescriptor imageViewDescriptor{};
 				imageViewDescriptor.mipLevelOffset = 0;
@@ -55,7 +35,20 @@ namespace Trident {
 				}
 			}
 
-		protected:
+			Extent2D getExtent() const;
+
+			uint32 getImageCount() const;
+
+			ref<ImageView> getImageView(uint32 index) const;
+
+			void update(const SwapchainDescriptor& descriptor);
+
+			explicit Swapchain(const Device* device, const SwapchainDescriptor& descriptor);
+
+		// TODO: Don't expose to the client side.
+		public:
+			const Device* device;
+			uint32 imageCount;
 			Extent2D extent;
 			sequence<ref<Image>> images;
 			sequence<ref<ImageView>> imageViews;

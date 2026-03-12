@@ -9,12 +9,16 @@
 namespace Trident {
 	class DX12::CommandPool final : public Trident::CommandPool {
 		public:
-			explicit CommandPool(const DX12::Device& device, D3D12_COMMAND_LIST_TYPE type);
-
-			~CommandPool() final override;
+			explicit CommandPool(const Trident::Device* device, D3D12_COMMAND_LIST_TYPE commandListType);
 
 		public:
 			ID3D12CommandAllocator* commandAllocator;
-			D3D12_COMMAND_LIST_TYPE type;
+			D3D12_COMMAND_LIST_TYPE commandListType;
 	};
+
+	namespace DX12 {
+		ref<Trident::CommandPool> createCommandPool(const Trident::Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability);
+
+		void destroyCommandPool(const Trident::Device* device, const Trident::CommandPool* commandPool);
+	}
 }

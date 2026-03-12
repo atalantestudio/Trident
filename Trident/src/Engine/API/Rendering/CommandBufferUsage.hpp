@@ -5,10 +5,9 @@
 
 namespace Trident {
 	enum class CommandBufferUsage : uint8 {
-		AUTO = 0,
-		ONE_TIME_SUBMIT = BIT(0),
-		SIMULTANEOUS_USE = BIT(2),
-	};
+		AUTO,
+		ONE_TIME_SUBMIT,
 
-	AS_FLAG(CommandBufferUsage);
+		count,
+	};
 }

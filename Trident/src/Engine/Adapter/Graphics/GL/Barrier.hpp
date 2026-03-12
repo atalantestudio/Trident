@@ -7,7 +7,7 @@
 
 namespace Trident::GL {
 	inline GLbitfield getBarrier(Access access) {
-		GLbitfield barrier{};
+		GLbitfield barrier = 0;
 
 		if (access & Access::SHADER_WRITE) {
 			barrier |= GL_BUFFER_UPDATE_BARRIER_BIT | GL_SHADER_STORAGE_BARRIER_BIT | GL_UNIFORM_BARRIER_BIT;

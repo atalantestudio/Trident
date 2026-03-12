@@ -9,14 +9,15 @@
 namespace Trident {
 	class VK::Fence final : public Trident::Fence {
 		public:
-			explicit Fence(const FenceDescriptor& descriptor, const VK::Device& device);
-
-			~Fence() final override;
+			explicit Fence(const Trident::Device* device);
 
 		public:
 			VkFence fence;
-
-		private:
-			const VK::Device& device;
 	};
+
+	namespace VK {
+		ref<Trident::Fence> createFence(const Trident::Device* device, const FenceDescriptor& descriptor);
+
+		void destroyFence(const Trident::Device* device, const Trident::Fence* fence);
+	}
 }

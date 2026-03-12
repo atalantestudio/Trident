@@ -8,49 +8,44 @@
 
 namespace Trident::DX12 {
 	inline D3D12_RESOURCE_DIMENSION getImageResourceDimension(ImageType imageType) {
-		switch (imageType) {
-			case ImageType::TEXTURE_2D: {
-				return D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-			}
-			default: {
-				ADAPTER_ASSERT(false, "Unsupported image type.");
+		static constexpr D3D12_RESOURCE_DIMENSION RESOURCE_DIMENSIONS[] = {
+			D3D12_RESOURCE_DIMENSION_TEXTURE2D,
+		};
 
-				return D3D12_RESOURCE_DIMENSION_UNKNOWN;
-			}
-		}
+		ADAPTER_ASSERT(imageType < ImageType::count, "Invalid image type.");
+
+		return RESOURCE_DIMENSIONS[static_cast<uint32>(imageType)];
 	}
 
 	inline D3D12_RTV_DIMENSION getRenderTargetViewDimension(ImageType imageType, uint32 layerCount) {
-		switch (imageType) {
-			case ImageType::TEXTURE_2D: {
-				if (layerCount > 1) {
-					return D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
-				}
+		static constexpr D3D12_RTV_DIMENSION RENDER_TARGET_VIEW_DIMENSIONS[] = {
+			D3D12_RTV_DIMENSION_TEXTURE2D,
+		};
 
-				return D3D12_RTV_DIMENSION_TEXTURE2D;
-			}
-			default: {
-				ADAPTER_ASSERT(false, "Unsupported image type.");
+		ADAPTER_ASSERT(imageType < ImageType::count, "Invalid image type.");
 
-				return D3D12_RTV_DIMENSION_UNKNOWN;
-			}
+		const D3D12_RTV_DIMENSION renderTargetViewDimension = RENDER_TARGET_VIEW_DIMENSIONS[static_cast<uint32>(imageType)];
+
+		if (layerCount > 1) {
+			return static_cast<D3D12_RTV_DIMENSION>(static_cast<uint32>(renderTargetViewDimension) + 1);
 		}
+
+		return renderTargetViewDimension;
 	}
 
 	inline D3D12_DSV_DIMENSION getDepthStencilViewDimension(ImageType imageType, uint32 layerCount) {
-		switch (imageType) {
-			case ImageType::TEXTURE_2D: {
-				if (layerCount > 1) {
-					return D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
-				}
+		static constexpr D3D12_DSV_DIMENSION DEPTH_STENCIL_VIEW_DIMENSIONS[] = {
+			D3D12_DSV_DIMENSION_TEXTURE2D,
+		};
 
-				return D3D12_DSV_DIMENSION_TEXTURE2D;
-			}
-			default: {
-				ADAPTER_ASSERT(false, "Unsupported image type.");
+		ADAPTER_ASSERT(imageType < ImageType::count, "Invalid image type.");
 
-				return D3D12_DSV_DIMENSION_UNKNOWN;
-			}
+		const D3D12_DSV_DIMENSION depthStencilViewDimension = DEPTH_STENCIL_VIEW_DIMENSIONS[static_cast<uint32>(imageType)];
+
+		if (layerCount > 1) {
+			return static_cast<D3D12_DSV_DIMENSION>(static_cast<uint32>(depthStencilViewDimension) + 1);
 		}
+
+		return depthStencilViewDimension;
 	}
 }

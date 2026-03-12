@@ -12,82 +12,58 @@
 #include "Engine/API/Rendering/Descriptor/BeginRenderPassDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/CommandBufferDescriptor.hpp"
 #include "Engine/API/Rendering/DescriptorSet.hpp"
+#include "Engine/API/Rendering/GraphicsPipeline.hpp"
 #include "Engine/API/Rendering/Image.hpp"
 #include "Engine/API/Rendering/ImageLayout.hpp"
 #include "Engine/API/Rendering/PipelineStage.hpp"
-#include "Engine/API/Rendering/RenderPipeline.hpp"
 
 namespace Trident {
 	class CommandEncoder {
 		public:
-			virtual ~CommandEncoder() = default;
+			~CommandEncoder();
 
-			virtual void begin() const = 0;
+			void begin() const;
 
-			virtual void beginRenderPass(const BeginRenderPassDescriptor& descriptor) = 0;
+			void beginRenderPass(const BeginRenderPassDescriptor& descriptor);
 
-			// TODO: Either merge bindComputePipeline and bindRenderPipeline,
+			// TODO: Either merge bindComputePipeline and bindGraphicsPipeline,
 			// or implement RenderPassCommandEncoder and ComputePassCommandEncoder.
-			virtual void bindComputePipeline(ref<ComputePipeline> computePipeline) = 0;
-
-			virtual void bindRenderPipeline(ref<RenderPipeline> renderPipeline) = 0;
+			void bindComputePipeline(ref<ComputePipeline> computePipeline);
 
 			/// Binds descriptor sets to the command buffer.
 			/// 
 			/// NOTE: The pipeline layout could have been taken from the current pipeline as well,
 			/// but in Vulkan this operation requires a valid layout. This method asks for a layout to make sure the user keeps it around at runtime.
-			virtual void bindDescriptorSets(ref<PipelineLayout> pipelineLayout, uint32 descriptorSetIndexOffset, view<ref<DescriptorSet>> descriptorSets) = 0;
+			void bindDescriptorSets(ref<PipelineLayout> pipelineLayout, uint32 descriptorSetIndexOffset, view<ref<DescriptorSet>> descriptorSets);
+
+			void bindGraphicsPipeline(ref<GraphicsPipeline> graphicsPipeline);
 
 			// Binds the provided index buffer.
 			// The `offset` is in bytes and must be a multiple of IndexType.
 			template<typename IndexType>
-			void bindIndexBuffer(ref<Buffer> indexBuffer, uint64 offset) {
+			void bindIndexBuffer(ref<BaseBuffer> indexBuffer, uint64 offset) {
 				bindIndexBuffer(indexBuffer, offset, sizeof(IndexType));
 			}
 
 			// `stride` is only used by OpenGL when calling glBindVertexBuffer.
-			virtual void bindVertexBuffer(uint32 bindingIndex, ref<Buffer> vertexBuffer, uint64 offset, uint32 stride) = 0;
+			void bindVertexBuffer(uint32 bindingIndex, ref<BaseBuffer> vertexBuffer, uint64 offset, uint32 stride);
 
-			virtual void copyBufferToBuffer(ref<Buffer> sourceBuffer, ref<Buffer> destinationBuffer, view<BufferCopyRegion> copyRegions) = 0;
+			void copyBufferToBuffer(ref<BaseBuffer> sourceBuffer, ref<BaseBuffer> destinationBuffer, view<BufferCopyRegion> copyRegions);
 
-			virtual void copyBufferToImage(ref<Buffer> sourceBuffer, ref<Image> destinationImage, view<BufferImageCopyRegion> copyRegions) = 0;
+			void copyBufferToImage(ref<BaseBuffer> sourceBuffer, ref<Image> destinationImage, view<BufferImageCopyRegion> copyRegions);
 
-			virtual void copyImageToBuffer(ref<Image> sourceImage, ref<Buffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) = 0;
+			void copyImageToBuffer(ref<Image> sourceImage, ref<BaseBuffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions);
 
-			virtual void dispatch(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) = 0;
+			void dispatch(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ);
 
-			virtual void dispatchIndirect(ref<Buffer> buffer, uint64 bufferOffset) = 0;
-
-			virtual void nextSubpass() = 0;
-
-			// TODO: Merge memory barriers, buffer memory barriers and image memory barriers into a single method.
-			virtual void insertBufferMemoryBarriers(view<BufferMemoryBarrier> barriers) = 0;
-
-			virtual void setImageMemoryBarrier(ref<Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) = 0;
-
-			virtual void setLineWidth(float32 lineWidth) = 0;
-
-			// Updates the scissor area.
-			// NOTE: This should only be used if the render pipeline's dynamic state contains SCISSOR.
-			virtual void setScissor(sint32 xOffset, sint32 yOffset, Extent2D extent) = 0;
-
-			// Updates the viewport area.
-			// NOTE: This should only be used if the render pipeline's dynamic state contains VIEWPORT.
-			virtual void setViewport(vec2<float32> origin, vec2<float32> size, float32 minDepth, float32 maxDepth) = 0;
+			void dispatchIndirect(ref<BaseBuffer> buffer, uint64 bufferOffset);
 
 			// Draws primitives.
 			// - `vertexCount` is the number of vertices to draw per instance.
 			// - `instanceCount` is the number of instances to draw.
 			// - `vertexOffset` is the offset in vertex units in vertex rate attributes at which to start drawing.
 			// - `instanceOffset` is the offset of the first instance, in instance units.
-			virtual void draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset, uint32 instanceOffset) = 0;
-
-			// Draws primitives using arguments from an indirect buffer.
-			// - `buffer` is the buffer containing draw arguments.
-			// - `bufferOffset` is the offset into `buffer` where arguments begin, in bytes.
-			// - `drawCount` is the number of draw calls to execute. Cannot be 0.
-			// - `stride` is the distance between successive sets of draw arguments, in bytes. Ignored if `drawCount` is 0 or 1.
-			virtual void drawIndirect(ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) = 0;
+			void draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset, uint32 instanceOffset);
 
 			// Draws primitives with indexed vertices.
 			// - `indexCount` is the number of indices to draw per instance.
@@ -95,25 +71,56 @@ namespace Trident {
 			// - `indexOffset` is the offset of the first index, in index units.
 			// - `indexBias` is a value added to the index before indexing into the vertex buffer.
 			// - `instanceOffset` is the offset of the first instance, in instance units.
-			virtual void drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset, sint32 indexBias, uint32 instanceOffset) = 0;
+			void drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset, sint32 indexBias, uint32 instanceOffset);
 
 			// Draws primitives with indexed vertices, using arguments from an indirect buffer.
 			// - `buffer` is the buffer containing draw arguments.
 			// - `bufferOffset` is the offset into `buffer` where arguments begin, in bytes.
 			// - `drawCount` is the number of draw calls to execute. Cannot be 0.
 			// - `stride` is the distance between successive sets of draw arguments, in bytes. Ignored if `drawCount` is 0 or 1.
-			virtual void drawIndexedIndirect(ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) = 0;
+			void drawIndexedIndirect(ref<BaseBuffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride);
 
-			virtual void endRenderPass() = 0;
+			// Draws primitives using arguments from an indirect buffer.
+			// - `buffer` is the buffer containing draw arguments.
+			// - `bufferOffset` is the offset into `buffer` where arguments begin, in bytes.
+			// - `drawCount` is the number of draw calls to execute. Cannot be 0.
+			// - `stride` is the distance between successive sets of draw arguments, in bytes. Ignored if `drawCount` is 0 or 1.
+			void drawIndirect(ref<BaseBuffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride);
 
-			virtual ref<CommandBuffer> end() const = 0;
+			ref<CommandBuffer> end() const;
 
-			virtual void reset() = 0;
+			void endRenderPass();
+
+			void nextSubpass();
+
+			// TODO: Merge memory barriers, buffer memory barriers and image memory barriers into a single method.
+			void insertBufferMemoryBarriers(view<BufferMemoryBarrier> barriers);
+
+			void reset();
+
+			void setImageMemoryBarrier(ref<Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage);
+
+			void setLineWidth(float32 lineWidth);
+
+			// Updates the scissor area.
+			// NOTE: This should only be used if the render pipeline's dynamic state contains SCISSOR.
+			void setScissor(sint32 xOffset, sint32 yOffset, Extent2D extent);
+
+			// Updates the viewport area.
+			// NOTE: This should only be used if the render pipeline's dynamic state contains VIEWPORT.
+			void setViewport(vec2<float32> origin, vec2<float32> size, float32 minDepth, float32 maxDepth);
 
 		protected:
-			virtual void bindIndexBuffer(ref<Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) = 0;
+			explicit CommandEncoder(const Device* device, const CommandPool* commandPool);
+
+		private:
+			void bindIndexBuffer(ref<BaseBuffer> indexBuffer, uint64 offset, uint8 indexTypeSize);
+
+		public:
+			const Device* device;
+			const CommandPool* commandPool;
 	};
 
-	template void CommandEncoder::bindIndexBuffer<uint16>(ref<Buffer> indexBuffer, uint64 offset);
-	template void CommandEncoder::bindIndexBuffer<uint32>(ref<Buffer> indexBuffer, uint64 offset);
+	template void CommandEncoder::bindIndexBuffer<uint16>(ref<BaseBuffer> indexBuffer, uint64 offset);
+	template void CommandEncoder::bindIndexBuffer<uint32>(ref<BaseBuffer> indexBuffer, uint64 offset);
 }

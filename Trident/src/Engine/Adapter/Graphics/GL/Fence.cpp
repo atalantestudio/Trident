@@ -7,37 +7,40 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	GL::Fence::Fence(const FenceDescriptor& descriptor) :
-		Trident::Fence(descriptor),
-		sync(nullptr)
-	{
-		if (!descriptor.signaled) {
-			create();
+	GL::Fence::Fence(const Trident::Device* device) :
+		Trident::Fence(device)
+	{}
+
+	ref<Trident::Fence> GL::createFence(const Trident::Device* device, const FenceDescriptor& descriptor) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		ref<GL::Fence> fence = createRef<GL::Fence>(device);
+
+		// TODO: Create sync object here?
+		/* if (!descriptor.signaled) {
+			#if OPENGL_VERSION >= OPENGL_VERSION_3_2
+				fence->sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+
+				ADAPTER_ASSERT(fence->sync != 0, "Failed to create fence.");
+			#else
+				ENGINE_ERROR_UNSUPPORTED();
+			#endif
+		} */
+
+		return fence;
+	}
+
+	void GL::destroyFence(const Trident::Device* device, const Trident::Fence* fence) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const GL::Fence* _fence = static_cast<const GL::Fence*>(fence);
+
+		if (_fence->sync) {
+			#if OPENGL_VERSION >= OPENGL_VERSION_3_2
+				glDeleteSync(_fence->sync);
+			#else
+				ENGINE_ERROR_UNSUPPORTED();
+			#endif
 		}
-	}
-
-	void GL::Fence::create() {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_3_2
-			// See https://registry.khronos.org/OpenGL-Refpages/gl4/html/glFenceSync.xhtml.
-			sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-
-			ADAPTER_ASSERT(sync != 0, "Failed to create fence.");
-		#else
-			ENGINE_ERROR_UNSUPPORTED();
-		#endif
-	}
-
-	void GL::Fence::reset() {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_3_2
-			glDeleteSync(sync);
-		#else
-			ENGINE_ERROR_UNSUPPORTED();
-		#endif
-
-		sync = nullptr;
 	}
 }

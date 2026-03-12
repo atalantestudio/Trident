@@ -8,17 +8,25 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	VK::PipelineLayout::PipelineLayout(const PipelineLayoutDescriptor& descriptor, const VK::Device& device) :
-		Trident::PipelineLayout(descriptor),
-		device(device)
-	{
+	VK::PipelineLayout::PipelineLayout(const Trident::Device* device) :
+		Trident::PipelineLayout(device)
+	{}
+
+	ref<Trident::PipelineLayout> VK::createPipelineLayout(const Trident::Device* device, const PipelineLayoutDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		VkResult result;
-		sequence<VkDescriptorSetLayout> vkDescriptorSetLayouts(descriptor.descriptorSetLayouts.count());
 
-		for (uint32 descriptorSetLayoutIndex = 0; descriptorSetLayoutIndex < descriptor.descriptorSetLayouts.count(); descriptorSetLayoutIndex += 1) {
+		ref<VK::PipelineLayout> pipelineLayout = createRef<VK::PipelineLayout>(device);
+
+		sequence<VkDescriptorSetLayout> vkDescriptorSetLayouts(descriptor.descriptorSetLayouts.count());
+		uint32 descriptorSetLayoutIndex = 0;
+
+		while (descriptorSetLayoutIndex < descriptor.descriptorSetLayouts.count()) {
 			vkDescriptorSetLayouts[descriptorSetLayoutIndex] = std::static_pointer_cast<VK::DescriptorSetLayout>(descriptor.descriptorSetLayouts[descriptorSetLayoutIndex])->descriptorSetLayout;
+
+			descriptorSetLayoutIndex += 1;
 		}
 
 		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
@@ -30,7 +38,7 @@ namespace Trident {
 		pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
 		pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
 
-		result = vkCreatePipelineLayout(device.device, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout);
+		result = _device->vkCreatePipelineLayout(_device->device, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout->pipelineLayout);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create pipeline layout ([]).", string_VkResult(result));
 
@@ -40,23 +48,24 @@ namespace Trident {
 				debugUtilsObjectNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
 				debugUtilsObjectNameInfo.pNext = nullptr;
 				debugUtilsObjectNameInfo.objectType = VK_OBJECT_TYPE_PIPELINE_LAYOUT;
-				debugUtilsObjectNameInfo.objectHandle = (uint64) pipelineLayout;
+				debugUtilsObjectNameInfo.objectHandle = (uint64) pipelineLayout->pipelineLayout;
 				debugUtilsObjectNameInfo.pObjectName = &descriptor.name[0];
 
-				result = vkSetDebugUtilsObjectNameEXT(device.device, &debugUtilsObjectNameInfo);
+				result = _device->vkSetDebugUtilsObjectNameEXT(_device->device, &debugUtilsObjectNameInfo);
 
 				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to set object name ([]).", string_VkResult(result));
 			}
 		#endif
+
+		return pipelineLayout;
 	}
 
-	VK::PipelineLayout::~PipelineLayout() {
+	void VK::destroyPipelineLayout(const Trident::Device* device, const Trident::PipelineLayout* pipelineLayout) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		// TODO: Only if the pool has been created with the VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT flag.
-		// const VkResult result = vkFreeDescriptorSets(device, descriptorPool, static_cast<uint32>(descriptorSets.size()), descriptorSets.data());
-		// ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to free descriptor sets ([]).", string_VkResult(result));
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		const VK::PipelineLayout* _pipelineLayout = static_cast<const VK::PipelineLayout*>(pipelineLayout);
 
-		vkDestroyPipelineLayout(device.device, pipelineLayout, nullptr);
+		_device->vkDestroyPipelineLayout(_device->device, _pipelineLayout->pipelineLayout, nullptr);
 	}
 }

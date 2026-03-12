@@ -13,7 +13,7 @@
 #include "Engine/API/Event/Window/WindowCloseEvent.hpp"
 #include "Engine/API/Event/Window/WindowResizeEvent.hpp"
 
-#ifndef WIN32_LEAN_AND_MEAN
+#if !defined(WIN32_LEAN_AND_MEAN)
 	// Exclude rarely-used stuff from Windows headers.
 	#define WIN32_LEAN_AND_MEAN
 #endif

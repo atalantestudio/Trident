@@ -3,45 +3,55 @@
 
 #pragma once
 
+#include "Engine/API/Graphics/Base.hpp"
+
+#include "Engine/API/Rendering/Access.hpp"
+#include "Engine/API/Rendering/BufferUsage.hpp"
 #include "Engine/API/Rendering/Descriptor/BufferDescriptor.hpp"
-#include "Engine/Validation/Descriptor.hpp"
 
 namespace Trident {
-	class Buffer {
+	class BaseBuffer {
 		public:
-			virtual ~Buffer() = default;
+			~BaseBuffer();
 
 			/// Returns the size in bytes of the buffer.
-			uint64 getSize() const {
-				return size;
-			}
+			uint64 getSize() const;
 
-			/// Maps a range of the buffer to CPU memory.
+			/// Returns the current buffer usage flags.
+			BufferUsage getUsage() const;
+
+			/// Returns the current buffer access flags.
+			Access getAccess() const;
+
+			/// Maps a range of the buffer to host memory.
 			/// The offset and size must be provided in bytes.
-			template<typename T>
-			T* map(uint64 offset, uint64 size) const {
-				return static_cast<T*>(getMappedRange(offset, size));
-			}
+			void* map(uint64 offset, uint64 size) const;
 
 			/// Unmaps the buffer.
-			virtual void unmap() const = 0;
+			void unmap() const;
 
 		protected:
-			explicit Buffer(const BufferDescriptor& descriptor) :
-				size(descriptor.size),
-				usage(descriptor.usage)
-			{
-				DEBUG_DESCRIPTOR_GUARD(descriptor);
-			}
-
-		private:
-			virtual void* getMappedRange(uint64 offset, uint64 size) const = 0;
+			explicit BaseBuffer(const Device* device, const BufferDescriptor& descriptor);
 
 		public:
-			// NOTE: Only used for debug assertions.
-			BufferUsage usage;
-
-		protected:
 			uint64 size;
+
+			// TODO: Add memory suballocation.
+
+			BufferUsage usage;
+			Access access = Access::NONE;
+
+		private:
+			const Device* device;
+	};
+
+	template<typename ElementType>
+	class Buffer : public BaseBuffer {
+		public:
+			/// Maps a range of the buffer to host memory.
+			/// The offset and size must be provided in bytes.
+			inline ElementType* map(uint64 offset, uint64 size) const {
+				return static_cast<ElementType*>(BaseBuffer::map(offset, size));
+			}
 	};
 }

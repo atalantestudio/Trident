@@ -6,8 +6,14 @@
 #include "Engine/Adapter/Graphics/DX12/Framebuffer.hpp"
 
 namespace Trident {
-	DX12::Framebuffer::Framebuffer(const FramebufferDescriptor& descriptor) :
-		Trident::Framebuffer(descriptor),
+	DX12::Framebuffer::Framebuffer(const Trident::Device* device, const FramebufferDescriptor& descriptor) :
+		Trident::Framebuffer(device, descriptor),
 		imageViews(descriptor.imageViews)
 	{}
+
+	ref<Trident::Framebuffer> DX12::createFramebuffer(const Trident::Device* device, const FramebufferDescriptor& descriptor) {
+		return createRef<DX12::Framebuffer>(device, descriptor);
+	}
+
+	void DX12::destroyFramebuffer(const Trident::Device* device, const Trident::Framebuffer* framebuffer) {}
 }

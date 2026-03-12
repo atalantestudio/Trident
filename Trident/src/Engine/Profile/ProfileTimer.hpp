@@ -8,7 +8,7 @@
 namespace Trident {
 	class ProfileTimer {
 		public:
-			explicit ProfileTimer(const std::string& name);
+			explicit ProfileTimer(view<char8> name);
 
 			~ProfileTimer();
 

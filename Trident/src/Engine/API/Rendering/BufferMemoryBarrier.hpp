@@ -8,7 +8,7 @@
 
 namespace Trident {
 	struct BufferMemoryBarrier {
-		ref<Buffer> buffer;
+		ref<BaseBuffer> buffer;
 		uint64 offset;
 		uint64 size;
 

@@ -18,17 +18,17 @@ namespace Trident {
 		const uint32 shelfGeometryIndex = scene.registerGeometry(shelfGeometry);
 		const uint32 tableGeometryIndex = scene.registerGeometry(tableGeometry);
 
-		InstanceDescriptor shelf1InstanceDescriptor{};
+		SceneInstanceDescriptor shelf1InstanceDescriptor{};
 		shelf1InstanceDescriptor.geometryIndex = shelfGeometryIndex;
 		shelf1InstanceDescriptor.position = {-2.0_m, -1.0_m, 3.0_m};
 		shelf1InstanceDescriptor.rotation = {pi<float32>() * 0.5f, 0.0_rad, 0.0_rad};
 
-		InstanceDescriptor woodenTable02InstanceDescriptor{};
+		SceneInstanceDescriptor woodenTable02InstanceDescriptor{};
 		woodenTable02InstanceDescriptor.geometryIndex = tableGeometryIndex;
 		woodenTable02InstanceDescriptor.position = {0.0_m, -1.0_m, 3.0_m};
 		woodenTable02InstanceDescriptor.rotation = {pi<float32>() * 0.5f, pi<float32>(), 0.0_rad};
 
-		InstanceDescriptor shelf2InstanceDescriptor{};
+		SceneInstanceDescriptor shelf2InstanceDescriptor{};
 		shelf2InstanceDescriptor.geometryIndex = shelfGeometryIndex;
 		shelf2InstanceDescriptor.position = {2.0_m, -1.0_m, 3.0_m};
 		shelf2InstanceDescriptor.rotation = {pi<float32>() * 0.5f, pi<float32>(), 0.0_rad};

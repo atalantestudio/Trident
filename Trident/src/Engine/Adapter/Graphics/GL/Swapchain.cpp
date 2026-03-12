@@ -7,55 +7,74 @@
 #include "Engine/Adapter/Graphics/GL/Swapchain.hpp"
 
 namespace Trident {
-	GL::Swapchain::Swapchain(const SwapchainDescriptor& descriptor, const GL::Instance& instance, const GL::Surface& surface) :
-		Trident::Swapchain(descriptor),
-		instance(instance),
-		surface(surface)
-	{
-		const uint32 imageCount = getImageCount();
+	GL::Swapchain::Swapchain(const Trident::Device* device, const SwapchainDescriptor& descriptor) :
+		Trident::Swapchain(device, descriptor)
+	{}
 
-		images = sequence<ref<Trident::Image>>(imageCount);
-		imageViews = sequence<ref<Trident::ImageView>>(imageCount);
+	ref<Trident::Swapchain> GL::createSwapchain(const Trident::Device* device, const SwapchainDescriptor& descriptor) {
+		static constexpr uint32 IMAGE_COUNT = 3;
 
-		update(descriptor);
-	}
-
-	uint32 GL::Swapchain::getImageCount() const {
-		return 1;
-	}
-
-	void GL::Swapchain::update(const SwapchainDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		DEBUG_DESCRIPTOR_GUARD(descriptor);
+		ref<GL::Swapchain> swapchain = createRef<GL::Swapchain>(device, descriptor);
+		swapchain->imageCount = IMAGE_COUNT;
+		swapchain->images = sequence<ref<Trident::Image>>(swapchain->imageCount);
+		swapchain->imageViews = sequence<ref<Trident::ImageView>>(swapchain->imageCount);
 
-		extent = descriptor.extent;
+		updateSwapchain(device, swapchain.get(), descriptor);
 
-		instance.setSwapInterval(static_cast<sint32>(descriptor.vSync));
+		return swapchain;
+	}
+
+	void GL::destroySwapchain(const Trident::Device* device, const Trident::Swapchain* swapchain) {}
+
+	void GL::recreateSwapchain(const Trident::Device* device, Trident::Swapchain* swapchain, const SwapchainDescriptor& descriptor) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		updateSwapchain(device, swapchain, descriptor);
+	}
+
+	void GL::updateSwapchain(const Trident::Device* device, Trident::Swapchain* swapchain, const SwapchainDescriptor& descriptor) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		swapchain->extent = descriptor.extent;
+
+		#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
+			static const PFNWGLGETEXTENSIONSSTRINGEXTPROC wglGetExtensionsStringEXT = loadProcedure<PFNWGLGETEXTENSIONSSTRINGEXTPROC>("wglGetExtensionsStringEXT");
+			static const view<char8> extensionsString = wglGetExtensionsStringEXT();
+
+			ADAPTER_ASSERT(extensionsString.find("WGL_EXT_swap_control", 0) < extensionsString.count(), "WGL_EXT_swap_control extension not supported.");
+
+			static const PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = loadProcedure<PFNWGLSWAPINTERVALEXTPROC>("wglSwapIntervalEXT");
+
+			BOOL result;
+
+			result = wglSwapIntervalEXT(static_cast<sint32>(descriptor.verticalSync));
+
+			WIN32_ASSERT(result == TRUE);
+		#endif
 
 		ImageDescriptor imageDescriptor{};
 		imageDescriptor.type = ImageType::TEXTURE_2D;
-		imageDescriptor.format = surface.getFormat();
-		imageDescriptor.extent.width = extent.width;
-		imageDescriptor.extent.height = extent.height;
+		imageDescriptor.format = descriptor.surface->getFormat();
+		imageDescriptor.extent.width = swapchain->extent.width;
+		imageDescriptor.extent.height = swapchain->extent.height;
 		imageDescriptor.extent.depth = 1;
 		imageDescriptor.mipLevelCount = 1;
 		imageDescriptor.layerCount = 1;
 		imageDescriptor.sampleCount = 1;
-
-		// Swapchain images are not associated with client-side usage.
 		imageDescriptor.usage = static_cast<ImageUsage>(0);
 
 		uint32 imageIndex = 0;
 
-		while (imageIndex < images.count()) {
+		while (imageIndex < swapchain->images.count()) {
 			SET_DEBUG_NAME(imageDescriptor, Logger::format("Swapchain image []", imageIndex));
 
-			images[imageIndex] = createRef<GL::Image>(imageDescriptor);
+			swapchain->images[imageIndex] = createImage(device, imageDescriptor);
 
 			imageIndex += 1;
 		}
 
-		createImageViews();
+		swapchain->createImageViews();
 	}
 }

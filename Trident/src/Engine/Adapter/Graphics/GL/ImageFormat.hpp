@@ -8,7 +8,7 @@
 
 namespace Trident::GL {
 	inline GLenum getFormat(ImageFormat imageFormat) {
-		static constexpr GLenum glFormats[] = {
+		static constexpr GLenum FORMATS[] = {
 			GL_RED,
 			GL_RGB,
 			GL_BGRA,
@@ -21,11 +21,13 @@ namespace Trident::GL {
 			GL_DEPTH_STENCIL,
 		};
 
-		return glFormats[static_cast<uint8>(imageFormat)];
+		ADAPTER_ASSERT(imageFormat < ImageFormat::count, "Invalid image format.");
+
+		return FORMATS[static_cast<uint32>(imageFormat)];
 	}
 
 	inline GLenum getInternalFormat(ImageFormat imageFormat) {
-		static constexpr GLenum glInternalFormats[] = {
+		static constexpr GLenum INTERNAL_FORMATS[] = {
 			GL_R8,
 			GL_RGB8,
 			GL_BGRA8_EXT,
@@ -38,7 +40,9 @@ namespace Trident::GL {
 			GL_DEPTH24_STENCIL8,
 		};
 
-		return glInternalFormats[static_cast<uint8>(imageFormat)];
+		ADAPTER_ASSERT(imageFormat < ImageFormat::count, "Invalid image format.");
+
+		return INTERNAL_FORMATS[static_cast<uint32>(imageFormat)];
 	}
 
 	inline ImageFormat fromInternalFormat(GLenum internalFormat) {
@@ -54,7 +58,7 @@ namespace Trident::GL {
 			case GL_DEPTH32F_STENCIL8: return ImageFormat::D32_SFLOAT_S8_UINT;
 			case GL_DEPTH24_STENCIL8: return ImageFormat::D24_UNORM_S8_UINT;
 			default: {
-				ADAPTER_ASSERT(false, "Unhandled internal format.");
+				ADAPTER_ASSERT(false, "Invalid internal format.");
 
 				return static_cast<ImageFormat>(0);
 			}

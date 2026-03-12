@@ -4,413 +4,133 @@
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/GL/Buffer.hpp"
+#include "Engine/Adapter/Graphics/GL/CommandEncoder.hpp"
 #include "Engine/Adapter/Graphics/GL/ComputePipeline.hpp"
 #include "Engine/Adapter/Graphics/GL/Fence.hpp"
 #include "Engine/Adapter/Graphics/GL/Framebuffer.hpp"
 #include "Engine/Adapter/Graphics/GL/GraphicsAdapter.hpp"
+#include "Engine/Adapter/Graphics/GL/GraphicsPipeline.hpp"
 #include "Engine/Adapter/Graphics/GL/Image.hpp"
+#include "Engine/Adapter/Graphics/GL/ImageView.hpp"
 #include "Engine/Adapter/Graphics/GL/RenderPass.hpp"
-#include "Engine/Adapter/Graphics/GL/RenderPipeline.hpp"
 #include "Engine/Adapter/Graphics/GL/Sampler.hpp"
 #include "Engine/Adapter/Graphics/GL/ShaderModule.hpp"
 #include "Engine/Adapter/Graphics/GL/Swapchain.hpp"
+#include "Engine/API/Rendering/CommandPool.hpp"
+#include "Engine/API/Rendering/MemoryAllocator.hpp"
 
-namespace Trident {
-	GL::GraphicsAdapter::GraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window, const ApplicationProperties& properties) :
-		Trident::GraphicsAdapter(window)
-	{
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		logger = ConsoleLogger(std::cout, LogLevel::ALL, "OPENGL");
-
-		if (properties.PreferIntegratedGPU) {
-			logger.warning("GPU selection can only be done at compile-time. Please enable the GL_PREFER_INTEGRATED_GPU macro instead.");
-		}
-
-		instance = createRef<GL::Instance>(window);
-		instance->makeCurrent();
-
-		surface = createRef<GL::Surface>();
-
-		loadProcedures();
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_3 && defined(DEBUG_ENABLE_MESSENGER)
-			glEnable(GL_DEBUG_OUTPUT);
-			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-			glDebugMessageCallback(debugMessageCallback, nullptr);
-			glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_OTHER, 0, GL_DEBUG_SEVERITY_NOTIFICATION, 0, "Enabled OpenGL debug message callback.");
-		#endif
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_3_2
-			glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);
-		#else
-			ENGINE_ERROR_UNSUPPORTED();
-		#endif
-
-		device = createRef<GL::Device>(*instance);
+namespace Trident::GL {
+	static ref<CommandPool> createCommandPool(const Trident::Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability) {
+		return createRef<CommandPool>(device);
 	}
 
-	ref<Buffer> GL::GraphicsAdapter::createBuffer(const BufferDescriptor& descriptor) const {
-		return createRef<GL::Buffer>(descriptor);
+	static ref<DescriptorSetLayout> createDescriptorSetLayout(const Trident::Device* device, const sequence<DescriptorSetLayoutBinding>& bindings) {
+		return createRef<DescriptorSetLayout>(device, bindings);
 	}
 
-	ref<Fence> GL::GraphicsAdapter::createFence(const FenceDescriptor& descriptor) const {
-		return createRef<GL::Fence>(descriptor);
+	static ref<MemoryAllocator> createMemoryAllocator(const Trident::Device* device) {
+		return createRef<MemoryAllocator>();
 	}
 
-	ref<Framebuffer> GL::GraphicsAdapter::createFramebuffer(const FramebufferDescriptor& descriptor) const {
-		return createRef<GL::Framebuffer>(descriptor);
+	static ref<PipelineLayout> createPipelineLayout(const Trident::Device* device, const PipelineLayoutDescriptor& descriptor) {
+		return createRef<PipelineLayout>(device);
 	}
 
-	ref<Image> GL::GraphicsAdapter::createImage(const ImageDescriptor& descriptor) const {
-		return createRef<GL::Image>(descriptor);
+	static ref<Semaphore> createSemaphore(const Trident::Device* device) {
+		return createRef<Semaphore>(device);
 	}
 
-	ref<ComputePipeline> GL::GraphicsAdapter::createComputePipeline(const ComputePipelineDescriptor& descriptor) const {
-		return createRef<GL::ComputePipeline>(descriptor);
-	}
+	static void destroyCommandPool(const Trident::Device* device, const CommandPool* commandPool) {}
 
-	ref<DescriptorSetLayout> GL::GraphicsAdapter::createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const {
-		return createRef<DescriptorSetLayout>(bindings);
-	}
+	static void destroyDescriptorSetLayout(const Trident::Device* device, const DescriptorSetLayout* descriptorSetLayout) {}
 
-	ref<PipelineLayout> GL::GraphicsAdapter::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
-		return createRef<PipelineLayout>(descriptor);
-	}
+	static void destroyPipelineLayout(const Trident::Device* device, const PipelineLayout* pipelineLayout) {}
 
-	ref<RenderPass> GL::GraphicsAdapter::createRenderPass(const RenderPassDescriptor& descriptor) const {
-		return createRef<GL::RenderPass>(descriptor);
-	}
+	static void destroySemaphore(const Trident::Device* device, const Semaphore* semaphore) {}
 
-	ref<RenderPipeline> GL::GraphicsAdapter::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
-		return createRef<GL::RenderPipeline>(descriptor);
-	}
+	void bindAdapter(Trident::GraphicsAdapter* adapter) {
+		adapter->logger = ConsoleLogger(std::cout, LogLevel::ALL, "OPENGL");
 
-	ref<Sampler> GL::GraphicsAdapter::createSampler(const SamplerDescriptor& descriptor) const {
-		return createRef<GL::Sampler>(descriptor);
-	}
-
-	ref<Semaphore> GL::GraphicsAdapter::createSemaphore() const {
-		return createRef<Semaphore>();
-	}
-
-	ref<ShaderModule> GL::GraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) const {
-		return createRef<GL::ShaderModule>(descriptor, asset);
-	}
-
-	ref<ShaderModule> GL::GraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) const {
-		return createRef<GL::ShaderModule>(descriptor, code);
-	}
-
-	ref<Swapchain> GL::GraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor) const {
-		return createRef<GL::Swapchain>(descriptor, *instance, *surface);
-	}
-
-	#if defined(DEBUG_ENABLE_MESSENGER)
-		void GL::GraphicsAdapter::debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
-			switch (severity) {
-				case GL_DEBUG_SEVERITY_NOTIFICATION: {
-					ADAPTER_INFO(message);
-
-					break;
-				}
-				case GL_DEBUG_SEVERITY_LOW:
-				case GL_DEBUG_SEVERITY_MEDIUM: {
-					ADAPTER_WARNING(message);
-
-					break;
-				}
-				case GL_DEBUG_SEVERITY_HIGH: {
-					ADAPTER_ERROR(message);
-
-					break;
-				}
-			}
-		}
-	#endif
-
-	ref<Device> GL::GraphicsAdapter::getDevice() const {
-		return device;
-	}
-
-	ref<Surface> GL::GraphicsAdapter::getSurface() const {
-		return surface;
-	}
-
-	void GL::GraphicsAdapter::loadProcedures() const {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		#define LOAD_PROCEDURE(procedure) procedure = static_cast<decltype(procedure)>(instance->getProcedure(#procedure))
-
-		LOAD_PROCEDURE(glAttachShader);
-		LOAD_PROCEDURE(glBindBuffer);
-		LOAD_PROCEDURE(glCreateProgram);
-		LOAD_PROCEDURE(glCreateShader);
-		LOAD_PROCEDURE(glCullFace);
-		LOAD_PROCEDURE(glDeleteBuffers);
-		LOAD_PROCEDURE(glDeleteProgram);
-		LOAD_PROCEDURE(glDeleteShader);
-		LOAD_PROCEDURE(glDeleteTextures);
-		LOAD_PROCEDURE(glDepthFunc);
-		LOAD_PROCEDURE(glDepthMask);
-		LOAD_PROCEDURE(glDetachShader);
-		LOAD_PROCEDURE(glDisable);
-		LOAD_PROCEDURE(glDrawBuffers);
-		LOAD_PROCEDURE(glEnable);
-		LOAD_PROCEDURE(glFrontFace);
-		LOAD_PROCEDURE(glFinish);
-		LOAD_PROCEDURE(glGenTextures);
-		LOAD_PROCEDURE(glGetFloatv);
-		LOAD_PROCEDURE(glGetIntegerv);
-		LOAD_PROCEDURE(glGetProgramInfoLog);
-		LOAD_PROCEDURE(glGetProgramiv);
-		LOAD_PROCEDURE(glGetShaderInfoLog);
-		LOAD_PROCEDURE(glGetShaderiv);
-
-		#if BUILD_MODE_DEBUG
-			LOAD_PROCEDURE(glGetString);
-		#endif
-
-		LOAD_PROCEDURE(glLineWidth);
-		LOAD_PROCEDURE(glLinkProgram);
-		LOAD_PROCEDURE(glPixelStorei);
-		LOAD_PROCEDURE(glPolygonMode);
-		LOAD_PROCEDURE(glScissor);
-		LOAD_PROCEDURE(glUseProgram);
-		LOAD_PROCEDURE(glViewport);
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-			LOAD_PROCEDURE(glBindBufferRange);
-			LOAD_PROCEDURE(glBindFramebuffer);
-			LOAD_PROCEDURE(glBindVertexArray);
-			LOAD_PROCEDURE(glDeleteFramebuffers);
-			LOAD_PROCEDURE(glDeleteVertexArrays);
-			LOAD_PROCEDURE(glDisablei);
-			LOAD_PROCEDURE(glEnablei);
-			LOAD_PROCEDURE(glGetIntegeri_v);
-		#endif
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_3_2
-			LOAD_PROCEDURE(glClientWaitSync);
-			LOAD_PROCEDURE(glDeleteSync);
-			LOAD_PROCEDURE(glFenceSync);
-			LOAD_PROCEDURE(glProvokingVertex);
-			LOAD_PROCEDURE(glSamplerParameteri);
-		#endif
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_3_3
-			LOAD_PROCEDURE(glBindSampler);
-			LOAD_PROCEDURE(glDeleteSamplers);
-		#endif
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_0
-			LOAD_PROCEDURE(glBlendFunci);
-			LOAD_PROCEDURE(glMinSampleShading);
-		#endif
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_2
-			LOAD_PROCEDURE(glBindImageTexture);
-			LOAD_PROCEDURE(glMemoryBarrier);
-		#endif
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_3
-			#if defined(DEBUG_ENABLE_MESSENGER)
-				LOAD_PROCEDURE(glDebugMessageCallback);
-				LOAD_PROCEDURE(glDebugMessageInsert);
-			#endif
-
-			LOAD_PROCEDURE(glDispatchCompute);
-			LOAD_PROCEDURE(glDispatchComputeIndirect);
-
-			#if defined(BUILD_MODE_DEBUG)
-				LOAD_PROCEDURE(glObjectLabel);
-			#endif
-
-			LOAD_PROCEDURE(glTextureView);
-		#endif
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			LOAD_PROCEDURE(glGetTextureSubImage);
-			LOAD_PROCEDURE(glVertexArrayElementBuffer);
-		#endif
-
-		#if defined(GL_SOURCE_FROM_SPIRV)
-			#if OPENGL_VERSION >= OPENGL_VERSION_4_6
-				LOAD_PROCEDURE(glShaderBinary);
-				LOAD_PROCEDURE(glSpecializeShader);
-			#endif
-		#else
-			#if OPENGL_VERSION >= OPENGL_VERSION_2_0
-				LOAD_PROCEDURE(glCompileShader);
-				LOAD_PROCEDURE(glShaderSource);
-			#endif
-		#endif
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			LOAD_PROCEDURE(glCopyNamedBufferSubData);
-		#elif OPENGL_VERSION >= OPENGL_VERSION_3_1
-			LOAD_PROCEDURE(glCopyBufferSubData);
-		#endif
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			LOAD_PROCEDURE(glCreateBuffers);
-			LOAD_PROCEDURE(glGetNamedBufferParameteriv);
-			LOAD_PROCEDURE(glUnmapNamedBuffer);
-		#else
-			LOAD_PROCEDURE(glGenBuffers);
-			LOAD_PROCEDURE(glGetBufferParameteriv);
-			LOAD_PROCEDURE(glUnmapBuffer);
-		#endif
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			LOAD_PROCEDURE(glBindTextureUnit);
-			LOAD_PROCEDURE(glCreateTextures);
-
-			#if defined(BUILD_MODE_DEBUG)
-				LOAD_PROCEDURE(glGetTextureParameteriv);
-			#endif
-
-			LOAD_PROCEDURE(glTextureParameteri);
-			LOAD_PROCEDURE(glTextureSubImage1D);
-			LOAD_PROCEDURE(glTextureSubImage2D);
-			LOAD_PROCEDURE(glTextureSubImage3D);
-		#else
-			LOAD_PROCEDURE(glActiveTexture);
-			LOAD_PROCEDURE(glBindTexture);
-
-			#if defined(BUILD_MODE_DEBUG)
-				LOAD_PROCEDURE(glGetTexParameteriv);
-			#endif
-
-			LOAD_PROCEDURE(glTexParameteri);
-			LOAD_PROCEDURE(glTexSubImage1D);
-			LOAD_PROCEDURE(glTexSubImage2D);
-			LOAD_PROCEDURE(glTexSubImage3D);
-		#endif
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			LOAD_PROCEDURE(glBlitNamedFramebuffer);
-
-			#if defined(BUILD_MODE_DEBUG)
-				LOAD_PROCEDURE(glCheckNamedFramebufferStatus);
-			#endif
-
-			LOAD_PROCEDURE(glClearNamedFramebufferfi);
-			LOAD_PROCEDURE(glClearNamedFramebufferfv);
-			LOAD_PROCEDURE(glClearNamedFramebufferiv);
-			LOAD_PROCEDURE(glClearNamedFramebufferuiv);
-			LOAD_PROCEDURE(glCreateFramebuffers);
-			LOAD_PROCEDURE(glNamedFramebufferTexture);
-		#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
-			LOAD_PROCEDURE(glBlitFramebuffer);
-
-			#if defined(BUILD_MODE_DEBUG)
-				LOAD_PROCEDURE(glCheckFramebufferStatus);
-			#endif
-
-			LOAD_PROCEDURE(glClearBufferfi);
-			LOAD_PROCEDURE(glClearBufferfv);
-			LOAD_PROCEDURE(glClearBufferiv);
-			LOAD_PROCEDURE(glClearBufferuiv);
-			LOAD_PROCEDURE(glFramebufferTexture2D);
-			LOAD_PROCEDURE(glGenFramebuffers);
-		#endif
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			LOAD_PROCEDURE(glCreateSamplers);
-		#elif OPENGL_VERSION >= OPENGL_VERSION_3_3
-			LOAD_PROCEDURE(glGenSamplers);
-		#endif
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			LOAD_PROCEDURE(glCreateVertexArrays);
-		#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
-			LOAD_PROCEDURE(glGenVertexArrays);
-		#endif
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_2
-			LOAD_PROCEDURE(glDrawArraysInstancedBaseInstance);
-		#elif OPENGL_VERSION >= OPENGL_VERSION_3_1
-			LOAD_PROCEDURE(glDrawArraysInstanced);
-		#else
-			LOAD_PROCEDURE(glDrawArrays);
-		#endif
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_2
-			LOAD_PROCEDURE(glDrawElementsInstancedBaseVertexBaseInstance);
-		#elif OPENGL_VERSION >= OPENGL_VERSION_3_2
-			LOAD_PROCEDURE(glDrawElementsInstancedBaseVertex);
-		#elif OPENGL_VERSION >= OPENGL_VERSION_3_1
-			LOAD_PROCEDURE(glDrawElementsInstanced);
-		#else
-			LOAD_PROCEDURE(glDrawElements);
-		#endif
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			LOAD_PROCEDURE(glEnableVertexArrayAttrib);
-		#else
-			LOAD_PROCEDURE(glEnableVertexAttribArray);
-		#endif
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			LOAD_PROCEDURE(glMapNamedBufferRange);
-		#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
-			LOAD_PROCEDURE(glMapBufferRange);
-		#endif
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_3
-			LOAD_PROCEDURE(glMultiDrawArraysIndirect);
-			LOAD_PROCEDURE(glMultiDrawElementsIndirect);
-		#elif OPENGL_VERSION >= OPENGL_VERSION_4_0
-			LOAD_PROCEDURE(glDrawArraysIndirect);
-			LOAD_PROCEDURE(glDrawElementsIndirect);
-		#endif
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			LOAD_PROCEDURE(glNamedBufferStorage);
-		#elif OPENGL_VERSION >= OPENGL_VERSION_4_4
-			LOAD_PROCEDURE(glBufferStorage);
-		#endif
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			LOAD_PROCEDURE(glNamedFramebufferReadBuffer);
-		#else
-			LOAD_PROCEDURE(glDrawBuffer);
-			LOAD_PROCEDURE(glReadBuffer);
-		#endif
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			LOAD_PROCEDURE(glTextureStorage2D);
-			LOAD_PROCEDURE(glTextureStorage3D);
-		#elif OPENGL_VERSION >= OPENGL_VERSION_4_2
-			LOAD_PROCEDURE(glTexStorage2D);
-			LOAD_PROCEDURE(glTexStorage3D);
-		#endif
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			LOAD_PROCEDURE(glTextureStorage2DMultisample);
-			LOAD_PROCEDURE(glTextureStorage3DMultisample);
-		#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
-			LOAD_PROCEDURE(glTexStorage2DMultisample);
-			LOAD_PROCEDURE(glTexStorage3DMultisample);
-		#endif
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			LOAD_PROCEDURE(glVertexArrayAttribBinding);
-			LOAD_PROCEDURE(glVertexArrayAttribFormat);
-			LOAD_PROCEDURE(glVertexArrayAttribIFormat);
-			LOAD_PROCEDURE(glVertexArrayAttribLFormat);
-			LOAD_PROCEDURE(glVertexArrayBindingDivisor);
-			LOAD_PROCEDURE(glVertexArrayVertexBuffer);
-		#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
-			LOAD_PROCEDURE(glBindVertexBuffer);
-			LOAD_PROCEDURE(glVertexAttribBinding);
-			LOAD_PROCEDURE(glVertexAttribFormat);
-			LOAD_PROCEDURE(glVertexAttribIFormat);
-			LOAD_PROCEDURE(glVertexAttribLFormat);
-			LOAD_PROCEDURE(glVertexBindingDivisor);
-		#endif
-
-		#undef LOAD_PROCEDURE
+		adapter->acquireNextImageImplementation = GL::acquireNextImage;
+		adapter->allocateDescriptorSetsImplementation = GL::allocateDescriptorSets;
+		adapter->beginImplementation = GL::begin;
+		adapter->beginRenderPassImplementation = GL::beginRenderPass;
+		adapter->bindComputePipelineImplementation = GL::bindComputePipeline;
+		adapter->bindDescriptorSetsImplementation = GL::bindDescriptorSets;
+		adapter->bindGraphicsPipelineImplementation = GL::bindGraphicsPipeline;
+		adapter->bindIndexBufferImplementation = GL::bindIndexBuffer;
+		adapter->bindVertexBufferImplementation = GL::bindVertexBuffer;
+		adapter->copyBufferToBufferImplementation = GL::copyBufferToBuffer;
+		adapter->copyBufferToImageImplementation = GL::copyBufferToImage;
+		adapter->copyImageToBufferImplementation = GL::copyImageToBuffer;
+		adapter->createBufferImplementation = GL::createBuffer;
+		adapter->createCommandEncoderImplementation = GL::createCommandEncoder;
+		adapter->createCommandPoolImplementation = GL::createCommandPool;
+		adapter->createComputePipelineImplementation = GL::createComputePipeline;
+		adapter->createDescriptorSetLayoutImplementation = GL::createDescriptorSetLayout;
+		adapter->createDeviceImplementation = GL::createDevice;
+		adapter->createFenceImplementation = GL::createFence;
+		adapter->createFramebufferImplementation = GL::createFramebuffer;
+		adapter->createGraphicsPipelineImplementation = GL::createGraphicsPipeline;
+		adapter->createImageImplementation = GL::createImage;
+		adapter->createImageViewImplementation = GL::createImageView;
+		adapter->createInstanceImplementation = GL::createInstance;
+		adapter->createMemoryAllocatorImplementation = GL::createMemoryAllocator;
+		adapter->createPipelineLayoutImplementation = GL::createPipelineLayout;
+		adapter->createRenderPassImplementation = GL::createRenderPass;
+		adapter->createSamplerImplementation = GL::createSampler;
+		adapter->createSemaphoreImplementation = GL::createSemaphore;
+		adapter->createShaderModuleFromAssetImplementation = GL::createShaderModule;
+		adapter->createShaderModuleFromCodeImplementation = GL::createShaderModule;
+		adapter->createSurfaceImplementation = GL::createSurface;
+		adapter->createSwapchainImplementation = GL::createSwapchain;
+		adapter->destroyBufferImplementation = GL::destroyBuffer;
+		adapter->destroyCommandEncoderImplementation = GL::destroyCommandEncoder;
+		adapter->destroyCommandPoolImplementation = GL::destroyCommandPool;
+		adapter->destroyComputePipelineImplementation = GL::destroyComputePipeline;
+		adapter->destroyDescriptorSetLayoutImplementation = GL::destroyDescriptorSetLayout;
+		adapter->destroyDeviceImplementation = GL::destroyDevice;
+		adapter->destroyFenceImplementation = GL::destroyFence;
+		adapter->destroyFramebufferImplementation = GL::destroyFramebuffer;
+		adapter->destroyGraphicsPipelineImplementation = GL::destroyGraphicsPipeline;
+		adapter->destroyPipelineLayoutImplementation = GL::destroyPipelineLayout;
+		adapter->destroyImageImplementation = GL::destroyImage;
+		adapter->destroyImageViewImplementation = GL::destroyImageView;
+		adapter->destroyInstanceImplementation = GL::destroyInstance;
+		adapter->destroyQueueImplementation = GL::destroyQueue;
+		adapter->destroyRenderPassImplementation = GL::destroyRenderPass;
+		adapter->destroySamplerImplementation = GL::destroySampler;
+		adapter->destroySemaphoreImplementation = GL::destroySemaphore;
+		adapter->destroyShaderModuleImplementation = GL::destroyShaderModule;
+		adapter->destroySurfaceImplementation = GL::destroySurface;
+		adapter->destroySwapchainImplementation = GL::destroySwapchain;
+		adapter->dispatchImplementation = GL::dispatch;
+		adapter->dispatchIndirectImplementation = GL::dispatchIndirect;
+		adapter->drawImplementation = GL::draw;
+		adapter->drawIndirectImplementation = GL::drawIndirect;
+		adapter->drawIndexedImplementation = GL::drawIndexed;
+		adapter->drawIndexedIndirectImplementation = GL::drawIndexedIndirect;
+		adapter->endImplementation = GL::end;
+		adapter->endRenderPassImplementation = GL::endRenderPass;
+		adapter->getQueueImplementation = GL::getQueue;
+		adapter->insertBufferMemoryBarriersImplementation = GL::insertBufferMemoryBarriers;
+		adapter->mapBufferImplementation = GL::mapBuffer;
+		adapter->nextSubpassImplementation = GL::nextSubpass;
+		adapter->presentImplementation = GL::present;
+		adapter->resetImplementation = GL::reset;
+		adapter->resetFenceImplementation = GL::resetFence;
+		adapter->selectPhysicalDeviceImplementation = GL::selectPhysicalDevice;
+		adapter->setImageMemoryBarrierImplementation = GL::setImageMemoryBarrier;
+		adapter->setLineWidthImplementation = GL::setLineWidth;
+		adapter->setScissorImplementation = GL::setScissor;
+		adapter->setViewportImplementation = GL::setViewport;
+		adapter->submitImplementation = GL::submit;
+		adapter->submit2Implementation = GL::submit;
+		adapter->unmapBufferImplementation = GL::unmapBuffer;
+		adapter->updateDescriptorSetsImplementation = GL::updateDescriptorSets;
+		adapter->updateSwapchainImplementation = GL::recreateSwapchain;
+		adapter->waitForFenceImplementation = GL::waitForFence;
+		adapter->waitIdleDeviceImplementation = GL::waitIdle;
+		adapter->waitIdleQueueImplementation = GL::waitIdle;
 	}
 }

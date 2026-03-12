@@ -3,25 +3,44 @@
 
 #include "pch.hpp"
 
+#include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/Adapter/Graphics/VK/ImageFormat.hpp"
 #include "Engine/Adapter/Graphics/VK/ImageLayout.hpp"
 #include "Engine/Adapter/Graphics/VK/RenderPass.hpp"
+#include "Engine/Adapter/Graphics/VK/Surface.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
+	static bool isColorAttachment(view<ref<Subpass>> subpasses, uint32 attachmentIndex) {
+		for (const ref<Subpass> subpass : subpasses) {
+			for (const AttachmentReference& colorAttachmentReference : subpass->getColorAttachmentReferences()) {
+				if (colorAttachmentReference.index == attachmentIndex) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
 	// TODO(subpass-refactor): Vulkan can make optimizations if we explicitly tell it that we don't care about the depth data post-rendering.
-	VK::RenderPass::RenderPass(const RenderPassDescriptor& descriptor, const VK::Surface& surface, const VK::Device& device) :
-		Trident::RenderPass(descriptor),
-		surface(surface),
-		device(device)
-	{
+	VK::RenderPass::RenderPass(const Trident::Device* device, const RenderPassDescriptor& descriptor) :
+		Trident::RenderPass(device, descriptor)
+	{}
+
+	ref<Trident::RenderPass> VK::createRenderPass(const Trident::Device* device, ref<Trident::Surface> surface, const RenderPassDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		const VkSurfaceFormatKHR surfaceFormat = surface.selectFormat();
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		const ref<VK::Surface> _surface = std::static_pointer_cast<VK::Surface>(surface);
+		VkResult result;
+
+		ref<VK::RenderPass> renderPass = createRef<VK::RenderPass>(device, descriptor);
+		renderPass->surfaceExtent = _surface->capabilities.currentExtent;
 
 		uint32 resolveAttachmentCount = 0;
 
-		for (const ref<Subpass> subpass : subpasses) {
+		for (const ref<Subpass> subpass : renderPass->subpasses) {
 			if (subpass->getRasterizationSampleCount() == 1) {
 				continue;
 			}
@@ -29,12 +48,12 @@ namespace Trident {
 			resolveAttachmentCount += subpass->getResolveAttachmentReferenceCount();
 		}
 
-		sequence<VkAttachmentDescription> attachmentDescriptions(attachments.count() + resolveAttachmentCount);
+		sequence<VkAttachmentDescription> attachmentDescriptions(renderPass->attachments.count() + resolveAttachmentCount);
 
 		uint32 resolveAttachmentIndex = 0;
 
-		for (uint32 attachmentIndex = 0; attachmentIndex < attachments.count(); attachmentIndex += 1) {
-			const Attachment& attachment = attachments[attachmentIndex];
+		for (uint32 attachmentIndex = 0; attachmentIndex < renderPass->attachments.count(); attachmentIndex += 1) {
+			const Attachment& attachment = renderPass->attachments[attachmentIndex];
 
 			VkAttachmentDescription& attachmentDescription = attachmentDescriptions[attachmentIndex];
 			attachmentDescription.flags = 0;
@@ -60,11 +79,11 @@ namespace Trident {
 
 			attachmentDescription.finalLayout = getImageLayout(attachment.finalLayout);
 
-			if (isColorAttachment(attachmentIndex) && attachment.sampleCount > 1) {
+			if (isColorAttachment(renderPass->subpasses, attachmentIndex) && attachment.sampleCount > 1) {
 				// Create resolve attachment description.
-				VkAttachmentDescription& resolveAttachmentDescription = attachmentDescriptions[attachments.count() + resolveAttachmentIndex];
+				VkAttachmentDescription& resolveAttachmentDescription = attachmentDescriptions[renderPass->attachments.count() + resolveAttachmentIndex];
 				resolveAttachmentDescription.flags = 0;
-				resolveAttachmentDescription.format = surfaceFormat.format;
+				resolveAttachmentDescription.format = _surface->surfaceFormat.format;
 				resolveAttachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
 				resolveAttachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 				resolveAttachmentDescription.storeOp = attachmentDescription.storeOp;
@@ -80,7 +99,7 @@ namespace Trident {
 			}
 		}
 
-		sequence<VkAttachmentReference> attachmentReferences(attachmentReferenceCount);
+		sequence<VkAttachmentReference> attachmentReferences(renderPass->attachmentReferenceCount);
 		sequence<VkSubpassDescription> subpassDescriptions(descriptor.subpasses.count());
 		uint32 attachmentReferenceOffset = 0;
 
@@ -114,7 +133,7 @@ namespace Trident {
 				// Create resolve attachment references.
 				for (uint32 resolveAttachmentReferenceIndex = 0; resolveAttachmentReferenceIndex < subpass->getColorAttachmentReferenceCount(); resolveAttachmentReferenceIndex += 1) {
 					VkAttachmentReference& attachmentReference = attachmentReferences[relativeAttachmentReferenceOffset + resolveAttachmentReferenceIndex];
-					attachmentReference.attachment = static_cast<uint32>(attachments.count()) + resolveAttachmentReferenceIndex;
+					attachmentReference.attachment = static_cast<uint32>(renderPass->attachments.count()) + resolveAttachmentReferenceIndex;
 					attachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 				}
 
@@ -203,26 +222,19 @@ namespace Trident {
 		renderPassCreateInfo.dependencyCount = static_cast<uint32>(subpassDependencies.count());
 		renderPassCreateInfo.pDependencies = &subpassDependencies[0];
 
-		const VkResult result = vkCreateRenderPass(device.device, &renderPassCreateInfo, nullptr, &renderPass);
+		result = _device->vkCreateRenderPass(_device->device, &renderPassCreateInfo, nullptr, &renderPass->renderPass);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create render pass ([]).", string_VkResult(result));
+
+		return renderPass;
 	}
 
-	VK::RenderPass::~RenderPass() {
+	void VK::destroyRenderPass(const Trident::Device* device, const Trident::RenderPass* renderPass) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		vkDestroyRenderPass(device.device, renderPass, nullptr);
-	}
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		const VK::RenderPass* _renderPass = static_cast<const VK::RenderPass*>(renderPass);
 
-	bool VK::RenderPass::isColorAttachment(uint32 attachmentIndex) const {
-		for (const ref<Subpass> subpass : subpasses) {
-			for (const AttachmentReference& colorAttachmentReference : subpass->getColorAttachmentReferences()) {
-				if (colorAttachmentReference.index == attachmentIndex) {
-					return true;
-				}
-			}
-		}
-
-		return false;
+		_device->vkDestroyRenderPass(_device->device, _renderPass->renderPass, nullptr);
 	}
 }

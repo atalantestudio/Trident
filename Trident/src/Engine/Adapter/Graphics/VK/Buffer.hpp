@@ -7,21 +7,22 @@
 #include "Engine/API/Rendering/Buffer.hpp"
 
 namespace Trident {
-	class VK::Buffer final : public Trident::Buffer {
+	class VK::BaseBuffer final : public Trident::BaseBuffer {
 		public:
-			explicit Buffer(const BufferDescriptor& descriptor, const VK::Device& device);
-
-			~Buffer() final override;
-
-			void unmap() const final override;
-
-			void* getMappedRange(uint64 offset, uint64 size) const final override;
+			explicit BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor);
 
 		public:
 			VkBuffer buffer;
-
-		private:
-			const VK::Device& device;
 			MemorySuballocation memorySuballocation;
 	};
+
+	namespace VK {
+		ref<Trident::BaseBuffer> createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, UINT stride);
+
+		void destroyBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer);
+
+		void* mapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer, uint64 offset, uint64 size);
+
+		void unmapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer);
+	}
 }

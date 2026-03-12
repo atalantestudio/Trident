@@ -9,7 +9,7 @@ namespace Trident {
 	class Physics2DPolygonsLayer : public BaseLayer {
 		public:
 			void build() override {
-				ConvexHullGeometry2DDescriptor polygonGeometryDescriptor;
+				ConvexHullGeometry2DDescriptor polygonGeometryDescriptor{};
 				polygonGeometryDescriptor.vertices = {
 					{-3.0f,   0.0f},
 					{ 4.0f,   0.0f},
@@ -27,7 +27,7 @@ namespace Trident {
 					{3, 0},
 				};
 
-				ConvexHullGeometry2DDescriptor triangleGeometryDescriptor;
+				ConvexHullGeometry2DDescriptor triangleGeometryDescriptor{};
 				triangleGeometryDescriptor.vertices = {
 					{0.0f, 0.0f},
 					{0.0f, 1.0f},

@@ -7,16 +7,23 @@
 #include <d3dcommon.h>
 #include <D3Dcompiler.h>
 #include <dxgi1_6.h>
-#include <wrl.h>
+
+#if defined(DEBUG_DX12_REPORT_LIVE_OBJECTS)
+	#include <dxgidebug.h>
+#endif
 
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "dxgi.lib")
 
+#if defined(DEBUG_DX12_REPORT_LIVE_OBJECTS)
+	#pragma comment(lib, "dxguid.lib")
+#endif
+
 namespace Trident::DX12 {
 	struct DescriptorHeapAllocation;
 
-	class Buffer;
+	class BaseBuffer;
 	class CommandBuffer;
 	class CommandEncoder;
 	class CommandPool;
@@ -26,6 +33,7 @@ namespace Trident::DX12 {
 	class Fence;
 	class Framebuffer;
 	class GraphicsAdapter;
+	class GraphicsPipeline;
 	class Image;
 	class ImageView;
 	class Instance;
@@ -33,7 +41,6 @@ namespace Trident::DX12 {
 	class PhysicalDevice;
 	class PipelineLayout;
 	class Queue;
-	class RenderPipeline;
 	class Sampler;
 	class ShaderModule;
 	class Surface;

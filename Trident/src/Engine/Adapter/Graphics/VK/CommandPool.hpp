@@ -8,14 +8,15 @@
 namespace Trident {
 	class VK::CommandPool final : public Trident::CommandPool {
 		public:
-			explicit CommandPool(const VK::Device& device, uint32 queueFamilyIndex);
-
-			~CommandPool() final override;
+			explicit CommandPool(const Trident::Device* device);
 
 		public:
 			VkCommandPool commandPool;
-
-		private:
-			const VK::Device& device;
 	};
+
+	namespace VK {
+		ref<Trident::CommandPool> createCommandPool(const Trident::Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability);
+
+		void destroyCommandPool(const Trident::Device* device, const Trident::CommandPool* commandPool);
+	}
 }

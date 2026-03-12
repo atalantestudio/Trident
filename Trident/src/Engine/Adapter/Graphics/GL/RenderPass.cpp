@@ -7,16 +7,20 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	GL::RenderPass::RenderPass(const RenderPassDescriptor& descriptor) :
-		Trident::RenderPass(descriptor)
-	{
+	GL::RenderPass::RenderPass(const Trident::Device* device, const Trident::RenderPassDescriptor& descriptor) :
+		Trident::RenderPass(device, descriptor)
+	{}
+
+	ref<Trident::RenderPass> GL::createRenderPass(const Trident::Device* device, ref<Trident::Surface> surface, const RenderPassDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		ref<GL::RenderPass> renderPass = createRef<GL::RenderPass>(device, descriptor);
 
 		uint32 totalColorAttachmentCount = 0;
 		bool anyPresentedColorAttachment = false;
 
 		// Check if a color attachment has is meant to be presented.
-		for (const ref<Subpass> subpass : subpasses) {
+		for (const ref<Subpass> subpass : renderPass->subpasses) {
 			for (const AttachmentReference& colorAttachmentReference : subpass->getColorAttachmentReferences()) {
 				if (colorAttachmentReference.index == AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
 					continue;
@@ -24,14 +28,15 @@ namespace Trident {
 
 				totalColorAttachmentCount += 1;
 
-				DEBUG_ASSERT(colorAttachmentReference.index < attachments.count());
+				DEBUG_ASSERT(colorAttachmentReference.index < renderPass->attachments.count());
 
-				const Attachment& colorAttachment = attachments[colorAttachmentReference.index];
+				const Attachment& colorAttachment = renderPass->attachments[colorAttachmentReference.index];
 
 				if (colorAttachment.finalLayout == ImageLayout::PRESENT_SRC) {
 					ADAPTER_ASSERT(!anyPresentedColorAttachment, "Only one color attachment can be presented.");
 
-					presentSourceAttachmentIndex = colorAttachmentReference.index;
+					renderPass->presentSourceAttachmentIndex = colorAttachmentReference.index;
+
 					anyPresentedColorAttachment = true;
 				}
 			}
@@ -45,10 +50,14 @@ namespace Trident {
 
 		for (const Attachment& attachment : descriptor.attachments) {
 			if (attachment.sampleCount > 1) {
-				multisample = true;
+				renderPass->multisample = true;
 
 				break;
 			}
 		}
+
+		return renderPass;
 	}
+
+	void GL::destroyRenderPass(const Trident::Device* device, const Trident::RenderPass* renderPass) {}
 }
