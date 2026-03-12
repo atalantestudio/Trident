@@ -9,6 +9,12 @@ namespace Trident {
 	class GL::Surface final : public Trident::Surface {
 		public:
 			explicit Surface(const Trident::Instance* instance);
+
+		public:
+			HDC deviceContext;
+			HGLRC renderingContext;
+			GL::PFNWGLDELETECONTEXTPROC wglDeleteContext;
+			GL::PFNWGLMAKECURRENTPROC wglMakeCurrent;
 	};
 
 	namespace GL {

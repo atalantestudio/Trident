@@ -16,7 +16,7 @@ namespace Trident::GL {
 
 		ADAPTER_ASSERT(cullMode < CullMode::count, "Invalid cull mode.");
 
-		return CULL_MODES[static_cast<uint8>(cullMode)];
+		return CULL_MODES[static_cast<uint32>(cullMode)];
 	}
 
 	// Returns the visible face using the cull mode value.
@@ -29,6 +29,6 @@ namespace Trident::GL {
 
 		ADAPTER_ASSERT(cullMode < CullMode::count, "Invalid cull mode.");
 
-		return FACES[static_cast<uint8>(cullMode)];
+		return FACES[static_cast<uint32>(cullMode)];
 	}
 }

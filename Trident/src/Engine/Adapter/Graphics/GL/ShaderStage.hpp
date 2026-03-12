@@ -7,7 +7,6 @@
 #include "Engine/API/Rendering/ShaderStage.hpp"
 
 namespace Trident::GL {
-	// TODO: Treat as flag.
 	inline GLenum getShaderStage(ShaderStage shaderStage) {
 		if (shaderStage == ShaderStage::VERTEX) {
 			return GL_VERTEX_SHADER;
@@ -21,7 +20,7 @@ namespace Trident::GL {
 			return GL_COMPUTE_SHADER;
 		}
 
-		ADAPTER_ASSERT(false, "Unsupported shader stage.");
+		ADAPTER_ASSERT(false, "Invalid shader stage.");
 
 		return 0;
 	}

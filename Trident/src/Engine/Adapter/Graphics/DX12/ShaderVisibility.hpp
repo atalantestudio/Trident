@@ -22,8 +22,6 @@ namespace Trident::DX12 {
 			return D3D12_SHADER_VISIBILITY_ALL;
 		}
 
-		ADAPTER_ASSERT(false, "Invalid shader stage.");
-
 		return D3D12_SHADER_VISIBILITY_ALL;
 	}
 }

@@ -22,8 +22,8 @@ namespace Trident {
 	class LayerCompositor {
 		private:
 			// NOTE
-			// Since Vulkan SDK 1.4.313, having less semaphores than swapchain images can cause the warning below to appear:
-			// "VkSemaphore is being signaled by VkQueue, but it may still be in use by VkSwapchainKHR".
+			// Since Vulkan SDK 1.4.313, having less semaphores than swapchain images will trigger a validation warning.
+			// See https://vulkan.lunarg.com/doc/view/1.4.321.1/windows/antora/spec/latest/chapters/cmdbuffers.html#VUID-vkQueueSubmit-pSignalSemaphores-00067.
 			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 3;
 
 		public:

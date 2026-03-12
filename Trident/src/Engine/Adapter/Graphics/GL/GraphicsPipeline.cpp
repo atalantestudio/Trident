@@ -16,61 +16,65 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	GL::GraphicsPipeline::GraphicsPipeline(const GraphicsPipelineDescriptor& descriptor) :
-		Trident::GraphicsPipeline(descriptor),
-		program(glCreateProgram()),
-		primitiveTopology(getPrimitiveTopology(descriptor.primitiveTopology)),
-		frontFace(getFrontFace(descriptor.frontFace)),
-		cullMode(getCullMode(descriptor.cullMode)),
-		polygonModeFace(getPolygonModeFace(descriptor.cullMode)),
-		polygonMode(getPolygonMode(descriptor.polygonMode)),
-		lineWidth(descriptor.lineWidth),
-		minSampleShading(descriptor.minSampleShading),
-		drawBuffers(descriptor.colorBlendState.attachments.count()),
-		depthTest(descriptor.depthStencilState.depthTest),
-		depthWrite(descriptor.depthStencilState.depthWrite),
-		depthFunc(getDepthFunc(descriptor.depthStencilState.compareOperation)),
-		multisample(std::static_pointer_cast<GL::RenderPass>(descriptor.renderPass)->multisample),
-		dynamicLineWidth(descriptor.dynamicState & DynamicState::LINE_WIDTH),
-		subpassIndex(descriptor.subpassIndex)
-	{
+	GL::GraphicsPipeline::GraphicsPipeline(const Trident::Device* device) :
+		Trident::GraphicsPipeline(device)
+	{}
+
+	ref<Trident::GraphicsPipeline> GL::createGraphicsPipeline(const Trident::Device* device, const GraphicsPipelineDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		ref<GL::GraphicsPipeline> graphicsPipeline = createRef<GL::GraphicsPipeline>(device);
+		graphicsPipeline->program = glCreateProgram();
+		graphicsPipeline->primitiveTopology = getPrimitiveTopology(descriptor.primitiveTopology);
+		graphicsPipeline->frontFace = getFrontFace(descriptor.frontFace);
+		graphicsPipeline->cullMode = getCullMode(descriptor.cullMode);
+		graphicsPipeline->polygonModeFace = getPolygonModeFace(descriptor.cullMode);
+		graphicsPipeline->polygonMode = getPolygonMode(descriptor.polygonMode);
+		graphicsPipeline->lineWidth = descriptor.lineWidth;
+		graphicsPipeline->minSampleShading = descriptor.minSampleShading;
+		graphicsPipeline->drawBuffers = sequence<GL::GraphicsPipeline::DrawBuffer>(descriptor.colorBlendState.attachments.count());
+		graphicsPipeline->depthTest = descriptor.depthStencilState.depthTest;
+		graphicsPipeline->depthWrite = descriptor.depthStencilState.depthWrite;
+		graphicsPipeline->depthFunc = getDepthFunc(descriptor.depthStencilState.compareOperation);
+		graphicsPipeline->multisample = std::static_pointer_cast<GL::RenderPass>(descriptor.renderPass)->multisample;
+		graphicsPipeline->dynamicLineWidth = descriptor.dynamicState & DynamicState::LINE_WIDTH;
+		graphicsPipeline->subpassIndex = descriptor.subpassIndex;
 
 		const ref<GL::ShaderModule> vertexShaderModule = std::static_pointer_cast<GL::ShaderModule>(descriptor.vertexShaderModule);
 		const ref<GL::ShaderModule> fragmentShaderModule = std::static_pointer_cast<GL::ShaderModule>(descriptor.fragmentShaderModule);
 
-		glAttachShader(program, vertexShaderModule->shader);
-		glAttachShader(program, fragmentShaderModule->shader);
-		glLinkProgram(program);
+		glAttachShader(graphicsPipeline->program, vertexShaderModule->shader);
+		glAttachShader(graphicsPipeline->program, fragmentShaderModule->shader);
+		glLinkProgram(graphicsPipeline->program);
 
 		GLint linkStatus;
 
-		glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
+		glGetProgramiv(graphicsPipeline->program, GL_LINK_STATUS, &linkStatus);
 
 		if (linkStatus != GL_TRUE) {
 			GLint infoLogLength;
 
-			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
+			glGetProgramiv(graphicsPipeline->program, GL_INFO_LOG_LENGTH, &infoLogLength);
 
 			DEBUG_ASSERT(infoLogLength > 0);
 
 			sequence<GLchar> infoLog(infoLogLength);
 
-			glGetProgramInfoLog(program, infoLogLength, nullptr, &infoLog[0]);
+			glGetProgramInfoLog(graphicsPipeline->program, infoLogLength, nullptr, &infoLog[0]);
 
 			ADAPTER_ASSERT(false, "Program linking failed:\n[]", infoLog);
 
-			return;
+			return nullptr;
 		}
 
-		glDetachShader(program, vertexShaderModule->shader);
-		glDetachShader(program, fragmentShaderModule->shader);
+		glDetachShader(graphicsPipeline->program, vertexShaderModule->shader);
+		glDetachShader(graphicsPipeline->program, fragmentShaderModule->shader);
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			glCreateVertexArrays(1, &vertexArray);
+			glCreateVertexArrays(1, &graphicsPipeline->vertexArray);
 		#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
-			glGenVertexArrays(1, &vertexArray);
-			glBindVertexArray(vertexArray);
+			glGenVertexArrays(1, &graphicsPipeline->vertexArray);
+			glBindVertexArray(graphicsPipeline->vertexArray);
 		#else
 			ENGINE_ERROR_UNSUPPORTED();
 		#endif
@@ -89,7 +93,7 @@ namespace Trident {
 				switch (type) {
 					case GL_FLOAT:
 						#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-							glVertexArrayAttribFormat(vertexArray, attribindex, size, type, GL_FALSE, relativeoffset);
+							glVertexArrayAttribFormat(graphicsPipeline->vertexArray, attribindex, size, type, GL_FALSE, relativeoffset);
 						#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
 							glVertexAttribFormat(attribindex, size, type, GL_FALSE, relativeoffset);
 						#else
@@ -104,7 +108,7 @@ namespace Trident {
 					case GL_INT:
 					case GL_UNSIGNED_INT:
 						#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-							glVertexArrayAttribIFormat(vertexArray, attribindex, size, type, relativeoffset);
+							glVertexArrayAttribIFormat(graphicsPipeline->vertexArray, attribindex, size, type, relativeoffset);
 						#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
 							glVertexAttribIFormat(attribindex, size, type, relativeoffset);
 						#else
@@ -114,7 +118,7 @@ namespace Trident {
 						break;
 					case GL_DOUBLE:
 						#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-							glVertexArrayAttribLFormat(vertexArray, attribindex, size, type, relativeoffset);
+							glVertexArrayAttribLFormat(graphicsPipeline->vertexArray, attribindex, size, type, relativeoffset);
 						#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
 							glVertexAttribLFormat(attribindex, size, type, relativeoffset);
 						#else
@@ -127,7 +131,7 @@ namespace Trident {
 				}
 
 				#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-					glVertexArrayAttribBinding(vertexArray, attribindex, bindingindex);
+					glVertexArrayAttribBinding(graphicsPipeline->vertexArray, attribindex, bindingindex);
 				#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
 					glVertexAttribBinding(attribindex, bindingindex);
 				#else
@@ -135,14 +139,14 @@ namespace Trident {
 				#endif
 
 				#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-					glEnableVertexArrayAttrib(vertexArray, attribindex);
+					glEnableVertexArrayAttrib(graphicsPipeline->vertexArray, attribindex);
 				#else
 					glEnableVertexAttribArray(attribindex);
 				#endif
 
 				if (vertexInputBinding.getInputRate() == InputRate::INSTANCE) {
 					#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-						glVertexArrayBindingDivisor(vertexArray, bindingindex, 1);
+						glVertexArrayBindingDivisor(graphicsPipeline->vertexArray, bindingindex, 1);
 					#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
 						glVertexBindingDivisor(bindingindex, 1);
 					#else
@@ -157,7 +161,7 @@ namespace Trident {
 		for (uint32 colorBlendAttachmentIndex = 0; colorBlendAttachmentIndex < descriptor.colorBlendState.attachments.count(); colorBlendAttachmentIndex += 1) {
 			const ColorBlendAttachment& colorBlendAttachment = descriptor.colorBlendState.attachments[colorBlendAttachmentIndex];
 
-			DrawBuffer& drawBuffer = drawBuffers[colorBlendAttachmentIndex];
+			GL::GraphicsPipeline::DrawBuffer& drawBuffer = graphicsPipeline->drawBuffers[colorBlendAttachmentIndex];
 			drawBuffer.blend = colorBlendAttachment.blend;
 			drawBuffer.srcColorBlendFactor = getBlendFactor(colorBlendAttachment.srcColorBlendFactor);
 			drawBuffer.dstColorBlendFactor = getBlendFactor(colorBlendAttachment.dstColorBlendFactor);
@@ -173,18 +177,22 @@ namespace Trident {
 
 		#if defined(BUILD_MODE_DEBUG)
 			if (descriptor.name.count() > 0) {
-				glObjectLabel(GL_PROGRAM, program, static_cast<GLsizei>(descriptor.name.count()), &descriptor.name[0]);
+				glObjectLabel(GL_PROGRAM, graphicsPipeline->program, static_cast<GLsizei>(descriptor.name.count()), &descriptor.name[0]);
 			}
 		#endif
+
+		return graphicsPipeline;
 	}
 
-	GL::GraphicsPipeline::~GraphicsPipeline() {
+	void GL::destroyGraphicsPipeline(const Trident::Device* device, const Trident::GraphicsPipeline* graphicsPipeline) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		glDeleteProgram(program);
+		const GL::GraphicsPipeline* _graphicsPipeline = static_cast<const GL::GraphicsPipeline*>(graphicsPipeline);
+
+		glDeleteProgram(_graphicsPipeline->program);
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-			glDeleteVertexArrays(1, &vertexArray);
+			glDeleteVertexArrays(1, &_graphicsPipeline->vertexArray);
 		#else
 			ENGINE_ERROR_UNSUPPORTED();
 		#endif

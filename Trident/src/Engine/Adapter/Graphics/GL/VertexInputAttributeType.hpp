@@ -28,11 +28,11 @@ namespace Trident::GL {
 			4,
 		};
 
-		const GLint glSize = VERTEX_INPUT_ATTRIBUTE_SIZES[static_cast<uint32>(type)];
+		const GLint vertexInputAttributeSize = VERTEX_INPUT_ATTRIBUTE_SIZES[static_cast<uint32>(type)];
 
-		ADAPTER_ASSERT(glSize != 0, "64-bit unsigned/signed integers as vertex input attributes aren't natively supported.");
+		ADAPTER_ASSERT(vertexInputAttributeSize != 0, "64-bit unsigned/signed integers as vertex input attributes aren't natively supported.");
 
-		return glSize;
+		return vertexInputAttributeSize;
 	}
 
 	inline GLenum getType(VertexInputAttributeType type) {
@@ -55,10 +55,10 @@ namespace Trident::GL {
 			GL_DOUBLE,
 		};
 
-		const GLenum glType = VERTEX_INPUT_ATTRIBUTE_TYPES[static_cast<uint32>(type)];
+		const GLenum vertexInputAttributeType = VERTEX_INPUT_ATTRIBUTE_TYPES[static_cast<uint32>(type)];
 
-		ADAPTER_ASSERT(glType != 0, "64-bit unsigned/signed integers as vertex input attributes aren't natively supported.");
+		ADAPTER_ASSERT(vertexInputAttributeType != 0, "64-bit unsigned/signed integers as vertex input attributes aren't natively supported.");
 
-		return glType;
+		return vertexInputAttributeType;
 	}
 }

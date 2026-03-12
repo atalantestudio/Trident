@@ -8,15 +8,22 @@
 
 namespace Trident::GL {
 	inline GLenum getBufferDescriptorType(DescriptorType descriptorType) {
-		switch (descriptorType) {
-			case DescriptorType::UNIFORM_BUFFER: return GL_UNIFORM_BUFFER;
-			case DescriptorType::READ_ONLY_STORAGE_BUFFER: return GL_SHADER_STORAGE_BUFFER;
-			case DescriptorType::READ_WRITE_STORAGE_BUFFER: return GL_SHADER_STORAGE_BUFFER;
-			default: {
-				ADAPTER_ASSERT(false, "The provided type is either unknown or not a buffer descriptor type.");
+		static constexpr GLenum DESCRIPTOR_TYPES[] = {
+			0,
+			0,
+			0,
+			0,
+			GL_UNIFORM_BUFFER,
+			GL_SHADER_STORAGE_BUFFER,
+			GL_SHADER_STORAGE_BUFFER,
+		};
 
-				return 0;
-			}
-		}
+		ADAPTER_ASSERT(descriptorType < DescriptorType::count, "Invalid descriptor type.");
+
+		const GLenum glDescriptorType = DESCRIPTOR_TYPES[static_cast<uint32>(descriptorType)];
+
+		ADAPTER_ASSERT(glDescriptorType != 0, "The provided type is not abuffer descriptor type.");
+
+		return glDescriptorType;
 	}
 }

@@ -12,19 +12,22 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	GL::Buffer::Buffer(const BufferDescriptor& descriptor) :
-		Trident::Buffer(descriptor)
-		#if OPENGL_VERSION < OPENGL_VERSION_4_5
-			, target(getTarget(descriptor.usage))
-		#endif
-	{
+	GL::BaseBuffer::BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor) :
+		Trident::BaseBuffer(device, descriptor)
+	{}
+
+	ref<Trident::BaseBuffer> GL::createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, UINT stride) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		ref<GL::BaseBuffer> buffer = createRef<GL::BaseBuffer>(device, descriptor);
+
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			glCreateBuffers(1, &buffer);
+			glCreateBuffers(1, &buffer->buffer);
 		#else
-			glGenBuffers(1, &buffer);
-			glBindBuffer(target, buffer);
+			buffer->target = getTarget(descriptor.usage);
+
+			glGenBuffers(1, &buffer->buffer);
+			glBindBuffer(buffer->target, buffer->buffer);
 		#endif
 
 		if (
@@ -32,29 +35,29 @@ namespace Trident {
 			(descriptor.memoryProperties & MemoryProperty::HOST_COHERENT) ||
 			(descriptor.memoryProperties & MemoryProperty::HOST_CACHED)
 		) {
-			mapAccessFlags |= GL_MAP_WRITE_BIT;
+			buffer->mapAccessFlags |= GL_MAP_WRITE_BIT;
 
 			if (!descriptor.persistent) {
-				storageAccessFlags |= GL_CLIENT_STORAGE_BIT;
+				buffer->storageAccessFlags |= GL_CLIENT_STORAGE_BIT;
 			}
 		}
 
 		if (descriptor.persistent) {
-			DEBUG_ASSERT(mapAccessFlags & GL_MAP_WRITE_BIT);
+			DEBUG_ASSERT(buffer->mapAccessFlags & GL_MAP_WRITE_BIT);
 
-			mapAccessFlags |= GL_MAP_PERSISTENT_BIT;
+			buffer->mapAccessFlags |= GL_MAP_PERSISTENT_BIT;
 
 			if (descriptor.memoryProperties & MemoryProperty::HOST_COHERENT) {
-				mapAccessFlags |= GL_MAP_COHERENT_BIT;
+				buffer->mapAccessFlags |= GL_MAP_COHERENT_BIT;
 			}
 		}
 
-		storageAccessFlags |= mapAccessFlags;
+		buffer->storageAccessFlags |= buffer->mapAccessFlags;
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			glNamedBufferStorage(buffer, size, nullptr, storageAccessFlags);
+			glNamedBufferStorage(buffer->buffer, buffer->size, nullptr, buffer->storageAccessFlags);
 		#elif OPENGL_VERSION >= OPENGL_VERSION_4_4
-			glBufferStorage(target, size, nullptr, storageAccessFlags);
+			glBufferStorage(buffer->target, buffer->size, nullptr, buffer->storageAccessFlags);
 		#else
 			ENGINE_ERROR_UNSUPPORTED();
 		#endif
@@ -64,9 +67,9 @@ namespace Trident {
 			GLint immutableStorage = GL_FALSE;
 
 			#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-				glGetNamedBufferParameteriv(buffer, GL_BUFFER_IMMUTABLE_STORAGE, &immutableStorage);
+				glGetNamedBufferParameteriv(buffer->buffer, GL_BUFFER_IMMUTABLE_STORAGE, &immutableStorage);
 			#else
-				glGetBufferParameteriv(target, GL_BUFFER_IMMUTABLE_STORAGE, &immutableStorage);
+				glGetBufferParameteriv(buffer->target, GL_BUFFER_IMMUTABLE_STORAGE, &immutableStorage);
 			#endif
 
 			ADAPTER_ASSERT(immutableStorage != GL_FALSE, "Only immutable buffer storage are not supported.");
@@ -74,54 +77,61 @@ namespace Trident {
 
 		#if defined(BUILD_MODE_DEBUG)
 			if (descriptor.name.count() > 0) {
-				glObjectLabel(GL_BUFFER, buffer, static_cast<GLsizei>(descriptor.name.count()), &descriptor.name[0]);
+				glObjectLabel(GL_BUFFER, buffer->buffer, static_cast<GLsizei>(descriptor.name.count()), &descriptor.name[0]);
 			}
 		#endif
 
 		#if OPENGL_VERSION < OPENGL_VERSION_4_5 && defined(OPENGL_UNBIND_AFTER_USE)
-			glBindBuffer(target, 0);
-		#endif
-	}
-
-	GL::Buffer::~Buffer() {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		glDeleteBuffers(1, &buffer);
-	}
-
-	void GL::Buffer::unmap() const {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		GLboolean result = GL_FALSE;
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			result = glUnmapNamedBuffer(buffer);
-		#else
-			glBindBuffer(target, buffer);
-
-			result = glUnmapBuffer(target);
+			glBindBuffer(buffer->target, 0);
 		#endif
 
-		ADAPTER_ASSERT(result == GL_TRUE, "Failed to unmap OpenGL buffer.");
+		return buffer;
 	}
 
-	void* GL::Buffer::getMappedRange(uint64 offset, uint64 size) const {
+	void GL::destroyBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		const GL::BaseBuffer* _buffer = static_cast<const GL::BaseBuffer*>(buffer);
+
+		glDeleteBuffers(1, &_buffer->buffer);
+	}
+
+	void* GL::mapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer, uint64 offset, uint64 size) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const GL::BaseBuffer* _buffer = static_cast<const GL::BaseBuffer*>(buffer);
 		void* mappedRange = nullptr;
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			mappedRange = glMapNamedBufferRange(buffer, offset, size, mapAccessFlags);
+			mappedRange = glMapNamedBufferRange(_buffer->buffer, offset, size, _buffer->mapAccessFlags);
 		#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
-			glBindBuffer(target, buffer);
+			glBindBuffer(_buffer->target, _buffer->buffer);
 
-			mappedRange = glMapBufferRange(target, offset, size, mapAccessFlags);
+			mappedRange = glMapBufferRange(_buffer->target, offset, size, _buffer->mapAccessFlags);
 		#else
+			// TODO: Use glMapBuffer.
 			ENGINE_ERROR_UNSUPPORTED();
 		#endif
 
 		ADAPTER_ASSERT(mappedRange != nullptr, "Failed to map OpenGL buffer range.");
 
 		return mappedRange;
+	}
+
+	void GL::unmapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const GL::BaseBuffer* _buffer = static_cast<const GL::BaseBuffer*>(buffer);
+		GLboolean result = GL_FALSE;
+
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+			result = glUnmapNamedBuffer(_buffer->buffer);
+		#else
+			glBindBuffer(_buffer->target, _buffer->buffer);
+
+			result = glUnmapBuffer(_buffer->target);
+		#endif
+
+		ADAPTER_ASSERT(result == GL_TRUE, "Failed to unmap OpenGL buffer.");
 	}
 }

@@ -179,7 +179,7 @@ namespace Trident {
 
 			void updateSwapchain(const Device* device, Swapchain* swapchain, const SwapchainDescriptor& descriptor) const;
 
-			void waitForFence(const Device* device, const Fence* fence) const;
+			void waitForFence(const Device* device, Fence* fence) const;
 
 			void waitIdle(const Device* device) const;
 			void waitIdle(const Queue* queue) const;

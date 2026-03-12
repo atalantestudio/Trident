@@ -16,31 +16,29 @@ namespace Trident {
 
 		free((void*) lpLibFileName);
 
-		WIN32_ASSERT(hLibModule != nullptr);
+		WIN32_ASSERT(hLibModule != NULL);
 
 		data = new Win32PlatformLibraryData();
 
 		Win32PlatformLibraryData* libraryData = static_cast<Win32PlatformLibraryData*>(data);
-
 		libraryData->hLibModule = hLibModule;
 	}
 
 	PlatformLibrary::~PlatformLibrary() {
-		BOOL result;
-
 		const HMODULE hLibModule = static_cast<const Win32PlatformLibraryData*>(data)->hLibModule;
+		BOOL result;
 
 		result = FreeLibrary(hLibModule);
 
 		WIN32_ASSERT(result != 0);
 	}
 
-	void* PlatformLibrary::getProcedure(view<char8> procedureName) const {
+	void* PlatformLibrary::loadProcedure(view<char8> procedureName) const {
 		static const HMODULE hLibModule = static_cast<const Win32PlatformLibraryData*>(data)->hLibModule;
 
 		const FARPROC procedure = GetProcAddress(hLibModule, &procedureName[0]);
 
-		WIN32_ASSERT(procedure != nullptr);
+		WIN32_ASSERT(procedure != NULL);
 
 		return procedure;
 	}

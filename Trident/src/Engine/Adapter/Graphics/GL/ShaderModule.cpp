@@ -8,13 +8,38 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	GL::ShaderModule::ShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) :
-		Trident::ShaderModule(descriptor),
-		shader(glCreateShader(getShaderStage(descriptor.stage)))
-	{
+	static void checkCompileStatus(GLuint shader) {
+		GLint compileStatus;
+
+		glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+
+		if (compileStatus == GL_TRUE) {
+			return;
+		}
+
+		GLint infoLogLength;
+
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
+
+		sequence<GLchar> infoLog(infoLogLength);
+
+		glGetShaderInfoLog(shader, infoLogLength, nullptr, &infoLog[0]);
+		glDeleteShader(shader);
+
+		ADAPTER_ASSERT(false, "Shader module compilation failed:\n[]", infoLog);
+	}
+
+	GL::ShaderModule::ShaderModule(const Trident::Device* device) :
+		Trident::ShaderModule(device)
+	{}
+
+	ref<Trident::ShaderModule> GL::createShaderModule(const Trident::Device* device, const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> shaderModuleAsset) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		ADAPTER_ASSERT(descriptor.stage == ShaderStage::VERTEX, "Only vertex shaders can be loaded as .tsm assets.");
+
+		ref<GL::ShaderModule> shaderModule = createRef<GL::ShaderModule>(device);
+		shaderModule->shader = glCreateShader(getShaderStage(descriptor.stage));
 
 		#if defined(GL_SOURCE_FROM_SPIRV)
 			// TODO
@@ -32,33 +57,35 @@ namespace Trident {
 			const GLchar* const string = static_cast<const GLchar* const>(&code[0]);
 			const GLsizei length = static_cast<GLsizei>(code.count());
 
-			glShaderSource(shader, 1, &string, &length);
-			glCompileShader(shader);
+			glShaderSource(shaderModule->shader, 1, &string, &length);
+			glCompileShader(shaderModule->shader);
 		#endif
 
 		#if defined(BUILD_MODE_DEBUG)
 			if (descriptor.name.count() > 0) {
-				glObjectLabel(GL_SHADER, shader, static_cast<GLsizei>(descriptor.name.count()), &descriptor.name[0]);
+				glObjectLabel(GL_SHADER, shaderModule->shader, static_cast<GLsizei>(descriptor.name.count()), &descriptor.name[0]);
 			}
 		#endif
 
-		checkCompileStatus();
+		checkCompileStatus(shaderModule->shader);
+
+		return shaderModule;
 	}
 
-	GL::ShaderModule::ShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) :
-		Trident::ShaderModule(descriptor),
-		shader(glCreateShader(getShaderStage(descriptor.stage)))
-	{
+	ref<Trident::ShaderModule> GL::createShaderModule(const Trident::Device* device, const ShaderModuleDescriptor& descriptor, view<char8> code) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		ref<GL::ShaderModule> shaderModule = createRef<GL::ShaderModule>(device);
+		shaderModule->shader = glCreateShader(getShaderStage(descriptor.stage));
 
 		GLsizei length = static_cast<GLsizei>(code.count());
 
 		#if defined(GL_SOURCE_FROM_SPIRV)
 			#if OPENGL_VERSION >= OPENGL_VERSION_4_6
-				glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, &code[0], length);
+				glShaderBinary(1, &shaderModule->shader, GL_SHADER_BINARY_FORMAT_SPIR_V, &code[0], length);
 
 				// TODO: Expose specialization constants.
-				glSpecializeShader(shader, &descriptor.entryPoint[0], 0, nullptr, nullptr);
+				glSpecializeShader(shaderModule->shader, &descriptor.entryPoint[0], 0, nullptr, nullptr);
 			#else
 				ENGINE_ERROR_UNSUPPORTED();
 			#endif
@@ -88,37 +115,20 @@ namespace Trident {
 
 			const GLchar* const string = static_cast<const GLchar* const>(codeString.data());
 
-			glShaderSource(shader, 1, &string, &length);
-			glCompileShader(shader);
+			glShaderSource(shaderModule->shader, 1, &string, &length);
+			glCompileShader(shaderModule->shader);
 		#endif
 
-		checkCompileStatus();
+		checkCompileStatus(shaderModule->shader);
+
+		return shaderModule;
 	}
 
-	GL::ShaderModule::~ShaderModule() {
+	void GL::destroyShaderModule(const Trident::Device* device, const Trident::ShaderModule* shaderModule) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		glDeleteShader(shader);
-	}
+		const GL::ShaderModule* _shaderModule = static_cast<const GL::ShaderModule*>(shaderModule);
 
-	void GL::ShaderModule::checkCompileStatus() const {
-		GLint compileStatus;
-
-		glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
-
-		if (compileStatus == GL_TRUE) {
-			return;
-		}
-
-		GLint infoLogLength;
-
-		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
-
-		sequence<GLchar> infoLog(infoLogLength);
-
-		glGetShaderInfoLog(shader, infoLogLength, nullptr, &infoLog[0]);
-		glDeleteShader(shader);
-
-		ADAPTER_ASSERT(false, "Shader module compilation failed:\n[]", infoLog);
+		glDeleteShader(_shaderModule->shader);
 	}
 }

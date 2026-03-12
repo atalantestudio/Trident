@@ -10,12 +10,16 @@
 namespace Trident {
 	class GL::Swapchain final : public Trident::Swapchain {
 		public:
-			explicit Swapchain(const SwapchainDescriptor& descriptor, const GL::Instance& instance, const GL::Surface& surface);
-
-			void update(const SwapchainDescriptor& descriptor) final override;
-
-		private:
-			const GL::Instance& instance;
-			const GL::Surface& surface;
+			explicit Swapchain(const Trident::Device* device, const SwapchainDescriptor& descriptor);
 	};
+
+	namespace GL {
+		ref<Trident::Swapchain> createSwapchain(const Trident::Device* device, const SwapchainDescriptor& descriptor);
+
+		void destroySwapchain(const Trident::Device* device, const Trident::Swapchain* swapchain);
+
+		void recreateSwapchain(const Trident::Device* device, Trident::Swapchain* swapchain, const SwapchainDescriptor& descriptor);
+
+		void updateSwapchain(const Trident::Device* device, Trident::Swapchain* swapchain, const SwapchainDescriptor& descriptor);
+	}
 }

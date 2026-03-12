@@ -3,15 +3,18 @@
 
 #pragma once
 
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/API/Rendering/FrontFace.hpp"
 
 namespace Trident::GL {
 	inline GLenum getFrontFace(FrontFace frontFace) {
-		static constexpr GLenum glFrontFaces[] = {
+		static constexpr GLenum FRONT_FACES[] = {
 			GL_CW,
 			GL_CCW,
 		};
 
-		return glFrontFaces[static_cast<uint8>(frontFace)];
+		ADAPTER_ASSERT(frontFace < FrontFace::count, "Invalid front face.");
+
+		return FRONT_FACES[static_cast<uint32>(frontFace)];
 	}
 }

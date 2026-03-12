@@ -4,15 +4,13 @@
 #pragma once
 
 #include "Engine/API/Rendering/Descriptor/PipelineLayoutDescriptor.hpp"
-#include "Engine/Validation/Descriptor.hpp"
 
 namespace Trident {
 	class PipelineLayout {
 		public:
-			~PipelineLayout();
-
-		protected:
 			explicit PipelineLayout(const Device* device);
+
+			~PipelineLayout();
 
 		public:
 			const Device* device;

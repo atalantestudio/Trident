@@ -90,7 +90,7 @@ namespace Trident {
 
 		void updateDescriptorSets(const Trident::Device* device, view<WriteDescriptorSet> writeDescriptorSets);
 
-		void waitForFence(const Trident::Device* device, const Trident::Fence* fence);
+		void waitForFence(const Trident::Device* device, Trident::Fence* fence);
 
 		void waitIdle(const Trident::Device* device);
 	}

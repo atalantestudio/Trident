@@ -8,8 +8,10 @@
 namespace Trident {
 	class GL::PhysicalDevice final : public Trident::PhysicalDevice {
 		public:
-			explicit PhysicalDevice();
-
-			void setLimits();
+			explicit PhysicalDevice(const Trident::GraphicsAdapter* adapter);
 	};
+
+	namespace GL {
+		ref<Trident::PhysicalDevice> selectPhysicalDevice(const Trident::Instance* instance, bool preferIntegratedGpu);
+	}
 }

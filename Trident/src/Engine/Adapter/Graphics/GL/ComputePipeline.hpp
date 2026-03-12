@@ -8,11 +8,15 @@
 namespace Trident {
 	class GL::ComputePipeline final : public Trident::ComputePipeline {
 		public:
-			explicit ComputePipeline(const ComputePipelineDescriptor& descriptor);
-
-			~ComputePipeline() final override;
+			explicit ComputePipeline(const Trident::Device* device);
 
 		public:
-			const GLuint program;
+			GLuint program;
 	};
+
+	namespace GL {
+		ref<Trident::ComputePipeline> createComputePipeline(const Trident::Device* device, const ComputePipelineDescriptor& descriptor);
+
+		void destroyComputePipeline(const Trident::Device* device, const Trident::ComputePipeline* computePipeline);
+	}
 }

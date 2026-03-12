@@ -15,31 +15,30 @@ namespace Trident {
 			};
 
 		public:
-			explicit GraphicsPipeline(const GraphicsPipelineDescriptor& descriptor);
-
-			~GraphicsPipeline() final override;
+			explicit GraphicsPipeline(const Trident::Device* device);
 
 		public:
-			const GLuint program;
+			GLuint program;
 			GLuint vertexArray;
-
-			const GLenum primitiveTopology;
-			const GLenum frontFace;
-			const GLenum cullMode;
-			const GLenum polygonModeFace;
-			const GLenum polygonMode;
-			const GLfloat lineWidth;
-			const GLfloat minSampleShading;
-
+			GLenum primitiveTopology;
+			GLenum frontFace;
+			GLenum cullMode;
+			GLenum polygonModeFace;
+			GLenum polygonMode;
+			GLfloat lineWidth;
+			GLfloat minSampleShading;
 			sequence<DrawBuffer> drawBuffers;
-
-			const GLboolean depthTest;
-			const GLboolean depthWrite;
-			const GLenum depthFunc;
-
-			const bool multisample;
-			const bool dynamicLineWidth;
-
-			const uint32 subpassIndex;
+			GLboolean depthTest;
+			GLboolean depthWrite;
+			GLenum depthFunc;
+			bool multisample;
+			bool dynamicLineWidth;
+			uint32 subpassIndex;
 	};
+
+	namespace GL {
+		ref<Trident::GraphicsPipeline> createGraphicsPipeline(const Trident::Device* device, const GraphicsPipelineDescriptor& descriptor);
+
+		void destroyGraphicsPipeline(const Trident::Device* device, const Trident::GraphicsPipeline* graphicsPipeline);
+	}
 }

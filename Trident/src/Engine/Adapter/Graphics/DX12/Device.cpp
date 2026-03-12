@@ -344,7 +344,7 @@ namespace Trident {
 		}
 	}
 
-	void DX12::waitForFence(const Trident::Device* device, const Trident::Fence* fence) {
+	void DX12::waitForFence(const Trident::Device* device, Trident::Fence* fence) {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
 		const DX12::Fence* _fence = static_cast<const DX12::Fence*>(fence);
 		HRESULT result;

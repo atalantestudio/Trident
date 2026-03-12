@@ -8,12 +8,7 @@
 namespace Trident {
 	class GL::Image final : public Trident::Image {
 		public:
-			explicit Image(const ImageDescriptor& descriptor);
-
-			~Image() final override;
-
-		protected:
-			ref<Trident::ImageView> createViewInternal(const ImageViewDescriptor& descriptor, Trident::Image* image) final override;
+			explicit Image(const Trident::Device* device, const ImageDescriptor& descriptor);
 
 		public:
 			GLuint texture;
@@ -22,4 +17,11 @@ namespace Trident {
 			GLenum internalFormat;
 			GLenum format;
 	};
+
+	namespace GL {
+		ref<Trident::Image> createImage(const Trident::Device* device, const ImageDescriptor& descriptor);
+		ref<Trident::Image> createImage(const Trident::Device* device, VkImage image, VkFormat format, Extent2D extent, uint32 index);
+
+		void destroyImage(const Trident::Device* device, const Trident::Image* image);
+	}
 }

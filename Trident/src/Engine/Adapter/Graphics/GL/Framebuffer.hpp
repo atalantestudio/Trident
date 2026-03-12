@@ -8,11 +8,15 @@
 namespace Trident {
 	class GL::Framebuffer final : public Trident::Framebuffer {
 		public:
-			explicit Framebuffer(const FramebufferDescriptor& descriptor);
-
-			~Framebuffer() final override;
+			explicit Framebuffer(const Trident::Device* device, const FramebufferDescriptor& descriptor);
 
 		public:
 			GLuint framebuffer;
 	};
+
+	namespace GL {
+		ref<Trident::Framebuffer> createFramebuffer(const Trident::Device* device, const FramebufferDescriptor& descriptor);
+
+		void destroyFramebuffer(const Trident::Device* device, const Trident::Framebuffer* framebuffer);
+	}
 }

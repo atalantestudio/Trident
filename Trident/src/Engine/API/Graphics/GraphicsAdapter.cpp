@@ -364,7 +364,7 @@ namespace Trident {
 		updateSwapchainImplementation(device, swapchain, descriptor);
 	}
 
-	void GraphicsAdapter::waitForFence(const Device* device, const Fence* fence) const {
+	void GraphicsAdapter::waitForFence(const Device* device, Fence* fence) const {
 		waitForFenceImplementation(device, fence);
 	}
 

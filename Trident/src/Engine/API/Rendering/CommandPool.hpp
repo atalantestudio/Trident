@@ -8,10 +8,9 @@
 namespace Trident {
 	class CommandPool {
 		public:
-			~CommandPool();
-
-		protected:
 			explicit CommandPool(const Device* device);
+
+			~CommandPool();
 
 		protected:
 			const Device* device;

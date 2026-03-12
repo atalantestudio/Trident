@@ -33,12 +33,11 @@ namespace Trident {
 		protected:
 			explicit BaseBuffer(const Device* device, const BufferDescriptor& descriptor);
 
-		protected:
+		public:
 			uint64 size;
 
 			// TODO: Add memory suballocation.
 
-			// TODO: These members will be updated at runtime.
 			BufferUsage usage;
 			Access access = Access::NONE;
 

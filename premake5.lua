@@ -45,7 +45,6 @@ project "Trident"
 
 	removefiles {
 		"%{prj.name}/src/Engine/Adapter/Graphics/DX12/**.cpp",
-		"%{prj.name}/src/Engine/Adapter/Graphics/GL/**.cpp", -- TODO(graphics-api-update)
 		"%{prj.name}/src/Engine/Adapter/Window/Win32/**.cpp",
 		"%{prj.name}/vendor/tsl/tsl/tslc.cpp",
 	}

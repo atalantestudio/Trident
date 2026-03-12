@@ -44,7 +44,7 @@ namespace Trident {
 									glBindBufferRange(
 										target,
 										descriptorSetLayoutOffset + bindingIndex + descriptorBufferIndex,
-										std::static_pointer_cast<GL::Buffer>(descriptorBuffer.buffer)->buffer,
+										std::static_pointer_cast<GL::BaseBuffer>(descriptorBuffer.buffer)->buffer,
 										descriptorBuffer.offset,
 										descriptorBuffer.size
 									);

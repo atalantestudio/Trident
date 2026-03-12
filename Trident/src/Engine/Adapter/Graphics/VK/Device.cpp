@@ -427,7 +427,7 @@ namespace Trident {
 		_device->vkUpdateDescriptorSets(_device->device, static_cast<uint32>(vkWriteDescriptorSets.count()), &vkWriteDescriptorSets[0], 0, nullptr);
 	}
 
-	void VK::waitForFence(const Trident::Device* device, const Trident::Fence* fence) {
+	void VK::waitForFence(const Trident::Device* device, Trident::Fence* fence) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);

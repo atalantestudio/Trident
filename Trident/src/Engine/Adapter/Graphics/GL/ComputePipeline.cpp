@@ -8,47 +8,55 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	GL::ComputePipeline::ComputePipeline(const ComputePipelineDescriptor& descriptor) :
-		Trident::ComputePipeline(descriptor),
-		program(glCreateProgram())
-	{
+	GL::ComputePipeline::ComputePipeline(const Trident::Device* device) :
+		Trident::ComputePipeline(device)
+	{}
+
+	ref<Trident::ComputePipeline> GL::createComputePipeline(const Trident::Device* device, const ComputePipelineDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		ref<GL::ComputePipeline> computePipeline = createRef<GL::ComputePipeline>(device);
+		computePipeline->program = glCreateProgram();
 
 		const ref<GL::ShaderModule> computeShaderModule = std::static_pointer_cast<GL::ShaderModule>(descriptor.computeShaderModule);
 
-		glAttachShader(program, computeShaderModule->shader);
-		glLinkProgram(program);
+		glAttachShader(computePipeline->program, computeShaderModule->shader);
+		glLinkProgram(computePipeline->program);
 
 		GLint linkStatus;
 
-		glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
+		glGetProgramiv(computePipeline->program, GL_LINK_STATUS, &linkStatus);
 
 		if (linkStatus != GL_TRUE) {
 			GLint infoLogLength;
 
-			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
+			glGetProgramiv(computePipeline->program, GL_INFO_LOG_LENGTH, &infoLogLength);
 
 			sequence<GLchar> infoLog(infoLogLength);
 
-			glGetProgramInfoLog(program, infoLogLength, nullptr, &infoLog[0]);
+			glGetProgramInfoLog(computePipeline->program, infoLogLength, nullptr, &infoLog[0]);
 
 			ADAPTER_ASSERT(false, "Program linking failed:\n[]", infoLog);
 
-			return;
+			return nullptr;
 		}
 
-		glDetachShader(program, computeShaderModule->shader);
+		glDetachShader(computePipeline->program, computeShaderModule->shader);
 
 		#if defined(BUILD_MODE_DEBUG)
 			if (descriptor.name.count() > 0) {
-				glObjectLabel(GL_PROGRAM, program, static_cast<GLsizei>(descriptor.name.count()), &descriptor.name[0]);
+				glObjectLabel(GL_PROGRAM, computePipeline->program, static_cast<GLsizei>(descriptor.name.count()), &descriptor.name[0]);
 			}
 		#endif
+
+		return computePipeline;
 	}
 
-	GL::ComputePipeline::~ComputePipeline() {
+	void GL::destroyComputePipeline(const Trident::Device* device, const Trident::ComputePipeline* computePipeline) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		glDeleteProgram(program);
+		const GL::ComputePipeline* _computePipeline = static_cast<const GL::ComputePipeline*>(computePipeline);
+
+		glDeleteProgram(_computePipeline->program);
 	}
 }

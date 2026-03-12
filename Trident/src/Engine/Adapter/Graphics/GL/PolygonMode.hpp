@@ -8,12 +8,12 @@
 
 namespace Trident::GL {
 	inline GLenum getPolygonMode(PolygonMode polygonMode) {
-		static constexpr GLenum glPolygonModes[] = {
+		static constexpr GLenum POLYGON_MODES[] = {
 			GL_POINT,
 			GL_LINE,
 			GL_FILL,
 		};
 
-		return glPolygonModes[static_cast<uint8>(polygonMode)];
+		return POLYGON_MODES[static_cast<uint32>(polygonMode)];
 	}
 }

@@ -12,7 +12,7 @@ namespace Trident {
 			explicit Fence(const Trident::Device* device);
 
 		public:
-			GLsync sync;
+			GLsync sync = nullptr;
 	};
 
 	namespace GL {
