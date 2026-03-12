@@ -440,18 +440,7 @@ namespace Trident {
 			ENGINE_ERROR_UNSUPPORTED();
 		#endif
 
-		surface->format = ImageFormat::B8G8R8A8_UNORM;
-
-		// TODO: Get default framebuffer color read format (helps to choose between RGBA and BGRA):
-		// glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &format);
-
-		// TODO: To get the bit count of each channel of the default framebuffer format, call glGetIntegerv with:
-		// - GL_RED_BITS
-		// - GL_GREEN_BITS
-		// - GL_BLUE_BITS
-		// - GL_ALPHA_BITS
-		// - GL_DEPTH_BITS
-		// - GL_STENCIL_BITS
+		surface->format = ImageFormat::R8G8B8A8_UNORM;
 
 		ref<GL::PhysicalDevice> _physicalDevice = std::static_pointer_cast<GL::PhysicalDevice>(physicalDevice);
 
