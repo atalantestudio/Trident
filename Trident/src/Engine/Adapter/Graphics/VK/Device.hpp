@@ -10,6 +10,8 @@ namespace Trident {
 		public:
 			explicit Device(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice);
 
+			~Device();
+
 			void loadProcedures();
 
 		public:
