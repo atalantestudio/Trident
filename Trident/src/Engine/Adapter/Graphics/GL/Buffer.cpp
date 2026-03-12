@@ -109,7 +109,7 @@ namespace Trident {
 
 			mappedRange = glMapBufferRange(_buffer->target, offset, size, _buffer->mapAccessFlags);
 		#else
-			// TODO: Use glMapBuffer.
+			// TODO: Use glMapBuffer/glMapNamedBuffer.
 			ENGINE_ERROR_UNSUPPORTED();
 		#endif
 

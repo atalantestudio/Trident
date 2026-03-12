@@ -3,7 +3,7 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-// TODO: "lowp" or "mediump" precision cause specular artifacts on integrated GPUs.
+// NOTE: "lowp" or "mediump" precision cause specular artifacts on integrated GPUs.
 precision highp float;
 
 in FragmentInput {
