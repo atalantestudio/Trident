@@ -41,8 +41,6 @@ namespace Trident {
 				surface = instance->createSurface(physicalDevice, window);
 				device = physicalDevice->createDevice();
 
-				const VK::Device* _device = static_cast<const VK::Device*>(device.get());
-
 				const ref<Queue> graphicsQueue = device->getQueue(QueueFamilyCapability::GRAPHICS);
 
 				SwapchainDescriptor swapchainDescriptor{};

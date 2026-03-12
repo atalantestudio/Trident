@@ -45,9 +45,9 @@ namespace Trident {
 			// TODO
 			ENGINE_ERROR_UNIMPLEMENTED();
 		#else
-			sequence<char8> code = asset->getGlslCode();
+			sequence<char8> code = shaderModuleAsset->getGlslCode();
 
-			const std::unordered_map<sequence<char8>, uint32>& entryPointActivationOffsets = asset->getGlslEntryPointActivationOffsets();
+			const std::unordered_map<sequence<char8>, uint32>& entryPointActivationOffsets = shaderModuleAsset->getGlslEntryPointActivationOffsets();
 			const std::unordered_map<sequence<char8>, uint32>::const_iterator entryPointActivationOffsetEntry = find(entryPointActivationOffsets, descriptor.entryPoint);
 
 			ADAPTER_ASSERT(entryPointActivationOffsetEntry != entryPointActivationOffsets.end(), "Entry point \"[]\" is not present in the shader module.", descriptor.entryPoint);
