@@ -45,9 +45,6 @@ namespace Trident {
 	// If not, a warning is outputted and the contour's winding order is inverted.
 	#define TTF_FIX_INVERTED_CONTOURS
 
-	// If enabled, OpenGL objects are cleanly unbound from their target after being used.
-	#define OPENGL_UNBIND_AFTER_USE
-
 	// Desired OpenGL version. Runtime support is not guaranteed.
 	#define OPENGL_VERSION OPENGL_VERSION_4_6
 

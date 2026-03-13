@@ -167,14 +167,6 @@ namespace Trident {
 			drawBuffer.dstColorBlendFactor = getBlendFactor(colorBlendAttachment.dstColorBlendFactor);
 		}
 
-		#if OPENGL_VERSION < OPENGL_VERSION_4_5 && defined(OPENGL_UNBIND_AFTER_USE)
-			#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-				glBindVertexArray(0);
-			#else
-				ENGINE_ERROR_UNSUPPORTED();
-			#endif
-		#endif
-
 		#if defined(BUILD_MODE_DEBUG)
 			if (descriptor.name.count() > 0) {
 				glObjectLabel(GL_PROGRAM, graphicsPipeline->program, static_cast<GLsizei>(descriptor.name.count()), &descriptor.name[0]);

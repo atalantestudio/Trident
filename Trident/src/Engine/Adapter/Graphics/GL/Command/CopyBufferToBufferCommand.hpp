@@ -33,11 +33,6 @@ namespace Trident {
 						ENGINE_ERROR_UNSUPPORTED();
 					#endif
 				}
-
-				#if OPENGL_VERSION < OPENGL_VERSION_4_5 && defined(OPENGL_UNBIND_AFTER_USE)
-					glBindBuffer(GL_COPY_READ_BUFFER, 0);
-					glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
-				#endif
 			}
 
 		private:

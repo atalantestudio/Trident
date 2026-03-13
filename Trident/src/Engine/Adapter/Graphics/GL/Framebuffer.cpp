@@ -135,10 +135,6 @@ namespace Trident {
 			}
 		#endif
 
-		#if OPENGL_VERSION >= OPENGL_VERSION_3_0 && defined(OPENGL_UNBIND_AFTER_USE)
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		#endif
-
 		return framebuffer;
 	}
 

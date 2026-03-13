@@ -132,10 +132,6 @@ namespace Trident {
 			#endif
 		}
 
-		#if OPENGL_VERSION < OPENGL_VERSION_4_5 && defined(OPENGL_UNBIND_AFTER_USE)
-			glBindTexture(image->target, 0);
-		#endif
-
 		return image;
 	}
 

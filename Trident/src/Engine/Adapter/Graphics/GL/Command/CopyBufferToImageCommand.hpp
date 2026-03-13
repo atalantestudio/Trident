@@ -139,14 +139,6 @@ namespace Trident {
 							break;
 					}
 				}
-
-				#if defined(OPENGL_UNBIND_AFTER_USE)
-					glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-
-					#if OPENGL_VERSION < OPENGL_VERSION_4_5
-						glBindTexture(destinationImage->target, 0);
-					#endif
-				#endif
 			}
 
 		private:

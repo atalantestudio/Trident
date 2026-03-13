@@ -57,10 +57,6 @@ namespace Trident {
 							break;
 					}
 				}
-
-				#if defined(OPENGL_UNBIND_AFTER_USE)
-					glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-				#endif
 			}
 
 		private:
