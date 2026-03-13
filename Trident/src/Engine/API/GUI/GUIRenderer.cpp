@@ -552,7 +552,7 @@ namespace Trident {
 
 		BeginRenderPassDescriptor beginRenderPassDescriptor{};
 		beginRenderPassDescriptor.framebuffer = framebuffers[getSwapchainImageIndex()];
-		beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 0.0f}};
+		beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
 
 		const Extent2D swapchainExtent = getSwapchain()->getExtent();
 		const float32 width = static_cast<float32>(swapchainExtent.width);

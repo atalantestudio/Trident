@@ -15,12 +15,11 @@ namespace Trident {
 			{}
 
 			void execute() const final override {
-				const ref<GL::Framebuffer> glFramebuffer = std::static_pointer_cast<GL::Framebuffer>(descriptor.framebuffer);
-				const ref<Trident::RenderPass> renderPass = glFramebuffer->getRenderPass();
+				const ref<GL::Framebuffer> framebuffer = std::static_pointer_cast<GL::Framebuffer>(descriptor.framebuffer);
+				const ref<Trident::RenderPass> renderPass = framebuffer->getRenderPass();
 
 				#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glFramebuffer->framebuffer);
-					glBindFramebuffer(GL_READ_FRAMEBUFFER, glFramebuffer->framebuffer);
+					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer->framebuffer);
 				#else
 					ENGINE_ERROR_UNSUPPORTED();
 				#endif
@@ -34,8 +33,11 @@ namespace Trident {
 					bufIndex += 1;
 				}
 
-				// TODO(draw-buffers): Use glNamedFramebufferDrawBuffers in OpenGL 4.5+.
-				glDrawBuffers(static_cast<GLsizei>(bufs.count()), &bufs[0]);
+				#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+					glNamedFramebufferDrawBuffers(framebuffer->framebuffer, static_cast<GLsizei>(bufs.count()), &bufs[0]);
+				#else
+					glDrawBuffers(static_cast<GLsizei>(bufs.count()), &bufs[0]);
+				#endif
 
 				uint32 attachmentIndex = 0;
 
@@ -52,7 +54,7 @@ namespace Trident {
 
 					if (isDepthFormat(attachment.format)) {
 						#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-							glClearNamedFramebufferfi(glFramebuffer->framebuffer, GL_DEPTH_STENCIL, 0, clearValue.depth, clearValue.stencil);
+							glClearNamedFramebufferfi(framebuffer->framebuffer, GL_DEPTH_STENCIL, 0, clearValue.depth, clearValue.stencil);
 						#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
 							glClearBufferfi(GL_DEPTH_STENCIL, 0, clearValue.depth, clearValue.stencil);
 						#else
@@ -61,7 +63,7 @@ namespace Trident {
 					}
 					else if (isSignedIntegerColorFormat(attachment.format)) {
 						#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-							glClearNamedFramebufferiv(glFramebuffer->framebuffer, GL_COLOR, attachmentIndex, pointer_cast<const GLint*>(clearValue.color));
+							glClearNamedFramebufferiv(framebuffer->framebuffer, GL_COLOR, attachmentIndex, pointer_cast<const GLint*>(clearValue.color));
 						#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
 							glClearBufferiv(GL_COLOR, attachmentIndex, clearValue.color);
 						#else
@@ -70,7 +72,7 @@ namespace Trident {
 					}
 					else if (isUnsignedIntegerColorFormat(attachment.format)) {
 						#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-							glClearNamedFramebufferuiv(glFramebuffer->framebuffer, GL_COLOR, attachmentIndex, pointer_cast<const GLuint*>(clearValue.color));
+							glClearNamedFramebufferuiv(framebuffer->framebuffer, GL_COLOR, attachmentIndex, pointer_cast<const GLuint*>(clearValue.color));
 						#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
 							glClearBufferuiv(GL_COLOR, attachmentIndex, clearValue.color);
 						#else
@@ -79,7 +81,7 @@ namespace Trident {
 					}
 					else {
 						#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-							glClearNamedFramebufferfv(glFramebuffer->framebuffer, GL_COLOR, attachmentIndex, clearValue.color);
+							glClearNamedFramebufferfv(framebuffer->framebuffer, GL_COLOR, attachmentIndex, clearValue.color);
 						#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
 							glClearBufferfv(GL_COLOR, attachmentIndex, clearValue.color);
 						#else
@@ -90,7 +92,7 @@ namespace Trident {
 					attachmentIndex += 1;
 				}
 
-				GL::NextSubpassCommand::setDrawBuffers(renderPass->getSubpass(0));
+				GL::NextSubpassCommand::setDrawBuffers(framebuffer, renderPass->getSubpass(0));
 			}
 
 		private:

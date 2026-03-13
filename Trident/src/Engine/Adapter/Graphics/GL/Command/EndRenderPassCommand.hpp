@@ -18,6 +18,27 @@ namespace Trident {
 				const ref<GL::RenderPass> renderPass = std::static_pointer_cast<GL::RenderPass>(framebuffer->getRenderPass());
 
 				if (renderPass->presentSourceAttachmentIndex == max<uint32>()) {
+					const Extent2D extent = framebuffer->getExtent();
+
+					// TODO: Should we resolve all color attachments?
+					glNamedFramebufferReadBuffer(framebuffer->framebuffer, GL_COLOR_ATTACHMENT0);
+					glNamedFramebufferDrawBuffer(framebuffer->resolveFramebuffer, GL_COLOR_ATTACHMENT0);
+
+					glBlitNamedFramebuffer(
+						framebuffer->framebuffer,
+						framebuffer->resolveFramebuffer,
+						0,
+						0,
+						extent.width,
+						extent.height,
+						0,
+						0,
+						extent.width,
+						extent.height,
+						GL_COLOR_BUFFER_BIT,
+						GL_NEAREST
+					);
+
 					return;
 				}
 
@@ -26,6 +47,7 @@ namespace Trident {
 
 				#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 					glNamedFramebufferReadBuffer(framebuffer->framebuffer, readBuffer);
+					glNamedFramebufferDrawBuffer(0, GL_FRONT_LEFT);
 
 					glBlitNamedFramebuffer(
 						framebuffer->framebuffer,
@@ -43,10 +65,10 @@ namespace Trident {
 					);
 				#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
 					glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer->framebuffer);
-					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-
 					glReadBuffer(readBuffer);
-					glDrawBuffer(GL::GraphicsAdapter::defaultFramebufferDrawBuffer);
+
+					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+					glDrawBuffer(GL_FRONT_LEFT);
 
 					glBlitFramebuffer(
 						0,

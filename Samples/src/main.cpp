@@ -29,7 +29,7 @@
 #include "Physics2D/Layer/Sample/SlidingBoxes.hpp"
 #include "Physics2D/Layer/Sample/Stacking.hpp"
 #include "Physics2D/Layer/Sample/Swing.hpp"
-// #include "Physics2D/Layer/GUI/StatisticsLayer.hpp"
+#include "Physics2D/Layer/GUI/StatisticsLayer.hpp"
 
 #include "Process/Default.hpp"
 
@@ -113,7 +113,7 @@ namespace Trident {
 						registerLayer<Physics2DSwingLayer>();
 					}
 
-					// registerLayer<Physics2DGUIStatisticsLayer>();
+					registerLayer<Physics2DGUIStatisticsLayer>();
 				}
 				else if (SampleGroupNameProperty == "Process") {
 					if (SampleNameProperty == "Default") {

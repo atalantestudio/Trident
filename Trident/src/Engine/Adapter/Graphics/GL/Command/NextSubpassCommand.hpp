@@ -11,23 +11,31 @@ namespace Trident {
 	class GL::NextSubpassCommand final : public GL::Command {
 		public:
 			// Selects draw buffers on the currently bound framebuffer.
-			static void setDrawBuffers(ref<Subpass> subpass) {
-				sequence<GLenum> bufs(subpass->getColorAttachmentReferenceCount());
+			static void setDrawBuffers(ref<GL::Framebuffer> framebuffer, ref<Subpass> subpass) {
+				const view<AttachmentReference> colorAttachmentReferences = subpass->getColorAttachmentReferences();
 
-				for (uint32 bufIndex = 0; bufIndex < bufs.count(); bufIndex += 1) {
-					const AttachmentReference& colorAttachmentReference = subpass->getColorAttachmentReferences()[bufIndex];
+				sequence<GLenum> bufs(colorAttachmentReferences.count());
+				uint32 bufIndex = 0;
+
+				while (bufIndex < bufs.count()) {
+					const AttachmentReference& colorAttachmentReference = colorAttachmentReferences[bufIndex];
 
 					if (colorAttachmentReference.index == AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
 						bufs[bufIndex] = GL_NONE;
+						bufIndex += 1;
 
 						continue;
 					}
 
 					bufs[bufIndex] = GL_COLOR_ATTACHMENT0 + colorAttachmentReference.index;
+					bufIndex += 1;
 				}
 
-				// TODO(draw-buffers): Use glNamedFramebufferDrawBuffers in OpenGL 4.5+.
-				glDrawBuffers(static_cast<GLsizei>(bufs.count()), &bufs[0]);
+				#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+					glNamedFramebufferDrawBuffers(framebuffer->framebuffer, static_cast<GLsizei>(bufs.count()), &bufs[0]);
+				#else
+					glDrawBuffers(static_cast<GLsizei>(bufs.count()), &bufs[0]);
+				#endif
 			}
 
 		public:
@@ -37,7 +45,7 @@ namespace Trident {
 			{}
 
 			void execute() const final override {
-				setDrawBuffers(subpass);
+				setDrawBuffers(framebuffer, subpass);
 			}
 
 		private:

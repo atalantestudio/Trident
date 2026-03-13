@@ -12,6 +12,10 @@ namespace Trident {
 
 		public:
 			GLuint framebuffer;
+
+			// All attachments in a framebuffer must have the same sample count.
+			// For multisampled framebuffers, a separate resolve framebuffer is used.
+			GLuint resolveFramebuffer;
 	};
 
 	namespace GL {
