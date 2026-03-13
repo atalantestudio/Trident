@@ -13,7 +13,6 @@ namespace Trident {
 				blue.layoutDirection = HORIZONTAL;
 				blue.layoutSpacing = 32_px;
 				blue.color = 0x0a6e89ff;
-				blue.borderRadius = 16.0f;
 				blue.debugName = "blue";
 
 				GUIComponent(blue) {
@@ -23,7 +22,6 @@ namespace Trident {
 					pink.layoutDirection = HORIZONTAL;
 					pink.layoutSpacing = 0_px;
 					pink.color = 0xfb938fff;
-					pink.borderRadius = 16.0f;
 					pink.debugName = "pink";
 
 					GUIComponent(pink);
@@ -34,7 +32,6 @@ namespace Trident {
 					yellow.layoutDirection = HORIZONTAL;
 					yellow.layoutSpacing = 0_px;
 					yellow.color = 0xfed84dff;
-					yellow.borderRadius = 16.0f;
 					yellow.debugName = "yellow";
 
 					GUIComponent(yellow);
@@ -45,7 +42,6 @@ namespace Trident {
 					lightBlue.layoutDirection = HORIZONTAL;
 					lightBlue.layoutSpacing = 0_px;
 					lightBlue.color = 0x5ecbe4ff;
-					lightBlue.borderRadius = 16.0f;
 					lightBlue.debugName = "lightBlue";
 
 					GUIComponent(lightBlue);

@@ -1,7 +1,10 @@
-#version 440
+#version 320 es
 
 // Copyright 2025 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
+
+precision highp float;
+precision highp sampler2DArray;
 
 in FragmentInput {
 	layout(location = 0) flat vec4 color;
@@ -17,7 +20,7 @@ layout(set = 0, binding = 1) uniform sampler2DArray textureArray;
 layout(location = 0) out vec4 fragment;
 
 void main() {
-	uint smallFontSize = uint(fragmentInput.fontSize < 64.0);
+	float smallFontSize = float(fragmentInput.fontSize < 64.0);
 	float inverseFontSize = 64.0 - fragmentInput.fontSize;
 	float threshold = smallFontSize * inverseFontSize * MIN_THRESHOLD_MULTIPLIER + 0.5;
 	float smoothness = smallFontSize * inverseFontSize * MIN_SMOOTHNESS_MULTIPLIER + 0.05;

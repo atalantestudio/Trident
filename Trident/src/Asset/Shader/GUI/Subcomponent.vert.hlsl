@@ -3,14 +3,10 @@
 
 struct VertexInput {
 	float4 vertexAndTextureCoordinate : VERTEX_INPUT_ATTRIBUTE0;
-	// float4 bounds : VERTEX_INPUT_ATTRIBUTE1;
 	float3x3 worldTransform : VERTEX_INPUT_ATTRIBUTE1;
 	float3x3 textureTransform : VERTEX_INPUT_ATTRIBUTE4;
 	float4 color : VERTEX_INPUT_ATTRIBUTE7;
-	// float4 outlineColor : VERTEX_INPUT_ATTRIBUTE9;
 	uint layerIndex : VERTEX_INPUT_ATTRIBUTE8;
-	// float outlineSize : VERTEX_INPUT_ATTRIBUTE11;
-	// float borderRadius : VERTEX_INPUT_ATTRIBUTE12;
 };
 
 struct VertexOutput {

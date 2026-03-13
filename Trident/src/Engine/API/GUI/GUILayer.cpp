@@ -128,12 +128,7 @@ namespace Trident {
 				}
 			}
 			else {
-				// Validate border radius.
-				const float32 minHalfDimension = min(component.size.width.value, component.size.height.value) / 2.0f;
-
-				ENGINE_ASSERT(component.borderRadius >= 0.0f && component.borderRadius <= minHalfDimension, "Invalid border radius.");
-
-				registerSubcomponent(component.origin, component.size, component.image, component.color, component.outlineSize, component.outlineColor, component.borderRadius);
+				registerSubcomponent(component.origin, component.size, component.image, component.color);
 			}
 		}
 	}
@@ -169,9 +164,6 @@ namespace Trident {
 		rootComponent.color = 0xffffffff;
 		rootComponent.image = 0;
 		rootComponent.pointerType = PointerType::DEFAULT;
-		rootComponent.outlineSize = 0_px;
-		rootComponent.outlineColor = 0x00000000;
-		rootComponent.borderRadius = 0.0f;
 		rootComponent.textComponent = false;
 		rootComponent.debugName = "__root";
 
@@ -229,9 +221,6 @@ namespace Trident {
 		component.color = style.color;
 		component.image = style.image;
 		component.pointerType = style.pointerType;
-		component.outlineSize = style.outlineSize;
-		component.outlineColor = style.outlineColor;
-		component.borderRadius = style.borderRadius;
 		component.textComponent = false;
 		component.eventListeners = style.eventListeners;
 		component.debugName = style.debugName;
@@ -847,14 +836,12 @@ namespace Trident {
 		return false;
 	}
 
-	void GUILayer::registerSubcomponent(svec2<float32> origin, const Size2D& size, ImageID imageId, const Color& color, float32 outlineSize, const Color& outlineColor, float32 borderRadius) {
+	void GUILayer::registerSubcomponent(svec2<float32> origin, const Size2D& size, ImageID imageId, const Color& color) {
 		const vec2<float32> decimalOrigin = {origin[0], origin[1]};
 		const vec2<float32> decimalSize = {size.width.value, size.height.value};
 		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(imageId);
 
 		GUISubcomponent subcomponent{};
-		// subcomponent.minBounds = {decimalOrigin[0], decimalOrigin[1]};
-		// subcomponent.maxBounds = {decimalOrigin[0] + decimalSize[0], decimalOrigin[1] + decimalSize[1]};
 		subcomponent.worldTransform = mat3x3<float32>::scaling(decimalSize) * mat3x3<float32>::translation(decimalOrigin);
 		subcomponent.textureTransform = mat3x3<float32>::scaling({
 			static_cast<float32>(imageExtent.width) / renderer.TEXTURE_ARRAY_MAX_WIDTH,
@@ -862,9 +849,6 @@ namespace Trident {
 		});
 		subcomponent.color = color.value;
 		subcomponent.textureArrayLayerIndex = imageId;
-		// subcomponent.outlineSize = outlineSize;
-		// subcomponent.outlineColor = outlineColor.value;
-		// subcomponent.borderRadius = borderRadius;
 
 		renderer.registerSubcomponent(subcomponent);
 	}

@@ -41,9 +41,6 @@ namespace Trident {
 		// The type of the pointer to display when hovering over the component.
 		PointerType pointerType;
 
-		float32 outlineSize;
-		Color outlineColor = 0x00000000;
-		float32 borderRadius;
 		std::vector<uint32> childIndices;
 		bool sizeIncludesPaddingAndSpacing = false;
 

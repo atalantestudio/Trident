@@ -327,14 +327,10 @@ namespace Trident {
 		vertexInputBinding.registerAttribute<vec4<float32>>(); // Vertex position and texture coordinate
 
 		VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-		// instanceInputBinding.registerAttribute<vec4<float32>>(); // Bounds
 		instanceInputBinding.registerAttribute<mat3x3<float32>>(); // World transform
 		instanceInputBinding.registerAttribute<mat3x3<float32>>(); // Texture transform
 		instanceInputBinding.registerAttribute<vec4<float32>>(); // Color
-		// instanceInputBinding.registerAttribute<vec4<float32>>(); // Outline color
 		instanceInputBinding.registerAttribute<uint32>(); // Texture array layer index
-		// instanceInputBinding.registerAttribute<float32>(); // Outline size
-		// instanceInputBinding.registerAttribute<float32>(); // Border radius
 
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;

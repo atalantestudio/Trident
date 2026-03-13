@@ -31,9 +31,6 @@ namespace Trident {
 		textComponent.color = textStyle.color;
 		textComponent.image = fonts[textStyle.font].glyphMapImageId;
 		textComponent.pointerType = PointerType::DEFAULT;
-		textComponent.outlineSize = 0_px;
-		textComponent.outlineColor = 0x00000000;
-		textComponent.borderRadius = 0.0f;
 		textComponent.textComponent = true;
 		textComponent.text = text;
 		textComponent.font = textStyle.font;

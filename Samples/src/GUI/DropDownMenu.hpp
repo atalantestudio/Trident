@@ -17,7 +17,6 @@ namespace Trident {
 				menu.layoutDirection = VERTICAL;
 				menu.layoutSpacing = 8_px;
 				menu.color = 0xa675a2ff;
-				menu.borderRadius = 4_px;
 				menu.debugName = "menu";
 
 				GUIComponent(menu) {
@@ -31,7 +30,6 @@ namespace Trident {
 						item.anchorPoint = AnchorPoint::LEFT | AnchorPoint::VCENTER;
 						item.layoutSpacing = 8_px;
 						item.color = 0xbd95bcff;
-						item.borderRadius = 4_px;
 						item.debugName = "item";
 
 						GUIComponent(item) {

@@ -1,4 +1,4 @@
-#version 440
+#version 320 es
 
 // Copyright 2025 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
