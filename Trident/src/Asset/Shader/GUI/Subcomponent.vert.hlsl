@@ -6,7 +6,8 @@ struct VertexInput {
 	float3x3 worldTransform : VERTEX_INPUT_ATTRIBUTE1;
 	float3x3 textureTransform : VERTEX_INPUT_ATTRIBUTE4;
 	float4 color : VERTEX_INPUT_ATTRIBUTE7;
-	uint layerIndex : VERTEX_INPUT_ATTRIBUTE8;
+	uint zIndex : VERTEX_INPUT_ATTRIBUTE8;
+	uint layerIndex : VERTEX_INPUT_ATTRIBUTE9;
 };
 
 struct VertexOutput {
@@ -29,6 +30,7 @@ VertexOutput main(VertexInput input) {
 
 	VertexOutput output;
 	output.position = float4(mul(camera.projection, mul(input.worldTransform, vertex)), 1.0);
+	output.position.z = float(input.zIndex);
 	output.color = input.color;
 	output.textureCoordinate = mul(input.textureTransform, textureCoordinate);
 	output.textureCoordinate.z = float(input.layerIndex);

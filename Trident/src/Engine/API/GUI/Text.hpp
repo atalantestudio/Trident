@@ -25,6 +25,7 @@ namespace Trident {
 		textComponent.size.height.value = textStyle.fontSize;
 		textComponent.maximumSize = {preferredWidth, textStyle.fontSize};
 		textComponent.minimumSize = {minimumWidth, textStyle.fontSize};
+		textComponent.zIndex = 0;
 		textComponent.padding = {0_px, 0_px};
 		textComponent.layoutDirection = HORIZONTAL;
 		textComponent.layoutSpacing = 0_px;

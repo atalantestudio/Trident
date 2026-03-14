@@ -24,6 +24,7 @@ namespace Trident {
 		uint32 parentIndex;
 		svec2<float32> origin;
 		Size2D size;
+		uint32 zIndex;
 		svec2<float32> maximumSize;
 		svec2<float32> minimumSize;
 		svec2<float32> padding;

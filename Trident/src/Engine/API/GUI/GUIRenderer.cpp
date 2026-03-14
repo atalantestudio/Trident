@@ -10,6 +10,9 @@ namespace Trident {
 	void GUIRenderer::build() {
 		setupRenderPass();
 
+		createDepthStencilImage();
+		createDepthStencilImageView();
+
 		recreateFramebuffers();
 
 		createCameraBuffer();
@@ -136,20 +139,60 @@ namespace Trident {
 		swapchainAttachment.storeOperation = StoreOperation::STORE;
 		swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
 
+		Attachment depthStencilAttachment{};
+		depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
+		depthStencilAttachment.sampleCount = 1;
+		depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
+		depthStencilAttachment.storeOperation = StoreOperation::UNDEFINED;
+		depthStencilAttachment.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
 		AttachmentReference swapchainAttachmentReference{};
 		swapchainAttachmentReference.index = 0;
 		swapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 
+		AttachmentReference depthStencilAttachmentReference{};
+		depthStencilAttachmentReference.index = 1;
+		depthStencilAttachmentReference.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
 		SubpassDescriptor subpassDescriptor{};
 		subpassDescriptor.colorAttachmentReferences = {swapchainAttachmentReference};
+		subpassDescriptor.depthStencilAttachmentReference = depthStencilAttachmentReference;
 
 		const ref<Subpass> subpass = createSubpass(subpassDescriptor);
 
 		RenderPassDescriptor renderPassDescriptor{};
-		renderPassDescriptor.attachments = {swapchainAttachment};
+		renderPassDescriptor.attachments = {swapchainAttachment, depthStencilAttachment};
 		renderPassDescriptor.subpasses = {subpass};
 
 		renderPass = createRenderPass(renderPassDescriptor);
+	}
+
+	void GUIRenderer::createDepthStencilImage() {
+		const Extent2D swapchainExtent = getSwapchain()->getExtent();
+
+		AttachmentImageDescriptor depthStencilAttachmentImageDescriptor{};
+		depthStencilAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
+		depthStencilAttachmentImageDescriptor.extent.width = swapchainExtent.width;
+		depthStencilAttachmentImageDescriptor.extent.height = swapchainExtent.height;
+		depthStencilAttachmentImageDescriptor.extent.depth = 1;
+		depthStencilAttachmentImageDescriptor.mipLevelCount = 1;
+		depthStencilAttachmentImageDescriptor.layerCount = 1;
+
+		SET_DEBUG_NAME(depthStencilAttachmentImageDescriptor, "Depth stencil image");
+
+		depthStencilImage = renderPass->createDepthStencilAttachmentImage(depthStencilAttachmentImageDescriptor, 0);
+	}
+
+	void GUIRenderer::createDepthStencilImageView() {
+		ImageViewDescriptor depthStencilImageViewDescriptor{};
+		depthStencilImageViewDescriptor.mipLevelOffset = 0;
+		depthStencilImageViewDescriptor.mipLevelCount = 1;
+		depthStencilImageViewDescriptor.layerOffset = 0;
+		depthStencilImageViewDescriptor.layerCount = 1;
+
+		SET_DEBUG_NAME(depthStencilImageViewDescriptor, "Depth stencil image view");
+
+		depthStencilImageView = depthStencilImage->createView(depthStencilImageViewDescriptor);
 	}
 
 	void GUIRenderer::recreateFramebuffers() {
@@ -159,7 +202,7 @@ namespace Trident {
 
 		FramebufferDescriptor framebufferDescriptor{};
 		framebufferDescriptor.renderPass = renderPass;
-		framebufferDescriptor.imageViews = {nullptr};
+		framebufferDescriptor.imageViews = {nullptr, depthStencilImageView};
 		framebufferDescriptor.extent = swapchain->getExtent();
 
 		#if defined(BUILD_MODE_DEBUG)
@@ -330,6 +373,7 @@ namespace Trident {
 		instanceInputBinding.registerAttribute<mat3x3<float32>>(); // World transform
 		instanceInputBinding.registerAttribute<mat3x3<float32>>(); // Texture transform
 		instanceInputBinding.registerAttribute<vec4<float32>>(); // Color
+		instanceInputBinding.registerAttribute<uint32>(); // Z-index
 		instanceInputBinding.registerAttribute<uint32>(); // Texture array layer index
 
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
@@ -364,7 +408,9 @@ namespace Trident {
 		subcomponentGraphicsPipelineDescriptor.lineWidth = 1.0f;
 		subcomponentGraphicsPipelineDescriptor.minSampleShading = 0.0f;
 		subcomponentGraphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-		subcomponentGraphicsPipelineDescriptor.depthStencilState.depthTest = false;
+		subcomponentGraphicsPipelineDescriptor.depthStencilState.depthTest = true;
+		subcomponentGraphicsPipelineDescriptor.depthStencilState.depthWrite = true;
+		subcomponentGraphicsPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
 		subcomponentGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 		subcomponentGraphicsPipelineDescriptor.renderPass = renderPass;
 		subcomponentGraphicsPipelineDescriptor.subpassIndex = 0;
@@ -550,9 +596,15 @@ namespace Trident {
 			return;
 		}
 
+		const ClearValue colorClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
+
+		ClearValue depthStencilClearValue{};
+		depthStencilClearValue.depth = 0.0f;
+		depthStencilClearValue.stencil = 0;
+
 		BeginRenderPassDescriptor beginRenderPassDescriptor{};
 		beginRenderPassDescriptor.framebuffer = framebuffers[getSwapchainImageIndex()];
-		beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
+		beginRenderPassDescriptor.clearValues = {colorClearValue, depthStencilClearValue};
 
 		const Extent2D swapchainExtent = getSwapchain()->getExtent();
 		const float32 width = static_cast<float32>(swapchainExtent.width);
@@ -584,6 +636,8 @@ namespace Trident {
 	}
 
 	void GUIRenderer::resize(WindowResizeEvent& event) {
+		createDepthStencilImage();
+		createDepthStencilImageView();
 		recreateFramebuffers();
 		updateCameraProjection();
 	}

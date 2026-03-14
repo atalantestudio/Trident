@@ -79,7 +79,7 @@ namespace Trident {
 			static bool IsIntersecting(const GUIContainer& component, const vec2<float32>& point);
 			void DispatchMouseEvents();
 
-			void registerSubcomponent(svec2<float32> origin, const Size2D& size, ImageID imageId, const Color& color);
+			void registerSubcomponent(const GUIContainer& component);
 
 			bool onMouseDown(MouseDownEvent& event);
 			bool onMouseUp(MouseUpEvent& event);

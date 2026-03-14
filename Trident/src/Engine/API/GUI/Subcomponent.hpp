@@ -8,6 +8,7 @@ namespace Trident {
 		mat3x3<float32> worldTransform;
 		mat3x3<float32> textureTransform;
 		vec4<float32> color;
+		uint32 zIndex;
 		uint32 textureArrayLayerIndex;
 	};
 

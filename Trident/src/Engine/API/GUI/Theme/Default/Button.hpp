@@ -37,6 +37,7 @@ namespace Trident {
 
 			void onMouseDown(MouseDownEvent& event) {
 				mouseDown = true;
+				style.zIndex = 1;
 				style.color = 0xc2c2c2ff;
 
 				// TODO: Propagate text color to children.
@@ -45,6 +46,7 @@ namespace Trident {
 
 			void onMouseUp(MouseUpEvent& event) {
 				mouseDown = false;
+				style.zIndex = 0;
 				style.color = 0x3a3a3aff;
 
 				// TODO: Propagate text color to children.
@@ -53,11 +55,13 @@ namespace Trident {
 
 			void onMouseHover(MouseMoveEvent& event) {
 				hovered = true;
+				innerStyle.zIndex = 1;
 				innerStyle.color = 0x1a1a1aff;
 			}
 
 			void onMouseLeave(MouseMoveEvent& event) {
 				hovered = false;
+				innerStyle.zIndex = 0;
 				innerStyle.color = 0x0a0a0aff;
 			}
 

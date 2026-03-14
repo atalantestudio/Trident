@@ -66,7 +66,9 @@ namespace Trident {
 			void createSubcomponentBuffer();
 			void createGlyphSubcomponentBuffer();
 			void createTextureArrayStagingBuffer();
+			void createDepthStencilImage();
 			void createTextureArrayImage();
+			void createDepthStencilImageView();
 			void createTextureArrayImageView();
 			void createNearestSampler();
 			void createLinearSampler();
@@ -106,8 +108,10 @@ namespace Trident {
 			ref<Buffer<GUIGlyphSubcomponent>> glyphSubcomponentBuffer;
 			ref<Buffer<uint8>> textureArrayStagingBuffer;
 
+			ref<Image> depthStencilImage;
 			ref<Image> textureArrayImage;
 
+			ref<ImageView> depthStencilImageView;
 			ref<ImageView> textureArrayImageView;
 
 			ref<Sampler> nearestSampler;

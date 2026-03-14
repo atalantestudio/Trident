@@ -128,7 +128,7 @@ namespace Trident {
 				}
 			}
 			else {
-				registerSubcomponent(component.origin, component.size, component.image, component.color);
+				registerSubcomponent(component);
 			}
 		}
 	}
@@ -154,6 +154,7 @@ namespace Trident {
 		rootComponent.parentIndex = ~0;
 		rootComponent.origin = {0_px, 0_px};
 		rootComponent.size = {FIT, FIT};
+		rootComponent.zIndex = 0;
 		rootComponent.padding = {0_px, 0_px};
 		rootComponent.anchorPoint = AnchorPoint::TOP | AnchorPoint::LEFT;
 
@@ -181,6 +182,7 @@ namespace Trident {
 		component.parentIndex = parentIndex;
 		component.origin = parent.origin;
 		component.size = style.size;
+		component.zIndex = style.zIndex;
 
 		if (component.size.width.fillMode == FillMode::FIXED) {
 			component.maximumSize.x = component.size.width.value;
@@ -836,10 +838,10 @@ namespace Trident {
 		return false;
 	}
 
-	void GUILayer::registerSubcomponent(svec2<float32> origin, const Size2D& size, ImageID imageId, const Color& color) {
-		const vec2<float32> decimalOrigin = {origin[0], origin[1]};
-		const vec2<float32> decimalSize = {size.width.value, size.height.value};
-		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(imageId);
+	void GUILayer::registerSubcomponent(const GUIContainer& component) {
+		const vec2<float32> decimalOrigin = {component.origin[0], component.origin[1]};
+		const vec2<float32> decimalSize = {component.size.width.value, component.size.height.value};
+		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(component.image);
 
 		GUISubcomponent subcomponent{};
 		subcomponent.worldTransform = mat3x3<float32>::scaling(decimalSize) * mat3x3<float32>::translation(decimalOrigin);
@@ -847,8 +849,9 @@ namespace Trident {
 			static_cast<float32>(imageExtent.width) / renderer.TEXTURE_ARRAY_MAX_WIDTH,
 			static_cast<float32>(imageExtent.height) / renderer.TEXTURE_ARRAY_MAX_HEIGHT,
 		});
-		subcomponent.color = color.value;
-		subcomponent.textureArrayLayerIndex = imageId;
+		subcomponent.color = component.color.value;
+		subcomponent.zIndex = component.zIndex;
+		subcomponent.textureArrayLayerIndex = component.image;
 
 		renderer.registerSubcomponent(subcomponent);
 	}
