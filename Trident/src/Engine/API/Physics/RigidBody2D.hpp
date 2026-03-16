@@ -69,5 +69,8 @@ namespace Trident {
 			float32 inverseInertia = 1.0_kg_m2;
 
 			ref<Geometry2D> geometry;
+
+			// TODO(debug-only)
+			sequence<char8> label;
 	};
 }

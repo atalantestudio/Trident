@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Engine/Application/Application.hpp"
 #include "Engine/Exports.hpp"
 
 extern Trident::Application* createApplication(Trident::uint32 argumentCount, Trident::char8** argumentValues);

@@ -9,6 +9,8 @@ namespace Trident {
 	class Physics2DPolygonsLayer : public BaseLayer {
 		public:
 			void build() override {
+				Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
+
 				ConvexHullGeometry2DDescriptor polygonGeometryDescriptor{};
 				polygonGeometryDescriptor.vertices = {
 					{-3.0f,   0.0f},
@@ -49,7 +51,7 @@ namespace Trident {
 				polygonDescriptor.position = {0.45_m, -0.625_m};
 				polygonDescriptor.friction = 0.2f;
 				polygonDescriptor.geometry = polygonGeometry;
-				polygonDescriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
+				polygonDescriptor.fillColor = 0xf4fedbff;
 
 				scene.createStaticEntity(polygonDescriptor);
 
@@ -59,7 +61,7 @@ namespace Trident {
 				triangleDescriptor.friction = radians(-30.0_deg);
 				triangleDescriptor.mass = 1.0_kg;
 				triangleDescriptor.geometry = triangleGeometry;
-				triangleDescriptor.fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
+				triangleDescriptor.fillColor = 0xe6ddffff;
 
 				scene.createDynamicEntity(triangleDescriptor);
 			}

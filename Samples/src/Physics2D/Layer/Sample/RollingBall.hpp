@@ -9,6 +9,8 @@ namespace Trident {
 	class Physics2DRollingBallLayer : public BaseLayer {
 		public:
 			void build() override {
+				Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
+
 				const ref<CircleGeometry2D> circleGeometry = CircleGeometry2D::unitCircle(32);
 				const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
 
@@ -17,7 +19,7 @@ namespace Trident {
 				floorDescriptor.scale = {100.0f, 20.0f};
 				floorDescriptor.friction = 0.2f;
 				floorDescriptor.geometry = squareGeometry;
-				floorDescriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
+				floorDescriptor.fillColor = 0xf4fedbff;
 
 				scene.createStaticEntity(floorDescriptor);
 
@@ -27,7 +29,7 @@ namespace Trident {
 				slide0Descriptor.scale = {20.0f, 0.5f};
 				slide0Descriptor.friction = 0.2f;
 				slide0Descriptor.geometry = squareGeometry;
-				slide0Descriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
+				slide0Descriptor.fillColor = 0xf4fedbff;
 
 				scene.createStaticEntity(slide0Descriptor);
 
@@ -37,7 +39,7 @@ namespace Trident {
 				slide1Descriptor.scale = {5.0f, 0.5f};
 				slide1Descriptor.friction = 0.2f;
 				slide1Descriptor.geometry = squareGeometry;
-				slide1Descriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
+				slide1Descriptor.fillColor = 0xf4fedbff;
 
 				scene.createStaticEntity(slide1Descriptor);
 
@@ -46,7 +48,7 @@ namespace Trident {
 				ballDescriptor.mass = 25.0_kg;
 				ballDescriptor.friction = 0.2f;
 				ballDescriptor.geometry = circleGeometry;
-				ballDescriptor.fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
+				ballDescriptor.fillColor = 0xe6ddffff;
 
 				scene.createDynamicEntity(ballDescriptor);
 			}

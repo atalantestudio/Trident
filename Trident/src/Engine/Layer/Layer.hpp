@@ -16,8 +16,9 @@ namespace Trident {
 			virtual ~Layer() = default;
 
 			const Application* getApplication() const;
+			Application* getApplication();
 
-			void setApplication(const Application* application);
+			void setApplication(Application* application);
 
 			virtual void build() = 0;
 
@@ -37,6 +38,6 @@ namespace Trident {
 			LayerInput* input;
 
 		private:
-			const Application* application;
+			Application* application;
 	};
 }

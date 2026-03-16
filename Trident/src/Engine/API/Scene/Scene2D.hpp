@@ -19,9 +19,10 @@ namespace Trident {
 		float32 restitution = 0.0f;
 		ref<Geometry2D> geometry;
 		float32 density = 1.0f;
-		vec4<float32> fillColor = {1.0f, 1.0f, 1.0f, 1.0f};
-		vec4<float32> strokeColor = {0.0f, 0.0f, 0.0f, 1.0f};
+		Color fillColor = 0xfffffff;
+		Color strokeColor = 0x000000ff;
 		uint32 layerIndex = 0;
+		sequence<char8> label;
 	};
 
 	struct DynamicEntityTag {};
@@ -120,8 +121,8 @@ namespace Trident {
 				// TODO: Set correct restitution.
 				ref<ColorFillStrokeMaterial> material = createRef<ColorFillStrokeMaterial>();
 				material->density = descriptor.density;
-				material->fillColor = descriptor.fillColor;
-				material->strokeColor = descriptor.strokeColor;
+				material->fillColor = descriptor.fillColor.value;
+				material->strokeColor = descriptor.strokeColor.value;
 
 				ENGINE_ASSERT(material->density > 0.0f, "Invalid material density.");
 				ENGINE_ASSERT(material->restitution >= 0.0f && material->restitution <= 1.0f, "Invalid material restitution.");
@@ -135,6 +136,7 @@ namespace Trident {
 				rigidBody.centerOfMass = descriptor.geometry->centroid;
 				rigidBody.friction = descriptor.friction;
 				rigidBody.geometry = ecs.getComponent<ref<Geometry2D>>(entity);
+				rigidBody.label = descriptor.label;
 
 				rigidBody.updateTransform();
 

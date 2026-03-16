@@ -9,6 +9,8 @@ namespace Trident {
 	class Physics2DSwingLayer : public BaseLayer {
 		public:
 			void build() override {
+				Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
+
 				const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
 
 				Entity2DDescriptor floorDescriptor{};
@@ -16,7 +18,7 @@ namespace Trident {
 				floorDescriptor.scale = {100.0f, 20.0f};
 				floorDescriptor.friction = 0.2f;
 				floorDescriptor.geometry = squareGeometry;
-				floorDescriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
+				floorDescriptor.fillColor = 0xf4fedbff;
 
 				scene.createStaticEntity(floorDescriptor);
 
@@ -25,7 +27,7 @@ namespace Trident {
 				swingBaseDescriptor.scale = {0.1f, 1.0f};
 				swingBaseDescriptor.friction = 0.0f;
 				swingBaseDescriptor.geometry = squareGeometry;
-				swingBaseDescriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
+				swingBaseDescriptor.fillColor = 0xf4fedbff;
 
 				scene.createStaticEntity(swingBaseDescriptor);
 
@@ -35,7 +37,7 @@ namespace Trident {
 				swingDescriptor.mass = 100.0_kg;
 				swingDescriptor.friction = 0.2f;
 				swingDescriptor.geometry = squareGeometry;
-				swingDescriptor.fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
+				swingDescriptor.fillColor = 0xe6ddffff;
 
 				scene.createDynamicEntity(swingDescriptor);
 
@@ -45,7 +47,7 @@ namespace Trident {
 				leftWeight0Descriptor.mass = 25.0_kg;
 				leftWeight0Descriptor.friction = 0.2f;
 				leftWeight0Descriptor.geometry = squareGeometry;
-				leftWeight0Descriptor.fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
+				leftWeight0Descriptor.fillColor = 0xe6ddffff;
 
 				scene.createDynamicEntity(leftWeight0Descriptor);
 
@@ -55,7 +57,7 @@ namespace Trident {
 				leftWeight1Descriptor.mass = 25.0_kg;
 				leftWeight1Descriptor.friction = 0.2f;
 				leftWeight1Descriptor.geometry = squareGeometry;
-				leftWeight1Descriptor.fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
+				leftWeight1Descriptor.fillColor = 0xe6ddffff;
 
 				scene.createDynamicEntity(leftWeight1Descriptor);
 
@@ -64,7 +66,7 @@ namespace Trident {
 				rightWeightDescriptor.mass = 100.0_kg;
 				rightWeightDescriptor.friction = 0.2f;
 				rightWeightDescriptor.geometry = squareGeometry;
-				rightWeightDescriptor.fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
+				rightWeightDescriptor.fillColor = 0xe6ddffff;
 
 				scene.createDynamicEntity(rightWeightDescriptor);
 			}

@@ -44,7 +44,6 @@ namespace Trident {
 
 		protected:
 			Physics2DRenderer renderer;
-			Scene2D scene;
 
 		private:
 			PhysicsEngine2D physicsEngine;

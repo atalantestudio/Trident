@@ -9,6 +9,8 @@ namespace Trident {
 	class Physics2DDominosLayer : public BaseLayer {
 		public:
 			void build() override {
+				Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
+
 				const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
 
 				Entity2DDescriptor floorDescriptor{};
@@ -16,7 +18,7 @@ namespace Trident {
 				floorDescriptor.scale = {100.0f, 20.0f};
 				floorDescriptor.friction = 0.2f;
 				floorDescriptor.geometry = squareGeometry;
-				floorDescriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
+				floorDescriptor.fillColor = 0xf4fedbff;
 
 				scene.createStaticEntity(floorDescriptor);
 
@@ -25,7 +27,7 @@ namespace Trident {
 				entity0Descriptor.scale = {12.0f, 0.5f};
 				entity0Descriptor.friction = 0.2f;
 				entity0Descriptor.geometry = squareGeometry;
-				entity0Descriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
+				entity0Descriptor.fillColor = 0xf4fedbff;
 
 				scene.createStaticEntity(entity0Descriptor);
 
@@ -35,7 +37,7 @@ namespace Trident {
 				entity1Descriptor.scale = {14.0f, 0.5f};
 				entity1Descriptor.friction = 0.2f;
 				entity1Descriptor.geometry = squareGeometry;
-				entity1Descriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
+				entity1Descriptor.fillColor = 0xf4fedbff;
 
 				scene.createStaticEntity(entity1Descriptor);
 
@@ -44,7 +46,7 @@ namespace Trident {
 				entity2Descriptor.scale = {0.5f, 3.0f};
 				entity2Descriptor.friction = 0.2f;
 				entity2Descriptor.geometry = squareGeometry;
-				entity2Descriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
+				entity2Descriptor.fillColor = 0xf4fedbff;
 
 				scene.createStaticEntity(entity2Descriptor);
 
@@ -55,7 +57,7 @@ namespace Trident {
 				pusherDescriptor.friction = 0.2f;
 				pusherDescriptor.mass = 10.0_kg;
 				pusherDescriptor.geometry = squareGeometry;
-				pusherDescriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
+				pusherDescriptor.fillColor = 0xf4fedbff;
 
 				scene.createDynamicEntity(pusherDescriptor);
 
@@ -64,7 +66,7 @@ namespace Trident {
 				dominoDescriptor.friction = 0.1f;
 				dominoDescriptor.mass = 10.0_kg;
 				dominoDescriptor.geometry = squareGeometry;
-				dominoDescriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
+				dominoDescriptor.fillColor = 0xf4fedbff;
 
 				for (uint32 dominoIndex = 0; dominoIndex < 10; dominoIndex += 1) {
 					dominoDescriptor.position = {-6.0_m + dominoIndex, 11.125_m};

@@ -5,6 +5,7 @@
 
 #include "Engine/API/Scene/Scene2D.hpp"
 
+#include "../../SampleApplication.hpp"
 #include "BaseLayer.hpp"
 
 namespace Trident {
@@ -17,6 +18,8 @@ namespace Trident {
 
 	void BaseLayer::postConstruct() {
 		renderer.layerInput = input;
+
+		Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
 
 		renderer.setLayer(this);
 		renderer.build();
@@ -35,6 +38,8 @@ namespace Trident {
 		physicsEngine.tick();
 
 		checkHover();
+
+		const Scene2D& scene = pointer_cast<const SampleApplication*>(getApplication())->scene;
 
 		// TODO: Only write once the static component transforms.
 		const ComponentPool<RigidBody2D>& rigidBodyComponentPool = scene.getComponentPool<RigidBody2D>();
@@ -120,6 +125,7 @@ namespace Trident {
 	void BaseLayer::checkHover() {
 		hoveredEntity = max<uint32>();
 
+		const Scene2D& scene = pointer_cast<const SampleApplication*>(getApplication())->scene;
 		const ComponentPool<RigidBody2D>& rigidBodyComponentPool = scene.getComponentPool<RigidBody2D>();
 
 		if (rigidBodyComponentPool.componentCount == 0) {
@@ -192,6 +198,8 @@ namespace Trident {
 	}
 
 	bool BaseLayer::onMouseUp(MouseUpEvent& event) {
+		Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
+
 		if (event.getButton() == MouseButton::LEFT && selectedEntity != max<uint32>()) {
 			RigidBody2D& rigidBody = scene.getRigidBody(selectedEntity);
 

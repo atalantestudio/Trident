@@ -9,6 +9,8 @@ namespace Trident {
 	class Physics2DEmptyLayer : public BaseLayer {
 		public:
 			void build() override {
+				Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
+
 				const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
 
 				Entity2DDescriptor floorDescriptor{};
@@ -16,7 +18,7 @@ namespace Trident {
 				floorDescriptor.scale = {100.0f, 20.0f};
 				floorDescriptor.friction = 0.2f;
 				floorDescriptor.geometry = squareGeometry;
-				floorDescriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
+				floorDescriptor.fillColor = 0xf4fedbff;
 
 				scene.createStaticEntity(floorDescriptor);
 			}

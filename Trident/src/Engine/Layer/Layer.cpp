@@ -11,7 +11,11 @@ namespace Trident {
 		return application;
 	}
 
-	void Layer::setApplication(const Application* application) {
+	Application* Layer::getApplication() {
+		return application;
+	}
+
+	void Layer::setApplication(Application* application) {
 		this->application = application;
 	}
 
