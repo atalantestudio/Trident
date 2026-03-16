@@ -20,16 +20,16 @@ namespace Trident {
 
 			virtual vec2<float32> calculateCentroid() const = 0;
 
-			virtual float32 calculateMass(float32 density, const vec2<float32>& scale) const = 0;
+			virtual float32 calculateMass(vec2<float32> scale, float32 density) const = 0;
 
 			virtual float32 calculateRadius() const = 0;
 
 			// Returns the farthest point on the geometry along `d`. `d` does not need to be normalized.
-			virtual vec2<float32> support(const vec2<float32>& d) const = 0;
+			virtual vec2<float32> support(vec2<float32> d) const = 0;
 
 			// Returns the index of the farthest point on the geometry along `d`. `d` does not need to be normalized.
 			// NOTE: Some geometries like CircleGeometry2D return more precise support points. In these cases, `support` must be used.
-			virtual uint32 supportIndex(const vec2<float32>& d) const = 0;
+			virtual uint32 supportIndex(vec2<float32> d) const = 0;
 
 		public:
 			Geometry2DType type;

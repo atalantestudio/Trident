@@ -23,7 +23,7 @@ namespace Trident {
 				return {0.0_m, 0.0_m};
 			}
 
-			float32 calculateMass(float32 density, const vec2<float32>& scale) const final override {
+			float32 calculateMass(vec2<float32> scale, float32 density) const final override {
 				return 0_kg;
 			}
 
@@ -31,11 +31,11 @@ namespace Trident {
 				return 0.0f;
 			}
 
-			vec2<float32> support(const vec2<float32>& d) const final override {
+			vec2<float32> support(vec2<float32> d) const final override {
 				return vertices[supportIndex(d)];
 			}
 
-			uint32 supportIndex(const vec2<float32>& d) const final override {
+			uint32 supportIndex(vec2<float32> d) const final override {
 				return 0;
 			}
 	};

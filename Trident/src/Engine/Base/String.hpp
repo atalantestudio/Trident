@@ -29,7 +29,7 @@ namespace Trident {
 	}
 
 	template<std::size_t C, typename T>
-	inline std::ostringstream& operator <<(std::ostringstream& stream, const lyah::vec<C, T>& a) {
+	inline std::ostringstream& operator <<(std::ostringstream& stream, lyah::vec<C, T> a) {
 		for (std::size_t index = 0; index < C - 1; index += 1) {
 			stream << a[index] << "  ";
 		}
@@ -51,7 +51,7 @@ namespace Trident {
 	}
 
 	template<typename T>
-	inline std::ostringstream& operator <<(std::ostringstream& stream, const lyah::quat<T>& a) {
+	inline std::ostringstream& operator <<(std::ostringstream& stream, lyah::quat<T> a) {
 		stream << a[0] << "  " << a[1] << "  " << a[2] << "  " << a[3];
 
 		return stream;

@@ -325,26 +325,27 @@ namespace Trident {
 	using lyah::tau;
 	using lyah::transpose;
 
+	// TODO: Access the vertices using the indices provided by the geometry.
 	// Returns the absolute area of a 2D polygon defined by a sequence of vertices.
 	// See https://stackoverflow.com/a/717367/17136841.
 	template<typename T>
-	T scaledArea(const sequence<lyah::vec<2, T>>& unclosedVertices, const vec2<float32>& scale) {
-		T area = static_cast<T>(0.0);
+	T scaledArea(view<vec<2, T>> unclosedVertices, vec2<float32> scale) {
+		T area = static_cast<T>(0);
 
 		// Close vertex array.
-		sequence<lyah::vec<2, T>> closedVertices(unclosedVertices.count() + 2);
+		sequence<vec<2, T>> closedVertices(unclosedVertices.count() + 2);
 
 		std::copy(unclosedVertices.begin(), unclosedVertices.end(), &closedVertices[0]);
 
 		closedVertices[unclosedVertices.count() + 0] = unclosedVertices[0];
 		closedVertices[unclosedVertices.count() + 1] = unclosedVertices[1];
 
-		uint32 i = 1;
+		uint32 vertexIndex = 1;
 
-		while (i <= unclosedVertices.count()) {
-			area += closedVertices[i][0] * scale[0] * (closedVertices[i + 1][1] * scale[1] - closedVertices[i - 1][1] * scale[1]);
+		while (vertexIndex <= unclosedVertices.count()) {
+			area += closedVertices[vertexIndex][0] * scale[0] * (closedVertices[vertexIndex + 1][1] * scale[1] - closedVertices[vertexIndex - 1][1] * scale[1]);
 
-			i += 1;
+			vertexIndex += 1;
 		}
 
 		return abs(area) * static_cast<T>(0.5);

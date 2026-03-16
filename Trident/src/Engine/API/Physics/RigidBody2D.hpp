@@ -16,16 +16,19 @@ namespace Trident {
 					mat3x3<float32>::translation(position);
 			}
 
-			// Applies a linear force to the body.
-			// - `F` is the linear force added to the body.
+			/// Applies a linear force to the body.
 			void applyLinearForce(vec2<float32> F) {
-				this->force += F;
+				force += F;
 			}
 
-			// Applies a linear and angular impulse to the body.
-			// - `j` is the impulse vector.
-			// - `r` is the vector from the entity's position to the contact (referred to as "radius").
-			void applyImpulse(vec2<float32> j, vec2<float32> r) {
+			/// Applies linear and angular impulses to the body.
+			void applyImpulse(
+				/// The impulse vector.
+				vec2<float32> j,
+
+				/// The vector from the entity's position to the contact.
+				vec2<float32> r
+			) {
 				linearVelocity += j * inverseMass;
 				angularVelocity += parallelogramArea(r, j) * inverseInertia;
 			}

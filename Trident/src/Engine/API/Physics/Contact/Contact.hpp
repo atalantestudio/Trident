@@ -43,7 +43,7 @@ namespace Trident {
 
 		Contact2DID id;
 
-		float32 accumulatedNormalImpulse = 0.0f;
-		float32 accumulatedTangentImpulse = 0.0f;
+		float32 accumulatedNormalImpulse;
+		float32 accumulatedTangentImpulse;
 	};
 }

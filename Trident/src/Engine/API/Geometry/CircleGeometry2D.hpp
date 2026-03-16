@@ -42,21 +42,21 @@ namespace Trident {
 				return {0.0f, 0.0f};
 			}
 
-			float32 calculateMass(float32 density, const vec2<float32>& scale) const final override {
+			float32 calculateMass(vec2<float32> scale, float32 density) const final override {
 				ENGINE_ASSERT(scale[0] == scale[1], "The scale must be equal in both X and Y directions.");
 
-				return density * pi<float32>() * pow(radius * scale[0], 2.0f);
+				return pi<float32>() * pow(radius * scale[0], 2.0f) * density;
 			}
 
 			float32 calculateRadius() const final override {
 				return radius;
 			}
 
-			vec2<float32> support(const vec2<float32>& d) const final override {
+			vec2<float32> support(vec2<float32> d) const final override {
 				return normalized(d) * radius;
 			}
 
-			uint32 supportIndex(const vec2<float32>& d) const final override {
+			uint32 supportIndex(vec2<float32> d) const final override {
 				ENGINE_ASSERT(false, "Use CircleGeometry::support to get a support point.");
 
 				return 0;
