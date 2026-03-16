@@ -18,7 +18,10 @@ namespace Trident {
 				floorDescriptor.geometry = squareGeometry;
 				floorDescriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
 
-				scene.createStaticEntity(floorDescriptor);
+				// TODO(stable-simulation)
+				floorDescriptor.mass = 0.0_kg;
+				scene.createDynamicEntity(floorDescriptor);
+				// scene.createStaticEntity(floorDescriptor);
 
 				Entity2DDescriptor boxDescriptor{};
 				boxDescriptor.mass = 1.0_kg;
@@ -26,10 +29,14 @@ namespace Trident {
 				boxDescriptor.geometry = squareGeometry;
 				boxDescriptor.fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
 
-				for (uint32 boxIndex = 0; boxIndex < 10; boxIndex += 1) {
-					boxDescriptor.position = {random<float32>(-0.1_m, 0.1_m), 0.51_m + boxIndex * 1.05f};
+				uint32 boxIndex = 0;
+
+				while (boxIndex < 10) {
+					boxDescriptor.position = {/* random<float32>(-0.1_m, 0.1_m) */ 0.0_m, 0.51_m + boxIndex * 1.05f};
 
 					scene.createDynamicEntity(boxDescriptor);
+
+					boxIndex += 1;
 				}
 			}
 	};

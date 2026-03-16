@@ -10,6 +10,10 @@
 #include <fstream>
 #include <functional>
 #include <iostream>
+
+// Used by the physics engine.
+#include <map>
+
 #include <random>
 #include <sstream>
 

@@ -52,7 +52,7 @@ namespace Trident {
 		private:
 			Scene2D* scene;
 			std::vector<EntityPair> entityPairs;
-			std::unordered_map<EntityPairKey, EntityContactPair2D> entityContactPairs;
+			std::map<EntityPair, EntityContactPair2D> entityContactPairs;
 			float32 deltaTime;
 			float32 inverseDeltaTime;
 			float32 halfDeltaTime;

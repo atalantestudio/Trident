@@ -26,10 +26,14 @@ namespace Trident {
 	}
 
 	void BaseLayer::update(float32 deltaTime, float32 inverseDeltaTime) {
-		physicsEngine.tick();
+		// TODO(stable-simulation)
+		// physicsEngine.tick();
 	}
 
 	void BaseLayer::preRender() {
+		// TODO(stable-simulation)
+		physicsEngine.tick();
+
 		checkHover();
 
 		// TODO: Only write once the static component transforms.

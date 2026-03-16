@@ -10,6 +10,6 @@ namespace Trident {
 		vec2<float32> normal;
 		vec2<float32> tangent;
 		uint8 contactCount;
-		Contact2D contacts[2];
+		Contact2D contacts[2]{};
 	};
 }

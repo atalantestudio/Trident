@@ -7,18 +7,7 @@
 #include "Engine/ECS/Entity.hpp"
 
 namespace Trident {
-	typedef uint64 EntityPairKey;
-
 	struct EntityPair {
-		EntityPairKey asKey() const {
-			return (static_cast<EntityPairKey>(A) << 32) | B;
-		}
-
-		void parseKey(EntityPairKey key) {
-			A = static_cast<Entity>(key >> 32);
-			B = static_cast<Entity>(key);
-		}
-
 		Entity A;
 		Entity B;
 	};
@@ -34,4 +23,16 @@ namespace Trident {
 		// TODO: Store combined restitution.
 		// float32 combinedRestitution;
 	};
+
+	inline bool operator<(EntityPair a, EntityPair b) {
+		if (a.A < b.A) {
+			return true;
+		}
+
+		if (a.A == b.A && a.B < b.B) {
+			return true;
+		}
+
+		return false;
+	}
 }

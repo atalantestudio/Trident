@@ -77,7 +77,9 @@ namespace Trident {
 				else {
 					rigidBody.inverseMass = 1.0f / m;
 
-					const float32 area = descriptor.geometry->calculateMass(material->density, rigidBody.scale) * 2.0f;
+					// TODO(stable-simulation)
+					const float32 area = rigidBody.scale[0] * rigidBody.scale[0] + rigidBody.scale[1] * rigidBody.scale[1];
+					// const float32 area = descriptor.geometry->calculateMass(rigidBody.scale, material->density) * 2.0f;
 
 					// TODO: Is this correct? See https://github.com/erincatto/box2d-lite/blob/227b71b6974ea57ab7e96d40f6374287bd6a0e77/src/Body.cpp#L47.
 					const float32 I = m * area / 12.0f;

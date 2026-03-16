@@ -15,11 +15,12 @@ namespace Trident {
 		// Normal of the reference edge.
 		vec2<float32> normal;
 
-		// Closest edge on the reference body to the incident body.
-		Feature2D referenceEdge;
-
 		// Index of the reference edge in the geometry vertex array.
 		uint32 referenceEdgeIndex;
+
+		// Closest edge on the reference body to the incident body.
+		// The vertices are already transformed.
+		Feature2D referenceEdge;
 
 		// Support point on the incident body, in the direction opposite to the reference edge's normal.
 		// This is the closest point to the reference edge.
@@ -32,36 +33,40 @@ namespace Trident {
 		const RigidBody2D* incidentBody;
 	};
 
-	static void queryEdgeDirections(const RigidBody2D& A, const RigidBody2D& B, SAT2DOutput& output) {
-		const ref<ConvexHullGeometry2D> geometry = std::static_pointer_cast<ConvexHullGeometry2D>(A.geometry);
-		const mat2x2<float32> R = mat2x2<float32>::rotation(B.rotation - A.rotation);
+	static void queryEdgeDirections(const RigidBody2D& referenceBody, const RigidBody2D& incidentBody, SAT2DOutput& output) {
+		const ref<ConvexHullGeometry2D> referenceGeometry = std::static_pointer_cast<ConvexHullGeometry2D>(referenceBody.geometry);
+		const mat2x2<float32> R = mat2x2<float32>::rotation(incidentBody.rotation - referenceBody.rotation);
 
-		// TODO: Expose edge normals from ConvexHullGeometry.
-		for (uint32 edgeIndex = 0; edgeIndex < geometry->edges.count(); edgeIndex += 1) {
-			const Edge& edge = geometry->edges[edgeIndex];
-			const vec2<float32> a = geometry->vertices[edge.indexA];
-			const vec2<float32> b = geometry->vertices[edge.indexB];
-			const vec2<float32> d = edgeNormalClockwise(a, b) * R;
-			const vec2<float32> s = B.geometry->support(-d);
-			const vec2<float32> aT = multiplyTransform(a, A.transform);
-			const vec2<float32> bT = multiplyTransform(b, A.transform);
-			const vec2<float32> sT = multiplyTransform(s, B.transform);
+		uint32 edgeIndex = 0;
+
+		// TODO: Expose edge normals from ConvexHullGeometry?
+		while (edgeIndex < referenceGeometry->edges.count()) {
+			const Edge& edge = referenceGeometry->edges[edgeIndex];
+			const vec2<float32> a = referenceGeometry->vertices[edge.indexA];
+			const vec2<float32> b = referenceGeometry->vertices[edge.indexB];
+			const vec2<float32> d = edgeNormalClockwise(a, b);
+			const vec2<float32> s = incidentBody.geometry->support(-d * R);
+			const vec2<float32> aT = multiplyTransform(a, referenceBody.transform);
+			const vec2<float32> bT = multiplyTransform(b, referenceBody.transform);
+			const vec2<float32> sT = multiplyTransform(s, incidentBody.transform);
 			const float32 separation = signedDistanceLinePoint(aT, bT, sT);
 
 			if (separation > output.separation) {
 				output.separation = separation;
 				output.normal = d;
+				output.referenceEdgeIndex = edgeIndex;
 				output.referenceEdge.edge[0] = aT;
 				output.referenceEdge.edge[1] = bT;
-				output.referenceEdgeIndex = edgeIndex;
 				output.incidentSupportPoint = sT;
-				output.referenceBody = &A;
-				output.incidentBody = &B;
+				output.referenceBody = &referenceBody;
+				output.incidentBody = &incidentBody;
 			}
 
 			if (separation > 0.0f) {
 				break;
 			}
+
+			edgeIndex += 1;
 		}
 	}
 
@@ -89,8 +94,7 @@ namespace Trident {
 			return output;
 		}
 
-		// Correct normal direction.
-		output.normal *= mat2x2<float32>::rotation(-output.incidentBody->rotation);
+		output.normal *= mat2x2<float32>::rotation(-output.referenceBody->rotation);
 
 		return output;
 	}

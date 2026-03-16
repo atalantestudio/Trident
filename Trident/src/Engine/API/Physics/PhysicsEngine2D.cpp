@@ -7,6 +7,39 @@
 #include "Engine/API/Physics/PhysicsEngine2D.hpp"
 
 namespace Trident {
+	#if 0
+		inline static std::ostream& operator<<(std::ostream& stream, vec2<float32> argument) {
+			stream << '(' << argument[0] << ", " << argument[1] << ')';
+
+			return stream;
+		}
+
+		inline static void debugEntity(Entity entity, const RigidBody2D& rigidBody) {
+			std::cout.precision(16);
+			std::cout
+				<< "Entity " << entity << "\n"
+				"- Linear velocity = " << rigidBody.linearVelocity << "\n"
+				"- Angular velocity = " << rigidBody.angularVelocity << "\n";
+		}
+
+		inline static void debugEntities(const Scene2D& scene) {
+			const ComponentPool<DynamicEntityTag>& dynamicPool = scene.getComponentPool<DynamicEntityTag>();
+
+			for (uint32 componentIndex = 0; componentIndex < dynamicPool.componentCount; componentIndex += 1) {
+				const Entity entity = dynamicPool.componentIndexToEntity[componentIndex];
+				const RigidBody2D& rigidBody = scene.getRigidBody(entity);
+
+				if (entity > 2) break;
+
+				if (rigidBody.inverseMass == 0.0_kg) {
+					continue;
+				}
+
+				debugEntity(entity, rigidBody);
+			}
+		}
+	#endif
+
 	inline vec2<float32> calculateRelativeVelocity(const RigidBody2D& A, const RigidBody2D& B, const Contact2D& contact) {
 		return B.linearVelocity + cross(contact.rB, -B.angularVelocity) - A.linearVelocity - cross(contact.rA, -A.angularVelocity);
 	}
@@ -65,8 +98,6 @@ namespace Trident {
 		EntityContactPair2D entityContactPair;
 
 		for (const EntityPair entityPair : entityPairs) {
-			const EntityPairKey key = entityPair.asKey();
-
 			const RigidBody2D& rigidBodyA = scene->getRigidBody(entityPair.A);
 			const RigidBody2D& rigidBodyB = scene->getRigidBody(entityPair.B);
 
@@ -89,7 +120,7 @@ namespace Trident {
 				)
 			) {
 				// Entities are not intersecting (or degenerate case).
-				entityContactPairs.erase(key);
+				entityContactPairs.erase(entityPair);
 
 				continue;
 			}
@@ -100,13 +131,13 @@ namespace Trident {
 				}
 			#endif
 
-			std::unordered_map<const EntityPairKey, EntityContactPair2D>::iterator entityContactPairIterator = entityContactPairs.find(key);
+			std::map<const EntityPair, EntityContactPair2D>::iterator entityContactPairIterator = entityContactPairs.find(entityPair);
 
 			if (entityContactPairIterator == entityContactPairs.end()) {
 				entityContactPair.A = entityPair.A;
 				entityContactPair.B = entityPair.B;
 
-				entityContactPairs.insert(std::pair<const EntityPairKey, EntityContactPair2D>(key, entityContactPair));
+				entityContactPairs.insert(std::pair<const EntityPair, EntityContactPair2D>(entityPair, entityContactPair));
 
 				continue;
 			}
@@ -142,7 +173,7 @@ namespace Trident {
 	void PhysicsEngine2D::UpdateManifolds() {
 		// Calculate combined values in each pair (static/dynamic friction, restitution, etc.).
 		// For each contact, calculate mass normal, mass tangent and bias value.
-		for (std::pair<const EntityPairKey, EntityContactPair2D>& entityContactPair : entityContactPairs) {
+		for (std::pair<const EntityPair, EntityContactPair2D>& entityContactPair : entityContactPairs) {
 			EntityContactPair2D& pair = entityContactPair.second;
 
 			RigidBody2D& rigidBodyA = scene->getRigidBody(pair.A);
@@ -195,14 +226,19 @@ namespace Trident {
 	}
 
 	void PhysicsEngine2D::ApplyImpulses() {
-		for (uint32 iteration = 0; iteration < SEQUENTIAL_IMPULSE_ITERATION_COUNT; iteration += 1) {
-			for (std::pair<const EntityPairKey, EntityContactPair2D>& entityContactPair : entityContactPairs) {
+		vec2<float32> relativeVelocity;
+		uint32 iteration = 0;
+		uint8 contactPointIndex = 0;
+
+		while (iteration < SEQUENTIAL_IMPULSE_ITERATION_COUNT) {
+			for (std::pair<const EntityPair, EntityContactPair2D>& entityContactPair : entityContactPairs) {
 				EntityContactPair2D& pair = entityContactPair.second;
 				RigidBody2D& rigidBodyA = scene->getRigidBody(pair.A);
 				RigidBody2D& rigidBodyB = scene->getRigidBody(pair.B);
-				vec2<float32> relativeVelocity;
 
-				for (uint8 contactPointIndex = 0; contactPointIndex < pair.contactManifold.contactCount; contactPointIndex += 1) {
+				contactPointIndex = 0;
+
+				while (contactPointIndex < pair.contactManifold.contactCount) {
 					Contact2D& contact = pair.contactManifold.contacts[contactPointIndex];
 
 					// Calculate the relative velocity at the contact point.
@@ -253,8 +289,12 @@ namespace Trident {
 					// Apply tangent (friction) impulse.
 					rigidBodyA.applyImpulse(-tangentImpulse, contact.rA);
 					rigidBodyB.applyImpulse(tangentImpulse, contact.rB);
+
+					contactPointIndex += 1;
 				}
 			}
+
+			iteration += 1;
 		}
 	}
 
@@ -279,6 +319,7 @@ namespace Trident {
 
 			rigidBody.updateTransform();
 
+			// TODO
 			// rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + G) * halfDeltaTime;
 			// rigidBody.angularVelocity += rigidBody.torque * rigidBody.inverseInertia * halfDeltaTime;
 
@@ -288,7 +329,7 @@ namespace Trident {
 	}
 
 	void PhysicsEngine2D::mergeContactManifolds(EntityContactPair2D& entityContactPair, const ContactManifold2D& newContactManifold) {
-		ContactManifold2D mergedContactManifold;
+		ContactManifold2D mergedContactManifold{};
 		uint32 contactIndex = 0;
 		uint32 previousContactIndex = 0;
 
