@@ -21,6 +21,7 @@
 
 #include "Physics2D/Layer/Sample/Boxes.hpp"
 #include "Physics2D/Layer/Sample/Circles.hpp"
+#include "Physics2D/Layer/Sample/ContactTest.hpp"
 #include "Physics2D/Layer/Sample/Dominos.hpp"
 #include "Physics2D/Layer/Sample/Empty.hpp"
 #include "Physics2D/Layer/Sample/Polygons.hpp"
@@ -86,6 +87,9 @@ namespace Trident {
 			else if (SampleNameProperty == "Circles") {
 				registerLayer<Physics2DCirclesLayer>();
 			}
+			else if (SampleNameProperty == "ContactTest") {
+				registerLayer<Physics2DContactTestLayer>();
+			}
 			else if (SampleNameProperty == "Dominos") {
 				registerLayer<Physics2DDominosLayer>();
 			}
@@ -110,6 +114,7 @@ namespace Trident {
 			else if (SampleNameProperty == "Swing") {
 				registerLayer<Physics2DSwingLayer>();
 			}
+
 			registerLayer<Physics2DGUIStatisticsLayer>();
 		}
 		else if (SampleGroupNameProperty == "Process") {

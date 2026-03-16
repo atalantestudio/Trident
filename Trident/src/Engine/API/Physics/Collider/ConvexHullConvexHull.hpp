@@ -100,8 +100,6 @@ namespace Trident {
 			}
 		}
 
-		DEBUG_ASSERT(contactManifold->contactCount > 0);
-
 		return contactManifold->contactCount > 0;
 	}
 }

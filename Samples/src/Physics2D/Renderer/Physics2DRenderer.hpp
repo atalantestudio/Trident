@@ -9,10 +9,10 @@
 
 namespace Trident {
 	// Toggle vertex/edge feature rendering.
-	// #define SHOW_FEATURES
+	#define SHOW_FEATURES
 
 	// Toggle closest point distance rendering.
-	// #define SHOW_DISTANCE
+	#define SHOW_DISTANCE
 
 	class Physics2DRenderer : public Renderer {
 		private:

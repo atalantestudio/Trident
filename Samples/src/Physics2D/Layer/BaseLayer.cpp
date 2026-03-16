@@ -34,6 +34,8 @@ namespace Trident {
 	}
 
 	void BaseLayer::preRender() {
+		visualizationData = {};
+
 		// TODO(stable-simulation)
 		physicsEngine.tick();
 
@@ -60,17 +62,19 @@ namespace Trident {
 		renderer.clearRegisteredData();
 
 		#if VISUALIZE_MODE == VISUALIZE_MODE_CONTACT_MANIFOLD
-			if (visualizationData.contactManifold.getContactCount() > 0) {
+			if (visualizationData.contactManifold.contactCount > 0) {
 				Feature2D contactManifold{};
-				contactManifold.setVertexCount(visualizationData.contactManifold.getContactCount());
+				contactManifold.vertexCount = visualizationData.contactManifold.contactCount;
 
-				for (uint8 contactIndex = 0; contactIndex < contactManifold.getVertexCount(); contactIndex += 1) {
+				uint8 contactIndex = 0;
+
+				while (contactIndex < contactManifold.vertexCount) {
 					contactManifold.edge[contactIndex] = visualizationData.contactManifold.contacts[contactIndex].position;
+
+					contactIndex += 1;
 				}
 
-				#if defined(SHOW_FEATURES)
-					renderer.registerFeature(contactManifold);
-				#endif
+				renderer.registerFeature(contactManifold);
 			}
 		#endif
 
@@ -85,11 +89,11 @@ namespace Trident {
 
 				#if defined(SHOW_FEATURES)
 					Feature2D vertexFeatureA{};
-					vertexFeatureA.setVertexCount(1);
+					vertexFeatureA.vertexCount = 1;
 					vertexFeatureA.vertex = closestA;
 
 					Feature2D vertexFeatureB{};
-					vertexFeatureB.setVertexCount(1);
+					vertexFeatureB.vertexCount = 1;
 					vertexFeatureB.vertex = closestB;
 
 					renderer.registerFeature(vertexFeatureA);

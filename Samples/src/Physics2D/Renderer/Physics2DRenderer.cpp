@@ -299,7 +299,7 @@ namespace Trident {
 
 			closestPointBuffer = createBuffer<Vertex>(closestPointBufferDescriptor);
 
-			closestPointBufferMappedRange = closestPointBuffer->map<Vertex>(0, closestPointBuffer->getSize());
+			closestPointBufferMappedRange = closestPointBuffer->map(0, closestPointBuffer->getSize());
 		}
 	#endif
 
@@ -315,7 +315,7 @@ namespace Trident {
 
 			vertexFeatureBuffer = createBuffer<Vertex>(vertexFeatureBufferDescriptor);
 
-			vertexFeatureBufferMappedRange = vertexFeatureBuffer->map<Vertex>(0, vertexFeatureBuffer->getSize());
+			vertexFeatureBufferMappedRange = vertexFeatureBuffer->map(0, vertexFeatureBuffer->getSize());
 		}
 
 		void Physics2DRenderer::createEdgeFeatureBuffer() {
@@ -329,7 +329,7 @@ namespace Trident {
 
 			edgeFeatureBuffer = createBuffer<Vertex>(edgeFeatureBufferDescriptor);
 
-			edgeFeatureBufferMappedRange = edgeFeatureBuffer->map<Vertex>(0, edgeFeatureBuffer->getSize());
+			edgeFeatureBufferMappedRange = edgeFeatureBuffer->map(0, edgeFeatureBuffer->getSize());
 		}
 	#endif
 
@@ -1049,7 +1049,7 @@ namespace Trident {
 
 	#if defined(SHOW_FEATURES)
 		void Physics2DRenderer::registerFeature(const Feature2D& feature) {
-			switch (feature.getVertexCount()) {
+			switch (feature.vertexCount) {
 				case 1:
 					vertexFeatureBufferMappedRange[vertexFeatureCount].position = {feature.vertex[0], feature.vertex[1]};
 					vertexFeatureCount += 1;
