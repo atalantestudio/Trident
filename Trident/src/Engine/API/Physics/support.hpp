@@ -9,20 +9,23 @@ namespace Trident {
 	// TODO: Some geometries (e.g. CircleGeometry2D) don't implement `supportIndex`. Prefer `supportVertex` instead.
 	// Returns the index of the farthest point on `A` along `d`, in local space.
 	static uint32 supportIndex(const RigidBody2D& A, vec2<float32> d) {
-		const vec2<float32> dR = d * mat2x2<float32>::rotation(-A.rotation);
+		// TODO: Check if R is correct.
+		const mat2x2<float32> R = mat2x2<float32>::rotation(-A.rotation);
 
-		return A.geometry->supportIndex(dR);
+		return A.geometry->supportIndex(d * R);
 	}
 
 	// Returns the farthest point on `A` along `d`, in local space.
 	static vec2<float32> supportVertex(const RigidBody2D& A, vec2<float32> d) {
-		const vec2<float32> dR = d * mat2x2<float32>::rotation(-A.rotation);
+		const mat2x2<float32> R = mat2x2<float32>::rotation(A.rotation);
 
-		return A.geometry->support(dR);
+		return A.geometry->support(d * R);
 	}
 
 	// Returns the farthest point on `A` along `d`, in world-space.
 	static vec2<float32> support(const RigidBody2D& A, vec2<float32> d) {
-		return multiplyTransform(supportVertex(A, d), A.transform);
+		const vec2<float32> s = supportVertex(A, d);
+
+		return multiplyTransform(s, A.transform);
 	}
 }

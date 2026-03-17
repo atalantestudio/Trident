@@ -14,14 +14,7 @@ namespace Trident {
 		const vec2<float32> ab = b - a;
 		const vec2<float32> ao = -a;
 
-		if (dot(ab, ao) > 0.0f) {
-			d = cross2d(ab, ao, ab);
-
-			return;
-		}
-
-		s = {a};
-		d = ao;
+		d = cross2d(ab, ao, ab);
 	}
 
 	static bool handleSimplex2(sim2<float32>& s, vec2<float32>& d) {
@@ -31,30 +24,19 @@ namespace Trident {
 		const vec2<float32> ab = b - a;
 		const vec2<float32> ac = c - a;
 		const vec2<float32> ao = -a;
+		const vec2<float32> abPerp = cross2d(ac, ab, ab);
+		const vec2<float32> acPerp = cross2d(ab, ac, ac);
 
-		// TODO: Fix vector cross product.
-		if (dot(ao, {0.0f, 0.0f}) > 0.0f) {
-			if (dot(ac, ao) > 0.0f) {
-				s = {a, c};
-				d = cross2d(ac, ao, ac);
-
-				return false;
-			}
-
+		if (dot(ao, abPerp) > 0.0f) {
 			s = {a, b};
-
-			handleSimplex1(s, d);
+			d = abPerp;
 
 			return false;
 		}
 
-		// TODO: Fix vector cross product.
-		if (dot(ao, {0.0f, 0.0f}) > 0.0f) {
-			BREAKPOINT();
-
-			s = {a, b};
-
-			handleSimplex1(s, d);
+		if (dot(ao, acPerp) > 0.0f) {
+			s = {a, c};
+			d = acPerp;
 
 			return false;
 		}
@@ -75,7 +57,7 @@ namespace Trident {
 		}
 
 		// Find a support point on the Minkowski difference of A and B.
-		vec2<float32> a = support(B, d) - support(A, -d);
+		vec2<float32> a = support(A, d) - support(B, -d);
 
 		// Check if `a` passes the origin.
 		if (dot(a, d) < 0.0f) {
@@ -86,9 +68,11 @@ namespace Trident {
 
 		d = -a;
 
-		for (uint8 i = 0; i < GJK_2D_CONDITIONAL_ITERATION_LIMIT; i += 1) {
+		uint8 iteration = 0;
+
+		while (iteration < GJK_2D_CONDITIONAL_ITERATION_LIMIT) {
 			// Find a support point on the Minkowski difference of A and B.
-			a = support(B, d) - support(A, -d);
+			a = support(A, d) - support(B, -d);
 
 			// Check if `a` passes the origin.
 			if (dot(a, d) < 0.0f) {
@@ -103,8 +87,11 @@ namespace Trident {
 					return true;
 				}
 			}
+			else {
+				handleSimplex1(s, d);
+			}
 
-			handleSimplex1(s, d);
+			iteration += 1;
 		}
 
 		ENGINE_WARNING("GJK 2D (conditional): Iteration limit reached.");

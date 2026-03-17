@@ -142,8 +142,6 @@ namespace Trident {
 
 		mouseRigidBody.updateTransform();
 
-		// Check if an entity is hovered.
-		// for (sint32 entity = scene.getLastEntity(); entity >= 0; entity -= 1) {
 		for (sint32 rigidBodyIndex = static_cast<sint32>(rigidBodyComponentPool.componentCount - 1); rigidBodyIndex >= 0; rigidBodyIndex -= 1) {
 			const Entity entity = static_cast<Entity>(rigidBodyComponentPool.componentIndexToEntity[rigidBodyIndex]);
 			const RigidBody2D& rigidBody = scene.getRigidBody(entity);
