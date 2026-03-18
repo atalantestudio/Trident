@@ -37,28 +37,10 @@ VertexOutput main(VertexInput input) {
 	uint normalIndex = vertexNormalIndexBuffer.Load(input.vertexIndex * 4);
 	uint textureCoordinateIndex = vertexTextureCoordinateIndexBuffer.Load(input.vertexIndex * 4);
 
-	float3 position = float3(
-		asfloat(vertexPositionComponentBuffer.Load((positionIndex * 3 + 0) * 4)),
-		asfloat(vertexPositionComponentBuffer.Load((positionIndex * 3 + 1) * 4)),
-		asfloat(vertexPositionComponentBuffer.Load((positionIndex * 3 + 2) * 4))
-	);
-
-	float3 normal = float3(
-		asfloat(vertexNormalComponentBuffer.Load((normalIndex * 3 + 0) * 4)),
-		asfloat(vertexNormalComponentBuffer.Load((normalIndex * 3 + 1) * 4)),
-		asfloat(vertexNormalComponentBuffer.Load((normalIndex * 3 + 2) * 4))
-	);
-
-	float2 textureCoordinate = float2(
-		asfloat(vertexTextureCoordinateComponentBuffer.Load((textureCoordinateIndex * 2 + 0) * 4)),
-		asfloat(vertexTextureCoordinateComponentBuffer.Load((textureCoordinateIndex * 2 + 1) * 4))
-	);
-
-	float3 tangent = float3(
-		asfloat(vertexTangentComponentBuffer.Load((triangleIndex * 3 + 0) * 4)),
-		asfloat(vertexTangentComponentBuffer.Load((triangleIndex * 3 + 1) * 4)),
-		asfloat(vertexTangentComponentBuffer.Load((triangleIndex * 3 + 2) * 4))
-	);
+	float3 position = asfloat(vertexPositionComponentBuffer.Load3(positionIndex * 12));
+	float3 normal = asfloat(vertexNormalComponentBuffer.Load3(normalIndex * 12));
+	float2 textureCoordinate = asfloat(vertexTextureCoordinateComponentBuffer.Load2(textureCoordinateIndex * 8));
+	float3 tangent = asfloat(vertexTangentComponentBuffer.Load3(triangleIndex * 12));
 
 	float4 surface = mul(input.transform, float4(position, 1.0));
 

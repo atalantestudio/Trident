@@ -88,11 +88,7 @@ Geometry fetchGeometry(uint geometryIndex) {
 float3 fetchVertexPosition(uint index, Geometry geometry) {
 	uint offset = (geometry.vertexOffset + index) * VERTEX_POSITION_STRIDE;
 
-	float x = asfloat(vertexPositionComponentBuffer.Load((offset + 0) * 4));
-	float y = asfloat(vertexPositionComponentBuffer.Load((offset + 1) * 4));
-	float z = asfloat(vertexPositionComponentBuffer.Load((offset + 2) * 4));
-
-	return float3(x, y, z);
+	return asfloat(vertexPositionComponentBuffer.Load3(offset * 4));
 }
 
 VertexOutput main(VertexInput input) {

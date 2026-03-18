@@ -176,32 +176,21 @@ float3 fetchVertexPosition(uint indexIndex, Geometry geometry) {
 	uint index = vertexPositionIndexBuffer.Load(indexIndex * 4);
 	uint offset = (geometry.vertexOffset + index) * 3;
 
-	float x = asfloat(vertexPositionComponentBuffer.Load((offset + 0) * 4));
-	float y = asfloat(vertexPositionComponentBuffer.Load((offset + 1) * 4));
-	float z = asfloat(vertexPositionComponentBuffer.Load((offset + 2) * 4));
-
-	return float3(x, y, z);
+	return asfloat(vertexPositionComponentBuffer.Load3(offset * 4));
 }
 
 float3 fetchVertexNormal(uint indexIndex, Geometry geometry) {
 	uint index = vertexNormalIndexBuffer.Load(indexIndex * 4);
 	uint offset = (geometry.vertexOffset + index) * 3;
 
-	float x = asfloat(vertexNormalComponentBuffer.Load((offset + 0) * 4));
-	float y = asfloat(vertexNormalComponentBuffer.Load((offset + 1) * 4));
-	float z = asfloat(vertexNormalComponentBuffer.Load((offset + 2) * 4));
-
-	return float3(x, y, z);
+	return asfloat(vertexNormalComponentBuffer.Load3(offset * 4));
 }
 
 float2 fetchVertexTextureCoordinate(uint indexIndex, Geometry geometry) {
 	uint index = vertexTextureCoordinateIndexBuffer.Load(indexIndex * 4);
 	uint offset = (geometry.vertexOffset + index) * 2;
 
-	float x = asfloat(vertexTextureCoordinateComponentBuffer.Load((offset + 0) * 4));
-	float y = asfloat(vertexTextureCoordinateComponentBuffer.Load((offset + 1) * 4));
-
-	return float2(x, y);
+	return asfloat(vertexTextureCoordinateComponentBuffer.Load2(offset * 4));
 }
 
 Triangle fetchTriangle(uint triangleIndex, Instance instance, Geometry geometry) {
