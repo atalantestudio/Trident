@@ -823,9 +823,6 @@ namespace Trident {
 
 	void DX12::setLineWidth(Trident::CommandEncoder* commandEncoder, float32 lineWidth) {
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
-
-		ENGINE_ERROR_UNIMPLEMENTED();
-
 		_commandEncoder->commandCount += 1;
 	}
 

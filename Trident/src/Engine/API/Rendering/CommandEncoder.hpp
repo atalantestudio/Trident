@@ -100,6 +100,7 @@ namespace Trident {
 
 			void setImageMemoryBarrier(ref<Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage);
 
+			// TODO: Deprecate (not supported by DirectX12).
 			void setLineWidth(float32 lineWidth);
 
 			// Updates the scissor area.

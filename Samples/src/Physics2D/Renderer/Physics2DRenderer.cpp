@@ -75,8 +75,9 @@ namespace Trident {
 		swapchainAttachment.storeOperation = StoreOperation::STORE;
 
 		// TODO(layer-superposition)
-		swapchainAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-		// swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
+		// TODO(DX12): The final layout must be PRESENT_SRC in order to have layer superposition working.
+		// swapchainAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+		swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
 
 		Attachment depthStencilAttachment{};
 		depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
@@ -387,7 +388,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Grid fragment");
 
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Base/ScreenUVNDC.vert");
+		const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/ScreenUVNDC.vert");
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/Grid.frag");
 
 		ColorBlendAttachment colorBlendAttachment{};
@@ -439,7 +440,7 @@ namespace Trident {
 		SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Fill fragment");
 
 		const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/Fill.vert");
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Base/FragmentRGBA.frag");
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/FragmentRGBA.frag");
 
 		ColorBlendAttachment colorBlendAttachment{};
 		colorBlendAttachment.blend = true;
@@ -594,8 +595,9 @@ namespace Trident {
 		ref<ShaderModule> vertexShaderModule;
 
 		switch (getGraphicsApi()) {
-			case GraphicsAPI::DX12: {
-				ENGINE_ERROR_UNIMPLEMENTED();
+			case GraphicsAPI::DX12:
+			case GraphicsAPI::VK: {
+				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/PlaceholderFill.vert");
 
 				break;
 			}
@@ -604,14 +606,9 @@ namespace Trident {
 
 				break;
 			}
-			case GraphicsAPI::VK: {
-				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/PlaceholderFill.vert");
-
-				break;
-			}
 		}
 
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Base/FragmentRGBA.frag");
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/FragmentRGBA.frag");
 
 		ColorBlendAttachment colorBlendAttachment{};
 		colorBlendAttachment.blend = true;
@@ -662,18 +659,14 @@ namespace Trident {
 		ref<ShaderModule> vertexShaderModule;
 
 		switch (getGraphicsApi()) {
-			case GraphicsAPI::DX12: {
-				ENGINE_ERROR_UNIMPLEMENTED();
+			case GraphicsAPI::DX12:
+			case GraphicsAPI::VK: {
+				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/PlaceholderStroke.vert");
 
 				break;
 			}
 			case GraphicsAPI::GL: {
 				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/PlaceholderStrokeSingleSet.vert");
-
-				break;
-			}
-			case GraphicsAPI::VK: {
-				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/PlaceholderStroke.vert");
 
 				break;
 			}
@@ -727,18 +720,14 @@ namespace Trident {
 		ref<ShaderModule> vertexShaderModule;
 
 		switch (getGraphicsApi()) {
-			case GraphicsAPI::DX12: {
-				ENGINE_ERROR_UNIMPLEMENTED();
+			case GraphicsAPI::DX12:
+			case GraphicsAPI::VK: {
+				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/PlaceholderCenterOfMass.vert");
 
 				break;
 			}
 			case GraphicsAPI::GL: {
 				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/PlaceholderCenterOfMassSingleSet.vert");
-
-				break;
-			}
-			case GraphicsAPI::VK: {
-				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/PlaceholderCenterOfMass.vert");
 
 				break;
 			}

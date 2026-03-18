@@ -54,7 +54,6 @@ namespace Trident {
 		graphicsPipelineStateDescriptor.StreamOutput.pBufferStrides = nullptr;
 		graphicsPipelineStateDescriptor.StreamOutput.NumStrides = 0;
 		graphicsPipelineStateDescriptor.StreamOutput.RasterizedStream = 0;
-
 		graphicsPipelineStateDescriptor.BlendState.AlphaToCoverageEnable = FALSE;
 		graphicsPipelineStateDescriptor.BlendState.IndependentBlendEnable = FALSE;
 
