@@ -3,15 +3,10 @@
 
 // TODO: Change to a generic distance field shader.
 
-// TODO
-// glyphImage is technically read-only but UAVs can only be bound to read/write images.
-// Find a way to specify the resource access mode.
-RWTexture2D<float> glyphImage : register(u0);
-
-RWTexture2D<float> glyphMapImage : register(u1);
-
-ByteAddressBuffer fontBuffer : register(t0);
-ByteAddressBuffer glyphBuffer : register(t1);
+Texture2D<float> glyphImage : register(t0);
+RWTexture2D<float> glyphMapImage : register(u0);
+ByteAddressBuffer fontBuffer : register(t1);
+ByteAddressBuffer glyphBuffer : register(t2);
 
 [numthreads(8, 8, 1)]
 void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
@@ -24,7 +19,7 @@ void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 	}
 
 	uint fontSpreadFactor = fontBuffer.Load(0);
-	uint2 glyphOffset = glyphBuffer.Load(0);
+	uint2 glyphOffset = glyphBuffer.Load2(0);
 
 	const uint spread = fontSpreadFactor * fontOutputGlyphSize;
 
@@ -51,7 +46,7 @@ void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 					continue;
 				}
 
-				uint2 power = uint2(pow(inputTexelCoordinate - sampleCoordinate, (2, 2)));
+				uint2 power = uint2(pow(inputTexelCoordinate - sampleCoordinate, uint2(2, 2)));
 				uint squareDistance = power.x + power.y;
 
 				closestSquareDistance = min(closestSquareDistance, squareDistance);

@@ -426,38 +426,38 @@ namespace Trident {
 	}
 
 	void DX12::copyBufferToImage(Trident::CommandEncoder* commandEncoder, ref<Trident::BaseBuffer> sourceBuffer, ref<Trident::Image> destinationImage, view<BufferImageCopyRegion> copyRegions) {
-		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 		const ref<DX12::BaseBuffer> srcBuffer = std::static_pointer_cast<DX12::BaseBuffer>(sourceBuffer);
 		const ref<DX12::Image> dstImage = std::static_pointer_cast<DX12::Image>(destinationImage);
-		const D3D12_RESOURCE_DESC srcBufferResourceDescriptor = srcBuffer->resource->GetDesc();
 		const D3D12_RESOURCE_DESC dstImageResourceDescriptor = dstImage->resource->GetDesc();
 		const UINT channelCount = getChannelCount(dstImage->getFormat());
 
-		D3D12_TEXTURE_COPY_LOCATION bufferCopyLocation{};
-		bufferCopyLocation.pResource = srcBuffer->resource;
-		bufferCopyLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
-		bufferCopyLocation.PlacedFootprint.Footprint.Format = dstImageResourceDescriptor.Format;
+		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 
-		D3D12_TEXTURE_COPY_LOCATION textureCopyLocation{};
-		textureCopyLocation.pResource = dstImage->resource;
-		textureCopyLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+		D3D12_TEXTURE_COPY_LOCATION sourceBufferCopyLocation{};
+		sourceBufferCopyLocation.pResource = srcBuffer->resource;
+		sourceBufferCopyLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+		sourceBufferCopyLocation.PlacedFootprint.Footprint.Format = dstImageResourceDescriptor.Format;
+
+		D3D12_TEXTURE_COPY_LOCATION destinationTextureCopyLocation{};
+		destinationTextureCopyLocation.pResource = dstImage->resource;
+		destinationTextureCopyLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
 
 		for (const BufferImageCopyRegion& copyRegion : copyRegions) {
 			const UINT64 layerSize = copyRegion.imageExtent.width * copyRegion.imageExtent.height * copyRegion.imageExtent.depth * channelCount;
 
-			bufferCopyLocation.PlacedFootprint.Footprint.Width = copyRegion.imageExtent.width;
-			bufferCopyLocation.PlacedFootprint.Footprint.Height = copyRegion.imageExtent.height;
-			bufferCopyLocation.PlacedFootprint.Footprint.Depth = copyRegion.imageExtent.depth;
-			bufferCopyLocation.PlacedFootprint.Footprint.RowPitch = copyRegion.imageExtent.width * channelCount;
+			sourceBufferCopyLocation.PlacedFootprint.Footprint.Width = copyRegion.imageExtent.width;
+			sourceBufferCopyLocation.PlacedFootprint.Footprint.Height = copyRegion.imageExtent.height;
+			sourceBufferCopyLocation.PlacedFootprint.Footprint.Depth = copyRegion.imageExtent.depth;
+			sourceBufferCopyLocation.PlacedFootprint.Footprint.RowPitch = copyRegion.imageExtent.width * channelCount;
 
 			UINT layerIndex = 0;
 
 			while (layerIndex < copyRegion.imageLayerCount) {
-				bufferCopyLocation.PlacedFootprint.Offset = copyRegion.bufferOffset + layerSize * layerIndex;
+				sourceBufferCopyLocation.PlacedFootprint.Offset = copyRegion.bufferOffset + layerSize * layerIndex;
 
-				textureCopyLocation.SubresourceIndex = copyRegion.imageLayerOffset + layerIndex;
+				destinationTextureCopyLocation.SubresourceIndex = copyRegion.imageLayerOffset + layerIndex;
 
-				_commandEncoder->commandList->CopyTextureRegion(&textureCopyLocation, copyRegion.imageOffsetX, copyRegion.imageOffsetY, copyRegion.imageOffsetZ, &bufferCopyLocation, nullptr);
+				_commandEncoder->commandList->CopyTextureRegion(&destinationTextureCopyLocation, copyRegion.imageOffsetX, copyRegion.imageOffsetY, copyRegion.imageOffsetZ, &sourceBufferCopyLocation, nullptr);
 
 				layerIndex += 1;
 			}
@@ -467,9 +467,50 @@ namespace Trident {
 	}
 
 	void DX12::copyImageToBuffer(Trident::CommandEncoder* commandEncoder, ref<Trident::Image> sourceImage, ref<Trident::BaseBuffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) {
+		const ref<DX12::Image> srcImage = std::static_pointer_cast<DX12::Image>(sourceImage);
+		const ref<DX12::BaseBuffer> dstBuffer = std::static_pointer_cast<DX12::BaseBuffer>(destinationBuffer);
+		const D3D12_RESOURCE_DESC srcImageResourceDescriptor = srcImage->resource->GetDesc();
+		const UINT channelCount = getChannelCount(srcImage->getFormat());
+
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 
-		ENGINE_ERROR_UNIMPLEMENTED();
+		D3D12_TEXTURE_COPY_LOCATION sourceTextureCopyLocation{};
+		sourceTextureCopyLocation.pResource = srcImage->resource;
+		sourceTextureCopyLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+
+		D3D12_TEXTURE_COPY_LOCATION destinationBufferCopyLocation{};
+		destinationBufferCopyLocation.pResource = dstBuffer->resource;
+		destinationBufferCopyLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+		destinationBufferCopyLocation.PlacedFootprint.Footprint.Format = srcImageResourceDescriptor.Format;
+
+		for (const BufferImageCopyRegion& copyRegion : copyRegions) {
+			const UINT64 layerSize = copyRegion.imageExtent.width * copyRegion.imageExtent.height * copyRegion.imageExtent.depth * channelCount;
+
+			destinationBufferCopyLocation.PlacedFootprint.Footprint.Width = copyRegion.imageExtent.width;
+			destinationBufferCopyLocation.PlacedFootprint.Footprint.Height = copyRegion.imageExtent.height;
+			destinationBufferCopyLocation.PlacedFootprint.Footprint.Depth = copyRegion.imageExtent.depth;
+			destinationBufferCopyLocation.PlacedFootprint.Footprint.RowPitch = copyRegion.imageExtent.width * channelCount;
+
+			UINT layerIndex = 0;
+
+			while (layerIndex < copyRegion.imageLayerCount) {
+				sourceTextureCopyLocation.SubresourceIndex = copyRegion.imageLayerOffset + layerIndex;
+
+				destinationBufferCopyLocation.PlacedFootprint.Offset = copyRegion.bufferOffset + layerSize * layerIndex;
+
+				D3D12_BOX sourceBox{};
+				sourceBox.left = copyRegion.imageOffsetX;
+				sourceBox.top = copyRegion.imageOffsetY;
+				sourceBox.front = copyRegion.imageOffsetZ;
+				sourceBox.right = copyRegion.imageOffsetX + copyRegion.imageExtent.width;
+				sourceBox.bottom = copyRegion.imageOffsetY + copyRegion.imageExtent.height;
+				sourceBox.back = copyRegion.imageOffsetZ + copyRegion.imageExtent.depth;
+
+				_commandEncoder->commandList->CopyTextureRegion(&destinationBufferCopyLocation, 0, 0, 0, &sourceTextureCopyLocation, &sourceBox);
+
+				layerIndex += 1;
+			}
+		}
 
 		_commandEncoder->commandCount += 1;
 	}

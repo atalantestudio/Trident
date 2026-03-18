@@ -2,7 +2,7 @@
 // Distributed under the GNU GPL v3 License.
 
 struct Edge {
-	// TODO: Pack x/y into 1x int.
+	// TODO: Pack x/y into 1 int.
 	int2 start;
 	int2 end;
 	int2 control;
@@ -10,18 +10,18 @@ struct Edge {
 	bool curved;
 };
 
+static const uint EDGE_STRIDE = 32;
+
 ByteAddressBuffer fontBuffer : register(t0);
 ByteAddressBuffer glyphBuffer : register(t1);
 RWTexture2D<float> glyphImage : register(u0);
 
 Edge loadEdge(uint edgeIndex) {
-	static const uint stride = 32;
-
 	Edge edge;
-	edge.start = asint(glyphBuffer.Load(edgeIndex * stride + 0));
-	edge.end = asint(glyphBuffer.Load(edgeIndex * stride + 8));
-	edge.control = asint(glyphBuffer.Load(edgeIndex * stride + 16));
-	edge.curved = glyphBuffer.Load(edgeIndex * stride + 24);
+	edge.start = asint(glyphBuffer.Load2(8 + edgeIndex * EDGE_STRIDE + 0));
+	edge.end = asint(glyphBuffer.Load2(8 + edgeIndex * EDGE_STRIDE + 8));
+	edge.control = asint(glyphBuffer.Load2(8 + edgeIndex * EDGE_STRIDE + 16));
+	edge.curved = glyphBuffer.Load(8 + edgeIndex * EDGE_STRIDE + 24);
 
 	return edge;
 }

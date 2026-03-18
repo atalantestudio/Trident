@@ -264,7 +264,7 @@ namespace Trident {
 		glyphMapBufferImageCopyRegion.imageLayerOffset = 0;
 		glyphMapBufferImageCopyRegion.imageLayerCount = glyphMapImage->getLayerCount();
 
-		SET_DEBUG_NAME(commandBufferDescriptor, "Glyph map staging buffer copy");
+		SET_DEBUG_NAME(commandBufferDescriptor, "Copy glyph map image");
 
 		commandEncoder = computeQueue->createCommandEncoder(commandBufferDescriptor);
 		commandEncoder->begin();
@@ -361,10 +361,15 @@ namespace Trident {
 		glyphBufferBinding.descriptorCount = 1;
 		glyphBufferBinding.shaderStages = ShaderStage::COMPUTE;
 
-		DescriptorSetLayoutBinding glyphImageBinding{};
-		glyphImageBinding.descriptorType = DescriptorType::STORAGE_IMAGE;
-		glyphImageBinding.descriptorCount = 1;
-		glyphImageBinding.shaderStages = ShaderStage::COMPUTE;
+		DescriptorSetLayoutBinding readWriteGlyphImageBinding{};
+		readWriteGlyphImageBinding.descriptorType = DescriptorType::STORAGE_IMAGE;
+		readWriteGlyphImageBinding.descriptorCount = 1;
+		readWriteGlyphImageBinding.shaderStages = ShaderStage::COMPUTE;
+
+		DescriptorSetLayoutBinding readOnlyGlyphImageBinding{};
+		readOnlyGlyphImageBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE;
+		readOnlyGlyphImageBinding.descriptorCount = 1;
+		readOnlyGlyphImageBinding.shaderStages = ShaderStage::COMPUTE;
 
 		DescriptorSetLayoutBinding glyphMapImageBinding{};
 		glyphMapImageBinding.descriptorType = DescriptorType::STORAGE_IMAGE;
@@ -376,8 +381,8 @@ namespace Trident {
 		glyphOffsetBufferBinding.descriptorCount = 1;
 		glyphOffsetBufferBinding.shaderStages = ShaderStage::COMPUTE;
 
-		glyphImageDescriptorSetLayout = Renderer::createDescriptorSetLayout({fontBufferBinding, glyphBufferBinding, glyphImageBinding});
-		glyphSdfDescriptorSetLayout = Renderer::createDescriptorSetLayout({glyphImageBinding, glyphMapImageBinding, fontBufferBinding, glyphOffsetBufferBinding});
+		glyphImageDescriptorSetLayout = Renderer::createDescriptorSetLayout({fontBufferBinding, glyphBufferBinding, readWriteGlyphImageBinding});
+		glyphSdfDescriptorSetLayout = Renderer::createDescriptorSetLayout({readOnlyGlyphImageBinding, glyphMapImageBinding, fontBufferBinding, glyphOffsetBufferBinding});
 	}
 
 	void GenerateSDFGlyphMapProcess::createGlyphImagePipelineLayout() {
