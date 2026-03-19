@@ -16,6 +16,7 @@ namespace Trident {
 			CommandBufferUsage usage;
 			UINT commandCount = 0;
 			UINT samplerDescriptorTableRootParameterIndex = max<UINT>();
+			bool computeCommandList;
 			bool computePipelineBound = false;
 			ref<DX12::Framebuffer> framebuffer = nullptr;
 			UINT subpassIndex = 0;

@@ -527,6 +527,7 @@ namespace Trident {
 		ref<DX12::CommandEncoder> commandEncoder = createRef<DX12::CommandEncoder>(device, commandPool);
 		commandEncoder->commandAllocator = _commandPool->commandAllocator;
 		commandEncoder->usage = descriptor.usage;
+		commandEncoder->computeCommandList = _commandPool->commandListType == D3D12_COMMAND_LIST_TYPE_COMPUTE;
 
 		result = _device->device->CreateCommandList(0, _commandPool->commandListType, _commandPool->commandAllocator, nullptr, IID_PPV_ARGS(&commandEncoder->commandList));
 
@@ -843,6 +844,10 @@ namespace Trident {
 
 		if (_commandEncoder->computePipelineBound && newLayout == ImageLayout::SHADER_READ_ONLY_OPTIMAL) {
 			newResourceState = D3D12_RESOURCE_STATE_COMMON;
+		}
+
+		if (_commandEncoder->computeCommandList && newResourceState == D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE) {
+			newResourceState = D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
 		}
 
 		D3D12_RESOURCE_BARRIER resourceBarrier{};
