@@ -41,7 +41,7 @@ namespace Trident {
 
 		// TODO: Expose edge normals from ConvexHullGeometry?
 		while (edgeIndex < referenceGeometry->edges.count()) {
-			const Edge& edge = referenceGeometry->edges[edgeIndex];
+			const Edge edge = referenceGeometry->edges[edgeIndex];
 			const vec2<float32> a = referenceGeometry->vertices[edge.indexA];
 			const vec2<float32> b = referenceGeometry->vertices[edge.indexB];
 			const vec2<float32> d = edgeNormalClockwise(a, b);

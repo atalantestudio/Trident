@@ -200,9 +200,13 @@ namespace Trident {
 		while (i < GJK_2D_ITERATION_LIMIT) {
 			const uint8 previousCount = s.count;
 
-			for (uint8 index = 0; index < s.count; index += 1) {
+			uint8 index = 0;
+
+			while (index < s.count) {
 				saveA[index] = s[index].iA;
 				saveB[index] = s[index].iB;
+
+				index += 1;
 			}
 
 			const uint8 countCopy = s.count;
@@ -263,13 +267,16 @@ namespace Trident {
 			vertex.iB = supportIndex(B, d);
 
 			bool duplicate = false;
+			uint8 j = 0;
 
-			for (uint8 j = 0; j < countCopy; j += 1) {
+			while (j < countCopy) {
 				if (vertex.iA == saveA[j] && vertex.iB == saveB[j]) {
 					duplicate = true;
 
 					break;
 				}
+
+				j += 1;
 			}
 
 			if (duplicate) {

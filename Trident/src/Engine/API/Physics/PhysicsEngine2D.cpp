@@ -24,18 +24,17 @@ namespace Trident {
 
 		inline static void debugEntities(const Scene2D& scene) {
 			const ComponentPool<DynamicEntityTag>& dynamicPool = scene.getComponentPool<DynamicEntityTag>();
+			uint32 componentIndex = 0;
 
-			for (uint32 componentIndex = 0; componentIndex < dynamicPool.componentCount; componentIndex += 1) {
+			while (componentIndex < dynamicPool.componentCount) {
 				const Entity entity = dynamicPool.componentIndexToEntity[componentIndex];
 				const RigidBody2D& rigidBody = scene.getRigidBody(entity);
 
-				if (entity > 2) break;
-
-				if (rigidBody.inverseMass == 0.0_kg) {
-					continue;
+				if (rigidBody.inverseMass > 0.0_kg) {
+					debugEntity(entity, rigidBody);
 				}
 
-				debugEntity(entity, rigidBody);
+				componentIndex += 1;
 			}
 		}
 	#endif
@@ -73,24 +72,36 @@ namespace Trident {
 		const ComponentPool<StaticEntityTag>& staticPool = scene->getComponentPool<StaticEntityTag>();
 
 		EntityPair entityPair;
+		uint32 indexA = 0;
+		uint32 indexB;
 
 		// TODO: Only register potentially overlapping entities.
-		for (uint32 indexA = 0; indexA < dynamicPool.componentCount; indexA += 1) {
+		while (indexA < dynamicPool.componentCount) {
 			entityPair.A = dynamicPool.componentIndexToEntity[indexA];
 
+			indexB = indexA + 1;
+
 			// Register all dynamic-dynamic entity pairs.
-			for (uint32 indexB = indexA + 1; indexB < dynamicPool.componentCount; indexB += 1) {
+			while (indexB < dynamicPool.componentCount) {
 				entityPair.B = dynamicPool.componentIndexToEntity[indexB];
 
 				entityPairs.emplace_back(entityPair);
+
+				indexB += 1;
 			}
 
+			indexB = 0;
+
 			// Register all dynamic-static entity pairs.
-			for (uint32 indexB = 0; indexB < staticPool.componentCount; indexB += 1) {
+			while (indexB < staticPool.componentCount) {
 				entityPair.B = staticPool.componentIndexToEntity[indexB];
 
 				entityPairs.emplace_back(entityPair);
+
+				indexB += 1;
 			}
+
+			indexA += 1;
 		}
 	}
 
@@ -148,15 +159,18 @@ namespace Trident {
 
 	void PhysicsEngine2D::ApplyForces() {
 		const ComponentPool<DynamicEntityTag>& dynamicPool = scene->getComponentPool<DynamicEntityTag>();
+		uint32 componentIndex = 0;
 
 		// TODO: Integrate velocities on dynamic resting entities (e.g. an object on a moving platform may move due to inertia)?
-		for (uint32 componentIndex = 0; componentIndex < dynamicPool.componentCount; componentIndex += 1) {
+		while (componentIndex < dynamicPool.componentCount) {
 			const Entity entity = dynamicPool.componentIndexToEntity[componentIndex];
 
 			RigidBody2D& rigidBody = scene->getRigidBody(entity);
 
 			// TODO: Exclude dynamic entities with an inverse mass of 0 from the loop.
 			if (rigidBody.inverseMass == 0.0_kg) {
+				componentIndex += 1;
+
 				continue;
 			}
 
@@ -167,10 +181,14 @@ namespace Trident {
 			rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + G) * deltaTime;
 			// rigidBody.angularVelocity += rigidBody.torque * rigidBody.inverseInertia * halfDeltaTime;
 			rigidBody.angularVelocity += rigidBody.torque * rigidBody.inverseInertia * deltaTime;
+
+			componentIndex += 1;
 		}
 	}
 
 	void PhysicsEngine2D::UpdateManifolds() {
+		uint8 contactPointIndex;
+
 		// Calculate combined values in each pair (static/dynamic friction, restitution, etc.).
 		// For each contact, calculate mass normal, mass tangent and bias value.
 		for (std::pair<const EntityPair, EntityContactPair2D>& entityContactPair : entityContactPairs) {
@@ -182,7 +200,9 @@ namespace Trident {
 			pair.contactManifold.tangent = perpendicularRight(pair.contactManifold.normal);
 			pair.combinedFriction = sqrt(rigidBodyA.friction * rigidBodyB.friction);
 
-			for (uint8 contactPointIndex = 0; contactPointIndex < pair.contactManifold.contactCount; contactPointIndex += 1) {
+			contactPointIndex = 0;
+
+			while (contactPointIndex < pair.contactManifold.contactCount) {
 				Contact2D& contact = pair.contactManifold.contacts[contactPointIndex];
 
 				// Distance from the contact to the entity's COM.
@@ -221,6 +241,8 @@ namespace Trident {
 					rigidBodyA.applyImpulse(-impulse, contact.rA);
 					rigidBodyB.applyImpulse(impulse, contact.rB);
 				#endif
+
+				contactPointIndex += 1;
 			}
 		}
 	}
@@ -300,17 +322,20 @@ namespace Trident {
 
 	void PhysicsEngine2D::Integrate() {
 		const ComponentPool<DynamicEntityTag>& dynamicPool = scene->getComponentPool<DynamicEntityTag>();
+		uint32 componentIndex = 0;
 
 		// TODO: Integration for static entities (e.g. a moving platform that isn't affected by other forces)?
 		// TODO: Integration for dynamic entities with infinite mass?
 		// TODO: Integration for dynamic resting entities (e.g. an object on a moving platform may move due to inertia)?
-		for (uint32 componentIndex = 0; componentIndex < dynamicPool.componentCount; componentIndex += 1) {
+		while (componentIndex < dynamicPool.componentCount) {
 			const Entity entity = dynamicPool.componentIndexToEntity[componentIndex];
 
 			RigidBody2D& rigidBody = scene->getRigidBody(entity);
 
 			// TODO: Exclude dynamic entities with an inverse mass of 0 from the loop.
 			if (rigidBody.inverseMass == 0.0_kg) {
+				componentIndex += 1;
+
 				continue;
 			}
 
@@ -325,6 +350,8 @@ namespace Trident {
 
 			rigidBody.force = {0.0_N, 0.0_N};
 			rigidBody.torque = 0.0_Nm;
+
+			componentIndex += 1;
 		}
 	}
 

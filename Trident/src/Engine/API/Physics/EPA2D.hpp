@@ -15,18 +15,22 @@ namespace Trident {
 	};
 
 	EPA2DResult EPA2D(const Simplex2& simplex, const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B) {
+		std::vector<vec2<float32>> polytope;
 		float32 minDistance = max<float32>();
 		vec2<float32> minNormal = {0.0f, 0.0f};
 		uint32 minIndex = 0;
+		uint32 vertexIndex = 0;
 
-		std::vector<vec2<float32>> polytope;
-
-		for (uint32 vertexIndex = 0; vertexIndex < simplex.count; vertexIndex += 1) {
+		while (vertexIndex < simplex.count) {
 			polytope[vertexIndex] = simplex[vertexIndex].v;
+
+			vertexIndex += 1;
 		}
 
 		while (minDistance == max<float32>()) {
-			for (uint32 indexI = 0; indexI < polytope.size(); indexI += 1) {
+			uint32 indexI = 0;
+
+			while (indexI < polytope.size()) {
 				const uint32 indexJ = (indexI + 1) % polytope.size();
 
 				const vec2<float32> i = polytope[indexI];
@@ -48,6 +52,8 @@ namespace Trident {
 
 					minIndex = indexJ;
 				}
+
+				indexI += 1;
 			}
 
 			const vec2<float32> s = B.geometry->support(minNormal) - A.geometry->support(-minNormal);
