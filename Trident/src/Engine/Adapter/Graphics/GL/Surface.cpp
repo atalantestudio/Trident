@@ -101,6 +101,7 @@ namespace Trident {
 			#endif
 
 			#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+				LOAD_PROCEDURE(glClipControl);
 				LOAD_PROCEDURE(glGetTextureSubImage);
 				LOAD_PROCEDURE(glVertexArrayElementBuffer);
 			#endif
@@ -434,6 +435,12 @@ namespace Trident {
 			#else
 				ENGINE_ERROR_UNSUPPORTED();
 			#endif
+		#endif
+
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+			glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
+		#else
+			ENGINE_ERROR_UNSUPPORTED();
 		#endif
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_3_2

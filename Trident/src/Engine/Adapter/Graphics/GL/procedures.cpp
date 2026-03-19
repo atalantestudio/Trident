@@ -93,6 +93,7 @@ namespace Trident {
 	#endif
 
 	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+		PFNGLCLIPCONTROLPROC glClipControl;
 		PFNGLGETTEXTURESUBIMAGEPROC glGetTextureSubImage;
 		PFNGLVERTEXARRAYELEMENTBUFFERPROC glVertexArrayElementBuffer;
 	#endif
