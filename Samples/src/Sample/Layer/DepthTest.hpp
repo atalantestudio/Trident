@@ -5,8 +5,10 @@
 
 #include "Engine/Renderer/Renderer.hpp"
 
+#include "../SampleLayer.hpp"
+
 namespace Trident {
-	class SampleRenderer : public Renderer {
+	class SampleDepthTestRenderer : public Renderer {
 		private:
 			struct Vertex {
 				vec3<float32> position;
@@ -286,4 +288,6 @@ namespace Trident {
 			ref<Buffer<Vertex>> vertexBuffer;
 			ref<Buffer<Instance>> instanceBuffer;
 	};
+
+	DEFINE_SAMPLE_LAYER(SampleDepthTest);
 }

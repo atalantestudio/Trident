@@ -5,8 +5,10 @@
 
 #include "Engine/Renderer/Renderer.hpp"
 
+#include "../SampleLayer.hpp"
+
 namespace Trident {
-	class SampleRenderer : public Renderer {
+	class SampleEmptyRenderer : public Renderer {
 		public:
 			void build() override {}
 
@@ -14,4 +16,6 @@ namespace Trident {
 
 			void resize(WindowResizeEvent& event) override {}
 	};
+
+	DEFINE_SAMPLE_LAYER(SampleEmpty);
 }

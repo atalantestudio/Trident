@@ -5,8 +5,10 @@
 
 #include "Engine/Renderer/Renderer.hpp"
 
+#include "../SampleLayer.hpp"
+
 namespace Trident {
-	class SampleRenderer : public Renderer {
+	class SampleTextureArrayRenderer : public Renderer {
 		private:
 			struct Vertex {
 				svec2<float32> position;
@@ -403,4 +405,6 @@ namespace Trident {
 			ref<Buffer<Vertex>> vertexBuffer;
 			ref<Buffer<Instance>> instanceBuffer;
 	};
+
+	DEFINE_SAMPLE_LAYER(SampleTextureArray);
 }

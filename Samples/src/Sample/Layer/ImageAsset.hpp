@@ -5,8 +5,10 @@
 
 #include "Engine/Renderer/Renderer.hpp"
 
+#include "../SampleLayer.hpp"
+
 namespace Trident {
-	class SampleRenderer : public Renderer {
+	class SampleImageAssetRenderer : public Renderer {
 		private:
 			static constexpr view<char8> IMAGE_ASSET_NAME = "DefaultFont";
 
@@ -295,4 +297,6 @@ namespace Trident {
 			ref<PipelineLayout> pipelineLayout;
 			ref<GraphicsPipeline> graphicsPipeline;
 	};
+
+	DEFINE_SAMPLE_LAYER(SampleImageAsset);
 }

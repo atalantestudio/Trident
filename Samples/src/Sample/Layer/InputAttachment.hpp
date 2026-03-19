@@ -5,8 +5,10 @@
 
 #include "Engine/Renderer/Renderer.hpp"
 
+#include "../SampleLayer.hpp"
+
 namespace Trident {
-	class SampleRenderer : public Renderer {
+	class SampleInputAttachmentRenderer : public Renderer {
 		private:
 			struct Vertex {
 				svec2<float32> vertex;
@@ -372,4 +374,6 @@ namespace Trident {
 			ref<GraphicsPipeline> readImageGraphicsPipeline;
 			ref<Buffer<Vertex>> vertexBuffer;
 	};
+
+	DEFINE_SAMPLE_LAYER(SampleInputAttachment);
 }

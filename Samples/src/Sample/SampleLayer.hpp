@@ -5,33 +5,30 @@
 
 #include "Engine/Layer/Layer.hpp"
 
-#include "Sample/Triangle.hpp"
-
-namespace Trident {
-	class SampleLayer : public Layer {
-		public:
-			void build() override {
-				renderer.setLayer(this);
-				renderer.build();
-			}
-
-			void render(ref<CommandEncoder> commandEncoder, float64 remainingFrameTime) const override {
-				renderer.render(commandEncoder);
-			}
-
-			void onEvent(Event& event) override {
-				EventDispatcher eventDispatcher(event);
-				eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
-			}
-
-		private:
-			bool onWindowResize(WindowResizeEvent& event) {
-				renderer.resize(event);
-
-				return true;
-			}
-
-		private:
-			SampleRenderer renderer;
+#define DEFINE_SAMPLE_LAYER(name) \
+	class name##Layer : public Layer { \
+		public: \
+			void build() override { \
+				renderer.setLayer(this); \
+				renderer.build(); \
+			} \
+			\
+			void render(ref<CommandEncoder> commandEncoder, float64 remainingFrameTime) const override { \
+				renderer.render(commandEncoder); \
+			} \
+			\
+			void onEvent(Event& event) override { \
+				EventDispatcher eventDispatcher(event); \
+				eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize)); \
+			} \
+			\
+		private: \
+			bool onWindowResize(WindowResizeEvent& event) { \
+				renderer.resize(event); \
+				\
+				return true; \
+			} \
+			\
+		private: \
+			name##Renderer renderer; \
 	};
-}

@@ -34,7 +34,23 @@
 
 #include "Process/Default.hpp"
 
-#include "Sample/SampleLayer.hpp"
+#include "Sample/Layer/ArrayTexture.hpp"
+#include "Sample/Layer/ColorBlend.hpp"
+#include "Sample/Layer/ComputeShader.hpp"
+#include "Sample/Layer/ComputeShaderIndirect.hpp"
+#include "Sample/Layer/DepthTest.hpp"
+#include "Sample/Layer/Empty.hpp"
+#include "Sample/Layer/Gradient.hpp"
+#include "Sample/Layer/Image.hpp"
+#include "Sample/Layer/ImageAsset.hpp"
+#include "Sample/Layer/InputAttachment.hpp"
+#include "Sample/Layer/MipLevels.hpp"
+#include "Sample/Layer/Multisampling.hpp"
+#include "Sample/Layer/TextureArray.hpp"
+#include "Sample/Layer/Triangle.hpp"
+#include "Sample/Layer/TriangleIndexed.hpp"
+#include "Sample/Layer/TriangleIndexedIndirect.hpp"
+#include "Sample/Layer/TriangleIndirect.hpp"
 
 #include "Sample3D/Layer/ForwardLayer.hpp"
 #include "Sample3D/Layer/VisibilityLayer.hpp"
@@ -123,7 +139,57 @@ namespace Trident {
 			}
 		}
 		else if (SampleGroupNameProperty == "Sample") {
-			registerLayer<SampleLayer>();
+			if (SampleNameProperty == "ArrayTexture") {
+				registerLayer<SampleArrayTextureLayer>();
+			}
+			else if (SampleNameProperty == "ColorBlend") {
+				registerLayer<SampleColorBlendLayer>();
+			}
+			else if (SampleNameProperty == "ComputeShader") {
+				registerLayer<SampleComputeShaderLayer>();
+			}
+			else if (SampleNameProperty == "ComputeShaderIndirect") {
+				registerLayer<SampleComputeShaderIndirectLayer>();
+			}
+			else if (SampleNameProperty == "DepthTest") {
+				registerLayer<SampleDepthTestLayer>();
+			}
+			else if (SampleNameProperty == "Empty") {
+				registerLayer<SampleEmptyLayer>();
+			}
+			else if (SampleNameProperty == "Gradient") {
+				registerLayer<SampleGradientLayer>();
+			}
+			else if (SampleNameProperty == "Image") {
+				registerLayer<SampleImageLayer>();
+			}
+			else if (SampleNameProperty == "ImageAsset") {
+				registerLayer<SampleImageAssetLayer>();
+			}
+			else if (SampleNameProperty == "InputAttachment") {
+				registerLayer<SampleInputAttachmentLayer>();
+			}
+			else if (SampleNameProperty == "MipLevels") {
+				registerLayer<SampleMipLevelsLayer>();
+			}
+			else if (SampleNameProperty == "Multisampling") {
+				registerLayer<SampleMultisamplingLayer>();
+			}
+			else if (SampleNameProperty == "TextureArray") {
+				registerLayer<SampleTextureArrayLayer>();
+			}
+			else if (SampleNameProperty == "Triangle") {
+				registerLayer<SampleTriangleLayer>();
+			}
+			else if (SampleNameProperty == "TriangleIndexed") {
+				registerLayer<SampleTriangleIndexedLayer>();
+			}
+			else if (SampleNameProperty == "TriangleIndexedIndirect") {
+				registerLayer<SampleTriangleIndexedIndirectLayer>();
+			}
+			else if (SampleNameProperty == "TriangleIndirect") {
+				registerLayer<SampleTriangleIndirectLayer>();
+			}
 		}
 		else if (SampleGroupNameProperty == "Sample3D") {
 			if (SampleNameProperty == "Forward") {

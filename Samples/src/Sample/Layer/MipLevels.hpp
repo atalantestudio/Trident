@@ -1,20 +1,44 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
 
 #include "Engine/Renderer/Renderer.hpp"
 
+#include "../SampleLayer.hpp"
+
 namespace Trident {
-	class SampleRenderer : public Renderer {
+	class SampleMipLevelsRenderer : public Renderer {
 		private:
-			static constexpr view<char8> IMAGE_PATH = "../../../Samples/Asset/Image/Zelda.png";
+			static constexpr view<char8> IMAGE_PATH = "Asset/Image/Baboon.png";
 
 		public:
 			void build() override {
 				setupRenderPass();
 
 				loadImage();
+
+				{
+					ImageViewDescriptor imageViewDescriptor{};
+					imageViewDescriptor.mipLevelOffset = 0;
+					imageViewDescriptor.mipLevelCount = 1;
+					imageViewDescriptor.layerOffset = 0;
+					imageViewDescriptor.layerCount = 1;
+
+					SET_DEBUG_NAME(imageViewDescriptor, "Input");
+
+					ref<ImageView> inputImageView = image->createView(imageViewDescriptor);
+
+					imageViewDescriptor.layerOffset = 1;
+					imageViewDescriptor.layerCount = image->getLayerCount() - 1;
+
+					SET_DEBUG_NAME(imageViewDescriptor, "Output");
+
+					ref<ImageView> outputImageView = image->createView(imageViewDescriptor);
+
+					generateMipLevels(inputImageView, outputImageView);
+				}
+
 				setupImageView();
 				setupSampler();
 
@@ -31,7 +55,7 @@ namespace Trident {
 			void render(ref<CommandEncoder> commandEncoder) const override {
 				BeginRenderPassDescriptor beginRenderPassDescriptor{};
 				beginRenderPassDescriptor.framebuffer = framebuffers[getSwapchainImageIndex()];
-				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
+				beginRenderPassDescriptor.clearValues = {{1.0f, 1.0f, 1.0f, 1.0f}};
 
 				const Extent2D swapchainExtent = getSwapchain()->getExtent();
 				const float32 width = static_cast<float32>(swapchainExtent.width);
@@ -79,49 +103,26 @@ namespace Trident {
 				const sequence<uint8> buffer = Filesystem::openByteBuffer(IMAGE_PATH);
 				const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(buffer);
 
-				ImageFormat imageFormat = file.format;
-
-				switch (file.format) {
-					case ImageFormat::R8_UNORM:
-					case ImageFormat::R8G8B8A8_UNORM: {
-						break;
-					}
-					case ImageFormat::R8G8B8_UNORM: {
-						imageFormat = ImageFormat::R8G8B8A8_UNORM;
-
-						break;
-					}
-					default: {
-						ENGINE_ERROR_UNSUPPORTED();
-
-						break;
-					}
-				}
-
-				const ref<Buffer<uint8>> imageStagingBuffer = createStagingBuffer<uint8>(file.extent.width * file.extent.height * getChannelCount(imageFormat));
+				const ref<Buffer<uint8>> imageStagingBuffer = createStagingBuffer<uint8>(file.data.count());
 
 				uint8* imageStagingBufferMappedRange = imageStagingBuffer->map(0, imageStagingBuffer->getSize());
 
-				if (file.format == ImageFormat::R8G8B8_UNORM) {
-					convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(file.data, imageStagingBufferMappedRange, imageStagingBuffer->getSize());
-				}
-				else {
-					std::copy(file.data.begin(), file.data.end(), imageStagingBufferMappedRange);
-				}
+				std::copy(file.data.begin(), file.data.end(), imageStagingBufferMappedRange);
 
 				imageStagingBuffer->unmap();
 
+				// NOTE: On Vulkan, the data of an RGB image must first be copied to an RGBA image which supports TRANSFER_DST usage.
 				ImageDescriptor imageDescriptor{};
 				imageDescriptor.type = ImageType::TEXTURE_2D;
-				imageDescriptor.format = imageFormat;
+				imageDescriptor.format = file.format;
 				imageDescriptor.extent = file.extent;
 				imageDescriptor.mipLevelCount = 1;
-				imageDescriptor.layerCount = 1;
+				imageDescriptor.layerCount = 2;
 				imageDescriptor.sampleCount = 1;
-				imageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
+				imageDescriptor.usage = ImageUsage::TRANSFER_DST | ImageUsage::SAMPLED | ImageUsage::STORAGE;
 				imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
-				SET_DEBUG_NAME(imageDescriptor, "Image");
+				SET_DEBUG_NAME(imageDescriptor, "Input");
 
 				image = createImage(imageDescriptor);
 
@@ -158,10 +159,10 @@ namespace Trident {
 				ImageViewDescriptor imageViewDescriptor{};
 				imageViewDescriptor.mipLevelOffset = 0;
 				imageViewDescriptor.mipLevelCount = 1;
-				imageViewDescriptor.layerOffset = 0;
+				imageViewDescriptor.layerOffset = 1;
 				imageViewDescriptor.layerCount = 1;
 
-				SET_DEBUG_NAME(imageViewDescriptor, "Image view");
+				SET_DEBUG_NAME(imageViewDescriptor, "Render");
 
 				imageView = image->createView(imageViewDescriptor);
 			}
@@ -238,7 +239,7 @@ namespace Trident {
 				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
 				pipelineLayoutDescriptor.descriptorSetLayouts = {imageDescriptorSetLayout};
 
-				SET_DEBUG_NAME(pipelineLayoutDescriptor, "Pipeline layout");
+				SET_DEBUG_NAME(pipelineLayoutDescriptor, "Render pipeline layout");
 
 				pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 			}
@@ -260,9 +261,7 @@ namespace Trident {
 				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/Image/Image.frag");
 
 				ColorBlendAttachment colorBlendAttachment{};
-				colorBlendAttachment.blend = true;
-				colorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
-				colorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
+				colorBlendAttachment.blend = false;
 
 				GraphicsPipelineDescriptor graphicsPipelineDescriptor{};
 				graphicsPipelineDescriptor.pipelineLayout = pipelineLayout;
@@ -285,6 +284,82 @@ namespace Trident {
 				graphicsPipeline = createGraphicsPipeline(graphicsPipelineDescriptor);
 			}
 
+			void generateMipLevels(ref<ImageView> inputImageView, ref<ImageView> outputImageView) const {
+				DescriptorSetLayoutBinding descriptorSetLayoutBinding{};
+				descriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_IMAGE;
+				descriptorSetLayoutBinding.descriptorCount = 2; // 0 = input, 1 = output
+				descriptorSetLayoutBinding.shaderStages = ShaderStage::COMPUTE;
+
+				ref<DescriptorSetLayout> descriptorSetLayout = createDescriptorSetLayout({descriptorSetLayoutBinding});
+
+				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({descriptorSetLayout});
+
+				ref<DescriptorSet> descriptorSet = descriptorSets[0];
+
+				DescriptorImage inputDescriptorImage{};
+				inputDescriptorImage.imageView = inputImageView;
+				inputDescriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
+				inputDescriptorImage.sampler = nullptr;
+
+				DescriptorImage outputDescriptorImage{};
+				outputDescriptorImage.imageView = outputImageView;
+				outputDescriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
+				outputDescriptorImage.sampler = nullptr;
+
+				WriteDescriptorSet writeDescriptorSet{};
+				writeDescriptorSet.descriptorSet = descriptorSet;
+				writeDescriptorSet.bindingIndex = 0;
+				writeDescriptorSet.descriptorImages = {inputDescriptorImage, outputDescriptorImage};
+
+				getDevice()->updateDescriptorSets({writeDescriptorSet});
+
+				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
+				pipelineLayoutDescriptor.descriptorSetLayouts = {descriptorSetLayout};
+
+				SET_DEBUG_NAME(pipelineLayoutDescriptor, "Compute pipeline");
+
+				ref<PipelineLayout> pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
+
+				ShaderModuleDescriptor shaderModuleDescriptor{};
+				shaderModuleDescriptor.stage = ShaderStage::COMPUTE;
+				shaderModuleDescriptor.entryPoint = "main";
+
+				SET_DEBUG_NAME(shaderModuleDescriptor, "Compute shader module");
+
+				ref<ShaderModule> shaderModule = loadShaderModule(shaderModuleDescriptor, "Sample/MipLevels/GenerateMipLevels.comp");
+
+				ComputePipelineDescriptor computePipelineDescriptor{};
+				computePipelineDescriptor.pipelineLayout = pipelineLayout;
+				computePipelineDescriptor.computeShaderModule = shaderModule;
+
+				SET_DEBUG_NAME(computePipelineDescriptor, "Compute pipeline");
+
+				ref<ComputePipeline> computePipeline = createComputePipeline(computePipelineDescriptor);
+
+				ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::COMPUTE);
+
+				CommandBufferDescriptor commandBufferDescriptor{};
+				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+				SET_DEBUG_NAME(commandBufferDescriptor, "Compute command buffer");
+
+				ref<CommandEncoder> commandEncoder = queue->createCommandEncoder(commandBufferDescriptor);
+
+				const Extent3D imageExtent = inputImageView->getImage()->getExtent();
+
+				commandEncoder->begin();
+				commandEncoder->bindComputePipeline(computePipeline);
+				commandEncoder->bindDescriptorSets(pipelineLayout, 0, {descriptorSet});
+				commandEncoder->dispatch((imageExtent.width + 0b111111) >> 6, (imageExtent.height + 0b111111) >> 6, 1);
+
+				ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+				// TODO: Create one-time submit overload (without semaphores/fence).
+				queue->submit({commandBuffer});
+
+				queue->waitIdle();
+			}
+
 		private:
 			ref<RenderPass> renderPass;
 			ref<Image> image;
@@ -296,4 +371,6 @@ namespace Trident {
 			ref<PipelineLayout> pipelineLayout;
 			ref<GraphicsPipeline> graphicsPipeline;
 	};
+
+	DEFINE_SAMPLE_LAYER(SampleMipLevels);
 }
