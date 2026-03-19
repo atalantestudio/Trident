@@ -28,15 +28,14 @@ namespace Trident {
 		physicsEngine.registerScene(scene);
 	}
 
-	void BaseLayer::update(float32 deltaTime, float32 inverseDeltaTime) {
-		// TODO(stable-simulation)
-		// physicsEngine.tick();
-	}
+	void BaseLayer::update(float32 deltaTime, float32 inverseDeltaTime) {}
 
 	void BaseLayer::preRender() {
 		visualizationData = {};
 
-		// TODO(stable-simulation)
+		// TODO
+		// For now there is 1 physics tick per frame because debugging along with Box2D Lite is easier.
+		// Ultimately though this must be in Layer::update.
 		physicsEngine.tick();
 
 		checkHover();

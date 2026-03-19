@@ -248,15 +248,21 @@ namespace Trident {
 		const float64 currentTime = timer.getCurrentTime();
 
 		frameTime = currentTime - previousTime;
-		previousTime = currentTime;
 		frameTimeAccumulator += frameTime;
+		previousTime = currentTime;
+
+		uint32 updateIndex = 0;
 
 		while (frameTimeAccumulator >= FIXED_DELTA_TIME) {
-			update(FIXED_DELTA_TIME, INVERSE_FIXED_DELTA_TIME);
+			if (updateIndex < MAX_UPDATES_PER_FRAME) {
+				update(FIXED_DELTA_TIME, INVERSE_FIXED_DELTA_TIME);
+			}
 
 			// Extract the fixed delta time from the accumulator.
 			// What's left is passed on to the next frame.
 			frameTimeAccumulator -= FIXED_DELTA_TIME;
+
+			updateIndex += 1;
 		}
 
 		if (window->isMinimized()) {
@@ -269,8 +275,7 @@ namespace Trident {
 		render(frameTimeAccumulator);
 
 		frameIndex += 1;
-		frameInFlightIndex += 1;
-		frameInFlightIndex %= MAX_FRAMES_IN_FLIGHT;
+		frameInFlightIndex = frameIndex % MAX_FRAMES_IN_FLIGHT;
 	}
 
 	void Application::update(float64 deltaTime, float64 inverseDeltaTime) {

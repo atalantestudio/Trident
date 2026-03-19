@@ -112,11 +112,9 @@ namespace Trident {
 
 		private:
 			static constexpr uint8 MAX_PARALLEL_INSTANCES = 5;
-
-			// TODO: 165 FPS causes the dominos in the domino physics sample to fall on the wrong side.
 			static constexpr float64 FIXED_DELTA_TIME = 1.0 / 60.0;
-
 			static constexpr float64 INVERSE_FIXED_DELTA_TIME = 1.0 / FIXED_DELTA_TIME;
+			static constexpr uint32 MAX_UPDATES_PER_FRAME = 2;
 
 		public:
 			// Since Vulkan SDK 1.4.313, having less semaphores than swapchain images can cause the warning below to appear:
