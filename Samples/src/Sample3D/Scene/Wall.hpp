@@ -7,7 +7,7 @@
 #include "Engine/API/Scene/Scene3D.hpp"
 
 namespace Trident {
-	Scene3D createWallScene(AssetLibrary* assetLibrary) {
+	Scene3D createWallScene(AssetLibrary* assetLibrary, GraphicsAPI graphicsApi) {
 		Scene3D scene;
 
 		Geometry3DDescriptor geometryDescriptor{};
@@ -43,7 +43,21 @@ namespace Trident {
 		const uint32 geometryIndex = scene.registerGeometry(geometry);
 
 		Material pbrMaterial{};
-		pbrMaterial.shaderModulePath = "Material/PBR.frag";
+
+		switch (graphicsApi) {
+			case GraphicsAPI::DX12:
+			case GraphicsAPI::VK: {
+				pbrMaterial.shaderModulePath = "Material/PBR.frag";
+
+				break;
+			}
+			case GraphicsAPI::GL: {
+				pbrMaterial.shaderModulePath = "Material/PBRSingleSet.frag";
+
+				break;
+			}
+		}
+
 		pbrMaterial.descriptorSetLayoutBindings = {};
 
 		const uint32 pbrMaterialIndex = scene.registerMaterial(pbrMaterial);

@@ -7,7 +7,7 @@
 #include "Engine/API/Scene/Scene3D.hpp"
 
 namespace Trident {
-	Scene3D createRubberDuckToyScene(AssetLibrary* assetLibrary) {
+	Scene3D createRubberDuckToyScene(AssetLibrary* assetLibrary, GraphicsAPI graphicsApi) {
 		Scene3D scene;
 
 		const ref<GeometryAsset> geometryAsset = assetLibrary->getAsset<GeometryAsset>("rubber_duck_toy_1k");
@@ -30,7 +30,21 @@ namespace Trident {
 		normalBinding.shaderStages = ShaderStage::FRAGMENT;
 
 		Material pbrMaterial{};
-		pbrMaterial.shaderModulePath = "Material/PBR.frag";
+
+		switch (graphicsApi) {
+			case GraphicsAPI::DX12:
+			case GraphicsAPI::VK: {
+				pbrMaterial.shaderModulePath = "Material/PBR.frag";
+
+				break;
+			}
+			case GraphicsAPI::GL: {
+				pbrMaterial.shaderModulePath = "Material/PBRSingleSet.frag";
+
+				break;
+			}
+		}
+
 		pbrMaterial.descriptorSetLayoutBindings = {
 			armBinding,
 			diffuseBinding,

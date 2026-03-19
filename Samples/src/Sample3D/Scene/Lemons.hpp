@@ -7,7 +7,7 @@
 #include "Engine/API/Scene/Scene3D.hpp"
 
 namespace Trident {
-	Scene3D createLemonsScene(AssetLibrary* assetLibrary) {
+	Scene3D createLemonsScene(AssetLibrary* assetLibrary, GraphicsAPI graphicsApi) {
 		Scene3D scene;
 
 		const ref<GeometryAsset> geometryAsset = assetLibrary->getAsset<GeometryAsset>("lemon_1k");
@@ -35,7 +35,21 @@ namespace Trident {
 		normalBinding.shaderStages = ShaderStage::FRAGMENT;
 
 		Material material{};
-		material.shaderModulePath = "Material/PBRSeparatedAORoughness.frag";
+
+		switch (graphicsApi) {
+			case GraphicsAPI::DX12:
+			case GraphicsAPI::VK: {
+				material.shaderModulePath = "Material/PBRSeparatedAORoughness.frag";
+
+				break;
+			}
+			case GraphicsAPI::GL: {
+				material.shaderModulePath = "Material/PBRSeparatedAORoughnessSingleSet.frag";
+
+				break;
+			}
+		}
+
 		material.descriptorSetLayoutBindings = {
 			aoBinding,
 			roughnessBinding,

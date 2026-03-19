@@ -19,7 +19,7 @@ namespace Trident {
 				renderer.setLayer(this);
 				renderer.build();
 
-				scene = createLemonsScene(getApplication()->getAssetLibrary());
+				scene = createLemonsScene(getApplication()->getAssetLibrary(), renderer.getGraphicsApi());
 
 				renderer.setScene(&scene);
 
