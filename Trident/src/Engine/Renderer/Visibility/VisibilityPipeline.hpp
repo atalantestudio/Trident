@@ -25,19 +25,21 @@ namespace Trident {
 		GraphicsPipelineDescriptor visibilityPipelineDescriptor{};
 		visibilityPipelineDescriptor.pipelineLayout = visibilityPipelineLayout;
 
-		#if defined(GL_SOURCE_FROM_SPIRV)
-			if (Renderer::getGraphicsApi() == GraphicsAPI::GL) {
-				visibilityPipelineDescriptor.vertexShaderModule = loadInternalShaderModule(visibilityVertexShaderModuleDescriptor, "Visibility/VisibilityGL.vert");
-				visibilityPipelineDescriptor.fragmentShaderModule = loadInternalShaderModule(visibilityFragmentShaderModuleDescriptor, "Visibility/VisibilityGL.frag");
-			}
-			else {
-		#endif
+		switch (getGraphicsApi()) {
+			case GraphicsAPI::DX12:
+			case GraphicsAPI::VK: {
 				visibilityPipelineDescriptor.vertexShaderModule = loadInternalShaderModule(visibilityVertexShaderModuleDescriptor, "Visibility/Visibility.vert");
-				visibilityPipelineDescriptor.fragmentShaderModule = loadInternalShaderModule(visibilityFragmentShaderModuleDescriptor, "Visibility/Visibility.frag");
-		#if defined(GL_SOURCE_FROM_SPIRV)
-			}
-		#endif
 
+				break;
+			}
+			case GraphicsAPI::GL: {
+				visibilityPipelineDescriptor.vertexShaderModule = loadInternalShaderModule(visibilityVertexShaderModuleDescriptor, "Visibility/VisibilitySingleSet.vert");
+
+				break;
+			}
+		}
+
+		visibilityPipelineDescriptor.fragmentShaderModule = loadInternalShaderModule(visibilityFragmentShaderModuleDescriptor, "Visibility/Visibility.frag");
 		visibilityPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 		visibilityPipelineDescriptor.polygonMode = PolygonMode::FILL;
 		visibilityPipelineDescriptor.cullMode = CullMode::BACK;

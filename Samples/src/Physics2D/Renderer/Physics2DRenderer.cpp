@@ -74,10 +74,21 @@ namespace Trident {
 		swapchainAttachment.loadOperation = LoadOperation::CLEAR;
 		swapchainAttachment.storeOperation = StoreOperation::STORE;
 
-		// TODO(layer-superposition)
-		// TODO(DX12): The final layout must be PRESENT_SRC in order to have layer superposition working.
-		// swapchainAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-		swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
+		switch (getGraphicsApi()) {
+			case GraphicsAPI::DX12: {
+				// TODO(DX12): The final layout must be PRESENT_SRC in order to have layer superposition working.
+				swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
+
+				break;
+			}
+			case GraphicsAPI::GL:
+			case GraphicsAPI::VK: {
+				// TODO(layer-superposition)
+				swapchainAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+
+				break;
+			}
+		}
 
 		Attachment depthStencilAttachment{};
 		depthStencilAttachment.format = ImageFormat::D32_SFLOAT;

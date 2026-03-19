@@ -29,22 +29,22 @@ struct Geometry {
 	uint clusterCount;
 };
 
-layout(binding = 0) uniform readonly CameraBuffer {
+layout(set = 0, binding = 0) uniform readonly CameraBuffer {
 	Camera camera;
 };
-layout(binding = 1) buffer readonly VertexPositionComponentBuffer {
+layout(set = 1, binding = 0) buffer readonly VertexPositionComponentBuffer {
 	float vertexPositionComponentBuffer[];
 };
-layout(binding = 2) buffer readonly VertexPositionIndexBuffer {
+layout(set = 1, binding = 1) buffer readonly VertexPositionIndexBuffer {
 	uint vertexPositionIndexBuffer[];
 };
-layout(binding = 3) buffer readonly ClusterBuffer {
+layout(set = 1, binding = 2) buffer readonly ClusterBuffer {
 	Cluster clusterBuffer[];
 };
-layout(binding = 4) buffer readonly InstanceBuffer {
+layout(set = 2, binding = 0) buffer readonly InstanceBuffer {
 	Instance instanceBuffer[];
 };
-layout(binding = 5) buffer readonly GeometryBuffer {
+layout(set = 2, binding = 1) buffer readonly GeometryBuffer {
 	Geometry geometryBuffer[];
 };
 
@@ -63,9 +63,9 @@ vec3 fetchVertexPosition(uint index, Geometry geometry) {
 }
 
 void main() {
-	uint indexIndex = gl_VertexID;
+	uint indexIndex = gl_VertexIndex;
 	uint triangleIndex = indexIndex / 3;
-	uint clusterIndex = gl_InstanceID;
+	uint clusterIndex = gl_InstanceIndex;
 
 	Cluster cluster = clusterBuffer[clusterIndex];
 	Instance instance = instanceBuffer[cluster.instanceIndex];

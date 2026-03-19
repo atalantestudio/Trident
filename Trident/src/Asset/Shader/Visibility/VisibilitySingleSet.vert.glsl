@@ -29,22 +29,22 @@ struct Geometry {
 	uint clusterCount;
 };
 
-layout(set = 0, binding = 0) uniform readonly CameraBuffer {
+layout(binding = 0) uniform readonly CameraBuffer {
 	Camera camera;
 };
-layout(set = 1, binding = 0) buffer readonly VertexPositionComponentBuffer {
+layout(binding = 1) buffer readonly VertexPositionComponentBuffer {
 	float vertexPositionComponentBuffer[];
 };
-layout(set = 1, binding = 1) buffer readonly VertexPositionIndexBuffer {
+layout(binding = 2) buffer readonly VertexPositionIndexBuffer {
 	uint vertexPositionIndexBuffer[];
 };
-layout(set = 1, binding = 2) buffer readonly ClusterBuffer {
+layout(binding = 3) buffer readonly ClusterBuffer {
 	Cluster clusterBuffer[];
 };
-layout(set = 2, binding = 0) buffer readonly InstanceBuffer {
+layout(binding = 4) buffer readonly InstanceBuffer {
 	Instance instanceBuffer[];
 };
-layout(set = 2, binding = 1) buffer readonly GeometryBuffer {
+layout(binding = 5) buffer readonly GeometryBuffer {
 	Geometry geometryBuffer[];
 };
 

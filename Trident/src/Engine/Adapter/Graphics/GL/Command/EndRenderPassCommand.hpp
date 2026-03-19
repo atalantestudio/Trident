@@ -18,26 +18,28 @@ namespace Trident {
 				const ref<GL::RenderPass> renderPass = std::static_pointer_cast<GL::RenderPass>(framebuffer->getRenderPass());
 
 				if (renderPass->presentSourceAttachmentIndex == max<uint32>()) {
-					const Extent2D extent = framebuffer->getExtent();
+					if (renderPass->multisample) {
+						const Extent2D extent = framebuffer->getExtent();
 
-					// TODO: Should we resolve all color attachments?
-					glNamedFramebufferReadBuffer(framebuffer->framebuffer, GL_COLOR_ATTACHMENT0);
-					glNamedFramebufferDrawBuffer(framebuffer->resolveFramebuffer, GL_COLOR_ATTACHMENT0);
+						// TODO: Should we resolve all color attachments?
+						glNamedFramebufferReadBuffer(framebuffer->framebuffer, GL_COLOR_ATTACHMENT0);
+						glNamedFramebufferDrawBuffer(framebuffer->resolveFramebuffer, GL_COLOR_ATTACHMENT0);
 
-					glBlitNamedFramebuffer(
-						framebuffer->framebuffer,
-						framebuffer->resolveFramebuffer,
-						0,
-						0,
-						extent.width,
-						extent.height,
-						0,
-						0,
-						extent.width,
-						extent.height,
-						GL_COLOR_BUFFER_BIT,
-						GL_NEAREST
-					);
+						glBlitNamedFramebuffer(
+							framebuffer->framebuffer,
+							framebuffer->resolveFramebuffer,
+							0,
+							0,
+							extent.width,
+							extent.height,
+							0,
+							0,
+							extent.width,
+							extent.height,
+							GL_COLOR_BUFFER_BIT,
+							GL_NEAREST
+						);
+					}
 
 					return;
 				}
