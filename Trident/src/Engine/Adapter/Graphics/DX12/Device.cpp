@@ -285,7 +285,7 @@ namespace Trident {
 
 					break;
 				}
-				case DescriptorType::STORAGE_IMAGE: {
+				case DescriptorType::READ_WRITE_STORAGE_IMAGE: {
 					for (const DescriptorImage& descriptorImage : writeDescriptorSet.descriptorImages) {
 						memoryAllocator->writeReadWriteStorageImage(viewDescriptorHandle, descriptorImage);
 

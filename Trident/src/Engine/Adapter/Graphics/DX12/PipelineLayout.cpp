@@ -103,7 +103,7 @@ namespace Trident {
 
 						break;
 					}
-					case DescriptorType::STORAGE_IMAGE: {
+					case DescriptorType::READ_WRITE_STORAGE_IMAGE: {
 						D3D12_DESCRIPTOR_RANGE1& descriptorRange = descriptorRanges[descriptorRangeOffset];
 						descriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
 						descriptorRange.NumDescriptors = binding.descriptorCount;

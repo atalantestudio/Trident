@@ -269,7 +269,7 @@ namespace Trident {
 
 			void writeImage() const {
 				DescriptorSetLayoutBinding imageBinding{};
-				imageBinding.descriptorType = DescriptorType::STORAGE_IMAGE;
+				imageBinding.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE;
 				imageBinding.descriptorCount = 1;
 				imageBinding.shaderStages = ShaderStage::COMPUTE;
 

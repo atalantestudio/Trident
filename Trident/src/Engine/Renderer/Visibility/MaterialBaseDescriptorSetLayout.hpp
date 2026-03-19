@@ -23,7 +23,7 @@ namespace Trident {
 		materialCoordinateBinding.shaderStages = ShaderStage::COMPUTE;
 
 		DescriptorSetLayoutBinding outputBinding{};
-		outputBinding.descriptorType = DescriptorType::STORAGE_IMAGE;
+		outputBinding.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE;
 		outputBinding.descriptorCount = 1;
 		outputBinding.shaderStages = ShaderStage::COMPUTE;
 

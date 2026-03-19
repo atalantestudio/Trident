@@ -10,7 +10,7 @@
 namespace Trident {
 	class SampleMipLevelsRenderer : public Renderer {
 		private:
-			static constexpr view<char8> IMAGE_PATH = "Asset/Image/Baboon.png";
+			static constexpr view<char8> IMAGE_ASSET_NAME = "Baboon";
 
 		public:
 			void build() override {
@@ -100,22 +100,21 @@ namespace Trident {
 			}
 
 			void loadImage() {
-				const sequence<uint8> buffer = Filesystem::openByteBuffer(IMAGE_PATH);
-				const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(buffer);
+				const ref<ImageAsset> imageAsset = getLayer()->getApplication()->getAssetLibrary()->getAsset<ImageAsset>(IMAGE_ASSET_NAME);
+				const ref<Buffer<uint8>> imageStagingBuffer = createStagingBuffer<uint8>(imageAsset->getExtent().width * imageAsset->getExtent().height * imageAsset->getExtent().depth * imageAsset->getLayerCount() * getChannelCount(imageAsset->getFormat()));
 
-				const ref<Buffer<uint8>> imageStagingBuffer = createStagingBuffer<uint8>(file.data.count());
+				DEBUG_ASSERT(imageAsset->getFormat() == ImageFormat::R8G8B8A8_UNORM);
 
 				uint8* imageStagingBufferMappedRange = imageStagingBuffer->map(0, imageStagingBuffer->getSize());
 
-				std::copy(file.data.begin(), file.data.end(), imageStagingBufferMappedRange);
+				std::copy(imageAsset->getData().begin(), imageAsset->getData().end(), imageStagingBufferMappedRange);
 
 				imageStagingBuffer->unmap();
 
-				// NOTE: On Vulkan, the data of an RGB image must first be copied to an RGBA image which supports TRANSFER_DST usage.
 				ImageDescriptor imageDescriptor{};
 				imageDescriptor.type = ImageType::TEXTURE_2D;
-				imageDescriptor.format = file.format;
-				imageDescriptor.extent = file.extent;
+				imageDescriptor.format = imageAsset->getFormat();
+				imageDescriptor.extent = imageAsset->getExtent();
 				imageDescriptor.mipLevelCount = 1;
 				imageDescriptor.layerCount = 2;
 				imageDescriptor.sampleCount = 1;
@@ -285,12 +284,17 @@ namespace Trident {
 			}
 
 			void generateMipLevels(ref<ImageView> inputImageView, ref<ImageView> outputImageView) const {
-				DescriptorSetLayoutBinding descriptorSetLayoutBinding{};
-				descriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_IMAGE;
-				descriptorSetLayoutBinding.descriptorCount = 2; // 0 = input, 1 = output
-				descriptorSetLayoutBinding.shaderStages = ShaderStage::COMPUTE;
+				DescriptorSetLayoutBinding inputImageBinding{};
+				inputImageBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE;
+				inputImageBinding.descriptorCount = 1;
+				inputImageBinding.shaderStages = ShaderStage::COMPUTE;
 
-				ref<DescriptorSetLayout> descriptorSetLayout = createDescriptorSetLayout({descriptorSetLayoutBinding});
+				DescriptorSetLayoutBinding outputImageBinding{};
+				outputImageBinding.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE;
+				outputImageBinding.descriptorCount = 1;
+				outputImageBinding.shaderStages = ShaderStage::COMPUTE;
+
+				ref<DescriptorSetLayout> descriptorSetLayout = createDescriptorSetLayout({inputImageBinding, outputImageBinding});
 
 				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({descriptorSetLayout});
 
@@ -306,12 +310,17 @@ namespace Trident {
 				outputDescriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
 				outputDescriptorImage.sampler = nullptr;
 
-				WriteDescriptorSet writeDescriptorSet{};
-				writeDescriptorSet.descriptorSet = descriptorSet;
-				writeDescriptorSet.bindingIndex = 0;
-				writeDescriptorSet.descriptorImages = {inputDescriptorImage, outputDescriptorImage};
+				WriteDescriptorSet inputImageWriteDescriptorSet{};
+				inputImageWriteDescriptorSet.descriptorSet = descriptorSet;
+				inputImageWriteDescriptorSet.bindingIndex = 0;
+				inputImageWriteDescriptorSet.descriptorImages = {inputDescriptorImage};
 
-				getDevice()->updateDescriptorSets({writeDescriptorSet});
+				WriteDescriptorSet outputImageWriteDescriptorSet{};
+				outputImageWriteDescriptorSet.descriptorSet = descriptorSet;
+				outputImageWriteDescriptorSet.bindingIndex = 1;
+				outputImageWriteDescriptorSet.descriptorImages = {outputDescriptorImage};
+
+				getDevice()->updateDescriptorSets({inputImageWriteDescriptorSet, outputImageWriteDescriptorSet});
 
 				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
 				pipelineLayoutDescriptor.descriptorSetLayouts = {descriptorSetLayout};
@@ -343,8 +352,7 @@ namespace Trident {
 
 				SET_DEBUG_NAME(commandBufferDescriptor, "Compute command buffer");
 
-				ref<CommandEncoder> commandEncoder = queue->createCommandEncoder(commandBufferDescriptor);
-
+				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder(commandBufferDescriptor);
 				const Extent3D imageExtent = inputImageView->getImage()->getExtent();
 
 				commandEncoder->begin();
@@ -352,11 +360,9 @@ namespace Trident {
 				commandEncoder->bindDescriptorSets(pipelineLayout, 0, {descriptorSet});
 				commandEncoder->dispatch((imageExtent.width + 0b111111) >> 6, (imageExtent.height + 0b111111) >> 6, 1);
 
-				ref<CommandBuffer> commandBuffer = commandEncoder->end();
+				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-				// TODO: Create one-time submit overload (without semaphores/fence).
 				queue->submit({commandBuffer});
-
 				queue->waitIdle();
 			}
 

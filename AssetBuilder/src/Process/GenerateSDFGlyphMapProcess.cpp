@@ -362,7 +362,7 @@ namespace Trident {
 		glyphBufferBinding.shaderStages = ShaderStage::COMPUTE;
 
 		DescriptorSetLayoutBinding readWriteGlyphImageBinding{};
-		readWriteGlyphImageBinding.descriptorType = DescriptorType::STORAGE_IMAGE;
+		readWriteGlyphImageBinding.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE;
 		readWriteGlyphImageBinding.descriptorCount = 1;
 		readWriteGlyphImageBinding.shaderStages = ShaderStage::COMPUTE;
 
@@ -372,7 +372,7 @@ namespace Trident {
 		readOnlyGlyphImageBinding.shaderStages = ShaderStage::COMPUTE;
 
 		DescriptorSetLayoutBinding glyphMapImageBinding{};
-		glyphMapImageBinding.descriptorType = DescriptorType::STORAGE_IMAGE;
+		glyphMapImageBinding.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE;
 		glyphMapImageBinding.descriptorCount = 1;
 		glyphMapImageBinding.shaderStages = ShaderStage::COMPUTE;
 
