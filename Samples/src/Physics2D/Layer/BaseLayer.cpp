@@ -41,15 +41,12 @@ namespace Trident {
 		checkHover();
 
 		const Scene2D& scene = pointer_cast<const SampleApplication*>(getApplication())->scene;
-
-		// TODO: Only write once the static component transforms.
 		const ComponentPool<RigidBody2D>& rigidBodyComponentPool = scene.getComponentPool<RigidBody2D>();
 
-		for (uint32 rigidBodyIndex = 0; rigidBodyIndex < rigidBodyComponentPool.componentCount; rigidBodyIndex += 1) {
-			const Entity entity = static_cast<Entity>(rigidBodyComponentPool.componentIndexToEntity[rigidBodyIndex]);
+		for (const uint32 entity : rigidBodyComponentPool.componentIndexToEntity) {
 			const RigidBody2D& rigidBody = scene.getRigidBody(entity);
 
-			renderer.setInstanceTransform(rigidBodyIndex, rigidBody.transform);
+			renderer.setInstanceTransform(entity, rigidBody.transform);
 		}
 
 		renderer.selectEntity(selectedEntity);
@@ -167,14 +164,6 @@ namespace Trident {
 		if (event.getButton() == MouseButton::LEFT && hoveredEntity != max<uint32>()) {
 			selectedEntity = hoveredEntity;
 			placeholderOffset = {0.0f, 0.0f};
-
-			// RigidBody2D& rigidBody = scene.getRigidBody(selectedEntity);
-
-			// selectedEntityPreviousInverseMass = rigidBody.inverseMass;
-			// selectedEntityPreviousInverseInertia = rigidBody.inverseInertia;
-
-			// rigidBody.inverseMass = 0.0_kg;
-			// rigidBody.inverseInertia = 0.0_kg_m2;
 		}
 
 		return true;
@@ -203,11 +192,7 @@ namespace Trident {
 
 		if (event.getButton() == MouseButton::LEFT && selectedEntity != max<uint32>()) {
 			RigidBody2D& rigidBody = scene.getRigidBody(selectedEntity);
-
 			rigidBody.position += placeholderOffset;
-			// rigidBody.inverseMass = selectedEntityPreviousInverseMass;
-			// rigidBody.inverseInertia = selectedEntityPreviousInverseInertia;
-
 			rigidBody.updateTransform();
 
 			selectedEntity = max<uint32>();

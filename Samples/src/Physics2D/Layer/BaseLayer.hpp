@@ -56,9 +56,5 @@ namespace Trident {
 			Entity selectedEntity = max<uint32>();
 
 			vec2<float32> placeholderOffset;
-
-			// TODO: Implement for debugging.
-			// float32 selectedEntityPreviousInverseMass;
-			// float32 selectedEntityPreviousInverseInertia;
 	};
 }
