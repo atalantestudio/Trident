@@ -47,15 +47,15 @@ namespace Trident {
 				const ref<ConvexHullGeometry2D> polygonGeometry = createRef<ConvexHullGeometry2D>(polygonGeometryDescriptor);
 				const ref<ConvexHullGeometry2D> triangleGeometry = createRef<ConvexHullGeometry2D>(triangleGeometryDescriptor);
 
-				Entity2DDescriptor polygonDescriptor{};
+				RigidBody2DDescriptor polygonDescriptor{};
 				polygonDescriptor.position = {0.45_m, -0.625_m};
 				polygonDescriptor.friction = 0.2f;
 				polygonDescriptor.geometry = polygonGeometry;
 				polygonDescriptor.fillColor = 0xf4fedbff;
 
-				scene.createStaticEntity(polygonDescriptor);
+				scene.createStaticRigidBody(polygonDescriptor);
 
-				Entity2DDescriptor triangleDescriptor{};
+				RigidBody2DDescriptor triangleDescriptor{};
 				triangleDescriptor.position = {0.0_m, 1.957_m};
 				triangleDescriptor.angularVelocity = radians(0.4617_w);
 				triangleDescriptor.friction = radians(-30.0_deg);
@@ -63,7 +63,7 @@ namespace Trident {
 				triangleDescriptor.geometry = triangleGeometry;
 				triangleDescriptor.fillColor = 0xe6ddffff;
 
-				scene.createDynamicEntity(triangleDescriptor);
+				scene.createDynamicRigidBody(triangleDescriptor);
 			}
 	};
 }

@@ -13,16 +13,16 @@ namespace Trident {
 
 				const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
 
-				Entity2DDescriptor floorDescriptor{};
+				RigidBody2DDescriptor floorDescriptor{};
 				floorDescriptor.position = {0.0_m, -10.0_m};
 				floorDescriptor.scale = {100.0f, 20.0f};
 				floorDescriptor.friction = 0.2f;
 				floorDescriptor.geometry = squareGeometry;
 				floorDescriptor.fillColor = 0xf4fedbff;
 
-				scene.createStaticEntity(floorDescriptor);
+				scene.createStaticRigidBody(floorDescriptor);
 
-				Entity2DDescriptor boxDescriptor{};
+				RigidBody2DDescriptor boxDescriptor{};
 				boxDescriptor.mass = 1.0_kg;
 				boxDescriptor.friction = 0.2f;
 				boxDescriptor.geometry = squareGeometry;
@@ -33,7 +33,7 @@ namespace Trident {
 				while (boxIndex < 10) {
 					boxDescriptor.position = {/* random<float32>(-0.1_m, 0.1_m) */ 0.0_m, 0.51_m + boxIndex * 1.05f};
 
-					scene.createDynamicEntity(boxDescriptor);
+					scene.createDynamicRigidBody(boxDescriptor);
 
 					boxIndex += 1;
 				}

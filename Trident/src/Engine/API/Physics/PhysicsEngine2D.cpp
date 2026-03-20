@@ -39,8 +39,8 @@ namespace Trident {
 		}
 	#endif
 
-	inline vec2<float32> calculateRelativeVelocity(const RigidBody2D& A, const RigidBody2D& B, const Contact2D& contact) {
-		return B.linearVelocity + cross(contact.rB, -B.angularVelocity) - A.linearVelocity - cross(contact.rA, -A.angularVelocity);
+	inline vec2<float32> calculateRelativeVelocity(const RigidBody2D& A, const RigidBody2D& B, vec2<float32> rA, vec2<float32> rB) {
+		return B.linearVelocity + cross(rB, -B.angularVelocity) - A.linearVelocity - cross(rA, -A.angularVelocity);
 	}
 
 	PhysicsEngine2D::PhysicsEngine2D(const PhysicsEngine2DDescriptor& descriptor) :
@@ -62,7 +62,8 @@ namespace Trident {
 		BroadPhase();
 		NarrowPhase();
 		ApplyForces();
-		UpdateManifolds();
+		UpdateContactManifolds();
+		UpdateJoints();
 		ApplyImpulses();
 		Integrate();
 	}
@@ -186,7 +187,7 @@ namespace Trident {
 		}
 	}
 
-	void PhysicsEngine2D::UpdateManifolds() {
+	void PhysicsEngine2D::UpdateContactManifolds() {
 		uint8 contactPointIndex;
 
 		// Calculate combined values in each pair (static/dynamic friction, restitution, etc.).
@@ -247,10 +248,66 @@ namespace Trident {
 		}
 	}
 
+	void PhysicsEngine2D::UpdateJoints() {
+		const ComponentPool<Joint2D>& jointPool = scene->getComponentPool<Joint2D>();
+		uint32 componentIndex = 0;
+
+		while (componentIndex < jointPool.componentCount) {
+			const Entity entity = jointPool.componentIndexToEntity[componentIndex];
+
+			Joint2D& joint = scene->getJoint(entity);
+			RigidBody2D& rigidBodyA = scene->getRigidBody(joint.A);
+			RigidBody2D& rigidBodyB = scene->getRigidBody(joint.B);
+
+			// TODO: Why is the transpose needed?
+			const mat2x2<float32> RAT = transpose(mat2x2<float32>::rotation(rigidBodyA.rotation));
+			const mat2x2<float32> RBT = transpose(mat2x2<float32>::rotation(rigidBodyB.rotation));
+
+			joint.rA = joint.localAnchorA * RAT;
+			joint.rB = joint.localAnchorB * RBT;
+
+			const vec2<float32> pA = rigidBodyA.position + joint.rA;
+			const vec2<float32> pB = rigidBodyB.position + joint.rB;
+			const vec2<float32> pAB = pB - pA;
+
+			const mat2x2<float32> K1 = {
+				rigidBodyA.inverseMass + rigidBodyB.inverseMass, 0.0f,
+				0.0f,                                            rigidBodyA.inverseMass + rigidBodyB.inverseMass,
+			};
+			const mat2x2<float32> K2 = {
+				 rigidBodyA.inverseInertia * joint.rA[1] * joint.rA[1], -rigidBodyA.inverseInertia * joint.rA[0] * joint.rA[1],
+				-rigidBodyA.inverseInertia * joint.rA[0] * joint.rA[1],  rigidBodyA.inverseInertia * joint.rA[0] * joint.rA[0],
+			};
+			const mat2x2<float32> K3 = {
+				 rigidBodyB.inverseInertia * joint.rB[1] * joint.rB[1], -rigidBodyB.inverseInertia * joint.rB[0] * joint.rB[1],
+				-rigidBodyB.inverseInertia * joint.rB[0] * joint.rB[1],  rigidBodyB.inverseInertia * joint.rB[0] * joint.rB[0],
+			};
+			const mat2x2<float32> S = {
+				joint.softness, 0.0f,
+				0.0f,           joint.softness,
+			};
+			const mat2x2<float32> K = K1 + K2 + K3 + S;
+
+			joint.M = inverse(K);
+			joint.bias = pAB * inverseDeltaTime * -joint.biasFactor;
+
+			#if defined(WARM_STARTING)
+				rigidBodyA.applyImpulse(-joint.accumulatedImpulse, joint.rA);
+				rigidBodyB.applyImpulse(joint.accumulatedImpulse, joint.rB);
+			#else
+				joint.accumulatedImpulse = {0.0f, 0.0f};
+			#endif
+
+			componentIndex += 1;
+		}
+	}
+
 	void PhysicsEngine2D::ApplyImpulses() {
+		const ComponentPool<Joint2D>& jointPool = scene->getComponentPool<Joint2D>();
 		vec2<float32> relativeVelocity;
 		uint32 iteration = 0;
-		uint8 contactPointIndex = 0;
+		uint8 contactPointIndex;
+		uint32 jointComponentIndex;
 
 		while (iteration < SEQUENTIAL_IMPULSE_ITERATION_COUNT) {
 			for (std::pair<const EntityPair, EntityContactPair2D>& entityContactPair : entityContactPairs) {
@@ -264,7 +321,7 @@ namespace Trident {
 					Contact2D& contact = pair.contactManifold.contacts[contactPointIndex];
 
 					// Calculate the relative velocity at the contact point.
-					relativeVelocity = calculateRelativeVelocity(rigidBodyA, rigidBodyB, contact);
+					relativeVelocity = calculateRelativeVelocity(rigidBodyA, rigidBodyB, contact.rA, contact.rB);
 
 					const float32 relativeVelocityTowardsNormal = dot(relativeVelocity, pair.contactManifold.normal);
 
@@ -287,7 +344,7 @@ namespace Trident {
 					rigidBodyB.applyImpulse(normalImpulse, contact.rB);
 
 					// Calculate the updated relative velocity at the contact point.
-					relativeVelocity = calculateRelativeVelocity(rigidBodyA, rigidBodyB, contact);
+					relativeVelocity = calculateRelativeVelocity(rigidBodyA, rigidBodyB, contact.rA, contact.rB);
 
 					const float32 relativeVelocityTowardsTangent = dot(relativeVelocity, pair.contactManifold.tangent);
 
@@ -314,6 +371,27 @@ namespace Trident {
 
 					contactPointIndex += 1;
 				}
+			}
+
+			jointComponentIndex = 0;
+
+			while (jointComponentIndex < jointPool.componentCount) {
+				const Entity entity = jointPool.componentIndexToEntity[jointComponentIndex];
+
+				Joint2D& joint = scene->getJoint(entity);
+				RigidBody2D& rigidBodyA = scene->getRigidBody(joint.A);
+				RigidBody2D& rigidBodyB = scene->getRigidBody(joint.B);
+
+				relativeVelocity = calculateRelativeVelocity(rigidBodyA, rigidBodyB, joint.rA, joint.rB);
+
+				const vec2<float32> j = (joint.bias - relativeVelocity - joint.softness * joint.accumulatedImpulse) * joint.M;
+
+				joint.accumulatedImpulse += j;
+
+				rigidBodyA.applyImpulse(-j, joint.rA);
+				rigidBodyB.applyImpulse(j, joint.rB);
+
+				jointComponentIndex += 1;
 			}
 
 			iteration += 1;

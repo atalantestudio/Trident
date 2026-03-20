@@ -43,10 +43,15 @@ namespace Trident {
 		const Scene2D& scene = pointer_cast<const SampleApplication*>(getApplication())->scene;
 		const ComponentPool<RigidBody2D>& rigidBodyComponentPool = scene.getComponentPool<RigidBody2D>();
 
-		for (const uint32 entity : rigidBodyComponentPool.componentIndexToEntity) {
+		uint32 componentIndex = 0;
+
+		while (componentIndex < rigidBodyComponentPool.componentCount) {
+			const Entity entity = rigidBodyComponentPool.componentIndexToEntity[componentIndex];
 			const RigidBody2D& rigidBody = scene.getRigidBody(entity);
 
 			renderer.setInstanceTransform(entity, rigidBody.transform);
+
+			componentIndex += 1;
 		}
 
 		renderer.selectEntity(selectedEntity);

@@ -6,6 +6,8 @@
 #include "Engine/ECS/Pool/ComponentPool.hpp"
 
 namespace Trident {
+	#define DEFINE_TAG_COMPONENT(name) struct name {}
+
 	class ECS {
 		public:
 			std::vector<Entity> availableEntities;

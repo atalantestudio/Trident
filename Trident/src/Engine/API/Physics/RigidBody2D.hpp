@@ -6,6 +6,26 @@
 #include "Engine/API/Geometry/Geometry2D.hpp"
 
 namespace Trident {
+	struct RigidBody2DDescriptor {
+		vec2<float32> position = {0.0_m, 0.0_m};
+		float32 rotation = 0.0_rad;
+		vec2<float32> scale = {1.0f, 1.0f};
+		vec2<float32> linearVelocity = {0.0_m_s, 0.0_m_s};
+		float32 angularVelocity = 0.0_w;
+		float32 mass = 0.0_kg;
+		float32 friction = 0.0f;
+		float32 restitution = 0.0f;
+		ref<Geometry2D> geometry;
+		float32 density = 1.0f;
+		Color fillColor = 0xfffffff;
+		Color strokeColor = 0x000000ff;
+
+		// TODO: Add layer/island system to scene ECS.
+		// uint32 layerIndex = 0;
+
+		sequence<char8> label;
+	};
+
 	class RigidBody2D {
 		public:
 			void updateTransform() {

@@ -94,6 +94,8 @@ namespace Trident {
 			return output;
 		}
 
+		DEBUG_ASSERT(output.referenceBody != nullptr);
+
 		output.normal *= mat2x2<float32>::rotation(-output.referenceBody->rotation);
 
 		return output;

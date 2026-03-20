@@ -36,7 +36,8 @@ namespace Trident {
 			void BroadPhase();
 			void NarrowPhase();
 			void ApplyForces();
-			void UpdateManifolds();
+			void UpdateContactManifolds();
+			void UpdateJoints();
 			void ApplyImpulses();
 			void Integrate();
 

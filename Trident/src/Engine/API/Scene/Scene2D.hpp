@@ -4,45 +4,23 @@
 #pragma once
 
 #include "Engine/API/Material/ColorFillStrokeMaterial.hpp"
+#include "Engine/API/Physics/Joint2D.hpp"
 #include "Engine/API/Physics/RigidBody2D.hpp"
 #include "Engine/API/Scene/Scene.hpp"
 
 namespace Trident {
-	struct Entity2DDescriptor {
-		vec2<float32> position = {0.0_m, 0.0_m};
-		float32 rotation = 0.0_rad;
-		vec2<float32> scale = {1.0f, 1.0f};
-		vec2<float32> linearVelocity = {0.0_m_s, 0.0_m_s};
-		float32 angularVelocity = 0.0_w;
-		float32 mass = 0.0_kg;
-		float32 friction = 0.0f;
-		float32 restitution = 0.0f;
-		ref<Geometry2D> geometry;
-		float32 density = 1.0f;
-		Color fillColor = 0xfffffff;
-		Color strokeColor = 0x000000ff;
-		uint32 layerIndex = 0;
-		sequence<char8> label;
-	};
-
-	struct DynamicEntityTag {};
-	struct StaticEntityTag {};
+	DEFINE_TAG_COMPONENT(DynamicEntityTag);
+	DEFINE_TAG_COMPONENT(StaticEntityTag);
 
 	class Scene2D : public Scene {
-		private:
-			static constexpr uint32 LAYER_COUNT = 4;
-
 		public:
 			explicit Scene2D() {
 				ecs.registerComponent<RigidBody2D>();
 				ecs.registerComponent<ref<Geometry2D>>();
 				ecs.registerComponent<ref<PhysicsMaterial>>();
+				ecs.registerComponent<Joint2D>();
 				ecs.registerComponent<DynamicEntityTag>();
 				ecs.registerComponent<StaticEntityTag>();
-			}
-
-			const std::array<std::vector<Entity>, LAYER_COUNT>& getLayers() const {
-				return layers;
 			}
 
 			const RigidBody2D& getRigidBody(Entity entity) const {
@@ -61,8 +39,16 @@ namespace Trident {
 				return ecs.getComponent<ref<PhysicsMaterial>>(entity);
 			}
 
-			void createDynamicEntity(const Entity2DDescriptor& descriptor) {
-				const Entity entity = createEntity(descriptor);
+			const Joint2D& getJoint(Entity entity) const {
+				return ecs.getComponent<Joint2D>(entity);
+			}
+
+			Joint2D& getJoint(Entity entity) {
+				return ecs.getComponent<Joint2D>(entity);
+			}
+
+			void createDynamicRigidBody(const RigidBody2DDescriptor& descriptor) {
+				const Entity entity = createRigidBody(descriptor);
 				const ref<PhysicsMaterial> material = getMaterial(entity);
 
 				RigidBody2D& rigidBody = getRigidBody(entity);
@@ -91,8 +77,8 @@ namespace Trident {
 				ecs.setComponent<DynamicEntityTag>(entity, {});
 			}
 
-			void createStaticEntity(const Entity2DDescriptor& descriptor) {
-				const Entity entity = createEntity(descriptor);
+			void createStaticRigidBody(const RigidBody2DDescriptor& descriptor) {
+				const Entity entity = createRigidBody(descriptor);
 
 				RigidBody2D& rigidBody = getRigidBody(entity);
 				rigidBody.inverseMass = 0.0_kg;
@@ -101,6 +87,25 @@ namespace Trident {
 				ecs.setComponent<StaticEntityTag>(entity, {});
 			}
 
+			void createJoint(const Joint2DDescriptor& descriptor) {
+				const Entity entity = ecs.createEntity();
+				const RigidBody2D& rigidBodyA = getRigidBody(descriptor.A);
+				const RigidBody2D& rigidBodyB = getRigidBody(descriptor.B);
+				const mat2x2<float32> RA = transpose(mat2x2<float32>::rotation(rigidBodyA.rotation));
+				const mat2x2<float32> RB = transpose(mat2x2<float32>::rotation(rigidBodyB.rotation));
+
+				Joint2D joint{};
+				joint.A = descriptor.A;
+				joint.B = descriptor.B;
+				joint.localAnchorA = (descriptor.anchor - rigidBodyA.position) * RA;
+				joint.localAnchorB = (descriptor.anchor - rigidBodyB.position) * RB;
+				joint.biasFactor = descriptor.biasFactor;
+				joint.softness = descriptor.softness;
+
+				ecs.setComponent<Joint2D>(entity, joint);
+			}
+
+		private:
 			void setGeometry(Entity entity, ref<Geometry2D> geometry) {
 				ecs.setComponent<ref<Geometry2D>>(entity, geometry);
 			}
@@ -109,11 +114,7 @@ namespace Trident {
 				ecs.setComponent<ref<PhysicsMaterial>>(entity, material);
 			}
 
-		private:
-			Entity createEntity(const Entity2DDescriptor& descriptor) {
-				// TODO: Restore physical layers.
-				// ENGINE_ASSERT(descriptor.layerIndex < LAYER_COUNT, "The layer index is overflowing.");
-
+			Entity createRigidBody(const RigidBody2DDescriptor& descriptor) {
 				const Entity entity = ecs.createEntity();
 
 				setGeometry(entity, descriptor.geometry);
@@ -142,13 +143,7 @@ namespace Trident {
 
 				ecs.setComponent<RigidBody2D>(entity, rigidBody);
 
-				// TODO: Restore physical layers.
-				// layers[descriptor.layerIndex].emplace_back(entity);
-
 				return entity;
 			}
-
-		private:
-			std::array<std::vector<Entity>, LAYER_COUNT> layers;
 	};
 }

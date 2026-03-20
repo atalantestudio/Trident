@@ -20,6 +20,7 @@
 #include "GUI/UTF8.hpp"
 
 #include "Physics2D/Layer/Sample/Boxes.hpp"
+#include "Physics2D/Layer/Sample/Bridge.hpp"
 #include "Physics2D/Layer/Sample/Circles.hpp"
 #include "Physics2D/Layer/Sample/ContactTest.hpp"
 #include "Physics2D/Layer/Sample/Dominos.hpp"
@@ -99,6 +100,9 @@ namespace Trident {
 		else if (SampleGroupNameProperty == "Physics2D") {
 			if (SampleNameProperty == "Boxes") {
 				registerLayer<Physics2DBoxesLayer>();
+			}
+			else if (SampleNameProperty == "Bridge") {
+				registerLayer<Physics2DBridgeLayer>();
 			}
 			else if (SampleNameProperty == "Circles") {
 				registerLayer<Physics2DCirclesLayer>();

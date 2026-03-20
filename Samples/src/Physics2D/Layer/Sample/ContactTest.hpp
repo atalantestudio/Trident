@@ -1,4 +1,4 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
@@ -28,13 +28,13 @@ namespace Trident {
 
 				const ref<ConvexHullGeometry2D> triangleGeometry = createRef<ConvexHullGeometry2D>(triangleGeometryDescriptor);
 
-				Entity2DDescriptor triangleDescriptor{};
+				RigidBody2DDescriptor triangleDescriptor{};
 				triangleDescriptor.position = {-0.0_m, -0.666_m};
 				triangleDescriptor.rotation = -0.3f;
 				triangleDescriptor.geometry = triangleGeometry;
 				triangleDescriptor.fillColor = 0xe6ddffff;
 
-				scene.createDynamicEntity(triangleDescriptor);
+				scene.createDynamicRigidBody(triangleDescriptor);
 			}
 	};
 }
