@@ -31,8 +31,8 @@ namespace Trident {
 
 			if (angle < minAngle) {
 				minAngle = angle;
-				incidentEdge.edge[0].position = a;
-				incidentEdge.edge[1].position = b;
+				incidentEdge.edge[0].position = b;
+				incidentEdge.edge[1].position = a;
 				incidentEdgeIndex = edgeIndex;
 			}
 
