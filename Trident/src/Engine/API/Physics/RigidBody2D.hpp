@@ -41,6 +41,11 @@ namespace Trident {
 				force += F;
 			}
 
+			/// Applies a linear impulse to the body.
+			void applyImpulse(vec2<float32> j) {
+				linearVelocity += j * inverseMass;
+			}
+
 			/// Applies linear and angular impulses to the body.
 			void applyImpulse(
 				/// The impulse vector.

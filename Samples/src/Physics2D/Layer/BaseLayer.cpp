@@ -47,7 +47,7 @@ namespace Trident {
 
 		while (componentIndex < rigidBodyComponentPool.componentCount) {
 			const Entity entity = rigidBodyComponentPool.componentIndexToEntity[componentIndex];
-			const RigidBody2D& rigidBody = scene.getRigidBody(entity);
+			const RigidBody2D& rigidBody = scene.getComponent<RigidBody2D>(entity);
 
 			renderer.setInstanceTransform(entity, rigidBody.transform);
 
@@ -118,7 +118,7 @@ namespace Trident {
 
 	PhysicsEngine2DDescriptor BaseLayer::getPhysicsEngineDescriptor() {
 		PhysicsEngine2DDescriptor descriptor{};
-		descriptor.deltaTime = Application::getFixedDeltaTime();
+		descriptor.deltaTime = getApplication()->getFixedDeltaTime();
 
 		#if defined(BUILD_MODE_DEBUG)
 			descriptor.visualizationData = &visualizationData;
@@ -145,7 +145,7 @@ namespace Trident {
 
 		for (sint32 rigidBodyIndex = static_cast<sint32>(rigidBodyComponentPool.componentCount - 1); rigidBodyIndex >= 0; rigidBodyIndex -= 1) {
 			const Entity entity = static_cast<Entity>(rigidBodyComponentPool.componentIndexToEntity[rigidBodyIndex]);
-			const RigidBody2D& rigidBody = scene.getRigidBody(entity);
+			const RigidBody2D& rigidBody = scene.getComponent<RigidBody2D>(entity);
 
 			if (GJK2DConditional(rigidBody, mouseRigidBody)) {
 				hoveredEntity = entity;
@@ -196,7 +196,7 @@ namespace Trident {
 		Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
 
 		if (event.getButton() == MouseButton::LEFT && selectedEntity != max<uint32>()) {
-			RigidBody2D& rigidBody = scene.getRigidBody(selectedEntity);
+			RigidBody2D& rigidBody = scene.getComponent<RigidBody2D>(selectedEntity);
 			rigidBody.position += placeholderOffset;
 			rigidBody.updateTransform();
 

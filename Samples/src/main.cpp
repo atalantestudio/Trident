@@ -22,6 +22,7 @@
 #include "Physics2D/Layer/Sample/Boxes.hpp"
 #include "Physics2D/Layer/Sample/Bridge.hpp"
 #include "Physics2D/Layer/Sample/Circles.hpp"
+#include "Physics2D/Layer/Sample/Constraint.hpp"
 #include "Physics2D/Layer/Sample/ContactTest.hpp"
 #include "Physics2D/Layer/Sample/Dominos.hpp"
 #include "Physics2D/Layer/Sample/Empty.hpp"
@@ -32,6 +33,7 @@
 #include "Physics2D/Layer/Sample/Stacking.hpp"
 #include "Physics2D/Layer/Sample/Swing.hpp"
 #include "Physics2D/Layer/GUI/StatisticsLayer.hpp"
+#include "Physics2D/Layer/SceneLayer.hpp"
 
 #include "Process/Default.hpp"
 
@@ -107,6 +109,9 @@ namespace Trident {
 			else if (SampleNameProperty == "Circles") {
 				registerLayer<Physics2DCirclesLayer>();
 			}
+			else if (SampleNameProperty == "Constraint") {
+				registerLayer<Physics2DConstraintLayer>();
+			}
 			else if (SampleNameProperty == "ContactTest") {
 				registerLayer<Physics2DContactTestLayer>();
 			}
@@ -124,6 +129,9 @@ namespace Trident {
 			}
 			else if (SampleNameProperty == "RollingBall") {
 				registerLayer<Physics2DRollingBallLayer>();
+			}
+			else if (SampleNameProperty == "Scene") {
+				registerLayer<Physics2DSceneLayer>();
 			}
 			else if (SampleNameProperty == "SlidingBoxes") {
 				registerLayer<Physics2DSlidingBoxesLayer>();

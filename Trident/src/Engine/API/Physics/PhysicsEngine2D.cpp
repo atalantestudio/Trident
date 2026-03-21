@@ -110,8 +110,8 @@ namespace Trident {
 		EntityContactPair2D entityContactPair;
 
 		for (const EntityPair entityPair : entityPairs) {
-			const RigidBody2D& rigidBodyA = scene->getRigidBody(entityPair.A);
-			const RigidBody2D& rigidBodyB = scene->getRigidBody(entityPair.B);
+			const RigidBody2D& rigidBodyA = scene->getComponent<RigidBody2D>(entityPair.A);
+			const RigidBody2D& rigidBodyB = scene->getComponent<RigidBody2D>(entityPair.B);
 
 			Geometry2DType typeA = rigidBodyA.geometry->type;
 			Geometry2DType typeB = rigidBodyB.geometry->type;
@@ -166,7 +166,7 @@ namespace Trident {
 		while (componentIndex < dynamicPool.componentCount) {
 			const Entity entity = dynamicPool.componentIndexToEntity[componentIndex];
 
-			RigidBody2D& rigidBody = scene->getRigidBody(entity);
+			RigidBody2D& rigidBody = scene->getComponent<RigidBody2D>(entity);
 
 			// TODO: Exclude dynamic entities with an inverse mass of 0 from the loop.
 			if (rigidBody.inverseMass == 0.0_kg) {
@@ -195,8 +195,8 @@ namespace Trident {
 		for (std::pair<const EntityPair, EntityContactPair2D>& entityContactPair : entityContactPairs) {
 			EntityContactPair2D& pair = entityContactPair.second;
 
-			RigidBody2D& rigidBodyA = scene->getRigidBody(pair.A);
-			RigidBody2D& rigidBodyB = scene->getRigidBody(pair.B);
+			RigidBody2D& rigidBodyA = scene->getComponent<RigidBody2D>(pair.A);
+			RigidBody2D& rigidBodyB = scene->getComponent<RigidBody2D>(pair.B);
 
 			pair.contactManifold.tangent = perpendicularRight(pair.contactManifold.normal);
 			pair.combinedFriction = sqrt(rigidBodyA.friction * rigidBodyB.friction);
@@ -255,9 +255,9 @@ namespace Trident {
 		while (componentIndex < jointPool.componentCount) {
 			const Entity entity = jointPool.componentIndexToEntity[componentIndex];
 
-			Joint2D& joint = scene->getJoint(entity);
-			RigidBody2D& rigidBodyA = scene->getRigidBody(joint.A);
-			RigidBody2D& rigidBodyB = scene->getRigidBody(joint.B);
+			Joint2D& joint = scene->getComponent<Joint2D>(entity);
+			RigidBody2D& rigidBodyA = scene->getComponent<RigidBody2D>(joint.A);
+			RigidBody2D& rigidBodyB = scene->getComponent<RigidBody2D>(joint.B);
 
 			// TODO: Why is the transpose needed?
 			const mat2x2<float32> RAT = transpose(mat2x2<float32>::rotation(rigidBodyA.rotation));
@@ -312,8 +312,8 @@ namespace Trident {
 		while (iteration < SEQUENTIAL_IMPULSE_ITERATION_COUNT) {
 			for (std::pair<const EntityPair, EntityContactPair2D>& entityContactPair : entityContactPairs) {
 				EntityContactPair2D& pair = entityContactPair.second;
-				RigidBody2D& rigidBodyA = scene->getRigidBody(pair.A);
-				RigidBody2D& rigidBodyB = scene->getRigidBody(pair.B);
+				RigidBody2D& rigidBodyA = scene->getComponent<RigidBody2D>(pair.A);
+				RigidBody2D& rigidBodyB = scene->getComponent<RigidBody2D>(pair.B);
 
 				contactPointIndex = 0;
 
@@ -378,9 +378,9 @@ namespace Trident {
 			while (jointComponentIndex < jointPool.componentCount) {
 				const Entity entity = jointPool.componentIndexToEntity[jointComponentIndex];
 
-				Joint2D& joint = scene->getJoint(entity);
-				RigidBody2D& rigidBodyA = scene->getRigidBody(joint.A);
-				RigidBody2D& rigidBodyB = scene->getRigidBody(joint.B);
+				Joint2D& joint = scene->getComponent<Joint2D>(entity);
+				RigidBody2D& rigidBodyA = scene->getComponent<RigidBody2D>(joint.A);
+				RigidBody2D& rigidBodyB = scene->getComponent<RigidBody2D>(joint.B);
 
 				relativeVelocity = calculateRelativeVelocity(rigidBodyA, rigidBodyB, joint.rA, joint.rB);
 
@@ -408,7 +408,7 @@ namespace Trident {
 		while (componentIndex < dynamicPool.componentCount) {
 			const Entity entity = dynamicPool.componentIndexToEntity[componentIndex];
 
-			RigidBody2D& rigidBody = scene->getRigidBody(entity);
+			RigidBody2D& rigidBody = scene->getComponent<RigidBody2D>(entity);
 
 			// TODO: Exclude dynamic entities with an inverse mass of 0 from the loop.
 			if (rigidBody.inverseMass == 0.0_kg) {

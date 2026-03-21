@@ -39,6 +39,9 @@
 #include "Engine/API/GUI/GUILayer.hpp"
 #include "Engine/API/GUI/GUIRenderer.hpp"
 
+// Input
+#include "Engine/API/Input/Input.hpp"
+
 // Renderer
 #include "Engine/API/Rendering/Buffer.hpp"
 #include "Engine/API/Rendering/ComputePipeline.hpp"

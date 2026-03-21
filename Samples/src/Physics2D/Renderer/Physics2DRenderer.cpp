@@ -964,7 +964,7 @@ namespace Trident {
 
 		for (uint32 instanceIndex = 0; instanceIndex < instanceCount; instanceIndex += 1) {
 			const Entity entity = rigidBodyPool.componentIndexToEntity[instanceIndex];
-			const ref<Geometry2D> geometry = scene.getGeometry(entity);
+			const ref<Geometry2D> geometry = scene.getComponent<ref<Geometry2D>>(entity);
 
 			vertexCount += geometry->getVertexCount() + 1;
 			indexCount += geometry->getIndexCount();
@@ -985,8 +985,8 @@ namespace Trident {
 
 		for (uint32 instanceIndex = 0; instanceIndex < instanceCount; instanceIndex += 1) {
 			const Entity entity = rigidBodyPool.componentIndexToEntity[instanceIndex];
-			const ref<Geometry2D> geometry = scene.getGeometry(entity);
-			const ref<PhysicsMaterial> material = scene.getMaterial(entity);
+			const ref<Geometry2D> geometry = scene.getComponent<ref<Geometry2D>>(entity);
+			const ref<PhysicsMaterial> material = scene.getComponent<ref<PhysicsMaterial>>(entity);
 
 			for (uint32 vertexIndex = 0; vertexIndex < geometry->vertices.count(); vertexIndex += 1) {
 				const vec2<float32>& vertex = geometry->vertices[vertexIndex];
@@ -1288,12 +1288,12 @@ namespace Trident {
 		uint32 vertexOffset = 0;
 
 		for (Entity entity = 0; entity < selectedInstanceIndex; entity += 1) {
-			const ref<Geometry2D> geometry = scene->getGeometry(entity);
+			const ref<Geometry2D> geometry = scene->getComponent<ref<Geometry2D>>(entity);
 
 			vertexOffset += geometry->getVertexCount() + 1;
 		}
 
-		const ref<Geometry2D> geometry = scene->getGeometry(selectedInstanceIndex);
+		const ref<Geometry2D> geometry = scene->getComponent<ref<Geometry2D>>(selectedInstanceIndex);
 
 		commandEncoder->bindGraphicsPipeline(placeholderCenterOfMassGraphicsPipeline);
 		commandEncoder->bindDescriptorSets(placeholderPipelineLayout, 0, {cameraViewDescriptorSet, placeholderDescriptorSet});

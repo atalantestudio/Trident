@@ -23,35 +23,21 @@ namespace Trident {
 				ecs.registerComponent<StaticEntityTag>();
 			}
 
-			const RigidBody2D& getRigidBody(Entity entity) const {
-				return ecs.getComponent<RigidBody2D>(entity);
+			template<typename ComponentType>
+			const ComponentType& getComponent(Entity entity) const {
+				return ecs.getComponent<ComponentType>(entity);
 			}
 
-			RigidBody2D& getRigidBody(Entity entity) {
-				return ecs.getComponent<RigidBody2D>(entity);
-			}
-
-			ref<Geometry2D> getGeometry(Entity entity) const {
-				return ecs.getComponent<ref<Geometry2D>>(entity);
-			}
-
-			ref<PhysicsMaterial> getMaterial(Entity entity) const {
-				return ecs.getComponent<ref<PhysicsMaterial>>(entity);
-			}
-
-			const Joint2D& getJoint(Entity entity) const {
-				return ecs.getComponent<Joint2D>(entity);
-			}
-
-			Joint2D& getJoint(Entity entity) {
-				return ecs.getComponent<Joint2D>(entity);
+			template<typename ComponentType>
+			ComponentType& getComponent(Entity entity) {
+				return ecs.getComponent<ComponentType>(entity);
 			}
 
 			void createDynamicRigidBody(const RigidBody2DDescriptor& descriptor) {
 				const Entity entity = createRigidBody(descriptor);
-				const ref<PhysicsMaterial> material = getMaterial(entity);
+				const ref<PhysicsMaterial> material = ecs.getComponent<ref<PhysicsMaterial>>(entity);
 
-				RigidBody2D& rigidBody = getRigidBody(entity);
+				RigidBody2D& rigidBody = getComponent<RigidBody2D>(entity);
 				rigidBody.linearVelocity = descriptor.linearVelocity;
 				rigidBody.angularVelocity = descriptor.angularVelocity;
 
@@ -80,7 +66,7 @@ namespace Trident {
 			void createStaticRigidBody(const RigidBody2DDescriptor& descriptor) {
 				const Entity entity = createRigidBody(descriptor);
 
-				RigidBody2D& rigidBody = getRigidBody(entity);
+				RigidBody2D& rigidBody = ecs.getComponent<RigidBody2D>(entity);
 				rigidBody.inverseMass = 0.0_kg;
 				rigidBody.inverseInertia = 0.0_kg_m2;
 
@@ -89,8 +75,8 @@ namespace Trident {
 
 			void createJoint(const Joint2DDescriptor& descriptor) {
 				const Entity entity = ecs.createEntity();
-				const RigidBody2D& rigidBodyA = getRigidBody(descriptor.A);
-				const RigidBody2D& rigidBodyB = getRigidBody(descriptor.B);
+				const RigidBody2D& rigidBodyA = ecs.getComponent<RigidBody2D>(descriptor.A);
+				const RigidBody2D& rigidBodyB = ecs.getComponent<RigidBody2D>(descriptor.B);
 				const mat2x2<float32> RA = transpose(mat2x2<float32>::rotation(rigidBodyA.rotation));
 				const mat2x2<float32> RB = transpose(mat2x2<float32>::rotation(rigidBodyB.rotation));
 
