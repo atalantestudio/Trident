@@ -4,6 +4,8 @@
 #include "pch.hpp"
 
 #include "Engine/API/Physics/Collider/Collider2DTable.hpp"
+#include "Engine/API/Physics/Constraint/Constraint2D.hpp"
+#include "Engine/API/Physics/Joint2D.hpp"
 #include "Engine/API/Physics/PhysicsEngine2D.hpp"
 
 namespace Trident {
@@ -159,12 +161,12 @@ namespace Trident {
 	}
 
 	void PhysicsEngine2D::ApplyForces() {
-		const ComponentPool<DynamicEntityTag>& dynamicPool = scene->getComponentPool<DynamicEntityTag>();
+		const ComponentPool<RigidBody2D>& rigidBodyPool = scene->getComponentPool<RigidBody2D>();
 		uint32 componentIndex = 0;
 
 		// TODO: Integrate velocities on dynamic resting entities (e.g. an object on a moving platform may move due to inertia)?
-		while (componentIndex < dynamicPool.componentCount) {
-			const Entity entity = dynamicPool.componentIndexToEntity[componentIndex];
+		while (componentIndex < rigidBodyPool.componentCount) {
+			const Entity entity = rigidBodyPool.componentIndexToEntity[componentIndex];
 
 			RigidBody2D& rigidBody = scene->getComponent<RigidBody2D>(entity);
 
@@ -303,10 +305,12 @@ namespace Trident {
 	}
 
 	void PhysicsEngine2D::ApplyImpulses() {
+		const ComponentPool<ref<Constraint2D>>& constraintPool = scene->getComponentPool<ref<Constraint2D>>();
 		const ComponentPool<Joint2D>& jointPool = scene->getComponentPool<Joint2D>();
 		vec2<float32> relativeVelocity;
 		uint32 iteration = 0;
 		uint8 contactPointIndex;
+		uint32 constraintComponentIndex;
 		uint32 jointComponentIndex;
 
 		while (iteration < SEQUENTIAL_IMPULSE_ITERATION_COUNT) {
@@ -373,6 +377,17 @@ namespace Trident {
 				}
 			}
 
+			constraintComponentIndex = 0;
+
+			while (constraintComponentIndex < constraintPool.componentCount) {
+				const Entity entity = constraintPool.componentIndexToEntity[constraintComponentIndex];
+				const ref<Constraint2D> constraint = scene->getComponent<ref<Constraint2D>>(entity);
+
+				constraint->update(scene, deltaTime);
+
+				constraintComponentIndex += 1;
+			}
+
 			jointComponentIndex = 0;
 
 			while (jointComponentIndex < jointPool.componentCount) {
@@ -399,14 +414,14 @@ namespace Trident {
 	}
 
 	void PhysicsEngine2D::Integrate() {
-		const ComponentPool<DynamicEntityTag>& dynamicPool = scene->getComponentPool<DynamicEntityTag>();
+		const ComponentPool<RigidBody2D>& rigidBodyPool = scene->getComponentPool<RigidBody2D>();
 		uint32 componentIndex = 0;
 
 		// TODO: Integration for static entities (e.g. a moving platform that isn't affected by other forces)?
 		// TODO: Integration for dynamic entities with infinite mass?
 		// TODO: Integration for dynamic resting entities (e.g. an object on a moving platform may move due to inertia)?
-		while (componentIndex < dynamicPool.componentCount) {
-			const Entity entity = dynamicPool.componentIndexToEntity[componentIndex];
+		while (componentIndex < rigidBodyPool.componentCount) {
+			const Entity entity = rigidBodyPool.componentIndexToEntity[componentIndex];
 
 			RigidBody2D& rigidBody = scene->getComponent<RigidBody2D>(entity);
 

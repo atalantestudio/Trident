@@ -5,7 +5,9 @@
 
 #include "Physics2DRenderer.hpp"
 
+#include "Engine/API/Geometry/Geometry2D.hpp"
 #include "Engine/API/Material/ColorFillStrokeMaterial.hpp"
+#include "Engine/API/Physics/RigidBody2D.hpp"
 
 namespace Trident {
 	void Physics2DRenderer::build() {

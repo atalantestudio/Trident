@@ -1,8 +1,9 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #include "pch.hpp"
 
+#include "Engine/API/Physics/Constraint/RotationConstraint2D.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 
 #include "../../SampleApplication.hpp"
@@ -59,6 +60,11 @@ namespace Trident {
 
 		scene.createDynamicRigidBody(obstacleDescriptor);
 
+		RotationConstraint2DDescriptor constraintDescriptor{};
+		constraintDescriptor.A = playerEntity;
+
+		scene.createConstraint<RotationConstraint2D>(constraintDescriptor);
+
 		physicsEngine.registerScene(scene);
 
 		renderer.layerInput = input;
@@ -68,17 +74,17 @@ namespace Trident {
 	}
 
 	void Physics2DSceneLayer::update(float32 deltaTime, float32 inverseDeltaTime) {
-		static constexpr float32 SPEED = 20.0f;
+		static constexpr float32 SPEED = 30.0f;
 		static constexpr float32 JUMP_SPEED = 450.0f;
 
 		Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
 		RigidBody2D& playerRigidBody = scene.getComponent<RigidBody2D>(playerEntity);
 
-		if (keyMap[KeyCode::Q] && !jumping) {
+		if (keyMap[KeyCode::Q]) {
 			playerRigidBody.applyImpulse({-SPEED * deltaTime, 0.0f});
 		}
 
-		if (keyMap[KeyCode::D] && !jumping) {
+		if (keyMap[KeyCode::D]) {
 			playerRigidBody.applyImpulse({SPEED * deltaTime, 0.0f});
 		}
 
@@ -91,11 +97,15 @@ namespace Trident {
 		if (abs(playerRigidBody.linearVelocity[1]) < 0.001f) {
 			jumping = false;
 		}
-
-		physicsEngine.tick();
 	}
 
 	void Physics2DSceneLayer::preRender() {
+		#if defined(BUILD_MODE_DEBUG)
+			visualizationData = {};
+		#endif
+
+		physicsEngine.tick();
+
 		checkHover();
 
 		const Scene2D& scene = pointer_cast<const SampleApplication*>(getApplication())->scene;

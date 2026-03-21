@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Engine/API/Physics/Joint2D.hpp"
+
 #include "../BaseLayer.hpp"
 
 namespace Trident {
