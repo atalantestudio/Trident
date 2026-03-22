@@ -9,8 +9,8 @@ namespace Trident {
 	void GUILayer::GUIText(const sequence<char8>& text, const TextStyle& textStyle) {
 		UTF8Stream stream(text);
 
-		const uint32 componentIndex = static_cast<uint32>(components.size());
-		const uint32 parentIndex = openComponentIndices.back();
+		const uint32 componentIndex = componentCount;
+		const uint32 parentIndex = openComponentIndices[openComponentIndexCount - 1];
 		const float32 preferredWidth = calculateTextPreferredWidth(stream, textStyle);
 		const float32 minimumWidth = calculateTextMinimumWidth(stream, textStyle);
 
@@ -41,11 +41,16 @@ namespace Trident {
 
 		// Pushing the component to the vector might invalidate the parent reference, so we update the parent's children indices before.
 		parent.childIndices.emplace_back(componentIndex);
-		components.emplace_back(textComponent);
-		leafComponentIndices.emplace_back(componentIndex);
+
+		components[componentCount] = textComponent;
+		componentCount += 1;
+
+		leafComponentIndices[leafComponentIndexCount] = componentIndex;
+		leafComponentIndexCount += 1;
 
 		if (textComponent.eventListeners != nullptr) {
-			buttonComponentIndices.emplace_back(componentIndex);
+			buttonComponentIndices[buttonComponentIndexCount] = componentIndex;
+			buttonComponentIndexCount += 1;
 		}
 
 		FitSizingWidths(componentIndex);

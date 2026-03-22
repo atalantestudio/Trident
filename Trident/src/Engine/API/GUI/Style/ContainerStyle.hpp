@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/GUI/EventListeners.hpp"
+#include "Engine/API/GUI/GUI.hpp"
 #include "Engine/API/GUI/ID.hpp"
 #include "Engine/API/GUI/LayoutDirection.hpp"
 #include "Engine/API/GUI/Size.hpp"
@@ -11,6 +12,9 @@
 
 namespace Trident {
 	struct ContainerStyle {
+		// TODO(gui/component-id)
+		// GUI::ComponentID id = max<GUI::ComponentID>();
+
 		Size2D size;
 		svec2<float32> maximumSize = {max<float32>(), max<float32>()};
 		svec2<float32> minimumSize = {0_px, 0_px};

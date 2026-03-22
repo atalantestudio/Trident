@@ -7,28 +7,45 @@
 
 namespace Trident {
 	class GUIEventTestLayer : public GUILayer {
+		private:
+			static constexpr uint32 LIST_ITEM_COUNT = 5;
+
 		public:
 			void registerAssets() override {
-				windowStyle.size = {EXPAND, EXPAND};
-				windowStyle.padding = {8_px, 8_px};
-				windowStyle.layoutSpacing = 8_px;
+				listContainerStyle.size = {EXPAND, EXPAND};
+				listContainerStyle.layoutDirection = VERTICAL;
+				listContainerStyle.color = 0xffffffff;
 
-				textStyle.color = 0xa5a5a5ff;
-				textStyle.font = loadFontAsset("test-bold");
-				textStyle.fontSize = 20_px;
+				listItemTextStyle.color = 0x000000ff;
+				listItemTextStyle.font = loadFontAsset("test-regular");
+				listItemTextStyle.fontSize = 30_px;
+
+				listItemStyle.size = {200_px, 100_px};
+				listItemStyle.color = 0xff9800ff;
 			}
 
 			void GUI() override {
-				GUIComponent(windowStyle) {
-					GUIComponentClass(button, [&]() {
-						GUIText("Click me, I'm a button.", textStyle);
-					});
+				GUIComponent(listContainerStyle) {
+					uint32 listItemIndex = 0;
+
+					while (listItemIndex < LIST_ITEM_COUNT) {
+						GUIComponent(listItemStyle) {
+							if (isCurrentComponentHovered()) {
+								GUIText(Logger::format("Hovered []", listItemIndex), listItemTextStyle);
+							}
+							else {
+								GUIText(Logger::format("Not hovered []", listItemIndex), listItemTextStyle);
+							}
+						}
+
+						listItemIndex += 1;
+					}
 				}
 			}
 
 		private:
-			ContainerStyle windowStyle;
-			Button button;
-			TextStyle textStyle;
+			ContainerStyle listContainerStyle;
+			ContainerStyle listItemStyle;
+			TextStyle listItemTextStyle;
 	};
 }

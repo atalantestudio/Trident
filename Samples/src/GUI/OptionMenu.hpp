@@ -7,6 +7,9 @@
 
 namespace Trident {
 	class GUIOptionMenuLayer : public GUILayer {
+		private:
+			static constexpr uint32 LIST_ITEM_COUNT = 5;
+
 		public:
 			void registerAssets() override {
 				listContainerStyle.size = {FIT, FIT};
@@ -46,8 +49,6 @@ namespace Trident {
 			}
 
 		private:
-			static constexpr uint32 LIST_ITEM_COUNT = 5;
-
 			sequence<Button> listItems;
 			ContainerStyle listContainerStyle;
 			TextStyle listItemTitleStyle;

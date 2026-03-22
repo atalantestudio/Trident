@@ -24,6 +24,11 @@ namespace Trident {
 		renderer.flushTextureArrayStagingBuffer();
 
 		textureArrayFlushed = true;
+
+		components = sequence<GUIContainer>(MAX_COMPONENT_COUNT);
+		openComponentIndices = sequence<uint32>(MAX_COMPONENT_COUNT);
+		leafComponentIndices = sequence<uint32>(MAX_COMPONENT_COUNT);
+		buttonComponentIndices = sequence<uint32>(MAX_COMPONENT_COUNT);
 	}
 
 	FontID GUILayer::loadFontAsset(view<char8> assetName) {
@@ -88,16 +93,16 @@ namespace Trident {
 	}
 
 	void GUILayer::preRender() {
-		components.clear();
-		openComponentIndices.clear();
-		leafComponentIndices.clear();
-		buttonComponentIndices.clear();
+		componentCount = 0;
+		openComponentIndexCount = 0;
+		leafComponentIndexCount = 0;
+		buttonComponentIndexCount = 0;
 
 		openRootComponent();
 
 		GUI();
 
-		if (components.size() == 1) {
+		if (componentCount <= 1) {
 			// No other components than root, return.
 			return;
 		}
@@ -106,7 +111,9 @@ namespace Trident {
 
 		DispatchMouseEvents();
 
-		for (uint32 componentIndex = 1; componentIndex < components.size(); componentIndex += 1) {
+		uint32 componentIndex = 1;
+
+		while (componentIndex < componentCount) {
 			const GUIContainer& component = components[componentIndex];
 
 			if (component.textComponent) {
@@ -130,6 +137,8 @@ namespace Trident {
 			else {
 				registerSubcomponent(component);
 			}
+
+			componentIndex += 1;
 		}
 	}
 
@@ -168,13 +177,16 @@ namespace Trident {
 		rootComponent.textComponent = false;
 		rootComponent.debugName = "__root";
 
-		components.emplace_back(rootComponent);
-		openComponentIndices.emplace_back(0);
+		components[componentCount] = rootComponent;
+		componentCount += 1;
+
+		openComponentIndices[openComponentIndexCount] = 0;
+		openComponentIndexCount += 1;
 	}
 
 	void GUILayer::openComponent(const ContainerStyle& style) {
-		const uint32 componentIndex = static_cast<uint32>(components.size());
-		const uint32 parentIndex = openComponentIndices.back();
+		const uint32 componentIndex = componentCount;
+		const uint32 parentIndex = openComponentIndices[openComponentIndexCount - 1];
 
 		GUIContainer& parent = components[parentIndex];
 
@@ -228,11 +240,16 @@ namespace Trident {
 		component.debugName = style.debugName;
 
 		parent.childIndices.emplace_back(componentIndex);
-		components.emplace_back(component);
-		openComponentIndices.emplace_back(componentIndex);
+
+		components[componentCount] = component;
+		componentCount += 1;
+
+		openComponentIndices[openComponentIndexCount] = componentIndex;
+		openComponentIndexCount += 1;
 
 		if (component.eventListeners != nullptr) {
-			buttonComponentIndices.emplace_back(componentIndex);
+			buttonComponentIndices[buttonComponentIndexCount] = componentIndex;
+			buttonComponentIndexCount += 1;
 		}
 	}
 
@@ -251,33 +268,34 @@ namespace Trident {
 
 		WrapTextChildrenRecursive(rootComponentIndex);
 
-		for (sint32 componentIndex = static_cast<sint32>(components.size()) - 1; componentIndex >= 1; componentIndex -= 1) {
+		for (sint32 componentIndex = static_cast<sint32>(componentCount) - 1; componentIndex >= 1; componentIndex -= 1) {
 			FitSizingHeights(componentIndex);
 		}
 
 		GrowAndShrinkSizingHeightsRecursive(rootComponentIndex);
 		PositionsAndAlignment(rootComponent, rootComponent.origin);
 
-		openComponentIndices.pop_back();
+		openComponentIndexCount -= 1;
 	}
 
 	void GUILayer::closeComponent() {
-		DEBUG_ASSERT(!openComponentIndices.empty());
+		DEBUG_ASSERT(openComponentIndexCount > 0);
 
-		const uint32 componentIndex = openComponentIndices.back();
+		const uint32 componentIndex = openComponentIndices[openComponentIndexCount - 1];
 
 		FitSizingWidths(componentIndex);
 
 		const GUIContainer& component = components[componentIndex];
 
 		if (component.childIndices.empty()) {
-			leafComponentIndices.emplace_back(componentIndex);
+			leafComponentIndices[leafComponentIndexCount] = componentIndex;
+			leafComponentIndexCount += 1;
 		}
 
-		openComponentIndices.pop_back();
+		openComponentIndexCount -= 1;
 	}
 
-	std::vector<uint32> GUILayer::FindGrowableChildIndices(const GUIContainer& parent, bool axis) const {
+	std::vector<uint32> GUILayer::FindGrowableChildIndices(const GUIContainer& parent, uint8 axis) const {
 		std::vector<uint32> childIndices;
 
 		for (uint32 index = 0; index < parent.childIndices.size(); index += 1) {
@@ -292,7 +310,7 @@ namespace Trident {
 		return childIndices;
 	}
 
-	std::vector<uint32> GUILayer::FindShrinkableChildIndices(const GUIContainer& parent, bool axis) const {
+	std::vector<uint32> GUILayer::FindShrinkableChildIndices(const GUIContainer& parent, uint8 axis) const {
 		std::vector<uint32> childIndices;
 
 		for (uint32 index = 0; index < parent.childIndices.size(); index += 1) {
@@ -755,7 +773,7 @@ namespace Trident {
 		const sint32* mousePositionInteger = getApplication()->getWindow()->getMousePosition();
 		const vec2<float32> mousePosition = {static_cast<float32>(mousePositionInteger[0]), static_cast<float32>(mousePositionInteger[1])};
 
-		for (sint32 buttonComponentIndex = static_cast<sint32>(buttonComponentIndices.size()) - 1; buttonComponentIndex >= 0; buttonComponentIndex -= 1) {
+		for (sint32 buttonComponentIndex = static_cast<sint32>(buttonComponentIndexCount) - 1; buttonComponentIndex >= 0; buttonComponentIndex -= 1) {
 			const uint32 componentIndex = buttonComponentIndices[buttonComponentIndex];
 			const GUIContainer& component = components[componentIndex];
 
@@ -854,5 +872,19 @@ namespace Trident {
 		subcomponent.textureArrayLayerIndex = component.image;
 
 		renderer.registerSubcomponent(subcomponent);
+	}
+
+	// TODO(gui/immediate-hover)
+	bool GUILayer::isCurrentComponentHovered() const {
+		DEBUG_ASSERT(openComponentIndexCount > 0);
+
+		const GUIContainer& component = components[openComponentIndexCount - 1];
+		const Window* window = getApplication()->getWindow();
+		const sint32* mousePositionInteger = window->getMousePosition();
+		const vec2<float32> mousePosition = {static_cast<float32>(mousePositionInteger[0]), static_cast<float32>(mousePositionInteger[1])};
+
+		const bool hovered = IsIntersecting(component, mousePosition);
+
+		return hovered;
 	}
 }

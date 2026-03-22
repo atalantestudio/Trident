@@ -4,10 +4,11 @@
 #pragma once
 
 #include "Engine/API/GUI/Component/Container.hpp"
-#include "Engine/API/GUI/Style/ContainerStyle.hpp"
-#include "Engine/API/GUI/Style/TextStyle.hpp"
+#include "Engine/API/GUI/GUI.hpp"
 #include "Engine/API/GUI/GUIRenderer.hpp"
 #include "Engine/API/GUI/ID.hpp"
+#include "Engine/API/GUI/Style/ContainerStyle.hpp"
+#include "Engine/API/GUI/Style/TextStyle.hpp"
 #include "Engine/Filesystem/Stream/UTF8Stream.hpp"
 #include "Engine/Layer/Layer.hpp"
 
@@ -53,6 +54,9 @@ namespace Trident {
 			FontID loadFontAsset(view<char8> assetName);
 			ImageID loadImageAsset(view<char8> assetName);
 
+			/// Returns true if the mouse pointer is inside the current open component.
+			bool isCurrentComponentHovered() const;
+
 		public:
 			void openComponent(const ContainerStyle& style);
 
@@ -64,8 +68,8 @@ namespace Trident {
 			void openRootComponent();
 			void closeRootComponent();
 
-			std::vector<uint32> FindGrowableChildIndices(const GUIContainer& parent, bool axis) const;
-			std::vector<uint32> FindShrinkableChildIndices(const GUIContainer& parent, bool axis) const;
+			std::vector<uint32> FindGrowableChildIndices(const GUIContainer& parent, uint8 axis) const;
+			std::vector<uint32> FindShrinkableChildIndices(const GUIContainer& parent, uint8 axis) const;
 
 			void FitSizingWidths(uint32 componentIndex);
 			void FitSizingHeights(uint32 componentIndex);
@@ -96,11 +100,13 @@ namespace Trident {
 			static constexpr float32 EXPAND = -1.0f;
 
 		private:
+			static constexpr uint32 MAX_COMPONENT_COUNT = 32;
+
 			static constexpr ImageID DEFAULT_IMAGE_INDEX = 0;
 			static constexpr uint32 MAX_FONT_COUNT = 4;
 
-			static constexpr bool WIDTH_AXIS = 0;
-			static constexpr bool HEIGHT_AXIS = 1;
+			static constexpr uint8 WIDTH_AXIS = 0;
+			static constexpr uint8 HEIGHT_AXIS = 1;
 
 		private:
 			GUIRenderer renderer;
@@ -110,10 +116,15 @@ namespace Trident {
 			std::array<FontData, MAX_FONT_COUNT> fonts;
 			uint32 fontCount = 0;
 
-			std::vector<GUIContainer> components;
-			std::vector<uint32> openComponentIndices;
-			std::vector<uint32> leafComponentIndices;
-			std::vector<uint32> buttonComponentIndices;
+			sequence<GUIContainer> components;
+			sequence<uint32> openComponentIndices;
+			sequence<uint32> leafComponentIndices;
+			sequence<uint32> buttonComponentIndices;
+
+			uint32 componentCount = 0;
+			uint32 openComponentIndexCount = 0;
+			uint32 leafComponentIndexCount = 0;
+			uint32 buttonComponentIndexCount = 0;
 
 			uint32 hoveredComponentIndex = max<uint32>();
 			uint32 mouseDownComponentIndex = max<uint32>();
