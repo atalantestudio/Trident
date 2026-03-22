@@ -51,12 +51,7 @@ namespace Trident {
 		uint8 a;
 
 		bool operator ==(qoi_rgba other) const {
-			return (
-				r == other.r &&
-				g == other.g &&
-				b == other.b &&
-				a == other.a
-			);
+			return *pointer_cast<const uint32*>(this) == *pointer_cast<const uint32*>(&other);
 		}
 	};
 
@@ -85,7 +80,7 @@ namespace Trident {
 	};
 
 	inline qoi_index rgbaHash(qoi_rgba p) {
-		qoi_index index;
+		qoi_index index{};
 		index.index = (p.r * 3 + p.g * 5 + p.b * 7 + p.a * 11) % 64;
 
 		return index;

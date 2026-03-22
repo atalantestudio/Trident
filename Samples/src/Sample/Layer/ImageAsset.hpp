@@ -10,7 +10,7 @@
 namespace Trident {
 	class SampleImageAssetRenderer : public Renderer {
 		private:
-			static constexpr view<char8> IMAGE_ASSET_NAME = "DefaultFont";
+			static constexpr view<char8> IMAGE_ASSET_NAME = "test-regular";
 
 		public:
 			void build() override {

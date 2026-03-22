@@ -65,28 +65,33 @@ namespace Trident {
 					case ImageFormat::R8G8B8_UNORM: {
 						const qoi_rgb* data = pointer_cast<const qoi_rgb*>(&descriptor.data[0]);
 
+						uint32 x;
+						uint32 y;
+						uint32 z = 0;
+						uint32 texelIndex = 0;
 						qoi_rgba texelCache[64]{};
 						qoi_rgba previousTexel = {0, 0, 0, 255};
 						qoi_index previousTexelHash = rgbaHash(previousTexel);
 						uint8 runLength = 0;
-						uint32 texelIndex = 0;
 
-						for (uint32 z = 0; z < descriptor.extent.depth; z += 1) {
-							for (uint32 y = 0; y < descriptor.extent.height; y += 1) {
-								for (uint32 x = 0; x < descriptor.extent.width; x += 1, texelIndex += 1) {
+						while (z < descriptor.extent.depth) {
+							y = 0;
+
+							while (y < descriptor.extent.height) {
+								x = 0;
+
+								while (x < descriptor.extent.width) {
 									texelCache[previousTexelHash.index] = previousTexel;
 
 									const qoi_rgb rgbTexel = data[texelIndex];
 									const qoi_rgba texel = {rgbTexel.r, rgbTexel.g, rgbTexel.b, 255};
-									const qoi_index texelHash = rgbaHash(texel);
 
-									if (texelHash.index == previousTexelHash.index && runLength != 62) {
-										// The hash is cheap to compare but can still give false positives.
-										if (texel == previousTexel) {
-											runLength += 1;
+									if (texel == previousTexel && runLength < 62) {
+										runLength += 1;
+										x += 1;
+										texelIndex += 1;
 
-											continue;
-										}
+										continue;
 									}
 
 									if (runLength > 0) {
@@ -97,7 +102,17 @@ namespace Trident {
 										outputByteStream.write<qoi_run>(run);
 
 										runLength = 0;
+
+										if (texel == previousTexel) {
+											runLength = 1;
+											x += 1;
+											texelIndex += 1;
+
+											continue;
+										}
 									}
+
+									const qoi_index texelHash = rgbaHash(texel);
 
 									if (texel == texelCache[texelHash.index]) {
 										qoi_index index{};
@@ -105,14 +120,43 @@ namespace Trident {
 										index.index = texelHash.index;
 
 										outputByteStream.write<qoi_index>(index);
+
+										previousTexel = texel;
+										previousTexelHash = texelHash;
+										x += 1;
+										texelIndex += 1;
+
+										continue;
 									}
-									else {
-										outputByteStream.write<uint8>(0b11111110);
-										outputByteStream.write<qoi_rgb>(rgbTexel);
+
+									const sint8 dr = (texel.r - previousTexel.r) % 256;
+									const sint8 dg = (texel.g - previousTexel.g) % 256;
+									const sint8 db = (texel.b - previousTexel.b) % 256;
+
+									if ((dr >= -2 && dr <= 1) && (dg >= -2 && dg <= 1) && (db >= -2 && db <= 1)) {
+										qoi_diff diff{};
+										diff.tag = 0b01;
+										diff.dr = dr + 2;
+										diff.dg = dg + 2;
+										diff.db = db + 2;
+
+										outputByteStream.write<qoi_diff>(diff);
+
+										previousTexel = texel;
+										previousTexelHash = texelHash;
+										x += 1;
+										texelIndex += 1;
+
+										continue;
 									}
+
+									outputByteStream.write<uint8>(0b11111110);
+									outputByteStream.write<qoi_rgb>(rgbTexel);
 
 									previousTexel = texel;
 									previousTexelHash = texelHash;
+									x += 1;
+									texelIndex += 1;
 								}
 							}
 						}
@@ -130,27 +174,32 @@ namespace Trident {
 					case ImageFormat::R8G8B8A8_UNORM: {
 						const qoi_rgba* data = pointer_cast<const qoi_rgba*>(&descriptor.data[0]);
 
+						uint32 x;
+						uint32 y;
+						uint32 z = 0;
+						uint32 texelIndex = 0;
 						qoi_rgba texelCache[64]{};
 						qoi_rgba previousTexel = {0, 0, 0, 255};
 						qoi_index previousTexelHash = rgbaHash(previousTexel);
 						uint8 runLength = 0;
-						uint32 texelIndex = 0;
 
-						for (uint32 z = 0; z < descriptor.extent.depth; z += 1) {
-							for (uint32 y = 0; y < descriptor.extent.height; y += 1) {
-								for (uint32 x = 0; x < descriptor.extent.width; x += 1, texelIndex += 1) {
+						while (z < descriptor.extent.depth) {
+							y = 0;
+
+							while (y < descriptor.extent.height) {
+								x = 0;
+
+								while (x < descriptor.extent.width) {
 									texelCache[previousTexelHash.index] = previousTexel;
 
 									const qoi_rgba texel = data[texelIndex];
-									const qoi_index texelHash = rgbaHash(texel);
 
-									if (texelHash.index == previousTexelHash.index && runLength != 62) {
-										// The hash is cheap to compare but can still give false positives.
-										if (texel == previousTexel) {
-											runLength += 1;
+									if (texel == previousTexel && runLength < 62) {
+										runLength += 1;
+										x += 1;
+										texelIndex += 1;
 
-											continue;
-										}
+										continue;
 									}
 
 									if (runLength > 0) {
@@ -161,7 +210,17 @@ namespace Trident {
 										outputByteStream.write<qoi_run>(run);
 
 										runLength = 0;
+
+										if (texel == previousTexel) {
+											runLength = 1;
+											x += 1;
+											texelIndex += 1;
+
+											continue;
+										}
 									}
+
+									const qoi_index texelHash = rgbaHash(texel);
 
 									if (texel == texelCache[texelHash.index]) {
 										qoi_index index{};
@@ -169,16 +228,49 @@ namespace Trident {
 										index.index = texelHash.index;
 
 										outputByteStream.write<qoi_index>(index);
+
+										previousTexel = texel;
+										previousTexelHash = texelHash;
+										x += 1;
+										texelIndex += 1;
+
+										continue;
 									}
-									else {
-										outputByteStream.write<uint8>(0b11111111);
-										outputByteStream.write<qoi_rgba>(texel);
+
+									const sint8 dr = (texel.r - previousTexel.r) % 256;
+									const sint8 dg = (texel.g - previousTexel.g) % 256;
+									const sint8 db = (texel.b - previousTexel.b) % 256;
+
+									if ((dr >= -2 && dr <= 1) && (dg >= -2 && dg <= 1) && (db >= -2 && db <= 1) && texel.a == previousTexel.a) {
+										qoi_diff diff{};
+										diff.tag = 0b01;
+										diff.dr = dr + 2;
+										diff.dg = dg + 2;
+										diff.db = db + 2;
+
+										outputByteStream.write<qoi_diff>(diff);
+
+										previousTexel = texel;
+										previousTexelHash = texelHash;
+										x += 1;
+										texelIndex += 1;
+
+										continue;
 									}
+
+									outputByteStream.write<uint8>(0b11111111);
+									outputByteStream.write<qoi_rgba>(texel);
 
 									previousTexel = texel;
 									previousTexelHash = texelHash;
+									x += 1;
+									texelIndex += 1;
 								}
+
+								y += 1;
 							}
+
+							z += 1;
 						}
 
 						if (runLength > 0) {
