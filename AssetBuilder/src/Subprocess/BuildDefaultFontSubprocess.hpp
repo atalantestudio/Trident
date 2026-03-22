@@ -19,7 +19,7 @@ namespace Trident {
 			};
 
 		private:
-			static constexpr char8* DEFAULT_FONT_NAME = "DefaultFont";
+			static constexpr const char8* DEFAULT_FONT_NAME = "DefaultFont";
 
 			static constexpr sint16 ASCENT = 9;
 			static constexpr sint16 DESCENT = -3;

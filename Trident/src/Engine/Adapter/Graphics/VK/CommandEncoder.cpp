@@ -104,6 +104,8 @@ namespace Trident {
 			vkClearValue.color.float32[3] = clearValue.color[3];
 		}
 
+		const Extent2D renderAreaExtent = framebuffer->getExtent();
+
 		VkRenderPassBeginInfo renderPassBeginInfo{};
 		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		renderPassBeginInfo.pNext = nullptr;
@@ -111,7 +113,7 @@ namespace Trident {
 		renderPassBeginInfo.framebuffer = framebuffer->framebuffer;
 		renderPassBeginInfo.renderArea.offset.x = 0;
 		renderPassBeginInfo.renderArea.offset.y = 0;
-		renderPassBeginInfo.renderArea.extent = *pointer_cast<const VkExtent2D*>(&framebuffer->getExtent());
+		renderPassBeginInfo.renderArea.extent = *pointer_cast<const VkExtent2D*>(&renderAreaExtent);
 		renderPassBeginInfo.clearValueCount = static_cast<uint32>(clearValues.count());
 
 		if (clearValues.count() == 0) {

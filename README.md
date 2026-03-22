@@ -4,7 +4,7 @@ Trident is a game engine made from the ground up, intended for technical teams. 
 
 The engine only supports Windows, but making it run on Linux shouldn't be too hard to add due to the cross-platform nature of the dependencies.
 
-Trident can only be built with the v145 platform toolset for MSBuild. However, it can be opened and compiled on both Visual Studio and Visual Studio Code.
+Trident can only be built on C++17 or later, with the v145 platform toolset for MSBuild. However, it can be opened and compiled on both Visual Studio and Visual Studio Code.
 
 
 

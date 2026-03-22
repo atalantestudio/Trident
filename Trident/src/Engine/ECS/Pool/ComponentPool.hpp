@@ -78,8 +78,8 @@ namespace Trident {
 				// Don't touch the deleted data; instead wait for another component to overwrite it.
 				componentCount -= 1;
 
-				T& component = components[componentIndex];
-				T& lastComponent = components[componentCount];
+				ComponentType& component = components[componentIndex];
+				ComponentType& lastComponent = components[componentCount];
 
 				// Move the component to be deleted to the end of the list.
 				std::swap(component, lastComponent);

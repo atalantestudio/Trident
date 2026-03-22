@@ -6,6 +6,7 @@
 #include "Engine/API/Scene/Scene.hpp"
 
 namespace Trident {
+	class Constraint2D;
 	struct Joint2DDescriptor;
 	class Geometry2D;
 	struct RigidBody2DDescriptor;

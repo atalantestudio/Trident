@@ -65,6 +65,11 @@
 #if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
 	#undef max
 	#undef min
+
+	#if STANDARD >= STANDARD_CPP20
+		#undef far
+		#undef near
+	#endif
 #endif
 
 // Register modules.

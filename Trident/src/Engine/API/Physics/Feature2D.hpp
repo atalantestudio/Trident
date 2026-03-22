@@ -15,7 +15,7 @@ namespace Trident {
 
 	// A vertex or edge of an object's geometry in world-space.
 	struct Feature2D {
-		Feature2D() = default;
+		Feature2D() {}
 
 		// The number of vertices used.
 		uint8 vertexCount;
@@ -28,7 +28,7 @@ namespace Trident {
 	};
 
 	struct ClipFeature2D {
-		ClipFeature2D() = default;
+		ClipFeature2D() {}
 
 		// The number of vertices used.
 		uint8 vertexCount;

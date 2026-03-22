@@ -5,6 +5,17 @@
 
 namespace Trident {
 	class GUIDropDownMenuLayer : public GUILayer {
+		private:
+			static constexpr uint32 ITEM_COUNT = 5;
+
+			inline static constexpr const char8* ITEM_LABELS[ITEM_COUNT] = {
+				"Copy",
+				"Paste",
+				"Delete",
+				"Layer",
+				"Comment",
+			};
+
 		public:
 			void registerAssets() override {
 				font = loadFontAsset("test-regular");
@@ -20,8 +31,10 @@ namespace Trident {
 				menu.debugName = "menu";
 
 				GUIComponent(menu) {
-					for (uint8 itemIndex = 0; itemIndex < 5; itemIndex += 1) {
-						const char8* label = itemLabels[itemIndex];
+					uint32 itemIndex = 0;
+
+					while (itemIndex < ITEM_COUNT) {
+						const char8* label = ITEM_LABELS[itemIndex];
 
 						ContainerStyle item{};
 						item.size = {EXPAND, 40_px};
@@ -44,7 +57,7 @@ namespace Trident {
 								itemLabel.font = font;
 								itemLabel.fontSize = 32;
 
-								GUIText(std::string(label), itemLabel);
+								GUIText(label, itemLabel);
 							}
 
 							ContainerStyle itemImage{};
@@ -54,19 +67,13 @@ namespace Trident {
 
 							GUIComponent(itemImage);
 						}
+
+						itemIndex += 1;
 					}
 				}
 			}
 
 		private:
-			static inline constexpr char8* itemLabels[5] = {
-				"Copy",
-				"Paste",
-				"Delete",
-				"Layer",
-				"Comment",
-			};
-
 			FontID font;
 	};
 }
