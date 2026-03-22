@@ -158,7 +158,11 @@ namespace Trident {
 									x += 1;
 									texelIndex += 1;
 								}
+
+								y += 1;
 							}
+
+							z += 1;
 						}
 
 						if (runLength > 0) {
