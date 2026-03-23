@@ -47,6 +47,6 @@ namespace Trident {
 		template<typename AssetType>
 		ref<AssetType> decodeAsset(ByteStream<StreamOperation::READ>& byteStream);
 
-		void QOIDecoderContentOnly(ByteStream<StreamOperation::READ>& stream, sequence<uint8>& data, uint8 channelCount, uint64 maxIterationCount);
+		void QOIDecoderContentOnly(ByteStream<StreamOperation::READ>& stream, sequence<uint8>& data, uint8 channelCount, uint32 footerByteSize);
 	};
 }

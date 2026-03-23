@@ -168,6 +168,10 @@ namespace Trident {
 		}
 	}
 
+	PropertyFile* Application::getPropertyFile() {
+		return propertyFile;
+	}
+
 	bool Application::hasLayers() const {
 		return layerCompositor->layers.size() > 0;
 	}

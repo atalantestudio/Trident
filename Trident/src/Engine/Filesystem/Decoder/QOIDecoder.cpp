@@ -20,6 +20,8 @@ namespace Trident {
 
 	template<>
 	File<FileFormat::QOI> Filesystem::decode<FileFormat::QOI>(const sequence<uint8>& data) {
+		constexpr uint64 QOI_FOOTER = 0x100000000000000;
+
 		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
 		ENGINE_ASSERT(validateSignature<FileFormat::QOI>(stream), "Invalid QOI signature.");
@@ -57,27 +59,25 @@ namespace Trident {
 
 		file.data = sequence<uint8>(file.extent.width * file.extent.height * channelCount);
 
-		// We cannot parse more than the total byte size - (14-byte header + 8-byte footer).
-		// NOTE: This implementation doesn't look at the footer.
-		const uint64 maxIterationCount = data.count() - 22;
+		QOIDecoderContentOnly(stream, file.data, channelCount, 8);
 
-		QOIDecoderContentOnly(stream, file.data, channelCount, maxIterationCount);
+		const uint8* footer = stream.getBytePosition();
+
+		ENGINE_ASSERT(std::memcmp(footer, &QOI_FOOTER, sizeof(uint64)) == 0, "QOI footer contains invalid bytes.");
 
 		return file;
 	}
 
-	void Filesystem::QOIDecoderContentOnly(ByteStream<StreamOperation::READ>& stream, sequence<uint8>& data, uint8 channelCount, uint64 maxIterationCount) {
+	void Filesystem::QOIDecoderContentOnly(ByteStream<StreamOperation::READ>& stream, sequence<uint8>& data, uint8 channelCount, uint32 footerByteSize) {
 		qoi_rgba previousTexel = {0, 0, 0, 255};
 		qoi_rgba texelCache[64]{};
 		uint64 dataOffset = 0;
-		uint64 iterationIndex = 0;
 
-		while (iterationIndex < maxIterationCount) {
+		while (stream.getRemainingSize() > footerByteSize) {
 			const uint8 tag = stream.peek<uint8>();
 
 			if (tag >= 0b11111110) {
 				// QOI_OP_RGB/QOI_OP_RGBA
-
 				stream.jump(1);
 
 				if (tag == 0b11111111) {
@@ -96,13 +96,11 @@ namespace Trident {
 				std::copy_n(pointer_cast<const uint8*>(&previousTexel), channelCount, &data[dataOffset]);
 
 				dataOffset += channelCount;
-				iterationIndex += channelCount + 1;
 			}
 			else {
 				switch (tag >> 6) {
 					case 0b00: {
 						// QOI_OP_INDEX
-
 						const qoi_index index = stream.read<qoi_index>();
 
 						previousTexel = texelCache[index.index];
@@ -110,13 +108,11 @@ namespace Trident {
 						std::copy_n(pointer_cast<const uint8*>(&previousTexel), channelCount, &data[dataOffset]);
 
 						dataOffset += channelCount;
-						iterationIndex += 1;
 
 						break;
 					}
 					case 0b01: {
 						// QOI_OP_DIFF
-
 						const qoi_diff diff = stream.read<qoi_diff>();
 
 						previousTexel.r += diff.dr - 2;
@@ -126,13 +122,11 @@ namespace Trident {
 						std::copy_n(pointer_cast<const uint8*>(&previousTexel), channelCount, &data[dataOffset]);
 
 						dataOffset += channelCount;
-						iterationIndex += 1;
 
 						break;
 					}
 					case 0b10: {
 						// QOI_OP_LUMA
-
 						const qoi_luma luma = stream.read<qoi_luma>();
 
 						previousTexel.r += luma.dg - 32 + luma.dr_dg - 8;
@@ -142,16 +136,13 @@ namespace Trident {
 						std::copy_n(pointer_cast<const uint8*>(&previousTexel), channelCount, &data[dataOffset]);
 
 						dataOffset += channelCount;
-						iterationIndex += 2;
 
 						break;
 					}
 					case 0b11: {
 						// QOI_OP_RUN
-
-						stream.jump(1);
-
-						const uint8 runLength = (tag & 0b00111111) + 1;
+						const qoi_run run = stream.read<qoi_run>();
+						const uint8 runLength = run.run + 1;
 
 						uint8 runOffset = 0;
 
@@ -161,8 +152,6 @@ namespace Trident {
 							dataOffset += channelCount;
 							runOffset += 1;
 						}
-
-						iterationIndex += 1;
 
 						break;
 					}

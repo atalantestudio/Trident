@@ -43,6 +43,8 @@ namespace Trident {
 
 			void setConsoleArguments(uint32 argumentCount, char8** argumentValues);
 
+			PropertyFile* getPropertyFile();
+
 			bool hasLayers() const;
 
 			// Returns the current frame time, in seconds.

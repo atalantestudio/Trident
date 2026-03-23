@@ -9,9 +9,6 @@
 
 namespace Trident {
 	class SampleImageAssetRenderer : public Renderer {
-		private:
-			static constexpr view<char8> IMAGE_ASSET_NAME = "test-regular";
-
 		public:
 			void build() override {
 				setupRenderPass();
@@ -78,7 +75,8 @@ namespace Trident {
 			}
 
 			void loadImageAsset() {
-				const ref<ImageAsset> imageAsset = getLayer()->getApplication()->getAssetLibrary()->getAsset<ImageAsset>(IMAGE_ASSET_NAME);
+				const view<char8> imageAssetName = ((Layer*) getLayer())->getApplication()->getPropertyFile()->getProperty<view<char8>>("AssetName");
+				const ref<ImageAsset> imageAsset = getLayer()->getApplication()->getAssetLibrary()->getAsset<ImageAsset>(imageAssetName);
 
 				ImageFormat imageFormat = imageAsset->getFormat();
 

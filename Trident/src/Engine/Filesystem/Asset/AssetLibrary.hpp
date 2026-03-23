@@ -300,7 +300,7 @@ namespace Trident {
 					}
 					case ImageFormat::R8G8B8_UNORM:
 					case ImageFormat::R8G8B8A8_UNORM: {
-						Filesystem::QOIDecoderContentOnly(byteStream, imageAssetDescriptor.data, channelCount, byteStream.getRemainingSize());
+						Filesystem::QOIDecoderContentOnly(byteStream, imageAssetDescriptor.data, channelCount, 0);
 
 						break;
 					}
