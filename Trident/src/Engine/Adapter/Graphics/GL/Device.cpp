@@ -118,7 +118,6 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_3_2
-			// TODO: Remove const_cast.
 			GL::Fence* _fence = static_cast<GL::Fence*>(fence);
 			GLenum status;
 
