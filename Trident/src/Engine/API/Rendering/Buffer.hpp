@@ -15,13 +15,19 @@ namespace Trident {
 			~BaseBuffer();
 
 			/// Returns the size in bytes of the buffer.
-			uint64 getSize() const;
+			inline uint64 getSize() const {
+				return size;
+			}
 
-			/// Returns the current buffer usage flags.
-			BufferUsage getUsage() const;
+			/// Returns the buffer usage flags.
+			inline BufferUsage getUsage() const {
+				return usage;
+			}
 
 			/// Returns the current buffer access flags.
-			Access getAccess() const;
+			inline Access getAccess() const {
+				return access;
+			}
 
 			/// Maps a range of the buffer to host memory.
 			/// The offset and size must be provided in bytes.
@@ -33,12 +39,13 @@ namespace Trident {
 		protected:
 			explicit BaseBuffer(const Device* device, const BufferDescriptor& descriptor);
 
+		// TODO: Make private.
 		public:
 			uint64 size;
-
-			// TODO: Add memory suballocation.
-
 			BufferUsage usage;
+
+			// TODO: Store memory suballocation.
+
 			Access access = Access::NONE;
 
 		private:

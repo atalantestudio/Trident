@@ -24,18 +24,6 @@ namespace Trident {
 		device->adapter->destroyBuffer(device, this);
 	}
 
-	uint64 BaseBuffer::getSize() const {
-		return size;
-	}
-
-	BufferUsage BaseBuffer::getUsage() const {
-		return usage;
-	}
-
-	Access BaseBuffer::getAccess() const {
-		return access;
-	}
-
 	void* BaseBuffer::map(uint64 offset, uint64 size) const {
 		return device->adapter->mapBuffer(device, this, offset, size);
 	}
