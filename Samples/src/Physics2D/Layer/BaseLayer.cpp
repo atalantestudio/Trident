@@ -31,7 +31,9 @@ namespace Trident {
 	void BaseLayer::update(float32 deltaTime, float32 inverseDeltaTime) {}
 
 	void BaseLayer::preRender() {
-		visualizationData = {};
+		#if defined(BUILD_MODE_DEBUG)
+			visualizationData = {};
+		#endif
 
 		// TODO
 		// For now there is 1 physics tick per frame because debugging along with Box2D Lite is easier.
@@ -62,53 +64,55 @@ namespace Trident {
 
 		renderer.clearRegisteredData();
 
-		#if VISUALIZE_MODE == VISUALIZE_MODE_CONTACT_MANIFOLD
-			if (visualizationData.contactManifold.contactCount > 0) {
-				Feature2D contactManifold{};
-				contactManifold.vertexCount = visualizationData.contactManifold.contactCount;
+		#if defined(BUILD_MODE_DEBUG)
+			#if VISUALIZE_MODE == VISUALIZE_MODE_CONTACT_MANIFOLD
+				if (visualizationData.contactManifold.contactCount > 0) {
+					Feature2D contactManifold{};
+					contactManifold.vertexCount = visualizationData.contactManifold.contactCount;
 
-				uint8 contactIndex = 0;
+					uint8 contactIndex = 0;
 
-				while (contactIndex < contactManifold.vertexCount) {
-					contactManifold.edge[contactIndex] = visualizationData.contactManifold.contacts[contactIndex].position;
+					while (contactIndex < contactManifold.vertexCount) {
+						contactManifold.edge[contactIndex] = visualizationData.contactManifold.contacts[contactIndex].position;
 
-					contactIndex += 1;
+						contactIndex += 1;
+					}
+
+					renderer.registerFeature(contactManifold);
 				}
+			#endif
 
-				renderer.registerFeature(contactManifold);
-			}
-		#endif
+			#if VISUALIZE_MODE == VISUALIZE_MODE_CLOSEST_POINTS
+				if (visualizationData.satOutput.separation > 0.0f) {
+					const vec2<float32>& closestA = visualizationData.satOutput.incidentSupportPoint;
+					const vec2<float32> closestB = closestA - visualizationData.satOutput.normal * visualizationData.satOutput.separation;
 
-		#if VISUALIZE_MODE == VISUALIZE_MODE_CLOSEST_POINTS
-			if (visualizationData.satOutput.separation > 0.0f) {
-				const vec2<float32>& closestA = visualizationData.satOutput.incidentSupportPoint;
-				const vec2<float32> closestB = closestA - visualizationData.satOutput.normal * visualizationData.satOutput.separation;
+					#if defined(SHOW_DISTANCE)
+						renderer.setClosestPoints(closestA, closestB);
+					#endif
 
-				#if defined(SHOW_DISTANCE)
-					renderer.setClosestPoints(closestA, closestB);
-				#endif
+					#if defined(SHOW_FEATURES)
+						Feature2D vertexFeatureA{};
+						vertexFeatureA.vertexCount = 1;
+						vertexFeatureA.vertex = closestA;
 
-				#if defined(SHOW_FEATURES)
-					Feature2D vertexFeatureA{};
-					vertexFeatureA.vertexCount = 1;
-					vertexFeatureA.vertex = closestA;
+						Feature2D vertexFeatureB{};
+						vertexFeatureB.vertexCount = 1;
+						vertexFeatureB.vertex = closestB;
 
-					Feature2D vertexFeatureB{};
-					vertexFeatureB.vertexCount = 1;
-					vertexFeatureB.vertex = closestB;
+						renderer.registerFeature(vertexFeatureA);
+						renderer.registerFeature(vertexFeatureB);
+					#endif
+				}
+			#endif
 
-					renderer.registerFeature(vertexFeatureA);
-					renderer.registerFeature(vertexFeatureB);
-				#endif
-			}
-		#endif
-
-		#if VISUALIZE_MODE == VISUALIZE_MODE_REFERENCE_EDGE_TOUCHING
-			if (visualizationData.satOutput.separation <= 0.0f) {
-				#if defined(SHOW_FEATURES)
-					renderer.registerFeature(visualizationData.satOutput.referenceEdge);
-				#endif
-			}
+			#if VISUALIZE_MODE == VISUALIZE_MODE_REFERENCE_EDGE_TOUCHING
+				if (visualizationData.satOutput.separation <= 0.0f) {
+					#if defined(SHOW_FEATURES)
+						renderer.registerFeature(visualizationData.satOutput.referenceEdge);
+					#endif
+				}
+			#endif
 		#endif
 	}
 
