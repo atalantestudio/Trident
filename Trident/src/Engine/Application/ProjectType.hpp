@@ -8,7 +8,7 @@ namespace Trident {
 		// Graphical applications (software, games, etc.).
 		MAIN = 0,
 
-		// Build tools do not use assets and don't require an Asset directory.
+		// Build tools are executed on the command-line.
 		BUILD = 1,
 	};
 }
