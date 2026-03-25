@@ -18,7 +18,7 @@ namespace Trident {
 		Feature2D() {}
 
 		// The number of vertices used.
-		uint8 vertexCount;
+		uint8 vertexCount = 0;
 
 		// The transformed vertices that compose the feature.
 		union {
@@ -31,7 +31,7 @@ namespace Trident {
 		ClipFeature2D() {}
 
 		// The number of vertices used.
-		uint8 vertexCount;
+		uint8 vertexCount = 0;
 
 		// The transformed vertices that compose the feature.
 		union {
