@@ -11,11 +11,16 @@ namespace Trident {
 		public:
 			static view<char8> getDefaultFileData() {
 				return (
-					"GraphicsAPI: Vulkan\n"
+					"GraphicsAPI: OpenGL\n"
 					"PreferIntegratedGPU: 0\n"
 					"WindowWidth: 1280\n"
 					"WindowHeight: 720\n"
-					"VerticalSync: 1"
+					"VerticalSync: 1\n"
+					"\n"
+					"SampleGroupName: Sample\n"
+					"SampleName: Triangle\n"
+					"\n"
+					"AssetName: test-regular"
 				);
 			}
 
