@@ -66,9 +66,6 @@ namespace Trident {
 
 			vec2<float32> linearVelocity = {0.0_m_s, 0.0_m_s};
 
-			// TODO: Use linear acceleration with Verlet integration.
-			vec2<float32> linearAcceleration = {0.0_m_s2, 0.0_m_s2};
-
 			// Sum of the forces acting on the object's linear properties.
 			vec2<float32> force = {0.0_N, 0.0_N};
 
