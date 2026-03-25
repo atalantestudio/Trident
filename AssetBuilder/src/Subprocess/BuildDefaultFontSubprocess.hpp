@@ -174,7 +174,7 @@ namespace Trident {
 		public:
 			explicit BuildDefaultFontSubprocess(const std::filesystem::path& assetOutputPath) {
 				const sequence<uint8> buffer = Filesystem::openByteBuffer("../Trident/src/Asset/Image/quiver.png");
-				const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(buffer);
+				const File<FileFormat::PNG> file = Decoder<FileFormat::PNG>::decode(buffer);
 
 				ENGINE_ASSERT(file.format == ImageFormat::R8G8B8A8_UNORM, "The default font bitmap must have RGBA format.");
 				ENGINE_ASSERT(file.extent.depth == 1, "The default font bitmap must have a depth of 1.");

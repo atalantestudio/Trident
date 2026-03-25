@@ -16,13 +16,13 @@ namespace Trident {
 				const sequence<uint8> inputData = Filesystem::openByteBuffer(path);
 				const ByteStream<StreamOperation::READ> inputByteStream(&inputData[0], inputData.count(), Endianness::BIG_ENDIAN);
 
-				if (!Filesystem::validateSignature<FileFormat::TTF>(inputByteStream)) {
+				if (!Decoder<FileFormat::TTF>::validateSignature(inputByteStream)) {
 					ENGINE_INFO("Ignoring non-TTF file \"[]\".", path);
 
 					return;
 				}
 
-				const File<FileFormat::TTF> file = Filesystem::decode<FileFormat::TTF>(inputData);
+				const File<FileFormat::TTF> file = Decoder<FileFormat::TTF>::decode(inputData);
 
 				SDFGlyphMap sdfGlyphMap;
 

@@ -38,12 +38,6 @@ namespace Trident {
 
 		Writer openWriter(view<char8> path);
 
-		template<FileFormat FileFormat>
-		bool validateSignature(const ByteStream<StreamOperation::READ>& stream);
-
-		template<FileFormat FileFormat>
-		File<FileFormat> decode(const sequence<uint8>& data);
-
 		template<typename AssetType>
 		ref<AssetType> decodeAsset(ByteStream<StreamOperation::READ>& byteStream);
 

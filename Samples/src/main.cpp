@@ -45,7 +45,6 @@
 #include "Sample/Layer/DepthTest.hpp"
 #include "Sample/Layer/Empty.hpp"
 #include "Sample/Layer/Gradient.hpp"
-#include "Sample/Layer/Image.hpp"
 #include "Sample/Layer/ImageAsset.hpp"
 #include "Sample/Layer/InputAttachment.hpp"
 #include "Sample/Layer/MipLevels.hpp"
@@ -175,9 +174,6 @@ namespace Trident {
 			}
 			else if (SampleNameProperty == "Gradient") {
 				registerLayer<SampleGradientLayer>();
-			}
-			else if (SampleNameProperty == "Image") {
-				registerLayer<SampleImageLayer>();
 			}
 			else if (SampleNameProperty == "ImageAsset") {
 				registerLayer<SampleImageAssetLayer>();

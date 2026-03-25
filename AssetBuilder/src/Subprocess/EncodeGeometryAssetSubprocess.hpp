@@ -4,23 +4,23 @@
 #pragma once
 
 #include "Engine/Build/Clusterizer.hpp"
+#include "Engine/Filesystem/Decoder/Decoder.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
-#include "Engine/Filesystem/File/FBXFile.hpp"
 
 namespace Trident {
-	// TODO: Ensure that FBX nodes exist before using them.
 	static void EncodeGeometryAssetSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::filesystem::path& assetOutputPath) {
 		const sequence<char8> path = directoryEntry.path().string();
 		const sequence<uint8> inputData = Filesystem::openByteBuffer(path);
 
-		if (!Filesystem::validateSignature<FileFormat::FBX>(ByteStream<StreamOperation::READ>(&inputData[0], inputData.count(), Endianness::LITTLE_ENDIAN))) {
+		if (!Decoder<FileFormat::FBX>::validateSignature(ByteStream<StreamOperation::READ>(&inputData[0], inputData.count(), Endianness::LITTLE_ENDIAN))) {
 			ENGINE_INFO("Ignoring non-FBX file \"[]\".", path);
 
 			return;
 		}
 
-		const File<FileFormat::FBX> file = Filesystem::decode<FileFormat::FBX>(inputData);
+		const File<FileFormat::FBX> file = Decoder<FileFormat::FBX>::decode(inputData);
 
+		// TODO: Ensure that FBX nodes exist before using them.
 		const FBXNode* ObjectsNode = file.searchNodeRecursive(file.NodeList, "Objects");
 		const FBXNode* GeometryNode = file.searchNodeRecursive(file.NodeList, "Geometry");
 		const FBXNode* VerticesNode = file.searchNodeRecursive(GeometryNode->NestedList, "Vertices");

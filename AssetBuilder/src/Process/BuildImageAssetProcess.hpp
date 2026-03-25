@@ -3,8 +3,9 @@
 
 #pragma once
 
-#include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 #include "Engine/API/Process/Process.hpp"
+#include "Engine/Filesystem/Asset/AssetLibrary.hpp"
+#include "Engine/Filesystem/Decoder/Decoder.hpp"
 
 namespace Trident {
 	class BuildImageAssetProcess : public Process {
@@ -230,15 +231,15 @@ namespace Trident {
 				imageAssetDescriptor.mipLevelCount = 1;
 				imageAssetDescriptor.layerCount = 1;
 
-				if (Filesystem::validateSignature<FileFormat::PNG>(ByteStream<StreamOperation::READ>(&inputData[0], inputData.count(), Endianness::BIG_ENDIAN))) {
-					const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(inputData);
+				if (Decoder<FileFormat::PNG>::validateSignature(ByteStream<StreamOperation::READ>(&inputData[0], inputData.count(), Endianness::BIG_ENDIAN))) {
+					const File<FileFormat::PNG> file = Decoder<FileFormat::PNG>::decode(inputData);
 
 					imageAssetDescriptor.format = file.format;
 					imageAssetDescriptor.extent = file.extent;
 					imageAssetDescriptor.data = file.data;
 				}
-				else if (Filesystem::validateSignature<FileFormat::QOI>(ByteStream<StreamOperation::READ>(&inputData[0], inputData.count(), Endianness::LITTLE_ENDIAN))) {
-					const File<FileFormat::QOI> file = Filesystem::decode<FileFormat::QOI>(inputData);
+				else if (Decoder<FileFormat::QOI>::validateSignature(ByteStream<StreamOperation::READ>(&inputData[0], inputData.count(), Endianness::LITTLE_ENDIAN))) {
+					const File<FileFormat::QOI> file = Decoder<FileFormat::QOI>::decode(inputData);
 
 					imageAssetDescriptor.format = file.format;
 					imageAssetDescriptor.extent = file.extent;

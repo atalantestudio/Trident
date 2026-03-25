@@ -3,12 +3,12 @@
 
 #include "pch.hpp"
 
+#include "Engine/Filesystem/Decoder/Decoder.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
-#include "Engine/Filesystem/Stream/BitStream.hpp"
 
 namespace Trident {
 	template<>
-	bool Filesystem::validateSignature<FileFormat::QOI>(const ByteStream<StreamOperation::READ>& stream) {
+	bool Decoder<FileFormat::QOI>::validateSignature(const ByteStream<StreamOperation::READ>& stream) {
 		if (stream.getRemainingSize() < sizeof(uint32)) {
 			return false;
 		}
@@ -19,12 +19,12 @@ namespace Trident {
 	}
 
 	template<>
-	File<FileFormat::QOI> Filesystem::decode<FileFormat::QOI>(const sequence<uint8>& data) {
+	File<FileFormat::QOI> Decoder<FileFormat::QOI>::decode(view<uint8> data) {
 		constexpr uint64 QOI_FOOTER = 0x100000000000000;
 
 		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-		ENGINE_ASSERT(validateSignature<FileFormat::QOI>(stream), "Invalid QOI signature.");
+		ENGINE_ASSERT(Decoder<FileFormat::QOI>::validateSignature(stream), "Invalid QOI signature.");
 
 		stream.jump(sizeof(uint32));
 
@@ -59,7 +59,7 @@ namespace Trident {
 
 		file.data = sequence<uint8>(file.extent.width * file.extent.height * channelCount);
 
-		QOIDecoderContentOnly(stream, file.data, channelCount, 8);
+		Filesystem::QOIDecoderContentOnly(stream, file.data, channelCount, 8);
 
 		const uint8* footer = stream.getBytePosition();
 

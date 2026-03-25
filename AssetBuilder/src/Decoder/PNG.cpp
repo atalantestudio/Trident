@@ -3,11 +3,12 @@
 
 #include "pch.hpp"
 
-#include "Engine/Filesystem/Filesystem.hpp"
+#include "Engine/Filesystem/Decoder/Decoder.hpp"
 #include "Engine/Filesystem/Stream/BitStream.hpp"
-#include "Engine/Filesystem/Stream/ByteStream.hpp"
 
 namespace Trident {
+	typedef uint8 (*Filter)(uint8 x, uint8 a, uint8 b, uint8 c);
+
 	static sint32 PaethPredictor(uint8 a, uint8 b, uint8 c) {
 		const sint16 p = a + b - c;
 		const uint16 pa = abs(p - a);
@@ -24,8 +25,6 @@ namespace Trident {
 
 		return c;
 	}
-
-	typedef uint8 (*Filter)(uint8 x, uint8 a, uint8 b, uint8 c);
 
 	static uint8 None(uint8 x, uint8 a, uint8 b, uint8 c) {
 		return x;
@@ -54,7 +53,7 @@ namespace Trident {
 	static constexpr Filter FILTERS[] = {None, Sub, Up, Average, Paeth};
 
 	template<>
-	bool Filesystem::validateSignature<FileFormat::PNG>(const ByteStream<StreamOperation::READ>& stream) {
+	bool Decoder<FileFormat::PNG>::validateSignature(const ByteStream<StreamOperation::READ>& stream) {
 		if (stream.getRemainingSize() < sizeof(uint64)) {
 			return false;
 		}
@@ -65,10 +64,10 @@ namespace Trident {
 	}
 
 	template<>
-	File<FileFormat::PNG> Filesystem::decode(const sequence<uint8>& data) {
+	File<FileFormat::PNG> Decoder<FileFormat::PNG>::decode(view<uint8> data) {
 		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::BIG_ENDIAN);
 
-		ENGINE_ASSERT(validateSignature<FileFormat::PNG>(stream), "Invalid PNG signature.");
+		ENGINE_ASSERT(Decoder<FileFormat::PNG>::validateSignature(stream), "Invalid PNG signature.");
 
 		stream.jump(sizeof(uint64));
 

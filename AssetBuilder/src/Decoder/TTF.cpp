@@ -3,8 +3,8 @@
 
 #include "pch.hpp"
 
+#include "Engine/Filesystem/Decoder/Decoder.hpp"
 #include "Engine/Filesystem/File/TTFFile.hpp"
-#include "Engine/Filesystem/Filesystem.hpp"
 
 namespace Trident {
 	namespace TrueTypeFont {
@@ -353,7 +353,7 @@ namespace Trident {
 	}
 
 	template<>
-	bool Filesystem::validateSignature<FileFormat::TTF>(const ByteStream<StreamOperation::READ>& stream) {
+	bool Decoder<FileFormat::TTF>::validateSignature(const ByteStream<StreamOperation::READ>& stream) {
 		if (stream.getRemainingSize() < sizeof(uint32)) {
 			return false;
 		}
@@ -361,19 +361,21 @@ namespace Trident {
 		const uint32 scalerType = stream.peek<uint32>();
 
 		switch (scalerType) {
-			case STRING_TO_BIG_ENDIAN_UINT32("true"):
 			case 0x00010000:
-			case STRING_TO_BIG_ENDIAN_UINT32("typ1"):
 			case STRING_TO_BIG_ENDIAN_UINT32("OTTO"):
+			case STRING_TO_BIG_ENDIAN_UINT32("true"):
+			case STRING_TO_BIG_ENDIAN_UINT32("typ1"): {
 				return true;
-			default:
+			}
+			default: {
 				return false;
+			}
 		}
 	}
 
 	// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6.html
 	template<>
-	File<FileFormat::TTF> Filesystem::decode(const sequence<uint8>& data) {
+	File<FileFormat::TTF> Decoder<FileFormat::TTF>::decode(view<uint8> data) {
 		using namespace TrueTypeFont;
 
 		File<FileFormat::TTF> file;

@@ -3,8 +3,8 @@
 
 #include "pch.hpp"
 
+#include "Engine/Filesystem/Decoder/Decoder.hpp"
 #include "Engine/Filesystem/File/FBXFile.hpp"
-#include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Filesystem/Stream/BitStream.hpp"
 
 namespace Trident {
@@ -135,7 +135,7 @@ namespace Trident {
 	}
 
 	template<>
-	bool Filesystem::validateSignature<FileFormat::FBX>(const ByteStream<StreamOperation::READ>& stream) {
+	bool Decoder<FileFormat::FBX>::validateSignature(const ByteStream<StreamOperation::READ>& stream) {
 		if (stream.getRemainingSize() < 22) {
 			return false;
 		}
@@ -148,12 +148,12 @@ namespace Trident {
 	// https://code.blender.org/2013/08/fbx-binary-file-format-specification
 	// https://banexdevblog.wordpress.com/2014/06/23/a-quick-tutorial-about-the-fbx-ascii-format
 	template<>
-	File<FileFormat::FBX> Filesystem::decode(const sequence<uint8>& data) {
+	File<FileFormat::FBX> Decoder<FileFormat::FBX>::decode(view<uint8> data) {
 		File<FileFormat::FBX> file;
 
 		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-		ENGINE_ASSERT(Filesystem::validateSignature<FileFormat::FBX>(stream), "Invalid FBX file signature.");
+		ENGINE_ASSERT(Decoder<FileFormat::FBX>::validateSignature(stream), "Invalid FBX file signature.");
 
 		stream.jump(21);
 
