@@ -6,6 +6,7 @@
 #include "Engine/API/Process/Process.hpp"
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 #include "Engine/Filesystem/Decoder/Decoder.hpp"
+#include "Engine/Filesystem/File/QOI.hpp"
 
 namespace Trident {
 	class BuildImageAssetProcess : public Process {

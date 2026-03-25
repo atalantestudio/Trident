@@ -7,6 +7,8 @@
 #include "Engine/Filesystem/Decoder/Decoder.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 
+#include "../File/FBX.hpp"
+
 namespace Trident {
 	static void EncodeGeometryAssetSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::filesystem::path& assetOutputPath) {
 		const sequence<char8> path = directoryEntry.path().string();

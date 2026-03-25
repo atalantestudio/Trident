@@ -6,6 +6,7 @@
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
+#include "../File/TTF.hpp"
 #include "GenerateSDFGlyphMapProcess.hpp"
 
 namespace Trident {

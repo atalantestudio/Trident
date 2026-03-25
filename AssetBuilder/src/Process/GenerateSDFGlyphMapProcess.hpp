@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/Filesystem/File/TTFFile.hpp"
+#include "Engine/Filesystem/File.hpp"
 #include "Engine/Font/Glyph.hpp"
 
 namespace Trident {

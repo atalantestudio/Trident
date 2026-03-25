@@ -5,6 +5,7 @@
 
 #include "Process/BuildImageAssetProcess.hpp"
 #include "Process/GenerateSDFGlyphMapProcess.hpp"
+#include "../File/TTF.hpp"
 
 namespace Trident {
 	class BuildTrueTypeFontSubprocess {

@@ -6,6 +6,8 @@
 #include "Engine/Filesystem/Decoder/Decoder.hpp"
 #include "Engine/Filesystem/Stream/BitStream.hpp"
 
+#include "../File/PNG.hpp"
+
 namespace Trident {
 	typedef uint8 (*Filter)(uint8 x, uint8 a, uint8 b, uint8 c);
 

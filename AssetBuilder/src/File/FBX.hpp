@@ -74,24 +74,22 @@ namespace Trident {
 	};
 
 	template<>
-	class File<FileFormat::FBX> {
-		public:
-			static const FBXNode* searchNodeRecursive(const std::vector<FBXNode>& NestedList, view<char8> Name, const FBXNode* ResultNode = nullptr) {
-				for (const FBXNode& Node : NestedList) {
-					if (Name == Node.Name) {
-						ResultNode = &Node;
+	struct File<FileFormat::FBX> {
+		static const FBXNode* searchNodeRecursive(const std::vector<FBXNode>& NestedList, view<char8> Name, const FBXNode* ResultNode = nullptr) {
+			for (const FBXNode& Node : NestedList) {
+				if (Name == Node.Name) {
+					ResultNode = &Node;
 
-						break;
-					}
-
-					ResultNode = searchNodeRecursive(Node.NestedList, Name, ResultNode);
+					break;
 				}
 
-				return ResultNode;
+				ResultNode = searchNodeRecursive(Node.NestedList, Name, ResultNode);
 			}
 
-		public:
-			uint32 Version;
-			std::vector<FBXNode> NodeList;
+			return ResultNode;
+		}
+
+		uint32 Version;
+		std::vector<FBXNode> NodeList;
 	};
 }

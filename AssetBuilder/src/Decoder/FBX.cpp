@@ -4,8 +4,9 @@
 #include "pch.hpp"
 
 #include "Engine/Filesystem/Decoder/Decoder.hpp"
-#include "Engine/Filesystem/File/FBXFile.hpp"
 #include "Engine/Filesystem/Stream/BitStream.hpp"
+
+#include "../File/FBX.hpp"
 
 namespace Trident {
 	static constexpr uint32 MAX_ROOT_NODE_ITERATIONS = 11;

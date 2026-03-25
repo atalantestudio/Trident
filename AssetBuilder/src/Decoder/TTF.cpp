@@ -4,7 +4,8 @@
 #include "pch.hpp"
 
 #include "Engine/Filesystem/Decoder/Decoder.hpp"
-#include "Engine/Filesystem/File/TTFFile.hpp"
+
+#include "../File/TTF.hpp"
 
 namespace Trident {
 	namespace TrueTypeFont {
