@@ -10,6 +10,73 @@
 #include "SceneLayer.hpp"
 
 namespace Trident {
+	void Physics2DSceneLayer::createPuzzleScene(Scene2D& scene) {
+		const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
+
+		// Floor
+		scene.createStaticRigidBody({
+			.position = {0_m, -0.5_m},
+			.scale = {16.0f, 1.0f},
+			.friction = 1.0f,
+			.geometry = squareGeometry,
+			.fillColor = 0xf4fedbff,
+		});
+
+		// Left wall
+		scene.createStaticRigidBody({
+			.position = {-7.75_m, 0.6_m},
+			.scale = {0.5f, 1.2f},
+			.friction = 1.0f,
+			.geometry = squareGeometry,
+			.fillColor = 0xf4fedbff,
+		});
+
+		// Right wall
+		scene.createStaticRigidBody({
+			.position = {7.75_m, 2_m},
+			.scale = {0.5f, 4.0f},
+			.friction = 1.0f,
+			.geometry = squareGeometry,
+			.fillColor = 0xf4fedbff,
+		});
+
+		// Heightened floor
+		scene.createStaticRigidBody({
+			.position = {7_m, 0.1_m},
+			.scale = {1.0f, 0.2f},
+			.friction = 1.0f,
+			.geometry = squareGeometry,
+			.fillColor = 0xf4fedbff,
+		});
+
+		// Player
+		scene.createDynamicRigidBody({
+			.position = {0_m, 1.8_m * 0.5f},
+			.scale = {1_m, 1.8_m},
+			.mass = 1_kg,
+			.friction = 1.0f,
+			.geometry = squareGeometry,
+			.fillColor = 0xe6ddffff,
+		});
+
+		playerEntity = scene.getLastEntity();
+
+		// Prop box
+		scene.createDynamicRigidBody({
+			.position = {4_m, 1_m},
+			.scale = {2.5f, 0.5f},
+			.mass = 1_kg,
+			.friction = 1.0f,
+			.geometry = squareGeometry,
+			.fillColor = 0xe6ddffff,
+		});
+
+		RotationConstraint2DDescriptor constraintDescriptor{};
+		constraintDescriptor.A = playerEntity;
+
+		scene.createConstraint<RotationConstraint2D>(constraintDescriptor);
+	}
+
 	Physics2DSceneLayer::Physics2DSceneLayer() :
 		physicsEngine(getPhysicsEngineDescriptor())
 	{}
@@ -28,42 +95,7 @@ namespace Trident {
 	void Physics2DSceneLayer::postConstruct() {
 		Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
 
-		const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
-
-		RigidBody2DDescriptor floorDescriptor{};
-		floorDescriptor.position = {0.0_m, -10.0_m};
-		floorDescriptor.scale = {100.0f, 20.0f};
-		floorDescriptor.friction = 1.0f;
-		floorDescriptor.geometry = squareGeometry;
-		floorDescriptor.fillColor = 0xf4fedbff;
-
-		scene.createStaticRigidBody(floorDescriptor);
-
-		RigidBody2DDescriptor playerDescriptor{};
-		playerDescriptor.position = {0.0_m, 1.80_m * 0.5f};
-		playerDescriptor.scale = {1.0_m, 1.80_m};
-		playerDescriptor.mass = 1.0_kg;
-		playerDescriptor.friction = 1.0f;
-		playerDescriptor.geometry = squareGeometry;
-		playerDescriptor.fillColor = 0xe6ddffff;
-
-		scene.createDynamicRigidBody(playerDescriptor);
-
-		playerEntity = scene.getLastEntity();
-
-		RigidBody2DDescriptor obstacleDescriptor{};
-		obstacleDescriptor.position = {5.0_m, 1.0_m};
-		obstacleDescriptor.mass = 100000.0_kg;
-		obstacleDescriptor.friction = 1.0f;
-		obstacleDescriptor.geometry = squareGeometry;
-		obstacleDescriptor.fillColor = 0xe6ddffff;
-
-		scene.createDynamicRigidBody(obstacleDescriptor);
-
-		RotationConstraint2DDescriptor constraintDescriptor{};
-		constraintDescriptor.A = playerEntity;
-
-		scene.createConstraint<RotationConstraint2D>(constraintDescriptor);
+		createPuzzleScene(scene);
 
 		physicsEngine.registerScene(scene);
 
@@ -74,22 +106,23 @@ namespace Trident {
 	}
 
 	void Physics2DSceneLayer::update(float32 deltaTime, float32 inverseDeltaTime) {
-		static constexpr float32 SPEED = 30.0f;
-		static constexpr float32 JUMP_SPEED = 450.0f;
+		constexpr float32 SPEED = 3.0f;
 
 		Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
 		RigidBody2D& playerRigidBody = scene.getComponent<RigidBody2D>(playerEntity);
 
 		if (keyMap[KeyCode::Q]) {
-			playerRigidBody.applyImpulse({-SPEED * deltaTime, 0.0f});
+			playerRigidBody.linearVelocity += {-SPEED, playerRigidBody.linearVelocity[1]};
 		}
 
 		if (keyMap[KeyCode::D]) {
-			playerRigidBody.applyImpulse({SPEED * deltaTime, 0.0f});
+			playerRigidBody.linearVelocity += {SPEED, playerRigidBody.linearVelocity[1]};
 		}
 
 		if (keyMap[KeyCode::SPACE] && !jumping) {
-			playerRigidBody.applyImpulse({0.0f, JUMP_SPEED * deltaTime});
+			const float32 jumpForce = sqrt(2.0f * 800.0f * 45.0f);
+
+			playerRigidBody.linearVelocity = {playerRigidBody.linearVelocity[0], jumpForce * deltaTime};
 
 			jumping = true;
 		}

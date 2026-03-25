@@ -29,6 +29,8 @@ namespace Trident {
 			void onEvent(Event& event) override;
 
 		private:
+			void createPuzzleScene(Scene2D& scene);
+
 			void checkHover();
 
 			bool onEvent(KeyDownEvent& event);
