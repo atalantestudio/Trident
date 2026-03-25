@@ -9,6 +9,7 @@
 
 #include "Compute/PrefixSum.hpp"
 
+#include "GUI/Card.hpp"
 #include "GUI/Demo1.hpp"
 #include "GUI/Demo2.hpp"
 #include "GUI/Demo3.hpp"
@@ -71,7 +72,10 @@ namespace Trident {
 			}
 		}
 		else if (SampleGroupNameProperty == "GUI") {
-			if (SampleNameProperty == "Demo1") {
+			if (SampleNameProperty == "Card") {
+				registerLayer<GUICardLayer>();
+			}
+			else if (SampleNameProperty == "Demo1") {
 				registerLayer<GUIDemo1Layer>();
 			}
 			else if (SampleNameProperty == "Demo2") {

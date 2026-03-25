@@ -130,7 +130,7 @@ namespace Trident {
 			uint32 mouseDownComponentIndex = max<uint32>();
 	};
 
-	#define GUIComponent(component) for (bool _opened = (openComponent(component), true); _opened; _opened = false, closeComponent())
+	#define GUIComponent(...) for (bool _opened = (openComponent(__VA_ARGS__), true); _opened; _opened = false, closeComponent())
 
 	// Specific to objects extending GUIComponent.
 	#define GUIComponentClass(component, renderChildren) component.render(BIND(openComponent), BIND(closeComponent), renderChildren)

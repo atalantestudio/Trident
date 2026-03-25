@@ -23,7 +23,7 @@ namespace Trident {
 		AnchorPoint anchorPoint = AnchorPoint::TOP | AnchorPoint::LEFT;
 		LayoutDirection layoutDirection = HORIZONTAL;
 		float32 layoutSpacing = 0_px;
-		Color color = 0xffffffff;
+		Color color = 0x00000000;
 		ImageID image = 0;
 		PointerType pointerType = PointerType::DEFAULT;
 

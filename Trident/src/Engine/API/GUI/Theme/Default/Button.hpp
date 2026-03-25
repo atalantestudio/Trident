@@ -36,42 +36,37 @@ namespace Trident {
 			}
 
 			void onMouseDown(MouseDownEvent& event) {
-				mouseDown = true;
 				style.zIndex = 1;
 				style.color = 0xc2c2c2ff;
+
+				innerStyle.zIndex = 1;
 
 				// TODO: Propagate text color to children.
 				// textStyle.color = 0xc2c2c2ff;
 			}
 
 			void onMouseUp(MouseUpEvent& event) {
-				mouseDown = false;
 				style.zIndex = 0;
 				style.color = 0x3a3a3aff;
+
+				innerStyle.zIndex = 0;
 
 				// TODO: Propagate text color to children.
 				// textStyle.color = 0xa5a5a5ff;
 			}
 
 			void onMouseHover(MouseMoveEvent& event) {
-				hovered = true;
-				innerStyle.zIndex = 1;
+				// innerStyle.zIndex = 1;
 				innerStyle.color = 0x1a1a1aff;
 			}
 
 			void onMouseLeave(MouseMoveEvent& event) {
-				hovered = false;
-				innerStyle.zIndex = 0;
 				innerStyle.color = 0x0a0a0aff;
 			}
 
 		public:
-			ContainerStyle innerStyle;
 			ContainerStyle style;
+			ContainerStyle innerStyle;
 			EventListeners eventListeners;
-
-		private:
-			bool mouseDown = false;
-			bool hovered = false;
 	};
 }
