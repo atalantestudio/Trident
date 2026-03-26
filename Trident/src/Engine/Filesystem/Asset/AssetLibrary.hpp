@@ -7,6 +7,7 @@
 #include "Engine/Filesystem/Asset/FontAsset.hpp"
 #include "Engine/Filesystem/Asset/GeometryAsset.hpp"
 #include "Engine/Filesystem/Asset/ImageAsset.hpp"
+#include "Engine/Filesystem/Asset/SceneAsset.hpp"
 #include "Engine/Filesystem/Asset/ShaderModuleAsset.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Filesystem/Stream/ByteStream.hpp"
@@ -79,6 +80,11 @@ namespace Trident {
 			}
 
 			template<>
+			const std::unordered_map<sequence<char8>, uint32>& getAssetPathToIndexMap<Scene2DAsset>() const {
+				return sceneAssetPathToIndex;
+			}
+
+			template<>
 			const std::unordered_map<sequence<char8>, uint32>& getAssetPathToIndexMap<ShaderModuleAsset>() const {
 				return shaderModuleAssetPathToIndex;
 			}
@@ -94,7 +100,7 @@ namespace Trident {
 
 				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::FONT_ASSET) {
+				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::FONT) {
 					return;
 				}
 
@@ -117,7 +123,7 @@ namespace Trident {
 
 				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::GEOMETRY_ASSET) {
+				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::GEOMETRY) {
 					return;
 				}
 
@@ -140,7 +146,7 @@ namespace Trident {
 
 				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::IMAGE_ASSET) {
+				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::IMAGE) {
 					return;
 				}
 
@@ -154,6 +160,29 @@ namespace Trident {
 			}
 
 			template<>
+			void loadAsset<Scene2DAsset>(view<char8> path) {
+				const std::filesystem::path absolutePath = getAbsolutePath("Asset/Scene", path, ".tsa");
+				const sequence<char8> assetPath = absolutePath.string();
+				const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
+
+				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
+
+				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::SCENE) {
+					return;
+				}
+
+				byteStream.jump(sizeof(AssetSignature));
+
+				const ref<Scene2DAsset> sceneAsset = decodeScene2DAsset(byteStream);
+				const uint32 sceneAssetIndex = static_cast<uint32>(assets.size());
+				const sequence<char8> stem = absolutePath.stem().string();
+
+				assetIdentifierToIndex.insert({sceneAsset->identifier, sceneAssetIndex});
+				sceneAssetPathToIndex.insert({stem, sceneAssetIndex});
+				assets.emplace_back(sceneAsset);
+			}
+
+			template<>
 			void loadAsset<ShaderModuleAsset>(view<char8> path) {
 				const std::filesystem::path absolutePath = getAbsolutePath("Asset/Shader", path, ".tsm");
 				const sequence<char8> assetPath = absolutePath.string();
@@ -161,7 +190,7 @@ namespace Trident {
 
 				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::SHADER_MODULE_ASSET) {
+				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::SHADER_MODULE) {
 					return;
 				}
 
@@ -245,34 +274,6 @@ namespace Trident {
 				return createRef<FontAsset>(fontAssetDescriptor);
 			}
 
-			ref<ShaderModuleAsset> decodeShaderModuleAsset(ByteStream<StreamOperation::READ>& byteStream) const {
-				ShaderModuleAssetDescriptor shaderModuleAssetDescriptor{};
-				shaderModuleAssetDescriptor.identifier = byteStream.read<uint32>();
-				shaderModuleAssetDescriptor.version = byteStream.read<VersionNumber>();
-				shaderModuleAssetDescriptor.glslCode = sequence<char8>(byteStream.read<uint32>());
-
-				for (char8& character : shaderModuleAssetDescriptor.glslCode) {
-					character = byteStream.read<char8>();
-				}
-
-				const uint32 entryPointCount = byteStream.read<uint32>();
-
-				shaderModuleAssetDescriptor.glslEntryPointActivationOffsets.reserve(entryPointCount);
-
-				for (uint32 entryPointIndex = 0; entryPointIndex < entryPointCount; entryPointIndex += 1) {
-					const uint32 identifierSize = byteStream.read<uint32>();
-					const view<char8> identifier(pointer_cast<const char8*>(byteStream.getBytePosition()), identifierSize);
-
-					byteStream.jump(identifierSize);
-
-					const uint32 activationOffset = byteStream.read<uint32>();
-
-					shaderModuleAssetDescriptor.glslEntryPointActivationOffsets.insert({identifier, activationOffset});
-				}
-
-				return createRef<ShaderModuleAsset>(shaderModuleAssetDescriptor);
-			}
-
 			ref<ImageAsset> decodeImageAsset(ByteStream<StreamOperation::READ>& byteStream) const {
 				const ImageAssetHeader& imageAssetHeader = *pointer_cast<const ImageAssetHeader*>(byteStream.getBytePosition());
 
@@ -314,12 +315,115 @@ namespace Trident {
 				return createRef<ImageAsset>(imageAssetDescriptor);
 			}
 
+			ref<Scene2DAsset> decodeScene2DAsset(ByteStream<StreamOperation::READ>& stream) const {
+				Scene2DAssetDescriptor sceneAssetDescriptor{};
+				sceneAssetDescriptor.identifier = stream.read<uint32>();
+				sceneAssetDescriptor.version = stream.read<VersionNumber>();
+				sceneAssetDescriptor.staticVertexCount = stream.read<uint32>();
+				sceneAssetDescriptor.staticIndexCount = stream.read<uint32>();
+				sceneAssetDescriptor.dynamicVertexCount = stream.read<uint32>();
+				sceneAssetDescriptor.dynamicIndexCount = stream.read<uint32>();
+				sceneAssetDescriptor.vertexBuffer = sequence<float32>((sceneAssetDescriptor.staticVertexCount + sceneAssetDescriptor.dynamicVertexCount) * 2);
+				sceneAssetDescriptor.indexBuffer = sequence<uint16>(sceneAssetDescriptor.staticIndexCount + sceneAssetDescriptor.dynamicIndexCount);
+				sceneAssetDescriptor.geometries = sequence<CachedGeometry2D>(stream.read<uint32>());
+				sceneAssetDescriptor.rigidBodies = sequence<CachedRigidBody2D>(stream.read<uint32>());
+
+				std::copy_n(pointer_cast<const float32*>(stream.getBytePosition()), sceneAssetDescriptor.vertexBuffer.count(), &sceneAssetDescriptor.vertexBuffer[0]);
+				stream.jump(sceneAssetDescriptor.vertexBuffer.count() * sizeof(float32));
+
+				std::copy_n(pointer_cast<const uint16*>(stream.getBytePosition()), sceneAssetDescriptor.indexBuffer.count(), &sceneAssetDescriptor.indexBuffer[0]);
+				stream.jump(sceneAssetDescriptor.indexBuffer.count() * sizeof(uint16));
+
+				for (CachedGeometry2D& geometry : sceneAssetDescriptor.geometries) {
+					geometry.centroid = stream.read<svec2<float32>>();
+				}
+
+				for (CachedGeometry2D& geometry : sceneAssetDescriptor.geometries) {
+					geometry.radius = stream.read<float32>();
+				}
+
+				for (CachedGeometry2D& geometry : sceneAssetDescriptor.geometries) {
+					geometry.vertexOffset = stream.read<uint32>();
+				}
+
+				for (CachedGeometry2D& geometry : sceneAssetDescriptor.geometries) {
+					geometry.indexOffset = stream.read<uint32>();
+				}
+
+				for (CachedGeometry2D& geometry : sceneAssetDescriptor.geometries) {
+					geometry.indexCount = stream.read<uint16>();
+				}
+
+				for (CachedGeometry2D& geometry : sceneAssetDescriptor.geometries) {
+					geometry.type = stream.read<Geometry2DType>();
+				}
+
+				for (CachedRigidBody2D& rigidBody : sceneAssetDescriptor.rigidBodies) {
+					rigidBody.position = stream.read<svec2<float32>>();
+				}
+
+				for (CachedRigidBody2D& rigidBody : sceneAssetDescriptor.rigidBodies) {
+					rigidBody.scale = stream.read<svec2<float32>>();
+				}
+
+				for (CachedRigidBody2D& rigidBody : sceneAssetDescriptor.rigidBodies) {
+					rigidBody.rotation = stream.read<float32>();
+				}
+
+				for (CachedRigidBody2D& rigidBody : sceneAssetDescriptor.rigidBodies) {
+					rigidBody.inverseMass = stream.read<float32>();
+				}
+
+				for (CachedRigidBody2D& rigidBody : sceneAssetDescriptor.rigidBodies) {
+					rigidBody.inverseInertia = stream.read<float32>();
+				}
+
+				for (CachedRigidBody2D& rigidBody : sceneAssetDescriptor.rigidBodies) {
+					rigidBody.friction = stream.read<float32>();
+				}
+
+				for (CachedRigidBody2D& rigidBody : sceneAssetDescriptor.rigidBodies) {
+					rigidBody.geometryIndex = stream.read<uint32>();
+				}
+
+				return createRef<Scene2DAsset>(sceneAssetDescriptor);
+			}
+
+			ref<ShaderModuleAsset> decodeShaderModuleAsset(ByteStream<StreamOperation::READ>& byteStream) const {
+				ShaderModuleAssetDescriptor shaderModuleAssetDescriptor{};
+				shaderModuleAssetDescriptor.identifier = byteStream.read<uint32>();
+				shaderModuleAssetDescriptor.version = byteStream.read<VersionNumber>();
+				shaderModuleAssetDescriptor.glslCode = sequence<char8>(byteStream.read<uint32>());
+
+				for (char8& character : shaderModuleAssetDescriptor.glslCode) {
+					character = byteStream.read<char8>();
+				}
+
+				const uint32 entryPointCount = byteStream.read<uint32>();
+
+				shaderModuleAssetDescriptor.glslEntryPointActivationOffsets.reserve(entryPointCount);
+
+				for (uint32 entryPointIndex = 0; entryPointIndex < entryPointCount; entryPointIndex += 1) {
+					const uint32 identifierSize = byteStream.read<uint32>();
+					const view<char8> identifier(pointer_cast<const char8*>(byteStream.getBytePosition()), identifierSize);
+
+					byteStream.jump(identifierSize);
+
+					const uint32 activationOffset = byteStream.read<uint32>();
+
+					shaderModuleAssetDescriptor.glslEntryPointActivationOffsets.insert({identifier, activationOffset});
+				}
+
+				return createRef<ShaderModuleAsset>(shaderModuleAssetDescriptor);
+			}
+
 		private:
 			std::vector<ref<Asset>> assets;
 			std::unordered_map<uint32, uint32> assetIdentifierToIndex;
 			std::unordered_map<sequence<char8>, uint32> fontAssetPathToIndex;
 			std::unordered_map<sequence<char8>, uint32> geometryAssetPathToIndex;
 			std::unordered_map<sequence<char8>, uint32> imageAssetPathToIndex;
+			std::unordered_map<sequence<char8>, uint32> sceneAssetPathToIndex;
 			std::unordered_map<sequence<char8>, uint32> shaderModuleAssetPathToIndex;
 	};
 }

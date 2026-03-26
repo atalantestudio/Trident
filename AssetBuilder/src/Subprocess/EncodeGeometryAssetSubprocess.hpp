@@ -358,7 +358,7 @@ namespace Trident {
 			totalIndexByteCount;
 
 		ByteStream<StreamOperation::WRITE> byteStream(outputSize, Endianness::LITTLE_ENDIAN);
-		byteStream.write<AssetSignature>(AssetSignature::GEOMETRY_ASSET);
+		byteStream.write<AssetSignature>(AssetSignature::GEOMETRY);
 		byteStream.write<uint32>(geometryAssetIdentifier);
 		byteStream.write<VersionNumber>({1, 0, 0});
 		byteStream.write<uint32>(clusterCount);

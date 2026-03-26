@@ -7,9 +7,10 @@
 
 namespace Trident {
 	struct Material {
-		// Path to an internal shader module. Relative to "Trident/src/Asset/Shader/".
+		// Path to a shader module internal to the engine. Relative to "Trident/src/Asset/Shader/".
 		sequence<char8> shaderModulePath;
 
+		// TODO: Use shader reflection.
 		sequence<DescriptorSetLayoutBinding> descriptorSetLayoutBindings;
 	};
 }

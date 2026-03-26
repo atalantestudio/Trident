@@ -15,7 +15,7 @@ namespace Trident {
 				descriptor.identifier = AssetLibrary::createAssetIdentifier();
 
 				ImageAssetHeader imageAssetHeader{};
-				imageAssetHeader.signature = AssetSignature::IMAGE_ASSET;
+				imageAssetHeader.signature = AssetSignature::IMAGE;
 				imageAssetHeader.identifier = descriptor.identifier;
 				imageAssetHeader.version = descriptor.version;
 				imageAssetHeader.format = static_cast<uint32>(descriptor.format);

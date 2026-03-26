@@ -113,7 +113,6 @@ namespace Trident {
 		rigidBody.position = descriptor.position;
 		rigidBody.rotation = descriptor.rotation;
 		rigidBody.scale = descriptor.scale;
-		rigidBody.centerOfMass = descriptor.geometry->centroid;
 		rigidBody.friction = descriptor.friction;
 		rigidBody.geometry = ecs.getComponent<ref<Geometry2D>>(entity);
 		rigidBody.label = descriptor.label;

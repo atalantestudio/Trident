@@ -14,7 +14,6 @@ namespace Trident {
 		float32 angularVelocity = 0.0_w;
 		float32 mass = 0.0_kg;
 		float32 friction = 0.0f;
-		float32 restitution = 0.0f;
 		ref<Geometry2D> geometry;
 		float32 density = 1.0f;
 		Color fillColor = 0xfffffff;
@@ -30,7 +29,7 @@ namespace Trident {
 		public:
 			void updateTransform() {
 				transform =
-					mat3x3<float32>::translation(-centerOfMass) *
+					mat3x3<float32>::translation(-geometry->centroid) *
 					mat3x3<float32>::scaling(scale) *
 					mat3x3<float32>::rotation(-rotation) *
 					mat3x3<float32>::translation(position);
@@ -80,8 +79,6 @@ namespace Trident {
 			vec2<float32> scale = {1.0f, 1.0f};
 
 			float32 inverseMass = 1.0f / 1.0_kg;
-
-			vec2<float32> centerOfMass;
 
 			// Coefficient of friction.
 			// TODO: Differentiate static friction from dynamic friction.

@@ -66,7 +66,7 @@ namespace Trident {
 				const uint32 entryPointCount = static_cast<uint32>(shaderModuleAssetDescriptor.glslEntryPointActivationOffsets.size());
 
 				ByteStream<StreamOperation::WRITE> outputByteStream(outputSize, Endianness::LITTLE_ENDIAN);
-				outputByteStream.write<AssetSignature>(AssetSignature::SHADER_MODULE_ASSET);
+				outputByteStream.write<AssetSignature>(AssetSignature::SHADER_MODULE);
 				outputByteStream.write<uint32>(shaderModuleAssetDescriptor.identifier);
 				outputByteStream.write<VersionNumber>({1, 0, 0});
 				outputByteStream.write<uint32>(static_cast<uint32>(shaderModuleAssetDescriptor.glslCode.count()));

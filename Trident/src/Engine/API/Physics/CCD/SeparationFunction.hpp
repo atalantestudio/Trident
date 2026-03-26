@@ -56,7 +56,7 @@ namespace Trident {
 		copy.angularVelocity += copy.torque * t;
 
 		copy.transform =
-			mat3x3<float32>::translation(-copy.geometry->centerOfMass) *
+			mat3x3<float32>::translation(-copy.geometry->centroid) *
 			mat3x3<float32>::scaling(copy.scale) *
 			mat3x3<float32>::rotation(-copy.rotation) *
 			mat3x3<float32>::translation(copy.position);

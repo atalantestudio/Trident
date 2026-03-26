@@ -53,7 +53,7 @@ namespace Trident {
 					(sizeof(uint16) + sizeof(uint32)) * file.unicodeMap.size();
 
 				ByteStream<StreamOperation::WRITE> outputByteStream(outputSize, Endianness::LITTLE_ENDIAN);
-				outputByteStream.write<AssetSignature>(AssetSignature::FONT_ASSET);
+				outputByteStream.write<AssetSignature>(AssetSignature::FONT);
 				outputByteStream.write<uint32>(fontAssetDescriptor.identifier);
 				outputByteStream.write<VersionNumber>({1, 0, 0});
 				outputByteStream.write<uint32>(imageAssetDescriptor.identifier);
