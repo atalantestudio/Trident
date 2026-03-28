@@ -287,7 +287,7 @@ namespace Trident {
 
 		const GUIContainer& component = components[componentIndex];
 
-		if (component.childIndices.empty()) {
+		if (component.childIndices.size() == 0) {
 			leafComponentIndices[leafComponentIndexCount] = componentIndex;
 			leafComponentIndexCount += 1;
 		}
@@ -408,12 +408,12 @@ namespace Trident {
 
 			remainingWidth -= parent.layoutSpacing * (parent.childIndices.size() - 1);
 
-			if (!growableChildIndices.empty()) {
+			if (growableChildIndices.size() > 0) {
 				std::vector<uint32> growableChildIndexCopy = growableChildIndices;
 
 				// Grow children.
 				while (remainingWidth > 0.0f) {
-					if (growableChildIndexCopy.empty()) {
+					if (growableChildIndexCopy.size() == 0) {
 						break;
 					}
 
@@ -464,12 +464,12 @@ namespace Trident {
 
 			const std::vector<uint32> shrinkableChildIndices = FindShrinkableChildIndices(parent, WIDTH_AXIS);
 
-			if (!shrinkableChildIndices.empty()) {
+			if (shrinkableChildIndices.size() > 0) {
 				std::vector<uint32> shrinkableChildIndexCopy = shrinkableChildIndices;
 
 				// Shrink children.
 				while (remainingWidth < 0.0f) {
-					if (shrinkableChildIndexCopy.empty()) {
+					if (shrinkableChildIndexCopy.size() == 0) {
 						break;
 					}
 
@@ -553,12 +553,12 @@ namespace Trident {
 
 			remainingHeight -= parent.layoutSpacing * (parent.childIndices.size() - 1);
 
-			if (!growableChildIndices.empty()) {
+			if (growableChildIndices.size() > 0) {
 				std::vector<uint32> growableChildIndexCopy = growableChildIndices;
 
 				// Grow children.
 				while (remainingHeight > 0.0f) {
-					if (growableChildIndexCopy.empty()) {
+					if (growableChildIndexCopy.size() == 0) {
 						break;
 					}
 
@@ -609,12 +609,12 @@ namespace Trident {
 
 			const std::vector<uint32> shrinkableChildIndices = FindShrinkableChildIndices(parent, WIDTH_AXIS);
 
-			if (!shrinkableChildIndices.empty()) {
+			if (shrinkableChildIndices.size() > 0) {
 				std::vector<uint32> shrinkableChildIndexCopy = shrinkableChildIndices;
 
 				// Shrink children.
 				while (remainingHeight < 0.0f) {
-					if (shrinkableChildIndexCopy.empty()) {
+					if (shrinkableChildIndexCopy.size() == 0) {
 						break;
 					}
 
@@ -701,7 +701,7 @@ namespace Trident {
 	void GUILayer::PositionsAndAlignment(GUIContainer& component, svec2<float32> origin) {
 		component.origin = origin;
 
-		if (component.childIndices.empty()) {
+		if (component.childIndices.size() == 0) {
 			const GUIContainer& parent = components[component.parentIndex];
 
 			// Skip over the component towards the layout direction (this includes the padding).

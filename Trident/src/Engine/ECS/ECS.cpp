@@ -7,7 +7,7 @@
 
 namespace Trident {
 	Entity ECS::createEntity() {
-		if (availableEntities.empty()) {
+		if (availableEntities.size() == 0) {
 			// Take the next entity from the iterator.
 			ENGINE_ASSERT(nextEntity < MAX_ENTITIES, "Entity limit reached.");
 

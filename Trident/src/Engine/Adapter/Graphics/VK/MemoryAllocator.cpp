@@ -267,7 +267,7 @@ namespace Trident {
 
 		uint32 memoryAllocationIndex = static_cast<uint32>(memoryAllocations.size());
 
-		if (!freeMemoryAllocationIndices.empty()) {
+		if (freeMemoryAllocationIndices.size() > 0) {
 			memoryAllocationIndex = freeMemoryAllocationIndices.back();
 
 			freeMemoryAllocationIndices.pop_back();
