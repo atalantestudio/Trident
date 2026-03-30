@@ -10,7 +10,7 @@
 #include "../File/FBX.hpp"
 
 namespace Trident {
-	static void EncodeGeometryAssetSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::filesystem::path& assetOutputPath) {
+	inline void EncodeGeometryAssetSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::filesystem::path& assetOutputPath) {
 		const sequence<char8> path = directoryEntry.path().string();
 		const sequence<uint8> inputData = Filesystem::openByteBuffer(path);
 

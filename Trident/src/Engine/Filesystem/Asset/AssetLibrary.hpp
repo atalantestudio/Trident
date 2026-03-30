@@ -336,68 +336,25 @@ namespace Trident {
 				std::copy_n(stream.getBytePosition(), sceneAssetDescriptor.vertexAndIndexBuffer.count(), &sceneAssetDescriptor.vertexAndIndexBuffer[0]);
 				stream.jump(sceneAssetDescriptor.vertexAndIndexBuffer.count());
 
-				// TODO(asset/scene): This is awful, review packing.
 				for (CachedGeometry2D& geometry : sceneAssetDescriptor.geometries) {
 					geometry.centroid = stream.read<svec2<float32>>();
-				}
-
-				for (CachedGeometry2D& geometry : sceneAssetDescriptor.geometries) {
 					geometry.radius = stream.read<float32>();
-				}
-
-				for (CachedGeometry2D& geometry : sceneAssetDescriptor.geometries) {
 					geometry.entity = stream.read<uint32>();
-				}
-
-				for (CachedGeometry2D& geometry : sceneAssetDescriptor.geometries) {
 					geometry.vertexOffset = stream.read<uint32>();
-				}
-
-				for (CachedGeometry2D& geometry : sceneAssetDescriptor.geometries) {
 					geometry.vertexCount = stream.read<uint32>();
-				}
-
-				for (CachedGeometry2D& geometry : sceneAssetDescriptor.geometries) {
 					geometry.indexOffset = stream.read<uint32>();
-				}
-
-				for (CachedGeometry2D& geometry : sceneAssetDescriptor.geometries) {
 					geometry.triangleListIndexCount = stream.read<uint16>();
-				}
-
-				for (CachedGeometry2D& geometry : sceneAssetDescriptor.geometries) {
 					geometry.lineStripIndexCount = stream.read<uint16>();
-				}
-
-				for (CachedGeometry2D& geometry : sceneAssetDescriptor.geometries) {
 					geometry.type = stream.read<Geometry2DType>();
 				}
 
 				for (CachedRigidBody2D& rigidBody : sceneAssetDescriptor.rigidBodies) {
 					rigidBody.position = stream.read<svec2<float32>>();
-				}
-
-				for (CachedRigidBody2D& rigidBody : sceneAssetDescriptor.rigidBodies) {
 					rigidBody.scale = stream.read<svec2<float32>>();
-				}
-
-				for (CachedRigidBody2D& rigidBody : sceneAssetDescriptor.rigidBodies) {
 					rigidBody.rotation = stream.read<float32>();
-				}
-
-				for (CachedRigidBody2D& rigidBody : sceneAssetDescriptor.rigidBodies) {
 					rigidBody.inverseMass = stream.read<float32>();
-				}
-
-				for (CachedRigidBody2D& rigidBody : sceneAssetDescriptor.rigidBodies) {
 					rigidBody.inverseInertia = stream.read<float32>();
-				}
-
-				for (CachedRigidBody2D& rigidBody : sceneAssetDescriptor.rigidBodies) {
 					rigidBody.friction = stream.read<float32>();
-				}
-
-				for (CachedRigidBody2D& rigidBody : sceneAssetDescriptor.rigidBodies) {
 					rigidBody.entity = stream.read<uint32>();
 				}
 

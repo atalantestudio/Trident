@@ -8,6 +8,6 @@ namespace Trident {
 		CIRCLE,
 		CONVEX_HULL,
 		POINT,
-		MAX_ENUM,
+		count,
 	};
 }

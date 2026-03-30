@@ -10,7 +10,7 @@
 #include "Engine/API/Physics/Collider/ConvexHullConvexHull.hpp"
 
 namespace Trident {
-	static constexpr Collider2D COLLIDER_2D_TABLE[static_cast<uint32>(Geometry2DType::MAX_ENUM)][static_cast<uint32>(Geometry2DType::MAX_ENUM)] = {
+	static constexpr Collider2D COLLIDER_2D_TABLE[static_cast<uint32>(Geometry2DType::count)][static_cast<uint32>(Geometry2DType::count)] = {
 		{CircleCircleCollider, CircleConvexHullCollider    },
 		{nullptr,              ConvexHullConvexHullCollider},
 	};

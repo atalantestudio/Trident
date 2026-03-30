@@ -13,7 +13,9 @@
 
 namespace Trident {
 	void Physics2DSceneLayer::loadScene() {
-		sceneAsset = getApplication()->getAssetLibrary()->getAsset<Scene2DAsset>("Scene");
+		const view<char8> sceneAssetName = getApplication()->getPropertyFile()->getProperty<view<char8>>("AssetName");
+
+		sceneAsset = getApplication()->getAssetLibrary()->getAsset<Scene2DAsset>(sceneAssetName);
 
 		const view<GeometryComponent> geometryComponents = sceneAsset->getGeometryComponents();
 
