@@ -47,7 +47,10 @@ Apart from Premake, the dependencies are managed by Atalante Studio. This allows
 
 ## Install (Windows)
 
-**Make sure that the Vulkan SDK is installed (the engine will search for the `VULKAN_SDK` environment variable).**
+> [!IMPORTANT]
+> 
+> Make sure that the Vulkan SDK is installed.
+> The engine will search for the `VULKAN_SDK` environment variable.
 
 Clone the repository, preferably with the `--recurse-submodules` option:
 
@@ -93,7 +96,10 @@ Then, type `F5` to start debugging.
 
 ### Visual Studio Code
 
-**Make sure that `MSBuild.exe` is included in your `PATH` or that you have launched VS Code with the Developer Command Prompt. For Visual Studio 2026, it should be located in `C:/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/MSBuild.exe`.**
+> [!IMPORTANT]
+> 
+> Make sure that `MSBuild.exe` is included in your `PATH` or that you have launched VS Code with the Developer Command Prompt.
+> For Visual Studio 2026, it should be located in `C:/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/MSBuild.exe`.
 
 Install the [C/C++](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools) language support extension.
 
