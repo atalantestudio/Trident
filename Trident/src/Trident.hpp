@@ -50,9 +50,6 @@
 #include "Engine/API/Rendering/ShaderModule.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
-// Geometry (2D)
-#include "Engine/API/Geometry/ConvexHullGeometry2D.hpp"
-
 // Geometry (3D)
 #include "Engine/API/Geometry/3D/BoxGeometry3D.hpp"
 

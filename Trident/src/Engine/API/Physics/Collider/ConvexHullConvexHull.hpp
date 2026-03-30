@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "Engine/API/Geometry/ConvexHullGeometry2D.hpp"
 #include "Engine/API/Physics/Collider/clipEdge.hpp"
 #include "Engine/API/Physics/Collider/findIncidentEdge.hpp"
 #include "Engine/API/Physics/Collider/Collider2D.hpp"
