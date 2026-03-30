@@ -118,16 +118,19 @@ Property files share the name of their parent project and end with .tpr.
 
 Missing property files will be automatically recreated by the application at runtime.
 
-Below is the list of supported properties and their available values.
+Below is the list of supported properties and their acceptable values.
 
-| Property | Available values |
+| Property | Values |
 | - | - |
 | `GraphicsAPI` | "OpenGL", "Vulkan" or "DirectX12" |
 | `PreferIntegratedGPU` | 0 or 1 |
 | `WindowWidth` | Any unsigned integer |
 | `WindowHeight` | Any unsigned integer |
 | `VerticalSync` | 0 or 1 |
-| `SampleGroup` | "GUI", "Physics2D", "Process", "Sample" or "Sample3D" (only used in the Samples project) |
+| `SampleGroupName` | See [Samples/src/main.cpp](https://github.com/atalantestudio/Trident/blob/main/Samples/src/main.cpp) |
+| `SampleName` | See [Samples/src/main.cpp](https://github.com/atalantestudio/Trident/blob/main/Samples/src/main.cpp) |
+
+Some samples may require additional properties, e.g. the name of an asset.
 
 
 
