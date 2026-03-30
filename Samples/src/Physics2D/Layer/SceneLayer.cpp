@@ -4,14 +4,38 @@
 #include "pch.hpp"
 
 #include "Engine/API/Physics/Constraint/RotationConstraint2D.hpp"
+#include "Engine/API/Physics/Joint2D.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
+#include "Engine/ECS/Tag.hpp"
 
 #include "../../SampleApplication.hpp"
 #include "SceneLayer.hpp"
 
 namespace Trident {
-	void Physics2DSceneLayer::createPuzzleScene(Scene2D& scene) {
-		const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
+	void Physics2DSceneLayer::loadScene() {
+		sceneAsset = getApplication()->getAssetLibrary()->getAsset<Scene2DAsset>("Scene");
+
+		const view<GeometryComponent> geometryComponents = sceneAsset->getGeometryComponents();
+
+		Entity entity = 0;
+
+		while (entity < sceneAsset->getEntityCount()) {
+			ecs.createEntity();
+			ecs.setComponent<GeometryComponent>(entity, geometryComponents[entity]);
+
+			entity += 1;
+		}
+
+		for (const CachedRigidBody2D& rigidBody : sceneAsset->getRigidBodies()) {
+			const GeometryComponent geometryComponent = ecs.getComponent<GeometryComponent>(rigidBody.entity);
+			const Geometry2D& geometry = sceneAsset->getGeometries()[geometryComponent.geometryIndex];
+
+			ecs.setComponent<RigidBody2D>(rigidBody.entity, RigidBody2D::fromCached(rigidBody, geometry.getCentroid()));
+			ecs.setTag<DynamicEntityTag>(rigidBody.entity);
+		}
+
+		// TODO(physics/samples): Restore sample.
+		/* const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
 
 		// Floor
 		scene.createStaticRigidBody({
@@ -74,42 +98,42 @@ namespace Trident {
 		RotationConstraint2DDescriptor constraintDescriptor{};
 		constraintDescriptor.A = playerEntity;
 
-		scene.createConstraint<RotationConstraint2D>(constraintDescriptor);
+		scene.createConstraint<RotationConstraint2D>(constraintDescriptor); */
 	}
 
 	Physics2DSceneLayer::Physics2DSceneLayer() :
-		physicsEngine(getPhysicsEngineDescriptor())
-	{}
+		physicsSimulation({
+			.ecs = &ecs,
+			.deltaTime = getApplication()->getFixedDeltaTime(),
+		})
+	{
+		ecs.registerComponentPool<GeometryComponent>();
 
-	PhysicsEngine2DDescriptor Physics2DSceneLayer::getPhysicsEngineDescriptor() {
-		PhysicsEngine2DDescriptor descriptor{};
-		descriptor.deltaTime = getApplication()->getFixedDeltaTime();
+		// TODO: MaterialReferenceComponent, RigidBody2DComponent, RigidBody3DComponent. Transform2DComponent/Transform3DComponent for static meshes?
 
-		#if defined(BUILD_MODE_DEBUG)
-			descriptor.visualizationData = &visualizationData;
-		#endif
+		ecs.registerComponentPool<RigidBody2D>();
+		ecs.registerComponentPool<ref<Constraint2D>>();
+		ecs.registerComponentPool<Joint2D>();
 
-		return descriptor;
+		ecs.registerTagPool<StaticEntityTag>();
+		ecs.registerTagPool<DynamicEntityTag>();
 	}
 
 	void Physics2DSceneLayer::postConstruct() {
-		Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
+		loadScene();
 
-		createPuzzleScene(scene);
-
-		physicsEngine.registerScene(scene);
+		physicsSimulation.sceneAsset = sceneAsset;
 
 		renderer.layerInput = input;
 		renderer.setLayer(this);
 		renderer.build();
-		renderer.setScene(scene);
+		renderer.setScene(sceneAsset, ecs);
 	}
 
 	void Physics2DSceneLayer::update(float32 deltaTime, float32 inverseDeltaTime) {
-		constexpr float32 SPEED = 3.0f;
+		/* constexpr float32 SPEED = 3.0f;
 
-		Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
-		RigidBody2D& playerRigidBody = scene.getComponent<RigidBody2D>(playerEntity);
+		RigidBody2D& playerRigidBody = ecs.getComponent<RigidBody2D>(playerEntity);
 
 		if (keyMap[KeyCode::Q]) {
 			playerRigidBody.linearVelocity += {-SPEED, playerRigidBody.linearVelocity[1]};
@@ -129,28 +153,27 @@ namespace Trident {
 
 		if (abs(playerRigidBody.linearVelocity[1]) < 0.001f) {
 			jumping = false;
-		}
+		} */
 	}
 
 	void Physics2DSceneLayer::preRender() {
-		#if defined(BUILD_MODE_DEBUG)
-			visualizationData = {};
-		#endif
+		physicsSimulation.tick();
 
-		physicsEngine.tick();
+		if (dragging) {
+			renderer.updateCameraProjection();
+		}
 
 		checkHover();
 
-		const Scene2D& scene = pointer_cast<const SampleApplication*>(getApplication())->scene;
-		const ComponentPool<RigidBody2D>& rigidBodyComponentPool = scene.getComponentPool<RigidBody2D>();
+		const ComponentPool<RigidBody2D>& rigidBodyComponentPool = ecs.getComponentPool<RigidBody2D>();
 
 		uint32 componentIndex = 0;
 
 		while (componentIndex < rigidBodyComponentPool.componentCount) {
 			const Entity entity = rigidBodyComponentPool.componentIndexToEntity[componentIndex];
-			const RigidBody2D& rigidBody = scene.getComponent<RigidBody2D>(entity);
+			const RigidBody2D& rigidBody = ecs.getComponent<RigidBody2D>(entity);
 
-			renderer.setInstanceTransform(entity, rigidBody.transform);
+			renderer.setRigidBodyTransform(entity, rigidBody.transform);
 
 			componentIndex += 1;
 		}
@@ -169,30 +192,38 @@ namespace Trident {
 	}
 
 	void Physics2DSceneLayer::checkHover() {
-		hoveredEntity = max<uint32>();
+		hoveredEntity = max<Entity>();
 
-		const Scene2D& scene = pointer_cast<const SampleApplication*>(getApplication())->scene;
-		const ComponentPool<RigidBody2D>& rigidBodyComponentPool = scene.getComponentPool<RigidBody2D>();
+		const ComponentPool<RigidBody2D>& rigidBodyComponentPool = ecs.getComponentPool<RigidBody2D>();
 
 		if (rigidBodyComponentPool.componentCount == 0) {
 			return;
 		}
 
+		const Geometry2D mouseGeometry = Geometry2D::pointAtOrigin();
+
 		RigidBody2D mouseRigidBody{};
-		mouseRigidBody.position = renderer.getNdcMousePosition();
-		mouseRigidBody.geometry = createRef<PointGeometry2D>();
 
-		mouseRigidBody.updateTransform();
+		// TODO: Include camera position.
+		mouseRigidBody.position = renderer.getNdcMousePosition() - renderer.cameraPosition;
 
-		for (sint32 rigidBodyIndex = static_cast<sint32>(rigidBodyComponentPool.componentCount - 1); rigidBodyIndex >= 0; rigidBodyIndex -= 1) {
-			const Entity entity = static_cast<Entity>(rigidBodyComponentPool.componentIndexToEntity[rigidBodyIndex]);
-			const RigidBody2D& rigidBody = scene.getComponent<RigidBody2D>(entity);
+		mouseRigidBody.updateTransform(mouseGeometry.getCentroid());
 
-			if (GJK2DConditional(rigidBody, mouseRigidBody)) {
+		sint32 componentIndex = static_cast<sint32>(rigidBodyComponentPool.componentCount) - 1;
+
+		while (componentIndex >= 0) {
+			const Entity entity = rigidBodyComponentPool.componentIndexToEntity[componentIndex];
+			const GeometryComponent geometryComponent = ecs.getComponent<GeometryComponent>(entity);
+			const Geometry2D& geometry = sceneAsset->getGeometries()[geometryComponent.geometryIndex];
+			const RigidBody2D& rigidBody = ecs.getComponent<RigidBody2D>(entity);
+
+			if (GJK2DConditional(rigidBody, mouseRigidBody, geometry, mouseGeometry)) {
 				hoveredEntity = entity;
 
 				break;
 			}
+
+			componentIndex -= 1;
 		}
 	}
 
@@ -221,9 +252,13 @@ namespace Trident {
 	}
 
 	bool Physics2DSceneLayer::onEvent(MouseDownEvent& event) {
-		if (event.getButton() == MouseButton::LEFT && hoveredEntity != max<uint32>()) {
+		if (event.getButton() == MouseButton::LEFT && hoveredEntity != max<Entity>()) {
 			selectedEntity = hoveredEntity;
 			placeholderOffset = {0.0f, 0.0f};
+		}
+
+		if (event.getButton() == MouseButton::RIGHT && !dragging) {
+			dragging = true;
 		}
 
 		return true;
@@ -232,30 +267,39 @@ namespace Trident {
 	bool Physics2DSceneLayer::onEvent(MouseMoveEvent& event) {
 		const float32 x = static_cast<float32>(event.getX());
 		const float32 y = static_cast<float32>(event.getY());
-
 		const vec2<float32> previousPosition = renderer.getNdcMousePosition();
 
 		renderer.setMousePosition(x, y);
 
-		if (selectedEntity != max<uint32>()) {
-			const vec2<float32>& position = renderer.getNdcMousePosition();
-			const vec2<float32> positionDelta = position - previousPosition;
+		const vec2<float32> position = renderer.getNdcMousePosition();
+		const vec2<float32> positionDelta = position - previousPosition;
 
+		if (selectedEntity != max<uint32>()) {
 			placeholderOffset += positionDelta;
+		}
+
+		if (dragging) {
+			// TODO(grid-drag): (20, 11.25) is used because the ratio is 16/9.
+			renderer.cameraPosition += positionDelta / vec2<float32>(20.0f, 11.25f);
 		}
 
 		return true;
 	}
 
 	bool Physics2DSceneLayer::onEvent(MouseUpEvent& event) {
-		Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
-
 		if (event.getButton() == MouseButton::LEFT && selectedEntity != max<uint32>()) {
-			RigidBody2D& rigidBody = scene.getComponent<RigidBody2D>(selectedEntity);
+			const GeometryComponent geometryComponent = ecs.getComponent<GeometryComponent>(selectedEntity);
+			const Geometry2D& geometry = sceneAsset->getGeometries()[geometryComponent.geometryIndex];
+
+			RigidBody2D& rigidBody = ecs.getComponent<RigidBody2D>(selectedEntity);
 			rigidBody.position += placeholderOffset;
-			rigidBody.updateTransform();
+			rigidBody.updateTransform(geometry.centroid);
 
 			selectedEntity = max<uint32>();
+		}
+
+		if (event.getButton() == MouseButton::RIGHT && dragging) {
+			dragging = false;
 		}
 
 		return true;

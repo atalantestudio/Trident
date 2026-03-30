@@ -9,41 +9,45 @@
 namespace Trident {
 	template<typename ComponentType>
 	class ComponentPool : public Pool {
+		private:
+			static constexpr uint32 NULL_COMPONENT_INDEX = max<uint32>();
+
 		public:
-			ComponentPool() {
-				// Fill array with null index.
-				for (Entity& entity : entityToComponentIndex) {
-					entity = NULL_COMPONENT_INDEX;
-				}
+			explicit ComponentPool() {
+				std::memset(&entityToComponentIndex, NULL_COMPONENT_INDEX, MAX_ENTITIES);
 			}
 
-			// Returns the component belonging to the provided entity.
+			bool hasComponent(Entity entity) const {
+				ENGINE_ASSERT(entity < MAX_ENTITIES, "Entity [] is overflowing.", entity);
+
+				return entityToComponentIndex[entity] != NULL_COMPONENT_INDEX;
+			}
+
+			/// Returns the component belonging to the provided entity.
 			const ComponentType& getComponent(Entity entity) const {
-				ENGINE_ASSERT(entity < MAX_ENTITIES, "The entity [] is overflowing.", entity);
+				ENGINE_ASSERT(entity < MAX_ENTITIES, "Entity [] is overflowing.", entity);
 
-				const Entity componentIndex = entityToComponentIndex[entity];
+				const uint32 componentIndex = entityToComponentIndex[entity];
 
 				ENGINE_ASSERT(componentIndex != NULL_COMPONENT_INDEX, "Entity [] has no components.", entity);
 
 				return components[componentIndex];
 			}
 
-			// Returns the component belonging to the provided entity.
+			/// Returns the component belonging to the provided entity.
 			ComponentType& getComponent(Entity entity) {
-				ENGINE_ASSERT(entity < MAX_ENTITIES, "The entity [] is overflowing.", entity);
+				ENGINE_ASSERT(entity < MAX_ENTITIES, "Entity [] is overflowing.", entity);
 
-				const Entity componentIndex = entityToComponentIndex[entity];
+				const uint32 componentIndex = entityToComponentIndex[entity];
 
 				ENGINE_ASSERT(componentIndex != NULL_COMPONENT_INDEX, "Entity [] has no components.", entity);
 
 				return components[componentIndex];
 			}
 
-			// TODO: Implement hasComponent.
-
-			// Sets or replaces the component belonging to the provided entity.
+			/// Sets or replaces the component belonging to the provided entity.
 			void setComponent(Entity entity, const ComponentType& component) {
-				ENGINE_ASSERT(entity < MAX_ENTITIES, "The entity [] is overflowing.", entity);
+				ENGINE_ASSERT(entity < MAX_ENTITIES, "Entity [] is overflowing.", entity);
 
 				const uint32 componentIndex = entityToComponentIndex[entity];
 
@@ -54,7 +58,6 @@ namespace Trident {
 					return;
 				}
 
-				// Set (add) component.
 				entityToComponentIndex[entity] = componentCount;
 
 				components.emplace_back(component);
@@ -63,14 +66,14 @@ namespace Trident {
 				componentCount += 1;
 			}
 
-			// Erases the component belonging to the provided entity.
+			/// Erases the component belonging to the provided entity.
 			void resetComponent(Entity entity) {
-				ENGINE_ASSERT(entity < MAX_ENTITIES, "The entity [] is overflowing.", entity);
+				ENGINE_ASSERT(entity < MAX_ENTITIES, "Entity [] is overflowing.", entity);
 
-				const Entity componentIndex = entityToComponentIndex[entity];
+				const uint32 componentIndex = entityToComponentIndex[entity];
 
 				if (componentIndex == NULL_COMPONENT_INDEX) {
-					ENGINE_ERROR("The component for the entity [] is already reset.", entity);
+					ENGINE_ERROR("The component for entity [] is already reset.", entity);
 
 					return;
 				}
@@ -94,13 +97,15 @@ namespace Trident {
 				entityToComponentIndex[entity] = NULL_COMPONENT_INDEX;
 			}
 
-		private:
-			static constexpr uint32 NULL_COMPONENT_INDEX = max<Entity>();
-
 		public:
-			std::array<Entity, MAX_ENTITIES> entityToComponentIndex; // (sparse array)
-			std::vector<uint32> componentIndexToEntity; // (dense array)
-			std::vector<ComponentType> components; // (dense array)
+			// (sparse array)
+			std::array<uint32, MAX_ENTITIES> entityToComponentIndex;
+
+			// (dense array)
+			std::vector<Entity> componentIndexToEntity;
+
+			// (dense array)
+			std::vector<ComponentType> components;
 
 			// Number of currently alive components.
 			uint32 componentCount = 0;

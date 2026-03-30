@@ -9,7 +9,8 @@ namespace Trident {
 	class Physics2DStackingLayer : public BaseLayer {
 		public:
 			void build() override {
-				Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
+				// TODO(physics/samples): Restore sample.
+				/* Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
 
 				const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
 
@@ -31,12 +32,12 @@ namespace Trident {
 				uint32 boxIndex = 0;
 
 				while (boxIndex < 10) {
-					boxDescriptor.position = {/* random<float32>(-0.1_m, 0.1_m) */ 0.0_m, 0.51_m + boxIndex * 1.05f};
+					boxDescriptor.position = {0.0_m, 0.51_m + boxIndex * 1.05f};
 
 					scene.createDynamicRigidBody(boxDescriptor);
 
 					boxIndex += 1;
-				}
+				} */
 			}
 	};
 }

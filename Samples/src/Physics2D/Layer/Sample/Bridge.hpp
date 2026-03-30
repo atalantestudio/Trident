@@ -11,7 +11,8 @@ namespace Trident {
 	class Physics2DBridgeLayer : public BaseLayer {
 		public:
 			void build() override {
-				static constexpr uint32 TILE_COUNT = 15;
+				// TODO(physics/samples): Restore sample.
+				/* static constexpr uint32 TILE_COUNT = 15;
 				static constexpr float32 TILE_MASS = 50.0_kg;
 				static constexpr float32 FREQUENCY = 2.0f;
 				static constexpr float32 OMEGA = 2.0f * pi<float32>() * FREQUENCY;
@@ -83,7 +84,7 @@ namespace Trident {
 				jointDescriptor.B = 0;
 				jointDescriptor.anchor = {-9.125_m + TILE_COUNT * 1.25f, 5.0_m};
 
-				scene.createJoint(jointDescriptor);
+				scene.createJoint(jointDescriptor); */
 			}
 	};
 }

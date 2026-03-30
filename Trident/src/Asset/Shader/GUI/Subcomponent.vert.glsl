@@ -10,7 +10,7 @@ layout(location = 7) in vec4 color;
 layout(location = 8) in uint zIndex;
 layout(location = 9) in uint textureArrayLayerIndex;
 
-layout(set = 0, binding = 0) uniform Camera {
+layout(set = 0, binding = 0) uniform readonly Camera {
 	mat3x3 projection;
 } camera;
 

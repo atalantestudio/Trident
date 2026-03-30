@@ -44,7 +44,7 @@ namespace Trident {
 
 			VkVertexInputBindingDescription vertexInputBindingDescription{};
 			vertexInputBindingDescription.binding = vertexInputBindingIndex;
-			vertexInputBindingDescription.stride = vertexInputBinding.getStride();
+			vertexInputBindingDescription.stride = vertexInputBinding.stride;
 			vertexInputBindingDescription.inputRate = getVertexInputRate(vertexInputBinding.getInputRate());
 
 			const std::vector<VertexInputAttribute>& attributes = vertexInputBinding.getAttributes();

@@ -29,12 +29,12 @@ namespace Trident {
 				svec2<float32> position;
 			};
 
-			struct Instance {
-				mat3x3<float32> world;
+			struct RigidBody {
+				mat3x3<float32> transform;
 				vec4<float32> fillColor;
 				vec4<float32> strokeColor;
 				float32 depth;
-				uint32 selected = 0;
+				uint32 selected;
 			};
 
 			struct CenterOfMass {
@@ -46,7 +46,7 @@ namespace Trident {
 			};
 
 		private:
-			static constexpr uint8 SAMPLE_COUNT = 4;
+			static constexpr uint8 SAMPLE_COUNT = 1;
 			static constexpr float32 MIN_ZOOM_LEVEL = 1.0f;
 			static constexpr float32 MAX_ZOOM_LEVEL = 64.0f;
 			static constexpr float32 DEFAULT_ZOOM_LEVEL = 32.0f;
@@ -57,15 +57,15 @@ namespace Trident {
 			// `x` and `y` are in the [0, viewport] range.
 			const vec2<float32>& getNdcMousePosition() const;
 
-			void setScene(const Scene2D& scene);
+			void setScene(ref<Scene2DAsset> sceneAsset, ECS& ecs);
 
 			#if defined(SHOW_DISTANCE)
 				void setClosestPoints(const vec2<float32>& closestPointA, const vec2<float32>& closestPointB) const;
 			#endif
 
-			void setInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const;
+			void setRigidBodyTransform(Entity entity, const mat3x3<float32>& transform) const;
 
-			// `x` and `y` are in the [0, viewport] range.
+			// `x` and `y` must be in the [0, viewport] range.
 			void setMousePosition(float32 x, float32 y);
 
 			void setPlaceholderOffset(const vec2<float32>& offset) const;
@@ -80,6 +80,8 @@ namespace Trident {
 
 			void resize(WindowResizeEvent& event) override;
 
+			void updateCameraProjection() const;
+
 			void zoom(float32 zoomLevelDelta);
 
 			void clearRegisteredData();
@@ -92,10 +94,6 @@ namespace Trident {
 			void recreateDepthStencilImage();
 			void recreateDepthStencilImageView();
 			void recreateFramebuffers();
-			void recreateVertexBuffer(uint64 size);
-			void recreateInstanceBuffer(uint64 size);
-			void recreateCenterOfMassBuffer(uint64 size);
-			void recreateIndexBuffer(uint64 size);
 
 			void createCameraBuffer();
 			void createViewBuffer();
@@ -114,13 +112,14 @@ namespace Trident {
 			void createPlaceholderDescriptorSetLayout();
 			void createCameraViewPipelineLayout();
 			void createPlaceholderPipelineLayout();
-			void createGridGraphicsPipeline();
-			void createFillGraphicsPipeline();
-			void createStrokeGraphicsPipeline();
-			void createCenterOfMassGraphicsPipeline();
-			void createPlaceholderFillGraphicsPipeline();
-			void createPlaceholderStrokeGraphicsPipeline();
-			void createPlaceholderCenterOfMassGraphicsPipeline();
+
+			void createGridPipeline();
+			void createRigidBodyFillPipeline();
+			void createRigidBodyStrokePipeline();
+			void createCenterOfMassPipeline();
+			void createRigidBodyPlaceholderFillPipeline();
+			void createRigidBodyPlaceholderStrokePipeline();
+			void createRigidBodyPlaceholderCenterOfMassPipeline();
 
 			#if defined(SHOW_DISTANCE)
 				void createDistanceGraphicsPipeline();
@@ -133,17 +132,10 @@ namespace Trident {
 
 			void allocateDescriptorSets();
 
-			void copyBuffers(ref<Buffer<uint8>> stagingBuffer) const;
-
 			void updateCameraViewDescriptorSet() const;
 			void updatePlaceholderDescriptorSet() const;
 			void updateCentersOfMass() const;
-			void updateCameraProjection() const;
 			void updateViewport() const;
-
-			void renderGrid(ref<CommandEncoder> commandEncoder) const;
-			void renderScene(ref<CommandEncoder> commandEncoder) const;
-			void renderSelectedInstancePlaceholder(ref<CommandEncoder> commandEncoder) const;
 
 			#if defined(SHOW_DISTANCE)
 				void renderDistance(ref<CommandEncoder> commandEncoder) const;
@@ -156,8 +148,11 @@ namespace Trident {
 		public:
 			LayerInput* layerInput;
 
+			vec2<float32> cameraPosition = {0.0_m, 0.0_m};
+
 		private:
-			const Scene2D* scene = nullptr;
+			ref<Scene2DAsset> sceneAsset = nullptr;
+			ECS* ecs = nullptr;
 
 			ref<RenderPass> renderPass;
 
@@ -176,13 +171,13 @@ namespace Trident {
 			ref<PipelineLayout> cameraViewPipelineLayout;
 			ref<PipelineLayout> placeholderPipelineLayout;
 
-			ref<GraphicsPipeline> gridGraphicsPipeline;
-			ref<GraphicsPipeline> fillGraphicsPipeline;
-			ref<GraphicsPipeline> strokeGraphicsPipeline;
-			ref<GraphicsPipeline> centerOfMassGraphicsPipeline;
-			ref<GraphicsPipeline> placeholderFillGraphicsPipeline;
-			ref<GraphicsPipeline> placeholderStrokeGraphicsPipeline;
-			ref<GraphicsPipeline> placeholderCenterOfMassGraphicsPipeline;
+			ref<GraphicsPipeline> gridPipeline;
+			ref<GraphicsPipeline> rigidBodyFillPipeline;
+			ref<GraphicsPipeline> rigidBodyStrokePipeline;
+			ref<GraphicsPipeline> centerOfMassPipeline;
+			ref<GraphicsPipeline> rigidBodyPlaceholderFillPipeline;
+			ref<GraphicsPipeline> rigidBodyPlaceholderStrokePipeline;
+			ref<GraphicsPipeline> rigidBodyPlaceholderCenterOfMassPipeline;
 
 			#if defined(SHOW_DISTANCE)
 				ref<GraphicsPipeline> distanceGraphicsPipeline;
@@ -207,30 +202,30 @@ namespace Trident {
 			#endif
 
 			ref<Buffer<Vertex>> vertexBuffer;
-			ref<Buffer<Instance>> instanceBuffer;
-			ref<Buffer<CenterOfMass>> centerOfMassBuffer;
 			ref<Buffer<uint16>> indexBuffer;
+			ref<Buffer<RigidBody>> rigidBodyBuffer;
+			ref<Buffer<CenterOfMass>> centerOfMassBuffer;
 
-			Camera* cameraBufferMappedRange = nullptr;
-			View* viewBufferMappedRange = nullptr;
-			Placeholder* placeholderBufferMappedRange = nullptr;
+			Camera* cameraMappedRange = nullptr;
+			View* viewMappedRange = nullptr;
+			Placeholder* placeholderMappedRange = nullptr;
 
 			#if defined(SHOW_DISTANCE)
-				Vertex* closestPointBufferMappedRange = nullptr;
+				Vertex* closestPointMappedRange = nullptr;
 			#endif
 
 			#if defined(SHOW_FEATURES)
-				Vertex* vertexFeatureBufferMappedRange = nullptr;
-				Vertex* edgeFeatureBufferMappedRange = nullptr;
+				Vertex* vertexFeatureMappedRange = nullptr;
+				Vertex* edgeFeatureMappedRange = nullptr;
 			#endif
 
-			Instance* instanceBufferMappedRange = nullptr;
-			CenterOfMass* centerOfMassBufferMappedRange = nullptr;
+			RigidBody* rigidBodyMappedRange = nullptr;
+			CenterOfMass* centerOfMassMappedRange = nullptr;
 
 			vec2<float32> mousePosition;
 			vec2<float32> ndcMousePosition;
 
-			uint32 selectedInstanceIndex = max<uint32>();
+			Entity selectedEntity = max<Entity>();
 
 			#if defined(SHOW_FEATURES)
 				uint32 vertexFeatureCount = 0;

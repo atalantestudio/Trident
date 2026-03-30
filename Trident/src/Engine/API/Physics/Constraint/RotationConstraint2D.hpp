@@ -17,8 +17,8 @@ namespace Trident {
 				A(descriptor.A)
 			{}
 
-			void update(Scene2D* scene, float32 deltaTime) const final override {
-				RigidBody2D& rigidBodyA = scene->getComponent<RigidBody2D>(A);
+			void update(ECS* ecs, float32 deltaTime) const final override {
+				RigidBody2D& rigidBodyA = ecs->getComponent<RigidBody2D>(A);
 				rigidBodyA.angularVelocity = 0.0f;
 			}
 

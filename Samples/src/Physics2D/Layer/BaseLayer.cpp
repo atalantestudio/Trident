@@ -3,42 +3,45 @@
 
 #include "pch.hpp"
 
+#include "Engine/API/Physics/Constraint/Constraint2D.hpp"
+#include "Engine/API/Physics/Joint2D.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
+#include "Engine/ECS/Tag.hpp"
 
 #include "../../SampleApplication.hpp"
 #include "BaseLayer.hpp"
 
 namespace Trident {
 	BaseLayer::BaseLayer() :
-		physicsEngine(getPhysicsEngineDescriptor())
-		#if defined(BUILD_MODE_DEBUG)
-			, visualizationData{}
-		#endif
-	{}
+		physicsSimulation({
+			.ecs = &ecs,
+			.deltaTime = getApplication()->getFixedDeltaTime(),
+		})
+	{
+		ecs.registerComponentPool<Geometry2D>();
+		ecs.registerComponentPool<RigidBody2D>();
+		ecs.registerComponentPool<ref<Constraint2D>>();
+		ecs.registerComponentPool<Joint2D>();
+
+		ecs.registerTagPool<StaticEntityTag>();
+		ecs.registerTagPool<DynamicEntityTag>();
+	}
 
 	void BaseLayer::postConstruct() {
 		renderer.layerInput = input;
 
-		Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
-
 		renderer.setLayer(this);
 		renderer.build();
-		renderer.setScene(scene);
-
-		physicsEngine.registerScene(scene);
+		renderer.setScene(sceneAsset, ecs);
 	}
 
 	void BaseLayer::update(float32 deltaTime, float32 inverseDeltaTime) {}
 
 	void BaseLayer::preRender() {
-		#if defined(BUILD_MODE_DEBUG)
-			visualizationData = {};
-		#endif
-
 		// TODO
 		// For now there is 1 physics tick per frame because debugging along with Box2D Lite is easier.
 		// Ultimately though this must be in Layer::update.
-		physicsEngine.tick();
+		physicsSimulation.tick();
 
 		checkHover();
 
@@ -51,7 +54,7 @@ namespace Trident {
 			const Entity entity = rigidBodyComponentPool.componentIndexToEntity[componentIndex];
 			const RigidBody2D& rigidBody = scene.getComponent<RigidBody2D>(entity);
 
-			renderer.setInstanceTransform(entity, rigidBody.transform);
+			renderer.setRigidBodyTransform(entity, rigidBody.transform);
 
 			componentIndex += 1;
 		}
@@ -64,7 +67,8 @@ namespace Trident {
 
 		renderer.clearRegisteredData();
 
-		#if defined(BUILD_MODE_DEBUG)
+		// TODO(physics/visualization-data)
+		/* #if defined(BUILD_MODE_DEBUG)
 			#if VISUALIZE_MODE == VISUALIZE_MODE_CONTACT_MANIFOLD
 				if (visualizationData.contactManifold.contactCount > 0) {
 					Feature2D contactManifold{};
@@ -113,22 +117,11 @@ namespace Trident {
 					#endif
 				}
 			#endif
-		#endif
+		#endif */
 	}
 
 	void BaseLayer::render(ref<CommandEncoder> commandEncoder, float64 remainingFrameTime) const {
 		renderer.render(commandEncoder);
-	}
-
-	PhysicsEngine2DDescriptor BaseLayer::getPhysicsEngineDescriptor() {
-		PhysicsEngine2DDescriptor descriptor{};
-		descriptor.deltaTime = getApplication()->getFixedDeltaTime();
-
-		#if defined(BUILD_MODE_DEBUG)
-			descriptor.visualizationData = &visualizationData;
-		#endif
-
-		return descriptor;
 	}
 
 	void BaseLayer::checkHover() {
@@ -141,17 +134,19 @@ namespace Trident {
 			return;
 		}
 
+		const Geometry2D mouseGeometry = Geometry2D::pointAtOrigin();
+
 		RigidBody2D mouseRigidBody{};
 		mouseRigidBody.position = renderer.getNdcMousePosition();
-		mouseRigidBody.geometry = createRef<PointGeometry2D>();
-
-		mouseRigidBody.updateTransform();
+		mouseRigidBody.updateTransform(mouseGeometry.getCentroid());
 
 		for (sint32 rigidBodyIndex = static_cast<sint32>(rigidBodyComponentPool.componentCount - 1); rigidBodyIndex >= 0; rigidBodyIndex -= 1) {
 			const Entity entity = static_cast<Entity>(rigidBodyComponentPool.componentIndexToEntity[rigidBodyIndex]);
+			const GeometryComponent geometryComponent = ecs.getComponent<GeometryComponent>(entity);
+			const Geometry2D& geometry = sceneAsset->getGeometries()[geometryComponent.geometryIndex];
 			const RigidBody2D& rigidBody = scene.getComponent<RigidBody2D>(entity);
 
-			if (GJK2DConditional(rigidBody, mouseRigidBody)) {
+			if (GJK2DConditional(rigidBody, mouseRigidBody, geometry, mouseGeometry)) {
 				hoveredEntity = entity;
 
 				break;
@@ -200,9 +195,12 @@ namespace Trident {
 		Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
 
 		if (event.getButton() == MouseButton::LEFT && selectedEntity != max<uint32>()) {
+			const GeometryComponent geometryComponent = ecs.getComponent<GeometryComponent>(selectedEntity);
+			const Geometry2D& geometry = sceneAsset->getGeometries()[geometryComponent.geometryIndex];
+
 			RigidBody2D& rigidBody = scene.getComponent<RigidBody2D>(selectedEntity);
 			rigidBody.position += placeholderOffset;
-			rigidBody.updateTransform();
+			rigidBody.updateTransform(geometry.getCentroid());
 
 			selectedEntity = max<uint32>();
 		}

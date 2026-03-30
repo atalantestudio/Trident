@@ -26,26 +26,25 @@ namespace Trident {
 		// This is the closest point to the reference edge.
 		vec2<float32> incidentSupportPoint;
 
-		// Pointer to the reference body.
 		const RigidBody2D* referenceBody;
-
-		// Pointer to the incident body.
 		const RigidBody2D* incidentBody;
+
+		const Geometry2D* referenceGeometry;
+		const Geometry2D* incidentGeometry;
 	};
 
-	static void queryEdgeDirections(const RigidBody2D& referenceBody, const RigidBody2D& incidentBody, SAT2DOutput& output) {
-		const ref<ConvexHullGeometry2D> referenceGeometry = std::static_pointer_cast<ConvexHullGeometry2D>(referenceBody.geometry);
+	static void queryEdgeDirections(const RigidBody2D& referenceBody, const RigidBody2D& incidentBody, const Geometry2D& referenceGeometry, const Geometry2D& incidentGeometry, SAT2DOutput& output) {
 		const mat2x2<float32> R = mat2x2<float32>::rotation(incidentBody.rotation - referenceBody.rotation);
 
 		uint32 edgeIndex = 0;
 
 		// TODO: Expose edge normals from ConvexHullGeometry?
-		while (edgeIndex < referenceGeometry->edges.count()) {
-			const Edge edge = referenceGeometry->edges[edgeIndex];
-			const vec2<float32> a = referenceGeometry->vertices[edge.indexA];
-			const vec2<float32> b = referenceGeometry->vertices[edge.indexB];
+		while (edgeIndex < referenceGeometry.getEdges().count()) {
+			const Edge edge = referenceGeometry.getEdges()[edgeIndex];
+			const vec2<float32> a = referenceGeometry.getVertices()[edge.indexA];
+			const vec2<float32> b = referenceGeometry.getVertices()[edge.indexB];
 			const vec2<float32> d = edgeNormalClockwise(a, b);
-			const vec2<float32> s = incidentBody.geometry->support(-d * R);
+			const vec2<float32> s = incidentGeometry.support(-d * R);
 			const vec2<float32> aT = multiplyTransform(a, referenceBody.transform);
 			const vec2<float32> bT = multiplyTransform(b, referenceBody.transform);
 			const vec2<float32> sT = multiplyTransform(s, incidentBody.transform);
@@ -60,6 +59,8 @@ namespace Trident {
 				output.incidentSupportPoint = sT;
 				output.referenceBody = &referenceBody;
 				output.incidentBody = &incidentBody;
+				output.referenceGeometry = &referenceGeometry;
+				output.incidentGeometry = &incidentGeometry;
 			}
 
 			if (separation > 0.0f) {
@@ -77,18 +78,18 @@ namespace Trident {
 	// - Don't test parallel axes (https://dyn4j.org/2010/01/sat)
 	// - Reuse the separation axis from the last run to make the algorithm O(1) in non-intersection cases.
 	//   But what if the separation axis changes e.g. due to rotation?
-	static SAT2DOutput SAT2D(const RigidBody2D& A, const RigidBody2D& B) {
+	static SAT2DOutput SAT2D(const RigidBody2D& A, const RigidBody2D& B, const Geometry2D& geometryA, const Geometry2D& geometryB) {
 		SAT2DOutput output{};
 		output.separation = min<float32>();
 		output.referenceEdge.vertexCount = 2;
 
-		queryEdgeDirections(A, B, output);
+		queryEdgeDirections(A, B, geometryA, geometryB, output);
 
 		if (output.separation > 0.0f) {
 			return output;
 		}
 
-		queryEdgeDirections(B, A, output);
+		queryEdgeDirections(B, A, geometryB, geometryA, output);
 
 		if (output.separation > 0.0f) {
 			return output;

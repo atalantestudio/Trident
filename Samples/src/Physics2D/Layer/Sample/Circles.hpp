@@ -9,7 +9,8 @@ namespace Trident {
 	class Physics2DCirclesLayer : public BaseLayer {
 		public:
 			void build() override {
-				Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
+				// TODO(physics/samples): Restore sample.
+				/* Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
 
 				const ref<CircleGeometry2D> circleGeometry = CircleGeometry2D::unitCircle(32);
 
@@ -38,7 +39,7 @@ namespace Trident {
 				smallCircleDescriptor.geometry = circleGeometry;
 				smallCircleDescriptor.fillColor = 0xe6ddffff;
 
-				scene.createDynamicRigidBody(smallCircleDescriptor);
+				scene.createDynamicRigidBody(smallCircleDescriptor); */
 			}
 	};
 }

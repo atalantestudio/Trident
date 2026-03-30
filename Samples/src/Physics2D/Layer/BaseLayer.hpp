@@ -32,8 +32,6 @@ namespace Trident {
 			void onEvent(Event& event) override;
 
 		private:
-			PhysicsEngine2DDescriptor getPhysicsEngineDescriptor();
-
 			void checkHover();
 
 			bool onMouseDown(MouseDownEvent& event);
@@ -42,15 +40,11 @@ namespace Trident {
 			bool onMouseWheel(MouseWheelEvent& event);
 			bool onWindowResize(WindowResizeEvent& event);
 
-		protected:
-			Physics2DRenderer renderer;
-
 		private:
-			PhysicsEngine2D physicsEngine;
-
-			#if defined(BUILD_MODE_DEBUG)
-				VisualizationData2D visualizationData;
-			#endif
+			ref<Scene2DAsset> sceneAsset;
+			ECS ecs;
+			PhysicsSimulation2D physicsSimulation;
+			Physics2DRenderer renderer;
 
 			Entity hoveredEntity = max<uint32>();
 			Entity selectedEntity = max<uint32>();

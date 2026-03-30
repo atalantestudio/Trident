@@ -9,10 +9,9 @@ namespace Trident {
 	static bool CircleCircleCollider(
 		const RigidBody2D& A,
 		const RigidBody2D& B,
+		const Geometry2D& geometryA,
+		const Geometry2D& geometryB,
 		ContactManifold2D* contactManifold
-		#if defined(BUILD_MODE_DEBUG)
-			, VisualizationData2D* visualizationData
-		#endif
 	) {
 		const vec2<float32> AB = B.position - A.position;
 		const float32 lengthAB = lengthSquared(AB);
@@ -22,18 +21,18 @@ namespace Trident {
 			return false;
 		}
 
-		// NOTE: The Y component is ignored for circle scaling.
+		// The scaling factor is assumed to be the same in both axes.
 		const float32 scaleA = A.scale[0];
 		const float32 scaleB = B.scale[0];
 
-		const float32 d = lengthAB - pow(A.geometry->radius * scaleA + B.geometry->radius * scaleB, 2.0f);
+		const float32 d = lengthAB - pow(geometryA.getRadius() * scaleA + geometryB.getRadius() * scaleB, 2.0f);
 
 		if (d > 0.0f) {
 			return false;
 		}
 
-		const vec2<float32> sA = A.position + A.geometry->support(AB) * scaleA;
-		const vec2<float32> sB = B.position + B.geometry->support(-AB) * scaleB;
+		const vec2<float32> sA = A.position + geometryA.support(AB) * scaleA;
+		const vec2<float32> sB = B.position + geometryB.support(-AB) * scaleB;
 
 		contactManifold->normal = normalized(AB);
 		contactManifold->contactCount = 1;

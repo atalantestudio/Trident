@@ -6,6 +6,16 @@
 #include "Engine/ECS/ECS.hpp"
 
 namespace Trident {
+	uint32 ECS::getNextComponentPoolIndex() {
+		static uint32 componentPoolIndex = 0;
+
+		const uint32 index = componentPoolIndex;
+
+		componentPoolIndex += 1;
+
+		return index;
+	}
+
 	Entity ECS::createEntity() {
 		if (availableEntities.size() == 0) {
 			// Take the next entity from the iterator.
@@ -24,15 +34,5 @@ namespace Trident {
 		availableEntities.pop_back();
 
 		return entity;
-	}
-
-	uint32 ECS::getNextComponentPoolIndex() {
-		static uint32 componentPoolIndex = 0;
-
-		const uint32 index = componentPoolIndex;
-
-		componentPoolIndex += 1;
-
-		return index;
 	}
 }

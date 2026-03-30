@@ -11,7 +11,8 @@ namespace Trident {
 	class Physics2DConstraintLayer : public BaseLayer {
 		public:
 			void build() override {
-				Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
+				// TODO(physics/samples): Restore sample.
+				/* Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
 
 				const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
 
@@ -35,7 +36,7 @@ namespace Trident {
 				constraintDescriptor.A = 0;
 				constraintDescriptor.B = 1;
 
-				scene.createConstraint<PointConstraint2D>(constraintDescriptor);
+				scene.createConstraint<PointConstraint2D>(constraintDescriptor); */
 			}
 	};
 }

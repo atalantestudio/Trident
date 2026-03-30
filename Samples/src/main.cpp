@@ -37,6 +37,7 @@
 #include "Physics2D/Layer/SceneLayer.hpp"
 
 #include "Process/Default.hpp"
+#include "Process/ECS.hpp"
 
 #include "Sample/Layer/ArrayTexture.hpp"
 #include "Sample/Layer/ColorBlend.hpp"
@@ -151,6 +152,9 @@ namespace Trident {
 		else if (SampleGroupNameProperty == "Process") {
 			if (SampleNameProperty == "Default") {
 				registerProcess<ProcessDefaultProcess>();
+			}
+			else if (SampleNameProperty == "ECS") {
+				registerProcess<ProcessECSProcess>();
 			}
 		}
 		else if (SampleGroupNameProperty == "Sample") {

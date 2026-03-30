@@ -25,10 +25,6 @@ namespace Trident {
 				return attributes;
 			}
 
-			uint32 getStride() const {
-				return stride;
-			}
-
 			uint32 getMaxAlignment() const {
 				return maxAlignment;
 			}
@@ -102,11 +98,16 @@ namespace Trident {
 				registerAttribute<vec4<float64>>(hlslSemanticName, 3);
 			}
 
+		public:
+			// NOTE
+			// The stride may be changed manually if it goes beyond the provided attributes.
+			// Keep in mind that calls to VertexInputBinding::registerAttribute will add to it.
+			uint32 stride = 0;
+
 		private:
 			InputRate inputRate = InputRate::VERTEX;
 			std::vector<VertexInputAttribute> attributes;
 			uint32 offset = 0;
-			uint32 stride = 0;
 			uint32 maxAlignment = 0;
 	};
 }

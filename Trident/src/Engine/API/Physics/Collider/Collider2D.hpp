@@ -3,20 +3,10 @@
 
 #pragma once
 
+#include "Engine/API/Geometry/Geometry2D.hpp"
 #include "Engine/API/Physics/Contact/ContactManifold.hpp"
 #include "Engine/API/Physics/RigidBody2D.hpp"
 
-#if defined(BUILD_MODE_DEBUG)
-	#include "Engine/API/Physics/VisualizationData.hpp"
-#endif
-
 namespace Trident {
-	typedef bool (*Collider2D)(
-		const RigidBody2D& A,
-		const RigidBody2D& B,
-		ContactManifold2D* contactManifold
-		#if defined(BUILD_MODE_DEBUG)
-			, VisualizationData2D* visualizationData
-		#endif
-	);
+	typedef bool (*Collider2D)(const RigidBody2D& A, const RigidBody2D& B, const Geometry2D& geometryA, const Geometry2D& geometryB, ContactManifold2D* contactManifold);
 }

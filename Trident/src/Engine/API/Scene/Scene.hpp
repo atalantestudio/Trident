@@ -13,6 +13,16 @@ namespace Trident {
 				return ecs.getComponentPool<ComponentType>();
 			}
 
+			template<typename ComponentType>
+			const ComponentType& getComponent(Entity entity) const {
+				return ecs.getComponent<ComponentType>(entity);
+			}
+
+			template<typename ComponentType>
+			ComponentType& getComponent(Entity entity) {
+				return ecs.getComponent<ComponentType>(entity);
+			}
+
 			Entity getLastEntity() const {
 				return ecs.nextEntity - 1;
 			}

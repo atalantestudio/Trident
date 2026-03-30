@@ -122,6 +122,7 @@ namespace Trident {
 			const VertexInputBinding& vertexInputBinding = descriptor.vertexInputBindings[vertexInputBindingIndex];
 			const std::vector<VertexInputAttribute>& vertexInputAttributes = vertexInputBinding.getAttributes();
 
+			// TODO(vertex-input-binding/stride): Unlike with OpenGL or Vulkan, it is not possible to provide a custom stride for a binding.
 			for (const VertexInputAttribute& vertexInputAttribute : vertexInputAttributes) {
 				D3D12_INPUT_ELEMENT_DESC& inputElementDescriptor = inputElementDescriptors[inputElementDescriptorIndex];
 				inputElementDescriptor.SemanticName = "VERTEX_INPUT_ATTRIBUTE";

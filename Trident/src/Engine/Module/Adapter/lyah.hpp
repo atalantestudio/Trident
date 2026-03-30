@@ -162,6 +162,12 @@ namespace Trident {
 
 			return pointer_cast<T*>(this)[index];
 		}
+
+		// TODO(lyah)
+		// Add scalar vectors and replace SIMD vectors by general-purpose registers.
+		operator vec<2, T>() const {
+			return {x, y};
+		}
 	};
 
 	template<typename T>

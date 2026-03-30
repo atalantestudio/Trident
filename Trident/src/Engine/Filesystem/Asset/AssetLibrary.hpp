@@ -323,17 +323,20 @@ namespace Trident {
 				sceneAssetDescriptor.staticIndexCount = stream.read<uint32>();
 				sceneAssetDescriptor.dynamicVertexCount = stream.read<uint32>();
 				sceneAssetDescriptor.dynamicIndexCount = stream.read<uint32>();
-				sceneAssetDescriptor.vertexBuffer = sequence<float32>((sceneAssetDescriptor.staticVertexCount + sceneAssetDescriptor.dynamicVertexCount) * 2);
-				sceneAssetDescriptor.indexBuffer = sequence<uint16>(sceneAssetDescriptor.staticIndexCount + sceneAssetDescriptor.dynamicIndexCount);
+				sceneAssetDescriptor.entityCount = stream.read<uint32>();
+
+				const uint64 vertexCount = (sceneAssetDescriptor.staticVertexCount + sceneAssetDescriptor.dynamicVertexCount) * 2;
+				const uint64 indexCount = sceneAssetDescriptor.staticIndexCount + sceneAssetDescriptor.dynamicIndexCount;
+
+				sceneAssetDescriptor.vertexAndIndexBuffer = sequence<uint8>(vertexCount * sizeof(float32) + indexCount * sizeof(uint16));
 				sceneAssetDescriptor.geometries = sequence<CachedGeometry2D>(stream.read<uint32>());
 				sceneAssetDescriptor.rigidBodies = sequence<CachedRigidBody2D>(stream.read<uint32>());
+				sceneAssetDescriptor.geometryComponents = sequence<GeometryComponent>(stream.read<uint32>());
 
-				std::copy_n(pointer_cast<const float32*>(stream.getBytePosition()), sceneAssetDescriptor.vertexBuffer.count(), &sceneAssetDescriptor.vertexBuffer[0]);
-				stream.jump(sceneAssetDescriptor.vertexBuffer.count() * sizeof(float32));
+				std::copy_n(stream.getBytePosition(), sceneAssetDescriptor.vertexAndIndexBuffer.count(), &sceneAssetDescriptor.vertexAndIndexBuffer[0]);
+				stream.jump(sceneAssetDescriptor.vertexAndIndexBuffer.count());
 
-				std::copy_n(pointer_cast<const uint16*>(stream.getBytePosition()), sceneAssetDescriptor.indexBuffer.count(), &sceneAssetDescriptor.indexBuffer[0]);
-				stream.jump(sceneAssetDescriptor.indexBuffer.count() * sizeof(uint16));
-
+				// TODO(asset/scene): This is awful, review packing.
 				for (CachedGeometry2D& geometry : sceneAssetDescriptor.geometries) {
 					geometry.centroid = stream.read<svec2<float32>>();
 				}
@@ -343,7 +346,15 @@ namespace Trident {
 				}
 
 				for (CachedGeometry2D& geometry : sceneAssetDescriptor.geometries) {
+					geometry.entity = stream.read<uint32>();
+				}
+
+				for (CachedGeometry2D& geometry : sceneAssetDescriptor.geometries) {
 					geometry.vertexOffset = stream.read<uint32>();
+				}
+
+				for (CachedGeometry2D& geometry : sceneAssetDescriptor.geometries) {
+					geometry.vertexCount = stream.read<uint32>();
 				}
 
 				for (CachedGeometry2D& geometry : sceneAssetDescriptor.geometries) {
@@ -351,7 +362,11 @@ namespace Trident {
 				}
 
 				for (CachedGeometry2D& geometry : sceneAssetDescriptor.geometries) {
-					geometry.indexCount = stream.read<uint16>();
+					geometry.triangleListIndexCount = stream.read<uint16>();
+				}
+
+				for (CachedGeometry2D& geometry : sceneAssetDescriptor.geometries) {
+					geometry.lineStripIndexCount = stream.read<uint16>();
 				}
 
 				for (CachedGeometry2D& geometry : sceneAssetDescriptor.geometries) {
@@ -383,7 +398,11 @@ namespace Trident {
 				}
 
 				for (CachedRigidBody2D& rigidBody : sceneAssetDescriptor.rigidBodies) {
-					rigidBody.geometryIndex = stream.read<uint32>();
+					rigidBody.entity = stream.read<uint32>();
+				}
+
+				for (GeometryComponent& geometryComponent : sceneAssetDescriptor.geometryComponents) {
+					geometryComponent = stream.read<GeometryComponent>();
 				}
 
 				return createRef<Scene2DAsset>(sceneAssetDescriptor);

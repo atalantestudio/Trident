@@ -12,29 +12,16 @@ namespace Trident {
 	struct RigidBody2DDescriptor;
 	struct PhysicsMaterial;
 
-	DEFINE_TAG_COMPONENT(DynamicEntityTag);
-	DEFINE_TAG_COMPONENT(StaticEntityTag);
-
 	class Scene2D : public Scene {
 		public:
 			explicit Scene2D();
 
-			template<typename ComponentType>
-			const ComponentType& getComponent(Entity entity) const {
-				return ecs.getComponent<ComponentType>(entity);
-			}
-
-			template<typename ComponentType>
-			ComponentType& getComponent(Entity entity) {
-				return ecs.getComponent<ComponentType>(entity);
-			}
-
 			/// Creates a rigid body without a collider.
-			void createGhostRigidBody(const RigidBody2DDescriptor& descriptor);
+			void createGhostRigidBody(const RigidBody2DDescriptor& descriptor, const Geometry2D& geometry);
 
-			void createDynamicRigidBody(const RigidBody2DDescriptor& descriptor);
+			void createDynamicRigidBody(const RigidBody2DDescriptor& descriptor, const Geometry2D& geometry);
 
-			void createStaticRigidBody(const RigidBody2DDescriptor& descriptor);
+			void createStaticRigidBody(const RigidBody2DDescriptor& descriptor, const Geometry2D& geometry);
 
 			template<typename ConstraintType, typename DescriptorType>
 			void createConstraint(const DescriptorType& descriptor) {
@@ -47,10 +34,10 @@ namespace Trident {
 			void createJoint(const Joint2DDescriptor& descriptor);
 
 		private:
-			void setGeometry(Entity entity, ref<Geometry2D> geometry);
+			void setGeometry(Entity entity, Geometry2D& geometry);
 
 			void setMaterial(Entity entity, ref<PhysicsMaterial> material);
 
-			Entity createRigidBody(const RigidBody2DDescriptor& descriptor);
+			Entity createRigidBody(const RigidBody2DDescriptor& descriptor, const Geometry2D& geometry);
 	};
 }

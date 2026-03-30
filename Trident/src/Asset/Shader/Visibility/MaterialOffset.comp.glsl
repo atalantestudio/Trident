@@ -5,6 +5,7 @@
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
+// TODO(glsl/read-write-qualifiers): Buffer should be qualified as "readonly writeonly" but glslc emits read/write errors.
 layout(set = 0, binding = 0) buffer MaterialCountBuffer {
 	uint materialCountBuffer[];
 };

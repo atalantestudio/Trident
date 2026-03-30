@@ -9,7 +9,8 @@ namespace Trident {
 	class Physics2DEmptyLayer : public BaseLayer {
 		public:
 			void build() override {
-				Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
+				// TODO(physics/samples): Restore sample.
+				/* Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
 
 				const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
 
@@ -20,7 +21,7 @@ namespace Trident {
 				floorDescriptor.geometry = squareGeometry;
 				floorDescriptor.fillColor = 0xf4fedbff;
 
-				scene.createStaticRigidBody(floorDescriptor);
+				scene.createStaticRigidBody(floorDescriptor); */
 			}
 	};
 }

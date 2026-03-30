@@ -9,7 +9,8 @@ namespace Trident {
 	class Physics2DBoxesLayer : public BaseLayer {
 		public:
 			void build() override {
-				Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
+				// TODO(physics/samples): Restore sample.
+				/* Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
 
 				const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
 
@@ -29,7 +30,7 @@ namespace Trident {
 				boxDescriptor.geometry = squareGeometry;
 				boxDescriptor.fillColor = 0xe6ddffff;
 
-				scene.createDynamicRigidBody(boxDescriptor);
+				scene.createDynamicRigidBody(boxDescriptor); */
 			}
 	};
 }

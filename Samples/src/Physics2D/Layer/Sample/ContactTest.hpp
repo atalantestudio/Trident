@@ -9,7 +9,8 @@ namespace Trident {
 	class Physics2DContactTestLayer : public BaseLayer {
 		public:
 			void build() override {
-				Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
+				// TODO(physics/samples): Restore sample.
+				/* Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
 
 				ConvexHullGeometry2DDescriptor triangleGeometryDescriptor{};
 				triangleGeometryDescriptor.vertices = {
@@ -34,7 +35,7 @@ namespace Trident {
 				triangleDescriptor.geometry = triangleGeometry;
 				triangleDescriptor.fillColor = 0xe6ddffff;
 
-				scene.createDynamicRigidBody(triangleDescriptor);
+				scene.createDynamicRigidBody(triangleDescriptor); */
 			}
 	};
 }

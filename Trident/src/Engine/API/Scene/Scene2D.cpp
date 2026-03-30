@@ -3,29 +3,31 @@
 
 #include "pch.hpp"
 
+#include "Engine/API/Geometry/Geometry2D.hpp"
 #include "Engine/API/Material/ColorFillStrokeMaterial.hpp"
 #include "Engine/API/Physics/Constraint/Constraint2D.hpp"
 #include "Engine/API/Physics/Joint2D.hpp"
 #include "Engine/API/Physics/RigidBody2D.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
+#include "Engine/ECS/Tag.hpp"
 
 namespace Trident {
 	Scene2D::Scene2D() {
-		ecs.registerComponent<RigidBody2D>();
-		ecs.registerComponent<ref<Geometry2D>>();
-		ecs.registerComponent<ref<PhysicsMaterial>>();
-		ecs.registerComponent<ref<Constraint2D>>();
-		ecs.registerComponent<Joint2D>();
+		ecs.registerComponentPool<RigidBody2D>();
+		ecs.registerComponentPool<Geometry2D>();
+		ecs.registerComponentPool<ref<PhysicsMaterial>>();
+		ecs.registerComponentPool<ref<Constraint2D>>();
+		ecs.registerComponentPool<Joint2D>();
 
-		ecs.registerComponent<DynamicEntityTag>();
-		ecs.registerComponent<StaticEntityTag>();
+		ecs.registerComponentPool<DynamicEntityTag>();
+		ecs.registerComponentPool<StaticEntityTag>();
 	}
 
-	void Scene2D::createGhostRigidBody(const RigidBody2DDescriptor& descriptor) {
-		const Entity entity = createRigidBody(descriptor);
+	void Scene2D::createGhostRigidBody(const RigidBody2DDescriptor& descriptor, const Geometry2D& geometry) {
+		const Entity entity = createRigidBody(descriptor, geometry);
 		const ref<PhysicsMaterial> material = ecs.getComponent<ref<PhysicsMaterial>>(entity);
 
-		RigidBody2D& rigidBody = getComponent<RigidBody2D>(entity);
+		RigidBody2D& rigidBody = ecs.getComponent<RigidBody2D>(entity);
 		rigidBody.linearVelocity = descriptor.linearVelocity;
 		rigidBody.angularVelocity = descriptor.angularVelocity;
 
@@ -38,33 +40,33 @@ namespace Trident {
 		else {
 			rigidBody.inverseMass = 1.0f / m;
 
-			// TODO(stable-simulation)
-			const float32 area = rigidBody.scale[0] * rigidBody.scale[0] + rigidBody.scale[1] * rigidBody.scale[1];
-			// const float32 area = descriptor.geometry->calculateMass(rigidBody.scale, material->density) * 2.0f;
+			// TODO(physics/inertia)
+			// const float32 area = geometry.calculateMass(rigidBody.scale, material->density) * 2.0f;
+			const float32 area = geometry.calculateMass(rigidBody.scale, material->density);
 
-			// TODO: Is this correct? See https://github.com/erincatto/box2d-lite/blob/227b71b6974ea57ab7e96d40f6374287bd6a0e77/src/Body.cpp#L47.
+			// TODO(physics/inertia): Is this correct? See https://github.com/erincatto/box2d-lite/blob/227b71b6974ea57ab7e96d40f6374287bd6a0e77/src/Body.cpp#L47.
 			const float32 I = m * area / 12.0f;
 
 			rigidBody.inverseInertia = 1.0f / I;
 		}
 	}
 
-	void Scene2D::createDynamicRigidBody(const RigidBody2DDescriptor& descriptor) {
-		createGhostRigidBody(descriptor);
+	void Scene2D::createDynamicRigidBody(const RigidBody2DDescriptor& descriptor, const Geometry2D& geometry) {
+		createGhostRigidBody(descriptor, geometry);
 
 		const Entity entity = getLastEntity();
 
-		ecs.setComponent<DynamicEntityTag>(entity, {});
+		ecs.setTag<DynamicEntityTag>(entity);
 	}
 
-	void Scene2D::createStaticRigidBody(const RigidBody2DDescriptor& descriptor) {
-		const Entity entity = createRigidBody(descriptor);
+	void Scene2D::createStaticRigidBody(const RigidBody2DDescriptor& descriptor, const Geometry2D& geometry) {
+		const Entity entity = createRigidBody(descriptor, geometry);
 
 		RigidBody2D& rigidBody = ecs.getComponent<RigidBody2D>(entity);
 		rigidBody.inverseMass = 0.0_kg;
 		rigidBody.inverseInertia = 0.0_kg_m2;
 
-		ecs.setComponent<StaticEntityTag>(entity, {});
+		ecs.setTag<StaticEntityTag>(entity);
 	}
 
 	void Scene2D::createJoint(const Joint2DDescriptor& descriptor) {
@@ -85,18 +87,18 @@ namespace Trident {
 		ecs.setComponent<Joint2D>(entity, joint);
 	}
 
-	void Scene2D::setGeometry(Entity entity, ref<Geometry2D> geometry) {
-		ecs.setComponent<ref<Geometry2D>>(entity, geometry);
+	void Scene2D::setGeometry(Entity entity, Geometry2D& geometry) {
+		ecs.setComponent<Geometry2D>(entity, geometry);
 	}
 
 	void Scene2D::setMaterial(Entity entity, ref<PhysicsMaterial> material) {
 		ecs.setComponent<ref<PhysicsMaterial>>(entity, material);
 	}
 
-	Entity Scene2D::createRigidBody(const RigidBody2DDescriptor& descriptor) {
+	Entity Scene2D::createRigidBody(const RigidBody2DDescriptor& descriptor, const Geometry2D& geometry) {
 		const Entity entity = ecs.createEntity();
 
-		setGeometry(entity, descriptor.geometry);
+		ecs.setComponent<Geometry2D>(entity, geometry);
 
 		// TODO: Set correct restitution.
 		ref<ColorFillStrokeMaterial> material = createRef<ColorFillStrokeMaterial>();
@@ -114,10 +116,8 @@ namespace Trident {
 		rigidBody.rotation = descriptor.rotation;
 		rigidBody.scale = descriptor.scale;
 		rigidBody.friction = descriptor.friction;
-		rigidBody.geometry = ecs.getComponent<ref<Geometry2D>>(entity);
-		rigidBody.label = descriptor.label;
 
-		rigidBody.updateTransform();
+		rigidBody.updateTransform(geometry.centroid);
 
 		ecs.setComponent<RigidBody2D>(entity, rigidBody);
 

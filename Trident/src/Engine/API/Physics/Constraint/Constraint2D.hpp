@@ -3,11 +3,12 @@
 
 #pragma once
 
-#include "Engine/API/Scene/Scene2D.hpp"
+#include "Engine/ECS/ECS.hpp"
 
 namespace Trident {
+	// TODO: Replace virtual properties by LUT.
 	class Constraint2D {
 		public:
-			virtual void update(Scene2D* scene, float32 deltaTime) const = 0;
+			virtual void update(ECS* ecs, float32 deltaTime) const = 0;
 	};
 }

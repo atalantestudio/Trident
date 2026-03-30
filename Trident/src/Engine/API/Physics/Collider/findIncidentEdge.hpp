@@ -9,23 +9,24 @@ namespace Trident {
 		/// The rigid body owning the incident edge.
 		const RigidBody2D& incidentBody,
 
+		/// The geometry used by the rigid body.
+		const Geometry2D& incidentGeometry,
+
 		/// The reference edge normal, rotated by (Reference - Incident).
 		vec2<float32> referenceEdgeNormal
 	) {
 		ClipFeature2D incidentEdge{};
 		incidentEdge.vertexCount = 2;
 
-		const ref<ConvexHullGeometry2D> incidentGeometry = std::static_pointer_cast<ConvexHullGeometry2D>(incidentBody.geometry);
-
 		float32 minAngle = max<float32>();
 		uint32 incidentEdgeIndex = 0;
 		uint32 edgeIndex = 0;
 
 		// TODO: Expose edge normals from ConvexHullGeometry.
-		while (edgeIndex < incidentGeometry->edges.count()) {
-			const Edge edge = incidentGeometry->edges[edgeIndex];
-			const vec2<float32> a = incidentGeometry->vertices[edge.indexA];
-			const vec2<float32> b = incidentGeometry->vertices[edge.indexB];
+		while (edgeIndex < incidentGeometry.getEdges().count()) {
+			const Edge edge = incidentGeometry.getEdges()[edgeIndex];
+			const vec2<float32> a = incidentGeometry.getVertices()[edge.indexA];
+			const vec2<float32> b = incidentGeometry.getVertices()[edge.indexB];
 			const vec2<float32> d = perpendicularLeft(b - a);
 			const float32 angle = dot(referenceEdgeNormal, d);
 
@@ -40,12 +41,12 @@ namespace Trident {
 		}
 
 		incidentEdge.edge[0].position = multiplyTransform(incidentEdge.edge[0].position, incidentBody.transform);
-		incidentEdge.edge[0].id.incidentEdge0Index = (incidentEdgeIndex + 1) % static_cast<uint16>(incidentGeometry->edges.count());
+		incidentEdge.edge[0].id.incidentEdge0Index = (incidentEdgeIndex + 1) % static_cast<uint16>(incidentGeometry.getEdges().count());
 		incidentEdge.edge[0].id.incidentEdge1Index = incidentEdgeIndex;
 
 		incidentEdge.edge[1].position = multiplyTransform(incidentEdge.edge[1].position, incidentBody.transform);
 		incidentEdge.edge[1].id.incidentEdge0Index = incidentEdgeIndex;
-		incidentEdge.edge[1].id.incidentEdge1Index = static_cast<sint32>(incidentEdgeIndex - 1) % static_cast<uint16>(incidentGeometry->edges.count());
+		incidentEdge.edge[1].id.incidentEdge1Index = static_cast<sint32>(incidentEdgeIndex - 1) % static_cast<uint16>(incidentGeometry.getEdges().count());
 
 		return incidentEdge;
 	}

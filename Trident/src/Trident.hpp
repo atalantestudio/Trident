@@ -22,10 +22,8 @@
 #include "Engine/API/Event/Window/WindowResizeEvent.hpp"
 
 // ECS
+#include "Engine/ECS/Component/GeometryComponent.hpp"
 #include "Engine/ECS/Component/ScriptComponent.hpp"
-#include "Engine/ECS/Component/SpriteComponent.hpp"
-#include "Engine/ECS/Component/Transform2DComponent.hpp"
-#include "Engine/ECS/Component/Transform3DComponent.hpp"
 #include "Engine/ECS/ECS.hpp"
 
 // Filesystem
@@ -53,9 +51,7 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 // Geometry (2D)
-#include "Engine/API/Geometry/CircleGeometry2D.hpp"
 #include "Engine/API/Geometry/ConvexHullGeometry2D.hpp"
-#include "Engine/API/Geometry/PointGeometry2D.hpp"
 
 // Geometry (3D)
 #include "Engine/API/Geometry/3D/BoxGeometry3D.hpp"
@@ -69,5 +65,4 @@
 #include "Engine/API/Physics/CCD/TimeOfImpact.hpp"
 #include "Engine/API/Physics/GJK2D.hpp"
 #include "Engine/API/Physics/GJK2DConditional.hpp"
-#include "Engine/API/Physics/PhysicsEngine2D.hpp"
-#include "Engine/API/Physics/VisualizationData.hpp"
+#include "Engine/API/Physics/PhysicsSimulation2D.hpp"

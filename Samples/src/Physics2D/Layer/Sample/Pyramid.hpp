@@ -9,7 +9,8 @@ namespace Trident {
 	class Physics2DPyramidLayer : public BaseLayer {
 		public:
 			void build() override {
-				Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
+				// TODO(physics/samples): Restore sample.
+				/* Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
 
 				const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
 
@@ -48,7 +49,7 @@ namespace Trident {
 
 					x += {0.5625_m, 2.0_m};
 					i += 1;
-				}
+				} */
 			}
 	};
 }

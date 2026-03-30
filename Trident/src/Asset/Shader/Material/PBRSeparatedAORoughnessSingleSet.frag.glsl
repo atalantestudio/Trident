@@ -75,8 +75,14 @@ vec3 FresnelSchlick(float angle, vec3 baseReflectivity) {
 	return baseReflectivity + (1.0 - baseReflectivity) * pow(clamp(1.0 - angle, 0.0, 1.0), 5.0);
 }
 
+vec3 gammaCorrect(vec3 color) {
+	return pow(color, vec3(1.0 / 2.2));
+}
+
 void main() {
-	vec3 diffuse = pow(texture(diffuseTexture, fragmentInput.textureCoordinate).rgb, vec3(2.2, 2.2, 2.2));
+	// Convert from sRGB space to linear space.
+	vec3 diffuse = pow(texture(diffuseTexture, fragmentInput.textureCoordinate).rgb, vec3(2.2));
+
 	vec3 normal = normalize(fragmentInput.TBN * (texture(normalTexture, fragmentInput.textureCoordinate).xyz * 2.0 - 1.0));
 	float ao = texture(aoTexture, fragmentInput.textureCoordinate).r;
 	float roughness = texture(roughnessTexture, fragmentInput.textureCoordinate).r;
@@ -123,7 +129,8 @@ void main() {
 
 	// Apply HDR.
 	color = color / (color + 1.0);
-	color = pow(color, vec3(1.0 / 2.2));
+
+	color = gammaCorrect(color);
 
 	fragment = vec4(color, 1.0);
 }

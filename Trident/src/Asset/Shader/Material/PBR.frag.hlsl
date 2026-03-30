@@ -88,8 +88,14 @@ float3 FresnelSchlick(float angle, float3 baseReflectivity) {
 	return baseReflectivity + (1.0 - baseReflectivity) * pow(clamp(1.0 - angle, 0.0, 1.0), 5.0);
 }
 
+float3 gammaCorrect(float3 color) {
+	return pow(color, 1.0 / 2.2);
+}
+
 FragmentOutput main(FragmentInput input) {
+	// Convert from sRGB space to linear space.
 	float3 diffuse = pow(diffuseTexture.Sample(diffuseSamplerState, input.textureCoordinate).rgb, float3(2.2, 2.2, 2.2));
+
 	float3 normal = normalize(mul(input.TBN, normalTexture.Sample(normalSamplerState, input.textureCoordinate).xyz * 2.0 - 1.0));
 	float3 arm = armTexture.Sample(armSamplerState, input.textureCoordinate).rgb;
 	float ao = arm[0];
@@ -137,7 +143,8 @@ FragmentOutput main(FragmentInput input) {
 
 	// Apply HDR.
 	color = color / (color + 1.0);
-	color = pow(color, float3(1.0, 1.0, 1.0) / 2.2);
+
+	color = gammaCorrect(color);
 
 	FragmentOutput output;
 	output.color = float4(color, 1.0);

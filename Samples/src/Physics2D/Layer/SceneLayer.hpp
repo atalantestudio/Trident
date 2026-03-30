@@ -14,8 +14,6 @@ namespace Trident {
 
 			virtual ~Physics2DSceneLayer() = default;
 
-			PhysicsEngine2DDescriptor getPhysicsEngineDescriptor();
-
 			void build() override {}
 
 			void postConstruct() override;
@@ -29,7 +27,7 @@ namespace Trident {
 			void onEvent(Event& event) override;
 
 		private:
-			void createPuzzleScene(Scene2D& scene);
+			void loadScene();
 
 			void checkHover();
 
@@ -42,8 +40,11 @@ namespace Trident {
 			bool onEvent(WindowResizeEvent& event);
 
 		private:
-			PhysicsEngine2D physicsEngine;
+			ref<Scene2DAsset> sceneAsset;
+			ECS ecs;
+			PhysicsSimulation2D physicsSimulation;
 			Physics2DRenderer renderer;
+
 			Input keyMap;
 			bool jumping = false;
 
@@ -52,8 +53,6 @@ namespace Trident {
 			Entity selectedEntity = max<uint32>();
 			vec2<float32> placeholderOffset;
 
-			#if defined(BUILD_MODE_DEBUG)
-				VisualizationData2D visualizationData{};
-			#endif
+			bool dragging = false;
 	};
 }

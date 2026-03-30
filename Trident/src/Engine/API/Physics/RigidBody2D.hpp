@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Geometry/Geometry2D.hpp"
+#include "Engine/API/Physics/Cached/CachedRigidBody2D.hpp"
 
 namespace Trident {
 	struct RigidBody2DDescriptor {
@@ -14,22 +15,35 @@ namespace Trident {
 		float32 angularVelocity = 0.0_w;
 		float32 mass = 0.0_kg;
 		float32 friction = 0.0f;
-		ref<Geometry2D> geometry;
 		float32 density = 1.0f;
-		Color fillColor = 0xfffffff;
+		Color fillColor = 0xffffffff;
 		Color strokeColor = 0x000000ff;
 
 		// TODO: Add layer/island system to scene ECS.
 		// uint32 layerIndex = 0;
-
-		sequence<char8> label;
 	};
 
 	class RigidBody2D {
 		public:
-			void updateTransform() {
+			static RigidBody2D fromCached(const CachedRigidBody2D& cachedRigidBody, vec2<float32> centroid) {
+				RigidBody2D rigidBody = {
+					.position = cachedRigidBody.position,
+					.rotation = cachedRigidBody.rotation,
+					.scale = cachedRigidBody.scale,
+					.inverseMass = cachedRigidBody.inverseMass,
+					.inverseInertia = cachedRigidBody.inverseInertia,
+					.friction = cachedRigidBody.friction,
+				};
+
+				rigidBody.updateTransform(centroid);
+
+				return rigidBody;
+			}
+
+		public:
+			void updateTransform(vec2<float32> centroid) {
 				transform =
-					mat3x3<float32>::translation(-geometry->centroid) *
+					mat3x3<float32>::translation(-centroid) *
 					mat3x3<float32>::scaling(scale) *
 					mat3x3<float32>::rotation(-rotation) *
 					mat3x3<float32>::translation(position);
@@ -80,16 +94,11 @@ namespace Trident {
 
 			float32 inverseMass = 1.0f / 1.0_kg;
 
-			// Coefficient of friction.
-			// TODO: Differentiate static friction from dynamic friction.
-			float32 friction = 0.0f;
-
 			// Inertia = mass distribution over the shape.
 			float32 inverseInertia = 1.0_kg_m2;
 
-			ref<Geometry2D> geometry;
-
-			// TODO(debug-only)
-			sequence<char8> label;
+			// Coefficient of friction.
+			// TODO: Differentiate static friction from dynamic friction.
+			float32 friction = 0.0f;
 	};
 }
