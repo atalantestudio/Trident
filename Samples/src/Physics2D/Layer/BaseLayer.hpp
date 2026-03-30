@@ -46,9 +46,10 @@ namespace Trident {
 			PhysicsSimulation2D physicsSimulation;
 			Physics2DRenderer renderer;
 
-			Entity hoveredEntity = max<uint32>();
-			Entity selectedEntity = max<uint32>();
+			Entity hoveredEntity = max<Entity>();
+			Entity selectedEntity = max<Entity>();
 
+			vec2<float32> mousePosition = {0.0_m, 0.0_m};
 			vec2<float32> placeholderOffset;
 	};
 }

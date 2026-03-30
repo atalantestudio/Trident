@@ -107,14 +107,15 @@ namespace Trident {
 			.deltaTime = getApplication()->getFixedDeltaTime(),
 		})
 	{
+		// TODO(ecs/scene-components):
+		// - MaterialReferenceComponent
+		// - RigidBody2DComponent
+		// - RigidBody3DComponent
+		// - Transform2DComponent/Transform3DComponent for static meshes?
 		ecs.registerComponentPool<GeometryComponent>();
-
-		// TODO: MaterialReferenceComponent, RigidBody2DComponent, RigidBody3DComponent. Transform2DComponent/Transform3DComponent for static meshes?
-
 		ecs.registerComponentPool<RigidBody2D>();
 		ecs.registerComponentPool<ref<Constraint2D>>();
 		ecs.registerComponentPool<Joint2D>();
-
 		ecs.registerTagPool<StaticEntityTag>();
 		ecs.registerTagPool<DynamicEntityTag>();
 	}
@@ -159,10 +160,6 @@ namespace Trident {
 	void Physics2DSceneLayer::preRender() {
 		physicsSimulation.tick();
 
-		if (dragging) {
-			renderer.updateCameraProjection();
-		}
-
 		checkHover();
 
 		const ComponentPool<RigidBody2D>& rigidBodyComponentPool = ecs.getComponentPool<RigidBody2D>();
@@ -180,8 +177,12 @@ namespace Trident {
 
 		renderer.selectEntity(selectedEntity);
 
-		if (selectedEntity != max<uint32>()) {
+		if (selectedEntity != max<Entity>()) {
 			renderer.setPlaceholderOffset(placeholderOffset);
+		}
+
+		if (draggingCamera) {
+			renderer.updateCameraProjection();
 		}
 
 		renderer.clearRegisteredData();
@@ -203,10 +204,7 @@ namespace Trident {
 		const Geometry2D mouseGeometry = Geometry2D::pointAtOrigin();
 
 		RigidBody2D mouseRigidBody{};
-
-		// TODO: Include camera position.
-		mouseRigidBody.position = renderer.getNdcMousePosition() - renderer.cameraPosition;
-
+		mouseRigidBody.position = renderer.cameraPosition + mousePosition;
 		mouseRigidBody.updateTransform(mouseGeometry.getCentroid());
 
 		sint32 componentIndex = static_cast<sint32>(rigidBodyComponentPool.componentCount) - 1;
@@ -252,42 +250,49 @@ namespace Trident {
 	}
 
 	bool Physics2DSceneLayer::onEvent(MouseDownEvent& event) {
-		if (event.getButton() == MouseButton::LEFT && hoveredEntity != max<Entity>()) {
-			selectedEntity = hoveredEntity;
-			placeholderOffset = {0.0f, 0.0f};
+		const Window* window = getApplication()->getWindow();
+		const sint32* size = window->getSize();
+
+		mousePosition = window->getNdcMousePosition() * (vec2<float32>(static_cast<float32>(size[0]), static_cast<float32>(size[1])) * 0.5f / renderer.getZoomLevel());
+		mouseDelta = {0.0f, 0.0f};
+
+		if (event.getButton() == MouseButton::RIGHT && selectedEntity == max<Entity>()) {
+			draggingCamera = true;
 		}
 
-		if (event.getButton() == MouseButton::RIGHT && !dragging) {
-			dragging = true;
+		if (event.getButton() == MouseButton::LEFT && hoveredEntity != max<Entity>() && !draggingCamera) {
+			selectedEntity = hoveredEntity;
+			placeholderOffset = {0.0f, 0.0f};
 		}
 
 		return true;
 	}
 
 	bool Physics2DSceneLayer::onEvent(MouseMoveEvent& event) {
-		const float32 x = static_cast<float32>(event.getX());
-		const float32 y = static_cast<float32>(event.getY());
-		const vec2<float32> previousPosition = renderer.getNdcMousePosition();
+		const Window* window = getApplication()->getWindow();
+		const sint32* size = window->getSize();
+		const vec2<float32> previousMousePosition = mousePosition;
 
-		renderer.setMousePosition(x, y);
+		mousePosition = window->getNdcMousePosition() * (vec2<float32>(static_cast<float32>(size[0]), static_cast<float32>(size[1])) * 0.5f / renderer.getZoomLevel());
+		mouseDelta = mousePosition - previousMousePosition;
 
-		const vec2<float32> position = renderer.getNdcMousePosition();
-		const vec2<float32> positionDelta = position - previousPosition;
-
-		if (selectedEntity != max<uint32>()) {
-			placeholderOffset += positionDelta;
+		if (draggingCamera) {
+			renderer.cameraPosition -= mouseDelta;
 		}
 
-		if (dragging) {
-			// TODO(grid-drag): (20, 11.25) is used because the ratio is 16/9.
-			renderer.cameraPosition += positionDelta / vec2<float32>(20.0f, 11.25f);
+		if (selectedEntity != max<Entity>()) {
+			placeholderOffset += mouseDelta;
 		}
 
 		return true;
 	}
 
 	bool Physics2DSceneLayer::onEvent(MouseUpEvent& event) {
-		if (event.getButton() == MouseButton::LEFT && selectedEntity != max<uint32>()) {
+		if (event.getButton() == MouseButton::RIGHT && draggingCamera) {
+			draggingCamera = false;
+		}
+
+		if (event.getButton() == MouseButton::LEFT && selectedEntity != max<Entity>()) {
 			const GeometryComponent geometryComponent = ecs.getComponent<GeometryComponent>(selectedEntity);
 			const Geometry2D& geometry = sceneAsset->getGeometries()[geometryComponent.geometryIndex];
 
@@ -295,11 +300,7 @@ namespace Trident {
 			rigidBody.position += placeholderOffset;
 			rigidBody.updateTransform(geometry.centroid);
 
-			selectedEntity = max<uint32>();
-		}
-
-		if (event.getButton() == MouseButton::RIGHT && dragging) {
-			dragging = false;
+			selectedEntity = max<Entity>();
 		}
 
 		return true;

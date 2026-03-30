@@ -34,6 +34,16 @@ namespace Trident {
 			// Returns the position of the mouse, relative to the top-left corner of the client area.
 			const sint32* getMousePosition() const;
 
+			vec2<float32> getNdcMousePosition() const {
+				const sint32* size = getSize();
+				const sint32* mousePosition = getMousePosition();
+
+				return {
+					-1.0f + static_cast<float32>(mousePosition[0]) / (size[0] * 0.5f),
+					 1.0f - static_cast<float32>(mousePosition[1]) / (size[1] * 0.5f),
+				};
+			}
+
 			bool isPointerLocked() const;
 
 			void show() const;

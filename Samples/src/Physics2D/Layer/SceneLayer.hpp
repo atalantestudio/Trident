@@ -27,6 +27,8 @@ namespace Trident {
 			void onEvent(Event& event) override;
 
 		private:
+			vec2<float32> getNdcMousePosition() const;
+
 			void loadScene();
 
 			void checkHover();
@@ -48,11 +50,14 @@ namespace Trident {
 			Input keyMap;
 			bool jumping = false;
 
-			Entity playerEntity = max<uint32>();
-			Entity hoveredEntity = max<uint32>();
-			Entity selectedEntity = max<uint32>();
+			Entity playerEntity = max<Entity>();
+			Entity hoveredEntity = max<Entity>();
+			Entity selectedEntity = max<Entity>();
 			vec2<float32> placeholderOffset;
 
-			bool dragging = false;
+			vec2<float32> mousePosition = {0.0_m, 0.0_m};
+			vec2<float32> mouseDelta;
+
+			bool draggingCamera = false;
 	};
 }

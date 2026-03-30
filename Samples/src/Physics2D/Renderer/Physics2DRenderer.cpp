@@ -927,10 +927,6 @@ namespace Trident {
 		placeholderDescriptorSet = descriptorSets[1];
 	}
 
-	const vec2<float32>& Physics2DRenderer::getNdcMousePosition() const {
-		return ndcMousePosition;
-	}
-
 	void Physics2DRenderer::setScene(ref<Scene2DAsset> sceneAsset, ECS& ecs) {
 		this->sceneAsset = sceneAsset;
 		this->ecs = &ecs;
@@ -1052,22 +1048,7 @@ namespace Trident {
 		rigidBodyMappedRange[entity].transform = transform;
 	}
 
-	void Physics2DRenderer::setMousePosition(float32 x, float32 y) {
-		mousePosition = {x, y};
-
-		const float32 inverseZoomLevel = 1.0f / cameraMappedRange->zoomLevel;
-
-		const Extent2D swapchainExtent = getSwapchain()->getExtent();
-		const float32 horizontalCellCount = swapchainExtent.width * inverseZoomLevel;
-		const float32 verticalCellCount = swapchainExtent.height * inverseZoomLevel;
-
-		x = (x / swapchainExtent.width - 0.5f) * horizontalCellCount;
-		y = -(y / swapchainExtent.height - 0.5f) * verticalCellCount;
-
-		ndcMousePosition = {x, y};
-	}
-
-	void Physics2DRenderer::setPlaceholderOffset(const vec2<float32>& offset) const {
+	void Physics2DRenderer::setPlaceholderOffset(vec2<float32> offset) const {
 		placeholderMappedRange->offset = {offset[0], offset[1]};
 	}
 
@@ -1163,13 +1144,13 @@ namespace Trident {
 		const Extent2D swapchainExtent = getSwapchain()->getExtent();
 		const float32 w = static_cast<float32>(swapchainExtent.width);
 		const float32 h = static_cast<float32>(swapchainExtent.height);
-		const vec2<float32> p = cameraPosition / cameraMappedRange->zoomLevel;
+		const vec2<float32> O = -cameraPosition / (vec2<float32>(w, h) * 0.5f);
 
 		// TODO: lyah::mat<3, 3, float32>::orthographic
 		cameraMappedRange->projection = {
 			2.0f / w,  0.0f,      0.0f,
 			0.0f,      2.0f / h,  0.0f,
-			p[0],      p[1],      1.0f,
+			O[0],      O[1],      1.0f,
 		};
 	}
 
@@ -1180,14 +1161,12 @@ namespace Trident {
 		viewMappedRange->viewport.y = static_cast<float32>(swapchainExtent.height);
 	}
 
-	void Physics2DRenderer::zoom(float32 zoomLevelDelta) {
-		if (zoomLevelDelta != 0.0f) {
-			zoomLevelDelta /= abs(zoomLevelDelta);
+	void Physics2DRenderer::zoom(float32 delta) {
+		if (delta != 0.0f) {
+			delta /= abs(delta);
 		}
 
-		cameraMappedRange->zoomLevel = clamp(cameraMappedRange->zoomLevel + zoomLevelDelta, MIN_ZOOM_LEVEL, MAX_ZOOM_LEVEL);
-
-		setMousePosition(mousePosition[0], mousePosition[1]);
+		cameraMappedRange->zoomLevel = clamp(cameraMappedRange->zoomLevel + delta, MIN_ZOOM_LEVEL, MAX_ZOOM_LEVEL);
 
 		updateCameraProjection();
 	}

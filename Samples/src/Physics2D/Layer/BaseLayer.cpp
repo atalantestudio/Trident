@@ -22,7 +22,6 @@ namespace Trident {
 		ecs.registerComponentPool<RigidBody2D>();
 		ecs.registerComponentPool<ref<Constraint2D>>();
 		ecs.registerComponentPool<Joint2D>();
-
 		ecs.registerTagPool<StaticEntityTag>();
 		ecs.registerTagPool<DynamicEntityTag>();
 	}
@@ -61,7 +60,7 @@ namespace Trident {
 
 		renderer.selectEntity(selectedEntity);
 
-		if (selectedEntity != max<uint32>()) {
+		if (selectedEntity != max<Entity>()) {
 			renderer.setPlaceholderOffset(placeholderOffset);
 		}
 
@@ -125,7 +124,7 @@ namespace Trident {
 	}
 
 	void BaseLayer::checkHover() {
-		hoveredEntity = max<uint32>();
+		hoveredEntity = max<Entity>();
 
 		const Scene2D& scene = pointer_cast<const SampleApplication*>(getApplication())->scene;
 		const ComponentPool<RigidBody2D>& rigidBodyComponentPool = scene.getComponentPool<RigidBody2D>();
@@ -137,7 +136,7 @@ namespace Trident {
 		const Geometry2D mouseGeometry = Geometry2D::pointAtOrigin();
 
 		RigidBody2D mouseRigidBody{};
-		mouseRigidBody.position = renderer.getNdcMousePosition();
+		mouseRigidBody.position = mousePosition;
 		mouseRigidBody.updateTransform(mouseGeometry.getCentroid());
 
 		for (sint32 rigidBodyIndex = static_cast<sint32>(rigidBodyComponentPool.componentCount - 1); rigidBodyIndex >= 0; rigidBodyIndex -= 1) {
@@ -165,7 +164,7 @@ namespace Trident {
 	}
 
 	bool BaseLayer::onMouseDown(MouseDownEvent& event) {
-		if (event.getButton() == MouseButton::LEFT && hoveredEntity != max<uint32>()) {
+		if (event.getButton() == MouseButton::LEFT && hoveredEntity != max<Entity>()) {
 			selectedEntity = hoveredEntity;
 			placeholderOffset = {0.0f, 0.0f};
 		}
@@ -177,12 +176,12 @@ namespace Trident {
 		const float32 x = static_cast<float32>(event.getX());
 		const float32 y = static_cast<float32>(event.getY());
 
-		const vec2<float32> previousPosition = renderer.getNdcMousePosition();
+		const vec2<float32> previousPosition = mousePosition;
 
-		renderer.setMousePosition(x, y);
+		mousePosition = {x, y};
 
-		if (selectedEntity != max<uint32>()) {
-			const vec2<float32>& position = renderer.getNdcMousePosition();
+		if (selectedEntity != max<Entity>()) {
+			const vec2<float32> position = mousePosition;
 			const vec2<float32> positionDelta = position - previousPosition;
 
 			placeholderOffset += positionDelta;
@@ -194,7 +193,7 @@ namespace Trident {
 	bool BaseLayer::onMouseUp(MouseUpEvent& event) {
 		Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
 
-		if (event.getButton() == MouseButton::LEFT && selectedEntity != max<uint32>()) {
+		if (event.getButton() == MouseButton::LEFT && selectedEntity != max<Entity>()) {
 			const GeometryComponent geometryComponent = ecs.getComponent<GeometryComponent>(selectedEntity);
 			const Geometry2D& geometry = sceneAsset->getGeometries()[geometryComponent.geometryIndex];
 
@@ -202,7 +201,7 @@ namespace Trident {
 			rigidBody.position += placeholderOffset;
 			rigidBody.updateTransform(geometry.getCentroid());
 
-			selectedEntity = max<uint32>();
+			selectedEntity = max<Entity>();
 		}
 
 		return true;

@@ -54,21 +54,17 @@ namespace Trident {
 		public:
 			void build() override;
 
-			// `x` and `y` are in the [0, viewport] range.
-			const vec2<float32>& getNdcMousePosition() const;
+			inline float32 getZoomLevel() const {
+				return cameraMappedRange->zoomLevel;
+			}
 
 			void setScene(ref<Scene2DAsset> sceneAsset, ECS& ecs);
+			void setRigidBodyTransform(Entity entity, const mat3x3<float32>& transform) const;
+			void setPlaceholderOffset(vec2<float32> offset) const;
 
 			#if defined(SHOW_DISTANCE)
 				void setClosestPoints(const vec2<float32>& closestPointA, const vec2<float32>& closestPointB) const;
 			#endif
-
-			void setRigidBodyTransform(Entity entity, const mat3x3<float32>& transform) const;
-
-			// `x` and `y` must be in the [0, viewport] range.
-			void setMousePosition(float32 x, float32 y);
-
-			void setPlaceholderOffset(const vec2<float32>& offset) const;
 
 			#if defined(SHOW_FEATURES)
 				void registerFeature(const Feature2D& feature);
@@ -82,7 +78,7 @@ namespace Trident {
 
 			void updateCameraProjection() const;
 
-			void zoom(float32 zoomLevelDelta);
+			void zoom(float32 delta);
 
 			void clearRegisteredData();
 
@@ -221,9 +217,6 @@ namespace Trident {
 
 			RigidBody* rigidBodyMappedRange = nullptr;
 			CenterOfMass* centerOfMassMappedRange = nullptr;
-
-			vec2<float32> mousePosition;
-			vec2<float32> ndcMousePosition;
 
 			Entity selectedEntity = max<Entity>();
 
