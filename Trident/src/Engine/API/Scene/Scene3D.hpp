@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Engine/API/Geometry/3D/Geometry3D.hpp"
 #include "Engine/API/Material/Material.hpp"
 #include "Engine/API/Material/MaterialReference.hpp"
 #include "Engine/API/Physics/RigidBody3D.hpp"

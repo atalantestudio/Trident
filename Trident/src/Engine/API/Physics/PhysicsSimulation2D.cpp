@@ -70,8 +70,8 @@ namespace Trident {
 		entityContactPair.contactManifold.normal = newContactManifold.normal;
 	}
 
-	PhysicsSimulation2D::PhysicsSimulation2D(const PhysicsSimulationDescriptor& descriptor) :
-		ecs(descriptor.ecs),
+	PhysicsSimulation2D::PhysicsSimulation2D(const Descriptor<PhysicsSimulation2D>& descriptor) :
+		scene(descriptor.scene),
 		deltaTime(static_cast<float32>(descriptor.deltaTime)),
 		inverseDeltaTime(static_cast<float32>(1.0 / descriptor.deltaTime)),
 		halfDeltaTime(static_cast<float32>(descriptor.deltaTime * 0.5))
@@ -93,15 +93,18 @@ namespace Trident {
 		integrate();
 	}
 
-	const Geometry2D& PhysicsSimulation2D::getGeometry(Entity entity) const {
-		const GeometryComponent geometryComponent = ecs->getComponent<GeometryComponent>(entity);
+	const Hull2D& PhysicsSimulation2D::getHull(Entity entity) const {
+		const GeometryComponent geometryComponent = scene->ecs.getComponent<GeometryComponent>(entity);
+		const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
 
-		return sceneAsset->getGeometries()[geometryComponent.geometryIndex];
+		ENGINE_ASSERT(geometry.getHullIndex() < scene->getHulls().count(), "Geometry doesn't have a hull.");
+
+		return scene->getHulls()[geometry.getHullIndex()];
 	}
 
 	void PhysicsSimulation2D::broadPhase() {
-		const TagPool<DynamicEntityTag>& dynamicPool = ecs->getTagPool<DynamicEntityTag>();
-		const TagPool<StaticEntityTag>& staticPool = ecs->getTagPool<StaticEntityTag>();
+		const TagPool<DynamicEntityTag>& dynamicPool = scene->ecs.getTagPool<DynamicEntityTag>();
+		const TagPool<StaticEntityTag>& staticPool = scene->ecs.getTagPool<StaticEntityTag>();
 
 		EntityPair entityPair;
 		uint32 indexA = 0;
@@ -141,25 +144,25 @@ namespace Trident {
 		EntityContactPair2D entityContactPair;
 
 		for (const EntityPair entityPair : entityPairs) {
-			const RigidBody2D& rigidBodyA = ecs->getComponent<RigidBody2D>(entityPair.A);
-			const RigidBody2D& rigidBodyB = ecs->getComponent<RigidBody2D>(entityPair.B);
-			const Geometry2D& geometryA = getGeometry(entityPair.A);
-			const Geometry2D& geometryB = getGeometry(entityPair.B);
+			const RigidBody2D& rigidBodyA = scene->ecs.getComponent<RigidBody2D>(entityPair.A);
+			const RigidBody2D& rigidBodyB = scene->ecs.getComponent<RigidBody2D>(entityPair.B);
+			const Hull2D& hullA = getHull(entityPair.A);
+			const Hull2D& hullB = getHull(entityPair.B);
 
-			Geometry2DType typeA = geometryA.getType();
-			Geometry2DType typeB = geometryB.getType();
+			Hull2DType typeA = hullA.getType();
+			Hull2DType typeB = hullB.getType();
 
 			if (typeA > typeB) {
-				typeA = geometryB.getType();
-				typeB = geometryA.getType();
+				typeA = hullB.getType();
+				typeB = hullA.getType();
 			}
 
 			if (
 				!COLLIDER_2D_TABLE[static_cast<uint32>(typeA)][static_cast<uint32>(typeB)](
 					rigidBodyA,
 					rigidBodyB,
-					geometryA,
-					geometryB,
+					hullA,
+					hullB,
 					&entityContactPair.contactManifold
 				)
 			) {
@@ -185,14 +188,14 @@ namespace Trident {
 	}
 
 	void PhysicsSimulation2D::applyForces() {
-		const ComponentPool<RigidBody2D>& rigidBodyPool = ecs->getComponentPool<RigidBody2D>();
+		const ComponentPool<RigidBody2D>& rigidBodyPool = scene->ecs.getComponentPool<RigidBody2D>();
 		uint32 componentIndex = 0;
 
 		// TODO: Integrate velocities on dynamic resting entities (e.g. an object on a moving platform may move due to inertia)?
 		while (componentIndex < rigidBodyPool.componentCount) {
 			const Entity entity = rigidBodyPool.componentIndexToEntity[componentIndex];
 
-			RigidBody2D& rigidBody = ecs->getComponent<RigidBody2D>(entity);
+			RigidBody2D& rigidBody = scene->ecs.getComponent<RigidBody2D>(entity);
 
 			// TODO: Exclude dynamic entities with an inverse mass of 0 from the loop.
 			if (rigidBody.inverseMass == 0.0_kg) {
@@ -206,8 +209,8 @@ namespace Trident {
 			// This looks like Velocity Verlet for gravity to me?
 			// rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + vec2<float32>(0.0f, G)) * halfDeltaTime;
 			rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + vec2<float32>(0.0f, G)) * deltaTime;
-			// rigidBody.angularVelocity += rigidBody.torque * rigidBody.inverseInertia * halfDeltaTime;
-			rigidBody.angularVelocity += rigidBody.torque * rigidBody.inverseInertia * deltaTime;
+			// rigidBody.angularVelocity += rigidBody.inverseInertia * halfDeltaTime;
+			rigidBody.angularVelocity += rigidBody.inverseInertia * deltaTime;
 
 			componentIndex += 1;
 		}
@@ -221,11 +224,11 @@ namespace Trident {
 		for (std::pair<const EntityPair, EntityContactPair2D>& entityContactPair : entityContactPairs) {
 			EntityContactPair2D& pair = entityContactPair.second;
 
-			const Geometry2D& geometryA = getGeometry(pair.A);
-			const Geometry2D& geometryB = getGeometry(pair.B);
+			const Hull2D& hullA = getHull(pair.A);
+			const Hull2D& hullB = getHull(pair.B);
 
-			RigidBody2D& rigidBodyA = ecs->getComponent<RigidBody2D>(pair.A);
-			RigidBody2D& rigidBodyB = ecs->getComponent<RigidBody2D>(pair.B);
+			RigidBody2D& rigidBodyA = scene->ecs.getComponent<RigidBody2D>(pair.A);
+			RigidBody2D& rigidBodyB = scene->ecs.getComponent<RigidBody2D>(pair.B);
 
 			pair.contactManifold.tangent = perpendicularRight(pair.contactManifold.normal);
 			pair.combinedFriction = sqrt(rigidBodyA.friction * rigidBodyB.friction);
@@ -261,7 +264,7 @@ namespace Trident {
 
 				contact.massTangent = 1.0f / massTangent;
 
-				const float32 penetrationBias = avg(geometryA.getPenetrationBias(), geometryB.getPenetrationBias());
+				const float32 penetrationBias = avg(hullA.getPenetrationBias(), hullB.getPenetrationBias());
 
 				contact.bias = -penetrationBias * inverseDeltaTime * min(0.0f, contact.separation + ALLOWED_PENETRATION);
 
@@ -278,15 +281,15 @@ namespace Trident {
 	}
 
 	void PhysicsSimulation2D::updateJoints() {
-		const ComponentPool<Joint2D>& jointPool = ecs->getComponentPool<Joint2D>();
+		const ComponentPool<Joint2D>& jointPool = scene->ecs.getComponentPool<Joint2D>();
 		uint32 componentIndex = 0;
 
 		while (componentIndex < jointPool.componentCount) {
 			const Entity entity = jointPool.componentIndexToEntity[componentIndex];
 
-			Joint2D& joint = ecs->getComponent<Joint2D>(entity);
-			RigidBody2D& rigidBodyA = ecs->getComponent<RigidBody2D>(joint.A);
-			RigidBody2D& rigidBodyB = ecs->getComponent<RigidBody2D>(joint.B);
+			Joint2D& joint = scene->ecs.getComponent<Joint2D>(entity);
+			RigidBody2D& rigidBodyA = scene->ecs.getComponent<RigidBody2D>(joint.A);
+			RigidBody2D& rigidBodyB = scene->ecs.getComponent<RigidBody2D>(joint.B);
 
 			// TODO: Why is the transpose needed?
 			const mat2x2<float32> RAT = transpose(mat2x2<float32>::rotation(rigidBodyA.rotation));
@@ -333,8 +336,8 @@ namespace Trident {
 	}
 
 	void PhysicsSimulation2D::applyImpulses() {
-		const ComponentPool<ref<Constraint2D>>& constraintPool = ecs->getComponentPool<ref<Constraint2D>>();
-		const ComponentPool<Joint2D>& jointPool = ecs->getComponentPool<Joint2D>();
+		const ComponentPool<ref<Constraint2D>>& constraintPool = scene->ecs.getComponentPool<ref<Constraint2D>>();
+		const ComponentPool<Joint2D>& jointPool = scene->ecs.getComponentPool<Joint2D>();
 		vec2<float32> relativeVelocity;
 		uint32 iteration = 0;
 		uint8 contactPointIndex;
@@ -344,8 +347,8 @@ namespace Trident {
 		while (iteration < SEQUENTIAL_IMPULSE_ITERATION_COUNT) {
 			for (std::pair<const EntityPair, EntityContactPair2D>& entityContactPair : entityContactPairs) {
 				EntityContactPair2D& pair = entityContactPair.second;
-				RigidBody2D& rigidBodyA = ecs->getComponent<RigidBody2D>(pair.A);
-				RigidBody2D& rigidBodyB = ecs->getComponent<RigidBody2D>(pair.B);
+				RigidBody2D& rigidBodyA = scene->ecs.getComponent<RigidBody2D>(pair.A);
+				RigidBody2D& rigidBodyB = scene->ecs.getComponent<RigidBody2D>(pair.B);
 
 				contactPointIndex = 0;
 
@@ -411,9 +414,9 @@ namespace Trident {
 
 			while (constraintComponentIndex < constraintPool.componentCount) {
 				const Entity entity = constraintPool.componentIndexToEntity[constraintComponentIndex];
-				const ref<Constraint2D> constraint = ecs->getComponent<ref<Constraint2D>>(entity);
+				const ref<Constraint2D> constraint = scene->ecs.getComponent<ref<Constraint2D>>(entity);
 
-				constraint->update(ecs, deltaTime);
+				constraint->update(&scene->ecs, deltaTime);
 
 				constraintComponentIndex += 1;
 			}
@@ -423,9 +426,9 @@ namespace Trident {
 			while (jointComponentIndex < jointPool.componentCount) {
 				const Entity entity = jointPool.componentIndexToEntity[jointComponentIndex];
 
-				Joint2D& joint = ecs->getComponent<Joint2D>(entity);
-				RigidBody2D& rigidBodyA = ecs->getComponent<RigidBody2D>(joint.A);
-				RigidBody2D& rigidBodyB = ecs->getComponent<RigidBody2D>(joint.B);
+				Joint2D& joint = scene->ecs.getComponent<Joint2D>(entity);
+				RigidBody2D& rigidBodyA = scene->ecs.getComponent<RigidBody2D>(joint.A);
+				RigidBody2D& rigidBodyB = scene->ecs.getComponent<RigidBody2D>(joint.B);
 
 				relativeVelocity = calculateRelativeVelocity(rigidBodyA, rigidBodyB, joint.rA, joint.rB);
 
@@ -444,7 +447,7 @@ namespace Trident {
 	}
 
 	void PhysicsSimulation2D::integrate() {
-		const ComponentPool<RigidBody2D>& rigidBodyPool = ecs->getComponentPool<RigidBody2D>();
+		const ComponentPool<RigidBody2D>& rigidBodyPool = scene->ecs.getComponentPool<RigidBody2D>();
 		uint32 componentIndex = 0;
 
 		// TODO: Integration for static entities (e.g. a moving platform that isn't affected by other forces)?
@@ -453,7 +456,7 @@ namespace Trident {
 		while (componentIndex < rigidBodyPool.componentCount) {
 			const Entity entity = rigidBodyPool.componentIndexToEntity[componentIndex];
 
-			RigidBody2D& rigidBody = ecs->getComponent<RigidBody2D>(entity);
+			RigidBody2D& rigidBody = scene->ecs.getComponent<RigidBody2D>(entity);
 
 			// TODO: Exclude dynamic entities with an inverse mass of 0 from the loop.
 			if (rigidBody.inverseMass == 0.0_kg) {
@@ -462,19 +465,18 @@ namespace Trident {
 				continue;
 			}
 
-			const Geometry2D& geometry = getGeometry(entity);
+			const Hull2D& hull = getHull(entity);
 
 			rigidBody.position += rigidBody.linearVelocity * deltaTime;
 			rigidBody.rotation += rigidBody.angularVelocity * deltaTime;
 
-			rigidBody.updateTransform(geometry.centroid);
+			rigidBody.updateTransform(hull.getCentroid());
 
 			// TODO
 			// rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + vec2<float32>(0.0f, G)) * halfDeltaTime;
-			// rigidBody.angularVelocity += rigidBody.torque * rigidBody.inverseInertia * halfDeltaTime;
+			// rigidBody.angularVelocity += rigidBody.inverseInertia * halfDeltaTime;
 
 			rigidBody.force = {0.0_N, 0.0_N};
-			rigidBody.torque = 0.0_Nm;
 
 			componentIndex += 1;
 		}

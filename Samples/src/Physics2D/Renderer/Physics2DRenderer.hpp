@@ -58,7 +58,7 @@ namespace Trident {
 				return cameraMappedRange->zoomLevel;
 			}
 
-			void setScene(ref<Scene2DAsset> sceneAsset, ECS& ecs);
+			void setScene(const Scene2D* scene);
 			void setRigidBodyTransform(Entity entity, const mat3x3<float32>& transform) const;
 			void setPlaceholderOffset(vec2<float32> offset) const;
 
@@ -147,8 +147,7 @@ namespace Trident {
 			vec2<float32> cameraPosition = {0.0_m, 0.0_m};
 
 		private:
-			ref<Scene2DAsset> sceneAsset = nullptr;
-			ECS* ecs = nullptr;
+			const Scene2D* scene = nullptr;
 
 			ref<RenderPass> renderPass;
 

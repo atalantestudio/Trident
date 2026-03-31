@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "Engine/Build/Clusterizer.hpp"
 #include "Engine/Filesystem/Decoder/Decoder.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 
@@ -339,7 +338,6 @@ namespace Trident {
 		ENGINE_ASSERT(vertexTextureCoordinateIndices.count() == vertexPositionIndices.count(), "Vertex texture coordinate index count is inconsistent with vertex position index count.");
 
 		const uint32 geometryAssetIdentifier = AssetLibrary::createAssetIdentifier();
-		const uint32 clusterCount = static_cast<uint32>(ceil(static_cast<float32>(indexCount) / CLUSTER_INDEX_COUNT));
 		const uint32 vertexPositionCount = static_cast<uint32>(vertexPositionComponents.count()) / Geometry3D::VERTEX_POSITION_STRIDE;
 		const uint32 vertexNormalCount = static_cast<uint32>(vertexNormalComponents.count()) / Geometry3D::VERTEX_NORMAL_STRIDE;
 		const uint32 vertexTextureCoordinateCount = static_cast<uint32>(vertexTextureCoordinateComponents.count()) / Geometry3D::VERTEX_TEXTURE_COORDINATE_STRIDE;
@@ -351,7 +349,7 @@ namespace Trident {
 
 		const uint64 outputSize =
 			sizeof(AssetHeader) +
-			5 * sizeof(uint32) +
+			4 * sizeof(uint32) +
 			vertexPositionComponents.count() * sizeof(float32) +
 			vertexNormalComponents.count() * sizeof(float32) +
 			vertexTextureCoordinateComponents.count() * sizeof(float32) +
@@ -361,7 +359,6 @@ namespace Trident {
 		byteStream.write<AssetSignature>(AssetSignature::GEOMETRY);
 		byteStream.write<uint32>(geometryAssetIdentifier);
 		byteStream.write<VersionNumber>({1, 0, 0});
-		byteStream.write<uint32>(clusterCount);
 		byteStream.write<uint32>(vertexPositionCount);
 
 		for (const float64 vertexPositionComponent : vertexPositionComponents) {

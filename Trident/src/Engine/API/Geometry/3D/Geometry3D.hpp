@@ -16,7 +16,7 @@ namespace Trident {
 		sequence<float32> vertexTangentComponents;
 	};
 
-	// TODO: Unify the vertex position/normal/texture coordinate indices since they are all the same length.
+	// TODO: Unify the vertex position/normal/texture coordinate indices since they must be the same length.
 	class Geometry3D {
 		public:
 			static constexpr uint32 VERTEX_POSITION_STRIDE = 3;

@@ -12,26 +12,16 @@
 #include "BaseLayer.hpp"
 
 namespace Trident {
-	BaseLayer::BaseLayer() :
-		physicsSimulation({
-			.ecs = &ecs,
-			.deltaTime = getApplication()->getFixedDeltaTime(),
-		})
-	{
-		ecs.registerComponentPool<Geometry2D>();
-		ecs.registerComponentPool<RigidBody2D>();
-		ecs.registerComponentPool<ref<Constraint2D>>();
-		ecs.registerComponentPool<Joint2D>();
-		ecs.registerTagPool<StaticEntityTag>();
-		ecs.registerTagPool<DynamicEntityTag>();
-	}
-
 	void BaseLayer::postConstruct() {
-		renderer.layerInput = input;
+		physicsSimulation = createScope<PhysicsSimulation2D>(Descriptor<PhysicsSimulation2D>{
+			.scene = scene.get(),
+			.deltaTime = getApplication()->getFixedDeltaTime(),
+		});
 
+		renderer.layerInput = input;
 		renderer.setLayer(this);
 		renderer.build();
-		renderer.setScene(sceneAsset, ecs);
+		renderer.setScene(scene.get());
 	}
 
 	void BaseLayer::update(float32 deltaTime, float32 inverseDeltaTime) {}
@@ -40,18 +30,17 @@ namespace Trident {
 		// TODO
 		// For now there is 1 physics tick per frame because debugging along with Box2D Lite is easier.
 		// Ultimately though this must be in Layer::update.
-		physicsSimulation.tick();
+		physicsSimulation->tick();
 
 		checkHover();
 
-		const Scene2D& scene = pointer_cast<const SampleApplication*>(getApplication())->scene;
-		const ComponentPool<RigidBody2D>& rigidBodyComponentPool = scene.getComponentPool<RigidBody2D>();
+		const ComponentPool<RigidBody2D>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2D>();
 
 		uint32 componentIndex = 0;
 
 		while (componentIndex < rigidBodyComponentPool.componentCount) {
 			const Entity entity = rigidBodyComponentPool.componentIndexToEntity[componentIndex];
-			const RigidBody2D& rigidBody = scene.getComponent<RigidBody2D>(entity);
+			const RigidBody2D& rigidBody = scene->ecs.getComponent<RigidBody2D>(entity);
 
 			renderer.setRigidBodyTransform(entity, rigidBody.transform);
 
@@ -126,26 +115,26 @@ namespace Trident {
 	void BaseLayer::checkHover() {
 		hoveredEntity = max<Entity>();
 
-		const Scene2D& scene = pointer_cast<const SampleApplication*>(getApplication())->scene;
-		const ComponentPool<RigidBody2D>& rigidBodyComponentPool = scene.getComponentPool<RigidBody2D>();
+		const ComponentPool<RigidBody2D>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2D>();
 
 		if (rigidBodyComponentPool.componentCount == 0) {
 			return;
 		}
 
-		const Geometry2D mouseGeometry = Geometry2D::pointAtOrigin();
+		const Hull2D mouseHull = Hull2D::point();
 
 		RigidBody2D mouseRigidBody{};
 		mouseRigidBody.position = mousePosition;
-		mouseRigidBody.updateTransform(mouseGeometry.getCentroid());
+		mouseRigidBody.updateTransform(mouseHull.getCentroid());
 
 		for (sint32 rigidBodyIndex = static_cast<sint32>(rigidBodyComponentPool.componentCount - 1); rigidBodyIndex >= 0; rigidBodyIndex -= 1) {
 			const Entity entity = static_cast<Entity>(rigidBodyComponentPool.componentIndexToEntity[rigidBodyIndex]);
-			const GeometryComponent geometryComponent = ecs.getComponent<GeometryComponent>(entity);
-			const Geometry2D& geometry = sceneAsset->getGeometries()[geometryComponent.geometryIndex];
-			const RigidBody2D& rigidBody = scene.getComponent<RigidBody2D>(entity);
+			const GeometryComponent geometryComponent = scene->ecs.getComponent<GeometryComponent>(entity);
+			const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
+			const Hull2D& hull = scene->getHulls()[geometry.getHullIndex()];
+			const RigidBody2D& rigidBody = scene->ecs.getComponent<RigidBody2D>(entity);
 
-			if (GJK2DConditional(rigidBody, mouseRigidBody, geometry, mouseGeometry)) {
+			if (GJK2DConditional(rigidBody, mouseRigidBody, hull, mouseHull)) {
 				hoveredEntity = entity;
 
 				break;
@@ -191,15 +180,14 @@ namespace Trident {
 	}
 
 	bool BaseLayer::onMouseUp(MouseUpEvent& event) {
-		Scene2D& scene = pointer_cast<SampleApplication*>(getApplication())->scene;
-
 		if (event.getButton() == MouseButton::LEFT && selectedEntity != max<Entity>()) {
-			const GeometryComponent geometryComponent = ecs.getComponent<GeometryComponent>(selectedEntity);
-			const Geometry2D& geometry = sceneAsset->getGeometries()[geometryComponent.geometryIndex];
+			const GeometryComponent geometryComponent = scene->ecs.getComponent<GeometryComponent>(selectedEntity);
+			const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
+			const Hull2D& hull = scene->getHulls()[geometry.getHullIndex()];
 
-			RigidBody2D& rigidBody = scene.getComponent<RigidBody2D>(selectedEntity);
+			RigidBody2D& rigidBody = scene->ecs.getComponent<RigidBody2D>(selectedEntity);
 			rigidBody.position += placeholderOffset;
-			rigidBody.updateTransform(geometry.getCentroid());
+			rigidBody.updateTransform(hull.getCentroid());
 
 			selectedEntity = max<Entity>();
 		}

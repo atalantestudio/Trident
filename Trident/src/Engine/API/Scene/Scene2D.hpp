@@ -1,43 +1,53 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
 
+#include "Engine/API/Geometry/Geometry2D.hpp"
+#include "Engine/API/Geometry/Hull2D.hpp"
 #include "Engine/API/Scene/Scene.hpp"
+#include "Engine/Filesystem/Asset/SceneAsset.hpp"
 
 namespace Trident {
-	class Constraint2D;
-	struct Joint2DDescriptor;
-	class Geometry2D;
-	struct RigidBody2DDescriptor;
-	struct PhysicsMaterial;
-
 	class Scene2D : public Scene {
 		public:
-			explicit Scene2D();
+			explicit Scene2D(ref<Scene2DAsset> sceneAsset);
 
-			/// Creates a rigid body without a collider.
-			void createGhostRigidBody(const RigidBody2DDescriptor& descriptor, const Geometry2D& geometry);
-
-			void createDynamicRigidBody(const RigidBody2DDescriptor& descriptor, const Geometry2D& geometry);
-
-			void createStaticRigidBody(const RigidBody2DDescriptor& descriptor, const Geometry2D& geometry);
-
-			template<typename ConstraintType, typename DescriptorType>
-			void createConstraint(const DescriptorType& descriptor) {
-				const Entity entity = ecs.createEntity();
-				const ref<ConstraintType> constraint = createRef<ConstraintType>(descriptor);
-
-				ecs.setComponent<ref<Constraint2D>>(entity, constraint);
+			inline uint32 getStaticVertexCount() const {
+				return staticVertexCount;
 			}
 
-			void createJoint(const Joint2DDescriptor& descriptor);
+			inline uint32 getStaticIndexCount() const {
+				return staticIndexCount;
+			}
+
+			inline uint32 getDynamicVertexCount() const {
+				return dynamicVertexCount;
+			}
+
+			inline uint32 getDynamicIndexCount() const {
+				return dynamicIndexCount;
+			}
+
+			inline const sequence<uint8>& getStaticBuffer() const {
+				return staticBuffer;
+			}
+
+			inline const sequence<Geometry2D>& getGeometries() const {
+				return geometries;
+			}
+
+			inline const sequence<Hull2D>& getHulls() const {
+				return hulls;
+			}
 
 		private:
-			void setGeometry(Entity entity, Geometry2D& geometry);
-
-			void setMaterial(Entity entity, ref<PhysicsMaterial> material);
-
-			Entity createRigidBody(const RigidBody2DDescriptor& descriptor, const Geometry2D& geometry);
+			uint32 staticVertexCount;
+			uint32 staticIndexCount;
+			sequence<uint8> staticBuffer;
+			uint32 dynamicVertexCount;
+			uint32 dynamicIndexCount;
+			sequence<Geometry2D> geometries;
+			sequence<Hull2D> hulls;
 	};
 }

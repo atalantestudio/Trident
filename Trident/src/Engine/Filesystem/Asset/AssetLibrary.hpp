@@ -33,6 +33,15 @@ namespace Trident {
 
 		public:
 			template<typename AssetType>
+			ref<AssetType> getAsset(uint32 identifier) const {
+				const auto iterator = assetIdentifierToIndex.find(identifier);
+
+				ENGINE_ASSERT(iterator != assetIdentifierToIndex.end(), "Asset is not loaded.");
+
+				return std::static_pointer_cast<AssetType>(assets[iterator->second]);
+			}
+
+			template<typename AssetType>
 			ref<AssetType> getAsset(uint32 identifier, view<char8> path) {
 				auto iterator = assetIdentifierToIndex.find(identifier);
 
@@ -110,7 +119,7 @@ namespace Trident {
 				const uint32 fontAssetIndex = static_cast<uint32>(assets.size());
 				const sequence<char8> stem = absolutePath.stem().string();
 
-				assetIdentifierToIndex.insert({fontAsset->identifier, fontAssetIndex});
+				assetIdentifierToIndex.insert({fontAsset->getIdentifier(), fontAssetIndex});
 				fontAssetPathToIndex.insert({stem, fontAssetIndex});
 				assets.emplace_back(fontAsset);
 			}
@@ -133,7 +142,7 @@ namespace Trident {
 				const uint32 geometryAssetIndex = static_cast<uint32>(assets.size());
 				const sequence<char8> stem = absolutePath.stem().string();
 
-				assetIdentifierToIndex.insert({geometryAsset->identifier, geometryAssetIndex});
+				assetIdentifierToIndex.insert({geometryAsset->getIdentifier(), geometryAssetIndex});
 				geometryAssetPathToIndex.insert({stem, geometryAssetIndex});
 				assets.emplace_back(geometryAsset);
 			}
@@ -154,7 +163,7 @@ namespace Trident {
 				const uint32 imageAssetIndex = static_cast<uint32>(assets.size());
 				const sequence<char8> stem = absolutePath.stem().string();
 
-				assetIdentifierToIndex.insert({imageAsset->identifier, imageAssetIndex});
+				assetIdentifierToIndex.insert({imageAsset->getIdentifier(), imageAssetIndex});
 				imageAssetPathToIndex.insert({stem, imageAssetIndex});
 				assets.emplace_back(imageAsset);
 			}
@@ -177,7 +186,7 @@ namespace Trident {
 				const uint32 sceneAssetIndex = static_cast<uint32>(assets.size());
 				const sequence<char8> stem = absolutePath.stem().string();
 
-				assetIdentifierToIndex.insert({sceneAsset->identifier, sceneAssetIndex});
+				assetIdentifierToIndex.insert({sceneAsset->getIdentifier(), sceneAssetIndex});
 				sceneAssetPathToIndex.insert({stem, sceneAssetIndex});
 				assets.emplace_back(sceneAsset);
 			}
@@ -200,7 +209,7 @@ namespace Trident {
 				const uint32 shaderModuleAssetIndex = static_cast<uint32>(assets.size());
 				const sequence<char8> stem = absolutePath.stem().string();
 
-				assetIdentifierToIndex.insert({shaderModuleAsset->identifier, shaderModuleAssetIndex});
+				assetIdentifierToIndex.insert({shaderModuleAsset->getIdentifier(), shaderModuleAssetIndex});
 				shaderModuleAssetPathToIndex.insert({stem, shaderModuleAssetIndex});
 				assets.emplace_back(shaderModuleAsset);
 			}
@@ -316,50 +325,50 @@ namespace Trident {
 			}
 
 			ref<Scene2DAsset> decodeScene2DAsset(ByteStream<StreamOperation::READ>& stream) const {
-				Scene2DAssetDescriptor sceneAssetDescriptor{};
+				Descriptor<Scene2DAsset> sceneAssetDescriptor{};
 				sceneAssetDescriptor.identifier = stream.read<uint32>();
 				sceneAssetDescriptor.version = stream.read<VersionNumber>();
 				sceneAssetDescriptor.staticVertexCount = stream.read<uint32>();
 				sceneAssetDescriptor.staticIndexCount = stream.read<uint32>();
-				sceneAssetDescriptor.dynamicVertexCount = stream.read<uint32>();
-				sceneAssetDescriptor.dynamicIndexCount = stream.read<uint32>();
 				sceneAssetDescriptor.entityCount = stream.read<uint32>();
+				sceneAssetDescriptor.staticBuffer = sequence<uint8>(sceneAssetDescriptor.staticVertexCount * sizeof(svec2<float32>) + sceneAssetDescriptor.staticIndexCount * sizeof(uint16));
 
-				const uint64 vertexCount = (sceneAssetDescriptor.staticVertexCount + sceneAssetDescriptor.dynamicVertexCount) * 2;
-				const uint64 indexCount = sceneAssetDescriptor.staticIndexCount + sceneAssetDescriptor.dynamicIndexCount;
+				const uint32 geometryAssetCount = stream.read<uint32>();
 
-				sceneAssetDescriptor.vertexAndIndexBuffer = sequence<uint8>(vertexCount * sizeof(float32) + indexCount * sizeof(uint16));
-				sceneAssetDescriptor.geometries = sequence<CachedGeometry2D>(stream.read<uint32>());
-				sceneAssetDescriptor.rigidBodies = sequence<CachedRigidBody2D>(stream.read<uint32>());
-				sceneAssetDescriptor.geometryComponents = sequence<GeometryComponent>(stream.read<uint32>());
+				sceneAssetDescriptor.geometryAssets = sequence<ref<GeometryAsset>>(geometryAssetCount);
 
-				std::copy_n(stream.getBytePosition(), sceneAssetDescriptor.vertexAndIndexBuffer.count(), &sceneAssetDescriptor.vertexAndIndexBuffer[0]);
-				stream.jump(sceneAssetDescriptor.vertexAndIndexBuffer.count());
+				const uint32 geometryMappingCount = stream.read<uint32>();
 
-				for (CachedGeometry2D& geometry : sceneAssetDescriptor.geometries) {
-					geometry.centroid = stream.read<svec2<float32>>();
-					geometry.radius = stream.read<float32>();
-					geometry.entity = stream.read<uint32>();
-					geometry.vertexOffset = stream.read<uint32>();
-					geometry.vertexCount = stream.read<uint32>();
-					geometry.indexOffset = stream.read<uint32>();
-					geometry.triangleListIndexCount = stream.read<uint16>();
-					geometry.lineStripIndexCount = stream.read<uint16>();
-					geometry.type = stream.read<Geometry2DType>();
+				sceneAssetDescriptor.geometryMappings = sequence<EntityComponentMapping<GeometryComponent>>(geometryMappingCount);
+
+				const uint32 rigidBodyMappingCount = stream.read<uint32>();
+
+				sceneAssetDescriptor.rigidBodyMappings = sequence<EntityComponentMapping<RigidBody2DComponent>>(rigidBodyMappingCount);
+
+				std::copy_n(stream.getBytePosition(), sceneAssetDescriptor.staticBuffer.count(), &sceneAssetDescriptor.staticBuffer[0]);
+
+				stream.jump(sceneAssetDescriptor.staticBuffer.count());
+
+				for (ref<GeometryAsset>& geometryAsset : sceneAssetDescriptor.geometryAssets) {
+					const uint32 identifier = stream.read<uint32>();
+
+					geometryAsset = getAsset<GeometryAsset>(identifier);
 				}
 
-				for (CachedRigidBody2D& rigidBody : sceneAssetDescriptor.rigidBodies) {
-					rigidBody.position = stream.read<svec2<float32>>();
-					rigidBody.scale = stream.read<svec2<float32>>();
-					rigidBody.rotation = stream.read<float32>();
-					rigidBody.inverseMass = stream.read<float32>();
-					rigidBody.inverseInertia = stream.read<float32>();
-					rigidBody.friction = stream.read<float32>();
-					rigidBody.entity = stream.read<uint32>();
+				for (EntityComponentMapping<GeometryComponent>& geometryMapping : sceneAssetDescriptor.geometryMappings) {
+					geometryMapping.entity = stream.read<Entity>();
+					geometryMapping.component.geometryIndex = stream.read<uint32>();
 				}
 
-				for (GeometryComponent& geometryComponent : sceneAssetDescriptor.geometryComponents) {
-					geometryComponent = stream.read<GeometryComponent>();
+				for (EntityComponentMapping<RigidBody2DComponent>& rigidBodyMapping : sceneAssetDescriptor.rigidBodyMappings) {
+					rigidBodyMapping.entity = stream.read<Entity>();
+					rigidBodyMapping.component.position = stream.read<svec2<float32>>();
+					rigidBodyMapping.component.rotation = stream.read<float32>();
+					rigidBodyMapping.component.scale = stream.read<svec2<float32>>();
+					rigidBodyMapping.component.inverseMass = stream.read<float32>();
+					rigidBodyMapping.component.inverseInertia = stream.read<float32>();
+					rigidBodyMapping.component.friction = stream.read<float32>();
+					rigidBodyMapping.component.restitution = stream.read<float32>();
 				}
 
 				return createRef<Scene2DAsset>(sceneAssetDescriptor);

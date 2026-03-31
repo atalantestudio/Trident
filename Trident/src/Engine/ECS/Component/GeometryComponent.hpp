@@ -4,9 +4,8 @@
 #pragma once
 
 namespace Trident {
-	// TODO: Use in the scene ECS.
-	/// References a geometry in a contiguous buffer.
 	struct GeometryComponent {
+		/// References a geometry in a contiguous buffer.
 		uint32 geometryIndex;
 	};
 }

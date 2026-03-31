@@ -9,8 +9,5 @@ namespace Trident {
 	class SampleApplication : public Application {
 		public:
 			explicit SampleApplication(const ProjectDescriptor& projectDescriptor);
-
-		public:
-			Scene2D scene;
 	};
 }

@@ -14,27 +14,9 @@
 namespace Trident {
 	void Physics2DSceneLayer::loadScene() {
 		const view<char8> sceneAssetName = getApplication()->getPropertyFile()->getProperty<view<char8>>("AssetName");
+		const ref<Scene2DAsset> sceneAsset = getApplication()->getAssetLibrary()->getAsset<Scene2DAsset>(sceneAssetName);
 
-		sceneAsset = getApplication()->getAssetLibrary()->getAsset<Scene2DAsset>(sceneAssetName);
-
-		const view<GeometryComponent> geometryComponents = sceneAsset->getGeometryComponents();
-
-		Entity entity = 0;
-
-		while (entity < sceneAsset->getEntityCount()) {
-			ecs.createEntity();
-			ecs.setComponent<GeometryComponent>(entity, geometryComponents[entity]);
-
-			entity += 1;
-		}
-
-		for (const CachedRigidBody2D& rigidBody : sceneAsset->getRigidBodies()) {
-			const GeometryComponent geometryComponent = ecs.getComponent<GeometryComponent>(rigidBody.entity);
-			const Geometry2D& geometry = sceneAsset->getGeometries()[geometryComponent.geometryIndex];
-
-			ecs.setComponent<RigidBody2D>(rigidBody.entity, RigidBody2D::fromCached(rigidBody, geometry.getCentroid()));
-			ecs.setTag<DynamicEntityTag>(rigidBody.entity);
-		}
+		scene = createScope<Scene2D>(sceneAsset);
 
 		// TODO(physics/samples): Restore sample.
 		/* const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
@@ -85,7 +67,7 @@ namespace Trident {
 			.fillColor = 0xe6ddffff,
 		});
 
-		playerEntity = scene.getLastEntity();
+		playerEntity = scene.ecs.nextEntity - 1;
 
 		// Prop box
 		scene.createDynamicRigidBody({
@@ -103,34 +85,18 @@ namespace Trident {
 		scene.createConstraint<RotationConstraint2D>(constraintDescriptor); */
 	}
 
-	Physics2DSceneLayer::Physics2DSceneLayer() :
-		physicsSimulation({
-			.ecs = &ecs,
-			.deltaTime = getApplication()->getFixedDeltaTime(),
-		})
-	{
-		// TODO(ecs/scene-components):
-		// - MaterialReferenceComponent
-		// - RigidBody2DComponent
-		// - RigidBody3DComponent
-		// - Transform2DComponent/Transform3DComponent for static meshes?
-		ecs.registerComponentPool<GeometryComponent>();
-		ecs.registerComponentPool<RigidBody2D>();
-		ecs.registerComponentPool<ref<Constraint2D>>();
-		ecs.registerComponentPool<Joint2D>();
-		ecs.registerTagPool<StaticEntityTag>();
-		ecs.registerTagPool<DynamicEntityTag>();
-	}
-
 	void Physics2DSceneLayer::postConstruct() {
 		loadScene();
 
-		physicsSimulation.sceneAsset = sceneAsset;
+		physicsSimulation = createScope<PhysicsSimulation2D>(Descriptor<PhysicsSimulation2D>{
+			.scene = scene.get(),
+			.deltaTime = getApplication()->getFixedDeltaTime(),
+		});
 
 		renderer.layerInput = input;
 		renderer.setLayer(this);
 		renderer.build();
-		renderer.setScene(sceneAsset, ecs);
+		renderer.setScene(scene.get());
 	}
 
 	void Physics2DSceneLayer::update(float32 deltaTime, float32 inverseDeltaTime) {
@@ -160,17 +126,17 @@ namespace Trident {
 	}
 
 	void Physics2DSceneLayer::preRender() {
-		physicsSimulation.tick();
+		physicsSimulation->tick();
 
 		checkHover();
 
-		const ComponentPool<RigidBody2D>& rigidBodyComponentPool = ecs.getComponentPool<RigidBody2D>();
+		const ComponentPool<RigidBody2D>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2D>();
 
 		uint32 componentIndex = 0;
 
 		while (componentIndex < rigidBodyComponentPool.componentCount) {
 			const Entity entity = rigidBodyComponentPool.componentIndexToEntity[componentIndex];
-			const RigidBody2D& rigidBody = ecs.getComponent<RigidBody2D>(entity);
+			const RigidBody2D& rigidBody = scene->ecs.getComponent<RigidBody2D>(entity);
 
 			renderer.setRigidBodyTransform(entity, rigidBody.transform);
 
@@ -197,27 +163,28 @@ namespace Trident {
 	void Physics2DSceneLayer::checkHover() {
 		hoveredEntity = max<Entity>();
 
-		const ComponentPool<RigidBody2D>& rigidBodyComponentPool = ecs.getComponentPool<RigidBody2D>();
+		const ComponentPool<RigidBody2D>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2D>();
 
 		if (rigidBodyComponentPool.componentCount == 0) {
 			return;
 		}
 
-		const Geometry2D mouseGeometry = Geometry2D::pointAtOrigin();
+		const Hull2D mouseHull = Hull2D::point();
 
 		RigidBody2D mouseRigidBody{};
 		mouseRigidBody.position = renderer.cameraPosition + mousePosition;
-		mouseRigidBody.updateTransform(mouseGeometry.getCentroid());
+		mouseRigidBody.updateTransform(mouseHull.getCentroid());
 
 		sint32 componentIndex = static_cast<sint32>(rigidBodyComponentPool.componentCount) - 1;
 
 		while (componentIndex >= 0) {
 			const Entity entity = rigidBodyComponentPool.componentIndexToEntity[componentIndex];
-			const GeometryComponent geometryComponent = ecs.getComponent<GeometryComponent>(entity);
-			const Geometry2D& geometry = sceneAsset->getGeometries()[geometryComponent.geometryIndex];
-			const RigidBody2D& rigidBody = ecs.getComponent<RigidBody2D>(entity);
+			const GeometryComponent geometryComponent = scene->ecs.getComponent<GeometryComponent>(entity);
+			const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
+			const Hull2D& hull = scene->getHulls()[geometry.getHullIndex()];
+			const RigidBody2D& rigidBody = scene->ecs.getComponent<RigidBody2D>(entity);
 
-			if (GJK2DConditional(rigidBody, mouseRigidBody, geometry, mouseGeometry)) {
+			if (GJK2DConditional(rigidBody, mouseRigidBody, hull, mouseHull)) {
 				hoveredEntity = entity;
 
 				break;
@@ -295,12 +262,13 @@ namespace Trident {
 		}
 
 		if (event.getButton() == MouseButton::LEFT && selectedEntity != max<Entity>()) {
-			const GeometryComponent geometryComponent = ecs.getComponent<GeometryComponent>(selectedEntity);
-			const Geometry2D& geometry = sceneAsset->getGeometries()[geometryComponent.geometryIndex];
+			const GeometryComponent geometryComponent = scene->ecs.getComponent<GeometryComponent>(selectedEntity);
+			const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
+			const Hull2D& hull = scene->getHulls()[geometry.getHullIndex()];
 
-			RigidBody2D& rigidBody = ecs.getComponent<RigidBody2D>(selectedEntity);
+			RigidBody2D& rigidBody = scene->ecs.getComponent<RigidBody2D>(selectedEntity);
 			rigidBody.position += placeholderOffset;
-			rigidBody.updateTransform(geometry.centroid);
+			rigidBody.updateTransform(hull.getCentroid());
 
 			selectedEntity = max<Entity>();
 		}

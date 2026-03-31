@@ -3,48 +3,51 @@
 
 #pragma once
 
-#include "Engine/Filesystem/Asset/AssetLibrary.hpp"
-#include "Engine/API/Physics/Cached/CachedGeometry2D.hpp"
-#include "Engine/API/Physics/Cached/CachedRigidBody2D.hpp"
-#include "Engine/API/Process/Process.hpp"
+#include "Engine/ECS/Component/GeometryComponent.hpp"
+#include "Engine/ECS/EntityComponentMapping.hpp"
+
+#include "RigidBody2DComponent.hpp"
 
 namespace Trident {
 	inline ByteStream<StreamOperation::WRITE> encode2DTestScene(uint32 identifier) {
-		std::vector<float32> dynamicVertexComponents;
-		std::vector<uint16> dynamicIndices;
-
 		const uint32 entityCount = 2;
 
-		const sequence<CachedGeometry2D> geometries = {
-			CachedGeometry2D::unitSquare(0, dynamicVertexComponents, dynamicIndices),
+		const sequence<uint32> geometryAssetIdentifiers = {
+			3879090019,
 		};
 
-		const sequence<GeometryComponent> geometryComponents = {
-			{
-				.geometryIndex = 0,
-			},
-			{
-				.geometryIndex = 0,
-			},
+		const sequence<EntityComponentMapping<GeometryComponent>> geometryMappings = {
+			{0, {0}},
+			{1, {0}},
 		};
 
-		const sequence<CachedRigidBody2D> rigidBodies = {
-			CachedRigidBody2D({
-				.entity = 0,
-				.position = {0.0_m, -10.0_m},
-				.rotation = 0.0_rad,
-				.scale = {100.0f, 20.0f},
-				.mass = max<float32>(),
-				.friction = 0.2f,
-			}),
-			CachedRigidBody2D({
-				.entity = 1,
-				.position = {0.0_m, 4.0_m},
-				.rotation = 0.0_rad,
-				.scale = {1.0f, 1.0f},
-				.mass = 200.0_kg,
-				.friction = 0.2f,
-			}),
+		const sequence<EntityComponentMapping<RigidBody2DComponent>> rigidBodyMappings = {
+			{
+				0,
+				createRigidBody({
+					.position = {0.0_m, -10.0_m},
+					.rotation = 0.0_rad,
+					.scale = {100.0f, 20.0f},
+					.mass = max<float32>(),
+					.density = 1.0f,
+					.friction = 0.2f,
+					.restitution = 0.0f,
+					.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
+				}),
+			},
+			{
+				1,
+				createRigidBody({
+					.position = {0.0_m, 4.0_m},
+					.rotation = 0.0_rad,
+					.scale = {1.0f, 1.0f},
+					.mass = 200.0_kg,
+					.density = 1.0f,
+					.friction = 0.2f,
+					.restitution = 0.0f,
+					.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
+				}),
+			},
 		};
 
 		Scene2DAssetHeader header{};
@@ -53,58 +56,43 @@ namespace Trident {
 		header.version = {0, 0, 0};
 		header.staticVertexCount = 0;
 		header.staticIndexCount = 0;
-		header.dynamicVertexCount = static_cast<uint32>(dynamicVertexComponents.size()) / 2;
-		header.dynamicIndexCount = static_cast<uint32>(dynamicIndices.size());
 		header.entityCount = entityCount;
-		header.geometryCount = static_cast<uint32>(geometries.count());
-		header.rigidBodyCount = static_cast<uint32>(rigidBodies.count());
-		header.geometryComponentCount = static_cast<uint32>(geometryComponents.count());
+		header.geometryAssetCount = static_cast<uint32>(geometryAssetIdentifiers.count());
+		header.geometryMappingCount = static_cast<uint32>(geometryMappings.count());
+		header.rigidBodyMappingCount = static_cast<uint32>(rigidBodyMappings.count());
 
 		uint64 size = 0;
 		size += sizeof(header);
 		size += header.staticVertexCount * sizeof(svec2<float32>);
 		size += header.staticIndexCount * sizeof(uint16);
-		size += header.dynamicVertexCount * sizeof(svec2<float32>);
-		size += header.dynamicIndexCount * sizeof(uint16);
-		size += header.geometryCount * (sizeof(Entity) + sizeof(svec2<float32>) + sizeof(float32) + sizeof(uint32) * 3 + sizeof(uint16) * 2 + sizeof(Geometry2DType));
-		size += header.rigidBodyCount * (sizeof(Entity) + sizeof(svec2<float32>) * 2 + sizeof(float32) * 4);
-		size += header.geometryComponentCount * sizeof(GeometryComponent);
+		size += header.geometryAssetCount * sizeof(uint32);
+		size += header.geometryMappingCount * (sizeof(Entity) + sizeof(uint32));
+		size += header.rigidBodyMappingCount * (sizeof(Entity) + sizeof(svec2<float32>) * 2 + sizeof(float32) * 5);
 
 		ByteStream<StreamOperation::WRITE> stream(size, Endianness::LITTLE_ENDIAN);
 
 		std::copy_n(pointer_cast<const uint8*>(&header), sizeof(header), stream.getBytePosition());
+
 		stream.jump(sizeof(header));
 
-		std::copy_n(pointer_cast<const uint8*>(&dynamicVertexComponents[0]), dynamicVertexComponents.size() * sizeof(float32), stream.getBytePosition());
-		stream.jump(dynamicVertexComponents.size() * sizeof(float32));
-
-		std::copy_n(pointer_cast<const uint8*>(&dynamicIndices[0]), dynamicIndices.size() * sizeof(uint16), stream.getBytePosition());
-		stream.jump(dynamicIndices.size() * sizeof(uint16));
-
-		for (const CachedGeometry2D& geometry : geometries) {
-			stream.write<svec2<float32>>(geometry.centroid);
-			stream.write<float32>(geometry.radius);
-			stream.write<uint32>(geometry.entity);
-			stream.write<uint32>(geometry.vertexOffset);
-			stream.write<uint32>(geometry.vertexCount);
-			stream.write<uint32>(geometry.indexOffset);
-			stream.write<uint16>(geometry.triangleListIndexCount);
-			stream.write<uint16>(geometry.lineStripIndexCount);
-			stream.write<Geometry2DType>(geometry.type);
+		for (const uint32 geometryAssetIdentifier : geometryAssetIdentifiers) {
+			stream.write<uint32>(geometryAssetIdentifier);
 		}
 
-		for (const CachedRigidBody2D& rigidBody : rigidBodies) {
-			stream.write<svec2<float32>>(rigidBody.position);
-			stream.write<svec2<float32>>(rigidBody.scale);
-			stream.write<float32>(rigidBody.rotation);
-			stream.write<float32>(rigidBody.inverseMass);
-			stream.write<float32>(rigidBody.inverseInertia);
-			stream.write<float32>(rigidBody.friction);
-			stream.write<uint32>(rigidBody.entity);
+		for (const EntityComponentMapping<GeometryComponent> geometryMapping : geometryMappings) {
+			stream.write<Entity>(geometryMapping.entity);
+			stream.write<uint32>(geometryMapping.component.geometryIndex);
 		}
 
-		for (const GeometryComponent geometryComponent : geometryComponents) {
-			stream.write<GeometryComponent>(geometryComponent);
+		for (const EntityComponentMapping<RigidBody2DComponent>& rigidBodyMapping : rigidBodyMappings) {
+			stream.write<Entity>(rigidBodyMapping.entity);
+			stream.write<svec2<float32>>(rigidBodyMapping.component.position);
+			stream.write<float32>(rigidBodyMapping.component.rotation);
+			stream.write<svec2<float32>>(rigidBodyMapping.component.scale);
+			stream.write<float32>(rigidBodyMapping.component.inverseMass);
+			stream.write<float32>(rigidBodyMapping.component.inverseInertia);
+			stream.write<float32>(rigidBodyMapping.component.friction);
+			stream.write<float32>(rigidBodyMapping.component.restitution);
 		}
 
 		return stream;

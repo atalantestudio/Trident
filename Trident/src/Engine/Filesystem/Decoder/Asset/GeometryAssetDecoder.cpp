@@ -11,10 +11,9 @@
 namespace Trident {
 	template<>
 	ref<GeometryAsset> Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& byteStream) {
-		GeometryAssetDescriptor geometryAssetDescriptor{};
+		Descriptor<GeometryAsset> geometryAssetDescriptor{};
 		geometryAssetDescriptor.identifier = byteStream.read<uint32>();
 		geometryAssetDescriptor.version = byteStream.read<VersionNumber>();
-		geometryAssetDescriptor.clusterCount = byteStream.read<uint32>();
 
 		const uint32 vertexPositionCount = byteStream.read<uint32>();
 

@@ -177,17 +177,17 @@ namespace Trident {
 	}
 
 	// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
-	inline GJK2DOutput GJK2D(const RigidBody2D& A, const RigidBody2D& B, const Geometry2D& geometryA, const Geometry2D& geometryB) {
-		DEBUG_ASSERT(geometryA.getVertices().count() < max<uint8>());
-		DEBUG_ASSERT(geometryB.getVertices().count() < max<uint8>());
+	inline GJK2DOutput GJK2D(const RigidBody2D& A, const RigidBody2D& B, const Hull2D& hullA, const Hull2D& hullB) {
+		DEBUG_ASSERT(hullA.getVertices().count() < max<uint8>());
+		DEBUG_ASSERT(hullB.getVertices().count() < max<uint8>());
 
 		vec2<float32> d = B.position - A.position;
 
 		Simplex2Vertex vertex;
 		vertex.iA = 0;
 		vertex.iB = 0;
-		vertex.vA = multiplyTransform(vec2<float32>(geometryA.getVertices()[vertex.iA]), A.transform);
-		vertex.vB = multiplyTransform(vec2<float32>(geometryB.getVertices()[vertex.iB]), B.transform);
+		vertex.vA = multiplyTransform(vec2<float32>(hullA.getVertices()[vertex.iA]), A.transform);
+		vertex.vB = multiplyTransform(vec2<float32>(hullB.getVertices()[vertex.iB]), B.transform);
 		vertex.v = vertex.vB - vertex.vA;
 
 		Simplex2 s = {vertex};
@@ -263,8 +263,8 @@ namespace Trident {
 			}
 
 			Simplex2Vertex vertex;
-			vertex.iA = supportIndex(A, geometryA, -d);
-			vertex.iB = supportIndex(B, geometryB, d);
+			vertex.iA = supportIndex(A, hullA, -d);
+			vertex.iB = supportIndex(B, hullB, d);
 
 			bool duplicate = false;
 			uint8 j = 0;
@@ -283,8 +283,8 @@ namespace Trident {
 				break;
 			}
 
-			vertex.vA = multiplyTransform(vec2<float32>(geometryA.getVertices()[vertex.iA]), A.transform);
-			vertex.vB = multiplyTransform(vec2<float32>(geometryB.getVertices()[vertex.iB]), B.transform);
+			vertex.vA = multiplyTransform(vec2<float32>(hullA.getVertices()[vertex.iA]), A.transform);
+			vertex.vB = multiplyTransform(vec2<float32>(hullB.getVertices()[vertex.iB]), B.transform);
 			vertex.v = vertex.vB - vertex.vA;
 
 			s[s.count] = vertex;

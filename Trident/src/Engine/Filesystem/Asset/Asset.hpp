@@ -6,13 +6,13 @@
 #include "Engine/Filesystem/Asset/AssetSignature.hpp"
 
 namespace Trident {
-	struct AssetDescriptor {
+	struct AssetHeader {
+		AssetSignature signature;
 		uint32 identifier;
 		VersionNumber version;
 	};
 
-	struct AssetHeader {
-		AssetSignature signature;
+	struct AssetDescriptor {
 		uint32 identifier;
 		VersionNumber version;
 	};
@@ -24,7 +24,15 @@ namespace Trident {
 				version(descriptor.version)
 			{}
 
-		public:
+			inline uint32 getIdentifier() const {
+				return identifier;
+			}
+
+			inline VersionNumber getVersion() const {
+				return version;
+			}
+
+		private:
 			uint32 identifier;
 			VersionNumber version;
 	};

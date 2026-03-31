@@ -3,14 +3,14 @@
 
 #pragma once
 
-#include "Engine/API/Geometry/Geometry2DType.hpp"
+#include "Engine/API/Geometry/Hull2DType.hpp"
 #include "Engine/API/Physics/Collider/Collider2D.hpp"
 #include "Engine/API/Physics/Collider/CircleCircle.hpp"
 #include "Engine/API/Physics/Collider/CircleConvexHull.hpp"
 #include "Engine/API/Physics/Collider/ConvexHullConvexHull.hpp"
 
 namespace Trident {
-	static constexpr Collider2D COLLIDER_2D_TABLE[static_cast<uint32>(Geometry2DType::count)][static_cast<uint32>(Geometry2DType::count)] = {
+	static constexpr Collider2D COLLIDER_2D_TABLE[static_cast<uint32>(Hull2DType::count)][static_cast<uint32>(Hull2DType::count)] = {
 		{CircleCircleCollider, CircleConvexHullCollider    },
 		{nullptr,              ConvexHullConvexHullCollider},
 	};

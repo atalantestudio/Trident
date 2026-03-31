@@ -47,7 +47,7 @@ namespace Trident {
 	// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
 	// Returns true if the Minkowski difference of A and B contains the origin, and false otherwise.
 	// NOTE: In this implementation, `a` is the name of the most recent vertex added to the simplex.
-	static bool GJK2DConditional(const RigidBody2D& A, const RigidBody2D& B, const Geometry2D& geometryA, const Geometry2D& geometryB) {
+	static bool GJK2DConditional(const RigidBody2D& A, const RigidBody2D& B, const Hull2D& hullA, const Hull2D& hullB) {
 		vec2<float32> d = B.position - A.position;
 
 		// Degenerate case: The objects have the same position.
@@ -56,7 +56,7 @@ namespace Trident {
 		}
 
 		// Find a support point on the Minkowski difference of A and B.
-		vec2<float32> a = support(A, geometryA, d) - support(B, geometryB, -d);
+		vec2<float32> a = support(A, hullA, d) - support(B, hullB, -d);
 
 		// Check if `a` passes the origin.
 		if (dot(a, d) < 0.0f) {
@@ -71,7 +71,7 @@ namespace Trident {
 
 		while (iteration < GJK_2D_CONDITIONAL_ITERATION_LIMIT) {
 			// Find a support point on the Minkowski difference of A and B.
-			a = support(A, geometryA, d) - support(B, geometryB, -d);
+			a = support(A, hullA, d) - support(B, hullB, -d);
 
 			// Check if `a` passes the origin.
 			if (dot(a, d) < 0.0f) {

@@ -4,12 +4,9 @@
 #pragma once
 
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
-#include "Engine/API/Physics/Cached/CachedGeometry2D.hpp"
-#include "Engine/API/Physics/Cached/CachedRigidBody2D.hpp"
 #include "Engine/API/Process/Process.hpp"
 
 #include "../Subprocess/Encode2DTestScene.hpp"
-#include "../Subprocess/Encode3DTestScene.hpp"
 
 namespace Trident {
 	class BuildSceneAssetProcess : public Process {
@@ -40,14 +37,6 @@ namespace Trident {
 					const ByteStream<StreamOperation::WRITE> stream = encode2DTestScene(identifier);
 
 					encodeSceneAsset(identifier, stream, "Scene2D", assetOutputPath);
-				}
-
-				// 3D test scene
-				{
-					const uint32 identifier = AssetLibrary::createAssetIdentifier();
-					const ByteStream<StreamOperation::WRITE> stream = encode3DTestScene(identifier);
-
-					encodeSceneAsset(identifier, stream, "Scene3D", assetOutputPath);
 				}
 
 				ENGINE_INFO("Done building scene assets.");

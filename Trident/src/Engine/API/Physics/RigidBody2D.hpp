@@ -3,43 +3,8 @@
 
 #pragma once
 
-#include "Engine/API/Geometry/Geometry2D.hpp"
-#include "Engine/API/Physics/Cached/CachedRigidBody2D.hpp"
-
 namespace Trident {
-	struct RigidBody2DDescriptor {
-		vec2<float32> position = {0.0_m, 0.0_m};
-		float32 rotation = 0.0_rad;
-		vec2<float32> scale = {1.0f, 1.0f};
-		vec2<float32> linearVelocity = {0.0_m_s, 0.0_m_s};
-		float32 angularVelocity = 0.0_w;
-		float32 mass = 0.0_kg;
-		float32 friction = 0.0f;
-		float32 density = 1.0f;
-		Color fillColor = 0xffffffff;
-		Color strokeColor = 0x000000ff;
-
-		// TODO: Add layer/island system to scene ECS.
-		// uint32 layerIndex = 0;
-	};
-
 	class RigidBody2D {
-		public:
-			static RigidBody2D fromCached(const CachedRigidBody2D& cachedRigidBody, vec2<float32> centroid) {
-				RigidBody2D rigidBody = {
-					.position = cachedRigidBody.position,
-					.rotation = cachedRigidBody.rotation,
-					.scale = cachedRigidBody.scale,
-					.inverseMass = cachedRigidBody.inverseMass,
-					.inverseInertia = cachedRigidBody.inverseInertia,
-					.friction = cachedRigidBody.friction,
-				};
-
-				rigidBody.updateTransform(centroid);
-
-				return rigidBody;
-			}
-
 		public:
 			void updateTransform(vec2<float32> centroid) {
 				transform =
@@ -85,9 +50,6 @@ namespace Trident {
 			float32 rotation = 0.0_rad;
 
 			float32 angularVelocity = 0.0_w;
-
-			// Torque = inertia * angular acceleration (around the COM).
-			float32 torque = 0.0_Nm;
 
 			// NOTE: The scale of an entity isn't meant to be dynamically updated.
 			vec2<float32> scale = {1.0f, 1.0f};

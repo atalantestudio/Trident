@@ -9,26 +9,20 @@
 #include "Engine/API/Physics/SATCircleConvexHull2D.hpp"
 
 namespace Trident {
-	static bool CircleConvexHullCollider(
-		const RigidBody2D& A,
-		const RigidBody2D& B,
-		const Geometry2D& geometryA,
-		const Geometry2D& geometryB,
-		ContactManifold2D* contactManifold
-	) {
-		const Geometry2D pointGeometry = Geometry2D::pointAtOrigin();
+	static bool CircleConvexHullCollider(const RigidBody2D& A, const RigidBody2D& B, const Hull2D& hullA, const Hull2D& hullB, ContactManifold2D* contactManifold) {
+		const Hull2D pointHull = Hull2D::point();
 
 		// The scaling factor is assumed to be the same in both axes.
 		const float32 scaleA = A.scale[0];
 
-		const GJK2DOutput gjkOutput = GJK2D(A, B, pointGeometry, geometryB);
-		const float32 d = gjkOutput.distance - geometryA.radius * scaleA;
+		const GJK2DOutput gjkOutput = GJK2D(A, B, pointHull, hullB);
+		const float32 d = gjkOutput.distance - hullA.radius * scaleA;
 
 		if (d > 0.0f) {
 			return false;
 		}
 
-		if (d > -geometryA.radius * scaleA) {
+		if (d > -hullA.radius * scaleA) {
 			contactManifold->normal = normalized(gjkOutput.closestB - gjkOutput.closestA);
 			contactManifold->contactCount = 1;
 			contactManifold->contacts[0].position = gjkOutput.closestB;
@@ -37,12 +31,12 @@ namespace Trident {
 			return true;
 		}
 
-		const SAT2DOutput satOutput = SATCircleConvexHull2D(A, B, geometryA, geometryB);
+		const SAT2DOutput satOutput = SATCircleConvexHull2D(A, B, hullA, hullB);
 
 		contactManifold->normal = -satOutput.normal;
 		contactManifold->contactCount = 1;
 		contactManifold->contacts[0].position = satOutput.incidentSupportPoint - satOutput.normal * satOutput.separation;
-		contactManifold->contacts[0].separation = satOutput.separation - geometryA.radius * scaleA;
+		contactManifold->contacts[0].separation = satOutput.separation - hullA.radius * scaleA;
 
 		return true;
 	}

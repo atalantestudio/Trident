@@ -3,14 +3,18 @@
 
 #pragma once
 
+#include "Engine/API/Descriptor.hpp"
 #include "Engine/API/Physics/EntityPair.hpp"
 #include "Engine/API/Physics/RigidBody2D.hpp"
-#include "Engine/ECS/ECS.hpp"
+#include "Engine/API/Scene/Scene2D.hpp"
 #include "Engine/Filesystem/Asset/SceneAsset.hpp"
 
 namespace Trident {
-	struct PhysicsSimulationDescriptor {
-		ECS* ecs;
+	class PhysicsSimulation2D;
+
+	template<>
+	struct Descriptor<PhysicsSimulation2D> {
+		Scene2D* scene;
 		float64 deltaTime;
 	};
 
@@ -30,13 +34,13 @@ namespace Trident {
 			static void mergeContactManifolds(EntityContactPair2D& entityContactPair, const ContactManifold2D& contactManifold);
 
 		public:
-			explicit PhysicsSimulation2D(const PhysicsSimulationDescriptor& descriptor);
+			explicit PhysicsSimulation2D(const Descriptor<PhysicsSimulation2D>& descriptor);
 
 			/// Advances the simulation by a single tick.
 			void tick();
 
 		private:
-			const Geometry2D& getGeometry(Entity entity) const;
+			const Hull2D& getHull(Entity entity) const;
 
 			void broadPhase();
 			void narrowPhase();
@@ -46,11 +50,8 @@ namespace Trident {
 			void applyImpulses();
 			void integrate();
 
-		public:
-			ref<Scene2DAsset> sceneAsset;
-
 		private:
-			ECS* ecs;
+			Scene2D* scene;
 
 			float32 deltaTime;
 			float32 inverseDeltaTime;

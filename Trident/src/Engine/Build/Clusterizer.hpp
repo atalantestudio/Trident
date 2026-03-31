@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Engine/API/Geometry/3D/Geometry3D.hpp"
 #include "Engine/API/Scene/Scene3D.hpp"
 #include "Engine/Build/Cluster.hpp"
 #include "Engine/Build/ClusteredGeometry.hpp"

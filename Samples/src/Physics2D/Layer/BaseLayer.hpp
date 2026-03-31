@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Trident.hpp"
+#include "Engine/API/Scene/Scene2D.hpp"
 
 #include "../Renderer/Physics2DRenderer.hpp"
 
@@ -17,8 +17,6 @@ namespace Trident {
 
 	class BaseLayer : public Layer {
 		public:
-			explicit BaseLayer();
-
 			virtual ~BaseLayer() = default;
 
 			void postConstruct() override;
@@ -41,9 +39,9 @@ namespace Trident {
 			bool onWindowResize(WindowResizeEvent& event);
 
 		private:
-			ref<Scene2DAsset> sceneAsset;
-			ECS ecs;
-			PhysicsSimulation2D physicsSimulation;
+			scope<Scene2D> scene;
+
+			scope<PhysicsSimulation2D> physicsSimulation;
 			Physics2DRenderer renderer;
 
 			Entity hoveredEntity = max<Entity>();
