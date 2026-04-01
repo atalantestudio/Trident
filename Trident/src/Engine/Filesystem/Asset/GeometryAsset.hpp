@@ -59,13 +59,9 @@ namespace Trident {
 	};
 
 	class GeometryAsset : public Asset {
-		private:
-			static constexpr uint32 CLUSTER_INDEX_COUNT = 384;
-
 		public:
 			explicit GeometryAsset(const Descriptor<GeometryAsset>& descriptor) :
 				Asset(descriptor),
-				clusterCount(static_cast<uint32>(ceil(static_cast<float32>(descriptor.vertexPositionIndices.count()) / CLUSTER_INDEX_COUNT))),
 				vertexPositionComponents(descriptor.vertexPositionComponents),
 				vertexNormalComponents(descriptor.vertexNormalComponents),
 				vertexTextureCoordinateComponents(descriptor.vertexTextureCoordinateComponents),
@@ -75,7 +71,10 @@ namespace Trident {
 			{}
 
 			inline uint32 getClusterCount() const {
-				return clusterCount;
+				// TODO: Use the constant from Build/Clusterizer.hpp.
+				constexpr uint32 CLUSTER_INDEX_COUNT = 384;
+
+				return static_cast<uint32>(ceil(static_cast<float32>(vertexPositionIndices.count()) / CLUSTER_INDEX_COUNT));
 			}
 
 			inline const sequence<float32>& getVertexPositionComponents() const {
@@ -103,7 +102,6 @@ namespace Trident {
 			}
 
 		private:
-			uint32 clusterCount;
 			sequence<float32> vertexPositionComponents;
 			sequence<float32> vertexNormalComponents;
 			sequence<float32> vertexTextureCoordinateComponents;

@@ -35,41 +35,74 @@ namespace Trident {
 				instances(MAX_INSTANCE_COUNT)
 			{}
 
-			view<ref<Geometry3D>> getGeometries() const {
+			inline const sequence<uint8>& getVertexBuffer() const {
+				return vertexBuffer;
+			}
+
+			inline uint64 getVertexPositionComponentBufferSize() const {
+				return vertexPositionComponentBufferSize;
+			}
+
+			inline uint64 getVertexPositionIndexBufferSize() const {
+				return vertexPositionIndexBufferSize;
+			}
+
+			inline uint64 getVertexNormalComponentBufferSize() const {
+				return vertexNormalComponentBufferSize;
+			}
+
+			inline uint64 getVertexNormalIndexBufferSize() const {
+				return vertexNormalIndexBufferSize;
+			}
+
+			inline uint64 getVertexTextureCoordinateComponentBufferSize() const {
+				return vertexTextureCoordinateComponentBufferSize;
+			}
+
+			inline uint64 getVertexTextureCoordinateIndexBufferSize() const {
+				return vertexTextureCoordinateIndexBufferSize;
+			}
+
+			inline uint64 getVertexTangentComponentBufferSize() const {
+				return vertexTangentComponentBufferSize;
+			}
+
+
+			inline view<ref<Geometry3D>> getGeometries() const {
 				return view<ref<Geometry3D>>(&geometries[0], geometryCount);
 			}
 
-			uint32 getGeometryCount() const {
+			inline uint32 getGeometryCount() const {
 				return geometryCount;
 			}
 
-			uint32 getVertexPositionIndexOffset(uint32 geometryIndex) const {
+			inline uint32 getVertexPositionIndexOffset(uint32 geometryIndex) const {
 				DEBUG_ASSERT(geometryIndex < geometryCount);
 
 				return vertexPositionIndexOffsets[geometryIndex];
 			}
 
-			view<Material> getMaterials() const {
+			inline view<Material> getMaterials() const {
 				return view<Material>(&materials[0], materialCount);
 			}
 
-			uint32 getMaterialCount() const {
+			inline uint32 getMaterialCount() const {
 				return materialCount;
 			}
 
-			uint32 getMaterialReferenceCount() const {
+			inline uint32 getMaterialReferenceCount() const {
 				return materialReferenceCount;
 			}
 
-			const sequence<std::vector<MaterialReference>>& getAllMaterialReferences() const {
+			inline const sequence<std::vector<MaterialReference>>& getAllMaterialReferences() const {
 				return materialReferences;
 			}
 
-			const sequence<MaterialReference>& getFlatMaterialReferences() const {
+			inline const sequence<MaterialReference>& getFlatMaterialReferences() const {
 				return flatMaterialReferences;
 			}
 
-			view<MaterialReference> getMaterialReferences(uint32 materialIndex) const {
+			inline view<MaterialReference> getMaterialReferences(uint32 materialIndex) const {
 				const std::vector<MaterialReference>& references = materialReferences[materialIndex];
 
 				if (references.size() == 0) {
@@ -79,11 +112,11 @@ namespace Trident {
 				return view<MaterialReference>(&references[0], references.size());
 			}
 
-			view<RigidBody3D> getInstances() const {
+			inline view<RigidBody3D> getInstances() const {
 				return view<RigidBody3D>(&instances[0], instanceCount);
 			}
 
-			uint32 getInstanceCount() const {
+			inline uint32 getInstanceCount() const {
 				return instanceCount;
 			}
 
@@ -163,7 +196,20 @@ namespace Trident {
 				return materialReferenceIndex;
 			}
 
+			void createVertexBuffer(uint64 minStorageBufferOffsetAlignment);
+
 		private:
+			// Contains components and indices for vertex positions, texture coordinates and normals.
+			sequence<uint8> vertexBuffer;
+
+			uint64 vertexPositionComponentBufferSize;
+			uint64 vertexPositionIndexBufferSize;
+			uint64 vertexNormalComponentBufferSize;
+			uint64 vertexNormalIndexBufferSize;
+			uint64 vertexTextureCoordinateComponentBufferSize;
+			uint64 vertexTextureCoordinateIndexBufferSize;
+			uint64 vertexTangentComponentBufferSize;
+
 			sequence<ref<Geometry3D>> geometries;
 			sequence<uint32> vertexPositionIndexOffsets;
 			sequence<Material> materials;

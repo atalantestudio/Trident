@@ -50,35 +50,35 @@ namespace Trident {
 				calculateVertexTangentComponents();
 			}
 
-			const sequence<float32>& getVertexPositionComponents() const {
+			inline const sequence<float32>& getVertexPositionComponents() const {
 				return vertexPositionComponents;
 			}
 
-			const sequence<float32>& getVertexNormalComponents() const {
+			inline const sequence<float32>& getVertexNormalComponents() const {
 				return vertexNormalComponents;
 			}
 
-			const sequence<float32>& getVertexTextureCoordinateComponents() const {
+			inline const sequence<float32>& getVertexTextureCoordinateComponents() const {
 				return vertexTextureCoordinateComponents;
 			}
 
-			const sequence<uint32>& getVertexPositionIndices() const {
+			inline const sequence<uint32>& getVertexPositionIndices() const {
 				return vertexPositionIndices;
 			}
 
-			const sequence<uint32>& getVertexNormalIndices() const {
+			inline const sequence<uint32>& getVertexNormalIndices() const {
 				return vertexNormalIndices;
 			}
 
-			const sequence<uint32>& getVertexTextureCoordinateIndices() const {
+			inline const sequence<uint32>& getVertexTextureCoordinateIndices() const {
 				return vertexTextureCoordinateIndices;
 			}
 
-			const sequence<float32>& getVertexTangentComponents() const {
+			inline const sequence<float32>& getVertexTangentComponents() const {
 				return vertexTangentComponents;
 			}
 
-			uint32 getTriangleCount() const {
+			inline uint32 getTriangleCount() const {
 				return static_cast<uint32>(vertexPositionIndices.count()) / 3;
 			}
 

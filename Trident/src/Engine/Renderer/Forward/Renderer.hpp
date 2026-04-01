@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Engine/API/Camera/PerspectiveCamera.hpp"
 #include "Engine/API/Scene/Scene3D.hpp"
 #include "Engine/Renderer/3D/SceneRenderer.hpp"
 
@@ -57,104 +58,50 @@ namespace Trident {
 					entity += 1;
 				}
 
-				view<ref<Geometry3D>> geometries = scene->getGeometries();
-				uint64 vertexPositionComponentBufferSize = 0;
-				uint64 vertexPositionIndexBufferSize = 0;
-				uint64 vertexNormalComponentBufferSize = 0;
-				uint64 vertexNormalIndexBufferSize = 0;
-				uint64 vertexTextureCoordinateComponentBufferSize = 0;
-				uint64 vertexTextureCoordinateIndexBufferSize = 0;
-				uint64 vertexTangentComponentBufferSize = 0;
+				const view<uint8> sceneVertexBuffer = scene->getVertexBuffer();
+				const ref<Buffer<uint8>> vertexStagingBuffer = createStagingBuffer<uint8>(sceneVertexBuffer.count());
 
-				for (const ref<Geometry3D> geometry : geometries) {
-					vertexPositionComponentBufferSize += sizeof(float32) * geometry->getVertexPositionComponents().count();
-					vertexPositionIndexBufferSize += sizeof(uint32) * geometry->getVertexPositionIndices().count();
-					vertexNormalComponentBufferSize += sizeof(float32) * geometry->getVertexNormalComponents().count();
-					vertexNormalIndexBufferSize += sizeof(uint32) * geometry->getVertexNormalIndices().count();
-					vertexTextureCoordinateComponentBufferSize += sizeof(float32) * geometry->getVertexTextureCoordinateComponents().count();
-					vertexTextureCoordinateIndexBufferSize += sizeof(uint32) * geometry->getVertexTextureCoordinateIndices().count();
-					vertexTangentComponentBufferSize += sizeof(float32) * geometry->getVertexTangentComponents().count();
-				}
+				uint8* vertexMappedRange = vertexStagingBuffer->map(0, vertexStagingBuffer->getSize());
 
-				const uint64 minStorageBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
-
-				vertexPositionComponentBufferSize = ceil(vertexPositionComponentBufferSize, minStorageBufferOffsetAlignment);
-				vertexPositionIndexBufferSize = ceil(vertexPositionIndexBufferSize, minStorageBufferOffsetAlignment);
-				vertexNormalComponentBufferSize = ceil(vertexNormalComponentBufferSize, minStorageBufferOffsetAlignment);
-				vertexNormalIndexBufferSize = ceil(vertexNormalIndexBufferSize, minStorageBufferOffsetAlignment);
-				vertexTextureCoordinateComponentBufferSize = ceil(vertexTextureCoordinateComponentBufferSize, minStorageBufferOffsetAlignment);
-				vertexTextureCoordinateIndexBufferSize = ceil(vertexTextureCoordinateIndexBufferSize, minStorageBufferOffsetAlignment);
-				vertexTangentComponentBufferSize = ceil(vertexTangentComponentBufferSize, minStorageBufferOffsetAlignment);
-
-				const ref<Buffer<uint8>> vertexStagingBuffer = createStagingBuffer<uint8>(vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize + vertexNormalIndexBufferSize + vertexTextureCoordinateComponentBufferSize + vertexTextureCoordinateIndexBufferSize + vertexTangentComponentBufferSize);
-
-				uint8* mappedRange = vertexStagingBuffer->map(0, vertexStagingBuffer->getSize());
-				float32* vertexPositionComponentMappedRange = pointer_cast<float32*>(mappedRange);
-				uint32* vertexPositionIndexMappedRange = pointer_cast<uint32*>(mappedRange + vertexPositionComponentBufferSize);
-				float32* vertexNormalComponentMappedRange = pointer_cast<float32*>(mappedRange + vertexPositionComponentBufferSize + vertexPositionIndexBufferSize);
-				uint32* vertexNormalIndexMappedRange = pointer_cast<uint32*>(mappedRange + vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize);
-				float32* vertexTextureCoordinateComponentMappedRange = pointer_cast<float32*>(mappedRange + vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize + vertexNormalIndexBufferSize);
-				uint32* vertexTextureCoordinateIndexMappedRange = pointer_cast<uint32*>(mappedRange + vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize + vertexNormalIndexBufferSize + vertexTextureCoordinateComponentBufferSize);
-				float32* vertexTangentComponentMappedRange = pointer_cast<float32*>(mappedRange + vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize + vertexNormalIndexBufferSize + vertexTextureCoordinateComponentBufferSize + vertexTextureCoordinateIndexBufferSize);
-
-				for (const ref<Geometry3D> geometry : geometries) {
-					const view<float32> vertexPositionComponents = geometry->getVertexPositionComponents();
-					const view<uint32> vertexPositionIndices = geometry->getVertexPositionIndices();
-					const view<float32> vertexNormalComponents = geometry->getVertexNormalComponents();
-					const view<uint32> vertexNormalIndices = geometry->getVertexNormalIndices();
-					const view<float32> vertexTextureCoordinateComponents = geometry->getVertexTextureCoordinateComponents();
-					const view<uint32> vertexTextureCoordinateIndices = geometry->getVertexTextureCoordinateIndices();
-					const view<float32> vertexTangentComponents = geometry->getVertexTangentComponents();
-
-					std::copy(vertexPositionComponents.begin(), vertexPositionComponents.end(), vertexPositionComponentMappedRange);
-					std::copy(vertexPositionIndices.begin(), vertexPositionIndices.end(), vertexPositionIndexMappedRange);
-					std::copy(vertexNormalComponents.begin(), vertexNormalComponents.end(), vertexNormalComponentMappedRange);
-					std::copy(vertexNormalIndices.begin(), vertexNormalIndices.end(), vertexNormalIndexMappedRange);
-					std::copy(vertexTextureCoordinateComponents.begin(), vertexTextureCoordinateComponents.end(), vertexTextureCoordinateComponentMappedRange);
-					std::copy(vertexTextureCoordinateIndices.begin(), vertexTextureCoordinateIndices.end(), vertexTextureCoordinateIndexMappedRange);
-					std::copy(vertexTangentComponents.begin(), vertexTangentComponents.end(), vertexTangentComponentMappedRange);
-
-					vertexPositionComponentMappedRange += vertexPositionComponents.count();
-					vertexPositionIndexMappedRange += vertexPositionIndices.count();
-					vertexNormalComponentMappedRange += vertexNormalComponents.count();
-					vertexNormalIndexMappedRange += vertexNormalIndices.count();
-					vertexTextureCoordinateComponentMappedRange += vertexTextureCoordinateComponents.count();
-					vertexTextureCoordinateIndexMappedRange += vertexTextureCoordinateIndices.count();
-					vertexTangentComponentMappedRange += vertexTangentComponents.count();
-				}
+				std::copy(sceneVertexBuffer.begin(), sceneVertexBuffer.end(), vertexMappedRange);
 
 				vertexStagingBuffer->unmap();
 
-				BufferDescriptor vertexBufferDescriptor{};
-				vertexBufferDescriptor.size = vertexStagingBuffer->getSize();
-				vertexBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
-				vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-				vertexBufferDescriptor.persistent = false;
-
-				SET_DEBUG_NAME(vertexBufferDescriptor, "Vertex");
-
-				vertexBuffer = createBuffer<uint8>(vertexBufferDescriptor);
-
-				BufferCopyRegion vertexBufferCopyRegion{};
-				vertexBufferCopyRegion.sourceOffset = 0;
-				vertexBufferCopyRegion.destinationOffset = 0;
-				vertexBufferCopyRegion.size = vertexBuffer->getSize();
-
-				CommandBufferDescriptor commandBufferDescriptor{};
-				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-				SET_DEBUG_NAME(commandBufferDescriptor, "Write vertex buffer");
+				vertexBuffer = createBuffer<uint8>({
+					.size = vertexStagingBuffer->getSize(),
+					.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
+					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+					.persistent = false,
+					#if defined(BUILD_MODE_DEBUG)
+						.name = "Vertex",
+					#endif
+				});
 
 				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
-				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder(commandBufferDescriptor);
+				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
+					.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
+					#if defined(BUILD_MODE_DEBUG)
+						.name = "Copy vertex buffer",
+					#endif
+				});
 
 				commandEncoder->begin();
-				commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, {vertexBufferCopyRegion});
+				commandEncoder->copyBufferToBuffer(
+					vertexStagingBuffer,
+					vertexBuffer,
+					{
+						{
+							.sourceOffset = 0,
+							.destinationOffset = 0,
+							.size = vertexBuffer->getSize(),
+						},
+					}
+				);
 
 				queue->submit({commandEncoder->end()});
 				queue->waitIdle();
 
-				updateDescriptorSets(vertexPositionComponentBufferSize, vertexPositionIndexBufferSize, vertexNormalComponentBufferSize, vertexNormalIndexBufferSize, vertexTextureCoordinateComponentBufferSize, vertexTextureCoordinateIndexBufferSize, vertexTangentComponentBufferSize);
+				updateDescriptorSets();
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
@@ -332,367 +279,108 @@ namespace Trident {
 			}
 
 			ref<ImageView> createColorImageView() const {
-				ImageViewDescriptor colorImageView{};
-				colorImageView.mipLevelOffset = 0;
-				colorImageView.mipLevelCount = 1;
-				colorImageView.layerOffset = 0;
-				colorImageView.layerCount = 1;
-
-				SET_DEBUG_NAME(colorImageView, "Color (multisampled)");
-
-				return colorImage->createView(colorImageView);
+				return colorImage->createView({
+					.mipLevelOffset = 0,
+					.mipLevelCount = 1,
+					.layerOffset = 0,
+					.layerCount = 1,
+					#if defined(BUILD_MODE_DEBUG)
+						.name = "Color (multisampled)",
+					#endif
+				});
 			}
 
 			ref<ImageView> createDepthStencilImageView() const {
-				ImageViewDescriptor depthStencilImageViewDescriptor{};
-				depthStencilImageViewDescriptor.mipLevelOffset = 0;
-				depthStencilImageViewDescriptor.mipLevelCount = 1;
-				depthStencilImageViewDescriptor.layerOffset = 0;
-				depthStencilImageViewDescriptor.layerCount = 1;
-
-				SET_DEBUG_NAME(depthStencilImageViewDescriptor, "Depth stencil");
-
-				return depthStencilImage->createView(depthStencilImageViewDescriptor);
+				return depthStencilImage->createView({
+					.mipLevelOffset = 0,
+					.mipLevelCount = 1,
+					.layerOffset = 0,
+					.layerCount = 1,
+					#if defined(BUILD_MODE_DEBUG)
+						.name = "Depth stencil",
+					#endif
+				});
 			}
 
 			ref<DescriptorSetLayout> createVertexDescriptorSetLayout() const {
-				DescriptorSetLayoutBinding cameraBinding{};
-				cameraBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-				cameraBinding.descriptorCount = 1;
-				cameraBinding.shaderStages = ShaderStage::VERTEX | ShaderStage::FRAGMENT;
-
-				DescriptorSetLayoutBinding vertexPositionComponentBinding{};
-				vertexPositionComponentBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
-				vertexPositionComponentBinding.descriptorCount = 1;
-				vertexPositionComponentBinding.shaderStages = ShaderStage::VERTEX;
-
-				DescriptorSetLayoutBinding vertexPositionIndexBinding{};
-				vertexPositionIndexBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
-				vertexPositionIndexBinding.descriptorCount = 1;
-				vertexPositionIndexBinding.shaderStages = ShaderStage::VERTEX;
-
-				DescriptorSetLayoutBinding vertexNormalComponentBinding{};
-				vertexNormalComponentBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
-				vertexNormalComponentBinding.descriptorCount = 1;
-				vertexNormalComponentBinding.shaderStages = ShaderStage::VERTEX;
-
-				DescriptorSetLayoutBinding vertexNormalIndexBinding{};
-				vertexNormalIndexBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
-				vertexNormalIndexBinding.descriptorCount = 1;
-				vertexNormalIndexBinding.shaderStages = ShaderStage::VERTEX;
-
-				DescriptorSetLayoutBinding vertexTextureCoordinateComponentBinding{};
-				vertexTextureCoordinateComponentBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
-				vertexTextureCoordinateComponentBinding.descriptorCount = 1;
-				vertexTextureCoordinateComponentBinding.shaderStages = ShaderStage::VERTEX;
-
-				DescriptorSetLayoutBinding vertexTextureCoordinateIndexBinding{};
-				vertexTextureCoordinateIndexBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
-				vertexTextureCoordinateIndexBinding.descriptorCount = 1;
-				vertexTextureCoordinateIndexBinding.shaderStages = ShaderStage::VERTEX;
-
-				DescriptorSetLayoutBinding vertexTangentComponentBinding{};
-				vertexTangentComponentBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
-				vertexTangentComponentBinding.descriptorCount = 1;
-				vertexTangentComponentBinding.shaderStages = ShaderStage::VERTEX;
-
 				return createDescriptorSetLayout({
-					cameraBinding,
-					vertexPositionComponentBinding,
-					vertexPositionIndexBinding,
-					vertexNormalComponentBinding,
-					vertexNormalIndexBinding,
-					vertexTextureCoordinateComponentBinding,
-					vertexTextureCoordinateIndexBinding,
-					vertexTangentComponentBinding,
+					{
+						.descriptorType = DescriptorType::UNIFORM_BUFFER,
+						.descriptorCount = 1,
+						.shaderStages = ShaderStage::VERTEX | ShaderStage::FRAGMENT,
+					},
+					{
+						.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+						.descriptorCount = 1,
+						.shaderStages = ShaderStage::VERTEX,
+					},
+					{
+						.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+						.descriptorCount = 1,
+						.shaderStages = ShaderStage::VERTEX,
+					},
+					{
+						.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+						.descriptorCount = 1,
+						.shaderStages = ShaderStage::VERTEX,
+					},
+					{
+						.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+						.descriptorCount = 1,
+						.shaderStages = ShaderStage::VERTEX,
+					},
+					{
+						.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+						.descriptorCount = 1,
+						.shaderStages = ShaderStage::VERTEX,
+					},
+					{
+						.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+						.descriptorCount = 1,
+						.shaderStages = ShaderStage::VERTEX,
+					},
+					{
+						.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+						.descriptorCount = 1,
+						.shaderStages = ShaderStage::VERTEX,
+					},
 				});
 			}
 
 			ref<Buffer<Instance>> createInstanceBuffer() const {
-				BufferDescriptor instanceBufferDescriptor{};
-				instanceBufferDescriptor.size = sizeof(Instance) * scene->getInstanceCount();
-				instanceBufferDescriptor.usage = BufferUsage::VERTEX;
-				instanceBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-				instanceBufferDescriptor.persistent = true;
-
-				SET_DEBUG_NAME(instanceBufferDescriptor, "Instance");
-
-				return createBuffer<Instance>(instanceBufferDescriptor);
-			}
-
-			void createMaterialObjects() {
-				// TODO: Use a larger extent, e.g. 4096 * 4096 * 1.
-				static constexpr Extent3D IMAGE_EXTENT = {1024, 1024, 1};
-
-				const view<Material> materials = scene->getMaterials();
-
-				// Each material has N bindings. 1 image asset is specified per binding for each material reference.
-				sequence<sequence<sequence<ref<ImageAsset>>>> materialImageAssets(materials.count());
-
-				materialDescriptorSetLayouts = sequence<ref<DescriptorSetLayout>>(materials.count());
-				materialDescriptorSets = sequence<ref<DescriptorSet>>(materials.count());
-				materialPipelineLayouts = sequence<ref<PipelineLayout>>(materials.count());
-				materialPipelines = sequence<ref<GraphicsPipeline>>(materials.count());
-				materialImages = sequence<sequence<ref<Image>>>(materials.count());
-
-				PipelineLayoutDescriptor materialPipelineLayoutDescriptor{};
-
-				VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-				instanceInputBinding.registerAttribute<mat4x4<float32>>();
-				instanceInputBinding.registerAttribute<mat3x3<float32>>();
-
-				ShaderModuleDescriptor materialVertexShaderModuleDescriptor{};
-				materialVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-				materialVertexShaderModuleDescriptor.entryPoint = "main";
-
-				SET_DEBUG_NAME(materialVertexShaderModuleDescriptor, "Material vertex");
-
-				ShaderModuleDescriptor materialFragmentShaderModuleDescriptor{};
-				materialFragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-				materialFragmentShaderModuleDescriptor.entryPoint = "main";
-
-				ColorBlendAttachment colorBlendAttachment{};
-				colorBlendAttachment.blend = false;
-
-				GraphicsPipelineDescriptor materialPipelineDescriptor{};
-				materialPipelineDescriptor.vertexInputBindings = {instanceInputBinding};
-				materialPipelineDescriptor.vertexShaderModule = loadInternalShaderModule(materialVertexShaderModuleDescriptor, "Forward/Forward.vert");
-				materialPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-				materialPipelineDescriptor.polygonMode = PolygonMode::FILL;
-				materialPipelineDescriptor.cullMode = CullMode::NONE;
-				materialPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-				materialPipelineDescriptor.lineWidth = 1.0f;
-				materialPipelineDescriptor.minSampleShading = 0.0f;
-				materialPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-				materialPipelineDescriptor.depthStencilState.depthTest = true;
-				materialPipelineDescriptor.depthStencilState.depthWrite = true;
-				materialPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::LESS;
-				materialPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-				materialPipelineDescriptor.renderPass = renderPass;
-				materialPipelineDescriptor.subpassIndex = 0;
-
-				ImageDescriptor materialDescriptorSetLayoutBindingImageDescriptor{};
-				materialDescriptorSetLayoutBindingImageDescriptor.type = ImageType::TEXTURE_2D;
-				materialDescriptorSetLayoutBindingImageDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
-				materialDescriptorSetLayoutBindingImageDescriptor.extent = IMAGE_EXTENT;
-				materialDescriptorSetLayoutBindingImageDescriptor.mipLevelCount = 1;
-				materialDescriptorSetLayoutBindingImageDescriptor.sampleCount = 1;
-				materialDescriptorSetLayoutBindingImageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
-				materialDescriptorSetLayoutBindingImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
-
-				#if defined(BUILD_MODE_DEBUG)
-					sequence<char8> name;
-				#endif
-
-				uint32 materialIndex = 0;
-				uint32 bindingIndex = 0;
-				uint32 materialBindingCount = 0;
-				uint32 materialReferenceIndex = 0;
-				uint32 imageCopyRegionCount = 0;
-				uint64 imageStagingBufferSize = 0;
-
-				while (materialIndex < materials.count()) {
-					const Material& material = materials[materialIndex];
-					const view<MaterialReference> materialReferences = scene->getMaterialReferences(materialIndex);
-
+				return createBuffer<Instance>({
+					.size = scene->getInstanceCount() * sizeof(Instance),
+					.usage = BufferUsage::VERTEX,
+					.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
+					.persistent = true,
 					#if defined(BUILD_MODE_DEBUG)
-						name = Logger::format("Material [] fragment", materialIndex);
-
-						SET_DEBUG_NAME(materialFragmentShaderModuleDescriptor, name);
-
-						name = Logger::format("Material []", materialIndex);
-
-						SET_DEBUG_NAME(materialPipelineLayoutDescriptor, name);
-						SET_DEBUG_NAME(materialPipelineDescriptor, name);
+						.name = "Instance",
 					#endif
-
-					materialDescriptorSetLayouts[materialIndex] = createDescriptorSetLayout(material.descriptorSetLayoutBindings);
-
-					materialPipelineLayoutDescriptor.descriptorSetLayouts = {vertexDescriptorSetLayout, materialDescriptorSetLayouts[materialIndex]};
-
-					materialPipelineLayouts[materialIndex] = createPipelineLayout(materialPipelineLayoutDescriptor);
-
-					materialPipelineDescriptor.pipelineLayout = materialPipelineLayouts[materialIndex];
-					materialPipelineDescriptor.fragmentShaderModule = loadInternalShaderModule(materialFragmentShaderModuleDescriptor, material.shaderModulePath);
-
-					materialPipelines[materialIndex] = createGraphicsPipeline(materialPipelineDescriptor);
-
-					materialImageAssets[materialIndex] = sequence<sequence<ref<ImageAsset>>>(material.descriptorSetLayoutBindings.count());
-					materialImages[materialIndex] = sequence<ref<Image>>(material.descriptorSetLayoutBindings.count());
-
-					bindingIndex = 0;
-
-					while (bindingIndex < material.descriptorSetLayoutBindings.count()) {
-						const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = material.descriptorSetLayoutBindings[bindingIndex];
-
-						DEBUG_ASSERT(descriptorSetLayoutBinding.descriptorType == DescriptorType::COMBINED_IMAGE_SAMPLER);
-						DEBUG_ASSERT(descriptorSetLayoutBinding.shaderStages == ShaderStage::FRAGMENT);
-
-						materialDescriptorSetLayoutBindingImageDescriptor.layerCount = descriptorSetLayoutBinding.descriptorCount;
-
-						#if defined(BUILD_MODE_DEBUG)
-							name = Logger::format("Material [], binding []", materialIndex, bindingIndex);
-
-							SET_DEBUG_NAME(materialDescriptorSetLayoutBindingImageDescriptor, name);
-						#endif
-
-						materialImages[materialIndex][bindingIndex] = createImage(materialDescriptorSetLayoutBindingImageDescriptor);
-						materialImageAssets[materialIndex][bindingIndex] = sequence<ref<ImageAsset>>(materialReferences.count());
-
-						materialReferenceIndex = 0;
-
-						while (materialReferenceIndex < materialReferences.count()) {
-							const MaterialReference& materialReference = materialReferences[materialReferenceIndex];
-							const ref<ImageAsset> imageAsset = getLayer()->getApplication()->getAssetLibrary()->getAsset<ImageAsset>(materialReference.descriptorImageAssetPaths[bindingIndex]);
-
-							materialImageAssets[materialIndex][bindingIndex][materialReferenceIndex] = imageAsset;
-
-							imageStagingBufferSize += imageAsset->getExtent().width * imageAsset->getExtent().height * imageAsset->getExtent().depth * imageAsset->getLayerCount() * 4;
-
-							imageCopyRegionCount += 1;
-							materialReferenceIndex += 1;
-						}
-
-						bindingIndex += 1;
-						materialBindingCount += 1;
-					}
-
-					materialIndex += 1;
-				}
-
-				materialDescriptorSets = getDevice()->allocateDescriptorSets(materialDescriptorSetLayouts);
-
-				const ref<Buffer<uint8>> imageStagingBuffer = createStagingBuffer<uint8>(imageStagingBufferSize);
-
-				uint8* imageMappedRange = imageStagingBuffer->map(0, imageStagingBuffer->getSize());
-				uint64 imageMappedRangeOffset = 0;
-				uint32 materialReferenceBindingImageIndex = 0;
-
-				materialReferenceBindingImageViews = sequence<ref<ImageView>>(imageCopyRegionCount);
-
-				sequence<BufferImageCopyRegion> imageCopyRegions(imageCopyRegionCount);
-				sequence<DescriptorImage> descriptorImages(imageCopyRegionCount);
-				sequence<WriteDescriptorSet> writeDescriptorSets(materialBindingCount);
-
-				materialIndex = 0;
-				materialBindingCount = 0;
-
-				ImageViewDescriptor materialReferenceBindingImageViewDescriptor{};
-				materialReferenceBindingImageViewDescriptor.mipLevelOffset = 0;
-				materialReferenceBindingImageViewDescriptor.mipLevelCount = 1;
-				materialReferenceBindingImageViewDescriptor.layerCount = 1;
-
-				CommandBufferDescriptor commandBufferDescriptor{};
-				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-				SET_DEBUG_NAME(commandBufferDescriptor, "Write layered images");
-
-				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
-				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder(commandBufferDescriptor);
-
-				commandEncoder->begin();
-
-				while (materialIndex < materials.count()) {
-					const Material& material = materials[materialIndex];
-					const view<MaterialReference> materialReferences = scene->getMaterialReferences(materialIndex);
-
-					bindingIndex = 0;
-
-					while (bindingIndex < material.descriptorSetLayoutBindings.count()) {
-						const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = material.descriptorSetLayoutBindings[bindingIndex];
-						const ref<Image> image = materialImages[materialIndex][bindingIndex];
-						const view<DescriptorImage> bindingDescriptorImages(&descriptorImages[materialReferenceBindingImageIndex], materialReferences.count());
-
-						sequence<BufferImageCopyRegion> imageCopyRegions(materialReferences.count());
-
-						materialReferenceIndex = 0;
-
-						while (materialReferenceIndex < materialReferences.count()) {
-							const ref<ImageAsset> imageAsset = materialImageAssets[materialIndex][bindingIndex][materialReferenceIndex];
-
-							DEBUG_ASSERT(imageAsset->getFormat() == ImageFormat::R8G8B8_UNORM);
-
-							sequence<uint8> data(imageAsset->getExtent().width * imageAsset->getExtent().height * imageAsset->getExtent().depth * imageAsset->getLayerCount() * 4);
-
-							convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(imageAsset->getData(), &data[0], data.count());
-
-							std::copy(data.begin(), data.end(), &imageMappedRange[imageMappedRangeOffset]);
-
-							BufferImageCopyRegion& imageCopyRegion = imageCopyRegions[materialReferenceIndex];
-							imageCopyRegion.bufferOffset = imageMappedRangeOffset;
-							imageCopyRegion.imageOffsetX = 0;
-							imageCopyRegion.imageOffsetY = 0;
-							imageCopyRegion.imageOffsetZ = 0;
-							imageCopyRegion.imageExtent = imageAsset->getExtent();
-							imageCopyRegion.imageMipLevel = 0;
-							imageCopyRegion.imageLayerOffset = materialReferenceIndex;
-							imageCopyRegion.imageLayerCount = 1;
-
-							materialReferenceBindingImageViewDescriptor.layerOffset = materialReferenceIndex;
-
-							#if defined(BUILD_MODE_DEBUG)
-								name = Logger::format("Material [], binding [], reference []", materialIndex, bindingIndex, materialReferenceIndex);
-
-								SET_DEBUG_NAME(materialReferenceBindingImageViewDescriptor, name);
-							#endif
-
-							materialReferenceBindingImageViews[materialReferenceBindingImageIndex] = image->createView(materialReferenceBindingImageViewDescriptor);
-
-							DescriptorImage& descriptorImage = descriptorImages[materialReferenceBindingImageIndex];
-							descriptorImage.imageView = materialReferenceBindingImageViews[materialReferenceBindingImageIndex];
-							descriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
-							descriptorImage.sampler = imageSampler;
-
-							imageMappedRangeOffset += data.count();
-							materialReferenceIndex += 1;
-							materialReferenceBindingImageIndex += 1;
-						}
-
-						WriteDescriptorSet& writeDescriptorSet = writeDescriptorSets[bindingIndex];
-						writeDescriptorSet.descriptorSet = materialDescriptorSets[materialIndex];
-						writeDescriptorSet.bindingIndex = bindingIndex;
-						writeDescriptorSet.descriptorImages = bindingDescriptorImages;
-
-						commandEncoder->setImageMemoryBarrier(image, ImageLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
-						commandEncoder->copyBufferToImage(imageStagingBuffer, image, imageCopyRegions);
-						commandEncoder->setImageMemoryBarrier(image, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
-
-						bindingIndex += 1;
-						materialBindingCount += 1;
-					}
-
-					materialIndex += 1;
-				}
-
-				imageStagingBuffer->unmap();
-
-				queue->submit({commandEncoder->end()});
-				queue->waitIdle();
-
-				getDevice()->updateDescriptorSets(writeDescriptorSets);
+				});
 			}
+
+			void createMaterialObjects();
 
 			ref<Buffer<Camera>> createCameraBuffer() const {
-				BufferDescriptor cameraBufferDescriptor{};
-				cameraBufferDescriptor.size = sizeof(Camera);
-				cameraBufferDescriptor.usage = BufferUsage::UNIFORM;
-				cameraBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-				cameraBufferDescriptor.persistent = true;
-
-				SET_DEBUG_NAME(cameraBufferDescriptor, "Camera");
-
-				return createBuffer<Camera>(cameraBufferDescriptor);
+				return createBuffer<Camera>({
+					.size = sizeof(Camera),
+					.usage = BufferUsage::UNIFORM,
+					.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
+					.persistent = true,
+					#if defined(BUILD_MODE_DEBUG)
+						.name = "Camera",
+					#endif
+				});
 			}
 
 			ref<Sampler> createImageSampler() const {
-				SamplerDescriptor samplerDescriptor{};
-				samplerDescriptor.magFilter = SamplerFilter::LINEAR;
-				samplerDescriptor.minFilter = SamplerFilter::LINEAR;
-
-				return createSampler(samplerDescriptor);
+				return createSampler({
+					.magFilter = SamplerFilter::LINEAR,
+					.minFilter = SamplerFilter::LINEAR,
+				});
 			}
 
-			void updateDescriptorSets(uint64 vertexPositionComponentBufferSize, uint64 vertexPositionIndexBufferSize, uint64 vertexNormalComponentBufferSize, uint64 vertexNormalIndexBufferSize, uint64 vertexTextureCoordinateComponentBufferSize, uint64 vertexTextureCoordinateIndexBufferSize, uint64 vertexTangentComponentBufferSize) const {
+			void updateDescriptorSets() const {
 				DescriptorBuffer cameraDescriptorBuffer{};
 				cameraDescriptorBuffer.buffer = cameraBuffer;
 				cameraDescriptorBuffer.offset = 0;
@@ -701,37 +389,37 @@ namespace Trident {
 				DescriptorBuffer vertexPositionComponentDescriptorBuffer{};
 				vertexPositionComponentDescriptorBuffer.buffer = vertexBuffer;
 				vertexPositionComponentDescriptorBuffer.offset = 0;
-				vertexPositionComponentDescriptorBuffer.size = vertexPositionComponentBufferSize;
+				vertexPositionComponentDescriptorBuffer.size = scene->getVertexPositionComponentBufferSize();
 
 				DescriptorBuffer vertexPositionIndexDescriptorBuffer{};
 				vertexPositionIndexDescriptorBuffer.buffer = vertexBuffer;
-				vertexPositionIndexDescriptorBuffer.offset = vertexPositionComponentBufferSize;
-				vertexPositionIndexDescriptorBuffer.size = vertexPositionIndexBufferSize;
+				vertexPositionIndexDescriptorBuffer.offset = scene->getVertexPositionComponentBufferSize();
+				vertexPositionIndexDescriptorBuffer.size = scene->getVertexPositionIndexBufferSize();
 
 				DescriptorBuffer vertexNormalComponentDescriptorBuffer{};
 				vertexNormalComponentDescriptorBuffer.buffer = vertexBuffer;
-				vertexNormalComponentDescriptorBuffer.offset = vertexPositionComponentBufferSize + vertexPositionIndexBufferSize;
-				vertexNormalComponentDescriptorBuffer.size = vertexNormalComponentBufferSize;
+				vertexNormalComponentDescriptorBuffer.offset = scene->getVertexPositionComponentBufferSize() + scene->getVertexPositionIndexBufferSize();
+				vertexNormalComponentDescriptorBuffer.size = scene->getVertexNormalComponentBufferSize();
 
 				DescriptorBuffer vertexNormalIndexDescriptorBuffer{};
 				vertexNormalIndexDescriptorBuffer.buffer = vertexBuffer;
-				vertexNormalIndexDescriptorBuffer.offset = vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize;
-				vertexNormalIndexDescriptorBuffer.size = vertexNormalIndexBufferSize;
+				vertexNormalIndexDescriptorBuffer.offset = scene->getVertexPositionComponentBufferSize() + scene->getVertexPositionIndexBufferSize() + scene->getVertexNormalComponentBufferSize();
+				vertexNormalIndexDescriptorBuffer.size = scene->getVertexNormalIndexBufferSize();
 
 				DescriptorBuffer vertexTextureCoordinateComponentDescriptorBuffer{};
 				vertexTextureCoordinateComponentDescriptorBuffer.buffer = vertexBuffer;
-				vertexTextureCoordinateComponentDescriptorBuffer.offset = vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize + vertexNormalIndexBufferSize;
-				vertexTextureCoordinateComponentDescriptorBuffer.size = vertexTextureCoordinateComponentBufferSize;
+				vertexTextureCoordinateComponentDescriptorBuffer.offset = scene->getVertexPositionComponentBufferSize() + scene->getVertexPositionIndexBufferSize() + scene->getVertexNormalComponentBufferSize() + scene->getVertexNormalIndexBufferSize();
+				vertexTextureCoordinateComponentDescriptorBuffer.size = scene->getVertexTextureCoordinateComponentBufferSize();
 
 				DescriptorBuffer vertexTextureCoordinateIndexDescriptorBuffer{};
 				vertexTextureCoordinateIndexDescriptorBuffer.buffer = vertexBuffer;
-				vertexTextureCoordinateIndexDescriptorBuffer.offset = vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize + vertexNormalIndexBufferSize + vertexTextureCoordinateComponentBufferSize;
-				vertexTextureCoordinateIndexDescriptorBuffer.size = vertexTextureCoordinateIndexBufferSize;
+				vertexTextureCoordinateIndexDescriptorBuffer.offset = scene->getVertexPositionComponentBufferSize() + scene->getVertexPositionIndexBufferSize() + scene->getVertexNormalComponentBufferSize() + scene->getVertexNormalIndexBufferSize() + scene->getVertexTextureCoordinateComponentBufferSize();
+				vertexTextureCoordinateIndexDescriptorBuffer.size = scene->getVertexTextureCoordinateIndexBufferSize();
 
 				DescriptorBuffer vertexTangentComponentDescriptorBuffer{};
 				vertexTangentComponentDescriptorBuffer.buffer = vertexBuffer;
-				vertexTangentComponentDescriptorBuffer.offset = vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize + vertexNormalIndexBufferSize + vertexTextureCoordinateComponentBufferSize + vertexTextureCoordinateIndexBufferSize;
-				vertexTangentComponentDescriptorBuffer.size = vertexTangentComponentBufferSize;
+				vertexTangentComponentDescriptorBuffer.offset = scene->getVertexPositionComponentBufferSize() + scene->getVertexPositionIndexBufferSize() + scene->getVertexNormalComponentBufferSize() + scene->getVertexNormalIndexBufferSize() + scene->getVertexTextureCoordinateComponentBufferSize() + scene->getVertexTextureCoordinateIndexBufferSize();
+				vertexTangentComponentDescriptorBuffer.size = scene->getVertexTangentComponentBufferSize();
 
 				WriteDescriptorSet cameraWriteDescriptorSet{};
 				cameraWriteDescriptorSet.descriptorSet = vertexDescriptorSet;
