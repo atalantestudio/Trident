@@ -16,7 +16,22 @@ namespace Trident {
 			{}
 
 			void execute() const final override {
-				glViewport(x, y, width, height);
+				GLint viewportX = x;
+				GLsizei viewportWidth = width;
+				GLint viewportY = y;
+				GLsizei viewportHeight = height;
+
+				if (width < 0.0f) {
+					viewportX += width;
+					viewportWidth = -width;
+				}
+
+				if (height < 0.0f) {
+					viewportY += height;
+					viewportHeight = -height;
+				}
+
+				glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
 			}
 
 		private:

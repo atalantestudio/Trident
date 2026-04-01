@@ -346,12 +346,9 @@ namespace Trident {
 
 		_commandEncoder->commands.emplace_back(createRef<GL::SetViewportCommand>(
 			static_cast<GLint>(origin[0]),
-
-			// TODO: Allow the origin's Y to be flipped, like in Vulkan?
-			0,
-
-			static_cast<GLsizei>(abs(size[0])),
-			static_cast<GLsizei>(abs(size[1]))
+			static_cast<GLint>(origin[1]),
+			static_cast<GLsizei>(size[0]),
+			static_cast<GLsizei>(size[1])
 		));
 	}
 }
