@@ -9,29 +9,34 @@ namespace Trident {
 	ref<Image> VisibilityRenderer::createOutputImage() const {
 		const Extent2D extent = getSwapchain()->getExtent();
 
-		AttachmentImageDescriptor outputAttachmentImageDescriptor{};
-		outputAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
-		outputAttachmentImageDescriptor.extent.width = extent.width;
-		outputAttachmentImageDescriptor.extent.height = extent.height;
-		outputAttachmentImageDescriptor.extent.depth = 1;
-		outputAttachmentImageDescriptor.mipLevelCount = 1;
-		outputAttachmentImageDescriptor.layerCount = 1;
-		outputAttachmentImageDescriptor.additionalUsage = ImageUsage::STORAGE;
-
-		SET_DEBUG_NAME(outputAttachmentImageDescriptor, "Output");
-
-		return visibilityRenderPass->createColorAttachmentImage(outputAttachmentImageDescriptor, 1);
+		return visibilityRenderPass->createColorAttachmentImage(
+			{
+				.type = ImageType::TEXTURE_2D,
+				.extent = {
+					.width = extent.width,
+					.height = extent.height,
+					.depth = 1,
+				},
+				.mipLevelCount = 1,
+				.layerCount = 1,
+				.additionalUsage = ImageUsage::STORAGE,
+				#if defined(BUILD_MODE_DEBUG)
+					.name = "Output",
+				#endif
+			},
+			1
+		);
 	}
 
 	ref<ImageView> VisibilityRenderer::createOutputImageView() {
-		ImageViewDescriptor outputImageViewDescriptor{};
-		outputImageViewDescriptor.mipLevelOffset = 0;
-		outputImageViewDescriptor.mipLevelCount = 1;
-		outputImageViewDescriptor.layerOffset = 0;
-		outputImageViewDescriptor.layerCount = 1;
-
-		SET_DEBUG_NAME(outputImageViewDescriptor, "Output");
-
-		return outputImage->createView(outputImageViewDescriptor);
+		return outputImage->createView({
+			.mipLevelOffset = 0,
+			.mipLevelCount = 1,
+			.layerOffset = 0,
+			.layerCount = 1,
+			#if defined(BUILD_MODE_DEBUG)
+				.name = "Output",
+			#endif
+		});
 	}
 }

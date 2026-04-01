@@ -86,14 +86,8 @@ namespace Trident {
 
 			ref<Buffer<DrawIndirectCommand>> createVisibilityIndirectBuffer() const;
 			ref<Buffer<Camera>> createCameraBuffer() const;
-			void createVertexPositionComponentBuffer();
-			void createVertexNormalComponentBuffer();
-			void createVertexTextureCoordinateComponentBuffer();
-			void createVertexPositionIndexBuffer();
-			void createVertexNormalIndexBuffer();
-			void createVertexTextureCoordinateIndexBuffer();
-			void createClusterBuffer();
-			void createInstanceBuffer();
+			ref<Buffer<uint8>> createDataBuffer() const;
+			ref<Buffer<ClusteredInstance>> createInstanceBuffer() const;
 			void createGeometryBuffer();
 			ref<Buffer<uint32>> createMaterialCountBuffer() const;
 			ref<Buffer<uint32>> createMaterialOffsetBuffer() const;
@@ -113,16 +107,9 @@ namespace Trident {
 			void allocateDescriptorSets();
 
 			void fillSceneBuffers() const;
-			void fillVertexPositionComponentBuffer(float32* mappedRange) const;
-			void fillVertexNormalComponentBuffer(float32* mappedRange) const;
-			void fillVertexTextureCoordinateComponentBuffer(float32* mappedRange) const;
-			void fillVertexPositionIndexBuffer(uint32* mappedRange) const;
-			void fillVertexNormalIndexBuffer(uint32* mappedRange) const;
-			void fillVertexTextureCoordinateIndexBuffer(uint32* mappedRange) const;
-			void fillClusterBuffer(Cluster* mappedRange) const;
-			void fillInstanceBuffer(ClusteredInstance* mappedRange) const;
-			void fillGeometryBuffer(Geometry* mappedRange) const;
 
+			void writeVisibilityIndirectCommand() const;
+			void updateDataRegionSizes();
 			void updateBufferDescriptorSets();
 			void updateDebugInputAttachmentDescriptorSets();
 
@@ -175,15 +162,19 @@ namespace Trident {
 
 			ref<Buffer<DrawIndirectCommand>> visibilityIndirectBuffer;
 			ref<Buffer<Camera>> cameraBuffer;
-			ref<Buffer<float32>> vertexPositionComponentBuffer;
-			ref<Buffer<float32>> vertexNormalComponentBuffer;
-			ref<Buffer<float32>> vertexTextureCoordinateComponentBuffer;
-			ref<Buffer<uint32>> vertexPositionIndexBuffer;
-			ref<Buffer<uint32>> vertexNormalIndexBuffer;
-			ref<Buffer<uint32>> vertexTextureCoordinateIndexBuffer;
-			ref<Buffer<Cluster>> clusterBuffer;
+
+			// TODO
+			// Contents:
+			// - Vertex position components
+			// - Vertex normal components
+			// - Vertex texture coordinate components
+			// - Vertex position indices
+			// - Vertex normal indices
+			// - Vertex texture coordinate indices
+			// - Clusters
+			// - Geometries
+			ref<Buffer<uint8>> dataBuffer;
 			ref<Buffer<ClusteredInstance>> instanceBuffer;
-			ref<Buffer<Geometry>> geometryBuffer;
 
 			// Number of pixels used per material.
 			ref<Buffer<uint32>> materialCountBuffer;
@@ -209,6 +200,15 @@ namespace Trident {
 			ref<ImageView> depthStencilImageView;
 
 			ref<Sampler> materialImageSampler;
+
+			uint64 vertexPositionComponentRegionSize;
+			uint64 vertexNormalComponentRegionSize;
+			uint64 vertexTextureCoordinateComponentRegionSize;
+			uint64 vertexPositionIndexRegionSize;
+			uint64 vertexNormalIndexRegionSize;
+			uint64 vertexTextureCoordinateIndexRegionSize;
+			uint64 clusterRegionSize;
+			uint64 geometryRegionSize;
 
 			Camera* cameraMappedRange;
 			ClusteredInstance* instanceMappedRange;

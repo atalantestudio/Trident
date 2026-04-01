@@ -7,10 +7,12 @@
 #include "Engine/Renderer/Visibility/CameraBuffer.hpp"
 #include "Engine/Renderer/Visibility/CameraDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Visibility/ClusterDescriptorSetLayout.hpp"
+#include "Engine/Renderer/Visibility/DataBuffer.hpp"
 #include "Engine/Renderer/Visibility/DebugDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Visibility/DebugPipeline.hpp"
 #include "Engine/Renderer/Visibility/DebugPipelineLayout.hpp"
 #include "Engine/Renderer/Visibility/DepthStencilImage.hpp"
+#include "Engine/Renderer/Visibility/InstanceBuffer.hpp"
 #include "Engine/Renderer/Visibility/InstanceDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Visibility/MaterialBaseDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Visibility/MaterialCoordinateBuffer.hpp"
@@ -86,18 +88,19 @@ namespace Trident {
 	}
 
 	void VisibilityRenderer::postSetScene() {
-		createVertexPositionComponentBuffer();
-		createVertexNormalComponentBuffer();
-		createVertexTextureCoordinateComponentBuffer();
-		createVertexPositionIndexBuffer();
-		createVertexNormalIndexBuffer();
-		createVertexTextureCoordinateIndexBuffer();
-		createClusterBuffer();
-		createInstanceBuffer();
-		createGeometryBuffer();
+		updateDataRegionSizes();
+
+		dataBuffer = createDataBuffer();
+		instanceBuffer = createInstanceBuffer();
 		materialCountBuffer = createMaterialCountBuffer();
 		materialOffsetBuffer = createMaterialOffsetBuffer();
 		materialIndirectBuffer = createMaterialIndirectBuffer();
+
+		instanceMappedRange = instanceBuffer->map(0, instanceBuffer->getSize());
+
+		writeVisibilityIndirectCommand();
+
+		visibilityIndirectBuffer->unmap();
 
 		fillSceneBuffers();
 
@@ -265,126 +268,6 @@ namespace Trident {
 		eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
 	}
 
-	void VisibilityRenderer::createVertexPositionComponentBuffer() {
-		DEBUG_ASSERT(scene != nullptr);
-
-		BufferDescriptor vertexPositionComponentBufferDescriptor{};
-		vertexPositionComponentBufferDescriptor.size = scene->vertexPositionComponents.count() * sizeof(float32);
-		vertexPositionComponentBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
-		vertexPositionComponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-		SET_DEBUG_NAME(vertexPositionComponentBufferDescriptor, "Vertex position component");
-
-		vertexPositionComponentBuffer = createBuffer<float32>(vertexPositionComponentBufferDescriptor);
-	}
-
-	void VisibilityRenderer::createVertexNormalComponentBuffer() {
-		DEBUG_ASSERT(scene != nullptr);
-
-		BufferDescriptor vertexNormalComponentBufferDescriptor{};
-		vertexNormalComponentBufferDescriptor.size = scene->vertexNormalComponents.count() * sizeof(float32);
-		vertexNormalComponentBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
-		vertexNormalComponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-		SET_DEBUG_NAME(vertexNormalComponentBufferDescriptor, "Vertex normal component");
-
-		vertexNormalComponentBuffer = createBuffer<float32>(vertexNormalComponentBufferDescriptor);
-	}
-
-	void VisibilityRenderer::createVertexTextureCoordinateComponentBuffer() {
-		DEBUG_ASSERT(scene != nullptr);
-
-		BufferDescriptor vertexTextureCoordinateComponentBufferDescriptor{};
-		vertexTextureCoordinateComponentBufferDescriptor.size = scene->vertexTextureCoordinateComponents.count() * sizeof(float32);
-		vertexTextureCoordinateComponentBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
-		vertexTextureCoordinateComponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-		SET_DEBUG_NAME(vertexTextureCoordinateComponentBufferDescriptor, "Vertex texture coordinate component");
-
-		vertexTextureCoordinateComponentBuffer = createBuffer<float32>(vertexTextureCoordinateComponentBufferDescriptor);
-	}
-
-	void VisibilityRenderer::createVertexPositionIndexBuffer() {
-		DEBUG_ASSERT(scene != nullptr);
-
-		BufferDescriptor vertexPositionIndexBufferDescriptor{};
-		vertexPositionIndexBufferDescriptor.size = scene->vertexPositionIndices.count() * sizeof(uint32);
-		vertexPositionIndexBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
-		vertexPositionIndexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-		SET_DEBUG_NAME(vertexPositionIndexBufferDescriptor, "Vertex position index");
-
-		vertexPositionIndexBuffer = createBuffer<uint32>(vertexPositionIndexBufferDescriptor);
-	}
-
-	void VisibilityRenderer::createVertexNormalIndexBuffer() {
-		DEBUG_ASSERT(scene != nullptr);
-
-		BufferDescriptor vertexNormalIndexBufferDescriptor{};
-		vertexNormalIndexBufferDescriptor.size = scene->vertexNormalIndices.count() * sizeof(uint32);
-		vertexNormalIndexBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
-		vertexNormalIndexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-		SET_DEBUG_NAME(vertexNormalIndexBufferDescriptor, "Vertex normal index");
-
-		vertexNormalIndexBuffer = createBuffer<uint32>(vertexNormalIndexBufferDescriptor);
-	}
-
-	void VisibilityRenderer::createVertexTextureCoordinateIndexBuffer() {
-		DEBUG_ASSERT(scene != nullptr);
-
-		BufferDescriptor vertexTextureCoordinateIndexBufferDescriptor{};
-		vertexTextureCoordinateIndexBufferDescriptor.size = scene->vertexTextureCoordinateIndices.count() * sizeof(uint32);
-		vertexTextureCoordinateIndexBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
-		vertexTextureCoordinateIndexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-		SET_DEBUG_NAME(vertexTextureCoordinateIndexBufferDescriptor, "Vertex texture coordinate index");
-
-		vertexTextureCoordinateIndexBuffer = createBuffer<uint32>(vertexTextureCoordinateIndexBufferDescriptor);
-	}
-
-	void VisibilityRenderer::createClusterBuffer() {
-		DEBUG_ASSERT(scene != nullptr);
-
-		BufferDescriptor clusterBufferDescriptor{};
-		clusterBufferDescriptor.size = scene->clusters.count() * sizeof(Cluster);
-		clusterBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
-		clusterBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-		SET_DEBUG_NAME(clusterBufferDescriptor, "Cluster");
-
-		clusterBuffer = createBuffer<Cluster>(clusterBufferDescriptor);
-	}
-
-	void VisibilityRenderer::createInstanceBuffer() {
-		DEBUG_ASSERT(scene != nullptr);
-
-		BufferDescriptor instanceBufferDescriptor{};
-		instanceBufferDescriptor.size = scene->instances.count() * sizeof(ClusteredInstance);
-		instanceBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
-		instanceBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-		instanceBufferDescriptor.persistent = true;
-
-		SET_DEBUG_NAME(instanceBufferDescriptor, "Instance");
-
-		instanceBuffer = createBuffer<ClusteredInstance>(instanceBufferDescriptor);
-
-		instanceMappedRange = instanceBuffer->map(0, instanceBuffer->getSize());
-	}
-
-	void VisibilityRenderer::createGeometryBuffer() {
-		DEBUG_ASSERT(scene != nullptr);
-
-		BufferDescriptor geometryBufferDescriptor{};
-		geometryBufferDescriptor.size = scene->geometries.count() * sizeof(Geometry);
-		geometryBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
-		geometryBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-		SET_DEBUG_NAME(geometryBufferDescriptor, "Geometry");
-
-		geometryBuffer = createBuffer<Geometry>(geometryBufferDescriptor);
-	}
-
 	void VisibilityRenderer::allocateDescriptorSets() {
 		const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({
 			cameraDescriptorSetLayout,
@@ -410,148 +293,80 @@ namespace Trident {
 	}
 
 	void VisibilityRenderer::fillSceneBuffers() const {
-		{
-			DrawIndirectCommand* visibilityIndirectMappedRange = visibilityIndirectBuffer->map(0, visibilityIndirectBuffer->getSize());
-			visibilityIndirectMappedRange->vertexCount = CLUSTER_INDEX_COUNT;
-			visibilityIndirectMappedRange->instanceCount = static_cast<uint32>(scene->clusters.count());
-			visibilityIndirectMappedRange->vertexOffset = 0;
-			visibilityIndirectMappedRange->instanceOffset = 0;
-
-			visibilityIndirectBuffer->unmap();
-		}
-
-		const ref<Buffer<uint8>> stagingBuffer = createStagingBuffer<uint8>(
-			vertexPositionComponentBuffer->getSize() +
-			vertexNormalComponentBuffer->getSize() +
-			vertexTextureCoordinateComponentBuffer->getSize() +
-			vertexPositionIndexBuffer->getSize() +
-			vertexNormalIndexBuffer->getSize() +
-			vertexTextureCoordinateIndexBuffer->getSize() +
-			clusterBuffer->getSize() +
-			instanceBuffer->getSize() +
-			geometryBuffer->getSize()
-		);
+		const ref<Buffer<uint8>> stagingBuffer = createStagingBuffer<uint8>(dataBuffer->getSize() + instanceBuffer->getSize());
 
 		uint8* mappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
-		uint64 sourceOffset = 0;
 
-		float32* vertexPositionComponentMappedRange = pointer_cast<float32*>(mappedRange + sourceOffset);
+		std::copy(scene->vertexPositionComponents.begin(), scene->vertexPositionComponents.end(), pointer_cast<float32*>(mappedRange));
+		mappedRange += vertexNormalComponentRegionSize;
 
-		fillVertexPositionComponentBuffer(vertexPositionComponentMappedRange);
+		std::copy(scene->vertexNormalComponents.begin(), scene->vertexNormalComponents.end(), pointer_cast<float32*>(mappedRange));
+		mappedRange += vertexNormalComponentRegionSize;
 
-		BufferCopyRegion vertexPositionComponentBufferCopyRegion{};
-		vertexPositionComponentBufferCopyRegion.sourceOffset = sourceOffset;
-		vertexPositionComponentBufferCopyRegion.destinationOffset = 0;
-		vertexPositionComponentBufferCopyRegion.size = vertexPositionComponentBuffer->getSize();
+		std::copy(scene->vertexTextureCoordinateComponents.begin(), scene->vertexTextureCoordinateComponents.end(), pointer_cast<float32*>(mappedRange));
+		mappedRange += vertexTextureCoordinateComponentRegionSize;
 
-		sourceOffset += vertexPositionComponentBuffer->getSize();
+		std::copy(scene->vertexPositionIndices.begin(), scene->vertexPositionIndices.end(), pointer_cast<uint32*>(mappedRange));
+		mappedRange += vertexPositionIndexRegionSize;
 
-		float32* vertexNormalComponentMappedRange = pointer_cast<float32*>(mappedRange + sourceOffset);
+		std::copy(scene->vertexNormalIndices.begin(), scene->vertexNormalIndices.end(), pointer_cast<uint32*>(mappedRange));
+		mappedRange += vertexNormalIndexRegionSize;
 
-		fillVertexNormalComponentBuffer(vertexNormalComponentMappedRange);
+		std::copy(scene->vertexTextureCoordinateIndices.begin(), scene->vertexTextureCoordinateIndices.end(), pointer_cast<uint32*>(mappedRange));
+		mappedRange += vertexTextureCoordinateIndexRegionSize;
 
-		BufferCopyRegion vertexNormalComponentBufferCopyRegion{};
-		vertexNormalComponentBufferCopyRegion.sourceOffset = sourceOffset;
-		vertexNormalComponentBufferCopyRegion.destinationOffset = 0;
-		vertexNormalComponentBufferCopyRegion.size = vertexNormalComponentBuffer->getSize();
+		std::copy(scene->clusters.begin(), scene->clusters.end(), pointer_cast<Cluster*>(mappedRange));
+		mappedRange += clusterRegionSize;
 
-		sourceOffset += vertexNormalComponentBuffer->getSize();
+		{
+			Geometry* geometryMappedRange = pointer_cast<Geometry*>(mappedRange);
+			uint32 geometryIndex = 0;
 
-		float32* vertexTextureCoordinateComponentMappedRange = pointer_cast<float32*>(mappedRange + sourceOffset);
+			while (geometryIndex < scene->geometries.count()) {
+				geometryMappedRange[geometryIndex].vertexOffset = scene->geometries[geometryIndex].vertexOffset;
+				geometryMappedRange[geometryIndex].clusterCount = scene->geometries[geometryIndex].clusterCount;
 
-		fillVertexTextureCoordinateComponentBuffer(vertexTextureCoordinateComponentMappedRange);
+				geometryIndex += 1;
+			}
 
-		BufferCopyRegion vertexTextureCoordinateComponentBufferCopyRegion{};
-		vertexTextureCoordinateComponentBufferCopyRegion.sourceOffset = sourceOffset;
-		vertexTextureCoordinateComponentBufferCopyRegion.destinationOffset = 0;
-		vertexTextureCoordinateComponentBufferCopyRegion.size = vertexTextureCoordinateComponentBuffer->getSize();
+			mappedRange += geometryRegionSize;
+		}
 
-		sourceOffset += vertexTextureCoordinateComponentBuffer->getSize();
-
-		uint32* vertexPositionIndexMappedRange = pointer_cast<uint32*>(mappedRange + sourceOffset);
-
-		fillVertexPositionIndexBuffer(vertexPositionIndexMappedRange);
-
-		BufferCopyRegion vertexPositionIndexBufferCopyRegion{};
-		vertexPositionIndexBufferCopyRegion.sourceOffset = sourceOffset;
-		vertexPositionIndexBufferCopyRegion.destinationOffset = 0;
-		vertexPositionIndexBufferCopyRegion.size = vertexPositionIndexBuffer->getSize();
-
-		sourceOffset += vertexPositionIndexBuffer->getSize();
-
-		uint32* vertexNormalIndexMappedRange = pointer_cast<uint32*>(mappedRange + sourceOffset);
-
-		fillVertexNormalIndexBuffer(vertexNormalIndexMappedRange);
-
-		BufferCopyRegion vertexNormalIndexBufferCopyRegion{};
-		vertexNormalIndexBufferCopyRegion.sourceOffset = sourceOffset;
-		vertexNormalIndexBufferCopyRegion.destinationOffset = 0;
-		vertexNormalIndexBufferCopyRegion.size = vertexNormalIndexBuffer->getSize();
-
-		sourceOffset += vertexNormalIndexBuffer->getSize();
-
-		uint32* vertexTextureCoordinateIndexMappedRange = pointer_cast<uint32*>(mappedRange + sourceOffset);
-
-		fillVertexTextureCoordinateIndexBuffer(vertexTextureCoordinateIndexMappedRange);
-
-		BufferCopyRegion vertexTextureCoordinateIndexBufferCopyRegion{};
-		vertexTextureCoordinateIndexBufferCopyRegion.sourceOffset = sourceOffset;
-		vertexTextureCoordinateIndexBufferCopyRegion.destinationOffset = 0;
-		vertexTextureCoordinateIndexBufferCopyRegion.size = vertexTextureCoordinateIndexBuffer->getSize();
-
-		sourceOffset += vertexTextureCoordinateIndexBuffer->getSize();
-
-		Cluster* clusterMappedRange = pointer_cast<Cluster*>(mappedRange + sourceOffset);
-
-		fillClusterBuffer(clusterMappedRange);
-
-		BufferCopyRegion clusterBufferCopyRegion{};
-		clusterBufferCopyRegion.sourceOffset = sourceOffset;
-		clusterBufferCopyRegion.destinationOffset = 0;
-		clusterBufferCopyRegion.size = clusterBuffer->getSize();
-
-		sourceOffset += clusterBuffer->getSize();
-
-		ClusteredInstance* instanceMappedRange = pointer_cast<ClusteredInstance*>(mappedRange + sourceOffset);
-
-		fillInstanceBuffer(instanceMappedRange);
-
-		BufferCopyRegion instanceBufferCopyRegion{};
-		instanceBufferCopyRegion.sourceOffset = sourceOffset;
-		instanceBufferCopyRegion.destinationOffset = 0;
-		instanceBufferCopyRegion.size = instanceBuffer->getSize();
-
-		sourceOffset += instanceBuffer->getSize();
-
-		Geometry* geometryMappedRange = pointer_cast<Geometry*>(mappedRange + sourceOffset);
-
-		fillGeometryBuffer(geometryMappedRange);
-
-		BufferCopyRegion geometryBufferCopyRegion{};
-		geometryBufferCopyRegion.sourceOffset = sourceOffset;
-		geometryBufferCopyRegion.destinationOffset = 0;
-		geometryBufferCopyRegion.size = geometryBuffer->getSize();
+		std::copy(scene->instances.begin(), scene->instances.end(), pointer_cast<ClusteredInstance*>(mappedRange));
 
 		stagingBuffer->unmap();
 
-		CommandBufferDescriptor commandBufferDescriptor{};
-		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-		SET_DEBUG_NAME(commandBufferDescriptor, "Buffer copy command encoder");
-
 		const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
-		const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
+		const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder({
+			.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
+			#if defined(BUILD_MODE_DEBUG)
+				.name = "Copy buffers",
+			#endif
+		});
 
 		commandEncoder->begin();
-		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexPositionComponentBuffer, {vertexPositionComponentBufferCopyRegion});
-		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexNormalComponentBuffer, {vertexNormalComponentBufferCopyRegion});
-		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexTextureCoordinateComponentBuffer, {vertexTextureCoordinateComponentBufferCopyRegion});
-		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexPositionIndexBuffer, {vertexPositionIndexBufferCopyRegion});
-		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexNormalIndexBuffer, {vertexNormalIndexBufferCopyRegion});
-		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexTextureCoordinateIndexBuffer, {vertexTextureCoordinateIndexBufferCopyRegion});
-		commandEncoder->copyBufferToBuffer(stagingBuffer, clusterBuffer, {clusterBufferCopyRegion});
-		commandEncoder->copyBufferToBuffer(stagingBuffer, instanceBuffer, {instanceBufferCopyRegion});
-		commandEncoder->copyBufferToBuffer(stagingBuffer, geometryBuffer, {geometryBufferCopyRegion});
+		commandEncoder->copyBufferToBuffer(
+			stagingBuffer,
+			dataBuffer,
+			{
+				{
+					.sourceOffset = 0,
+					.destinationOffset = 0,
+					.size = dataBuffer->getSize(),
+				},
+			}
+		);
+		commandEncoder->copyBufferToBuffer(
+			stagingBuffer,
+			instanceBuffer,
+			{
+				{
+					.sourceOffset = dataBuffer->getSize(),
+					.destinationOffset = 0,
+					.size = instanceBuffer->getSize(),
+				},
+			}
+		);
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -559,114 +374,94 @@ namespace Trident {
 		transferQueue->waitIdle();
 	}
 
-	void VisibilityRenderer::fillVertexPositionComponentBuffer(float32* mappedRange) const {
-		std::copy(scene->vertexPositionComponents.begin(), scene->vertexPositionComponents.end(), mappedRange);
-	}
+	void VisibilityRenderer::writeVisibilityIndirectCommand() const {
+		DrawIndirectCommand* visibilityIndirectMappedRange = visibilityIndirectBuffer->map(0, visibilityIndirectBuffer->getSize());
 
-	void VisibilityRenderer::fillVertexNormalComponentBuffer(float32* mappedRange) const {
-		std::copy(scene->vertexNormalComponents.begin(), scene->vertexNormalComponents.end(), mappedRange);
-	}
-
-	void VisibilityRenderer::fillVertexTextureCoordinateComponentBuffer(float32* mappedRange) const {
-		std::copy(scene->vertexTextureCoordinateComponents.begin(), scene->vertexTextureCoordinateComponents.end(), mappedRange);
-	}
-
-	void VisibilityRenderer::fillVertexPositionIndexBuffer(uint32* mappedRange) const {
-		std::copy(scene->vertexPositionIndices.begin(), scene->vertexPositionIndices.end(), mappedRange);
-	}
-
-	void VisibilityRenderer::fillVertexNormalIndexBuffer(uint32* mappedRange) const {
-		std::copy(scene->vertexNormalIndices.begin(), scene->vertexNormalIndices.end(), mappedRange);
-	}
-
-	void VisibilityRenderer::fillVertexTextureCoordinateIndexBuffer(uint32* mappedRange) const {
-		std::copy(scene->vertexTextureCoordinateIndices.begin(), scene->vertexTextureCoordinateIndices.end(), mappedRange);
-	}
-
-	void VisibilityRenderer::fillClusterBuffer(Cluster* mappedRange) const {
-		std::copy(scene->clusters.begin(), scene->clusters.end(), mappedRange);
-	}
-
-	void VisibilityRenderer::fillInstanceBuffer(ClusteredInstance* mappedRange) const {
-		std::copy(scene->instances.begin(), scene->instances.end(), mappedRange);
-	}
-
-	void VisibilityRenderer::fillGeometryBuffer(Geometry* mappedRange) const {
-		uint32 geometryIndex = 0;
-
-		while (geometryIndex < scene->geometries.count()) {
-			mappedRange[geometryIndex].vertexOffset = scene->geometries[geometryIndex].vertexOffset;
-			mappedRange[geometryIndex].clusterCount = scene->geometries[geometryIndex].clusterCount;
-
-			geometryIndex += 1;
-		}
+		DrawIndirectCommand& drawIndirectCommand = visibilityIndirectMappedRange[0];
+		drawIndirectCommand.vertexCount = CLUSTER_INDEX_COUNT;
+		drawIndirectCommand.instanceCount = static_cast<uint32>(scene->clusters.count());
+		drawIndirectCommand.vertexOffset = 0;
+		drawIndirectCommand.instanceOffset = 0;
 	}
 
 	void VisibilityRenderer::updateBufferDescriptorSets() {
-		DescriptorBuffer cameraDescriptorBuffer{};
-		cameraDescriptorBuffer.buffer = cameraBuffer;
-		cameraDescriptorBuffer.offset = 0;
-		cameraDescriptorBuffer.size = cameraBuffer->getSize();
+		const DescriptorBuffer cameraDescriptorBuffer = {
+			.buffer = cameraBuffer,
+			.offset = 0,
+			.size = cameraBuffer->getSize(),
+		};
 
-		DescriptorBuffer clusterDescriptorBuffer{};
-		clusterDescriptorBuffer.buffer = clusterBuffer;
-		clusterDescriptorBuffer.offset = 0;
-		clusterDescriptorBuffer.size = clusterBuffer->getSize();
+		const DescriptorBuffer vertexPositionComponentDescriptorBuffer = {
+			.buffer = dataBuffer,
+			.offset = 0,
+			.size = vertexPositionComponentRegionSize,
+		};
 
-		DescriptorBuffer instanceDescriptorBuffer{};
-		instanceDescriptorBuffer.buffer = instanceBuffer;
-		instanceDescriptorBuffer.offset = 0;
-		instanceDescriptorBuffer.size = instanceBuffer->getSize();
+		const DescriptorBuffer vertexNormalComponentDescriptorBuffer = {
+			.buffer = dataBuffer,
+			.offset = vertexPositionComponentRegionSize,
+			.size = vertexNormalComponentRegionSize,
+		};
 
-		DescriptorBuffer geometryDescriptorBuffer{};
-		geometryDescriptorBuffer.buffer = geometryBuffer;
-		geometryDescriptorBuffer.offset = 0;
-		geometryDescriptorBuffer.size = geometryBuffer->getSize();
+		const DescriptorBuffer vertexTextureCoordinateComponentDescriptorBuffer = {
+			.buffer = dataBuffer,
+			.offset = vertexPositionComponentRegionSize + vertexNormalComponentRegionSize,
+			.size = vertexTextureCoordinateComponentRegionSize,
+		};
 
-		DescriptorBuffer vertexPositionComponentDescriptorBuffer{};
-		vertexPositionComponentDescriptorBuffer.buffer = vertexPositionComponentBuffer;
-		vertexPositionComponentDescriptorBuffer.offset = 0;
-		vertexPositionComponentDescriptorBuffer.size = vertexPositionComponentBuffer->getSize();
+		const DescriptorBuffer vertexPositionIndexDescriptorBuffer = {
+			.buffer = dataBuffer,
+			.offset = vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize,
+			.size = vertexPositionIndexRegionSize,
+		};
 
-		DescriptorBuffer vertexNormalComponentDescriptorBuffer{};
-		vertexNormalComponentDescriptorBuffer.buffer = vertexNormalComponentBuffer;
-		vertexNormalComponentDescriptorBuffer.offset = 0;
-		vertexNormalComponentDescriptorBuffer.size = vertexNormalComponentBuffer->getSize();
+		const DescriptorBuffer vertexNormalIndexDescriptorBuffer = {
+			.buffer = dataBuffer,
+			.offset = vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize + vertexPositionIndexRegionSize,
+			.size = vertexNormalIndexRegionSize,
+		};
 
-		DescriptorBuffer vertexTextureCoordinateComponentDescriptorBuffer{};
-		vertexTextureCoordinateComponentDescriptorBuffer.buffer = vertexTextureCoordinateComponentBuffer;
-		vertexTextureCoordinateComponentDescriptorBuffer.offset = 0;
-		vertexTextureCoordinateComponentDescriptorBuffer.size = vertexTextureCoordinateComponentBuffer->getSize();
+		const DescriptorBuffer vertexTextureCoordinateIndexDescriptorBuffer = {
+			.buffer = dataBuffer,
+			.offset = vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize + vertexPositionIndexRegionSize + vertexNormalIndexRegionSize,
+			.size = vertexTextureCoordinateIndexRegionSize,
+		};
 
-		DescriptorBuffer vertexPositionIndexDescriptorBuffer{};
-		vertexPositionIndexDescriptorBuffer.buffer = vertexPositionIndexBuffer;
-		vertexPositionIndexDescriptorBuffer.offset = 0;
-		vertexPositionIndexDescriptorBuffer.size = vertexPositionIndexBuffer->getSize();
+		const DescriptorBuffer clusterDescriptorBuffer = {
+			.buffer = dataBuffer,
+			.offset = vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize + vertexPositionIndexRegionSize + vertexNormalIndexRegionSize + vertexTextureCoordinateIndexRegionSize,
+			.size = clusterRegionSize,
+		};
 
-		DescriptorBuffer vertexNormalIndexDescriptorBuffer{};
-		vertexNormalIndexDescriptorBuffer.buffer = vertexNormalIndexBuffer;
-		vertexNormalIndexDescriptorBuffer.offset = 0;
-		vertexNormalIndexDescriptorBuffer.size = vertexNormalIndexBuffer->getSize();
+		const DescriptorBuffer geometryDescriptorBuffer = {
+			.buffer = dataBuffer,
+			.offset = vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize + vertexPositionIndexRegionSize + vertexNormalIndexRegionSize + vertexTextureCoordinateIndexRegionSize + clusterRegionSize,
+			.size = geometryRegionSize,
+		};
 
-		DescriptorBuffer vertexTextureCoordinateIndexDescriptorBuffer{};
-		vertexTextureCoordinateIndexDescriptorBuffer.buffer = vertexTextureCoordinateIndexBuffer;
-		vertexTextureCoordinateIndexDescriptorBuffer.offset = 0;
-		vertexTextureCoordinateIndexDescriptorBuffer.size = vertexTextureCoordinateIndexBuffer->getSize();
+		const DescriptorBuffer instanceDescriptorBuffer = {
+			.buffer = instanceBuffer,
+			.offset = 0,
+			.size = scene->instances.count() * sizeof(ClusteredInstance),
+		};
 
-		DescriptorBuffer materialCountDescriptorBuffer{};
-		materialCountDescriptorBuffer.buffer = materialCountBuffer;
-		materialCountDescriptorBuffer.offset = 0;
-		materialCountDescriptorBuffer.size = materialCountBuffer->getSize();
+		const DescriptorBuffer materialCountDescriptorBuffer = {
+			.buffer = materialCountBuffer,
+			.offset = 0,
+			.size = materialCountBuffer->getSize(),
+		};
 
-		DescriptorBuffer materialOffsetDescriptorBuffer{};
-		materialOffsetDescriptorBuffer.buffer = materialOffsetBuffer;
-		materialOffsetDescriptorBuffer.offset = 0;
-		materialOffsetDescriptorBuffer.size = materialOffsetBuffer->getSize();
+		const DescriptorBuffer materialOffsetDescriptorBuffer = {
+			.buffer = materialOffsetBuffer,
+			.offset = 0,
+			.size = materialOffsetBuffer->getSize(),
+		};
 
-		DescriptorBuffer materialIndirectDescriptorBuffer{};
-		materialIndirectDescriptorBuffer.buffer = materialIndirectBuffer;
-		materialIndirectDescriptorBuffer.offset = 0;
-		materialIndirectDescriptorBuffer.size = materialIndirectBuffer->getSize();
+		const DescriptorBuffer materialIndirectDescriptorBuffer = {
+			.buffer = materialIndirectBuffer,
+			.offset = 0,
+			.size = materialIndirectBuffer->getSize(),
+		};
 
 		WriteDescriptorSet cameraWriteDescriptorSet{};
 		cameraWriteDescriptorSet.descriptorSet = cameraDescriptorSet;
@@ -852,25 +647,29 @@ namespace Trident {
 	}
 
 	void VisibilityRenderer::updateDebugInputAttachmentDescriptorSets() {
-		DescriptorImage outputDescriptorImage{};
-		outputDescriptorImage.imageView = outputImageView;
-		outputDescriptorImage.imageLayout = ImageLayout::GENERAL;
-		outputDescriptorImage.sampler = nullptr;
+		const DescriptorImage outputDescriptorImage = {
+			.imageView = outputImageView,
+			.imageLayout = ImageLayout::GENERAL,
+			.sampler = nullptr,
+		};
 
-		DescriptorImage visibilityDescriptorImage{};
-		visibilityDescriptorImage.imageView = visibilityImageView;
-		visibilityDescriptorImage.imageLayout = ImageLayout::GENERAL;
-		visibilityDescriptorImage.sampler = nullptr;
+		const DescriptorImage visibilityDescriptorImage = {
+			.imageView = visibilityImageView,
+			.imageLayout = ImageLayout::GENERAL,
+			.sampler = nullptr,
+		};
 
-		/* DescriptorImage depthStencilDescriptorImage{};
-		depthStencilDescriptorImage.imageView = depthStencilImageView;
-		depthStencilDescriptorImage.imageLayout = ImageLayout::DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-		depthStencilDescriptorImage.sampler = nullptr; */
+		/* const DescriptorImage depthStencilDescriptorImage = {
+			.imageView = depthStencilImageView,
+			.imageLayout = ImageLayout::DEPTH_STENCIL_READ_ONLY_OPTIMAL,
+			.sampler = nullptr,
+		}; */
 
-		DescriptorBuffer materialCoordinateDescriptorBuffer{};
-		materialCoordinateDescriptorBuffer.buffer = materialCoordinateBuffer;
-		materialCoordinateDescriptorBuffer.offset = 0;
-		materialCoordinateDescriptorBuffer.size = materialCoordinateBuffer->getSize();
+		const DescriptorBuffer materialCoordinateDescriptorBuffer = {
+			.buffer = materialCoordinateBuffer,
+			.offset = 0,
+			.size = materialCoordinateBuffer->getSize(),
+		};
 
 		WriteDescriptorSet materialCountVisibilityWriteDescriptorSet{};
 		materialCountVisibilityWriteDescriptorSet.descriptorSet = materialCountDescriptorSet;
