@@ -69,14 +69,14 @@ void main() {
 
 	uint pixelIndex = materialOffsetBuffer[MATERIAL_INDEX - 1u] + globalInvocationIndex;
 	uint packedCoordinate = materialCoordinateBuffer[pixelIndex];
-	uvec2 coordinate = uvec2(packedCoordinate >> 16, packedCoordinate & 0xffffu);
+	uvec2 screenCoordinate = uvec2(packedCoordinate >> 16, packedCoordinate & 0xffffu);
 
-	uint visibility = imageLoad(visibilityImage, ivec2(coordinate)).r;
+	uint visibility = imageLoad(visibilityImage, ivec2(screenCoordinate)).r;
 	uint clusterIndex = (visibility >> TRIANGLE_INDEX_BIT_COUNT) - 1u;
 	uint clusterTriangleIndex = visibility & TRIANGLE_INDEX_BIT_MASK;
 	uint triangleIndex = clusterIndex * CLUSTER_TRIANGLE_COUNT + clusterTriangleIndex;
 
 	vec3 color = uintToColor(triangleIndex + 1u);
 
-	imageStore(outputImage, ivec2(coordinate), vec4(color, 1.0));
+	imageStore(outputImage, ivec2(screenCoordinate), vec4(color, 1.0));
 }

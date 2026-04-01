@@ -54,15 +54,14 @@ void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 
 	uint pixelIndex = materialOffsetBuffer.Load((MATERIAL_INDEX - 1) * 4) + globalInvocationIndex.x;
 	uint packedCoordinate = materialCoordinateBuffer.Load(pixelIndex * 4);
-	uint2 coordinate = uint2(packedCoordinate >> 16, packedCoordinate & 0xffff);
+	uint2 screenCoordinate = uint2(packedCoordinate >> 16, packedCoordinate & 0xffff);
 
-	uint visibility = visibilityImage[coordinate];
+	uint visibility = visibilityImage[screenCoordinate];
 	uint clusterIndex = (visibility >> TRIANGLE_INDEX_BIT_COUNT) - 1;
 	uint clusterTriangleIndex = visibility & TRIANGLE_INDEX_BIT_MASK;
 	uint triangleIndex = clusterIndex * CLUSTER_TRIANGLE_COUNT + clusterTriangleIndex;
 
 	float3 color = uintToColor(triangleIndex + 1);
 
-	// outputImage[coordinate] = float4(color, 1.0);
-	outputImage[coordinate] = float4(1.0, 0.2, 0.0, 1.0);
+	outputImage[screenCoordinate] = float4(color, 1.0);
 }
