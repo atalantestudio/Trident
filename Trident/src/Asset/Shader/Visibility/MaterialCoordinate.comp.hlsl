@@ -9,6 +9,18 @@ struct Camera {
 	float3 position;
 };
 
+struct Cluster {
+	uint instanceIndex;
+};
+
+struct Instance {
+	float4x4 transform;
+	uint geometryIndex;
+	uint materialIndex;
+	uint materialReferenceIndex;
+	int clusterOffset;
+};
+
 static const uint TRIANGLE_INDEX_BIT_COUNT = 7;
 
 cbuffer Camera : register(b0) {
@@ -16,18 +28,10 @@ cbuffer Camera : register(b0) {
 }
 
 Texture2D<uint> visibilityImage : register(t0);
-ByteAddressBuffer clusterBuffer : register(t1);
-ByteAddressBuffer instanceBuffer : register(t2);
-RWByteAddressBuffer materialOffsetBuffer : register(u0);
-RWByteAddressBuffer materialCoordinateBuffer : register(u1);
-
-uint fetchInstanceIndex(uint clusterIndex) {
-	return clusterBuffer.Load(clusterIndex * 4);
-}
-
-uint fetchMaterialIndex(uint instanceIndex) {
-	return instanceBuffer.Load(instanceIndex * 80 + 68);
-}
+StructuredBuffer<Cluster> clusterBuffer : register(t1);
+StructuredBuffer<Instance> instanceBuffer : register(t2);
+RWStructuredBuffer<uint> materialOffsetBuffer : register(u0);
+RWStructuredBuffer<uint> materialCoordinateBuffer : register(u1);
 
 [numthreads(16, 16, 1)]
 void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
@@ -42,16 +46,16 @@ void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 
 	if (visibility > 0) {
 		uint clusterIndex = (visibility >> TRIANGLE_INDEX_BIT_COUNT) - 1;
-		uint instanceIndex = fetchInstanceIndex(clusterIndex);
+		uint instanceIndex = clusterBuffer[clusterIndex].instanceIndex;
 
-		materialIndex = fetchMaterialIndex(instanceIndex);
+		materialIndex = instanceBuffer[instanceIndex].materialIndex;
 	}
 
 	uint materialOffset;
 
-	materialOffsetBuffer.InterlockedAdd(materialIndex * 4, 1, materialOffset);
+	InterlockedAdd(materialOffsetBuffer[materialIndex], 1, materialOffset);
 
 	uint packedCoordinate = (globalInvocationIndex.x << 16) | globalInvocationIndex.y;
 
-	materialCoordinateBuffer.Store(materialOffset * 4, packedCoordinate);
+	materialCoordinateBuffer[materialOffset] = packedCoordinate;
 }

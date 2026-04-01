@@ -41,11 +41,13 @@ cbuffer CameraBuffer : register(b0) {
 	Camera camera;
 }
 
+// NOTE
+// These descriptors are part of a larger buffer.
+// Because their stride differ, they can't be represented as structured buffers.
 ByteAddressBuffer vertexPositionComponentBuffer : register(t0);
 ByteAddressBuffer vertexPositionIndexBuffer : register(t1);
 ByteAddressBuffer clusterBuffer : register(t2);
-
-ByteAddressBuffer instanceBuffer : register(t3);
+StructuredBuffer<Instance> instanceBuffer : register(t3);
 ByteAddressBuffer geometryBuffer : register(t4);
 
 Cluster fetchCluster(uint clusterIndex) {
@@ -55,24 +57,6 @@ Cluster fetchCluster(uint clusterIndex) {
 	cluster.instanceIndex = clusterBuffer.Load(clusterIndex * stride);
 
 	return cluster;
-}
-
-Instance fetchInstance(uint instanceIndex) {
-	static const uint stride = 80;
-
-	Instance instance;
-	instance.transform = transpose(float4x4(
-		asfloat(instanceBuffer.Load4(instanceIndex * stride + 0)),
-		asfloat(instanceBuffer.Load4(instanceIndex * stride + 16)),
-		asfloat(instanceBuffer.Load4(instanceIndex * stride + 32)),
-		asfloat(instanceBuffer.Load4(instanceIndex * stride + 48))
-	));
-	instance.geometryIndex = instanceBuffer.Load(instanceIndex * stride + 64);
-	instance.materialIndex = instanceBuffer.Load(instanceIndex * stride + 68);
-	instance.materialReferenceIndex = instanceBuffer.Load(instanceIndex * stride + 72);
-	instance.clusterOffset = asint(instanceBuffer.Load(instanceIndex * stride + 76));
-
-	return instance;
 }
 
 Geometry fetchGeometry(uint geometryIndex) {
@@ -97,7 +81,7 @@ VertexOutput main(VertexInput input) {
 	uint clusterIndex = input.instanceIndex;
 
 	Cluster cluster = fetchCluster(clusterIndex);
-	Instance instance = fetchInstance(cluster.instanceIndex);
+	Instance instance = instanceBuffer[cluster.instanceIndex];
 	Geometry geometry = fetchGeometry(instance.geometryIndex);
 
 	uint indexOffset = (instance.clusterOffset + clusterIndex) * CLUSTER_INDEX_COUNT;

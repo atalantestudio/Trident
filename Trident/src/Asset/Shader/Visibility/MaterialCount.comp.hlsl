@@ -28,17 +28,9 @@ cbuffer Camera : register(b0) {
 }
 
 Texture2D<uint> visibilityImage : register(t0);
-ByteAddressBuffer clusterBuffer : register(t1);
-ByteAddressBuffer instanceBuffer : register(t2);
-RWByteAddressBuffer materialCountBuffer : register(u0);
-
-uint fetchInstanceIndex(uint clusterIndex) {
-	return clusterBuffer.Load(clusterIndex * 4);
-}
-
-uint fetchMaterialIndex(uint instanceIndex) {
-	return instanceBuffer.Load(instanceIndex * 80 + 68);
-}
+StructuredBuffer<Cluster> clusterBuffer : register(t1);
+StructuredBuffer<Instance> instanceBuffer : register(t2);
+RWStructuredBuffer<uint> materialCountBuffer : register(u0);
 
 [numthreads(16, 16, 1)]
 void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
@@ -51,12 +43,10 @@ void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 
 	if (visibility > 0) {
 		uint clusterIndex = (visibility >> TRIANGLE_INDEX_BIT_COUNT) - 1;
-		uint instanceIndex = fetchInstanceIndex(clusterIndex);
+		uint instanceIndex = clusterBuffer[clusterIndex].instanceIndex;
 
-		materialIndex = fetchMaterialIndex(instanceIndex);
+		materialIndex = instanceBuffer[instanceIndex].materialIndex;
 	}
 
-	uint _;
-
-	materialCountBuffer.InterlockedAdd(materialIndex * 4, 1, _);
+	InterlockedAdd(materialCountBuffer[materialIndex], 1);
 }
