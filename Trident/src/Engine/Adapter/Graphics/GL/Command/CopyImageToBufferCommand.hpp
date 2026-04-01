@@ -3,8 +3,9 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/BufferImageCopyRegion.hpp"
+#include "Engine/Adapter/Graphics/GL/ImageFormat.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
+#include "Engine/API/Rendering/BufferImageCopyRegion.hpp"
 
 namespace Trident {
 	class GL::CopyImageToBufferCommand final : public GL::Command {
@@ -42,7 +43,7 @@ namespace Trident {
 									copyRegion.imageExtent.height,
 									copyRegion.imageExtent.depth * copyRegion.imageLayerCount,
 									sourceImage->format,
-									GL_UNSIGNED_BYTE,
+									getType(sourceImage->getFormat()),
 									static_cast<GLsizei>(destinationBuffer->getSize()),
 									(GLvoid*) copyRegion.bufferOffset
 								);

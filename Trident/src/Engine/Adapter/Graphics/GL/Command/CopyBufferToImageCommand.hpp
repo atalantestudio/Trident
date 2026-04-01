@@ -5,6 +5,7 @@
 
 #include "Engine/Adapter/Graphics/GL/Buffer.hpp"
 #include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
+#include "Engine/Adapter/Graphics/GL/ImageFormat.hpp"
 #include "Engine/API/Rendering/BufferImageCopyRegion.hpp"
 
 namespace Trident {
@@ -49,7 +50,7 @@ namespace Trident {
 									copyRegion.imageOffsetX,
 									copyRegion.imageExtent.width,
 									destinationImage->format,
-									GL_UNSIGNED_BYTE,
+									getType(destinationImage->getFormat()),
 									pixels
 								);
 							#else
@@ -59,7 +60,7 @@ namespace Trident {
 									copyRegion.imageOffsetX,
 									copyRegion.imageExtent.width,
 									destinationImage->format,
-									GL_UNSIGNED_BYTE,
+									getType(destinationImage->getFormat()),
 									pixels
 								);
 							#endif
@@ -82,7 +83,7 @@ namespace Trident {
 									copyRegion.imageExtent.width,
 									copyRegion.imageExtent.height * copyRegion.imageLayerCount,
 									destinationImage->format,
-									GL_UNSIGNED_BYTE,
+									getType(destinationImage->getFormat()),
 									pixels
 								);
 							#else
@@ -94,7 +95,7 @@ namespace Trident {
 									copyRegion.imageExtent.width,
 									copyRegion.imageExtent.height * copyRegion.imageLayerCount,
 									destinationImage->format,
-									GL_UNSIGNED_BYTE,
+									getType(destinationImage->getFormat()),
 									pixels
 								);
 							#endif
@@ -113,7 +114,7 @@ namespace Trident {
 									copyRegion.imageExtent.height,
 									copyRegion.imageExtent.depth * copyRegion.imageLayerCount,
 									destinationImage->format,
-									GL_UNSIGNED_BYTE,
+									getType(destinationImage->getFormat()),
 									pixels
 								);
 							#else
@@ -127,7 +128,7 @@ namespace Trident {
 									copyRegion.imageExtent.height,
 									copyRegion.imageExtent.depth * copyRegion.imageLayerCount,
 									destinationImage->format,
-									GL_UNSIGNED_BYTE,
+									getType(destinationImage->getFormat()),
 									pixels
 								);
 							#endif

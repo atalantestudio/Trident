@@ -3,6 +3,7 @@
 
 #include "pch.hpp"
 
+#include "Engine/API/Rendering/Adapter/copyImageToBuffer.hpp"
 #include "Engine/API/Rendering/Buffer.hpp"
 #include "Engine/API/Rendering/CommandPool.hpp"
 #include "Engine/API/Rendering/Device.hpp"
@@ -75,10 +76,6 @@ namespace Trident {
 
 	void CommandEncoder::copyBufferToImage(ref<BaseBuffer> sourceBuffer, ref<Image> destinationImage, view<BufferImageCopyRegion> copyRegions) {
 		device->adapter->copyBufferToImage(this, sourceBuffer, destinationImage, copyRegions);
-	}
-
-	void CommandEncoder::copyImageToBuffer(ref<Image> sourceImage, ref<BaseBuffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) {
-		device->adapter->copyImageToBuffer(this, sourceImage, destinationBuffer, copyRegions);
 	}
 
 	void CommandEncoder::dispatch(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) {
@@ -194,6 +191,7 @@ namespace Trident {
 		mipLevelCount(descriptor.mipLevelCount),
 		layerCount(descriptor.layerCount),
 		sampleCount(descriptor.sampleCount),
+		usage(descriptor.usage),
 		layout(ImageLayout::UNDEFINED)
 	{}
 
@@ -223,6 +221,10 @@ namespace Trident {
 
 	uint8 Image::getSampleCount() const {
 		return sampleCount;
+	}
+
+	ImageUsage Image::getUsage() const {
+		return usage;
 	}
 
 	ImageLayout Image::getLayout() const {

@@ -29,6 +29,8 @@ namespace Trident {
 			/// Returns the number of samples in the image.
 			uint8 getSampleCount() const;
 
+			ImageUsage getUsage() const;
+
 			/// Returns the current layout of the image.
 			ImageLayout getLayout() const;
 
@@ -47,6 +49,7 @@ namespace Trident {
 			uint32 mipLevelCount;
 			uint32 layerCount;
 			uint8 sampleCount;
+			ImageUsage usage;
 			ImageLayout layout;
 	};
 }
