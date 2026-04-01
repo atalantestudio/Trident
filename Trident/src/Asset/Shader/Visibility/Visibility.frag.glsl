@@ -3,12 +3,12 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-in VertexOutput {
+in FragmentInput {
 	layout(location = 0) flat uint visibility;
-} vertexOutput;
+} fragmentInput;
 
 layout(location = 0) out uint visibility;
 
 void main() {
-	visibility = vertexOutput.visibility;
+	visibility = fragmentInput.visibility;
 }

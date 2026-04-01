@@ -54,19 +54,44 @@ namespace Trident {
 								descriptorBufferIndex += 1;
 							}
 						}
+						else if (descriptorSetBinding.descriptorType == DescriptorType::READ_ONLY_STORAGE_IMAGE || descriptorSetBinding.descriptorType == DescriptorType::READ_WRITE_STORAGE_IMAGE) {
+							GLuint descriptorImageIndex = 0;
+
+							while (descriptorImageIndex < descriptorSetBinding.descriptorImages.count()) {
+								const DescriptorImage& descriptorImage = descriptorSetBinding.descriptorImages[descriptorImageIndex];
+								const ref<GL::ImageView> imageView = std::static_pointer_cast<GL::ImageView>(descriptorImage.imageView);
+								const GLuint unit = descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex;
+
+								// TODO: Use correct access.
+								constexpr GLenum access = GL_READ_WRITE;
+
+								GLenum format = static_cast<const GL::Image*>(imageView->getImage())->internalFormat;
+
+								if (format == GL_SRGB8_ALPHA8) {
+									format = GL_RGBA8;
+								}
+
+								#if OPENGL_VERSION >= OPENGL_VERSION_4_2
+									glBindImageTexture(unit, imageView->texture, imageView->getMipLevelOffset(), GL_FALSE, imageView->getLayerOffset(), access, format);
+								#else
+									ENGINE_ERROR_UNSUPPORTED();
+								#endif
+
+								descriptorImageIndex += 1;
+							}
+						}
 						else if (isImageDescriptorType(descriptorSetBinding.descriptorType)) {
 							GLuint descriptorImageIndex = 0;
 
 							while (descriptorImageIndex < descriptorSetBinding.descriptorImages.count()) {
 								const DescriptorImage& descriptorImage = descriptorSetBinding.descriptorImages[descriptorImageIndex];
 								const ref<GL::ImageView> imageView = std::static_pointer_cast<GL::ImageView>(descriptorImage.imageView);
-								const GL::Image* image = static_cast<const GL::Image*>(imageView->getImage());
 
 								#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 									glBindTextureUnit(descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex, imageView->texture);
 								#else
 									glActiveTexture(GL_TEXTURE0 + descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex);
-									glBindTexture(image->target, imageView->texture);
+									glBindTexture(static_cast<const GL::Image*>(imageView->getImage())->target, imageView->texture);
 								#endif
 
 								if (descriptorImage.sampler != nullptr) {
@@ -74,26 +99,6 @@ namespace Trident {
 										glBindSampler(
 											descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex,
 											std::static_pointer_cast<GL::Sampler>(descriptorImage.sampler)->sampler
-										);
-									#else
-										ENGINE_ERROR_UNSUPPORTED();
-									#endif
-								}
-
-								if (isFixedOrFloatingPointColorFormat(image->getFormat())) {
-									#if OPENGL_VERSION >= OPENGL_VERSION_4_2
-										glBindImageTexture(
-											descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex,
-											imageView->texture,
-											0,
-											GL_FALSE,
-											0,
-
-											// TODO: Use correct access.
-											GL_READ_WRITE,
-
-											// TODO: Remove condition.
-											image->internalFormat == GL_SRGB8_ALPHA8 ? GL_RGBA8 : image->internalFormat
 										);
 									#else
 										ENGINE_ERROR_UNSUPPORTED();

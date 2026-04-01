@@ -8,7 +8,7 @@
 namespace Trident {
 	ref<DescriptorSetLayout> VisibilityRenderer::createMaterialCountDescriptorSetLayout() const {
 		return createDescriptorSetLayout({
-			// View
+			// Camera
 			{
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
 				.descriptorCount = 1,

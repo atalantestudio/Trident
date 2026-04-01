@@ -124,18 +124,17 @@ namespace Trident {
 
 		// Visibility render pass
 		{
-			const ClearValue visibilityClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
-			const ClearValue outputClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
-
-			ClearValue depthStencilClearValue{};
-			depthStencilClearValue.depth = 1.0f;
-			depthStencilClearValue.stencil = 0;
-
-			BeginRenderPassDescriptor beginRenderPassDescriptor{};
-			beginRenderPassDescriptor.framebuffer = visibilityFramebuffer;
-			beginRenderPassDescriptor.clearValues = {visibilityClearValue, outputClearValue, depthStencilClearValue};
-
-			commandEncoder->beginRenderPass(beginRenderPassDescriptor);
+			commandEncoder->beginRenderPass({
+				.framebuffer = visibilityFramebuffer,
+				.clearValues = {
+					{0.0f, 0.0f, 0.0f, 1.0f},
+					{0.0f, 0.0f, 0.0f, 1.0f},
+					{
+						.depth = 1.0f,
+						.stencil = 0,
+					},
+				},
+			});
 			commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 			commandEncoder->setScissor(0, 0, extent);
 

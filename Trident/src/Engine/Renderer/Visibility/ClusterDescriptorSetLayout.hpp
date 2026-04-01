@@ -15,7 +15,7 @@ namespace Trident {
 				.shaderStages = ShaderStage::VERTEX,
 			},
 
-			// Vertex
+			// Vertex position index
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
