@@ -39,7 +39,7 @@ namespace Trident {
 					glDrawBuffers(static_cast<GLsizei>(bufs.count()), &bufs[0]);
 				#endif
 
-				attachmentIndex = 0;
+				uint32 attachmentIndex = 0;
 
 				while (attachmentIndex < descriptor.clearValues.count()) {
 					const Attachment& attachment = renderPass->getAttachment(attachmentIndex);
