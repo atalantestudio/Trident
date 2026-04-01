@@ -122,6 +122,8 @@ namespace Trident {
 		const float32 width = static_cast<float32>(extent.width);
 		const float32 height = static_cast<float32>(extent.height);
 
+		BufferMemoryBarrier bufferMemoryBarrier;
+
 		// Visibility render pass
 		{
 			commandEncoder->beginRenderPass({
@@ -159,12 +161,13 @@ namespace Trident {
 			commandEncoder->bindDescriptorSets(materialCountPipelineLayout, 0, {materialCountDescriptorSet});
 			commandEncoder->dispatch(groupCountX, groupCountY, 1);
 
-			BufferMemoryBarrier bufferMemoryBarrier{};
-			bufferMemoryBarrier.buffer = materialCountBuffer;
-			bufferMemoryBarrier.offset = 0;
-			bufferMemoryBarrier.size = materialCountBuffer->getSize();
-			bufferMemoryBarrier.sourceAccess = Access::SHADER_WRITE;
-			bufferMemoryBarrier.destinationAccess = Access::SHADER_READ | Access::SHADER_WRITE;
+			bufferMemoryBarrier = {
+				.buffer = materialCountBuffer,
+				.offset = 0,
+				.size = materialCountBuffer->getSize(),
+				.sourceAccess = Access::SHADER_WRITE,
+				.destinationAccess = Access::SHADER_READ | Access::SHADER_WRITE,
+			};
 
 			commandEncoder->insertBufferMemoryBarriers({bufferMemoryBarrier});
 
@@ -178,11 +181,13 @@ namespace Trident {
 			commandEncoder->bindDescriptorSets(materialCoordinatePipelineLayout, 0, {materialCoordinateDescriptorSet});
 			commandEncoder->dispatch(groupCountX, groupCountY, 1);
 
-			bufferMemoryBarrier.buffer = materialOffsetBuffer;
-			bufferMemoryBarrier.offset = 0;
-			bufferMemoryBarrier.size = materialOffsetBuffer->getSize();
-			bufferMemoryBarrier.sourceAccess = Access::SHADER_WRITE;
-			bufferMemoryBarrier.destinationAccess = Access::SHADER_READ;
+			bufferMemoryBarrier = {
+				.buffer = materialOffsetBuffer,
+				.offset = 0,
+				.size = materialOffsetBuffer->getSize(),
+				.sourceAccess = Access::SHADER_WRITE,
+				.destinationAccess = Access::SHADER_READ,
+			};
 
 			commandEncoder->insertBufferMemoryBarriers({bufferMemoryBarrier});
 
