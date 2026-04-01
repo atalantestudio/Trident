@@ -4,43 +4,48 @@
 
 namespace Trident {
 	ref<DescriptorSetLayout> VisibilityRenderer::createMaterialCoordinateDescriptorSetLayout() const {
-		DescriptorSetLayoutBinding viewBinding{};
-		viewBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-		viewBinding.descriptorCount = 1;
-		viewBinding.shaderStages = ShaderStage::COMPUTE;
-
-		DescriptorSetLayoutBinding visibilityBinding{};
-		visibilityBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE;
-		visibilityBinding.descriptorCount = 1;
-		visibilityBinding.shaderStages = ShaderStage::COMPUTE;
-
-		DescriptorSetLayoutBinding clusterBinding{};
-		clusterBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
-		clusterBinding.descriptorCount = 1;
-		clusterBinding.shaderStages = ShaderStage::COMPUTE;
-
-		DescriptorSetLayoutBinding instanceBinding{};
-		instanceBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
-		instanceBinding.descriptorCount = 1;
-		instanceBinding.shaderStages = ShaderStage::COMPUTE;
-
-		DescriptorSetLayoutBinding materialOffsetBinding{};
-		materialOffsetBinding.descriptorType = DescriptorType::READ_WRITE_STORAGE_BUFFER;
-		materialOffsetBinding.descriptorCount = 1;
-		materialOffsetBinding.shaderStages = ShaderStage::COMPUTE;
-
-		DescriptorSetLayoutBinding materialCoordinateBinding{};
-		materialCoordinateBinding.descriptorType = DescriptorType::READ_WRITE_STORAGE_BUFFER;
-		materialCoordinateBinding.descriptorCount = 1;
-		materialCoordinateBinding.shaderStages = ShaderStage::COMPUTE;
-
 		return createDescriptorSetLayout({
-			viewBinding,
-			visibilityBinding,
-			clusterBinding,
-			instanceBinding,
-			materialOffsetBinding,
-			materialCoordinateBinding,
+			// View
+			{
+				.descriptorType = DescriptorType::UNIFORM_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+
+			// Visibility
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+
+			// Cluster
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+
+			// Instance
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+
+			// Material offset
+			{
+				.descriptorType = DescriptorType::READ_WRITE_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+
+			// Material coordinate
+			{
+				.descriptorType = DescriptorType::READ_WRITE_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
 		});
 	}
 }

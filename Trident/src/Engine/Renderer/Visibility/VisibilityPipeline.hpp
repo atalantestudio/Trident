@@ -7,55 +7,69 @@
 
 namespace Trident {
 	ref<GraphicsPipeline> VisibilityRenderer::createVisibilityPipeline() const {
-		ShaderModuleDescriptor visibilityVertexShaderModuleDescriptor{};
-		visibilityVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-		visibilityVertexShaderModuleDescriptor.entryPoint = "main";
+		const ShaderModuleDescriptor visibilityVertexShaderModuleDescriptor = {
+			.stage = ShaderStage::VERTEX,
+			.entryPoint = "main",
+			#if defined(BUILD_MODE_DEBUG)
+				.name = "Visibility vertex",
+			#endif
+		};
 
-		SET_DEBUG_NAME(visibilityVertexShaderModuleDescriptor, "Visibility vertex");
-
-		ShaderModuleDescriptor visibilityFragmentShaderModuleDescriptor{};
-		visibilityFragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-		visibilityFragmentShaderModuleDescriptor.entryPoint = "main";
-
-		SET_DEBUG_NAME(visibilityFragmentShaderModuleDescriptor, "Visibility fragment");
-
-		ColorBlendAttachment visibilityColorBlendAttachment{};
-		visibilityColorBlendAttachment.blend = false;
-
-		GraphicsPipelineDescriptor visibilityPipelineDescriptor{};
-		visibilityPipelineDescriptor.pipelineLayout = visibilityPipelineLayout;
+		ref<ShaderModule> vertexShaderModule;
 
 		switch (getGraphicsApi()) {
 			case GraphicsAPI::DX12:
 			case GraphicsAPI::VK: {
-				visibilityPipelineDescriptor.vertexShaderModule = loadInternalShaderModule(visibilityVertexShaderModuleDescriptor, "Visibility/Visibility.vert");
+				vertexShaderModule = loadInternalShaderModule(visibilityVertexShaderModuleDescriptor, "Visibility/Visibility.vert");
 
 				break;
 			}
 			case GraphicsAPI::GL: {
-				visibilityPipelineDescriptor.vertexShaderModule = loadInternalShaderModule(visibilityVertexShaderModuleDescriptor, "Visibility/VisibilitySingleSet.vert");
+				vertexShaderModule = loadInternalShaderModule(visibilityVertexShaderModuleDescriptor, "Visibility/VisibilitySingleSet.vert");
 
 				break;
 			}
 		}
 
-		visibilityPipelineDescriptor.fragmentShaderModule = loadInternalShaderModule(visibilityFragmentShaderModuleDescriptor, "Visibility/Visibility.frag");
-		visibilityPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-		visibilityPipelineDescriptor.polygonMode = PolygonMode::FILL;
-		visibilityPipelineDescriptor.cullMode = CullMode::BACK;
-		visibilityPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-		visibilityPipelineDescriptor.lineWidth = 1.0f;
-		visibilityPipelineDescriptor.minSampleShading = 0.0f;
-		visibilityPipelineDescriptor.colorBlendState.attachments = {visibilityColorBlendAttachment};
-		visibilityPipelineDescriptor.depthStencilState.depthTest = true;
-		visibilityPipelineDescriptor.depthStencilState.depthWrite = true;
-		visibilityPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::LESS;
-		visibilityPipelineDescriptor.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT;
-		visibilityPipelineDescriptor.renderPass = visibilityRenderPass;
-		visibilityPipelineDescriptor.subpassIndex = 0;
+		const ref<ShaderModule> fragmentShaderModule = loadInternalShaderModule(
+			{
+				.stage = ShaderStage::FRAGMENT,
+				.entryPoint = "main",
+				#if defined(BUILD_MODE_DEBUG)
+					.name = "Visibility fragment",
+				#endif
+			},
+			"Visibility/Visibility.frag"
+		);
 
-		SET_DEBUG_NAME(visibilityPipelineDescriptor, "Visibility");
+		const ColorBlendAttachment visibilityColorBlendAttachment = {
+			.blend = false,
+		};
 
-		return createGraphicsPipeline(visibilityPipelineDescriptor);
+		return createGraphicsPipeline({
+			.pipelineLayout = visibilityPipelineLayout,
+			.vertexShaderModule = vertexShaderModule,
+			.fragmentShaderModule = fragmentShaderModule,
+			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
+			.polygonMode = PolygonMode::FILL,
+			.cullMode = CullMode::BACK,
+			.frontFace = FrontFace::CLOCKWISE,
+			.lineWidth = 1.0f,
+			.minSampleShading = 0.0f,
+			.colorBlendState = {
+				.attachments = {visibilityColorBlendAttachment},
+			},
+			.depthStencilState = {
+				.depthTest = true,
+				.depthWrite = true,
+				.compareOperation = CompareOperation::LESS,
+			},
+			.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT,
+			.renderPass = visibilityRenderPass,
+			.subpassIndex = 0,
+			#if defined(BUILD_MODE_DEBUG)
+				.name = "Visibility",
+			#endif
+		});
 	}
 }

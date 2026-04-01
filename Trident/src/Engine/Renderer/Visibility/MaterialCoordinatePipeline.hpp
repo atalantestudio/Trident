@@ -7,18 +7,23 @@
 
 namespace Trident {
 	ref<ComputePipeline> VisibilityRenderer::createMaterialCoordinatePipeline() const {
-		ShaderModuleDescriptor materialCoordinateShaderModuleDescriptor{};
-		materialCoordinateShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
-		materialCoordinateShaderModuleDescriptor.entryPoint = "main";
+		const ref<ShaderModule> shaderModule = loadInternalShaderModule(
+			{
+				.stage = ShaderStage::COMPUTE,
+				.entryPoint = "main",
+				#if defined(BUILD_MODE_DEBUG)
+					.name = "Material coordinate",
+				#endif
+			},
+			"Visibility/MaterialCoordinate.comp"
+		);
 
-		SET_DEBUG_NAME(materialCoordinateShaderModuleDescriptor, "Material coordinate");
-
-		ComputePipelineDescriptor materialCoordinatePipelineDescriptor{};
-		materialCoordinatePipelineDescriptor.pipelineLayout = materialCoordinatePipelineLayout;
-		materialCoordinatePipelineDescriptor.computeShaderModule = loadInternalShaderModule(materialCoordinateShaderModuleDescriptor, "Visibility/MaterialCoordinate.comp");
-
-		SET_DEBUG_NAME(materialCoordinatePipelineDescriptor, "Material coordinate");
-
-		return createComputePipeline(materialCoordinatePipelineDescriptor);
+		return createComputePipeline({
+			.pipelineLayout = materialCoordinatePipelineLayout,
+			.computeShaderModule = shaderModule,
+			#if defined(BUILD_MODE_DEBUG)
+				.name = "Material coordinate",
+			#endif
+		});
 	}
 }

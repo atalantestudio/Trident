@@ -7,19 +7,20 @@
 
 namespace Trident {
 	ref<DescriptorSetLayout> VisibilityRenderer::createInstanceDescriptorSetLayout() const {
-		DescriptorSetLayoutBinding instanceBinding{};
-		instanceBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
-		instanceBinding.descriptorCount = 1;
-		instanceBinding.shaderStages = ShaderStage::VERTEX | ShaderStage::FRAGMENT;
-
-		DescriptorSetLayoutBinding geometryBinding{};
-		geometryBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
-		geometryBinding.descriptorCount = 1;
-		geometryBinding.shaderStages = ShaderStage::VERTEX | ShaderStage::FRAGMENT;
-
 		return createDescriptorSetLayout({
-			instanceBinding,
-			geometryBinding,
+			// Instance
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::VERTEX | ShaderStage::FRAGMENT,
+			},
+
+			// Geometry
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::VERTEX | ShaderStage::FRAGMENT,
+			},
 		});
 	}
 }

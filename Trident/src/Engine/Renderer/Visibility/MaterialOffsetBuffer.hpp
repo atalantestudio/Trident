@@ -7,14 +7,14 @@
 
 namespace Trident {
 	ref<Buffer<uint32>> VisibilityRenderer::createMaterialOffsetBuffer() const {
-		BufferDescriptor materialOffsetBufferDescriptor{};
-		materialOffsetBufferDescriptor.size = sizeof(uint32) * scene->materials.count();
-		materialOffsetBufferDescriptor.usage = BufferUsage::READ_WRITE_STORAGE;
-		materialOffsetBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-		materialOffsetBufferDescriptor.persistent = false;
-
-		SET_DEBUG_NAME(materialOffsetBufferDescriptor, "Material offset");
-
-		return createBuffer<uint32>(materialOffsetBufferDescriptor);
+		return createBuffer<uint32>({
+			.size = scene->materials.count() * sizeof(uint32),
+			.usage = BufferUsage::READ_WRITE_STORAGE,
+			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+			.persistent = false,
+			#if defined(BUILD_MODE_DEBUG)
+				.name = "Material offset",
+			#endif
+		});
 	}
 }

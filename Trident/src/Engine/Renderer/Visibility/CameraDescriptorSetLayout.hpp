@@ -7,11 +7,13 @@
 
 namespace Trident {
 	ref<DescriptorSetLayout> VisibilityRenderer::createCameraDescriptorSetLayout() const {
-		DescriptorSetLayoutBinding cameraBinding{};
-		cameraBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-		cameraBinding.descriptorCount = 1;
-		cameraBinding.shaderStages = ShaderStage::VERTEX;
-
-		return createDescriptorSetLayout({cameraBinding});
+		return createDescriptorSetLayout({
+			// Camera
+			{
+				.descriptorType = DescriptorType::UNIFORM_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::VERTEX,
+			},
+		});
 	}
 }

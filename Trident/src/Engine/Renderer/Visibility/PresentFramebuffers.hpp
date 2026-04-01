@@ -11,10 +11,11 @@ namespace Trident {
 
 		presentFramebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
 
-		FramebufferDescriptor presentFramebufferDescriptor{};
-		presentFramebufferDescriptor.renderPass = presentRenderPass;
-		presentFramebufferDescriptor.imageViews = {nullptr/*, outputImageView */};
-		presentFramebufferDescriptor.extent = swapchain->getExtent();
+		FramebufferDescriptor presentFramebufferDescriptor = {
+			.renderPass = presentRenderPass,
+			.imageViews = {nullptr},
+			.extent = swapchain->getExtent(),
+		};
 
 		#if defined(BUILD_MODE_DEBUG)
 			sequence<char8> name;

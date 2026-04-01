@@ -7,50 +7,55 @@
 
 namespace Trident {
 	ref<Subpass> VisibilityRenderer::createVisibilitySubpass() const {
-		AttachmentReference writeVisibilityAttachmentReference{};
-		writeVisibilityAttachmentReference.index = 0;
-		writeVisibilityAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-
-		AttachmentReference writeDepthStencilAttachmentReference{};
-		writeDepthStencilAttachmentReference.index = 2;
-		writeDepthStencilAttachmentReference.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-		SubpassDescriptor visibilitySubpassDescriptor{};
-		visibilitySubpassDescriptor.colorAttachmentReferences = {writeVisibilityAttachmentReference};
-		visibilitySubpassDescriptor.depthStencilAttachmentReference = writeDepthStencilAttachmentReference;
-
-		return createSubpass(visibilitySubpassDescriptor);
+		return createSubpass({
+			.colorAttachmentReferences = {
+				// Visibility
+				{
+					.index = 0,
+					.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
+				},
+			},
+			.depthStencilAttachmentReference = {
+				.index = 2,
+				.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+			},
+		});
 	}
 
 	ref<RenderPass> VisibilityRenderer::createVisibilityRenderPass() const {
 		const ref<Subpass> visibilitySubpass = createVisibilitySubpass();
 
-		Attachment visibilityAttachment{};
-		visibilityAttachment.format = ImageFormat::R32_UINT;
-		visibilityAttachment.sampleCount = 1;
-		visibilityAttachment.loadOperation = LoadOperation::CLEAR;
-		visibilityAttachment.storeOperation = StoreOperation::UNDEFINED;
-		visibilityAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+		return createRenderPass({
+			.attachments = {
+				// Visibility
+				{
+					.format = ImageFormat::R32_UINT,
+					.sampleCount = 1,
+					.loadOperation = LoadOperation::CLEAR,
+					.storeOperation = StoreOperation::UNDEFINED,
+					.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
+				},
 
-		Attachment outputAttachment{};
-		outputAttachment.format = ImageFormat::R8G8B8A8_UNORM;
-		outputAttachment.sampleCount = 1;
-		outputAttachment.loadOperation = LoadOperation::CLEAR;
-		outputAttachment.storeOperation = StoreOperation::UNDEFINED;
-		outputAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+				// Output
+				{
+					.format = ImageFormat::R8G8B8A8_UNORM,
+					.sampleCount = 1,
+					.loadOperation = LoadOperation::CLEAR,
+					.storeOperation = StoreOperation::UNDEFINED,
+					.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
+				},
 
-		Attachment depthStencilAttachment{};
-		depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
-		depthStencilAttachment.sampleCount = 1;
-		depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
-		depthStencilAttachment.storeOperation = StoreOperation::UNDEFINED;
-		depthStencilAttachment.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-		RenderPassDescriptor renderPassDescriptor{};
-		renderPassDescriptor.attachments = {visibilityAttachment, outputAttachment, depthStencilAttachment};
-		renderPassDescriptor.subpasses = {visibilitySubpass};
-		renderPassDescriptor.subpassDependencies = {};
-
-		return createRenderPass(renderPassDescriptor);
+				// Depth stencil
+				{
+					.format = ImageFormat::D32_SFLOAT,
+					.sampleCount = 1,
+					.loadOperation = LoadOperation::CLEAR,
+					.storeOperation = StoreOperation::UNDEFINED,
+					.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+				},
+			},
+			.subpasses = {visibilitySubpass},
+			.subpassDependencies = {},
+		});
 	}
 }

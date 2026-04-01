@@ -7,39 +7,54 @@
 
 namespace Trident {
 	ref<GraphicsPipeline> VisibilityRenderer::createOutputPipeline() const {
-		ShaderModuleDescriptor outputVertexShaderModuleDescriptor{};
-		outputVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-		outputVertexShaderModuleDescriptor.entryPoint = "main";
+		const ref<ShaderModule> vertexShaderModule = loadInternalShaderModule(
+			{
+				.stage = ShaderStage::VERTEX,
+				.entryPoint = "main",
+				#if defined(BUILD_MODE_DEBUG)
+					.name = "Output vertex",
+				#endif
+			},
+			"Visibility/Output.vert"
+		);
 
-		SET_DEBUG_NAME(outputVertexShaderModuleDescriptor, "Output vertex");
+		const ref<ShaderModule> fragmentShaderModule = loadInternalShaderModule(
+			{
+				.stage = ShaderStage::FRAGMENT,
+				.entryPoint = "main",
+				#if defined(BUILD_MODE_DEBUG)
+					.name = "Output fragment",
+				#endif
+			},
+			"Visibility/Output.frag"
+		);
 
-		ShaderModuleDescriptor outputFragmentShaderModuleDescriptor{};
-		outputFragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-		outputFragmentShaderModuleDescriptor.entryPoint = "main";
+		const ColorBlendAttachment colorBlendAttachment = {
+			.blend = false,
+		};
 
-		SET_DEBUG_NAME(outputFragmentShaderModuleDescriptor, "Output fragment");
-
-		ColorBlendAttachment outputColorBlendAttachment{};
-		outputColorBlendAttachment.blend = false;
-
-		GraphicsPipelineDescriptor outputPipelineDescriptor{};
-		outputPipelineDescriptor.pipelineLayout = outputPipelineLayout;
-		outputPipelineDescriptor.vertexShaderModule = loadInternalShaderModule(outputVertexShaderModuleDescriptor, "Visibility/Output.vert");
-		outputPipelineDescriptor.fragmentShaderModule = loadInternalShaderModule(outputFragmentShaderModuleDescriptor, "Visibility/Output.frag");
-		outputPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-		outputPipelineDescriptor.polygonMode = PolygonMode::FILL;
-		outputPipelineDescriptor.cullMode = CullMode::BACK;
-		outputPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-		outputPipelineDescriptor.lineWidth = 1.0f;
-		outputPipelineDescriptor.minSampleShading = 0.0f;
-		outputPipelineDescriptor.colorBlendState.attachments = {outputColorBlendAttachment};
-		outputPipelineDescriptor.depthStencilState.depthTest = false;
-		outputPipelineDescriptor.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT;
-		outputPipelineDescriptor.renderPass = presentRenderPass;
-		outputPipelineDescriptor.subpassIndex = 0;
-
-		SET_DEBUG_NAME(outputPipelineDescriptor, "Output");
-
-		return createGraphicsPipeline(outputPipelineDescriptor);
+		return createGraphicsPipeline({
+			.pipelineLayout = outputPipelineLayout,
+			.vertexShaderModule = vertexShaderModule,
+			.fragmentShaderModule = fragmentShaderModule,
+			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
+			.polygonMode = PolygonMode::FILL,
+			.cullMode = CullMode::BACK,
+			.frontFace = FrontFace::CLOCKWISE,
+			.lineWidth = 1.0f,
+			.minSampleShading = 0.0f,
+			.colorBlendState = {
+				.attachments = {colorBlendAttachment},
+			},
+			.depthStencilState = {
+				.depthTest = false,
+			},
+			.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT,
+			.renderPass = presentRenderPass,
+			.subpassIndex = 0,
+			#if defined(BUILD_MODE_DEBUG)
+				.name = "Output",
+			#endif
+		});
 	}
 }

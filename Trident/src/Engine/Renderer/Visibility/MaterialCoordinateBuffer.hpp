@@ -9,14 +9,14 @@ namespace Trident {
 	ref<Buffer<uint32>> VisibilityRenderer::createMaterialCoordinateBuffer() const {
 		const Extent2D swapchainExtent = getSwapchain()->getExtent();
 
-		BufferDescriptor materialCoordinateBufferDescriptor{};
-		materialCoordinateBufferDescriptor.size = sizeof(uint32) * swapchainExtent.width * swapchainExtent.height;
-		materialCoordinateBufferDescriptor.usage = BufferUsage::READ_WRITE_STORAGE;
-		materialCoordinateBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-		materialCoordinateBufferDescriptor.persistent = false;
-
-		SET_DEBUG_NAME(materialCoordinateBufferDescriptor, "Material coordinate");
-
-		return createBuffer<uint32>(materialCoordinateBufferDescriptor);
+		return createBuffer<uint32>({
+			.size = swapchainExtent.width * swapchainExtent.height * sizeof(uint32),
+			.usage = BufferUsage::READ_WRITE_STORAGE,
+			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+			.persistent = false,
+			#if defined(BUILD_MODE_DEBUG)
+				.name = "Material coordinate",
+			#endif
+		});
 	}
 }

@@ -9,29 +9,34 @@ namespace Trident {
 	ref<Image> VisibilityRenderer::createVisibilityImage() const {
 		const Extent2D extent = getSwapchain()->getExtent();
 
-		AttachmentImageDescriptor visibilityAttachmentImageDescriptor{};
-		visibilityAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
-		visibilityAttachmentImageDescriptor.extent.width = extent.width;
-		visibilityAttachmentImageDescriptor.extent.height = extent.height;
-		visibilityAttachmentImageDescriptor.extent.depth = 1;
-		visibilityAttachmentImageDescriptor.mipLevelCount = 1;
-		visibilityAttachmentImageDescriptor.layerCount = 1;
-		visibilityAttachmentImageDescriptor.additionalUsage = ImageUsage::STORAGE;
-
-		SET_DEBUG_NAME(visibilityAttachmentImageDescriptor, "Visibility");
-
-		return visibilityRenderPass->createInputAttachmentImage(visibilityAttachmentImageDescriptor, 0);
+		return visibilityRenderPass->createInputAttachmentImage(
+			{
+				.type = ImageType::TEXTURE_2D,
+				.extent = {
+					.width = extent.width,
+					.height = extent.height,
+					.depth = 1,
+				},
+				.mipLevelCount = 1,
+				.layerCount = 1,
+				.additionalUsage = ImageUsage::STORAGE,
+				#if defined(BUILD_MODE_DEBUG)
+					.name = "Visibility",
+				#endif
+			},
+			0
+		);
 	}
 
 	ref<ImageView> VisibilityRenderer::createVisibilityImageView() {
-		ImageViewDescriptor visibilityImageViewDescriptor{};
-		visibilityImageViewDescriptor.mipLevelOffset = 0;
-		visibilityImageViewDescriptor.mipLevelCount = 1;
-		visibilityImageViewDescriptor.layerOffset = 0;
-		visibilityImageViewDescriptor.layerCount = 1;
-
-		SET_DEBUG_NAME(visibilityImageViewDescriptor, "Visibility");
-
-		return visibilityImage->createView(visibilityImageViewDescriptor);
+		return visibilityImage->createView({
+			.mipLevelOffset = 0,
+			.mipLevelCount = 1,
+			.layerOffset = 0,
+			.layerCount = 1,
+			#if defined(BUILD_MODE_DEBUG)
+				.name = "Visibility",
+			#endif
+		});
 	}
 }

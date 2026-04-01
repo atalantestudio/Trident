@@ -7,11 +7,13 @@
 
 namespace Trident {
 	ref<DescriptorSetLayout> VisibilityRenderer::createOutputDescriptorSetLayout() const {
-		DescriptorSetLayoutBinding outputBinding{};
-		outputBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE;
-		outputBinding.descriptorCount = 1;
-		outputBinding.shaderStages = ShaderStage::FRAGMENT;
-
-		return createDescriptorSetLayout({outputBinding});
+		return createDescriptorSetLayout({
+			// Output
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::FRAGMENT,
+			},
+		});
 	}
 }

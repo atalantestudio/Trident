@@ -7,15 +7,17 @@
 
 namespace Trident {
 	ref<Framebuffer> VisibilityRenderer::createVisibilityFramebuffer() const {
-		const ref<Swapchain> swapchain = getSwapchain();
-
-		FramebufferDescriptor visibilityFramebufferDescriptor{};
-		visibilityFramebufferDescriptor.renderPass = visibilityRenderPass;
-		visibilityFramebufferDescriptor.imageViews = {visibilityImageView, outputImageView, depthStencilImageView};
-		visibilityFramebufferDescriptor.extent = swapchain->getExtent();
-
-		SET_DEBUG_NAME(visibilityFramebufferDescriptor, "Visibility");
-
-		return createFramebuffer(visibilityFramebufferDescriptor);
+		return createFramebuffer({
+			.renderPass = visibilityRenderPass,
+			.imageViews = {
+				visibilityImageView,
+				outputImageView,
+				depthStencilImageView,
+			},
+			.extent = getSwapchain()->getExtent(),
+			#if defined(BUILD_MODE_DEBUG)
+				.name = "Visibility",
+			#endif
+		});
 	}
 }

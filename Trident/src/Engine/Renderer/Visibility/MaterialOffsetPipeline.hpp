@@ -7,18 +7,23 @@
 
 namespace Trident {
 	ref<ComputePipeline> VisibilityRenderer::createMaterialOffsetPipeline() const {
-		ShaderModuleDescriptor materialOffsetShaderModuleDescriptor{};
-		materialOffsetShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
-		materialOffsetShaderModuleDescriptor.entryPoint = "main";
+		const ref<ShaderModule> shaderModule = loadInternalShaderModule(
+			{
+				.stage = ShaderStage::COMPUTE,
+				.entryPoint = "main",
+				#if defined(BUILD_MODE_DEBUG)
+					.name = "Material offset",
+				#endif
+			},
+			"Visibility/MaterialOffset.comp"
+		);
 
-		SET_DEBUG_NAME(materialOffsetShaderModuleDescriptor, "Material offset");
-
-		ComputePipelineDescriptor materialOffsetPipelineDescriptor{};
-		materialOffsetPipelineDescriptor.pipelineLayout = materialOffsetPipelineLayout;
-		materialOffsetPipelineDescriptor.computeShaderModule = loadInternalShaderModule(materialOffsetShaderModuleDescriptor, "Visibility/MaterialOffset.comp");
-
-		SET_DEBUG_NAME(materialOffsetPipelineDescriptor, "Material offset");
-
-		return createComputePipeline(materialOffsetPipelineDescriptor);
+		return createComputePipeline({
+			.pipelineLayout = materialOffsetPipelineLayout,
+			.computeShaderModule = shaderModule,
+			#if defined(BUILD_MODE_DEBUG)
+				.name = "Material offset",
+			#endif
+		});
 	}
 }

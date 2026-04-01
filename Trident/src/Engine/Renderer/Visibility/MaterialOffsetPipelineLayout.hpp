@@ -7,11 +7,11 @@
 
 namespace Trident {
 	ref<PipelineLayout> VisibilityRenderer::createMaterialOffsetPipelineLayout() const {
-		PipelineLayoutDescriptor materialOffsetPipelineLayoutDescriptor{};
-		materialOffsetPipelineLayoutDescriptor.descriptorSetLayouts = {materialOffsetDescriptorSetLayout};
-
-		SET_DEBUG_NAME(materialOffsetPipelineLayoutDescriptor, "Material offset");
-
-		return createPipelineLayout(materialOffsetPipelineLayoutDescriptor);
+		return createPipelineLayout({
+			.descriptorSetLayouts = {materialOffsetDescriptorSetLayout},
+			#if defined(BUILD_MODE_DEBUG)
+				.name = "Material offset",
+			#endif
+		});
 	}
 }

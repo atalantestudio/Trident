@@ -7,11 +7,11 @@
 
 namespace Trident {
 	ref<PipelineLayout> VisibilityRenderer::createMaterialCoordinatePipelineLayout() const {
-		PipelineLayoutDescriptor materialCoordinatePipelineLayoutDescriptor{};
-		materialCoordinatePipelineLayoutDescriptor.descriptorSetLayouts = {materialCoordinateDescriptorSetLayout};
-
-		SET_DEBUG_NAME(materialCoordinatePipelineLayoutDescriptor, "Material coordinate");
-
-		return createPipelineLayout(materialCoordinatePipelineLayoutDescriptor);
+		return createPipelineLayout({
+			.descriptorSetLayouts = {materialCoordinateDescriptorSetLayout},
+			#if defined(BUILD_MODE_DEBUG)
+				.name = "Material coordinate",
+			#endif
+		});
 	}
 }

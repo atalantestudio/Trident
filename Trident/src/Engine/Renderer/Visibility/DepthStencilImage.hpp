@@ -9,28 +9,33 @@ namespace Trident {
 	ref<Image> VisibilityRenderer::createDepthStencilImage() const {
 		const Extent2D swapchainExtent = getSwapchain()->getExtent();
 
-		AttachmentImageDescriptor depthStencilAttachmentImageDescriptor{};
-		depthStencilAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
-		depthStencilAttachmentImageDescriptor.extent.width = swapchainExtent.width;
-		depthStencilAttachmentImageDescriptor.extent.height = swapchainExtent.height;
-		depthStencilAttachmentImageDescriptor.extent.depth = 1;
-		depthStencilAttachmentImageDescriptor.mipLevelCount = 1;
-		depthStencilAttachmentImageDescriptor.layerCount = 1;
-
-		SET_DEBUG_NAME(depthStencilAttachmentImageDescriptor, "Depth stencil");
-
-		return visibilityRenderPass->createDepthStencilAttachmentImage(depthStencilAttachmentImageDescriptor, 0);
+		return visibilityRenderPass->createDepthStencilAttachmentImage(
+			{
+				.type = ImageType::TEXTURE_2D,
+				.extent = {
+					.width = swapchainExtent.width,
+					.height = swapchainExtent.height,
+					.depth = 1,
+				},
+				.mipLevelCount = 1,
+				.layerCount = 1,
+				#if defined(BUILD_MODE_DEBUG)
+					.name = "Depth stencil",
+				#endif
+			},
+			0
+		);
 	}
 
 	ref<ImageView> VisibilityRenderer::createDepthStencilImageView() {
-		ImageViewDescriptor depthStencilImageViewDescriptor{};
-		depthStencilImageViewDescriptor.mipLevelOffset = 0;
-		depthStencilImageViewDescriptor.mipLevelCount = 1;
-		depthStencilImageViewDescriptor.layerOffset = 0;
-		depthStencilImageViewDescriptor.layerCount = 1;
-
-		SET_DEBUG_NAME(depthStencilImageViewDescriptor, "Depth stencil");
-
-		return depthStencilImage->createView(depthStencilImageViewDescriptor);
+		return depthStencilImage->createView({
+			.mipLevelOffset = 0,
+			.mipLevelCount = 1,
+			.layerOffset = 0,
+			.layerCount = 1,
+			#if defined(BUILD_MODE_DEBUG)
+				.name = "Depth stencil",
+			#endif
+		});
 	}
 }

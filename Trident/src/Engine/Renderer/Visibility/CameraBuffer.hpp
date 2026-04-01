@@ -7,14 +7,14 @@
 
 namespace Trident {
 	ref<Buffer<VisibilityRenderer::Camera>> VisibilityRenderer::createCameraBuffer() const {
-		BufferDescriptor cameraBuffer{};
-		cameraBuffer.size = sizeof(Camera);
-		cameraBuffer.usage = BufferUsage::UNIFORM;
-		cameraBuffer.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-		cameraBuffer.persistent = true;
-
-		SET_DEBUG_NAME(cameraBuffer, "Camera");
-
-		return createBuffer<Camera>(cameraBuffer);
+		return createBuffer<Camera>({
+			.size = sizeof(Camera),
+			.usage = BufferUsage::UNIFORM,
+			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
+			.persistent = true,
+			#if defined(BUILD_MODE_DEBUG)
+				.name = "Camera",
+			#endif
+		});
 	}
 }

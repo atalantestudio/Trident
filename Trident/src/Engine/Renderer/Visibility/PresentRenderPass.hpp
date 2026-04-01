@@ -7,16 +7,18 @@
 
 namespace Trident {
 	ref<Subpass> VisibilityRenderer::createPresentSubpass() const {
-		AttachmentReference writeSwapchainAttachmentReference{};
-		writeSwapchainAttachmentReference.index = 0;
-		writeSwapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-
-		SubpassDescriptor presentSubpassDescriptor{};
-		presentSubpassDescriptor.colorAttachmentReferences = {writeSwapchainAttachmentReference};
-
-		return createSubpass(presentSubpassDescriptor);
+		return createSubpass({
+			.colorAttachmentReferences = {
+				// Swapchain
+				{
+					.index = 0,
+					.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
+				},
+			},
+		});
 	}
 
+	// TODO(visibility/debug): Restore.
 	/* ref<Subpass> VisibilityRenderer::createDebugPresentSubpass() const {
 		AttachmentReference writeSwapchainAttachmentReference{};
 		writeSwapchainAttachmentReference.index = 0;
@@ -40,21 +42,25 @@ namespace Trident {
 	ref<RenderPass> VisibilityRenderer::createPresentRenderPass() const {
 		const ref<Subpass> presentSubpass = createPresentSubpass();
 
-		// TODO: Restore debug present subpass.
+		// TODO(visibility/debug): Restore.
 		// const ref<Subpass> debugPresentSubpass = createDebugPresentSubpass();
 
-		Attachment swapchainAttachment{};
-		swapchainAttachment.format = getSurface()->getFormat();
-		swapchainAttachment.sampleCount = 1;
-		swapchainAttachment.loadOperation = LoadOperation::CLEAR;
-		swapchainAttachment.storeOperation = StoreOperation::STORE;
-		swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
-
-		RenderPassDescriptor renderPassDescriptor{};
-		renderPassDescriptor.attachments = {swapchainAttachment};
-		renderPassDescriptor.subpasses = {presentSubpass/*, debugPresentSubpass */};
-		renderPassDescriptor.subpassDependencies = {};
-
-		return createRenderPass(renderPassDescriptor);
+		return createRenderPass({
+			.attachments = {
+				// Swapchain
+				{
+					.format = getSurface()->getFormat(),
+					.sampleCount = 1,
+					.loadOperation = LoadOperation::CLEAR,
+					.storeOperation = StoreOperation::STORE,
+					.finalLayout = ImageLayout::PRESENT_SRC,
+				},
+			},
+			.subpasses = {
+				presentSubpass,
+				// debugPresentSubpass,
+			},
+			.subpassDependencies = {},
+		});
 	}
 }

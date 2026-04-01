@@ -7,15 +7,15 @@
 
 namespace Trident {
 	ref<PipelineLayout> VisibilityRenderer::createVisibilityPipelineLayout() const {
-		PipelineLayoutDescriptor visibilityPipelineLayoutDescriptor{};
-		visibilityPipelineLayoutDescriptor.descriptorSetLayouts = {
-			cameraDescriptorSetLayout,
-			clusterDescriptorSetLayout,
-			instanceDescriptorSetLayout,
-		};
-
-		SET_DEBUG_NAME(visibilityPipelineLayoutDescriptor, "Visibility");
-
-		return createPipelineLayout(visibilityPipelineLayoutDescriptor);
+		return createPipelineLayout({
+			.descriptorSetLayouts = {
+				cameraDescriptorSetLayout,
+				clusterDescriptorSetLayout,
+				instanceDescriptorSetLayout,
+			},
+			#if defined(BUILD_MODE_DEBUG)
+				.name = "Visibility",
+			#endif
+		});
 	}
 }

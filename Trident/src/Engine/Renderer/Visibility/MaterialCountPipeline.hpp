@@ -7,18 +7,23 @@
 
 namespace Trident {
 	ref<ComputePipeline> VisibilityRenderer::createMaterialCountPipeline() const {
-		ShaderModuleDescriptor materialCountShaderModuleDescriptor{};
-		materialCountShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
-		materialCountShaderModuleDescriptor.entryPoint = "main";
+		const ref<ShaderModule> shaderModule = loadInternalShaderModule(
+			{
+				.stage = ShaderStage::COMPUTE,
+				.entryPoint = "main",
+				#if defined(BUILD_MODE_DEBUG)
+					.name = "Material count",
+				#endif
+			},
+			"Visibility/MaterialCount.comp"
+		);
 
-		SET_DEBUG_NAME(materialCountShaderModuleDescriptor, "Material count");
-
-		ComputePipelineDescriptor materialCountPipelineDescriptor{};
-		materialCountPipelineDescriptor.pipelineLayout = materialCountPipelineLayout;
-		materialCountPipelineDescriptor.computeShaderModule = loadInternalShaderModule(materialCountShaderModuleDescriptor, "Visibility/MaterialCount.comp");
-
-		SET_DEBUG_NAME(materialCountPipelineDescriptor, "Material count");
-
-		return createComputePipeline(materialCountPipelineDescriptor);
+		return createComputePipeline({
+			.pipelineLayout = materialCountPipelineLayout,
+			.computeShaderModule = shaderModule,
+			#if defined(BUILD_MODE_DEBUG)
+				.name = "Material count",
+			#endif
+		});
 	}
 }
