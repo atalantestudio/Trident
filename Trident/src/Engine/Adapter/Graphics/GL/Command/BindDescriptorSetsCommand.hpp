@@ -27,7 +27,9 @@ namespace Trident {
 				for (const ref<Trident::DescriptorSet> descriptorSet : descriptorSets) {
 					const ref<GL::DescriptorSet> glDescriptorSet = std::static_pointer_cast<GL::DescriptorSet>(descriptorSet);
 
-					for (uint32 bindingIndex = 0; bindingIndex < glDescriptorSet->bindings.count(); bindingIndex += 1) {
+					uint32 bindingIndex = 0;
+
+					while (bindingIndex < glDescriptorSet->bindings.count()) {
 						const GL::DescriptorSet::DescriptorSetBinding& descriptorSetBinding = glDescriptorSet->bindings[bindingIndex];
 
 						if (isBufferDescriptorType(descriptorSetBinding.descriptorType)) {
@@ -37,24 +39,25 @@ namespace Trident {
 
 							const GLenum target = getBufferDescriptorType(descriptorSetBinding.descriptorType);
 
-							for (uint32 descriptorBufferIndex = 0; descriptorBufferIndex < descriptorSetBinding.descriptorBuffers.count(); descriptorBufferIndex += 1) {
+							uint32 descriptorBufferIndex = 0;
+
+							while (descriptorBufferIndex < descriptorSetBinding.descriptorBuffers.count()) {
 								const DescriptorBuffer& descriptorBuffer = descriptorSetBinding.descriptorBuffers[descriptorBufferIndex];
+								const GLuint index = descriptorSetLayoutOffset + bindingIndex + descriptorBufferIndex;
 
 								#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-									glBindBufferRange(
-										target,
-										descriptorSetLayoutOffset + bindingIndex + descriptorBufferIndex,
-										std::static_pointer_cast<GL::BaseBuffer>(descriptorBuffer.buffer)->buffer,
-										descriptorBuffer.offset,
-										descriptorBuffer.size
-									);
+									glBindBufferRange(target, index, std::static_pointer_cast<GL::BaseBuffer>(descriptorBuffer.buffer)->buffer, descriptorBuffer.offset, descriptorBuffer.size);
 								#else
 									ENGINE_ERROR_UNSUPPORTED();
 								#endif
+
+								descriptorBufferIndex += 1;
 							}
 						}
 						else if (isImageDescriptorType(descriptorSetBinding.descriptorType)) {
-							for (GLuint descriptorImageIndex = 0; descriptorImageIndex < descriptorSetBinding.descriptorImages.count(); descriptorImageIndex += 1) {
+							GLuint descriptorImageIndex = 0;
+
+							while (descriptorImageIndex < descriptorSetBinding.descriptorImages.count()) {
 								const DescriptorImage& descriptorImage = descriptorSetBinding.descriptorImages[descriptorImageIndex];
 								const ref<GL::ImageView> imageView = std::static_pointer_cast<GL::ImageView>(descriptorImage.imageView);
 								const GL::Image* image = static_cast<const GL::Image*>(imageView->getImage());
@@ -96,11 +99,15 @@ namespace Trident {
 										ENGINE_ERROR_UNSUPPORTED();
 									#endif
 								}
+
+								descriptorImageIndex += 1;
 							}
 						}
 						else {
 							ADAPTER_ASSERT(false, "The descriptor must either have a buffer type or an image type.");
 						}
+
+						bindingIndex += 1;
 					}
 
 					descriptorSetLayoutOffset += static_cast<uint32>(glDescriptorSet->bindings.count());
