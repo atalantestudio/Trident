@@ -86,9 +86,8 @@ namespace Trident {
 
 			ref<Buffer<DrawIndirectCommand>> createVisibilityIndirectBuffer() const;
 			ref<Buffer<Camera>> createCameraBuffer() const;
-			ref<Buffer<uint8>> createDataBuffer() const;
+			ref<Buffer<uint8>> createDataBuffer(uint64 size) const;
 			ref<Buffer<ClusteredInstance>> createInstanceBuffer() const;
-			void createGeometryBuffer();
 			ref<Buffer<uint32>> createMaterialCountBuffer() const;
 			ref<Buffer<uint32>> createMaterialOffsetBuffer() const;
 			ref<Buffer<DispatchIndirectCommand>> createMaterialIndirectBuffer() const;
@@ -106,11 +105,8 @@ namespace Trident {
 
 			void allocateDescriptorSets();
 
-			void fillSceneBuffers() const;
-
 			void writeVisibilityIndirectCommand() const;
-			void updateDataRegionSizes();
-			void updateBufferDescriptorSets();
+			void updateBufferDescriptorSets(uint64 vertexPositionComponentRegionSize, uint64 vertexNormalComponentRegionSize, uint64 vertexTextureCoordinateComponentRegionSize, uint64 vertexPositionIndexRegionSize, uint64 vertexNormalIndexRegionSize, uint64 vertexTextureCoordinateIndexRegionSize, uint64 clusterRegionSize, uint64 geometryRegionSize);
 			void updateDebugInputAttachmentDescriptorSets();
 
 			bool onWindowResize(WindowResizeEvent& event);
@@ -163,17 +159,10 @@ namespace Trident {
 			ref<Buffer<DrawIndirectCommand>> visibilityIndirectBuffer;
 			ref<Buffer<Camera>> cameraBuffer;
 
-			// TODO
-			// Contents:
-			// - Vertex position components
-			// - Vertex normal components
-			// - Vertex texture coordinate components
-			// - Vertex position indices
-			// - Vertex normal indices
-			// - Vertex texture coordinate indices
-			// - Clusters
-			// - Geometries
+			// Vertex position components, vertex normal components, vertex texture coordinate components,
+			// vertex position indices, vertex normal indices, vertex texture coordinate indices, clusters and geometries.
 			ref<Buffer<uint8>> dataBuffer;
+
 			ref<Buffer<ClusteredInstance>> instanceBuffer;
 
 			// Number of pixels used per material.
@@ -185,8 +174,8 @@ namespace Trident {
 			// Indirect arguments for material pipelines.
 			ref<Buffer<DispatchIndirectCommand>> materialIndirectBuffer;
 
+			// TODO: Use a 1D image instead.
 			// Screen pixels sorted by material index.
-			// TODO: Use 1D image instead.
 			ref<Buffer<uint32>> materialCoordinateBuffer;
 
 			ref<Image> visibilityImage;
@@ -200,15 +189,6 @@ namespace Trident {
 			ref<ImageView> depthStencilImageView;
 
 			ref<Sampler> materialImageSampler;
-
-			uint64 vertexPositionComponentRegionSize;
-			uint64 vertexNormalComponentRegionSize;
-			uint64 vertexTextureCoordinateComponentRegionSize;
-			uint64 vertexPositionIndexRegionSize;
-			uint64 vertexNormalIndexRegionSize;
-			uint64 vertexTextureCoordinateIndexRegionSize;
-			uint64 clusterRegionSize;
-			uint64 geometryRegionSize;
 
 			Camera* cameraMappedRange;
 			ClusteredInstance* instanceMappedRange;
