@@ -104,7 +104,7 @@ float3 calculateRayDirection(uint2 screenCoordinate) {
 	float4x4 projectionView = transpose(camera.projectionView);
 	projectionView[3] = float4(0.0, 0.0, 0.0, 1.0);
 
-	float4 far = mul(inverse(projectionView), float4(normalizedDeviceCoordinate, 1.0, 1.0));
+	float4 far = mul(inverse(transpose(projectionView)), float4(normalizedDeviceCoordinate, 1.0, 1.0));
 
 	return normalize(far.xyz / far.w);
 }
@@ -207,30 +207,29 @@ float3 Material(uint2 screenCoordinate) {
 
 	float dstThroughAtmosphere = min(earthHit.t0 - atmosphereHit.t0, atmosphereHit.t1);
 
+	float3 color = float3(1.0, 1.0, 1.0);
+	bool sun = false;
+
 	if (earthHit.t1 <= 0.0) {
 		Hit sunHit = intersectRaySphere(ray, SUN);
 
 		if (sunHit.t1 > 0.0) {
-			return SUN_COLOR;
-		}
-		else {
-			return float3(1.0, 1.0, 1.0);
+			sun = true;
+			color = SUN_COLOR;
 		}
 	}
-	else if (dstThroughAtmosphere > 0.0) {
+
+	if (!sun && dstThroughAtmosphere > 0.0) {
 		float3 p = ray.origin + ray.direction * (atmosphereHit.t0 + EPSILON);
 
 		if (earthHit.t0 < FLT_MAX) {
 			dstThroughAtmosphere = atmosphereHit.t1;
 		}
 
-		return calculateLight(p, ray.direction, dstThroughAtmosphere - EPSILON * 2.0);
-	}
-	else {
-		return float3(1.0, 1.0, 1.0);
+		color = calculateLight(p, ray.direction, dstThroughAtmosphere - EPSILON * 2.0);
 	}
 
-	return float3(1.0, 1.0, 1.0);
+	return color;
 }
 
 [numthreads(256, 1, 1)]
