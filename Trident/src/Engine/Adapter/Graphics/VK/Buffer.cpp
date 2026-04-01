@@ -9,21 +9,18 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	VK::BaseBuffer::BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor) :
-		Trident::BaseBuffer(device, descriptor)
+	VK::BaseBuffer::BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, uint32 stride) :
+		Trident::BaseBuffer(device, descriptor, stride)
 	{}
 
-	ref<Trident::BaseBuffer> VK::createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, UINT stride) {
+	ref<Trident::BaseBuffer> VK::createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, uint32 stride) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		const ref<VK::MemoryAllocator> memoryAllocator = std::static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
 		VkResult result;
 
-		ref<VK::BaseBuffer> buffer = createRef<VK::BaseBuffer>(device, descriptor);
-
-		// TODO: Set stride.
-		// buffer->stride = stride;
+		ref<VK::BaseBuffer> buffer = createRef<VK::BaseBuffer>(device, descriptor, stride);
 
 		VkBufferCreateInfo bufferCreateInfo{};
 		bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;

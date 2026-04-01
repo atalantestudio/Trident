@@ -10,8 +10,8 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	DX12::BaseBuffer::BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor) :
-		Trident::BaseBuffer(device, descriptor)
+	DX12::BaseBuffer::BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, uint32 stride) :
+		Trident::BaseBuffer(device, descriptor, stride)
 	{
 		if (descriptor.usage & BufferUsage::UNIFORM) {
 			// NOTE: Constant buffer views need to be aligned to 256.
@@ -19,12 +19,11 @@ namespace Trident {
 		}
 	}
 
-	ref<Trident::BaseBuffer> DX12::createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, UINT stride) {
+	ref<Trident::BaseBuffer> DX12::createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, uint32 stride) {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
 		HRESULT result;
 
-		ref<DX12::BaseBuffer> buffer = createRef<DX12::BaseBuffer>(device, descriptor);
-		buffer->stride = stride;
+		ref<DX12::BaseBuffer> buffer = createRef<DX12::BaseBuffer>(device, descriptor, stride);
 
 		D3D12_HEAP_PROPERTIES heapProperties{};
 		heapProperties.Type = getHeapType(descriptor.usage, descriptor.memoryProperties);

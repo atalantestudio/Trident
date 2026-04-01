@@ -19,6 +19,10 @@ namespace Trident {
 				return size;
 			}
 
+			inline uint32 getStride() const {
+				return stride;
+			}
+
 			/// Returns the buffer usage flags.
 			inline BufferUsage getUsage() const {
 				return usage;
@@ -37,11 +41,12 @@ namespace Trident {
 			void unmap() const;
 
 		protected:
-			explicit BaseBuffer(const Device* device, const BufferDescriptor& descriptor);
+			explicit BaseBuffer(const Device* device, const BufferDescriptor& descriptor, uint32 stride);
 
 		// TODO: Make private.
 		public:
 			uint64 size;
+			uint32 stride;
 			BufferUsage usage;
 
 			// TODO: Store memory suballocation.

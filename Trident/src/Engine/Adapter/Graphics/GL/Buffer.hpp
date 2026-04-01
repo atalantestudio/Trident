@@ -8,7 +8,7 @@
 namespace Trident {
 	class GL::BaseBuffer final : public Trident::BaseBuffer {
 		public:
-			explicit BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor);
+			explicit BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, uint32 stride);
 
 		public:
 			GLuint buffer;
@@ -22,7 +22,7 @@ namespace Trident {
 	};
 
 	namespace GL {
-		ref<Trident::BaseBuffer> createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, UINT stride);
+		ref<Trident::BaseBuffer> createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, uint32 stride);
 
 		void destroyBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer);
 

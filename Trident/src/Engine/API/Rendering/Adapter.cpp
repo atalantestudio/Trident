@@ -15,10 +15,11 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace Trident {
-	BaseBuffer::BaseBuffer(const Device* device, const BufferDescriptor& descriptor) :
+	BaseBuffer::BaseBuffer(const Device* device, const BufferDescriptor& descriptor, uint32 stride) :
 		device(device),
 		size(descriptor.size),
-		usage(descriptor.usage)
+		usage(descriptor.usage),
+		stride(stride)
 	{}
 
 	BaseBuffer::~BaseBuffer() {

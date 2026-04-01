@@ -8,7 +8,7 @@
 namespace Trident {
 	class DX12::BaseBuffer final : public Trident::BaseBuffer {
 		public:
-			explicit BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor);
+			explicit BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, uint32 stride);
 
 		public:
 			ID3D12Resource* resource;
@@ -20,7 +20,7 @@ namespace Trident {
 	};
 
 	namespace DX12 {
-		ref<Trident::BaseBuffer> createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, UINT stride);
+		ref<Trident::BaseBuffer> createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, uint32 stride);
 
 		void destroyBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer);
 

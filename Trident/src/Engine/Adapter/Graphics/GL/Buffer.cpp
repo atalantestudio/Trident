@@ -12,14 +12,14 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	GL::BaseBuffer::BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor) :
-		Trident::BaseBuffer(device, descriptor)
+	GL::BaseBuffer::BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, uint32 stride) :
+		Trident::BaseBuffer(device, descriptor, stride)
 	{}
 
-	ref<Trident::BaseBuffer> GL::createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, UINT stride) {
+	ref<Trident::BaseBuffer> GL::createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, uint32 stride) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ref<GL::BaseBuffer> buffer = createRef<GL::BaseBuffer>(device, descriptor);
+		ref<GL::BaseBuffer> buffer = createRef<GL::BaseBuffer>(device, descriptor, stride);
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 			glCreateBuffers(1, &buffer->buffer);
