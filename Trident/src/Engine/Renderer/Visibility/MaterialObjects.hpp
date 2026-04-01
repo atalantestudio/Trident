@@ -41,6 +41,7 @@ namespace Trident {
 
 		#if defined(BUILD_MODE_DEBUG)
 			sequence<char8> name;
+			sequence<char8> name1;
 		#endif
 
 		uint32 materialIndex = 0;
@@ -59,10 +60,10 @@ namespace Trident {
 
 				SET_DEBUG_NAME(materialComputeShaderModuleDescriptor, name);
 
-				name = Logger::format("Material []", materialIndex);
+				name1 = Logger::format("Material []", materialIndex);
 
-				SET_DEBUG_NAME(materialPipelineLayoutDescriptor, name);
-				SET_DEBUG_NAME(materialPipelineDescriptor, name);
+				SET_DEBUG_NAME(materialPipelineLayoutDescriptor, name1);
+				SET_DEBUG_NAME(materialPipelineDescriptor, name1);
 			#endif
 
 			if (material.descriptorSetLayoutBindings.count() > 0) {
