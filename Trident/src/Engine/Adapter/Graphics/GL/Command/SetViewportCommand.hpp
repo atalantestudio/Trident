@@ -8,36 +8,37 @@
 namespace Trident {
 	class GL::SetViewportCommand final : public GL::Command {
 		public:
-			explicit SetViewportCommand(GLint x, GLint y, GLsizei width, GLsizei height) :
-				x(x),
-				y(y),
-				width(width),
-				height(height)
+			explicit SetViewportCommand(vec2<float32> origin, vec2<float32> size, float32 minDepth, float32 maxDepth) :
+				origin(origin),
+				size(size),
+				minDepth(minDepth),
+				maxDepth(maxDepth)
 			{}
 
 			void execute() const final override {
-				GLint viewportX = x;
-				GLsizei viewportWidth = width;
-				GLint viewportY = y;
-				GLsizei viewportHeight = height;
+				GLint x = static_cast<GLint>(origin[0]);
+				GLint y = static_cast<GLint>(origin[1]);
+				GLsizei width = static_cast<GLsizei>(size[0]);
+				GLsizei height = static_cast<GLsizei>(size[1]);
 
 				if (width < 0.0f) {
-					viewportX += width;
-					viewportWidth = -width;
+					x += width;
+					width = -width;
 				}
 
 				if (height < 0.0f) {
-					viewportY += height;
-					viewportHeight = -height;
+					y += height;
+					height = -height;
 				}
 
-				glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
+				glViewport(x, y, width, height);
+				glDepthRange(minDepth, maxDepth);
 			}
 
 		private:
-			GLint x;
-			GLint y;
-			GLsizei width;
-			GLsizei height;
+			vec2<float32> origin;
+			vec2<float32> size;
+			float32 minDepth;
+			float32 maxDepth;
 	};
 }

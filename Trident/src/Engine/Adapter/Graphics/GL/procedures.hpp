@@ -15,6 +15,7 @@ namespace Trident {
 	extern PFNGLDELETETEXTURESPROC glDeleteTextures;
 	extern PFNGLDEPTHFUNCPROC glDepthFunc;
 	extern PFNGLDEPTHMASKPROC glDepthMask;
+	extern PFNGLDEPTHRANGEPROC glDepthRange;
 	extern PFNGLDETACHSHADERPROC glDetachShader;
 	extern PFNGLDISABLEPROC glDisable;
 	extern PFNGLENABLEPROC glEnable;

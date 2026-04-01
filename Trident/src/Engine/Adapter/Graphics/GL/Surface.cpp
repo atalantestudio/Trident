@@ -25,6 +25,7 @@ namespace Trident {
 			LOAD_PROCEDURE(glDeleteTextures);
 			LOAD_PROCEDURE(glDepthFunc);
 			LOAD_PROCEDURE(glDepthMask);
+			LOAD_PROCEDURE(glDepthRange);
 			LOAD_PROCEDURE(glDetachShader);
 			LOAD_PROCEDURE(glDisable);
 			LOAD_PROCEDURE(glEnable);

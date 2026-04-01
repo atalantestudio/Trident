@@ -42,10 +42,8 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
-
 		_commandEncoder->framebuffer = std::static_pointer_cast<GL::Framebuffer>(descriptor.framebuffer);
 		_commandEncoder->renderPass = std::static_pointer_cast<GL::RenderPass>(descriptor.framebuffer->getRenderPass());
-
 		_commandEncoder->commands.emplace_back(createRef<GL::BeginRenderPassCommand>(descriptor));
 	}
 
@@ -53,7 +51,6 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
-
 		_commandEncoder->computePipeline = std::static_pointer_cast<GL::ComputePipeline>(computePipeline);
 		_commandEncoder->commands.emplace_back(createRef<GL::BindComputePipelineCommand>(_commandEncoder->computePipeline));
 	}
@@ -71,7 +68,6 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
-
 		_commandEncoder->graphicsPipeline = std::static_pointer_cast<GL::GraphicsPipeline>(graphicsPipeline);
 
 		ADAPTER_ASSERT(_commandEncoder->graphicsPipeline->subpassIndex == _commandEncoder->subpassIndex, "The pipeline must be associated to the current subpass.");
@@ -83,11 +79,9 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
-
 		_commandEncoder->indexOffset = static_cast<uint32>(offset);
 		_commandEncoder->indexType = getIndexType(indexTypeSize);
 		_commandEncoder->indexTypeSize = indexTypeSize;
-
 		_commandEncoder->commands.emplace_back(createRef<GL::BindIndexBufferCommand>(
 			_commandEncoder->graphicsPipeline->vertexArray,
 			std::static_pointer_cast<GL::BaseBuffer>(indexBuffer)->buffer
@@ -98,7 +92,6 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
-
 		_commandEncoder->commands.emplace_back(createRef<GL::BindVertexBufferCommand>(
 			_commandEncoder->graphicsPipeline->vertexArray,
 			bindingIndex,
@@ -112,7 +105,6 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
-
 		_commandEncoder->commands.emplace_back(createRef<GL::CopyBufferToBufferCommand>(
 			std::static_pointer_cast<GL::BaseBuffer>(sourceBuffer),
 			std::static_pointer_cast<GL::BaseBuffer>(destinationBuffer),
@@ -124,7 +116,6 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
-
 		_commandEncoder->commands.emplace_back(createRef<GL::CopyBufferToImageCommand>(
 			std::static_pointer_cast<GL::BaseBuffer>(sourceBuffer),
 			std::static_pointer_cast<GL::Image>(destinationImage),
@@ -136,7 +127,6 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
-
 		_commandEncoder->commands.emplace_back(createRef<GL::CopyImageToBufferCommand>(
 			std::static_pointer_cast<GL::Image>(sourceImage),
 			std::static_pointer_cast<GL::BaseBuffer>(destinationBuffer),
@@ -158,13 +148,12 @@ namespace Trident {
 	void GL::dispatch(Trident::CommandEncoder* commandEncoder, uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
-
 		// TODO: Move in Trident::CommandEncoder::dispatch.
 		// ADAPTER_ASSERT(groupCountX <= limits.maxComputeWorkgroupCount[0], "Group count in the X axis must not exceed [].", limits.maxComputeWorkgroupCount[0]);
 		// ADAPTER_ASSERT(groupCountY <= limits.maxComputeWorkgroupCount[1], "Group count in the Y axis must not exceed [].", limits.maxComputeWorkgroupCount[1]);
 		// ADAPTER_ASSERT(groupCountZ <= limits.maxComputeWorkgroupCount[2], "Group count in the Z axis must not exceed [].", limits.maxComputeWorkgroupCount[2]);
 
+		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
 		_commandEncoder->commands.emplace_back(createRef<GL::DispatchCommand>(groupCountX, groupCountY, groupCountZ));
 	}
 
@@ -172,7 +161,6 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
-
 		_commandEncoder->commands.emplace_back(createRef<GL::DispatchIndirectCommand>(std::static_pointer_cast<GL::BaseBuffer>(buffer)->buffer, bufferOffset));
 	}
 
@@ -180,7 +168,6 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
-
 		_commandEncoder->commands.emplace_back(createRef<GL::DrawCommand>(
 			_commandEncoder->graphicsPipeline->primitiveTopology,
 			vertexOffset,
@@ -215,7 +202,6 @@ namespace Trident {
 		ADAPTER_ASSERT(drawCount > 0, "A DrawIndirect command must result in at least 1 draw call.");
 
 		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
-
 		_commandEncoder->commands.emplace_back(createRef<GL::DrawIndexedIndirectCommand>(
 			_commandEncoder->graphicsPipeline->primitiveTopology,
 			_commandEncoder->indexType,
@@ -234,7 +220,6 @@ namespace Trident {
 		ADAPTER_ASSERT(drawCount > 0, "A DrawIndirect command must result in at least 1 draw call.");
 
 		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
-
 		_commandEncoder->commands.emplace_back(createRef<GL::DrawIndirectCommand>(
 			_commandEncoder->graphicsPipeline->primitiveTopology,
 			std::static_pointer_cast<GL::BaseBuffer>(buffer)->buffer,
@@ -256,7 +241,6 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
-
 		_commandEncoder->commands.emplace_back(createRef<GL::EndRenderPassCommand>(_commandEncoder->framebuffer));
 	}
 
@@ -283,7 +267,6 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
-
 		_commandEncoder->subpassIndex += 1;
 
 		ADAPTER_ASSERT(_commandEncoder->subpassIndex < _commandEncoder->renderPass->getSubpassCount(), "All subpasses have been executed.");
@@ -295,7 +278,6 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
-
 		_commandEncoder->commands.clear();
 		_commandEncoder->framebuffer = nullptr;
 		_commandEncoder->renderPass = nullptr;
@@ -317,7 +299,6 @@ namespace Trident {
 		}
 
 		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
-
 		_commandEncoder->commands.emplace_back(createRef<GL::SetImageMemoryBarrierCommand>(barrier));
 
 		image->layout = newLayout;
@@ -327,7 +308,6 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
-
 		_commandEncoder->commands.emplace_back(createRef<GL::SetLineWidthCommand>(lineWidth));
 	}
 
@@ -335,7 +315,6 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
-
 		_commandEncoder->commands.emplace_back(createRef<GL::SetScissorCommand>(xOffset, yOffset, extent));
 	}
 
@@ -343,12 +322,6 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
-
-		_commandEncoder->commands.emplace_back(createRef<GL::SetViewportCommand>(
-			static_cast<GLint>(origin[0]),
-			static_cast<GLint>(origin[1]),
-			static_cast<GLsizei>(size[0]),
-			static_cast<GLsizei>(size[1])
-		));
+		_commandEncoder->commands.emplace_back(createRef<GL::SetViewportCommand>(origin, size, minDepth, maxDepth));
 	}
 }
