@@ -297,7 +297,7 @@ namespace Trident {
 		uint8* mappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
 
 		std::copy(scene->vertexPositionComponents.begin(), scene->vertexPositionComponents.end(), pointer_cast<float32*>(mappedRange));
-		mappedRange += vertexNormalComponentRegionSize;
+		mappedRange += vertexPositionComponentRegionSize;
 
 		std::copy(scene->vertexNormalComponents.begin(), scene->vertexNormalComponents.end(), pointer_cast<float32*>(mappedRange));
 		mappedRange += vertexNormalComponentRegionSize;
