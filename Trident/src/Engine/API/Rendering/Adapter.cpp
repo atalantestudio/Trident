@@ -391,21 +391,25 @@ namespace Trident {
 
 		DEBUG_ASSERT(attachment.sampleCount > 1 || (attachment.sampleCount == 1 && attachment.finalLayout != ImageLayout::PRESENT_SRC));
 
-		ImageDescriptor imageDescriptor{};
-		imageDescriptor.type = descriptor.type;
-		imageDescriptor.format = attachment.format;
-		imageDescriptor.extent = descriptor.extent;
-		imageDescriptor.mipLevelCount = descriptor.mipLevelCount;
-		imageDescriptor.layerCount = descriptor.layerCount;
-		imageDescriptor.sampleCount = attachment.sampleCount;
-		imageDescriptor.usage = ImageUsage::COLOR_ATTACHMENT | ImageUsage::TRANSIENT_ATTACHMENT | descriptor.additionalUsage;
-		imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
+		ImageUsage usage = ImageUsage::COLOR_ATTACHMENT | descriptor.additionalUsage;
 
-		#if defined(BUILD_MODE_DEBUG)
-			imageDescriptor.name = descriptor.name;
-		#endif
+		if (!(usage & ImageUsage::STORAGE)) {
+			usage |= ImageUsage::TRANSIENT_ATTACHMENT;
+		}
 
-		return Renderer::createImage(imageDescriptor);
+		return Renderer::createImage({
+			.type = descriptor.type,
+			.format = attachment.format,
+			.extent = descriptor.extent,
+			.mipLevelCount = descriptor.mipLevelCount,
+			.layerCount = descriptor.layerCount,
+			.sampleCount = attachment.sampleCount,
+			.usage = usage,
+			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED,
+			#if defined(BUILD_MODE_DEBUG)
+				.name = descriptor.name,
+			#endif
+		});
 	}
 
 	ref<Image> RenderPass::createDepthStencilAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 subpassIndex) const {
