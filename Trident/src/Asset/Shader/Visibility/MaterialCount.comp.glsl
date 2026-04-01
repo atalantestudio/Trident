@@ -60,7 +60,7 @@ void main() {
 		return;
 	}
 
-	uint visibility = uint(imageLoad(visibilityImage, ivec2(globalInvocationIndex)).r);
+	uint visibility = uint(imageLoad(visibilityImage, ivec2(globalInvocationIndex.x, camera.viewport.y - 1 - globalInvocationIndex.y)).r);
 	uint materialIndex = 0;
 
 	if (visibility > 0) {

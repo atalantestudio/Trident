@@ -68,7 +68,7 @@ void main() {
 	uint packedCoordinate = materialCoordinateBuffer[pixelIndex];
 	uvec2 coordinate = uvec2(packedCoordinate >> 16, packedCoordinate & 0xffffu);
 
-	uint visibility = uint(imageLoad(visibilityImage, ivec2(coordinate)).r);
+	uint visibility = uint(imageLoad(visibilityImage, ivec2(coordinate.x, camera.viewport.y - 1 - coordinate.y)).r);
 	uint clusterIndex = (visibility >> TRIANGLE_INDEX_BIT_COUNT) - 1;
 	uint clusterTriangleIndex = visibility & TRIANGLE_INDEX_BIT_MASK;
 	uint triangleIndex = clusterIndex * CLUSTER_TRIANGLE_COUNT + clusterTriangleIndex;
