@@ -39,7 +39,7 @@ namespace Trident {
 					glDrawBuffers(static_cast<GLsizei>(bufs.count()), &bufs[0]);
 				#endif
 
-				uint32 attachmentIndex = 0;
+				attachmentIndex = 0;
 
 				while (attachmentIndex < descriptor.clearValues.count()) {
 					const Attachment& attachment = renderPass->getAttachment(attachmentIndex);
@@ -63,18 +63,18 @@ namespace Trident {
 					}
 					else if (isSignedIntegerColorFormat(attachment.format)) {
 						#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-							glClearNamedFramebufferiv(framebuffer->framebuffer, GL_COLOR, attachmentIndex, pointer_cast<const GLint*>(clearValue.color));
+							glClearNamedFramebufferiv(framebuffer->framebuffer, GL_COLOR, attachmentIndex, clearValue.colorSigned);
 						#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
-							glClearBufferiv(GL_COLOR, attachmentIndex, clearValue.color);
+							glClearBufferiv(GL_COLOR, attachmentIndex, clearValue.colorSigned);
 						#else
 							ENGINE_ERROR_UNSUPPORTED();
 						#endif
 					}
 					else if (isUnsignedIntegerColorFormat(attachment.format)) {
 						#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-							glClearNamedFramebufferuiv(framebuffer->framebuffer, GL_COLOR, attachmentIndex, pointer_cast<const GLuint*>(clearValue.color));
+							glClearNamedFramebufferuiv(framebuffer->framebuffer, GL_COLOR, attachmentIndex, clearValue.colorUnsigned);
 						#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
-							glClearBufferuiv(GL_COLOR, attachmentIndex, clearValue.color);
+							glClearBufferuiv(GL_COLOR, attachmentIndex, clearValue.colorUnsigned);
 						#else
 							ENGINE_ERROR_UNSUPPORTED();
 						#endif

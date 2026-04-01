@@ -50,7 +50,7 @@ namespace Trident {
 
 		DEBUG_ASSERT(imageFormat < ImageFormat::count);
 
-		return imageFormat <= FIRST_UNSIGNED_INTEGER_FORMAT && imageFormat >= LAST_UNSIGNED_INTEGER_FORMAT;
+		return imageFormat >= FIRST_UNSIGNED_INTEGER_FORMAT && imageFormat <= LAST_UNSIGNED_INTEGER_FORMAT;
 	}
 
 	static ImageFormat findUnormFormat(uint8 channelCount, uint8 channelBitCount) {
@@ -68,27 +68,38 @@ namespace Trident {
 		}
 	}
 
-	static uint8 getChannelCount(ImageFormat imageFormat) {
-		switch (imageFormat) {
-			case ImageFormat::R8_UNORM:
-			case ImageFormat::R32_UINT: {
-				return 1;
-			}
-			case ImageFormat::R32G32_UINT: {
-				return 2;
-			}
-			case ImageFormat::R8G8B8_UNORM: {
-				return 3;
-			}
-			case ImageFormat::B8G8R8A8_UNORM:
-			case ImageFormat::R8G8B8A8_SRGB:
-			case ImageFormat::R8G8B8A8_UNORM: {
-				return 4;
-			}
-			default:
-				ENGINE_ASSERT(false, "Unsupported image format.");
+	static uint8 getByteSize(ImageFormat imageFormat) {
+		static constexpr uint8 BYTE_SIZES[] = {
+			sizeof(uint8),
+			sizeof(uint8) * 3,
+			sizeof(uint8) * 4,
+			sizeof(uint8) * 4,
+			sizeof(uint8) * 4,
+			sizeof(uint32),
+			sizeof(uint32) * 2,
+			sizeof(float32),
+			sizeof(float32) + sizeof(uint8), // D32_SFLOAT_S8_UINT
+			sizeof(uint32), // D24_UNORM_S8_UINT
+		};
 
-				return 0;
-		}
+		ENGINE_ASSERT(imageFormat < ImageFormat::count, "Invalid image format.");
+
+		return BYTE_SIZES[static_cast<uint32>(imageFormat)];
+	}
+
+	static uint8 getChannelCount(ImageFormat imageFormat) {
+		static constexpr uint8 CHANNEL_COUNTS[] = {
+			1,
+			3,
+			4,
+			4,
+			4,
+			1,
+			2,
+		};
+
+		ENGINE_ASSERT(imageFormat < ImageFormat::D32_SFLOAT, "Invalid image format");
+
+		return CHANNEL_COUNTS[static_cast<uint32>(imageFormat)];
 	}
 }

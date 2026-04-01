@@ -7,6 +7,7 @@
 #include "Engine/API/Rendering/ImageFormat.hpp"
 
 namespace Trident::GL {
+	// See https://registry.khronos.org/OpenGL-Refpages/es3.0/html/glTexImage2D.xhtml.
 	inline GLenum getFormat(ImageFormat imageFormat) {
 		static constexpr GLenum FORMATS[] = {
 			GL_RED,
@@ -26,6 +27,7 @@ namespace Trident::GL {
 		return FORMATS[static_cast<uint32>(imageFormat)];
 	}
 
+	// See https://registry.khronos.org/OpenGL-Refpages/es3.0/html/glTexImage2D.xhtml.
 	inline GLenum getInternalFormat(ImageFormat imageFormat) {
 		static constexpr GLenum INTERNAL_FORMATS[] = {
 			GL_R8,
@@ -43,6 +45,22 @@ namespace Trident::GL {
 		ADAPTER_ASSERT(imageFormat < ImageFormat::count, "Invalid image format.");
 
 		return INTERNAL_FORMATS[static_cast<uint32>(imageFormat)];
+	}
+
+	inline GLenum getType(ImageFormat imageFormat) {
+		static constexpr GLenum TYPES[] = {
+			GL_UNSIGNED_BYTE,
+			GL_UNSIGNED_BYTE,
+			GL_UNSIGNED_BYTE,
+			GL_UNSIGNED_BYTE,
+			GL_UNSIGNED_BYTE,
+			GL_UNSIGNED_INT,
+			GL_UNSIGNED_INT,
+		};
+
+		ADAPTER_ASSERT(imageFormat < ImageFormat::D32_SFLOAT, "Invalid image format.");
+
+		return TYPES[static_cast<uint32>(imageFormat)];
 	}
 
 	inline ImageFormat fromInternalFormat(GLenum internalFormat) {

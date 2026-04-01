@@ -6,9 +6,14 @@
 namespace Trident {
 	// TODO: Restore union.
 	struct ClearValue {
-		// TODO: Replace by vec4<float32>.
 		// The color image clear values to use when clearing a color image or attachment.
-		float32 color[4];
+		union {
+			// TODO: Replace by vec4<float32>.
+			float32 color[4];
+
+			sint32 colorSigned[4];
+			uint32 colorUnsigned[4];
+		};
 
 		// The depth clear value to use when clearing a depth image or attachment.
 		float32 depth = 0.0f;
