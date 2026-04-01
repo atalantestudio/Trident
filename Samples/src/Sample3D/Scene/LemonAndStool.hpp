@@ -6,7 +6,7 @@
 #include "Engine/API/Scene/Scene3D.hpp"
 
 namespace Trident {
-	Scene3D createLemonsAndStoolScene(AssetLibrary* assetLibrary) {
+	Scene3D createLemonsAndStoolScene(AssetLibrary* assetLibrary, GraphicsAPI graphicsApi) {
 		Scene3D scene;
 
 		const ref<GeometryAsset> lemonGeometryAsset = assetLibrary->getAsset<GeometryAsset>("lemon_1k");
@@ -23,7 +23,21 @@ namespace Trident {
 		defaultMaterial.descriptorSetLayoutBindings = {};
 
 		Material testMaterial{};
-		testMaterial.shaderModulePath = "Visibility/Material/Test";
+
+		switch (graphicsApi) {
+			case GraphicsAPI::DX12:
+			case GraphicsAPI::VK: {
+				testMaterial.shaderModulePath = "Visibility/Material/Test";
+
+				break;
+			}
+			case GraphicsAPI::GL: {
+				testMaterial.shaderModulePath = "Visibility/Material/TestGL";
+
+				break;
+			}
+		}
+
 		testMaterial.descriptorSetLayoutBindings = {};
 
 		const uint32 defaultMaterialIndex = scene.registerMaterial(defaultMaterial);

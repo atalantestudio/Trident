@@ -19,7 +19,7 @@ namespace Trident {
 				renderer.setLayer(this);
 				renderer.build();
 
-				scene = createLemonsAndStoolScene(getApplication()->getAssetLibrary());
+				scene = createLemonsAndStoolScene(getApplication()->getAssetLibrary(), renderer.getGraphicsApi());
 				scene.createVertexBuffer(renderer.getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment);
 				clusteredScene = clusterizeScene(scene);
 

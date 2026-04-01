@@ -7,7 +7,7 @@
 #include "Engine/API/Scene/Scene3D.hpp"
 
 namespace Trident {
-	Scene3D createBoxScene(AssetLibrary* assetLibrary) {
+	Scene3D createBoxScene(AssetLibrary* assetLibrary, GraphicsAPI graphicsApi) {
 		Scene3D scene;
 
 		const vec3<float32> size = {1.0_m, 1.0_m, 1.0_m};
@@ -19,7 +19,21 @@ namespace Trident {
 		defaultMaterial.descriptorSetLayoutBindings = {};
 
 		Material testMaterial{};
-		testMaterial.shaderModulePath = "Visibility/Material/Test";
+
+		switch (graphicsApi) {
+			case GraphicsAPI::DX12:
+			case GraphicsAPI::VK: {
+				testMaterial.shaderModulePath = "Visibility/Material/Test";
+
+				break;
+			}
+			case GraphicsAPI::GL: {
+				testMaterial.shaderModulePath = "Visibility/Material/TestGL";
+
+				break;
+			}
+		}
+
 		testMaterial.descriptorSetLayoutBindings = {};
 
 		const uint32 defaultMaterialIndex = scene.registerMaterial(defaultMaterial);
