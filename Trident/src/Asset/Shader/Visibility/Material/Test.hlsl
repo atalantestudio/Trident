@@ -18,8 +18,8 @@ cbuffer Camera : register(b0) {
 	Camera camera;
 }
 
-ByteAddressBuffer materialCoordinateBuffer : register(t0);
-ByteAddressBuffer materialOffsetBuffer : register(t1);
+ByteAddressBuffer materialOffsetBuffer : register(t0);
+ByteAddressBuffer materialCoordinateBuffer : register(t1);
 RWTexture2D<float4> outputImage : register(u0);
 Texture2D<uint> visibilityImage : register(t2);
 
