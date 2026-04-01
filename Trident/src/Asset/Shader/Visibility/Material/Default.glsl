@@ -35,7 +35,6 @@ const vec3 UP = vec3(0.0, 1.0, 0.0);
 const Sphere EARTH = Sphere(vec3(0.0, 0.0, 0.0), 0.4);
 const Sphere EARTH_ATMOSPHERE = Sphere(vec3(0.0, 0.0, 0.0), 1.0);
 const Sphere SUN = Sphere(vec3(0.0, 1000.0, 0.0), 10.0);
-// const Sphere SUN = Sphere(vec3(0.0, 0.0, 1000.0), 10.0);
 const vec3 SUN_COLOR = vec3(1.0, 0.95, 0.87);
 const float EPSILON = 0.0001;
 const vec3 WAVE_LENGTHS = vec3(630.0, 532.0, 465.0);
@@ -93,8 +92,6 @@ Hit intersectRaySphere(Ray ray, Sphere sphere) {
 
 			hit.t0 = near;
 			hit.t1 = far - near;
-
-			return hit;
 		}
 	}
 
@@ -200,7 +197,8 @@ void main() {
 		return;
 	}
 
-	uint packedCoordinate = materialCoordinateBuffer[globalInvocationIndex];
+	uint pixelIndex = globalInvocationIndex;
+	uint packedCoordinate = materialCoordinateBuffer[pixelIndex];
 	uvec2 screenCoordinate = uvec2(packedCoordinate >> 16, packedCoordinate & 0xffffu);
 
 	vec3 color = Material(screenCoordinate);
