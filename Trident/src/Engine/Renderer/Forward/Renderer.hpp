@@ -125,7 +125,8 @@ namespace Trident {
 				// TODO(GL): Allow the vertex buffer to be bound before setting a render pipeline.
 				// commandEncoder->bindVertexBuffer(0, instanceBuffer, 0, sizeof(Instance));
 
-				const view<ref<Geometry3D>> geometries = scene->getGeometries();
+				// TODO: Restore.
+				/* const view<ref<Geometry3D>> geometries = scene->getGeometries();
 				const view<Material> materials = scene->getMaterials();
 				const view<MaterialReference> materialReferences = scene->getFlatMaterialReferences();
 				const view<RigidBody3D> instances = scene->getInstances();
@@ -145,7 +146,7 @@ namespace Trident {
 					commandEncoder->draw(vertexCount, 1, indexOffset, instanceIndex);
 
 					instanceIndex += 1;
-				}
+				} */
 
 				commandEncoder->endRenderPass();
 			}

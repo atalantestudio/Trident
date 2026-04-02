@@ -7,7 +7,8 @@
 
 namespace Trident {
 	void ForwardRenderer::createMaterialObjects() {
-		// TODO: Use a larger extent, e.g. 4096 * 4096 * 1.
+		// TODO: Restore.
+		/* // TODO: Use a larger extent, e.g. 4096 * 4096 * 1.
 		static constexpr Extent3D IMAGE_EXTENT = {1024, 1024, 1};
 
 		const view<Material> materials = scene->getMaterials();
@@ -161,7 +162,6 @@ namespace Trident {
 		sequence<WriteDescriptorSet> writeDescriptorSets(materialBindingCount);
 
 		materialIndex = 0;
-		materialBindingCount = 0;
 
 		ImageViewDescriptor materialReferenceBindingImageViewDescriptor{};
 		materialReferenceBindingImageViewDescriptor.mipLevelOffset = 0;
@@ -244,7 +244,6 @@ namespace Trident {
 				commandEncoder->setImageMemoryBarrier(image, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
 				bindingIndex += 1;
-				materialBindingCount += 1;
 			}
 
 			materialIndex += 1;
@@ -255,6 +254,6 @@ namespace Trident {
 		queue->submit({commandEncoder->end()});
 		queue->waitIdle();
 
-		getDevice()->updateDescriptorSets(writeDescriptorSets);
+		getDevice()->updateDescriptorSets(writeDescriptorSets); */
 	}
 }

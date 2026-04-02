@@ -23,13 +23,13 @@
 #include "Engine/Renderer/Visibility/MaterialCountDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Visibility/MaterialCountPipeline.hpp"
 #include "Engine/Renderer/Visibility/MaterialCountPipelineLayout.hpp"
-#include "Engine/Renderer/Visibility/MaterialImageSampler.hpp"
-#include "Engine/Renderer/Visibility/MaterialIndirectBuffer.hpp"
 #include "Engine/Renderer/Visibility/MaterialObjects.hpp"
 #include "Engine/Renderer/Visibility/MaterialOffsetBuffer.hpp"
 #include "Engine/Renderer/Visibility/MaterialOffsetDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Visibility/MaterialOffsetPipeline.hpp"
 #include "Engine/Renderer/Visibility/MaterialOffsetPipelineLayout.hpp"
+#include "Engine/Renderer/Visibility/MaterialShaderImageSampler.hpp"
+#include "Engine/Renderer/Visibility/MaterialShaderIndirectBuffer.hpp"
 #include "Engine/Renderer/Visibility/OutputDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Visibility/OutputImage.hpp"
 #include "Engine/Renderer/Visibility/OutputPipeline.hpp"
@@ -82,7 +82,7 @@ namespace Trident {
 		cameraBuffer = createCameraBuffer();
 		cameraMappedRange = cameraBuffer->map(0, cameraBuffer->getSize());
 
-		materialImageSampler = createMaterialImageSampler();
+		materialShaderImageSampler = createMaterialShaderImageSampler();
 
 		updateViewport();
 	}
@@ -102,7 +102,7 @@ namespace Trident {
 		instanceBuffer = createInstanceBuffer();
 		materialCountBuffer = createMaterialCountBuffer();
 		materialOffsetBuffer = createMaterialOffsetBuffer();
-		materialIndirectBuffer = createMaterialIndirectBuffer();
+		materialShaderIndirectBuffer = createMaterialShaderIndirectBuffer();
 
 		instanceMappedRange = instanceBuffer->map(0, instanceBuffer->getSize());
 
@@ -273,16 +273,16 @@ namespace Trident {
 
 			commandEncoder->insertBufferMemoryBarriers({bufferMemoryBarrier});
 
-			uint32 materialIndex = 0;
+			uint32 materialShaderIndex = 0;
 
-			while (materialIndex < scene->materials.count()) {
-				commandEncoder->bindComputePipeline(materialPipelines[materialIndex]);
-				commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialIndex], 0, {materialBaseDescriptorSet});
+			while (materialShaderIndex < scene->materialShaders.size()) {
+				commandEncoder->bindComputePipeline(materialShaderPipelines[materialShaderIndex]);
+				commandEncoder->bindDescriptorSets(materialShaderPipelineLayouts[materialShaderIndex], 0, {materialBaseDescriptorSet});
 
-				// TODO: Use the material reference index to access the correct image descriptor layers.
-				commandEncoder->dispatchIndirect(materialIndirectBuffer, sizeof(DispatchIndirectCommand) * materialIndex);
+				// TODO(visibility/material-graph): Use the material index to access the correct image descriptor layers.
+				commandEncoder->dispatchIndirect(materialShaderIndirectBuffer, materialShaderIndex * sizeof(DispatchIndirectCommand));
 
-				materialIndex += 1;
+				materialShaderIndex += 1;
 			}
 		}
 
@@ -466,10 +466,10 @@ namespace Trident {
 			.offset = 0,
 			.size = materialOffsetBuffer->getSize(),
 		};
-		const DescriptorBuffer materialIndirectDescriptorBuffer = {
-			.buffer = materialIndirectBuffer,
+		const DescriptorBuffer materialShaderIndirectDescriptorBuffer = {
+			.buffer = materialShaderIndirectBuffer,
 			.offset = 0,
-			.size = materialIndirectBuffer->getSize(),
+			.size = materialShaderIndirectBuffer->getSize(),
 		};
 
 		WriteDescriptorSet cameraWriteDescriptorSet{};
@@ -567,10 +567,10 @@ namespace Trident {
 		materialOffsetWriteDescriptorSet.bindingIndex = 1;
 		materialOffsetWriteDescriptorSet.descriptorBuffers = {materialOffsetDescriptorBuffer};
 
-		WriteDescriptorSet materialIndirectWriteDescriptorSet{};
-		materialIndirectWriteDescriptorSet.descriptorSet = materialOffsetDescriptorSet;
-		materialIndirectWriteDescriptorSet.bindingIndex = 2;
-		materialIndirectWriteDescriptorSet.descriptorBuffers = {materialIndirectDescriptorBuffer};
+		WriteDescriptorSet materialShaderIndirectWriteDescriptorSet{};
+		materialShaderIndirectWriteDescriptorSet.descriptorSet = materialOffsetDescriptorSet;
+		materialShaderIndirectWriteDescriptorSet.bindingIndex = 2;
+		materialShaderIndirectWriteDescriptorSet.descriptorBuffers = {materialShaderIndirectDescriptorBuffer};
 
 		// Material coordinate descriptor set
 
@@ -641,7 +641,7 @@ namespace Trident {
 
 			materialOffsetCountWriteDescriptorSet,
 			materialOffsetWriteDescriptorSet,
-			materialIndirectWriteDescriptorSet,
+			materialShaderIndirectWriteDescriptorSet,
 
 			materialCoordinateCameraWriteDescriptorSet,
 			materialCoordinateClusterWriteDescriptorSet,

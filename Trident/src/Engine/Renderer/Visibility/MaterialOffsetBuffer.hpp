@@ -8,7 +8,7 @@
 namespace Trident {
 	ref<Buffer<uint32>> VisibilityRenderer::createMaterialOffsetBuffer() const {
 		return createBuffer<uint32>({
-			.size = scene->materials.count() * sizeof(uint32),
+			.size = scene->materialShaders.size() * sizeof(uint32),
 			.usage = BufferUsage::READ_WRITE_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,

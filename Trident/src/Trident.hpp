@@ -53,10 +53,6 @@
 // Geometry (3D)
 #include "Engine/API/Geometry/3D/BoxGeometry3D.hpp"
 
-// Material
-#include "Engine/API/Material/ColorMaterial.hpp"
-#include "Engine/API/Material/ColorFillStrokeMaterial.hpp"
-
 // Physics
 #include "Engine/API/Physics/RigidBody2D.hpp"
 #include "Engine/API/Physics/CCD/TimeOfImpact.hpp"

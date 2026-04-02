@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Engine/API/Material/Material.hpp"
+#include "Engine/API/Material/Shader.hpp"
 #include "Engine/API/Scene/Scene3D.hpp"
 
 namespace Trident {
@@ -10,66 +12,145 @@ namespace Trident {
 		Scene3D scene;
 
 		const ref<GeometryAsset> lemonGeometryAsset = assetLibrary->getAsset<GeometryAsset>("lemon_1k");
-		const ref<GeometryAsset> stoolGeometryAsset = assetLibrary->getAsset<GeometryAsset>("folding_wooden_stool");
+		const ref<GeometryAsset> foldingWoodenStoolGeometryAsset = assetLibrary->getAsset<GeometryAsset>("folding_wooden_stool");
 
 		const ref<Geometry3D> lemonGeometry = createRef<Geometry3D>(lemonGeometryAsset);
-		const ref<Geometry3D> stoolGeometry = createRef<Geometry3D>(stoolGeometryAsset);
+		const ref<Geometry3D> foldingWoodenStoolGeometry = createRef<Geometry3D>(foldingWoodenStoolGeometryAsset);
 
 		const uint32 lemonGeometryIndex = scene.registerGeometry(lemonGeometry);
-		const uint32 stoolGeometryIndex = scene.registerGeometry(stoolGeometry);
+		const uint32 foldingWoodenStoolGeometryIndex = scene.registerGeometry(foldingWoodenStoolGeometry);
 
-		Material defaultMaterial{};
-		defaultMaterial.shaderModulePath = "Visibility/Material/Default";
-		defaultMaterial.descriptorSetLayoutBindings = {};
+		const uint32 defaultMaterialShaderIndex = scene.registerMaterialShader({
+			.modulePath = "Visibility/Material/Default",
+			.descriptorSetLayoutBindings = {},
+		});
 
-		Material testMaterial{};
+		const uint32 defaultMaterialIndex = scene.registerMaterial({
+			.shaderIndex = defaultMaterialShaderIndex,
+			.writeDescriptorSetBindings = {},
+		});
+
+		Shader pbrMaterialShader = {
+			.descriptorSetLayoutBindings = {
+				// Ambient occlusion, roughness, metallic
+				{
+					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+					.descriptorCount = 1,
+					.shaderStages = ShaderStage::COMPUTE,
+				},
+
+				// Diffuse
+				{
+					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+					.descriptorCount = 1,
+					.shaderStages = ShaderStage::COMPUTE,
+				},
+
+				// Normal
+				{
+					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+					.descriptorCount = 1,
+					.shaderStages = ShaderStage::COMPUTE,
+				},
+			},
+		};
 
 		switch (graphicsApi) {
 			case GraphicsAPI::DX12:
 			case GraphicsAPI::VK: {
-				testMaterial.shaderModulePath = "Visibility/Material/Test";
+				pbrMaterialShader.modulePath = "Visibility/Material/Test";
 
 				break;
 			}
 			case GraphicsAPI::GL: {
-				testMaterial.shaderModulePath = "Visibility/Material/TestGL";
+				pbrMaterialShader.modulePath = "Visibility/Material/TestGL";
 
 				break;
 			}
 		}
 
-		testMaterial.descriptorSetLayoutBindings = {};
+		const uint32 pbrMaterialShaderIndex = scene.registerMaterialShader(pbrMaterialShader);
 
-		const uint32 defaultMaterialIndex = scene.registerMaterial(defaultMaterial);
-		const uint32 testMaterialIndex = scene.registerMaterial(testMaterial);
+		const uint32 lemonMaterialIndex = scene.registerMaterial({
+			.shaderIndex = pbrMaterialShaderIndex,
+			.writeDescriptorSetBindings = {
+				{
+					.descriptorImages = {
+						{
+							.assetPath = "lemon_arm_1k",
+						},
+					},
+				},
+				{
+					.descriptorImages = {
+						{
+							.assetPath = "lemon_diff_1k",
+						},
+					},
+				},
+				{
+					.descriptorImages = {
+						{
+							.assetPath = "lemon_nor_gl_1k",
+						},
+					},
+				},
+			},
+		});
 
-		MaterialReference testMaterialReference{};
-		testMaterialReference.materialIndex = testMaterialIndex;
-		testMaterialReference.descriptorImageAssetPaths = {};
+		const uint32 foldingWoodenStoolMaterialIndex = scene.registerMaterial({
+			.shaderIndex = pbrMaterialShaderIndex,
+			.writeDescriptorSetBindings = {
+				{
+					.descriptorImages = {
+						{
+							.assetPath = "lemon_arm_1k",
+						},
+					},
+				},
+				{
+					.descriptorImages = {
+						{
+							.assetPath = "lemon_diff_1k",
+						},
+					},
+				},
+				{
+					.descriptorImages = {
+						{
+							.assetPath = "lemon_nor_gl_1k",
+						},
+					},
+				},
+			},
+		});
 
-		const uint32 testMaterialReferenceIndex = scene.registerMaterialReference(testMaterialReference);
+		// Lemon 1
+		scene.registerInstance({
+			.position = {-0.1_m, 0.0_m, 0.3_m},
+			.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
+			.scale = {1.0f, 1.0f, 1.0f},
+			.geometryIndex = lemonGeometryIndex,
+			.materialIndex = lemonMaterialIndex,
+		});
 
-		SceneInstanceDescriptor lemon1InstanceDescriptor{};
-		lemon1InstanceDescriptor.position = {-0.1_m, 0.0_m, 0.3_m};
-		lemon1InstanceDescriptor.rotation = {0.0_rad, 0.0_rad, 0.0_rad};
-		lemon1InstanceDescriptor.geometryIndex = lemonGeometryIndex;
-		lemon1InstanceDescriptor.materialReferenceIndex = testMaterialReferenceIndex;
+		// Lemon 2
+		scene.registerInstance({
+			.position = {0.0_m, 0.0_m, 0.3_m},
+			.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
+			.scale = {1.0f, 1.0f, 1.0f},
+			.geometryIndex = lemonGeometryIndex,
+			.materialIndex = lemonMaterialIndex,
+		});
 
-		SceneInstanceDescriptor lemon2InstanceDescriptor{};
-		lemon2InstanceDescriptor.position = {0.0_m, 0.0_m, 0.3_m};
-		lemon2InstanceDescriptor.rotation = {0.0_rad, 0.0_rad, 0.0_rad};
-		lemon2InstanceDescriptor.geometryIndex = lemonGeometryIndex;
-		lemon2InstanceDescriptor.materialReferenceIndex = testMaterialReferenceIndex;
-
-		SceneInstanceDescriptor stoolInstanceDescriptor{};
-		stoolInstanceDescriptor.position = {0.5_m, -0.225_m, 1.0_m};
-		stoolInstanceDescriptor.rotation = {pi<float32>() * 0.5f, 0.3_rad, 0.0_rad};
-		stoolInstanceDescriptor.geometryIndex = stoolGeometryIndex;
-		stoolInstanceDescriptor.materialReferenceIndex = testMaterialReferenceIndex;
-
-		scene.registerInstance(lemon1InstanceDescriptor);
-		scene.registerInstance(lemon2InstanceDescriptor);
-		scene.registerInstance(stoolInstanceDescriptor);
+		// Folding wooden stool
+		scene.registerInstance({
+			.position = {0.5_m, -0.225_m, 1.0_m},
+			.rotation = {pi<float32>() * 0.5f, 0.3_rad, 0.0_rad},
+			.scale = {1.0f, 1.0f, 1.0f},
+			.geometryIndex = foldingWoodenStoolGeometryIndex,
+			.materialIndex = foldingWoodenStoolMaterialIndex,
+		});
 
 		return scene;
 	}

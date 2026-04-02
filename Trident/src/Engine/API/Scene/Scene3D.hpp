@@ -5,7 +5,7 @@
 
 #include "Engine/API/Geometry/3D/Geometry3D.hpp"
 #include "Engine/API/Material/Material.hpp"
-#include "Engine/API/Material/MaterialReference.hpp"
+#include "Engine/API/Material/Shader.hpp"
 #include "Engine/API/Physics/RigidBody3D.hpp"
 #include "Engine/API/Scene/Scene.hpp"
 
@@ -15,23 +15,18 @@ namespace Trident {
 		vec3<float32> rotation = {0.0_rad, 0.0_rad, 0.0_rad};
 		vec3<float32> scale = {1.0f, 1.0f, 1.0f};
 		uint32 geometryIndex;
-		uint32 materialReferenceIndex;
+		uint32 materialIndex;
 	};
 
 	class Scene3D : public Scene {
 		private:
 			static constexpr uint32 MAX_GEOMETRY_COUNT = 4;
-			static constexpr uint32 MAX_MATERIAL_COUNT = 16;
-			static constexpr uint32 MAX_MATERIAL_REFERENCE_COUNT = 32;
 			static constexpr uint32 MAX_INSTANCE_COUNT = 4;
 
 		public:
 			explicit Scene3D() :
 				geometries(MAX_GEOMETRY_COUNT),
 				vertexPositionIndexOffsets(MAX_GEOMETRY_COUNT),
-				materials(MAX_MATERIAL_COUNT),
-				materialReferences(MAX_MATERIAL_COUNT),
-				flatMaterialReferences(MAX_MATERIAL_REFERENCE_COUNT),
 				instances(MAX_INSTANCE_COUNT)
 			{}
 
@@ -67,7 +62,6 @@ namespace Trident {
 				return vertexTangentComponentBufferSize;
 			}
 
-
 			inline view<ref<Geometry3D>> getGeometries() const {
 				return view<ref<Geometry3D>>(&geometries[0], geometryCount);
 			}
@@ -80,36 +74,6 @@ namespace Trident {
 				DEBUG_ASSERT(geometryIndex < geometryCount);
 
 				return vertexPositionIndexOffsets[geometryIndex];
-			}
-
-			inline view<Material> getMaterials() const {
-				return view<Material>(&materials[0], materialCount);
-			}
-
-			inline uint32 getMaterialCount() const {
-				return materialCount;
-			}
-
-			inline uint32 getMaterialReferenceCount() const {
-				return materialReferenceCount;
-			}
-
-			inline const sequence<std::vector<MaterialReference>>& getAllMaterialReferences() const {
-				return materialReferences;
-			}
-
-			inline const sequence<MaterialReference>& getFlatMaterialReferences() const {
-				return flatMaterialReferences;
-			}
-
-			inline view<MaterialReference> getMaterialReferences(uint32 materialIndex) const {
-				const std::vector<MaterialReference>& references = materialReferences[materialIndex];
-
-				if (references.size() == 0) {
-					return {};
-				}
-
-				return view<MaterialReference>(&references[0], references.size());
 			}
 
 			inline view<RigidBody3D> getInstances() const {
@@ -138,6 +102,18 @@ namespace Trident {
 				return geometryInstanceCount;
 			}
 
+			inline const std::vector<Shader>& getMaterialShaders() const {
+				return materialShaders;
+			}
+
+			inline const std::vector<std::vector<Material>>& getMaterials() const {
+				return materials;
+			}
+
+			inline uint32 getMaterialShaderIndex(uint32 materialIndex) const {
+				return materialIndexToShaderIndex[materialIndex];
+			}
+
 			uint32 registerInstance(const SceneInstanceDescriptor& descriptor) {
 				DEBUG_ASSERT(descriptor.geometryIndex < geometryCount);
 				DEBUG_ASSERT(instanceCount < MAX_INSTANCE_COUNT);
@@ -149,7 +125,7 @@ namespace Trident {
 				rigidBody.rotation = descriptor.rotation;
 				rigidBody.scale = descriptor.scale;
 				rigidBody.geometryIndex = descriptor.geometryIndex;
-				rigidBody.materialReferenceIndex = descriptor.materialReferenceIndex;
+				rigidBody.materialIndex = descriptor.materialIndex;
 
 				rigidBody.updateTransform();
 
@@ -172,28 +148,31 @@ namespace Trident {
 				return geometryIndex;
 			}
 
-			uint32 registerMaterial(const Material& material) {
-				DEBUG_ASSERT(materialCount < MAX_MATERIAL_COUNT);
+			/// Registers a new material shader and returns its index.
+			uint32 registerMaterialShader(const Shader& materialShader) {
+				const uint32 materialShaderIndex = static_cast<uint32>(materialShaders.size());
 
-				const uint32 materialIndex = materialCount;
+				materialShaders.emplace_back(materialShader);
 
-				materials[materialIndex] = material;
-				materialCount += 1;
-
-				return materialIndex;
+				return materialShaderIndex;
 			}
 
-			uint32 registerMaterialReference(const MaterialReference& materialReference) {
-				DEBUG_ASSERT(materialReferenceCount < MAX_MATERIAL_REFERENCE_COUNT);
-				DEBUG_ASSERT(materialReference.materialIndex < MAX_MATERIAL_COUNT);
+			/// Registers a new material and returns its index.
+			uint32 registerMaterial(const Material& material) {
+				ENGINE_ASSERT(material.shaderIndex < materialShaders.size(), "Material is using an unregistered shader (index []).", material.shaderIndex);
 
-				const uint32 materialReferenceIndex = materialReferenceCount;
+				const uint32 materialIndex = currentMaterialIndex;
 
-				materialReferences[materialReference.materialIndex].emplace_back(materialReference);
-				flatMaterialReferences[materialReferenceCount] = materialReference;
-				materialReferenceCount += 1;
+				if (material.shaderIndex >= materials.size()) {
+					materials.resize(material.shaderIndex + 1);
+				}
 
-				return materialReferenceIndex;
+				materials[material.shaderIndex].emplace_back(material);
+				materialIndexToShaderIndex.emplace_back(material.shaderIndex);
+
+				currentMaterialIndex += 1;
+
+				return materialIndex;
 			}
 
 			void createVertexBuffer(uint64 minStorageBufferOffsetAlignment);
@@ -212,14 +191,14 @@ namespace Trident {
 
 			sequence<ref<Geometry3D>> geometries;
 			sequence<uint32> vertexPositionIndexOffsets;
-			sequence<Material> materials;
-			sequence<std::vector<MaterialReference>> materialReferences;
-			sequence<MaterialReference> flatMaterialReferences;
 			sequence<RigidBody3D> instances;
 			uint32 geometryCount = 0;
 			uint32 vertexPositionIndexOffset = 0;
-			uint32 materialCount = 0;
-			uint32 materialReferenceCount = 0;
 			uint32 instanceCount = 0;
+			uint32 currentMaterialIndex = 0;
+
+			std::vector<Shader> materialShaders;
+			std::vector<std::vector<Material>> materials;
+			std::vector<uint32> materialIndexToShaderIndex;
 	};
 }

@@ -6,7 +6,6 @@
 #include "Physics2DRenderer.hpp"
 
 #include "Engine/API/Geometry/Hull2D.hpp"
-#include "Engine/API/Material/ColorFillStrokeMaterial.hpp"
 #include "Engine/API/Physics/RigidBody2D.hpp"
 
 namespace Trident {

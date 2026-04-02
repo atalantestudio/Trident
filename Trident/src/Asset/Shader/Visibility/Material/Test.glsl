@@ -60,6 +60,17 @@ vec3 uintToColor(uint value) {
 	return color / 255.0;
 }
 
+// TODO
+// Material offset buffer:
+// We only retrieve the offsets at MATERIAL_INDEX and MATERIAL_INDEX - 1 (start and end). Since each shader has a descriptor set dedicated to material data we could put a selected range of the material offset buffer inside.
+// We can prefix the material offset buffer with a 0 to keep the start of the first material loadable.
+// In the material compute shaders we provide a range starting to 1 to avoid overwriting the 0.
+// 
+// Material coordinate buffer:
+// The material coordinate buffer is still needed in full. We don't know the number of contiguous values being sampled, nor we know where the range starts.
+// 
+// Visibility image:
+// Similar to the material coordinate buffer, the visibity image is needed in full.
 void main() {
 	uint globalInvocationIndex = gl_GlobalInvocationID.x;
 

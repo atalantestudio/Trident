@@ -90,7 +90,7 @@ namespace Trident {
 			ref<Buffer<ClusteredInstance>> createInstanceBuffer() const;
 			ref<Buffer<uint32>> createMaterialCountBuffer() const;
 			ref<Buffer<uint32>> createMaterialOffsetBuffer() const;
-			ref<Buffer<DispatchIndirectCommand>> createMaterialIndirectBuffer() const;
+			ref<Buffer<DispatchIndirectCommand>> createMaterialShaderIndirectBuffer() const;
 			ref<Buffer<uint32>> createMaterialCoordinateBuffer() const;
 
 			ref<Image> createVisibilityImage() const;
@@ -101,7 +101,7 @@ namespace Trident {
 			ref<ImageView> createOutputImageView();
 			ref<ImageView> createDepthStencilImageView();
 
-			ref<Sampler> createMaterialImageSampler() const;
+			ref<Sampler> createMaterialShaderImageSampler() const;
 
 			void allocateDescriptorSets();
 
@@ -127,7 +127,10 @@ namespace Trident {
 			ref<DescriptorSetLayout> materialOffsetDescriptorSetLayout;
 			ref<DescriptorSetLayout> materialCoordinateDescriptorSetLayout;
 			ref<DescriptorSetLayout> materialBaseDescriptorSetLayout;
-			sequence<ref<DescriptorSetLayout>> materialDescriptorSetLayouts;
+
+			// One for each unique material shader (which can be used by multiple materials).
+			sequence<ref<DescriptorSetLayout>> materialShaderUserDescriptorSetLayouts;
+
 			ref<DescriptorSetLayout> outputDescriptorSetLayout;
 			ref<DescriptorSetLayout> debugDescriptorSetLayout;
 
@@ -138,7 +141,10 @@ namespace Trident {
 			ref<DescriptorSet> materialOffsetDescriptorSet;
 			ref<DescriptorSet> materialCoordinateDescriptorSet;
 			ref<DescriptorSet> materialBaseDescriptorSet;
-			sequence<ref<DescriptorSet>> materialDescriptorSets;
+
+			// One for each unique material shader (which can be used by multiple materials).
+			sequence<ref<DescriptorSet>> materialShaderUserDescriptorSets;
+
 			ref<DescriptorSet> outputDescriptorSet;
 			ref<DescriptorSet> debugDescriptorSet;
 
@@ -146,7 +152,10 @@ namespace Trident {
 			ref<PipelineLayout> materialCountPipelineLayout;
 			ref<PipelineLayout> materialOffsetPipelineLayout;
 			ref<PipelineLayout> materialCoordinatePipelineLayout;
-			sequence<ref<PipelineLayout>> materialPipelineLayouts;
+
+			// One for each unique material shader (which can be used by multiple materials).
+			sequence<ref<PipelineLayout>> materialShaderPipelineLayouts;
+
 			ref<PipelineLayout> outputPipelineLayout;
 			// ref<PipelineLayout> debugPipelineLayout;
 
@@ -154,7 +163,10 @@ namespace Trident {
 			ref<ComputePipeline> materialCountPipeline;
 			ref<ComputePipeline> materialOffsetPipeline;
 			ref<ComputePipeline> materialCoordinatePipeline;
-			sequence<ref<ComputePipeline>> materialPipelines;
+
+			// One for each unique material shader (which can be used by multiple materials).
+			sequence<ref<ComputePipeline>> materialShaderPipelines;
+
 			ref<GraphicsPipeline> outputPipeline;
 			// ref<GraphicsPipeline> debugPipeline;
 
@@ -173,24 +185,24 @@ namespace Trident {
 			// Offset of the first pixel used per material.
 			ref<Buffer<uint32>> materialOffsetBuffer;
 
-			// Indirect arguments for material pipelines.
-			ref<Buffer<DispatchIndirectCommand>> materialIndirectBuffer;
+			// Indirect arguments for material shader pipelines.
+			ref<Buffer<DispatchIndirectCommand>> materialShaderIndirectBuffer;
 
 			// TODO: Use a 1D image instead.
 			// Screen pixels sorted by material index.
 			ref<Buffer<uint32>> materialCoordinateBuffer;
 
 			ref<Image> visibilityImage;
-			sequence<sequence<ref<Image>>> materialImages;
-			ref<Image> outputImage;
 			ref<Image> depthStencilImage;
+			sequence<sequence<ref<Image>>> materialShaderImages;
+			ref<Image> outputImage;
 
 			ref<ImageView> visibilityImageView;
 			sequence<ref<ImageView>> materialReferenceBindingImageViews;
 			ref<ImageView> outputImageView;
 			ref<ImageView> depthStencilImageView;
 
-			ref<Sampler> materialImageSampler;
+			ref<Sampler> materialShaderImageSampler;
 
 			Camera* cameraMappedRange;
 			ClusteredInstance* instanceMappedRange;

@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Material/Material.hpp"
-#include "Engine/API/Material/MaterialReference.hpp"
+#include "Engine/API/Material/Shader.hpp"
 #include "Engine/Build/Cluster.hpp"
 #include "Engine/Build/ClusteredGeometry.hpp"
 #include "Engine/Build/ClusteredInstance.hpp"
@@ -23,7 +23,7 @@ namespace Trident {
 		sequence<uint32> vertexNormalIndices;
 		sequence<uint32> vertexTextureCoordinateIndices;
 
-		sequence<Material> materials;
-		sequence<sequence<MaterialReference>> materialReferences;
+		std::vector<Shader> materialShaders;
+		std::vector<std::vector<Material>> materials;
 	};
 }

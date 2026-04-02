@@ -10,83 +10,109 @@ namespace Trident {
 	Scene3D createLemonsScene(AssetLibrary* assetLibrary, GraphicsAPI graphicsApi) {
 		Scene3D scene;
 
-		const ref<GeometryAsset> geometryAsset = assetLibrary->getAsset<GeometryAsset>("lemon_1k");
-		const ref<Geometry3D> geometry = createRef<Geometry3D>(geometryAsset);
-		const uint32 geometryIndex = scene.registerGeometry(geometry);
+		const ref<GeometryAsset> lemonGeometryAsset = assetLibrary->getAsset<GeometryAsset>("lemon_1k");
+		const ref<Geometry3D> lemonGeometry = createRef<Geometry3D>(lemonGeometryAsset);
+		const uint32 lemonGeometryIndex = scene.registerGeometry(lemonGeometry);
 
-		DescriptorSetLayoutBinding aoBinding{};
-		aoBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-		aoBinding.descriptorCount = 1;
-		aoBinding.shaderStages = ShaderStage::FRAGMENT;
+		Shader pbrMaterialShader = {
+			.descriptorSetLayoutBindings = {
+				// Ambient occlusion
+				{
+					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+					.descriptorCount = 1,
+					.shaderStages = ShaderStage::FRAGMENT,
+				},
 
-		DescriptorSetLayoutBinding roughnessBinding{};
-		roughnessBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-		roughnessBinding.descriptorCount = 1;
-		roughnessBinding.shaderStages = ShaderStage::FRAGMENT;
+				// Roughness
+				{
+					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+					.descriptorCount = 1,
+					.shaderStages = ShaderStage::FRAGMENT,
+				},
 
-		DescriptorSetLayoutBinding diffuseBinding{};
-		diffuseBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-		diffuseBinding.descriptorCount = 1;
-		diffuseBinding.shaderStages = ShaderStage::FRAGMENT;
+				// Diffuse
+				{
+					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+					.descriptorCount = 1,
+					.shaderStages = ShaderStage::FRAGMENT,
+				},
 
-		DescriptorSetLayoutBinding normalBinding{};
-		normalBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-		normalBinding.descriptorCount = 1;
-		normalBinding.shaderStages = ShaderStage::FRAGMENT;
-
-		Material material{};
+				// Normal
+				{
+					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+					.descriptorCount = 1,
+					.shaderStages = ShaderStage::FRAGMENT,
+				},
+			},
+		};
 
 		switch (graphicsApi) {
 			case GraphicsAPI::DX12:
 			case GraphicsAPI::VK: {
-				material.shaderModulePath = "Material/PBRSeparatedAORoughness.frag";
+				pbrMaterialShader.modulePath = "Material/PBRSeparatedAORoughness.frag";
 
 				break;
 			}
 			case GraphicsAPI::GL: {
-				material.shaderModulePath = "Material/PBRSeparatedAORoughnessSingleSet.frag";
+				pbrMaterialShader.modulePath = "Material/PBRSeparatedAORoughnessSingleSet.frag";
 
 				break;
 			}
 		}
 
-		material.descriptorSetLayoutBindings = {
-			aoBinding,
-			roughnessBinding,
-			diffuseBinding,
-			normalBinding,
-		};
+		const uint32 pbrMaterialShaderIndex = scene.registerMaterialShader(pbrMaterialShader);
 
-		const uint32 materialIndex = scene.registerMaterial(material);
+		const uint32 lemonMaterialIndex = scene.registerMaterial({
+			.shaderIndex = pbrMaterialShaderIndex,
+			.writeDescriptorSetBindings = {
+				{
+					.descriptorImages = {
+						{
+							.assetPath = "lemon_ao_1k",
+						},
+					},
+				},
+				{
+					.descriptorImages = {
+						{
+							.assetPath = "lemon_rough_1k",
+						},
+					},
+				},
+				{
+					.descriptorImages = {
+						{
+							.assetPath = "lemon_diff_1k",
+						},
+					},
+				},
+				{
+					.descriptorImages = {
+						{
+							.assetPath = "lemon_nor_gl_1k",
+						},
+					},
+				},
+			},
+		});
 
-		MaterialReference materialReference{};
-		materialReference.materialIndex = materialIndex;
-		materialReference.descriptorImageAssetPaths = {
-			"lemon_ao_1k",
-			"lemon_rough_1k",
-			"lemon_diff_1k",
-			"lemon_nor_gl_1k",
-		};
+		// Lemon 1
+		scene.registerInstance({
+			.position = {0.3_m, 0.0_m, 1.25_m},
+			.rotation = {-pi<float32>() * 0.5f, -0.2_rad, pi<float32>()},
+			.scale = {10.0f, 10.0f, 10.0f},
+			.geometryIndex = lemonGeometryIndex,
+			.materialIndex = lemonMaterialIndex,
+		});
 
-		const uint32 materialReferenceIndex = scene.registerMaterialReference(materialReference);
-
-		SceneInstanceDescriptor instance1Descriptor{};
-		instance1Descriptor.position = {0.3_m, 0.0_m, 1.25_m};
-		instance1Descriptor.rotation = {-pi<float32>() / 2.0f, -0.2_rad, pi<float32>()};
-		instance1Descriptor.scale = {10.0f, 10.0f, 10.0f};
-		instance1Descriptor.geometryIndex = geometryIndex;
-		instance1Descriptor.materialReferenceIndex = materialReferenceIndex;
-
-		scene.registerInstance(instance1Descriptor);
-
-		SceneInstanceDescriptor instance2Descriptor{};
-		instance2Descriptor.position = {-0.35_m, -0.2_m, 1.25_m};
-		instance2Descriptor.rotation = {-0.3_rad, -0.3_rad, pi<float32>() / 2.0f};
-		instance2Descriptor.scale = {10.0f, 10.0f, 10.0f};
-		instance2Descriptor.geometryIndex = geometryIndex;
-		instance2Descriptor.materialReferenceIndex = materialReferenceIndex;
-
-		scene.registerInstance(instance2Descriptor);
+		// Lemon 2
+		scene.registerInstance({
+			.position = {-0.35_m, -0.2_m, 1.25_m},
+			.rotation = {-0.3_rad, -0.3_rad, pi<float32>() * 0.5f},
+			.scale = {10.0f, 10.0f, 10.0f},
+			.geometryIndex = lemonGeometryIndex,
+			.materialIndex = lemonMaterialIndex,
+		});
 
 		return scene;
 	}

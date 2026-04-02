@@ -29,7 +29,8 @@ namespace Trident {
 			// NOTE: The scale of an entity isn't meant to be dynamically updated.
 			vec3<float32> scale = {1.0f, 1.0f, 1.0f};
 
+			// TODO: Remove.
 			uint32 geometryIndex;
-			uint32 materialReferenceIndex;
+			uint32 materialIndex;
 	};
 }

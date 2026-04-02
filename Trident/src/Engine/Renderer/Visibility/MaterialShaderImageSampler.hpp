@@ -6,7 +6,7 @@
 #include "Engine/Renderer/Visibility/Renderer.hpp"
 
 namespace Trident {
-	ref<Sampler> VisibilityRenderer::createMaterialImageSampler() const {
+	ref<Sampler> VisibilityRenderer::createMaterialShaderImageSampler() const {
 		return createSampler({
 			.magFilter = SamplerFilter::NEAREST,
 			.minFilter = SamplerFilter::NEAREST,
