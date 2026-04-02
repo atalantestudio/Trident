@@ -188,9 +188,9 @@ namespace Trident {
 		transferQueue->submit({commandBuffer});
 		transferQueue->waitIdle();
 
+		transitionOutputImage();
 		updateBufferDescriptorSets(vertexPositionComponentRegionSize, vertexNormalComponentRegionSize, vertexTextureCoordinateComponentRegionSize, vertexPositionIndexRegionSize, vertexNormalIndexRegionSize, vertexTextureCoordinateIndexRegionSize, clusterRegionSize, geometryRegionSize);
 		updateDebugInputAttachmentDescriptorSets();
-
 		createMaterialObjects();
 	}
 
@@ -214,7 +214,6 @@ namespace Trident {
 				.framebuffer = visibilityFramebuffer,
 				.clearValues = {
 					{0.0f, 0.0f, 0.0f, 1.0f},
-					{0.0f, 0.0f, 0.0f, 1.0f},
 					{
 						.depth = 1.0f,
 						.stencil = 0,
@@ -233,7 +232,6 @@ namespace Trident {
 		}
 
 		commandEncoder->setImageMemoryBarrier(visibilityImage, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
-		commandEncoder->setImageMemoryBarrier(outputImage, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
 		// Material compute pass
 		{
@@ -314,6 +312,7 @@ namespace Trident {
 
 	void VisibilityRenderer::resize(WindowResizeEvent& event) {
 		createFrameResources();
+		transitionOutputImage();
 		updateDebugInputAttachmentDescriptorSets();
 	}
 
@@ -375,6 +374,25 @@ namespace Trident {
 		materialBaseDescriptorSet = descriptorSets[6];
 		outputDescriptorSet = descriptorSets[7];
 		debugDescriptorSet = descriptorSets[8];
+	}
+
+	void VisibilityRenderer::transitionOutputImage() const {
+		// TODO: Avoid creating a command encoder for a single image transition?
+		const ref<Queue> graphicsQueue = getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
+		const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder({
+			.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
+			#if defined(BUILD_MODE_DEBUG)
+				.name = "Transition output image",
+			#endif
+		});
+
+		commandEncoder->begin();
+		commandEncoder->setImageMemoryBarrier(outputImage, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+
+		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+		graphicsQueue->submit({commandBuffer});
+		graphicsQueue->waitIdle();
 	}
 
 	void VisibilityRenderer::writeVisibilityIndirectCommand() const {

@@ -9,23 +9,23 @@ namespace Trident {
 	ref<Image> VisibilityRenderer::createOutputImage() const {
 		const Extent2D extent = getSwapchain()->getExtent();
 
-		return visibilityRenderPass->createColorAttachmentImage(
-			{
-				.type = ImageType::TEXTURE_2D,
-				.extent = {
-					.width = extent.width,
-					.height = extent.height,
-					.depth = 1,
-				},
-				.mipLevelCount = 1,
-				.layerCount = 1,
-				.additionalUsage = ImageUsage::STORAGE,
-				#if defined(BUILD_MODE_DEBUG)
-					.name = "Output",
-				#endif
+		return createImage({
+			.type = ImageType::TEXTURE_2D,
+			.format = ImageFormat::R8G8B8A8_UNORM,
+			.extent = {
+				.width = extent.width,
+				.height = extent.height,
+				.depth = 1,
 			},
-			1
-		);
+			.mipLevelCount = 1,
+			.layerCount = 1,
+			.sampleCount = 1,
+			.usage = ImageUsage::STORAGE,
+			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED,
+			#if defined(BUILD_MODE_DEBUG)
+				.name = "Output",
+			#endif
+		});
 	}
 
 	ref<ImageView> VisibilityRenderer::createOutputImageView() {

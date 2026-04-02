@@ -16,7 +16,7 @@ namespace Trident {
 				},
 			},
 			.depthStencilAttachmentReference = {
-				.index = 2,
+				.index = 1,
 				.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
 			},
 		});
@@ -30,15 +30,6 @@ namespace Trident {
 				// Visibility
 				{
 					.format = ImageFormat::R32_UINT,
-					.sampleCount = 1,
-					.loadOperation = LoadOperation::CLEAR,
-					.storeOperation = StoreOperation::UNDEFINED,
-					.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
-				},
-
-				// Output
-				{
-					.format = ImageFormat::R8G8B8A8_UNORM,
 					.sampleCount = 1,
 					.loadOperation = LoadOperation::CLEAR,
 					.storeOperation = StoreOperation::UNDEFINED,

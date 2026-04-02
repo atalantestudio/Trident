@@ -105,6 +105,8 @@ namespace Trident {
 
 			void allocateDescriptorSets();
 
+			void transitionOutputImage() const;
+
 			void writeVisibilityIndirectCommand() const;
 			void updateBufferDescriptorSets(uint64 vertexPositionComponentRegionSize, uint64 vertexNormalComponentRegionSize, uint64 vertexTextureCoordinateComponentRegionSize, uint64 vertexPositionIndexRegionSize, uint64 vertexNormalIndexRegionSize, uint64 vertexTextureCoordinateIndexRegionSize, uint64 clusterRegionSize, uint64 geometryRegionSize);
 			void updateDebugInputAttachmentDescriptorSets();

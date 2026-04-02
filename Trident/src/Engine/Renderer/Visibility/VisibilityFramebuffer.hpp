@@ -9,11 +9,7 @@ namespace Trident {
 	ref<Framebuffer> VisibilityRenderer::createVisibilityFramebuffer() const {
 		return createFramebuffer({
 			.renderPass = visibilityRenderPass,
-			.imageViews = {
-				visibilityImageView,
-				outputImageView,
-				depthStencilImageView,
-			},
+			.imageViews = {visibilityImageView, depthStencilImageView},
 			.extent = getSwapchain()->getExtent(),
 			#if defined(BUILD_MODE_DEBUG)
 				.name = "Visibility",
