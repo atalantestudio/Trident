@@ -20,10 +20,25 @@ namespace Trident {
 		const uint32 lemonGeometryIndex = scene.registerGeometry(lemonGeometry);
 		const uint32 foldingWoodenStoolGeometryIndex = scene.registerGeometry(foldingWoodenStoolGeometry);
 
-		const uint32 defaultMaterialShaderIndex = scene.registerMaterialShader({
-			.modulePath = "Visibility/Material/Default",
+		Shader defaultMaterialShader = {
 			.descriptorSetLayoutBindings = {},
-		});
+		};
+
+		switch (graphicsApi) {
+			case GraphicsAPI::DX12:
+			case GraphicsAPI::VK: {
+				defaultMaterialShader.modulePath = "Visibility/Material/Default";
+
+				break;
+			}
+			case GraphicsAPI::GL: {
+				defaultMaterialShader.modulePath = "Visibility/Material/DefaultGL";
+
+				break;
+			}
+		}
+
+		const uint32 defaultMaterialShaderIndex = scene.registerMaterialShader(defaultMaterialShader);
 
 		const uint32 defaultMaterialIndex = scene.registerMaterial({
 			.shaderIndex = defaultMaterialShaderIndex,

@@ -20,8 +20,8 @@ struct Cluster {
 struct Instance {
 	mat4x4 transform;
 	uint geometryIndex;
+	uint materialShaderIndex;
 	uint materialIndex;
-	uint materialReferenceIndex;
 	int clusterOffset;
 };
 
@@ -30,28 +30,16 @@ const uint TRIANGLE_INDEX_BIT_COUNT = 7;
 layout(set = 0, binding = 0) uniform readonly CameraBuffer {
 	Camera camera;
 };
-
 layout(set = 0, binding = 1, r32ui) uniform readonly uimage2D visibilityImage;
-
 layout(set = 0, binding = 2) buffer readonly ClusterBuffer {
 	Cluster clusterBuffer[];
 };
-
 layout(set = 0, binding = 3) buffer readonly InstanceBuffer {
 	Instance instanceBuffer[];
 };
-
 layout(set = 0, binding = 4) buffer writeonly MaterialCount {
 	uint materialCountBuffer[];
 };
-
-uint fetchInstanceIndex(uint clusterIndex) {
-	return clusterBuffer[clusterIndex].instanceIndex;
-}
-
-uint fetchMaterialIndex(uint instanceIndex) {
-	return instanceBuffer[instanceIndex].materialIndex;
-}
 
 void main() {
 	uvec2 globalInvocationIndex = gl_GlobalInvocationID.xy;
@@ -61,14 +49,14 @@ void main() {
 	}
 
 	uint visibility = imageLoad(visibilityImage, ivec2(globalInvocationIndex.x, camera.viewport.y - 1 - globalInvocationIndex.y)).r;
-	uint materialIndex = 0;
+	uint materialShaderIndex = 0;
 
 	if (visibility > 0) {
 		uint clusterIndex = (visibility >> TRIANGLE_INDEX_BIT_COUNT) - 1;
-		uint instanceIndex = fetchInstanceIndex(clusterIndex);
+		uint instanceIndex = clusterBuffer[clusterIndex].instanceIndex;
 
-		materialIndex = fetchMaterialIndex(instanceIndex);
+		materialShaderIndex = instanceBuffer[instanceIndex].materialShaderIndex;
 	}
 
-	atomicAdd(materialCountBuffer[materialIndex], 1);
+	atomicAdd(materialCountBuffer[materialShaderIndex], 1);
 }

@@ -1,7 +1,10 @@
-#version 430
+#version 310 es
 
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
+
+precision highp image2D;
+precision highp uimage2D;
 
 layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
 
@@ -13,33 +16,51 @@ struct Camera {
 	vec3 position;
 };
 
-const uint MATERIAL_INDEX = 1;
-const uint CLUSTER_TRIANGLE_COUNT = 128;
-const uint TRIANGLE_INDEX_BIT_COUNT = 7;
-const uint TRIANGLE_INDEX_BIT_MASK = CLUSTER_TRIANGLE_COUNT - 1;
+struct Cluster {
+	uint instanceIndex;
+};
 
-layout(set = 0, binding = 0) uniform readonly CameraBuffer {
+struct Instance {
+	mat4x4 transform;
+	uint geometryIndex;
+	uint materialShaderIndex;
+	uint materialIndex;
+	int clusterOffset;
+};
+
+struct Range {
+	uint start;
+	uint end;
+};
+
+const uint CLUSTER_TRIANGLE_COUNT = 128u;
+const uint TRIANGLE_INDEX_BIT_COUNT = 7u;
+const uint TRIANGLE_INDEX_BIT_MASK = CLUSTER_TRIANGLE_COUNT - 1u;
+
+layout(binding = 0) uniform readonly CameraBuffer {
 	Camera camera;
 };
-
-layout(set = 0, binding = 1) buffer readonly MaterialOffsetBuffer {
-	uint materialOffsetBuffer[];
-};
-
-layout(set = 0, binding = 2) buffer readonly MaterialCoordinateBuffer {
+layout(binding = 1) buffer readonly MaterialCoordinateBuffer {
 	uint materialCoordinateBuffer[];
 };
-
-layout(set = 0, binding = 3, rgba8) uniform writeonly image2D outputImage;
-
-layout(set = 0, binding = 4, r32ui) uniform readonly uimage2D visibilityImage;
+layout(binding = 2, rgba8) uniform writeonly image2D outputImage;
+layout(binding = 3, r32ui) uniform readonly uimage2D visibilityImage;
+layout(binding = 4) buffer readonly ClusterBuffer {
+	Cluster clusterBuffer[];
+};
+layout(binding = 5) buffer readonly InstanceBuffer {
+	Instance instanceBuffer[];
+};
+layout(binding = 6) buffer readonly MaterialOffsetBuffer {
+	Range materialShaderCoordinateIndexRange;
+};
 
 uint murmurMix(uint hash) {
 	uint value = hash;
 	value ^= value >> 16;
-	value *= 0x85ebca6b;
+	value *= 0x85ebca6bu;
 	value ^= value >> 13;
-	value *= 0xc2b2ae35;
+	value *= 0xc2b2ae35u;
 	value ^= value >> 16;
 
 	return value;
@@ -49,31 +70,29 @@ vec3 uintToColor(uint value) {
 	uint hash = murmurMix(value);
 
 	vec3 color = vec3(
-		float((hash >> 0) & 255),
-		float((hash >> 8) & 255),
-		float((hash >> 16) & 255)
+		float((hash >> 0) & 255u),
+		float((hash >> 8) & 255u),
+		float((hash >> 16) & 255u)
 	);
 
 	return color / 255.0;
 }
 
 void main() {
-	uint globalInvocationIndex = gl_GlobalInvocationID.x;
-
-	if (globalInvocationIndex >= materialOffsetBuffer[MATERIAL_INDEX]) {
+	if (gl_GlobalInvocationID.x >= materialShaderCoordinateIndexRange.end) {
 		return;
 	}
 
-	uint pixelIndex = materialOffsetBuffer[MATERIAL_INDEX - 1] + globalInvocationIndex;
+	uint pixelIndex = materialShaderCoordinateIndexRange.start + gl_GlobalInvocationID.x;
 	uint packedCoordinate = materialCoordinateBuffer[pixelIndex];
 	uvec2 screenCoordinate = uvec2(packedCoordinate >> 16, packedCoordinate & 0xffffu);
 
-	uint visibility = imageLoad(visibilityImage, ivec2(screenCoordinate.x, camera.viewport.y - 1 - screenCoordinate.y)).r;
-	uint clusterIndex = (visibility >> TRIANGLE_INDEX_BIT_COUNT) - 1;
-	uint clusterTriangleIndex = visibility & TRIANGLE_INDEX_BIT_MASK;
-	uint triangleIndex = clusterIndex * CLUSTER_TRIANGLE_COUNT + clusterTriangleIndex;
+	uint visibility = imageLoad(visibilityImage, ivec2(screenCoordinate.x, camera.viewport.y - 1u - screenCoordinate.y)).r;
+	uint clusterIndex = (visibility >> TRIANGLE_INDEX_BIT_COUNT) - 1u;
+	Cluster cluster = clusterBuffer[clusterIndex];
+	Instance instance = instanceBuffer[cluster.instanceIndex];
 
-	vec3 color = uintToColor(triangleIndex + 1);
+	vec3 color = uintToColor(instance.materialIndex + 1u);
 
 	imageStore(outputImage, ivec2(screenCoordinate), vec4(color, 1.0));
 }

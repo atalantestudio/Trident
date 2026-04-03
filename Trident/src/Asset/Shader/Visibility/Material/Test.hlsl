@@ -9,7 +9,18 @@ struct Camera {
 	float3 position;
 };
 
-static const uint MATERIAL_INDEX = 1;
+struct Cluster {
+	uint instanceIndex;
+};
+
+struct Instance {
+	float4x4 transform;
+	uint geometryIndex;
+	uint materialShaderIndex;
+	uint materialIndex;
+	int clusterOffset;
+};
+
 static const uint CLUSTER_TRIANGLE_COUNT = 128;
 static const uint TRIANGLE_INDEX_BIT_COUNT = 7;
 static const uint TRIANGLE_INDEX_BIT_MASK = CLUSTER_TRIANGLE_COUNT - 1;
@@ -18,10 +29,12 @@ cbuffer Camera : register(b0) {
 	Camera camera;
 }
 
-ByteAddressBuffer materialOffsetBuffer : register(t0);
-ByteAddressBuffer materialCoordinateBuffer : register(t1);
+StructuredBuffer<uint> materialCoordinateBuffer : register(t0);
 RWTexture2D<float4> outputImage : register(u0);
-Texture2D<uint> visibilityImage : register(t2);
+Texture2D<uint> visibilityImage : register(t1);
+ByteAddressBuffer clusterBuffer : register(t2);
+StructuredBuffer<Instance> instanceBuffer : register(t3);
+StructuredBuffer<uint> materialOffsetBuffer : register(t4);
 
 uint murmurMix(uint hash) {
 	uint value = hash;
@@ -46,22 +59,33 @@ float3 uintToColor(uint value) {
 	return color / 255.0;
 }
 
+Cluster loadCluster(uint clusterIndex) {
+	Cluster cluster;
+	cluster.instanceIndex = clusterBuffer.Load(clusterIndex * 4);
+
+	return cluster;
+}
+
 [numthreads(256, 1, 1)]
 void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
-	if (globalInvocationIndex.x >= materialOffsetBuffer.Load(MATERIAL_INDEX * 4)) {
+	if (globalInvocationIndex.x >= materialOffsetBuffer[1]) {
 		return;
 	}
 
-	uint pixelIndex = materialOffsetBuffer.Load((MATERIAL_INDEX - 1) * 4) + globalInvocationIndex.x;
-	uint packedCoordinate = materialCoordinateBuffer.Load(pixelIndex * 4);
+	uint pixelIndex = materialOffsetBuffer[0] + globalInvocationIndex.x;
+	uint packedCoordinate = materialCoordinateBuffer[pixelIndex];
 	uint2 screenCoordinate = uint2(packedCoordinate >> 16, packedCoordinate & 0xffff);
 
 	uint visibility = visibilityImage[screenCoordinate];
 	uint clusterIndex = (visibility >> TRIANGLE_INDEX_BIT_COUNT) - 1;
-	uint clusterTriangleIndex = visibility & TRIANGLE_INDEX_BIT_MASK;
-	uint triangleIndex = clusterIndex * CLUSTER_TRIANGLE_COUNT + clusterTriangleIndex;
+	// uint clusterTriangleIndex = visibility & TRIANGLE_INDEX_BIT_MASK;
+	// uint triangleIndex = clusterIndex * CLUSTER_TRIANGLE_COUNT + clusterTriangleIndex;
 
-	float3 color = uintToColor(triangleIndex + 1);
+	Cluster cluster = loadCluster(clusterIndex);
+	Instance instance = instanceBuffer[cluster.instanceIndex];
+
+	float3 color = uintToColor(instance.materialIndex + 1);
+	// float3 color = uintToColor(triangleIndex + 1);
 
 	outputImage[screenCoordinate] = float4(color, 1.0);
 }

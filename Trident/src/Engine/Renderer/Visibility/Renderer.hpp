@@ -194,13 +194,19 @@ namespace Trident {
 
 			ref<Image> visibilityImage;
 			ref<Image> depthStencilImage;
+
+			// One for each material shader image.
 			sequence<sequence<ref<Image>>> materialShaderImages;
+
 			ref<Image> outputImage;
 
 			ref<ImageView> visibilityImageView;
-			sequence<ref<ImageView>> materialReferenceBindingImageViews;
-			ref<ImageView> outputImageView;
 			ref<ImageView> depthStencilImageView;
+
+			// One for each material shader image.
+			sequence<sequence<ref<ImageView>>> materialShaderImageViews;
+
+			ref<ImageView> outputImageView;
 
 			ref<Sampler> materialShaderImageSampler;
 

@@ -31,8 +31,8 @@ struct Cluster {
 struct Instance {
 	float4x4 transform;
 	uint geometryIndex;
+	uint materialShaderIndex;
 	uint materialIndex;
-	uint materialReferenceIndex;
 	int clusterOffset;
 };
 
@@ -115,7 +115,7 @@ ByteAddressBuffer clusterBuffer : register(t10);
 ByteAddressBuffer instanceBuffer : register(t11);
 ByteAddressBuffer geometryBuffer : register(t12);
 
-Cluster fetchCluster(uint clusterIndex) {
+Cluster loadCluster(uint clusterIndex) {
 	static const uint stride = 4;
 
 	Cluster cluster;
@@ -124,7 +124,7 @@ Cluster fetchCluster(uint clusterIndex) {
 	return cluster;
 }
 
-Instance fetchInstance(uint instanceIndex) {
+Instance loadInstance(uint instanceIndex) {
 	static const uint stride = 80;
 
 	Instance instance;
@@ -135,14 +135,14 @@ Instance fetchInstance(uint instanceIndex) {
 		asfloat(instanceBuffer.Load4(instanceIndex * stride + 48))
 	));
 	instance.geometryIndex = instanceBuffer.Load(instanceIndex * stride + 64);
-	instance.materialIndex = instanceBuffer.Load(instanceIndex * stride + 68);
-	instance.materialReferenceIndex = instanceBuffer.Load(instanceIndex * stride + 72);
+	instance.materialShaderIndex = instanceBuffer.Load(instanceIndex * stride + 68);
+	instance.materialIndex = instanceBuffer.Load(instanceIndex * stride + 72);
 	instance.clusterOffset = asint(instanceBuffer.Load(instanceIndex * stride + 76));
 
 	return instance;
 }
 
-Geometry fetchGeometry(uint geometryIndex) {
+Geometry loadGeometry(uint geometryIndex) {
 	static const uint stride = 8;
 
 	Geometry geometry;
@@ -172,43 +172,43 @@ Light createLight(float3 position, float3 ambient, float3 diffuse, float3 specul
 	return light;
 }
 
-float3 fetchVertexPosition(uint indexIndex, Geometry geometry) {
+float3 loadVertexPosition(uint indexIndex, Geometry geometry) {
 	uint index = vertexPositionIndexBuffer.Load(indexIndex * 4);
 	uint offset = (geometry.vertexOffset + index) * 3;
 
 	return asfloat(vertexPositionComponentBuffer.Load3(offset * 4));
 }
 
-float3 fetchVertexNormal(uint indexIndex, Geometry geometry) {
+float3 loadVertexNormal(uint indexIndex, Geometry geometry) {
 	uint index = vertexNormalIndexBuffer.Load(indexIndex * 4);
 	uint offset = (geometry.vertexOffset + index) * 3;
 
 	return asfloat(vertexNormalComponentBuffer.Load3(offset * 4));
 }
 
-float2 fetchVertexTextureCoordinate(uint indexIndex, Geometry geometry) {
+float2 loadVertexTextureCoordinate(uint indexIndex, Geometry geometry) {
 	uint index = vertexTextureCoordinateIndexBuffer.Load(indexIndex * 4);
 	uint offset = (geometry.vertexOffset + index) * 2;
 
 	return asfloat(vertexTextureCoordinateComponentBuffer.Load2(offset * 4));
 }
 
-Triangle fetchTriangle(uint triangleIndex, Instance instance, Geometry geometry) {
+Triangle loadTriangle(uint triangleIndex, Instance instance, Geometry geometry) {
 	uint indexOffset = instance.clusterOffset * CLUSTER_INDEX_COUNT + triangleIndex * 3;
 
 	Triangle _triangle;
 
-	_triangle.vertices[0].position = fetchVertexPosition(indexOffset + 0, geometry);
-	_triangle.vertices[1].position = fetchVertexPosition(indexOffset + 1, geometry);
-	_triangle.vertices[2].position = fetchVertexPosition(indexOffset + 2, geometry);
+	_triangle.vertices[0].position = loadVertexPosition(indexOffset + 0, geometry);
+	_triangle.vertices[1].position = loadVertexPosition(indexOffset + 1, geometry);
+	_triangle.vertices[2].position = loadVertexPosition(indexOffset + 2, geometry);
 
-	_triangle.vertices[0].normal = fetchVertexNormal(indexOffset + 0, geometry);
-	_triangle.vertices[1].normal = fetchVertexNormal(indexOffset + 1, geometry);
-	_triangle.vertices[2].normal = fetchVertexNormal(indexOffset + 2, geometry);
+	_triangle.vertices[0].normal = loadVertexNormal(indexOffset + 0, geometry);
+	_triangle.vertices[1].normal = loadVertexNormal(indexOffset + 1, geometry);
+	_triangle.vertices[2].normal = loadVertexNormal(indexOffset + 2, geometry);
 
-	_triangle.vertices[0].textureCoordinate = fetchVertexTextureCoordinate(indexOffset + 0, geometry);
-	_triangle.vertices[1].textureCoordinate = fetchVertexTextureCoordinate(indexOffset + 1, geometry);
-	_triangle.vertices[2].textureCoordinate = fetchVertexTextureCoordinate(indexOffset + 2, geometry);
+	_triangle.vertices[0].textureCoordinate = loadVertexTextureCoordinate(indexOffset + 0, geometry);
+	_triangle.vertices[1].textureCoordinate = loadVertexTextureCoordinate(indexOffset + 1, geometry);
+	_triangle.vertices[2].textureCoordinate = loadVertexTextureCoordinate(indexOffset + 2, geometry);
 
 	return _triangle;
 }
@@ -464,10 +464,10 @@ float4 main(VertexOutput input) : SV_Target {
 	// Global triangle index.
 	uint triangleIndex = clusterIndex * CLUSTER_TRIANGLE_COUNT + clusterTriangleIndex;
 
-	Cluster cluster = fetchCluster(clusterIndex);
-	Instance instance = fetchInstance(cluster.instanceIndex);
-	Geometry geometry = fetchGeometry(instance.geometryIndex);
-	Triangle _triangle = fetchTriangle(triangleIndex, instance, geometry);
+	Cluster cluster = loadCluster(clusterIndex);
+	Instance instance = loadInstance(cluster.instanceIndex);
+	Geometry geometry = loadGeometry(instance.geometryIndex);
+	Triangle _triangle = loadTriangle(triangleIndex, instance, geometry);
 
 	float3 color;
 
@@ -490,7 +490,7 @@ float4 main(VertexOutput input) : SV_Target {
 		color = uintToColor(instance.geometryIndex + 1);
 	}
 	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_MATERIAL_INDEX) {
-		color = uintToColor(instance.materialIndex + 1);
+		color = uintToColor(instance.materialShaderIndex + 1);
 	}
 	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_TRIANGLE_NORMAL) {
 		color = visualizeTriangleNormal(_triangle, instance);

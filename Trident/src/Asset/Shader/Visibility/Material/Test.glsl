@@ -16,7 +16,23 @@ struct Camera {
 	vec3 position;
 };
 
-const uint MATERIAL_INDEX = 1u;
+struct Cluster {
+	uint instanceIndex;
+};
+
+struct Instance {
+	mat4x4 transform;
+	uint geometryIndex;
+	uint materialShaderIndex;
+	uint materialIndex;
+	int clusterOffset;
+};
+
+struct Range {
+	uint start;
+	uint end;
+};
+
 const uint CLUSTER_TRIANGLE_COUNT = 128u;
 const uint TRIANGLE_INDEX_BIT_COUNT = 7u;
 const uint TRIANGLE_INDEX_BIT_MASK = CLUSTER_TRIANGLE_COUNT - 1u;
@@ -24,18 +40,20 @@ const uint TRIANGLE_INDEX_BIT_MASK = CLUSTER_TRIANGLE_COUNT - 1u;
 layout(set = 0, binding = 0) uniform readonly CameraBuffer {
 	Camera camera;
 };
-
-layout(set = 0, binding = 1) buffer readonly MaterialOffsetBuffer {
-	uint materialOffsetBuffer[];
-};
-
-layout(set = 0, binding = 2) buffer readonly MaterialCoordinateBuffer {
+layout(set = 0, binding = 1) buffer readonly MaterialCoordinateBuffer {
 	uint materialCoordinateBuffer[];
 };
-
-layout(set = 0, binding = 3, rgba8) uniform writeonly image2D outputImage;
-
-layout(set = 0, binding = 4, r32ui) uniform readonly uimage2D visibilityImage;
+layout(set = 0, binding = 2, rgba8) uniform writeonly image2D outputImage;
+layout(set = 0, binding = 3, r32ui) uniform readonly uimage2D visibilityImage;
+layout(set = 0, binding = 4) buffer readonly ClusterBuffer {
+	Cluster clusterBuffer[];
+};
+layout(set = 0, binding = 5) buffer readonly InstanceBuffer {
+	Instance instanceBuffer[];
+};
+layout(set = 1, binding = 0) buffer readonly MaterialOffsetBuffer {
+	Range materialShaderCoordinateIndexRange;
+};
 
 uint murmurMix(uint hash) {
 	uint value = hash;
@@ -60,34 +78,21 @@ vec3 uintToColor(uint value) {
 	return color / 255.0;
 }
 
-// TODO
-// Material offset buffer:
-// We only retrieve the offsets at MATERIAL_INDEX and MATERIAL_INDEX - 1 (start and end). Since each shader has a descriptor set dedicated to material data we could put a selected range of the material offset buffer inside.
-// We can prefix the material offset buffer with a 0 to keep the start of the first material loadable.
-// In the material compute shaders we provide a range starting to 1 to avoid overwriting the 0.
-// 
-// Material coordinate buffer:
-// The material coordinate buffer is still needed in full. We don't know the number of contiguous values being sampled, nor we know where the range starts.
-// 
-// Visibility image:
-// Similar to the material coordinate buffer, the visibity image is needed in full.
 void main() {
-	uint globalInvocationIndex = gl_GlobalInvocationID.x;
-
-	if (globalInvocationIndex >= materialOffsetBuffer[MATERIAL_INDEX]) {
+	if (gl_GlobalInvocationID.x >= materialShaderCoordinateIndexRange.end) {
 		return;
 	}
 
-	uint pixelIndex = materialOffsetBuffer[MATERIAL_INDEX - 1u] + globalInvocationIndex;
+	uint pixelIndex = materialShaderCoordinateIndexRange.start + gl_GlobalInvocationID.x;
 	uint packedCoordinate = materialCoordinateBuffer[pixelIndex];
 	uvec2 screenCoordinate = uvec2(packedCoordinate >> 16, packedCoordinate & 0xffffu);
 
 	uint visibility = imageLoad(visibilityImage, ivec2(screenCoordinate)).r;
 	uint clusterIndex = (visibility >> TRIANGLE_INDEX_BIT_COUNT) - 1u;
-	uint clusterTriangleIndex = visibility & TRIANGLE_INDEX_BIT_MASK;
-	uint triangleIndex = clusterIndex * CLUSTER_TRIANGLE_COUNT + clusterTriangleIndex;
+	Cluster cluster = clusterBuffer[clusterIndex];
+	Instance instance = instanceBuffer[cluster.instanceIndex];
 
-	vec3 color = uintToColor(triangleIndex + 1u);
+	vec3 color = uintToColor(instance.materialIndex + 1u);
 
 	imageStore(outputImage, ivec2(screenCoordinate), vec4(color, 1.0));
 }

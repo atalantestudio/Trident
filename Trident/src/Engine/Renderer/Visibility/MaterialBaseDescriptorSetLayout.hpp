@@ -15,13 +15,6 @@ namespace Trident {
 				.shaderStages = ShaderStage::COMPUTE,
 			},
 
-			// Material offset
-			{
-				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
-				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
-			},
-
 			// Material coordinate
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,

@@ -19,6 +19,9 @@
 "%VULKAN_SDK%\Bin\glslc.exe" -fshader-stage=frag Output.frag.glsl -o Output.frag.spv
 
 @REM Material shaders
+
 "%VULKAN_SDK%\Bin\glslc.exe" -fshader-stage=comp Material/Default.glsl -o Material/Default.spv
+"%VULKAN_SDK%\Bin\glslc.exe" -fshader-stage=comp Material/DefaultGL.glsl -o Material/DefaultGL.spv
+
 "%VULKAN_SDK%\Bin\glslc.exe" -fshader-stage=comp Material/Test.glsl -o Material/Test.spv
 "%VULKAN_SDK%\Bin\glslc.exe" -fshader-stage=comp Material/TestGL.glsl -o Material/TestGL.spv

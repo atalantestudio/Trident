@@ -16,8 +16,8 @@ struct Cluster {
 struct Instance {
 	float4x4 transform;
 	uint geometryIndex;
+	uint materialShaderIndex;
 	uint materialIndex;
-	uint materialReferenceIndex;
 	int clusterOffset;
 };
 
@@ -39,14 +39,14 @@ void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 	}
 
 	uint visibility = visibilityImage[globalInvocationIndex.xy];
-	uint materialIndex = 0;
+	uint materialShaderIndex = 0;
 
 	if (visibility > 0) {
 		uint clusterIndex = (visibility >> TRIANGLE_INDEX_BIT_COUNT) - 1;
 		uint instanceIndex = clusterBuffer[clusterIndex].instanceIndex;
 
-		materialIndex = instanceBuffer[instanceIndex].materialIndex;
+		materialShaderIndex = instanceBuffer[instanceIndex].materialShaderIndex;
 	}
 
-	InterlockedAdd(materialCountBuffer[materialIndex], 1);
+	InterlockedAdd(materialCountBuffer[materialShaderIndex], 1);
 }

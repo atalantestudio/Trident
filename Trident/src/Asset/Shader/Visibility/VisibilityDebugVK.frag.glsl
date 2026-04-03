@@ -28,8 +28,8 @@ struct Cluster {
 struct Instance {
 	mat4x4 transform;
 	uint geometryIndex;
+	uint materialShaderIndex;
 	uint materialIndex;
-	uint materialReferenceIndex;
 	int clusterOffset;
 };
 
@@ -128,7 +128,7 @@ layout(set = 2, binding = 1) buffer readonly GeometryBuffer {
 
 layout(location = 0) out vec4 fragment;
 
-vec3 fetchVertexPosition(uint indexIndex, Geometry geometry) {
+vec3 loadVertexPosition(uint indexIndex, Geometry geometry) {
 	uint index = vertexPositionIndexBuffer[indexIndex];
 	uint offset = (geometry.vertexOffset + index) * 3;
 
@@ -139,7 +139,7 @@ vec3 fetchVertexPosition(uint indexIndex, Geometry geometry) {
 	return vec3(x, y, z);
 }
 
-vec3 fetchVertexNormal(uint indexIndex, Geometry geometry) {
+vec3 loadVertexNormal(uint indexIndex, Geometry geometry) {
 	uint index = vertexNormalIndexBuffer[indexIndex];
 	uint offset = (geometry.vertexOffset + index) * 3;
 
@@ -150,7 +150,7 @@ vec3 fetchVertexNormal(uint indexIndex, Geometry geometry) {
 	return vec3(x, y, z);
 }
 
-vec2 fetchVertexTextureCoordinate(uint indexIndex, Geometry geometry) {
+vec2 loadVertexTextureCoordinate(uint indexIndex, Geometry geometry) {
 	uint index = vertexTextureCoordinateIndexBuffer[indexIndex];
 	uint offset = (uint(geometry.vertexOffset / 3.0 * 2.0) + index) * 2;
 
@@ -160,22 +160,22 @@ vec2 fetchVertexTextureCoordinate(uint indexIndex, Geometry geometry) {
 	return vec2(x, y);
 }
 
-Triangle fetchTriangle(uint triangleIndex, Instance instance, Geometry geometry) {
+Triangle loadTriangle(uint triangleIndex, Instance instance, Geometry geometry) {
 	uint indexOffset = instance.clusterOffset * CLUSTER_INDEX_COUNT + triangleIndex * 3;
 
 	Triangle triangle;
 
-	triangle.vertices[0].position = fetchVertexPosition(indexOffset + 0, geometry);
-	triangle.vertices[1].position = fetchVertexPosition(indexOffset + 1, geometry);
-	triangle.vertices[2].position = fetchVertexPosition(indexOffset + 2, geometry);
+	triangle.vertices[0].position = loadVertexPosition(indexOffset + 0, geometry);
+	triangle.vertices[1].position = loadVertexPosition(indexOffset + 1, geometry);
+	triangle.vertices[2].position = loadVertexPosition(indexOffset + 2, geometry);
 
-	triangle.vertices[0].normal = fetchVertexNormal(indexOffset + 0, geometry);
-	triangle.vertices[1].normal = fetchVertexNormal(indexOffset + 1, geometry);
-	triangle.vertices[2].normal = fetchVertexNormal(indexOffset + 2, geometry);
+	triangle.vertices[0].normal = loadVertexNormal(indexOffset + 0, geometry);
+	triangle.vertices[1].normal = loadVertexNormal(indexOffset + 1, geometry);
+	triangle.vertices[2].normal = loadVertexNormal(indexOffset + 2, geometry);
 
-	triangle.vertices[0].textureCoordinate = fetchVertexTextureCoordinate(indexOffset + 0, geometry);
-	triangle.vertices[1].textureCoordinate = fetchVertexTextureCoordinate(indexOffset + 1, geometry);
-	triangle.vertices[2].textureCoordinate = fetchVertexTextureCoordinate(indexOffset + 2, geometry);
+	triangle.vertices[0].textureCoordinate = loadVertexTextureCoordinate(indexOffset + 0, geometry);
+	triangle.vertices[1].textureCoordinate = loadVertexTextureCoordinate(indexOffset + 1, geometry);
+	triangle.vertices[2].textureCoordinate = loadVertexTextureCoordinate(indexOffset + 2, geometry);
 
 	return triangle;
 }
@@ -415,7 +415,7 @@ void main() {
 	Instance instance = instanceBuffer[cluster.instanceIndex];
 	Geometry geometry = geometryBuffer[instance.geometryIndex];
 
-	Triangle triangle = fetchTriangle(triangleIndex, instance, geometry);
+	Triangle triangle = loadTriangle(triangleIndex, instance, geometry);
 
 	vec3 color;
 
@@ -438,7 +438,7 @@ void main() {
 		color = uintToColor(instance.geometryIndex + 1);
 	}
 	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_MATERIAL_INDEX) {
-		color = uintToColor(instance.materialIndex + 1);
+		color = uintToColor(instance.materialShaderIndex + 1);
 	}
 	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_TRIANGLE_NORMAL) {
 		color = visualizeTriangleNormal(triangle, instance);

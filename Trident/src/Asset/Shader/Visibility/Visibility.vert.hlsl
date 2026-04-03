@@ -12,8 +12,8 @@ struct Cluster {
 struct Instance {
 	float4x4 transform;
 	uint geometryIndex;
+	uint materialShaderIndex;
 	uint materialIndex;
-	uint materialReferenceIndex;
 	int clusterOffset;
 };
 
@@ -50,7 +50,7 @@ ByteAddressBuffer clusterBuffer : register(t2);
 StructuredBuffer<Instance> instanceBuffer : register(t3);
 ByteAddressBuffer geometryBuffer : register(t4);
 
-Cluster fetchCluster(uint clusterIndex) {
+Cluster loadCluster(uint clusterIndex) {
 	static const uint stride = 4;
 
 	Cluster cluster;
@@ -59,7 +59,7 @@ Cluster fetchCluster(uint clusterIndex) {
 	return cluster;
 }
 
-Geometry fetchGeometry(uint geometryIndex) {
+Geometry loadGeometry(uint geometryIndex) {
 	static const uint stride = 8;
 
 	Geometry geometry;
@@ -69,7 +69,7 @@ Geometry fetchGeometry(uint geometryIndex) {
 	return geometry;
 }
 
-float3 fetchVertexPosition(uint index, Geometry geometry) {
+float3 loadVertexPosition(uint index, Geometry geometry) {
 	uint offset = (geometry.vertexOffset + index) * VERTEX_POSITION_STRIDE;
 
 	return asfloat(vertexPositionComponentBuffer.Load3(offset * 4));
@@ -80,13 +80,13 @@ VertexOutput main(VertexInput input) {
 	uint triangleIndex = indexIndex / 3;
 	uint clusterIndex = input.instanceIndex;
 
-	Cluster cluster = fetchCluster(clusterIndex);
+	Cluster cluster = loadCluster(clusterIndex);
 	Instance instance = instanceBuffer[cluster.instanceIndex];
-	Geometry geometry = fetchGeometry(instance.geometryIndex);
+	Geometry geometry = loadGeometry(instance.geometryIndex);
 
 	uint indexOffset = (instance.clusterOffset + clusterIndex) * CLUSTER_INDEX_COUNT;
 	uint relativeVertexPositionIndex = vertexPositionIndexBuffer.Load((indexOffset + indexIndex) * 4);
-	float3 vertex = fetchVertexPosition(relativeVertexPositionIndex, geometry);
+	float3 vertex = loadVertexPosition(relativeVertexPositionIndex, geometry);
 
 	VertexOutput output;
 	output.position = mul(camera.projectionView, mul(instance.transform, float4(vertex, 1.0)));

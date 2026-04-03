@@ -72,15 +72,13 @@ Sphere createSphere(float3 position, float radius) {
 	return sphere;
 }
 
-static const uint MATERIAL_INDEX = 0;
 static const float FLT_MAX = 4294967295.0;
+static const float EPSILON = 0.0001;
 
 static const float3 UP = float3(0.0, 1.0, 0.0);
 static const Sphere EARTH = createSphere(float3(0.0, 0.0, 0.0), 0.4);
 static const Sphere EARTH_ATMOSPHERE = createSphere(float3(0.0, 0.0, 0.0), 1.0);
 static const Sphere SUN = createSphere(float3(0.0, 1000.0, 0.0), 10.0);
-static const float3 SUN_COLOR = float3(1.0, 0.95, 0.87);
-static const float EPSILON = 0.0001;
 static const float3 WAVE_LENGTHS = float3(630.0, 532.0, 465.0);
 static const float SCATTERING_STRENGTH = 12.0;
 static const float3 SCATTERING_COEFFICIENTS = float3(
@@ -93,9 +91,9 @@ cbuffer Camera : register(b0) {
 	Camera camera;
 }
 
-ByteAddressBuffer materialOffsetBuffer : register(t0);
-ByteAddressBuffer materialCoordinateBuffer : register(t1);
+StructuredBuffer<uint> materialCoordinateBuffer : register(t0);
 RWTexture2D<float4> outputImage : register(u0);
+StructuredBuffer<uint> materialOffsetBuffer : register(t4);
 
 float3 calculateRayDirection(uint2 screenCoordinate) {
 	float2 normalizedDeviceCoordinate = float2(screenCoordinate) / camera.viewport * 2.0 - 1.0;
@@ -207,7 +205,7 @@ float3 Material(uint2 screenCoordinate) {
 
 	float dstThroughAtmosphere = min(earthHit.t0 - atmosphereHit.t0, atmosphereHit.t1);
 
-	float3 color = float3(1.0, 1.0, 1.0);
+	float3 color = float3(0.0, 0.0, 0.0);
 	bool sun = false;
 
 	if (earthHit.t1 <= 0.0) {
@@ -215,7 +213,7 @@ float3 Material(uint2 screenCoordinate) {
 
 		if (sunHit.t1 > 0.0) {
 			sun = true;
-			color = SUN_COLOR;
+			color = float3(1.0, 1.0, 1.0);
 		}
 	}
 
@@ -234,12 +232,12 @@ float3 Material(uint2 screenCoordinate) {
 
 [numthreads(256, 1, 1)]
 void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
-	if (globalInvocationIndex.x >= materialOffsetBuffer.Load(MATERIAL_INDEX * 4)) {
+	if (globalInvocationIndex.x >= materialOffsetBuffer[1]) {
 		return;
 	}
 
-	uint pixelIndex = globalInvocationIndex.x;
-	uint packedCoordinate = materialCoordinateBuffer.Load(pixelIndex * 4);
+	uint pixelIndex = materialOffsetBuffer[0] + globalInvocationIndex.x;
+	uint packedCoordinate = materialCoordinateBuffer[pixelIndex];
 	uint2 screenCoordinate = uint2(packedCoordinate >> 16, packedCoordinate & 0xffff);
 
 	float3 color = Material(screenCoordinate);
