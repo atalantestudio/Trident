@@ -148,7 +148,7 @@ namespace Trident {
 
 			ref<Queue> getQueue(const Device* device, QueueFamilyCapability queueFamilyCapability) const;
 
-			void insertBufferMemoryBarriers(CommandEncoder* commandEncoder, view<BufferMemoryBarrier> barriers) const;
+			void insertMemoryBarriers(CommandEncoder* commandEncoder, view<BufferMemoryBarrier> bufferMemoryBarriers, view<ImageMemoryBarrier> imageMemoryBarriers) const;
 
 			void* mapBuffer(const Device* device, const BaseBuffer* buffer, uint64 offset, uint64 size) const;
 
@@ -161,8 +161,6 @@ namespace Trident {
 			void resetFence(const Device* device, const Fence* fence) const;
 
 			ref<PhysicalDevice> selectPhysicalDevice(const Instance* instance, bool preferIntegratedGpu) const;
-
-			void setImageMemoryBarrier(CommandEncoder* commandEncoder, ref<Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) const;
 
 			void setLineWidth(CommandEncoder* commandEncoder, float32 lineWidth) const;
 
@@ -248,14 +246,13 @@ namespace Trident {
 			EndImplementation endImplementation;
 			EndRenderPassImplementation endRenderPassImplementation;
 			GetQueueImplementation getQueueImplementation;
-			InsertBufferMemoryBarriersImplementation insertBufferMemoryBarriersImplementation;
+			InsertMemoryBarriersImplementation insertMemoryBarriersImplementation;
 			MapBufferImplementation mapBufferImplementation;
 			NextSubpassImplementation nextSubpassImplementation;
 			PresentImplementation presentImplementation;
 			ResetImplementation resetImplementation;
 			ResetFenceImplementation resetFenceImplementation;
 			SelectPhysicalDeviceImplementation selectPhysicalDeviceImplementation;
-			SetImageMemoryBarrierImplementation setImageMemoryBarrierImplementation;
 			SetLineWidthImplementation setLineWidthImplementation;
 			SetScissorImplementation setScissorImplementation;
 			SetViewportImplementation setViewportImplementation;

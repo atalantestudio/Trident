@@ -300,8 +300,8 @@ namespace Trident {
 		return getQueueImplementation(device, queueFamilyCapability);
 	}
 
-	void GraphicsAdapter::insertBufferMemoryBarriers(CommandEncoder* commandEncoder, view<BufferMemoryBarrier> barriers) const {
-		insertBufferMemoryBarriersImplementation(commandEncoder, barriers);
+	void GraphicsAdapter::insertMemoryBarriers(CommandEncoder* commandEncoder, view<BufferMemoryBarrier> bufferMemoryBarriers, view<ImageMemoryBarrier> imageMemoryBarriers) const {
+		insertMemoryBarriersImplementation(commandEncoder, bufferMemoryBarriers, imageMemoryBarriers);
 	}
 
 	void* GraphicsAdapter::mapBuffer(const Device* device, const BaseBuffer* buffer, uint64 offset, uint64 size) const {
@@ -326,10 +326,6 @@ namespace Trident {
 
 	ref<PhysicalDevice> GraphicsAdapter::selectPhysicalDevice(const Instance* instance, bool preferIntegratedGpu) const {
 		return selectPhysicalDeviceImplementation(instance, preferIntegratedGpu);
-	}
-
-	void GraphicsAdapter::setImageMemoryBarrier(CommandEncoder* commandEncoder, ref<Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) const {
-		setImageMemoryBarrierImplementation(commandEncoder, image, newLayout, sourceStage, destinationStage);
 	}
 
 	void GraphicsAdapter::setLineWidth(CommandEncoder* commandEncoder, float32 lineWidth) const {

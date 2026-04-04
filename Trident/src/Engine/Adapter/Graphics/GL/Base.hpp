@@ -24,11 +24,13 @@
 #include "Engine/Adapter/Graphics/GL/procedures.hpp"
 
 namespace Trident::GL {
-	typedef HGLRC (*PFNWGLCREATECONTEXTPROC)(HDC);
-	typedef BOOL (*PFNWGLDELETECONTEXTPROC)(HGLRC);
-	typedef HDC (*PFNWGLGETCURRENTDCPROC)();
-	typedef PROC (*PFNWGLGETPROCADDRESSPROC)(LPCSTR);
-	typedef BOOL (*PFNWGLMAKECURRENTPROC)(HDC, HGLRC);
+	#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
+		typedef HGLRC (*PFNWGLCREATECONTEXTPROC)(HDC);
+		typedef BOOL (*PFNWGLDELETECONTEXTPROC)(HGLRC);
+		typedef HDC (*PFNWGLGETCURRENTDCPROC)();
+		typedef PROC (*PFNWGLGETPROCADDRESSPROC)(LPCSTR);
+		typedef BOOL (*PFNWGLMAKECURRENTPROC)(HDC, HGLRC);
+	#endif
 
 	class BeginRenderPassCommand;
 	class BindComputePipelineCommand;
@@ -47,8 +49,8 @@ namespace Trident::GL {
 	class DrawIndexedIndirectCommand;
 	class DrawIndirectCommand;
 	class EndRenderPassCommand;
+	class InsertMemoryBarriersCommand;
 	class NextSubpassCommand;
-	class SetImageMemoryBarrierCommand;
 	class SetLineWidthCommand;
 	class SetScissorCommand;
 	class SetViewportCommand;

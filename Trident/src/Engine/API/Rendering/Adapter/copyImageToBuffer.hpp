@@ -122,7 +122,7 @@ namespace Trident {
 				copyRegionIndex += 1;
 			}
 
-			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
 		#endif
 
 		device->adapter->copyImageToBuffer(this, sourceImage, destinationBuffer, copyRegions);

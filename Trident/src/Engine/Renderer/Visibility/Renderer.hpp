@@ -59,6 +59,8 @@ namespace Trident {
 			void createPresentFramebuffers();
 
 			void createMaterialObjects();
+			void initializeMaterialShaders(uint32& imageCount, uint32& imageAssetCount, uint64& imageStagingBufferSize);
+			void initializeMaterialImages(sequence<ImageMemoryBarrier>& imageMemoryBarriers, sequence<DescriptorBuffer>& materialOffsetDescriptorBuffers, sequence<DescriptorImage>& descriptorImages, sequence<WriteDescriptorSet>& writeDescriptorSets);
 
 			ref<DescriptorSetLayout> createCameraDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createClusterDescriptorSetLayout() const;
@@ -194,18 +196,12 @@ namespace Trident {
 
 			ref<Image> visibilityImage;
 			ref<Image> depthStencilImage;
-
-			// One for each material shader image.
-			sequence<sequence<ref<Image>>> materialShaderImages;
-
+			sequence<ref<Image>> materialShaderImages;
 			ref<Image> outputImage;
 
 			ref<ImageView> visibilityImageView;
 			ref<ImageView> depthStencilImageView;
-
-			// One for each material shader image.
-			sequence<sequence<ref<ImageView>>> materialShaderImageViews;
-
+			sequence<ref<ImageView>> materialShaderImageViews;
 			ref<ImageView> outputImageView;
 
 			ref<Sampler> materialShaderImageSampler;

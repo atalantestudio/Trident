@@ -187,9 +187,25 @@ namespace Trident {
 				const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder(commandBufferDescriptor);
 
 				commandEncoder->begin();
-				commandEncoder->setImageMemoryBarrier(textureArrayImage, ImageLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+
+				ImageMemoryBarrier textureArrayImageMemoryBarrier = {
+					.image = textureArrayImage,
+					.newLayout = ImageLayout::TRANSFER_DST_OPTIMAL,
+					.sourceAccess = Access::NONE,
+					.destinationAccess = Access::TRANSFER_WRITE,
+				};
+
+				commandEncoder->insertMemoryBarriers({}, {textureArrayImageMemoryBarrier});
 				commandEncoder->copyBufferToImage(textureArrayImageStagingBuffer, textureArrayImage, {bufferImageCopyRegion});
-				commandEncoder->setImageMemoryBarrier(textureArrayImage, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+
+				textureArrayImageMemoryBarrier = {
+					.image = textureArrayImage,
+					.newLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+					.sourceAccess = Access::TRANSFER_WRITE,
+					.destinationAccess = Access::SHADER_READ,
+				};
+
+				commandEncoder->insertMemoryBarriers({}, {textureArrayImageMemoryBarrier});
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 

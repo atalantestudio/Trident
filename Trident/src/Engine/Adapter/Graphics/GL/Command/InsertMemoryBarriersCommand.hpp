@@ -6,21 +6,21 @@
 #include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
 
 namespace Trident {
-	class GL::SetImageMemoryBarrierCommand final : public GL::Command {
+	class GL::InsertMemoryBarriersCommand final : public GL::Command {
 		public:
-			explicit SetImageMemoryBarrierCommand(GLbitfield barrier) :
-				barrier(barrier)
+			explicit InsertMemoryBarriersCommand(GLbitfield barriers) :
+				barriers(barriers)
 			{}
 
 			void execute() const final override {
 				#if OPENGL_VERSION >= OPENGL_VERSION_4_2
-					glMemoryBarrier(barrier);
+					glMemoryBarrier(barriers);
 				#else
 					ENGINE_ERROR_UNSUPPORTED();
 				#endif
 			}
 
 		private:
-			GLbitfield barrier;
+			GLbitfield barriers;
 	};
 }

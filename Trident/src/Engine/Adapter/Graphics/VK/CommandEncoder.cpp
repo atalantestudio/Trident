@@ -437,30 +437,57 @@ namespace Trident {
 		_commandEncoder->commandCount += 1;
 	}
 
-	void VK::insertBufferMemoryBarriers(Trident::CommandEncoder* commandEncoder, view<BufferMemoryBarrier> barriers) {
+	void VK::insertMemoryBarriers(Trident::CommandEncoder* commandEncoder, view<BufferMemoryBarrier> bufferMemoryBarriers, view<ImageMemoryBarrier> imageMemoryBarriers) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		static const PFN_vkCmdPipelineBarrier vkCmdPipelineBarrier = static_cast<PFN_vkCmdPipelineBarrier>(loadDeviceProcedure(static_cast<const VK::Device*>(commandEncoder->device)->device, "vkCmdPipelineBarrier"));
 
 		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
-		sequence<VkBufferMemoryBarrier> bufferMemoryBarriers(barriers.count());
-		index barrierIndex = 0;
+		sequence<VkBufferMemoryBarrier> vkBufferMemoryBarriers(bufferMemoryBarriers.count());
+		index bufferMemoryBarrierIndex = 0;
 
-		while (barrierIndex < barriers.count()) {
-			const BufferMemoryBarrier& barrier = barriers[barrierIndex];
+		while (bufferMemoryBarrierIndex < bufferMemoryBarriers.count()) {
+			const BufferMemoryBarrier& bufferMemoryBarrier = bufferMemoryBarriers[bufferMemoryBarrierIndex];
 
-			VkBufferMemoryBarrier& bufferMemoryBarrier = bufferMemoryBarriers[barrierIndex];
-			bufferMemoryBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
-			bufferMemoryBarrier.pNext = nullptr;
-			bufferMemoryBarrier.srcAccessMask = getAccessFlags(barrier.sourceAccess);
-			bufferMemoryBarrier.dstAccessMask = getAccessFlags(barrier.destinationAccess);
-			bufferMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			bufferMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			bufferMemoryBarrier.buffer = std::static_pointer_cast<VK::BaseBuffer>(barrier.buffer)->buffer;
-			bufferMemoryBarrier.offset = barrier.offset;
-			bufferMemoryBarrier.size = barrier.size;
+			VkBufferMemoryBarrier& vkBufferMemoryBarrier = vkBufferMemoryBarriers[bufferMemoryBarrierIndex];
+			vkBufferMemoryBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+			vkBufferMemoryBarrier.pNext = nullptr;
+			vkBufferMemoryBarrier.srcAccessMask = getAccessFlags(bufferMemoryBarrier.sourceAccess);
+			vkBufferMemoryBarrier.dstAccessMask = getAccessFlags(bufferMemoryBarrier.destinationAccess);
+			vkBufferMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			vkBufferMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			vkBufferMemoryBarrier.buffer = std::static_pointer_cast<VK::BaseBuffer>(bufferMemoryBarrier.buffer)->buffer;
+			vkBufferMemoryBarrier.offset = bufferMemoryBarrier.offset;
+			vkBufferMemoryBarrier.size = bufferMemoryBarrier.size;
 
-			barrierIndex += 1;
+			bufferMemoryBarrierIndex += 1;
+		}
+
+		sequence<VkImageMemoryBarrier> vkImageMemoryBarriers(imageMemoryBarriers.count());
+		index imageMemoryBarrierIndex = 0;
+
+		while (imageMemoryBarrierIndex < imageMemoryBarriers.count()) {
+			const ImageMemoryBarrier& imageMemoryBarrier = imageMemoryBarriers[imageMemoryBarrierIndex];
+
+			VkImageMemoryBarrier& vkImageMemoryBarrier = vkImageMemoryBarriers[imageMemoryBarrierIndex];
+			vkImageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+			vkImageMemoryBarrier.pNext = nullptr;
+			vkImageMemoryBarrier.srcAccessMask = getAccessFlags(imageMemoryBarrier.sourceAccess);
+			vkImageMemoryBarrier.dstAccessMask = getAccessFlags(imageMemoryBarrier.destinationAccess);
+			vkImageMemoryBarrier.oldLayout = getImageLayout(imageMemoryBarrier.image->getLayout());
+			vkImageMemoryBarrier.newLayout = getImageLayout(imageMemoryBarrier.newLayout);
+			vkImageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			vkImageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			vkImageMemoryBarrier.image = std::static_pointer_cast<VK::Image>(imageMemoryBarrier.image)->image;
+			vkImageMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			vkImageMemoryBarrier.subresourceRange.baseMipLevel = 0;
+			vkImageMemoryBarrier.subresourceRange.levelCount = imageMemoryBarrier.image->getMipLevelCount();
+			vkImageMemoryBarrier.subresourceRange.baseArrayLayer = 0;
+			vkImageMemoryBarrier.subresourceRange.layerCount = imageMemoryBarrier.image->getLayerCount();
+
+			imageMemoryBarrier.image->layout = imageMemoryBarrier.newLayout;
+
+			imageMemoryBarrierIndex += 1;
 		}
 
 		vkCmdPipelineBarrier(
@@ -470,10 +497,10 @@ namespace Trident {
 			0,
 			0,
 			nullptr,
-			static_cast<uint32>(bufferMemoryBarriers.count()),
-			&bufferMemoryBarriers[0],
-			0,
-			nullptr
+			static_cast<uint32>(vkBufferMemoryBarriers.count()),
+			&vkBufferMemoryBarriers[0],
+			static_cast<uint32>(vkImageMemoryBarriers.count()),
+			&vkImageMemoryBarriers[0]
 		);
 
 		_commandEncoder->commandCount += 1;
@@ -505,48 +532,6 @@ namespace Trident {
 
 		_commandEncoder->commandCount = 0;
 		_commandEncoder->pipelineBindPoint = VK_PIPELINE_BIND_POINT_MAX_ENUM;
-	}
-
-	void VK::setImageMemoryBarrier(Trident::CommandEncoder* commandEncoder, ref<Trident::Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		static const PFN_vkCmdPipelineBarrier vkCmdPipelineBarrier = static_cast<PFN_vkCmdPipelineBarrier>(loadDeviceProcedure(static_cast<const VK::Device*>(commandEncoder->device)->device, "vkCmdPipelineBarrier"));
-
-		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
-		const ref<VK::Image> vkImage = std::static_pointer_cast<VK::Image>(image);
-
-		VkImageMemoryBarrier imageMemoryBarrier{};
-		imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-		imageMemoryBarrier.pNext = nullptr;
-		imageMemoryBarrier.srcAccessMask = getAccessFlags(image->getLayout());
-		imageMemoryBarrier.dstAccessMask = getAccessFlags(newLayout);
-		imageMemoryBarrier.oldLayout = getImageLayout(image->getLayout());
-		imageMemoryBarrier.newLayout = getImageLayout(newLayout);
-		imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		imageMemoryBarrier.image = vkImage->image;
-		imageMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		imageMemoryBarrier.subresourceRange.baseMipLevel = 0;
-		imageMemoryBarrier.subresourceRange.levelCount = image->getMipLevelCount();
-		imageMemoryBarrier.subresourceRange.baseArrayLayer = 0;
-		imageMemoryBarrier.subresourceRange.layerCount = image->getLayerCount();
-
-		vkCmdPipelineBarrier(
-			_commandEncoder->commandBuffer,
-			getPipelineStageFlagBits(sourceStage),
-			getPipelineStageFlagBits(destinationStage),
-			0,
-			0,
-			nullptr,
-			0,
-			nullptr,
-			1,
-			&imageMemoryBarrier
-		);
-
-		image->layout = newLayout;
-
-		_commandEncoder->commandCount += 1;
 	}
 
 	void VK::setLineWidth(Trident::CommandEncoder* commandEncoder, float32 lineWidth) {

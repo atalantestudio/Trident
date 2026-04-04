@@ -44,23 +44,28 @@ namespace Trident {
 				data(descriptor.data)
 			{}
 
-			ImageFormat getFormat() const {
+			inline ImageFormat getFormat() const {
 				return format;
 			}
 
-			const Extent3D& getExtent() const {
+			inline const Extent3D& getExtent() const {
 				return extent;
 			}
 
-			uint32 getMipLevelCount() const {
+			/// Returns the byte size of the image data.
+			inline uint64 getSize() const {
+				return getChannelCount(format) * extent.width * extent.height * extent.depth * layerCount;
+			}
+
+			inline uint32 getMipLevelCount() const {
 				return mipLevelCount;
 			}
 
-			uint32 getLayerCount() const {
+			inline uint32 getLayerCount() const {
 				return layerCount;
 			}
 
-			const sequence<uint8>& getData() const {
+			inline const sequence<uint8>& getData() const {
 				return data;
 			}
 

@@ -20,6 +20,11 @@ namespace Trident {
 			/// Returns the 3-dimensional size of the image.
 			const Extent3D& getExtent() const;
 
+			/// Returns the byte size of the image data.
+			inline uint64 getSize() const {
+				return getChannelCount(format) * extent.width * extent.height * extent.depth * layerCount;
+			}
+
 			/// Returns the number of mip levels in the image.
 			uint32 getMipLevelCount() const;
 

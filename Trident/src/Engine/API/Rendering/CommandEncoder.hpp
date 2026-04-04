@@ -15,6 +15,7 @@
 #include "Engine/API/Rendering/GraphicsPipeline.hpp"
 #include "Engine/API/Rendering/Image.hpp"
 #include "Engine/API/Rendering/ImageLayout.hpp"
+#include "Engine/API/Rendering/ImageMemoryBarrier.hpp"
 #include "Engine/API/Rendering/PipelineStage.hpp"
 
 namespace Trident {
@@ -93,12 +94,9 @@ namespace Trident {
 
 			void nextSubpass();
 
-			// TODO: Merge memory barriers, buffer memory barriers and image memory barriers into a single method.
-			void insertBufferMemoryBarriers(view<BufferMemoryBarrier> barriers);
+			void insertMemoryBarriers(view<BufferMemoryBarrier> bufferMemoryBarriers, view<ImageMemoryBarrier> imageMemoryBarriers);
 
 			void reset();
-
-			void setImageMemoryBarrier(ref<Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage);
 
 			// TODO: Deprecate (not supported by DirectX12).
 			void setLineWidth(float32 lineWidth);

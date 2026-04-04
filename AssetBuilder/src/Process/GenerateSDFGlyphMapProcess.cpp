@@ -131,10 +131,25 @@ namespace Trident {
 		commandEncoder = computeQueue->createCommandEncoder(commandBufferDescriptor);
 		commandEncoder->begin();
 		commandEncoder->copyBufferToBuffer(fontStagingBuffer, fontBuffer, {fontBufferCopyRegion});
-		commandEncoder->setImageMemoryBarrier(glyphImage, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
-		commandEncoder->setImageMemoryBarrier(glyphMapImage, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
-		computeQueue->submit({commandEncoder->end()});
+		ImageMemoryBarrier glyphImageMemoryBarrier = {
+			.image = glyphImage,
+			.newLayout = ImageLayout::GENERAL,
+			.sourceAccess = Access::NONE,
+			.destinationAccess = Access::SHADER_READ | Access::SHADER_WRITE,
+		};
+		ImageMemoryBarrier glyphMapImageMemoryBarrier = {
+			.image = glyphMapImage,
+			.newLayout = ImageLayout::GENERAL,
+			.sourceAccess = Access::NONE,
+			.destinationAccess = Access::SHADER_WRITE,
+		};
+
+		commandEncoder->insertMemoryBarriers({}, {glyphImageMemoryBarrier, glyphMapImageMemoryBarrier});
+
+		ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+		computeQueue->submit({commandBuffer});
 		computeQueue->waitIdle();
 
 		FenceDescriptor writeBufferFenceDescriptor{};
@@ -230,7 +245,9 @@ namespace Trident {
 			commandEncoder->bindDescriptorSets(glyphSdfPipelineLayout, 0, {glyphSdfDescriptorSet});
 			commandEncoder->dispatch(8, 8, 1);
 
-			computeQueue->submit({commandEncoder->end()}, nullptr, nullptr, writeBufferFence);
+			commandBuffer = commandEncoder->end();
+
+			computeQueue->submit({commandBuffer}, nullptr, nullptr, writeBufferFence);
 
 			rowHeight = max(rowHeight, glyphHeight);
 
@@ -269,10 +286,20 @@ namespace Trident {
 
 		commandEncoder = computeQueue->createCommandEncoder(commandBufferDescriptor);
 		commandEncoder->begin();
-		commandEncoder->setImageMemoryBarrier(glyphMapImage, ImageLayout::TRANSFER_SRC_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+
+		glyphMapImageMemoryBarrier = {
+			.image = glyphMapImage,
+			.newLayout = ImageLayout::TRANSFER_SRC_OPTIMAL,
+			.sourceAccess = Access::SHADER_WRITE,
+			.destinationAccess = Access::TRANSFER_READ,
+		};
+
+		commandEncoder->insertMemoryBarriers({}, {glyphMapImageMemoryBarrier});
 		commandEncoder->copyImageToBuffer(glyphMapImage, glyphMapStagingBuffer, {glyphMapBufferImageCopyRegion});
 
-		computeQueue->submit({commandEncoder->end()});
+		commandBuffer = commandEncoder->end();
+
+		computeQueue->submit({commandBuffer});
 		computeQueue->waitIdle();
 
 		output.data = sequence<uint8>(glyphMapStagingBuffer->getSize());

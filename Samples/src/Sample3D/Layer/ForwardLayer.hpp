@@ -47,6 +47,7 @@ namespace Trident {
 			void onEvent(Event& event) override {
 				EventDispatcher eventDispatcher(event);
 				eventDispatcher.dispatch<KeyDownEvent>(BIND(onKeyDown));
+				eventDispatcher.dispatch<MouseDownEvent>(BIND(onMouseDown));
 				eventDispatcher.dispatch<MouseMoveEvent>(BIND(onMouseMove));
 				eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
 
@@ -55,21 +56,20 @@ namespace Trident {
 
 		private:
 			bool onKeyDown(KeyDownEvent& event) {
-				switch (event.getKeyCode()) {
-					case KeyCode::SPACE: {
-						const Window* window = getApplication()->getWindow();
+				const Window* window = getApplication()->getWindow();
 
-						if (!window->isPointerLocked()) {
-							window->lockPointer();
-						}
-						else {
-							window->unlockPointer();
-						}
+				if (event.getKeyCode() == KeyCode::ESCAPE && window->isPointerLocked()) {
+					window->unlockPointer();
+				}
 
-						break;
-					}
-					default:
-						break;
+				return true;
+			}
+
+			bool onMouseDown(MouseDownEvent& event) {
+				const Window* window = getApplication()->getWindow();
+
+				if (!window->isPointerLocked()) {
+					window->lockPointer();
 				}
 
 				return true;

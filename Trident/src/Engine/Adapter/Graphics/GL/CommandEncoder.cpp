@@ -20,8 +20,8 @@
 #include "Engine/Adapter/Graphics/GL/Command/DrawIndexedIndirectCommand.hpp"
 #include "Engine/Adapter/Graphics/GL/Command/DrawIndirectCommand.hpp"
 #include "Engine/Adapter/Graphics/GL/Command/EndRenderPassCommand.hpp"
+#include "Engine/Adapter/Graphics/GL/Command/InsertMemoryBarriersCommand.hpp"
 #include "Engine/Adapter/Graphics/GL/Command/NextSubpassCommand.hpp"
-#include "Engine/Adapter/Graphics/GL/Command/SetImageMemoryBarrierCommand.hpp"
 #include "Engine/Adapter/Graphics/GL/Command/SetLineWidthCommand.hpp"
 #include "Engine/Adapter/Graphics/GL/Command/SetScissorCommand.hpp"
 #include "Engine/Adapter/Graphics/GL/Command/SetViewportCommand.hpp"
@@ -244,23 +244,36 @@ namespace Trident {
 		_commandEncoder->commands.emplace_back(createRef<GL::EndRenderPassCommand>(_commandEncoder->framebuffer));
 	}
 
-	void GL::insertBufferMemoryBarriers(Trident::CommandEncoder* commandEncoder, view<BufferMemoryBarrier> barriers) {
+	void GL::insertMemoryBarriers(Trident::CommandEncoder* commandEncoder, view<BufferMemoryBarrier> bufferMemoryBarriers, view<ImageMemoryBarrier> imageMemoryBarriers) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
-		uint32 barrierIndex = 0;
+		GLbitfield barriers = 0;
+		uint32 bufferMemoryBarrierIndex = 0;
 
-		while (barrierIndex < barriers.count()) {
-			const GLbitfield barrier = getBarrier(barriers[barrierIndex].destinationAccess);
+		while (bufferMemoryBarrierIndex < bufferMemoryBarriers.count()) {
+			barriers |= getBarrier(bufferMemoryBarriers[bufferMemoryBarrierIndex].destinationAccess);
 
-			barrierIndex += 1;
-
-			if (barrier == 0) {
-				continue;
-			}
-
-			_commandEncoder->commands.emplace_back(createRef<GL::SetImageMemoryBarrierCommand>(barrier));
+			bufferMemoryBarrierIndex += 1;
 		}
+
+		uint32 imageMemoryBarrierIndex = 0;
+
+		while (imageMemoryBarrierIndex < imageMemoryBarriers.count()) {
+			const ImageMemoryBarrier& imageMemoryBarrier = imageMemoryBarriers[imageMemoryBarrierIndex];
+
+			barriers |= getBarrier(imageMemoryBarrier.image->getLayout());
+
+			imageMemoryBarrier.image->layout = imageMemoryBarrier.newLayout;
+
+			imageMemoryBarrierIndex += 1;
+		}
+
+		if (barriers == 0) {
+			return;
+		}
+
+		_commandEncoder->commands.emplace_back(createRef<GL::InsertMemoryBarriersCommand>(barriers));
 	}
 
 	void GL::nextSubpass(Trident::CommandEncoder* commandEncoder) {
@@ -287,21 +300,6 @@ namespace Trident {
 		_commandEncoder->indexOffset = 0;
 		_commandEncoder->indexType = 0;
 		_commandEncoder->indexTypeSize = 0;
-	}
-
-	void GL::setImageMemoryBarrier(Trident::CommandEncoder* commandEncoder, ref<Trident::Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		const GLbitfield barrier = getBarrier(image->getLayout());
-
-		if (barrier == 0) {
-			return;
-		}
-
-		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
-		_commandEncoder->commands.emplace_back(createRef<GL::SetImageMemoryBarrierCommand>(barrier));
-
-		image->layout = newLayout;
 	}
 
 	void GL::setLineWidth(Trident::CommandEncoder* commandEncoder, float32 lineWidth) {

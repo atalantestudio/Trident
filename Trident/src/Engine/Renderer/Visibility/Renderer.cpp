@@ -231,7 +231,17 @@ namespace Trident {
 			commandEncoder->endRenderPass();
 		}
 
-		commandEncoder->setImageMemoryBarrier(visibilityImage, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+		// TODO(render-pass/sync-image-layout): The layout of attachment images must be automatically updated when calling CommandEncoder->beginRenderPass.
+		visibilityImage->layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+
+		const ImageMemoryBarrier visibilityImageMemoryBarrier = {
+			.image = visibilityImage,
+			.newLayout = ImageLayout::GENERAL,
+			.sourceAccess = Access::NONE,
+			.destinationAccess = Access::SHADER_READ,
+		};
+
+		commandEncoder->insertMemoryBarriers({}, {visibilityImageMemoryBarrier});
 
 		// Material compute pass
 		{
@@ -251,7 +261,7 @@ namespace Trident {
 				.destinationAccess = Access::SHADER_READ | Access::SHADER_WRITE,
 			};
 
-			commandEncoder->insertBufferMemoryBarriers({bufferMemoryBarrier});
+			commandEncoder->insertMemoryBarriers({bufferMemoryBarrier}, {});
 
 			// Get the material pixel offsets with a prefix sum and write indirect arguments for each material pipeline.
 			commandEncoder->bindComputePipeline(materialOffsetPipeline);
@@ -271,7 +281,7 @@ namespace Trident {
 				.destinationAccess = Access::SHADER_READ,
 			};
 
-			commandEncoder->insertBufferMemoryBarriers({bufferMemoryBarrier});
+			commandEncoder->insertMemoryBarriers({bufferMemoryBarrier}, {});
 
 			uint32 materialShaderIndex = 0;
 
@@ -385,7 +395,15 @@ namespace Trident {
 		});
 
 		commandEncoder->begin();
-		commandEncoder->setImageMemoryBarrier(outputImage, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+
+		const ImageMemoryBarrier outputImageMemoryBarrier = {
+			.image = outputImage,
+			.newLayout = ImageLayout::GENERAL,
+			.sourceAccess = Access::NONE,
+			.destinationAccess = Access::SHADER_WRITE,
+		};
+
+		commandEncoder->insertMemoryBarriers({}, {outputImageMemoryBarrier});
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 

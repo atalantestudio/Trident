@@ -178,9 +178,24 @@ namespace Trident {
 
 					bufferImageCopyRegion.imageExtent = image->getExtent();
 
-					commandEncoder->setImageMemoryBarrier(image, ImageLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+					ImageMemoryBarrier imageMemoryBarrier = {
+						.image = image,
+						.newLayout = ImageLayout::TRANSFER_DST_OPTIMAL,
+						.sourceAccess = Access::NONE,
+						.destinationAccess = Access::TRANSFER_WRITE,
+					};
+
+					commandEncoder->insertMemoryBarriers({}, {imageMemoryBarrier});
 					commandEncoder->copyBufferToImage(stagingBuffer, image, {bufferImageCopyRegion});
-					commandEncoder->setImageMemoryBarrier(image, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+
+					imageMemoryBarrier = {
+						.image = image,
+						.newLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+						.sourceAccess = Access::TRANSFER_WRITE,
+						.destinationAccess = Access::SHADER_READ,
+					};
+
+					commandEncoder->insertMemoryBarriers({}, {imageMemoryBarrier});
 
 					bufferImageCopyRegion.bufferOffset += imageAssets[imageAssetIndex]->getData().count();
 

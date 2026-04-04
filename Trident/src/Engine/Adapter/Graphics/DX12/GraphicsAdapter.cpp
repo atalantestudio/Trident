@@ -110,14 +110,13 @@ namespace Trident::DX12 {
 		adapter->endImplementation = DX12::end;
 		adapter->endRenderPassImplementation = DX12::endRenderPass;
 		adapter->getQueueImplementation = DX12::getQueue;
-		adapter->insertBufferMemoryBarriersImplementation = DX12::insertBufferMemoryBarriers;
+		adapter->insertMemoryBarriersImplementation = DX12::insertMemoryBarriers;
 		adapter->mapBufferImplementation = DX12::mapBuffer;
 		adapter->nextSubpassImplementation = DX12::nextSubpass;
 		adapter->presentImplementation = DX12::present;
 		adapter->resetImplementation = DX12::reset;
 		adapter->resetFenceImplementation = DX12::resetFence;
 		adapter->selectPhysicalDeviceImplementation = DX12::selectPhysicalDevice;
-		adapter->setImageMemoryBarrierImplementation = DX12::setImageMemoryBarrier;
 		adapter->setLineWidthImplementation = DX12::setLineWidth;
 		adapter->setScissorImplementation = DX12::setScissor;
 		adapter->setViewportImplementation = DX12::setViewport;

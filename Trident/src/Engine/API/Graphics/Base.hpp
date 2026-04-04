@@ -25,6 +25,7 @@ namespace Trident {
 	struct FramebufferDescriptor;
 	struct GraphicsPipelineDescriptor;
 	struct ImageDescriptor;
+	struct ImageMemoryBarrier;
 	struct ImageViewDescriptor;
 	struct InstanceDescriptor;
 	struct PipelineLayoutDescriptor;
@@ -137,14 +138,13 @@ namespace Trident {
 	typedef void (*EndRenderPassImplementation)(CommandEncoder* commandEncoder);
 	typedef ref<Queue> (*GetQueueImplementation)(const Device* device, QueueFamilyCapability queueFamilyCapability);
 	typedef ImageFormat (*GetSurfaceFormatImplementation)(const Surface* surface);
-	typedef void (*InsertBufferMemoryBarriersImplementation)(CommandEncoder* commandEncoder, view<BufferMemoryBarrier> barriers);
+	typedef void (*InsertMemoryBarriersImplementation)(CommandEncoder* commandEncoder, view<BufferMemoryBarrier> bufferMemoryBarriers, view<ImageMemoryBarrier> imageMemoryBarriers);
 	typedef void* (*MapBufferImplementation)(const Device* device, const BaseBuffer* buffer, uint64 offset, uint64 size);
 	typedef void (*NextSubpassImplementation)(CommandEncoder* commandEncoder);
 	typedef PresentStatus (*PresentImplementation)(const Queue* queue, view<ref<Swapchain>> swapchains, view<uint32> presentableImageIndices, ref<Semaphore> waitSemaphore);
 	typedef void (*ResetFenceImplementation)(const Device* device, const Fence* fence);
 	typedef void (*ResetImplementation)(CommandEncoder* commandEncoder);
 	typedef ref<PhysicalDevice> (*SelectPhysicalDeviceImplementation)(const Instance* instance, bool preferIntegratedGpu);
-	typedef void (*SetImageMemoryBarrierImplementation)(CommandEncoder* commandEncoder, ref<Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage);
 	typedef void (*SetLineWidthImplementation)(CommandEncoder* commandEncoder, float32 lineWidth);
 	typedef void (*SetScissorImplementation)(CommandEncoder* commandEncoder, sint32 xOffset, sint32 yOffset, Extent2D extent);
 	typedef void (*SetViewportImplementation)(CommandEncoder* commandEncoder, vec2<float32> origin, vec2<float32> size, float32 minDepth, float32 maxDepth);

@@ -70,13 +70,11 @@ namespace Trident {
 
 		void endRenderPass(Trident::CommandEncoder* commandEncoder);
 
-		void insertBufferMemoryBarriers(Trident::CommandEncoder* commandEncoder, view<BufferMemoryBarrier> barriers);
+		void insertMemoryBarriers(Trident::CommandEncoder* commandEncoder, view<BufferMemoryBarrier> bufferMemoryBarriers, view<ImageMemoryBarrier> imageMemoryBarriers);
 
 		void nextSubpass(Trident::CommandEncoder* commandEncoder);
 
 		void reset(Trident::CommandEncoder* commandEncoder);
-
-		void setImageMemoryBarrier(Trident::CommandEncoder* commandEncoder, ref<Trident::Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage);
 
 		void setLineWidth(Trident::CommandEncoder* commandEncoder, float32 lineWidth);
 

@@ -12,7 +12,7 @@ namespace Trident {
 		uint64 offset;
 		uint64 size;
 
-		// TODO: Store in the buffer.
+		// TODO: Store inside the buffer.
 		Access sourceAccess;
 
 		Access destinationAccess;

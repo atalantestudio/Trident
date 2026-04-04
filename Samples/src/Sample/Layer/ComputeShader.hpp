@@ -300,11 +300,27 @@ namespace Trident {
 				const ref<CommandEncoder> commandEncoder = computeQueue->createCommandEncoder(commandBufferDescriptor);
 
 				commandEncoder->begin();
-				commandEncoder->setImageMemoryBarrier(image, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+
+				ImageMemoryBarrier imageMemoryBarrier = {
+					.image = image,
+					.newLayout = ImageLayout::GENERAL,
+					.sourceAccess = Access::NONE,
+					.destinationAccess = Access::SHADER_WRITE,
+				};
+
+				commandEncoder->insertMemoryBarriers({}, {imageMemoryBarrier});
 				commandEncoder->bindComputePipeline(computePipeline);
 				commandEncoder->bindDescriptorSets(pipelineLayout, 0, {imageDescriptorSet});
 				commandEncoder->dispatch(2, 2, 1);
-				commandEncoder->setImageMemoryBarrier(image, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+
+				imageMemoryBarrier = {
+					.image = image,
+					.newLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+					.sourceAccess = Access::SHADER_WRITE,
+					.destinationAccess = Access::SHADER_READ,
+				};
+
+				commandEncoder->insertMemoryBarriers({}, {imageMemoryBarrier});
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 

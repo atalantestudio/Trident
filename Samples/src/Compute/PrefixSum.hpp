@@ -129,7 +129,7 @@ namespace Trident {
 				elementStartMemoryBarrier.sourceAccess = Access::SHADER_WRITE;
 				elementStartMemoryBarrier.destinationAccess = Access::TRANSFER_READ;
 
-				commandEncoder->insertBufferMemoryBarriers({elementStartMemoryBarrier});
+				commandEncoder->insertMemoryBarriers({elementStartMemoryBarrier}, {});
 
 				BufferCopyRegion elementStartCopyRegion{};
 				elementStartCopyRegion.sourceOffset = 0;

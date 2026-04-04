@@ -250,8 +250,6 @@ namespace Trident {
 	}
 
 	void DX12::updateDescriptorSets(const Trident::Device* device, view<WriteDescriptorSet> writeDescriptorSets) {
-		DEBUG_DESCRIPTOR_GUARD(writeDescriptorSets);
-
 		const ref<DX12::MemoryAllocator> memoryAllocator = std::static_pointer_cast<DX12::MemoryAllocator>(device->getMemoryAllocator());
 
 		for (const WriteDescriptorSet& writeDescriptorSet : writeDescriptorSets) {

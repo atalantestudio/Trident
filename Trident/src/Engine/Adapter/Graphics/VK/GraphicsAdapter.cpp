@@ -117,14 +117,13 @@ namespace Trident::VK {
 		adapter->endImplementation = VK::end;
 		adapter->endRenderPassImplementation = VK::endRenderPass;
 		adapter->getQueueImplementation = VK::getQueue;
-		adapter->insertBufferMemoryBarriersImplementation = VK::insertBufferMemoryBarriers;
+		adapter->insertMemoryBarriersImplementation = VK::insertMemoryBarriers;
 		adapter->mapBufferImplementation = VK::mapBuffer;
 		adapter->nextSubpassImplementation = VK::nextSubpass;
 		adapter->presentImplementation = VK::present;
 		adapter->resetImplementation = VK::reset;
 		adapter->resetFenceImplementation = VK::resetFence;
 		adapter->selectPhysicalDeviceImplementation = VK::selectPhysicalDevice;
-		adapter->setImageMemoryBarrierImplementation = VK::setImageMemoryBarrier;
 		adapter->setLineWidthImplementation = VK::setLineWidth;
 		adapter->setScissorImplementation = VK::setScissor;
 		adapter->setViewportImplementation = VK::setViewport;

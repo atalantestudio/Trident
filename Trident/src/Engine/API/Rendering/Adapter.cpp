@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Engine/API/Rendering/Adapter/copyImageToBuffer.hpp"
+#include "Engine/API/Rendering/Adapter/insertMemoryBarriers.hpp"
 #include "Engine/API/Rendering/Buffer.hpp"
 #include "Engine/API/Rendering/CommandPool.hpp"
 #include "Engine/API/Rendering/Device.hpp"
@@ -115,16 +116,8 @@ namespace Trident {
 		device->adapter->nextSubpass(this);
 	}
 
-	void CommandEncoder::insertBufferMemoryBarriers(view<BufferMemoryBarrier> barriers) {
-		device->adapter->insertBufferMemoryBarriers(this, barriers);
-	}
-
 	void CommandEncoder::reset() {
 		device->adapter->reset(this);
-	}
-
-	void CommandEncoder::setImageMemoryBarrier(ref<Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
-		device->adapter->setImageMemoryBarrier(this, image, newLayout, sourceStage, destinationStage);
 	}
 
 	void CommandEncoder::setLineWidth(float32 lineWidth) {

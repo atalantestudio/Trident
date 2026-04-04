@@ -113,14 +113,13 @@ namespace Trident::GL {
 		adapter->endImplementation = GL::end;
 		adapter->endRenderPassImplementation = GL::endRenderPass;
 		adapter->getQueueImplementation = GL::getQueue;
-		adapter->insertBufferMemoryBarriersImplementation = GL::insertBufferMemoryBarriers;
+		adapter->insertMemoryBarriersImplementation = GL::insertMemoryBarriers;
 		adapter->mapBufferImplementation = GL::mapBuffer;
 		adapter->nextSubpassImplementation = GL::nextSubpass;
 		adapter->presentImplementation = GL::present;
 		adapter->resetImplementation = GL::reset;
 		adapter->resetFenceImplementation = GL::resetFence;
 		adapter->selectPhysicalDeviceImplementation = GL::selectPhysicalDevice;
-		adapter->setImageMemoryBarrierImplementation = GL::setImageMemoryBarrier;
 		adapter->setLineWidthImplementation = GL::setLineWidth;
 		adapter->setScissorImplementation = GL::setScissor;
 		adapter->setViewportImplementation = GL::setViewport;

@@ -44,7 +44,7 @@ namespace Trident {
 		HRESULT result;
 
 		ref<DX12::Image> image = createRef<DX12::Image>(device, descriptor);
-		image->resourceState = getImageResourceState(descriptor.usage, image->layout, image->sampleCount);
+		image->resourceState = D3D12_RESOURCE_STATE_COMMON;
 		image->usage = descriptor.usage;
 
 		D3D12_HEAP_PROPERTIES heapProperties{};
