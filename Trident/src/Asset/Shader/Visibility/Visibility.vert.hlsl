@@ -69,7 +69,7 @@ Geometry loadGeometry(uint geometryIndex) {
 	return geometry;
 }
 
-float3 loadVertexPosition(uint index, Geometry geometry) {
+float3 loadVertexPosition(Geometry geometry, uint index) {
 	uint offset = (geometry.vertexOffset + index) * VERTEX_POSITION_STRIDE;
 
 	return asfloat(vertexPositionComponentBuffer.Load3(offset * 4));
@@ -86,7 +86,7 @@ VertexOutput main(VertexInput input) {
 
 	uint indexOffset = (instance.clusterOffset + clusterIndex) * CLUSTER_INDEX_COUNT;
 	uint relativeVertexPositionIndex = vertexPositionIndexBuffer.Load((indexOffset + indexIndex) * 4);
-	float3 vertex = loadVertexPosition(relativeVertexPositionIndex, geometry);
+	float3 vertex = loadVertexPosition(geometry, relativeVertexPositionIndex);
 
 	VertexOutput output;
 	output.position = mul(camera.projectionView, mul(instance.transform, float4(vertex, 1.0)));

@@ -11,7 +11,7 @@ namespace Trident {
 			.stage = ShaderStage::COMPUTE,
 			.entryPoint = "main",
 			#if defined(BUILD_MODE_DEBUG)
-				.name = "Material coordinate",
+				.name = "Material coordinate compute",
 			#endif
 		};
 

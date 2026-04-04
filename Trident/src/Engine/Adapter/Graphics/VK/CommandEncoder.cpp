@@ -479,7 +479,14 @@ namespace Trident {
 			vkImageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 			vkImageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 			vkImageMemoryBarrier.image = std::static_pointer_cast<VK::Image>(imageMemoryBarrier.image)->image;
-			vkImageMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+
+			if (isDepthFormat(imageMemoryBarrier.image->getFormat())) {
+				vkImageMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+			}
+			else {
+				vkImageMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			}
+
 			vkImageMemoryBarrier.subresourceRange.baseMipLevel = 0;
 			vkImageMemoryBarrier.subresourceRange.levelCount = imageMemoryBarrier.image->getMipLevelCount();
 			vkImageMemoryBarrier.subresourceRange.baseArrayLayer = 0;

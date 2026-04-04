@@ -19,6 +19,10 @@ namespace Trident {
 				},
 				.mipLevelCount = 1,
 				.layerCount = 1,
+				#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
+					// Depth stencil attachment images do not always support STORAGE usage.
+					.additionalUsage = ImageUsage::SAMPLED,
+				#endif
 				#if defined(BUILD_MODE_DEBUG)
 					.name = "Depth stencil",
 				#endif

@@ -12,7 +12,7 @@ namespace Trident {
 				.stage = ShaderStage::COMPUTE,
 				.entryPoint = "main",
 				#if defined(BUILD_MODE_DEBUG)
-					.name = "Material offset",
+					.name = "Material offset compute",
 				#endif
 			},
 			"Visibility/MaterialOffset.comp"

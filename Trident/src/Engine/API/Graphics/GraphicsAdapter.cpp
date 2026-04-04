@@ -4,10 +4,10 @@
 #include "pch.hpp"
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-
 #include "Engine/Adapter/Graphics/DX12/GraphicsAdapter.hpp"
 #include "Engine/Adapter/Graphics/GL/GraphicsAdapter.hpp"
 #include "Engine/Adapter/Graphics/VK/GraphicsAdapter.hpp"
+#include "Engine/API/Rendering/Adapter/createDescriptorSetLayout.hpp"
 #include "Engine/API/Rendering/Device.hpp"
 #include "Engine/API/Rendering/Instance.hpp"
 
@@ -93,10 +93,6 @@ namespace Trident {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
 		return createComputePipelineImplementation(device, descriptor);
-	}
-
-	ref<DescriptorSetLayout> GraphicsAdapter::createDescriptorSetLayout(const Device* device, const sequence<DescriptorSetLayoutBinding>& bindings) const {
-		return createDescriptorSetLayoutImplementation(device, bindings);
 	}
 
 	ref<Device> GraphicsAdapter::createDevice(const PhysicalDevice* physicalDevice) const {

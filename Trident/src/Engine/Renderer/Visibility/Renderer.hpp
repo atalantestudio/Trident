@@ -1,4 +1,4 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
@@ -9,6 +9,8 @@
 #include "Engine/Renderer/3D/SceneRenderer.hpp"
 
 namespace Trident {
+	// #define ENABLE_VISIBILITY_DEBUG_PASS
+
 	class VisibilityRenderer : public SceneRenderer<ClusteredScene> {
 		private:
 			struct Camera {
@@ -53,7 +55,6 @@ namespace Trident {
 
 			ref<Subpass> createVisibilitySubpass() const;
 			ref<Subpass> createPresentSubpass() const;
-			// ref<Subpass> createDebugPresentSubpass() const;
 
 			ref<Framebuffer> createVisibilityFramebuffer() const;
 			void createPresentFramebuffers();
@@ -65,26 +66,38 @@ namespace Trident {
 			ref<DescriptorSetLayout> createCameraDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createClusterDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createInstanceDescriptorSetLayout() const;
+
+			#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
+				ref<DescriptorSetLayout> createVisibilityDebugDescriptorSetLayout() const;
+			#endif
+
 			ref<DescriptorSetLayout> createMaterialCountDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createMaterialOffsetDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createMaterialCoordinateDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createMaterialBaseDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createOutputDescriptorSetLayout() const;
-			ref<DescriptorSetLayout> createDebugDescriptorSetLayout() const;
 
 			ref<PipelineLayout> createVisibilityPipelineLayout() const;
+
+			#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
+				ref<PipelineLayout> createVisibilityDebugPipelineLayout() const;
+			#endif
+
 			ref<PipelineLayout> createMaterialCountPipelineLayout() const;
 			ref<PipelineLayout> createMaterialOffsetPipelineLayout() const;
 			ref<PipelineLayout> createMaterialCoordinatePipelineLayout() const;
 			ref<PipelineLayout> createOutputPipelineLayout() const;
-			// ref<PipelineLayout> createDebugPipelineLayout() const;
 
 			ref<GraphicsPipeline> createVisibilityPipeline() const;
+
+			#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
+				ref<ComputePipeline> createVisibilityDebugPipeline() const;
+			#endif
+
 			ref<ComputePipeline> createMaterialCountPipeline() const;
 			ref<ComputePipeline> createMaterialOffsetPipeline() const;
 			ref<ComputePipeline> createMaterialCoordinatePipeline() const;
 			ref<GraphicsPipeline> createOutputPipeline() const;
-			// ref<GraphicsPipeline> createDebugPipeline() const;
 
 			ref<Buffer<DrawIndirectCommand>> createVisibilityIndirectBuffer() const;
 			ref<Buffer<Camera>> createCameraBuffer() const;
@@ -96,12 +109,12 @@ namespace Trident {
 			ref<Buffer<uint32>> createMaterialCoordinateBuffer() const;
 
 			ref<Image> createVisibilityImage() const;
-			ref<Image> createOutputImage() const;
 			ref<Image> createDepthStencilImage() const;
+			ref<Image> createOutputImage() const;
 
 			ref<ImageView> createVisibilityImageView();
-			ref<ImageView> createOutputImageView();
 			ref<ImageView> createDepthStencilImageView();
+			ref<ImageView> createOutputImageView();
 
 			ref<Sampler> createMaterialShaderImageSampler() const;
 
@@ -125,52 +138,56 @@ namespace Trident {
 			ref<DescriptorSetLayout> cameraDescriptorSetLayout;
 			ref<DescriptorSetLayout> clusterDescriptorSetLayout;
 			ref<DescriptorSetLayout> instanceDescriptorSetLayout;
+
+			#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
+				ref<DescriptorSetLayout> visibilityDebugDescriptorSetLayout;
+			#endif
+
 			ref<DescriptorSetLayout> materialCountDescriptorSetLayout;
 			ref<DescriptorSetLayout> materialOffsetDescriptorSetLayout;
 			ref<DescriptorSetLayout> materialCoordinateDescriptorSetLayout;
 			ref<DescriptorSetLayout> materialBaseDescriptorSetLayout;
-
-			// One for each unique material shader (which can be used by multiple materials).
 			sequence<ref<DescriptorSetLayout>> materialShaderUserDescriptorSetLayouts;
-
 			ref<DescriptorSetLayout> outputDescriptorSetLayout;
-			ref<DescriptorSetLayout> debugDescriptorSetLayout;
 
 			ref<DescriptorSet> cameraDescriptorSet;
 			ref<DescriptorSet> clusterDescriptorSet;
 			ref<DescriptorSet> instanceDescriptorSet;
+
+			#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
+				ref<DescriptorSet> visibilityDebugDescriptorSet;
+			#endif
+
 			ref<DescriptorSet> materialCountDescriptorSet;
 			ref<DescriptorSet> materialOffsetDescriptorSet;
 			ref<DescriptorSet> materialCoordinateDescriptorSet;
 			ref<DescriptorSet> materialBaseDescriptorSet;
-
-			// One for each unique material shader (which can be used by multiple materials).
 			sequence<ref<DescriptorSet>> materialShaderUserDescriptorSets;
-
 			ref<DescriptorSet> outputDescriptorSet;
-			ref<DescriptorSet> debugDescriptorSet;
 
 			ref<PipelineLayout> visibilityPipelineLayout;
+
+			#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
+				ref<PipelineLayout> visibilityDebugPipelineLayout;
+			#endif
+
 			ref<PipelineLayout> materialCountPipelineLayout;
 			ref<PipelineLayout> materialOffsetPipelineLayout;
 			ref<PipelineLayout> materialCoordinatePipelineLayout;
-
-			// One for each unique material shader (which can be used by multiple materials).
 			sequence<ref<PipelineLayout>> materialShaderPipelineLayouts;
-
 			ref<PipelineLayout> outputPipelineLayout;
-			// ref<PipelineLayout> debugPipelineLayout;
 
 			ref<GraphicsPipeline> visibilityPipeline;
+
+			#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
+				ref<ComputePipeline> visibilityDebugPipeline;
+			#endif
+
 			ref<ComputePipeline> materialCountPipeline;
 			ref<ComputePipeline> materialOffsetPipeline;
 			ref<ComputePipeline> materialCoordinatePipeline;
-
-			// One for each unique material shader (which can be used by multiple materials).
 			sequence<ref<ComputePipeline>> materialShaderPipelines;
-
 			ref<GraphicsPipeline> outputPipeline;
-			// ref<GraphicsPipeline> debugPipeline;
 
 			ref<Buffer<DrawIndirectCommand>> visibilityIndirectBuffer;
 			ref<Buffer<Camera>> cameraBuffer;
@@ -204,6 +221,7 @@ namespace Trident {
 			sequence<ref<ImageView>> materialShaderImageViews;
 			ref<ImageView> outputImageView;
 
+			// NOTE: Also used for the depth stencil image in the visibility debug pass.
 			ref<Sampler> materialShaderImageSampler;
 
 			Camera* cameraMappedRange;

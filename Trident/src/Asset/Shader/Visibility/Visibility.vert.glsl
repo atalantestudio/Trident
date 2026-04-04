@@ -52,7 +52,7 @@ out VertexOutput {
 	layout(location = 0) flat uint visibility;
 } vertexOutput;
 
-vec3 loadVertexPosition(uint index, Geometry geometry) {
+vec3 loadVertexPosition(Geometry geometry, uint index) {
 	uint offset = (geometry.vertexOffset + index) * VERTEX_POSITION_STRIDE;
 
 	float x = vertexPositionComponentBuffer[offset + 0];
@@ -73,7 +73,7 @@ void main() {
 
 	uint indexOffset = (instance.clusterOffset + clusterIndex) * CLUSTER_INDEX_COUNT;
 	uint relativeVertexPositionIndex = vertexPositionIndexBuffer[indexOffset + indexIndex];
-	vec3 vertex = loadVertexPosition(relativeVertexPositionIndex, geometry);
+	vec3 vertex = loadVertexPosition(geometry, relativeVertexPositionIndex);
 
 	gl_Position = camera.projectionView * instance.transform * vec4(vertex, 1.0);
 

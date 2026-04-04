@@ -2,10 +2,8 @@
 "%VULKAN_SDK%\Bin\glslc.exe" -fshader-stage=vert VisibilitySingleSet.vert.glsl -o VisibilitySingleSet.vert.spv
 "%VULKAN_SDK%\Bin\glslc.exe" -fshader-stage=frag Visibility.frag.glsl -o Visibility.frag.spv
 
-@REM "%VULKAN_SDK%\Bin\glslc.exe" -fshader-stage=vert VisibilityDebug.vert.glsl -o VisibilityDebugGL.vert.spv
-"%VULKAN_SDK%\Bin\glslc.exe" -fshader-stage=vert VisibilityDebugVK.vert.glsl -o VisibilityDebug.vert.spv
-@REM "%VULKAN_SDK%\Bin\glslc.exe" -fshader-stage=frag VisibilityDebug.frag.glsl -o VisibilityDebugGL.frag.spv
-"%VULKAN_SDK%\Bin\glslc.exe" -fshader-stage=frag VisibilityDebugVK.frag.glsl -o VisibilityDebug.frag.spv
+"%VULKAN_SDK%\Bin\glslc.exe" -fshader-stage=comp VisibilityDebug.comp.glsl -o VisibilityDebug.comp.spv
+"%VULKAN_SDK%\Bin\glslc.exe" -fshader-stage=comp VisibilityDebugGL.comp.glsl -o VisibilityDebugGL.comp.spv
 
 "%VULKAN_SDK%\Bin\glslc.exe" -fshader-stage=comp MaterialCoordinate.comp.glsl -o MaterialCoordinate.comp.spv
 "%VULKAN_SDK%\Bin\glslc.exe" -fshader-stage=comp MaterialCoordinateGL.comp.glsl -o MaterialCoordinateGL.comp.spv

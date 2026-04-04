@@ -1,6 +1,8 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
+// TODO: Cleanup when the DX12 image memory barriers are fixed.
+
 struct VertexOutput {
 	float4 position : SV_Position;
 	float2 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE1;

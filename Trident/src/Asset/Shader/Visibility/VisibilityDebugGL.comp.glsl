@@ -1,7 +1,12 @@
-#version 450
+#version 310 es
 
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
+
+precision highp image2D;
+precision highp uimage2D;
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 
 struct Camera {
 	mat4x4 projectionView;
@@ -50,13 +55,6 @@ struct Gradients {
 	vec2 ddy;
 };
 
-struct Material {
-	vec3 ambient;
-	vec3 diffuse;
-	vec3 specular;
-	float shininess;
-};
-
 struct Light {
 	vec3 position;
 	vec3 ambient;
@@ -64,118 +62,125 @@ struct Light {
 	vec3 specular;
 };
 
-const uint CLUSTER_TRIANGLE_COUNT = 128;
-const uint CLUSTER_INDEX_COUNT = CLUSTER_TRIANGLE_COUNT * 3;
-const uint TRIANGLE_INDEX_BIT_COUNT = 7;
-const uint TRIANGLE_INDEX_BIT_MASK = CLUSTER_TRIANGLE_COUNT - 1;
+struct Material {
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+	float shininess;
+};
+
+const uint CLUSTER_TRIANGLE_COUNT = 128u;
+const uint CLUSTER_INDEX_COUNT = CLUSTER_TRIANGLE_COUNT * 3u;
+const uint TRIANGLE_INDEX_BIT_COUNT = 7u;
+const uint TRIANGLE_INDEX_BIT_MASK = CLUSTER_TRIANGLE_COUNT - 1u;
 const float MATERIAL_SPECULAR_MULTIPLIER = 4.0;
 
 // Visibility visualization modes.
-const uint VISUALIZATION_MODE_TRIANGLE_INDEX = 0;
-const uint VISUALIZATION_MODE_CLUSTER_INDEX = 1;
-const uint VISUALIZATION_MODE_LINEAR_DEPTH = 2;
+const uint VISUALIZATION_MODE_TRIANGLE_INDEX = 0u;
+const uint VISUALIZATION_MODE_CLUSTER_INDEX = 1u;
+const uint VISUALIZATION_MODE_LINEAR_DEPTH = 2u;
 
 // Scene visualization modes.
-const uint VISUALIZATION_MODE_INSTANCE_INDEX = 3;
-const uint VISUALIZATION_MODE_GEOMETRY_INDEX = 4;
-const uint VISUALIZATION_MODE_MATERIAL_INDEX = 5;
+const uint VISUALIZATION_MODE_INSTANCE_INDEX = 3u;
+const uint VISUALIZATION_MODE_GEOMETRY_INDEX = 4u;
+const uint VISUALIZATION_MODE_MATERIAL_INDEX = 5u;
 
 // Primitive visualization modes.
-const uint VISUALIZATION_MODE_TRIANGLE_NORMAL = 6;
-const uint VISUALIZATION_MODE_BARYCENTRIC_DERIVATIVES = 7;
-const uint VISUALIZATION_MODE_VERTEX_NORMAL = 8;
-const uint VISUALIZATION_MODE_VERTEX_TEXTURE_COORDINATE = 9;
+const uint VISUALIZATION_MODE_TRIANGLE_NORMAL = 6u;
+const uint VISUALIZATION_MODE_BARYCENTRIC_DERIVATIVES = 7u;
+const uint VISUALIZATION_MODE_VERTEX_NORMAL = 8u;
+const uint VISUALIZATION_MODE_VERTEX_TEXTURE_COORDINATE = 9u;
 
 // Shading visualization modes.
-const uint VISUALIZATION_MODE_FLAT_SHADING = 10;
-const uint VISUALIZATION_MODE_BLINN_PHONG_SHADING = 11;
+const uint VISUALIZATION_MODE_FLAT_SHADING = 10u;
+const uint VISUALIZATION_MODE_BLINN_PHONG_SHADING = 11u;
 
-// TODO: Use specialization constant.
-const uint VISUALIZATION_MODE = VISUALIZATION_MODE_MATERIAL_INDEX;
+// TODO: Use a value from a uniform buffer.
+const uint VISUALIZATION_MODE = VISUALIZATION_MODE_BLINN_PHONG_SHADING;
 
-layout(set = 0, binding = 0) uniform readonly CameraBuffer {
+layout(binding = 0) uniform readonly CameraBuffer {
 	Camera camera;
 };
-layout(set = 0, binding = 1, input_attachment_index = 0) uniform usubpassInput visibilityImage;
-layout(set = 0, binding = 2, input_attachment_index = 1) uniform subpassInput depthStencilImage;
-layout(set = 0, binding = 3) buffer readonly VertexPositionComponentBuffer {
+layout(binding = 1, r32ui) uniform readonly uimage2D visibilityImage;
+layout(binding = 2) uniform sampler2D depthStencilImage;
+layout(binding = 3) buffer readonly VertexPositionComponentBuffer {
 	float vertexPositionComponentBuffer[];
 };
-layout(set = 0, binding = 4) buffer readonly VertexNormalComponentBuffer {
+layout(binding = 4) buffer readonly VertexNormalComponentBuffer {
 	float vertexNormalComponentBuffer[];
 };
-layout(set = 0, binding = 5) buffer readonly VertexTextureCoordinateComponentBuffer {
+layout(binding = 5) buffer readonly VertexTextureCoordinateComponentBuffer {
 	float vertexTextureCoordinateComponentBuffer[];
 };
-layout(set = 0, binding = 6) buffer readonly VertexPositionIndexBuffer {
+layout(binding = 6) buffer readonly VertexPositionIndexBuffer {
 	uint vertexPositionIndexBuffer[];
 };
-layout(set = 0, binding = 7) buffer readonly VertexNormalIndexBuffer {
+layout(binding = 7) buffer readonly VertexNormalIndexBuffer {
 	uint vertexNormalIndexBuffer[];
 };
-layout(set = 0, binding = 8) buffer readonly VertexTextureCoordinateIndexBuffer {
+layout(binding = 8) buffer readonly VertexTextureCoordinateIndexBuffer {
 	uint vertexTextureCoordinateIndexBuffer[];
 };
-layout(set = 1, binding = 2) buffer readonly ClusterBuffer {
+layout(binding = 9, rgba8) uniform writeonly image2D outputImage;
+layout(binding = 12) buffer readonly ClusterBuffer {
 	Cluster clusterBuffer[];
 };
-layout(set = 2, binding = 0) buffer readonly InstanceBuffer {
+layout(binding = 13) buffer readonly InstanceBuffer {
 	Instance instanceBuffer[];
 };
-layout(set = 2, binding = 1) buffer readonly GeometryBuffer {
+layout(binding = 14) buffer readonly GeometryBuffer {
 	Geometry geometryBuffer[];
 };
 
-layout(location = 0) out vec4 fragment;
-
-vec3 loadVertexPosition(uint indexIndex, Geometry geometry) {
+vec3 loadVertexPosition(Geometry geometry, uint indexIndex) {
 	uint index = vertexPositionIndexBuffer[indexIndex];
-	uint offset = (geometry.vertexOffset + index) * 3;
+	uint offset = (geometry.vertexOffset + index) * 3u;
 
-	float x = vertexPositionComponentBuffer[offset + 0];
-	float y = vertexPositionComponentBuffer[offset + 1];
-	float z = vertexPositionComponentBuffer[offset + 2];
+	float x = vertexPositionComponentBuffer[offset + 0u];
+	float y = vertexPositionComponentBuffer[offset + 1u];
+	float z = vertexPositionComponentBuffer[offset + 2u];
 
 	return vec3(x, y, z);
 }
 
-vec3 loadVertexNormal(uint indexIndex, Geometry geometry) {
+vec3 loadVertexNormal(Geometry geometry, uint indexIndex) {
 	uint index = vertexNormalIndexBuffer[indexIndex];
-	uint offset = (geometry.vertexOffset + index) * 3;
+	uint offset = (geometry.vertexOffset + index) * 3u;
 
-	float x = vertexNormalComponentBuffer[offset + 0];
-	float y = vertexNormalComponentBuffer[offset + 1];
-	float z = vertexNormalComponentBuffer[offset + 2];
+	float x = vertexNormalComponentBuffer[offset + 0u];
+	float y = vertexNormalComponentBuffer[offset + 1u];
+	float z = vertexNormalComponentBuffer[offset + 2u];
 
 	return vec3(x, y, z);
 }
 
-vec2 loadVertexTextureCoordinate(uint indexIndex, Geometry geometry) {
+vec2 loadVertexTextureCoordinate(Geometry geometry, uint indexIndex) {
 	uint index = vertexTextureCoordinateIndexBuffer[indexIndex];
-	uint offset = (uint(geometry.vertexOffset / 3.0 * 2.0) + index) * 2;
+	uint offset = (uint(geometry.vertexOffset / 3u * 2u) + index) * 2u;
 
-	float x = vertexTextureCoordinateComponentBuffer[offset + 0];
-	float y = vertexTextureCoordinateComponentBuffer[offset + 1];
+	float x = vertexTextureCoordinateComponentBuffer[offset + 0u];
+	float y = vertexTextureCoordinateComponentBuffer[offset + 1u];
 
 	return vec2(x, y);
 }
 
 Triangle loadTriangle(uint triangleIndex, Instance instance, Geometry geometry) {
-	uint indexOffset = instance.clusterOffset * CLUSTER_INDEX_COUNT + triangleIndex * 3;
+	// TODO: Is the conversion on instance.clusterOffset correct?
+	uint indexOffset = uint(instance.clusterOffset) * CLUSTER_INDEX_COUNT + triangleIndex * 3u;
 
 	Triangle triangle;
 
-	triangle.vertices[0].position = loadVertexPosition(indexOffset + 0, geometry);
-	triangle.vertices[1].position = loadVertexPosition(indexOffset + 1, geometry);
-	triangle.vertices[2].position = loadVertexPosition(indexOffset + 2, geometry);
+	triangle.vertices[0].position = loadVertexPosition(geometry, indexOffset + 0u);
+	triangle.vertices[1].position = loadVertexPosition(geometry, indexOffset + 1u);
+	triangle.vertices[2].position = loadVertexPosition(geometry, indexOffset + 2u);
 
-	triangle.vertices[0].normal = loadVertexNormal(indexOffset + 0, geometry);
-	triangle.vertices[1].normal = loadVertexNormal(indexOffset + 1, geometry);
-	triangle.vertices[2].normal = loadVertexNormal(indexOffset + 2, geometry);
+	triangle.vertices[0].normal = loadVertexNormal(geometry, indexOffset + 0u);
+	triangle.vertices[1].normal = loadVertexNormal(geometry, indexOffset + 1u);
+	triangle.vertices[2].normal = loadVertexNormal(geometry, indexOffset + 2u);
 
-	triangle.vertices[0].textureCoordinate = loadVertexTextureCoordinate(indexOffset + 0, geometry);
-	triangle.vertices[1].textureCoordinate = loadVertexTextureCoordinate(indexOffset + 1, geometry);
-	triangle.vertices[2].textureCoordinate = loadVertexTextureCoordinate(indexOffset + 2, geometry);
+	triangle.vertices[0].textureCoordinate = loadVertexTextureCoordinate(geometry, indexOffset + 0u);
+	triangle.vertices[1].textureCoordinate = loadVertexTextureCoordinate(geometry, indexOffset + 1u);
+	triangle.vertices[2].textureCoordinate = loadVertexTextureCoordinate(geometry, indexOffset + 2u);
 
 	return triangle;
 }
@@ -183,9 +188,9 @@ Triangle loadTriangle(uint triangleIndex, Instance instance, Geometry geometry) 
 uint murmurMix(uint hash) {
 	uint value = hash;
 	value ^= value >> 16;
-	value *= 0x85ebca6b;
+	value *= 0x85ebca6bu;
 	value ^= value >> 13;
-	value *= 0xc2b2ae35;
+	value *= 0xc2b2ae35u;
 	value ^= value >> 16;
 
 	return value;
@@ -195,16 +200,16 @@ vec3 uintToColor(uint value) {
 	uint hash = murmurMix(value);
 
 	vec3 color = vec3(
-		float((hash >> 0) & 255),
-		float((hash >> 8) & 255),
-		float((hash >> 16) & 255)
+		float((hash >> 0) & 255u),
+		float((hash >> 8) & 255u),
+		float((hash >> 16) & 255u)
 	);
 
 	return color / 255.0;
 }
 
 vec2 ndc(vec2 coordinate) {
-	vec2 ndc = coordinate / camera.viewport * 2.0 - 1.0;
+	vec2 ndc = coordinate / vec2(camera.viewport) * 2.0 - 1.0;
 	ndc.y *= -1.0;
 
 	return ndc;
@@ -258,7 +263,7 @@ BarycentricDerivatives computeBarycentricDerivatives(Triangle triangle, Instance
 	derivatives.lambda.y = interpW * (delta.x * derivatives.ddx.y + delta.y * derivatives.ddy.y);
 	derivatives.lambda.z = interpW * (delta.x * derivatives.ddx.z + delta.y * derivatives.ddy.z);
 
-	vec2 viewport2 = 2.0 / camera.viewport;
+	vec2 viewport2 = 2.0 / vec2(camera.viewport);
 
 	derivatives.ddx *= viewport2.x;
 	derivatives.ddy *= -viewport2.y;
@@ -342,14 +347,14 @@ vec3 visualizeFlatShading(Triangle triangle, Instance instance, vec2 coordinate)
 }
 
 vec3 visualizeBlinnPhongShading(Triangle triangle, Instance instance, vec2 coordinate) {
-	const Light DEFAULT_LIGHT = Light(
+	Light DEFAULT_LIGHT = Light(
 		camera.position,
 		vec3(0.2, 0.2, 0.2),
 		vec3(0.5, 0.5, 0.5),
 		vec3(1.0, 1.0, 1.0)
 	);
 
-	const Material DEFAULT_MATERIAL = Material(
+	Material DEFAULT_MATERIAL = Material(
 		vec3(1.0, 1.0, 1.0),
 		vec3(1.0, 1.0, 1.0),
 		vec3(0.2, 0.2, 0.2),
@@ -379,31 +384,25 @@ vec3 visualizeBlinnPhongShading(Triangle triangle, Instance instance, vec2 coord
 	return ambient + diffuse + specular;
 }
 
-void main() {
-	uint visibility = subpassLoad(visibilityImage).r;
+vec4 VisibilityDebug(uvec2 screenCoordinate) {
+	uint visibility = imageLoad(visibilityImage, ivec2(screenCoordinate.x, camera.viewport.y - 1u - screenCoordinate.y)).r;
 
-	if (visibility == 0) {
+	if (visibility == 0u) {
 		if (VISUALIZATION_MODE == VISUALIZATION_MODE_MATERIAL_INDEX) {
-			fragment = vec4(uintToColor(1), 1.0);
-
-			return;
+			return vec4(uintToColor(1u), 1.0);
 		}
 
 		if (VISUALIZATION_MODE == VISUALIZATION_MODE_LINEAR_DEPTH) {
-			fragment = vec4(1.0, 1.0, 1.0, 1.0);
-
-			return;
+			return vec4(1.0, 1.0, 1.0, 1.0);
 		}
 
-		fragment = vec4(0.0, 0.0, 0.0, 1.0);
-
-		return;
+		return vec4(0.0, 0.0, 0.0, 1.0);
 	}
 
 	// Fragment coordinate in NDC space.
-	vec2 coordinate = ndc(gl_FragCoord.xy);
+	vec2 coordinate = ndc(vec2(screenCoordinate));
 
-	uint clusterIndex = (visibility >> TRIANGLE_INDEX_BIT_COUNT) - 1;
+	uint clusterIndex = (visibility >> TRIANGLE_INDEX_BIT_COUNT) - 1u;
 
 	// Triangle index relative to the parent cluster.
 	uint clusterTriangleIndex = visibility & TRIANGLE_INDEX_BIT_MASK;
@@ -419,45 +418,60 @@ void main() {
 
 	vec3 color;
 
-	if (VISUALIZATION_MODE == VISUALIZATION_MODE_TRIANGLE_INDEX) {
-		color = uintToColor(triangleIndex + 1);
-	}
-	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_CLUSTER_INDEX) {
-		color = uintToColor(clusterIndex + 1);
-	}
-	if (VISUALIZATION_MODE == VISUALIZATION_MODE_LINEAR_DEPTH) {
-		float nonLinearDepth = subpassLoad(depthStencilImage).r;
-		float linearDepth = linearizeDepth(nonLinearDepth);
+	switch (VISUALIZATION_MODE) {
+		case VISUALIZATION_MODE_TRIANGLE_INDEX: {
+			return vec4(uintToColor(triangleIndex + 1u), 1.0);
+		}
+		case VISUALIZATION_MODE_CLUSTER_INDEX: {
+			return vec4(uintToColor(clusterIndex + 1u), 1.0);
+		}
+		case VISUALIZATION_MODE_LINEAR_DEPTH: {
+			float nonLinearDepth = texture(depthStencilImage, vec2(screenCoordinate.x, camera.viewport.y - 1u - screenCoordinate.y) / vec2(camera.viewport)).r;
+			float linearDepth = linearizeDepth(nonLinearDepth);
 
-		color = vec3(linearDepth);
+			return vec4(vec3(linearDepth), 1.0);
+		}
+		case VISUALIZATION_MODE_INSTANCE_INDEX: {
+			return vec4(uintToColor(cluster.instanceIndex + 1u), 1.0);
+		}
+		case VISUALIZATION_MODE_GEOMETRY_INDEX: {
+			return vec4(uintToColor(instance.geometryIndex + 1u), 1.0);
+		}
+		case VISUALIZATION_MODE_MATERIAL_INDEX: {
+			return vec4(uintToColor(instance.materialShaderIndex + 1u), 1.0);
+		}
+		case VISUALIZATION_MODE_TRIANGLE_NORMAL: {
+			return vec4(visualizeTriangleNormal(triangle, instance), 1.0);
+		}
+		case VISUALIZATION_MODE_BARYCENTRIC_DERIVATIVES: {
+			return vec4(visualizeBarycentricDerivatives(triangle, instance, coordinate), 1.0);
+		}
+		case VISUALIZATION_MODE_VERTEX_NORMAL: {
+			return vec4(visualizeVertexNormal(triangle, instance, coordinate), 1.0);
+		}
+		case VISUALIZATION_MODE_VERTEX_TEXTURE_COORDINATE: {
+			return vec4(visualizeVertexTextureCoordinate(triangle, instance, coordinate), 1.0);
+		}
+		case VISUALIZATION_MODE_FLAT_SHADING: {
+			return vec4(visualizeFlatShading(triangle, instance, coordinate), 1.0);
+		}
+		case VISUALIZATION_MODE_BLINN_PHONG_SHADING: {
+			return vec4(visualizeBlinnPhongShading(triangle, instance, coordinate), 1.0);
+		}
+		default: {
+			vec4(0.0, 0.0, 0.0, 1.0);
+		}
 	}
-	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_INSTANCE_INDEX) {
-		color = uintToColor(cluster.instanceIndex + 1);
-	}
-	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_GEOMETRY_INDEX) {
-		color = uintToColor(instance.geometryIndex + 1);
-	}
-	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_MATERIAL_INDEX) {
-		color = uintToColor(instance.materialShaderIndex + 1);
-	}
-	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_TRIANGLE_NORMAL) {
-		color = visualizeTriangleNormal(triangle, instance);
-	}
-	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_BARYCENTRIC_DERIVATIVES) {
-		color = visualizeBarycentricDerivatives(triangle, instance, coordinate);
-	}
-	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_VERTEX_NORMAL) {
-		color = visualizeVertexNormal(triangle, instance, coordinate);
-	}
-	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_VERTEX_TEXTURE_COORDINATE) {
-		color = visualizeVertexTextureCoordinate(triangle, instance, coordinate);
-	}
-	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_FLAT_SHADING) {
-		color = visualizeFlatShading(triangle, instance, coordinate);
-	}
-	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_BLINN_PHONG_SHADING) {
-		color = visualizeBlinnPhongShading(triangle, instance, coordinate);
+}
+
+void main() {
+	uvec2 screenCoordinate = gl_GlobalInvocationID.xy;
+
+	if (screenCoordinate.x >= camera.viewport.x || screenCoordinate.y >= camera.viewport.y) {
+		return;
 	}
 
-	fragment = vec4(color, 1.0);
+	vec4 color = VisibilityDebug(screenCoordinate);
+
+	imageStore(outputImage, ivec2(screenCoordinate), color);
 }
