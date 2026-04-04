@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/VK/Image.hpp"
+#include "Engine/Adapter/Graphics/VK/ImageAspectFlags.hpp"
 #include "Engine/Adapter/Graphics/VK/ImageFormat.hpp"
 #include "Engine/Adapter/Graphics/VK/ImageType.hpp"
 #include "Engine/Adapter/Graphics/VK/ImageUsage.hpp"
@@ -43,6 +44,7 @@ namespace Trident {
 		ref<VK::Image> image = createRef<VK::Image>(device, descriptor);
 		image->type = getImageType(descriptor.type);
 		image->format = getFormat(descriptor.format);
+		image->aspectFlags = getImageAspectFlags(image->format);
 		image->swapchainImage = false;
 
 		VkImageCreateInfo imageCreateInfo{};
@@ -131,6 +133,7 @@ namespace Trident {
 		_image->image = image;
 		_image->type = VK_IMAGE_TYPE_2D;
 		_image->format = format;
+		_image->aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
 		_image->memorySuballocation = {};
 		_image->swapchainImage = true;
 

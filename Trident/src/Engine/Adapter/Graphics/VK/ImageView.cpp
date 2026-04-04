@@ -34,20 +34,7 @@ namespace Trident {
 		imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-		imageViewCreateInfo.subresourceRange.aspectMask = 0;
-
-		if (isDepthFormat(_image->format)) {
-			imageViewCreateInfo.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_DEPTH_BIT;
-		}
-
-		if (isStencilFormat(_image->format)) {
-			imageViewCreateInfo.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
-		}
-
-		if (!isDepthFormat(_image->format) && !isStencilFormat(_image->format)) {
-			imageViewCreateInfo.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_COLOR_BIT;
-		}
-
+		imageViewCreateInfo.subresourceRange.aspectMask = _image->aspectFlags;
 		imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
 		imageViewCreateInfo.subresourceRange.levelCount = image->getMipLevelCount();
 		imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;

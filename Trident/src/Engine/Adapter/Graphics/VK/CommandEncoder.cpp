@@ -25,7 +25,7 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	static sequence<VkBufferImageCopy> parseBufferImageCopyRegions(view<BufferImageCopyRegion> copyRegions) {
+	static sequence<VkBufferImageCopy> parseBufferImageCopyRegions(view<BufferImageCopyRegion> copyRegions, VkImageAspectFlags aspectFlags) {
 		sequence<VkBufferImageCopy> bufferImageCopies(copyRegions.count());
 		uint32 bufferImageCopyIndex = 0;
 
@@ -36,7 +36,7 @@ namespace Trident {
 			bufferImageCopy.bufferOffset = copyRegion.bufferOffset;
 			bufferImageCopy.bufferRowLength = 0;
 			bufferImageCopy.bufferImageHeight = 0;
-			bufferImageCopy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			bufferImageCopy.imageSubresource.aspectMask = aspectFlags;
 			bufferImageCopy.imageSubresource.mipLevel = copyRegion.imageMipLevel;
 			bufferImageCopy.imageSubresource.baseArrayLayer = copyRegion.imageLayerOffset;
 			bufferImageCopy.imageSubresource.layerCount = copyRegion.imageLayerCount;
@@ -244,12 +244,13 @@ namespace Trident {
 		static const PFN_vkCmdCopyBufferToImage vkCmdCopyBufferToImage = static_cast<PFN_vkCmdCopyBufferToImage>(loadDeviceProcedure(static_cast<const VK::Device*>(commandEncoder->device)->device, "vkCmdCopyBufferToImage"));
 
 		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
-		const sequence<VkBufferImageCopy> bufferImageCopies = parseBufferImageCopyRegions(copyRegions);
+		const ref<VK::Image> vkImage = std::static_pointer_cast<VK::Image>(destinationImage);
+		const sequence<VkBufferImageCopy> bufferImageCopies = parseBufferImageCopyRegions(copyRegions, vkImage->aspectFlags);
 
 		vkCmdCopyBufferToImage(
 			_commandEncoder->commandBuffer,
 			std::static_pointer_cast<VK::BaseBuffer>(sourceBuffer)->buffer,
-			std::static_pointer_cast<VK::Image>(destinationImage)->image,
+			vkImage->image,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			static_cast<uint32>(bufferImageCopies.count()),
 			&bufferImageCopies[0]
@@ -264,11 +265,12 @@ namespace Trident {
 		static const PFN_vkCmdCopyImageToBuffer vkCmdCopyImageToBuffer = static_cast<PFN_vkCmdCopyImageToBuffer>(loadDeviceProcedure(static_cast<const VK::Device*>(commandEncoder->device)->device, "vkCmdCopyImageToBuffer"));
 
 		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
-		const sequence<VkBufferImageCopy> bufferImageCopies = parseBufferImageCopyRegions(copyRegions);
+		const ref<VK::Image> vkImage = std::static_pointer_cast<VK::Image>(sourceImage);
+		const sequence<VkBufferImageCopy> bufferImageCopies = parseBufferImageCopyRegions(copyRegions, vkImage->aspectFlags);
 
 		vkCmdCopyImageToBuffer(
 			_commandEncoder->commandBuffer,
-			std::static_pointer_cast<VK::Image>(sourceImage)->image,
+			vkImage->image,
 			VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 			std::static_pointer_cast<VK::BaseBuffer>(destinationBuffer)->buffer,
 			static_cast<uint32>(bufferImageCopies.count()),
@@ -468,6 +470,7 @@ namespace Trident {
 
 		while (imageMemoryBarrierIndex < imageMemoryBarriers.count()) {
 			const ImageMemoryBarrier& imageMemoryBarrier = imageMemoryBarriers[imageMemoryBarrierIndex];
+			const ref<VK::Image> image = std::static_pointer_cast<VK::Image>(imageMemoryBarrier.image);
 
 			VkImageMemoryBarrier& vkImageMemoryBarrier = vkImageMemoryBarriers[imageMemoryBarrierIndex];
 			vkImageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -478,15 +481,8 @@ namespace Trident {
 			vkImageMemoryBarrier.newLayout = getImageLayout(imageMemoryBarrier.newLayout);
 			vkImageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 			vkImageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			vkImageMemoryBarrier.image = std::static_pointer_cast<VK::Image>(imageMemoryBarrier.image)->image;
-
-			if (isDepthFormat(imageMemoryBarrier.image->getFormat())) {
-				vkImageMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-			}
-			else {
-				vkImageMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			}
-
+			vkImageMemoryBarrier.image = image->image;
+			vkImageMemoryBarrier.subresourceRange.aspectMask = image->aspectFlags;
 			vkImageMemoryBarrier.subresourceRange.baseMipLevel = 0;
 			vkImageMemoryBarrier.subresourceRange.levelCount = imageMemoryBarrier.image->getMipLevelCount();
 			vkImageMemoryBarrier.subresourceRange.baseArrayLayer = 0;

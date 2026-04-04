@@ -16,6 +16,7 @@ namespace Trident {
 			VkImage image;
 			VkImageType type;
 			VkFormat format;
+			VkImageAspectFlags aspectFlags;
 			MemorySuballocation memorySuballocation;
 			bool swapchainImage;
 	};
