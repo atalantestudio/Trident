@@ -92,21 +92,21 @@ namespace Trident {
 				{
 					.descriptorImages = {
 						{
-							.assetPath = "lemon_arm_1k",
+							.assetPath = "red",
 						},
 					},
 				},
 				{
 					.descriptorImages = {
 						{
-							.assetPath = "lemon_diff_1k",
+							.assetPath = "green",
 						},
 					},
 				},
 				{
 					.descriptorImages = {
 						{
-							.assetPath = "lemon_nor_gl_1k",
+							.assetPath = "green",
 						},
 					},
 				},
@@ -119,21 +119,21 @@ namespace Trident {
 				{
 					.descriptorImages = {
 						{
-							.assetPath = "lemon_arm_1k",
+							.assetPath = "blue",
 						},
 					},
 				},
 				{
 					.descriptorImages = {
 						{
-							.assetPath = "lemon_diff_1k",
+							.assetPath = "green",
 						},
 					},
 				},
 				{
 					.descriptorImages = {
 						{
-							.assetPath = "lemon_nor_gl_1k",
+							.assetPath = "green",
 						},
 					},
 				},

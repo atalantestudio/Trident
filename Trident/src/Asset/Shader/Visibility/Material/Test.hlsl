@@ -36,6 +36,15 @@ ByteAddressBuffer clusterBuffer : register(t2);
 StructuredBuffer<Instance> instanceBuffer : register(t3);
 StructuredBuffer<uint> materialOffsetBuffer : register(t4);
 
+SamplerState armSamplerState : register(s0);
+Texture2DArray<float4> armMap : register(t5);
+
+SamplerState diffuseSamplerState : register(s1);
+Texture2DArray<float4> diffuseMap : register(t6);
+
+SamplerState normalSamplerState : register(s2);
+Texture2DArray<float4> normalMap : register(t7);
+
 uint murmurMix(uint hash) {
 	uint value = hash;
 	value ^= value >> 16;
@@ -78,14 +87,10 @@ void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 
 	uint visibility = visibilityImage[screenCoordinate];
 	uint clusterIndex = (visibility >> TRIANGLE_INDEX_BIT_COUNT) - 1;
-	// uint clusterTriangleIndex = visibility & TRIANGLE_INDEX_BIT_MASK;
-	// uint triangleIndex = clusterIndex * CLUSTER_TRIANGLE_COUNT + clusterTriangleIndex;
-
 	Cluster cluster = loadCluster(clusterIndex);
 	Instance instance = instanceBuffer[cluster.instanceIndex];
 
-	float3 color = uintToColor(instance.materialIndex + 1);
-	// float3 color = uintToColor(triangleIndex + 1);
+	float3 color = armMap.Sample(armSamplerState, float3(0.0, 0.0, instance.materialIndex - 1)).rgb;
 
 	outputImage[screenCoordinate] = float4(color, 1.0);
 }

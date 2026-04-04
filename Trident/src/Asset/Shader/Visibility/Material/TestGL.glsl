@@ -5,6 +5,7 @@
 
 precision highp image2D;
 precision highp uimage2D;
+precision highp sampler2DArray;
 
 layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
 
@@ -55,6 +56,10 @@ layout(binding = 6) buffer readonly MaterialOffsetBuffer {
 	Range materialShaderCoordinateIndexRange;
 };
 
+layout(binding = 7) uniform sampler2DArray armMap;
+layout(binding = 8) uniform sampler2DArray diffuseMap;
+layout(binding = 9) uniform sampler2DArray normalMap;
+
 uint murmurMix(uint hash) {
 	uint value = hash;
 	value ^= value >> 16;
@@ -92,7 +97,7 @@ void main() {
 	Cluster cluster = clusterBuffer[clusterIndex];
 	Instance instance = instanceBuffer[cluster.instanceIndex];
 
-	vec3 color = uintToColor(instance.materialIndex + 1u);
+	vec3 color = texture(armMap, vec3(0.0, 0.0, instance.materialIndex - 1u)).rgb;
 
 	imageStore(outputImage, ivec2(screenCoordinate), vec4(color, 1.0));
 }

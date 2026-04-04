@@ -321,9 +321,12 @@ namespace Trident {
 							// TODO(material-graph/multiple-image-descriptors): Add support for multiple image descriptors.
 							const ref<ImageAsset> imageAsset = assetLibrary->getAsset<ImageAsset>(materialWriteDescriptorSetBinding.descriptorImages[0].assetPath);
 
+							const Extent3D imageAssetExtent = imageAsset->getExtent();
+							const uint64 imageAssetSize = getChannelCount(ImageFormat::R8G8B8A8_UNORM) * imageAssetExtent.width * imageAssetExtent.height * imageAssetExtent.depth * imageAsset->getLayerCount();
+
 							switch (imageAsset->getFormat()) {
 								case ImageFormat::R8G8B8_UNORM: {
-									convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(imageAsset->getData(), &imageMappedRange[imageMappedRangeOffset], imageAsset->getSize());
+									convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(imageAsset->getData(), &imageMappedRange[imageMappedRangeOffset], imageAssetSize);
 
 									break;
 								}
@@ -350,7 +353,7 @@ namespace Trident {
 								.imageLayerCount = 1,
 							};
 
-							imageMappedRangeOffset += imageAsset->getSize();
+							imageMappedRangeOffset += imageAssetSize;
 
 							materialIndex += 1;
 						}
