@@ -14,44 +14,63 @@ namespace Trident {
 		const ref<Geometry3D> geometry = createRef<BoxGeometry3D>(size);
 		const uint32 geometryIndex = scene.registerGeometry(geometry);
 
-		Material defaultMaterial{};
-		defaultMaterial.shaderModulePath = "Visibility/Material/Default";
-		defaultMaterial.descriptorSetLayoutBindings = {};
-
-		Material testMaterial{};
+		Shader defaultMaterialShader = {
+			.descriptorSetLayoutBindings = {},
+		};
 
 		switch (graphicsApi) {
 			case GraphicsAPI::DX12:
 			case GraphicsAPI::VK: {
-				testMaterial.shaderModulePath = "Visibility/Material/Test";
+				defaultMaterialShader.modulePath = "Visibility/Material/Default";
 
 				break;
 			}
 			case GraphicsAPI::GL: {
-				testMaterial.shaderModulePath = "Visibility/Material/TestGL";
+				defaultMaterialShader.modulePath = "Visibility/Material/DefaultGL";
 
 				break;
 			}
 		}
 
-		testMaterial.descriptorSetLayoutBindings = {};
+		const uint32 defaultMaterialShaderIndex = scene.registerMaterialShader(defaultMaterialShader);
 
-		const uint32 defaultMaterialIndex = scene.registerMaterial(defaultMaterial);
-		const uint32 testMaterialIndex = scene.registerMaterial(testMaterial);
+		const uint32 defaultMaterialIndex = scene.registerMaterial({
+			.shaderIndex = defaultMaterialShaderIndex,
+			.writeDescriptorSetBindings = {},
+		});
 
-		MaterialReference testMaterialReference{};
-		testMaterialReference.materialIndex = testMaterialIndex;
-		testMaterialReference.descriptorImageAssetPaths = {};
+		Shader testMaterialShader = {
+			.descriptorSetLayoutBindings = {},
+		};
 
-		const uint32 testMaterialReferenceIndex = scene.registerMaterialReference(testMaterialReference);
+		switch (graphicsApi) {
+			case GraphicsAPI::DX12:
+			case GraphicsAPI::VK: {
+				testMaterialShader.modulePath = "Visibility/Material/Default";
 
-		SceneInstanceDescriptor instanceDescriptor{};
-		instanceDescriptor.position = {0.0_m, 0.0_m, 3.0_m};
-		instanceDescriptor.rotation = {0.0_rad, 0.0_rad, 0.0_rad};
-		instanceDescriptor.geometryIndex = geometryIndex;
-		instanceDescriptor.materialReferenceIndex = testMaterialReferenceIndex;
+				break;
+			}
+			case GraphicsAPI::GL: {
+				testMaterialShader.modulePath = "Visibility/Material/DefaultGL";
 
-		scene.registerInstance(instanceDescriptor);
+				break;
+			}
+		}
+
+		const uint32 testMaterialShaderIndex = scene.registerMaterialShader(testMaterialShader);
+
+		const uint32 testMaterialIndex = scene.registerMaterial({
+			.shaderIndex = testMaterialShaderIndex,
+			.writeDescriptorSetBindings = {},
+		});
+
+		scene.registerInstance({
+			.position = {0.0_m, 0.0_m, 3.0_m},
+			.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
+			.scale = {1.0f, 1.0f, 1.0f},
+			.geometryIndex = geometryIndex,
+			.materialIndex = testMaterialIndex,
+		});
 
 		return scene;
 	}
