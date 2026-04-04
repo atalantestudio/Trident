@@ -17,7 +17,7 @@ namespace Trident {
 		public:
 			/// Creates and returns a unique asset identifier.
 			/// See https://en.wikipedia.org/wiki/Ostrich_algorithm.
-			static uint32 createAssetIdentifier() {
+			inline static uint32 createAssetIdentifier() {
 				return random<uint32>(min<uint32>(), max<uint32>());
 			}
 

@@ -12,11 +12,11 @@ namespace Trident {
 		const float32 radius = 0.5_m;
 		const float32 theta = pi<float32>() * 2.0f / resolution;
 
-		sequence<svec2<float32>> vertices = sequence<svec2<float32>>(resolution);
-		sequence<uint16> fillIndices = sequence<uint16>(resolution * 3);
+		sequence<svec2<float32>> vertices(resolution);
+		sequence<uint32> fillIndices(resolution * 3);
 
 		// TODO: Restore line indices?
-		// sequence<uint16> lineIndices = sequence<uint16>(resolution + 1);
+		// sequence<uint16> lineIndices(resolution + 1);
 
 		float32 angle = 0.0f;
 		uint32 triangleIndex = 0;
@@ -43,18 +43,26 @@ namespace Trident {
 		// lineIndices[triangleIndex] = 0;
 
 		return Geometry2D({
-			.vertices = vertices,
+			// TODO
+			// .vertices = vertices,
+
 			.indices = fillIndices,
 		});
 	}
 
 	Geometry2D Geometry2D::unitSquare() {
 		return Geometry2D({
-			.vertices = {
-				{-0.5f,  0.5f}, // Top left
-				{ 0.5f,  0.5f}, // Top right
-				{ 0.5f, -0.5f}, // Bottom right
-				{-0.5f, -0.5f}, // Bottom left
+			.vertexPositionComponents = {
+				-0.5f,  0.5f, // Top left
+				 0.5f,  0.5f, // Top right
+				 0.5f, -0.5f, // Bottom right
+				-0.5f, -0.5f, // Bottom left
+			},
+			.vertexTextureCoordinateComponents = {
+				0.0f, 0.0f, // Top left
+				1.0f, 0.0f, // Top right
+				1.0f, 1.0f, // Bottom right
+				0.0f, 1.0f, // Bottom left
 			},
 			.indices = {
 				0, 1, 2,
@@ -62,9 +70,4 @@ namespace Trident {
 			},
 		});
 	}
-
-	Geometry2D::Geometry2D(const Descriptor<Geometry2D>& descriptor) :
-		vertices(descriptor.vertices),
-		indices(descriptor.indices)
-	{}
 }

@@ -358,7 +358,7 @@ namespace Trident {
 
 		const uint64 outputSize =
 			sizeof(AssetHeader) +
-			4 * sizeof(uint32) +
+			5 * sizeof(uint32) +
 			vertexPositionComponents.count() * sizeof(float32) +
 			vertexNormalComponents.count() * sizeof(float32) +
 			vertexTextureCoordinateComponents.count() * sizeof(float32) +
@@ -368,6 +368,7 @@ namespace Trident {
 		byteStream.write<AssetSignature>(AssetSignature::GEOMETRY);
 		byteStream.write<uint32>(geometryAssetIdentifier);
 		byteStream.write<VersionNumber>({1, 0, 0});
+		byteStream.write<uint32>(static_cast<uint32>(GeometryAssetFlags::IS_3D));
 		byteStream.write<uint32>(vertexPositionCount);
 
 		for (const float64 vertexPositionComponent : vertexPositionComponents) {

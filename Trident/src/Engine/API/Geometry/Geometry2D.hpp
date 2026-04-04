@@ -10,15 +10,18 @@ namespace Trident {
 
 	template<>
 	struct Descriptor<Geometry2D> {
-		sequence<svec2<float32>> vertices;
-		sequence<uint16> indices;
+		sequence<float32> vertexPositionComponents;
+		sequence<float32> vertexTextureCoordinateComponents;
+		sequence<uint32> indices;
 	};
 
 	class Geometry2D {
 		public:
+			// TODO: Move inside the asset builder. This geometry must not be created at runtime.
 			/// Creates and returns a 2D geometry representing a unit circle.
 			static Geometry2D unitCircle(uint32 resolution);
 
+			// TODO: Move inside the asset builder. This geometry must not be created at runtime.
 			/// Creates and returns a 2D geometry representing a unit square.
 			/// 
 			///         0
@@ -32,13 +35,27 @@ namespace Trident {
 			static Geometry2D unitSquare();
 
 		public:
-			explicit Geometry2D(const Descriptor<Geometry2D>& descriptor);
+			explicit Geometry2D() = default;
 
-			inline const sequence<svec2<float32>>& getVertices() const {
-				return vertices;
+			explicit Geometry2D(const Descriptor<Geometry2D>& descriptor) :
+				vertexPositionComponents(descriptor.vertexPositionComponents),
+				vertexTextureCoordinateComponents(descriptor.vertexTextureCoordinateComponents),
+				indices(descriptor.indices)
+			{}
+
+			inline uint32 getVertexCount() const {
+				return static_cast<uint32>(vertexPositionComponents.count()) / 2;
 			}
 
-			inline const sequence<uint16>& getIndices() const {
+			inline const sequence<float32>& getVertexPositionComponents() const {
+				return vertexPositionComponents;
+			}
+
+			inline const sequence<float32>& getVertexTextureCoordinateComponents() const {
+				return vertexTextureCoordinateComponents;
+			}
+
+			inline const sequence<uint32>& getIndices() const {
 				return indices;
 			}
 
@@ -47,10 +64,11 @@ namespace Trident {
 			}
 
 		private:
-			sequence<svec2<float32>> vertices;
+			sequence<float32> vertexPositionComponents;
+			sequence<float32> vertexTextureCoordinateComponents;
 
-			/// Indices for the default visualization mode (usually with the TRIANGLE_LIST topology).
-			sequence<uint16> indices;
+			/// Indices for the default (TRIANGLE_LIST) visualization mode.
+			sequence<uint32> indices;
 
 			uint32 hullIndex = max<uint32>();
 	};

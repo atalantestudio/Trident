@@ -3,34 +3,99 @@
 
 #include "pch.hpp"
 
+#include "Engine/API/Physics/Constraint/Constraint2D.hpp"
+#include "Engine/API/Physics/Joint2D.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 #include "Engine/ECS/Component/GeometryComponent.hpp"
 #include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 #include "Engine/ECS/Tag.hpp"
 
 namespace Trident {
-	Scene2D::Scene2D(ref<Scene2DAsset> sceneAsset) {
-		// TODO: Load scene from asset file.
-		/* const view<GeometryComponent> geometryComponents = sceneAsset->getGeometryComponents();
+	Scene2D::Scene2D(ref<Scene2DAsset> sceneAsset) :
+		staticVertexCount(sceneAsset->getStaticVertexCount()),
+		staticIndexCount(sceneAsset->getStaticIndexCount())
+	{
+		loadGeometries(sceneAsset);
 
-		Entity entity = 0;
+		// TODO: Load hulls.
+		// loadHulls(sceneAsset);
 
-		while (entity < sceneAsset->getEntityCount()) {
-			ecs.createEntity();
-			ecs.setComponent<GeometryComponent>(entity, geometryComponents[entity]);
+		loadEntityComponentMappings(sceneAsset);
+	}
 
-			entity += 1;
+	void Scene2D::loadGeometries(ref<Scene2DAsset> sceneAsset) {
+		const sequence<uint8>& staticBuffer = sceneAsset->getStaticBuffer();
+		const sequence<ref<GeometryAsset>>& geometryAssets = sceneAsset->getGeometryAssets();
+
+		geometries = sequence<Geometry2D>(geometryAssets.count());
+
+		uint32 geometryIndex = 0;
+
+		while (geometryIndex < geometries.count()) {
+			const ref<GeometryAsset> geometryAsset = geometryAssets[geometryIndex];
+
+			geometries[geometryIndex] = Geometry2D({
+				.vertexPositionComponents = geometryAsset->getVertexPositionComponents(),
+				.vertexTextureCoordinateComponents = geometryAsset->getVertexTextureCoordinateComponents(),
+				.indices = geometryAsset->getVertexPositionIndices(),
+			});
+
+			dynamicVertexCount += geometries[geometryIndex].getVertexCount();
+			dynamicIndexCount += static_cast<uint32>(geometries[geometryIndex].getIndices().count());
+
+			geometryIndex += 1;
 		}
 
-		for (const CachedRigidBody2D& rigidBody : sceneAsset->getRigidBodies()) {
-			const GeometryComponent geometryComponent = ecs.getComponent<GeometryComponent>(rigidBody.entity);
-			const Geometry2D& geometry = sceneAsset->getGeometries()[geometryComponent.geometryIndex];
-			const Hull2D& hull = sceneAsset->getHulls()[geometry.getHullIndex()];
+		dataBuffer = sequence<uint8>((staticVertexCount + dynamicVertexCount) * 4 * sizeof(float32) + (staticIndexCount + dynamicIndexCount) * sizeof(uint32));
 
-			ecs.setComponent<RigidBody2D>(rigidBody.entity, RigidBody2D::fromCached(rigidBody, hull.getCentroid()));
-			ecs.setTag<DynamicEntityTag>(rigidBody.entity);
-		} */
+		uint64 dataOffset = 0;
 
+		std::copy(staticBuffer.begin(), staticBuffer.end(), &dataBuffer[dataOffset]);
+
+		dataOffset += staticBuffer.count();
+
+		geometryIndex = 0;
+
+		while (geometryIndex < geometries.count()) {
+			const Geometry2D& geometry = geometries[geometryIndex];
+			const sequence<float32>& vertexPositionComponents = geometry.getVertexPositionComponents();
+
+			std::copy(vertexPositionComponents.begin(), vertexPositionComponents.end(), pointer_cast<float32*>(&dataBuffer[dataOffset]));
+
+			dataOffset += vertexPositionComponents.count() * sizeof(float32);
+			geometryIndex += 1;
+		}
+
+		geometryIndex = 0;
+
+		while (geometryIndex < geometries.count()) {
+			const Geometry2D& geometry = geometries[geometryIndex];
+			const sequence<float32>& vertexTextureCoordinateComponents = geometry.getVertexTextureCoordinateComponents();
+
+			std::copy(vertexTextureCoordinateComponents.begin(), vertexTextureCoordinateComponents.end(), pointer_cast<float32*>(&dataBuffer[dataOffset]));
+
+			dataOffset += vertexTextureCoordinateComponents.count() * sizeof(float32);
+			geometryIndex += 1;
+		}
+
+		geometryIndex = 0;
+
+		while (geometryIndex < geometries.count()) {
+			const Geometry2D& geometry = geometries[geometryIndex];
+			const sequence<uint32>& indices = geometry.getIndices();
+
+			std::copy(indices.begin(), indices.end(), pointer_cast<uint32*>(&dataBuffer[dataOffset]));
+
+			dataOffset += indices.count() * sizeof(uint32);
+			geometryIndex += 1;
+		}
+	}
+
+	void Scene2D::loadHulls(ref<Scene2DAsset> sceneAsset) {
+		ENGINE_ERROR_UNIMPLEMENTED();
+	}
+
+	void Scene2D::loadEntityComponentMappings(ref<Scene2DAsset> sceneAsset) {
 		// TODO(ecs/scene-components):
 		// - MaterialReferenceComponent
 		// - RigidBody3DComponent
@@ -38,12 +103,29 @@ namespace Trident {
 
 		ecs.registerComponentPool<GeometryComponent>();
 		ecs.registerComponentPool<RigidBody2DComponent>();
-
-		// TODO: Restore joint constraints.
-		// ecs.registerComponentPool<Joint2D>();
-
+		ecs.registerComponentPool<Joint2D>();
+		ecs.registerComponentPool<ref<Constraint2D>>();
 		ecs.registerTagPool<DynamicEntityTag>();
 		ecs.registerTagPool<StaticEntityTag>();
+
+		Entity entity = 0;
+
+		while (entity < sceneAsset->getEntityCount()) {
+			ecs.createEntity();
+
+			entity += 1;
+		}
+
+		for (const EntityComponentMapping<GeometryComponent> geometryMapping : sceneAsset->getGeometryMappings()) {
+			ecs.setComponent<GeometryComponent>(geometryMapping.entity, geometryMapping.component);
+		}
+
+		for (const EntityComponentMapping<RigidBody2DComponent>& rigidBodyMapping : sceneAsset->getRigidBodyMappings()) {
+			ecs.setComponent<RigidBody2DComponent>(rigidBodyMapping.entity, rigidBodyMapping.component);
+
+			// TODO(debug-only)
+			ecs.setTag<DynamicEntityTag>(entity);
+		}
 	}
 
 	// TODO: Restore joint constraints.

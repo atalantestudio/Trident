@@ -151,6 +151,12 @@ namespace Trident {
 			x(x), y(y)
 		{}
 
+		// TODO: Remove once Lyah supports scalar vector math.
+		constexpr explicit svec(vec<2, T> a) :
+			x(a[0]),
+			y(a[1])
+		{}
+
 		T operator [](std::size_t index) const {
 			DEBUG_ASSERT(index < 2);
 

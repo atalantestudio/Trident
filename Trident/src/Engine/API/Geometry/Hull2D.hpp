@@ -17,9 +17,13 @@ namespace Trident {
 		Hull2DType type;
 		svec2<float32> centroid;
 		float32 radius;
-		sequence<svec2<float32>> vertices;
-		sequence<uint16> fillIndices;
-		sequence<uint16> lineIndices;
+
+		// TODO(hull/vertex-duplication)
+		// Circle, sphere and capsule hulls don't need vertices and convex hulls use a subset of the geometry's vertices.
+		// However polygon hulls may have vertices that don't appear on the geometry (e.g. an AABB hull wrapping a cylinder geometry such as a glass).
+		view<svec2<float32>> vertices;
+
+		sequence<uint32> fillIndices;
 	};
 
 	class Hull2D {
@@ -30,7 +34,7 @@ namespace Trident {
 			static Hull2D fromGeometry(const Geometry2D& geometry);
 
 		public:
-			Hull2D() = default;
+			explicit Hull2D() = default;
 
 			explicit Hull2D(const Descriptor<Hull2D>& descriptor);
 
@@ -58,16 +62,20 @@ namespace Trident {
 				return indexOffset;
 			}
 
-			inline view<uint16> getTriangleListIndices() const {
-				return triangleListIndices;
+			inline view<uint32> getFillIndices() const {
+				return fillIndices;
 			}
 
-			inline uint16 getTriangleListIndexCount() const {
-				return triangleListIndexCount;
+			inline const sequence<uint16>& getLineIndices() const {
+				return lineIndices;
 			}
 
-			inline uint16 getLineStripIndexCount() const {
-				return lineStripIndexCount;
+			inline uint16 getFillIndexCount() const {
+				return fillIndexCount;
+			}
+
+			inline uint16 getLineIndexCount() const {
+				return lineIndexCount;
 			}
 
 			inline const sequence<Edge>& getEdges() const {
@@ -75,7 +83,11 @@ namespace Trident {
 			}
 
 			inline float32 getPenetrationBias() const {
-				static constexpr float32 PENETRATION_BIASES[static_cast<uint32>(Hull2DType::count)] = {0.1f, 0.0f, 0.2f};
+				static constexpr float32 PENETRATION_BIASES[static_cast<uint32>(Hull2DType::count)] = {
+					0.1f,
+					0.0f,
+					0.2f,
+				};
 
 				DEBUG_ASSERT(type < Hull2DType::count);
 
@@ -170,7 +182,7 @@ namespace Trident {
 				}
 			}
 
-		public:
+		private:
 			Hull2DType type;
 
 			/// Average of all vertices.
@@ -183,9 +195,10 @@ namespace Trident {
 			view<svec2<float32>> vertices;
 
 			uint32 indexOffset;
-			view<uint16> triangleListIndices;
-			uint16 triangleListIndexCount;
-			uint16 lineStripIndexCount;
+			view<uint32> fillIndices;
+			sequence<uint16> lineIndices;
+			uint16 fillIndexCount;
+			uint16 lineIndexCount;
 
 			// TODO: Store the geometry edges in a shared contiguous buffer.
 			sequence<Edge> edges;

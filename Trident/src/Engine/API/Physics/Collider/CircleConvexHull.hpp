@@ -16,13 +16,13 @@ namespace Trident {
 		const float32 scaleA = A.scale[0];
 
 		const GJK2DOutput gjkOutput = GJK2D(A, B, pointHull, hullB);
-		const float32 d = gjkOutput.distance - hullA.radius * scaleA;
+		const float32 d = gjkOutput.distance - hullA.getRadius() * scaleA;
 
 		if (d > 0.0f) {
 			return false;
 		}
 
-		if (d > -hullA.radius * scaleA) {
+		if (d > -hullA.getRadius() * scaleA) {
 			contactManifold->normal = normalized(gjkOutput.closestB - gjkOutput.closestA);
 			contactManifold->contactCount = 1;
 			contactManifold->contacts[0].position = gjkOutput.closestB;
@@ -36,7 +36,7 @@ namespace Trident {
 		contactManifold->normal = -satOutput.normal;
 		contactManifold->contactCount = 1;
 		contactManifold->contacts[0].position = satOutput.incidentSupportPoint - satOutput.normal * satOutput.separation;
-		contactManifold->contacts[0].separation = satOutput.separation - hullA.radius * scaleA;
+		contactManifold->contacts[0].separation = satOutput.separation - hullA.getRadius() * scaleA;
 
 		return true;
 	}

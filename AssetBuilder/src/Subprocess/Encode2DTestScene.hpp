@@ -13,7 +13,8 @@ namespace Trident {
 		const uint32 entityCount = 2;
 
 		const sequence<uint32> geometryAssetIdentifiers = {
-			3879090019,
+			// TODO(debug-only)
+			484634187,
 		};
 
 		const sequence<EntityComponentMapping<GeometryComponent>> geometryMappings = {
@@ -86,9 +87,9 @@ namespace Trident {
 
 		for (const EntityComponentMapping<RigidBody2DComponent>& rigidBodyMapping : rigidBodyMappings) {
 			stream.write<Entity>(rigidBodyMapping.entity);
-			stream.write<svec2<float32>>(rigidBodyMapping.component.position);
+			stream.write<svec2<float32>>(svec2<float32>(rigidBodyMapping.component.position));
 			stream.write<float32>(rigidBodyMapping.component.rotation);
-			stream.write<svec2<float32>>(rigidBodyMapping.component.scale);
+			stream.write<svec2<float32>>(svec2<float32>(rigidBodyMapping.component.scale));
 			stream.write<float32>(rigidBodyMapping.component.inverseMass);
 			stream.write<float32>(rigidBodyMapping.component.inverseInertia);
 			stream.write<float32>(rigidBodyMapping.component.friction);

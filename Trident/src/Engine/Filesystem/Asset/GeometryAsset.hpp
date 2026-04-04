@@ -6,6 +6,7 @@
 #include "Engine/API/Descriptor.hpp"
 #include "Engine/API/Geometry/Hull2DType.hpp"
 #include "Engine/Filesystem/Asset/Asset.hpp"
+#include "Engine/Filesystem/Asset/GeometryAssetFlags.hpp"
 
 namespace Trident {
 	class GeometryAsset;
@@ -24,24 +25,13 @@ namespace Trident {
 	};
 
 	struct Geometry2DAssetHeader : public AssetHeader {
-		/// If true, the geometry data is followed by a `Hull2DHeader` structure.
-		bool hull;
-
-		uint8 _p0;
-		uint8 _p1;
-		uint8 _p2;
-
+		GeometryAssetFlags flags;
 		uint32 vertexCount;
 		uint32 indexCount;
 	};
 
 	struct Hull2DHeader {
-		// TODO: Rename to Hull2DType.
 		Hull2DType hullType;
-
-		uint8 _p0;
-		uint8 _p1;
-		uint8 _p2;
 
 		/// Average vertex.
 		svec2<float32> centroid;

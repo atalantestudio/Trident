@@ -10,75 +10,114 @@
 
 namespace Trident {
 	template<>
-	ref<GeometryAsset> Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& byteStream) {
-		Descriptor<GeometryAsset> geometryAssetDescriptor{};
-		geometryAssetDescriptor.identifier = byteStream.read<uint32>();
-		geometryAssetDescriptor.version = byteStream.read<VersionNumber>();
+	ref<GeometryAsset> Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream) {
+		Descriptor<GeometryAsset> descriptor{};
+		descriptor.identifier = stream.read<uint32>();
+		descriptor.version = stream.read<VersionNumber>();
 
-		const uint32 vertexPositionCount = byteStream.read<uint32>();
+		const GeometryAssetFlags flags = static_cast<GeometryAssetFlags>(stream.read<uint32>());
 
-		geometryAssetDescriptor.vertexPositionComponents = sequence<float32>(vertexPositionCount * Geometry3D::VERTEX_POSITION_STRIDE);
+		if (flags & GeometryAssetFlags::IS_2D) {
+			const uint32 vertexCount = stream.read<uint32>();
+			const uint32 indexCount = stream.read<uint32>();
 
-		for (float32& vertexPositionComponent : geometryAssetDescriptor.vertexPositionComponents) {
-			vertexPositionComponent = byteStream.read<float32>();
+			descriptor.vertexPositionComponents = sequence<float32>(vertexCount * 2);
+			descriptor.vertexTextureCoordinateComponents = sequence<float32>(vertexCount * 2);
+			descriptor.vertexPositionIndices = sequence<uint32>(indexCount);
+
+			std::copy_n(pointer_cast<const float32*>(stream.getBytePosition()), descriptor.vertexPositionComponents.count(), &descriptor.vertexPositionComponents[0]);
+
+			stream.jump(descriptor.vertexPositionComponents.count() * sizeof(float32));
+
+			std::copy_n(pointer_cast<const float32*>(stream.getBytePosition()), descriptor.vertexTextureCoordinateComponents.count(), &descriptor.vertexTextureCoordinateComponents[0]);
+
+			stream.jump(descriptor.vertexTextureCoordinateComponents.count() * sizeof(float32));
+
+			std::copy_n(pointer_cast<const uint32*>(stream.getBytePosition()), descriptor.vertexPositionIndices.count(), &descriptor.vertexPositionIndices[0]);
+
+			stream.jump(descriptor.vertexPositionIndices.count() * sizeof(uint32));
+
+			if (flags & GeometryAssetFlags::HAS_HULL) {
+				// TODO: Decode hull data.
+			}
+
+			return createRef<GeometryAsset>(descriptor);
 		}
 
-		const uint32 vertexNormalCount = byteStream.read<uint32>();
+		if (flags & GeometryAssetFlags::IS_3D) {
+			if (flags & GeometryAssetFlags::HAS_HULL) {
+				ENGINE_ERROR_UNIMPLEMENTED();
+			}
 
-		geometryAssetDescriptor.vertexNormalComponents = sequence<float32>(vertexNormalCount * Geometry3D::VERTEX_NORMAL_STRIDE);
+			const uint32 vertexPositionCount = stream.read<uint32>();
 
-		for (float32& vertexNormalComponent : geometryAssetDescriptor.vertexNormalComponents) {
-			vertexNormalComponent = byteStream.read<float32>();
+			descriptor.vertexPositionComponents = sequence<float32>(vertexPositionCount * Geometry3D::VERTEX_POSITION_STRIDE);
+
+			for (float32& vertexPositionComponent : descriptor.vertexPositionComponents) {
+				vertexPositionComponent = stream.read<float32>();
+			}
+
+			const uint32 vertexNormalCount = stream.read<uint32>();
+
+			descriptor.vertexNormalComponents = sequence<float32>(vertexNormalCount * Geometry3D::VERTEX_NORMAL_STRIDE);
+
+			for (float32& vertexNormalComponent : descriptor.vertexNormalComponents) {
+				vertexNormalComponent = stream.read<float32>();
+			}
+
+			const uint32 vertexTextureCoordinateCount = stream.read<uint32>();
+
+			descriptor.vertexTextureCoordinateComponents = sequence<float32>(vertexTextureCoordinateCount * Geometry3D::VERTEX_TEXTURE_COORDINATE_STRIDE);
+
+			for (float32& vertexTextureCoordinateComponent : descriptor.vertexTextureCoordinateComponents) {
+				vertexTextureCoordinateComponent = stream.read<float32>();
+			}
+
+			const uint32 largestVertexPositionIndex = vertexPositionCount - 1;
+			const uint32 largestVertexNormalIndex = vertexNormalCount - 1;
+			const uint32 largestVertexTextureCoordinateIndex = vertexTextureCoordinateCount - 1;
+
+			const uint8 vertexPositionIndexBitCount = countBits(largestVertexPositionIndex);
+			const uint8 vertexNormalIndexBitCount = countBits(largestVertexNormalIndex);
+			const uint8 vertexTextureCoordinateIndexBitCount = countBits(largestVertexTextureCoordinateIndex);
+
+			const uint32 indexCount = stream.read<uint32>();
+
+			descriptor.vertexPositionIndices = sequence<uint32>(indexCount);
+			descriptor.vertexTextureCoordinateIndices = sequence<uint32>(indexCount);
+			descriptor.vertexNormalIndices = sequence<uint32>(indexCount);
+
+			BitStream<StreamOperation::READ> bitStream(stream.getBytePosition(), stream.getRemainingSize(), Endianness::LITTLE_ENDIAN);
+
+			uint32 indexOffset = 0;
+
+			while (indexOffset < indexCount) {
+				descriptor.vertexPositionIndices[indexOffset] = bitStream.read<uint32>(vertexPositionIndexBitCount);
+
+				indexOffset += 1;
+			}
+
+			indexOffset = 0;
+
+			while (indexOffset < indexCount) {
+				descriptor.vertexNormalIndices[indexOffset] = bitStream.read<uint32>(vertexNormalIndexBitCount);
+
+				indexOffset += 1;
+			}
+
+			indexOffset = 0;
+
+			while (indexOffset < indexCount) {
+				descriptor.vertexTextureCoordinateIndices[indexOffset] = bitStream.read<uint32>(vertexTextureCoordinateIndexBitCount);
+
+				indexOffset += 1;
+			}
+
+			return createRef<GeometryAsset>(descriptor);
 		}
 
-		const uint32 vertexTextureCoordinateCount = byteStream.read<uint32>();
+		ENGINE_ASSERT(false, "Invalid geometry asset data.");
 
-		geometryAssetDescriptor.vertexTextureCoordinateComponents = sequence<float32>(vertexTextureCoordinateCount * Geometry3D::VERTEX_TEXTURE_COORDINATE_STRIDE);
-
-		for (float32& vertexTextureCoordinateComponent : geometryAssetDescriptor.vertexTextureCoordinateComponents) {
-			vertexTextureCoordinateComponent = byteStream.read<float32>();
-		}
-
-		const uint32 largestVertexPositionIndex = vertexPositionCount - 1;
-		const uint32 largestVertexNormalIndex = vertexNormalCount - 1;
-		const uint32 largestVertexTextureCoordinateIndex = vertexTextureCoordinateCount - 1;
-
-		const uint8 vertexPositionIndexBitCount = countBits(largestVertexPositionIndex);
-		const uint8 vertexNormalIndexBitCount = countBits(largestVertexNormalIndex);
-		const uint8 vertexTextureCoordinateIndexBitCount = countBits(largestVertexTextureCoordinateIndex);
-
-		const uint32 indexCount = byteStream.read<uint32>();
-
-		geometryAssetDescriptor.vertexPositionIndices = sequence<uint32>(indexCount);
-		geometryAssetDescriptor.vertexTextureCoordinateIndices = sequence<uint32>(indexCount);
-		geometryAssetDescriptor.vertexNormalIndices = sequence<uint32>(indexCount);
-
-		BitStream<StreamOperation::READ> bitStream(byteStream.getBytePosition(), byteStream.getRemainingSize(), Endianness::LITTLE_ENDIAN);
-
-		uint32 indexOffset = 0;
-
-		while (indexOffset < indexCount) {
-			geometryAssetDescriptor.vertexPositionIndices[indexOffset] = bitStream.read<uint32>(vertexPositionIndexBitCount);
-
-			indexOffset += 1;
-		}
-
-		indexOffset = 0;
-
-		while (indexOffset < indexCount) {
-			geometryAssetDescriptor.vertexNormalIndices[indexOffset] = bitStream.read<uint32>(vertexNormalIndexBitCount);
-
-			indexOffset += 1;
-		}
-
-		indexOffset = 0;
-
-		while (indexOffset < indexCount) {
-			geometryAssetDescriptor.vertexTextureCoordinateIndices[indexOffset] = bitStream.read<uint32>(vertexTextureCoordinateIndexBitCount);
-
-			indexOffset += 1;
-		}
-
-		return createRef<GeometryAsset>(geometryAssetDescriptor);
+		return nullptr;
 	}
 }

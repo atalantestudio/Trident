@@ -207,7 +207,6 @@ namespace Trident {
 
 		for (const ref<Layer> layer : layerCompositor->layers) {
 			layer->input = &lastLayerInput;
-
 			layer->postConstruct();
 		}
 	}

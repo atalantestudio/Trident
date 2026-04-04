@@ -29,8 +29,8 @@ namespace Trident {
 				return dynamicIndexCount;
 			}
 
-			inline const sequence<uint8>& getStaticBuffer() const {
-				return staticBuffer;
+			inline const sequence<uint8>& getDataBuffer() const {
+				return dataBuffer;
 			}
 
 			inline const sequence<Geometry2D>& getGeometries() const {
@@ -42,11 +42,19 @@ namespace Trident {
 			}
 
 		private:
+			void loadGeometries(ref<Scene2DAsset> sceneAsset);
+			void loadHulls(ref<Scene2DAsset> sceneAsset);
+			void loadEntityComponentMappings(ref<Scene2DAsset> sceneAsset);
+
+		private:
 			uint32 staticVertexCount;
 			uint32 staticIndexCount;
-			sequence<uint8> staticBuffer;
-			uint32 dynamicVertexCount;
-			uint32 dynamicIndexCount;
+
+			/// Contains static (internal to the scene) and dynamic (external geometries) vertices and indices.
+			sequence<uint8> dataBuffer;
+
+			uint32 dynamicVertexCount = 0;
+			uint32 dynamicIndexCount = 0;
 			sequence<Geometry2D> geometries;
 			sequence<Hull2D> hulls;
 	};

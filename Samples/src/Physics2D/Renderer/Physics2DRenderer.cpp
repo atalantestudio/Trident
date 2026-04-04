@@ -929,16 +929,16 @@ namespace Trident {
 	void Physics2DRenderer::setScene(const Scene2D* scene) {
 		this->scene = scene;
 
-		const sequence<uint8>& staticBuffer = scene->getStaticBuffer();
+		const sequence<uint8>& dataBuffer = scene->getDataBuffer();
 		const ComponentPool<RigidBody2DComponent>& rigidBodyPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
 		const uint64 rigidBodyBufferSize = rigidBodyPool.componentCount * sizeof(RigidBody);
-		const ref<Buffer<uint8>> stagingBuffer = createStagingBuffer<uint8>(staticBuffer.count() + rigidBodyBufferSize);
+		const ref<Buffer<uint8>> stagingBuffer = createStagingBuffer<uint8>(dataBuffer.count() + rigidBodyBufferSize);
 
 		uint8* mappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
 
-		std::copy(staticBuffer.begin(), staticBuffer.end(), &mappedRange[0]);
+		std::copy(dataBuffer.begin(), dataBuffer.end(), &mappedRange[0]);
 
-		RigidBody* stagingRigidBodyMappedRange = pointer_cast<RigidBody*>(&mappedRange[staticBuffer.count()]);
+		RigidBody* stagingRigidBodyMappedRange = pointer_cast<RigidBody*>(&mappedRange[dataBuffer.count()]);
 		uint32 rigidBodyIndex = 0;
 
 		while (rigidBodyIndex < rigidBodyPool.componentCount) {
@@ -1123,17 +1123,17 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::updateCentersOfMass() const {
-		const ComponentPool<RigidBody2D>& rigidBodyPool = scene->ecs.getComponentPool<RigidBody2D>();
-		const uint32 componentCount = rigidBodyPool.componentCount;
+		const ComponentPool<RigidBody2DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
+		const uint32 componentCount = rigidBodyComponentPool.componentCount;
 		const float32 inverseComponentCount = 1.0f / componentCount;
 
 		uint32 componentIndex = 0;
 
 		while (componentIndex < componentCount) {
-			const Entity entity = rigidBodyPool.componentIndexToEntity[componentIndex];
-			const RigidBody2D& rigidBody = rigidBodyPool.components[componentIndex];
+			const Entity entity = rigidBodyComponentPool.componentIndexToEntity[componentIndex];
+			const RigidBody2DComponent& rigidBodyComponent = rigidBodyComponentPool.components[componentIndex];
 
-			centerOfMassMappedRange[entity].position = {rigidBody.position[0], rigidBody.position[1], componentIndex * inverseComponentCount};
+			centerOfMassMappedRange[entity].position = {rigidBodyComponent.position[0], rigidBodyComponent.position[1], componentIndex * inverseComponentCount};
 			componentIndex += 1;
 		}
 	}
@@ -1230,7 +1230,7 @@ namespace Trident {
 				const Hull2D& hull = scene->getHulls()[geometry.getHullIndex()];
 
 				// TODO: Restore materials.
-				commandEncoder->drawIndexed(hull.getTriangleListIndexCount(), 1, hull.getIndexOffset(), 0, entity);
+				commandEncoder->drawIndexed(hull.getFillIndexCount(), 1, hull.getIndexOffset(), 0, entity);
 
 				componentIndex += 1;
 			}
@@ -1253,13 +1253,13 @@ namespace Trident {
 				const Hull2D& hull = scene->getHulls()[geometry.getHullIndex()];
 
 				// TODO: Restore materials.
-				commandEncoder->drawIndexed(hull.getLineStripIndexCount(), 1, hull.getIndexOffset() + hull.getTriangleListIndexCount(), 0, entity);
+				commandEncoder->drawIndexed(hull.getLineIndexCount(), 1, hull.getIndexOffset() + hull.getFillIndexCount(), 0, entity);
 
 				componentIndex += 1;
 			}
 		}
 
-		const ComponentPool<RigidBody2D>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2D>();
+		const ComponentPool<RigidBody2DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
 
 		// Center of mass
 		{
@@ -1299,7 +1299,7 @@ namespace Trident {
 				commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0, sizeof(RigidBody));
 				commandEncoder->bindIndexBuffer<uint16>(indexBuffer, scene->getStaticIndexCount() * sizeof(uint16));
 				commandEncoder->bindDescriptorSets(placeholderPipelineLayout, 0, {cameraViewDescriptorSet, placeholderDescriptorSet});
-				commandEncoder->drawIndexed(hull.getTriangleListIndexCount(), 1, hull.getIndexOffset(), 0, selectedEntity);
+				commandEncoder->drawIndexed(hull.getFillIndexCount(), 1, hull.getIndexOffset(), 0, selectedEntity);
 			}
 
 			// Rigid body placeholder stroke
@@ -1309,7 +1309,7 @@ namespace Trident {
 				commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0, sizeof(RigidBody));
 				commandEncoder->bindIndexBuffer<uint16>(indexBuffer, scene->getStaticIndexCount() * sizeof(uint16));
 				commandEncoder->bindDescriptorSets(placeholderPipelineLayout, 0, {cameraViewDescriptorSet, placeholderDescriptorSet});
-				commandEncoder->drawIndexed(hull.getLineStripIndexCount(), 1, hull.getIndexOffset() + hull.getTriangleListIndexCount(), 0, selectedEntity);
+				commandEncoder->drawIndexed(hull.getLineIndexCount(), 1, hull.getIndexOffset() + hull.getFillIndexCount(), 0, selectedEntity);
 			}
 		}
 

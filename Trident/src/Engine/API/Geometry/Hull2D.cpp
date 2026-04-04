@@ -20,9 +20,11 @@ namespace Trident {
 
 	template<>
 	Hull2D Hull2D::fromGeometry<Hull2DType::CIRCLE>(const Geometry2D& geometry) {
+		const view<svec2<float32>> vertices(pointer_cast<const svec2<float32>*>(&geometry.getVertexPositionComponents()[0]), geometry.getVertexCount());
+
 		float32 radius = 0.0_m;
 
-		for (const svec2<float32> vertex : geometry.getVertices()) {
+		for (const svec2<float32> vertex : vertices) {
 			radius = max(radius, lengthSquared(-vec2<float32>(vertex)));
 		}
 
@@ -34,7 +36,6 @@ namespace Trident {
 			.radius = radius,
 			.vertices = {},
 			.fillIndices = {},
-			.lineIndices = {},
 		});
 	}
 
@@ -45,7 +46,7 @@ namespace Trident {
 
 	template<>
 	Hull2D Hull2D::fromGeometry<Hull2DType::POLYGON>(const Geometry2D& geometry) {
-		const view<svec2<float32>> vertices = geometry.getVertices();
+		const view<svec2<float32>> vertices(pointer_cast<const svec2<float32>*>(&geometry.getVertexPositionComponents()[0]), geometry.getVertexCount());
 
 		vec2<float32> centroid = {0.0_m, 0.0_m};
 		float32 radius = 0.0_m;
@@ -66,9 +67,8 @@ namespace Trident {
 			.type = Hull2DType::POLYGON,
 			.centroid = {centroid[0], centroid[1]},
 			.radius = radius,
-			.vertices = geometry.getVertices(),
+			.vertices = vertices,
 			.fillIndices = geometry.getIndices(),
-			.lineIndices = {},
 		});
 	}
 
@@ -77,14 +77,24 @@ namespace Trident {
 		centroid(descriptor.centroid),
 		radius(descriptor.radius),
 		vertices(descriptor.vertices),
-		// fillIndices(descriptor.fillIndices),
-		// lineIndices(descriptor.lineIndices),
+		fillIndices(descriptor.fillIndices),
+		lineIndices(descriptor.vertices.count() + 1),
 		edges(descriptor.fillIndices.count() / 3 * 2)
 	{
+		uint32 vertexIndex = 0;
+
+		while (vertexIndex < descriptor.vertices.count()) {
+			lineIndices[vertexIndex] = vertexIndex;
+
+			vertexIndex += 1;
+		}
+
+		lineIndices[vertexIndex] = 0;
+
 		uint32 edgeIndex = 0;
 
 		while (edgeIndex < edges.count()) {
-			edges[edgeIndex] = {edgeIndex, (edgeIndex + 1) % edges.count()};
+			edges[edgeIndex] = {edgeIndex, (edgeIndex + 1) % static_cast<uint32>(edges.count())};
 
 			edgeIndex += 1;
 		}

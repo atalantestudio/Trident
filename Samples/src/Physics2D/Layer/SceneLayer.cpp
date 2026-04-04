@@ -13,8 +13,11 @@
 
 namespace Trident {
 	void Physics2DSceneLayer::loadScene() {
+		AssetLibrary* assetLibrary = getApplication()->getAssetLibrary();
+
 		const view<char8> sceneAssetName = getApplication()->getPropertyFile()->getProperty<view<char8>>("AssetName");
-		const ref<Scene2DAsset> sceneAsset = getApplication()->getAssetLibrary()->getAsset<Scene2DAsset>(sceneAssetName);
+		const ref<GeometryAsset> defaultGeometryAsset = assetLibrary->getAsset<GeometryAsset>("unit_square");
+		const ref<Scene2DAsset> sceneAsset = assetLibrary->getAsset<Scene2DAsset>(sceneAssetName);
 
 		scene = createScope<Scene2D>(sceneAsset);
 
@@ -130,15 +133,15 @@ namespace Trident {
 
 		checkHover();
 
-		const ComponentPool<RigidBody2D>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2D>();
+		const ComponentPool<RigidBody2DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
 
 		uint32 componentIndex = 0;
 
 		while (componentIndex < rigidBodyComponentPool.componentCount) {
 			const Entity entity = rigidBodyComponentPool.componentIndexToEntity[componentIndex];
-			const RigidBody2D& rigidBody = scene->ecs.getComponent<RigidBody2D>(entity);
+			const RigidBody2DComponent& rigidBodyComponent = scene->ecs.getComponent<RigidBody2DComponent>(entity);
 
-			renderer.setRigidBodyTransform(entity, rigidBody.transform);
+			renderer.setRigidBodyTransform(entity, rigidBodyComponent.transform);
 
 			componentIndex += 1;
 		}
@@ -163,7 +166,7 @@ namespace Trident {
 	void Physics2DSceneLayer::checkHover() {
 		hoveredEntity = max<Entity>();
 
-		const ComponentPool<RigidBody2D>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2D>();
+		const ComponentPool<RigidBody2DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
 
 		if (rigidBodyComponentPool.componentCount == 0) {
 			return;
@@ -171,9 +174,9 @@ namespace Trident {
 
 		const Hull2D mouseHull = Hull2D::point();
 
-		RigidBody2D mouseRigidBody{};
-		mouseRigidBody.position = renderer.cameraPosition + mousePosition;
-		mouseRigidBody.updateTransform(mouseHull.getCentroid());
+		RigidBody2DComponent mouseRigidBodyComponent{};
+		mouseRigidBodyComponent.position = svec2<float32>(renderer.cameraPosition + mousePosition);
+		mouseRigidBodyComponent.updateTransform(mouseHull.getCentroid());
 
 		sint32 componentIndex = static_cast<sint32>(rigidBodyComponentPool.componentCount) - 1;
 
@@ -182,9 +185,9 @@ namespace Trident {
 			const GeometryComponent geometryComponent = scene->ecs.getComponent<GeometryComponent>(entity);
 			const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
 			const Hull2D& hull = scene->getHulls()[geometry.getHullIndex()];
-			const RigidBody2D& rigidBody = scene->ecs.getComponent<RigidBody2D>(entity);
+			const RigidBody2DComponent& rigidBodyComponent = scene->ecs.getComponent<RigidBody2DComponent>(entity);
 
-			if (GJK2DConditional(rigidBody, mouseRigidBody, hull, mouseHull)) {
+			if (GJK2DConditional(rigidBodyComponent, mouseRigidBodyComponent, hull, mouseHull)) {
 				hoveredEntity = entity;
 
 				break;

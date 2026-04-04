@@ -13,17 +13,33 @@ namespace Trident {
 				mat3x3<float32>::translation(position);
 		}
 
+		/// Applies linear and angular impulses to the body.
+		void applyImpulse(
+			/// The impulse vector.
+			vec2<float32> j,
+
+			/// The vector from the entity's position to the contact.
+			vec2<float32> r
+		) {
+			linearVelocity += j * inverseMass;
+			angularVelocity += parallelogramArea(r, j) * inverseInertia;
+		}
+
+		// TODO: Use svec2<float32> instead.
 		/// Position of the center of mass in world-space.
-		svec2<float32> position;
+		vec2<float32> position;
 
 		float32 rotation;
 
+		// TODO: Use svec2<float32> instead.
 		// NOTE: This isn't meant to be dynamically updated.
-		svec2<float32> scale;
+		vec2<float32> scale;
 
 		mat3x3<float32> transform;
 
-		svec2<float32> linearVelocity;
+		// TODO: Use svec2<float32> instead.
+		vec2<float32> linearVelocity;
+
 		float32 angularVelocity;
 
 		float32 inverseMass;
@@ -34,5 +50,8 @@ namespace Trident {
 		float32 friction;
 
 		float32 restitution;
+
+		// TODO: Keep?
+		vec2<float32> force;
 	};
 }

@@ -34,15 +34,15 @@ namespace Trident {
 
 		checkHover();
 
-		const ComponentPool<RigidBody2D>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2D>();
+		const ComponentPool<RigidBody2DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
 
 		uint32 componentIndex = 0;
 
 		while (componentIndex < rigidBodyComponentPool.componentCount) {
 			const Entity entity = rigidBodyComponentPool.componentIndexToEntity[componentIndex];
-			const RigidBody2D& rigidBody = scene->ecs.getComponent<RigidBody2D>(entity);
+			const RigidBody2DComponent& rigidBodyComponent = scene->ecs.getComponent<RigidBody2DComponent>(entity);
 
-			renderer.setRigidBodyTransform(entity, rigidBody.transform);
+			renderer.setRigidBodyTransform(entity, rigidBodyComponent.transform);
 
 			componentIndex += 1;
 		}
@@ -115,7 +115,7 @@ namespace Trident {
 	void BaseLayer::checkHover() {
 		hoveredEntity = max<Entity>();
 
-		const ComponentPool<RigidBody2D>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2D>();
+		const ComponentPool<RigidBody2DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
 
 		if (rigidBodyComponentPool.componentCount == 0) {
 			return;
@@ -132,9 +132,9 @@ namespace Trident {
 			const GeometryComponent geometryComponent = scene->ecs.getComponent<GeometryComponent>(entity);
 			const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
 			const Hull2D& hull = scene->getHulls()[geometry.getHullIndex()];
-			const RigidBody2D& rigidBody = scene->ecs.getComponent<RigidBody2D>(entity);
+			const RigidBody2DComponent& rigidBodyComponent = scene->ecs.getComponent<RigidBody2DComponent>(entity);
 
-			if (GJK2DConditional(rigidBody, mouseRigidBody, hull, mouseHull)) {
+			if (GJK2DConditional(rigidBodyComponent, mouseRigidBody, hull, mouseHull)) {
 				hoveredEntity = entity;
 
 				break;

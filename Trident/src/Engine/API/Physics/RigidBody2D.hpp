@@ -3,8 +3,13 @@
 
 #pragma once
 
+#include "Engine/ECS/Component/RigidBody2DComponent.hpp"
+
 namespace Trident {
-	class RigidBody2D {
+	// TODO: Remove.
+	typedef RigidBody2DComponent RigidBody2D;
+
+	/* class RigidBody2D {
 		public:
 			void updateTransform(vec2<float32> centroid) {
 				transform =
@@ -62,5 +67,5 @@ namespace Trident {
 			// Coefficient of friction.
 			// TODO: Differentiate static friction from dynamic friction.
 			float32 friction = 0.0f;
-	};
+	}; */
 }

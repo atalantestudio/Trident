@@ -188,17 +188,17 @@ namespace Trident {
 	}
 
 	void PhysicsSimulation2D::applyForces() {
-		const ComponentPool<RigidBody2D>& rigidBodyPool = scene->ecs.getComponentPool<RigidBody2D>();
+		const ComponentPool<RigidBody2DComponent>& rigidBodyPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
 		uint32 componentIndex = 0;
 
 		// TODO: Integrate velocities on dynamic resting entities (e.g. an object on a moving platform may move due to inertia)?
 		while (componentIndex < rigidBodyPool.componentCount) {
 			const Entity entity = rigidBodyPool.componentIndexToEntity[componentIndex];
 
-			RigidBody2D& rigidBody = scene->ecs.getComponent<RigidBody2D>(entity);
+			RigidBody2DComponent& rigidBodyComponent = scene->ecs.getComponent<RigidBody2DComponent>(entity);
 
 			// TODO: Exclude dynamic entities with an inverse mass of 0 from the loop.
-			if (rigidBody.inverseMass == 0.0_kg) {
+			if (rigidBodyComponent.inverseMass == 0.0_kg) {
 				componentIndex += 1;
 
 				continue;
@@ -207,10 +207,10 @@ namespace Trident {
 			// TODO
 			// Integrate gravity like in https://web.archive.org/web/20161201054257/https://www.niksula.hut.fi/~hkankaan/Homepages/gravity.html.
 			// This looks like Velocity Verlet for gravity to me?
-			// rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + vec2<float32>(0.0f, G)) * halfDeltaTime;
-			rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + vec2<float32>(0.0f, G)) * deltaTime;
-			// rigidBody.angularVelocity += rigidBody.inverseInertia * halfDeltaTime;
-			rigidBody.angularVelocity += rigidBody.inverseInertia * deltaTime;
+			// rigidBodyComponent.linearVelocity += (rigidBodyComponent.force * rigidBodyComponent.inverseMass + vec2<float32>(0.0f, G)) * halfDeltaTime;
+			rigidBodyComponent.linearVelocity += (rigidBodyComponent.force * rigidBodyComponent.inverseMass + vec2<float32>(0.0f, G)) * deltaTime;
+			// rigidBodyComponent.angularVelocity += rigidBodyComponent.inverseInertia * halfDeltaTime;
+			rigidBodyComponent.angularVelocity += rigidBodyComponent.inverseInertia * deltaTime;
 
 			componentIndex += 1;
 		}
@@ -447,19 +447,19 @@ namespace Trident {
 	}
 
 	void PhysicsSimulation2D::integrate() {
-		const ComponentPool<RigidBody2D>& rigidBodyPool = scene->ecs.getComponentPool<RigidBody2D>();
+		const ComponentPool<RigidBody2DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
 		uint32 componentIndex = 0;
 
 		// TODO: Integration for static entities (e.g. a moving platform that isn't affected by other forces)?
 		// TODO: Integration for dynamic entities with infinite mass?
 		// TODO: Integration for dynamic resting entities (e.g. an object on a moving platform may move due to inertia)?
-		while (componentIndex < rigidBodyPool.componentCount) {
-			const Entity entity = rigidBodyPool.componentIndexToEntity[componentIndex];
+		while (componentIndex < rigidBodyComponentPool.componentCount) {
+			const Entity entity = rigidBodyComponentPool.componentIndexToEntity[componentIndex];
 
-			RigidBody2D& rigidBody = scene->ecs.getComponent<RigidBody2D>(entity);
+			RigidBody2DComponent& rigidBody2DComponent = scene->ecs.getComponent<RigidBody2DComponent>(entity);
 
 			// TODO: Exclude dynamic entities with an inverse mass of 0 from the loop.
-			if (rigidBody.inverseMass == 0.0_kg) {
+			if (rigidBody2DComponent.inverseMass == 0.0_kg) {
 				componentIndex += 1;
 
 				continue;
@@ -467,16 +467,16 @@ namespace Trident {
 
 			const Hull2D& hull = getHull(entity);
 
-			rigidBody.position += rigidBody.linearVelocity * deltaTime;
-			rigidBody.rotation += rigidBody.angularVelocity * deltaTime;
+			rigidBody2DComponent.position += rigidBody2DComponent.linearVelocity * deltaTime;
+			rigidBody2DComponent.rotation += rigidBody2DComponent.angularVelocity * deltaTime;
 
-			rigidBody.updateTransform(hull.getCentroid());
+			rigidBody2DComponent.updateTransform(hull.getCentroid());
 
 			// TODO
-			// rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + vec2<float32>(0.0f, G)) * halfDeltaTime;
-			// rigidBody.angularVelocity += rigidBody.inverseInertia * halfDeltaTime;
+			// rigidBody2DComponent.linearVelocity += (rigidBody2DComponent.force * rigidBody2DComponent.inverseMass + vec2<float32>(0.0f, G)) * halfDeltaTime;
+			// rigidBody2DComponent.angularVelocity += rigidBody2DComponent.inverseInertia * halfDeltaTime;
 
-			rigidBody.force = {0.0_N, 0.0_N};
+			rigidBody2DComponent.force = {0.0_N, 0.0_N};
 
 			componentIndex += 1;
 		}
