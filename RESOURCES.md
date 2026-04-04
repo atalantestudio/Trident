@@ -76,7 +76,6 @@ If both creation and last update dates are provided, the Date field will indicat
 | Title | Author(s) | Date | Links |
 | - | - | - | - |
 | *gLTF Validator* | The Khronos Group | - | [Website](https://github.khronos.org/glTF-Validator) |
-| *\[C++\] Making a Simple JSON Parser from Scratch* | UponTheSky | July 30, 2023 | [Article](https://dev.to/uponthesky/c-making-a-simple-json-parser-from-scratch-250g) |
 
 ### JSON
 
