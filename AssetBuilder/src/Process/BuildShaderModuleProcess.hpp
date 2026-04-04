@@ -13,6 +13,15 @@ namespace Trident {
 	class BuildShaderModuleProcess : public Process {
 		private:
 			sint32 processFile(const std::filesystem::directory_entry& directoryEntry, const std::filesystem::path& assetOutputPath) {
+				std::filesystem::path finalAssetOutputPath = assetOutputPath / "Shader" / directoryEntry.path().filename();
+				finalAssetOutputPath.replace_extension("tsm");
+
+				if (std::filesystem::exists(finalAssetOutputPath)) {
+					ENGINE_INFO("Shader module asset \"[]\" already exists.", finalAssetOutputPath.filename().string());
+
+					return 0;
+				}
+
 				const sequence<char8> path = directoryEntry.path().string();
 				const sequence<char8> inputData = Filesystem::openTextBuffer(path);
 

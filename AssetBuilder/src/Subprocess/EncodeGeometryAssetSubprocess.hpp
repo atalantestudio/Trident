@@ -13,6 +13,15 @@ namespace Trident {
 		const sequence<char8> path = directoryEntry.path().string();
 		const sequence<uint8> inputData = Filesystem::openByteBuffer(path);
 
+		std::filesystem::path finalAssetOutputPath = assetOutputPath / "Geometry" / directoryEntry.path().filename();
+		finalAssetOutputPath.replace_extension("tge");
+
+		if (std::filesystem::exists(finalAssetOutputPath)) {
+			ENGINE_INFO("Geometry asset \"[]\" already exists.", finalAssetOutputPath.filename().string());
+
+			return;
+		}
+
 		if (!Decoder<FileFormat::FBX>::validateSignature(ByteStream<StreamOperation::READ>(&inputData[0], inputData.count(), Endianness::LITTLE_ENDIAN))) {
 			ENGINE_INFO("Ignoring non-FBX file \"[]\".", path);
 

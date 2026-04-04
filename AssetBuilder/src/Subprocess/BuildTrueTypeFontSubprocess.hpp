@@ -11,6 +11,15 @@ namespace Trident {
 	class BuildTrueTypeFontSubprocess {
 		public:
 			explicit BuildTrueTypeFontSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::filesystem::path& assetOutputPath) {
+				std::filesystem::path finalAssetOutputPath = assetOutputPath / "Font" / directoryEntry.path().filename();
+				finalAssetOutputPath.replace_extension("tfo");
+
+				if (std::filesystem::exists(finalAssetOutputPath)) {
+					ENGINE_INFO("Font asset \"[]\" already exists.", finalAssetOutputPath.filename().string());
+
+					return;
+				}
+
 				const sequence<char8> path = directoryEntry.path().string();
 				const std::string assetNameString = directoryEntry.path().stem().string();
 				const view<char8> assetName(&assetNameString[0], assetNameString.size());
