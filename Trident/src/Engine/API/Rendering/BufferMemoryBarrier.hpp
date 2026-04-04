@@ -11,10 +11,6 @@ namespace Trident {
 		ref<BaseBuffer> buffer;
 		uint64 offset;
 		uint64 size;
-
-		// TODO: Store inside the buffer.
-		Access sourceAccess;
-
-		Access destinationAccess;
+		Access newAccess;
 	};
 }

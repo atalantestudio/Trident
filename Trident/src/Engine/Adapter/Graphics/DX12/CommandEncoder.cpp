@@ -415,8 +415,8 @@ namespace Trident {
 		// D3D12_HEAP_TYPE_UPLOAD heaps only allow CPU writes.
 		// The source and destination buffers are mapped to emulate a GPU copy command.
 		if (_destinationBuffer->heapType == D3D12_HEAP_TYPE_UPLOAD) {
-			const uint8* sourceMappedRange = static_cast<const uint8*>(sourceBuffer->map(0, sourceBuffer->getSize()));
-			uint8* destinationMappedRange = static_cast<uint8*>(destinationBuffer->map(0, destinationBuffer->getSize()));
+			const uint8* sourceMappedRange = static_cast<const uint8*>(std::static_pointer_cast<Buffer<uint8>>(sourceBuffer)->map(0, sourceBuffer->getSize()));
+			uint8* destinationMappedRange = static_cast<uint8*>(std::static_pointer_cast<Buffer<uint8>>(destinationBuffer)->map(0, destinationBuffer->getSize()));
 
 			for (const BufferCopyRegion& copyRegion : copyRegions) {
 				std::copy_n(sourceMappedRange + copyRegion.sourceOffset, copyRegion.size, destinationMappedRange + copyRegion.destinationOffset);
@@ -813,11 +813,13 @@ namespace Trident {
 			D3D12_BUFFER_BARRIER& bufferBarrier = bufferBarriers[bufferBarrierIndex];
 			bufferBarrier.SyncBefore = D3D12_BARRIER_SYNC_ALL;
 			bufferBarrier.SyncAfter = D3D12_BARRIER_SYNC_ALL;
-			bufferBarrier.AccessBefore = getBufferBarrierAccess(bufferMemoryBarrier.sourceAccess);
-			bufferBarrier.AccessAfter = getBufferBarrierAccess(bufferMemoryBarrier.destinationAccess);
+			bufferBarrier.AccessBefore = getBufferBarrierAccess(bufferMemoryBarrier.buffer->access);
+			bufferBarrier.AccessAfter = getBufferBarrierAccess(bufferMemoryBarrier.newAccess);
 			bufferBarrier.pResource = std::static_pointer_cast<DX12::BaseBuffer>(bufferMemoryBarrier.buffer)->resource;
 			bufferBarrier.Offset = bufferMemoryBarrier.offset;
 			bufferBarrier.Size = bufferMemoryBarrier.size;
+
+			bufferMemoryBarrier.buffer->access = bufferMemoryBarrier.newAccess;
 
 			bufferBarrierIndex += 1;
 		}
@@ -831,8 +833,8 @@ namespace Trident {
 			D3D12_TEXTURE_BARRIER& textureBarrier = textureBarriers[imageMemoryBarrierIndex];
 			textureBarrier.SyncBefore = D3D12_BARRIER_SYNC_ALL;
 			textureBarrier.SyncAfter = D3D12_BARRIER_SYNC_ALL;
-			textureBarrier.AccessBefore = getImageBarrierAccess(imageMemoryBarrier.sourceAccess, imageMemoryBarrier.newLayout);
-			textureBarrier.AccessAfter = getImageBarrierAccess(imageMemoryBarrier.destinationAccess, imageMemoryBarrier.newLayout);
+			textureBarrier.AccessBefore = getImageBarrierAccess(imageMemoryBarrier.image->access, imageMemoryBarrier.newLayout);
+			textureBarrier.AccessAfter = getImageBarrierAccess(imageMemoryBarrier.newAccess, imageMemoryBarrier.newLayout);
 
 			// TODO: Determine correct barrier layouts.
 			ENGINE_ERROR_UNIMPLEMENTED();
@@ -850,6 +852,7 @@ namespace Trident {
 			textureBarrier.Flags = D3D12_TEXTURE_BARRIER_FLAG_NONE;
 
 			imageMemoryBarrier.image->layout = imageMemoryBarrier.newLayout;
+			imageMemoryBarrier.image->access = imageMemoryBarrier.newAccess;
 
 			imageMemoryBarrierIndex += 1;
 		}

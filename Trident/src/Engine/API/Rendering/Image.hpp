@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/Base.hpp"
+#include "Engine/API/Rendering/Access.hpp"
 #include "Engine/API/Rendering/Descriptor/ImageDescriptor.hpp"
 
 namespace Trident {
@@ -12,13 +13,19 @@ namespace Trident {
 			~Image();
 
 			/// Returns the type of the image.
-			ImageType getType() const;
+			inline ImageType getType() const {
+				return type;
+			}
 
 			/// Returns the format of the image.
-			ImageFormat getFormat() const;
+			inline ImageFormat getFormat() const {
+				return format;
+			}
 
 			/// Returns the 3-dimensional size of the image.
-			const Extent3D& getExtent() const;
+			inline Extent3D getExtent() const {
+				return extent;
+			}
 
 			/// Returns the byte size of the image data.
 			inline uint64 getSize() const {
@@ -26,18 +33,33 @@ namespace Trident {
 			}
 
 			/// Returns the number of mip levels in the image.
-			uint32 getMipLevelCount() const;
+			inline uint32 getMipLevelCount() const {
+				return mipLevelCount;
+			}
 
 			/// Returns the number of layers in the image.
-			uint32 getLayerCount() const;
+			inline uint32 getLayerCount() const {
+				return layerCount;
+			}
 
 			/// Returns the number of samples in the image.
-			uint8 getSampleCount() const;
+			inline uint8 getSampleCount() const {
+				return sampleCount;
+			}
 
-			ImageUsage getUsage() const;
+			inline ImageUsage getUsage() const {
+				return usage;
+			}
 
 			/// Returns the current layout of the image.
-			ImageLayout getLayout() const;
+			inline ImageLayout getLayout() const {
+				return layout;
+			}
+
+			/// Returns the current access flags for the image.
+			inline Access getAccess() const {
+				return access;
+			}
 
 			ref<ImageView> createView(const ImageViewDescriptor& descriptor);
 
@@ -56,5 +78,6 @@ namespace Trident {
 			uint8 sampleCount;
 			ImageUsage usage;
 			ImageLayout layout;
+			Access access = Access::NONE;
 	};
 }

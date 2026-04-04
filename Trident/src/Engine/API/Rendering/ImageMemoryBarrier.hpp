@@ -11,10 +11,6 @@ namespace Trident {
 	struct ImageMemoryBarrier {
 		ref<Image> image;
 		ImageLayout newLayout;
-
-		// TODO: Store inside the image.
-		Access sourceAccess;
-
-		Access destinationAccess;
+		Access newAccess;
 	};
 }

@@ -4,7 +4,6 @@
 #pragma once
 
 #include "Engine/API/Graphics/Base.hpp"
-
 #include "Engine/API/Rendering/Access.hpp"
 #include "Engine/API/Rendering/BufferUsage.hpp"
 #include "Engine/API/Rendering/Descriptor/BufferDescriptor.hpp"
@@ -28,20 +27,20 @@ namespace Trident {
 				return usage;
 			}
 
-			/// Returns the current buffer access flags.
+			/// Returns the current access flags for the buffer.
 			inline Access getAccess() const {
 				return access;
 			}
-
-			/// Maps a range of the buffer to host memory.
-			/// The offset and size must be provided in bytes.
-			void* map(uint64 offset, uint64 size) const;
 
 			/// Unmaps the buffer.
 			void unmap() const;
 
 		protected:
 			explicit BaseBuffer(const Device* device, const BufferDescriptor& descriptor, uint32 stride);
+
+			/// Maps a range of the buffer to host memory.
+			/// The offset and size must be provided in bytes.
+			void* map(uint64 offset, uint64 size) const;
 
 		// TODO: Make private.
 		public:

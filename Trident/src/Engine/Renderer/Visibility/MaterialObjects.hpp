@@ -191,8 +191,7 @@ namespace Trident {
 						imageMemoryBarriers[imageIndex] = {
 							.image = materialShaderImages[imageIndex],
 							.newLayout = ImageLayout::TRANSFER_DST_OPTIMAL,
-							.sourceAccess = Access::NONE,
-							.destinationAccess = Access::TRANSFER_WRITE,
+							.newAccess = Access::TRANSFER_WRITE,
 						};
 
 						descriptorImages[imageIndex] = {
@@ -363,8 +362,7 @@ namespace Trident {
 						imageMemoryBarriers[imageIndex] = {
 							.image = image,
 							.newLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-							.sourceAccess = Access::TRANSFER_WRITE,
-							.destinationAccess = Access::SHADER_READ,
+							.newAccess = Access::SHADER_READ,
 						};
 
 						imageIndex += 1;

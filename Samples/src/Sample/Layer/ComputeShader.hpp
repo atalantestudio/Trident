@@ -304,8 +304,7 @@ namespace Trident {
 				ImageMemoryBarrier imageMemoryBarrier = {
 					.image = image,
 					.newLayout = ImageLayout::GENERAL,
-					.sourceAccess = Access::NONE,
-					.destinationAccess = Access::SHADER_WRITE,
+					.newAccess = Access::SHADER_WRITE,
 				};
 
 				commandEncoder->insertMemoryBarriers({}, {imageMemoryBarrier});
@@ -316,8 +315,7 @@ namespace Trident {
 				imageMemoryBarrier = {
 					.image = image,
 					.newLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-					.sourceAccess = Access::SHADER_WRITE,
-					.destinationAccess = Access::SHADER_READ,
+					.newAccess = Access::SHADER_READ,
 				};
 
 				commandEncoder->insertMemoryBarriers({}, {imageMemoryBarrier});

@@ -193,38 +193,6 @@ namespace Trident {
 		device->adapter->destroyImage(device, this);
 	}
 
-	ImageType Image::getType() const {
-		return type;
-	}
-
-	ImageFormat Image::getFormat() const {
-		return format;
-	}
-
-	const Extent3D& Image::getExtent() const {
-		return extent;
-	}
-
-	uint32 Image::getMipLevelCount() const {
-		return mipLevelCount;
-	}
-
-	uint32 Image::getLayerCount() const {
-		return layerCount;
-	}
-
-	uint8 Image::getSampleCount() const {
-		return sampleCount;
-	}
-
-	ImageUsage Image::getUsage() const {
-		return usage;
-	}
-
-	ImageLayout Image::getLayout() const {
-		return layout;
-	}
-
 	ref<ImageView> Image::createView(const ImageViewDescriptor& descriptor) {
 		return device->adapter->createImageView(device, this, descriptor);
 	}

@@ -247,8 +247,7 @@ namespace Trident {
 		const ImageMemoryBarrier visibilityImageMemoryBarrier = {
 			.image = visibilityImage,
 			.newLayout = ImageLayout::GENERAL,
-			.sourceAccess = Access::NONE,
-			.destinationAccess = Access::SHADER_READ,
+			.newAccess = Access::SHADER_READ,
 		};
 
 		#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
@@ -257,8 +256,7 @@ namespace Trident {
 				const ImageMemoryBarrier depthStencilImageMemoryBarrier = {
 					.image = depthStencilImage,
 					.newLayout = ImageLayout::DEPTH_STENCIL_READ_ONLY_OPTIMAL,
-					.sourceAccess = Access::NONE,
-					.destinationAccess = Access::NONE,
+					.newAccess = Access::NONE,
 				};
 
 				commandEncoder->insertMemoryBarriers({}, {visibilityImageMemoryBarrier, depthStencilImageMemoryBarrier});
@@ -287,8 +285,7 @@ namespace Trident {
 					.buffer = materialCountBuffer,
 					.offset = 0,
 					.size = materialCountBuffer->getSize(),
-					.sourceAccess = Access::SHADER_WRITE,
-					.destinationAccess = Access::SHADER_READ | Access::SHADER_WRITE,
+					.newAccess = Access::SHADER_READ | Access::SHADER_WRITE,
 				};
 
 				commandEncoder->insertMemoryBarriers({bufferMemoryBarrier}, {});
@@ -307,8 +304,7 @@ namespace Trident {
 					.buffer = materialOffsetBuffer,
 					.offset = 0,
 					.size = materialOffsetBuffer->getSize(),
-					.sourceAccess = Access::SHADER_WRITE,
-					.destinationAccess = Access::SHADER_READ,
+					.newAccess = Access::SHADER_READ,
 				};
 
 				commandEncoder->insertMemoryBarriers({bufferMemoryBarrier}, {});
@@ -431,8 +427,7 @@ namespace Trident {
 		const ImageMemoryBarrier outputImageMemoryBarrier = {
 			.image = outputImage,
 			.newLayout = ImageLayout::GENERAL,
-			.sourceAccess = Access::NONE,
-			.destinationAccess = Access::SHADER_WRITE,
+			.newAccess = Access::SHADER_WRITE,
 		};
 
 		commandEncoder->insertMemoryBarriers({}, {outputImageMemoryBarrier});

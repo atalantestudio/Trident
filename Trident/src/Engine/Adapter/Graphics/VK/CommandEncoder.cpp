@@ -454,13 +454,15 @@ namespace Trident {
 			VkBufferMemoryBarrier& vkBufferMemoryBarrier = vkBufferMemoryBarriers[bufferMemoryBarrierIndex];
 			vkBufferMemoryBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
 			vkBufferMemoryBarrier.pNext = nullptr;
-			vkBufferMemoryBarrier.srcAccessMask = getAccessFlags(bufferMemoryBarrier.sourceAccess);
-			vkBufferMemoryBarrier.dstAccessMask = getAccessFlags(bufferMemoryBarrier.destinationAccess);
+			vkBufferMemoryBarrier.srcAccessMask = getAccessFlags(bufferMemoryBarrier.buffer->access);
+			vkBufferMemoryBarrier.dstAccessMask = getAccessFlags(bufferMemoryBarrier.newAccess);
 			vkBufferMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 			vkBufferMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 			vkBufferMemoryBarrier.buffer = std::static_pointer_cast<VK::BaseBuffer>(bufferMemoryBarrier.buffer)->buffer;
 			vkBufferMemoryBarrier.offset = bufferMemoryBarrier.offset;
 			vkBufferMemoryBarrier.size = bufferMemoryBarrier.size;
+
+			bufferMemoryBarrier.buffer->access = bufferMemoryBarrier.newAccess;
 
 			bufferMemoryBarrierIndex += 1;
 		}
@@ -475,8 +477,8 @@ namespace Trident {
 			VkImageMemoryBarrier& vkImageMemoryBarrier = vkImageMemoryBarriers[imageMemoryBarrierIndex];
 			vkImageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 			vkImageMemoryBarrier.pNext = nullptr;
-			vkImageMemoryBarrier.srcAccessMask = getAccessFlags(imageMemoryBarrier.sourceAccess);
-			vkImageMemoryBarrier.dstAccessMask = getAccessFlags(imageMemoryBarrier.destinationAccess);
+			vkImageMemoryBarrier.srcAccessMask = getAccessFlags(imageMemoryBarrier.image->access);
+			vkImageMemoryBarrier.dstAccessMask = getAccessFlags(imageMemoryBarrier.newAccess);
 			vkImageMemoryBarrier.oldLayout = getImageLayout(imageMemoryBarrier.image->getLayout());
 			vkImageMemoryBarrier.newLayout = getImageLayout(imageMemoryBarrier.newLayout);
 			vkImageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
@@ -489,6 +491,7 @@ namespace Trident {
 			vkImageMemoryBarrier.subresourceRange.layerCount = imageMemoryBarrier.image->getLayerCount();
 
 			imageMemoryBarrier.image->layout = imageMemoryBarrier.newLayout;
+			imageMemoryBarrier.image->access = imageMemoryBarrier.newAccess;
 
 			imageMemoryBarrierIndex += 1;
 		}

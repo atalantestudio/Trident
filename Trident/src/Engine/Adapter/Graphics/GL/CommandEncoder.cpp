@@ -252,7 +252,11 @@ namespace Trident {
 		uint32 bufferMemoryBarrierIndex = 0;
 
 		while (bufferMemoryBarrierIndex < bufferMemoryBarriers.count()) {
-			barriers |= getBarrier(bufferMemoryBarriers[bufferMemoryBarrierIndex].destinationAccess);
+			const BufferMemoryBarrier& bufferMemoryBarrier = bufferMemoryBarriers[bufferMemoryBarrierIndex];
+
+			barriers |= getBarrier(bufferMemoryBarrier.newAccess);
+
+			bufferMemoryBarrier.buffer->access = bufferMemoryBarrier.newAccess;
 
 			bufferMemoryBarrierIndex += 1;
 		}
@@ -265,6 +269,7 @@ namespace Trident {
 			barriers |= getBarrier(imageMemoryBarrier.image->getLayout());
 
 			imageMemoryBarrier.image->layout = imageMemoryBarrier.newLayout;
+			imageMemoryBarrier.image->access = imageMemoryBarrier.newAccess;
 
 			imageMemoryBarrierIndex += 1;
 		}

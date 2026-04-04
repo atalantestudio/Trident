@@ -135,14 +135,12 @@ namespace Trident {
 		ImageMemoryBarrier glyphImageMemoryBarrier = {
 			.image = glyphImage,
 			.newLayout = ImageLayout::GENERAL,
-			.sourceAccess = Access::NONE,
-			.destinationAccess = Access::SHADER_READ | Access::SHADER_WRITE,
+			.newAccess = Access::SHADER_READ | Access::SHADER_WRITE,
 		};
 		ImageMemoryBarrier glyphMapImageMemoryBarrier = {
 			.image = glyphMapImage,
 			.newLayout = ImageLayout::GENERAL,
-			.sourceAccess = Access::NONE,
-			.destinationAccess = Access::SHADER_WRITE,
+			.newAccess = Access::SHADER_WRITE,
 		};
 
 		commandEncoder->insertMemoryBarriers({}, {glyphImageMemoryBarrier, glyphMapImageMemoryBarrier});
@@ -290,8 +288,7 @@ namespace Trident {
 		glyphMapImageMemoryBarrier = {
 			.image = glyphMapImage,
 			.newLayout = ImageLayout::TRANSFER_SRC_OPTIMAL,
-			.sourceAccess = Access::SHADER_WRITE,
-			.destinationAccess = Access::TRANSFER_READ,
+			.newAccess = Access::TRANSFER_READ,
 		};
 
 		commandEncoder->insertMemoryBarriers({}, {glyphMapImageMemoryBarrier});
