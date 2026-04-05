@@ -29,7 +29,8 @@ struct Cluster {
 };
 
 struct Instance {
-	float4x4 transform;
+	float4x4 world;
+	float3x3 normal;
 	uint geometryIndex;
 	uint materialShaderIndex;
 	uint materialIndex;
@@ -223,12 +224,9 @@ float2 ndc(float2 coordinate) {
 	return ndc;
 }
 
-// TODO: Fix linear depth values fading too quickly between the near and far planes.
+// See https://pastebin.com/7H4S6Yw3.
 float linearizeDepth(float depth) {
-	float nearPlane = camera.nearPlane;
-	float farPlane = camera.farPlane;
-
-	return nearPlane * farPlane / (farPlane + depth * (nearPlane - farPlane));
+	return (2.0 * camera.nearPlane) / (camera.farPlane + camera.nearPlane - depth * (camera.farPlane - camera.nearPlane));
 }
 
 // See https://pastebin.com/7H4S6Yw3.
@@ -244,7 +242,7 @@ BarycentricDerivatives computePartialDerivatives(float2 a, float2 b, float2 c) {
 
 // `p` is the fragment coordinate in NDC space.
 BarycentricDerivatives computeBarycentricDerivatives(Triangle _triangle, Instance instance, float2 p) {
-	float4x4 projectionViewTransform = mul(camera.projectionView, instance.transform);
+	float4x4 projectionViewTransform = mul(camera.projectionView, instance.world);
 	float4 a = mul(projectionViewTransform, float4(_triangle.vertices[0].position, 1.0));
 	float4 b = mul(projectionViewTransform, float4(_triangle.vertices[1].position, 1.0));
 	float4 c = mul(projectionViewTransform, float4(_triangle.vertices[2].position, 1.0));
@@ -330,15 +328,7 @@ float3 visualizeTriangleNormal(Triangle _triangle, Instance instance) {
 	float3 b = _triangle.vertices[1].position;
 	float3 c = _triangle.vertices[2].position;
 
-	// TODO: Retrieve the normal matrix from the instance.
-	float4x4 T = instance.transform;
-	float3x3 N = transpose(inverse(float3x3(
-		T[0].xyz,
-		T[1].xyz,
-		T[2].xyz
-	)));
-
-	return normalize(mul(N, cross(b - a, c - a)));
+	return normalize(mul(instance.normal, cross(b - a, c - a)));
 }
 
 float3 visualizeBarycentricDerivatives(Triangle _triangle, Instance instance, float2 coordinate) {
@@ -350,15 +340,7 @@ float3 visualizeBarycentricDerivatives(Triangle _triangle, Instance instance, fl
 float3 visualizeVertexNormal(Triangle _triangle, Instance instance, float2 coordinate) {
 	BarycentricDerivatives derivatives = computeBarycentricDerivatives(_triangle, instance, coordinate);
 
-	// TODO: Retrieve the normal matrix from the instance.
-	float4x4 T = instance.transform;
-	float3x3 N = transpose(inverse(float3x3(
-		T[0].xyz,
-		T[1].xyz,
-		T[2].xyz
-	)));
-
-	return normalize(mul(N, interpolate3x3(derivatives, _triangle.vertices[0].normal, _triangle.vertices[1].normal, _triangle.vertices[2].normal)));
+	return normalize(mul(instance.normal, interpolate3x3(derivatives, _triangle.vertices[0].normal, _triangle.vertices[1].normal, _triangle.vertices[2].normal)));
 }
 
 float3 visualizeVertexTextureCoordinate(Triangle _triangle, Instance instance, float2 coordinate) {
@@ -371,7 +353,7 @@ float3 visualizeVertexTextureCoordinate(Triangle _triangle, Instance instance, f
 float3 visualizeFlatShading(Triangle _triangle, Instance instance, float2 coordinate) {
 	BarycentricDerivatives derivatives = computeBarycentricDerivatives(_triangle, instance, coordinate);
 
-	float3 surface = mul(instance.transform, float4(interpolate3x3(derivatives, _triangle.vertices[0].position, _triangle.vertices[1].position, _triangle.vertices[2].position), 1.0)).xyz;
+	float3 surface = mul(instance.world, float4(interpolate3x3(derivatives, _triangle.vertices[0].position, _triangle.vertices[1].position, _triangle.vertices[2].position), 1.0)).xyz;
 	float3 surfaceToCameraDirection = normalize(camera.position - surface);
 	float3 normal = visualizeTriangleNormal(_triangle, instance);
 
@@ -397,7 +379,7 @@ float3 visualizeBlinnPhongShading(Triangle _triangle, Instance instance, float2 
 
 	BarycentricDerivatives derivatives = computeBarycentricDerivatives(_triangle, instance, coordinate);
 
-	float3 surface = mul(instance.transform, float4(interpolate3x3(derivatives, _triangle.vertices[0].position, _triangle.vertices[1].position, _triangle.vertices[2].position), 1.0)).xyz;
+	float3 surface = mul(instance.world, float4(interpolate3x3(derivatives, _triangle.vertices[0].position, _triangle.vertices[1].position, _triangle.vertices[2].position), 1.0)).xyz;
 	float3 normal = visualizeVertexNormal(_triangle, instance, coordinate);
 
 	// Light position towards surface.

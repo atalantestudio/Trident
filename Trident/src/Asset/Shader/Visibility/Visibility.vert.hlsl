@@ -10,7 +10,8 @@ struct Cluster {
 };
 
 struct Instance {
-	float4x4 transform;
+	float4x4 world;
+	float3x3 normal;
 	uint geometryIndex;
 	uint materialShaderIndex;
 	uint materialIndex;
@@ -89,7 +90,7 @@ VertexOutput main(VertexInput input) {
 	float3 vertex = loadVertexPosition(geometry, relativeVertexPositionIndex);
 
 	VertexOutput output;
-	output.position = mul(camera.projectionView, mul(instance.transform, float4(vertex, 1.0)));
+	output.position = mul(camera.projectionView, mul(instance.world, float4(vertex, 1.0)));
 	output.visibility = ((clusterIndex + 1) << TRIANGLE_INDEX_BIT_COUNT) | triangleIndex;
 
 	return output;

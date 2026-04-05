@@ -369,8 +369,8 @@ namespace Trident {
 		cameraMappedRange->viewport = getSwapchain()->getExtent();
 	}
 
-	void VisibilityRenderer::updateInstanceTransform(Entity entity, const mat4x4<float32>& transform) {
-		instanceMappedRange[entity].transform = transform;
+	void VisibilityRenderer::updateInstanceWorld(Entity entity, const mat4x4<float32>& world) {
+		instanceMappedRange[entity].world = world;
 	}
 
 	void VisibilityRenderer::onEvent(Event& event) {

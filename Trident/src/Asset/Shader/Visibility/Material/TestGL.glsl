@@ -22,7 +22,8 @@ struct Cluster {
 };
 
 struct Instance {
-	mat4x4 transform;
+	mat4x4 world;
+	mat3x3 normal;
 	uint geometryIndex;
 	uint materialShaderIndex;
 	uint materialIndex;

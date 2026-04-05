@@ -31,7 +31,8 @@ struct Cluster {
 };
 
 struct Instance {
-	mat4x4 transform;
+	mat4x4 world;
+	mat3x3 normal;
 	uint geometryIndex;
 	uint materialShaderIndex;
 	uint materialIndex;
@@ -96,7 +97,7 @@ const uint VISUALIZATION_MODE_FLAT_SHADING = 10u;
 const uint VISUALIZATION_MODE_BLINN_PHONG_SHADING = 11u;
 
 // TODO: Use a value from a uniform buffer.
-const uint VISUALIZATION_MODE = VISUALIZATION_MODE_BLINN_PHONG_SHADING;
+const uint VISUALIZATION_MODE = VISUALIZATION_MODE_VERTEX_TEXTURE_COORDINATE;
 
 layout(set = 0, binding = 0) uniform readonly CameraBuffer {
 	Camera camera;
@@ -165,19 +166,15 @@ vec2 loadVertexTextureCoordinate(Geometry geometry, uint indexIndex) {
 }
 
 Triangle loadTriangle(uint triangleIndex, Instance instance, Geometry geometry) {
-	// TODO: Is the conversion on instance.clusterOffset correct?
-	uint indexOffset = uint(instance.clusterOffset) * CLUSTER_INDEX_COUNT + triangleIndex * 3u;
+	uint indexOffset = uint(instance.clusterOffset * int(CLUSTER_INDEX_COUNT) + int(triangleIndex) * 3);
 
 	Triangle triangle;
-
 	triangle.vertices[0].position = loadVertexPosition(geometry, indexOffset + 0u);
 	triangle.vertices[1].position = loadVertexPosition(geometry, indexOffset + 1u);
 	triangle.vertices[2].position = loadVertexPosition(geometry, indexOffset + 2u);
-
 	triangle.vertices[0].normal = loadVertexNormal(geometry, indexOffset + 0u);
 	triangle.vertices[1].normal = loadVertexNormal(geometry, indexOffset + 1u);
 	triangle.vertices[2].normal = loadVertexNormal(geometry, indexOffset + 2u);
-
 	triangle.vertices[0].textureCoordinate = loadVertexTextureCoordinate(geometry, indexOffset + 0u);
 	triangle.vertices[1].textureCoordinate = loadVertexTextureCoordinate(geometry, indexOffset + 1u);
 	triangle.vertices[2].textureCoordinate = loadVertexTextureCoordinate(geometry, indexOffset + 2u);
@@ -215,33 +212,25 @@ vec2 ndc(vec2 coordinate) {
 	return ndc;
 }
 
-// TODO: Fix linear depth values fading too quickly between the near and far planes.
+// See https://pastebin.com/7H4S6Yw3.
 float linearizeDepth(float depth) {
-	float nearPlane = camera.nearPlane;
-	float farPlane = camera.farPlane;
-
-	return nearPlane * farPlane / (farPlane + depth * (nearPlane - farPlane));
+	return (2.0 * camera.nearPlane) / (camera.farPlane + camera.nearPlane - depth * (camera.farPlane - camera.nearPlane));
 }
 
 // See https://pastebin.com/7H4S6Yw3.
 BarycentricDerivatives computePartialDerivatives(vec2 a, vec2 b, vec2 c) {
-	float dInverse = 1.0 / determinant(mat2x2(c - b, a - b));
+	float inverseDeterminant = 1.0 / determinant(mat2x2(c - b, a - b));
 
 	BarycentricDerivatives derivatives;
-	derivatives.ddx = vec3(b.y - c.y, c.y - a.y, a.y - b.y) * dInverse;
-	derivatives.ddy = vec3(c.x - b.x, a.x - c.x, b.x - a.x) * dInverse;
+	derivatives.ddx = vec3(b.y - c.y, c.y - a.y, a.y - b.y) * inverseDeterminant;
+	derivatives.ddy = vec3(c.x - b.x, a.x - c.x, b.x - a.x) * inverseDeterminant;
 
 	return derivatives;
 }
 
 // `p` is the fragment coordinate in NDC space.
-BarycentricDerivatives computeBarycentricDerivatives(Triangle triangle, Instance instance, vec2 p) {
-	mat4x4 projectionViewTransform = camera.projectionView * instance.transform;
-	vec4 a = projectionViewTransform * vec4(triangle.vertices[0].position, 1.0);
-	vec4 b = projectionViewTransform * vec4(triangle.vertices[1].position, 1.0);
-	vec4 c = projectionViewTransform * vec4(triangle.vertices[2].position, 1.0);
-
-	vec3 wInverse = 1.0 / vec3(a.w, b.w, c.w);
+BarycentricDerivatives computeBarycentricDerivatives(vec4 a, vec4 b, vec4 c, vec2 p) {
+	vec3 wInverse = vec3(1.0, 1.0, 1.0) / vec3(a.w, b.w, c.w);
 
 	vec2 pA = a.xy * wInverse.x;
 	vec2 pB = b.xy * wInverse.y;
@@ -276,8 +265,18 @@ BarycentricDerivatives computeBarycentricDerivatives(Triangle triangle, Instance
 	return derivatives;
 }
 
+// `p` is the fragment coordinate in NDC space.
+BarycentricDerivatives computeBarycentricDerivatives(Triangle triangle, Instance instance, vec2 p) {
+	mat4x4 projectionViewTransform = camera.projectionView * instance.world;
+	vec4 a = projectionViewTransform * vec4(triangle.vertices[0].position, 1.0);
+	vec4 b = projectionViewTransform * vec4(triangle.vertices[1].position, 1.0);
+	vec4 c = projectionViewTransform * vec4(triangle.vertices[2].position, 1.0);
+
+	return computeBarycentricDerivatives(a, b, c, p);
+}
+
 float interpolate3x1(BarycentricDerivatives derivatives, float a, float b, float c) {
-	return derivatives.lambda.x * a + derivatives.lambda.y * b + derivatives.lambda.z * c;
+	return dot(derivatives.lambda, vec3(a, b, c));
 }
 
 Gradients interpolate3x2(BarycentricDerivatives derivatives, vec2 a, vec2 b, vec2 c) {
@@ -304,11 +303,7 @@ vec3 visualizeTriangleNormal(Triangle triangle, Instance instance) {
 	vec3 b = triangle.vertices[1].position;
 	vec3 c = triangle.vertices[2].position;
 
-	// TODO: Retrieve the normal matrix from the instance.
-	mat4x4 T = instance.transform;
-	mat3x3 N = transpose(inverse(mat3x3(T)));
-
-	return normalize(N * cross(b - a, c - a));
+	return normalize(instance.normal * cross(b - a, c - a));
 }
 
 vec3 visualizeBarycentricDerivatives(Triangle triangle, Instance instance, vec2 coordinate) {
@@ -320,11 +315,7 @@ vec3 visualizeBarycentricDerivatives(Triangle triangle, Instance instance, vec2 
 vec3 visualizeVertexNormal(Triangle triangle, Instance instance, vec2 coordinate) {
 	BarycentricDerivatives derivatives = computeBarycentricDerivatives(triangle, instance, coordinate);
 
-	// TODO: Retrieve the normal matrix from the instance.
-	mat4x4 T = instance.transform;
-	mat3x3 N = transpose(inverse(mat3x3(T)));
-
-	return normalize(N * interpolate3x3(derivatives, triangle.vertices[0].normal, triangle.vertices[1].normal, triangle.vertices[2].normal));
+	return normalize(instance.normal * interpolate3x3(derivatives, triangle.vertices[0].normal, triangle.vertices[1].normal, triangle.vertices[2].normal));
 }
 
 vec3 visualizeVertexTextureCoordinate(Triangle triangle, Instance instance, vec2 coordinate) {
@@ -337,7 +328,7 @@ vec3 visualizeVertexTextureCoordinate(Triangle triangle, Instance instance, vec2
 vec3 visualizeFlatShading(Triangle triangle, Instance instance, vec2 coordinate) {
 	BarycentricDerivatives derivatives = computeBarycentricDerivatives(triangle, instance, coordinate);
 
-	vec3 surface = (instance.transform * vec4(interpolate3x3(derivatives, triangle.vertices[0].position, triangle.vertices[1].position, triangle.vertices[2].position), 1.0)).xyz;
+	vec3 surface = (instance.world * vec4(interpolate3x3(derivatives, triangle.vertices[0].position, triangle.vertices[1].position, triangle.vertices[2].position), 1.0)).xyz;
 	vec3 surfaceToCameraDirection = normalize(camera.position - surface);
 	vec3 normal = visualizeTriangleNormal(triangle, instance);
 
@@ -363,7 +354,7 @@ vec3 visualizeBlinnPhongShading(Triangle triangle, Instance instance, vec2 coord
 
 	BarycentricDerivatives derivatives = computeBarycentricDerivatives(triangle, instance, coordinate);
 
-	vec3 surface = (instance.transform * vec4(interpolate3x3(derivatives, triangle.vertices[0].position, triangle.vertices[1].position, triangle.vertices[2].position), 1.0)).xyz;
+	vec3 surface = (instance.world * vec4(interpolate3x3(derivatives, triangle.vertices[0].position, triangle.vertices[1].position, triangle.vertices[2].position), 1.0)).xyz;
 	vec3 normal = visualizeVertexNormal(triangle, instance, coordinate);
 
 	// Light position towards surface.

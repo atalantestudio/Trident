@@ -9,7 +9,7 @@
 #include "Engine/Renderer/3D/SceneRenderer.hpp"
 
 namespace Trident {
-	// #define ENABLE_VISIBILITY_DEBUG_PASS
+	#define ENABLE_VISIBILITY_DEBUG_PASS
 
 	class VisibilityRenderer : public SceneRenderer<ClusteredScene> {
 		private:
@@ -43,7 +43,7 @@ namespace Trident {
 
 			void updateViewport() const;
 
-			void updateInstanceTransform(Entity entity, const mat4x4<float32>& transform);
+			void updateInstanceWorld(Entity entity, const mat4x4<float32>& world);
 
 			void onEvent(Event& event) override;
 

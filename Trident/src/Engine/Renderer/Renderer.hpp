@@ -39,15 +39,15 @@ namespace Trident {
 			/// Creates and returns a buffer suitable for memory transfers from the CPU to the GPU.
 			template<typename ElementType>
 			static ref<Buffer<ElementType>> createStagingBuffer(uint64 size, bool persistent = false) {
-				BufferDescriptor stagingBufferDescriptor{};
-				stagingBufferDescriptor.size = size;
-				stagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
-				stagingBufferDescriptor.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT;
-				stagingBufferDescriptor.persistent = persistent;
-
-				SET_DEBUG_NAME(stagingBufferDescriptor, "Staging buffer");
-
-				return layerCompositor->device->createBuffer<ElementType>(stagingBufferDescriptor);
+				return layerCompositor->device->createBuffer<ElementType>({
+					.size = size,
+					.usage = BufferUsage::TRANSFER_SRC,
+					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
+					.persistent = persistent,
+					#if defined(BUILD_MODE_DEBUG)
+						.name = "Staging",
+					#endif
+				});
 			}
 
 			static ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor);

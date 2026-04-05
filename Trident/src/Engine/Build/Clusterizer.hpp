@@ -113,11 +113,15 @@ namespace Trident {
 			const ClusteredGeometry& clusteredGeometry = clusteredScene.geometries[instance.geometryIndex];
 
 			ClusteredInstance& clusteredInstance = clusteredScene.instances[instanceIndex];
-			clusteredInstance.transform = instance.transform;
+			clusteredInstance.world = instance.transform;
+			clusteredInstance.normal = transpose(inverse(mat3x3<float32>(
+				instance.transform[0][0], instance.transform[0][1], instance.transform[0][2],
+				instance.transform[1][0], instance.transform[1][1], instance.transform[1][2],
+				instance.transform[2][0], instance.transform[2][1], instance.transform[2][2]
+			)));
 			clusteredInstance.geometryIndex = instance.geometryIndex;
 			clusteredInstance.materialShaderIndex = scene.getMaterialShaderIndex(instance.materialIndex);
 			clusteredInstance.materialIndex = instance.materialIndex;
-
 			clusteredInstance.clusterOffset = clusteredGeometry.clusterOffset - clusterOffset;
 
 			clusterIndex = 0;

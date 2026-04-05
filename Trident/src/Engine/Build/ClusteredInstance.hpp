@@ -5,7 +5,8 @@
 
 namespace Trident {
 	struct ClusteredInstance {
-		mat4x4<float32> transform;
+		mat4x4<float32> world;
+		mat3x3<float32> normal;
 		uint32 geometryIndex;
 		uint32 materialShaderIndex;
 		uint32 materialIndex;
