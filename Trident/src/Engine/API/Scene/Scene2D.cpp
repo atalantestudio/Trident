@@ -38,6 +38,9 @@ namespace Trident {
 				.vertexPositionComponents = geometryAsset->getVertexPositionComponents(),
 				.vertexTextureCoordinateComponents = geometryAsset->getVertexTextureCoordinateComponents(),
 				.indices = geometryAsset->getVertexPositionIndices(),
+
+				// TODO: Provide correct offset.
+				.indexOffset = 0,
 			});
 
 			dynamicVertexCount += geometries[geometryIndex].getVertexCount();
@@ -46,7 +49,8 @@ namespace Trident {
 			geometryIndex += 1;
 		}
 
-		dataBuffer = sequence<uint8>((staticVertexCount + dynamicVertexCount) * 4 * sizeof(float32) + (staticIndexCount + dynamicIndexCount) * sizeof(uint32));
+		// TODO: Restore texture coordinates.
+		dataBuffer = sequence<uint8>((staticVertexCount + dynamicVertexCount) * /* 4 */ 2 * sizeof(float32) + (staticIndexCount + dynamicIndexCount) * sizeof(uint32));
 
 		uint64 dataOffset = 0;
 
@@ -66,7 +70,8 @@ namespace Trident {
 			geometryIndex += 1;
 		}
 
-		geometryIndex = 0;
+		// TODO: Restore texture coordinates.
+		/* geometryIndex = 0;
 
 		while (geometryIndex < geometries.count()) {
 			const Geometry2D& geometry = geometries[geometryIndex];
@@ -76,7 +81,7 @@ namespace Trident {
 
 			dataOffset += vertexTextureCoordinateComponents.count() * sizeof(float32);
 			geometryIndex += 1;
-		}
+		} */
 
 		geometryIndex = 0;
 
@@ -124,6 +129,7 @@ namespace Trident {
 			ecs.setComponent<RigidBody2DComponent>(rigidBodyMapping.entity, rigidBodyMapping.component);
 
 			// TODO(debug-only)
+			ecs.getComponent<RigidBody2DComponent>(rigidBodyMapping.entity).updateTransform({0.0f, 0.0f});
 			ecs.setTag<DynamicEntityTag>(entity);
 		}
 	}

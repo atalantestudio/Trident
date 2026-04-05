@@ -32,13 +32,12 @@ namespace Trident {
 		// NOTE: For this example the vertices on the hull are the same as the geometry.
 		hullHeader.vertexCount = 0;
 
-		hullHeader.fillIndexCount = static_cast<uint32>(hull.getFillIndices().count());
 		hullHeader.lineIndexCount = static_cast<uint32>(hull.getLineIndices().count());
 
 		const uint64 size =
 			sizeof(geometryHeader) +
-			geometry.getVertexPositionComponents().count() * sizeof(float32) +
-			geometry.getVertexTextureCoordinateComponents().count() * sizeof(float32) +
+			geometry.getVertexCount() * 4 * sizeof(float32) +
+			geometry.getIndexCount() * sizeof(uint32) +
 			sizeof(hullHeader);
 
 		ByteStream<StreamOperation::WRITE> stream(size, Endianness::LITTLE_ENDIAN);
@@ -54,6 +53,10 @@ namespace Trident {
 		std::copy(geometry.getVertexTextureCoordinateComponents().begin(), geometry.getVertexTextureCoordinateComponents().end(), pointer_cast<float32*>(stream.getBytePosition()));
 
 		stream.jump(geometry.getVertexCount() * 2 * sizeof(float32));
+
+		std::copy(geometry.getIndices().begin(), geometry.getIndices().end(), pointer_cast<uint32*>(stream.getBytePosition()));
+
+		stream.jump(geometry.getIndexCount() * sizeof(uint32));
 
 		std::copy_n(pointer_cast<const uint8*>(&hullHeader), sizeof(hullHeader), stream.getBytePosition());
 

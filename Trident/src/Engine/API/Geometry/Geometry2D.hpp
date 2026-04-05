@@ -13,6 +13,7 @@ namespace Trident {
 		sequence<float32> vertexPositionComponents;
 		sequence<float32> vertexTextureCoordinateComponents;
 		sequence<uint32> indices;
+		uint32 indexOffset;
 	};
 
 	class Geometry2D {
@@ -40,7 +41,8 @@ namespace Trident {
 			explicit Geometry2D(const Descriptor<Geometry2D>& descriptor) :
 				vertexPositionComponents(descriptor.vertexPositionComponents),
 				vertexTextureCoordinateComponents(descriptor.vertexTextureCoordinateComponents),
-				indices(descriptor.indices)
+				indices(descriptor.indices),
+				indexOffset(descriptor.indexOffset)
 			{}
 
 			inline uint32 getVertexCount() const {
@@ -55,6 +57,14 @@ namespace Trident {
 				return vertexTextureCoordinateComponents;
 			}
 
+			inline uint32 getIndexOffset() const {
+				return indexOffset;
+			}
+
+			inline uint32 getIndexCount() const {
+				return static_cast<uint32>(indices.count());
+			}
+
 			inline const sequence<uint32>& getIndices() const {
 				return indices;
 			}
@@ -66,6 +76,8 @@ namespace Trident {
 		private:
 			sequence<float32> vertexPositionComponents;
 			sequence<float32> vertexTextureCoordinateComponents;
+
+			uint32 indexOffset;
 
 			/// Indices for the default (TRIANGLE_LIST) visualization mode.
 			sequence<uint32> indices;

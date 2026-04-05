@@ -35,7 +35,7 @@ namespace Trident {
 			.centroid = {0.0_m, 0.0_m},
 			.radius = radius,
 			.vertices = {},
-			.fillIndices = {},
+			.edgeCount = static_cast<uint32>(geometry.getIndices().count()) / 3 * 2,
 		});
 	}
 
@@ -68,7 +68,7 @@ namespace Trident {
 			.centroid = {centroid[0], centroid[1]},
 			.radius = radius,
 			.vertices = vertices,
-			.fillIndices = geometry.getIndices(),
+			.edgeCount = static_cast<uint32>(geometry.getIndices().count()) / 3 * 2,
 		});
 	}
 
@@ -77,9 +77,8 @@ namespace Trident {
 		centroid(descriptor.centroid),
 		radius(descriptor.radius),
 		vertices(descriptor.vertices),
-		fillIndices(descriptor.fillIndices),
 		lineIndices(descriptor.vertices.count() + 1),
-		edges(descriptor.fillIndices.count() / 3 * 2)
+		edges(descriptor.edgeCount)
 	{
 		uint32 vertexIndex = 0;
 

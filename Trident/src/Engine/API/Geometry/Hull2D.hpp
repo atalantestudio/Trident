@@ -23,7 +23,7 @@ namespace Trident {
 		// However polygon hulls may have vertices that don't appear on the geometry (e.g. an AABB hull wrapping a cylinder geometry such as a glass).
 		view<svec2<float32>> vertices;
 
-		sequence<uint32> fillIndices;
+		uint32 edgeCount;
 	};
 
 	class Hull2D {
@@ -62,16 +62,8 @@ namespace Trident {
 				return indexOffset;
 			}
 
-			inline view<uint32> getFillIndices() const {
-				return fillIndices;
-			}
-
 			inline const sequence<uint16>& getLineIndices() const {
 				return lineIndices;
-			}
-
-			inline uint16 getFillIndexCount() const {
-				return fillIndexCount;
 			}
 
 			inline uint16 getLineIndexCount() const {
@@ -195,9 +187,7 @@ namespace Trident {
 			view<svec2<float32>> vertices;
 
 			uint32 indexOffset;
-			view<uint32> fillIndices;
 			sequence<uint16> lineIndices;
-			uint16 fillIndexCount;
 			uint16 lineIndexCount;
 
 			// TODO: Store the geometry edges in a shared contiguous buffer.

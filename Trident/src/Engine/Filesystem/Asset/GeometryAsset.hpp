@@ -22,6 +22,10 @@ namespace Trident {
 		sequence<uint32> vertexPositionIndices;
 		sequence<uint32> vertexNormalIndices;
 		sequence<uint32> vertexTextureCoordinateIndices;
+
+		bool hasHull;
+		svec3<float32> hullCentroid;
+		float32 hullRadius;
 	};
 
 	struct Geometry2DAssetHeader : public AssetHeader {
@@ -40,11 +44,10 @@ namespace Trident {
 		float32 radius;
 
 		uint32 vertexCount;
-		uint16 fillIndexCount;
 
 		/// In 2D, the wireframe is rendered with the `LINE_STRIP` topology.
 		/// In 3D, it is rendered with the `LINE_LIST` topology.
-		/// Geometries are not guaranteed to support wireframe rendering.
+		/// Geometry hulls are not guaranteed to support wireframe rendering.
 		uint16 lineIndexCount;
 	};
 

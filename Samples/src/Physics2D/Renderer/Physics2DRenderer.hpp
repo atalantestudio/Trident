@@ -197,7 +197,7 @@ namespace Trident {
 			#endif
 
 			ref<Buffer<Vertex>> vertexBuffer;
-			ref<Buffer<uint16>> indexBuffer;
+			ref<Buffer<uint32>> indexBuffer;
 			ref<Buffer<RigidBody>> rigidBodyBuffer;
 			ref<Buffer<CenterOfMass>> centerOfMassBuffer;
 

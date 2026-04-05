@@ -966,8 +966,8 @@ namespace Trident {
 			#endif
 		});
 
-		indexBuffer = createBuffer<uint16>({
-			.size = (scene->getStaticIndexCount() + scene->getDynamicIndexCount()) * sizeof(uint16),
+		indexBuffer = createBuffer<uint32>({
+			.size = (scene->getStaticIndexCount() + scene->getDynamicIndexCount()) * sizeof(uint32),
 			.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
@@ -1031,7 +1031,9 @@ namespace Trident {
 			},
 		});
 
-		transferQueue->submit({commandEncoder->end()});
+		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+		transferQueue->submit({commandBuffer});
 		transferQueue->waitIdle();
 	}
 
@@ -1220,17 +1222,16 @@ namespace Trident {
 			commandEncoder->bindGraphicsPipeline(rigidBodyFillPipeline);
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, scene->getStaticVertexCount() * sizeof(Vertex), sizeof(Vertex));
 			commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0, sizeof(RigidBody));
-			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, scene->getStaticIndexCount() * sizeof(uint16));
+			commandEncoder->bindIndexBuffer<uint32>(indexBuffer, scene->getStaticIndexCount() * sizeof(uint32));
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, {cameraViewDescriptorSet});
 
 			while (componentIndex < geometryComponentPool.componentCount) {
 				const Entity entity = geometryComponentPool.componentIndexToEntity[componentIndex];
 				const GeometryComponent geometryComponent = geometryComponentPool.components[componentIndex];
 				const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
-				const Hull2D& hull = scene->getHulls()[geometry.getHullIndex()];
 
 				// TODO: Restore materials.
-				commandEncoder->drawIndexed(hull.getFillIndexCount(), 1, hull.getIndexOffset(), 0, entity);
+				commandEncoder->drawIndexed(geometry.getIndexCount(), 1, geometry.getIndexOffset(), 0, entity);
 
 				componentIndex += 1;
 			}
@@ -1239,11 +1240,12 @@ namespace Trident {
 		componentIndex = 0;
 
 		// Rigid body stroke
-		{
+		// TODO: Restore.
+		/* {
 			commandEncoder->bindGraphicsPipeline(rigidBodyStrokePipeline);
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, scene->getStaticVertexCount() * sizeof(Vertex), sizeof(Vertex));
 			commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0, sizeof(RigidBody));
-			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, scene->getStaticIndexCount() * sizeof(uint16));
+			commandEncoder->bindIndexBuffer<uint32>(indexBuffer, scene->getStaticIndexCount() * sizeof(uint32));
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, {cameraViewDescriptorSet});
 
 			while (componentIndex < geometryComponentPool.componentCount) {
@@ -1257,7 +1259,7 @@ namespace Trident {
 
 				componentIndex += 1;
 			}
-		}
+		} */
 
 		const ComponentPool<RigidBody2DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
 
@@ -1282,7 +1284,6 @@ namespace Trident {
 		if (selectedEntity != max<Entity>()) {
 			const GeometryComponent geometryComponent = scene->ecs.getComponent<GeometryComponent>(selectedEntity);
 			const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
-			const Hull2D& hull = scene->getHulls()[geometry.getHullIndex()];
 
 			// Rigid body placeholder center of mass
 			{
@@ -1297,20 +1298,23 @@ namespace Trident {
 				commandEncoder->bindGraphicsPipeline(rigidBodyPlaceholderFillPipeline);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, scene->getStaticVertexCount() * sizeof(Vertex), sizeof(Vertex));
 				commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0, sizeof(RigidBody));
-				commandEncoder->bindIndexBuffer<uint16>(indexBuffer, scene->getStaticIndexCount() * sizeof(uint16));
+				commandEncoder->bindIndexBuffer<uint32>(indexBuffer, scene->getStaticIndexCount() * sizeof(uint32));
 				commandEncoder->bindDescriptorSets(placeholderPipelineLayout, 0, {cameraViewDescriptorSet, placeholderDescriptorSet});
-				commandEncoder->drawIndexed(hull.getFillIndexCount(), 1, hull.getIndexOffset(), 0, selectedEntity);
+				commandEncoder->drawIndexed(geometry.getIndexCount(), 1, geometry.getIndexOffset(), 0, selectedEntity);
 			}
 
 			// Rigid body placeholder stroke
-			{
+			// TODO: Restore.
+			/* {
+				const Hull2D& hull = scene->getHulls()[geometry.getHullIndex()];
+
 				commandEncoder->bindGraphicsPipeline(rigidBodyPlaceholderStrokePipeline);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, scene->getStaticVertexCount() * sizeof(Vertex), sizeof(Vertex));
 				commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0, sizeof(RigidBody));
-				commandEncoder->bindIndexBuffer<uint16>(indexBuffer, scene->getStaticIndexCount() * sizeof(uint16));
+				commandEncoder->bindIndexBuffer<uint32>(indexBuffer, scene->getStaticIndexCount() * sizeof(uint32));
 				commandEncoder->bindDescriptorSets(placeholderPipelineLayout, 0, {cameraViewDescriptorSet, placeholderDescriptorSet});
 				commandEncoder->drawIndexed(hull.getLineIndexCount(), 1, hull.getIndexOffset() + hull.getFillIndexCount(), 0, selectedEntity);
-			}
+			} */
 		}
 
 		commandEncoder->endRenderPass();

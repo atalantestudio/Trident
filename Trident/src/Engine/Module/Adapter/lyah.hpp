@@ -4,8 +4,6 @@
 #pragma once
 
 namespace lyah {
-	// TODO: Use static arrays instead of class as polyfills.
-
 	// vec<2, sint32> polyfill.
 	template<>
 	struct lyah::vec<2, std::int32_t> {
@@ -151,7 +149,7 @@ namespace Trident {
 			x(x), y(y)
 		{}
 
-		// TODO: Remove once Lyah supports scalar vector math.
+		// TODO(lyah): Remove once Lyah supports scalar vector math.
 		constexpr explicit svec(vec<2, T> a) :
 			x(a[0]),
 			y(a[1])
@@ -169,8 +167,7 @@ namespace Trident {
 			return pointer_cast<T*>(this)[index];
 		}
 
-		// TODO(lyah)
-		// Add scalar vectors and replace SIMD vectors by general-purpose registers.
+		// TODO(lyah): Add scalar vectors and replace SIMD vectors by general-purpose registers.
 		operator vec<2, T>() const {
 			return {x, y};
 		}
@@ -183,7 +180,7 @@ namespace Trident {
 		T z;
 
 		constexpr svec() :
-			x(static_cast<T>(0)), y(static_cast<T>(0)), y(static_cast<T>(0))
+			x(static_cast<T>(0)), y(static_cast<T>(0)), z(static_cast<T>(0))
 		{}
 
 		constexpr svec(T x, T y, T z) :
@@ -337,7 +334,8 @@ namespace Trident {
 	using lyah::tau;
 	using lyah::transpose;
 
-	// TODO: Access the vertices using the indices provided by the geometry.
+	// TODO
+	// Access the vertices using the indices provided by the geometry.
 	// Returns the absolute area of a 2D polygon defined by a sequence of vertices.
 	// See https://stackoverflow.com/a/717367/17136841.
 	template<typename T>
@@ -367,11 +365,6 @@ namespace Trident {
 	lyah::vec<2, T> cross2d(const lyah::vec<2, T>& a, const lyah::vec<2, T>& b, const lyah::vec<2, T>& c) {
 		const lyah::vec<2, T> b_c = {b[0] * c[1], b[1] * c[0]};
 
-		// TODO: Check if this function is correct.
-		/* return {
-			a.y * (b.x * c.y - b.y * c.x),
-			a.x * (b.y * c.x - b.x * c.y),
-		} */
 		return {
 			a[1] * (b_c[0] - b_c[1]),
 			a[0] * (b_c[1] - b_c[0]),

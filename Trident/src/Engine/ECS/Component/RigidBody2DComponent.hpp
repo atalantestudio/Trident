@@ -33,9 +33,9 @@ namespace Trident {
 
 		// TODO: Use svec2<float32> instead.
 		// NOTE: This isn't meant to be dynamically updated.
-		vec2<float32> scale;
+		vec2<float32> scale = {1.0f, 1.0f};
 
-		mat3x3<float32> transform;
+		mat3x3<float32> transform = mat3x3<float32>::identity();
 
 		// TODO: Use svec2<float32> instead.
 		vec2<float32> linearVelocity;

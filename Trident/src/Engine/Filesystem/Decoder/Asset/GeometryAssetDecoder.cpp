@@ -38,7 +38,12 @@ namespace Trident {
 			stream.jump(descriptor.vertexPositionIndices.count() * sizeof(uint32));
 
 			if (flags & GeometryAssetFlags::HAS_HULL) {
-				// TODO: Decode hull data.
+				descriptor.hasHull = true;
+
+				const svec2<float32> centroid = stream.read<svec2<float32>>();
+
+				descriptor.hullCentroid = {centroid[0], centroid[1], 0.0f};
+				descriptor.hullRadius = stream.read<float32>();
 			}
 
 			return createRef<GeometryAsset>(descriptor);
