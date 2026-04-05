@@ -24,6 +24,7 @@ struct Hit {
 	float t1;
 };
 
+// TODO: Store the inverse projection matrix in Camera.
 // See https://gist.github.com/mattatz/86fff4b32d198d0928d0fa4ff32cf6fa.
 float4x4 inverse(float4x4 m) {
     float n11 = m[0][0], n12 = m[1][0], n13 = m[2][0], n14 = m[3][0];
@@ -93,7 +94,7 @@ cbuffer Camera : register(b0) {
 
 StructuredBuffer<uint> materialCoordinateBuffer : register(t0);
 RWTexture2D<float4> outputImage : register(u0);
-StructuredBuffer<uint> materialOffsetBuffer : register(t4);
+StructuredBuffer<uint> materialOffsetBuffer : register(t11);
 
 float3 calculateRayDirection(uint2 screenCoordinate) {
 	float2 normalizedDeviceCoordinate = float2(screenCoordinate) / camera.viewport * 2.0 - 1.0;

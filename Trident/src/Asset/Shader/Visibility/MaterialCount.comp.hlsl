@@ -15,7 +15,7 @@ struct Cluster {
 
 struct Instance {
 	float4x4 world;
-	float3x3 normal;
+	float3x4 normal;
 	uint geometryIndex;
 	uint materialShaderIndex;
 	uint materialIndex;

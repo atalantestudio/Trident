@@ -6,7 +6,6 @@
 const uint CLUSTER_TRIANGLE_COUNT = 128;
 const uint CLUSTER_INDEX_COUNT = CLUSTER_TRIANGLE_COUNT * 3;
 const uint TRIANGLE_INDEX_BIT_COUNT = 7;
-const uint VERTEX_POSITION_STRIDE = 3;
 
 struct Camera {
 	mat4x4 projectionView;
@@ -27,6 +26,7 @@ struct Instance {
 
 struct Geometry {
 	uint vertexOffset;
+	uint vertexTextureCoordinateOffset;
 	uint clusterCount;
 };
 
@@ -54,7 +54,7 @@ out VertexOutput {
 } vertexOutput;
 
 vec3 loadVertexPosition(uint index, Geometry geometry) {
-	uint offset = (geometry.vertexOffset + index) * VERTEX_POSITION_STRIDE;
+	uint offset = (geometry.vertexOffset + index) * 3;
 
 	float x = vertexPositionComponentBuffer[offset + 0];
 	float y = vertexPositionComponentBuffer[offset + 1];

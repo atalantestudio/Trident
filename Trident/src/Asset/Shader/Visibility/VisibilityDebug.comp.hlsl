@@ -30,7 +30,7 @@ struct Cluster {
 
 struct Instance {
 	float4x4 world;
-	float3x3 normal;
+	float3x4 normal;
 	uint geometryIndex;
 	uint materialShaderIndex;
 	uint materialIndex;
@@ -39,6 +39,7 @@ struct Instance {
 
 struct Geometry {
 	uint vertexOffset;
+	uint vertexTextureCoordinateOffset;
 	uint clusterCount;
 };
 
@@ -95,7 +96,7 @@ static const uint VISUALIZATION_MODE_FLAT_SHADING = 10;
 static const uint VISUALIZATION_MODE_BLINN_PHONG_SHADING = 11;
 
 // TODO: Use specialization constant.
-static const uint VISUALIZATION_MODE = VISUALIZATION_MODE_MATERIAL_INDEX;
+static const uint VISUALIZATION_MODE = VISUALIZATION_MODE_TRIANGLE_INDEX;
 
 cbuffer CameraBuffer : register(b0) {
 	Camera camera;
@@ -115,20 +116,17 @@ StructuredBuffer<Instance> instanceBuffer : register(t12);
 ByteAddressBuffer geometryBuffer : register(t13);
 
 Cluster loadCluster(uint clusterIndex) {
-	static const uint stride = 4;
-
 	Cluster cluster;
-	cluster.instanceIndex = clusterBuffer.Load(clusterIndex * stride);
+	cluster.instanceIndex = clusterBuffer.Load(clusterIndex * 4);
 
 	return cluster;
 }
 
 Geometry loadGeometry(uint geometryIndex) {
-	static const uint stride = 8;
-
 	Geometry geometry;
-	geometry.vertexOffset = geometryBuffer.Load(geometryIndex * stride + 0);
-	geometry.clusterCount = geometryBuffer.Load(geometryIndex * stride + 4);
+	geometry.vertexOffset = geometryBuffer.Load(geometryIndex * 12 + 0);
+	geometry.vertexTextureCoordinateOffset = geometryBuffer.Load(geometryIndex * 12 + 4);
+	geometry.clusterCount = geometryBuffer.Load(geometryIndex * 12 + 8);
 
 	return geometry;
 }
@@ -169,7 +167,7 @@ float3 loadVertexNormal(uint indexIndex, Geometry geometry) {
 
 float2 loadVertexTextureCoordinate(uint indexIndex, Geometry geometry) {
 	uint index = vertexTextureCoordinateIndexBuffer.Load(indexIndex * 4);
-	uint offset = (geometry.vertexOffset + index) * 2;
+	uint offset = (geometry.vertexTextureCoordinateOffset + index) * 2;
 
 	return asfloat(vertexTextureCoordinateComponentBuffer.Load2(offset * 4));
 }
@@ -178,15 +176,12 @@ Triangle loadTriangle(uint triangleIndex, Instance instance, Geometry geometry) 
 	uint indexOffset = instance.clusterOffset * CLUSTER_INDEX_COUNT + triangleIndex * 3;
 
 	Triangle _triangle;
-
 	_triangle.vertices[0].position = loadVertexPosition(indexOffset + 0, geometry);
 	_triangle.vertices[1].position = loadVertexPosition(indexOffset + 1, geometry);
 	_triangle.vertices[2].position = loadVertexPosition(indexOffset + 2, geometry);
-
 	_triangle.vertices[0].normal = loadVertexNormal(indexOffset + 0, geometry);
 	_triangle.vertices[1].normal = loadVertexNormal(indexOffset + 1, geometry);
 	_triangle.vertices[2].normal = loadVertexNormal(indexOffset + 2, geometry);
-
 	_triangle.vertices[0].textureCoordinate = loadVertexTextureCoordinate(indexOffset + 0, geometry);
 	_triangle.vertices[1].textureCoordinate = loadVertexTextureCoordinate(indexOffset + 1, geometry);
 	_triangle.vertices[2].textureCoordinate = loadVertexTextureCoordinate(indexOffset + 2, geometry);
@@ -195,26 +190,19 @@ Triangle loadTriangle(uint triangleIndex, Instance instance, Geometry geometry) 
 }
 
 uint murmurMix(uint hash) {
-	uint value = hash;
-	value ^= value >> 16;
-	value *= 0x85ebca6b;
-	value ^= value >> 13;
-	value *= 0xc2b2ae35;
-	value ^= value >> 16;
+	hash ^= hash >> 16;
+	hash *= 0x85ebca6b;
+	hash ^= hash >> 13;
+	hash *= 0xc2b2ae35;
+	hash ^= hash >> 16;
 
-	return value;
+	return hash;
 }
 
 float3 uintToColor(uint value) {
 	uint hash = murmurMix(value);
 
-	float3 color = float3(
-		float((hash >> 0) & 255),
-		float((hash >> 8) & 255),
-		float((hash >> 16) & 255)
-	);
-
-	return color / 255.0;
+	return float3(float(hash & 255), float((hash >> 8) & 255), float((hash >> 16) & 255)) / 255.0;
 }
 
 float2 ndc(float2 coordinate) {
@@ -258,8 +246,8 @@ BarycentricDerivatives computeBarycentricDerivatives(Triangle _triangle, Instanc
 	derivatives.ddx *= wInverse;
 	derivatives.ddy *= wInverse;
 
-	float ddxSum = dot(derivatives.ddx, float3(1.0, 1.0, 1.0));
-	float ddySum = dot(derivatives.ddy, float3(1.0, 1.0, 1.0));
+	float ddxSum = derivatives.ddx.x + derivatives.ddx.y + derivatives.ddx.z;
+	float ddySum = derivatives.ddy.x + derivatives.ddy.y + derivatives.ddy.z;
 
 	float2 delta = p - pA;
 	float interpInvW = wInverse.x + delta.x * ddxSum + delta.y * ddySum;
@@ -328,7 +316,7 @@ float3 visualizeTriangleNormal(Triangle _triangle, Instance instance) {
 	float3 b = _triangle.vertices[1].position;
 	float3 c = _triangle.vertices[2].position;
 
-	return normalize(mul(instance.normal, cross(b - a, c - a)));
+	return normalize(mul((float3x3) instance.normal, cross(b - a, c - a)));
 }
 
 float3 visualizeBarycentricDerivatives(Triangle _triangle, Instance instance, float2 coordinate) {
@@ -340,7 +328,7 @@ float3 visualizeBarycentricDerivatives(Triangle _triangle, Instance instance, fl
 float3 visualizeVertexNormal(Triangle _triangle, Instance instance, float2 coordinate) {
 	BarycentricDerivatives derivatives = computeBarycentricDerivatives(_triangle, instance, coordinate);
 
-	return normalize(mul(instance.normal, interpolate3x3(derivatives, _triangle.vertices[0].normal, _triangle.vertices[1].normal, _triangle.vertices[2].normal)));
+	return normalize(mul((float3x3) instance.normal, interpolate3x3(derivatives, _triangle.vertices[0].normal, _triangle.vertices[1].normal, _triangle.vertices[2].normal)));
 }
 
 float3 visualizeVertexTextureCoordinate(Triangle _triangle, Instance instance, float2 coordinate) {

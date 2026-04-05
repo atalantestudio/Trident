@@ -11,7 +11,7 @@ struct Cluster {
 
 struct Instance {
 	float4x4 world;
-	float3x3 normal;
+	float3x4 normal;
 	uint geometryIndex;
 	uint materialShaderIndex;
 	uint materialIndex;
@@ -20,6 +20,7 @@ struct Instance {
 
 struct Geometry {
 	uint vertexOffset;
+	uint vertexTextureCoordinateOffset;
 	uint clusterCount;
 };
 
@@ -36,7 +37,6 @@ struct VertexOutput {
 static const uint CLUSTER_TRIANGLE_COUNT = 128;
 static const uint CLUSTER_INDEX_COUNT = CLUSTER_TRIANGLE_COUNT * 3;
 static const uint TRIANGLE_INDEX_BIT_COUNT = 7;
-static const uint VERTEX_POSITION_STRIDE = 3;
 
 cbuffer CameraBuffer : register(b0) {
 	Camera camera;
@@ -52,26 +52,23 @@ StructuredBuffer<Instance> instanceBuffer : register(t3);
 ByteAddressBuffer geometryBuffer : register(t4);
 
 Cluster loadCluster(uint clusterIndex) {
-	static const uint stride = 4;
-
 	Cluster cluster;
-	cluster.instanceIndex = clusterBuffer.Load(clusterIndex * stride);
+	cluster.instanceIndex = clusterBuffer.Load(clusterIndex * 4);
 
 	return cluster;
 }
 
 Geometry loadGeometry(uint geometryIndex) {
-	static const uint stride = 8;
-
 	Geometry geometry;
-	geometry.vertexOffset = geometryBuffer.Load(geometryIndex * stride + 0);
-	geometry.clusterCount = geometryBuffer.Load(geometryIndex * stride + 4);
+	geometry.vertexOffset = geometryBuffer.Load(geometryIndex * 12 + 0);
+	geometry.vertexTextureCoordinateOffset = geometryBuffer.Load(geometryIndex * 12 + 4);
+	geometry.clusterCount = geometryBuffer.Load(geometryIndex * 12 + 8);
 
 	return geometry;
 }
 
 float3 loadVertexPosition(Geometry geometry, uint index) {
-	uint offset = (geometry.vertexOffset + index) * VERTEX_POSITION_STRIDE;
+	uint offset = (geometry.vertexOffset + index) * 3;
 
 	return asfloat(vertexPositionComponentBuffer.Load3(offset * 4));
 }

@@ -152,6 +152,7 @@ namespace Trident {
 
 		while (geometryIndex < scene->geometries.count()) {
 			geometryMappedRange[geometryIndex].vertexOffset = scene->geometries[geometryIndex].vertexOffset;
+			geometryMappedRange[geometryIndex].vertexTextureCoordinateOffset = scene->geometries[geometryIndex].vertexTextureCoordinateOffset;
 			geometryMappedRange[geometryIndex].clusterCount = scene->geometries[geometryIndex].clusterCount;
 
 			geometryIndex += 1;
@@ -255,8 +256,8 @@ namespace Trident {
 			{
 				const ImageMemoryBarrier depthStencilImageMemoryBarrier = {
 					.image = depthStencilImage,
-					.newLayout = ImageLayout::DEPTH_STENCIL_READ_ONLY_OPTIMAL,
-					.newAccess = Access::NONE,
+					.newLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+					.newAccess = Access::SHADER_READ,
 				};
 
 				commandEncoder->insertMemoryBarriers({}, {visibilityImageMemoryBarrier, depthStencilImageMemoryBarrier});
@@ -455,39 +456,31 @@ namespace Trident {
 			.offset = 0,
 			.size = vertexPositionComponentRegionSize,
 		};
-
-		#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
-			const DescriptorBuffer vertexNormalComponentDescriptorBuffer = {
-				.buffer = dataBuffer,
-				.offset = vertexPositionComponentRegionSize,
-				.size = vertexNormalComponentRegionSize,
-			};
-			const DescriptorBuffer vertexTextureCoordinateComponentDescriptorBuffer = {
-				.buffer = dataBuffer,
-				.offset = vertexPositionComponentRegionSize + vertexNormalComponentRegionSize,
-				.size = vertexTextureCoordinateComponentRegionSize,
-			};
-		#endif
-
+		const DescriptorBuffer vertexNormalComponentDescriptorBuffer = {
+			.buffer = dataBuffer,
+			.offset = vertexPositionComponentRegionSize,
+			.size = vertexNormalComponentRegionSize,
+		};
+		const DescriptorBuffer vertexTextureCoordinateComponentDescriptorBuffer = {
+			.buffer = dataBuffer,
+			.offset = vertexPositionComponentRegionSize + vertexNormalComponentRegionSize,
+			.size = vertexTextureCoordinateComponentRegionSize,
+		};
 		const DescriptorBuffer vertexPositionIndexDescriptorBuffer = {
 			.buffer = dataBuffer,
 			.offset = vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize,
 			.size = vertexPositionIndexRegionSize,
 		};
-
-		#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
-			const DescriptorBuffer vertexNormalIndexDescriptorBuffer = {
-				.buffer = dataBuffer,
-				.offset = vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize + vertexPositionIndexRegionSize,
-				.size = vertexNormalIndexRegionSize,
-			};
-			const DescriptorBuffer vertexTextureCoordinateIndexDescriptorBuffer = {
-				.buffer = dataBuffer,
-				.offset = vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize + vertexPositionIndexRegionSize + vertexNormalIndexRegionSize,
-				.size = vertexTextureCoordinateIndexRegionSize,
-			};
-		#endif
-
+		const DescriptorBuffer vertexNormalIndexDescriptorBuffer = {
+			.buffer = dataBuffer,
+			.offset = vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize + vertexPositionIndexRegionSize,
+			.size = vertexNormalIndexRegionSize,
+		};
+		const DescriptorBuffer vertexTextureCoordinateIndexDescriptorBuffer = {
+			.buffer = dataBuffer,
+			.offset = vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize + vertexPositionIndexRegionSize + vertexNormalIndexRegionSize,
+			.size = vertexTextureCoordinateIndexRegionSize,
+		};
 		const DescriptorBuffer clusterDescriptorBuffer = {
 			.buffer = dataBuffer,
 			.offset = vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize + vertexPositionIndexRegionSize + vertexNormalIndexRegionSize + vertexTextureCoordinateIndexRegionSize,
@@ -575,37 +568,31 @@ namespace Trident {
 				.bindingIndex = 0,
 				.descriptorBuffers = {cameraDescriptorBuffer},
 			};
-
 			const WriteDescriptorSet visibilityDebugVertexPositionComponentWriteDescriptorSet = {
 				.descriptorSet = visibilityDebugDescriptorSet,
 				.bindingIndex = 3,
 				.descriptorBuffers = {vertexPositionComponentDescriptorBuffer},
 			};
-
 			const WriteDescriptorSet visibilityDebugVertexNormalComponentWriteDescriptorSet = {
 				.descriptorSet = visibilityDebugDescriptorSet,
 				.bindingIndex = 4,
 				.descriptorBuffers = {vertexNormalComponentDescriptorBuffer},
 			};
-
 			const WriteDescriptorSet visibilityDebugVertexTextureCoordinateComponentWriteDescriptorSet = {
 				.descriptorSet = visibilityDebugDescriptorSet,
 				.bindingIndex = 5,
 				.descriptorBuffers = {vertexTextureCoordinateComponentDescriptorBuffer},
 			};
-
 			const WriteDescriptorSet visibilityDebugVertexPositionIndexWriteDescriptorSet = {
 				.descriptorSet = visibilityDebugDescriptorSet,
 				.bindingIndex = 6,
 				.descriptorBuffers = {vertexPositionIndexDescriptorBuffer},
 			};
-
 			const WriteDescriptorSet visibilityDebugVertexNormalIndexWriteDescriptorSet = {
 				.descriptorSet = visibilityDebugDescriptorSet,
 				.bindingIndex = 7,
 				.descriptorBuffers = {vertexNormalIndexDescriptorBuffer},
 			};
-
 			const WriteDescriptorSet visibilityDebugVertexTextureCoordinateIndexWriteDescriptorSet = {
 				.descriptorSet = visibilityDebugDescriptorSet,
 				.bindingIndex = 8,
@@ -652,20 +639,56 @@ namespace Trident {
 
 		// Material base descriptor set
 
-		WriteDescriptorSet materialBaseCameraWriteDescriptorSet{};
-		materialBaseCameraWriteDescriptorSet.descriptorSet = materialBaseDescriptorSet;
-		materialBaseCameraWriteDescriptorSet.bindingIndex = 0;
-		materialBaseCameraWriteDescriptorSet.descriptorBuffers = {cameraDescriptorBuffer};
-
-		WriteDescriptorSet materialBaseClusterWriteDescriptorSet{};
-		materialBaseClusterWriteDescriptorSet.descriptorSet = materialBaseDescriptorSet;
-		materialBaseClusterWriteDescriptorSet.bindingIndex = 4;
-		materialBaseClusterWriteDescriptorSet.descriptorBuffers = {clusterDescriptorBuffer};
-
-		WriteDescriptorSet materialBaseInstanceWriteDescriptorSet{};
-		materialBaseInstanceWriteDescriptorSet.descriptorSet = materialBaseDescriptorSet;
-		materialBaseInstanceWriteDescriptorSet.bindingIndex = 5;
-		materialBaseInstanceWriteDescriptorSet.descriptorBuffers = {instanceDescriptorBuffer};
+		const WriteDescriptorSet materialBaseCameraWriteDescriptorSet = {
+			.descriptorSet = materialBaseDescriptorSet,
+			.bindingIndex = 0,
+			.descriptorBuffers = {cameraDescriptorBuffer},
+		};
+		const WriteDescriptorSet materialBaseVertexPositionComponentWriteDescriptorSet = {
+			.descriptorSet = materialBaseDescriptorSet,
+			.bindingIndex = 3,
+			.descriptorBuffers = {vertexPositionComponentDescriptorBuffer},
+		};
+		const WriteDescriptorSet materialBaseVertexNormalComponentWriteDescriptorSet = {
+			.descriptorSet = materialBaseDescriptorSet,
+			.bindingIndex = 4,
+			.descriptorBuffers = {vertexNormalComponentDescriptorBuffer},
+		};
+		const WriteDescriptorSet materialBaseVertexTextureCoordinateComponentWriteDescriptorSet = {
+			.descriptorSet = materialBaseDescriptorSet,
+			.bindingIndex = 5,
+			.descriptorBuffers = {vertexTextureCoordinateComponentDescriptorBuffer},
+		};
+		const WriteDescriptorSet materialBaseVertexPositionIndexWriteDescriptorSet = {
+			.descriptorSet = materialBaseDescriptorSet,
+			.bindingIndex = 6,
+			.descriptorBuffers = {vertexPositionIndexDescriptorBuffer},
+		};
+		const WriteDescriptorSet materialBaseVertexNormalIndexWriteDescriptorSet = {
+			.descriptorSet = materialBaseDescriptorSet,
+			.bindingIndex = 7,
+			.descriptorBuffers = {vertexNormalIndexDescriptorBuffer},
+		};
+		const WriteDescriptorSet materialBaseVertexTextureCoordinateIndexWriteDescriptorSet = {
+			.descriptorSet = materialBaseDescriptorSet,
+			.bindingIndex = 8,
+			.descriptorBuffers = {vertexTextureCoordinateIndexDescriptorBuffer},
+		};
+		const WriteDescriptorSet materialBaseClusterWriteDescriptorSet = {
+			.descriptorSet = materialBaseDescriptorSet,
+			.bindingIndex = 9,
+			.descriptorBuffers = {clusterDescriptorBuffer},
+		};
+		const WriteDescriptorSet materialBaseInstanceWriteDescriptorSet = {
+			.descriptorSet = materialBaseDescriptorSet,
+			.bindingIndex = 10,
+			.descriptorBuffers = {instanceDescriptorBuffer},
+		};
+		const WriteDescriptorSet materialBaseGeometryWriteDescriptorSet = {
+			.descriptorSet = materialBaseDescriptorSet,
+			.bindingIndex = 11,
+			.descriptorBuffers = {geometryDescriptorBuffer},
+		};
 
 		getDevice()->updateDescriptorSets({
 			cameraWriteDescriptorSet,
@@ -702,8 +725,15 @@ namespace Trident {
 			materialCoordinateMaterialOffsetWriteDescriptorSet,
 
 			materialBaseCameraWriteDescriptorSet,
+			materialBaseVertexPositionComponentWriteDescriptorSet,
+			materialBaseVertexNormalComponentWriteDescriptorSet,
+			materialBaseVertexTextureCoordinateComponentWriteDescriptorSet,
+			materialBaseVertexPositionIndexWriteDescriptorSet,
+			materialBaseVertexNormalIndexWriteDescriptorSet,
+			materialBaseVertexTextureCoordinateIndexWriteDescriptorSet,
 			materialBaseClusterWriteDescriptorSet,
 			materialBaseInstanceWriteDescriptorSet,
+			materialBaseGeometryWriteDescriptorSet,
 		});
 	}
 
@@ -748,20 +778,21 @@ namespace Trident {
 		materialCoordinateCoordinateWriteDescriptorSet.bindingIndex = 5;
 		materialCoordinateCoordinateWriteDescriptorSet.descriptorBuffers = {materialCoordinateDescriptorBuffer};
 
-		WriteDescriptorSet materialBaseCoordinateWriteDescriptorSet{};
-		materialBaseCoordinateWriteDescriptorSet.descriptorSet = materialBaseDescriptorSet;
-		materialBaseCoordinateWriteDescriptorSet.bindingIndex = 1;
-		materialBaseCoordinateWriteDescriptorSet.descriptorBuffers = {materialCoordinateDescriptorBuffer};
-
-		WriteDescriptorSet materialBaseOutputWriteDescriptorSet{};
-		materialBaseOutputWriteDescriptorSet.descriptorSet = materialBaseDescriptorSet;
-		materialBaseOutputWriteDescriptorSet.bindingIndex = 2;
-		materialBaseOutputWriteDescriptorSet.descriptorImages = {outputDescriptorImage};
-
-		WriteDescriptorSet materialBaseVisibilityWriteDescriptorSet{};
-		materialBaseVisibilityWriteDescriptorSet.descriptorSet = materialBaseDescriptorSet;
-		materialBaseVisibilityWriteDescriptorSet.bindingIndex = 3;
-		materialBaseVisibilityWriteDescriptorSet.descriptorImages = {visibilityDescriptorImage};
+		const WriteDescriptorSet materialBaseMaterialCoordinateWriteDescriptorSet = {
+			.descriptorSet = materialBaseDescriptorSet,
+			.bindingIndex = 1,
+			.descriptorBuffers = {materialCoordinateDescriptorBuffer},
+		};
+		const WriteDescriptorSet materialBaseVisibilityWriteDescriptorSet = {
+			.descriptorSet = materialBaseDescriptorSet,
+			.bindingIndex = 2,
+			.descriptorImages = {visibilityDescriptorImage},
+		};
+		const WriteDescriptorSet materialBaseOutputWriteDescriptorSet = {
+			.descriptorSet = materialBaseDescriptorSet,
+			.bindingIndex = 12,
+			.descriptorImages = {outputDescriptorImage},
+		};
 
 		WriteDescriptorSet outputWriteDescriptorSet{};
 		outputWriteDescriptorSet.descriptorSet = outputDescriptorSet;
@@ -794,9 +825,9 @@ namespace Trident {
 			materialCoordinateVisibilityWriteDescriptorSet,
 			materialCoordinateCoordinateWriteDescriptorSet,
 
-			materialBaseCoordinateWriteDescriptorSet,
-			materialBaseOutputWriteDescriptorSet,
+			materialBaseMaterialCoordinateWriteDescriptorSet,
 			materialBaseVisibilityWriteDescriptorSet,
+			materialBaseOutputWriteDescriptorSet,
 
 			outputWriteDescriptorSet,
 

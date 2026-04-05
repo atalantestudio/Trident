@@ -85,6 +85,5 @@ void main() {
 	vertexOutput.surface = surface.xyz;
 	vertexOutput.textureCoordinate = vec2(textureCoordinate.x, 1.0 - textureCoordinate.y);
 
-	// NOTE: GLSL doesn't require the TBN matrix to be transposed.
 	vertexOutput.TBN = mat3x3(T, B, N);
 }

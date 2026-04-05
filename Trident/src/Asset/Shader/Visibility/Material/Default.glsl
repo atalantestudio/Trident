@@ -55,7 +55,7 @@ layout(set = 0, binding = 0) uniform readonly CameraBuffer {
 layout(set = 0, binding = 1) buffer readonly MaterialCoordinateBuffer {
 	uint materialCoordinateBuffer[];
 };
-layout(set = 0, binding = 2, rgba8) uniform writeonly image2D outputImage;
+layout(set = 0, binding = 12, rgba8) uniform writeonly image2D outputImage;
 layout(set = 1, binding = 0) buffer readonly MaterialOffsetBuffer {
 	Range materialShaderCoordinateIndexRange;
 };

@@ -92,21 +92,22 @@ namespace Trident {
 				{
 					.descriptorImages = {
 						{
-							.assetPath = "red",
+							// TODO: lemon_1k needs the PBRSeparatedAORoughness, or I must manually create the ARM map.
+							.assetPath = "lemon_ao_1k",
 						},
 					},
 				},
 				{
 					.descriptorImages = {
 						{
-							.assetPath = "green",
+							.assetPath = "lemon_diff_1k",
 						},
 					},
 				},
 				{
 					.descriptorImages = {
 						{
-							.assetPath = "green",
+							.assetPath = "lemon_nor_gl_1k",
 						},
 					},
 				},
@@ -119,52 +120,47 @@ namespace Trident {
 				{
 					.descriptorImages = {
 						{
-							.assetPath = "blue",
+							.assetPath = "folding_wooden_stool_arm_1k",
 						},
 					},
 				},
 				{
 					.descriptorImages = {
 						{
-							.assetPath = "green",
+							.assetPath = "folding_wooden_stool_diff_1k",
 						},
 					},
 				},
 				{
 					.descriptorImages = {
 						{
-							.assetPath = "green",
+							.assetPath = "folding_wooden_stool_nor_gl_1k",
 						},
 					},
 				},
 			},
 		});
 
-		// Lemon 1
 		scene.registerInstance({
-			.position = {-0.1_m, 0.0_m, 0.3_m},
-			.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
-			.scale = {1.0f, 1.0f, 1.0f},
-			.geometryIndex = lemonGeometryIndex,
-			.materialIndex = lemonMaterialIndex,
-		});
-
-		// Lemon 2
-		scene.registerInstance({
-			.position = {0.0_m, 0.0_m, 0.3_m},
-			.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
-			.scale = {1.0f, 1.0f, 1.0f},
-			.geometryIndex = lemonGeometryIndex,
-			.materialIndex = lemonMaterialIndex,
-		});
-
-		// Folding wooden stool
-		scene.registerInstance({
-			.position = {0.5_m, -0.225_m, 1.0_m},
+			.position = {0.0_m, -0.5_m, 1.0_m},
 			.rotation = {pi<float32>() * 0.5f, 0.3_rad, 0.0_rad},
 			.scale = {1.0f, 1.0f, 1.0f},
 			.geometryIndex = foldingWoodenStoolGeometryIndex,
 			.materialIndex = foldingWoodenStoolMaterialIndex,
+		});
+		scene.registerInstance({
+			.position = {-0.04_m, -0.025_m, 1.0_m},
+			.rotation = {0.2_rad, 0.0_rad, 0.0_rad},
+			.scale = {1.0f, 1.0f, 1.0f},
+			.geometryIndex = lemonGeometryIndex,
+			.materialIndex = lemonMaterialIndex,
+		});
+		scene.registerInstance({
+			.position = {0.03_m, -0.025_m, 0.9_m},
+			.rotation = {-0.2_rad, 0.5_rad, 0.0_rad},
+			.scale = {1.0f, 1.0f, 1.0f},
+			.geometryIndex = lemonGeometryIndex,
+			.materialIndex = lemonMaterialIndex,
 		});
 
 		return scene;

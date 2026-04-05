@@ -41,6 +41,7 @@ struct Instance {
 
 struct Geometry {
 	uint vertexOffset;
+	uint vertexTextureCoordinateOffset;
 	uint clusterCount;
 };
 
@@ -157,7 +158,7 @@ vec3 loadVertexNormal(Geometry geometry, uint indexIndex) {
 
 vec2 loadVertexTextureCoordinate(Geometry geometry, uint indexIndex) {
 	uint index = vertexTextureCoordinateIndexBuffer[indexIndex];
-	uint offset = (uint(geometry.vertexOffset / 3u * 2u) + index) * 2u;
+	uint offset = (geometry.vertexOffset + index) * 2u;
 
 	float x = vertexTextureCoordinateComponentBuffer[offset + 0u];
 	float y = vertexTextureCoordinateComponentBuffer[offset + 1u];
@@ -183,26 +184,19 @@ Triangle loadTriangle(uint triangleIndex, Instance instance, Geometry geometry) 
 }
 
 uint murmurMix(uint hash) {
-	uint value = hash;
-	value ^= value >> 16;
-	value *= 0x85ebca6bu;
-	value ^= value >> 13;
-	value *= 0xc2b2ae35u;
-	value ^= value >> 16;
+	hash ^= hash >> 16;
+	hash *= 0x85ebca6bu;
+	hash ^= hash >> 13;
+	hash *= 0xc2b2ae35u;
+	hash ^= hash >> 16;
 
-	return value;
+	return hash;
 }
 
 vec3 uintToColor(uint value) {
 	uint hash = murmurMix(value);
 
-	vec3 color = vec3(
-		float((hash >> 0) & 255u),
-		float((hash >> 8) & 255u),
-		float((hash >> 16) & 255u)
-	);
-
-	return color / 255.0;
+	return vec3(float(hash & 255u), float((hash >> 8) & 255u), float((hash >> 16) & 255u)) / 255.0;
 }
 
 vec2 ndc(vec2 coordinate) {
@@ -241,8 +235,8 @@ BarycentricDerivatives computeBarycentricDerivatives(vec4 a, vec4 b, vec4 c, vec
 	derivatives.ddx *= wInverse;
 	derivatives.ddy *= wInverse;
 
-	float ddxSum = dot(derivatives.ddx, vec3(1.0));
-	float ddySum = dot(derivatives.ddy, vec3(1.0));
+	float ddxSum = derivatives.ddx.x + derivatives.ddx.y + derivatives.ddx.z;
+	float ddySum = derivatives.ddy.x + derivatives.ddy.y + derivatives.ddy.z;
 
 	vec2 delta = p - pA;
 	float interpInvW = wInverse.x + delta.x * ddxSum + delta.y * ddySum;

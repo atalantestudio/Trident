@@ -22,16 +22,51 @@ namespace Trident {
 				.shaderStages = ShaderStage::COMPUTE,
 			},
 
-			// Output
+			// Visibility
 			{
-				.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE,
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE,
 				.descriptorCount = 1,
 				.shaderStages = ShaderStage::COMPUTE,
 			},
 
-			// Visibility
+			// Vertex position component
 			{
-				.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE,
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+
+			// Vertex normal component
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+
+			// Vertex texture coordinate component
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+
+			// Vertex position index
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+
+			// Vertex normal index
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+
+			// Vertex texture coordinate index
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
 				.shaderStages = ShaderStage::COMPUTE,
 			},
@@ -46,6 +81,20 @@ namespace Trident {
 			// Instance
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+
+			// Geometry
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+
+			// Output
+			{
+				.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE,
 				.descriptorCount = 1,
 				.shaderStages = ShaderStage::COMPUTE,
 			},

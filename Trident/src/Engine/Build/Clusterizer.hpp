@@ -70,10 +70,11 @@ namespace Trident {
 		clusteredScene.vertexNormalIndices = sequence<uint32>(totalIndexCount);
 		clusteredScene.vertexTextureCoordinateIndices = sequence<uint32>(totalIndexCount);
 
-		uint32 vertexPositionComponentOffset = 0;
-		uint32 vertexNormalComponentOffset = 0;
-		uint32 vertexTextureCoordinateComponentOffset = 0;
+		uint64 vertexPositionComponentOffset = 0;
+		uint64 vertexNormalComponentOffset = 0;
+		uint64 vertexTextureCoordinateComponentOffset = 0;
 		uint32 vertexOffset = 0;
+		uint32 vertexTextureCoordinateOffset = 0;
 
 		// Index offset relative to the parent cluster. Includes degenerate indices.
 		uint32 indexOffset = 0;
@@ -85,6 +86,7 @@ namespace Trident {
 
 			ClusteredGeometry& clusteredGeometry = clusteredScene.geometries[geometryIndex];
 			clusteredGeometry.vertexOffset = vertexOffset;
+			clusteredGeometry.vertexTextureCoordinateOffset = vertexTextureCoordinateOffset;
 
 			std::copy(geometry->getVertexPositionComponents().begin(), geometry->getVertexPositionComponents().end(), &clusteredScene.vertexPositionComponents[vertexPositionComponentOffset]);
 			std::copy(geometry->getVertexNormalComponents().begin(), geometry->getVertexNormalComponents().end(), &clusteredScene.vertexNormalComponents[vertexNormalComponentOffset]);
@@ -94,11 +96,12 @@ namespace Trident {
 			std::copy(geometry->getVertexNormalIndices().begin(), geometry->getVertexNormalIndices().end(), &clusteredScene.vertexNormalIndices[indexOffset]);
 			std::copy(geometry->getVertexTextureCoordinateIndices().begin(), geometry->getVertexTextureCoordinateIndices().end(), &clusteredScene.vertexTextureCoordinateIndices[indexOffset]);
 
+			vertexPositionComponentOffset += geometry->getVertexPositionComponents().count();
+			vertexNormalComponentOffset += geometry->getVertexNormalComponents().count();
+			vertexTextureCoordinateComponentOffset += geometry->getVertexTextureCoordinateComponents().count();
 			vertexOffset += clusteredGeometry.vertexCount;
+			vertexTextureCoordinateOffset += static_cast<uint32>(geometry->getVertexTextureCoordinateComponents().count()) / 2;
 			indexOffset += clusteredGeometry.clusterCount * CLUSTER_INDEX_COUNT;
-			vertexPositionComponentOffset += static_cast<uint32>(geometry->getVertexPositionComponents().count());
-			vertexNormalComponentOffset += static_cast<uint32>(geometry->getVertexNormalComponents().count());
-			vertexTextureCoordinateComponentOffset += static_cast<uint32>(geometry->getVertexTextureCoordinateComponents().count());
 
 			geometryIndex += 1;
 		}

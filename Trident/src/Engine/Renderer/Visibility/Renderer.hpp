@@ -9,7 +9,7 @@
 #include "Engine/Renderer/3D/SceneRenderer.hpp"
 
 namespace Trident {
-	#define ENABLE_VISIBILITY_DEBUG_PASS
+	// #define ENABLE_VISIBILITY_DEBUG_PASS
 
 	class VisibilityRenderer : public SceneRenderer<ClusteredScene> {
 		private:
@@ -23,6 +23,7 @@ namespace Trident {
 
 			struct Geometry {
 				uint32 vertexOffset;
+				uint32 vertexTextureCoordinateOffset;
 				uint32 clusterCount;
 			};
 

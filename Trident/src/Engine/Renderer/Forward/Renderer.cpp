@@ -194,14 +194,26 @@ namespace Trident {
 
 				while (materialIndex < materials.size()) {
 					const ref<ImageAsset> imageAsset = materialImageAssets[materialShaderIndex][bindingIndex][materialIndex];
+					const Extent3D imageAssetExtent = imageAsset->getExtent();
+					const uint64 imageAssetSize = getChannelCount(ImageFormat::R8G8B8A8_UNORM) * imageAssetExtent.width * imageAssetExtent.height * imageAssetExtent.depth * imageAsset->getLayerCount();
 
-					DEBUG_ASSERT(imageAsset->getFormat() == ImageFormat::R8G8B8_UNORM);
+					switch (imageAsset->getFormat()) {
+						case ImageFormat::R8G8B8_UNORM: {
+							convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(imageAsset->getData(), &imageMappedRange[imageMappedRangeOffset], imageAssetSize);
 
-					sequence<uint8> data(imageAsset->getExtent().width * imageAsset->getExtent().height * imageAsset->getExtent().depth * imageAsset->getLayerCount() * 4);
+							break;
+						}
+						case ImageFormat::R8G8B8A8_UNORM: {
+							std::copy(imageAsset->getData().begin(), imageAsset->getData().end(), &imageMappedRange[imageMappedRangeOffset]);
 
-					convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(imageAsset->getData(), &data[0], data.count());
+							break;
+						}
+						default: {
+							ENGINE_ERROR_UNSUPPORTED();
 
-					std::copy(data.begin(), data.end(), &imageMappedRange[imageMappedRangeOffset]);
+							break;
+						}
+					}
 
 					BufferImageCopyRegion& imageCopyRegion = imageCopyRegions[materialIndex];
 					imageCopyRegion.bufferOffset = imageMappedRangeOffset;
@@ -228,7 +240,7 @@ namespace Trident {
 					descriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
 					descriptorImage.sampler = imageSampler;
 
-					imageMappedRangeOffset += data.count();
+					imageMappedRangeOffset += imageAssetSize;
 					materialIndex += 1;
 					materialReferenceBindingImageIndex += 1;
 				}

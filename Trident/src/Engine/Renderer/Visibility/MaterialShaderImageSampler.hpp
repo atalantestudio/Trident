@@ -8,8 +8,8 @@
 namespace Trident {
 	ref<Sampler> VisibilityRenderer::createMaterialShaderImageSampler() const {
 		return createSampler({
-			.magFilter = SamplerFilter::NEAREST,
-			.minFilter = SamplerFilter::NEAREST,
+			.magFilter = SamplerFilter::LINEAR,
+			.minFilter = SamplerFilter::LINEAR,
 		});
 	}
 }
