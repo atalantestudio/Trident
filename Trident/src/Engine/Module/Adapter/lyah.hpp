@@ -201,7 +201,7 @@ namespace Trident {
 		T& operator [](std::size_t index) {
 			DEBUG_ASSERT(index < 3);
 
-			return pointer_const<T*>(this)[index];
+			return pointer_cast<T*>(this)[index];
 		}
 	};
 
