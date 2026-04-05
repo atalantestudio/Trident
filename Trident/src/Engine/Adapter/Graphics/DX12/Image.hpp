@@ -12,7 +12,8 @@ namespace Trident {
 
 		public:
 			ID3D12Resource* resource;
-			D3D12_RESOURCE_STATES resourceState;
+			D3D12_BARRIER_ACCESS barrierAccess = D3D12_BARRIER_ACCESS_NO_ACCESS;
+			D3D12_BARRIER_LAYOUT barrierLayout = D3D12_BARRIER_LAYOUT_UNDEFINED;
 			ImageUsage usage;
 	};
 

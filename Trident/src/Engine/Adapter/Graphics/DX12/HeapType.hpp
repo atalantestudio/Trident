@@ -9,24 +9,6 @@
 #include "Engine/API/Rendering/MemoryProperty.hpp"
 
 namespace Trident::DX12 {
-	inline D3D12_HEAP_TYPE getHeapType(BufferUsage usage, MemoryProperty memoryProperties) {
-		if (usage == BufferUsage::TRANSFER_DST) {
-			return D3D12_HEAP_TYPE_READBACK;
-		}
-
-		if (memoryProperties & MemoryProperty::HOST_VISIBLE) {
-			return D3D12_HEAP_TYPE_UPLOAD;
-		}
-
-		if (memoryProperties & MemoryProperty::HOST_COHERENT) {
-			return D3D12_HEAP_TYPE_UPLOAD;
-		}
-
-		ADAPTER_ASSERT(memoryProperties & MemoryProperty::DEVICE_LOCAL, "Memory properties must contain DEVICE_LOCAL.");
-
-		return D3D12_HEAP_TYPE_DEFAULT;
-	}
-
 	inline D3D12_HEAP_TYPE getHeapType(ImageUsage usage, MemoryProperty memoryProperties) {
 		if (usage == ImageUsage::TRANSFER_DST) {
 			return D3D12_HEAP_TYPE_READBACK;

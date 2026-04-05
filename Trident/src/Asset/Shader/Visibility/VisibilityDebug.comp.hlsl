@@ -1,8 +1,6 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-// TODO: Cleanup when the DX12 image memory barriers are fixed.
-
 struct VertexOutput {
 	float4 position : SV_Position;
 	float2 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE1;
@@ -101,21 +99,19 @@ static const uint VISUALIZATION_MODE = VISUALIZATION_MODE_MATERIAL_INDEX;
 cbuffer CameraBuffer : register(b0) {
 	Camera camera;
 }
-
 Texture2D<uint> visibilityImage : register(t0);
+SamplerState depthStencilSamplerState : register(s0);
 Texture2D<float> depthStencilImage : register(t1);
-
 ByteAddressBuffer vertexPositionComponentBuffer : register(t2);
 ByteAddressBuffer vertexNormalComponentBuffer : register(t3);
 ByteAddressBuffer vertexTextureCoordinateComponentBuffer : register(t4);
 ByteAddressBuffer vertexPositionIndexBuffer : register(t5);
 ByteAddressBuffer vertexNormalIndexBuffer : register(t6);
 ByteAddressBuffer vertexTextureCoordinateIndexBuffer : register(t7);
-
-ByteAddressBuffer clusterBuffer : register(t10);
-
-ByteAddressBuffer instanceBuffer : register(t11);
-ByteAddressBuffer geometryBuffer : register(t12);
+RWTexture2D<float4> outputImage : register(u0);
+ByteAddressBuffer clusterBuffer : register(t11);
+StructuredBuffer<Instance> instanceBuffer : register(t12);
+ByteAddressBuffer geometryBuffer : register(t13);
 
 Cluster loadCluster(uint clusterIndex) {
 	static const uint stride = 4;
@@ -124,24 +120,6 @@ Cluster loadCluster(uint clusterIndex) {
 	cluster.instanceIndex = clusterBuffer.Load(clusterIndex * stride);
 
 	return cluster;
-}
-
-Instance loadInstance(uint instanceIndex) {
-	static const uint stride = 80;
-
-	Instance instance;
-	instance.transform = transpose(float4x4(
-		asfloat(instanceBuffer.Load4(instanceIndex * stride + 0)),
-		asfloat(instanceBuffer.Load4(instanceIndex * stride + 16)),
-		asfloat(instanceBuffer.Load4(instanceIndex * stride + 32)),
-		asfloat(instanceBuffer.Load4(instanceIndex * stride + 48))
-	));
-	instance.geometryIndex = instanceBuffer.Load(instanceIndex * stride + 64);
-	instance.materialShaderIndex = instanceBuffer.Load(instanceIndex * stride + 68);
-	instance.materialIndex = instanceBuffer.Load(instanceIndex * stride + 72);
-	instance.clusterOffset = asint(instanceBuffer.Load(instanceIndex * stride + 76));
-
-	return instance;
 }
 
 Geometry loadGeometry(uint geometryIndex) {
@@ -245,7 +223,7 @@ float2 ndc(float2 coordinate) {
 	return ndc;
 }
 
-// TODO: Fix linear depth values fading too quick between the near and far planes.
+// TODO: Fix linear depth values fading too quickly between the near and far planes.
 float linearizeDepth(float depth) {
 	float nearPlane = camera.nearPlane;
 	float farPlane = camera.farPlane;
@@ -440,78 +418,116 @@ float3 visualizeBlinnPhongShading(Triangle _triangle, Instance instance, float2 
 	return ambient + diffuse + specular;
 }
 
-float4 main(VertexOutput input) : SV_Target {
-	uint visibility = visibilityImage[input.position.xy];
+float4 VisibilityDebug(uint2 screenCoordinate) {
+	uint visibility = visibilityImage[screenCoordinate];
+	float4 color = float4(0.0, 0.0, 0.0, 1.0);
 
-	if (visibility == 0) {
+	if (visibility == 0u) {
 		if (VISUALIZATION_MODE == VISUALIZATION_MODE_MATERIAL_INDEX) {
-			return float4(uintToColor(1), 1.0);
+			color = float4(uintToColor(1u), 1.0);
 		}
 
 		if (VISUALIZATION_MODE == VISUALIZATION_MODE_LINEAR_DEPTH) {
-			return float4(1.0, 1.0, 1.0, 1.0);
+			color = float4(1.0, 1.0, 1.0, 1.0);
 		}
+	}
+	else {
+		// Fragment coordinate in NDC space.
+		float2 coordinate = ndc(screenCoordinate);
 
-		return float4(0.0, 0.0, 0.0, 1.0);
+		uint clusterIndex = (visibility >> TRIANGLE_INDEX_BIT_COUNT) - 1u;
+
+		// Triangle index relative to the parent cluster.
+		uint clusterTriangleIndex = visibility & TRIANGLE_INDEX_BIT_MASK;
+
+		// Global triangle index.
+		uint triangleIndex = clusterIndex * CLUSTER_TRIANGLE_COUNT + clusterTriangleIndex;
+
+		Cluster cluster = loadCluster(clusterIndex);
+		Instance instance = instanceBuffer[cluster.instanceIndex];
+		Geometry geometry = loadGeometry(instance.geometryIndex);
+
+		Triangle _triangle = loadTriangle(triangleIndex, instance, geometry);
+
+		switch (VISUALIZATION_MODE) {
+			case VISUALIZATION_MODE_TRIANGLE_INDEX: {
+				color = float4(uintToColor(triangleIndex + 1u), 1.0);
+
+				break;
+			}
+			case VISUALIZATION_MODE_CLUSTER_INDEX: {
+				color = float4(uintToColor(clusterIndex + 1u), 1.0);
+
+				break;
+			}
+			case VISUALIZATION_MODE_LINEAR_DEPTH: {
+				float nonLinearDepth = depthStencilImage.Sample(depthStencilSamplerState, float2(screenCoordinate / camera.viewport)).r;
+				float linearDepth = linearizeDepth(nonLinearDepth);
+
+				color = float4(linearDepth, linearDepth, linearDepth, 1.0);
+
+				break;
+			}
+			case VISUALIZATION_MODE_INSTANCE_INDEX: {
+				color = float4(uintToColor(cluster.instanceIndex + 1u), 1.0);
+
+				break;
+			}
+			case VISUALIZATION_MODE_GEOMETRY_INDEX: {
+				color = float4(uintToColor(instance.geometryIndex + 1u), 1.0);
+
+				break;
+			}
+			case VISUALIZATION_MODE_MATERIAL_INDEX: {
+				color = float4(uintToColor(instance.materialShaderIndex + 1u), 1.0);
+
+				break;
+			}
+			case VISUALIZATION_MODE_TRIANGLE_NORMAL: {
+				color = float4(visualizeTriangleNormal(_triangle, instance), 1.0);
+
+				break;
+			}
+			case VISUALIZATION_MODE_BARYCENTRIC_DERIVATIVES: {
+				color = float4(visualizeBarycentricDerivatives(_triangle, instance, coordinate), 1.0);
+
+				break;
+			}
+			case VISUALIZATION_MODE_VERTEX_NORMAL: {
+				color = float4(visualizeVertexNormal(_triangle, instance, coordinate), 1.0);
+
+				break;
+			}
+			case VISUALIZATION_MODE_VERTEX_TEXTURE_COORDINATE: {
+				color = float4(visualizeVertexTextureCoordinate(_triangle, instance, coordinate), 1.0);
+
+				break;
+			}
+			case VISUALIZATION_MODE_FLAT_SHADING: {
+				color = float4(visualizeFlatShading(_triangle, instance, coordinate), 1.0);
+
+				break;
+			}
+			case VISUALIZATION_MODE_BLINN_PHONG_SHADING: {
+				color = float4(visualizeBlinnPhongShading(_triangle, instance, coordinate), 1.0);
+
+				break;
+			}
+		}
 	}
 
-	// Fragment coordinate in NDC space.
-	float2 coordinate = ndc(input.position.xy);
+	return color;
+}
 
-	uint clusterIndex = (visibility >> TRIANGLE_INDEX_BIT_COUNT) - 1;
+[numthreads(16, 16, 1)]
+void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
+	uint2 screenCoordinate = globalInvocationIndex.xy;
 
-	// Triangle index relative to the parent cluster.
-	uint clusterTriangleIndex = visibility & TRIANGLE_INDEX_BIT_MASK;
-
-	// Global triangle index.
-	uint triangleIndex = clusterIndex * CLUSTER_TRIANGLE_COUNT + clusterTriangleIndex;
-
-	Cluster cluster = loadCluster(clusterIndex);
-	Instance instance = loadInstance(cluster.instanceIndex);
-	Geometry geometry = loadGeometry(instance.geometryIndex);
-	Triangle _triangle = loadTriangle(triangleIndex, instance, geometry);
-
-	float3 color;
-
-	if (VISUALIZATION_MODE == VISUALIZATION_MODE_TRIANGLE_INDEX) {
-		color = uintToColor(triangleIndex + 1);
-	}
-	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_CLUSTER_INDEX) {
-		color = uintToColor(clusterIndex + 1);
-	}
-	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_LINEAR_DEPTH) {
-		float nonLinearDepth = depthStencilImage[input.position.xy];
-		float linearDepth = linearizeDepth(nonLinearDepth);
-
-		color = float3(linearDepth, linearDepth, linearDepth);
-	}
-	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_INSTANCE_INDEX) {
-		color = uintToColor(cluster.instanceIndex + 1);
-	}
-	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_GEOMETRY_INDEX) {
-		color = uintToColor(instance.geometryIndex + 1);
-	}
-	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_MATERIAL_INDEX) {
-		color = uintToColor(instance.materialShaderIndex + 1);
-	}
-	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_TRIANGLE_NORMAL) {
-		color = visualizeTriangleNormal(_triangle, instance);
-	}
-	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_BARYCENTRIC_DERIVATIVES) {
-		color = visualizeBarycentricDerivatives(_triangle, instance, coordinate);
-	}
-	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_VERTEX_NORMAL) {
-		color = visualizeVertexNormal(_triangle, instance, coordinate);
-	}
-	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_VERTEX_TEXTURE_COORDINATE) {
-		color = visualizeVertexTextureCoordinate(_triangle, instance, coordinate);
-	}
-	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_FLAT_SHADING) {
-		color = visualizeFlatShading(_triangle, instance, coordinate);
-	}
-	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_BLINN_PHONG_SHADING) {
-		color = visualizeBlinnPhongShading(_triangle, instance, coordinate);
+	if (any(screenCoordinate >= camera.viewport)) {
+		return;
 	}
 
-	return float4(color, 1.0);
+	float4 color = VisibilityDebug(screenCoordinate);
+
+	outputImage[screenCoordinate] = color;
 }

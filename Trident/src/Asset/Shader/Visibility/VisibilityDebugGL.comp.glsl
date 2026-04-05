@@ -215,7 +215,7 @@ vec2 ndc(vec2 coordinate) {
 	return ndc;
 }
 
-// TODO: Fix linear depth values fading too quick between the near and far planes.
+// TODO: Fix linear depth values fading too quickly between the near and far planes.
 float linearizeDepth(float depth) {
 	float nearPlane = camera.nearPlane;
 	float farPlane = camera.farPlane;

@@ -44,7 +44,6 @@ namespace Trident {
 		HRESULT result;
 
 		ref<DX12::Image> image = createRef<DX12::Image>(device, descriptor);
-		image->resourceState = D3D12_RESOURCE_STATE_COMMON;
 		image->usage = descriptor.usage;
 
 		D3D12_HEAP_PROPERTIES heapProperties{};
@@ -68,6 +67,7 @@ namespace Trident {
 		resourceDescriptor.Flags = getImageResourceFlags(descriptor.usage);
 
 		const D3D12_HEAP_FLAGS heapFlags = D3D12_HEAP_FLAG_NONE;
+		const D3D12_RESOURCE_STATES initialResourceStates = getInitialResourceState(D3D12_RESOURCE_STATE_COMMON, heapProperties.Type);
 		const D3D12_CLEAR_VALUE* optimizedClearValuePointer = nullptr;
 
 		D3D12_CLEAR_VALUE optimizedClearValue{};
@@ -88,7 +88,7 @@ namespace Trident {
 			optimizedClearValuePointer = &optimizedClearValue;
 		}
 
-		result = _device->device->CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, image->resourceState, optimizedClearValuePointer, IID_PPV_ARGS(&image->resource));
+		result = _device->device->CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, initialResourceStates, optimizedClearValuePointer, IID_PPV_ARGS(&image->resource));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create committed image resource.");
 
@@ -118,7 +118,6 @@ namespace Trident {
 		SET_DEBUG_NAME(descriptor, Logger::format("Swapchain image []", index));
 
 		ref<DX12::Image> image = createRef<DX12::Image>(device, descriptor);
-		image->resourceState = D3D12_RESOURCE_STATE_PRESENT;
 		image->usage = static_cast<ImageUsage>(0);
 
 		result = _swapchain->swapChain->GetBuffer(index, IID_PPV_ARGS(&image->resource));

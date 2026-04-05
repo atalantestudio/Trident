@@ -116,7 +116,18 @@ namespace Trident {
 		ADAPTER_ASSERT(image->getType() == ImageType::TEXTURE_2D, "Images other than TEXTURE_2D are not supported.");
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDescriptor{};
-		shaderResourceViewDescriptor.Format = getImageFormat(image->getFormat());
+
+		if (isDepthFormat(image->getFormat())) {
+			if (image->getFormat() == ImageFormat::D32_SFLOAT) {
+				shaderResourceViewDescriptor.Format = DXGI_FORMAT_R32_FLOAT;
+			}
+			else {
+				ENGINE_ERROR_UNSUPPORTED();
+			}
+		}
+		else {
+			shaderResourceViewDescriptor.Format = getImageFormat(image->getFormat());
+		}
 
 		if (image->getLayerCount() > 1) {
 			shaderResourceViewDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;

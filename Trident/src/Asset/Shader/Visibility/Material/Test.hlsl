@@ -90,7 +90,8 @@ void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 	Cluster cluster = loadCluster(clusterIndex);
 	Instance instance = instanceBuffer[cluster.instanceIndex];
 
-	float3 color = armMap.Sample(armSamplerState, float3(0.0, 0.0, instance.materialIndex - 1)).rgb;
+	// TODO: Texture2DArray.Sample doesn't seem to work on HLSL compute shaders?
+	float3 color = armMap.SampleLevel(armSamplerState, float3(0.0, 0.0, instance.materialIndex - 1), 0.0).rgb;
 
 	outputImage[screenCoordinate] = float4(color, 1.0);
 }

@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/DX12/BarrierAccess.hpp"
+#include "Engine/Adapter/Graphics/DX12/BarrierLayout.hpp"
 #include "Engine/Adapter/Graphics/DX12/Buffer.hpp"
 #include "Engine/Adapter/Graphics/DX12/CommandBuffer.hpp"
 #include "Engine/Adapter/Graphics/DX12/CommandEncoder.hpp"
@@ -35,7 +36,7 @@ namespace Trident {
 		if (subpass->getInputAttachmentReferenceCount() > 0) {
 			const view<AttachmentReference> inputAttachmentReferences = subpass->getInputAttachmentReferences();
 
-			sequence<D3D12_RESOURCE_BARRIER> resourceBarriers(subpass->getInputAttachmentReferenceCount());
+			sequence<D3D12_TEXTURE_BARRIER> textureBarriers(subpass->getInputAttachmentReferenceCount());
 			UINT inputAttachmentReferenceIndex = 0;
 
 			while (inputAttachmentReferenceIndex < inputAttachmentReferences.count()) {
@@ -49,24 +50,40 @@ namespace Trident {
 					continue;
 				}
 
-				DX12::Image* image = static_cast<DX12::Image*>(commandEncoder->framebuffer->imageViews[inputAttachmentReference.index]->getImage());
+				const ref<Trident::ImageView> imageView = commandEncoder->framebuffer->imageViews[inputAttachmentReference.index];
+				Trident::Image* image = imageView->getImage();
+				DX12::Image* dxImage = static_cast<DX12::Image*>(image);
 
-				D3D12_RESOURCE_BARRIER& resourceBarrier = resourceBarriers[inputAttachmentReferenceIndex];
-				resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-				resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-				resourceBarrier.Transition.pResource = image->resource;
-				resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-				resourceBarrier.Transition.StateBefore = image->resourceState;
+				D3D12_TEXTURE_BARRIER& textureBarrier = textureBarriers[inputAttachmentReferenceIndex];
+				textureBarrier.SyncBefore = D3D12_BARRIER_SYNC_ALL;
+				textureBarrier.SyncAfter = D3D12_BARRIER_SYNC_ALL;
+				textureBarrier.AccessBefore = dxImage->barrierAccess;
+				textureBarrier.AccessAfter = D3D12_BARRIER_ACCESS_SHADER_RESOURCE;
+				textureBarrier.LayoutBefore = dxImage->barrierLayout;
+				textureBarrier.LayoutAfter = D3D12_BARRIER_LAYOUT_SHADER_RESOURCE;
+				textureBarrier.pResource = dxImage->resource;
+				textureBarrier.Subresources.IndexOrFirstMipLevel = imageView->getMipLevelOffset();
+				textureBarrier.Subresources.NumMipLevels = imageView->getMipLevelCount();
+				textureBarrier.Subresources.FirstArraySlice = imageView->getLayerOffset();
+				textureBarrier.Subresources.NumArraySlices = imageView->getLayerCount();
+				textureBarrier.Subresources.FirstPlane = 0;
+				textureBarrier.Subresources.NumPlanes = 1;
+				textureBarrier.Flags = D3D12_TEXTURE_BARRIER_FLAG_NONE;
 
-				// TODO: Don't apply NON_PIXEL_SHADER_RESOURCE if the resource is only visible to fragment shaders.
-				resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
+				dxImage->barrierAccess = textureBarrier.AccessAfter;
+				dxImage->barrierLayout = textureBarrier.LayoutAfter;
 
-				image->resourceState = resourceBarrier.Transition.StateAfter;
+				image->layout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
 
 				inputAttachmentReferenceIndex += 1;
 			}
 
-			commandEncoder->commandList->ResourceBarrier(static_cast<UINT>(resourceBarriers.count()), &resourceBarriers[0]);
+			D3D12_BARRIER_GROUP barrierGroup{};
+			barrierGroup.Type = D3D12_BARRIER_TYPE_TEXTURE;
+			barrierGroup.NumBarriers = static_cast<UINT>(textureBarriers.count());
+			barrierGroup.pTextureBarriers = &textureBarriers[0];
+
+			commandEncoder->commandList->Barrier(1, &barrierGroup);
 		}
 
 		UINT renderTargetCount = 0;
@@ -80,7 +97,7 @@ namespace Trident {
 		}
 
 		sequence<D3D12_CPU_DESCRIPTOR_HANDLE> renderTargetViewHandles(renderTargetCount);
-		std::vector<D3D12_RESOURCE_BARRIER> resourceBarriers;
+		std::vector<D3D12_TEXTURE_BARRIER> textureBarriers;
 		UINT renderTargetIndex = 0;
 		UINT colorAttachmentIndex = 0;
 
@@ -103,33 +120,55 @@ namespace Trident {
 			if (colorAttachment.finalLayout == ImageLayout::PRESENT_SRC) {
 				commandEncoder->presentRenderTargetIndex = colorAttachmentReference.index;
 
-				if (colorAttachment.loadOperation != LoadOperation::CLEAR && image->resourceState != D3D12_RESOURCE_STATE_RENDER_TARGET) {
-					D3D12_RESOURCE_BARRIER resourceBarrier{};
-					resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-					resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-					resourceBarrier.Transition.pResource = image->resource;
-					resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-					resourceBarrier.Transition.StateBefore = image->resourceState;
-					resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+				if (colorAttachment.loadOperation != LoadOperation::CLEAR && image->barrierLayout != D3D12_BARRIER_LAYOUT_RENDER_TARGET) {
+					D3D12_TEXTURE_BARRIER textureBarrier{};
+					textureBarrier.SyncBefore = D3D12_BARRIER_SYNC_ALL;
+					textureBarrier.SyncAfter = D3D12_BARRIER_SYNC_ALL;
+					textureBarrier.AccessBefore = image->barrierAccess;
+					textureBarrier.AccessAfter = D3D12_BARRIER_ACCESS_RENDER_TARGET;
+					textureBarrier.LayoutBefore = image->barrierLayout;
+					textureBarrier.LayoutAfter = D3D12_BARRIER_LAYOUT_RENDER_TARGET;
+					textureBarrier.pResource = image->resource;
+					textureBarrier.Subresources.IndexOrFirstMipLevel = imageView->getMipLevelOffset();
+					textureBarrier.Subresources.NumMipLevels = imageView->getMipLevelCount();
+					textureBarrier.Subresources.FirstArraySlice = imageView->getLayerOffset();
+					textureBarrier.Subresources.NumArraySlices = imageView->getLayerCount();
+					textureBarrier.Subresources.FirstPlane = 0;
+					textureBarrier.Subresources.NumPlanes = 1;
+					textureBarrier.Flags = D3D12_TEXTURE_BARRIER_FLAG_NONE;
 
-					image->resourceState = resourceBarrier.Transition.StateAfter;
+					image->barrierAccess = textureBarrier.AccessAfter;
+					image->barrierLayout = textureBarrier.LayoutAfter;
 
-					resourceBarriers.emplace_back(resourceBarrier);
+					image->layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+
+					textureBarriers.emplace_back(textureBarrier);
 				}
 			}
 
 			if (image->usage & ImageUsage::INPUT_ATTACHMENT && colorAttachment.loadOperation != LoadOperation::CLEAR) {
-				D3D12_RESOURCE_BARRIER resourceBarrier{};
-				resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-				resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-				resourceBarrier.Transition.pResource = image->resource;
-				resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-				resourceBarrier.Transition.StateBefore = image->resourceState;
-				resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+				D3D12_TEXTURE_BARRIER textureBarrier{};
+				textureBarrier.SyncBefore = D3D12_BARRIER_SYNC_ALL;
+				textureBarrier.SyncAfter = D3D12_BARRIER_SYNC_ALL;
+				textureBarrier.AccessBefore = image->barrierAccess;
+				textureBarrier.AccessAfter = D3D12_BARRIER_ACCESS_RENDER_TARGET;
+				textureBarrier.LayoutBefore = image->barrierLayout;
+				textureBarrier.LayoutAfter = D3D12_BARRIER_LAYOUT_RENDER_TARGET;
+				textureBarrier.pResource = image->resource;
+				textureBarrier.Subresources.IndexOrFirstMipLevel = imageView->getMipLevelOffset();
+				textureBarrier.Subresources.NumMipLevels = imageView->getMipLevelCount();
+				textureBarrier.Subresources.FirstArraySlice = imageView->getLayerOffset();
+				textureBarrier.Subresources.NumArraySlices = imageView->getLayerCount();
+				textureBarrier.Subresources.FirstPlane = 0;
+				textureBarrier.Subresources.NumPlanes = 1;
+				textureBarrier.Flags = D3D12_TEXTURE_BARRIER_FLAG_NONE;
 
-				image->resourceState = resourceBarrier.Transition.StateAfter;
+				image->barrierAccess = textureBarrier.AccessAfter;
+				image->barrierLayout = textureBarrier.LayoutAfter;
 
-				resourceBarriers.emplace_back(resourceBarrier);
+				image->layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+
+				textureBarriers.emplace_back(textureBarrier);
 			}
 
 			renderTargetViewHandles[colorAttachmentIndex] = imageView->descriptorHandle;
@@ -137,8 +176,13 @@ namespace Trident {
 			renderTargetIndex += 1;
 		}
 
-		if (resourceBarriers.size() > 0) {
-			commandEncoder->commandList->ResourceBarrier(static_cast<UINT>(resourceBarriers.size()), &resourceBarriers[0]);
+		if (textureBarriers.size() > 0) {
+			D3D12_BARRIER_GROUP barrierGroup{};
+			barrierGroup.Type = D3D12_BARRIER_TYPE_TEXTURE;
+			barrierGroup.NumBarriers = static_cast<UINT>(textureBarriers.size());
+			barrierGroup.pTextureBarriers = &textureBarriers[0];
+
+			commandEncoder->commandList->Barrier(1, &barrierGroup);
 		}
 
 		const D3D12_CPU_DESCRIPTOR_HANDLE* depthStencilViewHandlePointer = nullptr;
@@ -152,17 +196,33 @@ namespace Trident {
 			DX12::Image* image = static_cast<DX12::Image*>(imageView->getImage());
 
 			if (image->usage & ImageUsage::INPUT_ATTACHMENT && renderPass->getAttachment(depthStencilAttachmentReference.index).loadOperation != LoadOperation::CLEAR) {
-				D3D12_RESOURCE_BARRIER resourceBarrier{};
-				resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-				resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-				resourceBarrier.Transition.pResource = image->resource;
-				resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-				resourceBarrier.Transition.StateBefore = image->resourceState;
-				resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+				D3D12_TEXTURE_BARRIER textureBarrier{};
+				textureBarrier.SyncBefore = D3D12_BARRIER_SYNC_ALL;
+				textureBarrier.SyncAfter = D3D12_BARRIER_SYNC_ALL;
+				textureBarrier.AccessBefore = image->barrierAccess;
+				textureBarrier.AccessAfter = D3D12_BARRIER_ACCESS_DEPTH_STENCIL_WRITE;
+				textureBarrier.LayoutBefore = image->barrierLayout;
+				textureBarrier.LayoutAfter = D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE;
+				textureBarrier.pResource = image->resource;
+				textureBarrier.Subresources.IndexOrFirstMipLevel = imageView->getMipLevelOffset();
+				textureBarrier.Subresources.NumMipLevels = imageView->getMipLevelCount();
+				textureBarrier.Subresources.FirstArraySlice = imageView->getLayerOffset();
+				textureBarrier.Subresources.NumArraySlices = imageView->getLayerCount();
+				textureBarrier.Subresources.FirstPlane = 0;
+				textureBarrier.Subresources.NumPlanes = 1;
+				textureBarrier.Flags = D3D12_TEXTURE_BARRIER_FLAG_NONE;
 
-				image->resourceState = resourceBarrier.Transition.StateAfter;
+				image->barrierAccess = textureBarrier.AccessAfter;
+				image->barrierLayout = textureBarrier.LayoutAfter;
 
-				commandEncoder->commandList->ResourceBarrier(1, &resourceBarrier);
+				image->layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+				D3D12_BARRIER_GROUP barrierGroup{};
+				barrierGroup.Type = D3D12_BARRIER_TYPE_TEXTURE;
+				barrierGroup.NumBarriers = 1;
+				barrierGroup.pTextureBarriers = &textureBarrier;
+
+				commandEncoder->commandList->Barrier(1, &barrierGroup);
 			}
 
 			depthStencilViewHandle = imageView->descriptorHandle;
@@ -195,43 +255,63 @@ namespace Trident {
 		rectangle.right = _commandEncoder->framebuffer->getExtent().width;
 		rectangle.bottom = _commandEncoder->framebuffer->getExtent().height;
 
-		// TODO: Use sequence<D3D12_RESOURCE_BARRIER>.
-		std::vector<D3D12_RESOURCE_BARRIER> resourceBarriers;
+		// TODO: Use a sequence instead.
+		std::vector<D3D12_TEXTURE_BARRIER> textureBarriers;
 
 		while (attachmentIndex < renderPass->getAttachmentCount()) {
 			const ref<DX12::ImageView> imageView = std::static_pointer_cast<DX12::ImageView>(_commandEncoder->framebuffer->imageViews[attachmentIndex]);
 
 			DX12::Image* image = static_cast<DX12::Image*>(imageView->getImage());
 
-			if (image->resourceState == D3D12_RESOURCE_STATE_RENDER_TARGET || image->resourceState == D3D12_RESOURCE_STATE_DEPTH_WRITE) {
+			if (image->barrierLayout == D3D12_BARRIER_LAYOUT_RENDER_TARGET || image->barrierLayout == D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE) {
 				attachmentIndex += 1;
 
 				continue;
 			}
 
-			D3D12_RESOURCE_BARRIER resourceBarrier{};
-			resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			resourceBarrier.Transition.pResource = image->resource;
-			resourceBarrier.Transition.Subresource = imageView->getLayerOffset();
-			resourceBarrier.Transition.StateBefore = image->resourceState;
+			D3D12_TEXTURE_BARRIER textureBarrier{};
+			textureBarrier.SyncBefore = D3D12_BARRIER_SYNC_ALL;
+			textureBarrier.SyncAfter = D3D12_BARRIER_SYNC_ALL;
+			textureBarrier.AccessBefore = image->barrierAccess;
+			textureBarrier.LayoutBefore = image->barrierLayout;
 
 			if (isDepthFormat(image->getFormat())) {
-				resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+				textureBarrier.AccessAfter = D3D12_BARRIER_ACCESS_DEPTH_STENCIL_WRITE;
+				textureBarrier.LayoutAfter = D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE;
+
+				image->layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 			}
 			else {
-				resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+				textureBarrier.AccessAfter = D3D12_BARRIER_ACCESS_RENDER_TARGET;
+				textureBarrier.LayoutAfter = D3D12_BARRIER_LAYOUT_RENDER_TARGET;
+
+				image->layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 			}
 
-			image->resourceState = resourceBarrier.Transition.StateAfter;
+			textureBarrier.pResource = image->resource;
+			textureBarrier.Subresources.IndexOrFirstMipLevel = imageView->getMipLevelOffset();
+			textureBarrier.Subresources.NumMipLevels = imageView->getMipLevelCount();
+			textureBarrier.Subresources.FirstArraySlice = imageView->getLayerOffset();
+			textureBarrier.Subresources.NumArraySlices = imageView->getLayerCount();
+			textureBarrier.Subresources.FirstPlane = 0;
+			textureBarrier.Subresources.NumPlanes = 1;
+			textureBarrier.Flags = D3D12_TEXTURE_BARRIER_FLAG_NONE;
 
-			resourceBarriers.emplace_back(resourceBarrier);
+			image->barrierAccess = textureBarrier.AccessAfter;
+			image->barrierLayout = textureBarrier.LayoutAfter;
+
+			textureBarriers.emplace_back(textureBarrier);
 
 			attachmentIndex += 1;
 		}
 
-		if (resourceBarriers.size() > 0) {
-			_commandEncoder->commandList->ResourceBarrier(static_cast<UINT>(resourceBarriers.size()), &resourceBarriers[0]);
+		if (textureBarriers.size() > 0) {
+			D3D12_BARRIER_GROUP barrierGroup{};
+			barrierGroup.Type = D3D12_BARRIER_TYPE_TEXTURE;
+			barrierGroup.NumBarriers = static_cast<UINT>(textureBarriers.size());
+			barrierGroup.pTextureBarriers = &textureBarriers[0];
+
+			_commandEncoder->commandList->Barrier(1, &barrierGroup);
 		}
 
 		attachmentIndex = 0;
@@ -751,29 +831,54 @@ namespace Trident {
 				presentImageView = std::static_pointer_cast<DX12::ImageView>(_commandEncoder->framebuffer->imageViews[subpass->getResolveAttachmentReferenceCount() + (subpass->hasDepthStencilAttachmentReference() ? 1 : 0) + _commandEncoder->presentRenderTargetIndex]);
 				presentImage = static_cast<DX12::Image*>(presentImageView->getImage());
 
-				D3D12_RESOURCE_BARRIER resourceBarriers[2];
+				D3D12_TEXTURE_BARRIER textureBarriers[2];
 
-				D3D12_RESOURCE_BARRIER& resolveResourceBarrier = resourceBarriers[0];
-				resolveResourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-				resolveResourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-				resolveResourceBarrier.Transition.pResource = resolveImage->resource;
-				resolveResourceBarrier.Transition.Subresource = resolveImageView->getLayerOffset();
-				resolveResourceBarrier.Transition.StateBefore = resolveImage->resourceState;
-				resolveResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RESOLVE_SOURCE;
+				D3D12_TEXTURE_BARRIER& resolveTextureBarrier = textureBarriers[0];
+				resolveTextureBarrier.SyncBefore = D3D12_BARRIER_SYNC_ALL;
+				resolveTextureBarrier.SyncAfter = D3D12_BARRIER_SYNC_ALL;
+				resolveTextureBarrier.AccessBefore = resolveImage->barrierAccess;
+				resolveTextureBarrier.AccessAfter = D3D12_BARRIER_ACCESS_RESOLVE_SOURCE;
+				resolveTextureBarrier.LayoutBefore = resolveImage->barrierLayout;
+				resolveTextureBarrier.LayoutAfter = D3D12_BARRIER_LAYOUT_RESOLVE_SOURCE;
+				resolveTextureBarrier.pResource = resolveImage->resource;
+				resolveTextureBarrier.Subresources.IndexOrFirstMipLevel = resolveImageView->getMipLevelOffset();
+				resolveTextureBarrier.Subresources.NumMipLevels = resolveImageView->getMipLevelCount();
+				resolveTextureBarrier.Subresources.FirstArraySlice = resolveImageView->getLayerOffset();
+				resolveTextureBarrier.Subresources.NumArraySlices = resolveImageView->getLayerCount();
+				resolveTextureBarrier.Subresources.FirstPlane = 0;
+				resolveTextureBarrier.Subresources.NumPlanes = 1;
+				resolveTextureBarrier.Flags = D3D12_TEXTURE_BARRIER_FLAG_NONE;
 
-				resolveImage->resourceState = resolveResourceBarrier.Transition.StateAfter;
+				// resolveImage->resourceState = resolveTextureBarrier.Transition.StateAfter;
+				resolveImage->barrierAccess = resolveTextureBarrier.AccessAfter;
+				resolveImage->barrierLayout = resolveTextureBarrier.LayoutAfter;
 
-				D3D12_RESOURCE_BARRIER& presentResourceBarrier = resourceBarriers[1];
-				presentResourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-				presentResourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-				presentResourceBarrier.Transition.pResource = presentImage->resource;
-				presentResourceBarrier.Transition.Subresource = presentImageView->getLayerOffset();
-				presentResourceBarrier.Transition.StateBefore = presentImage->resourceState;
-				presentResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RESOLVE_DEST;
+				D3D12_TEXTURE_BARRIER& presentTextureBarrier = textureBarriers[1];
+				presentTextureBarrier.SyncBefore = D3D12_BARRIER_SYNC_ALL;
+				presentTextureBarrier.SyncAfter = D3D12_BARRIER_SYNC_ALL;
+				presentTextureBarrier.AccessBefore = presentImage->barrierAccess;
+				presentTextureBarrier.AccessAfter = D3D12_BARRIER_ACCESS_RESOLVE_DEST;
+				presentTextureBarrier.LayoutBefore = presentImage->barrierLayout;
+				presentTextureBarrier.LayoutAfter = D3D12_BARRIER_LAYOUT_RESOLVE_DEST;
+				presentTextureBarrier.pResource = presentImage->resource;
+				presentTextureBarrier.Subresources.IndexOrFirstMipLevel = presentImageView->getMipLevelOffset();
+				presentTextureBarrier.Subresources.NumMipLevels = presentImageView->getMipLevelCount();
+				presentTextureBarrier.Subresources.FirstArraySlice = presentImageView->getLayerOffset();
+				presentTextureBarrier.Subresources.NumArraySlices = presentImageView->getLayerCount();
+				presentTextureBarrier.Subresources.FirstPlane = 0;
+				presentTextureBarrier.Subresources.NumPlanes = 1;
+				presentTextureBarrier.Flags = D3D12_TEXTURE_BARRIER_FLAG_NONE; 
 
-				presentImage->resourceState = presentResourceBarrier.Transition.StateAfter;
+				// presentImage->resourceState = presentTextureBarrier.Transition.StateAfter;
+				presentImage->barrierAccess = presentTextureBarrier.AccessAfter;
+				presentImage->barrierLayout = presentTextureBarrier.LayoutAfter;
 
-				_commandEncoder->commandList->ResourceBarrier(2, &resourceBarriers[0]);
+				D3D12_BARRIER_GROUP barrierGroup{};
+				barrierGroup.Type = D3D12_BARRIER_TYPE_TEXTURE;
+				barrierGroup.NumBarriers = 2;
+				barrierGroup.pTextureBarriers = &textureBarriers[0];
+
+				_commandEncoder->commandList->Barrier(1, &barrierGroup);
 
 				_commandEncoder->commandList->ResolveSubresource(
 					presentImage->resource,
@@ -784,17 +889,33 @@ namespace Trident {
 				);
 			}
 
-			D3D12_RESOURCE_BARRIER resourceBarrier{};
-			resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			resourceBarrier.Transition.pResource = presentImage->resource;
-			resourceBarrier.Transition.Subresource = presentImageView->getLayerOffset();
-			resourceBarrier.Transition.StateBefore = presentImage->resourceState;
-			resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+			D3D12_TEXTURE_BARRIER textureBarrier{};
+			textureBarrier.SyncBefore = D3D12_BARRIER_SYNC_ALL;
+			textureBarrier.SyncAfter = D3D12_BARRIER_SYNC_ALL;
+			textureBarrier.AccessBefore = presentImage->barrierAccess;
+			textureBarrier.AccessAfter = D3D12_BARRIER_ACCESS_COMMON;
+			textureBarrier.LayoutBefore = presentImage->barrierLayout;
+			textureBarrier.LayoutAfter = D3D12_BARRIER_LAYOUT_PRESENT;
+			textureBarrier.pResource = presentImage->resource;
+			textureBarrier.Subresources.IndexOrFirstMipLevel = presentImageView->getMipLevelOffset();
+			textureBarrier.Subresources.NumMipLevels = presentImageView->getMipLevelCount();
+			textureBarrier.Subresources.FirstArraySlice = presentImageView->getLayerOffset();
+			textureBarrier.Subresources.NumArraySlices = presentImageView->getLayerCount();
+			textureBarrier.Subresources.FirstPlane = 0;
+			textureBarrier.Subresources.NumPlanes = 1;
+			textureBarrier.Flags = D3D12_TEXTURE_BARRIER_FLAG_NONE; 
 
-			presentImage->resourceState = resourceBarrier.Transition.StateAfter;
+			presentImage->barrierAccess = textureBarrier.AccessAfter;
+			presentImage->barrierLayout = textureBarrier.LayoutAfter;
 
-			_commandEncoder->commandList->ResourceBarrier(1, &resourceBarrier);
+			presentImage->layout = ImageLayout::PRESENT_SRC;
+
+			D3D12_BARRIER_GROUP barrierGroup{};
+			barrierGroup.Type = D3D12_BARRIER_TYPE_TEXTURE;
+			barrierGroup.NumBarriers = 1;
+			barrierGroup.pTextureBarriers = &textureBarrier;
+
+			_commandEncoder->commandList->Barrier(1, &barrierGroup);
 		}
 
 		_commandEncoder->commandCount += 1;
@@ -804,8 +925,16 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
+		sequence<D3D12_BARRIER_GROUP> barrierGroups(2);
 		sequence<D3D12_BUFFER_BARRIER> bufferBarriers(bufferMemoryBarriers.count());
+		sequence<D3D12_TEXTURE_BARRIER> textureBarriers(imageMemoryBarriers.count());
 		UINT bufferBarrierIndex = 0;
+		index imageMemoryBarrierIndex = 0;
+
+		// TODO: Fix driver warning:
+		// "ExecuteCommandLists references command lists that have recorded only Barrier commands. Since there is no other GPU work to synchronize against,
+		// all barriers should use AccessAfter / AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS and SyncBefore / SyncAfter = D3D12_BARRIER_SYNC_NONE.
+		// This information can be used as an optimization hint by some drivers."
 
 		while (bufferBarrierIndex < bufferMemoryBarriers.count()) {
 			const BufferMemoryBarrier& bufferMemoryBarrier = bufferMemoryBarriers[bufferBarrierIndex];
@@ -824,24 +953,22 @@ namespace Trident {
 			bufferBarrierIndex += 1;
 		}
 
-		sequence<D3D12_TEXTURE_BARRIER> textureBarriers(imageMemoryBarriers.count());
-		index imageMemoryBarrierIndex = 0;
+		D3D12_BARRIER_GROUP& bufferBarrierGroup = barrierGroups[0];
+		bufferBarrierGroup.Type = D3D12_BARRIER_TYPE_BUFFER;
+		bufferBarrierGroup.NumBarriers = static_cast<UINT>(bufferBarriers.count());
+		bufferBarrierGroup.pBufferBarriers = &bufferBarriers[0];
 
 		while (imageMemoryBarrierIndex < imageMemoryBarriers.count()) {
 			const ImageMemoryBarrier& imageMemoryBarrier = imageMemoryBarriers[imageMemoryBarrierIndex];
+			const ref<DX12::Image> dxImage = std::static_pointer_cast<DX12::Image>(imageMemoryBarrier.image);
 
 			D3D12_TEXTURE_BARRIER& textureBarrier = textureBarriers[imageMemoryBarrierIndex];
 			textureBarrier.SyncBefore = D3D12_BARRIER_SYNC_ALL;
 			textureBarrier.SyncAfter = D3D12_BARRIER_SYNC_ALL;
-			textureBarrier.AccessBefore = getImageBarrierAccess(imageMemoryBarrier.image->access, imageMemoryBarrier.newLayout);
+			textureBarrier.AccessBefore = dxImage->barrierAccess;
 			textureBarrier.AccessAfter = getImageBarrierAccess(imageMemoryBarrier.newAccess, imageMemoryBarrier.newLayout);
-
-			// TODO: Determine correct barrier layouts.
-			ENGINE_ERROR_UNIMPLEMENTED();
-
-			// textureBarrier.LayoutBefore = getImageTransitionBarrierLayout(imageMemoryBarrier.image->getLayout());
-			// textureBarrier.LayoutAfter = getImageTransitionBarrierLayout(imageMemoryBarrier.newLayout);
-
+			textureBarrier.LayoutBefore = dxImage->barrierLayout;
+			textureBarrier.LayoutAfter = getBarrierLayout(imageMemoryBarrier.newLayout, imageMemoryBarrier.newAccess);
 			textureBarrier.pResource = std::static_pointer_cast<DX12::Image>(imageMemoryBarrier.image)->resource;
 			textureBarrier.Subresources.IndexOrFirstMipLevel = 0;
 			textureBarrier.Subresources.NumMipLevels = imageMemoryBarrier.image->getMipLevelCount();
@@ -851,18 +978,14 @@ namespace Trident {
 			textureBarrier.Subresources.NumPlanes = 1;
 			textureBarrier.Flags = D3D12_TEXTURE_BARRIER_FLAG_NONE;
 
+			dxImage->barrierAccess = textureBarrier.AccessAfter;
+			dxImage->barrierLayout = textureBarrier.LayoutAfter;
+
 			imageMemoryBarrier.image->layout = imageMemoryBarrier.newLayout;
 			imageMemoryBarrier.image->access = imageMemoryBarrier.newAccess;
 
 			imageMemoryBarrierIndex += 1;
 		}
-
-		sequence<D3D12_BARRIER_GROUP> barrierGroups(2);
-
-		D3D12_BARRIER_GROUP& bufferBarrierGroup = barrierGroups[0];
-		bufferBarrierGroup.Type = D3D12_BARRIER_TYPE_BUFFER;
-		bufferBarrierGroup.NumBarriers = static_cast<UINT>(bufferBarriers.count());
-		bufferBarrierGroup.pBufferBarriers = &bufferBarriers[0];
 
 		D3D12_BARRIER_GROUP& textureBarrierGroup = barrierGroups[1];
 		textureBarrierGroup.Type = D3D12_BARRIER_TYPE_TEXTURE;

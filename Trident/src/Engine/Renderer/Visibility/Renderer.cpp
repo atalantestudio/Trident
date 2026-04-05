@@ -383,59 +383,55 @@ namespace Trident {
 			cameraDescriptorSetLayout,
 			clusterDescriptorSetLayout,
 			instanceDescriptorSetLayout,
-
-			#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
-				visibilityDebugDescriptorSetLayout,
-			#endif
-
 			materialCountDescriptorSetLayout,
 			materialOffsetDescriptorSetLayout,
 			materialCoordinateDescriptorSetLayout,
 			materialBaseDescriptorSetLayout,
 			outputDescriptorSetLayout,
-		});
-
-		uint32 descriptorSetIndex = 0;
-
-		cameraDescriptorSet = descriptorSets[descriptorSetIndex++];
-		clusterDescriptorSet = descriptorSets[descriptorSetIndex++];
-		instanceDescriptorSet = descriptorSets[descriptorSetIndex++];
-
-		#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
-			visibilityDebugDescriptorSet = descriptorSets[descriptorSetIndex++];
-		#endif
-
-		materialCountDescriptorSet = descriptorSets[descriptorSetIndex++];
-		materialOffsetDescriptorSet = descriptorSets[descriptorSetIndex++];
-		materialCoordinateDescriptorSet = descriptorSets[descriptorSetIndex++];
-		materialBaseDescriptorSet = descriptorSets[descriptorSetIndex++];
-		outputDescriptorSet = descriptorSets[descriptorSetIndex++];
-	}
-
-	void VisibilityRenderer::transitionOutputImage() const {
-		// TODO: Avoid creating a command encoder for a single image transition?
-		const ref<Queue> graphicsQueue = getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
-		const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder({
-			.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
-			#if defined(BUILD_MODE_DEBUG)
-				.name = "Transition output image",
+			#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
+				visibilityDebugDescriptorSetLayout,
 			#endif
 		});
 
-		commandEncoder->begin();
+		cameraDescriptorSet = descriptorSets[0];
+		clusterDescriptorSet = descriptorSets[1];
+		instanceDescriptorSet = descriptorSets[2];
+		materialCountDescriptorSet = descriptorSets[3];
+		materialOffsetDescriptorSet = descriptorSets[4];
+		materialCoordinateDescriptorSet = descriptorSets[5];
+		materialBaseDescriptorSet = descriptorSets[6];
+		outputDescriptorSet = descriptorSets[7];
+		#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
+			visibilityDebugDescriptorSet = descriptorSets[8];
+		#endif
+	}
 
-		const ImageMemoryBarrier outputImageMemoryBarrier = {
-			.image = outputImage,
-			.newLayout = ImageLayout::GENERAL,
-			.newAccess = Access::SHADER_WRITE,
-		};
+	void VisibilityRenderer::transitionOutputImage() const {
+		if (getGraphicsApi() != GraphicsAPI::DX12) {
+			// TODO: Avoid creating a command encoder for a single image transition?
+			const ref<Queue> graphicsQueue = getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
+			const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder({
+				.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
+				#if defined(BUILD_MODE_DEBUG)
+					.name = "Transition output image",
+				#endif
+			});
 
-		commandEncoder->insertMemoryBarriers({}, {outputImageMemoryBarrier});
+			commandEncoder->begin();
 
-		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+			const ImageMemoryBarrier outputImageMemoryBarrier = {
+				.image = outputImage,
+				.newLayout = ImageLayout::GENERAL,
+				.newAccess = Access::SHADER_WRITE,
+			};
 
-		graphicsQueue->submit({commandBuffer});
-		graphicsQueue->waitIdle();
+			commandEncoder->insertMemoryBarriers({}, {outputImageMemoryBarrier});
+
+			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+			graphicsQueue->submit({commandBuffer});
+			graphicsQueue->waitIdle();
+		}
 	}
 
 	void VisibilityRenderer::writeVisibilityIndirectCommand() const {

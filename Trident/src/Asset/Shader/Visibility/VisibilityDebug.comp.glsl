@@ -215,7 +215,7 @@ vec2 ndc(vec2 coordinate) {
 	return ndc;
 }
 
-// TODO: Fix linear depth values fading too quick between the near and far planes.
+// TODO: Fix linear depth values fading too quickly between the near and far planes.
 float linearizeDepth(float depth) {
 	float nearPlane = camera.nearPlane;
 	float farPlane = camera.farPlane;
@@ -416,8 +416,6 @@ vec4 VisibilityDebug(uvec2 screenCoordinate) {
 
 	Triangle triangle = loadTriangle(triangleIndex, instance, geometry);
 
-	vec3 color;
-
 	switch (VISUALIZATION_MODE) {
 		case VISUALIZATION_MODE_TRIANGLE_INDEX: {
 			return vec4(uintToColor(triangleIndex + 1u), 1.0);
@@ -459,7 +457,7 @@ vec4 VisibilityDebug(uvec2 screenCoordinate) {
 			return vec4(visualizeBlinnPhongShading(triangle, instance, coordinate), 1.0);
 		}
 		default: {
-			vec4(0.0, 0.0, 0.0, 1.0);
+			return vec4(0.0, 0.0, 0.0, 1.0);
 		}
 	}
 }

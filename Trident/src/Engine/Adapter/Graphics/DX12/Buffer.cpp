@@ -5,8 +5,6 @@
 
 #include "Engine/Adapter/Graphics/DX12/Buffer.hpp"
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
-#include "Engine/Adapter/Graphics/DX12/HeapType.hpp"
-#include "Engine/Adapter/Graphics/DX12/ResourceState.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
@@ -26,11 +24,12 @@ namespace Trident {
 		ref<DX12::BaseBuffer> buffer = createRef<DX12::BaseBuffer>(device, descriptor, stride);
 
 		D3D12_HEAP_PROPERTIES heapProperties{};
-		heapProperties.Type = getHeapType(descriptor.usage, descriptor.memoryProperties);
 		heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
 		heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
 		heapProperties.CreationNodeMask = 1;
 		heapProperties.VisibleNodeMask = 1;
+
+		const D3D12_HEAP_FLAGS heapFlags = D3D12_HEAP_FLAG_NONE;
 
 		D3D12_RESOURCE_DESC resourceDescriptor{};
 		resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
@@ -45,17 +44,32 @@ namespace Trident {
 		resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 		resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-		if (descriptor.usage & BufferUsage::READ_WRITE_STORAGE) {
-			resourceDescriptor.Flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+		D3D12_RESOURCE_STATES initialResourceStates{};
+
+		if (descriptor.memoryProperties & MemoryProperty::DEVICE_LOCAL) {
+			// TODO: Put in the validation layer (Device::createBuffer).
+			// ADAPTER_ASSERT(descriptor.memoryProperties & MemoryProperty::DEVICE_LOCAL, "Memory properties must contain DEVICE_LOCAL.");
+
+			heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
+			initialResourceStates = D3D12_RESOURCE_STATE_COMMON;
+
+			if (descriptor.usage & BufferUsage::READ_WRITE_STORAGE) {
+				resourceDescriptor.Flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+			}
 		}
 
-		const D3D12_HEAP_FLAGS heapFlags = D3D12_HEAP_FLAG_NONE;
-
-		D3D12_RESOURCE_STATES initialResourceStates = getBufferResourceState(descriptor.usage);
-
-		if (heapProperties.Type == D3D12_HEAP_TYPE_READBACK) {
-			initialResourceStates = D3D12_RESOURCE_STATE_COPY_DEST;
+		if (descriptor.memoryProperties & MemoryProperty::HOST_VISIBLE) {
+			if (descriptor.usage == BufferUsage::TRANSFER_DST) {
+				heapProperties.Type = D3D12_HEAP_TYPE_READBACK;
+				initialResourceStates = D3D12_RESOURCE_STATE_COPY_DEST;
+			}
+			else {
+				heapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;
+				initialResourceStates = D3D12_RESOURCE_STATE_GENERIC_READ;
+			}
 		}
+
+		ADAPTER_ASSERT(descriptor.memoryProperties & MemoryProperty::DEVICE_LOCAL || descriptor.memoryProperties & MemoryProperty::HOST_VISIBLE, "Invalid memory properties.");
 
 		{
 			PROFILE_SCOPE("CreateCommittedResource (buffer)");
