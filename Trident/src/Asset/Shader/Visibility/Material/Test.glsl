@@ -191,8 +191,10 @@ BarycentricDerivatives computePartialDerivatives(vec2 a, vec2 b, vec2 c) {
 	return derivatives;
 }
 
-// `p` is the fragment coordinate in NDC space.
-BarycentricDerivatives computeBarycentricDerivatives(vec4 a, vec4 b, vec4 c, vec2 p) {
+// TODO(visibility/barycentrics)
+// A part of the barycentrics can be calculated per triangle.
+// The visibility buffer could store this part to avoid it being computed here for each pixel of the triangle.
+BarycentricDerivatives computeBarycentricDerivatives(vec4 a, vec4 b, vec4 c, vec2 ndcScreenCoordinate) {
 	vec3 wInverse = vec3(1.0, 1.0, 1.0) / vec3(a.w, b.w, c.w);
 
 	vec2 pA = a.xy * wInverse.x;
@@ -207,7 +209,7 @@ BarycentricDerivatives computeBarycentricDerivatives(vec4 a, vec4 b, vec4 c, vec
 	float ddxSum = derivatives.ddx.x + derivatives.ddx.y + derivatives.ddx.z;
 	float ddySum = derivatives.ddy.x + derivatives.ddy.y + derivatives.ddy.z;
 
-	vec2 delta = p - pA;
+	vec2 delta = ndcScreenCoordinate - pA;
 	float interpInvW = wInverse.x + delta.x * ddxSum + delta.y * ddySum;
 	float interpW = 1.0 / interpInvW;
 
