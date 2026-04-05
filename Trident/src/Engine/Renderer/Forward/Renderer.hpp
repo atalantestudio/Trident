@@ -123,30 +123,28 @@ namespace Trident {
 				commandEncoder->setScissor(0, 0, swapchainExtent);
 
 				// TODO(GL): Allow the vertex buffer to be bound before setting a render pipeline.
-				// commandEncoder->bindVertexBuffer(0, instanceBuffer, 0, sizeof(Instance));
 
-				// TODO: Restore.
-				/* const view<ref<Geometry3D>> geometries = scene->getGeometries();
-				const view<Material> materials = scene->getMaterials();
-				const view<MaterialReference> materialReferences = scene->getFlatMaterialReferences();
+				const view<ref<Geometry3D>> geometries = scene->getGeometries();
 				const view<RigidBody3D> instances = scene->getInstances();
+				const std::vector<Shader>& materialShaders = scene->getMaterialShaders();
+				const std::vector<std::vector<Material>>& materials = scene->getMaterials();
 
 				uint32 instanceIndex = 0;
 
 				while (instanceIndex < instances.count()) {
 					const RigidBody3D& instance = instances[instanceIndex];
 					const ref<Geometry3D> geometry = geometries[instance.geometryIndex];
-					const MaterialReference& materialReference = materialReferences[instance.materialReferenceIndex];
+					const uint32 materialShaderIndex = scene->getMaterialShaderIndex(instance.materialIndex);
 					const uint32 vertexCount = static_cast<uint32>(geometry->getVertexPositionIndices().count());
 					const uint32 indexOffset = scene->getVertexPositionIndexOffset(instance.geometryIndex);
 
-					commandEncoder->bindGraphicsPipeline(materialPipelines[materialReference.materialIndex]);
+					commandEncoder->bindGraphicsPipeline(materialPipelines[materialShaderIndex]);
 					commandEncoder->bindVertexBuffer(0, instanceBuffer, 0, sizeof(Instance));
-					commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialReference.materialIndex], 0, {vertexDescriptorSet, materialDescriptorSets[instance.materialReferenceIndex]});
+					commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialShaderIndex], 0, {vertexDescriptorSet, materialDescriptorSets[materialShaderIndex]});
 					commandEncoder->draw(vertexCount, 1, indexOffset, instanceIndex);
 
 					instanceIndex += 1;
-				} */
+				}
 
 				commandEncoder->endRenderPass();
 			}
