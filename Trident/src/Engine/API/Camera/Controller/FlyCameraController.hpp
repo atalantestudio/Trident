@@ -29,7 +29,7 @@ namespace Trident {
 
 			void update(float32 deltaTime) override {
 				// camera.updatePosition(linearMotionOffset * deltaTime);
-				camera.updateOrientation(angularMotionOffset * deltaTime);
+				camera.updateOrientation(svec3<float32>(angularMotionOffset * deltaTime));
 
 				camera.updateView();
 				camera.updateProjectionView();
