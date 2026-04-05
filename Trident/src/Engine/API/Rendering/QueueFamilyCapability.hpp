@@ -6,6 +6,7 @@
 namespace Trident {
 	// Capabilities of queues in a queue family.
 	// Used when querying the corresponding queue from a device.
+	// In general, graphics queues accept any command, compute queues accept compute and transfer related commands and transfer queues accept only transfer commands.
 	enum class QueueFamilyCapability : uint8 {
 		GRAPHICS,
 		COMPUTE,
