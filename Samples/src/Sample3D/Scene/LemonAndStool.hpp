@@ -10,15 +10,16 @@
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 
 namespace Trident::LemonAndStool {
-	void initializeScene(Scene3D& scene, AssetLibrary* assetLibrary, GraphicsAPI graphicsApi) {
+	Scene3D initializeScene(Application* application, GraphicsAPI graphicsApi) {
+		AssetLibrary* assetLibrary = application->getAssetLibrary();
+
 		const ref<GeometryAsset> lemonGeometryAsset = assetLibrary->getAsset<GeometryAsset>("lemon_1k");
 		const ref<GeometryAsset> foldingWoodenStoolGeometryAsset = assetLibrary->getAsset<GeometryAsset>("folding_wooden_stool");
 
-		const ref<Geometry3D> lemonGeometry = createRef<Geometry3D>(lemonGeometryAsset);
-		const ref<Geometry3D> foldingWoodenStoolGeometry = createRef<Geometry3D>(foldingWoodenStoolGeometryAsset);
+		const view<char8> sceneAssetName = application->getPropertyFile()->getProperty<view<char8>>("AssetName");
+		const ref<Scene3DAsset> sceneAsset = assetLibrary->getAsset<Scene3DAsset>(sceneAssetName);
 
-		const uint32 lemonGeometryIndex = scene.registerGeometry(lemonGeometry);
-		const uint32 foldingWoodenStoolGeometryIndex = scene.registerGeometry(foldingWoodenStoolGeometry);
+		Scene3D scene(sceneAsset);
 
 		Shader pbrMaterialShader = {
 			.descriptorSetLayoutBindings = {
@@ -116,26 +117,6 @@ namespace Trident::LemonAndStool {
 			},
 		});
 
-		scene.registerInstance({
-			.position = {0.0_m, -0.5_m, 1.0_m},
-			.rotation = {pi<float32>() * 0.5f, 0.3_rad, 0.0_rad},
-			.scale = {1.0f, 1.0f, 1.0f},
-			.geometryIndex = foldingWoodenStoolGeometryIndex,
-			.materialIndex = foldingWoodenStoolMaterialIndex,
-		});
-		scene.registerInstance({
-			.position = {-0.04_m, -0.025_m, 1.0_m},
-			.rotation = {0.2_rad, 0.0_rad, 0.0_rad},
-			.scale = {1.0f, 1.0f, 1.0f},
-			.geometryIndex = lemonGeometryIndex,
-			.materialIndex = lemonMaterialIndex,
-		});
-		scene.registerInstance({
-			.position = {0.03_m, -0.025_m, 0.9_m},
-			.rotation = {-0.2_rad, 0.5_rad, 0.0_rad},
-			.scale = {1.0f, 1.0f, 1.0f},
-			.geometryIndex = lemonGeometryIndex,
-			.materialIndex = lemonMaterialIndex,
-		});
+		return scene;
 	}
 }

@@ -7,13 +7,44 @@
 #include "Engine/API/Graphics/GraphicsAPI.hpp"
 #include "Engine/API/Material/Shader.hpp"
 #include "Engine/API/Scene/Scene3D.hpp"
+#include "Engine/ECS/Component/MaterialComponent.hpp"
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 
 namespace Trident::Lemons {
-	void initializeScene(Scene3D& scene, AssetLibrary* assetLibrary, GraphicsAPI graphicsApi) {
+	Scene3D initializeScene(Application* application, GraphicsAPI graphicsApi) {
+		AssetLibrary* assetLibrary = application->getAssetLibrary();
+
 		const ref<GeometryAsset> lemonGeometryAsset = assetLibrary->getAsset<GeometryAsset>("lemon_1k");
-		const ref<Geometry3D> lemonGeometry = createRef<Geometry3D>(lemonGeometryAsset);
-		const uint32 lemonGeometryIndex = scene.registerGeometry(lemonGeometry);
+
+		const view<char8> sceneAssetName = application->getPropertyFile()->getProperty<view<char8>>("AssetName");
+		const ref<Scene3DAsset> sceneAsset = assetLibrary->getAsset<Scene3DAsset>(sceneAssetName);
+
+		Scene3D scene(sceneAsset);
+
+		/* Shader defaultMaterialShader = {
+			.descriptorSetLayoutBindings = {},
+		};
+
+		switch (graphicsApi) {
+			case GraphicsAPI::DX12:
+			case GraphicsAPI::VK: {
+				defaultMaterialShader.modulePath = "Material/Default";
+
+				break;
+			}
+			case GraphicsAPI::GL: {
+				defaultMaterialShader.modulePath = "Material/DefaultGL";
+
+				break;
+			}
+		}
+
+		const uint32 defaultMaterialShaderIndex = scene.registerMaterialShader(defaultMaterialShader);
+
+		scene.registerMaterial({
+			.shaderIndex = defaultMaterialShaderIndex,
+			.writeDescriptorSetBindings = {},
+		}); */
 
 		Shader pbrMaterialShader = {
 			.descriptorSetLayoutBindings = {
@@ -97,19 +128,10 @@ namespace Trident::Lemons {
 			},
 		});
 
-		scene.registerInstance({
-			.position = {0.3_m, 0.0_m, 1.25_m},
-			.rotation = {-pi<float32>() * 0.5f, -0.2_rad, pi<float32>()},
-			.scale = {10.0f, 10.0f, 10.0f},
-			.geometryIndex = lemonGeometryIndex,
-			.materialIndex = lemonMaterialIndex,
-		});
-		scene.registerInstance({
-			.position = {-0.35_m, -0.2_m, 1.25_m},
-			.rotation = {-0.3_rad, -0.3_rad, pi<float32>() * 0.5f},
-			.scale = {10.0f, 10.0f, 10.0f},
-			.geometryIndex = lemonGeometryIndex,
-			.materialIndex = lemonMaterialIndex,
-		});
+		// TODO: Simplify.
+		scene.ecs.getComponentPool<MaterialComponent>().setComponent(0, {0});
+		scene.ecs.getComponentPool<MaterialComponent>().setComponent(1, {0});
+
+		return scene;
 	}
 }

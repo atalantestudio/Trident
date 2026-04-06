@@ -3,8 +3,8 @@
 
 #pragma once
 
+#include "Engine/API/Axis.hpp"
 #include "Engine/API/Camera/Camera.hpp"
-#include "Engine/API/Physics/Axis.hpp"
 
 namespace Trident {
 	class PerspectiveCamera : public Camera {

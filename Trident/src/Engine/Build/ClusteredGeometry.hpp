@@ -14,6 +14,7 @@ namespace Trident {
 		// Index of the first cluster belonging to this geometry.
 		uint32 clusterOffset;
 
+		// TODO: Remove (not used).
 		// Number of instances using this geometry.
 		uint32 instanceCount;
 

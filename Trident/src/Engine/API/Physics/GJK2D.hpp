@@ -186,8 +186,8 @@ namespace Trident {
 		Simplex2Vertex vertex;
 		vertex.iA = 0;
 		vertex.iB = 0;
-		vertex.vA = multiplyTransform(vec2<float32>(hullA.getVertices()[vertex.iA]), A.transform);
-		vertex.vB = multiplyTransform(vec2<float32>(hullB.getVertices()[vertex.iB]), B.transform);
+		vertex.vA = multiplyTransform(vec2<float32>(hullA.getVertices()[vertex.iA]), A.world);
+		vertex.vB = multiplyTransform(vec2<float32>(hullB.getVertices()[vertex.iB]), B.world);
 		vertex.v = vertex.vB - vertex.vA;
 
 		Simplex2 s = {vertex};
@@ -283,8 +283,8 @@ namespace Trident {
 				break;
 			}
 
-			vertex.vA = multiplyTransform(vec2<float32>(hullA.getVertices()[vertex.iA]), A.transform);
-			vertex.vB = multiplyTransform(vec2<float32>(hullB.getVertices()[vertex.iB]), B.transform);
+			vertex.vA = multiplyTransform(vec2<float32>(hullA.getVertices()[vertex.iA]), A.world);
+			vertex.vB = multiplyTransform(vec2<float32>(hullB.getVertices()[vertex.iB]), B.world);
 			vertex.v = vertex.vB - vertex.vA;
 
 			s[s.count] = vertex;

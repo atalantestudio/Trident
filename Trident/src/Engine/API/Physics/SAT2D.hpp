@@ -44,9 +44,9 @@ namespace Trident {
 			const vec2<float32> b = referenceHull.getVertices()[edge.indexB];
 			const vec2<float32> d = edgeNormalClockwise(a, b);
 			const vec2<float32> s = incidentHull.support(-d * R);
-			const vec2<float32> aT = multiplyTransform(a, referenceBody.transform);
-			const vec2<float32> bT = multiplyTransform(b, referenceBody.transform);
-			const vec2<float32> sT = multiplyTransform(s, incidentBody.transform);
+			const vec2<float32> aT = multiplyTransform(a, referenceBody.world);
+			const vec2<float32> bT = multiplyTransform(b, referenceBody.world);
+			const vec2<float32> sT = multiplyTransform(s, incidentBody.world);
 			const float32 separation = signedDistanceLinePoint(aT, bT, sT);
 
 			if (separation > output.separation) {

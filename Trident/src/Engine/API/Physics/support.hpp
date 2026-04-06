@@ -27,6 +27,6 @@ namespace Trident {
 	static vec2<float32> support(const RigidBody2D& A, const Hull2D& hull, vec2<float32> d) {
 		const vec2<float32> s = supportVertex(A, hull, d);
 
-		return multiplyTransform(s, A.transform);
+		return multiplyTransform(s, A.world);
 	}
 }

@@ -78,7 +78,7 @@ namespace Trident {
 		component.inverseMass = 1.0f / m;
 		component.inverseInertia = 1.0f / I;
 
-		component.updateTransform(descriptor.centroid);
+		component.updateWorld(descriptor.centroid);
 
 		return component;
 	}

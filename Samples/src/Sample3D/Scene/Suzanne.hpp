@@ -39,13 +39,13 @@ namespace Trident {
 
 		const uint32 pbrMaterialReferenceIndex = scene.registerMaterialReference(pbrMaterialReference);
 
-		SceneInstanceDescriptor instanceDescriptor{};
+		/* SceneInstanceDescriptor instanceDescriptor{};
 		instanceDescriptor.position = {0.0_m, 0.0_m, 0.0_m};
 		instanceDescriptor.rotation = {pi<float32>() * -0.5f, 0.0_rad, pi<float32>()};
 		instanceDescriptor.geometryIndex = geometryIndex;
 		instanceDescriptor.materialReferenceIndex = pbrMaterialReferenceIndex;
 
-		scene.registerInstance(instanceDescriptor);
+		scene.registerInstance(instanceDescriptor); */
 
 		return scene;
 	}

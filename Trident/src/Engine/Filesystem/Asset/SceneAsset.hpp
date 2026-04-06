@@ -6,14 +6,17 @@
 #include "Engine/API/Descriptor.hpp"
 #include "Engine/ECS/Component/GeometryComponent.hpp"
 #include "Engine/ECS/Component/RigidBody2DComponent.hpp"
+#include "Engine/ECS/Component/RigidBody3DComponent.hpp"
 #include "Engine/ECS/EntityComponentMapping.hpp"
 #include "Engine/Filesystem/Asset/Asset.hpp"
 #include "Engine/Filesystem/Asset/GeometryAsset.hpp"
 
 namespace Trident {
+	class SceneAsset;
 	class Scene2DAsset;
+	class Scene3DAsset;
 
-	struct Scene2DAssetHeader : public AssetHeader {
+	struct SceneAssetHeader : public AssetHeader {
 		uint32 staticVertexCount;
 		uint32 staticIndexCount;
 		uint32 entityCount;
@@ -23,27 +26,35 @@ namespace Trident {
 	};
 
 	template<>
-	struct Descriptor<Scene2DAsset> : public AssetDescriptor {
+	struct Descriptor<SceneAsset> : public AssetDescriptor {
 		uint32 staticVertexCount;
 		uint32 staticIndexCount;
 		uint32 entityCount;
 		sequence<uint8> staticBuffer;
 		sequence<ref<GeometryAsset>> geometryAssets;
 		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
+	};
+
+	template<>
+	struct Descriptor<Scene2DAsset> : public Descriptor<SceneAsset> {
 		sequence<EntityComponentMapping<RigidBody2DComponent>> rigidBodyMappings;
 	};
 
-	class Scene2DAsset : public Asset {
+	template<>
+	struct Descriptor<Scene3DAsset> : public Descriptor<SceneAsset> {
+		sequence<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;
+	};
+
+	class SceneAsset : public Asset {
 		public:
-			explicit Scene2DAsset(const Descriptor<Scene2DAsset>& descriptor) :
+			explicit SceneAsset(const Descriptor<SceneAsset>& descriptor) :
 				Asset(descriptor),
 				staticVertexCount(descriptor.staticVertexCount),
 				staticIndexCount(descriptor.staticIndexCount),
 				entityCount(descriptor.entityCount),
 				staticBuffer(descriptor.staticBuffer),
 				geometryAssets(descriptor.geometryAssets),
-				geometryMappings(descriptor.geometryMappings),
-				rigidBodyMappings(descriptor.rigidBodyMappings)
+				geometryMappings(descriptor.geometryMappings)
 			{}
 
 			inline uint32 getStaticVertexCount() const {
@@ -70,10 +81,6 @@ namespace Trident {
 				return geometryMappings;
 			}
 
-			inline const sequence<EntityComponentMapping<RigidBody2DComponent>>& getRigidBodyMappings() const {
-				return rigidBodyMappings;
-			}
-
 		private:
 			uint32 staticVertexCount;
 			uint32 staticIndexCount;
@@ -81,6 +88,35 @@ namespace Trident {
 			sequence<uint8> staticBuffer;
 			sequence<ref<GeometryAsset>> geometryAssets;
 			sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
+	};
+
+	class Scene2DAsset : public SceneAsset {
+		public:
+			explicit Scene2DAsset(const Descriptor<Scene2DAsset>& descriptor) :
+				SceneAsset(descriptor),
+				rigidBodyMappings(descriptor.rigidBodyMappings)
+			{}
+
+			inline const sequence<EntityComponentMapping<RigidBody2DComponent>>& getRigidBodyMappings() const {
+				return rigidBodyMappings;
+			}
+
+		private:
 			sequence<EntityComponentMapping<RigidBody2DComponent>> rigidBodyMappings;
+	};
+
+	class Scene3DAsset : public SceneAsset {
+		public:
+			explicit Scene3DAsset(const Descriptor<Scene3DAsset>& descriptor) :
+				SceneAsset(descriptor),
+				rigidBodyMappings(descriptor.rigidBodyMappings)
+			{}
+
+			inline const sequence<EntityComponentMapping<RigidBody3DComponent>>& getRigidBodyMappings() const {
+				return rigidBodyMappings;
+			}
+
+		private:
+			sequence<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;
 	};
 }

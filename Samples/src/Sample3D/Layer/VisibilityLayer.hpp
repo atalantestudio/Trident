@@ -19,35 +19,8 @@ namespace Trident {
 				renderer.setLayer(this);
 				renderer.build();
 
-				Shader defaultMaterialShader = {
-					.descriptorSetLayoutBindings = {},
-				};
-
-				switch (renderer.getGraphicsApi()) {
-					case GraphicsAPI::DX12:
-					case GraphicsAPI::VK: {
-						defaultMaterialShader.modulePath = "Material/Default";
-
-						break;
-					}
-					case GraphicsAPI::GL: {
-						defaultMaterialShader.modulePath = "Material/DefaultGL";
-
-						break;
-					}
-				}
-
-				const uint32 defaultMaterialShaderIndex = scene.registerMaterialShader(defaultMaterialShader);
-
-				scene.registerMaterial({
-					.shaderIndex = defaultMaterialShaderIndex,
-					.writeDescriptorSetBindings = {},
-				});
-
-				LemonAndStool::initializeScene(scene, getApplication()->getAssetLibrary(), renderer.getGraphicsApi());
-
-				scene.createVertexBuffer(renderer.getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment);
-				clusteredScene = clusterizeScene(scene);
+				scene = createScope<Scene3D>(LemonAndStool::initializeScene(getApplication(), renderer.getGraphicsApi()));
+				clusteredScene = clusterizeScene(scene.get());
 
 				renderer.setScene(&clusteredScene);
 
@@ -157,7 +130,7 @@ namespace Trident {
 
 		private:
 			VisibilityRenderer renderer;
-			Scene3D scene;
+			scope<Scene3D> scene;
 			ClusteredScene clusteredScene;
 			FlyCameraController cameraController;
 	};

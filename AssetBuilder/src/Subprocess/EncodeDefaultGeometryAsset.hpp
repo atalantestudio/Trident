@@ -11,8 +11,7 @@ namespace Trident {
 	inline void EncodeDefaultGeometryAsset(const std::filesystem::path& outputDirectory) {
 		constexpr Hull2DType HULL_TYPE = Hull2DType::POLYGON;
 
-		// const uint32 identifier = AssetLibrary::createAssetIdentifier();
-		const uint32 identifier = 484634187;
+		constexpr uint32 identifier = 484634187;
 		const Geometry2D geometry = Geometry2D::unitSquare();
 		const Hull2D hull = Hull2D::fromGeometry<HULL_TYPE>(geometry);
 

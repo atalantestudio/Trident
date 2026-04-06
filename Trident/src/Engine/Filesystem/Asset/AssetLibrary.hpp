@@ -88,8 +88,15 @@ namespace Trident {
 				return imageAssetPathToIndex;
 			}
 
+			// 2D and 3D scenes share the same index map.
 			template<>
 			const std::unordered_map<sequence<char8>, uint32>& getAssetPathToIndexMap<Scene2DAsset>() const {
+				return sceneAssetPathToIndex;
+			}
+
+			// 2D and 3D scenes share the same index map.
+			template<>
+			const std::unordered_map<sequence<char8>, uint32>& getAssetPathToIndexMap<Scene3DAsset>() const {
 				return sceneAssetPathToIndex;
 			}
 
@@ -116,11 +123,11 @@ namespace Trident {
 				byteStream.jump(sizeof(AssetSignature));
 
 				const ref<FontAsset> fontAsset = decodeFontAsset(path, byteStream);
-				const uint32 fontAssetIndex = static_cast<uint32>(assets.size());
+				const uint32 assetIndex = static_cast<uint32>(assets.size());
 				const sequence<char8> stem = absolutePath.stem().string();
 
-				assetIdentifierToIndex.insert({fontAsset->getIdentifier(), fontAssetIndex});
-				fontAssetPathToIndex.insert({stem, fontAssetIndex});
+				assetIdentifierToIndex.insert({fontAsset->getIdentifier(), assetIndex});
+				fontAssetPathToIndex.insert({stem, assetIndex});
 				assets.emplace_back(fontAsset);
 			}
 
@@ -139,11 +146,11 @@ namespace Trident {
 				byteStream.jump(sizeof(AssetSignature));
 
 				const ref<GeometryAsset> geometryAsset = Filesystem::decodeAsset<GeometryAsset>(byteStream);
-				const uint32 geometryAssetIndex = static_cast<uint32>(assets.size());
+				const uint32 assetIndex = static_cast<uint32>(assets.size());
 				const sequence<char8> stem = absolutePath.stem().string();
 
-				assetIdentifierToIndex.insert({geometryAsset->getIdentifier(), geometryAssetIndex});
-				geometryAssetPathToIndex.insert({stem, geometryAssetIndex});
+				assetIdentifierToIndex.insert({geometryAsset->getIdentifier(), assetIndex});
+				geometryAssetPathToIndex.insert({stem, assetIndex});
 				assets.emplace_back(geometryAsset);
 			}
 
@@ -160,11 +167,11 @@ namespace Trident {
 				}
 
 				const ref<ImageAsset> imageAsset = decodeImageAsset(byteStream);
-				const uint32 imageAssetIndex = static_cast<uint32>(assets.size());
+				const uint32 assetIndex = static_cast<uint32>(assets.size());
 				const sequence<char8> stem = absolutePath.stem().string();
 
-				assetIdentifierToIndex.insert({imageAsset->getIdentifier(), imageAssetIndex});
-				imageAssetPathToIndex.insert({stem, imageAssetIndex});
+				assetIdentifierToIndex.insert({imageAsset->getIdentifier(), assetIndex});
+				imageAssetPathToIndex.insert({stem, assetIndex});
 				assets.emplace_back(imageAsset);
 			}
 
@@ -183,11 +190,34 @@ namespace Trident {
 				byteStream.jump(sizeof(AssetSignature));
 
 				const ref<Scene2DAsset> sceneAsset = decodeScene2DAsset(byteStream);
-				const uint32 sceneAssetIndex = static_cast<uint32>(assets.size());
+				const uint32 assetIndex = static_cast<uint32>(assets.size());
 				const sequence<char8> stem = absolutePath.stem().string();
 
-				assetIdentifierToIndex.insert({sceneAsset->getIdentifier(), sceneAssetIndex});
-				sceneAssetPathToIndex.insert({stem, sceneAssetIndex});
+				assetIdentifierToIndex.insert({sceneAsset->getIdentifier(), assetIndex});
+				sceneAssetPathToIndex.insert({stem, assetIndex});
+				assets.emplace_back(sceneAsset);
+			}
+
+			template<>
+			void loadAsset<Scene3DAsset>(view<char8> path) {
+				const std::filesystem::path absolutePath = getAbsolutePath("Asset/Scene", path, ".tsa");
+				const sequence<char8> assetPath = absolutePath.string();
+				const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
+
+				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
+
+				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::SCENE) {
+					return;
+				}
+
+				byteStream.jump(sizeof(AssetSignature));
+
+				const ref<Scene3DAsset> sceneAsset = decodeScene3DAsset(byteStream);
+				const uint32 assetIndex = static_cast<uint32>(assets.size());
+				const sequence<char8> stem = absolutePath.stem().string();
+
+				assetIdentifierToIndex.insert({sceneAsset->getIdentifier(), assetIndex});
+				sceneAssetPathToIndex.insert({stem, assetIndex});
 				assets.emplace_back(sceneAsset);
 			}
 
@@ -206,11 +236,11 @@ namespace Trident {
 				byteStream.jump(sizeof(AssetSignature));
 
 				const ref<ShaderModuleAsset> shaderModuleAsset = decodeShaderModuleAsset(byteStream);
-				const uint32 shaderModuleAssetIndex = static_cast<uint32>(assets.size());
+				const uint32 assetIndex = static_cast<uint32>(assets.size());
 				const sequence<char8> stem = absolutePath.stem().string();
 
-				assetIdentifierToIndex.insert({shaderModuleAsset->getIdentifier(), shaderModuleAssetIndex});
-				shaderModuleAssetPathToIndex.insert({stem, shaderModuleAssetIndex});
+				assetIdentifierToIndex.insert({shaderModuleAsset->getIdentifier(), assetIndex});
+				shaderModuleAssetPathToIndex.insert({stem, assetIndex});
 				assets.emplace_back(shaderModuleAsset);
 			}
 
@@ -372,6 +402,57 @@ namespace Trident {
 				}
 
 				return createRef<Scene2DAsset>(sceneAssetDescriptor);
+			}
+
+			ref<Scene3DAsset> decodeScene3DAsset(ByteStream<StreamOperation::READ>& stream) const {
+				Descriptor<Scene3DAsset> sceneAssetDescriptor{};
+				sceneAssetDescriptor.identifier = stream.read<uint32>();
+				sceneAssetDescriptor.version = stream.read<VersionNumber>();
+				sceneAssetDescriptor.staticVertexCount = stream.read<uint32>();
+				sceneAssetDescriptor.staticIndexCount = stream.read<uint32>();
+				sceneAssetDescriptor.entityCount = stream.read<uint32>();
+				sceneAssetDescriptor.staticBuffer = sequence<uint8>(sceneAssetDescriptor.staticVertexCount * sizeof(svec2<float32>) + sceneAssetDescriptor.staticIndexCount * sizeof(uint16));
+
+				const uint32 geometryAssetCount = stream.read<uint32>();
+
+				sceneAssetDescriptor.geometryAssets = sequence<ref<GeometryAsset>>(geometryAssetCount);
+
+				const uint32 geometryMappingCount = stream.read<uint32>();
+
+				sceneAssetDescriptor.geometryMappings = sequence<EntityComponentMapping<GeometryComponent>>(geometryMappingCount);
+
+				const uint32 rigidBodyMappingCount = stream.read<uint32>();
+
+				sceneAssetDescriptor.rigidBodyMappings = sequence<EntityComponentMapping<RigidBody3DComponent>>(rigidBodyMappingCount);
+
+				std::copy_n(stream.getBytePosition(), sceneAssetDescriptor.staticBuffer.count(), &sceneAssetDescriptor.staticBuffer[0]);
+
+				stream.jump(sceneAssetDescriptor.staticBuffer.count());
+
+				for (ref<GeometryAsset>& geometryAsset : sceneAssetDescriptor.geometryAssets) {
+					const uint32 identifier = stream.read<uint32>();
+
+					geometryAsset = getAsset<GeometryAsset>(identifier);
+				}
+
+				for (EntityComponentMapping<GeometryComponent>& geometryMapping : sceneAssetDescriptor.geometryMappings) {
+					geometryMapping.entity = stream.read<Entity>();
+					geometryMapping.component.geometryIndex = stream.read<uint32>();
+				}
+
+				for (EntityComponentMapping<RigidBody3DComponent>& rigidBodyMapping : sceneAssetDescriptor.rigidBodyMappings) {
+					rigidBodyMapping.entity = stream.read<Entity>();
+
+					const svec3<float32> position = stream.read<svec3<float32>>();
+					const svec3<float32> rotation = stream.read<svec3<float32>>();
+					const svec3<float32> scale = stream.read<svec3<float32>>();
+
+					rigidBodyMapping.component.position = {position[0], position[1], position[2]};
+					rigidBodyMapping.component.rotation = {rotation[0], rotation[1], rotation[2]};
+					rigidBodyMapping.component.scale = {scale[0], scale[1], scale[2]};
+				}
+
+				return createRef<Scene3DAsset>(sceneAssetDescriptor);
 			}
 
 			ref<ShaderModuleAsset> decodeShaderModuleAsset(ByteStream<StreamOperation::READ>& byteStream) const {

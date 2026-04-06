@@ -470,7 +470,7 @@ namespace Trident {
 			rigidBody2DComponent.position += rigidBody2DComponent.linearVelocity * deltaTime;
 			rigidBody2DComponent.rotation += rigidBody2DComponent.angularVelocity * deltaTime;
 
-			rigidBody2DComponent.updateTransform(hull.getCentroid());
+			rigidBody2DComponent.updateWorld(hull.getCentroid());
 
 			// TODO
 			// rigidBody2DComponent.linearVelocity += (rigidBody2DComponent.force * rigidBody2DComponent.inverseMass + vec2<float32>(0.0f, G)) * halfDeltaTime;

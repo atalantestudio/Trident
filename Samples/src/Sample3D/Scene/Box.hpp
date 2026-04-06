@@ -82,12 +82,12 @@ namespace Trident::Box {
 			},
 		});
 
-		scene.registerInstance({
+		/* scene.registerInstance({
 			.position = {0.0_m, 0.0_m, 3.0_m},
 			.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
 			.scale = {1.0f, 1.0f, 1.0f},
 			.geometryIndex = geometryIndex,
 			.materialIndex = testMaterialIndex,
-		});
+		}); */
 	}
 }

@@ -5,6 +5,9 @@
 
 #include "Engine/API/Camera/PerspectiveCamera.hpp"
 #include "Engine/API/Scene/Scene3D.hpp"
+#include "Engine/ECS/Component/GeometryComponent.hpp"
+#include "Engine/ECS/Component/MaterialComponent.hpp"
+#include "Engine/ECS/Component/RigidBody3DComponent.hpp"
 #include "Engine/Renderer/3D/SceneRenderer.hpp"
 
 namespace Trident {
@@ -16,7 +19,7 @@ namespace Trident {
 			};
 
 			struct Instance {
-				mat4x4<float32> transform;
+				mat4x4<float32> world;
 				mat3x3<float32> normal;
 			};
 
@@ -50,20 +53,30 @@ namespace Trident {
 				instanceBuffer = createInstanceBuffer();
 				instanceMappedRange = instanceBuffer->map(0, instanceBuffer->getSize());
 
-				Entity entity = 0;
+				const ComponentPool<RigidBody3DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody3DComponent>();
 
-				while (entity < scene->getInstanceCount()) {
-					updateTransform(entity);
+				uint32 componentIndex = 0;
 
-					entity += 1;
+				while (componentIndex < rigidBodyComponentPool.componentCount) {
+					const RigidBody3DComponent& rigidBodyComponent = rigidBodyComponentPool.components[componentIndex];
+
+					Instance& instance = instanceMappedRange[componentIndex];
+					instance.world = rigidBodyComponent.world;
+					instance.normal = transpose(inverse(mat3x3<float32>(
+						instance.world[0][0], instance.world[0][1], instance.world[0][2],
+						instance.world[1][0], instance.world[1][1], instance.world[1][2],
+						instance.world[2][0], instance.world[2][1], instance.world[2][2]
+					)));
+
+					componentIndex += 1;
 				}
 
-				const view<uint8> sceneVertexBuffer = scene->getVertexBuffer();
-				const ref<Buffer<uint8>> vertexStagingBuffer = createStagingBuffer<uint8>(sceneVertexBuffer.count());
+				const view<uint8> dataBuffer = scene->getDataBuffer();
+				const ref<Buffer<uint8>> vertexStagingBuffer = createStagingBuffer<uint8>(dataBuffer.count());
 
 				uint8* vertexMappedRange = vertexStagingBuffer->map(0, vertexStagingBuffer->getSize());
 
-				std::copy(sceneVertexBuffer.begin(), sceneVertexBuffer.end(), vertexMappedRange);
+				std::copy(dataBuffer.begin(), dataBuffer.end(), vertexMappedRange);
 
 				vertexStagingBuffer->unmap();
 
@@ -108,23 +121,53 @@ namespace Trident {
 				const Extent2D swapchainExtent = getSwapchain()->getExtent();
 				const float32 width = static_cast<float32>(swapchainExtent.width);
 				const float32 height = static_cast<float32>(swapchainExtent.height);
-				const ClearValue colorClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
 
-				ClearValue depthStencilClearValue{};
-				depthStencilClearValue.depth = 1.0f;
-				depthStencilClearValue.stencil = 0;
-
-				BeginRenderPassDescriptor beginRenderPassDescriptor{};
-				beginRenderPassDescriptor.framebuffer = framebuffers[getSwapchainImageIndex()];
-				beginRenderPassDescriptor.clearValues = {colorClearValue, depthStencilClearValue, colorClearValue};
-
-				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
+				commandEncoder->beginRenderPass({
+					.framebuffer = framebuffers[getSwapchainImageIndex()],
+					.clearValues = {
+						{0.0f, 0.0f, 0.0f, 1.0f},
+						{
+							.depth = 1.0f,
+							.stencil = 0,
+						},
+						{0.0f, 0.0f, 0.0f, 1.0f},
+					},
+				});
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
 
 				// TODO(GL): Allow the vertex buffer to be bound before setting a render pipeline.
 
-				const view<ref<Geometry3D>> geometries = scene->getGeometries();
+				const sequence<Geometry3D>& geometries = scene->getGeometries();
+				const ComponentPool<GeometryComponent>& geometryComponentPool = scene->ecs.getComponentPool<GeometryComponent>();
+				const ComponentPool<MaterialComponent>& materialComponentPool = scene->ecs.getComponentPool<MaterialComponent>();
+				const ComponentPool<RigidBody3DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody3DComponent>();
+
+				uint32 rigidBodyComponentIndex = 0;
+
+				while (rigidBodyComponentIndex < rigidBodyComponentPool.componentCount) {
+					const Entity entity = rigidBodyComponentPool.componentIndexToEntity[rigidBodyComponentIndex];
+
+					const GeometryComponent geometryComponent = geometryComponentPool.components[geometryComponentPool.entityToComponentIndex[entity]];
+					const Geometry3D& geometry = geometries[geometryComponent.geometryIndex];
+					const uint32 vertexCount = static_cast<uint32>(geometry.getVertexPositionIndices().count());
+
+					// TODO: Fix.
+					const uint32 indexOffset = 0;
+
+					const MaterialComponent materialComponent = materialComponentPool.components[geometryComponentPool.entityToComponentIndex[entity]];
+					const uint32 materialShaderIndex = scene->getMaterialShaderIndex(materialComponent.materialIndex);
+
+					commandEncoder->bindGraphicsPipeline(materialPipelines[materialShaderIndex]);
+					commandEncoder->bindVertexBuffer(0, instanceBuffer, 0, sizeof(Instance));
+					commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialShaderIndex], 0, {vertexDescriptorSet, materialDescriptorSets[materialShaderIndex]});
+					commandEncoder->draw(vertexCount, 1, indexOffset, rigidBodyComponentIndex);
+
+					rigidBodyComponentIndex += 1;
+				}
+
+				// TODO
+				/* const view<ref<Geometry3D>> geometries = scene->getGeometries();
 				const view<RigidBody3D> instances = scene->getInstances();
 				const std::vector<Shader>& materialShaders = scene->getMaterialShaders();
 				const std::vector<std::vector<Material>>& materials = scene->getMaterials();
@@ -144,7 +187,7 @@ namespace Trident {
 					commandEncoder->draw(vertexCount, 1, indexOffset, instanceIndex);
 
 					instanceIndex += 1;
-				}
+				} */
 
 				commandEncoder->endRenderPass();
 			}
@@ -158,16 +201,6 @@ namespace Trident {
 
 				createFramebuffers();
 				updateCamera();
-			}
-
-			void updateTransform(Entity entity) {
-				Instance& instance = instanceMappedRange[entity];
-				instance.transform = scene->getInstances()[entity].transform;
-				instance.normal = transpose(inverse(mat3x3<float32>(
-					instance.transform[0][0], instance.transform[0][1], instance.transform[0][2],
-					instance.transform[1][0], instance.transform[1][1], instance.transform[1][2],
-					instance.transform[2][0], instance.transform[2][1], instance.transform[2][2]
-				)));
 			}
 
 			void updateCamera() {
@@ -219,10 +252,11 @@ namespace Trident {
 
 				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
 
-				FramebufferDescriptor framebufferDescriptor{};
-				framebufferDescriptor.renderPass = renderPass;
-				framebufferDescriptor.imageViews = {colorImageView, depthStencilImageView, nullptr};
-				framebufferDescriptor.extent = swapchain->getExtent();
+				FramebufferDescriptor framebufferDescriptor = {
+					.renderPass = renderPass,
+					.imageViews = {colorImageView, depthStencilImageView, nullptr},
+					.extent = swapchain->getExtent(),
+				};
 
 				#if defined(BUILD_MODE_DEBUG)
 					sequence<char8> name;
@@ -234,7 +268,7 @@ namespace Trident {
 					#if defined(BUILD_MODE_DEBUG)
 						name = Logger::format("In flight framebuffer []", framebufferIndex);
 
-						SET_DEBUG_NAME(framebufferDescriptor, name);
+						framebufferDescriptor.name = name;
 					#endif
 
 					framebufferDescriptor.imageViews[2] = swapchain->getImageView(framebufferIndex);
@@ -248,33 +282,35 @@ namespace Trident {
 			ref<Image> createColorImage() const {
 				const Extent2D extent = getSwapchain()->getExtent();
 
-				AttachmentImageDescriptor colorAttachmentImageDescriptor{};
-				colorAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
-				colorAttachmentImageDescriptor.extent.width = extent.width;
-				colorAttachmentImageDescriptor.extent.height = extent.height;
-				colorAttachmentImageDescriptor.extent.depth = 1;
-				colorAttachmentImageDescriptor.mipLevelCount = 1;
-				colorAttachmentImageDescriptor.layerCount = 1;
-
-				SET_DEBUG_NAME(colorAttachmentImageDescriptor, "Color (multisampled)");
-
-				return renderPass->createColorAttachmentImage(colorAttachmentImageDescriptor, 0);
+				return renderPass->createColorAttachmentImage(
+					{
+						.type = ImageType::TEXTURE_2D,
+						.extent = {extent.width, extent.height, 1},
+						.mipLevelCount = 1,
+						.layerCount = 1,
+						#if defined(BUILD_MODE_DEBUG)
+							.name = "Color (multisampled)",
+						#endif
+					},
+					0
+				);
 			}
 
 			ref<Image> createDepthStencilImage() const {
 				const Extent2D extent = getSwapchain()->getExtent();
 
-				AttachmentImageDescriptor depthStencilAttachmentImageDescriptor{};
-				depthStencilAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
-				depthStencilAttachmentImageDescriptor.extent.width = extent.width;
-				depthStencilAttachmentImageDescriptor.extent.height = extent.height;
-				depthStencilAttachmentImageDescriptor.extent.depth = 1;
-				depthStencilAttachmentImageDescriptor.mipLevelCount = 1;
-				depthStencilAttachmentImageDescriptor.layerCount = 1;
-
-				SET_DEBUG_NAME(depthStencilAttachmentImageDescriptor, "Depth stencil");
-
-				return renderPass->createDepthStencilAttachmentImage(depthStencilAttachmentImageDescriptor, 0);
+				return renderPass->createDepthStencilAttachmentImage(
+					{
+						.type = ImageType::TEXTURE_2D,
+						.extent = {extent.width, extent.height, 1},
+						.mipLevelCount = 1,
+						.layerCount = 1,
+						#if defined(BUILD_MODE_DEBUG)
+							.name = "Depth stencil"
+						#endif
+					},
+					0
+				);
 			}
 
 			ref<ImageView> createColorImageView() const {
@@ -303,41 +339,56 @@ namespace Trident {
 
 			ref<DescriptorSetLayout> createVertexDescriptorSetLayout() const {
 				return createDescriptorSetLayout({
+					// Camera
 					{
 						.descriptorType = DescriptorType::UNIFORM_BUFFER,
 						.descriptorCount = 1,
 						.shaderStages = ShaderStage::VERTEX | ShaderStage::FRAGMENT,
 					},
+
+					// Vertex position component
 					{
 						.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 						.descriptorCount = 1,
 						.shaderStages = ShaderStage::VERTEX,
 					},
+
+					// Vertex position index
 					{
 						.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 						.descriptorCount = 1,
 						.shaderStages = ShaderStage::VERTEX,
 					},
+
+					// Vertex normal component
 					{
 						.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 						.descriptorCount = 1,
 						.shaderStages = ShaderStage::VERTEX,
 					},
+
+					// Vertex normal index
 					{
 						.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 						.descriptorCount = 1,
 						.shaderStages = ShaderStage::VERTEX,
 					},
+
+					// Vertex texture coordinate component
 					{
 						.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 						.descriptorCount = 1,
 						.shaderStages = ShaderStage::VERTEX,
 					},
+
+					// Vertex texture coordinate index
 					{
 						.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 						.descriptorCount = 1,
 						.shaderStages = ShaderStage::VERTEX,
 					},
+
+					// Vertex tangent component
 					{
 						.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 						.descriptorCount = 1,
@@ -347,8 +398,10 @@ namespace Trident {
 			}
 
 			ref<Buffer<Instance>> createInstanceBuffer() const {
+				const ComponentPool<RigidBody3DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody3DComponent>();
+
 				return createBuffer<Instance>({
-					.size = scene->getInstanceCount() * sizeof(Instance),
+					.size = rigidBodyComponentPool.componentCount * sizeof(Instance),
 					.usage = BufferUsage::VERTEX,
 					.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 					.persistent = true,
@@ -380,45 +433,46 @@ namespace Trident {
 			}
 
 			void updateDescriptorSets() const {
-				DescriptorBuffer cameraDescriptorBuffer{};
-				cameraDescriptorBuffer.buffer = cameraBuffer;
-				cameraDescriptorBuffer.offset = 0;
-				cameraDescriptorBuffer.size = cameraBuffer->getSize();
-
-				DescriptorBuffer vertexPositionComponentDescriptorBuffer{};
-				vertexPositionComponentDescriptorBuffer.buffer = vertexBuffer;
-				vertexPositionComponentDescriptorBuffer.offset = 0;
-				vertexPositionComponentDescriptorBuffer.size = scene->getVertexPositionComponentBufferSize();
-
-				DescriptorBuffer vertexPositionIndexDescriptorBuffer{};
-				vertexPositionIndexDescriptorBuffer.buffer = vertexBuffer;
-				vertexPositionIndexDescriptorBuffer.offset = scene->getVertexPositionComponentBufferSize();
-				vertexPositionIndexDescriptorBuffer.size = scene->getVertexPositionIndexBufferSize();
-
-				DescriptorBuffer vertexNormalComponentDescriptorBuffer{};
-				vertexNormalComponentDescriptorBuffer.buffer = vertexBuffer;
-				vertexNormalComponentDescriptorBuffer.offset = scene->getVertexPositionComponentBufferSize() + scene->getVertexPositionIndexBufferSize();
-				vertexNormalComponentDescriptorBuffer.size = scene->getVertexNormalComponentBufferSize();
-
-				DescriptorBuffer vertexNormalIndexDescriptorBuffer{};
-				vertexNormalIndexDescriptorBuffer.buffer = vertexBuffer;
-				vertexNormalIndexDescriptorBuffer.offset = scene->getVertexPositionComponentBufferSize() + scene->getVertexPositionIndexBufferSize() + scene->getVertexNormalComponentBufferSize();
-				vertexNormalIndexDescriptorBuffer.size = scene->getVertexNormalIndexBufferSize();
-
-				DescriptorBuffer vertexTextureCoordinateComponentDescriptorBuffer{};
-				vertexTextureCoordinateComponentDescriptorBuffer.buffer = vertexBuffer;
-				vertexTextureCoordinateComponentDescriptorBuffer.offset = scene->getVertexPositionComponentBufferSize() + scene->getVertexPositionIndexBufferSize() + scene->getVertexNormalComponentBufferSize() + scene->getVertexNormalIndexBufferSize();
-				vertexTextureCoordinateComponentDescriptorBuffer.size = scene->getVertexTextureCoordinateComponentBufferSize();
-
-				DescriptorBuffer vertexTextureCoordinateIndexDescriptorBuffer{};
-				vertexTextureCoordinateIndexDescriptorBuffer.buffer = vertexBuffer;
-				vertexTextureCoordinateIndexDescriptorBuffer.offset = scene->getVertexPositionComponentBufferSize() + scene->getVertexPositionIndexBufferSize() + scene->getVertexNormalComponentBufferSize() + scene->getVertexNormalIndexBufferSize() + scene->getVertexTextureCoordinateComponentBufferSize();
-				vertexTextureCoordinateIndexDescriptorBuffer.size = scene->getVertexTextureCoordinateIndexBufferSize();
-
-				DescriptorBuffer vertexTangentComponentDescriptorBuffer{};
-				vertexTangentComponentDescriptorBuffer.buffer = vertexBuffer;
-				vertexTangentComponentDescriptorBuffer.offset = scene->getVertexPositionComponentBufferSize() + scene->getVertexPositionIndexBufferSize() + scene->getVertexNormalComponentBufferSize() + scene->getVertexNormalIndexBufferSize() + scene->getVertexTextureCoordinateComponentBufferSize() + scene->getVertexTextureCoordinateIndexBufferSize();
-				vertexTangentComponentDescriptorBuffer.size = scene->getVertexTangentComponentBufferSize();
+				const DescriptorBuffer cameraDescriptorBuffer = {
+					.buffer = cameraBuffer,
+					.offset = 0,
+					.size = cameraBuffer->getSize(),
+				};
+				const DescriptorBuffer vertexPositionComponentDescriptorBuffer = {
+					.buffer = vertexBuffer,
+					.offset = 0,
+					.size = scene->getVertexPositionComponentBufferSize(),
+				};
+				const DescriptorBuffer vertexPositionIndexDescriptorBuffer = {
+					.buffer = vertexBuffer,
+					.offset = scene->getVertexPositionComponentBufferSize(),
+					.size = scene->getVertexPositionIndexBufferSize(),
+				};
+				const DescriptorBuffer vertexNormalComponentDescriptorBuffer = {
+					.buffer = vertexBuffer,
+					.offset = scene->getVertexPositionComponentBufferSize() + scene->getVertexPositionIndexBufferSize(),
+					.size = scene->getVertexNormalComponentBufferSize(),
+				};
+				const DescriptorBuffer vertexNormalIndexDescriptorBuffer = {
+					.buffer = vertexBuffer,
+					.offset = scene->getVertexPositionComponentBufferSize() + scene->getVertexPositionIndexBufferSize() + scene->getVertexNormalComponentBufferSize(),
+					.size = scene->getVertexNormalIndexBufferSize(),
+				};
+				const DescriptorBuffer vertexTextureCoordinateComponentDescriptorBuffer = {
+					.buffer = vertexBuffer,
+					.offset = scene->getVertexPositionComponentBufferSize() + scene->getVertexPositionIndexBufferSize() + scene->getVertexNormalComponentBufferSize() + scene->getVertexNormalIndexBufferSize(),
+					.size = scene->getVertexTextureCoordinateComponentBufferSize(),
+				};
+				const DescriptorBuffer vertexTextureCoordinateIndexDescriptorBuffer = {
+					.buffer = vertexBuffer,
+					.offset = scene->getVertexPositionComponentBufferSize() + scene->getVertexPositionIndexBufferSize() + scene->getVertexNormalComponentBufferSize() + scene->getVertexNormalIndexBufferSize() + scene->getVertexTextureCoordinateComponentBufferSize(),
+					.size = scene->getVertexTextureCoordinateIndexBufferSize(),
+				};
+				const DescriptorBuffer vertexTangentComponentDescriptorBuffer = {
+					.buffer = vertexBuffer,
+					.offset = scene->getVertexPositionComponentBufferSize() + scene->getVertexPositionIndexBufferSize() + scene->getVertexNormalComponentBufferSize() + scene->getVertexNormalIndexBufferSize() + scene->getVertexTextureCoordinateComponentBufferSize() + scene->getVertexTextureCoordinateIndexBufferSize(),
+					.size = scene->getVertexTangentComponentBufferSize(),
+				};
 
 				WriteDescriptorSet cameraWriteDescriptorSet{};
 				cameraWriteDescriptorSet.descriptorSet = vertexDescriptorSet;

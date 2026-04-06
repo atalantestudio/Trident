@@ -19,11 +19,10 @@ namespace Trident {
 				renderer.setLayer(this);
 				renderer.build();
 
-				Lemons::initializeScene(scene, getApplication()->getAssetLibrary(), renderer.getGraphicsApi());
+				scene = createScope<Scene3D>(Lemons::initializeScene(getApplication(), renderer.getGraphicsApi()));
+				scene->createDataBuffer(renderer.getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment);
 
-				scene.createVertexBuffer(renderer.getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment);
-
-				renderer.setScene(&scene);
+				renderer.setScene(scene.get());
 
 				cameraController.setAspectRatio(getApplication()->getWindow()->getAspectRatio());
 				cameraController.updateProjection();
@@ -126,7 +125,7 @@ namespace Trident {
 
 		private:
 			ForwardRenderer renderer;
-			Scene3D scene;
+			scope<Scene3D> scene;
 			FlyCameraController cameraController;
 	};
 }

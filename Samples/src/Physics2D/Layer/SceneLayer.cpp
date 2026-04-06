@@ -143,7 +143,7 @@ namespace Trident {
 			const Entity entity = rigidBodyComponentPool.componentIndexToEntity[componentIndex];
 			const RigidBody2DComponent& rigidBodyComponent = scene->ecs.getComponent<RigidBody2DComponent>(entity);
 
-			renderer.setRigidBodyTransform(entity, rigidBodyComponent.transform);
+			renderer.setWorld(entity, rigidBodyComponent.world);
 
 			componentIndex += 1;
 		}
@@ -178,7 +178,7 @@ namespace Trident {
 
 		RigidBody2DComponent mouseRigidBodyComponent{};
 		mouseRigidBodyComponent.position = svec2<float32>(renderer.cameraPosition + mousePosition);
-		mouseRigidBodyComponent.updateTransform(mouseHull.getCentroid());
+		mouseRigidBodyComponent.updateWorld(mouseHull.getCentroid());
 
 		sint32 componentIndex = static_cast<sint32>(rigidBodyComponentPool.componentCount) - 1;
 
@@ -274,7 +274,7 @@ namespace Trident {
 
 			RigidBody2D& rigidBody = scene->ecs.getComponent<RigidBody2D>(selectedEntity);
 			rigidBody.position += placeholderOffset;
-			rigidBody.updateTransform(hull.getCentroid());
+			rigidBody.updateWorld(hull.getCentroid());
 
 			selectedEntity = max<Entity>();
 		} */

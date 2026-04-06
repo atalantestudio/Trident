@@ -12,8 +12,10 @@
 
 namespace Trident {
 	Scene2D::Scene2D(ref<Scene2DAsset> sceneAsset) :
-		staticVertexCount(sceneAsset->getStaticVertexCount()),
-		staticIndexCount(sceneAsset->getStaticIndexCount())
+		Scene({
+			.staticVertexCount = sceneAsset->getStaticVertexCount(),
+			.staticIndexCount = sceneAsset->getStaticIndexCount()
+		})
 	{
 		loadGeometries(sceneAsset);
 
@@ -101,11 +103,7 @@ namespace Trident {
 	}
 
 	void Scene2D::loadEntityComponentMappings(ref<Scene2DAsset> sceneAsset) {
-		// TODO(ecs/scene-components):
-		// - MaterialReferenceComponent
-		// - RigidBody3DComponent
-		// - Transform2DComponent/Transform3DComponent for static meshes?
-
+		// TODO(ecs/scene-components): Transform2DComponent/Transform3DComponent for static meshes?
 		ecs.registerComponentPool<GeometryComponent>();
 		ecs.registerComponentPool<RigidBody2DComponent>();
 		ecs.registerComponentPool<Joint2D>();
@@ -129,7 +127,7 @@ namespace Trident {
 			ecs.setComponent<RigidBody2DComponent>(rigidBodyMapping.entity, rigidBodyMapping.component);
 
 			// TODO(debug-only)
-			ecs.getComponent<RigidBody2DComponent>(rigidBodyMapping.entity).updateTransform({0.0f, 0.0f});
+			ecs.getComponent<RigidBody2DComponent>(rigidBodyMapping.entity).updateWorld({0.0f, 0.0f});
 			ecs.setTag<DynamicEntityTag>(entity);
 		}
 	}

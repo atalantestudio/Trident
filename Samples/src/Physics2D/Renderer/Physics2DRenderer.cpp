@@ -945,7 +945,7 @@ namespace Trident {
 			const RigidBody2DComponent& rigidBodyComponent = rigidBodyPool.components[rigidBodyIndex];
 
 			RigidBody& rigidBody = stagingRigidBodyMappedRange[rigidBodyIndex];
-			rigidBody.transform = rigidBodyComponent.transform;
+			rigidBody.world = rigidBodyComponent.world;
 			rigidBody.fillColor = Color(0xf4fedbff).value;
 			rigidBody.strokeColor = {0.0f, 0.0f, 0.0f, 1.0f};
 			rigidBody.depth = static_cast<float32>(rigidBodyIndex) / rigidBodyPool.componentCount;
@@ -1044,8 +1044,8 @@ namespace Trident {
 		}
 	#endif
 
-	void Physics2DRenderer::setRigidBodyTransform(Entity entity, const mat3x3<float32>& transform) const {
-		rigidBodyMappedRange[entity].transform = transform;
+	void Physics2DRenderer::setWorld(Entity entity, const mat3x3<float32>& world) const {
+		rigidBodyMappedRange[entity].world = world;
 	}
 
 	void Physics2DRenderer::setPlaceholderOffset(vec2<float32> offset) const {

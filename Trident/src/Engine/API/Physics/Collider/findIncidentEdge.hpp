@@ -32,19 +32,22 @@ namespace Trident {
 
 			if (angle < minAngle) {
 				minAngle = angle;
+
+				// TODO: Why a and b need to be inverted?
 				incidentEdge.edge[0].position = b;
 				incidentEdge.edge[1].position = a;
+
 				incidentEdgeIndex = edgeIndex;
 			}
 
 			edgeIndex += 1;
 		}
 
-		incidentEdge.edge[0].position = multiplyTransform(incidentEdge.edge[0].position, incidentBody.transform);
+		incidentEdge.edge[0].position = multiplyTransform(incidentEdge.edge[0].position, incidentBody.world);
 		incidentEdge.edge[0].id.incidentEdge0Index = (incidentEdgeIndex + 1) % static_cast<uint16>(incidentHull.getEdges().count());
 		incidentEdge.edge[0].id.incidentEdge1Index = incidentEdgeIndex;
 
-		incidentEdge.edge[1].position = multiplyTransform(incidentEdge.edge[1].position, incidentBody.transform);
+		incidentEdge.edge[1].position = multiplyTransform(incidentEdge.edge[1].position, incidentBody.world);
 		incidentEdge.edge[1].id.incidentEdge0Index = incidentEdgeIndex;
 		incidentEdge.edge[1].id.incidentEdge1Index = static_cast<sint32>(incidentEdgeIndex - 1) % static_cast<uint16>(incidentHull.getEdges().count());
 

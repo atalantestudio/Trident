@@ -1,4 +1,4 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
@@ -6,33 +6,13 @@
 #include "Engine/API/Geometry/3D/Geometry3D.hpp"
 #include "Engine/API/Material/Material.hpp"
 #include "Engine/API/Material/Shader.hpp"
-#include "Engine/API/Physics/RigidBody3D.hpp"
 #include "Engine/API/Scene/Scene.hpp"
+#include "Engine/Filesystem/Asset/SceneAsset.hpp"
 
 namespace Trident {
-	struct SceneInstanceDescriptor {
-		vec3<float32> position = {0.0_m, 0.0_m, 0.0_m};
-		vec3<float32> rotation = {0.0_rad, 0.0_rad, 0.0_rad};
-		vec3<float32> scale = {1.0f, 1.0f, 1.0f};
-		uint32 geometryIndex;
-		uint32 materialIndex;
-	};
-
 	class Scene3D : public Scene {
-		private:
-			static constexpr uint32 MAX_GEOMETRY_COUNT = 4;
-			static constexpr uint32 MAX_INSTANCE_COUNT = 4;
-
 		public:
-			explicit Scene3D() :
-				geometries(MAX_GEOMETRY_COUNT),
-				vertexPositionIndexOffsets(MAX_GEOMETRY_COUNT),
-				instances(MAX_INSTANCE_COUNT)
-			{}
-
-			inline const sequence<uint8>& getVertexBuffer() const {
-				return vertexBuffer;
-			}
+			explicit Scene3D(ref<Scene3DAsset> sceneAsset);
 
 			inline uint64 getVertexPositionComponentBufferSize() const {
 				return vertexPositionComponentBufferSize;
@@ -62,44 +42,8 @@ namespace Trident {
 				return vertexTangentComponentBufferSize;
 			}
 
-			inline view<ref<Geometry3D>> getGeometries() const {
-				return view<ref<Geometry3D>>(&geometries[0], geometryCount);
-			}
-
-			inline uint32 getGeometryCount() const {
-				return geometryCount;
-			}
-
-			inline uint32 getVertexPositionIndexOffset(uint32 geometryIndex) const {
-				DEBUG_ASSERT(geometryIndex < geometryCount);
-
-				return vertexPositionIndexOffsets[geometryIndex];
-			}
-
-			inline view<RigidBody3D> getInstances() const {
-				return view<RigidBody3D>(&instances[0], instanceCount);
-			}
-
-			inline uint32 getInstanceCount() const {
-				return instanceCount;
-			}
-
-			/// Returns the number of instances using the provided geometry.
-			uint32 getInstanceCount(uint32 geometryIndex) const {
-				uint32 geometryInstanceCount = 0;
-				uint32 instanceIndex = 0;
-
-				while (instanceIndex < instanceCount) {
-					const RigidBody3D& rigidBody = instances[instanceIndex];
-
-					if (rigidBody.geometryIndex == geometryIndex) {
-						geometryInstanceCount += 1;
-					}
-
-					instanceIndex += 1;
-				}
-
-				return geometryInstanceCount;
+			inline const sequence<Geometry3D>& getGeometries() const {
+				return geometries;
 			}
 
 			inline const std::vector<Shader>& getMaterialShaders() const {
@@ -112,40 +56,6 @@ namespace Trident {
 
 			inline uint32 getMaterialShaderIndex(uint32 materialIndex) const {
 				return materialIndexToShaderIndex[materialIndex];
-			}
-
-			uint32 registerInstance(const SceneInstanceDescriptor& descriptor) {
-				DEBUG_ASSERT(descriptor.geometryIndex < geometryCount);
-				DEBUG_ASSERT(instanceCount < MAX_INSTANCE_COUNT);
-
-				const uint32 instanceIndex = instanceCount;
-
-				RigidBody3D& rigidBody = instances[instanceIndex];
-				rigidBody.position = descriptor.position;
-				rigidBody.rotation = descriptor.rotation;
-				rigidBody.scale = descriptor.scale;
-				rigidBody.geometryIndex = descriptor.geometryIndex;
-				rigidBody.materialIndex = descriptor.materialIndex;
-
-				rigidBody.updateTransform();
-
-				instanceCount += 1;
-
-				return instanceIndex;
-			}
-
-			uint32 registerGeometry(ref<Geometry3D> geometry) {
-				DEBUG_ASSERT(geometryCount < MAX_GEOMETRY_COUNT);
-
-				const uint32 geometryIndex = geometryCount;
-
-				geometries[geometryIndex] = geometry;
-				geometryCount += 1;
-
-				vertexPositionIndexOffsets[geometryIndex] = vertexPositionIndexOffset;
-				vertexPositionIndexOffset += static_cast<uint32>(geometry->getVertexPositionIndices().count());
-
-				return geometryIndex;
 			}
 
 			/// Registers a new material shader and returns its index.
@@ -175,12 +85,13 @@ namespace Trident {
 				return materialIndex;
 			}
 
-			void createVertexBuffer(uint64 minStorageBufferOffsetAlignment);
+			void createDataBuffer(uint64 minStorageBufferOffsetAlignment);
 
 		private:
-			// Contains components and indices for vertex positions, texture coordinates and normals.
-			sequence<uint8> vertexBuffer;
+			void loadGeometries(ref<Scene3DAsset> sceneAsset);
+			void loadEntityComponentMappings(ref<Scene3DAsset> sceneAsset);
 
+		private:
 			uint64 vertexPositionComponentBufferSize;
 			uint64 vertexPositionIndexBufferSize;
 			uint64 vertexNormalComponentBufferSize;
@@ -189,16 +100,11 @@ namespace Trident {
 			uint64 vertexTextureCoordinateIndexBufferSize;
 			uint64 vertexTangentComponentBufferSize;
 
-			sequence<ref<Geometry3D>> geometries;
-			sequence<uint32> vertexPositionIndexOffsets;
-			sequence<RigidBody3D> instances;
-			uint32 geometryCount = 0;
-			uint32 vertexPositionIndexOffset = 0;
-			uint32 instanceCount = 0;
-			uint32 currentMaterialIndex = 0;
+			sequence<Geometry3D> geometries;
 
 			std::vector<Shader> materialShaders;
 			std::vector<std::vector<Material>> materials;
 			std::vector<uint32> materialIndexToShaderIndex;
+			uint32 currentMaterialIndex = 0;
 	};
 }

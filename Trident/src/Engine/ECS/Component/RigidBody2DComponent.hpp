@@ -5,16 +5,21 @@
 
 namespace Trident {
 	struct RigidBody2DComponent {
-		void updateTransform(vec2<float32> centroid) {
-			transform =
+		void updateWorld(vec2<float32> centroid) {
+			world =
 				mat3x3<float32>::translation(-centroid) *
 				mat3x3<float32>::scaling(scale) *
 				mat3x3<float32>::rotation(-rotation) *
 				mat3x3<float32>::translation(position);
 		}
 
+		/// Applies a linear force to the body.
+		inline void applyLinearForce(vec2<float32> F) {
+			force += F;
+		}
+
 		/// Applies linear and angular impulses to the body.
-		void applyImpulse(
+		inline void applyImpulse(
 			/// The impulse vector.
 			vec2<float32> j,
 
@@ -35,7 +40,7 @@ namespace Trident {
 		// NOTE: This isn't meant to be dynamically updated.
 		vec2<float32> scale = {1.0f, 1.0f};
 
-		mat3x3<float32> transform = mat3x3<float32>::identity();
+		mat3x3<float32> world = mat3x3<float32>::identity();
 
 		// TODO: Use svec2<float32> instead.
 		vec2<float32> linearVelocity;

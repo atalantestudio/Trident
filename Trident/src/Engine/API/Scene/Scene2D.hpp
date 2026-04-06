@@ -13,26 +13,6 @@ namespace Trident {
 		public:
 			explicit Scene2D(ref<Scene2DAsset> sceneAsset);
 
-			inline uint32 getStaticVertexCount() const {
-				return staticVertexCount;
-			}
-
-			inline uint32 getStaticIndexCount() const {
-				return staticIndexCount;
-			}
-
-			inline uint32 getDynamicVertexCount() const {
-				return dynamicVertexCount;
-			}
-
-			inline uint32 getDynamicIndexCount() const {
-				return dynamicIndexCount;
-			}
-
-			inline const sequence<uint8>& getDataBuffer() const {
-				return dataBuffer;
-			}
-
 			inline const sequence<Geometry2D>& getGeometries() const {
 				return geometries;
 			}
@@ -47,14 +27,6 @@ namespace Trident {
 			void loadEntityComponentMappings(ref<Scene2DAsset> sceneAsset);
 
 		private:
-			uint32 staticVertexCount;
-			uint32 staticIndexCount;
-
-			/// Contains static (internal to the scene) and dynamic (external geometries) vertices and indices.
-			sequence<uint8> dataBuffer;
-
-			uint32 dynamicVertexCount = 0;
-			uint32 dynamicIndexCount = 0;
 			sequence<Geometry2D> geometries;
 			sequence<Hull2D> hulls;
 	};

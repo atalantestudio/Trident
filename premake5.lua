@@ -140,6 +140,7 @@ project "Samples"
 		"MKDIR %[bin/" .. outputdir .. "/%{prj.name}/Asset/Font]",
 		"MKDIR %[bin/" .. outputdir .. "/%{prj.name}/Asset/Geometry]",
 		"MKDIR %[bin/" .. outputdir .. "/%{prj.name}/Asset/Image]",
+		"MKDIR %[bin/" .. outputdir .. "/%{prj.name}/Asset/Scene]",
 		"MKDIR %[bin/" .. outputdir .. "/%{prj.name}/Asset/Shader]",
 		"MKDIR %[bin/" .. outputdir .. "/%{prj.name}/Trace]",
 		"IF EXIST Asset/Shader {COPYDIR} Asset/Shader %[bin/" .. outputdir .. "/%{prj.name}/Asset/Shader]",

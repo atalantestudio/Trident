@@ -51,7 +51,7 @@ namespace Trident {
 			},
 		};
 
-		Scene2DAssetHeader header{};
+		SceneAssetHeader header{};
 		header.signature = AssetSignature::SCENE;
 		header.identifier = identifier;
 		header.version = {0, 0, 0};

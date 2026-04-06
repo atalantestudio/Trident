@@ -30,7 +30,7 @@ namespace Trident {
 			};
 
 			struct RigidBody {
-				mat3x3<float32> transform;
+				mat3x3<float32> world;
 				vec4<float32> fillColor;
 				vec4<float32> strokeColor;
 				float32 depth;
@@ -59,7 +59,7 @@ namespace Trident {
 			}
 
 			void setScene(const Scene2D* scene);
-			void setRigidBodyTransform(Entity entity, const mat3x3<float32>& transform) const;
+			void setWorld(Entity entity, const mat3x3<float32>& world) const;
 			void setPlaceholderOffset(vec2<float32> offset) const;
 
 			#if defined(SHOW_DISTANCE)
