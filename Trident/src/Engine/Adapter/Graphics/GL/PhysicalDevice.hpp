@@ -13,5 +13,7 @@ namespace Trident {
 
 	namespace GL {
 		ref<Trident::PhysicalDevice> selectPhysicalDevice(const Trident::Instance* instance, bool preferIntegratedGpu);
+
+		view<char8> getPhysicalDeviceName(const Trident::PhysicalDevice* physicalDevice);
 	}
 }

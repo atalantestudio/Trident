@@ -25,4 +25,11 @@ namespace Trident {
 
 		return physicalDevice;
 	}
+
+	view<char8> GL::getPhysicalDeviceName(const Trident::PhysicalDevice* physicalDevice) {
+		// TODO(graphics/gl/load-procedures): Find a way around this issue.
+		ADAPTER_ASSERT(glGetString != nullptr, "Procedures can only be loaded after a surface is created.");
+
+		return pointer_cast<const GLchar*>(glGetString(GL_RENDERER));
+	}
 }

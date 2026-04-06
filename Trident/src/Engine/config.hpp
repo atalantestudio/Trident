@@ -38,7 +38,13 @@ namespace Trident {
 		#define DEBUG_ENABLE_MESSENGER
 
 		// Toggle validation layers for graphics APIs that support them.
+		// TODO: Do not mix with ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER, which toggles a custom validation layer.
 		#define DEBUG_ENABLE_VALIDATION_LAYERS
+	#endif
+
+	#if defined(BUILD_MODE_DEBUG)
+		/// If enabled, all graphics API function calls will be intercepted by the engine's internal validation layer.
+		#define ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER
 	#endif
 
 	// If enabled, glyphs with a single contour are checked to ensure that the contour is clockwise.

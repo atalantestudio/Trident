@@ -16,7 +16,10 @@ namespace Trident {
 			// Returns the position of the upper-left corner of the client area.
 			const sint32* getPosition() const;
 
+			Extent2D getExtent() const;
+
 			// Returns the size of the client area.
+			// TODO: Deprecate in favor of Window::getExtent.
 			const sint32* getSize() const;
 
 			float32 getAspectRatio() const {

@@ -40,9 +40,7 @@ namespace Trident {
 			}
 
 			// TODO: Use view<DescriptorSetLayoutBinding> instead.
-			ref<DescriptorSetLayout> createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const {
-				return adapter->createDescriptorSetLayout(this, bindings);
-			}
+			ref<DescriptorSetLayout> createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const;
 
 			ref<Fence> createFence(const FenceDescriptor& descriptor) const {
 				return adapter->createFence(this, descriptor);

@@ -30,9 +30,11 @@ namespace Trident {
 		return score;
 	}
 
-	DX12::PhysicalDevice::PhysicalDevice(const Trident::GraphicsAdapter* adapter, IDXGIAdapter* dxgiAdapter, IDXGIFactory4* factory) :
+	DX12::PhysicalDevice::PhysicalDevice(const Trident::GraphicsAdapter* adapter, IDXGIAdapter* dxgiAdapter, const DXGI_ADAPTER_DESC& adapterDescriptor, IDXGIFactory4* factory) :
 		Trident::PhysicalDevice(adapter),
 		adapter(dxgiAdapter),
+		adapterDescriptor(adapterDescriptor),
+		name(ConvertUTF16ToUTF8(adapterDescriptor.Description)),
 		factory(factory)
 	{
 		limits.minStorageBufferOffsetAlignment = D3D12_RAW_UAV_SRV_BYTE_ALIGNMENT;
@@ -43,10 +45,11 @@ namespace Trident {
 		const DX12::Instance* _instance = static_cast<const DX12::Instance*>(instance);
 		HRESULT result;
 		UINT adapterIndex = 0;
-		UINT bestAdapterScore = 0;
-		UINT bestAdapterIndex = 0;
 		IDXGIAdapter* adapter;
 		DXGI_ADAPTER_DESC adapterDescriptor;
+		UINT bestAdapterScore = 0;
+		UINT bestAdapterIndex = 0;
+		DXGI_ADAPTER_DESC bestAdapterDescriptor;
 
 		ADAPTER_INFO("Available adapters:");
 
@@ -68,6 +71,7 @@ namespace Trident {
 			if (adapterScore > bestAdapterScore) {
 				bestAdapterScore = adapterScore;
 				bestAdapterIndex = adapterIndex;
+				bestAdapterDescriptor = adapterDescriptor;
 			}
 
 			const LPCSTR description = ConvertUTF16ToUTF8(adapterDescriptor.Description);
@@ -85,16 +89,10 @@ namespace Trident {
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to enumerate adapter.");
 
-		result = adapter->GetDesc(&adapterDescriptor);
+		return createRef<DX12::PhysicalDevice>(_instance->adapter, adapter, bestAdapterDescriptor, _instance->factory);
+	}
 
-		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to get adapter descriptor.");
-
-		const LPCSTR description = ConvertUTF16ToUTF8(adapterDescriptor.Description);
-
-		ADAPTER_INFO("Using [].", description);
-
-		delete[] description;
-
-		return createRef<DX12::PhysicalDevice>(_instance->adapter, adapter, _instance->factory);
+	view<char8> DX12::getPhysicalDeviceName(const Trident::PhysicalDevice* physicalDevice) {
+		return static_cast<const DX12::PhysicalDevice*>(physicalDevice)->name;
 	}
 }

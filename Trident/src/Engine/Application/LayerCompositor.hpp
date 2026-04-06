@@ -32,60 +32,55 @@ namespace Trident {
 				adapter(adapter),
 				verticalSync(applicationProperties.VerticalSync)
 			{
-				InstanceDescriptor instanceDescriptor{};
-				instanceDescriptor.projectName = projectDescriptor.name;
-				instanceDescriptor.projectVersion = projectDescriptor.version;
-
-				instance = adapter->createInstance(instanceDescriptor);
+				instance = adapter->createInstance({
+					.projectName = projectDescriptor.name,
+					.projectVersion = projectDescriptor.version,
+				});
 				physicalDevice = instance->selectPhysicalDevice(applicationProperties.PreferIntegratedGPU);
 				surface = instance->createSurface(physicalDevice, window);
+
+				ENGINE_INFO("Using physical device \"[]\".", physicalDevice->getName());
+
 				device = physicalDevice->createDevice();
+				graphicsQueue = device->getQueue(QueueFamilyCapability::GRAPHICS);
+				swapchain = device->createSwapchain({
+					.surface = surface,
+					.imageCount = MAX_FRAMES_IN_FLIGHT,
+					.extent = window->getExtent(),
+					.verticalSync = verticalSync,
+				});
 
-				const ref<Queue> graphicsQueue = device->getQueue(QueueFamilyCapability::GRAPHICS);
-
-				SwapchainDescriptor swapchainDescriptor{};
-				swapchainDescriptor.surface = surface;
-				swapchainDescriptor.imageCount = MAX_FRAMES_IN_FLIGHT;
-				swapchainDescriptor.extent.width = window->getSize()[0];
-				swapchainDescriptor.extent.height = window->getSize()[1];
-				swapchainDescriptor.verticalSync = verticalSync;
-
-				swapchain = device->createSwapchain(swapchainDescriptor);
-
-				commandEncoders = sequence<ref<CommandEncoder>>(MAX_FRAMES_IN_FLIGHT);
+				inFlightCommandEncoders = sequence<ref<CommandEncoder>>(MAX_FRAMES_IN_FLIGHT);
 				acquiredNextImageSemaphores = sequence<ref<Semaphore>>(MAX_FRAMES_IN_FLIGHT);
 				finishedExecutionSemaphores = sequence<ref<Semaphore>>(MAX_FRAMES_IN_FLIGHT);
 				inFlightFences = sequence<ref<Fence>>(MAX_FRAMES_IN_FLIGHT);
 
-				CommandBufferDescriptor inFlightCommandBufferDescriptor{};
-				inFlightCommandBufferDescriptor.usage = CommandBufferUsage::AUTO;
+				CommandBufferDescriptor inFlightCommandBufferDescriptor = {
+					.usage = CommandBufferUsage::AUTO,
+				};
+				FenceDescriptor inFlightFenceDescriptor = {
+					.signaled = true,
+				};
 
-				FenceDescriptor inFlightFenceDescriptor{};
-				inFlightFenceDescriptor.signaled = true;
+				#if defined(BUILD_MODE_DEBUG)
+					sequence<char8> inFlightCommandEncoderName;
+					sequence<char8> inFlightFenceName;
+				#endif
 
 				uint32 frameInFlightIndex = 0;
 
-				#if defined(BUILD_MODE_DEBUG)
-					sequence<char8> name;
-				#endif
-
 				while (frameInFlightIndex < MAX_FRAMES_IN_FLIGHT) {
 					#if defined(BUILD_MODE_DEBUG)
-						name = Logger::format("In flight command buffer []", frameInFlightIndex);
+						inFlightCommandEncoderName = Logger::format("In flight command encoder []", frameInFlightIndex);
+						inFlightFenceName = Logger::format("In flight fence []", frameInFlightIndex);
 
-						SET_DEBUG_NAME(inFlightCommandBufferDescriptor, name);
+						inFlightCommandBufferDescriptor.name = inFlightCommandEncoderName;
+						inFlightFenceDescriptor.name = inFlightFenceName;
 					#endif
 
-					commandEncoders[frameInFlightIndex] = graphicsQueue->createCommandEncoder(inFlightCommandBufferDescriptor);
+					inFlightCommandEncoders[frameInFlightIndex] = graphicsQueue->createCommandEncoder(inFlightCommandBufferDescriptor);
 					acquiredNextImageSemaphores[frameInFlightIndex] = device->createSemaphore();
 					finishedExecutionSemaphores[frameInFlightIndex] = device->createSemaphore();
-
-					#if defined(BUILD_MODE_DEBUG)
-						name = Logger::format("In flight fence []", frameInFlightIndex);
-
-						SET_DEBUG_NAME(inFlightFenceDescriptor, name);
-					#endif
-
 					inFlightFences[frameInFlightIndex] = device->createFence(inFlightFenceDescriptor);
 
 					frameInFlightIndex += 1;
@@ -95,7 +90,7 @@ namespace Trident {
 			PresentStatus render(uint32 frameInFlightIndex, float64 remainingFrameTime) {
 				PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-				const ref<CommandEncoder> commandEncoder = commandEncoders[frameInFlightIndex];
+				const ref<CommandEncoder> commandEncoder = inFlightCommandEncoders[frameInFlightIndex];
 				const ref<Semaphore> acquiredNextImageSemaphore = acquiredNextImageSemaphores[frameInFlightIndex];
 				const ref<Semaphore> finishedExecutionSemaphore = finishedExecutionSemaphores[frameInFlightIndex];
 				const ref<Fence> inFlightFence = inFlightFences[frameInFlightIndex];
@@ -105,7 +100,7 @@ namespace Trident {
 
 				const AcquireNextImageStatus acquireNextImageStatus = device->acquireNextImage(swapchain, acquiredNextImageSemaphore, swapchainImageIndex);
 
-				// TODO: Trigger a resize if AcquireNextImageStatus is SUBOPTIMAL or ERROR_OUT_OF_DATE.
+				// TODO(graphics/acquire-next-image-status): Resize the swapchain if the status is SUBOPTIMAL or ERROR_OUT_OF_DATE.
 				ENGINE_ASSERT(acquireNextImageStatus == AcquireNextImageStatus::SUBOPTIMAL || acquireNextImageStatus == AcquireNextImageStatus::SUCCESS, "Failed to acquire the next swapchain image.");
 
 				commandEncoder->reset();
@@ -118,7 +113,6 @@ namespace Trident {
 				}
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-				const ref<Queue> graphicsQueue = device->getQueue(QueueFamilyCapability::GRAPHICS);
 
 				graphicsQueue->submit({commandBuffer}, acquiredNextImageSemaphore, finishedExecutionSemaphore, inFlightFence);
 
@@ -130,14 +124,12 @@ namespace Trident {
 
 				device->waitIdle();
 
-				SwapchainDescriptor swapchainDescriptor{};
-				swapchainDescriptor.surface = surface;
-				swapchainDescriptor.imageCount = MAX_FRAMES_IN_FLIGHT;
-				swapchainDescriptor.extent.width = window->getSize()[0];
-				swapchainDescriptor.extent.height = window->getSize()[1];
-				swapchainDescriptor.verticalSync = verticalSync;
-
-				swapchain->update(swapchainDescriptor);
+				swapchain->update({
+					.surface = surface,
+					.imageCount = MAX_FRAMES_IN_FLIGHT,
+					.extent = window->getExtent(),
+					.verticalSync = verticalSync,
+				});
 			}
 
 		public:
@@ -151,10 +143,11 @@ namespace Trident {
 			ref<PhysicalDevice> physicalDevice;
 			ref<Surface> surface;
 			ref<Device> device;
+			ref<Queue> graphicsQueue;
 			ref<Swapchain> swapchain;
 
 		private:
-			sequence<ref<CommandEncoder>> commandEncoders;
+			sequence<ref<CommandEncoder>> inFlightCommandEncoders;
 			sequence<ref<Semaphore>> acquiredNextImageSemaphores;
 			sequence<ref<Semaphore>> finishedExecutionSemaphores;
 			sequence<ref<Fence>> inFlightFences;

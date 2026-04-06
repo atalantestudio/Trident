@@ -31,8 +31,7 @@ namespace Trident {
 		sint32 positionY;
 
 		// TODO: Use vec2<sint32> (no SIMD).
-		sint32 sizeX;
-		sint32 sizeY;
+		Extent2D extent;
 
 		bool minimized;
 		bool maximized;

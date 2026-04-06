@@ -116,6 +116,7 @@ namespace Trident::VK {
 		adapter->drawIndexedIndirectImplementation = VK::drawIndexedIndirect;
 		adapter->endImplementation = VK::end;
 		adapter->endRenderPassImplementation = VK::endRenderPass;
+		adapter->getPhysicalDeviceNameImplementation = VK::getPhysicalDeviceName;
 		adapter->getQueueImplementation = VK::getQueue;
 		adapter->insertMemoryBarriersImplementation = VK::insertMemoryBarriers;
 		adapter->mapBufferImplementation = VK::mapBuffer;

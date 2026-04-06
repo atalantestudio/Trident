@@ -72,8 +72,8 @@ namespace Trident {
 		RECT rect{};
 		rect.left = 0;
 		rect.top = 0;
-		rect.right = descriptor.size.width;
-		rect.bottom = descriptor.size.height;
+		rect.right = descriptor.extent.width;
+		rect.bottom = descriptor.extent.height;
 
 		constexpr DWORD dwStyle = WS_CAPTION | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SYSMENU | WS_THICKFRAME;
 		constexpr BOOL bMenu = FALSE;
@@ -118,9 +118,7 @@ namespace Trident {
 
 		WIN32_ASSERT(windowData->hDC != nullptr);
 
-		windowData->sizeX = descriptor.size.width;
-		windowData->sizeY = descriptor.size.height;
-
+		windowData->extent = descriptor.extent;
 		windowData->keyDownEventListener = descriptor.keyDownEventListener;
 		windowData->keyUpEventListener = descriptor.keyUpEventListener;
 		windowData->mouseDownEventListener = descriptor.mouseDownEventListener;
@@ -186,10 +184,16 @@ namespace Trident {
 		return &windowData.positionX;
 	}
 
+	Extent2D Window::getExtent() const {
+		const Win32WindowData& windowData = *static_cast<const Win32WindowData*>(data);
+
+		return windowData.extent;
+	}
+
 	const sint32* Window::getSize() const {
 		const Win32WindowData& windowData = *static_cast<const Win32WindowData*>(data);
 
-		return &windowData.sizeX;
+		return pointer_cast<const sint32*>(&windowData.extent.width);
 	}
 
 	bool Window::isKeyDown(KeyCode keyCode) const {
@@ -294,11 +298,11 @@ namespace Trident {
 		}
 
 		// TODO: Verify that the condition is correct.
-		// windowData->cursorX != windowData->sizeX / 2 || windowData->cursorY != windowData->sizeY / 2
+		// windowData->cursorX != windowData->extent.width / 2 || windowData->cursorY != windowData->sizeY / 2
 		if (windowData->pointerLocked) {
 			POINT point{};
-			point.x = windowData->sizeX / 2;
-			point.y = windowData->sizeY / 2;
+			point.x = windowData->extent.width / 2;
+			point.y = windowData->extent.height / 2;
 
 			windowData->cursorX = point.x;
 			windowData->cursorY = point.y;

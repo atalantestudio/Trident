@@ -109,6 +109,7 @@ namespace Trident::DX12 {
 		adapter->drawIndexedIndirectImplementation = DX12::drawIndexedIndirect;
 		adapter->endImplementation = DX12::end;
 		adapter->endRenderPassImplementation = DX12::endRenderPass;
+		adapter->getPhysicalDeviceNameImplementation = DX12::getPhysicalDeviceName;
 		adapter->getQueueImplementation = DX12::getQueue;
 		adapter->insertMemoryBarriersImplementation = DX12::insertMemoryBarriers;
 		adapter->mapBufferImplementation = DX12::mapBuffer;

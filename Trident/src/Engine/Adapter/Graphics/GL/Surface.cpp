@@ -38,11 +38,7 @@ namespace Trident {
 			LOAD_PROCEDURE(glGetProgramiv);
 			LOAD_PROCEDURE(glGetShaderInfoLog);
 			LOAD_PROCEDURE(glGetShaderiv);
-
-			#if defined(BUILD_MODE_DEBUG)
-				LOAD_PROCEDURE(glGetString);
-			#endif
-
+			LOAD_PROCEDURE(glGetString);
 			LOAD_PROCEDURE(glLineWidth);
 			LOAD_PROCEDURE(glLinkProgram);
 			LOAD_PROCEDURE(glPixelStorei);
@@ -453,14 +449,6 @@ namespace Trident {
 		surface->format = ImageFormat::R8G8B8A8_UNORM;
 
 		ref<GL::PhysicalDevice> _physicalDevice = std::static_pointer_cast<GL::PhysicalDevice>(physicalDevice);
-
-		#if defined(BUILD_MODE_DEBUG)
-			const GLchar* vendor = pointer_cast<const GLchar*>(glGetString(GL_VENDOR));
-			const GLchar* renderer = pointer_cast<const GLchar*>(glGetString(GL_RENDERER));
-			const GLchar* version = pointer_cast<const GLchar*>(glGetString(GL_VERSION));
-
-			ADAPTER_INFO("Using [] [] [].", vendor, renderer, version);
-		#endif
 
 		_physicalDevice->limits.bufferImageGranularity = 0;
 

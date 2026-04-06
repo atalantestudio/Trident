@@ -7,7 +7,6 @@
 #include "Engine/Adapter/Graphics/DX12/GraphicsAdapter.hpp"
 #include "Engine/Adapter/Graphics/GL/GraphicsAdapter.hpp"
 #include "Engine/Adapter/Graphics/VK/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/Adapter/createDescriptorSetLayout.hpp"
 #include "Engine/API/Rendering/Device.hpp"
 #include "Engine/API/Rendering/Instance.hpp"
 
@@ -27,10 +26,6 @@ namespace Trident {
 		DEBUG_ASSERT(properties.GraphicsAPI < GraphicsAPI::count);
 
 		BIND_ADAPTER_IMPLEMENTATIONS[static_cast<index>(properties.GraphicsAPI)](this);
-	}
-
-	GraphicsAPI GraphicsAdapter::getApi() const {
-		return api;
 	}
 
 	AcquireNextImageStatus GraphicsAdapter::acquireNextImage(const Device* device, const Swapchain* swapchain, const Semaphore* semaphore, uint32& imageIndex) const {

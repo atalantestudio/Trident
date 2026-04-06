@@ -7,7 +7,7 @@
 
 namespace Trident {
 	void CommandEncoder::insertMemoryBarriers(view<BufferMemoryBarrier> bufferMemoryBarriers, view<ImageMemoryBarrier> imageMemoryBarriers) {
-		#if defined(BUILD_MODE_DEBUG)
+		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 			uint32 bufferMemoryBarrierIndex = 0;

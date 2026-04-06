@@ -12,12 +12,12 @@ namespace Trident {
 		HANDLE hMutex;
 	};
 
-	Mutex::Mutex(const std::string& name) {
-		DEBUG_ASSERT(name.size() < MAX_PATH);
+	Mutex::Mutex(view<char8> name) {
+		DEBUG_ASSERT(name.count() < MAX_PATH);
 
 		const LPSECURITY_ATTRIBUTES lpMutexAttributes = nullptr;
 		const BOOL bInitialOwner = FALSE;
-		const LPCWSTR lpName = ConvertUTF8ToUTF16(name.data());
+		const LPCWSTR lpName = ConvertUTF8ToUTF16(&name[0]);
 
 		Win32MutexData* mutexData = new Win32MutexData();
 

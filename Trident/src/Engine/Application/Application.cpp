@@ -23,27 +23,17 @@ namespace Trident {
 		return INVERSE_FIXED_DELTA_TIME;
 	}
 
-	sequence<char8> Application::formatWindowName(view<char8> projectName, uint8 instanceCount) {
-		if (instanceCount == 0) {
-			return projectName;
-		}
-
-		return Logger::format("[] ([])", projectName, static_cast<sint32>(instanceCount));
-	}
-
 	Application::Application(const ProjectDescriptor& projectDescriptor) :
 		projectType(projectDescriptor.type)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ENGINE_DEBUG("Launching.");
-
 		Platform::initialize(&projectDescriptor.name[0]);
 
-		mutex = createScope<Mutex>("Mutex");
+		mutex = createScope<Mutex>("ApplicationMutex");
 		mutex->acquire();
 
-		sharedMemory = createScope<SharedMemory>("SharedMemory", sizeof(SharedMemoryData));
+		sharedMemory = createScope<SharedMemory>("ApplicationSharedMemory", sizeof(SharedMemoryData));
 		sharedMemoryData = static_cast<SharedMemoryData*>(sharedMemory->map(0, sizeof(SharedMemoryData)));
 
 		if (sharedMemoryData->instanceCount > MAX_PARALLEL_INSTANCES) {
@@ -57,6 +47,11 @@ namespace Trident {
 		}
 
 		initializePropertyFile();
+
+		sharedMemoryData->instanceCount += 1;
+
+		mutex->release();
+
 		initializeWindow(projectDescriptor);
 		initializeGraphicsAdapter(projectDescriptor);
 
@@ -73,7 +68,7 @@ namespace Trident {
 		//       If a property is invalid, the application emits a warning, but continues to use the current value.
 		const std::filesystem::path projectRootDirectory = Filesystem::getProjectRootDirectory();
 
-		const sequence<char8> propertyFilePath = Logger::format("[]\\[].tpr", projectRootDirectory.string(), projectRootDirectory.filename().string());
+		const sequence<char8> propertyFilePath = Logger::format("[]/[].tpr", projectRootDirectory.string(), projectRootDirectory.filename().string());
 
 		// Try to open the property file located at "[PROJECT_ROOT_DIRECTORY]/[PROJECT_NAME].tpr".
 		Reader propertyFileReader = Filesystem::openReader(propertyFilePath);
@@ -88,7 +83,7 @@ namespace Trident {
 
 			propertyFileWriter.write(pointer_cast<const uint8*>(&defaultFileData[0]), defaultFileData.count());
 
-			ENGINE_INFO("Created new property file with default values.");
+			ENGINE_INFO("Created property file \"[]\" with default values.", propertyFilePath);
 		}
 
 		properties = new ApplicationProperties();
@@ -109,24 +104,24 @@ namespace Trident {
 	}
 
 	void Application::initializeWindow(const ProjectDescriptor& projectDescriptor) {
-		WindowDescriptor windowDescriptor{};
-		windowDescriptor.name = formatWindowName(projectDescriptor.name, sharedMemoryData->instanceCount);
-		windowDescriptor.size.width = properties->WindowWidth;
-		windowDescriptor.size.height = properties->WindowHeight;
-		windowDescriptor.keyDownEventListener = BIND(Application::propagateEventFrontToBack);
-		windowDescriptor.keyUpEventListener = BIND(Application::propagateEventFrontToBack);
-		windowDescriptor.mouseDownEventListener = BIND(Application::propagateEventFrontToBack);
-		windowDescriptor.mouseMoveEventListener = BIND(Application::propagateEventFrontToBack);
-		windowDescriptor.mouseUpEventListener = BIND(Application::propagateEventFrontToBack);
-		windowDescriptor.mouseWheelEventListener = BIND(Application::propagateEventFrontToBack);
-		windowDescriptor.windowCloseEventListener = BIND(Application::onWindowClose);
-		windowDescriptor.windowResizeEventListener = BIND(Application::onWindowResize);
+		sequence<char8> name = projectDescriptor.name;
 
-		sharedMemoryData->instanceCount += 1;
+		if (sharedMemoryData->instanceCount > 0) {
+			name = Logger::format("[] ([])", projectDescriptor.name, static_cast<uint32>(sharedMemoryData->instanceCount));
+		}
 
-		mutex->release();
-
-		window = new Window(windowDescriptor);
+		window = new Window({
+			.name = name,
+			.extent = {properties->WindowWidth, properties->WindowHeight},
+			.keyDownEventListener = BIND(Application::propagateEventFrontToBack),
+			.keyUpEventListener = BIND(Application::propagateEventFrontToBack),
+			.mouseDownEventListener = BIND(Application::propagateEventFrontToBack),
+			.mouseMoveEventListener = BIND(Application::propagateEventFrontToBack),
+			.mouseUpEventListener = BIND(Application::propagateEventFrontToBack),
+			.mouseWheelEventListener = BIND(Application::propagateEventFrontToBack),
+			.windowCloseEventListener = BIND(Application::onWindowClose),
+			.windowResizeEventListener = BIND(Application::onWindowResize),
+		});
 	}
 
 	void Application::initializeGraphicsAdapter(const ProjectDescriptor& projectDescriptor) {

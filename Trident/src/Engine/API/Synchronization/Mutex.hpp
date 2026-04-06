@@ -6,7 +6,7 @@
 namespace Trident {
 	class Mutex {
 		public:
-			Mutex(const std::string& name);
+			explicit Mutex(view<char8> name);
 
 			~Mutex();
 

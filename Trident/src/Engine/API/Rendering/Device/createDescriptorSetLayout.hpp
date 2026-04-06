@@ -3,15 +3,11 @@
 
 #pragma once
 
-#include "Engine/API/Graphics/GraphicsAdapter.hpp"
-
-#include "Engine/API/Rendering/DescriptorSetLayout.hpp"
-#include "Engine/API/Rendering/DescriptorType.hpp"
-#include "Engine/API/Rendering/ShaderStage.hpp"
+#include "Engine/API/Rendering/Device.hpp"
 
 namespace Trident {
-	ref<DescriptorSetLayout> GraphicsAdapter::createDescriptorSetLayout(const Device* device, const sequence<DescriptorSetLayoutBinding>& bindings) const {
-		#if defined(BUILD_MODE_DEBUG)
+	ref<DescriptorSetLayout> Device::createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const {
+		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 			uint32 descriptorSetLayoutBindingIndex = 0;
@@ -31,6 +27,6 @@ namespace Trident {
 			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
 		#endif
 
-		return createDescriptorSetLayoutImplementation(device, bindings);
+		return adapter->createDescriptorSetLayout(this, bindings);
 	}
 }

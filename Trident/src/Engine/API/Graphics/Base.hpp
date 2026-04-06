@@ -136,6 +136,7 @@ namespace Trident {
 	typedef void (*DrawIndexedIndirectImplementation)(CommandEncoder* commandEncoder, ref<BaseBuffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride);
 	typedef ref<CommandBuffer> (*EndImplementation)(const CommandEncoder* commandEncoder);
 	typedef void (*EndRenderPassImplementation)(CommandEncoder* commandEncoder);
+	typedef view<char8> (*GetPhysicalDeviceNameImplementation)(const PhysicalDevice* physicalDevice);
 	typedef ref<Queue> (*GetQueueImplementation)(const Device* device, QueueFamilyCapability queueFamilyCapability);
 	typedef ImageFormat (*GetSurfaceFormatImplementation)(const Surface* surface);
 	typedef void (*InsertMemoryBarriersImplementation)(CommandEncoder* commandEncoder, view<BufferMemoryBarrier> bufferMemoryBarriers, view<ImageMemoryBarrier> imageMemoryBarriers);

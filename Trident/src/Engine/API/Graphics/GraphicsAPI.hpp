@@ -5,8 +5,13 @@
 
 namespace Trident {
 	enum class GraphicsAPI : uint8 {
+		// DirectX 12.
 		DX12,
+
+		// OpenGL.
 		GL,
+
+		// Vulkan.
 		VK,
 
 		count,

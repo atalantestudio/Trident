@@ -165,10 +165,6 @@ namespace Trident {
 
 		_instance->vkGetPhysicalDeviceProperties(_physicalDevice->physicalDevice, &_physicalDevice->properties);
 
-		const view<char8> physicalDeviceType = formatPhysicalDeviceType(_physicalDevice->properties.deviceType);
-
-		ADAPTER_INFO("Using [] [].", _physicalDevice->properties.deviceName, physicalDeviceType);
-
 		// Select queue family indices.
 		{
 			uint32 queueFamilyCount;
@@ -278,5 +274,9 @@ namespace Trident {
 		}
 
 		return _physicalDevice;
+	}
+
+	view<char8> VK::getPhysicalDeviceName(const Trident::PhysicalDevice* physicalDevice) {
+		return static_cast<const VK::PhysicalDevice*>(physicalDevice)->properties.deviceName;
 	}
 }

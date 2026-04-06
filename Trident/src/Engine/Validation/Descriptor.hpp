@@ -6,7 +6,7 @@
 #include "Engine/API/Graphics/Base.hpp"
 
 namespace Trident {
-	#if defined(BUILD_MODE_DEBUG)
+	#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 		#define SET_DEBUG_NAME(descriptor, value) descriptor.name = value
 
 		// API descriptor validators for debug mode.

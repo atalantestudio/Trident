@@ -8,8 +8,10 @@
 #include "Engine/API/Rendering/Buffer.hpp"
 #include "Engine/API/Rendering/CommandPool.hpp"
 #include "Engine/API/Rendering/Device.hpp"
+#include "Engine/API/Rendering/Device/createDescriptorSetLayout.hpp"
 #include "Engine/API/Rendering/ImageView.hpp"
 #include "Engine/API/Rendering/PhysicalDevice.hpp"
+#include "Engine/API/Rendering/PhysicalDevice/getName.hpp"
 #include "Engine/API/Rendering/PipelineLayout.hpp"
 #include "Engine/API/Rendering/RenderPass.hpp"
 #include "Engine/API/Rendering/ShaderModule.hpp"
@@ -185,8 +187,7 @@ namespace Trident {
 		mipLevelCount(descriptor.mipLevelCount),
 		layerCount(descriptor.layerCount),
 		sampleCount(descriptor.sampleCount),
-		usage(descriptor.usage),
-		layout(ImageLayout::UNDEFINED)
+		usage(descriptor.usage)
 	{}
 
 	Image::~Image() {

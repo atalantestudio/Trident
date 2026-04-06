@@ -9,6 +9,9 @@
 namespace Trident {
 	class PhysicalDevice {
 		public:
+			/// Returns the name of the physical device.
+			view<char8> getName() const;
+
 			const PhysicalDeviceLimits& getLimits() const {
 				return limits;
 			}

@@ -8,16 +8,18 @@
 namespace Trident {
 	class DX12::PhysicalDevice final : public Trident::PhysicalDevice {
 		public:
-			explicit PhysicalDevice(const Trident::GraphicsAdapter* adapter, IDXGIAdapter* dxgiAdapter, IDXGIFactory4* factory);
+			explicit PhysicalDevice(const Trident::GraphicsAdapter* adapter, IDXGIAdapter* dxgiAdapter, const DXGI_ADAPTER_DESC& adapterDescriptor, IDXGIFactory4* factory);
 
 		public:
 			IDXGIAdapter* adapter;
-
-			// Used when creating a swapchain from this physical device.
+			DXGI_ADAPTER_DESC adapterDescriptor;
 			IDXGIFactory4* factory;
+			sequence<char8> name;
 	};
 
 	namespace DX12 {
 		ref<Trident::PhysicalDevice> selectPhysicalDevice(const Trident::Instance* instance, bool preferIntegratedGpu);
+
+		view<char8> getPhysicalDeviceName(const Trident::PhysicalDevice* physicalDevice);
 	}
 }

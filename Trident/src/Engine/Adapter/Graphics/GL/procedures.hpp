@@ -28,11 +28,7 @@ namespace Trident {
 	extern PFNGLGETPROGRAMIVPROC glGetProgramiv;
 	extern PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog;
 	extern PFNGLGETSHADERIVPROC glGetShaderiv;
-
-	#if defined(BUILD_MODE_DEBUG)
-		extern PFNGLGETSTRINGPROC glGetString;
-	#endif
-
+	extern PFNGLGETSTRINGPROC glGetString;
 	extern PFNGLLINEWIDTHPROC glLineWidth;
 	extern PFNGLLINKPROGRAMPROC glLinkProgram;
 	extern PFNGLPIXELSTOREIPROC glPixelStorei;

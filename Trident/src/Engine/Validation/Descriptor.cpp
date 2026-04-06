@@ -3,12 +3,12 @@
 
 #include "pch.hpp"
 
-#if defined(BUILD_MODE_DEBUG)
+#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 	#include "Engine/Renderer/Renderer.hpp"
 #endif
 
 namespace Trident {
-	#if defined(BUILD_MODE_DEBUG)
+	#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 		static bool validateSampleCount(uint8 sampleCount) {
 			switch (sampleCount) {
 				case 1:

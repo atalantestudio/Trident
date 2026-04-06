@@ -23,17 +23,16 @@ namespace Trident {
 				return 0;
 			}
 			case WM_SIZE: {
-				const sint32 width = GET_X_LPARAM(lParam);
-				const sint32 height = GET_Y_LPARAM(lParam);
+				const uint32 width = GET_X_LPARAM(lParam);
+				const uint32 height = GET_Y_LPARAM(lParam);
 
-				if (windowData->sizeX != width || windowData->sizeY != height) {
+				if (windowData->extent.width != width || windowData->extent.height != height) {
 					WindowResizeEvent windowResizeEvent(width, height);
 
 					windowData->windowResizeEventListener(windowResizeEvent);
 				}
 
-				windowData->sizeX = width;
-				windowData->sizeY = height;
+				windowData->extent = {width, height};
 				windowData->minimized = wParam == SIZE_MINIMIZED;
 				windowData->maximized = wParam == SIZE_MAXIMIZED;
 

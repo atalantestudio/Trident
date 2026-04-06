@@ -77,7 +77,7 @@ namespace Trident {
 			uint32 layerCount;
 			uint8 sampleCount;
 			ImageUsage usage;
-			ImageLayout layout;
+			ImageLayout layout = ImageLayout::UNDEFINED;
 			Access access = Access::NONE;
 	};
 }

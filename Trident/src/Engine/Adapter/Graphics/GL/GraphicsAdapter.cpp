@@ -112,6 +112,7 @@ namespace Trident::GL {
 		adapter->drawIndexedIndirectImplementation = GL::drawIndexedIndirect;
 		adapter->endImplementation = GL::end;
 		adapter->endRenderPassImplementation = GL::endRenderPass;
+		adapter->getPhysicalDeviceNameImplementation = GL::getPhysicalDeviceName;
 		adapter->getQueueImplementation = GL::getQueue;
 		adapter->insertMemoryBarriersImplementation = GL::insertMemoryBarriers;
 		adapter->mapBufferImplementation = GL::mapBuffer;

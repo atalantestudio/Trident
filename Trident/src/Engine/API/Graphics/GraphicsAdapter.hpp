@@ -18,7 +18,9 @@ namespace Trident {
 		public:
 			explicit GraphicsAdapter(const ApplicationProperties& properties);
 
-			GraphicsAPI getApi() const;
+			inline GraphicsAPI getApi() const {
+				return api;
+			}
 
 			AcquireNextImageStatus acquireNextImage(const Device* device, const Swapchain* swapchain, const Semaphore* semaphore, uint32& imageIndex) const;
 
@@ -59,7 +61,9 @@ namespace Trident {
 
 			ref<ComputePipeline> createComputePipeline(const Device* device, const ComputePipelineDescriptor& descriptor) const;
 
-			ref<DescriptorSetLayout> createDescriptorSetLayout(const Device* device, const sequence<DescriptorSetLayoutBinding>& bindings) const;
+			inline ref<DescriptorSetLayout> createDescriptorSetLayout(const Device* device, const sequence<DescriptorSetLayoutBinding>& bindings) const {
+				return createDescriptorSetLayoutImplementation(device, bindings);
+			}
 
 			ref<Device> createDevice(const PhysicalDevice* physicalDevice) const;
 
@@ -145,6 +149,10 @@ namespace Trident {
 			ref<CommandBuffer> end(const CommandEncoder* commandEncoder) const;
 
 			void endRenderPass(CommandEncoder* commandEncoder) const;
+
+			inline view<char8> getPhysicalDeviceName(const PhysicalDevice* physicalDevice) const {
+				return getPhysicalDeviceNameImplementation(physicalDevice);
+			}
 
 			ref<Queue> getQueue(const Device* device, QueueFamilyCapability queueFamilyCapability) const;
 
@@ -245,6 +253,7 @@ namespace Trident {
 			DrawIndexedIndirectImplementation drawIndexedIndirectImplementation;
 			EndImplementation endImplementation;
 			EndRenderPassImplementation endRenderPassImplementation;
+			GetPhysicalDeviceNameImplementation getPhysicalDeviceNameImplementation;
 			GetQueueImplementation getQueueImplementation;
 			InsertMemoryBarriersImplementation insertMemoryBarriersImplementation;
 			MapBufferImplementation mapBufferImplementation;

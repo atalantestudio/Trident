@@ -26,8 +26,6 @@ namespace Trident {
 
 			static float64 getInverseFixedDeltaTime();
 
-			static sequence<char8> formatWindowName(view<char8> projectName, uint8 instanceCount);
-
 		public:
 			explicit Application(const ProjectDescriptor& projectDescriptor);
 
