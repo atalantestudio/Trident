@@ -3,14 +3,14 @@
 
 #pragma once
 
-#include "Engine/API/Material/Material.hpp"
+#include "Engine/API/Geometry/3D/Geometry3D.hpp"
+#include "Engine/API/Graphics/GraphicsAPI.hpp"
 #include "Engine/API/Material/Shader.hpp"
 #include "Engine/API/Scene/Scene3D.hpp"
+#include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 
-namespace Trident {
-	Scene3D createLemonsAndStoolScene(AssetLibrary* assetLibrary, GraphicsAPI graphicsApi) {
-		Scene3D scene;
-
+namespace Trident::LemonAndStool {
+	void initializeScene(Scene3D& scene, AssetLibrary* assetLibrary, GraphicsAPI graphicsApi) {
 		const ref<GeometryAsset> lemonGeometryAsset = assetLibrary->getAsset<GeometryAsset>("lemon_1k");
 		const ref<GeometryAsset> foldingWoodenStoolGeometryAsset = assetLibrary->getAsset<GeometryAsset>("folding_wooden_stool");
 
@@ -19,31 +19,6 @@ namespace Trident {
 
 		const uint32 lemonGeometryIndex = scene.registerGeometry(lemonGeometry);
 		const uint32 foldingWoodenStoolGeometryIndex = scene.registerGeometry(foldingWoodenStoolGeometry);
-
-		Shader defaultMaterialShader = {
-			.descriptorSetLayoutBindings = {},
-		};
-
-		switch (graphicsApi) {
-			case GraphicsAPI::DX12:
-			case GraphicsAPI::VK: {
-				defaultMaterialShader.modulePath = "Visibility/Material/Default";
-
-				break;
-			}
-			case GraphicsAPI::GL: {
-				defaultMaterialShader.modulePath = "Visibility/Material/DefaultGL";
-
-				break;
-			}
-		}
-
-		const uint32 defaultMaterialShaderIndex = scene.registerMaterialShader(defaultMaterialShader);
-
-		const uint32 defaultMaterialIndex = scene.registerMaterial({
-			.shaderIndex = defaultMaterialShaderIndex,
-			.writeDescriptorSetBindings = {},
-		});
 
 		Shader pbrMaterialShader = {
 			.descriptorSetLayoutBindings = {
@@ -73,12 +48,12 @@ namespace Trident {
 		switch (graphicsApi) {
 			case GraphicsAPI::DX12:
 			case GraphicsAPI::VK: {
-				pbrMaterialShader.modulePath = "Visibility/Material/Test";
+				pbrMaterialShader.modulePath = "Material/Test";
 
 				break;
 			}
 			case GraphicsAPI::GL: {
-				pbrMaterialShader.modulePath = "Visibility/Material/TestGL";
+				pbrMaterialShader.modulePath = "Material/TestGL";
 
 				break;
 			}
@@ -162,7 +137,5 @@ namespace Trident {
 			.geometryIndex = lemonGeometryIndex,
 			.materialIndex = lemonMaterialIndex,
 		});
-
-		return scene;
 	}
 }

@@ -19,7 +19,8 @@ namespace Trident {
 				renderer.setLayer(this);
 				renderer.build();
 
-				scene = createLemonsScene(getApplication()->getAssetLibrary(), renderer.getGraphicsApi());
+				Lemons::initializeScene(scene, getApplication()->getAssetLibrary(), renderer.getGraphicsApi());
+
 				scene.createVertexBuffer(renderer.getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment);
 
 				renderer.setScene(&scene);

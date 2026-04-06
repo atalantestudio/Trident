@@ -3,13 +3,14 @@
 
 #pragma once
 
-#include "Engine/API/Material/Material.hpp"
+#include "Engine/API/Geometry/3D/Geometry3D.hpp"
+#include "Engine/API/Graphics/GraphicsAPI.hpp"
+#include "Engine/API/Material/Shader.hpp"
 #include "Engine/API/Scene/Scene3D.hpp"
+#include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 
-namespace Trident {
-	Scene3D createLemonsScene(AssetLibrary* assetLibrary, GraphicsAPI graphicsApi) {
-		Scene3D scene;
-
+namespace Trident::Lemons {
+	void initializeScene(Scene3D& scene, AssetLibrary* assetLibrary, GraphicsAPI graphicsApi) {
 		const ref<GeometryAsset> lemonGeometryAsset = assetLibrary->getAsset<GeometryAsset>("lemon_1k");
 		const ref<Geometry3D> lemonGeometry = createRef<Geometry3D>(lemonGeometryAsset);
 		const uint32 lemonGeometryIndex = scene.registerGeometry(lemonGeometry);
@@ -96,7 +97,6 @@ namespace Trident {
 			},
 		});
 
-		// Lemon 1
 		scene.registerInstance({
 			.position = {0.3_m, 0.0_m, 1.25_m},
 			.rotation = {-pi<float32>() * 0.5f, -0.2_rad, pi<float32>()},
@@ -104,8 +104,6 @@ namespace Trident {
 			.geometryIndex = lemonGeometryIndex,
 			.materialIndex = lemonMaterialIndex,
 		});
-
-		// Lemon 2
 		scene.registerInstance({
 			.position = {-0.35_m, -0.2_m, 1.25_m},
 			.rotation = {-0.3_rad, -0.3_rad, pi<float32>() * 0.5f},
@@ -113,7 +111,5 @@ namespace Trident {
 			.geometryIndex = lemonGeometryIndex,
 			.materialIndex = lemonMaterialIndex,
 		});
-
-		return scene;
 	}
 }

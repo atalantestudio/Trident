@@ -19,7 +19,33 @@ namespace Trident {
 				renderer.setLayer(this);
 				renderer.build();
 
-				scene = createLemonsAndStoolScene(getApplication()->getAssetLibrary(), renderer.getGraphicsApi());
+				Shader defaultMaterialShader = {
+					.descriptorSetLayoutBindings = {},
+				};
+
+				switch (renderer.getGraphicsApi()) {
+					case GraphicsAPI::DX12:
+					case GraphicsAPI::VK: {
+						defaultMaterialShader.modulePath = "Material/Default";
+
+						break;
+					}
+					case GraphicsAPI::GL: {
+						defaultMaterialShader.modulePath = "Material/DefaultGL";
+
+						break;
+					}
+				}
+
+				const uint32 defaultMaterialShaderIndex = scene.registerMaterialShader(defaultMaterialShader);
+
+				scene.registerMaterial({
+					.shaderIndex = defaultMaterialShaderIndex,
+					.writeDescriptorSetBindings = {},
+				});
+
+				LemonAndStool::initializeScene(scene, getApplication()->getAssetLibrary(), renderer.getGraphicsApi());
+
 				scene.createVertexBuffer(renderer.getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment);
 				clusteredScene = clusterizeScene(scene);
 

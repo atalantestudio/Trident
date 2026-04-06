@@ -13,7 +13,6 @@ namespace Trident {
 		sequence<uint32> vertexNormalIndices;
 		sequence<float32> vertexTextureCoordinateComponents;
 		sequence<uint32> vertexTextureCoordinateIndices;
-		sequence<float32> vertexTangentComponents;
 	};
 
 	// TODO: Unify the vertex position/normal/texture coordinate indices since they must be the same length.
@@ -82,7 +81,7 @@ namespace Trident {
 				return static_cast<uint32>(vertexPositionIndices.count()) / 3;
 			}
 
-		private:
+		protected:
 			void calculateVertexTangentComponents() {
 				uint64 triangleIndex = 0;
 

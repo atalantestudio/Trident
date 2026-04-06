@@ -4,54 +4,50 @@
 #pragma once
 
 #include "Engine/API/Geometry/3D/BoxGeometry3D.hpp"
+#include "Engine/API/Graphics/GraphicsAPI.hpp"
+#include "Engine/API/Material/Shader.hpp"
 #include "Engine/API/Scene/Scene3D.hpp"
+#include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 
-namespace Trident {
-	Scene3D createBoxScene(AssetLibrary* assetLibrary, GraphicsAPI graphicsApi) {
-		Scene3D scene;
-
-		const vec3<float32> size = {1.0_m, 1.0_m, 1.0_m};
-		const ref<Geometry3D> geometry = createRef<BoxGeometry3D>(size);
+namespace Trident::Box {
+	void initializeScene(Scene3D& scene, AssetLibrary* assetLibrary, GraphicsAPI graphicsApi) {
+		const ref<Geometry3D> geometry = createRef<BoxGeometry3D>(vec3<float32>(1.0f, 1.0f, 1.0f));
 		const uint32 geometryIndex = scene.registerGeometry(geometry);
 
-		Shader defaultMaterialShader = {
-			.descriptorSetLayoutBindings = {},
-		};
-
-		switch (graphicsApi) {
-			case GraphicsAPI::DX12:
-			case GraphicsAPI::VK: {
-				defaultMaterialShader.modulePath = "Visibility/Material/Default";
-
-				break;
-			}
-			case GraphicsAPI::GL: {
-				defaultMaterialShader.modulePath = "Visibility/Material/DefaultGL";
-
-				break;
-			}
-		}
-
-		const uint32 defaultMaterialShaderIndex = scene.registerMaterialShader(defaultMaterialShader);
-
-		const uint32 defaultMaterialIndex = scene.registerMaterial({
-			.shaderIndex = defaultMaterialShaderIndex,
-			.writeDescriptorSetBindings = {},
-		});
-
 		Shader testMaterialShader = {
-			.descriptorSetLayoutBindings = {},
+			.descriptorSetLayoutBindings = {
+				// Ambient occlusion, roughness, metallic
+				{
+					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+					.descriptorCount = 1,
+					.shaderStages = ShaderStage::COMPUTE,
+				},
+
+				// Diffuse
+				{
+					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+					.descriptorCount = 1,
+					.shaderStages = ShaderStage::COMPUTE,
+				},
+
+				// Normal
+				{
+					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+					.descriptorCount = 1,
+					.shaderStages = ShaderStage::COMPUTE,
+				},
+			},
 		};
 
 		switch (graphicsApi) {
 			case GraphicsAPI::DX12:
 			case GraphicsAPI::VK: {
-				testMaterialShader.modulePath = "Visibility/Material/Default";
+				testMaterialShader.modulePath = "Material/Test";
 
 				break;
 			}
 			case GraphicsAPI::GL: {
-				testMaterialShader.modulePath = "Visibility/Material/DefaultGL";
+				testMaterialShader.modulePath = "Material/TestGL";
 
 				break;
 			}
@@ -61,7 +57,29 @@ namespace Trident {
 
 		const uint32 testMaterialIndex = scene.registerMaterial({
 			.shaderIndex = testMaterialShaderIndex,
-			.writeDescriptorSetBindings = {},
+			.writeDescriptorSetBindings = {
+				{
+					.descriptorImages = {
+						{
+							.assetPath = "red",
+						},
+					},
+				},
+				{
+					.descriptorImages = {
+						{
+							.assetPath = "green",
+						},
+					},
+				},
+				{
+					.descriptorImages = {
+						{
+							.assetPath = "blue",
+						},
+					},
+				},
+			},
 		});
 
 		scene.registerInstance({
@@ -71,7 +89,5 @@ namespace Trident {
 			.geometryIndex = geometryIndex,
 			.materialIndex = testMaterialIndex,
 		});
-
-		return scene;
 	}
 }

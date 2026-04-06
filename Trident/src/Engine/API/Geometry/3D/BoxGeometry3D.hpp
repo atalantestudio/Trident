@@ -8,7 +8,7 @@
 namespace Trident {
 	class BoxGeometry3D : public Geometry3D {
 		private:
-			static inline const sequence<float32> VERTEX_POSITION_COMPONENTS = {
+			inline static const sequence<float32> VERTEX_POSITION_COMPONENTS = {
 				 0.5f, -0.5f,  0.5f,
 				 0.5f,  0.5f,  0.5f,
 				-0.5f,  0.5f,  0.5f,
@@ -19,7 +19,7 @@ namespace Trident {
 				 0.5f, -0.5f, -0.5f,
 			};
 
-			static inline const sequence<uint32> TRIANGLE_VERTEX_POSITION_INDICES = {
+			inline static const sequence<uint32> TRIANGLE_VERTEX_POSITION_INDICES = {
 				// Front (+Z)
 				0, 1, 2,
 				0, 2, 3,
@@ -40,7 +40,7 @@ namespace Trident {
 				3, 7, 0,
 			};
 
-			static inline const sequence<float32> VERTEX_NORMAL_COMPONENTS = {
+			inline static const sequence<float32> VERTEX_NORMAL_COMPONENTS = {
 				 0.0f,  0.0f,  1.0f,
 				 0.0f,  0.0f, -1.0f,
 				-1.0f,  0.0f,  0.0f,
@@ -49,7 +49,7 @@ namespace Trident {
 				 0.0f, -1.0f,  0.0f,
 			};
 
-			static inline const sequence<uint32> VERTEX_NORMAL_INDICES = {
+			inline static const sequence<uint32> VERTEX_NORMAL_INDICES = {
 				// Front (+Z)
 				0, 0, 0,
 				0, 0, 0,
@@ -70,14 +70,14 @@ namespace Trident {
 				5, 5, 5,
 			};
 
-			static inline const sequence<float32> VERTEX_TEXTURE_COORDINATE_COMPONENTS = {
+			inline static const sequence<float32> VERTEX_TEXTURE_COORDINATE_COMPONENTS = {
 				0.0f, 0.0f,
 				1.0f, 0.0f,
 				0.0f, 1.0f,
 				1.0f, 1.0f,
 			};
 
-			static inline const sequence<uint32> VERTEX_TEXTURE_COORDINATE_INDICES = {
+			inline static const sequence<uint32> VERTEX_TEXTURE_COORDINATE_INDICES = {
 				// Front (+Z)
 				0, 2, 3,
 				0, 3, 1,
@@ -99,22 +99,27 @@ namespace Trident {
 			};
 
 		public:
-			explicit BoxGeometry3D(const vec3<float32>& size) {
+			explicit BoxGeometry3D(vec3<float32> size) :
+				Geometry3D({
+					.vertexPositionComponents = VERTEX_POSITION_COMPONENTS,
+					.vertexPositionIndices = TRIANGLE_VERTEX_POSITION_INDICES,
+					.vertexNormalComponents = VERTEX_NORMAL_COMPONENTS,
+					.vertexNormalIndices = VERTEX_NORMAL_INDICES,
+					.vertexTextureCoordinateComponents = VERTEX_TEXTURE_COORDINATE_COMPONENTS,
+					.vertexTextureCoordinateIndices = VERTEX_TEXTURE_COORDINATE_INDICES,
+				})
+			{
 				const vec3<float32> halfSize = size * 0.5f;
 
-				vertexPositionComponents = VERTEX_POSITION_COMPONENTS;
+				uint32 vertexIndex = 0;
 
-				for (uint32 vertexIndex = 0; vertexIndex < VERTEX_POSITION_COMPONENTS.count(); vertexIndex += 3) {
+				while (vertexIndex < VERTEX_POSITION_COMPONENTS.count()) {
 					vertexPositionComponents[vertexIndex + 0] *= halfSize[0];
 					vertexPositionComponents[vertexIndex + 1] *= halfSize[1];
 					vertexPositionComponents[vertexIndex + 2] *= halfSize[2];
-				}
 
-				vertexPositionIndices = TRIANGLE_VERTEX_POSITION_INDICES;
-				vertexNormalComponents = VERTEX_NORMAL_COMPONENTS;
-				vertexNormalIndices = VERTEX_NORMAL_INDICES;
-				vertexTextureCoordinateComponents = VERTEX_TEXTURE_COORDINATE_COMPONENTS;
-				vertexTextureCoordinateIndices = VERTEX_TEXTURE_COORDINATE_INDICES;
+					vertexIndex += 3;
+				}
 			}
 	};
 }
