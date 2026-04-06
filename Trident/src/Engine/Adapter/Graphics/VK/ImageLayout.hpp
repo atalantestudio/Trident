@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/ImageLayout.hpp"
+#include "Engine/API/Graphics/ImageLayout.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident::VK {

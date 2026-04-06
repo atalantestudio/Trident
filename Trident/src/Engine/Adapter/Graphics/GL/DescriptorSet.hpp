@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/DescriptorSet.hpp"
-#include "Engine/API/Rendering/DescriptorType.hpp"
+#include "Engine/API/Graphics/DescriptorSet.hpp"
+#include "Engine/API/Graphics/DescriptorType.hpp"
 
 namespace Trident {
 	class GL::DescriptorSet final : public Trident::DescriptorSet {

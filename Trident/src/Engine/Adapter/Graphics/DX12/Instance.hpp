@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/Instance.hpp"
+#include "Engine/API/Graphics/Instance.hpp"
 
 namespace Trident {
 	class DX12::Instance final : public Trident::Instance {

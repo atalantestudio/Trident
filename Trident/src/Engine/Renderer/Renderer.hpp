@@ -5,12 +5,12 @@
 
 #include "Engine/API/Event/Window/WindowResizeEvent.hpp"
 #include "Engine/API/Graphics/GraphicsAPI.hpp"
-#include "Engine/API/Rendering/CommandEncoder.hpp"
-#include "Engine/API/Rendering/Descriptor/ComputePipelineDescriptor.hpp"
-#include "Engine/API/Rendering/Descriptor/GraphicsPipelineDescriptor.hpp"
-#include "Engine/API/Rendering/Descriptor/ImageDescriptor.hpp"
-#include "Engine/API/Rendering/Descriptor/ImageViewDescriptor.hpp"
-#include "Engine/API/Rendering/Descriptor/PipelineLayoutDescriptor.hpp"
+#include "Engine/API/Graphics/CommandEncoder.hpp"
+#include "Engine/API/Graphics/Descriptor/ComputePipelineDescriptor.hpp"
+#include "Engine/API/Graphics/Descriptor/GraphicsPipelineDescriptor.hpp"
+#include "Engine/API/Graphics/Descriptor/ImageDescriptor.hpp"
+#include "Engine/API/Graphics/Descriptor/ImageViewDescriptor.hpp"
+#include "Engine/API/Graphics/Descriptor/PipelineLayoutDescriptor.hpp"
 #include "Engine/API/Window/Window.hpp"
 #include "Engine/Application/Application.hpp"
 

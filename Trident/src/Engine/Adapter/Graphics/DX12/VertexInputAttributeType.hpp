@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/VertexInputAttributeType.hpp"
+#include "Engine/API/Graphics/VertexInputAttributeType.hpp"
 
 namespace Trident::DX12 {
 	inline DXGI_FORMAT getVertexInputAttributeType(VertexInputAttributeType vertexInputAttributeType) {

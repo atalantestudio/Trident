@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/CommandEncoder.hpp"
+#include "Engine/API/Graphics/CommandEncoder.hpp"
 
 namespace Trident {
 	class DX12::CommandEncoder final : public Trident::CommandEncoder {

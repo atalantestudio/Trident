@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/Fence.hpp"
+#include "Engine/API/Graphics/Fence.hpp"
 
 namespace Trident {
 	class DX12::Fence final : public Trident::Fence {

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/Framebuffer.hpp"
+#include "Engine/API/Graphics/Framebuffer.hpp"
 
 namespace Trident {
 	class DX12::Framebuffer final : public Trident::Framebuffer {

@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/Access.hpp"
-#include "Engine/API/Rendering/ImageLayout.hpp"
+#include "Engine/API/Graphics/Access.hpp"
+#include "Engine/API/Graphics/ImageLayout.hpp"
 
 namespace Trident::DX12 {
 	inline D3D12_BARRIER_ACCESS getBufferBarrierAccess(Access access) {

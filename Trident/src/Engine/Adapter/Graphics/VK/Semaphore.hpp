@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/Semaphore.hpp"
+#include "Engine/API/Graphics/Semaphore.hpp"
 
 namespace Trident {
 	class VK::Semaphore final : public Trident::Semaphore {

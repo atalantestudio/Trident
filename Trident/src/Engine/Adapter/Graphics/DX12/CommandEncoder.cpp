@@ -18,9 +18,9 @@
 #include "Engine/Adapter/Graphics/DX12/ResourceState.hpp"
 #include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/DispatchIndirectCommand.hpp"
-#include "Engine/API/Rendering/DrawIndexedIndirectCommand.hpp"
-#include "Engine/API/Rendering/DrawIndirectCommand.hpp"
+#include "Engine/API/Graphics/DispatchIndirectCommand.hpp"
+#include "Engine/API/Graphics/DrawIndexedIndirectCommand.hpp"
+#include "Engine/API/Graphics/DrawIndirectCommand.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace Trident {

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/PhysicalDevice.hpp"
+#include "Engine/API/Graphics/PhysicalDevice.hpp"
 
 namespace Trident {
 	class DX12::PhysicalDevice final : public Trident::PhysicalDevice {

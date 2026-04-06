@@ -6,7 +6,7 @@
 #include "Engine/Adapter/Graphics/DX12/CommandPool.hpp"
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
 #include "Engine/Adapter/Graphics/DX12/Fence.hpp"
-#include "Engine/API/Rendering/Queue.hpp"
+#include "Engine/API/Graphics/Queue.hpp"
 
 namespace Trident {
 	class DX12::Queue final : public Trident::Queue {

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/Pipeline.hpp"
+#include "Engine/API/Graphics/Pipeline.hpp"
 
 namespace Trident {
 	class VK::Pipeline : public Trident::Pipeline {

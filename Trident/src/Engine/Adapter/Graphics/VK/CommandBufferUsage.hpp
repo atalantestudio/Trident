@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/CommandBufferUsage.hpp"
+#include "Engine/API/Graphics/CommandBufferUsage.hpp"
 
 namespace Trident::VK {
 	inline VkCommandBufferUsageFlags getCommandBufferUsageFlag(CommandBufferUsage commandBufferUsage) {

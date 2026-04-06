@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/CommandPool.hpp"
+#include "Engine/API/Graphics/CommandPool.hpp"
 
 namespace Trident {
 	class VK::CommandPool final : public Trident::CommandPool {

@@ -6,7 +6,7 @@
 #include "Engine/Adapter/Graphics/GL/Instance.hpp"
 #include "Engine/Adapter/Graphics/GL/PhysicalDevice.hpp"
 #include "Engine/Adapter/Graphics/GL/Queue.hpp"
-#include "Engine/API/Rendering/Device.hpp"
+#include "Engine/API/Graphics/Device.hpp"
 
 namespace Trident {
 	class GL::Device final : public Trident::Device {

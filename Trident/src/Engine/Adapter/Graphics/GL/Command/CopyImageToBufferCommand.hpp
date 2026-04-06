@@ -5,7 +5,7 @@
 
 #include "Engine/Adapter/Graphics/GL/ImageFormat.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/BufferImageCopyRegion.hpp"
+#include "Engine/API/Graphics/BufferImageCopyRegion.hpp"
 
 namespace Trident {
 	class GL::CopyImageToBufferCommand final : public GL::Command {

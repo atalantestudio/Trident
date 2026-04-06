@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
-#include "Engine/API/Rendering/CommandBuffer.hpp"
+#include "Engine/API/Graphics/CommandBuffer.hpp"
 
 namespace Trident {
 	class GL::CommandBuffer final : public Trident::CommandBuffer {

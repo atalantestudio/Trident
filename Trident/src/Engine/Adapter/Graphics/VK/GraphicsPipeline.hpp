@@ -5,7 +5,7 @@
 
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/Adapter/Graphics/VK/Pipeline.hpp"
-#include "Engine/API/Rendering/GraphicsPipeline.hpp"
+#include "Engine/API/Graphics/GraphicsPipeline.hpp"
 
 namespace Trident {
 	class VK::GraphicsPipeline final : public Trident::GraphicsPipeline {

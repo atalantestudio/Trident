@@ -9,7 +9,7 @@
 #include "Engine/Adapter/Graphics/GL/Framebuffer.hpp"
 #include "Engine/Adapter/Graphics/GL/GraphicsPipeline.hpp"
 #include "Engine/Adapter/Graphics/GL/RenderPass.hpp"
-#include "Engine/API/Rendering/CommandEncoder.hpp"
+#include "Engine/API/Graphics/CommandEncoder.hpp"
 
 namespace Trident {
 	class GL::CommandEncoder final : public Trident::CommandEncoder {

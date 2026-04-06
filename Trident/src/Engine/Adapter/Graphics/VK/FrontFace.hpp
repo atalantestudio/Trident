@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/FrontFace.hpp"
+#include "Engine/API/Graphics/FrontFace.hpp"
 
 namespace Trident::VK {
 	inline VkFrontFace getFrontFace(FrontFace frontFace) {

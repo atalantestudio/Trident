@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/CompareOperation.hpp"
+#include "Engine/API/Graphics/CompareOperation.hpp"
 
 namespace Trident::GL {
 	inline GLenum getDepthFunc(CompareOperation compareOperation) {

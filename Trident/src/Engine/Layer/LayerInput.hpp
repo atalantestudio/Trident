@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/Image.hpp"
-#include "Engine/API/Rendering/ImageView.hpp"
+#include "Engine/API/Graphics/Image.hpp"
+#include "Engine/API/Graphics/ImageView.hpp"
 
 namespace Trident {
 	struct LayerInput {

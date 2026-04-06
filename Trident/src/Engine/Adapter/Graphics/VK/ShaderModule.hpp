@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
-#include "Engine/API/Rendering/ShaderModule.hpp"
+#include "Engine/API/Graphics/ShaderModule.hpp"
 
 namespace Trident {
 	class VK::ShaderModule final : public Trident::ShaderModule {

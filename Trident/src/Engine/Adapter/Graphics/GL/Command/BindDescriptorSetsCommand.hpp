@@ -10,7 +10,7 @@
 #include "Engine/Adapter/Graphics/GL/Image.hpp"
 #include "Engine/Adapter/Graphics/GL/ImageView.hpp"
 #include "Engine/Adapter/Graphics/GL/Sampler.hpp"
-#include "Engine/API/Rendering/DescriptorSet.hpp"
+#include "Engine/API/Graphics/DescriptorSet.hpp"
 
 namespace Trident {
 	class GL::BindDescriptorSetsCommand final : public GL::Command {

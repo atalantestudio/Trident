@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/PrimitiveTopology.hpp"
+#include "Engine/API/Graphics/PrimitiveTopology.hpp"
 
 namespace Trident::VK {
 	inline VkPrimitiveTopology getPrimitiveTopology(PrimitiveTopology primitiveTopology) {

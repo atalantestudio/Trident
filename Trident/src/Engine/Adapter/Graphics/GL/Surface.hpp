@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/Surface.hpp"
+#include "Engine/API/Graphics/Surface.hpp"
 
 namespace Trident {
 	class GL::Surface final : public Trident::Surface {

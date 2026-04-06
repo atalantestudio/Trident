@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/DescriptorSetLayout.hpp"
+#include "Engine/API/Graphics/DescriptorSetLayout.hpp"
 
 namespace Trident {
 	// TODO(shader-reflection): Replace by ShaderModuleAsset once reflection is ready.

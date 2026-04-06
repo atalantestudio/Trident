@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/ImageUsage.hpp"
+#include "Engine/API/Graphics/ImageUsage.hpp"
 
 namespace Trident::VK {
 	inline VkImageUsageFlagBits getImageUsageFlagBits(ImageUsage imageUsage) {

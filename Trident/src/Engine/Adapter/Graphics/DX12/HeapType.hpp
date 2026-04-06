@@ -4,9 +4,9 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/BufferUsage.hpp"
-#include "Engine/API/Rendering/ImageUsage.hpp"
-#include "Engine/API/Rendering/MemoryProperty.hpp"
+#include "Engine/API/Graphics/BufferUsage.hpp"
+#include "Engine/API/Graphics/ImageUsage.hpp"
+#include "Engine/API/Graphics/MemoryProperty.hpp"
 
 namespace Trident::DX12 {
 	inline D3D12_HEAP_TYPE getHeapType(ImageUsage usage, MemoryProperty memoryProperties) {

@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/PolygonMode.hpp"
+#include "Engine/API/Graphics/PolygonMode.hpp"
 
 namespace Trident::DX12 {
 	inline D3D12_FILL_MODE getFillMode(PolygonMode polygonMode) {

@@ -5,7 +5,7 @@
 
 #include "Engine/Adapter/Graphics/VK/Instance.hpp"
 #include "Engine/Adapter/Graphics/VK/PhysicalDevice.hpp"
-#include "Engine/API/Rendering/Surface.hpp"
+#include "Engine/API/Graphics/Surface.hpp"
 #include "Engine/API/Window/Window.hpp"
 
 namespace Trident {

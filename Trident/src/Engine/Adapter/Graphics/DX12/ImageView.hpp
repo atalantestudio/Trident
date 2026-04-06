@@ -5,7 +5,7 @@
 
 #include "Engine/Adapter/Graphics/DX12/Image.hpp"
 #include "Engine/Adapter/Graphics/DX12/MemoryAllocator.hpp"
-#include "Engine/API/Rendering/ImageView.hpp"
+#include "Engine/API/Graphics/ImageView.hpp"
 
 namespace Trident {
 	class DX12::ImageView final : public Trident::ImageView {

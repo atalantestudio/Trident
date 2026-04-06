@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/BufferUsage.hpp"
+#include "Engine/API/Graphics/BufferUsage.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident::VK {

@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/BlendFactor.hpp"
+#include "Engine/API/Graphics/BlendFactor.hpp"
 
 namespace Trident::VK {
 	inline VkBlendFactor getBlendFactor(BlendFactor blendFactor) {

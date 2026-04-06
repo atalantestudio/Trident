@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
-#include "Engine/API/Rendering/PipelineLayout.hpp"
+#include "Engine/API/Graphics/PipelineLayout.hpp"
 
 namespace Trident {
 	class VK::PipelineLayout final : public Trident::PipelineLayout {

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/Instance.hpp"
+#include "Engine/API/Graphics/Instance.hpp"
 #include "Engine/API/Window/Window.hpp"
 
 namespace Trident {

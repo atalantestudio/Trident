@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/PrimitiveTopology.hpp"
+#include "Engine/API/Graphics/PrimitiveTopology.hpp"
 
 namespace Trident::DX12 {
 	inline D3D12_PRIMITIVE_TOPOLOGY_TYPE getPrimitiveTopologyType(PrimitiveTopology primitiveTopology) {

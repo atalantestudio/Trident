@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/ShaderModule.hpp"
+#include "Engine/API/Graphics/ShaderModule.hpp"
 
 namespace Trident {
 	class DX12::ShaderModule final : public Trident::ShaderModule {

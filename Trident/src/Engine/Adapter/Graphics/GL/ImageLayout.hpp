@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/ImageLayout.hpp"
+#include "Engine/API/Graphics/ImageLayout.hpp"
 
 namespace Trident::GL {
 	inline GLbitfield getBarrier(ImageLayout imageLayout) {

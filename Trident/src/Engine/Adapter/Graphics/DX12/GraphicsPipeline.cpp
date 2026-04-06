@@ -14,7 +14,7 @@
 #include "Engine/Adapter/Graphics/DX12/ShaderModule.hpp"
 #include "Engine/Adapter/Graphics/DX12/VertexInputAttributeType.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/Descriptor/GraphicsPipelineDescriptor.hpp"
+#include "Engine/API/Graphics/Descriptor/GraphicsPipelineDescriptor.hpp"
 
 namespace Trident {
 	DX12::GraphicsPipeline::GraphicsPipeline(const Trident::Device* device) :

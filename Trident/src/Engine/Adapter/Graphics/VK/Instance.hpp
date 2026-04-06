@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/Instance.hpp"
+#include "Engine/API/Graphics/Instance.hpp"
 #include "Engine/Application/ApplicationProperties.hpp"
 #include "Engine/Application/ProjectDescriptor.hpp"
 

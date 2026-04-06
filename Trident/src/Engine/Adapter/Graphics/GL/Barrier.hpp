@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/Access.hpp"
+#include "Engine/API/Graphics/Access.hpp"
 
 namespace Trident::GL {
 	inline GLbitfield getBarrier(Access access) {

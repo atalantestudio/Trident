@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
-#include "Engine/API/Rendering/ImageView.hpp"
+#include "Engine/API/Graphics/ImageView.hpp"
 
 namespace Trident {
 	class VK::ImageView final : public Trident::ImageView {

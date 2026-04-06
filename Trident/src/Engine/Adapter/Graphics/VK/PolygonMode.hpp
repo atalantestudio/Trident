@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/PolygonMode.hpp"
+#include "Engine/API/Graphics/PolygonMode.hpp"
 
 namespace Trident::VK {
 	inline VkPolygonMode getPolygonMode(PolygonMode polygonMode) {

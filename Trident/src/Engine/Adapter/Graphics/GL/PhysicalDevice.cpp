@@ -5,7 +5,7 @@
 
 #include "Engine/Adapter/Graphics/GL/PhysicalDevice.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/Instance.hpp"
+#include "Engine/API/Graphics/Instance.hpp"
 
 namespace Trident {
 	GL::PhysicalDevice::PhysicalDevice(const Trident::GraphicsAdapter* adapter) :

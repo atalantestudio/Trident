@@ -5,7 +5,7 @@
 
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/Adapter/Graphics/VK/MemoryAllocator.hpp"
-#include "Engine/API/Rendering/Image.hpp"
+#include "Engine/API/Graphics/Image.hpp"
 
 namespace Trident {
 	class VK::Image final : public Trident::Image {

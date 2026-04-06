@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/MemoryAllocator.hpp"
-#include "Engine/API/Rendering/PhysicalDevice.hpp"
+#include "Engine/API/Graphics/MemoryAllocator.hpp"
+#include "Engine/API/Graphics/PhysicalDevice.hpp"
 
 namespace Trident {
 	#define UNDEFINED_MEMORY_TYPE_INDEX max<uint32>()

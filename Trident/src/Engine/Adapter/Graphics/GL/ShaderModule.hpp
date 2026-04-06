@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/ShaderModule.hpp"
+#include "Engine/API/Graphics/ShaderModule.hpp"
 #include "Engine/Filesystem/Asset/ShaderModuleAsset.hpp"
 
 namespace Trident {

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/Device.hpp"
+#include "Engine/API/Graphics/Device.hpp"
 
 namespace Trident {
 	class VK::Device final : public Trident::Device {

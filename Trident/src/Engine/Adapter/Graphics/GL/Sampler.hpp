@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/Sampler.hpp"
+#include "Engine/API/Graphics/Sampler.hpp"
 
 namespace Trident {
 	class GL::Sampler final : public Trident::Sampler {

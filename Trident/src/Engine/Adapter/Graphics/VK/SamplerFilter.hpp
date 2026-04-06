@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/SamplerFilter.hpp"
+#include "Engine/API/Graphics/SamplerFilter.hpp"
 
 namespace Trident::VK {
 	inline VkFilter getFilter(SamplerFilter samplerFilter) {

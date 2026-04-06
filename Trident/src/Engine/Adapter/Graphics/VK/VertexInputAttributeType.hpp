@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/VertexInputAttributeType.hpp"
+#include "Engine/API/Graphics/VertexInputAttributeType.hpp"
 
 namespace Trident::VK {
 	inline VkFormat getFormat(VertexInputAttributeType vertexInputAttributeType) {

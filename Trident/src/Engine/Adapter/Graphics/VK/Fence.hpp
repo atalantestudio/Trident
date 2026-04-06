@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
-#include "Engine/API/Rendering/Fence.hpp"
+#include "Engine/API/Graphics/Fence.hpp"
 
 namespace Trident {
 	class VK::Fence final : public Trident::Fence {

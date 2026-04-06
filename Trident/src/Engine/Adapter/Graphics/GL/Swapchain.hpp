@@ -5,7 +5,7 @@
 
 #include "Engine/Adapter/Graphics/GL/Instance.hpp"
 #include "Engine/Adapter/Graphics/GL/Surface.hpp"
-#include "Engine/API/Rendering/Swapchain.hpp"
+#include "Engine/API/Graphics/Swapchain.hpp"
 
 namespace Trident {
 	class GL::Swapchain final : public Trident::Swapchain {

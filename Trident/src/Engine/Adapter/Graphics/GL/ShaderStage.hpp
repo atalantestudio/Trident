@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/ShaderStage.hpp"
+#include "Engine/API/Graphics/ShaderStage.hpp"
 
 namespace Trident::GL {
 	inline GLenum getShaderStage(ShaderStage shaderStage) {

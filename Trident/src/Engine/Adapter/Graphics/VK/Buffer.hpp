@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/Adapter/Graphics/VK/MemoryAllocator.hpp"
-#include "Engine/API/Rendering/Buffer.hpp"
+#include "Engine/API/Graphics/Buffer.hpp"
 
 namespace Trident {
 	class VK::BaseBuffer final : public Trident::BaseBuffer {

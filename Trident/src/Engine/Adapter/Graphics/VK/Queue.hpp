@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/Adapter/Graphics/VK/CommandPool.hpp"
-#include "Engine/API/Rendering/Queue.hpp"
+#include "Engine/API/Graphics/Queue.hpp"
 
 namespace Trident {
 	class VK::Queue final : public Trident::Queue {

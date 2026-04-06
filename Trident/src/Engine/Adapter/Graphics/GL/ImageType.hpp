@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/ImageType.hpp"
+#include "Engine/API/Graphics/ImageType.hpp"
 
 namespace Trident::GL {
 	inline GLenum getImageType(ImageType imageType, uint8 sampleCount, uint32 layerCount) {

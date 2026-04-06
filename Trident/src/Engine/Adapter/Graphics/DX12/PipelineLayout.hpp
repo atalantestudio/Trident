@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
-#include "Engine/API/Rendering/PipelineLayout.hpp"
+#include "Engine/API/Graphics/PipelineLayout.hpp"
 
 namespace Trident {
 	class DX12::PipelineLayout final : public Trident::PipelineLayout {

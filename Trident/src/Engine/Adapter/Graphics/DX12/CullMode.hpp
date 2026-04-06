@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/CullMode.hpp"
+#include "Engine/API/Graphics/CullMode.hpp"
 
 namespace Trident::DX12 {
 	inline D3D12_CULL_MODE getCullMode(CullMode cullMode) {

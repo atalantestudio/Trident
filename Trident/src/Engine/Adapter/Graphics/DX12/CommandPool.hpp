@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
-#include "Engine/API/Rendering/CommandPool.hpp"
+#include "Engine/API/Graphics/CommandPool.hpp"
 
 namespace Trident {
 	class DX12::CommandPool final : public Trident::CommandPool {

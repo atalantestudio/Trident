@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
-#include "Engine/API/Rendering/ComputePipeline.hpp"
+#include "Engine/API/Graphics/ComputePipeline.hpp"
 
 namespace Trident {
 	class VK::ComputePipeline final : public Trident::ComputePipeline {

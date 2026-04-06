@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/BlendFactor.hpp"
+#include "Engine/API/Graphics/BlendFactor.hpp"
 
 namespace Trident::GL {
 	inline GLenum getBlendFactor(BlendFactor blendFactor) {

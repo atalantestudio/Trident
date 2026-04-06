@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/ComputePipeline.hpp"
+#include "Engine/API/Graphics/ComputePipeline.hpp"
 
 namespace Trident {
 	class GL::ComputePipeline final : public Trident::ComputePipeline {

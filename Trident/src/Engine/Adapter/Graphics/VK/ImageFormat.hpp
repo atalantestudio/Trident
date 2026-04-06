@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/ImageFormat.hpp"
+#include "Engine/API/Graphics/ImageFormat.hpp"
 
 namespace Trident::VK {
 	inline VkFormat getFormat(ImageFormat imageFormat) {

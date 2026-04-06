@@ -7,7 +7,7 @@
 #include "Engine/Adapter/Graphics/DX12/PipelineLayout.hpp"
 #include "Engine/Adapter/Graphics/DX12/ShaderModule.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/Descriptor/ComputePipelineDescriptor.hpp"
+#include "Engine/API/Graphics/Descriptor/ComputePipelineDescriptor.hpp"
 
 namespace Trident {
 	DX12::ComputePipeline::ComputePipeline(const Trident::Device* device) :

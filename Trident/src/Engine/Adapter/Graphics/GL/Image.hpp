@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/Image.hpp"
+#include "Engine/API/Graphics/Image.hpp"
 
 namespace Trident {
 	class GL::Image final : public Trident::Image {

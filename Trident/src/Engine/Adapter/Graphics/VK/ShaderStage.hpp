@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/ShaderStage.hpp"
+#include "Engine/API/Graphics/ShaderStage.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident::VK {

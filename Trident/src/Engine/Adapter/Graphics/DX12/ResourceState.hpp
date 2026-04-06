@@ -4,8 +4,8 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/BufferUsage.hpp"
-#include "Engine/API/Rendering/ImageLayout.hpp"
+#include "Engine/API/Graphics/BufferUsage.hpp"
+#include "Engine/API/Graphics/ImageLayout.hpp"
 
 namespace Trident::DX12 {
 	inline D3D12_RESOURCE_STATES getInitialResourceState(D3D12_RESOURCE_STATES resourceStates, D3D12_HEAP_TYPE heapType) {

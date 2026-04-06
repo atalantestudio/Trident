@@ -5,7 +5,7 @@
 
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
 #include "Engine/Adapter/Graphics/DX12/Image.hpp"
-#include "Engine/API/Rendering/Swapchain.hpp"
+#include "Engine/API/Graphics/Swapchain.hpp"
 
 namespace Trident {
 	class DX12::Swapchain final : public Trident::Swapchain {

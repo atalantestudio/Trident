@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/ImageFormat.hpp"
+#include "Engine/API/Graphics/ImageFormat.hpp"
 #include "Engine/Filesystem/File.hpp"
 
 namespace Trident {

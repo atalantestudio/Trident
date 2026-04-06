@@ -6,7 +6,7 @@
 #include "Engine/Adapter/Graphics/DX12/Fence.hpp"
 #include "Engine/Adapter/Graphics/DX12/Instance.hpp"
 #include "Engine/Adapter/Graphics/DX12/PhysicalDevice.hpp"
-#include "Engine/API/Rendering/Device.hpp"
+#include "Engine/API/Graphics/Device.hpp"
 
 namespace Trident {
 	class DX12::Device final : public Trident::Device {

@@ -5,7 +5,7 @@
 
 #include "Engine/Adapter/Graphics/GL/Command/NextSubpassCommand.hpp"
 #include "Engine/Adapter/Graphics/GL/Framebuffer.hpp"
-#include "Engine/API/Rendering/Descriptor/BeginRenderPassDescriptor.hpp"
+#include "Engine/API/Graphics/Descriptor/BeginRenderPassDescriptor.hpp"
 
 namespace Trident {
 	class GL::BeginRenderPassCommand final : public GL::Command {

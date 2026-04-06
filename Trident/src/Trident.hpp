@@ -39,15 +39,15 @@
 #include "Engine/API/Input/Input.hpp"
 
 // Renderer
-#include "Engine/API/Rendering/Buffer.hpp"
-#include "Engine/API/Rendering/ComputePipeline.hpp"
-#include "Engine/API/Rendering/DispatchIndirectCommand.hpp"
-#include "Engine/API/Rendering/DrawIndexedIndirectCommand.hpp"
-#include "Engine/API/Rendering/DrawIndirectCommand.hpp"
-#include "Engine/API/Rendering/Framebuffer.hpp"
-#include "Engine/API/Rendering/GraphicsPipeline.hpp"
-#include "Engine/API/Rendering/Swapchain.hpp"
-#include "Engine/API/Rendering/ShaderModule.hpp"
+#include "Engine/API/Graphics/Buffer.hpp"
+#include "Engine/API/Graphics/ComputePipeline.hpp"
+#include "Engine/API/Graphics/DispatchIndirectCommand.hpp"
+#include "Engine/API/Graphics/DrawIndexedIndirectCommand.hpp"
+#include "Engine/API/Graphics/DrawIndirectCommand.hpp"
+#include "Engine/API/Graphics/Framebuffer.hpp"
+#include "Engine/API/Graphics/GraphicsPipeline.hpp"
+#include "Engine/API/Graphics/Swapchain.hpp"
+#include "Engine/API/Graphics/ShaderModule.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
 // Geometry (3D)

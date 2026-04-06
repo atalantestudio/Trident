@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/PipelineStage.hpp"
+#include "Engine/API/Graphics/PipelineStage.hpp"
 
 namespace Trident::VK {
 	inline VkPipelineStageFlagBits getPipelineStageFlagBits(PipelineStage pipelineStage) {

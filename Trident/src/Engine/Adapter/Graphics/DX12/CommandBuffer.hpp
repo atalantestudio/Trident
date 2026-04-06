@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/CommandBuffer.hpp"
+#include "Engine/API/Graphics/CommandBuffer.hpp"
 
 namespace Trident {
 	class DX12::CommandBuffer final : public Trident::CommandBuffer {

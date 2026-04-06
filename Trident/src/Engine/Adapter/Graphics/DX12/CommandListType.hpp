@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/QueueFamilyCapability.hpp"
+#include "Engine/API/Graphics/QueueFamilyCapability.hpp"
 
 namespace Trident::DX12 {
 	inline D3D12_COMMAND_LIST_TYPE getCommandListType(QueueFamilyCapability queueFamilyCapability) {

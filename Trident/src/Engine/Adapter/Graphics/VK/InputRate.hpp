@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/InputRate.hpp"
+#include "Engine/API/Graphics/InputRate.hpp"
 
 namespace Trident::VK {
 	inline VkVertexInputRate getVertexInputRate(InputRate inputRate) {

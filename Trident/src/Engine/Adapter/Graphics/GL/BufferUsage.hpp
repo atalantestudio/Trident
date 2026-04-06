@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/BufferUsage.hpp"
+#include "Engine/API/Graphics/BufferUsage.hpp"
 
 namespace Trident::GL {
 	inline GLenum getTarget(BufferUsage bufferUsage) {

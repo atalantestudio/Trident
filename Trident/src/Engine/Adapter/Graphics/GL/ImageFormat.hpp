@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/ImageFormat.hpp"
+#include "Engine/API/Graphics/ImageFormat.hpp"
 
 namespace Trident::GL {
 	// See https://registry.khronos.org/OpenGL-Refpages/es3.0/html/glTexImage2D.xhtml.

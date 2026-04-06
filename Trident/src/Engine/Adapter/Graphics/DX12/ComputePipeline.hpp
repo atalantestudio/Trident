@@ -5,7 +5,7 @@
 
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
 #include "Engine/Adapter/Graphics/DX12/PipelineLayout.hpp"
-#include "Engine/API/Rendering/ComputePipeline.hpp"
+#include "Engine/API/Graphics/ComputePipeline.hpp"
 
 namespace Trident {
 	class DX12::ComputePipeline final : public Trident::ComputePipeline {

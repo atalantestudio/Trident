@@ -4,8 +4,8 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/Access.hpp"
-#include "Engine/API/Rendering/ImageLayout.hpp"
+#include "Engine/API/Graphics/Access.hpp"
+#include "Engine/API/Graphics/ImageLayout.hpp"
 
 namespace Trident::DX12 {
 	inline D3D12_BARRIER_LAYOUT getBarrierLayout(ImageLayout imageLayout, Access access) {

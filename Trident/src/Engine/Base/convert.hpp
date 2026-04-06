@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/ImageFormat.hpp"
+#include "Engine/API/Graphics/ImageFormat.hpp"
 
 namespace Trident {
 	// NOTE: These utilities provide unoptimized image format conversion and are not meant to be used in production builds.

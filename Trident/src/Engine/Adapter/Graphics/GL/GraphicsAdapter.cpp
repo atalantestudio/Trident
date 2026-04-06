@@ -16,8 +16,8 @@
 #include "Engine/Adapter/Graphics/GL/Sampler.hpp"
 #include "Engine/Adapter/Graphics/GL/ShaderModule.hpp"
 #include "Engine/Adapter/Graphics/GL/Swapchain.hpp"
-#include "Engine/API/Rendering/CommandPool.hpp"
-#include "Engine/API/Rendering/MemoryAllocator.hpp"
+#include "Engine/API/Graphics/CommandPool.hpp"
+#include "Engine/API/Graphics/MemoryAllocator.hpp"
 
 namespace Trident::GL {
 	static ref<CommandPool> createCommandPool(const Trident::Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability) {

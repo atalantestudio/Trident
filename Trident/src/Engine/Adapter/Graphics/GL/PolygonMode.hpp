@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/CullMode.hpp"
-#include "Engine/API/Rendering/PolygonMode.hpp"
+#include "Engine/API/Graphics/CullMode.hpp"
+#include "Engine/API/Graphics/PolygonMode.hpp"
 
 namespace Trident::GL {
 	inline GLenum getPolygonMode(PolygonMode polygonMode) {

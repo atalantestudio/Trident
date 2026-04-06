@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/Status.hpp"
+#include "Engine/API/Graphics/Status.hpp"
 
 namespace Trident::VK {
 	inline AcquireNextImageStatus acquireNextImageStatusFromResult(VkResult result) {

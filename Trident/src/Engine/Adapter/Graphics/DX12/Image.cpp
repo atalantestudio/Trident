@@ -12,7 +12,7 @@
 #include "Engine/Adapter/Graphics/DX12/ResourceFlags.hpp"
 #include "Engine/Adapter/Graphics/DX12/ResourceState.hpp"
 #include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
-#include "Engine/API/Rendering/Descriptor/ImageDescriptor.hpp"
+#include "Engine/API/Graphics/Descriptor/ImageDescriptor.hpp"
 
 namespace Trident {
 	static ImageDescriptor createSwapchainImageDescriptor(Extent2D extent, UINT index) {

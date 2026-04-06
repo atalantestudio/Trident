@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/DynamicState.hpp"
+#include "Engine/API/Graphics/DynamicState.hpp"
 
 namespace Trident::VK {
 	inline sequence<VkDynamicState> getDynamicStates(DynamicState dynamicState) {

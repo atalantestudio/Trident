@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAPI.hpp"
-#include "Engine/API/Rendering/ShaderStage.hpp"
+#include "Engine/API/Graphics/ShaderStage.hpp"
 
 namespace Trident::DX12 {
 	inline D3D12_SHADER_VISIBILITY getShaderVisibility(ShaderStage shaderStage) {

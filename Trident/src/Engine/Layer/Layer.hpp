@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Event/Event.hpp"
-#include "Engine/API/Rendering/CommandEncoder.hpp"
+#include "Engine/API/Graphics/CommandEncoder.hpp"
 #include "Engine/Layer/LayerInput.hpp"
 
 namespace Trident {

@@ -7,8 +7,8 @@
 #include "Engine/Adapter/Graphics/DX12/GraphicsAdapter.hpp"
 #include "Engine/Adapter/Graphics/GL/GraphicsAdapter.hpp"
 #include "Engine/Adapter/Graphics/VK/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/Device.hpp"
-#include "Engine/API/Rendering/Instance.hpp"
+#include "Engine/API/Graphics/Device.hpp"
+#include "Engine/API/Graphics/Instance.hpp"
 
 // TODO: Restore descriptor validation.
 namespace Trident {

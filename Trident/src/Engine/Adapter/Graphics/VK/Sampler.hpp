@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
-#include "Engine/API/Rendering/Sampler.hpp"
+#include "Engine/API/Graphics/Sampler.hpp"
 
 namespace Trident {
 	class VK::Sampler final : public Trident::Sampler {

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/ImageType.hpp"
+#include "Engine/API/Graphics/ImageType.hpp"
 
 namespace Trident::VK {
 	inline VkImageType getImageType(ImageType imageType) {

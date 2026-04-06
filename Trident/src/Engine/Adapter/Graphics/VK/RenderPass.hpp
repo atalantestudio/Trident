@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/RenderPass.hpp"
+#include "Engine/API/Graphics/RenderPass.hpp"
 
 namespace Trident {
 	class VK::RenderPass final : public Trident::RenderPass {

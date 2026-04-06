@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/ImageUsage.hpp"
+#include "Engine/API/Graphics/ImageUsage.hpp"
 
 namespace Trident::GL {
 	inline GLenum getImageUsage(ImageUsage imageUsage) {

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/Buffer.hpp"
+#include "Engine/API/Graphics/Buffer.hpp"
 
 namespace Trident {
 	class DX12::BaseBuffer final : public Trident::BaseBuffer {

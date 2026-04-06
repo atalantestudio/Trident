@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/Swapchain.hpp"
+#include "Engine/API/Graphics/Swapchain.hpp"
 
 namespace Trident {
 	class VK::Swapchain final : public Trident::Swapchain {

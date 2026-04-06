@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/DescriptorType.hpp"
+#include "Engine/API/Graphics/DescriptorType.hpp"
 
 namespace Trident::VK {
 	inline VkDescriptorType getDescriptorType(DescriptorType descriptorType) {

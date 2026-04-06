@@ -5,8 +5,8 @@
 
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
 #include "Engine/Adapter/Graphics/DX12/Sampler.hpp"
-#include "Engine/API/Rendering/DescriptorSet.hpp"
-#include "Engine/API/Rendering/MemoryAllocator.hpp"
+#include "Engine/API/Graphics/DescriptorSet.hpp"
+#include "Engine/API/Graphics/MemoryAllocator.hpp"
 
 namespace Trident {
 	struct DX12::DescriptorHeapAllocation {

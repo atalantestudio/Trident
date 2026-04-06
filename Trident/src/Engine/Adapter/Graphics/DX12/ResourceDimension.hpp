@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/ImageType.hpp"
+#include "Engine/API/Graphics/ImageType.hpp"
 
 namespace Trident::DX12 {
 	inline D3D12_RESOURCE_DIMENSION getImageResourceDimension(ImageType imageType) {

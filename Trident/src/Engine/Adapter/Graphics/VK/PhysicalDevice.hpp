@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/PhysicalDevice.hpp"
+#include "Engine/API/Graphics/PhysicalDevice.hpp"
 
 #define DEBUG_ENUMERATE_DEVICE_EXTENSIONS
 

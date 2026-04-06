@@ -5,7 +5,7 @@
 
 #include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
 #include "Engine/Adapter/Graphics/GL/Framebuffer.hpp"
-#include "Engine/API/Rendering/Subpass.hpp"
+#include "Engine/API/Graphics/Subpass.hpp"
 
 namespace Trident {
 	class GL::NextSubpassCommand final : public GL::Command {

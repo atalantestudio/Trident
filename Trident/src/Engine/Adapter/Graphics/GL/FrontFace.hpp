@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/FrontFace.hpp"
+#include "Engine/API/Graphics/FrontFace.hpp"
 
 namespace Trident::GL {
 	inline GLenum getFrontFace(FrontFace frontFace) {

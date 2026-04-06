@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Rendering/VertexInputAttributeType.hpp"
+#include "Engine/API/Graphics/VertexInputAttributeType.hpp"
 
 namespace Trident::GL {
 	// Returns the number of component per generic vertex attribute.

@@ -5,7 +5,7 @@
 
 #include "Engine/Adapter/Graphics/GL/Device.hpp"
 #include "Engine/Adapter/Graphics/GL/Instance.hpp"
-#include "Engine/API/Rendering/Queue.hpp"
+#include "Engine/API/Graphics/Queue.hpp"
 
 namespace Trident {
 	class GL::Queue final : public Trident::Queue {

@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/Device.hpp"
-#include "Engine/API/Rendering/Fence.hpp"
+#include "Engine/API/Graphics/Device.hpp"
+#include "Engine/API/Graphics/Fence.hpp"
 
 namespace Trident {
 	class GL::Fence final : public Trident::Fence {
