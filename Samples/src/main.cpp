@@ -38,6 +38,7 @@
 
 #include "Process/Default.hpp"
 #include "Process/ECS.hpp"
+#include "Process/SIMD.hpp"
 
 #include "Sample/Layer/ArrayTexture.hpp"
 #include "Sample/Layer/ColorBlend.hpp"
@@ -155,6 +156,9 @@ namespace Trident {
 			}
 			else if (SampleNameProperty == "ECS") {
 				registerProcess<ProcessECSProcess>();
+			}
+			else if (SampleNameProperty == "SIMD") {
+				registerProcess<ProcessSIMDProcess>();
 			}
 		}
 		else if (SampleGroupNameProperty == "Sample") {
