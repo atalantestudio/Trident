@@ -61,7 +61,7 @@ namespace Trident {
 
 		stream.jump(sizeof(hullHeader));
 
-		const std::filesystem::path outputPath = outputDirectory / "unit_square.tge";
+		const std::filesystem::path outputPath = outputDirectory / "unit_square.tga";
 		const std::string outputPathString = outputPath.string();
 
 		Writer writer = Filesystem::openWriter(view<char8>(&outputPathString[0], outputPathString.size()));

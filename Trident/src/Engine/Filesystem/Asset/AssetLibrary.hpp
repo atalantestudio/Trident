@@ -133,7 +133,7 @@ namespace Trident {
 
 			template<>
 			void loadAsset<GeometryAsset>(view<char8> path) {
-				const std::filesystem::path absolutePath = getAbsolutePath("Asset/Geometry", path, ".tge");
+				const std::filesystem::path absolutePath = getAbsolutePath("Asset/Geometry", path, ".tga");
 				const sequence<char8> assetPath = absolutePath.string();
 				const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
 

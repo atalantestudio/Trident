@@ -14,7 +14,7 @@ namespace Trident {
 
 		const sequence<uint32> geometryAssetIdentifiers = {
 			// TODO(debug-only): lemon_1k
-			2118110974,
+			617709465,
 		};
 
 		const sequence<EntityComponentMapping<GeometryComponent>> geometryMappings = {
