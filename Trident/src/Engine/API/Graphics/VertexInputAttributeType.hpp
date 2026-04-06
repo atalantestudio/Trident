@@ -5,19 +5,12 @@
 
 namespace Trident {
 	// TODO: Implement remaining types using scalar vectors.
+	// NOTE: TSL only supports 32-bit and 64-bit floating-point formats.
 	enum class VertexInputAttributeType : uint8 {
-		// NOTE: Not supported by TSL.
 		R8_SINT,
-
-		// NOTE: Not supported by TSL.
 		R8_UINT,
-
-		// NOTE: Not supported by TSL.
 		R16_SINT,
-
-		// NOTE: Not supported by TSL.
 		R16_UINT,
-
 		R32_SINT,
 		R32_UINT,
 		R32_FLOAT,
@@ -30,13 +23,8 @@ namespace Trident {
 		// R32G32B32A32_SINT,
 		// R32G32B32A32_UINT,
 		R32G32B32A32_FLOAT,
-
-		// NOTE: Not supported by TSL.
 		R64_SINT,
-
-		// NOTE: Not supported by TSL.
 		R64_UINT,
-
 		R64_FLOAT,
 		// R64G64_SINT,
 		// R64G64_UINT,

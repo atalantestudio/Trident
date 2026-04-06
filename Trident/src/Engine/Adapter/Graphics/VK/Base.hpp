@@ -44,7 +44,6 @@ namespace Trident::VK {
 	class Instance;
 	class MemoryAllocator;
 	class PhysicalDevice;
-	class Pipeline;
 	class PipelineLayout;
 	class Queue;
 	class RenderPass;

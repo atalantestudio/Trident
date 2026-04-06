@@ -35,11 +35,19 @@ namespace Trident {
 				}
 			}
 
-			Extent2D getExtent() const;
+			inline Extent2D getExtent() const {
+				return extent;
+			}
 
-			uint32 getImageCount() const;
+			inline uint32 getImageCount() const {
+				return imageCount;
+			}
 
-			ref<ImageView> getImageView(uint32 index) const;
+			inline ref<ImageView> getImageView(uint32 index) const {
+				ENGINE_ASSERT(index < imageViews.count(), "Image view index overflow.");
+
+				return imageViews[index];
+			}
 
 			void update(const SwapchainDescriptor& descriptor);
 

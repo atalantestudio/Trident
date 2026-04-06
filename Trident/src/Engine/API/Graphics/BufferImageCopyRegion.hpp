@@ -7,7 +7,7 @@ namespace Trident {
 	struct BufferImageCopyRegion {
 		uint64 bufferOffset;
 
-		// TODO: Use Extent3D or vec3<uint32>.
+		// TODO: Use vec3<sint32> instead.
 		sint32 imageOffsetX;
 		sint32 imageOffsetY;
 		sint32 imageOffsetZ;

@@ -20,7 +20,7 @@ namespace Trident {
 		/// Specifies a list of triangle primitives where each consecutive triangle pair shares an edge.
 		TRIANGLE_STRIP,
 
-		// TODO
+		// TODO(graphics/triangle-fan)
 		// On Vulkan, TRIANGLE_FAN is only supported with an extension.
 		// It will be added when the device is updated to automatically enable needed extensions.
 

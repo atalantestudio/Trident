@@ -27,39 +27,39 @@ namespace Trident {
 				}
 			}
 
-			uint32 getColorAttachmentReferenceCount() const {
+			inline uint32 getColorAttachmentReferenceCount() const {
 				return static_cast<uint32>(colorAttachmentReferences.count());
 			}
 
-			view<AttachmentReference> getColorAttachmentReferences() const {
+			inline view<AttachmentReference> getColorAttachmentReferences() const {
 				return colorAttachmentReferences;
 			}
 
-			bool hasDepthStencilAttachmentReference() const {
+			inline bool hasDepthStencilAttachmentReference() const {
 				return depthStencilAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX;
 			}
 
-			AttachmentReference getDepthStencilAttachmentReference() const {
+			inline AttachmentReference getDepthStencilAttachmentReference() const {
 				return depthStencilAttachmentReference;
 			}
 
-			uint32 getInputAttachmentReferenceCount() const {
+			inline uint32 getInputAttachmentReferenceCount() const {
 				return static_cast<uint32>(inputAttachmentReferences.count());
 			}
 
-			view<AttachmentReference> getInputAttachmentReferences() const {
+			inline view<AttachmentReference> getInputAttachmentReferences() const {
 				return inputAttachmentReferences;
 			}
 
-			uint32 getResolveAttachmentReferenceCount() const {
+			inline uint32 getResolveAttachmentReferenceCount() const {
 				return resolveAttachmentReferenceCount;
 			}
 
-			uint8 getRasterizationSampleCount() const {
+			inline uint8 getRasterizationSampleCount() const {
 				return rasterizationSampleCount;
 			}
 
-			void setRasterizationSampleCount(uint8 rasterizationSampleCount) {
+			inline void setRasterizationSampleCount(uint8 rasterizationSampleCount) {
 				this->rasterizationSampleCount = rasterizationSampleCount;
 			}
 
@@ -68,6 +68,6 @@ namespace Trident {
 			AttachmentReference depthStencilAttachmentReference;
 			sequence<AttachmentReference> inputAttachmentReferences;
 			uint32 resolveAttachmentReferenceCount = 0;
-			uint8 rasterizationSampleCount : 7;
+			uint8 rasterizationSampleCount;
 	};
 }

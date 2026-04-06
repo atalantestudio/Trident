@@ -6,7 +6,7 @@
 namespace Trident {
 	class CommandBuffer {
 		public:
-			uint32 getCommandCount() const {
+			inline uint32 getCommandCount() const {
 				return commandCount;
 			}
 
@@ -16,6 +16,6 @@ namespace Trident {
 			{}
 
 		private:
-			const uint32 commandCount;
+			uint32 commandCount;
 	};
 }

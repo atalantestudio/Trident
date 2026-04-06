@@ -4,7 +4,6 @@
 #pragma once
 
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
-#include "Engine/Adapter/Graphics/VK/Pipeline.hpp"
 #include "Engine/API/Graphics/GraphicsPipeline.hpp"
 
 namespace Trident {

@@ -12,11 +12,11 @@ namespace Trident {
 		public:
 			~Framebuffer();
 
-			ref<RenderPass> getRenderPass() const {
+			inline ref<RenderPass> getRenderPass() const {
 				return renderPass;
 			}
 
-			Extent2D getExtent() const {
+			inline Extent2D getExtent() const {
 				return extent;
 			}
 

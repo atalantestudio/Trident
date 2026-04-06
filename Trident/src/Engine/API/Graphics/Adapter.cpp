@@ -211,26 +211,6 @@ namespace Trident {
 		device->adapter->destroyImageView(device, this);
 	}
 
-	Image* ImageView::getImage() {
-		return image;
-	}
-
-	uint32 ImageView::getMipLevelOffset() const {
-		return mipLevelOffset;
-	}
-
-	uint32 ImageView::getMipLevelCount() const {
-		return mipLevelCount;
-	}
-
-	uint32 ImageView::getLayerOffset() const {
-		return layerOffset;
-	}
-
-	uint32 ImageView::getLayerCount() const {
-		return layerCount;
-	}
-
 	PipelineLayout::PipelineLayout(const Device* device) :
 		device(device)
 	{}
@@ -318,14 +298,6 @@ namespace Trident {
 		device->adapter->destroyRenderPass(device, this);
 	}
 
-	uint32 RenderPass::getAttachmentReferenceCount() const {
-		return static_cast<uint32>(attachmentReferenceCount);
-	}
-
-	uint32 RenderPass::getAttachmentCount() const {
-		return static_cast<uint32>(attachments.count());
-	}
-
 	const Attachment& RenderPass::getAttachment(uint32 attachmentIndex) const {
 		if (attachmentIndex >= attachments.count()) {
 			DEBUG_ASSERT(attachmentIndex < attachmentReferenceCount);
@@ -336,16 +308,6 @@ namespace Trident {
 		}
 
 		return attachments[attachmentIndex];
-	}
-
-	uint32 RenderPass::getSubpassCount() const {
-		return static_cast<uint32>(subpasses.count());
-	}
-
-	ref<Subpass> RenderPass::getSubpass(uint32 subpassIndex) const {
-		DEBUG_ASSERT(subpassIndex < subpasses.count());
-
-		return subpasses[subpassIndex];
 	}
 
 	ref<Image> RenderPass::createColorAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 attachmentIndex) const {
@@ -501,20 +463,6 @@ namespace Trident {
 
 	Swapchain::~Swapchain() {
 		device->adapter->destroySwapchain(device, this);
-	}
-
-	Extent2D Swapchain::getExtent() const {
-		return extent;
-	}
-
-	uint32 Swapchain::getImageCount() const {
-		return imageCount;
-	}
-
-	ref<ImageView> Swapchain::getImageView(uint32 index) const {
-		ENGINE_ASSERT(index < imageViews.count(), "Image view index overflow.");
-
-		return imageViews[index];
 	}
 
 	void Swapchain::update(const SwapchainDescriptor& descriptor) {

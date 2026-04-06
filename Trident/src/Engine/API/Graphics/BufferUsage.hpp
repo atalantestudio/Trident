@@ -4,19 +4,29 @@
 #pragma once
 
 namespace Trident {
-	enum class BufferUsage : uint16 {
+	enum class BufferUsage : uint8 {
+		/// Indicates a buffer used as the source of a transfer command.
 		TRANSFER_SRC = BIT(0),
+
+		/// Indicates a buffer used as the destination of a transfer command.
 		TRANSFER_DST = BIT(1),
+
+		/// Indicates a uniform buffer.
 		UNIFORM = BIT(2),
 
-		// The buffer will only be read by the device.
+		/// Indicates a storage buffer that will only be read by the device.
 		READ_ONLY_STORAGE = BIT(3),
 
-		// The buffer may be written to by the device.
+		/// Indicates a storage buffer that will be read and/or written to by the device.
 		READ_WRITE_STORAGE = BIT(4),
 
+		/// Indicates an index buffer.
 		INDEX = BIT(5),
+
+		/// Indicates a vertex buffer.
 		VERTEX = BIT(6),
+
+		/// Indicates an indirect buffer.
 		INDIRECT = BIT(7),
 	};
 

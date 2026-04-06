@@ -6,10 +6,10 @@
 namespace Trident {
 	enum class StoreOperation : uint8 {
 		// Stores the contents generated during the render pass and within the render area.
-		STORE = 0,
+		STORE,
 
 		// Marks the contents generated during the render pass and within the render area as undefined.
-		UNDEFINED = 1,
+		UNDEFINED,
 
 		count,
 	};

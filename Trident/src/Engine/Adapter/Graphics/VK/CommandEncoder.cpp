@@ -18,7 +18,6 @@
 #include "Engine/Adapter/Graphics/VK/Image.hpp"
 #include "Engine/Adapter/Graphics/VK/ImageLayout.hpp"
 #include "Engine/Adapter/Graphics/VK/IndexType.hpp"
-#include "Engine/Adapter/Graphics/VK/Pipeline.hpp"
 #include "Engine/Adapter/Graphics/VK/PipelineLayout.hpp"
 #include "Engine/Adapter/Graphics/VK/PipelineStage.hpp"
 #include "Engine/Adapter/Graphics/VK/RenderPass.hpp"

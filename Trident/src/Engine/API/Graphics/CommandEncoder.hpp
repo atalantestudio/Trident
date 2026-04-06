@@ -33,8 +33,9 @@ namespace Trident {
 
 			/// Binds descriptor sets to the command buffer.
 			/// 
-			/// NOTE: The pipeline layout could have been taken from the current pipeline as well,
-			/// but in Vulkan this operation requires a valid layout. This method asks for a layout to make sure the user keeps it around at runtime.
+			/// NOTE
+			/// The pipeline layout could have been taken from the current pipeline as well,
+			/// but in Vulkan this operation requires a valid layout. This method asks for the pipeline layout to make sure the user keeps it around at runtime.
 			void bindDescriptorSets(ref<PipelineLayout> pipelineLayout, uint32 descriptorSetIndexOffset, view<ref<DescriptorSet>> descriptorSets);
 
 			void bindGraphicsPipeline(ref<GraphicsPipeline> graphicsPipeline);

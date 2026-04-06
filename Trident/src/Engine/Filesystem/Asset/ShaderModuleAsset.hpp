@@ -32,5 +32,7 @@ namespace Trident {
 		private:
 			sequence<char8> glslCode;
 			std::unordered_map<sequence<char8>, uint32> glslEntryPointActivationOffsets;
+
+			// TODO: Store reflection data.
 	};
 }

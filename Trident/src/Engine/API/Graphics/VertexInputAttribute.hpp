@@ -6,7 +6,6 @@
 #include "Engine/API/Graphics/VertexInputAttributeType.hpp"
 
 namespace Trident {
-	// Attributes are never normalized when using the OpenGL graphics adapter.
 	struct VertexInputAttribute {
 		// Type of the attribute.
 		VertexInputAttributeType type;

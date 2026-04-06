@@ -11,7 +11,7 @@ namespace Trident {
 		public:
 			~Surface();
 
-			ImageFormat getFormat() const {
+			inline ImageFormat getFormat() const {
 				return format;
 			}
 

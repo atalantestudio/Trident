@@ -8,8 +8,7 @@ namespace Trident {
 		VIEWPORT = BIT(0),
 		SCISSOR = BIT(1),
 
-		// TODO: Deprecate.
-		// NOTE: LINE_WIDTH is not natively supported by DirectX12 and has visual inconsistencies with the other adapters.
+		// TODO: Deprecate. LINE_WIDTH is not natively supported by DirectX12 and has visual inconsistencies with the other adapters.
 		LINE_WIDTH = BIT(2),
 	};
 

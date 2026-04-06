@@ -17,15 +17,15 @@ namespace Trident {
 				inputRate(inputRate)
 			{}
 
-			InputRate getInputRate() const {
+			inline InputRate getInputRate() const {
 				return inputRate;
 			}
 
-			const std::vector<VertexInputAttribute>& getAttributes() const {
+			inline const std::vector<VertexInputAttribute>& getAttributes() const {
 				return attributes;
 			}
 
-			uint32 getMaxAlignment() const {
+			inline uint32 getMaxAlignment() const {
 				return maxAlignment;
 			}
 
