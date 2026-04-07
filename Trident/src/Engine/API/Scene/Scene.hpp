@@ -11,30 +11,34 @@ namespace Trident {
 
 	template<>
 	struct Descriptor<Scene> {
-		uint32 staticVertexCount;
-		uint32 staticIndexCount;
+		uint64 staticVertexCount;
+		uint64 staticIndexCount;
+		uint64 dynamicVertexCount;
+		uint64 dynamicIndexCount;
 	};
 
 	class Scene {
 		public:
 			explicit Scene(const Descriptor<Scene>& descriptor) :
 				staticVertexCount(descriptor.staticVertexCount),
-				staticIndexCount(descriptor.staticIndexCount)
+				staticIndexCount(descriptor.staticIndexCount),
+				dynamicVertexCount(descriptor.dynamicVertexCount),
+				dynamicIndexCount(descriptor.dynamicIndexCount)
 			{}
 
-			inline uint32 getStaticVertexCount() const {
+			inline uint64 getStaticVertexCount() const {
 				return staticVertexCount;
 			}
 
-			inline uint32 getStaticIndexCount() const {
+			inline uint64 getStaticIndexCount() const {
 				return staticIndexCount;
 			}
 
-			inline uint32 getDynamicVertexCount() const {
+			inline uint64 getDynamicVertexCount() const {
 				return dynamicVertexCount;
 			}
 
-			inline uint32 getDynamicIndexCount() const {
+			inline uint64 getDynamicIndexCount() const {
 				return dynamicIndexCount;
 			}
 
@@ -46,12 +50,20 @@ namespace Trident {
 			ECS ecs;
 
 		protected:
+			uint64 staticVertexCount;
+			uint64 staticIndexCount;
+			uint64 dynamicVertexCount;
+			uint64 dynamicIndexCount;
+
+			// NOTE: Buffer layout:
+			// - Vertex position components of each geometry, in order
+			// - Vertex normal components of each geometry, in order
+			// - Vertex texture coordinate components of each geometry, in order
+			// - Vertex position indices of each geometry, in order (TRIANGLE_LIST)
+			// - Vertex position indices of each hull, in order (LINE_STRIP for 2D, LINE_LIST for 3D)
+			// - Vertex normal indices of each geometry, in order
+			// - Vertex texture coordinate indices of each geometry, in order
 			/// Contains static (internal to the scene) and dynamic (external geometries) vertices and indices.
 			sequence<uint8> dataBuffer;
-
-			uint32 staticVertexCount;
-			uint32 staticIndexCount;
-			uint32 dynamicVertexCount = 0;
-			uint32 dynamicIndexCount = 0;
 	};
 }

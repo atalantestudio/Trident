@@ -8,6 +8,8 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace Trident {
+	#define PHYSICS_2D_RENDERER_SAMPLE_COUNT 4
+
 	// Toggle vertex/edge feature rendering.
 	#define SHOW_FEATURES
 
@@ -46,7 +48,6 @@ namespace Trident {
 			};
 
 		private:
-			static constexpr uint8 SAMPLE_COUNT = 1;
 			static constexpr float32 MIN_ZOOM_LEVEL = 1.0f;
 			static constexpr float32 MAX_ZOOM_LEVEL = 64.0f;
 			static constexpr float32 DEFAULT_ZOOM_LEVEL = 32.0f;

@@ -24,20 +24,22 @@ namespace Trident {
 		// However polygon hulls may have vertices that don't appear on the geometry (e.g. an AABB hull wrapping a cylinder geometry such as a glass).
 		view<svec2<float32>> vertices;
 
-		uint32 edgeCount;
+		range<uint32, uint32> lineIndexRange;
 	};
 
 	class Hull2D {
 		public:
+			/// Creates and returns a point hull.
+			/// When coupled with a rigid body, point hulls can represent the position of a 2D point (e.g. the pointer's position).
 			static Hull2D point();
-
-			template<Hull2DType HullType>
-			static Hull2D fromGeometry(const Geometry2D& geometry);
 
 		public:
 			explicit Hull2D() = default;
+
+			// TODO: Only used by the asset builder.
 			explicit Hull2D(const Descriptor<Hull2D>& descriptor);
-			explicit Hull2D(ref<GeometryAsset> geometryAsset);
+
+			explicit Hull2D(ref<GeometryAsset> geometryAsset, view<svec2<float32>> vertices, uint32 lineIndexOffset);
 
 			inline Hull2DType getType() const {
 				return type;
@@ -51,24 +53,12 @@ namespace Trident {
 				return radius;
 			}
 
-			inline uint32 getVertexOffset() const {
-				return vertexOffset;
-			}
-
 			inline view<svec2<float32>> getVertices() const {
 				return vertices;
 			}
 
-			inline uint32 getIndexOffset() const {
-				return indexOffset;
-			}
-
-			inline const sequence<uint32>& getLineIndices() const {
-				return lineIndices;
-			}
-
-			inline uint32 getLineIndexCount() const {
-				return lineIndexCount;
+			inline range<uint32, uint32> getLineIndexRange() const {
+				return lineIndexRange;
 			}
 
 			inline const sequence<Edge>& getEdges() const {
@@ -113,7 +103,7 @@ namespace Trident {
 				}
 			}
 
-			// Returns the farthest point on the geometry along `d`.
+			/// Returns the farthest point on the hull along `d`.
 			inline vec2<float32> support(vec2<float32> d) const {
 				// TODO: Replace with LUT.
 				switch (type) {
@@ -136,8 +126,8 @@ namespace Trident {
 				}
 			}
 
-			// Returns the index of the farthest point on the geometry along `d`.
 			// NOTE: Some geometries like CircleGeometry2D return more precise support points. In these cases, `support` must be used.
+			/// Returns the index of the farthest point on the hull along `d`.
 			inline uint32 supportIndex(vec2<float32> d) const {
 				// TODO: Replace with LUT.
 				switch (type) {
@@ -184,14 +174,12 @@ namespace Trident {
 			/// Distance between the center of mass and the farthest vertex.
 			float32 radius;
 
-			uint32 vertexOffset = 0;
+			// Vertex positions on the parent geometry.
 			view<svec2<float32>> vertices;
 
-			uint32 indexOffset = 0;
-			sequence<uint32> lineIndices;
-			uint32 lineIndexCount;
+			range<uint32, uint32> lineIndexRange;
 
-			// TODO: Store the geometry edges in a shared contiguous buffer.
+			// TODO(physics/hull-edges): Store the geometry edges in a shared contiguous buffer.
 			sequence<Edge> edges;
 	};
 }

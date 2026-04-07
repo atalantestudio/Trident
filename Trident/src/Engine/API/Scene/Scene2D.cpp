@@ -14,107 +14,98 @@ namespace Trident {
 	Scene2D::Scene2D(ref<Scene2DAsset> sceneAsset) :
 		Scene({
 			.staticVertexCount = sceneAsset->getStaticVertexCount(),
-			.staticIndexCount = sceneAsset->getStaticIndexCount()
+			.staticIndexCount = sceneAsset->getStaticIndexCount(),
+			.dynamicVertexCount = sceneAsset->getDynamicVertexPositionCount() + sceneAsset->getDynamicVertexTextureCoordinateCount(),
+			.dynamicIndexCount = sceneAsset->getDynamicVertexPositionIndexCount() + sceneAsset->getDynamicVertexTextureCoordinateIndexCount()
 		})
 	{
 		loadGeometries(sceneAsset);
-		loadHulls(sceneAsset);
 		loadEntityComponentMappings(sceneAsset);
 	}
 
 	void Scene2D::loadGeometries(ref<Scene2DAsset> sceneAsset) {
 		const sequence<uint8>& staticBuffer = sceneAsset->getStaticBuffer();
 		const sequence<ref<GeometryAsset>>& geometryAssets = sceneAsset->getGeometryAssets();
+		const uint32 vertexComponentCount = static_cast<uint32>(staticVertexCount + dynamicVertexCount * 2);
+		const uint64 vertexByteCount = staticVertexCount + dynamicVertexCount * sizeof(svec2<float32>);
+		const uint64 indexByteCount = staticIndexCount + dynamicIndexCount * sizeof(uint32);
 
+		dataBuffer = sequence<uint8>(vertexByteCount + indexByteCount);
 		geometries = sequence<Geometry2D>(geometryAssets.count());
+		hulls = sequence<Hull2D>(sceneAsset->getHullCount());
+
+		std::copy(staticBuffer.begin(), staticBuffer.end(), &dataBuffer[0]);
+
+		uint8* dynamicDataBuffer = &dataBuffer[staticBuffer.count()];
+		uint64 offset = 0;
+
+		range<uint32, uint32> vertexPositionComponentRange = {static_cast<uint32>(offset), 0};
+
+		for (const ref<GeometryAsset> geometryAsset : geometryAssets) {
+			const sequence<float32>& vertexPositionComponents = geometryAsset->getVertexPositionComponents();
+
+			std::copy(vertexPositionComponents.begin(), vertexPositionComponents.end(), &pointer_cast<float32*>(dynamicDataBuffer)[offset]);
+
+			offset += vertexPositionComponents.count();
+		}
+
+		range<uint32, uint32> vertexTextureCoordinateComponentRange = {static_cast<uint32>(offset), 0};
+
+		for (const ref<GeometryAsset> geometryAsset : geometryAssets) {
+			const sequence<float32>& vertexTextureCoordinateComponents = geometryAsset->getVertexTextureCoordinateComponents();
+
+			std::copy(vertexTextureCoordinateComponents.begin(), vertexTextureCoordinateComponents.end(), &pointer_cast<float32*>(dynamicDataBuffer)[offset]);
+
+			offset += vertexTextureCoordinateComponents.count();
+		}
+
+		range<uint32, uint32> vertexPositionIndexRange = {static_cast<uint32>(offset), 0};
+
+		for (const ref<GeometryAsset> geometryAsset : geometryAssets) {
+			const sequence<uint32>& vertexPositionIndices = geometryAsset->getVertexPositionIndices();
+
+			std::copy(vertexPositionIndices.begin(), vertexPositionIndices.end(), &pointer_cast<uint32*>(dynamicDataBuffer)[offset]);
+
+			offset += vertexPositionIndices.count();
+		}
 
 		uint32 geometryIndex = 0;
+		uint32 hullIndex = 0;
 
 		while (geometryIndex < geometries.count()) {
 			const ref<GeometryAsset> geometryAsset = geometryAssets[geometryIndex];
 
-			geometries[geometryIndex] = Geometry2D({
-				.vertexPositionComponents = geometryAsset->getVertexPositionComponents(),
-				.vertexTextureCoordinateComponents = geometryAsset->getVertexTextureCoordinateComponents(),
-				.indices = geometryAsset->getVertexPositionIndices(),
+			vertexPositionComponentRange.count = static_cast<uint32>(geometryAsset->getVertexPositionComponents().count());
+			vertexTextureCoordinateComponentRange.count = static_cast<uint32>(geometryAsset->getVertexTextureCoordinateComponents().count());
+			vertexPositionIndexRange.count = static_cast<uint32>(geometryAsset->getVertexPositionIndices().count());
 
-				// TODO: Provide correct offset.
-				.indexOffset = 0,
+			geometries[geometryIndex] = Geometry2D({
+				.vertexPositionComponentRange = {vertexPositionComponentRange.offset - vertexComponentCount, vertexPositionComponentRange.count},
+				.vertexTextureCoordinateComponentRange = {vertexTextureCoordinateComponentRange.offset - vertexComponentCount, vertexTextureCoordinateComponentRange.count},
+				.indexRange = {vertexPositionIndexRange.offset - vertexComponentCount, vertexPositionIndexRange.count},
 			});
 
-			dynamicVertexCount += geometries[geometryIndex].getVertexCount();
-			dynamicIndexCount += static_cast<uint32>(geometries[geometryIndex].getIndices().count());
-
-			geometryIndex += 1;
-		}
-
-		// TODO: Restore texture coordinates.
-		dataBuffer = sequence<uint8>((staticVertexCount + dynamicVertexCount) * /* 4 */ 2 * sizeof(float32) + (staticIndexCount + dynamicIndexCount) * sizeof(uint32));
-
-		uint64 dataOffset = 0;
-
-		std::copy(staticBuffer.begin(), staticBuffer.end(), &dataBuffer[dataOffset]);
-
-		dataOffset += staticBuffer.count();
-
-		geometryIndex = 0;
-
-		while (geometryIndex < geometries.count()) {
-			const Geometry2D& geometry = geometries[geometryIndex];
-			const sequence<float32>& vertexPositionComponents = geometry.getVertexPositionComponents();
-
-			std::copy(vertexPositionComponents.begin(), vertexPositionComponents.end(), pointer_cast<float32*>(&dataBuffer[dataOffset]));
-
-			dataOffset += vertexPositionComponents.count() * sizeof(float32);
-			geometryIndex += 1;
-		}
-
-		// TODO: Restore texture coordinates.
-		/* geometryIndex = 0;
-
-		while (geometryIndex < geometries.count()) {
-			const Geometry2D& geometry = geometries[geometryIndex];
-			const sequence<float32>& vertexTextureCoordinateComponents = geometry.getVertexTextureCoordinateComponents();
-
-			std::copy(vertexTextureCoordinateComponents.begin(), vertexTextureCoordinateComponents.end(), pointer_cast<float32*>(&dataBuffer[dataOffset]));
-
-			dataOffset += vertexTextureCoordinateComponents.count() * sizeof(float32);
-			geometryIndex += 1;
-		} */
-
-		geometryIndex = 0;
-
-		while (geometryIndex < geometries.count()) {
-			const Geometry2D& geometry = geometries[geometryIndex];
-			const sequence<uint32>& indices = geometry.getIndices();
-
-			std::copy(indices.begin(), indices.end(), pointer_cast<uint32*>(&dataBuffer[dataOffset]));
-
-			dataOffset += indices.count() * sizeof(uint32);
-			geometryIndex += 1;
-		}
-	}
-
-	void Scene2D::loadHulls(ref<Scene2DAsset> sceneAsset) {
-		const sequence<ref<GeometryAsset>>& geometryAssets = sceneAsset->getGeometryAssets();
-
-		hulls = sequence<Hull2D>(sceneAsset->getHullCount());
-
-		uint32 geometryAssetIndex = 0;
-		uint32 hullIndex = 0;
-
-		while (hullIndex < hulls.count()) {
-			const ref<GeometryAsset> geometryAsset = geometryAssets[geometryAssetIndex];
-
 			if (geometryAsset->getFlags() & GeometryAssetFlags::HAS_HULL) {
-				hulls[hullIndex] = Hull2D(geometryAsset);
+				const sequence<uint32>& hullLineIndices = geometryAsset->getHullLineIndices();
 
-				geometries[geometryAssetIndex].hullIndex = hullIndex;
+				std::copy(hullLineIndices.begin(), hullLineIndices.end(), &pointer_cast<uint32*>(dynamicDataBuffer)[offset]);
+
+				offset += hullLineIndices.count();
+
+				const view<svec2<float32>> vertices(pointer_cast<const svec2<float32>*>(&dynamicDataBuffer[vertexPositionComponentRange.offset * sizeof(float32)]), vertexPositionComponentRange.count / 2);
+
+				hulls[hullIndex] = Hull2D(geometryAsset, vertices, vertexPositionIndexRange.offset + vertexPositionIndexRange.count - vertexComponentCount);
+
+				geometries[geometryIndex].hullIndex = hullIndex;
 
 				hullIndex += 1;
 			}
 
-			geometryAssetIndex += 1;
+			vertexPositionComponentRange.offset += vertexPositionComponentRange.count;
+			vertexTextureCoordinateComponentRange.offset += vertexTextureCoordinateComponentRange.count;
+			vertexPositionIndexRange.offset += vertexPositionIndexRange.count;
+
+			geometryIndex += 1;
 		}
 	}
 
@@ -142,9 +133,14 @@ namespace Trident {
 		for (const EntityComponentMapping<RigidBody2DComponent>& rigidBodyMapping : sceneAsset->getRigidBodyMappings()) {
 			ecs.setComponent<RigidBody2DComponent>(rigidBodyMapping.entity, rigidBodyMapping.component);
 
+			const GeometryComponent geometryComponent = ecs.getComponent<GeometryComponent>(rigidBodyMapping.entity);
+			const Geometry2D& geometry = geometries[geometryComponent.geometryIndex];
+			const Hull2D& hull = hulls[geometry.hullIndex];
+
+			ecs.getComponent<RigidBody2DComponent>(rigidBodyMapping.entity).updateWorld(hull.getCentroid());
+
 			// TODO(debug-only)
-			ecs.getComponent<RigidBody2DComponent>(rigidBodyMapping.entity).updateWorld({0.0f, 0.0f});
-			ecs.setTag<DynamicEntityTag>(entity);
+			ecs.setTag<DynamicEntityTag>(rigidBodyMapping.entity);
 		}
 	}
 

@@ -12,7 +12,9 @@ namespace Trident {
 	Scene3D::Scene3D(ref<Scene3DAsset> sceneAsset) :
 		Scene({
 			.staticVertexCount = sceneAsset->getStaticVertexCount(),
-			.staticIndexCount = sceneAsset->getStaticIndexCount()
+			.staticIndexCount = sceneAsset->getStaticIndexCount(),
+			.dynamicVertexCount = sceneAsset->getDynamicVertexPositionCount() + sceneAsset->getDynamicVertexNormalCount() + sceneAsset->getDynamicVertexTextureCoordinateCount(),
+			.dynamicIndexCount = sceneAsset->getDynamicVertexPositionIndexCount() + sceneAsset->getDynamicVertexNormalIndexCount() + sceneAsset->getDynamicVertexTextureCoordinateIndexCount()
 		})
 	{
 		loadGeometries(sceneAsset);
@@ -31,9 +33,6 @@ namespace Trident {
 			const ref<GeometryAsset> geometryAsset = geometryAssets[geometryIndex];
 
 			geometries[geometryIndex] = Geometry3D(geometryAsset);
-
-			dynamicVertexCount += static_cast<uint32>(geometries[geometryIndex].getVertexPositionComponents().count() / 3);
-			dynamicIndexCount += static_cast<uint32>(geometries[geometryIndex].getVertexPositionIndices().count());
 
 			geometryIndex += 1;
 		}

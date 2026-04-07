@@ -1,4 +1,4 @@
-﻿// Copyright 2025 Atalante Studio.
+﻿// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
@@ -7,38 +7,43 @@
 #include "Engine/Filesystem/Decoder/Decoder.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 
+#include "Geometry.hpp"
+#include "Hull.hpp"
+
 namespace Trident {
 	inline void EncodeDefaultGeometryAsset(const std::filesystem::path& outputDirectory) {
 		constexpr Hull2DType HULL_TYPE = Hull2DType::POLYGON;
 
+		// TODO(debug-only)
 		constexpr uint32 identifier = 484634187;
-		const Geometry2D geometry = Geometry2D::unitSquare();
-		const Hull2D hull = Hull2D::fromGeometry<HULL_TYPE>(geometry);
+
+		std::vector<float32> vertexComponentBuffer;
+		std::vector<uint32> indexBuffer;
+
+		const Geometry2D geometry = createUnitSquareGeometry(vertexComponentBuffer, indexBuffer);
+		const Hull2D hull = createHull<HULL_TYPE>(geometry, vertexComponentBuffer, indexBuffer);
+		const range<uint32, uint32> lineIndexRange = hull.getLineIndexRange();
 
 		GeometryAssetHeader geometryHeader{};
 		geometryHeader.signature = AssetSignature::GEOMETRY;
 		geometryHeader.identifier = identifier;
 		geometryHeader.version = {0, 0, 0};
 		geometryHeader.flags = GeometryAssetFlags::IS_2D | GeometryAssetFlags::HAS_HULL;
-		geometryHeader.vertexCount = geometry.getVertexCount();
-		geometryHeader.indexCount = static_cast<uint32>(geometry.getIndices().count());
+		geometryHeader.vertexCount = geometry.getVertexPositionComponentRange().count / 2;
+		geometryHeader.indexCount = static_cast<uint32>(geometry.getIndexRange().count);
 
 		Hull2DHeader hullHeader{};
 		hullHeader.hullType = HULL_TYPE;
 		hullHeader.centroid = hull.getCentroid();
 		hullHeader.radius = hull.getRadius();
-
-		// NOTE: For this example the vertices on the hull are the same as the geometry.
-		hullHeader.vertexCount = 0;
-
-		hullHeader.lineIndexCount = static_cast<uint32>(hull.getLineIndices().count());
+		hullHeader.lineIndexCount = lineIndexRange.count;
 
 		const uint64 size =
 			sizeof(geometryHeader) +
-			geometry.getVertexCount() * 4 * sizeof(float32) +
-			geometry.getIndexCount() * sizeof(uint32) +
+			geometryHeader.vertexCount * 2 * sizeof(svec2<float32>) +
+			geometryHeader.indexCount * sizeof(uint32) +
 			sizeof(hullHeader) +
-			hull.getLineIndices().count() * sizeof(uint32);
+			lineIndexRange.count * sizeof(uint32);
 
 		ByteStream<StreamOperation::WRITE> stream(size, Endianness::LITTLE_ENDIAN);
 
@@ -46,25 +51,21 @@ namespace Trident {
 
 		stream.jump(sizeof(geometryHeader));
 
-		std::copy(geometry.getVertexPositionComponents().begin(), geometry.getVertexPositionComponents().end(), pointer_cast<float32*>(stream.getBytePosition()));
+		std::copy(vertexComponentBuffer.begin(), vertexComponentBuffer.end(), pointer_cast<float32*>(stream.getBytePosition()));
 
-		stream.jump(geometry.getVertexCount() * 2 * sizeof(float32));
+		stream.jump(vertexComponentBuffer.size() * sizeof(float32));
 
-		std::copy(geometry.getVertexTextureCoordinateComponents().begin(), geometry.getVertexTextureCoordinateComponents().end(), pointer_cast<float32*>(stream.getBytePosition()));
+		std::copy_n(&indexBuffer[0], geometryHeader.indexCount, pointer_cast<uint32*>(stream.getBytePosition()));
 
-		stream.jump(geometry.getVertexCount() * 2 * sizeof(float32));
-
-		std::copy(geometry.getIndices().begin(), geometry.getIndices().end(), pointer_cast<uint32*>(stream.getBytePosition()));
-
-		stream.jump(geometry.getIndexCount() * sizeof(uint32));
+		stream.jump(geometryHeader.indexCount * sizeof(uint32));
 
 		std::copy_n(pointer_cast<const uint8*>(&hullHeader), sizeof(hullHeader), stream.getBytePosition());
 
 		stream.jump(sizeof(hullHeader));
 
-		std::copy(hull.getLineIndices().begin(), hull.getLineIndices().begin(), pointer_cast<uint32*>(stream.getBytePosition()));
+		std::copy(&indexBuffer[lineIndexRange.offset], &indexBuffer[lineIndexRange.offset + lineIndexRange.count - 1], pointer_cast<uint32*>(stream.getBytePosition()));
 
-		stream.jump(hull.getLineIndices().count() * sizeof(uint32));
+		stream.jump(lineIndexRange.count * sizeof(uint32));
 
 		const std::filesystem::path outputPath = outputDirectory / "unit_square.tga";
 		const std::string outputPathString = outputPath.string();

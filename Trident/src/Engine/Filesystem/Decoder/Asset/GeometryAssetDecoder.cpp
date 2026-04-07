@@ -45,7 +45,6 @@ namespace Trident {
 
 				descriptor.hullCentroid = {centroid[0], centroid[1], 0.0f};
 				descriptor.hullRadius = stream.read<float32>();
-				descriptor.hullVertexCount = stream.read<uint32>();
 				descriptor.hullLineIndices = sequence<uint32>(stream.read<uint32>());
 
 				std::copy_n(pointer_cast<const uint32*>(stream.getBytePosition()), descriptor.hullLineIndices.count(), &descriptor.hullLineIndices[0]);

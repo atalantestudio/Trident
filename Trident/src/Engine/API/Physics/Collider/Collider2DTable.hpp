@@ -11,7 +11,8 @@
 
 namespace Trident {
 	static constexpr Collider2D COLLIDER_2D_TABLE[static_cast<uint32>(Hull2DType::count)][static_cast<uint32>(Hull2DType::count)] = {
-		{CircleCircleCollider, CircleConvexHullCollider    },
-		{nullptr,              ConvexHullConvexHullCollider},
+		{nullptr, nullptr, nullptr},
+		{nullptr, CircleCircleCollider, CircleConvexHullCollider},
+		{nullptr, nullptr, ConvexHullConvexHullCollider},
 	};
 }

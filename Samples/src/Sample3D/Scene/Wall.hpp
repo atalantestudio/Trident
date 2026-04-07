@@ -10,7 +10,7 @@ namespace Trident {
 	Scene3D createWallScene(AssetLibrary* assetLibrary, GraphicsAPI graphicsApi) {
 		Scene3D scene;
 
-		Geometry3DDescriptor geometryDescriptor{};
+		Descriptor<Geometry3D> geometryDescriptor{};
 		geometryDescriptor.vertexPositionComponents = {
 			-0.5f,  0.5f,  0.0f,
 			 0.5f,  0.5f,  0.0f,

@@ -32,7 +32,6 @@ namespace Trident {
 		svec3<float32> hullCentroid;
 
 		float32 hullRadius;
-		uint32 hullVertexCount;
 
 		/// In 2D, the wireframe is rendered with the `LINE_STRIP` topology.
 		/// In 3D, it is rendered with the `LINE_LIST` topology.
@@ -50,7 +49,6 @@ namespace Trident {
 		Hull2DType hullType;
 		svec2<float32> centroid;
 		float32 radius;
-		uint32 vertexCount;
 		uint32 lineIndexCount;
 	};
 
@@ -68,7 +66,6 @@ namespace Trident {
 				hullType(descriptor.hullType),
 				hullCentroid(descriptor.hullCentroid),
 				hullRadius(descriptor.hullRadius),
-				hullVertexCount(descriptor.hullVertexCount),
 				hullLineIndices(descriptor.hullLineIndices)
 			{}
 
@@ -117,10 +114,6 @@ namespace Trident {
 				return hullRadius;
 			}
 
-			inline uint32 getHullVertexCount() const {
-				return hullVertexCount;
-			}
-
 			inline const sequence<uint32>& getHullLineIndices() const {
 				return hullLineIndices;
 			}
@@ -136,7 +129,6 @@ namespace Trident {
 			Hull2DType hullType;
 			svec3<float32> hullCentroid;
 			float32 hullRadius;
-			uint32 hullVertexCount;
 			sequence<uint32> hullLineIndices;
 	};
 }

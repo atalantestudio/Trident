@@ -3,10 +3,14 @@
 
 #pragma once
 
+#include "Engine/API/Descriptor.hpp"
 #include "Engine/Filesystem/Asset/GeometryAsset.hpp"
 
 namespace Trident {
-	struct Geometry3DDescriptor {
+	class Geometry3D;
+
+	template<>
+	struct Descriptor<Geometry3D> {
 		sequence<float32> vertexPositionComponents;
 		sequence<uint32> vertexPositionIndices;
 		sequence<float32> vertexNormalComponents;
@@ -25,7 +29,8 @@ namespace Trident {
 		public:
 			explicit Geometry3D() = default;
 
-			explicit Geometry3D(const Geometry3DDescriptor& descriptor) :
+			// TODO: Only used by the asset builder.
+			explicit Geometry3D(const Descriptor<Geometry3D>& descriptor) :
 				vertexPositionComponents(descriptor.vertexPositionComponents),
 				vertexNormalComponents(descriptor.vertexNormalComponents),
 				vertexTextureCoordinateComponents(descriptor.vertexTextureCoordinateComponents),
@@ -61,6 +66,10 @@ namespace Trident {
 				return vertexTextureCoordinateComponents;
 			}
 
+			inline const sequence<float32>& getVertexTangentComponents() const {
+				return vertexTangentComponents;
+			}
+
 			inline const sequence<uint32>& getVertexPositionIndices() const {
 				return vertexPositionIndices;
 			}
@@ -71,10 +80,6 @@ namespace Trident {
 
 			inline const sequence<uint32>& getVertexTextureCoordinateIndices() const {
 				return vertexTextureCoordinateIndices;
-			}
-
-			inline const sequence<float32>& getVertexTangentComponents() const {
-				return vertexTangentComponents;
 			}
 
 			inline uint32 getTriangleCount() const {

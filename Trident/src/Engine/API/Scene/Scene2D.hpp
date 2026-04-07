@@ -23,7 +23,6 @@ namespace Trident {
 
 		private:
 			void loadGeometries(ref<Scene2DAsset> sceneAsset);
-			void loadHulls(ref<Scene2DAsset> sceneAsset);
 			void loadEntityComponentMappings(ref<Scene2DAsset> sceneAsset);
 
 		private:

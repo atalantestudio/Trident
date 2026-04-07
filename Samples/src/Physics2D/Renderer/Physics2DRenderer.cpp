@@ -12,10 +12,12 @@ namespace Trident {
 	void Physics2DRenderer::build() {
 		setupRenderPass();
 
-		if (SAMPLE_COUNT > 1 && layerInput->swapchainImage == nullptr) {
-			recreateMultisampleImage();
-			recreateMultisampleImageView();
-		}
+		#if PHYSICS_2D_RENDERER_SAMPLE_COUNT > 1
+			if (layerInput->swapchainImage == nullptr) {
+				recreateMultisampleImage();
+				recreateMultisampleImageView();
+			}
+		#endif
 
 		recreateDepthStencilImage();
 		recreateDepthStencilImageView();
@@ -69,7 +71,7 @@ namespace Trident {
 	void Physics2DRenderer::setupRenderPass() {
 		Attachment swapchainAttachment{};
 		swapchainAttachment.format = getSurface()->getFormat();
-		swapchainAttachment.sampleCount = SAMPLE_COUNT;
+		swapchainAttachment.sampleCount = PHYSICS_2D_RENDERER_SAMPLE_COUNT;
 		swapchainAttachment.loadOperation = LoadOperation::CLEAR;
 		swapchainAttachment.storeOperation = StoreOperation::STORE;
 
@@ -91,7 +93,7 @@ namespace Trident {
 
 		Attachment depthStencilAttachment{};
 		depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
-		depthStencilAttachment.sampleCount = SAMPLE_COUNT;
+		depthStencilAttachment.sampleCount = PHYSICS_2D_RENDERER_SAMPLE_COUNT;
 		depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
 		depthStencilAttachment.storeOperation = StoreOperation::UNDEFINED;
 		depthStencilAttachment.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
@@ -193,12 +195,11 @@ namespace Trident {
 			.extent = swapchain->getExtent(),
 		};
 
-		if constexpr (SAMPLE_COUNT > 1) {
+		#if PHYSICS_2D_RENDERER_SAMPLE_COUNT > 1
 			framebufferDescriptor.imageViews = {layerInput->swapchainImageView, depthStencilImageView, nullptr};
-		}
-		else {
+		#else
 			framebufferDescriptor.imageViews = {nullptr, depthStencilImageView};
-		}
+		#endif
 
 		#if defined(BUILD_MODE_DEBUG)
 			sequence<char8> name;
@@ -213,12 +214,11 @@ namespace Trident {
 				SET_DEBUG_NAME(framebufferDescriptor, name);
 			#endif
 
-			if constexpr (SAMPLE_COUNT > 1) {
+			#if PHYSICS_2D_RENDERER_SAMPLE_COUNT > 1
 				framebufferDescriptor.imageViews[2] = swapchain->getImageView(framebufferIndex);
-			}
-			else {
+			#else
 				framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
-			}
+			#endif
 
 			framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
 
@@ -965,7 +965,6 @@ namespace Trident {
 				.name = "Vertex",
 			#endif
 		});
-
 		indexBuffer = createBuffer<uint32>({
 			.size = (scene->getStaticIndexCount() + scene->getDynamicIndexCount()) * sizeof(uint32),
 			.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST,
@@ -975,7 +974,6 @@ namespace Trident {
 				.name = "Index",
 			#endif
 		});
-
 		rigidBodyBuffer = createBuffer<RigidBody>({
 			.size = rigidBodyBufferSize,
 			.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST,
@@ -985,7 +983,6 @@ namespace Trident {
 				.name = "Rigid body",
 			#endif
 		});
-
 		centerOfMassBuffer = createBuffer<CenterOfMass>({
 			.size = rigidBodyPool.componentCount * sizeof(CenterOfMass),
 			.usage = BufferUsage::VERTEX,
@@ -1000,7 +997,6 @@ namespace Trident {
 		centerOfMassMappedRange = centerOfMassBuffer->map(0, centerOfMassBuffer->getSize());
 
 		const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
-
 		const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder({
 			.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
 			#if defined(BUILD_MODE_DEBUG)
@@ -1055,21 +1051,24 @@ namespace Trident {
 	#if defined(SHOW_FEATURES)
 		void Physics2DRenderer::registerFeature(const Feature2D& feature) {
 			switch (feature.vertexCount) {
-				case 1:
+				case 1: {
 					vertexFeatureMappedRange[vertexFeatureCount].position = {feature.vertex[0], feature.vertex[1]};
 					vertexFeatureCount += 1;
 
 					break;
-				case 2:
+				}
+				case 2: {
 					edgeFeatureMappedRange[edgeFeatureCount * 2 + 0].position = {feature.edge[0][0], feature.edge[0][1]};
 					edgeFeatureMappedRange[edgeFeatureCount * 2 + 1].position = {feature.edge[1][0], feature.edge[1][1]};
 					edgeFeatureCount += 1;
 
 					break;
-				default:
+				}
+				default: {
 					DEBUG_ASSERT(false);
 
 					break;
+				}
 			}
 		}
 	#endif
@@ -1172,37 +1171,23 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::render(ref<CommandEncoder> commandEncoder) const {
-		sequence<ClearValue> clearValues;
-
-		if constexpr (SAMPLE_COUNT > 1) {
-			clearValues = {
-				{1.0f, 1.0f, 1.0f, 1.0f},
-				{
-					.depth = 0.0f,
-					.stencil = 0,
-				},
-				{0.0f, 0.0f, 0.0f, 1.0f},
-			};
-		}
-		else {
-			clearValues = {
-				{1.0f, 1.0f, 1.0f, 1.0f},
-				{
-					.depth = 0.0f,
-					.stencil = 0,
-				},
-			};
-		}
-
-		commandEncoder->beginRenderPass({
-			.framebuffer = framebuffers[getSwapchainImageIndex()],
-			.clearValues = clearValues,
-		});
-
 		const Extent2D swapchainExtent = getSwapchain()->getExtent();
 		const float32 width = static_cast<float32>(swapchainExtent.width);
 		const float32 height = static_cast<float32>(swapchainExtent.height);
 
+		commandEncoder->beginRenderPass({
+			.framebuffer = framebuffers[getSwapchainImageIndex()],
+			.clearValues = {
+				{1.0f, 1.0f, 1.0f, 1.0f},
+				{
+					.depth = 0.0f,
+					.stencil = 0,
+				},
+				#if PHYSICS_2D_RENDERER_SAMPLE_COUNT > 1
+					{0.0f, 0.0f, 0.0f, 1.0f},
+				#endif
+			},
+		});
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, swapchainExtent);
 
@@ -1213,6 +1198,8 @@ namespace Trident {
 			commandEncoder->draw(3, 1, 0, 0);
 		}
 
+		const sequence<Geometry2D>& geometries = scene->getGeometries();
+		const sequence<Hull2D>& hulls = scene->getHulls();
 		const ComponentPool<GeometryComponent>& geometryComponentPool = scene->ecs.getComponentPool<GeometryComponent>();
 
 		uint32 componentIndex = 0;
@@ -1228,10 +1215,11 @@ namespace Trident {
 			while (componentIndex < geometryComponentPool.componentCount) {
 				const Entity entity = geometryComponentPool.componentIndexToEntity[componentIndex];
 				const GeometryComponent geometryComponent = geometryComponentPool.components[componentIndex];
-				const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
+				const Geometry2D& geometry = geometries[geometryComponent.geometryIndex];
+				const range<uint32, uint32> indexRange = geometry.getIndexRange();
 
 				// TODO: Restore materials.
-				commandEncoder->drawIndexed(geometry.getIndexCount(), 1, geometry.getIndexOffset(), 0, entity);
+				commandEncoder->drawIndexed(indexRange.count, 1, indexRange.offset, 0, entity);
 
 				componentIndex += 1;
 			}
@@ -1250,11 +1238,12 @@ namespace Trident {
 			while (componentIndex < geometryComponentPool.componentCount) {
 				const Entity entity = geometryComponentPool.componentIndexToEntity[componentIndex];
 				const GeometryComponent geometryComponent = geometryComponentPool.components[componentIndex];
-				const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
-				const Hull2D& hull = scene->getHulls()[geometry.hullIndex];
+				const Geometry2D& geometry = geometries[geometryComponent.geometryIndex];
+				const Hull2D& hull = hulls[geometry.hullIndex];
+				const range<uint32, uint32> indexRange = hull.getLineIndexRange();
 
 				// TODO: Restore materials.
-				commandEncoder->drawIndexed(hull.getLineIndexCount(), 1, hull.getIndexOffset(), 0, entity);
+				commandEncoder->drawIndexed(indexRange.count, 1, indexRange.offset, 0, entity);
 
 				componentIndex += 1;
 			}
@@ -1282,7 +1271,8 @@ namespace Trident {
 
 		if (selectedEntity != max<Entity>()) {
 			const GeometryComponent geometryComponent = scene->ecs.getComponent<GeometryComponent>(selectedEntity);
-			const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
+			const Geometry2D& geometry = geometries[geometryComponent.geometryIndex];
+			const Hull2D& hull = hulls[geometry.hullIndex];
 
 			// Rigid body placeholder center of mass
 			{
@@ -1294,24 +1284,26 @@ namespace Trident {
 
 			// Rigid body placeholder fill
 			{
+				const range<uint32, uint32> indexRange = geometry.getIndexRange();
+
 				commandEncoder->bindGraphicsPipeline(rigidBodyPlaceholderFillPipeline);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, scene->getStaticVertexCount() * sizeof(Vertex), sizeof(Vertex));
 				commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0, sizeof(RigidBody));
 				commandEncoder->bindIndexBuffer<uint32>(indexBuffer, scene->getStaticIndexCount() * sizeof(uint32));
 				commandEncoder->bindDescriptorSets(placeholderPipelineLayout, 0, {cameraViewDescriptorSet, placeholderDescriptorSet});
-				commandEncoder->drawIndexed(geometry.getIndexCount(), 1, geometry.getIndexOffset(), 0, selectedEntity);
+				commandEncoder->drawIndexed(indexRange.count, 1, indexRange.offset, 0, selectedEntity);
 			}
 
 			// Rigid body placeholder stroke
 			{
-				const Hull2D& hull = scene->getHulls()[geometry.hullIndex];
+				const range<uint32, uint32> indexRange = hull.getLineIndexRange();
 
 				commandEncoder->bindGraphicsPipeline(rigidBodyPlaceholderStrokePipeline);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, scene->getStaticVertexCount() * sizeof(Vertex), sizeof(Vertex));
 				commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0, sizeof(RigidBody));
 				commandEncoder->bindIndexBuffer<uint32>(indexBuffer, scene->getStaticIndexCount() * sizeof(uint32));
 				commandEncoder->bindDescriptorSets(placeholderPipelineLayout, 0, {cameraViewDescriptorSet, placeholderDescriptorSet});
-				commandEncoder->drawIndexed(hull.getLineIndexCount(), 1, hull.getIndexOffset(), 0, selectedEntity);
+				commandEncoder->drawIndexed(indexRange.count, 1, indexRange.offset, 0, selectedEntity);
 			}
 		}
 
@@ -1346,10 +1338,12 @@ namespace Trident {
 	#endif
 
 	void Physics2DRenderer::resize(WindowResizeEvent& event) {
-		if (SAMPLE_COUNT > 1 && layerInput->swapchainImage == nullptr) {
-			recreateMultisampleImage();
-			recreateMultisampleImageView();
-		}
+		#if PHYSICS_2D_RENDERER_SAMPLE_COUNT > 1
+			if (layerInput->swapchainImage == nullptr) {
+				recreateMultisampleImage();
+				recreateMultisampleImageView();
+			}
+		#endif
 
 		recreateDepthStencilImage();
 		recreateDepthStencilImageView();

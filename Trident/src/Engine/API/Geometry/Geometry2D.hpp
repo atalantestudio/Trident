@@ -10,75 +10,42 @@ namespace Trident {
 
 	template<>
 	struct Descriptor<Geometry2D> {
-		sequence<float32> vertexPositionComponents;
-		sequence<float32> vertexTextureCoordinateComponents;
-		sequence<uint32> indices;
-		uint32 indexOffset;
+		range<uint32, uint32> vertexPositionComponentRange;
+		range<uint32, uint32> vertexTextureCoordinateComponentRange;
+		range<uint32, uint32> indexRange;
 	};
 
 	class Geometry2D {
 		public:
-			// TODO: Move inside the asset builder. This geometry must not be created at runtime.
-			/// Creates and returns a 2D geometry representing a unit circle.
-			static Geometry2D unitCircle(uint32 resolution);
-
-			// TODO: Move inside the asset builder. This geometry must not be created at runtime.
-			/// Creates and returns a 2D geometry representing a unit square.
-			/// 
-			///         0
-			///    0 ‒‒‒‒‒‒‒ 1
-			///    ¦         ¦
-			/// 3  ¦         ¦  1
-			///    ¦         ¦
-			///    3 ‒‒‒‒‒‒‒ 2
-			///         2
-			/// 
-			static Geometry2D unitSquare();
-
-		public:
 			explicit Geometry2D() = default;
 
+			// TODO: Only used by the asset builder.
 			explicit Geometry2D(const Descriptor<Geometry2D>& descriptor) :
-				vertexPositionComponents(descriptor.vertexPositionComponents),
-				vertexTextureCoordinateComponents(descriptor.vertexTextureCoordinateComponents),
-				indices(descriptor.indices),
-				indexOffset(descriptor.indexOffset)
+				vertexPositionComponentRange(descriptor.vertexPositionComponentRange),
+				vertexTextureCoordinateComponentRange(descriptor.vertexTextureCoordinateComponentRange),
+				indexRange(descriptor.indexRange)
 			{}
 
-			inline uint32 getVertexCount() const {
-				return static_cast<uint32>(vertexPositionComponents.count()) / 2;
+			inline range<uint32, uint32> getVertexPositionComponentRange() const {
+				return vertexPositionComponentRange;
 			}
 
-			inline const sequence<float32>& getVertexPositionComponents() const {
-				return vertexPositionComponents;
+			inline range<uint32, uint32> getVertexTextureCoordinateComponentRange() const {
+				return vertexTextureCoordinateComponentRange;
 			}
 
-			inline const sequence<float32>& getVertexTextureCoordinateComponents() const {
-				return vertexTextureCoordinateComponents;
-			}
-
-			inline uint32 getIndexOffset() const {
-				return indexOffset;
-			}
-
-			inline uint32 getIndexCount() const {
-				return static_cast<uint32>(indices.count());
-			}
-
-			inline const sequence<uint32>& getIndices() const {
-				return indices;
+			inline range<uint32, uint32> getIndexRange() const {
+				return indexRange;
 			}
 
 		public:
 			uint32 hullIndex = max<uint32>();
 
 		private:
-			sequence<float32> vertexPositionComponents;
-			sequence<float32> vertexTextureCoordinateComponents;
+			range<uint32, uint32> vertexPositionComponentRange;
+			range<uint32, uint32> vertexTextureCoordinateComponentRange;
 
-			uint32 indexOffset;
-
-			/// Indices for the default (TRIANGLE_LIST) visualization mode.
-			sequence<uint32> indices;
+			/// Indices for the default visualization mode (TRIANGLE_LIST).
+			range<uint32, uint32> indexRange;
 	};
 }

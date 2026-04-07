@@ -17,8 +17,10 @@ namespace Trident {
 	class Scene3DAsset;
 
 	struct SceneAssetHeader : public AssetHeader {
+		// TODO: Store 64-bit vertex/index counts.
 		uint32 staticVertexCount;
 		uint32 staticIndexCount;
+
 		uint32 entityCount;
 		uint32 geometryAssetCount;
 		uint32 geometryMappingCount;
@@ -27,8 +29,14 @@ namespace Trident {
 
 	template<>
 	struct Descriptor<SceneAsset> : public AssetDescriptor {
-		uint32 staticVertexCount;
-		uint32 staticIndexCount;
+		uint64 staticVertexCount;
+		uint64 staticIndexCount;
+		uint64 dynamicVertexPositionCount;
+		uint64 dynamicVertexNormalCount;
+		uint64 dynamicVertexTextureCoordinateCount;
+		uint64 dynamicVertexPositionIndexCount;
+		uint64 dynamicVertexNormalIndexCount;
+		uint64 dynamicVertexTextureCoordinateIndexCount;
 		uint32 entityCount;
 		uint32 hullCount;
 		sequence<uint8> staticBuffer;
@@ -52,6 +60,12 @@ namespace Trident {
 				Asset(descriptor),
 				staticVertexCount(descriptor.staticVertexCount),
 				staticIndexCount(descriptor.staticIndexCount),
+				dynamicVertexPositionCount(descriptor.dynamicVertexPositionCount),
+				dynamicVertexNormalCount(descriptor.dynamicVertexNormalCount),
+				dynamicVertexTextureCoordinateCount(descriptor.dynamicVertexTextureCoordinateCount),
+				dynamicVertexPositionIndexCount(descriptor.dynamicVertexPositionIndexCount),
+				dynamicVertexNormalIndexCount(descriptor.dynamicVertexNormalIndexCount),
+				dynamicVertexTextureCoordinateIndexCount(descriptor.dynamicVertexTextureCoordinateIndexCount),
 				entityCount(descriptor.entityCount),
 				hullCount(descriptor.hullCount),
 				staticBuffer(descriptor.staticBuffer),
@@ -59,12 +73,36 @@ namespace Trident {
 				geometryMappings(descriptor.geometryMappings)
 			{}
 
-			inline uint32 getStaticVertexCount() const {
+			inline uint64 getStaticVertexCount() const {
 				return staticVertexCount;
 			}
 
-			inline uint32 getStaticIndexCount() const {
+			inline uint64 getStaticIndexCount() const {
 				return staticIndexCount;
+			}
+
+			inline uint64 getDynamicVertexPositionCount() const {
+				return dynamicVertexPositionCount;
+			}
+
+			inline uint64 getDynamicVertexNormalCount() const {
+				return dynamicVertexNormalCount;
+			}
+
+			inline uint64 getDynamicVertexTextureCoordinateCount() const {
+				return dynamicVertexTextureCoordinateCount;
+			}
+
+			inline uint64 getDynamicVertexPositionIndexCount() const {
+				return dynamicVertexPositionIndexCount;
+			}
+
+			inline uint64 getDynamicVertexNormalIndexCount() const {
+				return dynamicVertexNormalIndexCount;
+			}
+
+			inline uint64 getDynamicVertexTextureCoordinateIndexCount() const {
+				return dynamicVertexTextureCoordinateIndexCount;
 			}
 
 			inline uint32 getEntityCount() const {
@@ -88,8 +126,14 @@ namespace Trident {
 			}
 
 		private:
-			uint32 staticVertexCount;
-			uint32 staticIndexCount;
+			uint64 staticVertexCount;
+			uint64 staticIndexCount;
+			uint64 dynamicVertexPositionCount;
+			uint64 dynamicVertexNormalCount;
+			uint64 dynamicVertexTextureCoordinateCount;
+			uint64 dynamicVertexPositionIndexCount;
+			uint64 dynamicVertexNormalIndexCount;
+			uint64 dynamicVertexTextureCoordinateIndexCount;
 			uint32 entityCount;
 			uint32 hullCount;
 			sequence<uint8> staticBuffer;

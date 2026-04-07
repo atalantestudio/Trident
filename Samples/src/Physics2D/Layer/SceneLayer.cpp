@@ -129,11 +129,9 @@ namespace Trident {
 	}
 
 	void Physics2DSceneLayer::preRender() {
-		// TODO: Restore.
-		// physicsSimulation->tick();
+		physicsSimulation->tick();
 
-		// TODO: Restore.
-		// checkHover();
+		checkHover();
 
 		const ComponentPool<RigidBody2DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
 
@@ -266,8 +264,7 @@ namespace Trident {
 			draggingCamera = false;
 		}
 
-		// TODO: Restore.
-		/* if (event.getButton() == MouseButton::LEFT && selectedEntity != max<Entity>()) {
+		if (event.getButton() == MouseButton::LEFT && selectedEntity != max<Entity>()) {
 			const GeometryComponent geometryComponent = scene->ecs.getComponent<GeometryComponent>(selectedEntity);
 			const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
 			const Hull2D& hull = scene->getHulls()[geometry.hullIndex];
@@ -277,7 +274,7 @@ namespace Trident {
 			rigidBody.updateWorld(hull.getCentroid());
 
 			selectedEntity = max<Entity>();
-		} */
+		}
 
 		return true;
 	}

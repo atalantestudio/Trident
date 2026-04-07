@@ -14,7 +14,6 @@ namespace Trident {
 		float32 rotation;
 		svec2<float32> scale;
 		float32 mass;
-		float32 density;
 		float32 friction;
 		float32 restitution;
 		MomentOfInertia2D momentOfInertia;
@@ -22,7 +21,6 @@ namespace Trident {
 
 	inline RigidBody2DComponent createRigidBody(const Descriptor<RigidBody2DComponent>& descriptor) {
 		ENGINE_ASSERT(descriptor.mass > 0.0_kg, "Mass must be positive.");
-		ENGINE_ASSERT(descriptor.density > 0.0_kg, "Density must be positive.");
 		ENGINE_ASSERT(descriptor.friction >= 0.0f && descriptor.friction <= 1.0f, "Friction must be between 0 and 1.");
 		ENGINE_ASSERT(descriptor.restitution >= 0.0f && descriptor.restitution <= 1.0f, "Restitution must be between 0 and 1.");
 
@@ -32,15 +30,17 @@ namespace Trident {
 			.scale = descriptor.scale,
 			.linearVelocity = {0.0_m_s, 0.0_m_s},
 			.angularVelocity = 0.0_w,
+			.inverseMass = 0.0_kg,
+			.inverseInertia = 0.0_kg_m2,
 			.friction = descriptor.friction,
 			.restitution = descriptor.restitution,
 		};
 
-		const float32 m = descriptor.mass * descriptor.density;
-
-		float32 I = 0.0_kg_m2;
+		const float32 m = descriptor.mass;
 
 		if (m < max<float32>()) {
+			float32 I = 0.0_kg_m2;
+
 			// See https://en.wikipedia.org/wiki/List_of_moments_of_inertia.
 			switch (descriptor.momentOfInertia) {
 				case MomentOfInertia2D::POINT: {
@@ -73,10 +73,10 @@ namespace Trident {
 					break;
 				}
 			}
-		}
 
-		component.inverseMass = 1.0f / m;
-		component.inverseInertia = 1.0f / I;
+			component.inverseMass = 1.0f / m;
+			component.inverseInertia = 1.0f / I;
+		}
 
 		component.updateWorld(descriptor.centroid);
 

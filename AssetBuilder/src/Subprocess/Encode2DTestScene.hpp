@@ -30,7 +30,6 @@ namespace Trident {
 					.rotation = 0.0_rad,
 					.scale = {100.0f, 20.0f},
 					.mass = max<float32>(),
-					.density = 1.0f,
 					.friction = 0.2f,
 					.restitution = 0.0f,
 					.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
@@ -43,7 +42,6 @@ namespace Trident {
 					.rotation = 0.0_rad,
 					.scale = {1.0f, 1.0f},
 					.mass = 200.0_kg,
-					.density = 1.0f,
 					.friction = 0.2f,
 					.restitution = 0.0f,
 					.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
@@ -65,7 +63,7 @@ namespace Trident {
 		uint64 size = 0;
 		size += sizeof(header);
 		size += header.staticVertexCount * sizeof(svec2<float32>);
-		size += header.staticIndexCount * sizeof(uint16);
+		size += header.staticIndexCount * sizeof(uint32);
 		size += header.geometryAssetCount * sizeof(uint32);
 		size += header.geometryMappingCount * (sizeof(Entity) + sizeof(uint32));
 		size += header.rigidBodyMappingCount * (sizeof(Entity) + sizeof(svec2<float32>) * 2 + sizeof(float32) * 5);

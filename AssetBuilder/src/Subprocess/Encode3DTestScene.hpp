@@ -55,7 +55,7 @@ namespace Trident {
 		uint64 size = 0;
 		size += sizeof(header);
 		size += header.staticVertexCount * sizeof(svec2<float32>);
-		size += header.staticIndexCount * sizeof(uint16);
+		size += header.staticIndexCount * sizeof(uint32);
 		size += header.geometryAssetCount * sizeof(uint32);
 		size += header.geometryMappingCount * (sizeof(Entity) + sizeof(uint32));
 		size += header.rigidBodyMappingCount * (sizeof(Entity) + sizeof(svec2<float32>) * 2 + sizeof(float32) * 5);
