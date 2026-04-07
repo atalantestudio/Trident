@@ -5,7 +5,7 @@
 
 #include "Engine/API/Process/Process.hpp"
 
-#include "../Subprocess/EncodeDefaultGeometryAsset.hpp"
+#include "../Subprocess/EncodeDefaultGeometryAssets.hpp"
 #include "../Subprocess/EncodeGeometryAssetSubprocess.hpp"
 
 namespace Trident {
@@ -21,7 +21,8 @@ namespace Trident {
 				const std::filesystem::path assetOutputPath = rootOutputPath / "Asset/";
 				const std::filesystem::recursive_directory_iterator geometryDirectoryIterator(rootInputPath / "Asset/Geometry");
 
-				EncodeDefaultGeometryAsset(assetOutputPath / "Geometry");
+				EncodeUnitSquareGeometryAsset(assetOutputPath / "Geometry");
+				EncodeUnitCircleGeometryAsset(assetOutputPath / "Geometry");
 
 				for (const std::filesystem::directory_entry& directoryEntry : geometryDirectoryIterator) {
 					if (directoryEntry.is_directory()) {

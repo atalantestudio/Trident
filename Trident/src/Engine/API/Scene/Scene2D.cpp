@@ -140,7 +140,12 @@ namespace Trident {
 			ecs.getComponent<RigidBody2DComponent>(rigidBodyMapping.entity).updateWorld(hull.getCentroid());
 
 			// TODO(debug-only)
-			ecs.setTag<DynamicEntityTag>(rigidBodyMapping.entity);
+			if (rigidBodyMapping.component.inverseMass == 0.0_kg) {
+				ecs.setTag<StaticEntityTag>(rigidBodyMapping.entity);
+			}
+			else {
+				ecs.setTag<DynamicEntityTag>(rigidBodyMapping.entity);
+			}
 		}
 	}
 

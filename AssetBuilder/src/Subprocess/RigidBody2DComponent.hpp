@@ -13,6 +13,8 @@ namespace Trident {
 		svec2<float32> position;
 		float32 rotation;
 		svec2<float32> scale;
+		svec2<float32> linearVelocity = {0.0_m_s, 0.0_m_s};
+		float32 angularVelocity = 0.0_w;
 		float32 mass;
 		float32 friction;
 		float32 restitution;
@@ -28,8 +30,8 @@ namespace Trident {
 			.position = descriptor.position,
 			.rotation = descriptor.rotation,
 			.scale = descriptor.scale,
-			.linearVelocity = {0.0_m_s, 0.0_m_s},
-			.angularVelocity = 0.0_w,
+			.linearVelocity = descriptor.linearVelocity,
+			.angularVelocity = descriptor.angularVelocity,
 			.inverseMass = 0.0_kg,
 			.inverseInertia = 0.0_kg_m2,
 			.friction = descriptor.friction,

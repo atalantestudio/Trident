@@ -930,8 +930,11 @@ namespace Trident {
 		this->scene = scene;
 
 		const sequence<uint8>& dataBuffer = scene->getDataBuffer();
-		const ComponentPool<RigidBody2DComponent>& rigidBodyPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
-		const uint64 rigidBodyBufferSize = rigidBodyPool.componentCount * sizeof(RigidBody);
+		const sequence<Geometry2D>& geometries = scene->getGeometries();
+		const sequence<Hull2D>& hulls = scene->getHulls();
+		const ComponentPool<RigidBody2DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
+		const ComponentPool<GeometryComponent>& geometryComponentPool = scene->ecs.getComponentPool<GeometryComponent>();
+		const uint64 rigidBodyBufferSize = rigidBodyComponentPool.componentCount * sizeof(RigidBody);
 		const ref<Buffer<uint8>> stagingBuffer = createStagingBuffer<uint8>(dataBuffer.count() + rigidBodyBufferSize);
 
 		uint8* mappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
@@ -941,14 +944,25 @@ namespace Trident {
 		RigidBody* stagingRigidBodyMappedRange = pointer_cast<RigidBody*>(&mappedRange[dataBuffer.count()]);
 		uint32 rigidBodyIndex = 0;
 
-		while (rigidBodyIndex < rigidBodyPool.componentCount) {
-			const RigidBody2DComponent& rigidBodyComponent = rigidBodyPool.components[rigidBodyIndex];
+		while (rigidBodyIndex < rigidBodyComponentPool.componentCount) {
+			const RigidBody2DComponent& rigidBodyComponent = rigidBodyComponentPool.components[rigidBodyIndex];
+			const GeometryComponent geometryComponent = geometryComponentPool.components[rigidBodyComponentPool.componentIndexToEntity[rigidBodyIndex]];
+			const Geometry2D& geometry = geometries[geometryComponent.geometryIndex];
+			const Hull2D& hull = hulls[geometry.hullIndex];
 
 			RigidBody& rigidBody = stagingRigidBodyMappedRange[rigidBodyIndex];
 			rigidBody.world = rigidBodyComponent.world;
-			rigidBody.fillColor = Color(0xf4fedbff).value;
+
+			if (hull.getType() != Hull2DType::POLYGON) {
+				// Make the hull more visible if it doesn't support wireframe visualization.
+				rigidBody.fillColor = Color(0x8b9476ff).value;
+			}
+			else {
+				rigidBody.fillColor = Color(0xf4fedbff).value;
+			}
+
 			rigidBody.strokeColor = {0.0f, 0.0f, 0.0f, 1.0f};
-			rigidBody.depth = static_cast<float32>(rigidBodyIndex) / rigidBodyPool.componentCount;
+			rigidBody.depth = static_cast<float32>(rigidBodyIndex) / rigidBodyComponentPool.componentCount;
 			rigidBody.selected = 0;
 
 			rigidBodyIndex += 1;
@@ -984,7 +998,7 @@ namespace Trident {
 			#endif
 		});
 		centerOfMassBuffer = createBuffer<CenterOfMass>({
-			.size = rigidBodyPool.componentCount * sizeof(CenterOfMass),
+			.size = rigidBodyComponentPool.componentCount * sizeof(CenterOfMass),
 			.usage = BufferUsage::VERTEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = true,
@@ -1218,7 +1232,7 @@ namespace Trident {
 				const Geometry2D& geometry = geometries[geometryComponent.geometryIndex];
 				const range<uint32, uint32> indexRange = geometry.getIndexRange();
 
-				// TODO: Restore materials.
+				// TODO: Restore materials (test colors were 0xf4fedbff and 0xe6ddffff).
 				commandEncoder->drawIndexed(indexRange.count, 1, indexRange.offset, 0, entity);
 
 				componentIndex += 1;
@@ -1242,7 +1256,7 @@ namespace Trident {
 				const Hull2D& hull = hulls[geometry.hullIndex];
 				const range<uint32, uint32> indexRange = hull.getLineIndexRange();
 
-				// TODO: Restore materials.
+				// TODO: Restore materials (test colors were 0xf4fedbff and 0xe6ddffff).
 				commandEncoder->drawIndexed(indexRange.count, 1, indexRange.offset, 0, entity);
 
 				componentIndex += 1;

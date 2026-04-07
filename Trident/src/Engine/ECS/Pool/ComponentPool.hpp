@@ -14,7 +14,7 @@ namespace Trident {
 
 		public:
 			explicit ComponentPool() {
-				std::memset(&entityToComponentIndex, NULL_COMPONENT_INDEX, MAX_ENTITIES);
+				std::memset(&entityToComponentIndex, NULL_COMPONENT_INDEX, MAX_ENTITIES * sizeof(uint32));
 			}
 
 			bool hasComponent(Entity entity) const {

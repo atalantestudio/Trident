@@ -20,19 +20,6 @@
 #include "GUI/Text.hpp"
 #include "GUI/UTF8.hpp"
 
-#include "Physics2D/Layer/Sample/Boxes.hpp"
-#include "Physics2D/Layer/Sample/Bridge.hpp"
-#include "Physics2D/Layer/Sample/Circles.hpp"
-#include "Physics2D/Layer/Sample/Constraint.hpp"
-#include "Physics2D/Layer/Sample/ContactTest.hpp"
-#include "Physics2D/Layer/Sample/Dominos.hpp"
-#include "Physics2D/Layer/Sample/Empty.hpp"
-#include "Physics2D/Layer/Sample/Polygons.hpp"
-#include "Physics2D/Layer/Sample/Pyramid.hpp"
-#include "Physics2D/Layer/Sample/RollingBall.hpp"
-#include "Physics2D/Layer/Sample/SlidingBoxes.hpp"
-#include "Physics2D/Layer/Sample/Stacking.hpp"
-#include "Physics2D/Layer/Sample/Swing.hpp"
 #include "Physics2D/Layer/GUI/StatisticsLayer.hpp"
 #include "Physics2D/Layer/SceneLayer.hpp"
 
@@ -105,49 +92,7 @@ namespace Trident {
 			}
 		}
 		else if (SampleGroupNameProperty == "Physics2D") {
-			if (SampleNameProperty == "Boxes") {
-				registerLayer<Physics2DBoxesLayer>();
-			}
-			else if (SampleNameProperty == "Bridge") {
-				registerLayer<Physics2DBridgeLayer>();
-			}
-			else if (SampleNameProperty == "Circles") {
-				registerLayer<Physics2DCirclesLayer>();
-			}
-			else if (SampleNameProperty == "Constraint") {
-				registerLayer<Physics2DConstraintLayer>();
-			}
-			else if (SampleNameProperty == "ContactTest") {
-				registerLayer<Physics2DContactTestLayer>();
-			}
-			else if (SampleNameProperty == "Dominos") {
-				registerLayer<Physics2DDominosLayer>();
-			}
-			else if (SampleNameProperty == "Empty") {
-				registerLayer<Physics2DEmptyLayer>();
-			}
-			else if (SampleNameProperty == "Polygons") {
-				registerLayer<Physics2DPolygonsLayer>();
-			}
-			else if (SampleNameProperty == "Pyramid") {
-				registerLayer<Physics2DPyramidLayer>();
-			}
-			else if (SampleNameProperty == "RollingBall") {
-				registerLayer<Physics2DRollingBallLayer>();
-			}
-			else if (SampleNameProperty == "Scene") {
-				registerLayer<Physics2DSceneLayer>();
-			}
-			else if (SampleNameProperty == "SlidingBoxes") {
-				registerLayer<Physics2DSlidingBoxesLayer>();
-			}
-			else if (SampleNameProperty == "Stacking") {
-				registerLayer<Physics2DStackingLayer>();
-			}
-			else if (SampleNameProperty == "Swing") {
-				registerLayer<Physics2DSwingLayer>();
-			}
-
+			registerLayer<Physics2DSceneLayer>();
 			registerLayer<Physics2DGUIStatisticsLayer>();
 		}
 		else if (SampleGroupNameProperty == "Process") {

@@ -16,7 +16,7 @@ namespace Trident {
 		const uint32 indexOffset = static_cast<uint32>(indexBuffer.size());
 		const float32 theta = pi<float32>() * 2.0f / resolution;
 
-		vertexComponentBuffer.resize(vertexComponentBuffer.size() + resolution * 2);
+		vertexComponentBuffer.resize(vertexComponentBuffer.size() + resolution * 4);
 		indexBuffer.resize(indexBuffer.size() + resolution * 3);
 
 		uint32 triangleIndex = 0;
@@ -30,6 +30,8 @@ namespace Trident {
 			vertexComponentBuffer[vertexComponentOffset + triangleIndex * 2 + 0] = vertex[0];
 			vertexComponentBuffer[vertexComponentOffset + triangleIndex * 2 + 1] = vertex[1];
 
+			// TODO: Generate vertex texture coordinates.
+
 			indexBuffer[indexOffset + triangleIndex * 3 + 0] = 0;
 			indexBuffer[indexOffset + triangleIndex * 3 + 1] = triangleIndex + 1;
 			indexBuffer[indexOffset + triangleIndex * 3 + 2] = triangleIndex + 2;
@@ -40,7 +42,7 @@ namespace Trident {
 
 		return Geometry2D({
 			.vertexPositionComponentRange = {vertexComponentOffset, resolution * 2},
-			.vertexTextureCoordinateComponentRange = {vertexComponentOffset + resolution * 2, 0},
+			.vertexTextureCoordinateComponentRange = {vertexComponentOffset + resolution * 2, resolution * 2},
 			.indexRange = {indexOffset, resolution * 3},
 		});
 	}

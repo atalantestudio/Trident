@@ -412,6 +412,8 @@ namespace Trident {
 					rigidBodyMapping.component.position = stream.read<svec2<float32>>();
 					rigidBodyMapping.component.rotation = stream.read<float32>();
 					rigidBodyMapping.component.scale = stream.read<svec2<float32>>();
+					rigidBodyMapping.component.linearVelocity = stream.read<svec2<float32>>();
+					rigidBodyMapping.component.angularVelocity = stream.read<float32>();
 					rigidBodyMapping.component.inverseMass = stream.read<float32>();
 					rigidBodyMapping.component.inverseInertia = stream.read<float32>();
 					rigidBodyMapping.component.friction = stream.read<float32>();

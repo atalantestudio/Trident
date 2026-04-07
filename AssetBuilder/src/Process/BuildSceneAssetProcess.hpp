@@ -17,15 +17,29 @@ namespace Trident {
 			typedef Scene3DData (*CreateScene3DFunction)();
 
 		private:
-			static constexpr uint32 SCENE_2D_COUNT = 1;
+			static constexpr uint32 SCENE_2D_COUNT = 8;
 			static constexpr uint32 SCENE_3D_COUNT = 1;
 
 			inline static const view<char8> SCENE_2D_NAMES[SCENE_2D_COUNT] = {
 				"Boxes",
+				"Circles",
+				"Dominos",
+				"Pyramid",
+				"Stacking",
+				"RollingBall",
+				"SlidingBoxes",
+				"Swing",
 			};
 
 			inline static constexpr CreateScene2DFunction SCENE_2D_FUNCTIONS[SCENE_2D_COUNT] = {
 				createBoxesScene,
+				createCirclesScene,
+				createDominosScene,
+				createPyramidScene,
+				createStackingScene,
+				createRollingBallScene,
+				createSlidingBoxesScene,
+				createSwingScene,
 			};
 
 			inline static const view<char8> SCENE_3D_NAMES[SCENE_3D_COUNT] = {
@@ -55,7 +69,7 @@ namespace Trident {
 					header.staticIndexCount * sizeof(uint32) +
 					header.geometryAssetCount * sizeof(uint32) +
 					header.geometryMappingCount * (sizeof(Entity) + sizeof(uint32)) +
-					header.rigidBodyMappingCount * (sizeof(Entity) + sizeof(svec2<float32>) * 2 + sizeof(float32) * 5);
+					header.rigidBodyMappingCount * (sizeof(Entity) + sizeof(svec2<float32>) * 3 + sizeof(float32) * 6);
 
 				ByteStream<StreamOperation::WRITE> stream(size, Endianness::LITTLE_ENDIAN);
 
@@ -77,6 +91,8 @@ namespace Trident {
 					stream.write<svec2<float32>>(svec2<float32>(rigidBodyMapping.component.position));
 					stream.write<float32>(rigidBodyMapping.component.rotation);
 					stream.write<svec2<float32>>(svec2<float32>(rigidBodyMapping.component.scale));
+					stream.write<svec2<float32>>(svec2<float32>(rigidBodyMapping.component.linearVelocity));
+					stream.write<float32>(rigidBodyMapping.component.angularVelocity);
 					stream.write<float32>(rigidBodyMapping.component.inverseMass);
 					stream.write<float32>(rigidBodyMapping.component.inverseInertia);
 					stream.write<float32>(rigidBodyMapping.component.friction);

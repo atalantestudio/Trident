@@ -6,12 +6,15 @@
 #include "Engine/API/Geometry/Hull2D.hpp"
 
 namespace Trident {
+	// TODO: Point hulls need to have 1 vertex for GJK to work.
+	inline static const sequence<svec2<float32>> pointHullVertices = {{0.0f, 0.0f}};
+
 	Hull2D Hull2D::point() {
 		return Hull2D({
 			.type = Hull2DType::POINT,
 			.centroid = {0.0_m, 0.0_m},
 			.radius = 0.0_m,
-			.vertices = {},
+			.vertices = pointHullVertices,
 			.lineIndexRange = {0, 0},
 		});
 	}
