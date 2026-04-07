@@ -15,7 +15,7 @@ namespace Trident {
 		const Geometry2D geometry = Geometry2D::unitSquare();
 		const Hull2D hull = Hull2D::fromGeometry<HULL_TYPE>(geometry);
 
-		Geometry2DAssetHeader geometryHeader{};
+		GeometryAssetHeader geometryHeader{};
 		geometryHeader.signature = AssetSignature::GEOMETRY;
 		geometryHeader.identifier = identifier;
 		geometryHeader.version = {0, 0, 0};
@@ -37,7 +37,8 @@ namespace Trident {
 			sizeof(geometryHeader) +
 			geometry.getVertexCount() * 4 * sizeof(float32) +
 			geometry.getIndexCount() * sizeof(uint32) +
-			sizeof(hullHeader);
+			sizeof(hullHeader) +
+			hull.getLineIndices().count() * sizeof(uint32);
 
 		ByteStream<StreamOperation::WRITE> stream(size, Endianness::LITTLE_ENDIAN);
 
@@ -60,6 +61,10 @@ namespace Trident {
 		std::copy_n(pointer_cast<const uint8*>(&hullHeader), sizeof(hullHeader), stream.getBytePosition());
 
 		stream.jump(sizeof(hullHeader));
+
+		std::copy(hull.getLineIndices().begin(), hull.getLineIndices().begin(), pointer_cast<uint32*>(stream.getBytePosition()));
+
+		stream.jump(hull.getLineIndices().count() * sizeof(uint32));
 
 		const std::filesystem::path outputPath = outputDirectory / "unit_square.tga";
 		const std::string outputPathString = outputPath.string();

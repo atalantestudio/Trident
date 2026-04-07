@@ -11,10 +11,8 @@ namespace Trident {
 			.type = Hull2DType::POINT,
 			.centroid = {0.0_m, 0.0_m},
 			.radius = 0.0_m,
-			// .vertexOffset = 0,
-			// .indexOffset = 0,
-			// .triangleListIndexCount = 0,
-			// .lineStripIndexCount = 0,
+			.vertices = {},
+			.edgeCount = 0,
 		});
 	}
 
@@ -98,4 +96,15 @@ namespace Trident {
 			edgeIndex += 1;
 		}
 	}
+
+	Hull2D::Hull2D(ref<GeometryAsset> geometryAsset) :
+		type(geometryAsset->getHullType()),
+		centroid(svec2<float32>(geometryAsset->getHullCentroid()[0], geometryAsset->getHullCentroid()[1])),
+		radius(geometryAsset->getHullRadius()),
+		vertices(view<svec2<float32>>(pointer_cast<const svec2<float32>*>(&geometryAsset->getVertexPositionComponents()[0]), geometryAsset->getHullVertexCount())),
+		lineIndexCount(static_cast<uint32>(geometryAsset->getHullLineIndices().count())),
+
+		// TODO
+		edges(0)
+	{}
 }

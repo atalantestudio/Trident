@@ -8,6 +8,7 @@
 #include "Engine/API/Geometry/Geometry2D.hpp"
 #include "Engine/API/Geometry/Hull2DType.hpp"
 #include "Engine/API/Physics/Cached/CachedGeometry2D.hpp"
+#include "Engine/Filesystem/Asset/GeometryAsset.hpp"
 
 namespace Trident {
 	class Hull2D;
@@ -35,8 +36,8 @@ namespace Trident {
 
 		public:
 			explicit Hull2D() = default;
-
 			explicit Hull2D(const Descriptor<Hull2D>& descriptor);
+			explicit Hull2D(ref<GeometryAsset> geometryAsset);
 
 			inline Hull2DType getType() const {
 				return type;
@@ -62,11 +63,11 @@ namespace Trident {
 				return indexOffset;
 			}
 
-			inline const sequence<uint16>& getLineIndices() const {
+			inline const sequence<uint32>& getLineIndices() const {
 				return lineIndices;
 			}
 
-			inline uint16 getLineIndexCount() const {
+			inline uint32 getLineIndexCount() const {
 				return lineIndexCount;
 			}
 
@@ -183,12 +184,12 @@ namespace Trident {
 			/// Distance between the center of mass and the farthest vertex.
 			float32 radius;
 
-			uint32 vertexOffset;
+			uint32 vertexOffset = 0;
 			view<svec2<float32>> vertices;
 
-			uint32 indexOffset;
-			sequence<uint16> lineIndices;
-			uint16 lineIndexCount;
+			uint32 indexOffset = 0;
+			sequence<uint32> lineIndices;
+			uint32 lineIndexCount;
 
 			// TODO: Store the geometry edges in a shared contiguous buffer.
 			sequence<Edge> edges;

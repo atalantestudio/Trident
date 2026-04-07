@@ -186,7 +186,7 @@ namespace Trident {
 			const Entity entity = rigidBodyComponentPool.componentIndexToEntity[componentIndex];
 			const GeometryComponent geometryComponent = scene->ecs.getComponent<GeometryComponent>(entity);
 			const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
-			const Hull2D& hull = scene->getHulls()[geometry.getHullIndex()];
+			const Hull2D& hull = scene->getHulls()[geometry.hullIndex];
 			const RigidBody2DComponent& rigidBodyComponent = scene->ecs.getComponent<RigidBody2DComponent>(entity);
 
 			if (GJK2DConditional(rigidBodyComponent, mouseRigidBodyComponent, hull, mouseHull)) {
@@ -270,7 +270,7 @@ namespace Trident {
 		/* if (event.getButton() == MouseButton::LEFT && selectedEntity != max<Entity>()) {
 			const GeometryComponent geometryComponent = scene->ecs.getComponent<GeometryComponent>(selectedEntity);
 			const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
-			const Hull2D& hull = scene->getHulls()[geometry.getHullIndex()];
+			const Hull2D& hull = scene->getHulls()[geometry.hullIndex];
 
 			RigidBody2D& rigidBody = scene->ecs.getComponent<RigidBody2D>(selectedEntity);
 			rigidBody.position += placeholderOffset;

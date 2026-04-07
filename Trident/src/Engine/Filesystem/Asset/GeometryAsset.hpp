@@ -5,6 +5,7 @@
 
 #include "Engine/API/Descriptor.hpp"
 #include "Engine/API/Geometry/Hull2DType.hpp"
+#include "Engine/Build/Cluster.hpp"
 #include "Engine/Filesystem/Asset/Asset.hpp"
 #include "Engine/Filesystem/Asset/GeometryAssetFlags.hpp"
 
@@ -13,6 +14,8 @@ namespace Trident {
 
 	template<>
 	struct Descriptor<GeometryAsset> : public AssetDescriptor {
+		GeometryAssetFlags flags;
+
 		// 3D vertex components.
 		sequence<float32> vertexPositionComponents;
 		sequence<float32> vertexNormalComponents;
@@ -23,12 +26,21 @@ namespace Trident {
 		sequence<uint32> vertexNormalIndices;
 		sequence<uint32> vertexTextureCoordinateIndices;
 
-		bool hasHull;
+		Hull2DType hullType;
+
+		/// In 2D, only the first 2 components are used.
 		svec3<float32> hullCentroid;
+
 		float32 hullRadius;
+		uint32 hullVertexCount;
+
+		/// In 2D, the wireframe is rendered with the `LINE_STRIP` topology.
+		/// In 3D, it is rendered with the `LINE_LIST` topology.
+		/// Geometry hulls are not guaranteed to support wireframe rendering.
+		sequence<uint32> hullLineIndices;
 	};
 
-	struct Geometry2DAssetHeader : public AssetHeader {
+	struct GeometryAssetHeader : public AssetHeader {
 		GeometryAssetFlags flags;
 		uint32 vertexCount;
 		uint32 indexCount;
@@ -36,37 +48,35 @@ namespace Trident {
 
 	struct Hull2DHeader {
 		Hull2DType hullType;
-
-		/// Average vertex.
 		svec2<float32> centroid;
-
-		/// Distance from the centroid to the farthest vertex.
 		float32 radius;
-
 		uint32 vertexCount;
-
-		/// In 2D, the wireframe is rendered with the `LINE_STRIP` topology.
-		/// In 3D, it is rendered with the `LINE_LIST` topology.
-		/// Geometry hulls are not guaranteed to support wireframe rendering.
-		uint16 lineIndexCount;
+		uint32 lineIndexCount;
 	};
 
 	class GeometryAsset : public Asset {
 		public:
 			explicit GeometryAsset(const Descriptor<GeometryAsset>& descriptor) :
 				Asset(descriptor),
+				flags(descriptor.flags),
 				vertexPositionComponents(descriptor.vertexPositionComponents),
 				vertexNormalComponents(descriptor.vertexNormalComponents),
 				vertexTextureCoordinateComponents(descriptor.vertexTextureCoordinateComponents),
 				vertexPositionIndices(descriptor.vertexPositionIndices),
 				vertexNormalIndices(descriptor.vertexNormalIndices),
-				vertexTextureCoordinateIndices(descriptor.vertexTextureCoordinateIndices)
+				vertexTextureCoordinateIndices(descriptor.vertexTextureCoordinateIndices),
+				hullType(descriptor.hullType),
+				hullCentroid(descriptor.hullCentroid),
+				hullRadius(descriptor.hullRadius),
+				hullVertexCount(descriptor.hullVertexCount),
+				hullLineIndices(descriptor.hullLineIndices)
 			{}
 
-			inline uint32 getClusterCount() const {
-				// TODO: Use the constant from Build/Clusterizer.hpp.
-				constexpr uint32 CLUSTER_INDEX_COUNT = 384;
+			inline GeometryAssetFlags getFlags() const {
+				return flags;
+			}
 
+			inline uint32 getClusterCount() const {
 				return static_cast<uint32>(ceil(static_cast<float32>(vertexPositionIndices.count()) / CLUSTER_INDEX_COUNT));
 			}
 
@@ -94,12 +104,39 @@ namespace Trident {
 				return vertexTextureCoordinateIndices;
 			}
 
+			// TODO: Add 3D getter as well.
+			inline Hull2DType getHullType() const {
+				return hullType;
+			}
+
+			inline svec3<float32> getHullCentroid() const {
+				return hullCentroid;
+			}
+
+			inline float32 getHullRadius() const {
+				return hullRadius;
+			}
+
+			inline uint32 getHullVertexCount() const {
+				return hullVertexCount;
+			}
+
+			inline const sequence<uint32>& getHullLineIndices() const {
+				return hullLineIndices;
+			}
+
 		private:
+			GeometryAssetFlags flags;
 			sequence<float32> vertexPositionComponents;
 			sequence<float32> vertexNormalComponents;
 			sequence<float32> vertexTextureCoordinateComponents;
 			sequence<uint32> vertexPositionIndices;
 			sequence<uint32> vertexNormalIndices;
 			sequence<uint32> vertexTextureCoordinateIndices;
+			Hull2DType hullType;
+			svec3<float32> hullCentroid;
+			float32 hullRadius;
+			uint32 hullVertexCount;
+			sequence<uint32> hullLineIndices;
 	};
 }

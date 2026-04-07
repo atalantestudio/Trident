@@ -97,9 +97,9 @@ namespace Trident {
 		const GeometryComponent geometryComponent = scene->ecs.getComponent<GeometryComponent>(entity);
 		const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
 
-		ENGINE_ASSERT(geometry.getHullIndex() < scene->getHulls().count(), "Geometry doesn't have a hull.");
+		ENGINE_ASSERT(geometry.hullIndex < scene->getHulls().count(), "Geometry doesn't have a hull.");
 
-		return scene->getHulls()[geometry.getHullIndex()];
+		return scene->getHulls()[geometry.hullIndex];
 	}
 
 	void PhysicsSimulation2D::broadPhase() {

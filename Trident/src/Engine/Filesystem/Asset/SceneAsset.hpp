@@ -30,6 +30,7 @@ namespace Trident {
 		uint32 staticVertexCount;
 		uint32 staticIndexCount;
 		uint32 entityCount;
+		uint32 hullCount;
 		sequence<uint8> staticBuffer;
 		sequence<ref<GeometryAsset>> geometryAssets;
 		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
@@ -52,6 +53,7 @@ namespace Trident {
 				staticVertexCount(descriptor.staticVertexCount),
 				staticIndexCount(descriptor.staticIndexCount),
 				entityCount(descriptor.entityCount),
+				hullCount(descriptor.hullCount),
 				staticBuffer(descriptor.staticBuffer),
 				geometryAssets(descriptor.geometryAssets),
 				geometryMappings(descriptor.geometryMappings)
@@ -67,6 +69,10 @@ namespace Trident {
 
 			inline uint32 getEntityCount() const {
 				return entityCount;
+			}
+
+			inline uint32 getHullCount() const {
+				return hullCount;
 			}
 
 			inline const sequence<uint8>& getStaticBuffer() const {
@@ -85,6 +91,7 @@ namespace Trident {
 			uint32 staticVertexCount;
 			uint32 staticIndexCount;
 			uint32 entityCount;
+			uint32 hullCount;
 			sequence<uint8> staticBuffer;
 			sequence<ref<GeometryAsset>> geometryAssets;
 			sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;

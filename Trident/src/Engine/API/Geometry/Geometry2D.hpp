@@ -69,9 +69,8 @@ namespace Trident {
 				return indices;
 			}
 
-			inline uint32 getHullIndex() const {
-				return hullIndex;
-			}
+		public:
+			uint32 hullIndex = max<uint32>();
 
 		private:
 			sequence<float32> vertexPositionComponents;
@@ -81,7 +80,5 @@ namespace Trident {
 
 			/// Indices for the default (TRIANGLE_LIST) visualization mode.
 			sequence<uint32> indices;
-
-			uint32 hullIndex = max<uint32>();
 	};
 }

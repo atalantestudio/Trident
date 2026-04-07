@@ -1240,8 +1240,7 @@ namespace Trident {
 		componentIndex = 0;
 
 		// Rigid body stroke
-		// TODO: Restore.
-		/* {
+		{
 			commandEncoder->bindGraphicsPipeline(rigidBodyStrokePipeline);
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, scene->getStaticVertexCount() * sizeof(Vertex), sizeof(Vertex));
 			commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0, sizeof(RigidBody));
@@ -1252,14 +1251,14 @@ namespace Trident {
 				const Entity entity = geometryComponentPool.componentIndexToEntity[componentIndex];
 				const GeometryComponent geometryComponent = geometryComponentPool.components[componentIndex];
 				const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
-				const Hull2D& hull = scene->getHulls()[geometry.getHullIndex()];
+				const Hull2D& hull = scene->getHulls()[geometry.hullIndex];
 
 				// TODO: Restore materials.
-				commandEncoder->drawIndexed(hull.getLineIndexCount(), 1, hull.getIndexOffset() + hull.getFillIndexCount(), 0, entity);
+				commandEncoder->drawIndexed(hull.getLineIndexCount(), 1, hull.getIndexOffset(), 0, entity);
 
 				componentIndex += 1;
 			}
-		} */
+		}
 
 		const ComponentPool<RigidBody2DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
 
@@ -1304,17 +1303,16 @@ namespace Trident {
 			}
 
 			// Rigid body placeholder stroke
-			// TODO: Restore.
-			/* {
-				const Hull2D& hull = scene->getHulls()[geometry.getHullIndex()];
+			{
+				const Hull2D& hull = scene->getHulls()[geometry.hullIndex];
 
 				commandEncoder->bindGraphicsPipeline(rigidBodyPlaceholderStrokePipeline);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, scene->getStaticVertexCount() * sizeof(Vertex), sizeof(Vertex));
 				commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0, sizeof(RigidBody));
 				commandEncoder->bindIndexBuffer<uint32>(indexBuffer, scene->getStaticIndexCount() * sizeof(uint32));
 				commandEncoder->bindDescriptorSets(placeholderPipelineLayout, 0, {cameraViewDescriptorSet, placeholderDescriptorSet});
-				commandEncoder->drawIndexed(hull.getLineIndexCount(), 1, hull.getIndexOffset() + hull.getFillIndexCount(), 0, selectedEntity);
-			} */
+				commandEncoder->drawIndexed(hull.getLineIndexCount(), 1, hull.getIndexOffset(), 0, selectedEntity);
+			}
 		}
 
 		commandEncoder->endRenderPass();

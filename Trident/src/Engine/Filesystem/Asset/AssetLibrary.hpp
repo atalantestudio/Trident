@@ -361,6 +361,7 @@ namespace Trident {
 				sceneAssetDescriptor.staticVertexCount = stream.read<uint32>();
 				sceneAssetDescriptor.staticIndexCount = stream.read<uint32>();
 				sceneAssetDescriptor.entityCount = stream.read<uint32>();
+				sceneAssetDescriptor.hullCount = 0;
 				sceneAssetDescriptor.staticBuffer = sequence<uint8>(sceneAssetDescriptor.staticVertexCount * sizeof(svec2<float32>) + sceneAssetDescriptor.staticIndexCount * sizeof(uint16));
 
 				const uint32 geometryAssetCount = stream.read<uint32>();
@@ -383,6 +384,10 @@ namespace Trident {
 					const uint32 identifier = stream.read<uint32>();
 
 					geometryAsset = getAsset<GeometryAsset>(identifier);
+
+					if (geometryAsset->getFlags() & GeometryAssetFlags::HAS_HULL) {
+						sceneAssetDescriptor.hullCount += 1;
+					}
 				}
 
 				for (EntityComponentMapping<GeometryComponent>& geometryMapping : sceneAssetDescriptor.geometryMappings) {
@@ -411,6 +416,7 @@ namespace Trident {
 				sceneAssetDescriptor.staticVertexCount = stream.read<uint32>();
 				sceneAssetDescriptor.staticIndexCount = stream.read<uint32>();
 				sceneAssetDescriptor.entityCount = stream.read<uint32>();
+				sceneAssetDescriptor.hullCount = 0;
 				sceneAssetDescriptor.staticBuffer = sequence<uint8>(sceneAssetDescriptor.staticVertexCount * sizeof(svec2<float32>) + sceneAssetDescriptor.staticIndexCount * sizeof(uint16));
 
 				const uint32 geometryAssetCount = stream.read<uint32>();

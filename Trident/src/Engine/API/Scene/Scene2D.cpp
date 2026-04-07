@@ -18,10 +18,7 @@ namespace Trident {
 		})
 	{
 		loadGeometries(sceneAsset);
-
-		// TODO: Load hulls.
-		// loadHulls(sceneAsset);
-
+		loadHulls(sceneAsset);
 		loadEntityComponentMappings(sceneAsset);
 	}
 
@@ -99,7 +96,26 @@ namespace Trident {
 	}
 
 	void Scene2D::loadHulls(ref<Scene2DAsset> sceneAsset) {
-		ENGINE_ERROR_UNIMPLEMENTED();
+		const sequence<ref<GeometryAsset>>& geometryAssets = sceneAsset->getGeometryAssets();
+
+		hulls = sequence<Hull2D>(sceneAsset->getHullCount());
+
+		uint32 geometryAssetIndex = 0;
+		uint32 hullIndex = 0;
+
+		while (hullIndex < hulls.count()) {
+			const ref<GeometryAsset> geometryAsset = geometryAssets[geometryAssetIndex];
+
+			if (geometryAsset->getFlags() & GeometryAssetFlags::HAS_HULL) {
+				hulls[hullIndex] = Hull2D(geometryAsset);
+
+				geometries[geometryAssetIndex].hullIndex = hullIndex;
+
+				hullIndex += 1;
+			}
+
+			geometryAssetIndex += 1;
+		}
 	}
 
 	void Scene2D::loadEntityComponentMappings(ref<Scene2DAsset> sceneAsset) {

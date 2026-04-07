@@ -14,10 +14,9 @@ namespace Trident {
 		Descriptor<GeometryAsset> descriptor{};
 		descriptor.identifier = stream.read<uint32>();
 		descriptor.version = stream.read<VersionNumber>();
+		descriptor.flags = static_cast<GeometryAssetFlags>(stream.read<uint32>());
 
-		const GeometryAssetFlags flags = static_cast<GeometryAssetFlags>(stream.read<uint32>());
-
-		if (flags & GeometryAssetFlags::IS_2D) {
+		if (descriptor.flags & GeometryAssetFlags::IS_2D) {
 			const uint32 vertexCount = stream.read<uint32>();
 			const uint32 indexCount = stream.read<uint32>();
 
@@ -37,20 +36,28 @@ namespace Trident {
 
 			stream.jump(descriptor.vertexPositionIndices.count() * sizeof(uint32));
 
-			if (flags & GeometryAssetFlags::HAS_HULL) {
-				descriptor.hasHull = true;
+			if (descriptor.flags & GeometryAssetFlags::HAS_HULL) {
+				descriptor.hullType = static_cast<Hull2DType>(stream.read<uint32>());
+
+				stream.jump(sizeof(uint32));
 
 				const svec2<float32> centroid = stream.read<svec2<float32>>();
 
 				descriptor.hullCentroid = {centroid[0], centroid[1], 0.0f};
 				descriptor.hullRadius = stream.read<float32>();
+				descriptor.hullVertexCount = stream.read<uint32>();
+				descriptor.hullLineIndices = sequence<uint32>(stream.read<uint32>());
+
+				std::copy_n(pointer_cast<const uint32*>(stream.getBytePosition()), descriptor.hullLineIndices.count(), &descriptor.hullLineIndices[0]);
+
+				stream.jump(descriptor.hullLineIndices.count() * sizeof(uint32));
 			}
 
 			return createRef<GeometryAsset>(descriptor);
 		}
 
-		if (flags & GeometryAssetFlags::IS_3D) {
-			if (flags & GeometryAssetFlags::HAS_HULL) {
+		if (descriptor.flags & GeometryAssetFlags::IS_3D) {
+			if (descriptor.flags & GeometryAssetFlags::HAS_HULL) {
 				ENGINE_ERROR_UNIMPLEMENTED();
 			}
 

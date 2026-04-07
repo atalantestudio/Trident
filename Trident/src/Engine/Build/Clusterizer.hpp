@@ -14,9 +14,6 @@
 #include "Engine/ECS/Component/RigidBody3DComponent.hpp"
 
 namespace Trident {
-	static constexpr uint32 CLUSTER_TRIANGLE_COUNT = 128;
-	static constexpr uint32 CLUSTER_INDEX_COUNT = CLUSTER_TRIANGLE_COUNT * 3;
-
 	static ClusteredScene clusterizeScene(const Scene3D* scene) {
 		const ComponentPool<GeometryComponent>& geometryComponentPool = scene->ecs.getComponentPool<GeometryComponent>();
 		const ComponentPool<MaterialComponent>& materialComponentPool = scene->ecs.getComponentPool<MaterialComponent>();

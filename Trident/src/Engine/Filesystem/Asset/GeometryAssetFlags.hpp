@@ -5,6 +5,7 @@
 
 namespace Trident {
 	enum class GeometryAssetFlags : uint8 {
+		// TODO: Extract from this enum.
 		IS_2D = BIT(0),
 		IS_3D = BIT(1),
 
