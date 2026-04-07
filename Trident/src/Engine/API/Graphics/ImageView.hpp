@@ -11,25 +11,15 @@ namespace Trident {
 		public:
 			~ImageView();
 
-			inline Image* getImage() {
-				return image;
-			}
+			Image* getImage();
 
-			inline uint32 getMipLevelOffset() const {
-				return mipLevelOffset;
-			}
+			uint32 getMipLevelOffset() const;
 
-			inline uint32 getMipLevelCount() const {
-				return mipLevelCount;
-			}
+			uint32 getMipLevelCount() const;
 
-			inline uint32 getLayerOffset() const {
-				return layerOffset;
-			}
+			uint32 getLayerOffset() const;
 
-			inline uint32 getLayerCount() const {
-				return layerCount;
-			}
+			uint32 getLayerCount() const;
 
 		protected:
 			explicit ImageView(const Device* device, Image* image, const ImageViewDescriptor& descriptor);

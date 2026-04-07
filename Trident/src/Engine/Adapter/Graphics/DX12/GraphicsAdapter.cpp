@@ -101,6 +101,7 @@ namespace Trident::DX12 {
 		adapter->destroyShaderModuleImplementation = DX12::destroyShaderModule;
 		adapter->destroySurfaceImplementation = DX12::destroySurface;
 		adapter->destroySwapchainImplementation = DX12::destroySwapchain;
+		adapter->deviceWaitIdleImplementation = DX12::waitIdle;
 		adapter->dispatchImplementation = DX12::dispatch;
 		adapter->dispatchIndirectImplementation = DX12::dispatchIndirect;
 		adapter->drawImplementation = DX12::draw;
@@ -115,6 +116,7 @@ namespace Trident::DX12 {
 		adapter->mapBufferImplementation = DX12::mapBuffer;
 		adapter->nextSubpassImplementation = DX12::nextSubpass;
 		adapter->presentImplementation = DX12::present;
+		adapter->queueWaitIdleImplementation = DX12::waitIdle;
 		adapter->resetImplementation = DX12::reset;
 		adapter->resetFenceImplementation = DX12::resetFence;
 		adapter->selectPhysicalDeviceImplementation = DX12::selectPhysicalDevice;
@@ -127,7 +129,5 @@ namespace Trident::DX12 {
 		adapter->updateDescriptorSetsImplementation = DX12::updateDescriptorSets;
 		adapter->updateSwapchainImplementation = DX12::recreateSwapchain;
 		adapter->waitForFenceImplementation = DX12::waitForFence;
-		adapter->waitIdleDeviceImplementation = DX12::waitIdle;
-		adapter->waitIdleQueueImplementation = DX12::waitIdle;
 	}
 }

@@ -13,25 +13,15 @@ namespace Trident {
 			~RenderPass();
 
 			// Returns the number of attachments references, including resolve references.
-			inline uint32 getAttachmentReferenceCount() const {
-				return static_cast<uint32>(attachmentReferenceCount);
-			}
+			uint32 getAttachmentReferenceCount() const;
 
-			inline uint32 getAttachmentCount() const {
-				return static_cast<uint32>(attachments.count());
-			}
+			uint32 getAttachmentCount() const;
 
 			const Attachment& getAttachment(uint32 attachmentIndex) const;
 
-			inline uint32 getSubpassCount() const {
-				return static_cast<uint32>(subpasses.count());
-			}
+			uint32 getSubpassCount() const;
 
-			inline ref<Subpass> getSubpass(uint32 subpassIndex) const {
-				DEBUG_ASSERT(subpassIndex < subpasses.count());
-
-				return subpasses[subpassIndex];
-			}
+			ref<Subpass> getSubpass(uint32 subpassIndex) const;
 
 			ref<Image> createColorAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 attachmentIndex) const;
 

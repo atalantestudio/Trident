@@ -12,20 +12,12 @@ namespace Trident {
 		public:
 			~Framebuffer();
 
-			inline ref<RenderPass> getRenderPass() const {
-				return renderPass;
-			}
+			ref<RenderPass> getRenderPass() const;
 
-			inline Extent2D getExtent() const {
-				return extent;
-			}
+			Extent2D getExtent() const;
 
 		protected:
-			explicit Framebuffer(const Device* device, const FramebufferDescriptor& descriptor) :
-				device(device),
-				renderPass(descriptor.renderPass),
-				extent(descriptor.extent)
-			{}
+			explicit Framebuffer(const Device* device, const FramebufferDescriptor& descriptor);
 
 		protected:
 			const Device* device;

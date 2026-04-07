@@ -4,7 +4,6 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Graphics/Descriptor/InstanceDescriptor.hpp"
 #include "Engine/API/Graphics/PhysicalDevice.hpp"
 #include "Engine/API/Graphics/Surface.hpp"
 #include "Engine/API/Window/Window.hpp"
@@ -13,16 +12,16 @@ namespace Trident {
 	class Instance {
 		public:
 			~Instance() {
-				adapter->destroyInstance(this);
+				adapter->destroyInstanceImplementation(this);
 			}
 
 			// TODO: Use ref<Window> instead.
 			ref<Surface> createSurface(ref<PhysicalDevice> physicalDevice, const Window* window) const {
-				return adapter->createSurface(this, physicalDevice, window);
+				return adapter->createSurfaceImplementation(this, physicalDevice, window);
 			}
 
 			ref<PhysicalDevice> selectPhysicalDevice(bool preferIntegratedGpu) const {
-				return adapter->selectPhysicalDevice(this, preferIntegratedGpu);
+				return adapter->selectPhysicalDeviceImplementation(this, preferIntegratedGpu);
 			}
 
 		protected:

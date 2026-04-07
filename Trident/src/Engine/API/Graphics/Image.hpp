@@ -14,53 +14,34 @@ namespace Trident {
 			~Image();
 
 			/// Returns the type of the image.
-			inline ImageType getType() const {
-				return type;
-			}
+			ImageType getType() const;
 
 			/// Returns the format of the image.
-			inline ImageFormat getFormat() const {
-				return format;
-			}
+			ImageFormat getFormat() const;
 
 			/// Returns the 3-dimensional size of the image.
-			inline Extent3D getExtent() const {
-				return extent;
-			}
+			Extent3D getExtent() const;
 
 			/// Returns the byte size of the image data.
-			inline uint64 getSize() const {
-				return getChannelCount(format) * extent.width * extent.height * extent.depth * layerCount;
-			}
+			uint64 getSize() const;
 
 			/// Returns the number of mip levels in the image.
-			inline uint32 getMipLevelCount() const {
-				return mipLevelCount;
-			}
+			uint32 getMipLevelCount() const;
 
 			/// Returns the number of layers in the image.
-			inline uint32 getLayerCount() const {
-				return layerCount;
-			}
+			uint32 getLayerCount() const;
 
 			/// Returns the number of samples in the image.
-			inline uint8 getSampleCount() const {
-				return sampleCount;
-			}
+			uint8 getSampleCount() const;
 
-			inline ImageUsage getUsage() const {
-				return usage;
-			}
+			/// Returns the image usage flags.
+			ImageUsage getUsage() const;
 
 			/// Returns the current layout of the image.
-			inline ImageLayout getLayout() const {
-				return layout;
-			}
+			ImageLayout getLayout() const;
 
 			/// Returns the current access flags for the image.
-			inline Access getAccess() const {
-				return access;
-			}
+			Access getAccess() const;
 
 			ref<ImageView> createView(const ImageViewDescriptor& descriptor);
 

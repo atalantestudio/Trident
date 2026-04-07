@@ -104,6 +104,7 @@ namespace Trident::GL {
 		adapter->destroyShaderModuleImplementation = GL::destroyShaderModule;
 		adapter->destroySurfaceImplementation = GL::destroySurface;
 		adapter->destroySwapchainImplementation = GL::destroySwapchain;
+		adapter->deviceWaitIdleImplementation = GL::waitIdle;
 		adapter->dispatchImplementation = GL::dispatch;
 		adapter->dispatchIndirectImplementation = GL::dispatchIndirect;
 		adapter->drawImplementation = GL::draw;
@@ -118,6 +119,7 @@ namespace Trident::GL {
 		adapter->mapBufferImplementation = GL::mapBuffer;
 		adapter->nextSubpassImplementation = GL::nextSubpass;
 		adapter->presentImplementation = GL::present;
+		adapter->queueWaitIdleImplementation = GL::waitIdle;
 		adapter->resetImplementation = GL::reset;
 		adapter->resetFenceImplementation = GL::resetFence;
 		adapter->selectPhysicalDeviceImplementation = GL::selectPhysicalDevice;
@@ -130,7 +132,5 @@ namespace Trident::GL {
 		adapter->updateDescriptorSetsImplementation = GL::updateDescriptorSets;
 		adapter->updateSwapchainImplementation = GL::recreateSwapchain;
 		adapter->waitForFenceImplementation = GL::waitForFence;
-		adapter->waitIdleDeviceImplementation = GL::waitIdle;
-		adapter->waitIdleQueueImplementation = GL::waitIdle;
 	}
 }

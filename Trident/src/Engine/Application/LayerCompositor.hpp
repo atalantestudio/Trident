@@ -16,6 +16,7 @@
 #include "Engine/API/Graphics/Surface.hpp"
 #include "Engine/API/Graphics/Swapchain.hpp"
 #include "Engine/Application/ApplicationProperties.hpp"
+#include "Engine/Application/ProjectDescriptor.hpp"
 #include "Engine/Layer/Layer.hpp"
 
 namespace Trident {

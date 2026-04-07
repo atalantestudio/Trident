@@ -108,6 +108,7 @@ namespace Trident::VK {
 		adapter->destroyShaderModuleImplementation = VK::destroyShaderModule;
 		adapter->destroySurfaceImplementation = VK::destroySurface;
 		adapter->destroySwapchainImplementation = VK::destroySwapchain;
+		adapter->deviceWaitIdleImplementation = VK::waitIdle;
 		adapter->dispatchImplementation = VK::dispatch;
 		adapter->dispatchIndirectImplementation = VK::dispatchIndirect;
 		adapter->drawImplementation = VK::draw;
@@ -122,6 +123,7 @@ namespace Trident::VK {
 		adapter->mapBufferImplementation = VK::mapBuffer;
 		adapter->nextSubpassImplementation = VK::nextSubpass;
 		adapter->presentImplementation = VK::present;
+		adapter->queueWaitIdleImplementation = VK::waitIdle;
 		adapter->resetImplementation = VK::reset;
 		adapter->resetFenceImplementation = VK::resetFence;
 		adapter->selectPhysicalDeviceImplementation = VK::selectPhysicalDevice;
@@ -134,7 +136,5 @@ namespace Trident::VK {
 		adapter->updateDescriptorSetsImplementation = VK::updateDescriptorSets;
 		adapter->updateSwapchainImplementation = VK::recreateSwapchain;
 		adapter->waitForFenceImplementation = VK::waitForFence;
-		adapter->waitIdleDeviceImplementation = VK::waitIdle;
-		adapter->waitIdleQueueImplementation = VK::waitIdle;
 	}
 }

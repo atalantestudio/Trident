@@ -18,7 +18,65 @@ namespace Trident {
 				depthStencilAttachmentReference(descriptor.depthStencilAttachmentReference),
 				inputAttachmentReferences(descriptor.inputAttachmentReferences)
 			{
-				DEBUG_DESCRIPTOR_GUARD(descriptor);
+				#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+					uint32 warningCount = 0;
+					uint32 errorCount = 0;
+					uint32 colorAttachmentReferenceIndex = 0;
+					uint32 inputAttachmentReferenceIndex = 0;
+					bool anyUsedColorAttachment = false;
+
+					if (descriptor.colorAttachmentReferences.count() == 0) {
+						ENGINE_ERROR("descriptor.colorAttachmentReferences must not be empty.");
+
+						errorCount += 1;
+					}
+
+					while (colorAttachmentReferenceIndex < descriptor.colorAttachmentReferences.count()) {
+						const AttachmentReference& colorAttachmentReference = descriptor.colorAttachmentReferences[colorAttachmentReferenceIndex];
+
+						if (colorAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
+							anyUsedColorAttachment = true;
+
+							if (colorAttachmentReference.layout >= ImageLayout::count) {
+								ENGINE_ERROR("descriptor.colorAttachmentReferences[[]].layout must be a valid ImageLayout value.", colorAttachmentReferenceIndex);
+
+								errorCount += 1;
+							}
+						}
+
+						colorAttachmentReferenceIndex += 1;
+					}
+
+					if (!anyUsedColorAttachment) {
+						ENGINE_ERROR("descriptor.colorAttachmentReferences must contain at least one used attachment.");
+
+						errorCount += 1;
+					}
+
+					if (descriptor.depthStencilAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX && descriptor.depthStencilAttachmentReference.layout >= ImageLayout::count) {
+						ENGINE_ERROR("descriptor.depthStencilAttachmentReference.layout must be a valid ImageLayout value.");
+
+						errorCount += 1;
+					}
+
+					while (inputAttachmentReferenceIndex < descriptor.inputAttachmentReferences.count()) {
+						const AttachmentReference& inputAttachmentReference = descriptor.inputAttachmentReferences[inputAttachmentReferenceIndex];
+
+						if (inputAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
+							anyUsedColorAttachment = true;
+
+							if (inputAttachmentReference.layout >= ImageLayout::count) {
+								ENGINE_ERROR("descriptor.inputAttachmentReferences[[]].layout must be a valid ImageLayout value.", inputAttachmentReferenceIndex);
+
+								errorCount += 1;
+							}
+						}
+
+						inputAttachmentReferenceIndex += 1;
+					}
+
+					ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+				#endif
 
 				for (const AttachmentReference& colorAttachmentReference : colorAttachmentReferences) {
 					if (colorAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX) {

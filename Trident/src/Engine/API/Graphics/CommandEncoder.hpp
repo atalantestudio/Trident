@@ -40,14 +40,14 @@ namespace Trident {
 
 			void bindGraphicsPipeline(ref<GraphicsPipeline> graphicsPipeline);
 
-			// Binds the provided index buffer.
-			// The `offset` is in bytes and must be a multiple of IndexType.
+			/// Binds the provided index buffer.
+			/// The offset is in bytes and must be a multiple of IndexType.
 			template<typename IndexType>
-			void bindIndexBuffer(ref<BaseBuffer> indexBuffer, uint64 offset) {
+			inline void bindIndexBuffer(ref<BaseBuffer> indexBuffer, uint64 offset) {
 				bindIndexBuffer(indexBuffer, offset, sizeof(IndexType));
 			}
 
-			// `stride` is only used by OpenGL when calling glBindVertexBuffer.
+			// NOTE: `stride` is only used by the OpenGL adapter (see glBindVertexBuffer).
 			void bindVertexBuffer(uint32 bindingIndex, ref<BaseBuffer> vertexBuffer, uint64 offset, uint32 stride);
 
 			void copyBufferToBuffer(ref<BaseBuffer> sourceBuffer, ref<BaseBuffer> destinationBuffer, view<BufferCopyRegion> copyRegions);

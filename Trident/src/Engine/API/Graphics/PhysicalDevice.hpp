@@ -12,19 +12,14 @@ namespace Trident {
 			/// Returns the name of the physical device.
 			view<char8> getName() const;
 
-			const PhysicalDeviceLimits& getLimits() const {
-				return limits;
-			}
+			/// Returns a report of the physical device's limits.
+			const PhysicalDeviceLimits& getLimits() const;
 
 			/// Creates and returns a logical device from this physical device.
-			ref<Device> createDevice() const {
-				return adapter->createDevice(this);
-			}
+			ref<Device> createDevice() const;
 
 		protected:
-			explicit PhysicalDevice(const GraphicsAdapter* adapter) :
-				adapter(adapter)
-			{}
+			explicit PhysicalDevice(const GraphicsAdapter* adapter);
 
 		protected:
 			const GraphicsAdapter* adapter;

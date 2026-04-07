@@ -14,23 +14,15 @@ namespace Trident {
 			~BaseBuffer();
 
 			/// Returns the size in bytes of the buffer.
-			inline uint64 getSize() const {
-				return size;
-			}
+			uint64 getSize() const;
 
-			inline uint32 getStride() const {
-				return stride;
-			}
+			uint32 getStride() const;
 
 			/// Returns the buffer usage flags.
-			inline BufferUsage getUsage() const {
-				return usage;
-			}
+			BufferUsage getUsage() const;
 
 			/// Returns the current access flags for the buffer.
-			inline Access getAccess() const {
-				return access;
-			}
+			Access getAccess() const;
 
 			/// Unmaps the buffer.
 			void unmap() const;

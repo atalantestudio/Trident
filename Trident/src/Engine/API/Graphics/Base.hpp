@@ -128,6 +128,7 @@ namespace Trident {
 	typedef void (*DestroyShaderModuleImplementation)(const Device* device, const ShaderModule* shaderModule);
 	typedef void (*DestroySurfaceImplementation)(const Instance* instance, const Surface* surface);
 	typedef void (*DestroySwapchainImplementation)(const Device* device, const Swapchain* swapchain);
+	typedef void (*DeviceWaitIdleImplementation)(const Device* device);
 	typedef void (*DispatchImplementation)(CommandEncoder* commandEncoder, uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ);
 	typedef void (*DispatchIndirectImplementation)(CommandEncoder* commandEncoder, ref<BaseBuffer> buffer, uint64 bufferOffset);
 	typedef void (*DrawImplementation)(CommandEncoder* commandEncoder, uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset, uint32 instanceOffset);
@@ -143,6 +144,7 @@ namespace Trident {
 	typedef void* (*MapBufferImplementation)(const Device* device, const BaseBuffer* buffer, uint64 offset, uint64 size);
 	typedef void (*NextSubpassImplementation)(CommandEncoder* commandEncoder);
 	typedef PresentStatus (*PresentImplementation)(const Queue* queue, view<ref<Swapchain>> swapchains, view<uint32> presentableImageIndices, ref<Semaphore> waitSemaphore);
+	typedef void (*QueueWaitIdleImplementation)(const Queue* queue);
 	typedef void (*ResetFenceImplementation)(const Device* device, const Fence* fence);
 	typedef void (*ResetImplementation)(CommandEncoder* commandEncoder);
 	typedef ref<PhysicalDevice> (*SelectPhysicalDeviceImplementation)(const Instance* instance, bool preferIntegratedGpu);
@@ -155,6 +157,4 @@ namespace Trident {
 	typedef void (*UpdateDescriptorSetsImplementation)(const Device* device, view<WriteDescriptorSet> writeDescriptorSets);
 	typedef void (*UpdateSwapchainImplementation)(const Device* device, Swapchain* swapchain, const SwapchainDescriptor& descriptor);
 	typedef void (*WaitForFenceImplementation)(const Device* device, Fence* fence);
-	typedef void (*WaitIdleDeviceImplementation)(const Device* device);
-	typedef void (*WaitIdleQueueImplementation)(const Queue* queue);
 }
