@@ -103,6 +103,8 @@ namespace Trident {
 	}
 
 	void PhysicsSimulation2D::broadPhase() {
+		static int maxPairCount = 0;
+
 		const TagPool<DynamicEntityTag>& dynamicPool = scene->ecs.getTagPool<DynamicEntityTag>();
 		const TagPool<StaticEntityTag>& staticPool = scene->ecs.getTagPool<StaticEntityTag>();
 
@@ -157,16 +159,8 @@ namespace Trident {
 				typeB = hullA.getType();
 			}
 
-			if (
-				!COLLIDER_2D_TABLE[static_cast<uint32>(typeA)][static_cast<uint32>(typeB)](
-					rigidBodyA,
-					rigidBodyB,
-					hullA,
-					hullB,
-					&entityContactPair.contactManifold
-				)
-			) {
-				// Entities are not intersecting (or degenerate case).
+			if (!COLLIDER_2D_TABLE[static_cast<uint32>(typeA)][static_cast<uint32>(typeB)](rigidBodyA, rigidBodyB, hullA, hullB, &entityContactPair.contactManifold)) {
+				// Either a degenerate case, or the entities are not intersecting.
 				entityContactPairs.erase(entityPair);
 
 				continue;
@@ -188,10 +182,13 @@ namespace Trident {
 	}
 
 	void PhysicsSimulation2D::applyForces() {
+		// TODO: Implement torque.
+		constexpr float32 torque = 0.0_Nm;
+
 		const ComponentPool<RigidBody2DComponent>& rigidBodyPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
 		uint32 componentIndex = 0;
 
-		// TODO: Integrate velocities on dynamic resting entities (e.g. an object on a moving platform may move due to inertia)?
+		// TODO: Integrate velocities on dynamic resting entities (e.g. an object on a moving platform may move due to inertia).
 		while (componentIndex < rigidBodyPool.componentCount) {
 			const Entity entity = rigidBodyPool.componentIndexToEntity[componentIndex];
 
@@ -210,7 +207,7 @@ namespace Trident {
 			// rigidBodyComponent.linearVelocity += (rigidBodyComponent.force * rigidBodyComponent.inverseMass + vec2<float32>(0.0f, G)) * halfDeltaTime;
 			rigidBodyComponent.linearVelocity += (rigidBodyComponent.force * rigidBodyComponent.inverseMass + vec2<float32>(0.0f, G)) * deltaTime;
 			// rigidBodyComponent.angularVelocity += rigidBodyComponent.inverseInertia * halfDeltaTime;
-			rigidBodyComponent.angularVelocity += rigidBodyComponent.inverseInertia * deltaTime;
+			rigidBodyComponent.angularVelocity += torque * rigidBodyComponent.inverseInertia * deltaTime;
 
 			componentIndex += 1;
 		}

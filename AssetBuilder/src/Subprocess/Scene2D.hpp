@@ -299,64 +299,6 @@ namespace Trident {
 		};
 	}
 
-	Scene2DData createStackingScene() {
-		constexpr uint32 entityCount = 11;
-
-		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings(entityCount);
-
-		Entity entity = 0;
-
-		while (entity < geometryMappings.count()) {
-			geometryMappings[entity] = {entity, {0}};
-
-			entity += 1;
-		}
-
-		sequence<EntityComponentMapping<RigidBody2DComponent>> rigidBodyMappings(entityCount);
-
-		// Floor
-		rigidBodyMappings[0] = {
-			0,
-			createRigidBody({
-				.position = {0.0_m, -10.0_m},
-				.rotation = 0.0_rad,
-				.scale = {100.0f, 20.0f},
-				.mass = max<float32>(),
-				.friction = 0.2f,
-				.restitution = 0.0f,
-				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
-			}),
-		};
-
-		Descriptor<RigidBody2DComponent> boxDescriptor = {
-			.rotation = 0.0_rad,
-			.scale = {1.0f, 1.0f},
-			.mass = 10.0_kg,
-			.friction = 0.2f,
-			.restitution = 0.0f,
-			.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
-		};
-
-		uint32 boxIndex = 0;
-
-		while (boxIndex < 10) {
-			boxDescriptor.position = {0.0_m, 0.51_m + boxIndex * 1.05f};
-
-			rigidBodyMappings[boxIndex + 1] = {boxIndex + 1, createRigidBody(boxDescriptor)};
-
-			boxIndex += 1;
-		}
-
-		return {
-			.staticVertexCount = 0,
-			.staticIndexCount = 0,
-			.entityCount = entityCount,
-			.geometryAssetIdentifiers = {UNIT_SQUARE_GEOMETRY_ASSET_IDENTIFIER},
-			.geometryMappings = geometryMappings,
-			.rigidBodyMappings = rigidBodyMappings,
-		};
-	}
-
 	Scene2DData createRollingBallScene() {
 		return {
 			.staticVertexCount = 0,
@@ -548,6 +490,64 @@ namespace Trident {
 			boxDescriptor.friction = frictions[boxIndex];
 
 			rigidBodyMappings[boxIndex + 6] = {boxIndex + 6, createRigidBody(boxDescriptor)};
+
+			boxIndex += 1;
+		}
+
+		return {
+			.staticVertexCount = 0,
+			.staticIndexCount = 0,
+			.entityCount = entityCount,
+			.geometryAssetIdentifiers = {UNIT_SQUARE_GEOMETRY_ASSET_IDENTIFIER},
+			.geometryMappings = geometryMappings,
+			.rigidBodyMappings = rigidBodyMappings,
+		};
+	}
+
+	Scene2DData createStackingScene() {
+		constexpr uint32 entityCount = 11;
+
+		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings(entityCount);
+
+		Entity entity = 0;
+
+		while (entity < geometryMappings.count()) {
+			geometryMappings[entity] = {entity, {0}};
+
+			entity += 1;
+		}
+
+		sequence<EntityComponentMapping<RigidBody2DComponent>> rigidBodyMappings(entityCount);
+
+		// Floor
+		rigidBodyMappings[0] = {
+			0,
+			createRigidBody({
+				.position = {0.0_m, -10.0_m},
+				.rotation = 0.0_rad,
+				.scale = {100.0f, 20.0f},
+				.mass = max<float32>(),
+				.friction = 0.2f,
+				.restitution = 0.0f,
+				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
+			}),
+		};
+
+		Descriptor<RigidBody2DComponent> boxDescriptor = {
+			.rotation = 0.0_rad,
+			.scale = {1.0f, 1.0f},
+			.mass = 10.0_kg,
+			.friction = 0.2f,
+			.restitution = 0.0f,
+			.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
+		};
+
+		uint32 boxIndex = 0;
+
+		while (boxIndex < 10) {
+			boxDescriptor.position = {0.0_m, 0.51_m + boxIndex * 1.05f};
+
+			rigidBodyMappings[boxIndex + 1] = {boxIndex + 1, createRigidBody(boxDescriptor)};
 
 			boxIndex += 1;
 		}
