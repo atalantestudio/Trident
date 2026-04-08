@@ -1230,10 +1230,9 @@ namespace Trident {
 				const Entity entity = geometryComponentPool.componentIndexToEntity[componentIndex];
 				const GeometryComponent geometryComponent = geometryComponentPool.components[componentIndex];
 				const Geometry2D& geometry = geometries[geometryComponent.geometryIndex];
-				const range<uint32, uint32> indexRange = geometry.getIndexRange();
 
 				// TODO: Restore materials (test colors were 0xf4fedbff and 0xe6ddffff).
-				commandEncoder->drawIndexed(indexRange.count, 1, indexRange.offset, 0, entity);
+				commandEncoder->drawIndexed(geometry.getIndexRange().count, 1, geometry.getIndexRange().offset, geometry.getVertexPositionComponentRange().offset / 2, entity);
 
 				componentIndex += 1;
 			}
@@ -1254,10 +1253,9 @@ namespace Trident {
 				const GeometryComponent geometryComponent = geometryComponentPool.components[componentIndex];
 				const Geometry2D& geometry = geometries[geometryComponent.geometryIndex];
 				const Hull2D& hull = hulls[geometry.hullIndex];
-				const range<uint32, uint32> indexRange = hull.getLineIndexRange();
 
 				// TODO: Restore materials (test colors were 0xf4fedbff and 0xe6ddffff).
-				commandEncoder->drawIndexed(indexRange.count, 1, indexRange.offset, 0, entity);
+				commandEncoder->drawIndexed(hull.getLineIndexRange().count, 1, hull.getLineIndexRange().offset, 0, entity);
 
 				componentIndex += 1;
 			}
@@ -1298,26 +1296,22 @@ namespace Trident {
 
 			// Rigid body placeholder fill
 			{
-				const range<uint32, uint32> indexRange = geometry.getIndexRange();
-
 				commandEncoder->bindGraphicsPipeline(rigidBodyPlaceholderFillPipeline);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, scene->getStaticVertexCount() * sizeof(Vertex), sizeof(Vertex));
 				commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0, sizeof(RigidBody));
 				commandEncoder->bindIndexBuffer<uint32>(indexBuffer, scene->getStaticIndexCount() * sizeof(uint32));
 				commandEncoder->bindDescriptorSets(placeholderPipelineLayout, 0, {cameraViewDescriptorSet, placeholderDescriptorSet});
-				commandEncoder->drawIndexed(indexRange.count, 1, indexRange.offset, 0, selectedEntity);
+				commandEncoder->drawIndexed(geometry.getIndexRange().count, 1, geometry.getIndexRange().offset, geometry.getVertexPositionComponentRange().offset / 2, selectedEntity);
 			}
 
 			// Rigid body placeholder stroke
 			{
-				const range<uint32, uint32> indexRange = hull.getLineIndexRange();
-
 				commandEncoder->bindGraphicsPipeline(rigidBodyPlaceholderStrokePipeline);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, scene->getStaticVertexCount() * sizeof(Vertex), sizeof(Vertex));
 				commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0, sizeof(RigidBody));
 				commandEncoder->bindIndexBuffer<uint32>(indexBuffer, scene->getStaticIndexCount() * sizeof(uint32));
 				commandEncoder->bindDescriptorSets(placeholderPipelineLayout, 0, {cameraViewDescriptorSet, placeholderDescriptorSet});
-				commandEncoder->drawIndexed(indexRange.count, 1, indexRange.offset, 0, selectedEntity);
+				commandEncoder->drawIndexed(hull.getLineIndexRange().count, 1, hull.getLineIndexRange().offset, 0, selectedEntity);
 			}
 		}
 

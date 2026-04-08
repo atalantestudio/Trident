@@ -90,13 +90,12 @@ namespace Trident {
 
 				std::copy(hullLineIndices.begin(), hullLineIndices.end(), &pointer_cast<uint32*>(dynamicDataBuffer)[offset]);
 
-				offset += hullLineIndices.count();
-
 				const view<svec2<float32>> vertices(pointer_cast<const svec2<float32>*>(&dynamicDataBuffer[vertexPositionComponentRange.offset * sizeof(float32)]), vertexPositionComponentRange.count / 2);
 
-				hulls[hullIndex] = Hull2D(geometryAsset, vertices, vertexPositionIndexRange.offset + vertexPositionIndexRange.count - vertexComponentCount);
-
 				geometries[geometryIndex].hullIndex = hullIndex;
+				hulls[hullIndex] = Hull2D(geometryAsset, vertices, static_cast<uint32>(offset) - vertexComponentCount);
+
+				offset += hullLineIndices.count();
 
 				hullIndex += 1;
 			}
