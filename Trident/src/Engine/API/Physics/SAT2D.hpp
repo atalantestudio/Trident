@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Physics/Feature2D.hpp"
-#include "Engine/API/Physics/RigidBody2D.hpp"
+#include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 
 namespace Trident {
 	struct SAT2DOutput {
@@ -25,14 +25,14 @@ namespace Trident {
 		// This is the closest point to the reference edge.
 		vec2<float32> incidentSupportPoint;
 
-		const RigidBody2D* referenceBody;
-		const RigidBody2D* incidentBody;
+		const RigidBody2DComponent* referenceBody;
+		const RigidBody2DComponent* incidentBody;
 
 		const Hull2D* referenceHull;
 		const Hull2D* incidentHull;
 	};
 
-	static void queryEdgeDirections(const RigidBody2D& referenceBody, const RigidBody2D& incidentBody, const Hull2D& referenceHull, const Hull2D& incidentHull, SAT2DOutput& output) {
+	static void queryEdgeDirections(const RigidBody2DComponent& referenceBody, const RigidBody2DComponent& incidentBody, const Hull2D& referenceHull, const Hull2D& incidentHull, SAT2DOutput& output) {
 		const mat2x2<float32> R = mat2x2<float32>::rotation(incidentBody.rotation - referenceBody.rotation);
 
 		uint32 edgeIndex = 0;
@@ -77,7 +77,7 @@ namespace Trident {
 	// - Don't test parallel axes (https://dyn4j.org/2010/01/sat)
 	// - Reuse the separation axis from the last run to make the algorithm O(1) in non-intersection cases.
 	//   But what if the separation axis changes e.g. due to rotation?
-	static SAT2DOutput SAT2D(const RigidBody2D& A, const RigidBody2D& B, const Hull2D& hullA, const Hull2D& hullB) {
+	static SAT2DOutput SAT2D(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB) {
 		SAT2DOutput output{};
 		output.separation = min<float32>();
 		output.referenceEdge.vertexCount = 2;

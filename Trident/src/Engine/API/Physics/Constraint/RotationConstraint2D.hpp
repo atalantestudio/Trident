@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Physics/Constraint/Constraint2D.hpp"
-#include "Engine/API/Physics/RigidBody2D.hpp"
+#include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 
 namespace Trident {
 	struct RotationConstraint2DDescriptor {
@@ -18,7 +18,7 @@ namespace Trident {
 			{}
 
 			void update(ECS* ecs, float32 deltaTime) const final override {
-				RigidBody2D& rigidBodyA = ecs->getComponent<RigidBody2D>(A);
+				RigidBody2DComponent& rigidBodyA = ecs->getComponent<RigidBody2DComponent>(A);
 				rigidBodyA.angularVelocity = 0.0f;
 			}
 

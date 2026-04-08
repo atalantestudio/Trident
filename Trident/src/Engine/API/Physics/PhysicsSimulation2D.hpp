@@ -5,11 +5,14 @@
 
 #include "Engine/API/Descriptor.hpp"
 #include "Engine/API/Physics/EntityPair.hpp"
-#include "Engine/API/Physics/RigidBody2D.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
+#include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 #include "Engine/Filesystem/Asset/SceneAsset.hpp"
 
 namespace Trident {
+	#define ENABLE_PHYSICS_2D_IMPULSE_ACCUMULATION
+	#define ENABLE_PHYSICS_2D_WARM_STARTING
+
 	class PhysicsSimulation2D;
 
 	template<>
@@ -22,14 +25,12 @@ namespace Trident {
 	class PhysicsSimulation2D {
 		private:
 			static constexpr uint32 SEQUENTIAL_IMPULSE_ITERATION_COUNT = 10;
-			static constexpr bool ACCUMULATE_IMPULSES = true;
-			static constexpr bool WARM_STARTING = true;
 
 			static constexpr float32 ALLOWED_PENETRATION = 0.01f;
 			static constexpr float32 G = -9.80665f;
 
 		private:
-			static vec2<float32> calculateRelativeVelocity(const RigidBody2D& A, const RigidBody2D& B, vec2<float32> rA, vec2<float32> rB);
+			static vec2<float32> calculateRelativeVelocity(const RigidBody2DComponent& A, const RigidBody2DComponent& B, vec2<float32> rA, vec2<float32> rB);
 
 			static void mergeContactManifolds(EntityContactPair2D& entityContactPair, const ContactManifold2D& contactManifold);
 

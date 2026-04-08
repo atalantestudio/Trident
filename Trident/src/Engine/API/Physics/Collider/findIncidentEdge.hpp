@@ -7,7 +7,7 @@ namespace Trident {
 	/// Finds and returns the incident edge on the provided rigid body.
 	inline ClipFeature2D findIncidentEdge(
 		/// The rigid body owning the incident edge.
-		const RigidBody2D& incidentBody,
+		const RigidBody2DComponent& incidentBody,
 
 		/// The hull used by the rigid body.
 		const Hull2D& incidentHull,

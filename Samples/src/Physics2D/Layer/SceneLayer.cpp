@@ -110,7 +110,7 @@ namespace Trident {
 	void Physics2DSceneLayer::update(float32 deltaTime, float32 inverseDeltaTime) {
 		/* constexpr float32 SPEED = 3.0f;
 
-		RigidBody2D& playerRigidBody = ecs.getComponent<RigidBody2D>(playerEntity);
+		RigidBody2DComponent& playerRigidBody = ecs.getComponent<RigidBody2DComponent>(playerEntity);
 
 		if (keyMap[KeyCode::Q]) {
 			playerRigidBody.linearVelocity += {-SPEED, playerRigidBody.linearVelocity[1]};
@@ -274,7 +274,7 @@ namespace Trident {
 			const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
 			const Hull2D& hull = scene->getHulls()[geometry.hullIndex];
 
-			RigidBody2D& rigidBody = scene->ecs.getComponent<RigidBody2D>(selectedEntity);
+			RigidBody2DComponent& rigidBody = scene->ecs.getComponent<RigidBody2DComponent>(selectedEntity);
 			rigidBody.position += placeholderOffset;
 			rigidBody.updateWorld(hull.getCentroid());
 

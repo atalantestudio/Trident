@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "Engine/API/Physics/RigidBody2D.hpp"
 #include "Engine/ECS/Entity.hpp"
 
 namespace Trident {

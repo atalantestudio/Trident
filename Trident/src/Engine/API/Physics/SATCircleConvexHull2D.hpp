@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "Engine/API/Physics/RigidBody2D.hpp"
 #include "Engine/API/Physics/SAT2D.hpp"
+#include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 
 namespace Trident {
 	// Separating Axis Theorem algorithm implementation in 2D.
@@ -14,7 +14,7 @@ namespace Trident {
 	// - Don't test parallel axes (https://dyn4j.org/2010/01/sat)
 	// - Reuse the separation axis from the last run to make the algorithm O(1) in non-intersection cases.
 	//   But what if the separation axis changes e.g. due to rotation?
-	static SAT2DOutput SATCircleConvexHull2D(const RigidBody2D& circleBody, const RigidBody2D& convexHullBody, const Hull2D& circleHull, const Hull2D& convexHullGeometry) {
+	static SAT2DOutput SATCircleConvexHull2D(const RigidBody2DComponent& circleBody, const RigidBody2DComponent& convexHullBody, const Hull2D& circleHull, const Hull2D& convexHullGeometry) {
 		SAT2DOutput output{};
 		output.separation = min<float32>();
 		output.referenceEdge.vertexCount = 2;

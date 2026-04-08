@@ -56,7 +56,8 @@ namespace Trident {
 
 		float32 restitution;
 
-		// TODO: Keep?
+		// TODO: Use svec2<float32> instead.
+		// TODO: Keep inside the rigid body?
 		vec2<float32> force;
 	};
 }

@@ -152,8 +152,8 @@ namespace Trident {
 	// TODO: Restore joint constraints.
 	/* void Scene2D::createJoint(const Joint2DDescriptor& descriptor) {
 		const Entity entity = ecs.createEntity();
-		const RigidBody2D& rigidBodyA = ecs.getComponent<RigidBody2D>(descriptor.A);
-		const RigidBody2D& rigidBodyB = ecs.getComponent<RigidBody2D>(descriptor.B);
+		const RigidBody2DComponent& rigidBodyA = ecs.getComponent<RigidBody2DComponent>(descriptor.A);
+		const RigidBody2DComponent& rigidBodyB = ecs.getComponent<RigidBody2DComponent>(descriptor.B);
 		const mat2x2<float32> RA = transpose(mat2x2<float32>::rotation(rigidBodyA.rotation));
 		const mat2x2<float32> RB = transpose(mat2x2<float32>::rotation(rigidBodyB.rotation));
 

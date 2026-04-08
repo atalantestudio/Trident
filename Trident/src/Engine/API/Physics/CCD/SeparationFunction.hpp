@@ -28,7 +28,7 @@ namespace Trident {
 	};
 
 	static PhysicalObjectCopy2D copyPhysicalObject(const Scene2D& scene, Entity entity) {
-		const RigidBody2D& rigidBody = scene.getRigidBody(entity);
+		const RigidBody2DComponent& rigidBody = scene.getRigidBody(entity);
 		const ref<Geometry2D> geometry = scene.getGeometry(entity);
 
 		PhysicalObjectCopy2D copy{};

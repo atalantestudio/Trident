@@ -54,8 +54,8 @@
 #include "Engine/API/Geometry/3D/BoxGeometry3D.hpp"
 
 // Physics
-#include "Engine/API/Physics/RigidBody2D.hpp"
-#include "Engine/API/Physics/CCD/TimeOfImpact.hpp"
 #include "Engine/API/Physics/GJK2D.hpp"
 #include "Engine/API/Physics/GJK2DConditional.hpp"
 #include "Engine/API/Physics/PhysicsSimulation2D.hpp"
+#include "Engine/API/Physics/SAT2D.hpp"
+#include "Engine/API/Physics/SATCircleConvexHull2D.hpp"

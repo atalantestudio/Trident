@@ -9,7 +9,7 @@
 #include "Engine/API/Physics/SATCircleConvexHull2D.hpp"
 
 namespace Trident {
-	static bool CircleConvexHullCollider(const RigidBody2D& A, const RigidBody2D& B, const Hull2D& hullA, const Hull2D& hullB, ContactManifold2D* contactManifold) {
+	static bool CircleConvexHullCollider(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB, ContactManifold2D* contactManifold) {
 		const Hull2D pointHull = Hull2D::point();
 
 		// The scaling factor is assumed to be the same in both axes.

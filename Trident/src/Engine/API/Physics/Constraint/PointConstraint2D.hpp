@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Physics/Constraint/Constraint2D.hpp"
+#include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 
 namespace Trident {
 	struct PointConstraint2DDescriptor {
@@ -21,8 +22,8 @@ namespace Trident {
 			void update(ECS* ecs, float32 deltaTime) const final override {
 				static constexpr float32 DAMPING_COEFFICIENT = 0.9f;
 
-				const RigidBody2D& rigidBodyA = ecs->getComponent<RigidBody2D>(A);
-				RigidBody2D& rigidBodyB = ecs->getComponent<RigidBody2D>(B);
+				const RigidBody2DComponent& rigidBodyA = ecs->getComponent<RigidBody2DComponent>(A);
+				RigidBody2DComponent& rigidBodyB = ecs->getComponent<RigidBody2DComponent>(B);
 
 				const vec2<float32> C = rigidBodyB.position - rigidBodyA.position;
 

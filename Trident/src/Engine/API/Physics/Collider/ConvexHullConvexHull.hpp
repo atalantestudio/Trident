@@ -9,7 +9,7 @@
 #include "Engine/API/Physics/Feature2D.hpp"
 
 namespace Trident {
-	static bool ConvexHullConvexHullCollider(const RigidBody2D& A, const RigidBody2D& B, const Hull2D& hullA, const Hull2D& hullB, ContactManifold2D* contactManifold) {
+	static bool ConvexHullConvexHullCollider(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB, ContactManifold2D* contactManifold) {
 		const SAT2DOutput satOutput = SAT2D(A, B, hullA, hullB);
 
 		if (satOutput.separation > 0.0f) {

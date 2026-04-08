@@ -7,8 +7,8 @@
 
 namespace Trident {
 	static bool CircleCircleCollider(
-		const RigidBody2D& A,
-		const RigidBody2D& B,
+		const RigidBody2DComponent& A,
+		const RigidBody2DComponent& B,
 		const Hull2D& hullA,
 		const Hull2D& hullB,
 		ContactManifold2D* contactManifold
