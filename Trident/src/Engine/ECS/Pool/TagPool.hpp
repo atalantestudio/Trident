@@ -1,4 +1,4 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
@@ -14,7 +14,7 @@ namespace Trident {
 
 		public:
 			explicit TagPool() {
-				std::memset(&entityToTagIndex, NULL_TAG_INDEX, MAX_ENTITIES);
+				std::memset(&entityToTagIndex, NULL_TAG_INDEX, MAX_ENTITIES * sizeof(uint32));
 			}
 
 			bool hasTag(Entity entity) const {
