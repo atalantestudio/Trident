@@ -67,8 +67,8 @@ namespace Trident {
 
 			inline float32 getPenetrationBias() const {
 				static constexpr float32 PENETRATION_BIASES[static_cast<uint32>(Hull2DType::count)] = {
-					0.1f,
 					0.0f,
+					0.01f,
 					0.2f,
 				};
 
