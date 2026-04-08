@@ -80,8 +80,8 @@ namespace Trident {
 			vertexPositionIndexRange.count = static_cast<uint32>(geometryAsset->getVertexPositionIndices().count());
 
 			geometries[geometryIndex] = Geometry2D({
-				.vertexPositionComponentRange = {vertexPositionComponentRange.offset - vertexComponentCount, vertexPositionComponentRange.count},
-				.vertexTextureCoordinateComponentRange = {vertexTextureCoordinateComponentRange.offset - vertexComponentCount, vertexTextureCoordinateComponentRange.count},
+				.vertexPositionComponentRange = {vertexPositionComponentRange.offset, vertexPositionComponentRange.count},
+				.vertexTextureCoordinateComponentRange = {vertexTextureCoordinateComponentRange.offset, vertexTextureCoordinateComponentRange.count},
 				.indexRange = {vertexPositionIndexRange.offset - vertexComponentCount, vertexPositionIndexRange.count},
 			});
 
