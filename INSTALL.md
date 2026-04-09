@@ -13,8 +13,7 @@ git submodule update --init --recursive
 ```
 
 > [!TIP]
-> It is recommended to use either Visual Studio or Visual Studio Code when opening Trident.
-> Custom tasks and launch configurations have been written for VS Code to help speed up the development.
+> The engine provides Visual Studio Code integration through [tasks](https://code.visualstudio.com/docs/debugtest/tasks) and [launch configurations](https://code.visualstudio.com/docs/debugtest/debugging-configuration). See the related [section](#visual-studio-code-integration).
 
 
 
@@ -100,10 +99,8 @@ Run [scripts/Clean.bat](https://github.com/atalantestudio/Trident/tree/main/scri
 
 ## Visual Studio Code integration
 
-The engine provides Visual Studio Code integration through [tasks](https://code.visualstudio.com/docs/debugtest/tasks) and [launch configurations](https://code.visualstudio.com/docs/debugtest/debugging-configuration).
+Make sure that whatever build tool you're using is exposed in your PATH.
 
 You may want to install the [C/C++](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools) language support extension.
-
-Make sure that whatever build tool you're using is exposed in your PATH.
 
 Type `F6` to open the task menu. After compiling, go to the Run and Debug panel and select a launch option according to your desired project and configuration, then type `F5` to start debugging.
