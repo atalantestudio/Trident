@@ -9,11 +9,13 @@
 
 namespace Trident {
 	// TODO: Expose to the client side.
-	static const view<const char8*> ENABLED_LAYER_NAMES = {
+	static constexpr const char8* ENABLED_LAYER_NAMES_ARRAY[] = {
 		#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
 			"VK_LAYER_KHRONOS_validation",
 		#endif
 	};
+
+	static constexpr view<const char8*> ENABLED_LAYER_NAMES = view<const char8*>(ENABLED_LAYER_NAMES_ARRAY, std::size(ENABLED_LAYER_NAMES_ARRAY));
 
 	#if defined(DEBUG_ENABLE_MESSENGER)
 		static VkBool32 debugUtilsMessengerUserCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
@@ -139,14 +141,8 @@ namespace Trident {
 
 		instanceCreateInfo.flags = 0;
 		instanceCreateInfo.pApplicationInfo = &applicationInfo;
-
-		#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
-			instanceCreateInfo.enabledLayerCount = static_cast<uint32>(ENABLED_LAYER_NAMES.count());
-			instanceCreateInfo.ppEnabledLayerNames = &ENABLED_LAYER_NAMES[0];
-		#else
-			instanceCreateInfo.enabledLayerCount = 0;
-			instanceCreateInfo.ppEnabledLayerNames = nullptr;
-		#endif
+		instanceCreateInfo.enabledLayerCount = static_cast<uint32>(ENABLED_LAYER_NAMES.count());
+		instanceCreateInfo.ppEnabledLayerNames = &ENABLED_LAYER_NAMES[0];
 
 		std::vector<const char8*> enabledExtensionNames;
 
