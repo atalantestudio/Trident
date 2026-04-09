@@ -47,12 +47,12 @@ namespace Trident {
 		}
 
 		initializePropertyFile();
+		initializeWindow(projectDescriptor);
 
 		sharedMemoryData->instanceCount += 1;
 
 		mutex->release();
 
-		initializeWindow(projectDescriptor);
 		initializeGraphicsAdapter(projectDescriptor);
 
 		if (projectType == ProjectType::MAIN) {
