@@ -5,11 +5,11 @@
 [submodule "Trident/vendor/lyah"]
 	path = Trident/vendor/lyah
 	url = ../lyah.git
-	branch = main
+	branch = v1.2.0+dev
 [submodule "Trident/vendor/scroll"]
 	path = Trident/vendor/scroll
 	url = ../scroll.git
-	branch = main
+	branch = v1.0.5+dev
 [submodule "Trident/vendor/tsl"]
 	path = Trident/vendor/tsl
 	url = ../tsl.git
