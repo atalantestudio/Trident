@@ -32,7 +32,7 @@ namespace Trident {
 
 		// TODO: Ensure that FBX nodes exist before using them.
 		const FBXNode* ObjectsNode = file.searchNodeRecursive(file.NodeList, "Objects");
-		const FBXNode* GeometryNode = file.searchNodeRecursive(file.NodeList, "Geometry");
+		const FBXNode* GeometryNode = file.searchNodeRecursive(ObjectsNode->NestedList, "Geometry");
 		const FBXNode* VerticesNode = file.searchNodeRecursive(GeometryNode->NestedList, "Vertices");
 		const FBXNode* PolygonVertexIndexNode = file.searchNodeRecursive(GeometryNode->NestedList, "PolygonVertexIndex");
 
@@ -76,7 +76,6 @@ namespace Trident {
 		}
 
 		sequence<uint32> vertexPositionIndices(indexCount);
-		uint32 polygonCount = 0;
 		uint32 polygonOffset = 0;
 		uint32 indexOffset = 0;
 
@@ -98,7 +97,6 @@ namespace Trident {
 					vertexPositionIndices[indexOffset - 1] = ~indexC;
 
 					polygonOffset += triangleOffset + 2;
-					polygonCount += 1;
 
 					break;
 				}

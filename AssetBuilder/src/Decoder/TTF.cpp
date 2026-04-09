@@ -470,7 +470,7 @@ namespace Trident {
 		// References:
 		// - https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6.html
 		// - https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6head.html
-		const uint32 checkSumAdjustment = byteStream.read<uint32>();
+		byteStream.jump(sizeof(uint32)); // checkSumAdjustment
 
 		const uint32 magicNumber = byteStream.peek<uint32>();
 
@@ -648,12 +648,15 @@ namespace Trident {
 			byteStream.seek(unicodeTableOffset);
 
 			const uint16 length = byteStream.read<uint16>();
-			const uint16 language = byteStream.read<uint16>();
+
+			byteStream.jump(sizeof(uint16)); // language
+
 			const uint16 segCountX2 = byteStream.read<uint16>();
 			const uint16 segCount = segCountX2 / 2;
-			const uint16 searchRange = byteStream.read<uint16>();
-			const uint16 entrySelector = byteStream.read<uint16>();
-			const uint16 rangeShift = byteStream.read<uint16>();
+
+			byteStream.jump(sizeof(uint16)); // searchRange
+			byteStream.jump(sizeof(uint16)); // entrySelector
+			byteStream.jump(sizeof(uint16)); // rangeShift
 
 			sequence<uint16> endCodes(segCount);
 

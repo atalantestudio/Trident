@@ -84,7 +84,6 @@ namespace Trident {
 			ref<ComputePipeline> glyphImageComputePipeline;
 			ref<ComputePipeline> glyphSdfComputePipeline;
 
-			FontStorage* fontMappedRange;
 			GlyphBuffer* glyphMappedRange;
 			uint32* glyphOffsetMappedRange;
 	};

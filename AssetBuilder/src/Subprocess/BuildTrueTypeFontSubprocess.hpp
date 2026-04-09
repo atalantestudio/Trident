@@ -99,11 +99,11 @@ namespace Trident {
 					outputByteStream.write<sint16>(glyph.topSideBearing);
 				}
 
-				for (const std::pair<uint16, uint32>& unicodeEntry : file.unicodeMap) {
+				for (const std::pair<uint16, uint32> unicodeEntry : file.unicodeMap) {
 					outputByteStream.write<uint16>(unicodeEntry.first);
 				}
 
-				for (const std::pair<uint16, uint32>& unicodeEntry : file.unicodeMap) {
+				for (const std::pair<uint16, uint32> unicodeEntry : file.unicodeMap) {
 					outputByteStream.write<uint32>(unicodeEntry.second);
 				}
 

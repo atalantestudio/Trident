@@ -359,7 +359,7 @@ namespace Trident {
 	void DX12::waitIdle(const Trident::Device* device) {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
 
-		for (const ref<Trident::Queue> queue : _device->queues) {
+		for (const ref<Trident::Queue>& queue : _device->queues) {
 			queue->waitIdle();
 		}
 	}

@@ -22,7 +22,6 @@ namespace Trident {
 	}
 
 	void Scene3D::loadGeometries(ref<Scene3DAsset> sceneAsset) {
-		const sequence<uint8>& staticBuffer = sceneAsset->getStaticBuffer();
 		const sequence<ref<GeometryAsset>>& geometryAssets = sceneAsset->getGeometryAssets();
 
 		geometries = sequence<Geometry3D>(geometryAssets.count());
@@ -38,6 +37,7 @@ namespace Trident {
 		}
 
 		// NOTE: The data buffer is created on the client's request because it needs a physical device limit.
+		// TODO: Copy static data into the buffer as well.
 	}
 
 	void Scene3D::loadEntityComponentMappings(ref<Scene3DAsset> sceneAsset) {

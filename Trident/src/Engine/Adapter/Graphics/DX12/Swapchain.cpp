@@ -28,11 +28,11 @@ namespace Trident {
 	void DX12::destroySwapchain(const Trident::Device* device, const Trident::Swapchain* swapchain) {
 		const DX12::Swapchain* _swapchain = static_cast<const DX12::Swapchain*>(swapchain);
 
-		for (const ref<Trident::ImageView> imageView : _swapchain->imageViews) {
+		for (const ref<Trident::ImageView>& imageView : _swapchain->imageViews) {
 			imageView.~shared_ptr();
 		}
 
-		for (const ref<Trident::Image> image : _swapchain->images) {
+		for (const ref<Trident::Image>& image : _swapchain->images) {
 			image.~shared_ptr();
 		}
 

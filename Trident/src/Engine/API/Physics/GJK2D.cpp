@@ -171,8 +171,6 @@ namespace Trident {
 		uint8 i = 0;
 
 		while (i < GJK_2D_ITERATION_LIMIT) {
-			const uint8 previousCount = s.count;
-
 			uint8 index = 0;
 
 			while (index < s.count) {

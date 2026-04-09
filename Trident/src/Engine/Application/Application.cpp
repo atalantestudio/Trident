@@ -132,7 +132,7 @@ namespace Trident {
 	}
 
 	Application::~Application() {
-		for (const ref<Layer> layer : layerCompositor->layers) {
+		for (const ref<Layer>& layer : layerCompositor->layers) {
 			layer.~shared_ptr();
 		}
 
@@ -200,7 +200,7 @@ namespace Trident {
 	void Application::postConstruct() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		for (const ref<Layer> layer : layerCompositor->layers) {
+		for (const ref<Layer>& layer : layerCompositor->layers) {
 			layer->input = &lastLayerInput;
 			layer->postConstruct();
 		}
@@ -211,7 +211,7 @@ namespace Trident {
 
 		sint32 code = 0;
 
-		for (const ref<Process> process : processes) {
+		for (const ref<Process>& process : processes) {
 			code = process->main(arguments);
 
 			if (code != 0) {
@@ -279,7 +279,7 @@ namespace Trident {
 	void Application::update(float64 deltaTime, float64 inverseDeltaTime) {
 		PROFILE_SCOPE("Application update/integrate");
 
-		for (const ref<Layer> layer : layerCompositor->layers) {
+		for (const ref<Layer>& layer : layerCompositor->layers) {
 			layer->update(static_cast<float32>(deltaTime), static_cast<float32>(inverseDeltaTime));
 		}
 	}

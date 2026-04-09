@@ -10,8 +10,8 @@ namespace Trident {
 	BaseBuffer::BaseBuffer(const Device* device, const BufferDescriptor& descriptor, uint32 stride) :
 		device(device),
 		size(descriptor.size),
-		usage(descriptor.usage),
-		stride(stride)
+		stride(stride),
+		usage(descriptor.usage)
 	{}
 
 	BaseBuffer::~BaseBuffer() {

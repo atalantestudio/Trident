@@ -609,21 +609,20 @@ namespace Trident {
 			return;
 		}
 
-		const ClearValue colorClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
-
-		ClearValue depthStencilClearValue{};
-		depthStencilClearValue.depth = 0.0f;
-		depthStencilClearValue.stencil = 0;
-
-		BeginRenderPassDescriptor beginRenderPassDescriptor{};
-		beginRenderPassDescriptor.framebuffer = framebuffers[getSwapchainImageIndex()];
-		beginRenderPassDescriptor.clearValues = {colorClearValue, depthStencilClearValue};
-
 		const Extent2D swapchainExtent = getSwapchain()->getExtent();
 		const float32 width = static_cast<float32>(swapchainExtent.width);
 		const float32 height = static_cast<float32>(swapchainExtent.height);
 
-		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
+		commandEncoder->beginRenderPass({
+			.framebuffer = framebuffers[getSwapchainImageIndex()],
+			.clearValues = {
+				{0.0f, 0.0f, 0.0f, 1.0f},
+				{
+					.depth = 0.0f,
+					.stencil = 0,
+				},
+			},
+		});
 		commandEncoder->setScissor(0, 0, swapchainExtent);
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 

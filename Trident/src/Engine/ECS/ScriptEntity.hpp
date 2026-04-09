@@ -6,6 +6,8 @@
 namespace Trident {
 	class ScriptEntity {
 		public:
+			virtual ~ScriptEntity() {}
+
 			virtual void onConstruct() {}
 
 			virtual void onUpdate() {}

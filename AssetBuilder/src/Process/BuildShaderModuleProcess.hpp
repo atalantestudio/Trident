@@ -10,7 +10,7 @@
 #include "tsl/Generator/GLSLGenerator.hpp"
 
 namespace Trident {
-	class BuildShaderModuleProcess : public Process {
+	class BuildShaderModuleProcess final : public Process {
 		private:
 			sint32 processFile(const std::filesystem::directory_entry& directoryEntry, const std::filesystem::path& assetOutputPath) {
 				std::filesystem::path finalAssetOutputPath = assetOutputPath / "Shader" / directoryEntry.path().filename();

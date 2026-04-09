@@ -9,7 +9,7 @@
 #include "../Subprocess/BuildTrueTypeFontSubprocess.hpp"
 
 namespace Trident {
-	class BuildFontProcess : public Process {
+	class BuildFontProcess final : public Process {
 		private:
 			static constexpr uint32 PROJECT_INPUT_PATH_ARGUMENT_INDEX = 1;
 			static constexpr uint32 PROJECT_OUTPUT_PATH_ARGUMENT_INDEX = 2;

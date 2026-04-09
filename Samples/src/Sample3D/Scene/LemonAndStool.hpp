@@ -62,7 +62,7 @@ namespace Trident::LemonAndStool {
 
 		const uint32 pbrMaterialShaderIndex = scene.registerMaterialShader(pbrMaterialShader);
 
-		const uint32 lemonMaterialIndex = scene.registerMaterial({
+		scene.registerMaterial({
 			.shaderIndex = pbrMaterialShaderIndex,
 			.writeDescriptorSetBindings = {
 				{
@@ -90,7 +90,7 @@ namespace Trident::LemonAndStool {
 			},
 		});
 
-		const uint32 foldingWoodenStoolMaterialIndex = scene.registerMaterial({
+		scene.registerMaterial({
 			.shaderIndex = pbrMaterialShaderIndex,
 			.writeDescriptorSetBindings = {
 				{

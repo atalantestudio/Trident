@@ -24,7 +24,7 @@ namespace Trident {
 		count,
 	};
 
-	static bool isDepthFormat(ImageFormat imageFormat) {
+	inline bool isDepthFormat(ImageFormat imageFormat) {
 		static constexpr ImageFormat FIRST_DEPTH_FORMAT = ImageFormat::D32_SFLOAT;
 
 		DEBUG_ASSERT(imageFormat < ImageFormat::count);
@@ -32,7 +32,7 @@ namespace Trident {
 		return imageFormat >= FIRST_DEPTH_FORMAT;
 	}
 
-	static bool isFixedOrFloatingPointColorFormat(ImageFormat imageFormat) {
+	inline bool isFixedOrFloatingPointColorFormat(ImageFormat imageFormat) {
 		static constexpr ImageFormat LAST_FIXED_OR_FLOATING_POINT_COLOR_FORMAT = ImageFormat::R8G8B8A8_UNORM;
 
 		DEBUG_ASSERT(imageFormat < ImageFormat::count);
@@ -40,11 +40,11 @@ namespace Trident {
 		return imageFormat <= LAST_FIXED_OR_FLOATING_POINT_COLOR_FORMAT;
 	}
 
-	static bool isSignedIntegerColorFormat(ImageFormat imageFormat) {
+	inline bool isSignedIntegerColorFormat(ImageFormat imageFormat) {
 		return false;
 	}
 
-	static bool isUnsignedIntegerColorFormat(ImageFormat imageFormat) {
+	inline bool isUnsignedIntegerColorFormat(ImageFormat imageFormat) {
 		static constexpr ImageFormat FIRST_UNSIGNED_INTEGER_FORMAT = ImageFormat::R32_UINT;
 		static constexpr ImageFormat LAST_UNSIGNED_INTEGER_FORMAT = ImageFormat::R32G32_UINT;
 
@@ -53,7 +53,7 @@ namespace Trident {
 		return imageFormat >= FIRST_UNSIGNED_INTEGER_FORMAT && imageFormat <= LAST_UNSIGNED_INTEGER_FORMAT;
 	}
 
-	static ImageFormat findUnormFormat(uint8 channelCount, uint8 channelBitCount) {
+	inline ImageFormat findUnormFormat(uint8 channelCount, uint8 channelBitCount) {
 		ENGINE_ASSERT(channelBitCount == 8, "Unsupported channel bit count.");
 
 		switch (channelCount) {
@@ -68,7 +68,7 @@ namespace Trident {
 		}
 	}
 
-	static uint8 getByteSize(ImageFormat imageFormat) {
+	inline uint8 getByteSize(ImageFormat imageFormat) {
 		static constexpr uint8 BYTE_SIZES[] = {
 			sizeof(uint8),
 			sizeof(uint8) * 3,
@@ -87,7 +87,7 @@ namespace Trident {
 		return BYTE_SIZES[static_cast<uint32>(imageFormat)];
 	}
 
-	static uint8 getChannelCount(ImageFormat imageFormat) {
+	inline uint8 getChannelCount(ImageFormat imageFormat) {
 		static constexpr uint8 CHANNEL_COUNTS[] = {
 			1,
 			3,

@@ -9,7 +9,7 @@
 #include "../Subprocess/EncodeGeometryAssetSubprocess.hpp"
 
 namespace Trident {
-	class BuildGeometryProcess : public Process {
+	class BuildGeometryProcess final : public Process {
 		private:
 			static constexpr uint32 PROJECT_INPUT_PATH_ARGUMENT_INDEX = 1;
 			static constexpr uint32 PROJECT_OUTPUT_PATH_ARGUMENT_INDEX = 2;

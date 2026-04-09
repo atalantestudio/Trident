@@ -18,7 +18,6 @@ namespace Trident {
 	void PhysicsSimulation2D::mergeContactManifolds(EntityContactPair2D& entityContactPair, const ContactManifold2D& newContactManifold) {
 		ContactManifold2D mergedContactManifold{};
 		uint32 contactIndex = 0;
-		uint32 previousContactIndex = 0;
 
 		while (contactIndex < newContactManifold.contactCount) {
 			const Contact2D& cNew = newContactManifold.contacts[contactIndex];
@@ -73,8 +72,10 @@ namespace Trident {
 	PhysicsSimulation2D::PhysicsSimulation2D(const Descriptor<PhysicsSimulation2D>& descriptor) :
 		scene(descriptor.scene),
 		deltaTime(static_cast<float32>(descriptor.deltaTime)),
-		inverseDeltaTime(static_cast<float32>(1.0 / descriptor.deltaTime)),
-		halfDeltaTime(static_cast<float32>(descriptor.deltaTime * 0.5))
+		inverseDeltaTime(static_cast<float32>(1.0 / descriptor.deltaTime))
+
+		// TODO: Use.
+		// halfDeltaTime(static_cast<float32>(descriptor.deltaTime * 0.5))
 	{}
 
 	void PhysicsSimulation2D::tick() {
@@ -103,8 +104,6 @@ namespace Trident {
 	}
 
 	void PhysicsSimulation2D::broadPhase() {
-		static int maxPairCount = 0;
-
 		const TagPool<DynamicEntityTag>& dynamicPool = scene->ecs.getTagPool<DynamicEntityTag>();
 		const TagPool<StaticEntityTag>& staticPool = scene->ecs.getTagPool<StaticEntityTag>();
 

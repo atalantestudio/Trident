@@ -4,7 +4,7 @@
 #pragma once
 
 namespace Trident {
-	class ProcessDefaultProcess : public Process {
+	class ProcessDefaultProcess final : public Process {
 		public:
 			sint32 main(view<void*> arguments) override {
 				return 0;

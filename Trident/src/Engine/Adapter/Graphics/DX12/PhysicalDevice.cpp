@@ -34,8 +34,8 @@ namespace Trident {
 		Trident::PhysicalDevice(adapter),
 		adapter(dxgiAdapter),
 		adapterDescriptor(adapterDescriptor),
-		name(ConvertUTF16ToUTF8(adapterDescriptor.Description)),
-		factory(factory)
+		factory(factory),
+		name(ConvertUTF16ToUTF8(adapterDescriptor.Description))
 	{
 		limits.minStorageBufferOffsetAlignment = D3D12_RAW_UAV_SRV_BYTE_ALIGNMENT;
 		limits.minUniformBufferOffsetAlignment = D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT;

@@ -96,7 +96,6 @@ namespace Trident {
 	}
 
 	void* VK::mapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer, uint64 offset, uint64 size) {
-		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		const ref<VK::MemoryAllocator> memoryAllocator = std::static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
 		const VK::BaseBuffer* _buffer = static_cast<const VK::BaseBuffer*>(buffer);
 
@@ -104,7 +103,6 @@ namespace Trident {
 	}
 
 	void VK::unmapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer) {
-		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		const ref<VK::MemoryAllocator> memoryAllocator = std::static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
 		const VK::BaseBuffer* _buffer = static_cast<const VK::BaseBuffer*>(buffer);
 

@@ -24,7 +24,7 @@ namespace Trident {
 			void execute() const final override {
 				uint32 descriptorSetLayoutOffset = 0;
 
-				for (const ref<Trident::DescriptorSet> descriptorSet : descriptorSets) {
+				for (const ref<Trident::DescriptorSet>& descriptorSet : descriptorSets) {
 					const ref<GL::DescriptorSet> glDescriptorSet = std::static_pointer_cast<GL::DescriptorSet>(descriptorSet);
 
 					uint32 bindingIndex = 0;

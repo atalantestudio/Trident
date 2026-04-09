@@ -4,7 +4,7 @@
 #pragma once
 
 namespace Trident {
-	class ProcessSIMDProcess : public Process {
+	class ProcessSIMDProcess final : public Process {
 		public:
 			sint32 main(view<void*> arguments) override {
 				sequence<uint16> offsets = {0, 2, 5, 7, 9, 11, 14, 18, 22, 23, 29, 31};

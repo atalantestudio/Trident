@@ -144,7 +144,7 @@ namespace Trident {
 
 				uint8* stagingBufferMappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
 
-				for (const ref<ImageAsset> imageAsset : imageAssets) {
+				for (const ref<ImageAsset>& imageAsset : imageAssets) {
 					std::copy(imageAsset->getData().begin(), imageAsset->getData().end(), stagingBufferMappedRange);
 
 					stagingBufferMappedRange += imageAsset->getData().count();

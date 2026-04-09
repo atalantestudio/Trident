@@ -20,7 +20,7 @@ namespace Trident {
 		bool anyPresentedColorAttachment = false;
 
 		// Check if a color attachment has is meant to be presented.
-		for (const ref<Subpass> subpass : renderPass->subpasses) {
+		for (const ref<Subpass>& subpass : renderPass->subpasses) {
 			for (const AttachmentReference& colorAttachmentReference : subpass->getColorAttachmentReferences()) {
 				if (colorAttachmentReference.index == AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
 					continue;

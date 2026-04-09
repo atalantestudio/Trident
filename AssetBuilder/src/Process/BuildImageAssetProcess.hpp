@@ -9,7 +9,7 @@
 #include "Engine/Filesystem/File/QOI.hpp"
 
 namespace Trident {
-	class BuildImageAssetProcess : public Process {
+	class BuildImageAssetProcess final : public Process {
 		public:
 			static void encodeImageAsset(const std::filesystem::path& assetOutputPath, view<char8> assetName, ImageAssetDescriptor& descriptor) {
 				descriptor.identifier = AssetLibrary::createAssetIdentifier();

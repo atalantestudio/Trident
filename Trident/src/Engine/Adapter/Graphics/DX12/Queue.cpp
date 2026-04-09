@@ -65,7 +65,7 @@ namespace Trident {
 
 		HRESULT result;
 
-		for (const ref<Trident::Swapchain> swapchain : swapchains) {
+		for (const ref<Trident::Swapchain>& swapchain : swapchains) {
 			const ref<DX12::Swapchain> _swapchain = std::static_pointer_cast<DX12::Swapchain>(swapchain);
 
 			result = _swapchain->swapChain->Present(_swapchain->syncInterval, 0);

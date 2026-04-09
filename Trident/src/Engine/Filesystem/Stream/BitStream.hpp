@@ -353,8 +353,6 @@ namespace Trident {
 				// Create a mask from the bit count.
 				const T bitCountMask = (static_cast<T>(1) << bitCount) - 1;
 
-				const BitStreamSize partToBeUpdated = static_cast<BitStreamSize>(bitCountMask) << bitOffset;
-
 				BitStreamSize* bitBuffer = pointer_cast<BitStreamSize*>(data + byteOffset);
 
 				bitBuffer[0] |= static_cast<BitStreamSize>(value & bitCountMask) << bitOffset;

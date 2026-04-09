@@ -12,7 +12,7 @@
 
 namespace Trident {
 	static bool isColorAttachment(view<ref<Subpass>> subpasses, uint32 attachmentIndex) {
-		for (const ref<Subpass> subpass : subpasses) {
+		for (const ref<Subpass>& subpass : subpasses) {
 			for (const AttachmentReference& colorAttachmentReference : subpass->getColorAttachmentReferences()) {
 				if (colorAttachmentReference.index == attachmentIndex) {
 					return true;
@@ -40,7 +40,7 @@ namespace Trident {
 
 		uint32 resolveAttachmentCount = 0;
 
-		for (const ref<Subpass> subpass : renderPass->subpasses) {
+		for (const ref<Subpass>& subpass : renderPass->subpasses) {
 			if (subpass->getRasterizationSampleCount() == 1) {
 				continue;
 			}

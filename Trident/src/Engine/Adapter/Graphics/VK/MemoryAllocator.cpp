@@ -97,7 +97,6 @@ namespace Trident {
 			}
 
 			const VkMemoryType memoryType = physicalDevice->memoryProperties.memoryTypes[memoryTypeIndex];
-			const VkMemoryHeap& memoryHeap = physicalDevice->memoryProperties.memoryHeaps[memoryType.heapIndex];
 
 			if ((memoryType.propertyFlags & memoryPropertyFlags) == memoryPropertyFlags) {
 				suitableMemoryTypeIndex = memoryTypeIndex;

@@ -172,9 +172,8 @@ namespace Trident {
 				}
 			}
 
-			const uint32 CRC = stream.read<uint32>();
-
 			// TODO: Check CRC. See https://www.w3.org/TR/2003/REC-PNG-20031110/#D-CRCAppendix.
+			stream.jump(sizeof(uint32)); // CRC
 		}
 
 		sequence<uint8> compressedData(compressedDataSize);

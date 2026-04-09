@@ -184,7 +184,6 @@ namespace Trident {
 			bindingIndex = 0;
 
 			while (bindingIndex < materialShader.descriptorSetLayoutBindings.count()) {
-				const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = materialShader.descriptorSetLayoutBindings[bindingIndex];
 				const ref<Image> image = materialImages[materialShaderIndex][bindingIndex];
 				const view<DescriptorImage> bindingDescriptorImages(&descriptorImages[materialReferenceBindingImageIndex], materials.size());
 

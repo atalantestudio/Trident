@@ -302,7 +302,7 @@ namespace Trident {
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 
-		for (const ref<Trident::Queue> queue : _device->queues) {
+		for (const ref<Trident::Queue>& queue : _device->queues) {
 			queue.~shared_ptr();
 		}
 

@@ -41,7 +41,7 @@ namespace Trident {
 
 		range<uint32, uint32> vertexPositionComponentRange = {static_cast<uint32>(offset), 0};
 
-		for (const ref<GeometryAsset> geometryAsset : geometryAssets) {
+		for (const ref<GeometryAsset>& geometryAsset : geometryAssets) {
 			const sequence<float32>& vertexPositionComponents = geometryAsset->getVertexPositionComponents();
 
 			std::copy(vertexPositionComponents.begin(), vertexPositionComponents.end(), &pointer_cast<float32*>(dynamicDataBuffer)[offset]);
@@ -51,7 +51,7 @@ namespace Trident {
 
 		range<uint32, uint32> vertexTextureCoordinateComponentRange = {static_cast<uint32>(offset), 0};
 
-		for (const ref<GeometryAsset> geometryAsset : geometryAssets) {
+		for (const ref<GeometryAsset>& geometryAsset : geometryAssets) {
 			const sequence<float32>& vertexTextureCoordinateComponents = geometryAsset->getVertexTextureCoordinateComponents();
 
 			std::copy(vertexTextureCoordinateComponents.begin(), vertexTextureCoordinateComponents.end(), &pointer_cast<float32*>(dynamicDataBuffer)[offset]);
@@ -61,7 +61,7 @@ namespace Trident {
 
 		range<uint32, uint32> vertexPositionIndexRange = {static_cast<uint32>(offset), 0};
 
-		for (const ref<GeometryAsset> geometryAsset : geometryAssets) {
+		for (const ref<GeometryAsset>& geometryAsset : geometryAssets) {
 			const sequence<uint32>& vertexPositionIndices = geometryAsset->getVertexPositionIndices();
 
 			std::copy(vertexPositionIndices.begin(), vertexPositionIndices.end(), &pointer_cast<uint32*>(dynamicDataBuffer)[offset]);

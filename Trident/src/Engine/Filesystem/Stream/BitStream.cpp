@@ -155,7 +155,7 @@ namespace Trident {
 
 			ENGINE_ASSERT(literalLengthCodeLengthCount <= MAX_LITERAL_LENGTH_CODE_LENGTH_COUNT, "The literal/length code length count is overflowing.");
 
-			for (uint16 literalLengthCodeLengthIndex = 0; literalLengthCodeLengthIndex < literalLengthCodeLengthCount;) {
+			while (literalLengthCodeLengthIndex < literalLengthCodeLengthCount) {
 				const uint8 encodedCodeLength = static_cast<uint8>(literalLengthCodeLengthDictionary.decode(*this));
 
 				ENGINE_ASSERT(encodedCodeLength <= 18, "Code length = [] is not allowed.", encodedCodeLength);

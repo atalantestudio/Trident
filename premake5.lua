@@ -24,9 +24,11 @@ workspace "Trident"
 			"User32",
 		}
 
-	filter "toolset:clang"
+	filter "toolset:clang or toolset:gcc"
 		buildoptions {
 			-- "-gcodeview",
+			"-Wno-missing-designated-field-initializers",
+			"-Wno-unused-parameter",
 		}
 
 include "Trident"

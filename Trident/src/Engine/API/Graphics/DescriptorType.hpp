@@ -17,7 +17,7 @@ namespace Trident {
 		count,
 	};
 
-	static bool isBufferDescriptorType(DescriptorType descriptorType) {
+	inline bool isBufferDescriptorType(DescriptorType descriptorType) {
 		static constexpr DescriptorType firstBufferDescriptorType = DescriptorType::UNIFORM_BUFFER;
 
 		DEBUG_ASSERT(descriptorType < DescriptorType::count);
@@ -25,7 +25,7 @@ namespace Trident {
 		return descriptorType >= firstBufferDescriptorType;
 	}
 
-	static bool isImageDescriptorType(DescriptorType descriptorType) {
+	inline bool isImageDescriptorType(DescriptorType descriptorType) {
 		static constexpr DescriptorType lastImageDescriptorType = DescriptorType::INPUT_ATTACHMENT;
 
 		DEBUG_ASSERT(descriptorType < DescriptorType::count);
@@ -33,7 +33,7 @@ namespace Trident {
 		return descriptorType <= lastImageDescriptorType;
 	}
 
-	static bool isSamplerDescriptorType(DescriptorType descriptorType) {
+	inline bool isSamplerDescriptorType(DescriptorType descriptorType) {
 		DEBUG_ASSERT(descriptorType < DescriptorType::count);
 
 		return descriptorType == DescriptorType::COMBINED_IMAGE_SAMPLER;

@@ -11,7 +11,7 @@
 #include "../Subprocess/Scene3D.hpp"
 
 namespace Trident {
-	class BuildSceneAssetProcess : public Process {
+	class BuildSceneAssetProcess final : public Process {
 		private:
 			typedef Scene2DData (*CreateScene2DFunction)();
 			typedef Scene3DData (*CreateScene3DFunction)();

@@ -94,7 +94,7 @@ namespace Trident::Lemons {
 
 		const uint32 pbrMaterialShaderIndex = scene.registerMaterialShader(pbrMaterialShader);
 
-		const uint32 lemonMaterialIndex = scene.registerMaterial({
+		scene.registerMaterial({
 			.shaderIndex = pbrMaterialShaderIndex,
 			.writeDescriptorSetBindings = {
 				{

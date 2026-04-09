@@ -34,7 +34,7 @@ namespace Trident {
 
 		ShaderStage samplerShaderStages{};
 
-		for (const ref<DescriptorSetLayout> descriptorSetLayout : descriptor.descriptorSetLayouts) {
+		for (const ref<DescriptorSetLayout>& descriptorSetLayout : descriptor.descriptorSetLayouts) {
 			if (descriptorSetLayout->bindings.count() == 0) {
 				continue;
 			}
@@ -61,7 +61,7 @@ namespace Trident {
 		sequence<D3D12_ROOT_PARAMETER1> rootParameters(rootParameterCount);
 		sequence<D3D12_DESCRIPTOR_RANGE1> descriptorRanges(viewDescriptorRangeCount + samplerDescriptorRangeCount);
 
-		for (const ref<DescriptorSetLayout> descriptorSetLayout : descriptor.descriptorSetLayouts) {
+		for (const ref<DescriptorSetLayout>& descriptorSetLayout : descriptor.descriptorSetLayouts) {
 			if (descriptorSetLayout->bindings.count() == 0) {
 				continue;
 			}

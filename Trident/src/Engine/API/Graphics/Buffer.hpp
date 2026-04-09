@@ -34,6 +34,9 @@ namespace Trident {
 			/// The offset and size must be provided in bytes.
 			void* map(uint64 offset, uint64 size) const;
 
+		private:
+			const Device* device;
+
 		// TODO: Make private.
 		public:
 			uint64 size;
@@ -43,9 +46,6 @@ namespace Trident {
 			// TODO: Store memory suballocation.
 
 			Access access = Access::NONE;
-
-		private:
-			const Device* device;
 	};
 
 	template<typename ElementType>

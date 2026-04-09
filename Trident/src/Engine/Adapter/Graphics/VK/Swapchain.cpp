@@ -31,7 +31,7 @@ namespace Trident {
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		const VK::Swapchain* _swapchain = static_cast<const VK::Swapchain*>(swapchain);
 
-		for (const ref<Trident::ImageView> imageView : _swapchain->imageViews) {
+		for (const ref<Trident::ImageView>& imageView : _swapchain->imageViews) {
 			imageView.~shared_ptr();
 		}
 
@@ -42,7 +42,7 @@ namespace Trident {
 	void VK::recreateSwapchain(const Trident::Device* device, Trident::Swapchain* swapchain, const SwapchainDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		for (const ref<Trident::ImageView> imageView : swapchain->imageViews) {
+		for (const ref<Trident::ImageView>& imageView : swapchain->imageViews) {
 			imageView.~shared_ptr();
 		}
 

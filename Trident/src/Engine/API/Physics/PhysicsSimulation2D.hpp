@@ -56,7 +56,9 @@ namespace Trident {
 
 			float32 deltaTime;
 			float32 inverseDeltaTime;
-			float32 halfDeltaTime;
+
+			// TODO: Use.
+			// float32 halfDeltaTime;
 
 			std::vector<EntityPair> entityPairs;
 			std::map<EntityPair, EntityContactPair2D> entityContactPairs;

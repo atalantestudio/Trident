@@ -7,7 +7,7 @@
 #include "Engine/ECS/Tag.hpp"
 
 namespace Trident {
-	class ProcessECSProcess : public Process {
+	class ProcessECSProcess final : public Process {
 		private:
 			struct CharacterTraits {
 				uint32 age;

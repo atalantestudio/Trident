@@ -29,8 +29,8 @@ namespace Trident {
 
 		public:
 			explicit LayerCompositor(const Window* window, const GraphicsAdapter* adapter, const ProjectDescriptor& projectDescriptor, const ApplicationProperties& applicationProperties) :
-				window(window),
 				adapter(adapter),
+				window(window),
 				verticalSync(applicationProperties.VerticalSync)
 			{
 				instance = adapter->createInstance({
@@ -107,7 +107,7 @@ namespace Trident {
 				commandEncoder->reset();
 				commandEncoder->begin();
 
-				for (const ref<Layer> layer : layers) {
+				for (const ref<Layer>& layer : layers) {
 					layer->preRender();
 					layer->render(commandEncoder, remainingFrameTime);
 					layer->postRender();

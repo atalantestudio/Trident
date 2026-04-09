@@ -69,7 +69,7 @@ namespace Trident {
 	static constexpr LPCWSTR WINDOW_CLASS_DATA_PROPERTY_STRING = L"WindowClassDataProperty";
 	static constexpr LPCWSTR WINDOW_DATA_PROPERTY_STRING = L"WindowDataProperty";
 
-	static void PrintLastError();
+	void PrintLastError();
 
 	#if defined(BUILD_MODE_DEBUG)
 		#define WIN32_ASSERT(condition) { \
@@ -82,7 +82,7 @@ namespace Trident {
 		#define WIN32_ASSERT
 	#endif
 
-	static HINSTANCE GetInstance() {
+	inline HINSTANCE GetInstance() {
 		const HINSTANCE hInstance = GetModuleHandle(nullptr);
 
 		WIN32_ASSERT(hInstance != nullptr);
@@ -92,7 +92,7 @@ namespace Trident {
 
 	// Converts an UTF-8 string to UTF-16.
 	// The string is assumed to be null-terminated.
-	static LPWSTR ConvertUTF8ToUTF16(LPCCH lpMultiByteStr) {
+	inline LPWSTR ConvertUTF8ToUTF16(LPCCH lpMultiByteStr) {
 		const sint32 cchWideChar = MultiByteToWideChar(CP_UTF8, 0, lpMultiByteStr, -1, nullptr, 0);
 
 		WIN32_ASSERT(cchWideChar > 0);
@@ -112,7 +112,7 @@ namespace Trident {
 
 	// Converts an UTF-16 string to UTF-8.
 	// The string is assumed to be null-terminated.
-	static LPSTR ConvertUTF16ToUTF8(LPCWCH lpWideCharStr) {
+	inline LPSTR ConvertUTF16ToUTF8(LPCWCH lpWideCharStr) {
 		const sint32 cbMultiByte = WideCharToMultiByte(CP_UTF8, 0, lpWideCharStr, -1, nullptr, 0, nullptr, nullptr);
 
 		WIN32_ASSERT(cbMultiByte > 0);
@@ -130,7 +130,7 @@ namespace Trident {
 		return lpMultiByteStr;
 	}
 
-	static void PrintLastError() {
+	inline void PrintLastError() {
 		const DWORD dwMessageId = GetLastError();
 		constexpr DWORD dwLanguageId = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
 

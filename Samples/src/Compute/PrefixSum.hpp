@@ -170,7 +170,7 @@ namespace Trident {
 			void render(ref<CommandEncoder> commandEncoder) const override {}
 	};
 
-	class ComputePrefixSumProcess : public Process {
+	class ComputePrefixSumProcess final : public Process {
 		public:
 			sint32 main(view<void*> arguments) override {
 				renderer.build();

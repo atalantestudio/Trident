@@ -307,17 +307,17 @@ namespace Trident {
 
 	// Returns the area of the parallelogram formed by `a` and `b`.
 	template<std::size_t C, typename T>
-	T parallelogramArea(const lyah::vec<C, T>& a, const lyah::vec<C, T>& b) {
+	inline T parallelogramArea(const lyah::vec<C, T>& a, const lyah::vec<C, T>& b) {
 		return a[0] * b[1] - a[1] * b[0];
 	}
 
 	template<typename T>
-	lyah::vec<2, T> perpendicularLeft(const lyah::vec<2, T>& a) {
+	inline lyah::vec<2, T> perpendicularLeft(const lyah::vec<2, T>& a) {
 		return {-a[1], a[0]};
 	}
 
 	template<typename T>
-	lyah::vec<2, T> perpendicularRight(const lyah::vec<2, T>& a) {
+	inline lyah::vec<2, T> perpendicularRight(const lyah::vec<2, T>& a) {
 		return {a[1], -a[0]};
 	}
 
@@ -367,7 +367,7 @@ namespace Trident {
 	}
 
 	template<typename T>
-	lyah::vec<2, T> cross2d(const lyah::vec<2, T>& a, const lyah::vec<2, T>& b, const lyah::vec<2, T>& c) {
+	inline lyah::vec<2, T> cross2d(const lyah::vec<2, T>& a, const lyah::vec<2, T>& b, const lyah::vec<2, T>& c) {
 		const lyah::vec<2, T> b_c = {b[0] * c[1], b[1] * c[0]};
 
 		return {
@@ -377,21 +377,21 @@ namespace Trident {
 	}
 
 	template<typename T>
-	lyah::vec<2, T> multiplyTransform(const lyah::vec<2, T>& a, const lyah::mat<3, 3, T>& t) {
+	inline lyah::vec<2, T> multiplyTransform(const lyah::vec<2, T>& a, const lyah::mat<3, 3, T>& t) {
 		return {
 			t[0][0] * a[0] + t[1][0] * a[1] + t[2][0],
 			t[0][1] * a[0] + t[1][1] * a[1] + t[2][1],
 		};
 	}
 
-	float32 signedDistanceLinePoint(const vec2<float32>& a, const vec2<float32>& b, const vec2<float32>& p) {
+	inline float32 signedDistanceLinePoint(const vec2<float32>& a, const vec2<float32>& b, const vec2<float32>& p) {
 		const vec2<float32> ab = b - a;
 		const vec2<float32> ap = p - a;
 
 		return parallelogramArea(ab, ap) / length(ab);
 	}
 
-	vec2<float32> edgeNormalClockwise(const vec2<float32>& a, const vec2<float32>& b) {
+	inline vec2<float32> edgeNormalClockwise(const vec2<float32>& a, const vec2<float32>& b) {
 		return perpendicularLeft(normalized(b - a));
 	}
 
@@ -399,7 +399,7 @@ namespace Trident {
 	// - fieldOfView is in radians.
 	// - coordinateSystem is 1 for left-handed and -1 for right-handed.
 	// - bias defaults to pi / 2.
-	static mat4x4<float32> perspective(float32 fieldOfView, float32 aspectRatio, float32 nearPlane, float32 farPlane, float32 coordinateSystem, float32 bias = pi<float32>() * 0.5f) {
+	inline mat4x4<float32> perspective(float32 fieldOfView, float32 aspectRatio, float32 nearPlane, float32 farPlane, float32 coordinateSystem, float32 bias = pi<float32>() * 0.5f) {
 		ENGINE_ASSERT(nearPlane > 0.0f, "Invalid near plane.");
 
 		const float32 f = tan(bias - fieldOfView * 0.5f);
