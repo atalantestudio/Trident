@@ -5,14 +5,14 @@
 
 namespace Trident {
 	static LRESULT CALLBACK DummyWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
-		return DefWindowProcW(hWnd, Msg, wParam, lParam);
+		return DefWindowProc(hWnd, Msg, wParam, lParam);
 	}
 
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
-		Win32WindowData* windowData = static_cast<Win32WindowData*>(GetPropW(hWnd, WINDOW_DATA_PROPERTY_STRING));
+		Win32WindowData* windowData = static_cast<Win32WindowData*>(GetProp(hWnd, WINDOW_DATA_PROPERTY_STRING));
 
 		if (windowData == nullptr) {
-			return DefWindowProcW(hWnd, Msg, wParam, lParam);
+			return DefWindowProc(hWnd, Msg, wParam, lParam);
 		}
 
 		switch (Msg) {
@@ -47,7 +47,7 @@ namespace Trident {
 			}
 			case WM_SETCURSOR: {
 				if (LOWORD(lParam) == HTCLIENT) {
-					const WindowClass* windowClassData = static_cast<const WindowClass*>(GetPropW(hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING));
+					const WindowClass* windowClassData = static_cast<const WindowClass*>(GetProp(hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING));
 
 					SetCursor(windowClassData->hCursor);
 
@@ -64,7 +64,7 @@ namespace Trident {
 				// ENGINE_DEBUG("Extended key = []", extendedKey);
 
 				const uint32 code = static_cast<uint32>(wParam);
-				// const uint32 scanCode = MapVirtualKeyW(code, MAPVK_VK_TO_VSC);
+				// const uint32 scanCode = MapVirtualKey(code, MAPVK_VK_TO_VSC);
 
 				windowData->keyMap[code] = true;
 
@@ -175,6 +175,6 @@ namespace Trident {
 			}
 		}
 
-		return DefWindowProcW(hWnd, Msg, wParam, lParam);
+		return DefWindowProc(hWnd, Msg, wParam, lParam);
 	}
 }

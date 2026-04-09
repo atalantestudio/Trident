@@ -83,7 +83,7 @@ namespace Trident {
 	#endif
 
 	static HINSTANCE GetInstance() {
-		const HINSTANCE hInstance = GetModuleHandleW(nullptr);
+		const HINSTANCE hInstance = GetModuleHandle(nullptr);
 
 		WIN32_ASSERT(hInstance != nullptr);
 
@@ -136,7 +136,7 @@ namespace Trident {
 
 		LPWSTR buffer = nullptr;
 
-		const DWORD nSize = FormatMessageW(
+		const DWORD nSize = FormatMessage(
 			FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 			nullptr,
 			dwMessageId,

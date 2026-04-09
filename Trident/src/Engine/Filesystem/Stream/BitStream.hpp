@@ -89,7 +89,7 @@ namespace Trident {
 				T value = *pointer_cast<const T*>(&bitBuffer);
 
 				if (static_cast<uint8>(endianness) + swapEndianness ^ static_cast<uint8>(Platform::getEndianness())) {
-					value = Stream::byteswap(value);
+					value = byteswap(value);
 				}
 
 				BitStreamSize valueStreamSize = *pointer_cast<const BitStreamSize*>(&value);

@@ -20,150 +20,150 @@ namespace Trident {
 	};
 
 	template<typename T>
-	static constexpr uint32 getAlignment();
+	constexpr uint32 getAlignment();
 
 	template<>
-	static constexpr uint32 getAlignment<sint8>() {
+	constexpr uint32 getAlignment<sint8>() {
 		return sizeof(sint32);
 	}
 
 	template<>
-	static constexpr uint32 getAlignment<uint8>() {
+	constexpr uint32 getAlignment<uint8>() {
 		return sizeof(uint32);
 	}
 
 	template<>
-	static constexpr uint32 getAlignment<sint16>() {
+	constexpr uint32 getAlignment<sint16>() {
 		return sizeof(sint32);
 	}
 
 	template<>
-	static constexpr uint32 getAlignment<uint16>() {
+	constexpr uint32 getAlignment<uint16>() {
 		return sizeof(uint32);
 	}
 
 	template<>
-	static constexpr uint32 getAlignment<sint32>() {
+	constexpr uint32 getAlignment<sint32>() {
 		return sizeof(sint32);
 	}
 
 	template<>
-	static constexpr uint32 getAlignment<uint32>() {
+	constexpr uint32 getAlignment<uint32>() {
 		return sizeof(uint32);
 	}
 
 	template<>
-	static constexpr uint32 getAlignment<float32>() {
+	constexpr uint32 getAlignment<float32>() {
 		return sizeof(float32);
 	}
 
 	/* template<>
-	static constexpr uint32 getAlignment<vec2<sint32>>() {
+	constexpr uint32 getAlignment<vec2<sint32>>() {
 		return 2 * sizeof(sint32);
 	} */
 
 	/* template<>
-	static constexpr uint32 getAlignment<vec2<uint32>>() {
+	constexpr uint32 getAlignment<vec2<uint32>>() {
 		return 2 * sizeof(uint32);
 	} */
 
 	template<>
-	static constexpr uint32 getAlignment<svec2<float32>>() {
+	constexpr uint32 getAlignment<svec2<float32>>() {
 		return 2 * sizeof(float32);
 	}
 
 	/* template<>
-	static constexpr uint32 getAlignment<vec3<sint32>>() {
+	constexpr uint32 getAlignment<vec3<sint32>>() {
 		return 4 * sizeof(sint32);
 	} */
 
 	/* template<>
-	static constexpr uint32 getAlignment<vec3<uint32>>() {
+	constexpr uint32 getAlignment<vec3<uint32>>() {
 		return 4 * sizeof(uint32);
 	} */
 
 	template<>
-	static constexpr uint32 getAlignment<svec3<float32>>() {
+	constexpr uint32 getAlignment<svec3<float32>>() {
 		return 3 * sizeof(float32);
 	}
 
 	template<>
-	static constexpr uint32 getAlignment<vec3<float32>>() {
+	constexpr uint32 getAlignment<vec3<float32>>() {
 		return 4 * sizeof(float32);
 	}
 
 	/* template<>
-	static constexpr uint32 getAlignment<vec4<sint32>>() {
+	constexpr uint32 getAlignment<vec4<sint32>>() {
 		return 4 * sizeof(sint32);
 	} */
 
 	/* template<>
-	static constexpr uint32 getAlignment<vec4<uint32>>() {
+	constexpr uint32 getAlignment<vec4<uint32>>() {
 		return 4 * sizeof(uint32);
 	} */
 
 	template<>
-	static constexpr uint32 getAlignment<vec4<float32>>() {
+	constexpr uint32 getAlignment<vec4<float32>>() {
 		return 4 * sizeof(float32);
 	}
 
 	template<>
-	static constexpr uint32 getAlignment<sint64>() {
+	constexpr uint32 getAlignment<sint64>() {
 		return sizeof(sint64);
 	}
 
 	template<>
-	static constexpr uint32 getAlignment<uint64>() {
+	constexpr uint32 getAlignment<uint64>() {
 		return sizeof(uint64);
 	}
 
 	template<>
-	static constexpr uint32 getAlignment<float64>() {
+	constexpr uint32 getAlignment<float64>() {
 		return sizeof(float64);
 	}
 
 	/* template<>
-	static constexpr uint32 getAlignment<vec2<sint64>>() {
+	constexpr uint32 getAlignment<vec2<sint64>>() {
 		return 2 * sizeof(sint64);
 	} */
 
 	/* template<>
-	static constexpr uint32 getAlignment<vec2<uint64>>() {
+	constexpr uint32 getAlignment<vec2<uint64>>() {
 		return 2 * sizeof(uint64);
 	} */
 
 	template<>
-	static constexpr uint32 getAlignment<vec2<float64>>() {
+	constexpr uint32 getAlignment<vec2<float64>>() {
 		return 2 * sizeof(float64);
 	}
 
 	/* template<>
-	static constexpr uint32 getAlignment<vec3<sint64>>() {
+	constexpr uint32 getAlignment<vec3<sint64>>() {
 		return 4 * sizeof(sint64);
 	} */
 
 	/* template<>
-	static constexpr uint32 getAlignment<vec3<uint64>>() {
+	constexpr uint32 getAlignment<vec3<uint64>>() {
 		return 4 * sizeof(uint64);
 	} */
 
 	template<>
-	static constexpr uint32 getAlignment<vec3<float64>>() {
+	constexpr uint32 getAlignment<vec3<float64>>() {
 		return 4 * sizeof(float64);
 	}
 
 	/* template<>
-	static constexpr uint32 getAlignment<vec4<sint64>>() {
+	constexpr uint32 getAlignment<vec4<sint64>>() {
 		return 4 * sizeof(sint64);
 	} */
 
 	/* template<>
-	static constexpr uint32 getAlignment<vec4<uint64>>() {
+	constexpr uint32 getAlignment<vec4<uint64>>() {
 		return 4 * sizeof(uint64);
 	} */
 
 	template<>
-	static constexpr uint32 getAlignment<vec4<float64>>() {
+	constexpr uint32 getAlignment<vec4<float64>>() {
 		return 4 * sizeof(float64);
 	}
 }

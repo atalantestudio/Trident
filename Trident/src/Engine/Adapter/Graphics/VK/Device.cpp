@@ -39,7 +39,7 @@ namespace Trident {
 	}
 
 	void VK::Device::loadProcedures() {
-		#define LOAD_DEVICE_PROCEDURE(procedure) procedure = static_cast<decltype(procedure)>(loadDeviceProcedure(device, #procedure))
+		#define LOAD_DEVICE_PROCEDURE(procedure) procedure = loadDeviceProcedure<decltype(procedure)>(device, #procedure)
 
 		LOAD_DEVICE_PROCEDURE(vkAcquireNextImageKHR);
 		LOAD_DEVICE_PROCEDURE(vkAllocateCommandBuffers);
@@ -298,7 +298,7 @@ namespace Trident {
 	void VK::destroyDevice(const Trident::Device* device) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		static const PFN_vkDestroyDevice vkDestroyDevice = static_cast<PFN_vkDestroyDevice>(loadDeviceProcedure(static_cast<const VK::Device*>(device)->device, "vkDestroyDevice"));
+		static PFN_vkDestroyDevice vkDestroyDevice = loadDeviceProcedure<PFN_vkDestroyDevice>(static_cast<const VK::Device*>(device)->device, "vkDestroyDevice");
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 

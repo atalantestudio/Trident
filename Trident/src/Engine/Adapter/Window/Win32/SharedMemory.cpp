@@ -18,7 +18,7 @@ namespace Trident {
 		Win32SharedMemoryData* sharedMemoryData = new Win32SharedMemoryData();
 
 		// Try to open file mapping.
-		sharedMemoryData->hFileMappingObject = OpenFileMappingW(
+		sharedMemoryData->hFileMappingObject = OpenFileMapping(
 			FILE_MAP_WRITE,
 			FALSE,
 			lpName
@@ -26,7 +26,7 @@ namespace Trident {
 
 		if (sharedMemoryData->hFileMappingObject == nullptr) {
 			// File mapping doesn't exist; create it.
-			sharedMemoryData->hFileMappingObject = CreateFileMappingW(
+			sharedMemoryData->hFileMappingObject = CreateFileMapping(
 				INVALID_HANDLE_VALUE,
 				nullptr,
 				PAGE_READWRITE,
@@ -51,9 +51,9 @@ namespace Trident {
 
 		WIN32_ASSERT(result != 0);
 
-		delete data;
+		delete sharedMemoryData;
 
-		data = nullptr;
+		sharedMemoryData = nullptr;
 	}
 
 	void* SharedMemory::map(uint64 offset, uint64 size) const {

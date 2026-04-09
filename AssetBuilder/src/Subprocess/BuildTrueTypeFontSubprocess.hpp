@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "Process/BuildImageAssetProcess.hpp"
-#include "Process/GenerateSDFGlyphMapProcess.hpp"
+#include "../Process/BuildImageAssetProcess.hpp"
+#include "../Process/GenerateSDFGlyphMapProcess.hpp"
 #include "../File/TTF.hpp"
 
 namespace Trident {

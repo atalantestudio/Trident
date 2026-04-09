@@ -3,6 +3,10 @@
 
 #pragma once
 
+#if !defined(UNICODE)
+	#define UNICODE
+#endif
+
 #define NOGDICAPMASKS
 #define NOVIRTUALKEYCODES
 #define NOSYSMETRICS
@@ -18,7 +22,11 @@
 #define NOKERNEL
 #define NOMEMMGR
 #define NOMETAFILE
-#define NOMINMAX
+
+#if !defined(NOMINMAX)
+	#define NOMINMAX
+#endif
+
 #define NOOPENFILE
 #define NOSCROLL
 #define NOSERVICE
@@ -33,7 +41,7 @@
 #define NODEFERWINDOWPOS
 #define NOMCX
 
-#include <Windows.h>
+#include <windows.h>
 #include <windowsx.h>
 
 // NOTE

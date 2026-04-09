@@ -5,8 +5,8 @@
 
 #include "Engine/API/Process/Process.hpp"
 
-#include "Subprocess/BuildDefaultFontSubprocess.hpp"
-#include "Subprocess/BuildTrueTypeFontSubprocess.hpp"
+#include "../Subprocess/BuildDefaultFontSubprocess.hpp"
+#include "../Subprocess/BuildTrueTypeFontSubprocess.hpp"
 
 namespace Trident {
 	class BuildFontProcess : public Process {

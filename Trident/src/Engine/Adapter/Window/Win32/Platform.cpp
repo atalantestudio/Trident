@@ -26,7 +26,7 @@ namespace Trident {
 		const LPCWSTR titleString = ConvertUTF8ToUTF16(windowName);
 		const LPCWSTR messageString = ConvertUTF8ToUTF16(&message[0]);
 
-		result = MessageBoxW(nullptr, messageString, titleString, MB_OK | MB_ICONERROR);
+		result = MessageBox(nullptr, messageString, titleString, MB_OK | MB_ICONERROR);
 
 		WIN32_ASSERT(result != 0);
 

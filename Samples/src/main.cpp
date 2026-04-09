@@ -166,7 +166,7 @@ namespace Trident {
 		}
 	}
 
-	Application* Trident::createApplication(uint32 argumentCount, char8** argumentValues) {
+	Application* createApplication(uint32 argumentCount, char8** argumentValues) {
 		ProjectDescriptor projectDescriptor{};
 		projectDescriptor.type = ProjectType::MAIN;
 		projectDescriptor.name = "Trident Sample";

@@ -9,7 +9,7 @@
 #if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
 	#include <vulkan/vulkan_win32.h>
 #else
-	#error "Unsupported operating system.'
+	#error "Unsupported operating system."
 #endif
 
 #if defined(BUILD_MODE_DEBUG)

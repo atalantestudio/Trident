@@ -81,7 +81,7 @@ namespace Trident::GL {
 		static Procedure loadWglProcedure(view<char8> procedureName) {
 			static const PlatformLibrary library = Platform::openLibrary("opengl32.dll");
 
-			return static_cast<Procedure>(library.loadProcedure(procedureName));
+			return library.loadProcedure<Procedure>(procedureName);
 		}
 	#endif
 
@@ -97,7 +97,7 @@ namespace Trident::GL {
 				return loadWglProcedure<Procedure>(procedureName);
 			}
 
-			return pointer_cast<Procedure>(procedure);
+			return function_cast<Procedure>(procedure);
 		}
 	#endif
 }

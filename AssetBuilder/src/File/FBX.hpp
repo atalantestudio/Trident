@@ -77,7 +77,9 @@ namespace Trident {
 	struct File<FileFormat::FBX> {
 		static const FBXNode* searchNodeRecursive(const std::vector<FBXNode>& NestedList, view<char8> Name, const FBXNode* ResultNode = nullptr) {
 			for (const FBXNode& Node : NestedList) {
-				if (Name == Node.Name) {
+				const view<char8> NodeName = Node.Name;
+
+				if (Name == NodeName) {
 					ResultNode = &Node;
 
 					break;

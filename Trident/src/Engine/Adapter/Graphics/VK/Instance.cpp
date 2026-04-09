@@ -49,7 +49,7 @@ namespace Trident {
 	{}
 
 	void VK::Instance::loadProcedures() {
-		#define LOAD_INSTANCE_PROCEDURE(procedure) procedure = static_cast<decltype(procedure)>(loadInstanceProcedure(instance, #procedure))
+		#define LOAD_INSTANCE_PROCEDURE(procedure) procedure = loadInstanceProcedure<decltype(procedure)>(instance, #procedure)
 
 		LOAD_INSTANCE_PROCEDURE(vkCreateDevice);
 
@@ -79,10 +79,10 @@ namespace Trident {
 		VkResult result;
 
 		// Load instance procedures.
-		#define LOAD_PROCEDURE(instance, procedure) static_cast<decltype(procedure)>(loadInstanceProcedure(instance, #procedure))
+		#define LOAD_PROCEDURE(instance, procedure) loadInstanceProcedure<decltype(procedure)>(instance, #procedure)
 
-		static const PFN_vkCreateInstance vkCreateInstance = LOAD_PROCEDURE(nullptr, vkCreateInstance);
-		static const PFN_vkEnumerateInstanceLayerProperties vkEnumerateInstanceLayerProperties = LOAD_PROCEDURE(nullptr, vkEnumerateInstanceLayerProperties);
+		static PFN_vkCreateInstance vkCreateInstance = LOAD_PROCEDURE(nullptr, vkCreateInstance);
+		static PFN_vkEnumerateInstanceLayerProperties vkEnumerateInstanceLayerProperties = LOAD_PROCEDURE(nullptr, vkEnumerateInstanceLayerProperties);
 
 		#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
 			{
@@ -185,12 +185,12 @@ namespace Trident {
 	void VK::destroyInstance(const Trident::Instance* instance) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		static const PFN_vkDestroyInstance vkDestroyInstance = static_cast<PFN_vkDestroyInstance>(loadInstanceProcedure(static_cast<const VK::Instance*>(instance)->instance, "vkDestroyInstance"));
+		static PFN_vkDestroyInstance vkDestroyInstance = loadInstanceProcedure<PFN_vkDestroyInstance>(static_cast<const VK::Instance*>(instance)->instance, "vkDestroyInstance");
 
 		const VK::Instance* _instance = static_cast<const VK::Instance*>(instance);
 
 		#if defined(DEBUG_ENABLE_MESSENGER)
-			static const PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = static_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(loadInstanceProcedure(static_cast<const VK::Instance*>(instance)->instance, "vkDestroyDebugUtilsMessengerEXT"));
+			static PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = loadInstanceProcedure<PFN_vkDestroyDebugUtilsMessengerEXT>(static_cast<const VK::Instance*>(instance)->instance, "vkDestroyDebugUtilsMessengerEXT");
 
 			vkDestroyDebugUtilsMessengerEXT(_instance->instance, _instance->debugUtilsMessenger, nullptr);
 		#endif

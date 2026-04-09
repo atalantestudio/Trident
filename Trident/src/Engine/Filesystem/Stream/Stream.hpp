@@ -4,68 +4,67 @@
 #pragma once
 
 namespace Trident {
+	template<typename T>
+	inline constexpr T byteswap(T value) {
+		switch (sizeof(T)) {
+			case 1: {
+				return value;
+			}
+			case 2: {
+				const uint16 valueInteger = *pointer_cast<const uint16*>(&value);
+
+				return *pointer_cast<const T*>(&valueInteger);
+			}
+			case 4: {
+				const uint32 valueInteger = *pointer_cast<const uint32*>(&value);
+
+				return *pointer_cast<const T*>(&valueInteger);
+			}
+			case 8: {
+				const uint64 valueInteger = *pointer_cast<const uint64*>(&value);
+
+				return *pointer_cast<const T*>(&valueInteger);
+			}
+			default: {
+				ENGINE_ASSERT(false, "Unable to byteswap value.");
+
+				return value;
+			}
+		}
+	}
+
+	template<>
+	inline sint16 byteswap(sint16 value) {
+		return _byteswap_ushort(value);
+	}
+
+	template<>
+	inline uint16 byteswap(uint16 value) {
+		return _byteswap_ushort(value);
+	}
+
+	template<>
+	inline sint32 byteswap(sint32 value) {
+		return _byteswap_ulong(value);
+	}
+
+	template<>
+	inline uint32 byteswap(uint32 value) {
+		return _byteswap_ulong(value);
+	}
+
+	template<>
+	inline sint64 byteswap(sint64 value) {
+		return _byteswap_uint64(value);
+	}
+
+	template<>
+	inline uint64 byteswap(uint64 value) {
+		return _byteswap_uint64(value);
+	}
+
 	// A generic data stream.
 	class Stream {
-		public:
-			template<typename T>
-			static constexpr T byteswap(T value) {
-				switch (sizeof(T)) {
-					case 1: {
-						return value;
-					}
-					case 2: {
-						const uint16 valueInteger = *pointer_cast<const uint16*>(&value);
-
-						return *pointer_cast<const T*>(&valueInteger);
-					}
-					case 4: {
-						const uint32 valueInteger = *pointer_cast<const uint32*>(&value);
-
-						return *pointer_cast<const T*>(&valueInteger);
-					}
-					case 8: {
-						const uint64 valueInteger = *pointer_cast<const uint64*>(&value);
-
-						return *pointer_cast<const T*>(&valueInteger);
-					}
-					default: {
-						ENGINE_ASSERT(false, "Unable to byteswap value.");
-
-						return value;
-					}
-				}
-			}
-
-			template<>
-			static sint16 byteswap(sint16 value) {
-				return _byteswap_ushort(value);
-			}
-
-			template<>
-			static uint16 byteswap(uint16 value) {
-				return _byteswap_ushort(value);
-			}
-
-			template<>
-			static sint32 byteswap(sint32 value) {
-				return _byteswap_ulong(value);
-			}
-
-			template<>
-			static uint32 byteswap(uint32 value) {
-				return _byteswap_ulong(value);
-			}
-
-			template<>
-			static sint64 byteswap(sint64 value) {
-				return _byteswap_uint64(value);
-			}
-
-			template<>
-			static uint64 byteswap(uint64 value) {
-				return _byteswap_uint64(value);
-			}
-
 		protected:
 			explicit Stream(uint64 size, Endianness endianness) :
 				size(size),

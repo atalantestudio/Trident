@@ -5,7 +5,13 @@
 
 namespace Trident {
 	inline std::ostringstream& operator <<(std::ostringstream& stream, __m128 m) {
-		const std::float_t* buffer = m.m128_f32;
+		#if COMPILER == COMPILER_MSVC
+			const std::float_t* buffer = m.m128_f32;
+		#else
+			std::float_t buffer[4];
+
+			_mm_store_ps(buffer, m);
+		#endif
 
 		stream << buffer[0] << "  " << buffer[1] << "  " << buffer[2] << "  " << buffer[3];
 
@@ -13,7 +19,13 @@ namespace Trident {
 	}
 
 	inline std::ostringstream& operator <<(std::ostringstream& stream, __m128d m) {
-		const std::double_t* buffer = m.m128d_f64;
+		#if COMPILER == COMPILER_MSVC
+			const std::double_t* buffer = m.m128d_f64;
+		#else
+			std::double_t buffer[2];
+
+			_mm_store_pd(buffer, m);
+		#endif
 
 		stream << buffer[0] << "  " << buffer[1];
 
@@ -21,7 +33,13 @@ namespace Trident {
 	}
 
 	inline std::ostringstream& operator <<(std::ostringstream& stream, __m256d m) {
-		const std::double_t* buffer = m.m256d_f64;
+		#if COMPILER == COMPILER_MSVC
+			const std::double_t* buffer = m.m256d_f64;
+		#else
+			std::double_t buffer[4];
+
+			_mm256_store_pd(buffer, m);
+		#endif
 
 		stream << buffer[0] << "  " << buffer[1] << "  " << buffer[2] << "  " << buffer[3];
 

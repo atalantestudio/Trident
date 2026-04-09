@@ -6,7 +6,7 @@
 namespace lyah {
 	// vec<2, sint32> polyfill.
 	template<>
-	struct lyah::vec<2, std::int32_t> {
+	struct vec<2, std::int32_t> {
 		public:
 			std::int32_t operator [](std::size_t index) const noexcept {
 				DEBUG_ASSERT(index < 2);
@@ -26,7 +26,7 @@ namespace lyah {
 
 	// vec<3, sint32> polyfill.
 	template<>
-	struct lyah::vec<3, std::int32_t> {
+	struct vec<3, std::int32_t> {
 		public:
 			std::int32_t operator [](std::size_t index) const noexcept {
 				DEBUG_ASSERT(index < 3);
@@ -46,7 +46,7 @@ namespace lyah {
 
 	// vec<2, uint32> polyfill.
 	template<>
-	struct lyah::vec<2, std::uint32_t> {
+	struct vec<2, std::uint32_t> {
 		public:
 			std::uint32_t operator [](std::size_t index) const noexcept {
 				DEBUG_ASSERT(index < 2);
@@ -66,7 +66,7 @@ namespace lyah {
 
 	// vec<3, uint32> polyfill.
 	template<>
-	struct lyah::vec<3, std::uint32_t> {
+	struct vec<3, std::uint32_t> {
 		public:
 			std::uint32_t operator [](std::size_t index) const noexcept {
 				DEBUG_ASSERT(index < 3);
@@ -86,7 +86,7 @@ namespace lyah {
 
 	// vec<4, uint32> polyfill.
 	template<>
-	struct lyah::vec<4, std::uint32_t> {
+	struct vec<4, std::uint32_t> {
 		public:
 			std::uint32_t operator [](std::size_t index) const noexcept {
 				DEBUG_ASSERT(index < 4);
@@ -110,13 +110,13 @@ namespace Trident {
 	using vec = lyah::vec<C, T>;
 
 	template<typename T>
-	using vec2 alignas(2 * sizeof(T)) = lyah::vec2<T>;
+	using vec2 = lyah::vec2<T>;
 
 	template<typename T>
-	using vec3 alignas(4 * sizeof(T)) = lyah::vec3<T>;
+	using vec3 = lyah::vec3<T>;
 
 	template<typename T>
-	using vec4 alignas(4 * sizeof(T)) = lyah::vec4<T>;
+	using vec4 = lyah::vec4<T>;
 
 	template<std::size_t M, std::size_t N, typename T>
 	using mat = lyah::mat<M, N, T>;
@@ -131,7 +131,7 @@ namespace Trident {
 	using mat4x4 = lyah::mat4x4<T>;
 
 	template<typename T>
-	using quat alignas(4 * sizeof(T)) = lyah::quat<T>;
+	using quat = lyah::quat<T>;
 
 	template<std::size_t C, typename T>
 	struct svec;
@@ -384,14 +384,14 @@ namespace Trident {
 		};
 	}
 
-	static float32 signedDistanceLinePoint(const vec2<float32>& a, const vec2<float32>& b, const vec2<float32>& p) {
+	float32 signedDistanceLinePoint(const vec2<float32>& a, const vec2<float32>& b, const vec2<float32>& p) {
 		const vec2<float32> ab = b - a;
 		const vec2<float32> ap = p - a;
 
 		return parallelogramArea(ab, ap) / length(ab);
 	}
 
-	static vec2<float32> edgeNormalClockwise(const vec2<float32>& a, const vec2<float32>& b) {
+	vec2<float32> edgeNormalClockwise(const vec2<float32>& a, const vec2<float32>& b) {
 		return perpendicularLeft(normalized(b - a));
 	}
 

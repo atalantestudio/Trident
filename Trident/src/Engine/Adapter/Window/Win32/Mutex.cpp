@@ -21,7 +21,7 @@ namespace Trident {
 
 		Win32MutexData* mutexData = new Win32MutexData();
 
-		mutexData->hMutex = CreateMutexW(lpMutexAttributes, bInitialOwner, lpName);
+		mutexData->hMutex = CreateMutex(lpMutexAttributes, bInitialOwner, lpName);
 
 		free((void*) lpName);
 
@@ -40,9 +40,9 @@ namespace Trident {
 
 		WIN32_ASSERT(result != 0);
 
-		delete data;
+		delete mutexData;
 
-		data = nullptr;
+		mutexData = nullptr;
 	}
 
 	void Mutex::acquire() const {

@@ -30,28 +30,6 @@ namespace Trident::VK {
 		return createRef<VK::MemoryAllocator>(device);
 	}
 
-	void* loadInstanceProcedure(VkInstance instance, view<char8> name) {
-		static const PlatformLibrary library = Platform::openLibrary("vulkan-1.dll");
-		static const PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = pointer_cast<PFN_vkGetInstanceProcAddr>(library.loadProcedure("vkGetInstanceProcAddr"));
-
-		const PFN_vkVoidFunction procedure = vkGetInstanceProcAddr(instance, &name[0]);
-
-		ADAPTER_ASSERT(procedure != nullptr, "Cannot find instance procedure \"[]\".", name);
-
-		return procedure;
-	}
-
-	void* loadDeviceProcedure(VkDevice device, view<char8> name) {
-		static const PlatformLibrary library = Platform::openLibrary("vulkan-1.dll");
-		static const PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr = pointer_cast<PFN_vkGetDeviceProcAddr>(library.loadProcedure("vkGetDeviceProcAddr"));
-
-		const PFN_vkVoidFunction procedure = vkGetDeviceProcAddr(device, &name[0]);
-
-		ADAPTER_ASSERT(procedure != nullptr, "Cannot find device procedure \"[]\".", name);
-
-		return procedure;
-	}
-
 	void bindAdapter(Trident::GraphicsAdapter* adapter) {
 		adapter->logger = ConsoleLogger(std::cout, LogLevel::ALL, "VULKAN");
 

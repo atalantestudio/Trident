@@ -41,11 +41,7 @@
 	#error "Unsupported C++ version."
 #endif
 
-#if COMPILER == COMPILER_CLANG
-	#error "Clang is not supported."
-#elif COMPILER == COMPILER_GCC
-	#error "GCC is not supported."
-#elif COMPILER == COMPILER_OTHER
+#if COMPILER == COMPILER_OTHER
 	#error "Unknown compiler."
 #endif
 
@@ -98,6 +94,7 @@ namespace Trident {
 	using atl::find;
 	using atl::trim;
 
+	using atl::function_cast;
 	using atl::pointer_cast;
 
 	using atl::max;

@@ -33,13 +33,13 @@ namespace Trident {
 		WIN32_ASSERT(result != 0);
 	}
 
-	void* PlatformLibrary::loadProcedure(view<char8> procedureName) const {
+	void* PlatformLibrary::loadWin32Procedure(view<char8> procedureName) const {
 		static const HMODULE hLibModule = static_cast<const Win32PlatformLibraryData*>(data)->hLibModule;
 
-		const FARPROC procedure = GetProcAddress(hLibModule, &procedureName[0]);
+		FARPROC procedure = GetProcAddress(hLibModule, &procedureName[0]);
 
 		WIN32_ASSERT(procedure != NULL);
 
-		return procedure;
+		return function_cast<void*>(procedure);
 	}
 }

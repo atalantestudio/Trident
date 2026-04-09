@@ -33,13 +33,13 @@ namespace Trident {
 		wndClass.lpszClassName = lpszWndClassExName;
 		wndClass.hIconSm = nullptr;
 
-		result = RegisterClassExW(&wndClass);
+		result = RegisterClassEx(&wndClass);
 
 		WIN32_ASSERT(result != 0);
 
 		windowClass = new WindowClass();
 		windowClass->className = wndClass.lpszClassName;
-		windowClass->hCursor = LoadCursorW(nullptr, IDC_ARROW);
+		windowClass->hCursor = LoadCursor(nullptr, IDC_ARROW);
 
 		WIN32_ASSERT(windowClass->hCursor != nullptr);
 	}
@@ -53,7 +53,7 @@ namespace Trident {
 
 		WIN32_ASSERT(result != 0);
 
-		result = UnregisterClassW(windowClass->className, hInstance);
+		result = UnregisterClass(windowClass->className, hInstance);
 
 		WIN32_ASSERT(result != 0);
 
@@ -95,7 +95,7 @@ namespace Trident {
 		Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
 
 		// The event loop starts automatically after creating the window.
-		windowData->hWnd = CreateWindowExW(
+		windowData->hWnd = CreateWindowEx(
 			dwExStyle,
 			windowClass->className,
 			lpWindowName,
@@ -130,11 +130,11 @@ namespace Trident {
 
 		windowData->keyMap = sequence<bool>(static_cast<uint32>(KeyCode::count));
 
-		result = SetPropW(windowData->hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING, windowClass);
+		result = SetProp(windowData->hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING, windowClass);
 
 		WIN32_ASSERT(result != 0);
 
-		result = SetPropW(windowData->hWnd, WINDOW_DATA_PROPERTY_STRING, windowData);
+		result = SetProp(windowData->hWnd, WINDOW_DATA_PROPERTY_STRING, windowData);
 
 		WIN32_ASSERT(result != 0);
 
@@ -152,11 +152,11 @@ namespace Trident {
 
 		WIN32_ASSERT(releaseDeviceContextResult != 0);
 
-		removePropertyResult = RemovePropW(windowData->hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING);
+		removePropertyResult = RemoveProp(windowData->hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING);
 
 		WIN32_ASSERT(removePropertyResult != nullptr);
 
-		removePropertyResult = RemovePropW(windowData->hWnd, WINDOW_DATA_PROPERTY_STRING);
+		removePropertyResult = RemoveProp(windowData->hWnd, WINDOW_DATA_PROPERTY_STRING);
 
 		WIN32_ASSERT(removePropertyResult != nullptr);
 
@@ -281,7 +281,7 @@ namespace Trident {
 		MSG msg;
 		BOOL result;
 
-		while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) {
+		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
 			if (msg.message == WM_QUIT) {
 				// TODO: Test this path.
 				DEBUG_ASSERT(false);
@@ -294,7 +294,7 @@ namespace Trident {
 			}
 
 			TranslateMessage(&msg);
-			DispatchMessageW(&msg);
+			DispatchMessage(&msg);
 		}
 
 		// TODO: Verify that the condition is correct.
@@ -328,7 +328,7 @@ namespace Trident {
 	void Window::updatePointerType(PointerType pointerType) const {
 		const LPWSTR lpCursorName = getWin32CursorName(pointerType);
 
-		windowClass->hCursor = LoadCursorW(nullptr, lpCursorName);
+		windowClass->hCursor = LoadCursor(nullptr, lpCursorName);
 
 		WIN32_ASSERT(windowClass->hCursor != nullptr);
 	}

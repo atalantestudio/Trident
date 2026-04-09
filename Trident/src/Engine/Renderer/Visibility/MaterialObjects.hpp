@@ -163,10 +163,13 @@ namespace Trident {
 				.size = 2 * sizeof(uint32),
 			};
 
+			// MSVC v142 (2019) emits an unresolved external symbol error when the view is defined on the fly when creating the WriteDescriptorSet.
+			const view<DescriptorBuffer> descriptorBuffers(&materialOffsetDescriptorBuffers[materialShaderIndex], 1);
+
 			writeDescriptorSets[writeDescriptorSetIndex] = {
 				.descriptorSet = materialShaderUserDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorBuffers = view<DescriptorBuffer>(&materialOffsetDescriptorBuffers[materialShaderIndex], 1),
+				.descriptorBuffers = descriptorBuffers,
 			};
 
 			writeDescriptorSetIndex += 1;

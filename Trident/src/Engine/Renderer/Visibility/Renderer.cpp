@@ -817,7 +817,7 @@ namespace Trident {
 				.bindingIndex = 9,
 				.descriptorImages = {outputDescriptorImage},
 			};
-		#endif;
+		#endif
 
 		getDevice()->updateDescriptorSets({
 			materialCountVisibilityWriteDescriptorSet,

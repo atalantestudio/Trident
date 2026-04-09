@@ -254,7 +254,7 @@ namespace Trident {
 					/* #if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
 						const std::string command = (outputPath / "../tslc/tslc.exe").string();
 
-						ShellExecuteA(0, "open", &command[0], &path[0], NULL, SW_SHOW);
+						ShellExecute(0, L"open", &command[0], &path[0], NULL, SW_SHOW);
 					#endif */
 
 					code = processFile(directoryEntry, assetOutputPath);

@@ -5,8 +5,8 @@
 
 #include "Engine/API/Process/Process.hpp"
 
-#include "File/PNG.hpp"
-#include "Process/BuildImageAssetProcess.hpp"
+#include "../File/PNG.hpp"
+#include "../Process/BuildImageAssetProcess.hpp"
 
 namespace Trident {
 	class BuildDefaultFontSubprocess {

@@ -215,7 +215,7 @@ namespace Trident {
 
 			WIN32_ASSERT(hModule != NULL);
 
-			const DXGIGetDebugInterfaceProc DXGIGetDebugInterface = pointer_cast<DXGIGetDebugInterfaceProc>(GetProcAddress(hModule, "DXGIGetDebugInterface"));
+			const DXGIGetDebugInterfaceProc DXGIGetDebugInterface = function_cast<DXGIGetDebugInterfaceProc>(GetProcAddress(hModule, "DXGIGetDebugInterface"));
 
 			WIN32_ASSERT(DXGIGetDebugInterface != NULL);
 

@@ -26,7 +26,7 @@ namespace Trident {
 
 		private:
 			template<typename T>
-			static T parseValueString(view<char8> valueString, view<char8> propertyName) {
+			T parseValueString(view<char8> valueString, view<char8> propertyName) {
 				uint32 value = 0;
 
 				for (const char8 character : valueString) {
@@ -38,7 +38,7 @@ namespace Trident {
 			}
 
 			template<>
-			static GraphicsAPI parseValueString(view<char8> valueString, view<char8> propertyName) {
+			GraphicsAPI parseValueString(view<char8> valueString, view<char8> propertyName) {
 				if (valueString == "DirectX12") {
 					return GraphicsAPI::DX12;
 				}
