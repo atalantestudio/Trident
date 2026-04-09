@@ -6,8 +6,8 @@ project "AssetBuilder"
 	staticruntime "on"
 	vectorextensions ("AVX2", "AVX", "SSE4.1", "SSE3", "SSE2", "SSE")
 
-	targetdir ("../bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("../obj/" .. outputdir .. "/%{prj.name}")
+	targetdir ("../bin/" .. OUTPUT_DIR .. "/%{prj.name}")
+	objdir ("../obj/" .. OUTPUT_DIR .. "/%{prj.name}")
 
 	dependson {
 		"Trident",
@@ -25,7 +25,7 @@ project "AssetBuilder"
 		"../Trident/vendor/lyah",
 		"../Trident/vendor/scroll",
 		"../Trident/vendor/tsl",
-		vulkansdk .. "/Include", -- TODO: Temporary
+		VULKAN_SDK .. "/Include", -- TODO: Temporary
 	}
 
 	links {
@@ -42,7 +42,7 @@ project "AssetBuilder"
 	filter "_ACTION:vs2019 or _ACTION:vs2022 or _ACTION:vs2026"
 		postbuildcommands {
 			-- If a .tpr file exists, use it as the default configuration file.
-			"IF EXIST %[%{prj.name}.tpr] {COPYFILE} %[%{prj.name}.tpr] %[../bin/" .. outputdir .. "/%{prj.name}/%{prj.name}.tpr]",
+			"IF EXIST %[%{prj.name}.tpr] {COPYFILE} %[%{prj.name}.tpr] %[../bin/" .. OUTPUT_DIR .. "/%{prj.name}/%{prj.name}.tpr]",
 		}
 
 	filter "configurations:Debug"

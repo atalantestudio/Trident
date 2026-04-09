@@ -6,8 +6,8 @@ project "Samples"
 	staticruntime "on"
 	vectorextensions ("AVX2", "AVX", "SSE4.1", "SSE3", "SSE2", "SSE")
 
-	targetdir ("../bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("../obj/" .. outputdir .. "/%{prj.name}")
+	targetdir ("../bin/" .. OUTPUT_DIR .. "/%{prj.name}")
+	objdir ("../obj/" .. OUTPUT_DIR .. "/%{prj.name}")
 
 	dependson {
 		"Trident",
@@ -25,7 +25,7 @@ project "Samples"
 		"../Trident/vendor/lyah",
 		"../Trident/vendor/scroll",
 		"../Trident/vendor/tsl",
-		vulkansdk .. "/Include", -- TODO: Temporary
+		VULKAN_SDK .. "/Include", -- TODO: Temporary
 	}
 
 	links {
@@ -42,21 +42,21 @@ project "Samples"
 	filter "_ACTION:vs2019 or _ACTION:vs2022 or _ACTION:vs2026"
 		postbuildcommands {
 			-- Create asset directories.
-			"{MKDIR} %[../bin/" .. outputdir .. "/%{prj.name}/Asset]",
-			"{MKDIR} %[../bin/" .. outputdir .. "/%{prj.name}/Asset/Font]",
-			"{MKDIR} %[../bin/" .. outputdir .. "/%{prj.name}/Asset/Geometry]",
-			"{MKDIR} %[../bin/" .. outputdir .. "/%{prj.name}/Asset/Image]",
-			"{MKDIR} %[../bin/" .. outputdir .. "/%{prj.name}/Asset/Scene]",
-			"{MKDIR} %[../bin/" .. outputdir .. "/%{prj.name}/Asset/Shader]",
-			"{MKDIR} %[../bin/" .. outputdir .. "/%{prj.name}/Trace]",
+			"{MKDIR} %[../bin/" .. OUTPUT_DIR .. "/%{prj.name}/Asset]",
+			"{MKDIR} %[../bin/" .. OUTPUT_DIR .. "/%{prj.name}/Asset/Font]",
+			"{MKDIR} %[../bin/" .. OUTPUT_DIR .. "/%{prj.name}/Asset/Geometry]",
+			"{MKDIR} %[../bin/" .. OUTPUT_DIR .. "/%{prj.name}/Asset/Image]",
+			"{MKDIR} %[../bin/" .. OUTPUT_DIR .. "/%{prj.name}/Asset/Scene]",
+			"{MKDIR} %[../bin/" .. OUTPUT_DIR .. "/%{prj.name}/Asset/Shader]",
+			"{MKDIR} %[../bin/" .. OUTPUT_DIR .. "/%{prj.name}/Trace]",
 
 			-- Copy shaders.
 			-- NOTE: IF EXIST required on cmd.exe. See https://premake.github.io/docs/Tokens#command-tokens.
-			"IF EXIST Asset/Shader {COPYDIR} Asset/Shader %[../bin/" .. outputdir .. "/%{prj.name}/Asset/Shader]",
+			"IF EXIST Asset/Shader {COPYDIR} Asset/Shader %[../bin/" .. OUTPUT_DIR .. "/%{prj.name}/Asset/Shader]",
 
 			-- If a .tpr file exists, use it as the default configuration file.
 			-- NOTE: IF EXIST required on cmd.exe. See https://premake.github.io/docs/Tokens#command-tokens.
-			"IF EXIST %[%{prj.name}.tpr] {COPYFILE} %[%{prj.name}.tpr] %[../bin/" .. outputdir .. "/%{prj.name}/%{prj.name}.tpr]",
+			"IF EXIST %[%{prj.name}.tpr] {COPYFILE} %[%{prj.name}.tpr] %[../bin/" .. OUTPUT_DIR .. "/%{prj.name}/%{prj.name}.tpr]",
 		}
 
 	filter "configurations:Debug"

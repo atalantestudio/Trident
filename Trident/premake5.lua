@@ -6,8 +6,8 @@ project "Trident"
 	staticruntime "on"
 	vectorextensions ("AVX2", "AVX", "SSE4.1", "SSE3", "SSE2", "SSE")
 
-	targetdir ("../bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("../obj/" .. outputdir .. "/%{prj.name}")
+	targetdir ("../bin/" .. OUTPUT_DIR .. "/%{prj.name}")
+	objdir ("../obj/" .. OUTPUT_DIR .. "/%{prj.name}")
 
 	pchheader "pch.hpp"
 	pchsource "src/pch.cpp"
@@ -42,11 +42,11 @@ project "Trident"
 		"vendor/lyah",
 		"vendor/scroll",
 		"vendor/tsl",
-		vulkansdk .. "/Include",
+		VULKAN_SDK .. "/Include",
 	}
 
 	libdirs {
-		vulkansdk .. "/Lib",
+		VULKAN_SDK .. "/Lib",
 	}
 
 	filter "system:windows"
