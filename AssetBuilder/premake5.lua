@@ -25,7 +25,8 @@ project "AssetBuilder"
 		"../Trident/vendor/lyah",
 		"../Trident/vendor/scroll",
 		"../Trident/vendor/tsl",
-		VULKAN_SDK .. "/Include", -- TODO: Temporary
+		-- TODO(ci/vk/sdk-inclusion): Only include in debug mode, when the validation layers are enabled.
+		VULKAN_SDK .. "/Include",
 	}
 
 	links {

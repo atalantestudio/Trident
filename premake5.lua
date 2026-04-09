@@ -4,14 +4,13 @@ VULKAN_SDK = os.getenv("VULKAN_SDK")
 workspace "Trident"
 	architecture "x86_64"
 	startproject "Samples"
+	multiprocessorcompile "on"
 
 	configurations {
 		"Debug",
 		"Profile",
 		"Release",
 	}
-
-	multiprocessorcompile "on"
 
 	filter "system:windows"
 		links {
@@ -85,7 +84,8 @@ project "tslc"
 		"Trident/vendor/lyah", -- TODO: Remove.
 		"Trident/vendor/scroll",
 		"Trident/vendor/tsl",
-		VULKAN_SDK .. "/Include", -- TODO: Remove.
+		-- TODO(ci/vk/sdk-inclusion): Only include in debug mode, when the validation layers are enabled.
+		VULKAN_SDK .. "/Include",
 	}
 
 	links {
@@ -150,7 +150,8 @@ project "tsllsp"
 		"Trident/vendor/lyah", -- TODO: Remove.
 		"Trident/vendor/scroll",
 		"Trident/vendor/tsl",
-		VULKAN_SDK .. "/Include", -- TODO: Remove.
+		-- TODO(ci/vk/sdk-inclusion): Only include in debug mode, when the validation layers are enabled.
+		VULKAN_SDK .. "/Include",
 	}
 
 	links {

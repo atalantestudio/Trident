@@ -9,7 +9,7 @@ call mingw32-make config=release -j8
 
 pushd %~dp0\..\..\
 
-set "outputdir=bin/windows_x86_64_Debug"
+set "outputdir=bin/windows_x86_64_Release"
 
 @REM If a .tpr file exists, use it as the default configuration file.
 if exist "AssetBuilder/AssetBuilder.tpr" (

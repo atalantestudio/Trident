@@ -9,7 +9,7 @@ call mingw32-make config=profile -j8
 
 pushd %~dp0\..\..\
 
-set "outputdir=bin/windows_x86_64_Debug"
+set "outputdir=bin/windows_x86_64_Profile"
 
 @REM If a .tpr file exists, use it as the default configuration file.
 if exist "AssetBuilder/AssetBuilder.tpr" (
@@ -33,7 +33,7 @@ if not exist "%outputdir%/Samples/Asset/Image" mkdir "%outputdir%/Samples/Asset/
 if not exist "%outputdir%/Samples/Asset/Scene" mkdir "%outputdir%/Samples/Asset/Scene"
 if not exist "%outputdir%/Samples/Asset/Shader" mkdir "%outputdir%/Samples/Asset/Shader"
 
-@REM Create trace directory.
+@REM Create trace output directory.
 if not exist "%outputdir%/Samples/Trace" mkdir "%outputdir%/Samples/Trace"
 
 @REM Copy shaders.

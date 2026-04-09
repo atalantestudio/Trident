@@ -25,7 +25,8 @@ project "Samples"
 		"../Trident/vendor/lyah",
 		"../Trident/vendor/scroll",
 		"../Trident/vendor/tsl",
-		VULKAN_SDK .. "/Include", -- TODO: Temporary
+		-- TODO(ci/vk/sdk-inclusion): Only include in debug mode, when the validation layers are enabled.
+		VULKAN_SDK .. "/Include",
 	}
 
 	links {
@@ -48,7 +49,6 @@ project "Samples"
 			"{MKDIR} %[../bin/" .. OUTPUT_DIR .. "/%{prj.name}/Asset/Image]",
 			"{MKDIR} %[../bin/" .. OUTPUT_DIR .. "/%{prj.name}/Asset/Scene]",
 			"{MKDIR} %[../bin/" .. OUTPUT_DIR .. "/%{prj.name}/Asset/Shader]",
-			"{MKDIR} %[../bin/" .. OUTPUT_DIR .. "/%{prj.name}/Trace]",
 
 			-- Copy shaders.
 			-- NOTE: IF EXIST required on cmd.exe. See https://premake.github.io/docs/Tokens#command-tokens.
@@ -74,6 +74,11 @@ project "Samples"
 
 		runtime "Release"
 		optimize "on"
+
+		postbuildcommands {
+			-- Create trace output directory.
+			"{MKDIR} %[../bin/" .. OUTPUT_DIR .. "/%{prj.name}/Trace]",
+		}
 
 	filter "configurations:Release"
 		defines {
