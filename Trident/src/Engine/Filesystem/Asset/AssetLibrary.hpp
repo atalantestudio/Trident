@@ -73,176 +73,8 @@ namespace Trident {
 			template<typename AssetType>
 			const std::unordered_map<sequence<char8>, uint32>& getAssetPathToIndexMap() const;
 
-			template<>
-			const std::unordered_map<sequence<char8>, uint32>& getAssetPathToIndexMap<FontAsset>() const {
-				return fontAssetPathToIndex;
-			}
-
-			template<>
-			const std::unordered_map<sequence<char8>, uint32>& getAssetPathToIndexMap<GeometryAsset>() const {
-				return geometryAssetPathToIndex;
-			}
-
-			template<>
-			const std::unordered_map<sequence<char8>, uint32>& getAssetPathToIndexMap<ImageAsset>() const {
-				return imageAssetPathToIndex;
-			}
-
-			// 2D and 3D scenes share the same index map.
-			template<>
-			const std::unordered_map<sequence<char8>, uint32>& getAssetPathToIndexMap<Scene2DAsset>() const {
-				return sceneAssetPathToIndex;
-			}
-
-			// 2D and 3D scenes share the same index map.
-			template<>
-			const std::unordered_map<sequence<char8>, uint32>& getAssetPathToIndexMap<Scene3DAsset>() const {
-				return sceneAssetPathToIndex;
-			}
-
-			template<>
-			const std::unordered_map<sequence<char8>, uint32>& getAssetPathToIndexMap<ShaderModuleAsset>() const {
-				return shaderModuleAssetPathToIndex;
-			}
-
 			template<typename AssetType>
 			void loadAsset(view<char8> path);
-
-			template<>
-			void loadAsset<FontAsset>(view<char8> path) {
-				const std::filesystem::path absolutePath = getAbsolutePath("Asset/Font", path, ".tfo");
-				const sequence<char8> assetPath = absolutePath.string();
-				const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
-
-				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
-
-				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::FONT) {
-					return;
-				}
-
-				byteStream.jump(sizeof(AssetSignature));
-
-				const ref<FontAsset> fontAsset = decodeFontAsset(path, byteStream);
-				const uint32 assetIndex = static_cast<uint32>(assets.size());
-				const sequence<char8> stem = absolutePath.stem().string();
-
-				assetIdentifierToIndex.insert({fontAsset->getIdentifier(), assetIndex});
-				fontAssetPathToIndex.insert({stem, assetIndex});
-				assets.emplace_back(fontAsset);
-			}
-
-			template<>
-			void loadAsset<GeometryAsset>(view<char8> path) {
-				const std::filesystem::path absolutePath = getAbsolutePath("Asset/Geometry", path, ".tga");
-				const sequence<char8> assetPath = absolutePath.string();
-				const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
-
-				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
-
-				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::GEOMETRY) {
-					return;
-				}
-
-				byteStream.jump(sizeof(AssetSignature));
-
-				const ref<GeometryAsset> geometryAsset = Filesystem::decodeAsset<GeometryAsset>(byteStream);
-				const uint32 assetIndex = static_cast<uint32>(assets.size());
-				const sequence<char8> stem = absolutePath.stem().string();
-
-				assetIdentifierToIndex.insert({geometryAsset->getIdentifier(), assetIndex});
-				geometryAssetPathToIndex.insert({stem, assetIndex});
-				assets.emplace_back(geometryAsset);
-			}
-
-			template<>
-			void loadAsset<ImageAsset>(view<char8> path) {
-				const std::filesystem::path absolutePath = getAbsolutePath("Asset/Image", path, ".tia");
-				const sequence<char8> assetPath = absolutePath.string();
-				const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
-
-				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
-
-				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::IMAGE) {
-					return;
-				}
-
-				const ref<ImageAsset> imageAsset = decodeImageAsset(byteStream);
-				const uint32 assetIndex = static_cast<uint32>(assets.size());
-				const sequence<char8> stem = absolutePath.stem().string();
-
-				assetIdentifierToIndex.insert({imageAsset->getIdentifier(), assetIndex});
-				imageAssetPathToIndex.insert({stem, assetIndex});
-				assets.emplace_back(imageAsset);
-			}
-
-			template<>
-			void loadAsset<Scene2DAsset>(view<char8> path) {
-				const std::filesystem::path absolutePath = getAbsolutePath("Asset/Scene", path, ".tsa");
-				const sequence<char8> assetPath = absolutePath.string();
-				const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
-
-				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
-
-				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::SCENE) {
-					return;
-				}
-
-				byteStream.jump(sizeof(AssetSignature));
-
-				const ref<Scene2DAsset> sceneAsset = decodeScene2DAsset(byteStream);
-				const uint32 assetIndex = static_cast<uint32>(assets.size());
-				const sequence<char8> stem = absolutePath.stem().string();
-
-				assetIdentifierToIndex.insert({sceneAsset->getIdentifier(), assetIndex});
-				sceneAssetPathToIndex.insert({stem, assetIndex});
-				assets.emplace_back(sceneAsset);
-			}
-
-			template<>
-			void loadAsset<Scene3DAsset>(view<char8> path) {
-				const std::filesystem::path absolutePath = getAbsolutePath("Asset/Scene", path, ".tsa");
-				const sequence<char8> assetPath = absolutePath.string();
-				const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
-
-				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
-
-				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::SCENE) {
-					return;
-				}
-
-				byteStream.jump(sizeof(AssetSignature));
-
-				const ref<Scene3DAsset> sceneAsset = decodeScene3DAsset(byteStream);
-				const uint32 assetIndex = static_cast<uint32>(assets.size());
-				const sequence<char8> stem = absolutePath.stem().string();
-
-				assetIdentifierToIndex.insert({sceneAsset->getIdentifier(), assetIndex});
-				sceneAssetPathToIndex.insert({stem, assetIndex});
-				assets.emplace_back(sceneAsset);
-			}
-
-			template<>
-			void loadAsset<ShaderModuleAsset>(view<char8> path) {
-				const std::filesystem::path absolutePath = getAbsolutePath("Asset/Shader", path, ".tsm");
-				const sequence<char8> assetPath = absolutePath.string();
-				const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
-
-				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
-
-				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::SHADER_MODULE) {
-					return;
-				}
-
-				byteStream.jump(sizeof(AssetSignature));
-
-				const ref<ShaderModuleAsset> shaderModuleAsset = decodeShaderModuleAsset(byteStream);
-				const uint32 assetIndex = static_cast<uint32>(assets.size());
-				const sequence<char8> stem = absolutePath.stem().string();
-
-				assetIdentifierToIndex.insert({shaderModuleAsset->getIdentifier(), assetIndex});
-				shaderModuleAssetPathToIndex.insert({stem, assetIndex});
-				assets.emplace_back(shaderModuleAsset);
-			}
 
 			ref<FontAsset> decodeFontAsset(view<char8> path, ByteStream<StreamOperation::READ>& byteStream) {
 				FontAssetDescriptor fontAssetDescriptor{};
@@ -530,4 +362,172 @@ namespace Trident {
 			std::unordered_map<sequence<char8>, uint32> sceneAssetPathToIndex;
 			std::unordered_map<sequence<char8>, uint32> shaderModuleAssetPathToIndex;
 	};
+
+	template<>
+	inline const std::unordered_map<sequence<char8>, uint32>& AssetLibrary::getAssetPathToIndexMap<FontAsset>() const {
+		return fontAssetPathToIndex;
+	}
+
+	template<>
+	inline const std::unordered_map<sequence<char8>, uint32>& AssetLibrary::getAssetPathToIndexMap<GeometryAsset>() const {
+		return geometryAssetPathToIndex;
+	}
+
+	template<>
+	inline const std::unordered_map<sequence<char8>, uint32>& AssetLibrary::getAssetPathToIndexMap<ImageAsset>() const {
+		return imageAssetPathToIndex;
+	}
+
+	// 2D and 3D scenes share the same index map.
+	template<>
+	inline const std::unordered_map<sequence<char8>, uint32>& AssetLibrary::getAssetPathToIndexMap<Scene2DAsset>() const {
+		return sceneAssetPathToIndex;
+	}
+
+	// 2D and 3D scenes share the same index map.
+	template<>
+	inline const std::unordered_map<sequence<char8>, uint32>& AssetLibrary::getAssetPathToIndexMap<Scene3DAsset>() const {
+		return sceneAssetPathToIndex;
+	}
+
+	template<>
+	inline const std::unordered_map<sequence<char8>, uint32>& AssetLibrary::getAssetPathToIndexMap<ShaderModuleAsset>() const {
+		return shaderModuleAssetPathToIndex;
+	}
+
+	template<>
+	inline void AssetLibrary::loadAsset<FontAsset>(view<char8> path) {
+		const std::filesystem::path absolutePath = getAbsolutePath("Asset/Font", path, ".tfo");
+		const sequence<char8> assetPath = absolutePath.string();
+		const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
+
+		ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
+
+		if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::FONT) {
+			return;
+		}
+
+		byteStream.jump(sizeof(AssetSignature));
+
+		const ref<FontAsset> fontAsset = decodeFontAsset(path, byteStream);
+		const uint32 assetIndex = static_cast<uint32>(assets.size());
+		const sequence<char8> stem = absolutePath.stem().string();
+
+		assetIdentifierToIndex.insert({fontAsset->getIdentifier(), assetIndex});
+		fontAssetPathToIndex.insert({stem, assetIndex});
+		assets.emplace_back(fontAsset);
+	}
+
+	template<>
+	inline void AssetLibrary::loadAsset<GeometryAsset>(view<char8> path) {
+		const std::filesystem::path absolutePath = getAbsolutePath("Asset/Geometry", path, ".tga");
+		const sequence<char8> assetPath = absolutePath.string();
+		const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
+
+		ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
+
+		if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::GEOMETRY) {
+			return;
+		}
+
+		byteStream.jump(sizeof(AssetSignature));
+
+		const ref<GeometryAsset> geometryAsset = Filesystem::decodeAsset<GeometryAsset>(byteStream);
+		const uint32 assetIndex = static_cast<uint32>(assets.size());
+		const sequence<char8> stem = absolutePath.stem().string();
+
+		assetIdentifierToIndex.insert({geometryAsset->getIdentifier(), assetIndex});
+		geometryAssetPathToIndex.insert({stem, assetIndex});
+		assets.emplace_back(geometryAsset);
+	}
+
+	template<>
+	inline void AssetLibrary::loadAsset<ImageAsset>(view<char8> path) {
+		const std::filesystem::path absolutePath = getAbsolutePath("Asset/Image", path, ".tia");
+		const sequence<char8> assetPath = absolutePath.string();
+		const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
+
+		ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
+
+		if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::IMAGE) {
+			return;
+		}
+
+		const ref<ImageAsset> imageAsset = decodeImageAsset(byteStream);
+		const uint32 assetIndex = static_cast<uint32>(assets.size());
+		const sequence<char8> stem = absolutePath.stem().string();
+
+		assetIdentifierToIndex.insert({imageAsset->getIdentifier(), assetIndex});
+		imageAssetPathToIndex.insert({stem, assetIndex});
+		assets.emplace_back(imageAsset);
+	}
+
+	template<>
+	inline void AssetLibrary::loadAsset<Scene2DAsset>(view<char8> path) {
+		const std::filesystem::path absolutePath = getAbsolutePath("Asset/Scene", path, ".tsa");
+		const sequence<char8> assetPath = absolutePath.string();
+		const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
+
+		ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
+
+		if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::SCENE) {
+			return;
+		}
+
+		byteStream.jump(sizeof(AssetSignature));
+
+		const ref<Scene2DAsset> sceneAsset = decodeScene2DAsset(byteStream);
+		const uint32 assetIndex = static_cast<uint32>(assets.size());
+		const sequence<char8> stem = absolutePath.stem().string();
+
+		assetIdentifierToIndex.insert({sceneAsset->getIdentifier(), assetIndex});
+		sceneAssetPathToIndex.insert({stem, assetIndex});
+		assets.emplace_back(sceneAsset);
+	}
+
+	template<>
+	inline void AssetLibrary::loadAsset<Scene3DAsset>(view<char8> path) {
+		const std::filesystem::path absolutePath = getAbsolutePath("Asset/Scene", path, ".tsa");
+		const sequence<char8> assetPath = absolutePath.string();
+		const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
+
+		ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
+
+		if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::SCENE) {
+			return;
+		}
+
+		byteStream.jump(sizeof(AssetSignature));
+
+		const ref<Scene3DAsset> sceneAsset = decodeScene3DAsset(byteStream);
+		const uint32 assetIndex = static_cast<uint32>(assets.size());
+		const sequence<char8> stem = absolutePath.stem().string();
+
+		assetIdentifierToIndex.insert({sceneAsset->getIdentifier(), assetIndex});
+		sceneAssetPathToIndex.insert({stem, assetIndex});
+		assets.emplace_back(sceneAsset);
+	}
+
+	template<>
+	inline void AssetLibrary::loadAsset<ShaderModuleAsset>(view<char8> path) {
+		const std::filesystem::path absolutePath = getAbsolutePath("Asset/Shader", path, ".tsm");
+		const sequence<char8> assetPath = absolutePath.string();
+		const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
+
+		ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
+
+		if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::SHADER_MODULE) {
+			return;
+		}
+
+		byteStream.jump(sizeof(AssetSignature));
+
+		const ref<ShaderModuleAsset> shaderModuleAsset = decodeShaderModuleAsset(byteStream);
+		const uint32 assetIndex = static_cast<uint32>(assets.size());
+		const sequence<char8> stem = absolutePath.stem().string();
+
+		assetIdentifierToIndex.insert({shaderModuleAsset->getIdentifier(), assetIndex});
+		shaderModuleAssetPathToIndex.insert({stem, assetIndex});
+		assets.emplace_back(shaderModuleAsset);
+	}
 }

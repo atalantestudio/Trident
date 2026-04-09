@@ -89,7 +89,7 @@ namespace Trident {
 				return static_cast<uint32>(colorAttachmentReferences.count());
 			}
 
-			inline view<AttachmentReference> getColorAttachmentReferences() const {
+			inline const sequence<AttachmentReference>& getColorAttachmentReferences() const {
 				return colorAttachmentReferences;
 			}
 
@@ -105,7 +105,7 @@ namespace Trident {
 				return static_cast<uint32>(inputAttachmentReferences.count());
 			}
 
-			inline view<AttachmentReference> getInputAttachmentReferences() const {
+			inline const sequence<AttachmentReference>& getInputAttachmentReferences() const {
 				return inputAttachmentReferences;
 			}
 

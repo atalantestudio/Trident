@@ -1,7 +1,10 @@
 ﻿// Copyright 2025 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-#pragma once
+// TODO(ci/gcc-include-guard)
+// #pragma once
+#if !defined(PLATFORM_LIBRARY_HPP)
+#define PLATFORM_LIBRARY_HPP
 
 namespace Trident {
 	class PlatformLibrary {
@@ -30,3 +33,5 @@ namespace Trident {
 			void* data;
 	};
 }
+
+#endif

@@ -88,7 +88,7 @@ namespace Trident {
 
 				T value = *pointer_cast<const T*>(&bitBuffer);
 
-				if (static_cast<uint8>(endianness) + swapEndianness ^ static_cast<uint8>(Platform::getEndianness())) {
+				if ((static_cast<uint8>(endianness) + swapEndianness) ^ static_cast<uint8>(Platform::getEndianness())) {
 					value = byteswap(value);
 				}
 
@@ -357,7 +357,7 @@ namespace Trident {
 
 				bitBuffer[0] |= static_cast<BitStreamSize>(value & bitCountMask) << bitOffset;
 
-				if (bitOffset + bitCount >= sizeof(BitStreamSize) * 8) {
+				if (static_cast<uint64>(bitOffset + bitCount) >= sizeof(BitStreamSize) * 8) {
 					// If the value overflows the offsetted bit buffer, continue the write beyond the bit buffer.
 					const BitStreamSize offset = sizeof(BitStreamSize) * 8 - bitOffset;
 

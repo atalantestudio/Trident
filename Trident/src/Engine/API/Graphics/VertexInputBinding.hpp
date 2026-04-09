@@ -29,15 +29,8 @@ namespace Trident {
 				return maxAlignment;
 			}
 
-			// TODO: Deprecate.
 			template<typename AttributeType>
-			constexpr void registerAttribute(view<char8> hlslSemanticName = "") {
-				registerAttribute<AttributeType>(hlslSemanticName, 0);
-			}
-
-			// TODO: Deprecate `hlslSemanticName` and `hlslSemanticIndex`.
-			template<typename AttributeType>
-			constexpr void registerAttribute(view<char8> hlslSemanticName, uint32 hlslSemanticIndex) {
+			constexpr void registerAttribute() {
 				constexpr uint32 alignment = getAlignment<AttributeType>();
 
 				uint32 remainder = offset % alignment;
@@ -50,8 +43,6 @@ namespace Trident {
 				VertexInputAttribute vertexInputAttribute{};
 				vertexInputAttribute.type = getVertexInputAttributeType<AttributeType>();
 				vertexInputAttribute.offset = offset;
-				vertexInputAttribute.hlslSemanticName = hlslSemanticName;
-				vertexInputAttribute.hlslSemanticIndex = hlslSemanticIndex;
 
 				attributes.emplace_back(vertexInputAttribute);
 
@@ -68,36 +59,6 @@ namespace Trident {
 				}
 			}
 
-			template<>
-			constexpr void registerAttribute<mat3x3<float32>>(view<char8> hlslSemanticName) {
-				registerAttribute<vec3<float32>>(hlslSemanticName, 0);
-				registerAttribute<vec3<float32>>(hlslSemanticName, 1);
-				registerAttribute<vec3<float32>>(hlslSemanticName, 2);
-			}
-
-			template<>
-			constexpr void registerAttribute<mat3x3<float64>>(view<char8> hlslSemanticName) {
-				registerAttribute<vec3<float64>>(hlslSemanticName, 0);
-				registerAttribute<vec3<float64>>(hlslSemanticName, 1);
-				registerAttribute<vec3<float64>>(hlslSemanticName, 2);
-			}
-
-			template<>
-			constexpr void registerAttribute<mat4x4<float32>>(view<char8> hlslSemanticName) {
-				registerAttribute<vec4<float32>>(hlslSemanticName, 0);
-				registerAttribute<vec4<float32>>(hlslSemanticName, 1);
-				registerAttribute<vec4<float32>>(hlslSemanticName, 2);
-				registerAttribute<vec4<float32>>(hlslSemanticName, 3);
-			}
-
-			template<>
-			constexpr void registerAttribute<mat4x4<float64>>(view<char8> hlslSemanticName) {
-				registerAttribute<vec4<float64>>(hlslSemanticName, 0);
-				registerAttribute<vec4<float64>>(hlslSemanticName, 1);
-				registerAttribute<vec4<float64>>(hlslSemanticName, 2);
-				registerAttribute<vec4<float64>>(hlslSemanticName, 3);
-			}
-
 		public:
 			// NOTE
 			// The stride may be changed manually if it goes beyond the provided attributes.
@@ -110,4 +71,34 @@ namespace Trident {
 			uint32 offset = 0;
 			uint32 maxAlignment = 0;
 	};
+
+	template<>
+	inline constexpr void VertexInputBinding::registerAttribute<mat3x3<float32>>() {
+		registerAttribute<vec3<float32>>();
+		registerAttribute<vec3<float32>>();
+		registerAttribute<vec3<float32>>();
+	}
+
+	template<>
+	inline constexpr void VertexInputBinding::registerAttribute<mat3x3<float64>>() {
+		registerAttribute<vec3<float64>>();
+		registerAttribute<vec3<float64>>();
+		registerAttribute<vec3<float64>>();
+	}
+
+	template<>
+	inline constexpr void VertexInputBinding::registerAttribute<mat4x4<float32>>() {
+		registerAttribute<vec4<float32>>();
+		registerAttribute<vec4<float32>>();
+		registerAttribute<vec4<float32>>();
+		registerAttribute<vec4<float32>>();
+	}
+
+	template<>
+	inline constexpr void VertexInputBinding::registerAttribute<mat4x4<float64>>() {
+		registerAttribute<vec4<float64>>();
+		registerAttribute<vec4<float64>>();
+		registerAttribute<vec4<float64>>();
+		registerAttribute<vec4<float64>>();
+	}
 }

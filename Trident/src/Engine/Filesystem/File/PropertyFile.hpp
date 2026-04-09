@@ -37,25 +37,6 @@ namespace Trident {
 				return static_cast<T>(value);
 			}
 
-			template<>
-			GraphicsAPI parseValueString(view<char8> valueString, view<char8> propertyName) {
-				if (valueString == "DirectX12") {
-					return GraphicsAPI::DX12;
-				}
-
-				if (valueString == "OpenGL") {
-					return GraphicsAPI::GL;
-				}
-
-				if (valueString == "Vulkan") {
-					return GraphicsAPI::VK;
-				}
-
-				ENGINE_ASSERT(false, "Invalid value \"[]\" for property \"[]\".", valueString, propertyName);
-
-				return static_cast<GraphicsAPI>(0);
-			}
-
 		public:
 			explicit PropertyFile(const sequence<char8>& data) :
 				data(data)
@@ -105,43 +86,62 @@ namespace Trident {
 				return static_cast<T>(-1);
 			}
 
-			template<>
-			view<char8> getProperty(view<char8> propertyName) {
-				const view<char8> lines = data;
-
-				index previousOffset = 0;
-				index offset = 0;
-
-				while (offset < lines.count()) {
-					offset = lines.find('\n', previousOffset);
-
-					const view<char8> line(&lines[previousOffset], offset - previousOffset);
-
-					// TODO
-					// A false positive is returned if the line contains a word that matches the start of the property name,
-					// (e.g. "SampleGroup" vs. "Sample").
-					const index propertyNameOffset = line.find(propertyName, 0);
-
-					if (propertyNameOffset < line.count()) {
-						const index valueStartOffset = line.find(':', propertyNameOffset) + 1;
-
-						ENGINE_ASSERT(valueStartOffset < line.count(), "The property file is corrupted.");
-
-						const view<char8> value(&line[valueStartOffset], line.count() - valueStartOffset);
-
-						return trim(value);
-					}
-
-					offset += 1;
-					previousOffset = offset;
-				}
-
-				ENGINE_ASSERT(false, "Could not find the value for \"[]\" in the property file.", propertyName);
-
-				return "";
-			}
-
 		private:
 			sequence<char8> data;
 	};
+
+	template<>
+	inline GraphicsAPI PropertyFile::parseValueString(view<char8> valueString, view<char8> propertyName) {
+		if (valueString == "DirectX12") {
+			return GraphicsAPI::DX12;
+		}
+
+		if (valueString == "OpenGL") {
+			return GraphicsAPI::GL;
+		}
+
+		if (valueString == "Vulkan") {
+			return GraphicsAPI::VK;
+		}
+
+		ENGINE_ASSERT(false, "Invalid value \"[]\" for property \"[]\".", valueString, propertyName);
+
+		return static_cast<GraphicsAPI>(0);
+	}
+
+	template<>
+	inline view<char8> PropertyFile::getProperty(view<char8> propertyName) {
+		const view<char8> lines = data;
+
+		index previousOffset = 0;
+		index offset = 0;
+
+		while (offset < lines.count()) {
+			offset = lines.find('\n', previousOffset);
+
+			const view<char8> line(&lines[previousOffset], offset - previousOffset);
+
+			// TODO
+			// A false positive is returned if the line contains a word that matches the start of the property name,
+			// (e.g. "SampleGroup" vs. "Sample").
+			const index propertyNameOffset = line.find(propertyName, 0);
+
+			if (propertyNameOffset < line.count()) {
+				const index valueStartOffset = line.find(':', propertyNameOffset) + 1;
+
+				ENGINE_ASSERT(valueStartOffset < line.count(), "The property file is corrupted.");
+
+				const view<char8> value(&line[valueStartOffset], line.count() - valueStartOffset);
+
+				return trim(value);
+			}
+
+			offset += 1;
+			previousOffset = offset;
+		}
+
+		ENGINE_ASSERT(false, "Could not find the value for \"[]\" in the property file.", propertyName);
+
+		return "";
+	}
 }

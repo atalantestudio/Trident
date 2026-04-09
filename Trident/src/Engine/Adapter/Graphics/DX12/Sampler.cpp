@@ -3,6 +3,8 @@
 
 #include "pch.hpp"
 
+#include "Engine/Adapter/Graphics/DX12/Base.hpp"
+
 #include "Engine/Adapter/Graphics/DX12/Filter.hpp"
 #include "Engine/Adapter/Graphics/DX12/Sampler.hpp"
 
@@ -19,7 +21,14 @@ namespace Trident {
 		sampler->descriptor.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 		sampler->descriptor.MipLODBias = 0.0f;
 		sampler->descriptor.MaxAnisotropy = 0;
-		sampler->descriptor.ComparisonFunc = D3D12_COMPARISON_FUNC_NONE;
+
+		#if COMPILER == COMPILER_GCC
+			// TODO(ci/gcc): D3D12_COMPARISON_FUNC_NONE does not seem to be in the header pulled by GCC.
+			sampler->descriptor.ComparisonFunc = static_cast<D3D12_COMPARISON_FUNC>(0);
+		#else
+			sampler->descriptor.ComparisonFunc = D3D12_COMPARISON_FUNC_NONE;
+		#endif
+
 		sampler->descriptor.BorderColor[0] = 0.0f;
 		sampler->descriptor.BorderColor[1] = 0.0f;
 		sampler->descriptor.BorderColor[2] = 0.0f;

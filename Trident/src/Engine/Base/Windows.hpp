@@ -44,7 +44,8 @@
 #include <windows.h>
 #include <windowsx.h>
 
-// NOTE
-// Load Windows 11 theme.
-// See https://learn.microsoft.com/en-us/answers/questions/1184393/when-including-comctl32-lib-causes-the-ordinal-345.
-#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df'\"")
+#if COMPILER == COMPILER_CLANG || COMPILER == COMPILER_MSVC
+	// NOTE: This loads the Windows 11 theme, which is used for error dialogs.
+	// See https://learn.microsoft.com/en-us/answers/questions/1184393/when-including-comctl32-lib-causes-the-ordinal-345.
+	#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df'\"")
+#endif

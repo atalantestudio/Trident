@@ -1,7 +1,12 @@
 ﻿// Copyright 2025 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-#pragma once
+// TODO(ci/gcc-include-guard)
+// The include order is messed up with GCC.
+// Include guards fix the issue but I'd like to keep using #pragma once.
+// #pragma once
+#if !defined(PLATFORM_HPP)
+#define PLATFORM_HPP
 
 #include "Engine/Base/Platform/PlatformLibrary.hpp"
 
@@ -39,3 +44,5 @@ namespace Trident {
 			static const char8* windowName;
 	};
 }
+
+#endif

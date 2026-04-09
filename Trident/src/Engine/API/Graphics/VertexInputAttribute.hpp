@@ -12,11 +12,6 @@ namespace Trident {
 
 		// Offset relative to the start of an element in the vertex input binding, in bytes.
 		uint32 offset;
-
-		// TODO: Fill in semantic data with info provided by TSL modules.
-		// Used by the DX12 graphics adapter.
-		view<char8> hlslSemanticName;
-		uint32 hlslSemanticIndex;
 	};
 
 	template<typename T>

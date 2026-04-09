@@ -32,7 +32,7 @@ namespace Trident {
 
 				T value = *pointer_cast<const T*>(data + byteOffset);
 
-				if (static_cast<uint8>(endianness) + swapEndianness ^ static_cast<uint8>(Platform::getEndianness())) {
+				if ((static_cast<uint8>(endianness) + swapEndianness) ^ static_cast<uint8>(Platform::getEndianness())) {
 					value = byteswap<T>(value);
 				}
 
