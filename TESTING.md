@@ -1,59 +1,93 @@
 # Testing
 
-All of the following criteria must be regularly tested:
+## Hardware
 
-- Desktop and laptop
-- All build configurations
-- All GPU types (discrete and integrated)
-- OpenGL graphics adapter
-	- All OPENGL_VERSION values
-	- All GL_SOURCE_FROM_SPIRV values
-- Vulkan graphics adapter
-- All renderers from the Samples project (GUI, Physics2D, Process, Sample)
+- Desktop (i7-13700K, 32Gb RAM, 27", 165Hz)
+- Laptop (i5-12450H, 16Gb RAM, 15.6", 144Hz)
 
-## Image formats
+## GPUs
 
-### PNG
+- Discrete
+	- AMD Radeon™ RX 7900 XTX
+	- Nvidia GeForce RTX™ 3050
+- Integrated
+	- Intel® UHD Graphics 770
+	- Intel® UHD Graphics (Core 12th Gen)
 
-- [x] ../Trident/src/Asset/Image/Quiver.png
-- [x] Asset/Image/qoi_test_images/dice.png
-- [x] Asset/Image/qoi_test_images/edgecase.png
-- [x] Asset/Image/qoi_test_images/kodim10.png
-- [x] Asset/Image/qoi_test_images/kodim23.png
-- [x] Asset/Image/qoi_test_images/qoi_logo.png
-- [x] Asset/Image/qoi_test_images/testcard.png
-- [x] Asset/Image/qoi_test_images/testcard_rgba.png
-- [x] Asset/Image/qoi_test_images/wikipedia_008.png
-- [x] Asset/Image/Baboon.png
-- [x] Asset/Image/Cameraman.png
-- [x] Asset/Image/checkerboard_cm0.png
-- [x] Asset/Image/checkerboard_cm9.png
-- [x] Asset/Image/checkerboard1.png
-- [x] Asset/Image/checkerboard2.png
-- [x] Asset/Image/graffiti.png
-- [x] Asset/Image/Horse_rgb.png
-- [x] Asset/Image/Horse_rgba.png
-- [x] Asset/Image/Lenna.png
-- [x] Asset/Image/MetallicGold.png
-- [x] Asset/Image/Pepper.png
-- [x] Asset/Image/RPGpack_sheet_2X.png
-- [x] Asset/Image/test_inflate_0.png
-- [x] Asset/Image/test_inflate_1.png
-- [x] Asset/Image/test_inflate_1b.png
-- [x] Asset/Image/test_inflate_2.png
-- [x] Asset/Image/test_inflate_9.png
-- [x] Asset/Image/test_inflate2_0.png
-- [x] Asset/Image/test_inflate2_9.png
-- [x] Asset/Image/Zelda.png
+## Compilers
 
-### QOI
+- Clang
+- MSVC v142
+- MSVC v143
+- MSVC v145
 
-- [x] Asset/Image/qoi_test_images/dice.qoi
-- [x] Asset/Image/qoi_test_images/edgecase.qoi
-- [x] Asset/Image/qoi_test_images/kodim10.qoi
-- [x] Asset/Image/qoi_test_images/kodim23.qoi
-- [x] Asset/Image/qoi_test_images/qoi_logo.qoi
-- [x] Asset/Image/qoi_test_images/testcard.qoi
-- [x] Asset/Image/qoi_test_images/testcard_rgba.qoi
-- [x] Asset/Image/qoi_test_images/wikipedia_008.qoi
-- [x] Asset/Image/test1.qoi
+## Configurations
+
+- Debug
+- Profile
+- Release
+
+## Graphics APIs
+
+- OpenGL
+- Vulkan
+- DirectX 12
+
+## AssetBuilder
+
+- Font assets
+- Image assets
+- Geometry assets
+- Scene assets
+- Shader modules assets
+
+## Samples
+
+- Compute
+	- PrefixSum
+- GUI
+	- Card
+	- Demo1
+	- Demo2
+	- Demo3
+	- DropDownMenu
+	- EventTest
+	- OptionMenu
+	- Sample
+	- Text
+	- UTF8
+- Physics2D
+	- Scene
+		- Boxes
+		- Circles
+		- Dominos
+		- Pyramid
+		- RollingBall
+		- SlidingBoxes
+		- Stacking
+		- Swing
+	- Statistics
+- Process
+	- ECS
+	- SIMD
+- Sample
+	- ArrayTexture
+	- ClearColor
+	- ColorBlend
+	- ComputeShader
+	- ComputeShaderIndirect
+	- DepthTest
+	- Gradient
+	- ImageAsset
+	- InputAttachment
+	- MipLevels
+	- Multisampling
+	- TextureArray
+	- Triangle
+	- TriangleIndexed
+	- TriangleIndexedIndirect
+	- TriangleIndirect
+- Sample3D
+	- Forward
+		- Lemons
+	- Visibility
