@@ -65,6 +65,7 @@ project "Trident"
 
 		runtime "Debug"
 		symbols "on"
+		optimize "off"
 
 		excludes "src/Engine/Profile/**"
 

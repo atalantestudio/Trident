@@ -53,6 +53,7 @@ project "AssetBuilder"
 
 		runtime "Debug"
 		symbols "on"
+		optimize "off"
 
 	filter "configurations:Profile"
 		defines {

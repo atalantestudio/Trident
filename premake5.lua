@@ -34,9 +34,6 @@ workspace "Trident"
 
 	filter "toolset:clang or toolset:gcc"
 		buildoptions {
-			-- TODO(ci/breakpoints): Make breakpoints works with Clang/GCC.
-			-- "-gcodeview",
-
 			-- "-Wextra",
 			"-Wno-unused-parameter",
 		}
@@ -44,6 +41,10 @@ workspace "Trident"
 		filter "toolset:clang"
 			buildoptions {
 				"-Wno-missing-designated-field-initializers",
+			}
+
+			linkoptions {
+				"-g",
 			}
 
 		filter "toolset:gcc"
@@ -105,6 +106,7 @@ project "tslc"
 
 		runtime "Debug"
 		symbols "on"
+		optimize "off"
 
 	filter "configurations:Profile"
 		defines {
@@ -177,6 +179,7 @@ project "tsllsp"
 
 		runtime "Debug"
 		symbols "on"
+		optimize "off"
 
 	filter "configurations:Profile"
 		defines {
