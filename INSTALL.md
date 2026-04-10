@@ -101,6 +101,8 @@ Run [scripts/Clean.bat](https://github.com/atalantestudio/Trident/tree/main/scri
 
 Make sure that whatever build tool you're using is exposed in your PATH.
 
-You may want to install the [C/C++](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools) language support extension.
+Start by installing the [C/C++](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools) language support extension.
 
-Type `F6` to open the task menu. After compiling, go to the Run and Debug panel and select a launch option according to your desired project and configuration, then type `F5` to start debugging.
+Type `Ctrl` + `Shift` + `P` to open the command menu, then select "C/C++: Select a Configuration...".
+
+Type `F6` to open the task menu. Run a Configure task and a Build task according to your desired configuration. Go to the Run and Debug panel and select the project to run, then type `F5` to start debugging.
