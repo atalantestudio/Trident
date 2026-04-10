@@ -4,7 +4,7 @@ project "Samples"
 	language "C++"
 	cppdialect "C++20"
 	staticruntime "on"
-	vectorextensions ("AVX2", "AVX", "SSE4.1", "SSE3", "SSE2", "SSE")
+	vectorextensions "AVX2"
 
 	targetdir ("../bin/" .. OUTPUT_DIR .. "/%{prj.name}")
 	objdir ("../obj/" .. OUTPUT_DIR .. "/%{prj.name}")
@@ -19,14 +19,15 @@ project "Samples"
 	}
 
 	includedirs {
+		-- TODO(ci/vk/sdk-inclusion): Only include in debug mode, when the validation layers are enabled.
+		VULKAN_SDK .. "/Include",
+
 		"../Trident/src",
 		"../Trident/vendor/API",
 		"../Trident/vendor/Base",
 		"../Trident/vendor/lyah",
 		"../Trident/vendor/scroll",
 		"../Trident/vendor/tsl",
-		-- TODO(ci/vk/sdk-inclusion): Only include in debug mode, when the validation layers are enabled.
-		VULKAN_SDK .. "/Include",
 	}
 
 	links {

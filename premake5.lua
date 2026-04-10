@@ -1,5 +1,5 @@
-OUTPUT_DIR = "%{cfg.system}_%{cfg.architecture}_%{cfg.buildcfg}"
 VULKAN_SDK = os.getenv("VULKAN_SDK")
+OUTPUT_DIR = "%{cfg.system}_%{cfg.architecture}_%{cfg.buildcfg}"
 
 workspace "Trident"
 	architecture "x86_64"
@@ -63,7 +63,7 @@ project "tslc"
 	language "C++"
 	cppdialect "C++20"
 	staticruntime "on"
-	vectorextensions ("AVX2", "AVX", "SSE4.1", "SSE3", "SSE2", "SSE")
+	vectorextensions "AVX2"
 
 	targetdir ("bin/" .. OUTPUT_DIR .. "/%{prj.name}")
 	objdir ("obj/" .. OUTPUT_DIR .. "/%{prj.name}")
@@ -82,14 +82,15 @@ project "tslc"
 	}
 
 	includedirs {
-		"Trident/src",
-		"Trident/vendor/API", -- TODO: Remove.
-		"Trident/vendor/Base",
-		"Trident/vendor/lyah", -- TODO: Remove.
-		"Trident/vendor/scroll",
-		"Trident/vendor/tsl",
 		-- TODO(ci/vk/sdk-inclusion): Only include in debug mode, when the validation layers are enabled.
 		VULKAN_SDK .. "/Include",
+
+		"Trident/src",
+		"Trident/vendor/API",
+		"Trident/vendor/Base",
+		"Trident/vendor/lyah",
+		"Trident/vendor/scroll",
+		"Trident/vendor/tsl",
 	}
 
 	links {
@@ -130,7 +131,7 @@ project "tsllsp"
 	language "C++"
 	cppdialect "C++20"
 	staticruntime "on"
-	vectorextensions ("AVX2", "AVX", "SSE4.1", "SSE3", "SSE2", "SSE")
+	vectorextensions "AVX2"
 
 	targetdir ("bin/" .. OUTPUT_DIR .. "/%{prj.name}")
 	objdir ("obj/" .. OUTPUT_DIR .. "/%{prj.name}")
@@ -149,14 +150,15 @@ project "tsllsp"
 	}
 
 	includedirs {
-		"Trident/src",
-		"Trident/vendor/API", -- TODO: Remove.
-		"Trident/vendor/Base",
-		"Trident/vendor/lyah", -- TODO: Remove.
-		"Trident/vendor/scroll",
-		"Trident/vendor/tsl",
 		-- TODO(ci/vk/sdk-inclusion): Only include in debug mode, when the validation layers are enabled.
 		VULKAN_SDK .. "/Include",
+
+		"Trident/src",
+		"Trident/vendor/API",
+		"Trident/vendor/Base",
+		"Trident/vendor/lyah",
+		"Trident/vendor/scroll",
+		"Trident/vendor/tsl",
 	}
 
 	links {
@@ -166,7 +168,7 @@ project "tsllsp"
 	filter "toolset:msc-v142 or toolset:msc-v143 or toolset:msc-v145"
 		postbuildcommands {
 			-- TODO(debug-only): Test LSP server executable inside IDE.
-			-- "{COPYFILE} %[bin/" .. outputdir .. "/%{prj.name}/%{prj.name}.exe] C:/Users/Mattéo/.vscode/extensions/tsl/src/lsp.exe", -- TODO: (debug-only)
+			-- "{COPYFILE} %[bin/" .. outputdir .. "/%{prj.name}/%{prj.name}.exe] C:/Users/Mattéo/.vscode/extensions/tsl/src/lsp.exe",
 		}
 
 	filter "system:windows"
