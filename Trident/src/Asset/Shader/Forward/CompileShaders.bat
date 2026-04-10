@@ -1,1 +1,0 @@
-"%VULKAN_SDK%\Bin\glslc.exe" -fshader-stage=vert Forward.vert.glsl -o Forward.vert.spv
