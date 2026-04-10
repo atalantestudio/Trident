@@ -8,17 +8,6 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	static constexpr index ENABLED_LAYER_COUNT = 1;
-
-	// TODO: Expose to the client side.
-	static constexpr const char8* ENABLED_LAYERS[ENABLED_LAYER_COUNT] = {
-		#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
-			"VK_LAYER_KHRONOS_validation",
-		#endif
-	};
-
-	static constexpr view<const char8*> ENABLED_LAYER_NAMES = view<const char8*>(ENABLED_LAYERS, ENABLED_LAYER_COUNT);
-
 	#if defined(DEBUG_ENABLE_MESSENGER)
 		static VkBool32 debugUtilsMessengerUserCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
 			switch (messageSeverity) {
@@ -77,6 +66,13 @@ namespace Trident {
 	}
 
 	ref<Trident::Instance> VK::createInstance(const Trident::GraphicsAdapter* adapter, const InstanceDescriptor& descriptor) {
+		// TODO: Expose to the client side.
+		static const sequence<const char8*> ENABLED_LAYER_NAMES = {
+			#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
+				"VK_LAYER_KHRONOS_validation",
+			#endif
+		};
+
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		ref<VK::Instance> instance = createRef<VK::Instance>(adapter);

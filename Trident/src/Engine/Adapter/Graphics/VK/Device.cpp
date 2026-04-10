@@ -230,7 +230,7 @@ namespace Trident {
 		static constexpr float32 DEFAULT_QUEUE_PRIORITY = 1.0f;
 
 		// TODO: Expose to the client side.
-		static const view<const char8*> ENABLED_EXTENSION_NAMES = {
+		static const sequence<const char8*> ENABLED_EXTENSION_NAMES = {
 			VK_KHR_MAINTENANCE_1_EXTENSION_NAME,
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 		};
