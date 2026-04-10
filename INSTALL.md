@@ -1,5 +1,11 @@
 # Installation
 
+Trident can be compiled on Windows with Clang/GCC (through `mingw32-make`) and MSVC 2019/2022/2026.
+
+
+
+## Cloning
+
 Clone the repository, preferably with the `--recurse-submodules` option:
 
 ```sh
@@ -17,11 +23,9 @@ git submodule update --init --recursive
 
 
 
-## Building
+## Configuring
 
 Trident comes packaged with Premake 5.0 beta 8.
-
-Trident can be compiled on Windows with Clang/GCC (through `mingw32-make`) and MSVC 2019/2022/2026.
 
 > [!WARNING]
 > GCC support is broken, although the project compiles and links fine. See https://github.com/atalantestudio/Trident/issues/59.
@@ -39,7 +43,7 @@ To generate the project files, run the script according to your version of the b
 
 
 
-## Compiling
+## Building
 
 ### Clang
 
@@ -67,23 +71,13 @@ Type `Ctrl` + `Shift` + `B` to build the project, then type `F5` to start debugg
 
 
 
-## Compiling shaders
+## Building the shaders
 
-<mark>**TODO**</mark>
+Vulkan and OpenGL 4.6 (if `GL_SOURCE_FROM_SPIRV` is enabled) require SPIR-V binaries.
 
-<!-- If using the Vulkan adapter (or the OpenGL adapter with `GL_SOURCE_FROM_SPIRV`), you will need to compile the GLSL shaders to SPIR-V binaries.
+Run [scripts/BuildShaders.bat](https://github.com/atalantestudio/Trident/tree/main/scripts/BuildShaders.bat) to compile the GLSL shaders to SPIR-V. This will generate the binaries inside the current asset directory.
 
-The engine features several `CompileShaders.bat` scripts that compile a batch of GLSL shaders at once. They can be found in the following directories:
-- `Trident/src/Asset/Shader/GUI`: subcomponents/glyph subcomponents
-- `AssetBuilder/Asset/Shader`: vector glyph rasterization and distance field generation
-- `Samples/Asset/Shader/Base`: generic shaders
-- `Samples/Asset/Shader/Physics2D`: physics demo
-- `Samples/Asset/Shader/Sample`: rendering samples
-- `Samples/Asset/Shader/Visibility`: Visibility renderer
-
-Then, run the project. The property file will automatically be created, and you should see a window open with the selected sample.
-
-If not, create the `SampleGroup` property in the .tpr file and try again. -->
+Once a build is done, the Asset/Shader directory will be copied to the output directory next to the executable.
 
 
 
