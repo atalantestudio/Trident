@@ -2,89 +2,31 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "Run Samples (Debug)",
+			"name": "Run AssetBuilder",
 			"type": "cppvsdbg",
 			"request": "launch",
-			"program": "${workspaceFolder}/bin/windows_x86_64_Debug/Samples/Samples.exe",
-			"args": [],
-			"stopAtEntry": false,
-			"cwd": "${workspaceFolder}/bin/windows_x86_64_Debug/Samples",
-			"environment": [],
-			"console": "integratedTerminal"
-		},
-		{
-			"name": "Run Samples (Profile)",
-			"type": "cppvsdbg",
-			"request": "launch",
-			"program": "${workspaceFolder}/bin/windows_x86_64_Profile/Samples/Samples.exe",
-			"args": [],
-			"stopAtEntry": false,
-			"cwd": "${workspaceFolder}/bin/windows_x86_64_Profile/Samples",
-			"environment": [],
-			"console": "integratedTerminal"
-		},
-		{
-			"name": "Run Samples (Release)",
-			"type": "cppvsdbg",
-			"request": "launch",
-			"program": "${workspaceFolder}/bin/windows_x86_64_Release/Samples/Samples.exe",
-			"args": [],
-			"stopAtEntry": false,
-			"cwd": "${workspaceFolder}/bin/windows_x86_64_Release/Samples",
-			"environment": [],
-			"console": "integratedTerminal"
-		},
-		{
-			"name": "Run AssetBuilder (Debug)",
-			"type": "cppvsdbg",
-			"request": "launch",
-			"program": "${workspaceFolder}/bin/windows_x86_64_Debug/AssetBuilder/AssetBuilder.exe",
+			"program": "${workspaceFolder}/bin/windows_x86_64_${command:cpptools.activeConfigName}/AssetBuilder/AssetBuilder.exe",
 			"args": [
 				"${workspaceFolder}/Samples",
-				"${workspaceFolder}/bin/windows_x86_64_Debug/Samples",
+				"${workspaceFolder}/bin/windows_x86_64_${command:cpptools.activeConfigName}/Samples",
 			],
-			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}/AssetBuilder",
-			"environment": [],
 			"console": "integratedTerminal"
 		},
 		{
-			"name": "Run AssetBuilder (Profile)",
+			"name": "Run Samples",
 			"type": "cppvsdbg",
 			"request": "launch",
-			"program": "${workspaceFolder}/bin/windows_x86_64_Profile/AssetBuilder/AssetBuilder.exe",
-			"args": [
-				"${workspaceFolder}/Samples",
-				"${workspaceFolder}/bin/windows_x86_64_Profile/Samples",
-			],
-			"stopAtEntry": false,
-			"cwd": "${workspaceFolder}/AssetBuilder",
-			"environment": [],
+			"program": "${workspaceFolder}/bin/windows_x86_64_${command:cpptools.activeConfigName}/Samples/Samples.exe",
+			"cwd": "${workspaceFolder}/bin/windows_x86_64_${command:cpptools.activeConfigName}/Samples",
 			"console": "integratedTerminal"
 		},
 		{
-			"name": "Run AssetBuilder (Release)",
+			"name": "Run TSL LSP Server",
 			"type": "cppvsdbg",
 			"request": "launch",
-			"program": "${workspaceFolder}/bin/windows_x86_64_Release/AssetBuilder/AssetBuilder.exe",
-			"args": [
-				"${workspaceFolder}/Samples",
-				"${workspaceFolder}/bin/windows_x86_64_Release/Samples",
-			],
-			"stopAtEntry": false,
-			"cwd": "${workspaceFolder}/AssetBuilder",
-			"environment": [],
-			"console": "integratedTerminal"
-		},
-		{
-			"name": "Run TSL LSP Server (Debug)",
-			"type": "cppvsdbg",
-			"request": "launch",
-			"program": "${workspaceFolder}/bin/windows_x86_64_Debug/tsllsp/tsllsp.exe",
-			"args": [],
-			"stopAtEntry": false,
+			"program": "${workspaceFolder}/bin/windows_x86_64_${command:cpptools.activeConfigName}/tsllsp/tsllsp.exe",
 			"cwd": "${workspaceFolder}/Trident/vendor/tsl",
-			"environment": [],
 			"console": "integratedTerminal"
 		}
 	]

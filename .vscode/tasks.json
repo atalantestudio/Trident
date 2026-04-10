@@ -2,84 +2,122 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "Generate Windows Project Files (Visual Studio 2026)",
+			"label": "Configure (clang)",
 			"type": "process",
-			"command": "scripts/Windows/premake5_vs2026.bat",
+			"command": "scripts/premake5_clang.bat",
 			"group": {
 				"kind": "build"
 			},
 			"presentation": {
-				"clear": true,
+				"echo": false,
+				"group": "Configure",
+				"showReuseMessage": false
+			}
+		},
+		{
+			"label": "Configure (vs2019)",
+			"type": "process",
+			"command": "scripts/premake5_vs2019.bat",
+			"group": {
+				"kind": "build"
+			},
+			"presentation": {
+				"echo": false,
+				"group": "Configure",
+				"showReuseMessage": false
+			}
+		},
+		{
+			"label": "Configure (vs2022)",
+			"type": "process",
+			"command": "scripts/premake5_vs2022.bat",
+			"group": {
+				"kind": "build"
+			},
+			"presentation": {
+				"echo": false,
+				"group": "Configure",
+				"showReuseMessage": false
+			}
+		},
+		{
+			"label": "Configure (vs2026)",
+			"type": "process",
+			"command": "scripts/premake5_vs2026.bat",
+			"group": {
+				"kind": "build"
+			},
+			"presentation": {
+				"echo": false,
+				"group": "Configure",
+				"showReuseMessage": false
+			}
+		},
+		{
+			"label": "Build (clang)",
+			"type": "process",
+			"command": "scripts/${command:cpptools.activeConfigName}/mingw32-make.bat",
+			"group": {
+				"kind": "build"
+			},
+			"presentation": {
+				"echo": false,
+				"group": "Build",
 				"showReuseMessage": false
 			},
 			"problemMatcher": "$msCompile"
 		},
 		{
-			"label": "Build (Debug)",
+			"label": "Build (vs2019)",
 			"type": "process",
-			"command": "MSBuild.exe",
-			"args": [
-				"Trident.slnx",
-				"/t:Build",
-				"/property:Configuration=Debug"
-			],
+			"command": "scripts/${command:cpptools.activeConfigName}/vs2019.bat",
 			"group": {
 				"kind": "build"
 			},
 			"presentation": {
+				"echo": false,
 				"group": "Build",
-				"clear": true,
 				"showReuseMessage": false
 			},
 			"problemMatcher": "$msCompile"
 		},
 		{
-			"label": "Build (Profile)",
+			"label": "Build (vs2022)",
 			"type": "process",
-			"command": "MSBuild.exe",
-			"args": [
-				"Trident.slnx",
-				"/t:Build",
-				"/property:Configuration=Profile"
-			],
+			"command": "scripts/${command:cpptools.activeConfigName}/vs2022.bat",
 			"group": {
 				"kind": "build"
 			},
 			"presentation": {
+				"echo": false,
 				"group": "Build",
-				"clear": true,
 				"showReuseMessage": false
 			},
 			"problemMatcher": "$msCompile"
 		},
 		{
-			"label": "Build (Release)",
+			"label": "Build (vs2026)",
 			"type": "process",
-			"command": "MSBuild.exe",
-			"args": [
-				"Trident.slnx",
-				"/t:Build",
-				"/property:Configuration=Release"
-			],
+			"command": "scripts/${command:cpptools.activeConfigName}/vs2026.bat",
 			"group": {
 				"kind": "build"
 			},
 			"presentation": {
+				"echo": false,
 				"group": "Build",
-				"clear": true,
 				"showReuseMessage": false
 			},
 			"problemMatcher": "$msCompile"
 		},
 		{
 			"label": "Clean",
-			"type": "shell",
-			"command": "rm -rf .vs && rm -rf bin && rm -rf obj",
+			"type": "process",
+			"command": "scripts/Clean.bat",
 			"group": {
 				"kind": "build"
 			},
 			"presentation": {
-				"clear": true,
+				"echo": false,
 				"showReuseMessage": false
 			}
 		}
