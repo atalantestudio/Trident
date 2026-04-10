@@ -37,8 +37,11 @@ namespace Trident {
 		materialFragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		materialFragmentShaderModuleDescriptor.entryPoint = "main";
 
-		ColorBlendAttachment colorBlendAttachment{};
-		colorBlendAttachment.blend = false;
+		const sequence<ColorBlendAttachment> colorBlendAttachments = {
+			{
+				.blend = false,
+			},
+		};
 
 		GraphicsPipelineDescriptor materialPipelineDescriptor{};
 		materialPipelineDescriptor.vertexInputBindings = {instanceInputBinding};
@@ -49,7 +52,7 @@ namespace Trident {
 		materialPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		materialPipelineDescriptor.lineWidth = 1.0f;
 		materialPipelineDescriptor.minSampleShading = 0.0f;
-		materialPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+		materialPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
 		materialPipelineDescriptor.depthStencilState.depthTest = true;
 		materialPipelineDescriptor.depthStencilState.depthWrite = true;
 		materialPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::LESS;

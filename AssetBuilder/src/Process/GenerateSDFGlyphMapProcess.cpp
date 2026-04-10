@@ -526,54 +526,52 @@ namespace Trident {
 		DescriptorImage glyphDescriptorImage{};
 		glyphDescriptorImage.imageView = glyphImageView;
 		glyphDescriptorImage.imageLayout = ImageLayout::GENERAL;
+		glyphDescriptorImage.sampler = nullptr;
 
 		DescriptorImage glyphMapDescriptorImage{};
 		glyphMapDescriptorImage.imageView = glyphMapImageView;
 		glyphMapDescriptorImage.imageLayout = ImageLayout::GENERAL;
+		glyphMapDescriptorImage.sampler = nullptr;
 
-		WriteDescriptorSet glyphImageFontWriteDescriptorSet{};
-		glyphImageFontWriteDescriptorSet.descriptorSet = glyphImageDescriptorSet;
-		glyphImageFontWriteDescriptorSet.bindingIndex = 0;
-		glyphImageFontWriteDescriptorSet.descriptorBuffers = {fontDescriptorBuffer};
+		const sequence<WriteDescriptorSet> writeDescriptorSets = {
+			{
+				.descriptorSet = glyphImageDescriptorSet,
+				.bindingIndex = 0,
+				.descriptorBuffers = {fontDescriptorBuffer},
+			},
+			{
+				.descriptorSet = glyphImageDescriptorSet,
+				.bindingIndex = 1,
+				.descriptorBuffers = {glyphDescriptorBuffer},
+			},
+			{
+				.descriptorSet = glyphImageDescriptorSet,
+				.bindingIndex = 2,
+				.descriptorImages = {glyphDescriptorImage},
+			},
+			{
+				.descriptorSet = glyphSdfDescriptorSet,
+				.bindingIndex = 0,
+				.descriptorImages = {glyphDescriptorImage},
+			},
+			{
+				.descriptorSet = glyphSdfDescriptorSet,
+				.bindingIndex = 1,
+				.descriptorImages = {glyphMapDescriptorImage},
+			},
+			{
+				.descriptorSet = glyphSdfDescriptorSet,
+				.bindingIndex = 2,
+				.descriptorBuffers = {fontDescriptorOffsetBuffer},
+			},
+			{
+				.descriptorSet = glyphSdfDescriptorSet,
+				.bindingIndex = 3,
+				.descriptorBuffers = {glyphOffsetDescriptorBuffer},
+			},
+		};
 
-		WriteDescriptorSet glyphImageGlyphBufferWriteDescriptorSet{};
-		glyphImageGlyphBufferWriteDescriptorSet.descriptorSet = glyphImageDescriptorSet;
-		glyphImageGlyphBufferWriteDescriptorSet.bindingIndex = 1;
-		glyphImageGlyphBufferWriteDescriptorSet.descriptorBuffers = {glyphDescriptorBuffer};
-
-		WriteDescriptorSet glyphImageGlyphImageWriteDescriptorSet{};
-		glyphImageGlyphImageWriteDescriptorSet.descriptorSet = glyphImageDescriptorSet;
-		glyphImageGlyphImageWriteDescriptorSet.bindingIndex = 2;
-		glyphImageGlyphImageWriteDescriptorSet.descriptorImages = {glyphDescriptorImage};
-
-		WriteDescriptorSet glyphSdfGlyphImageWriteDescriptorSet{};
-		glyphSdfGlyphImageWriteDescriptorSet.descriptorSet = glyphSdfDescriptorSet;
-		glyphSdfGlyphImageWriteDescriptorSet.bindingIndex = 0;
-		glyphSdfGlyphImageWriteDescriptorSet.descriptorImages = {glyphDescriptorImage};
-
-		WriteDescriptorSet glyphSdfGlyphMapWriteDescriptorSet{};
-		glyphSdfGlyphMapWriteDescriptorSet.descriptorSet = glyphSdfDescriptorSet;
-		glyphSdfGlyphMapWriteDescriptorSet.bindingIndex = 1;
-		glyphSdfGlyphMapWriteDescriptorSet.descriptorImages = {glyphMapDescriptorImage};
-
-		WriteDescriptorSet glyphSdfFontWriteDescriptorSet{};
-		glyphSdfFontWriteDescriptorSet.descriptorSet = glyphSdfDescriptorSet;
-		glyphSdfFontWriteDescriptorSet.bindingIndex = 2;
-		glyphSdfFontWriteDescriptorSet.descriptorBuffers = {fontDescriptorOffsetBuffer};
-
-		WriteDescriptorSet glyphSdfGlyphOffsetWriteDescriptorSet{};
-		glyphSdfGlyphOffsetWriteDescriptorSet.descriptorSet = glyphSdfDescriptorSet;
-		glyphSdfGlyphOffsetWriteDescriptorSet.bindingIndex = 3;
-		glyphSdfGlyphOffsetWriteDescriptorSet.descriptorBuffers = {glyphOffsetDescriptorBuffer};
-
-		Renderer::getDevice()->updateDescriptorSets({
-			glyphImageFontWriteDescriptorSet,
-			glyphImageGlyphBufferWriteDescriptorSet,
-			glyphImageGlyphImageWriteDescriptorSet,
-			glyphSdfGlyphImageWriteDescriptorSet,
-			glyphSdfGlyphMapWriteDescriptorSet,
-			glyphSdfFontWriteDescriptorSet,
-			glyphSdfGlyphOffsetWriteDescriptorSet,
-		});
+		// TODO: Obtain a device from LayerCompositor/GraphicsAdapter.
+		Renderer::getDevice()->updateDescriptorSets(writeDescriptorSets);
 	}
 }

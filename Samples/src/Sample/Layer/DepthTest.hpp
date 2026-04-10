@@ -188,8 +188,11 @@ namespace Trident {
 				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/DepthTest/DepthTest.vert");
 				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/DepthTest/DepthTest.frag");
 
-				ColorBlendAttachment colorBlendAttachment{};
-				colorBlendAttachment.blend = false;
+				const sequence<ColorBlendAttachment> colorBlendAttachments = {
+					{
+						.blend = false,
+					},
+				};
 
 				GraphicsPipelineDescriptor graphicsPipelineDescriptor{};
 				graphicsPipelineDescriptor.pipelineLayout = pipelineLayout;
@@ -202,7 +205,7 @@ namespace Trident {
 				graphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 				graphicsPipelineDescriptor.lineWidth = 1.0f;
 				graphicsPipelineDescriptor.minSampleShading = 0.0f;
-				graphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+				graphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
 				graphicsPipelineDescriptor.depthStencilState.depthTest = true;
 				graphicsPipelineDescriptor.depthStencilState.depthWrite = true;
 				graphicsPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;

@@ -34,15 +34,21 @@ namespace Trident {
 		ref<VK::GraphicsPipeline> graphicsPipeline = createRef<VK::GraphicsPipeline>(device);
 
 		VkResult result;
-		std::vector<VkVertexInputBindingDescription> vertexInputBindingDescriptions;
+
+		const sequence<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos = {
+			std::static_pointer_cast<VK::ShaderModule>(descriptor.vertexShaderModule)->createInfo,
+			std::static_pointer_cast<VK::ShaderModule>(descriptor.fragmentShaderModule)->createInfo,
+		};
+
+		sequence<VkVertexInputBindingDescription> vertexInputBindingDescriptions(descriptor.vertexInputBindings.count());
 		std::vector<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;
+		uint32 vertexInputBindingIndex = 0;
 		uint32 location = 0;
-		uint32 vertexInputBindingIndex = 0;;
 
 		while (vertexInputBindingIndex < descriptor.vertexInputBindings.count()) {
 			const VertexInputBinding& vertexInputBinding = descriptor.vertexInputBindings[vertexInputBindingIndex];
 
-			VkVertexInputBindingDescription vertexInputBindingDescription{};
+			VkVertexInputBindingDescription& vertexInputBindingDescription = vertexInputBindingDescriptions[vertexInputBindingIndex];
 			vertexInputBindingDescription.binding = vertexInputBindingIndex;
 			vertexInputBindingDescription.stride = vertexInputBinding.stride;
 			vertexInputBindingDescription.inputRate = getVertexInputRate(vertexInputBinding.getInputRate());
@@ -61,7 +67,6 @@ namespace Trident {
 				location += 1;
 			}
 
-			vertexInputBindingDescriptions.emplace_back(vertexInputBindingDescription);
 			vertexInputBindingIndex += 1;
 		}
 
@@ -69,8 +74,8 @@ namespace Trident {
 		vertexInputStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 		vertexInputStateCreateInfo.pNext = nullptr;
 		vertexInputStateCreateInfo.flags = 0;
-		vertexInputStateCreateInfo.vertexBindingDescriptionCount = static_cast<uint32>(vertexInputBindingDescriptions.size());
-		vertexInputStateCreateInfo.pVertexBindingDescriptions = vertexInputBindingDescriptions.data();
+		vertexInputStateCreateInfo.vertexBindingDescriptionCount = static_cast<uint32>(vertexInputBindingDescriptions.count());
+		vertexInputStateCreateInfo.pVertexBindingDescriptions = &vertexInputBindingDescriptions[0];
 		vertexInputStateCreateInfo.vertexAttributeDescriptionCount = static_cast<uint32>(vertexInputAttributeDescriptions.size());
 		vertexInputStateCreateInfo.pVertexAttributeDescriptions = vertexInputAttributeDescriptions.data();
 
@@ -136,6 +141,40 @@ namespace Trident {
 		multisampleStateCreateInfo.alphaToCoverageEnable = VK_FALSE;
 		multisampleStateCreateInfo.alphaToOneEnable = VK_FALSE;
 
+		VkPipelineDepthStencilStateCreateInfo depthStencilStateCreateInfo{};
+		depthStencilStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+		depthStencilStateCreateInfo.pNext = nullptr;
+		depthStencilStateCreateInfo.flags = 0;
+		depthStencilStateCreateInfo.depthTestEnable = descriptor.depthStencilState.depthTest;
+
+		if (descriptor.depthStencilState.depthTest) {
+			depthStencilStateCreateInfo.depthWriteEnable = descriptor.depthStencilState.depthWrite;
+			depthStencilStateCreateInfo.depthCompareOp = static_cast<VkCompareOp>(descriptor.depthStencilState.compareOperation);
+		}
+		else {
+			depthStencilStateCreateInfo.depthWriteEnable = VK_FALSE;
+			depthStencilStateCreateInfo.depthCompareOp = VK_COMPARE_OP_NEVER;
+		}
+
+		depthStencilStateCreateInfo.depthBoundsTestEnable = VK_FALSE;
+		depthStencilStateCreateInfo.stencilTestEnable = VK_FALSE;
+		depthStencilStateCreateInfo.front.failOp = VK_STENCIL_OP_KEEP;
+		depthStencilStateCreateInfo.front.passOp = VK_STENCIL_OP_KEEP;
+		depthStencilStateCreateInfo.front.depthFailOp = VK_STENCIL_OP_KEEP;
+		depthStencilStateCreateInfo.front.compareOp = VK_COMPARE_OP_ALWAYS;
+		depthStencilStateCreateInfo.front.compareMask = 0;
+		depthStencilStateCreateInfo.front.writeMask = 0;
+		depthStencilStateCreateInfo.front.reference = 0;
+		depthStencilStateCreateInfo.back.failOp = VK_STENCIL_OP_KEEP;
+		depthStencilStateCreateInfo.back.passOp = VK_STENCIL_OP_KEEP;
+		depthStencilStateCreateInfo.back.depthFailOp = VK_STENCIL_OP_KEEP;
+		depthStencilStateCreateInfo.back.compareOp = VK_COMPARE_OP_ALWAYS;
+		depthStencilStateCreateInfo.back.compareMask = 0;
+		depthStencilStateCreateInfo.back.writeMask = 0;
+		depthStencilStateCreateInfo.back.reference = 0;
+		depthStencilStateCreateInfo.minDepthBounds = 0.0f;
+		depthStencilStateCreateInfo.maxDepthBounds = 1.0f;
+
 		sequence<VkPipelineColorBlendAttachmentState> colorBlendAttachmentStates(descriptor.colorBlendState.attachments.count());
 		uint32 colorBlendAttachmentIndex = 0;
 
@@ -177,11 +216,6 @@ namespace Trident {
 		dynamicStateCreateInfo.dynamicStateCount = static_cast<uint32>(dynamicStates.count());
 		dynamicStateCreateInfo.pDynamicStates = &dynamicStates[0];
 
-		const sequence<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos = {
-			std::static_pointer_cast<VK::ShaderModule>(descriptor.vertexShaderModule)->createInfo,
-			std::static_pointer_cast<VK::ShaderModule>(descriptor.fragmentShaderModule)->createInfo,
-		};
-
 		VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo{};
 		graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 		graphicsPipelineCreateInfo.pNext = nullptr;
@@ -194,48 +228,7 @@ namespace Trident {
 		graphicsPipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
 		graphicsPipelineCreateInfo.pRasterizationState = &rasterizationStateCreateInfo;
 		graphicsPipelineCreateInfo.pMultisampleState = &multisampleStateCreateInfo;
-
-		if (subpass->hasDepthStencilAttachmentReference()) {
-			VkPipelineDepthStencilStateCreateInfo depthStencilStateCreateInfo{};
-			depthStencilStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-			depthStencilStateCreateInfo.pNext = nullptr;
-			depthStencilStateCreateInfo.flags = 0;
-			depthStencilStateCreateInfo.depthTestEnable = descriptor.depthStencilState.depthTest;
-
-			if (descriptor.depthStencilState.depthTest) {
-				depthStencilStateCreateInfo.depthWriteEnable = descriptor.depthStencilState.depthWrite;
-				depthStencilStateCreateInfo.depthCompareOp = static_cast<VkCompareOp>(descriptor.depthStencilState.compareOperation);
-			}
-			else {
-				depthStencilStateCreateInfo.depthWriteEnable = VK_FALSE;
-				depthStencilStateCreateInfo.depthCompareOp = VK_COMPARE_OP_NEVER;
-			}
-
-			depthStencilStateCreateInfo.depthBoundsTestEnable = VK_FALSE;
-			depthStencilStateCreateInfo.stencilTestEnable = VK_FALSE;
-			depthStencilStateCreateInfo.front.failOp = VK_STENCIL_OP_KEEP;
-			depthStencilStateCreateInfo.front.passOp = VK_STENCIL_OP_KEEP;
-			depthStencilStateCreateInfo.front.depthFailOp = VK_STENCIL_OP_KEEP;
-			depthStencilStateCreateInfo.front.compareOp = VK_COMPARE_OP_ALWAYS;
-			depthStencilStateCreateInfo.front.compareMask = 0;
-			depthStencilStateCreateInfo.front.writeMask = 0;
-			depthStencilStateCreateInfo.front.reference = 0;
-			depthStencilStateCreateInfo.back.failOp = VK_STENCIL_OP_KEEP;
-			depthStencilStateCreateInfo.back.passOp = VK_STENCIL_OP_KEEP;
-			depthStencilStateCreateInfo.back.depthFailOp = VK_STENCIL_OP_KEEP;
-			depthStencilStateCreateInfo.back.compareOp = VK_COMPARE_OP_ALWAYS;
-			depthStencilStateCreateInfo.back.compareMask = 0;
-			depthStencilStateCreateInfo.back.writeMask = 0;
-			depthStencilStateCreateInfo.back.reference = 0;
-			depthStencilStateCreateInfo.minDepthBounds = 0.0f;
-			depthStencilStateCreateInfo.maxDepthBounds = 1.0f;
-
-			graphicsPipelineCreateInfo.pDepthStencilState = &depthStencilStateCreateInfo;
-		}
-		else {
-			graphicsPipelineCreateInfo.pDepthStencilState = nullptr;
-		}
-
+		graphicsPipelineCreateInfo.pDepthStencilState = &depthStencilStateCreateInfo;
 		graphicsPipelineCreateInfo.pColorBlendState = &colorBlendStateCreateInfo;
 		graphicsPipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
 		graphicsPipelineCreateInfo.layout = std::static_pointer_cast<VK::PipelineLayout>(descriptor.pipelineLayout)->pipelineLayout;

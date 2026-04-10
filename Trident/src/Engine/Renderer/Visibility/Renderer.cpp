@@ -512,229 +512,182 @@ namespace Trident {
 			.size = materialShaderIndirectBuffer->getSize(),
 		};
 
-		WriteDescriptorSet cameraWriteDescriptorSet{};
-		cameraWriteDescriptorSet.descriptorSet = cameraDescriptorSet;
-		cameraWriteDescriptorSet.bindingIndex = 0;
-		cameraWriteDescriptorSet.descriptorBuffers = {cameraDescriptorBuffer};
-
-		WriteDescriptorSet vertexPositionComponentWriteDescriptorSet{};
-		vertexPositionComponentWriteDescriptorSet.descriptorSet = clusterDescriptorSet;
-		vertexPositionComponentWriteDescriptorSet.bindingIndex = 0;
-		vertexPositionComponentWriteDescriptorSet.descriptorBuffers = {vertexPositionComponentDescriptorBuffer};
-
-		WriteDescriptorSet vertexPositionIndexWriteDescriptorSet{};
-		vertexPositionIndexWriteDescriptorSet.descriptorSet = clusterDescriptorSet;
-		vertexPositionIndexWriteDescriptorSet.bindingIndex = 1;
-		vertexPositionIndexWriteDescriptorSet.descriptorBuffers = {vertexPositionIndexDescriptorBuffer};
-
-		WriteDescriptorSet clusterWriteDescriptorSet{};
-		clusterWriteDescriptorSet.descriptorSet = clusterDescriptorSet;
-		clusterWriteDescriptorSet.bindingIndex = 2;
-		clusterWriteDescriptorSet.descriptorBuffers = {clusterDescriptorBuffer};
-
-		WriteDescriptorSet instanceWriteDescriptorSet{};
-		instanceWriteDescriptorSet.descriptorSet = instanceDescriptorSet;
-		instanceWriteDescriptorSet.bindingIndex = 0;
-		instanceWriteDescriptorSet.descriptorBuffers = {instanceDescriptorBuffer};
-
-		WriteDescriptorSet geometryWriteDescriptorSet{};
-		geometryWriteDescriptorSet.descriptorSet = instanceDescriptorSet;
-		geometryWriteDescriptorSet.bindingIndex = 1;
-		geometryWriteDescriptorSet.descriptorBuffers = {geometryDescriptorBuffer};
-
-		WriteDescriptorSet materialCountCameraWriteDescriptorSet{};
-		materialCountCameraWriteDescriptorSet.descriptorSet = materialCountDescriptorSet;
-		materialCountCameraWriteDescriptorSet.bindingIndex = 0;
-		materialCountCameraWriteDescriptorSet.descriptorBuffers = {cameraDescriptorBuffer};
-
-		WriteDescriptorSet materialCountClusterWriteDescriptorSet{};
-		materialCountClusterWriteDescriptorSet.descriptorSet = materialCountDescriptorSet;
-		materialCountClusterWriteDescriptorSet.bindingIndex = 2;
-		materialCountClusterWriteDescriptorSet.descriptorBuffers = {clusterDescriptorBuffer};
-
-		WriteDescriptorSet materialCountInstanceWriteDescriptorSet{};
-		materialCountInstanceWriteDescriptorSet.descriptorSet = materialCountDescriptorSet;
-		materialCountInstanceWriteDescriptorSet.bindingIndex = 3;
-		materialCountInstanceWriteDescriptorSet.descriptorBuffers = {instanceDescriptorBuffer};
-
-		WriteDescriptorSet materialCountCountWriteDescriptorSet{};
-		materialCountCountWriteDescriptorSet.descriptorSet = materialCountDescriptorSet;
-		materialCountCountWriteDescriptorSet.bindingIndex = 4;
-		materialCountCountWriteDescriptorSet.descriptorBuffers = {materialCountDescriptorBuffer};
-
-		#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
-			const WriteDescriptorSet visibilityDebugCameraWriteDescriptorSet = {
-				.descriptorSet = visibilityDebugDescriptorSet,
+		const sequence<WriteDescriptorSet> writeDescriptorSets = {
+			{
+				.descriptorSet = cameraDescriptorSet,
 				.bindingIndex = 0,
 				.descriptorBuffers = {cameraDescriptorBuffer},
-			};
-			const WriteDescriptorSet visibilityDebugVertexPositionComponentWriteDescriptorSet = {
-				.descriptorSet = visibilityDebugDescriptorSet,
+			},
+			{
+				.descriptorSet = clusterDescriptorSet,
+				.bindingIndex = 0,
+				.descriptorBuffers = {vertexPositionComponentDescriptorBuffer},
+			},
+			{
+				.descriptorSet = clusterDescriptorSet,
+				.bindingIndex = 1,
+				.descriptorBuffers = {vertexPositionIndexDescriptorBuffer},
+			},
+			{
+				.descriptorSet = clusterDescriptorSet,
+				.bindingIndex = 2,
+				.descriptorBuffers = {clusterDescriptorBuffer},
+			},
+			{
+				.descriptorSet = instanceDescriptorSet,
+				.bindingIndex = 0,
+				.descriptorBuffers = {instanceDescriptorBuffer},
+			},
+			{
+				.descriptorSet = instanceDescriptorSet,
+				.bindingIndex = 1,
+				.descriptorBuffers = {geometryDescriptorBuffer},
+			},
+			{
+				.descriptorSet = materialCountDescriptorSet,
+				.bindingIndex = 0,
+				.descriptorBuffers = {cameraDescriptorBuffer},
+			},
+			{
+				.descriptorSet = materialCountDescriptorSet,
+				.bindingIndex = 2,
+				.descriptorBuffers = {clusterDescriptorBuffer},
+			},
+			{
+				.descriptorSet = materialCountDescriptorSet,
+				.bindingIndex = 3,
+				.descriptorBuffers = {instanceDescriptorBuffer},
+			},
+			{
+				.descriptorSet = materialCountDescriptorSet,
+				.bindingIndex = 4,
+				.descriptorBuffers = {materialCountDescriptorBuffer},
+			},
+			#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
+				{
+					.descriptorSet = visibilityDebugDescriptorSet,
+					.bindingIndex = 0,
+					.descriptorBuffers = {cameraDescriptorBuffer},
+				},
+				{
+					.descriptorSet = visibilityDebugDescriptorSet,
+					.bindingIndex = 3,
+					.descriptorBuffers = {vertexPositionComponentDescriptorBuffer},
+				},
+				{
+					.descriptorSet = visibilityDebugDescriptorSet,
+					.bindingIndex = 4,
+					.descriptorBuffers = {vertexNormalComponentDescriptorBuffer},
+				},
+				{
+					.descriptorSet = visibilityDebugDescriptorSet,
+					.bindingIndex = 5,
+					.descriptorBuffers = {vertexTextureCoordinateComponentDescriptorBuffer},
+				},
+				{
+					.descriptorSet = visibilityDebugDescriptorSet,
+					.bindingIndex = 6,
+					.descriptorBuffers = {vertexPositionIndexDescriptorBuffer},
+				},
+				{
+					.descriptorSet = visibilityDebugDescriptorSet,
+					.bindingIndex = 7,
+					.descriptorBuffers = {vertexNormalIndexDescriptorBuffer},
+				},
+				{
+					.descriptorSet = visibilityDebugDescriptorSet,
+					.bindingIndex = 8,
+					.descriptorBuffers = {vertexTextureCoordinateIndexDescriptorBuffer},
+				},
+			#endif
+			{
+				.descriptorSet = materialOffsetDescriptorSet,
+				.bindingIndex = 0,
+				.descriptorBuffers = {materialCountDescriptorBuffer},
+			},
+			{
+				.descriptorSet = materialOffsetDescriptorSet,
+				.bindingIndex = 1,
+				.descriptorBuffers = {materialOffsetDescriptorBuffer},
+			},
+			{
+				.descriptorSet = materialOffsetDescriptorSet,
+				.bindingIndex = 2,
+				.descriptorBuffers = {materialShaderIndirectDescriptorBuffer},
+			},
+			{
+				.descriptorSet = materialCoordinateDescriptorSet,
+				.bindingIndex = 0,
+				.descriptorBuffers = {cameraDescriptorBuffer},
+			},
+			{
+				.descriptorSet = materialCoordinateDescriptorSet,
+				.bindingIndex = 2,
+				.descriptorBuffers = {clusterDescriptorBuffer},
+			},
+			{
+				.descriptorSet = materialCoordinateDescriptorSet,
+				.bindingIndex = 3,
+				.descriptorBuffers = {instanceDescriptorBuffer},
+			},
+			{
+				.descriptorSet = materialCoordinateDescriptorSet,
+				.bindingIndex = 4,
+				.descriptorBuffers = {materialOffsetDescriptorBuffer},
+			},
+			{
+				.descriptorSet = materialBaseDescriptorSet,
+				.bindingIndex = 0,
+				.descriptorBuffers = {cameraDescriptorBuffer},
+			},
+			{
+				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 3,
 				.descriptorBuffers = {vertexPositionComponentDescriptorBuffer},
-			};
-			const WriteDescriptorSet visibilityDebugVertexNormalComponentWriteDescriptorSet = {
-				.descriptorSet = visibilityDebugDescriptorSet,
+			},
+			{
+				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 4,
 				.descriptorBuffers = {vertexNormalComponentDescriptorBuffer},
-			};
-			const WriteDescriptorSet visibilityDebugVertexTextureCoordinateComponentWriteDescriptorSet = {
-				.descriptorSet = visibilityDebugDescriptorSet,
+			},
+			{
+				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 5,
 				.descriptorBuffers = {vertexTextureCoordinateComponentDescriptorBuffer},
-			};
-			const WriteDescriptorSet visibilityDebugVertexPositionIndexWriteDescriptorSet = {
-				.descriptorSet = visibilityDebugDescriptorSet,
+			},
+			{
+				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 6,
 				.descriptorBuffers = {vertexPositionIndexDescriptorBuffer},
-			};
-			const WriteDescriptorSet visibilityDebugVertexNormalIndexWriteDescriptorSet = {
-				.descriptorSet = visibilityDebugDescriptorSet,
+			},
+			{
+				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 7,
 				.descriptorBuffers = {vertexNormalIndexDescriptorBuffer},
-			};
-			const WriteDescriptorSet visibilityDebugVertexTextureCoordinateIndexWriteDescriptorSet = {
-				.descriptorSet = visibilityDebugDescriptorSet,
+			},
+			{
+				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 8,
 				.descriptorBuffers = {vertexTextureCoordinateIndexDescriptorBuffer},
-			};
-		#endif
-
-		WriteDescriptorSet materialOffsetCountWriteDescriptorSet{};
-		materialOffsetCountWriteDescriptorSet.descriptorSet = materialOffsetDescriptorSet;
-		materialOffsetCountWriteDescriptorSet.bindingIndex = 0;
-		materialOffsetCountWriteDescriptorSet.descriptorBuffers = {materialCountDescriptorBuffer};
-
-		WriteDescriptorSet materialOffsetWriteDescriptorSet{};
-		materialOffsetWriteDescriptorSet.descriptorSet = materialOffsetDescriptorSet;
-		materialOffsetWriteDescriptorSet.bindingIndex = 1;
-		materialOffsetWriteDescriptorSet.descriptorBuffers = {materialOffsetDescriptorBuffer};
-
-		WriteDescriptorSet materialShaderIndirectWriteDescriptorSet{};
-		materialShaderIndirectWriteDescriptorSet.descriptorSet = materialOffsetDescriptorSet;
-		materialShaderIndirectWriteDescriptorSet.bindingIndex = 2;
-		materialShaderIndirectWriteDescriptorSet.descriptorBuffers = {materialShaderIndirectDescriptorBuffer};
-
-		// Material coordinate descriptor set
-
-		WriteDescriptorSet materialCoordinateCameraWriteDescriptorSet{};
-		materialCoordinateCameraWriteDescriptorSet.descriptorSet = materialCoordinateDescriptorSet;
-		materialCoordinateCameraWriteDescriptorSet.bindingIndex = 0;
-		materialCoordinateCameraWriteDescriptorSet.descriptorBuffers = {cameraDescriptorBuffer};
-
-		WriteDescriptorSet materialCoordinateClusterWriteDescriptorSet{};
-		materialCoordinateClusterWriteDescriptorSet.descriptorSet = materialCoordinateDescriptorSet;
-		materialCoordinateClusterWriteDescriptorSet.bindingIndex = 2;
-		materialCoordinateClusterWriteDescriptorSet.descriptorBuffers = {clusterDescriptorBuffer};
-
-		WriteDescriptorSet materialCoordinateInstanceWriteDescriptorSet{};
-		materialCoordinateInstanceWriteDescriptorSet.descriptorSet = materialCoordinateDescriptorSet;
-		materialCoordinateInstanceWriteDescriptorSet.bindingIndex = 3;
-		materialCoordinateInstanceWriteDescriptorSet.descriptorBuffers = {instanceDescriptorBuffer};
-
-		WriteDescriptorSet materialCoordinateMaterialOffsetWriteDescriptorSet{};
-		materialCoordinateMaterialOffsetWriteDescriptorSet.descriptorSet = materialCoordinateDescriptorSet;
-		materialCoordinateMaterialOffsetWriteDescriptorSet.bindingIndex = 4;
-		materialCoordinateMaterialOffsetWriteDescriptorSet.descriptorBuffers = {materialOffsetDescriptorBuffer};
-
-		// Material base descriptor set
-
-		const WriteDescriptorSet materialBaseCameraWriteDescriptorSet = {
-			.descriptorSet = materialBaseDescriptorSet,
-			.bindingIndex = 0,
-			.descriptorBuffers = {cameraDescriptorBuffer},
-		};
-		const WriteDescriptorSet materialBaseVertexPositionComponentWriteDescriptorSet = {
-			.descriptorSet = materialBaseDescriptorSet,
-			.bindingIndex = 3,
-			.descriptorBuffers = {vertexPositionComponentDescriptorBuffer},
-		};
-		const WriteDescriptorSet materialBaseVertexNormalComponentWriteDescriptorSet = {
-			.descriptorSet = materialBaseDescriptorSet,
-			.bindingIndex = 4,
-			.descriptorBuffers = {vertexNormalComponentDescriptorBuffer},
-		};
-		const WriteDescriptorSet materialBaseVertexTextureCoordinateComponentWriteDescriptorSet = {
-			.descriptorSet = materialBaseDescriptorSet,
-			.bindingIndex = 5,
-			.descriptorBuffers = {vertexTextureCoordinateComponentDescriptorBuffer},
-		};
-		const WriteDescriptorSet materialBaseVertexPositionIndexWriteDescriptorSet = {
-			.descriptorSet = materialBaseDescriptorSet,
-			.bindingIndex = 6,
-			.descriptorBuffers = {vertexPositionIndexDescriptorBuffer},
-		};
-		const WriteDescriptorSet materialBaseVertexNormalIndexWriteDescriptorSet = {
-			.descriptorSet = materialBaseDescriptorSet,
-			.bindingIndex = 7,
-			.descriptorBuffers = {vertexNormalIndexDescriptorBuffer},
-		};
-		const WriteDescriptorSet materialBaseVertexTextureCoordinateIndexWriteDescriptorSet = {
-			.descriptorSet = materialBaseDescriptorSet,
-			.bindingIndex = 8,
-			.descriptorBuffers = {vertexTextureCoordinateIndexDescriptorBuffer},
-		};
-		const WriteDescriptorSet materialBaseClusterWriteDescriptorSet = {
-			.descriptorSet = materialBaseDescriptorSet,
-			.bindingIndex = 9,
-			.descriptorBuffers = {clusterDescriptorBuffer},
-		};
-		const WriteDescriptorSet materialBaseInstanceWriteDescriptorSet = {
-			.descriptorSet = materialBaseDescriptorSet,
-			.bindingIndex = 10,
-			.descriptorBuffers = {instanceDescriptorBuffer},
-		};
-		const WriteDescriptorSet materialBaseGeometryWriteDescriptorSet = {
-			.descriptorSet = materialBaseDescriptorSet,
-			.bindingIndex = 11,
-			.descriptorBuffers = {geometryDescriptorBuffer},
+			},
+			{
+				.descriptorSet = materialBaseDescriptorSet,
+				.bindingIndex = 9,
+				.descriptorBuffers = {clusterDescriptorBuffer},
+			},
+			{
+				.descriptorSet = materialBaseDescriptorSet,
+				.bindingIndex = 10,
+				.descriptorBuffers = {instanceDescriptorBuffer},
+			},
+			{
+				.descriptorSet = materialBaseDescriptorSet,
+				.bindingIndex = 11,
+				.descriptorBuffers = {geometryDescriptorBuffer},
+			},
 		};
 
-		getDevice()->updateDescriptorSets({
-			cameraWriteDescriptorSet,
-			vertexPositionComponentWriteDescriptorSet,
-			vertexPositionIndexWriteDescriptorSet,
-
-			clusterWriteDescriptorSet,
-
-			instanceWriteDescriptorSet,
-			geometryWriteDescriptorSet,
-
-			materialCountCameraWriteDescriptorSet,
-			materialCountClusterWriteDescriptorSet,
-			materialCountInstanceWriteDescriptorSet,
-			materialCountCountWriteDescriptorSet,
-
-			#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
-				visibilityDebugCameraWriteDescriptorSet,
-				visibilityDebugVertexPositionComponentWriteDescriptorSet,
-				visibilityDebugVertexNormalComponentWriteDescriptorSet,
-				visibilityDebugVertexTextureCoordinateComponentWriteDescriptorSet,
-				visibilityDebugVertexPositionIndexWriteDescriptorSet,
-				visibilityDebugVertexNormalIndexWriteDescriptorSet,
-				visibilityDebugVertexTextureCoordinateIndexWriteDescriptorSet,
-			#endif
-
-			materialOffsetCountWriteDescriptorSet,
-			materialOffsetWriteDescriptorSet,
-			materialShaderIndirectWriteDescriptorSet,
-
-			materialCoordinateCameraWriteDescriptorSet,
-			materialCoordinateClusterWriteDescriptorSet,
-			materialCoordinateInstanceWriteDescriptorSet,
-			materialCoordinateMaterialOffsetWriteDescriptorSet,
-
-			materialBaseCameraWriteDescriptorSet,
-			materialBaseVertexPositionComponentWriteDescriptorSet,
-			materialBaseVertexNormalComponentWriteDescriptorSet,
-			materialBaseVertexTextureCoordinateComponentWriteDescriptorSet,
-			materialBaseVertexPositionIndexWriteDescriptorSet,
-			materialBaseVertexNormalIndexWriteDescriptorSet,
-			materialBaseVertexTextureCoordinateIndexWriteDescriptorSet,
-			materialBaseClusterWriteDescriptorSet,
-			materialBaseInstanceWriteDescriptorSet,
-			materialBaseGeometryWriteDescriptorSet,
-		});
+		getDevice()->updateDescriptorSets(writeDescriptorSets);
 	}
 
 	void VisibilityRenderer::updateDebugInputAttachmentDescriptorSets() {
@@ -763,80 +716,62 @@ namespace Trident {
 			.size = materialCoordinateBuffer->getSize(),
 		};
 
-		WriteDescriptorSet materialCountVisibilityWriteDescriptorSet{};
-		materialCountVisibilityWriteDescriptorSet.descriptorSet = materialCountDescriptorSet;
-		materialCountVisibilityWriteDescriptorSet.bindingIndex = 1;
-		materialCountVisibilityWriteDescriptorSet.descriptorImages = {visibilityDescriptorImage};
-
-		WriteDescriptorSet materialCoordinateVisibilityWriteDescriptorSet{};
-		materialCoordinateVisibilityWriteDescriptorSet.descriptorSet = materialCoordinateDescriptorSet;
-		materialCoordinateVisibilityWriteDescriptorSet.bindingIndex = 1;
-		materialCoordinateVisibilityWriteDescriptorSet.descriptorImages = {visibilityDescriptorImage};
-
-		WriteDescriptorSet materialCoordinateCoordinateWriteDescriptorSet{};
-		materialCoordinateCoordinateWriteDescriptorSet.descriptorSet = materialCoordinateDescriptorSet;
-		materialCoordinateCoordinateWriteDescriptorSet.bindingIndex = 5;
-		materialCoordinateCoordinateWriteDescriptorSet.descriptorBuffers = {materialCoordinateDescriptorBuffer};
-
-		const WriteDescriptorSet materialBaseMaterialCoordinateWriteDescriptorSet = {
-			.descriptorSet = materialBaseDescriptorSet,
-			.bindingIndex = 1,
-			.descriptorBuffers = {materialCoordinateDescriptorBuffer},
-		};
-		const WriteDescriptorSet materialBaseVisibilityWriteDescriptorSet = {
-			.descriptorSet = materialBaseDescriptorSet,
-			.bindingIndex = 2,
-			.descriptorImages = {visibilityDescriptorImage},
-		};
-		const WriteDescriptorSet materialBaseOutputWriteDescriptorSet = {
-			.descriptorSet = materialBaseDescriptorSet,
-			.bindingIndex = 12,
-			.descriptorImages = {outputDescriptorImage},
-		};
-
-		WriteDescriptorSet outputWriteDescriptorSet{};
-		outputWriteDescriptorSet.descriptorSet = outputDescriptorSet;
-		outputWriteDescriptorSet.bindingIndex = 0;
-		outputWriteDescriptorSet.descriptorImages = {outputDescriptorImage};
-
-		#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
-			const WriteDescriptorSet visibilityDebugVisibilityWriteDescriptorSet = {
-				.descriptorSet = visibilityDebugDescriptorSet,
+		const sequence<WriteDescriptorSet> writeDescriptorSets = {
+			{
+				.descriptorSet = materialCountDescriptorSet,
 				.bindingIndex = 1,
 				.descriptorImages = {visibilityDescriptorImage},
-			};
-
-			const WriteDescriptorSet visibilityDebugDepthStencilWriteDescriptorSet = {
-				.descriptorSet = visibilityDebugDescriptorSet,
+			},
+			{
+				.descriptorSet = materialCoordinateDescriptorSet,
+				.bindingIndex = 1,
+				.descriptorImages = {visibilityDescriptorImage},
+			},
+			{
+				.descriptorSet = materialCoordinateDescriptorSet,
+				.bindingIndex = 5,
+				.descriptorBuffers = {materialCoordinateDescriptorBuffer},
+			},
+			{
+				.descriptorSet = materialBaseDescriptorSet,
+				.bindingIndex = 1,
+				.descriptorBuffers = {materialCoordinateDescriptorBuffer},
+			},
+			{
+				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 2,
-				.descriptorImages = {depthStencilDescriptorImage},
-			};
-
-			const WriteDescriptorSet visibilityDebugOutputImageWriteDescriptorSet = {
-				.descriptorSet = visibilityDebugDescriptorSet,
-				.bindingIndex = 9,
+				.descriptorImages = {visibilityDescriptorImage},
+			},
+			{
+				.descriptorSet = materialBaseDescriptorSet,
+				.bindingIndex = 12,
 				.descriptorImages = {outputDescriptorImage},
-			};
-		#endif
-
-		getDevice()->updateDescriptorSets({
-			materialCountVisibilityWriteDescriptorSet,
-
-			materialCoordinateVisibilityWriteDescriptorSet,
-			materialCoordinateCoordinateWriteDescriptorSet,
-
-			materialBaseMaterialCoordinateWriteDescriptorSet,
-			materialBaseVisibilityWriteDescriptorSet,
-			materialBaseOutputWriteDescriptorSet,
-
-			outputWriteDescriptorSet,
-
+			},
+			{
+				.descriptorSet = outputDescriptorSet,
+				.bindingIndex = 0,
+				.descriptorImages = {outputDescriptorImage},
+			},
 			#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
-				visibilityDebugVisibilityWriteDescriptorSet,
-				visibilityDebugDepthStencilWriteDescriptorSet,
-				visibilityDebugOutputImageWriteDescriptorSet,
+				{
+					.descriptorSet = visibilityDebugDescriptorSet,
+					.bindingIndex = 1,
+					.descriptorImages = {visibilityDescriptorImage},
+				},
+				{
+					.descriptorSet = visibilityDebugDescriptorSet,
+					.bindingIndex = 2,
+					.descriptorImages = {depthStencilDescriptorImage},
+				},
+				{
+					.descriptorSet = visibilityDebugDescriptorSet,
+					.bindingIndex = 9,
+					.descriptorImages = {outputDescriptorImage},
+				},
 			#endif
-		});
+		};
+
+		getDevice()->updateDescriptorSets(writeDescriptorSets);
 	}
 
 	bool VisibilityRenderer::onWindowResize(WindowResizeEvent& event) {

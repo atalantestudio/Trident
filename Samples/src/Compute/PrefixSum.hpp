@@ -97,17 +97,20 @@ namespace Trident {
 				elementStartDescriptorBuffer.offset = 0;
 				elementStartDescriptorBuffer.size = elementStartBuffer->getSize();
 
-				WriteDescriptorSet elementCountWriteDescriptorSet{};
-				elementCountWriteDescriptorSet.descriptorSet = prefixSumDescriptorSet;
-				elementCountWriteDescriptorSet.bindingIndex = 0;
-				elementCountWriteDescriptorSet.descriptorBuffers = {elementCountDescriptorBuffer};
+				const sequence<WriteDescriptorSet> writeDescriptorSets = {
+					{
+						.descriptorSet = prefixSumDescriptorSet,
+						.bindingIndex = 0,
+						.descriptorBuffers = {elementCountDescriptorBuffer},
+					},
+					{
+						.descriptorSet = prefixSumDescriptorSet,
+						.bindingIndex = 1,
+						.descriptorBuffers = {elementStartDescriptorBuffer},
+					},
+				};
 
-				WriteDescriptorSet elementStartWriteDescriptorSet{};
-				elementStartWriteDescriptorSet.descriptorSet = prefixSumDescriptorSet;
-				elementStartWriteDescriptorSet.bindingIndex = 1;
-				elementStartWriteDescriptorSet.descriptorBuffers = {elementStartDescriptorBuffer};
-
-				device->updateDescriptorSets({elementCountWriteDescriptorSet, elementStartWriteDescriptorSet});
+				device->updateDescriptorSets(writeDescriptorSets);
 
 				CommandBufferDescriptor commandBufferDescriptor{};
 				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;

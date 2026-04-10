@@ -404,10 +404,13 @@ namespace Trident {
 		const ref<ShaderModule> vertexShaderModule = loadInternalShaderModule(vertexShaderModuleDescriptor, "GUI/Subcomponent.vert");
 		const ref<ShaderModule> fragmentShaderModule = loadInternalShaderModule(fragmentShaderModuleDescriptor, "GUI/Subcomponent.frag");
 
-		ColorBlendAttachment colorBlendAttachment{};
-		colorBlendAttachment.blend = true;
-		colorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
-		colorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
+		const sequence<ColorBlendAttachment> colorBlendAttachments = {
+			{
+				.blend = true,
+				.srcColorBlendFactor = BlendFactor::SRC_ALPHA,
+				.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA,
+			},
+		};
 
 		GraphicsPipelineDescriptor subcomponentGraphicsPipelineDescriptor{};
 		subcomponentGraphicsPipelineDescriptor.pipelineLayout = subcomponentPipelineLayout;
@@ -420,7 +423,7 @@ namespace Trident {
 		subcomponentGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		subcomponentGraphicsPipelineDescriptor.lineWidth = 1.0f;
 		subcomponentGraphicsPipelineDescriptor.minSampleShading = 0.0f;
-		subcomponentGraphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+		subcomponentGraphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
 		subcomponentGraphicsPipelineDescriptor.depthStencilState.depthTest = true;
 		subcomponentGraphicsPipelineDescriptor.depthStencilState.depthWrite = true;
 		subcomponentGraphicsPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
@@ -459,10 +462,13 @@ namespace Trident {
 		const ref<ShaderModule> vertexShaderModule = loadInternalShaderModule(vertexShaderModuleDescriptor, "GUI/GlyphSubcomponent.vert");
 		const ref<ShaderModule> fragmentShaderModule = loadInternalShaderModule(fragmentShaderModuleDescriptor, "GUI/GlyphSubcomponent.frag");
 
-		ColorBlendAttachment colorBlendAttachment{};
-		colorBlendAttachment.blend = true;
-		colorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
-		colorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
+		const sequence<ColorBlendAttachment> colorBlendAttachments = {
+			{
+				.blend = true,
+				.srcColorBlendFactor = BlendFactor::SRC_ALPHA,
+				.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA,
+			},
+		};
 
 		GraphicsPipelineDescriptor glyphSubcomponentGraphicsPipelineDescriptor{};
 		glyphSubcomponentGraphicsPipelineDescriptor.pipelineLayout = subcomponentPipelineLayout;
@@ -475,7 +481,7 @@ namespace Trident {
 		glyphSubcomponentGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		glyphSubcomponentGraphicsPipelineDescriptor.lineWidth = 1.0f;
 		glyphSubcomponentGraphicsPipelineDescriptor.minSampleShading = 0.0f;
-		glyphSubcomponentGraphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+		glyphSubcomponentGraphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
 		glyphSubcomponentGraphicsPipelineDescriptor.depthStencilState.depthTest = false;
 		glyphSubcomponentGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 		glyphSubcomponentGraphicsPipelineDescriptor.renderPass = renderPass;
@@ -560,32 +566,30 @@ namespace Trident {
 		linearTextureArrayDescriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
 		linearTextureArrayDescriptorImage.sampler = linearSampler;
 
-		WriteDescriptorSet subcomponentCameraWriteDescriptorSet{};
-		subcomponentCameraWriteDescriptorSet.descriptorSet = subcomponentDescriptorSet;
-		subcomponentCameraWriteDescriptorSet.bindingIndex = 0;
-		subcomponentCameraWriteDescriptorSet.descriptorBuffers = {cameraDescriptorBuffer};
+		const sequence<WriteDescriptorSet> writeDescriptorSets = {
+			{
+				.descriptorSet = subcomponentDescriptorSet,
+				.bindingIndex = 0,
+				.descriptorBuffers = {cameraDescriptorBuffer},
+			},
+			{
+				.descriptorSet = subcomponentDescriptorSet,
+				.bindingIndex = 1,
+				.descriptorImages = {nearestTextureArrayDescriptorImage},
+			},
+			{
+				.descriptorSet = glyphSubcomponentDescriptorSet,
+				.bindingIndex = 0,
+				.descriptorBuffers = {cameraDescriptorBuffer},
+			},
+			{
+				.descriptorSet = glyphSubcomponentDescriptorSet,
+				.bindingIndex = 1,
+				.descriptorImages = {linearTextureArrayDescriptorImage},
+			},
+		};
 
-		WriteDescriptorSet subcomponentTextureArrayWriteDescriptorSet{};
-		subcomponentTextureArrayWriteDescriptorSet.descriptorSet = subcomponentDescriptorSet;
-		subcomponentTextureArrayWriteDescriptorSet.bindingIndex = 1;
-		subcomponentTextureArrayWriteDescriptorSet.descriptorImages = {nearestTextureArrayDescriptorImage};
-
-		WriteDescriptorSet glyphSubcomponentCameraWriteDescriptorSet{};
-		glyphSubcomponentCameraWriteDescriptorSet.descriptorSet = glyphSubcomponentDescriptorSet;
-		glyphSubcomponentCameraWriteDescriptorSet.bindingIndex = 0;
-		glyphSubcomponentCameraWriteDescriptorSet.descriptorBuffers = {cameraDescriptorBuffer};
-
-		WriteDescriptorSet glyphSubcomponentTextureArrayWriteDescriptorSet{};
-		glyphSubcomponentTextureArrayWriteDescriptorSet.descriptorSet = glyphSubcomponentDescriptorSet;
-		glyphSubcomponentTextureArrayWriteDescriptorSet.bindingIndex = 1;
-		glyphSubcomponentTextureArrayWriteDescriptorSet.descriptorImages = {linearTextureArrayDescriptorImage};
-
-		getDevice()->updateDescriptorSets({
-			subcomponentCameraWriteDescriptorSet,
-			subcomponentTextureArrayWriteDescriptorSet,
-			glyphSubcomponentCameraWriteDescriptorSet,
-			glyphSubcomponentTextureArrayWriteDescriptorSet,
-		});
+		getDevice()->updateDescriptorSets(writeDescriptorSets);
 	}
 
 	void GUIRenderer::updateCameraProjection() const {

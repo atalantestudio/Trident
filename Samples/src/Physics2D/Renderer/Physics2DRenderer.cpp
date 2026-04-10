@@ -376,10 +376,13 @@ namespace Trident {
 		const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/ScreenUVNDC.vert");
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/Grid.frag");
 
-		ColorBlendAttachment colorBlendAttachment{};
-		colorBlendAttachment.blend = true;
-		colorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
-		colorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
+		const sequence<ColorBlendAttachment> colorBlendAttachments = {
+			{
+				.blend = true,
+				.srcColorBlendFactor = BlendFactor::SRC_ALPHA,
+				.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA,
+			},
+		};
 
 		GraphicsPipelineDescriptor gridGraphicsPipelineDescriptor{};
 		gridGraphicsPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
@@ -391,7 +394,7 @@ namespace Trident {
 		gridGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		gridGraphicsPipelineDescriptor.lineWidth = 1.0f;
 		gridGraphicsPipelineDescriptor.minSampleShading = 0.0f;
-		gridGraphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+		gridGraphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
 		gridGraphicsPipelineDescriptor.depthStencilState.depthTest = false;
 		gridGraphicsPipelineDescriptor.depthStencilState.depthWrite = false;
 		gridGraphicsPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::NEVER;
@@ -540,8 +543,11 @@ namespace Trident {
 		const ref<ShaderModule> vertexShaderModule = loadShaderModule(centerOfMassVertexShaderModuleDescriptor, "Physics2D/CenterOfMass.vert");
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(centerOfMassFragmentShaderModuleDescriptor, "Physics2D/CenterOfMass.frag");
 
-		ColorBlendAttachment colorBlendAttachment{};
-		colorBlendAttachment.blend = false;
+		const sequence<ColorBlendAttachment> colorBlendAttachments = {
+			{
+				.blend = false,
+			},
+		};
 
 		GraphicsPipelineDescriptor centerOfMassGraphicsPipelineDescriptor{};
 		centerOfMassGraphicsPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
@@ -554,7 +560,7 @@ namespace Trident {
 		centerOfMassGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		centerOfMassGraphicsPipelineDescriptor.lineWidth = 1.0f;
 		centerOfMassGraphicsPipelineDescriptor.minSampleShading = 1.0f;
-		centerOfMassGraphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+		centerOfMassGraphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
 		centerOfMassGraphicsPipelineDescriptor.depthStencilState.depthTest = true;
 		centerOfMassGraphicsPipelineDescriptor.depthStencilState.depthWrite = true;
 		centerOfMassGraphicsPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
@@ -803,8 +809,11 @@ namespace Trident {
 			const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/Distance.vert");
 			const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/Distance.frag");
 
-			ColorBlendAttachment colorBlendAttachment{};
-			colorBlendAttachment.blend = false;
+			const sequence<ColorBlendAttachment> colorBlendAttachments = {
+				{
+					.blend = false,
+				},
+			};
 
 			GraphicsPipelineDescriptor distanceGraphicsPipelineDescriptor{};
 			distanceGraphicsPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
@@ -817,7 +826,7 @@ namespace Trident {
 			distanceGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 			distanceGraphicsPipelineDescriptor.lineWidth = 1.0f;
 			distanceGraphicsPipelineDescriptor.minSampleShading = 0.0f;
-			distanceGraphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+			distanceGraphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
 			distanceGraphicsPipelineDescriptor.depthStencilState.depthTest = false;
 			distanceGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 			distanceGraphicsPipelineDescriptor.renderPass = renderPass;
@@ -849,8 +858,11 @@ namespace Trident {
 			const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/VertexFeature.vert");
 			const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/VertexFeature.frag");
 
-			ColorBlendAttachment colorBlendAttachment{};
-			colorBlendAttachment.blend = false;
+			const sequence<ColorBlendAttachment> colorBlendAttachments = {
+				{
+					.blend = false,
+				},
+			};
 
 			GraphicsPipelineDescriptor vertexFeatureGraphicsPipelineDescriptor{};
 			vertexFeatureGraphicsPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
@@ -863,7 +875,7 @@ namespace Trident {
 			vertexFeatureGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 			vertexFeatureGraphicsPipelineDescriptor.lineWidth = 1.0f;
 			vertexFeatureGraphicsPipelineDescriptor.minSampleShading = 1.0f;
-			vertexFeatureGraphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+			vertexFeatureGraphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
 			vertexFeatureGraphicsPipelineDescriptor.depthStencilState.depthTest = false;
 			vertexFeatureGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 			vertexFeatureGraphicsPipelineDescriptor.renderPass = renderPass;
@@ -893,8 +905,11 @@ namespace Trident {
 			const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/EdgeFeature.vert");
 			const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/EdgeFeature.frag");
 
-			ColorBlendAttachment colorBlendAttachment{};
-			colorBlendAttachment.blend = false;
+			const sequence<ColorBlendAttachment> colorBlendAttachments = {
+				{
+					.blend = false,
+				},
+			};
 
 			GraphicsPipelineDescriptor edgeFeatureGraphicsPipelineDescriptor{};
 			edgeFeatureGraphicsPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
@@ -907,7 +922,7 @@ namespace Trident {
 			edgeFeatureGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 			edgeFeatureGraphicsPipelineDescriptor.lineWidth = 3.0f;
 			edgeFeatureGraphicsPipelineDescriptor.minSampleShading = 0.0f;
-			edgeFeatureGraphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+			edgeFeatureGraphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
 			edgeFeatureGraphicsPipelineDescriptor.depthStencilState.depthTest = false;
 			edgeFeatureGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 			edgeFeatureGraphicsPipelineDescriptor.renderPass = renderPass;
@@ -1110,17 +1125,21 @@ namespace Trident {
 		viewDescriptorBuffer.offset = 0;
 		viewDescriptorBuffer.size = viewBuffer->getSize();
 
-		WriteDescriptorSet cameraWriteDescriptorSet{};
-		cameraWriteDescriptorSet.descriptorSet = cameraViewDescriptorSet;
-		cameraWriteDescriptorSet.bindingIndex = 0;
-		cameraWriteDescriptorSet.descriptorBuffers = {cameraDescriptorBuffer};
+		const sequence<WriteDescriptorSet> writeDescriptorSets = {
+			{
+				.descriptorSet = cameraViewDescriptorSet,
+				.bindingIndex = 0,
+				.descriptorBuffers = {cameraDescriptorBuffer},
+			},
 
-		WriteDescriptorSet viewWriteDescriptorSet{};
-		viewWriteDescriptorSet.descriptorSet = cameraViewDescriptorSet;
-		viewWriteDescriptorSet.bindingIndex = 1;
-		viewWriteDescriptorSet.descriptorBuffers = {viewDescriptorBuffer};
+			{
+				.descriptorSet = cameraViewDescriptorSet,
+				.bindingIndex = 1,
+				.descriptorBuffers = {viewDescriptorBuffer},
+			},
+		};
 
-		getDevice()->updateDescriptorSets({cameraWriteDescriptorSet, viewWriteDescriptorSet});
+		getDevice()->updateDescriptorSets(writeDescriptorSets);
 	}
 
 	void Physics2DRenderer::updatePlaceholderDescriptorSet() const {

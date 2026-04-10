@@ -272,8 +272,11 @@ namespace Trident {
 				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/Image/Image.vert");
 				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/Image/Image.frag");
 
-				ColorBlendAttachment colorBlendAttachment{};
-				colorBlendAttachment.blend = false;
+				const sequence<ColorBlendAttachment> colorBlendAttachments = {
+					{
+						.blend = false,
+					},
+				};
 
 				GraphicsPipelineDescriptor graphicsPipelineDescriptor{};
 				graphicsPipelineDescriptor.pipelineLayout = pipelineLayout;
@@ -285,7 +288,7 @@ namespace Trident {
 				graphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 				graphicsPipelineDescriptor.lineWidth = 1.0f;
 				graphicsPipelineDescriptor.minSampleShading = 0.0f;
-				graphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+				graphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
 				graphicsPipelineDescriptor.depthStencilState.depthTest = false;
 				graphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 				graphicsPipelineDescriptor.renderPass = renderPass;
@@ -323,17 +326,20 @@ namespace Trident {
 				outputDescriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
 				outputDescriptorImage.sampler = nullptr;
 
-				WriteDescriptorSet inputImageWriteDescriptorSet{};
-				inputImageWriteDescriptorSet.descriptorSet = descriptorSet;
-				inputImageWriteDescriptorSet.bindingIndex = 0;
-				inputImageWriteDescriptorSet.descriptorImages = {inputDescriptorImage};
+				const sequence<WriteDescriptorSet> writeDescriptorSets = {
+					{
+						.descriptorSet = descriptorSet,
+						.bindingIndex = 0,
+						.descriptorImages = {inputDescriptorImage},
+					},
+					{
+						.descriptorSet = descriptorSet,
+						.bindingIndex = 1,
+						.descriptorImages = {outputDescriptorImage},
+					},
+				};
 
-				WriteDescriptorSet outputImageWriteDescriptorSet{};
-				outputImageWriteDescriptorSet.descriptorSet = descriptorSet;
-				outputImageWriteDescriptorSet.bindingIndex = 1;
-				outputImageWriteDescriptorSet.descriptorImages = {outputDescriptorImage};
-
-				getDevice()->updateDescriptorSets({inputImageWriteDescriptorSet, outputImageWriteDescriptorSet});
+				getDevice()->updateDescriptorSets(writeDescriptorSets);
 
 				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
 				pipelineLayoutDescriptor.descriptorSetLayouts = {descriptorSetLayout};

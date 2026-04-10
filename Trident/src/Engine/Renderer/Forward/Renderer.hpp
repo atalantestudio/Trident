@@ -474,56 +474,50 @@ namespace Trident {
 					.size = scene->getVertexTangentComponentBufferSize(),
 				};
 
-				WriteDescriptorSet cameraWriteDescriptorSet{};
-				cameraWriteDescriptorSet.descriptorSet = vertexDescriptorSet;
-				cameraWriteDescriptorSet.bindingIndex = 0;
-				cameraWriteDescriptorSet.descriptorBuffers = {cameraDescriptorBuffer};
+				const sequence<WriteDescriptorSet> writeDescriptorSets = {
+					{
+						.descriptorSet = vertexDescriptorSet,
+						.bindingIndex = 0,
+						.descriptorBuffers = {cameraDescriptorBuffer},
+					},
+					{
+						.descriptorSet = vertexDescriptorSet,
+						.bindingIndex = 1,
+						.descriptorBuffers = {vertexPositionComponentDescriptorBuffer},
+					},
+					{
+						.descriptorSet = vertexDescriptorSet,
+						.bindingIndex = 2,
+						.descriptorBuffers = {vertexPositionIndexDescriptorBuffer},
+					},
+					{
+						.descriptorSet = vertexDescriptorSet,
+						.bindingIndex = 3,
+						.descriptorBuffers = {vertexNormalComponentDescriptorBuffer},
+					},
+					{
+						.descriptorSet = vertexDescriptorSet,
+						.bindingIndex = 4,
+						.descriptorBuffers = {vertexNormalIndexDescriptorBuffer},
+					},
+					{
+						.descriptorSet = vertexDescriptorSet,
+						.bindingIndex = 5,
+						.descriptorBuffers = {vertexTextureCoordinateComponentDescriptorBuffer},
+					},
+					{
+						.descriptorSet = vertexDescriptorSet,
+						.bindingIndex = 6,
+						.descriptorBuffers = {vertexTextureCoordinateIndexDescriptorBuffer},
+					},
+					{
+						.descriptorSet = vertexDescriptorSet,
+						.bindingIndex = 7,
+						.descriptorBuffers = {vertexTangentComponentDescriptorBuffer},
+					},
+				};
 
-				WriteDescriptorSet vertexPositionComponentWriteDescriptorSet{};
-				vertexPositionComponentWriteDescriptorSet.descriptorSet = vertexDescriptorSet;
-				vertexPositionComponentWriteDescriptorSet.bindingIndex = 1;
-				vertexPositionComponentWriteDescriptorSet.descriptorBuffers = {vertexPositionComponentDescriptorBuffer};
-
-				WriteDescriptorSet vertexPositionIndexWriteDescriptorSet{};
-				vertexPositionIndexWriteDescriptorSet.descriptorSet = vertexDescriptorSet;
-				vertexPositionIndexWriteDescriptorSet.bindingIndex = 2;
-				vertexPositionIndexWriteDescriptorSet.descriptorBuffers = {vertexPositionIndexDescriptorBuffer};
-
-				WriteDescriptorSet vertexNormalComponentWriteDescriptorSet{};
-				vertexNormalComponentWriteDescriptorSet.descriptorSet = vertexDescriptorSet;
-				vertexNormalComponentWriteDescriptorSet.bindingIndex = 3;
-				vertexNormalComponentWriteDescriptorSet.descriptorBuffers = {vertexNormalComponentDescriptorBuffer};
-
-				WriteDescriptorSet vertexNormalIndexWriteDescriptorSet{};
-				vertexNormalIndexWriteDescriptorSet.descriptorSet = vertexDescriptorSet;
-				vertexNormalIndexWriteDescriptorSet.bindingIndex = 4;
-				vertexNormalIndexWriteDescriptorSet.descriptorBuffers = {vertexNormalIndexDescriptorBuffer};
-
-				WriteDescriptorSet vertexTextureCoordinateComponentWriteDescriptorSet{};
-				vertexTextureCoordinateComponentWriteDescriptorSet.descriptorSet = vertexDescriptorSet;
-				vertexTextureCoordinateComponentWriteDescriptorSet.bindingIndex = 5;
-				vertexTextureCoordinateComponentWriteDescriptorSet.descriptorBuffers = {vertexTextureCoordinateComponentDescriptorBuffer};
-
-				WriteDescriptorSet vertexTextureCoordinateIndexWriteDescriptorSet{};
-				vertexTextureCoordinateIndexWriteDescriptorSet.descriptorSet = vertexDescriptorSet;
-				vertexTextureCoordinateIndexWriteDescriptorSet.bindingIndex = 6;
-				vertexTextureCoordinateIndexWriteDescriptorSet.descriptorBuffers = {vertexTextureCoordinateIndexDescriptorBuffer};
-
-				WriteDescriptorSet vertexTangentComponentWriteDescriptorSet{};
-				vertexTangentComponentWriteDescriptorSet.descriptorSet = vertexDescriptorSet;
-				vertexTangentComponentWriteDescriptorSet.bindingIndex = 7;
-				vertexTangentComponentWriteDescriptorSet.descriptorBuffers = {vertexTangentComponentDescriptorBuffer};
-
-				getDevice()->updateDescriptorSets({
-					cameraWriteDescriptorSet,
-					vertexPositionComponentWriteDescriptorSet,
-					vertexPositionIndexWriteDescriptorSet,
-					vertexNormalComponentWriteDescriptorSet,
-					vertexNormalIndexWriteDescriptorSet,
-					vertexTextureCoordinateComponentWriteDescriptorSet,
-					vertexTextureCoordinateIndexWriteDescriptorSet,
-					vertexTangentComponentWriteDescriptorSet,
-				});
+				getDevice()->updateDescriptorSets(writeDescriptorSets);
 			}
 
 			void postSetCameraController() override {}

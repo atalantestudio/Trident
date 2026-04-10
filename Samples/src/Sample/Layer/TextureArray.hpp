@@ -311,8 +311,11 @@ namespace Trident {
 				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/TextureArray/TextureArray.vert");
 				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/TextureArray/TextureArray.frag");
 
-				ColorBlendAttachment colorBlendAttachment{};
-				colorBlendAttachment.blend = false;
+				const sequence<ColorBlendAttachment> colorBlendAttachments = {
+					{
+						.blend = false,
+					},
+				};
 
 				GraphicsPipelineDescriptor graphicsPipelineDescriptor{};
 				graphicsPipelineDescriptor.pipelineLayout = pipelineLayout;
@@ -325,7 +328,7 @@ namespace Trident {
 				graphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 				graphicsPipelineDescriptor.lineWidth = 1.0f;
 				graphicsPipelineDescriptor.minSampleShading = 0.0f;
-				graphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+				graphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
 				graphicsPipelineDescriptor.depthStencilState.depthTest = false;
 				graphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 				graphicsPipelineDescriptor.renderPass = renderPass;

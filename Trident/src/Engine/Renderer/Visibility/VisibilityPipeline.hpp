@@ -42,8 +42,10 @@ namespace Trident {
 			"Visibility/Visibility.frag"
 		);
 
-		const ColorBlendAttachment visibilityColorBlendAttachment = {
-			.blend = false,
+		const sequence<ColorBlendAttachment> colorBlendAttachments = {
+			{
+				.blend = false,
+			},
 		};
 
 		return createGraphicsPipeline({
@@ -57,7 +59,7 @@ namespace Trident {
 			.lineWidth = 1.0f,
 			.minSampleShading = 0.0f,
 			.colorBlendState = {
-				.attachments = {visibilityColorBlendAttachment},
+				.attachments = colorBlendAttachments,
 			},
 			.depthStencilState = {
 				.depthTest = true,

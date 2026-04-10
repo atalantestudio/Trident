@@ -378,13 +378,17 @@ namespace Trident {
 			if (isBufferDescriptorType(descriptorSetBinding.descriptorType)) {
 				const uint32 descriptorBufferCount = static_cast<uint32>(writeDescriptorSet.descriptorBuffers.count());
 
-				for (uint32 descriptorBufferIndex = 0; descriptorBufferIndex < descriptorBufferCount; descriptorBufferIndex += 1) {
+				uint32 descriptorBufferIndex = 0;
+
+				while (descriptorBufferIndex < descriptorBufferCount) {
 					const DescriptorBuffer& descriptorBuffer = writeDescriptorSet.descriptorBuffers[descriptorBufferIndex];
 
 					VkDescriptorBufferInfo& descriptorBufferInfo = descriptorBufferInfos[descriptorBufferInfoOffset + descriptorBufferIndex];
 					descriptorBufferInfo.buffer = std::static_pointer_cast<VK::BaseBuffer>(descriptorBuffer.buffer)->buffer;
 					descriptorBufferInfo.offset = descriptorBuffer.offset;
 					descriptorBufferInfo.range = descriptorBuffer.size;
+
+					descriptorBufferIndex += 1;
 				}
 
 				vkWriteDescriptorSet.descriptorCount = descriptorBufferCount;
@@ -395,7 +399,9 @@ namespace Trident {
 			else if (isImageDescriptorType(descriptorSetBinding.descriptorType)) {
 				const uint32 descriptorImageCount = static_cast<uint32>(writeDescriptorSet.descriptorImages.count());
 
-				for (uint32 descriptorImageIndex = 0; descriptorImageIndex < descriptorImageCount; descriptorImageIndex += 1) {
+				uint32 descriptorImageIndex = 0;
+
+				while (descriptorImageIndex < descriptorImageCount) {
 					const DescriptorImage& descriptorImage = writeDescriptorSet.descriptorImages[descriptorImageIndex];
 					const ref<VK::ImageView> imageView = std::static_pointer_cast<VK::ImageView>(descriptorImage.imageView);
 
@@ -410,6 +416,8 @@ namespace Trident {
 
 					descriptorImageInfo.imageView = imageView->imageView;
 					descriptorImageInfo.imageLayout = getImageLayout(descriptorImage.imageLayout);
+
+					descriptorImageIndex += 1;
 				}
 
 				vkWriteDescriptorSet.descriptorCount = descriptorImageCount;

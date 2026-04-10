@@ -242,8 +242,11 @@ namespace Trident {
 				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/Triangle/Triangle.vert");
 				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/Triangle/Triangle.frag");
 
-				ColorBlendAttachment colorBlendAttachment{};
-				colorBlendAttachment.blend = false;
+				const sequence<ColorBlendAttachment> colorBlendAttachments = {
+					{
+						.blend = false,
+					},
+				};
 
 				GraphicsPipelineDescriptor writeImageGraphicsPipelineDescriptor{};
 				writeImageGraphicsPipelineDescriptor.pipelineLayout = writeImagePipelineLayout;
@@ -256,7 +259,7 @@ namespace Trident {
 				writeImageGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 				writeImageGraphicsPipelineDescriptor.lineWidth = 1.0f;
 				writeImageGraphicsPipelineDescriptor.minSampleShading = 0.0f;
-				writeImageGraphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+				writeImageGraphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
 				writeImageGraphicsPipelineDescriptor.depthStencilState.depthTest = false;
 				writeImageGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 				writeImageGraphicsPipelineDescriptor.renderPass = renderPass;
@@ -292,8 +295,11 @@ namespace Trident {
 				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/InputAttachment/InputAttachment.vert");
 				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/InputAttachment/InputAttachment.frag");
 
-				ColorBlendAttachment colorBlendAttachment{};
-				colorBlendAttachment.blend = false;
+				const sequence<ColorBlendAttachment> colorBlendAttachments = {
+					{
+						.blend = false,
+					},
+				};
 
 				GraphicsPipelineDescriptor readImageGraphicsPipelineDescriptor{};
 				readImageGraphicsPipelineDescriptor.pipelineLayout = readImagePipelineLayout;
@@ -305,7 +311,7 @@ namespace Trident {
 				readImageGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 				readImageGraphicsPipelineDescriptor.lineWidth = 1.0f;
 				readImageGraphicsPipelineDescriptor.minSampleShading = 0.0f;
-				readImageGraphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+				readImageGraphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
 				readImageGraphicsPipelineDescriptor.depthStencilState.depthTest = false;
 				readImageGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 				readImageGraphicsPipelineDescriptor.renderPass = renderPass;

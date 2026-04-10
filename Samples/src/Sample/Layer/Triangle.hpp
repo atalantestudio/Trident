@@ -28,15 +28,14 @@ namespace Trident {
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
-				BeginRenderPassDescriptor beginRenderPassDescriptor{};
-				beginRenderPassDescriptor.framebuffer = framebuffers[getSwapchainImageIndex()];
-				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
-
 				const Extent2D swapchainExtent = getSwapchain()->getExtent();
 				const float32 width = static_cast<float32>(swapchainExtent.width);
 				const float32 height = static_cast<float32>(swapchainExtent.height);
 
-				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
+				commandEncoder->beginRenderPass({
+					.framebuffer = framebuffers[getSwapchainImageIndex()],
+					.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}},
+				});
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
 				commandEncoder->bindGraphicsPipeline(graphicsPipeline);
@@ -100,8 +99,11 @@ namespace Trident {
 				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/Triangle/Triangle.vert");
 				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/Triangle/Triangle.frag");
 
-				ColorBlendAttachment colorBlendAttachment{};
-				colorBlendAttachment.blend = false;
+				const sequence<ColorBlendAttachment> colorBlendAttachments = {
+					{
+						.blend = false,
+					},
+				};
 
 				GraphicsPipelineDescriptor graphicsPipelineDescriptor{};
 				graphicsPipelineDescriptor.pipelineLayout = pipelineLayout;
@@ -114,7 +116,7 @@ namespace Trident {
 				graphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 				graphicsPipelineDescriptor.lineWidth = 1.0f;
 				graphicsPipelineDescriptor.minSampleShading = 0.0f;
-				graphicsPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+				graphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
 				graphicsPipelineDescriptor.depthStencilState.depthTest = false;
 				graphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 				graphicsPipelineDescriptor.renderPass = renderPass;

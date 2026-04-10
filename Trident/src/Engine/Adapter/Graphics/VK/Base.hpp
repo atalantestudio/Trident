@@ -16,7 +16,6 @@
 	#include <vulkan/vk_enum_string_helper.h>
 #else
 	namespace Trident::VK {
-		// TODO(debug-only)
 		inline sint32 string_VkResult(VkResult result) {
 			return static_cast<sint32>(result);
 		}
