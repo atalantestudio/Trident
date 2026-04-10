@@ -8,7 +8,7 @@ pushd %~dp0\..\
 rm -rf bin
 rm -rf obj
 
-rm -rf **/Makefile
+rm -rf Makefile **/Makefile
 rm -rf **.make
 rm -rf **.sln
 rm -rf **.slnx
