@@ -12,6 +12,10 @@ workspace "Trident"
 		"Release",
 	}
 
+	buildoptions {
+		-- "-Wall",
+	}
+
 	filter "system:windows"
 		links {
 			"d3d12",
@@ -33,8 +37,7 @@ workspace "Trident"
 			-- TODO(ci/breakpoints): Make breakpoints works with Clang/GCC.
 			-- "-gcodeview",
 
-			"-Wall",
-			"-Wextra",
+			-- "-Wextra",
 			"-Wno-unused-parameter",
 		}
 
@@ -158,7 +161,7 @@ project "tsllsp"
 		"Trident",
 	}
 
-	filter "_ACTION:vs2019 or _ACTION:vs2022 or _ACTION:vs2026"
+	filter "toolset:msc-v142 or toolset:msc-v143 or toolset:msc-v145"
 		postbuildcommands {
 			-- TODO(debug-only): Test LSP server executable inside IDE.
 			-- "{COPYFILE} %[bin/" .. outputdir .. "/%{prj.name}/%{prj.name}.exe] C:/Users/Mattéo/.vscode/extensions/tsl/src/lsp.exe", -- TODO: (debug-only)

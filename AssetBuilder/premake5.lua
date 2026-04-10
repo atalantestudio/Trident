@@ -40,7 +40,7 @@ project "AssetBuilder"
 	filter "system:windows"
 		systemversion "latest"
 
-	filter "_ACTION:vs2019 or _ACTION:vs2022 or _ACTION:vs2026"
+	filter "toolset:msc-v142 or toolset:msc-v143 or toolset:msc-v145"
 		postbuildcommands {
 			-- If a .tpr file exists, use it as the default configuration file.
 			"IF EXIST %[%{prj.name}.tpr] {COPYFILE} %[%{prj.name}.tpr] %[../bin/" .. OUTPUT_DIR .. "/%{prj.name}/%{prj.name}.tpr]",
