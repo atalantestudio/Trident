@@ -28,6 +28,7 @@
 #include "Process/SIMD.hpp"
 
 #include "Sample/Layer/ArrayTexture.hpp"
+#include "Sample/Layer/ClearColor.hpp"
 #include "Sample/Layer/ColorBlend.hpp"
 #include "Sample/Layer/ComputeShader.hpp"
 #include "Sample/Layer/ComputeShaderIndirect.hpp"
@@ -109,6 +110,9 @@ namespace Trident {
 		else if (SampleGroupNameProperty == "Sample") {
 			if (SampleNameProperty == "ArrayTexture") {
 				registerLayer<SampleArrayTextureLayer>();
+			}
+			else if (SampleNameProperty == "ClearColor") {
+				registerLayer<SampleClearColorLayer>();
 			}
 			else if (SampleNameProperty == "ColorBlend") {
 				registerLayer<SampleColorBlendLayer>();
