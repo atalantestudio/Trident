@@ -8,14 +8,16 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
+	static constexpr index ENABLED_LAYER_COUNT = 1;
+
 	// TODO: Expose to the client side.
-	static constexpr const char8* ENABLED_LAYER_NAMES_ARRAY[] = {
+	static constexpr const char8* ENABLED_LAYERS[ENABLED_LAYER_COUNT] = {
 		#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
 			"VK_LAYER_KHRONOS_validation",
 		#endif
 	};
 
-	static constexpr view<const char8*> ENABLED_LAYER_NAMES = view<const char8*>(ENABLED_LAYER_NAMES_ARRAY, std::size(ENABLED_LAYER_NAMES_ARRAY));
+	static constexpr view<const char8*> ENABLED_LAYER_NAMES = view<const char8*>(ENABLED_LAYERS, ENABLED_LAYER_COUNT);
 
 	#if defined(DEBUG_ENABLE_MESSENGER)
 		static VkBool32 debugUtilsMessengerUserCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
