@@ -3,18 +3,6 @@
 
 #include "pch.hpp"
 
-#if defined(ENABLE_DX12_ADAPTER)
-	#include "Engine/Adapter/Graphics/DX12/GraphicsAdapter.hpp"
-#endif
-
-#if defined(ENABLE_GL_ADAPTER)
-	#include "Engine/Adapter/Graphics/GL/GraphicsAdapter.hpp"
-#endif
-
-#if defined(ENABLE_VK_ADAPTER)
-	#include "Engine/Adapter/Graphics/VK/GraphicsAdapter.hpp"
-#endif
-
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Validation/Descriptor.hpp"

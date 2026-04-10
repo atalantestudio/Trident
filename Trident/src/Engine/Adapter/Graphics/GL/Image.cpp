@@ -135,12 +135,6 @@ namespace Trident {
 		return image;
 	}
 
-	ref<Trident::Image> GL::createImage(const Trident::Device* device, VkImage image, VkFormat format, Extent2D extent, uint32 index) {
-		ADAPTER_ASSERT(false, "Swapchain images are implicitly handled by the adapter.");
-
-		return nullptr;
-	}
-
 	void GL::destroyImage(const Trident::Device* device, const Trident::Image* image) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 

@@ -20,7 +20,6 @@ namespace Trident {
 
 	namespace GL {
 		ref<Trident::Image> createImage(const Trident::Device* device, const ImageDescriptor& descriptor);
-		ref<Trident::Image> createImage(const Trident::Device* device, VkImage image, VkFormat format, Extent2D extent, uint32 index);
 
 		void destroyImage(const Trident::Device* device, const Trident::Image* image);
 	}

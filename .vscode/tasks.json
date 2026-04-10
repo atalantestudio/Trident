@@ -61,6 +61,7 @@
 				"kind": "build"
 			},
 			"presentation": {
+				"clear": true,
 				"echo": false,
 				"group": "Build",
 				"showReuseMessage": false
@@ -75,6 +76,7 @@
 				"kind": "build"
 			},
 			"presentation": {
+				"clear": true,
 				"echo": false,
 				"group": "Build",
 				"showReuseMessage": false
@@ -89,6 +91,7 @@
 				"kind": "build"
 			},
 			"presentation": {
+				"clear": true,
 				"echo": false,
 				"group": "Build",
 				"showReuseMessage": false
@@ -103,6 +106,7 @@
 				"kind": "build"
 			},
 			"presentation": {
+				"clear": true,
 				"echo": false,
 				"group": "Build",
 				"showReuseMessage": false

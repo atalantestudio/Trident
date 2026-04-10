@@ -36,9 +36,7 @@ project "Trident"
 	}
 
 	includedirs {
-		-- TODO(ci/vk/sdk-inclusion): Only include in debug mode, when the validation layers are enabled.
 		VULKAN_SDK .. "/Include",
-
 		"src",
 		"vendor/API",
 		"vendor/Base",

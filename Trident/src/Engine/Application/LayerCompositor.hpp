@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include "Engine/Adapter/Graphics/VK/Device.hpp"
-
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/API/Graphics/CommandEncoder.hpp"
 #include "Engine/API/Graphics/Descriptor/InstanceDescriptor.hpp"
