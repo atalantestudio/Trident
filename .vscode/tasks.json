@@ -65,7 +65,7 @@
 				"group": "Build",
 				"showReuseMessage": false
 			},
-			"problemMatcher": "$msCompile"
+			"problemMatcher": "$gcc"
 		},
 		{
 			"label": "Build (vs2019)",
