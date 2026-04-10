@@ -110,6 +110,18 @@
 			"problemMatcher": "$msCompile"
 		},
 		{
+			"label": "Build all shaders",
+			"type": "process",
+			"command": "scripts/BuildShaders.bat",
+			"group": {
+				"kind": "build"
+			},
+			"presentation": {
+				"echo": false,
+				"showReuseMessage": false
+			}
+		},
+		{
 			"label": "Clean",
 			"type": "process",
 			"command": "scripts/Clean.bat",
