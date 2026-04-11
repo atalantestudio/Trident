@@ -339,15 +339,28 @@ namespace Trident {
 
 				shaderModuleAssetDescriptor.glslEntryPointActivationOffsets.reserve(entryPointCount);
 
-				for (uint32 entryPointIndex = 0; entryPointIndex < entryPointCount; entryPointIndex += 1) {
+				uint32 entryPointIndex = 0;
+
+				sequence<view<char8>> entryPointIdentifiers(entryPointCount);
+
+				while (entryPointIndex < entryPointCount) {
 					const uint32 identifierSize = byteStream.read<uint32>();
-					const view<char8> identifier(pointer_cast<const char8*>(byteStream.getBytePosition()), identifierSize);
+
+					entryPointIdentifiers[entryPointIndex] = view<char8>(pointer_cast<const char8*>(byteStream.getBytePosition()), identifierSize);
 
 					byteStream.jump(identifierSize);
 
+					entryPointIndex += 1;
+				}
+
+				entryPointIndex = 0;
+
+				while (entryPointIndex < entryPointCount) {
 					const uint32 activationOffset = byteStream.read<uint32>();
 
-					shaderModuleAssetDescriptor.glslEntryPointActivationOffsets.insert({identifier, activationOffset});
+					shaderModuleAssetDescriptor.glslEntryPointActivationOffsets.insert({entryPointIdentifiers[entryPointIndex], activationOffset});
+
+					entryPointIndex += 1;
 				}
 
 				return createRef<ShaderModuleAsset>(shaderModuleAssetDescriptor);

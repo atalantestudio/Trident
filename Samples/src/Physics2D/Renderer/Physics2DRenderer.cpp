@@ -324,6 +324,7 @@ namespace Trident {
 				.descriptorCount = 1,
 				.shaderStages = ShaderStage::VERTEX | ShaderStage::FRAGMENT,
 			},
+
 			// View
 			{
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
@@ -343,21 +344,21 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::createCameraViewPipelineLayout() {
-		PipelineLayoutDescriptor cameraViewPipelineLayoutDescriptor{};
-		cameraViewPipelineLayoutDescriptor.descriptorSetLayouts = {cameraViewDescriptorSetLayout};
-
-		SET_DEBUG_NAME(cameraViewPipelineLayoutDescriptor, "Camera view");
-
-		cameraViewPipelineLayout = createPipelineLayout(cameraViewPipelineLayoutDescriptor);
+		cameraViewPipelineLayout = createPipelineLayout({
+			.descriptorSetLayouts = {cameraViewDescriptorSetLayout},
+			#if defined(BUILD_MODE_DEBUG)
+				.name = "Camera view",
+			#endif
+		});
 	}
 
 	void Physics2DRenderer::createPlaceholderPipelineLayout() {
-		PipelineLayoutDescriptor placeholderPipelineLayoutDescriptor{};
-		placeholderPipelineLayoutDescriptor.descriptorSetLayouts = {cameraViewDescriptorSetLayout, placeholderDescriptorSetLayout};
-
-		SET_DEBUG_NAME(placeholderPipelineLayoutDescriptor, "Placeholder");
-
-		placeholderPipelineLayout = createPipelineLayout(placeholderPipelineLayoutDescriptor);
+		placeholderPipelineLayout = createPipelineLayout({
+			.descriptorSetLayouts = {cameraViewDescriptorSetLayout, placeholderDescriptorSetLayout},
+			#if defined(BUILD_MODE_DEBUG)
+				.name = "Placeholder",
+			#endif
+		});
 	}
 
 	void Physics2DRenderer::createGridPipeline() {
@@ -935,7 +936,12 @@ namespace Trident {
 	#endif
 
 	void Physics2DRenderer::allocateDescriptorSets() {
-		const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({cameraViewDescriptorSetLayout, placeholderDescriptorSetLayout});
+		const sequence<ref<DescriptorSetLayout>> descriptorSetLayouts = {
+			cameraViewDescriptorSetLayout,
+			placeholderDescriptorSetLayout,
+		};
+
+		const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(descriptorSetLayouts);
 
 		cameraViewDescriptorSet = descriptorSets[0];
 		placeholderDescriptorSet = descriptorSets[1];
@@ -1115,15 +1121,17 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::updateCameraViewDescriptorSet() const {
-		DescriptorBuffer cameraDescriptorBuffer{};
-		cameraDescriptorBuffer.buffer = cameraBuffer;
-		cameraDescriptorBuffer.offset = 0;
-		cameraDescriptorBuffer.size = cameraBuffer->getSize();
+		const DescriptorBuffer cameraDescriptorBuffer = {
+			.buffer = cameraBuffer,
+			.offset = 0,
+			.size = cameraBuffer->getSize(),
+		};
 
-		DescriptorBuffer viewDescriptorBuffer{};
-		viewDescriptorBuffer.buffer = viewBuffer;
-		viewDescriptorBuffer.offset = 0;
-		viewDescriptorBuffer.size = viewBuffer->getSize();
+		const DescriptorBuffer viewDescriptorBuffer = {
+			.buffer = viewBuffer,
+			.offset = 0,
+			.size = viewBuffer->getSize(),
+		};
 
 		const sequence<WriteDescriptorSet> writeDescriptorSets = {
 			{
@@ -1131,7 +1139,6 @@ namespace Trident {
 				.bindingIndex = 0,
 				.descriptorBuffers = {cameraDescriptorBuffer},
 			},
-
 			{
 				.descriptorSet = cameraViewDescriptorSet,
 				.bindingIndex = 1,
@@ -1143,17 +1150,21 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::updatePlaceholderDescriptorSet() const {
-		DescriptorBuffer placeholderDescriptorBuffer{};
-		placeholderDescriptorBuffer.buffer = placeholderBuffer;
-		placeholderDescriptorBuffer.offset = 0;
-		placeholderDescriptorBuffer.size = placeholderBuffer->getSize();
+		const DescriptorBuffer placeholderDescriptorBuffer = {
+			.buffer = placeholderBuffer,
+			.offset = 0,
+			.size = placeholderBuffer->getSize(),
+		};
 
-		WriteDescriptorSet placeholderWriteDescriptorSet{};
-		placeholderWriteDescriptorSet.descriptorSet = placeholderDescriptorSet;
-		placeholderWriteDescriptorSet.bindingIndex = 0;
-		placeholderWriteDescriptorSet.descriptorBuffers = {placeholderDescriptorBuffer};
+		const sequence<WriteDescriptorSet> writeDescriptorSets = {
+			{
+				.descriptorSet = placeholderDescriptorSet,
+				.bindingIndex = 0,
+				.descriptorBuffers = {placeholderDescriptorBuffer},
+			},
+		};
 
-		getDevice()->updateDescriptorSets({placeholderWriteDescriptorSet});
+		getDevice()->updateDescriptorSets(writeDescriptorSets);
 	}
 
 	void Physics2DRenderer::updateCentersOfMass() const {

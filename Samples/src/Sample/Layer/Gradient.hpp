@@ -85,8 +85,8 @@ namespace Trident {
 				ref<ShaderModule> vertexShaderModule;
 
 				if (getGraphicsApi() == GraphicsAPI::GL) {
-					AssetLibrary* assetLibrary = getLayer()->getApplication()->getAssetLibrary();
-					const ref<ShaderModuleAsset> vertexShaderModuleAsset = assetLibrary->getAsset<ShaderModuleAsset>("Screen");
+					// TODO(debug-only): Test importing a TSL shader module.
+					const ref<ShaderModuleAsset> vertexShaderModuleAsset = getLayer()->getApplication()->getAssetLibrary()->getAsset<ShaderModuleAsset>("Screen");
 
 					vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, vertexShaderModuleAsset);
 				}

@@ -100,7 +100,7 @@ namespace Trident {
 			static constexpr float32 EXPAND = -1.0f;
 
 		private:
-			static constexpr uint32 MAX_COMPONENT_COUNT = 32;
+			static constexpr uint32 MAX_COMPONENT_COUNT = 64;
 
 			static constexpr ImageID DEFAULT_IMAGE_INDEX = 0;
 			static constexpr uint32 MAX_FONT_COUNT = 4;

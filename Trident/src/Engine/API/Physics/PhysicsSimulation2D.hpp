@@ -25,7 +25,6 @@ namespace Trident {
 	class PhysicsSimulation2D {
 		private:
 			static constexpr uint32 SEQUENTIAL_IMPULSE_ITERATION_COUNT = 10;
-
 			static constexpr float32 ALLOWED_PENETRATION = 0.01f;
 			static constexpr float32 G = -9.80665f;
 

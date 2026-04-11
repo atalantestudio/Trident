@@ -132,21 +132,17 @@ namespace Trident {
 		private:
 			ApplicationProperties* properties = nullptr;
 			ProjectType projectType;
-
-			GraphicsAdapter* graphicsAdapter;
-			LayerCompositor* layerCompositor;
-
+			sequence<void*> consoleArguments;
 			scope<Mutex> mutex;
 			scope<SharedMemory> sharedMemory;
 			SharedMemoryData* sharedMemoryData = nullptr;
 			HighResolutionTimer timer;
-			Window* window = nullptr;
-			LayerInput lastLayerInput;
-			std::vector<ref<Process>> processes;
-
-			sequence<void*> consoleArguments;
-
 			AssetLibrary* assetLibrary = nullptr;
+			Window* window = nullptr;
+			GraphicsAdapter* graphicsAdapter;
+			LayerInput lastLayerInput;
+			LayerCompositor* layerCompositor;
+			std::vector<ref<Process>> processes;
 
 			uint32 frameIndex = 0;
 

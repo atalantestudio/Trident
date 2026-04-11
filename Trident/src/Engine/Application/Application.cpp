@@ -131,17 +131,20 @@ namespace Trident {
 		Renderer::initialize(layerCompositor);
 	}
 
+	// TODO(application/destruction-leaks)
 	Application::~Application() {
-		for (const ref<Layer>& layer : layerCompositor->layers) {
-			layer.~shared_ptr();
-		}
-
 		delete propertyFile;
 
-		lastLayerInput.swapchainImageView.~shared_ptr();
-		lastLayerInput.swapchainImage.~shared_ptr();
-
 		delete layerCompositor;
+
+		if (lastLayerInput.swapchainImageView != nullptr) {
+			lastLayerInput.swapchainImageView.~shared_ptr();
+		}
+
+		if (lastLayerInput.swapchainImage != nullptr) {
+			lastLayerInput.swapchainImage.~shared_ptr();
+		}
+
 		delete graphicsAdapter;
 
 		mutex->acquire();

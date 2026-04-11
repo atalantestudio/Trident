@@ -2,8 +2,8 @@
 
 ## Hardware
 
-- Desktop (i7-13700K, 32Gb RAM, 27", 165Hz)
-- Laptop (i5-12450H, 16Gb RAM, 15.6", 144Hz)
+- Custom build (i7-13700K, 32Gb RAM, 27", 165Hz)
+- HP Victus laptop (i5-12450H, 16Gb RAM, 15.6", 144Hz)
 
 ## GPUs
 
@@ -66,7 +66,6 @@
 		- SlidingBoxes
 		- Stacking
 		- Swing
-	- Statistics
 - Process
 	- ECS
 	- SIMD
