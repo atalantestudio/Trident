@@ -22,8 +22,8 @@ namespace Trident {
 	#define ENABLE_GL_ADAPTER
 
 	// Whether to prioritize integrated GPUs over discrete GPUs when using the OpenGL graphics adapter.
-	// 
 	// NOTE: Use this instead of the PreferIntegratedGPU project property. GPU selection for a GL context can't be done at runtime.
+	// TODO(graphics/gl/igpu): Fix OpenGL adapter never using integrated GPU.
 	// #define GL_PREFER_INTEGRATED_GPU
 
 	// If enabled, OpenGL shaders will be sourced from SPIR-V binaries.

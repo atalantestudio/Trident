@@ -17,7 +17,7 @@ namespace Trident {
 
 		#if defined(BUILD_MODE_DEBUG)
 			if (preferIntegratedGpu) {
-				instance->adapter->logger.warning("GPU selection can only be done at compile-time. Please enable the GL_PREFER_INTEGRATED_GPU macro instead.");
+				ADAPTER_WARNING("GPU selection can only be done at compile-time. Please define GL_PREFER_INTEGRATED_GPU instead.");
 			}
 		#endif
 
