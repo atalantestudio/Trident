@@ -92,7 +92,7 @@ namespace Trident {
 		};
 
 		commandEncoder->begin();
-		commandEncoder->insertMemoryBarriers({}, {textureArrayImageMemoryBarrier});
+		commandEncoder->insertMemoryBarriers({}, textureArrayImageMemoryBarrier);
 		commandEncoder->copyBufferToImage(textureArrayStagingBuffer, textureArrayImage, copyRegions);
 
 		textureArrayImageMemoryBarrier = {
@@ -101,9 +101,11 @@ namespace Trident {
 			.newAccess = Access::SHADER_READ,
 		};
 
-		commandEncoder->insertMemoryBarriers({}, {textureArrayImageMemoryBarrier});
+		commandEncoder->insertMemoryBarriers({}, textureArrayImageMemoryBarrier);
 
-		graphicsQueue->submit({commandEncoder->end()});
+		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+		graphicsQueue->submit(commandBuffer);
 		graphicsQueue->waitIdle();
 
 		textureArrayStagingBuffer.~shared_ptr();
@@ -493,7 +495,10 @@ namespace Trident {
 	}
 
 	void GUIRenderer::allocateDescriptorSets() {
-		const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({subcomponentDescriptorSetLayout, subcomponentDescriptorSetLayout});
+		const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(sequence<ref<DescriptorSetLayout>>{
+			subcomponentDescriptorSetLayout,
+			subcomponentDescriptorSetLayout,
+		});
 
 		subcomponentDescriptorSet = descriptorSets[0];
 		glyphSubcomponentDescriptorSet = descriptorSets[1];
@@ -522,70 +527,77 @@ namespace Trident {
 
 		stagingBuffer->unmap();
 
-		BufferCopyRegion vertexBufferCopyRegion{};
-		vertexBufferCopyRegion.sourceOffset = 0;
-		vertexBufferCopyRegion.destinationOffset = 0;
-		vertexBufferCopyRegion.size = vertexBuffer->getSize();
+		const sequence<BufferCopyRegion> copyRegions = {
+			// Vertex
+			{
+				.sourceOffset = 0,
+				.destinationOffset = 0,
+				.size = vertexBuffer->getSize(),
+			},
 
-		BufferCopyRegion indexBufferCopyRegion{};
-		indexBufferCopyRegion.sourceOffset = vertexBuffer->getSize();
-		indexBufferCopyRegion.destinationOffset = 0;
-		indexBufferCopyRegion.size = indexBuffer->getSize();
-
-		CommandBufferDescriptor commandBufferDescriptor{};
-		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-		SET_DEBUG_NAME(commandBufferDescriptor, "Copy buffers");
+			// Index
+			{
+				.sourceOffset = vertexBuffer->getSize(),
+				.destinationOffset = 0,
+				.size = indexBuffer->getSize(),
+			},
+		};
 
 		const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
-		const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
+		const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder({
+			.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
+			#if defined(BUILD_MODE_DEBUG)
+				.name = "Copy buffers",
+			#endif
+		});
 
 		commandEncoder->begin();
-		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, {vertexBufferCopyRegion});
-		commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, {indexBufferCopyRegion});
+		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, copyRegions[0]);
+		commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, copyRegions[1]);
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-		transferQueue->submit({commandBuffer});
+		transferQueue->submit(commandBuffer);
 		transferQueue->waitIdle();
 	}
 
 	void GUIRenderer::updateDescriptorSets() const {
-		DescriptorBuffer cameraDescriptorBuffer{};
-		cameraDescriptorBuffer.buffer = cameraBuffer;
-		cameraDescriptorBuffer.offset = 0;
-		cameraDescriptorBuffer.size = cameraBuffer->getSize();
-
-		DescriptorImage nearestTextureArrayDescriptorImage{};
-		nearestTextureArrayDescriptorImage.imageView = textureArrayImageView;
-		nearestTextureArrayDescriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
-		nearestTextureArrayDescriptorImage.sampler = nearestSampler;
-
-		DescriptorImage linearTextureArrayDescriptorImage{};
-		linearTextureArrayDescriptorImage.imageView = textureArrayImageView;
-		linearTextureArrayDescriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
-		linearTextureArrayDescriptorImage.sampler = linearSampler;
+		const DescriptorBuffer cameraDescriptorBuffer = {
+			.buffer = cameraBuffer,
+			.offset = 0,
+			.size = cameraBuffer->getSize(),
+		};
+		const DescriptorImage nearestTextureArrayDescriptorImage = {
+			.imageView = textureArrayImageView,
+			.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+			.sampler = nearestSampler,
+		};
+		const DescriptorImage linearTextureArrayDescriptorImage = {
+			.imageView = textureArrayImageView,
+			.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+			.sampler = linearSampler,
+		};
 
 		const sequence<WriteDescriptorSet> writeDescriptorSets = {
 			{
 				.descriptorSet = subcomponentDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorBuffers = {cameraDescriptorBuffer},
+				.descriptorBuffers = cameraDescriptorBuffer,
 			},
 			{
 				.descriptorSet = subcomponentDescriptorSet,
 				.bindingIndex = 1,
-				.descriptorImages = {nearestTextureArrayDescriptorImage},
+				.descriptorImages = nearestTextureArrayDescriptorImage,
 			},
 			{
 				.descriptorSet = glyphSubcomponentDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorBuffers = {cameraDescriptorBuffer},
+				.descriptorBuffers = cameraDescriptorBuffer,
 			},
 			{
 				.descriptorSet = glyphSubcomponentDescriptorSet,
 				.bindingIndex = 1,
-				.descriptorImages = {linearTextureArrayDescriptorImage},
+				.descriptorImages = linearTextureArrayDescriptorImage,
 			},
 		};
 
@@ -632,7 +644,7 @@ namespace Trident {
 
 		if (subcomponentCount > 0) {
 			commandEncoder->bindGraphicsPipeline(subcomponentGraphicsPipeline);
-			commandEncoder->bindDescriptorSets(subcomponentPipelineLayout, 0, {subcomponentDescriptorSet});
+			commandEncoder->bindDescriptorSets(subcomponentPipelineLayout, 0, subcomponentDescriptorSet);
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 			commandEncoder->bindVertexBuffer(1, subcomponentBuffer, 0, sizeof(GUISubcomponent));
 			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
@@ -641,7 +653,7 @@ namespace Trident {
 
 		if (glyphSubcomponentCount > 0) {
 			commandEncoder->bindGraphicsPipeline(glyphSubcomponentGraphicsPipeline);
-			commandEncoder->bindDescriptorSets(subcomponentPipelineLayout, 0, {glyphSubcomponentDescriptorSet});
+			commandEncoder->bindDescriptorSets(subcomponentPipelineLayout, 0, glyphSubcomponentDescriptorSet);
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 			commandEncoder->bindVertexBuffer(1, glyphSubcomponentBuffer, 0, sizeof(GUIGlyphSubcomponent));
 			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);

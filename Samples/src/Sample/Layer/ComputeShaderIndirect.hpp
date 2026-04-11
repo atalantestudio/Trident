@@ -50,7 +50,7 @@ namespace Trident {
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
 				commandEncoder->bindGraphicsPipeline(graphicsPipeline);
-				commandEncoder->bindDescriptorSets(pipelineLayout, 0, {imageDescriptorSet});
+				commandEncoder->bindDescriptorSets(pipelineLayout, 0, imageDescriptorSet);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 				commandEncoder->draw(3, 1, 0, 0);
 				commandEncoder->endRenderPass();
@@ -125,7 +125,7 @@ namespace Trident {
 			}
 
 			void allocateImageDescriptorSetLayout() {
-				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({imageDescriptorSetLayout});
+				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(imageDescriptorSetLayout);
 
 				imageDescriptorSet = descriptorSets[0];
 			}
@@ -258,7 +258,7 @@ namespace Trident {
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-				transferQueue->submit({commandBuffer});
+				transferQueue->submit(commandBuffer);
 				transferQueue->waitIdle();
 			}
 
@@ -277,7 +277,7 @@ namespace Trident {
 				imageBinding.shaderStages = ShaderStage::COMPUTE;
 
 				const ref<DescriptorSetLayout> imageDescriptorSetLayout = createDescriptorSetLayout({imageBinding});
-				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({imageDescriptorSetLayout});
+				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(imageDescriptorSetLayout);
 				const ref<DescriptorSet> imageDescriptorSet = descriptorSets[0];
 
 				DescriptorImage descriptorImage{};
@@ -333,7 +333,7 @@ namespace Trident {
 
 				commandEncoder->insertMemoryBarriers({}, {outputImageMemoryBarrier});
 				commandEncoder->bindComputePipeline(computePipeline);
-				commandEncoder->bindDescriptorSets(pipelineLayout, 0, {imageDescriptorSet});
+				commandEncoder->bindDescriptorSets(pipelineLayout, 0, imageDescriptorSet);
 				commandEncoder->dispatchIndirect(indirectBuffer, 0);
 
 				outputImageMemoryBarrier = {
@@ -346,7 +346,7 @@ namespace Trident {
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-				computeQueue->submit({commandBuffer});
+				computeQueue->submit(commandBuffer);
 				computeQueue->waitIdle();
 			}
 

@@ -168,7 +168,7 @@ namespace Trident {
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-				transferQueue->submit({commandBuffer});
+				transferQueue->submit(commandBuffer);
 				transferQueue->waitIdle();
 			}
 

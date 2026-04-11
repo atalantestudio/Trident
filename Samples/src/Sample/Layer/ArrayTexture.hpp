@@ -61,7 +61,7 @@ namespace Trident {
 				commandEncoder->bindGraphicsPipeline(graphicsPipeline);
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
-				commandEncoder->bindDescriptorSets(pipelineLayout, 0, {arrayTextureDescriptorSet});
+				commandEncoder->bindDescriptorSets(pipelineLayout, 0, arrayTextureDescriptorSet);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 				commandEncoder->bindVertexBuffer(1, instanceBuffer, 0, sizeof(Instance));
 				commandEncoder->draw(6, 4, 0, 0);
@@ -202,49 +202,54 @@ namespace Trident {
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-				graphicsQueue->submit({commandBuffer});
+				graphicsQueue->submit(commandBuffer);
 				graphicsQueue->waitIdle();
 			}
 
 			void setupSampler() {
-				SamplerDescriptor samplerDescriptor{};
-				samplerDescriptor.magFilter = SamplerFilter::LINEAR;
-				samplerDescriptor.minFilter = SamplerFilter::NEAREST;
-
-				sampler = createSampler(samplerDescriptor);
+				sampler = createSampler({
+					.magFilter = SamplerFilter::LINEAR,
+					.minFilter = SamplerFilter::NEAREST,
+				});
 			}
 
 			void createArrayTextureDescriptorSetLayout() {
-				DescriptorSetLayoutBinding arrayTextureBinding{};
-				arrayTextureBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-				arrayTextureBinding.descriptorCount = ASSET_COUNT;
-				arrayTextureBinding.shaderStages = ShaderStage::FRAGMENT;
-
-				arrayTextureDescriptorSetLayout = createDescriptorSetLayout({arrayTextureBinding});
+				arrayTextureDescriptorSetLayout = createDescriptorSetLayout({
+					{
+						.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+						.descriptorCount = ASSET_COUNT,
+						.shaderStages = ShaderStage::FRAGMENT,
+					},
+				});
 			}
 
 			void allocateArrayTextureDescriptorSet() {
-				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({arrayTextureDescriptorSetLayout});
+				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(arrayTextureDescriptorSetLayout);
 
 				arrayTextureDescriptorSet = descriptorSets[0];
 			}
 
 			void updateArrayTextureDescriptorSet() {
 				sequence<DescriptorImage> descriptorImages(ASSET_COUNT);
+				uint32 imageIndex = 0;
 
-				for (uint32 descriptorImageIndex = 0; descriptorImageIndex < descriptorImages.count(); descriptorImageIndex += 1) {
-					DescriptorImage& descriptorImage = descriptorImages[descriptorImageIndex];
-					descriptorImage.imageView = imageViews[descriptorImageIndex];
-					descriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
-					descriptorImage.sampler = sampler;
+				while (imageIndex < descriptorImages.count()) {
+					descriptorImages[imageIndex] = {
+						.imageView = imageViews[imageIndex],
+						.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+						.sampler = sampler,
+					};
+
+					imageIndex += 1;
 				}
 
-				WriteDescriptorSet arrayTextureWriteDescriptorSet{};
-				arrayTextureWriteDescriptorSet.descriptorSet = arrayTextureDescriptorSet;
-				arrayTextureWriteDescriptorSet.bindingIndex = 0;
-				arrayTextureWriteDescriptorSet.descriptorImages = descriptorImages;
+				const WriteDescriptorSet arrayTextureWriteDescriptorSet = {
+					.descriptorSet = arrayTextureDescriptorSet,
+					.bindingIndex = 0,
+					.descriptorImages = descriptorImages,
+				};
 
-				getDevice()->updateDescriptorSets({arrayTextureWriteDescriptorSet});
+				getDevice()->updateDescriptorSets(arrayTextureWriteDescriptorSet);
 			}
 
 			void recreateFramebuffers() {
@@ -252,10 +257,11 @@ namespace Trident {
 
 				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
 
-				FramebufferDescriptor framebufferDescriptor{};
-				framebufferDescriptor.renderPass = renderPass;
-				framebufferDescriptor.imageViews = {nullptr};
-				framebufferDescriptor.extent = swapchain->getExtent();
+				FramebufferDescriptor framebufferDescriptor = {
+					.renderPass = renderPass,
+					.imageViews = {nullptr},
+					.extent = swapchain->getExtent(),
+				};
 
 				#if defined(BUILD_MODE_DEBUG)
 					sequence<char8> name;
@@ -404,7 +410,7 @@ namespace Trident {
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-				transferQueue->submit({commandBuffer});
+				transferQueue->submit(commandBuffer);
 				transferQueue->waitIdle();
 			}
 

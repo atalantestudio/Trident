@@ -68,7 +68,7 @@ namespace Trident {
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
 				commandEncoder->bindGraphicsPipeline(graphicsPipeline);
-				commandEncoder->bindDescriptorSets(pipelineLayout, 0, {textureArrayDescriptorSet});
+				commandEncoder->bindDescriptorSets(pipelineLayout, 0, textureArrayDescriptorSet);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(svec2<float32>));
 				commandEncoder->bindVertexBuffer(1, instanceBuffer, 0, sizeof(Instance));
 				commandEncoder->draw(6, 4, 0, 0);
@@ -207,7 +207,7 @@ namespace Trident {
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-				graphicsQueue->submit({commandBuffer});
+				graphicsQueue->submit(commandBuffer);
 				graphicsQueue->waitIdle();
 			}
 
@@ -260,7 +260,7 @@ namespace Trident {
 			}
 
 			void allocateTextureArrayImageDescriptorSet() {
-				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({textureArrayDescriptorSetLayout});
+				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(textureArrayDescriptorSetLayout);
 
 				textureArrayDescriptorSet = descriptorSets[0];
 			}
@@ -405,7 +405,7 @@ namespace Trident {
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-				transferQueue->submit({commandBuffer});
+				transferQueue->submit(commandBuffer);
 				transferQueue->waitIdle();
 			}
 

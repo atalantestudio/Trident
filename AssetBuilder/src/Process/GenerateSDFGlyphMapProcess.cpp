@@ -132,28 +132,35 @@ namespace Trident {
 		commandEncoder->begin();
 		commandEncoder->copyBufferToBuffer(fontStagingBuffer, fontBuffer, {fontBufferCopyRegion});
 
-		ImageMemoryBarrier glyphImageMemoryBarrier = {
-			.image = glyphImage,
-			.newLayout = ImageLayout::GENERAL,
-			.newAccess = Access::SHADER_READ | Access::SHADER_WRITE,
-		};
-		ImageMemoryBarrier glyphMapImageMemoryBarrier = {
-			.image = glyphMapImage,
-			.newLayout = ImageLayout::GENERAL,
-			.newAccess = Access::SHADER_WRITE,
+		const sequence<ImageMemoryBarrier> imageMemoryBarriers = {
+			// Glyph
+			{
+				.image = glyphImage,
+				.newLayout = ImageLayout::GENERAL,
+				.newAccess = Access::SHADER_READ | Access::SHADER_WRITE,
+			},
+
+			// Glyph map
+			{
+				.image = glyphMapImage,
+				.newLayout = ImageLayout::GENERAL,
+				.newAccess = Access::SHADER_WRITE,
+			},
 		};
 
-		commandEncoder->insertMemoryBarriers({}, {glyphImageMemoryBarrier, glyphMapImageMemoryBarrier});
+		commandEncoder->insertMemoryBarriers({}, imageMemoryBarriers);
 
 		ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-		computeQueue->submit({commandBuffer});
+		computeQueue->submit(commandBuffer);
 		computeQueue->waitIdle();
 
-		FenceDescriptor writeBufferFenceDescriptor{};
-		writeBufferFenceDescriptor.signaled = true;
-
-		SET_DEBUG_NAME(writeBufferFenceDescriptor, "Buffer write");
+		const FenceDescriptor writeBufferFenceDescriptor = {
+			.signaled = true,
+			#if defined(BUILD_MODE_DEBUG)
+				.name = "Buffer write",
+			#endif
+		};
 
 		const ref<Fence> writeBufferFence = Renderer::createFence(writeBufferFenceDescriptor);
 		const Extent3D& glyphMapExtent = glyphMapImage->getExtent();
@@ -234,18 +241,18 @@ namespace Trident {
 			commandEncoder->reset();
 			commandEncoder->begin();
 			commandEncoder->bindComputePipeline(glyphImageComputePipeline);
-			commandEncoder->bindDescriptorSets(glyphImagePipelineLayout, 0, {glyphImageDescriptorSet});
+			commandEncoder->bindDescriptorSets(glyphImagePipelineLayout, 0, glyphImageDescriptorSet);
 
 			// TODO: Dispatch less groups depending on the size of the area occupied by the glyph.
 			commandEncoder->dispatch(128, 128, 1);
 
 			commandEncoder->bindComputePipeline(glyphSdfComputePipeline);
-			commandEncoder->bindDescriptorSets(glyphSdfPipelineLayout, 0, {glyphSdfDescriptorSet});
+			commandEncoder->bindDescriptorSets(glyphSdfPipelineLayout, 0, glyphSdfDescriptorSet);
 			commandEncoder->dispatch(8, 8, 1);
 
 			commandBuffer = commandEncoder->end();
 
-			computeQueue->submit({commandBuffer}, nullptr, nullptr, writeBufferFence);
+			computeQueue->submit(commandBuffer, nullptr, nullptr, writeBufferFence);
 
 			rowHeight = max(rowHeight, glyphHeight);
 
@@ -261,42 +268,46 @@ namespace Trident {
 			glyphIndex += 1;
 		}
 
-		BufferDescriptor glyphMapStagingBufferDescriptor{};
-		glyphMapStagingBufferDescriptor.size = output.extent.width * output.extent.height;
-		glyphMapStagingBufferDescriptor.usage = BufferUsage::TRANSFER_DST;
-		glyphMapStagingBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
+		const ref<Buffer<uint8>> glyphMapStagingBuffer = Renderer::createBuffer<uint8>({
+			.size = output.extent.width * output.extent.height,
+			.usage = BufferUsage::TRANSFER_DST,
+			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
+			.persistent = false,
+			#if defined(BUILD_MODE_DEBUG)
+				.name = "Glyph map staging",
+			#endif
+		});
 
-		SET_DEBUG_NAME(glyphMapStagingBufferDescriptor, "Glyph map staging buffer");
+		const BufferImageCopyRegion glyphMapBufferImageCopyRegion = {
+			.bufferOffset = 0,
+			.imageOffsetX = 0,
+			.imageOffsetY = 0,
+			.imageOffsetZ = 0,
+			.imageExtent = glyphMapImage->getExtent(),
+			.imageMipLevel = 0,
+			.imageLayerOffset = 0,
+			.imageLayerCount = glyphMapImage->getLayerCount(),
+		};
 
-		const ref<Buffer<uint8>> glyphMapStagingBuffer = Renderer::createBuffer<uint8>(glyphMapStagingBufferDescriptor);
-
-		BufferImageCopyRegion glyphMapBufferImageCopyRegion{};
-		glyphMapBufferImageCopyRegion.bufferOffset = 0;
-		glyphMapBufferImageCopyRegion.imageOffsetX = 0;
-		glyphMapBufferImageCopyRegion.imageOffsetY = 0;
-		glyphMapBufferImageCopyRegion.imageOffsetZ = 0;
-		glyphMapBufferImageCopyRegion.imageExtent = glyphMapImage->getExtent();
-		glyphMapBufferImageCopyRegion.imageMipLevel = 0;
-		glyphMapBufferImageCopyRegion.imageLayerOffset = 0;
-		glyphMapBufferImageCopyRegion.imageLayerCount = glyphMapImage->getLayerCount();
-
-		SET_DEBUG_NAME(commandBufferDescriptor, "Copy glyph map image");
+		#if defined(BUILD_MODE_DEBUG)
+			commandBufferDescriptor.name = "Copy glyph map image";
+		#endif
 
 		commandEncoder = computeQueue->createCommandEncoder(commandBufferDescriptor);
 		commandEncoder->begin();
 
-		glyphMapImageMemoryBarrier = {
+		const ImageMemoryBarrier glyphMapImageMemoryBarrier = {
 			.image = glyphMapImage,
 			.newLayout = ImageLayout::TRANSFER_SRC_OPTIMAL,
 			.newAccess = Access::TRANSFER_READ,
 		};
 
-		commandEncoder->insertMemoryBarriers({}, {glyphMapImageMemoryBarrier});
-		commandEncoder->copyImageToBuffer(glyphMapImage, glyphMapStagingBuffer, {glyphMapBufferImageCopyRegion});
+		commandEncoder->insertMemoryBarriers({}, glyphMapImageMemoryBarrier);
+		commandEncoder->copyImageToBuffer(glyphMapImage, glyphMapStagingBuffer, glyphMapBufferImageCopyRegion);
 
 		commandBuffer = commandEncoder->end();
 
-		computeQueue->submit({commandBuffer});
+		computeQueue->submit(commandBuffer);
 		computeQueue->waitIdle();
 
 		output.data = sequence<uint8>(glyphMapStagingBuffer->getSize());
@@ -496,7 +507,10 @@ namespace Trident {
 	}
 
 	void GenerateSDFGlyphMapProcess::allocateDescriptorSets() {
-		const sequence<ref<DescriptorSet>> descriptorSets = Renderer::getDevice()->allocateDescriptorSets({glyphImageDescriptorSetLayout, glyphSdfDescriptorSetLayout});
+		const sequence<ref<DescriptorSet>> descriptorSets = Renderer::getDevice()->allocateDescriptorSets(sequence<ref<DescriptorSetLayout>>{
+			glyphImageDescriptorSetLayout,
+			glyphSdfDescriptorSetLayout,
+		});
 
 		glyphImageDescriptorSet = descriptorSets[0];
 		glyphSdfDescriptorSet = descriptorSets[1];

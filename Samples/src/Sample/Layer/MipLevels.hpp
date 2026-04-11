@@ -65,7 +65,7 @@ namespace Trident {
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
 				commandEncoder->bindGraphicsPipeline(graphicsPipeline);
-				commandEncoder->bindDescriptorSets(pipelineLayout, 0, {imageDescriptorSet});
+				commandEncoder->bindDescriptorSets(pipelineLayout, 0, imageDescriptorSet);
 				commandEncoder->draw(3, 1, 0, 0);
 				commandEncoder->endRenderPass();
 			}
@@ -163,7 +163,7 @@ namespace Trident {
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-				graphicsQueue->submit({commandBuffer});
+				graphicsQueue->submit(commandBuffer);
 				graphicsQueue->waitIdle();
 			}
 
@@ -228,7 +228,7 @@ namespace Trident {
 			}
 
 			void allocateImageDescriptorSet() {
-				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({imageDescriptorSetLayout});
+				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(imageDescriptorSetLayout);
 
 				imageDescriptorSet = descriptorSets[0];
 			}
@@ -312,7 +312,7 @@ namespace Trident {
 
 				ref<DescriptorSetLayout> descriptorSetLayout = createDescriptorSetLayout({inputImageBinding, outputImageBinding});
 
-				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({descriptorSetLayout});
+				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(descriptorSetLayout);
 
 				ref<DescriptorSet> descriptorSet = descriptorSets[0];
 
@@ -376,12 +376,12 @@ namespace Trident {
 
 				commandEncoder->begin();
 				commandEncoder->bindComputePipeline(computePipeline);
-				commandEncoder->bindDescriptorSets(pipelineLayout, 0, {descriptorSet});
+				commandEncoder->bindDescriptorSets(pipelineLayout, 0, descriptorSet);
 				commandEncoder->dispatch((imageExtent.width + 0b111111) >> 6, (imageExtent.height + 0b111111) >> 6, 1);
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-				queue->submit({commandBuffer});
+				queue->submit(commandBuffer);
 				queue->waitIdle();
 			}
 

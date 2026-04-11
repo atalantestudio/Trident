@@ -66,7 +66,7 @@ namespace Trident {
 				// Read image subpass.
 				{
 					commandEncoder->bindGraphicsPipeline(readImageGraphicsPipeline);
-					commandEncoder->bindDescriptorSets(readImagePipelineLayout, 0, {imageDescriptorSet});
+					commandEncoder->bindDescriptorSets(readImagePipelineLayout, 0, imageDescriptorSet);
 					commandEncoder->draw(3, 1, 0, 0);
 				}
 
@@ -195,7 +195,7 @@ namespace Trident {
 			}
 
 			void allocateImageDescriptorSet() {
-				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({imageDescriptorSetLayout});
+				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(imageDescriptorSetLayout);
 
 				imageDescriptorSet = descriptorSets[0];
 			}
@@ -363,7 +363,7 @@ namespace Trident {
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-				transferQueue->submit({commandBuffer});
+				transferQueue->submit(commandBuffer);
 				transferQueue->waitIdle();
 			}
 

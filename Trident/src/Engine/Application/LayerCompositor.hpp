@@ -113,9 +113,9 @@ namespace Trident {
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-				graphicsQueue->submit({commandBuffer}, acquiredNextImageSemaphore, finishedExecutionSemaphore, inFlightFence);
+				graphicsQueue->submit(commandBuffer, acquiredNextImageSemaphore, finishedExecutionSemaphore, inFlightFence);
 
-				return graphicsQueue->present({swapchain}, {swapchainImageIndex}, finishedExecutionSemaphore);
+				return graphicsQueue->present(swapchain, swapchainImageIndex, finishedExecutionSemaphore);
 			}
 
 			void resize() {

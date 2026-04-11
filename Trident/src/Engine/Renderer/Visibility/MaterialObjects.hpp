@@ -206,7 +206,7 @@ namespace Trident {
 						writeDescriptorSets[writeDescriptorSetIndex] = {
 							.descriptorSet = materialShaderUserDescriptorSet,
 							.bindingIndex = descriptorSetLayoutBindingIndex + 1,
-							.descriptorImages = view<DescriptorImage>(&descriptorImages[imageIndex], 1),
+							.descriptorImages = descriptorImages[imageIndex],
 						};
 
 						imageIndex += 1;
@@ -391,7 +391,7 @@ namespace Trident {
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-		graphicsQueue->submit({commandBuffer});
+		graphicsQueue->submit(commandBuffer);
 		graphicsQueue->waitIdle();
 
 		device->updateDescriptorSets(writeDescriptorSets);

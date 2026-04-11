@@ -84,7 +84,7 @@ namespace Trident {
 
 				elementCountBuffer->unmap();
 
-				const sequence<ref<DescriptorSet>> descriptorSets = device->allocateDescriptorSets({prefixSumDescriptorSetLayout});
+				const sequence<ref<DescriptorSet>> descriptorSets = device->allocateDescriptorSets(prefixSumDescriptorSetLayout);
 				const ref<DescriptorSet> prefixSumDescriptorSet = descriptorSets[0];
 
 				DescriptorBuffer elementCountDescriptorBuffer{};
@@ -122,7 +122,7 @@ namespace Trident {
 
 				commandEncoder->begin();
 				commandEncoder->bindComputePipeline(prefixSumPipeline);
-				commandEncoder->bindDescriptorSets(prefixSumPipelineLayout, 0, {prefixSumDescriptorSet});
+				commandEncoder->bindDescriptorSets(prefixSumPipelineLayout, 0, prefixSumDescriptorSet);
 				commandEncoder->dispatch(1, 1, 1);
 
 				BufferMemoryBarrier elementStartMemoryBarrier{};
@@ -131,7 +131,7 @@ namespace Trident {
 				elementStartMemoryBarrier.size = elementStartBuffer->getSize();
 				elementStartMemoryBarrier.newAccess = Access::TRANSFER_READ;
 
-				commandEncoder->insertMemoryBarriers({elementStartMemoryBarrier}, {});
+				commandEncoder->insertMemoryBarriers(elementStartMemoryBarrier, {});
 
 				BufferCopyRegion elementStartCopyRegion{};
 				elementStartCopyRegion.sourceOffset = 0;
@@ -140,7 +140,9 @@ namespace Trident {
 
 				commandEncoder->copyBufferToBuffer(elementStartBuffer, elementStartStagingBuffer, {elementStartCopyRegion});
 
-				queue->submit({commandEncoder->end()});
+				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+				queue->submit(commandBuffer);
 				queue->waitIdle();
 
 				const uint32* elementStartMappedRange = elementStartStagingBuffer->map(0, elementStartBuffer->getSize());

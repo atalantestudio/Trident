@@ -278,7 +278,7 @@ namespace Trident {
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-				graphicsQueue->submit({commandBuffer});
+				graphicsQueue->submit(commandBuffer);
 				graphicsQueue->waitIdle();
 			}
 

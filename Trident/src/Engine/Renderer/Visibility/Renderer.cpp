@@ -164,6 +164,22 @@ namespace Trident {
 
 		stagingBuffer->unmap();
 
+		const sequence<BufferCopyRegion> copyRegions = {
+			// Data
+			{
+				.sourceOffset = 0,
+				.destinationOffset = 0,
+				.size = dataBuffer->getSize(),
+			},
+
+			// Instance
+			{
+				.sourceOffset = dataBuffer->getSize(),
+				.destinationOffset = 0,
+				.size = instanceBuffer->getSize(),
+			},
+		};
+
 		const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
 		const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder({
 			.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
@@ -173,32 +189,12 @@ namespace Trident {
 		});
 
 		commandEncoder->begin();
-		commandEncoder->copyBufferToBuffer(
-			stagingBuffer,
-			dataBuffer,
-			{
-				{
-					.sourceOffset = 0,
-					.destinationOffset = 0,
-					.size = dataBuffer->getSize(),
-				},
-			}
-		);
-		commandEncoder->copyBufferToBuffer(
-			stagingBuffer,
-			instanceBuffer,
-			{
-				{
-					.sourceOffset = dataBuffer->getSize(),
-					.destinationOffset = 0,
-					.size = instanceBuffer->getSize(),
-				},
-			}
-		);
+		commandEncoder->copyBufferToBuffer(stagingBuffer, dataBuffer, copyRegions[0]);
+		commandEncoder->copyBufferToBuffer(stagingBuffer, instanceBuffer, copyRegions[1]);
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-		transferQueue->submit({commandBuffer});
+		transferQueue->submit(commandBuffer);
 		transferQueue->waitIdle();
 
 		transitionOutputImage();
@@ -223,6 +219,12 @@ namespace Trident {
 
 		// Visibility render pass
 		{
+			const sequence<ref<DescriptorSet>> descriptorSets = {
+				cameraDescriptorSet,
+				clusterDescriptorSet,
+				instanceDescriptorSet,
+			};
+
 			commandEncoder->beginRenderPass({
 				.framebuffer = visibilityFramebuffer,
 				.clearValues = {
@@ -236,7 +238,7 @@ namespace Trident {
 			commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 			commandEncoder->setScissor(0, 0, extent);
 			commandEncoder->bindGraphicsPipeline(visibilityPipeline);
-			commandEncoder->bindDescriptorSets(visibilityPipelineLayout, 0, {cameraDescriptorSet, clusterDescriptorSet, instanceDescriptorSet});
+			commandEncoder->bindDescriptorSets(visibilityPipelineLayout, 0, descriptorSets);
 			commandEncoder->drawIndirect(visibilityIndirectBuffer, 0, 1, 0);
 			commandEncoder->endRenderPass();
 		}
@@ -254,23 +256,32 @@ namespace Trident {
 		#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
 			// Visibility debug pass
 			{
-				const ImageMemoryBarrier depthStencilImageMemoryBarrier = {
-					.image = depthStencilImage,
-					.newLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-					.newAccess = Access::SHADER_READ,
+				const sequence<ImageMemoryBarrier> imageMemoryBarriers = {
+					visibilityImageMemoryBarrier,
+					{
+						.image = depthStencilImage,
+						.newLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+						.newAccess = Access::SHADER_READ,
+					},
 				};
 
-				commandEncoder->insertMemoryBarriers({}, {visibilityImageMemoryBarrier, depthStencilImageMemoryBarrier});
+				commandEncoder->insertMemoryBarriers({}, imageMemoryBarriers);
+
+				const sequence<ref<DescriptorSet>> descriptorSets = {
+					visibilityDebugDescriptorSet,
+					clusterDescriptorSet,
+					instanceDescriptorSet,
+				};
 
 				const uint32 groupCountX = static_cast<uint32>(ceil(width / 16.0f));
 				const uint32 groupCountY = static_cast<uint32>(ceil(height / 16.0f));
 
 				commandEncoder->bindComputePipeline(visibilityDebugPipeline);
-				commandEncoder->bindDescriptorSets(visibilityDebugPipelineLayout, 0, {visibilityDebugDescriptorSet, clusterDescriptorSet, instanceDescriptorSet});
+				commandEncoder->bindDescriptorSets(visibilityDebugPipelineLayout, 0, descriptorSets);
 				commandEncoder->dispatch(groupCountX, groupCountY, 1);
 			}
 		#else
-			commandEncoder->insertMemoryBarriers({}, {visibilityImageMemoryBarrier});
+			commandEncoder->insertMemoryBarriers({}, visibilityImageMemoryBarrier);
 
 			// Material compute pass
 			{
@@ -279,7 +290,7 @@ namespace Trident {
 
 				// Count the number of pixels used by each material.
 				commandEncoder->bindComputePipeline(materialCountPipeline);
-				commandEncoder->bindDescriptorSets(materialCountPipelineLayout, 0, {materialCountDescriptorSet});
+				commandEncoder->bindDescriptorSets(materialCountPipelineLayout, 0, materialCountDescriptorSet);
 				commandEncoder->dispatch(groupCountX, groupCountY, 1);
 
 				bufferMemoryBarrier = {
@@ -289,16 +300,16 @@ namespace Trident {
 					.newAccess = Access::SHADER_READ | Access::SHADER_WRITE,
 				};
 
-				commandEncoder->insertMemoryBarriers({bufferMemoryBarrier}, {});
+				commandEncoder->insertMemoryBarriers(bufferMemoryBarrier, {});
 
 				// Get the material pixel offsets with a prefix sum and write indirect arguments for each material pipeline.
 				commandEncoder->bindComputePipeline(materialOffsetPipeline);
-				commandEncoder->bindDescriptorSets(materialOffsetPipelineLayout, 0, {materialOffsetDescriptorSet});
+				commandEncoder->bindDescriptorSets(materialOffsetPipelineLayout, 0, materialOffsetDescriptorSet);
 				commandEncoder->dispatch(1, 1, 1);
 
 				// Re-order the pixels per material index.
 				commandEncoder->bindComputePipeline(materialCoordinatePipeline);
-				commandEncoder->bindDescriptorSets(materialCoordinatePipelineLayout, 0, {materialCoordinateDescriptorSet});
+				commandEncoder->bindDescriptorSets(materialCoordinatePipelineLayout, 0, materialCoordinateDescriptorSet);
 				commandEncoder->dispatch(groupCountX, groupCountY, 1);
 
 				bufferMemoryBarrier = {
@@ -308,13 +319,16 @@ namespace Trident {
 					.newAccess = Access::SHADER_READ,
 				};
 
-				commandEncoder->insertMemoryBarriers({bufferMemoryBarrier}, {});
+				commandEncoder->insertMemoryBarriers(bufferMemoryBarrier, {});
 
+				sequence<ref<DescriptorSet>> descriptorSets = {materialBaseDescriptorSet, nullptr};
 				uint32 materialShaderIndex = 0;
 
 				while (materialShaderIndex < scene->materialShaders.size()) {
+					descriptorSets[1] = materialShaderUserDescriptorSets[materialShaderIndex];
+
 					commandEncoder->bindComputePipeline(materialShaderPipelines[materialShaderIndex]);
-					commandEncoder->bindDescriptorSets(materialShaderPipelineLayouts[materialShaderIndex], 0, {materialBaseDescriptorSet, materialShaderUserDescriptorSets[materialShaderIndex]});
+					commandEncoder->bindDescriptorSets(materialShaderPipelineLayouts[materialShaderIndex], 0, descriptorSets);
 					commandEncoder->dispatchIndirect(materialShaderIndirectBuffer, materialShaderIndex * sizeof(DispatchIndirectCommand));
 
 					materialShaderIndex += 1;
@@ -331,7 +345,7 @@ namespace Trident {
 			commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 			commandEncoder->setScissor(0, 0, extent);
 			commandEncoder->bindGraphicsPipeline(outputPipeline);
-			commandEncoder->bindDescriptorSets(outputPipelineLayout, 0, {outputDescriptorSet});
+			commandEncoder->bindDescriptorSets(outputPipelineLayout, 0, outputDescriptorSet);
 			commandEncoder->draw(3, 1, 0, 0);
 			commandEncoder->endRenderPass();
 		}
@@ -380,7 +394,7 @@ namespace Trident {
 	}
 
 	void VisibilityRenderer::allocateDescriptorSets() {
-		const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({
+		const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(sequence<ref<DescriptorSetLayout>>{
 			cameraDescriptorSetLayout,
 			clusterDescriptorSetLayout,
 			instanceDescriptorSetLayout,
@@ -426,11 +440,11 @@ namespace Trident {
 				.newAccess = Access::SHADER_WRITE,
 			};
 
-			commandEncoder->insertMemoryBarriers({}, {outputImageMemoryBarrier});
+			commandEncoder->insertMemoryBarriers({}, outputImageMemoryBarrier);
 
 			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-			graphicsQueue->submit({commandBuffer});
+			graphicsQueue->submit(commandBuffer);
 			graphicsQueue->waitIdle();
 		}
 	}
@@ -516,174 +530,174 @@ namespace Trident {
 			{
 				.descriptorSet = cameraDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorBuffers = {cameraDescriptorBuffer},
+				.descriptorBuffers = cameraDescriptorBuffer,
 			},
 			{
 				.descriptorSet = clusterDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorBuffers = {vertexPositionComponentDescriptorBuffer},
+				.descriptorBuffers = vertexPositionComponentDescriptorBuffer,
 			},
 			{
 				.descriptorSet = clusterDescriptorSet,
 				.bindingIndex = 1,
-				.descriptorBuffers = {vertexPositionIndexDescriptorBuffer},
+				.descriptorBuffers = vertexPositionIndexDescriptorBuffer,
 			},
 			{
 				.descriptorSet = clusterDescriptorSet,
 				.bindingIndex = 2,
-				.descriptorBuffers = {clusterDescriptorBuffer},
+				.descriptorBuffers = clusterDescriptorBuffer,
 			},
 			{
 				.descriptorSet = instanceDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorBuffers = {instanceDescriptorBuffer},
+				.descriptorBuffers = instanceDescriptorBuffer,
 			},
 			{
 				.descriptorSet = instanceDescriptorSet,
 				.bindingIndex = 1,
-				.descriptorBuffers = {geometryDescriptorBuffer},
+				.descriptorBuffers = geometryDescriptorBuffer,
 			},
 			{
 				.descriptorSet = materialCountDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorBuffers = {cameraDescriptorBuffer},
+				.descriptorBuffers = cameraDescriptorBuffer,
 			},
 			{
 				.descriptorSet = materialCountDescriptorSet,
 				.bindingIndex = 2,
-				.descriptorBuffers = {clusterDescriptorBuffer},
+				.descriptorBuffers = clusterDescriptorBuffer,
 			},
 			{
 				.descriptorSet = materialCountDescriptorSet,
 				.bindingIndex = 3,
-				.descriptorBuffers = {instanceDescriptorBuffer},
+				.descriptorBuffers = instanceDescriptorBuffer,
 			},
 			{
 				.descriptorSet = materialCountDescriptorSet,
 				.bindingIndex = 4,
-				.descriptorBuffers = {materialCountDescriptorBuffer},
+				.descriptorBuffers = materialCountDescriptorBuffer,
 			},
 			#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
 				{
 					.descriptorSet = visibilityDebugDescriptorSet,
 					.bindingIndex = 0,
-					.descriptorBuffers = {cameraDescriptorBuffer},
+					.descriptorBuffers = cameraDescriptorBuffer,
 				},
 				{
 					.descriptorSet = visibilityDebugDescriptorSet,
 					.bindingIndex = 3,
-					.descriptorBuffers = {vertexPositionComponentDescriptorBuffer},
+					.descriptorBuffers = vertexPositionComponentDescriptorBuffer,
 				},
 				{
 					.descriptorSet = visibilityDebugDescriptorSet,
 					.bindingIndex = 4,
-					.descriptorBuffers = {vertexNormalComponentDescriptorBuffer},
+					.descriptorBuffers = vertexNormalComponentDescriptorBuffer,
 				},
 				{
 					.descriptorSet = visibilityDebugDescriptorSet,
 					.bindingIndex = 5,
-					.descriptorBuffers = {vertexTextureCoordinateComponentDescriptorBuffer},
+					.descriptorBuffers = vertexTextureCoordinateComponentDescriptorBuffer,
 				},
 				{
 					.descriptorSet = visibilityDebugDescriptorSet,
 					.bindingIndex = 6,
-					.descriptorBuffers = {vertexPositionIndexDescriptorBuffer},
+					.descriptorBuffers = vertexPositionIndexDescriptorBuffer,
 				},
 				{
 					.descriptorSet = visibilityDebugDescriptorSet,
 					.bindingIndex = 7,
-					.descriptorBuffers = {vertexNormalIndexDescriptorBuffer},
+					.descriptorBuffers = vertexNormalIndexDescriptorBuffer,
 				},
 				{
 					.descriptorSet = visibilityDebugDescriptorSet,
 					.bindingIndex = 8,
-					.descriptorBuffers = {vertexTextureCoordinateIndexDescriptorBuffer},
+					.descriptorBuffers = vertexTextureCoordinateIndexDescriptorBuffer,
 				},
 			#endif
 			{
 				.descriptorSet = materialOffsetDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorBuffers = {materialCountDescriptorBuffer},
+				.descriptorBuffers = materialCountDescriptorBuffer,
 			},
 			{
 				.descriptorSet = materialOffsetDescriptorSet,
 				.bindingIndex = 1,
-				.descriptorBuffers = {materialOffsetDescriptorBuffer},
+				.descriptorBuffers = materialOffsetDescriptorBuffer,
 			},
 			{
 				.descriptorSet = materialOffsetDescriptorSet,
 				.bindingIndex = 2,
-				.descriptorBuffers = {materialShaderIndirectDescriptorBuffer},
+				.descriptorBuffers = materialShaderIndirectDescriptorBuffer,
 			},
 			{
 				.descriptorSet = materialCoordinateDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorBuffers = {cameraDescriptorBuffer},
+				.descriptorBuffers = cameraDescriptorBuffer,
 			},
 			{
 				.descriptorSet = materialCoordinateDescriptorSet,
 				.bindingIndex = 2,
-				.descriptorBuffers = {clusterDescriptorBuffer},
+				.descriptorBuffers = clusterDescriptorBuffer,
 			},
 			{
 				.descriptorSet = materialCoordinateDescriptorSet,
 				.bindingIndex = 3,
-				.descriptorBuffers = {instanceDescriptorBuffer},
+				.descriptorBuffers = instanceDescriptorBuffer,
 			},
 			{
 				.descriptorSet = materialCoordinateDescriptorSet,
 				.bindingIndex = 4,
-				.descriptorBuffers = {materialOffsetDescriptorBuffer},
+				.descriptorBuffers = materialOffsetDescriptorBuffer,
 			},
 			{
 				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorBuffers = {cameraDescriptorBuffer},
+				.descriptorBuffers = cameraDescriptorBuffer,
 			},
 			{
 				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 3,
-				.descriptorBuffers = {vertexPositionComponentDescriptorBuffer},
+				.descriptorBuffers = vertexPositionComponentDescriptorBuffer,
 			},
 			{
 				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 4,
-				.descriptorBuffers = {vertexNormalComponentDescriptorBuffer},
+				.descriptorBuffers = vertexNormalComponentDescriptorBuffer,
 			},
 			{
 				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 5,
-				.descriptorBuffers = {vertexTextureCoordinateComponentDescriptorBuffer},
+				.descriptorBuffers = vertexTextureCoordinateComponentDescriptorBuffer,
 			},
 			{
 				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 6,
-				.descriptorBuffers = {vertexPositionIndexDescriptorBuffer},
+				.descriptorBuffers = vertexPositionIndexDescriptorBuffer,
 			},
 			{
 				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 7,
-				.descriptorBuffers = {vertexNormalIndexDescriptorBuffer},
+				.descriptorBuffers = vertexNormalIndexDescriptorBuffer,
 			},
 			{
 				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 8,
-				.descriptorBuffers = {vertexTextureCoordinateIndexDescriptorBuffer},
+				.descriptorBuffers = vertexTextureCoordinateIndexDescriptorBuffer,
 			},
 			{
 				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 9,
-				.descriptorBuffers = {clusterDescriptorBuffer},
+				.descriptorBuffers = clusterDescriptorBuffer,
 			},
 			{
 				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 10,
-				.descriptorBuffers = {instanceDescriptorBuffer},
+				.descriptorBuffers = instanceDescriptorBuffer,
 			},
 			{
 				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 11,
-				.descriptorBuffers = {geometryDescriptorBuffer},
+				.descriptorBuffers = geometryDescriptorBuffer,
 			},
 		};
 
@@ -720,53 +734,53 @@ namespace Trident {
 			{
 				.descriptorSet = materialCountDescriptorSet,
 				.bindingIndex = 1,
-				.descriptorImages = {visibilityDescriptorImage},
+				.descriptorImages = visibilityDescriptorImage,
 			},
 			{
 				.descriptorSet = materialCoordinateDescriptorSet,
 				.bindingIndex = 1,
-				.descriptorImages = {visibilityDescriptorImage},
+				.descriptorImages = visibilityDescriptorImage,
 			},
 			{
 				.descriptorSet = materialCoordinateDescriptorSet,
 				.bindingIndex = 5,
-				.descriptorBuffers = {materialCoordinateDescriptorBuffer},
+				.descriptorBuffers = materialCoordinateDescriptorBuffer,
 			},
 			{
 				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 1,
-				.descriptorBuffers = {materialCoordinateDescriptorBuffer},
+				.descriptorBuffers = materialCoordinateDescriptorBuffer,
 			},
 			{
 				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 2,
-				.descriptorImages = {visibilityDescriptorImage},
+				.descriptorImages = visibilityDescriptorImage,
 			},
 			{
 				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 12,
-				.descriptorImages = {outputDescriptorImage},
+				.descriptorImages = outputDescriptorImage,
 			},
 			{
 				.descriptorSet = outputDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorImages = {outputDescriptorImage},
+				.descriptorImages = outputDescriptorImage,
 			},
 			#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
 				{
 					.descriptorSet = visibilityDebugDescriptorSet,
 					.bindingIndex = 1,
-					.descriptorImages = {visibilityDescriptorImage},
+					.descriptorImages = visibilityDescriptorImage,
 				},
 				{
 					.descriptorSet = visibilityDebugDescriptorSet,
 					.bindingIndex = 2,
-					.descriptorImages = {depthStencilDescriptorImage},
+					.descriptorImages = depthStencilDescriptorImage,
 				},
 				{
 					.descriptorSet = visibilityDebugDescriptorSet,
 					.bindingIndex = 9,
-					.descriptorImages = {outputDescriptorImage},
+					.descriptorImages = outputDescriptorImage,
 				},
 			#endif
 		};

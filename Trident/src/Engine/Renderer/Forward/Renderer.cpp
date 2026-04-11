@@ -258,7 +258,7 @@ namespace Trident {
 					.newAccess = Access::TRANSFER_WRITE,
 				};
 
-				commandEncoder->insertMemoryBarriers({}, {imageMemoryBarrier});
+				commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
 				commandEncoder->copyBufferToImage(imageStagingBuffer, image, imageCopyRegions);
 
 				imageMemoryBarrier = {
@@ -267,7 +267,7 @@ namespace Trident {
 					.newAccess = Access::SHADER_READ,
 				};
 
-				commandEncoder->insertMemoryBarriers({}, {imageMemoryBarrier});
+				commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
 
 				bindingIndex += 1;
 			}
@@ -277,7 +277,9 @@ namespace Trident {
 
 		imageStagingBuffer->unmap();
 
-		queue->submit({commandEncoder->end()});
+		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+		queue->submit(commandBuffer);
 		queue->waitIdle();
 
 		getDevice()->updateDescriptorSets(writeDescriptorSets);

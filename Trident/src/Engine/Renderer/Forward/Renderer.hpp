@@ -37,7 +37,7 @@ namespace Trident {
 
 				vertexDescriptorSetLayout = createVertexDescriptorSetLayout();
 
-				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({vertexDescriptorSetLayout});
+				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(vertexDescriptorSetLayout);
 
 				vertexDescriptorSet = descriptorSets[0];
 
@@ -98,20 +98,20 @@ namespace Trident {
 					#endif
 				});
 
-				commandEncoder->begin();
-				commandEncoder->copyBufferToBuffer(
-					vertexStagingBuffer,
-					vertexBuffer,
+				const sequence<BufferCopyRegion> copyRegions = {
 					{
-						{
-							.sourceOffset = 0,
-							.destinationOffset = 0,
-							.size = vertexBuffer->getSize(),
-						},
-					}
-				);
+						.sourceOffset = 0,
+						.destinationOffset = 0,
+						.size = vertexBuffer->getSize(),
+					},
+				};
 
-				queue->submit({commandEncoder->end()});
+				commandEncoder->begin();
+				commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, copyRegions);
+
+				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+				queue->submit(commandBuffer);
 				queue->waitIdle();
 
 				updateDescriptorSets();
@@ -152,15 +152,16 @@ namespace Trident {
 					const Geometry3D& geometry = geometries[geometryComponent.geometryIndex];
 					const uint32 vertexCount = static_cast<uint32>(geometry.getVertexPositionIndices().count());
 
-					// TODO: Fix.
+					// TODO: Calculate correct index offset.
 					const uint32 indexOffset = 0;
 
 					const MaterialComponent materialComponent = materialComponentPool.components[geometryComponentPool.entityToComponentIndex[entity]];
 					const uint32 materialShaderIndex = scene->getMaterialShaderIndex(materialComponent.materialIndex);
+					const sequence<ref<DescriptorSet>> descriptorSets = {vertexDescriptorSet, materialDescriptorSets[materialShaderIndex]};
 
 					commandEncoder->bindGraphicsPipeline(materialPipelines[materialShaderIndex]);
 					commandEncoder->bindVertexBuffer(0, instanceBuffer, 0, sizeof(Instance));
-					commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialShaderIndex], 0, {vertexDescriptorSet, materialDescriptorSets[materialShaderIndex]});
+					commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialShaderIndex], 0, descriptorSets);
 					commandEncoder->draw(vertexCount, 1, indexOffset, rigidBodyComponentIndex);
 
 					rigidBodyComponentIndex += 1;
@@ -478,42 +479,42 @@ namespace Trident {
 					{
 						.descriptorSet = vertexDescriptorSet,
 						.bindingIndex = 0,
-						.descriptorBuffers = {cameraDescriptorBuffer},
+						.descriptorBuffers = cameraDescriptorBuffer,
 					},
 					{
 						.descriptorSet = vertexDescriptorSet,
 						.bindingIndex = 1,
-						.descriptorBuffers = {vertexPositionComponentDescriptorBuffer},
+						.descriptorBuffers = vertexPositionComponentDescriptorBuffer,
 					},
 					{
 						.descriptorSet = vertexDescriptorSet,
 						.bindingIndex = 2,
-						.descriptorBuffers = {vertexPositionIndexDescriptorBuffer},
+						.descriptorBuffers = vertexPositionIndexDescriptorBuffer,
 					},
 					{
 						.descriptorSet = vertexDescriptorSet,
 						.bindingIndex = 3,
-						.descriptorBuffers = {vertexNormalComponentDescriptorBuffer},
+						.descriptorBuffers = vertexNormalComponentDescriptorBuffer,
 					},
 					{
 						.descriptorSet = vertexDescriptorSet,
 						.bindingIndex = 4,
-						.descriptorBuffers = {vertexNormalIndexDescriptorBuffer},
+						.descriptorBuffers = vertexNormalIndexDescriptorBuffer,
 					},
 					{
 						.descriptorSet = vertexDescriptorSet,
 						.bindingIndex = 5,
-						.descriptorBuffers = {vertexTextureCoordinateComponentDescriptorBuffer},
+						.descriptorBuffers = vertexTextureCoordinateComponentDescriptorBuffer,
 					},
 					{
 						.descriptorSet = vertexDescriptorSet,
 						.bindingIndex = 6,
-						.descriptorBuffers = {vertexTextureCoordinateIndexDescriptorBuffer},
+						.descriptorBuffers = vertexTextureCoordinateIndexDescriptorBuffer,
 					},
 					{
 						.descriptorSet = vertexDescriptorSet,
 						.bindingIndex = 7,
-						.descriptorBuffers = {vertexTangentComponentDescriptorBuffer},
+						.descriptorBuffers = vertexTangentComponentDescriptorBuffer,
 					},
 				};
 
