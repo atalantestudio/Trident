@@ -19,6 +19,10 @@ namespace Trident {
 				{0, {0}},
 				{1, {0}},
 			},
+			.materialMappings = {
+				{0, {1}},
+				{1, {1}},
+			},
 			.rigidBodyMappings = {
 				{
 					0,

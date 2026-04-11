@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/ECS/Component/GeometryComponent.hpp"
+#include "Engine/ECS/Component/MaterialComponent.hpp"
 #include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 #include "Engine/ECS/Component/RigidBody3DComponent.hpp"
 #include "Engine/ECS/EntityComponentMapping.hpp"
@@ -24,6 +25,7 @@ namespace Trident {
 		uint32 entityCount;
 		sequence<uint32> geometryAssetIdentifiers;
 		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
+		sequence<EntityComponentMapping<MaterialComponent>> materialMappings;
 		sequence<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;
 	};
 }

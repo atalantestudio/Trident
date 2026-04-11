@@ -41,9 +41,10 @@ namespace Trident {
 	}
 
 	void Scene3D::loadEntityComponentMappings(ref<Scene3DAsset> sceneAsset) {
-		// TODO(ecs/scene-components): Transform2DComponent/Transform3DComponent for static meshes?
 		ecs.registerComponentPool<GeometryComponent>();
 		ecs.registerComponentPool<MaterialComponent>();
+
+		// TODO(ecs/scene-components): Transform3DComponent for static meshes?
 		ecs.registerComponentPool<RigidBody3DComponent>();
 
 		Entity entity = 0;
@@ -56,6 +57,10 @@ namespace Trident {
 
 		for (const EntityComponentMapping<GeometryComponent> geometryMapping : sceneAsset->getGeometryMappings()) {
 			ecs.setComponent<GeometryComponent>(geometryMapping.entity, geometryMapping.component);
+		}
+
+		for (const EntityComponentMapping<MaterialComponent> materialMapping : sceneAsset->getMaterialMappings()) {
+			ecs.setComponent<MaterialComponent>(materialMapping.entity, materialMapping.component);
 		}
 
 		for (const EntityComponentMapping<RigidBody3DComponent>& rigidBodyMapping : sceneAsset->getRigidBodyMappings()) {

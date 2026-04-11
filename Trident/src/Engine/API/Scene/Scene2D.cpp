@@ -7,6 +7,7 @@
 #include "Engine/API/Physics/Joint2D.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 #include "Engine/ECS/Component/GeometryComponent.hpp"
+#include "Engine/ECS/Component/MaterialComponent.hpp"
 #include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 #include "Engine/ECS/Tag.hpp"
 
@@ -109,9 +110,12 @@ namespace Trident {
 	}
 
 	void Scene2D::loadEntityComponentMappings(ref<Scene2DAsset> sceneAsset) {
-		// TODO(ecs/scene-components): Transform2DComponent/Transform3DComponent for static meshes?
 		ecs.registerComponentPool<GeometryComponent>();
+		ecs.registerComponentPool<MaterialComponent>();
+
+		// TODO(ecs/scene-components): Transform2DComponent for static meshes?
 		ecs.registerComponentPool<RigidBody2DComponent>();
+
 		ecs.registerComponentPool<Joint2D>();
 		ecs.registerComponentPool<ref<Constraint2D>>();
 		ecs.registerTagPool<DynamicEntityTag>();
@@ -127,6 +131,10 @@ namespace Trident {
 
 		for (const EntityComponentMapping<GeometryComponent> geometryMapping : sceneAsset->getGeometryMappings()) {
 			ecs.setComponent<GeometryComponent>(geometryMapping.entity, geometryMapping.component);
+		}
+
+		for (const EntityComponentMapping<MaterialComponent> materialMapping : sceneAsset->getMaterialMappings()) {
+			ecs.setComponent<MaterialComponent>(materialMapping.entity, materialMapping.component);
 		}
 
 		for (const EntityComponentMapping<RigidBody2DComponent>& rigidBodyMapping : sceneAsset->getRigidBodyMappings()) {

@@ -203,15 +203,13 @@ namespace Trident {
 				sceneAssetDescriptor.staticBuffer = sequence<uint8>(sceneAssetDescriptor.staticVertexCount * sizeof(svec2<float32>) + sceneAssetDescriptor.staticIndexCount * sizeof(uint16));
 
 				const uint32 geometryAssetCount = stream.read<uint32>();
-
-				sceneAssetDescriptor.geometryAssets = sequence<ref<GeometryAsset>>(geometryAssetCount);
-
 				const uint32 geometryMappingCount = stream.read<uint32>();
-
-				sceneAssetDescriptor.geometryMappings = sequence<EntityComponentMapping<GeometryComponent>>(geometryMappingCount);
-
+				const uint32 materialMappingCount = stream.read<uint32>();
 				const uint32 rigidBodyMappingCount = stream.read<uint32>();
 
+				sceneAssetDescriptor.geometryAssets = sequence<ref<GeometryAsset>>(geometryAssetCount);
+				sceneAssetDescriptor.geometryMappings = sequence<EntityComponentMapping<GeometryComponent>>(geometryMappingCount);
+				sceneAssetDescriptor.materialMappings = sequence<EntityComponentMapping<MaterialComponent>>(materialMappingCount);
 				sceneAssetDescriptor.rigidBodyMappings = sequence<EntityComponentMapping<RigidBody2DComponent>>(rigidBodyMappingCount);
 
 				std::copy_n(stream.getBytePosition(), sceneAssetDescriptor.staticBuffer.count(), &sceneAssetDescriptor.staticBuffer[0]);
@@ -237,6 +235,11 @@ namespace Trident {
 				for (EntityComponentMapping<GeometryComponent>& geometryMapping : sceneAssetDescriptor.geometryMappings) {
 					geometryMapping.entity = stream.read<Entity>();
 					geometryMapping.component.geometryIndex = stream.read<uint32>();
+				}
+
+				for (EntityComponentMapping<MaterialComponent>& materialMapping : sceneAssetDescriptor.materialMappings) {
+					materialMapping.entity = stream.read<Entity>();
+					materialMapping.component.materialIndex = stream.read<uint32>();
 				}
 
 				for (EntityComponentMapping<RigidBody2DComponent>& rigidBodyMapping : sceneAssetDescriptor.rigidBodyMappings) {
@@ -272,15 +275,13 @@ namespace Trident {
 				sceneAssetDescriptor.staticBuffer = sequence<uint8>(sceneAssetDescriptor.staticVertexCount * sizeof(svec2<float32>) + sceneAssetDescriptor.staticIndexCount * sizeof(uint16));
 
 				const uint32 geometryAssetCount = stream.read<uint32>();
-
-				sceneAssetDescriptor.geometryAssets = sequence<ref<GeometryAsset>>(geometryAssetCount);
-
 				const uint32 geometryMappingCount = stream.read<uint32>();
-
-				sceneAssetDescriptor.geometryMappings = sequence<EntityComponentMapping<GeometryComponent>>(geometryMappingCount);
-
+				const uint32 materialMappingCount  = stream.read<uint32>();
 				const uint32 rigidBodyMappingCount = stream.read<uint32>();
 
+				sceneAssetDescriptor.geometryAssets = sequence<ref<GeometryAsset>>(geometryAssetCount);
+				sceneAssetDescriptor.geometryMappings = sequence<EntityComponentMapping<GeometryComponent>>(geometryMappingCount);
+				sceneAssetDescriptor.materialMappings = sequence<EntityComponentMapping<MaterialComponent>>(materialMappingCount);
 				sceneAssetDescriptor.rigidBodyMappings = sequence<EntityComponentMapping<RigidBody3DComponent>>(rigidBodyMappingCount);
 
 				std::copy_n(stream.getBytePosition(), sceneAssetDescriptor.staticBuffer.count(), &sceneAssetDescriptor.staticBuffer[0]);
@@ -308,6 +309,11 @@ namespace Trident {
 				for (EntityComponentMapping<GeometryComponent>& geometryMapping : sceneAssetDescriptor.geometryMappings) {
 					geometryMapping.entity = stream.read<Entity>();
 					geometryMapping.component.geometryIndex = stream.read<uint32>();
+				}
+
+				for (EntityComponentMapping<MaterialComponent>& materialMapping : sceneAssetDescriptor.materialMappings) {
+					materialMapping.entity = stream.read<Entity>();
+					materialMapping.component.materialIndex = stream.read<uint32>();
 				}
 
 				for (EntityComponentMapping<RigidBody3DComponent>& rigidBodyMapping : sceneAssetDescriptor.rigidBodyMappings) {

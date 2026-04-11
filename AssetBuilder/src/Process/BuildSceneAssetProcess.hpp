@@ -61,6 +61,7 @@ namespace Trident {
 				header.entityCount = data.entityCount;
 				header.geometryAssetCount = static_cast<uint32>(data.geometryAssetIdentifiers.count());
 				header.geometryMappingCount = static_cast<uint32>(data.geometryMappings.count());
+				header.materialMappingCount = 0;
 				header.rigidBodyMappingCount = static_cast<uint32>(data.rigidBodyMappings.count());
 
 				const uint64 size =
@@ -69,6 +70,7 @@ namespace Trident {
 					header.staticIndexCount * sizeof(uint32) +
 					header.geometryAssetCount * sizeof(uint32) +
 					header.geometryMappingCount * (sizeof(Entity) + sizeof(uint32)) +
+					header.materialMappingCount * (sizeof(Entity) + sizeof(uint32)) +
 					header.rigidBodyMappingCount * (sizeof(Entity) + sizeof(svec2<float32>) * 3 + sizeof(float32) * 6);
 
 				ByteStream<StreamOperation::WRITE> stream(size, Endianness::LITTLE_ENDIAN);
@@ -112,6 +114,7 @@ namespace Trident {
 				header.entityCount = data.entityCount;
 				header.geometryAssetCount = static_cast<uint32>(data.geometryAssetIdentifiers.count());
 				header.geometryMappingCount = static_cast<uint32>(data.geometryMappings.count());
+				header.materialMappingCount = static_cast<uint32>(data.materialMappings.count());
 				header.rigidBodyMappingCount = static_cast<uint32>(data.rigidBodyMappings.count());
 
 				const uint64 size =
@@ -120,6 +123,7 @@ namespace Trident {
 					header.staticIndexCount * sizeof(uint32) +
 					header.geometryAssetCount * sizeof(uint32) +
 					header.geometryMappingCount * (sizeof(Entity) + sizeof(uint32)) +
+					header.materialMappingCount * (sizeof(Entity) + sizeof(uint32)) +
 					header.rigidBodyMappingCount * (sizeof(Entity) + sizeof(svec2<float32>) * 2 + sizeof(float32) * 5);
 
 				ByteStream<StreamOperation::WRITE> stream(size, Endianness::LITTLE_ENDIAN);
@@ -135,6 +139,11 @@ namespace Trident {
 				for (const EntityComponentMapping<GeometryComponent> geometryMapping : data.geometryMappings) {
 					stream.write<Entity>(geometryMapping.entity);
 					stream.write<uint32>(geometryMapping.component.geometryIndex);
+				}
+
+				for (const EntityComponentMapping<MaterialComponent> materialMapping : data.materialMappings) {
+					stream.write<Entity>(materialMapping.entity);
+					stream.write<uint32>(materialMapping.component.materialIndex);
 				}
 
 				for (const EntityComponentMapping<RigidBody3DComponent>& rigidBodyMapping : data.rigidBodyMappings) {

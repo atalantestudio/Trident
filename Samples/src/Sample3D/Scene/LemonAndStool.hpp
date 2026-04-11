@@ -21,6 +21,31 @@ namespace Trident::LemonAndStool {
 
 		Scene3D scene(sceneAsset);
 
+		Shader defaultMaterialShader = {
+			.descriptorSetLayoutBindings = {},
+		};
+
+		switch (graphicsApi) {
+			case GraphicsAPI::DX12:
+			case GraphicsAPI::VK: {
+				defaultMaterialShader.modulePath = "Material/Default";
+
+				break;
+			}
+			case GraphicsAPI::GL: {
+				defaultMaterialShader.modulePath = "Material/DefaultGL";
+
+				break;
+			}
+		}
+
+		const uint32 defaultMaterialShaderIndex = scene.registerMaterialShader(defaultMaterialShader);
+
+		scene.registerMaterial({
+			.shaderIndex = defaultMaterialShaderIndex,
+			.writeDescriptorSetBindings = {},
+		});
+
 		Shader pbrMaterialShader = {
 			.descriptorSetLayoutBindings = {
 				// Ambient occlusion, roughness, metallic

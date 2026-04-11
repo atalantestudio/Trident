@@ -5,6 +5,7 @@
 
 #include "Engine/API/Descriptor.hpp"
 #include "Engine/ECS/Component/GeometryComponent.hpp"
+#include "Engine/ECS/Component/MaterialComponent.hpp"
 #include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 #include "Engine/ECS/Component/RigidBody3DComponent.hpp"
 #include "Engine/ECS/EntityComponentMapping.hpp"
@@ -24,6 +25,7 @@ namespace Trident {
 		uint32 entityCount;
 		uint32 geometryAssetCount;
 		uint32 geometryMappingCount;
+		uint32 materialMappingCount;
 		uint32 rigidBodyMappingCount;
 	};
 
@@ -42,6 +44,7 @@ namespace Trident {
 		sequence<uint8> staticBuffer;
 		sequence<ref<GeometryAsset>> geometryAssets;
 		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
+		sequence<EntityComponentMapping<MaterialComponent>> materialMappings;
 	};
 
 	template<>
@@ -70,7 +73,8 @@ namespace Trident {
 				hullCount(descriptor.hullCount),
 				staticBuffer(descriptor.staticBuffer),
 				geometryAssets(descriptor.geometryAssets),
-				geometryMappings(descriptor.geometryMappings)
+				geometryMappings(descriptor.geometryMappings),
+				materialMappings(descriptor.materialMappings)
 			{}
 
 			inline uint64 getStaticVertexCount() const {
@@ -125,6 +129,10 @@ namespace Trident {
 				return geometryMappings;
 			}
 
+			inline const sequence<EntityComponentMapping<MaterialComponent>>& getMaterialMappings() const {
+				return materialMappings;
+			}
+
 		private:
 			uint64 staticVertexCount;
 			uint64 staticIndexCount;
@@ -139,6 +147,7 @@ namespace Trident {
 			sequence<uint8> staticBuffer;
 			sequence<ref<GeometryAsset>> geometryAssets;
 			sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
+			sequence<EntityComponentMapping<MaterialComponent>> materialMappings;
 	};
 
 	class Scene2DAsset : public SceneAsset {
