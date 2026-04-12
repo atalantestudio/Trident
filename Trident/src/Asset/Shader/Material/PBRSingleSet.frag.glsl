@@ -127,9 +127,7 @@ void main() {
 
 	vec3 color = AMBIENT_LIGHT * diffuse * ao + L;
 
-	// Apply HDR.
 	color = color / (color + 1.0);
-
 	color = gammaCorrect(color);
 
 	fragment = vec4(color, 1.0);

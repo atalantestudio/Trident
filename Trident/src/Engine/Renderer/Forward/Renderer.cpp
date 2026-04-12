@@ -152,6 +152,11 @@ namespace Trident {
 
 		materialDescriptorSets = getDevice()->allocateDescriptorSets(materialDescriptorSetLayouts);
 
+		if (imageStagingBufferSize == 0) {
+			// TODO: Fix crash in DX12 when binding empty descriptor sets.
+			return;
+		}
+
 		const ref<Buffer<uint8>> imageStagingBuffer = createStagingBuffer<uint8>(imageStagingBufferSize);
 
 		uint8* imageMappedRange = imageStagingBuffer->map(0, imageStagingBuffer->getSize());

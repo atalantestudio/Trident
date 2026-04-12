@@ -7,23 +7,24 @@
 #include "Engine/Layer/Layer.hpp"
 #include "Engine/Renderer/Forward/Renderer.hpp"
 
-#include "../Scene/Lemons.hpp"
+#include "../Scene/FlatColor.hpp"
 
 namespace Trident {
 	class Sample3DForwardLayer : public Layer {
 		private:
-			static constexpr float32 MOVEMENT_SPEED = 1.5f;
+			static constexpr float32 MOVEMENT_SPEED = 2.0f;
 
 		public:
 			void build() override {
 				renderer.setLayer(this);
 				renderer.build();
 
-				scene = createScope<Scene3D>(Lemons::initializeScene(getApplication(), renderer.getGraphicsApi(), renderer.getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment));
+				scene = createScope<Scene3D>(FlatColor::initializeScene(getApplication(), renderer.getGraphicsApi(), renderer.getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment));
 
 				renderer.setScene(scene.get());
 
 				cameraController.setAspectRatio(getApplication()->getWindow()->getAspectRatio());
+				cameraController.getCamera().setPosition({0.0_m, 0.9_m, 0.0_m});
 				cameraController.updateProjection();
 
 				renderer.setCameraController<PerspectiveCamera>(&cameraController);

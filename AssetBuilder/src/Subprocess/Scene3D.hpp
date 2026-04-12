@@ -10,23 +10,36 @@ namespace Trident {
 		return {
 			.staticVertexCount = 0,
 			.staticIndexCount = 0,
-			.entityCount = 1,
+			.entityCount = 2,
 			.geometryAssetIdentifiers = {
 				// TODO(debug-only): UnitBox
 				36,
 			},
 			.geometryMappings = {
 				{0, {0}},
+				{1, {0}},
 			},
 			.materialMappings = {
 				// NOTE: Counting default material for visibility rendering.
 				{0, {1}},
+				{1, {1}},
 			},
 			.rigidBodyMappings = {
+				// Floor
 				{
 					0,
 					createRigidBody({
-						.position = {0.0_m, 0.0_m, 3.0_m},
+						.position = {0.0_m, -0.05_m, 0.0_m},
+						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
+						.scale = {10.0f, 0.1f, 10.0f},
+					}),
+				},
+
+				// Box
+				{
+					1,
+					createRigidBody({
+						.position = {0.0_m, 0.5_m, 2.0_m},
 						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
 						.scale = {1.0f, 1.0f, 1.0f},
 					}),

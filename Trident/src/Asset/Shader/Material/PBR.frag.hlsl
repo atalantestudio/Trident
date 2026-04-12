@@ -141,9 +141,7 @@ FragmentOutput main(FragmentInput input) {
 
 	float3 color = AMBIENT_LIGHT * diffuse * ao + L;
 
-	// Apply HDR.
 	color = color / (color + 1.0);
-
 	color = gammaCorrect(color);
 
 	FragmentOutput output;

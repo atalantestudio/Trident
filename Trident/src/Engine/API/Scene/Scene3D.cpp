@@ -24,8 +24,8 @@ namespace Trident {
 		vertexNormalIndexRange(0, 0),
 		vertexTextureCoordinateIndexRange(0, 0)
 	{
-		loadEntityComponentMappings(sceneAsset);
 		loadGeometries(sceneAsset, minStorageBufferOffsetAlignment);
+		loadEntityComponentMappings(sceneAsset);
 	}
 
 	void Scene3D::loadGeometries(ref<Scene3DAsset> sceneAsset, uint64 minStorageBufferOffsetAlignment) {
