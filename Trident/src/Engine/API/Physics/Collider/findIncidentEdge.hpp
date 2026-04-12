@@ -22,7 +22,6 @@ namespace Trident {
 		uint32 incidentEdgeIndex = 0;
 		uint32 edgeIndex = 0;
 
-		// TODO: Expose edge normals from ConvexHullGeometry.
 		while (edgeIndex < incidentHull.getEdges().count()) {
 			const Edge edge = incidentHull.getEdges()[edgeIndex];
 			const vec2<float32> a = incidentHull.getVertices()[edge.indexA];

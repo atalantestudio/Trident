@@ -11,21 +11,17 @@ namespace Trident {
 
 		uint32 edgeIndex = 0;
 
-		// TODO: Expose edge normals from ConvexHullGeometry?
 		while (edgeIndex < referenceHull.getEdges().count()) {
-			const Edge edge = referenceHull.getEdges()[edgeIndex];
-			const vec2<float32> a = referenceHull.getVertices()[edge.indexA];
-			const vec2<float32> b = referenceHull.getVertices()[edge.indexB];
-			const vec2<float32> d = edgeNormalClockwise(a, b);
-			const vec2<float32> s = incidentHull.support(-d * R);
-			const vec2<float32> aT = multiplyTransform(a, referenceBody.world);
-			const vec2<float32> bT = multiplyTransform(b, referenceBody.world);
+			const Hull2DEdge edge = referenceHull.getEdge(edgeIndex);
+			const vec2<float32> s = incidentHull.support(-edge.normal * R);
+			const vec2<float32> aT = multiplyTransform(edge.a, referenceBody.world);
+			const vec2<float32> bT = multiplyTransform(edge.b, referenceBody.world);
 			const vec2<float32> sT = multiplyTransform(s, incidentBody.world);
 			const float32 separation = signedDistanceLinePoint(aT, bT, sT);
 
 			if (separation > output.separation) {
 				output.separation = separation;
-				output.normal = d;
+				output.normal = edge.normal;
 				output.referenceEdgeIndex = edgeIndex;
 				output.referenceEdge.edge[0] = aT;
 				output.referenceEdge.edge[1] = bT;
@@ -68,8 +64,6 @@ namespace Trident {
 			return output;
 		}
 
-		DEBUG_ASSERT(output.referenceBody != nullptr);
-
 		output.normal *= mat2x2<float32>::rotation(-output.referenceBody->rotation);
 
 		return output;
@@ -87,7 +81,7 @@ namespace Trident {
 		}
 
 		// TODO: Since the incident body is always the circle, does the normal need to be corrected?
-		output.normal = output.normal * mat2x2<float32>::rotation(-output.incidentBody->rotation);
+		output.normal *= mat2x2<float32>::rotation(-output.incidentBody->rotation);
 
 		return output;
 	}

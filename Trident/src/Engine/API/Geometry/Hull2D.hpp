@@ -5,6 +5,7 @@
 
 #include "Engine/API/Descriptor.hpp"
 #include "Engine/API/Geometry/Edge.hpp"
+#include "Engine/API/Geometry/Hull2DEdge.hpp"
 #include "Engine/API/Geometry/Hull2DType.hpp"
 
 namespace Trident {
@@ -63,6 +64,15 @@ namespace Trident {
 				return edges;
 			}
 
+			inline Hull2DEdge getEdge(uint32 index) const {
+				Hull2DEdge edge{};
+				edge.a = vertices[edges[index].indexA];
+				edge.b = vertices[edges[index].indexB];
+				edge.normal = edgeNormalClockwise(edge.a, edge.b);
+
+				return edge;
+			}
+
 			inline float32 getPenetrationBias() const {
 				static constexpr float32 PENETRATION_BIASES[static_cast<uint32>(Hull2DType::count)] = {
 					0.0f,
@@ -73,32 +83,6 @@ namespace Trident {
 				DEBUG_ASSERT(type < Hull2DType::count);
 
 				return PENETRATION_BIASES[static_cast<uint32>(type)];
-			}
-
-			inline float32 calculateMass(vec2<float32> scale, float32 density) const {
-				// TODO: Replace with LUT.
-				switch (type) {
-					case Hull2DType::CIRCLE: {
-						ENGINE_ASSERT(scale[0] == scale[1], "The scale must be equal in both X and Y directions.");
-
-						return pi<float32>() * pow(radius * scale[0], 2.0f) * density;
-					}
-					case Hull2DType::POINT: {
-						return 0.0_kg;
-					}
-					case Hull2DType::POLYGON: {
-						// TODO(physics/inertia)
-						// return scaledArea(view<vec2<float32>>(vertices), scale) * density;
-						const float32 area = scale[0] * scale[0] + scale[1] * scale[1];
-
-						return area;
-					}
-					default: {
-						DEBUG_ASSERT(false);
-
-						return 0.0_kg;
-					}
-				}
 			}
 
 			/// Returns the farthest point on the hull along `d`.
@@ -178,7 +162,7 @@ namespace Trident {
 			// TODO: 2D and 3D hulls should use 16-bit indices.
 			range<uint32, uint32> lineIndexRange;
 
-			// TODO(physics/hull-edges): Store the geometry edges in a shared contiguous buffer.
+			// TODO(physics/hull-edges): Replace by a view inside a contiguous buffer.
 			sequence<Edge> edges;
 	};
 }

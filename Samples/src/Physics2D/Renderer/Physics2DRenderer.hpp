@@ -8,7 +8,7 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace Trident {
-	#define PHYSICS_2D_RENDERER_SAMPLE_COUNT 4
+	#define PHYSICS_2D_RENDERER_SAMPLE_COUNT 1
 
 	// Toggle vertex/edge feature rendering.
 	#define SHOW_FEATURES

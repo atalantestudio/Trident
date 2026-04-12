@@ -9,7 +9,8 @@
 
 namespace Trident {
 	struct SAT2DOutput {
-		// A separation less than or equal to 0 indicates overlap between the shapes.
+		/// The separation value between the two shapes.
+		/// The shapes overlap if the separation is negative or 0.
 		float32 separation;
 
 		// Normal of the reference edge.
@@ -33,8 +34,8 @@ namespace Trident {
 		const Hull2D* incidentHull;
 	};
 
-	// Separating Axis Theorem algorithm implementation in 2D.
-	// 
+	/// The Separating Axis Theorem algorithm in 2D.
+	/// See https://media.gdcvault.com/gdc2013/slides/822403Gregorius_Dirk_TheSeparatingAxisTest.pdf.
 	// TODO: Basic optimizations:
 	// - Don't test the same separating axis multiple times
 	// - Don't test parallel axes (https://dyn4j.org/2010/01/sat)
@@ -42,7 +43,7 @@ namespace Trident {
 	//   But what if the separation axis changes e.g. due to rotation?
 	SAT2DOutput SAT2D(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB);
 
-	// Separating Axis Theorem algorithm implementation in 2D.
+	/// The Separating Axis Theorem algorithm in 2D.
 	// A has a circle geometry and B has a convex hull geometry.
 	// TODO: Basic optimizations:
 	// - Don't test the same separating axis multiple times
