@@ -7,7 +7,7 @@
 #include "Engine/Filesystem/Asset/GeometryAsset.hpp"
 
 namespace Trident {
-	// TODO: Point hulls need to have 1 vertex for GJK to work.
+	// TODO(refactor): Point hulls need to have 1 vertex for GJK to work.
 	inline static const sequence<svec2<float32>> pointHullVertices = {{0.0f, 0.0f}};
 
 	Hull2D Hull2D::point() {

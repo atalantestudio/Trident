@@ -16,9 +16,10 @@ namespace Trident {
 			)));
 		}
 
-		// TODO: Pass the hull centroid.
-		void updateWorld() {
+		void updateWorld(vec3<float32> centroid) {
+			// TODO: Multiply with the orientation quaternion instead of the Euler angles.
 			world =
+				mat4x4<float32>::translation(-centroid) *
 				mat4x4<float32>::scaling(scale) *
 				mat4x4<float32>::rotation(RIGHT, -rotation[0]) *
 				mat4x4<float32>::rotation(UP, -rotation[1]) *

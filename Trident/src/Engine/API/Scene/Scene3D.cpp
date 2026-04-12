@@ -156,10 +156,10 @@ namespace Trident {
 			geometryVertexTextureCoordinateIndexRange.count = static_cast<uint32>(geometryAsset->getVertexTextureCoordinateIndices().count());
 
 			geometries[geometryIndex] = Geometry3D({
+				.triangleCount = geometryVertexPositionIndexRange.count / 3,
 				.vertexPositionComponentRange = geometryVertexPositionComponentRange,
 				.vertexNormalComponentRange = geometryVertexNormalComponentRange,
 				.vertexTextureCoordinateComponentRange = geometryVertexTextureCoordinateComponentRange,
-				.triangleCount = geometryVertexPositionIndexRange.count / 3,
 				.triangleTangentComponentOffset = geometryTriangleTangentComponentRange.offset,
 				.vertexPositionIndexOffset = geometryVertexPositionIndexRange.offset,
 				.vertexNormalIndexOffset = geometryVertexNormalIndexRange.offset,
@@ -205,7 +205,7 @@ namespace Trident {
 			ecs.setComponent<RigidBody3DComponent>(rigidBodyMapping.entity, rigidBodyMapping.component);
 
 			// TODO(debug-only)
-			ecs.getComponent<RigidBody3DComponent>(rigidBodyMapping.entity).updateWorld();
+			ecs.getComponent<RigidBody3DComponent>(rigidBodyMapping.entity).updateWorld({0.0_m, 0.0_m, 0.0_m});
 		}
 	}
 }

@@ -153,7 +153,7 @@ namespace Trident {
 			/// Average of all vertices.
 			svec2<float32> centroid;
 
-			/// Distance between the center of mass and the farthest vertex.
+			/// THe distance between the centroid and the farthest vertex.
 			float32 radius;
 
 			// Vertex positions on the parent geometry.
@@ -162,7 +162,7 @@ namespace Trident {
 			// TODO: 2D and 3D hulls should use 16-bit indices.
 			range<uint32, uint32> lineIndexRange;
 
-			// TODO(physics/hull-edges): Replace by a view inside a contiguous buffer.
+			// TODO(physics/hull-edges): Replace with a view inside a contiguous buffer.
 			sequence<Edge> edges;
 	};
 }

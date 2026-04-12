@@ -20,7 +20,7 @@ namespace Trident {
 			.scale = {descriptor.scale[0], descriptor.scale[1], descriptor.scale[2]},
 		};
 
-		component.updateWorld();
+		component.updateWorld({0.0_m, 0.0_m, 0.0_m});
 
 		return component;
 	}

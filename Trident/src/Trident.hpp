@@ -50,6 +50,12 @@
 #include "Engine/API/Graphics/ShaderModule.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
+// Geometry
+#include "Engine/API/Geometry/Geometry2D.hpp"
+#include "Engine/API/Geometry/Geometry3D.hpp"
+#include "Engine/API/Geometry/Hull2D.hpp"
+#include "Engine/API/Geometry/Hull3D.hpp"
+
 // Physics
 #include "Engine/API/Physics/GJK2D.hpp"
 #include "Engine/API/Physics/GJK2DConditional.hpp"
