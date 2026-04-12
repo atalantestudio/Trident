@@ -10,7 +10,7 @@ namespace Trident {
 	Scene3D createWallScene(AssetLibrary* assetLibrary, GraphicsAPI graphicsApi) {
 		Scene3D scene;
 
-		Descriptor<Geometry3D> geometryDescriptor{};
+		/* Descriptor<Geometry3D> geometryDescriptor{};
 		geometryDescriptor.vertexPositionComponents = {
 			-0.5f,  0.5f,  0.0f,
 			 0.5f,  0.5f,  0.0f,
@@ -66,7 +66,7 @@ namespace Trident {
 		pbrMaterialReference.materialIndex = pbrMaterialIndex;
 		pbrMaterialReference.descriptorImagePaths = {};
 
-		const uint32 pbrMaterialReferenceIndex = scene.registerMaterialReference(pbrMaterialReference);
+		const uint32 pbrMaterialReferenceIndex = scene.registerMaterialReference(pbrMaterialReference); */
 
 		/* SceneInstanceDescriptor instanceDescriptor{};
 		instanceDescriptor.position = {0.0_m, 0.0_m, 0.4_m};

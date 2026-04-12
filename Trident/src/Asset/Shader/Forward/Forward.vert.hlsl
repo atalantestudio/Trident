@@ -24,12 +24,12 @@ cbuffer Camera : register(b0) {
 }
 
 ByteAddressBuffer vertexPositionComponentBuffer : register(t0);
-ByteAddressBuffer vertexPositionIndexBuffer : register(t1);
-ByteAddressBuffer vertexNormalComponentBuffer : register(t2);
-ByteAddressBuffer vertexNormalIndexBuffer : register(t3);
-ByteAddressBuffer vertexTextureCoordinateComponentBuffer : register(t4);
-ByteAddressBuffer vertexTextureCoordinateIndexBuffer : register(t5);
-ByteAddressBuffer vertexTangentComponentBuffer : register(t6);
+ByteAddressBuffer vertexNormalComponentBuffer : register(t1);
+ByteAddressBuffer vertexTextureCoordinateComponentBuffer : register(t2);
+ByteAddressBuffer triangleTangentComponentBuffer : register(t3);
+ByteAddressBuffer vertexPositionIndexBuffer : register(t4);
+ByteAddressBuffer vertexNormalIndexBuffer : register(t5);
+ByteAddressBuffer vertexTextureCoordinateIndexBuffer : register(t6);
 
 VertexOutput main(VertexInput input) {
 	uint triangleIndex = input.vertexIndex / 3;
@@ -40,7 +40,7 @@ VertexOutput main(VertexInput input) {
 	float3 position = asfloat(vertexPositionComponentBuffer.Load3(positionIndex * 12));
 	float3 normal = asfloat(vertexNormalComponentBuffer.Load3(normalIndex * 12));
 	float2 textureCoordinate = asfloat(vertexTextureCoordinateComponentBuffer.Load2(textureCoordinateIndex * 8));
-	float3 tangent = asfloat(vertexTangentComponentBuffer.Load3(triangleIndex * 12));
+	float3 tangent = asfloat(triangleTangentComponentBuffer.Load3(triangleIndex * 12));
 
 	float4 surface = mul(input.transform, float4(position, 1.0));
 

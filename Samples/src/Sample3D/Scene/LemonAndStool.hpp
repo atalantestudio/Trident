@@ -3,23 +3,22 @@
 
 #pragma once
 
-#include "Engine/API/Geometry/3D/Geometry3D.hpp"
 #include "Engine/API/Graphics/GraphicsAPI.hpp"
 #include "Engine/API/Material/Shader.hpp"
 #include "Engine/API/Scene/Scene3D.hpp"
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 
 namespace Trident::LemonAndStool {
-	Scene3D initializeScene(Application* application, GraphicsAPI graphicsApi) {
+	Scene3D initializeScene(Application* application, GraphicsAPI graphicsApi, uint64 minStorageBufferOffsetAlignment) {
 		AssetLibrary* assetLibrary = application->getAssetLibrary();
 
-		const ref<GeometryAsset> lemonGeometryAsset = assetLibrary->getAsset<GeometryAsset>("lemon_1k");
-		const ref<GeometryAsset> foldingWoodenStoolGeometryAsset = assetLibrary->getAsset<GeometryAsset>("folding_wooden_stool");
+		assetLibrary->getAsset<GeometryAsset>("lemon_1k");
+		assetLibrary->getAsset<GeometryAsset>("folding_wooden_stool");
 
 		const view<char8> sceneAssetName = application->getPropertyFile()->getProperty<view<char8>>("AssetName");
 		const ref<Scene3DAsset> sceneAsset = assetLibrary->getAsset<Scene3DAsset>(sceneAssetName);
 
-		Scene3D scene(sceneAsset);
+		Scene3D scene(sceneAsset, minStorageBufferOffsetAlignment);
 
 		Shader defaultMaterialShader = {
 			.descriptorSetLayoutBindings = {},

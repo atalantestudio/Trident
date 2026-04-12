@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Geometry/3D/Geometry3D.hpp"
+#include "Engine/API/Geometry/Geometry3D.hpp"
 #include "Engine/API/Material/Material.hpp"
 #include "Engine/API/Material/Shader.hpp"
 #include "Engine/API/Scene/Scene.hpp"
@@ -12,34 +12,34 @@
 namespace Trident {
 	class Scene3D : public Scene {
 		public:
-			explicit Scene3D(ref<Scene3DAsset> sceneAsset);
+			explicit Scene3D(ref<Scene3DAsset> sceneAsset, uint64 minStorageBufferOffsetAlignment);
 
-			inline uint64 getVertexPositionComponentBufferSize() const {
-				return vertexPositionComponentBufferSize;
+			inline range<uint64, uint64> getVertexPositionComponentRange() const {
+				return vertexPositionComponentRange;
 			}
 
-			inline uint64 getVertexPositionIndexBufferSize() const {
-				return vertexPositionIndexBufferSize;
+			inline range<uint64, uint64> getVertexNormalComponentRange() const {
+				return vertexNormalComponentRange;
 			}
 
-			inline uint64 getVertexNormalComponentBufferSize() const {
-				return vertexNormalComponentBufferSize;
+			inline range<uint64, uint64> getVertexTextureCoordinateComponentRange() const {
+				return vertexTextureCoordinateComponentRange;
 			}
 
-			inline uint64 getVertexNormalIndexBufferSize() const {
-				return vertexNormalIndexBufferSize;
+			inline range<uint64, uint64> getTriangleTangentComponentRange() const {
+				return triangleTangentComponentRange;
 			}
 
-			inline uint64 getVertexTextureCoordinateComponentBufferSize() const {
-				return vertexTextureCoordinateComponentBufferSize;
+			inline range<uint64, uint64> getVertexPositionIndexRange() const {
+				return vertexPositionIndexRange;
 			}
 
-			inline uint64 getVertexTextureCoordinateIndexBufferSize() const {
-				return vertexTextureCoordinateIndexBufferSize;
+			inline range<uint64, uint64> getVertexNormalIndexRange() const {
+				return vertexNormalIndexRange;
 			}
 
-			inline uint64 getVertexTangentComponentBufferSize() const {
-				return vertexTangentComponentBufferSize;
+			inline range<uint64, uint64> getVertexTextureCoordinateIndexRange() const {
+				return vertexTextureCoordinateIndexRange;
 			}
 
 			inline const sequence<Geometry3D>& getGeometries() const {
@@ -85,22 +85,23 @@ namespace Trident {
 				return materialIndex;
 			}
 
-			void createDataBuffer(uint64 minStorageBufferOffsetAlignment);
-
 		private:
-			void loadGeometries(ref<Scene3DAsset> sceneAsset);
+			void loadGeometries(ref<Scene3DAsset> sceneAsset, uint64 minStorageBufferOffsetAlignment);
 			void loadEntityComponentMappings(ref<Scene3DAsset> sceneAsset);
 
 		private:
-			uint64 vertexPositionComponentBufferSize;
-			uint64 vertexPositionIndexBufferSize;
-			uint64 vertexNormalComponentBufferSize;
-			uint64 vertexNormalIndexBufferSize;
-			uint64 vertexTextureCoordinateComponentBufferSize;
-			uint64 vertexTextureCoordinateIndexBufferSize;
-			uint64 vertexTangentComponentBufferSize;
+			/// Ranges in bytes of the descriptor buffers, aligned to the `minStorageBufferOffsetAlignment` limit.
+			range<uint64, uint64> vertexPositionComponentRange;
+			range<uint64, uint64> vertexNormalComponentRange;
+			range<uint64, uint64> vertexTextureCoordinateComponentRange;
+			range<uint64, uint64> triangleTangentComponentRange;
+			range<uint64, uint64> vertexPositionIndexRange;
+			range<uint64, uint64> vertexNormalIndexRange;
+			range<uint64, uint64> vertexTextureCoordinateIndexRange;
 
 			sequence<Geometry3D> geometries;
+
+			// TODO: Implement 3D hulls.
 
 			std::vector<Shader> materialShaders;
 			std::vector<std::vector<Material>> materials;

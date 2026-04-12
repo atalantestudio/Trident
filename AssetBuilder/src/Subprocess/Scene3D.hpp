@@ -6,6 +6,35 @@
 #include "RigidBody3DComponent.hpp"
 
 namespace Trident {
+	Scene3DData createBoxScene() {
+		return {
+			.staticVertexCount = 0,
+			.staticIndexCount = 0,
+			.entityCount = 1,
+			.geometryAssetIdentifiers = {
+				// TODO(debug-only): UnitBox
+				36,
+			},
+			.geometryMappings = {
+				{0, {0}},
+			},
+			.materialMappings = {
+				// NOTE: Counting default material for visibility rendering.
+				{0, {1}},
+			},
+			.rigidBodyMappings = {
+				{
+					0,
+					createRigidBody({
+						.position = {0.0_m, 0.0_m, 3.0_m},
+						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
+						.scale = {1.0f, 1.0f, 1.0f},
+					}),
+				},
+			},
+		};
+	}
+
 	Scene3DData createLemonsScene() {
 		return {
 			.staticVertexCount = 0,
@@ -13,13 +42,14 @@ namespace Trident {
 			.entityCount = 2,
 			.geometryAssetIdentifiers = {
 				// TODO(debug-only): lemon_1k
-				41,
+				38,
 			},
 			.geometryMappings = {
 				{0, {0}},
 				{1, {0}},
 			},
 			.materialMappings = {
+				// NOTE: Counting default material for visibility rendering.
 				{0, {1}},
 				{1, {1}},
 			},

@@ -174,7 +174,7 @@ namespace Trident {
 	};
 
 	template<typename T>
-	struct /* alignas(4 * sizeof(T)) */ svec<3, T> {
+	struct svec<3, T> {
 		T x;
 		T y;
 		T z;
@@ -202,6 +202,11 @@ namespace Trident {
 			DEBUG_ASSERT(index < 3);
 
 			return pointer_cast<T*>(this)[index];
+		}
+
+		// TODO(lyah): Add scalar vectors and replace SIMD vectors by general-purpose registers.
+		operator vec<3, T>() const {
+			return {x, y, z};
 		}
 	};
 

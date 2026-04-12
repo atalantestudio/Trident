@@ -19,6 +19,9 @@ namespace Trident {
 		sequence<float32> vertexNormalComponents;
 		sequence<float32> vertexTextureCoordinateComponents;
 
+		// TODO: Use in the visibility renderer.
+		sequence<float32> triangleTangentComponents;
+
 		sequence<uint32> vertexPositionIndices;
 		sequence<uint32> vertexNormalIndices;
 		sequence<uint32> vertexTextureCoordinateIndices;

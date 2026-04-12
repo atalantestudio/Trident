@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Descriptor.hpp"
+#include "Engine/API/Geometry/Geometry.hpp"
 
 namespace Trident {
 	class Geometry2D;
@@ -15,11 +16,10 @@ namespace Trident {
 		range<uint32, uint32> indexRange;
 	};
 
-	class Geometry2D {
+	class Geometry2D : public Geometry {
 		public:
 			explicit Geometry2D() = default;
 
-			// TODO: Only used by the asset builder.
 			explicit Geometry2D(const Descriptor<Geometry2D>& descriptor) :
 				vertexPositionComponentRange(descriptor.vertexPositionComponentRange),
 				vertexTextureCoordinateComponentRange(descriptor.vertexTextureCoordinateComponentRange),
@@ -37,9 +37,6 @@ namespace Trident {
 			inline range<uint32, uint32> getIndexRange() const {
 				return indexRange;
 			}
-
-		public:
-			uint32 hullIndex = max<uint32>();
 
 		private:
 			range<uint32, uint32> vertexPositionComponentRange;

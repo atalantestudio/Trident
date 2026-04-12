@@ -12,15 +12,14 @@
 namespace Trident {
 	class Sample3DForwardLayer : public Layer {
 		private:
-			static constexpr float32 MOVEMENT_SPEED = 0.5f;
+			static constexpr float32 MOVEMENT_SPEED = 1.5f;
 
 		public:
 			void build() override {
 				renderer.setLayer(this);
 				renderer.build();
 
-				scene = createScope<Scene3D>(Lemons::initializeScene(getApplication(), renderer.getGraphicsApi()));
-				scene->createDataBuffer(renderer.getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment);
+				scene = createScope<Scene3D>(Lemons::initializeScene(getApplication(), renderer.getGraphicsApi(), renderer.getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment));
 
 				renderer.setScene(scene.get());
 
@@ -125,7 +124,7 @@ namespace Trident {
 
 		private:
 			ForwardRenderer renderer;
-			scope<Scene3D> scene;
+			ref<Scene3D> scene;
 			FlyCameraController cameraController;
 	};
 }

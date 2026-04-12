@@ -5,13 +5,11 @@
 
 #include "Engine/API/Descriptor.hpp"
 #include "Engine/API/Geometry/Edge.hpp"
-#include "Engine/API/Geometry/Geometry2D.hpp"
 #include "Engine/API/Geometry/Hull2DType.hpp"
-#include "Engine/API/Physics/Cached/CachedGeometry2D.hpp"
-#include "Engine/Filesystem/Asset/GeometryAsset.hpp"
 
 namespace Trident {
 	class Hull2D;
+	class GeometryAsset;
 
 	template<>
 	struct Descriptor<Hull2D> {
@@ -177,6 +175,7 @@ namespace Trident {
 			// Vertex positions on the parent geometry.
 			view<svec2<float32>> vertices;
 
+			// TODO: 2D and 3D hulls should use 16-bit indices.
 			range<uint32, uint32> lineIndexRange;
 
 			// TODO(physics/hull-edges): Store the geometry edges in a shared contiguous buffer.

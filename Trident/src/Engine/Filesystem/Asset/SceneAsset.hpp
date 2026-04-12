@@ -34,10 +34,8 @@ namespace Trident {
 		uint64 staticVertexCount;
 		uint64 staticIndexCount;
 		uint64 dynamicVertexPositionCount;
-		uint64 dynamicVertexNormalCount;
 		uint64 dynamicVertexTextureCoordinateCount;
 		uint64 dynamicVertexPositionIndexCount;
-		uint64 dynamicVertexNormalIndexCount;
 		uint64 dynamicVertexTextureCoordinateIndexCount;
 		uint32 entityCount;
 		uint32 hullCount;
@@ -54,6 +52,9 @@ namespace Trident {
 
 	template<>
 	struct Descriptor<Scene3DAsset> : public Descriptor<SceneAsset> {
+		uint64 dynamicVertexNormalCount;
+		uint64 dynamicTriangleTangentCount;
+		uint64 dynamicVertexNormalIndexCount;
 		sequence<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;
 	};
 
@@ -64,10 +65,8 @@ namespace Trident {
 				staticVertexCount(descriptor.staticVertexCount),
 				staticIndexCount(descriptor.staticIndexCount),
 				dynamicVertexPositionCount(descriptor.dynamicVertexPositionCount),
-				dynamicVertexNormalCount(descriptor.dynamicVertexNormalCount),
 				dynamicVertexTextureCoordinateCount(descriptor.dynamicVertexTextureCoordinateCount),
 				dynamicVertexPositionIndexCount(descriptor.dynamicVertexPositionIndexCount),
-				dynamicVertexNormalIndexCount(descriptor.dynamicVertexNormalIndexCount),
 				dynamicVertexTextureCoordinateIndexCount(descriptor.dynamicVertexTextureCoordinateIndexCount),
 				entityCount(descriptor.entityCount),
 				hullCount(descriptor.hullCount),
@@ -89,20 +88,12 @@ namespace Trident {
 				return dynamicVertexPositionCount;
 			}
 
-			inline uint64 getDynamicVertexNormalCount() const {
-				return dynamicVertexNormalCount;
-			}
-
 			inline uint64 getDynamicVertexTextureCoordinateCount() const {
 				return dynamicVertexTextureCoordinateCount;
 			}
 
 			inline uint64 getDynamicVertexPositionIndexCount() const {
 				return dynamicVertexPositionIndexCount;
-			}
-
-			inline uint64 getDynamicVertexNormalIndexCount() const {
-				return dynamicVertexNormalIndexCount;
 			}
 
 			inline uint64 getDynamicVertexTextureCoordinateIndexCount() const {
@@ -137,10 +128,8 @@ namespace Trident {
 			uint64 staticVertexCount;
 			uint64 staticIndexCount;
 			uint64 dynamicVertexPositionCount;
-			uint64 dynamicVertexNormalCount;
 			uint64 dynamicVertexTextureCoordinateCount;
 			uint64 dynamicVertexPositionIndexCount;
-			uint64 dynamicVertexNormalIndexCount;
 			uint64 dynamicVertexTextureCoordinateIndexCount;
 			uint32 entityCount;
 			uint32 hullCount;
@@ -169,14 +158,32 @@ namespace Trident {
 		public:
 			explicit Scene3DAsset(const Descriptor<Scene3DAsset>& descriptor) :
 				SceneAsset(descriptor),
+				dynamicVertexNormalCount(descriptor.dynamicVertexNormalCount),
+				dynamicTriangleTangentCount(descriptor.dynamicTriangleTangentCount),
+				dynamicVertexNormalIndexCount(descriptor.dynamicVertexNormalIndexCount),
 				rigidBodyMappings(descriptor.rigidBodyMappings)
 			{}
+
+			inline uint64 getDynamicVertexNormalCount() const {
+				return dynamicVertexNormalCount;
+			}
+
+			inline uint64 getDynamicTriangleTangentCount() const {
+				return dynamicTriangleTangentCount;
+			}
+
+			inline uint64 getDynamicVertexNormalIndexCount() const {
+				return dynamicVertexNormalIndexCount;
+			}
 
 			inline const sequence<EntityComponentMapping<RigidBody3DComponent>>& getRigidBodyMappings() const {
 				return rigidBodyMappings;
 			}
 
 		private:
+			uint64 dynamicVertexNormalCount;
+			uint64 dynamicTriangleTangentCount;
+			uint64 dynamicVertexNormalIndexCount;
 			sequence<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;
 	};
 }

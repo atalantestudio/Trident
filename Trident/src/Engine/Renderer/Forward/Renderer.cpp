@@ -3,6 +3,7 @@
 
 #include "pch.hpp"
 
+#include "Engine/Filesystem/Asset/ImageAsset.hpp"
 #include "Engine/Renderer/Forward/Renderer.hpp"
 
 namespace Trident {

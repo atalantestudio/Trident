@@ -18,7 +18,7 @@ namespace Trident {
 
 		private:
 			static constexpr uint32 SCENE_2D_COUNT = 8;
-			static constexpr uint32 SCENE_3D_COUNT = 1;
+			static constexpr uint32 SCENE_3D_COUNT = 2;
 
 			inline static const view<char8> SCENE_2D_NAMES[SCENE_2D_COUNT] = {
 				"Boxes",
@@ -43,10 +43,12 @@ namespace Trident {
 			};
 
 			inline static const view<char8> SCENE_3D_NAMES[SCENE_3D_COUNT] = {
+				"Box",
 				"Lemons",
 			};
 
 			inline static constexpr CreateScene3DFunction SCENE_3D_FUNCTIONS[SCENE_3D_COUNT] = {
+				createBoxScene,
 				createLemonsScene,
 			};
 
@@ -157,7 +159,6 @@ namespace Trident {
 			}
 
 			static void encodeSceneAsset(uint32 identifier, const ByteStream<StreamOperation::WRITE>& stream, view<char8> assetName, const std::filesystem::path& assetOutputPath) {
-				const uint64 size = stream.getByteOffset();
 				const std::string assetOutputPathString = assetOutputPath.string();
 
 				sequence<char8> outputPath(assetOutputPathString.size() + assetName.count() + 5);
@@ -166,7 +167,7 @@ namespace Trident {
 				std::copy_n(".tsa", 4, &outputPath[assetOutputPathString.size() + assetName.count()]);
 
 				Writer writer = Filesystem::openWriter(outputPath);
-				writer.write(stream.data, size);
+				writer.write(stream.data, stream.size);
 
 				ENGINE_INFO("Generated scene asset \"[]\" (ID: []).", outputPath, identifier);
 			}

@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Engine/API/Geometry/Hull2D.hpp"
+#include "Engine/Filesystem/Asset/GeometryAsset.hpp"
 
 namespace Trident {
 	// TODO: Point hulls need to have 1 vertex for GJK to work.

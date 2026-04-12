@@ -3,23 +3,21 @@
 
 #pragma once
 
-#include "Engine/API/Geometry/3D/Geometry3D.hpp"
 #include "Engine/API/Graphics/GraphicsAPI.hpp"
 #include "Engine/API/Material/Shader.hpp"
 #include "Engine/API/Scene/Scene3D.hpp"
-#include "Engine/ECS/Component/MaterialComponent.hpp"
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 
 namespace Trident::Lemons {
-	Scene3D initializeScene(Application* application, GraphicsAPI graphicsApi) {
+	Scene3D initializeScene(Application* application, GraphicsAPI graphicsApi, uint64 minStorageBufferOffsetAlignment) {
 		AssetLibrary* assetLibrary = application->getAssetLibrary();
 
-		const ref<GeometryAsset> lemonGeometryAsset = assetLibrary->getAsset<GeometryAsset>("lemon_1k");
+		assetLibrary->getAsset<GeometryAsset>("lemon_1k");
 
 		const view<char8> sceneAssetName = application->getPropertyFile()->getProperty<view<char8>>("AssetName");
 		const ref<Scene3DAsset> sceneAsset = assetLibrary->getAsset<Scene3DAsset>(sceneAssetName);
 
-		Scene3D scene(sceneAsset);
+		Scene3D scene(sceneAsset, minStorageBufferOffsetAlignment);
 
 		/* Shader defaultMaterialShader = {
 			.descriptorSetLayoutBindings = {},
@@ -127,10 +125,6 @@ namespace Trident::Lemons {
 				},
 			},
 		});
-
-		// TODO: Simplify.
-		scene.ecs.getComponentPool<MaterialComponent>().setComponent(0, {0});
-		scene.ecs.getComponentPool<MaterialComponent>().setComponent(1, {0});
 
 		return scene;
 	}

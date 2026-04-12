@@ -3,7 +3,11 @@
 
 #pragma once
 
+#include "Engine/API/GUI/Component/Container.hpp"
 #include "Engine/API/GUI/GUILayer.hpp"
+#include "Engine/API/GUI/Style/TextStyle.hpp"
+#include "Engine/Filesystem/Asset/FontAsset.hpp"
+#include "Engine/Filesystem/Stream/UTF8Stream.hpp"
 
 namespace Trident {
 	void GUILayer::GUIText(const sequence<char8>& text, const TextStyle& textStyle) {

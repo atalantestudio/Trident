@@ -3,38 +3,49 @@
 
 #pragma once
 
-#include "Engine/API/Geometry/3D/BoxGeometry3D.hpp"
 #include "Engine/API/Graphics/GraphicsAPI.hpp"
-#include "Engine/API/Material/Shader.hpp"
 #include "Engine/API/Scene/Scene3D.hpp"
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 
 namespace Trident::Box {
-	void initializeScene(Scene3D& scene, AssetLibrary* assetLibrary, GraphicsAPI graphicsApi) {
-		const ref<Geometry3D> geometry = createRef<BoxGeometry3D>(vec3<float32>(1.0f, 1.0f, 1.0f));
-		const uint32 geometryIndex = scene.registerGeometry(geometry);
+	Scene3D initializeScene(Application* application, GraphicsAPI graphicsApi, uint64 minStorageBufferOffsetAlignment) {
+		AssetLibrary* assetLibrary = application->getAssetLibrary();
 
-		Shader testMaterialShader = {
+		assetLibrary->getAsset<GeometryAsset>("UnitBox");
+
+		const view<char8> sceneAssetName = application->getPropertyFile()->getProperty<view<char8>>("AssetName");
+		const ref<Scene3DAsset> sceneAsset = assetLibrary->getAsset<Scene3DAsset>(sceneAssetName);
+
+		Scene3D scene(sceneAsset, minStorageBufferOffsetAlignment);
+
+		Shader pbrMaterialShader = {
 			.descriptorSetLayoutBindings = {
-				// Ambient occlusion, roughness, metallic
+				// Ambient occlusion
 				{
 					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
 					.descriptorCount = 1,
-					.shaderStages = ShaderStage::COMPUTE,
+					.shaderStages = ShaderStage::FRAGMENT,
+				},
+
+				// Roughness
+				{
+					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+					.descriptorCount = 1,
+					.shaderStages = ShaderStage::FRAGMENT,
 				},
 
 				// Diffuse
 				{
 					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
 					.descriptorCount = 1,
-					.shaderStages = ShaderStage::COMPUTE,
+					.shaderStages = ShaderStage::FRAGMENT,
 				},
 
 				// Normal
 				{
 					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
 					.descriptorCount = 1,
-					.shaderStages = ShaderStage::COMPUTE,
+					.shaderStages = ShaderStage::FRAGMENT,
 				},
 			},
 		};
@@ -42,52 +53,53 @@ namespace Trident::Box {
 		switch (graphicsApi) {
 			case GraphicsAPI::DX12:
 			case GraphicsAPI::VK: {
-				testMaterialShader.modulePath = "Material/Test";
+				pbrMaterialShader.modulePath = "Material/PBRSeparatedAORoughness.frag";
 
 				break;
 			}
 			case GraphicsAPI::GL: {
-				testMaterialShader.modulePath = "Material/TestGL";
+				pbrMaterialShader.modulePath = "Material/PBRSeparatedAORoughnessSingleSet.frag";
 
 				break;
 			}
 		}
 
-		const uint32 testMaterialShaderIndex = scene.registerMaterialShader(testMaterialShader);
+		const uint32 pbrMaterialShaderIndex = scene.registerMaterialShader(pbrMaterialShader);
 
-		const uint32 testMaterialIndex = scene.registerMaterial({
-			.shaderIndex = testMaterialShaderIndex,
+		scene.registerMaterial({
+			.shaderIndex = pbrMaterialShaderIndex,
 			.writeDescriptorSetBindings = {
 				{
 					.descriptorImages = {
 						{
-							.assetPath = "red",
+							.assetPath = "checkerboard1",
 						},
 					},
 				},
 				{
 					.descriptorImages = {
 						{
-							.assetPath = "green",
+							.assetPath = "checkerboard1",
 						},
 					},
 				},
 				{
 					.descriptorImages = {
 						{
-							.assetPath = "blue",
+							.assetPath = "checkerboard1",
+						},
+					},
+				},
+				{
+					.descriptorImages = {
+						{
+							.assetPath = "checkerboard1",
 						},
 					},
 				},
 			},
 		});
 
-		/* scene.registerInstance({
-			.position = {0.0_m, 0.0_m, 3.0_m},
-			.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
-			.scale = {1.0f, 1.0f, 1.0f},
-			.geometryIndex = geometryIndex,
-			.materialIndex = testMaterialIndex,
-		}); */
+		return scene;
 	}
 }

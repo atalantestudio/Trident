@@ -19,7 +19,7 @@ namespace Trident {
 				renderer.setLayer(this);
 				renderer.build();
 
-				scene = createScope<Scene3D>(LemonAndStool::initializeScene(getApplication(), renderer.getGraphicsApi()));
+				scene = createScope<Scene3D>(LemonAndStool::initializeScene(getApplication(), renderer.getGraphicsApi(), renderer.getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment));
 				clusteredScene = clusterizeScene(scene.get());
 
 				renderer.setScene(&clusteredScene);

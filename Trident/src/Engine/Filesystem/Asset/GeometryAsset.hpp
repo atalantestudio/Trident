@@ -16,16 +16,18 @@ namespace Trident {
 	struct Descriptor<GeometryAsset> : public AssetDescriptor {
 		GeometryAssetFlags flags;
 
-		// 3D vertex components.
+		// Packed vertices.
 		sequence<float32> vertexPositionComponents;
 		sequence<float32> vertexNormalComponents;
 		sequence<float32> vertexTextureCoordinateComponents;
+		sequence<float32> triangleTangentComponents;
 
-		// Indices arranged in clusters. Not including degenerate indices.
+		// The index count is the same for positions, normals and texture coordinates.
 		sequence<uint32> vertexPositionIndices;
 		sequence<uint32> vertexNormalIndices;
 		sequence<uint32> vertexTextureCoordinateIndices;
 
+		// TODO: Add support for 3D hulls.
 		Hull2DType hullType;
 
 		/// In 2D, only the first 2 components are used.
@@ -39,9 +41,20 @@ namespace Trident {
 		sequence<uint32> hullLineIndices;
 	};
 
-	struct GeometryAssetHeader : public AssetHeader {
+	struct GeometryAsset2DHeader : public AssetHeader {
 		GeometryAssetFlags flags;
 		uint32 vertexCount;
+		uint32 indexCount;
+	};
+
+	struct Geometry3DAssetHeader : public AssetHeader {
+		GeometryAssetFlags flags;
+		uint32 vertexPositionCount;
+		uint32 vertexNormalCount;
+		uint32 vertexTextureCoordinateCount;
+		uint32 triangleTangentCount;
+
+		// The index count is the same for positions, normals and texture coordinates.
 		uint32 indexCount;
 	};
 
@@ -60,6 +73,7 @@ namespace Trident {
 				vertexPositionComponents(descriptor.vertexPositionComponents),
 				vertexNormalComponents(descriptor.vertexNormalComponents),
 				vertexTextureCoordinateComponents(descriptor.vertexTextureCoordinateComponents),
+				triangleTangentComponents(descriptor.triangleTangentComponents),
 				vertexPositionIndices(descriptor.vertexPositionIndices),
 				vertexNormalIndices(descriptor.vertexNormalIndices),
 				vertexTextureCoordinateIndices(descriptor.vertexTextureCoordinateIndices),
@@ -89,6 +103,10 @@ namespace Trident {
 				return vertexTextureCoordinateComponents;
 			}
 
+			inline const sequence<float32>& getTriangleTangentComponents() const {
+				return triangleTangentComponents;
+			}
+
 			inline const sequence<uint32>& getVertexPositionIndices() const {
 				return vertexPositionIndices;
 			}
@@ -101,7 +119,6 @@ namespace Trident {
 				return vertexTextureCoordinateIndices;
 			}
 
-			// TODO: Add 3D getter as well.
 			inline Hull2DType getHullType() const {
 				return hullType;
 			}
@@ -123,6 +140,7 @@ namespace Trident {
 			sequence<float32> vertexPositionComponents;
 			sequence<float32> vertexNormalComponents;
 			sequence<float32> vertexTextureCoordinateComponents;
+			sequence<float32> triangleTangentComponents;
 			sequence<uint32> vertexPositionIndices;
 			sequence<uint32> vertexNormalIndices;
 			sequence<uint32> vertexTextureCoordinateIndices;

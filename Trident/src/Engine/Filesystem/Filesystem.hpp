@@ -38,6 +38,7 @@ namespace Trident {
 
 		Writer openWriter(view<char8> path);
 
+		// TODO: Implement other asset types (GeometryAsset is already done).
 		template<typename AssetType>
 		ref<AssetType> decodeAsset(ByteStream<StreamOperation::READ>& byteStream);
 
