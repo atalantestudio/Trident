@@ -241,7 +241,6 @@ namespace Trident {
 				// Precompute normal mass, tangent mass and bias.
 				const float32 rnA = dot(contact.rA, pair.contactManifold.normal);
 				const float32 rnB = dot(contact.rB, pair.contactManifold.normal);
-
 				const float32 massNormal =
 					(dot(contact.rA, contact.rA) - rnA * rnA) * rigidBodyA.inverseInertia +
 					(dot(contact.rB, contact.rB) - rnB * rnB) * rigidBodyB.inverseInertia +

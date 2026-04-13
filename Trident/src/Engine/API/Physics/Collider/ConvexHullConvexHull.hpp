@@ -7,64 +7,89 @@
 #include "Engine/API/Physics/Collider/findIncidentEdge.hpp"
 #include "Engine/API/Physics/Collider/Collider2D.hpp"
 #include "Engine/API/Physics/Feature2D.hpp"
+#include "Engine/API/Physics/Plane.hpp"
 
 namespace Trident {
 	static bool ConvexHullConvexHullCollider(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB, ContactManifold2D* contactManifold) {
-		const SAT2DOutput satOutput = SAT2D(A, B, hullA, hullB);
+		const SAT2DOutput sat = SAT2D(A, B, hullA, hullB);
 
-		if (satOutput.separation > 0.0f) {
+		if (sat.separation > 0.0f) {
 			return false;
 		}
 
-		const mat2x2<float32> referenceInverseRotation = mat2x2<float32>::rotation(-satOutput.referenceBody->rotation);
+		const vec2<float32> referenceCentroid = sat.referenceHull->centroid;
+		const mat2x2<float32> referenceInverseRotation = mat2x2<float32>::rotation(-sat.referenceBody->rotation);
 
-		const Edge referenceEdge = satOutput.referenceHull->edges[satOutput.referenceEdgeIndex];
-		const float32 referenceEdgeDistance = abs(signedDistanceLinePoint(vec2<float32>(satOutput.referenceHull->vertices[referenceEdge.indexA]) * satOutput.referenceBody->scale, vec2<float32>(satOutput.referenceHull->vertices[referenceEdge.indexB]) * satOutput.referenceBody->scale, {0.0f, 0.0f}));
+		const uint32 referenceLeftEdgeIndex = (static_cast<sint32>(sat.referenceEdgeIndex) - 1) % sat.referenceHull->edges.count();
+		const uint32 referenceRightEdgeIndex = (sat.referenceEdgeIndex + 1) % sat.referenceHull->edges.count();
 
-		const uint32 referenceLeftEdgeIndex = (static_cast<sint32>(satOutput.referenceEdgeIndex) - 1) % satOutput.referenceHull->edges.count();
-		const Edge referenceLeftEdge = satOutput.referenceHull->edges[referenceLeftEdgeIndex];
-		const vec2<float32> referenceLeftEdgeNormal = edgeNormalClockwise(satOutput.referenceHull->vertices[referenceLeftEdge.indexA], satOutput.referenceHull->vertices[referenceLeftEdge.indexB]) * referenceInverseRotation;
-		const float32 referenceLeftEdgeDistance = abs(signedDistanceLinePoint(vec2<float32>(satOutput.referenceHull->vertices[referenceLeftEdge.indexA]) * satOutput.referenceBody->scale, vec2<float32>(satOutput.referenceHull->vertices[referenceLeftEdge.indexB]) * satOutput.referenceBody->scale, {0.0f, 0.0f}));
+		const Edge referenceEdge = sat.referenceHull->edges[sat.referenceEdgeIndex];
+		const Edge referenceLeftEdge = sat.referenceHull->edges[referenceLeftEdgeIndex];
+		const Edge referenceRightEdge = sat.referenceHull->edges[referenceRightEdgeIndex];
 
-		const uint32 referenceRightEdgeIndex = (satOutput.referenceEdgeIndex + 1) % satOutput.referenceHull->edges.count();
-		const Edge referenceRightEdge = satOutput.referenceHull->edges[referenceRightEdgeIndex];
-		const vec2<float32> referenceRightEdgeNormal = edgeNormalClockwise(satOutput.referenceHull->vertices[referenceRightEdge.indexA], satOutput.referenceHull->vertices[referenceRightEdge.indexB]) * referenceInverseRotation;
-		const float32 referenceRightEdgeDistance = abs(signedDistanceLinePoint(vec2<float32>(satOutput.referenceHull->vertices[referenceRightEdge.indexA]) * satOutput.referenceBody->scale, vec2<float32>(satOutput.referenceHull->vertices[referenceRightEdge.indexB]) * satOutput.referenceBody->scale, {0.0f, 0.0f}));
+		const vec2<float32> referenceEdgeA = sat.referenceHull->vertices[referenceEdge.indexA];
+		const vec2<float32> referenceEdgeB = sat.referenceHull->vertices[referenceEdge.indexB];
+		const vec2<float32> referenceLeftEdgeA = sat.referenceHull->vertices[referenceLeftEdge.indexA];
+		const vec2<float32> referenceLeftEdgeB = sat.referenceHull->vertices[referenceLeftEdge.indexB];
+		const vec2<float32> referenceRightEdgeA = sat.referenceHull->vertices[referenceRightEdge.indexA];
+		const vec2<float32> referenceRightEdgeB = sat.referenceHull->vertices[referenceRightEdge.indexB];
 
-		ClipFeature2D incidentEdge = findIncidentEdge(*satOutput.incidentBody, *satOutput.incidentHull, satOutput.normal * mat2x2<float32>::rotation(satOutput.incidentBody->rotation));
-		float32 offset;
+		const vec2<float32> referenceLeftEdgeNormal = edgeNormalClockwise(referenceLeftEdgeA, referenceLeftEdgeB) * referenceInverseRotation;
+		const vec2<float32> referenceRightEdgeNormal = edgeNormalClockwise(referenceRightEdgeA, referenceRightEdgeB) * referenceInverseRotation;
+
+		const float32 referenceEdgeDistance = abs(signedDistanceLinePoint(
+			referenceEdgeA * sat.referenceBody->scale,
+			referenceEdgeB * sat.referenceBody->scale,
+			referenceCentroid
+		));
+		const float32 referenceLeftEdgeDistance = abs(signedDistanceLinePoint(
+			referenceLeftEdgeA * sat.referenceBody->scale,
+			referenceLeftEdgeB * sat.referenceBody->scale,
+			referenceCentroid
+		));
+		const float32 referenceRightEdgeDistance = abs(signedDistanceLinePoint(
+			referenceRightEdgeA * sat.referenceBody->scale,
+			referenceRightEdgeB * sat.referenceBody->scale,
+			referenceCentroid
+		));
+
+		ClipFeature2D incidentEdge = findIncidentEdge(*sat.incidentBody, *sat.incidentHull, sat.normal * mat2x2<float32>::rotation(sat.incidentBody->rotation));
+		Plane2D plane;
 
 		// Clip against reference left edge.
-		offset = dot(satOutput.referenceBody->position, referenceLeftEdgeNormal) + referenceLeftEdgeDistance;
-		incidentEdge = clipEdge(incidentEdge, referenceLeftEdgeNormal, offset, referenceLeftEdgeIndex);
+		plane.normal = referenceLeftEdgeNormal;
+		plane.offset = dot(sat.referenceBody->position, referenceLeftEdgeNormal) + referenceLeftEdgeDistance;
+		incidentEdge = clipEdge(incidentEdge, plane, referenceLeftEdgeIndex);
 
 		if (incidentEdge.vertexCount < 2) {
 			return false;
 		}
 
 		// Clip against reference right edge.
-		offset = dot(satOutput.referenceBody->position, referenceRightEdgeNormal) + referenceRightEdgeDistance;
-		incidentEdge = clipEdge(incidentEdge, referenceRightEdgeNormal, offset, referenceRightEdgeIndex);
+		plane.normal = referenceRightEdgeNormal;
+		plane.offset = dot(sat.referenceBody->position, referenceRightEdgeNormal) + referenceRightEdgeDistance;
+		incidentEdge = clipEdge(incidentEdge, plane, referenceRightEdgeIndex);
 
 		if (incidentEdge.vertexCount < 2) {
 			return false;
 		}
 
-		contactManifold->normal = satOutput.normal;
+		contactManifold->normal = sat.normal;
 		contactManifold->contactCount = 0;
 
-		offset = dot(satOutput.referenceBody->position, satOutput.normal) + referenceEdgeDistance;
+		plane.normal = sat.normal;
+		plane.offset = dot(sat.referenceBody->position, sat.normal) + referenceEdgeDistance;
 
 		uint32 vertexIndex = 0;
 
 		// Discard vertices with a positive separation and put the rest on the reference edge.
 		while (vertexIndex < 2) {
 			const ClipVertex2D& clipVertex = incidentEdge.edge[vertexIndex];
-			const float32 separation = dot(clipVertex.position, satOutput.normal) - offset;
+			const float32 separation = dot(clipVertex.position, plane.normal) - plane.offset;
 
 			if (separation <= 0.0f) {
 				Contact2D& contact = contactManifold->contacts[contactManifold->contactCount];
-				contact.position = clipVertex.position - satOutput.normal * separation;
+				contact.position = clipVertex.position - sat.normal * separation;
 				contact.separation = separation;
 				contact.id = clipVertex.id;
 
@@ -74,7 +99,7 @@ namespace Trident {
 			vertexIndex += 1;
 		}
 
-		if (satOutput.referenceBody == &B) {
+		if (sat.referenceBody == &B) {
 			contactManifold->normal *= -1.0f;
 
 			uint8 contactIndex = 0;

@@ -23,7 +23,7 @@ namespace Trident {
 			/// The impulse vector.
 			vec2<float32> j,
 
-			/// The vector from the entity's position to the contact.
+			/// The vector from the body's position to the contact.
 			vec2<float32> r
 		) {
 			linearVelocity += j * inverseMass;
