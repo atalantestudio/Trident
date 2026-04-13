@@ -17,13 +17,14 @@ namespace Trident {
 			typedef Scene3DData (*CreateScene3DFunction)();
 
 		private:
-			static constexpr uint32 SCENE_2D_COUNT = 8;
+			static constexpr uint32 SCENE_2D_COUNT = 9;
 			static constexpr uint32 SCENE_3D_COUNT = 2;
 
 			inline static const view<char8> SCENE_2D_NAMES[SCENE_2D_COUNT] = {
 				"Boxes",
 				"Circles",
 				"Dominos",
+				"Polygons",
 				"Pyramid",
 				"Stacking",
 				"RollingBall",
@@ -35,6 +36,7 @@ namespace Trident {
 				createBoxesScene,
 				createCirclesScene,
 				createDominosScene,
+				createPolygonsScene,
 				createPyramidScene,
 				createStackingScene,
 				createRollingBallScene,

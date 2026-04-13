@@ -13,7 +13,7 @@ namespace Trident {
 			.entityCount = 2,
 			.geometryAssetIdentifiers = {
 				// TODO(debug-only): UnitBox
-				36,
+				38,
 			},
 			.geometryMappings = {
 				{0, {0}},
@@ -55,7 +55,7 @@ namespace Trident {
 			.entityCount = 2,
 			.geometryAssetIdentifiers = {
 				// TODO(debug-only): lemon_1k
-				38,
+				40,
 			},
 			.geometryMappings = {
 				{0, {0}},

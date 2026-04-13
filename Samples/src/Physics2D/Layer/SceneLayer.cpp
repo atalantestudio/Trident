@@ -20,6 +20,8 @@ namespace Trident {
 		// For now they must be loaded manually before loading the scene.
 		assetLibrary->getAsset<GeometryAsset>("UnitCircle");
 		assetLibrary->getAsset<GeometryAsset>("UnitSquare");
+		assetLibrary->getAsset<GeometryAsset>("Triangle");
+		assetLibrary->getAsset<GeometryAsset>("Polygon");
 
 		const view<char8> sceneAssetName = getApplication()->getPropertyFile()->getProperty<view<char8>>("AssetName");
 		const ref<Scene2DAsset> sceneAsset = assetLibrary->getAsset<Scene2DAsset>(sceneAssetName);

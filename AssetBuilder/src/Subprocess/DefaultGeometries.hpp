@@ -24,10 +24,100 @@ namespace Trident {
 	}
 
 	Geometry2DData createUnitSquare() {
-		std::vector<float32> vertexComponentBuffer;
-		std::vector<uint32> indexBuffer;
+		std::vector<float32> vertexComponentBuffer = {
+			// Positions
+			-0.5f,  0.5f, // Top left
+			 0.5f,  0.5f, // Top right
+ 			 0.5f, -0.5f, // Bottom right
+			-0.5f, -0.5f, // Bottom left
 
-		const Geometry2D geometry = createUnitSquareGeometry(vertexComponentBuffer, indexBuffer);
+			// Texture coordinates
+			0.0f, 0.0f, // Top left
+			1.0f, 0.0f, // Top right
+			1.0f, 1.0f, // Bottom right
+			0.0f, 1.0f, // Bottom left
+		};
+
+		std::vector<uint32> indexBuffer = {
+			0, 1, 2,
+			0, 2, 3,
+		};
+
+		const Geometry2D geometry = Geometry2D({
+			.vertexPositionComponentRange = {0, 8},
+			.vertexTextureCoordinateComponentRange = {8, 8},
+			.indexRange = {0, 6},
+		});
+
+		const Hull2D hull = createHull<Hull2DType::POLYGON>(geometry, vertexComponentBuffer, indexBuffer);
+
+		return {
+			.vertexComponentBuffer = vertexComponentBuffer,
+			.indexBuffer = indexBuffer,
+			.geometry = geometry,
+			.hull = hull,
+		};
+	}
+
+	Geometry2DData createTriangle() {
+		std::vector<float32> vertexComponentBuffer = {
+			// Positions
+			0.0f, 0.0f,
+			0.0f, 1.0f,
+			6.0f, 0.0f,
+
+			// Texture coordinates
+			0.0f, 0.0f, // Top left
+			0.0f, 1.0f, // Bottom left
+			1.0f, 1.0f, // Bottom right
+		};
+
+		std::vector<uint32> indexBuffer = {
+			0, 1, 2,
+		};
+
+		const Geometry2D geometry = Geometry2D({
+			.vertexPositionComponentRange = {0, 6},
+			.vertexTextureCoordinateComponentRange = {6, 6},
+			.indexRange = {0, 3},
+		});
+
+		const Hull2D hull = createHull<Hull2DType::POLYGON>(geometry, vertexComponentBuffer, indexBuffer);
+
+		return {
+			.vertexComponentBuffer = vertexComponentBuffer,
+			.indexBuffer = indexBuffer,
+			.geometry = geometry,
+			.hull = hull,
+		};
+	}
+
+	Geometry2DData createPolygon() {
+		std::vector<float32> vertexComponentBuffer = {
+			// Positions
+			-3.0f,   0.0f,
+			 4.0f,   0.0f,
+			 3.0f,  -1.0f,
+			-2.25f, -1.5f,
+
+			// Texture coordinates
+			0.0f, 0.0f, // Top left
+			1.0f, 0.0f, // Top right
+			0.0f, 1.0f, // Bottom left
+			1.0f, 1.0f, // Bottom right
+		};
+
+		std::vector<uint32> indexBuffer = {
+			0, 1, 2,
+			0, 2, 3,
+		};
+
+		const Geometry2D geometry = Geometry2D({
+			.vertexPositionComponentRange = {0, 8},
+			.vertexTextureCoordinateComponentRange = {8, 8},
+			.indexRange = {0, 6},
+		});
+
 		const Hull2D hull = createHull<Hull2DType::POLYGON>(geometry, vertexComponentBuffer, indexBuffer);
 
 		return {

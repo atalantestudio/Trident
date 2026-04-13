@@ -19,17 +19,21 @@ namespace Trident {
 			static constexpr uint32 PROJECT_INPUT_PATH_ARGUMENT_INDEX = 1;
 			static constexpr uint32 PROJECT_OUTPUT_PATH_ARGUMENT_INDEX = 2;
 
-			static constexpr uint32 DEFAULT_GEOMETRY_2D_COUNT = 2;
+			static constexpr uint32 DEFAULT_GEOMETRY_2D_COUNT = 4;
 			static constexpr uint32 DEFAULT_GEOMETRY_3D_COUNT = 1;
 
 			inline static const view<char8> DEFAULT_GEOMETRY_2D_NAMES[DEFAULT_GEOMETRY_2D_COUNT] = {
 				"UnitCircle",
 				"UnitSquare",
+				"Triangle",
+				"Polygon",
 			};
 
 			inline static constexpr CreateGeometry2DFunction DEFAULT_GEOMETRY_2D_FUNCTIONS[DEFAULT_GEOMETRY_2D_COUNT] = {
 				createUnitCircle,
 				createUnitSquare,
+				createTriangle,
+				createPolygon,
 			};
 
 			inline static const view<char8> DEFAULT_GEOMETRY_3D_NAMES[DEFAULT_GEOMETRY_3D_COUNT] = {

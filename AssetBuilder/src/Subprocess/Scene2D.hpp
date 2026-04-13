@@ -225,6 +225,56 @@ namespace Trident {
 		};
 	}
 
+	Scene2DData createPolygonsScene() {
+		return {
+			.staticVertexCount = 0,
+			.staticIndexCount = 0,
+			.entityCount = 2,
+			.geometryAssetIdentifiers = {
+				// TODO(debug-only): Polygon
+				37,
+
+				// TODO(debug-only): Triangle
+				36,
+			},
+			.geometryMappings = {
+				{0, {0}},
+				{1, {1}},
+			},
+			.rigidBodyMappings = {
+				// Polygon
+				{
+					0,
+					createRigidBody({
+						.position = {0.45_m, -0.625_m},
+						.rotation = 0.0_rad,
+						.scale = {1.0f, 1.0f},
+						.mass = max<float32>(),
+						.friction = 0.2f,
+						.restitution = 0.0f,
+						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
+					}),
+				},
+
+				// Triangle
+				{
+					1,
+					createRigidBody({
+						.position = {0.0_m, 1.957_m},
+						.rotation = 0.0_rad,
+						// .rotation = radians(-30.0_deg),
+						.scale = {1.0f, 1.0f},
+						// .angularVelocity = radians(0.4617_w),
+						.mass = 1.0_kg,
+						.friction = 0.2f,
+						.restitution = 0.0f,
+						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
+					}),
+				},
+			},
+		};
+	}
+
 	Scene2DData createPyramidScene() {
 		constexpr uint32 entityCount = 79;
 
