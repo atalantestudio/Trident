@@ -4,7 +4,7 @@
 struct VertexInput {
 	uint vertexIndex : SV_VertexID;
 	float4x4 world : VERTEX_INPUT_ATTRIBUTE0;
-	float3x3 normal : VERTEX_INPUT_ATTRIBUTE1;
+	float3x3 normal : VERTEX_INPUT_ATTRIBUTE4;
 };
 
 struct VertexOutput {
