@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "RigidBody2DComponent.hpp"
+#include "RigidBody.hpp"
 
 namespace Trident {
 	// TODO(debug-only)
@@ -29,9 +29,9 @@ namespace Trident {
 						.rotation = 0.0_rad,
 						.scale = {100.0f, 20.0f},
 						.mass = max<float32>(),
+						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 						.friction = 0.2f,
 						.restitution = 0.0f,
-						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 					}),
 				},
 
@@ -43,9 +43,9 @@ namespace Trident {
 						.rotation = 0.0_rad,
 						.scale = {1.0f, 1.0f},
 						.mass = 200.0_kg,
+						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 						.friction = 0.2f,
 						.restitution = 0.0f,
-						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 					}),
 				},
 			},
@@ -72,9 +72,9 @@ namespace Trident {
 						.rotation = 0.0_rad,
 						.scale = {20.0f, 20.0f},
 						.mass = max<float32>(),
+						.momentOfInertia = MomentOfInertia2D::THIN_SOLID_DISK,
 						.friction = 0.2f,
 						.restitution = 0.0f,
-						.momentOfInertia = MomentOfInertia2D::THIN_SOLID_DISK,
 					}),
 				},
 
@@ -86,9 +86,9 @@ namespace Trident {
 						.rotation = 0.0_rad,
 						.scale = {20.0f, 20.0f},
 						.mass = max<float32>(),
+						.momentOfInertia = MomentOfInertia2D::THIN_SOLID_DISK,
 						.friction = 0.2f,
 						.restitution = 0.0f,
-						.momentOfInertia = MomentOfInertia2D::THIN_SOLID_DISK,
 					}),
 				},
 
@@ -100,9 +100,9 @@ namespace Trident {
 						.rotation = 0.0_rad,
 						.scale = {1.0f, 1.0f},
 						.mass = 200.0_kg,
+						.momentOfInertia = MomentOfInertia2D::THIN_SOLID_DISK,
 						.friction = 0.2f,
 						.restitution = 0.0f,
-						.momentOfInertia = MomentOfInertia2D::THIN_SOLID_DISK,
 					}),
 				},
 			},
@@ -132,9 +132,9 @@ namespace Trident {
 				.rotation = 0.0_rad,
 				.scale = {100.0f, 20.0f},
 				.mass = max<float32>(),
+				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 				.friction = 0.2f,
 				.restitution = 0.0f,
-				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 			}),
 		};
 
@@ -146,9 +146,9 @@ namespace Trident {
 				.rotation = 0.0_rad,
 				.scale = {12.0f, 0.5f},
 				.mass = max<float32>(),
+				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 				.friction = 0.2f,
 				.restitution = 0.0f,
-				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 			}),
 		};
 
@@ -160,9 +160,9 @@ namespace Trident {
 				.rotation = 0.3_rad,
 				.scale = {14.0f, 0.5f},
 				.mass = max<float32>(),
+				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 				.friction = 0.2f,
 				.restitution = 0.0f,
-				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 			}),
 		};
 
@@ -174,9 +174,9 @@ namespace Trident {
 				.rotation = 0.0_rad,
 				.scale = {0.5f, 3.0f},
 				.mass = max<float32>(),
+				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 				.friction = 0.2f,
 				.restitution = 0.0f,
-				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 			}),
 		};
 
@@ -189,9 +189,9 @@ namespace Trident {
 				.scale = {0.5f, 2.0f},
 				.linearVelocity = {4.0_m_s, 0.0_m_s},
 				.mass = 10.0_kg,
+				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 				.friction = 0.2f,
 				.restitution = 0.0f,
-				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 			}),
 		};
 
@@ -199,9 +199,9 @@ namespace Trident {
 			.rotation = 0.0_rad,
 			.scale = {0.2_m, 2.0_m},
 			.mass = 10.0_kg,
+			.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 			.friction = 0.1f,
 			.restitution = 0.0f,
-			.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 		};
 
 		uint32 dominoIndex = 0;
@@ -253,9 +253,9 @@ namespace Trident {
 						.rotation = 0.0_rad,
 						.scale = {100.0f, 20.0f},
 						.mass = max<float32>(),
+						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 						.friction = 0.2f,
 						.restitution = 0.0f,
-						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 					}),
 				},
 
@@ -267,9 +267,9 @@ namespace Trident {
 						.rotation = 0.0_rad,
 						.scale = {1.0f, 1.0f},
 						.mass = max<float32>(),
+						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 						.friction = 0.2f,
 						.restitution = 0.0f,
-						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 					}),
 				},
 
@@ -282,9 +282,9 @@ namespace Trident {
 						.rotation = radians(-165.0_deg),
 						.scale = {1.0f, 1.0f},
 						.mass = 1.0_kg,
+						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 						.friction = 0.2f,
 						.restitution = 0.0f,
-						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 					}),
 				},
 			},
@@ -314,9 +314,9 @@ namespace Trident {
 				.rotation = 0.0_rad,
 				.scale = {100.0f, 20.0f},
 				.mass = max<float32>(),
+				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 				.friction = 0.2f,
 				.restitution = 0.0f,
-				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 			}),
 		};
 
@@ -324,9 +324,9 @@ namespace Trident {
 			.rotation = 0.0_rad,
 			.scale = {1.0f, 1.0f},
 			.mass = 10.0_kg,
+			.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 			.friction = 0.2f,
 			.restitution = 0.0f,
-			.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 		};
 
 		vec2<float32> x = {-6.0_m, 0.75_m};
@@ -389,9 +389,9 @@ namespace Trident {
 						.rotation = 0.0_rad,
 						.scale = {100.0f, 20.0f},
 						.mass = max<float32>(),
+						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 						.friction = 0.2f,
 						.restitution = 0.0f,
-						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 					}),
 				},
 
@@ -403,9 +403,9 @@ namespace Trident {
 						.rotation = radians(-20.0_deg),
 						.scale = {20.0f, 0.5f},
 						.mass = max<float32>(),
+						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 						.friction = 0.2f,
 						.restitution = 0.0f,
-						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 					}),
 				},
 
@@ -417,9 +417,9 @@ namespace Trident {
 						.rotation = radians(20.0_deg),
 						.scale = {5.0f, 0.5f},
 						.mass = max<float32>(),
+						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 						.friction = 0.2f,
 						.restitution = 0.0f,
-						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 					}),
 				},
 
@@ -431,9 +431,9 @@ namespace Trident {
 						.rotation = 0.0_rad,
 						.scale = {1.0f, 1.0f},
 						.mass = 25.0_kg,
+						.momentOfInertia = MomentOfInertia2D::THIN_SOLID_DISK,
 						.friction = 0.2f,
 						.restitution = 0.0f,
-						.momentOfInertia = MomentOfInertia2D::THIN_SOLID_DISK,
 					}),
 				},
 			},
@@ -464,9 +464,9 @@ namespace Trident {
 				.rotation = 0.0_rad,
 				.scale = {100.0f, 20.0f},
 				.mass = max<float32>(),
+				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 				.friction = 0.2f,
 				.restitution = 0.0f,
-				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 			}),
 		};
 
@@ -478,9 +478,9 @@ namespace Trident {
 				.rotation = -0.25_rad,
 				.scale = {13.0f, 0.25f},
 				.mass = max<float32>(),
+				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 				.friction = 0.2f,
 				.restitution = 0.0f,
-				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 			}),
 		};
 
@@ -492,9 +492,9 @@ namespace Trident {
 				.rotation = 0.0_rad,
 				.scale = {0.25f, 1.0f},
 				.mass = max<float32>(),
+				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 				.friction = 0.2f,
 				.restitution = 0.0f,
-				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 			}),
 		};
 
@@ -506,9 +506,9 @@ namespace Trident {
 				.rotation = 0.25_rad,
 				.scale = {13.0f, 0.25f},
 				.mass = max<float32>(),
+				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 				.friction = 0.2f,
 				.restitution = 0.0f,
-				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 			}),
 		};
 
@@ -520,9 +520,9 @@ namespace Trident {
 				.rotation = 0.0_rad,
 				.scale = {0.25f, 1.0f},
 				.mass = max<float32>(),
+				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 				.friction = 0.2f,
 				.restitution = 0.0f,
-				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 			}),
 		};
 
@@ -534,9 +534,9 @@ namespace Trident {
 				.rotation = -0.25_rad,
 				.scale = {13.0f, 0.25f},
 				.mass = max<float32>(),
+				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 				.friction = 0.2f,
 				.restitution = 0.0f,
-				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 			}),
 		};
 
@@ -544,9 +544,9 @@ namespace Trident {
 			.rotation = 0.0_rad,
 			.scale = {0.5f, 0.5f},
 			.mass = 25.0_kg,
+			.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 			.friction = 0.2f,
 			.restitution = 0.0f,
-			.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 		};
 
 		uint32 boxIndex = 0;
@@ -593,9 +593,9 @@ namespace Trident {
 				.rotation = 0.0_rad,
 				.scale = {100.0f, 20.0f},
 				.mass = max<float32>(),
+				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 				.friction = 0.2f,
 				.restitution = 0.0f,
-				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 			}),
 		};
 
@@ -603,9 +603,9 @@ namespace Trident {
 			.rotation = 0.0_rad,
 			.scale = {1.0f, 1.0f},
 			.mass = 10.0_kg,
+			.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 			.friction = 0.2f,
 			.restitution = 0.0f,
-			.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 		};
 
 		uint32 boxIndex = 0;
@@ -651,9 +651,9 @@ namespace Trident {
 						.rotation = 0.0_rad,
 						.scale = {100.0f, 20.0f},
 						.mass = max<float32>(),
+						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 						.friction = 0.2f,
 						.restitution = 0.0f,
-						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 					}),
 				},
 
@@ -665,9 +665,9 @@ namespace Trident {
 						.rotation = 0.0_rad,
 						.scale = {0.1f, 1.0f},
 						.mass = max<float32>(),
+						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 						.friction = 0.0f,
 						.restitution = 0.0f,
-						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 					}),
 				},
 
@@ -679,9 +679,9 @@ namespace Trident {
 						.rotation = 0.0_rad,
 						.scale = {12.0f, 0.25f},
 						.mass = 100.0_kg,
+						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 						.friction = 0.2f,
 						.restitution = 0.0f,
-						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 					}),
 				},
 
@@ -693,9 +693,9 @@ namespace Trident {
 						.rotation = 0.0_rad,
 						.scale = {0.5f, 0.5f},
 						.mass = 25.0_kg,
+						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 						.friction = 0.2f,
 						.restitution = 0.0f,
-						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 					}),
 				},
 
@@ -707,9 +707,9 @@ namespace Trident {
 						.rotation = 0.0_rad,
 						.scale = {0.5f, 0.5f},
 						.mass = 25.0_kg,
+						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 						.friction = 0.2f,
 						.restitution = 0.0f,
-						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 					}),
 				},
 
@@ -721,9 +721,9 @@ namespace Trident {
 						.rotation = 0.0_rad,
 						.scale = {1.0f, 1.0f},
 						.mass = 100.0_kg,
+						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 						.friction = 0.2f,
 						.restitution = 0.0f,
-						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 					}),
 				},
 			},

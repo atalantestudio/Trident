@@ -41,15 +41,18 @@ namespace Trident {
 		mat4x4<float32> world = mat4x4<float32>::identity();
 		quat<float32> orientation = quat<float32>::identity();
 
-		// TODO: Use svec2<float32> instead.
+		// TODO: Use svec3<float32> instead.
 		vec3<float32> linearVelocity;
 
-		// TODO: Use svec2<float32> instead.
+		// TODO: Use svec3<float32> instead.
 		vec3<float32> angularVelocity;
 
 		float32 inverseMass;
 		mat3x3<float32> inverseInertia;
 
-		// TODO: Add friction, restitution and forces.
+		float32 friction;
+		float32 restitution;
+
+		// TODO: Add sum of forces.
 	};
 }
