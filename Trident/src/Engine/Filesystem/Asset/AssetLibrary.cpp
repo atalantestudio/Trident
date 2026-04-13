@@ -265,14 +265,19 @@ namespace Trident {
 
 		for (EntityComponentMapping<RigidBody3DComponent>& rigidBodyMapping : sceneAssetDescriptor.rigidBodyMappings) {
 			rigidBodyMapping.entity = stream.read<Entity>();
-
-			const svec3<float32> position = stream.read<svec3<float32>>();
-			const svec3<float32> rotation = stream.read<svec3<float32>>();
-			const svec3<float32> scale = stream.read<svec3<float32>>();
-
-			rigidBodyMapping.component.position = {position[0], position[1], position[2]};
-			rigidBodyMapping.component.rotation = {rotation[0], rotation[1], rotation[2]};
-			rigidBodyMapping.component.scale = {scale[0], scale[1], scale[2]};
+			rigidBodyMapping.component.position = vec3<float32>(stream.read<svec3<float32>>());
+			rigidBodyMapping.component.rotation = vec3<float32>(stream.read<svec3<float32>>());
+			rigidBodyMapping.component.scale = vec3<float32>(stream.read<svec3<float32>>());
+			rigidBodyMapping.component.linearVelocity = vec3<float32>(stream.read<svec3<float32>>());
+			rigidBodyMapping.component.angularVelocity = vec3<float32>(stream.read<svec3<float32>>());
+			rigidBodyMapping.component.inverseMass = stream.read<float32>();
+			rigidBodyMapping.component.inverseInertia = {
+				vec3<float32>(stream.read<svec3<float32>>()),
+				vec3<float32>(stream.read<svec3<float32>>()),
+				vec3<float32>(stream.read<svec3<float32>>()),
+			};
+			rigidBodyMapping.component.friction = stream.read<float32>();
+			rigidBodyMapping.component.restitution = stream.read<float32>();
 		}
 
 		return createRef<Scene3DAsset>(sceneAssetDescriptor);

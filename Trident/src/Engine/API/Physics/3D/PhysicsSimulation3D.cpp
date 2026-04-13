@@ -49,8 +49,6 @@ namespace Trident {
 
 	void PhysicsSimulation3D::narrowPhase() {
 		// TODO
-
-		// BREAKPOINT();
 	}
 
 	void PhysicsSimulation3D::applyForces() {
@@ -74,14 +72,10 @@ namespace Trident {
 
 	void PhysicsSimulation3D::updateContactManifolds() {
 		// TODO
-
-		// BREAKPOINT();
 	}
 
 	void PhysicsSimulation3D::applyImpulses() {
 		// TODO
-
-		// BREAKPOINT();
 	}
 
 	void PhysicsSimulation3D::integrate() {

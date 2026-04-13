@@ -47,6 +47,8 @@ namespace Trident {
 			void updateContactManifolds();
 			void updateJoints();
 			void applyImpulses();
+
+			/// NOTE: Uses Semi-Implicit Euler.
 			void integrate();
 
 		private:

@@ -128,7 +128,7 @@ namespace Trident {
 					header.geometryAssetCount * sizeof(uint32) +
 					header.geometryMappingCount * (sizeof(Entity) + sizeof(uint32)) +
 					header.materialMappingCount * (sizeof(Entity) + sizeof(uint32)) +
-					header.rigidBodyMappingCount * (sizeof(Entity) + sizeof(svec2<float32>) * 2 + sizeof(float32) * 5);
+					header.rigidBodyMappingCount * (sizeof(Entity) + sizeof(svec3<float32>) * 8 + sizeof(float32) * 3);
 
 				ByteStream<StreamOperation::WRITE> stream(size, Endianness::LITTLE_ENDIAN);
 
@@ -155,6 +155,14 @@ namespace Trident {
 					stream.write<svec3<float32>>(svec3<float32>(rigidBodyMapping.component.position));
 					stream.write<svec3<float32>>(svec3<float32>(rigidBodyMapping.component.rotation));
 					stream.write<svec3<float32>>(svec3<float32>(rigidBodyMapping.component.scale));
+					stream.write<svec3<float32>>(svec3<float32>(rigidBodyMapping.component.linearVelocity));
+					stream.write<svec3<float32>>(svec3<float32>(rigidBodyMapping.component.angularVelocity));
+					stream.write<float32>(rigidBodyMapping.component.inverseMass);
+					stream.write<svec3<float32>>(svec3<float32>(rigidBodyMapping.component.inverseInertia[0]));
+					stream.write<svec3<float32>>(svec3<float32>(rigidBodyMapping.component.inverseInertia[1]));
+					stream.write<svec3<float32>>(svec3<float32>(rigidBodyMapping.component.inverseInertia[2]));
+					stream.write<float32>(rigidBodyMapping.component.friction);
+					stream.write<float32>(rigidBodyMapping.component.restitution);
 				}
 
 				return stream;

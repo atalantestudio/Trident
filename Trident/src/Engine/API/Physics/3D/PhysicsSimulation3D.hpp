@@ -38,6 +38,8 @@ namespace Trident {
 			void applyForces();
 			void updateContactManifolds();
 			void applyImpulses();
+
+			/// NOTE: Uses Semi-Implicit Euler.
 			void integrate();
 
 		private:

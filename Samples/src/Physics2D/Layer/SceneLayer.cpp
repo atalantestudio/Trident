@@ -146,7 +146,7 @@ namespace Trident {
 
 		while (componentIndex < rigidBodyComponentPool.componentCount) {
 			const Entity entity = rigidBodyComponentPool.componentIndexToEntity[componentIndex];
-			const RigidBody2DComponent& rigidBodyComponent = scene->ecs.getComponent<RigidBody2DComponent>(entity);
+			const RigidBody2DComponent& rigidBodyComponent = rigidBodyComponentPool.components[componentIndex];
 
 			renderer.setWorld(entity, rigidBodyComponent.world);
 

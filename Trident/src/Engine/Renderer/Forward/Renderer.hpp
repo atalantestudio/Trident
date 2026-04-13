@@ -222,6 +222,10 @@ namespace Trident {
 				cameraMappedRange->position = camera.getPosition();
 			}
 
+			void setWorld(Entity entity, const mat4x4<float32>& world) const {
+				instanceMappedRange[entity].world = world;
+			}
+
 		private:
 			void _createRenderPass() {
 				constexpr uint32 SAMPLE_COUNT = 4;

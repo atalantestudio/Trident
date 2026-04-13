@@ -45,6 +45,19 @@ namespace Trident {
 			void preRender() override {
 				physicsSimulation->tick();
 
+				const ComponentPool<RigidBody3DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody3DComponent>();
+
+				uint32 componentIndex = 0;
+
+				while (componentIndex < rigidBodyComponentPool.componentCount) {
+					const Entity entity = rigidBodyComponentPool.componentIndexToEntity[componentIndex];
+					const RigidBody3DComponent& rigidBodyComponent = rigidBodyComponentPool.components[componentIndex];
+
+					renderer.setWorld(entity, rigidBodyComponent.world);
+
+					componentIndex += 1;
+				}
+
 				renderer.updateCamera();
 			}
 
