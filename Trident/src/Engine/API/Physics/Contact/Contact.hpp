@@ -28,7 +28,7 @@ namespace Trident {
 	struct Contact2D {
 		vec2<float32> position;
 
-		// Distance to the normal of the reference edge.
+		// Distance to the reference edge.
 		float32 separation;
 
 		// A's position to the contact.

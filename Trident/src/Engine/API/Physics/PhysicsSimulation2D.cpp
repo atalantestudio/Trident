@@ -8,14 +8,15 @@
 #include "Engine/API/Physics/Joint2D.hpp"
 #include "Engine/API/Physics/PhysicsSimulation2D.hpp"
 #include "Engine/ECS/Component/GeometryComponent.hpp"
+#include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 #include "Engine/ECS/Tag.hpp"
 
 namespace Trident {
-	vec2<float32> PhysicsSimulation2D::calculateRelativeVelocity(const RigidBody2DComponent& A, const RigidBody2DComponent& B, vec2<float32> rA, vec2<float32> rB) {
+	inline vec2<float32> calculateRelativeVelocity(const RigidBody2DComponent& A, const RigidBody2DComponent& B, vec2<float32> rA, vec2<float32> rB) {
 		return B.linearVelocity + cross(rB, -B.angularVelocity) - A.linearVelocity - cross(rA, -A.angularVelocity);
 	}
 
-	void PhysicsSimulation2D::mergeContactManifolds(EntityContactPair2D& entityContactPair, const ContactManifold2D& newContactManifold) {
+	void PhysicsSimulation2D::mergeContactManifolds(ContactPair2D& contactPair, const ContactManifold2D& newContactManifold) {
 		ContactManifold2D mergedContactManifold{};
 		uint32 contactIndex = 0;
 
@@ -25,8 +26,8 @@ namespace Trident {
 			int k = -1;
 			int j = 0;
 
-			while (j < entityContactPair.contactManifold.contactCount) {
-				const Contact2D& cOld = entityContactPair.contactManifold.contacts[j];
+			while (j < contactPair.contactManifold.contactCount) {
+				const Contact2D& cOld = contactPair.contactManifold.contacts[j];
 
 				if (cNew.id == cOld.id) {
 					k = j;
@@ -48,7 +49,7 @@ namespace Trident {
 			mergedContactManifold.contacts[contactIndex] = cNew;
 
 			#if defined(ENABLE_PHYSICS_2D_WARM_STARTING)
-				const Contact2D& cOld = entityContactPair.contactManifold.contacts[k];
+				const Contact2D& cOld = contactPair.contactManifold.contacts[k];
 
 				mergedContactManifold.contacts[contactIndex].accumulatedNormalImpulse = cOld.accumulatedNormalImpulse;
 				mergedContactManifold.contacts[contactIndex].accumulatedTangentImpulse = cOld.accumulatedTangentImpulse;
@@ -60,13 +61,13 @@ namespace Trident {
 		contactIndex = 0;
 
 		while (contactIndex < newContactManifold.contactCount) {
-			entityContactPair.contactManifold.contacts[contactIndex] = mergedContactManifold.contacts[contactIndex];
+			contactPair.contactManifold.contacts[contactIndex] = mergedContactManifold.contacts[contactIndex];
 
 			contactIndex += 1;
 		}
 
-		entityContactPair.contactManifold.contactCount = newContactManifold.contactCount;
-		entityContactPair.contactManifold.normal = newContactManifold.normal;
+		contactPair.contactManifold.contactCount = newContactManifold.contactCount;
+		contactPair.contactManifold.normal = newContactManifold.normal;
 	}
 
 	PhysicsSimulation2D::PhysicsSimulation2D(const Descriptor<PhysicsSimulation2D>& descriptor) :
@@ -142,7 +143,7 @@ namespace Trident {
 	}
 
 	void PhysicsSimulation2D::narrowPhase() {
-		EntityContactPair2D entityContactPair;
+		ContactPair2D contactPair;
 
 		for (const EntityPair entityPair : entityPairs) {
 			const RigidBody2DComponent& rigidBodyA = scene->ecs.getComponent<RigidBody2DComponent>(entityPair.A);
@@ -158,25 +159,25 @@ namespace Trident {
 				typeB = hullA.type;
 			}
 
-			if (!COLLIDER_2D_TABLE[static_cast<uint32>(typeA)][static_cast<uint32>(typeB)](rigidBodyA, rigidBodyB, hullA, hullB, &entityContactPair.contactManifold)) {
+			if (!COLLIDER_2D_TABLE[static_cast<uint32>(typeA)][static_cast<uint32>(typeB)](rigidBodyA, rigidBodyB, hullA, hullB, &contactPair.contactManifold)) {
 				// Either a degenerate case, or the entities are not intersecting.
-				entityContactPairs.erase(entityPair);
+				contactPairs.erase(entityPair);
 
 				continue;
 			}
 
-			std::map<const EntityPair, EntityContactPair2D>::iterator entityContactPairIterator = entityContactPairs.find(entityPair);
+			std::map<const EntityPair, ContactPair2D>::iterator contactPairIterator = contactPairs.find(entityPair);
 
-			if (entityContactPairIterator == entityContactPairs.end()) {
-				entityContactPair.A = entityPair.A;
-				entityContactPair.B = entityPair.B;
+			if (contactPairIterator == contactPairs.end()) {
+				contactPair.A = entityPair.A;
+				contactPair.B = entityPair.B;
 
-				entityContactPairs.insert(std::pair<const EntityPair, EntityContactPair2D>(entityPair, entityContactPair));
+				contactPairs.insert(std::pair<const EntityPair, ContactPair2D>(entityPair, contactPair));
 
 				continue;
 			}
 
-			mergeContactManifolds(entityContactPairIterator->second, entityContactPair.contactManifold);
+			mergeContactManifolds(contactPairIterator->second, contactPair.contactManifold);
 		}
 	}
 
@@ -201,8 +202,8 @@ namespace Trident {
 			// TODO
 			// Integrate gravity like in https://web.archive.org/web/20161201054257/https://www.niksula.hut.fi/~hkankaan/Homepages/gravity.html.
 			// This looks like Velocity Verlet for gravity to me?
-			// rigidBodyComponent.linearVelocity += (rigidBodyComponent.force * rigidBodyComponent.inverseMass + vec2<float32>(0.0f, G)) * halfDeltaTime;
-			rigidBodyComponent.linearVelocity += (rigidBodyComponent.force * rigidBodyComponent.inverseMass + vec2<float32>(0.0f, G)) * deltaTime;
+			// rigidBodyComponent.linearVelocity += (rigidBodyComponent.force * rigidBodyComponent.inverseMass + G) * halfDeltaTime;
+			rigidBodyComponent.linearVelocity += (rigidBodyComponent.force * rigidBodyComponent.inverseMass + G) * deltaTime;
 			// rigidBodyComponent.angularVelocity += rigidBodyComponent.inverseInertia * halfDeltaTime;
 			rigidBodyComponent.angularVelocity += torque * rigidBodyComponent.inverseInertia * deltaTime;
 
@@ -215,8 +216,8 @@ namespace Trident {
 
 		// Calculate combined values in each pair (static/dynamic friction, restitution, etc.).
 		// For each contact, calculate mass normal, mass tangent and bias value.
-		for (std::pair<const EntityPair, EntityContactPair2D>& entityContactPair : entityContactPairs) {
-			EntityContactPair2D& pair = entityContactPair.second;
+		for (std::pair<const EntityPair, ContactPair2D>& contactPair : contactPairs) {
+			ContactPair2D& pair = contactPair.second;
 
 			const Hull2D& hullA = getHull(pair.A);
 			const Hull2D& hullB = getHull(pair.B);
@@ -337,8 +338,8 @@ namespace Trident {
 		uint32 jointComponentIndex;
 
 		while (iteration < SEQUENTIAL_IMPULSE_ITERATION_COUNT) {
-			for (std::pair<const EntityPair, EntityContactPair2D>& entityContactPair : entityContactPairs) {
-				EntityContactPair2D& pair = entityContactPair.second;
+			for (std::pair<const EntityPair, ContactPair2D>& contactPair : contactPairs) {
+				ContactPair2D& pair = contactPair.second;
 				RigidBody2DComponent& rigidBodyA = scene->ecs.getComponent<RigidBody2DComponent>(pair.A);
 				RigidBody2DComponent& rigidBodyB = scene->ecs.getComponent<RigidBody2DComponent>(pair.B);
 
@@ -444,10 +445,10 @@ namespace Trident {
 		// TODO: Integration for dynamic entities with infinite mass?
 		// TODO: Integration for dynamic resting entities (e.g. an object on a moving platform may move due to inertia)?
 		while (componentIndex < rigidBodyComponentPool.componentCount) {
-			RigidBody2DComponent& rigidBody2DComponent = rigidBodyComponentPool.components[componentIndex];
+			RigidBody2DComponent& rigidBodyComponent = rigidBodyComponentPool.components[componentIndex];
 
 			// TODO: Exclude dynamic entities with an inverse mass of 0 from the loop.
-			if (rigidBody2DComponent.inverseMass == 0.0_kg) {
+			if (rigidBodyComponent.inverseMass == 0.0_kg) {
 				componentIndex += 1;
 
 				continue;
@@ -455,16 +456,15 @@ namespace Trident {
 
 			const Hull2D& hull = getHull(rigidBodyComponentPool.componentIndexToEntity[componentIndex]);
 
-			rigidBody2DComponent.position += rigidBody2DComponent.linearVelocity * deltaTime;
-			rigidBody2DComponent.rotation += rigidBody2DComponent.angularVelocity * deltaTime;
-
-			rigidBody2DComponent.updateWorld(hull.centroid);
+			rigidBodyComponent.position += rigidBodyComponent.linearVelocity * deltaTime;
+			rigidBodyComponent.rotation += rigidBodyComponent.angularVelocity * deltaTime;
+			rigidBodyComponent.updateWorld(hull.centroid);
 
 			// TODO
-			// rigidBody2DComponent.linearVelocity += (rigidBody2DComponent.force * rigidBody2DComponent.inverseMass + vec2<float32>(0.0f, G)) * halfDeltaTime;
-			// rigidBody2DComponent.angularVelocity += rigidBody2DComponent.inverseInertia * halfDeltaTime;
+			// rigidBodyComponent.linearVelocity += (rigidBodyComponent.force * rigidBodyComponent.inverseMass + vec2<float32>(0.0f, G)) * halfDeltaTime;
+			// rigidBodyComponent.angularVelocity += rigidBodyComponent.inverseInertia * halfDeltaTime;
 
-			rigidBody2DComponent.force = {0.0_N, 0.0_N};
+			rigidBodyComponent.force = {0.0_N, 0.0_N};
 
 			componentIndex += 1;
 		}

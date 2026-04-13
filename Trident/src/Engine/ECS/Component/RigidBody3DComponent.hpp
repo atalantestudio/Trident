@@ -53,6 +53,7 @@ namespace Trident {
 		float32 friction;
 		float32 restitution;
 
-		// TODO: Add sum of forces.
+		// TODO: Use svec3<float32> instead.
+		vec3<float32> force;
 	};
 }

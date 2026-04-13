@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Camera/Controller/FlyCameraController.hpp"
+#include "Engine/API/Physics/3D/PhysicsSimulation3D.hpp"
 #include "Engine/Layer/Layer.hpp"
 #include "Engine/Renderer/Forward/Renderer.hpp"
 
@@ -21,6 +22,11 @@ namespace Trident {
 
 				scene = createScope<Scene3D>(FlatColor::initializeScene(getApplication(), renderer.getGraphicsApi(), renderer.getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment));
 
+				physicsSimulation = createScope<PhysicsSimulation3D>(Descriptor<PhysicsSimulation3D>{
+					.scene = scene.get(),
+					.deltaTime = getApplication()->getFixedDeltaTime(),
+				});
+
 				renderer.setScene(scene.get());
 
 				cameraController.setAspectRatio(getApplication()->getWindow()->getAspectRatio());
@@ -37,6 +43,8 @@ namespace Trident {
 			}
 
 			void preRender() override {
+				physicsSimulation->tick();
+
 				renderer.updateCamera();
 			}
 
@@ -125,7 +133,8 @@ namespace Trident {
 
 		private:
 			ForwardRenderer renderer;
-			ref<Scene3D> scene;
+			scope<Scene3D> scene;
+			scope<PhysicsSimulation3D> physicsSimulation;
 			FlyCameraController cameraController;
 	};
 }

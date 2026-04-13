@@ -4,10 +4,9 @@
 #pragma once
 
 #include "Engine/API/Descriptor.hpp"
-#include "Engine/API/Physics/EntityPair.hpp"
+#include "Engine/API/Physics/2D/ContactPair2D.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
-#include "Engine/ECS/Component/RigidBody2DComponent.hpp"
-#include "Engine/Filesystem/Asset/SceneAsset.hpp"
+#include "Engine/ECS/EntityPair.hpp"
 
 namespace Trident {
 	#define ENABLE_PHYSICS_2D_IMPULSE_ACCUMULATION
@@ -26,14 +25,14 @@ namespace Trident {
 		private:
 			static constexpr uint32 SEQUENTIAL_IMPULSE_ITERATION_COUNT = 10;
 			static constexpr float32 ALLOWED_PENETRATION = 0.01f;
-			static constexpr float32 G = -9.80665f;
+
+			inline static const vec2<float32> G = {0.0f, -9.80665f};
 
 		private:
-			static vec2<float32> calculateRelativeVelocity(const RigidBody2DComponent& A, const RigidBody2DComponent& B, vec2<float32> rA, vec2<float32> rB);
-
-			static void mergeContactManifolds(EntityContactPair2D& entityContactPair, const ContactManifold2D& contactManifold);
+			static void mergeContactManifolds(ContactPair2D& contactPair, const ContactManifold2D& contactManifold);
 
 		public:
+			/// Constructs a physics simulation for the provided scene.
 			explicit PhysicsSimulation2D(const Descriptor<PhysicsSimulation2D>& descriptor);
 
 			/// Advances the simulation by a single tick.
@@ -60,6 +59,6 @@ namespace Trident {
 			// float32 halfDeltaTime;
 
 			std::vector<EntityPair> entityPairs;
-			std::map<EntityPair, EntityContactPair2D> entityContactPairs;
+			std::map<EntityPair, ContactPair2D> contactPairs;
 	};
 }
