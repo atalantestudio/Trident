@@ -25,7 +25,7 @@ namespace Trident {
 		const float32 scaleA = A.scale[0];
 		const float32 scaleB = B.scale[0];
 
-		const float32 d = lengthAB - pow(hullA.getRadius() * scaleA + hullB.getRadius() * scaleB, 2.0f);
+		const float32 d = lengthAB - pow(hullA.radius * scaleA + hullB.radius * scaleB, 2.0f);
 
 		if (d > 0.0f) {
 			return false;

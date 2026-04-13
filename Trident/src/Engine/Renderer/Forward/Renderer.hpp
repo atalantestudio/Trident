@@ -41,6 +41,9 @@ namespace Trident {
 
 				vertexDescriptorSet = descriptorSets[0];
 
+				debugHullWireframePipelineLayout = createDebugHullWireframePipelineLayout();
+				debugHullWireframePipeline = createDebugHullWireframePipeline();
+
 				cameraBuffer = createCameraBuffer();
 				cameraMappedRange = cameraBuffer->map(0, cameraBuffer->getSize());
 
@@ -52,6 +55,8 @@ namespace Trident {
 
 				instanceBuffer = createInstanceBuffer();
 				instanceMappedRange = instanceBuffer->map(0, instanceBuffer->getSize());
+
+				debugHullWireframeBuffer = createDebugHullWireframeBuffer();
 
 				const ComponentPool<RigidBody3DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody3DComponent>();
 
@@ -68,16 +73,16 @@ namespace Trident {
 				}
 
 				const view<uint8> dataBuffer = scene->getDataBuffer();
-				const ref<Buffer<uint8>> vertexStagingBuffer = createStagingBuffer<uint8>(dataBuffer.count());
+				const ref<Buffer<uint8>> dataStagingBuffer = createStagingBuffer<uint8>(dataBuffer.count());
 
-				uint8* vertexMappedRange = vertexStagingBuffer->map(0, vertexStagingBuffer->getSize());
+				uint8* vertexMappedRange = dataStagingBuffer->map(0, dataStagingBuffer->getSize());
 
 				std::copy(dataBuffer.begin(), dataBuffer.end(), vertexMappedRange);
 
-				vertexStagingBuffer->unmap();
+				dataStagingBuffer->unmap();
 
 				vertexBuffer = createBuffer<uint8>({
-					.size = vertexStagingBuffer->getSize(),
+					.size = dataStagingBuffer->getSize(),
 					.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
 					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 					.persistent = false,
@@ -90,20 +95,26 @@ namespace Trident {
 				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
 					.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
 					#if defined(BUILD_MODE_DEBUG)
-						.name = "Copy vertex buffer",
+						.name = "Copy buffers",
 					#endif
 				});
 
-				const sequence<BufferCopyRegion> copyRegions = {
-					{
-						.sourceOffset = 0,
-						.destinationOffset = 0,
-						.size = vertexBuffer->getSize(),
-					},
+				BufferCopyRegion copyRegion = {
+					.sourceOffset = 0,
+					.destinationOffset = 0,
+					.size = vertexBuffer->getSize(),
 				};
 
 				commandEncoder->begin();
-				commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, copyRegions);
+				commandEncoder->copyBufferToBuffer(dataStagingBuffer, vertexBuffer, copyRegion);
+
+				copyRegion = {
+					.sourceOffset = scene->getHullLineIndexByteOffset(),
+					.destinationOffset = 0,
+					.size = debugHullWireframeBuffer->getSize(),
+				};
+
+				commandEncoder->copyBufferToBuffer(dataStagingBuffer, debugHullWireframeBuffer, copyRegion);
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -144,7 +155,6 @@ namespace Trident {
 
 				while (rigidBodyComponentIndex < rigidBodyComponentPool.componentCount) {
 					const Entity entity = rigidBodyComponentPool.componentIndexToEntity[rigidBodyComponentIndex];
-
 					const GeometryComponent geometryComponent = geometryComponentPool.components[geometryComponentPool.entityToComponentIndex[entity]];
 					const Geometry3D& geometry = geometries[geometryComponent.geometryIndex];
 					const MaterialComponent materialComponent = materialComponentPool.components[materialComponentPool.entityToComponentIndex[entity]];
@@ -162,6 +172,33 @@ namespace Trident {
 					commandEncoder->draw(indexRange.count, 1, indexRange.offset, rigidBodyComponentIndex);
 
 					rigidBodyComponentIndex += 1;
+				}
+
+				if (debugHullWireframe) {
+					rigidBodyComponentIndex = 0;
+
+					commandEncoder->bindGraphicsPipeline(debugHullWireframePipeline);
+					commandEncoder->bindDescriptorSets(debugHullWireframePipelineLayout, 0, vertexDescriptorSet);
+					commandEncoder->bindVertexBuffer(0, instanceBuffer, 0, sizeof(Instance));
+					commandEncoder->bindIndexBuffer<uint16>(debugHullWireframeBuffer, 0);
+
+					while (rigidBodyComponentIndex < rigidBodyComponentPool.componentCount) {
+						const Entity entity = rigidBodyComponentPool.componentIndexToEntity[rigidBodyComponentIndex];
+						const GeometryComponent geometryComponent = geometryComponentPool.components[geometryComponentPool.entityToComponentIndex[entity]];
+						const Geometry3D& geometry = geometries[geometryComponent.geometryIndex];
+
+						if (geometry.hullIndex >= scene->getHulls().count()) {
+							rigidBodyComponentIndex += 1;
+
+							continue;
+						}
+
+						const Hull3D& hull = scene->getHulls()[geometry.hullIndex];
+
+						commandEncoder->drawIndexed(hull.lineIndexRange.count, 1, hull.lineIndexRange.offset, geometry.getVertexPositionComponentRange().offset / 2, rigidBodyComponentIndex);
+
+						rigidBodyComponentIndex += 1;
+					}
 				}
 
 				commandEncoder->endRenderPass();
@@ -257,6 +294,10 @@ namespace Trident {
 					framebufferIndex += 1;
 				}
 			}
+
+			ref<PipelineLayout> createDebugHullWireframePipelineLayout() const;
+
+			ref<GraphicsPipeline> createDebugHullWireframePipeline() const;
 
 			ref<Image> createColorImage() const {
 				const Extent2D extent = getSwapchain()->getExtent();
@@ -390,6 +431,8 @@ namespace Trident {
 				});
 			}
 
+			ref<Buffer<uint16>> createDebugHullWireframeBuffer() const;
+
 			void createMaterialObjects();
 
 			ref<Buffer<Camera>> createCameraBuffer() const {
@@ -485,12 +528,15 @@ namespace Trident {
 			sequence<ref<DescriptorSet>> materialDescriptorSets;
 
 			sequence<ref<PipelineLayout>> materialPipelineLayouts;
+			ref<PipelineLayout> debugHullWireframePipelineLayout;
 
 			sequence<ref<GraphicsPipeline>> materialPipelines;
+			ref<GraphicsPipeline> debugHullWireframePipeline;
 
 			ref<Buffer<uint8>> vertexBuffer;
 			ref<Buffer<Instance>> instanceBuffer;
 			ref<Buffer<Camera>> cameraBuffer;
+			ref<Buffer<uint16>> debugHullWireframeBuffer;
 
 			ref<Image> colorImage;
 			ref<Image> depthStencilImage;
@@ -504,5 +550,7 @@ namespace Trident {
 
 			Camera* cameraMappedRange = nullptr;
 			Instance* instanceMappedRange = nullptr;
+
+			bool debugHullWireframe = true;
 	};
 }

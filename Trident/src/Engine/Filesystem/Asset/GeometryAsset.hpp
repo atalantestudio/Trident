@@ -4,7 +4,9 @@
 #pragma once
 
 #include "Engine/API/Descriptor.hpp"
+#include "Engine/API/Geometry/Edge.hpp"
 #include "Engine/API/Geometry/Hull2DType.hpp"
+#include "Engine/API/Geometry/Hull3DType.hpp"
 #include "Engine/Build/Cluster.hpp"
 #include "Engine/Filesystem/Asset/Asset.hpp"
 #include "Engine/Filesystem/Asset/GeometryAssetFlags.hpp"
@@ -27,18 +29,25 @@ namespace Trident {
 		sequence<uint32> vertexNormalIndices;
 		sequence<uint32> vertexTextureCoordinateIndices;
 
-		// TODO: Add support for 3D hulls.
-		Hull2DType hullType;
+		// NOTE: Hull2DType in 2D, Hull3DType in 3D.
+		uint8 hullType;
 
 		/// In 2D, only the first 2 components are used.
 		svec3<float32> hullCentroid;
 
 		float32 hullRadius;
 
+		sequence<HalfEdge> hull3DEdges;
+		sequence<float32> hull3DFaceNormalComponents;
+
 		/// In 2D, the wireframe is rendered with the `LINE_STRIP` topology.
+		/// Geometry hulls are not guaranteed to support wireframe rendering.
+		// TODO: Use 16-bit indices for 2D hull wireframes.
+		sequence<uint32> hull2DLineIndices;
+
 		/// In 3D, it is rendered with the `LINE_LIST` topology.
 		/// Geometry hulls are not guaranteed to support wireframe rendering.
-		sequence<uint32> hullLineIndices;
+		sequence<uint16> hull3DLineIndices;
 	};
 
 	struct GeometryAsset2DHeader : public AssetHeader {
@@ -65,6 +74,18 @@ namespace Trident {
 		uint32 lineIndexCount;
 	};
 
+	struct Hull3DHeader {
+		svec3<float32> centroid;
+		float32 radius;
+
+		// Total number of edges, including base and twins.
+		uint16 edgeCount;
+
+		uint16 faceCount;
+		uint16 lineIndexCount;
+		Hull3DType hullType;
+	};
+
 	class GeometryAsset : public Asset {
 		public:
 			explicit GeometryAsset(const Descriptor<GeometryAsset>& descriptor) :
@@ -80,7 +101,10 @@ namespace Trident {
 				hullType(descriptor.hullType),
 				hullCentroid(descriptor.hullCentroid),
 				hullRadius(descriptor.hullRadius),
-				hullLineIndices(descriptor.hullLineIndices)
+				hull2DLineIndices(descriptor.hull2DLineIndices),
+				hull3DEdges(descriptor.hull3DEdges),
+				hull3DFaceNormalComponents(descriptor.hull3DFaceNormalComponents),
+				hull3DLineIndices(descriptor.hull3DLineIndices)
 			{}
 
 			inline GeometryAssetFlags getFlags() const {
@@ -119,7 +143,7 @@ namespace Trident {
 				return vertexTextureCoordinateIndices;
 			}
 
-			inline Hull2DType getHullType() const {
+			inline uint8 getHullType() const {
 				return hullType;
 			}
 
@@ -131,8 +155,20 @@ namespace Trident {
 				return hullRadius;
 			}
 
-			inline const sequence<uint32>& getHullLineIndices() const {
-				return hullLineIndices;
+			inline const sequence<uint32>& getHull2DLineIndices() const {
+				return hull2DLineIndices;
+			}
+
+			inline const sequence<HalfEdge>& getHull3DEdges() const {
+				return hull3DEdges;
+			}
+
+			inline const sequence<float32>& getHull3DFaceNormalComponents() const {
+				return hull3DFaceNormalComponents;
+			}
+
+			inline const sequence<uint16>& getHull3DLineIndices() const {
+				return hull3DLineIndices;
 			}
 
 		private:
@@ -144,9 +180,13 @@ namespace Trident {
 			sequence<uint32> vertexPositionIndices;
 			sequence<uint32> vertexNormalIndices;
 			sequence<uint32> vertexTextureCoordinateIndices;
-			Hull2DType hullType;
+			uint8 hullType;
 			svec3<float32> hullCentroid;
 			float32 hullRadius;
-			sequence<uint32> hullLineIndices;
+			sequence<uint32> hull2DLineIndices;
+
+			sequence<HalfEdge> hull3DEdges;
+			sequence<float32> hull3DFaceNormalComponents;
+			sequence<uint16> hull3DLineIndices;
 	};
 }

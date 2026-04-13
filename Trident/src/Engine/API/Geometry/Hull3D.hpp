@@ -12,6 +12,8 @@ namespace Trident {
 		// TODO: Implement.
 		// explicit Hull3D(ref<GeometryAsset> geometryAsset, view<svec3<float32>> vertexPositions, uint32 lineIndexOffset);
 
+		// TODO(physics/runtime-hull-creation): Some hulls may need to be created at runtime (e.g. the player collision hull).
+
 		/// The mean position of all vertices.
 		/// It coincides with the center of mass in uniform mass distribution scenarios.
 		svec3<float32> centroid;
@@ -28,7 +30,7 @@ namespace Trident {
 
 		// TODO: Use 16-bit indices.
 		/// Line indices used for wireframe rendering.
-		range<uint16, uint16> lineIndexRange;
+		range<uint32, uint16> lineIndexRange;
 
 		/// The type of the hull, used in physics optimizations.
 		Hull3DType type;

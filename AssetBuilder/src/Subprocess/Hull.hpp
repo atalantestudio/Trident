@@ -5,11 +5,16 @@
 
 #include "Engine/API/Geometry/Geometry2D.hpp"
 #include "Engine/API/Geometry/Hull2D.hpp"
+#include "Engine/API/Geometry/Hull3D.hpp"
 #include "Engine/API/Geometry/Hull2DType.hpp"
+#include "Engine/API/Geometry/Hull3DType.hpp"
 
 namespace Trident {
 	template<Hull2DType HullType>
 	Hull2D createHull(const Geometry2D& geometry, std::vector<float32>& vertexComponentBuffer, std::vector<uint32>& indexBuffer);
+
+	template<Hull3DType HullType>
+	Hull3D createHull(view<float64> vertexPositionComponents);
 
 	template<>
 	Hull2D createHull<Hull2DType::CIRCLE>(const Geometry2D& geometry, std::vector<float32>& vertexComponentBuffer, std::vector<uint32>& indexBuffer) {
@@ -24,13 +29,14 @@ namespace Trident {
 
 		radius = sqrt(radius);
 
-		return Hull2D({
+		return {
 			.type = Hull2DType::CIRCLE,
 			.centroid = {0.0_m, 0.0_m},
 			.radius = radius,
 			.vertices = {},
 			.lineIndexRange = {static_cast<uint32>(indexBuffer.size()), 0},
-		});
+			.edges = {},
+		};
 	}
 
 	template<>
@@ -72,12 +78,43 @@ namespace Trident {
 
 		radius = sqrt(radius);
 
-		return Hull2D({
+		return {
 			.type = Hull2DType::POLYGON,
 			.centroid = {centroid[0], centroid[1]},
 			.radius = radius,
 			.vertices = vertices,
 			.lineIndexRange = {indexOffset, lineIndexCount},
-		});
+			.edges = {},
+		};
+	}
+
+	template<>
+	Hull3D createHull<Hull3DType::POLYGON>(view<float64> vertexPositionComponents) {
+		const view<svec3<float64>> vertices(pointer_cast<const svec3<float64>*>(&vertexPositionComponents[0]), vertexPositionComponents.count() / 3);
+
+		vec3<float64> centroid = {0.0_m, 0.0_m, 0.0_m};
+		float64 radius = 0.0_m;
+
+		for (const svec3<float64> vertex : vertices) {
+			centroid += vec3<float64>(vertex);
+		}
+
+		centroid /= static_cast<float64>(vertices.count());
+
+		for (const svec3<float64> vertex : vertices) {
+			radius = max(radius, distanceSquared(vec3<float64>(vertex), centroid));
+		}
+
+		radius = sqrt(radius);
+
+		return {
+			.centroid = svec3<float32>(vec3<float32>(centroid)),
+			.radius = static_cast<float32>(radius),
+			.vertexPositions = {},
+			.edges = {},
+			.faceNormals = {},
+			.lineIndexRange = {},
+			.type = Hull3DType::POLYGON,
+		};
 	}
 }

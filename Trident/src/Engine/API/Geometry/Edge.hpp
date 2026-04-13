@@ -18,10 +18,8 @@ namespace Trident {
 		/// The other vertex is the origin vertex of the next edge.
 		uint16 originVertexIndex;
 
-		/// Index of the next half-edge.
-		uint16 nextEdgeIndex;
-
 		/// Index of the face this half-edge is linked to.
+		/// This is the face at the right of the edge.
 		uint16 faceIndex;
 	};
 }

@@ -972,8 +972,8 @@ namespace Trident {
 			RigidBody& rigidBody = stagingRigidBodyMappedRange[rigidBodyIndex];
 			rigidBody.world = rigidBodyComponent.world;
 
-			if (hull.getType() != Hull2DType::POLYGON) {
-				// Make the hull more visible if it doesn't support wireframe visualization.
+			if (hull.type != Hull2DType::POLYGON) {
+				// Make hulls that don't support wireframe visualization more visible.
 				rigidBody.fillColor = Color(0x8b9476ff).value;
 			}
 			else {
@@ -1283,7 +1283,7 @@ namespace Trident {
 				const Hull2D& hull = hulls[geometry.hullIndex];
 
 				// TODO: Restore materials (test colors were 0xf4fedbff and 0xe6ddffff).
-				commandEncoder->drawIndexed(hull.getLineIndexRange().count, 1, hull.getLineIndexRange().offset, 0, entity);
+				commandEncoder->drawIndexed(hull.lineIndexRange.count, 1, hull.lineIndexRange.offset, 0, entity);
 
 				componentIndex += 1;
 			}
@@ -1340,7 +1340,7 @@ namespace Trident {
 				commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0, sizeof(RigidBody));
 				commandEncoder->bindIndexBuffer<uint32>(indexBuffer, scene->getStaticIndexCount() * sizeof(uint32));
 				commandEncoder->bindDescriptorSets(placeholderPipelineLayout, 0, descriptorSets);
-				commandEncoder->drawIndexed(hull.getLineIndexRange().count, 1, hull.getLineIndexRange().offset, 0, selectedEntity);
+				commandEncoder->drawIndexed(hull.lineIndexRange.count, 1, hull.lineIndexRange.offset, 0, selectedEntity);
 			}
 		}
 

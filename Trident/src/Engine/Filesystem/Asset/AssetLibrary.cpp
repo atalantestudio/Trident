@@ -166,7 +166,9 @@ namespace Trident {
 			sceneAssetDescriptor.dynamicVertexTextureCoordinateIndexCount += geometryAsset->getVertexTextureCoordinateIndices().count();
 
 			if (geometryAsset->getFlags() & GeometryAssetFlags::HAS_HULL) {
-				sceneAssetDescriptor.dynamicVertexPositionIndexCount += geometryAsset->getHullLineIndices().count();
+				// TODO: Don't mix triangle and line indices?
+				sceneAssetDescriptor.dynamicVertexPositionIndexCount += geometryAsset->getHull2DLineIndices().count();
+
 				sceneAssetDescriptor.hullCount += 1;
 			}
 		}
@@ -212,6 +214,8 @@ namespace Trident {
 		sceneAssetDescriptor.dynamicVertexTextureCoordinateIndexCount = 0;
 		sceneAssetDescriptor.entityCount = stream.read<uint32>();
 		sceneAssetDescriptor.hullCount = 0;
+		sceneAssetDescriptor.hullEdgeCount = 0;
+		sceneAssetDescriptor.hullFaceCount = 0;
 		sceneAssetDescriptor.staticBuffer = sequence<uint8>(sceneAssetDescriptor.staticVertexCount * sizeof(svec2<float32>) + sceneAssetDescriptor.staticIndexCount * sizeof(uint16));
 
 		const uint32 geometryAssetCount = stream.read<uint32>();
@@ -242,8 +246,10 @@ namespace Trident {
 			sceneAssetDescriptor.dynamicVertexTextureCoordinateIndexCount += geometryAsset->getVertexTextureCoordinateIndices().count();
 
 			if (geometryAsset->getFlags() & GeometryAssetFlags::HAS_HULL) {
-				sceneAssetDescriptor.dynamicVertexPositionIndexCount += geometryAsset->getHullLineIndices().count();
 				sceneAssetDescriptor.hullCount += 1;
+				sceneAssetDescriptor.hullEdgeCount += static_cast<uint32>(geometryAsset->getHull3DEdges().count());
+				sceneAssetDescriptor.hullFaceCount += static_cast<uint32>(geometryAsset->getHull3DFaceNormalComponents().count() / 3);
+				sceneAssetDescriptor.hullLineIndexCount += static_cast<uint32>(geometryAsset->getHull3DLineIndices().count());
 			}
 		}
 

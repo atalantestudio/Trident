@@ -43,23 +43,30 @@ namespace Trident {
 		vertexNormalComponentRange.count = ceil(sceneAsset->getDynamicVertexNormalCount() * sizeof(svec3<float32>), minStorageBufferOffsetAlignment);
 		vertexTextureCoordinateComponentRange.count = ceil(sceneAsset->getDynamicVertexTextureCoordinateCount() * sizeof(svec2<float32>), minStorageBufferOffsetAlignment);
 		triangleTangentComponentRange.count = ceil(sceneAsset->getDynamicTriangleTangentCount() * sizeof(svec3<float32>), minStorageBufferOffsetAlignment);
-		vertexPositionIndexRange.count = ceil(sceneAsset->getDynamicVertexPositionIndexCount() * sizeof(uint32), minStorageBufferOffsetAlignment);
+		vertexPositionIndexRange.count = ceil(sceneAsset->getDynamicVertexPositionIndexCount() * sizeof(uint32) + sceneAsset->getHullLineIndexCount() * sizeof(uint16), minStorageBufferOffsetAlignment);
 		vertexNormalIndexRange.count = ceil(sceneAsset->getDynamicVertexNormalIndexCount() * sizeof(uint32), minStorageBufferOffsetAlignment);
 		vertexTextureCoordinateIndexRange.count = ceil(sceneAsset->getDynamicVertexTextureCoordinateIndexCount() * sizeof(uint32), minStorageBufferOffsetAlignment);
+
+		hullLineIndexCount = sceneAsset->getHullLineIndexCount();
 
 		range<uint64, uint64>* ranges = &vertexPositionComponentRange;
 		uint64 dataBufferSize = ceil(sceneAsset->getStaticVertexCount() * sizeof(svec3<float32>), minStorageBufferOffsetAlignment);
 
 		// Propagate the range offset.
-		while (ranges <= &vertexTextureCoordinateIndexRange) {
+		while (ranges < &vertexTextureCoordinateIndexRange) {
 			ranges[1].offset = ranges[0].offset + ranges[0].count;
 			dataBufferSize += ranges[0].count;
 
 			ranges += 1;
 		}
 
+		dataBufferSize += ranges->count;
+
 		dataBuffer = sequence<uint8>(dataBufferSize);
 		geometries = sequence<Geometry3D>(geometryAssets.count());
+		hulls = sequence<Hull3D>(sceneAsset->getHullCount());
+		hullEdges = sequence<HalfEdge>(sceneAsset->getHullEdgeCount());
+		hullFaceNormalComponents = sequence<float32>(sceneAsset->getHullFaceCount() * 3);
 
 		std::copy(staticBuffer.begin(), staticBuffer.end(), &dataBuffer[0]);
 
@@ -113,6 +120,7 @@ namespace Trident {
 			byteOffset += vertexPositionIndices.count() * sizeof(uint32);
 		}
 
+		hullLineIndexByteOffset = byteOffset;
 		byteOffset = vertexNormalIndexRange.offset;
 
 		for (const ref<GeometryAsset>& geometryAsset : geometryAssets) {
@@ -143,6 +151,10 @@ namespace Trident {
 		range<uint32, uint32> geometryVertexTextureCoordinateIndexRange = {0, 0};
 
 		uint32 geometryIndex = 0;
+		uint32 hullIndex = 0;
+		uint32 hullEdgeOffset = 0;
+		uint32 hullFaceOffset = 0;
+		uint32 hullLineIndexOffset = 0;
 
 		while (geometryIndex < geometries.count()) {
 			const ref<GeometryAsset> geometryAsset = geometryAssets[geometryIndex];
@@ -165,6 +177,34 @@ namespace Trident {
 				.vertexNormalIndexOffset = geometryVertexNormalIndexRange.offset,
 				.vertexTextureCoordinateIndexOffset = geometryVertexTextureCoordinateIndexRange.offset,
 			});
+
+			if (geometryAsset->getFlags() & GeometryAssetFlags::HAS_HULL) {
+				geometries[geometryIndex].hullIndex = hullIndex;
+
+				std::copy(geometryAsset->getHull3DEdges().begin(), geometryAsset->getHull3DEdges().end(), &hullEdges[hullEdgeOffset]);
+				std::copy(geometryAsset->getHull3DFaceNormalComponents().begin(), geometryAsset->getHull3DFaceNormalComponents().end(), &hullFaceNormalComponents[hullFaceOffset]);
+				std::copy(geometryAsset->getHull3DLineIndices().begin(), geometryAsset->getHull3DLineIndices().end(), pointer_cast<uint16*>(&dataBuffer[hullLineIndexByteOffset + hullLineIndexOffset * sizeof(uint16)]));
+
+				const view<svec3<float32>> vertexPositions(pointer_cast<const svec3<float32>*>(&dataBuffer[geometryVertexPositionComponentRange.offset * sizeof(float32)]), geometryVertexPositionComponentRange.count / 3);
+				const view<HalfEdge> edges(&hullEdges[hullEdgeOffset], geometryAsset->getHull3DEdges().count());
+				const view<svec3<float32>> faceNormals(pointer_cast<const svec3<float32>*>(&hullFaceNormalComponents[hullFaceOffset]), geometryAsset->getHull3DFaceNormalComponents().count() / 3);
+				const range<uint32, uint16> lineIndexRange = {hullLineIndexOffset, static_cast<uint16>(geometryAsset->getHull3DLineIndices().count())};
+
+				hulls[hullIndex] = {
+					.centroid = geometryAsset->getHullCentroid(),
+					.radius = geometryAsset->getHullRadius(),
+					.vertexPositions = vertexPositions,
+					.edges = edges,
+					.faceNormals = faceNormals,
+					.lineIndexRange = lineIndexRange,
+					.type = static_cast<Hull3DType>(geometryAsset->getHullType()),
+				};
+
+				hullIndex += 1;
+				hullEdgeOffset += static_cast<uint32>(geometryAsset->getHull3DEdges().count());
+				hullFaceOffset += static_cast<uint32>(geometryAsset->getHull3DFaceNormalComponents().count() / 3);
+				hullLineIndexOffset += lineIndexRange.count;
+			}
 
 			geometryVertexPositionComponentRange.offset += geometryVertexPositionComponentRange.count;
 			geometryVertexNormalComponentRange.offset += geometryVertexNormalComponentRange.count;

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Geometry/Geometry3D.hpp"
+#include "Engine/API/Geometry/Hull3D.hpp"
 #include "Engine/API/Material/Material.hpp"
 #include "Engine/API/Material/Shader.hpp"
 #include "Engine/API/Scene/Scene.hpp"
@@ -42,8 +43,20 @@ namespace Trident {
 				return vertexTextureCoordinateIndexRange;
 			}
 
+			inline uint32 getHullLineIndexCount() const {
+				return hullLineIndexCount;
+			}
+
+			inline uint64 getHullLineIndexByteOffset() const {
+				return hullLineIndexByteOffset;
+			}
+
 			inline const sequence<Geometry3D>& getGeometries() const {
 				return geometries;
+			}
+
+			inline const sequence<Hull3D>& getHulls() const {
+				return hulls;
 			}
 
 			inline const std::vector<Shader>& getMaterialShaders() const {
@@ -99,9 +112,13 @@ namespace Trident {
 			range<uint64, uint64> vertexNormalIndexRange;
 			range<uint64, uint64> vertexTextureCoordinateIndexRange;
 
-			sequence<Geometry3D> geometries;
+			uint32 hullLineIndexCount;
+			uint64 hullLineIndexByteOffset;
 
-			// TODO: Implement 3D hulls.
+			sequence<Geometry3D> geometries;
+			sequence<Hull3D> hulls;
+			sequence<HalfEdge> hullEdges;
+			sequence<float32> hullFaceNormalComponents;
 
 			std::vector<Shader> materialShaders;
 			std::vector<std::vector<Material>> materials;

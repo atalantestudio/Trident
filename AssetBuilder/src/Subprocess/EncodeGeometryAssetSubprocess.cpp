@@ -339,6 +339,11 @@ namespace Trident {
 			.vertexPositionIndices = vertexPositionIndices,
 			.vertexNormalIndices = vertexNormalIndices,
 			.vertexTextureCoordinateIndices = vertexTextureCoordinateIndices,
+			.flags = {},
+			.hullLineIndices = {},
+			.hullFaceNormalComponents = {},
+			.hullEdges = {},
+			.hull = {},
 		};
 	}
 }

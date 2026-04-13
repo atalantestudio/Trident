@@ -150,12 +150,12 @@ namespace Trident {
 			const Hull2D& hullA = getHull(entityPair.A);
 			const Hull2D& hullB = getHull(entityPair.B);
 
-			Hull2DType typeA = hullA.getType();
-			Hull2DType typeB = hullB.getType();
+			Hull2DType typeA = hullA.type;
+			Hull2DType typeB = hullB.type;
 
 			if (typeA > typeB) {
-				typeA = hullB.getType();
-				typeB = hullA.getType();
+				typeA = hullB.type;
+				typeB = hullA.type;
 			}
 
 			if (!COLLIDER_2D_TABLE[static_cast<uint32>(typeA)][static_cast<uint32>(typeB)](rigidBodyA, rigidBodyB, hullA, hullB, &entityContactPair.contactManifold)) {
@@ -459,7 +459,7 @@ namespace Trident {
 			rigidBody2DComponent.position += rigidBody2DComponent.linearVelocity * deltaTime;
 			rigidBody2DComponent.rotation += rigidBody2DComponent.angularVelocity * deltaTime;
 
-			rigidBody2DComponent.updateWorld(hull.getCentroid());
+			rigidBody2DComponent.updateWorld(hull.centroid);
 
 			// TODO
 			// rigidBody2DComponent.linearVelocity += (rigidBody2DComponent.force * rigidBody2DComponent.inverseMass + vec2<float32>(0.0f, G)) * halfDeltaTime;

@@ -35,7 +35,12 @@ namespace Trident {
 		uint64 staticIndexCount;
 		uint64 dynamicVertexPositionCount;
 		uint64 dynamicVertexTextureCoordinateCount;
+
+		// NOTE
+		// In 2D, contains the line indices of the hulls.
+		// For the line indices of the hulls in a 3D scene, see Descriptor<Scene3DAsset>::hullLineIndexCount.
 		uint64 dynamicVertexPositionIndexCount;
+
 		uint64 dynamicVertexTextureCoordinateIndexCount;
 		uint32 entityCount;
 		uint32 hullCount;
@@ -55,6 +60,9 @@ namespace Trident {
 		uint64 dynamicVertexNormalCount;
 		uint64 dynamicTriangleTangentCount;
 		uint64 dynamicVertexNormalIndexCount;
+		uint32 hullEdgeCount;
+		uint32 hullFaceCount;
+		uint32 hullLineIndexCount;
 		sequence<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;
 	};
 
@@ -161,6 +169,9 @@ namespace Trident {
 				dynamicVertexNormalCount(descriptor.dynamicVertexNormalCount),
 				dynamicTriangleTangentCount(descriptor.dynamicTriangleTangentCount),
 				dynamicVertexNormalIndexCount(descriptor.dynamicVertexNormalIndexCount),
+				hullEdgeCount(descriptor.hullEdgeCount),
+				hullFaceCount(descriptor.hullFaceCount),
+				hullLineIndexCount(descriptor.hullLineIndexCount),
 				rigidBodyMappings(descriptor.rigidBodyMappings)
 			{}
 
@@ -176,6 +187,18 @@ namespace Trident {
 				return dynamicVertexNormalIndexCount;
 			}
 
+			inline uint32 getHullEdgeCount() const {
+				return hullEdgeCount;
+			}
+
+			inline uint32 getHullFaceCount() const {
+				return hullFaceCount;
+			}
+
+			inline uint32 getHullLineIndexCount() const {
+				return hullLineIndexCount;
+			}
+
 			inline const sequence<EntityComponentMapping<RigidBody3DComponent>>& getRigidBodyMappings() const {
 				return rigidBodyMappings;
 			}
@@ -184,6 +207,9 @@ namespace Trident {
 			uint64 dynamicVertexNormalCount;
 			uint64 dynamicTriangleTangentCount;
 			uint64 dynamicVertexNormalIndexCount;
+			uint32 hullEdgeCount;
+			uint32 hullFaceCount;
+			uint32 hullLineIndexCount;
 			sequence<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;
 	};
 }

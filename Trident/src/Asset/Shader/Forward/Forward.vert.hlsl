@@ -3,7 +3,7 @@
 
 struct VertexInput {
 	uint vertexIndex : SV_VertexID;
-	float4x4 transform : VERTEX_INPUT_ATTRIBUTE0;
+	float4x4 world : VERTEX_INPUT_ATTRIBUTE0;
 	float3x3 normal : VERTEX_INPUT_ATTRIBUTE4;
 };
 
@@ -42,7 +42,7 @@ VertexOutput main(VertexInput input) {
 	float2 textureCoordinate = asfloat(vertexTextureCoordinateComponentBuffer.Load2(textureCoordinateIndex * 8));
 	float3 tangent = asfloat(triangleTangentComponentBuffer.Load3(triangleIndex * 12));
 
-	float4 surface = mul(input.transform, float4(position, 1.0));
+	float4 surface = mul(input.world, float4(position, 1.0));
 
 	float3 N = normalize(mul(input.normal, normal));
 	float3 T = normalize(mul(input.normal, tangent));

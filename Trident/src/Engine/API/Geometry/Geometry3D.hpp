@@ -23,7 +23,7 @@ namespace Trident {
 		uint32 vertexTextureCoordinateIndexOffset;
 	};
 
-	class Geometry3D {
+	class Geometry3D : public Geometry {
 		public:
 			explicit Geometry3D() = default;
 

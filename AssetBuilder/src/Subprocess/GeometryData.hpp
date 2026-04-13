@@ -5,6 +5,7 @@
 
 #include "Engine/API/Geometry/Geometry2D.hpp"
 #include "Engine/API/Geometry/Hull2D.hpp"
+#include "Engine/API/Geometry/Hull3D.hpp"
 
 namespace Trident {
 	struct Geometry2DData {
@@ -23,7 +24,10 @@ namespace Trident {
 		sequence<uint32> vertexNormalIndices;
 		sequence<uint32> vertexTextureCoordinateIndices;
 
-		// TODO
-		// Hull3D hull;
+		GeometryAssetFlags flags;
+		sequence<uint16> hullLineIndices;
+		sequence<float32> hullFaceNormalComponents;
+		sequence<HalfEdge> hullEdges;
+		Hull3D hull;
 	};
 }

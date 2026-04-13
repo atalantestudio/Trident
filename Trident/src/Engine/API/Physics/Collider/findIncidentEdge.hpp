@@ -18,14 +18,16 @@ namespace Trident {
 		ClipFeature2D incidentEdge{};
 		incidentEdge.vertexCount = 2;
 
+		const uint16 edgeCount = static_cast<uint16>(incidentHull.edges.count());
+
 		float32 minAngle = max<float32>();
 		uint32 incidentEdgeIndex = 0;
 		uint32 edgeIndex = 0;
 
-		while (edgeIndex < incidentHull.getEdges().count()) {
-			const Edge edge = incidentHull.getEdges()[edgeIndex];
-			const vec2<float32> a = incidentHull.getVertices()[edge.indexA];
-			const vec2<float32> b = incidentHull.getVertices()[edge.indexB];
+		while (edgeIndex < edgeCount) {
+			const Edge edge = incidentHull.edges[edgeIndex];
+			const vec2<float32> a = incidentHull.vertices[edge.indexA];
+			const vec2<float32> b = incidentHull.vertices[edge.indexB];
 			const vec2<float32> d = perpendicularLeft(b - a);
 			const float32 angle = dot(referenceEdgeNormal, d);
 
@@ -43,12 +45,12 @@ namespace Trident {
 		}
 
 		incidentEdge.edge[0].position = multiplyTransform(incidentEdge.edge[0].position, incidentBody.world);
-		incidentEdge.edge[0].id.incidentEdge0Index = (incidentEdgeIndex + 1) % static_cast<uint16>(incidentHull.getEdges().count());
+		incidentEdge.edge[0].id.incidentEdge0Index = (incidentEdgeIndex + 1) % edgeCount;
 		incidentEdge.edge[0].id.incidentEdge1Index = incidentEdgeIndex;
 
 		incidentEdge.edge[1].position = multiplyTransform(incidentEdge.edge[1].position, incidentBody.world);
 		incidentEdge.edge[1].id.incidentEdge0Index = incidentEdgeIndex;
-		incidentEdge.edge[1].id.incidentEdge1Index = static_cast<sint32>(incidentEdgeIndex - 1) % static_cast<uint16>(incidentHull.getEdges().count());
+		incidentEdge.edge[1].id.incidentEdge1Index = static_cast<sint32>(incidentEdgeIndex - 1) % edgeCount;
 
 		return incidentEdge;
 	}

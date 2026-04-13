@@ -18,18 +18,18 @@ namespace Trident {
 
 		const mat2x2<float32> referenceInverseRotation = mat2x2<float32>::rotation(-satOutput.referenceBody->rotation);
 
-		const Edge referenceEdge = satOutput.referenceHull->getEdges()[satOutput.referenceEdgeIndex];
-		const float32 referenceEdgeDistance = abs(signedDistanceLinePoint(vec2<float32>(satOutput.referenceHull->getVertices()[referenceEdge.indexA]) * satOutput.referenceBody->scale, vec2<float32>(satOutput.referenceHull->getVertices()[referenceEdge.indexB]) * satOutput.referenceBody->scale, {0.0f, 0.0f}));
+		const Edge referenceEdge = satOutput.referenceHull->edges[satOutput.referenceEdgeIndex];
+		const float32 referenceEdgeDistance = abs(signedDistanceLinePoint(vec2<float32>(satOutput.referenceHull->vertices[referenceEdge.indexA]) * satOutput.referenceBody->scale, vec2<float32>(satOutput.referenceHull->vertices[referenceEdge.indexB]) * satOutput.referenceBody->scale, {0.0f, 0.0f}));
 
-		const uint32 referenceLeftEdgeIndex = (static_cast<sint32>(satOutput.referenceEdgeIndex) - 1) % satOutput.referenceHull->getEdges().count();
-		const Edge referenceLeftEdge = satOutput.referenceHull->getEdges()[referenceLeftEdgeIndex];
-		const vec2<float32> referenceLeftEdgeNormal = edgeNormalClockwise(satOutput.referenceHull->getVertices()[referenceLeftEdge.indexA], satOutput.referenceHull->getVertices()[referenceLeftEdge.indexB]) * referenceInverseRotation;
-		const float32 referenceLeftEdgeDistance = abs(signedDistanceLinePoint(vec2<float32>(satOutput.referenceHull->getVertices()[referenceLeftEdge.indexA]) * satOutput.referenceBody->scale, vec2<float32>(satOutput.referenceHull->getVertices()[referenceLeftEdge.indexB]) * satOutput.referenceBody->scale, {0.0f, 0.0f}));
+		const uint32 referenceLeftEdgeIndex = (static_cast<sint32>(satOutput.referenceEdgeIndex) - 1) % satOutput.referenceHull->edges.count();
+		const Edge referenceLeftEdge = satOutput.referenceHull->edges[referenceLeftEdgeIndex];
+		const vec2<float32> referenceLeftEdgeNormal = edgeNormalClockwise(satOutput.referenceHull->vertices[referenceLeftEdge.indexA], satOutput.referenceHull->vertices[referenceLeftEdge.indexB]) * referenceInverseRotation;
+		const float32 referenceLeftEdgeDistance = abs(signedDistanceLinePoint(vec2<float32>(satOutput.referenceHull->vertices[referenceLeftEdge.indexA]) * satOutput.referenceBody->scale, vec2<float32>(satOutput.referenceHull->vertices[referenceLeftEdge.indexB]) * satOutput.referenceBody->scale, {0.0f, 0.0f}));
 
-		const uint32 referenceRightEdgeIndex = (satOutput.referenceEdgeIndex + 1) % satOutput.referenceHull->getEdges().count();
-		const Edge referenceRightEdge = satOutput.referenceHull->getEdges()[referenceRightEdgeIndex];
-		const vec2<float32> referenceRightEdgeNormal = edgeNormalClockwise(satOutput.referenceHull->getVertices()[referenceRightEdge.indexA], satOutput.referenceHull->getVertices()[referenceRightEdge.indexB]) * referenceInverseRotation;
-		const float32 referenceRightEdgeDistance = abs(signedDistanceLinePoint(vec2<float32>(satOutput.referenceHull->getVertices()[referenceRightEdge.indexA]) * satOutput.referenceBody->scale, vec2<float32>(satOutput.referenceHull->getVertices()[referenceRightEdge.indexB]) * satOutput.referenceBody->scale, {0.0f, 0.0f}));
+		const uint32 referenceRightEdgeIndex = (satOutput.referenceEdgeIndex + 1) % satOutput.referenceHull->edges.count();
+		const Edge referenceRightEdge = satOutput.referenceHull->edges[referenceRightEdgeIndex];
+		const vec2<float32> referenceRightEdgeNormal = edgeNormalClockwise(satOutput.referenceHull->vertices[referenceRightEdge.indexA], satOutput.referenceHull->vertices[referenceRightEdge.indexB]) * referenceInverseRotation;
+		const float32 referenceRightEdgeDistance = abs(signedDistanceLinePoint(vec2<float32>(satOutput.referenceHull->vertices[referenceRightEdge.indexA]) * satOutput.referenceBody->scale, vec2<float32>(satOutput.referenceHull->vertices[referenceRightEdge.indexB]) * satOutput.referenceBody->scale, {0.0f, 0.0f}));
 
 		ClipFeature2D incidentEdge = findIncidentEdge(*satOutput.incidentBody, *satOutput.incidentHull, satOutput.normal * mat2x2<float32>::rotation(satOutput.incidentBody->rotation));
 		float32 offset;

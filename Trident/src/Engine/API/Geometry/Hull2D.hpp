@@ -3,76 +3,31 @@
 
 #pragma once
 
-#include "Engine/API/Descriptor.hpp"
 #include "Engine/API/Geometry/Edge.hpp"
-#include "Engine/API/Geometry/Hull2DEdge.hpp"
 #include "Engine/API/Geometry/Hull2DType.hpp"
 
 namespace Trident {
-	class Hull2D;
-	class GeometryAsset;
+	/// A convex hull wrapping a 2D geometry.
+	struct Hull2D {
+		private:
+			// Point hulls need to have 1 vertex for GJK to work.
+			inline static const sequence<svec2<float32>> pointHullVertices = {{0.0f, 0.0f}};
 
-	template<>
-	struct Descriptor<Hull2D> {
-		Hull2DType type;
-		svec2<float32> centroid;
-		float32 radius;
-
-		// TODO(hull/vertex-duplication)
-		// Circle, sphere and capsule hulls don't need vertices and convex hulls use a subset of the geometry's vertices.
-		// However polygon hulls may have vertices that don't appear on the geometry (e.g. an AABB hull wrapping a cylinder geometry such as a glass).
-		view<svec2<float32>> vertices;
-
-		range<uint32, uint32> lineIndexRange;
-	};
-
-	class Hull2D {
 		public:
 			/// Creates and returns a point hull.
 			/// When coupled with a rigid body, point hulls can represent the position of a 2D point (e.g. the pointer's position).
-			static Hull2D point();
+			inline static Hull2D point() {
+				return {
+					.type = Hull2DType::POINT,
+					.centroid = {0.0_m, 0.0_m},
+					.radius = 0.0_m,
+					.vertices = pointHullVertices,
+					.lineIndexRange = {0, 0},
+					.edges = {},
+				};
+			}
 
 		public:
-			explicit Hull2D() = default;
-
-			// TODO: Only used by the asset builder.
-			explicit Hull2D(const Descriptor<Hull2D>& descriptor);
-
-			explicit Hull2D(ref<GeometryAsset> geometryAsset, view<svec2<float32>> vertices, uint32 lineIndexOffset);
-
-			inline Hull2DType getType() const {
-				return type;
-			}
-
-			inline svec2<float32> getCentroid() const {
-				return centroid;
-			}
-
-			inline float32 getRadius() const {
-				return radius;
-			}
-
-			inline view<svec2<float32>> getVertices() const {
-				return vertices;
-			}
-
-			inline range<uint32, uint32> getLineIndexRange() const {
-				return lineIndexRange;
-			}
-
-			inline const sequence<Edge>& getEdges() const {
-				return edges;
-			}
-
-			inline Hull2DEdge getEdge(uint32 index) const {
-				Hull2DEdge edge{};
-				edge.a = vertices[edges[index].indexA];
-				edge.b = vertices[edges[index].indexB];
-				edge.normal = edgeNormalClockwise(edge.a, edge.b);
-
-				return edge;
-			}
-
 			inline float32 getPenetrationBias() const {
 				static constexpr float32 PENETRATION_BIASES[static_cast<uint32>(Hull2DType::count)] = {
 					0.0f,
@@ -147,13 +102,13 @@ namespace Trident {
 				}
 			}
 
-		private:
+		public:
 			Hull2DType type;
 
 			/// Average of all vertices.
 			svec2<float32> centroid;
 
-			/// THe distance between the centroid and the farthest vertex.
+			/// The distance between the centroid and the farthest vertex.
 			float32 radius;
 
 			// Vertex positions on the parent geometry.

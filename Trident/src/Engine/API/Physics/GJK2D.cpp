@@ -151,16 +151,16 @@ namespace Trident {
 	GJK2DOutput GJK2D(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB) {
 		constexpr uint8 GJK_2D_ITERATION_LIMIT = 8;
 
-		DEBUG_ASSERT(hullA.getVertices().count() < max<uint8>());
-		DEBUG_ASSERT(hullB.getVertices().count() < max<uint8>());
+		DEBUG_ASSERT(hullA.vertices.count() < max<uint8>());
+		DEBUG_ASSERT(hullB.vertices.count() < max<uint8>());
 
 		vec2<float32> d = B.position - A.position;
 
 		Simplex2Vertex vertex;
 		vertex.iA = 0;
 		vertex.iB = 0;
-		vertex.vA = multiplyTransform(vec2<float32>(hullA.getVertices()[vertex.iA]), A.world);
-		vertex.vB = multiplyTransform(vec2<float32>(hullB.getVertices()[vertex.iB]), B.world);
+		vertex.vA = multiplyTransform(vec2<float32>(hullA.vertices[vertex.iA]), A.world);
+		vertex.vB = multiplyTransform(vec2<float32>(hullB.vertices[vertex.iB]), B.world);
 		vertex.v = vertex.vB - vertex.vA;
 
 		Simplex2 s = {vertex};
@@ -254,8 +254,8 @@ namespace Trident {
 				break;
 			}
 
-			vertex.vA = multiplyTransform(vec2<float32>(hullA.getVertices()[vertex.iA]), A.world);
-			vertex.vB = multiplyTransform(vec2<float32>(hullB.getVertices()[vertex.iB]), B.world);
+			vertex.vA = multiplyTransform(vec2<float32>(hullA.vertices[vertex.iA]), A.world);
+			vertex.vB = multiplyTransform(vec2<float32>(hullB.vertices[vertex.iB]), B.world);
 			vertex.v = vertex.vB - vertex.vA;
 
 			s[s.count] = vertex;

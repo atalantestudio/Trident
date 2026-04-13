@@ -181,7 +181,7 @@ namespace Trident {
 
 		RigidBody2DComponent mouseRigidBodyComponent{};
 		mouseRigidBodyComponent.position = svec2<float32>(renderer.cameraPosition + mousePosition);
-		mouseRigidBodyComponent.updateWorld(mouseHull.getCentroid());
+		mouseRigidBodyComponent.updateWorld(mouseHull.centroid);
 
 		sint32 componentIndex = static_cast<sint32>(rigidBodyComponentPool.componentCount) - 1;
 
@@ -276,7 +276,7 @@ namespace Trident {
 
 			RigidBody2DComponent& rigidBody = scene->ecs.getComponent<RigidBody2DComponent>(selectedEntity);
 			rigidBody.position += placeholderOffset;
-			rigidBody.updateWorld(hull.getCentroid());
+			rigidBody.updateWorld(hull.centroid);
 
 			selectedEntity = max<Entity>();
 		}

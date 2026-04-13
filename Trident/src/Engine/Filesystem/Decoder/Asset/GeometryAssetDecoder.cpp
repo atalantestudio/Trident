@@ -30,7 +30,7 @@ namespace Trident {
 		stream.jump(descriptor.vertexPositionIndices.count() * sizeof(uint32));
 
 		if (descriptor.flags & GeometryAssetFlags::HAS_HULL) {
-			descriptor.hullType = static_cast<Hull2DType>(stream.read<uint32>());
+			descriptor.hullType = static_cast<uint8>(stream.read<uint32>());
 
 			stream.jump(sizeof(uint32));
 
@@ -38,11 +38,11 @@ namespace Trident {
 
 			descriptor.hullCentroid = {centroid[0], centroid[1], 0.0f};
 			descriptor.hullRadius = stream.read<float32>();
-			descriptor.hullLineIndices = sequence<uint32>(stream.read<uint32>());
+			descriptor.hull2DLineIndices = sequence<uint32>(stream.read<uint32>());
 
-			std::copy_n(pointer_cast<const uint32*>(stream.getBytePosition()), descriptor.hullLineIndices.count(), &descriptor.hullLineIndices[0]);
+			std::copy_n(pointer_cast<const uint32*>(stream.getBytePosition()), descriptor.hull2DLineIndices.count(), &descriptor.hull2DLineIndices[0]);
 
-			stream.jump(descriptor.hullLineIndices.count() * sizeof(uint32));
+			stream.jump(descriptor.hull2DLineIndices.count() * sizeof(uint32));
 		}
 	}
 
@@ -80,8 +80,9 @@ namespace Trident {
 		const uint8 vertexPositionIndexBitCount = countBits(vertexPositionCount - 1);
 		const uint8 vertexNormalIndexBitCount = countBits(vertexNormalCount - 1);
 		const uint8 vertexTextureCoordinateIndexBitCount = countBits(vertexTextureCoordinateCount - 1);
+		const uint64 totalIndexByteCount = static_cast<uint64>(ceil(indexCount * (vertexPositionIndexBitCount + vertexNormalIndexBitCount + vertexTextureCoordinateIndexBitCount) / 8.0f));
 
-		BitStream<StreamOperation::READ> bitStream(stream.getBytePosition(), stream.getRemainingSize(), Endianness::LITTLE_ENDIAN);
+		BitStream<StreamOperation::READ> bitStream(stream.getBytePosition(), totalIndexByteCount, Endianness::LITTLE_ENDIAN);
 
 		uint32 indexOffset = 0;
 
@@ -105,6 +106,31 @@ namespace Trident {
 			descriptor.vertexTextureCoordinateIndices[indexOffset] = bitStream.read<uint32>(vertexTextureCoordinateIndexBitCount);
 
 			indexOffset += 1;
+		}
+
+		if (descriptor.flags & GeometryAssetFlags::HAS_HULL) {
+			stream.jump(totalIndexByteCount);
+
+			descriptor.hullCentroid = stream.read<svec3<float32>>();
+			descriptor.hullRadius = stream.read<float32>();
+			descriptor.hull3DEdges = sequence<HalfEdge>(stream.read<uint16>());
+			descriptor.hull3DFaceNormalComponents = sequence<float32>(stream.read<uint16>() * 3);
+			descriptor.hull3DLineIndices = sequence<uint16>(stream.read<uint16>());
+			descriptor.hullType = stream.read<uint8>();
+
+			stream.jump(sizeof(uint8));
+
+			for (HalfEdge& edge : descriptor.hull3DEdges) {
+				edge = stream.read<HalfEdge>();
+			}
+
+			for (float32& faceNormalComponent : descriptor.hull3DFaceNormalComponents) {
+				faceNormalComponent = stream.read<float32>();
+			}
+
+			for (uint16& lineIndex : descriptor.hull3DLineIndices) {
+				lineIndex = stream.read<uint16>();
+			}
 		}
 	}
 

@@ -11,17 +11,20 @@ namespace Trident {
 
 		uint32 edgeIndex = 0;
 
-		while (edgeIndex < referenceHull.getEdges().count()) {
-			const Hull2DEdge edge = referenceHull.getEdge(edgeIndex);
-			const vec2<float32> s = incidentHull.support(-edge.normal * R);
-			const vec2<float32> aT = multiplyTransform(edge.a, referenceBody.world);
-			const vec2<float32> bT = multiplyTransform(edge.b, referenceBody.world);
+		while (edgeIndex < referenceHull.edges.count()) {
+			const Edge edge = referenceHull.edges[edgeIndex];
+			const vec2<float32> a = referenceHull.vertices[edge.indexA];
+			const vec2<float32> b = referenceHull.vertices[edge.indexB];
+			const vec2<float32> d = edgeNormalClockwise(a, b);
+			const vec2<float32> s = incidentHull.support(-d * R);
+			const vec2<float32> aT = multiplyTransform(a, referenceBody.world);
+			const vec2<float32> bT = multiplyTransform(b, referenceBody.world);
 			const vec2<float32> sT = multiplyTransform(s, incidentBody.world);
 			const float32 separation = signedDistanceLinePoint(aT, bT, sT);
 
 			if (separation > output.separation) {
 				output.separation = separation;
-				output.normal = edge.normal;
+				output.normal = d;
 				output.referenceEdgeIndex = edgeIndex;
 				output.referenceEdge.edge[0] = aT;
 				output.referenceEdge.edge[1] = bT;
