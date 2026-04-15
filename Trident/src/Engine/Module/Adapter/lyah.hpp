@@ -396,11 +396,28 @@ namespace Trident {
 		return {r[0], r[1], r[2]};
 	}
 
-	inline float32 signedDistanceLinePoint(const vec2<float32>& a, const vec2<float32>& b, const vec2<float32>& p) {
+	/// Calculates and returns the signed distance between a point and an infinite line represented by two points.
+	inline float32 signedDistanceLPAB(vec2<float32> a, vec2<float32> b, vec2<float32> p) {
 		const vec2<float32> ab = b - a;
 		const vec2<float32> ap = p - a;
 
 		return parallelogramArea(ab, ap) / length(ab);
+	}
+
+	/// Calculates and returns the signed distance between a point and an infinite line represented by a normal and a scalar offset.
+	inline float32 signedDistanceLP(vec2<float32> normal, float32 offset, vec2<float32> point) {
+		return dot(point, normal) - offset;
+	}
+
+	/// Calculates and returns the signed distance between a point and an infinite line represented by a normal and a vector offset.
+	/// NOTE: Prefer using the overload with a scalar offset instead, if possible.
+	inline float32 signedDistanceLP(vec2<float32> normal, vec2<float32> offset, vec2<float32> point) {
+		return dot(normal, point - offset);
+	}
+
+	/// Calculates and returns the signed distance between a point and an infinite plane represented by a normal and an offset.
+	inline float32 signedDistanceFP(vec3<float32> normal, vec3<float32> offset, vec3<float32> point) {
+		return dot(normal, point - offset);
 	}
 
 	inline vec2<float32> edgeNormalClockwise(const vec2<float32>& a, const vec2<float32>& b) {

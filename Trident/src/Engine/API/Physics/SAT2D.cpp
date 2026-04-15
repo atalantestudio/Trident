@@ -6,10 +6,6 @@
 #include "Engine/API/Physics/SAT2D.hpp"
 
 namespace Trident {
-	inline float32 signedDistanceEdgePoint(vec2<float32> normal, vec2<float32> offset, vec2<float32> p) {
-		return dot(normal, p - offset);
-	}
-
 	static void queryEdgeDirections(const RigidBody2DComponent& referenceBody, const RigidBody2DComponent& incidentBody, const Hull2D& referenceHull, const Hull2D& incidentHull, SAT2DOutput& output) {
 		// Relative rotation between A and B.
 		const mat2x2<float32> R = mat2x2<float32>::rotation(incidentBody.rotation - referenceBody.rotation);
@@ -27,10 +23,13 @@ namespace Trident {
 			const vec2<float32> s = incidentHull.support(-d * R);
 			const vec2<float32> sT = multiplyTransform(s, incidentBody.world);
 
-			const float32 edgeDistance = abs(signedDistanceLinePoint(a, b, referenceHull.centroid));
+			// NOTE
+			// The centroid is not involved in calculating the edge distance
+			// because it is applied when multiplying by the world matrix.
+			const float32 edgeDistance = abs(signedDistanceLPAB(a, b, {0.0f, 0.0f}));
 			const vec2<float32> offset = multiplyTransform(edgeDistance * d, referenceBody.world);
 
-			const float32 separation = signedDistanceEdgePoint(d * RA, offset, sT);
+			const float32 separation = signedDistanceLP(d * RA, offset, sT);
 
 			if (separation > output.separation) {
 				output.separation = separation;

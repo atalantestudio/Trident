@@ -18,7 +18,8 @@ namespace Trident {
 		}
 
 		const vec2<float32> referenceCentroid = sat.referenceHull->centroid;
-		const mat2x2<float32> referenceInverseRotation = mat2x2<float32>::rotation(-sat.referenceBody->rotation);
+		const mat2x2<float32> referenceRotation = mat2x2<float32>::rotation(-sat.referenceBody->rotation);
+		const mat2x2<float32> incidentInverseRotation = mat2x2<float32>::rotation(sat.incidentBody->rotation);
 
 		const uint32 referenceLeftEdgeIndex = (static_cast<sint32>(sat.referenceEdgeIndex) - 1) % sat.referenceHull->edges.count();
 		const uint32 referenceRightEdgeIndex = (sat.referenceEdgeIndex + 1) % sat.referenceHull->edges.count();
@@ -34,26 +35,26 @@ namespace Trident {
 		const vec2<float32> referenceRightEdgeA = sat.referenceHull->vertices[referenceRightEdge.indexA];
 		const vec2<float32> referenceRightEdgeB = sat.referenceHull->vertices[referenceRightEdge.indexB];
 
-		const vec2<float32> referenceLeftEdgeNormal = edgeNormalClockwise(referenceLeftEdgeA, referenceLeftEdgeB) * referenceInverseRotation;
-		const vec2<float32> referenceRightEdgeNormal = edgeNormalClockwise(referenceRightEdgeA, referenceRightEdgeB) * referenceInverseRotation;
+		const vec2<float32> referenceLeftEdgeNormal = edgeNormalClockwise(referenceLeftEdgeA, referenceLeftEdgeB) * referenceRotation;
+		const vec2<float32> referenceRightEdgeNormal = edgeNormalClockwise(referenceRightEdgeA, referenceRightEdgeB) * referenceRotation;
 
-		const float32 referenceEdgeDistance = abs(signedDistanceLinePoint(
+		const float32 referenceEdgeDistance = abs(signedDistanceLPAB(
 			referenceEdgeA * sat.referenceBody->scale,
 			referenceEdgeB * sat.referenceBody->scale,
 			referenceCentroid
 		));
-		const float32 referenceLeftEdgeDistance = abs(signedDistanceLinePoint(
+		const float32 referenceLeftEdgeDistance = abs(signedDistanceLPAB(
 			referenceLeftEdgeA * sat.referenceBody->scale,
 			referenceLeftEdgeB * sat.referenceBody->scale,
 			referenceCentroid
 		));
-		const float32 referenceRightEdgeDistance = abs(signedDistanceLinePoint(
+		const float32 referenceRightEdgeDistance = abs(signedDistanceLPAB(
 			referenceRightEdgeA * sat.referenceBody->scale,
 			referenceRightEdgeB * sat.referenceBody->scale,
 			referenceCentroid
 		));
 
-		ClipFeature2D incidentEdge = findIncidentEdge(*sat.incidentBody, *sat.incidentHull, sat.normal * mat2x2<float32>::rotation(sat.incidentBody->rotation));
+		ClipFeature2D incidentEdge = findIncidentEdge(*sat.incidentBody, *sat.incidentHull, sat.normal * incidentInverseRotation);
 		Plane2D plane;
 
 		// Clip against reference left edge.

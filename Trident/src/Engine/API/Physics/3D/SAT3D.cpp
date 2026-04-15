@@ -6,10 +6,6 @@
 #include "Engine/API/Physics/3D/SAT3D.hpp"
 
 namespace Trident {
-	inline static float32 signedDistanceFacePoint(vec3<float32> normal, vec3<float32> offset, vec3<float32> p) {
-		return dot(normal, p - offset);
-	}
-
 	static vec3<float32> support(const Hull3D& hull, vec3<float32> d) {
 		float32 maxValue = dot(vec3<float32>(hull.vertexPositions[0]), d);
 		uint32 maxVertexIndex = 0;
@@ -46,7 +42,7 @@ namespace Trident {
 			// TODO: In 2D the base normal is needed but here it doesn't work it it's not the transformed normal.
 			const vec3<float32> offset = multiplyTransform(faceA.offset * vec3<float32>(normal), rigidBodyA.world);
 
-			const float32 separation = signedDistanceFacePoint(normal, offset, sT);
+			const float32 separation = signedDistanceFP(normal, offset, sT);
 
 			if (separation > output.separation) {
 				output.separation = separation;
