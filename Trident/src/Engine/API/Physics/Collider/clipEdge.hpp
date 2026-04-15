@@ -3,48 +3,48 @@
 
 #pragma once
 
-#include "Engine/API/Physics/Plane.hpp"
-
 namespace Trident {
 	/// Clips an edge against a 2D plane.
 	/// Returns a new edge containing the clipped vertices.
 	inline ClipFeature2D clipEdge(const ClipFeature2D& edge, Plane2D plane, uint32 edgeIndex) {
+		const ClipVertex2D& a = edge.edge[0];
+		const ClipVertex2D& b = edge.edge[1];
+
+		const float32 distanceA = signedDistance(a.position, plane);
+		const float32 distanceB = signedDistance(b.position, plane);
+
 		ClipFeature2D clippedEdge{};
 
-		// Signed distances between the plane and the edge vertices.
-		const float32 distanceA = dot(edge.edge[0].position, plane.normal) - plane.offset;
-		const float32 distanceB = dot(edge.edge[1].position, plane.normal) - plane.offset;
-
 		if (distanceA <= 0.0f) {
-			// The vertex is below the line: keep it.
-			clippedEdge.edge[clippedEdge.vertexCount] = edge.edge[0];
+			// Keep vertices that are below the line.
+			clippedEdge.edge[clippedEdge.vertexCount] = a;
 			clippedEdge.vertexCount += 1;
 		}
 
 		if (distanceB <= 0.0f) {
-			// The vertex is below the line: keep it.
-			clippedEdge.edge[clippedEdge.vertexCount] = edge.edge[1];
+			// Keep vertices that are below the line.
+			clippedEdge.edge[clippedEdge.vertexCount] = b;
 			clippedEdge.vertexCount += 1;
 		}
 
 		if (distanceA * distanceB < 0.0f) {
-			// If the vertices are on different sides of the plane, interpolate.
+			// If the vertices are on different sides of the plane, insert the intersection point.
 			DEBUG_ASSERT(clippedEdge.vertexCount < 2);
 
 			const float32 t = distanceA / (distanceA - distanceB);
 
-			ClipVertex2D& clipVertex = clippedEdge.edge[clippedEdge.vertexCount];
-			clipVertex.position = lerp(edge.edge[0].position, edge.edge[1].position, t);
+			ClipVertex2D& c = clippedEdge.edge[clippedEdge.vertexCount];
+			c.position = lerp(a.position, b.position, t);
 
 			if (distanceA > 0.0f) {
-				clipVertex.id = edge.edge[0].id;
-				clipVertex.id.referenceEdge0Index = edgeIndex;
-				clipVertex.id.referenceEdge1Index = Contact2DID::NULL_EDGE_INDEX;
+				c.id = a.id;
+				c.id.referenceEdgeAIndex = edgeIndex;
+				c.id.referenceEdgeBIndex = Contact2DID::NULL_EDGE_INDEX;
 			}
 			else {
-				clipVertex.id = edge.edge[1].id;
-				clipVertex.id.incidentEdge0Index = edgeIndex;
-				clipVertex.id.incidentEdge1Index = Contact2DID::NULL_EDGE_INDEX;
+				c.id = b.id;
+				c.id.incidentEdgeAIndex = edgeIndex;
+				c.id.incidentEdgeBIndex = Contact2DID::NULL_EDGE_INDEX;
 			}
 
 			clippedEdge.vertexCount += 1;

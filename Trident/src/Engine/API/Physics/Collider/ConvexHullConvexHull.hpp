@@ -7,7 +7,6 @@
 #include "Engine/API/Physics/Collider/findIncidentEdge.hpp"
 #include "Engine/API/Physics/Collider/Collider2D.hpp"
 #include "Engine/API/Physics/Feature2D.hpp"
-#include "Engine/API/Physics/Plane.hpp"
 
 namespace Trident {
 	static bool ConvexHullConvexHullCollider(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB, ContactManifold2D* contactManifold) {

@@ -8,20 +8,20 @@ namespace Trident {
 		static constexpr uint16 NULL_EDGE_INDEX = max<uint16>();
 
 		// The edge is represented in a clockwise order, so the normal is pointing left (outside of the body).
-		uint16 referenceEdge0Index = NULL_EDGE_INDEX;
-		uint16 referenceEdge1Index = NULL_EDGE_INDEX;
+		uint16 referenceEdgeAIndex = NULL_EDGE_INDEX;
+		uint16 referenceEdgeBIndex = NULL_EDGE_INDEX;
 
 		// The edge is represented in a clockwise order, so the normal is pointing left (outside of the body).
-		uint16 incidentEdge0Index = NULL_EDGE_INDEX;
-		uint16 incidentEdge1Index = NULL_EDGE_INDEX;
+		uint16 incidentEdgeAIndex = NULL_EDGE_INDEX;
+		uint16 incidentEdgeBIndex = NULL_EDGE_INDEX;
 
 		bool operator ==(const Contact2DID& other) const {
 			return *pointer_cast<const uint64*>(this) == *pointer_cast<const uint64*>(&other);
 		}
 
 		void flip() {
-			std::swap(referenceEdge0Index, referenceEdge1Index);
-			std::swap(incidentEdge0Index, incidentEdge1Index);
+			std::swap(referenceEdgeAIndex, referenceEdgeBIndex);
+			std::swap(incidentEdgeAIndex, incidentEdgeBIndex);
 		}
 	};
 
