@@ -145,7 +145,6 @@ namespace Trident {
 
 				// TODO(GL): Allow the vertex buffer to be bound before setting a render pipeline.
 
-				const sequence<Geometry3D>& geometries = scene->getGeometries();
 				const ComponentPool<GeometryComponent>& geometryComponentPool = scene->ecs.getComponentPool<GeometryComponent>();
 				const ComponentPool<MaterialComponent>& materialComponentPool = scene->ecs.getComponentPool<MaterialComponent>();
 				const ComponentPool<RigidBody3DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody3DComponent>();
@@ -156,7 +155,7 @@ namespace Trident {
 				while (rigidBodyComponentIndex < rigidBodyComponentPool.componentCount) {
 					const Entity entity = rigidBodyComponentPool.componentIndexToEntity[rigidBodyComponentIndex];
 					const GeometryComponent geometryComponent = geometryComponentPool.components[geometryComponentPool.entityToComponentIndex[entity]];
-					const Geometry3D& geometry = geometries[geometryComponent.geometryIndex];
+					const Geometry3D& geometry = scene->geometries[geometryComponent.geometryIndex];
 					const MaterialComponent materialComponent = materialComponentPool.components[materialComponentPool.entityToComponentIndex[entity]];
 
 					// NOTE: Material is incremented by 1 for visibility rendering.
@@ -185,15 +184,15 @@ namespace Trident {
 					while (rigidBodyComponentIndex < rigidBodyComponentPool.componentCount) {
 						const Entity entity = rigidBodyComponentPool.componentIndexToEntity[rigidBodyComponentIndex];
 						const GeometryComponent geometryComponent = geometryComponentPool.components[geometryComponentPool.entityToComponentIndex[entity]];
-						const Geometry3D& geometry = geometries[geometryComponent.geometryIndex];
+						const Geometry3D& geometry = scene->geometries[geometryComponent.geometryIndex];
 
-						if (geometry.hullIndex >= scene->getHulls().count()) {
+						if (geometry.hullIndex >= scene->hulls.count()) {
 							rigidBodyComponentIndex += 1;
 
 							continue;
 						}
 
-						const Hull3D& hull = scene->getHulls()[geometry.hullIndex];
+						const Hull3D& hull = scene->hulls[geometry.hullIndex];
 
 						commandEncoder->drawIndexed(hull.lineIndexRange.count, 1, hull.lineIndexRange.offset, geometry.getVertexPositionComponentRange().offset / 2, rigidBodyComponentIndex);
 

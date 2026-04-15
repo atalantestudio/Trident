@@ -26,7 +26,7 @@ namespace Trident {
 			},
 			.rigidBodyMappings = {
 				// Floor
-				{
+				/* {
 					0,
 					createRigidBody({
 						.position = {0.0_m, -0.05_m, 0.0_m},
@@ -37,9 +37,23 @@ namespace Trident {
 						.friction = 0.2f,
 						.restitution = 0.0f,
 					}),
+				}, */
+
+				// Box 1
+				{
+					0,
+					createRigidBody({
+						.position = {0.0_m, 0.0_m, 2.0_m},
+						.rotation = {0.0_rad, pi<float32>() * 0.25f, 0.0_rad},
+						.scale = {1.0f, 1.0f, 1.0f},
+						.mass = max<float32>(),
+						.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
+						.friction = 0.2f,
+						.restitution = 0.0f,
+					}),
 				},
 
-				// Box
+				// Box 2
 				{
 					1,
 					createRigidBody({

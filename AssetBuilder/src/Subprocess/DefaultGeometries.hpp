@@ -249,15 +249,6 @@ namespace Trident {
 				7, 2,
 				3, 6,
 			},
-			.hullFaceNormalComponents = {
-				// NOTE: Same as the face normals (special case).
-				 0.0f,  0.0f,  1.0f,
-				 0.0f,  0.0f, -1.0f,
-				-1.0f,  0.0f,  0.0f,
-				 1.0f,  0.0f,  0.0f,
-				 0.0f,  1.0f,  0.0f,
-				 0.0f, -1.0f,  0.0f,
-			},
 			.hullEdges = {
 				{.originVertexIndex = 0, .faceIndex = 0}, // front
 				{.originVertexIndex = 1, .faceIndex = 4}, // top
@@ -283,6 +274,14 @@ namespace Trident {
 				{.originVertexIndex = 2, .faceIndex = 3}, // right
 				{.originVertexIndex = 3, .faceIndex = 5}, // bottom
 				{.originVertexIndex = 6, .faceIndex = 2}, // left
+			},
+			.hullFaces = {
+				{{ 0.0f,  0.0f,  1.0f}, 0.5f},
+				{{ 0.0f,  0.0f, -1.0f}, 0.5f},
+				{{-1.0f,  0.0f,  0.0f}, 0.5f},
+				{{ 1.0f,  0.0f,  0.0f}, 0.5f},
+				{{ 0.0f,  1.0f,  0.0f}, 0.5f},
+				{{ 0.0f, -1.0f,  0.0f}, 0.5f},
 			},
 		};
 

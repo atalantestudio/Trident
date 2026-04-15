@@ -26,8 +26,8 @@ namespace Trident {
 
 		GeometryAssetFlags flags;
 		sequence<uint16> hullLineIndices;
-		sequence<float32> hullFaceNormalComponents;
-		sequence<HalfEdge> hullEdges;
+		sequence<Edge3D> hullEdges;
+		sequence<Face3D> hullFaces;
 		Hull3D hull;
 	};
 }

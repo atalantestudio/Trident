@@ -18,10 +18,9 @@ namespace Trident {
 		const ComponentPool<MaterialComponent>& materialComponentPool = scene->ecs.getComponentPool<MaterialComponent>();
 		const ComponentPool<RigidBody3DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody3DComponent>();
 		const view<uint8> dataBuffer = scene->getDataBuffer();
-		const sequence<Geometry3D>& geometries = scene->getGeometries();
 
 		ClusteredScene clusteredScene{};
-		clusteredScene.geometries = sequence<ClusteredGeometry>(geometries.count());
+		clusteredScene.geometries = sequence<ClusteredGeometry>(scene->geometries.count());
 		clusteredScene.materialShaders = scene->getMaterialShaders();
 		clusteredScene.materials = scene->getMaterials();
 
@@ -36,8 +35,8 @@ namespace Trident {
 		uint32 clusterOffset = 0;
 		uint32 geometryIndex = 0;
 
-		while (geometryIndex < geometries.count()) {
-			const Geometry3D& geometry = geometries[geometryIndex];
+		while (geometryIndex < scene->geometries.count()) {
+			const Geometry3D& geometry = scene->geometries[geometryIndex];
 			const uint64 indexCount = geometry.getVertexPositionIndexRange().count;
 
 			// There should be as many position indices as there are normal and texture coordinate indices.
@@ -105,8 +104,8 @@ namespace Trident {
 
 		geometryIndex = 0;
 
-		while (geometryIndex < geometries.count()) {
-			const Geometry3D& geometry = geometries[geometryIndex];
+		while (geometryIndex < scene->geometries.count()) {
+			const Geometry3D& geometry = scene->geometries[geometryIndex];
 
 			ClusteredGeometry& clusteredGeometry = clusteredScene.geometries[geometryIndex];
 			clusteredGeometry.vertexOffset = vertexOffset;

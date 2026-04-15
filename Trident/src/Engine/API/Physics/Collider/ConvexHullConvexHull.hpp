@@ -23,9 +23,9 @@ namespace Trident {
 		const uint32 referenceLeftEdgeIndex = (static_cast<sint32>(sat.referenceEdgeIndex) - 1) % sat.referenceHull->edges.count();
 		const uint32 referenceRightEdgeIndex = (sat.referenceEdgeIndex + 1) % sat.referenceHull->edges.count();
 
-		const Edge referenceEdge = sat.referenceHull->edges[sat.referenceEdgeIndex];
-		const Edge referenceLeftEdge = sat.referenceHull->edges[referenceLeftEdgeIndex];
-		const Edge referenceRightEdge = sat.referenceHull->edges[referenceRightEdgeIndex];
+		const Edge2D referenceEdge = sat.referenceHull->edges[sat.referenceEdgeIndex];
+		const Edge2D referenceLeftEdge = sat.referenceHull->edges[referenceLeftEdgeIndex];
+		const Edge2D referenceRightEdge = sat.referenceHull->edges[referenceRightEdgeIndex];
 
 		const vec2<float32> referenceEdgeA = sat.referenceHull->vertices[referenceEdge.indexA];
 		const vec2<float32> referenceEdgeB = sat.referenceHull->vertices[referenceEdge.indexB];

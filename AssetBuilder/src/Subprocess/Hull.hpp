@@ -112,7 +112,7 @@ namespace Trident {
 			.radius = static_cast<float32>(radius),
 			.vertexPositions = {},
 			.edges = {},
-			.faceNormals = {},
+			.faces = {},
 			.lineIndexRange = {},
 			.type = Hull3DType::POLYGON,
 		};

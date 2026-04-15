@@ -160,19 +160,19 @@ namespace Trident {
 			}
 
 			if (!COLLIDER_2D_TABLE[static_cast<uint32>(typeA)][static_cast<uint32>(typeB)](rigidBodyA, rigidBodyB, hullA, hullB, &contactPair.contactManifold)) {
-				// Either a degenerate case, or the entities are not intersecting.
+				// Either a degenerate case, or the entities are not overlapping.
 				contactPairs.erase(entityPair);
 
 				continue;
 			}
 
-			std::map<const EntityPair, ContactPair2D>::iterator contactPairIterator = contactPairs.find(entityPair);
+			const std::map<const EntityPair, ContactPair2D>::iterator contactPairIterator = contactPairs.find(entityPair);
 
 			if (contactPairIterator == contactPairs.end()) {
 				contactPair.A = entityPair.A;
 				contactPair.B = entityPair.B;
 
-				contactPairs.insert(std::pair<const EntityPair, ContactPair2D>(entityPair, contactPair));
+				contactPairs.insert({entityPair, contactPair});
 
 				continue;
 			}

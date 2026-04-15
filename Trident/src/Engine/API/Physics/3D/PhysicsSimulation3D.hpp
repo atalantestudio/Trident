@@ -14,7 +14,6 @@ namespace Trident {
 	template<>
 	struct Descriptor<PhysicsSimulation3D> {
 		Scene3D* scene;
-
 		float64 deltaTime;
 	};
 
@@ -23,7 +22,8 @@ namespace Trident {
 			static constexpr uint32 SEQUENTIAL_IMPULSE_ITERATION_COUNT = 10;
 			static constexpr float32 ALLOWED_PENETRATION = 0.01f;
 
-			inline static const vec3<float32> G = {0.0f, -9.80665f, 0.0f};
+			// TODO(debug)
+			inline static const vec3<float32> G = vec3<float32>{0.0f, -9.80665f, 0.0f} / 20.0f;
 
 		public:
 			/// Constructs a physics simulation for the provided scene.

@@ -389,6 +389,13 @@ namespace Trident {
 		};
 	}
 
+	template<typename T>
+	inline vec<3, T> multiplyTransform(vec<3, T> a, const mat<4, 4, T>& M) {
+		const vec<4, T> r = vec<4, T>(a[0], a[1], a[2], 1.0f) * M;
+
+		return {r[0], r[1], r[2]};
+	}
+
 	inline float32 signedDistanceLinePoint(const vec2<float32>& a, const vec2<float32>& b, const vec2<float32>& p) {
 		const vec2<float32> ab = b - a;
 		const vec2<float32> ap = p - a;

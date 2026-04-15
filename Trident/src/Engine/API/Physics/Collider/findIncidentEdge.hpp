@@ -25,7 +25,7 @@ namespace Trident {
 		uint32 edgeIndex = 0;
 
 		while (edgeIndex < edgeCount) {
-			const Edge edge = incidentHull.edges[edgeIndex];
+			const Edge2D edge = incidentHull.edges[edgeIndex];
 			const vec2<float32> a = incidentHull.vertices[edge.indexA];
 			const vec2<float32> b = incidentHull.vertices[edge.indexB];
 			const vec2<float32> d = perpendicularLeft(b - a);

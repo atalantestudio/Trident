@@ -7,12 +7,13 @@
 
 namespace Trident {
 	static void queryEdgeDirections(const RigidBody2DComponent& referenceBody, const RigidBody2DComponent& incidentBody, const Hull2D& referenceHull, const Hull2D& incidentHull, SAT2DOutput& output) {
+		// Relative rotation between A and B.
 		const mat2x2<float32> R = mat2x2<float32>::rotation(incidentBody.rotation - referenceBody.rotation);
 
 		uint32 edgeIndex = 0;
 
 		while (edgeIndex < referenceHull.edges.count()) {
-			const Edge edge = referenceHull.edges[edgeIndex];
+			const Edge2D edge = referenceHull.edges[edgeIndex];
 			const vec2<float32> a = referenceHull.vertices[edge.indexA];
 			const vec2<float32> b = referenceHull.vertices[edge.indexB];
 			const vec2<float32> d = edgeNormalClockwise(a, b);

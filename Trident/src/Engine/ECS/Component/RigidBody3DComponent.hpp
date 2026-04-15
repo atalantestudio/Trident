@@ -17,14 +17,25 @@ namespace Trident {
 		}
 
 		void updateWorld(vec3<float32> centroid) {
-			// TODO: Multiply with the orientation quaternion instead of the Euler angles.
 			world =
 				mat4x4<float32>::translation(-centroid) *
 				mat4x4<float32>::scaling(scale) *
-				mat4x4<float32>::rotation(RIGHT, -rotation[0]) *
-				mat4x4<float32>::rotation(UP, -rotation[1]) *
-				mat4x4<float32>::rotation(FORWARD, -rotation[2]) *
+				mat4x4<float32>(orientation) *
 				mat4x4<float32>::translation(position);
+		}
+
+		/// Applies linear and angular impulses to the body.
+		inline void applyImpulse(
+			/// The impulse vector.
+			vec3<float32> j,
+
+			/// The vector from the body's position to the contact.
+			vec3<float32> r
+		) {
+			linearVelocity += j * inverseMass;
+
+			// TODO(physics/3d/angular-impulse)
+			// angularVelocity += parallelogramArea(r, j) * inverseInertia;
 		}
 
 		// TODO: Use svec3<float32> instead.

@@ -78,7 +78,7 @@ namespace Trident {
 					}
 					case Hull2DType::POLYGON: {
 						float32 maxValue = dot(vec2<float32>(vertices[0]), d);
-						uint32 maxValueIndex = 0;
+						uint32 maxVertexIndex = 0;
 						uint32 vertexIndex = 1;
 
 						while (vertexIndex < vertices.count()) {
@@ -86,13 +86,13 @@ namespace Trident {
 
 							if (value > maxValue) {
 								maxValue = value;
-								maxValueIndex = vertexIndex;
+								maxVertexIndex = vertexIndex;
 							}
 
 							vertexIndex += 1;
 						}
 
-						return maxValueIndex;
+						return maxVertexIndex;
 					}
 					default: {
 						DEBUG_ASSERT(false);
@@ -114,10 +114,10 @@ namespace Trident {
 			// Vertex positions on the parent geometry.
 			view<svec2<float32>> vertices;
 
-			// TODO: 2D and 3D hulls should use 16-bit indices.
+			// TODO: Use 16-bit indices.
 			range<uint32, uint32> lineIndexRange;
 
 			// TODO(physics/hull-edges): Replace with a view inside a contiguous buffer.
-			sequence<Edge> edges;
+			sequence<Edge2D> edges;
 	};
 }

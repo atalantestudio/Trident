@@ -3,9 +3,15 @@
 
 #include "pch.hpp"
 
+#include "Engine/API/Geometry/Hull3DType.hpp"
+#include "Engine/API/Physics/3D/Collider.hpp"
 #include "Engine/API/Physics/3D/PhysicsSimulation3D.hpp"
 
 namespace Trident {
+	static constexpr Collider3D COLLIDER_TABLE[static_cast<uint32>(Hull3DType::count)][static_cast<uint32>(Hull3DType::count)] = {
+		{PolygonPolygon},
+	};
+
 	PhysicsSimulation3D::PhysicsSimulation3D(const Descriptor<PhysicsSimulation3D>& descriptor) :
 		scene(descriptor.scene),
 		deltaTime(static_cast<float32>(descriptor.deltaTime)),
@@ -48,7 +54,51 @@ namespace Trident {
 	}
 
 	void PhysicsSimulation3D::narrowPhase() {
-		// TODO
+		ContactPair3D contactPair;
+
+		for (const EntityPair entityPair : entityPairs) {
+			const RigidBody3DComponent& rigidBodyA = scene->ecs.getComponent<RigidBody3DComponent>(entityPair.A);
+			const RigidBody3DComponent& rigidBodyB = scene->ecs.getComponent<RigidBody3DComponent>(entityPair.B);
+
+			const GeometryComponent geometryComponentA = scene->ecs.getComponent<GeometryComponent>(entityPair.A);
+			const GeometryComponent geometryComponentB = scene->ecs.getComponent<GeometryComponent>(entityPair.B);
+
+			const Geometry3D& geometryA = scene->geometries[geometryComponentA.geometryIndex];
+			const Geometry3D& geometryB = scene->geometries[geometryComponentB.geometryIndex];
+
+			const Hull3D& hullA = scene->hulls[geometryA.hullIndex];
+			const Hull3D& hullB = scene->hulls[geometryB.hullIndex];
+
+			Hull3DType typeA = hullA.type;
+			Hull3DType typeB = hullB.type;
+
+			if (typeA > typeB) {
+				typeA = hullB.type;
+				typeB = hullA.type;
+			}
+
+			const Collider3D collider = COLLIDER_TABLE[static_cast<uint32>(typeA)][static_cast<uint32>(typeB)];
+
+			if (!collider(rigidBodyA, rigidBodyB, hullA, hullB, &contactPair.manifold)) {
+				// Either a degenerate case, or the entities are not overlapping.
+				contactPairs.erase(entityPair);
+
+				continue;
+			}
+
+			const std::map<const EntityPair, ContactPair3D>::iterator contactPairIterator = contactPairs.find(entityPair);
+
+			if (contactPairIterator == contactPairs.end()) {
+				contactPair.A = entityPair.A;
+				contactPair.B = entityPair.B;
+
+				contactPairs.insert({entityPair, contactPair});
+
+				continue;
+			}
+
+			// TODO(physics/3d/merge-contact-manifolds)
+		}
 	}
 
 	void PhysicsSimulation3D::applyForces() {
@@ -75,7 +125,21 @@ namespace Trident {
 	}
 
 	void PhysicsSimulation3D::applyImpulses() {
-		// TODO
+		uint32 iteration = 0;
+
+		while (iteration < SEQUENTIAL_IMPULSE_ITERATION_COUNT) {
+			for (std::pair<const EntityPair, ContactPair3D>& entityContactPair : contactPairs) {
+				ContactPair3D& contactPair = entityContactPair.second;
+				RigidBody3DComponent& rigidBodyA = scene->ecs.getComponent<RigidBody3DComponent>(contactPair.A);
+				RigidBody3DComponent& rigidBodyB = scene->ecs.getComponent<RigidBody3DComponent>(contactPair.B);
+
+				// TODO(debug)
+				rigidBodyA.linearVelocity = {0.0_m_s, 0.0_m_s, 0.0_m_s};
+				rigidBodyB.linearVelocity = {0.0_m_s, 0.0_m_s, 0.0_m_s};
+			}
+
+			iteration += 1;
+		}
 	}
 
 	void PhysicsSimulation3D::integrate() {
@@ -93,8 +157,8 @@ namespace Trident {
 
 			const Entity entity = rigidBodyComponentPool.componentIndexToEntity[componentIndex];
 			const GeometryComponent geometryComponent = scene->ecs.getComponent<GeometryComponent>(entity);
-			const Geometry3D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
-			const Hull3D& hull = scene->getHulls()[geometry.hullIndex];
+			const Geometry3D& geometry = scene->geometries[geometryComponent.geometryIndex];
+			const Hull3D& hull = scene->hulls[geometry.hullIndex];
 
 			rigidBodyComponent.position += rigidBodyComponent.linearVelocity * deltaTime;
 			rigidBodyComponent.rotation += rigidBodyComponent.angularVelocity * deltaTime;

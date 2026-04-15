@@ -3,6 +3,7 @@
 
 #include "pch.hpp"
 
+#include "Engine/API/Axis.hpp"
 #include "Engine/API/Scene/Scene3D.hpp"
 #include "Engine/ECS/Component/GeometryComponent.hpp"
 #include "Engine/ECS/Component/MaterialComponent.hpp"
@@ -65,8 +66,8 @@ namespace Trident {
 		dataBuffer = sequence<uint8>(dataBufferSize);
 		geometries = sequence<Geometry3D>(geometryAssets.count());
 		hulls = sequence<Hull3D>(sceneAsset->getHullCount());
-		hullEdges = sequence<HalfEdge>(sceneAsset->getHullEdgeCount());
-		hullFaceNormalComponents = sequence<float32>(sceneAsset->getHullFaceCount() * 3);
+		hullEdges = sequence<Edge3D>(sceneAsset->getHullEdgeCount());
+		hullFaces = sequence<Face3D>(sceneAsset->getHullFaceCount());
 
 		std::copy(staticBuffer.begin(), staticBuffer.end(), &dataBuffer[0]);
 
@@ -182,12 +183,12 @@ namespace Trident {
 				geometries[geometryIndex].hullIndex = hullIndex;
 
 				std::copy(geometryAsset->getHull3DEdges().begin(), geometryAsset->getHull3DEdges().end(), &hullEdges[hullEdgeOffset]);
-				std::copy(geometryAsset->getHull3DFaceNormalComponents().begin(), geometryAsset->getHull3DFaceNormalComponents().end(), &hullFaceNormalComponents[hullFaceOffset]);
+				std::copy(geometryAsset->getHull3DFaces().begin(), geometryAsset->getHull3DFaces().end(), &hullFaces[hullFaceOffset]);
 				std::copy(geometryAsset->getHull3DLineIndices().begin(), geometryAsset->getHull3DLineIndices().end(), pointer_cast<uint16*>(&dataBuffer[hullLineIndexByteOffset + hullLineIndexOffset * sizeof(uint16)]));
 
 				const view<svec3<float32>> vertexPositions(pointer_cast<const svec3<float32>*>(&dataBuffer[geometryVertexPositionComponentRange.offset * sizeof(float32)]), geometryVertexPositionComponentRange.count / 3);
-				const view<HalfEdge> edges(&hullEdges[hullEdgeOffset], geometryAsset->getHull3DEdges().count());
-				const view<svec3<float32>> faceNormals(pointer_cast<const svec3<float32>*>(&hullFaceNormalComponents[hullFaceOffset]), geometryAsset->getHull3DFaceNormalComponents().count() / 3);
+				const view<Edge3D> edges(&hullEdges[hullEdgeOffset], geometryAsset->getHull3DEdges().count());
+				const view<Face3D> faces(&hullFaces[hullFaceOffset], geometryAsset->getHull3DFaces().count());
 				const range<uint32, uint16> lineIndexRange = {hullLineIndexOffset, static_cast<uint16>(geometryAsset->getHull3DLineIndices().count())};
 
 				hulls[hullIndex] = {
@@ -195,14 +196,14 @@ namespace Trident {
 					.radius = geometryAsset->getHullRadius(),
 					.vertexPositions = vertexPositions,
 					.edges = edges,
-					.faceNormals = faceNormals,
+					.faces = faces,
 					.lineIndexRange = lineIndexRange,
 					.type = static_cast<Hull3DType>(geometryAsset->getHullType()),
 				};
 
 				hullIndex += 1;
 				hullEdgeOffset += static_cast<uint32>(geometryAsset->getHull3DEdges().count());
-				hullFaceOffset += static_cast<uint32>(geometryAsset->getHull3DFaceNormalComponents().count() / 3);
+				hullFaceOffset += static_cast<uint32>(geometryAsset->getHull3DFaces().count());
 				hullLineIndexOffset += lineIndexRange.count;
 			}
 
@@ -244,8 +245,14 @@ namespace Trident {
 		for (const EntityComponentMapping<RigidBody3DComponent>& rigidBodyMapping : sceneAsset->getRigidBodyMappings()) {
 			ecs.setComponent<RigidBody3DComponent>(rigidBodyMapping.entity, rigidBodyMapping.component);
 
-			// TODO(debug-only)
-			ecs.getComponent<RigidBody3DComponent>(rigidBodyMapping.entity).updateWorld({0.0_m, 0.0_m, 0.0_m});
+			RigidBody3DComponent& rigidBodyComponent = ecs.getComponent<RigidBody3DComponent>(rigidBodyMapping.entity);
+
+			const quat<float32> pitch = quat<float32>::axisAngle(RIGHT, rigidBodyComponent.rotation[0]);
+			const quat<float32> yaw = quat<float32>::axisAngle(UP, rigidBodyComponent.rotation[1]);
+			const quat<float32> roll = quat<float32>::axisAngle(FORWARD, rigidBodyComponent.rotation[2]);
+
+			rigidBodyComponent.orientation = normalized((yaw * pitch) * roll);
+			rigidBodyComponent.updateWorld({0.0_m, 0.0_m, 0.0_m});
 		}
 	}
 }

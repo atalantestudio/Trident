@@ -248,7 +248,7 @@ namespace Trident {
 			if (geometryAsset->getFlags() & GeometryAssetFlags::HAS_HULL) {
 				sceneAssetDescriptor.hullCount += 1;
 				sceneAssetDescriptor.hullEdgeCount += static_cast<uint32>(geometryAsset->getHull3DEdges().count());
-				sceneAssetDescriptor.hullFaceCount += static_cast<uint32>(geometryAsset->getHull3DFaceNormalComponents().count() / 3);
+				sceneAssetDescriptor.hullFaceCount += static_cast<uint32>(geometryAsset->getHull3DFaces().count());
 				sceneAssetDescriptor.hullLineIndexCount += static_cast<uint32>(geometryAsset->getHull3DLineIndices().count());
 			}
 		}

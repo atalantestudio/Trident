@@ -9,11 +9,11 @@
 
 namespace Trident {
 	struct SAT2DOutput {
-		/// The separation value between the two shapes.
+		/// The separation between the two bodies.
 		/// The shapes overlap if the separation is negative or 0.
 		float32 separation;
 
-		// Normal of the reference edge.
+		// The separating axis (the normal of the reference edge).
 		vec2<float32> normal;
 
 		// Index of the reference edge in the geometry vertex array.

@@ -4,16 +4,13 @@
 #pragma once
 
 namespace Trident {
-	struct Edge {
+	struct Edge2D {
 		uint32 indexA;
 		uint32 indexB;
 	};
 
 	/// See https://en.wikipedia.org/wiki/Doubly_connected_edge_list.
-	/// 
-	/// NOTE: Edges and twin edges must be stored one after the other.
-	/// This allows to efficiently iterate over unique edges by ignoring even or odd entries.
-	struct HalfEdge {
+	struct Edge3D {
 		/// Index of the origin vertex of this half-edge.
 		/// The other vertex is the origin vertex of the next edge.
 		uint16 originVertexIndex;

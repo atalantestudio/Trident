@@ -51,14 +51,6 @@ namespace Trident {
 				return hullLineIndexByteOffset;
 			}
 
-			inline const sequence<Geometry3D>& getGeometries() const {
-				return geometries;
-			}
-
-			inline const sequence<Hull3D>& getHulls() const {
-				return hulls;
-			}
-
 			inline const std::vector<Shader>& getMaterialShaders() const {
 				return materialShaders;
 			}
@@ -115,11 +107,13 @@ namespace Trident {
 			uint32 hullLineIndexCount;
 			uint64 hullLineIndexByteOffset;
 
+		public:
 			sequence<Geometry3D> geometries;
 			sequence<Hull3D> hulls;
-			sequence<HalfEdge> hullEdges;
-			sequence<float32> hullFaceNormalComponents;
+			sequence<Edge3D> hullEdges;
+			sequence<Face3D> hullFaces;
 
+		private:
 			std::vector<Shader> materialShaders;
 			std::vector<std::vector<Material>> materials;
 			std::vector<uint32> materialIndexToShaderIndex;

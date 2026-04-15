@@ -110,7 +110,7 @@ namespace Trident {
 				if (hull.type == Hull2DType::POLYGON) {
 					const uint32 edgeCount = static_cast<uint32>(geometryAsset->getHull2DLineIndices().count() - 1);
 
-					hull.edges = sequence<Edge>(edgeCount);
+					hull.edges = sequence<Edge2D>(edgeCount);
 
 					uint32 edgeIndex = 0;
 

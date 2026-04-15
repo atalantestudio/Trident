@@ -341,8 +341,8 @@ namespace Trident {
 			.vertexTextureCoordinateIndices = vertexTextureCoordinateIndices,
 			.flags = {},
 			.hullLineIndices = {},
-			.hullFaceNormalComponents = {},
 			.hullEdges = {},
+			.hullFaces = {},
 			.hull = {},
 		};
 	}
