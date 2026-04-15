@@ -25,31 +25,17 @@ namespace Trident {
 			const vec2<float32> b = referenceHull.vertices[edge.indexB];
 			const vec2<float32> d = edgeNormalClockwise(a, b);
 			const vec2<float32> s = incidentHull.support(-d * R);
-
-			// TODO
-			// const vec2<float32> aT = multiplyTransform(a, referenceBody.world);
-			// const vec2<float32> bT = multiplyTransform(b, referenceBody.world);
 			const vec2<float32> sT = multiplyTransform(s, incidentBody.world);
-			// const float32 separation = signedDistanceLinePoint(aT, bT, sT);
 
-			auto c = lerp(a, b, 0.5f);
-			auto normal = d * RA;
-			auto off = multiplyTransform(c, referenceBody.world);
+			const float32 edgeDistance = abs(signedDistanceLinePoint(a, b, referenceHull.centroid));
+			const vec2<float32> offset = multiplyTransform(edgeDistance * d, referenceBody.world);
 
-			const float32 separation = signedDistanceEdgePoint(normal, off, sT);
-
-			// float32 o = abs(signedDistanceLinePoint(a, b, {0.0f, 0.0f}));
-			// auto offset = referenceBody.position + (c * referenceBody.scale);
+			const float32 separation = signedDistanceEdgePoint(d * RA, offset, sT);
 
 			if (separation > output.separation) {
-				const vec2<float32> aT = multiplyTransform(a, referenceBody.world);
-				const vec2<float32> bT = multiplyTransform(b, referenceBody.world);
-
 				output.separation = separation;
 				output.normal = d;
 				output.referenceEdgeIndex = edgeIndex;
-				output.referenceEdge.edge[0] = aT;
-				output.referenceEdge.edge[1] = bT;
 				output.incidentSupportPoint = sT;
 				output.referenceBody = &referenceBody;
 				output.incidentBody = &incidentBody;
@@ -75,7 +61,6 @@ namespace Trident {
 	SAT2DOutput SAT2D(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB) {
 		SAT2DOutput output{};
 		output.separation = min<float32>();
-		output.referenceEdge.vertexCount = 2;
 
 		queryEdgeDirections(A, B, hullA, hullB, output);
 
@@ -97,7 +82,6 @@ namespace Trident {
 	SAT2DOutput SATCircleConvexHull2D(const RigidBody2DComponent& circleBody, const RigidBody2DComponent& convexHullBody, const Hull2D& circleHull, const Hull2D& convexHullGeometry) {
 		SAT2DOutput output{};
 		output.separation = min<float32>();
-		output.referenceEdge.vertexCount = 2;
 
 		queryEdgeDirections(convexHullBody, circleBody, convexHullGeometry, circleHull, output);
 

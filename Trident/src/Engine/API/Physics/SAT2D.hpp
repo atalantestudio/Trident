@@ -19,10 +19,6 @@ namespace Trident {
 		// Index of the reference edge in the geometry vertex array.
 		uint32 referenceEdgeIndex;
 
-		// Closest edge on the reference body to the incident body.
-		// The vertices are already transformed.
-		Feature2D referenceEdge;
-
 		// Support point on the incident body, in the direction opposite to the reference edge's normal.
 		// This is the closest point to the reference edge.
 		vec2<float32> incidentSupportPoint;
