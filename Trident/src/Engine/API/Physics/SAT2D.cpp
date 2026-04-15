@@ -6,9 +6,16 @@
 #include "Engine/API/Physics/SAT2D.hpp"
 
 namespace Trident {
+	inline float32 signedDistanceEdgePoint(vec2<float32> normal, vec2<float32> offset, vec2<float32> p) {
+		return dot(normal, p - offset);
+	}
+
 	static void queryEdgeDirections(const RigidBody2DComponent& referenceBody, const RigidBody2DComponent& incidentBody, const Hull2D& referenceHull, const Hull2D& incidentHull, SAT2DOutput& output) {
 		// Relative rotation between A and B.
 		const mat2x2<float32> R = mat2x2<float32>::rotation(incidentBody.rotation - referenceBody.rotation);
+
+		// TODO(physics/2d/rotation-signs): Use correct sign (inverted in the RigidBody2DComponent).
+		const mat2x2<float32> RA = mat2x2<float32>::rotation(-referenceBody.rotation);
 
 		uint32 edgeIndex = 0;
 
@@ -18,12 +25,26 @@ namespace Trident {
 			const vec2<float32> b = referenceHull.vertices[edge.indexB];
 			const vec2<float32> d = edgeNormalClockwise(a, b);
 			const vec2<float32> s = incidentHull.support(-d * R);
-			const vec2<float32> aT = multiplyTransform(a, referenceBody.world);
-			const vec2<float32> bT = multiplyTransform(b, referenceBody.world);
+
+			// TODO
+			// const vec2<float32> aT = multiplyTransform(a, referenceBody.world);
+			// const vec2<float32> bT = multiplyTransform(b, referenceBody.world);
 			const vec2<float32> sT = multiplyTransform(s, incidentBody.world);
-			const float32 separation = signedDistanceLinePoint(aT, bT, sT);
+			// const float32 separation = signedDistanceLinePoint(aT, bT, sT);
+
+			auto c = lerp(a, b, 0.5f);
+			auto normal = d * RA;
+			auto off = multiplyTransform(c, referenceBody.world);
+
+			const float32 separation = signedDistanceEdgePoint(normal, off, sT);
+
+			// float32 o = abs(signedDistanceLinePoint(a, b, {0.0f, 0.0f}));
+			// auto offset = referenceBody.position + (c * referenceBody.scale);
 
 			if (separation > output.separation) {
+				const vec2<float32> aT = multiplyTransform(a, referenceBody.world);
+				const vec2<float32> bT = multiplyTransform(b, referenceBody.world);
+
 				output.separation = separation;
 				output.normal = d;
 				output.referenceEdgeIndex = edgeIndex;
