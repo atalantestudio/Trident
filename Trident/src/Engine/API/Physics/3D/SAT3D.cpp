@@ -6,16 +6,8 @@
 #include "Engine/API/Physics/3D/SAT3D.hpp"
 
 namespace Trident {
-	inline static float32 signedDistanceFacePoint(Face3D face, vec3<float32> p) {
-		return dot(vec3<float32>(face.normal), p - face.offset * vec3<float32>(face.normal));
-	}
-
-	inline static Face3D transformFace(const RigidBody3DComponent& rigidBody, Face3D face) {
-		Face3D transformedFace{};
-		transformedFace.normal = svec3<float32>(vec3<float32>(face.normal) * rigidBody.orientation);
-		transformedFace.offset = dot(vec3<float32>(transformedFace.normal), rigidBody.position + (vec3<float32>(face.normal) * face.offset * rigidBody.scale));
-
-		return transformedFace;
+	inline static float32 signedDistanceFacePoint(vec3<float32> normal, vec3<float32> offset, vec3<float32> p) {
+		return dot(normal, p - offset);
 	}
 
 	static vec3<float32> support(const Hull3D& hull, vec3<float32> d) {
@@ -46,10 +38,15 @@ namespace Trident {
 		while (faceIndex < hullA.faces.count()) {
 			const Face3D faceA = hullA.faces[faceIndex];
 			const vec3<float32> d = vec3<float32>(faceA.normal);
-			const vec3<float32> sB = support(hullB, -d * R);
-			const Face3D transformedFace = transformFace(rigidBodyA, faceA);
-			const vec3<float32> sBT = multiplyTransform(sB, rigidBodyB.world);
-			const float32 separation = signedDistanceFacePoint(transformedFace, sBT);
+			const vec3<float32> s = support(hullB, -d * R);
+			const vec3<float32> sT = multiplyTransform(s, rigidBodyB.world);
+
+			const vec3<float32> normal = vec3<float32>(faceA.normal) * rigidBodyA.orientation;
+
+			// TODO: In 2D the base normal is needed but here it doesn't work it it's not the transformed normal.
+			const vec3<float32> offset = multiplyTransform(faceA.offset * vec3<float32>(normal), rigidBodyA.world);
+
+			const float32 separation = signedDistanceFacePoint(normal, offset, sT);
 
 			if (separation > output.separation) {
 				output.separation = separation;
@@ -85,7 +82,7 @@ namespace Trident {
 			return output;
 		}
 
-		output.axis *= -output.incidentBody->orientation;
+		output.axis *= output.incidentBody->orientation;
 
 		return output;
 	}
