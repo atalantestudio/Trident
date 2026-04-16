@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Engine/API/Physics/3D/Collider.hpp"
+#include "Engine/API/Physics/3D/FaceFeature3D.hpp"
 #include "Engine/API/Physics/3D/SAT3D.hpp"
 
 namespace Trident {
@@ -110,65 +111,98 @@ namespace Trident {
 	}
 
 	/// See https://en.wikipedia.org/wiki/Sutherland%E2%80%93Hodgman_algorithm.
-	std::vector<vec3<float32>> SutherlandHodgman(const SATOutput3D& sat, const std::vector<Face3D>& referenceSideFaces, const std::vector<uint32>& incidentEdgeIndices) {
-		std::vector<vec3<float32>> clippedVertices;
+	std::vector<EdgeFeature3D> SutherlandHodgman(const SATOutput3D& sat, std::vector<EdgeFeature3D> incidentEdges, const std::vector<Face3D>& referenceSideFaces) {
+		uint8 clippedEdgeCount = 0;
+		uint8 previousEdgeCount = (uint8) incidentEdges.size();
 
 		for (const Face3D referenceFace : referenceSideFaces) {
-			// Transform face.
 			const vec3<float32> transformedFaceNormal = vec3<float32>(referenceFace.normal) * sat.referenceBody->orientation;
-			const vec3<float32> transformedFaceOffset = multiplyTransform(referenceFace.offset * vec3<float32>(transformedFaceNormal), sat.referenceBody->world);
 
-			for (uint32 incidentEdgeIndex : incidentEdgeIndices) {
-				uint32 otherEdgeIndex;
+			// TODO: Fix face offset transformation.
+			// const vec3<float32> transformedFaceOffset = multiplyTransform(referenceFace.offset * vec3<float32>(transformedFaceNormal), sat.referenceBody->world);
+			const vec3<float32> transformedFaceOffset = referenceFace.offset * vec3<float32>(transformedFaceNormal);
 
-				if (incidentEdgeIndex & 1) {
-					otherEdgeIndex = incidentEdgeIndex - 1;
+			std::vector<EdgeFeature3D> clippedEdges(8);
+			uint8 incidentEdgeIndex = 0;
+
+			clippedEdgeCount = 0;
+
+			while (incidentEdgeIndex < previousEdgeCount) {
+				const EdgeFeature3D& incidentEdge = incidentEdges[incidentEdgeIndex];
+				const ClipVertex3D& a = incidentEdge.edge[0];
+				const ClipVertex3D& b = incidentEdge.edge[1];
+
+				const float32 distanceA = signedDistanceFP(transformedFaceNormal, transformedFaceOffset, a.position);
+				const float32 distanceB = signedDistanceFP(transformedFaceNormal, transformedFaceOffset, b.position);
+
+				EdgeFeature3D& clippedEdge = clippedEdges[clippedEdgeCount];
+				clippedEdge.vertexCount = 0;
+
+				/* if (distanceA <= 0.0f && distanceB <= 0.0f) {
+					// If both v1 and v2 are 'in', write only v2 to your 'cv' table.
+					clippedEdge.edge[clippedEdge.vertexCount] = b;
+					clippedEdge.vertexCount += 1;
 				}
-				else {
-					otherEdgeIndex = incidentEdgeIndex + 1;
+				else if (distanceA < 0.0f && distanceB > 0.0f) {
+					// If v1 is 'in' and v2 is 'out', the edge is apparently 'going out'.
+					// Determine the point where the edge leaves the 'screen'.
+					const float32 t = distanceA / (distanceA - distanceB);
+
+					ClipVertex3D& c = clippedEdge.edge[clippedEdge.vertexCount];
+					c.position = lerp(a.position, b.position, t);
+
+					clippedEdge.vertexCount += 1;
 				}
+				else if (distanceA > 0.0f && distanceB <= 0.0f) {
+					// If v1 is 'out' and v2 is 'in', the edge is apparently 'coming in', determine the point of entrance.
+					const float32 t = distanceA / (distanceA - distanceB);
 
-				const Edge3D edge = sat.incidentHull->edges[incidentEdgeIndex];
-				const Edge3D otherEdge = sat.incidentHull->edges[otherEdgeIndex];
+					ClipVertex3D& c = clippedEdge.edge[clippedEdge.vertexCount];
+					c.position = lerp(a.position, b.position, t);
+					clippedEdge.vertexCount += 1;
 
-				const vec3<float32> a = multiplyTransform(vec3<float32>(sat.incidentHull->vertexPositions[edge.originVertexIndex]), sat.incidentBody->world);
-				const vec3<float32> b = multiplyTransform(vec3<float32>(sat.incidentHull->vertexPositions[otherEdge.originVertexIndex]), sat.incidentBody->world);
-
-				const float32 distanceA = signedDistanceFP(transformedFaceNormal, transformedFaceOffset, a);
-				const float32 distanceB = signedDistanceFP(transformedFaceNormal, transformedFaceOffset, b);
-
-				uint32 newVertexCount = 0;
+					// Also write 'v2' in your 'cv' table, Lines that are entering the area always cause two entries in the 'cv' table.
+					clippedEdge.edge[clippedEdge.vertexCount] = b;
+					clippedEdge.vertexCount += 1;
+				} */
 
 				if (distanceA <= 0.0f) {
 					// Keep vertices that are below the face.
-					clippedVertices.emplace_back(a);
-
-					newVertexCount += 1;
+					clippedEdge.edge[clippedEdge.vertexCount] = a;
+					clippedEdge.vertexCount += 1;
 				}
 
 				if (distanceB <= 0.0f) {
 					// Keep vertices that are below the face.
-					clippedVertices.emplace_back(b);
-
-					newVertexCount += 1;
+					clippedEdge.edge[clippedEdge.vertexCount] = b;
+					clippedEdge.vertexCount += 1;
 				}
 
 				if (distanceA * distanceB < 0.0f) {
 					// If the vertices are on different sides of the faces,
 					// generate a new vertex by interpolating between the computed distances.
-					DEBUG_ASSERT(newVertexCount < 2);
+					DEBUG_ASSERT(clippedEdge.vertexCount < 2);
 
 					const float32 t = distanceA / (distanceA - distanceB);
-					const vec3<float32> c = lerp(a, b, t);
 
-					clippedVertices.emplace_back(c);
+					ClipVertex3D& c = clippedEdge.edge[clippedEdge.vertexCount];
+					c.position = lerp(a.position, b.position, t);
+
+					clippedEdge.vertexCount += 1;
 				}
+
+				incidentEdgeIndex += 1;
+				clippedEdgeCount += 1;
 			}
 
-			BREAKPOINT();
+			incidentEdges = clippedEdges;
+
+			previousEdgeCount = clippedEdgeCount;
 		}
 
-		return clippedVertices;
+		incidentEdges.resize(clippedEdgeCount);
+
+		return incidentEdges;
 	}
 
 	bool PolygonPolygon(const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, const Hull3D& hullA, const Hull3D& hullB, ContactManifold3D* contactManifold) {
@@ -184,9 +218,53 @@ namespace Trident {
 
 		const std::vector<Face3D> referenceSideFaces = findReferenceSideFaces(*sat.referenceHull, sat.referenceFaceIndex);
 
-		const std::vector<vec3<float32>> clippedVertices = SutherlandHodgman(sat, referenceSideFaces, incidentFaceSideEdgeIndices);
+		std::vector<EdgeFeature3D> incidentEdges(incidentFaceSideEdgeIndices.size());
+		uint32 edgeIndex = 0;
+
+		while (edgeIndex < incidentFaceSideEdgeIndices.size()) {
+			const uint32 firstEdgeIndex = incidentFaceSideEdgeIndices[edgeIndex];
+			const Edge3D edge = sat.incidentHull->edges[firstEdgeIndex];
+
+			uint16 indexA = edge.originVertexIndex;
+			uint16 indexB;
+
+			if (firstEdgeIndex & 1) {
+				indexB = sat.incidentHull->edges[firstEdgeIndex - 1].originVertexIndex;
+			}
+			else {
+				indexB = sat.incidentHull->edges[firstEdgeIndex + 1].originVertexIndex;
+			}
+
+			incidentEdges[edgeIndex].vertexCount = 2;
+			incidentEdges[edgeIndex].edge[0].position = multiplyTransform(vec3<float32>(sat.incidentHull->vertexPositions[indexA]), sat.incidentBody->world);
+			incidentEdges[edgeIndex].edge[1].position = multiplyTransform(vec3<float32>(sat.incidentHull->vertexPositions[indexB]), sat.incidentBody->world);
+
+			edgeIndex += 1;
+		}
+
+		std::vector<EdgeFeature3D> clippedEdges = SutherlandHodgman(sat, incidentEdges, referenceSideFaces);
+
+		// TODO: Discard points that are above the reference face.
 
 		contactManifold->normal = sat.axis;
+		contactManifold->contactCount = 0;
+
+		// Move the contact points onto the reference face.
+		for (EdgeFeature3D& clippedEdge : clippedEdges) {
+			DEBUG_ASSERT(clippedEdge.vertexCount == 2);
+
+			clippedEdge.edge[0].position -= sat.axis * sat.separation;
+			clippedEdge.edge[1].position -= sat.axis * sat.separation;
+		}
+
+		int i = 0;
+		for (auto e : clippedEdges) {
+			DEBUG_ASSERT(e.vertexCount == 2);
+
+			ENGINE_DEBUG("Edge []:\n- A = ([])\n- B = ([])", i, e.edge[0].position, e.edge[1].position);
+
+			i += 1;
+		}
 
 		return true;
 	}

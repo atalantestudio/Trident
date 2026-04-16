@@ -7,8 +7,8 @@ namespace Trident {
 	/// Clips an edge against a 2D plane.
 	/// Returns a new edge containing the clipped vertices.
 	inline ClipFeature2D clipEdge(const ClipFeature2D& edge, Plane2D plane, uint32 edgeIndex) {
-		const ClipVertex2D& a = edge.edge[0];
-		const ClipVertex2D& b = edge.edge[1];
+		const ClipVertex2D a = edge.edge[0];
+		const ClipVertex2D b = edge.edge[1];
 
 		const float32 distanceA = signedDistance(a.position, plane);
 		const float32 distanceB = signedDistance(b.position, plane);

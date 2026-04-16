@@ -30,7 +30,7 @@ namespace Trident {
 				renderer.setScene(scene.get());
 
 				cameraController.setAspectRatio(getApplication()->getWindow()->getAspectRatio());
-				cameraController.getCamera().setPosition({0.0_m, 0.9_m, 0.0_m});
+				cameraController.getCamera().setPosition({0.0_m, 0.9_m, -2.0_m});
 				cameraController.updateProjection();
 
 				renderer.setCameraController<PerspectiveCamera>(&cameraController);

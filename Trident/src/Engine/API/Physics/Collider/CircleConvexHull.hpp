@@ -33,9 +33,9 @@ namespace Trident {
 
 		const SAT2DOutput satOutput = SATCircleConvexHull2D(A, B, hullA, hullB);
 
-		contactManifold->normal = -satOutput.normal;
+		contactManifold->normal = -satOutput.axis;
 		contactManifold->contactCount = 1;
-		contactManifold->contacts[0].position = satOutput.incidentSupportPoint - satOutput.normal * satOutput.separation;
+		contactManifold->contacts[0].position = satOutput.incidentSupportPoint - satOutput.axis * satOutput.separation;
 		contactManifold->contacts[0].separation = satOutput.separation - hullA.radius * scaleA;
 
 		return true;

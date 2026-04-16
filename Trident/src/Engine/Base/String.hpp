@@ -75,3 +75,23 @@ namespace Trident {
 		return stream;
 	}
 }
+
+namespace scroll {
+	using Trident::operator<<;
+
+	template<>
+	inline std::string toString(lyah::vec<2, std::float_t> a) {
+		std::ostringstream stream;
+		stream << a;
+
+		return stream.str();
+	}
+
+	template<>
+	inline std::string toString(lyah::vec<3, std::float_t> a) {
+		std::ostringstream stream;
+		stream << a;
+
+		return stream.str();
+	}
+}

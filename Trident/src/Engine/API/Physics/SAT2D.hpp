@@ -14,7 +14,7 @@ namespace Trident {
 		float32 separation;
 
 		// The separating axis (the normal of the reference edge).
-		vec2<float32> normal;
+		vec2<float32> axis;
 
 		// Index of the reference edge in the geometry vertex array.
 		uint32 referenceEdgeIndex;

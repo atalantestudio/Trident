@@ -6,7 +6,6 @@
 #include "Engine/API/Physics/Collider/clipEdge.hpp"
 #include "Engine/API/Physics/Collider/findIncidentEdge.hpp"
 #include "Engine/API/Physics/Collider/Collider2D.hpp"
-#include "Engine/API/Physics/Feature2D.hpp"
 
 namespace Trident {
 	static bool ConvexHullConvexHullCollider(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB, ContactManifold2D* contactManifold) {
@@ -53,7 +52,7 @@ namespace Trident {
 			referenceCentroid
 		));
 
-		ClipFeature2D incidentEdge = findIncidentEdge(*sat.incidentBody, *sat.incidentHull, sat.normal * incidentInverseRotation);
+		ClipFeature2D incidentEdge = findIncidentEdge(*sat.incidentBody, *sat.incidentHull, sat.axis * incidentInverseRotation);
 		Plane2D plane;
 
 		// Clip against reference left edge.
@@ -74,24 +73,26 @@ namespace Trident {
 			return false;
 		}
 
-		contactManifold->normal = sat.normal;
+		contactManifold->normal = sat.axis;
 		contactManifold->contactCount = 0;
 
-		plane.normal = sat.normal;
-		plane.offset = dot(sat.referenceBody->position, sat.normal) + referenceEdgeDistance;
+		plane.normal = sat.axis;
+		plane.offset = dot(sat.referenceBody->position, sat.axis) + referenceEdgeDistance;
 
 		uint32 vertexIndex = 0;
 
 		// Discard vertices with a positive separation and put the rest on the reference edge.
 		while (vertexIndex < 2) {
 			const ClipVertex2D& clipVertex = incidentEdge.edge[vertexIndex];
-			const float32 separation = dot(clipVertex.position, plane.normal) - plane.offset;
+			const float32 separation = signedDistance(clipVertex.position, plane);
 
 			if (separation <= 0.0f) {
 				Contact2D& contact = contactManifold->contacts[contactManifold->contactCount];
-				contact.position = clipVertex.position - sat.normal * separation;
 				contact.separation = separation;
 				contact.id = clipVertex.id;
+
+				// Move the contact point onto the reference plane.
+				contact.position = clipVertex.position - sat.axis * separation;
 
 				contactManifold->contactCount += 1;
 			}

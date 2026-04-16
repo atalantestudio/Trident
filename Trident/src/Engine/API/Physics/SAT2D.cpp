@@ -33,7 +33,7 @@ namespace Trident {
 
 			if (separation > output.separation) {
 				output.separation = separation;
-				output.normal = d;
+				output.axis = d;
 				output.referenceEdgeIndex = edgeIndex;
 				output.incidentSupportPoint = sT;
 				output.referenceBody = &referenceBody;
@@ -73,7 +73,7 @@ namespace Trident {
 			return output;
 		}
 
-		output.normal *= mat2x2<float32>::rotation(-output.referenceBody->rotation);
+		output.axis *= mat2x2<float32>::rotation(-output.referenceBody->rotation);
 
 		return output;
 	}
@@ -88,8 +88,8 @@ namespace Trident {
 			return output;
 		}
 
-		// TODO: Since the incident body is always the circle, does the normal need to be corrected?
-		output.normal *= mat2x2<float32>::rotation(-output.incidentBody->rotation);
+		// TODO: Since the incident body is always the circle, does the axis need to be corrected?
+		output.axis *= mat2x2<float32>::rotation(-output.incidentBody->rotation);
 
 		return output;
 	}
