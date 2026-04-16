@@ -138,34 +138,6 @@ namespace Trident {
 				EdgeFeature3D& clippedEdge = clippedEdges[clippedEdgeCount];
 				clippedEdge.vertexCount = 0;
 
-				/* if (distanceA <= 0.0f && distanceB <= 0.0f) {
-					// If both v1 and v2 are 'in', write only v2 to your 'cv' table.
-					clippedEdge.edge[clippedEdge.vertexCount] = b;
-					clippedEdge.vertexCount += 1;
-				}
-				else if (distanceA < 0.0f && distanceB > 0.0f) {
-					// If v1 is 'in' and v2 is 'out', the edge is apparently 'going out'.
-					// Determine the point where the edge leaves the 'screen'.
-					const float32 t = distanceA / (distanceA - distanceB);
-
-					ClipVertex3D& c = clippedEdge.edge[clippedEdge.vertexCount];
-					c.position = lerp(a.position, b.position, t);
-
-					clippedEdge.vertexCount += 1;
-				}
-				else if (distanceA > 0.0f && distanceB <= 0.0f) {
-					// If v1 is 'out' and v2 is 'in', the edge is apparently 'coming in', determine the point of entrance.
-					const float32 t = distanceA / (distanceA - distanceB);
-
-					ClipVertex3D& c = clippedEdge.edge[clippedEdge.vertexCount];
-					c.position = lerp(a.position, b.position, t);
-					clippedEdge.vertexCount += 1;
-
-					// Also write 'v2' in your 'cv' table, Lines that are entering the area always cause two entries in the 'cv' table.
-					clippedEdge.edge[clippedEdge.vertexCount] = b;
-					clippedEdge.vertexCount += 1;
-				} */
-
 				if (distanceA <= 0.0f) {
 					// Keep vertices that are below the face.
 					clippedEdge.edge[clippedEdge.vertexCount] = a;
@@ -203,6 +175,126 @@ namespace Trident {
 		incidentEdges.resize(clippedEdgeCount);
 
 		return incidentEdges;
+	}
+
+	static vec3<float32> support(const std::vector<EdgeFeature3D>& edges, vec3<float32> d) {
+		float32 maxValue = min<float32>();
+		vec3<float32> s;
+
+		for (const EdgeFeature3D& edge : edges) {
+			DEBUG_ASSERT(edge.vertexCount == 2);
+
+			float32 value = dot(edge.edge[0].position, d);
+
+			if (value > maxValue) {
+				maxValue = value;
+				s = edge.edge[0].position;
+			}
+
+			value = dot(edge.edge[1].position, d);
+
+			if (value > maxValue) {
+				maxValue = value;
+				s = edge.edge[1].position;
+			}
+		}
+
+		return s;
+	}
+
+	static vec3<float32> farthestFrom(const std::vector<EdgeFeature3D>& edges, vec3<float32> a) {
+		float32 maxDistance = min<float32>();
+		vec3<float32> b;
+
+		for (const EdgeFeature3D& edge : edges) {
+			DEBUG_ASSERT(edge.vertexCount == 2);
+
+			float32 _distance = distanceSquared(edge.edge[0].position, b);
+
+			if (_distance > maxDistance) {
+				maxDistance = _distance;
+				b = edge.edge[0].position;
+			}
+
+			_distance = distanceSquared(edge.edge[0].position, b);
+
+			if (_distance > maxDistance) {
+				maxDistance = _distance;
+				b = edge.edge[1].position;
+			}
+		}
+
+		return b;
+	}
+
+	static vec3<float32> areaMaximized(const std::vector<EdgeFeature3D>& edges, vec3<float32> a, vec3<float32> b, vec3<float32> faceNormal) {
+		float32 maxArea = min<float32>();
+		float32 area;
+		vec3<float32> c;
+		vec3<float32> ca;
+		vec3<float32> cb;
+
+		for (const EdgeFeature3D& edge : edges) {
+			DEBUG_ASSERT(edge.vertexCount == 2);
+
+			ca = a - edge.edge[0].position;
+			cb = b - edge.edge[0].position;
+
+			area = dot((0.5f * cross(ca, cb)), faceNormal);
+
+			if (area > maxArea) {
+				maxArea = area;
+				c = edge.edge[0].position;
+			}
+
+			ca = a - edge.edge[1].position;
+			cb = b - edge.edge[1].position;
+
+			area = dot((0.5f * cross(ca, cb)), faceNormal);
+
+			if (area > maxArea) {
+				maxArea = area;
+				c = edge.edge[1].position;
+			}
+		}
+
+		return c;
+	}
+
+	static vec3<float32> areaMaximizedNegative(const std::vector<EdgeFeature3D>& edges, vec3<float32> a, vec3<float32> b, vec3<float32> c, vec3<float32> faceNormal) {
+		float32 area;
+		float32 minArea = max<float32>();
+		const vec3<float32> ab = b - a;
+		vec3<float32> bc;
+		vec3<float32> ca;
+		vec3<float32> d;
+
+		// TODO
+		/* for (const EdgeFeature3D& edge : edges) {
+			DEBUG_ASSERT(edge.vertexCount == 2);
+
+			d0 = edge.edge[0].position - b;
+			d1 = a - edge.edge[0].position;
+
+			area = dot((0.5f * cross(ca, cb)), faceNormal);
+
+			if (area < minArea) {
+				minArea = area;
+				c = edge.edge[0].position;
+			}
+
+			bc = edge.edge[0].position - b;
+			ca = a - edge.edge[0].position;
+
+			area = dot((0.5f * cross(ca, cb)), faceNormal);
+
+			if (area < minArea) {
+				minArea = area;
+				c = edge.edge[1].position;
+			}
+		} */
+
+		return c;
 	}
 
 	bool PolygonPolygon(const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, const Hull3D& hullA, const Hull3D& hullB, ContactManifold3D* contactManifold) {
@@ -265,6 +357,25 @@ namespace Trident {
 
 			i += 1;
 		}
+
+		/// Contact point reduction.
+		/// See https://media.steampowered.com/apps/valve/2015/DirkGregorius_Contacts.pdf.
+
+		// The first contact is selected in a fixed direction to avoid jitter.
+		contactManifold->contacts[contactManifold->contactCount].position = support(clippedEdges, {1.0f, 1.0f, 1.0f});
+		contactManifold->contactCount += 1;
+
+		// The second contact is the farthest one from the first contact.
+		contactManifold->contacts[contactManifold->contactCount].position = farthestFrom(clippedEdges, contactManifold->contacts[0].position);
+		contactManifold->contactCount += 1;
+
+		// The third contact maximizes the area of the current manifold.
+		contactManifold->contacts[contactManifold->contactCount].position = areaMaximized(clippedEdges, contactManifold->contacts[0].position, contactManifold->contacts[1].position, sat.axis);
+		contactManifold->contactCount += 1;
+
+		// The fourth contact adds the largest area of the current manifold.
+		contactManifold->contacts[contactManifold->contactCount].position = areaMaximizedNegative(clippedEdges, contactManifold->contacts[0].position, contactManifold->contacts[1].position, contactManifold->contacts[2].position, sat.axis);
+		contactManifold->contactCount += 1;
 
 		return true;
 	}
