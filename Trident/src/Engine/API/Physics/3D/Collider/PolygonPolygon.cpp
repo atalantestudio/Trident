@@ -177,126 +177,6 @@ namespace Trident {
 		return incidentEdges;
 	}
 
-	static vec3<float32> support(const std::vector<EdgeFeature3D>& edges, vec3<float32> d) {
-		float32 maxValue = min<float32>();
-		vec3<float32> s;
-
-		for (const EdgeFeature3D& edge : edges) {
-			DEBUG_ASSERT(edge.vertexCount == 2);
-
-			float32 value = dot(edge.edge[0].position, d);
-
-			if (value > maxValue) {
-				maxValue = value;
-				s = edge.edge[0].position;
-			}
-
-			value = dot(edge.edge[1].position, d);
-
-			if (value > maxValue) {
-				maxValue = value;
-				s = edge.edge[1].position;
-			}
-		}
-
-		return s;
-	}
-
-	static vec3<float32> farthestFrom(const std::vector<EdgeFeature3D>& edges, vec3<float32> a) {
-		float32 maxDistance = min<float32>();
-		vec3<float32> b;
-
-		for (const EdgeFeature3D& edge : edges) {
-			DEBUG_ASSERT(edge.vertexCount == 2);
-
-			float32 _distance = distanceSquared(edge.edge[0].position, b);
-
-			if (_distance > maxDistance) {
-				maxDistance = _distance;
-				b = edge.edge[0].position;
-			}
-
-			_distance = distanceSquared(edge.edge[0].position, b);
-
-			if (_distance > maxDistance) {
-				maxDistance = _distance;
-				b = edge.edge[1].position;
-			}
-		}
-
-		return b;
-	}
-
-	static vec3<float32> areaMaximized(const std::vector<EdgeFeature3D>& edges, vec3<float32> a, vec3<float32> b, vec3<float32> faceNormal) {
-		float32 maxArea = min<float32>();
-		float32 area;
-		vec3<float32> c;
-		vec3<float32> ca;
-		vec3<float32> cb;
-
-		for (const EdgeFeature3D& edge : edges) {
-			DEBUG_ASSERT(edge.vertexCount == 2);
-
-			ca = a - edge.edge[0].position;
-			cb = b - edge.edge[0].position;
-
-			area = dot((0.5f * cross(ca, cb)), faceNormal);
-
-			if (area > maxArea) {
-				maxArea = area;
-				c = edge.edge[0].position;
-			}
-
-			ca = a - edge.edge[1].position;
-			cb = b - edge.edge[1].position;
-
-			area = dot((0.5f * cross(ca, cb)), faceNormal);
-
-			if (area > maxArea) {
-				maxArea = area;
-				c = edge.edge[1].position;
-			}
-		}
-
-		return c;
-	}
-
-	static vec3<float32> areaMaximizedNegative(const std::vector<EdgeFeature3D>& edges, vec3<float32> a, vec3<float32> b, vec3<float32> c, vec3<float32> faceNormal) {
-		float32 area;
-		float32 minArea = max<float32>();
-		const vec3<float32> ab = b - a;
-		vec3<float32> bc;
-		vec3<float32> ca;
-		vec3<float32> d;
-
-		// TODO
-		/* for (const EdgeFeature3D& edge : edges) {
-			DEBUG_ASSERT(edge.vertexCount == 2);
-
-			d0 = edge.edge[0].position - b;
-			d1 = a - edge.edge[0].position;
-
-			area = dot((0.5f * cross(ca, cb)), faceNormal);
-
-			if (area < minArea) {
-				minArea = area;
-				c = edge.edge[0].position;
-			}
-
-			bc = edge.edge[0].position - b;
-			ca = a - edge.edge[0].position;
-
-			area = dot((0.5f * cross(ca, cb)), faceNormal);
-
-			if (area < minArea) {
-				minArea = area;
-				c = edge.edge[1].position;
-			}
-		} */
-
-		return c;
-	}
-
 	bool PolygonPolygon(const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, const Hull3D& hullA, const Hull3D& hullB, ContactManifold3D* contactManifold) {
 		const SATOutput3D sat = SAT3D(rigidBodyA, rigidBodyB, hullA, hullB);
 
@@ -358,24 +238,162 @@ namespace Trident {
 			i += 1;
 		}
 
+		checklist<vec3<float32>, 8> contacts;
+
+		// TODO(physics/3d/contact-checklist): This can be removed if we can get a vertex list from Sutherland-Hodgman.
+		{
+			for (const EdgeFeature3D& edge : clippedEdges) {
+				DEBUG_ASSERT(edge.vertexCount == 2);
+
+				contacts.add(edge.edge[0].position);
+				contacts.add(edge.edge[1].position);
+			}
+		}
+
+		DEBUG_ASSERT(contacts.count() > 0);
+
 		/// Contact point reduction.
 		/// See https://media.steampowered.com/apps/valve/2015/DirkGregorius_Contacts.pdf.
 
-		// The first contact is selected in a fixed direction to avoid jitter.
-		contactManifold->contacts[contactManifold->contactCount].position = support(clippedEdges, {1.0f, 1.0f, 1.0f});
-		contactManifold->contactCount += 1;
+		// Select the first contact as the support point towards a fixed direction to avoid jitter.
+		{
+			// TODO(constexpr)
+			static const vec3<float32> n = {1.0f, 1.0f, 1.0f};
+
+			index contactIndex = 0;
+			index maxAngleContactIndex = max<index>();
+			float32 angle;
+			float32 maxAngle = min<float32>();
+
+			while (contactIndex < contacts.count()) {
+				angle = dot(contacts[contactIndex], n);
+
+				if (angle > maxAngle) {
+					maxAngle = angle;
+					maxAngleContactIndex = contactIndex;
+				}
+
+				contactIndex += 1;
+			}
+
+			contactManifold->contacts[0].position = contacts[maxAngleContactIndex];
+			contactManifold->contactCount += 1;
+
+			contacts.remove(maxAngleContactIndex);
+		}
+
+		if (contacts.count() == 0) {
+			return true;
+		}
 
 		// The second contact is the farthest one from the first contact.
-		contactManifold->contacts[contactManifold->contactCount].position = farthestFrom(clippedEdges, contactManifold->contacts[0].position);
-		contactManifold->contactCount += 1;
+		{
+			const vec3<float32> a = contactManifold->contacts[0].position;
+
+			index contactIndex = 0;
+			index maxDistanceContactIndex = max<index>();
+			float32 distance;
+			float32 maxDistance = min<float32>();
+
+			while (contactIndex < contacts.count()) {
+				distance = distanceSquared(a, contacts[contactIndex]);
+
+				if (distance > maxDistance) {
+					maxDistance = distance;
+					maxDistanceContactIndex = contactIndex;
+				}
+
+				contactIndex += 1;
+			}
+
+			contactManifold->contacts[1].position = contacts[maxDistanceContactIndex];
+			contactManifold->contactCount += 1;
+
+			contacts.remove(maxDistanceContactIndex);
+		}
+
+		if (contacts.count() == 0) {
+			return true;
+		}
 
 		// The third contact maximizes the area of the current manifold.
-		contactManifold->contacts[contactManifold->contactCount].position = areaMaximized(clippedEdges, contactManifold->contacts[0].position, contactManifold->contacts[1].position, sat.axis);
-		contactManifold->contactCount += 1;
+		{
+			const vec3<float32> a = contactManifold->contacts[0].position;
+			const vec3<float32> b = contactManifold->contacts[1].position;
 
-		// The fourth contact adds the largest area of the current manifold.
-		contactManifold->contacts[contactManifold->contactCount].position = areaMaximizedNegative(clippedEdges, contactManifold->contacts[0].position, contactManifold->contacts[1].position, contactManifold->contacts[2].position, sat.axis);
-		contactManifold->contactCount += 1;
+			index contactIndex = 0;
+			index maxAreaContactIndex = max<index>();
+			float32 area;
+			float32 maxArea = min<float32>();
+			vec3<float32> c;
+
+			while (contactIndex < contacts.count()) {
+				c = contacts[contactIndex];
+
+				area = dot(cross(a - c, b - c) * 0.5f, sat.axis);
+
+				if (area > maxArea) {
+					maxArea = area;
+					maxAreaContactIndex = contactIndex;
+				}
+
+				contactIndex += 1;
+			}
+
+			contactManifold->contacts[2].position = contacts[maxAreaContactIndex];
+			contactManifold->contactCount += 1;
+
+			contacts.remove(maxAreaContactIndex);
+		}
+
+		if (contacts.count() == 0) {
+			return true;
+		}
+
+		// The fourth contact adds the largest area to the current manifold.
+		{
+			const vec3<float32> a = contactManifold->contacts[0].position;
+			const vec3<float32> b = contactManifold->contacts[1].position;
+			const vec3<float32> c = contactManifold->contacts[2].position;
+
+			index contactIndex = 0;
+			index minAreaContactIndex = max<index>();
+			float32 area;
+			float32 minArea = max<float32>();
+			vec3<float32> d;
+
+			while (contactIndex < contacts.count()) {
+				d = contacts[contactIndex];
+
+				area = dot(cross(a - d, b - d) * 0.5f, sat.axis);
+
+				if (area < minArea) {
+					minArea = area;
+					minAreaContactIndex = contactIndex;
+				}
+
+				area = dot(cross(b - d, c - d) * 0.5f, sat.axis);
+
+				if (area < minArea) {
+					minArea = area;
+					minAreaContactIndex = contactIndex;
+				}
+
+				area = dot(cross(c - d, a - d) * 0.5f, sat.axis);
+
+				if (area < minArea) {
+					minArea = area;
+					minAreaContactIndex = contactIndex;
+				}
+
+				contactIndex += 1;
+			}
+
+			contactManifold->contacts[3].position = contacts[minAreaContactIndex];
+			contactManifold->contactCount += 1;
+
+			contacts.remove(minAreaContactIndex);
+		}
 
 		return true;
 	}
