@@ -121,7 +121,75 @@ namespace Trident {
 	}
 
 	void PhysicsSimulation3D::updateContactManifolds() {
-		// TODO
+		uint8 contactPointIndex;
+
+		// Calculate combined values in each pair (static/dynamic friction, restitution, etc.).
+		// For each contact, calculate mass normal, mass tangent and bias value.
+		for (std::pair<const EntityPair, ContactPair3D>& pair : contactPairs) {
+			ContactPair3D& contactPair = pair.second;
+
+			const GeometryComponent geometryComponentA = scene->ecs.getComponent<GeometryComponent>(contactPair.A);
+			const GeometryComponent geometryComponentB = scene->ecs.getComponent<GeometryComponent>(contactPair.B);
+
+			const Geometry3D& geometryA = scene->geometries[geometryComponentA.geometryIndex];
+			const Geometry3D& geometryB = scene->geometries[geometryComponentB.geometryIndex];
+
+			const Hull3D& hullA = scene->hulls[geometryA.hullIndex];
+			const Hull3D& hullB = scene->hulls[geometryB.hullIndex];
+
+			RigidBody3DComponent& rigidBodyA = scene->ecs.getComponent<RigidBody3DComponent>(contactPair.A);
+			RigidBody3DComponent& rigidBodyB = scene->ecs.getComponent<RigidBody3DComponent>(contactPair.B);
+
+			// TODO(physics/3d/tangents)
+			// contactPair.manifold.tangent = perpendicularRight(contactPair.manifold.normal);
+
+			// TODO(physics/3d/friction)
+			// contactPair.combinedFriction = sqrt(rigidBodyA.friction * rigidBodyB.friction);
+
+			contactPointIndex = 0;
+
+			while (contactPointIndex < contactPair.manifold.contactCount) {
+				Contact3D& contact = contactPair.manifold.contacts[contactPointIndex];
+
+				// Distance from the contact to the entity's COM.
+				contact.rA = contact.position - rigidBodyA.position;
+				contact.rB = contact.position - rigidBodyB.position;
+
+				const float32 inverseMassSum = rigidBodyA.inverseMass + rigidBodyB.inverseMass;
+
+				// Precompute normal mass, tangent mass and bias.
+				const vec3<float32> rnA = cross(contact.rA, contactPair.manifold.normal);
+				const vec3<float32> rnB = cross(contact.rB, contactPair.manifold.normal);
+				const float32 massNormal =
+					dot(rnA, rnA * rigidBodyA.inverseInertia) +
+					dot(rnB, rnA * rigidBodyB.inverseInertia) +
+					inverseMassSum;
+
+				contact.massNormal = 1.0f / massNormal;
+
+				const vec3<float32> rtA = cross(contact.rA, contactPair.manifold.tangent);
+				const vec3<float32> rtB = cross(contact.rB, contactPair.manifold.tangent);
+				const float32 massTangent =
+					dot(rtA, rtA * rigidBodyA.inverseInertia) +
+					dot(rtB, rtB * rigidBodyB.inverseInertia) +
+					inverseMassSum;
+
+				contact.massTangent = 1.0f / massTangent;
+
+				const float32 penetrationBias = avg(hullA.getPenetrationBias(), hullB.getPenetrationBias());
+
+				contact.bias = -penetrationBias * inverseDeltaTime * min(0.0f, contact.separation + ALLOWED_PENETRATION);
+
+				#if defined(ENABLE_PHYSICS_3D_IMPULSE_ACCUMULATION)
+					const vec3<float32> impulse = contactPair.manifold.normal * contact.accumulatedNormalImpulse + contactPair.manifold.tangent * contact.accumulatedTangentImpulse;
+
+					rigidBodyA.applyImpulse(-impulse, contact.rA);
+					rigidBodyB.applyImpulse(impulse, contact.rB);
+				#endif
+
+				contactPointIndex += 1;
+			}
+		}
 	}
 
 	void PhysicsSimulation3D::applyImpulses() {

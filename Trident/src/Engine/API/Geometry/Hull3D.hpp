@@ -11,6 +11,11 @@ namespace Trident {
 	/// A convex hull wrapping a 3D geometry.
 	// TODO(physics/runtime-hull-creation): Some hulls may need to be created at runtime (e.g. the player collision hull).
 	struct Hull3D {
+		inline float32 getPenetrationBias() const {
+			// TODO(physics/3d/hull-penetration): Return different biases for each hull type (sphere, capsule, polygon).
+			return 0.2f;
+		}
+
 		/// The mean position of all vertices.
 		/// It coincides with the center of mass in uniform mass distribution scenarios.
 		svec3<float32> centroid;

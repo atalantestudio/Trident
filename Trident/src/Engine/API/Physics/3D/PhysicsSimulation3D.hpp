@@ -9,6 +9,9 @@
 #include "Engine/ECS/EntityPair.hpp"
 
 namespace Trident {
+	#define ENABLE_PHYSICS_3D_IMPULSE_ACCUMULATION
+	#define ENABLE_PHYSICS_3D_WARM_STARTING
+
 	class PhysicsSimulation3D;
 
 	template<>

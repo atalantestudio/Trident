@@ -28,25 +28,6 @@ namespace Trident {
 		return minFaceIndex;
 	}
 
-	static std::vector<vec3<float32>> findFaceVertices(const Hull3D& hull, uint32 faceIndex) {
-		std::vector<vec3<float32>> vertices;
-		uint32 edgeIndex = 0;
-
-		while (edgeIndex < hull.edges.count()) {
-			const Edge3D edge = hull.edges[edgeIndex];
-
-			if (edge.faceIndex == faceIndex) {
-				const vec3<float32> baseVertex = hull.vertexPositions[edge.originVertexIndex];
-
-				vertices.emplace_back(baseVertex);
-			}
-
-			edgeIndex += 1;
-		}
-
-		return vertices;
-	}
-
 	// NOTE: The twin edges of the edges belonging to the face are not included.
 	std::vector<uint32> findFaceSideEdgeIndices(const Hull3D& hull, uint32 faceIndex) {
 		std::vector<uint32> edgeIndices;
@@ -57,17 +38,6 @@ namespace Trident {
 
 			if (edge.faceIndex == faceIndex) {
 				edgeIndices.emplace_back(edgeIndex);
-
-				/* uint32 otherEdgeIndex = edgeIndex;
-
-				if (~edgeIndex & 1) {
-					otherEdgeIndex += 1;
-				}
-				else {
-					otherEdgeIndex -= 1;
-				}
-
-				edgeIndices.emplace_back(otherEdgeIndex); */
 			}
 
 			edgeIndex += 1;
@@ -185,7 +155,6 @@ namespace Trident {
 		}
 
 		const uint32 incidentFaceIndex = findIncidentFaceIndex(*sat.incidentHull, sat.axis);
-		const std::vector<vec3<float32>> referenceFaceVertices = findFaceVertices(*sat.incidentHull, incidentFaceIndex);
 		const std::vector<uint32> incidentFaceSideEdgeIndices = findFaceSideEdgeIndices(*sat.incidentHull, incidentFaceIndex);
 
 		const std::vector<Face3D> referenceSideFaces = findReferenceSideFaces(*sat.referenceHull, sat.referenceFaceIndex);
@@ -229,15 +198,6 @@ namespace Trident {
 			clippedEdge.edge[1].position -= sat.axis * sat.separation;
 		}
 
-		int i = 0;
-		for (auto e : clippedEdges) {
-			DEBUG_ASSERT(e.vertexCount == 2);
-
-			ENGINE_DEBUG("Edge []:\n- A = ([])\n- B = ([])", i, e.edge[0].position, e.edge[1].position);
-
-			i += 1;
-		}
-
 		checklist<vec3<float32>, 8> contacts;
 
 		// TODO(physics/3d/contact-checklist): This can be removed if we can get a vertex list from Sutherland-Hodgman.
@@ -251,6 +211,23 @@ namespace Trident {
 		}
 
 		DEBUG_ASSERT(contacts.count() > 0);
+
+		if (contacts.count() <= 4) {
+			// No need to reduce the contact set.
+
+			index contactIndex = 0;
+
+			while (contactIndex < contacts.count()) {
+				contactManifold->contacts[contactIndex].position = contacts[contactIndex];
+				contactManifold->contacts[contactIndex].separation = sat.separation;
+
+				contactIndex += 1;
+			}
+
+			contactManifold->contactCount = static_cast<uint8>(contacts.count());
+
+			return true;
+		}
 
 		/// Contact point reduction.
 		/// See https://media.steampowered.com/apps/valve/2015/DirkGregorius_Contacts.pdf.
@@ -277,13 +254,10 @@ namespace Trident {
 			}
 
 			contactManifold->contacts[0].position = contacts[maxAngleContactIndex];
+			contactManifold->contacts[0].separation = sat.separation;
 			contactManifold->contactCount += 1;
 
 			contacts.remove(maxAngleContactIndex);
-		}
-
-		if (contacts.count() == 0) {
-			return true;
 		}
 
 		// The second contact is the farthest one from the first contact.
@@ -307,13 +281,10 @@ namespace Trident {
 			}
 
 			contactManifold->contacts[1].position = contacts[maxDistanceContactIndex];
+			contactManifold->contacts[1].separation = sat.separation;
 			contactManifold->contactCount += 1;
 
 			contacts.remove(maxDistanceContactIndex);
-		}
-
-		if (contacts.count() == 0) {
-			return true;
 		}
 
 		// The third contact maximizes the area of the current manifold.
@@ -341,13 +312,10 @@ namespace Trident {
 			}
 
 			contactManifold->contacts[2].position = contacts[maxAreaContactIndex];
+			contactManifold->contacts[2].separation = sat.separation;
 			contactManifold->contactCount += 1;
 
 			contacts.remove(maxAreaContactIndex);
-		}
-
-		if (contacts.count() == 0) {
-			return true;
 		}
 
 		// The fourth contact adds the largest area to the current manifold.
@@ -390,10 +358,24 @@ namespace Trident {
 			}
 
 			contactManifold->contacts[3].position = contacts[minAreaContactIndex];
+			contactManifold->contacts[3].separation = sat.separation;
 			contactManifold->contactCount += 1;
 
 			contacts.remove(minAreaContactIndex);
 		}
+
+		// TODO(debug)
+		#if 0
+			index contactIndex = 0;
+
+			ENGINE_DEBUG("Contact manifold:");
+
+			while (contactIndex < contactManifold->contactCount) {
+				ENGINE_DEBUG("[]. ([])", contactIndex, contactManifold->contacts[contactIndex].position);
+
+				contactIndex += 1;
+			}
+		#endif
 
 		return true;
 	}
