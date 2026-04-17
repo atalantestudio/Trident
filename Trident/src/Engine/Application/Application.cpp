@@ -259,8 +259,7 @@ namespace Trident {
 				update(FIXED_DELTA_TIME, INVERSE_FIXED_DELTA_TIME);
 			}
 
-			// Extract the fixed delta time from the accumulator.
-			// What's left is passed on to the next frame.
+			// Extract 1x FIXED_DELTA_TIME from the accumulator. What's left is passed on to the next frame.
 			frameTimeAccumulator -= FIXED_DELTA_TIME;
 
 			updateIndex += 1;
@@ -272,7 +271,7 @@ namespace Trident {
 
 		// TODO
 		// Interpolate between current time and frameTimeAccumulator.
-		// Use frameTimeAccumulator / FIXED_DELTA_TIME to get a value between 0 and 1.
+		// Use frameTimeAccumulator / FIXED_DELTA_TIME to get a value between [0, 1[.
 		render(frameTimeAccumulator);
 
 		frameIndex += 1;
