@@ -12,6 +12,10 @@ namespace Trident {
 		{PolygonPolygon},
 	};
 
+	inline static vec3<float32> calculateRelativeVelocity(const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, vec3<float32> rA, vec3<float32> rB) {
+		return rigidBodyB.linearVelocity + cross(rB, -rigidBodyB.angularVelocity) - rigidBodyA.linearVelocity - cross(rA, -rigidBodyA.angularVelocity);
+	}
+
 	PhysicsSimulation3D::PhysicsSimulation3D(const Descriptor<PhysicsSimulation3D>& descriptor) :
 		scene(descriptor.scene),
 		deltaTime(static_cast<float32>(descriptor.deltaTime)),
@@ -121,7 +125,7 @@ namespace Trident {
 	}
 
 	void PhysicsSimulation3D::updateContactManifolds() {
-		uint8 contactPointIndex;
+		uint8 contactIndex;
 
 		// Calculate combined values in each pair (static/dynamic friction, restitution, etc.).
 		// For each contact, calculate mass normal, mass tangent and bias value.
@@ -140,16 +144,20 @@ namespace Trident {
 			RigidBody3DComponent& rigidBodyA = scene->ecs.getComponent<RigidBody3DComponent>(contactPair.A);
 			RigidBody3DComponent& rigidBodyB = scene->ecs.getComponent<RigidBody3DComponent>(contactPair.B);
 
-			// TODO(physics/3d/tangents)
-			// contactPair.manifold.tangent = perpendicularRight(contactPair.manifold.normal);
+			vec3<float32> normalAntiParallel = RIGHT;
 
-			// TODO(physics/3d/friction)
-			// contactPair.combinedFriction = sqrt(rigidBodyA.friction * rigidBodyB.friction);
+			if (abs(contactPair.manifold.normal[0]) > 0.9f) {
+				normalAntiParallel = UP;
+			}
 
-			contactPointIndex = 0;
+			contactPair.manifold.tangent0 = normalized(cross(contactPair.manifold.normal, normalAntiParallel));
+			contactPair.manifold.tangent1 = cross(contactPair.manifold.normal, contactPair.manifold.tangent0);
+			contactPair.combinedFriction = sqrt(rigidBodyA.friction * rigidBodyB.friction);
 
-			while (contactPointIndex < contactPair.manifold.contactCount) {
-				Contact3D& contact = contactPair.manifold.contacts[contactPointIndex];
+			contactIndex = 0;
+
+			while (contactIndex < contactPair.manifold.contactCount) {
+				Contact3D& contact = contactPair.manifold.contacts[contactIndex];
 
 				// Distance from the contact to the entity's COM.
 				contact.rA = contact.position - rigidBodyA.position;
@@ -157,37 +165,39 @@ namespace Trident {
 
 				const float32 inverseMassSum = rigidBodyA.inverseMass + rigidBodyB.inverseMass;
 
-				// Precompute normal mass, tangent mass and bias.
-				const vec3<float32> rnA = cross(contact.rA, contactPair.manifold.normal);
-				const vec3<float32> rnB = cross(contact.rB, contactPair.manifold.normal);
-				const float32 massNormal =
-					dot(rnA, rnA * rigidBodyA.inverseInertia) +
-					dot(rnB, rnA * rigidBodyB.inverseInertia) +
-					inverseMassSum;
+				{
+					const vec3<float32> rnA = cross(contact.rA, contactPair.manifold.normal);
+					const vec3<float32> rnB = cross(contact.rB, contactPair.manifold.normal);
 
-				contact.massNormal = 1.0f / massNormal;
+					contact.massNormal = 1.0f / (dot(rnA, rnA * rigidBodyA.inverseInertia) + dot(rnB, rnA * rigidBodyB.inverseInertia) + inverseMassSum);
+				}
 
-				const vec3<float32> rtA = cross(contact.rA, contactPair.manifold.tangent);
-				const vec3<float32> rtB = cross(contact.rB, contactPair.manifold.tangent);
-				const float32 massTangent =
-					dot(rtA, rtA * rigidBodyA.inverseInertia) +
-					dot(rtB, rtB * rigidBodyB.inverseInertia) +
-					inverseMassSum;
+				{
+					const vec3<float32> rt0A = cross(contact.rA, contactPair.manifold.tangent0);
+					const vec3<float32> rt0B = cross(contact.rB, contactPair.manifold.tangent0);
 
-				contact.massTangent = 1.0f / massTangent;
+					contact.massTangent0 = 1.0f / (dot(rt0A, rt0A * rigidBodyA.inverseInertia) + dot(rt0B, rt0B * rigidBodyB.inverseInertia) + inverseMassSum);
+				}
+
+				{
+					const vec3<float32> rt1A = cross(contact.rA, contactPair.manifold.tangent1);
+					const vec3<float32> rt1B = cross(contact.rB, contactPair.manifold.tangent1);
+
+					contact.massTangent1 = 1.0f / (dot(rt1A, rt1A * rigidBodyA.inverseInertia) + dot(rt1B, rt1B * rigidBodyB.inverseInertia) + inverseMassSum);
+				}
 
 				const float32 penetrationBias = avg(hullA.getPenetrationBias(), hullB.getPenetrationBias());
 
 				contact.bias = -penetrationBias * inverseDeltaTime * min(0.0f, contact.separation + ALLOWED_PENETRATION);
 
 				#if defined(ENABLE_PHYSICS_3D_IMPULSE_ACCUMULATION)
-					const vec3<float32> impulse = contactPair.manifold.normal * contact.accumulatedNormalImpulse + contactPair.manifold.tangent * contact.accumulatedTangentImpulse;
+					const vec3<float32> impulse = contactPair.manifold.normal * contact.accumulatedNormalImpulse + contactPair.manifold.tangent0 * contact.accumulatedTangentImpulse;
 
 					rigidBodyA.applyImpulse(-impulse, contact.rA);
 					rigidBodyB.applyImpulse(impulse, contact.rB);
 				#endif
 
-				contactPointIndex += 1;
+				contactIndex += 1;
 			}
 		}
 	}
@@ -201,9 +211,39 @@ namespace Trident {
 				RigidBody3DComponent& rigidBodyA = scene->ecs.getComponent<RigidBody3DComponent>(contactPair.A);
 				RigidBody3DComponent& rigidBodyB = scene->ecs.getComponent<RigidBody3DComponent>(contactPair.B);
 
-				// TODO(debug)
-				rigidBodyA.linearVelocity = {0.0_m_s, 0.0_m_s, 0.0_m_s};
-				rigidBodyB.linearVelocity = {0.0_m_s, 0.0_m_s, 0.0_m_s};
+				uint8 contactIndex = 0;
+
+				while (contactIndex < contactPair.manifold.contactCount) {
+					Contact3D& contact = contactPair.manifold.contacts[contactIndex];
+
+					const vec3<float32> relativeVelocity = calculateRelativeVelocity(rigidBodyA, rigidBodyB, contact.rA, contact.rB);
+
+					// Apply normal impulse.
+					{
+						const float32 relativeVelocityTowardsNormal = dot(relativeVelocity, contactPair.manifold.normal);
+
+						float32 normalImpulseLength = (-relativeVelocityTowardsNormal + contact.bias) * contact.massNormal;
+
+						#if defined(ENABLE_PHYSICS_3D_IMPULSE_ACCUMULATION)
+							const float32 oldNormalValue = contact.accumulatedNormalImpulse;
+
+							contact.accumulatedNormalImpulse = max(0.0f, oldNormalValue + normalImpulseLength);
+
+							normalImpulseLength = contact.accumulatedNormalImpulse - oldNormalValue;
+						#else
+							normalImpulseLength = max(0.0f, normalImpulseLength);
+						#endif
+
+						const vec3<float32> j = contactPair.manifold.normal * normalImpulseLength;
+
+						rigidBodyA.applyImpulse(-j, contact.rA);
+						rigidBodyB.applyImpulse(j, contact.rB);
+					}
+
+					// TODO: Apply friction impulse.
+
+					contactIndex += 1;
+				}
 			}
 
 			iteration += 1;

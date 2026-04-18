@@ -33,9 +33,7 @@ namespace Trident {
 			vec3<float32> r
 		) {
 			linearVelocity += j * inverseMass;
-
-			// TODO(physics/3d/angular-impulse)
-			// angularVelocity += parallelogramArea(r, j) * inverseInertia;
+			angularVelocity += cross(r, j) * inverseInertia;
 		}
 
 		// TODO: Use svec3<float32> instead.

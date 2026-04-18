@@ -192,42 +192,45 @@ namespace Trident {
 
 		// Move the contact points onto the reference face.
 		for (EdgeFeature3D& clippedEdge : clippedEdges) {
-			DEBUG_ASSERT(clippedEdge.vertexCount == 2);
-
 			clippedEdge.edge[0].position -= sat.axis * sat.separation;
 			clippedEdge.edge[1].position -= sat.axis * sat.separation;
 		}
 
-		checklist<vec3<float32>, 8> contacts;
+		pool<vec3<float32>, 8> contactPool;
 
-		// TODO(physics/3d/contact-checklist): This can be removed if we can get a vertex list from Sutherland-Hodgman.
+		// TODO(physics/3d/contact-pool): This can be removed if we can get a vertex list from Sutherland-Hodgman.
 		{
 			for (const EdgeFeature3D& edge : clippedEdges) {
-				DEBUG_ASSERT(edge.vertexCount == 2);
+				if (edge.vertexCount >= 1) {
+					contactPool.add(edge.edge[0].position);
 
-				contacts.add(edge.edge[0].position);
-				contacts.add(edge.edge[1].position);
+					if (edge.vertexCount >= 2) {
+						contactPool.add(edge.edge[1].position);
+					}
+				}
 			}
 		}
 
-		DEBUG_ASSERT(contacts.count() > 0);
+		DEBUG_ASSERT(contactPool.count() > 0);
 
-		if (contacts.count() <= 4) {
-			// No need to reduce the contact set.
+		if (contactPool.count() <= 4) {
+			// No need to reduce the contact pool.
 
 			index contactIndex = 0;
 
-			while (contactIndex < contacts.count()) {
-				contactManifold->contacts[contactIndex].position = contacts[contactIndex];
+			while (contactIndex < contactPool.count()) {
+				contactManifold->contacts[contactIndex].position = contactPool[contactIndex];
 				contactManifold->contacts[contactIndex].separation = sat.separation;
 
 				contactIndex += 1;
 			}
 
-			contactManifold->contactCount = static_cast<uint8>(contacts.count());
+			contactManifold->contactCount = static_cast<uint8>(contactPool.count());
 
 			return true;
 		}
+
+		contactManifold->contactCount = 4;
 
 		/// Contact point reduction.
 		/// See https://media.steampowered.com/apps/valve/2015/DirkGregorius_Contacts.pdf.
@@ -242,8 +245,8 @@ namespace Trident {
 			float32 angle;
 			float32 maxAngle = min<float32>();
 
-			while (contactIndex < contacts.count()) {
-				angle = dot(contacts[contactIndex], n);
+			while (contactIndex < contactPool.count()) {
+				angle = dot(contactPool[contactIndex], n);
 
 				if (angle > maxAngle) {
 					maxAngle = angle;
@@ -253,11 +256,10 @@ namespace Trident {
 				contactIndex += 1;
 			}
 
-			contactManifold->contacts[0].position = contacts[maxAngleContactIndex];
+			contactManifold->contacts[0].position = contactPool[maxAngleContactIndex];
 			contactManifold->contacts[0].separation = sat.separation;
-			contactManifold->contactCount += 1;
 
-			contacts.remove(maxAngleContactIndex);
+			contactPool.remove(maxAngleContactIndex);
 		}
 
 		// The second contact is the farthest one from the first contact.
@@ -269,8 +271,8 @@ namespace Trident {
 			float32 distance;
 			float32 maxDistance = min<float32>();
 
-			while (contactIndex < contacts.count()) {
-				distance = distanceSquared(a, contacts[contactIndex]);
+			while (contactIndex < contactPool.count()) {
+				distance = distanceSquared(a, contactPool[contactIndex]);
 
 				if (distance > maxDistance) {
 					maxDistance = distance;
@@ -280,11 +282,10 @@ namespace Trident {
 				contactIndex += 1;
 			}
 
-			contactManifold->contacts[1].position = contacts[maxDistanceContactIndex];
+			contactManifold->contacts[1].position = contactPool[maxDistanceContactIndex];
 			contactManifold->contacts[1].separation = sat.separation;
-			contactManifold->contactCount += 1;
 
-			contacts.remove(maxDistanceContactIndex);
+			contactPool.remove(maxDistanceContactIndex);
 		}
 
 		// The third contact maximizes the area of the current manifold.
@@ -298,8 +299,8 @@ namespace Trident {
 			float32 maxArea = min<float32>();
 			vec3<float32> c;
 
-			while (contactIndex < contacts.count()) {
-				c = contacts[contactIndex];
+			while (contactIndex < contactPool.count()) {
+				c = contactPool[contactIndex];
 
 				area = dot(cross(a - c, b - c) * 0.5f, sat.axis);
 
@@ -311,11 +312,10 @@ namespace Trident {
 				contactIndex += 1;
 			}
 
-			contactManifold->contacts[2].position = contacts[maxAreaContactIndex];
+			contactManifold->contacts[2].position = contactPool[maxAreaContactIndex];
 			contactManifold->contacts[2].separation = sat.separation;
-			contactManifold->contactCount += 1;
 
-			contacts.remove(maxAreaContactIndex);
+			contactPool.remove(maxAreaContactIndex);
 		}
 
 		// The fourth contact adds the largest area to the current manifold.
@@ -330,8 +330,8 @@ namespace Trident {
 			float32 minArea = max<float32>();
 			vec3<float32> d;
 
-			while (contactIndex < contacts.count()) {
-				d = contacts[contactIndex];
+			while (contactIndex < contactPool.count()) {
+				d = contactPool[contactIndex];
 
 				area = dot(cross(a - d, b - d) * 0.5f, sat.axis);
 
@@ -357,11 +357,10 @@ namespace Trident {
 				contactIndex += 1;
 			}
 
-			contactManifold->contacts[3].position = contacts[minAreaContactIndex];
+			contactManifold->contacts[3].position = contactPool[minAreaContactIndex];
 			contactManifold->contacts[3].separation = sat.separation;
-			contactManifold->contactCount += 1;
 
-			contacts.remove(minAreaContactIndex);
+			contactPool.remove(minAreaContactIndex);
 		}
 
 		// TODO(debug)

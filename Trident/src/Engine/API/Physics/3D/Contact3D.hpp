@@ -18,7 +18,8 @@ namespace Trident {
 		vec3<float32> rB;
 
 		float32 massNormal;
-		float32 massTangent;
+		float32 massTangent0;
+		float32 massTangent1;
 		float32 bias;
 
 		// TODO(physics/3d/contact-id)

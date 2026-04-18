@@ -6,7 +6,7 @@
 namespace Trident {
 	/// A data structure for O(1) addition and O(1) deletion.
 	template<typename ElementType, index ElementCount>
-	class checklist {
+	class pool {
 		public:
 			inline index count() const {
 				return _count;

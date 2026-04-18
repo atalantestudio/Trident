@@ -44,7 +44,7 @@ namespace Trident {
 					0,
 					createRigidBody({
 						.position = {0.0_m, 0.0_m, 0.0_m},
-						.rotation = {0.0_rad, pi<float32>() * 0.25f, 0.0_rad},
+						// .rotation = {0.0_rad, pi<float32>() * 0.25f, 0.0_rad},
 						.scale = {1.0f, 1.0f, 1.0f},
 						.mass = max<float32>(),
 						.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
@@ -57,7 +57,7 @@ namespace Trident {
 				{
 					1,
 					createRigidBody({
-						.position = {0.0_m, 2.5_m, 0.0_m},
+						.position = {0.6_m, 2.5_m, 0.0_m},
 						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
 						.scale = {1.0f, 1.0f, 1.0f},
 						.mass = 25.0_kg,

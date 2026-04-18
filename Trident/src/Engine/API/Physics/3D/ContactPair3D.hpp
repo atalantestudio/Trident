@@ -13,6 +13,7 @@ namespace Trident {
 
 		ContactManifold3D manifold;
 
-		// TODO(physics/3d/combined-friction)
+		// TODO(physics/3d/friction-types): Differentiate static and dynamic friction.
+		float32 combinedFriction;
 	};
 }
