@@ -5,7 +5,6 @@
 
 #include "Engine/API/Physics/CCD/MinSeparationOutput.hpp"
 #include "Engine/API/Physics/Feature2D.hpp"
-#include "Engine/API/Physics/support.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 
 namespace Trident {

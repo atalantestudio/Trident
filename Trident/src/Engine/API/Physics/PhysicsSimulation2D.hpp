@@ -29,7 +29,7 @@ namespace Trident {
 			inline static const vec2<float32> G = {0.0f, -9.80665f};
 
 		private:
-			static void mergeContactManifolds(ContactPair2D& contactPair, const ContactManifold2D& contactManifold);
+			static void mergeContactManifolds(ContactPair2D& contactPair, const ContactManifold2D& newContactManifold);
 
 		public:
 			/// Constructs a physics simulation for the provided scene.

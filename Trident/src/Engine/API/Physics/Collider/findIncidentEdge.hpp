@@ -20,6 +20,7 @@ namespace Trident {
 
 		const uint16 edgeCount = static_cast<uint16>(incidentHull.edges.count());
 
+		float32 angle;
 		float32 minAngle = max<float32>();
 		uint32 incidentEdgeIndex = 0;
 		uint32 edgeIndex = 0;
@@ -29,7 +30,8 @@ namespace Trident {
 			const vec2<float32> a = incidentHull.vertices[edge.indexA];
 			const vec2<float32> b = incidentHull.vertices[edge.indexB];
 			const vec2<float32> d = perpendicularLeft(b - a);
-			const float32 angle = dot(referenceEdgeNormal, d);
+
+			angle = dot(d, referenceEdgeNormal);
 
 			if (angle < minAngle) {
 				minAngle = angle;
@@ -44,13 +46,19 @@ namespace Trident {
 			edgeIndex += 1;
 		}
 
-		incidentEdge.edge[0].position = multiplyTransform(incidentEdge.edge[0].position, incidentBody.world);
-		incidentEdge.edge[0].id.incidentEdgeAIndex = (incidentEdgeIndex + 1) % edgeCount;
-		incidentEdge.edge[0].id.incidentEdgeBIndex = incidentEdgeIndex;
+		ClipVertex2D& a = incidentEdge.edge[0];
+		a.position = multiplyTransform(a.position, incidentBody.world);
+		a.id.referenceEdgeAIndex = Contact2DID::NULL_EDGE_INDEX;
+		a.id.referenceEdgeBIndex = Contact2DID::NULL_EDGE_INDEX;
+		a.id.incidentEdgeAIndex = (incidentEdgeIndex + 1) % edgeCount;
+		a.id.incidentEdgeBIndex = incidentEdgeIndex;
 
-		incidentEdge.edge[1].position = multiplyTransform(incidentEdge.edge[1].position, incidentBody.world);
-		incidentEdge.edge[1].id.incidentEdgeAIndex = incidentEdgeIndex;
-		incidentEdge.edge[1].id.incidentEdgeBIndex = (static_cast<sint16>(incidentEdgeIndex) - 1) % edgeCount;
+		ClipVertex2D& b = incidentEdge.edge[1];
+		b.position = multiplyTransform(b.position, incidentBody.world);
+		b.id.referenceEdgeAIndex = Contact2DID::NULL_EDGE_INDEX;
+		b.id.referenceEdgeBIndex = Contact2DID::NULL_EDGE_INDEX;
+		b.id.incidentEdgeAIndex = incidentEdgeIndex;
+		b.id.incidentEdgeBIndex = (static_cast<sint16>(incidentEdgeIndex) - 1) % edgeCount;
 
 		return incidentEdge;
 	}

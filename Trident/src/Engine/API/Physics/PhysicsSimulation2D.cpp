@@ -13,7 +13,7 @@
 
 namespace Trident {
 	inline vec2<float32> calculateRelativeVelocity(const RigidBody2DComponent& A, const RigidBody2DComponent& B, vec2<float32> rA, vec2<float32> rB) {
-		return B.linearVelocity + cross(rB, -B.angularVelocity) - A.linearVelocity - cross(rA, -A.angularVelocity);
+		return B.linearVelocity + cross(rB, B.angularVelocity) - A.linearVelocity - cross(rA, A.angularVelocity);
 	}
 
 	void PhysicsSimulation2D::mergeContactManifolds(ContactPair2D& contactPair, const ContactManifold2D& newContactManifold) {
@@ -26,8 +26,8 @@ namespace Trident {
 			int k = -1;
 			int j = 0;
 
-			while (j < contactPair.contactManifold.contactCount) {
-				const Contact2D& cOld = contactPair.contactManifold.contacts[j];
+			while (j < contactPair.manifold.contactCount) {
+				const Contact2D& cOld = contactPair.manifold.contacts[j];
 
 				if (cNew.id == cOld.id) {
 					k = j;
@@ -49,7 +49,7 @@ namespace Trident {
 			mergedContactManifold.contacts[contactIndex] = cNew;
 
 			#if defined(ENABLE_PHYSICS_2D_WARM_STARTING)
-				const Contact2D& cOld = contactPair.contactManifold.contacts[k];
+				const Contact2D& cOld = contactPair.manifold.contacts[k];
 
 				mergedContactManifold.contacts[contactIndex].accumulatedNormalImpulse = cOld.accumulatedNormalImpulse;
 				mergedContactManifold.contacts[contactIndex].accumulatedTangentImpulse = cOld.accumulatedTangentImpulse;
@@ -61,13 +61,13 @@ namespace Trident {
 		contactIndex = 0;
 
 		while (contactIndex < newContactManifold.contactCount) {
-			contactPair.contactManifold.contacts[contactIndex] = mergedContactManifold.contacts[contactIndex];
+			contactPair.manifold.contacts[contactIndex] = mergedContactManifold.contacts[contactIndex];
 
 			contactIndex += 1;
 		}
 
-		contactPair.contactManifold.contactCount = newContactManifold.contactCount;
-		contactPair.contactManifold.normal = newContactManifold.normal;
+		contactPair.manifold.contactCount = newContactManifold.contactCount;
+		contactPair.manifold.normal = newContactManifold.normal;
 	}
 
 	PhysicsSimulation2D::PhysicsSimulation2D(const Descriptor<PhysicsSimulation2D>& descriptor) :
@@ -84,14 +84,10 @@ namespace Trident {
 
 		broadPhase();
 		narrowPhase();
-
 		applyForces();
-
 		updateContactManifolds();
 		updateJoints();
-
 		applyImpulses();
-
 		integrate();
 	}
 
@@ -159,7 +155,9 @@ namespace Trident {
 				typeB = hullA.type;
 			}
 
-			if (!COLLIDER_2D_TABLE[static_cast<uint32>(typeA)][static_cast<uint32>(typeB)](rigidBodyA, rigidBodyB, hullA, hullB, &contactPair.contactManifold)) {
+			const Collider2D collider = COLLIDER_2D_TABLE[static_cast<uint32>(typeA)][static_cast<uint32>(typeB)];
+
+			if (!collider(rigidBodyA, rigidBodyB, hullA, hullB, &contactPair.manifold)) {
 				// Either a degenerate case, or the entities are not overlapping.
 				contactPairs.erase(entityPair);
 
@@ -177,7 +175,7 @@ namespace Trident {
 				continue;
 			}
 
-			mergeContactManifolds(contactPairIterator->second, contactPair.contactManifold);
+			mergeContactManifolds(contactPairIterator->second, contactPair.manifold);
 		}
 	}
 
@@ -214,55 +212,51 @@ namespace Trident {
 	void PhysicsSimulation2D::updateContactManifolds() {
 		// Calculate combined values in each pair (static/dynamic friction, restitution, etc.).
 		// For each contact, calculate mass normal, mass tangent and bias value.
-		for (std::pair<const EntityPair, ContactPair2D>& contactPair : contactPairs) {
-			ContactPair2D& pair = contactPair.second;
+		for (std::pair<const EntityPair, ContactPair2D>& pair : contactPairs) {
+			ContactPair2D& contactPair = pair.second;
+			RigidBody2DComponent& rigidBodyA = scene->ecs.getComponent<RigidBody2DComponent>(contactPair.A);
+			RigidBody2DComponent& rigidBodyB = scene->ecs.getComponent<RigidBody2DComponent>(contactPair.B);
 
-			const Hull2D& hullA = getHull(pair.A);
-			const Hull2D& hullB = getHull(pair.B);
+			const Hull2D& hullA = getHull(contactPair.A);
+			const Hull2D& hullB = getHull(contactPair.B);
 
-			RigidBody2DComponent& rigidBodyA = scene->ecs.getComponent<RigidBody2DComponent>(pair.A);
-			RigidBody2DComponent& rigidBodyB = scene->ecs.getComponent<RigidBody2DComponent>(pair.B);
-
-			pair.contactManifold.tangent = perpendicularRight(pair.contactManifold.normal);
-			pair.combinedFriction = sqrt(rigidBodyA.friction * rigidBodyB.friction);
+			contactPair.manifold.tangent = perpendicularRight(contactPair.manifold.normal);
+			contactPair.combinedFriction = sqrt(rigidBodyA.friction * rigidBodyB.friction);
 
 			uint8 contactIndex = 0;
 
-			while (contactIndex < pair.contactManifold.contactCount) {
-				Contact2D& contact = pair.contactManifold.contacts[contactIndex];
+			while (contactIndex < contactPair.manifold.contactCount) {
+				Contact2D& contact = contactPair.manifold.contacts[contactIndex];
 				contact.rA = contact.position - rigidBodyA.position;
 				contact.rB = contact.position - rigidBodyB.position;
 
 				const float32 inverseMassSum = rigidBodyA.inverseMass + rigidBodyB.inverseMass;
+				const float32 rArA = dot(contact.rA, contact.rA);
+				const float32 rBrB = dot(contact.rB, contact.rB);
 
-				// Precompute normal mass, tangent mass and bias.
-				const float32 rnA = dot(contact.rA, pair.contactManifold.normal);
-				const float32 rnB = dot(contact.rB, pair.contactManifold.normal);
-				const float32 massNormal =
-					(dot(contact.rA, contact.rA) - rnA * rnA) * rigidBodyA.inverseInertia +
-					(dot(contact.rB, contact.rB) - rnB * rnB) * rigidBodyB.inverseInertia +
-					inverseMassSum;
+				{
+					const float32 rnA = dot(contact.rA, contactPair.manifold.normal);
+					const float32 rnB = dot(contact.rB, contactPair.manifold.normal);
 
-				contact.massNormal = 1.0f / massNormal;
+					contact.massNormal = 1.0f / ((rArA - rnA * rnA) * rigidBodyA.inverseInertia + (rBrB - rnB * rnB) * rigidBodyB.inverseInertia + inverseMassSum);
+				}
 
-				const float32 rtA = dot(contact.rA, pair.contactManifold.tangent);
-				const float32 rtB = dot(contact.rB, pair.contactManifold.tangent);
-				const float32 massTangent =
-					(dot(contact.rA, contact.rA) - rtA * rtA) * rigidBodyA.inverseInertia +
-					(dot(contact.rB, contact.rB) - rtB * rtB) * rigidBodyB.inverseInertia +
-					inverseMassSum;
+				{
+					const float32 rtA = dot(contact.rA, contactPair.manifold.tangent);
+					const float32 rtB = dot(contact.rB, contactPair.manifold.tangent);
 
-				contact.massTangent = 1.0f / massTangent;
+					contact.massTangent = 1.0f / ((rArA - rtA * rtA) * rigidBodyA.inverseInertia + (rBrB - rtB * rtB) * rigidBodyB.inverseInertia + inverseMassSum);
+				}
 
 				const float32 penetrationBias = avg(hullA.getPenetrationBias(), hullB.getPenetrationBias());
 
 				contact.bias = -penetrationBias * inverseDeltaTime * min(0.0f, contact.separation + ALLOWED_PENETRATION);
 
 				#if defined(ENABLE_PHYSICS_2D_IMPULSE_ACCUMULATION)
-					const vec2<float32> impulse = pair.contactManifold.normal * contact.accumulatedNormalImpulse + pair.contactManifold.tangent * contact.accumulatedTangentImpulse;
+					const vec2<float32> j = contactPair.manifold.normal * contact.accumulatedNormalImpulse + contactPair.manifold.tangent * contact.accumulatedTangentImpulse;
 
-					rigidBodyA.applyImpulse(-impulse, contact.rA);
-					rigidBodyB.applyImpulse(impulse, contact.rB);
+					rigidBodyA.applyImpulse(-j, contact.rA);
+					rigidBodyB.applyImpulse(j, contact.rB);
 				#endif
 
 				contactIndex += 1;
@@ -333,15 +327,15 @@ namespace Trident {
 		uint32 jointComponentIndex;
 
 		while (iteration < SEQUENTIAL_IMPULSE_ITERATION_COUNT) {
-			for (std::pair<const EntityPair, ContactPair2D>& contactPair : contactPairs) {
-				ContactPair2D& pair = contactPair.second;
-				RigidBody2DComponent& rigidBodyA = scene->ecs.getComponent<RigidBody2DComponent>(pair.A);
-				RigidBody2DComponent& rigidBodyB = scene->ecs.getComponent<RigidBody2DComponent>(pair.B);
+			for (std::pair<const EntityPair, ContactPair2D>& pair : contactPairs) {
+				ContactPair2D& contactPair = pair.second;
+				RigidBody2DComponent& rigidBodyA = scene->ecs.getComponent<RigidBody2DComponent>(contactPair.A);
+				RigidBody2DComponent& rigidBodyB = scene->ecs.getComponent<RigidBody2DComponent>(contactPair.B);
 
 				uint8 contactIndex = 0;
 
-				while (contactIndex < pair.contactManifold.contactCount) {
-					Contact2D& contact = pair.contactManifold.contacts[contactIndex];
+				while (contactIndex < contactPair.manifold.contactCount) {
+					Contact2D& contact = contactPair.manifold.contacts[contactIndex];
 
 					relativeVelocity = calculateRelativeVelocity(rigidBodyA, rigidBodyB, contact.rA, contact.rB);
 
@@ -349,7 +343,7 @@ namespace Trident {
 
 					// Apply normal impulse.
 					{
-						const float32 relativeVelocityTowardsNormal = dot(relativeVelocity, pair.contactManifold.normal);
+						const float32 relativeVelocityTowardsNormal = dot(relativeVelocity, contactPair.manifold.normal);
 
 						normalImpulseLength = (-relativeVelocityTowardsNormal + contact.bias) * contact.massNormal;
 
@@ -363,7 +357,7 @@ namespace Trident {
 							normalImpulseLength = max(0.0f, normalImpulseLength);
 						#endif
 
-						const vec2<float32> j = pair.contactManifold.normal * normalImpulseLength;
+						const vec2<float32> j = contactPair.manifold.normal * normalImpulseLength;
 
 						rigidBodyA.applyImpulse(-j, contact.rA);
 						rigidBodyB.applyImpulse(j, contact.rB);
@@ -373,24 +367,24 @@ namespace Trident {
 
 					// Apply friction impulse.
 					{
-						const float32 relativeVelocityTowardsTangent = dot(relativeVelocity, pair.contactManifold.tangent);
+						const float32 relativeVelocityTowardsTangent = dot(relativeVelocity, contactPair.manifold.tangent);
 
 						float32 tangentImpulseLength = -relativeVelocityTowardsTangent * contact.massTangent;
 
 						#if defined(ENABLE_PHYSICS_2D_IMPULSE_ACCUMULATION)
-							const float32 maxTangentImpulseLength = pair.combinedFriction * contact.accumulatedNormalImpulse;
+							const float32 maxTangentImpulseLength = contactPair.combinedFriction * contact.accumulatedNormalImpulse;
 							const float32 oldTangentValue = contact.accumulatedTangentImpulse;
 
 							contact.accumulatedTangentImpulse = clamp(oldTangentValue + tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
 
 							tangentImpulseLength = contact.accumulatedTangentImpulse - oldTangentValue;
 						#else
-							const float32 maxTangentImpulseLength = pair.combinedFriction * normalImpulseLength;
+							const float32 maxTangentImpulseLength = contactPair.combinedFriction * normalImpulseLength;
 
 							tangentImpulseLength = clamp(tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
 						#endif
 
-						const vec2<float32> j = pair.contactManifold.tangent * tangentImpulseLength;
+						const vec2<float32> j = contactPair.manifold.tangent * tangentImpulseLength;
 
 						rigidBodyA.applyImpulse(-j, contact.rA);
 						rigidBodyB.applyImpulse(j, contact.rB);

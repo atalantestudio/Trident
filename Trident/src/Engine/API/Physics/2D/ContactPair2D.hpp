@@ -10,7 +10,7 @@ namespace Trident {
 	struct ContactPair2D {
 		Entity A;
 		Entity B;
-		ContactManifold2D contactManifold;
+		ContactManifold2D manifold;
 
 		// TODO: Differentiate static and dynamic friction.
 		float32 combinedFriction;

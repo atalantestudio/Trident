@@ -7,11 +7,8 @@
 
 namespace Trident {
 	static void queryEdgeDirections(const RigidBody2DComponent& referenceBody, const RigidBody2DComponent& incidentBody, const Hull2D& referenceHull, const Hull2D& incidentHull, SAT2DOutput& output) {
-		// Relative rotation between A and B.
-		const mat2x2<float32> R = mat2x2<float32>::rotation(incidentBody.rotation - referenceBody.rotation);
-
-		// TODO(physics/2d/rotation-signs): Use correct sign (inverted in the RigidBody2DComponent).
-		const mat2x2<float32> RA = mat2x2<float32>::rotation(-referenceBody.rotation);
+		const mat2x2<float32> RBA = mat2x2<float32>::rotation(referenceBody.rotation - incidentBody.rotation);
+		const mat2x2<float32> RA = mat2x2<float32>::rotation(referenceBody.rotation);
 
 		uint32 edgeIndex = 0;
 
@@ -20,7 +17,7 @@ namespace Trident {
 			const vec2<float32> a = referenceHull.vertices[edge.indexA];
 			const vec2<float32> b = referenceHull.vertices[edge.indexB];
 			const vec2<float32> d = edgeNormalClockwise(a, b);
-			const vec2<float32> s = incidentHull.support(-d * R);
+			const vec2<float32> s = incidentHull.support(-d * RBA);
 			const vec2<float32> sT = multiplyTransform(s, incidentBody.world);
 
 			// NOTE
@@ -50,13 +47,6 @@ namespace Trident {
 		}
 	}
 
-	// Separating Axis Theorem algorithm implementation in 2D.
-	// 
-	// TODO: Basic optimizations:
-	// - Don't test the same separating axis multiple times
-	// - Don't test parallel axes (https://dyn4j.org/2010/01/sat)
-	// - Reuse the separation axis from the last run to make the algorithm O(1) in non-intersection cases.
-	//   But what if the separation axis changes e.g. due to rotation?
 	SAT2DOutput SAT2D(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB) {
 		SAT2DOutput output{};
 		output.separation = min<float32>();
@@ -73,7 +63,7 @@ namespace Trident {
 			return output;
 		}
 
-		output.axis *= mat2x2<float32>::rotation(-output.referenceBody->rotation);
+		output.axis *= mat2x2<float32>::rotation(output.referenceBody->rotation);
 
 		return output;
 	}
@@ -89,7 +79,7 @@ namespace Trident {
 		}
 
 		// TODO: Since the incident body is always the circle, does the axis need to be corrected?
-		output.axis *= mat2x2<float32>::rotation(-output.incidentBody->rotation);
+		output.axis *= mat2x2<float32>::rotation(output.referenceBody->rotation);
 
 		return output;
 	}

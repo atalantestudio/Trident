@@ -9,7 +9,7 @@ namespace Trident {
 			world =
 				mat3x3<float32>::translation(-centroid) *
 				mat3x3<float32>::scaling(scale) *
-				mat3x3<float32>::rotation(-rotation) *
+				mat3x3<float32>::rotation(rotation) *
 				mat3x3<float32>::translation(position);
 		}
 
@@ -27,7 +27,9 @@ namespace Trident {
 			vec2<float32> r
 		) {
 			linearVelocity += j * inverseMass;
-			angularVelocity += parallelogramArea(r, j) * inverseInertia;
+
+			// Subtract to get a clockwise rotation.
+			angularVelocity -= parallelogramArea(r, j) * inverseInertia;
 		}
 
 		// TODO: Use svec2<float32> instead.

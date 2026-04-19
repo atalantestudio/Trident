@@ -4,9 +4,16 @@
 #include "pch.hpp"
 
 #include "Engine/API/Physics/GJK2DConditional.hpp"
-#include "Engine/API/Physics/support.hpp"
 
 namespace Trident {
+	// Returns the farthest point on `A` along `d`, in world-space.
+	inline static vec2<float32> support(const RigidBody2DComponent& A, const Hull2D& hull, vec2<float32> d) {
+		const mat2x2<float32> inverseRotation = mat2x2<float32>::rotation(-A.rotation);
+		const vec2<float32> s = hull.support(d * inverseRotation);
+
+		return multiplyTransform(s, A.world);
+	}
+
 	static void handleSimplex1(sim2<float32>& s, vec2<float32>& d) {
 		const vec2<float32> a = s[1];
 		const vec2<float32> b = s[0];

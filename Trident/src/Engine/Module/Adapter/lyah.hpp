@@ -316,18 +316,18 @@ namespace Trident {
 	using sim2 = sim<2, T>;
 
 	// Returns the area of the parallelogram formed by `a` and `b`.
-	template<std::size_t C, typename T>
-	inline T parallelogramArea(const lyah::vec<C, T>& a, const lyah::vec<C, T>& b) {
+	template<typename T>
+	inline T parallelogramArea(vec<2, T> a, vec<2, T> b) {
 		return a[0] * b[1] - a[1] * b[0];
 	}
 
 	template<typename T>
-	inline lyah::vec<2, T> perpendicularLeft(const lyah::vec<2, T>& a) {
+	inline vec<2, T> perpendicularLeft(vec<2, T> a) {
 		return {-a[1], a[0]};
 	}
 
 	template<typename T>
-	inline lyah::vec<2, T> perpendicularRight(const lyah::vec<2, T>& a) {
+	inline vec<2, T> perpendicularRight(vec<2, T> a) {
 		return {a[1], -a[0]};
 	}
 

@@ -157,7 +157,7 @@ namespace Trident {
 			2,
 			createRigidBody({
 				.position = {1.0_m, 6.0_m},
-				.rotation = 0.3_rad,
+				.rotation = -0.3_rad,
 				.scale = {14.0f, 0.5f},
 				.mass = max<float32>(),
 				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
@@ -400,7 +400,7 @@ namespace Trident {
 					1,
 					createRigidBody({
 						.position = {-4.0_m, 3.2_m},
-						.rotation = radians(-20.0_deg),
+						.rotation = radians(20.0_deg),
 						.scale = {20.0f, 0.5f},
 						.mass = max<float32>(),
 						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
@@ -414,7 +414,7 @@ namespace Trident {
 					2,
 					createRigidBody({
 						.position = {8.0_m, 0.5_m},
-						.rotation = radians(20.0_deg),
+						.rotation = radians(-20.0_deg),
 						.scale = {5.0f, 0.5f},
 						.mass = max<float32>(),
 						.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
@@ -475,7 +475,7 @@ namespace Trident {
 			1,
 			createRigidBody({
 				.position = {-2.0_m, 11.0_m},
-				.rotation = -0.25_rad,
+				.rotation = 0.25_rad,
 				.scale = {13.0f, 0.25f},
 				.mass = max<float32>(),
 				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
@@ -503,7 +503,7 @@ namespace Trident {
 			3,
 			createRigidBody({
 				.position = {2.0_m, 7.0_m},
-				.rotation = 0.25_rad,
+				.rotation = -0.25_rad,
 				.scale = {13.0f, 0.25f},
 				.mass = max<float32>(),
 				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
@@ -531,7 +531,7 @@ namespace Trident {
 			5,
 			createRigidBody({
 				.position = {-2.0_m, 3.0_m},
-				.rotation = -0.25_rad,
+				.rotation = 0.25_rad,
 				.scale = {13.0f, 0.25f},
 				.mass = max<float32>(),
 				.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
