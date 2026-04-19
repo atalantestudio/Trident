@@ -24,14 +24,12 @@ namespace Trident {
 
 				renderer.setScene(&clusteredScene);
 
-				cameraController.setAspectRatio(getApplication()->getWindow()->getAspectRatio());
-				cameraController.updateProjection();
-
-				// TODO: The projection-view matrix doesn't seem to be correct on the first frame.
+				cameraController.getCamera().aspectRatio = getApplication()->getWindow()->getAspectRatio();
+				cameraController.getCamera().updateProjection();
 				cameraController.getCamera().updateView();
 				cameraController.getCamera().updateProjectionView();
 
-				renderer.setCameraController<PerspectiveCamera>(&cameraController);
+				renderer.setCameraController<PerspectiveCamera3D>(&cameraController);
 			}
 
 			void update(float32 deltaTime, float32 inverseDeltaTime) override {
@@ -89,14 +87,14 @@ namespace Trident {
 				const float32 yaw = static_cast<float32>(event.getX());
 				const vec3<float32> rotation = {pitch, yaw, 0.0_deg};
 
-				cameraController.addAngularMotion(radians(rotation));
+				cameraController.accumulateAngularMotion(radians(rotation));
 
 				return true;
 			}
 
 			bool onWindowResize(WindowResizeEvent& event) {
-				cameraController.setAspectRatio(getApplication()->getWindow()->getAspectRatio());
-				cameraController.updateProjection();
+				cameraController.getCamera().aspectRatio = getApplication()->getWindow()->getAspectRatio();
+				cameraController.getCamera().updateProjection();
 
 				renderer.updateViewport();
 
@@ -110,7 +108,7 @@ namespace Trident {
 					return;
 				}
 
-				PerspectiveCamera& camera = cameraController.getCamera();
+				PerspectiveCamera3D& camera = cameraController.getCamera();
 
 				const float32 forward = static_cast<float32>(window.isKeyDown(KeyCode::Z));
 				const float32 back = static_cast<float32>(window.isKeyDown(KeyCode::S));
@@ -125,7 +123,7 @@ namespace Trident {
 
 				const vec3<float32> wishdir = normalized(wishvel) * MOVEMENT_SPEED * deltaTime;
 
-				camera.setPosition(camera.getPosition() + wishdir);
+				camera.position += wishdir;
 			}
 
 		private:

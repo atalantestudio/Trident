@@ -4,23 +4,19 @@
 #pragma once
 
 #include "Engine/API/Camera/Controller/CameraController.hpp"
-#include "Engine/API/Camera/PerspectiveCamera.hpp"
+#include "Engine/API/Camera/3D/PerspectiveCamera3D.hpp"
 
 namespace Trident {
-	class FlyCameraController : public CameraController<PerspectiveCamera> {
+	class FlyCameraController : public CameraController<PerspectiveCamera3D> {
 		private:
 			static constexpr float32 ROTATION_SPEED = 5.0f;
 
 		public:
 			FlyCameraController() {
-				camera.setPosition({0.0_m, 0.0_m, -0.4_m});
-				camera.setFieldOfView(radians(60.0_deg));
-				camera.setNearPlane(0.01_m);
-				camera.setFarPlane(100.0_m);
-			}
-
-			void setAspectRatio(float32 aspectRatio) {
-				camera.setAspectRatio(aspectRatio);
+				camera.position = {0.0_m, 0.0_m, -0.4_m};
+				camera.fieldOfView = radians(60.0_deg);
+				camera.nearPlane = 0.01_m;
+				camera.farPlane = 100.0_m;
 			}
 
 			void updateProjection() {
@@ -29,7 +25,7 @@ namespace Trident {
 
 			void update(float32 deltaTime) override {
 				// camera.updatePosition(linearMotionOffset * deltaTime);
-				camera.updateOrientation(svec3<float32>(angularMotionOffset * deltaTime));
+				camera.updateOrientation(svec3<float32>(angularMotionOffset /* * deltaTime */));
 
 				camera.updateView();
 				camera.updateProjectionView();
@@ -43,8 +39,8 @@ namespace Trident {
 			} */
 
 			// NOTE: `motion` must be given in radians.
-			void addAngularMotion(const vec3<float32>& motion) {
-				angularMotionOffset += motion * ROTATION_SPEED;
+			void accumulateAngularMotion(const vec3<float32>& motion) {
+				angularMotionOffset += motion;// * ROTATION_SPEED;
 			}
 
 		private:

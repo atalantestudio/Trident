@@ -25,6 +25,7 @@ namespace Trident {
 		// TODO(physics/3d/contact-id)
 
 		float32 accumulatedNormalImpulse;
-		float32 accumulatedTangentImpulse;
+		float32 accumulatedTangent0Impulse;
+		float32 accumulatedTangent1Impulse;
 	};
 }

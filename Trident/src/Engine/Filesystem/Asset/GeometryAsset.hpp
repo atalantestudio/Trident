@@ -40,6 +40,7 @@ namespace Trident {
 
 		sequence<Edge3D> hull3DEdges;
 		sequence<Face3D> hull3DFaces;
+		sequence<uint16> hull3DFaceEdgeIndices;
 
 		/// In 2D, the wireframe is rendered with the `LINE_STRIP` topology.
 		/// Geometry hulls are not guaranteed to support wireframe rendering.
@@ -83,6 +84,7 @@ namespace Trident {
 		uint16 edgeCount;
 
 		uint16 faceCount;
+		uint16 faceEdgeIndexCount;
 		uint16 lineIndexCount;
 		Hull3DType hullType;
 	};
@@ -102,9 +104,10 @@ namespace Trident {
 				hullType(descriptor.hullType),
 				hullCentroid(descriptor.hullCentroid),
 				hullRadius(descriptor.hullRadius),
-				hull2DLineIndices(descriptor.hull2DLineIndices),
 				hull3DEdges(descriptor.hull3DEdges),
 				hull3DFaces(descriptor.hull3DFaces),
+				hull3DFaceEdgeIndices(descriptor.hull3DFaceEdgeIndices),
+				hull2DLineIndices(descriptor.hull2DLineIndices),
 				hull3DLineIndices(descriptor.hull3DLineIndices)
 			{}
 
@@ -156,16 +159,20 @@ namespace Trident {
 				return hullRadius;
 			}
 
-			inline const sequence<uint32>& getHull2DLineIndices() const {
-				return hull2DLineIndices;
-			}
-
 			inline const sequence<Edge3D>& getHull3DEdges() const {
 				return hull3DEdges;
 			}
 
 			inline const sequence<Face3D>& getHull3DFaces() const {
 				return hull3DFaces;
+			}
+
+			inline const sequence<uint16>& getHull3DFaceEdgeIndices() const {
+				return hull3DFaceEdgeIndices;
+			}
+
+			inline const sequence<uint32>& getHull2DLineIndices() const {
+				return hull2DLineIndices;
 			}
 
 			inline const sequence<uint16>& getHull3DLineIndices() const {
@@ -184,9 +191,10 @@ namespace Trident {
 			uint8 hullType;
 			svec3<float32> hullCentroid;
 			float32 hullRadius;
-			sequence<uint32> hull2DLineIndices;
 			sequence<Edge3D> hull3DEdges;
 			sequence<Face3D> hull3DFaces;
+			sequence<uint16> hull3DFaceEdgeIndices;
+			sequence<uint32> hull2DLineIndices;
 			sequence<uint16> hull3DLineIndices;
 	};
 }

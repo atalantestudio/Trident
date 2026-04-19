@@ -342,6 +342,7 @@ namespace Trident {
 			.flags = {},
 			.hullLineIndices = {},
 			.hullEdges = {},
+			.hullFaceEdgeIndices = {},
 			.hullFaces = {},
 			.hull = {},
 		};

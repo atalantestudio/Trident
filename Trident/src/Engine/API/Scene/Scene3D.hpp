@@ -112,6 +112,7 @@ namespace Trident {
 			sequence<Hull3D> hulls;
 			sequence<Edge3D> hullEdges;
 			sequence<Face3D> hullFaces;
+			sequence<uint16> hullFaceEdgeIndices;
 
 		private:
 			std::vector<Shader> materialShaders;

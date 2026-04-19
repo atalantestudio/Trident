@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Camera/PerspectiveCamera.hpp"
+#include "Engine/API/Camera/3D/PerspectiveCamera3D.hpp"
 #include "Engine/API/Scene/Scene3D.hpp"
 #include "Engine/ECS/Component/GeometryComponent.hpp"
 #include "Engine/ECS/Component/MaterialComponent.hpp"
@@ -22,6 +22,9 @@ namespace Trident {
 				mat4x4<float32> world;
 				mat3x3<float32> normal;
 			};
+
+		public:
+			static constexpr index DEBUG_MAX_CONTACTS = 16;
 
 		public:
 			void build() override {
@@ -44,8 +47,14 @@ namespace Trident {
 				debugHullWireframePipelineLayout = createDebugHullWireframePipelineLayout();
 				debugHullWireframePipeline = createDebugHullWireframePipeline();
 
+				debugContactManifoldPipelineLayout = createDebugContactManifoldPipelineLayout();
+				debugContactManifoldPipeline = createDebugContactManifoldPipeline();
+
 				cameraBuffer = createCameraBuffer();
 				cameraMappedRange = cameraBuffer->map(0, cameraBuffer->getSize());
+
+				debugContactManifoldBuffer = createDebugContactManifoldBuffer();
+				debugContactRange = debugContactManifoldBuffer->map(0, debugContactManifoldBuffer->getSize());
 
 				imageSampler = createImageSampler();
 			}
@@ -152,7 +161,7 @@ namespace Trident {
 				sequence<ref<DescriptorSet>> descriptorSets = {vertexDescriptorSet, nullptr};
 				uint32 rigidBodyComponentIndex = 0;
 
-				while (rigidBodyComponentIndex < rigidBodyComponentPool.componentCount) {
+				/* while (rigidBodyComponentIndex < rigidBodyComponentPool.componentCount) {
 					const Entity entity = rigidBodyComponentPool.componentIndexToEntity[rigidBodyComponentIndex];
 					const GeometryComponent geometryComponent = geometryComponentPool.components[geometryComponentPool.entityToComponentIndex[entity]];
 					const Geometry3D& geometry = scene->geometries[geometryComponent.geometryIndex];
@@ -171,15 +180,15 @@ namespace Trident {
 					commandEncoder->draw(indexRange.count, 1, indexRange.offset, rigidBodyComponentIndex);
 
 					rigidBodyComponentIndex += 1;
-				}
+				} */
 
 				if (debugHullWireframe) {
-					rigidBodyComponentIndex = 0;
-
 					commandEncoder->bindGraphicsPipeline(debugHullWireframePipeline);
 					commandEncoder->bindDescriptorSets(debugHullWireframePipelineLayout, 0, vertexDescriptorSet);
 					commandEncoder->bindVertexBuffer(0, instanceBuffer, 0, sizeof(Instance));
 					commandEncoder->bindIndexBuffer<uint16>(debugHullWireframeBuffer, 0);
+
+					uint32 rigidBodyComponentIndex = 0;
 
 					while (rigidBodyComponentIndex < rigidBodyComponentPool.componentCount) {
 						const Entity entity = rigidBodyComponentPool.componentIndexToEntity[rigidBodyComponentIndex];
@@ -200,6 +209,13 @@ namespace Trident {
 					}
 				}
 
+				if (debugContactManifolds) {
+					commandEncoder->bindGraphicsPipeline(debugContactManifoldPipeline);
+					commandEncoder->bindDescriptorSets(debugContactManifoldPipelineLayout, 0, vertexDescriptorSet);
+					commandEncoder->bindVertexBuffer(0, debugContactManifoldBuffer, 0, sizeof(svec3<float32>));
+					commandEncoder->draw(contactCount, 1, 0, 0);
+				}
+
 				commandEncoder->endRenderPass();
 			}
 
@@ -215,10 +231,10 @@ namespace Trident {
 			}
 
 			void updateCamera() {
-				const PerspectiveCamera& camera = getCameraController<PerspectiveCamera>().getCamera();
+				const PerspectiveCamera3D& camera = getCameraController<PerspectiveCamera3D>().getCamera();
 
 				cameraMappedRange->projectionView = camera.getProjectionView();
-				cameraMappedRange->position = camera.getPosition();
+				cameraMappedRange->position = camera.position;
 			}
 
 			void setWorld(Entity entity, const mat4x4<float32>& world) const {
@@ -299,8 +315,10 @@ namespace Trident {
 			}
 
 			ref<PipelineLayout> createDebugHullWireframePipelineLayout() const;
+			ref<PipelineLayout> createDebugContactManifoldPipelineLayout() const;
 
 			ref<GraphicsPipeline> createDebugHullWireframePipeline() const;
+			ref<GraphicsPipeline> createDebugContactManifoldPipeline() const;
 
 			ref<Image> createColorImage() const {
 				const Extent2D extent = getSwapchain()->getExtent();
@@ -435,6 +453,7 @@ namespace Trident {
 			}
 
 			ref<Buffer<uint16>> createDebugHullWireframeBuffer() const;
+			ref<Buffer<svec3<float32>>> createDebugContactManifoldBuffer() const;
 
 			void createMaterialObjects();
 
@@ -532,14 +551,17 @@ namespace Trident {
 
 			sequence<ref<PipelineLayout>> materialPipelineLayouts;
 			ref<PipelineLayout> debugHullWireframePipelineLayout;
+			ref<PipelineLayout> debugContactManifoldPipelineLayout;
 
 			sequence<ref<GraphicsPipeline>> materialPipelines;
 			ref<GraphicsPipeline> debugHullWireframePipeline;
+			ref<GraphicsPipeline> debugContactManifoldPipeline;
 
 			ref<Buffer<uint8>> vertexBuffer;
 			ref<Buffer<Instance>> instanceBuffer;
 			ref<Buffer<Camera>> cameraBuffer;
 			ref<Buffer<uint16>> debugHullWireframeBuffer;
+			ref<Buffer<svec3<float32>>> debugContactManifoldBuffer;
 
 			ref<Image> colorImage;
 			ref<Image> depthStencilImage;
@@ -554,6 +576,12 @@ namespace Trident {
 			Camera* cameraMappedRange = nullptr;
 			Instance* instanceMappedRange = nullptr;
 
+		public:
+			svec3<float32>* debugContactRange = nullptr;
+			uint32 contactCount = 0;
+
+		private:
 			bool debugHullWireframe = true;
+			bool debugContactManifolds = true;
 	};
 }

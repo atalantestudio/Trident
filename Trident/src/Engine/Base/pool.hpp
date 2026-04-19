@@ -18,6 +18,12 @@ namespace Trident {
 				return _elements[index];
 			}
 
+			inline ElementType& operator[](index index) {
+				DEBUG_ASSERT(index < _count);
+
+				return _elements[index];
+			}
+
 			inline void add(const ElementType& element) {
 				DEBUG_ASSERT(_count < ElementCount);
 
@@ -33,7 +39,7 @@ namespace Trident {
 			}
 
 		private:
-			ElementType _elements[ElementCount] = nullptr;
+			ElementType _elements[ElementCount]{};
 			index _count = 0;
 	};
 }

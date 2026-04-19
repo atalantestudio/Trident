@@ -21,6 +21,7 @@ namespace Trident {
 
 		// Support point on the incident body, in the direction opposite to the reference edge's normal.
 		// This is the closest point to the reference edge.
+		// TODO: This is only used in the Circle-ConvexHull implementation. Remove in ConvexHull-ConvexHull cases.
 		vec2<float32> incidentSupportPoint;
 
 		const RigidBody2DComponent* referenceBody;

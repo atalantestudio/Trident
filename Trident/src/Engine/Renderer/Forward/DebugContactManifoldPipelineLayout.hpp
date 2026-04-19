@@ -1,0 +1,17 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
+#pragma once
+
+#include "Engine/Renderer/Forward/Renderer.hpp"
+
+namespace Trident {
+	ref<PipelineLayout> ForwardRenderer::createDebugContactManifoldPipelineLayout() const {
+		return createPipelineLayout({
+			.descriptorSetLayouts = {vertexDescriptorSetLayout},
+			#if defined(BUILD_MODE_DEBUG)
+				.name = "Debug contact manifold",
+			#endif
+		});
+	}
+}

@@ -216,6 +216,7 @@ namespace Trident {
 		sceneAssetDescriptor.hullCount = 0;
 		sceneAssetDescriptor.hullEdgeCount = 0;
 		sceneAssetDescriptor.hullFaceCount = 0;
+		sceneAssetDescriptor.hullFaceEdgeIndexCount = 0;
 		sceneAssetDescriptor.staticBuffer = sequence<uint8>(sceneAssetDescriptor.staticVertexCount * sizeof(svec2<float32>) + sceneAssetDescriptor.staticIndexCount * sizeof(uint16));
 
 		const uint32 geometryAssetCount = stream.read<uint32>();
@@ -249,6 +250,7 @@ namespace Trident {
 				sceneAssetDescriptor.hullCount += 1;
 				sceneAssetDescriptor.hullEdgeCount += static_cast<uint32>(geometryAsset->getHull3DEdges().count());
 				sceneAssetDescriptor.hullFaceCount += static_cast<uint32>(geometryAsset->getHull3DFaces().count());
+				sceneAssetDescriptor.hullFaceEdgeIndexCount += static_cast<uint16>(geometryAsset->getHull3DFaceEdgeIndices().count());
 				sceneAssetDescriptor.hullLineIndexCount += static_cast<uint32>(geometryAsset->getHull3DLineIndices().count());
 			}
 		}

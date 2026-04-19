@@ -32,15 +32,13 @@ namespace Trident {
 		uint32 faceIndex = 0;
 
 		while (faceIndex < hullA.faces.count()) {
-			const Face3D faceA = hullA.faces[faceIndex];
+			const Face3D& faceA = hullA.faces[faceIndex];
 			const vec3<float32> d = vec3<float32>(faceA.normal);
 			const vec3<float32> s = support(hullB, -d * R);
 			const vec3<float32> sT = multiplyTransform(s, rigidBodyB.world);
 
 			const vec3<float32> normal = vec3<float32>(faceA.normal) * rigidBodyA.orientation;
-
-			// TODO: In 2D the base normal is needed but here it doesn't work it it's not the transformed normal.
-			const vec3<float32> offset = multiplyTransform(faceA.offset * vec3<float32>(normal), rigidBodyA.world);
+			const float32 offset = length(multiplyTransform(faceA.offset * vec3<float32>(faceA.normal), rigidBodyA.world));
 
 			const float32 separation = signedDistanceFP(normal, offset, sT);
 

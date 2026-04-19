@@ -6,48 +6,10 @@
 #include "Engine/API/Physics/3D/Collider.hpp"
 #include "Engine/API/Physics/3D/FaceFeature3D.hpp"
 #include "Engine/API/Physics/3D/SAT3D.hpp"
+#include "Engine/API/Physics/3D/SutherlandHodgman3D.hpp"
 
 namespace Trident {
-	static uint32 findIncidentFaceIndex(const Hull3D& incidentHull, vec3<float32> referenceFaceNormal) {
-		float32 minValue = max<float32>();
-		uint32 minFaceIndex = 0;
-		uint32 faceIndex = 0;
-
-		while (faceIndex < incidentHull.faces.count()) {
-			const Face3D face = incidentHull.faces[faceIndex];
-			const float32 value = dot(referenceFaceNormal, vec3<float32>(face.normal));
-
-			if (value < minValue) {
-				minValue = value;
-				minFaceIndex = faceIndex;
-			}
-
-			faceIndex += 1;
-		}
-
-		return minFaceIndex;
-	}
-
-	// NOTE: The twin edges of the edges belonging to the face are not included.
-	std::vector<uint32> findFaceSideEdgeIndices(const Hull3D& hull, uint32 faceIndex) {
-		std::vector<uint32> edgeIndices;
-		uint32 edgeIndex = 0;
-
-		while (edgeIndex < hull.edges.count()) {
-			const Edge3D edge = hull.edges[edgeIndex];
-
-			if (edge.faceIndex == faceIndex) {
-				edgeIndices.emplace_back(edgeIndex);
-			}
-
-			edgeIndex += 1;
-		}
-
-		return edgeIndices;
-	}
-
 	static std::vector<Face3D> findReferenceSideFaces(const Hull3D& referenceHull, uint32 referenceFaceIndex) {
-		// This list SHOULD contain unique faces.
 		std::vector<Face3D> sideFaces;
 
 		uint32 edgeIndex = 0;
@@ -69,7 +31,7 @@ namespace Trident {
 					DEBUG_ASSERT(otherEdgeIndex < referenceHull.edges.count());
 				}
 
-				const Face3D sideFace = referenceHull.faces[referenceHull.edges[otherEdgeIndex].faceIndex];
+				const Face3D& sideFace = referenceHull.faces[referenceHull.edges[otherEdgeIndex].faceIndex];
 
 				sideFaces.emplace_back(sideFace);
 			}
@@ -80,73 +42,6 @@ namespace Trident {
 		return sideFaces;
 	}
 
-	/// See https://en.wikipedia.org/wiki/Sutherland%E2%80%93Hodgman_algorithm.
-	std::vector<EdgeFeature3D> SutherlandHodgman(const SATOutput3D& sat, std::vector<EdgeFeature3D> incidentEdges, const std::vector<Face3D>& referenceSideFaces) {
-		uint8 clippedEdgeCount = 0;
-		uint8 previousEdgeCount = (uint8) incidentEdges.size();
-
-		for (const Face3D referenceFace : referenceSideFaces) {
-			const vec3<float32> transformedFaceNormal = vec3<float32>(referenceFace.normal) * sat.referenceBody->orientation;
-
-			// TODO: Fix face offset transformation.
-			// const vec3<float32> transformedFaceOffset = multiplyTransform(referenceFace.offset * vec3<float32>(transformedFaceNormal), sat.referenceBody->world);
-			const vec3<float32> transformedFaceOffset = referenceFace.offset * vec3<float32>(transformedFaceNormal);
-
-			std::vector<EdgeFeature3D> clippedEdges(8);
-			uint8 incidentEdgeIndex = 0;
-
-			clippedEdgeCount = 0;
-
-			while (incidentEdgeIndex < previousEdgeCount) {
-				const EdgeFeature3D& incidentEdge = incidentEdges[incidentEdgeIndex];
-				const ClipVertex3D& a = incidentEdge.edge[0];
-				const ClipVertex3D& b = incidentEdge.edge[1];
-
-				const float32 distanceA = signedDistanceFP(transformedFaceNormal, transformedFaceOffset, a.position);
-				const float32 distanceB = signedDistanceFP(transformedFaceNormal, transformedFaceOffset, b.position);
-
-				EdgeFeature3D& clippedEdge = clippedEdges[clippedEdgeCount];
-				clippedEdge.vertexCount = 0;
-
-				if (distanceA <= 0.0f) {
-					// Keep vertices that are below the face.
-					clippedEdge.edge[clippedEdge.vertexCount] = a;
-					clippedEdge.vertexCount += 1;
-				}
-
-				if (distanceB <= 0.0f) {
-					// Keep vertices that are below the face.
-					clippedEdge.edge[clippedEdge.vertexCount] = b;
-					clippedEdge.vertexCount += 1;
-				}
-
-				if (distanceA * distanceB < 0.0f) {
-					// If the vertices are on different sides of the faces,
-					// generate a new vertex by interpolating between the computed distances.
-					DEBUG_ASSERT(clippedEdge.vertexCount < 2);
-
-					const float32 t = distanceA / (distanceA - distanceB);
-
-					ClipVertex3D& c = clippedEdge.edge[clippedEdge.vertexCount];
-					c.position = lerp(a.position, b.position, t);
-
-					clippedEdge.vertexCount += 1;
-				}
-
-				incidentEdgeIndex += 1;
-				clippedEdgeCount += 1;
-			}
-
-			incidentEdges = clippedEdges;
-
-			previousEdgeCount = clippedEdgeCount;
-		}
-
-		incidentEdges.resize(clippedEdgeCount);
-
-		return incidentEdges;
-	}
-
 	bool PolygonPolygon(const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, const Hull3D& hullA, const Hull3D& hullB, ContactManifold3D* contactManifold) {
 		const SATOutput3D sat = SAT3D(rigidBodyA, rigidBodyB, hullA, hullB);
 
@@ -154,64 +49,61 @@ namespace Trident {
 			return false;
 		}
 
-		const uint32 incidentFaceIndex = findIncidentFaceIndex(*sat.incidentHull, sat.axis);
-		const std::vector<uint32> incidentFaceSideEdgeIndices = findFaceSideEdgeIndices(*sat.incidentHull, incidentFaceIndex);
+		// TODO(physics/3d/edge-contact): Face contacts are assumed for now. Add support for edge contacts.
+
+		contactManifold->normal = sat.axis;
+
+		// Find the index of the incident face.
+		uint32 incidentFaceIndex = max<uint32>();
 
 		const std::vector<Face3D> referenceSideFaces = findReferenceSideFaces(*sat.referenceHull, sat.referenceFaceIndex);
 
-		std::vector<EdgeFeature3D> incidentEdges(incidentFaceSideEdgeIndices.size());
-		uint32 edgeIndex = 0;
+		{
+			float32 angle;
+			float32 minAngle = max<float32>();
+			uint32 faceIndex = 0;
 
-		while (edgeIndex < incidentFaceSideEdgeIndices.size()) {
-			const uint32 firstEdgeIndex = incidentFaceSideEdgeIndices[edgeIndex];
-			const Edge3D edge = sat.incidentHull->edges[firstEdgeIndex];
+			while (faceIndex < sat.incidentHull->faces.count()) {
+				angle = dot(vec3<float32>(sat.incidentHull->faces[faceIndex].normal), sat.axis);
 
-			uint16 indexA = edge.originVertexIndex;
-			uint16 indexB;
+				if (angle < minAngle) {
+					minAngle = angle;
+					incidentFaceIndex = faceIndex;
+				}
 
-			if (firstEdgeIndex & 1) {
-				indexB = sat.incidentHull->edges[firstEdgeIndex - 1].originVertexIndex;
+				faceIndex += 1;
 			}
-			else {
-				indexB = sat.incidentHull->edges[firstEdgeIndex + 1].originVertexIndex;
-			}
+		}
 
-			incidentEdges[edgeIndex].vertexCount = 2;
-			incidentEdges[edgeIndex].edge[0].position = multiplyTransform(vec3<float32>(sat.incidentHull->vertexPositions[indexA]), sat.incidentBody->world);
-			incidentEdges[edgeIndex].edge[1].position = multiplyTransform(vec3<float32>(sat.incidentHull->vertexPositions[indexB]), sat.incidentBody->world);
+		const Face3D& incidentFace = sat.incidentHull->faces[incidentFaceIndex];
+
+		pool<ClipVertex3D, MAX_FACE_VERTEX_COUNT> incidentFaceVertices{};
+
+		uint16 edgeIndex = 0;
+
+		while (edgeIndex < incidentFace.edgeIndexRange.count) {
+			const Edge3D edge = sat.incidentHull->edges[incidentFace.edgeIndexRange.offset + edgeIndex];
+
+			ClipVertex3D clipVertex{};
+			clipVertex.position = multiplyTransform(vec3<float32>(sat.incidentHull->vertexPositions[edge.originVertexIndex]), sat.incidentBody->world);
+
+			incidentFaceVertices.add(clipVertex);
 
 			edgeIndex += 1;
 		}
 
-		std::vector<EdgeFeature3D> clippedEdges = SutherlandHodgman(sat, incidentEdges, referenceSideFaces);
+		pool<ClipVertex3D, 8> contactPool = SutherlandHodgman3D(sat, incidentFaceVertices, referenceSideFaces);
 
-		// TODO: Discard points that are above the reference face.
-
-		contactManifold->normal = sat.axis;
-		contactManifold->contactCount = 0;
-
-		// Move the contact points onto the reference face.
-		for (EdgeFeature3D& clippedEdge : clippedEdges) {
-			clippedEdge.edge[0].position -= sat.axis * sat.separation;
-			clippedEdge.edge[1].position -= sat.axis * sat.separation;
-		}
-
-		pool<vec3<float32>, 8> contactPool;
-
-		// TODO(physics/3d/contact-pool): This can be removed if we can get a vertex list from Sutherland-Hodgman.
+		// Move the contacts onto the reference face.
 		{
-			for (const EdgeFeature3D& edge : clippedEdges) {
-				if (edge.vertexCount >= 1) {
-					contactPool.add(edge.edge[0].position);
+			uint8 contactIndex = 0;
 
-					if (edge.vertexCount >= 2) {
-						contactPool.add(edge.edge[1].position);
-					}
-				}
+			while (contactIndex < contactPool.count()) {
+				contactPool[contactIndex].position -= sat.axis * sat.separation;
+
+				contactIndex += 1;
 			}
 		}
-
-		DEBUG_ASSERT(contactPool.count() > 0);
 
 		if (contactPool.count() <= 4) {
 			// No need to reduce the contact pool.
@@ -219,7 +111,7 @@ namespace Trident {
 			index contactIndex = 0;
 
 			while (contactIndex < contactPool.count()) {
-				contactManifold->contacts[contactIndex].position = contactPool[contactIndex];
+				contactManifold->contacts[contactIndex].position = contactPool[contactIndex].position;
 				contactManifold->contacts[contactIndex].separation = sat.separation;
 
 				contactIndex += 1;
@@ -246,7 +138,7 @@ namespace Trident {
 			float32 maxAngle = min<float32>();
 
 			while (contactIndex < contactPool.count()) {
-				angle = dot(contactPool[contactIndex], n);
+				angle = dot(contactPool[contactIndex].position, n);
 
 				if (angle > maxAngle) {
 					maxAngle = angle;
@@ -256,7 +148,7 @@ namespace Trident {
 				contactIndex += 1;
 			}
 
-			contactManifold->contacts[0].position = contactPool[maxAngleContactIndex];
+			contactManifold->contacts[0].position = contactPool[maxAngleContactIndex].position;
 			contactManifold->contacts[0].separation = sat.separation;
 
 			contactPool.remove(maxAngleContactIndex);
@@ -272,7 +164,7 @@ namespace Trident {
 			float32 maxDistance = min<float32>();
 
 			while (contactIndex < contactPool.count()) {
-				distance = distanceSquared(a, contactPool[contactIndex]);
+				distance = distanceSquared(a, contactPool[contactIndex].position);
 
 				if (distance > maxDistance) {
 					maxDistance = distance;
@@ -282,7 +174,7 @@ namespace Trident {
 				contactIndex += 1;
 			}
 
-			contactManifold->contacts[1].position = contactPool[maxDistanceContactIndex];
+			contactManifold->contacts[1].position = contactPool[maxDistanceContactIndex].position;
 			contactManifold->contacts[1].separation = sat.separation;
 
 			contactPool.remove(maxDistanceContactIndex);
@@ -300,7 +192,7 @@ namespace Trident {
 			vec3<float32> c;
 
 			while (contactIndex < contactPool.count()) {
-				c = contactPool[contactIndex];
+				c = contactPool[contactIndex].position;
 
 				area = dot(cross(a - c, b - c) * 0.5f, sat.axis);
 
@@ -312,7 +204,7 @@ namespace Trident {
 				contactIndex += 1;
 			}
 
-			contactManifold->contacts[2].position = contactPool[maxAreaContactIndex];
+			contactManifold->contacts[2].position = contactPool[maxAreaContactIndex].position;
 			contactManifold->contacts[2].separation = sat.separation;
 
 			contactPool.remove(maxAreaContactIndex);
@@ -331,7 +223,7 @@ namespace Trident {
 			vec3<float32> d;
 
 			while (contactIndex < contactPool.count()) {
-				d = contactPool[contactIndex];
+				d = contactPool[contactIndex].position;
 
 				area = dot(cross(a - d, b - d) * 0.5f, sat.axis);
 
@@ -357,24 +249,14 @@ namespace Trident {
 				contactIndex += 1;
 			}
 
-			contactManifold->contacts[3].position = contactPool[minAreaContactIndex];
+			contactManifold->contacts[3].position = contactPool[minAreaContactIndex].position;
 			contactManifold->contacts[3].separation = sat.separation;
 
 			contactPool.remove(minAreaContactIndex);
 		}
 
-		// TODO(debug)
-		#if 0
-			index contactIndex = 0;
-
-			ENGINE_DEBUG("Contact manifold:");
-
-			while (contactIndex < contactManifold->contactCount) {
-				ENGINE_DEBUG("[]. ([])", contactIndex, contactManifold->contacts[contactIndex].position);
-
-				contactIndex += 1;
-			}
-		#endif
+		// TODO(debug): Swap contacts for LINE_STRIP visualization.
+		std::swap(contactManifold->contacts[1], contactManifold->contacts[2]);
 
 		return true;
 	}

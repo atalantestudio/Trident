@@ -68,6 +68,7 @@ namespace Trident {
 		hulls = sequence<Hull3D>(sceneAsset->getHullCount());
 		hullEdges = sequence<Edge3D>(sceneAsset->getHullEdgeCount());
 		hullFaces = sequence<Face3D>(sceneAsset->getHullFaceCount());
+		hullFaceEdgeIndices = sequence<uint16>(sceneAsset->getHullFaceEdgeIndexCount());
 
 		std::copy(staticBuffer.begin(), staticBuffer.end(), &dataBuffer[0]);
 
@@ -155,6 +156,7 @@ namespace Trident {
 		uint32 hullIndex = 0;
 		uint32 hullEdgeOffset = 0;
 		uint32 hullFaceOffset = 0;
+		uint16 hullFaceEdgeIndexOffset = 0;
 		uint32 hullLineIndexOffset = 0;
 
 		while (geometryIndex < geometries.count()) {
@@ -184,11 +186,13 @@ namespace Trident {
 
 				std::copy(geometryAsset->getHull3DEdges().begin(), geometryAsset->getHull3DEdges().end(), &hullEdges[hullEdgeOffset]);
 				std::copy(geometryAsset->getHull3DFaces().begin(), geometryAsset->getHull3DFaces().end(), &hullFaces[hullFaceOffset]);
+				std::copy(geometryAsset->getHull3DFaceEdgeIndices().begin(), geometryAsset->getHull3DFaceEdgeIndices().end(), &hullFaceEdgeIndices[hullFaceEdgeIndexOffset]);
 				std::copy(geometryAsset->getHull3DLineIndices().begin(), geometryAsset->getHull3DLineIndices().end(), pointer_cast<uint16*>(&dataBuffer[hullLineIndexByteOffset + hullLineIndexOffset * sizeof(uint16)]));
 
 				const view<svec3<float32>> vertexPositions(pointer_cast<const svec3<float32>*>(&dataBuffer[geometryVertexPositionComponentRange.offset * sizeof(float32)]), geometryVertexPositionComponentRange.count / 3);
 				const view<Edge3D> edges(&hullEdges[hullEdgeOffset], geometryAsset->getHull3DEdges().count());
 				const view<Face3D> faces(&hullFaces[hullFaceOffset], geometryAsset->getHull3DFaces().count());
+				const view<uint16> faceEdgeIndices(&hullFaceEdgeIndices[hullFaceEdgeIndexOffset], geometryAsset->getHull3DFaceEdgeIndices().count());
 				const range<uint32, uint16> lineIndexRange = {hullLineIndexOffset, static_cast<uint16>(geometryAsset->getHull3DLineIndices().count())};
 
 				hulls[hullIndex] = {
@@ -197,6 +201,7 @@ namespace Trident {
 					.vertexPositions = vertexPositions,
 					.edges = edges,
 					.faces = faces,
+					.faceEdgeIndices = faceEdgeIndices,
 					.lineIndexRange = lineIndexRange,
 					.type = static_cast<Hull3DType>(geometryAsset->getHullType()),
 				};
@@ -204,6 +209,7 @@ namespace Trident {
 				hullIndex += 1;
 				hullEdgeOffset += static_cast<uint32>(geometryAsset->getHull3DEdges().count());
 				hullFaceOffset += static_cast<uint32>(geometryAsset->getHull3DFaces().count());
+				hullFaceEdgeIndexOffset += static_cast<uint16>(geometryAsset->getHull3DFaceEdgeIndices().count());
 				hullLineIndexOffset += lineIndexRange.count;
 			}
 

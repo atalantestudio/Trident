@@ -25,6 +25,8 @@ namespace Trident {
 			EVENT_CATEGORY(EventCategory::INPUT | EventCategory::MOUSE)
 
 		private:
+			/// If the window is pointer-locked, this is the pointer delta position since the previous movement.
+			/// Otherwise, this is the current pointer position.
 			// TODO: Use vec2<sint32>.
 			const sint32 x;
 			const sint32 y;

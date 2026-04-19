@@ -30,8 +30,10 @@ namespace Trident {
 		view<Edge3D> edges;
 
 		/// The faces composing the hull.
-		/// NOTE: Cannot contain more than 65535 faces.
 		view<Face3D> faces;
+
+		/// The edge indices per face.
+		view<uint16> faceEdgeIndices;
 
 		/// Line indices used for wireframe rendering.
 		range<uint32, uint16> lineIndexRange;

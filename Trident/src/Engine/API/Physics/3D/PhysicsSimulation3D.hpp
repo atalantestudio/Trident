@@ -45,13 +45,13 @@ namespace Trident {
 			/// NOTE: Uses Semi-Implicit Euler.
 			void integrate();
 
+		public:
+			std::map<EntityPair, ContactPair3D> contactPairs;
+
 		private:
 			Scene3D* scene;
-
 			float32 deltaTime;
 			float32 inverseDeltaTime;
-
 			std::vector<EntityPair> entityPairs;
-			std::map<EntityPair, ContactPair3D> contactPairs;
 	};
 }

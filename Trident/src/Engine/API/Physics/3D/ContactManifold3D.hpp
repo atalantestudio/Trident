@@ -8,6 +8,7 @@
 namespace Trident {
 	struct ContactManifold3D {
 		/// The normal of the manifold's plane.
+		/// It points away from the reference body and towards the incident body.
 		vec3<float32> normal;
 
 		/// The tangents of the manifold's plane.

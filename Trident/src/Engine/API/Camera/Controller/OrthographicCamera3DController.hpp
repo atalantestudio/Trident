@@ -3,13 +3,13 @@
 
 #pragma once
 
-#include "Engine/API/Camera/OrthographicCamera.hpp"
+#include "Engine/API/Camera/3D/OrthographicCamera3D.hpp"
 #include "Engine/API/Event/EventDispatcher.hpp"
 #include "Engine/API/Event/Mouse/MouseWheelEvent.hpp"
 #include "Engine/API/Event/Window/WindowResizeEvent.hpp"
 
 namespace Trident {
-	// TODO: Extend CameraController<OrthographicCamera>.
+	// TODO: Extend CameraController<OrthographicCamera3D>.
 	class OrthographicCameraController {
 		private:
 			float32 aspectRatio;
@@ -19,7 +19,7 @@ namespace Trident {
 			float32 rotation;
 			float32 rotationSpeed;
 			vec4<float32> bounds;
-			OrthographicCamera camera;
+			OrthographicCamera3D camera;
 
 		public:
 			explicit OrthographicCameraController(float32 aspectRatio) :
@@ -41,7 +41,7 @@ namespace Trident {
 				return bounds;
 			}
 
-			inline const OrthographicCamera& getCamera() const {
+			inline const OrthographicCamera3D& getCamera() const {
 				return camera;
 			}
 

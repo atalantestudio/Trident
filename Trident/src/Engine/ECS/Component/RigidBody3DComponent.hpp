@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Axis.hpp"
+#include "Engine/ECS/Entity.hpp"
 
 namespace Trident {
 	struct RigidBody3DComponent {
@@ -51,10 +52,10 @@ namespace Trident {
 		quat<float32> orientation = quat<float32>::identity();
 
 		// TODO: Use svec3<float32> instead.
-		vec3<float32> linearVelocity;
+		vec3<float32> linearVelocity = {0.0_m_s, 0.0_m_s, 0.0_m_s};
 
 		// TODO: Use svec3<float32> instead.
-		vec3<float32> angularVelocity;
+		vec3<float32> angularVelocity = {0.0_rad, 0.0_rad, 0.0_rad};
 
 		float32 inverseMass;
 		mat3x3<float32> inverseInertia;
@@ -64,5 +65,8 @@ namespace Trident {
 
 		// TODO: Use svec3<float32> instead.
 		vec3<float32> force;
+
+		/// The entity owning the rigid body this body is currently resting on.
+		Entity groundEntity = max<Entity>();
 	};
 }

@@ -4,6 +4,9 @@
 #include "pch.hpp"
 
 #include "Engine/Filesystem/Asset/ImageAsset.hpp"
+#include "Engine/Renderer/Forward/DebugContactManifoldBuffer.hpp"
+#include "Engine/Renderer/Forward/DebugContactManifoldPipeline.hpp"
+#include "Engine/Renderer/Forward/DebugContactManifoldPipelineLayout.hpp"
 #include "Engine/Renderer/Forward/DebugHullWireframeBuffer.hpp"
 #include "Engine/Renderer/Forward/DebugHullWireframePipeline.hpp"
 #include "Engine/Renderer/Forward/DebugHullWireframePipelineLayout.hpp"

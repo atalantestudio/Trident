@@ -57,7 +57,7 @@ namespace Trident {
 				{
 					1,
 					createRigidBody({
-						.position = {0.6_m, 2.5_m, 0.0_m},
+						.position = {0.6_m, 1.5_m, 0.0_m},
 						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
 						.scale = {1.0f, 1.0f, 1.0f},
 						.mass = 25.0_kg,
@@ -113,6 +113,73 @@ namespace Trident {
 						.restitution = 0.0f,
 					}),
 				},
+			},
+		};
+	}
+
+	Scene3DData createPlayerMovementScene() {
+		return {
+			.staticVertexCount = 0,
+			.staticIndexCount = 0,
+			.entityCount = 2,
+			.geometryAssetIdentifiers = {
+				// TODO(debug-only): UnitBox
+				38,
+			},
+			.geometryMappings = {
+				{0, {0}},
+				{1, {0}},
+				// {2, {0}},
+			},
+			.materialMappings = {
+				// NOTE: Counting default material for visibility rendering.
+				{0, {1}},
+				{1, {1}},
+				// {2, {1}},
+			},
+			.rigidBodyMappings = {
+				// Floor
+				{
+					0,
+					createRigidBody({
+						.position = {0.0_m, -1024.0_m, 0.0_m},
+						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
+						.scale = {2048.0f, 2048.0f, 2048.0f},
+						.mass = max<float32>(),
+						.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
+						.friction = 0.2f,
+						.restitution = 0.0f,
+					}),
+				},
+
+				// Player
+				{
+					1,
+					createRigidBody({
+						.position = {0.0_m, 128.0_m, 0.0_m},
+						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
+						// .scale = {1.0f, 1.8f, 1.0f},
+						.scale = {64.0f, 64.0f, 64.0f},
+						.mass = 70.0_kg,
+						.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
+						.friction = 0.2f,
+						.restitution = 0.0f,
+					}),
+				},
+
+				// Box
+				/* {
+					2,
+					createRigidBody({
+						.position = {1.0_m, 0.5_m, 3.0_m},
+						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
+						.scale = {1.0f, 1.0f, 1.0f},
+						.mass = max<float32>(),
+						.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
+						.friction = 0.2f,
+						.restitution = 0.0f,
+					}),
+				}, */
 			},
 		};
 	}

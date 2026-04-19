@@ -3,7 +3,7 @@
 
 #include "pch.hpp"
 
-#include "Engine/API/Camera/PerspectiveCamera.hpp"
+#include "Engine/API/Camera/3D/PerspectiveCamera3D.hpp"
 #include "Engine/Renderer/Visibility/CameraBuffer.hpp"
 #include "Engine/Renderer/Visibility/CameraDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Visibility/ClusterDescriptorSetLayout.hpp"
@@ -204,10 +204,10 @@ namespace Trident {
 	}
 
 	void VisibilityRenderer::postSetCameraController() {
-		const PerspectiveCamera& camera = getCameraController<PerspectiveCamera>().getCamera();
+		const PerspectiveCamera3D& camera = getCameraController<PerspectiveCamera3D>().getCamera();
 
-		cameraMappedRange->nearPlane = camera.getNearPlane();
-		cameraMappedRange->farPlane = camera.getFarPlane();
+		cameraMappedRange->nearPlane = camera.nearPlane;
+		cameraMappedRange->farPlane = camera.farPlane;
 	}
 
 	void VisibilityRenderer::render(ref<CommandEncoder> commandEncoder) const {
@@ -373,11 +373,11 @@ namespace Trident {
 	}
 
 	void VisibilityRenderer::updateCameraPosition() const {
-		cameraMappedRange->position = getCameraController<PerspectiveCamera>().getCamera().getPosition();
+		cameraMappedRange->position = getCameraController<PerspectiveCamera3D>().getCamera().position;
 	}
 
 	void VisibilityRenderer::updateCameraProjectionView() const {
-		cameraMappedRange->projectionView = getCameraController<PerspectiveCamera>().getCamera().getProjectionView();
+		cameraMappedRange->projectionView = getCameraController<PerspectiveCamera3D>().getCamera().getProjectionView();
 	}
 
 	void VisibilityRenderer::updateViewport() const {

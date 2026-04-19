@@ -135,6 +135,7 @@ namespace Trident {
 					hullHeader.radius = data.hull.radius;
 					hullHeader.edgeCount = static_cast<uint16>(data.hullEdges.count());
 					hullHeader.faceCount = static_cast<uint16>(data.hullFaces.count());
+					hullHeader.faceEdgeIndexCount = static_cast<uint16>(data.hullFaceEdgeIndices.count());
 					hullHeader.lineIndexCount = static_cast<uint16>(data.hullLineIndices.count());
 					hullHeader.hullType = data.hull.type;
 
@@ -142,6 +143,7 @@ namespace Trident {
 						sizeof(hullHeader) +
 						hullHeader.edgeCount * sizeof(Edge3D) +
 						hullHeader.faceCount * sizeof(Face3D) +
+						hullHeader.faceEdgeIndexCount * sizeof(uint16) +
 						hullHeader.lineIndexCount * sizeof(uint16);
 				}
 
@@ -196,16 +198,23 @@ namespace Trident {
 					stream.write<float32>(hullHeader.radius);
 					stream.write<uint16>(hullHeader.edgeCount);
 					stream.write<uint16>(hullHeader.faceCount);
+					stream.write<uint16>(hullHeader.faceEdgeIndexCount);
 					stream.write<uint16>(hullHeader.lineIndexCount);
 					stream.write<Hull3DType>(hullHeader.hullType);
-					stream.jump(sizeof(uint8));
+					stream.jump(3 * sizeof(uint8));
 
 					for (const Edge3D edge : data.hullEdges) {
 						stream.write<Edge3D>(edge);
 					}
 
-					for (const Face3D face : data.hullFaces) {
-						stream.write<Face3D>(face);
+					for (const Face3D& face : data.hullFaces) {
+						stream.write<svec3<float32>>(face.normal);
+						stream.write<float32>(face.offset);
+						stream.write<range<uint16, uint16>>(face.edgeIndexRange);
+					}
+
+					for (const uint16 faceEdgeIndex : data.hullFaceEdgeIndices) {
+						stream.write<uint16>(faceEdgeIndex);
 					}
 
 					for (const uint16 lineIndex : data.hullLineIndices) {

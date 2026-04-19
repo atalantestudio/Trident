@@ -1,4 +1,4 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
@@ -6,9 +6,9 @@
 #include "Engine/API/Camera/Camera.hpp"
 
 namespace Trident {
-	class OrthographicCamera : public Camera {
+	class OrthographicCamera3D : public Camera {
 		public:
-			explicit OrthographicCamera(float32 left, float32 right, float32 bottom, float32 top, float32 nearPlane, float32 farPlane) :
+			explicit OrthographicCamera3D(float32 left, float32 right, float32 bottom, float32 top, float32 nearPlane, float32 farPlane) :
 				Camera(mat4x4<float32>::orthographic(left, right, bottom, top, nearPlane, farPlane))
 			{}
 
