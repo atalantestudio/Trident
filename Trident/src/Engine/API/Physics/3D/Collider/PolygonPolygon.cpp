@@ -57,6 +57,7 @@ namespace Trident {
 		uint32 incidentFaceIndex = max<uint32>();
 
 		const std::vector<Face3D> referenceSideFaces = findReferenceSideFaces(*sat.referenceHull, sat.referenceFaceIndex);
+		const vec3<float32> incidentFaceDirection = sat.axis * inverse(sat.incidentBody->orientation);
 
 		{
 			float32 angle;
@@ -64,7 +65,7 @@ namespace Trident {
 			uint32 faceIndex = 0;
 
 			while (faceIndex < sat.incidentHull->faces.count()) {
-				angle = dot(vec3<float32>(sat.incidentHull->faces[faceIndex].normal), sat.axis);
+				angle = dot(vec3<float32>(sat.incidentHull->faces[faceIndex].normal), incidentFaceDirection);
 
 				if (angle < minAngle) {
 					minAngle = angle;

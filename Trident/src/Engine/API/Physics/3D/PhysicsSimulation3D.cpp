@@ -13,7 +13,7 @@ namespace Trident {
 	};
 
 	inline static vec3<float32> calculateRelativeVelocity(const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, vec3<float32> rA, vec3<float32> rB) {
-		return rigidBodyB.linearVelocity + cross(rB, -rigidBodyB.angularVelocity) - rigidBodyA.linearVelocity - cross(rA, -rigidBodyA.angularVelocity);
+		return rigidBodyB.linearVelocity + cross(rB, rigidBodyB.angularVelocity) - rigidBodyA.linearVelocity - cross(rA, rigidBodyA.angularVelocity);
 	}
 
 	PhysicsSimulation3D::PhysicsSimulation3D(const Descriptor<PhysicsSimulation3D>& descriptor) :
@@ -276,9 +276,7 @@ namespace Trident {
 			const quat<float32> yaw = quat<float32>::axisAngle(UP, rigidBodyComponent.rotation[1]);
 			const quat<float32> roll = quat<float32>::axisAngle(FORWARD, rigidBodyComponent.rotation[2]);
 
-			// TODO: Fix orientation.
 			rigidBodyComponent.orientation = normalized(yaw * pitch * roll);
-
 			rigidBodyComponent.force = {0.0_N, 0.0_N, 0.0_N};
 			rigidBodyComponent.updateWorld(hull.centroid);
 

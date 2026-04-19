@@ -34,7 +34,9 @@ namespace Trident {
 			vec3<float32> r
 		) {
 			linearVelocity += j * inverseMass;
-			angularVelocity += cross(r, j) * inverseInertia;
+
+			// Subtract to get a clockwise rotation.
+			angularVelocity -= cross(r, j) * inverseInertia;
 		}
 
 		// TODO: Use svec3<float32> instead.
