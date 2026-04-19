@@ -7,22 +7,23 @@
 
 namespace Trident {
 	static vec3<float32> support(const Hull3D& hull, vec3<float32> d) {
-		float32 maxValue = dot(vec3<float32>(hull.vertexPositions[0]), d);
-		uint32 maxVertexIndex = 0;
+		float32 distance;
+		float32 maxDistance = dot(vec3<float32>(hull.vertexPositions[0]), d);
+		uint32 maxDistanceVertexIndex = 0;
 		uint32 vertexIndex = 1;
 
 		while (vertexIndex < hull.vertexPositions.count()) {
-			const float32 value = dot(vec3<float32>(hull.vertexPositions[vertexIndex]), d);
+			distance = dot(vec3<float32>(hull.vertexPositions[vertexIndex]), d);
 
-			if (value > maxValue) {
-				maxValue = value;
-				maxVertexIndex = vertexIndex;
+			if (distance > maxDistance) {
+				maxDistance = distance;
+				maxDistanceVertexIndex = vertexIndex;
 			}
 
 			vertexIndex += 1;
 		}
 
-		return vec3<float32>(hull.vertexPositions[maxVertexIndex]);
+		return vec3<float32>(hull.vertexPositions[maxDistanceVertexIndex]);
 	}
 
 	static void queryFaceDirections(SATOutput3D& output, const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, const Hull3D& hullA, const Hull3D& hullB) {
@@ -37,8 +38,8 @@ namespace Trident {
 			const vec3<float32> s = support(hullB, -d * R);
 			const vec3<float32> sT = multiplyTransform(s, rigidBodyB.world);
 
-			const vec3<float32> normal = vec3<float32>(faceA.normal) * rigidBodyA.orientation;
-			const float32 offset = length(multiplyTransform(faceA.offset * vec3<float32>(faceA.normal), rigidBodyA.world));
+			const vec3<float32> normal = d * rigidBodyA.orientation;
+			const float32 offset = length(multiplyTransform(faceA.offset * d, rigidBodyA.world));
 
 			const float32 separation = signedDistanceFP(normal, offset, sT);
 

@@ -9,8 +9,8 @@
 #include "Engine/ECS/EntityPair.hpp"
 
 namespace Trident {
-	#define ENABLE_PHYSICS_3D_IMPULSE_ACCUMULATION
-	#define ENABLE_PHYSICS_3D_WARM_STARTING
+	// #define ENABLE_PHYSICS_3D_IMPULSE_ACCUMULATION
+	// #define ENABLE_PHYSICS_3D_WARM_STARTING
 
 	class PhysicsSimulation3D;
 
@@ -44,6 +44,8 @@ namespace Trident {
 
 			/// NOTE: Uses Semi-Implicit Euler.
 			void integrate();
+
+			void mergeContactManifolds(ContactPair3D& contactPair, const ContactManifold3D& newContactManifold);
 
 		public:
 			std::map<EntityPair, ContactPair3D> contactPairs;

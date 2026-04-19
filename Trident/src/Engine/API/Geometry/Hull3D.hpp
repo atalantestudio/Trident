@@ -13,7 +13,7 @@ namespace Trident {
 	struct Hull3D {
 		inline float32 getPenetrationBias() const {
 			// TODO(physics/3d/hull-penetration): Return different biases for each hull type (sphere, capsule, polygon).
-			return 0.2f;
+			return 0.4f;
 		}
 
 		/// The mean position of all vertices.

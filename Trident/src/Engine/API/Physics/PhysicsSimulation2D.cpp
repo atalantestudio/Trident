@@ -230,8 +230,6 @@ namespace Trident {
 
 			while (contactIndex < pair.contactManifold.contactCount) {
 				Contact2D& contact = pair.contactManifold.contacts[contactIndex];
-
-				// Distance from the contact to the entity's COM.
 				contact.rA = contact.position - rigidBodyA.position;
 				contact.rB = contact.position - rigidBodyB.position;
 

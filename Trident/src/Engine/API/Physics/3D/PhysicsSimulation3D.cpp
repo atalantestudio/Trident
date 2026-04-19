@@ -101,7 +101,7 @@ namespace Trident {
 				continue;
 			}
 
-			// TODO(physics/3d/merge-contact-manifolds)
+			mergeContactManifolds(contactPairIterator->second, contactPair.manifold);
 		}
 	}
 
@@ -144,11 +144,6 @@ namespace Trident {
 				rigidBodyB.groundEntity = contactPair.A;
 			}
 
-			// TODO(debug)
-			rigidBodyA.linearVelocity = {0.0f, 0.0f, 0.0f};
-			rigidBodyB.linearVelocity = {0.0f, 0.0f, 0.0f};
-
-			// TODO: Restore.
 			/* vec3<float32> normalAntiParallel = RIGHT;
 
 			if (abs(contactPair.manifold.normal[0]) > 0.9f) {
@@ -156,15 +151,13 @@ namespace Trident {
 			}
 
 			contactPair.manifold.tangent0 = normalized(cross(contactPair.manifold.normal, normalAntiParallel));
-			contactPair.manifold.tangent1 = cross(contactPair.manifold.normal, contactPair.manifold.tangent0);
+			contactPair.manifold.tangent1 = cross(contactPair.manifold.normal, contactPair.manifold.tangent0); */
 			contactPair.combinedFriction = sqrt(rigidBodyA.friction * rigidBodyB.friction);
 
 			uint8 contactIndex = 0;
 
 			while (contactIndex < contactPair.manifold.contactCount) {
 				Contact3D& contact = contactPair.manifold.contacts[contactIndex];
-
-				// Distance from the contact to the entity's COM.
 				contact.rA = contact.position - rigidBodyA.position;
 				contact.rB = contact.position - rigidBodyB.position;
 
@@ -177,7 +170,7 @@ namespace Trident {
 					contact.massNormal = 1.0f / (dot(rnA, rnA * rigidBodyA.inverseInertia) + dot(rnB, rnB * rigidBodyB.inverseInertia) + inverseMassSum);
 				}
 
-				{
+				/* {
 					const vec3<float32> rt0A = cross(contact.rA, contactPair.manifold.tangent0);
 					const vec3<float32> rt0B = cross(contact.rB, contactPair.manifold.tangent0);
 
@@ -189,7 +182,7 @@ namespace Trident {
 					const vec3<float32> rt1B = cross(contact.rB, contactPair.manifold.tangent1);
 
 					contact.massTangent1 = 1.0f / (dot(rt1A, rt1A * rigidBodyA.inverseInertia) + dot(rt1B, rt1B * rigidBodyB.inverseInertia) + inverseMassSum);
-				}
+				} */
 
 				const float32 penetrationBias = avg(hullA.getPenetrationBias(), hullB.getPenetrationBias());
 
@@ -206,7 +199,7 @@ namespace Trident {
 				#endif
 
 				contactIndex += 1;
-			} */
+			}
 		}
 	}
 
@@ -278,11 +271,23 @@ namespace Trident {
 
 			rigidBodyComponent.position += rigidBodyComponent.linearVelocity * deltaTime;
 			rigidBodyComponent.rotation += rigidBodyComponent.angularVelocity * deltaTime;
-			rigidBodyComponent.updateWorld(hull.centroid);
+
+			const quat<float32> pitch = quat<float32>::axisAngle(RIGHT, rigidBodyComponent.rotation[0]);
+			const quat<float32> yaw = quat<float32>::axisAngle(UP, rigidBodyComponent.rotation[1]);
+			const quat<float32> roll = quat<float32>::axisAngle(FORWARD, rigidBodyComponent.rotation[2]);
+
+			// TODO: Fix orientation.
+			rigidBodyComponent.orientation = normalized(yaw * pitch * roll);
 
 			rigidBodyComponent.force = {0.0_N, 0.0_N, 0.0_N};
+			rigidBodyComponent.updateWorld(hull.centroid);
 
 			componentIndex += 1;
 		}
+	}
+
+	void PhysicsSimulation3D::mergeContactManifolds(ContactPair3D& contactPair, const ContactManifold3D& newContactManifold) {
+		// TODO(physics/3d/merge-contact-manifolds)
+		contactPair.manifold = newContactManifold;
 	}
 }

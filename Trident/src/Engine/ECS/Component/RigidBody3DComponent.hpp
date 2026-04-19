@@ -64,7 +64,7 @@ namespace Trident {
 		float32 restitution;
 
 		// TODO: Use svec3<float32> instead.
-		vec3<float32> force;
+		vec3<float32> force = {0.0_N, 0.0_N, 0.0_N};
 
 		/// The entity owning the rigid body this body is currently resting on.
 		Entity groundEntity = max<Entity>();
