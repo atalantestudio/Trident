@@ -144,14 +144,14 @@ namespace Trident {
 				rigidBodyB.groundEntity = contactPair.A;
 			}
 
-			/* vec3<float32> normalAntiParallel = RIGHT;
+			vec3<float32> normalAntiParallel = RIGHT;
 
 			if (abs(contactPair.manifold.normal[0]) > 0.9f) {
 				normalAntiParallel = UP;
 			}
 
 			contactPair.manifold.tangent0 = normalized(cross(contactPair.manifold.normal, normalAntiParallel));
-			contactPair.manifold.tangent1 = cross(contactPair.manifold.normal, contactPair.manifold.tangent0); */
+			contactPair.manifold.tangent1 = cross(contactPair.manifold.normal, contactPair.manifold.tangent0);
 			contactPair.combinedFriction = sqrt(rigidBodyA.friction * rigidBodyB.friction);
 
 			uint8 contactIndex = 0;
@@ -170,19 +170,19 @@ namespace Trident {
 					contact.massNormal = 1.0f / (inverseMassSum + dot(rnA + rnB, contactPair.manifold.normal));
 				}
 
-				/* {
-					const vec3<float32> rt0A = cross(contact.rA, contactPair.manifold.tangent0);
-					const vec3<float32> rt0B = cross(contact.rB, contactPair.manifold.tangent0);
+				{
+					const vec3<float32> rt0A = cross(cross(contact.rA, contactPair.manifold.tangent0) * rigidBodyA.inverseInertia, contact.rA);
+					const vec3<float32> rt0B = cross(cross(contact.rB, contactPair.manifold.tangent0) * rigidBodyB.inverseInertia, contact.rB);
 
-					contact.massTangent0 = 1.0f / (inverseMassSum + dot(rt0A, rt0A * rigidBodyA.inverseInertia) + dot(rt0B, rt0B * rigidBodyB.inverseInertia));
+					contact.massTangent0 = 1.0f / (inverseMassSum + dot(rt0A + rt0B, contactPair.manifold.tangent0));
 				}
 
 				{
-					const vec3<float32> rt1A = cross(contact.rA, contactPair.manifold.tangent1);
-					const vec3<float32> rt1B = cross(contact.rB, contactPair.manifold.tangent1);
+					const vec3<float32> rt1A = cross(cross(contact.rA, contactPair.manifold.tangent1) * rigidBodyA.inverseInertia, contact.rA);
+					const vec3<float32> rt1B = cross(cross(contact.rB, contactPair.manifold.tangent1) * rigidBodyB.inverseInertia, contact.rB);
 
-					contact.massTangent1 = 1.0f / (inverseMassSum + dot(rt1A, rt1A * rigidBodyA.inverseInertia) + dot(rt1B, rt1B * rigidBodyB.inverseInertia));
-				} */
+					contact.massTangent1 = 1.0f / (inverseMassSum + dot(rt1A + rt1B, contactPair.manifold.tangent1));
+				}
 
 				const float32 penetrationBias = avg(hullA.getPenetrationBias(), hullB.getPenetrationBias());
 
@@ -190,9 +190,9 @@ namespace Trident {
 
 				#if defined(ENABLE_PHYSICS_3D_IMPULSE_ACCUMULATION)
 					const vec3<float32> j =
-						contactPair.manifold.normal * contact.accumulatedNormalImpulse/*  +
+						contactPair.manifold.normal * contact.accumulatedNormalImpulse +
 						contactPair.manifold.tangent0 * contact.accumulatedTangent0Impulse +
-						contactPair.manifold.tangent1 * contact.accumulatedTangent1Impulse */;
+						contactPair.manifold.tangent1 * contact.accumulatedTangent1Impulse;
 
 					rigidBodyA.applyImpulse(-j, contact.rA);
 					rigidBodyB.applyImpulse(j, contact.rB);
@@ -217,11 +217,13 @@ namespace Trident {
 				while (contactIndex < contactPair.manifold.contactCount) {
 					Contact3D& contact = contactPair.manifold.contacts[contactIndex];
 
-					const vec3<float32> relativeVelocity = calculateRelativeVelocity(rigidBodyA, rigidBodyB, contact.rA, contact.rB);
+					float32 normalImpulseLength;
 
 					// Apply normal impulse.
 					{
-						float32 normalImpulseLength = (-dot(relativeVelocity, contactPair.manifold.normal) + contact.bias) * contact.massNormal;
+						const vec3<float32> relativeVelocity = calculateRelativeVelocity(rigidBodyA, rigidBodyB, contact.rA, contact.rB);
+
+						normalImpulseLength = (-dot(relativeVelocity, contactPair.manifold.normal) + contact.bias) * contact.massNormal;
 
 						#if defined(ENABLE_PHYSICS_3D_IMPULSE_ACCUMULATION)
 							const float32 oldNormalValue = contact.accumulatedNormalImpulse;
@@ -239,7 +241,55 @@ namespace Trident {
 						rigidBodyB.applyImpulse(j, contact.rB);
 					}
 
-					// TODO: Apply friction impulse.
+					// Apply first friction impulse.
+					{
+						const vec3<float32> relativeVelocity = calculateRelativeVelocity(rigidBodyA, rigidBodyB, contact.rA, contact.rB);
+
+						float32 tangentImpulseLength = -dot(relativeVelocity, contactPair.manifold.tangent0) * contact.massTangent0;
+
+						#if defined(ENABLE_PHYSICS_2D_IMPULSE_ACCUMULATION)
+							const float32 maxTangentImpulseLength = contactPair.combinedFriction * contact.accumulatedNormalImpulse;
+							const float32 oldTangentValue = contact.accumulatedTangent0Impulse;
+
+							contact.accumulatedTangent0Impulse = clamp(oldTangentValue + tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
+
+							tangentImpulseLength = contact.accumulatedTangent0Impulse - oldTangentValue;
+						#else
+							const float32 maxTangentImpulseLength = contactPair.combinedFriction * normalImpulseLength;
+
+							tangentImpulseLength = clamp(tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
+						#endif
+
+						const vec3<float32> j = contactPair.manifold.tangent0 * tangentImpulseLength;
+
+						rigidBodyA.applyImpulse(-j, contact.rA);
+						rigidBodyB.applyImpulse(j, contact.rB);
+					}
+
+					// Apply second friction impulse.
+					{
+						const vec3<float32> relativeVelocity = calculateRelativeVelocity(rigidBodyA, rigidBodyB, contact.rA, contact.rB);
+
+						float32 tangentImpulseLength = -dot(relativeVelocity, contactPair.manifold.tangent1) * contact.massTangent1;
+
+						#if defined(ENABLE_PHYSICS_2D_IMPULSE_ACCUMULATION)
+							const float32 maxTangentImpulseLength = contactPair.combinedFriction * contact.accumulatedNormalImpulse;
+							const float32 oldTangentValue = contact.accumulatedTangent1Impulse;
+
+							contact.accumulatedTangent1Impulse = clamp(oldTangentValue + tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
+
+							tangentImpulseLength = contact.accumulatedTangent1Impulse - oldTangentValue;
+						#else
+							const float32 maxTangentImpulseLength = contactPair.combinedFriction * normalImpulseLength;
+
+							tangentImpulseLength = clamp(tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
+						#endif
+
+						const vec3<float32> j = contactPair.manifold.tangent1 * tangentImpulseLength;
+
+						rigidBodyA.applyImpulse(-j, contact.rA);
+						rigidBodyB.applyImpulse(j, contact.rB);
+					}
 
 					contactIndex += 1;
 				}
