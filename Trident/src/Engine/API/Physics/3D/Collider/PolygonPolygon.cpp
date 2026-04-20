@@ -61,7 +61,8 @@ namespace Trident {
 		const std::vector<Face3D> referenceSideFaces = findReferenceSideFaces(*faceQuery.referenceHull, faceQuery.referenceFaceIndex);
 
 		// Rotate by the inverse of the incident body's orientation to get a normal that can be used as a support direction.
-		const vec3<float32> referenceFaceDirection = vec3<float32>(F.normal) * inverse(faceQuery.incidentBody->orientation);
+		// TODO: Invert the orientation before multiplying?
+		const vec3<float32> referenceFaceDirection = vec3<float32>(F.normal) * faceQuery.incidentBody->orientation;
 
 		index incidentFaceIndex = max<index>();
 
@@ -90,17 +91,26 @@ namespace Trident {
 		uint16 edgeIndex = 0;
 
 		while (edgeIndex < incidentFace.edgeIndexRange.count) {
-			const Edge3D edge = faceQuery.incidentHull->edges[incidentFace.edgeIndexRange.offset + edgeIndex];
+			const Edge3D edge = faceQuery.incidentHull->edges[faceQuery.incidentHull->faceEdgeIndices[incidentFace.edgeIndexRange.offset + edgeIndex]];
 
 			ClipVertex3D clipVertex{};
 			clipVertex.position = multiplyTransform(vec3<float32>(faceQuery.incidentHull->vertexPositions[edge.originVertexIndex]), faceQuery.incidentBody->world);
+			clipVertex.separation = 0.0f;
+			clipVertex.id.referenceEdgeAIndex = max<uint16>();
+			clipVertex.id.referenceEdgeBIndex = max<uint16>();
+			clipVertex.id.referenceFaceAIndex = static_cast<sint16>(edge.faceIndex - 1) % static_cast<uint16>(faceQuery.incidentHull->faces.count());
+			clipVertex.id.referenceFaceBIndex = edge.faceIndex;
+			clipVertex.id.incidentEdgeAIndex = max<uint16>();
+			clipVertex.id.incidentEdgeBIndex = max<uint16>();
+			clipVertex.id.incidentFaceAIndex = edge.faceIndex;
+			clipVertex.id.incidentFaceBIndex = (edge.faceIndex + 1) % static_cast<uint16>(faceQuery.incidentHull->faces.count());
 
 			incidentFaceVertices.add(clipVertex);
 
 			edgeIndex += 1;
 		}
 
-		pool<ClipVertex3D, 8> contactPool = SutherlandHodgman3D(faceQuery, incidentFaceVertices, referenceSideFaces);
+		pool<ClipVertex3D, 8> contactPool = SutherlandHodgman3D(faceQuery, faceQuery.referenceFaceIndex, incidentFaceVertices, referenceSideFaces);
 
 		// Discard contacts that are above the reference plane, and move the rest onto the plane.
 		// This helps with coherence when reducing the number of contacts.
@@ -140,15 +150,13 @@ namespace Trident {
 
 				contactManifold->contacts[contactIndex].position = contact.position;
 				contactManifold->contacts[contactIndex].separation = contact.separation;
+				contactManifold->contacts[contactIndex].id = contact.id;
 
 				contactIndex += 1;
 			}
 
 			return;
 		}
-
-		// Reduce contact points.
-		// See https://media.steampowered.com/apps/valve/2015/DirkGregorius_Contacts.pdf.
 
 		contactManifold->contactCount = 4;
 
@@ -175,6 +183,7 @@ namespace Trident {
 
 			contactManifold->contacts[0].position = contactPool[maxAngleContactIndex].position;
 			contactManifold->contacts[0].separation = contactPool[maxAngleContactIndex].separation;
+			contactManifold->contacts[0].id = contactPool[maxAngleContactIndex].id;
 
 			contactPool.remove(maxAngleContactIndex);
 		}
@@ -201,6 +210,7 @@ namespace Trident {
 
 			contactManifold->contacts[1].position = contactPool[maxDistanceContactIndex].position;
 			contactManifold->contacts[1].separation = contactPool[maxDistanceContactIndex].separation;
+			contactManifold->contacts[1].id = contactPool[maxDistanceContactIndex].id;
 
 			contactPool.remove(maxDistanceContactIndex);
 		}
@@ -231,6 +241,7 @@ namespace Trident {
 
 			contactManifold->contacts[2].position = contactPool[maxAreaContactIndex].position;
 			contactManifold->contacts[2].separation = contactPool[maxAreaContactIndex].separation;
+			contactManifold->contacts[2].id = contactPool[maxAreaContactIndex].id;
 
 			contactPool.remove(maxAreaContactIndex);
 		}
@@ -276,6 +287,7 @@ namespace Trident {
 
 			contactManifold->contacts[3].position = contactPool[minAreaContactIndex].position;
 			contactManifold->contacts[3].separation = contactPool[minAreaContactIndex].separation;
+			contactManifold->contacts[3].id = contactPool[minAreaContactIndex].id;
 
 			contactPool.remove(minAreaContactIndex);
 		}
@@ -303,6 +315,16 @@ namespace Trident {
 				sat.faceQueryB.axis *= inverse(sat.faceQueryB.referenceBody->orientation);
 
 				createFaceContact(sat.faceQueryB, contactManifold);
+
+				contactManifold->normal *= -1.0f;
+
+				index contactIndex = 0;
+
+				while (contactIndex < contactManifold->contactCount) {
+					contactManifold->contacts[contactIndex].id.flip();
+
+					contactIndex += 1;
+				}
 			}
 		}
 		else {

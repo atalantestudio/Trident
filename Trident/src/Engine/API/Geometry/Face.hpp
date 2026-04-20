@@ -20,7 +20,7 @@ namespace Trident {
 
 		return {
 			.normal = svec3<float32>(n2),
-			.offset = abs(dot(o, n2)),
+			.offset = dot(o, n2),
 		};
 	}
 }

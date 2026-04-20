@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Engine/API/Physics/3D/ContactID3D.hpp"
+
 namespace Trident {
 	struct Contact3D {
 		/// Position of the contact in world space.
@@ -21,9 +23,7 @@ namespace Trident {
 		float32 massTangent0;
 		float32 massTangent1;
 		float32 bias;
-
-		// TODO(physics/3d/contact-id)
-
+		ContactID3D id;
 		float32 accumulatedNormalImpulse;
 		float32 accumulatedTangent0Impulse;
 		float32 accumulatedTangent1Impulse;

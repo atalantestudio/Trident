@@ -62,7 +62,7 @@ namespace Trident {
 		// Relative rotation between A and B.
 		const quat<float32> R = rigidBodyB.orientation * inverse(rigidBodyA.orientation);
 
-		uint32 faceIndex = 0;
+		uint16 faceIndex = 0;
 
 		while (faceIndex < hullA.faces.count()) {
 			const Face3D& faceA = hullA.faces[faceIndex];

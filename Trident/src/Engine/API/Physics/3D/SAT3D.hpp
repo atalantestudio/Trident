@@ -29,7 +29,7 @@ namespace Trident {
 		vec3<float32> axis;
 
 		/// The closest feature (face or edge) on the reference body, facing towards the incident body.
-		uint32 referenceFaceIndex;
+		uint16 referenceFaceIndex;
 
 		const RigidBody3DComponent* referenceBody;
 		const RigidBody3DComponent* incidentBody;

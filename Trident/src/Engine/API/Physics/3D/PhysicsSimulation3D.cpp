@@ -328,7 +328,57 @@ namespace Trident {
 	}
 
 	void PhysicsSimulation3D::mergeContactManifolds(ContactPair3D& contactPair, const ContactManifold3D& newContactManifold) {
-		// TODO(physics/3d/merge-contact-manifolds)
-		contactPair.manifold = newContactManifold;
+		ContactManifold3D mergedContactManifold{};
+		uint32 contactIndex = 0;
+
+		while (contactIndex < newContactManifold.contactCount) {
+			const Contact3D& cNew = newContactManifold.contacts[contactIndex];
+
+			int k = -1;
+			int j = 0;
+
+			while (j < contactPair.manifold.contactCount) {
+				const Contact3D& cOld = contactPair.manifold.contacts[j];
+
+				if (cNew.id == cOld.id) {
+					k = j;
+
+					break;
+				}
+
+				j += 1;
+			}
+
+			if (k == -1) {
+				mergedContactManifold.contacts[contactIndex] = newContactManifold.contacts[contactIndex];
+
+				contactIndex += 1;
+
+				continue;
+			}
+
+			mergedContactManifold.contacts[contactIndex] = cNew;
+
+			#if defined(ENABLE_PHYSICS_3D_WARM_STARTING)
+				const Contact3D& cOld = contactPair.manifold.contacts[k];
+
+				mergedContactManifold.contacts[contactIndex].accumulatedNormalImpulse = cOld.accumulatedNormalImpulse;
+				mergedContactManifold.contacts[contactIndex].accumulatedTangent0Impulse = cOld.accumulatedTangent0Impulse;
+				mergedContactManifold.contacts[contactIndex].accumulatedTangent1Impulse = cOld.accumulatedTangent1Impulse;
+			#endif
+
+			contactIndex += 1;
+		}
+
+		contactIndex = 0;
+
+		while (contactIndex < newContactManifold.contactCount) {
+			contactPair.manifold.contacts[contactIndex] = mergedContactManifold.contacts[contactIndex];
+
+			contactIndex += 1;
+		}
+
+		contactPair.manifold.contactCount = newContactManifold.contactCount;
+		contactPair.manifold.normal = newContactManifold.normal;
 	}
 }

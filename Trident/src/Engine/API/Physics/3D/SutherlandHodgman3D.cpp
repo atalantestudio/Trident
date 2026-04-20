@@ -6,7 +6,7 @@
 #include "Engine/API/Physics/3D/SutherlandHodgman3D.hpp"
 
 namespace Trident {
-	pool<ClipVertex3D, 8> SutherlandHodgman3D(const FaceQuery& faceQuery, pool<ClipVertex3D, MAX_FACE_VERTEX_COUNT> inputVertices, const std::vector<Face3D>& referenceSideFaces) {
+	pool<ClipVertex3D, 8> SutherlandHodgman3D(const FaceQuery& faceQuery, uint16 faceIndex, pool<ClipVertex3D, MAX_FACE_VERTEX_COUNT> inputVertices, const std::vector<Face3D>& referenceSideFaces) {
 		for (const Face3D& referenceFace : referenceSideFaces) {
 			const Face3D F = transformFace(referenceFace, faceQuery.referenceBody->world);
 
@@ -28,6 +28,17 @@ namespace Trident {
 					c.position = lerp(a.position, b.position, t);
 
 					outputVertices.add(c);
+
+					if (distanceA > 0.0f) {
+						c.id = a.id;
+						c.id.referenceFaceAIndex = max<uint16>();
+						c.id.referenceFaceBIndex = faceIndex;
+					}
+					else {
+						c.id = b.id;
+						c.id.incidentFaceAIndex = max<uint16>();
+						c.id.incidentFaceBIndex = faceIndex;
+					}
 				}
 
 				// If B is below the plane, keep it.
