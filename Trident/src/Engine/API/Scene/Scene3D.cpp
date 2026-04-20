@@ -253,11 +253,7 @@ namespace Trident {
 
 			RigidBody3DComponent& rigidBodyComponent = ecs.getComponent<RigidBody3DComponent>(rigidBodyMapping.entity);
 
-			const quat<float32> pitch = quat<float32>::axisAngle(RIGHT, rigidBodyComponent.rotation[0]);
-			const quat<float32> yaw = quat<float32>::axisAngle(UP, rigidBodyComponent.rotation[1]);
-			const quat<float32> roll = quat<float32>::axisAngle(FORWARD, rigidBodyComponent.rotation[2]);
-
-			rigidBodyComponent.orientation = normalized((yaw * pitch) * roll);
+			rigidBodyComponent.updateOrientation();
 			rigidBodyComponent.updateWorld({0.0_m, 0.0_m, 0.0_m});
 		}
 	}

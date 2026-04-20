@@ -9,7 +9,7 @@
 #include "Engine/ECS/EntityPair.hpp"
 
 namespace Trident {
-	// #define ENABLE_PHYSICS_3D_IMPULSE_ACCUMULATION
+	#define ENABLE_PHYSICS_3D_IMPULSE_ACCUMULATION
 	// #define ENABLE_PHYSICS_3D_WARM_STARTING
 
 	class PhysicsSimulation3D;
@@ -25,8 +25,7 @@ namespace Trident {
 			static constexpr uint32 SEQUENTIAL_IMPULSE_ITERATION_COUNT = 10;
 			static constexpr float32 ALLOWED_PENETRATION = 0.01f;
 
-			// TODO(debug)
-			inline static const vec3<float32> G = vec3<float32>{0.0f, -9.80665f, 0.0f} / 20.0f;
+			inline static const vec3<float32> G = {0.0f, -9.80665f, 0.0f};
 
 		public:
 			/// Constructs a physics simulation for the provided scene.

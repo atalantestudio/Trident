@@ -6,5 +6,6 @@
 namespace Trident {
 	struct ClipVertex3D {
 		vec3<float32> position;
+		float32 separation;
 	};
 }

@@ -13,5 +13,5 @@ namespace Trident {
 	/// - https://en.wikipedia.org/wiki/Sutherland%E2%80%93Hodgman_algorithm
 	/// - https://alamot.github.io/sutherland_hodgman_algorithm
 	/// - https://www.flipcode.com/archives/Real-time_3D_Clipping_Sutherland-Hodgeman.shtml
-	pool<ClipVertex3D, 8> SutherlandHodgman3D(const SATOutput3D& sat, pool<ClipVertex3D, MAX_FACE_VERTEX_COUNT> incidentFaceVertices, const std::vector<Face3D>& referenceSideFaces);
+	pool<ClipVertex3D, 8> SutherlandHodgman3D(const FaceQuery& faceQuery, pool<ClipVertex3D, MAX_FACE_VERTEX_COUNT> incidentFaceVertices, const std::vector<Face3D>& referenceSideFaces);
 }

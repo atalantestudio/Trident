@@ -75,12 +75,11 @@ namespace Trident {
 
 			// Keep vertices that are below the reference plane.
 			if (separation <= 0.0f) {
+				// Move the contact point onto the reference plane.
 				Contact2D& contact = contactManifold->contacts[contactManifold->contactCount];
+				contact.position = clipVertex.position - sat.axis * separation;
 				contact.separation = separation;
 				contact.id = clipVertex.id;
-
-				// Move the contact point onto the reference plane.
-				contact.position = clipVertex.position - sat.axis * separation;
 
 				contactManifold->contactCount += 1;
 			}

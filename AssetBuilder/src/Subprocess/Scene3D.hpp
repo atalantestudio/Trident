@@ -26,26 +26,12 @@ namespace Trident {
 			},
 			.rigidBodyMappings = {
 				// Floor
-				/* {
-					0,
-					createRigidBody({
-						.position = {0.0_m, -0.05_m, 0.0_m},
-						.rotation = {0.0_rad, 0.0_rad, 0.15_rad},
-						.scale = {10.0f, 0.1f, 10.0f},
-						.mass = max<float32>(),
-						.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
-						.friction = 0.2f,
-						.restitution = 0.0f,
-					}),
-				}, */
-
-				// Box 1
 				{
 					0,
 					createRigidBody({
-						.position = {0.0_m, 0.0_m, 0.0_m},
-						// .rotation = {0.0_rad, pi<float32>() * 0.25f, 0.0_rad},
-						.scale = {1.0f, 1.0f, 1.0f},
+						.position = {0.0f, 0.0f, 0.2f},
+						.rotation = {0.0f, 0.0f, 0.15f},
+						.scale = {5.0f, 0.1f, 1.0f},
 						.mass = max<float32>(),
 						.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
 						.friction = 0.2f,
@@ -53,12 +39,27 @@ namespace Trident {
 					}),
 				},
 
+				// Box 1
+				/* {
+					0,
+					createRigidBody({
+						.position = {0.6_m, 0.0_m, 0.0_m},
+						// .rotation = {0.0_rad, pi<float32>() * 0.25f, 0.0_rad},
+						.rotation = {0.0f, 0.0f, 0.0f},
+						.scale = {1.0f, 1.0f, 1.0f},
+						.mass = max<float32>(),
+						.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
+						.friction = 0.2f,
+						.restitution = 0.0f,
+					}),
+				}, */
+
 				// Box 2
 				{
 					1,
 					createRigidBody({
-						.position = {0.6_m, 1.5_m, 0.0_m},
-						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
+						.position = {0.0_m, 2.2_m, 0.0_m},
+						.rotation = {0.0f, 0.0f, 0.0f},
 						.scale = {1.0f, 1.0f, 1.0f},
 						.mass = 25.0_kg,
 						.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,

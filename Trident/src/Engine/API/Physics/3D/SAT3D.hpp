@@ -9,16 +9,26 @@
 namespace Trident {
 	static constexpr uint8 MAX_FACE_VERTEX_COUNT = 8;
 
-	struct SATOutput3D {
+	struct EdgeQuery {
 		/// The separation between the two bodies.
 		float32 separation;
 
-		/// The separating axis (the normal of the reference feature).
+		/// The separating axis.
+		float32 axis;
+
+		/// The closest edges on A and B.
+		Edge3D edgeA;
+		Edge3D edgeB;
+	};
+
+	struct FaceQuery {
+		/// The separation between the two bodies.
+		float32 separation;
+
+		/// The separating axis (the normal of the reference face).
 		vec3<float32> axis;
 
-		/// Closest feature on the reference body to the incident body.
-		// TODO(physics/3d/feature)
-		// Feature3D referenceFeature;
+		/// The closest feature (face or edge) on the reference body, facing towards the incident body.
 		uint32 referenceFaceIndex;
 
 		const RigidBody3DComponent* referenceBody;
@@ -26,6 +36,14 @@ namespace Trident {
 
 		const Hull3D* referenceHull;
 		const Hull3D* incidentHull;
+	};
+
+	struct SATOutput3D {
+		bool overlap;
+
+		EdgeQuery edgeQuery;
+		FaceQuery faceQueryA;
+		FaceQuery faceQueryB;
 	};
 
 	/// The Separating Axis Theorem algorithm in 3D.

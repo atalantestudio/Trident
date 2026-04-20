@@ -161,7 +161,7 @@ namespace Trident {
 				sequence<ref<DescriptorSet>> descriptorSets = {vertexDescriptorSet, nullptr};
 				uint32 rigidBodyComponentIndex = 0;
 
-				/* while (rigidBodyComponentIndex < rigidBodyComponentPool.componentCount) {
+				while (rigidBodyComponentIndex < rigidBodyComponentPool.componentCount) {
 					const Entity entity = rigidBodyComponentPool.componentIndexToEntity[rigidBodyComponentIndex];
 					const GeometryComponent geometryComponent = geometryComponentPool.components[geometryComponentPool.entityToComponentIndex[entity]];
 					const Geometry3D& geometry = scene->geometries[geometryComponent.geometryIndex];
@@ -180,7 +180,7 @@ namespace Trident {
 					commandEncoder->draw(indexRange.count, 1, indexRange.offset, rigidBodyComponentIndex);
 
 					rigidBodyComponentIndex += 1;
-				} */
+				}
 
 				if (debugHullWireframe) {
 					commandEncoder->bindGraphicsPipeline(debugHullWireframePipeline);

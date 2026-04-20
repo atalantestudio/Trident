@@ -17,6 +17,14 @@ namespace Trident {
 			)));
 		}
 
+		void updateOrientation() {
+			const quat<float32> pitch = quat<float32>::axisAngle(RIGHT, rotation[0]);
+			const quat<float32> yaw = quat<float32>::axisAngle(UP, rotation[1]);
+			const quat<float32> roll = quat<float32>::axisAngle(FORWARD, rotation[2]);
+
+			orientation = normalized(yaw * pitch * roll);
+		}
+
 		void updateWorld(vec3<float32> centroid) {
 			world =
 				mat4x4<float32>::translation(-centroid) *

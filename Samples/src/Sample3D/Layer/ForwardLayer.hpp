@@ -65,7 +65,7 @@ namespace Trident {
 					camera.updateView();
 					camera.updateProjectionView();
 				#else
-					cameraController.getCamera().position = {0.0_m, 0.9_m, -2.0_m};
+					cameraController.getCamera().position = {0.0_m, 0.9_m, -4.0_m};
 					cameraController.getCamera().aspectRatio = getApplication()->getWindow()->getAspectRatio();
 					cameraController.updateProjection();
 				#endif

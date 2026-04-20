@@ -164,24 +164,24 @@ namespace Trident {
 				const float32 inverseMassSum = rigidBodyA.inverseMass + rigidBodyB.inverseMass;
 
 				{
-					const vec3<float32> rnA = cross(contact.rA, contactPair.manifold.normal);
-					const vec3<float32> rnB = cross(contact.rB, contactPair.manifold.normal);
+					const vec3<float32> rnA = cross(cross(contact.rA, contactPair.manifold.normal) * rigidBodyA.inverseInertia, contact.rA);
+					const vec3<float32> rnB = cross(cross(contact.rB, contactPair.manifold.normal) * rigidBodyB.inverseInertia, contact.rB);
 
-					contact.massNormal = 1.0f / (dot(rnA, rnA * rigidBodyA.inverseInertia) + dot(rnB, rnB * rigidBodyB.inverseInertia) + inverseMassSum);
+					contact.massNormal = 1.0f / (inverseMassSum + dot(rnA + rnB, contactPair.manifold.normal));
 				}
 
 				/* {
 					const vec3<float32> rt0A = cross(contact.rA, contactPair.manifold.tangent0);
 					const vec3<float32> rt0B = cross(contact.rB, contactPair.manifold.tangent0);
 
-					contact.massTangent0 = 1.0f / (dot(rt0A, rt0A * rigidBodyA.inverseInertia) + dot(rt0B, rt0B * rigidBodyB.inverseInertia) + inverseMassSum);
+					contact.massTangent0 = 1.0f / (inverseMassSum + dot(rt0A, rt0A * rigidBodyA.inverseInertia) + dot(rt0B, rt0B * rigidBodyB.inverseInertia));
 				}
 
 				{
 					const vec3<float32> rt1A = cross(contact.rA, contactPair.manifold.tangent1);
 					const vec3<float32> rt1B = cross(contact.rB, contactPair.manifold.tangent1);
 
-					contact.massTangent1 = 1.0f / (dot(rt1A, rt1A * rigidBodyA.inverseInertia) + dot(rt1B, rt1B * rigidBodyB.inverseInertia) + inverseMassSum);
+					contact.massTangent1 = 1.0f / (inverseMassSum + dot(rt1A, rt1A * rigidBodyA.inverseInertia) + dot(rt1B, rt1B * rigidBodyB.inverseInertia));
 				} */
 
 				const float32 penetrationBias = avg(hullA.getPenetrationBias(), hullB.getPenetrationBias());
@@ -190,9 +190,9 @@ namespace Trident {
 
 				#if defined(ENABLE_PHYSICS_3D_IMPULSE_ACCUMULATION)
 					const vec3<float32> j =
-						contactPair.manifold.normal * contact.accumulatedNormalImpulse +
+						contactPair.manifold.normal * contact.accumulatedNormalImpulse/*  +
 						contactPair.manifold.tangent0 * contact.accumulatedTangent0Impulse +
-						contactPair.manifold.tangent1 * contact.accumulatedTangent1Impulse;
+						contactPair.manifold.tangent1 * contact.accumulatedTangent1Impulse */;
 
 					rigidBodyA.applyImpulse(-j, contact.rA);
 					rigidBodyB.applyImpulse(j, contact.rB);
@@ -221,9 +221,7 @@ namespace Trident {
 
 					// Apply normal impulse.
 					{
-						const float32 relativeVelocityTowardsNormal = dot(relativeVelocity, contactPair.manifold.normal);
-
-						float32 normalImpulseLength = (-relativeVelocityTowardsNormal + contact.bias) * contact.massNormal;
+						float32 normalImpulseLength = (-dot(relativeVelocity, contactPair.manifold.normal) + contact.bias) * contact.massNormal;
 
 						#if defined(ENABLE_PHYSICS_3D_IMPULSE_ACCUMULATION)
 							const float32 oldNormalValue = contact.accumulatedNormalImpulse;
@@ -271,14 +269,9 @@ namespace Trident {
 
 			rigidBodyComponent.position += rigidBodyComponent.linearVelocity * deltaTime;
 			rigidBodyComponent.rotation += rigidBodyComponent.angularVelocity * deltaTime;
-
-			const quat<float32> pitch = quat<float32>::axisAngle(RIGHT, rigidBodyComponent.rotation[0]);
-			const quat<float32> yaw = quat<float32>::axisAngle(UP, rigidBodyComponent.rotation[1]);
-			const quat<float32> roll = quat<float32>::axisAngle(FORWARD, rigidBodyComponent.rotation[2]);
-
-			rigidBodyComponent.orientation = normalized(yaw * pitch * roll);
-			rigidBodyComponent.force = {0.0_N, 0.0_N, 0.0_N};
+			rigidBodyComponent.updateOrientation();
 			rigidBodyComponent.updateWorld(hull.centroid);
+			rigidBodyComponent.force = {0.0_N, 0.0_N, 0.0_N};
 
 			componentIndex += 1;
 		}
