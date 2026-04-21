@@ -27,6 +27,7 @@ namespace Trident {
 	{
 		loadGeometries(sceneAsset, minStorageBufferOffsetAlignment);
 		loadEntityComponentMappings(sceneAsset);
+		updateRigidBodyFacePlanes();
 	}
 
 	void Scene3D::loadGeometries(ref<Scene3DAsset> sceneAsset, uint64 minStorageBufferOffsetAlignment) {
@@ -69,6 +70,7 @@ namespace Trident {
 		hullEdges = sequence<Edge3D>(sceneAsset->getHullEdgeCount());
 		hullFaces = sequence<Face3D>(sceneAsset->getHullFaceCount());
 		hullFaceEdgeIndices = sequence<uint16>(sceneAsset->getHullFaceEdgeIndexCount());
+		rigidBodyFacePlanes = sequence<Plane3D>(sceneAsset->getRigidBodyFacePlaneCount());
 
 		std::copy(staticBuffer.begin(), staticBuffer.end(), &dataBuffer[0]);
 
@@ -248,13 +250,77 @@ namespace Trident {
 			ecs.setComponent<MaterialComponent>(materialMapping.entity, materialMapping.component);
 		}
 
+		index rigidBodyFacePlaneOffset = 0;
+
 		for (const EntityComponentMapping<RigidBody3DComponent>& rigidBodyMapping : sceneAsset->getRigidBodyMappings()) {
 			ecs.setComponent<RigidBody3DComponent>(rigidBodyMapping.entity, rigidBodyMapping.component);
 
 			RigidBody3DComponent& rigidBodyComponent = ecs.getComponent<RigidBody3DComponent>(rigidBodyMapping.entity);
 
+			const GeometryComponent geometryComponent = ecs.getComponent<GeometryComponent>(rigidBodyMapping.entity);
+			const Geometry3D& geometry = geometries[geometryComponent.geometryIndex];
+
+			if (geometry.hullIndex != max<uint32>()) {
+				const Hull3D& hull = hulls[geometry.hullIndex];
+
+				rigidBodyComponent.facePlanes = view<Plane3D>(&rigidBodyFacePlanes[rigidBodyFacePlaneOffset], hull.faces.count());
+
+				index faceIndex = 0;
+
+				while (faceIndex < hull.faces.count()) {
+					const Face3D& face = hull.faces[faceIndex];
+
+					Plane3D& plane = rigidBodyFacePlanes[rigidBodyFacePlaneOffset + faceIndex];
+					plane.localNormal = vec3<float32>(face.normal);
+					plane.localDistance = face.offset;
+
+					faceIndex += 1;
+				}
+
+				rigidBodyFacePlaneOffset += rigidBodyComponent.facePlanes.count();
+			}
+
 			rigidBodyComponent.updateOrientation();
 			rigidBodyComponent.updateWorld({0.0_m, 0.0_m, 0.0_m});
+		}
+	}
+
+	void Scene3D::updateRigidBodyFacePlanes() {
+		ComponentPool<RigidBody3DComponent>& componentPool = ecs.getComponentPool<RigidBody3DComponent>();
+		index componentIndex = 0;
+		index rigidBodyFaceOffset = 0;
+
+		while (componentIndex < componentPool.componentCount) {
+			const Entity entity = componentPool.componentIndexToEntity[componentIndex];
+			const GeometryComponent geometryComponent = ecs.getComponent<GeometryComponent>(entity);
+			const Geometry3D& geometry = geometries[geometryComponent.geometryIndex];
+
+			if (geometry.hullIndex == max<uint32>()) {
+				componentIndex += 1;
+
+				continue;
+			}
+
+			RigidBody3DComponent& rigidBodyComponent = componentPool.components[componentIndex];
+
+			const mat4x4<float32> transposeInverseWorld = transpose(inverse(rigidBodyComponent.world));
+			const Hull3D& hull = hulls[geometry.hullIndex];
+
+			index faceIndex = 0;
+
+			while (faceIndex < rigidBodyComponent.facePlanes.count()) {
+				Plane3D& plane = rigidBodyFacePlanes[rigidBodyFaceOffset + faceIndex];
+
+				// TODO(rigid-body/uniform-scaling): Remove non-uniform scaling properties on the rigid bodies.
+				plane.worldNormal = normalized(multiplyTransform(plane.localNormal, transposeInverseWorld));
+
+				plane.worldDistance = dot(multiplyTransform(plane.localNormal * plane.localDistance, rigidBodyComponent.world), plane.worldNormal);
+
+				faceIndex += 1;
+			}
+
+			rigidBodyFaceOffset += rigidBodyComponent.facePlanes.count();
+			componentIndex += 1;
 		}
 	}
 }

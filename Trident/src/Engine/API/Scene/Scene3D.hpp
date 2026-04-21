@@ -90,6 +90,8 @@ namespace Trident {
 				return materialIndex;
 			}
 
+			void updateRigidBodyFacePlanes();
+
 		private:
 			void loadGeometries(ref<Scene3DAsset> sceneAsset, uint64 minStorageBufferOffsetAlignment);
 			void loadEntityComponentMappings(ref<Scene3DAsset> sceneAsset);
@@ -113,6 +115,7 @@ namespace Trident {
 			sequence<Edge3D> hullEdges;
 			sequence<Face3D> hullFaces;
 			sequence<uint16> hullFaceEdgeIndices;
+			sequence<Plane3D> rigidBodyFacePlanes;
 
 		private:
 			std::vector<Shader> materialShaders;

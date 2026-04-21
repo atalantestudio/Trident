@@ -45,14 +45,14 @@ namespace Trident {
 			};
 
 			inline static const view<char8> SCENE_3D_NAMES[SCENE_3D_COUNT] = {
-				"Box",
+				"Boxes3D",
 				"BoxStacking",
 				"Lemons",
 				"PlayerMovement",
 			};
 
 			inline static constexpr CreateScene3DFunction SCENE_3D_FUNCTIONS[SCENE_3D_COUNT] = {
-				createBoxScene,
+				createBoxes3DScene,
 				createBoxStackingScene,
 				createLemonsScene,
 				createPlayerMovementScene,

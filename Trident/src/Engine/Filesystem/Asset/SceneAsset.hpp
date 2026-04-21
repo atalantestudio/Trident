@@ -64,6 +64,7 @@ namespace Trident {
 		uint32 hullFaceCount;
 		uint16 hullFaceEdgeIndexCount;
 		uint32 hullLineIndexCount;
+		uint32 rigidBodyFacePlaneCount;
 		sequence<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;
 	};
 
@@ -174,6 +175,7 @@ namespace Trident {
 				hullFaceCount(descriptor.hullFaceCount),
 				hullFaceEdgeIndexCount(descriptor.hullFaceEdgeIndexCount),
 				hullLineIndexCount(descriptor.hullLineIndexCount),
+				rigidBodyFacePlaneCount(descriptor.rigidBodyFacePlaneCount),
 				rigidBodyMappings(descriptor.rigidBodyMappings)
 			{}
 
@@ -205,6 +207,10 @@ namespace Trident {
 				return hullLineIndexCount;
 			}
 
+			inline uint32 getRigidBodyFacePlaneCount() const {
+				return rigidBodyFacePlaneCount;
+			}
+
 			inline const sequence<EntityComponentMapping<RigidBody3DComponent>>& getRigidBodyMappings() const {
 				return rigidBodyMappings;
 			}
@@ -217,6 +223,7 @@ namespace Trident {
 			uint32 hullFaceCount;
 			uint16 hullFaceEdgeIndexCount;
 			uint32 hullLineIndexCount;
+			uint32 rigidBodyFacePlaneCount;
 			sequence<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;
 	};
 }

@@ -6,7 +6,7 @@
 #include "RigidBody.hpp"
 
 namespace Trident {
-	Scene3DData createBoxScene() {
+	Scene3DData createBoxes3DScene() {
 		return {
 			.staticVertexCount = 0,
 			.staticIndexCount = 0,

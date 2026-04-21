@@ -47,6 +47,9 @@ namespace Trident {
 			angularVelocity -= cross(r, j) * inverseInertia;
 		}
 
+		/// The planes composing the body.
+		view<Plane3D> facePlanes;
+
 		// TODO: Use svec3<float32> instead.
 		/// Position of the center of mass in world-space.
 		vec3<float32> position;

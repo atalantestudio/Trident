@@ -6,9 +6,11 @@
 #include "Engine/API/Physics/3D/SutherlandHodgman3D.hpp"
 
 namespace Trident {
-	pool<ClipVertex3D, 8> SutherlandHodgman3D(const FaceQuery& faceQuery, uint16 faceIndex, pool<ClipVertex3D, MAX_FACE_VERTEX_COUNT> inputVertices, const std::vector<Face3D>& referenceSideFaces) {
-		for (const Face3D& referenceFace : referenceSideFaces) {
-			const Face3D F = transformFace(referenceFace, faceQuery.referenceBody->world);
+	pool<ClipVertex3D, 8> SutherlandHodgman3D(const FaceQuery& faceQuery, uint16 faceIndex, pool<ClipVertex3D, MAX_FACE_VERTEX_COUNT> inputVertices, const pool<uint16, 8>& referenceSidePlaneIndices) {
+		index planeIndex = 0;
+
+		while (planeIndex < referenceSidePlaneIndices.count()) {
+			const Plane3D P = faceQuery.referenceBody->facePlanes[referenceSidePlaneIndices[planeIndex]];
 
 			pool<ClipVertex3D, MAX_FACE_VERTEX_COUNT> outputVertices;
 			index vertexOffset = 0;
@@ -17,8 +19,8 @@ namespace Trident {
 				const ClipVertex3D& a = inputVertices[vertexOffset];
 				const ClipVertex3D& b = inputVertices[(vertexOffset + 1) % inputVertices.count()];
 
-				const float32 distanceA = signedDistanceFP(vec3<float32>(F.normal), F.offset, a.position);
-				const float32 distanceB = signedDistanceFP(vec3<float32>(F.normal), F.offset, b.position);
+				const float32 distanceA = signedDistanceWorld(P, a.position);
+				const float32 distanceB = signedDistanceWorld(P, b.position);
 
 				// If A and B are on different sides of the plane, keep the intersection point.
 				if (distanceA * distanceB < 0.0f) {
@@ -50,6 +52,8 @@ namespace Trident {
 			}
 
 			inputVertices = outputVertices;
+
+			planeIndex += 1;
 		}
 
 		return inputVertices;

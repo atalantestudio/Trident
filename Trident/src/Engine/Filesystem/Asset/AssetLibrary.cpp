@@ -217,6 +217,7 @@ namespace Trident {
 		sceneAssetDescriptor.hullEdgeCount = 0;
 		sceneAssetDescriptor.hullFaceCount = 0;
 		sceneAssetDescriptor.hullFaceEdgeIndexCount = 0;
+		sceneAssetDescriptor.rigidBodyFacePlaneCount = 0;
 		sceneAssetDescriptor.staticBuffer = sequence<uint8>(sceneAssetDescriptor.staticVertexCount * sizeof(svec2<float32>) + sceneAssetDescriptor.staticIndexCount * sizeof(uint16));
 
 		const uint32 geometryAssetCount = stream.read<uint32>();
@@ -280,6 +281,20 @@ namespace Trident {
 			};
 			rigidBodyMapping.component.friction = stream.read<float32>();
 			rigidBodyMapping.component.restitution = stream.read<float32>();
+
+			for (const EntityComponentMapping<GeometryComponent>& geometryMapping : sceneAssetDescriptor.geometryMappings) {
+				if (geometryMapping.entity != rigidBodyMapping.entity) {
+					continue;
+				}
+
+				const ref<GeometryAsset>& geometryAsset = sceneAssetDescriptor.geometryAssets[geometryMapping.component.geometryIndex];
+
+				if (!(geometryAsset->getFlags() & GeometryAssetFlags::HAS_HULL)) {
+					continue;
+				}
+
+				sceneAssetDescriptor.rigidBodyFacePlaneCount += static_cast<uint32>(geometryAsset->getHull3DFaces().count());
+			}
 		}
 
 		return createRef<Scene3DAsset>(sceneAssetDescriptor);

@@ -325,6 +325,8 @@ namespace Trident {
 
 			componentIndex += 1;
 		}
+
+		scene->updateRigidBodyFacePlanes();
 	}
 
 	void PhysicsSimulation3D::mergeContactManifolds(ContactPair3D& contactPair, const ContactManifold3D& newContactManifold) {

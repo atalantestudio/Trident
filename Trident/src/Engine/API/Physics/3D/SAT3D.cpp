@@ -65,16 +65,13 @@ namespace Trident {
 		uint16 faceIndex = 0;
 
 		while (faceIndex < hullA.faces.count()) {
-			const Face3D& faceA = hullA.faces[faceIndex];
-			const vec3<float32> d = faceA.normal;
-			const vec3<float32> s = support(hullB, -d * R);
-			const vec3<float32> sT = multiplyTransform(s, rigidBodyB.world);
-			const Face3D F = transformFace(faceA, rigidBodyA.world);
-			const float32 separation = signedDistanceFP(vec3<float32>(F.normal), F.offset, sT);
+			const Plane3D& P = rigidBodyA.facePlanes[faceIndex];
+			const vec3<float32> s = multiplyTransform(support(hullB, -P.localNormal * R), rigidBodyB.world);
+			const float32 separation = signedDistanceWorld(P, s);
 
 			if (separation > query.separation) {
 				query.separation = separation;
-				query.axis = d;
+				query.axis = P.localNormal;
 				query.referenceFaceIndex = faceIndex;
 				query.referenceBody = &rigidBodyA;
 				query.incidentBody = &rigidBodyB;

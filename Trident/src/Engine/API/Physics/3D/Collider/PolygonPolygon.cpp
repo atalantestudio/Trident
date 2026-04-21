@@ -4,44 +4,10 @@
 #include "pch.hpp"
 
 #include "Engine/API/Physics/3D/Collider.hpp"
-#include "Engine/API/Physics/3D/FaceFeature3D.hpp"
 #include "Engine/API/Physics/3D/SAT3D.hpp"
 #include "Engine/API/Physics/3D/SutherlandHodgman3D.hpp"
 
 namespace Trident {
-	static std::vector<Face3D> findReferenceSideFaces(const Hull3D& referenceHull, uint32 referenceFaceIndex) {
-		std::vector<Face3D> sideFaces;
-
-		uint32 edgeIndex = 0;
-
-		while (edgeIndex < referenceHull.edges.count()) {
-			const Edge3D edge = referenceHull.edges[edgeIndex];
-
-			if (edge.faceIndex == referenceFaceIndex) {
-				uint32 otherEdgeIndex = edgeIndex;
-
-				if (edgeIndex & 1) {
-					// If it's a twin edge, add the edge preceeding it (base).
-					otherEdgeIndex -= 1;
-				}
-				else {
-					// If it's a base edge, add the edge following it (twin).
-					otherEdgeIndex += 1;
-
-					DEBUG_ASSERT(otherEdgeIndex < referenceHull.edges.count());
-				}
-
-				const Face3D& sideFace = referenceHull.faces[referenceHull.edges[otherEdgeIndex].faceIndex];
-
-				sideFaces.emplace_back(sideFace);
-			}
-
-			edgeIndex += 1;
-		}
-
-		return sideFaces;
-	}
-
 	static void createEdgeContact(const EdgeQuery& edgeQuery, const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, const Hull3D& hullA, const Hull3D& hullB, ContactManifold3D* contactManifold) {
 		// TODO(physics/3d/edge-contact)
 		BREAKPOINT();
@@ -55,14 +21,38 @@ namespace Trident {
 		// Replace with scalar math.
 		contactManifold->normal = {faceQuery.axis[0], faceQuery.axis[1], faceQuery.axis[2]};
 
-		const Face3D& referenceFace = faceQuery.referenceHull->faces[faceQuery.referenceFaceIndex];
-		const Face3D F = transformFace(referenceFace, faceQuery.referenceBody->world);
+		const Plane3D& referencePlane = faceQuery.referenceBody->facePlanes[faceQuery.referenceFaceIndex];
 
-		const std::vector<Face3D> referenceSideFaces = findReferenceSideFaces(*faceQuery.referenceHull, faceQuery.referenceFaceIndex);
+		pool<uint16, 8> referenceSidePlaneIndices;
+
+		{
+			uint32 edgeIndex = 0;
+
+			while (edgeIndex < faceQuery.referenceHull->edges.count()) {
+				const Edge3D edge = faceQuery.referenceHull->edges[edgeIndex];
+
+				if (edge.faceIndex == faceQuery.referenceFaceIndex) {
+					uint32 otherEdgeIndex = edgeIndex;
+
+					if (edgeIndex & 1) {
+						// If it's a twin edge, add the edge preceeding it (base).
+						otherEdgeIndex -= 1;
+					}
+					else {
+						// If it's a base edge, add the edge following it (twin).
+						otherEdgeIndex += 1;
+					}
+
+					referenceSidePlaneIndices.add(faceQuery.referenceHull->edges[otherEdgeIndex].faceIndex);
+				}
+
+				edgeIndex += 1;
+			}
+		}
 
 		// Rotate by the inverse of the incident body's orientation to get a normal that can be used as a support direction.
 		// TODO: Invert the orientation before multiplying?
-		const vec3<float32> referenceFaceDirection = vec3<float32>(F.normal) * faceQuery.incidentBody->orientation;
+		const vec3<float32> referenceFaceDirection = referencePlane.worldNormal * faceQuery.incidentBody->orientation;
 
 		index incidentFaceIndex = max<index>();
 
@@ -72,8 +62,8 @@ namespace Trident {
 			float32 minAngle = max<float32>();
 			index faceIndex = 0;
 
-			while (faceIndex < faceQuery.incidentHull->faces.count()) {
-				angle = dot(vec3<float32>(faceQuery.incidentHull->faces[faceIndex].normal), referenceFaceDirection);
+			while (faceIndex < faceQuery.incidentBody->facePlanes.count()) {
+				angle = dot(faceQuery.incidentBody->facePlanes[faceIndex].localNormal, referenceFaceDirection);
 
 				if (angle < minAngle) {
 					minAngle = angle;
@@ -110,7 +100,7 @@ namespace Trident {
 			edgeIndex += 1;
 		}
 
-		pool<ClipVertex3D, 8> contactPool = SutherlandHodgman3D(faceQuery, faceQuery.referenceFaceIndex, incidentFaceVertices, referenceSideFaces);
+		pool<ClipVertex3D, 8> contactPool = SutherlandHodgman3D(faceQuery, faceQuery.referenceFaceIndex, incidentFaceVertices, referenceSidePlaneIndices);
 
 		// Discard contacts that are above the reference plane, and move the rest onto the plane.
 		// This helps with coherence when reducing the number of contacts.
@@ -120,7 +110,7 @@ namespace Trident {
 			while (contactIndex >= 0) {
 				ClipVertex3D& contact = contactPool[contactIndex];
 
-				const float32 separation = signedDistanceFP(vec3<float32>(F.normal), F.offset, contact.position);
+				const float32 separation = signedDistanceWorld(referencePlane, contact.position);
 
 				if (separation > 0.0f) {
 					contactPool.remove(contactIndex);
