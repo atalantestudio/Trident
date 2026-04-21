@@ -163,6 +163,14 @@ namespace Trident {
 
 				while (rigidBodyComponentIndex < rigidBodyComponentPool.componentCount) {
 					const Entity entity = rigidBodyComponentPool.componentIndexToEntity[rigidBodyComponentIndex];
+
+					// TODO(debug): Don't render the player entity.
+					if (entity == 1) {
+						rigidBodyComponentIndex += 1;
+
+						continue;
+					}
+
 					const GeometryComponent geometryComponent = geometryComponentPool.components[geometryComponentPool.entityToComponentIndex[entity]];
 					const Geometry3D& geometry = scene->geometries[geometryComponent.geometryIndex];
 					const MaterialComponent materialComponent = materialComponentPool.components[materialComponentPool.entityToComponentIndex[entity]];

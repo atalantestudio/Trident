@@ -166,22 +166,40 @@ namespace Trident {
 				{
 					const vec3<float32> rnA = cross(cross(contact.rA, contactPair.manifold.normal) * rigidBodyA.inverseInertia, contact.rA);
 					const vec3<float32> rnB = cross(cross(contact.rB, contactPair.manifold.normal) * rigidBodyB.inverseInertia, contact.rB);
+					const float32 denominator = inverseMassSum + dot(rnA + rnB, contactPair.manifold.normal);
 
-					contact.massNormal = 1.0f / (inverseMassSum + dot(rnA + rnB, contactPair.manifold.normal));
+					if (abs(denominator) < 0.001f) {
+						contact.massNormal = 0.0f;
+					}
+					else {
+						contact.massNormal = 1.0f / denominator;
+					}
 				}
 
 				{
 					const vec3<float32> rt0A = cross(cross(contact.rA, contactPair.manifold.tangent0) * rigidBodyA.inverseInertia, contact.rA);
 					const vec3<float32> rt0B = cross(cross(contact.rB, contactPair.manifold.tangent0) * rigidBodyB.inverseInertia, contact.rB);
+					const float32 denominator = inverseMassSum + dot(rt0A + rt0B, contactPair.manifold.tangent0);
 
-					contact.massTangent0 = 1.0f / (inverseMassSum + dot(rt0A + rt0B, contactPair.manifold.tangent0));
+					if (abs(denominator) < 0.001f) {
+						contact.massTangent0 = 0.0f;
+					}
+					else {
+						contact.massTangent0 = 1.0f / denominator;
+					}
 				}
 
 				{
 					const vec3<float32> rt1A = cross(cross(contact.rA, contactPair.manifold.tangent1) * rigidBodyA.inverseInertia, contact.rA);
 					const vec3<float32> rt1B = cross(cross(contact.rB, contactPair.manifold.tangent1) * rigidBodyB.inverseInertia, contact.rB);
+					const float32 denominator = inverseMassSum + dot(rt1A + rt1B, contactPair.manifold.tangent1);
 
-					contact.massTangent1 = 1.0f / (inverseMassSum + dot(rt1A + rt1B, contactPair.manifold.tangent1));
+					if (abs(denominator) < 0.001f) {
+						contact.massTangent1 = 0.0f;
+					}
+					else {
+						contact.massTangent1 = 1.0f / denominator;
+					}
 				}
 
 				const float32 penetrationBias = avg(hullA.getPenetrationBias(), hullB.getPenetrationBias());
@@ -197,6 +215,8 @@ namespace Trident {
 					rigidBodyA.applyImpulse(-j, contact.rA);
 					rigidBodyB.applyImpulse(j, contact.rB);
 				#endif
+
+				if (isnan(rigidBodyA.linearVelocity[0]) || isnan(rigidBodyB.linearVelocity[0])) BREAKPOINT();
 
 				contactIndex += 1;
 			}
@@ -247,7 +267,7 @@ namespace Trident {
 
 						float32 tangentImpulseLength = -dot(relativeVelocity, contactPair.manifold.tangent0) * contact.massTangent0;
 
-						#if defined(ENABLE_PHYSICS_2D_IMPULSE_ACCUMULATION)
+						#if defined(ENABLE_PHYSICS_3D_IMPULSE_ACCUMULATION)
 							const float32 maxTangentImpulseLength = contactPair.combinedFriction * contact.accumulatedNormalImpulse;
 							const float32 oldTangentValue = contact.accumulatedTangent0Impulse;
 
@@ -272,7 +292,7 @@ namespace Trident {
 
 						float32 tangentImpulseLength = -dot(relativeVelocity, contactPair.manifold.tangent1) * contact.massTangent1;
 
-						#if defined(ENABLE_PHYSICS_2D_IMPULSE_ACCUMULATION)
+						#if defined(ENABLE_PHYSICS_3D_IMPULSE_ACCUMULATION)
 							const float32 maxTangentImpulseLength = contactPair.combinedFriction * contact.accumulatedNormalImpulse;
 							const float32 oldTangentValue = contact.accumulatedTangent1Impulse;
 
@@ -293,6 +313,11 @@ namespace Trident {
 
 					contactIndex += 1;
 				}
+			}
+
+			// TODO(debug): Apply a rotational constraint to the player entity.
+			{
+				scene->ecs.getComponent<RigidBody3DComponent>(1).angularVelocity = {0.0f, 0.0f, 0.0f};
 			}
 
 			iteration += 1;
