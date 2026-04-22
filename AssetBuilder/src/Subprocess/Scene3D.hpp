@@ -72,6 +72,56 @@ namespace Trident {
 		};
 	}
 
+	Scene3DData createEdgeContactScene() {
+		return {
+			.staticVertexCount = 0,
+			.staticIndexCount = 0,
+			.entityCount = 2,
+			.geometryAssetIdentifiers = {
+				// TODO(debug-only): UnitBox
+				38,
+			},
+			.geometryMappings = {
+				{0, {0}},
+				{1, {0}},
+			},
+			.materialMappings = {
+				// NOTE: Counting default material for visibility rendering.
+				{0, {1}},
+				{1, {1}},
+			},
+			.rigidBodyMappings = {
+				// Box 1
+				{
+					0,
+					createRigidBody({
+						.position = {0.0_m, 0.0_m, 0.0_m},
+						.rotation = {0.0f, 0.0f, 0.0f},
+						.scale = {1.0f, 1.0f, 1.0f},
+						.mass = max<float32>(),
+						.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
+						.friction = 0.2f,
+						.restitution = 0.0f,
+					}),
+				},
+
+				// Box 2
+				{
+					1,
+					createRigidBody({
+						.position = {1.0_m, 2.0_m, 0.0_m},
+						.rotation = {0.0f, -0.3f, /*-pi<float32>() / 4.0f */-0.4f},
+						.scale = {1.0f, 1.0f, 1.0f},
+						.mass = 3.0_kg,
+						.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
+						.friction = 0.0f,
+						.restitution = 0.0f,
+					}),
+				},
+			},
+		};
+	}
+
 	Scene3DData createBoxStackingScene() {
 		return {
 			.staticVertexCount = 0,

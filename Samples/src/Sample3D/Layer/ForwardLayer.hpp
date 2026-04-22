@@ -3,7 +3,7 @@
 
 #pragma once
 
-// #define FORWARD_USE_NOCLIP_CAMERA
+#define FORWARD_USE_NOCLIP_CAMERA
 
 #if !defined(FORWARD_USE_NOCLIP_CAMERA)
 	#include "Engine/API/Camera/Controller/PlayerCameraController.hpp"
@@ -87,7 +87,10 @@ namespace Trident {
 				// TODO(debug)
 				physicsSimulation->broadPhase();
 				physicsSimulation->narrowPhase();
-				// physicsSimulation->applyForces();
+
+				#if defined(FORWARD_USE_NOCLIP_CAMERA)
+					physicsSimulation->applyForces();
+				#endif
 
 				#if !defined(FORWARD_USE_NOCLIP_CAMERA)
 					playerMove(deltaTime);

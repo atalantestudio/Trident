@@ -27,7 +27,19 @@ namespace Trident {
 	}
 
 	/// See https://media.gdcvault.com/gdc2013/slides/822403Gregorius_Dirk_TheSeparatingAxisTest.pdf.
-	static bool isMinkowskiFace(vec3<float32> a, vec3<float32> b, vec3<float32> c, vec3<float32> d) {
+	static bool isMinkowskiFace(
+		/// Face normal of the base edge on A.
+		vec3<float32> a,
+
+		/// Face normal of the twin edge on A.
+		vec3<float32> b,
+
+		/// Face normal of the base edge on B.
+		vec3<float32> c,
+
+		/// Face normal of the twin edge on B.
+		vec3<float32> d
+	) {
 		const vec3<float32> crossBA = cross(b, a);
 		const vec3<float32> crossDC = cross(d, c);
 
@@ -40,8 +52,8 @@ namespace Trident {
 	}
 
 	static float32 calculateEdgeDistance(vec3<float32> hullCentroidA, vec3<float32> edgeOriginA, vec3<float32> edgeDirectionA, vec3<float32> edgeOriginB, vec3<float32> edgeDirectionB) {
-		// Edges are parallel or nearly parallel.
 		if (distanceSquared(edgeDirectionA, edgeDirectionB) < 0.001f) {
+			// Edges are parallel or nearly parallel.
 			return min<float32>();
 		}
 
@@ -53,6 +65,71 @@ namespace Trident {
 		}
 
 		return dot(normal, edgeOriginB - edgeOriginA);
+	}
+
+	static EdgeQuery queryEdgeDirections(const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, const Hull3D& hullA, const Hull3D& hullB) {
+		EdgeQuery query{};
+		query.separation = min<float32>();
+
+		// TODO(debug)
+		const vec3<float32> hullCentroidA = vec3<float32>(hullA.centroid); // + rigidBodyA.position;
+
+		// TODO(debug)
+		// A:
+		// - [vertexID: 0, faceID: 4] // top (16)
+		// - [vertexID: 5, faceID: 3] // right (17)
+		// 
+		// B:
+		// - [vertexID: 6, faceID: 1] // back (14)
+		// - [vertexID: 4, faceID: 2] // left (15)
+
+		uint16 edgeIndexA = 0;
+
+		while (edgeIndexA < hullA.edges.count()) {
+			const Edge3D edgeA = hullA.edges[edgeIndexA + 0];
+			const Edge3D twinEdgeA = hullA.edges[edgeIndexA + 1];
+			const vec3<float32> a = rigidBodyA.facePlanes[edgeA.faceIndex].worldNormal;
+			const vec3<float32> b = rigidBodyA.facePlanes[twinEdgeA.faceIndex].worldNormal;
+
+			uint16 edgeIndexB = 0;
+
+			while (edgeIndexB < hullB.edges.count()) {
+				const Edge3D edgeB = hullB.edges[edgeIndexB + 0];
+				const Edge3D twinEdgeB = hullB.edges[edgeIndexB + 1];
+				const vec3<float32> c = rigidBodyB.facePlanes[edgeB.faceIndex].worldNormal;
+				const vec3<float32> d = rigidBodyB.facePlanes[twinEdgeB.faceIndex].worldNormal;
+
+				// TODO(debug)
+				// if (edgeIndexA == 16 && edgeIndexB == 14) BREAKPOINT();
+
+				if (isMinkowskiFace(a, b, -c, -d)) {
+					const vec3<float32> edgeOriginA = multiplyTransform(vec3<float32>(hullA.vertexPositions[edgeA.originVertexIndex]), rigidBodyA.world);
+					const vec3<float32> edgeEndA = multiplyTransform(vec3<float32>(hullA.vertexPositions[twinEdgeA.originVertexIndex]), rigidBodyA.world);
+					const vec3<float32> edgeDirectionA = normalized(edgeEndA - edgeOriginA);
+					const vec3<float32> edgeOriginB = multiplyTransform(vec3<float32>(hullB.vertexPositions[edgeB.originVertexIndex]), rigidBodyB.world);
+					const vec3<float32> edgeEndB = multiplyTransform(vec3<float32>(hullB.vertexPositions[twinEdgeB.originVertexIndex]), rigidBodyB.world);
+					const vec3<float32> edgeDirectionB = normalized(edgeEndB - edgeOriginB);
+
+					const float32 separation = calculateEdgeDistance(hullCentroidA, edgeOriginA, edgeDirectionA, edgeOriginB, edgeDirectionB);
+
+					if (separation > query.separation) {
+						query.separation = separation;
+						query.edgeA = edgeA;
+						query.edgeB = edgeB;
+					}
+
+					if (separation > 0.0f) {
+						break;
+					}
+				}
+
+				edgeIndexB += 2;
+			}
+
+			edgeIndexA += 2;
+		}
+
+		return query;
 	}
 
 	static FaceQuery queryFaceDirections(const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, const Hull3D& hullA, const Hull3D& hullB) {
@@ -89,51 +166,6 @@ namespace Trident {
 		return query;
 	}
 
-	static EdgeQuery queryEdgeDirections(const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, const Hull3D& hullA, const Hull3D& hullB) {
-		EdgeQuery query;
-		query.separation = min<float32>();
-
-		// Relative rotation between A and B.
-		const quat<float32> R = rigidBodyB.orientation * inverse(rigidBodyA.orientation);
-
-		uint16 edgeIndexA = 0;
-
-		const vec3<float32> hullCentroidA = vec3<float32>(hullA.centroid) + rigidBodyA.position;
-
-		while (edgeIndexA < hullA.edges.count()) {
-			const Edge3D edgeA = hullA.edges[edgeIndexA];
-			const Edge3D twinEdgeA = hullA.edges[edgeIndexA + 1];
-			const vec3<float32> a = vec3<float32>(hullA.faces[edgeA.faceIndex].normal) * rigidBodyA.orientation;
-			const vec3<float32> b = vec3<float32>(hullA.faces[twinEdgeA.faceIndex].normal) * rigidBodyA.orientation;
-			const vec3<float32> ab = b - a;
-
-			uint16 edgeIndexB = 0;
-
-			while (edgeIndexB < hullB.edges.count()) {
-				const Edge3D edgeB = hullB.edges[edgeIndexB];
-				const Edge3D twinEdgeB = hullA.edges[edgeIndexB + 1];
-				const vec3<float32> c = vec3<float32>(hullB.faces[edgeB.faceIndex].normal) * rigidBodyB.orientation;
-				const vec3<float32> d = vec3<float32>(hullB.faces[twinEdgeB.faceIndex].normal) * rigidBodyB.orientation;
-
-				if (isMinkowskiFace(a, b, -c, -d)) {
-					const float32 separation = calculateEdgeDistance(hullCentroidA, a, ab, c, d - c);
-
-					if (separation > query.separation) {
-						query.separation = separation;
-						query.edgeA = edgeA;
-						query.edgeB = edgeB;
-					}
-				}
-
-				edgeIndexB += 2;
-			}
-
-			edgeIndexA += 2;
-		}
-
-		return query;
-	}
-
 	SATOutput3D SAT3D(const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, const Hull3D& hullA, const Hull3D& hullB) {
 		SATOutput3D output{};
 		output.overlap = false;
@@ -150,12 +182,11 @@ namespace Trident {
 			return output;
 		}
 
-		output.edgeQuery.separation = min<float32>();
-		/* output.edgeQuery = queryEdgeDirections(rigidBodyA, rigidBodyB, hullA, hullB);
+		output.edgeQuery = queryEdgeDirections(rigidBodyA, rigidBodyB, hullA, hullB);
 
 		if (output.edgeQuery.separation > 0.0f) {
 			return output;
-		} */
+		}
 
 		output.overlap = true;
 

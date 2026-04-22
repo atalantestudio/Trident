@@ -18,7 +18,7 @@ namespace Trident {
 
 		private:
 			static constexpr uint32 SCENE_2D_COUNT = 9;
-			static constexpr uint32 SCENE_3D_COUNT = 4;
+			static constexpr uint32 SCENE_3D_COUNT = 5;
 
 			inline static const view<char8> SCENE_2D_NAMES[SCENE_2D_COUNT] = {
 				"Boxes",
@@ -47,6 +47,7 @@ namespace Trident {
 			inline static const view<char8> SCENE_3D_NAMES[SCENE_3D_COUNT] = {
 				"Boxes3D",
 				"BoxStacking",
+				"EdgeContact",
 				"Lemons",
 				"PlayerMovement",
 			};
@@ -54,6 +55,7 @@ namespace Trident {
 			inline static constexpr CreateScene3DFunction SCENE_3D_FUNCTIONS[SCENE_3D_COUNT] = {
 				createBoxes3DScene,
 				createBoxStackingScene,
+				createEdgeContactScene,
 				createLemonsScene,
 				createPlayerMovementScene,
 			};
