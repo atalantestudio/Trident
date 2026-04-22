@@ -8,7 +8,7 @@
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 
 namespace Trident::FlatColor {
-	Scene3D initializeScene(Application* application, GraphicsAPI graphicsApi, uint64 minStorageBufferOffsetAlignment) {
+	inline Scene3D initializeScene(Application* application, GraphicsAPI graphicsApi, uint64 minStorageBufferOffsetAlignment) {
 		AssetLibrary* assetLibrary = application->getAssetLibrary();
 
 		// Preload geometry assets.

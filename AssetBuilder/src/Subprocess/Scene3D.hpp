@@ -271,7 +271,7 @@ namespace Trident {
 					createRigidBody({
 						.position = {0.0f, -8.0f, 0.0f},
 						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
-						.scale = {2048.0f, 16.0f, 2048.0f},
+						.scale = {512.0f, 16.0f, 512.0f},
 						.mass = max<float32>(),
 						.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
 						.friction = 0.2f,
@@ -297,9 +297,10 @@ namespace Trident {
 				{
 					2,
 					createRigidBody({
-						.position = {128.0f, 32.0f, 256.0f},
+						.position = {128.0f, 8.0f, 128.0f},
 						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
-						.scale = {64.0f, 64.0f, 64.0f},
+						.scale = {64.0f, 16.0f, 64.0f},
+						// .mass = 20.0_kg,
 						.mass = max<float32>(),
 						.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
 						.friction = 0.2f,

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#define FORWARD_USE_NOCLIP_CAMERA
+// #define FORWARD_USE_NOCLIP_CAMERA
 
 #if !defined(FORWARD_USE_NOCLIP_CAMERA)
 	#include "Engine/API/Camera/Controller/PlayerCameraController.hpp"
@@ -11,6 +11,7 @@
 	#include "Engine/API/Camera/Controller/FlyCameraController.hpp"
 #endif
 
+#include "Engine/API/Event/EventDispatcher.hpp"
 #include "Engine/API/Physics/3D/PhysicsSimulation3D.hpp"
 #include "Engine/Layer/Layer.hpp"
 #include "Engine/Renderer/Forward/Renderer.hpp"
@@ -33,6 +34,7 @@ namespace Trident {
 			static constexpr float32 PLAYER_SPEED = 400.0f;
 			static constexpr float32 PLAYER_MAX_SPEED = 270.0f;
 			static constexpr float32 PLAYER_STOP_SPEED = 100.0f;
+			static constexpr float32 PLAYER_JUMP_FORCE = 268.3f;
 
 			static constexpr float32 GROUND_ACCELERATE = 10.0f;
 			static constexpr float32 AIR_ACCELERATE = 10.0f;
@@ -56,8 +58,8 @@ namespace Trident {
 
 				#if !defined(FORWARD_USE_NOCLIP_CAMERA)
 					PerspectiveCamera3D& camera = cameraController.getCamera();
-					camera.distance = 256.0_m;
-					camera.fieldOfView = radians(60.0_deg);
+					// camera.distance = 128.0_m;
+					camera.fieldOfView = radians(70.0_deg);
 					camera.aspectRatio = getApplication()->getWindow()->getAspectRatio();
 					camera.nearPlane = 0.01_m;
 					camera.farPlane = 4096.0_m;
@@ -74,18 +76,30 @@ namespace Trident {
 			}
 
 			void update(float32 deltaTime, float32 inverseDeltaTime) override {
+				RigidBody3DComponent& playerRigidBody = scene->ecs.getComponent<RigidBody3DComponent>(PLAYER_ENTITY);
+
 				#if !defined(FORWARD_USE_NOCLIP_CAMERA)
 					handleInputs();
-					handlePlayerMovement(deltaTime);
-				#else
-					noclipMove(deltaTime);
 				#endif
 
 				physicsSimulation->tick();
 
-				#if !defined(FORWARD_USE_NOCLIP_CAMERA)
-					const RigidBody3DComponent& playerRigidBody = scene->ecs.getComponent<RigidBody3DComponent>(PLAYER_ENTITY);
+				// TODO(debug)
+				physicsSimulation->broadPhase();
+				physicsSimulation->narrowPhase();
+				// physicsSimulation->applyForces();
 
+				#if !defined(FORWARD_USE_NOCLIP_CAMERA)
+					playerMove(deltaTime);
+				#else
+					noclipMove(deltaTime);
+				#endif
+
+				physicsSimulation->updateContactManifolds();
+				physicsSimulation->applyImpulses();
+				physicsSimulation->integrate();
+
+				#if !defined(FORWARD_USE_NOCLIP_CAMERA)
 					PerspectiveCamera3D& camera = cameraController.getCamera();
 					camera.position = playerRigidBody.position + PLAYER_CAMERA_OFFSET;
 				#endif
@@ -112,6 +126,10 @@ namespace Trident {
 					renderer.contactCount = 0;
 
 					for (const std::pair<EntityPair, ContactPair3D>& pair : physicsSimulation->contactPairs) {
+						if (pair.first.A != PLAYER_ENTITY && pair.first.B != PLAYER_ENTITY) {
+							continue;
+						}
+
 						uint8 contactIndex = 0;
 
 						while (contactIndex < pair.second.manifold.contactCount) {
@@ -188,176 +206,42 @@ namespace Trident {
 				return true;
 			}
 
-			void noclipMove(float32 deltaTime) {
-				const Window& window = *getApplication()->getWindow();
+			void handleInputs();
 
-				if (!window.isPointerLocked()) {
-					return;
-				}
+			void playerMove(float32 deltaTime);
 
-				PerspectiveCamera3D& camera = cameraController.getCamera();
+			void jump(float32 deltaTime);
 
-				const float32 forward = static_cast<float32>(window.isKeyDown(KeyCode::Z));
-				const float32 back = static_cast<float32>(window.isKeyDown(KeyCode::S));
-				const float32 right = static_cast<float32>(window.isKeyDown(KeyCode::D));
-				const float32 left = static_cast<float32>(window.isKeyDown(KeyCode::Q));
+			void applyFriction(float32 deltaTime);
 
-				const vec3<float32> wishvel = camera.getForward() * (forward - back) + camera.getRight() * (right - left);
+			void groundAccelerate(
+				/// The normalized direction in which the player wants to go.
+				vec3<float32> direction,
 
-				if (lengthSquared(wishvel) == 0.0f) {
-					return;
-				}
+				float32 wishspeed,
 
-				const vec3<float32> wishdir = normalized(wishvel) * MOVEMENT_SPEED * deltaTime;
+				/// The acceleration constant.
+				float32 acceleration,
 
-				camera.position += wishdir;
-			}
+				float32 deltaTime
+			);
 
-			void handleInputs() {
-				forwardmove = 0;
-				sidemove = 0;
+			void airAccelerate(
+				/// The normalized direction in which the player wants to go.
+				vec3<float32> direction,
 
-				const Window& window = *getApplication()->getWindow();
+				float32 wishspeed,
 
-				if (!window.isPointerLocked()) {
-					return;
-				}
+				/// The acceleration constant.
+				float32 acceleration,
 
-				const float32 forward = static_cast<float32>(window.isKeyDown(KeyCode::Z));
-				const float32 back = static_cast<float32>(window.isKeyDown(KeyCode::S));
-				const float32 right = static_cast<float32>(window.isKeyDown(KeyCode::D));
-				const float32 left = static_cast<float32>(window.isKeyDown(KeyCode::Q));
+				float32 deltaTime
+			);
 
-				forwardmove += PLAYER_SPEED * forward;
-				forwardmove -= PLAYER_SPEED * back;
-				sidemove += PLAYER_SPEED * right;
-				sidemove -= PLAYER_SPEED * left;
-			}
+			void groundMove(float32 deltaTime);
+			void airMove(float32 deltaTime);
 
-			// wishdir = The normalized direction that the player has requested to move (taking into account the movement keys and look direction)
-			// accel = The server-defined player acceleration value
-			void accelerate(vec3<float32> wishdir, float32 wishspeed, float32 accel, float32 deltaTime) {
-				RigidBody3DComponent& playerRigidBody = scene->ecs.getComponent<RigidBody3DComponent>(PLAYER_ENTITY);
-
-				// See if we are changing direction a bit.
-				float32 currentspeed = dot(playerRigidBody.linearVelocity, wishdir);
-
-				// Reduce wishspeed by the amount of veer.
-				float32 addspeed = wishspeed - currentspeed;
-
-				// If not going to add any speed, done.
-				if (addspeed <= 0.0f) {
-					return;
-				}
-
-				// Determine amount of acceleration.
-				float32 accelspeed = wishspeed * accel * deltaTime; // friction = 1?
-
-				// Cap at addspeed.
-				if (accelspeed > addspeed) {
-					accelspeed = addspeed;
-				}
-
-				playerRigidBody.linearVelocity += wishdir * accelspeed;
-			}
-
-			void walkMove(float32 deltaTime) {
-				RigidBody3DComponent& playerRigidBody = scene->ecs.getComponent<RigidBody3DComponent>(PLAYER_ENTITY);
-
-				const PerspectiveCamera3D& camera = cameraController.getCamera();
-				const vec3<float32> forward = normalized(camera.getForward() * vec3<float32>{1.0f, 0.0f, 1.0f});
-				const vec3<float32> right = normalized(camera.getRight() * vec3<float32>{1.0f, 0.0f, 1.0f});
-
-				vec3<float32> wishvel = {
-					forward[0] * forwardmove + right[0] * sidemove,
-					0.0f,
-					forward[2] * forwardmove + right[2] * sidemove,
-				};
-				float32 wishspeed = length(wishvel);
-
-				if (wishspeed == 0.0f) {
-					return;
-				}
-
-				const vec3<float32> wishdir = normalized(wishvel);
-
-				// Clamp to max speed
-				if (wishspeed > PLAYER_MAX_SPEED) {
-					wishvel *= PLAYER_MAX_SPEED / wishspeed;
-					wishspeed = PLAYER_MAX_SPEED;
-				}
-
-				playerRigidBody.linearVelocity *= {1.0f, 0.0f, 1.0f};
-
-				accelerate(wishdir, wishspeed, GROUND_ACCELERATE, deltaTime);
-
-				playerRigidBody.linearVelocity *= {1.0f, 0.0f, 1.0f};
-
-				const float32 speed = length(playerRigidBody.linearVelocity);
-
-				if (speed < 1.0f) {
-					playerRigidBody.linearVelocity = {0.0f, 0.0f, 0.0f};
-
-					return;
-				}
-
-				playerRigidBody.groundEntity = max<Entity>();
-			}
-
-			void applyVelocity(float32 deltaTime) {
-				// TODO: Move into PhysicsSimulation3D?
-				RigidBody3DComponent& playerRigidBody = scene->ecs.getComponent<RigidBody3DComponent>(PLAYER_ENTITY);
-				playerRigidBody.position += playerRigidBody.linearVelocity * deltaTime;
-				playerRigidBody.updateWorld({0.0f, 0.0f, 0.0f});
-			}
-
-			void handlePlayerMovement(float32 deltaTime) {
-				static const float32 JUMP_FORCE = sqrt(2.0f * 800.0f * 45.0f);
-
-				const Window& window = *getApplication()->getWindow();
-
-				RigidBody3DComponent& playerRigidBody = scene->ecs.getComponent<RigidBody3DComponent>(PLAYER_ENTITY);
-
-				// Add half the gravity.
-				playerRigidBody.linearVelocity += PLAYER_GRAVITY * deltaTime * 0.5f;
-
-				// Handle jumps.
-				if (window.isKeyDown(KeyCode::SPACE)) {
-					if (playerRigidBody.groundEntity != max<Entity>()) {
-						// If on ground, allow jumps.
-						playerRigidBody.linearVelocity += {0.0f, JUMP_FORCE, 0.0f};
-
-						playerRigidBody.groundEntity = max<Entity>();
-					}
-				}
-
-				// Apply friction.
-				/* if (playerRigidBody.groundEntity != max<Entity>()) {
-					// Reset Y before applying friction
-					player.getVelocity()[1] = 0;
-
-					applyFriction(deltaTime);
-				} */
-
-				// Walk.
-				if (playerRigidBody.groundEntity != max<Entity>()) {
-					// This nullifies the player's ground mesh.
-					walkMove(deltaTime);
-				} else {
-					// airMove(deltaTime);
-				}
-
-				// Add half the gravity.
-				playerRigidBody.linearVelocity += PLAYER_GRAVITY * deltaTime * 0.5f;
-
-				if (playerRigidBody.groundEntity == max<Entity>()) {
-					// Apply velocity.
-					applyVelocity(deltaTime);
-				} else {
-					// If we are on ground, no downward velocity.
-					playerRigidBody.linearVelocity *= {1.0f, 0.0f, 1.0f};
-				}
-			}
+			void noclipMove(float32 deltaTime);
 
 		private:
 			ForwardRenderer renderer;
@@ -370,7 +254,6 @@ namespace Trident {
 				FlyCameraController cameraController;
 			#endif
 
-			float32 forwardmove = 0.0f;
-			float32 sidemove = 0.0f;
+			vec3<float32> desiredVelocity = {0.0f, 0.0f, 0.0f};
 	};
 }

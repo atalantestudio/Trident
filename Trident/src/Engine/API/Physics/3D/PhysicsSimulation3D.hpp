@@ -34,7 +34,7 @@ namespace Trident {
 			/// Advances the simulation by a single tick.
 			void tick();
 
-		private:
+		public:
 			void broadPhase();
 			void narrowPhase();
 			void applyForces();
@@ -44,6 +44,7 @@ namespace Trident {
 			/// NOTE: Uses Semi-Implicit Euler.
 			void integrate();
 
+		private:
 			void mergeContactManifolds(ContactPair3D& contactPair, const ContactManifold3D& newContactManifold);
 
 		public:

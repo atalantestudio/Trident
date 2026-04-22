@@ -25,12 +25,13 @@ namespace Trident {
 	void PhysicsSimulation3D::tick() {
 		entityPairs.clear();
 
-		broadPhase();
+		// TODO(debug)
+		/* broadPhase();
 		narrowPhase();
 		applyForces();
 		updateContactManifolds();
 		applyImpulses();
-		integrate();
+		integrate(); */
 	}
 
 	void PhysicsSimulation3D::broadPhase() {
@@ -142,6 +143,9 @@ namespace Trident {
 
 			if (dot(contactPair.manifold.normal, UP) > 0.0f) {
 				rigidBodyB.groundEntity = contactPair.A;
+			}
+			else if (dot(contactPair.manifold.normal, -UP) > 0.0f) {
+				rigidBodyA.groundEntity = contactPair.B;
 			}
 
 			vec3<float32> normalAntiParallel = RIGHT;
