@@ -22,7 +22,7 @@ namespace Trident {
 			.sampleCount = 1,
 			.usage = ImageUsage::STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED,
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Output",
 			#endif
 		});
@@ -34,7 +34,7 @@ namespace Trident {
 			.mipLevelCount = 1,
 			.layerOffset = 0,
 			.layerCount = 1,
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Output",
 			#endif
 		});

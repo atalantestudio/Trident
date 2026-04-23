@@ -38,7 +38,9 @@ namespace Trident {
 		materialVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		materialVertexShaderModuleDescriptor.entryPoint = "main";
 
-		SET_DEBUG_NAME(materialVertexShaderModuleDescriptor, "Material vertex");
+		#if defined(DEBUG_OBJECT_NAME)
+			materialVertexShaderModuleDescriptor.name = "Material vertex";
+		#endif
 
 		ShaderModuleDescriptor materialFragmentShaderModuleDescriptor{};
 		materialFragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
@@ -76,8 +78,9 @@ namespace Trident {
 		materialDescriptorSetLayoutBindingImageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
 		materialDescriptorSetLayoutBindingImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
-		#if defined(BUILD_MODE_DEBUG)
-			sequence<char8> name;
+		#if defined(DEBUG_OBJECT_NAME)
+			sequence<char8> materialName;
+			sequence<char8> materialFragmentShaderName;
 		#endif
 
 		uint32 materialShaderIndex = 0;
@@ -91,15 +94,13 @@ namespace Trident {
 			const Shader& materialShader = materialShaders[materialShaderIndex];
 			const std::vector<Material>& materials = scene->getMaterials()[materialShaderIndex];
 
-			#if defined(BUILD_MODE_DEBUG)
-				name = Logger::format("Material [] fragment", materialShaderIndex);
+			#if defined(DEBUG_OBJECT_NAME)
+				materialName = Logger::format("Material []", materialShaderIndex);
+				materialFragmentShaderName = Logger::format("Material [] fragment", materialShaderIndex);
 
-				SET_DEBUG_NAME(materialFragmentShaderModuleDescriptor, name);
-
-				name = Logger::format("Material []", materialShaderIndex);
-
-				SET_DEBUG_NAME(materialPipelineLayoutDescriptor, name);
-				SET_DEBUG_NAME(materialPipelineDescriptor, name);
+				materialFragmentShaderModuleDescriptor.name = materialFragmentShaderName;
+				materialPipelineLayoutDescriptor.name = materialName;
+				materialPipelineDescriptor.name = materialName;
 			#endif
 
 			materialDescriptorSetLayouts[materialShaderIndex] = createDescriptorSetLayout(materialShader.descriptorSetLayoutBindings);
@@ -126,10 +127,10 @@ namespace Trident {
 
 				materialDescriptorSetLayoutBindingImageDescriptor.layerCount = descriptorSetLayoutBinding.descriptorCount;
 
-				#if defined(BUILD_MODE_DEBUG)
-					name = Logger::format("Material [], binding []", materialShaderIndex, bindingIndex);
+				#if defined(DEBUG_OBJECT_NAME)
+					materialName = Logger::format("Material [], binding []", materialShaderIndex, bindingIndex);
 
-					SET_DEBUG_NAME(materialDescriptorSetLayoutBindingImageDescriptor, name);
+					materialDescriptorSetLayoutBindingImageDescriptor.name = materialName;
 				#endif
 
 				materialImages[materialShaderIndex][bindingIndex] = createImage(materialDescriptorSetLayoutBindingImageDescriptor);
@@ -185,7 +186,9 @@ namespace Trident {
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-		SET_DEBUG_NAME(commandBufferDescriptor, "Write layered images");
+		#if defined(DEBUG_OBJECT_NAME)
+			commandBufferDescriptor.name = "Write layered images";
+		#endif
 
 		const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
 		const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder(commandBufferDescriptor);
@@ -241,10 +244,10 @@ namespace Trident {
 
 					materialReferenceBindingImageViewDescriptor.layerOffset = materialIndex;
 
-					#if defined(BUILD_MODE_DEBUG)
-						name = Logger::format("Material [], binding [], reference []", materialShaderIndex, bindingIndex, materialIndex);
+					#if defined(DEBUG_OBJECT_NAME)
+						materialName = Logger::format("Material [], binding [], reference []", materialShaderIndex, bindingIndex, materialIndex);
 
-						SET_DEBUG_NAME(materialReferenceBindingImageViewDescriptor, name);
+						materialReferenceBindingImageViewDescriptor.name = materialName;
 					#endif
 
 					materialReferenceBindingImageViews[materialReferenceBindingImageIndex] = image->createView(materialReferenceBindingImageViewDescriptor);

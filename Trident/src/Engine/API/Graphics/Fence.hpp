@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/Descriptor/FenceDescriptor.hpp"
-#include "Engine/Validation/Descriptor.hpp"
+#include "Engine/API/Graphics/Device.hpp"
 
 namespace Trident {
 	class Fence {

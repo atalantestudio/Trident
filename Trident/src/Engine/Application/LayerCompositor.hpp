@@ -61,7 +61,7 @@ namespace Trident {
 					.signaled = true,
 				};
 
-				#if defined(BUILD_MODE_DEBUG)
+				#if defined(DEBUG_OBJECT_NAME)
 					sequence<char8> inFlightCommandEncoderName;
 					sequence<char8> inFlightFenceName;
 				#endif
@@ -69,7 +69,7 @@ namespace Trident {
 				uint32 frameInFlightIndex = 0;
 
 				while (frameInFlightIndex < MAX_FRAMES_IN_FLIGHT) {
-					#if defined(BUILD_MODE_DEBUG)
+					#if defined(DEBUG_OBJECT_NAME)
 						inFlightCommandEncoderName = Logger::format("In flight command encoder []", frameInFlightIndex);
 						inFlightFenceName = Logger::format("In flight fence []", frameInFlightIndex);
 

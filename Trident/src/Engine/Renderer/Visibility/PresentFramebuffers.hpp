@@ -17,14 +17,14 @@ namespace Trident {
 			.extent = swapchain->getExtent(),
 		};
 
-		#if defined(BUILD_MODE_DEBUG)
+		#if defined(DEBUG_OBJECT_NAME)
 			sequence<char8> name;
 		#endif
 
 		uint32 presentFramebufferIndex = 0;
 
 		while (presentFramebufferIndex < presentFramebuffers.count()) {
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_OBJECT_NAME)
 				name = Logger::format("In flight framebuffer []", presentFramebufferIndex);
 
 				presentFramebufferDescriptor.name = name;

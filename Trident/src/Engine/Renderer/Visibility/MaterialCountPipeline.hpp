@@ -10,7 +10,7 @@ namespace Trident {
 		const ShaderModuleDescriptor shaderModuleDescriptor = {
 			.stage = ShaderStage::COMPUTE,
 			.entryPoint = "main",
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Material count compute",
 			#endif
 		};
@@ -34,7 +34,7 @@ namespace Trident {
 		return createComputePipeline({
 			.pipelineLayout = materialCountPipelineLayout,
 			.computeShaderModule = shaderModule,
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Material count",
 			#endif
 		});

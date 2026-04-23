@@ -115,7 +115,9 @@ namespace Trident {
 
 		ImageDescriptor descriptor = createSwapchainImageDescriptor(_swapchain->getExtent(), index);
 
-		SET_DEBUG_NAME(descriptor, Logger::format("Swapchain image []", index));
+		#if defined(DEBUG_OBJECT_NAME)
+			descriptor.name = Logger::format("Swapchain image []", index);
+		#endif
 
 		ref<DX12::Image> image = createRef<DX12::Image>(device, descriptor);
 		image->usage = static_cast<ImageUsage>(0);
@@ -124,7 +126,7 @@ namespace Trident {
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to get buffer for render target view.");
 
-		#if defined(BUILD_MODE_DEBUG)
+		#if defined(DEBUG_OBJECT_NAME)
 			const sequence<char8> descriptorName = Logger::format("Swapchain image []", index);
 			const LPWSTR name = ConvertUTF8ToUTF16(&descriptorName[0]);
 

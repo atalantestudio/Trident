@@ -177,7 +177,7 @@ namespace Trident {
 			}
 		#endif
 
-		#if defined(BUILD_MODE_DEBUG)
+		#if defined(DEBUG_OBJECT_NAME)
 			if (descriptor.name.count() > 0) {
 				glObjectLabel(GL_FRAMEBUFFER, framebuffer->framebuffer, static_cast<GLsizei>(descriptor.name.count()), &descriptor.name[0]);
 

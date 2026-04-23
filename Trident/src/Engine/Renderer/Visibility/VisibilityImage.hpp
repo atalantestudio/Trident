@@ -20,7 +20,7 @@ namespace Trident {
 				.mipLevelCount = 1,
 				.layerCount = 1,
 				.additionalUsage = ImageUsage::STORAGE,
-				#if defined(BUILD_MODE_DEBUG)
+				#if defined(DEBUG_OBJECT_NAME)
 					.name = "Visibility",
 				#endif
 			},
@@ -34,7 +34,7 @@ namespace Trident {
 			.mipLevelCount = 1,
 			.layerOffset = 0,
 			.layerCount = 1,
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Visibility",
 			#endif
 		});

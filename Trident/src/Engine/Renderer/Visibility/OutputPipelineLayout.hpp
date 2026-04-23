@@ -9,7 +9,7 @@ namespace Trident {
 	ref<PipelineLayout> VisibilityRenderer::createOutputPipelineLayout() const {
 		return createPipelineLayout({
 			.descriptorSetLayouts = {outputDescriptorSetLayout},
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Output",
 			#endif
 		});

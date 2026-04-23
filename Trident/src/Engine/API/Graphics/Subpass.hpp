@@ -6,7 +6,6 @@
 #include "Engine/API/Graphics/Descriptor/AttachmentImageDescriptor.hpp"
 #include "Engine/API/Graphics/Descriptor/SubpassDescriptor.hpp"
 #include "Engine/API/Graphics/Image.hpp"
-#include "Engine/Validation/Descriptor.hpp"
 
 namespace Trident {
 	struct Subpass {

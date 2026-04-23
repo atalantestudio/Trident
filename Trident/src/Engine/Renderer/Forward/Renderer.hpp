@@ -95,7 +95,7 @@ namespace Trident {
 					.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
 					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 					.persistent = false,
-					#if defined(BUILD_MODE_DEBUG)
+					#if defined(DEBUG_OBJECT_NAME)
 						.name = "Vertex",
 					#endif
 				});
@@ -103,7 +103,7 @@ namespace Trident {
 				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
 				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
 					.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
-					#if defined(BUILD_MODE_DEBUG)
+					#if defined(DEBUG_OBJECT_NAME)
 						.name = "Copy buffers",
 					#endif
 				});
@@ -301,14 +301,14 @@ namespace Trident {
 					.extent = swapchain->getExtent(),
 				};
 
-				#if defined(BUILD_MODE_DEBUG)
+				#if defined(DEBUG_OBJECT_NAME)
 					sequence<char8> name;
 				#endif
 
 				uint32 framebufferIndex = 0;
 
 				while (framebufferIndex < framebuffers.count()) {
-					#if defined(BUILD_MODE_DEBUG)
+					#if defined(DEBUG_OBJECT_NAME)
 						name = Logger::format("In flight framebuffer []", framebufferIndex);
 
 						framebufferDescriptor.name = name;
@@ -337,7 +337,7 @@ namespace Trident {
 						.extent = {extent.width, extent.height, 1},
 						.mipLevelCount = 1,
 						.layerCount = 1,
-						#if defined(BUILD_MODE_DEBUG)
+						#if defined(DEBUG_OBJECT_NAME)
 							.name = "Color (multisampled)",
 						#endif
 					},
@@ -354,7 +354,7 @@ namespace Trident {
 						.extent = {extent.width, extent.height, 1},
 						.mipLevelCount = 1,
 						.layerCount = 1,
-						#if defined(BUILD_MODE_DEBUG)
+						#if defined(DEBUG_OBJECT_NAME)
 							.name = "Depth stencil"
 						#endif
 					},
@@ -368,7 +368,7 @@ namespace Trident {
 					.mipLevelCount = 1,
 					.layerOffset = 0,
 					.layerCount = 1,
-					#if defined(BUILD_MODE_DEBUG)
+					#if defined(DEBUG_OBJECT_NAME)
 						.name = "Color (multisampled)",
 					#endif
 				});
@@ -380,7 +380,7 @@ namespace Trident {
 					.mipLevelCount = 1,
 					.layerOffset = 0,
 					.layerCount = 1,
-					#if defined(BUILD_MODE_DEBUG)
+					#if defined(DEBUG_OBJECT_NAME)
 						.name = "Depth stencil",
 					#endif
 				});
@@ -454,7 +454,7 @@ namespace Trident {
 					.usage = BufferUsage::VERTEX,
 					.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 					.persistent = true,
-					#if defined(BUILD_MODE_DEBUG)
+					#if defined(DEBUG_OBJECT_NAME)
 						.name = "Instance",
 					#endif
 				});
@@ -471,7 +471,7 @@ namespace Trident {
 					.usage = BufferUsage::UNIFORM,
 					.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 					.persistent = true,
-					#if defined(BUILD_MODE_DEBUG)
+					#if defined(DEBUG_OBJECT_NAME)
 						.name = "Camera",
 					#endif
 				});

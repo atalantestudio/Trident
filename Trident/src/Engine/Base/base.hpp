@@ -67,6 +67,10 @@
 	#define BUILD_MODE BUILD_MODE_RELEASE
 #endif
 
+#if defined(BUILD_MODE_DEBUG)
+	#define DEBUG_OBJECT_NAME
+#endif
+
 namespace Trident {
 	using atl::sint8;
 	using atl::sint16;

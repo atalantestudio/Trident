@@ -12,7 +12,7 @@ namespace Trident {
 			.usage = BufferUsage::VERTEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = true,
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Debug contact manifold",
 			#endif
 		});

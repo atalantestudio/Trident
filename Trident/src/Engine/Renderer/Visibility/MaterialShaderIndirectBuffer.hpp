@@ -12,7 +12,7 @@ namespace Trident {
 			.usage = BufferUsage::READ_WRITE_STORAGE | BufferUsage::INDIRECT,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Material shader indirect",
 			#endif
 		});

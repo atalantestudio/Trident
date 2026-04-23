@@ -29,7 +29,7 @@ namespace Trident {
 		};
 		ComputePipelineDescriptor materialShaderPipelineDescriptor = {};
 
-		#if defined(BUILD_MODE_DEBUG)
+		#if defined(DEBUG_OBJECT_NAME)
 			sequence<char8> materialShaderName;
 			sequence<char8> materialShaderModuleName;
 		#endif
@@ -40,7 +40,7 @@ namespace Trident {
 			const Shader& materialShader = scene->materialShaders[materialShaderIndex];
 			const std::vector<Material>& materials = scene->materials[materialShaderIndex];
 
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_OBJECT_NAME)
 				materialShaderModuleName = Logger::format("Material shader [] compute", materialShaderIndex);
 				materialShaderName = Logger::format("Material shader []", materialShaderIndex);
 
@@ -141,7 +141,7 @@ namespace Trident {
 			.layerOffset = 0,
 		};
 
-		#if defined(BUILD_MODE_DEBUG)
+		#if defined(DEBUG_OBJECT_NAME)
 			sequence<char8> materialShaderDescriptorSetLayoutBindingName;
 		#endif
 
@@ -181,7 +181,7 @@ namespace Trident {
 
 				switch (descriptorSetLayoutBinding.descriptorType) {
 					case DescriptorType::COMBINED_IMAGE_SAMPLER: {
-						#if defined(BUILD_MODE_DEBUG)
+						#if defined(DEBUG_OBJECT_NAME)
 							materialShaderDescriptorSetLayoutBindingName = Logger::format("Material [], binding []", materialShaderIndex, descriptorSetLayoutBindingIndex);
 
 							imageDescriptor.name = materialShaderDescriptorSetLayoutBindingName;
@@ -290,7 +290,7 @@ namespace Trident {
 		const ref<Queue> graphicsQueue = device->getQueue(QueueFamilyCapability::GRAPHICS);
 		const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder({
 			.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Copy material shader images",
 			#endif
 		});

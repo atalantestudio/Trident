@@ -104,7 +104,7 @@ namespace Trident {
 
 		image->memorySuballocation = memoryAllocator->suballocateImage(image->image, memoryTypeIndex, memoryRequirements);
 
-		#if defined(BUILD_MODE_DEBUG)
+		#if defined(DEBUG_OBJECT_NAME)
 			if (descriptor.name.count() > 0) {
 				VkDebugUtilsObjectNameInfoEXT debugUtilsObjectNameInfo{};
 				debugUtilsObjectNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
@@ -127,7 +127,9 @@ namespace Trident {
 
 		ImageDescriptor descriptor = createSwapchainImageDescriptor(extent);
 
-		SET_DEBUG_NAME(descriptor, Logger::format("Swapchain image []", index));
+		#if defined(DEBUG_OBJECT_NAME)
+			descriptor.name = Logger::format("Swapchain image []", index);
+		#endif
 
 		ref<VK::Image> _image = createRef<VK::Image>(device, descriptor);
 		_image->image = image;

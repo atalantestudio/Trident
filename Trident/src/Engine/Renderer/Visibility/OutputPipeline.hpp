@@ -11,7 +11,7 @@ namespace Trident {
 			{
 				.stage = ShaderStage::VERTEX,
 				.entryPoint = "main",
-				#if defined(BUILD_MODE_DEBUG)
+				#if defined(DEBUG_OBJECT_NAME)
 					.name = "Output vertex",
 				#endif
 			},
@@ -22,7 +22,7 @@ namespace Trident {
 			{
 				.stage = ShaderStage::FRAGMENT,
 				.entryPoint = "main",
-				#if defined(BUILD_MODE_DEBUG)
+				#if defined(DEBUG_OBJECT_NAME)
 					.name = "Output fragment",
 				#endif
 			},
@@ -54,7 +54,7 @@ namespace Trident {
 			.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT,
 			.renderPass = presentRenderPass,
 			.subpassIndex = 0,
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Output",
 			#endif
 		});

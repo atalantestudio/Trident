@@ -300,7 +300,7 @@ namespace Trident {
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create command buffer ([]).", string_VkResult(result));
 
-		#if defined(BUILD_MODE_DEBUG)
+		#if defined(DEBUG_OBJECT_NAME)
 			if (descriptor.name.count() > 0) {
 				VkDebugUtilsObjectNameInfoEXT debugUtilsObjectNameInfo{};
 				debugUtilsObjectNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;

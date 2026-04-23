@@ -75,7 +75,7 @@ namespace Trident {
 			ADAPTER_ASSERT(immutableStorage != GL_FALSE, "Only immutable buffer storage are not supported.");
 		#endif
 
-		#if defined(BUILD_MODE_DEBUG)
+		#if defined(DEBUG_OBJECT_NAME)
 			if (descriptor.name.count() > 0) {
 				glObjectLabel(GL_BUFFER, buffer->buffer, static_cast<GLsizei>(descriptor.name.count()), &descriptor.name[0]);
 			}

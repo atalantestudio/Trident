@@ -9,7 +9,7 @@
 namespace Trident {
 	class GL::ShaderModule final : public Trident::ShaderModule {
 		public:
-			explicit ShaderModule(const Trident::Device* device);
+			explicit ShaderModule(const Trident::Device* device, const ShaderModuleDescriptor& descriptor);
 
 		public:
 			GLuint shader;

@@ -13,7 +13,7 @@ namespace Trident {
 				clusterDescriptorSetLayout,
 				instanceDescriptorSetLayout,
 			},
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Visibility",
 			#endif
 		});

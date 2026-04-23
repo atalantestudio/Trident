@@ -11,7 +11,7 @@ namespace Trident {
 			{
 				.stage = ShaderStage::COMPUTE,
 				.entryPoint = "main",
-				#if defined(BUILD_MODE_DEBUG)
+				#if defined(DEBUG_OBJECT_NAME)
 					.name = "Material offset compute",
 				#endif
 			},
@@ -21,7 +21,7 @@ namespace Trident {
 		return createComputePipeline({
 			.pipelineLayout = materialOffsetPipelineLayout,
 			.computeShaderModule = shaderModule,
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Material offset",
 			#endif
 		});

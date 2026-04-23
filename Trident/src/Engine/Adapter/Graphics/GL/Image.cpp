@@ -132,6 +132,12 @@ namespace Trident {
 			#endif
 		}
 
+		#if defined(DEBUG_OBJECT_NAME)
+			if (descriptor.name.count() > 0) {
+				glObjectLabel(GL_TEXTURE, image->texture, static_cast<GLsizei>(descriptor.name.count()), &descriptor.name[0]);
+			}
+		#endif
+
 		return image;
 	}
 

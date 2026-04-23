@@ -39,7 +39,9 @@ namespace Trident {
 		FenceDescriptor idleFenceDescriptor{};
 		idleFenceDescriptor.signaled = false;
 
-		SET_DEBUG_NAME(idleFenceDescriptor, "Queue idle fence");
+		#if defined(DEBUG_OBJECT_NAME)
+			idleFenceDescriptor.name = "Queue idle fence";
+		#endif
 
 		queue->idleFence = createFence(device, idleFenceDescriptor);
 		queue->completionEvent = CreateEvent(nullptr, false, false, L"Completion event");

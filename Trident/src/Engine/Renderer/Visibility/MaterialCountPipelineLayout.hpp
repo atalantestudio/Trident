@@ -9,7 +9,7 @@ namespace Trident {
 	ref<PipelineLayout> VisibilityRenderer::createMaterialCountPipelineLayout() const {
 		return createPipelineLayout({
 			.descriptorSetLayouts = {materialCountDescriptorSetLayout},
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Material count",
 			#endif
 		});

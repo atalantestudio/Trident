@@ -30,7 +30,9 @@ namespace Trident {
 				PipelineLayoutDescriptor prefixSumPipelineLayoutDescriptor{};
 				prefixSumPipelineLayoutDescriptor.descriptorSetLayouts = {prefixSumDescriptorSetLayout};
 
-				SET_DEBUG_NAME(prefixSumPipelineLayoutDescriptor, "Prefix sum");
+				#if defined(DEBUG_OBJECT_NAME)
+					prefixSumPipelineLayoutDescriptor.name = "Prefix sum";
+				#endif
 
 				const ref<PipelineLayout> prefixSumPipelineLayout = createPipelineLayout(prefixSumPipelineLayoutDescriptor);
 
@@ -38,13 +40,17 @@ namespace Trident {
 				prefixSumShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
 				prefixSumShaderModuleDescriptor.entryPoint = "main";
 
-				SET_DEBUG_NAME(prefixSumShaderModuleDescriptor, "Prefix sum compute");
+				#if defined(DEBUG_OBJECT_NAME)
+					prefixSumShaderModuleDescriptor.name = "Prefix sum compute";
+				#endif
 
 				ComputePipelineDescriptor prefixSumPipelineDescriptor{};
 				prefixSumPipelineDescriptor.pipelineLayout = prefixSumPipelineLayout;
 				prefixSumPipelineDescriptor.computeShaderModule = loadShaderModule(prefixSumShaderModuleDescriptor, "Compute/PrefixSum/PrefixSum.comp");
 
-				SET_DEBUG_NAME(prefixSumPipelineDescriptor, "Prefix sum");
+				#if defined(DEBUG_OBJECT_NAME)
+					prefixSumPipelineDescriptor.name = "Prefix sum";
+				#endif
 
 				const ref<ComputePipeline> prefixSumPipeline = createComputePipeline(prefixSumPipelineDescriptor);
 
@@ -54,7 +60,9 @@ namespace Trident {
 				elementCountBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 				elementCountBufferDescriptor.persistent = false;
 
-				SET_DEBUG_NAME(elementCountBufferDescriptor, "Element count");
+				#if defined(DEBUG_OBJECT_NAME)
+					elementCountBufferDescriptor.name = "Element count";
+				#endif
 
 				const ref<Buffer<uint32>> elementCountBuffer = createBuffer<uint32>(elementCountBufferDescriptor);
 
@@ -64,7 +72,9 @@ namespace Trident {
 				elementStartBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 				elementStartBufferDescriptor.persistent = false;
 
-				SET_DEBUG_NAME(elementStartBufferDescriptor, "Element start");
+				#if defined(DEBUG_OBJECT_NAME)
+					elementStartBufferDescriptor.name = "Element start";
+				#endif
 
 				const ref<Buffer<uint32>> elementStartBuffer = createBuffer<uint32>(elementStartBufferDescriptor);
 
@@ -74,7 +84,9 @@ namespace Trident {
 				elementStartStagingBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 				elementStartStagingBufferDescriptor.persistent = false;
 
-				SET_DEBUG_NAME(elementStartStagingBufferDescriptor, "Element start staging");
+				#if defined(DEBUG_OBJECT_NAME)
+					elementStartStagingBufferDescriptor.name = "Element start staging";
+				#endif
 
 				const ref<Buffer<uint32>> elementStartStagingBuffer = createBuffer<uint32>(elementStartStagingBufferDescriptor);
 
@@ -115,7 +127,9 @@ namespace Trident {
 				CommandBufferDescriptor commandBufferDescriptor{};
 				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-				SET_DEBUG_NAME(commandBufferDescriptor, "Run prefix sum");
+				#if defined(DEBUG_OBJECT_NAME)
+					commandBufferDescriptor.name = "Run prefix sum";
+				#endif
 
 				const ref<Queue> queue = device->getQueue(QueueFamilyCapability::COMPUTE);
 				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder(commandBufferDescriptor);

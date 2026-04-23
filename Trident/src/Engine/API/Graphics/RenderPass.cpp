@@ -158,7 +158,7 @@ namespace Trident {
 			.sampleCount = attachment.sampleCount,
 			.usage = usage,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED,
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_OBJECT_NAME)
 				.name = descriptor.name,
 			#endif
 		});

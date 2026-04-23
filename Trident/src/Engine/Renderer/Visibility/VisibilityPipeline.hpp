@@ -10,7 +10,7 @@ namespace Trident {
 		const ShaderModuleDescriptor visibilityVertexShaderModuleDescriptor = {
 			.stage = ShaderStage::VERTEX,
 			.entryPoint = "main",
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Visibility vertex",
 			#endif
 		};
@@ -35,7 +35,7 @@ namespace Trident {
 			{
 				.stage = ShaderStage::FRAGMENT,
 				.entryPoint = "main",
-				#if defined(BUILD_MODE_DEBUG)
+				#if defined(DEBUG_OBJECT_NAME)
 					.name = "Visibility fragment",
 				#endif
 			},
@@ -69,7 +69,7 @@ namespace Trident {
 			.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT,
 			.renderPass = visibilityRenderPass,
 			.subpassIndex = 0,
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Visibility",
 			#endif
 		});

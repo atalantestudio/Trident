@@ -29,17 +29,23 @@ namespace Trident {
 		ADAPTER_ASSERT(false, "Shader module compilation failed:\n[]", infoLog);
 	}
 
-	GL::ShaderModule::ShaderModule(const Trident::Device* device) :
-		Trident::ShaderModule(device)
-	{}
+	GL::ShaderModule::ShaderModule(const Trident::Device* device, const ShaderModuleDescriptor& descriptor) :
+		Trident::ShaderModule(device),
+		shader(glCreateShader(getShaderStage(descriptor.stage)))
+	{
+		#if defined(DEBUG_OBJECT_NAME)
+			if (descriptor.name.count() > 0) {
+				glObjectLabel(GL_SHADER, shader, static_cast<GLsizei>(descriptor.name.count()), &descriptor.name[0]);
+			}
+		#endif
+	}
 
 	ref<Trident::ShaderModule> GL::createShaderModule(const Trident::Device* device, const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> shaderModuleAsset) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		ADAPTER_ASSERT(descriptor.stage == ShaderStage::VERTEX, "Only vertex shaders can be loaded as .tsm assets.");
 
-		ref<GL::ShaderModule> shaderModule = createRef<GL::ShaderModule>(device);
-		shaderModule->shader = glCreateShader(getShaderStage(descriptor.stage));
+		ref<GL::ShaderModule> shaderModule = createRef<GL::ShaderModule>(device, descriptor);
 
 		#if defined(GL_SOURCE_FROM_SPIRV)
 			// TODO
@@ -61,12 +67,6 @@ namespace Trident {
 			glCompileShader(shaderModule->shader);
 		#endif
 
-		#if defined(BUILD_MODE_DEBUG)
-			if (descriptor.name.count() > 0) {
-				glObjectLabel(GL_SHADER, shaderModule->shader, static_cast<GLsizei>(descriptor.name.count()), &descriptor.name[0]);
-			}
-		#endif
-
 		checkCompileStatus(shaderModule->shader);
 
 		return shaderModule;
@@ -75,8 +75,7 @@ namespace Trident {
 	ref<Trident::ShaderModule> GL::createShaderModule(const Trident::Device* device, const ShaderModuleDescriptor& descriptor, view<char8> code) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ref<GL::ShaderModule> shaderModule = createRef<GL::ShaderModule>(device);
-		shaderModule->shader = glCreateShader(getShaderStage(descriptor.stage));
+		ref<GL::ShaderModule> shaderModule = createRef<GL::ShaderModule>(device, descriptor);
 
 		GLsizei length = static_cast<GLsizei>(code.count());
 

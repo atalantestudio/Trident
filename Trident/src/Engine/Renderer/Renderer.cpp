@@ -5,7 +5,6 @@
 
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Renderer/Renderer.hpp"
-#include "Engine/Validation/Descriptor.hpp"
 
 namespace Trident {
 	const LayerCompositor* Renderer::layerCompositor;

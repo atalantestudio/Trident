@@ -23,7 +23,7 @@ namespace Trident {
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create fence.");
 
-		#if defined(BUILD_MODE_DEBUG)
+		#if defined(DEBUG_OBJECT_NAME)
 			if (descriptor.name.count() > 0) {
 				const LPWSTR name = ConvertUTF8ToUTF16(&descriptor.name[0]);
 

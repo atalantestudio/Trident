@@ -5,7 +5,6 @@
 
 #include "Engine/API/Graphics/Descriptor/FramebufferDescriptor.hpp"
 #include "Engine/API/Graphics/Device.hpp"
-#include "Engine/Validation/Descriptor.hpp"
 
 namespace Trident {
 	class Framebuffer {

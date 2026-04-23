@@ -23,7 +23,7 @@ namespace Trident {
 					// Depth stencil attachment images do not always support STORAGE usage.
 					.additionalUsage = ImageUsage::SAMPLED,
 				#endif
-				#if defined(BUILD_MODE_DEBUG)
+				#if defined(DEBUG_OBJECT_NAME)
 					.name = "Depth stencil",
 				#endif
 			},
@@ -37,7 +37,7 @@ namespace Trident {
 			.mipLevelCount = 1,
 			.layerOffset = 0,
 			.layerCount = 1,
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Depth stencil",
 			#endif
 		});

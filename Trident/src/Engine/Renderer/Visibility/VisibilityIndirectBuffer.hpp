@@ -12,7 +12,7 @@ namespace Trident {
 			.usage = BufferUsage::INDIRECT,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = false,
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Visibility indirect",
 			#endif
 		});

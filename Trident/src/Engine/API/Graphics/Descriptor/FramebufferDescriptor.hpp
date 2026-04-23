@@ -12,7 +12,7 @@ namespace Trident {
 		sequence<ref<ImageView>> imageViews;
 		Extent2D extent;
 
-		#if defined(BUILD_MODE_DEBUG)
+		#if defined(DEBUG_OBJECT_NAME)
 			view<char8> name;
 		#endif
 	};

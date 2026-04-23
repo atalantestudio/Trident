@@ -126,7 +126,9 @@ namespace Trident {
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-		SET_DEBUG_NAME(commandBufferDescriptor, "Glyph map");
+		#if defined(DEBUG_OBJECT_NAME)
+			commandBufferDescriptor.name = "Glyph map";
+		#endif
 
 		commandEncoder = computeQueue->createCommandEncoder(commandBufferDescriptor);
 		commandEncoder->begin();
@@ -157,7 +159,7 @@ namespace Trident {
 
 		const FenceDescriptor writeBufferFenceDescriptor = {
 			.signaled = true,
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Buffer write",
 			#endif
 		};
@@ -273,7 +275,7 @@ namespace Trident {
 			.usage = BufferUsage::TRANSFER_DST,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = false,
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Glyph map staging",
 			#endif
 		});
@@ -325,7 +327,9 @@ namespace Trident {
 		fontBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
 		fontBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
-		SET_DEBUG_NAME(fontBufferDescriptor, "Font");
+		#if defined(DEBUG_OBJECT_NAME)
+			fontBufferDescriptor.name = "Font";
+		#endif
 
 		fontBuffer = Renderer::createBuffer<FontStorage>(fontBufferDescriptor);
 	}
@@ -337,7 +341,9 @@ namespace Trident {
 		glyphBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		glyphBufferDescriptor.persistent = true;
 
-		SET_DEBUG_NAME(glyphBufferDescriptor, "Glyph");
+		#if defined(DEBUG_OBJECT_NAME)
+			glyphBufferDescriptor.name = "Glyph";
+		#endif
 
 		glyphBuffer = Renderer::createBuffer<GlyphBuffer>(glyphBufferDescriptor);
 		glyphMappedRange = glyphBuffer->map(0, glyphBuffer->getSize());
@@ -350,7 +356,9 @@ namespace Trident {
 		glyphOffsetBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		glyphOffsetBufferDescriptor.persistent = true;
 
-		SET_DEBUG_NAME(glyphOffsetBufferDescriptor, "Glyph offset");
+		#if defined(DEBUG_OBJECT_NAME)
+			glyphOffsetBufferDescriptor.name = "Glyph offset";
+		#endif
 
 		glyphOffsetBuffer = Renderer::createBuffer<uint32>(glyphOffsetBufferDescriptor);
 		glyphOffsetMappedRange = glyphOffsetBuffer->map(0, glyphOffsetBuffer->getSize());
@@ -369,7 +377,9 @@ namespace Trident {
 		glyphImageDescriptor.usage = ImageUsage::STORAGE;
 		glyphImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
-		SET_DEBUG_NAME(glyphImageDescriptor, "Glyph");
+		#if defined(DEBUG_OBJECT_NAME)
+			glyphImageDescriptor.name = "Glyph";
+		#endif
 
 		glyphImage = Renderer::createImage(glyphImageDescriptor);
 	}
@@ -381,7 +391,9 @@ namespace Trident {
 		glyphImageViewDescriptor.layerOffset = 0;
 		glyphImageViewDescriptor.layerCount = 1;
 
-		SET_DEBUG_NAME(glyphImageViewDescriptor, "Glyph");
+		#if defined(DEBUG_OBJECT_NAME)
+			glyphImageViewDescriptor.name = "Glyph";
+		#endif
 
 		glyphImageView = glyphImage->createView(glyphImageViewDescriptor);
 	}
@@ -425,7 +437,9 @@ namespace Trident {
 		PipelineLayoutDescriptor glyphImagePipelineLayoutDescriptor{};
 		glyphImagePipelineLayoutDescriptor.descriptorSetLayouts = {glyphImageDescriptorSetLayout};
 
-		SET_DEBUG_NAME(glyphImagePipelineLayoutDescriptor, "Glyph");
+		#if defined(DEBUG_OBJECT_NAME)
+			glyphImagePipelineLayoutDescriptor.name = "Glyph";
+		#endif
 
 		glyphImagePipelineLayout = Renderer::createPipelineLayout(glyphImagePipelineLayoutDescriptor);
 	}
@@ -435,7 +449,9 @@ namespace Trident {
 		computeShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
 		computeShaderModuleDescriptor.entryPoint = "main";
 
-		SET_DEBUG_NAME(computeShaderModuleDescriptor, "Rasterize glyph");
+		#if defined(DEBUG_OBJECT_NAME)
+			computeShaderModuleDescriptor.name = "Rasterize glyph";
+		#endif
 
 		const ref<ShaderModule> computeShaderModule = Renderer::loadShaderModule(computeShaderModuleDescriptor, "RasterizeGlyph.comp");
 
@@ -443,7 +459,9 @@ namespace Trident {
 		glyphImageComputePipelineDescriptor.pipelineLayout = glyphImagePipelineLayout;
 		glyphImageComputePipelineDescriptor.computeShaderModule = computeShaderModule;
 
-		SET_DEBUG_NAME(glyphImageComputePipelineDescriptor, "Glyph image");
+		#if defined(DEBUG_OBJECT_NAME)
+			glyphImageComputePipelineDescriptor.name = "Glyph image";
+		#endif
 
 		glyphImageComputePipeline = Renderer::createComputePipeline(glyphImageComputePipelineDescriptor);
 	}
@@ -462,7 +480,9 @@ namespace Trident {
 		glyphMapImageDescriptor.usage = ImageUsage::STORAGE | ImageUsage::TRANSFER_SRC;
 		glyphMapImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
-		SET_DEBUG_NAME(glyphMapImageDescriptor, "Glyph map");
+		#if defined(DEBUG_OBJECT_NAME)
+			glyphMapImageDescriptor.name = "Glyph map";
+		#endif
 
 		glyphMapImage = Renderer::createImage(glyphMapImageDescriptor);
 	}
@@ -474,7 +494,9 @@ namespace Trident {
 		glyphMapImageViewDescriptor.layerOffset = 0;
 		glyphMapImageViewDescriptor.layerCount = 1;
 
-		SET_DEBUG_NAME(glyphMapImageViewDescriptor, "Glyph map");
+		#if defined(DEBUG_OBJECT_NAME)
+			glyphMapImageViewDescriptor.name = "Glyph map";
+		#endif
 
 		glyphMapImageView = glyphMapImage->createView(glyphMapImageViewDescriptor);
 	}
@@ -483,7 +505,9 @@ namespace Trident {
 		PipelineLayoutDescriptor glyphSdfPipelineLayoutDescriptor{};
 		glyphSdfPipelineLayoutDescriptor.descriptorSetLayouts = {glyphSdfDescriptorSetLayout};
 
-		SET_DEBUG_NAME(glyphSdfPipelineLayoutDescriptor, "Glyph SDF");
+		#if defined(DEBUG_OBJECT_NAME)
+			glyphSdfPipelineLayoutDescriptor.name = "Glyph SDF";
+		#endif
 
 		glyphSdfPipelineLayout = Renderer::createPipelineLayout(glyphSdfPipelineLayoutDescriptor);
 	}
@@ -493,7 +517,9 @@ namespace Trident {
 		computeShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
 		computeShaderModuleDescriptor.entryPoint = "main";
 
-		SET_DEBUG_NAME(computeShaderModuleDescriptor, "Distance field");
+		#if defined(DEBUG_OBJECT_NAME)
+			computeShaderModuleDescriptor.name = "Distance field";
+		#endif
 
 		const ref<ShaderModule> computeShaderModule = Renderer::loadShaderModule(computeShaderModuleDescriptor, "DistanceField.comp");
 
@@ -501,7 +527,9 @@ namespace Trident {
 		glyphSdfComputePipelineDescriptor.pipelineLayout = glyphSdfPipelineLayout;
 		glyphSdfComputePipelineDescriptor.computeShaderModule = computeShaderModule;
 
-		SET_DEBUG_NAME(glyphSdfComputePipelineDescriptor, "Glyph SDF");
+		#if defined(DEBUG_OBJECT_NAME)
+			glyphSdfComputePipelineDescriptor.name = "Glyph SDF";
+		#endif
 
 		glyphSdfComputePipeline = Renderer::createComputePipeline(glyphSdfComputePipelineDescriptor);
 	}

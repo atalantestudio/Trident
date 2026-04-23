@@ -10,7 +10,7 @@ namespace Trident {
 		ShaderStage stage;
 		view<char8> entryPoint;
 
-		#if defined(BUILD_MODE_DEBUG)
+		#if defined(DEBUG_OBJECT_NAME)
 			view<char8> name;
 		#endif
 	};

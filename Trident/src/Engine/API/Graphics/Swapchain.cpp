@@ -69,7 +69,9 @@ namespace Trident {
 			imageViewDescriptor.mipLevelCount = image->getMipLevelCount();
 			imageViewDescriptor.layerCount = image->getLayerCount();
 
-			SET_DEBUG_NAME(imageViewDescriptor, Logger::format("Swapchain image view []", imageViewIndex));
+			#if defined(DEBUG_OBJECT_NAME)
+				imageViewDescriptor.name = Logger::format("Swapchain image view []", imageViewIndex);
+			#endif
 
 			imageViews[imageViewIndex] = image->createView(imageViewDescriptor);
 

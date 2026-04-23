@@ -112,7 +112,9 @@ namespace Trident {
 				depthStencilAttachmentImageDescriptor.mipLevelCount = 1;
 				depthStencilAttachmentImageDescriptor.layerCount = 1;
 
-				SET_DEBUG_NAME(depthStencilAttachmentImageDescriptor, "Depth stencil image");
+				#if defined(DEBUG_OBJECT_NAME)
+					depthStencilAttachmentImageDescriptor.name = "Depth stencil image";
+				#endif
 
 				depthStencilImage = renderPass->createDepthStencilAttachmentImage(depthStencilAttachmentImageDescriptor, 0);
 			}
@@ -124,7 +126,9 @@ namespace Trident {
 				depthStencilImageViewDescriptor.layerOffset = 0;
 				depthStencilImageViewDescriptor.layerCount = 1;
 
-				SET_DEBUG_NAME(depthStencilImageViewDescriptor, "Depth stencil image view");
+				#if defined(DEBUG_OBJECT_NAME)
+					depthStencilImageViewDescriptor.name = "Depth stencil image view";
+				#endif
 
 				depthStencilImageView = depthStencilImage->createView(depthStencilImageViewDescriptor);
 			}
@@ -139,17 +143,17 @@ namespace Trident {
 				framebufferDescriptor.imageViews = {nullptr, depthStencilImageView};
 				framebufferDescriptor.extent = swapchain->getExtent();
 
-				#if defined(BUILD_MODE_DEBUG)
+				#if defined(DEBUG_OBJECT_NAME)
 					sequence<char8> name;
 				#endif
 
 				uint32 framebufferIndex = 0;
 
 				while (framebufferIndex < framebuffers.count()) {
-					#if defined(BUILD_MODE_DEBUG)
+					#if defined(DEBUG_OBJECT_NAME)
 						name = Logger::format("In flight framebuffer []", framebufferIndex);
 
-						SET_DEBUG_NAME(framebufferDescriptor, name);
+						framebufferDescriptor.name = name;
 					#endif
 
 					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
@@ -163,7 +167,9 @@ namespace Trident {
 			void setupGraphicsPipeline() {
 				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
 
-				SET_DEBUG_NAME(pipelineLayoutDescriptor, "Pipeline layout");
+				#if defined(DEBUG_OBJECT_NAME)
+					pipelineLayoutDescriptor.name = "Pipeline layout";
+				#endif
 
 				const ref<PipelineLayout> pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
@@ -177,13 +183,17 @@ namespace Trident {
 				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 				vertexShaderModuleDescriptor.entryPoint = "main";
 
-				SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Vertex shader module");
+				#if defined(DEBUG_OBJECT_NAME)
+					vertexShaderModuleDescriptor.name = "Vertex shader module";
+				#endif
 
 				ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 				fragmentShaderModuleDescriptor.entryPoint = "main";
 
-				SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Fragment shader module");
+				#if defined(DEBUG_OBJECT_NAME)
+					fragmentShaderModuleDescriptor.name = "Fragment shader module";
+				#endif
 
 				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/DepthTest/DepthTest.vert");
 				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/DepthTest/DepthTest.frag");
@@ -213,7 +223,9 @@ namespace Trident {
 				graphicsPipelineDescriptor.renderPass = renderPass;
 				graphicsPipelineDescriptor.subpassIndex = 0;
 
-				SET_DEBUG_NAME(graphicsPipelineDescriptor, "Render pipeline");
+				#if defined(DEBUG_OBJECT_NAME)
+					graphicsPipelineDescriptor.name = "Render pipeline";
+				#endif
 
 				graphicsPipeline = createGraphicsPipeline(graphicsPipelineDescriptor);
 			}
@@ -242,14 +254,18 @@ namespace Trident {
 				vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 				vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
-				SET_DEBUG_NAME(vertexBufferDescriptor, "Vertex buffer");
+				#if defined(DEBUG_OBJECT_NAME)
+					vertexBufferDescriptor.name = "Vertex buffer";
+				#endif
 
 				BufferDescriptor instanceBufferDescriptor{};
 				instanceBufferDescriptor.size = INSTANCE_BUFFER_SIZE;
 				instanceBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 				instanceBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
-				SET_DEBUG_NAME(instanceBufferDescriptor, "Instance buffer");
+				#if defined(DEBUG_OBJECT_NAME)
+					instanceBufferDescriptor.name = "Instance buffer";
+				#endif
 
 				vertexBuffer = createBuffer<Vertex>(vertexBufferDescriptor);
 				instanceBuffer = createBuffer<Instance>(instanceBufferDescriptor);
@@ -267,7 +283,9 @@ namespace Trident {
 				CommandBufferDescriptor commandBufferDescriptor{};
 				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-				SET_DEBUG_NAME(commandBufferDescriptor, "Buffer copy command buffer");
+				#if defined(DEBUG_OBJECT_NAME)
+					commandBufferDescriptor.name = "Buffer copy command buffer";
+				#endif
 
 				const ref<Queue> graphicsQueue = getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
 				const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder(commandBufferDescriptor);

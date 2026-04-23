@@ -9,7 +9,7 @@ namespace Trident {
 	struct CommandBufferDescriptor {
 		CommandBufferUsage usage;
 
-		#if defined(BUILD_MODE_DEBUG)
+		#if defined(DEBUG_OBJECT_NAME)
 			view<char8> name;
 		#endif
 	};

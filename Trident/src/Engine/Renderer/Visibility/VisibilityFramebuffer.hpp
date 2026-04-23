@@ -11,7 +11,7 @@ namespace Trident {
 			.renderPass = visibilityRenderPass,
 			.imageViews = {visibilityImageView, depthStencilImageView},
 			.extent = getSwapchain()->getExtent(),
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Visibility",
 			#endif
 		});

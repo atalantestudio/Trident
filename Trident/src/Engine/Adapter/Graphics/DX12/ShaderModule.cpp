@@ -74,7 +74,7 @@ namespace Trident {
 			#endif
 		);
 
-		#if defined(BUILD_MODE_DEBUG)
+		#if defined(DEBUG_OBJECT_NAME)
 			if (errorBlob) {
 				const view<char8> error(pointer_cast<const char8*>(errorBlob->GetBufferPointer()), errorBlob->GetBufferSize());
 

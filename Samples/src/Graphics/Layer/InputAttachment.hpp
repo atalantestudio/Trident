@@ -137,7 +137,9 @@ namespace Trident {
 				attachmentImageDescriptor.mipLevelCount = 1;
 				attachmentImageDescriptor.layerCount = 1;
 
-				SET_DEBUG_NAME(attachmentImageDescriptor, "Image");
+				#if defined(DEBUG_OBJECT_NAME)
+					attachmentImageDescriptor.name = "Image";
+				#endif
 
 				image = renderPass->createInputAttachmentImage(attachmentImageDescriptor, 1);
 			}
@@ -149,7 +151,9 @@ namespace Trident {
 				imageViewDescriptor.layerOffset = 0;
 				imageViewDescriptor.layerCount = 1;
 
-				SET_DEBUG_NAME(imageViewDescriptor, "Image view");
+				#if defined(DEBUG_OBJECT_NAME)
+					imageViewDescriptor.name = "Image view";
+				#endif
 
 				imageView = image->createView(imageViewDescriptor);
 			}
@@ -164,17 +168,17 @@ namespace Trident {
 				framebufferDescriptor.imageViews = {nullptr, imageView};
 				framebufferDescriptor.extent = swapchain->getExtent();
 
-				#if defined(BUILD_MODE_DEBUG)
+				#if defined(DEBUG_OBJECT_NAME)
 					sequence<char8> name;
 				#endif
 
 				uint32 framebufferIndex = 0;
 
 				while (framebufferIndex < framebuffers.count()) {
-					#if defined(BUILD_MODE_DEBUG)
+					#if defined(DEBUG_OBJECT_NAME)
 						name = Logger::format("In flight framebuffer []", framebufferIndex);
 
-						SET_DEBUG_NAME(framebufferDescriptor, name);
+						framebufferDescriptor.name = name;
 					#endif
 
 					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
@@ -217,7 +221,9 @@ namespace Trident {
 			void createWriteImagePipelineLayout() {
 				PipelineLayoutDescriptor writeImagePipelineLayoutDescriptor{};
 
-				SET_DEBUG_NAME(writeImagePipelineLayoutDescriptor, "Image write");
+				#if defined(DEBUG_OBJECT_NAME)
+					writeImagePipelineLayoutDescriptor.name = "Image write";
+				#endif
 
 				writeImagePipelineLayout = createPipelineLayout(writeImagePipelineLayoutDescriptor);
 			}
@@ -231,13 +237,17 @@ namespace Trident {
 				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 				vertexShaderModuleDescriptor.entryPoint = "main";
 
-				SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Image write vertex");
+				#if defined(DEBUG_OBJECT_NAME)
+					vertexShaderModuleDescriptor.name = "Image write vertex";
+				#endif
 
 				ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 				fragmentShaderModuleDescriptor.entryPoint = "main";
 
-				SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Image write fragment");
+				#if defined(DEBUG_OBJECT_NAME)
+					fragmentShaderModuleDescriptor.name = "Image write fragment";
+				#endif
 
 				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/Triangle/Triangle.vert");
 				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/Triangle/Triangle.frag");
@@ -265,7 +275,9 @@ namespace Trident {
 				writeImageGraphicsPipelineDescriptor.renderPass = renderPass;
 				writeImageGraphicsPipelineDescriptor.subpassIndex = WRITE_IMAGE_SUBPASS_INDEX;
 
-				SET_DEBUG_NAME(writeImageGraphicsPipelineDescriptor, "Image write");
+				#if defined(DEBUG_OBJECT_NAME)
+					writeImageGraphicsPipelineDescriptor.name = "Image write";
+				#endif
 
 				writeImageGraphicsPipeline = createGraphicsPipeline(writeImageGraphicsPipelineDescriptor);
 			}
@@ -274,7 +286,9 @@ namespace Trident {
 				PipelineLayoutDescriptor readImagePipelineLayoutDescriptor{};
 				readImagePipelineLayoutDescriptor.descriptorSetLayouts = {imageDescriptorSetLayout};
 
-				SET_DEBUG_NAME(readImagePipelineLayoutDescriptor, "Image read");
+				#if defined(DEBUG_OBJECT_NAME)
+					readImagePipelineLayoutDescriptor.name = "Image read";
+				#endif
 
 				readImagePipelineLayout = createPipelineLayout(readImagePipelineLayoutDescriptor);
 			}
@@ -284,13 +298,17 @@ namespace Trident {
 				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 				vertexShaderModuleDescriptor.entryPoint = "main";
 
-				SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Image read vertex");
+				#if defined(DEBUG_OBJECT_NAME)
+					vertexShaderModuleDescriptor.name = "Image read vertex";
+				#endif
 
 				ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 				fragmentShaderModuleDescriptor.entryPoint = "main";
 
-				SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Image read fragment");
+				#if defined(DEBUG_OBJECT_NAME)
+					fragmentShaderModuleDescriptor.name = "Image read fragment";
+				#endif
 
 				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/InputAttachment/InputAttachment.vert");
 				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/InputAttachment/InputAttachment.frag");
@@ -317,7 +335,9 @@ namespace Trident {
 				readImageGraphicsPipelineDescriptor.renderPass = renderPass;
 				readImageGraphicsPipelineDescriptor.subpassIndex = READ_IMAGE_SUBPASS_INDEX;
 
-				SET_DEBUG_NAME(readImageGraphicsPipelineDescriptor, "Image read");
+				#if defined(DEBUG_OBJECT_NAME)
+					readImageGraphicsPipelineDescriptor.name = "Image read";
+				#endif
 
 				readImageGraphicsPipeline = createGraphicsPipeline(readImageGraphicsPipelineDescriptor);
 			}
@@ -341,7 +361,9 @@ namespace Trident {
 				vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 				vertexBufferDescriptor.persistent = false;
 
-				SET_DEBUG_NAME(vertexBufferDescriptor, "Vertex buffer");
+				#if defined(DEBUG_OBJECT_NAME)
+					vertexBufferDescriptor.name = "Vertex buffer";
+				#endif
 
 				vertexBuffer = createBuffer<Vertex>(vertexBufferDescriptor);
 
@@ -353,7 +375,9 @@ namespace Trident {
 				CommandBufferDescriptor commandBufferDescriptor{};
 				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-				SET_DEBUG_NAME(commandBufferDescriptor, "Buffer copy command buffer");
+				#if defined(DEBUG_OBJECT_NAME)
+					commandBufferDescriptor.name = "Buffer copy command buffer";
+				#endif
 
 				const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
 				const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);

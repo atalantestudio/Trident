@@ -9,7 +9,7 @@ namespace Trident {
 	ref<PipelineLayout> VisibilityRenderer::createMaterialCoordinatePipelineLayout() const {
 		return createPipelineLayout({
 			.descriptorSetLayouts = {materialCoordinateDescriptorSetLayout},
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Material coordinate",
 			#endif
 		});

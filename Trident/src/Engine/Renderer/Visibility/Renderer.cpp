@@ -183,7 +183,7 @@ namespace Trident {
 		const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
 		const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder({
 			.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Copy buffers",
 			#endif
 		});
@@ -427,7 +427,7 @@ namespace Trident {
 			const ref<Queue> graphicsQueue = getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
 			const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder({
 				.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
-				#if defined(BUILD_MODE_DEBUG)
+				#if defined(DEBUG_OBJECT_NAME)
 					.name = "Transition output image",
 				#endif
 			});

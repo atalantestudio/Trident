@@ -15,7 +15,7 @@ namespace Trident {
 			{
 				.stage = ShaderStage::VERTEX,
 				.entryPoint = "main",
-				#if defined(BUILD_MODE_DEBUG)
+				#if defined(DEBUG_OBJECT_NAME)
 					.name = "Debug hull wireframe vertex",
 				#endif
 			},
@@ -26,7 +26,7 @@ namespace Trident {
 			{
 				.stage = ShaderStage::FRAGMENT,
 				.entryPoint = "main",
-				#if defined(BUILD_MODE_DEBUG)
+				#if defined(DEBUG_OBJECT_NAME)
 					.name = "Debug hull wireframe fragment",
 				#endif
 			},
@@ -61,7 +61,7 @@ namespace Trident {
 			.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT,
 			.renderPass = renderPass,
 			.subpassIndex = 0,
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Debug hull wireframe",
 			#endif
 		});
