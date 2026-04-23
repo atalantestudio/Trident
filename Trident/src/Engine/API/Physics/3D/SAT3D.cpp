@@ -52,12 +52,14 @@ namespace Trident {
 	}
 
 	static float32 calculateEdgeDistance(vec3<float32> hullCentroidA, vec3<float32> edgeOriginA, vec3<float32> edgeDirectionA, vec3<float32> edgeOriginB, vec3<float32> edgeDirectionB) {
-		if (distanceSquared(edgeDirectionA, edgeDirectionB) < 0.001f) {
+		const vec3<float32> crossAB = cross(edgeDirectionA, edgeDirectionB);
+
+		if (lengthSquared(crossAB) < epsilon<float32>()) {
 			// Edges are parallel or nearly parallel.
 			return min<float32>();
 		}
 
-		vec3<float32> normal = normalized(cross(edgeDirectionA, edgeDirectionB));
+		vec3<float32> normal = normalized(crossAB);
 
 		if (dot(normal, edgeOriginA - hullCentroidA) > 0.0f) {
 			// Ensure the normal points towards B.
@@ -71,17 +73,7 @@ namespace Trident {
 		EdgeQuery query{};
 		query.separation = min<float32>();
 
-		// TODO(debug)
-		const vec3<float32> hullCentroidA = vec3<float32>(hullA.centroid); // + rigidBodyA.position;
-
-		// TODO(debug)
-		// A:
-		// - [vertexID: 0, faceID: 4] // top (16)
-		// - [vertexID: 5, faceID: 3] // right (17)
-		// 
-		// B:
-		// - [vertexID: 6, faceID: 1] // back (14)
-		// - [vertexID: 4, faceID: 2] // left (15)
+		const vec3<float32> centroidA = vec3<float32>(hullA.centroid) + rigidBodyA.position;
 
 		uint16 edgeIndexA = 0;
 
@@ -99,9 +91,6 @@ namespace Trident {
 				const vec3<float32> c = rigidBodyB.facePlanes[edgeB.faceIndex].worldNormal;
 				const vec3<float32> d = rigidBodyB.facePlanes[twinEdgeB.faceIndex].worldNormal;
 
-				// TODO(debug)
-				// if (edgeIndexA == 16 && edgeIndexB == 14) BREAKPOINT();
-
 				if (isMinkowskiFace(a, b, -c, -d)) {
 					const vec3<float32> edgeOriginA = multiplyTransform(vec3<float32>(hullA.vertexPositions[edgeA.originVertexIndex]), rigidBodyA.world);
 					const vec3<float32> edgeEndA = multiplyTransform(vec3<float32>(hullA.vertexPositions[twinEdgeA.originVertexIndex]), rigidBodyA.world);
@@ -110,16 +99,20 @@ namespace Trident {
 					const vec3<float32> edgeEndB = multiplyTransform(vec3<float32>(hullB.vertexPositions[twinEdgeB.originVertexIndex]), rigidBodyB.world);
 					const vec3<float32> edgeDirectionB = normalized(edgeEndB - edgeOriginB);
 
-					const float32 separation = calculateEdgeDistance(hullCentroidA, edgeOriginA, edgeDirectionA, edgeOriginB, edgeDirectionB);
+					const float32 separation = calculateEdgeDistance(centroidA, edgeOriginA, edgeDirectionA, edgeOriginB, edgeDirectionB);
 
 					if (separation > query.separation) {
 						query.separation = separation;
-						query.edgeA = edgeA;
-						query.edgeB = edgeB;
+						query.originA = edgeOriginA;
+						query.originB = edgeOriginB;
+						query.directionA = edgeDirectionA;
+						query.directionB = edgeDirectionB;
+						query.centroidA = centroidA;
 					}
 
+					// TODO(physics/3d/edge-query): Fix edge query returning with positive separation when the bodies are overlapping.
 					if (separation > 0.0f) {
-						break;
+						return query;
 					}
 				}
 

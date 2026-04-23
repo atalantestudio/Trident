@@ -9,10 +9,31 @@
 
 namespace Trident {
 	static void createEdgeContact(const EdgeQuery& edgeQuery, const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, const Hull3D& hullA, const Hull3D& hullB, ContactManifold3D* contactManifold) {
-		// TODO(physics/3d/edge-contact)
-		BREAKPOINT();
+		// See https://math.stackexchange.com/a/2217845.
+		const vec3<float32> ab = edgeQuery.originB - edgeQuery.originA;
 
-		contactManifold->contactCount = 0;
+		vec3<float32> normal = normalized(cross(edgeQuery.directionA, edgeQuery.directionB));
+
+		if (dot(normal, edgeQuery.originA - edgeQuery.centroidA) > 0.0f) {
+			// Ensure the normal points towards B.
+			normal = -normal;
+		}
+
+		const float32 nn = dot(normal, normal);
+
+		const float32 tA = dot(cross(edgeQuery.originB, normal), ab) / nn;
+		const float32 tB = dot(cross(edgeQuery.originA, normal), ab) / nn;
+
+		const vec3<float32> closestA = edgeQuery.originA + edgeQuery.directionA * tA;
+		const vec3<float32> closestB = edgeQuery.originB + edgeQuery.directionB * tB;
+
+		contactManifold->normal = normal;
+		contactManifold->contactCount = 1;
+		contactManifold->contacts[0].position = (closestA + closestB) * 0.5f;
+		contactManifold->contacts[0].separation = edgeQuery.separation;
+
+		// TODO(physics/3d/edge-contact-id)
+		BREAKPOINT();
 	}
 
 	static void createFaceContact(const FaceQuery& faceQuery, ContactManifold3D* contactManifold) {

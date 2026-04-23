@@ -13,12 +13,16 @@ namespace Trident {
 		/// The separation between the two bodies.
 		float32 separation;
 
-		/// The separating axis.
-		float32 axis;
+		/// The edge origins in world space.
+		vec3<float32> originA;
+		vec3<float32> originB;
 
-		/// The closest edges on A and B.
-		Edge3D edgeA;
-		Edge3D edgeB;
+		/// The normalized directions of the edges in world space.
+		vec3<float32> directionA;
+		vec3<float32> directionB;
+
+		/// The centroid of A in world space.
+		vec3<float32> centroidA;
 	};
 
 	struct FaceQuery {
