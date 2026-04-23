@@ -17,7 +17,7 @@ namespace Trident {
 					"WindowHeight: 720\n"
 					"VerticalSync: 1\n"
 					"\n"
-					"SampleGroupName: Sample\n"
+					"SampleGroupName: Graphics\n"
 					"SampleName: Triangle\n"
 					"\n"
 					"AssetName: test-regular"

@@ -5,32 +5,28 @@
 
 #include "Engine/Renderer/Renderer.hpp"
 
-#include "../SampleLayer.hpp"
+#include "../GraphicsLayer.hpp"
 
 namespace Trident {
-	class SampleDepthTestRenderer : public Renderer {
+	class SampleColorBlendRenderer : public Renderer {
 		private:
 			struct Vertex {
-				vec3<float32> position;
+				svec2<float32> position;
 			};
 
 			struct Instance {
-				vec3<float32> color;
+				vec4<float32> color;
 			};
 
 		private:
-			static constexpr uint64 INSTANCE_COUNT = 2;
+			static constexpr uint32 INSTANCE_COUNT = 2;
 			static constexpr uint64 VERTEX_BUFFER_SIZE = 3 * INSTANCE_COUNT * sizeof(Vertex);
 			static constexpr uint64 INSTANCE_BUFFER_SIZE = INSTANCE_COUNT * sizeof(Instance);
 
 		public:
 			void build() override {
 				setupRenderPass();
-
-				recreateDepthStencilImage();
-				recreateDepthStencilImageView();
 				recreateFramebuffers();
-
 				setupGraphicsPipeline();
 				createBuffers();
 			}
@@ -38,17 +34,17 @@ namespace Trident {
 			void render(ref<CommandEncoder> commandEncoder) const override {
 				BeginRenderPassDescriptor beginRenderPassDescriptor{};
 				beginRenderPassDescriptor.framebuffer = framebuffers[getSwapchainImageIndex()];
-				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 1.0f}};
+				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
 
 				const Extent2D swapchainExtent = getSwapchain()->getExtent();
 				const float32 width = static_cast<float32>(swapchainExtent.width);
 				const float32 height = static_cast<float32>(swapchainExtent.height);
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
-				commandEncoder->bindGraphicsPipeline(graphicsPipeline);
-				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
+				commandEncoder->bindGraphicsPipeline(graphicsPipeline);
+				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 
 				for (uint32 instanceIndex = 0; instanceIndex < INSTANCE_COUNT; instanceIndex += 1) {
 					commandEncoder->bindVertexBuffer(1, instanceBuffer, instanceIndex * sizeof(Instance), sizeof(Instance));
@@ -59,8 +55,6 @@ namespace Trident {
 			}
 
 			void resize(WindowResizeEvent& event) override {
-				recreateDepthStencilImage();
-				recreateDepthStencilImageView();
 				recreateFramebuffers();
 			}
 
@@ -73,60 +67,20 @@ namespace Trident {
 				swapchainAttachment.storeOperation = StoreOperation::STORE;
 				swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
 
-				Attachment depthStencilAttachment{};
-				depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
-				depthStencilAttachment.sampleCount = 1;
-				depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
-				depthStencilAttachment.storeOperation = StoreOperation::UNDEFINED;
-				depthStencilAttachment.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
 				AttachmentReference swapchainAttachmentReference{};
 				swapchainAttachmentReference.index = 0;
 				swapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 
-				AttachmentReference depthStencilAttachmentReference{};
-				depthStencilAttachmentReference.index = 1;
-				depthStencilAttachmentReference.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
 				SubpassDescriptor subpassDescriptor{};
 				subpassDescriptor.colorAttachmentReferences = {swapchainAttachmentReference};
-				subpassDescriptor.depthStencilAttachmentReference = depthStencilAttachmentReference;
 
 				const ref<Subpass> subpass = createSubpass(subpassDescriptor);
 
 				RenderPassDescriptor renderPassDescriptor{};
-				renderPassDescriptor.attachments = {swapchainAttachment, depthStencilAttachment};
+				renderPassDescriptor.attachments = {swapchainAttachment};
 				renderPassDescriptor.subpasses = {subpass};
 
 				renderPass = createRenderPass(renderPassDescriptor);
-			}
-
-			void recreateDepthStencilImage() {
-				const Extent2D swapchainExtent = getSwapchain()->getExtent();
-
-				AttachmentImageDescriptor depthStencilAttachmentImageDescriptor{};
-				depthStencilAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
-				depthStencilAttachmentImageDescriptor.extent.width = swapchainExtent.width;
-				depthStencilAttachmentImageDescriptor.extent.height = swapchainExtent.height;
-				depthStencilAttachmentImageDescriptor.extent.depth = 1;
-				depthStencilAttachmentImageDescriptor.mipLevelCount = 1;
-				depthStencilAttachmentImageDescriptor.layerCount = 1;
-
-				SET_DEBUG_NAME(depthStencilAttachmentImageDescriptor, "Depth stencil image");
-
-				depthStencilImage = renderPass->createDepthStencilAttachmentImage(depthStencilAttachmentImageDescriptor, 0);
-			}
-
-			void recreateDepthStencilImageView() {
-				ImageViewDescriptor depthStencilImageViewDescriptor{};
-				depthStencilImageViewDescriptor.mipLevelOffset = 0;
-				depthStencilImageViewDescriptor.mipLevelCount = 1;
-				depthStencilImageViewDescriptor.layerOffset = 0;
-				depthStencilImageViewDescriptor.layerCount = 1;
-
-				SET_DEBUG_NAME(depthStencilImageViewDescriptor, "Depth stencil image view");
-
-				depthStencilImageView = depthStencilImage->createView(depthStencilImageViewDescriptor);
 			}
 
 			void recreateFramebuffers() {
@@ -136,7 +90,7 @@ namespace Trident {
 
 				FramebufferDescriptor framebufferDescriptor{};
 				framebufferDescriptor.renderPass = renderPass;
-				framebufferDescriptor.imageViews = {nullptr, depthStencilImageView};
+				framebufferDescriptor.imageViews = {nullptr};
 				framebufferDescriptor.extent = swapchain->getExtent();
 
 				#if defined(BUILD_MODE_DEBUG)
@@ -168,10 +122,10 @@ namespace Trident {
 				const ref<PipelineLayout> pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
 				VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-				vertexInputBinding.registerAttribute<vec3<float32>>();
+				vertexInputBinding.registerAttribute<svec2<float32>>();
 
 				VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-				instanceInputBinding.registerAttribute<vec3<float32>>();
+				instanceInputBinding.registerAttribute<vec4<float32>>();
 
 				ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -185,12 +139,14 @@ namespace Trident {
 
 				SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Fragment shader module");
 
-				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/DepthTest/DepthTest.vert");
-				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/DepthTest/DepthTest.frag");
+				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/ColorBlend/ColorBlend.vert");
+				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/ColorBlend/ColorBlend.frag");
 
 				const sequence<ColorBlendAttachment> colorBlendAttachments = {
 					{
-						.blend = false,
+						.blend = true,
+						.srcColorBlendFactor = BlendFactor::SRC_ALPHA,
+						.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA,
 					},
 				};
 
@@ -206,9 +162,7 @@ namespace Trident {
 				graphicsPipelineDescriptor.lineWidth = 1.0f;
 				graphicsPipelineDescriptor.minSampleShading = 0.0f;
 				graphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
-				graphicsPipelineDescriptor.depthStencilState.depthTest = true;
-				graphicsPipelineDescriptor.depthStencilState.depthWrite = true;
-				graphicsPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
+				graphicsPipelineDescriptor.depthStencilState.depthTest = false;
 				graphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 				graphicsPipelineDescriptor.renderPass = renderPass;
 				graphicsPipelineDescriptor.subpassIndex = 0;
@@ -224,16 +178,16 @@ namespace Trident {
 				uint8* stagingBufferMappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
 
 				Vertex* vertexStagingBufferMappedRange = pointer_cast<Vertex*>(stagingBufferMappedRange);
-				vertexStagingBufferMappedRange[0].position = {-0.75f,  0.75f,  1.0f};
-				vertexStagingBufferMappedRange[1].position = { 0.25f,  0.75f,  1.0f};
-				vertexStagingBufferMappedRange[2].position = {-0.75f, -0.75f,  1.0f};
-				vertexStagingBufferMappedRange[3].position = {-0.5f,   0.5f,   0.0f};
-				vertexStagingBufferMappedRange[4].position = { 0.5f,   0.5f,   0.0f};
-				vertexStagingBufferMappedRange[5].position = {-0.5f,  -0.5f,   0.0f};
+				vertexStagingBufferMappedRange[0].position = {-0.75f,  0.75f};
+				vertexStagingBufferMappedRange[1].position = { 0.25f,  0.75f};
+				vertexStagingBufferMappedRange[2].position = {-0.75f, -0.75f};
+				vertexStagingBufferMappedRange[3].position = {-0.5f,   0.5f};
+				vertexStagingBufferMappedRange[4].position = { 0.5f,   0.5f};
+				vertexStagingBufferMappedRange[5].position = {-0.5f,  -0.5f};
 
 				Instance* instanceStagingBufferMappedRange = pointer_cast<Instance*>(stagingBufferMappedRange + VERTEX_BUFFER_SIZE);
-				instanceStagingBufferMappedRange[0].color = {1.0f, 1.0f, 1.0f};
-				instanceStagingBufferMappedRange[1].color = {1.0f, 0.2f, 0.0f};
+				instanceStagingBufferMappedRange[0].color = {1.0f, 1.0f, 1.0f, 1.0f};
+				instanceStagingBufferMappedRange[1].color = {1.0f, 0.2f, 0.0f, 0.5f};
 
 				stagingBuffer->unmap();
 
@@ -269,8 +223,8 @@ namespace Trident {
 
 				SET_DEBUG_NAME(commandBufferDescriptor, "Buffer copy command buffer");
 
-				const ref<Queue> graphicsQueue = getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
-				const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder(commandBufferDescriptor);
+				const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
+				const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
 
 				commandEncoder->begin();
 				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, {vertexBufferCopyRegion});
@@ -278,19 +232,17 @@ namespace Trident {
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-				graphicsQueue->submit(commandBuffer);
-				graphicsQueue->waitIdle();
+				transferQueue->submit(commandBuffer);
+				transferQueue->waitIdle();
 			}
 
 		private:
 			ref<RenderPass> renderPass;
-			ref<Image> depthStencilImage;
-			ref<ImageView> depthStencilImageView;
 			sequence<ref<Framebuffer>> framebuffers;
 			ref<GraphicsPipeline> graphicsPipeline;
 			ref<Buffer<Vertex>> vertexBuffer;
 			ref<Buffer<Instance>> instanceBuffer;
 	};
 
-	DEFINE_SAMPLE_LAYER(SampleDepthTest);
+	DEFINE_SAMPLE_LAYER(SampleColorBlend);
 }

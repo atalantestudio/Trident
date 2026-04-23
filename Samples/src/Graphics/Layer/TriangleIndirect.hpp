@@ -5,30 +5,26 @@
 
 #include "Engine/Renderer/Renderer.hpp"
 
-#include "../SampleLayer.hpp"
+#include "../GraphicsLayer.hpp"
 
 namespace Trident {
-	class SampleColorBlendRenderer : public Renderer {
+	class SampleTriangleIndirectRenderer : public Renderer {
 		private:
 			struct Vertex {
 				svec2<float32> position;
-			};
-
-			struct Instance {
-				vec4<float32> color;
+				vec3<float32> color;
 			};
 
 		private:
-			static constexpr uint32 INSTANCE_COUNT = 2;
-			static constexpr uint64 VERTEX_BUFFER_SIZE = 3 * INSTANCE_COUNT * sizeof(Vertex);
-			static constexpr uint64 INSTANCE_BUFFER_SIZE = INSTANCE_COUNT * sizeof(Instance);
+			static constexpr uint32 VERTEX_COUNT = 3;
 
 		public:
 			void build() override {
 				setupRenderPass();
-				recreateFramebuffers();
 				setupGraphicsPipeline();
 				createBuffers();
+
+				recreateFramebuffers();
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
@@ -45,12 +41,7 @@ namespace Trident {
 				commandEncoder->setScissor(0, 0, swapchainExtent);
 				commandEncoder->bindGraphicsPipeline(graphicsPipeline);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
-
-				for (uint32 instanceIndex = 0; instanceIndex < INSTANCE_COUNT; instanceIndex += 1) {
-					commandEncoder->bindVertexBuffer(1, instanceBuffer, instanceIndex * sizeof(Instance), sizeof(Instance));
-					commandEncoder->draw(3, 1, instanceIndex * 3, 0);
-				}
-
+				commandEncoder->drawIndirect(indirectBuffer, 0, 1, 0);
 				commandEncoder->endRenderPass();
 			}
 
@@ -81,6 +72,128 @@ namespace Trident {
 				renderPassDescriptor.subpasses = {subpass};
 
 				renderPass = createRenderPass(renderPassDescriptor);
+			}
+
+			void setupGraphicsPipeline() {
+				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
+
+				SET_DEBUG_NAME(pipelineLayoutDescriptor, "Pipeline layout");
+
+				const ref<PipelineLayout> pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
+
+				VertexInputBinding vertexInputBinding(InputRate::VERTEX);
+				vertexInputBinding.registerAttribute<svec2<float32>>();
+				vertexInputBinding.registerAttribute<vec3<float32>>();
+
+				ShaderModuleDescriptor vertexShaderModuleDescriptor{};
+				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
+				vertexShaderModuleDescriptor.entryPoint = "main";
+
+				SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Vertex shader module");
+
+				ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
+				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
+				fragmentShaderModuleDescriptor.entryPoint = "main";
+
+				SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Fragment shader module");
+
+				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/Triangle/Triangle.vert");
+				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/Triangle/Triangle.frag");
+
+				const sequence<ColorBlendAttachment> colorBlendAttachments = {
+					{
+						.blend = false,
+					},
+				};
+
+				GraphicsPipelineDescriptor graphicsPipelineDescriptor{};
+				graphicsPipelineDescriptor.pipelineLayout = pipelineLayout;
+				graphicsPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
+				graphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+				graphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+				graphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+				graphicsPipelineDescriptor.polygonMode = PolygonMode::FILL;
+				graphicsPipelineDescriptor.cullMode = CullMode::BACK;
+				graphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+				graphicsPipelineDescriptor.lineWidth = 1.0f;
+				graphicsPipelineDescriptor.minSampleShading = 0.0f;
+				graphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
+				graphicsPipelineDescriptor.depthStencilState.depthTest = false;
+				graphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+				graphicsPipelineDescriptor.renderPass = renderPass;
+				graphicsPipelineDescriptor.subpassIndex = 0;
+
+				SET_DEBUG_NAME(graphicsPipelineDescriptor, "Render pipeline");
+
+				graphicsPipeline = createGraphicsPipeline(graphicsPipelineDescriptor);
+			}
+
+			void createBuffers() {
+				const ref<Buffer<uint8>> stagingBuffer = createStagingBuffer<uint8>(VERTEX_COUNT * sizeof(Vertex) + sizeof(DrawIndirectCommand));
+
+				uint8* stagingBufferMappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
+
+				Vertex* vertexStagingBufferMappedRange = pointer_cast<Vertex*>(stagingBufferMappedRange);
+				vertexStagingBufferMappedRange[0].position = {-0.5f, -0.5f};
+				vertexStagingBufferMappedRange[0].color = {1.0f, 0.0f, 0.0f};
+				vertexStagingBufferMappedRange[1].position = {0.0f, 0.5f};
+				vertexStagingBufferMappedRange[1].color = {0.0f, 1.0f, 0.0f};
+				vertexStagingBufferMappedRange[2].position = {0.5f, -0.5f};
+				vertexStagingBufferMappedRange[2].color = {0.0f, 0.0f, 1.0f};
+
+				DrawIndirectCommand* indirectStagingBufferMappedRange = pointer_cast<DrawIndirectCommand*>(stagingBufferMappedRange + VERTEX_COUNT * sizeof(Vertex));
+				indirectStagingBufferMappedRange[0].vertexCount = 3;
+				indirectStagingBufferMappedRange[0].instanceCount = 1;
+				indirectStagingBufferMappedRange[0].vertexOffset = 0;
+				indirectStagingBufferMappedRange[0].instanceOffset = 0;
+
+				stagingBuffer->unmap();
+
+				BufferDescriptor vertexBufferDescriptor{};
+				vertexBufferDescriptor.size = VERTEX_COUNT * sizeof(Vertex);
+				vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
+				vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+				vertexBufferDescriptor.persistent = false;
+
+				SET_DEBUG_NAME(vertexBufferDescriptor, "Vertex buffer");
+
+				BufferDescriptor indirectBufferDescriptor{};
+				indirectBufferDescriptor.size = sizeof(DrawIndirectCommand);
+				indirectBufferDescriptor.usage = BufferUsage::INDIRECT | BufferUsage::TRANSFER_DST;
+				indirectBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+				indirectBufferDescriptor.persistent = false;
+
+				SET_DEBUG_NAME(indirectBufferDescriptor, "Indirect buffer");
+
+				vertexBuffer = createBuffer<Vertex>(vertexBufferDescriptor);
+				indirectBuffer = createBuffer<DrawIndirectCommand>(indirectBufferDescriptor);
+
+				BufferCopyRegion vertexBufferCopyRegion{};
+				vertexBufferCopyRegion.sourceOffset = 0;
+				vertexBufferCopyRegion.destinationOffset = 0;
+				vertexBufferCopyRegion.size = vertexBuffer->getSize();
+
+				BufferCopyRegion indirectBufferCopyRegion{};
+				indirectBufferCopyRegion.sourceOffset = vertexBuffer->getSize();
+				indirectBufferCopyRegion.destinationOffset = 0;
+				indirectBufferCopyRegion.size = indirectBuffer->getSize();
+
+				CommandBufferDescriptor commandBufferDescriptor{};
+				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+				SET_DEBUG_NAME(commandBufferDescriptor, "Buffer copy command buffer");
+
+				const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
+				const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
+
+				commandEncoder->begin();
+				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, {vertexBufferCopyRegion});
+				commandEncoder->copyBufferToBuffer(stagingBuffer, indirectBuffer, {indirectBufferCopyRegion});
+
+				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+				transferQueue->submit(commandBuffer);
+				transferQueue->waitIdle();
 			}
 
 			void recreateFramebuffers() {
@@ -114,135 +227,13 @@ namespace Trident {
 				}
 			}
 
-			void setupGraphicsPipeline() {
-				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
-
-				SET_DEBUG_NAME(pipelineLayoutDescriptor, "Pipeline layout");
-
-				const ref<PipelineLayout> pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
-
-				VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-				vertexInputBinding.registerAttribute<svec2<float32>>();
-
-				VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-				instanceInputBinding.registerAttribute<vec4<float32>>();
-
-				ShaderModuleDescriptor vertexShaderModuleDescriptor{};
-				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-				vertexShaderModuleDescriptor.entryPoint = "main";
-
-				SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Vertex shader module");
-
-				ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
-				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-				fragmentShaderModuleDescriptor.entryPoint = "main";
-
-				SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Fragment shader module");
-
-				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/ColorBlend/ColorBlend.vert");
-				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/ColorBlend/ColorBlend.frag");
-
-				const sequence<ColorBlendAttachment> colorBlendAttachments = {
-					{
-						.blend = true,
-						.srcColorBlendFactor = BlendFactor::SRC_ALPHA,
-						.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA,
-					},
-				};
-
-				GraphicsPipelineDescriptor graphicsPipelineDescriptor{};
-				graphicsPipelineDescriptor.pipelineLayout = pipelineLayout;
-				graphicsPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
-				graphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-				graphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-				graphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-				graphicsPipelineDescriptor.polygonMode = PolygonMode::FILL;
-				graphicsPipelineDescriptor.cullMode = CullMode::BACK;
-				graphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-				graphicsPipelineDescriptor.lineWidth = 1.0f;
-				graphicsPipelineDescriptor.minSampleShading = 0.0f;
-				graphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
-				graphicsPipelineDescriptor.depthStencilState.depthTest = false;
-				graphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-				graphicsPipelineDescriptor.renderPass = renderPass;
-				graphicsPipelineDescriptor.subpassIndex = 0;
-
-				SET_DEBUG_NAME(graphicsPipelineDescriptor, "Render pipeline");
-
-				graphicsPipeline = createGraphicsPipeline(graphicsPipelineDescriptor);
-			}
-
-			void createBuffers() {
-				const ref<Buffer<uint8>> stagingBuffer = createStagingBuffer<uint8>(VERTEX_BUFFER_SIZE + INSTANCE_BUFFER_SIZE);
-
-				uint8* stagingBufferMappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
-
-				Vertex* vertexStagingBufferMappedRange = pointer_cast<Vertex*>(stagingBufferMappedRange);
-				vertexStagingBufferMappedRange[0].position = {-0.75f,  0.75f};
-				vertexStagingBufferMappedRange[1].position = { 0.25f,  0.75f};
-				vertexStagingBufferMappedRange[2].position = {-0.75f, -0.75f};
-				vertexStagingBufferMappedRange[3].position = {-0.5f,   0.5f};
-				vertexStagingBufferMappedRange[4].position = { 0.5f,   0.5f};
-				vertexStagingBufferMappedRange[5].position = {-0.5f,  -0.5f};
-
-				Instance* instanceStagingBufferMappedRange = pointer_cast<Instance*>(stagingBufferMappedRange + VERTEX_BUFFER_SIZE);
-				instanceStagingBufferMappedRange[0].color = {1.0f, 1.0f, 1.0f, 1.0f};
-				instanceStagingBufferMappedRange[1].color = {1.0f, 0.2f, 0.0f, 0.5f};
-
-				stagingBuffer->unmap();
-
-				BufferDescriptor vertexBufferDescriptor{};
-				vertexBufferDescriptor.size = VERTEX_BUFFER_SIZE;
-				vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
-				vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-				SET_DEBUG_NAME(vertexBufferDescriptor, "Vertex buffer");
-
-				BufferDescriptor instanceBufferDescriptor{};
-				instanceBufferDescriptor.size = INSTANCE_BUFFER_SIZE;
-				instanceBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
-				instanceBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-				SET_DEBUG_NAME(instanceBufferDescriptor, "Instance buffer");
-
-				vertexBuffer = createBuffer<Vertex>(vertexBufferDescriptor);
-				instanceBuffer = createBuffer<Instance>(instanceBufferDescriptor);
-
-				BufferCopyRegion vertexBufferCopyRegion{};
-				vertexBufferCopyRegion.sourceOffset = 0;
-				vertexBufferCopyRegion.destinationOffset = 0;
-				vertexBufferCopyRegion.size = vertexBuffer->getSize();
-
-				BufferCopyRegion instanceBufferCopyRegion{};
-				instanceBufferCopyRegion.sourceOffset = vertexBuffer->getSize();
-				instanceBufferCopyRegion.destinationOffset = 0;
-				instanceBufferCopyRegion.size = instanceBuffer->getSize();
-
-				CommandBufferDescriptor commandBufferDescriptor{};
-				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-				SET_DEBUG_NAME(commandBufferDescriptor, "Buffer copy command buffer");
-
-				const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
-				const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
-
-				commandEncoder->begin();
-				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, {vertexBufferCopyRegion});
-				commandEncoder->copyBufferToBuffer(stagingBuffer, instanceBuffer, {instanceBufferCopyRegion});
-
-				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-				transferQueue->submit(commandBuffer);
-				transferQueue->waitIdle();
-			}
-
 		private:
 			ref<RenderPass> renderPass;
 			sequence<ref<Framebuffer>> framebuffers;
 			ref<GraphicsPipeline> graphicsPipeline;
 			ref<Buffer<Vertex>> vertexBuffer;
-			ref<Buffer<Instance>> instanceBuffer;
+			ref<Buffer<DrawIndirectCommand>> indirectBuffer;
 	};
 
-	DEFINE_SAMPLE_LAYER(SampleColorBlend);
+	DEFINE_SAMPLE_LAYER(SampleTriangleIndirect);
 }

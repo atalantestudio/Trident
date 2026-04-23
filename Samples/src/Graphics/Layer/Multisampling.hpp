@@ -5,10 +5,10 @@
 
 #include "Engine/Renderer/Renderer.hpp"
 
-#include "../SampleLayer.hpp"
+#include "../GraphicsLayer.hpp"
 
 namespace Trident {
-	class SampleTriangleRenderer : public Renderer {
+	class SampleMultisamplingRenderer : public Renderer {
 		private:
 			struct Vertex {
 				svec2<float32> position;
@@ -16,26 +16,31 @@ namespace Trident {
 			};
 
 		private:
-			static constexpr uint32 VERTEX_COUNT = 3;
+			static constexpr uint8 SAMPLE_COUNT = 4;
+			static constexpr uint32 VERTEX_BUFFER_SIZE = 3 * sizeof(Vertex);
 
 		public:
 			void build() override {
 				setupRenderPass();
+
+				recreateImage();
+				recreateImageView();
+				recreateFramebuffers();
+
 				setupGraphicsPipeline();
 				createBuffers();
-
-				recreateFramebuffers();
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
+				BeginRenderPassDescriptor beginRenderPassDescriptor{};
+				beginRenderPassDescriptor.framebuffer = framebuffers[getSwapchainImageIndex()];
+				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 1.0f}};
+
 				const Extent2D swapchainExtent = getSwapchain()->getExtent();
 				const float32 width = static_cast<float32>(swapchainExtent.width);
 				const float32 height = static_cast<float32>(swapchainExtent.height);
 
-				commandEncoder->beginRenderPass({
-					.framebuffer = framebuffers[getSwapchainImageIndex()],
-					.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}},
-				});
+				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
 				commandEncoder->bindGraphicsPipeline(graphicsPipeline);
@@ -45,6 +50,8 @@ namespace Trident {
 			}
 
 			void resize(WindowResizeEvent& event) override {
+				recreateImage();
+				recreateImageView();
 				recreateFramebuffers();
 			}
 
@@ -52,7 +59,7 @@ namespace Trident {
 			void setupRenderPass() {
 				Attachment swapchainAttachment{};
 				swapchainAttachment.format = getSurface()->getFormat();
-				swapchainAttachment.sampleCount = 1;
+				swapchainAttachment.sampleCount = SAMPLE_COUNT;
 				swapchainAttachment.loadOperation = LoadOperation::CLEAR;
 				swapchainAttachment.storeOperation = StoreOperation::STORE;
 				swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
@@ -71,6 +78,65 @@ namespace Trident {
 				renderPassDescriptor.subpasses = {subpass};
 
 				renderPass = createRenderPass(renderPassDescriptor);
+			}
+
+			void recreateImage() {
+				const Extent2D swapchainExtent = getSwapchain()->getExtent();
+
+				AttachmentImageDescriptor imageDescriptor{};
+				imageDescriptor.type = ImageType::TEXTURE_2D;
+				imageDescriptor.extent.width = swapchainExtent.width;
+				imageDescriptor.extent.height = swapchainExtent.height;
+				imageDescriptor.extent.depth = 1;
+				imageDescriptor.mipLevelCount = 1;
+				imageDescriptor.layerCount = 1;
+
+				SET_DEBUG_NAME(imageDescriptor, "Color attachment");
+
+				image = renderPass->createColorAttachmentImage(imageDescriptor, 0);
+			}
+
+			void recreateImageView() {
+				ImageViewDescriptor imageViewDescriptor{};
+				imageViewDescriptor.mipLevelOffset = 0;
+				imageViewDescriptor.mipLevelCount = 1;
+				imageViewDescriptor.layerOffset = 0;
+				imageViewDescriptor.layerCount = 1;
+
+				SET_DEBUG_NAME(imageViewDescriptor, "Color attachment");
+
+				imageView = image->createView(imageViewDescriptor);
+			}
+
+			void recreateFramebuffers() {
+				const ref<Swapchain> swapchain = getSwapchain();
+
+				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
+
+				FramebufferDescriptor framebufferDescriptor{};
+				framebufferDescriptor.renderPass = renderPass;
+				framebufferDescriptor.imageViews = {imageView, nullptr};
+				framebufferDescriptor.extent = swapchain->getExtent();
+
+				#if defined(BUILD_MODE_DEBUG)
+					sequence<char8> name;
+				#endif
+
+				uint32 framebufferIndex = 0;
+
+				while (framebufferIndex < framebuffers.count()) {
+					#if defined(BUILD_MODE_DEBUG)
+						name = Logger::format("In flight framebuffer []", framebufferIndex);
+
+						SET_DEBUG_NAME(framebufferDescriptor, name);
+					#endif
+
+					framebufferDescriptor.imageViews[1] = swapchain->getImageView(framebufferIndex);
+
+					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
+
+					framebufferIndex += 1;
+				}
 			}
 
 			void setupGraphicsPipeline() {
@@ -96,8 +162,8 @@ namespace Trident {
 
 				SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Fragment shader module");
 
-				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/Triangle/Triangle.vert");
-				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/Triangle/Triangle.frag");
+				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/Multisampling/Multisampling.vert");
+				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/Multisampling/Multisampling.frag");
 
 				const sequence<ColorBlendAttachment> colorBlendAttachments = {
 					{
@@ -128,9 +194,9 @@ namespace Trident {
 			}
 
 			void createBuffers() {
-				const ref<Buffer<Vertex>> vertexStagingBuffer = createStagingBuffer<Vertex>(VERTEX_COUNT * sizeof(Vertex));
+				const ref<Buffer<Vertex>> stagingBuffer = createStagingBuffer<Vertex>(VERTEX_BUFFER_SIZE);
 
-				Vertex* vertexStagingBufferMappedRange = vertexStagingBuffer->map(0, vertexStagingBuffer->getSize());
+				Vertex* vertexStagingBufferMappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
 				vertexStagingBufferMappedRange[0].position = {-0.5f, -0.5f};
 				vertexStagingBufferMappedRange[0].color = {1.0f, 0.0f, 0.0f};
 				vertexStagingBufferMappedRange[1].position = {0.0f, 0.5f};
@@ -138,13 +204,12 @@ namespace Trident {
 				vertexStagingBufferMappedRange[2].position = {0.5f, -0.5f};
 				vertexStagingBufferMappedRange[2].color = {0.0f, 0.0f, 1.0f};
 
-				vertexStagingBuffer->unmap();
+				stagingBuffer->unmap();
 
 				BufferDescriptor vertexBufferDescriptor{};
-				vertexBufferDescriptor.size = vertexStagingBuffer->getSize();
+				vertexBufferDescriptor.size = VERTEX_BUFFER_SIZE;
 				vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 				vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-				vertexBufferDescriptor.persistent = false;
 
 				SET_DEBUG_NAME(vertexBufferDescriptor, "Vertex buffer");
 
@@ -164,7 +229,7 @@ namespace Trident {
 				const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
 
 				commandEncoder->begin();
-				commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, {vertexBufferCopyRegion});
+				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, {vertexBufferCopyRegion});
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -172,43 +237,14 @@ namespace Trident {
 				transferQueue->waitIdle();
 			}
 
-			void recreateFramebuffers() {
-				const ref<Swapchain> swapchain = getSwapchain();
-
-				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
-
-				FramebufferDescriptor framebufferDescriptor{};
-				framebufferDescriptor.renderPass = renderPass;
-				framebufferDescriptor.imageViews = {nullptr};
-				framebufferDescriptor.extent = swapchain->getExtent();
-
-				#if defined(BUILD_MODE_DEBUG)
-					sequence<char8> name;
-				#endif
-
-				uint32 framebufferIndex = 0;
-
-				while (framebufferIndex < framebuffers.count()) {
-					#if defined(BUILD_MODE_DEBUG)
-						name = Logger::format("In flight framebuffer []", framebufferIndex);
-
-						SET_DEBUG_NAME(framebufferDescriptor, name);
-					#endif
-
-					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
-
-					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
-
-					framebufferIndex += 1;
-				}
-			}
-
 		private:
 			ref<RenderPass> renderPass;
+			ref<Image> image;
+			ref<ImageView> imageView;
 			sequence<ref<Framebuffer>> framebuffers;
 			ref<GraphicsPipeline> graphicsPipeline;
 			ref<Buffer<Vertex>> vertexBuffer;
 	};
 
-	DEFINE_SAMPLE_LAYER(SampleTriangle);
+	DEFINE_SAMPLE_LAYER(SampleMultisampling);
 }

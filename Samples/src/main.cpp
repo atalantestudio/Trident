@@ -27,23 +27,23 @@
 #include "Process/ECS.hpp"
 #include "Process/SIMD.hpp"
 
-#include "Sample/Layer/ArrayTexture.hpp"
-#include "Sample/Layer/ClearColor.hpp"
-#include "Sample/Layer/ColorBlend.hpp"
-#include "Sample/Layer/ComputeShader.hpp"
-#include "Sample/Layer/ComputeShaderIndirect.hpp"
-#include "Sample/Layer/DepthTest.hpp"
-#include "Sample/Layer/Empty.hpp"
-#include "Sample/Layer/Gradient.hpp"
-#include "Sample/Layer/ImageAsset.hpp"
-#include "Sample/Layer/InputAttachment.hpp"
-#include "Sample/Layer/MipLevels.hpp"
-#include "Sample/Layer/Multisampling.hpp"
-#include "Sample/Layer/TextureArray.hpp"
-#include "Sample/Layer/Triangle.hpp"
-#include "Sample/Layer/TriangleIndexed.hpp"
-#include "Sample/Layer/TriangleIndexedIndirect.hpp"
-#include "Sample/Layer/TriangleIndirect.hpp"
+#include "Graphics/Layer/ArrayTexture.hpp"
+#include "Graphics/Layer/ClearColor.hpp"
+#include "Graphics/Layer/ColorBlend.hpp"
+#include "Graphics/Layer/ComputeShader.hpp"
+#include "Graphics/Layer/ComputeShaderIndirect.hpp"
+#include "Graphics/Layer/DepthTest.hpp"
+#include "Graphics/Layer/Empty.hpp"
+#include "Graphics/Layer/Gradient.hpp"
+#include "Graphics/Layer/ImageAsset.hpp"
+#include "Graphics/Layer/InputAttachment.hpp"
+#include "Graphics/Layer/MipLevels.hpp"
+#include "Graphics/Layer/Multisampling.hpp"
+#include "Graphics/Layer/TextureArray.hpp"
+#include "Graphics/Layer/Triangle.hpp"
+#include "Graphics/Layer/TriangleIndexed.hpp"
+#include "Graphics/Layer/TriangleIndexedIndirect.hpp"
+#include "Graphics/Layer/TriangleIndirect.hpp"
 
 #include "Sample3D/Layer/ForwardLayer.hpp"
 #include "Sample3D/Layer/VisibilityLayer.hpp"
@@ -107,7 +107,7 @@ namespace Trident {
 				registerProcess<ProcessSIMDProcess>();
 			}
 		}
-		else if (SampleGroupNameProperty == "Sample") {
+		else if (SampleGroupNameProperty == "Graphics") {
 			if (SampleNameProperty == "ArrayTexture") {
 				registerLayer<SampleArrayTextureLayer>();
 			}

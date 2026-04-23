@@ -5,10 +5,10 @@
 
 #include "Engine/Renderer/Renderer.hpp"
 
-#include "../SampleLayer.hpp"
+#include "../GraphicsLayer.hpp"
 
 namespace Trident {
-	class SampleTriangleIndexedIndirectRenderer : public Renderer {
+	class SampleTriangleRenderer : public Renderer {
 		private:
 			struct Vertex {
 				svec2<float32> position;
@@ -16,34 +16,31 @@ namespace Trident {
 			};
 
 		private:
-			static constexpr uint32 VERTEX_BUFFER_SIZE = 3 * sizeof(Vertex);
-			static constexpr uint32 INDEX_BUFFER_SIZE = 3 * sizeof(uint16);
-			static constexpr uint32 INDIRECT_BUFFER_SIZE = sizeof(DrawIndexedIndirectCommand);
+			static constexpr uint32 VERTEX_COUNT = 3;
 
 		public:
 			void build() override {
 				setupRenderPass();
-				recreateFramebuffers();
 				setupGraphicsPipeline();
 				createBuffers();
+
+				recreateFramebuffers();
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
-				BeginRenderPassDescriptor beginRenderPassDescriptor{};
-				beginRenderPassDescriptor.framebuffer = framebuffers[getSwapchainImageIndex()];
-				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
-
 				const Extent2D swapchainExtent = getSwapchain()->getExtent();
 				const float32 width = static_cast<float32>(swapchainExtent.width);
 				const float32 height = static_cast<float32>(swapchainExtent.height);
 
-				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
+				commandEncoder->beginRenderPass({
+					.framebuffer = framebuffers[getSwapchainImageIndex()],
+					.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}},
+				});
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
 				commandEncoder->bindGraphicsPipeline(graphicsPipeline);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
-				commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
-				commandEncoder->drawIndexedIndirect(indirectBuffer, 0, 1, 0);
+				commandEncoder->draw(3, 1, 0, 0);
 				commandEncoder->endRenderPass();
 			}
 
@@ -131,11 +128,9 @@ namespace Trident {
 			}
 
 			void createBuffers() {
-				const ref<Buffer<uint8>> stagingBuffer = createStagingBuffer<uint8>(VERTEX_BUFFER_SIZE + INDEX_BUFFER_SIZE + INDIRECT_BUFFER_SIZE);
+				const ref<Buffer<Vertex>> vertexStagingBuffer = createStagingBuffer<Vertex>(VERTEX_COUNT * sizeof(Vertex));
 
-				uint8* stagingBufferMappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
-
-				Vertex* vertexStagingBufferMappedRange = pointer_cast<Vertex*>(stagingBufferMappedRange);
+				Vertex* vertexStagingBufferMappedRange = vertexStagingBuffer->map(0, vertexStagingBuffer->getSize());
 				vertexStagingBufferMappedRange[0].position = {-0.5f, -0.5f};
 				vertexStagingBufferMappedRange[0].color = {1.0f, 0.0f, 0.0f};
 				vertexStagingBufferMappedRange[1].position = {0.0f, 0.5f};
@@ -143,62 +138,22 @@ namespace Trident {
 				vertexStagingBufferMappedRange[2].position = {0.5f, -0.5f};
 				vertexStagingBufferMappedRange[2].color = {0.0f, 0.0f, 1.0f};
 
-				uint16* indexStagingBufferMappedRange = pointer_cast<uint16*>(stagingBufferMappedRange + VERTEX_BUFFER_SIZE);
-				indexStagingBufferMappedRange[0] = 0;
-				indexStagingBufferMappedRange[1] = 1;
-				indexStagingBufferMappedRange[2] = 2;
-
-				DrawIndexedIndirectCommand* indirectStagingBufferMappedRange = pointer_cast<DrawIndexedIndirectCommand*>(stagingBufferMappedRange + VERTEX_BUFFER_SIZE + INDEX_BUFFER_SIZE);
-				indirectStagingBufferMappedRange[0].indexCount = 3;
-				indirectStagingBufferMappedRange[0].instanceCount = 1;
-				indirectStagingBufferMappedRange[0].indexOffset = 0;
-				indirectStagingBufferMappedRange[0].vertexBias = 0;
-				indirectStagingBufferMappedRange[0].instanceOffset = 0;
-
-				stagingBuffer->unmap();
+				vertexStagingBuffer->unmap();
 
 				BufferDescriptor vertexBufferDescriptor{};
-				vertexBufferDescriptor.size = VERTEX_BUFFER_SIZE;
+				vertexBufferDescriptor.size = vertexStagingBuffer->getSize();
 				vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 				vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 				vertexBufferDescriptor.persistent = false;
 
 				SET_DEBUG_NAME(vertexBufferDescriptor, "Vertex buffer");
 
-				BufferDescriptor indexBufferDescriptor{};
-				indexBufferDescriptor.size = INDEX_BUFFER_SIZE;
-				indexBufferDescriptor.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST;
-				indexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-				indexBufferDescriptor.persistent = false;
-
-				SET_DEBUG_NAME(indexBufferDescriptor, "Index buffer");
-
-				BufferDescriptor indirectBufferDescriptor{};
-				indirectBufferDescriptor.size = INDIRECT_BUFFER_SIZE;
-				indirectBufferDescriptor.usage = BufferUsage::INDIRECT | BufferUsage::TRANSFER_DST;
-				indirectBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-				indirectBufferDescriptor.persistent = false;
-
-				SET_DEBUG_NAME(indirectBufferDescriptor, "Indirect buffer");
-
 				vertexBuffer = createBuffer<Vertex>(vertexBufferDescriptor);
-				indexBuffer = createBuffer<uint16>(indexBufferDescriptor);
-				indirectBuffer = createBuffer<DrawIndexedIndirectCommand>(indirectBufferDescriptor);
 
 				BufferCopyRegion vertexBufferCopyRegion{};
 				vertexBufferCopyRegion.sourceOffset = 0;
 				vertexBufferCopyRegion.destinationOffset = 0;
 				vertexBufferCopyRegion.size = vertexBuffer->getSize();
-
-				BufferCopyRegion indexBufferCopyRegion{};
-				indexBufferCopyRegion.sourceOffset = vertexBuffer->getSize();
-				indexBufferCopyRegion.destinationOffset = 0;
-				indexBufferCopyRegion.size = indexBuffer->getSize();
-
-				BufferCopyRegion indirectBufferCopyRegion{};
-				indirectBufferCopyRegion.sourceOffset = vertexBuffer->getSize() + indexBuffer->getSize();
-				indirectBufferCopyRegion.destinationOffset = 0;
-				indirectBufferCopyRegion.size = indirectBuffer->getSize();
 
 				CommandBufferDescriptor commandBufferDescriptor{};
 				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
@@ -209,9 +164,7 @@ namespace Trident {
 				const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
 
 				commandEncoder->begin();
-				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, {vertexBufferCopyRegion});
-				commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, {indexBufferCopyRegion});
-				commandEncoder->copyBufferToBuffer(stagingBuffer, indirectBuffer, {indirectBufferCopyRegion});
+				commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, {vertexBufferCopyRegion});
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -255,9 +208,7 @@ namespace Trident {
 			sequence<ref<Framebuffer>> framebuffers;
 			ref<GraphicsPipeline> graphicsPipeline;
 			ref<Buffer<Vertex>> vertexBuffer;
-			ref<Buffer<uint16>> indexBuffer;
-			ref<Buffer<DrawIndexedIndirectCommand>> indirectBuffer;
 	};
 
-	DEFINE_SAMPLE_LAYER(SampleTriangleIndexedIndirect);
+	DEFINE_SAMPLE_LAYER(SampleTriangle);
 }

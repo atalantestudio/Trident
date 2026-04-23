@@ -5,7 +5,7 @@
 
 #include "Engine/Renderer/Renderer.hpp"
 
-#include "../SampleLayer.hpp"
+#include "../GraphicsLayer.hpp"
 
 namespace Trident {
 	class SampleTextureArrayRenderer : public Renderer {

@@ -1,44 +1,19 @@
-// Copyright 2026 Atalante Studio.
+// Copyright 2025 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
 
 #include "Engine/Renderer/Renderer.hpp"
 
-#include "../SampleLayer.hpp"
+#include "../GraphicsLayer.hpp"
 
 namespace Trident {
-	class SampleMipLevelsRenderer : public Renderer {
-		private:
-			static constexpr view<char8> IMAGE_ASSET_NAME = "Baboon";
-
+	class SampleImageAssetRenderer : public Renderer {
 		public:
 			void build() override {
 				setupRenderPass();
 
-				loadImage();
-
-				{
-					ImageViewDescriptor imageViewDescriptor{};
-					imageViewDescriptor.mipLevelOffset = 0;
-					imageViewDescriptor.mipLevelCount = 1;
-					imageViewDescriptor.layerOffset = 0;
-					imageViewDescriptor.layerCount = 1;
-
-					SET_DEBUG_NAME(imageViewDescriptor, "Input");
-
-					ref<ImageView> inputImageView = image->createView(imageViewDescriptor);
-
-					imageViewDescriptor.layerOffset = 1;
-					imageViewDescriptor.layerCount = image->getLayerCount() - 1;
-
-					SET_DEBUG_NAME(imageViewDescriptor, "Output");
-
-					ref<ImageView> outputImageView = image->createView(imageViewDescriptor);
-
-					generateMipLevels(inputImageView, outputImageView);
-				}
-
+				loadImageAsset();
 				setupImageView();
 				setupSampler();
 
@@ -55,7 +30,7 @@ namespace Trident {
 			void render(ref<CommandEncoder> commandEncoder) const override {
 				BeginRenderPassDescriptor beginRenderPassDescriptor{};
 				beginRenderPassDescriptor.framebuffer = framebuffers[getSwapchainImageIndex()];
-				beginRenderPassDescriptor.clearValues = {{1.0f, 1.0f, 1.0f, 1.0f}};
+				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
 
 				const Extent2D swapchainExtent = getSwapchain()->getExtent();
 				const float32 width = static_cast<float32>(swapchainExtent.width);
@@ -99,29 +74,53 @@ namespace Trident {
 				renderPass = createRenderPass(renderPassDescriptor);
 			}
 
-			void loadImage() {
-				const ref<ImageAsset> imageAsset = getLayer()->getApplication()->getAssetLibrary()->getAsset<ImageAsset>(IMAGE_ASSET_NAME);
-				const ref<Buffer<uint8>> imageStagingBuffer = createStagingBuffer<uint8>(imageAsset->getExtent().width * imageAsset->getExtent().height * imageAsset->getExtent().depth * imageAsset->getLayerCount() * getChannelCount(imageAsset->getFormat()));
+			void loadImageAsset() {
+				const view<char8> imageAssetName = ((Layer*) getLayer())->getApplication()->getPropertyFile()->getProperty<view<char8>>("AssetName");
+				const ref<ImageAsset> imageAsset = getLayer()->getApplication()->getAssetLibrary()->getAsset<ImageAsset>(imageAssetName);
 
-				DEBUG_ASSERT(imageAsset->getFormat() == ImageFormat::R8G8B8A8_UNORM);
+				ImageFormat imageFormat = imageAsset->getFormat();
+
+				switch (imageAsset->getFormat()) {
+					case ImageFormat::R8_UNORM:
+					case ImageFormat::R8G8B8A8_UNORM: {
+						break;
+					}
+					case ImageFormat::R8G8B8_UNORM: {
+						imageFormat = ImageFormat::R8G8B8A8_UNORM;
+
+						break;
+					}
+					default: {
+						ENGINE_ERROR_UNSUPPORTED();
+
+						break;
+					}
+				}
+
+				const ref<Buffer<uint8>> imageStagingBuffer = createStagingBuffer<uint8>(imageAsset->getExtent().width * imageAsset->getExtent().height * imageAsset->getExtent().depth * imageAsset->getLayerCount() * getChannelCount(imageFormat));
 
 				uint8* imageStagingBufferMappedRange = imageStagingBuffer->map(0, imageStagingBuffer->getSize());
 
-				std::copy(imageAsset->getData().begin(), imageAsset->getData().end(), imageStagingBufferMappedRange);
+				if (imageAsset->getFormat() == ImageFormat::R8G8B8_UNORM) {
+					convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(imageAsset->getData(), imageStagingBufferMappedRange, imageStagingBuffer->getSize());
+				}
+				else {
+					std::copy(imageAsset->getData().begin(), imageAsset->getData().end(), imageStagingBufferMappedRange);
+				}
 
 				imageStagingBuffer->unmap();
 
 				ImageDescriptor imageDescriptor{};
 				imageDescriptor.type = ImageType::TEXTURE_2D;
-				imageDescriptor.format = imageAsset->getFormat();
+				imageDescriptor.format = imageFormat;
 				imageDescriptor.extent = imageAsset->getExtent();
-				imageDescriptor.mipLevelCount = 1;
-				imageDescriptor.layerCount = 2;
+				imageDescriptor.mipLevelCount = imageAsset->getMipLevelCount();
+				imageDescriptor.layerCount = imageAsset->getLayerCount();
 				imageDescriptor.sampleCount = 1;
-				imageDescriptor.usage = ImageUsage::TRANSFER_DST | ImageUsage::SAMPLED | ImageUsage::STORAGE;
+				imageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
 				imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
-				SET_DEBUG_NAME(imageDescriptor, "Input");
+				SET_DEBUG_NAME(imageDescriptor, "Image");
 
 				image = createImage(imageDescriptor);
 
@@ -171,10 +170,10 @@ namespace Trident {
 				ImageViewDescriptor imageViewDescriptor{};
 				imageViewDescriptor.mipLevelOffset = 0;
 				imageViewDescriptor.mipLevelCount = 1;
-				imageViewDescriptor.layerOffset = 1;
+				imageViewDescriptor.layerOffset = 0;
 				imageViewDescriptor.layerCount = 1;
 
-				SET_DEBUG_NAME(imageViewDescriptor, "Render");
+				SET_DEBUG_NAME(imageViewDescriptor, "Image view");
 
 				imageView = image->createView(imageViewDescriptor);
 			}
@@ -197,11 +196,11 @@ namespace Trident {
 				framebufferDescriptor.imageViews = {nullptr};
 				framebufferDescriptor.extent = swapchain->getExtent();
 
+				uint32 framebufferIndex = 0;
+
 				#if defined(BUILD_MODE_DEBUG)
 					sequence<char8> name;
 				#endif
-
-				uint32 framebufferIndex = 0;
 
 				while (framebufferIndex < framebuffers.count()) {
 					#if defined(BUILD_MODE_DEBUG)
@@ -251,7 +250,7 @@ namespace Trident {
 				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
 				pipelineLayoutDescriptor.descriptorSetLayouts = {imageDescriptorSetLayout};
 
-				SET_DEBUG_NAME(pipelineLayoutDescriptor, "Render pipeline layout");
+				SET_DEBUG_NAME(pipelineLayoutDescriptor, "Pipeline layout");
 
 				pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 			}
@@ -274,7 +273,9 @@ namespace Trident {
 
 				const sequence<ColorBlendAttachment> colorBlendAttachments = {
 					{
-						.blend = false,
+						.blend = true,
+						.srcColorBlendFactor = BlendFactor::SRC_ALPHA,
+						.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA,
 					},
 				};
 
@@ -299,92 +300,6 @@ namespace Trident {
 				graphicsPipeline = createGraphicsPipeline(graphicsPipelineDescriptor);
 			}
 
-			void generateMipLevels(ref<ImageView> inputImageView, ref<ImageView> outputImageView) const {
-				DescriptorSetLayoutBinding inputImageBinding{};
-				inputImageBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE;
-				inputImageBinding.descriptorCount = 1;
-				inputImageBinding.shaderStages = ShaderStage::COMPUTE;
-
-				DescriptorSetLayoutBinding outputImageBinding{};
-				outputImageBinding.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE;
-				outputImageBinding.descriptorCount = 1;
-				outputImageBinding.shaderStages = ShaderStage::COMPUTE;
-
-				ref<DescriptorSetLayout> descriptorSetLayout = createDescriptorSetLayout({inputImageBinding, outputImageBinding});
-
-				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(descriptorSetLayout);
-
-				ref<DescriptorSet> descriptorSet = descriptorSets[0];
-
-				DescriptorImage inputDescriptorImage{};
-				inputDescriptorImage.imageView = inputImageView;
-				inputDescriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
-				inputDescriptorImage.sampler = nullptr;
-
-				DescriptorImage outputDescriptorImage{};
-				outputDescriptorImage.imageView = outputImageView;
-				outputDescriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
-				outputDescriptorImage.sampler = nullptr;
-
-				const sequence<WriteDescriptorSet> writeDescriptorSets = {
-					{
-						.descriptorSet = descriptorSet,
-						.bindingIndex = 0,
-						.descriptorImages = {inputDescriptorImage},
-					},
-					{
-						.descriptorSet = descriptorSet,
-						.bindingIndex = 1,
-						.descriptorImages = {outputDescriptorImage},
-					},
-				};
-
-				getDevice()->updateDescriptorSets(writeDescriptorSets);
-
-				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
-				pipelineLayoutDescriptor.descriptorSetLayouts = {descriptorSetLayout};
-
-				SET_DEBUG_NAME(pipelineLayoutDescriptor, "Compute pipeline");
-
-				ref<PipelineLayout> pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
-
-				ShaderModuleDescriptor shaderModuleDescriptor{};
-				shaderModuleDescriptor.stage = ShaderStage::COMPUTE;
-				shaderModuleDescriptor.entryPoint = "main";
-
-				SET_DEBUG_NAME(shaderModuleDescriptor, "Compute shader module");
-
-				ref<ShaderModule> shaderModule = loadShaderModule(shaderModuleDescriptor, "Sample/MipLevels/GenerateMipLevels.comp");
-
-				ComputePipelineDescriptor computePipelineDescriptor{};
-				computePipelineDescriptor.pipelineLayout = pipelineLayout;
-				computePipelineDescriptor.computeShaderModule = shaderModule;
-
-				SET_DEBUG_NAME(computePipelineDescriptor, "Compute pipeline");
-
-				ref<ComputePipeline> computePipeline = createComputePipeline(computePipelineDescriptor);
-
-				ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::COMPUTE);
-
-				CommandBufferDescriptor commandBufferDescriptor{};
-				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-				SET_DEBUG_NAME(commandBufferDescriptor, "Compute command buffer");
-
-				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder(commandBufferDescriptor);
-				const Extent3D imageExtent = inputImageView->getImage()->getExtent();
-
-				commandEncoder->begin();
-				commandEncoder->bindComputePipeline(computePipeline);
-				commandEncoder->bindDescriptorSets(pipelineLayout, 0, descriptorSet);
-				commandEncoder->dispatch((imageExtent.width + 0b111111) >> 6, (imageExtent.height + 0b111111) >> 6, 1);
-
-				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-				queue->submit(commandBuffer);
-				queue->waitIdle();
-			}
-
 		private:
 			ref<RenderPass> renderPass;
 			ref<Image> image;
@@ -397,5 +312,5 @@ namespace Trident {
 			ref<GraphicsPipeline> graphicsPipeline;
 	};
 
-	DEFINE_SAMPLE_LAYER(SampleMipLevels);
+	DEFINE_SAMPLE_LAYER(SampleImageAsset);
 }
