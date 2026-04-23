@@ -25,7 +25,7 @@ namespace Trident {
 		float32 layoutSpacing = 0_px;
 		Color color = 0x00000000;
 		ImageID image = 0;
-		PointerType pointerType = PointerType::DEFAULT;
+		PointerType pointerType = PointerType::INHERIT;
 
 		// TODO: If the ContainerStyle instance is not properly initialized, its event listeners will be null, thus crashing the GUI layer.
 		const EventListeners* eventListeners = {};

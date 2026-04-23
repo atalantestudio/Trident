@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include "Engine/API/GUI/Theme/Default/Button.hpp"
-
 namespace Trident {
 	class GUIPageMenuLayer : public GUILayer {
 		private:
@@ -14,12 +12,6 @@ namespace Trident {
 			void registerAssets() override {
 				fontBold = loadFontAsset("test-bold");
 				fontRegular = loadFontAsset("test-regular");
-
-				listItems = sequence<Button>(LIST_ITEM_COUNT);
-
-				for (Button& button : listItems) {
-					button.innerStyle.size[0] = 300_px;
-				}
 			}
 
 			void GUI() override {
@@ -41,18 +33,16 @@ namespace Trident {
 						uint32 listItemIndex = 0;
 
 						while (listItemIndex < LIST_ITEM_COUNT) {
-							GUIComponentClass(listItems[listItemIndex], [&]() {
-								GUIText(Logger::format("Option []", listItemIndex), {
-									.color = 0xa5a5a5ff,
-									.font = fontBold,
-									.fontSize = 22_px,
-								});
+							GUIText(Logger::format("Option []", listItemIndex), {
+								.color = 0xa5a5a5ff,
+								.font = fontBold,
+								.fontSize = 22_px,
+							});
 
-								GUIText(Logger::format("Description for option []", listItemIndex), {
-									.color = 0x828282ff,
-									.font = fontRegular,
-									.fontSize = 18_px,
-								});
+							GUIText(Logger::format("Description for option []", listItemIndex), {
+								.color = 0x828282ff,
+								.font = fontRegular,
+								.fontSize = 18_px,
 							});
 
 							listItemIndex += 1;
@@ -90,7 +80,5 @@ namespace Trident {
 		private:
 			FontID fontBold;
 			FontID fontRegular;
-
-			sequence<Button> listItems;
 	};
 }

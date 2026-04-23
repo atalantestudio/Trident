@@ -57,6 +57,15 @@ namespace Trident {
 			/// Returns whether the mouse pointer is hovering over the current component.
 			bool IsHovered() const;
 
+			/// Returns whether the mouse pointer is hovering over the next component.
+			bool IsNextHovered() const;
+
+			/// Returns whether the mouse button is pressed on the current component.
+			bool IsMouseDown() const;
+
+			/// Returns whether the mouse button is pressed on the next component.
+			bool IsNextMouseDown() const;
+
 			/// Returns whether the mouse pointer is clicking on the current component.
 			bool IsClicked();
 
@@ -97,6 +106,9 @@ namespace Trident {
 
 			float32 calculateTextPreferredWidth(UTF8Stream& stream, const TextStyle& textStyle) const;
 			float32 calculateTextMinimumWidth(UTF8Stream& stream, const TextStyle& textStyle) const;
+
+			bool IsHovered(uint32 componentIndex) const;
+			bool IsMouseDown(uint32 componentIndex) const;
 
 		public:
 			// Shrink towards the layout direction.
@@ -143,7 +155,4 @@ namespace Trident {
 	};
 
 	#define GUIComponent(...) for (bool _opened = (openComponent(__VA_ARGS__), true); _opened; _opened = false, closeComponent())
-
-	// Specific to objects extending GUIComponent.
-	#define GUIComponentClass(component, renderChildren) component.render(BIND(openComponent), BIND(closeComponent), renderChildren)
 }

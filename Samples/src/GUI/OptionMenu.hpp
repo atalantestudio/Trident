@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include "Engine/API/GUI/Theme/Default/Button.hpp"
-
 namespace Trident {
 	class GUIOptionMenuLayer : public GUILayer {
 		public:
@@ -38,7 +36,7 @@ namespace Trident {
 
 					GraphicsOptionList();
 
-					Text("Loaded asset:", {
+					Text("AssetName property:", {
 						.color = 0x828282ff,
 						.font = fontRegular,
 						.fontSize = 18_px,
@@ -78,12 +76,27 @@ namespace Trident {
 			}
 
 			void VSyncOptionButton() {
+				uint32 borderZIndex = 0;
+				Color borderColor = 0x3a3a3aff;
+
+				if (IsNextMouseDown()) {
+					borderZIndex = 1;
+					borderColor = 0xc2c2c2ff;
+				}
+
 				GUIComponent({
 					.size = {EXPAND, FIT},
+					.zIndex = borderZIndex,
 					.padding = {1_px, 1_px},
-					.color = 0x3a3a3aff,
+					.color = borderColor,
 					.pointerType = PointerType::INTERACTIVE,
 				}) {
+					Color backgroundColor = 0x0a0a0aff;
+
+					if (IsNextHovered()) {
+						backgroundColor = 0x1a1a1aff;
+					}
+
 					if (IsClicked()) {
 						VSync = !VSync;
 					}
@@ -92,7 +105,7 @@ namespace Trident {
 						.size = {EXPAND, FIT},
 						.padding = {10_px, 8_px},
 						.layoutDirection = LayoutDirection::VERTICAL,
-						.color = 0x0a0a0aff,
+						.color = backgroundColor,
 						.pointerType = PointerType::INTERACTIVE,
 					}) {
 						Text("V-Sync", {
@@ -126,12 +139,27 @@ namespace Trident {
 			}
 
 			void FullScreenOptionButton() {
+				uint32 borderZIndex = 0;
+				Color borderColor = 0x3a3a3aff;
+
+				if (IsNextMouseDown()) {
+					borderZIndex = 1;
+					borderColor = 0xc2c2c2ff;
+				}
+
 				GUIComponent({
 					.size = {EXPAND, FIT},
+					.zIndex = borderZIndex,
 					.padding = {1_px, 1_px},
-					.color = 0x3a3a3aff,
+					.color = borderColor,
 					.pointerType = PointerType::INTERACTIVE,
 				}) {
+					Color backgroundColor = 0x0a0a0aff;
+
+					if (IsNextHovered()) {
+						backgroundColor = 0x1a1a1aff;
+					}
+
 					if (IsClicked()) {
 						FullScreen = !FullScreen;
 					}
@@ -140,8 +168,7 @@ namespace Trident {
 						.size = {EXPAND, FIT},
 						.padding = {10_px, 8_px},
 						.layoutDirection = LayoutDirection::VERTICAL,
-						.color = 0x0a0a0aff,
-						.pointerType = PointerType::INTERACTIVE,
+						.color = backgroundColor,
 					}) {
 						Text("Full-screen", {
 							.color = 0xa5a5a5ff,

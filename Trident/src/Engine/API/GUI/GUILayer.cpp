@@ -194,7 +194,7 @@ namespace Trident {
 		component.parentIndex = parentIndex;
 		component.origin = parent.origin;
 		component.size = style.size;
-		component.zIndex = style.zIndex;
+		component.zIndex = parent.zIndex + style.zIndex;
 
 		if (component.size.width.fillMode == FillMode::FIXED) {
 			component.maximumSize.x = component.size.width.value;
@@ -234,7 +234,14 @@ namespace Trident {
 		component.layoutSpacing = style.layoutSpacing;
 		component.color = style.color;
 		component.image = style.image;
-		component.pointerType = style.pointerType;
+
+		if (style.pointerType == PointerType::INHERIT) {
+			component.pointerType = parent.pointerType;
+		}
+		else {
+			component.pointerType = style.pointerType;
+		}
+
 		component.textComponent = false;
 		component.eventListeners = style.eventListeners;
 		component.debugName = style.debugName;
@@ -892,17 +899,43 @@ namespace Trident {
 		renderer.registerSubcomponent(subcomponent);
 	}
 
-	bool GUILayer::IsHovered() const {
-		if (previousComponentCount < componentCount) {
+	bool GUILayer::IsHovered(uint32 componentIndex) const {
+		if (previousComponentCount < componentIndex + 1) {
 			return false;
 		}
 
-		const GUIContainer& component = previousComponents[componentCount - 1];
+		const GUIContainer& component = previousComponents[componentIndex];
 		const Window* window = getApplication()->getWindow();
 		const sint32* mousePositionInteger = window->getMousePosition();
 		const vec2<float32> mousePosition = {static_cast<float32>(mousePositionInteger[0]), static_cast<float32>(mousePositionInteger[1])};
 
 		return IsIntersecting(component, mousePosition);
+	}
+
+	bool GUILayer::IsMouseDown(uint32 componentIndex) const {
+		if (previousComponentCount < componentIndex + 1) {
+			return false;
+		}
+
+		const GUIContainer& component = previousComponents[componentIndex];
+
+		return IsIntersecting(component, lastMouseDownPosition);
+	}
+
+	bool GUILayer::IsHovered() const {
+		return IsHovered(componentCount - 1);
+	}
+
+	bool GUILayer::IsNextHovered() const {
+		return IsHovered(componentCount);
+	}
+
+	bool GUILayer::IsMouseDown() const {
+		return IsMouseDown(componentCount - 1);
+	}
+
+	bool GUILayer::IsNextMouseDown() const {
+		return IsMouseDown(componentCount);
 	}
 
 	bool GUILayer::IsClicked() {
