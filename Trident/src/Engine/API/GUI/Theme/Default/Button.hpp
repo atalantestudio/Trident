@@ -23,7 +23,7 @@ namespace Trident {
 
 				innerStyle.size = {GUILayer::FIT, GUILayer::FIT};
 				innerStyle.padding = {10_px, 8_px};
-				innerStyle.layoutDirection = VERTICAL;
+				innerStyle.layoutDirection = VERTICAL;	
 				innerStyle.color = 0x0a0a0aff;
 			}
 

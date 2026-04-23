@@ -16,6 +16,7 @@
 #include "GUI/Demo3.hpp"
 #include "GUI/DropDownMenu.hpp"
 #include "GUI/OptionMenu.hpp"
+#include "GUI/PageMenu.hpp"
 #include "GUI/Sample.hpp"
 #include "GUI/Text.hpp"
 #include "GUI/UTF8.hpp"
@@ -81,6 +82,9 @@ namespace Trident {
 			}
 			else if (SampleNameProperty == "OptionMenu") {
 				registerLayer<GUIOptionMenuLayer>();
+			}
+			else if (SampleNameProperty == "PageMenu") {
+				registerLayer<GUIPageMenuLayer>();
 			}
 			else if (SampleNameProperty == "Sample") {
 				registerLayer<GUISampleLayer>();

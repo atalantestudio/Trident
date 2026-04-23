@@ -251,6 +251,17 @@ namespace Trident {
 			buttonComponentIndices[buttonComponentIndexCount] = componentIndex;
 			buttonComponentIndexCount += 1;
 		}
+
+		if (previousComponentCount >= componentCount) {
+			const GUIContainer& component = previousComponents[componentCount - 1];
+			const Window* window = getApplication()->getWindow();
+			const sint32* mousePositionInteger = window->getMousePosition();
+			const vec2<float32> mousePosition = {static_cast<float32>(mousePositionInteger[0]), static_cast<float32>(mousePositionInteger[1])};
+
+			if (IsIntersecting(component, mousePosition)) {
+				window->updatePointerType(component.pointerType);
+			}
+		}
 	}
 
 	void GUILayer::closeRootComponent() {
@@ -815,19 +826,33 @@ namespace Trident {
 	}
 
 	bool GUILayer::onMouseDown(MouseDownEvent& event) {
-		if (hoveredComponentIndex > 0 && hoveredComponentIndex < max<uint32>()) {
+		mouseUp = false;
+
+		const Window* window = getApplication()->getWindow();
+		const sint32* mousePositionInteger = window->getMousePosition();
+
+		lastMouseDownPosition = {static_cast<float32>(mousePositionInteger[0]), static_cast<float32>(mousePositionInteger[1])};
+
+		/* if (hoveredComponentIndex > 0 && hoveredComponentIndex < max<uint32>()) {
 			// Dispatch mouse down event.
 			const GUIContainer& component = components[hoveredComponentIndex];
 			component.eventListeners->onMouseDown(event);
 		}
 
-		mouseDownComponentIndex = hoveredComponentIndex;
+		mouseDownComponentIndex = hoveredComponentIndex; */
 
 		return false;
 	}
 
 	bool GUILayer::onMouseUp(MouseUpEvent& event) {
-		if (mouseDownComponentIndex > 0 && mouseDownComponentIndex < max<uint32>()) {
+		mouseUp = true;
+
+		const Window* window = getApplication()->getWindow();
+		const sint32* mousePositionInteger = window->getMousePosition();
+
+		lastMouseUpPosition = {static_cast<float32>(mousePositionInteger[0]), static_cast<float32>(mousePositionInteger[1])};
+
+		/* if (mouseDownComponentIndex > 0 && mouseDownComponentIndex < max<uint32>()) {
 			// Dispatch a mouse down event.
 			const GUIContainer& component = components[mouseDownComponentIndex];
 			component.eventListeners->onMouseUp(event);
@@ -838,7 +863,7 @@ namespace Trident {
 			}
 		}
 
-		mouseDownComponentIndex = max<uint32>();
+		mouseDownComponentIndex = max<uint32>(); */
 
 		return false;
 	}
@@ -878,5 +903,19 @@ namespace Trident {
 		const vec2<float32> mousePosition = {static_cast<float32>(mousePositionInteger[0]), static_cast<float32>(mousePositionInteger[1])};
 
 		return IsIntersecting(component, mousePosition);
+	}
+
+	bool GUILayer::IsClicked() {
+		if (!mouseUp || previousComponentCount < componentCount) {
+			return false;
+		}
+
+		const GUIContainer& component = previousComponents[componentCount - 1];
+		const bool intersecting = IsIntersecting(component, lastMouseDownPosition) && IsIntersecting(component, lastMouseUpPosition);
+
+		lastMouseDownPosition = {-1.0f, -1.0f};
+		lastMouseUpPosition = {-1.0f, -1.0f};
+
+		return intersecting;
 	}
 }

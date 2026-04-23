@@ -57,6 +57,9 @@ namespace Trident {
 			/// Returns whether the mouse pointer is hovering over the current component.
 			bool IsHovered() const;
 
+			/// Returns whether the mouse pointer is clicking on the current component.
+			bool IsClicked();
+
 		public:
 			void openComponent(const ContainerStyle& style);
 
@@ -133,6 +136,10 @@ namespace Trident {
 
 			uint32 hoveredComponentIndex = max<uint32>();
 			uint32 mouseDownComponentIndex = max<uint32>();
+
+			bool mouseUp = false;
+			vec2<float32> lastMouseDownPosition = {-1.0f, -1.0f};
+			vec2<float32> lastMouseUpPosition = {-1.0f, -1.0f};
 	};
 
 	#define GUIComponent(...) for (bool _opened = (openComponent(__VA_ARGS__), true); _opened; _opened = false, closeComponent())

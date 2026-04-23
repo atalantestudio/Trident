@@ -7,19 +7,10 @@
 
 namespace Trident {
 	class GUIOptionMenuLayer : public GUILayer {
-		private:
-			static constexpr uint32 LIST_ITEM_COUNT = 5;
-
 		public:
 			void registerAssets() override {
 				fontBold = loadFontAsset("test-bold");
 				fontRegular = loadFontAsset("test-regular");
-
-				listItems = sequence<Button>(LIST_ITEM_COUNT);
-
-				for (Button& button : listItems) {
-					button.innerStyle.size[0] = 300_px;
-				}
 			}
 
 			void GUI() override {
@@ -28,57 +19,55 @@ namespace Trident {
 				GUIComponent({
 					.size = {static_cast<float32>(size[0] - 24_px), static_cast<float32>(size[1] - 16_px)},
 					.padding = {8_px, 8_px},
-					.layoutDirection = HORIZONTAL,
+					.layoutDirection = VERTICAL,
 					.layoutSpacing = 8_px,
 					.color = 0x000000ff,
 				}) {
-					// Option list
-					GUIComponent({
-						.size = {FIT, EXPAND},
-						.layoutDirection = VERTICAL,
-						.layoutSpacing = -1_px,
-					}) {
-						uint32 listItemIndex = 0;
+					VSyncOptionButton();
+				}
+			}
 
-						while (listItemIndex < LIST_ITEM_COUNT) {
-							GUIComponentClass(listItems[listItemIndex], [&]() {
-								GUIText(Logger::format("Option []", listItemIndex), {
-									.color = 0xa5a5a5ff,
-									.font = fontBold,
-									.fontSize = 22_px,
-								});
-
-								GUIText(Logger::format("Description for option []", listItemIndex), {
-									.color = 0x828282ff,
-									.font = fontRegular,
-									.fontSize = 18_px,
-								});
-							});
-
-							listItemIndex += 1;
-						}
+		private:
+			void VSyncOptionButton() {
+				GUIComponent({
+					.size = {FIT, FIT},
+					.padding = {1_px, 1_px},
+					.color = 0x3a3a3aff,
+					.pointerType = PointerType::INTERACTIVE,
+				}) {
+					if (IsClicked()) {
+						VSync = !VSync;
 					}
 
-					// Menu
 					GUIComponent({
-						.size = {EXPAND, EXPAND},
-						.padding = {1_px, 1_px},
-						.color = 0x3a3a3aff,
+						.size = {200_px, FIT},
+						.padding = {10_px, 8_px},
+						.layoutDirection = LayoutDirection::VERTICAL,
+						.color = 0x0a0a0aff,
+						.pointerType = PointerType::INTERACTIVE,
 					}) {
-						GUIComponent({
-							.size = {EXPAND, EXPAND},
-							.padding = {8_px, 8_px},
-							.layoutDirection = VERTICAL,
-							.color = 0x0a0a0aff,
-						}) {
-							GUIText("Option Menu", {
-								.color = 0xc2c2c2ff,
-								.font = fontBold,
-								.fontSize = 28_px,
-							});
+						Text("V-Sync", {
+							.color = 0xa5a5a5ff,
+							.font = fontBold,
+							.fontSize = 22_px,
+						});
 
-							GUIText("Configure the option properties there.", {
-								.color = 0x828282ff,
+						Text("Vertical synchronization.", {
+							.color = 0x828282ff,
+							.font = fontRegular,
+							.fontSize = 18_px,
+						});
+
+						if (VSync) {
+							Text("Enabled", {
+								.color = 0x80ef80ff,
+								.font = fontRegular,
+								.fontSize = 18_px,
+							});
+						}
+						else {
+							Text("Disabled", {
+								.color = 0xff474cff,
 								.font = fontRegular,
 								.fontSize = 18_px,
 							});
@@ -91,6 +80,6 @@ namespace Trident {
 			FontID fontBold;
 			FontID fontRegular;
 
-			sequence<Button> listItems;
+			bool VSync = false;
 	};
 }
