@@ -9,12 +9,12 @@
 
 #include "Compute/PrefixSum.hpp"
 
+#include "GUI/ButtonTest.hpp"
 #include "GUI/Card.hpp"
 #include "GUI/Demo1.hpp"
 #include "GUI/Demo2.hpp"
 #include "GUI/Demo3.hpp"
 #include "GUI/DropDownMenu.hpp"
-#include "GUI/EventTest.hpp"
 #include "GUI/OptionMenu.hpp"
 #include "GUI/Sample.hpp"
 #include "GUI/Text.hpp"
@@ -61,7 +61,10 @@ namespace Trident {
 			}
 		}
 		else if (SampleGroupNameProperty == "GUI") {
-			if (SampleNameProperty == "Card") {
+			if (SampleNameProperty == "ButtonTest") {
+				registerLayer<GUIButtonTestLayer>();
+			}
+			else if (SampleNameProperty == "Card") {
 				registerLayer<GUICardLayer>();
 			}
 			else if (SampleNameProperty == "Demo1") {
@@ -75,9 +78,6 @@ namespace Trident {
 			}
 			else if (SampleNameProperty == "DropDownMenu") {
 				registerLayer<GUIDropDownMenuLayer>();
-			}
-			else if (SampleNameProperty == "EventTest") {
-				registerLayer<GUIEventTestLayer>();
 			}
 			else if (SampleNameProperty == "OptionMenu") {
 				registerLayer<GUIOptionMenuLayer>();

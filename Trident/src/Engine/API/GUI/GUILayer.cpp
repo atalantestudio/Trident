@@ -26,8 +26,8 @@ namespace Trident {
 		textureArrayFlushed = true;
 
 		components = sequence<GUIContainer>(MAX_COMPONENT_COUNT);
+		previousComponents = sequence<GUIContainer>(MAX_COMPONENT_COUNT);
 		openComponentIndices = sequence<uint32>(MAX_COMPONENT_COUNT);
-		leafComponentIndices = sequence<uint32>(MAX_COMPONENT_COUNT);
 		buttonComponentIndices = sequence<uint32>(MAX_COMPONENT_COUNT);
 	}
 
@@ -95,7 +95,6 @@ namespace Trident {
 	void GUILayer::preRender() {
 		componentCount = 0;
 		openComponentIndexCount = 0;
-		leafComponentIndexCount = 0;
 		buttonComponentIndexCount = 0;
 
 		openRootComponent();
@@ -140,6 +139,10 @@ namespace Trident {
 
 			componentIndex += 1;
 		}
+
+		std::copy(&components[0], &components[componentCount], &previousComponents[0]);
+
+		previousComponentCount = componentCount;
 	}
 
 	void GUILayer::render(ref<CommandEncoder> commandEncoder, float64 remainingFrameTime) const {
@@ -166,10 +169,7 @@ namespace Trident {
 		rootComponent.zIndex = 0;
 		rootComponent.padding = {0_px, 0_px};
 		rootComponent.anchorPoint = AnchorPoint::TOP | AnchorPoint::LEFT;
-
-		// TODO: Change to VERTICAL.
-		rootComponent.layoutDirection = HORIZONTAL;
-
+		rootComponent.layoutDirection = VERTICAL;
 		rootComponent.layoutSpacing = 0_px;
 		rootComponent.color = 0xffffffff;
 		rootComponent.image = 0;
@@ -284,13 +284,6 @@ namespace Trident {
 		const uint32 componentIndex = openComponentIndices[openComponentIndexCount - 1];
 
 		FitSizingWidths(componentIndex);
-
-		const GUIContainer& component = components[componentIndex];
-
-		if (component.childIndices.size() == 0) {
-			leafComponentIndices[leafComponentIndexCount] = componentIndex;
-			leafComponentIndexCount += 1;
-		}
 
 		openComponentIndexCount -= 1;
 	}
@@ -874,17 +867,16 @@ namespace Trident {
 		renderer.registerSubcomponent(subcomponent);
 	}
 
-	// TODO(gui/immediate-hover)
-	bool GUILayer::isCurrentComponentHovered() const {
-		DEBUG_ASSERT(openComponentIndexCount > 0);
+	bool GUILayer::IsHovered() const {
+		if (previousComponentCount < componentCount) {
+			return false;
+		}
 
-		const GUIContainer& component = components[openComponentIndexCount - 1];
+		const GUIContainer& component = previousComponents[componentCount - 1];
 		const Window* window = getApplication()->getWindow();
 		const sint32* mousePositionInteger = window->getMousePosition();
 		const vec2<float32> mousePosition = {static_cast<float32>(mousePositionInteger[0]), static_cast<float32>(mousePositionInteger[1])};
 
-		const bool hovered = IsIntersecting(component, mousePosition);
-
-		return hovered;
+		return IsIntersecting(component, mousePosition);
 	}
 }

@@ -10,13 +10,13 @@
 #include "Engine/Filesystem/Stream/UTF8Stream.hpp"
 
 namespace Trident {
-	void GUILayer::GUIText(const sequence<char8>& text, const TextStyle& textStyle) {
+	void GUILayer::GUIText(const sequence<char8>& text, const TextStyle& style) {
 		UTF8Stream stream(text);
 
 		const uint32 componentIndex = componentCount;
 		const uint32 parentIndex = openComponentIndices[openComponentIndexCount - 1];
-		const float32 preferredWidth = calculateTextPreferredWidth(stream, textStyle);
-		const float32 minimumWidth = calculateTextMinimumWidth(stream, textStyle);
+		const float32 preferredWidth = calculateTextPreferredWidth(stream, style);
+		const float32 minimumWidth = calculateTextMinimumWidth(stream, style);
 
 		GUIContainer& parent = components[parentIndex];
 
@@ -26,22 +26,22 @@ namespace Trident {
 		textComponent.size.width.fillMode = FillMode::FIT;
 		textComponent.size.width.value = preferredWidth;
 		textComponent.size.height.fillMode = FillMode::FIT;
-		textComponent.size.height.value = textStyle.fontSize;
-		textComponent.maximumSize = {preferredWidth, textStyle.fontSize};
-		textComponent.minimumSize = {minimumWidth, textStyle.fontSize};
+		textComponent.size.height.value = style.fontSize;
+		textComponent.maximumSize = {preferredWidth, style.fontSize};
+		textComponent.minimumSize = {minimumWidth, style.fontSize};
 		textComponent.zIndex = 0;
 		textComponent.padding = {0_px, 0_px};
 		textComponent.layoutDirection = HORIZONTAL;
 		textComponent.layoutSpacing = 0_px;
-		textComponent.color = textStyle.color;
-		textComponent.image = fonts[textStyle.font].glyphMapImageId;
+		textComponent.color = style.color;
+		textComponent.image = fonts[style.font].glyphMapImageId;
 		textComponent.pointerType = PointerType::DEFAULT;
 		textComponent.textComponent = true;
 		textComponent.text = text;
-		textComponent.font = textStyle.font;
-		textComponent.fontSize = textStyle.fontSize;
-		textComponent.eventListeners = textStyle.eventListeners;
-		textComponent.debugName = textStyle.debugName;
+		textComponent.font = style.font;
+		textComponent.fontSize = style.fontSize;
+		textComponent.eventListeners = style.eventListeners;
+		textComponent.debugName = style.debugName;
 
 		// Pushing the component to the vector might invalidate the parent reference, so we update the parent's children indices before.
 		parent.childIndices.emplace_back(componentIndex);
@@ -49,15 +49,16 @@ namespace Trident {
 		components[componentCount] = textComponent;
 		componentCount += 1;
 
-		leafComponentIndices[leafComponentIndexCount] = componentIndex;
-		leafComponentIndexCount += 1;
-
 		if (textComponent.eventListeners != nullptr) {
 			buttonComponentIndices[buttonComponentIndexCount] = componentIndex;
 			buttonComponentIndexCount += 1;
 		}
 
 		FitSizingWidths(componentIndex);
+	}
+
+	void GUILayer::Text(view<char8> text, const TextStyle& style) {
+		return GUIText(text, style);
 	}
 
 	void GUILayer::WrapText(GUIContainer& textComponent) {

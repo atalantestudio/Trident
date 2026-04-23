@@ -54,13 +54,16 @@ namespace Trident {
 			FontID loadFontAsset(view<char8> assetName);
 			ImageID loadImageAsset(view<char8> assetName);
 
-			/// Returns true if the mouse pointer is inside the current open component.
-			bool isCurrentComponentHovered() const;
+			/// Returns whether the mouse pointer is hovering over the current component.
+			bool IsHovered() const;
 
 		public:
 			void openComponent(const ContainerStyle& style);
 
-			void GUIText(const sequence<char8>& text, const TextStyle& textStyle);
+			// TODO: Deprecate (use Text instead).
+			void GUIText(const sequence<char8>& text, const TextStyle& style);
+
+			void Text(view<char8> text, const TextStyle& style);
 
 			void closeComponent();
 
@@ -118,12 +121,14 @@ namespace Trident {
 
 			sequence<GUIContainer> components;
 			sequence<uint32> openComponentIndices;
-			sequence<uint32> leafComponentIndices;
 			sequence<uint32> buttonComponentIndices;
 
+			/// Component tree from the previous frame.
+			sequence<GUIContainer> previousComponents;
+
 			uint32 componentCount = 0;
+			uint32 previousComponentCount = 0;
 			uint32 openComponentIndexCount = 0;
-			uint32 leafComponentIndexCount = 0;
 			uint32 buttonComponentIndexCount = 0;
 
 			uint32 hoveredComponentIndex = max<uint32>();
