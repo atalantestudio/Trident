@@ -946,8 +946,10 @@ namespace Trident {
 		const GUIContainer& component = previousComponents[componentCount - 1];
 		const bool intersecting = IsIntersecting(component, lastMouseDownPosition) && IsIntersecting(component, lastMouseUpPosition);
 
-		lastMouseDownPosition = {-1.0f, -1.0f};
-		lastMouseUpPosition = {-1.0f, -1.0f};
+		if (intersecting) {
+			lastMouseDownPosition = {-1.0f, -1.0f};
+			lastMouseUpPosition = {-1.0f, -1.0f};
+		}
 
 		return intersecting;
 	}
