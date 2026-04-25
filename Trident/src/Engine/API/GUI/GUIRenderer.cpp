@@ -3,8 +3,8 @@
 
 #include "pch.hpp"
 
-#include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/API/GUI/GUIRenderer.hpp"
+#include "Engine/Filesystem/Filesystem.hpp"
 
 namespace Trident {
 	void GUIRenderer::build() {
@@ -61,31 +61,28 @@ namespace Trident {
 		while (layerIndex < textureArrayLayerCount) {
 			const Extent2D& extent = textureArrayLayerExtents[layerIndex];
 
-			BufferImageCopyRegion& copyRegion = copyRegions[layerIndex];
-			copyRegion.bufferOffset = bufferOffset;
-			copyRegion.imageOffsetX = 0;
-			copyRegion.imageOffsetY = 0;
-			copyRegion.imageOffsetZ = 0;
-			copyRegion.imageExtent.width = extent.width;
-			copyRegion.imageExtent.height = extent.height;
-			copyRegion.imageExtent.depth = 1;
-			copyRegion.imageMipLevel = 0;
-			copyRegion.imageLayerOffset = layerIndex;
-			copyRegion.imageLayerCount = 1;
+			copyRegions[layerIndex] = {
+				.bufferOffset = bufferOffset,
+				.imageOffsetX = 0,
+				.imageOffsetY = 0,
+				.imageOffsetZ = 0,
+				.imageExtent = {extent.width, extent.height, 1},
+				.imageMipLevel = 0,
+				.imageLayerOffset = layerIndex,
+				.imageLayerCount = 1,
+			};
 
 			bufferOffset += extent.width * extent.height * getChannelCount(ImageFormat::R8G8B8A8_UNORM);
 			layerIndex += 1;
 		}
 
-		CommandBufferDescriptor commandBufferDescriptor{};
-		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-		#if defined(DEBUG_OBJECT_NAME)
-			commandBufferDescriptor.name = "Copy texture array layers";
-		#endif
-
 		const ref<Queue> graphicsQueue = getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
-		const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder(commandBufferDescriptor);
+		const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder({
+			.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Copy texture array layers",
+			#endif
+		});
 
 		ImageMemoryBarrier textureArrayImageMemoryBarrier = {
 			.image = textureArrayImage,
@@ -144,76 +141,72 @@ namespace Trident {
 	}
 
 	void GUIRenderer::setupRenderPass() {
-		Attachment swapchainAttachment{};
-		swapchainAttachment.format = getSurface()->getFormat();
-		swapchainAttachment.sampleCount = 1;
+		renderPass = createRenderPass({
+			.attachments = {
+				{
+					.format = getSurface()->getFormat(),
+					.sampleCount = 1,
 
-		// TODO(layer-superposition)
-		// TODO: Using LOAD when this layer is the only one registered will generate non-blocking errors from the Vulkan validation layers.
-		swapchainAttachment.loadOperation = LoadOperation::LOAD;
-		// swapchainAttachment.loadOperation = LoadOperation::CLEAR;
+					// TODO(layer-superposition)
+					// TODO: Using LOAD when this layer is the only one registered will generate non-blocking errors from the Vulkan validation layers.
+					.loadOperation = LoadOperation::LOAD,
+					// .loadOperation = LoadOperation::CLEAR,
 
-		swapchainAttachment.storeOperation = StoreOperation::STORE;
-		swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
-
-		Attachment depthStencilAttachment{};
-		depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
-		depthStencilAttachment.sampleCount = 1;
-		depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
-		depthStencilAttachment.storeOperation = StoreOperation::UNDEFINED;
-		depthStencilAttachment.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-		AttachmentReference swapchainAttachmentReference{};
-		swapchainAttachmentReference.index = 0;
-		swapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-
-		AttachmentReference depthStencilAttachmentReference{};
-		depthStencilAttachmentReference.index = 1;
-		depthStencilAttachmentReference.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-		SubpassDescriptor subpassDescriptor{};
-		subpassDescriptor.colorAttachmentReferences = {swapchainAttachmentReference};
-		subpassDescriptor.depthStencilAttachmentReference = depthStencilAttachmentReference;
-
-		const ref<Subpass> subpass = createSubpass(subpassDescriptor);
-
-		RenderPassDescriptor renderPassDescriptor{};
-		renderPassDescriptor.attachments = {swapchainAttachment, depthStencilAttachment};
-		renderPassDescriptor.subpasses = {subpass};
-
-		renderPass = createRenderPass(renderPassDescriptor);
+					.storeOperation = StoreOperation::STORE,
+					.finalLayout = ImageLayout::PRESENT_SRC,
+				},
+				{
+					.format = ImageFormat::D32_SFLOAT,
+					.sampleCount = 1,
+					.loadOperation = LoadOperation::CLEAR,
+					.storeOperation = StoreOperation::UNDEFINED,
+					.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+				}
+			},
+			.subpasses = {
+				createSubpass({
+					.colorAttachmentReferences = {
+						{
+							.index = 0,
+							.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
+						},
+					},
+					.depthStencilAttachmentReference = {
+						.index = 1,
+						.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+					},
+				}),
+			},
+		});
 	}
 
 	void GUIRenderer::createDepthStencilImage() {
 		const Extent2D swapchainExtent = getSwapchain()->getExtent();
 
-		AttachmentImageDescriptor depthStencilAttachmentImageDescriptor{};
-		depthStencilAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
-		depthStencilAttachmentImageDescriptor.extent.width = swapchainExtent.width;
-		depthStencilAttachmentImageDescriptor.extent.height = swapchainExtent.height;
-		depthStencilAttachmentImageDescriptor.extent.depth = 1;
-		depthStencilAttachmentImageDescriptor.mipLevelCount = 1;
-		depthStencilAttachmentImageDescriptor.layerCount = 1;
-
-		#if defined(DEBUG_OBJECT_NAME)
-			depthStencilAttachmentImageDescriptor.name = "Depth stencil image";
-		#endif
-
-		depthStencilImage = renderPass->createDepthStencilAttachmentImage(depthStencilAttachmentImageDescriptor, 0);
+		depthStencilImage = renderPass->createDepthStencilAttachmentImage(
+			{
+				.type = ImageType::TEXTURE_2D,
+				.extent = {swapchainExtent.width, swapchainExtent.height, 1},
+				.mipLevelCount = 1,
+				.layerCount = 1,
+				#if defined(DEBUG_OBJECT_NAME)
+					.name = "Depth stencil image",
+				#endif
+			},
+			0
+		);
 	}
 
 	void GUIRenderer::createDepthStencilImageView() {
-		ImageViewDescriptor depthStencilImageViewDescriptor{};
-		depthStencilImageViewDescriptor.mipLevelOffset = 0;
-		depthStencilImageViewDescriptor.mipLevelCount = 1;
-		depthStencilImageViewDescriptor.layerOffset = 0;
-		depthStencilImageViewDescriptor.layerCount = 1;
-
-		#if defined(DEBUG_OBJECT_NAME)
-			depthStencilImageViewDescriptor.name = "Depth stencil image view";
-		#endif
-
-		depthStencilImageView = depthStencilImage->createView(depthStencilImageViewDescriptor);
+		depthStencilImageView = depthStencilImage->createView({
+			.mipLevelOffset = 0,
+			.mipLevelCount = 1,
+			.layerOffset = 0,
+			.layerCount = 1,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Depth stencil image view",
+			#endif
+		});
 	}
 
 	void GUIRenderer::recreateFramebuffers() {
@@ -221,10 +214,11 @@ namespace Trident {
 
 		framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
 
-		FramebufferDescriptor framebufferDescriptor{};
-		framebufferDescriptor.renderPass = renderPass;
-		framebufferDescriptor.imageViews = {nullptr, depthStencilImageView};
-		framebufferDescriptor.extent = swapchain->getExtent();
+		FramebufferDescriptor framebufferDescriptor = {
+			.renderPass = renderPass,
+			.imageViews = {nullptr, depthStencilImageView},
+			.extent = swapchain->getExtent(),
+		};
 
 		#if defined(DEBUG_OBJECT_NAME)
 			sequence<char8> name;
@@ -248,76 +242,63 @@ namespace Trident {
 	}
 
 	void GUIRenderer::createCameraBuffer() {
-		BufferDescriptor cameraBufferDescriptor{};
-		cameraBufferDescriptor.size = sizeof(Camera);
-		cameraBufferDescriptor.usage = BufferUsage::UNIFORM;
-		cameraBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-		cameraBufferDescriptor.persistent = true;
-
-		#if defined(DEBUG_OBJECT_NAME)
-			cameraBufferDescriptor.name = "Camera";
-		#endif
-
-		cameraBuffer = createBuffer<Camera>(cameraBufferDescriptor);
-
+		cameraBuffer = createBuffer<Camera>({
+			.size = sizeof(Camera),
+			.usage = BufferUsage::UNIFORM,
+			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
+			.persistent = true,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Camera",
+			#endif
+		});
 		cameraBufferMappedRange = cameraBuffer->map(0, cameraBuffer->getSize());
 	}
 
 	void GUIRenderer::createVertexBuffer() {
-		BufferDescriptor vertexBufferDescriptor{};
-		vertexBufferDescriptor.size = VERTEX_BUFFER_SIZE;
-		vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
-		vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-		#if defined(DEBUG_OBJECT_NAME)
-			vertexBufferDescriptor.name = "Vertex";
-		#endif
-
-		vertexBuffer = createBuffer<Vertex>(vertexBufferDescriptor);
+		vertexBuffer = createBuffer<Vertex>({
+			.size = VERTEX_BUFFER_SIZE,
+			.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST,
+			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Vertex",
+			#endif
+		});
 	}
 
 	void GUIRenderer::createIndexBuffer() {
-		BufferDescriptor indexBufferDescriptor{};
-		indexBufferDescriptor.size = INDEX_BUFFER_SIZE;
-		indexBufferDescriptor.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST;
-		indexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-		#if defined(DEBUG_OBJECT_NAME)
-			indexBufferDescriptor.name = "Index";
-		#endif
-
-		indexBuffer = createBuffer<uint16>(indexBufferDescriptor);
+		indexBuffer = createBuffer<uint16>({
+			.size = INDEX_BUFFER_SIZE,
+			.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST,
+			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Index",
+			#endif
+		});
 	}
 
 	void GUIRenderer::createSubcomponentBuffer() {
-		BufferDescriptor subcomponentBufferDescriptor{};
-		subcomponentBufferDescriptor.size = SUBCOMPONENT_BUFFER_SIZE;
-		subcomponentBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
-		subcomponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-		subcomponentBufferDescriptor.persistent = true;
-
-		#if defined(DEBUG_OBJECT_NAME)
-			subcomponentBufferDescriptor.name = "Subcomponent";
-		#endif
-
-		subcomponentBuffer = createBuffer<GUISubcomponent>(subcomponentBufferDescriptor);
-
+		subcomponentBuffer = createBuffer<GUISubcomponent>({
+			.size = SUBCOMPONENT_BUFFER_SIZE,
+			.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST,
+			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
+			.persistent = true,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Subcomponent",
+			#endif
+		});
 		subcomponentBufferMappedRange = subcomponentBuffer->map(0, subcomponentBuffer->getSize());
 	}
 
 	void GUIRenderer::createGlyphSubcomponentBuffer() {
-		BufferDescriptor glyphSubcomponentBufferDescriptor{};
-		glyphSubcomponentBufferDescriptor.size = GLYPH_SUBCOMPONENT_BUFFER_SIZE;
-		glyphSubcomponentBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
-		glyphSubcomponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-		glyphSubcomponentBufferDescriptor.persistent = true;
-
-		#if defined(DEBUG_OBJECT_NAME)
-			glyphSubcomponentBufferDescriptor.name = "Glyph subcomponent";
-		#endif
-
-		glyphSubcomponentBuffer = createBuffer<GUIGlyphSubcomponent>(glyphSubcomponentBufferDescriptor);
-
+		glyphSubcomponentBuffer = createBuffer<GUIGlyphSubcomponent>({
+			.size = GLYPH_SUBCOMPONENT_BUFFER_SIZE,
+			.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST,
+			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
+			.persistent = true,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Glyph subcomponent",
+			#endif
+		});
 		glyphSubcomponentBufferMappedRange = glyphSubcomponentBuffer->map(0, glyphSubcomponentBuffer->getSize());
 	}
 
@@ -328,78 +309,70 @@ namespace Trident {
 	}
 
 	void GUIRenderer::createTextureArrayImage() {
-		ImageDescriptor textureArrayImageDescriptor{};
-		textureArrayImageDescriptor.type = ImageType::TEXTURE_2D;
-		textureArrayImageDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
-		textureArrayImageDescriptor.extent.width = TEXTURE_ARRAY_MAX_WIDTH;
-		textureArrayImageDescriptor.extent.height = TEXTURE_ARRAY_MAX_HEIGHT;
-		textureArrayImageDescriptor.extent.depth = 1;
-		textureArrayImageDescriptor.mipLevelCount = 1;
-		textureArrayImageDescriptor.layerCount = TEXTURE_ARRAY_MAX_LAYER_COUNT;
-		textureArrayImageDescriptor.sampleCount = 1;
-		textureArrayImageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
-		textureArrayImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
-
-		#if defined(DEBUG_OBJECT_NAME)
-			textureArrayImageDescriptor.name = "Texture array";
-		#endif
-
-		textureArrayImage = createImage(textureArrayImageDescriptor);
+		textureArrayImage = createImage({
+			.type = ImageType::TEXTURE_2D,
+			.format = ImageFormat::R8G8B8A8_UNORM,
+			.extent = {TEXTURE_ARRAY_MAX_WIDTH, TEXTURE_ARRAY_MAX_HEIGHT, 1},
+			.mipLevelCount = 1,
+			.layerCount = TEXTURE_ARRAY_MAX_LAYER_COUNT,
+			.sampleCount = 1,
+			.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST,
+			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Texture array",
+			#endif
+		});
 	}
 
 	void GUIRenderer::createTextureArrayImageView() {
-		ImageViewDescriptor textureArrayImageViewDescriptor{};
-		textureArrayImageViewDescriptor.mipLevelOffset = 0;
-		textureArrayImageViewDescriptor.mipLevelCount = 1;
-		textureArrayImageViewDescriptor.layerOffset = 0;
-		textureArrayImageViewDescriptor.layerCount = textureArrayImage->getLayerCount();
-
-		#if defined(DEBUG_OBJECT_NAME)
-			textureArrayImageViewDescriptor.name = "Texture array";
-		#endif
-
-		textureArrayImageView = textureArrayImage->createView(textureArrayImageViewDescriptor);
+		textureArrayImageView = textureArrayImage->createView({
+			.mipLevelOffset = 0,
+			.mipLevelCount = 1,
+			.layerOffset = 0,
+			.layerCount = textureArrayImage->getLayerCount(),
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Texture array",
+			#endif
+		});
 	}
 
 	void GUIRenderer::createNearestSampler() {
-		SamplerDescriptor nearestSamplerDescriptor{};
-		nearestSamplerDescriptor.magFilter = SamplerFilter::NEAREST;
-		nearestSamplerDescriptor.minFilter = SamplerFilter::NEAREST;
-
-		nearestSampler = createSampler(nearestSamplerDescriptor);
+		nearestSampler = createSampler({
+			.magFilter = SamplerFilter::NEAREST,
+			.minFilter = SamplerFilter::NEAREST,
+		});
 	}
 
 	void GUIRenderer::createLinearSampler() {
-		SamplerDescriptor linearSamplerDescriptor{};
-		linearSamplerDescriptor.magFilter = SamplerFilter::LINEAR;
-		linearSamplerDescriptor.minFilter = SamplerFilter::LINEAR;
-
-		linearSampler = createSampler(linearSamplerDescriptor);
+		linearSampler = createSampler({
+			.magFilter = SamplerFilter::LINEAR,
+			.minFilter = SamplerFilter::LINEAR,
+		});
 	}
 
 	void GUIRenderer::createDescriptorSetLayouts() {
-		DescriptorSetLayoutBinding cameraBinding{};
-		cameraBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-		cameraBinding.descriptorCount = 1;
-		cameraBinding.shaderStages = ShaderStage::VERTEX;
+		const DescriptorSetLayoutBinding cameraBinding = {
+			.descriptorType = DescriptorType::UNIFORM_BUFFER,
+			.descriptorCount = 1,
+			.shaderStages = ShaderStage::VERTEX,
+		};
 
-		DescriptorSetLayoutBinding textureArrayBinding{};
-		textureArrayBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-		textureArrayBinding.descriptorCount = 1;
-		textureArrayBinding.shaderStages = ShaderStage::FRAGMENT;
+		const DescriptorSetLayoutBinding textureArrayBinding = {
+			.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
+			.shaderStages = ShaderStage::FRAGMENT,
+		};
 
 		subcomponentDescriptorSetLayout = createDescriptorSetLayout({cameraBinding, textureArrayBinding});
 	}
 
 	void GUIRenderer::createSubcomponentPipelineLayout() {
-		PipelineLayoutDescriptor subcomponentPipelineLayoutDescriptor{};
-		subcomponentPipelineLayoutDescriptor.descriptorSetLayouts = {subcomponentDescriptorSetLayout};
-
-		#if defined(DEBUG_OBJECT_NAME)
-			subcomponentPipelineLayoutDescriptor.name = "Subcomponent";
-		#endif
-
-		subcomponentPipelineLayout = createPipelineLayout(subcomponentPipelineLayoutDescriptor);
+		subcomponentPipelineLayout = createPipelineLayout({
+			.descriptorSetLayouts = {subcomponentDescriptorSetLayout},
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Subcomponent",
+			#endif
+		});
 	}
 
 	void GUIRenderer::createSubcomponentGraphicsPipeline() {
@@ -504,28 +477,30 @@ namespace Trident {
 			},
 		};
 
-		GraphicsPipelineDescriptor glyphSubcomponentGraphicsPipelineDescriptor{};
-		glyphSubcomponentGraphicsPipelineDescriptor.pipelineLayout = subcomponentPipelineLayout;
-		glyphSubcomponentGraphicsPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
-		glyphSubcomponentGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-		glyphSubcomponentGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-		glyphSubcomponentGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-		glyphSubcomponentGraphicsPipelineDescriptor.polygonMode = PolygonMode::FILL;
-		glyphSubcomponentGraphicsPipelineDescriptor.cullMode = CullMode::BACK;
-		glyphSubcomponentGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-		glyphSubcomponentGraphicsPipelineDescriptor.lineWidth = 1.0f;
-		glyphSubcomponentGraphicsPipelineDescriptor.minSampleShading = 0.0f;
-		glyphSubcomponentGraphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
-		glyphSubcomponentGraphicsPipelineDescriptor.depthStencilState.depthTest = false;
-		glyphSubcomponentGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-		glyphSubcomponentGraphicsPipelineDescriptor.renderPass = renderPass;
-		glyphSubcomponentGraphicsPipelineDescriptor.subpassIndex = 0;
-
-		#if defined(DEBUG_OBJECT_NAME)
-			glyphSubcomponentGraphicsPipelineDescriptor.name = "Glyph subcomponent";
-		#endif
-
-		glyphSubcomponentGraphicsPipeline = createGraphicsPipeline(glyphSubcomponentGraphicsPipelineDescriptor);
+		glyphSubcomponentGraphicsPipeline = createGraphicsPipeline({
+			.pipelineLayout = subcomponentPipelineLayout,
+			.vertexInputBindings = {vertexInputBinding, instanceInputBinding},
+			.vertexShaderModule = vertexShaderModule,
+			.fragmentShaderModule = fragmentShaderModule,
+			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
+			.polygonMode = PolygonMode::FILL,
+			.cullMode = CullMode::BACK,
+			.frontFace = FrontFace::CLOCKWISE,
+			.lineWidth = 1.0f,
+			.minSampleShading = 0.0f,
+			.colorBlendState = {
+				.attachments = colorBlendAttachments,
+			},
+			.depthStencilState = {
+				.depthTest = false,
+			},
+			.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
+			.renderPass = renderPass,
+			.subpassIndex = 0,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Glyph subcomponent",
+			#endif
+		});
 	}
 
 	void GUIRenderer::allocateDescriptorSets() {
@@ -650,12 +625,7 @@ namespace Trident {
 	}
 
 	void GUIRenderer::render(ref<CommandEncoder> commandEncoder) const {
-		if (subcomponentCount == 0 && glyphSubcomponentCount == 0) {
-			// TODO
-			// If no commands have been encoded, the attachments will not be transitioned into the final layout.
-			// Handle properly the case where the command buffer is empty.
-			ENGINE_ASSERT(false, "No GUI components to render.");
-
+		if (subcomponentCount + glyphSubcomponentCount == 0) {
 			return;
 		}
 
