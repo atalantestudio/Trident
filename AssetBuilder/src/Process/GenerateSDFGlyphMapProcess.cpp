@@ -202,7 +202,7 @@ namespace Trident {
 			const vec2<float32> rawGlyphTexelSize = ttfUnitSize * scale;
 
 			// The glyph size on the glyph map, in pixels. Including the spread of the distance field.
-			const vec2<float32> spreadGlyphTexelSize = rawGlyphTexelSize + vec2<float32>(spreadFactor * 2.0f, spreadFactor * 2.0f);
+			const vec2<float32> spreadGlyphTexelSize = rawGlyphTexelSize + vec2<float32>{spreadFactor * 2.0f, spreadFactor * 2.0f};
 
 			// TODO(lyah): Add vec<C, T> ceil(vec<C, T>, vec<C, T>).
 			const uint32 glyphWidth = static_cast<uint32>(ceil(spreadGlyphTexelSize[0]));
@@ -258,10 +258,10 @@ namespace Trident {
 
 			rowHeight = max(rowHeight, glyphHeight);
 
-			outputGlyph.minCoordinate.x = static_cast<float32>(x + spreadFactor) * inverseGlyphMapWidth;
-			outputGlyph.minCoordinate.y = static_cast<float32>(y + spreadFactor) * inverseGlyphMapHeight;
-			outputGlyph.maxCoordinate.x = static_cast<float32>(x + spreadFactor + ceil(rawGlyphTexelSize[0])) * inverseGlyphMapWidth;
-			outputGlyph.maxCoordinate.y = static_cast<float32>(y + spreadFactor + ceil(rawGlyphTexelSize[1])) * inverseGlyphMapHeight;
+			outputGlyph.minCoordinate.x = (x + spreadFactor) * inverseGlyphMapWidth;
+			outputGlyph.minCoordinate.y = (y + spreadFactor) * inverseGlyphMapHeight;
+			outputGlyph.maxCoordinate.x = (x + spreadFactor + rawGlyphTexelSize[0] + 1) * inverseGlyphMapWidth;
+			outputGlyph.maxCoordinate.y = (y + spreadFactor + rawGlyphTexelSize[1] + 1) * inverseGlyphMapHeight;
 
 			x += glyphWidth;
 
