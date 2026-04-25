@@ -27,7 +27,7 @@ namespace Trident {
 				itemTextStyle.font = loadFontAsset("test-regular");
 			}
 
-			void GUI() override {
+			void render() override {
 				GUIComponent(listStyle) {
 					float32 fontSize = 96_px;
 

@@ -12,7 +12,7 @@ namespace Trident {
 				textStyle.fontSize = 96_px;
 			}
 
-			void GUI() override {
+			void render() override {
 				// GUIText("ÀÁÂÃÄÅĀĂĄǍÆǼÇĆĈĊČĎĐÈÉÊËĒĔĖ\nĘĚĜĞĠĢĤĦÌÍÎÏĨĪĬĮİǏĴĶĹĻĽŁÑŃŅŇÒÓÔ\nÕÖØŌŎŐǑŒŔŖŘŚŜŞŠŢŤŦÙÚÛÜŨŪ\nŬŮŰŲǓŴÝŶŸŹŻŽ", textStyle);
 				GUIText("àáâãäåāăąǎæǽçćĉċčďđèéêëēĕėęěĝğ\nġģĥħìíîïĩīĭįıǐĵķĺļľłñńņňòóôõöøōŏőǒœŕŗř\nśŝşšţťŧùúûüũūŭůűųǔŵýŷÿźżž", textStyle);
 			}

@@ -31,10 +31,12 @@ namespace Trident {
 				float32 lineHeight;
 			};
 
+		private:
+			static bool IsIntersecting(const GUIContainer& component, vec2<float32> point);
+
 		public:
 			void build() final override {}
 
-			// Client-side build method.
 			virtual void registerAssets() {}
 
 			void postConstruct() final override;
@@ -45,12 +47,12 @@ namespace Trident {
 
 			void postRender() final override;
 
-			// Client-side render method.
-			virtual void GUI() {}
+			virtual void render() {}
 
 			virtual void onEvent(Event& event) final override;
 
 		protected:
+			// TODO(gui/load-assets): Make these methods available only inside GUILayer::registerAssets.
 			FontID loadFontAsset(view<char8> assetName);
 			ImageID loadImageAsset(view<char8> assetName);
 
@@ -95,10 +97,9 @@ namespace Trident {
 			void FlushWord(FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset);
 			void PositionsAndAlignment(GUIContainer& component, svec2<float32> origin);
 			uint32 GetHoveredComponentIndex() const;
-			static bool IsIntersecting(const GUIContainer& component, const vec2<float32>& point);
-			void DispatchMouseEvents();
 
-			void registerSubcomponent(const GUIContainer& component);
+			// TODO: Deprecate? Hover, MouseDown and Clicked are implemented differently.
+			void DispatchMouseEvents();
 
 			bool onMouseDown(MouseDownEvent& event);
 			bool onMouseUp(MouseUpEvent& event);
@@ -111,18 +112,15 @@ namespace Trident {
 			bool IsMouseDown(uint32 componentIndex) const;
 
 		public:
-			// Shrink towards the layout direction.
+			/// Shrink towards the layout direction.
 			static constexpr float32 FIT = -2.0f;
 
-			// Grow towards the layout direction.
+			/// Grow towards the layout direction.
 			static constexpr float32 EXPAND = -1.0f;
 
 		private:
 			static constexpr uint32 MAX_COMPONENT_COUNT = 64;
-
-			static constexpr ImageID DEFAULT_IMAGE_INDEX = 0;
 			static constexpr uint32 MAX_FONT_COUNT = 4;
-
 			static constexpr uint8 WIDTH_AXIS = 0;
 			static constexpr uint8 HEIGHT_AXIS = 1;
 

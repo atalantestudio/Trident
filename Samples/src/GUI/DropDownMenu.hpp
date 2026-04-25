@@ -21,7 +21,7 @@ namespace Trident {
 				font = loadFontAsset("test-regular");
 			}
 
-			void GUI() override {
+			void render() override {
 				ContainerStyle menu{};
 				menu.size = {FIT, FIT};
 				menu.padding = {8_px, 8_px};

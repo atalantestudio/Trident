@@ -10,7 +10,7 @@ namespace Trident {
 				font = loadFontAsset("test-regular");
 			}
 
-			void GUI() override {
+			void render() override {
 				ContainerStyle blue{};
 				blue.size = {1000_px, 500_px};
 				blue.padding = {32_px, 32_px};

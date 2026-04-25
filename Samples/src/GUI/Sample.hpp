@@ -39,7 +39,7 @@ namespace Trident {
 				legendStyle.fontSize = 16_px;
 			}
 
-			void GUI() override {
+			void render() override {
 				GUIComponent(containerStyle) {
 					GUIText("Lorem Ipsum", titleStyle);
 

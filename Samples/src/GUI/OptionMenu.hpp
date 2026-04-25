@@ -24,7 +24,7 @@ namespace Trident {
 				fontRegular = loadFontAsset("test-regular");
 			}
 
-			void GUI() override {
+			void render() override {
 				const sint32* size = getApplication()->getWindow()->getSize();
 
 				GUIComponent({

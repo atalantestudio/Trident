@@ -9,6 +9,15 @@
 #include "Engine/Filesystem/Filesystem.hpp"
 
 namespace Trident {
+	bool GUILayer::IsIntersecting(const GUIContainer& component, vec2<float32> point) {
+		return (
+			point[0] >= component.origin.x &&
+			point[0] < component.origin.x + component.size.width.value &&
+			point[1] >= component.origin.y &&
+			point[1] < component.origin.y + component.size.height.value
+		);
+	}
+
 	void GUILayer::postConstruct() {
 		renderer.setLayer(this);
 		renderer.build();
@@ -45,18 +54,9 @@ namespace Trident {
 		glyphMapImageLayer.extent.height = glyphMapImageAsset->getExtent().height;
 		glyphMapImageLayer.data = sequence<uint8>(glyphMapImageLayer.extent.width * glyphMapImageLayer.extent.height * getChannelCount(ImageFormat::R8G8B8A8_UNORM));
 
-		if (glyphMapImageAsset->getFormat() == ImageFormat::R8_UNORM) {
-			convert<ImageFormat::R8_UNORM, ImageFormat::R8G8B8A8_UNORM>(glyphMapImageAsset->getData(), &glyphMapImageLayer.data[0], glyphMapImageLayer.data.count());
-		}
-		else if (glyphMapImageAsset->getFormat() == ImageFormat::R8G8B8_UNORM) {
-			convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(glyphMapImageAsset->getData(), &glyphMapImageLayer.data[0], glyphMapImageLayer.data.count());
-		}
-		else if (glyphMapImageAsset->getFormat() == ImageFormat::R8G8B8A8_UNORM) {
-			std::copy(glyphMapImageAsset->getData().begin(), glyphMapImageAsset->getData().end(), &glyphMapImageLayer.data[0]);
-		}
-		else {
-			ENGINE_ERROR_UNSUPPORTED();
-		}
+		ENGINE_ASSERT(glyphMapImageAsset->getFormat() == ImageFormat::R8_UNORM, "Glyph map images must have the R8_UNORM format.");
+
+		convert<ImageFormat::R8_UNORM, ImageFormat::R8G8B8A8_UNORM>(glyphMapImageAsset->getData(), &glyphMapImageLayer.data[0], glyphMapImageLayer.data.count());
 
 		const FontID fontId = fontCount;
 
@@ -76,17 +76,27 @@ namespace Trident {
 		imageLayer.extent.height = imageAsset->getExtent().height;
 		imageLayer.data = sequence<uint8>(imageLayer.extent.width * imageLayer.extent.height * getChannelCount(ImageFormat::R8G8B8A8_UNORM));
 
-		if (imageAsset->getFormat() == ImageFormat::R8_UNORM) {
-			convert<ImageFormat::R8_UNORM, ImageFormat::R8G8B8A8_UNORM>(imageAsset->getData(), &imageLayer.data[0], imageLayer.data.count());
-		}
-		else if (imageAsset->getFormat() == ImageFormat::R8G8B8_UNORM) {
-			convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(imageAsset->getData(), &imageLayer.data[0], imageLayer.data.count());
-		}
-		else if (imageAsset->getFormat() == ImageFormat::R8G8B8A8_UNORM) {
-			std::copy(imageAsset->getData().begin(), imageAsset->getData().end(), &imageLayer.data[0]);
-		}
-		else {
-			ENGINE_ERROR_UNSUPPORTED();
+		switch (imageAsset->getFormat()) {
+			case ImageFormat::R8_UNORM: {
+				convert<ImageFormat::R8_UNORM, ImageFormat::R8G8B8A8_UNORM>(imageAsset->getData(), &imageLayer.data[0], imageLayer.data.count());
+
+				break;
+			}
+			case ImageFormat::R8G8B8_UNORM: {
+				convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(imageAsset->getData(), &imageLayer.data[0], imageLayer.data.count());
+
+				break;
+			}
+			case ImageFormat::R8G8B8A8_UNORM: {
+				std::copy(imageAsset->getData().begin(), imageAsset->getData().end(), &imageLayer.data[0]);
+
+				break;
+			}
+			default: {
+				ENGINE_ERROR_UNSUPPORTED();
+
+				break;
+			}
 		}
 
 		return renderer.registerTextureArrayLayer(imageLayer);
@@ -98,8 +108,7 @@ namespace Trident {
 		buttonComponentIndexCount = 0;
 
 		openRootComponent();
-
-		GUI();
+		render();
 
 		if (componentCount <= 1) {
 			// No other components than root, return.
@@ -107,7 +116,6 @@ namespace Trident {
 		}
 
 		closeRootComponent();
-
 		DispatchMouseEvents();
 
 		uint32 componentIndex = 1;
@@ -134,7 +142,21 @@ namespace Trident {
 				}
 			}
 			else {
-				registerSubcomponent(component);
+				const vec2<float32> decimalOrigin = {component.origin[0], component.origin[1]};
+				const vec2<float32> decimalSize = {component.size.width.value, component.size.height.value};
+				const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(component.image);
+
+				GUISubcomponent subcomponent{};
+				subcomponent.worldTransform = mat3x3<float32>::scaling(decimalSize) * mat3x3<float32>::translation(decimalOrigin);
+				subcomponent.textureTransform = mat3x3<float32>::scaling({
+					static_cast<float32>(imageExtent.width) / renderer.TEXTURE_ARRAY_MAX_WIDTH,
+					static_cast<float32>(imageExtent.height) / renderer.TEXTURE_ARRAY_MAX_HEIGHT,
+				});
+				subcomponent.color = component.color.value;
+				subcomponent.zIndex = component.zIndex;
+				subcomponent.textureArrayLayerIndex = component.image;
+
+				renderer.registerSubcomponent(subcomponent);
 			}
 
 			componentIndex += 1;
@@ -618,7 +640,7 @@ namespace Trident {
 				}
 			}
 
-			const std::vector<uint32> shrinkableChildIndices = FindShrinkableChildIndices(parent, WIDTH_AXIS);
+			const std::vector<uint32> shrinkableChildIndices = FindShrinkableChildIndices(parent, HEIGHT_AXIS);
 
 			if (shrinkableChildIndices.size() > 0) {
 				std::vector<uint32> shrinkableChildIndexCopy = shrinkableChildIndices;
@@ -796,15 +818,6 @@ namespace Trident {
 		return 0;
 	}
 
-	bool GUILayer::IsIntersecting(const GUIContainer& component, const vec2<float32>& point) {
-		return (
-			point[0] >= component.origin.x &&
-			point[0] < component.origin.x + component.size.width.value &&
-			point[1] >= component.origin.y &&
-			point[1] < component.origin.y + component.size.height.value
-		);
-	}
-
 	void GUILayer::DispatchMouseEvents() {
 		const Window* window = getApplication()->getWindow();
 		const sint32* mousePositionInteger = window->getMousePosition();
@@ -840,6 +853,7 @@ namespace Trident {
 
 		lastMouseDownPosition = {static_cast<float32>(mousePositionInteger[0]), static_cast<float32>(mousePositionInteger[1])};
 
+		// TODO: Remove?
 		/* if (hoveredComponentIndex > 0 && hoveredComponentIndex < max<uint32>()) {
 			// Dispatch mouse down event.
 			const GUIContainer& component = components[hoveredComponentIndex];
@@ -859,6 +873,7 @@ namespace Trident {
 
 		lastMouseUpPosition = {static_cast<float32>(mousePositionInteger[0]), static_cast<float32>(mousePositionInteger[1])};
 
+		// TODO: Remove?
 		/* if (mouseDownComponentIndex > 0 && mouseDownComponentIndex < max<uint32>()) {
 			// Dispatch a mouse down event.
 			const GUIContainer& component = components[mouseDownComponentIndex];
@@ -879,24 +894,6 @@ namespace Trident {
 		renderer.resize(event);
 
 		return false;
-	}
-
-	void GUILayer::registerSubcomponent(const GUIContainer& component) {
-		const vec2<float32> decimalOrigin = {component.origin[0], component.origin[1]};
-		const vec2<float32> decimalSize = {component.size.width.value, component.size.height.value};
-		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(component.image);
-
-		GUISubcomponent subcomponent{};
-		subcomponent.worldTransform = mat3x3<float32>::scaling(decimalSize) * mat3x3<float32>::translation(decimalOrigin);
-		subcomponent.textureTransform = mat3x3<float32>::scaling({
-			static_cast<float32>(imageExtent.width) / renderer.TEXTURE_ARRAY_MAX_WIDTH,
-			static_cast<float32>(imageExtent.height) / renderer.TEXTURE_ARRAY_MAX_HEIGHT,
-		});
-		subcomponent.color = component.color.value;
-		subcomponent.zIndex = component.zIndex;
-		subcomponent.textureArrayLayerIndex = component.image;
-
-		renderer.registerSubcomponent(subcomponent);
 	}
 
 	bool GUILayer::IsHovered(uint32 componentIndex) const {

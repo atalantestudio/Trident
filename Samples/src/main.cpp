@@ -9,16 +9,17 @@
 
 #include "Compute/PrefixSum.hpp"
 
-#include "GUI/ButtonTest.hpp"
 #include "GUI/Card.hpp"
 #include "GUI/Demo1.hpp"
 #include "GUI/Demo2.hpp"
 #include "GUI/Demo3.hpp"
 #include "GUI/DropDownMenu.hpp"
 #include "GUI/FrameStatisticsLayer.hpp"
+#include "GUI/Launch.hpp"
 #include "GUI/OptionMenu.hpp"
 #include "GUI/PageMenu.hpp"
 #include "GUI/Sample.hpp"
+#include "GUI/Test.hpp"
 #include "GUI/Text.hpp"
 #include "GUI/UTF8.hpp"
 
@@ -62,10 +63,7 @@ namespace Trident {
 			}
 		}
 		else if (SampleGroupNameProperty == "GUI") {
-			if (SampleNameProperty == "ButtonTest") {
-				registerLayer<GUIButtonTestLayer>();
-			}
-			else if (SampleNameProperty == "Card") {
+			if (SampleNameProperty == "Card") {
 				registerLayer<GUICardLayer>();
 			}
 			else if (SampleNameProperty == "Demo1") {
@@ -80,6 +78,9 @@ namespace Trident {
 			else if (SampleNameProperty == "DropDownMenu") {
 				registerLayer<GUIDropDownMenuLayer>();
 			}
+			else if (SampleNameProperty == "Launch") {
+				registerLayer<GUILaunchLayer>();
+			}
 			else if (SampleNameProperty == "OptionMenu") {
 				registerLayer<GUIOptionMenuLayer>();
 				registerLayer<FrameStatisticsLayer>();
@@ -89,6 +90,9 @@ namespace Trident {
 			}
 			else if (SampleNameProperty == "Sample") {
 				registerLayer<GUISampleLayer>();
+			}
+			else if (SampleNameProperty == "Test") {
+				registerLayer<GUITestLayer>();
 			}
 			else if (SampleNameProperty == "Text") {
 				registerLayer<GUITextLayer>();

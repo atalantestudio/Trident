@@ -6,7 +6,7 @@
 namespace Trident {
 	class GUIDemo2Layer : public GUILayer {
 		public:
-			void GUI() override {
+			void render() override {
 				ContainerStyle blue{};
 				blue.size = {FIT, FIT};
 				blue.padding = {8_px, 8_px};

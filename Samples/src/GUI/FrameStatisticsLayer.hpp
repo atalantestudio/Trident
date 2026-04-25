@@ -10,7 +10,7 @@ namespace Trident {
 				fontRegular = loadFontAsset("test-regular");
 			}
 
-			void GUI() override {
+			void render() override {
 				time += getApplication()->getCurrentFrameTime();
 
 				if (time >= 1.0_s) {

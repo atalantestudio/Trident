@@ -4,27 +4,21 @@
 #pragma once
 
 namespace Trident {
-	class GUIButtonTestLayer : public GUILayer {
+	class GUITestLayer : public GUILayer {
 		public:
 			void registerAssets() override {
 				font = loadFontAsset("test-regular");
 			}
 
-			void GUI() override {
-				bool hovered = false;
-
+			void render() override {
 				GUIComponent({
-					.size = {200_px, 100_px},
-					.color = 0xff980ff,
+					.size = {FIT, FIT},
+					.color = 0xff9800ff,
 				}) {
-					hovered = IsHovered();
-				}
-
-				if (hovered) {
-					GUIText("Hovered", {
-						.color = 0xffffffff,
+					GUIText("Hello world", {
+						.color = 0xde1818ff,
 						.font = font,
-						.fontSize = 30_px,
+						.fontSize = 128_px,
 					});
 				}
 			}
