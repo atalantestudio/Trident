@@ -15,13 +15,13 @@
 #include "GUI/Demo2.hpp"
 #include "GUI/Demo3.hpp"
 #include "GUI/DropDownMenu.hpp"
+#include "GUI/FrameStatisticsLayer.hpp"
 #include "GUI/OptionMenu.hpp"
 #include "GUI/PageMenu.hpp"
 #include "GUI/Sample.hpp"
 #include "GUI/Text.hpp"
 #include "GUI/UTF8.hpp"
 
-#include "Physics2D/Layer/GUI/StatisticsLayer.hpp"
 #include "Physics2D/Layer/SceneLayer.hpp"
 
 #include "Process/Default.hpp"
@@ -82,6 +82,7 @@ namespace Trident {
 			}
 			else if (SampleNameProperty == "OptionMenu") {
 				registerLayer<GUIOptionMenuLayer>();
+				registerLayer<FrameStatisticsLayer>();
 			}
 			else if (SampleNameProperty == "PageMenu") {
 				registerLayer<GUIPageMenuLayer>();
@@ -98,7 +99,7 @@ namespace Trident {
 		}
 		else if (SampleGroupNameProperty == "Physics2D") {
 			registerLayer<Physics2DSceneLayer>();
-			registerLayer<Physics2DGUIStatisticsLayer>();
+			registerLayer<FrameStatisticsLayer>();
 		}
 		else if (SampleGroupNameProperty == "Process") {
 			if (SampleNameProperty == "Default") {

@@ -17,6 +17,18 @@ namespace Trident {
 		count,
 	};
 
+	inline view<char8> toString(GraphicsAPI api) {
+		static constexpr view<char8> GRAPHICS_API_NAMES[] = {
+			"DirectX12",
+			"OpenGL",
+			"Vulkan",
+		};
+
+		DEBUG_ASSERT(api < GraphicsAPI::count);
+
+		return GRAPHICS_API_NAMES[static_cast<uint8>(api)];
+	}
+
 	// TODO: Implement.
 	// API_QUEUE = Graphics API listed by priority.
 	//             First APIs are more recent but more performant,

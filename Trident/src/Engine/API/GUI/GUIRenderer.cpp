@@ -150,8 +150,8 @@ namespace Trident {
 
 		// TODO(layer-superposition)
 		// TODO: Using LOAD when this layer is the only one registered will generate non-blocking errors from the Vulkan validation layers.
-		// swapchainAttachment.loadOperation = LoadOperation::LOAD;
-		swapchainAttachment.loadOperation = LoadOperation::CLEAR;
+		swapchainAttachment.loadOperation = LoadOperation::LOAD;
+		// swapchainAttachment.loadOperation = LoadOperation::CLEAR;
 
 		swapchainAttachment.storeOperation = StoreOperation::STORE;
 		swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;

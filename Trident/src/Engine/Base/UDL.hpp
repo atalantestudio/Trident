@@ -28,6 +28,10 @@ namespace Trident {
 	UDL(px, float32);
 	UDL(rad, float32);
 
+	// Time
+	UDL(ms, float32);
+	UDL(s, float32);
+
 	// Omega (ω)
 	UDL(w, float32);
 }

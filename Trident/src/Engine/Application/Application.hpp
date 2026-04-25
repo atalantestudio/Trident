@@ -57,6 +57,10 @@ namespace Trident {
 
 			AssetLibrary* getAssetLibrary() const;
 
+			inline const LayerCompositor* getLayerCompositor() const {
+				return layerCompositor;
+			}
+
 			void postConstruct();
 
 			sint32 runProcesses() const;
