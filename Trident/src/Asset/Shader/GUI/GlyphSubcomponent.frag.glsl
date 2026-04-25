@@ -28,5 +28,10 @@ void main() {
 	float _sample = texture(textureArray, fragmentInput.textureCoordinate).r;
 	float _distance = smoothstep(threshold - smoothness, threshold + smoothness, _sample);
 
+	// TODO(ui/smooth-text): Fix pixelated text at small font sizes.
+	/* if (fragmentInput.fontSize == 24.0) {
+		_distance = smoothstep(0.3, 0.6, _sample);
+	} */
+
 	fragment = _distance * fragmentInput.color;
 }

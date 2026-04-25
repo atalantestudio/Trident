@@ -19,7 +19,7 @@ namespace Trident {
 				}
 			}
 
-			operator float32() const {
+			inline operator float32() const {
 				return value;
 			}
 

@@ -140,7 +140,7 @@ namespace Trident {
 					.layoutSpacing = -1_px,
 					.color = 0xff9800ff,
 				}) {
-					VSyncOptionButton();
+					Checkbox(VSync, "V-Sync", "Vertical synchronization.");
 				}
 			}
 
@@ -151,11 +151,11 @@ namespace Trident {
 					.layoutSpacing = -1_px,
 					.color = 0xff9800ff,
 				}) {
-					FullScreenOptionButton();
+					Checkbox(FullScreen, "Full-screen", "Run in either a full-screen window or a bordered window.");
 				}
 			}
 
-			void VSyncOptionButton() {
+			void Checkbox(bool& value, view<char8> title, view<char8> description) {
 				uint32 borderZIndex = 0;
 				Color borderColor = 0x3a3a3aff;
 
@@ -178,104 +178,56 @@ namespace Trident {
 					}
 
 					if (IsClicked()) {
-						VSync = !VSync;
+						value = !value;
 					}
 
 					GUIComponent({
 						.size = {EXPAND, FIT},
-						.padding = {10_px, 8_px},
+						.padding = {8_px, 8_px},
 						.layoutDirection = LayoutDirection::VERTICAL,
+						.layoutSpacing = 2_px,
 						.color = backgroundColor,
 						.pointerType = PointerType::INTERACTIVE,
 					}) {
-						Text("V-Sync", {
-							.color = 0xa5a5a5ff,
-							.font = fontBold,
-							.fontSize = 22_px,
-						});
+						GUIComponent({
+							.size = {EXPAND, FIT},
+							.layoutDirection = LayoutDirection::HORIZONTAL,
+						}) {
+							GUIComponent({
+								.size = {EXPAND, EXPAND},
+							}) {
+								Text(title, {
+									.color = 0xa5a5a5ff,
+									.font = fontRegular,
+									.fontSize = 24_px,
+								});
+							}
 
-						Text("Vertical synchronization.", {
+							GUIComponent({
+								.size = {20_px, 20_px},
+								.padding = {1_px, 1_px},
+								.color = value ? 0xc2c2c2ff : borderColor,
+							}) {
+								GUIComponent({
+									.size = {EXPAND, EXPAND},
+									.padding = {1_px, 1_px},
+									.color = backgroundColor,
+								}) {
+									if (value) {
+										GUIComponent({
+											.size = {EXPAND, EXPAND},
+											.color = 0xc2c2c2ff,
+										});
+									}
+								}
+							}
+						}
+
+						Text(description, {
 							.color = 0x828282ff,
 							.font = fontRegular,
-							.fontSize = 18_px,
+							.fontSize = 20_px,
 						});
-
-						if (VSync) {
-							Text("Enabled", {
-								.color = 0x80ef80ff,
-								.font = fontRegular,
-								.fontSize = 18_px,
-							});
-						}
-						else {
-							Text("Disabled", {
-								.color = 0xff474cff,
-								.font = fontRegular,
-								.fontSize = 18_px,
-							});
-						}
-					}
-				}
-			}
-
-			void FullScreenOptionButton() {
-				uint32 borderZIndex = 0;
-				Color borderColor = 0x3a3a3aff;
-
-				if (IsNextMouseDown()) {
-					borderZIndex = 1;
-					borderColor = 0xc2c2c2ff;
-				}
-
-				GUIComponent({
-					.size = {EXPAND, FIT},
-					.zIndex = borderZIndex,
-					.padding = {1_px, 1_px},
-					.color = borderColor,
-					.pointerType = PointerType::INTERACTIVE,
-				}) {
-					Color backgroundColor = 0x0a0a0aff;
-
-					if (IsNextHovered()) {
-						backgroundColor = 0x1a1a1aff;
-					}
-
-					if (IsClicked()) {
-						FullScreen = !FullScreen;
-					}
-
-					GUIComponent({
-						.size = {EXPAND, FIT},
-						.padding = {10_px, 8_px},
-						.layoutDirection = LayoutDirection::VERTICAL,
-						.color = backgroundColor,
-					}) {
-						Text("Full-screen", {
-							.color = 0xa5a5a5ff,
-							.font = fontBold,
-							.fontSize = 22_px,
-						});
-
-						Text("Run in either a full-screen window or a bordered window.", {
-							.color = 0x828282ff,
-							.font = fontRegular,
-							.fontSize = 18_px,
-						});
-
-						if (FullScreen) {
-							Text("Enabled", {
-								.color = 0x80ef80ff,
-								.font = fontRegular,
-								.fontSize = 18_px,
-							});
-						}
-						else {
-							Text("Disabled", {
-								.color = 0xff474cff,
-								.font = fontRegular,
-								.fontSize = 18_px,
-							});
-						}
 					}
 				}
 			}
