@@ -6,6 +6,7 @@
 #include "Engine/Adapter/Graphics/VK/Buffer.hpp"
 #include "Engine/Adapter/Graphics/VK/BufferUsage.hpp"
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
+#include "Engine/Adapter/Graphics/VK/MemoryAllocator.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {

@@ -3,10 +3,11 @@
 
 #pragma once
 
-#include "Engine/API/Graphics/Base.hpp"
 #include "Engine/API/Graphics/Access.hpp"
+#include "Engine/API/Graphics/Base.hpp"
 #include "Engine/API/Graphics/BufferUsage.hpp"
 #include "Engine/API/Graphics/Descriptor/BufferDescriptor.hpp"
+#include "Engine/API/Graphics/MemorySuballocation.hpp"
 
 namespace Trident {
 	class BaseBuffer {
@@ -20,6 +21,9 @@ namespace Trident {
 
 			/// Returns the buffer usage flags.
 			BufferUsage getUsage() const;
+
+			/// Returns the memory suballocation the buffer lives in.
+			MemorySuballocation getMemorySuballocation() const;
 
 			/// Returns the current access flags for the buffer.
 			Access getAccess() const;
@@ -42,9 +46,7 @@ namespace Trident {
 			uint64 size;
 			uint32 stride;
 			BufferUsage usage;
-
-			// TODO: Store memory suballocation.
-
+			MemorySuballocation memorySuballocation;
 			Access access = Access::NONE;
 	};
 

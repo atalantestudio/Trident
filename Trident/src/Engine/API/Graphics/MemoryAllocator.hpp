@@ -3,6 +3,14 @@
 
 #pragma once
 
+#include "Engine/API/Graphics/MemoryAllocation.hpp"
+
 namespace Trident {
-	class MemoryAllocator {};
+	class MemoryAllocator {
+		private:
+			static constexpr uint64 DYNAMIC_MEMORY_ALLOCATION_SIZE = 16000000;
+
+		private:
+			std::vector<MemoryAllocation> allocations;
+	};
 }

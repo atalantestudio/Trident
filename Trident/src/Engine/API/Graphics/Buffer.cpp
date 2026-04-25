@@ -31,6 +31,10 @@ namespace Trident {
 		return usage;
 	}
 
+	MemorySuballocation BaseBuffer::getMemorySuballocation() const {
+		return memorySuballocation;
+	}
+
 	/// Returns the current access flags for the buffer.
 	Access BaseBuffer::getAccess() const {
 		return access;

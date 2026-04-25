@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "Engine/Adapter/Graphics/VK/MemoryAllocator.hpp"
 #include "Engine/API/Graphics/Buffer.hpp"
 
 namespace Trident {
@@ -13,7 +12,6 @@ namespace Trident {
 
 		public:
 			VkBuffer buffer;
-			MemorySuballocation memorySuballocation;
 	};
 
 	namespace VK {

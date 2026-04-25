@@ -34,12 +34,6 @@ namespace Trident {
 		void* mappedRange;
 	};
 
-	struct VK::MemorySuballocation {
-		uint32 allocationIndex;
-		VkDeviceSize offset;
-		VkDeviceSize size;
-	};
-
 	class VK::MemoryAllocator : public Trident::MemoryAllocator {
 		private:
 			// Memory allocations have a default size of 16Mb.
@@ -57,11 +51,11 @@ namespace Trident {
 			// Finds a suitable memory type for the requirements, and returns its index.
 			uint32 findSuitableMemoryType(const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags memoryPropertyFlags);
 
-			VK::MemorySuballocation suballocateBuffer(VkBuffer buffer, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements);
+			MemorySuballocation suballocateBuffer(VkBuffer buffer, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements);
 
-			VK::MemorySuballocation suballocateImage(VkImage image, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements);
+			MemorySuballocation suballocateImage(VkImage image, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements);
 
-			void* mapSuballocation(const VK::MemorySuballocation& memorySuballocation, VkDeviceSize offset, VkDeviceSize size);
+			void* mapSuballocation(const MemorySuballocation& memorySuballocation, VkDeviceSize offset, VkDeviceSize size);
 
 			void unmapSuballocation(uint32 memoryAllocationIndex);
 
@@ -72,8 +66,7 @@ namespace Trident {
 			uint32 createAllocation(uint32 memoryTypeIndex, VkDeviceSize size);
 
 			// Creates and returns a suballocation from a memory allocation.
-			// If isBuffer is false, the suballocation is done on image memory.
-			VK::MemorySuballocation suballocate(uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements, sequence<uint32>& currentMemoryAllocationIndices);
+			MemorySuballocation suballocate(uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements, sequence<uint32>& currentMemoryAllocationIndices);
 
 		private:
 			const VK::Device* device;

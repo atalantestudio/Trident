@@ -81,6 +81,13 @@ namespace Trident {
 
 		buffer->heapType = heapProperties.Type;
 
+		// TODO(graphics/dx12/custom-memory-allocation)
+		buffer->memorySuballocation = {
+			.allocationIndex = 0,
+			.offset = 0,
+			.size = descriptor.size,
+		};
+
 		#if defined(DEBUG_OBJECT_NAME)
 			if (descriptor.name.count() > 0) {
 				const LPWSTR name = ConvertUTF8ToUTF16(&descriptor.name[0]);

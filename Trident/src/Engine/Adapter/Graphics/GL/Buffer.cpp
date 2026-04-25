@@ -62,6 +62,12 @@ namespace Trident {
 			ENGINE_ERROR_UNSUPPORTED();
 		#endif
 
+		buffer->memorySuballocation = {
+			.allocationIndex = 0,
+			.offset = 0,
+			.size = descriptor.size,
+		};
+
 		// Verify that the buffer has an immutable storage.
 		#if defined(BUILD_MODE_DEBUG)
 			GLint immutableStorage = GL_FALSE;

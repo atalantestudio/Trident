@@ -109,8 +109,8 @@ namespace Trident {
 		return suitableMemoryTypeIndex;
 	}
 
-	VK::MemorySuballocation VK::MemoryAllocator::suballocateBuffer(VkBuffer buffer, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements) {
-		const VK::MemorySuballocation memorySuballocation = suballocate(memoryTypeIndex, memoryRequirements, currentBufferMemoryAllocationIndices);
+	MemorySuballocation VK::MemoryAllocator::suballocateBuffer(VkBuffer buffer, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements) {
+		const MemorySuballocation memorySuballocation = suballocate(memoryTypeIndex, memoryRequirements, currentBufferMemoryAllocationIndices);
 		VK::MemoryAllocation& memoryAllocation = memoryAllocations[memorySuballocation.allocationIndex];
 		VkResult result;
 
@@ -137,8 +137,8 @@ namespace Trident {
 		return memorySuballocation;
 	}
 
-	VK::MemorySuballocation VK::MemoryAllocator::suballocateImage(VkImage image, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements) {
-		const VK::MemorySuballocation memorySuballocation = suballocate(memoryTypeIndex, memoryRequirements, currentImageMemoryAllocationIndices);
+	MemorySuballocation VK::MemoryAllocator::suballocateImage(VkImage image, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements) {
+		const MemorySuballocation memorySuballocation = suballocate(memoryTypeIndex, memoryRequirements, currentImageMemoryAllocationIndices);
 		VK::MemoryAllocation& memoryAllocation = memoryAllocations[memorySuballocation.allocationIndex];
 		VkResult result;
 
@@ -165,7 +165,7 @@ namespace Trident {
 		return memorySuballocation;
 	}
 
-	void* VK::MemoryAllocator::mapSuballocation(const VK::MemorySuballocation& memorySuballocation, VkDeviceSize offset, VkDeviceSize size) {
+	void* VK::MemoryAllocator::mapSuballocation(const MemorySuballocation& memorySuballocation, VkDeviceSize offset, VkDeviceSize size) {
 		VK::MemoryAllocation& memoryAllocation = memoryAllocations[memorySuballocation.allocationIndex];
 		VkResult result;
 
@@ -238,15 +238,14 @@ namespace Trident {
 
 			memoryAllocation.suballocationCount = 0;
 
-			// Reset corresponding memory allocation index.
-			for (uint32 i = 0; i < physicalDevice->memoryProperties.memoryTypeCount; i += 1) {
-				if (currentBufferMemoryAllocationIndices[i] == memoryAllocationIndex) {
-					currentBufferMemoryAllocationIndices[i] = UNDEFINED_MEMORY_ALLOCATION_INDEX;
-				}
+			uint32 memoryAllocationIndexIndex = 0;
 
-				if (currentImageMemoryAllocationIndices[i] == memoryAllocationIndex) {
-					currentImageMemoryAllocationIndices[i] = UNDEFINED_MEMORY_ALLOCATION_INDEX;
-				}
+			// Reset corresponding memory allocation index.
+			while (memoryAllocationIndexIndex < currentBufferMemoryAllocationIndices.count()) {
+				currentBufferMemoryAllocationIndices[memoryAllocationIndexIndex] = UNDEFINED_MEMORY_ALLOCATION_INDEX;
+				currentImageMemoryAllocationIndices[memoryAllocationIndexIndex] = UNDEFINED_MEMORY_ALLOCATION_INDEX;
+
+				memoryAllocationIndexIndex += 1;
 			}
 
 			ADAPTER_INFO("Freed memory allocation [].", memoryAllocationIndex);
@@ -310,7 +309,7 @@ namespace Trident {
 		return memoryAllocationIndex;
 	}
 
-	VK::MemorySuballocation VK::MemoryAllocator::suballocate(uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements, sequence<uint32>& currentMemoryAllocationIndices) {
+	MemorySuballocation VK::MemoryAllocator::suballocate(uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements, sequence<uint32>& currentMemoryAllocationIndices) {
 		uint32 currentMemoryAllocationIndex = currentMemoryAllocationIndices[memoryTypeIndex];
 
 		const VkDeviceSize size = std::max(memoryRequirements.size, memoryRequirements.alignment);
@@ -349,7 +348,7 @@ namespace Trident {
 			offset = 0;
 		}
 
-		VK::MemorySuballocation memorySuballocation{};
+		MemorySuballocation memorySuballocation{};
 		memorySuballocation.allocationIndex = currentMemoryAllocationIndex;
 		memorySuballocation.offset = offset;
 		memorySuballocation.size = size;
