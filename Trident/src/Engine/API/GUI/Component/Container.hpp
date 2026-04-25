@@ -46,7 +46,6 @@ namespace Trident {
 		PointerType pointerType;
 
 		std::vector<uint32> childIndices;
-		bool sizeIncludesPaddingAndSpacing = false;
 
 		// Exclusive to text components.
 		bool textComponent;

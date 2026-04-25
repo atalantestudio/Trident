@@ -939,7 +939,7 @@ namespace Trident {
 	}
 
 	bool GUILayer::IsClicked() {
-		if (!mouseUp || previousComponentCount < componentCount) {
+		if (previousComponentCount < componentCount || !mouseUp) {
 			return false;
 		}
 
