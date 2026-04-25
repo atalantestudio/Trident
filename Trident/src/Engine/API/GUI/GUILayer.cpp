@@ -169,7 +169,7 @@ namespace Trident {
 		rootComponent.zIndex = 0;
 		rootComponent.padding = {0_px, 0_px};
 		rootComponent.anchorPoint = AnchorPoint::TOP | AnchorPoint::LEFT;
-		rootComponent.layoutDirection = VERTICAL;
+		rootComponent.layoutDirection = LayoutDirection::VERTICAL;
 		rootComponent.layoutSpacing = 0_px;
 		rootComponent.color = 0xffffffff;
 		rootComponent.image = 0;
@@ -342,7 +342,7 @@ namespace Trident {
 		// Add padding to the component's size.
 		component.size.width.value += component.padding.x * 2.0f;
 
-		if (component.layoutDirection == HORIZONTAL) {
+		if (component.layoutDirection == LayoutDirection::HORIZONTAL) {
 			// Add layout spacing to the component's size.
 			const sint32 childCount = static_cast<sint32>(component.childIndices.size());
 			const float32 layoutSpacing = component.layoutSpacing * static_cast<float32>(max(0, childCount - 1));
@@ -353,7 +353,7 @@ namespace Trident {
 		GUIContainer& parent = components[component.parentIndex];
 
 		// Update the component and its parent depending on the parent's layout direction.
-		if (parent.layoutDirection == HORIZONTAL) {
+		if (parent.layoutDirection == LayoutDirection::HORIZONTAL) {
 			if (parent.size.width.fillMode != FillMode::FIXED) {
 				parent.size.width.value += component.size.width.value;
 				parent.minimumSize.x += component.minimumSize.x;
@@ -379,12 +379,12 @@ namespace Trident {
 
 		float32 componentHeight = component.size.height.value + component.padding.y * 2.0f;
 
-		if (component.layoutDirection == VERTICAL) {
+		if (component.layoutDirection == LayoutDirection::VERTICAL) {
 			componentHeight += component.layoutSpacing * (max(0, static_cast<sint32>(component.childIndices.size()) - 1));
 		}
 
 		// Update the component and its parent depending on the parent's layout direction.
-		if (parent.layoutDirection == VERTICAL) {
+		if (parent.layoutDirection == LayoutDirection::VERTICAL) {
 			if (parent.size.height.fillMode != FillMode::FIXED) {
 				parent.size.height.value += componentHeight;
 				parent.minimumSize.y += component.minimumSize.y;
@@ -408,7 +408,7 @@ namespace Trident {
 
 		const std::vector<uint32> growableChildIndices = FindGrowableChildIndices(parent, WIDTH_AXIS);
 
-		if (parent.layoutDirection == HORIZONTAL) {
+		if (parent.layoutDirection == LayoutDirection::HORIZONTAL) {
 			float32 remainingWidth = parent.size.width.value - parent.padding.x * 2.0f;
 
 			for (const uint32 childIndex : parent.childIndices) {
@@ -553,7 +553,7 @@ namespace Trident {
 
 		const std::vector<uint32> growableChildIndices = FindGrowableChildIndices(parent, HEIGHT_AXIS);
 
-		if (parent.layoutDirection == VERTICAL) {
+		if (parent.layoutDirection == LayoutDirection::VERTICAL) {
 			float32 remainingHeight = parent.size.height.value - parent.padding.y * 2.0f;
 
 			for (const uint32 childIndex : parent.childIndices) {
@@ -662,8 +662,8 @@ namespace Trident {
 						if (child.size.height.value == largestHeight) {
 							child.size.height.value += heightToRemove;
 
-							if (child.size.height.value < child.minimumSize.x) {
-								child.size.height.value = child.minimumSize.x;
+							if (child.size.height.value < child.minimumSize.y) {
+								child.size.height.value = child.minimumSize.y;
 
 								shrinkableChildIndexCopy.erase(shrinkableChildIndexCopy.begin() + index);
 							}

@@ -33,5 +33,5 @@ void main() {
 		_distance = smoothstep(0.3, 0.6, _sample);
 	} */
 
-	fragment = _distance * fragmentInput.color;
+	fragment = fragmentInput.color * _distance;
 }
