@@ -44,7 +44,7 @@ namespace Trident {
 
 			// Returns the glyph represented by the provided code point.
 			// If no corresponding glyph is found, the .notdef glyph is returned.
-			const Glyph& operator [](uint16 codePoint) const {
+			const Glyph& operator[](uint16 codePoint) const {
 				if (codePoint == 0) {
 					return glyphs[0];
 				}
@@ -52,7 +52,7 @@ namespace Trident {
 				const auto glyphIndex = unicodeMap.find(codePoint);
 
 				if (glyphIndex == unicodeMap.end()) {
-					// Encountered a UTF-16 code point that's not supported by the font.
+					// Return .noglyph if we encounter a UTF-16 code point that's not supported by the font.
 					return glyphs[0];
 				}
 

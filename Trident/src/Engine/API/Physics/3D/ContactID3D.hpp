@@ -5,7 +5,7 @@
 
 namespace Trident {
 	struct ContactID3D {
-		inline bool operator ==(const ContactID3D& other) const {
+		inline bool operator==(const ContactID3D& other) const {
 			return (
 				*(pointer_cast<const uint64*>(this) + 0) == *(pointer_cast<const uint64*>(&other) + 0) &&
 				*(pointer_cast<const uint64*>(this) + 1) == *(pointer_cast<const uint64*>(&other) + 1)

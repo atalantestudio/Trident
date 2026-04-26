@@ -32,19 +32,19 @@ namespace Trident {
 		Size1D width;
 		Size1D height;
 
-		Size1D operator [](std::size_t index) const {
+		inline Size1D operator[](std::size_t index) const {
 			ENGINE_ASSERT(index < 2, "Index overflow.");
 
 			return pointer_cast<const Size1D*>(this)[index];
 		}
 
-		Size1D& operator [](std::size_t index) {
+		inline Size1D& operator[](std::size_t index) {
 			ENGINE_ASSERT(index < 2, "Index overflow.");
 
 			return pointer_cast<Size1D*>(this)[index];
 		}
 
-		operator svec2<float32>() const {
+		inline operator svec2<float32>() const {
 			return {width.value, height.value};
 		}
 	};

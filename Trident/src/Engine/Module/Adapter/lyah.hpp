@@ -8,13 +8,13 @@ namespace lyah {
 	template<>
 	struct vec<2, std::int32_t> {
 		public:
-			std::int32_t operator [](std::size_t index) const noexcept {
+			inline std::int32_t operator[](std::size_t index) const noexcept {
 				DEBUG_ASSERT(index < 2);
 
 				return m[index];
 			}
 
-			std::int32_t& operator [](std::size_t index) noexcept {
+			inline std::int32_t& operator[](std::size_t index) noexcept {
 				DEBUG_ASSERT(index < 2);
 
 				return m[index];
@@ -28,13 +28,13 @@ namespace lyah {
 	template<>
 	struct vec<3, std::int32_t> {
 		public:
-			std::int32_t operator [](std::size_t index) const noexcept {
+			inline std::int32_t operator[](std::size_t index) const noexcept {
 				DEBUG_ASSERT(index < 3);
 
 				return m[index];
 			}
 
-			std::int32_t& operator [](std::size_t index) noexcept {
+			inline std::int32_t& operator[](std::size_t index) noexcept {
 				DEBUG_ASSERT(index < 3);
 
 				return m[index];
@@ -48,13 +48,13 @@ namespace lyah {
 	template<>
 	struct vec<2, std::uint32_t> {
 		public:
-			std::uint32_t operator [](std::size_t index) const noexcept {
+			inline std::uint32_t operator[](std::size_t index) const noexcept {
 				DEBUG_ASSERT(index < 2);
 
 				return m[index];
 			}
 
-			std::uint32_t& operator [](std::size_t index) noexcept {
+			inline std::uint32_t& operator[](std::size_t index) noexcept {
 				DEBUG_ASSERT(index < 2);
 
 				return m[index];
@@ -68,13 +68,13 @@ namespace lyah {
 	template<>
 	struct vec<3, std::uint32_t> {
 		public:
-			std::uint32_t operator [](std::size_t index) const noexcept {
+			inline std::uint32_t operator[](std::size_t index) const noexcept {
 				DEBUG_ASSERT(index < 3);
 
 				return m[index];
 			}
 
-			std::uint32_t& operator [](std::size_t index) noexcept {
+			inline std::uint32_t& operator[](std::size_t index) noexcept {
 				DEBUG_ASSERT(index < 3);
 
 				return m[index];
@@ -88,13 +88,13 @@ namespace lyah {
 	template<>
 	struct vec<4, std::uint32_t> {
 		public:
-			std::uint32_t operator [](std::size_t index) const noexcept {
+			inline std::uint32_t operator[](std::size_t index) const noexcept {
 				DEBUG_ASSERT(index < 4);
 
 				return m[index];
 			}
 
-			std::uint32_t& operator [](std::size_t index) noexcept {
+			inline std::uint32_t& operator[](std::size_t index) noexcept {
 				DEBUG_ASSERT(index < 4);
 
 				return m[index];
@@ -155,20 +155,20 @@ namespace Trident {
 			y(a[1])
 		{}
 
-		T operator [](std::size_t index) const {
+		inline T operator[](std::size_t index) const {
 			DEBUG_ASSERT(index < 2);
 
 			return pointer_cast<const T*>(this)[index];
 		}
 
-		T& operator [](std::size_t index) {
+		inline T& operator[](std::size_t index) {
 			DEBUG_ASSERT(index < 2);
 
 			return pointer_cast<T*>(this)[index];
 		}
 
 		// TODO(lyah): Add scalar vectors and replace SIMD vectors by general-purpose registers.
-		operator vec<2, T>() const {
+		inline operator vec<2, T>() const {
 			return {x, y};
 		}
 	};
@@ -192,29 +192,29 @@ namespace Trident {
 			x(a[0]), y(a[1]), z(a[2])
 		{}
 
-		T operator [](std::size_t index) const {
+		inline T operator[](std::size_t index) const {
 			DEBUG_ASSERT(index < 3);
 
 			return pointer_cast<const T*>(this)[index];
 		}
 
-		T& operator [](std::size_t index) {
+		inline T& operator[](std::size_t index) {
 			DEBUG_ASSERT(index < 3);
 
 			return pointer_cast<T*>(this)[index];
 		}
 
 		// TODO(lyah): Add scalar vectors and replace SIMD vectors by general-purpose registers.
-		operator vec<3, T>() const {
+		inline operator vec<3, T>() const {
 			return {x, y, z};
 		}
 	};
 
 	template<std::size_t C, typename T>
-	constexpr svec<C, T>& operator +=(svec<C, T>& a, const svec<C, T>& b);
+	constexpr svec<C, T>& operator+=(svec<C, T>& a, const svec<C, T>& b);
 
 	template<typename T>
-	constexpr svec<2, T>& operator +=(svec<2, T>& a, const svec<2, T>& b) {
+	constexpr svec<2, T>& operator+=(svec<2, T>& a, const svec<2, T>& b) {
 		a.x += b.x;
 		a.y += b.y;
 
@@ -222,7 +222,7 @@ namespace Trident {
 	}
 
 	template<typename T>
-	constexpr svec<3, T>& operator +=(svec<3, T>& a, const svec<3, T>& b) {
+	constexpr svec<3, T>& operator+=(svec<3, T>& a, const svec<3, T>& b) {
 		a.x += b.x;
 		a.y += b.y;
 		a.z += b.z;
@@ -231,10 +231,10 @@ namespace Trident {
 	}
 
 	template<std::size_t C, typename T>
-	constexpr svec<C, T>& operator /=(svec<C, T>& a, T b);
+	constexpr svec<C, T>& operator/=(svec<C, T>& a, T b);
 
 	template<typename T>
-	constexpr svec<2, T>& operator /=(svec<2, T>& a, T b) {
+	constexpr svec<2, T>& operator/=(svec<2, T>& a, T b) {
 		a.x /= b;
 		a.y /= b;
 
@@ -242,7 +242,7 @@ namespace Trident {
 	}
 
 	template<typename T>
-	constexpr svec<3, T>& operator /=(svec<3, T>& a, T b) {
+	constexpr svec<3, T>& operator/=(svec<3, T>& a, T b) {
 		a.x /= b;
 		a.y /= b;
 		a.z /= b;
@@ -251,15 +251,15 @@ namespace Trident {
 	}
 
 	template<std::size_t C, typename T>
-	constexpr svec<C, T> operator -(const svec<C, T>& a, const svec<C, T>& b);
+	constexpr svec<C, T> operator-(const svec<C, T>& a, const svec<C, T>& b);
 
 	template<typename T>
-	constexpr svec<2, T> operator -(const svec<2, T>& a, const svec<2, T>& b) {
+	constexpr svec<2, T> operator-(const svec<2, T>& a, const svec<2, T>& b) {
 		return {b.x - a.x, b.y - a.y};
 	}
 
 	template<typename T>
-	constexpr svec<3, T> operator -(const svec<3, T>& a, const svec<3, T>& b) {
+	constexpr svec<3, T> operator-(const svec<3, T>& a, const svec<3, T>& b) {
 		return {b.x - a.x, b.y - a.y, b.z - a.z};
 	}
 
@@ -295,13 +295,13 @@ namespace Trident {
 				count(2)
 			{}
 
-			const lyah::vec<2, T>& operator [](std::uint8_t index) const {
+			inline const lyah::vec<2, T>& operator[](std::uint8_t index) const {
 				DEBUG_ASSERT(index < count);
 
 				return m[index];
 			}
 
-			lyah::vec<2, T>& operator [](std::uint8_t index) {
+			inline lyah::vec<2, T>& operator[](std::uint8_t index) {
 				DEBUG_ASSERT(index < 3);
 
 				return m[index];

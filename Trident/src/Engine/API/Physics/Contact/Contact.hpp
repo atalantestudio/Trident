@@ -15,11 +15,11 @@ namespace Trident {
 		uint16 incidentEdgeAIndex = NULL_EDGE_INDEX;
 		uint16 incidentEdgeBIndex = NULL_EDGE_INDEX;
 
-		bool operator ==(const Contact2DID& other) const {
+		inline bool operator==(const Contact2DID& other) const {
 			return *pointer_cast<const uint64*>(this) == *pointer_cast<const uint64*>(&other);
 		}
 
-		void flip() {
+		inline void flip() {
 			std::swap(referenceEdgeAIndex, referenceEdgeBIndex);
 			std::swap(incidentEdgeAIndex, incidentEdgeBIndex);
 		}

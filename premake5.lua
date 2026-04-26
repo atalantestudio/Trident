@@ -17,6 +17,9 @@ workspace "Trident"
 	}
 
 	filter "system:windows"
+		system "windows"
+		systemversion "latest"
+
 		links {
 			"d3d12",
 
@@ -95,9 +98,6 @@ project "tslc"
 		"Trident",
 	}
 
-	filter "system:windows"
-		systemversion "latest"
-
 	filter "configurations:Debug"
 		defines {
 			"BUILD_MODE_DEBUG",
@@ -166,9 +166,6 @@ project "tsllsp"
 			-- TODO(debug-only): Test LSP server executable inside IDE.
 			-- "{COPYFILE} %[bin/" .. outputdir .. "/%{prj.name}/%{prj.name}.exe] C:/Users/Mattéo/.vscode/extensions/tsl/src/lsp.exe",
 		}
-
-	filter "system:windows"
-		systemversion "latest"
 
 	filter "configurations:Debug"
 		defines {

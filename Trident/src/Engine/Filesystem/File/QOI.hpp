@@ -21,7 +21,7 @@ namespace Trident {
 		uint8 g;
 		uint8 b;
 
-		bool operator ==(qoi_rgb other) const {
+		inline bool operator==(qoi_rgb other) const {
 			return (
 				r == other.r &&
 				g == other.g &&
@@ -36,7 +36,7 @@ namespace Trident {
 		uint8 b;
 		uint8 a;
 
-		bool operator ==(qoi_rgba other) const {
+		inline bool operator==(qoi_rgba other) const {
 			return *pointer_cast<const uint32*>(this) == *pointer_cast<const uint32*>(&other);
 		}
 	};

@@ -35,13 +35,13 @@ namespace Trident {
 				count(1)
 			{}
 
-			const Simplex2Vertex& operator [](uint8 index) const {
+			inline const Simplex2Vertex& operator[](uint8 index) const {
 				DEBUG_ASSERT(index < MAX_VERTICES);
 
 				return vertices[index];
 			}
 
-			Simplex2Vertex& operator [](uint8 index) {
+			inline Simplex2Vertex& operator[](uint8 index) {
 				DEBUG_ASSERT(index < MAX_VERTICES);
 
 				return vertices[index];

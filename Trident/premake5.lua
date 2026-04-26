@@ -50,8 +50,6 @@ project "Trident"
 	}
 
 	filter "system:windows"
-		systemversion "latest"
-
 		files {
 			"src/Engine/Adapter/Graphics/DX12/**.cpp",
 			"src/Engine/Adapter/Window/Win32/**.cpp",

@@ -26,11 +26,11 @@ namespace Trident {
 				)
 			{}
 
-			bool operator ==(const Color& color) const {
+			inline bool operator==(const Color& color) const {
 				return value == color.value;
 			}
 
-			bool operator !=(const Color& color) const {
+			inline bool operator!=(const Color& color) const {
 				return value != color.value;
 			}
 

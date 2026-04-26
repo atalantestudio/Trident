@@ -4,7 +4,7 @@
 #pragma once
 
 namespace Trident {
-	inline std::ostringstream& operator <<(std::ostringstream& stream, __m128 m) {
+	inline std::ostringstream& operator<<(std::ostringstream& stream, __m128 m) {
 		#if COMPILER == COMPILER_MSVC
 			const std::float_t* buffer = m.m128_f32;
 		#else
@@ -18,7 +18,7 @@ namespace Trident {
 		return stream;
 	}
 
-	inline std::ostringstream& operator <<(std::ostringstream& stream, __m128d m) {
+	inline std::ostringstream& operator<<(std::ostringstream& stream, __m128d m) {
 		#if COMPILER == COMPILER_MSVC
 			const std::double_t* buffer = m.m128d_f64;
 		#else
@@ -32,7 +32,7 @@ namespace Trident {
 		return stream;
 	}
 
-	inline std::ostringstream& operator <<(std::ostringstream& stream, __m256d m) {
+	inline std::ostringstream& operator<<(std::ostringstream& stream, __m256d m) {
 		#if COMPILER == COMPILER_MSVC
 			const std::double_t* buffer = m.m256d_f64;
 		#else
@@ -47,7 +47,7 @@ namespace Trident {
 	}
 
 	template<std::size_t C, typename T>
-	inline std::ostringstream& operator <<(std::ostringstream& stream, lyah::vec<C, T> a) {
+	inline std::ostringstream& operator<<(std::ostringstream& stream, lyah::vec<C, T> a) {
 		for (std::size_t index = 0; index < C - 1; index += 1) {
 			stream << a[index] << "  ";
 		}
@@ -58,7 +58,7 @@ namespace Trident {
 	}
 
 	template<std::size_t R, std::size_t C, typename T>
-	inline std::ostringstream& operator <<(std::ostringstream& stream, const lyah::mat<R, C, T>& a) {
+	inline std::ostringstream& operator<<(std::ostringstream& stream, const lyah::mat<R, C, T>& a) {
 		for (std::size_t index = 0; index < R - 1; index += 1) {
 			stream << a[index] << '\n';
 		}
@@ -69,7 +69,7 @@ namespace Trident {
 	}
 
 	template<typename T>
-	inline std::ostringstream& operator <<(std::ostringstream& stream, lyah::quat<T> a) {
+	inline std::ostringstream& operator<<(std::ostringstream& stream, lyah::quat<T> a) {
 		stream << a[0] << "  " << a[1] << "  " << a[2] << "  " << a[3];
 
 		return stream;
