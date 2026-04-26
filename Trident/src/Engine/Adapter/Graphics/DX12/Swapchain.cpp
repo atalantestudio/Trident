@@ -71,6 +71,10 @@ namespace Trident {
 		swapchainDescriptor.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 		swapchainDescriptor.Flags = 0;
 
+		if (!descriptor.verticalSync) {
+			swapchainDescriptor.Flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+		}
+
 		const ref<DX12::Queue> graphicsQueue = std::static_pointer_cast<DX12::Queue>(device->getQueue(QueueFamilyCapability::GRAPHICS));
 
 		IDXGISwapChain1* swapChain1;

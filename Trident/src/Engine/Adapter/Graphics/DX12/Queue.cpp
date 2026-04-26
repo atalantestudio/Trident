@@ -70,7 +70,13 @@ namespace Trident {
 		for (const ref<Trident::Swapchain>& swapchain : swapchains) {
 			const ref<DX12::Swapchain> _swapchain = std::static_pointer_cast<DX12::Swapchain>(swapchain);
 
-			result = _swapchain->swapChain->Present(_swapchain->syncInterval, 0);
+			UINT presentFlags = 0;
+
+			if (!_swapchain->syncInterval) {
+				presentFlags |= DXGI_PRESENT_ALLOW_TEARING;
+			}
+
+			result = _swapchain->swapChain->Present(_swapchain->syncInterval, presentFlags);
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to present.");
 		}
