@@ -12,49 +12,50 @@ namespace Trident {
 				fontRegularItalic = loadFontAsset("test-regular-italic");
 
 				image = loadImageAsset("Cameraman");
-
-				containerStyle.size = {1280_px, 720_px};
-				containerStyle.padding = {12_px, 12_px};
-				containerStyle.layoutDirection = VERTICAL;
-				containerStyle.layoutSpacing = 16_px;
-				containerStyle.color = 0xffffffff;
-
-				imageContainerStyle.size = {FIT, FIT};
-				imageContainerStyle.layoutDirection = VERTICAL;
-				imageContainerStyle.layoutSpacing = 4_px;
-
-				imageStyle.size = {256_px, 256_px};
-				imageStyle.image = image;
-
-				titleStyle.color = 0x000000ff;
-				titleStyle.font = fontBold;
-				titleStyle.fontSize = 28_px;
-
-				paragraphStyle.color = 0x000000ff;
-				paragraphStyle.font = fontRegular;
-				paragraphStyle.fontSize = 20_px;
-
-				legendStyle.color = 0x757575ff;
-				legendStyle.font = fontRegularItalic;
-				legendStyle.fontSize = 16_px;
 			}
 
 			void render() override {
-				GUIComponent(containerStyle) {
-					GUIText("Lorem Ipsum", titleStyle);
+				GUIComponent({
+					.size = {1280_px, 720_px},
+					.padding = {12_px, 12_px},
+					.layoutDirection = LayoutDirection::VERTICAL,
+					.layoutSpacing = 16_px,
+					.color = 0xffffffff,
+				}) {
+					Text("Lorem Ipsum", {
+						.color = 0x000000ff,
+						.font = fontBold,
+						.fontSize = 28_px,
+					});
 
-					GUIText(
+					Text(
 						"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n"
 						"Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n"
 						"Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\n"
 						"Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-						paragraphStyle
+						{
+							.color = 0x000000ff,
+							.font = fontRegular,
+							.fontSize = 20_px,
+						}
 					);
 
-					GUIComponent(imageContainerStyle) {
-						GUIComponent(imageStyle);
+					GUIComponent({
+						.size = {FIT, FIT},
+						.layoutDirection = LayoutDirection::VERTICAL,
+						.layoutSpacing = 4_px,
+					}) {
+						GUIComponent({
+							.size = {256_px, 256_px},
+							.color = 0xffffffff,
+							.image = image,
+						});
 
-						GUIText("The Cameraman test image.", legendStyle);
+						Text("The Cameraman test image.", {
+							.color = 0x757575ff,
+							.font = fontRegularItalic,
+							.fontSize = 16_px,
+						});
 					}
 				}
 			}
@@ -64,13 +65,5 @@ namespace Trident {
 			FontID fontRegular;
 			FontID fontRegularItalic;
 			ImageID image;
-
-			ContainerStyle containerStyle;
-			ContainerStyle imageContainerStyle;
-			ContainerStyle imageStyle;
-
-			TextStyle titleStyle;
-			TextStyle paragraphStyle;
-			TextStyle legendStyle;
 	};
 }

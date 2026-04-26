@@ -7,17 +7,25 @@ namespace Trident {
 	class GUILaunchLayer : public GUILayer {
 		public:
 			void registerAssets() override {
-				logo = loadImageAsset("Cameraman");
+				icon = loadImageAsset("icon-transparent");
 			}
 
 			void render() override {
+				const sint32* size = getApplication()->getWindow()->getSize();
+
 				GUIComponent({
-					.size = {400_px, 400_px},
-					.image = logo,
-				});
+					.size = {static_cast<float32>(size[0]), static_cast<float32>(size[1])},
+					.anchorPoint = AnchorPoint::HCENTER | AnchorPoint::VCENTER,
+				}) {
+					GUIComponent({
+						.size = {256_px, 256_px},
+						.color = 0xffffffff,
+						.image = icon,
+					});
+				}
 			}
 
 		private:
-			ImageID logo;
+			ImageID icon;
 	};
 }

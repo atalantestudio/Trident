@@ -123,6 +123,12 @@ namespace Trident {
 		while (componentIndex < componentCount) {
 			const GUIContainer& component = components[componentIndex];
 
+			if (component.color.value[3] == 0.0f) {
+				componentIndex += 1;
+
+				continue;
+			}
+
 			if (component.textComponent) {
 				GUIGlyphSubcomponent defaultGlyphSubcomponent{};
 				defaultGlyphSubcomponent.color = component.color.value;
