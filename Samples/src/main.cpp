@@ -83,7 +83,6 @@ namespace Trident {
 			}
 			else if (SampleNameProperty == "OptionMenu") {
 				registerLayer<GUIOptionMenuLayer>();
-				registerLayer<FrameStatisticsLayer>();
 			}
 			else if (SampleNameProperty == "PageMenu") {
 				registerLayer<GUIPageMenuLayer>();
@@ -103,7 +102,6 @@ namespace Trident {
 		}
 		else if (SampleGroupNameProperty == "Physics2D") {
 			registerLayer<Physics2DSceneLayer>();
-			registerLayer<FrameStatisticsLayer>();
 		}
 		else if (SampleGroupNameProperty == "Process") {
 			if (SampleNameProperty == "Default") {
@@ -177,6 +175,8 @@ namespace Trident {
 				registerLayer<Sample3DVisibilityLayer>();
 			}
 		}
+
+		registerLayer<FrameStatisticsLayer>();
 	}
 
 	Application* createApplication(uint32 argumentCount, char8** argumentValues) {

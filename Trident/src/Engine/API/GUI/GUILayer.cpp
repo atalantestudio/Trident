@@ -381,14 +381,12 @@ namespace Trident {
 		GUIContainer& parent = components[component.parentIndex];
 
 		// Update the component and its parent depending on the parent's layout direction.
-		if (parent.layoutDirection == LayoutDirection::HORIZONTAL) {
-			if (parent.size.width.fillMode != FillMode::FIXED) {
+		if (parent.size.width.fillMode != FillMode::FIXED) {
+			if (parent.layoutDirection == LayoutDirection::HORIZONTAL) {
 				parent.size.width.value += component.size.width.value;
 				parent.minimumSize.x += component.minimumSize.x;
 			}
-		}
-		else {
-			if (parent.size.width.fillMode != FillMode::FIXED) {
+			else {
 				parent.size.width.value = max(parent.size.width.value, component.size.width.value);
 				parent.minimumSize.x = max(parent.minimumSize.x, component.minimumSize.x);
 			}
@@ -396,6 +394,8 @@ namespace Trident {
 
 		parent.size.width.value = min(parent.size.width.value, parent.maximumSize.x);
 		parent.maximumSize.x = max(parent.maximumSize.x, parent.minimumSize.x);
+
+		component.minimumSize.x += component.padding.x * 2.0f;
 	}
 
 	void GUILayer::FitSizingHeights(uint32 componentIndex) {
@@ -412,14 +412,12 @@ namespace Trident {
 		}
 
 		// Update the component and its parent depending on the parent's layout direction.
-		if (parent.layoutDirection == LayoutDirection::VERTICAL) {
-			if (parent.size.height.fillMode != FillMode::FIXED) {
+		if (parent.size.height.fillMode != FillMode::FIXED) {
+			if (parent.layoutDirection == LayoutDirection::VERTICAL) {
 				parent.size.height.value += componentHeight;
 				parent.minimumSize.y += component.minimumSize.y;
 			}
-		}
-		else {
-			if (parent.size.height.fillMode != FillMode::FIXED) {
+			else {
 				parent.size.height.value = max(parent.size.height.value, componentHeight);
 				parent.minimumSize.y = max(parent.minimumSize.y, component.minimumSize.y);
 			}
@@ -429,6 +427,7 @@ namespace Trident {
 		parent.maximumSize.y = max(parent.maximumSize.y, parent.minimumSize.y);
 
 		component.size.height.value = componentHeight;
+		component.minimumSize.y += component.padding.y * 2.0f;
 	}
 
 	void GUILayer::GrowAndShrinkSizingWidthsRecursive(uint32 parentIndex) {
@@ -457,7 +456,7 @@ namespace Trident {
 					}
 
 					float32 smallestWidth = components[growableChildIndexCopy[0]].size.width.value;
-					float32 secondSmallestWidth = infinity<float32>();
+					float32 secondSmallestWidth = max<float32>();
 					float32 widthToAdd = remainingWidth;
 
 					for (const uint32 childIndex : growableChildIndexCopy) {
@@ -602,7 +601,7 @@ namespace Trident {
 					}
 
 					float32 smallestHeight = components[growableChildIndexCopy[0]].size.height.value;
-					float32 secondSmallestHeight = infinity<float32>();
+					float32 secondSmallestHeight = max<float32>();
 					float32 heightToAdd = remainingHeight;
 
 					for (const uint32 childIndex : growableChildIndexCopy) {
@@ -627,6 +626,7 @@ namespace Trident {
 
 					for (sint32 index = static_cast<sint32>(growableChildIndexCopy.size()) - 1; index >= 0; index -= 1) {
 						const uint32 childIndex = growableChildIndexCopy[index];
+
 						GUIContainer& child = components[childIndex];
 
 						const float32 previousHeight = child.size.height.value;
@@ -705,7 +705,6 @@ namespace Trident {
 		else {
 			for (const uint32 childIndex : growableChildIndices) {
 				GUIContainer& child = components[childIndex];
-
 				child.size.height.value = parent.size.height.value - parent.padding.y * 2.0f;
 			}
 		}
