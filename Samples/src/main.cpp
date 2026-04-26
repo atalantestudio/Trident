@@ -99,6 +99,8 @@ namespace Trident {
 			else if (SampleNameProperty == "UTF8") {
 				registerLayer<GUIUTF8Layer>();
 			}
+
+			registerLayer<FrameStatisticsLayer>();
 		}
 		else if (SampleGroupNameProperty == "Physics2D") {
 			registerLayer<Physics2DSceneLayer>();
@@ -175,8 +177,6 @@ namespace Trident {
 				registerLayer<Sample3DVisibilityLayer>();
 			}
 		}
-
-		registerLayer<FrameStatisticsLayer>();
 	}
 
 	Application* createApplication(uint32 argumentCount, char8** argumentValues) {

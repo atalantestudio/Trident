@@ -165,7 +165,7 @@ namespace Trident {
 					const Entity entity = rigidBodyComponentPool.componentIndexToEntity[rigidBodyComponentIndex];
 
 					// TODO(debug): Don't render the player entity.
-					if (entity == 1) {
+					if (entity == playerEntity) {
 						rigidBodyComponentIndex += 1;
 
 						continue;
@@ -591,5 +591,9 @@ namespace Trident {
 		private:
 			bool debugHullWireframe = true;
 			bool debugContactManifolds = true;
+
+		public:
+			// TODO(debug)
+			Entity playerEntity;
 	};
 }

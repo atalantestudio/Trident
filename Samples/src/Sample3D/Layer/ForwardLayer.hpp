@@ -47,11 +47,22 @@ namespace Trident {
 				renderer.setLayer(this);
 				renderer.build();
 
+				#if !defined(FORWARD_USE_NOCLIP_CAMERA)
+					renderer.playerEntity = PLAYER_ENTITY;
+				#else
+					renderer.playerEntity = max<Entity>();
+				#endif
+
 				scene = createScope<Scene3D>(FlatColor::initializeScene(getApplication(), renderer.getGraphicsApi(), renderer.getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment));
 
 				physicsSimulation = createScope<PhysicsSimulation3D>(Descriptor<PhysicsSimulation3D>{
 					.scene = scene.get(),
 					.deltaTime = getApplication()->getFixedDeltaTime(),
+					#if !defined(FORWARD_USE_NOCLIP_CAMERA)
+						.playerEntity = PLAYER_ENTITY,
+					#else
+						.playerEntity = max<Entity>(),
+					#endif
 				});
 
 				renderer.setScene(scene.get());
@@ -87,10 +98,7 @@ namespace Trident {
 				// TODO(debug)
 				physicsSimulation->broadPhase();
 				physicsSimulation->narrowPhase();
-
-				#if defined(FORWARD_USE_NOCLIP_CAMERA)
-					physicsSimulation->applyForces();
-				#endif
+				physicsSimulation->applyForces();
 
 				#if !defined(FORWARD_USE_NOCLIP_CAMERA)
 					playerMove(deltaTime);

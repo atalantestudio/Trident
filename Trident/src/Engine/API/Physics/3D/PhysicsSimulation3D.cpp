@@ -19,7 +19,8 @@ namespace Trident {
 	PhysicsSimulation3D::PhysicsSimulation3D(const Descriptor<PhysicsSimulation3D>& descriptor) :
 		scene(descriptor.scene),
 		deltaTime(static_cast<float32>(descriptor.deltaTime)),
-		inverseDeltaTime(static_cast<float32>(1.0 / descriptor.deltaTime))
+		inverseDeltaTime(static_cast<float32>(1.0 / descriptor.deltaTime)),
+		playerEntity(descriptor.playerEntity)
 	{}
 
 	void PhysicsSimulation3D::tick() {
@@ -114,6 +115,13 @@ namespace Trident {
 			RigidBody3DComponent& rigidBodyComponent = rigidBodyComponentPool.components[componentIndex];
 
 			if (rigidBodyComponent.inverseMass == 0.0_kg) {
+				componentIndex += 1;
+
+				continue;
+			}
+
+			// TODO(debug)
+			if (rigidBodyComponentPool.componentIndexToEntity[componentIndex] == playerEntity) {
 				componentIndex += 1;
 
 				continue;
@@ -320,8 +328,8 @@ namespace Trident {
 			}
 
 			// TODO(debug): Apply a rotational constraint to the player entity.
-			{
-				scene->ecs.getComponent<RigidBody3DComponent>(1).angularVelocity = {0.0f, 0.0f, 0.0f};
+			if (playerEntity != max<Entity>()) {
+				scene->ecs.getComponent<RigidBody3DComponent>(playerEntity).angularVelocity = {0.0f, 0.0f, 0.0f};
 			}
 
 			iteration += 1;

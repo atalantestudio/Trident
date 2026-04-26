@@ -18,6 +18,9 @@ namespace Trident {
 	struct Descriptor<PhysicsSimulation3D> {
 		Scene3D* scene;
 		float64 deltaTime;
+
+		// TODO(debug)
+		Entity playerEntity;
 	};
 
 	class PhysicsSimulation3D {
@@ -54,6 +57,7 @@ namespace Trident {
 			Scene3D* scene;
 			float32 deltaTime;
 			float32 inverseDeltaTime;
+			Entity playerEntity;
 			std::vector<EntityPair> entityPairs;
 	};
 }
