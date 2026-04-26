@@ -306,7 +306,9 @@ namespace Trident {
 		lastLayerInput.swapchainImage = nullptr;
 		lastLayerInput.swapchainImageView = nullptr;
 
-		WindowResizeEvent event(window->getSize()[0], window->getSize()[1]);
+		const Extent2D extent = window->getExtent();
+
+		WindowResizeEvent event(extent.width, extent.height);
 
 		// Propagate the event to the layer stack.
 		propagateEventBackToFront(event);

@@ -190,12 +190,6 @@ namespace Trident {
 		return windowData.extent;
 	}
 
-	const sint32* Window::getSize() const {
-		const Win32WindowData& windowData = *static_cast<const Win32WindowData*>(data);
-
-		return pointer_cast<const sint32*>(&windowData.extent.width);
-	}
-
 	bool Window::isKeyDown(KeyCode keyCode) const {
 		const Win32WindowData& windowData = *static_cast<const Win32WindowData*>(data);
 

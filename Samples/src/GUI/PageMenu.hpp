@@ -15,10 +15,10 @@ namespace Trident {
 			}
 
 			void render() override {
-				const sint32* size = getApplication()->getWindow()->getSize();
+				const Extent2D extent = getApplication()->getWindow()->getExtent();
 
 				GUIComponent({
-					.size = {static_cast<float32>(size[0] - 24_px), static_cast<float32>(size[1] - 16_px)},
+					.size = {static_cast<float32>(extent.width - 24_px), static_cast<float32>(extent.height - 16_px)},
 					.padding = {8_px, 8_px},
 					.layoutDirection = HORIZONTAL,
 					.layoutSpacing = 8_px,

@@ -11,10 +11,10 @@ namespace Trident {
 			}
 
 			void render() override {
-				const sint32* size = getApplication()->getWindow()->getSize();
+				const Extent2D extent = getApplication()->getWindow()->getExtent();
 
 				GUIComponent({
-					.size = {static_cast<float32>(size[0]), static_cast<float32>(size[1])},
+					.size = {static_cast<float32>(extent.width), static_cast<float32>(extent.height)},
 					.anchorPoint = AnchorPoint::HCENTER | AnchorPoint::VCENTER,
 				}) {
 					GUIComponent({

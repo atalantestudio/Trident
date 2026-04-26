@@ -13,19 +13,15 @@ namespace Trident {
 
 			~Window();
 
-			// Returns the position of the upper-left corner of the client area.
+			/// Returns the position of the top-left corner of the client area.
 			const sint32* getPosition() const;
 
 			Extent2D getExtent() const;
 
-			// Returns the size of the client area.
-			// TODO: Deprecate in favor of Window::getExtent.
-			const sint32* getSize() const;
+			inline float32 getAspectRatio() const {
+				const Extent2D extent = getExtent();
 
-			float32 getAspectRatio() const {
-				const sint32* size = getSize();
-
-				return static_cast<float32>(size[0]) / size[1];
+				return static_cast<float32>(extent.width) / extent.height;
 			}
 
 			bool isKeyDown(KeyCode keyCode) const;
@@ -34,16 +30,16 @@ namespace Trident {
 
 			bool isMinimized() const;
 
-			// Returns the position of the mouse, relative to the top-left corner of the client area.
+			/// Returns the position of the mouse relative to the top-left corner of the client area.
 			const sint32* getMousePosition() const;
 
-			vec2<float32> getNdcMousePosition() const {
-				const sint32* size = getSize();
+			inline vec2<float32> getNdcMousePosition() const {
+				const Extent2D extent = getExtent();
 				const sint32* mousePosition = getMousePosition();
 
 				return {
-					-1.0f + static_cast<float32>(mousePosition[0]) / (size[0] * 0.5f),
-					 1.0f - static_cast<float32>(mousePosition[1]) / (size[1] * 0.5f),
+					-1.0f + static_cast<float32>(mousePosition[0]) / (extent.width * 0.5f),
+					 1.0f - static_cast<float32>(mousePosition[1]) / (extent.height * 0.5f),
 				};
 			}
 
@@ -51,21 +47,21 @@ namespace Trident {
 
 			void show() const;
 
-			// Hides the pointer and captures it into the client area.
-			// While in this state, mouse move events store the mouse delta instead of a relative position.
+			/// Hides the pointer and captures it into the client area.
+			/// While in this state, mouse move events store the mouse delta instead of a relative position.
 			void lockPointer() const;
 
-			// Shows the pointer and releases it from the client area.
+			/// Shows the pointer and releases it from the client area.
 			void unlockPointer() const;
 
-			// Peeks, translates and dispatches incoming non-queued messages.
+			/// Peeks, translates and dispatches incoming non-queued messages.
 			void processMessages() const;
 
 			void waitMessage() const;
 
 			void updatePointerType(PointerType pointerType) const;
 
-		// TODO: Make data and key map private?
+		// TODO: Make private?
 		public:
 			void* data;
 	};
