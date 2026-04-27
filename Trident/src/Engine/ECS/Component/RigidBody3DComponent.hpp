@@ -28,7 +28,10 @@ namespace Trident {
 		void updateWorld(vec3<float32> centroid) {
 			world =
 				mat4x4<float32>::translation(-centroid) *
-				mat4x4<float32>::scaling(scale) *
+
+				// TODO: Remove non-uniform scaling.
+				// mat4x4<float32>::scaling(scale) *
+
 				mat4x4<float32>(orientation) *
 				mat4x4<float32>::translation(position);
 		}

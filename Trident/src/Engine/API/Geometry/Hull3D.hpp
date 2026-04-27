@@ -16,6 +16,25 @@ namespace Trident {
 			return 0.2f;
 		}
 
+		inline vec3<float32> support(vec3<float32> d) const {
+			float32 maxProjection = min<float32>();
+			uint32 maxProjectionVertexIndex = max<uint32>();
+			uint32 vertexIndex = 0;
+
+			while (vertexIndex < vertexPositions.count()) {
+				const float32 projection = dot(vec3<float32>(vertexPositions[vertexIndex]), d);
+
+				if (projection > maxProjection) {
+					maxProjection = projection;
+					maxProjectionVertexIndex = vertexIndex;
+				}
+
+				vertexIndex += 1;
+			}
+
+			return vec3<float32>(vertexPositions[maxProjectionVertexIndex]);
+		}
+
 		/// The mean position of all vertices.
 		/// It coincides with the center of mass in uniform mass distribution scenarios.
 		svec3<float32> centroid;

@@ -9,23 +9,38 @@
 
 namespace Trident {
 	static void createEdgeContact(const EdgeQuery& edgeQuery, const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, const Hull3D& hullA, const Hull3D& hullB, ContactManifold3D* contactManifold) {
-		// See https://math.stackexchange.com/a/2217845.
-		const vec3<float32> ab = edgeQuery.originB - edgeQuery.originA;
+		const vec3<float32> centroidA = multiplyTransform({0.0f, 0.0f, 0.0f}, rigidBodyA.world);
 
-		vec3<float32> normal = normalized(cross(edgeQuery.directionA, edgeQuery.directionB));
+		const Edge3D edgeA = hullA.edges[edgeQuery.edgeIndexA + 0];
+		const Edge3D twinA = hullA.edges[edgeQuery.edgeIndexA + 1];
 
-		if (dot(normal, edgeQuery.originA - edgeQuery.centroidA) > 0.0f) {
+		const vec3<float32> p1 = multiplyTransform(vec3<float32>(hullA.vertexPositions[edgeA.originVertexIndex]), rigidBodyA.world);
+		const vec3<float32> q1 = multiplyTransform(vec3<float32>(hullA.vertexPositions[twinA.originVertexIndex]), rigidBodyA.world);
+		const vec3<float32> e1 = normalized(q1 - p1);
+
+		const Edge3D edgeB = hullB.edges[edgeQuery.edgeIndexB + 0];
+		const Edge3D twinB = hullB.edges[edgeQuery.edgeIndexB + 1];
+
+		const vec3<float32> p2 = multiplyTransform(vec3<float32>(hullB.vertexPositions[edgeB.originVertexIndex]), rigidBodyB.world);
+		const vec3<float32> q2 = multiplyTransform(vec3<float32>(hullB.vertexPositions[twinB.originVertexIndex]), rigidBodyB.world);
+		const vec3<float32> e2 = normalized(q2 - p2);
+
+		vec3<float32> normal = normalized(cross(e1, e2));
+
+		if (dot(normal, p1 - centroidA) < 0.0f) {
 			// Ensure the normal points towards B.
 			normal = -normal;
 		}
 
+		// See https://math.stackexchange.com/a/2217845.
+		const vec3<float32> ab = p2 - p1;
+
 		const float32 nn = dot(normal, normal);
+		const float32 tA = dot(cross(p2, normal), ab) / nn;
+		const float32 tB = dot(cross(p1, normal), ab) / nn;
 
-		const float32 tA = dot(cross(edgeQuery.originB, normal), ab) / nn;
-		const float32 tB = dot(cross(edgeQuery.originA, normal), ab) / nn;
-
-		const vec3<float32> closestA = edgeQuery.originA + edgeQuery.directionA * tA;
-		const vec3<float32> closestB = edgeQuery.originB + edgeQuery.directionB * tB;
+		const vec3<float32> closestA = p1 + e1 * tA;
+		const vec3<float32> closestB = p2 + e2 * tB;
 
 		contactManifold->normal = normal;
 		contactManifold->contactCount = 1;
@@ -33,7 +48,6 @@ namespace Trident {
 		contactManifold->contacts[0].separation = edgeQuery.separation;
 
 		// TODO(physics/3d/edge-contact-id)
-		BREAKPOINT();
 	}
 
 	static void createFaceContact(const FaceQuery& faceQuery, ContactManifold3D* contactManifold) {
@@ -314,32 +328,34 @@ namespace Trident {
 			return false;
 		}
 
-		if (sat.faceQueryA.separation > sat.edgeQuery.separation && sat.faceQueryB.separation > sat.edgeQuery.separation) {
-			if (sat.faceQueryA.separation >= sat.faceQueryB.separation) {
-				// TODO(physics/3d/separating-axis-orientation): The axis should be rotated by the base orientation. Why is the inverse needed?
-				sat.faceQueryA.axis *= inverse(sat.faceQueryA.referenceBody->orientation);
-
-				createFaceContact(sat.faceQueryA, contactManifold);
-			}
-			else {
-				// TODO(physics/3d/separating-axis-orientation): The axis should be rotated by the base orientation. Why is the inverse needed?
-				sat.faceQueryB.axis *= inverse(sat.faceQueryB.referenceBody->orientation);
-
-				createFaceContact(sat.faceQueryB, contactManifold);
-
-				contactManifold->normal *= -1.0f;
-
-				index contactIndex = 0;
-
-				while (contactIndex < contactManifold->contactCount) {
-					contactManifold->contacts[contactIndex].id.flip();
-
-					contactIndex += 1;
-				}
-			}
-		}
-		else {
+		if (sat.edgeQuery.separation > sat.faceQueryA.separation && sat.edgeQuery.separation > sat.faceQueryB.separation) {
 			createEdgeContact(sat.edgeQuery, rigidBodyA, rigidBodyB, hullA, hullB, contactManifold);
+
+			return true;
+		}
+
+		if (sat.faceQueryA.separation >= sat.faceQueryB.separation) {
+			// TODO(physics/3d/separating-axis-orientation): The axis should be rotated by the base orientation. Why is the inverse needed?
+			sat.faceQueryA.axis *= inverse(sat.faceQueryA.referenceBody->orientation);
+
+			createFaceContact(sat.faceQueryA, contactManifold);
+
+			return true;
+		}
+
+		// TODO(physics/3d/separating-axis-orientation): The axis should be rotated by the base orientation. Why is the inverse needed?
+		sat.faceQueryB.axis *= inverse(sat.faceQueryB.referenceBody->orientation);
+
+		createFaceContact(sat.faceQueryB, contactManifold);
+
+		contactManifold->normal *= -1.0f;
+
+		index contactIndex = 0;
+
+		while (contactIndex < contactManifold->contactCount) {
+			contactManifold->contacts[contactIndex].id.flip();
+
+			contactIndex += 1;
 		}
 
 		return true;

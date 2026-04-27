@@ -6,43 +6,26 @@
 #include "Engine/API/Physics/3D/SAT3D.hpp"
 
 namespace Trident {
-	static vec3<float32> support(const Hull3D& hull, vec3<float32> d) {
-		float32 distance;
-		float32 maxDistance = dot(vec3<float32>(hull.vertexPositions[0]), d);
-		uint32 maxDistanceVertexIndex = 0;
-		uint32 vertexIndex = 1;
-
-		while (vertexIndex < hull.vertexPositions.count()) {
-			distance = dot(vec3<float32>(hull.vertexPositions[vertexIndex]), d);
-
-			if (distance > maxDistance) {
-				maxDistance = distance;
-				maxDistanceVertexIndex = vertexIndex;
-			}
-
-			vertexIndex += 1;
-		}
-
-		return vec3<float32>(hull.vertexPositions[maxDistanceVertexIndex]);
-	}
-
 	/// See https://media.gdcvault.com/gdc2013/slides/822403Gregorius_Dirk_TheSeparatingAxisTest.pdf.
-	static bool isMinkowskiFace(
+	inline static bool isMinkowskiFace(
 		/// Face normal of the base edge on A.
 		vec3<float32> a,
 
 		/// Face normal of the twin edge on A.
 		vec3<float32> b,
 
+		/// The cross product of B and A.
+		vec3<float32> crossBA,
+
 		/// Face normal of the base edge on B.
 		vec3<float32> c,
 
 		/// Face normal of the twin edge on B.
-		vec3<float32> d
-	) {
-		const vec3<float32> crossBA = cross(b, a);
-		const vec3<float32> crossDC = cross(d, c);
+		vec3<float32> d,
 
+		/// The cross product of D and C.
+		vec3<float32> crossDC
+	) {
 		const float32 cba = dot(c, crossBA);
 		const float32 dba = dot(d, crossBA);
 		const float32 adc = dot(a, crossDC);
@@ -51,17 +34,20 @@ namespace Trident {
 		return cba * dba < 0.0f && adc * bdc < 0.0f && cba * bdc > 0.0f;
 	}
 
-	static float32 calculateEdgeDistance(vec3<float32> hullCentroidA, vec3<float32> edgeOriginA, vec3<float32> edgeDirectionA, vec3<float32> edgeOriginB, vec3<float32> edgeDirectionB) {
-		const vec3<float32> crossAB = cross(edgeDirectionA, edgeDirectionB);
+	static float32 calculateEdgeDistance(vec3<float32> edgeOriginA, vec3<float32> edgeDirectionA, vec3<float32> edgeOriginB, vec3<float32> edgeDirectionB, vec3<float32> centroidA) {
+		static constexpr float32 PARALLEL_EDGE_TOLERANCE = 0.005f;
 
-		if (lengthSquared(crossAB) < epsilon<float32>()) {
+		const vec3<float32> crossAB = cross(edgeDirectionA, edgeDirectionB);
+		const float32 lengthCrossAB = length(crossAB);
+
+		if (lengthCrossAB < PARALLEL_EDGE_TOLERANCE * sqrt(lengthSquared(edgeDirectionA) * lengthSquared(edgeDirectionB))) {
 			// Edges are parallel or nearly parallel.
 			return min<float32>();
 		}
 
-		vec3<float32> normal = normalized(crossAB);
+		vec3<float32> normal = crossAB / lengthCrossAB;
 
-		if (dot(normal, edgeOriginA - hullCentroidA) > 0.0f) {
+		if (dot(normal, edgeOriginA - centroidA) < 0.0f) {
 			// Ensure the normal points towards B.
 			normal = -normal;
 		}
@@ -73,44 +59,48 @@ namespace Trident {
 		EdgeQuery query{};
 		query.separation = min<float32>();
 
-		const vec3<float32> centroidA = vec3<float32>(hullA.centroid) + rigidBodyA.position;
+		// TODO(physics/3d/transform): Cleanup transform step.
+		const mat4x4<float32> relativeTransform = inverse(rigidBodyB.world) * rigidBodyA.world;
+		// const quat<float32> relativeOrientation = rigidBodyB.orientation * conjugate(rigidBodyA.orientation);
+		const mat4x4<float32> relativeOrientation = inverse(mat4x4<float32>(rigidBodyB.orientation)) * mat4x4<float32>(rigidBodyA.orientation);
+
+		const vec3<float32> centroidA = multiplyTransform(vec3<float32>(hullA.centroid), relativeTransform);
 
 		uint16 edgeIndexA = 0;
 
 		while (edgeIndexA < hullA.edges.count()) {
 			const Edge3D edgeA = hullA.edges[edgeIndexA + 0];
-			const Edge3D twinEdgeA = hullA.edges[edgeIndexA + 1];
-			const vec3<float32> a = rigidBodyA.facePlanes[edgeA.faceIndex].worldNormal;
-			const vec3<float32> b = rigidBodyA.facePlanes[twinEdgeA.faceIndex].worldNormal;
+			const Edge3D twinA = hullA.edges[edgeIndexA + 1];
+
+			const vec3<float32> p1 = multiplyTransform(vec3<float32>(hullA.vertexPositions[edgeA.originVertexIndex]), relativeTransform);
+			const vec3<float32> q1 = multiplyTransform(vec3<float32>(hullA.vertexPositions[twinA.originVertexIndex]), relativeTransform);
+			const vec3<float32> e1 = q1 - p1;
+
+			const vec3<float32> u1 = multiplyTransform(rigidBodyA.facePlanes[edgeA.faceIndex].localNormal, relativeOrientation);
+			const vec3<float32> v1 = multiplyTransform(rigidBodyA.facePlanes[twinA.faceIndex].localNormal, relativeOrientation);
 
 			uint16 edgeIndexB = 0;
 
 			while (edgeIndexB < hullB.edges.count()) {
 				const Edge3D edgeB = hullB.edges[edgeIndexB + 0];
-				const Edge3D twinEdgeB = hullB.edges[edgeIndexB + 1];
-				const vec3<float32> c = rigidBodyB.facePlanes[edgeB.faceIndex].worldNormal;
-				const vec3<float32> d = rigidBodyB.facePlanes[twinEdgeB.faceIndex].worldNormal;
+				const Edge3D twinB = hullB.edges[edgeIndexB + 1];
 
-				if (isMinkowskiFace(a, b, -c, -d)) {
-					const vec3<float32> edgeOriginA = multiplyTransform(vec3<float32>(hullA.vertexPositions[edgeA.originVertexIndex]), rigidBodyA.world);
-					const vec3<float32> edgeEndA = multiplyTransform(vec3<float32>(hullA.vertexPositions[twinEdgeA.originVertexIndex]), rigidBodyA.world);
-					const vec3<float32> edgeDirectionA = normalized(edgeEndA - edgeOriginA);
-					const vec3<float32> edgeOriginB = multiplyTransform(vec3<float32>(hullB.vertexPositions[edgeB.originVertexIndex]), rigidBodyB.world);
-					const vec3<float32> edgeEndB = multiplyTransform(vec3<float32>(hullB.vertexPositions[twinEdgeB.originVertexIndex]), rigidBodyB.world);
-					const vec3<float32> edgeDirectionB = normalized(edgeEndB - edgeOriginB);
+				const vec3<float32> p2 = hullB.vertexPositions[edgeB.originVertexIndex];
+				const vec3<float32> q2 = hullB.vertexPositions[twinB.originVertexIndex];
+				const vec3<float32> e2 = q2 - p2;
 
-					const float32 separation = calculateEdgeDistance(centroidA, edgeOriginA, edgeDirectionA, edgeOriginB, edgeDirectionB);
+				const vec3<float32> u2 = rigidBodyB.facePlanes[edgeB.faceIndex].localNormal;
+				const vec3<float32> v2 = rigidBodyB.facePlanes[twinB.faceIndex].localNormal;
+
+				if (isMinkowskiFace(u1, v1, -e1, -u2, -v2, -e2)) {
+					const float32 separation = calculateEdgeDistance(p1, e1, p2, e2, centroidA);
 
 					if (separation > query.separation) {
 						query.separation = separation;
-						query.originA = edgeOriginA;
-						query.originB = edgeOriginB;
-						query.directionA = edgeDirectionA;
-						query.directionB = edgeDirectionB;
-						query.centroidA = centroidA;
+						query.edgeIndexA = edgeIndexA;
+						query.edgeIndexB = edgeIndexB;
 					}
 
-					// TODO(physics/3d/edge-query): Fix edge query returning with positive separation when the bodies are overlapping.
 					if (separation > 0.0f) {
 						return query;
 					}
@@ -136,7 +126,7 @@ namespace Trident {
 
 		while (faceIndex < hullA.faces.count()) {
 			const Plane3D& P = rigidBodyA.facePlanes[faceIndex];
-			const vec3<float32> s = multiplyTransform(support(hullB, -P.localNormal * R), rigidBodyB.world);
+			const vec3<float32> s = multiplyTransform(hullB.support(-P.localNormal * R), rigidBodyB.world);
 			const float32 separation = signedDistanceWorld(P, s);
 
 			if (separation > query.separation) {
