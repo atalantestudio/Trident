@@ -3,8 +3,9 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-layout(location = 0) in mat4x4 world;
-layout(location = 4) in mat3x3 instanceNormal;
+layout(location = 0) in uvec3 vertex;
+layout(location = 1) in mat4x4 world;
+layout(location = 5) in mat3x3 instanceNormal;
 
 layout(set = 0, binding = 0) uniform readonly Camera {
 	mat4x4 projectionView;
@@ -27,18 +28,6 @@ layout(set = 0, binding = 4) buffer readonly TriangleTangentComponent {
 	float triangleTangentComponentBuffer[];
 };
 
-layout(set = 0, binding = 5) buffer readonly VertexPositionIndex {
-	uint vertexPositionIndexBuffer[];
-};
-
-layout(set = 0, binding = 6) buffer readonly VertexNormalIndex {
-	uint vertexNormalIndexBuffer[];
-};
-
-layout(set = 0, binding = 7) buffer readonly VertexTextureCoordinateIndex {
-	uint vertexTextureCoordinateIndexBuffer[];
-};
-
 out VertexOutput {
 	layout(location = 0) vec3 surface;
 	layout(location = 1) vec2 textureCoordinate;
@@ -46,16 +35,33 @@ out VertexOutput {
 } vertexOutput;
 
 void main() {
-	uint triangleIndex = uint(gl_VertexIndex / 3);
-	uint positionIndex = vertexPositionIndexBuffer[gl_VertexIndex] * 3u;
-	uint normalIndex = vertexNormalIndexBuffer[gl_VertexIndex] * 3u;
-	uint textureCoordinateIndex = vertexTextureCoordinateIndexBuffer[gl_VertexIndex] * 2u;
-	uint tangentIndex = triangleIndex * 3u;
+	uint positionComponentOffset = vertex[0] * 3u;
+	uint normalComponentOffset = vertex[1] * 3u;
+	uint textureCoordinateComponentOffset = vertex[2] * 2u;
+	uint tangentComponentOffset = uint(gl_VertexIndex / 3) * 3u;
 
-	vec3 position = vec3(vertexPositionComponentBuffer[positionIndex + 0u], vertexPositionComponentBuffer[positionIndex + 1u], vertexPositionComponentBuffer[positionIndex + 2u]);
-	vec3 normal = vec3(vertexNormalComponentBuffer[normalIndex + 0u], vertexNormalComponentBuffer[normalIndex + 1u], vertexNormalComponentBuffer[normalIndex + 2u]);
-	vec2 textureCoordinate = vec2(vertexTextureCoordinateComponentBuffer[textureCoordinateIndex + 0u], vertexTextureCoordinateComponentBuffer[textureCoordinateIndex + 1u]);
-	vec3 tangent = vec3(triangleTangentComponentBuffer[tangentIndex + 0u], triangleTangentComponentBuffer[tangentIndex + 1u], triangleTangentComponentBuffer[tangentIndex + 2u]);
+	vec3 position = vec3(
+		vertexPositionComponentBuffer[positionComponentOffset + 0u],
+		vertexPositionComponentBuffer[positionComponentOffset + 1u],
+		vertexPositionComponentBuffer[positionComponentOffset + 2u]
+	);
+
+	vec3 normal = vec3(
+		vertexNormalComponentBuffer[normalComponentOffset + 0u],
+		vertexNormalComponentBuffer[normalComponentOffset + 1u],
+		vertexNormalComponentBuffer[normalComponentOffset + 2u]
+	);
+
+	vec2 textureCoordinate = vec2(
+		vertexTextureCoordinateComponentBuffer[textureCoordinateComponentOffset + 0u],
+		vertexTextureCoordinateComponentBuffer[textureCoordinateComponentOffset + 1u]
+	);
+
+	vec3 tangent = vec3(
+		triangleTangentComponentBuffer[tangentComponentOffset + 0u],
+		triangleTangentComponentBuffer[tangentComponentOffset + 1u],
+		triangleTangentComponentBuffer[tangentComponentOffset + 2u]
+	);
 
 	vec4 surface = world * vec4(position, 1.0);
 

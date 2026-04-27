@@ -14,9 +14,12 @@ namespace Trident {
 			.geometryAssetIdentifiers = {
 				// TODO(debug-only): UnitBox
 				38,
+
+				// TODO(debug): RectangularCuboid
+				39,
 			},
 			.geometryMappings = {
-				{0, {0}},
+				{0, {1}},
 				{1, {0}},
 			},
 			.materialMappings = {
@@ -128,8 +131,8 @@ namespace Trident {
 			.staticIndexCount = 0,
 			.entityCount = 4,
 			.geometryAssetIdentifiers = {
-				// TODO(debug-only): UnitBox
-				38,
+				// TODO(debug-only): RectangularCuboid
+				39,
 			},
 			.geometryMappings = {
 				{0, {0}},

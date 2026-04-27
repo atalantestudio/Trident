@@ -13,6 +13,7 @@ namespace Trident::FlatColor {
 
 		// Preload geometry assets.
 		assetLibrary->getAsset<GeometryAsset>("UnitBox");
+		assetLibrary->getAsset<GeometryAsset>("RectangularCuboid");
 
 		const view<char8> sceneAssetName = application->getPropertyFile()->getProperty<view<char8>>("AssetName");
 		const ref<Scene3DAsset> sceneAsset = assetLibrary->getAsset<Scene3DAsset>(sceneAssetName);

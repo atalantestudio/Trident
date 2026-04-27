@@ -16,9 +16,9 @@ namespace Trident {
 	};
 
 	struct Geometry3DData {
-		sequence<float64> vertexPositionComponents;
-		sequence<float64> vertexNormalComponents;
-		sequence<float64> vertexTextureCoordinateComponents;
+		sequence<float32> vertexPositionComponents;
+		sequence<float32> vertexNormalComponents;
+		sequence<float32> vertexTextureCoordinateComponents;
 		sequence<float32> triangleTangentComponents;
 		sequence<uint32> vertexPositionIndices;
 		sequence<uint32> vertexNormalIndices;

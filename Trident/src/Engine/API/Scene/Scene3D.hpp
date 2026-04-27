@@ -15,6 +15,10 @@ namespace Trident {
 		public:
 			explicit Scene3D(ref<Scene3DAsset> sceneAsset, uint64 minStorageBufferOffsetAlignment);
 
+			inline uint32 getIndexCount() const {
+				return indexCount;
+			}
+
 			inline range<uint64, uint64> getVertexPositionComponentRange() const {
 				return vertexPositionComponentRange;
 			}
@@ -97,6 +101,9 @@ namespace Trident {
 			void loadEntityComponentMappings(ref<Scene3DAsset> sceneAsset);
 
 		private:
+			/// Total number of indices.
+			uint32 indexCount;
+
 			/// Ranges in bytes of the descriptor buffers, aligned to the `minStorageBufferOffsetAlignment` limit.
 			range<uint64, uint64> vertexPositionComponentRange;
 			range<uint64, uint64> vertexNormalComponentRange;

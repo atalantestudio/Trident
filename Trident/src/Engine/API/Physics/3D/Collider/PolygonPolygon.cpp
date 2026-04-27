@@ -9,7 +9,7 @@
 
 namespace Trident {
 	static void createEdgeContact(const EdgeQuery& edgeQuery, const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, const Hull3D& hullA, const Hull3D& hullB, ContactManifold3D* contactManifold) {
-		const vec3<float32> centroidA = multiplyTransform({0.0f, 0.0f, 0.0f}, rigidBodyA.world);
+		const vec3<float32> centroidA = multiplyTransform(vec3<float32>(hullA.centroid), rigidBodyA.world);
 
 		const Edge3D edgeA = hullA.edges[edgeQuery.edgeIndexA + 0];
 		const Edge3D twinA = hullA.edges[edgeQuery.edgeIndexA + 1];
@@ -44,7 +44,7 @@ namespace Trident {
 
 		contactManifold->normal = normal;
 		contactManifold->contactCount = 1;
-		contactManifold->contacts[0].position = (closestA + closestB) * 0.5f;
+		contactManifold->contacts[0].position = lerp(closestA, closestB, 0.5f);
 		contactManifold->contacts[0].separation = edgeQuery.separation;
 
 		// TODO(physics/3d/edge-contact-id)

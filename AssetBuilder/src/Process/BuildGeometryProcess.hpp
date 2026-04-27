@@ -20,7 +20,7 @@ namespace Trident {
 			static constexpr uint32 PROJECT_OUTPUT_PATH_ARGUMENT_INDEX = 2;
 
 			static constexpr uint32 DEFAULT_GEOMETRY_2D_COUNT = 4;
-			static constexpr uint32 DEFAULT_GEOMETRY_3D_COUNT = 1;
+			static constexpr uint32 DEFAULT_GEOMETRY_3D_COUNT = 2;
 
 			inline static const view<char8> DEFAULT_GEOMETRY_2D_NAMES[DEFAULT_GEOMETRY_2D_COUNT] = {
 				"UnitCircle",
@@ -38,10 +38,12 @@ namespace Trident {
 
 			inline static const view<char8> DEFAULT_GEOMETRY_3D_NAMES[DEFAULT_GEOMETRY_3D_COUNT] = {
 				"UnitBox",
+				"RectangularCuboid",
 			};
 
 			inline static constexpr CreateGeometry3DFunction DEFAULT_GEOMETRY_3D_FUNCTIONS[DEFAULT_GEOMETRY_3D_COUNT] = {
 				createUnitBox,
+				createRectangularCuboid,
 			};
 
 		private:
@@ -159,16 +161,16 @@ namespace Trident {
 				stream.write<uint32>(header.triangleTangentCount);
 				stream.write<uint32>(header.indexCount);
 
-				for (const float64 vertexPositionComponent : data.vertexPositionComponents) {
-					stream.write<float32>(static_cast<float32>(vertexPositionComponent));
+				for (const float32 vertexPositionComponent : data.vertexPositionComponents) {
+					stream.write<float32>(vertexPositionComponent);
 				}
 
-				for (const float64 vertexNormalComponent : data.vertexNormalComponents) {
-					stream.write<float32>(static_cast<float32>(vertexNormalComponent));
+				for (const float32 vertexNormalComponent : data.vertexNormalComponents) {
+					stream.write<float32>(vertexNormalComponent);
 				}
 
-				for (const float64 vertexTextureCoordinateComponent : data.vertexTextureCoordinateComponents) {
-					stream.write<float32>(static_cast<float32>(vertexTextureCoordinateComponent));
+				for (const float32 vertexTextureCoordinateComponent : data.vertexTextureCoordinateComponents) {
+					stream.write<float32>(vertexTextureCoordinateComponent);
 				}
 
 				for (const float32 triangleTangentComponent : data.triangleTangentComponents) {

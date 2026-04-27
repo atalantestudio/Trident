@@ -329,12 +329,44 @@ namespace Trident {
 
 		ENGINE_ASSERT(vertexTextureCoordinateIndices.count() == vertexPositionIndices.count(), "Vertex texture coordinate index count is inconsistent with vertex position index count.");
 
-		const sequence<float32> triangleTangentComponents = calculateTriangleTangentComponents(vertexPositionComponents, vertexTextureCoordinateComponents, vertexPositionIndices, vertexTextureCoordinateIndices);
+		sequence<float32> finalVertexPositionComponents(vertexPositionComponents.count());
+		sequence<float32> finalVertexNormalComponents(vertexNormalComponents.count());
+		sequence<float32> finalVertexTextureCoordinateComponents(vertexTextureCoordinateComponents.count());
+		index componentOffset = 0;
+
+		while (componentOffset < finalVertexPositionComponents.count()) {
+			finalVertexPositionComponents[componentOffset + 0] = static_cast<float32>(vertexPositionComponents[componentOffset + 0]);
+			finalVertexPositionComponents[componentOffset + 1] = static_cast<float32>(vertexPositionComponents[componentOffset + 1]);
+			finalVertexPositionComponents[componentOffset + 2] = static_cast<float32>(vertexPositionComponents[componentOffset + 2]);
+
+			componentOffset += 3;
+		}
+
+		componentOffset = 0;
+
+		while (componentOffset < finalVertexNormalComponents.count()) {
+			finalVertexNormalComponents[componentOffset + 0] = static_cast<float32>(vertexNormalComponents[componentOffset + 0]);
+			finalVertexNormalComponents[componentOffset + 1] = static_cast<float32>(vertexNormalComponents[componentOffset + 1]);
+			finalVertexNormalComponents[componentOffset + 2] = static_cast<float32>(vertexNormalComponents[componentOffset + 2]);
+
+			componentOffset += 3;
+		}
+
+		componentOffset = 0;
+
+		while (componentOffset < finalVertexTextureCoordinateComponents.count()) {
+			finalVertexTextureCoordinateComponents[componentOffset + 0] = static_cast<float32>(vertexTextureCoordinateComponents[componentOffset + 0]);
+			finalVertexTextureCoordinateComponents[componentOffset + 1] = static_cast<float32>(vertexTextureCoordinateComponents[componentOffset + 1]);
+
+			componentOffset += 2;
+		}
+
+		const sequence<float32> triangleTangentComponents = calculateTriangleTangentComponents(finalVertexPositionComponents, finalVertexTextureCoordinateComponents, vertexPositionIndices, vertexTextureCoordinateIndices);
 
 		return {
-			.vertexPositionComponents = vertexPositionComponents,
-			.vertexNormalComponents = vertexNormalComponents,
-			.vertexTextureCoordinateComponents = vertexTextureCoordinateComponents,
+			.vertexPositionComponents = finalVertexPositionComponents,
+			.vertexNormalComponents = finalVertexNormalComponents,
+			.vertexTextureCoordinateComponents = finalVertexTextureCoordinateComponents,
 			.triangleTangentComponents = triangleTangentComponents,
 			.vertexPositionIndices = vertexPositionIndices,
 			.vertexNormalIndices = vertexNormalIndices,

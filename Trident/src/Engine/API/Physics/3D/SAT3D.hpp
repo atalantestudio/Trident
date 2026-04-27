@@ -11,11 +11,11 @@ namespace Trident {
 
 	struct EdgeQuery {
 		/// The separation between the two bodies.
-		float32 separation;
+		float32 separation = min<float32>();
 
 		/// The indices of the intersecting edges.
-		uint16 edgeIndexA;
-		uint16 edgeIndexB;
+		uint16 edgeIndexA = max<uint16>();
+		uint16 edgeIndexB = max<uint16>();
 	};
 
 	struct FaceQuery {
@@ -38,9 +38,9 @@ namespace Trident {
 	struct SATOutput3D {
 		bool overlap;
 
-		EdgeQuery edgeQuery;
 		FaceQuery faceQueryA;
 		FaceQuery faceQueryB;
+		EdgeQuery edgeQuery;
 	};
 
 	/// The Separating Axis Theorem algorithm in 3D.

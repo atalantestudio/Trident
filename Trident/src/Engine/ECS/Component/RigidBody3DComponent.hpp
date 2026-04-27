@@ -8,6 +8,10 @@
 
 namespace Trident {
 	struct RigidBody3DComponent {
+		inline Transform3D getTransform() const {
+			return {position, orientation};
+		}
+
 		/// Returns a 3x3 normal matrix calculated from the world matrix of this component.
 		inline mat3x3<float32> calculateNormal() const {
 			return transpose(inverse(mat3x3<float32>(
@@ -27,10 +31,11 @@ namespace Trident {
 
 		void updateWorld(vec3<float32> centroid) {
 			world =
-				mat4x4<float32>::translation(-centroid) *
+				// TODO(rigid-body/3d/centroid): Include the centroid in the world matrix?
+				// mat4x4<float32>::translation(-centroid) *
 
-				// TODO: Remove non-uniform scaling.
-				// mat4x4<float32>::scaling(scale) *
+				// TODO(rigid-body/3d/uniform-scaling)
+				// mat4x4<float32>::scaling({scale, scale, scale}) *
 
 				mat4x4<float32>(orientation) *
 				mat4x4<float32>::translation(position);
@@ -60,9 +65,8 @@ namespace Trident {
 		// TODO: Use svec3<float32> instead.
 		vec3<float32> rotation;
 
-		// TODO: Use svec3<float32> instead.
-		// NOTE: This isn't meant to be dynamically updated.
-		vec3<float32> scale = {1.0f, 1.0f, 1.0f};
+		/// Uniform scaling across all directions.
+		float32 scale = 1.0f;
 
 		mat4x4<float32> world = mat4x4<float32>::identity();
 		quat<float32> orientation = quat<float32>::identity();

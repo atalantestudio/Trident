@@ -80,6 +80,27 @@ namespace Trident {
 	}
 
 	void CommandEncoder::copyBufferToBuffer(ref<BaseBuffer> sourceBuffer, ref<BaseBuffer> destinationBuffer, view<BufferCopyRegion> copyRegions) {
+		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+			uint32 warningCount = 0;
+			uint32 errorCount = 0;
+
+			if (!(sourceBuffer->getUsage() & BufferUsage::TRANSFER_SRC)) {
+				ENGINE_ERROR("The source buffer must have the TRANSFER_SRC usage flag.");
+
+				errorCount += 1;
+			}
+
+			if (!(destinationBuffer->getUsage() & BufferUsage::TRANSFER_DST)) {
+				ENGINE_ERROR("The destination buffer must have the TRANSFER_DST usage flag.");
+
+				errorCount += 1;
+			}
+
+			// TODO: Validate copy regions.
+
+			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+		#endif
+
 		device->adapter->copyBufferToBufferImplementation(this, sourceBuffer, destinationBuffer, copyRegions);
 	}
 

@@ -40,6 +40,8 @@ namespace Trident {
 			sceneAsset->getDynamicVertexTextureCoordinateCount() * 2
 		);
 
+		indexCount = static_cast<uint32>(sceneAsset->getDynamicVertexPositionIndexCount());
+
 		// TODO: Include static ranges.
 		vertexPositionComponentRange.count = ceil(sceneAsset->getDynamicVertexPositionCount() * sizeof(svec3<float32>), minStorageBufferOffsetAlignment);
 		vertexNormalComponentRange.count = ceil(sceneAsset->getDynamicVertexNormalCount() * sizeof(svec3<float32>), minStorageBufferOffsetAlignment);

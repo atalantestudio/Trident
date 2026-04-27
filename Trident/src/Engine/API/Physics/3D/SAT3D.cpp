@@ -6,21 +6,20 @@
 #include "Engine/API/Physics/3D/SAT3D.hpp"
 
 namespace Trident {
-	/// See https://media.gdcvault.com/gdc2013/slides/822403Gregorius_Dirk_TheSeparatingAxisTest.pdf.
 	inline static bool isMinkowskiFace(
-		/// Face normal of the base edge on A.
+		/// The face normal of the base edge on A.
 		vec3<float32> a,
 
-		/// Face normal of the twin edge on A.
+		/// The face normal of the twin edge on A.
 		vec3<float32> b,
 
 		/// The cross product of B and A.
 		vec3<float32> crossBA,
 
-		/// Face normal of the base edge on B.
+		/// The face normal of the base edge on B.
 		vec3<float32> c,
 
-		/// Face normal of the twin edge on B.
+		/// The face normal of the twin edge on B.
 		vec3<float32> d,
 
 		/// The cross product of D and C.
@@ -40,31 +39,28 @@ namespace Trident {
 		const vec3<float32> crossAB = cross(edgeDirectionA, edgeDirectionB);
 		const float32 lengthCrossAB = length(crossAB);
 
+		// Stop if the edges are quasi-parallel.
 		if (lengthCrossAB < PARALLEL_EDGE_TOLERANCE * sqrt(lengthSquared(edgeDirectionA) * lengthSquared(edgeDirectionB))) {
-			// Edges are parallel or nearly parallel.
 			return min<float32>();
 		}
 
 		vec3<float32> normal = crossAB / lengthCrossAB;
 
+		// Ensure the normal points towards B.
 		if (dot(normal, edgeOriginA - centroidA) < 0.0f) {
-			// Ensure the normal points towards B.
 			normal = -normal;
 		}
 
 		return dot(normal, edgeOriginB - edgeOriginA);
 	}
 
-	static EdgeQuery queryEdgeDirections(const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, const Hull3D& hullA, const Hull3D& hullB) {
+	static EdgeQuery queryEdgeDirections(const Transform3D& transformA, const Transform3D& transformB, const Hull3D& hullA, const Hull3D& hullB) {
 		EdgeQuery query{};
-		query.separation = min<float32>();
 
-		// TODO(physics/3d/transform): Cleanup transform step.
-		const mat4x4<float32> relativeTransform = inverse(rigidBodyB.world) * rigidBodyA.world;
-		// const quat<float32> relativeOrientation = rigidBodyB.orientation * conjugate(rigidBodyA.orientation);
-		const mat4x4<float32> relativeOrientation = inverse(mat4x4<float32>(rigidBodyB.orientation)) * mat4x4<float32>(rigidBodyA.orientation);
+		// All computations are done in the local space of B.
+		const Transform3D transform = transformA * inverse(transformB);
 
-		const vec3<float32> centroidA = multiplyTransform(vec3<float32>(hullA.centroid), relativeTransform);
+		const vec3<float32> centroidA = vec3<float32>(hullA.centroid) + transform.position;
 
 		uint16 edgeIndexA = 0;
 
@@ -72,12 +68,13 @@ namespace Trident {
 			const Edge3D edgeA = hullA.edges[edgeIndexA + 0];
 			const Edge3D twinA = hullA.edges[edgeIndexA + 1];
 
-			const vec3<float32> p1 = multiplyTransform(vec3<float32>(hullA.vertexPositions[edgeA.originVertexIndex]), relativeTransform);
-			const vec3<float32> q1 = multiplyTransform(vec3<float32>(hullA.vertexPositions[twinA.originVertexIndex]), relativeTransform);
-			const vec3<float32> e1 = q1 - p1;
+			const vec3<float32> a = vec3<float32>(hullA.vertexPositions[edgeA.originVertexIndex]) + transform.position;
+			const vec3<float32> b = vec3<float32>(hullA.vertexPositions[twinA.originVertexIndex]) + transform.position;
+			const vec3<float32> ab = b - a;
 
-			const vec3<float32> u1 = multiplyTransform(rigidBodyA.facePlanes[edgeA.faceIndex].localNormal, relativeOrientation);
-			const vec3<float32> v1 = multiplyTransform(rigidBodyA.facePlanes[twinA.faceIndex].localNormal, relativeOrientation);
+			// Face normals are vertices on the Gauss map.
+			const vec3<float32> gmA = vec3<float32>(hullA.faces[edgeA.faceIndex].normal) * transform.orientation;
+			const vec3<float32> gmB = vec3<float32>(hullA.faces[twinA.faceIndex].normal) * transform.orientation;
 
 			uint16 edgeIndexB = 0;
 
@@ -85,15 +82,16 @@ namespace Trident {
 				const Edge3D edgeB = hullB.edges[edgeIndexB + 0];
 				const Edge3D twinB = hullB.edges[edgeIndexB + 1];
 
-				const vec3<float32> p2 = hullB.vertexPositions[edgeB.originVertexIndex];
-				const vec3<float32> q2 = hullB.vertexPositions[twinB.originVertexIndex];
-				const vec3<float32> e2 = q2 - p2;
+				const vec3<float32> c = hullB.vertexPositions[edgeB.originVertexIndex];
+				const vec3<float32> d = hullB.vertexPositions[twinB.originVertexIndex];
+				const vec3<float32> cd = d - c;
 
-				const vec3<float32> u2 = rigidBodyB.facePlanes[edgeB.faceIndex].localNormal;
-				const vec3<float32> v2 = rigidBodyB.facePlanes[twinB.faceIndex].localNormal;
+				// Face normals are vertices on the Gauss map.
+				const vec3<float32> gmC = hullB.faces[edgeB.faceIndex].normal;
+				const vec3<float32> gmD = hullB.faces[twinB.faceIndex].normal;
 
-				if (isMinkowskiFace(u1, v1, -e1, -u2, -v2, -e2)) {
-					const float32 separation = calculateEdgeDistance(p1, e1, p2, e2, centroidA);
+				if (isMinkowskiFace(gmA, gmB, -ab, -gmC, -gmD, -cd)) {
+					const float32 separation = calculateEdgeDistance(a, ab, c, cd, centroidA);
 
 					if (separation > query.separation) {
 						query.separation = separation;
@@ -150,9 +148,8 @@ namespace Trident {
 	}
 
 	SATOutput3D SAT3D(const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, const Hull3D& hullA, const Hull3D& hullB) {
-		SATOutput3D output{};
+		SATOutput3D output;
 		output.overlap = false;
-
 		output.faceQueryA = queryFaceDirections(rigidBodyA, rigidBodyB, hullA, hullB);
 
 		if (output.faceQueryA.separation > 0.0f) {
@@ -165,7 +162,7 @@ namespace Trident {
 			return output;
 		}
 
-		output.edgeQuery = queryEdgeDirections(rigidBodyA, rigidBodyB, hullA, hullB);
+		output.edgeQuery = queryEdgeDirections(rigidBodyA.getTransform(), rigidBodyB.getTransform(), hullA, hullB);
 
 		if (output.edgeQuery.separation > 0.0f) {
 			return output;

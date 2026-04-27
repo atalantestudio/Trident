@@ -31,6 +31,8 @@ namespace Trident {
 	struct Descriptor<RigidBody3DComponent> {
 		svec3<float32> position;
 		svec3<float32> rotation;
+
+		// TODO(physics/3d/uniform-scaling): Deprecate.
 		svec3<float32> scale;
 
 		svec3<float32> linearVelocity = {0.0_m_s, 0.0_m_s, 0.0_m_s};

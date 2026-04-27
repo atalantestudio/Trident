@@ -30,6 +30,9 @@ namespace Trident {
 
 		PipelineLayoutDescriptor materialPipelineLayoutDescriptor{};
 
+		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
+		vertexInputBinding.registerAttribute<svec3<uint32>>();
+
 		VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
 		instanceInputBinding.registerAttribute<mat4x4<float32>>();
 		instanceInputBinding.registerAttribute<mat3x3<float32>>();
@@ -53,7 +56,7 @@ namespace Trident {
 		};
 
 		GraphicsPipelineDescriptor materialPipelineDescriptor{};
-		materialPipelineDescriptor.vertexInputBindings = {instanceInputBinding};
+		materialPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
 		materialPipelineDescriptor.vertexShaderModule = loadInternalShaderModule(materialVertexShaderModuleDescriptor, "Forward/Forward.vert");
 		materialPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 		materialPipelineDescriptor.polygonMode = PolygonMode::FILL;
