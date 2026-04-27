@@ -104,6 +104,7 @@ namespace Trident {
 		}
 		else if (SampleGroupNameProperty == "Physics2D") {
 			registerLayer<Physics2DSceneLayer>();
+			registerLayer<FrameStatisticsLayer>();
 		}
 		else if (SampleGroupNameProperty == "Process") {
 			if (SampleNameProperty == "Default") {
