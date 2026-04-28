@@ -328,7 +328,7 @@ namespace Trident {
 			return false;
 		}
 
-		if (sat.edgeQuery.separation > sat.faceQueryA.separation && sat.edgeQuery.separation > sat.faceQueryB.separation) {
+		if (sat.edgeQuery.separation >= sat.faceQueryA.separation && sat.edgeQuery.separation >= sat.faceQueryB.separation) {
 			createEdgeContact(sat.edgeQuery, rigidBodyA, rigidBodyB, hullA, hullB, contactManifold);
 
 			return true;

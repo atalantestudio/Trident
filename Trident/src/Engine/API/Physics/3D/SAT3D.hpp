@@ -20,7 +20,7 @@ namespace Trident {
 
 	struct FaceQuery {
 		/// The separation between the two bodies.
-		float32 separation;
+		float32 separation = min<float32>();
 
 		/// The separating axis (the normal of the reference face).
 		vec3<float32> axis;

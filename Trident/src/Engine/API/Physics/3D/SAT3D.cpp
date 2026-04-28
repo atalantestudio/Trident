@@ -113,23 +113,38 @@ namespace Trident {
 		return query;
 	}
 
-	static FaceQuery queryFaceDirections(const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, const Hull3D& hullA, const Hull3D& hullB) {
+	static FaceQuery queryFaceDirections(const Transform3D& transformA, const Transform3D& transformB, const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, const Hull3D& hullA, const Hull3D& hullB) {
 		FaceQuery query{};
-		query.separation = min<float32>();
 
-		// Relative rotation between A and B.
+		// TODO(physics/3d/sat): Move computations in the local space of B.
+		// // All computations are done in the local space of B.
+		// const Transform3D transform = transformA * inverse(transformB);
+
 		const quat<float32> R = rigidBodyB.orientation * inverse(rigidBodyA.orientation);
 
 		uint16 faceIndex = 0;
 
 		while (faceIndex < hullA.faces.count()) {
+			const Face3D face = hullA.faces[faceIndex];
+
+			// TODO(physics/3d/sat): Move computations in the local space of B.
 			const Plane3D& P = rigidBodyA.facePlanes[faceIndex];
-			const vec3<float32> s = multiplyTransform(hullB.support(-P.localNormal * R), rigidBodyB.world);
-			const float32 separation = signedDistanceWorld(P, s);
+			const Face3D plane = {svec3<float32>(P.worldNormal), P.worldDistance};
+			const vec3<float32> support = multiplyTransform(hullB.support(-vec3<float32>(face.normal) * R), rigidBodyB.world);
+
+			/* Face3D plane = face * transform;
+
+			if (bToA) {
+				plane.offset = abs(plane.offset);
+			}
+
+			const vec3<float32> support = hullB.support(-vec3<float32>(plane.normal)); */
+
+			const float32 separation = signedDistance(plane, support);
 
 			if (separation > query.separation) {
 				query.separation = separation;
-				query.axis = P.localNormal;
+				query.axis = face.normal;
 				query.referenceFaceIndex = faceIndex;
 				query.referenceBody = &rigidBodyA;
 				query.incidentBody = &rigidBodyB;
@@ -150,13 +165,13 @@ namespace Trident {
 	SATOutput3D SAT3D(const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, const Hull3D& hullA, const Hull3D& hullB) {
 		SATOutput3D output;
 		output.overlap = false;
-		output.faceQueryA = queryFaceDirections(rigidBodyA, rigidBodyB, hullA, hullB);
+		output.faceQueryA = queryFaceDirections(rigidBodyA.getTransform(), rigidBodyB.getTransform(), rigidBodyA, rigidBodyB, hullA, hullB);
 
 		if (output.faceQueryA.separation > 0.0f) {
 			return output;
 		}
 
-		output.faceQueryB = queryFaceDirections(rigidBodyB, rigidBodyA, hullB, hullA);
+		output.faceQueryB = queryFaceDirections(rigidBodyB.getTransform(), rigidBodyA.getTransform(), rigidBodyB, rigidBodyA, hullB, hullA);
 
 		if (output.faceQueryB.separation > 0.0f) {
 			return output;
