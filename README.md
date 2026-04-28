@@ -15,7 +15,8 @@ Trident is a 2D/3D game engine developed by Atalante Studio, intended for techni
 - SDF text rendering
 - Immediate-mode 2D GUI API with automatic layout distribution
 - Sparse ECS
-- 2D physics API inspired by Box2D-Lite
+- 2D physics engine with support for convex hulls and spheres
+- 3D physics engine with support for convex hulls
 - Asset builder
 - Custom binary file formats for font, geometry, image and scene assets
 - Custom shader language (compiler, LSP server and completion features)
