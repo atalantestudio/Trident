@@ -494,7 +494,7 @@ namespace Trident {
 
 		const uint16 maxComponentDepth = byteStream.read<uint16>();
 
-		// The actual local offset divided by 2 is stored. The value of n is the number of glyphs in the font + 1.
+		// The value of n is the number of glyphs in the font + 1.
 		// The number of glyphs in the font is found in the maximum profile table.
 		sequence<uint32> glyphOffsets(numGlyphs + 1);
 		sequence<uint32> glyphLengths(numGlyphs + 1);
@@ -506,51 +506,27 @@ namespace Trident {
 
 		byteStream.seek(tableOffset->second);
 
+		uint32 glyphOffsetIndex = 0;
+		uint32 previousGlyphOffsetIndex = numGlyphs;
+
 		if (indexToLocFormat == 1) {
-			uint32 glyphOffsetIndex = 0;
-			uint32 previousGlyphOffset = 0;
-
-			while (glyphOffsetIndex < glyphOffsets.count()) {
+			while (glyphOffsetIndex < numGlyphs) {
 				glyphOffsets[glyphOffsetIndex] = byteStream.read<uint32>();
-				glyphLengths[glyphOffsetIndex] = glyphOffsets[glyphOffsetIndex] - previousGlyphOffset;
-
-				previousGlyphOffset = glyphOffsets[glyphOffsetIndex];
+				glyphLengths[previousGlyphOffsetIndex] = glyphOffsets[glyphOffsetIndex] - glyphOffsets[previousGlyphOffsetIndex];
 
 				glyphOffsetIndex += 1;
+				previousGlyphOffsetIndex = (previousGlyphOffsetIndex + 1) % glyphLengths.count();
 			}
 		}
 		else if (indexToLocFormat == 0) {
-			for (uint32& glyphOffset : glyphOffsets) {
-				glyphOffset = static_cast<uint32>(byteStream.read<uint16>()) * 2;
-			}
+			while (glyphOffsetIndex < numGlyphs) {
+				// The actual local offset divided by 2 is stored.
+				glyphOffsets[glyphOffsetIndex] = static_cast<uint32>(byteStream.read<uint16>()) * 2;
 
-			const uint32 regCount = static_cast<uint32>(glyphLengths.count() / 8);
+				glyphLengths[previousGlyphOffsetIndex] = glyphOffsets[glyphOffsetIndex] - glyphOffsets[previousGlyphOffsetIndex];
 
-			uint32 regOffset = 0;
-
-			/* TODO: Add reg<C, T> to lyah.
-			while (regOffset < regCount * 8) {
-				const lyah::reg<8, uint16> current(&glyphOffsets[regOffset]);
-				const lyah::reg<8, uint16> next(&glyphOffsets[regOffset + 1]);
-				const lyah::reg<8, uint16> subtracted = next - current;
-
-				lyah::store(&glyphLengths[regOffset], subtracted);
-
-				regOffset += 8;
-			} */
-			while (regOffset < regCount * 8) {
-				const __m128i curr = _mm_load_si128(pointer_cast<const __m128i*>(&glyphOffsets[regOffset]));
-				const __m128i next = _mm_load_si128(pointer_cast<const __m128i*>(&glyphOffsets[regOffset + 1]));
-				const __m128i sub = _mm_sub_epi16(next, curr);
-
-				_mm_store_si128(pointer_cast<__m128i*>(&glyphLengths[regOffset]), sub);
-
-				regOffset += 8;
-			}
-
-			// Leave last glyph length as 0.
-			for (uint32 glyphIndex = regCount * 8; glyphIndex < numGlyphs; glyphIndex += 1) {
-				glyphLengths[glyphIndex] = glyphOffsets[glyphIndex + 1] - glyphOffsets[glyphIndex];
+				glyphOffsetIndex += 1;
+				previousGlyphOffsetIndex = (previousGlyphOffsetIndex + 1) % glyphLengths.count();
 			}
 		}
 		else {
@@ -565,14 +541,14 @@ namespace Trident {
 		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'glyf' table.");
 
 		for (uint16 glyphIndex = 0; glyphIndex < file.glyphs.count(); glyphIndex += 1) {
+			// The glyph has no outlines.
+			// Since compound glyphs have no reason to reference "empty" glyphs, this check can be omitted within the depth of a compound glyph.
 			if (glyphLengths[glyphIndex] == 0) {
-				// Glyph has no outlines.
-				// Since compound glyphs have no reason to reference "empty" glyphs, this check can be omitted within the depth of a compound glyph.
 				continue;
 			}
 
+			// The glyph has already been parsed.
 			if (!file.glyphs[glyphIndex].emptyOrUnparsed()) {
-				// Glyph has already been parsed.
 				continue;
 			}
 
