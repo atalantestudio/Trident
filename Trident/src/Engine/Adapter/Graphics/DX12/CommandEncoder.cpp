@@ -351,7 +351,6 @@ namespace Trident {
 
 		_commandEncoder->commandList->SetPipelineState(pipeline->pipelineState);
 		_commandEncoder->commandList->SetComputeRootSignature(pipeline->pipelineLayout->rootSignature);
-
 		_commandEncoder->computePipelineBound = true;
 		_commandEncoder->commandCount += 1;
 	}
@@ -444,9 +443,7 @@ namespace Trident {
 		_commandEncoder->commandList->SetPipelineState(pipeline->pipelineState);
 		_commandEncoder->commandList->SetGraphicsRootSignature(pipeline->pipelineLayout->rootSignature);
 		_commandEncoder->commandList->IASetPrimitiveTopology(pipeline->primitiveTopology);
-
 		_commandEncoder->samplerDescriptorTableRootParameterIndex = pipeline->pipelineLayout->samplerDescriptorTableRootParameterIndex;
-
 		_commandEncoder->computePipelineBound = false;
 		_commandEncoder->commandCount += 1;
 	}
@@ -464,7 +461,6 @@ namespace Trident {
 		indexBufferView.Format = getIndexBufferFormat(indexTypeSize);
 
 		_commandEncoder->commandList->IASetIndexBuffer(&indexBufferView);
-
 		_commandEncoder->commandCount += 1;
 	}
 
@@ -481,7 +477,6 @@ namespace Trident {
 		vertexBufferView.StrideInBytes = stride;
 
 		_commandEncoder->commandList->IASetVertexBuffers(bindingIndex, 1, &vertexBufferView);
-
 		_commandEncoder->commandCount += 1;
 	}
 
@@ -663,7 +658,6 @@ namespace Trident {
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 
 		_commandEncoder->commandList->Dispatch(groupCountX, groupCountY, groupCountZ);
-
 		_commandEncoder->commandCount += 1;
 	}
 
@@ -702,7 +696,6 @@ namespace Trident {
 			nullptr,
 			0
 		);
-
 		_commandEncoder->commandCount += 1;
 	}
 
@@ -712,7 +705,6 @@ namespace Trident {
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 
 		_commandEncoder->commandList->DrawInstanced(vertexCount, instanceCount, vertexOffset, instanceOffset);
-
 		_commandEncoder->commandCount += 1;
 	}
 
@@ -722,7 +714,6 @@ namespace Trident {
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 
 		_commandEncoder->commandList->DrawIndexedInstanced(indexCount, instanceCount, indexOffset, indexBias, instanceOffset);
-
 		_commandEncoder->commandCount += 1;
 	}
 
@@ -759,7 +750,6 @@ namespace Trident {
 			nullptr,
 			0
 		);
-
 		_commandEncoder->commandCount += 1;
 	}
 
@@ -796,7 +786,6 @@ namespace Trident {
 			nullptr,
 			0
 		);
-
 		_commandEncoder->commandCount += 1;
 	}
 
@@ -879,7 +868,6 @@ namespace Trident {
 				barrierGroup.pTextureBarriers = &textureBarriers[0];
 
 				_commandEncoder->commandList->Barrier(1, &barrierGroup);
-
 				_commandEncoder->commandList->ResolveSubresource(
 					presentImage->resource,
 					presentImageView->getLayerOffset(),

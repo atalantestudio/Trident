@@ -15,8 +15,13 @@ layout(set = 0, binding = 1) buffer readonly VertexPositionComponent {
 };
 
 void main() {
-	uint positionIndex = uint(gl_VertexIndex * 3);
-	vec3 position = vec3(vertexPositionComponentBuffer[positionIndex + 0u], vertexPositionComponentBuffer[positionIndex + 1u], vertexPositionComponentBuffer[positionIndex + 2u]);
+	uint positionComponentOffset = uint(gl_VertexIndex * 3);
+
+	vec3 position = vec3(
+		vertexPositionComponentBuffer[positionComponentOffset + 0u],
+		vertexPositionComponentBuffer[positionComponentOffset + 1u],
+		vertexPositionComponentBuffer[positionComponentOffset + 2u]
+	);
 
 	gl_Position = camera.projectionView * world * vec4(position, 1.0);
 }

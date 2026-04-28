@@ -22,8 +22,8 @@ cbuffer Camera : register(b0) {
 ByteAddressBuffer vertexPositionComponentBuffer : register(t0);
 
 VertexOutput main(VertexInput input) {
-	uint positionIndex = input.vertexIndex * 4;
-	float3 position = asfloat(vertexPositionComponentBuffer.Load3(positionIndex * 12));
+	uint positionComponentOffset = input.vertexIndex * 3;
+	float3 position = asfloat(vertexPositionComponentBuffer.Load3(positionComponentOffset * 4));
 
 	VertexOutput output;
 	output.position = mul(mul(camera.projectionView, input.world), float4(position, 1.0));

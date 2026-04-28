@@ -73,6 +73,7 @@ namespace Trident {
 			// - `indexOffset` is the offset of the first index, in index units.
 			// - `indexBias` is a value added to the index before indexing into the vertex buffer.
 			// - `instanceOffset` is the offset of the first instance, in instance units.
+			// TODO(graphics/dx12/index-bias): The bias isn't applied to `SV_VertexID`, so the shader doesn't see the same value as `gl_VertexID`/`gl_VertexIndex`.
 			void drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset, sint32 indexBias, uint32 instanceOffset);
 
 			// Draws primitives with indexed vertices, using arguments from an indirect buffer.

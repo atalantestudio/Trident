@@ -3,8 +3,9 @@
 
 struct VertexInput {
 	uint vertexIndex : SV_VertexID;
-	float4x4 world : VERTEX_INPUT_ATTRIBUTE0;
-	float3x3 normal : VERTEX_INPUT_ATTRIBUTE4;
+	uint3 vertex : VERTEX_INPUT_ATTRIBUTE0;
+	float4x4 world : VERTEX_INPUT_ATTRIBUTE1;
+	float3x3 normal : VERTEX_INPUT_ATTRIBUTE5;
 };
 
 struct VertexOutput {
@@ -27,20 +28,17 @@ ByteAddressBuffer vertexPositionComponentBuffer : register(t0);
 ByteAddressBuffer vertexNormalComponentBuffer : register(t1);
 ByteAddressBuffer vertexTextureCoordinateComponentBuffer : register(t2);
 ByteAddressBuffer triangleTangentComponentBuffer : register(t3);
-ByteAddressBuffer vertexPositionIndexBuffer : register(t4);
-ByteAddressBuffer vertexNormalIndexBuffer : register(t5);
-ByteAddressBuffer vertexTextureCoordinateIndexBuffer : register(t6);
 
 VertexOutput main(VertexInput input) {
-	uint triangleIndex = input.vertexIndex / 3;
-	uint positionIndex = vertexPositionIndexBuffer.Load(input.vertexIndex * 4);
-	uint normalIndex = vertexNormalIndexBuffer.Load(input.vertexIndex * 4);
-	uint textureCoordinateIndex = vertexTextureCoordinateIndexBuffer.Load(input.vertexIndex * 4);
+	uint positionComponentOffset = input.vertex[0] * 3;
+	uint normalComponentOffset = input.vertex[1] * 3;
+	uint textureCoordinateComponentOffset = input.vertex[2] * 2;
+	uint tangentComponentOffset = input.vertexIndex / 3 * 3;
 
-	float3 position = asfloat(vertexPositionComponentBuffer.Load3(positionIndex * 12));
-	float3 normal = asfloat(vertexNormalComponentBuffer.Load3(normalIndex * 12));
-	float2 textureCoordinate = asfloat(vertexTextureCoordinateComponentBuffer.Load2(textureCoordinateIndex * 8));
-	float3 tangent = asfloat(triangleTangentComponentBuffer.Load3(triangleIndex * 12));
+	float3 position = asfloat(vertexPositionComponentBuffer.Load3(positionComponentOffset * 4));
+	float3 normal = asfloat(vertexNormalComponentBuffer.Load3(normalComponentOffset * 4));
+	float2 textureCoordinate = asfloat(vertexTextureCoordinateComponentBuffer.Load2(textureCoordinateComponentOffset * 4));
+	float3 tangent = asfloat(triangleTangentComponentBuffer.Load3(tangentComponentOffset * 4));
 
 	float4 surface = mul(input.world, float4(position, 1.0));
 
