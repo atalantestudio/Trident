@@ -65,10 +65,13 @@ namespace Trident {
 	}
 
 	GenerateSDFGlyphMapProcess::GenerateSDFGlyphMapProcess(const File<FileFormat::TTF>& file, SDFGlyphMap& output) {
+		// The remaining glyphs will be ignored.
+		static constexpr uint64 MAX_GLYPH_COUNT = 737;
+
 		static constexpr uint32 GLYPH_SUBIMAGE_DIMENSION = 64;
 		static constexpr uint32 spreadFactor = 7;
 
-		const view<TrueTypeFont::Glyph> glyphView(&file.glyphs[0], file.glyphs.count());
+		const view<TrueTypeFont::Glyph> glyphView(&file.glyphs[0], min(MAX_GLYPH_COUNT, file.glyphs.count()));
 
 		output.extent = {2048, 2048};
 		output.glyphs = sequence<Glyph>(glyphView.count());

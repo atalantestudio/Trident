@@ -51,7 +51,7 @@ namespace Trident {
 			y = static_cast<FWord>(T.n * (previousX * (T.b / T.n) + y * (T.d / T.n) + T.f));
 		}
 
-		static void parseGlyph(ByteStream<StreamOperation::READ>& stream, uint32 tableOffset, const sequence<uint16>& glyphOffsets, sequence<Glyph>& glyphs, uint16 glyphIndex, uint16 maxComponentDepth) {
+		static void parseGlyph(ByteStream<StreamOperation::READ>& stream, uint32 tableOffset, const sequence<uint32>& glyphOffsets, sequence<Glyph>& glyphs, uint16 glyphIndex, uint16 maxComponentDepth) {
 			Glyph& glyph = glyphs[glyphIndex];
 
 			if (!glyph.emptyOrUnparsed()) {
@@ -481,8 +481,6 @@ namespace Trident {
 		// 0 for short offsets, 1 for long.
 		const sint16 indexToLocFormat = byteStream.read<sint16>();
 
-		ENGINE_ASSERT(indexToLocFormat == 0, "IndexToLocFormat = [] is not supported.", indexToLocFormat);
-
 		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6maxp.html
 		tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("maxp"));
 
@@ -498,8 +496,8 @@ namespace Trident {
 
 		// The actual local offset divided by 2 is stored. The value of n is the number of glyphs in the font + 1.
 		// The number of glyphs in the font is found in the maximum profile table.
-		sequence<uint16> glyphOffsets(numGlyphs + 1);
-		sequence<uint16> glyphLengths(numGlyphs + 1);
+		sequence<uint32> glyphOffsets(numGlyphs + 1);
+		sequence<uint32> glyphLengths(numGlyphs + 1);
 
 		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6loca.html
 		tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("loca"));
@@ -508,38 +506,55 @@ namespace Trident {
 
 		byteStream.seek(tableOffset->second);
 
-		for (uint16& glyphOffset : glyphOffsets) {
-			glyphOffset = byteStream.read<uint16>() * 2;
+		if (indexToLocFormat == 1) {
+			uint32 glyphOffsetIndex = 0;
+			uint32 previousGlyphOffset = 0;
+
+			while (glyphOffsetIndex < glyphOffsets.count()) {
+				glyphOffsets[glyphOffsetIndex] = byteStream.read<uint32>();
+				glyphLengths[glyphOffsetIndex] = glyphOffsets[glyphOffsetIndex] - previousGlyphOffset;
+
+				previousGlyphOffset = glyphOffsets[glyphOffsetIndex];
+
+				glyphOffsetIndex += 1;
+			}
 		}
+		else if (indexToLocFormat == 0) {
+			for (uint32& glyphOffset : glyphOffsets) {
+				glyphOffset = static_cast<uint32>(byteStream.read<uint16>()) * 2;
+			}
 
-		const uint16 regCount = static_cast<uint16>(glyphLengths.count() / 8);
-		uint16 regOffset = 0;
+			const uint32 regCount = static_cast<uint32>(glyphLengths.count() / 8);
 
-		/* TODO: Add reg<C, T> to lyah.
+			uint32 regOffset = 0;
 
-		while (regOffset < regCount * 8) {
-			const lyah::reg<8, uint16> current(&glyphOffsets[regOffset]);
-			const lyah::reg<8, uint16> next(&glyphOffsets[regOffset + 1]);
-			const lyah::reg<8, uint16> subtracted = next - current;
+			/* TODO: Add reg<C, T> to lyah.
+			while (regOffset < regCount * 8) {
+				const lyah::reg<8, uint16> current(&glyphOffsets[regOffset]);
+				const lyah::reg<8, uint16> next(&glyphOffsets[regOffset + 1]);
+				const lyah::reg<8, uint16> subtracted = next - current;
 
-			lyah::store(&glyphLengths[regOffset], subtracted);
+				lyah::store(&glyphLengths[regOffset], subtracted);
 
-			regOffset += 8;
-		} */
+				regOffset += 8;
+			} */
+			while (regOffset < regCount * 8) {
+				const __m128i curr = _mm_load_si128(pointer_cast<const __m128i*>(&glyphOffsets[regOffset]));
+				const __m128i next = _mm_load_si128(pointer_cast<const __m128i*>(&glyphOffsets[regOffset + 1]));
+				const __m128i sub = _mm_sub_epi16(next, curr);
 
-		while (regOffset < regCount * 8) {
-			const __m128i curr = _mm_load_si128(pointer_cast<const __m128i*>(&glyphOffsets[regOffset]));
-			const __m128i next = _mm_load_si128(pointer_cast<const __m128i*>(&glyphOffsets[regOffset + 1]));
-			const __m128i sub = _mm_sub_epi16(next, curr);
+				_mm_store_si128(pointer_cast<__m128i*>(&glyphLengths[regOffset]), sub);
 
-			_mm_store_si128(pointer_cast<__m128i*>(&glyphLengths[regOffset]), sub);
+				regOffset += 8;
+			}
 
-			regOffset += 8;
+			// Leave last glyph length as 0.
+			for (uint32 glyphIndex = regCount * 8; glyphIndex < numGlyphs; glyphIndex += 1) {
+				glyphLengths[glyphIndex] = glyphOffsets[glyphIndex + 1] - glyphOffsets[glyphIndex];
+			}
 		}
-
-		// Leave last glyph length as 0.
-		for (uint16 glyphIndex = regCount * 8; glyphIndex < numGlyphs; glyphIndex += 1) {
-			glyphLengths[glyphIndex] = glyphOffsets[glyphIndex + 1] - glyphOffsets[glyphIndex];
+		else {
+			DEBUG_ASSERT(false);
 		}
 
 		file.glyphs = sequence<TrueTypeFont::Glyph>(numGlyphs);
