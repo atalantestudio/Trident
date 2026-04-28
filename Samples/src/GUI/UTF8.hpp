@@ -7,8 +7,10 @@ namespace Trident {
 	class GUIUTF8Layer : public GUILayer {
 		public:
 			void registerAssets() override {
+				const view<char8> assetName = getApplication()->getPropertyFile()->getProperty<view<char8>>("AssetName");
+
 				textStyle.color = 0xffffffff;
-				textStyle.font = loadFontAsset("test-regular");
+				textStyle.font = loadFontAsset(assetName);
 				textStyle.fontSize = 96_px;
 			}
 
