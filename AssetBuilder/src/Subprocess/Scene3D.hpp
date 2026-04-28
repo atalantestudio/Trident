@@ -215,7 +215,7 @@ namespace Trident {
 			.entityCount = 2,
 			.geometryAssetIdentifiers = {
 				// TODO(debug-only): lemon_1k
-				40,
+				41,
 			},
 			.geometryMappings = {
 				{0, {0}},
@@ -230,9 +230,9 @@ namespace Trident {
 				{
 					0,
 					createRigidBody({
-						.position = {0.3_m, 0.0_m, 1.25_m},
-						.rotation = {-pi<float32>() * 0.5f, -0.2_rad, pi<float32>()},
-						.scale = {10.0f, 10.0f, 10.0f},
+						.position = svec3<float32>(vec3<float32>{0.3_m, 0.0_m, 1.25_m} / 10.0f),
+						.rotation = {pi<float32>() * 0.5f, -0.2_rad, pi<float32>()},
+						.scale = {1.0f, 1.0f, 1.0f},
 						.mass = max<float32>(),
 						.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
 						.friction = 0.2f,
@@ -242,9 +242,9 @@ namespace Trident {
 				{
 					1,
 					createRigidBody({
-						.position = {-0.35_m, -0.2_m, 1.25_m},
+						.position = svec3<float32>(vec3<float32>{-0.35_m, -0.2_m, 1.25_m} / 10.0f),
 						.rotation = {-0.3_rad, -0.3_rad, pi<float32>() * 0.5f},
-						.scale = {10.0f, 10.0f, 10.0f},
+						.scale = {1.0f, 1.0f, 1.0f},
 						.mass = max<float32>(),
 						.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
 						.friction = 0.2f,

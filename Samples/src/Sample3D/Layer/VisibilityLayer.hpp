@@ -13,6 +13,7 @@ namespace Trident {
 	class Sample3DVisibilityLayer : public Layer {
 		private:
 			static constexpr float32 MOVEMENT_SPEED = 1.5f;
+			static constexpr float32 LOOK_SENSITIVITY = 0.075f;
 
 		public:
 			void build() override {
@@ -83,11 +84,10 @@ namespace Trident {
 					return true;
 				}
 
-				const float32 pitch = static_cast<float32>(event.getY());
-				const float32 yaw = static_cast<float32>(event.getX());
-				const vec3<float32> rotation = {pitch, yaw, 0.0_deg};
+				const float32 pitch = event.getY() * LOOK_SENSITIVITY;
+				const float32 yaw = event.getX() * LOOK_SENSITIVITY;
 
-				cameraController.accumulateAngularMotion(radians(rotation));
+				cameraController.accumulateAngularMotion(radians(vec3<float32>{pitch, yaw, 0.0_deg}));
 
 				return true;
 			}
