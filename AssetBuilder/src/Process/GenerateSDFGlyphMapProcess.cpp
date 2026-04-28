@@ -184,12 +184,16 @@ namespace Trident {
 		uint32 x = 0;
 		uint32 y = 0;
 		uint32 rowHeight = 0;
-		uint16 glyphIndex = 0;
+		uint64 glyphIndex = 0;
 		uint16 edgeIndex;
 
 		while (glyphIndex < glyphView.count()) {
 			const TrueTypeFont::Glyph& glyph = glyphView[glyphIndex];
-			const TrueTypeFont::longHorMetric& horizontalMetric = file.hMetrics[glyphIndex];
+
+			// TODO(asset-builder/font/ttf/metric-overflow)
+			// On some fonts (e.g. Bodoni Black) there is one less hMetric entry.
+			// For now, overflowing glyphs use the last entry. This seems coherent with FontDrop!.
+			const TrueTypeFont::longHorMetric& horizontalMetric = file.hMetrics[min(glyphIndex, file.hMetrics.count() - 1)];
 
 			Glyph& outputGlyph = output.glyphs[glyphIndex];
 			outputGlyph.width = glyph.max.x - glyph.min.x;
