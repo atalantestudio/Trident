@@ -5,9 +5,9 @@
 
 #include "Engine/API/Descriptor.hpp"
 #include "Engine/API/Geometry/Edge.hpp"
-#include "Engine/API/Geometry/Face.hpp"
 #include "Engine/API/Geometry/Hull2DType.hpp"
 #include "Engine/API/Geometry/Hull3DType.hpp"
+#include "Engine/API/Geometry/Plane3D.hpp"
 #include "Engine/Build/Cluster.hpp"
 #include "Engine/Filesystem/Asset/Asset.hpp"
 #include "Engine/Filesystem/Asset/GeometryAssetFlags.hpp"
@@ -39,7 +39,7 @@ namespace Trident {
 		float32 hullRadius;
 
 		sequence<Edge3D> hull3DEdges;
-		sequence<Face3D> hull3DFaces;
+		sequence<Plane3D> hull3DFaces;
 		sequence<uint16> hull3DFaceEdgeIndices;
 
 		/// In 2D, the wireframe is rendered with the `LINE_STRIP` topology.
@@ -163,7 +163,7 @@ namespace Trident {
 				return hull3DEdges;
 			}
 
-			inline const sequence<Face3D>& getHull3DFaces() const {
+			inline const sequence<Plane3D>& getHull3DFaces() const {
 				return hull3DFaces;
 			}
 
@@ -192,7 +192,7 @@ namespace Trident {
 			svec3<float32> hullCentroid;
 			float32 hullRadius;
 			sequence<Edge3D> hull3DEdges;
-			sequence<Face3D> hull3DFaces;
+			sequence<Plane3D> hull3DFaces;
 			sequence<uint16> hull3DFaceEdgeIndices;
 			sequence<uint32> hull2DLineIndices;
 			sequence<uint16> hull3DLineIndices;

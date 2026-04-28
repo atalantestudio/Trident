@@ -90,8 +90,6 @@
 #include "Engine/Module/Adapter/lyah.hpp"
 #include "Engine/Module/Adapter/tsl.hpp"
 
-#include "Engine/API/Geometry/Plane3D.hpp"
-
 #include "Engine/Base/Color.hpp"
 #include "Engine/Base/convert.hpp"
 #include "Engine/Base/KeyCode.hpp"

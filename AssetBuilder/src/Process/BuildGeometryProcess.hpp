@@ -144,7 +144,7 @@ namespace Trident {
 					outputSize +=
 						sizeof(hullHeader) +
 						hullHeader.edgeCount * sizeof(Edge3D) +
-						hullHeader.faceCount * sizeof(Face3D) +
+						hullHeader.faceCount * sizeof(Plane3D) +
 						hullHeader.faceEdgeIndexCount * sizeof(uint16) +
 						hullHeader.lineIndexCount * sizeof(uint16);
 				}
@@ -209,9 +209,9 @@ namespace Trident {
 						stream.write<Edge3D>(edge);
 					}
 
-					for (const Face3D& face : data.hullFaces) {
+					for (const Plane3D& face : data.hullFaces) {
 						stream.write<svec3<float32>>(face.normal);
-						stream.write<float32>(face.offset);
+						stream.write<float32>(face.distance);
 						stream.write<range<uint16, uint16>>(face.edgeIndexRange);
 					}
 

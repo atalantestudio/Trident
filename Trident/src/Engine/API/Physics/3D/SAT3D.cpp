@@ -125,14 +125,13 @@ namespace Trident {
 		uint16 faceIndex = 0;
 
 		while (faceIndex < hullA.faces.count()) {
-			const Face3D face = hullA.faces[faceIndex];
+			const Plane3D face = hullA.faces[faceIndex];
 
 			// TODO(physics/3d/sat): Move computations in the local space of B.
-			const Plane3D& P = rigidBodyA.facePlanes[faceIndex];
-			const Face3D plane = {svec3<float32>(P.worldNormal), P.worldDistance};
+			const Plane3D plane = rigidBodyA.facePlanes[faceIndex];
 			const vec3<float32> support = multiplyTransform(hullB.support(-vec3<float32>(face.normal) * R), rigidBodyB.world);
 
-			/* Face3D plane = face * transform;
+			/* Plane3D plane = face * transform;
 
 			if (bToA) {
 				plane.offset = abs(plane.offset);
@@ -146,10 +145,6 @@ namespace Trident {
 				query.separation = separation;
 				query.axis = face.normal;
 				query.referenceFaceIndex = faceIndex;
-				query.referenceBody = &rigidBodyA;
-				query.incidentBody = &rigidBodyB;
-				query.referenceHull = &hullA;
-				query.incidentHull = &hullB;
 			}
 
 			if (separation > 0.0f) {

@@ -120,7 +120,7 @@ namespace Trident {
 			sequence<Geometry3D> geometries;
 			sequence<Hull3D> hulls;
 			sequence<Edge3D> hullEdges;
-			sequence<Face3D> hullFaces;
+			sequence<Plane3D> hullFaces;
 			sequence<uint16> hullFaceEdgeIndices;
 			sequence<Plane3D> rigidBodyFacePlanes;
 

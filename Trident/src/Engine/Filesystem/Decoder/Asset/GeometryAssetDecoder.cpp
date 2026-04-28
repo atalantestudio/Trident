@@ -114,7 +114,7 @@ namespace Trident {
 			descriptor.hullCentroid = stream.read<svec3<float32>>();
 			descriptor.hullRadius = stream.read<float32>();
 			descriptor.hull3DEdges = sequence<Edge3D>(stream.read<uint16>());
-			descriptor.hull3DFaces = sequence<Face3D>(stream.read<uint16>());
+			descriptor.hull3DFaces = sequence<Plane3D>(stream.read<uint16>());
 			descriptor.hull3DFaceEdgeIndices = sequence<uint16>(stream.read<uint16>());
 			descriptor.hull3DLineIndices = sequence<uint16>(stream.read<uint16>());
 			descriptor.hullType = stream.read<uint8>();
@@ -125,9 +125,9 @@ namespace Trident {
 				edge = stream.read<Edge3D>();
 			}
 
-			for (Face3D& face : descriptor.hull3DFaces) {
+			for (Plane3D& face : descriptor.hull3DFaces) {
 				face.normal = stream.read<svec3<float32>>();
-				face.offset = stream.read<float32>();
+				face.distance = stream.read<float32>();
 				face.edgeIndexRange = stream.read<range<uint16, uint16>>();
 			}
 

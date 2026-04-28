@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Geometry/Face.hpp"
+#include "Engine/API/Geometry/Plane3D.hpp"
 
 namespace Trident {
 	struct Transform3D {
@@ -26,11 +26,11 @@ namespace Trident {
 		return p * A.orientation + A.position;
 	} */
 
-	inline Face3D operator*(Face3D f, const Transform3D& A) {
-		f.normal = svec3<float32>(vec3<float32>(f.normal) * A.orientation);
-		f.offset = dot(vec3<float32>(f.normal), A.position) + f.offset;
+	inline Plane3D operator*(Plane3D plane, const Transform3D& A) {
+		plane.normal = svec3<float32>(vec3<float32>(plane.normal) * A.orientation);
+		plane.distance = dot(vec3<float32>(plane.normal), A.position) + plane.distance;
 
-		return f;
+		return plane;
 	}
 
 	/// Returns the inverse transform of `A`.

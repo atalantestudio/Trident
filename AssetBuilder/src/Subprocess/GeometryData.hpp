@@ -28,7 +28,7 @@ namespace Trident {
 		sequence<uint16> hullLineIndices;
 		sequence<Edge3D> hullEdges;
 		sequence<uint16> hullFaceEdgeIndices;
-		sequence<Face3D> hullFaces;
+		sequence<Plane3D> hullFaces;
 		Hull3D hull;
 	};
 }

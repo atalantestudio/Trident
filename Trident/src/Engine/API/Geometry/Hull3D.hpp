@@ -4,8 +4,8 @@
 #pragma once
 
 #include "Engine/API/Geometry/Edge.hpp"
-#include "Engine/API/Geometry/Face.hpp"
 #include "Engine/API/Geometry/Hull3DType.hpp"
+#include "Engine/API/Geometry/Plane3D.hpp"
 
 namespace Trident {
 	/// A convex hull wrapping a 3D geometry.
@@ -49,7 +49,7 @@ namespace Trident {
 		view<Edge3D> edges;
 
 		/// The faces composing the hull.
-		view<Face3D> faces;
+		view<Plane3D> faces;
 
 		/// The edge indices per face.
 		view<uint16> faceEdgeIndices;

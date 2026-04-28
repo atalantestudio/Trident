@@ -6,11 +6,11 @@
 #include "Engine/API/Physics/3D/SutherlandHodgman3D.hpp"
 
 namespace Trident {
-	pool<ClipVertex3D, 8> SutherlandHodgman3D(const FaceQuery& faceQuery, uint16 faceIndex, pool<ClipVertex3D, MAX_FACE_VERTEX_COUNT> inputVertices, const pool<uint16, 8>& referenceSidePlaneIndices) {
+	pool<ClipVertex3D, 8> SutherlandHodgman3D(const RigidBody3DComponent& referenceBody, uint16 faceIndex, pool<ClipVertex3D, MAX_FACE_VERTEX_COUNT> inputVertices, const pool<uint16, 8>& referenceSidePlaneIndices) {
 		index planeIndex = 0;
 
 		while (planeIndex < referenceSidePlaneIndices.count()) {
-			const Plane3D P = faceQuery.referenceBody->facePlanes[referenceSidePlaneIndices[planeIndex]];
+			const Plane3D plane = referenceBody.facePlanes[referenceSidePlaneIndices[planeIndex]];
 
 			pool<ClipVertex3D, MAX_FACE_VERTEX_COUNT> outputVertices;
 			index vertexOffset = 0;
@@ -19,8 +19,8 @@ namespace Trident {
 				const ClipVertex3D& a = inputVertices[vertexOffset];
 				const ClipVertex3D& b = inputVertices[(vertexOffset + 1) % inputVertices.count()];
 
-				const float32 distanceA = signedDistanceWorld(P, a.position);
-				const float32 distanceB = signedDistanceWorld(P, b.position);
+				const float32 distanceA = signedDistance(plane, a.position);
+				const float32 distanceB = signedDistance(plane, b.position);
 
 				// If A and B are on different sides of the plane, keep the intersection point.
 				if (distanceA * distanceB < 0.0f) {
@@ -28,8 +28,6 @@ namespace Trident {
 
 					ClipVertex3D c{};
 					c.position = lerp(a.position, b.position, t);
-
-					outputVertices.add(c);
 
 					if (distanceA > 0.0f) {
 						c.id = a.id;
@@ -41,6 +39,8 @@ namespace Trident {
 						c.id.incidentFaceAIndex = max<uint16>();
 						c.id.incidentFaceBIndex = faceIndex;
 					}
+
+					outputVertices.add(c);
 				}
 
 				// If B is below the plane, keep it.

@@ -50,21 +50,21 @@ namespace Trident {
 		// TODO(physics/3d/edge-contact-id)
 	}
 
-	static void createFaceContact(const FaceQuery& faceQuery, ContactManifold3D* contactManifold) {
+	static void createFaceContact(const FaceQuery& faceQuery, const RigidBody3DComponent& referenceBody, const RigidBody3DComponent& incidentBody, const Hull3D& referenceHull, const Hull3D& incidentHull, ContactManifold3D* contactManifold) {
 		// TODO(lyah/scalar-math)
 		// Last component of the SIMD register is not 0, which causes issues when solving.
 		// Replace with scalar math.
 		contactManifold->normal = {faceQuery.axis[0], faceQuery.axis[1], faceQuery.axis[2]};
 
-		const Plane3D& referencePlane = faceQuery.referenceBody->facePlanes[faceQuery.referenceFaceIndex];
+		const Plane3D referencePlane = referenceBody.facePlanes[faceQuery.referenceFaceIndex];
 
 		pool<uint16, 8> referenceSidePlaneIndices;
 
 		{
 			uint32 edgeIndex = 0;
 
-			while (edgeIndex < faceQuery.referenceHull->edges.count()) {
-				const Edge3D edge = faceQuery.referenceHull->edges[edgeIndex];
+			while (edgeIndex < referenceHull.edges.count()) {
+				const Edge3D edge = referenceHull.edges[edgeIndex];
 
 				if (edge.faceIndex == faceQuery.referenceFaceIndex) {
 					uint32 otherEdgeIndex = edgeIndex;
@@ -78,7 +78,7 @@ namespace Trident {
 						otherEdgeIndex += 1;
 					}
 
-					referenceSidePlaneIndices.add(faceQuery.referenceHull->edges[otherEdgeIndex].faceIndex);
+					referenceSidePlaneIndices.add(referenceHull.edges[otherEdgeIndex].faceIndex);
 				}
 
 				edgeIndex += 1;
@@ -87,7 +87,7 @@ namespace Trident {
 
 		// Rotate by the inverse of the incident body's orientation to get a normal that can be used as a support direction.
 		// TODO: Invert the orientation before multiplying?
-		const vec3<float32> referenceFaceDirection = referencePlane.worldNormal * faceQuery.incidentBody->orientation;
+		const vec3<float32> referenceFaceDirection = vec3<float32>(referencePlane.normal) * incidentBody.orientation;
 
 		index incidentFaceIndex = max<index>();
 
@@ -97,8 +97,8 @@ namespace Trident {
 			float32 minAngle = max<float32>();
 			index faceIndex = 0;
 
-			while (faceIndex < faceQuery.incidentBody->facePlanes.count()) {
-				angle = dot(faceQuery.incidentBody->facePlanes[faceIndex].localNormal, referenceFaceDirection);
+			while (faceIndex < incidentHull.faces.count()) {
+				angle = dot(vec3<float32>(incidentHull.faces[faceIndex].normal), referenceFaceDirection);
 
 				if (angle < minAngle) {
 					minAngle = angle;
@@ -109,33 +109,33 @@ namespace Trident {
 			}
 		}
 
-		const Face3D& incidentFace = faceQuery.incidentHull->faces[incidentFaceIndex];
+		const Plane3D& incidentFace = incidentHull.faces[incidentFaceIndex];
 
 		pool<ClipVertex3D, MAX_FACE_VERTEX_COUNT> incidentFaceVertices{};
 
 		uint16 edgeIndex = 0;
 
 		while (edgeIndex < incidentFace.edgeIndexRange.count) {
-			const Edge3D edge = faceQuery.incidentHull->edges[faceQuery.incidentHull->faceEdgeIndices[incidentFace.edgeIndexRange.offset + edgeIndex]];
+			const Edge3D edge = incidentHull.edges[incidentHull.faceEdgeIndices[incidentFace.edgeIndexRange.offset + edgeIndex]];
 
 			ClipVertex3D clipVertex{};
-			clipVertex.position = multiplyTransform(vec3<float32>(faceQuery.incidentHull->vertexPositions[edge.originVertexIndex]), faceQuery.incidentBody->world);
+			clipVertex.position = multiplyTransform(vec3<float32>(incidentHull.vertexPositions[edge.originVertexIndex]), incidentBody.world);
 			clipVertex.separation = 0.0f;
 			clipVertex.id.referenceEdgeAIndex = max<uint16>();
 			clipVertex.id.referenceEdgeBIndex = max<uint16>();
-			clipVertex.id.referenceFaceAIndex = static_cast<sint16>(edge.faceIndex - 1) % static_cast<uint16>(faceQuery.incidentHull->faces.count());
+			clipVertex.id.referenceFaceAIndex = static_cast<sint16>(edge.faceIndex - 1) % static_cast<uint16>(incidentHull.faces.count());
 			clipVertex.id.referenceFaceBIndex = edge.faceIndex;
 			clipVertex.id.incidentEdgeAIndex = max<uint16>();
 			clipVertex.id.incidentEdgeBIndex = max<uint16>();
 			clipVertex.id.incidentFaceAIndex = edge.faceIndex;
-			clipVertex.id.incidentFaceBIndex = (edge.faceIndex + 1) % static_cast<uint16>(faceQuery.incidentHull->faces.count());
+			clipVertex.id.incidentFaceBIndex = (edge.faceIndex + 1) % static_cast<uint16>(incidentHull.faces.count());
 
 			incidentFaceVertices.add(clipVertex);
 
 			edgeIndex += 1;
 		}
 
-		pool<ClipVertex3D, 8> contactPool = SutherlandHodgman3D(faceQuery, faceQuery.referenceFaceIndex, incidentFaceVertices, referenceSidePlaneIndices);
+		pool<ClipVertex3D, 8> contactPool = SutherlandHodgman3D(referenceBody, faceQuery.referenceFaceIndex, incidentFaceVertices, referenceSidePlaneIndices);
 
 		// Discard contacts that are above the reference plane, and move the rest onto the plane.
 		// This helps with coherence when reducing the number of contacts.
@@ -145,7 +145,7 @@ namespace Trident {
 			while (contactIndex >= 0) {
 				ClipVertex3D& contact = contactPool[contactIndex];
 
-				const float32 separation = signedDistanceWorld(referencePlane, contact.position);
+				const float32 separation = signedDistance(referencePlane, contact.position);
 
 				if (separation > 0.0f) {
 					contactPool.remove(contactIndex);
@@ -336,17 +336,17 @@ namespace Trident {
 
 		if (sat.faceQueryA.separation >= sat.faceQueryB.separation) {
 			// TODO(physics/3d/separating-axis-orientation): The axis should be rotated by the base orientation. Why is the inverse needed?
-			sat.faceQueryA.axis *= inverse(sat.faceQueryA.referenceBody->orientation);
+			sat.faceQueryA.axis *= inverse(rigidBodyA.orientation);
 
-			createFaceContact(sat.faceQueryA, contactManifold);
+			createFaceContact(sat.faceQueryA, rigidBodyA, rigidBodyB, hullA, hullB, contactManifold);
 
 			return true;
 		}
 
 		// TODO(physics/3d/separating-axis-orientation): The axis should be rotated by the base orientation. Why is the inverse needed?
-		sat.faceQueryB.axis *= inverse(sat.faceQueryB.referenceBody->orientation);
+		sat.faceQueryB.axis *= inverse(rigidBodyB.orientation);
 
-		createFaceContact(sat.faceQueryB, contactManifold);
+		createFaceContact(sat.faceQueryB, rigidBodyB, rigidBodyA, hullB, hullA, contactManifold);
 
 		contactManifold->normal *= -1.0f;
 

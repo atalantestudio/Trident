@@ -70,7 +70,7 @@ namespace Trident {
 		geometries = sequence<Geometry3D>(geometryAssets.count());
 		hulls = sequence<Hull3D>(sceneAsset->getHullCount());
 		hullEdges = sequence<Edge3D>(sceneAsset->getHullEdgeCount());
-		hullFaces = sequence<Face3D>(sceneAsset->getHullFaceCount());
+		hullFaces = sequence<Plane3D>(sceneAsset->getHullFaceCount());
 		hullFaceEdgeIndices = sequence<uint16>(sceneAsset->getHullFaceEdgeIndexCount());
 		rigidBodyFacePlanes = sequence<Plane3D>(sceneAsset->getRigidBodyFacePlaneCount());
 
@@ -195,7 +195,7 @@ namespace Trident {
 
 				const view<svec3<float32>> vertexPositions(pointer_cast<const svec3<float32>*>(&dataBuffer[geometryVertexPositionComponentRange.offset * sizeof(float32)]), geometryVertexPositionComponentRange.count / 3);
 				const view<Edge3D> edges(&hullEdges[hullEdgeOffset], geometryAsset->getHull3DEdges().count());
-				const view<Face3D> faces(&hullFaces[hullFaceOffset], geometryAsset->getHull3DFaces().count());
+				const view<Plane3D> faces(&hullFaces[hullFaceOffset], geometryAsset->getHull3DFaces().count());
 				const view<uint16> faceEdgeIndices(&hullFaceEdgeIndices[hullFaceEdgeIndexOffset], geometryAsset->getHull3DFaceEdgeIndices().count());
 				const range<uint32, uint16> lineIndexRange = {hullLineIndexOffset, static_cast<uint16>(geometryAsset->getHull3DLineIndices().count())};
 
@@ -267,18 +267,6 @@ namespace Trident {
 
 				rigidBodyComponent.facePlanes = view<Plane3D>(&rigidBodyFacePlanes[rigidBodyFacePlaneOffset], hull.faces.count());
 
-				index faceIndex = 0;
-
-				while (faceIndex < hull.faces.count()) {
-					const Face3D& face = hull.faces[faceIndex];
-
-					Plane3D& plane = rigidBodyFacePlanes[rigidBodyFacePlaneOffset + faceIndex];
-					plane.localNormal = vec3<float32>(face.normal);
-					plane.localDistance = face.offset;
-
-					faceIndex += 1;
-				}
-
 				rigidBodyFacePlaneOffset += rigidBodyComponent.facePlanes.count();
 			}
 
@@ -310,18 +298,19 @@ namespace Trident {
 
 			index faceIndex = 0;
 
-			while (faceIndex < rigidBodyComponent.facePlanes.count()) {
+			while (faceIndex < hull.faces.count()) {
+				const Plane3D face = hull.faces[faceIndex];
+
 				Plane3D& plane = rigidBodyFacePlanes[rigidBodyFaceOffset + faceIndex];
 
 				// TODO(rigid-body/uniform-scaling): Remove non-uniform scaling properties on the rigid bodies.
-				plane.worldNormal = normalized(multiplyTransform(plane.localNormal, transposeInverseWorld));
-
-				plane.worldDistance = dot(multiplyTransform(plane.localNormal * plane.localDistance, rigidBodyComponent.world), plane.worldNormal);
+				plane.normal = svec3<float32>(normalized(multiplyTransform(vec3<float32>(face.normal), transposeInverseWorld)));
+				plane.distance = dot(multiplyTransform(vec3<float32>(face.normal) * face.distance, rigidBodyComponent.world), vec3<float32>(plane.normal));
 
 				faceIndex += 1;
 			}
 
-			rigidBodyFaceOffset += rigidBodyComponent.facePlanes.count();
+			rigidBodyFaceOffset += hull.faces.count();
 			componentIndex += 1;
 		}
 	}

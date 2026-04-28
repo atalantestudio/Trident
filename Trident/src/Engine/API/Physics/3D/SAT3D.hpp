@@ -7,8 +7,6 @@
 #include "Engine/ECS/Component/RigidBody3DComponent.hpp"
 
 namespace Trident {
-	static constexpr uint8 MAX_FACE_VERTEX_COUNT = 8;
-
 	struct EdgeQuery {
 		/// The separation between the two bodies.
 		float32 separation = min<float32>();
@@ -27,12 +25,6 @@ namespace Trident {
 
 		/// The closest feature (face or edge) on the reference body, facing towards the incident body.
 		uint16 referenceFaceIndex;
-
-		const RigidBody3DComponent* referenceBody;
-		const RigidBody3DComponent* incidentBody;
-
-		const Hull3D* referenceHull;
-		const Hull3D* incidentHull;
 	};
 
 	struct SATOutput3D {

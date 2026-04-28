@@ -5,21 +5,15 @@
 
 namespace Trident {
 	struct Plane3D {
-		/// Normal in local space.
-		vec3<float32> localNormal;
+		svec3<float32> normal;
+		float32 distance;
 
-		/// Distance from the origin in local space.
-		float32 localDistance;
-
-		/// Normal in world space.
-		vec3<float32> worldNormal;
-
-		/// Distance from the origin in world space.
-		float32 worldDistance;
+		// TODO: The count should be 8-bits, as a face cannot be referred by more than 255 edges.
+		range<uint16, uint16> edgeIndexRange;
 	};
 
 	/// Calculates and returns the signed distance between a point and a plane in world space.
-	inline float32 signedDistanceWorld(const Plane3D& P, vec3<float32> p) {
-		return dot(P.worldNormal, p) - P.worldDistance;
+	inline float32 signedDistance(Plane3D plane, vec3<float32> p) {
+		return dot(vec3<float32>(plane.normal), p) - plane.distance;
 	}
 }
