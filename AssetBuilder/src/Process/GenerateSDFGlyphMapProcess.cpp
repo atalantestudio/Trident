@@ -10,7 +10,7 @@
 #include "GenerateSDFGlyphMapProcess.hpp"
 
 namespace Trident {
-	static bool calculateGlyphMapLayout(Extent2D glyphMapExtent, const File<FileFormat::TTF>& file, view<TrueTypeFont::Glyph> glyphView, uint32 spreadFactor) {
+	static uint64 calculateGlyphMapLayout(Extent2D glyphMapExtent, const File<FileFormat::TTF>& file, view<TrueTypeFont::Glyph> glyphView, uint32 spreadFactor) {
 		const sint16 lineHeight = file.ascent - file.descent;
 		const float32 inverseLineHeight = static_cast<float32>(1.0 / lineHeight * 64.0);
 		const vec2<float32> spread = {spreadFactor * 2.0f, spreadFactor * 2.0f};
@@ -18,9 +18,14 @@ namespace Trident {
 		uint32 x = 0;
 		uint32 y = 0;
 		uint32 rowHeight = 0;
+		uint64 glyphCount = 0;
 
-		for (const TrueTypeFont::Glyph& glyph : glyphView) {
+		while (glyphCount < glyphView.count()) {
+			const TrueTypeFont::Glyph& glyph = glyphView[glyphCount];
+
 			if (glyph.emptyOrUnparsed()) {
+				glyphCount += 1;
+
 				continue;
 			}
 
@@ -47,11 +52,13 @@ namespace Trident {
 			}
 
 			if (y >= glyphMapExtent.height) {
-				return false;
+				break;
 			}
+
+			glyphCount += 1;
 		}
 
-		return true;
+		return glyphCount;
 	}
 
 	static uint64 calculateGlyphBufferSize(const File<FileFormat::TTF>& file, view<TrueTypeFont::Glyph> glyphView) {
@@ -65,22 +72,22 @@ namespace Trident {
 	}
 
 	GenerateSDFGlyphMapProcess::GenerateSDFGlyphMapProcess(const File<FileFormat::TTF>& file, SDFGlyphMap& output) {
-		// The remaining glyphs will be ignored.
-		static constexpr uint64 MAX_GLYPH_COUNT = 737;
-
 		static constexpr uint32 GLYPH_SUBIMAGE_DIMENSION = 64;
 		static constexpr uint32 spreadFactor = 7;
 
-		const view<TrueTypeFont::Glyph> glyphView(&file.glyphs[0], min(MAX_GLYPH_COUNT, file.glyphs.count()));
-
 		output.extent = {2048, 2048};
-		output.glyphs = sequence<Glyph>(glyphView.count());
 
-		if (!calculateGlyphMapLayout(output.extent, file, glyphView, spreadFactor)) {
-			ENGINE_ASSERT(false, "The glyph map is too small.");
+		view<TrueTypeFont::Glyph> glyphView(&file.glyphs[0], file.glyphs.count());
 
-			return;
+		const uint64 glyphCount = calculateGlyphMapLayout(output.extent, file, glyphView, spreadFactor);
+
+		if (glyphCount < glyphView.count()) {
+			ENGINE_WARNING("The total size needed for the glyphs exceeds the size of the glyph map. [] glyphs were ignored.", glyphView.count() - glyphCount);
+
+			glyphView = view<TrueTypeFont::Glyph>(&file.glyphs[0], glyphCount);
 		}
+
+		output.glyphs = sequence<Glyph>(glyphView.count());
 
 		const uint64 glyphBufferSize = calculateGlyphBufferSize(file, glyphView);
 
