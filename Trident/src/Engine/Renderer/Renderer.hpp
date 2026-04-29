@@ -32,18 +32,18 @@ namespace Trident {
 
 		public:
 			template<typename ElementType>
-			static ref<Buffer<ElementType>> createBuffer(const BufferDescriptor& descriptor) {
+			inline static ref<Buffer<ElementType>> createBuffer(const BufferDescriptor& descriptor) {
 				return layerCompositor->device->createBuffer<ElementType>(descriptor);
 			}
 
 			/// Creates and returns a buffer suitable for memory transfers from the CPU to the GPU.
 			template<typename ElementType>
-			static ref<Buffer<ElementType>> createStagingBuffer(uint64 size, bool persistent = false) {
+			inline static ref<Buffer<ElementType>> createStagingBuffer(uint64 size) {
 				return layerCompositor->device->createBuffer<ElementType>({
 					.size = size,
 					.usage = BufferUsage::TRANSFER_SRC,
 					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
-					.persistent = persistent,
+					.persistent = false,
 					#if defined(DEBUG_OBJECT_NAME)
 						.name = "Staging",
 					#endif

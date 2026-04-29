@@ -120,8 +120,6 @@ namespace Trident {
 
 		writeVisibilityIndirectCommand();
 
-		visibilityIndirectBuffer->unmap();
-
 		const ref<Buffer<uint8>> stagingBuffer = createStagingBuffer<uint8>(dataBuffer->getSize() + instanceBuffer->getSize());
 
 		uint8* mappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
@@ -457,6 +455,8 @@ namespace Trident {
 		drawIndirectCommand.instanceCount = static_cast<uint32>(scene->clusters.count());
 		drawIndirectCommand.vertexOffset = 0;
 		drawIndirectCommand.instanceOffset = 0;
+
+		visibilityIndirectBuffer->unmap();
 	}
 
 	void VisibilityRenderer::updateBufferDescriptorSets(uint64 vertexPositionComponentRegionSize, uint64 vertexNormalComponentRegionSize, uint64 vertexTextureCoordinateComponentRegionSize, uint64 vertexPositionIndexRegionSize, uint64 vertexNormalIndexRegionSize, uint64 vertexTextureCoordinateIndexRegionSize, uint64 clusterRegionSize, uint64 geometryRegionSize) {
