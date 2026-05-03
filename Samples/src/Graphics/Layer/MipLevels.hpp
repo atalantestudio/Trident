@@ -70,6 +70,15 @@ namespace Trident {
 				if (keyCode >= KeyCode::DIGIT_0 && keyCode <= KeyCode::DIGIT_9) {
 					*mipLevelMappedRange = static_cast<uint32>(keyCode) - static_cast<uint32>(KeyCode::DIGIT_0);
 				}
+				else if (keyCode == KeyCode::A) {
+					*mipLevelMappedRange = 10;
+				}
+				else if (keyCode == KeyCode::Z) {
+					*mipLevelMappedRange = 11;
+				}
+				else if (keyCode == KeyCode::E) {
+					*mipLevelMappedRange = 12;
+				}
 
 				return true;
 			}
