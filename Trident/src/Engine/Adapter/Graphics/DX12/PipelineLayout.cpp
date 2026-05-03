@@ -83,7 +83,7 @@ namespace Trident {
 						imageDescriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
 						imageDescriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-						shaderResourceViewShaderRegister += 1;
+						shaderResourceViewShaderRegister += binding.descriptorCount;
 
 						D3D12_DESCRIPTOR_RANGE1& samplerDescriptorRange = descriptorRanges[samplerDescriptorRangeOffset];
 						samplerDescriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
@@ -94,7 +94,7 @@ namespace Trident {
 						samplerDescriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 						samplerDescriptorRangeOffset += 1;
-						samplerShaderRegister += 1;
+						samplerShaderRegister += binding.descriptorCount;
 						samplerShaderStages |= binding.shaderStages;
 
 						break;
@@ -108,7 +108,7 @@ namespace Trident {
 						descriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
 						descriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-						shaderResourceViewShaderRegister += 1;
+						shaderResourceViewShaderRegister += binding.descriptorCount;
 
 						break;
 					}
@@ -121,7 +121,7 @@ namespace Trident {
 						descriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
 						descriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-						unorderedAccessViewShaderRegister += 1;
+						unorderedAccessViewShaderRegister += binding.descriptorCount;
 
 						break;
 					}
@@ -134,7 +134,7 @@ namespace Trident {
 						descriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
 						descriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-						constantBufferViewShaderRegister += 1;
+						constantBufferViewShaderRegister += binding.descriptorCount;
 
 						break;
 					}
@@ -147,7 +147,7 @@ namespace Trident {
 						descriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
 						descriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-						shaderResourceViewShaderRegister += 1;
+						shaderResourceViewShaderRegister += binding.descriptorCount;
 
 						break;
 					}
@@ -158,7 +158,7 @@ namespace Trident {
 						descriptorRange.BaseShaderRegister = unorderedAccessViewShaderRegister;
 
 						if (binding.shaderStages & ShaderStage::FRAGMENT) {
-							// NOTE: UAV registers live in the same name space as outputs, so they must be bound to at least 'u1'.
+							// UAV registers live in the same name space as outputs, so they must be bound to at least 'u1'.
 							descriptorRange.BaseShaderRegister += 1;
 						}
 
@@ -166,7 +166,7 @@ namespace Trident {
 						descriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
 						descriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-						unorderedAccessViewShaderRegister += 1;
+						unorderedAccessViewShaderRegister += binding.descriptorCount;
 
 						break;
 					}
@@ -179,7 +179,7 @@ namespace Trident {
 						descriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
 						descriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-						shaderResourceViewShaderRegister += 1;
+						shaderResourceViewShaderRegister += binding.descriptorCount;
 
 						break;
 					}
