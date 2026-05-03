@@ -195,18 +195,35 @@ namespace Trident {
 					mipLevel += 1;
 				}
 
+				const ref<Buffer<uint32>> atomicCounterBuffer = createBuffer<uint32>({
+					.size = sizeof(uint32),
+					.usage = BufferUsage::READ_WRITE_STORAGE,
+					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+					.persistent = false,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Atomic counter",
+					#endif
+				});
+
 				const sequence<DescriptorSetLayoutBinding> bindings = {
-					// Input image
+					// Source
 					{
 						.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE,
 						.descriptorCount = 1,
 						.shaderStages = ShaderStage::COMPUTE,
 					},
 
-					// Output image
+					// Destination
 					{
 						.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE,
 						.descriptorCount = static_cast<uint32>(imageViews.count() - 1),
+						.shaderStages = ShaderStage::COMPUTE,
+					},
+
+					// Atomic counter
+					{
+						.descriptorType = DescriptorType::READ_WRITE_STORAGE_BUFFER,
+						.descriptorCount = 1,
 						.shaderStages = ShaderStage::COMPUTE,
 					},
 				};
@@ -235,19 +252,32 @@ namespace Trident {
 					mipLevel += 1;
 				}
 
+				const DescriptorBuffer atomicCounterDescriptorBuffer = {
+					.buffer = atomicCounterBuffer,
+					.offset = 0,
+					.size = atomicCounterBuffer->getSize(),
+				};
+
 				const sequence<WriteDescriptorSet> writeDescriptorSets = {
-					// Input image
+					// Source
 					{
 						.descriptorSet = descriptorSet,
 						.bindingIndex = 0,
 						.descriptorImages = descriptorImages[0],
 					},
 
-					// Output image
+					// Destination
 					{
 						.descriptorSet = descriptorSet,
 						.bindingIndex = 1,
 						.descriptorImages = view<DescriptorImage>(&descriptorImages[1], descriptorImages.count() - 1),
+					},
+
+					// Atomic counter
+					{
+						.descriptorSet = descriptorSet,
+						.bindingIndex = 2,
+						.descriptorBuffers = atomicCounterDescriptorBuffer,
 					},
 				};
 
