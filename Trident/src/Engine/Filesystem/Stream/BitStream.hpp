@@ -213,7 +213,7 @@ namespace Trident {
 				uint64 dataOffset = 0;
 
 				// TODO: Compute theoretical max. number of blocks.
-				static constexpr uint32 MAX_BLOCK_COUNT = 1000;
+				static constexpr uint32 MAX_BLOCK_COUNT = 1834;
 
 				for (uint32 blockIndex = 0; blockIndex < MAX_BLOCK_COUNT; blockIndex += 1) {
 					// BFINAL is set if and only if this is the last block of the data set.
