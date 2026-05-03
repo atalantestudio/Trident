@@ -7,7 +7,10 @@ namespace Trident {
 	enum class ImageFormat : uint8 {
 		// Fixed/floating point color formats.
 		R8_UNORM,
+
+		// NOTE: Only used for asset storage.
 		R8G8B8_UNORM,
+
 		B8G8R8A8_UNORM,
 		R8G8B8A8_SRGB,
 		R8G8B8A8_UNORM,

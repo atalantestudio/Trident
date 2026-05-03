@@ -9,69 +9,69 @@
 
 namespace Trident {
 	class SampleMipLevelsRenderer : public Renderer {
-		private:
-			static constexpr view<char8> IMAGE_ASSET_NAME = "Baboon";
-
 		public:
 			void build() override {
-				setupRenderPass();
-
 				loadImage();
 
-				{
-					ImageViewDescriptor imageViewDescriptor{};
-					imageViewDescriptor.mipLevelOffset = 0;
-					imageViewDescriptor.mipLevelCount = 1;
-					imageViewDescriptor.layerOffset = 0;
-					imageViewDescriptor.layerCount = 1;
+				generateMipLevels(image);
 
-					#if defined(DEBUG_OBJECT_NAME)
-						imageViewDescriptor.name = "Input";
-					#endif
-
-					ref<ImageView> inputImageView = image->createView(imageViewDescriptor);
-
-					imageViewDescriptor.layerOffset = 1;
-					imageViewDescriptor.layerCount = image->getLayerCount() - 1;
-
-					#if defined(DEBUG_OBJECT_NAME)
-						imageViewDescriptor.name = "Output";
-					#endif
-
-					ref<ImageView> outputImageView = image->createView(imageViewDescriptor);
-
-					generateMipLevels(inputImageView, outputImageView);
-				}
-
-				setupImageView();
-				setupSampler();
-
+				setupRenderPass();
 				recreateFramebuffers();
 
-				createImageDescriptorSetLayout();
-				allocateImageDescriptorSet();
-				updateImageDescriptorSet();
+				debugImageView = createDebugImageView();
 
-				setupPipelineLayout();
-				setupGraphicsPipeline();
+				debugSampler = createDebugSampler();
+
+				mipLevelBuffer = createMipLevelBuffer();
+
+				mipLevelMappedRange = mipLevelBuffer->map(0, mipLevelBuffer->getSize());
+				*mipLevelMappedRange = 0;
+
+				debugImageDescriptorSetLayout = createImageDescriptorSetLayout();
+
+				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(debugImageDescriptorSetLayout);
+
+				debugImageDescriptorSet = descriptorSets[0];
+
+				updateDebugImageDescriptorSet();
+
+				debugImagePipelineLayout = createDebugImagePipelineLayout();
+
+				debugImagePipeline = createDebugImagePipeline();
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
-				BeginRenderPassDescriptor beginRenderPassDescriptor{};
-				beginRenderPassDescriptor.framebuffer = framebuffers[getSwapchainImageIndex()];
-				beginRenderPassDescriptor.clearValues = {{1.0f, 1.0f, 1.0f, 1.0f}};
-
 				const Extent2D swapchainExtent = getSwapchain()->getExtent();
 				const float32 width = static_cast<float32>(swapchainExtent.width);
 				const float32 height = static_cast<float32>(swapchainExtent.height);
 
-				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
+				commandEncoder->beginRenderPass({
+					.framebuffer = framebuffers[getSwapchainImageIndex()],
+					.clearValues = {{1.0f, 1.0f, 1.0f, 1.0f}},
+				});
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
-				commandEncoder->bindGraphicsPipeline(graphicsPipeline);
-				commandEncoder->bindDescriptorSets(pipelineLayout, 0, imageDescriptorSet);
+				commandEncoder->bindGraphicsPipeline(debugImagePipeline);
+				commandEncoder->bindDescriptorSets(debugImagePipelineLayout, 0, debugImageDescriptorSet);
 				commandEncoder->draw(3, 1, 0, 0);
 				commandEncoder->endRenderPass();
+			}
+
+			void onEvent(Event& event) override {
+				EventDispatcher eventDispatcher(event);
+				eventDispatcher.dispatch<KeyDownEvent>(BIND(onKeyDown));
+
+				Renderer::onEvent(event);
+			}
+
+			bool onKeyDown(KeyDownEvent& event) {
+				const KeyCode keyCode = event.getKeyCode();
+
+				if (keyCode >= KeyCode::DIGIT_0 && keyCode <= KeyCode::DIGIT_9) {
+					*mipLevelMappedRange = static_cast<uint32>(keyCode) - static_cast<uint32>(KeyCode::DIGIT_0);
+				}
+
+				return true;
 			}
 
 			void resize(WindowResizeEvent& event) override {
@@ -79,77 +79,71 @@ namespace Trident {
 			}
 
 		private:
-			void setupRenderPass() {
-				Attachment swapchainAttachment{};
-				swapchainAttachment.format = getSurface()->getFormat();
-				swapchainAttachment.sampleCount = 1;
-				swapchainAttachment.loadOperation = LoadOperation::CLEAR;
-				swapchainAttachment.storeOperation = StoreOperation::STORE;
-				swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
-
-				AttachmentReference swapchainAttachmentReference{};
-				swapchainAttachmentReference.index = 0;
-				swapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-
-				SubpassDescriptor subpassDescriptor{};
-				subpassDescriptor.colorAttachmentReferences = {swapchainAttachmentReference};
-
-				const ref<Subpass> subpass = createSubpass(subpassDescriptor);
-
-				RenderPassDescriptor renderPassDescriptor{};
-				renderPassDescriptor.attachments = {swapchainAttachment};
-				renderPassDescriptor.subpasses = {subpass};
-
-				renderPass = createRenderPass(renderPassDescriptor);
-			}
-
 			void loadImage() {
-				const ref<ImageAsset> imageAsset = getLayer()->getApplication()->getAssetLibrary()->getAsset<ImageAsset>(IMAGE_ASSET_NAME);
-				const ref<Buffer<uint8>> imageStagingBuffer = createStagingBuffer<uint8>(imageAsset->getExtent().width * imageAsset->getExtent().height * imageAsset->getExtent().depth * imageAsset->getLayerCount() * getChannelCount(imageAsset->getFormat()));
-
-				DEBUG_ASSERT(imageAsset->getFormat() == ImageFormat::R8G8B8A8_UNORM);
+				const view<char8> assetName = ((Layer*) getLayer())->getApplication()->getPropertyFile()->getProperty<view<char8>>("AssetName");
+				const ref<ImageAsset> imageAsset = getLayer()->getApplication()->getAssetLibrary()->getAsset<ImageAsset>(assetName);
+				const Extent3D imageExtent = imageAsset->getExtent();
+				const ref<Buffer<uint8>> imageStagingBuffer = createStagingBuffer<uint8>(imageExtent.width * imageExtent.height * imageExtent.depth * imageAsset->getLayerCount() * getChannelCount(ImageFormat::R8G8B8A8_UNORM));
 
 				uint8* imageStagingBufferMappedRange = imageStagingBuffer->map(0, imageStagingBuffer->getSize());
 
-				std::copy(imageAsset->getData().begin(), imageAsset->getData().end(), imageStagingBufferMappedRange);
+				switch (imageAsset->getFormat()) {
+					case ImageFormat::R8_UNORM: {
+						convert<ImageFormat::R8_UNORM, ImageFormat::R8G8B8A8_UNORM>(imageAsset->getData(), &imageStagingBufferMappedRange[0], imageStagingBuffer->getSize());
+
+						break;
+					}
+					case ImageFormat::R8G8B8_UNORM: {
+						convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(imageAsset->getData(), &imageStagingBufferMappedRange[0], imageStagingBuffer->getSize());
+
+						break;
+					}
+					case ImageFormat::R8G8B8A8_UNORM: {
+						std::copy(imageAsset->getData().begin(), imageAsset->getData().end(), imageStagingBufferMappedRange);
+
+						break;
+					}
+					default: {
+						ENGINE_ERROR_UNSUPPORTED();
+
+						break;
+					}
+				}
 
 				imageStagingBuffer->unmap();
 
-				ImageDescriptor imageDescriptor{};
-				imageDescriptor.type = ImageType::TEXTURE_2D;
-				imageDescriptor.format = imageAsset->getFormat();
-				imageDescriptor.extent = imageAsset->getExtent();
-				imageDescriptor.mipLevelCount = 1;
-				imageDescriptor.layerCount = 2;
-				imageDescriptor.sampleCount = 1;
-				imageDescriptor.usage = ImageUsage::TRANSFER_DST | ImageUsage::SAMPLED | ImageUsage::STORAGE;
-				imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
+				image = createImage({
+					.type = ImageType::TEXTURE_2D,
+					.format = ImageFormat::R8G8B8A8_UNORM,
+					.extent = imageAsset->getExtent(),
+					.mipLevelCount = calculateMaxMipLevelCount(imageAsset->getExtent()),
+					.layerCount = 1,
+					.sampleCount = 1,
+					.usage = ImageUsage::TRANSFER_DST | ImageUsage::SAMPLED | ImageUsage::STORAGE,
+					.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Input",
+					#endif
+				});
 
-				#if defined(DEBUG_OBJECT_NAME)
-					imageDescriptor.name = "Input";
-				#endif
-
-				image = createImage(imageDescriptor);
-
-				BufferImageCopyRegion bufferImageCopyRegion{};
-				bufferImageCopyRegion.bufferOffset = 0;
-				bufferImageCopyRegion.imageOffsetX = 0;
-				bufferImageCopyRegion.imageOffsetY = 0;
-				bufferImageCopyRegion.imageOffsetZ = 0;
-				bufferImageCopyRegion.imageExtent = image->getExtent();
-				bufferImageCopyRegion.imageMipLevel = 0;
-				bufferImageCopyRegion.imageLayerOffset = 0;
-				bufferImageCopyRegion.imageLayerCount = 1;
-
-				CommandBufferDescriptor commandBufferDescriptor{};
-				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					commandBufferDescriptor.name = "Image copy command buffer";
-				#endif
+				const BufferImageCopyRegion bufferImageCopyRegion = {
+					.bufferOffset = 0,
+					.imageOffsetX = 0,
+					.imageOffsetY = 0,
+					.imageOffsetZ = 0,
+					.imageExtent = image->getExtent(),
+					.imageMipLevel = 0,
+					.imageLayerOffset = 0,
+					.imageLayerCount = 1,
+				};
 
 				const ref<Queue> graphicsQueue = getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
-				const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder(commandBufferDescriptor);
+				const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder({
+					.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Image copy command buffer",
+					#endif
+				});
 
 				ImageMemoryBarrier imageMemoryBarrier = {
 					.image = image,
@@ -175,26 +169,162 @@ namespace Trident {
 				graphicsQueue->waitIdle();
 			}
 
-			void setupImageView() {
-				ImageViewDescriptor imageViewDescriptor{};
-				imageViewDescriptor.mipLevelOffset = 0;
-				imageViewDescriptor.mipLevelCount = 1;
-				imageViewDescriptor.layerOffset = 1;
-				imageViewDescriptor.layerCount = 1;
+			void generateMipLevels(ref<Image> image) const {
+				sequence<ref<ImageView>> imageViews(image->getMipLevelCount());
+				uint32 mipLevel = 0;
 
 				#if defined(DEBUG_OBJECT_NAME)
-					imageViewDescriptor.name = "Render";
+					sequence<char8> name;
 				#endif
 
-				imageView = image->createView(imageViewDescriptor);
+				while (mipLevel < imageViews.count()) {
+					#if defined(DEBUG_OBJECT_NAME)
+						name = Logger::format("Mip level []", mipLevel + 1);
+					#endif
+
+					imageViews[mipLevel] = image->createView({
+						.mipLevelOffset = mipLevel,
+						.mipLevelCount = 1,
+						.layerOffset = 0,
+						.layerCount = 1,
+						#if defined(DEBUG_OBJECT_NAME)
+							.name = name,
+						#endif
+					});
+
+					mipLevel += 1;
+				}
+
+				const sequence<DescriptorSetLayoutBinding> bindings = {
+					// Input image
+					{
+						.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE,
+						.descriptorCount = 1,
+						.shaderStages = ShaderStage::COMPUTE,
+					},
+
+					// Output image
+					{
+						.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE,
+						.descriptorCount = static_cast<uint32>(imageViews.count() - 1),
+						.shaderStages = ShaderStage::COMPUTE,
+					},
+				};
+
+				const ref<DescriptorSetLayout> descriptorSetLayout = createDescriptorSetLayout(bindings);
+				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(descriptorSetLayout);
+				const ref<DescriptorSet> descriptorSet = descriptorSets[0];
+
+				sequence<DescriptorImage> descriptorImages(image->getMipLevelCount());
+
+				descriptorImages[0] = {
+					.imageView = imageViews[0],
+					.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+					.sampler = nullptr,
+				};
+
+				mipLevel = 1;
+
+				while (mipLevel < image->getMipLevelCount()) {
+					descriptorImages[mipLevel] = {
+						.imageView = imageViews[mipLevel],
+						.imageLayout = ImageLayout::GENERAL,
+						.sampler = nullptr,
+					};
+
+					mipLevel += 1;
+				}
+
+				const sequence<WriteDescriptorSet> writeDescriptorSets = {
+					// Input image
+					{
+						.descriptorSet = descriptorSet,
+						.bindingIndex = 0,
+						.descriptorImages = descriptorImages[0],
+					},
+
+					// Output image
+					{
+						.descriptorSet = descriptorSet,
+						.bindingIndex = 1,
+						.descriptorImages = view<DescriptorImage>(&descriptorImages[1], descriptorImages.count() - 1),
+					},
+				};
+
+				getDevice()->updateDescriptorSets(writeDescriptorSets);
+
+				const ref<PipelineLayout> pipelineLayout = createPipelineLayout({
+					.descriptorSetLayouts = {descriptorSetLayout},
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Generate mip levels",
+					#endif
+				});
+
+				const ref<ComputePipeline> computePipeline = createComputePipeline({
+					.pipelineLayout = pipelineLayout,
+					.computeShaderModule = loadShaderModule(
+						{
+							.stage = ShaderStage::COMPUTE,
+							.entryPoint = "main",
+							#if defined(DEBUG_OBJECT_NAME)
+								.name = "Generate mip levels compute",
+							#endif
+						},
+						"Sample/MipLevels/GenerateMipLevels.comp"
+					),
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Generate mip levels",
+					#endif
+				});
+
+				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::COMPUTE);
+
+				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
+					.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Generate mip levels",
+					#endif
+				});
+				const Extent3D imageExtent = image->getExtent();
+
+				commandEncoder->begin();
+				commandEncoder->bindComputePipeline(computePipeline);
+				commandEncoder->bindDescriptorSets(pipelineLayout, 0, descriptorSet);
+
+				const uint32 groupCountX = (imageExtent.width + 0b111111) >> 6;
+				const uint32 groupCountY = (imageExtent.height + 0b111111) >> 6;
+				const uint32 groupCountZ = 1;
+
+				commandEncoder->dispatch(groupCountX, groupCountY, groupCountZ);
+
+				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+				queue->submit(commandBuffer);
+				queue->waitIdle();
 			}
 
-			void setupSampler() {
-				SamplerDescriptor samplerDescriptor{};
-				samplerDescriptor.magFilter = SamplerFilter::NEAREST;
-				samplerDescriptor.minFilter = SamplerFilter::NEAREST;
-
-				sampler = createSampler(samplerDescriptor);
+			void setupRenderPass() {
+				renderPass = createRenderPass({
+					.attachments = {
+						{
+							.format = getSurface()->getFormat(),
+							.sampleCount = 1,
+							.loadOperation = LoadOperation::CLEAR,
+							.storeOperation = StoreOperation::STORE,
+							.finalLayout = ImageLayout::PRESENT_SRC,
+						},
+					},
+					.subpasses = {
+						createSubpass({
+							.colorAttachmentReferences = {
+								{
+									.index = 0,
+									.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
+								},
+							},
+						}),
+					},
+				});
 			}
 
 			void recreateFramebuffers() {
@@ -202,10 +332,11 @@ namespace Trident {
 
 				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
 
-				FramebufferDescriptor framebufferDescriptor{};
-				framebufferDescriptor.renderPass = renderPass;
-				framebufferDescriptor.imageViews = {nullptr};
-				framebufferDescriptor.extent = swapchain->getExtent();
+				FramebufferDescriptor framebufferDescriptor = {
+					.renderPass = renderPass,
+					.imageViews = {nullptr},
+					.extent = swapchain->getExtent(),
+				};
 
 				#if defined(DEBUG_OBJECT_NAME)
 					sequence<char8> name;
@@ -228,199 +359,159 @@ namespace Trident {
 				}
 			}
 
-			void createImageDescriptorSetLayout() {
-				DescriptorSetLayoutBinding imageBinding{};
-				imageBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-				imageBinding.descriptorCount = 1;
-				imageBinding.shaderStages = ShaderStage::FRAGMENT;
-
-				imageDescriptorSetLayout = createDescriptorSetLayout({imageBinding});
+			ref<ImageView> createDebugImageView() const {
+				return image->createView({
+					.mipLevelOffset = 0,
+					.mipLevelCount = image->getMipLevelCount(),
+					.layerOffset = 0,
+					.layerCount = 1,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Debug",
+					#endif
+				});
 			}
 
-			void allocateImageDescriptorSet() {
-				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(imageDescriptorSetLayout);
-
-				imageDescriptorSet = descriptorSets[0];
+			ref<Sampler> createDebugSampler() const {
+				return createSampler({
+					.magFilter = SamplerFilter::NEAREST,
+					.minFilter = SamplerFilter::NEAREST,
+				});
 			}
 
-			void updateImageDescriptorSet() {
-				DescriptorImage descriptorImage{};
-				descriptorImage.imageView = imageView;
-				descriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
-				descriptorImage.sampler = sampler;
-
-				WriteDescriptorSet imageWriteDescriptorSet{};
-				imageWriteDescriptorSet.descriptorSet = imageDescriptorSet;
-				imageWriteDescriptorSet.bindingIndex = 0;
-				imageWriteDescriptorSet.descriptorImages = {descriptorImage};
-
-				getDevice()->updateDescriptorSets({imageWriteDescriptorSet});
+			ref<Buffer<uint32>> createMipLevelBuffer() const {
+				return createBuffer<uint32>({
+					.size = sizeof(uint32),
+					.usage = BufferUsage::UNIFORM,
+					.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
+					.persistent = true,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Mip level",
+					#endif
+				});
 			}
 
-			void setupPipelineLayout() {
-				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
-				pipelineLayoutDescriptor.descriptorSetLayouts = {imageDescriptorSetLayout};
+			ref<DescriptorSetLayout> createImageDescriptorSetLayout() const {
+				const sequence<DescriptorSetLayoutBinding> bindings = {
+					// Mip level
+					{
+						.descriptorType = DescriptorType::UNIFORM_BUFFER,
+						.descriptorCount = 1,
+						.shaderStages = ShaderStage::FRAGMENT,
+					},
 
-				#if defined(DEBUG_OBJECT_NAME)
-					pipelineLayoutDescriptor.name = "Render pipeline layout";
-				#endif
+					// Image
+					{
+						.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+						.descriptorCount = 1,
+						.shaderStages = ShaderStage::FRAGMENT,
+					},
+				};
 
-				pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
+				return createDescriptorSetLayout(bindings);
 			}
 
-			void setupGraphicsPipeline() {
-				ShaderModuleDescriptor vertexShaderModuleDescriptor{};
-				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-				vertexShaderModuleDescriptor.entryPoint = "main";
+			void updateDebugImageDescriptorSet() {
+				const DescriptorBuffer mipLevelDescriptorBuffer = {
+					.buffer = mipLevelBuffer,
+					.offset = 0,
+					.size = mipLevelBuffer->getSize(),
+				};
 
-				#if defined(DEBUG_OBJECT_NAME)
-					vertexShaderModuleDescriptor.name = "Vertex shader module";
-				#endif
+				const DescriptorImage debugDescriptorImage = {
+					.imageView = debugImageView,
+					.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+					.sampler = debugSampler,
+				};
 
-				ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
-				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-				fragmentShaderModuleDescriptor.entryPoint = "main";
+				const sequence<WriteDescriptorSet> writeDescriptorSets = {
+					{
+						.descriptorSet = debugImageDescriptorSet,
+						.bindingIndex = 0,
+						.descriptorBuffers = mipLevelDescriptorBuffer,
+					},
+					{
+						.descriptorSet = debugImageDescriptorSet,
+						.bindingIndex = 1,
+						.descriptorImages = debugDescriptorImage,
+					},
+				};
 
-				#if defined(DEBUG_OBJECT_NAME)
-					fragmentShaderModuleDescriptor.name = "Fragment shader module";
-				#endif
+				getDevice()->updateDescriptorSets(writeDescriptorSets);
+			}
 
-				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/Image/Image.vert");
-				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/Image/Image.frag");
+			ref<PipelineLayout> createDebugImagePipelineLayout() const {
+				return createPipelineLayout({
+					.descriptorSetLayouts = {debugImageDescriptorSetLayout},
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Debug image",
+					#endif
+				});
+			}
 
+			ref<GraphicsPipeline> createDebugImagePipeline() const {
 				const sequence<ColorBlendAttachment> colorBlendAttachments = {
 					{
 						.blend = false,
 					},
 				};
 
-				GraphicsPipelineDescriptor graphicsPipelineDescriptor{};
-				graphicsPipelineDescriptor.pipelineLayout = pipelineLayout;
-				graphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-				graphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-				graphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-				graphicsPipelineDescriptor.polygonMode = PolygonMode::FILL;
-				graphicsPipelineDescriptor.cullMode = CullMode::BACK;
-				graphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-				graphicsPipelineDescriptor.lineWidth = 1.0f;
-				graphicsPipelineDescriptor.minSampleShading = 0.0f;
-				graphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
-				graphicsPipelineDescriptor.depthStencilState.depthTest = false;
-				graphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-				graphicsPipelineDescriptor.renderPass = renderPass;
-				graphicsPipelineDescriptor.subpassIndex = 0;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					graphicsPipelineDescriptor.name = "Render pipeline";
-				#endif
-
-				graphicsPipeline = createGraphicsPipeline(graphicsPipelineDescriptor);
-			}
-
-			void generateMipLevels(ref<ImageView> inputImageView, ref<ImageView> outputImageView) const {
-				DescriptorSetLayoutBinding inputImageBinding{};
-				inputImageBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE;
-				inputImageBinding.descriptorCount = 1;
-				inputImageBinding.shaderStages = ShaderStage::COMPUTE;
-
-				DescriptorSetLayoutBinding outputImageBinding{};
-				outputImageBinding.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE;
-				outputImageBinding.descriptorCount = 1;
-				outputImageBinding.shaderStages = ShaderStage::COMPUTE;
-
-				ref<DescriptorSetLayout> descriptorSetLayout = createDescriptorSetLayout({inputImageBinding, outputImageBinding});
-
-				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(descriptorSetLayout);
-
-				ref<DescriptorSet> descriptorSet = descriptorSets[0];
-
-				DescriptorImage inputDescriptorImage{};
-				inputDescriptorImage.imageView = inputImageView;
-				inputDescriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
-				inputDescriptorImage.sampler = nullptr;
-
-				DescriptorImage outputDescriptorImage{};
-				outputDescriptorImage.imageView = outputImageView;
-				outputDescriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
-				outputDescriptorImage.sampler = nullptr;
-
-				const sequence<WriteDescriptorSet> writeDescriptorSets = {
-					{
-						.descriptorSet = descriptorSet,
-						.bindingIndex = 0,
-						.descriptorImages = {inputDescriptorImage},
+				return createGraphicsPipeline({
+					.pipelineLayout = debugImagePipelineLayout,
+					.vertexShaderModule = loadShaderModule(
+						{
+							.stage = ShaderStage::VERTEX,
+							.entryPoint = "main",
+							#if defined(DEBUG_OBJECT_NAME)
+								.name = "Image vertex",
+							#endif
+						},
+						"Sample/Image/Image.vert"
+					),
+					.fragmentShaderModule = loadShaderModule(
+						{
+							.stage = ShaderStage::FRAGMENT,
+							.entryPoint = "main",
+							#if defined(DEBUG_OBJECT_NAME)
+								.name = "Image fragment",
+							#endif
+						},
+						"Sample/MipLevels/DebugImage.frag"
+					),
+					.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
+					.polygonMode = PolygonMode::FILL,
+					.cullMode = CullMode::BACK,
+					.frontFace = FrontFace::CLOCKWISE,
+					.lineWidth = 1.0f,
+					.minSampleShading = 0.0f,
+					.colorBlendState = {
+						.attachments = colorBlendAttachments,
 					},
-					{
-						.descriptorSet = descriptorSet,
-						.bindingIndex = 1,
-						.descriptorImages = {outputDescriptorImage},
+					.depthStencilState = {
+						.depthTest = false,
 					},
-				};
-
-				getDevice()->updateDescriptorSets(writeDescriptorSets);
-
-				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
-				pipelineLayoutDescriptor.descriptorSetLayouts = {descriptorSetLayout};
-
-				#if defined(DEBUG_OBJECT_NAME)
-					pipelineLayoutDescriptor.name = "Compute pipeline";
-				#endif
-
-				ref<PipelineLayout> pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
-
-				ShaderModuleDescriptor shaderModuleDescriptor{};
-				shaderModuleDescriptor.stage = ShaderStage::COMPUTE;
-				shaderModuleDescriptor.entryPoint = "main";
-
-				#if defined(DEBUG_OBJECT_NAME)
-					shaderModuleDescriptor.name = "Compute shader module";
-				#endif
-
-				ref<ShaderModule> shaderModule = loadShaderModule(shaderModuleDescriptor, "Sample/MipLevels/GenerateMipLevels.comp");
-
-				ComputePipelineDescriptor computePipelineDescriptor{};
-				computePipelineDescriptor.pipelineLayout = pipelineLayout;
-				computePipelineDescriptor.computeShaderModule = shaderModule;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					computePipelineDescriptor.name = "Compute pipeline";
-				#endif
-
-				ref<ComputePipeline> computePipeline = createComputePipeline(computePipelineDescriptor);
-
-				ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::COMPUTE);
-
-				CommandBufferDescriptor commandBufferDescriptor{};
-				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					commandBufferDescriptor.name = "Compute command buffer";
-				#endif
-
-				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder(commandBufferDescriptor);
-				const Extent3D imageExtent = inputImageView->getImage()->getExtent();
-
-				commandEncoder->begin();
-				commandEncoder->bindComputePipeline(computePipeline);
-				commandEncoder->bindDescriptorSets(pipelineLayout, 0, descriptorSet);
-				commandEncoder->dispatch((imageExtent.width + 0b111111) >> 6, (imageExtent.height + 0b111111) >> 6, 1);
-
-				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-				queue->submit(commandBuffer);
-				queue->waitIdle();
+					.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
+					.renderPass = renderPass,
+					.subpassIndex = 0,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Debug image",
+					#endif
+				});
 			}
 
 		private:
-			ref<RenderPass> renderPass;
 			ref<Image> image;
-			ref<ImageView> imageView;
-			ref<Sampler> sampler;
+
+			ref<RenderPass> renderPass;
 			sequence<ref<Framebuffer>> framebuffers;
-			ref<DescriptorSetLayout> imageDescriptorSetLayout;
-			ref<DescriptorSet> imageDescriptorSet;
-			ref<PipelineLayout> pipelineLayout;
-			ref<GraphicsPipeline> graphicsPipeline;
+			ref<DescriptorSetLayout> debugImageDescriptorSetLayout;
+			ref<DescriptorSet> debugImageDescriptorSet;
+			ref<PipelineLayout> debugImagePipelineLayout;
+			ref<GraphicsPipeline> debugImagePipeline;
+			ref<Buffer<uint32>> mipLevelBuffer;
+			ref<ImageView> debugImageView;
+			ref<Sampler> debugSampler;
+
+			uint32* mipLevelMappedRange = nullptr;
 	};
 
 	DEFINE_SAMPLE_LAYER(SampleMipLevels);

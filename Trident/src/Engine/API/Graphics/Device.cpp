@@ -368,7 +368,7 @@ namespace Trident {
 			}
 
 			if (descriptor.format == ImageFormat::R8G8B8_UNORM) {
-				ENGINE_ERROR("descriptor.format must not be R8G8B8_UNORM. This format only exists for filesystem data transfer.");
+				ENGINE_ERROR("descriptor.format must not be R8G8B8_UNORM. This format only exists for asset storage.");
 
 				errorCount += 1;
 			}
@@ -380,7 +380,7 @@ namespace Trident {
 			}
 
 			if (descriptor.extent.width > max(limits.maxImageDimension1D, max(limits.maxImageDimension2D, limits.maxImageDimension3D))) {
-				ENGINE_ERROR("descriptor.extent.width must be less than the maximum dimension for 1D, 2D or 3D images.");
+				ENGINE_ERROR("descriptor.extent.width must be less than or equal to the maximum dimension for 1D, 2D or 3D images.");
 
 				errorCount += 1;
 			}
@@ -392,7 +392,7 @@ namespace Trident {
 			}
 
 			if (descriptor.extent.height > max(limits.maxImageDimension2D, limits.maxImageDimension3D)) {
-				ENGINE_ERROR("descriptor.extent.height must be less than the maximum dimension for 2D or 3D images.");
+				ENGINE_ERROR("descriptor.extent.height must be less than or equal to the maximum dimension for 2D or 3D images.");
 
 				errorCount += 1;
 			}
@@ -404,7 +404,7 @@ namespace Trident {
 			}
 
 			if (descriptor.extent.depth > limits.maxImageDimension3D) {
-				ENGINE_ERROR("descriptor.extent.depth must be less than the maximum dimension for 3D images.");
+				ENGINE_ERROR("descriptor.extent.depth must be less than or equal to the maximum dimension for 3D images.");
 
 				errorCount += 1;
 			}
@@ -415,8 +415,10 @@ namespace Trident {
 				errorCount += 1;
 			}
 
-			if (descriptor.mipLevelCount > floor(log2(max(descriptor.extent.width, max(descriptor.extent.height, descriptor.extent.depth)))) + 1) {
-				ENGINE_ERROR("descriptor.mipLevelCount must be less than the maximum mip level for this size.");
+			const uint32 maxMipLevelCount = calculateMaxMipLevelCount(descriptor.extent);
+
+			if (descriptor.mipLevelCount > maxMipLevelCount) {
+				ENGINE_ERROR("descriptor.mipLevelCount must be less than or equal to the maximum mip level count for this size ([]).", maxMipLevelCount);
 
 				errorCount += 1;
 			}
@@ -428,7 +430,7 @@ namespace Trident {
 			}
 
 			if (descriptor.layerCount > limits.maxImageLayerCount) {
-				ENGINE_ERROR("descriptor.layerCount must be less than the maximum layer count.");
+				ENGINE_ERROR("descriptor.layerCount must be less than or equal to the maximum layer count.");
 
 				errorCount += 1;
 			}

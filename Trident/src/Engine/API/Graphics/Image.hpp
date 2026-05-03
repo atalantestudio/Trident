@@ -9,6 +9,9 @@
 #include "Engine/API/Graphics/ImageLayout.hpp"
 
 namespace Trident {
+	// TODO(architecture): Move inside utility folder?
+	uint32 calculateMaxMipLevelCount(Extent3D extent);
+
 	class Image {
 		public:
 			~Image();

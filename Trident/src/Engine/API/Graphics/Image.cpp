@@ -7,6 +7,11 @@
 #include "Engine/API/Graphics/Image.hpp"
 
 namespace Trident {
+	uint32 calculateMaxMipLevelCount(Extent3D extent) {
+		// ⌊log2(max(width, height, depth))⌋ + 1
+		return static_cast<uint32>(floor(log2(max(extent.width, max(extent.height, extent.depth))))) + 1;
+	}
+
 	Image::Image(const Device* device, const ImageDescriptor& descriptor) :
 		device(device),
 		type(descriptor.type),

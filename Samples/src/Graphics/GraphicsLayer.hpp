@@ -20,6 +20,8 @@
 			void onEvent(Event& event) override { \
 				EventDispatcher eventDispatcher(event); \
 				eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize)); \
+				\
+				renderer.onEvent(event); \
 			} \
 			\
 		private: \
