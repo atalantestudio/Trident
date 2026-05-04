@@ -45,11 +45,16 @@ namespace Trident {
 
 				createFramebuffers();
 
+				cameraDescriptorSetLayout = createCameraDescriptorSetLayout();
 				vertexDescriptorSetLayout = createVertexDescriptorSetLayout();
 
-				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(vertexDescriptorSetLayout);
+				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(sequence<ref<DescriptorSetLayout>>{
+					cameraDescriptorSetLayout,
+					vertexDescriptorSetLayout,
+				});
 
-				vertexDescriptorSet = descriptorSets[0];
+				cameraDescriptorSet = descriptorSets[0];
+				vertexDescriptorSet = descriptorSets[1];
 
 				debugHullWireframePipelineLayout = createDebugHullWireframePipelineLayout();
 				debugHullWireframePipeline = createDebugHullWireframePipeline();
@@ -68,6 +73,12 @@ namespace Trident {
 
 			void postSetScene() override {
 				createMaterialObjects();
+
+				staticVertexBuffer = createStaticVertexBuffer();
+				staticIndexBuffer = createStaticIndexBuffer();
+
+				staticMaterialPipelineLayout = createStaticMaterialPipelineLayout();
+				staticMaterialPipeline = createStaticMaterialPipeline();
 
 				// Write index buffer.
 				const view<uint8> sourceDataBuffer = scene->getDataBuffer();
@@ -191,6 +202,8 @@ namespace Trident {
 				});
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
+
+				renderStaticObjects(commandEncoder);
 
 				// TODO(graphics/gl/bind-vertex-buffers): Allow vertex buffers to be bound before setting a graphics pipeline.
 
@@ -328,11 +341,16 @@ namespace Trident {
 				}
 			}
 
+			ref<DescriptorSetLayout> createCameraDescriptorSetLayout() const;
+			ref<DescriptorSetLayout> createVertexDescriptorSetLayout() const;
+
 			ref<PipelineLayout> createDebugHullWireframePipelineLayout() const;
 			ref<PipelineLayout> createDebugContactManifoldPipelineLayout() const;
+			ref<PipelineLayout> createStaticMaterialPipelineLayout() const;
 
 			ref<GraphicsPipeline> createDebugHullWireframePipeline() const;
 			ref<GraphicsPipeline> createDebugContactManifoldPipeline() const;
+			ref<GraphicsPipeline> createStaticMaterialPipeline() const;
 
 			ref<Image> createColorImage() const;
 			ref<Image> createDepthStencilImage() const;
@@ -340,15 +358,15 @@ namespace Trident {
 			ref<ImageView> createColorImageView() const;
 			ref<ImageView> createDepthStencilImageView() const;
 
-			ref<DescriptorSetLayout> createVertexDescriptorSetLayout() const;
-
-			void createMaterialObjects();
-
 			ref<Buffer<Camera>> createCameraBuffer() const;
 			ref<Buffer<Instance>> createInstanceBuffer() const;
 			ref<Buffer<Vertex>> createVertexBuffer() const;
 			ref<Buffer<uint16>> createDebugHullWireframeBuffer() const;
 			ref<Buffer<svec3<float32>>> createDebugContactManifoldBuffer() const;
+
+			// TODO: Use the static data from a scene asset.
+			ref<Buffer<svec3<float32>>> createStaticVertexBuffer() const;
+			ref<Buffer<uint16>> createStaticIndexBuffer() const;
 
 			ref<Sampler> createImageSampler() const;
 
@@ -381,10 +399,10 @@ namespace Trident {
 					},
 				};
 
-				sequence<WriteDescriptorSet> writeDescriptorSets(descriptorBuffers.count());
+				sequence<WriteDescriptorSet> writeDescriptorSets(descriptorBuffers.count() + 1);
 				index writeDescriptorSetIndex = 0;
 
-				while (writeDescriptorSetIndex < writeDescriptorSets.count()) {
+				while (writeDescriptorSetIndex < descriptorBuffers.count()) {
 					writeDescriptorSets[writeDescriptorSetIndex] = {
 						.descriptorSet = vertexDescriptorSet,
 						.bindingIndex = static_cast<uint32>(writeDescriptorSetIndex),
@@ -394,21 +412,32 @@ namespace Trident {
 					writeDescriptorSetIndex += 1;
 				}
 
+				writeDescriptorSets[descriptorBuffers.count()] = {
+					.descriptorSet = cameraDescriptorSet,
+					.bindingIndex = 0,
+					.descriptorBuffers = descriptorBuffers[0],
+				};
+
 				getDevice()->updateDescriptorSets(writeDescriptorSets);
 			}
 
 			void postSetCameraController() override {}
 
-			void renderStaticObjects() const;
+			void createMaterialObjects();
+
+			// See https://blog.tojicode.com/2011/09/source-engine-in-webgl-tech-talk.html.
+			void renderStaticObjects(ref<CommandEncoder> commandEncoder) const;
 
 		private:
 			ref<RenderPass> renderPass;
 
 			sequence<ref<Framebuffer>> framebuffers;
 
+			ref<DescriptorSetLayout> cameraDescriptorSetLayout;
 			ref<DescriptorSetLayout> vertexDescriptorSetLayout;
 			sequence<ref<DescriptorSetLayout>> materialDescriptorSetLayouts;
 
+			ref<DescriptorSet> cameraDescriptorSet;
 			ref<DescriptorSet> vertexDescriptorSet;
 			sequence<ref<DescriptorSet>> materialDescriptorSets;
 
@@ -416,9 +445,15 @@ namespace Trident {
 			ref<PipelineLayout> debugHullWireframePipelineLayout;
 			ref<PipelineLayout> debugContactManifoldPipelineLayout;
 
+			// TODO: Use the same system as for the dynamic objects.
+			ref<PipelineLayout> staticMaterialPipelineLayout;
+
 			sequence<ref<GraphicsPipeline>> materialPipelines;
 			ref<GraphicsPipeline> debugHullWireframePipeline;
 			ref<GraphicsPipeline> debugContactManifoldPipeline;
+
+			// TODO: Use the same system as for the dynamic objects.
+			ref<GraphicsPipeline> staticMaterialPipeline;
 
 			ref<Buffer<Vertex>> vertexBuffer;
 			ref<Buffer<Instance>> instanceBuffer;
@@ -426,6 +461,8 @@ namespace Trident {
 			ref<Buffer<Camera>> cameraBuffer;
 			ref<Buffer<uint16>> debugHullWireframeBuffer;
 			ref<Buffer<svec3<float32>>> debugContactManifoldBuffer;
+			ref<Buffer<svec3<float32>>> staticVertexBuffer;
+			ref<Buffer<uint16>> staticIndexBuffer;
 
 			ref<Image> colorImage;
 			ref<Image> depthStencilImage;

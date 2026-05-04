@@ -21,7 +21,7 @@
 namespace Trident {
 	class Sample3DForwardLayer : public Layer {
 		private:
-			static constexpr float32 MOVEMENT_SPEED = 2.0f;
+			static constexpr float32 MOVEMENT_SPEED = 50.0f;
 			static constexpr Entity PLAYER_ENTITY = 1;
 
 			static constexpr float32 LOOK_SENSITIVITY = 0.075f;
@@ -93,12 +93,12 @@ namespace Trident {
 					handleInputs();
 				#endif
 
-				physicsSimulation->tick();
+				// physicsSimulation->tick();
 
 				// TODO(debug)
-				physicsSimulation->broadPhase();
-				physicsSimulation->narrowPhase();
-				physicsSimulation->applyForces();
+				// physicsSimulation->broadPhase();
+				// physicsSimulation->narrowPhase();
+				// physicsSimulation->applyForces();
 
 				#if !defined(FORWARD_USE_NOCLIP_CAMERA)
 					playerMove(deltaTime);
@@ -106,9 +106,9 @@ namespace Trident {
 					noclipMove(deltaTime);
 				#endif
 
-				physicsSimulation->updateContactManifolds();
-				physicsSimulation->applyImpulses();
-				physicsSimulation->integrate();
+				// physicsSimulation->updateContactManifolds();
+				// physicsSimulation->applyImpulses();
+				// physicsSimulation->integrate();
 
 				#if !defined(FORWARD_USE_NOCLIP_CAMERA)
 					PerspectiveCamera3D& camera = cameraController.getCamera();

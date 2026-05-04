@@ -5,6 +5,7 @@
 
 #include "Engine/Filesystem/Asset/ImageAsset.hpp"
 #include "Engine/Renderer/Forward/CameraBuffer.hpp"
+#include "Engine/Renderer/Forward/CameraDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Forward/ColorImage.hpp"
 #include "Engine/Renderer/Forward/DebugContactManifoldBuffer.hpp"
 #include "Engine/Renderer/Forward/DebugContactManifoldPipeline.hpp"
@@ -17,6 +18,9 @@
 #include "Engine/Renderer/Forward/InstanceBuffer.hpp"
 #include "Engine/Renderer/Forward/Renderer.hpp"
 #include "Engine/Renderer/Forward/RenderPass.hpp"
+#include "Engine/Renderer/Forward/Static.hpp"
+#include "Engine/Renderer/Forward/StaticMaterialPipeline.hpp"
+#include "Engine/Renderer/Forward/StaticMaterialPipelineLayout.hpp"
 #include "Engine/Renderer/Forward/VertexDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Forward/VertexBuffer.hpp"
 
@@ -69,7 +73,7 @@ namespace Trident {
 		materialPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 		materialPipelineDescriptor.polygonMode = PolygonMode::FILL;
 		materialPipelineDescriptor.cullMode = CullMode::NONE;
-		materialPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		materialPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;	
 		materialPipelineDescriptor.lineWidth = 1.0f;
 		materialPipelineDescriptor.minSampleShading = 0.0f;
 		materialPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
@@ -311,7 +315,13 @@ namespace Trident {
 		getDevice()->updateDescriptorSets(writeDescriptorSets);
 	}
 
-	void ForwardRenderer::renderStaticObjects() const {
-		// TODO
+	void ForwardRenderer::renderStaticObjects(ref<CommandEncoder> commandEncoder) const {
+		const uint32 indexCount = static_cast<uint32>(staticIndexBuffer->getSize() / 2);
+
+		commandEncoder->bindGraphicsPipeline(staticMaterialPipeline);
+		commandEncoder->bindVertexBuffer(0, staticVertexBuffer, 0, sizeof(svec3<float32>));
+		commandEncoder->bindIndexBuffer<uint16>(staticIndexBuffer, 0);
+		commandEncoder->bindDescriptorSets(staticMaterialPipelineLayout, 0, cameraDescriptorSet);
+		commandEncoder->drawIndexed(indexCount, 1, 0, 0, 0);
 	}
 }
