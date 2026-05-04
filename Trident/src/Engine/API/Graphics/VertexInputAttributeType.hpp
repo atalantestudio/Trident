@@ -15,7 +15,7 @@ namespace Trident {
 		R32_UINT,
 		R32_FLOAT,
 		// R32G32_SINT,
-		// R32G32_UINT,
+		R32G32_UINT,
 		R32G32_FLOAT,
 		// R32G32B32_SINT,
 		R32G32B32_UINT,
@@ -82,10 +82,10 @@ namespace Trident {
 		return VertexInputAttributeType::R32G32_SINT;
 	} */
 
-	/* template<>
-	constexpr VertexInputAttributeType getVertexInputAttributeType<vec2<uint32>>() {
+	template<>
+	constexpr VertexInputAttributeType getVertexInputAttributeType<svec2<uint32>>() {
 		return VertexInputAttributeType::R32G32_UINT;
-	} */
+	}
 
 	template<>
 	constexpr VertexInputAttributeType getVertexInputAttributeType<svec2<float32>>() {

@@ -19,6 +19,13 @@ namespace Trident {
 				uint32 textureCoordinateIndex;
 			};
 
+			struct PackedVertex {
+				uint16 positionIndex;
+				uint16 normalIndex;
+				uint16 textureCoordinateIndex;
+				uint16 _;
+			};
+
 			struct Camera {
 				mat4x4<float32> projectionView;
 				vec3<float32> position;
@@ -45,15 +52,15 @@ namespace Trident {
 
 				createFramebuffers();
 
-				cameraDescriptorSetLayout = createCameraDescriptorSetLayout();
+				staticDescriptorSetLayout = createStaticDescriptorSetLayout();
 				vertexDescriptorSetLayout = createVertexDescriptorSetLayout();
 
 				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(sequence<ref<DescriptorSetLayout>>{
-					cameraDescriptorSetLayout,
+					staticDescriptorSetLayout,
 					vertexDescriptorSetLayout,
 				});
 
-				cameraDescriptorSet = descriptorSets[0];
+				staticDescriptorSet = descriptorSets[0];
 				vertexDescriptorSet = descriptorSets[1];
 
 				debugHullWireframePipelineLayout = createDebugHullWireframePipelineLayout();
@@ -74,6 +81,9 @@ namespace Trident {
 			void postSetScene() override {
 				createMaterialObjects();
 
+				staticPositionBuffer = createStaticPositionBuffer();
+				staticNormalBuffer = createStaticNormalBuffer();
+				staticTextureCoordinateBuffer = createStaticTextureCoordinateBuffer();
 				staticVertexBuffer = createStaticVertexBuffer();
 				staticIndexBuffer = createStaticIndexBuffer();
 
@@ -341,7 +351,7 @@ namespace Trident {
 				}
 			}
 
-			ref<DescriptorSetLayout> createCameraDescriptorSetLayout() const;
+			ref<DescriptorSetLayout> createStaticDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createVertexDescriptorSetLayout() const;
 
 			ref<PipelineLayout> createDebugHullWireframePipelineLayout() const;
@@ -365,18 +375,24 @@ namespace Trident {
 			ref<Buffer<svec3<float32>>> createDebugContactManifoldBuffer() const;
 
 			// TODO: Use the static data from a scene asset.
-			ref<Buffer<svec3<float32>>> createStaticVertexBuffer() const;
+			ref<Buffer<svec3<float32>>> createStaticPositionBuffer() const;
+			ref<Buffer<svec3<float32>>> createStaticNormalBuffer() const;
+			ref<Buffer<svec2<float32>>> createStaticTextureCoordinateBuffer() const;
+			ref<Buffer<PackedVertex>> createStaticVertexBuffer() const;
 			ref<Buffer<uint16>> createStaticIndexBuffer() const;
 
 			ref<Sampler> createImageSampler() const;
 
 			void updateDescriptorSets() const {
 				const sequence<DescriptorBuffer> descriptorBuffers = {
+					// Camera
 					{
 						.buffer = cameraBuffer,
 						.offset = 0,
 						.size = cameraBuffer->getSize(),
 					},
+
+					// Vertex
 					{
 						.buffer = dataBuffer,
 						.offset = scene->getVertexPositionComponentRange().offset,
@@ -397,12 +413,29 @@ namespace Trident {
 						.offset = scene->getTriangleTangentComponentRange().offset,
 						.size = scene->getTriangleTangentComponentRange().count,
 					},
+
+					// Static
+					{
+						.buffer = staticPositionBuffer,
+						.offset = 0,
+						.size = staticPositionBuffer->getSize(),
+					},
+					{
+						.buffer = staticNormalBuffer,
+						.offset = 0,
+						.size = staticNormalBuffer->getSize(),
+					},
+					{
+						.buffer = staticTextureCoordinateBuffer,
+						.offset = 0,
+						.size = staticTextureCoordinateBuffer->getSize(),
+					},
 				};
 
-				sequence<WriteDescriptorSet> writeDescriptorSets(descriptorBuffers.count() + 1);
+				sequence<WriteDescriptorSet> writeDescriptorSets(9);
 				index writeDescriptorSetIndex = 0;
 
-				while (writeDescriptorSetIndex < descriptorBuffers.count()) {
+				while (writeDescriptorSetIndex < 5) {
 					writeDescriptorSets[writeDescriptorSetIndex] = {
 						.descriptorSet = vertexDescriptorSet,
 						.bindingIndex = static_cast<uint32>(writeDescriptorSetIndex),
@@ -412,10 +445,25 @@ namespace Trident {
 					writeDescriptorSetIndex += 1;
 				}
 
-				writeDescriptorSets[descriptorBuffers.count()] = {
-					.descriptorSet = cameraDescriptorSet,
+				writeDescriptorSets[5] = {
+					.descriptorSet = staticDescriptorSet,
 					.bindingIndex = 0,
 					.descriptorBuffers = descriptorBuffers[0],
+				};
+				writeDescriptorSets[6] = {
+					.descriptorSet = staticDescriptorSet,
+					.bindingIndex = 1,
+					.descriptorBuffers = descriptorBuffers[5],
+				};
+				writeDescriptorSets[7] = {
+					.descriptorSet = staticDescriptorSet,
+					.bindingIndex = 2,
+					.descriptorBuffers = descriptorBuffers[6],
+				};
+				writeDescriptorSets[8] = {
+					.descriptorSet = staticDescriptorSet,
+					.bindingIndex = 3,
+					.descriptorBuffers = descriptorBuffers[7],
 				};
 
 				getDevice()->updateDescriptorSets(writeDescriptorSets);
@@ -433,11 +481,11 @@ namespace Trident {
 
 			sequence<ref<Framebuffer>> framebuffers;
 
-			ref<DescriptorSetLayout> cameraDescriptorSetLayout;
+			ref<DescriptorSetLayout> staticDescriptorSetLayout;
 			ref<DescriptorSetLayout> vertexDescriptorSetLayout;
 			sequence<ref<DescriptorSetLayout>> materialDescriptorSetLayouts;
 
-			ref<DescriptorSet> cameraDescriptorSet;
+			ref<DescriptorSet> staticDescriptorSet;
 			ref<DescriptorSet> vertexDescriptorSet;
 			sequence<ref<DescriptorSet>> materialDescriptorSets;
 
@@ -461,7 +509,10 @@ namespace Trident {
 			ref<Buffer<Camera>> cameraBuffer;
 			ref<Buffer<uint16>> debugHullWireframeBuffer;
 			ref<Buffer<svec3<float32>>> debugContactManifoldBuffer;
-			ref<Buffer<svec3<float32>>> staticVertexBuffer;
+			ref<Buffer<svec3<float32>>> staticPositionBuffer;
+			ref<Buffer<svec3<float32>>> staticNormalBuffer;
+			ref<Buffer<svec2<float32>>> staticTextureCoordinateBuffer;
+			ref<Buffer<PackedVertex>> staticVertexBuffer;
 			ref<Buffer<uint16>> staticIndexBuffer;
 
 			ref<Image> colorImage;

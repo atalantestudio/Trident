@@ -8,7 +8,7 @@
 namespace Trident {
 	ref<GraphicsPipeline> ForwardRenderer::createStaticMaterialPipeline() const {
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<svec3<float32>>();
+		vertexInputBinding.registerAttribute<svec2<uint32>>();
 
 		const sequence<ColorBlendAttachment> colorBlendAttachments = {
 			{

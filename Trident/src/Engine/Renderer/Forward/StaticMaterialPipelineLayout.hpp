@@ -8,7 +8,7 @@
 namespace Trident {
 	ref<PipelineLayout> ForwardRenderer::createStaticMaterialPipelineLayout() const {
 		return createPipelineLayout({
-			.descriptorSetLayouts = {cameraDescriptorSetLayout},
+			.descriptorSetLayouts = {staticDescriptorSetLayout},
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Static material",
 			#endif

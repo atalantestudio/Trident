@@ -57,10 +57,10 @@ namespace Trident {
 		return 2 * sizeof(sint32);
 	} */
 
-	/* template<>
-	constexpr uint32 getAlignment<vec2<uint32>>() {
+	template<>
+	constexpr uint32 getAlignment<svec2<uint32>>() {
 		return 2 * sizeof(uint32);
-	} */
+	}
 
 	template<>
 	constexpr uint32 getAlignment<svec2<float32>>() {
