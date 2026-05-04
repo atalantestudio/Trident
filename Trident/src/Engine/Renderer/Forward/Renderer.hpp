@@ -253,6 +253,7 @@ namespace Trident {
 
 						const Hull3D& hull = scene->hulls[geometry.hullIndex];
 
+						// TODO: DX12 doesn't pass the BaseVertexOffset to the vertex shader so indexing the vertex buffer doesn't return the same values as OpenGL/Vulkan.
 						commandEncoder->drawIndexed(hull.lineIndexRange.count, 1, hull.lineIndexRange.offset, geometry.getVertexPositionComponentRange().offset / 3, rigidBodyComponentIndex);
 
 						rigidBodyComponentIndex += 1;

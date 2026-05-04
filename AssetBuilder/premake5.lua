@@ -20,6 +20,7 @@ project "AssetBuilder"
 
 	includedirs {
 		VULKAN_SDK .. "/Include",
+		"../AssetBuilder/src",
 		"../Trident/src",
 		"../Trident/vendor/API",
 		"../Trident/vendor/Base",
