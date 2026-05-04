@@ -5,7 +5,6 @@
 
 #include "Engine/API/GUI/AnchorPoint.hpp"
 #include "Engine/API/GUI/ID.hpp"
-#include "Engine/API/GUI/EventListeners.hpp"
 #include "Engine/API/GUI/LayoutDirection.hpp"
 #include "Engine/API/GUI/Size.hpp"
 #include "Engine/API/GUI/Subcomponent.hpp"
@@ -53,8 +52,6 @@ namespace Trident {
 		std::vector<TextCharacter> characters;
 		FontID font;
 		float32 fontSize;
-
-		const EventListeners* eventListeners;
 
 		// TODO (debug-only)
 		view<char8> debugName;

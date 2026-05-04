@@ -28,15 +28,17 @@ namespace Trident {
 			}
 
 			void render() override {
-				GUIComponent(listStyle) {
+				Container(listStyle) {
 					float32 fontSize = 96_px;
+					sequence<char8> text;
 
 					while (fontSize > 8_px) {
-						GUIComponent(itemStyle) {
+						Container(itemStyle) {
 							itemTextStyle.fontSize = fontSize;
+							text = Logger::format("[]px", static_cast<uint32>(fontSize));
 
-							GUIText(Logger::format("[]px", static_cast<uint32>(fontSize)), itemLabelStyle);
-							GUIText("The quick brown fox jumps over the lazy dog.", itemTextStyle);
+							Text(text, itemLabelStyle);
+							Text("The quick brown fox jumps over the lazy dog.", itemTextStyle);
 						}
 
 						fontSize -= 8_px;

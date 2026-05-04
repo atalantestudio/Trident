@@ -17,7 +17,7 @@ namespace Trident {
 			void render() override {
 				const Extent2D extent = getApplication()->getWindow()->getExtent();
 
-				GUIComponent({
+				Container({
 					.size = {static_cast<float32>(extent.width - 24_px), static_cast<float32>(extent.height - 16_px)},
 					.padding = {8_px, 8_px},
 					.layoutDirection = HORIZONTAL,
@@ -25,21 +25,26 @@ namespace Trident {
 					.color = 0x000000ff,
 				}) {
 					// Option list
-					GUIComponent({
+					Container({
 						.size = {FIT, EXPAND},
 						.layoutDirection = VERTICAL,
 						.layoutSpacing = -1_px,
 					}) {
 						uint32 listItemIndex = 0;
+						sequence<char8> text;
 
 						while (listItemIndex < LIST_ITEM_COUNT) {
-							GUIText(Logger::format("Option []", listItemIndex), {
+							text = Logger::format("Option []", listItemIndex);
+
+							Text(text, {
 								.color = 0xa5a5a5ff,
 								.font = fontBold,
 								.fontSize = 22_px,
 							});
 
-							GUIText(Logger::format("Description for option []", listItemIndex), {
+							text = Logger::format("Description for option []", listItemIndex);
+
+							Text(text, {
 								.color = 0x828282ff,
 								.font = fontRegular,
 								.fontSize = 18_px,
@@ -50,24 +55,24 @@ namespace Trident {
 					}
 
 					// Menu
-					GUIComponent({
+					Container({
 						.size = {EXPAND, EXPAND},
 						.padding = {1_px, 1_px},
 						.color = 0x3a3a3aff,
 					}) {
-						GUIComponent({
+						Container({
 							.size = {EXPAND, EXPAND},
 							.padding = {8_px, 8_px},
 							.layoutDirection = VERTICAL,
 							.color = 0x0a0a0aff,
 						}) {
-							GUIText("Option Menu", {
+							Text("Option Menu", {
 								.color = 0xc2c2c2ff,
 								.font = fontBold,
 								.fontSize = 28_px,
 							});
 
-							GUIText("Configure the option properties there.", {
+							Text("Configure the option properties there.", {
 								.color = 0x828282ff,
 								.font = fontRegular,
 								.fontSize = 18_px,

@@ -13,11 +13,11 @@ namespace Trident {
 			void render() override {
 				const Extent2D extent = getApplication()->getWindow()->getExtent();
 
-				GUIComponent({
+				Container({
 					.size = {static_cast<float32>(extent.width), static_cast<float32>(extent.height)},
 					.anchorPoint = AnchorPoint::HCENTER | AnchorPoint::VCENTER,
 				}) {
-					GUIComponent({
+					Container({
 						.size = {256_px, 256_px},
 						.color = 0xffffffff,
 						.image = icon,

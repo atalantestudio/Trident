@@ -27,14 +27,14 @@ namespace Trident {
 			void render() override {
 				const Extent2D extent = getApplication()->getWindow()->getExtent();
 
-				GUIComponent({
+				Container({
 					.size = {static_cast<float32>(extent.width), static_cast<float32>(extent.height)},
 					.anchorPoint = AnchorPoint::HCENTER | AnchorPoint::TOP,
 					.layoutDirection = LayoutDirection::VERTICAL,
 					.color = 0x000000ff,
 					.debugName = "WindowContainer",
 				}) {
-					GUIComponent({
+					Container({
 						.size = {EXPAND, 48_px},
 						.anchorPoint = AnchorPoint::HCENTER | AnchorPoint::TOP,
 						.color = 0x0a0a0aff,
@@ -43,7 +43,7 @@ namespace Trident {
 						OptionMenuTabList();
 					}
 
-					GUIComponent({
+					Container({
 						.size = {548_px, EXPAND},
 						.padding = {8_px, 8_px},
 						.layoutDirection = LayoutDirection::VERTICAL,
@@ -68,7 +68,7 @@ namespace Trident {
 
 		private:
 			void OptionMenuTabList() {
-				GUIComponent({
+				Container({
 					.size = {548_px, EXPAND},
 					.anchorPoint = AnchorPoint::HCENTER | AnchorPoint::TOP,
 				}) {
@@ -89,7 +89,7 @@ namespace Trident {
 					backgroundColor = 0x1a1a1aff;
 				}
 
-				GUIComponent({
+				Container({
 					.size = {FIT, EXPAND},
 					.padding = {10_px, 0_px},
 					.anchorPoint = AnchorPoint::HCENTER | AnchorPoint::VCENTER,
@@ -109,7 +109,7 @@ namespace Trident {
 			}
 
 			void OptionListContainer() {
-				GUIComponent({
+				Container({
 					.size = {540_px, EXPAND},
 					.padding = {8_px, 8_px},
 					.layoutDirection = LayoutDirection::VERTICAL,
@@ -121,7 +121,7 @@ namespace Trident {
 			}
 
 			void OptionListTitle(view<char8> title) {
-				GUIComponent({
+				Container({
 					.size = {EXPAND, FIT},
 					.padding = {8_px, 0_px},
 				}) {
@@ -134,7 +134,7 @@ namespace Trident {
 			}
 
 			void GraphicsOptionList() {
-				GUIComponent({
+				Container({
 					.size = {EXPAND, FIT},
 					.layoutDirection = LayoutDirection::VERTICAL,
 					.layoutSpacing = -1_px,
@@ -145,7 +145,7 @@ namespace Trident {
 			}
 
 			void AccessibilityOptionList() {
-				GUIComponent({
+				Container({
 					.size = {EXPAND, FIT},
 					.layoutDirection = LayoutDirection::VERTICAL,
 					.layoutSpacing = -1_px,
@@ -164,7 +164,7 @@ namespace Trident {
 					borderColor = 0xc2c2c2ff;
 				}
 
-				GUIComponent({
+				Container({
 					.size = {EXPAND, FIT},
 					.zIndex = borderZIndex,
 					.padding = {1_px, 1_px},
@@ -181,7 +181,7 @@ namespace Trident {
 						value = !value;
 					}
 
-					GUIComponent({
+					Container({
 						.size = {EXPAND, FIT},
 						.padding = {8_px, 8_px},
 						.layoutDirection = LayoutDirection::VERTICAL,
@@ -189,11 +189,11 @@ namespace Trident {
 						.color = backgroundColor,
 						.pointerType = PointerType::INTERACTIVE,
 					}) {
-						GUIComponent({
+						Container({
 							.size = {EXPAND, FIT},
 							.layoutDirection = LayoutDirection::HORIZONTAL,
 						}) {
-							GUIComponent({
+							Container({
 								.size = {EXPAND, EXPAND},
 							}) {
 								Text(title, {
@@ -203,18 +203,18 @@ namespace Trident {
 								});
 							}
 
-							GUIComponent({
+							Container({
 								.size = {20_px, 20_px},
 								.padding = {1_px, 1_px},
 								.color = value ? 0xc2c2c2ff : borderColor,
 							}) {
-								GUIComponent({
+								Container({
 									.size = {EXPAND, EXPAND},
 									.padding = {1_px, 1_px},
 									.color = backgroundColor,
 								}) {
 									if (value) {
-										GUIComponent({
+										Container({
 											.size = {EXPAND, EXPAND},
 											.color = 0xc2c2c2ff,
 										});

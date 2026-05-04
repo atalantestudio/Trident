@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "Engine/API/GUI/EventListeners.hpp"
 #include "Engine/API/GUI/GUI.hpp"
 #include "Engine/API/GUI/ID.hpp"
 #include "Engine/API/GUI/LayoutDirection.hpp"
@@ -26,10 +25,6 @@ namespace Trident {
 		Color color = 0x00000000;
 		ImageID image = 0;
 		PointerType pointerType = PointerType::INHERIT;
-
-		// TODO: If the ContainerStyle instance is not properly initialized, its event listeners will be null, thus crashing the GUI layer.
-		const EventListeners* eventListeners = {};
-
 		view<char8> debugName;
 	};
 }

@@ -56,6 +56,12 @@ namespace Trident {
 			FontID loadFontAsset(view<char8> assetName);
 			ImageID loadImageAsset(view<char8> assetName);
 
+			void openComponent(const ContainerStyle& style);
+
+			void Text(view<char8> text, const TextStyle& style);
+
+			void closeComponent();
+
 			/// Returns whether the mouse pointer is hovering over the current component.
 			bool IsHovered() const;
 
@@ -68,18 +74,13 @@ namespace Trident {
 			/// Returns whether the mouse button is pressed on the next component.
 			bool IsNextMouseDown() const;
 
+			/// Returns whether the mouse button is released on the current component.
+			bool IsMouseUp() const;
+
 			/// Returns whether the mouse pointer is clicking on the current component.
 			bool IsClicked();
 
-		public:
-			void openComponent(const ContainerStyle& style);
-
-			// TODO: Deprecate (use Text instead).
-			void GUIText(const sequence<char8>& text, const TextStyle& style);
-
-			void Text(view<char8> text, const TextStyle& style);
-
-			void closeComponent();
+			vec2<float32> getMousePosition() const;
 
 		private:
 			void openRootComponent();
@@ -96,10 +97,6 @@ namespace Trident {
 			void WrapText(GUIContainer& textComponent);
 			void FlushWord(FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset);
 			void PositionsAndAlignment(GUIContainer& component, svec2<float32> origin);
-			uint32 GetHoveredComponentIndex() const;
-
-			// TODO: Deprecate? Hover, MouseDown and Clicked are implemented differently.
-			void DispatchMouseEvents();
 
 			bool onMouseDown(MouseDownEvent& event);
 			bool onMouseUp(MouseUpEvent& event);
@@ -110,6 +107,7 @@ namespace Trident {
 
 			bool IsHovered(uint32 componentIndex) const;
 			bool IsMouseDown(uint32 componentIndex) const;
+			bool IsMouseUp(uint32 componentIndex) const;
 
 		public:
 			/// Shrink towards the layout direction.
@@ -134,7 +132,6 @@ namespace Trident {
 
 			sequence<GUIContainer> components;
 			sequence<uint32> openComponentIndices;
-			sequence<uint32> buttonComponentIndices;
 
 			/// Component tree from the previous frame.
 			sequence<GUIContainer> previousComponents;
@@ -142,7 +139,6 @@ namespace Trident {
 			uint32 componentCount = 0;
 			uint32 previousComponentCount = 0;
 			uint32 openComponentIndexCount = 0;
-			uint32 buttonComponentIndexCount = 0;
 
 			uint32 hoveredComponentIndex = max<uint32>();
 			uint32 mouseDownComponentIndex = max<uint32>();
@@ -152,5 +148,5 @@ namespace Trident {
 			vec2<float32> lastMouseUpPosition = {-1.0f, -1.0f};
 	};
 
-	#define GUIComponent(...) for (bool _opened = (openComponent(__VA_ARGS__), true); _opened; _opened = false, closeComponent())
+	#define Container(...) for (bool _opened = (openComponent(__VA_ARGS__), true); _opened; _opened = false, closeComponent())
 }

@@ -10,7 +10,7 @@
 #include "Engine/Filesystem/Stream/UTF8Stream.hpp"
 
 namespace Trident {
-	void GUILayer::GUIText(const sequence<char8>& text, const TextStyle& style) {
+	void GUILayer::Text(view<char8> text, const TextStyle& style) {
 		UTF8Stream stream(text);
 
 		const uint32 componentIndex = componentCount;
@@ -40,7 +40,6 @@ namespace Trident {
 		textComponent.text = text;
 		textComponent.font = style.font;
 		textComponent.fontSize = style.fontSize;
-		textComponent.eventListeners = style.eventListeners;
 		textComponent.debugName = style.debugName;
 
 		// Pushing the component to the vector might invalidate the parent reference, so we update the parent's children indices before.
@@ -49,16 +48,7 @@ namespace Trident {
 		components[componentCount] = textComponent;
 		componentCount += 1;
 
-		if (textComponent.eventListeners != nullptr) {
-			buttonComponentIndices[buttonComponentIndexCount] = componentIndex;
-			buttonComponentIndexCount += 1;
-		}
-
 		FitSizingWidths(componentIndex);
-	}
-
-	void GUILayer::Text(view<char8> text, const TextStyle& style) {
-		return GUIText(text, style);
 	}
 
 	void GUILayer::WrapText(GUIContainer& textComponent) {

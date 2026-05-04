@@ -11,11 +11,11 @@ namespace Trident {
 			}
 
 			void render() override {
-				GUIComponent({
+				Container({
 					.size = {FIT, FIT},
 					.color = 0xff9800ff,
 				}) {
-					GUIText("Hello world", {
+					Text("Hello world", {
 						.color = 0xde1818ff,
 						.font = font,
 						.fontSize = 128_px,

@@ -7,44 +7,29 @@ namespace Trident {
 	class GUIDemo1Layer : public GUILayer {
 		public:
 			void render() override {
-				ContainerStyle blue{};
-				blue.size = {1600_px, FIT};
-				blue.padding = {32_px, 32_px};
-				blue.layoutDirection = HORIZONTAL;
-				blue.layoutSpacing = 32_px;
-				blue.color = 0x0a6e89ff;
-				blue.debugName = "blue";
-
-				GUIComponent(blue) {
-					ContainerStyle pink{};
-					pink.size = {300_px, EXPAND};
-					pink.padding = {0_px, 0_px};
-					pink.layoutDirection = HORIZONTAL;
-					pink.layoutSpacing = 0_px;
-					pink.color = 0xfb938fff;
-					pink.debugName = "pink";
-
-					GUIComponent(pink);
-
-					ContainerStyle yellow{};
-					yellow.size = {EXPAND, 200_px};
-					yellow.padding = {0_px, 0_px};
-					yellow.layoutDirection = HORIZONTAL;
-					yellow.layoutSpacing = 0_px;
-					yellow.color = 0xfed84dff;
-					yellow.debugName = "yellow";
-
-					GUIComponent(yellow);
-
-					ContainerStyle lightBlue{};
-					lightBlue.size = {EXPAND, 300_px};
-					lightBlue.padding = {0_px, 0_px};
-					lightBlue.layoutDirection = HORIZONTAL;
-					lightBlue.layoutSpacing = 0_px;
-					lightBlue.color = 0x5ecbe4ff;
-					lightBlue.debugName = "lightBlue";
-
-					GUIComponent(lightBlue);
+				Container({
+					.size = {800_px, FIT},
+					.padding = {32_px, 32_px},
+					.layoutDirection = LayoutDirection::HORIZONTAL,
+					.layoutSpacing = 32_px,
+					.color = 0x0a6e89ff,
+					.debugName = "blue",
+				}) {
+					Container({
+						.size = {300_px, EXPAND},
+						.color = 0xfb938fff,
+						.debugName = "pink",
+					});
+					Container({
+						.size = {EXPAND, 200_px},
+						.color = 0xfed84dff,
+						.debugName = "yellow",
+					});
+					Container({
+						.size = {EXPAND, 300_px},
+						.color = 0x5ecbe4ff,
+						.debugName = "lightBlue",
+					});
 				}
 			}
 	};

@@ -15,7 +15,7 @@ namespace Trident {
 			}
 
 			void render() override {
-				GUIComponent({
+				Container({
 					.size = {1280_px, 720_px},
 					.padding = {12_px, 12_px},
 					.layoutDirection = LayoutDirection::VERTICAL,
@@ -40,12 +40,12 @@ namespace Trident {
 						}
 					);
 
-					GUIComponent({
+					Container({
 						.size = {FIT, FIT},
 						.layoutDirection = LayoutDirection::VERTICAL,
 						.layoutSpacing = 4_px,
 					}) {
-						GUIComponent({
+						Container({
 							.size = {256_px, 256_px},
 							.color = 0xffffffff,
 							.image = image,

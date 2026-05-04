@@ -18,12 +18,12 @@ namespace Trident {
 					framesPerSecond = static_cast<uint64>(round(getApplication()->getFramesPerSecond()));
 				}
 
-				GUIComponent({
+				Container({
 					.size = {FIT, FIT},
 					.padding = {8.0_px, 8.0_px},
 					.layoutDirection = LayoutDirection::VERTICAL,
 				}) {
-					GUIComponent({
+					Container({
 						.size = {FIT, FIT},
 						.padding = {4.0_px, 4.0_px},
 						.layoutDirection = LayoutDirection::VERTICAL,
@@ -31,7 +31,7 @@ namespace Trident {
 					}) {
 						PhysicalDeviceName();
 
-						GUIComponent({
+						Container({
 							.size = {FIT, FIT},
 							.layoutSpacing = 16_px,
 						}) {

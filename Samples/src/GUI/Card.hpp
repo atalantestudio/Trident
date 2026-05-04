@@ -9,44 +9,40 @@ namespace Trident {
 			void registerAssets() override {
 				fontBold = loadFontAsset("test-bold");
 				fontRegular = loadFontAsset("test-regular");
+				image = loadImageAsset("Cameraman");
 			}
 
 			void render() override {
-				const Extent2D extent = getApplication()->getWindow()->getExtent();
-
-				GUIComponent({
-					.size = {static_cast<float32>(extent.width), static_cast<float32>(extent.height)},
-					.color = 0xffffffff,
+				// TODO: Fix height overflow (also happening in Demo1, Demo2 and DropDownMenu).
+				Container({
+					.size = {FIT, FIT},
+					.padding = {8_px, 8_px},
+					.layoutDirection = LayoutDirection::VERTICAL,
+					.layoutSpacing = 8_px,
+					.color = 0xeeeeeeff,
 				}) {
-					GUIComponent({
-						.size = {FIT, FIT},
-						.padding = {8_px, 8_px},
-						.layoutDirection = VERTICAL,
-						.layoutSpacing = 8_px,
-						.color = 0xeeeeeeff,
+					Container({
+						.size = {200_px, 200_px},
+						.color = 0xffffffff,
+						.image = image,
+					});
+
+					Container({
+						.size = {EXPAND, FIT},
+						.layoutDirection = LayoutDirection::VERTICAL,
+						.layoutSpacing = 2_px,
 					}) {
-						GUIComponent({
-							.size = {200_px, 200_px},
-							.color = 0xccccccff,
+						Text("Title", {
+							.color = 0x000000ff,
+							.font = fontBold,
+							.fontSize = 22_px,
 						});
 
-						GUIComponent({
-							.size = {EXPAND, FIT},
-							.layoutDirection = VERTICAL,
-							.layoutSpacing = 2_px,
-						}) {
-							GUIText("Card title", {
-								.color = 0x000000ff,
-								.font = fontBold,
-								.fontSize = 22.0_px,
-							});
-
-							GUIText("Card description", {
-								.color = 0x00000080,
-								.font = fontRegular,
-								.fontSize = 18.0_px,
-							});
-						}
+						Text("Description", {
+							.color = 0x00000080,
+							.font = fontRegular,
+							.fontSize = 18_px,
+						});
 					}
 				}
 			}
@@ -54,5 +50,6 @@ namespace Trident {
 		private:
 			FontID fontBold;
 			FontID fontRegular;
+			ImageID image;
 	};
 }

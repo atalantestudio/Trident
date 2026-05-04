@@ -15,7 +15,7 @@ namespace Trident {
 				blue.color = 0x0a6e89ff;
 				blue.debugName = "blue";
 
-				GUIComponent(blue) {
+				Container(blue) {
 					for (uint32 i = 0; i < 3; i += 1) {
 						ContainerStyle pink{};
 						pink.size = {FIT, FIT};
@@ -36,10 +36,10 @@ namespace Trident {
 						yellow.color = 0xfed84dff;
 						yellow.debugName = "yellow";
 
-						GUIComponent(pink) {
-							GUIComponent(lightBlue) {
-								GUIComponent(yellow);
-								GUIComponent(yellow);
+						Container(pink) {
+							Container(lightBlue) {
+								Container(yellow);
+								Container(yellow);
 							}
 						}
 					}

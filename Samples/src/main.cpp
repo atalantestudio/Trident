@@ -21,6 +21,7 @@
 #include "GUI/Sample.hpp"
 #include "GUI/Test.hpp"
 #include "GUI/Text.hpp"
+#include "GUI/TextSmoothness.hpp"
 #include "GUI/UTF8.hpp"
 
 #include "Physics2D/Layer/SceneLayer.hpp"
@@ -95,6 +96,9 @@ namespace Trident {
 			}
 			else if (SampleNameProperty == "Text") {
 				registerLayer<GUITextLayer>();
+			}
+			else if (SampleNameProperty == "TextSmoothness") {
+				registerLayer<GUITextSmoothnessLayer>();
 			}
 			else if (SampleNameProperty == "UTF8") {
 				registerLayer<GUIUTF8Layer>();

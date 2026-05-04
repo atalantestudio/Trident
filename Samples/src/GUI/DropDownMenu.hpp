@@ -8,7 +8,7 @@ namespace Trident {
 		private:
 			static constexpr uint32 ITEM_COUNT = 5;
 
-			inline static constexpr const char8* ITEM_LABELS[ITEM_COUNT] = {
+			inline static constexpr const view<char8> ITEM_LABELS[ITEM_COUNT] = {
 				"Copy",
 				"Paste",
 				"Delete",
@@ -22,50 +22,45 @@ namespace Trident {
 			}
 
 			void render() override {
-				ContainerStyle menu{};
-				menu.size = {FIT, FIT};
-				menu.padding = {8_px, 8_px};
-				menu.layoutDirection = VERTICAL;
-				menu.layoutSpacing = 8_px;
-				menu.color = 0xa675a2ff;
-				menu.debugName = "menu";
-
-				GUIComponent(menu) {
+				Container({
+					.size = {FIT, FIT},
+					.padding = {8_px, 8_px},
+					.layoutDirection = VERTICAL,
+					.layoutSpacing = 8_px,
+					.color = 0xa675a2ff,
+					.debugName = "menu",
+				}) {
 					uint32 itemIndex = 0;
 
 					while (itemIndex < ITEM_COUNT) {
-						const char8* label = ITEM_LABELS[itemIndex];
+						const view<char8> label = ITEM_LABELS[itemIndex];
 
-						ContainerStyle item{};
-						item.size = {EXPAND, 40_px};
-						item.minimumSize.y = 40_px;
-						item.padding = {8_px, 8_px};
-						item.anchorPoint = AnchorPoint::LEFT | AnchorPoint::VCENTER;
-						item.layoutSpacing = 8_px;
-						item.color = 0xbd95bcff;
-						item.debugName = "item";
-
-						GUIComponent(item) {
-							ContainerStyle labelContainer{};
-							labelContainer.size = {EXPAND, FIT};
-							labelContainer.color = 0x00000000;
-							labelContainer.debugName = "labelContainer";
-
-							GUIComponent(labelContainer) {
-								TextStyle itemLabel{};
-								itemLabel.color = 0xffffffff;
-								itemLabel.font = font;
-								itemLabel.fontSize = 32;
-
-								GUIText(label, itemLabel);
+						Container({
+							.size = {EXPAND, 40_px},
+							.minimumSize = {0_px, 40_px},
+							.padding = {8_px, 8_px},
+							.anchorPoint = AnchorPoint::LEFT | AnchorPoint::VCENTER,
+							.layoutSpacing = 8_px,
+							.color = 0xbd95bcff,
+							.debugName = "item",
+						}) {
+							Container({
+								.size = {EXPAND, FIT},
+								.color = 0x00000000,
+								.debugName = "labelContainer",
+							}) {
+								Text(label, {
+									.color = 0xffffffff,
+									.font = font,
+									.fontSize = 32,
+								});
 							}
 
-							ContainerStyle itemImage{};
-							itemImage.size = {32_px, 32_px};
-							itemImage.color = 0xff9800ff;
-							itemImage.debugName = "itemImage";
-
-							GUIComponent(itemImage);
+							Container({
+								.size = {32_px, 32_px},
+								.color = 0xff9800ff,
+								.debugName = "itemImage",
+							});
 						}
 
 						itemIndex += 1;
