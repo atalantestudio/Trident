@@ -30,11 +30,12 @@ namespace Trident {
 			};
 
 		public:
+			static constexpr uint8 SAMPLE_COUNT = 4;
 			static constexpr index DEBUG_MAX_CONTACTS = 16;
 
 		public:
 			void build() override {
-				_createRenderPass();
+				renderPass = createRenderPass();
 
 				colorImage = createColorImage();
 				depthStencilImage = createDepthStencilImage();
@@ -293,45 +294,7 @@ namespace Trident {
 			}
 
 		private:
-			void _createRenderPass() {
-				constexpr uint32 SAMPLE_COUNT = 4;
-
-				renderPass = createRenderPass({
-					.attachments = {
-						// Color
-						{
-							.format = getSurface()->getFormat(),
-							.sampleCount = SAMPLE_COUNT,
-							.loadOperation = LoadOperation::CLEAR,
-							.storeOperation = StoreOperation::UNDEFINED,
-							.finalLayout = ImageLayout::PRESENT_SRC,
-						},
-
-						// Depth stencil
-						{
-							.format = ImageFormat::D32_SFLOAT,
-							.sampleCount = SAMPLE_COUNT,
-							.loadOperation = LoadOperation::CLEAR,
-							.storeOperation = StoreOperation::UNDEFINED,
-							.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-						},
-					},
-					.subpasses = {
-						createSubpass({
-							.colorAttachmentReferences = {
-								{
-									.index = 0,
-									.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
-								},
-							},
-							.depthStencilAttachmentReference = {
-								.index = 1,
-								.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-							},
-						}),
-					},
-				});
-			}
+			ref<RenderPass> createRenderPass() const;
 
 			void createFramebuffers() {
 				const ref<Swapchain> swapchain = getSwapchain();
@@ -371,152 +334,23 @@ namespace Trident {
 			ref<GraphicsPipeline> createDebugHullWireframePipeline() const;
 			ref<GraphicsPipeline> createDebugContactManifoldPipeline() const;
 
-			ref<Image> createColorImage() const {
-				const Extent2D extent = getSwapchain()->getExtent();
+			ref<Image> createColorImage() const;
+			ref<Image> createDepthStencilImage() const;
 
-				return renderPass->createColorAttachmentImage(
-					{
-						.type = ImageType::TEXTURE_2D,
-						.extent = {extent.width, extent.height, 1},
-						.mipLevelCount = 1,
-						.layerCount = 1,
-						#if defined(DEBUG_OBJECT_NAME)
-							.name = "Color",
-						#endif
-					},
-					0
-				);
-			}
+			ref<ImageView> createColorImageView() const;
+			ref<ImageView> createDepthStencilImageView() const;
 
-			ref<Image> createDepthStencilImage() const {
-				const Extent2D extent = getSwapchain()->getExtent();
-
-				return renderPass->createDepthStencilAttachmentImage(
-					{
-						.type = ImageType::TEXTURE_2D,
-						.extent = {extent.width, extent.height, 1},
-						.mipLevelCount = 1,
-						.layerCount = 1,
-						#if defined(DEBUG_OBJECT_NAME)
-							.name = "Depth stencil",
-						#endif
-					},
-					0
-				);
-			}
-
-			ref<ImageView> createColorImageView() const {
-				return colorImage->createView({
-					.mipLevelOffset = 0,
-					.mipLevelCount = 1,
-					.layerOffset = 0,
-					.layerCount = 1,
-					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Color",
-					#endif
-				});
-			}
-
-			ref<ImageView> createDepthStencilImageView() const {
-				return depthStencilImage->createView({
-					.mipLevelOffset = 0,
-					.mipLevelCount = 1,
-					.layerOffset = 0,
-					.layerCount = 1,
-					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Depth stencil",
-					#endif
-				});
-			}
-
-			ref<DescriptorSetLayout> createVertexDescriptorSetLayout() const {
-				return createDescriptorSetLayout({
-					// Camera
-					{
-						.descriptorType = DescriptorType::UNIFORM_BUFFER,
-						.descriptorCount = 1,
-						.shaderStages = ShaderStage::VERTEX | ShaderStage::FRAGMENT,
-					},
-
-					// Vertex position component
-					{
-						.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
-						.descriptorCount = 1,
-						.shaderStages = ShaderStage::VERTEX,
-					},
-
-					// Vertex normal component
-					{
-						.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
-						.descriptorCount = 1,
-						.shaderStages = ShaderStage::VERTEX,
-					},
-
-					// Vertex texture coordinate component
-					{
-						.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
-						.descriptorCount = 1,
-						.shaderStages = ShaderStage::VERTEX,
-					},
-
-					// Triangle tangent component
-					{
-						.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
-						.descriptorCount = 1,
-						.shaderStages = ShaderStage::VERTEX,
-					},
-				});
-			}
-
-			ref<Buffer<uint16>> createDebugHullWireframeBuffer() const;
-			ref<Buffer<svec3<float32>>> createDebugContactManifoldBuffer() const;
+			ref<DescriptorSetLayout> createVertexDescriptorSetLayout() const;
 
 			void createMaterialObjects();
 
-			ref<Buffer<Vertex>> createVertexBuffer() const {
-				return createBuffer<Vertex>({
-					.size = scene->getIndexCount() * sizeof(Vertex),
-					.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX,
-					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
-					.persistent = false,
-					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Vertex",
-					#endif
-				});
-			}
+			ref<Buffer<Camera>> createCameraBuffer() const;
+			ref<Buffer<Instance>> createInstanceBuffer() const;
+			ref<Buffer<Vertex>> createVertexBuffer() const;
+			ref<Buffer<uint16>> createDebugHullWireframeBuffer() const;
+			ref<Buffer<svec3<float32>>> createDebugContactManifoldBuffer() const;
 
-			ref<Buffer<Instance>> createInstanceBuffer() const {
-				const ComponentPool<RigidBody3DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody3DComponent>();
-
-				return createBuffer<Instance>({
-					.size = rigidBodyComponentPool.componentCount * sizeof(Instance),
-					.usage = BufferUsage::VERTEX,
-					.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
-					.persistent = true,
-					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Instance",
-					#endif
-				});
-			}
-
-			ref<Buffer<Camera>> createCameraBuffer() const {
-				return createBuffer<Camera>({
-					.size = sizeof(Camera),
-					.usage = BufferUsage::UNIFORM,
-					.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
-					.persistent = true,
-					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Camera",
-					#endif
-				});
-			}
-
-			ref<Sampler> createImageSampler() const {
-				return createSampler({
-					.magFilter = SamplerFilter::LINEAR,
-					.minFilter = SamplerFilter::LINEAR,
-				});
-			}
+			ref<Sampler> createImageSampler() const;
 
 			void updateDescriptorSets() const {
 				const sequence<DescriptorBuffer> descriptorBuffers = {
@@ -564,6 +398,8 @@ namespace Trident {
 			}
 
 			void postSetCameraController() override {}
+
+			void renderStaticObjects() const;
 
 		private:
 			ref<RenderPass> renderPass;

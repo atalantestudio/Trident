@@ -4,13 +4,21 @@
 #include "pch.hpp"
 
 #include "Engine/Filesystem/Asset/ImageAsset.hpp"
+#include "Engine/Renderer/Forward/CameraBuffer.hpp"
+#include "Engine/Renderer/Forward/ColorImage.hpp"
 #include "Engine/Renderer/Forward/DebugContactManifoldBuffer.hpp"
 #include "Engine/Renderer/Forward/DebugContactManifoldPipeline.hpp"
 #include "Engine/Renderer/Forward/DebugContactManifoldPipelineLayout.hpp"
 #include "Engine/Renderer/Forward/DebugHullWireframeBuffer.hpp"
 #include "Engine/Renderer/Forward/DebugHullWireframePipeline.hpp"
 #include "Engine/Renderer/Forward/DebugHullWireframePipelineLayout.hpp"
+#include "Engine/Renderer/Forward/DepthStencilImage.hpp"
+#include "Engine/Renderer/Forward/ImageSampler.hpp"
+#include "Engine/Renderer/Forward/InstanceBuffer.hpp"
 #include "Engine/Renderer/Forward/Renderer.hpp"
+#include "Engine/Renderer/Forward/RenderPass.hpp"
+#include "Engine/Renderer/Forward/VertexDescriptorSetLayout.hpp"
+#include "Engine/Renderer/Forward/VertexBuffer.hpp"
 
 namespace Trident {
 	void ForwardRenderer::createMaterialObjects() {
@@ -301,5 +309,9 @@ namespace Trident {
 		queue->waitIdle();
 
 		getDevice()->updateDescriptorSets(writeDescriptorSets);
+	}
+
+	void ForwardRenderer::renderStaticObjects() const {
+		// TODO
 	}
 }
