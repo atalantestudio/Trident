@@ -101,6 +101,7 @@ namespace Trident {
 
 		const std::vector<uint32> growableChildIndices = FilterChildren(parent, 0, FillMode::EXPAND);
 
+		// TODO(gui/fit-sizing): Merge growable and shrinkable passes.
 		if (parent.layoutDirection == LayoutDirection::HORIZONTAL) {
 			float32 remainingWidth = parent.size.width.value - parent.padding.x * 2.0f;
 
@@ -235,7 +236,6 @@ namespace Trident {
 		else {
 			for (const uint32 childIndex : growableChildIndices) {
 				GUIContainer& child = components[childIndex];
-
 				child.size.width.value = parent.size.width.value - parent.padding.x * 2.0f;
 			}
 		}
@@ -252,6 +252,7 @@ namespace Trident {
 
 		const std::vector<uint32> growableChildIndices = FilterChildren(parent, 1, FillMode::EXPAND);
 
+		// TODO(gui/fit-sizing): Merge growable and shrinkable passes.
 		if (parent.layoutDirection == LayoutDirection::VERTICAL) {
 			float32 remainingHeight = parent.size.height.value - parent.padding.y * 2.0f;
 

@@ -19,5 +19,9 @@ namespace Trident {
 		uint32 zIndex;
 		uint32 textureArrayLayerIndex;
 		float32 fontSize;
+
+		// TODO(gui/text-smoothness)
+		// float32 a;
+		// float32 b;
 	};
 }

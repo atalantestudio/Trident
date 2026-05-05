@@ -4,27 +4,77 @@
 #pragma once
 
 namespace Trident {
-	// TODO: WIP
 	class GUITextSmoothnessLayer : public GUILayer {
 		public:
 			void registerAssets() override {
-				font = loadFontAsset("test-regular");
+				fontBold = loadFontAsset("test-bold");
+				fontBoldItalic = loadFontAsset("test-bold-italic");
+				fontRegular = loadFontAsset("test-regular");
+				fontRegularItalic = loadFontAsset("test-regular");
 			}
 
 			void render() override {
-				RangeControl(300_px, dragging, offset, previousOffset, value);
+				Container({
+					.size = {EXPAND, 720_px},
+					.layoutDirection = LayoutDirection::VERTICAL,
+					.color = 0x0a0a0aff,
+				}) {
+					sequence<char8> text;
 
-				ENGINE_DEBUG(value);
+					/* TODO(gui/text-smoothness)
+					- 16px = (A = 0.15-0.23, B = 0.70-0.64)
+					- 18px = (A = 0.12-0.20, B = 0.70-0.60)
+					- 22px = (A = 0.35, B = 0.58)
+					- 40px = (A = 0.39, B = 0.58)
+					- 96px = (A = 0.46, B = 0.53)
+					*/
 
-				Text("The quick brown fox jumps over the lazy dog.", {
-					.color = 0xc2c2c2ff,
-					.font = font,
-					.fontSize = 16_px,
-				});
+					text = Logger::format("A = []", a);
+
+					Text(text, {
+						.color = 0xa5a5a5ff,
+						.font = fontRegular,
+						.fontSize = 16_px,
+					});
+
+					RangeControl(300_px, draggingA, offsetA, previousOffsetA, a);
+
+					text = Logger::format("B = []", b);
+
+					Text(text, {
+						.color = 0xa5a5a5ff,
+						.font = fontRegular,
+						.fontSize = 16_px,
+					});
+
+					RangeControl(300_px, draggingB, offsetB, previousOffsetB, b);
+
+					Text("(18px) The quick brown fox jumps over the lazy dog.", {
+						.color = 0xa5a5a5ff,
+						.font = fontRegular,
+						.fontSize = 18_px,
+					});
+					Text("(18px) The quick brown fox jumps over the lazy dog.", {
+						.color = 0xa5a5a5ff,
+						.font = fontBold,
+						.fontSize = 18_px,
+					});
+					Text("(18px) The quick brown fox jumps over the lazy dog.", {
+						.color = 0xa5a5a5ff,
+						.font = fontRegularItalic,
+						.fontSize = 18_px,
+					});
+					Text("(18px) The quick brown fox jumps over the lazy dog.", {
+						.color = 0xa5a5a5ff,
+						.font = fontBoldItalic,
+						.fontSize = 18_px,
+					});
+				}
 			}
 
 			void onMouseUpClient(MouseUpEvent& event) override {
-				dragging = false;
+				draggingA = false;
+				draggingB = false;
 			}
 
 		private:
@@ -79,11 +129,17 @@ namespace Trident {
 			}
 
 		private:
-			FontID font;
+			FontID fontBold;
+			FontID fontBoldItalic;
+			FontID fontRegular;
+			FontID fontRegularItalic;
 
-			bool dragging = false;
-			float32 offset = 7_px;
-			float32 previousOffset = 7_px;
-			float32 value = 0.0f;
+			bool draggingA = false;
+			float32 offsetA = 7_px;
+			float32 previousOffsetA = 7_px;
+
+			bool draggingB = false;
+			float32 offsetB = 7_px;
+			float32 previousOffsetB = 7_px;
 	};
 }

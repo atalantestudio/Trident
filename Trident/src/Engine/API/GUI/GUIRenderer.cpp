@@ -453,6 +453,10 @@ namespace Trident {
 		instanceInputBinding.registerAttribute<uint32>(); // Layer index
 		instanceInputBinding.registerAttribute<float32>(); // Font size
 
+		// TODO(gui/text-smoothness)
+		// instanceInputBinding.registerAttribute<float32>();
+		// instanceInputBinding.registerAttribute<float32>();
+
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";

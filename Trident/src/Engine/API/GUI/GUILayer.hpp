@@ -123,6 +123,10 @@ namespace Trident {
 		protected:
 			Color rootColor = 0x000000ff;
 
+			// TODO(gui/text-smoothness)
+			float32 a = 0.0f;
+			float32 b = 0.0f;
+
 		private:
 			GUIRenderer renderer;
 

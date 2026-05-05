@@ -134,6 +134,10 @@ namespace Trident {
 				glyphSubcomponent.textureArrayLayerIndex = fonts[component.font].glyphMapImageId;
 				glyphSubcomponent.fontSize = component.fontSize;
 
+				// TODO(gui/text-smoothness)
+				// glyphSubcomponent.a = a;
+				// glyphSubcomponent.b = b;
+
 				const vec2<float32> origin = {component.origin.x, component.origin.y};
 
 				for (const TextCharacter& textCharacter : component.characters) {
