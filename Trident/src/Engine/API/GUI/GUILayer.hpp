@@ -51,6 +51,8 @@ namespace Trident {
 
 			virtual void onEvent(Event& event) final override;
 
+			virtual void onMouseUpClient(MouseUpEvent& event) {}
+
 		protected:
 			// TODO(gui/load-assets): Make these methods available only inside GUILayer::registerAssets.
 			FontID loadFontAsset(view<char8> assetName);

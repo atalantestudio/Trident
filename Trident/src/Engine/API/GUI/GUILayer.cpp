@@ -225,6 +225,7 @@ namespace Trident {
 		component.parentIndex = parentIndex;
 		component.floating = floating;
 		component.origin = parent.origin;
+		component.offset = style.offset;
 		component.size = style.size;
 		component.zIndex = parent.zIndex + style.zIndex;
 
@@ -335,6 +336,8 @@ namespace Trident {
 	bool GUILayer::onMouseUp(MouseUpEvent& event) {
 		mouseUp = true;
 		lastMouseUpPosition = getMousePosition();
+
+		onMouseUpClient(event);
 
 		return false;
 	}

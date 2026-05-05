@@ -13,6 +13,9 @@ namespace Trident {
 		// TODO(gui/component-id)
 		// GUI::ComponentID id = max<GUI::ComponentID>();
 
+		/// Offset from the origin (for floating components only).
+		svec2<float32> offset = {0_px, 0_px};
+
 		Size2D size;
 		svec2<float32> maximumSize = {max<float32>(), max<float32>()};
 		svec2<float32> minimumSize = {0_px, 0_px};

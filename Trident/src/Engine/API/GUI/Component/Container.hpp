@@ -26,6 +26,10 @@ namespace Trident {
 		bool floating;
 
 		svec2<float32> origin;
+
+		/// Offset to the origin (floating components only).
+		svec2<float32> offset;
+
 		Size2D size;
 
 		/// The Z-index is relative to the parent's Z index.

@@ -12,7 +12,9 @@ namespace Trident {
 			}
 
 			void render() override {
-				Track();
+				RangeControl(300_px, dragging, offset, previousOffset, value);
+
+				ENGINE_DEBUG(value);
 
 				Text("The quick brown fox jumps over the lazy dog.", {
 					.color = 0xc2c2c2ff,
@@ -21,48 +23,67 @@ namespace Trident {
 				});
 			}
 
+			void onMouseUpClient(MouseUpEvent& event) override {
+				dragging = false;
+			}
+
 		private:
-			void Track() {
+			void RangeControl(float32 width, bool& dragging, float32& offset, float32& previousOffset, float32& value) {
 				Container({
-					.size = {300_px, FIT},
-					.color = 0xff9800ff,
+					.size = {width, 23_px},
+					.padding = {7_px, 7_px},
+					.color = 0xf5f5f5ff,
+					.debugName = "RangeControlContainer",
 				}) {
-					Thumb();
+					RangeControlTrack();
+					RangeControlThumb(width, dragging, offset, previousOffset, value);
 				}
 			}
 
-			void Thumb() {
-				float32 offset = 0.0f;
+			void RangeControlTrack() {
+				Floating({
+					.offset = {0_px, 11_px},
+					.size = {EXPAND, 1_px},
+					.color = 0x535353ff,
+					.debugName = "RangeControlTrack",
+				});
+			}
 
+			void RangeControlThumb(float32 width, bool& dragging, float32& offset, float32& previousOffset, float32& value) {
 				if (dragging) {
-					currentX = getMousePosition()[0];
+					const float32 currentOffset = getMousePosition()[0];
 
-					offset = currentX;
+					offset += currentOffset - previousOffset;
+					previousOffset = currentOffset;
+
+					offset = clamp(offset, 0_px, width);
+					value = offset / width;
 				}
 
-				Container({
-					.size = {40_px, 40_px},
-					.padding = {offset, 0.0f},
-					.color = 0xde1818ff,
+				Floating({
+					.offset = {offset - 7_px, 0.0f},
+					.size = {14_px, 23_px},
+					.color = 0x5cafe7ff,
+					.pointerType = PointerType::INTERACTIVE,
+					.debugName = "RangeControlThumb",
 				}) {
 					if (IsMouseDown()) {
 						dragging = true;
-						currentX = getMousePosition()[0];
+						previousOffset = getMousePosition()[0];
 					}
 
 					if (IsMouseUp()) {
 						dragging = false;
 					}
 				}
-
-				previousX = currentX;
 			}
 
 		private:
 			FontID font;
 
 			bool dragging = false;
-			float32 currentX = 0.0f;
-			float32 previousX = 0.0f;
+			float32 offset = 7_px;
+			float32 previousOffset = 7_px;
+			float32 value = 0.0f;
 	};
 }

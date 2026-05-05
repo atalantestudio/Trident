@@ -10,7 +10,9 @@ namespace Trident {
 		std::vector<uint32> childIndices;
 
 		for (const uint32 childIndex : parent.childIndices) {
-			if (components[childIndex].size[axis].fillMode == fillMode) {
+			const GUIContainer& component = components[childIndex];
+
+			if (component.size[axis].fillMode == fillMode) {
 				childIndices.emplace_back(childIndex);
 			}
 		}
@@ -105,7 +107,9 @@ namespace Trident {
 			for (const uint32 childIndex : parent.childIndices) {
 				const GUIContainer& child = components[childIndex];
 
-				remainingWidth -= child.size.width.value;
+				if (!child.floating) {
+					remainingWidth -= child.size.width.value;
+				}
 			}
 
 			remainingWidth -= parent.layoutSpacing * (parent.childIndices.size() - 1);
@@ -254,7 +258,9 @@ namespace Trident {
 			for (const uint32 childIndex : parent.childIndices) {
 				const GUIContainer& child = components[childIndex];
 
-				remainingHeight -= child.size.height.value;
+				if (!child.floating) {
+					remainingHeight -= child.size.height.value;
+				}
 			}
 
 			remainingHeight -= parent.layoutSpacing * (parent.childIndices.size() - 1);
@@ -393,7 +399,13 @@ namespace Trident {
 	}
 
 	void GUILayer::PositionsAndAlignment(GUIContainer& component, svec2<float32> origin) {
+		const svec2<float32> previousOrigin = origin;
+
 		component.origin = origin;
+
+		if (component.floating) {
+			component.origin += component.offset;
+		}
 
 		if (component.childIndices.size() == 0) {
 			const GUIContainer& parent = components[component.parentIndex];
@@ -442,13 +454,17 @@ namespace Trident {
 		while (index < component.childIndices.size()) {
 			GUIContainer& child = components[component.childIndices[index]];
 
-			const float32 remainingAcross = componentAcross - child.size[!component.layoutDirection].value;
+			if (!child.floating) {
+				const float32 remainingAcross = componentAcross - child.size[!component.layoutDirection].value;
 
-			origin[!component.layoutDirection] = originAcross + remainingAcross * fAcross;
+				origin[!component.layoutDirection] = originAcross + remainingAcross * fAcross;
+			}
 
 			PositionsAndAlignment(child, origin);
 
-			origin[component.layoutDirection] += child.size[component.layoutDirection].value;
+			if (!child.floating) {
+				origin[component.layoutDirection] += child.size[component.layoutDirection].value;
+			}
 
 			if (index + 1 == component.childIndices.size()) {
 				break;
