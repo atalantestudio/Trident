@@ -455,7 +455,7 @@ namespace Trident {
 		glGetFloatv(GL_SMOOTH_LINE_WIDTH_GRANULARITY, &_physicalDevice->limits.lineWidthGranularity);
 		glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, pointer_cast<GLint*>(&_physicalDevice->limits.maxColorAttachmentCount));
 
-		_physicalDevice->limits.maxBoundDescriptorSetCount = ~0;
+		_physicalDevice->limits.maxBoundDescriptorSetCount = max<uint32>();
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_3_0
 			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, pointer_cast<GLint*>(&_physicalDevice->limits.maxComputeWorkgroupCount[0]));

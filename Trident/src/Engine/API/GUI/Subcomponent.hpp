@@ -16,6 +16,7 @@ namespace Trident {
 		mat3x3<float32> world;
 		mat3x3<float32> textureWorld;
 		vec4<float32> color;
+		uint32 zIndex;
 		uint32 textureArrayLayerIndex;
 		float32 fontSize;
 	};

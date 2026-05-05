@@ -16,6 +16,7 @@
 #include "GUI/DropDownMenu.hpp"
 #include "GUI/FrameStatisticsLayer.hpp"
 #include "GUI/Launch.hpp"
+#include "GUI/MenuBar.hpp"
 #include "GUI/OptionMenu.hpp"
 #include "GUI/PageMenu.hpp"
 #include "GUI/Sample.hpp"
@@ -82,6 +83,9 @@ namespace Trident {
 			else if (SampleNameProperty == "Launch") {
 				registerLayer<GUILaunchLayer>();
 			}
+			else if (SampleNameProperty == "MenuBar") {
+				registerLayer<GUIMenuBarLayer>();
+			}
 			else if (SampleNameProperty == "OptionMenu") {
 				registerLayer<GUIOptionMenuLayer>();
 			}
@@ -104,7 +108,7 @@ namespace Trident {
 				registerLayer<GUIUTF8Layer>();
 			}
 
-			registerLayer<FrameStatisticsLayer>();
+			// registerLayer<FrameStatisticsLayer>();
 		}
 		else if (SampleGroupNameProperty == "Physics2D") {
 			registerLayer<Physics2DSceneLayer>();

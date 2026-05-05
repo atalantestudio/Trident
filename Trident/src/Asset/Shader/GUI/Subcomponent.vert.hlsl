@@ -30,7 +30,7 @@ VertexOutput main(VertexInput input) {
 
 	VertexOutput output;
 	output.position = float4(mul(camera.projection, mul(input.worldTransform, vertex)), 1.0);
-	output.position.z = float(input.zIndex);
+	output.position.z = float(input.zIndex) / 100.0;
 	output.color = input.color;
 	output.textureCoordinate = mul(input.textureTransform, textureCoordinate);
 	output.textureCoordinate.z = float(input.layerIndex);

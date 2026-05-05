@@ -413,30 +413,32 @@ namespace Trident {
 			},
 		};
 
-		GraphicsPipelineDescriptor subcomponentGraphicsPipelineDescriptor{};
-		subcomponentGraphicsPipelineDescriptor.pipelineLayout = subcomponentPipelineLayout;
-		subcomponentGraphicsPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
-		subcomponentGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-		subcomponentGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-		subcomponentGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-		subcomponentGraphicsPipelineDescriptor.polygonMode = PolygonMode::FILL;
-		subcomponentGraphicsPipelineDescriptor.cullMode = CullMode::BACK;
-		subcomponentGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-		subcomponentGraphicsPipelineDescriptor.lineWidth = 1.0f;
-		subcomponentGraphicsPipelineDescriptor.minSampleShading = 0.0f;
-		subcomponentGraphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
-		subcomponentGraphicsPipelineDescriptor.depthStencilState.depthTest = true;
-		subcomponentGraphicsPipelineDescriptor.depthStencilState.depthWrite = true;
-		subcomponentGraphicsPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
-		subcomponentGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-		subcomponentGraphicsPipelineDescriptor.renderPass = renderPass;
-		subcomponentGraphicsPipelineDescriptor.subpassIndex = 0;
-
-		#if defined(DEBUG_OBJECT_NAME)
-			subcomponentGraphicsPipelineDescriptor.name = "Subcomponent";
-		#endif
-
-		subcomponentGraphicsPipeline = createGraphicsPipeline(subcomponentGraphicsPipelineDescriptor);
+		subcomponentGraphicsPipeline = createGraphicsPipeline({
+			.pipelineLayout = subcomponentPipelineLayout,
+			.vertexInputBindings = {vertexInputBinding, instanceInputBinding},
+			.vertexShaderModule = vertexShaderModule,
+			.fragmentShaderModule = fragmentShaderModule,
+			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
+			.polygonMode = PolygonMode::FILL,
+			.cullMode = CullMode::BACK,
+			.frontFace = FrontFace::CLOCKWISE,
+			.lineWidth = 1.0f,
+			.minSampleShading = 0.0f,
+			.colorBlendState = {
+				.attachments = colorBlendAttachments,
+			},
+			.depthStencilState = {
+				.depthTest = true,
+				.depthWrite = true,
+				.compareOperation = CompareOperation::GREATER_OR_EQUAL,
+			},
+			.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
+			.renderPass = renderPass,
+			.subpassIndex = 0,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Subcomponent",
+			#endif
+		});
 	}
 
 	void GUIRenderer::createGlyphSubcomponentGraphicsPipeline() {
@@ -447,6 +449,7 @@ namespace Trident {
 		instanceInputBinding.registerAttribute<mat3x3<float32>>(); // World transform
 		instanceInputBinding.registerAttribute<mat3x3<float32>>(); // Texture transform
 		instanceInputBinding.registerAttribute<vec4<float32>>(); // Color
+		instanceInputBinding.registerAttribute<uint32>(); // Z-index
 		instanceInputBinding.registerAttribute<uint32>(); // Layer index
 		instanceInputBinding.registerAttribute<float32>(); // Font size
 
@@ -492,7 +495,9 @@ namespace Trident {
 				.attachments = colorBlendAttachments,
 			},
 			.depthStencilState = {
-				.depthTest = false,
+				.depthTest = true,
+				.depthWrite = true,
+				.compareOperation = CompareOperation::GREATER_OR_EQUAL,
 			},
 			.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
 			.renderPass = renderPass,
@@ -636,7 +641,7 @@ namespace Trident {
 		commandEncoder->beginRenderPass({
 			.framebuffer = framebuffers[getSwapchainImageIndex()],
 			.clearValues = {
-				{0.0f, 0.0f, 0.0f, 1.0f},
+				{clearColor.value[0], clearColor.value[1], clearColor.value[2], clearColor.value[3]},
 				{
 					.depth = 0.0f,
 					.stencil = 0,

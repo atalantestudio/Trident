@@ -31,6 +31,14 @@ namespace Trident {
 			component.size.width.value += component.layoutSpacing * childCount;
 		}
 
+		if (component.floating) {
+			component.minimumSize.x += component.padding.x * 2.0f;
+
+			return;
+		}
+
+		DEBUG_ASSERT(component.parentIndex != max<uint32>());
+
 		GUIContainer& parent = components[component.parentIndex];
 
 		if (parent.size.width.fillMode != FillMode::FIXED) {
@@ -61,6 +69,10 @@ namespace Trident {
 
 			component.size.height.value += component.layoutSpacing * childCount;
 			component.minimumSize.y += component.layoutSpacing * childCount;
+		}
+
+		if (component.floating) {
+			return;
 		}
 
 		DEBUG_ASSERT(component.parentIndex != max<uint32>());

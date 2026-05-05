@@ -7,8 +7,9 @@ layout(location = 0) in vec4 vertexAndTextureCoordinate;
 layout(location = 1) in mat3x3 worldTransform;
 layout(location = 4) in mat3x3 textureTransform;
 layout(location = 7) in vec4 color;
-layout(location = 8) in uint textureArrayLayerIndex;
-layout(location = 9) in float fontSize;
+layout(location = 8) in uint zIndex;
+layout(location = 9) in uint textureArrayLayerIndex;
+layout(location = 10) in float fontSize;
 
 layout(set = 0, binding = 0) uniform readonly Camera {
 	mat3x3 projection;
@@ -25,6 +26,7 @@ void main() {
 	vec3 textureCoordinate = vec3(vertexAndTextureCoordinate.zw, 1.0);
 
 	gl_Position = vec4(camera.projection * worldTransform * vertex, 1.0);
+	gl_Position.z = float(zIndex) / 100.0;
 
 	vertexOutput.color = color;
 	vertexOutput.textureCoordinate = textureTransform * textureCoordinate;

@@ -21,6 +21,10 @@ namespace Trident {
 
 	struct GUIContainer {
 		uint32 parentIndex;
+
+		/// Floating components don't add to the size of their parent.
+		bool floating;
+
 		svec2<float32> origin;
 		Size2D size;
 

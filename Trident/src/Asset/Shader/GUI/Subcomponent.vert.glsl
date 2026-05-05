@@ -24,7 +24,7 @@ void main() {
 	vec3 textureCoordinate = vec3(vertexAndTextureCoordinate.zw, 1.0);
 
 	gl_Position = vec4(camera.projection * worldTransform * vertex, 1.0);
-	gl_Position.z = float(zIndex);
+	gl_Position.z = float(zIndex) / 100.0;
 
 	vertexOutput.color = color;
 	vertexOutput.textureCoordinate = textureTransform * textureCoordinate;

@@ -56,7 +56,7 @@ namespace Trident {
 			FontID loadFontAsset(view<char8> assetName);
 			ImageID loadImageAsset(view<char8> assetName);
 
-			void openContainer(const ContainerStyle& style);
+			void openContainer(const ContainerStyle& style, bool floating);
 			void closeContainer();
 
 			void Text(view<char8> text, const TextStyle& style);
@@ -82,8 +82,8 @@ namespace Trident {
 			vec2<float32> getMousePosition() const;
 
 		private:
-			void openRootComponent();
-			void closeRootComponent();
+			void openRootContainer();
+			void closeRootContainer();
 
 			std::vector<uint32> FilterChildren(const GUIContainer& parent, uint8 axis, FillMode fillMode) const;
 
@@ -118,6 +118,9 @@ namespace Trident {
 			static constexpr uint32 MAX_COMPONENT_COUNT = 64;
 			static constexpr uint32 MAX_FONT_COUNT = 4;
 
+		protected:
+			Color rootColor = 0x000000ff;
+
 		private:
 			GUIRenderer renderer;
 
@@ -144,5 +147,9 @@ namespace Trident {
 			vec2<float32> lastMouseUpPosition = {-1.0f, -1.0f};
 	};
 
-	#define Container(...) for (bool _ = (openContainer(__VA_ARGS__), true); _; _ = (closeContainer(), false))
+	/// Opens a GUI container component.
+	#define Container(...) for (bool _ = (openContainer(__VA_ARGS__, false), true); _; _ = (closeContainer(), false))
+
+	/// Opens a floating GUI container component.
+	#define Floating(...) for (bool _ = (openContainer(__VA_ARGS__, true), true); _; _ = (closeContainer(), false))
 }

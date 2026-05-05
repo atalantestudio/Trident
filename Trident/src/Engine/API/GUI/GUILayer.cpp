@@ -106,7 +106,7 @@ namespace Trident {
 		componentCount = 0;
 		openContainerIndexCount = 0;
 
-		openRootComponent();
+		openRootContainer();
 		render();
 
 		// No other components than root, return.
@@ -114,7 +114,7 @@ namespace Trident {
 			return;
 		}
 
-		closeRootComponent();
+		closeRootContainer();
 
 		uint32 componentIndex = 1;
 
@@ -128,15 +128,15 @@ namespace Trident {
 			}
 
 			if (component.textComponent) {
-				GUIGlyphSubcomponent defaultGlyphSubcomponent{};
-				defaultGlyphSubcomponent.color = component.color.value;
-				defaultGlyphSubcomponent.textureArrayLayerIndex = fonts[component.font].glyphMapImageId;
-				defaultGlyphSubcomponent.fontSize = component.fontSize;
+				GUIGlyphSubcomponent glyphSubcomponent{};
+				glyphSubcomponent.color = component.color.value;
+				glyphSubcomponent.zIndex = component.zIndex;
+				glyphSubcomponent.textureArrayLayerIndex = fonts[component.font].glyphMapImageId;
+				glyphSubcomponent.fontSize = component.fontSize;
 
 				const vec2<float32> origin = {component.origin.x, component.origin.y};
 
 				for (const TextCharacter& textCharacter : component.characters) {
-					GUIGlyphSubcomponent glyphSubcomponent = defaultGlyphSubcomponent;
 					glyphSubcomponent.world =
 						mat3x3<float32>::scaling(textCharacter.size) *
 						mat3x3<float32>::translation(origin + textCharacter.offset);
@@ -169,6 +169,8 @@ namespace Trident {
 		std::copy(&components[0], &components[componentCount], &previousComponents[0]);
 
 		previousComponentCount = componentCount;
+
+		renderer.clearColor = rootColor;
 	}
 
 	void GUILayer::render(ref<CommandEncoder> commandEncoder, float64 remainingFrameTime) const {
@@ -186,12 +188,16 @@ namespace Trident {
 		eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
 	}
 
-	void GUILayer::openRootComponent() {
+	void GUILayer::openRootContainer() {
+		const Window* window = getApplication()->getWindow();
+
 		GUIContainer rootComponent{};
-		rootComponent.parentIndex = ~0;
+		rootComponent.parentIndex = max<uint32>();
 		rootComponent.origin = {0_px, 0_px};
-		rootComponent.size = {FIT, FIT};
+		rootComponent.size = {static_cast<float32>(window->getExtent().width), FIT};
 		rootComponent.zIndex = 0;
+		rootComponent.maximumSize = {max<float32>(), max<float32>()};
+		rootComponent.minimumSize = {0_px, 0_px};
 		rootComponent.padding = {0_px, 0_px};
 		rootComponent.anchorPoint = AnchorPoint::TOP | AnchorPoint::LEFT;
 		rootComponent.layoutDirection = LayoutDirection::VERTICAL;
@@ -209,7 +215,7 @@ namespace Trident {
 		openContainerIndexCount += 1;
 	}
 
-	void GUILayer::openContainer(const ContainerStyle& style) {
+	void GUILayer::openContainer(const ContainerStyle& style, bool floating) {
 		const uint32 componentIndex = componentCount;
 		const uint32 parentIndex = openContainerIndices[openContainerIndexCount - 1];
 
@@ -217,6 +223,7 @@ namespace Trident {
 
 		GUIContainer component{};
 		component.parentIndex = parentIndex;
+		component.floating = floating;
 		component.origin = parent.origin;
 		component.size = style.size;
 		component.zIndex = parent.zIndex + style.zIndex;
@@ -300,20 +307,9 @@ namespace Trident {
 		openContainerIndexCount -= 1;
 	}
 
-	void GUILayer::closeRootComponent() {
-		static constexpr uint32 rootComponentIndex = 0;
-
-		GUIContainer& rootComponent = components[rootComponentIndex];
-
-		for (const uint32 childIndex : rootComponent.childIndices) {
-			GUIContainer& child = components[childIndex];
-
-			if (!child.textComponent) {
-				GrowAndShrinkSizingWidthsRecursive(childIndex);
-			}
-		}
-
-		WrapTextChildrenRecursive(rootComponentIndex);
+	void GUILayer::closeRootContainer() {
+		GrowAndShrinkSizingWidthsRecursive(0);
+		WrapTextChildrenRecursive(0);
 
 		sint32 componentIndex = static_cast<sint32>(componentCount) - 1;
 
@@ -323,8 +319,8 @@ namespace Trident {
 			componentIndex -= 1;
 		}
 
-		GrowAndShrinkSizingHeightsRecursive(rootComponentIndex);
-		PositionsAndAlignment(rootComponent, rootComponent.origin);
+		GrowAndShrinkSizingHeightsRecursive(0);
+		PositionsAndAlignment(components[0], components[0].origin);
 
 		openContainerIndexCount -= 1;
 	}
