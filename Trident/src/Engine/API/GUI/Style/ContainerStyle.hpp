@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "Engine/API/GUI/GUI.hpp"
 #include "Engine/API/GUI/ID.hpp"
 #include "Engine/API/GUI/LayoutDirection.hpp"
 #include "Engine/API/GUI/Size.hpp"

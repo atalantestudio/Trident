@@ -5,7 +5,6 @@
 
 #include "Engine/API/GUI/Component/Container.hpp"
 #include "Engine/API/GUI/FillMode.hpp"
-#include "Engine/API/GUI/GUI.hpp"
 #include "Engine/API/GUI/GUIRenderer.hpp"
 #include "Engine/API/GUI/ID.hpp"
 #include "Engine/API/GUI/Style/ContainerStyle.hpp"
@@ -118,8 +117,6 @@ namespace Trident {
 		private:
 			static constexpr uint32 MAX_COMPONENT_COUNT = 64;
 			static constexpr uint32 MAX_FONT_COUNT = 4;
-			static constexpr uint8 WIDTH_AXIS = 0;
-			static constexpr uint8 HEIGHT_AXIS = 1;
 
 		private:
 			GUIRenderer renderer;

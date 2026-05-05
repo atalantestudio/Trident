@@ -21,13 +21,6 @@ namespace Trident {
 	void GUILayer::AdjustWidth(uint32 componentIndex) {
 		GUIContainer& component = components[componentIndex];
 
-		// TODO
-		// When closing a component, add its padding to its size.
-		// Then add its (updated) size to the parent's size:
-		// - Add its size along the parent's layout direction
-		// - Set the parent's size to max(component.size, parent.size) across the parent's layout direction
-		// Add the layout spacing to the parent's layout direction
-
 		// Add padding to the component's size.
 		component.size.width.value += component.padding.x * 2.0f;
 
@@ -92,7 +85,7 @@ namespace Trident {
 	void GUILayer::GrowAndShrinkSizingWidthsRecursive(uint32 parentIndex) {
 		GUIContainer& parent = components[parentIndex];
 
-		const std::vector<uint32> growableChildIndices = FilterChildren(parent, WIDTH_AXIS, FillMode::EXPAND);
+		const std::vector<uint32> growableChildIndices = FilterChildren(parent, 0, FillMode::EXPAND);
 
 		if (parent.layoutDirection == LayoutDirection::HORIZONTAL) {
 			float32 remainingWidth = parent.size.width.value - parent.padding.x * 2.0f;
@@ -138,7 +131,9 @@ namespace Trident {
 					// Double-check that the width to add is <= than the equal distribution of the width among children.
 					widthToAdd = min(widthToAdd, remainingWidth / growableChildIndexCopy.size());
 
-					for (sint32 index = static_cast<sint32>(growableChildIndexCopy.size()) - 1; index >= 0; index -= 1) {
+					sint32 index = static_cast<sint32>(growableChildIndexCopy.size()) - 1;
+
+					while (index >= 0) {
 						const uint32 childIndex = growableChildIndexCopy[index];
 						GUIContainer& child = components[childIndex];
 
@@ -155,11 +150,13 @@ namespace Trident {
 
 							remainingWidth -= child.size.width.value - previousWidth;
 						}
+
+						index -= 1;
 					}
 				}
 			}
 
-			const std::vector<uint32> shrinkableChildIndices = FilterChildren(parent, WIDTH_AXIS, FillMode::FIT);
+			const std::vector<uint32> shrinkableChildIndices = FilterChildren(parent, 0, FillMode::FIT);
 
 			if (shrinkableChildIndices.size() > 0) {
 				std::vector<uint32> shrinkableChildIndexCopy = shrinkableChildIndices;
@@ -194,7 +191,9 @@ namespace Trident {
 					// Double-check that the width to remove is >= than the equal distribution of the width among children.
 					widthToRemove = max(widthToRemove, remainingWidth / shrinkableChildIndexCopy.size());
 
-					for (sint32 index = static_cast<sint32>(shrinkableChildIndexCopy.size()) - 1; index >= 0; index -= 1) {
+					sint32 index = static_cast<sint32>(shrinkableChildIndexCopy.size()) - 1;
+
+					while (index >= 0) {
 						const uint32 childIndex = shrinkableChildIndexCopy[index];
 						GUIContainer& child = components[childIndex];
 
@@ -211,6 +210,8 @@ namespace Trident {
 
 							remainingWidth -= child.size.width.value - previousWidth;
 						}
+
+						index -= 1;
 					}
 				}
 			}
@@ -233,7 +234,7 @@ namespace Trident {
 	void GUILayer::GrowAndShrinkSizingHeightsRecursive(uint32 parentIndex) {
 		GUIContainer& parent = components[parentIndex];
 
-		const std::vector<uint32> growableChildIndices = FilterChildren(parent, HEIGHT_AXIS, FillMode::EXPAND);
+		const std::vector<uint32> growableChildIndices = FilterChildren(parent, 1, FillMode::EXPAND);
 
 		if (parent.layoutDirection == LayoutDirection::VERTICAL) {
 			float32 remainingHeight = parent.size.height.value - parent.padding.y * 2.0f;
@@ -279,7 +280,9 @@ namespace Trident {
 					// Double-check that the height to add is <= than the equal distribution of the height among expanding children.
 					heightToAdd = min(heightToAdd, remainingHeight / growableChildIndexCopy.size());
 
-					for (sint32 index = static_cast<sint32>(growableChildIndexCopy.size()) - 1; index >= 0; index -= 1) {
+					sint32 index = static_cast<sint32>(growableChildIndexCopy.size()) - 1;
+
+					while (index >= 0) {
 						const uint32 childIndex = growableChildIndexCopy[index];
 
 						GUIContainer& child = components[childIndex];
@@ -297,11 +300,13 @@ namespace Trident {
 
 							remainingHeight -= child.size.height.value - previousHeight;
 						}
+
+						index -= 1;
 					}
 				}
 			}
 
-			const std::vector<uint32> shrinkableChildIndices = FilterChildren(parent, HEIGHT_AXIS, FillMode::FIT);
+			const std::vector<uint32> shrinkableChildIndices = FilterChildren(parent, 1, FillMode::FIT);
 
 			if (shrinkableChildIndices.size() > 0) {
 				std::vector<uint32> shrinkableChildIndexCopy = shrinkableChildIndices;
@@ -336,7 +341,9 @@ namespace Trident {
 					// Double-check that the height to remove is >= than the equal distribution of the height among expanding children.
 					heightToRemove = max(heightToRemove, remainingHeight / shrinkableChildIndexCopy.size());
 
-					for (sint32 index = static_cast<sint32>(shrinkableChildIndexCopy.size()) - 1; index >= 0; index -= 1) {
+					sint32 index = static_cast<sint32>(shrinkableChildIndexCopy.size()) - 1;
+
+					while (index >= 0) {
 						const uint32 childIndex = shrinkableChildIndexCopy[index];
 						GUIContainer& child = components[childIndex];
 
@@ -353,6 +360,8 @@ namespace Trident {
 
 							remainingHeight -= child.size.height.value - previousHeight;
 						}
+
+						index -= 1;
 					}
 				}
 			}
@@ -416,7 +425,9 @@ namespace Trident {
 		const float32 componentAcross = component.size[!component.layoutDirection].value - component.padding[!component.layoutDirection] * 2.0f;
 		const float32 originAcross = origin[!component.layoutDirection];
 
-		for (uint32 index = 0; index < component.childIndices.size(); index += 1) {
+		index index = 0;
+
+		while (index < component.childIndices.size()) {
 			GUIContainer& child = components[component.childIndices[index]];
 
 			const float32 remainingAcross = componentAcross - child.size[!component.layoutDirection].value;
@@ -433,6 +444,8 @@ namespace Trident {
 
 			// Add layout spacing (only if it's not the last child).
 			origin[component.layoutDirection] += component.layoutSpacing;
+
+			index += 1;
 		}
 
 		// Add padding along the layout direction.
