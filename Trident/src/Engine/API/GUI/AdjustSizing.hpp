@@ -60,34 +60,33 @@ namespace Trident {
 	void GUILayer::AdjustHeight(uint32 componentIndex) {
 		GUIContainer& component = components[componentIndex];
 
-		DEBUG_ASSERT(component.parentIndex != max<uint32>());
-
-		float32 componentHeight = component.size.height.value + component.padding.y * 2.0f;
+		component.size.height.value += component.padding.y * 2.0f;
+		component.minimumSize.y += component.padding.y * 2.0f;
 
 		if (component.layoutDirection == LayoutDirection::VERTICAL) {
 			const index childCount = max(static_cast<index>(0), component.childIndices.size() - 1);
 
-			componentHeight += component.layoutSpacing * childCount;
+			component.size.height.value += component.layoutSpacing * childCount;
+			component.minimumSize.y += component.layoutSpacing * childCount;
 		}
+
+		DEBUG_ASSERT(component.parentIndex != max<uint32>());
 
 		GUIContainer& parent = components[component.parentIndex];
 
 		if (parent.size.height.fillMode != FillMode::FIXED) {
 			if (parent.layoutDirection == LayoutDirection::VERTICAL) {
-				parent.size.height.value += componentHeight;
+				parent.size.height.value += component.size.height.value;
 				parent.minimumSize.y += component.minimumSize.y;
 			}
 			else {
-				parent.size.height.value = max(parent.size.height.value, componentHeight);
+				parent.size.height.value = max(parent.size.height.value, component.size.height.value);
 				parent.minimumSize.y = max(parent.minimumSize.y, component.minimumSize.y);
 			}
 		}
 
 		parent.size.height.value = min(parent.size.height.value, parent.maximumSize.y);
 		parent.maximumSize.y = max(parent.minimumSize.y, parent.maximumSize.y);
-
-		component.size.height.value = componentHeight;
-		component.minimumSize.y += component.padding.y * 2.0f;
 	}
 
 	void GUILayer::GrowAndShrinkSizingWidthsRecursive(uint32 parentIndex) {
@@ -225,13 +224,9 @@ namespace Trident {
 		}
 
 		for (const uint32 childIndex : parent.childIndices) {
-			const GUIContainer& child = components[childIndex];
-
-			if (child.textComponent) {
-				continue;
+			if (!components[childIndex].textComponent) {
+				GrowAndShrinkSizingWidthsRecursive(childIndex);
 			}
-
-			GrowAndShrinkSizingWidthsRecursive(childIndex);
 		}
 	}
 
@@ -370,13 +365,9 @@ namespace Trident {
 		}
 
 		for (const uint32 childIndex : parent.childIndices) {
-			const GUIContainer& child = components[childIndex];
-
-			if (child.textComponent) {
-				continue;
+			if (!components[childIndex].textComponent) {
+				GrowAndShrinkSizingHeightsRecursive(childIndex);
 			}
-
-			GrowAndShrinkSizingHeightsRecursive(childIndex);
 		}
 	}
 
