@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/GUI/Component/Container.hpp"
+#include "Engine/API/GUI/FillMode.hpp"
 #include "Engine/API/GUI/GUI.hpp"
 #include "Engine/API/GUI/GUIRenderer.hpp"
 #include "Engine/API/GUI/ID.hpp"
@@ -56,11 +57,10 @@ namespace Trident {
 			FontID loadFontAsset(view<char8> assetName);
 			ImageID loadImageAsset(view<char8> assetName);
 
-			void openComponent(const ContainerStyle& style);
+			void openContainer(const ContainerStyle& style);
+			void closeContainer();
 
 			void Text(view<char8> text, const TextStyle& style);
-
-			void closeComponent();
 
 			/// Returns whether the mouse pointer is hovering over the current component.
 			bool IsHovered() const;
@@ -86,11 +86,10 @@ namespace Trident {
 			void openRootComponent();
 			void closeRootComponent();
 
-			std::vector<uint32> FindGrowableChildIndices(const GUIContainer& parent, uint8 axis) const;
-			std::vector<uint32> FindShrinkableChildIndices(const GUIContainer& parent, uint8 axis) const;
+			std::vector<uint32> FilterChildren(const GUIContainer& parent, uint8 axis, FillMode fillMode) const;
 
-			void FitSizingWidths(uint32 componentIndex);
-			void FitSizingHeights(uint32 componentIndex);
+			void AdjustWidth(uint32 componentIndex);
+			void AdjustHeight(uint32 componentIndex);
 			void GrowAndShrinkSizingWidthsRecursive(uint32 parentIndex);
 			void GrowAndShrinkSizingHeightsRecursive(uint32 parentIndex);
 			void WrapTextChildrenRecursive(uint32 parentIndex);
@@ -131,14 +130,14 @@ namespace Trident {
 			uint32 fontCount = 0;
 
 			sequence<GUIContainer> components;
-			sequence<uint32> openComponentIndices;
+			sequence<uint32> openContainerIndices;
 
 			/// Component tree from the previous frame.
 			sequence<GUIContainer> previousComponents;
 
 			uint32 componentCount = 0;
 			uint32 previousComponentCount = 0;
-			uint32 openComponentIndexCount = 0;
+			uint32 openContainerIndexCount = 0;
 
 			uint32 hoveredComponentIndex = max<uint32>();
 			uint32 mouseDownComponentIndex = max<uint32>();
@@ -148,5 +147,5 @@ namespace Trident {
 			vec2<float32> lastMouseUpPosition = {-1.0f, -1.0f};
 	};
 
-	#define Container(...) for (bool _opened = (openComponent(__VA_ARGS__), true); _opened; _opened = false, closeComponent())
+	#define Container(...) for (bool _ = (openContainer(__VA_ARGS__), true); _; _ = (closeContainer(), false))
 }

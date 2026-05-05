@@ -14,7 +14,7 @@ namespace Trident {
 		UTF8Stream stream(text);
 
 		const uint32 componentIndex = componentCount;
-		const uint32 parentIndex = openComponentIndices[openComponentIndexCount - 1];
+		const uint32 parentIndex = openContainerIndices[openContainerIndexCount - 1];
 		const float32 preferredWidth = calculateTextPreferredWidth(stream, style);
 		const float32 minimumWidth = calculateTextMinimumWidth(stream, style);
 
@@ -48,7 +48,7 @@ namespace Trident {
 		components[componentCount] = textComponent;
 		componentCount += 1;
 
-		FitSizingWidths(componentIndex);
+		AdjustWidth(componentIndex);
 	}
 
 	void GUILayer::WrapText(GUIContainer& textComponent) {
@@ -196,6 +196,22 @@ namespace Trident {
 			textCharacters.emplace_back(textCharacter);
 
 			characterOffset.x += glyph.advanceWidth * data.lineHeight;
+		}
+	}
+
+	void GUILayer::WrapTextChildrenRecursive(uint32 parentIndex) {
+		GUIContainer& parent = components[parentIndex];
+
+		for (const uint32 childIndex : parent.childIndices) {
+			GUIContainer& child = components[childIndex];
+
+			if (!child.textComponent) {
+				WrapTextChildrenRecursive(childIndex);
+
+				continue;
+			}
+
+			WrapText(child);
 		}
 	}
 

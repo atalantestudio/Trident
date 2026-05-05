@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Engine/API/Event/EventDispatcher.hpp"
+#include "Engine/API/GUI/AdjustSizing.hpp"
 #include "Engine/API/GUI/GUILayer.hpp"
 #include "Engine/API/GUI/Text.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
@@ -36,7 +37,7 @@ namespace Trident {
 
 		components = sequence<GUIContainer>(MAX_COMPONENT_COUNT);
 		previousComponents = sequence<GUIContainer>(MAX_COMPONENT_COUNT);
-		openComponentIndices = sequence<uint32>(MAX_COMPONENT_COUNT);
+		openContainerIndices = sequence<uint32>(MAX_COMPONENT_COUNT);
 	}
 
 	FontID GUILayer::loadFontAsset(view<char8> assetName) {
@@ -103,13 +104,13 @@ namespace Trident {
 
 	void GUILayer::preRender() {
 		componentCount = 0;
-		openComponentIndexCount = 0;
+		openContainerIndexCount = 0;
 
 		openRootComponent();
 		render();
 
+		// No other components than root, return.
 		if (componentCount <= 1) {
-			// No other components than root, return.
 			return;
 		}
 
@@ -204,13 +205,13 @@ namespace Trident {
 		components[componentCount] = rootComponent;
 		componentCount += 1;
 
-		openComponentIndices[openComponentIndexCount] = 0;
-		openComponentIndexCount += 1;
+		openContainerIndices[openContainerIndexCount] = 0;
+		openContainerIndexCount += 1;
 	}
 
-	void GUILayer::openComponent(const ContainerStyle& style) {
+	void GUILayer::openContainer(const ContainerStyle& style) {
 		const uint32 componentIndex = componentCount;
-		const uint32 parentIndex = openComponentIndices[openComponentIndexCount - 1];
+		const uint32 parentIndex = openContainerIndices[openContainerIndexCount - 1];
 
 		GUIContainer& parent = components[parentIndex];
 
@@ -274,8 +275,8 @@ namespace Trident {
 		components[componentCount] = component;
 		componentCount += 1;
 
-		openComponentIndices[openComponentIndexCount] = componentIndex;
-		openComponentIndexCount += 1;
+		openContainerIndices[openContainerIndexCount] = componentIndex;
+		openContainerIndexCount += 1;
 
 		if (previousComponentCount >= componentCount) {
 			const GUIContainer& component = previousComponents[componentCount - 1];
@@ -287,6 +288,16 @@ namespace Trident {
 				window->updatePointerType(component.pointerType);
 			}
 		}
+	}
+
+	void GUILayer::closeContainer() {
+		DEBUG_ASSERT(openContainerIndexCount > 0);
+
+		const uint32 componentIndex = openContainerIndices[openContainerIndexCount - 1];
+
+		AdjustWidth(componentIndex);
+
+		openContainerIndexCount -= 1;
 	}
 
 	void GUILayer::closeRootComponent() {
@@ -304,497 +315,18 @@ namespace Trident {
 
 		WrapTextChildrenRecursive(rootComponentIndex);
 
-		for (sint32 componentIndex = static_cast<sint32>(componentCount) - 1; componentIndex >= 1; componentIndex -= 1) {
-			FitSizingHeights(componentIndex);
+		sint32 componentIndex = static_cast<sint32>(componentCount) - 1;
+
+		while (componentIndex >= 1) {
+			AdjustHeight(componentIndex);
+
+			componentIndex -= 1;
 		}
 
 		GrowAndShrinkSizingHeightsRecursive(rootComponentIndex);
 		PositionsAndAlignment(rootComponent, rootComponent.origin);
 
-		openComponentIndexCount -= 1;
-	}
-
-	void GUILayer::closeComponent() {
-		DEBUG_ASSERT(openComponentIndexCount > 0);
-
-		const uint32 componentIndex = openComponentIndices[openComponentIndexCount - 1];
-
-		FitSizingWidths(componentIndex);
-
-		openComponentIndexCount -= 1;
-	}
-
-	std::vector<uint32> GUILayer::FindGrowableChildIndices(const GUIContainer& parent, uint8 axis) const {
-		std::vector<uint32> childIndices;
-
-		for (uint32 index = 0; index < parent.childIndices.size(); index += 1) {
-			const uint32 childIndex = parent.childIndices[index];
-			const GUIContainer& child = components[childIndex];
-
-			if (child.size[axis].fillMode == FillMode::EXPAND) {
-				childIndices.emplace_back(childIndex);
-			}
-		}
-
-		return childIndices;
-	}
-
-	std::vector<uint32> GUILayer::FindShrinkableChildIndices(const GUIContainer& parent, uint8 axis) const {
-		std::vector<uint32> childIndices;
-
-		for (uint32 index = 0; index < parent.childIndices.size(); index += 1) {
-			const uint32 childIndex = parent.childIndices[index];
-			const GUIContainer& child = components[childIndex];
-
-			if (child.size[axis].fillMode == FillMode::FIT) {
-				childIndices.emplace_back(childIndex);
-			}
-		}
-
-		return childIndices;
-	}
-
-	void GUILayer::FitSizingWidths(uint32 componentIndex) {
-		GUIContainer& component = components[componentIndex];
-
-		// Add padding to the component's size.
-		component.size.width.value += component.padding.x * 2.0f;
-
-		if (component.layoutDirection == LayoutDirection::HORIZONTAL) {
-			// Add layout spacing to the component's size.
-			const sint32 childCount = static_cast<sint32>(component.childIndices.size());
-			const float32 layoutSpacing = component.layoutSpacing * static_cast<float32>(max(0, childCount - 1));
-
-			component.size.width.value += layoutSpacing;
-		}
-
-		GUIContainer& parent = components[component.parentIndex];
-
-		// Update the component and its parent depending on the parent's layout direction.
-		if (parent.size.width.fillMode != FillMode::FIXED) {
-			if (parent.layoutDirection == LayoutDirection::HORIZONTAL) {
-				parent.size.width.value += component.size.width.value;
-				parent.minimumSize.x += component.minimumSize.x;
-			}
-			else {
-				parent.size.width.value = max(parent.size.width.value, component.size.width.value);
-				parent.minimumSize.x = max(parent.minimumSize.x, component.minimumSize.x);
-			}
-		}
-
-		parent.size.width.value = min(parent.size.width.value, parent.maximumSize.x);
-		parent.maximumSize.x = max(parent.maximumSize.x, parent.minimumSize.x);
-
-		component.minimumSize.x += component.padding.x * 2.0f;
-	}
-
-	void GUILayer::FitSizingHeights(uint32 componentIndex) {
-		GUIContainer& component = components[componentIndex];
-
-		DEBUG_ASSERT(component.parentIndex != max<uint32>());
-
-		GUIContainer& parent = components[component.parentIndex];
-
-		float32 componentHeight = component.size.height.value + component.padding.y * 2.0f;
-
-		if (component.layoutDirection == LayoutDirection::VERTICAL) {
-			componentHeight += component.layoutSpacing * (max(0, static_cast<sint32>(component.childIndices.size()) - 1));
-		}
-
-		// Update the component and its parent depending on the parent's layout direction.
-		if (parent.size.height.fillMode != FillMode::FIXED) {
-			if (parent.layoutDirection == LayoutDirection::VERTICAL) {
-				parent.size.height.value += componentHeight;
-				parent.minimumSize.y += component.minimumSize.y;
-			}
-			else {
-				parent.size.height.value = max(parent.size.height.value, componentHeight);
-				parent.minimumSize.y = max(parent.minimumSize.y, component.minimumSize.y);
-			}
-		}
-
-		parent.size.height.value = min(parent.size.height.value, parent.maximumSize.y);
-		parent.maximumSize.y = max(parent.maximumSize.y, parent.minimumSize.y);
-
-		component.size.height.value = componentHeight;
-		component.minimumSize.y += component.padding.y * 2.0f;
-	}
-
-	void GUILayer::GrowAndShrinkSizingWidthsRecursive(uint32 parentIndex) {
-		GUIContainer& parent = components[parentIndex];
-
-		const std::vector<uint32> growableChildIndices = FindGrowableChildIndices(parent, WIDTH_AXIS);
-
-		if (parent.layoutDirection == LayoutDirection::HORIZONTAL) {
-			float32 remainingWidth = parent.size.width.value - parent.padding.x * 2.0f;
-
-			for (const uint32 childIndex : parent.childIndices) {
-				const GUIContainer& child = components[childIndex];
-
-				remainingWidth -= child.size.width.value;
-			}
-
-			remainingWidth -= parent.layoutSpacing * (parent.childIndices.size() - 1);
-
-			if (growableChildIndices.size() > 0) {
-				std::vector<uint32> growableChildIndexCopy = growableChildIndices;
-
-				// Grow children.
-				while (remainingWidth > 0.0f) {
-					if (growableChildIndexCopy.size() == 0) {
-						break;
-					}
-
-					float32 smallestWidth = components[growableChildIndexCopy[0]].size.width.value;
-					float32 secondSmallestWidth = max<float32>();
-					float32 widthToAdd = remainingWidth;
-
-					for (const uint32 childIndex : growableChildIndexCopy) {
-						const GUIContainer& child = components[childIndex];
-						const float32 width = child.size.width.value;
-
-						// If we have found a child smaller than the smallest width registered, replace it with the child's width.
-						if (width < smallestWidth) {
-							secondSmallestWidth = smallestWidth;
-							smallestWidth = width;
-						}
-
-						// This child not the smallest.
-						if (width > smallestWidth) {
-							secondSmallestWidth = min(secondSmallestWidth, width);
-							widthToAdd = secondSmallestWidth - smallestWidth;
-						}
-					}
-
-					// Double-check that the width to add is <= than the equal distribution of the width among children.
-					widthToAdd = min(widthToAdd, remainingWidth / growableChildIndexCopy.size());
-
-					for (sint32 index = static_cast<sint32>(growableChildIndexCopy.size()) - 1; index >= 0; index -= 1) {
-						const uint32 childIndex = growableChildIndexCopy[index];
-						GUIContainer& child = components[childIndex];
-
-						const float32 previousWidth = child.size.width.value;
-
-						if (child.size.width.value == smallestWidth) {
-							child.size.width.value += widthToAdd;
-
-							if (child.size.width.value > child.maximumSize.x) {
-								child.size.width.value = child.maximumSize.x;
-
-								growableChildIndexCopy.erase(growableChildIndexCopy.begin() + index);
-							}
-
-							remainingWidth -= child.size.width.value - previousWidth;
-						}
-					}
-				}
-			}
-
-			const std::vector<uint32> shrinkableChildIndices = FindShrinkableChildIndices(parent, WIDTH_AXIS);
-
-			if (shrinkableChildIndices.size() > 0) {
-				std::vector<uint32> shrinkableChildIndexCopy = shrinkableChildIndices;
-
-				// Shrink children.
-				while (remainingWidth < 0.0f) {
-					if (shrinkableChildIndexCopy.size() == 0) {
-						break;
-					}
-
-					float32 largestWidth = components[shrinkableChildIndexCopy[0]].size.width.value;
-					float32 secondLargestWidth = 0.0f;
-					float32 widthToRemove = remainingWidth;
-
-					for (const uint32 childIndex : shrinkableChildIndexCopy) {
-						const GUIContainer& child = components[childIndex];
-						const float32 width = child.size.width.value;
-
-						// If we have found a child larger than the largest width registered, replace it with the child's width.
-						if (width > largestWidth) {
-							secondLargestWidth = largestWidth;
-							largestWidth = width;
-						}
-
-						// This child is not the largest.
-						if (width < largestWidth) {
-							secondLargestWidth = max(secondLargestWidth, width);
-							widthToRemove = secondLargestWidth - largestWidth;
-						}
-					}
-
-					// Double-check that the width to remove is >= than the equal distribution of the width among children.
-					widthToRemove = max(widthToRemove, remainingWidth / shrinkableChildIndexCopy.size());
-
-					for (sint32 index = static_cast<sint32>(shrinkableChildIndexCopy.size()) - 1; index >= 0; index -= 1) {
-						const uint32 childIndex = shrinkableChildIndexCopy[index];
-						GUIContainer& child = components[childIndex];
-
-						const float32 previousWidth = child.size.width.value;
-
-						if (child.size.width.value == largestWidth) {
-							child.size.width.value += widthToRemove;
-
-							if (child.size.width.value < child.minimumSize.x) {
-								child.size.width.value = child.minimumSize.x;
-
-								shrinkableChildIndexCopy.erase(shrinkableChildIndexCopy.begin() + index);
-							}
-
-							remainingWidth -= child.size.width.value - previousWidth;
-						}
-					}
-				}
-			}
-		}
-		else {
-			for (const uint32 childIndex : growableChildIndices) {
-				GUIContainer& child = components[childIndex];
-
-				child.size.width.value = parent.size.width.value - parent.padding.x * 2.0f;
-			}
-		}
-
-		for (const uint32 childIndex : parent.childIndices) {
-			const GUIContainer& child = components[childIndex];
-
-			if (child.textComponent) {
-				continue;
-			}
-
-			GrowAndShrinkSizingWidthsRecursive(childIndex);
-		}
-	}
-
-	void GUILayer::GrowAndShrinkSizingHeightsRecursive(uint32 parentIndex) {
-		GUIContainer& parent = components[parentIndex];
-
-		const std::vector<uint32> growableChildIndices = FindGrowableChildIndices(parent, HEIGHT_AXIS);
-
-		if (parent.layoutDirection == LayoutDirection::VERTICAL) {
-			float32 remainingHeight = parent.size.height.value - parent.padding.y * 2.0f;
-
-			for (const uint32 childIndex : parent.childIndices) {
-				const GUIContainer& child = components[childIndex];
-
-				remainingHeight -= child.size.height.value;
-			}
-
-			remainingHeight -= parent.layoutSpacing * (parent.childIndices.size() - 1);
-
-			if (growableChildIndices.size() > 0) {
-				std::vector<uint32> growableChildIndexCopy = growableChildIndices;
-
-				// Grow children.
-				while (remainingHeight > 0.0f) {
-					if (growableChildIndexCopy.size() == 0) {
-						break;
-					}
-
-					float32 smallestHeight = components[growableChildIndexCopy[0]].size.height.value;
-					float32 secondSmallestHeight = max<float32>();
-					float32 heightToAdd = remainingHeight;
-
-					for (const uint32 childIndex : growableChildIndexCopy) {
-						const GUIContainer& child = components[childIndex];
-						const float32 height = child.size.height.value;
-
-						// If we have found a child smaller than the smallest height registered, replace it with the child's height.
-						if (height < smallestHeight) {
-							secondSmallestHeight = smallestHeight;
-							smallestHeight = height;
-						}
-
-						// This child not the smallest.
-						if (height > smallestHeight) {
-							secondSmallestHeight = min(secondSmallestHeight, height);
-							heightToAdd = secondSmallestHeight - smallestHeight;
-						}
-					}
-
-					// Double-check that the height to add is <= than the equal distribution of the height among expanding children.
-					heightToAdd = min(heightToAdd, remainingHeight / growableChildIndexCopy.size());
-
-					for (sint32 index = static_cast<sint32>(growableChildIndexCopy.size()) - 1; index >= 0; index -= 1) {
-						const uint32 childIndex = growableChildIndexCopy[index];
-
-						GUIContainer& child = components[childIndex];
-
-						const float32 previousHeight = child.size.height.value;
-
-						if (child.size.height.value == smallestHeight) {
-							child.size.height.value += heightToAdd;
-
-							if (child.size.height.value > child.maximumSize.y) {
-								child.size.height.value = child.maximumSize.y;
-
-								growableChildIndexCopy.erase(growableChildIndexCopy.begin() + index);
-							}
-
-							remainingHeight -= child.size.height.value - previousHeight;
-						}
-					}
-				}
-			}
-
-			const std::vector<uint32> shrinkableChildIndices = FindShrinkableChildIndices(parent, HEIGHT_AXIS);
-
-			if (shrinkableChildIndices.size() > 0) {
-				std::vector<uint32> shrinkableChildIndexCopy = shrinkableChildIndices;
-
-				// Shrink children.
-				while (remainingHeight < 0.0f) {
-					if (shrinkableChildIndexCopy.size() == 0) {
-						break;
-					}
-
-					float32 largestHeight = components[shrinkableChildIndexCopy[0]].size.height.value;
-					float32 secondLargestHeight = 0.0f;
-					float32 heightToRemove = remainingHeight;
-
-					for (const uint32 childIndex : shrinkableChildIndexCopy) {
-						const GUIContainer& child = components[childIndex];
-						const float32 height = child.size.height.value;
-
-						// If we have found a child larger than the largest height registered, replace it with the child's height.
-						if (height > largestHeight) {
-							secondLargestHeight = largestHeight;
-							largestHeight = height;
-						}
-
-						// This child is not the largest.
-						if (height < largestHeight) {
-							secondLargestHeight = max(secondLargestHeight, height);
-							heightToRemove = secondLargestHeight - largestHeight;
-						}
-					}
-
-					// Double-check that the height to remove is >= than the equal distribution of the height among expanding children.
-					heightToRemove = max(heightToRemove, remainingHeight / shrinkableChildIndexCopy.size());
-
-					for (sint32 index = static_cast<sint32>(shrinkableChildIndexCopy.size()) - 1; index >= 0; index -= 1) {
-						const uint32 childIndex = shrinkableChildIndexCopy[index];
-						GUIContainer& child = components[childIndex];
-
-						const float32 previousHeight = child.size.height.value;
-
-						if (child.size.height.value == largestHeight) {
-							child.size.height.value += heightToRemove;
-
-							if (child.size.height.value < child.minimumSize.y) {
-								child.size.height.value = child.minimumSize.y;
-
-								shrinkableChildIndexCopy.erase(shrinkableChildIndexCopy.begin() + index);
-							}
-
-							remainingHeight -= child.size.height.value - previousHeight;
-						}
-					}
-				}
-			}
-		}
-		else {
-			for (const uint32 childIndex : growableChildIndices) {
-				GUIContainer& child = components[childIndex];
-				child.size.height.value = parent.size.height.value - parent.padding.y * 2.0f;
-			}
-		}
-
-		for (const uint32 childIndex : parent.childIndices) {
-			const GUIContainer& child = components[childIndex];
-
-			if (child.textComponent) {
-				continue;
-			}
-
-			GrowAndShrinkSizingHeightsRecursive(childIndex);
-		}
-	}
-
-	void GUILayer::WrapTextChildrenRecursive(uint32 parentIndex) {
-		GUIContainer& parent = components[parentIndex];
-
-		for (const uint32 childIndex : parent.childIndices) {
-			GUIContainer& child = components[childIndex];
-
-			if (!child.textComponent) {
-				WrapTextChildrenRecursive(childIndex);
-
-				continue;
-			}
-
-			WrapText(child);
-		}
-	}
-
-	void GUILayer::PositionsAndAlignment(GUIContainer& component, svec2<float32> origin) {
-		component.origin = origin;
-
-		if (component.childIndices.size() == 0) {
-			const GUIContainer& parent = components[component.parentIndex];
-
-			// Skip over the component towards the layout direction (this includes the padding).
-			origin[parent.layoutDirection] += component.size[parent.layoutDirection].value;
-
-			return;
-		}
-
-		// Add top/left padding.
-		origin.x += component.padding.x;
-		origin.y += component.padding.y;
-
-		svec2<float32> remainingSize = {component.size.width.value - component.padding.x * 2.0f, component.size.height.value - component.padding.y * 2.0f};
-		float32 remainingAcross = 0.0f;
-
-		for (const uint32 childIndex : component.childIndices) {
-			const GUIContainer& child = components[childIndex];
-
-			remainingSize[component.layoutDirection] -= child.size[component.layoutDirection].value;
-			remainingAcross = max(remainingAcross, child.size[!component.layoutDirection].value);
-		}
-
-		remainingSize[component.layoutDirection] -= component.layoutSpacing * (static_cast<uint32>(component.childIndices.size()) - 1);
-		remainingSize[!component.layoutDirection] -= remainingAcross;
-
-		// Snap to anchor point along layout direction.
-		const uint8 shiftAmountAlong = 4 - component.layoutDirection * 3;
-		const uint8 maskAlong = 0b111000 >> component.layoutDirection * 3;
-		const uint8 anchorRangeAlong = (static_cast<uint8>(component.anchorPoint) & maskAlong) >> shiftAmountAlong;
-		const float32 fAlong = static_cast<float32>(anchorRangeAlong) * 0.5f;
-
-		origin[component.layoutDirection] += remainingSize[component.layoutDirection] * fAlong;
-
-		// Snap to anchor point across layout direction.
-		const uint8 shiftAmountAcross = 1 + component.layoutDirection * 3;
-		const uint8 maskAcross = 0b111000 >> (!component.layoutDirection) * 3;
-		const uint8 anchorRangeAcross = (static_cast<uint8>(component.anchorPoint) & maskAcross) >> shiftAmountAcross;
-		const float32 fAcross = static_cast<float32>(anchorRangeAcross) * 0.5f;
-		const float32 componentAcross = component.size[!component.layoutDirection].value - component.padding[!component.layoutDirection] * 2.0f;
-		const float32 originAcross = origin[!component.layoutDirection];
-
-		for (uint32 index = 0; index < component.childIndices.size(); index += 1) {
-			GUIContainer& child = components[component.childIndices[index]];
-
-			const float32 remainingAcross = componentAcross - child.size[!component.layoutDirection].value;
-
-			origin[!component.layoutDirection] = originAcross + remainingAcross * fAcross;
-
-			PositionsAndAlignment(child, origin);
-
-			origin[component.layoutDirection] += child.size[component.layoutDirection].value;
-
-			if (index + 1 == component.childIndices.size()) {
-				break;
-			}
-
-			// Add layout spacing (only if it's not the last child).
-			origin[component.layoutDirection] += component.layoutSpacing;
-		}
-
-		// Add padding along the layout direction.
-		origin[component.layoutDirection] += component.padding[component.layoutDirection];
-
-		// Remove padding across the layout direction.
-		origin[!component.layoutDirection] -= component.padding[!component.layoutDirection];
+		openContainerIndexCount -= 1;
 	}
 
 	bool GUILayer::onMouseDown(MouseDownEvent& event) {
