@@ -9,11 +9,22 @@
 
 namespace Trident {
 	class SampleMipLevelsRenderer : public Renderer {
+		private:
+			struct MipLevelArguments {
+				/// Total number of thread groups.
+				uint32 groupCount;
+
+				/// Number of mip levels to generate.
+				uint32 mipLevelCount;
+			};
+
 		public:
 			void build() override {
 				loadImage();
 
-				generateMipLevels(image);
+				const uint32 mipLevelCount = ((Layer*) getLayer())->getApplication()->getPropertyFile()->getProperty<uint32>("MipLevelCount");
+
+				generateMipLevels(image, mipLevelCount);
 
 				setupRenderPass();
 				recreateFramebuffers();
@@ -178,21 +189,29 @@ namespace Trident {
 				graphicsQueue->waitIdle();
 			}
 
-			void generateMipLevels(ref<Image> image) const {
-				sequence<ref<ImageView>> imageViews(image->getMipLevelCount());
-				uint32 mipLevel = 0;
+			void generateMipLevels(ref<Image> image, uint32 mipLevelCount) const {
+				ENGINE_ASSERT(mipLevelCount > 0, "The number of mip levels to generate must be positive.");
+				ENGINE_ASSERT(mipLevelCount < image->getMipLevelCount(), "The number of mip levels to generate must be less than the maximum number of mip levels in the image ([]).", image->getMipLevelCount());
+
+				const Extent3D extent = image->getExtent();
+				const uint32 groupCountX = (extent.width + 0b111111) >> 6;
+				const uint32 groupCountY = (extent.height + 0b111111) >> 6;
+				const uint32 groupCountZ = 1;
+
+				sequence<ref<ImageView>> imageViews(mipLevelCount + 1);
+				uint32 mipLevelIndex = 0;
 
 				#if defined(DEBUG_OBJECT_NAME)
 					sequence<char8> name;
 				#endif
 
-				while (mipLevel < imageViews.count()) {
+				while (mipLevelIndex < mipLevelCount + 1) {
 					#if defined(DEBUG_OBJECT_NAME)
-						name = Logger::format("Mip level []", mipLevel + 1);
+						name = Logger::format("Mip level []", mipLevelIndex);
 					#endif
 
-					imageViews[mipLevel] = image->createView({
-						.mipLevelOffset = mipLevel,
+					imageViews[mipLevelIndex] = image->createView({
+						.mipLevelOffset = mipLevelIndex,
 						.mipLevelCount = 1,
 						.layerOffset = 0,
 						.layerCount = 1,
@@ -201,7 +220,7 @@ namespace Trident {
 						#endif
 					});
 
-					mipLevel += 1;
+					mipLevelIndex += 1;
 				}
 
 				const ref<Buffer<uint32>> atomicCounterBuffer = createBuffer<uint32>({
@@ -214,7 +233,30 @@ namespace Trident {
 					#endif
 				});
 
+				const ref<Buffer<MipLevelArguments>> argumentBuffer = createBuffer<MipLevelArguments>({
+					.size = sizeof(MipLevelArguments),
+					.usage = BufferUsage::UNIFORM,
+					.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
+					.persistent = false,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Mip level arguments",
+					#endif
+				});
+
+				MipLevelArguments* arguments = argumentBuffer->map(0, argumentBuffer->getSize());
+				arguments->groupCount = groupCountX * groupCountY * groupCountZ;
+				arguments->mipLevelCount = mipLevelCount;
+
+				argumentBuffer->unmap();
+
 				const sequence<DescriptorSetLayoutBinding> bindings = {
+					// Arguments
+					{
+						.descriptorType = DescriptorType::UNIFORM_BUFFER,
+						.descriptorCount = 1,
+						.shaderStages = ShaderStage::COMPUTE,
+					},
+
 					// Source
 					{
 						.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE,
@@ -225,7 +267,7 @@ namespace Trident {
 					// Destination
 					{
 						.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE,
-						.descriptorCount = static_cast<uint32>(imageViews.count() - 1),
+						.descriptorCount = 12,
 						.shaderStages = ShaderStage::COMPUTE,
 					},
 
@@ -241,52 +283,75 @@ namespace Trident {
 				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(descriptorSetLayout);
 				const ref<DescriptorSet> descriptorSet = descriptorSets[0];
 
-				sequence<DescriptorImage> descriptorImages(image->getMipLevelCount());
+				const sequence<DescriptorBuffer> descriptorBuffers = {
+					// Arguments
+					{
+						.buffer = argumentBuffer,
+						.offset = 0,
+						.size = argumentBuffer->getSize(),
+					},
 
-				descriptorImages[0] = {
-					.imageView = imageViews[0],
-					.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-					.sampler = nullptr,
+					// Atomic counter
+					{
+						.buffer = atomicCounterBuffer,
+						.offset = 0,
+						.size = atomicCounterBuffer->getSize(),
+					},
 				};
 
-				mipLevel = 1;
+				sequence<DescriptorImage> descriptorImages(13);
 
-				while (mipLevel < image->getMipLevelCount()) {
-					descriptorImages[mipLevel] = {
-						.imageView = imageViews[mipLevel],
+				mipLevelIndex = 0;
+
+				while (mipLevelIndex < mipLevelCount + 1) {
+					descriptorImages[mipLevelIndex] = {
+						.imageView = imageViews[mipLevelIndex],
 						.imageLayout = ImageLayout::GENERAL,
 						.sampler = nullptr,
 					};
 
-					mipLevel += 1;
+					mipLevelIndex += 1;
 				}
 
-				const DescriptorBuffer atomicCounterDescriptorBuffer = {
-					.buffer = atomicCounterBuffer,
-					.offset = 0,
-					.size = atomicCounterBuffer->getSize(),
-				};
+				while (mipLevelIndex < 13) {
+					descriptorImages[mipLevelIndex] = {
+						.imageView = imageViews[0],
+						.imageLayout = ImageLayout::GENERAL,
+						.sampler = nullptr,
+					};
+
+					mipLevelIndex += 1;
+				}
+
+				descriptorImages[0].imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
 
 				const sequence<WriteDescriptorSet> writeDescriptorSets = {
-					// Source
+					// Arguments
 					{
 						.descriptorSet = descriptorSet,
 						.bindingIndex = 0,
+						.descriptorBuffers = descriptorBuffers[0],
+					},
+
+					// Source
+					{
+						.descriptorSet = descriptorSet,
+						.bindingIndex = 1,
 						.descriptorImages = descriptorImages[0],
 					},
 
 					// Destination
 					{
 						.descriptorSet = descriptorSet,
-						.bindingIndex = 1,
-						.descriptorImages = view<DescriptorImage>(&descriptorImages[1], descriptorImages.count() - 1),
+						.bindingIndex = 2,
+						.descriptorImages = view<DescriptorImage>(&descriptorImages[1], 12),
 					},
 
 					// Atomic counter
 					{
 						.descriptorSet = descriptorSet,
-						.bindingIndex = 2,
-						.descriptorBuffers = atomicCounterDescriptorBuffer,
+						.bindingIndex = 3,
+						.descriptorBuffers = descriptorBuffers[1],
 					},
 				};
 
@@ -324,16 +389,10 @@ namespace Trident {
 						.name = "Generate mip levels",
 					#endif
 				});
-				const Extent3D imageExtent = image->getExtent();
 
 				commandEncoder->begin();
 				commandEncoder->bindComputePipeline(computePipeline);
 				commandEncoder->bindDescriptorSets(pipelineLayout, 0, descriptorSet);
-
-				const uint32 groupCountX = (imageExtent.width + 0b111111) >> 6;
-				const uint32 groupCountY = (imageExtent.height + 0b111111) >> 6;
-				const uint32 groupCountZ = 1;
-
 				commandEncoder->dispatch(groupCountX, groupCountY, groupCountZ);
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
