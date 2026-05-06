@@ -290,6 +290,21 @@ namespace Trident {
 			sequence<PairValue> pairValueRecords;
 		};
 
+		/// See https://learn.microsoft.com/en-us/typography/opentype/spec/gpos#lookup-type-1-subtable-single-adjustment-positioning.
+		struct SinglePosFormat1 {
+			// Format identifier — format = 1.
+			uint16 format;
+
+			// Offset to Coverage table, from beginning of SinglePos subtable.
+			Offset16 coverageOffset;
+
+			// Defines the types of data in the ValueRecord.
+			ValueFormat valueFormat;
+
+			// Defines positioning value(s) — applied to all glyphs in the Coverage table.
+			ValueRecord valueRecord;
+		};
+
 		/// See https://learn.microsoft.com/en-us/typography/opentype/spec/gpos#lookup-type-2-subtable-pair-adjustment-positioning.
 		struct PairPosFormat1 {
 			// Format identifier — format = 1.

@@ -45,6 +45,20 @@ namespace Trident {
 			return valueRecord;
 		}
 
+		static void decodeSinglePosSubtable(ByteStream<StreamOperation::READ>& stream) {
+			SinglePosFormat1 singlePosSubtable{};
+			singlePosSubtable.format = stream.read<uint16>();
+
+			ENGINE_ASSERT(singlePosSubtable.format == 1, "Unsupported SinglePos format.");
+
+			singlePosSubtable.coverageOffset = stream.read<Offset16>();
+			singlePosSubtable.valueFormat = static_cast<ValueFormat>(stream.read<uint16>());
+			singlePosSubtable.valueRecord = decodeValueRecord(stream, singlePosSubtable.valueFormat);
+
+			// TODO(filesystem/ttf/gpos/single-pos)
+			BREAKPOINT();
+		}
+
 		/// The `offset` parameter is the sum of:
 		/// - the GPOS table offset
 		/// - the LookupList offset
@@ -105,11 +119,18 @@ namespace Trident {
 			posExtensionSubtable.extensionLookupType = static_cast<LookupType>(stream.read<uint16>());
 			posExtensionSubtable.extensionOffset = stream.read<Offset32>();
 
-			switch (posExtensionSubtable.extensionLookupType) {
-				case LookupType::PAIR_ADJUSTMENT: {
-					stream.seek(offset + posExtensionSubtable.extensionOffset);
+			offset += posExtensionSubtable.extensionOffset;
 
-					decodePairPosSubtable(stream, offset + posExtensionSubtable.extensionOffset);
+			stream.seek(offset);
+
+			switch (posExtensionSubtable.extensionLookupType) {
+				case LookupType::SINGLE_ADJUSTMENT: {
+					decodeSinglePosSubtable(stream);
+
+					break;
+				}
+				case LookupType::PAIR_ADJUSTMENT: {
+					decodePairPosSubtable(stream, offset);
 
 					break;
 				}
@@ -369,6 +390,15 @@ namespace Trident {
 					const uint32 offset = tableOffset->second + gpos.lookupListOffset + lookupOffset;
 
 					switch (lookup.lookupType) {
+						case LookupType::SINGLE_ADJUSTMENT: {
+							for (const Offset16 subtableOffset : lookup.subtableOffsets) {
+								stream.seek(offset + subtableOffset);
+
+								decodeSinglePosSubtable(stream);
+							}
+
+							break;
+						}
 						case LookupType::PAIR_ADJUSTMENT: {
 							for (const Offset16 subtableOffset : lookup.subtableOffsets) {
 								stream.seek(offset + subtableOffset);
