@@ -340,6 +340,72 @@ namespace Trident {
 			}
 		}
 
+		/// See https://learn.microsoft.com/en-us/typography/opentype/spec/gsub.
+		static void parseGSUBTable(ByteStream<StreamOperation::READ>& stream, const std::unordered_map<uint32, uint32>& tableOffsetMap) {
+			const std::unordered_map<uint32, uint32>::const_iterator tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("GSUB"));
+
+			ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'GSUB' table.");
+
+			stream.seek(tableOffset->second);
+
+			GSUB gsub{};
+			gsub.majorVersion = stream.read<uint16>();
+			gsub.minorVersion = stream.read<uint16>();
+			gsub.scriptListOffset = stream.read<Offset16>();
+			gsub.featureListOffset = stream.read<Offset16>();
+			gsub.lookupListOffset = stream.read<Offset16>();
+
+			if (gsub.majorVersion == 1 && gsub.minorVersion == 1) {
+				gsub.featureVariationOffset = stream.read<Offset32>();
+			}
+
+			stream.seek(tableOffset->second + gsub.scriptListOffset);
+
+			ScriptList scriptList{};
+			scriptList.scriptCount = stream.read<uint16>();
+			scriptList.scriptRecords = sequence<ScriptRecord>(scriptList.scriptCount);
+
+			for (ScriptRecord& scriptRecord : scriptList.scriptRecords) {
+				scriptRecord.scriptTag = stream.read<Tag>(true);
+				scriptRecord.scriptOffset = stream.read<Offset16>();
+			}
+
+			for (const ScriptRecord& scriptRecord : scriptList.scriptRecords) {
+				stream.seek(tableOffset->second + gsub.scriptListOffset + scriptRecord.scriptOffset);
+
+				Script script{};
+				script.defaultLangSysOffset = stream.read<Offset16>();
+				script.langSysCount = stream.read<uint16>();
+				script.langSysRecords = sequence<LangSysRecord>(script.langSysCount);
+
+				for (LangSysRecord& langSysRecord : script.langSysRecords) {
+					langSysRecord.langSysTag = stream.read<Tag>(true);
+					langSysRecord.langSysOffset = stream.read<Offset16>();
+				}
+
+				for (const LangSysRecord& langSysRecord : script.langSysRecords) {
+					stream.seek(tableOffset->second + gsub.scriptListOffset + scriptRecord.scriptOffset + langSysRecord.langSysOffset);
+					stream.jump(sizeof(LangSys::lookupOrderOffset));
+
+					LangSys langSys{};
+					langSys.requiredFeatureIndex = stream.read<uint16>();
+					langSys.featureIndexCount = stream.read<uint16>();
+					langSys.featureIndices = sequence<uint16>(langSys.featureIndexCount);
+
+					for (uint16& featureIndex : langSys.featureIndices) {
+						featureIndex = stream.read<uint16>();
+					}
+
+					BREAKPOINT();
+				}
+
+				BREAKPOINT();
+			}
+
+			BREAKPOINT();
+		}
+
+		// TODO(ttf/checksum)
 		/* static uint32 calculateTableChecksum(const uint32* table, uint32 byteCount) {
 			uint32 checksum = 0;
 			uint32 longCount = (byteCount + 3) / 4;
@@ -374,7 +440,7 @@ namespace Trident {
 		}
 	}
 
-	// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6.html
+	// See https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6.html.
 	template<>
 	File<FileFormat::TTF> Decoder<FileFormat::TTF>::decode(view<uint8> data) {
 		using namespace TrueTypeFont;
@@ -386,23 +452,27 @@ namespace Trident {
 		OffsetSubtable offsetSubtable{};
 		offsetSubtable.scalerType = byteStream.read<uint32>();
 
-		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6.html#ScalerTypeNote
+		// See https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6.html#ScalerTypeNote.
 		switch (offsetSubtable.scalerType) {
 			case STRING_TO_BIG_ENDIAN_UINT32("true"):
-			case 0x00010000:
+			case 0x00010000: {
 				break;
-			case STRING_TO_BIG_ENDIAN_UINT32("typ1"):
+			}
+			case STRING_TO_BIG_ENDIAN_UINT32("typ1"): {
 				ENGINE_ASSERT(false, "sfnt-housed PostScript fonts are not supported.");
 
 				return file;
-			case STRING_TO_BIG_ENDIAN_UINT32("OTTO"):
+			}
+			case STRING_TO_BIG_ENDIAN_UINT32("OTTO"): {
 				ENGINE_ASSERT(false, "OpenType fonts with PostScript outlines are not supported.");
 
 				return file;
-			default:
+			}
+			default: {
 				ENGINE_ASSERT(false, "Unsupported scaler type. See https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6.html#ScalerTypeNote.");
 
 				return file;
+			}
 		}
 
 		offsetSubtable.numTables = byteStream.read<uint16>();
@@ -435,7 +505,7 @@ namespace Trident {
 			} */
 		}
 
-		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6head.html
+		// See https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6head.html.
 		auto tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("head"));
 
 		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'head' table.");
@@ -481,7 +551,7 @@ namespace Trident {
 		// 0 for short offsets, 1 for long.
 		const sint16 indexToLocFormat = byteStream.read<sint16>();
 
-		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6maxp.html
+		// See https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6maxp.html.
 		tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("maxp"));
 
 		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'maxp' table.");
@@ -499,7 +569,7 @@ namespace Trident {
 		sequence<uint32> glyphOffsets(numGlyphs + 1);
 		sequence<uint32> glyphLengths(numGlyphs + 1);
 
-		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6loca.html
+		// See https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6loca.html.
 		tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("loca"));
 
 		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'loca' table.");
@@ -535,7 +605,7 @@ namespace Trident {
 
 		file.glyphs = sequence<TrueTypeFont::Glyph>(numGlyphs);
 
-		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html
+		// See https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html.
 		tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("glyf"));
 
 		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'glyf' table.");
@@ -555,7 +625,7 @@ namespace Trident {
 			parseGlyph(byteStream, tableOffset->second, glyphOffsets, file.glyphs, glyphIndex, maxComponentDepth);
 		}
 
-		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6hhea.html
+		// See https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6hhea.html.
 		tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("hhea"));
 
 		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'hhea' table.");
@@ -570,7 +640,7 @@ namespace Trident {
 
 		const uint16 numOfLongHorMetrics = byteStream.read<uint16>();
 
-		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6hmtx.html
+		// See https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6hmtx.html.
 		tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("hmtx"));
 
 		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'hmtx' table.");
@@ -590,7 +660,9 @@ namespace Trident {
 			leftSideBearing = byteStream.read<FWord>();
 		}
 
-		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6cmap.html
+		parseGSUBTable(byteStream, tableOffsetMap);
+
+		// See https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6cmap.html.
 		tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("cmap"));
 
 		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'cmap' table.");
