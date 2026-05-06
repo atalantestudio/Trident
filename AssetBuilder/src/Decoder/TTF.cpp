@@ -340,26 +340,26 @@ namespace Trident {
 			}
 		}
 
-		/// See https://learn.microsoft.com/en-us/typography/opentype/spec/gsub.
-		static void parseGSUBTable(ByteStream<StreamOperation::READ>& stream, const std::unordered_map<uint32, uint32>& tableOffsetMap) {
-			const std::unordered_map<uint32, uint32>::const_iterator tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("GSUB"));
+		/// See https://learn.microsoft.com/en-us/typography/opentype/spec/gpos.
+		static void parseGPOSTable(ByteStream<StreamOperation::READ>& stream, const std::unordered_map<uint32, uint32>& tableOffsetMap) {
+			const std::unordered_map<uint32, uint32>::const_iterator tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("GPOS"));
 
-			ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'GSUB' table.");
+			ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'GPOS' table.");
 
 			stream.seek(tableOffset->second);
 
-			GSUB gsub{};
-			gsub.majorVersion = stream.read<uint16>();
-			gsub.minorVersion = stream.read<uint16>();
-			gsub.scriptListOffset = stream.read<Offset16>();
-			gsub.featureListOffset = stream.read<Offset16>();
-			gsub.lookupListOffset = stream.read<Offset16>();
+			GPOS gpos{};
+			gpos.majorVersion = stream.read<uint16>();
+			gpos.minorVersion = stream.read<uint16>();
+			gpos.scriptListOffset = stream.read<Offset16>();
+			gpos.featureListOffset = stream.read<Offset16>();
+			gpos.lookupListOffset = stream.read<Offset16>();
 
-			if (gsub.majorVersion == 1 && gsub.minorVersion == 1) {
-				gsub.featureVariationOffset = stream.read<Offset32>();
+			if (gpos.majorVersion == 1 && gpos.minorVersion == 1) {
+				gpos.featureVariationOffset = stream.read<Offset32>();
 			}
 
-			stream.seek(tableOffset->second + gsub.scriptListOffset);
+			stream.seek(tableOffset->second + gpos.scriptListOffset);
 
 			ScriptList scriptList{};
 			scriptList.scriptCount = stream.read<uint16>();
@@ -370,36 +370,113 @@ namespace Trident {
 				scriptRecord.scriptOffset = stream.read<Offset16>();
 			}
 
-			for (const ScriptRecord& scriptRecord : scriptList.scriptRecords) {
-				stream.seek(tableOffset->second + gsub.scriptListOffset + scriptRecord.scriptOffset);
+			sequence<Script> scripts(scriptList.scriptCount);
 
-				Script script{};
-				script.defaultLangSysOffset = stream.read<Offset16>();
-				script.langSysCount = stream.read<uint16>();
-				script.langSysRecords = sequence<LangSysRecord>(script.langSysCount);
+			// Parse scripts.
+			{
+				uint16 scriptIndex = 0;
 
-				for (LangSysRecord& langSysRecord : script.langSysRecords) {
-					langSysRecord.langSysTag = stream.read<Tag>(true);
-					langSysRecord.langSysOffset = stream.read<Offset16>();
-				}
+				while (scriptIndex < scriptList.scriptCount) {
+					const ScriptRecord& scriptRecord = scriptList.scriptRecords[scriptIndex];
 
-				for (const LangSysRecord& langSysRecord : script.langSysRecords) {
-					stream.seek(tableOffset->second + gsub.scriptListOffset + scriptRecord.scriptOffset + langSysRecord.langSysOffset);
-					stream.jump(sizeof(LangSys::lookupOrderOffset));
+					stream.seek(tableOffset->second + gpos.scriptListOffset + scriptRecord.scriptOffset);
 
-					LangSys langSys{};
-					langSys.requiredFeatureIndex = stream.read<uint16>();
-					langSys.featureIndexCount = stream.read<uint16>();
-					langSys.featureIndices = sequence<uint16>(langSys.featureIndexCount);
+					Script& script = scripts[scriptIndex];
+					script.defaultLangSysOffset = stream.read<Offset16>();
+					script.langSysCount = stream.read<uint16>();
+					script.langSysRecords = sequence<LangSysRecord>(script.langSysCount);
 
-					for (uint16& featureIndex : langSys.featureIndices) {
-						featureIndex = stream.read<uint16>();
+					for (LangSysRecord& langSysRecord : script.langSysRecords) {
+						langSysRecord.langSysTag = stream.read<Tag>(true);
+						langSysRecord.langSysOffset = stream.read<Offset16>();
 					}
 
-					BREAKPOINT();
-				}
+					for (const LangSysRecord& langSysRecord : script.langSysRecords) {
+						stream.seek(tableOffset->second + gpos.scriptListOffset + scriptRecord.scriptOffset + langSysRecord.langSysOffset);
+						stream.jump(sizeof(LangSys::lookupOrderOffset));
 
-				BREAKPOINT();
+						LangSys langSys{};
+						langSys.requiredFeatureIndex = stream.read<uint16>();
+						langSys.featureIndexCount = stream.read<uint16>();
+						langSys.featureIndices = sequence<uint16>(langSys.featureIndexCount);
+
+						for (uint16& featureIndex : langSys.featureIndices) {
+							featureIndex = stream.read<uint16>();
+						}
+					}
+
+					scriptIndex += 1;
+				}
+			}
+
+			stream.seek(tableOffset->second + gpos.featureListOffset);
+
+			FeatureList featureList{};
+			featureList.featureCount = stream.read<uint16>();
+			featureList.featureRecords = sequence<FeatureRecord>(featureList.featureCount);
+
+			for (FeatureRecord& featureRecord : featureList.featureRecords) {
+				featureRecord.featureTag = stream.read<Tag>(true);
+				featureRecord.featureOffset = stream.read<Offset16>();
+			}
+
+			sequence<Feature> features(featureList.featureCount);
+
+			// Parse features.
+			{
+				uint16 featureIndex = 0;
+
+				while (featureIndex < featureList.featureCount) {
+					const FeatureRecord& featureRecord = featureList.featureRecords[featureIndex];
+
+					stream.seek(tableOffset->second + gpos.featureListOffset + featureRecord.featureOffset);
+
+					Feature& feature = features[featureIndex];
+					feature.featureParamsOffset = stream.read<Offset16>();
+					feature.lookupIndexCount = stream.read<uint16>();
+					feature.lookupListIndices = sequence<uint16>(feature.lookupIndexCount);
+
+					for (uint16& lookupListIndex : feature.lookupListIndices) {
+						lookupListIndex = stream.read<uint16>();
+					}
+
+					featureIndex += 1;
+				}
+			}
+
+			stream.seek(tableOffset->second + gpos.lookupListOffset);
+
+			LookupList lookupList{};
+			lookupList.lookupCount = stream.read<uint16>();
+			lookupList.lookupOffsets = sequence<Offset16>(lookupList.lookupCount);
+
+			for (Offset16& lookupOffset : lookupList.lookupOffsets) {
+				lookupOffset = stream.read<Offset16>();
+			}
+
+			sequence<Lookup> lookups(lookupList.lookupCount);
+
+			// Parse lookups.
+			{
+				uint16 lookupIndex = 0;
+
+				while (lookupIndex < lookupList.lookupCount) {
+					const Offset16 lookupOffset = lookupList.lookupOffsets[lookupIndex];
+
+					stream.seek(tableOffset->second + gpos.lookupListOffset + lookupOffset);
+
+					Lookup& lookup = lookups[lookupIndex];
+					lookup.lookupType = stream.read<uint16>();
+					lookup.lookupFlag = stream.read<uint16>();
+					lookup.subtableCount = stream.read<uint16>();
+					lookup.subtableOffsets = sequence<Offset16>(lookup.subtableCount);
+
+					if (lookup.lookupFlag & LookupFlag::USE_MARK_FILTERING_SET) {
+						lookup.markFilteringSet = stream.read<uint16>();
+					}
+
+					lookupIndex += 1;
+				}
 			}
 
 			BREAKPOINT();
@@ -660,7 +737,7 @@ namespace Trident {
 			leftSideBearing = byteStream.read<FWord>();
 		}
 
-		parseGSUBTable(byteStream, tableOffsetMap);
+		parseGPOSTable(byteStream, tableOffsetMap);
 
 		// See https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6cmap.html.
 		tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("cmap"));

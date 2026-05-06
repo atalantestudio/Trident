@@ -6,7 +6,7 @@
 #include "Engine/Filesystem/File.hpp"
 
 #include "File/TTF/Types.hpp"
-#include "File/TTF/GSUB.hpp"
+#include "File/TTF/GPOS.hpp"
 
 namespace Trident {
 	namespace TrueTypeFont {
