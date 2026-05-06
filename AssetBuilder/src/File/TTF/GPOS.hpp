@@ -25,7 +25,6 @@ namespace Trident {
 			Offset16 lookupListOffset;
 
 			// Offset to FeatureVariations table, from beginning of GPOS table (may be NULL).
-			// NOTE: Only present in the 1.1 version of this header.
 			Offset32 featureVariationOffset;
 		};
 
@@ -173,18 +172,6 @@ namespace Trident {
 			uint16 markFilteringSet;
 		};
 
-		/* /// See https://learn.microsoft.com/en-us/typography/opentype/spec/chapter2#coverage-format-1.
-		struct CoverageFormat1 {
-			// Format identifier — format.
-			uint16 format;
-
-			// Number of glyphs in the glyph array.
-			uint16 glyphCount;
-
-			// Array of glyph IDs — in numerical order.
-			sequence<uint16> glyphArray;
-		};
-
 		struct RangeRecord {
 			// First glyph ID in the range.
 			uint16 startGlyphID;
@@ -196,17 +183,32 @@ namespace Trident {
 			uint16 startCoverageIndex;
 		};
 
+		/// See https://learn.microsoft.com/en-us/typography/opentype/spec/chapter2#coverage-format-1.
+		struct CoverageFormat1 {
+			// Number of glyphs in the glyph array.
+			uint16 glyphCount;
+
+			// Array of glyph IDs — in numerical order.
+			sequence<uint16> glyphArray;
+		};
+
 		/// See https://learn.microsoft.com/en-us/typography/opentype/spec/chapter2#coverage-format-2.
 		struct CoverageFormat2 {
-			// Format identifier — format.
-			uint16 format;
-
 			// Number of RangeRecords.
-			uint16 glyphCount;
+			uint16 rangeCount;
 
 			// Array of glyph ranges — ordered by startGlyphID.
 			sequence<RangeRecord> rangeRecords;
-		}; */
+		};
+
+		/// See https://learn.microsoft.com/en-us/typography/opentype/spec/chapter2#coverage-table.
+		struct Coverage {
+			// Format identifier — format = 1 or 2.
+			uint16 format;
+
+			CoverageFormat1 coverageFormat1;
+			CoverageFormat2 coverageFormat2;
+		};
 
 		/// See https://learn.microsoft.com/en-us/typography/opentype/spec/gpos#value-record.
 		struct ValueRecord {

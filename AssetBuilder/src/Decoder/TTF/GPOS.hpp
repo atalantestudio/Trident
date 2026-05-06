@@ -11,6 +11,6 @@
 namespace Trident {
 	namespace TrueTypeFont {
 		/// See https://learn.microsoft.com/en-us/typography/opentype/spec/gpos.
-		void decodeGPOSTable(ByteStream<StreamOperation::READ>& stream, const std::unordered_map<uint32, uint32>& tableOffsetMap);
+		void decodeGPOSTable(ByteStream<StreamOperation::READ>& stream, const std::unordered_map<uint32, uint32>& tableOffsetMap, File<FileFormat::TTF>& file);
 	}
 }

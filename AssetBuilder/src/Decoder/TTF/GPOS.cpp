@@ -45,6 +45,7 @@ namespace Trident {
 			return valueRecord;
 		}
 
+		// TODO(filesystem/ttf/gpos/single-pos): Keep decoding SinglePos subtable?
 		static void decodeSinglePosSubtable(ByteStream<StreamOperation::READ>& stream) {
 			SinglePosFormat1 singlePosSubtable{};
 			singlePosSubtable.format = stream.read<uint16>();
@@ -56,15 +57,26 @@ namespace Trident {
 			singlePosSubtable.valueRecord = decodeValueRecord(stream, singlePosSubtable.valueFormat);
 
 			// TODO(filesystem/ttf/gpos/single-pos)
-			BREAKPOINT();
+			ENGINE_ERROR_UNIMPLEMENTED();
 		}
 
-		/// The `offset` parameter is the sum of:
-		/// - the GPOS table offset
-		/// - the LookupList offset
-		/// - the offset of the current lookup
-		/// - the offset of the current subtable
-		static void decodePairPosSubtable(ByteStream<StreamOperation::READ>& stream, uint32 offset) {
+		static void insertKerningPairs(uint16 firstGlyph, view<PairSet> pairSets, File<FileFormat::TTF>& file) {
+			for (const PairSet& pairSet : pairSets) {
+				for (const PairValue& pairValue : pairSet.pairValueRecords) {
+					const GlyphPair glyphPair = {firstGlyph, pairValue.secondGlyph};
+					const KerningPair kerningPair = {pairValue.valueRecord1.xAdvance, pairValue.valueRecord2.xAdvance};
+
+					// TODO(debug)
+					DEBUG_ASSERT(file.kerningPairs.find(glyphPair) == file.kerningPairs.end());
+
+					file.kerningPairs.insert({glyphPair, kerningPair});
+				}
+			}
+		}
+
+		static void decodePairPosSubtable(ByteStream<StreamOperation::READ>& stream, File<FileFormat::TTF>& file) {
+			const uint64 offset = stream.getByteOffset();
+
 			PairPosFormat1 pairPosSubtable{};
 			pairPosSubtable.format = stream.read<uint16>();
 
@@ -78,6 +90,41 @@ namespace Trident {
 
 			for (Offset16& pairSetOffset : pairPosSubtable.pairSetOffsets) {
 				pairSetOffset = stream.read<Offset16>();
+			}
+
+			stream.seek(offset + pairPosSubtable.coverageOffset);
+
+			Coverage coverage{};
+			coverage.format = stream.read<uint16>();
+
+			switch (coverage.format) {
+				case 1: {
+					coverage.coverageFormat1.glyphCount = stream.read<uint16>();
+					coverage.coverageFormat1.glyphArray = sequence<uint16>(coverage.coverageFormat1.glyphCount);
+
+					for (uint16& glyph : coverage.coverageFormat1.glyphArray) {
+						glyph = stream.read<uint16>();
+					}
+
+					break;
+				}
+				case 2: {
+					coverage.coverageFormat2.rangeCount = stream.read<uint16>();
+					coverage.coverageFormat2.rangeRecords = sequence<RangeRecord>(coverage.coverageFormat2.rangeCount);
+
+					for (RangeRecord& rangeRecord : coverage.coverageFormat2.rangeRecords) {
+						rangeRecord.startGlyphID = stream.read<uint16>();
+						rangeRecord.endGlyphID = stream.read<uint16>();
+						rangeRecord.startCoverageIndex = stream.read<uint16>();
+					}
+
+					break;
+				}
+				default: {
+					ENGINE_ASSERT(false, "Invalid coverage table format.");
+
+					break;
+				}
 			}
 
 			sequence<PairSet> pairSets(pairPosSubtable.pairSetCount);
@@ -101,16 +148,40 @@ namespace Trident {
 				pairSetIndex += 1;
 			}
 
-			// TODO(filesystem/ttf/gpos/pair-pos)
-			BREAKPOINT();
+			if (pairPosSubtable.valueFormat1 & ValueFormat::X_ADVANCE) {
+				switch (coverage.format) {
+					case 1: {
+						for (const uint16 firstGlyph : coverage.coverageFormat1.glyphArray) {
+							insertKerningPairs(firstGlyph, pairSets, file);
+						}
+
+						break;
+					}
+					case 2: {
+						for (const RangeRecord& rangeRecord : coverage.coverageFormat2.rangeRecords) {
+							uint16 firstGlyph = rangeRecord.startGlyphID;
+
+							while (firstGlyph <= rangeRecord.endGlyphID) {
+								insertKerningPairs(firstGlyph, pairSets, file);
+
+								firstGlyph += 1;
+							}
+						}
+
+						break;
+					}
+					default: {
+						DEBUG_ASSERT(false);
+
+						break;
+					}
+				}
+			}
 		}
 
-		/// The `offset` parameter is the sum of:
-		/// - the GPOS table offset
-		/// - the LookupList offset
-		/// - the offset of the current lookup
-		/// - the offset of the current subtable
-		static void decodePosExtensionSubtable(ByteStream<StreamOperation::READ>& stream, uint32 offset) {
+		static void decodePosExtensionSubtable(ByteStream<StreamOperation::READ>& stream, File<FileFormat::TTF>& file) {
+			const uint64 offset = stream.getByteOffset();
+
 			PosExtensionFormat1 posExtensionSubtable{};
 			posExtensionSubtable.format = stream.read<uint16>();
 
@@ -119,9 +190,7 @@ namespace Trident {
 			posExtensionSubtable.extensionLookupType = static_cast<LookupType>(stream.read<uint16>());
 			posExtensionSubtable.extensionOffset = stream.read<Offset32>();
 
-			offset += posExtensionSubtable.extensionOffset;
-
-			stream.seek(offset);
+			stream.seek(offset + posExtensionSubtable.extensionOffset);
 
 			switch (posExtensionSubtable.extensionLookupType) {
 				case LookupType::SINGLE_ADJUSTMENT: {
@@ -130,7 +199,7 @@ namespace Trident {
 					break;
 				}
 				case LookupType::PAIR_ADJUSTMENT: {
-					decodePairPosSubtable(stream, offset);
+					decodePairPosSubtable(stream, file);
 
 					break;
 				}
@@ -147,7 +216,7 @@ namespace Trident {
 			}
 		}
 
-		void decodeGPOSTable(ByteStream<StreamOperation::READ>& stream, const std::unordered_map<uint32, uint32>& tableOffsetMap) {
+		void decodeGPOSTable(ByteStream<StreamOperation::READ>& stream, const std::unordered_map<uint32, uint32>& tableOffsetMap, File<FileFormat::TTF>& file) {
 			const std::unordered_map<uint32, uint32>::const_iterator tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("GPOS"));
 
 			ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'GPOS' table.");
@@ -165,7 +234,7 @@ namespace Trident {
 				gpos.featureVariationOffset = stream.read<Offset32>();
 			}
 
-			// TODO(filesystem/ttf/gpos/script): Should scripts be used with features and lookups?
+			// TODO(filesystem/ttf/gpos/script): Should scripts be decoded along with features and lookups?
 			stream.seek(tableOffset->second + gpos.scriptListOffset);
 
 			ScriptList scriptList{};
@@ -290,87 +359,6 @@ namespace Trident {
 				}
 			}
 
-			#if 0
-				uint16 index = 0;
-
-				while (index < scriptList.scriptCount) {
-					const ScriptRecord& scriptRecord = scriptList.scriptRecords[index];
-					const Script& script = scripts[index];
-					const view<char8> tag(pointer_cast<const char8*>(&scriptRecord.scriptTag), 4);
-
-					ENGINE_DEBUG(
-						"Script []:\n"
-						"- Tag = '[]'\n"
-						"- Language system count = []",
-						index,
-						tag,
-						script.langSysCount
-					);
-
-					index += 1;
-				}
-
-				index = 0;
-
-				while (index < featureList.featureCount) {
-					const FeatureRecord& featureRecord = featureList.featureRecords[index];
-					const Feature& feature = features[index];
-					const view<char8> tag(pointer_cast<const char8*>(&featureRecord.featureTag), 4);
-
-					ENGINE_DEBUG(
-						"Feature []:\n"
-						"- Tag = []\n"
-						"- Lookup index count:",
-						index,
-						tag,
-						feature.lookupIndexCount
-					);
-
-					for (const uint16 lookupIndex : feature.lookupListIndices) {
-						const Offset16 lookupOffset = lookupList.lookupOffsets[lookupIndex];
-						const Lookup& lookup = lookups[lookupIndex];
-
-						ENGINE_DEBUG(
-							"\tLookup []:\n"
-							"\t- Type = []\n"
-							"\t- Flag = []\n"
-							"\t- Subtables:",
-							lookupIndex,
-							(uint16) lookup.lookupType,
-							(uint16) lookup.lookupFlag,
-							lookup.subtableCount
-						);
-
-						if (lookup.lookupType == LookupType::POSITIONING_EXTENSION) {
-							uint16 subtableIndex = 0;
-
-							while (subtableIndex < lookup.subtableCount) {
-								const Offset16 subtableOffset = lookup.subtableOffsets[subtableIndex];
-
-								stream.seek(tableOffset->second + gpos.lookupListOffset + lookupOffset + subtableOffset);
-
-								const uint16 format = stream.read<uint16>();
-								const uint16 extensionLookupType = stream.read<uint16>();
-								const Offset16 extensionOffset = stream.read<Offset16>();
-
-								ENGINE_DEBUG(
-									"\t\tSubtable []:\n"
-									"\t\t- Format = []\n"
-									"\t\t- Extension lookup type = []",
-									subtableIndex,
-									format,
-									extensionLookupType
-								);
-
-								subtableIndex += 1;
-							}
-						}
-					}
-
-					index += 1;
-				}
-			#endif
-
 			uint16 featureIndex = 0;
 
 			while (featureIndex < featureList.featureCount) {
@@ -403,7 +391,7 @@ namespace Trident {
 							for (const Offset16 subtableOffset : lookup.subtableOffsets) {
 								stream.seek(offset + subtableOffset);
 
-								decodePairPosSubtable(stream, offset + subtableOffset);
+								decodePairPosSubtable(stream, file);
 							}
 
 							break;
@@ -412,7 +400,7 @@ namespace Trident {
 							for (const Offset16 subtableOffset : lookup.subtableOffsets) {
 								stream.seek(offset + subtableOffset);
 
-								decodePosExtensionSubtable(stream, offset + subtableOffset);
+								decodePosExtensionSubtable(stream, file);
 							}
 
 							break;

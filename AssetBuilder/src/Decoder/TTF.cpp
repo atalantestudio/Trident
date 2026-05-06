@@ -595,7 +595,7 @@ namespace Trident {
 			leftSideBearing = stream.read<FWord>();
 		}
 
-		decodeGPOSTable(stream, tableOffsetMap);
+		decodeGPOSTable(stream, tableOffsetMap, file);
 
 		// See https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6cmap.html.
 		tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("cmap"));
