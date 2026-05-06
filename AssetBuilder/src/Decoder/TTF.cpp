@@ -5,6 +5,7 @@
 
 #include "Engine/Filesystem/Decoder/Decoder.hpp"
 
+#include "Decoder/TTF/GPOS.hpp"
 #include "../File/TTF.hpp"
 
 namespace Trident {
@@ -340,148 +341,6 @@ namespace Trident {
 			}
 		}
 
-		/// See https://learn.microsoft.com/en-us/typography/opentype/spec/gpos.
-		static void parseGPOSTable(ByteStream<StreamOperation::READ>& stream, const std::unordered_map<uint32, uint32>& tableOffsetMap) {
-			const std::unordered_map<uint32, uint32>::const_iterator tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("GPOS"));
-
-			ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'GPOS' table.");
-
-			stream.seek(tableOffset->second);
-
-			GPOS gpos{};
-			gpos.majorVersion = stream.read<uint16>();
-			gpos.minorVersion = stream.read<uint16>();
-			gpos.scriptListOffset = stream.read<Offset16>();
-			gpos.featureListOffset = stream.read<Offset16>();
-			gpos.lookupListOffset = stream.read<Offset16>();
-
-			if (gpos.majorVersion == 1 && gpos.minorVersion == 1) {
-				gpos.featureVariationOffset = stream.read<Offset32>();
-			}
-
-			stream.seek(tableOffset->second + gpos.scriptListOffset);
-
-			ScriptList scriptList{};
-			scriptList.scriptCount = stream.read<uint16>();
-			scriptList.scriptRecords = sequence<ScriptRecord>(scriptList.scriptCount);
-
-			for (ScriptRecord& scriptRecord : scriptList.scriptRecords) {
-				scriptRecord.scriptTag = stream.read<Tag>(true);
-				scriptRecord.scriptOffset = stream.read<Offset16>();
-			}
-
-			sequence<Script> scripts(scriptList.scriptCount);
-
-			// Parse scripts.
-			{
-				uint16 scriptIndex = 0;
-
-				while (scriptIndex < scriptList.scriptCount) {
-					const ScriptRecord& scriptRecord = scriptList.scriptRecords[scriptIndex];
-
-					stream.seek(tableOffset->second + gpos.scriptListOffset + scriptRecord.scriptOffset);
-
-					Script& script = scripts[scriptIndex];
-					script.defaultLangSysOffset = stream.read<Offset16>();
-					script.langSysCount = stream.read<uint16>();
-					script.langSysRecords = sequence<LangSysRecord>(script.langSysCount);
-
-					for (LangSysRecord& langSysRecord : script.langSysRecords) {
-						langSysRecord.langSysTag = stream.read<Tag>(true);
-						langSysRecord.langSysOffset = stream.read<Offset16>();
-					}
-
-					for (const LangSysRecord& langSysRecord : script.langSysRecords) {
-						stream.seek(tableOffset->second + gpos.scriptListOffset + scriptRecord.scriptOffset + langSysRecord.langSysOffset);
-						stream.jump(sizeof(LangSys::lookupOrderOffset));
-
-						LangSys langSys{};
-						langSys.requiredFeatureIndex = stream.read<uint16>();
-						langSys.featureIndexCount = stream.read<uint16>();
-						langSys.featureIndices = sequence<uint16>(langSys.featureIndexCount);
-
-						for (uint16& featureIndex : langSys.featureIndices) {
-							featureIndex = stream.read<uint16>();
-						}
-					}
-
-					scriptIndex += 1;
-				}
-			}
-
-			stream.seek(tableOffset->second + gpos.featureListOffset);
-
-			FeatureList featureList{};
-			featureList.featureCount = stream.read<uint16>();
-			featureList.featureRecords = sequence<FeatureRecord>(featureList.featureCount);
-
-			for (FeatureRecord& featureRecord : featureList.featureRecords) {
-				featureRecord.featureTag = stream.read<Tag>(true);
-				featureRecord.featureOffset = stream.read<Offset16>();
-			}
-
-			sequence<Feature> features(featureList.featureCount);
-
-			// Parse features.
-			{
-				uint16 featureIndex = 0;
-
-				while (featureIndex < featureList.featureCount) {
-					const FeatureRecord& featureRecord = featureList.featureRecords[featureIndex];
-
-					stream.seek(tableOffset->second + gpos.featureListOffset + featureRecord.featureOffset);
-
-					Feature& feature = features[featureIndex];
-					feature.featureParamsOffset = stream.read<Offset16>();
-					feature.lookupIndexCount = stream.read<uint16>();
-					feature.lookupListIndices = sequence<uint16>(feature.lookupIndexCount);
-
-					for (uint16& lookupListIndex : feature.lookupListIndices) {
-						lookupListIndex = stream.read<uint16>();
-					}
-
-					featureIndex += 1;
-				}
-			}
-
-			stream.seek(tableOffset->second + gpos.lookupListOffset);
-
-			LookupList lookupList{};
-			lookupList.lookupCount = stream.read<uint16>();
-			lookupList.lookupOffsets = sequence<Offset16>(lookupList.lookupCount);
-
-			for (Offset16& lookupOffset : lookupList.lookupOffsets) {
-				lookupOffset = stream.read<Offset16>();
-			}
-
-			sequence<Lookup> lookups(lookupList.lookupCount);
-
-			// Parse lookups.
-			{
-				uint16 lookupIndex = 0;
-
-				while (lookupIndex < lookupList.lookupCount) {
-					const Offset16 lookupOffset = lookupList.lookupOffsets[lookupIndex];
-
-					stream.seek(tableOffset->second + gpos.lookupListOffset + lookupOffset);
-
-					Lookup& lookup = lookups[lookupIndex];
-					lookup.lookupType = stream.read<uint16>();
-					lookup.lookupFlag = stream.read<uint16>();
-					lookup.subtableCount = stream.read<uint16>();
-					lookup.subtableOffsets = sequence<Offset16>(lookup.subtableCount);
-
-					if (lookup.lookupFlag & LookupFlag::USE_MARK_FILTERING_SET) {
-						lookup.markFilteringSet = stream.read<uint16>();
-					}
-
-					lookupIndex += 1;
-				}
-			}
-
-			BREAKPOINT();
-		}
-
 		// TODO(ttf/checksum)
 		/* static uint32 calculateTableChecksum(const uint32* table, uint32 byteCount) {
 			uint32 checksum = 0;
@@ -505,8 +364,8 @@ namespace Trident {
 		const uint32 scalerType = stream.peek<uint32>();
 
 		switch (scalerType) {
-			case 0x00010000:
 			case STRING_TO_BIG_ENDIAN_UINT32("OTTO"):
+			case 0x00010000:
 			case STRING_TO_BIG_ENDIAN_UINT32("true"):
 			case STRING_TO_BIG_ENDIAN_UINT32("typ1"): {
 				return true;
@@ -523,11 +382,10 @@ namespace Trident {
 		using namespace TrueTypeFont;
 
 		File<FileFormat::TTF> file;
-
-		ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::BIG_ENDIAN);
+		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::BIG_ENDIAN);
 
 		OffsetSubtable offsetSubtable{};
-		offsetSubtable.scalerType = byteStream.read<uint32>();
+		offsetSubtable.scalerType = stream.read<uint32>();
 
 		// See https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6.html#ScalerTypeNote.
 		switch (offsetSubtable.scalerType) {
@@ -552,26 +410,26 @@ namespace Trident {
 			}
 		}
 
-		offsetSubtable.numTables = byteStream.read<uint16>();
-		offsetSubtable.searchRange = byteStream.read<uint16>();
-		offsetSubtable.entrySelector = byteStream.read<uint16>();
-		offsetSubtable.rangeShift = byteStream.read<uint16>();
+		offsetSubtable.numTables = stream.read<uint16>();
+		offsetSubtable.searchRange = stream.read<uint16>();
+		offsetSubtable.entrySelector = stream.read<uint16>();
+		offsetSubtable.rangeShift = stream.read<uint16>();
 
 		std::unordered_map<uint32, uint32> tableOffsetMap;
 
 		for (uint16 tableIndex = 0; tableIndex < offsetSubtable.numTables; tableIndex += 1) {
 			TableDirectory tableDirectory{};
-			tableDirectory.tag = byteStream.read<uint32>(true);
+			tableDirectory.tag = stream.read<uint32>(true);
 
-			byteStream.jump(sizeof(uint32));
+			stream.jump(sizeof(uint32));
 
-			tableDirectory.offset = byteStream.read<uint32>();
-			tableDirectory.length = byteStream.read<uint32>();
+			tableDirectory.offset = stream.read<uint32>();
+			tableDirectory.length = stream.read<uint32>();
 
 			tableOffsetMap.insert(std::make_pair(tableDirectory.tag, tableDirectory.offset));
 
 			// TODO: Verify font and table checksums.
-			/* const uint32* start = pointer_cast<const uint32*>(byteStream.getBytePosition() - byteStream.getByteOffset());
+			/* const uint32* start = pointer_cast<const uint32*>(stream.getBytePosition() - stream.getByteOffset());
 			const uint32* position = start + tableDirectory.offset;
 			const uint32 calculatedChecksum = calculateTableChecksum(position, tableDirectory.length);
 
@@ -587,7 +445,7 @@ namespace Trident {
 
 		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'head' table.");
 
-		byteStream.seek(tableOffset->second + 8);
+		stream.seek(tableOffset->second + 8);
 
 		// TODO: Checksum notes from https://developer.apple.com/fonts/TrueType-Reference-Manual.
 		// 
@@ -617,29 +475,29 @@ namespace Trident {
 		// References:
 		// - https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6.html
 		// - https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6head.html
-		byteStream.jump(sizeof(uint32)); // checkSumAdjustment
+		stream.jump(sizeof(uint32)); // checkSumAdjustment
 
-		const uint32 magicNumber = byteStream.peek<uint32>();
+		const uint32 magicNumber = stream.peek<uint32>();
 
 		ENGINE_ASSERT(magicNumber == 0x5f0f3cf5, "Invalid TTF magic.");
 
-		byteStream.seek(tableOffset->second + 50);
+		stream.seek(tableOffset->second + 50);
 
 		// 0 for short offsets, 1 for long.
-		const sint16 indexToLocFormat = byteStream.read<sint16>();
+		const sint16 indexToLocFormat = stream.read<sint16>();
 
 		// See https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6maxp.html.
 		tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("maxp"));
 
 		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'maxp' table.");
 
-		byteStream.seek(tableOffset->second + 4);
+		stream.seek(tableOffset->second + 4);
 
-		const uint16 numGlyphs = byteStream.read<uint16>();
+		const uint16 numGlyphs = stream.read<uint16>();
 
-		byteStream.jump(24);
+		stream.jump(24);
 
-		const uint16 maxComponentDepth = byteStream.read<uint16>();
+		const uint16 maxComponentDepth = stream.read<uint16>();
 
 		// The value of n is the number of glyphs in the font + 1.
 		// The number of glyphs in the font is found in the maximum profile table.
@@ -651,14 +509,14 @@ namespace Trident {
 
 		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'loca' table.");
 
-		byteStream.seek(tableOffset->second);
+		stream.seek(tableOffset->second);
 
 		uint32 glyphOffsetIndex = 0;
 		uint32 previousGlyphOffsetIndex = numGlyphs;
 
 		if (indexToLocFormat == 1) {
 			while (glyphOffsetIndex < numGlyphs) {
-				glyphOffsets[glyphOffsetIndex] = byteStream.read<uint32>();
+				glyphOffsets[glyphOffsetIndex] = stream.read<uint32>();
 				glyphLengths[previousGlyphOffsetIndex] = glyphOffsets[glyphOffsetIndex] - glyphOffsets[previousGlyphOffsetIndex];
 
 				glyphOffsetIndex += 1;
@@ -668,7 +526,7 @@ namespace Trident {
 		else if (indexToLocFormat == 0) {
 			while (glyphOffsetIndex < numGlyphs) {
 				// The actual local offset divided by 2 is stored.
-				glyphOffsets[glyphOffsetIndex] = static_cast<uint32>(byteStream.read<uint16>()) * 2;
+				glyphOffsets[glyphOffsetIndex] = static_cast<uint32>(stream.read<uint16>()) * 2;
 
 				glyphLengths[previousGlyphOffsetIndex] = glyphOffsets[glyphOffsetIndex] - glyphOffsets[previousGlyphOffsetIndex];
 
@@ -699,7 +557,7 @@ namespace Trident {
 				continue;
 			}
 
-			parseGlyph(byteStream, tableOffset->second, glyphOffsets, file.glyphs, glyphIndex, maxComponentDepth);
+			parseGlyph(stream, tableOffset->second, glyphOffsets, file.glyphs, glyphIndex, maxComponentDepth);
 		}
 
 		// See https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6hhea.html.
@@ -707,72 +565,72 @@ namespace Trident {
 
 		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'hhea' table.");
 
-		byteStream.seek(tableOffset->second + 4);
+		stream.seek(tableOffset->second + 4);
 
-		file.ascent = byteStream.read<FWord>();
-		file.descent = byteStream.read<FWord>();
-		file.lineGap = byteStream.read<FWord>();
+		file.ascent = stream.read<FWord>();
+		file.descent = stream.read<FWord>();
+		file.lineGap = stream.read<FWord>();
 
-		byteStream.jump(24);
+		stream.jump(24);
 
-		const uint16 numOfLongHorMetrics = byteStream.read<uint16>();
+		const uint16 numOfLongHorMetrics = stream.read<uint16>();
 
 		// See https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6hmtx.html.
 		tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("hmtx"));
 
 		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'hmtx' table.");
 
-		byteStream.seek(tableOffset->second);
+		stream.seek(tableOffset->second);
 
 		file.hMetrics = sequence<longHorMetric>(numOfLongHorMetrics);
 
 		for (longHorMetric& hMetric : file.hMetrics) {
-			hMetric.advanceWidth = byteStream.read<uint16>();
-			hMetric.leftSideBearing = byteStream.read<sint16>();
+			hMetric.advanceWidth = stream.read<uint16>();
+			hMetric.leftSideBearing = stream.read<sint16>();
 		}
 
 		file.leftSideBearings = sequence<FWord>(numGlyphs - numOfLongHorMetrics);
 
 		for (FWord& leftSideBearing : file.leftSideBearings) {
-			leftSideBearing = byteStream.read<FWord>();
+			leftSideBearing = stream.read<FWord>();
 		}
 
-		parseGPOSTable(byteStream, tableOffsetMap);
+		decodeGPOSTable(stream, tableOffsetMap);
 
 		// See https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6cmap.html.
 		tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("cmap"));
 
 		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'cmap' table.");
 
-		byteStream.seek(tableOffset->second + 2);
+		stream.seek(tableOffset->second + 2);
 
 		// Number of encoding subtables.
-		const uint16 numberSubtables = byteStream.read<uint16>();
+		const uint16 numberSubtables = stream.read<uint16>();
 
-		uint64 subtableOffset = byteStream.getByteOffset();
+		uint64 subtableOffset = stream.getByteOffset();
 		uint64 unicodeTableOffset = 0;
 
 		// Find Unicode table.
 		for (uint16 subtableIndex = 0; subtableIndex < numberSubtables; subtableIndex += 1) {
-			byteStream.seek(subtableOffset);
+			stream.seek(subtableOffset);
 
 			// Platform identifier.
-			const uint16 platformID = byteStream.read<uint16>();
+			const uint16 platformID = stream.read<uint16>();
 
 			// Skip platformSpecificID.
-			byteStream.jump(sizeof(uint16));
+			stream.jump(sizeof(uint16));
 
-			const uint32 offset = byteStream.read<uint32>();
+			const uint32 offset = stream.read<uint32>();
 
 			if (platformID == 0) {
-				subtableOffset = byteStream.getByteOffset();
+				subtableOffset = stream.getByteOffset();
 
-				byteStream.seek(tableOffset->second + offset);
+				stream.seek(tableOffset->second + offset);
 
-				const uint16 format = byteStream.read<uint16>();
+				const uint16 format = stream.read<uint16>();
 
 				if (format == 4) {
-					unicodeTableOffset = byteStream.getByteOffset();
+					unicodeTableOffset = stream.getByteOffset();
 
 					break;
 				}
@@ -785,51 +643,51 @@ namespace Trident {
 
 		// Parse Unicode table.
 		{
-			byteStream.seek(unicodeTableOffset);
+			stream.seek(unicodeTableOffset);
 
-			const uint16 length = byteStream.read<uint16>();
+			const uint16 length = stream.read<uint16>();
 
-			byteStream.jump(sizeof(uint16)); // language
+			stream.jump(sizeof(uint16)); // language
 
-			const uint16 segCountX2 = byteStream.read<uint16>();
+			const uint16 segCountX2 = stream.read<uint16>();
 			const uint16 segCount = segCountX2 / 2;
 
-			byteStream.jump(sizeof(uint16)); // searchRange
-			byteStream.jump(sizeof(uint16)); // entrySelector
-			byteStream.jump(sizeof(uint16)); // rangeShift
+			stream.jump(sizeof(uint16)); // searchRange
+			stream.jump(sizeof(uint16)); // entrySelector
+			stream.jump(sizeof(uint16)); // rangeShift
 
 			sequence<uint16> endCodes(segCount);
 
 			for (uint16& endCode : endCodes) {
-				endCode = byteStream.read<uint16>();
+				endCode = stream.read<uint16>();
 			}
 
-			byteStream.jump(sizeof(uint16));
+			stream.jump(sizeof(uint16));
 
 			sequence<uint16> startCodes(segCount);
 
 			for (uint16& startCode : startCodes) {
-				startCode = byteStream.read<uint16>();
+				startCode = stream.read<uint16>();
 			}
 
 			sequence<uint16> idDeltas(segCount);
 
 			for (uint16& idDelta : idDeltas) {
-				idDelta = byteStream.read<uint16>();
+				idDelta = stream.read<uint16>();
 			}
 
 			std::vector<uint16> idRangeOffsets(segCount);
 
 			for (uint16& idRangeOffset : idRangeOffsets) {
-				idRangeOffset = byteStream.read<uint16>();
+				idRangeOffset = stream.read<uint16>();
 			}
 
-			const uint64 glyphIndexArrayCount = (length - (byteStream.getByteOffset() - unicodeTableOffset)) / 2;
+			const uint64 glyphIndexArrayCount = (length - (stream.getByteOffset() - unicodeTableOffset)) / 2;
 
 			idRangeOffsets.resize(segCount + glyphIndexArrayCount);
 
 			for (uint32 glyphIndexIndex = 0; glyphIndexIndex < glyphIndexArrayCount; glyphIndexIndex += 1) {
-				idRangeOffsets[segCount + glyphIndexIndex] = byteStream.read<uint16>();
+				idRangeOffsets[segCount + glyphIndexIndex] = stream.read<uint16>();
 			}
 
 			for (uint16 segmentIndex = 0; segmentIndex < segCount; segmentIndex += 1) {

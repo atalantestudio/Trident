@@ -119,6 +119,17 @@ namespace Trident {
 			sequence<Offset16> lookupOffsets;
 		};
 
+		enum class LookupType : uint16 {
+			// Adjust position of a single glyph.
+			SINGLE_ADJUSTMENT = 1,
+
+			// Adjust position of a pair of glyphs.
+			PAIR_ADJUSTMENT = 2,
+
+			// Extension mechanism for other positionings.
+			POSITIONING_EXTENSION = 9,
+		};
+
 		enum class LookupFlag : uint16 {
 			// This bit is used only in relation to cursive attachment positioning (GPOS lookup type 3).
 			// When this bit is set, the last glyph in a matched input sequence will be positioned on the baseline.
@@ -146,10 +157,10 @@ namespace Trident {
 		/// See https://learn.microsoft.com/en-us/typography/opentype/spec/chapter2#lookup-table.
 		struct Lookup {
 			// Different enumerations for GSUB and GPOS.
-			uint16 lookupType;
+			LookupType lookupType;
 
 			// Lookup qualifiers.
-			uint16 lookupFlag;
+			LookupFlag lookupFlag;
 
 			// Number of elements in the subtableOffsets array.
 			uint16 subtableCount;
@@ -160,6 +171,156 @@ namespace Trident {
 			// Index (base 0) into GDEF mark glyph sets structure.
 			// This field is only present if the USE_MARK_FILTERING_SET lookup flag is set.
 			uint16 markFilteringSet;
+		};
+
+		/* /// See https://learn.microsoft.com/en-us/typography/opentype/spec/chapter2#coverage-format-1.
+		struct CoverageFormat1 {
+			// Format identifier — format.
+			uint16 format;
+
+			// Number of glyphs in the glyph array.
+			uint16 glyphCount;
+
+			// Array of glyph IDs — in numerical order.
+			sequence<uint16> glyphArray;
+		};
+
+		struct RangeRecord {
+			// First glyph ID in the range.
+			uint16 startGlyphID;
+
+			// Last glyph ID in the range.
+			uint16 endGlyphID;
+
+			// Coverage Index of first glyph ID in range.
+			uint16 startCoverageIndex;
+		};
+
+		/// See https://learn.microsoft.com/en-us/typography/opentype/spec/chapter2#coverage-format-2.
+		struct CoverageFormat2 {
+			// Format identifier — format.
+			uint16 format;
+
+			// Number of RangeRecords.
+			uint16 glyphCount;
+
+			// Array of glyph ranges — ordered by startGlyphID.
+			sequence<RangeRecord> rangeRecords;
+		}; */
+
+		/// See https://learn.microsoft.com/en-us/typography/opentype/spec/gpos#value-record.
+		struct ValueRecord {
+			// Horizontal adjustment for placement, in design units.
+			sint16 xPlacement;
+
+			// Vertical adjustment for placement, in design units.
+			sint16 yPlacement;
+
+			// Horizontal adjustment for advance, in design units — only used for horizontal layout.
+			sint16 xAdvance;
+
+			// Vertical adjustment for advance, in design units — only used for vertical layout.
+			sint16 yAdvance;
+
+			// Offset to Device table (non-variable font) / VariationIndex table (variable font) for horizontal placement,
+			// from beginning of the immediate parent table (SinglePos or PairPosFormat2 lookup subtable,
+			// PairSet table within a PairPosFormat1 lookup subtable) — may be NULL.
+			Offset16 xPlaDeviceOffset;
+
+			// Offset to Device table (non-variable font) / VariationIndex table (variable font) for vertical placement,
+			// from beginning of the immediate parent table (SinglePos or PairPosFormat2 lookup subtable,
+			// PairSet table within a PairPosFormat1 lookup subtable) — may be NULL.
+			Offset16 yPlaDeviceOffset;
+
+			// Offset to Device table (non-variable font) / VariationIndex table (variable font) for horizontal advance,
+			// from beginning of the immediate parent table (SinglePos or PairPosFormat2 lookup subtable,
+			// PairSet table within a PairPosFormat1 lookup subtable) — may be NULL.
+			Offset16 xAdvDeviceOffset;
+
+			// Offset to Device table (non-variable font) / VariationIndex table (variable font) for vertical advance,
+			// from beginning of the immediate parent table (SinglePos or PairPosFormat2 lookup subtable,
+			// PairSet table within a PairPosFormat1 lookup subtable) — may be NULL.
+			Offset16 yAdvDeviceOffset;
+		};
+
+		enum class ValueFormat : uint16 {
+			// Includes horizontal adjustment for placement.
+			X_PLACEMENT = 0x0001,
+
+			// Includes vertical adjustment for placement.
+			Y_PLACEMENT = 0x0002,
+
+			// Includes horizontal adjustment for advance.
+			X_ADVANCE = 0x0004,
+
+			// Includes vertical adjustment for advance.
+			Y_ADVANCE = 0x0008,
+
+			// Includes Device table (non-variable font) / VariationIndex table (variable font) for horizontal placement.
+			X_PLACEMENT_DEVICE = 0x0010,
+
+			// Includes Device table (non-variable font) / VariationIndex table (variable font) for vertical placement.
+			Y_PLACEMENT_DEVICE = 0x0020,
+
+			// Includes Device table (non-variable font) / VariationIndex table (variable font) for horizontal advance.
+			X_ADVANCE_DEVICE = 0x0040,
+
+			// Includes Device table (non-variable font) / VariationIndex table (variable font) for vertical advance.
+			Y_ADVANCE_DEVICE = 0x0080,
+		};
+
+		AS_FLAG(ValueFormat);
+
+		struct PairValue {
+			// Glyph ID of second glyph in the pair (first glyph is listed in the Coverage table).
+			uint16 secondGlyph;
+
+			// Positioning data for the first glyph in the pair.
+			ValueRecord valueRecord1;
+
+			// Positioning data for the second glyph in the pair.
+			ValueRecord valueRecord2;
+		};
+
+		struct PairSet {
+			// Number of PairValue records.
+			uint16 pairValueCount;
+
+			// Array of PairValue records, ordered by glyph ID of the second glyph.
+			sequence<PairValue> pairValueRecords;
+		};
+
+		/// See https://learn.microsoft.com/en-us/typography/opentype/spec/gpos#lookup-type-2-subtable-pair-adjustment-positioning.
+		struct PairPosFormat1 {
+			// Format identifier — format = 1.
+			uint16 format;
+
+			// Offset to Coverage table, from beginning of PairPos subtable.
+			Offset16 coverageOffset;
+
+			// Defines the types of data in valueRecord1 — for the first glyph in the pair (may be zero).
+			ValueFormat valueFormat1;
+
+			// Defines the types of data in valueRecord2 — for the second glyph in the pair (may be zero).
+			ValueFormat valueFormat2;
+
+			// Number of PairSet tables.
+			uint16 pairSetCount;
+
+			// Array of offsets to PairSet tables. Offsets are from beginning of PairPos subtable, ordered by Coverage Index.
+			sequence<Offset16> pairSetOffsets;
+		};
+
+		/// See https://learn.microsoft.com/en-us/typography/opentype/spec/gpos#lookup-type-9-subtable-positioning-subtable-extension.
+		struct PosExtensionFormat1 {
+			// Format identifier — format = 1.
+			uint16 format;
+
+			// Lookup type of subtable referenced by extensionOffset (i.e. the extension subtable).
+			LookupType extensionLookupType;
+
+			// Offset to the extension subtable, of lookup type extensionLookupType, relative to the start of the PosExtensionFormat1 subtable.
+			Offset32 extensionOffset;
 		};
 	}
 }
