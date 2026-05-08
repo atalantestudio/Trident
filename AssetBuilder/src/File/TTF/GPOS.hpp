@@ -292,6 +292,59 @@ namespace Trident {
 			sequence<PairValue> pairValueRecords;
 		};
 
+		struct ClassRange {
+			// First glyph ID in the range.
+			uint16 startGlyphID;
+
+			// Last glyph ID in the range.
+			uint16 endGlyphID;
+
+			// Applied to all glyphs in the range.
+			uint16 _class;
+		};
+
+		struct Class2 {
+			// Positioning for first glyph — empty if valueFormat1 = 0.
+			ValueRecord valueRecord1;
+
+			// Positioning for second glyph — empty if valueFormat2 = 0.
+			ValueRecord valueRecord2;
+		};
+
+		struct Class1 {
+			// Array of Class2 records, ordered by classes in classDef2.
+			sequence<Class2> class2Records;
+		};
+
+		/// See https://learn.microsoft.com/en-us/typography/opentype/spec/chapter2#class-definition-format-1.
+		struct ClassDefFormat1 {
+			// First glyph ID assigned to a class.
+			uint16 startGlyphID;
+
+			// Number of elements in the classValues array.
+			uint16 glyphCount;
+
+			// Array of class values — one per glyph ID.
+			sequence<uint16> classValues;
+		};
+
+		/// See https://learn.microsoft.com/en-us/typography/opentype/spec/chapter2#class-definition-format-2.
+		struct ClassDefFormat2 {
+			// Number of ClassRange records.
+			uint16 classRangeCount;
+
+			// Array of ClassRangeRecords — ordered by startGlyphID.
+			sequence<ClassRange> classRangeRecords;
+		};
+
+		struct ClassDef {
+			// Format identifier.
+			uint16 format;
+
+			ClassDefFormat1 classDefFormat1;
+			ClassDefFormat2 classDefFormat2;
+		};
+
 		/// See https://learn.microsoft.com/en-us/typography/opentype/spec/gpos#lookup-type-1-subtable-single-adjustment-positioning.
 		struct SinglePosFormat1 {
 			// Format identifier — format = 1.
@@ -307,20 +360,7 @@ namespace Trident {
 			ValueRecord valueRecord;
 		};
 
-		/// See https://learn.microsoft.com/en-us/typography/opentype/spec/gpos#lookup-type-2-subtable-pair-adjustment-positioning.
 		struct PairPosFormat1 {
-			// Format identifier — format = 1.
-			uint16 format;
-
-			// Offset to Coverage table, from beginning of PairPos subtable.
-			Offset16 coverageOffset;
-
-			// Defines the types of data in valueRecord1 — for the first glyph in the pair (may be zero).
-			ValueFormat valueFormat1;
-
-			// Defines the types of data in valueRecord2 — for the second glyph in the pair (may be zero).
-			ValueFormat valueFormat2;
-
 			// Number of PairSet tables.
 			uint16 pairSetCount;
 
@@ -328,16 +368,55 @@ namespace Trident {
 			sequence<Offset16> pairSetOffsets;
 		};
 
-		/// See https://learn.microsoft.com/en-us/typography/opentype/spec/gpos#lookup-type-9-subtable-positioning-subtable-extension.
-		struct PosExtensionFormat1 {
-			// Format identifier — format = 1.
+		struct PairPosFormat2 {
+			// Offset to ClassDef table, from beginning of PairPos subtable — for the first glyph of the pair.
+			Offset16 classDef1Offset;
+
+			// Offset to ClassDef table, from beginning of PairPos subtable — for the second glyph of the pair.
+			Offset16 classDef2Offset;
+
+			// Number of classes in classDef1 table — includes class 0.
+			uint16 class1Count;
+
+			// Number of classes in classDef2 table — includes class 0.
+			uint16 class2Count;
+
+			// Array of Class1 records, ordered by classes in classDef1.
+			sequence<Class1> class1Records;
+		};
+
+		/// See https://learn.microsoft.com/en-us/typography/opentype/spec/gpos#lookup-type-2-subtable-pair-adjustment-positioning.
+		struct PairPos {
+			// Format identifier.
 			uint16 format;
 
+			// Offset to Coverage table, from beginning of PairPos subtable.
+			Offset16 coverageOffset;
+
+			// ValueRecord definition — for the first glyph of the pair (may be zero).
+			ValueFormat valueFormat1;
+
+			// ValueRecord definition — for the second glyph of the pair (may be zero).
+			ValueFormat valueFormat2;
+
+			PairPosFormat1 pairPosFormat1;
+			PairPosFormat2 pairPosFormat2;
+		};
+
+		struct PosExtensionFormat1 {
 			// Lookup type of subtable referenced by extensionOffset (i.e. the extension subtable).
 			LookupType extensionLookupType;
 
 			// Offset to the extension subtable, of lookup type extensionLookupType, relative to the start of the PosExtensionFormat1 subtable.
 			Offset32 extensionOffset;
+		};
+
+		/// See https://learn.microsoft.com/en-us/typography/opentype/spec/gpos#lookup-type-9-subtable-positioning-subtable-extension.
+		struct PosExtension {
+			// Format identifier.
+			uint16 format;
+
+			PosExtensionFormat1 posExtensionFormat1;
 		};
 	}
 }

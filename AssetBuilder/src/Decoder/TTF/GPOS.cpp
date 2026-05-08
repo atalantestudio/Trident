@@ -45,6 +45,44 @@ namespace Trident {
 			return valueRecord;
 		}
 
+		static ClassDef decodeClassDef(ByteStream<StreamOperation::READ>& stream) {
+			ClassDef classDef;
+			classDef.format = stream.read<uint16>();
+
+			switch (classDef.format) {
+				case 1: {
+					classDef.classDefFormat1.startGlyphID = stream.read<uint16>();
+					classDef.classDefFormat1.glyphCount = stream.read<uint16>();
+					classDef.classDefFormat1.classValues = sequence<uint16>(classDef.classDefFormat1.glyphCount);
+
+					for (uint16& classValue : classDef.classDefFormat1.classValues) {
+						classValue = stream.read<uint16>();
+					}
+
+					break;
+				}
+				case 2: {
+					classDef.classDefFormat2.classRangeCount = stream.read<uint16>();
+					classDef.classDefFormat2.classRangeRecords = sequence<ClassRange>(classDef.classDefFormat2.classRangeCount);
+
+					for (ClassRange& classRange : classDef.classDefFormat2.classRangeRecords) {
+						classRange.startGlyphID = stream.read<uint16>();
+						classRange.endGlyphID = stream.read<uint16>();
+						classRange._class = stream.read<uint16>();
+					}
+
+					break;
+				}
+				default: {
+					ENGINE_ASSERT(false, "Unsupported ClassDef format.");
+
+					break;
+				}
+			}
+
+			return classDef;
+		}
+
 		// TODO(filesystem/ttf/gpos/single-pos): Keep decoding SinglePos subtable?
 		static void decodeSinglePosSubtable(ByteStream<StreamOperation::READ>& stream) {
 			SinglePosFormat1 singlePosSubtable{};
@@ -60,36 +98,103 @@ namespace Trident {
 			ENGINE_ERROR_UNIMPLEMENTED();
 		}
 
-		static void insertKerningPairs(uint16 firstGlyph, view<PairSet> pairSets, File<FileFormat::TTF>& file) {
-			for (const PairSet& pairSet : pairSets) {
-				for (const PairValue& pairValue : pairSet.pairValueRecords) {
-					const GlyphPair glyphPair = {firstGlyph, pairValue.secondGlyph};
-					const KerningPair kerningPair = {pairValue.valueRecord1.xAdvance, pairValue.valueRecord2.xAdvance};
+		static void insertKerningPair(uint16 firstGlyph, const PairValue& pairValue, File<FileFormat::TTF>& file) {
+			const GlyphPair glyphPair = {firstGlyph, pairValue.secondGlyph};
+			const KerningPair kerningPair = {pairValue.valueRecord1.xAdvance, pairValue.valueRecord2.xAdvance};
 
-					// TODO(debug)
-					DEBUG_ASSERT(file.kerningPairs.find(glyphPair) == file.kerningPairs.end());
+			// TODO(debug)
+			DEBUG_ASSERT(file.kerningPairs.find(glyphPair) == file.kerningPairs.end());
 
-					file.kerningPairs.insert({glyphPair, kerningPair});
-				}
-			}
+			file.kerningPairs.insert({glyphPair, kerningPair});
+		}
+
+		static void insertKerningPair(uint16 firstGlyph, uint16 secondGlyph, const Class2& class2, File<FileFormat::TTF>& file) {
+			const GlyphPair glyphPair = {firstGlyph, secondGlyph};
+			const KerningPair kerningPair = {class2.valueRecord1.xAdvance, class2.valueRecord2.xAdvance};
+
+			// TODO(debug)
+			DEBUG_ASSERT(file.kerningPairs.find(glyphPair) == file.kerningPairs.end());
+
+			file.kerningPairs.insert({glyphPair, kerningPair});
 		}
 
 		static void decodePairPosSubtable(ByteStream<StreamOperation::READ>& stream, File<FileFormat::TTF>& file) {
 			const uint64 offset = stream.getByteOffset();
 
-			PairPosFormat1 pairPosSubtable{};
+			PairPos pairPosSubtable{};
 			pairPosSubtable.format = stream.read<uint16>();
-
-			ENGINE_ASSERT(pairPosSubtable.format == 1, "Unsupported PairPos format.");
-
 			pairPosSubtable.coverageOffset = stream.read<Offset16>();
 			pairPosSubtable.valueFormat1 = static_cast<ValueFormat>(stream.read<uint16>());
 			pairPosSubtable.valueFormat2 = static_cast<ValueFormat>(stream.read<uint16>());
-			pairPosSubtable.pairSetCount = stream.read<uint16>();
-			pairPosSubtable.pairSetOffsets = sequence<Offset16>(pairPosSubtable.pairSetCount);
 
-			for (Offset16& pairSetOffset : pairPosSubtable.pairSetOffsets) {
-				pairSetOffset = stream.read<Offset16>();
+			sequence<PairSet> pairSets;
+			ClassDef classDef1;
+			ClassDef classDef2;
+
+			switch (pairPosSubtable.format) {
+				case 1: {
+					pairPosSubtable.pairPosFormat1.pairSetCount = stream.read<uint16>();
+					pairPosSubtable.pairPosFormat1.pairSetOffsets = sequence<Offset16>(pairPosSubtable.pairPosFormat1.pairSetCount);
+
+					for (Offset16& pairSetOffset : pairPosSubtable.pairPosFormat1.pairSetOffsets) {
+						pairSetOffset = stream.read<Offset16>();
+					}
+
+					pairSets = sequence<PairSet>(pairPosSubtable.pairPosFormat1.pairSetCount);
+
+					uint16 pairSetIndex = 0;
+
+					while (pairSetIndex < pairPosSubtable.pairPosFormat1.pairSetCount) {
+						const Offset16 pairSetOffset = pairPosSubtable.pairPosFormat1.pairSetOffsets[pairSetIndex];
+
+						stream.seek(offset + pairSetOffset);
+
+						PairSet& pairSet = pairSets[pairSetIndex];
+						pairSet.pairValueCount = stream.read<uint16>();
+						pairSet.pairValueRecords = sequence<PairValue>(pairSet.pairValueCount);
+
+						for (PairValue& pairValue : pairSet.pairValueRecords) {
+							pairValue.secondGlyph = stream.read<uint16>();
+							pairValue.valueRecord1 = decodeValueRecord(stream, pairPosSubtable.valueFormat1);
+							pairValue.valueRecord2 = decodeValueRecord(stream, pairPosSubtable.valueFormat2);
+						}
+
+						pairSetIndex += 1;
+					}
+
+					break;
+				}
+				case 2: {
+					pairPosSubtable.pairPosFormat2.classDef1Offset = stream.read<Offset16>();
+					pairPosSubtable.pairPosFormat2.classDef2Offset = stream.read<Offset16>();
+					pairPosSubtable.pairPosFormat2.class1Count = stream.read<uint16>();
+					pairPosSubtable.pairPosFormat2.class2Count = stream.read<uint16>();
+					pairPosSubtable.pairPosFormat2.class1Records = sequence<Class1>(pairPosSubtable.pairPosFormat2.class1Count);
+
+					for (Class1& class1Record : pairPosSubtable.pairPosFormat2.class1Records) {
+						class1Record.class2Records = sequence<Class2>(pairPosSubtable.pairPosFormat2.class2Count);
+
+						for (Class2& class2Record : class1Record.class2Records) {
+							class2Record.valueRecord1 = decodeValueRecord(stream, pairPosSubtable.valueFormat1);
+							class2Record.valueRecord2 = decodeValueRecord(stream, pairPosSubtable.valueFormat2);
+						}
+					}
+
+					stream.seek(offset + pairPosSubtable.pairPosFormat2.classDef1Offset);
+
+					classDef1 = decodeClassDef(stream);
+
+					stream.seek(offset + pairPosSubtable.pairPosFormat2.classDef2Offset);
+
+					classDef2 = decodeClassDef(stream);
+
+					break;
+				}
+				default: {
+					ENGINE_ASSERT(false, "Unsupported PairPos format.");
+
+					break;
+				}
 			}
 
 			stream.seek(offset + pairPosSubtable.coverageOffset);
@@ -127,54 +232,188 @@ namespace Trident {
 				}
 			}
 
-			sequence<PairSet> pairSets(pairPosSubtable.pairSetCount);
-			uint16 pairSetIndex = 0;
-
-			while (pairSetIndex < pairPosSubtable.pairSetCount) {
-				const Offset16 pairSetOffset = pairPosSubtable.pairSetOffsets[pairSetIndex];
-
-				stream.seek(offset + pairSetOffset);
-
-				PairSet& pairSet = pairSets[pairSetIndex];
-				pairSet.pairValueCount = stream.read<uint16>();
-				pairSet.pairValueRecords = sequence<PairValue>(pairSet.pairValueCount);
-
-				for (PairValue& pairValue : pairSet.pairValueRecords) {
-					pairValue.secondGlyph = stream.read<uint16>();
-					pairValue.valueRecord1 = decodeValueRecord(stream, pairPosSubtable.valueFormat1);
-					pairValue.valueRecord2 = decodeValueRecord(stream, pairPosSubtable.valueFormat2);
-				}
-
-				pairSetIndex += 1;
+			if (!(pairPosSubtable.valueFormat1 & ValueFormat::X_ADVANCE && pairPosSubtable.valueFormat2 == 0)) {
+				return;
 			}
 
-			if (pairPosSubtable.valueFormat1 & ValueFormat::X_ADVANCE) {
-				switch (coverage.format) {
-					case 1: {
-						for (const uint16 firstGlyph : coverage.coverageFormat1.glyphArray) {
-							insertKerningPairs(firstGlyph, pairSets, file);
-						}
-
-						break;
-					}
-					case 2: {
-						for (const RangeRecord& rangeRecord : coverage.coverageFormat2.rangeRecords) {
-							uint16 firstGlyph = rangeRecord.startGlyphID;
-
-							while (firstGlyph <= rangeRecord.endGlyphID) {
-								insertKerningPairs(firstGlyph, pairSets, file);
-
-								firstGlyph += 1;
+			switch (pairPosSubtable.format) {
+				case 1: {
+					switch (coverage.format) {
+						case 1: {
+							for (const uint16 firstGlyph : coverage.coverageFormat1.glyphArray) {
+								for (const PairSet& pairSet : pairSets) {
+									for (const PairValue& pairValue : pairSet.pairValueRecords) {
+										insertKerningPair(firstGlyph, pairValue, file);
+									}
+								}
 							}
+
+							break;
 						}
+						case 2: {
+							for (const RangeRecord& rangeRecord : coverage.coverageFormat2.rangeRecords) {
+								uint16 firstGlyph = rangeRecord.startGlyphID;
 
-						break;
-					}
-					default: {
-						DEBUG_ASSERT(false);
+								while (firstGlyph <= rangeRecord.endGlyphID) {
+									for (const PairSet& pairSet : pairSets) {
+										for (const PairValue& pairValue : pairSet.pairValueRecords) {
+											insertKerningPair(firstGlyph, pairValue, file);
+										}
+									}
 
-						break;
+									firstGlyph += 1;
+								}
+							}
+
+							break;
+						}
+						default: {
+							break;
+						}
 					}
+
+					break;
+				}
+				case 2: {
+					switch (classDef1.format) {
+						case 1: {
+							uint16 firstGlyphOffset = 0;
+
+							while (firstGlyphOffset < classDef1.classDefFormat1.glyphCount) {
+								const uint16 classValue = classDef1.classDefFormat1.classValues[firstGlyphOffset];
+
+								if (classValue == 0) {
+									firstGlyphOffset += 1;
+
+									continue;
+								}
+
+								const uint16 firstGlyph = firstGlyphOffset + classDef1.classDefFormat1.startGlyphID;
+								const Class1& class1 = pairPosSubtable.pairPosFormat2.class1Records[classValue - 1];
+
+								switch (classDef2.format) {
+									case 1: {
+										uint16 secondGlyphOffset = 0;
+
+										while (secondGlyphOffset < classDef2.classDefFormat1.glyphCount) {
+											const uint16 classValue = classDef2.classDefFormat1.classValues[secondGlyphOffset];
+
+											if (classValue == 0) {
+												secondGlyphOffset += 1;
+
+												continue;
+											}
+
+											const uint16 secondGlyph = secondGlyphOffset + classDef2.classDefFormat1.startGlyphID;
+											const Class2& class2 = class1.class2Records[classValue - 1];
+
+											insertKerningPair(firstGlyph, secondGlyph, class2, file);
+
+											secondGlyphOffset += 1;
+										}
+
+										break;
+									}
+									case 2: {
+										for (const ClassRange& classRange2 : classDef2.classDefFormat2.classRangeRecords) {
+											DEBUG_ASSERT(classRange2._class > 0);
+
+											const Class2& class2 = class1.class2Records[classRange2._class];
+
+											uint16 secondGlyph = classRange2.startGlyphID;
+
+											while (secondGlyph <= classRange2.endGlyphID) {
+												insertKerningPair(firstGlyph, secondGlyph, class2, file);
+
+												secondGlyph += 1;
+											}
+										}
+
+										break;
+									}
+									default: {
+										break;
+									}
+								}
+
+								firstGlyphOffset += 1;
+							}
+
+							break;
+						}
+						case 2: {
+							for (const ClassRange& classRange1 : classDef1.classDefFormat2.classRangeRecords) {
+								DEBUG_ASSERT(classRange1._class > 0);
+
+								const Class1& class1 = pairPosSubtable.pairPosFormat2.class1Records[classRange1._class];
+
+								uint16 firstGlyph = classRange1.startGlyphID;
+
+								switch (classDef2.format) {
+									case 1: {
+										while (firstGlyph <= classRange1.endGlyphID) {
+											uint16 secondGlyphOffset = 0;
+
+											while (secondGlyphOffset < classDef2.classDefFormat1.glyphCount) {
+												const uint16 classValue = classDef2.classDefFormat1.classValues[secondGlyphOffset];
+
+												if (classValue == 0) {
+													secondGlyphOffset += 1;
+
+													continue;
+												}
+
+												const uint16 secondGlyph = secondGlyphOffset + classDef2.classDefFormat1.startGlyphID;
+												const Class2& class2 = class1.class2Records[classValue - 1];
+
+												insertKerningPair(firstGlyph, secondGlyph, class2, file);
+
+												secondGlyphOffset += 1;
+											}
+
+											firstGlyph += 1;
+										}
+
+										break;
+									}
+									case 2: {
+										while (firstGlyph <= classRange1.endGlyphID) {
+											for (const ClassRange& classRange2 : classDef2.classDefFormat2.classRangeRecords) {
+												DEBUG_ASSERT(classRange2._class > 0);
+
+												const Class2& class2 = class1.class2Records[classRange2._class];
+
+												uint16 secondGlyph = classRange2.startGlyphID;
+
+												while (secondGlyph <= classRange2.endGlyphID) {
+													insertKerningPair(firstGlyph, secondGlyph, class2, file);
+
+													secondGlyph += 1;
+												}
+											}
+
+											firstGlyph += 1;
+										}
+
+										break;
+									}
+									default: {
+										break;
+									}
+								}
+							}
+
+							break;
+						}
+						default: {
+							break;
+						}
+					}
+
+					break;
+				}
+				default: {
+					break;
 				}
 			}
 		}
@@ -182,17 +421,17 @@ namespace Trident {
 		static void decodePosExtensionSubtable(ByteStream<StreamOperation::READ>& stream, File<FileFormat::TTF>& file) {
 			const uint64 offset = stream.getByteOffset();
 
-			PosExtensionFormat1 posExtensionSubtable{};
+			PosExtension posExtensionSubtable{};
 			posExtensionSubtable.format = stream.read<uint16>();
 
 			ENGINE_ASSERT(posExtensionSubtable.format == 1, "Unsupported PosExtension format.");
 
-			posExtensionSubtable.extensionLookupType = static_cast<LookupType>(stream.read<uint16>());
-			posExtensionSubtable.extensionOffset = stream.read<Offset32>();
+			posExtensionSubtable.posExtensionFormat1.extensionLookupType = static_cast<LookupType>(stream.read<uint16>());
+			posExtensionSubtable.posExtensionFormat1.extensionOffset = stream.read<Offset32>();
 
-			stream.seek(offset + posExtensionSubtable.extensionOffset);
+			stream.seek(offset + posExtensionSubtable.posExtensionFormat1.extensionOffset);
 
-			switch (posExtensionSubtable.extensionLookupType) {
+			switch (posExtensionSubtable.posExtensionFormat1.extensionLookupType) {
 				case LookupType::SINGLE_ADJUSTMENT: {
 					decodeSinglePosSubtable(stream);
 
