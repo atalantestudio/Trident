@@ -7,6 +7,66 @@
 
 namespace Trident {
 	namespace TrueTypeFont {
+		static Script decodeScript(ByteStream<StreamOperation::READ>& stream) {
+			Script script{};
+			script.defaultLangSysOffset = stream.read<Offset16>();
+			script.langSysCount = stream.read<uint16>();
+			script.langSysRecords = sequence<LangSysRecord>(script.langSysCount);
+
+			for (LangSysRecord& langSysRecord : script.langSysRecords) {
+				langSysRecord.langSysTag = stream.read<Tag>(true);
+				langSysRecord.langSysOffset = stream.read<Offset16>();
+			}
+
+			return script;
+		}
+
+		static LangSys decodeLangSys(ByteStream<StreamOperation::READ>& stream) {
+			stream.jump(sizeof(LangSys::lookupOrderOffset));
+
+			LangSys langSys{};
+			langSys.requiredFeatureIndex = stream.read<uint16>();
+			langSys.featureIndexCount = stream.read<uint16>();
+			langSys.featureIndices = sequence<uint16>(langSys.featureIndexCount);
+
+			for (uint16& featureIndex : langSys.featureIndices) {
+				featureIndex = stream.read<uint16>();
+			}
+
+			return langSys;
+		}
+
+		static Lookup decodeLookup(ByteStream<StreamOperation::READ>& stream) {
+			Lookup lookup{};
+			lookup.lookupType = static_cast<LookupType>(stream.read<uint16>());
+			lookup.lookupFlag = static_cast<LookupFlag>(stream.read<uint16>());
+			lookup.subtableCount = stream.read<uint16>();
+			lookup.subtableOffsets = sequence<Offset16>(lookup.subtableCount);
+
+			for (Offset16& subtableOffset : lookup.subtableOffsets) {
+				subtableOffset = stream.read<Offset16>();
+			}
+
+			if (lookup.lookupFlag & LookupFlag::USE_MARK_FILTERING_SET) {
+				lookup.markFilteringSet = stream.read<uint16>();
+			}
+
+			return lookup;
+		}
+
+		static Feature decodeFeature(ByteStream<StreamOperation::READ>& stream) {
+			Feature feature{};
+			feature.featureParamsOffset = stream.read<Offset16>();
+			feature.lookupIndexCount = stream.read<uint16>();
+			feature.lookupListIndices = sequence<uint16>(feature.lookupIndexCount);
+
+			for (uint16& lookupListIndex : feature.lookupListIndices) {
+				lookupListIndex = stream.read<uint16>();
+			}
+
+			return feature;
+		}
+
 		static ValueRecord decodeValueRecord(ByteStream<StreamOperation::READ>& stream, ValueFormat valueFormat) {
 			ValueRecord valueRecord{};
 
@@ -164,7 +224,7 @@ namespace Trident {
 
 					break;
 				}
-				case 2: {
+				/* case 2: {
 					pairPosSubtable.pairPosFormat2.classDef1Offset = stream.read<Offset16>();
 					pairPosSubtable.pairPosFormat2.classDef2Offset = stream.read<Offset16>();
 					pairPosSubtable.pairPosFormat2.class1Count = stream.read<uint16>();
@@ -189,9 +249,9 @@ namespace Trident {
 					classDef2 = decodeClassDef(stream);
 
 					break;
-				}
+				} */
 				default: {
-					ENGINE_ASSERT(false, "Unsupported PairPos format.");
+					ENGINE_WARNING("Encountered unsupported TTF PairPos format ([]).", pairPosSubtable.format);
 
 					break;
 				}
@@ -240,25 +300,30 @@ namespace Trident {
 				case 1: {
 					switch (coverage.format) {
 						case 1: {
-							for (const uint16 firstGlyph : coverage.coverageFormat1.glyphArray) {
-								for (const PairSet& pairSet : pairSets) {
-									for (const PairValue& pairValue : pairSet.pairValueRecords) {
-										insertKerningPair(firstGlyph, pairValue, file);
-									}
+							uint16 coverageIndex = 0;
+
+							while (coverageIndex < coverage.coverageFormat1.glyphCount) {
+								const uint16 firstGlyph = coverage.coverageFormat1.glyphArray[coverageIndex];
+								const PairSet& pairSet = pairSets[coverageIndex];
+
+								for (const PairValue& pairValue : pairSet.pairValueRecords) {
+									insertKerningPair(firstGlyph, pairValue, file);
 								}
+
+								coverageIndex += 1;
 							}
 
 							break;
 						}
 						case 2: {
 							for (const RangeRecord& rangeRecord : coverage.coverageFormat2.rangeRecords) {
+								const PairSet& pairSet = pairSets[rangeRecord.startCoverageIndex];
+
 								uint16 firstGlyph = rangeRecord.startGlyphID;
 
 								while (firstGlyph <= rangeRecord.endGlyphID) {
-									for (const PairSet& pairSet : pairSets) {
-										for (const PairValue& pairValue : pairSet.pairValueRecords) {
-											insertKerningPair(firstGlyph, pairValue, file);
-										}
+									for (const PairValue& pairValue : pairSet.pairValueRecords) {
+										insertKerningPair(firstGlyph, pairValue, file);
 									}
 
 									firstGlyph += 1;
@@ -274,7 +339,7 @@ namespace Trident {
 
 					break;
 				}
-				case 2: {
+				/* case 2: {
 					switch (classDef1.format) {
 						case 1: {
 							uint16 firstGlyphOffset = 0;
@@ -411,7 +476,7 @@ namespace Trident {
 					}
 
 					break;
-				}
+				} */
 				default: {
 					break;
 				}
@@ -455,6 +520,103 @@ namespace Trident {
 			}
 		}
 
+		static void applyDefaultLangSys(
+			ByteStream<StreamOperation::READ>& stream,
+			uint32 tableOffset,
+			const GPOS& gpos,
+			const ScriptList& scriptList,
+			const LookupList& lookupList,
+			const FeatureList& featureList,
+			File<FileFormat::TTF>& file
+		) {
+			uint16 scriptIndex = 0;
+
+			while (scriptIndex < scriptList.scriptCount) {
+				const ScriptRecord& scriptRecord = scriptList.scriptRecords[scriptIndex];
+
+				if (scriptRecord.scriptTag == STRING_TO_LITTLE_ENDIAN_UINT32("DFLT")) {
+					break;
+				}
+
+				scriptIndex += 1;
+			}
+
+			const ScriptRecord& scriptRecord = scriptList.scriptRecords[scriptIndex];
+
+			stream.seek(tableOffset + gpos.scriptListOffset + scriptRecord.scriptOffset);
+
+			const Script script = decodeScript(stream);
+
+			stream.seek(tableOffset + gpos.scriptListOffset + scriptRecord.scriptOffset + script.defaultLangSysOffset);
+
+			const LangSys defaultLangSys = decodeLangSys(stream);
+
+			uint16 featureIndex;
+			uint16 featureIndexIndex = 0;
+
+			while (featureIndexIndex < defaultLangSys.featureIndexCount) {
+				featureIndex = defaultLangSys.featureIndices[featureIndexIndex];
+
+				const FeatureRecord& featureRecord = featureList.featureRecords[featureIndex];
+
+				if (featureRecord.featureTag == STRING_TO_LITTLE_ENDIAN_UINT32("kern")) {
+					break;
+				}
+
+				featureIndexIndex += 1;
+			}
+
+			const FeatureRecord& featureRecord = featureList.featureRecords[featureIndex];
+
+			stream.seek(tableOffset + gpos.featureListOffset + featureRecord.featureOffset);
+
+			const Feature feature = decodeFeature(stream);
+
+			for (const uint16 lookupIndex : feature.lookupListIndices) {
+				const Offset16 lookupOffset = lookupList.lookupOffsets[lookupIndex];
+				const uint64 offset = tableOffset + gpos.lookupListOffset + lookupOffset;
+
+				stream.seek(offset);
+
+				const Lookup lookup = decodeLookup(stream);
+
+				switch (lookup.lookupType) {
+					case LookupType::SINGLE_ADJUSTMENT: {
+						for (const Offset16 subtableOffset : lookup.subtableOffsets) {
+							stream.seek(offset + subtableOffset);
+
+							decodeSinglePosSubtable(stream);
+						}
+
+						break;
+					}
+					case LookupType::PAIR_ADJUSTMENT: {
+						for (const Offset16 subtableOffset : lookup.subtableOffsets) {
+							stream.seek(offset + subtableOffset);
+
+							decodePairPosSubtable(stream, file);
+						}
+
+						break;
+					}
+					case LookupType::POSITIONING_EXTENSION: {
+						for (const Offset16 subtableOffset : lookup.subtableOffsets) {
+							stream.seek(offset + subtableOffset);
+
+							decodePosExtensionSubtable(stream, file);
+						}
+
+						break;
+					}
+					default: {
+						ENGINE_WARNING("Encountered unsupported TTF lookup type ([]).", lookup.lookupType);
+
+						break;
+					}
+				}
+			}
+		}
+
 		void decodeGPOSTable(ByteStream<StreamOperation::READ>& stream, const std::unordered_map<uint32, uint32>& tableOffsetMap, File<FileFormat::TTF>& file) {
 			const std::unordered_map<uint32, uint32>::const_iterator tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("GPOS"));
 
@@ -473,7 +635,6 @@ namespace Trident {
 				gpos.featureVariationOffset = stream.read<Offset32>();
 			}
 
-			// TODO(filesystem/ttf/gpos/script): Should scripts be decoded along with features and lookups?
 			stream.seek(tableOffset->second + gpos.scriptListOffset);
 
 			ScriptList scriptList{};
@@ -485,45 +646,6 @@ namespace Trident {
 				scriptRecord.scriptOffset = stream.read<Offset16>();
 			}
 
-			sequence<Script> scripts(scriptList.scriptCount);
-
-			// Parse scripts.
-			{
-				uint16 scriptIndex = 0;
-
-				while (scriptIndex < scriptList.scriptCount) {
-					const ScriptRecord& scriptRecord = scriptList.scriptRecords[scriptIndex];
-
-					stream.seek(tableOffset->second + gpos.scriptListOffset + scriptRecord.scriptOffset);
-
-					Script& script = scripts[scriptIndex];
-					script.defaultLangSysOffset = stream.read<Offset16>();
-					script.langSysCount = stream.read<uint16>();
-					script.langSysRecords = sequence<LangSysRecord>(script.langSysCount);
-
-					for (LangSysRecord& langSysRecord : script.langSysRecords) {
-						langSysRecord.langSysTag = stream.read<Tag>(true);
-						langSysRecord.langSysOffset = stream.read<Offset16>();
-					}
-
-					for (const LangSysRecord& langSysRecord : script.langSysRecords) {
-						stream.seek(tableOffset->second + gpos.scriptListOffset + scriptRecord.scriptOffset + langSysRecord.langSysOffset);
-						stream.jump(sizeof(LangSys::lookupOrderOffset));
-
-						LangSys langSys{};
-						langSys.requiredFeatureIndex = stream.read<uint16>();
-						langSys.featureIndexCount = stream.read<uint16>();
-						langSys.featureIndices = sequence<uint16>(langSys.featureIndexCount);
-
-						for (uint16& featureIndex : langSys.featureIndices) {
-							featureIndex = stream.read<uint16>();
-						}
-					}
-
-					scriptIndex += 1;
-				}
-			}
-
 			stream.seek(tableOffset->second + gpos.lookupListOffset);
 
 			LookupList lookupList{};
@@ -532,35 +654,6 @@ namespace Trident {
 
 			for (Offset16& lookupOffset : lookupList.lookupOffsets) {
 				lookupOffset = stream.read<Offset16>();
-			}
-
-			sequence<Lookup> lookups(lookupList.lookupCount);
-
-			// Parse lookups.
-			{
-				uint16 lookupIndex = 0;
-
-				while (lookupIndex < lookupList.lookupCount) {
-					const Offset16 lookupOffset = lookupList.lookupOffsets[lookupIndex];
-
-					stream.seek(tableOffset->second + gpos.lookupListOffset + lookupOffset);
-
-					Lookup& lookup = lookups[lookupIndex];
-					lookup.lookupType = static_cast<LookupType>(stream.read<uint16>());
-					lookup.lookupFlag = static_cast<LookupFlag>(stream.read<uint16>());
-					lookup.subtableCount = stream.read<uint16>();
-					lookup.subtableOffsets = sequence<Offset16>(lookup.subtableCount);
-
-					for (Offset16& subtableOffset : lookup.subtableOffsets) {
-						subtableOffset = stream.read<Offset16>();
-					}
-
-					if (lookup.lookupFlag & LookupFlag::USE_MARK_FILTERING_SET) {
-						lookup.markFilteringSet = stream.read<uint16>();
-					}
-
-					lookupIndex += 1;
-				}
 			}
 
 			stream.seek(tableOffset->second + gpos.featureListOffset);
@@ -574,88 +667,9 @@ namespace Trident {
 				featureRecord.featureOffset = stream.read<Offset16>();
 			}
 
-			sequence<Feature> features(featureList.featureCount);
+			stream.seek(tableOffset->second + gpos.scriptListOffset);
 
-			// Parse features.
-			{
-				uint16 featureIndex = 0;
-
-				while (featureIndex < featureList.featureCount) {
-					const FeatureRecord& featureRecord = featureList.featureRecords[featureIndex];
-
-					stream.seek(tableOffset->second + gpos.featureListOffset + featureRecord.featureOffset);
-
-					Feature& feature = features[featureIndex];
-					feature.featureParamsOffset = stream.read<Offset16>();
-					feature.lookupIndexCount = stream.read<uint16>();
-					feature.lookupListIndices = sequence<uint16>(feature.lookupIndexCount);
-
-					for (uint16& lookupListIndex : feature.lookupListIndices) {
-						lookupListIndex = stream.read<uint16>();
-					}
-
-					featureIndex += 1;
-				}
-			}
-
-			uint16 featureIndex = 0;
-
-			while (featureIndex < featureList.featureCount) {
-				const FeatureRecord& featureRecord = featureList.featureRecords[featureIndex];
-
-				if (featureRecord.featureTag != STRING_TO_LITTLE_ENDIAN_UINT32("kern")) {
-					featureIndex += 1;
-
-					continue;
-				}
-
-				const Feature& feature = features[featureIndex];
-
-				for (const uint16 lookupIndex : feature.lookupListIndices) {
-					const Offset16 lookupOffset = lookupList.lookupOffsets[lookupIndex];
-					const Lookup& lookup = lookups[lookupIndex];
-					const uint32 offset = tableOffset->second + gpos.lookupListOffset + lookupOffset;
-
-					switch (lookup.lookupType) {
-						case LookupType::SINGLE_ADJUSTMENT: {
-							for (const Offset16 subtableOffset : lookup.subtableOffsets) {
-								stream.seek(offset + subtableOffset);
-
-								decodeSinglePosSubtable(stream);
-							}
-
-							break;
-						}
-						case LookupType::PAIR_ADJUSTMENT: {
-							for (const Offset16 subtableOffset : lookup.subtableOffsets) {
-								stream.seek(offset + subtableOffset);
-
-								decodePairPosSubtable(stream, file);
-							}
-
-							break;
-						}
-						case LookupType::POSITIONING_EXTENSION: {
-							for (const Offset16 subtableOffset : lookup.subtableOffsets) {
-								stream.seek(offset + subtableOffset);
-
-								decodePosExtensionSubtable(stream, file);
-							}
-
-							break;
-						}
-
-						// TODO(filesystem/ttf/gpos/lookup-type): Add support for other lookup types.
-						default: {
-							break;
-						}
-					}
-				}
-
-				featureIndex += 1;
-			}
-
-			BREAKPOINT();
+			applyDefaultLangSys(stream, tableOffset->second, gpos, scriptList, lookupList, featureList, file);
 		}
 	}
 }
