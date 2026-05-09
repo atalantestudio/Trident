@@ -17,70 +17,88 @@ namespace Trident {
 		return std::filesystem::path(base.begin(), base.end()) / std::filesystem::path(path.begin(), path.end());
 	}
 
-	ref<FontAsset> AssetLibrary::decodeFontAsset(view<char8> path, ByteStream<StreamOperation::READ>& byteStream) {
+	ref<FontAsset> AssetLibrary::decodeFontAsset(view<char8> path, ByteStream<StreamOperation::READ>& stream) {
 		FontAssetDescriptor fontAssetDescriptor{};
-		fontAssetDescriptor.identifier = byteStream.read<uint32>();
-		fontAssetDescriptor.version = byteStream.read<VersionNumber>();
+		fontAssetDescriptor.identifier = stream.read<uint32>();
+		fontAssetDescriptor.version = stream.read<VersionNumber>();
 
-		const uint32 glyphMapImageAssetIdentifier = byteStream.read<uint32>();
+		const uint32 glyphMapImageAssetIdentifier = stream.read<uint32>();
 
 		fontAssetDescriptor.glyphMapImage = getAsset<ImageAsset>(glyphMapImageAssetIdentifier, path);
 
-		const sint16 ascent = byteStream.read<sint16>();
-		const sint16 descent = byteStream.read<sint16>();
-		const sint16 lineGap = byteStream.read<sint16>();
+		const sint16 ascent = stream.read<sint16>();
+		const sint16 descent = stream.read<sint16>();
+		const sint16 lineGap = stream.read<sint16>();
 
 		fontAssetDescriptor.lineHeight = ascent - descent + lineGap;
 
-		byteStream.jump(sizeof(uint16));
+		stream.jump(sizeof(uint16));
 
-		const uint32 glyphCount = byteStream.read<uint32>();
+		const uint32 glyphCount = stream.read<uint32>();
+		const uint32 unicodeEntryCount = stream.read<uint32>();
+		const uint32 kerningPairCount = stream.read<uint32>();
 
 		fontAssetDescriptor.glyphs = sequence<Glyph>(glyphCount);
 
 		for (Glyph& glyph : fontAssetDescriptor.glyphs) {
-			glyph.minCoordinate.x = byteStream.read<float32>();
-			glyph.minCoordinate.y = byteStream.read<float32>();
-			glyph.maxCoordinate.x = byteStream.read<float32>();
-			glyph.maxCoordinate.y = byteStream.read<float32>();
+			glyph.minCoordinate.x = stream.read<float32>();
+			glyph.minCoordinate.y = stream.read<float32>();
+			glyph.maxCoordinate.x = stream.read<float32>();
+			glyph.maxCoordinate.y = stream.read<float32>();
 			glyph.whitespace = glyph.minCoordinate.x == glyph.maxCoordinate.x && glyph.minCoordinate.y == glyph.maxCoordinate.y;
 		}
 
 		for (Glyph& glyph : fontAssetDescriptor.glyphs) {
-			glyph.width = byteStream.read<uint16>();
+			glyph.width = stream.read<uint16>();
 		}
 
 		for (Glyph& glyph : fontAssetDescriptor.glyphs) {
-			glyph.advanceWidth = byteStream.read<uint16>();
+			glyph.advanceWidth = stream.read<uint16>();
 		}
 
 		for (Glyph& glyph : fontAssetDescriptor.glyphs) {
-			glyph.height = byteStream.read<uint16>();
+			glyph.height = stream.read<uint16>();
 		}
 
 		for (Glyph& glyph : fontAssetDescriptor.glyphs) {
-			glyph.leftSideBearing = byteStream.read<sint16>();
+			glyph.leftSideBearing = stream.read<sint16>();
 		}
 
 		for (Glyph& glyph : fontAssetDescriptor.glyphs) {
-			glyph.topSideBearing = byteStream.read<sint16>();
+			glyph.topSideBearing = stream.read<sint16>();
 		}
 
-		const uint64 unicodeMapOffset = byteStream.getByteOffset();
-		const uint64 unicodeMapSize = byteStream.getRemainingSize() / (sizeof(uint16) + sizeof(uint32));
+		ByteStream<StreamOperation::READ> keyStream(stream.getBytePosition(), stream.getRemainingSize(), stream.getEndianness());
+		ByteStream<StreamOperation::READ> valueStream(stream.getBytePosition(), stream.getRemainingSize(), stream.getEndianness());
 
-		fontAssetDescriptor.unicodeMap.reserve(unicodeMapSize);
+		valueStream.jump(unicodeEntryCount * sizeof(uint16));
 
-		for (uint64 unicodeEntryIndex = 0; unicodeEntryIndex < unicodeMapSize; unicodeEntryIndex += 1) {
-			byteStream.seek(unicodeMapOffset + unicodeMapSize * sizeof(uint16) + unicodeEntryIndex * sizeof(uint32));
+		fontAssetDescriptor.unicodeMap.reserve(unicodeEntryCount);
 
-			const uint32 glyphIndex = byteStream.peek<uint32>();
+		uint16 entryIndex = 0;
 
-			byteStream.seek(unicodeMapOffset + unicodeEntryIndex * sizeof(uint16));
-
-			const uint16 codePoint = byteStream.read<uint16>();
+		while (entryIndex < unicodeEntryCount) {
+			const uint16 codePoint = keyStream.read<uint16>();
+			const uint32 glyphIndex = valueStream.read<uint32>();
 
 			fontAssetDescriptor.unicodeMap.insert({codePoint, glyphIndex});
+
+			entryIndex += 1;
+		}
+
+		fontAssetDescriptor.kerningPairs.reserve(kerningPairCount);
+
+		entryIndex = 0;
+
+		while (entryIndex < kerningPairCount) {
+			const uint16 firstGlyphIndex = keyStream.read<uint16>();
+			const uint16 secondGlyphIndex = keyStream.read<uint16>();
+			const GlyphPair glyphPair = {firstGlyphIndex, secondGlyphIndex};
+			const uint32 firstGlyphXAdvance = valueStream.read<sint16>();
+
+			fontAssetDescriptor.kerningPairs.insert({glyphPair, firstGlyphXAdvance});
+
+			entryIndex += 1;
 		}
 
 		return createRef<FontAsset>(fontAssetDescriptor);

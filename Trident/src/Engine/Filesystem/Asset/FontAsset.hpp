@@ -12,9 +12,8 @@ namespace Trident {
 		sint32 lineHeight;
 		sequence<Glyph> glyphs;
 		std::unordered_map<uint16, uint32> unicodeMap;
+		std::unordered_map<GlyphPair, sint16> kerningPairs;
 	};
-
-	// TODO: FontAssetHeader structure.
 
 	class FontAsset : public Asset {
 		public:
@@ -23,7 +22,8 @@ namespace Trident {
 				glyphMapImage(descriptor.glyphMapImage),
 				lineHeight(descriptor.lineHeight),
 				glyphs(descriptor.glyphs),
-				unicodeMap(descriptor.unicodeMap)
+				unicodeMap(descriptor.unicodeMap),
+				kerningPairs(descriptor.kerningPairs)
 			{}
 
 			ref<ImageAsset> getGlyphMapImage() const {
@@ -64,7 +64,10 @@ namespace Trident {
 			sint32 lineHeight;
 			sequence<Glyph> glyphs;
 
-			// <code point, glyph index>
+			/// Layout: <code point, glyph index>
 			std::unordered_map<uint16, uint32> unicodeMap;
+
+			/// Layout: <glyph index pair, first glyph X advance>
+			std::unordered_map<GlyphPair, sint16> kerningPairs;
 	};
 }

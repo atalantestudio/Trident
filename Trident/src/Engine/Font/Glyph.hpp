@@ -30,4 +30,20 @@ namespace Trident {
 		// Spaces, tabs, etc.
 		bool whitespace;
 	};
+
+	struct GlyphPair {
+		uint16 firstGlyph;
+		uint16 secondGlyph;
+
+		bool operator==(GlyphPair other) const {
+			return *pointer_cast<const uint32*>(this) == *pointer_cast<const uint32*>(&other);
+		}
+	};
 }
+
+template<>
+struct std::hash<Trident::GlyphPair> {
+	std::size_t operator()(Trident::GlyphPair key) const {
+		return *pointer_cast<const Trident::uint32*>(&key);
+	}
+};

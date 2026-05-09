@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/Filesystem/File.hpp"
+#include "Engine/Font/Glyph.hpp"
 
 #include "File/TTF/Types.hpp"
 #include "File/TTF/GPOS.hpp"
@@ -80,28 +81,7 @@ namespace Trident {
 			float32 n = 0.0f;
 		};
 	}
-
-	struct GlyphPair {
-		uint16 firstGlyph;
-		uint16 secondGlyph;
-
-		bool operator==(GlyphPair other) const {
-			return *pointer_cast<const uint32*>(this) == *pointer_cast<const uint32*>(&other);
-		}
-	};
-
-	struct KerningPair {
-		sint16 firstXAdvance;
-		sint16 secondXAdvance;
-	};
 }
-
-template<>
-struct std::hash<Trident::GlyphPair> {
-	std::size_t operator()(Trident::GlyphPair key) const {
-		return *pointer_cast<const Trident::uint32*>(&key);
-	}
-};
 
 namespace Trident {
 	template<>
@@ -111,9 +91,8 @@ namespace Trident {
 		sequence<TrueTypeFont::longHorMetric> hMetrics;
 		sequence<TrueTypeFont::FWord> leftSideBearings;
 
-		/// The key is laid out as [First glyph index, second glyph index]
-		/// and the value is laid out as [First glyph X advance, second glyph X advance].
-		std::unordered_map<GlyphPair, KerningPair> kerningPairs;
+		/// The value is the X advance of the first glyph.
+		std::unordered_map<GlyphPair, sint16> kerningPairs;
 
 		TrueTypeFont::FWord ascent;
 		TrueTypeFont::FWord descent;

@@ -160,22 +160,18 @@ namespace Trident {
 
 		static void insertKerningPair(uint16 firstGlyph, const PairValue& pairValue, File<FileFormat::TTF>& file) {
 			const GlyphPair glyphPair = {firstGlyph, pairValue.secondGlyph};
-			const KerningPair kerningPair = {pairValue.valueRecord1.xAdvance, pairValue.valueRecord2.xAdvance};
 
-			// TODO(debug)
 			DEBUG_ASSERT(file.kerningPairs.find(glyphPair) == file.kerningPairs.end());
 
-			file.kerningPairs.insert({glyphPair, kerningPair});
+			file.kerningPairs.insert({glyphPair, pairValue.valueRecord1.xAdvance});
 		}
 
 		static void insertKerningPair(uint16 firstGlyph, uint16 secondGlyph, const Class2& class2, File<FileFormat::TTF>& file) {
 			const GlyphPair glyphPair = {firstGlyph, secondGlyph};
-			const KerningPair kerningPair = {class2.valueRecord1.xAdvance, class2.valueRecord2.xAdvance};
 
-			// TODO(debug)
 			DEBUG_ASSERT(file.kerningPairs.find(glyphPair) == file.kerningPairs.end());
 
-			file.kerningPairs.insert({glyphPair, kerningPair});
+			file.kerningPairs.insert({glyphPair, class2.valueRecord1.xAdvance});
 		}
 
 		static void decodePairPosSubtable(ByteStream<StreamOperation::READ>& stream, File<FileFormat::TTF>& file) {

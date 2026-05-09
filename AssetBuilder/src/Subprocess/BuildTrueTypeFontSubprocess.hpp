@@ -54,12 +54,16 @@ namespace Trident {
 				fontAssetDescriptor.lineHeight = file.ascent - file.descent + file.lineGap;
 				fontAssetDescriptor.glyphs = sdfGlyphMap.glyphs;
 				fontAssetDescriptor.unicodeMap = file.unicodeMap;
+				fontAssetDescriptor.kerningPairs = file.kerningPairs;
 
 				const uint32 glyphCount = static_cast<uint32>(fontAssetDescriptor.glyphs.count());
+				const uint32 unicodeEntryCount = static_cast<uint32>(fontAssetDescriptor.unicodeMap.size());
+				const uint32 kerningPairCount = static_cast<uint32>(fontAssetDescriptor.kerningPairs.size());
 				const uint64 outputSize =
-					sizeof(uint32) * 7 +
+					sizeof(uint32) * 9 +
 					(sizeof(svec2<float32>) * 2 + sizeof(uint16) * 3 + sizeof(sint16) * 2) * glyphCount +
-					(sizeof(uint16) + sizeof(uint32)) * file.unicodeMap.size();
+					(sizeof(uint16) + sizeof(uint32)) * file.unicodeMap.size() +
+					(sizeof(GlyphPair) + sizeof(sint16)) * file.kerningPairs.size();
 
 				ByteStream<StreamOperation::WRITE> outputByteStream(outputSize, Endianness::LITTLE_ENDIAN);
 				outputByteStream.write<AssetSignature>(AssetSignature::FONT);
@@ -71,6 +75,8 @@ namespace Trident {
 				outputByteStream.write<sint16>(file.lineGap);
 				outputByteStream.jump(sizeof(uint16));
 				outputByteStream.write<uint32>(glyphCount);
+				outputByteStream.write<uint32>(unicodeEntryCount);
+				outputByteStream.write<uint32>(kerningPairCount);
 
 				for (const Glyph& glyph : fontAssetDescriptor.glyphs) {
 					outputByteStream.write<float32>(glyph.minCoordinate.x);
@@ -105,6 +111,15 @@ namespace Trident {
 
 				for (const std::pair<uint16, uint32> unicodeEntry : file.unicodeMap) {
 					outputByteStream.write<uint32>(unicodeEntry.second);
+				}
+
+				for (const std::pair<GlyphPair, sint16> kerningPair : file.kerningPairs) {
+					outputByteStream.write<uint16>(kerningPair.first.firstGlyph);
+					outputByteStream.write<uint16>(kerningPair.first.secondGlyph);
+				}
+
+				for (const std::pair<GlyphPair, sint16> kerningPair : file.kerningPairs) {
+					outputByteStream.write<sint16>(kerningPair.second);
 				}
 
 				const std::string stem = directoryEntry.path().stem().string();
