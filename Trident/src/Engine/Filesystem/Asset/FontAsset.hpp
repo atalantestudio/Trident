@@ -10,6 +10,7 @@ namespace Trident {
 	struct FontAssetDescriptor : public AssetDescriptor {
 		ref<ImageAsset> glyphMapImage;
 		sint32 lineHeight;
+		uint16 unitsPerEm;
 		sequence<Glyph> glyphs;
 		std::unordered_map<uint16, uint32> unicodeMap;
 		std::unordered_map<GlyphPair, sint16> kerningPairs;
@@ -36,6 +37,13 @@ namespace Trident {
 
 			const sequence<Glyph>& getGlyphs() const {
 				return glyphs;
+			}
+
+			/// See https://developer.apple.com/fonts/TrueType-Reference-Manual/RM02/Chap2.html#converting.
+			float32 calculateScale(float32 pointSize, uint32 devicePixelRatio) const {
+				static constexpr uint32 GRID_SIZE = 4096;
+
+				return pointSize * devicePixelRatio / (72 * GRID_SIZE);
 			}
 
 			uint32 getGlyphCount() const {

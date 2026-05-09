@@ -86,6 +86,7 @@ namespace Trident {
 namespace Trident {
 	template<>
 	struct File<FileFormat::TTF> {
+		uint16 unitsPerEm;
 		std::unordered_map<uint16, uint32> unicodeMap;
 		sequence<TrueTypeFont::Glyph> glyphs;
 		sequence<TrueTypeFont::longHorMetric> hMetrics;

@@ -222,11 +222,17 @@ namespace Trident {
 					fontAssetDescriptor.unicodeMap.insert({static_cast<uint16>(codePoint), glyphIndex});
 				}
 
+				// TODO: Determine correct value for non-TTF fonts.
+				static constexpr uint16 UNITS_PER_EM = 1000;
+
 				const uint32 glyphCount = static_cast<uint32>(fontAssetDescriptor.glyphs.count());
+				const uint32 unicodeEntryCount = static_cast<uint32>(fontAssetDescriptor.unicodeMap.size());
+				const uint32 kerningPairCount = static_cast<uint32>(fontAssetDescriptor.kerningPairs.size());
 				const uint64 outputSize =
-					sizeof(uint32) * 7 +
+					sizeof(AssetSignature) + sizeof(VersionNumber) + sizeof(uint32) * 5 + sizeof(sint16) * 3 + sizeof(uint16) +
 					(sizeof(svec2<float32>) * 2 + sizeof(uint16) * 3 + sizeof(sint16) * 2) * glyphCount +
-					(sizeof(uint16) + sizeof(uint32)) * fontAssetDescriptor.unicodeMap.size();
+					(sizeof(uint16) + sizeof(uint32)) * fontAssetDescriptor.unicodeMap.size() +
+					(sizeof(GlyphPair) + sizeof(sint16)) * fontAssetDescriptor.kerningPairs.size();
 
 				ByteStream<StreamOperation::WRITE> outputByteStream(outputSize, Endianness::LITTLE_ENDIAN);
 				outputByteStream.write<AssetSignature>(AssetSignature::FONT);
@@ -236,8 +242,10 @@ namespace Trident {
 				outputByteStream.write<sint16>(ASCENT);
 				outputByteStream.write<sint16>(DESCENT);
 				outputByteStream.write<sint16>(LINE_GAP);
-				outputByteStream.jump(sizeof(uint16));
+				outputByteStream.write<uint16>(UNITS_PER_EM);
 				outputByteStream.write<uint32>(glyphCount);
+				outputByteStream.write<uint32>(unicodeEntryCount);
+				outputByteStream.write<uint32>(kerningPairCount);
 
 				for (const Glyph& glyph : fontAssetDescriptor.glyphs) {
 					outputByteStream.write<float32>(glyph.minCoordinate.x);

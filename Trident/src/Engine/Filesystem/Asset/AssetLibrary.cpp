@@ -31,8 +31,7 @@ namespace Trident {
 		const sint16 lineGap = stream.read<sint16>();
 
 		fontAssetDescriptor.lineHeight = ascent - descent + lineGap;
-
-		stream.jump(sizeof(uint16));
+		fontAssetDescriptor.unitsPerEm = stream.read<uint16>();
 
 		const uint32 glyphCount = stream.read<uint32>();
 		const uint32 unicodeEntryCount = stream.read<uint32>();

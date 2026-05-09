@@ -477,9 +477,13 @@ namespace Trident {
 		// - https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6head.html
 		stream.jump(sizeof(uint32)); // checkSumAdjustment
 
-		const uint32 magicNumber = stream.peek<uint32>();
+		const uint32 magicNumber = stream.read<uint32>();
 
 		ENGINE_ASSERT(magicNumber == 0x5f0f3cf5, "Invalid TTF magic.");
+
+		stream.jump(sizeof(uint16));
+
+		file.unitsPerEm = stream.peek<uint16>();
 
 		stream.seek(tableOffset->second + 50);
 

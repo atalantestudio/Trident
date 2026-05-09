@@ -52,6 +52,7 @@ namespace Trident {
 				fontAssetDescriptor.version = {1, 0, 0};
 				fontAssetDescriptor.glyphMapImage = nullptr;
 				fontAssetDescriptor.lineHeight = file.ascent - file.descent + file.lineGap;
+				fontAssetDescriptor.unitsPerEm = file.unitsPerEm;
 				fontAssetDescriptor.glyphs = sdfGlyphMap.glyphs;
 				fontAssetDescriptor.unicodeMap = file.unicodeMap;
 				fontAssetDescriptor.kerningPairs = file.kerningPairs;
@@ -60,7 +61,7 @@ namespace Trident {
 				const uint32 unicodeEntryCount = static_cast<uint32>(fontAssetDescriptor.unicodeMap.size());
 				const uint32 kerningPairCount = static_cast<uint32>(fontAssetDescriptor.kerningPairs.size());
 				const uint64 outputSize =
-					sizeof(uint32) * 9 +
+					sizeof(AssetSignature) + sizeof(VersionNumber) + sizeof(uint32) * 5 + sizeof(sint16) * 3 + sizeof(uint16) +
 					(sizeof(svec2<float32>) * 2 + sizeof(uint16) * 3 + sizeof(sint16) * 2) * glyphCount +
 					(sizeof(uint16) + sizeof(uint32)) * file.unicodeMap.size() +
 					(sizeof(GlyphPair) + sizeof(sint16)) * file.kerningPairs.size();
@@ -73,7 +74,7 @@ namespace Trident {
 				outputByteStream.write<sint16>(file.ascent);
 				outputByteStream.write<sint16>(file.descent);
 				outputByteStream.write<sint16>(file.lineGap);
-				outputByteStream.jump(sizeof(uint16));
+				outputByteStream.write<uint16>(file.unitsPerEm);
 				outputByteStream.write<uint32>(glyphCount);
 				outputByteStream.write<uint32>(unicodeEntryCount);
 				outputByteStream.write<uint32>(kerningPairCount);
