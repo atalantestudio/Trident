@@ -19,6 +19,7 @@
 #include "GUI/MenuBar.hpp"
 #include "GUI/OptionMenu.hpp"
 #include "GUI/PageMenu.hpp"
+#include "GUI/PropertyPanel.hpp"
 #include "GUI/Sample.hpp"
 #include "GUI/Test.hpp"
 #include "GUI/Text.hpp"
@@ -82,6 +83,9 @@ namespace Trident {
 			}
 			else if (SampleNameProperty == "Launch") {
 				registerLayer<GUILaunchLayer>();
+			}
+			else if (SampleNameProperty == "PropertyPanel") {
+				registerLayer<GUIPropertyPanelLayer>();
 			}
 			else if (SampleNameProperty == "MenuBar") {
 				registerLayer<GUIMenuBarLayer>();

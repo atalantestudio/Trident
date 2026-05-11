@@ -16,7 +16,9 @@ namespace Trident {
 		/// Offset from the origin (for floating components only).
 		svec2<float32> offset = {0_px, 0_px};
 
-		Size2D size;
+		/// The default sizing mode is FIT in both directions.
+		Size2D size = {-2.0f, -2.0f};
+
 		svec2<float32> maximumSize = {max<float32>(), max<float32>()};
 		svec2<float32> minimumSize = {0_px, 0_px};
 		uint32 zIndex = 0;

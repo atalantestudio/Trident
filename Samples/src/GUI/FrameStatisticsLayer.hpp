@@ -47,7 +47,7 @@ namespace Trident {
 				Text(getApplication()->getLayerCompositor()->physicalDevice->getName(), {
 					.color = 0x76b900ff,
 					.font = fontRegular,
-					.fontSize = 18_px,
+					.fontSize = 14.2_px,
 				});
 			}
 
@@ -55,7 +55,7 @@ namespace Trident {
 				Text(toString(getApplication()->getLayerCompositor()->adapter->getApi()), {
 					.color = 0x777777ff,
 					.font = fontRegular,
-					.fontSize = 18_px,
+					.fontSize = 14.2_px,
 				});
 			}
 
@@ -65,7 +65,7 @@ namespace Trident {
 				Text(string, {
 					.color = 0xffffffff,
 					.font = fontRegular,
-					.fontSize = 18_px,
+					.fontSize = 14.2_px,
 				});
 			}
 

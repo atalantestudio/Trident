@@ -140,7 +140,7 @@ namespace Trident {
 				// glyphSubcomponent.a = a;
 				// glyphSubcomponent.b = b;
 
-				const vec2<float32> origin = {component.origin.x, component.origin.y};
+				const vec2<float32> origin = {component.origin.x + 0.5f, component.origin.y + 0.5f};
 
 				for (const TextCharacter& textCharacter : component.characters) {
 					glyphSubcomponent.world =
@@ -152,7 +152,7 @@ namespace Trident {
 				}
 			}
 			else {
-				const vec2<float32> decimalOrigin = {component.origin[0], component.origin[1]};
+				const vec2<float32> decimalOrigin = {component.origin.x, round(component.origin.y)};
 				const vec2<float32> decimalSize = {component.size.width.value, component.size.height.value};
 				const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(component.image);
 
