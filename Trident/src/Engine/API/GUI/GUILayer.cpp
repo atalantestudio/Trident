@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Engine/API/Event/EventDispatcher.hpp"
+#include "Engine/API/GUI/AdjustPositions.hpp"
 #include "Engine/API/GUI/AdjustSizing.hpp"
 #include "Engine/API/GUI/GUILayer.hpp"
 #include "Engine/API/GUI/Text.hpp"
@@ -108,7 +109,33 @@ namespace Trident {
 
 		renderer.clearColor = rootColor;
 
-		openRootContainer();
+		const Extent2D extent = getApplication()->getWindow()->getExtent();
+
+		GUIContainer rootComponent{};
+		rootComponent.type = GUIComponentType::DEFAULT;
+		rootComponent.parentIndex = max<uint32>();
+		rootComponent.origin = {0_px, 0_px};
+		rootComponent.size = {static_cast<float32>(extent.width), FIT};
+		rootComponent.zIndex = 0;
+		rootComponent.maximumSize = {max<float32>(), max<float32>()};
+		rootComponent.minimumSize = {0_px, 0_px};
+		rootComponent.padding = {0_px, 0_px};
+		rootComponent.anchorPoint = AnchorPoint::TOP | AnchorPoint::LEFT;
+		rootComponent.layoutDirection = LayoutDirection::VERTICAL;
+		rootComponent.layoutOffset = 0_px;
+		rootComponent.layoutSpacing = 0_px;
+		rootComponent.color = 0xffffffff;
+		rootComponent.image = 0;
+		rootComponent.pointerType = PointerType::DEFAULT;
+		rootComponent.textComponent = false;
+		rootComponent.debugName = "__root";
+
+		components[componentCount] = rootComponent;
+		componentCount += 1;
+
+		openContainerIndices[openContainerIndexCount] = 0;
+		openContainerIndexCount += 1;
+
 		render();
 
 		// No other components than root, return.
@@ -116,61 +143,19 @@ namespace Trident {
 			return;
 		}
 
-		closeRootContainer();
+		GrowAndShrinkSizingWidthsRecursive(0);
+		WrapTextChildrenRecursive(0);
 
-		uint32 componentIndex = 1;
+		sint32 componentIndex = static_cast<sint32>(componentCount) - 1;
 
-		while (componentIndex < componentCount) {
-			const GUIContainer& component = components[componentIndex];
+		while (componentIndex >= 1) {
+			AdjustHeight(componentIndex);
 
-			if (component.color.value[3] == 0.0f) {
-				componentIndex += 1;
-
-				continue;
-			}
-
-			if (component.textComponent) {
-				GUIGlyphSubcomponent glyphSubcomponent{};
-				glyphSubcomponent.color = component.color.value;
-				glyphSubcomponent.zIndex = component.zIndex;
-				glyphSubcomponent.textureArrayLayerIndex = fonts[component.font].glyphMapImageId;
-				glyphSubcomponent.fontSize = component.fontSize;
-
-				// TODO(gui/text-smoothness)
-				// glyphSubcomponent.a = a;
-				// glyphSubcomponent.b = b;
-
-				const vec2<float32> origin = {component.origin.x + 0.5f, component.origin.y + 0.5f};
-
-				for (const TextCharacter& textCharacter : component.characters) {
-					glyphSubcomponent.world =
-						mat3x3<float32>::scaling(textCharacter.size) *
-						mat3x3<float32>::translation(origin + textCharacter.offset);
-					glyphSubcomponent.textureWorld = textCharacter.textureTransform;
-
-					renderer.registerGlyphSubcomponent(glyphSubcomponent);
-				}
-			}
-			else {
-				const vec2<float32> decimalOrigin = {component.origin.x, round(component.origin.y)};
-				const vec2<float32> decimalSize = {component.size.width.value, component.size.height.value};
-				const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(component.image);
-
-				GUISubcomponent subcomponent{};
-				subcomponent.worldTransform = mat3x3<float32>::scaling(decimalSize) * mat3x3<float32>::translation(decimalOrigin);
-				subcomponent.textureTransform = mat3x3<float32>::scaling({
-					static_cast<float32>(imageExtent.width) / renderer.TEXTURE_ARRAY_MAX_WIDTH,
-					static_cast<float32>(imageExtent.height) / renderer.TEXTURE_ARRAY_MAX_HEIGHT,
-				});
-				subcomponent.color = component.color.value;
-				subcomponent.zIndex = component.zIndex;
-				subcomponent.textureArrayLayerIndex = component.image;
-
-				renderer.registerSubcomponent(subcomponent);
-			}
-
-			componentIndex += 1;
+			componentIndex -= 1;
 		}
+
+		GrowAndShrinkSizingHeightsRecursive(0);
+		PositionsAndAlignment(components[0], components[0].origin, true);
 
 		std::copy(&components[0], &components[componentCount], &previousComponents[0]);
 
@@ -192,33 +177,6 @@ namespace Trident {
 		eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
 	}
 
-	void GUILayer::openRootContainer() {
-		const Window* window = getApplication()->getWindow();
-
-		GUIContainer rootComponent{};
-		rootComponent.parentIndex = max<uint32>();
-		rootComponent.origin = {0_px, 0_px};
-		rootComponent.size = {static_cast<float32>(window->getExtent().width), FIT};
-		rootComponent.zIndex = 0;
-		rootComponent.maximumSize = {max<float32>(), max<float32>()};
-		rootComponent.minimumSize = {0_px, 0_px};
-		rootComponent.padding = {0_px, 0_px};
-		rootComponent.anchorPoint = AnchorPoint::TOP | AnchorPoint::LEFT;
-		rootComponent.layoutDirection = LayoutDirection::VERTICAL;
-		rootComponent.layoutSpacing = 0_px;
-		rootComponent.color = 0xffffffff;
-		rootComponent.image = 0;
-		rootComponent.pointerType = PointerType::DEFAULT;
-		rootComponent.textComponent = false;
-		rootComponent.debugName = "__root";
-
-		components[componentCount] = rootComponent;
-		componentCount += 1;
-
-		openContainerIndices[openContainerIndexCount] = 0;
-		openContainerIndexCount += 1;
-	}
-
 	void GUILayer::openContainer(const ContainerStyle& style, bool floating) {
 		const uint32 componentIndex = componentCount;
 		const uint32 parentIndex = openContainerIndices[openContainerIndexCount - 1];
@@ -226,6 +184,7 @@ namespace Trident {
 		GUIContainer& parent = components[parentIndex];
 
 		GUIContainer component{};
+		component.type = GUIComponentType::DEFAULT;
 		component.parentIndex = parentIndex;
 		component.floating = floating;
 		component.origin = parent.origin;
@@ -268,6 +227,96 @@ namespace Trident {
 		component.padding = style.padding;
 		component.anchorPoint = style.anchorPoint;
 		component.layoutDirection = style.layoutDirection;
+		component.layoutOffset = 0_px;
+		component.layoutSpacing = style.layoutSpacing;
+		component.color = style.color;
+		component.image = style.image;
+
+		if (style.pointerType == PointerType::INHERIT) {
+			component.pointerType = parent.pointerType;
+		}
+		else {
+			component.pointerType = style.pointerType;
+		}
+
+		component.textComponent = false;
+		component.debugName = style.debugName;
+
+		parent.childIndices.emplace_back(componentIndex);
+
+		components[componentCount] = component;
+		componentCount += 1;
+
+		openContainerIndices[openContainerIndexCount] = componentIndex;
+		openContainerIndexCount += 1;
+
+		if (previousComponentCount >= componentCount) {
+			const GUIContainer& component = previousComponents[componentCount - 1];
+			const Window* window = getApplication()->getWindow();
+			const sint32* mousePositionInteger = window->getMousePosition();
+			const vec2<float32> mousePosition = {static_cast<float32>(mousePositionInteger[0]), static_cast<float32>(mousePositionInteger[1])};
+
+			if (IsIntersecting(component, mousePosition)) {
+				window->updatePointerType(component.pointerType);
+			}
+		}
+	}
+
+	// TODO(gui): Reuse GUILayer::openContainer.
+	void GUILayer::openVerticalList(const ContainerStyle& style) {
+		ENGINE_ASSERT(style.size.height.fillMode != FillMode::FIT, "FillMode::FIT cannot be used on the height of a vertical list.");
+		ENGINE_ASSERT(style.layoutDirection != LayoutDirection::HORIZONTAL, "Vertical lists must have a vertical layout direction.");
+
+		const uint32 componentIndex = componentCount;
+		const uint32 parentIndex = openContainerIndices[openContainerIndexCount - 1];
+
+		GUIContainer& parent = components[parentIndex];
+
+		GUIContainer component{};
+		component.type = GUIComponentType::VERTICAL_LIST;
+		component.parentIndex = parentIndex;
+		component.floating = false;
+		component.origin = parent.origin;
+		component.offset = style.offset;
+		component.size = style.size;
+		component.zIndex = parent.zIndex + style.zIndex;
+
+		if (component.size.width.fillMode == FillMode::FIXED) {
+			component.maximumSize.x = component.size.width.value;
+			component.minimumSize.x = component.size.width.value;
+		}
+		else {
+			component.maximumSize.x = style.maximumSize.x;
+
+			if (style.minimumSize.x == max<float32>()) {
+				component.minimumSize.x = component.size.width.value;
+			}
+			else {
+				component.minimumSize.x = style.minimumSize.x;
+				component.size.width.value = style.minimumSize.x;
+			}
+		}
+
+		if (component.size.height.fillMode == FillMode::FIXED) {
+			component.maximumSize.y = component.size.height.value;
+			component.minimumSize.y = component.size.height.value;
+		}
+		else {
+			component.maximumSize.y = style.maximumSize.y;
+
+			if (style.minimumSize.y == max<float32>()) {
+				component.minimumSize.y = component.size.height.value;
+			}
+			else {
+				component.minimumSize.y = style.minimumSize.y;
+				component.size.height.value = style.minimumSize.y;
+			}
+		}
+
+		component.padding = style.padding;
+		component.anchorPoint = style.anchorPoint;
+		component.layoutDirection = style.layoutDirection;
+		component.layoutOffset = style.layoutOffset;
 		component.layoutSpacing = style.layoutSpacing;
 		component.color = style.color;
 		component.image = style.image;
@@ -308,24 +357,6 @@ namespace Trident {
 		const uint32 componentIndex = openContainerIndices[openContainerIndexCount - 1];
 
 		AdjustWidth(componentIndex);
-
-		openContainerIndexCount -= 1;
-	}
-
-	void GUILayer::closeRootContainer() {
-		GrowAndShrinkSizingWidthsRecursive(0);
-		WrapTextChildrenRecursive(0);
-
-		sint32 componentIndex = static_cast<sint32>(componentCount) - 1;
-
-		while (componentIndex >= 1) {
-			AdjustHeight(componentIndex);
-
-			componentIndex -= 1;
-		}
-
-		GrowAndShrinkSizingHeightsRecursive(0);
-		PositionsAndAlignment(components[0], components[0].origin);
 
 		openContainerIndexCount -= 1;
 	}

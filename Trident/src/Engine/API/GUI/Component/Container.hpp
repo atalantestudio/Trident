@@ -11,15 +11,23 @@
 #include "Engine/API/Window/PointerType.hpp"
 
 namespace Trident {
+	enum class GUIComponentType : uint8 {
+		DEFAULT,
+		VERTICAL_LIST,
+	};
+
 	struct TextCharacter {
-		// Character position relative to the component's origin.
+		/// Character position relative to the component's origin.
 		vec2<float32> offset;
 
 		vec2<float32> size;
-		mat3x3<float32> textureTransform;
+		vec2<float32> startTextureCoordinate;
+		vec2<float32> endTextureCoordinate;
 	};
 
 	struct GUIContainer {
+		GUIComponentType type;
+
 		uint32 parentIndex;
 
 		/// Floating components don't add to the size of their parent.
@@ -46,6 +54,7 @@ namespace Trident {
 		// Exclusive to non-text components.
 		AnchorPoint anchorPoint;
 		LayoutDirection layoutDirection = LayoutDirection::HORIZONTAL;
+		float32 layoutOffset;
 		float32 layoutSpacing;
 		ImageID image;
 

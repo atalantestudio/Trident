@@ -58,6 +58,8 @@ namespace Trident {
 			ImageID loadImageAsset(view<char8> assetName);
 
 			void openContainer(const ContainerStyle& style, bool floating);
+			void openVerticalList(const ContainerStyle& style);
+
 			void closeContainer();
 
 			void Text(view<char8> text, const TextStyle& style);
@@ -83,8 +85,7 @@ namespace Trident {
 			vec2<float32> getMousePosition() const;
 
 		private:
-			void openRootContainer();
-			void closeRootContainer();
+			bool registerSubcomponent(const GUIContainer& component);
 
 			std::vector<uint32> FilterChildren(const GUIContainer& parent, uint8 axis, FillMode fillMode) const;
 
@@ -96,7 +97,7 @@ namespace Trident {
 			void WrapText(GUIContainer& component);
 			static void FlushCurrentWord(FlushWordData& flushWordData, GUIContainer& component, const UTF8Stream& stream, svec2<float32>& characterOffset, range<uint64, uint64>& wordByteRange);
 			static void FlushWord(FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset);
-			void PositionsAndAlignment(GUIContainer& component, svec2<float32> origin);
+			void PositionsAndAlignment(GUIContainer& component, svec2<float32> origin, bool registerSubcomponents);
 
 			bool onMouseDown(MouseDownEvent& event);
 			bool onMouseUp(MouseUpEvent& event);
@@ -152,6 +153,9 @@ namespace Trident {
 
 	/// Opens a GUI container component.
 	#define Container(...) for (bool _ = (openContainer(__VA_ARGS__, false), true); _; _ = (closeContainer(), false))
+
+	/// Opens a GUI vertical list.
+	#define VerticalList(...) for (bool _ = (openVerticalList(__VA_ARGS__), true); _; _ = (closeContainer(), false))
 
 	/// Opens a floating GUI container component.
 	#define Floating(...) for (bool _ = (openContainer(__VA_ARGS__, true), true); _; _ = (closeContainer(), false))

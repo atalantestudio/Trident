@@ -22,8 +22,38 @@ namespace Trident {
 					.layoutSpacing = 8_px,
 					.color = PRIMARY_COLOR,
 				}) {
-					Button("Light");
+					if (Button("Light")) {
+						verticalListScrollOffset += 10_px;
+					}
+
+					VerticalList({
+						.size = {300_px, 30_px},
+						.padding = {1_px, 1_px},
+						.layoutDirection = LayoutDirection::VERTICAL,
+						.layoutOffset = verticalListScrollOffset,
+						.layoutSpacing = 1_px,
+						.color = SECONDARY_COLOR,
+						.debugName = "VList",
+					}) {
+						for (uint32 i = 0; i < 20; i += 1) {
+							Container({
+								.size = {EXPAND, FIT},
+								.color = TERTIARY_COLOR,
+							}) {
+								const sequence<char8> text = Logger::format("Element []", i);
+
+								Text(text, {
+									.color = TEXT_COLOR,
+									.font = fontRegular,
+									.fontSize = 16_px,
+								});
+							}
+						}
+					}
 				}
 			}
+
+		private:
+			float32 verticalListScrollOffset = 0_px;
 	};
 }

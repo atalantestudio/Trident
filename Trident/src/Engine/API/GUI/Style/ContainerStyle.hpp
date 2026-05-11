@@ -13,7 +13,7 @@ namespace Trident {
 		// TODO(gui/component-id)
 		// GUI::ComponentID id = max<GUI::ComponentID>();
 
-		/// Offset from the origin (for floating components only).
+		/// Offset from the origin (only for floating components).
 		svec2<float32> offset = {0_px, 0_px};
 
 		/// The default sizing mode is FIT in both directions.
@@ -25,6 +25,10 @@ namespace Trident {
 		svec2<float32> padding = {0_px, 0_px};
 		AnchorPoint anchorPoint = AnchorPoint::TOP | AnchorPoint::LEFT;
 		LayoutDirection layoutDirection = HORIZONTAL;
+
+		/// Child offset along the layout axis (only for vertical lists).
+		float32 layoutOffset = 0_px;
+
 		float32 layoutSpacing = 0_px;
 		Color color = 0x00000000;
 		ImageID image = 0;

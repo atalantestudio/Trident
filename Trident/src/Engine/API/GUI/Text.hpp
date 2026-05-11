@@ -271,9 +271,8 @@ namespace Trident {
 			TextCharacter textCharacter{};
 			textCharacter.offset = {x, y};
 			textCharacter.size = {width, height};
-			textCharacter.textureTransform =
-				mat3x3<float32>::scaling((vec2<float32>{endU, endV} - vec2<float32>{startU, startV}) * imageScale) *
-				mat3x3<float32>::translation(vec2<float32>{startU, startV} * imageScale);
+			textCharacter.startTextureCoordinate = vec2<float32>{startU, startV} * imageScale;
+			textCharacter.endTextureCoordinate = vec2<float32>{endU, endV} * imageScale;
 
 			textCharacters.emplace_back(textCharacter);
 
