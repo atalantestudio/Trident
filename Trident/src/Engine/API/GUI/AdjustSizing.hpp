@@ -230,6 +230,11 @@ namespace Trident {
 
 						index -= 1;
 					}
+
+					// TODO(gui/adjust-sizing-hack): Hack to fix infinite loop when sizing text components due to small negative remaining width.
+					if (remainingWidth < 0.0f && remainingWidth > -0.0001f) {
+						break;
+					}
 				}
 			}
 		}
@@ -381,6 +386,11 @@ namespace Trident {
 						}
 
 						index -= 1;
+					}
+
+					// TODO(gui/adjust-sizing-hack): Hack to fix infinite loop when sizing text components due to small negative remaining height.
+					if (remainingHeight < 0.0f && remainingHeight > -0.0001f) {
+						break;
 					}
 				}
 			}

@@ -17,22 +17,40 @@ namespace Trident {
 				Container({
 					.size = {EXPAND, 720_px},
 					.layoutDirection = LayoutDirection::VERTICAL,
-					.color = 0x0a0a0aff,
+					// .color = 0x0a0a0aff,
+					.color = 0xffffffff,
 				}) {
+					Container({
+						.size = {FIT, FIT},
+						.color = 0xff9800ff,
+					}) {
+						Text("Hello World", {
+							.color = 0xde1818ff,
+							.font = fontRegular,
+							// .fontSize = 128_px,
+							// .fontSize = 24_px,
+							.fontSize = 18, // 18pt == 24px
+						});
+					}
+
 					sequence<char8> text;
 
 					/* TODO(gui/text-smoothness)
 					- 16px = (A = 0.15-0.23, B = 0.70-0.64)
 					- 18px = (A = 0.12-0.20, B = 0.70-0.60)
 					- 22px = (A = 0.35, B = 0.58)
+					- 18pt (24px) = (A = 0.4, B = 1.0)
 					- 40px = (A = 0.39, B = 0.58)
 					- 96px = (A = 0.46, B = 0.53)
 					*/
 
 					text = Logger::format("A = []", a);
 
+					// const Color textColor = 0xa5a5a5ff;
+					const Color textColor = 0x000000ff;
+
 					Text(text, {
-						.color = 0xa5a5a5ff,
+						.color = textColor,
 						.font = fontRegular,
 						.fontSize = 16_px,
 					});
@@ -42,32 +60,32 @@ namespace Trident {
 					text = Logger::format("B = []", b);
 
 					Text(text, {
-						.color = 0xa5a5a5ff,
+						.color = textColor,
 						.font = fontRegular,
 						.fontSize = 16_px,
 					});
 
 					RangeControl(300_px, draggingB, offsetB, previousOffsetB, b);
 
-					Text("(18px) The quick brown fox jumps over the lazy dog.", {
-						.color = 0xa5a5a5ff,
+					Text("(12px) The quick brown fox jumps over the lazy dog.", {
+						.color = textColor,
 						.font = fontRegular,
-						.fontSize = 18_px,
+						.fontSize = 12_px,
 					});
 					Text("(18px) The quick brown fox jumps over the lazy dog.", {
-						.color = 0xa5a5a5ff,
+						.color = textColor,
 						.font = fontBold,
 						.fontSize = 18_px,
 					});
-					Text("(18px) The quick brown fox jumps over the lazy dog.", {
-						.color = 0xa5a5a5ff,
+					Text("(30px) The quick brown fox jumps over the lazy dog.", {
+						.color = textColor,
 						.font = fontRegularItalic,
-						.fontSize = 18_px,
+						.fontSize = 30_px,
 					});
-					Text("(18px) The quick brown fox jumps over the lazy dog.", {
-						.color = 0xa5a5a5ff,
+					Text("(128px) The quick brown fox jumps over the lazy dog.", {
+						.color = textColor,
 						.font = fontBoldItalic,
-						.fontSize = 18_px,
+						.fontSize = 128_px,
 					});
 				}
 			}

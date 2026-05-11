@@ -16,8 +16,8 @@ namespace Trident {
 				byteSize(data.count())
 			{}
 
-			inline const uint8* getData() const {
-				return data;
+			inline view<char8> getData() const {
+				return view<char8>(pointer_cast<const char8*>(data), byteSize);
 			}
 
 			inline uint64 getByteSize() const {

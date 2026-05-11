@@ -91,19 +91,19 @@ namespace Trident {
 				}
 
 				for (const Glyph& glyph : fontAssetDescriptor.glyphs) {
-					outputByteStream.write<uint16>(glyph.advanceWidth);
-				}
-
-				for (const Glyph& glyph : fontAssetDescriptor.glyphs) {
 					outputByteStream.write<uint16>(glyph.height);
 				}
 
 				for (const Glyph& glyph : fontAssetDescriptor.glyphs) {
-					outputByteStream.write<sint16>(glyph.leftSideBearing);
+					outputByteStream.write<sint16>(glyph.yMax);
 				}
 
 				for (const Glyph& glyph : fontAssetDescriptor.glyphs) {
-					outputByteStream.write<sint16>(glyph.topSideBearing);
+					outputByteStream.write<uint16>(glyph.advanceWidth);
+				}
+
+				for (const Glyph& glyph : fontAssetDescriptor.glyphs) {
+					outputByteStream.write<sint16>(glyph.leftSideBearing);
 				}
 
 				for (const std::pair<uint16, uint32> unicodeEntry : file.unicodeMap) {

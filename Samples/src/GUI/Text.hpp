@@ -7,49 +7,62 @@ namespace Trident {
 	class GUITextLayer : public GUILayer {
 		public:
 			void registerAssets() override {
-				listStyle.size = {FIT, FIT};
-				listStyle.padding = {8_px, 0_px};
-				listStyle.layoutDirection = VERTICAL;
-				listStyle.layoutSpacing = 8_px;
-				listStyle.color = 0x000000ff;
-
-				itemStyle.size = {FIT, FIT};
-				itemStyle.anchorPoint = AnchorPoint::VCENTER;
-				itemStyle.layoutDirection = HORIZONTAL;
-				itemStyle.layoutSpacing = 8_px;
-				itemStyle.color = 0x000000ff;
-
-				itemLabelStyle.color = 0xa5a5a5ff;
-				itemLabelStyle.font = loadFontAsset("test-regular-italic");
-				itemLabelStyle.fontSize = 16_px;
-
-				itemTextStyle.color = 0xc2c2c2ff;
-				itemTextStyle.font = loadFontAsset("test-regular");
+				font = loadFontAsset("test-regular");
+				fontItalic = loadFontAsset("test-regular");
 			}
 
 			void render() override {
-				Container(listStyle) {
-					float32 fontSize = 96_px;
-					sequence<char8> text;
+				const Extent2D extent = getApplication()->getWindow()->getExtent();
 
-					while (fontSize > 8_px) {
-						Container(itemStyle) {
-							itemTextStyle.fontSize = fontSize;
-							text = Logger::format("[]px", static_cast<uint32>(fontSize));
+				Container({
+					.size = {static_cast<float32>(extent.width), static_cast<float32>(extent.height)},
+					.layoutDirection = LayoutDirection::VERTICAL,
+					.color = 0xffffffff,
+				}) {
+					float32 fontSize = 30_px;
 
-							Text(text, itemLabelStyle);
-							Text("The quick brown fox jumps over the lazy dog.", itemTextStyle);
-						}
+					while (fontSize >= 10_px) {
+						TextSample("The quick brown fox jumps over the lazy dog.", fontSize);
 
-						fontSize -= 8_px;
+						fontSize -= 1_px;
+					}
+				}
+			}
+
+		protected:
+			void TextSample(view<char8> text, float32 fontSize) {
+				const sequence<char8> label = Logger::format("[]px", static_cast<sint32>(fontSize));
+
+				Container({
+					.size = {FIT, FIT},
+					.anchorPoint = AnchorPoint::VCENTER,
+					.layoutDirection = LayoutDirection::HORIZONTAL,
+				}) {
+					Container({
+						.size = {20_px, FIT},
+						.padding = {8_px, 0_px},
+					}) {
+						Text(label, {
+							.color = 0xa5a5a5ff,
+							.font = fontItalic,
+							.fontSize = 10_px,
+						});
+					}
+
+					Container({
+						.size = {FIT, FIT},
+					}) {
+						Text(text, {
+							.color = 0x000000ff,
+							.font = font,
+							.fontSize = fontSize,
+						});
 					}
 				}
 			}
 
 		private:
-			ContainerStyle listStyle;
-			ContainerStyle itemStyle;
-			TextStyle itemLabelStyle;
-			TextStyle itemTextStyle;
+			FontID font;
+			FontID fontItalic;
 	};
 }

@@ -18,7 +18,7 @@ namespace Trident {
 					Text("Hello world", {
 						.color = 0xde1818ff,
 						.font = font,
-						.fontSize = 128_px,
+						.fontSize = 24_px,
 					});
 				}
 			}

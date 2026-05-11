@@ -216,7 +216,10 @@ namespace Trident {
 					glyph.advanceWidth = bitmapGlyph.width + 1;
 					glyph.height = bitmapGlyph.height;
 					glyph.leftSideBearing = 0;
-					glyph.topSideBearing = bitmapGlyph.topSideBearing;
+
+					// TODO(asset-builder/font/bitmap): Fix max Y being top side bearing.
+					glyph.yMax = bitmapGlyph.topSideBearing;
+
 					glyph.whitespace = codePoint == ' ';
 
 					fontAssetDescriptor.unicodeMap.insert({static_cast<uint16>(codePoint), glyphIndex});
@@ -259,19 +262,19 @@ namespace Trident {
 				}
 
 				for (const Glyph& glyph : fontAssetDescriptor.glyphs) {
-					outputByteStream.write<uint16>(glyph.advanceWidth);
-				}
-
-				for (const Glyph& glyph : fontAssetDescriptor.glyphs) {
 					outputByteStream.write<uint16>(glyph.height);
 				}
 
 				for (const Glyph& glyph : fontAssetDescriptor.glyphs) {
-					outputByteStream.write<sint16>(glyph.leftSideBearing);
+					outputByteStream.write<sint16>(glyph.yMax);
 				}
 
 				for (const Glyph& glyph : fontAssetDescriptor.glyphs) {
-					outputByteStream.write<sint16>(glyph.topSideBearing);
+					outputByteStream.write<uint16>(glyph.advanceWidth);
+				}
+
+				for (const Glyph& glyph : fontAssetDescriptor.glyphs) {
+					outputByteStream.write<sint16>(glyph.leftSideBearing);
 				}
 
 				for (const std::pair<uint16, uint32> unicodeEntry : fontAssetDescriptor.unicodeMap) {

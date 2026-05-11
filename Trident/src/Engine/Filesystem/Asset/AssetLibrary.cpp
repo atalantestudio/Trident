@@ -30,6 +30,7 @@ namespace Trident {
 		const sint16 descent = stream.read<sint16>();
 		const sint16 lineGap = stream.read<sint16>();
 
+		fontAssetDescriptor.ascent = ascent;
 		fontAssetDescriptor.lineHeight = ascent - descent + lineGap;
 		fontAssetDescriptor.unitsPerEm = stream.read<uint16>();
 
@@ -52,19 +53,19 @@ namespace Trident {
 		}
 
 		for (Glyph& glyph : fontAssetDescriptor.glyphs) {
-			glyph.advanceWidth = stream.read<uint16>();
-		}
-
-		for (Glyph& glyph : fontAssetDescriptor.glyphs) {
 			glyph.height = stream.read<uint16>();
 		}
 
 		for (Glyph& glyph : fontAssetDescriptor.glyphs) {
-			glyph.leftSideBearing = stream.read<sint16>();
+			glyph.yMax = stream.read<sint16>();
 		}
 
 		for (Glyph& glyph : fontAssetDescriptor.glyphs) {
-			glyph.topSideBearing = stream.read<sint16>();
+			glyph.advanceWidth = stream.read<uint16>();
+		}
+
+		for (Glyph& glyph : fontAssetDescriptor.glyphs) {
+			glyph.leftSideBearing = stream.read<sint16>();
 		}
 
 		ByteStream<StreamOperation::READ> keyStream(stream.getBytePosition(), stream.getRemainingSize(), stream.getEndianness());

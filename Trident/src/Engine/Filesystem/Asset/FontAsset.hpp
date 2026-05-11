@@ -9,6 +9,7 @@
 namespace Trident {
 	struct FontAssetDescriptor : public AssetDescriptor {
 		ref<ImageAsset> glyphMapImage;
+		sint16 ascent;
 		sint32 lineHeight;
 		uint16 unitsPerEm;
 		sequence<Glyph> glyphs;
@@ -21,38 +22,50 @@ namespace Trident {
 			explicit FontAsset(const FontAssetDescriptor& descriptor) :
 				Asset(descriptor),
 				glyphMapImage(descriptor.glyphMapImage),
+				ascent(descriptor.ascent),
 				lineHeight(descriptor.lineHeight),
+				unitsPerEm(descriptor.unitsPerEm),
 				glyphs(descriptor.glyphs),
 				unicodeMap(descriptor.unicodeMap),
 				kerningPairs(descriptor.kerningPairs)
 			{}
 
-			ref<ImageAsset> getGlyphMapImage() const {
+			inline ref<ImageAsset> getGlyphMapImage() const {
 				return glyphMapImage;
 			}
 
-			sint32 getLineHeight() const {
+			inline sint16 getAscent() const {
+				return ascent;
+			}
+
+			inline sint32 getLineHeight() const {
 				return lineHeight;
 			}
 
-			const sequence<Glyph>& getGlyphs() const {
+			inline const sequence<Glyph>& getGlyphs() const {
 				return glyphs;
 			}
 
 			/// See https://developer.apple.com/fonts/TrueType-Reference-Manual/RM02/Chap2.html#converting.
-			float32 calculateScale(float32 pointSize, uint32 devicePixelRatio) const {
-				static constexpr uint32 GRID_SIZE = 4096;
-
-				return pointSize * devicePixelRatio / (72 * GRID_SIZE);
+			inline float32 calculateScale(float32 pointSize, uint32 dpi) const {
+				return pointSize * dpi / (72 * unitsPerEm);
 			}
 
-			uint32 getGlyphCount() const {
+			inline float32 pxToPt(float32 px, uint32 dpi) const {
+				return px * 72 / dpi;
+			}
+
+			inline float32 ptToPx(float32 pointSize, uint32 dpi) const {
+				return pointSize * dpi / 72;
+			}
+
+			inline uint32 getGlyphCount() const {
 				return static_cast<uint32>(glyphs.count());
 			}
 
 			// Returns the glyph represented by the provided code point.
 			// If no corresponding glyph is found, the .notdef glyph is returned.
-			const Glyph& operator[](uint16 codePoint) const {
+			inline const Glyph& operator[](uint16 codePoint) const {
 				if (codePoint == 0) {
 					return glyphs[0];
 				}
@@ -67,9 +80,21 @@ namespace Trident {
 				return glyphs[glyphIndex->second];
 			}
 
+			inline sint16 getKerning(uint16 firstGlyphIndex, uint16 secondGlyphIndex) const {
+				const auto kerning = kerningPairs.find({firstGlyphIndex, secondGlyphIndex});
+
+				if (kerning == kerningPairs.end()) {
+					return 0;
+				}
+
+				return kerning->second;
+			}
+
 		private:
 			ref<ImageAsset> glyphMapImage;
+			sint16 ascent;
 			sint32 lineHeight;
+			uint16 unitsPerEm;
 			sequence<Glyph> glyphs;
 
 			/// Layout: <code point, glyph index>

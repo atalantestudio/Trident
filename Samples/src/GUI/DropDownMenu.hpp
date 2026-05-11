@@ -8,7 +8,7 @@ namespace Trident {
 		private:
 			static constexpr uint32 ITEM_COUNT = 5;
 
-			inline static constexpr const view<char8> ITEM_LABELS[ITEM_COUNT] = {
+			inline static constexpr view<char8> ITEM_LABELS[ITEM_COUNT] = {
 				"Copy",
 				"Paste",
 				"Delete",
@@ -52,7 +52,7 @@ namespace Trident {
 								Text(label, {
 									.color = 0xffffffff,
 									.font = font,
-									.fontSize = 32,
+									.fontSize = 32_px,
 								});
 							}
 

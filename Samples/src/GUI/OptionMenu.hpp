@@ -103,7 +103,7 @@ namespace Trident {
 					Text(OPTION_MENU_TAB_STRINGS[static_cast<uint8>(tab)], {
 						.color = 0xa5a5a5ff,
 						.font = fontBold,
-						.fontSize = 22_px,
+						.fontSize = 20_px,
 					});
 				}
 			}
@@ -128,7 +128,7 @@ namespace Trident {
 					Text(title, {
 						.color = 0xa5a5a5ff,
 						.font = fontBold,
-						.fontSize = 28_px,
+						.fontSize = 24_px,
 					});
 				}
 			}
@@ -198,8 +198,8 @@ namespace Trident {
 							}) {
 								Text(title, {
 									.color = 0xa5a5a5ff,
-									.font = fontRegular,
-									.fontSize = 24_px,
+									.font = fontBold,
+									.fontSize = 20_px,
 								});
 							}
 
@@ -226,7 +226,7 @@ namespace Trident {
 						Text(description, {
 							.color = 0x828282ff,
 							.font = fontRegular,
-							.fontSize = 20_px,
+							.fontSize = 16_px,
 						});
 					}
 				}

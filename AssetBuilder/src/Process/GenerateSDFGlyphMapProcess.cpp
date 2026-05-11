@@ -200,7 +200,7 @@ namespace Trident {
 			outputGlyph.advanceWidth = horizontalMetric.advanceWidth;
 			outputGlyph.height = glyph.max.y - glyph.min.y;
 			outputGlyph.leftSideBearing = horizontalMetric.leftSideBearing;
-			outputGlyph.topSideBearing = file.ascent - glyph.max.y;
+			outputGlyph.yMax = glyph.max.y;
 			outputGlyph.whitespace = glyph.emptyOrUnparsed();
 
 			if (outputGlyph.whitespace) {

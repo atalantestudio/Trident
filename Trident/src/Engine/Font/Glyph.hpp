@@ -12,20 +12,20 @@ namespace Trident {
 		// Bottom-right coordinate on the glyph map.
 		svec2<float32> maxCoordinate;
 
-		// In TTF units.
+		/// In FUnits.
 		uint16 width;
 
-		// In TTF units.
-		uint16 advanceWidth;
-
-		// In TTF units.
+		/// In FUnits.
 		uint16 height;
 
-		// In TTF units.
-		sint16 leftSideBearing;
+		/// In FUnits.
+		sint16 yMax;
 
-		// In TTF units.
-		sint16 topSideBearing;
+		/// In FUnits.
+		uint16 advanceWidth;
+
+		/// In FUnits.
+		sint16 leftSideBearing;
 
 		// Spaces, tabs, etc.
 		bool whitespace;

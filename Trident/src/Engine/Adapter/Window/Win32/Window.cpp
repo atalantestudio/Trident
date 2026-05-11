@@ -190,6 +190,15 @@ namespace Trident {
 		return windowData.extent;
 	}
 
+	uint32 Window::getDpi() const {
+		const Win32WindowData& windowData = *static_cast<const Win32WindowData*>(data);
+		const uint32 dpi = GetDpiForWindow(windowData.hWnd);
+
+		WIN32_ASSERT(dpi != 0);
+
+		return dpi;
+	}
+
 	bool Window::isKeyDown(KeyCode keyCode) const {
 		const Win32WindowData& windowData = *static_cast<const Win32WindowData*>(data);
 

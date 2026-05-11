@@ -22,17 +22,16 @@ namespace Trident {
 
 			struct FlushWordData {
 				UTF8Stream stream;
-
 				const FontAsset* fontAsset;
 				vec2<float32> imageSize;
-				float32 fontSize;
-
-				// Line height scaled by the font size.
-				float32 lineHeight;
+				float32 scale;
 			};
 
 		private:
 			static bool IsIntersecting(const GUIContainer& component, vec2<float32> point);
+
+			static float32 calculateTextPreferredWidth(UTF8Stream& stream, const FontAsset& fontAsset, float32 scale);
+			static float32 calculateTextMinimumWidth(UTF8Stream& stream, const FontAsset& fontAsset, float32 scale);
 
 		public:
 			void build() final override {}
@@ -94,16 +93,14 @@ namespace Trident {
 			void GrowAndShrinkSizingWidthsRecursive(uint32 parentIndex);
 			void GrowAndShrinkSizingHeightsRecursive(uint32 parentIndex);
 			void WrapTextChildrenRecursive(uint32 parentIndex);
-			void WrapText(GUIContainer& textComponent);
-			void FlushWord(FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset);
+			void WrapText(GUIContainer& component);
+			static void FlushCurrentWord(FlushWordData& flushWordData, GUIContainer& component, const UTF8Stream& stream, svec2<float32>& characterOffset, range<uint64, uint64>& wordByteRange);
+			static void FlushWord(FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset);
 			void PositionsAndAlignment(GUIContainer& component, svec2<float32> origin);
 
 			bool onMouseDown(MouseDownEvent& event);
 			bool onMouseUp(MouseUpEvent& event);
 			bool onWindowResize(WindowResizeEvent& event);
-
-			float32 calculateTextPreferredWidth(UTF8Stream& stream, const TextStyle& textStyle) const;
-			float32 calculateTextMinimumWidth(UTF8Stream& stream, const TextStyle& textStyle) const;
 
 			bool IsHovered(uint32 componentIndex) const;
 			bool IsMouseDown(uint32 componentIndex) const;
@@ -117,7 +114,7 @@ namespace Trident {
 			static constexpr float32 EXPAND = -1.0f;
 
 		private:
-			static constexpr uint32 MAX_COMPONENT_COUNT = 64;
+			static constexpr uint32 MAX_COMPONENT_COUNT = 128;
 			static constexpr uint32 MAX_FONT_COUNT = 4;
 
 		protected:

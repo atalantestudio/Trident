@@ -24,6 +24,9 @@ namespace Trident {
 				return static_cast<float32>(extent.width) / extent.height;
 			}
 
+			/// Returns the dots per inch value for the window.
+			uint32 getDpi() const;
+
 			bool isKeyDown(KeyCode keyCode) const;
 
 			bool isMaximized() const;
