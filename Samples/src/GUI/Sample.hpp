@@ -9,23 +9,24 @@ namespace Trident {
 			void registerAssets() override {
 				fontBold = loadFontAsset("test-bold");
 				fontRegular = loadFontAsset("test-regular");
-				fontRegularItalic = loadFontAsset("test-regular-italic");
 
 				image = loadImageAsset("Cameraman");
 			}
 
 			void render() override {
+				const Extent2D extent = getApplication()->getWindow()->getExtent();
+
 				Container({
-					.size = {1280_px, 720_px},
-					.padding = {12_px, 12_px},
+					.size = {static_cast<float32>(extent.width - 16_px), static_cast<float32>(extent.height - 16_px)},
+					.padding = {8_px, 8_px},
 					.layoutDirection = LayoutDirection::VERTICAL,
 					.layoutSpacing = 16_px,
-					.color = 0xffffffff,
+					.color = 0xfefefeff,
 				}) {
 					Text("Lorem Ipsum", {
-						.color = 0x000000ff,
+						.color = 0x0a0a0aff,
 						.font = fontBold,
-						.fontSize = 28_px,
+						.fontSize = 26.4_px,
 					});
 
 					Text(
@@ -34,9 +35,9 @@ namespace Trident {
 						"Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\n"
 						"Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
 						{
-							.color = 0x000000ff,
+							.color = 0x0a0a0aff,
 							.font = fontRegular,
-							.fontSize = 20_px,
+							.fontSize = 17.6_px,
 						}
 					);
 
@@ -53,8 +54,8 @@ namespace Trident {
 
 						Text("The Cameraman test image.", {
 							.color = 0x757575ff,
-							.font = fontRegularItalic,
-							.fontSize = 16_px,
+							.font = fontRegular,
+							.fontSize = 14_px,
 						});
 					}
 				}
@@ -63,7 +64,7 @@ namespace Trident {
 		private:
 			FontID fontBold;
 			FontID fontRegular;
-			FontID fontRegularItalic;
+
 			ImageID image;
 	};
 }

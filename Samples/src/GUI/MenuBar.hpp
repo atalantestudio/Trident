@@ -117,7 +117,7 @@ namespace Trident {
 						Text(MENU_ITEMS[menuIndex], {
 							.color = labelColor,
 							.font = labelFont,
-							.fontSize = 19_px,
+							.fontSize = 17.6_px,
 						});
 					}
 
@@ -159,7 +159,7 @@ namespace Trident {
 					Text(name, {
 						.color = textColor,
 						.font = fontRegular,
-						.fontSize = 19_px,
+						.fontSize = 17.6_px,
 					});
 				}
 			}

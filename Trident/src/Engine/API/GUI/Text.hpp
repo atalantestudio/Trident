@@ -152,7 +152,7 @@ namespace Trident {
 				FlushCurrentWord(flushWordData, component, stream, characterOffset, wordByteRange);
 
 				characterOffset.x = 0.0f;
-				characterOffset.y += lineHeight * scale;
+				characterOffset.y += lineHeight;
 				wordCharacterOffsetX = 0.0f;
 				lineCount += 1;
 
@@ -232,10 +232,16 @@ namespace Trident {
 		wordByteRange.count = 0;
 	}
 
+	inline static float32 fract(float32 x) {
+		return x - static_cast<sint32>(x);
+	}
+
 	void GUILayer::FlushWord(FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset) {
+		constexpr float32 hintingY = -0.4f;
+
 		const vec2<float32> imageScale = data.imageSize / GUIRenderer::TEXTURE_ARRAY_MAX_SIZE;
 
-		const float32 baseline = characterOffset.y + data.fontAsset->getAscent() * data.scale;
+		const float32 baseline = characterOffset.y + data.fontAsset->getAscent() * data.scale + hintingY;
 
 		while (data.stream.getRemainingByteSize() > 0) {
 			const uint32 codePoint = data.stream.read();
@@ -247,7 +253,7 @@ namespace Trident {
 			float32 endV = glyph.maxCoordinate.y;
 
 			float32 x = characterOffset.x + glyph.leftSideBearing * data.scale;
-			float32 y = baseline - glyph.yMax * data.scale;
+			float32 y = baseline - (glyph.yMax + 1) * data.scale;
 
 			// TODO(gui/text/kerning)
 			/* if (data.stream.getRemainingByteSize() > 0) {
@@ -261,7 +267,6 @@ namespace Trident {
 			float32 height = glyph.height * data.scale;
 
 			x = round(x);
-			width = ceil(width);
 
 			TextCharacter textCharacter{};
 			textCharacter.offset = {x, y};
