@@ -106,6 +106,8 @@ namespace Trident {
 		componentCount = 0;
 		openContainerIndexCount = 0;
 
+		renderer.clearColor = rootColor;
+
 		openRootContainer();
 		render();
 
@@ -173,8 +175,6 @@ namespace Trident {
 		std::copy(&components[0], &components[componentCount], &previousComponents[0]);
 
 		previousComponentCount = componentCount;
-
-		renderer.clearColor = rootColor;
 	}
 
 	void GUILayer::render(ref<CommandEncoder> commandEncoder, float64 remainingFrameTime) const {
