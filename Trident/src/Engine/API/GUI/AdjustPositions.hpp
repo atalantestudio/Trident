@@ -7,8 +7,6 @@
 
 namespace Trident {
 	void GUILayer::PositionsAndAlignment(GUIContainer& component, svec2<float32> origin, bool registerSubcomponents) {
-		const svec2<float32> previousOrigin = origin;
-
 		if (component.parentIndex != max<uint32>()) {
 			const GUIContainer& parent = components[component.parentIndex];
 
@@ -73,7 +71,7 @@ namespace Trident {
 				GUIContainer& child = components[component.childIndices[index]];
 
 				if (!child.floating) {
-					const float32 remainingAcross = componentAcross - child.size[!component.layoutDirection].value;
+					const float32 remainingAcross = componentAcross - round(child.size[!component.layoutDirection].value);
 
 					origin[!component.layoutDirection] = originAcross + remainingAcross * fAcross;
 				}
@@ -81,7 +79,7 @@ namespace Trident {
 				PositionsAndAlignment(child, origin, registerSubcomponents);
 
 				if (!child.floating) {
-					origin[component.layoutDirection] += child.size[component.layoutDirection].value;
+					origin[component.layoutDirection] += round(child.size[component.layoutDirection].value);
 				}
 
 				if (index + 1 == component.childIndices.size()) {
