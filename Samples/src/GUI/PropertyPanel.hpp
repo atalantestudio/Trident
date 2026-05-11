@@ -3,20 +3,13 @@
 
 #pragma once
 
-namespace Trident {
-	class GUIPropertyPanelLayer : public GUILayer {
-		private:
-			inline static const Color PRIMARY_COLOR = 0xf0f0f0ff;
-			inline static const Color SECONDARY_COLOR = 0x989898ff;
-			inline static const Color TERTIARY_COLOR = 0xd2d2d2ff;
-			inline static const Color BORDER_FOCUS_COLOR = 0x3a3a3aff;
-			inline static const Color TEXT_COLOR = 0x0a0a0aff;
-			inline static const Color TEXT_HOVER_COLOR = 0x535353ff;
+#include "Theme/DefaultTheme.hpp"
 
+namespace Trident {
+	class GUIPropertyPanelLayer : public GUIDefaultTheme {
 		public:
 			void registerAssets() override {
-				fontBold = loadFontAsset("test-bold");
-				fontRegular = loadFontAsset("test-regular");
+				GUIDefaultTheme::registerAssets();
 			}
 
 			void render() override {
@@ -32,43 +25,5 @@ namespace Trident {
 					Button("Light");
 				}
 			}
-
-		private:
-			void Button(view<char8> label) {
-				Color borderColor = SECONDARY_COLOR;
-
-				if (IsNextMouseDown()) {
-					borderColor = BORDER_FOCUS_COLOR;
-				}
-
-				Container({
-					.padding = {1_px, 1_px},
-					.color = borderColor,
-					.pointerType = PointerType::INTERACTIVE,
-				}) {
-					Color buttonColor = PRIMARY_COLOR;
-					Color labelColor = TEXT_COLOR;
-
-					if (IsHovered()) {
-						buttonColor = TERTIARY_COLOR;
-						labelColor = TEXT_HOVER_COLOR;
-					}
-
-					Container({
-						.padding = {5_px, 0_px},
-						.color = buttonColor,
-					}) {
-						Text(label, {
-							.color = labelColor,
-							.font = fontRegular,
-							.fontSize = 16_px,
-						});
-					}
-				}
-			}
-
-		private:
-			FontID fontBold;
-			FontID fontRegular;
 	};
 }
