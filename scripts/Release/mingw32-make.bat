@@ -19,6 +19,13 @@ if exist "AssetBuilder/AssetBuilder.tpr" (
 )
 
 @REM If a .tpr file exists, use it as the default configuration file.
+if exist "Editor/Editor.tpr" (
+	cp "Editor/Editor.tpr" "%outputdir%/Editor/Editor.tpr"
+
+	echo Copied Editor/Editor.tpr to %outputdir%/Editor/Editor.tpr.
+)
+
+@REM If a .tpr file exists, use it as the default configuration file.
 if exist "Samples/Samples.tpr" (
 	cp "Samples/Samples.tpr" "%outputdir%/Samples/Samples.tpr"
 

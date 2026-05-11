@@ -41,6 +41,8 @@
 - Scene assets
 - Shader modules assets
 
+## Editor
+
 ## Samples
 
 - Compute

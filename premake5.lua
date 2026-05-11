@@ -58,6 +58,7 @@ workspace "Trident"
 
 include "Trident"
 include "AssetBuilder"
+include "Editor"
 include "Samples"
 
 project "tslc"
