@@ -128,7 +128,7 @@ namespace Trident {
 					for (ClassRange& classRange : classDef.classDefFormat2.classRangeRecords) {
 						classRange.startGlyphID = stream.read<uint16>();
 						classRange.endGlyphID = stream.read<uint16>();
-						classRange._class = stream.read<uint16>();
+						classRange.class_ = stream.read<uint16>();
 					}
 
 					break;
@@ -141,21 +141,6 @@ namespace Trident {
 			}
 
 			return classDef;
-		}
-
-		// TODO(filesystem/ttf/gpos/single-pos): Keep decoding SinglePos subtable?
-		static void decodeSinglePosSubtable(ByteStream<StreamOperation::READ>& stream) {
-			SinglePosFormat1 singlePosSubtable{};
-			singlePosSubtable.format = stream.read<uint16>();
-
-			ENGINE_ASSERT(singlePosSubtable.format == 1, "Unsupported SinglePos format.");
-
-			singlePosSubtable.coverageOffset = stream.read<Offset16>();
-			singlePosSubtable.valueFormat = static_cast<ValueFormat>(stream.read<uint16>());
-			singlePosSubtable.valueRecord = decodeValueRecord(stream, singlePosSubtable.valueFormat);
-
-			// TODO(filesystem/ttf/gpos/single-pos)
-			ENGINE_ERROR_UNIMPLEMENTED();
 		}
 
 		static void insertKerningPair(uint16 firstGlyph, const PairValue& pairValue, File<FileFormat::TTF>& file) {
@@ -313,11 +298,12 @@ namespace Trident {
 						}
 						case 2: {
 							for (const RangeRecord& rangeRecord : coverage.coverageFormat2.rangeRecords) {
-								const PairSet& pairSet = pairSets[rangeRecord.startCoverageIndex];
-
 								uint16 firstGlyph = rangeRecord.startGlyphID;
 
 								while (firstGlyph <= rangeRecord.endGlyphID) {
+									const uint16 coverageIndex = rangeRecord.startCoverageIndex + firstGlyph - rangeRecord.startGlyphID;
+									const PairSet& pairSet = pairSets[coverageIndex];
+
 									for (const PairValue& pairValue : pairSet.pairValueRecords) {
 										insertKerningPair(firstGlyph, pairValue, file);
 									}
@@ -377,9 +363,9 @@ namespace Trident {
 									}
 									case 2: {
 										for (const ClassRange& classRange2 : classDef2.classDefFormat2.classRangeRecords) {
-											DEBUG_ASSERT(classRange2._class > 0);
+											DEBUG_ASSERT(classRange2.class_ > 0);
 
-											const Class2& class2 = class1.class2Records[classRange2._class];
+											const Class2& class2 = class1.class2Records[classRange2.class_];
 
 											uint16 secondGlyph = classRange2.startGlyphID;
 
@@ -404,9 +390,9 @@ namespace Trident {
 						}
 						case 2: {
 							for (const ClassRange& classRange1 : classDef1.classDefFormat2.classRangeRecords) {
-								DEBUG_ASSERT(classRange1._class > 0);
+								DEBUG_ASSERT(classRange1.class_ > 0);
 
-								const Class1& class1 = pairPosSubtable.pairPosFormat2.class1Records[classRange1._class];
+								const Class1& class1 = pairPosSubtable.pairPosFormat2.class1Records[classRange1.class_];
 
 								uint16 firstGlyph = classRange1.startGlyphID;
 
@@ -440,9 +426,9 @@ namespace Trident {
 									case 2: {
 										while (firstGlyph <= classRange1.endGlyphID) {
 											for (const ClassRange& classRange2 : classDef2.classDefFormat2.classRangeRecords) {
-												DEBUG_ASSERT(classRange2._class > 0);
+												DEBUG_ASSERT(classRange2.class_ > 0);
 
-												const Class2& class2 = class1.class2Records[classRange2._class];
+												const Class2& class2 = class1.class2Records[classRange2.class_];
 
 												uint16 secondGlyph = classRange2.startGlyphID;
 
@@ -493,11 +479,6 @@ namespace Trident {
 			stream.seek(offset + posExtensionSubtable.posExtensionFormat1.extensionOffset);
 
 			switch (posExtensionSubtable.posExtensionFormat1.extensionLookupType) {
-				case LookupType::SINGLE_ADJUSTMENT: {
-					decodeSinglePosSubtable(stream);
-
-					break;
-				}
 				case LookupType::PAIR_ADJUSTMENT: {
 					decodePairPosSubtable(stream, file);
 
@@ -577,15 +558,6 @@ namespace Trident {
 				const Lookup lookup = decodeLookup(stream);
 
 				switch (lookup.lookupType) {
-					case LookupType::SINGLE_ADJUSTMENT: {
-						for (const Offset16 subtableOffset : lookup.subtableOffsets) {
-							stream.seek(offset + subtableOffset);
-
-							decodeSinglePosSubtable(stream);
-						}
-
-						break;
-					}
 					case LookupType::PAIR_ADJUSTMENT: {
 						for (const Offset16 subtableOffset : lookup.subtableOffsets) {
 							stream.seek(offset + subtableOffset);
