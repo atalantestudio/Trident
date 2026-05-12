@@ -452,10 +452,6 @@ namespace Trident {
 		instanceInputBinding.registerAttribute<uint32>(); // Layer index
 		instanceInputBinding.registerAttribute<float32>(); // Font size
 
-		// TODO(gui/text-smoothness)
-		// instanceInputBinding.registerAttribute<float32>();
-		// instanceInputBinding.registerAttribute<float32>();
-
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";
@@ -644,7 +640,7 @@ namespace Trident {
 		commandEncoder->beginRenderPass({
 			.framebuffer = framebuffers[getSwapchainImageIndex()],
 			.clearValues = {
-				{clearColor.value[0], clearColor.value[1], clearColor.value[2], clearColor.value[3]},
+				{0.0f, 0.0f, 0.0f, 1.0f},
 				{
 					.depth = 0.0f,
 					.stencil = 0,

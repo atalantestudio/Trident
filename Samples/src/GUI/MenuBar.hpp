@@ -46,7 +46,7 @@ namespace Trident {
 				fontBold = loadFontAsset("test-bold");
 				fontRegular = loadFontAsset("test-regular");
 
-				rootColor = 0xf0f0f0ff;
+				clearColor = 0xf0f0f0ff;
 			}
 
 			void render() override {

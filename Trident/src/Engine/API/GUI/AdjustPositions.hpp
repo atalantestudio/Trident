@@ -101,37 +101,8 @@ namespace Trident {
 	}
 
 	bool GUILayer::registerSubcomponent(const GUIContainer& component) {
-		if (component.debugName == "__root") {
+		if (component.color.value[3] == 0.0f) {
 			return true;
-		}
-
-		const GUIContainer& parent = components[component.parentIndex];
-
-		if (component.textComponent) {
-			GUIGlyphSubcomponent glyphSubcomponent{};
-			glyphSubcomponent.color = component.color.value;
-			glyphSubcomponent.zIndex = component.zIndex;
-			glyphSubcomponent.textureArrayLayerIndex = fonts[component.font].glyphMapImageId;
-			glyphSubcomponent.fontSize = component.fontSize;
-
-			// TODO(gui/text-smoothness)
-			// glyphSubcomponent.a = a;
-			// glyphSubcomponent.b = b;
-
-			const vec2<float32> origin = {component.origin.x + 0.5f, component.origin.y + 0.5f};
-
-			for (const TextCharacter& textCharacter : component.characters) {
-				glyphSubcomponent.world =
-					mat3x3<float32>::scaling(textCharacter.size) *
-					mat3x3<float32>::translation(origin + textCharacter.offset);
-				glyphSubcomponent.textureWorld =
-					mat3x3<float32>::scaling((textCharacter.endTextureCoordinate - textCharacter.startTextureCoordinate)) *
-					mat3x3<float32>::translation(textCharacter.startTextureCoordinate);
-
-				renderer.registerGlyphSubcomponent(glyphSubcomponent);
-			}
-
-			return false;
 		}
 
 		float32 x = component.origin.x;
@@ -140,22 +111,56 @@ namespace Trident {
 		float32 width = component.size.width.value;
 		float32 height = component.size.height.value;
 
-		if (parent.type == GUIComponentType::VERTICAL_LIST) {
-			if (component.origin.y + component.size.height.value <= parent.origin.y) {
+		if (component.parentIndex != max<uint32>()) {
+			const GUIContainer& parent = components[component.parentIndex];
+
+			if (component.textComponent) {
+				GUIGlyphSubcomponent glyphSubcomponent{};
+				glyphSubcomponent.color = component.color.value;
+				glyphSubcomponent.zIndex = component.zIndex;
+				glyphSubcomponent.textureArrayLayerIndex = fonts[component.font].glyphMapImageId;
+				glyphSubcomponent.fontSize = component.fontSize;
+
+				// TODO(gui/text-smoothness)
+				// glyphSubcomponent.a = a;
+				// glyphSubcomponent.b = b;
+
+				const vec2<float32> origin = {component.origin.x + 0.5f, component.origin.y + 0.5f};
+
+				for (const TextCharacter& textCharacter : component.characters) {
+					glyphSubcomponent.world =
+						mat3x3<float32>::scaling(textCharacter.size) *
+						mat3x3<float32>::translation(origin + textCharacter.offset);
+					glyphSubcomponent.textureWorld =
+						mat3x3<float32>::scaling((textCharacter.endTextureCoordinate - textCharacter.startTextureCoordinate)) *
+						mat3x3<float32>::translation(textCharacter.startTextureCoordinate);
+
+					renderer.registerGlyphSubcomponent(glyphSubcomponent);
+				}
+
 				return false;
 			}
 
-			if (component.origin.y >= parent.origin.y + parent.size.height.value) {
-				return false;
+			if (parent.type == GUIComponentType::VERTICAL_LIST) {
+				if (component.origin.y + component.size.height.value <= parent.origin.y) {
+					return false;
+				}
+
+				if (component.origin.y >= parent.origin.y + parent.size.height.value) {
+					return false;
+				}
+
+				const float32 clippedHeight = (parent.origin.y + parent.size.height.value) - component.origin.y;
+
+				if (clippedHeight < height) {
+					height = clippedHeight;
+				}
+
+				// TODO(gui/scroll-container/clipping): Finish clipping.
 			}
-
-			const float32 clippedHeight = (parent.origin.y + parent.size.height.value) - component.origin.y;
-
-			if (clippedHeight < height) {
-				height = clippedHeight;
-			}
-
-			// TODO(gui/scroll-container/clipping): Finish clipping.
+		}
+		else {
+			height = static_cast<float32>(getApplication()->getWindow()->getExtent().height);
 		}
 
 		const vec2<float32> decimalOrigin = {x, round(y)};

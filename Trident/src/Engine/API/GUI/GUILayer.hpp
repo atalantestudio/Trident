@@ -119,7 +119,8 @@ namespace Trident {
 			static constexpr uint32 MAX_FONT_COUNT = 4;
 
 		protected:
-			Color rootColor = 0x000000ff;
+			/// Color of the root component.
+			Color clearColor = 0x00000000;
 
 			// TODO(gui/text-smoothness)
 			float32 a = 0.0f;

@@ -107,8 +107,6 @@ namespace Trident {
 		componentCount = 0;
 		openContainerIndexCount = 0;
 
-		renderer.clearColor = rootColor;
-
 		const Extent2D extent = getApplication()->getWindow()->getExtent();
 
 		GUIContainer rootComponent{};
@@ -124,7 +122,7 @@ namespace Trident {
 		rootComponent.layoutDirection = LayoutDirection::VERTICAL;
 		rootComponent.layoutOffset = 0_px;
 		rootComponent.layoutSpacing = 0_px;
-		rootComponent.color = 0xffffffff;
+		rootComponent.color = clearColor;
 		rootComponent.image = 0;
 		rootComponent.pointerType = PointerType::DEFAULT;
 		rootComponent.textComponent = false;

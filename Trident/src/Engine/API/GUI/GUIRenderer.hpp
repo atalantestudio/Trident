@@ -86,9 +86,6 @@ namespace Trident {
 
 			void updateCameraProjection() const;
 
-		public:
-			Color clearColor = 0x000000ff;
-
 		private:
 			ref<RenderPass> renderPass;
 
