@@ -5,14 +5,6 @@
 
 namespace Trident {
 	class GUIDefaultTheme : public GUILayer {
-		protected:
-			inline static const Color PRIMARY_COLOR = 0xf0f0f0ff;
-			inline static const Color SECONDARY_COLOR = 0x989898ff;
-			inline static const Color TERTIARY_COLOR = 0xd2d2d2ff;
-			inline static const Color BORDER_FOCUS_COLOR = 0x3a3a3aff;
-			inline static const Color TEXT_COLOR = 0x0a0a0aff;
-			inline static const Color TEXT_HOVER_COLOR = 0x535353ff;
-
 		public:
 			void registerAssets() override {
 				fontBold = loadFontAsset("test-bold");
@@ -20,12 +12,33 @@ namespace Trident {
 			}
 
 		protected:
+			void updateThemeColors(bool darkMode) {
+				// TODO: Blue (0x5cafe7ff)
+
+				if (darkMode) {
+					primaryColor = 0x0a0a0aff;
+					secondaryColor = 0x3a3a3aff;
+					backgroundHoverColor = 0x1a1a1aff;
+					borderFocusColor = 0xc2c2c2ff;
+					textColor = 0xa5a5a5ff;
+					textHoverColor = 0xc2c2c2ff;
+				}
+				else {
+					primaryColor = 0xf0f0f0ff;
+					secondaryColor = 0x989898ff;
+					backgroundHoverColor = 0xd2d2d2ff;
+					borderFocusColor = 0x3a3a3aff;
+					textColor = 0x0a0a0aff;
+					textHoverColor = 0x535353ff;
+				}
+			}
+
 			bool Button(view<char8> label) {
 				bool clicked = false;
-				Color borderColor = SECONDARY_COLOR;
+				Color borderColor = secondaryColor;
 
 				if (IsNextMouseDown()) {
-					borderColor = BORDER_FOCUS_COLOR;
+					borderColor = borderFocusColor;
 				}
 
 				Container({
@@ -33,12 +46,12 @@ namespace Trident {
 					.color = borderColor,
 					.pointerType = PointerType::INTERACTIVE,
 				}) {
-					Color buttonColor = PRIMARY_COLOR;
-					Color labelColor = TEXT_COLOR;
+					Color buttonColor = primaryColor;
+					Color labelColor = textColor;
 
 					if (IsHovered()) {
-						buttonColor = TERTIARY_COLOR;
-						labelColor = TEXT_HOVER_COLOR;
+						buttonColor = backgroundHoverColor;
+						labelColor = textHoverColor;
 					}
 
 					clicked = IsClicked();
@@ -58,8 +71,76 @@ namespace Trident {
 				return clicked;
 			}
 
+			void RangeControl(bool& dragging, float32& previousOffset, float32& value) {
+				Container({
+					.size = {EXPAND, 23_px},
+					.padding = {0_px, 0_px},
+					.color = primaryColor,
+				}) {
+					RangeControlTrack();
+					RangeControlThumb(dragging, previousOffset, value);
+				}
+			}
+
+		private:
+			void RangeControlTrack() {
+				Floating({
+					.offset = {0_px, 11_px},
+					.size = {EXPAND, 1_px},
+					.color = secondaryColor,
+				});
+			}
+
+			void RangeControlThumb(bool& dragging, float32& previousOffset, float32& value) {
+				if (CurrentComponent() == nullptr) {
+					return;
+				}
+
+				const float32 width = CurrentComponent()->size.width.value;
+
+				if (dragging) {
+					const float32 currentOffset = getMousePosition()[0];
+
+					value += (currentOffset - previousOffset) / width;
+					previousOffset = currentOffset;
+
+					value = clamp(value, 0.0f, 1.0f);
+				}
+
+				Floating({
+					.offset = {value * width - 7_px, 0.0f},
+					// .size = {FIT, FIT},
+					.size = {14_px, 23_px},
+					// .padding = {1_px, 1_px},
+					.color = textHoverColor,
+					.pointerType = PointerType::INTERACTIVE,
+				}) {
+					if (IsMouseDown()) {
+						dragging = true;
+						previousOffset = getMousePosition()[0];
+					}
+
+					if (IsMouseUp()) {
+						dragging = false;
+					}
+
+					// TODO
+					/* Container({
+						.size = {12_px, 18_px},
+						.color = 0x5cafe7ff,
+					}); */
+				}
+			}
+
 		protected:
 			FontID fontBold;
 			FontID fontRegular;
+
+			Color primaryColor = 0x00000000;
+			Color secondaryColor = 0x00000000;
+			Color backgroundHoverColor = 0x00000000;
+			Color borderFocusColor = 0x00000000;
+			Color textColor = 0x00000000;
+			Color textHoverColor = 0x00000000;
 	};
 }

@@ -20,7 +20,7 @@ namespace Trident {
 					.padding = {8_px, 8_px},
 					.layoutDirection = LayoutDirection::VERTICAL,
 					.layoutSpacing = 8_px,
-					.color = PRIMARY_COLOR,
+					.color = primaryColor,
 				}) {
 					if (Button("Light")) {
 						verticalListScrollOffset += 10_px;
@@ -32,18 +32,18 @@ namespace Trident {
 						.layoutDirection = LayoutDirection::VERTICAL,
 						.layoutOffset = verticalListScrollOffset,
 						.layoutSpacing = 1_px,
-						.color = SECONDARY_COLOR,
+						.color = secondaryColor,
 						.debugName = "VList",
 					}) {
 						for (uint32 i = 0; i < 20; i += 1) {
 							Container({
 								.size = {EXPAND, FIT},
-								.color = TERTIARY_COLOR,
+								.color = secondaryColor,
 							}) {
 								const sequence<char8> text = Logger::format("Element []", i);
 
 								Text(text, {
-									.color = TEXT_COLOR,
+									.color = textColor,
 									.font = fontRegular,
 									.fontSize = 16_px,
 								});

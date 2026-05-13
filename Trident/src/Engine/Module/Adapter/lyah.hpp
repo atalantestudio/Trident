@@ -454,4 +454,8 @@ namespace Trident {
 	inline T ceil(T value, T multiplier) {
 		return (value + multiplier - 1) & ~(multiplier - 1);
 	}
+
+	inline float32 fract(float32 a) {
+		return a - static_cast<sint32>(a);
+	}
 }

@@ -23,6 +23,7 @@
 #include "GUI/Sample.hpp"
 #include "GUI/Test.hpp"
 #include "GUI/Text.hpp"
+#include "GUI/TextDebug.hpp"
 #include "GUI/TextSmoothness.hpp"
 #include "GUI/UTF8.hpp"
 
@@ -104,6 +105,9 @@ namespace Trident {
 			}
 			else if (SampleNameProperty == "Text") {
 				registerLayer<GUITextLayer>();
+			}
+			else if (SampleNameProperty == "TextDebug") {
+				registerLayer<GUITextDebugLayer>();
 			}
 			else if (SampleNameProperty == "TextSmoothness") {
 				registerLayer<GUITextSmoothnessLayer>();

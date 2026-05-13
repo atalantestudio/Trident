@@ -44,7 +44,7 @@ namespace Trident {
 					- 96px = (A = 0.46, B = 0.53)
 					*/
 
-					text = Logger::format("A = []", a);
+					text = Logger::format("A = []", hintingY);
 
 					// const Color textColor = 0xa5a5a5ff;
 					const Color textColor = 0x000000ff;
@@ -55,9 +55,9 @@ namespace Trident {
 						.fontSize = 16_px,
 					});
 
-					RangeControl(300_px, draggingA, offsetA, previousOffsetA, a);
+					RangeControl(300_px, draggingA, offsetA, previousOffsetA, hintingY);
 
-					text = Logger::format("B = []", b);
+					text = Logger::format("B = []", hintingX);
 
 					Text(text, {
 						.color = textColor,
@@ -65,7 +65,7 @@ namespace Trident {
 						.fontSize = 16_px,
 					});
 
-					RangeControl(300_px, draggingB, offsetB, previousOffsetB, b);
+					RangeControl(300_px, draggingB, offsetB, previousOffsetB, hintingX);
 
 					Text("(12px) The quick brown fox jumps over the lazy dog.", {
 						.color = textColor,

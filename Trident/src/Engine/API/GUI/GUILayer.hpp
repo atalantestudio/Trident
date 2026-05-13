@@ -64,6 +64,9 @@ namespace Trident {
 
 			void Text(view<char8> text, const TextStyle& style);
 
+			/// Returns the current component (computed on the previous frame).
+			const GUIContainer* CurrentComponent() const;
+
 			/// Returns whether the mouse pointer is hovering over the current component.
 			bool IsHovered() const;
 
@@ -95,8 +98,8 @@ namespace Trident {
 			void GrowAndShrinkSizingHeightsRecursive(uint32 parentIndex);
 			void WrapTextChildrenRecursive(uint32 parentIndex);
 			void WrapText(GUIContainer& component);
-			static void FlushCurrentWord(FlushWordData& flushWordData, GUIContainer& component, const UTF8Stream& stream, svec2<float32>& characterOffset, range<uint64, uint64>& wordByteRange);
-			static void FlushWord(FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset);
+			void FlushCurrentWord(FlushWordData& flushWordData, GUIContainer& component, const UTF8Stream& stream, svec2<float32>& characterOffset, range<uint64, uint64>& wordByteRange) const;
+			void FlushWord(FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset) const;
 			void PositionsAndAlignment(GUIContainer& component, svec2<float32> origin, bool registerSubcomponents);
 
 			bool onMouseDown(MouseDownEvent& event);
@@ -123,8 +126,8 @@ namespace Trident {
 			Color clearColor = 0x00000000;
 
 			// TODO(gui/text-smoothness)
-			float32 a = 0.0f;
-			float32 b = 0.0f;
+			float32 hintingX = 0.0f;
+			float32 hintingY = 0.0f;
 
 		private:
 			GUIRenderer renderer;

@@ -381,6 +381,14 @@ namespace Trident {
 		return false;
 	}
 
+	const GUIContainer* GUILayer::CurrentComponent() const {
+		if (previousComponentCount < componentCount) {
+			return nullptr;
+		}
+
+		return &previousComponents[componentCount - 1];
+	}
+
 	bool GUILayer::IsHovered(uint32 componentIndex) const {
 		if (previousComponentCount < componentIndex + 1) {
 			return false;

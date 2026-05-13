@@ -223,7 +223,7 @@ namespace Trident {
 		const UTF8Stream& stream,
 		svec2<float32>& characterOffset,
 		range<uint64, uint64>& wordByteRange
-	) {
+	) const {
 		flushWordData.stream = UTF8Stream(view<char8>(&stream.getData()[wordByteRange.offset], wordByteRange.count));
 
 		FlushWord(flushWordData, component.characters, characterOffset);
@@ -232,41 +232,38 @@ namespace Trident {
 		wordByteRange.count = 0;
 	}
 
-	inline static float32 fract(float32 x) {
-		return x - static_cast<sint32>(x);
-	}
-
-	void GUILayer::FlushWord(FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset) {
-		constexpr float32 hintingY = -0.4f;
-
+	void GUILayer::FlushWord(FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset) const {
+		const float32 scale = data.scale;
 		const vec2<float32> imageScale = data.imageSize / GUIRenderer::TEXTURE_ARRAY_MAX_SIZE;
 
-		const float32 baseline = characterOffset.y + data.fontAsset->getAscent() * data.scale + hintingY;
+		float32 baseline = characterOffset.y + data.fontAsset->getAscent() * scale;
+
+		if (fract(baseline) > 0.5f) {
+			baseline = floor(baseline);
+		}
 
 		while (data.stream.getRemainingByteSize() > 0) {
 			const uint32 codePoint = data.stream.read();
 			const Glyph& glyph = (*data.fontAsset)[codePoint];
 
-			float32 startU = glyph.minCoordinate.x;
-			float32 startV = glyph.minCoordinate.y;
-			float32 endU = glyph.maxCoordinate.x;
-			float32 endV = glyph.maxCoordinate.y;
-
-			float32 x = characterOffset.x + glyph.leftSideBearing * data.scale;
-			float32 y = baseline - (glyph.yMax + 1) * data.scale;
+			float32 x = round(characterOffset.x + glyph.leftSideBearing * scale) + 0.5f;
+			float32 y = baseline - glyph.yMax * scale;
 
 			// TODO(gui/text/kerning)
 			/* if (data.stream.getRemainingByteSize() > 0) {
 				const uint32 nextCodePoint = data.stream.peek();
 				const sint16 kerning = data.fontAsset->getKerning(codePoint, nextCodePoint);
 
-				x += kerning * data.scale;
+				x += kerning * scale;
 			} */
 
-			float32 width = glyph.width * data.scale;
-			float32 height = glyph.height * data.scale;
+			float32 width = glyph.width * scale;
+			float32 height = glyph.height * scale;
 
-			x = round(x);
+			float32 startU = glyph.minCoordinate.x;
+			float32 startV = glyph.minCoordinate.y;
+			float32 endU = glyph.maxCoordinate.x;
+			float32 endV = glyph.maxCoordinate.y;
 
 			TextCharacter textCharacter{};
 			textCharacter.offset = {x, y};
@@ -276,7 +273,7 @@ namespace Trident {
 
 			textCharacters.emplace_back(textCharacter);
 
-			characterOffset.x += glyph.advanceWidth * data.scale;
+			characterOffset.x += glyph.advanceWidth * scale;
 		}
 	}
 
