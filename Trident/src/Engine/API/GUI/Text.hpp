@@ -236,6 +236,13 @@ namespace Trident {
 		const float32 scale = data.scale;
 		const vec2<float32> imageScale = data.imageSize / GUIRenderer::TEXTURE_ARRAY_MAX_SIZE;
 
+		float32 horizontalHinting = 0.0f;
+
+		// TODO
+		if (true) {
+			horizontalHinting = 0.5f;
+		}
+
 		float32 baseline = characterOffset.y + data.fontAsset->getAscent() * scale;
 
 		if (fract(baseline) > 0.5f) {
@@ -246,7 +253,7 @@ namespace Trident {
 			const uint32 codePoint = data.stream.read();
 			const Glyph& glyph = (*data.fontAsset)[codePoint];
 
-			float32 x = round(characterOffset.x + glyph.leftSideBearing * scale) + 0.5f;
+			float32 x = ceil(characterOffset.x + glyph.leftSideBearing * scale) + horizontalHinting;
 			float32 y = baseline - glyph.yMax * scale;
 
 			// TODO(gui/text/kerning)
