@@ -23,8 +23,10 @@ namespace Trident {
 	void GUILayer::AdjustWidth(uint32 componentIndex) {
 		GUIContainer& component = components[componentIndex];
 
+		const float32 horizontalPadding = component.padding[0] + component.padding[1];
+
 		// Add padding to the component's size.
-		component.size.width.value += component.padding.x * 2.0f;
+		component.size.width.value += horizontalPadding;
 
 		// Add layout spacing to the component's size.
 		if (component.layoutDirection == LayoutDirection::HORIZONTAL) {
@@ -34,7 +36,7 @@ namespace Trident {
 		}
 
 		if (component.floating) {
-			component.minimumSize.x += component.padding.x * 2.0f;
+			component.minimumSize.x += horizontalPadding;
 
 			return;
 		}
@@ -57,14 +59,16 @@ namespace Trident {
 		parent.size.width.value = min(parent.size.width.value, parent.maximumSize.x);
 		parent.maximumSize.x = max(parent.maximumSize.x, parent.minimumSize.x);
 
-		component.minimumSize.x += component.padding.x * 2.0f;
+		component.minimumSize.x += horizontalPadding;
 	}
 
 	void GUILayer::AdjustHeight(uint32 componentIndex) {
 		GUIContainer& component = components[componentIndex];
 
-		component.size.height.value += component.padding.y * 2.0f;
-		component.minimumSize.y += component.padding.y * 2.0f;
+		const float32 verticalPadding = component.padding[2] + component.padding[3];
+
+		component.size.height.value += verticalPadding;
+		component.minimumSize.y += verticalPadding;
 
 		if (component.layoutDirection == LayoutDirection::VERTICAL) {
 			const index childCount = max(static_cast<index>(0), component.childIndices.size() - 1);
@@ -103,7 +107,7 @@ namespace Trident {
 
 		// TODO(gui/fit-sizing): Merge growable and shrinkable passes.
 		if (parent.layoutDirection == LayoutDirection::HORIZONTAL) {
-			float32 remainingWidth = parent.size.width.value - parent.padding.x * 2.0f;
+			float32 remainingWidth = parent.size.width.value - (parent.padding[0] + parent.padding[1]);
 
 			for (const uint32 childIndex : parent.childIndices) {
 				const GUIContainer& child = components[childIndex];
@@ -241,7 +245,7 @@ namespace Trident {
 		else {
 			for (const uint32 childIndex : growableChildIndices) {
 				GUIContainer& child = components[childIndex];
-				child.size.width.value = parent.size.width.value - parent.padding.x * 2.0f;
+				child.size.width.value = parent.size.width.value - (parent.padding[0] + parent.padding[1]);
 			}
 		}
 
@@ -259,7 +263,7 @@ namespace Trident {
 
 		// TODO(gui/fit-sizing): Merge growable and shrinkable passes.
 		if (parent.layoutDirection == LayoutDirection::VERTICAL) {
-			float32 remainingHeight = parent.size.height.value - parent.padding.y * 2.0f;
+			float32 remainingHeight = parent.size.height.value - (parent.padding[2] + parent.padding[3]);
 
 			for (const uint32 childIndex : parent.childIndices) {
 				const GUIContainer& child = components[childIndex];
@@ -398,7 +402,7 @@ namespace Trident {
 		else {
 			for (const uint32 childIndex : growableChildIndices) {
 				GUIContainer& child = components[childIndex];
-				child.size.height.value = parent.size.height.value - parent.padding.y * 2.0f;
+				child.size.height.value = parent.size.height.value - (parent.padding[2] + parent.padding[3]);
 			}
 		}
 

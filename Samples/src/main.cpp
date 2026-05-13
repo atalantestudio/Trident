@@ -9,6 +9,7 @@
 
 #include "Compute/PrefixSum.hpp"
 
+#include "GUI/Article.hpp"
 #include "GUI/Card.hpp"
 #include "GUI/Demo1.hpp"
 #include "GUI/Demo2.hpp"
@@ -20,7 +21,6 @@
 #include "GUI/OptionMenu.hpp"
 #include "GUI/PageMenu.hpp"
 #include "GUI/PropertyPanel.hpp"
-#include "GUI/Sample.hpp"
 #include "GUI/Test.hpp"
 #include "GUI/Text.hpp"
 #include "GUI/TextDebug.hpp"
@@ -67,7 +67,10 @@ namespace Trident {
 			}
 		}
 		else if (SampleGroupNameProperty == "GUI") {
-			if (SampleNameProperty == "Card") {
+			if (SampleNameProperty == "Article") {
+				registerLayer<GUIArticleLayer>();
+			}
+			else if (SampleNameProperty == "Card") {
 				registerLayer<GUICardLayer>();
 			}
 			else if (SampleNameProperty == "Demo1") {
@@ -96,9 +99,6 @@ namespace Trident {
 			}
 			else if (SampleNameProperty == "PageMenu") {
 				registerLayer<GUIPageMenuLayer>();
-			}
-			else if (SampleNameProperty == "Sample") {
-				registerLayer<GUISampleLayer>();
 			}
 			else if (SampleNameProperty == "Test") {
 				registerLayer<GUITestLayer>();

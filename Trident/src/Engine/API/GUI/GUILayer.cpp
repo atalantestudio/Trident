@@ -117,7 +117,7 @@ namespace Trident {
 		rootComponent.zIndex = 0;
 		rootComponent.maximumSize = {max<float32>(), max<float32>()};
 		rootComponent.minimumSize = {0_px, 0_px};
-		rootComponent.padding = {0_px, 0_px};
+		rootComponent.padding = {0_px, 0_px, 0_px, 0_px};
 		rootComponent.anchorPoint = AnchorPoint::TOP | AnchorPoint::LEFT;
 		rootComponent.layoutDirection = LayoutDirection::VERTICAL;
 		rootComponent.layoutOffset = 0_px;

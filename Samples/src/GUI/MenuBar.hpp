@@ -54,7 +54,7 @@ namespace Trident {
 
 				Container({
 					.size = {FIT, FIT},
-					.padding = {8_px, 24_px},
+					.padding = {8_px, 8_px, 24_px, 24_px},
 				}) {
 					Text("Home", {
 						.color = textColor,
@@ -95,7 +95,7 @@ namespace Trident {
 
 					Container({
 						.size = {FIT, FIT},
-						.padding = {8_px, 4_px},
+						.padding = {8_px, 8_px, 4_px, 4_px},
 						.color = color,
 						.pointerType = PointerType::INTERACTIVE,
 					}) {
@@ -133,7 +133,7 @@ namespace Trident {
 				Floating({
 					.size = {FIT, FIT},
 					.zIndex = 1,
-					.padding = {1_px, 1_px},
+					.padding = {1_px, 1_px, 1_px, 1_px},
 					.layoutDirection = LayoutDirection::VERTICAL,
 					.layoutSpacing = 1_px,
 					.color = 0x989898ff,
@@ -152,7 +152,7 @@ namespace Trident {
 				Container({
 					.size = {EXPAND, FIT},
 					.zIndex = 1,
-					.padding = {8_px, 4_px},
+					.padding = {8_px, 8_px, 4_px, 4_px},
 					.color = 0xf0f0f0ff,
 					.pointerType = PointerType::INTERACTIVE,
 				}) {

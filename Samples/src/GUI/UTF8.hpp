@@ -9,17 +9,21 @@ namespace Trident {
 			void registerAssets() override {
 				const view<char8> assetName = getApplication()->getPropertyFile()->getProperty<view<char8>>("AssetName");
 
-				textStyle.color = 0xffffffff;
-				textStyle.font = loadFontAsset(assetName);
-				textStyle.fontSize = 96_px;
+				font = loadFontAsset(assetName);
 			}
 
 			void render() override {
+				const TextStyle textStyle = {
+					.color = 0xffffffff,
+					.font = font,
+					.fontSize = 96_px,
+				};
+
 				// Text("ÀÁÂÃÄÅĀĂĄǍÆǼÇĆĈĊČĎĐÈÉÊËĒĔĖ\nĘĚĜĞĠĢĤĦÌÍÎÏĨĪĬĮİǏĴĶĹĻĽŁÑŃŅŇÒÓÔ\nÕÖØŌŎŐǑŒŔŖŘŚŜŞŠŢŤŦÙÚÛÜŨŪ\nŬŮŰŲǓŴÝŶŸŹŻŽ", textStyle);
 				Text("àáâãäåāăąǎæǽçćĉċčďđèéêëēĕėęěĝğ\nġģĥħìíîïĩīĭįıǐĵķĺļľłñńņňòóôõöøōŏőǒœŕŗř\nśŝşšţťŧùúûüũūŭůűųǔŵýŷÿźżž", textStyle);
 			}
 
 		private:
-			TextStyle textStyle;
+			FontID font;
 	};
 }

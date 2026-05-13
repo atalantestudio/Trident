@@ -24,7 +24,7 @@ namespace Trident {
 			void render() override {
 				Container({
 					.size = {FIT, FIT},
-					.padding = {8_px, 8_px},
+					.padding = {8_px, 8_px, 8_px, 8_px},
 					.layoutDirection = VERTICAL,
 					.layoutSpacing = 8_px,
 					.color = 0xa675a2ff,
@@ -38,7 +38,7 @@ namespace Trident {
 						Container({
 							.size = {EXPAND, 40_px},
 							.minimumSize = {0_px, 40_px},
-							.padding = {8_px, 8_px},
+							.padding = {8_px, 8_px, 8_px, 8_px},
 							.anchorPoint = AnchorPoint::LEFT | AnchorPoint::VCENTER,
 							.layoutSpacing = 8_px,
 							.color = 0xbd95bcff,

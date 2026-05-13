@@ -9,7 +9,7 @@ namespace Trident {
 			void render() override {
 				Container({
 					.size = {800_px, FIT},
-					.padding = {32_px, 32_px},
+					.padding = {32_px, 32_px, 32_px, 32_px},
 					.layoutDirection = LayoutDirection::HORIZONTAL,
 					.layoutSpacing = 32_px,
 					.color = 0x0a6e89ff,

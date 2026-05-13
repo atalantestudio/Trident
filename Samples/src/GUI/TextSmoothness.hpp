@@ -99,7 +99,7 @@ namespace Trident {
 			void RangeControl(float32 width, bool& dragging, float32& offset, float32& previousOffset, float32& value) {
 				Container({
 					.size = {width, 23_px},
-					.padding = {7_px, 7_px},
+					.padding = {7_px, 7_px, 7_px, 7_px},
 					.color = 0xf5f5f5ff,
 					.debugName = "RangeControlContainer",
 				}) {

@@ -99,7 +99,7 @@ namespace Trident {
 		textComponent.maximumSize = {preferredWidth, style.fontSize};
 		textComponent.minimumSize = {minimumWidth, style.fontSize};
 		textComponent.zIndex = parent.zIndex;
-		textComponent.padding = {0_px, 0_px};
+		textComponent.padding = {0_px, 0_px, 0_px, 0_px};
 		textComponent.layoutDirection = HORIZONTAL;
 		textComponent.layoutSpacing = 0_px;
 		textComponent.color = style.color;

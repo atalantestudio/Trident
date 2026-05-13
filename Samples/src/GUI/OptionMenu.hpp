@@ -45,7 +45,7 @@ namespace Trident {
 
 					Container({
 						.size = {548_px, EXPAND},
-						.padding = {8_px, 8_px},
+						.padding = {8_px, 8_px, 8_px, 8_px},
 						.layoutDirection = LayoutDirection::VERTICAL,
 						.color = 0x0a0a0aff,
 						.debugName = "OptionMenuContainer",
@@ -91,7 +91,7 @@ namespace Trident {
 
 				Container({
 					.size = {FIT, EXPAND},
-					.padding = {10_px, 0_px},
+					.padding = {10_px, 10_px, 0_px, 0_px},
 					.anchorPoint = AnchorPoint::HCENTER | AnchorPoint::VCENTER,
 					.color = backgroundColor,
 					.pointerType = PointerType::INTERACTIVE,
@@ -111,7 +111,7 @@ namespace Trident {
 			void OptionListContainer() {
 				Container({
 					.size = {540_px, EXPAND},
-					.padding = {8_px, 8_px},
+					.padding = {8_px, 8_px, 8_px, 8_px},
 					.layoutDirection = LayoutDirection::VERTICAL,
 					.layoutSpacing = 8_px,
 					.color = 0x0a0a0aff,
@@ -123,7 +123,7 @@ namespace Trident {
 			void OptionListTitle(view<char8> title) {
 				Container({
 					.size = {EXPAND, FIT},
-					.padding = {8_px, 0_px},
+					.padding = {8_px, 8_px, 0_px, 0_px},
 				}) {
 					Text(title, {
 						.color = 0xa5a5a5ff,
@@ -167,7 +167,7 @@ namespace Trident {
 				Container({
 					.size = {EXPAND, FIT},
 					.zIndex = borderZIndex,
-					.padding = {1_px, 1_px},
+					.padding = {1_px, 1_px, 1_px, 1_px},
 					.color = borderColor,
 					.pointerType = PointerType::INTERACTIVE,
 				}) {
@@ -183,7 +183,7 @@ namespace Trident {
 
 					Container({
 						.size = {EXPAND, FIT},
-						.padding = {8_px, 8_px},
+						.padding = {8_px, 8_px, 8_px, 8_px},
 						.layoutDirection = LayoutDirection::VERTICAL,
 						.layoutSpacing = 2_px,
 						.color = backgroundColor,
@@ -205,12 +205,12 @@ namespace Trident {
 
 							Container({
 								.size = {20_px, 20_px},
-								.padding = {1_px, 1_px},
+								.padding = {1_px, 1_px, 1_px, 1_px},
 								.color = value ? 0xc2c2c2ff : borderColor,
 							}) {
 								Container({
 									.size = {EXPAND, EXPAND},
-									.padding = {1_px, 1_px},
+									.padding = {1_px, 1_px, 1_px, 1_px},
 									.color = backgroundColor,
 								}) {
 									if (value) {

@@ -32,11 +32,14 @@ namespace Trident {
 			origin[parent.layoutDirection] += component.size[parent.layoutDirection].value;
 		}
 		else {
-			// Add top/left padding.
-			origin.x += component.padding.x;
-			origin.y += component.padding.y;
+			const float32 horizontalPadding = component.padding[0] + component.padding[1];
+			const float32 verticalPadding = component.padding[2] + component.padding[3];
 
-			svec2<float32> remainingSize = {component.size.width.value - component.padding.x * 2.0f, component.size.height.value - component.padding.y * 2.0f};
+			// Add top/left padding.
+			origin.x += component.padding[0];
+			origin.y += component.padding[2];
+
+			svec2<float32> remainingSize = {component.size.width.value - horizontalPadding, component.size.height.value - verticalPadding};
 			float32 remainingAcross = 0.0f;
 
 			for (const uint32 childIndex : component.childIndices) {

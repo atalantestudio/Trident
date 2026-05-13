@@ -12,14 +12,12 @@ namespace Trident {
 				GUIDefaultTheme::registerAssets();
 
 				updateThemeColors(darkTheme);
-
-				clearColor = primaryColor;
 			}
 
 			void render() override {
 				Container({
 					.size = {EXPAND, FIT},
-					// .padding = {8_px, 8_px},
+					// .padding = {8_px, 8_px, 8_px, 8_px},
 					.layoutDirection = LayoutDirection::HORIZONTAL,
 				}) {
 					Container({
@@ -31,12 +29,12 @@ namespace Trident {
 
 					Container({
 						.size = {256_px, FIT},
-						.padding = {1_px, 1_px},
+						.padding = {1_px, 1_px, 1_px, 1_px},
 						.color = secondaryColor,
 					}) {
 						Container({
 							.size = {EXPAND, FIT},
-							.padding = {8_px, 8_px},
+							.padding = {8_px, 8_px, 8_px, 8_px},
 							.layoutDirection = LayoutDirection::VERTICAL,
 							.layoutSpacing = 8_px,
 							.color = primaryColor,
@@ -76,8 +74,6 @@ namespace Trident {
 					darkTheme = !darkTheme;
 
 					updateThemeColors(darkTheme);
-
-					clearColor = primaryColor;
 				}
 
 				RangeControlFormField("Font Size Multiplier", fontSizeMultiplier, draggingFSM, previousOffsetFSM);

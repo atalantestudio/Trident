@@ -20,12 +20,12 @@ namespace Trident {
 
 				Container({
 					.size = {FIT, FIT},
-					.padding = {8.0_px, 8.0_px},
+					.padding = {8_px, 8_px, 8_px, 8_px},
 					.layoutDirection = LayoutDirection::VERTICAL,
 				}) {
 					Container({
 						.size = {FIT, FIT},
-						.padding = {4.0_px, 4.0_px},
+						.padding = {4_px, 4_px, 4_px, 4_px},
 						.layoutDirection = LayoutDirection::VERTICAL,
 						.color = 0x22222275,
 					}) {

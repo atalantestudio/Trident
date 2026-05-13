@@ -19,7 +19,7 @@ namespace Trident {
 
 				Container({
 					.size = {static_cast<float32>(extent.width - 24_px), static_cast<float32>(extent.height - 16_px)},
-					.padding = {8_px, 8_px},
+					.padding = {8_px, 8_px, 8_px, 8_px},
 					.layoutDirection = HORIZONTAL,
 					.layoutSpacing = 8_px,
 					.color = 0x000000ff,
@@ -57,12 +57,12 @@ namespace Trident {
 					// Menu
 					Container({
 						.size = {EXPAND, EXPAND},
-						.padding = {1_px, 1_px},
+						.padding = {1_px, 1_px, 1_px, 1_px},
 						.color = 0x3a3a3aff,
 					}) {
 						Container({
 							.size = {EXPAND, EXPAND},
-							.padding = {8_px, 8_px},
+							.padding = {8_px, 8_px, 8_px, 8_px},
 							.layoutDirection = VERTICAL,
 							.color = 0x0a0a0aff,
 						}) {

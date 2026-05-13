@@ -13,7 +13,7 @@ namespace Trident {
 			void render() override {
 				ContainerStyle blue{};
 				blue.size = {1000_px, 500_px};
-				blue.padding = {32_px, 32_px};
+				blue.padding = {32_px, 32_px, 32_px, 32_px};
 				blue.anchorPoint = AnchorPoint::LEFT | AnchorPoint::VCENTER;
 				blue.layoutSpacing = 32_px;
 				blue.color = 0x0a6e89ff;
@@ -37,7 +37,7 @@ namespace Trident {
 
 					ContainerStyle lightBlue{};
 					lightBlue.size = {FIT, FIT};
-					lightBlue.padding = {32_px, 32_px};
+					lightBlue.padding = {32_px, 32_px, 32_px, 32_px};
 					lightBlue.color = 0x5ecbe4ff;
 					lightBlue.debugName = "lightBlue";
 

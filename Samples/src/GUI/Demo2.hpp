@@ -15,7 +15,7 @@ namespace Trident {
 
 				Container({
 					.size = {FIT, FIT},
-					.padding = {8_px, 8_px},
+					.padding = {8_px, 8_px, 8_px, 8_px},
 					.layoutDirection = LayoutDirection::VERTICAL,
 					.layoutSpacing = 8_px,
 					.color = 0x0a6e89ff,
@@ -26,13 +26,13 @@ namespace Trident {
 					while (i < 3) {
 						Container({
 							.size = {FIT, FIT},
-							.padding = {8_px, 8_px},
+							.padding = {8_px, 8_px, 8_px, 8_px},
 							.color = 0xfb938fff,
 							.debugName = "pink",
 						}) {
 							Container({
 								.size = {FIT, FIT},
-								.padding = {8_px, 8_px},
+								.padding = {8_px, 8_px, 8_px, 8_px},
 								.layoutDirection = LayoutDirection::HORIZONTAL,
 								.layoutSpacing = 8_px,
 								.color = 0x5ecbe4ff,

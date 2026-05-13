@@ -40,7 +40,7 @@ namespace Trident {
 				}) {
 					Container({
 						.size = {20_px, FIT},
-						.padding = {8_px, 0_px},
+						.padding = {8_px, 8_px, 0_px, 0_px},
 					}) {
 						Text(label, {
 							.color = 0xa5a5a5ff,

@@ -45,7 +45,9 @@ namespace Trident {
 
 		svec2<float32> maximumSize;
 		svec2<float32> minimumSize;
-		svec2<float32> padding;
+
+		/// Order: left, right, top, bottom.
+		vec4<float32> padding;
 
 		// For non-text components, this is the background color blended with the image.
 		// For text component, this is the text color.
