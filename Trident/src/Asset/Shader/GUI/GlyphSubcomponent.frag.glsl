@@ -32,13 +32,13 @@ float calculateScreenScalePx() {
 
 void main() {
 	float screenScale = calculateScreenScalePx();
-
-	// NOTE: Looks good when multiplied by 3.0.
-	float antialiasPerEm = interstage.fontSize * 3.0;
-
+	float antialiasPerEm = interstage.fontSize;
 	float _sample = texture(textureArray, interstage.textureCoordinate).r;
 	float distanceEm = mix(0.05, -0.05, _sample);
-	float inverseWidth = screenScale * antialiasPerEm;
+
+	// NOTE: Looks good when multiplied by something larger than 2.
+	float inverseWidth = screenScale * antialiasPerEm * 2.5;
+
 	float opacity = clamp(-distanceEm * inverseWidth + 0.5, 0.0, 1.0);
 
 	fragment = interstage.color * opacity;

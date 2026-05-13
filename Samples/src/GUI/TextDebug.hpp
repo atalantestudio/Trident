@@ -56,6 +56,8 @@ namespace Trident {
 					.fontSize = fontSize,
 				});
 
+				WarningNote("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt...");
+
 				Text("Sample text B", {
 					.color = textColor,
 					.font = fontRegular,
