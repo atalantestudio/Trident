@@ -184,7 +184,7 @@ namespace Trident {
 		GUIContainer& parent = components[parentIndex];
 
 		GUIContainer component{};
-		component.type = GUIComponentType::DEFAULT;
+		component.type = style.componentType;
 		component.parentIndex = parentIndex;
 		component.floating = floating;
 		component.origin = parent.origin;
@@ -382,6 +382,32 @@ namespace Trident {
 			}
 
 			return false;
+		}
+
+		if (focusedComponentIndex < previousFocusableComponentCount) {
+			const uint32 focusedComponentIndex_ = focusableComponentIndexToComponentIndex[focusedComponentIndex];
+
+			GUIContainer& focusedComponent = components[focusedComponentIndex_];
+
+			switch (focusedComponent.type) {
+				case GUIComponentType::TEXT_INPUT: {
+					if (event.getKeyCode() >= KeyCode::A && event.getKeyCode() <= KeyCode::Z) {
+						std::string text(&focusedComponent.text[0], focusedComponent.text.count());
+
+						text += static_cast<char8>(static_cast<uint16>(event.getKeyCode()) - static_cast<uint16>(KeyCode::A));
+
+						focusedComponent.text = sequence<char8>(&text[0], text.size());
+					}
+
+					// TODO(gui/component/text-input)
+					ENGINE_ERROR_UNIMPLEMENTED();
+
+					break;
+				}
+				default: {
+					break;
+				}
+			}
 		}
 
 		return false;

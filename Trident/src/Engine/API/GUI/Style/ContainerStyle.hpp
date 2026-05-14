@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Engine/API/GUI/ComponentType.hpp"
 #include "Engine/API/GUI/ID.hpp"
 #include "Engine/API/GUI/LayoutDirection.hpp"
 #include "Engine/API/GUI/Size.hpp"
@@ -12,6 +13,8 @@ namespace Trident {
 	struct ContainerStyle {
 		// TODO(gui/component-id)
 		// GUI::ComponentID id = max<GUI::ComponentID>();
+
+		GUIComponentType componentType = GUIComponentType::DEFAULT;
 
 		/// Offset from the origin (only for floating components).
 		svec2<float32> offset = {0_px, 0_px};

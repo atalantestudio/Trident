@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/GUI/AnchorPoint.hpp"
+#include "Engine/API/GUI/ComponentType.hpp"
 #include "Engine/API/GUI/ID.hpp"
 #include "Engine/API/GUI/LayoutDirection.hpp"
 #include "Engine/API/GUI/Size.hpp"
@@ -11,11 +12,6 @@
 #include "Engine/API/Window/PointerType.hpp"
 
 namespace Trident {
-	enum class GUIComponentType : uint8 {
-		DEFAULT,
-		VERTICAL_LIST,
-	};
-
 	struct TextCharacter {
 		/// Character position relative to the component's origin.
 		vec2<float32> offset;
