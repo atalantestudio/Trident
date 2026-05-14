@@ -101,6 +101,8 @@ namespace Trident {
 			void AdjustWidth(uint32 componentIndex);
 			void AdjustHeight(uint32 componentIndex);
 
+			float32 calculateRemainingSize(const GUIContainer& component, uint8 axis) const;
+
 			/// Width is represented by an axis of 0 and height is represented by an axis of 1.
 			/// This function recursively calls the component's children.
 			void expandAndFitComponent(uint32 componentIndex, uint8 axis);

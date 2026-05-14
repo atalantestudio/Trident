@@ -20,6 +20,24 @@ namespace Trident {
 		return childIndices;
 	}
 
+	float32 GUILayer::calculateRemainingSize(const GUIContainer& component, uint8 axis) const {
+		float32 remainingSize = component.size[axis].value - component.padding[axis * 2 + 0] - component.padding[axis * 2 + 1];
+
+		for (const uint32 childIndex : component.childIndices) {
+			const GUIContainer& child = components[childIndex];
+
+			if (child.floating) {
+				continue;
+			}
+
+			remainingSize -= child.size[axis].value;
+		}
+
+		remainingSize -= component.layoutSpacing * max(static_cast<index>(0), component.childIndices.size() - 1);
+
+		return remainingSize;
+	}
+
 	void GUILayer::AdjustWidth(uint32 componentIndex) {
 		GUIContainer& component = components[componentIndex];
 
@@ -40,8 +58,6 @@ namespace Trident {
 
 			return;
 		}
-
-		DEBUG_ASSERT(component.parentIndex != max<uint32>());
 
 		GUIContainer& parent = components[component.parentIndex];
 
@@ -81,8 +97,6 @@ namespace Trident {
 			return;
 		}
 
-		DEBUG_ASSERT(component.parentIndex != max<uint32>());
-
 		GUIContainer& parent = components[component.parentIndex];
 
 		if (parent.size.height.fillMode != FillMode::FIXED) {
@@ -103,146 +117,129 @@ namespace Trident {
 	void GUILayer::expandAndFitComponent(uint32 componentIndex, uint8 axis) {
 		GUIContainer& component = components[componentIndex];
 
-		const std::vector<uint32> expandableChildIndices = FilterChildren(component, axis, FillMode::EXPAND);
-
-		// TODO(gui/fit-sizing): Merge growable and shrinkable passes.
+		// TODO(gui/expand-and-fit): Merge expand and fit passes.
 		if (component.layoutDirection == static_cast<LayoutDirection>(axis)) {
-			float32 remainingSize = component.size[axis].value - component.padding[axis * 2 + 0] - component.padding[axis * 2 + 1];
+			std::vector<uint32> expandableChildIndices = FilterChildren(component, axis, FillMode::EXPAND);
+			std::vector<uint32> fittableChildIndices = FilterChildren(component, axis, FillMode::FIT);
+			float32 remainingSize = calculateRemainingSize(component, axis);
 
-			for (const uint32 childIndex : component.childIndices) {
-				const GUIContainer& child = components[childIndex];
+			while (remainingSize > 0.0f && expandableChildIndices.size() > 0) {
+				float32 smallestSize = components[expandableChildIndices[0]].size[axis].value;
+				float32 secondSmallestSize = max<float32>();
+				float32 sizeToAdd = remainingSize;
 
-				if (child.floating) {
-					continue;
+				for (const uint32 childIndex : expandableChildIndices) {
+					const GUIContainer& child = components[childIndex];
+					const float32 size = child.size[axis].value;
+
+					if (size > smallestSize) {
+						// If we have found a child larger than the smallest registered size, replace it with the child's size.
+						secondSmallestSize = smallestSize;
+						smallestSize = size;
+
+						continue;
+					}
+
+					if (size < smallestSize) {
+						// This child is not the smallest.
+						secondSmallestSize = min(secondSmallestSize, size);
+						sizeToAdd = secondSmallestSize - smallestSize;
+					}
 				}
 
-				remainingSize -= child.size[axis].value;
-			}
+				// Double-check that the size to add is >= than the equal size distribution among the children.
+				sizeToAdd = min(sizeToAdd, remainingSize / expandableChildIndices.size());
 
-			remainingSize -= component.layoutSpacing * max(static_cast<index>(0), component.childIndices.size() - 1);
+				sint32 index = static_cast<sint32>(expandableChildIndices.size()) - 1;
 
-			if (expandableChildIndices.size() > 0) {
-				std::vector<uint32> expandableChildIndices2 = expandableChildIndices;
+				while (index >= 0) {
+					const uint32 childIndex = expandableChildIndices[index];
 
-				while (remainingSize > 0.0f) {
-					if (expandableChildIndices2.size() == 0) {
-						break;
-					}
+					GUIContainer& child = components[childIndex];
 
-					float32 smallestSize = components[expandableChildIndices2[0]].size[axis].value;
-					float32 secondSmallestSize = max<float32>();
-					float32 sizeToAdd = remainingSize;
-
-					for (const uint32 childIndex : expandableChildIndices2) {
-						const GUIContainer& child = components[childIndex];
-						const float32 size = child.size[axis].value;
-
-						if (size < smallestSize) {
-							// This child is not the largest.
-							secondSmallestSize = min(secondSmallestSize, size);
-							sizeToAdd = secondSmallestSize - smallestSize;
-						}
-						else if (size > smallestSize) {
-							// If we have found a child larger than the largest registered size, replace it with the child's size.
-							secondSmallestSize = smallestSize;
-							smallestSize = size;
-						}
-					}
-
-					// Double-check that the size to add is >= than the equal size distribution among the children.
-					sizeToAdd = min(sizeToAdd, remainingSize / expandableChildIndices2.size());
-
-					sint32 index = static_cast<sint32>(expandableChildIndices2.size()) - 1;
-
-					while (index >= 0) {
-						const uint32 childIndex = expandableChildIndices2[index];
-						GUIContainer& child = components[childIndex];
-
+					if (child.size[axis].value == smallestSize) {
 						const float32 previousSize = child.size[axis].value;
 
-						if (child.size[axis].value == smallestSize) {
-							child.size[axis].value += sizeToAdd;
+						child.size[axis].value += sizeToAdd;
 
-							if (child.size[axis].value > child.maximumSize[axis]) {
-								child.size[axis].value = child.maximumSize[axis];
+						if (child.size[axis].value > child.maximumSize[axis]) {
+							child.size[axis].value = child.maximumSize[axis];
 
-								expandableChildIndices2.erase(expandableChildIndices2.begin() + index);
-							}
-
-							remainingSize -= child.size[axis].value - previousSize;
+							expandableChildIndices.erase(expandableChildIndices.begin() + index);
 						}
 
-						index -= 1;
+						remainingSize -= child.size[axis].value - previousSize;
 					}
+
+					index -= 1;
 				}
 			}
 
-			const std::vector<uint32> fittableChildIndices = FilterChildren(component, axis, FillMode::FIT);
+			while (remainingSize < 0.0f && fittableChildIndices.size() > 0) {
+				float32 largestSize = components[fittableChildIndices[0]].size[axis].value;
+				float32 secondLargestSize = 0.0f;
+				float32 sizeToRemove = remainingSize;
 
-			if (fittableChildIndices.size() > 0) {
-				std::vector<uint32> fittableChildIndices2 = fittableChildIndices;
+				for (const uint32 childIndex : fittableChildIndices) {
+					const GUIContainer& child = components[childIndex];
+					const float32 size = child.size[axis].value;
 
-				while (remainingSize < 0.0f) {
-					if (fittableChildIndices2.size() == 0) {
-						break;
+					if (size > largestSize) {
+						// If we have found a child larger than the largest registered size, replace it with the child's size.
+						secondLargestSize = largestSize;
+						largestSize = size;
+
+						continue;
 					}
 
-					float32 largestSize = components[fittableChildIndices2[0]].size[axis].value;
-					float32 secondLargestSize = 0.0f;
-					float32 sizeToRemove = remainingSize;
-
-					for (const uint32 childIndex : fittableChildIndices2) {
-						const GUIContainer& child = components[childIndex];
-						const float32 size = child.size[axis].value;
-
-						if (size < largestSize) {
-							// This child is not the largest.
-							secondLargestSize = max(secondLargestSize, size);
-							sizeToRemove = secondLargestSize - largestSize;
-						}
-						else if (size > largestSize) {
-							// If we have found a child larger than the largest registered size, replace it with the child's size.
-							secondLargestSize = largestSize;
-							largestSize = size;
-						}
+					if (size < largestSize) {
+						// This child is not the largest.
+						secondLargestSize = max(secondLargestSize, size);
+						sizeToRemove = secondLargestSize - largestSize;
 					}
+				}
 
-					// Double-check that the size to add is >= than the equal size distribution among the children.
-					sizeToRemove = max(sizeToRemove, remainingSize / fittableChildIndices2.size());
+				// Double-check that the size to remove is >= than the equal size distribution among the children.
+				sizeToRemove = max(sizeToRemove, remainingSize / fittableChildIndices.size());
 
-					sint32 index = static_cast<sint32>(fittableChildIndices2.size()) - 1;
+				sint32 index = static_cast<sint32>(fittableChildIndices.size()) - 1;
 
-					while (index >= 0) {
-						const uint32 childIndex = fittableChildIndices2[index];
-						GUIContainer& child = components[childIndex];
+				while (index >= 0) {
+					const uint32 childIndex = fittableChildIndices[index];
 
+					GUIContainer& child = components[childIndex];
+
+					if (child.size[axis].value == largestSize) {
 						const float32 previousSize = child.size[axis].value;
 
-						if (child.size[axis].value == largestSize) {
-							child.size[axis].value += sizeToRemove;
+						child.size[axis].value += sizeToRemove;
 
-							if (child.size[axis].value < child.minimumSize[axis]) {
-								child.size[axis].value = child.minimumSize[axis];
+						if (child.size[axis].value < child.minimumSize[axis]) {
+							child.size[axis].value = child.minimumSize[axis];
 
-								fittableChildIndices2.erase(fittableChildIndices2.begin() + index);
-							}
-
-							remainingSize -= child.size[axis].value - previousSize;
+							fittableChildIndices.erase(fittableChildIndices.begin() + index);
 						}
 
-						index -= 1;
+						remainingSize -= child.size[axis].value - previousSize;
 					}
 
-					// TODO(gui/adjust-sizing): Hack to fix infinite loop when sizing text components due to small negative remaining size.
-					if (remainingSize > -0.0001f && remainingSize < 0.0f) {
-						break;
-					}
+					index -= 1;
+				}
+
+				// TODO(gui/adjust-sizing): Hack to fix infinite loop when sizing text components due to small negative remaining size.
+				if (remainingSize > -0.0001f && remainingSize < 0.0f) {
+					break;
 				}
 			}
 		}
 		else {
-			for (const uint32 childIndex : expandableChildIndices) {
+			for (const uint32 childIndex : component.childIndices) {
 				GUIContainer& child = components[childIndex];
+
+				if (child.size[axis].fillMode != FillMode::EXPAND) {
+					continue;
+				}
+
 				child.size[axis].value = component.size[axis].value - component.padding[axis * 2 + 0] - component.padding[axis * 2 + 1];
 			}
 		}
