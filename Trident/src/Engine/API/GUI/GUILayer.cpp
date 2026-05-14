@@ -23,16 +23,11 @@ namespace Trident {
 	void GUILayer::postConstruct() {
 		renderer.setLayer(this);
 		renderer.build();
-
-		TextureArrayLayer defaultImageLayer;
-		defaultImageLayer.extent = {1, 1};
-		defaultImageLayer.data = {255, 255, 255, 255};
-
-		renderer.registerTextureArrayLayer(defaultImageLayer);
+		renderer.registerDefaultUserImage();
 
 		registerAssets();
 
-		renderer.flushTextureArrayStagingBuffer();
+		renderer.flushUserImageStagingBuffer();
 
 		components = sequence<GUIContainer>(MAX_COMPONENT_COUNT);
 		previousComponents = sequence<GUIContainer>(MAX_COMPONENT_COUNT);
@@ -42,64 +37,28 @@ namespace Trident {
 
 	FontID GUILayer::loadFontAsset(view<char8> assetName) {
 		ENGINE_ASSERT(fontCount < MAX_FONT_COUNT, "Too many fonts loaded.");
-		ENGINE_ASSERT(!renderer.isTextureArrayFlushed(), "New fonts cannot be registered after flushing the GUI texture array.");
+		ENGINE_ASSERT(!renderer.doneFlushing(), "New fonts cannot be registered after flushing the GUI texture array.");
 
 		const ref<FontAsset> fontAsset = getApplication()->getAssetLibrary()->getAsset<FontAsset>(assetName);
-		const ref<ImageAsset> glyphMapImageAsset = fontAsset->getGlyphMapImage();
+
+		ENGINE_ASSERT(fontAsset->getGlyphMapImage()->getFormat() == ImageFormat::R8_UNORM, "Glyph map images must have the R8_UNORM format.");
 
 		fonts[fontCount].fontAsset = fontAsset;
 
-		TextureArrayLayer glyphMapImageLayer{};
-		glyphMapImageLayer.extent.width = glyphMapImageAsset->getExtent().width;
-		glyphMapImageLayer.extent.height = glyphMapImageAsset->getExtent().height;
-		glyphMapImageLayer.data = sequence<uint8>(glyphMapImageLayer.extent.width * glyphMapImageLayer.extent.height * getChannelCount(ImageFormat::R8G8B8A8_UNORM));
-
-		ENGINE_ASSERT(glyphMapImageAsset->getFormat() == ImageFormat::R8_UNORM, "Glyph map images must have the R8_UNORM format.");
-
-		convert<ImageFormat::R8_UNORM, ImageFormat::R8G8B8A8_UNORM>(glyphMapImageAsset->getData(), &glyphMapImageLayer.data[0], glyphMapImageLayer.data.count());
-
 		const FontID fontId = fontCount;
 
-		fonts[fontCount].glyphMapImageId = renderer.registerTextureArrayLayer(glyphMapImageLayer);
+		fonts[fontCount].glyphMapImageId = renderer.registerUserImage(fontAsset->getGlyphMapImage());
 		fontCount += 1;
 
 		return fontId;
 	}
 
 	ImageID GUILayer::loadImageAsset(view<char8> assetName) {
-		ENGINE_ASSERT(!renderer.isTextureArrayFlushed(), "New images cannot be registered after flushing the GUI texture array.");
+		ENGINE_ASSERT(!renderer.doneFlushing(), "New images cannot be registered after flushing the GUI texture array.");
 
 		const ref<ImageAsset> imageAsset = getApplication()->getAssetLibrary()->getAsset<ImageAsset>(assetName);
 
-		TextureArrayLayer imageLayer{};
-		imageLayer.extent.width = imageAsset->getExtent().width;
-		imageLayer.extent.height = imageAsset->getExtent().height;
-		imageLayer.data = sequence<uint8>(imageLayer.extent.width * imageLayer.extent.height * getChannelCount(ImageFormat::R8G8B8A8_UNORM));
-
-		switch (imageAsset->getFormat()) {
-			case ImageFormat::R8_UNORM: {
-				convert<ImageFormat::R8_UNORM, ImageFormat::R8G8B8A8_UNORM>(imageAsset->getData(), &imageLayer.data[0], imageLayer.data.count());
-
-				break;
-			}
-			case ImageFormat::R8G8B8_UNORM: {
-				convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(imageAsset->getData(), &imageLayer.data[0], imageLayer.data.count());
-
-				break;
-			}
-			case ImageFormat::R8G8B8A8_UNORM: {
-				std::copy(imageAsset->getData().begin(), imageAsset->getData().end(), &imageLayer.data[0]);
-
-				break;
-			}
-			default: {
-				ENGINE_ERROR_UNSUPPORTED();
-
-				break;
-			}
-		}
-
-		return renderer.registerTextureArrayLayer(imageLayer);
+		return renderer.registerUserImage(imageAsset);
 	}
 
 	void GUILayer::preRender() {

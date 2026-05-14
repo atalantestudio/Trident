@@ -123,8 +123,7 @@ namespace Trident {
 	void GUILayer::WrapText(GUIContainer& component) {
 		const FontData& fontData = fonts[component.font];
 		const FontAsset& fontAsset = *fontData.fontAsset;
-		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(fontData.glyphMapImageId);
-		const vec2<float32> imageSize = {static_cast<float32>(imageExtent.width), static_cast<float32>(imageExtent.height)};
+		const Extent3D imageExtent = renderer.getUserImage(fontData.glyphMapImageId)->getExtent();
 		const uint32 dpi = getApplication()->getWindow()->getDpi();
 		const float32 fontSizePt = fontAsset.pxToPt(component.fontSize, dpi);
 		const float32 scale = fontAsset.calculateScale(fontSizePt, dpi);
@@ -132,7 +131,6 @@ namespace Trident {
 
 		FlushWordData flushWordData{};
 		flushWordData.fontAsset = &fontAsset;
-		flushWordData.imageSize = imageSize;
 		flushWordData.scale = scale;
 
 		svec2<float32> characterOffset = component.origin;
@@ -208,7 +206,6 @@ namespace Trident {
 			FlushWordData flushWordData{};
 			flushWordData.stream = UTF8Stream(view<char8>(&stream.getData()[wordByteRange.offset], wordByteRange.count));
 			flushWordData.fontAsset = &fontAsset;
-			flushWordData.imageSize = imageSize;
 			flushWordData.scale = scale;
 
 			FlushWord(flushWordData, component.characters, characterOffset);
@@ -234,7 +231,6 @@ namespace Trident {
 
 	void GUILayer::FlushWord(FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset) const {
 		const float32 scale = data.scale;
-		const vec2<float32> imageScale = data.imageSize / GUIRenderer::TEXTURE_ARRAY_MAX_SIZE;
 
 		float32 horizontalHinting = 0.0f;
 
@@ -275,8 +271,8 @@ namespace Trident {
 			TextCharacter textCharacter{};
 			textCharacter.offset = {x, y};
 			textCharacter.size = {width, height};
-			textCharacter.startTextureCoordinate = vec2<float32>{startU, startV} * imageScale;
-			textCharacter.endTextureCoordinate = vec2<float32>{endU, endV} * imageScale;
+			textCharacter.startTextureCoordinate = vec2<float32>{startU, startV};
+			textCharacter.endTextureCoordinate = vec2<float32>{endU, endV};
 
 			textCharacters.emplace_back(textCharacter);
 

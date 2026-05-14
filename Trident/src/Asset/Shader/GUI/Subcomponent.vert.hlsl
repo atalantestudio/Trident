@@ -10,7 +10,7 @@ struct VertexInput {
 	uint layerIndex : VERTEX_INPUT_ATTRIBUTE9;
 };
 
-struct VertexOutput {
+struct Interstage {
 	float4 position : SV_Position;
 	nointerpolation float4 color : VERTEX_OUTPUT_ATTRIBUTE1;
 	float3 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE2;
@@ -24,16 +24,16 @@ cbuffer Camera : register(b0) {
 	Camera camera;
 }
 
-VertexOutput main(VertexInput input) {
+Interstage main(VertexInput input) {
 	float3 vertex = float3(input.vertexAndTextureCoordinate.xy, 1.0);
 	float3 textureCoordinate = float3(input.vertexAndTextureCoordinate.zw, 1.0);
 
-	VertexOutput output;
-	output.position = float4(mul(camera.projection, mul(input.worldTransform, vertex)), 1.0);
-	output.position.z = float(input.zIndex) / 100.0;
-	output.color = input.color;
-	output.textureCoordinate = mul(input.textureTransform, textureCoordinate);
-	output.textureCoordinate.z = float(input.layerIndex);
+	Interstage interstage;
+	interstage.position = float4(mul(camera.projection, mul(input.worldTransform, vertex)), 1.0);
+	interstage.position.z = float(input.zIndex) / 100.0;
+	interstage.color = input.color;
+	interstage.textureCoordinate = mul(input.textureTransform, textureCoordinate);
+	interstage.textureCoordinate.z = float(input.layerIndex);
 
-	return output;
+	return interstage;
 }

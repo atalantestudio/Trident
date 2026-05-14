@@ -14,10 +14,10 @@ layout(set = 0, binding = 0) uniform readonly Camera {
 	mat3x3 projection;
 } camera;
 
-out VertexOutput {
+out Interstage {
 	layout(location = 0) flat vec4 color;
 	layout(location = 1) vec3 textureCoordinate;
-} vertexOutput;
+} interstage;
 
 void main() {
 	vec3 vertex = vec3(vertexAndTextureCoordinate.xy, 1.0);
@@ -26,7 +26,7 @@ void main() {
 	gl_Position = vec4(camera.projection * worldTransform * vertex, 1.0);
 	gl_Position.z = float(zIndex) / 100.0;
 
-	vertexOutput.color = color;
-	vertexOutput.textureCoordinate = textureTransform * textureCoordinate;
-	vertexOutput.textureCoordinate.z = float(textureArrayLayerIndex);
+	interstage.color = color;
+	interstage.textureCoordinate = textureTransform * textureCoordinate;
+	interstage.textureCoordinate.z = float(textureArrayLayerIndex);
 }

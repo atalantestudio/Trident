@@ -428,6 +428,14 @@ namespace Trident {
 		return perpendicularLeft(normalized(b - a));
 	}
 
+	inline mat3x3<float32> orthographicTopLeftOrigin(vec2<float32> viewport) {
+		return {
+			 2.0f / viewport[0],  0.0f,                0.0f,
+			 0.0f,               -2.0f / viewport[1],  0.0f,
+			-1.0f,                1.0f,                1.0f,
+		};
+	}
+
 	// Returns a perspective projection matrix.
 	// - fieldOfView is in radians.
 	// - coordinateSystem is 1 for left-handed and -1 for right-handed.

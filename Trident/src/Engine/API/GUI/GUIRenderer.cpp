@@ -8,150 +8,223 @@
 
 namespace Trident {
 	void GUIRenderer::build() {
-		setupRenderPass();
+		renderPass = createRenderPass();
 
-		createDepthStencilImage();
-		createDepthStencilImageView();
+		depthStencilImage = createDepthStencilImage();
+		depthStencilImageView = createDepthStencilImageView();
 
 		recreateFramebuffers();
 
-		createCameraBuffer();
-		createVertexBuffer();
-		createIndexBuffer();
-		createSubcomponentBuffer();
-		createGlyphSubcomponentBuffer();
-		createTextureArrayStagingBuffer();
+		vertexBuffer = createVertexBuffer();
+		indexBuffer = createIndexBuffer();
 
-		createTextureArrayImage();
-		createTextureArrayImageView();
+		cameraBuffer = createCameraBuffer();
+		cameraBufferMappedRange = cameraBuffer->map(0, cameraBuffer->getSize());
 
-		createNearestSampler();
-		createLinearSampler();
+		subcomponentBuffer = createSubcomponentBuffer();
+		subcomponentBufferMappedRange = subcomponentBuffer->map(0, subcomponentBuffer->getSize());
 
-		createDescriptorSetLayouts();
+		glyphSubcomponentBuffer = createGlyphSubcomponentBuffer();
+		glyphSubcomponentBufferMappedRange = glyphSubcomponentBuffer->map(0, glyphSubcomponentBuffer->getSize());
 
-		allocateDescriptorSets();
+		userImageStagingBuffer = createUserImageStagingBuffer();
+		userImageStagingBufferMappedRange = userImageStagingBuffer->map(0, userImageStagingBuffer->getSize());
+
+		userImages = sequence<ref<Image>>(MAX_USER_IMAGE_COUNT);
+		userImageViews = sequence<ref<ImageView>>(MAX_USER_IMAGE_COUNT);
+
+		nearestSampler = createNearestSampler();
+		linearSampler = createLinearSampler();
+
+		subcomponentDescriptorSetLayout = createSubcomponentDescriptorSetLayout();
+
+		const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(subcomponentDescriptorSetLayout);
+
+		subcomponentDescriptorSet = descriptorSets[0];
 
 		copyBuffers();
 
-		createSubcomponentPipelineLayout();
+		subcomponentPipelineLayout = createSubcomponentPipelineLayout();
 
-		createSubcomponentGraphicsPipeline();
-		createGlyphSubcomponentGraphicsPipeline();
+		subcomponentGraphicsPipeline = createSubcomponentGraphicsPipeline();
+		glyphSubcomponentGraphicsPipeline = createGlyphSubcomponentGraphicsPipeline();
 
-		updateDescriptorSets();
 		updateCameraProjection();
 	}
 
-	Extent2D GUIRenderer::getTextureArrayLayerExtent(uint32 layerIndex) const {
-		DEBUG_ASSERT(layerIndex < textureArrayLayerCount);
+	ref<Image> GUIRenderer::getUserImage(uint32 imageIndex) const {
+		DEBUG_ASSERT(imageIndex < userImageCount);
 
-		return textureArrayLayerExtents[layerIndex];
+		return userImages[imageIndex];
 	}
 
-	void GUIRenderer::flushTextureArrayStagingBuffer() {
-		DEBUG_ASSERT(!textureArrayFlushed);
-		DEBUG_ASSERT(textureArrayLayerCount > 0);
+	void GUIRenderer::flushUserImageStagingBuffer() {
+		DEBUG_ASSERT(!userImagesFlushed);
 
-		textureArrayStagingBuffer->unmap();
-
-		sequence<BufferImageCopyRegion> copyRegions(textureArrayLayerCount);
-		uint64 bufferOffset = 0;
-		uint32 layerIndex = 0;
-
-		while (layerIndex < textureArrayLayerCount) {
-			const Extent2D& extent = textureArrayLayerExtents[layerIndex];
-
-			copyRegions[layerIndex] = {
-				.bufferOffset = bufferOffset,
-				.imageOffsetX = 0,
-				.imageOffsetY = 0,
-				.imageOffsetZ = 0,
-				.imageExtent = {extent.width, extent.height, 1},
-				.imageMipLevel = 0,
-				.imageLayerOffset = layerIndex,
-				.imageLayerCount = 1,
-			};
-
-			bufferOffset += extent.width * extent.height * getChannelCount(ImageFormat::R8G8B8A8_UNORM);
-			layerIndex += 1;
-		}
+		userImageStagingBuffer->unmap();
 
 		const ref<Queue> graphicsQueue = getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
 		const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder({
 			.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Copy texture array layers",
+				.name = "Copy user images",
 			#endif
 		});
 
-		ImageMemoryBarrier textureArrayImageMemoryBarrier = {
-			.image = textureArrayImage,
-			.newLayout = ImageLayout::TRANSFER_DST_OPTIMAL,
-			.newAccess = Access::TRANSFER_WRITE,
-		};
-
 		commandEncoder->begin();
-		commandEncoder->insertMemoryBarriers({}, textureArrayImageMemoryBarrier);
-		commandEncoder->copyBufferToImage(textureArrayStagingBuffer, textureArrayImage, copyRegions);
 
-		textureArrayImageMemoryBarrier = {
-			.image = textureArrayImage,
-			.newLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-			.newAccess = Access::SHADER_READ,
-		};
+		BufferImageCopyRegion bufferImageCopyRegion;
+		uint64 bufferOffset = 0;
+		uint32 userImageIndex = 0;
 
-		commandEncoder->insertMemoryBarriers({}, textureArrayImageMemoryBarrier);
+		while (userImageIndex < userImageCount) {
+			const ref<Image> userImage = userImages[userImageIndex];
+
+			bufferImageCopyRegion = {
+				.bufferOffset = bufferOffset,
+				.imageOffsetX = 0,
+				.imageOffsetY = 0,
+				.imageOffsetZ = 0,
+				.imageExtent = userImage->getExtent(),
+				.imageMipLevel = 0,
+				.imageLayerOffset = 0,
+				.imageLayerCount = 1,
+			};
+
+			commandEncoder->copyBufferToImage(userImageStagingBuffer, userImages[userImageIndex], bufferImageCopyRegion);
+
+			bufferOffset += userImage->getSize();
+			userImageIndex += 1;
+		}
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
 		graphicsQueue->submit(commandBuffer);
 		graphicsQueue->waitIdle();
 
-		textureArrayStagingBuffer.~shared_ptr();
+		userImageStagingBuffer.~shared_ptr();
 
-		textureArrayFlushed = true;
+		updateDescriptorSets();
+
+		userImagesFlushed = true;
 	}
 
-	uint32 GUIRenderer::registerTextureArrayLayer(const TextureArrayLayer& layer) {
-		ENGINE_ASSERT(textureArrayLayerCount + 1 <= TEXTURE_ARRAY_MAX_LAYER_COUNT, "Too many client-side images.");
-		ENGINE_ASSERT(layer.extent.width <= TEXTURE_ARRAY_MAX_WIDTH, "Image width ([]) is larger than the maximum width ([]).", layer.extent.width, TEXTURE_ARRAY_MAX_WIDTH);
-		ENGINE_ASSERT(layer.extent.height <= TEXTURE_ARRAY_MAX_HEIGHT, "Image height ([]) is larger than the maximum height ([]).", layer.extent.height, TEXTURE_ARRAY_MAX_HEIGHT);
+	void GUIRenderer::registerDefaultUserImage() {
+		const ImageID userImageIndex = userImageCount;
 
-		const uint32 layerIndex = textureArrayLayerCount;
+		DEBUG_ASSERT(userImageIndex < MAX_USER_IMAGE_COUNT);
 
-		std::copy(layer.data.begin(), layer.data.end(), textureArrayStagingBufferMappedRange);
+		#if defined(DEBUG_OBJECT_NAME)
+			const sequence<char8> name = Logger::format("User image [] (default)", userImageIndex);
+		#endif
 
-		textureArrayStagingBufferMappedRange += layer.data.count();
-		textureArrayLayerExtents[textureArrayLayerCount] = layer.extent;
-		textureArrayLayerCount += 1;
+		userImages[userImageIndex] = createImage({
+			.type = ImageType::TEXTURE_2D,
+			.format = ImageFormat::R8G8B8A8_UNORM,
+			.extent = {1, 1, 1},
+			.mipLevelCount = 1,
+			.layerCount = 1,
+			.sampleCount = 1,
+			.usage = ImageUsage::TRANSFER_DST | ImageUsage::SAMPLED,
+			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = name,
+			#endif
+		});
+		userImageViews[userImageIndex] = userImages[userImageIndex]->createView({
+			.mipLevelOffset = 0,
+			.mipLevelCount = 1,
+			.layerOffset = 0,
+			.layerCount = 1,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = name,
+			#endif
+		});
 
-		return layerIndex;
+		const sequence<uint8> data = {255, 255, 255, 255};
+
+		std::copy(data.begin(), data.end(), userImageStagingBufferMappedRange);
+
+		userImageStagingBufferMappedRange += data.count();
+		userImageCount += 1;
+	}
+
+	ImageID GUIRenderer::registerUserImage(ref<ImageAsset> imageAsset) {
+		const ImageID userImageIndex = userImageCount;
+
+		DEBUG_ASSERT(userImageIndex < MAX_USER_IMAGE_COUNT);
+
+		#if defined(DEBUG_OBJECT_NAME)
+			const sequence<char8> name = Logger::format("User []", userImageIndex);
+		#endif
+
+		ImageFormat format = imageAsset->getFormat();
+
+		if (format == ImageFormat::R8G8B8_UNORM) {
+			format = ImageFormat::R8G8B8A8_UNORM;
+
+			const uint64 size = imageAsset->getExtent().width * imageAsset->getExtent().height * imageAsset->getExtent().depth * imageAsset->getLayerCount() * getChannelCount(ImageFormat::R8G8B8A8_UNORM);
+
+			convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(imageAsset->getData(), userImageStagingBufferMappedRange, size);
+
+			userImageStagingBufferMappedRange += size;
+		}
+		else {
+			std::copy(imageAsset->getData().begin(), imageAsset->getData().end(), userImageStagingBufferMappedRange);
+
+			userImageStagingBufferMappedRange += imageAsset->getSize();
+		}
+
+		userImages[userImageIndex] = createImage({
+			.type = ImageType::TEXTURE_2D,
+			.format = format,
+			.extent = imageAsset->getExtent(),
+			.mipLevelCount = 1,
+			.layerCount = 1,
+			.sampleCount = 1,
+			.usage = ImageUsage::TRANSFER_DST | ImageUsage::SAMPLED,
+			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = name,
+			#endif
+		});
+		userImageViews[userImageIndex] = userImages[userImageIndex]->createView({
+			.mipLevelOffset = 0,
+			.mipLevelCount = 1,
+			.layerOffset = 0,
+			.layerCount = 1,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = name,
+			#endif
+		});
+
+		userImageCount += 1;
+
+		return userImageIndex;
 	}
 
 	void GUIRenderer::registerSubcomponent(const GUISubcomponent& subcomponent) {
-		DEBUG_ASSERT(subcomponentCount < MAX_SUBCOMPONENTS);
+		DEBUG_ASSERT(subcomponentCount < MAX_SUBCOMPONENT_COUNT);
 
 		subcomponentBufferMappedRange[subcomponentCount] = subcomponent;
 		subcomponentCount += 1;
 	}
 
 	void GUIRenderer::registerGlyphSubcomponent(const GUIGlyphSubcomponent& glyphSubcomponent) {
-		DEBUG_ASSERT(glyphSubcomponentCount < MAX_GLYPH_SUBCOMPONENTS);
+		DEBUG_ASSERT(glyphSubcomponentCount < MAX_GLYPH_SUBCOMPONENT_COUNT);
 
 		glyphSubcomponentBufferMappedRange[glyphSubcomponentCount] = glyphSubcomponent;
 		glyphSubcomponentCount += 1;
 	}
 
-	void GUIRenderer::setupRenderPass() {
-		renderPass = createRenderPass({
+	ref<RenderPass> GUIRenderer::createRenderPass() const {
+		return Renderer::createRenderPass({
 			.attachments = {
 				{
 					.format = getSurface()->getFormat(),
 					.sampleCount = 1,
 
-					// TODO(layer-superposition)
-					// TODO: Using LOAD when this layer is the only one registered will generate non-blocking errors from the Vulkan validation layers.
+					// TODO(layer-superposition): Using LOAD when this layer is the only one registered will generate non-blocking errors from the Vulkan validation layers.
 					.loadOperation = LoadOperation::LOAD,
 					// .loadOperation = LoadOperation::CLEAR,
 
@@ -164,7 +237,7 @@ namespace Trident {
 					.loadOperation = LoadOperation::CLEAR,
 					.storeOperation = StoreOperation::UNDEFINED,
 					.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-				}
+				},
 			},
 			.subpasses = {
 				createSubpass({
@@ -180,35 +253,6 @@ namespace Trident {
 					},
 				}),
 			},
-		});
-	}
-
-	void GUIRenderer::createDepthStencilImage() {
-		const Extent2D swapchainExtent = getSwapchain()->getExtent();
-
-		depthStencilImage = renderPass->createDepthStencilAttachmentImage(
-			{
-				.type = ImageType::TEXTURE_2D,
-				.extent = {swapchainExtent.width, swapchainExtent.height, 1},
-				.mipLevelCount = 1,
-				.layerCount = 1,
-				#if defined(DEBUG_OBJECT_NAME)
-					.name = "Depth stencil image",
-				#endif
-			},
-			0
-		);
-	}
-
-	void GUIRenderer::createDepthStencilImageView() {
-		depthStencilImageView = depthStencilImage->createView({
-			.mipLevelOffset = 0,
-			.mipLevelCount = 1,
-			.layerOffset = 0,
-			.layerCount = 1,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Depth stencil image view",
-			#endif
 		});
 	}
 
@@ -244,22 +288,9 @@ namespace Trident {
 		}
 	}
 
-	void GUIRenderer::createCameraBuffer() {
-		cameraBuffer = createBuffer<Camera>({
-			.size = sizeof(Camera),
-			.usage = BufferUsage::UNIFORM,
-			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
-			.persistent = true,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Camera",
-			#endif
-		});
-		cameraBufferMappedRange = cameraBuffer->map(0, cameraBuffer->getSize());
-	}
-
-	void GUIRenderer::createVertexBuffer() {
-		vertexBuffer = createBuffer<Vertex>({
-			.size = VERTEX_BUFFER_SIZE,
+	ref<Buffer<GUIRenderer::Vertex>> GUIRenderer::createVertexBuffer() const {
+		return createBuffer<Vertex>({
+			.size = sizeof(Vertex) * 4,
 			.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			#if defined(DEBUG_OBJECT_NAME)
@@ -268,9 +299,9 @@ namespace Trident {
 		});
 	}
 
-	void GUIRenderer::createIndexBuffer() {
-		indexBuffer = createBuffer<uint16>({
-			.size = INDEX_BUFFER_SIZE,
+	ref<Buffer<uint16>> GUIRenderer::createIndexBuffer() const {
+		return createBuffer<uint16>({
+			.size = sizeof(uint16) * 6,
 			.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			#if defined(DEBUG_OBJECT_NAME)
@@ -279,9 +310,21 @@ namespace Trident {
 		});
 	}
 
-	void GUIRenderer::createSubcomponentBuffer() {
-		subcomponentBuffer = createBuffer<GUISubcomponent>({
-			.size = SUBCOMPONENT_BUFFER_SIZE,
+	ref<Buffer<GUIRenderer::Camera>> GUIRenderer::createCameraBuffer() const {
+		return createBuffer<Camera>({
+			.size = sizeof(Camera),
+			.usage = BufferUsage::UNIFORM,
+			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
+			.persistent = true,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Camera",
+			#endif
+		});
+	}
+
+	ref<Buffer<GUISubcomponent>> GUIRenderer::createSubcomponentBuffer() const {
+		return createBuffer<GUISubcomponent>({
+			.size = sizeof(GUISubcomponent) * MAX_SUBCOMPONENT_COUNT,
 			.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = true,
@@ -289,12 +332,11 @@ namespace Trident {
 				.name = "Subcomponent",
 			#endif
 		});
-		subcomponentBufferMappedRange = subcomponentBuffer->map(0, subcomponentBuffer->getSize());
 	}
 
-	void GUIRenderer::createGlyphSubcomponentBuffer() {
-		glyphSubcomponentBuffer = createBuffer<GUIGlyphSubcomponent>({
-			.size = GLYPH_SUBCOMPONENT_BUFFER_SIZE,
+	ref<Buffer<GUIGlyphSubcomponent>> GUIRenderer::createGlyphSubcomponentBuffer() const {
+		return createBuffer<GUIGlyphSubcomponent>({
+			.size = sizeof(GUIGlyphSubcomponent) * MAX_GLYPH_SUBCOMPONENT_COUNT,
 			.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = true,
@@ -302,74 +344,78 @@ namespace Trident {
 				.name = "Glyph subcomponent",
 			#endif
 		});
-		glyphSubcomponentBufferMappedRange = glyphSubcomponentBuffer->map(0, glyphSubcomponentBuffer->getSize());
 	}
 
-	void GUIRenderer::createTextureArrayStagingBuffer() {
-		textureArrayStagingBuffer = createStagingBuffer<uint8>(TEXTURE_ARRAY_MAX_WIDTH * TEXTURE_ARRAY_MAX_HEIGHT * TEXTURE_ARRAY_MAX_LAYER_COUNT * TEXTURE_ARRAY_LAYER_BPP);
-		textureArrayStagingBufferMappedRange = textureArrayStagingBuffer->map(0, textureArrayStagingBuffer->getSize());
+	ref<Image> GUIRenderer::createDepthStencilImage() const {
+		const Extent2D swapchainExtent = getSwapchain()->getExtent();
+
+		return renderPass->createDepthStencilAttachmentImage(
+			{
+				.type = ImageType::TEXTURE_2D,
+				.extent = {swapchainExtent.width, swapchainExtent.height, 1},
+				.mipLevelCount = 1,
+				.layerCount = 1,
+				#if defined(DEBUG_OBJECT_NAME)
+					.name = "Depth stencil image",
+				#endif
+			},
+			0
+		);
 	}
 
-	void GUIRenderer::createTextureArrayImage() {
-		textureArrayImage = createImage({
-			.type = ImageType::TEXTURE_2D,
-			.format = ImageFormat::R8G8B8A8_UNORM,
-			.extent = {TEXTURE_ARRAY_MAX_WIDTH, TEXTURE_ARRAY_MAX_HEIGHT, 1},
-			.mipLevelCount = 1,
-			.layerCount = TEXTURE_ARRAY_MAX_LAYER_COUNT,
-			.sampleCount = 1,
-			.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST,
-			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Texture array",
-			#endif
-		});
-	}
-
-	void GUIRenderer::createTextureArrayImageView() {
-		textureArrayImageView = textureArrayImage->createView({
+	ref<ImageView> GUIRenderer::createDepthStencilImageView() const {
+		return depthStencilImage->createView({
 			.mipLevelOffset = 0,
 			.mipLevelCount = 1,
 			.layerOffset = 0,
-			.layerCount = textureArrayImage->getLayerCount(),
+			.layerCount = 1,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Texture array",
+				.name = "Depth stencil image view",
 			#endif
 		});
 	}
 
-	void GUIRenderer::createNearestSampler() {
-		nearestSampler = createSampler({
+	ref<Buffer<uint8>> GUIRenderer::createUserImageStagingBuffer() const {
+		// Can accomodate for 8 2048x2048 RGBA textures.
+		return createStagingBuffer<uint8>(134217728);
+	}
+
+	ref<Sampler> GUIRenderer::createNearestSampler() const {
+		return createSampler({
 			.magFilter = SamplerFilter::NEAREST,
 			.minFilter = SamplerFilter::NEAREST,
 		});
 	}
 
-	void GUIRenderer::createLinearSampler() {
-		linearSampler = createSampler({
+	ref<Sampler> GUIRenderer::createLinearSampler() const {
+		return createSampler({
 			.magFilter = SamplerFilter::LINEAR,
 			.minFilter = SamplerFilter::LINEAR,
 		});
 	}
 
-	void GUIRenderer::createDescriptorSetLayouts() {
-		const DescriptorSetLayoutBinding cameraBinding = {
-			.descriptorType = DescriptorType::UNIFORM_BUFFER,
-			.descriptorCount = 1,
-			.shaderStages = ShaderStage::VERTEX,
+	ref<DescriptorSetLayout> GUIRenderer::createSubcomponentDescriptorSetLayout() const {
+		const sequence<DescriptorSetLayoutBinding> bindings = {
+			// Camera
+			{
+				.descriptorType = DescriptorType::UNIFORM_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::VERTEX,
+			},
+
+			// User images
+			{
+				.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+				.descriptorCount = MAX_USER_IMAGE_COUNT,
+				.shaderStages = ShaderStage::FRAGMENT,
+			},
 		};
 
-		const DescriptorSetLayoutBinding textureArrayBinding = {
-			.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
-			.descriptorCount = 1,
-			.shaderStages = ShaderStage::FRAGMENT,
-		};
-
-		subcomponentDescriptorSetLayout = createDescriptorSetLayout({cameraBinding, textureArrayBinding});
+		return createDescriptorSetLayout(bindings);
 	}
 
-	void GUIRenderer::createSubcomponentPipelineLayout() {
-		subcomponentPipelineLayout = createPipelineLayout({
+	ref<PipelineLayout> GUIRenderer::createSubcomponentPipelineLayout() const {
+		return createPipelineLayout({
 			.descriptorSetLayouts = {subcomponentDescriptorSetLayout},
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Subcomponent",
@@ -377,7 +423,7 @@ namespace Trident {
 		});
 	}
 
-	void GUIRenderer::createSubcomponentGraphicsPipeline() {
+	ref<GraphicsPipeline> GUIRenderer::createSubcomponentGraphicsPipeline() const {
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 		vertexInputBinding.registerAttribute<vec4<float32>>(); // Vertex position and texture coordinate
 
@@ -388,25 +434,6 @@ namespace Trident {
 		instanceInputBinding.registerAttribute<uint32>(); // Z-index
 		instanceInputBinding.registerAttribute<uint32>(); // Texture array layer index
 
-		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
-		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-		vertexShaderModuleDescriptor.entryPoint = "main";
-
-		#if defined(DEBUG_OBJECT_NAME)
-			vertexShaderModuleDescriptor.name = "Subcomponent vertex";
-		#endif
-
-		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
-		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-		fragmentShaderModuleDescriptor.entryPoint = "main";
-
-		#if defined(DEBUG_OBJECT_NAME)
-			fragmentShaderModuleDescriptor.name = "Subcomponent fragment";
-		#endif
-
-		const ref<ShaderModule> vertexShaderModule = loadInternalShaderModule(vertexShaderModuleDescriptor, "GUI/Subcomponent.vert");
-		const ref<ShaderModule> fragmentShaderModule = loadInternalShaderModule(fragmentShaderModuleDescriptor, "GUI/Subcomponent.frag");
-
 		const sequence<ColorBlendAttachment> colorBlendAttachments = {
 			{
 				.blend = true,
@@ -415,11 +442,31 @@ namespace Trident {
 			},
 		};
 
-		subcomponentGraphicsPipeline = createGraphicsPipeline({
+		return createGraphicsPipeline({
 			.pipelineLayout = subcomponentPipelineLayout,
 			.vertexInputBindings = {vertexInputBinding, instanceInputBinding},
-			.vertexShaderModule = vertexShaderModule,
-			.fragmentShaderModule = fragmentShaderModule,
+			.vertexShaderModule = loadInternalShaderModule(
+				{
+					.stage = ShaderStage::VERTEX,
+					.entryPoint = "main",
+
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Subcomponent vertex",
+					#endif
+				},
+				"GUI/Subcomponent.vert"
+			),
+			.fragmentShaderModule = loadInternalShaderModule(
+				{
+					.stage = ShaderStage::FRAGMENT,
+					.entryPoint = "main",
+
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Subcomponent fragment",
+					#endif
+				},
+				"GUI/Subcomponent.frag"
+			),
 			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
 			.polygonMode = PolygonMode::FILL,
 			.cullMode = CullMode::BACK,
@@ -443,7 +490,7 @@ namespace Trident {
 		});
 	}
 
-	void GUIRenderer::createGlyphSubcomponentGraphicsPipeline() {
+	ref<GraphicsPipeline> GUIRenderer::createGlyphSubcomponentGraphicsPipeline() const {
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 		vertexInputBinding.registerAttribute<vec4<float32>>(); // Vertex position and texture coordinate
 
@@ -455,25 +502,6 @@ namespace Trident {
 		instanceInputBinding.registerAttribute<uint32>(); // Layer index
 		instanceInputBinding.registerAttribute<float32>(); // Font size
 
-		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
-		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-		vertexShaderModuleDescriptor.entryPoint = "main";
-
-		#if defined(DEBUG_OBJECT_NAME)
-			vertexShaderModuleDescriptor.name = "Glyph subcomponent vertex";
-		#endif
-
-		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
-		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-		fragmentShaderModuleDescriptor.entryPoint = "main";
-
-		#if defined(DEBUG_OBJECT_NAME)
-			fragmentShaderModuleDescriptor.name = "Glyph subcomponent fragment";
-		#endif
-
-		const ref<ShaderModule> vertexShaderModule = loadInternalShaderModule(vertexShaderModuleDescriptor, "GUI/GlyphSubcomponent.vert");
-		const ref<ShaderModule> fragmentShaderModule = loadInternalShaderModule(fragmentShaderModuleDescriptor, "GUI/GlyphSubcomponent.frag");
-
 		const sequence<ColorBlendAttachment> colorBlendAttachments = {
 			{
 				.blend = true,
@@ -482,11 +510,31 @@ namespace Trident {
 			},
 		};
 
-		glyphSubcomponentGraphicsPipeline = createGraphicsPipeline({
+		return createGraphicsPipeline({
 			.pipelineLayout = subcomponentPipelineLayout,
 			.vertexInputBindings = {vertexInputBinding, instanceInputBinding},
-			.vertexShaderModule = vertexShaderModule,
-			.fragmentShaderModule = fragmentShaderModule,
+			.vertexShaderModule =  loadInternalShaderModule(
+				{
+					.stage = ShaderStage::VERTEX,
+					.entryPoint = "main",
+
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Glyph subcomponent vertex",
+					#endif
+				},
+				"GUI/GlyphSubcomponent.vert"
+			),
+			.fragmentShaderModule = loadInternalShaderModule(
+				{
+					.stage = ShaderStage::FRAGMENT,
+					.entryPoint = "main",
+
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Glyph subcomponent fragment",
+					#endif
+				},
+				"GUI/GlyphSubcomponent.frag"
+			),
 			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
 			.polygonMode = PolygonMode::FILL,
 			.cullMode = CullMode::BACK,
@@ -510,18 +558,8 @@ namespace Trident {
 		});
 	}
 
-	void GUIRenderer::allocateDescriptorSets() {
-		const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(sequence<ref<DescriptorSetLayout>>{
-			subcomponentDescriptorSetLayout,
-			subcomponentDescriptorSetLayout,
-		});
-
-		subcomponentDescriptorSet = descriptorSets[0];
-		glyphSubcomponentDescriptorSet = descriptorSets[1];
-	}
-
 	void GUIRenderer::copyBuffers() const {
-		const ref<Buffer<uint8>> stagingBuffer = createStagingBuffer<uint8>(VERTEX_BUFFER_SIZE + INDEX_BUFFER_SIZE);
+		const ref<Buffer<uint8>> stagingBuffer = createStagingBuffer<uint8>(vertexBuffer->getSize() + indexBuffer->getSize());
 
 		uint8* mappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
 
@@ -535,11 +573,11 @@ namespace Trident {
 		vertexMappedRange[3].position = {0.0f, 1.0f};
 		vertexMappedRange[3].textureCoordinate = {0.0f, 1.0f};
 
-		uint16* indexMappedRange = pointer_cast<uint16*>(mappedRange + VERTEX_BUFFER_SIZE);
+		uint16* indexMappedRange = pointer_cast<uint16*>(mappedRange + vertexBuffer->getSize());
 
 		static constexpr uint16 INDICES[] = {0, 1, 2, 0, 2, 3};
 
-		std::copy_n(INDICES, INDEX_BUFFER_SIZE, indexMappedRange);
+		std::copy_n(INDICES, 6, indexMappedRange);
 
 		stagingBuffer->unmap();
 
@@ -583,16 +621,22 @@ namespace Trident {
 			.offset = 0,
 			.size = cameraBuffer->getSize(),
 		};
-		const DescriptorImage nearestTextureArrayDescriptorImage = {
-			.imageView = textureArrayImageView,
-			.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-			.sampler = nearestSampler,
-		};
-		const DescriptorImage linearTextureArrayDescriptorImage = {
-			.imageView = textureArrayImageView,
-			.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-			.sampler = linearSampler,
-		};
+
+		sequence<DescriptorImage> userDescriptorImages(userImageCount);
+
+		uint32 userImageIndex = 0;
+
+		while (userImageIndex < userImageCount) {
+			userDescriptorImages[userImageIndex] = {
+				.imageView = userImageViews[userImageIndex],
+				.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+
+				// TODO(gui/image/sampler): Let the user choose the sampler for each image.
+				.sampler = linearSampler,
+			};
+
+			userImageIndex += 1;
+		}
 
 		const sequence<WriteDescriptorSet> writeDescriptorSets = {
 			{
@@ -603,17 +647,9 @@ namespace Trident {
 			{
 				.descriptorSet = subcomponentDescriptorSet,
 				.bindingIndex = 1,
-				.descriptorImages = nearestTextureArrayDescriptorImage,
-			},
-			{
-				.descriptorSet = glyphSubcomponentDescriptorSet,
-				.bindingIndex = 0,
-				.descriptorBuffers = cameraDescriptorBuffer,
-			},
-			{
-				.descriptorSet = glyphSubcomponentDescriptorSet,
-				.bindingIndex = 1,
-				.descriptorImages = linearTextureArrayDescriptorImage,
+
+				// TODO: Update all images in the descriptor (Vulkan and DX12).
+				.descriptorImages = userDescriptorImages,
 			},
 		};
 
@@ -621,14 +657,10 @@ namespace Trident {
 	}
 
 	void GUIRenderer::updateCameraProjection() const {
-		const Extent2D swapchainExtent = getSwapchain()->getExtent();
+		const Extent2D extent = getSwapchain()->getExtent();
 
 		// TODO: lyah::mat<3, 3, float32>::orthographic
-		cameraBufferMappedRange->projection = {
-			 2.0f / swapchainExtent.width,  0.0f,                           0.0f,
-			 0.0f,                         -2.0f / swapchainExtent.height,  0.0f,
-			-1.0f,                          1.0f,                           1.0f,
-		};
+		cameraBufferMappedRange->projection = orthographicTopLeftOrigin({static_cast<float32>(extent.width), static_cast<float32>(extent.height)});
 	}
 
 	void GUIRenderer::render(ref<CommandEncoder> commandEncoder) const {
@@ -656,7 +688,10 @@ namespace Trident {
 		if (subcomponentCount > 0) {
 			commandEncoder->bindGraphicsPipeline(subcomponentGraphicsPipeline);
 			commandEncoder->bindDescriptorSets(subcomponentPipelineLayout, 0, subcomponentDescriptorSet);
+
+			// TODO: Remove vertex buffer.
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
+
 			commandEncoder->bindVertexBuffer(1, subcomponentBuffer, 0, sizeof(GUISubcomponent));
 			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 			commandEncoder->drawIndexed(6, subcomponentCount, 0, 0, 0);
@@ -664,8 +699,11 @@ namespace Trident {
 
 		if (glyphSubcomponentCount > 0) {
 			commandEncoder->bindGraphicsPipeline(glyphSubcomponentGraphicsPipeline);
-			commandEncoder->bindDescriptorSets(subcomponentPipelineLayout, 0, glyphSubcomponentDescriptorSet);
+			commandEncoder->bindDescriptorSets(subcomponentPipelineLayout, 0, subcomponentDescriptorSet);
+
+			// TODO: Remove vertex buffer.
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
+
 			commandEncoder->bindVertexBuffer(1, glyphSubcomponentBuffer, 0, sizeof(GUIGlyphSubcomponent));
 			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 			commandEncoder->drawIndexed(6, glyphSubcomponentCount, 0, 0, 0);
@@ -675,9 +713,11 @@ namespace Trident {
 	}
 
 	void GUIRenderer::resize(WindowResizeEvent& event) {
-		createDepthStencilImage();
-		createDepthStencilImageView();
+		depthStencilImage = createDepthStencilImage();
+		depthStencilImageView = createDepthStencilImageView();
+
 		recreateFramebuffers();
+
 		updateCameraProjection();
 	}
 

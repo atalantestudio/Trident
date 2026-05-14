@@ -23,7 +23,6 @@ namespace Trident {
 			struct FlushWordData {
 				UTF8Stream stream;
 				const FontAsset* fontAsset;
-				vec2<float32> imageSize;
 				float32 scale;
 			};
 

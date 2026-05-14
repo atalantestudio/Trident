@@ -164,12 +164,10 @@ namespace Trident {
 
 		const vec2<float32> decimalOrigin = {x, round(y)};
 		const vec2<float32> decimalSize = {width, height};
-		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(component.image);
-		const vec2<float32> imageSize = {static_cast<float32>(imageExtent.width), static_cast<float32>(imageExtent.height)};
 
 		GUISubcomponent subcomponent{};
 		subcomponent.worldTransform = mat3x3<float32>::scaling(decimalSize) * mat3x3<float32>::translation(decimalOrigin);
-		subcomponent.textureTransform = mat3x3<float32>::scaling(imageSize / renderer.TEXTURE_ARRAY_MAX_SIZE);
+		subcomponent.textureTransform = mat3x3<float32>::identity();
 		subcomponent.color = component.color.value;
 		subcomponent.zIndex = component.zIndex;
 		subcomponent.textureArrayLayerIndex = component.image;

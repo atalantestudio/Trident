@@ -43,6 +43,11 @@ namespace Trident {
 
 							while (descriptorBufferIndex < descriptorSetBinding.descriptorBuffers.count()) {
 								const DescriptorBuffer& descriptorBuffer = descriptorSetBinding.descriptorBuffers[descriptorBufferIndex];
+
+								if (descriptorBuffer.buffer == nullptr) {
+									break;
+								}
+
 								const GLuint index = descriptorSetLayoutOffset + bindingIndex + descriptorBufferIndex;
 
 								#if OPENGL_VERSION >= OPENGL_VERSION_3_0
@@ -60,6 +65,11 @@ namespace Trident {
 							while (descriptorImageIndex < descriptorSetBinding.descriptorImages.count()) {
 								const DescriptorImage& descriptorImage = descriptorSetBinding.descriptorImages[descriptorImageIndex];
 								const ref<GL::ImageView> imageView = std::static_pointer_cast<GL::ImageView>(descriptorImage.imageView);
+
+								if (imageView == nullptr) {
+									break;
+								}
+
 								const GLuint unit = descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex;
 
 								// TODO: Use correct access.
@@ -86,6 +96,10 @@ namespace Trident {
 							while (descriptorImageIndex < descriptorSetBinding.descriptorImages.count()) {
 								const DescriptorImage& descriptorImage = descriptorSetBinding.descriptorImages[descriptorImageIndex];
 								const ref<GL::ImageView> imageView = std::static_pointer_cast<GL::ImageView>(descriptorImage.imageView);
+
+								if (imageView == nullptr) {
+									break;
+								}
 
 								#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 									glBindTextureUnit(descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex, imageView->texture);

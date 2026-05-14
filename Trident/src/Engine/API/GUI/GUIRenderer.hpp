@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Event/Window/WindowResizeEvent.hpp"
+#include "Engine/API/GUI/ID.hpp"
 #include "Engine/API/GUI/TextureArrayLayer.hpp"
 #include "Engine/API/GUI/Subcomponent.hpp"
 #include "Engine/ECS/ECS.hpp"
@@ -22,28 +23,20 @@ namespace Trident {
 			};
 
 		public:
-			static constexpr uint32 MAX_SUBCOMPONENTS = 2048;
-			static constexpr uint32 MAX_GLYPH_SUBCOMPONENTS = 2048;
-			static constexpr uint32 VERTEX_BUFFER_SIZE = 6 * sizeof(Vertex);
-			static constexpr uint32 INDEX_BUFFER_SIZE = 6 * sizeof(uint16);
-			static constexpr uint32 SUBCOMPONENT_BUFFER_SIZE = MAX_SUBCOMPONENTS * sizeof(GUISubcomponent);
-			static constexpr uint32 GLYPH_SUBCOMPONENT_BUFFER_SIZE = MAX_GLYPH_SUBCOMPONENTS * sizeof(GUIGlyphSubcomponent);
-			static constexpr uint32 TEXTURE_ARRAY_MAX_WIDTH = 2048;
-			static constexpr uint32 TEXTURE_ARRAY_MAX_HEIGHT = 2048;
-			static constexpr uint32 TEXTURE_ARRAY_MAX_LAYER_COUNT = 8;
-			static constexpr uint64 TEXTURE_ARRAY_LAYER_BPP = sizeof(uint32);
-			static inline const vec2<float32> TEXTURE_ARRAY_MAX_SIZE = {TEXTURE_ARRAY_MAX_WIDTH, TEXTURE_ARRAY_MAX_HEIGHT};
+			static constexpr uint32 MAX_USER_IMAGE_COUNT = 8;
+			static constexpr uint32 MAX_SUBCOMPONENT_COUNT = 2048;
+			static constexpr uint32 MAX_GLYPH_SUBCOMPONENT_COUNT = 2048;
 
 		public:
 			void build() final override;
 
-			Extent2D getTextureArrayLayerExtent(uint32 layerIndex) const;
+			ref<Image> getUserImage(uint32 imageIndex) const;
 
-			void flushTextureArrayStagingBuffer();
+			void registerDefaultUserImage();
 
-			// Copies the image data to the texture array staging buffer.
-			// Returns the layer index of the image in the array.
-			uint32 registerTextureArrayLayer(const TextureArrayLayer& layer);
+			ImageID registerUserImage(ref<ImageAsset> imageAsset);
+
+			void flushUserImageStagingBuffer();
 
 			void registerSubcomponent(const GUISubcomponent& subcomponent);
 
@@ -55,38 +48,39 @@ namespace Trident {
 
 			void resetCounters();
 
-			inline bool isTextureArrayFlushed() const {
-				return textureArrayFlushed;
+			inline bool doneFlushing() const {
+				return userImagesFlushed;
 			}
 
 		private:
-			void setupRenderPass();
+			ref<RenderPass> createRenderPass() const;
 
 			void recreateFramebuffers();
 
-			void createCameraBuffer();
-			void createVertexBuffer();
-			void createIndexBuffer();
-			void createSubcomponentBuffer();
-			void createGlyphSubcomponentBuffer();
-			void createTextureArrayStagingBuffer();
-			void createDepthStencilImage();
-			void createTextureArrayImage();
-			void createDepthStencilImageView();
-			void createTextureArrayImageView();
-			void createNearestSampler();
-			void createLinearSampler();
-			void createDescriptorSetLayouts();
-			void createSubcomponentPipelineLayout();
-			void createGlyphSubcomponentPipelineLayout();
-			void createSubcomponentGraphicsPipeline();
-			void createGlyphSubcomponentGraphicsPipeline();
-
-			void allocateDescriptorSets();
-
-			void copyBuffers() const;
+			ref<DescriptorSetLayout> createSubcomponentDescriptorSetLayout() const;
 
 			void updateDescriptorSets() const;
+
+			ref<PipelineLayout> createSubcomponentPipelineLayout() const;
+
+			ref<GraphicsPipeline> createSubcomponentGraphicsPipeline() const;
+			ref<GraphicsPipeline> createGlyphSubcomponentGraphicsPipeline() const;
+
+			ref<Buffer<Vertex>> createVertexBuffer() const;
+			ref<Buffer<uint16>> createIndexBuffer() const;
+			ref<Buffer<Camera>> createCameraBuffer() const;
+			ref<Buffer<uint8>> createUserImageStagingBuffer() const;
+			ref<Buffer<GUISubcomponent>> createSubcomponentBuffer() const;
+			ref<Buffer<GUIGlyphSubcomponent>> createGlyphSubcomponentBuffer() const;
+
+			ref<Image> createDepthStencilImage() const;
+
+			ref<ImageView> createDepthStencilImageView() const;
+
+			ref<Sampler> createNearestSampler() const;
+			ref<Sampler> createLinearSampler() const;
+
+			void copyBuffers() const;
 
 			void updateCameraProjection() const;
 
@@ -98,7 +92,6 @@ namespace Trident {
 			ref<DescriptorSetLayout> subcomponentDescriptorSetLayout;
 
 			ref<DescriptorSet> subcomponentDescriptorSet;
-			ref<DescriptorSet> glyphSubcomponentDescriptorSet;
 
 			ref<PipelineLayout> subcomponentPipelineLayout;
 
@@ -110,13 +103,13 @@ namespace Trident {
 			ref<Buffer<uint16>> indexBuffer;
 			ref<Buffer<GUISubcomponent>> subcomponentBuffer;
 			ref<Buffer<GUIGlyphSubcomponent>> glyphSubcomponentBuffer;
-			ref<Buffer<uint8>> textureArrayStagingBuffer;
+			ref<Buffer<uint8>> userImageStagingBuffer;
 
 			ref<Image> depthStencilImage;
-			ref<Image> textureArrayImage;
+			sequence<ref<Image>> userImages;
 
 			ref<ImageView> depthStencilImageView;
-			ref<ImageView> textureArrayImageView;
+			sequence<ref<ImageView>> userImageViews;
 
 			ref<Sampler> nearestSampler;
 			ref<Sampler> linearSampler;
@@ -124,14 +117,12 @@ namespace Trident {
 			Camera* cameraBufferMappedRange = nullptr;
 			GUISubcomponent* subcomponentBufferMappedRange = nullptr;
 			GUIGlyphSubcomponent* glyphSubcomponentBufferMappedRange = nullptr;
-			uint8* textureArrayStagingBufferMappedRange = nullptr;
-
-			Extent2D textureArrayLayerExtents[TEXTURE_ARRAY_MAX_LAYER_COUNT];
+			uint8* userImageStagingBufferMappedRange = nullptr;
 
 			uint32 subcomponentCount = 0;
 			uint32 glyphSubcomponentCount = 0;
-			uint32 textureArrayLayerCount = 0;
+			uint32 userImageCount = 0;
 
-			bool textureArrayFlushed = false;
+			bool userImagesFlushed = false;
 	};
 }
