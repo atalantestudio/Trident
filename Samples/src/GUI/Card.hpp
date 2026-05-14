@@ -13,7 +13,6 @@ namespace Trident {
 			}
 
 			void render() override {
-				// TODO: Fix height overflow (also happening in Demo1, Demo2 and DropDownMenu).
 				Container({
 					.size = {FIT, FIT},
 					.padding = {8_px, 8_px, 8_px, 8_px},

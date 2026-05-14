@@ -20,17 +20,7 @@ namespace Trident {
 					.layoutDirection = LayoutDirection::VERTICAL,
 					.layoutSpacing = 8_px,
 				}) {
-					if (Button("Light")) {
-						ENGINE_DEBUG("Light");
-					}
-
-					InfoNote("I'm not focusable.");
-
-					if (Button("Dark")) {
-						ENGINE_DEBUG("Dark");
-					}
-
-					/* VerticalList({
+					VerticalList({
 						.size = {300_px, 200_px},
 						.padding = {1_px, 1_px, 1_px, 1_px},
 						.layoutDirection = LayoutDirection::VERTICAL,
@@ -53,7 +43,7 @@ namespace Trident {
 								});
 							}
 						}
-					} */
+					}
 				}
 			}
 

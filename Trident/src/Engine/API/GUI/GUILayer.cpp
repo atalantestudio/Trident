@@ -232,7 +232,10 @@ namespace Trident {
 		component.color = style.color;
 		component.image = style.image;
 
-		if (style.pointerType == PointerType::INHERIT) {
+		if (style.focusable) {
+			component.pointerType = PointerType::INTERACTIVE;
+		}
+		else if (style.pointerType == PointerType::INHERIT) {
 			component.pointerType = parent.pointerType;
 		}
 		else {

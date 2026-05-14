@@ -21,6 +21,7 @@
 #include "GUI/OptionMenu.hpp"
 #include "GUI/PageMenu.hpp"
 #include "GUI/PropertyPanel.hpp"
+#include "GUI/SliderWidget.hpp"
 #include "GUI/Test.hpp"
 #include "GUI/Text.hpp"
 #include "GUI/TextDebug.hpp"
@@ -99,6 +100,9 @@ namespace Trident {
 			}
 			else if (SampleNameProperty == "PageMenu") {
 				registerLayer<GUIPageMenuLayer>();
+			}
+			else if (SampleNameProperty == "SliderWidget") {
+				registerLayer<GUISliderWidgetLayer>();
 			}
 			else if (SampleNameProperty == "Test") {
 				registerLayer<GUITestLayer>();
