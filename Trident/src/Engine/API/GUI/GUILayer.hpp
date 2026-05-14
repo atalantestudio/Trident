@@ -100,8 +100,11 @@ namespace Trident {
 
 			void AdjustWidth(uint32 componentIndex);
 			void AdjustHeight(uint32 componentIndex);
-			void GrowAndShrinkSizingWidthsRecursive(uint32 parentIndex);
-			void GrowAndShrinkSizingHeightsRecursive(uint32 parentIndex);
+
+			/// Width is represented by an axis of 0 and height is represented by an axis of 1.
+			/// This function recursively calls the component's children.
+			void expandAndFitComponent(uint32 componentIndex, uint8 axis);
+
 			void WrapTextChildrenRecursive(uint32 parentIndex);
 			void WrapText(GUIContainer& component);
 			void FlushCurrentWord(FlushWordData& flushWordData, GUIContainer& component, const UTF8Stream& stream, svec2<float32>& characterOffset, range<uint64, uint64>& wordByteRange) const;

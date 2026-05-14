@@ -141,7 +141,7 @@ namespace Trident {
 			return;
 		}
 
-		GrowAndShrinkSizingWidthsRecursive(0);
+		expandAndFitComponent(0, 0);
 		WrapTextChildrenRecursive(0);
 
 		sint32 componentIndex = static_cast<sint32>(componentCount) - 1;
@@ -152,7 +152,7 @@ namespace Trident {
 			componentIndex -= 1;
 		}
 
-		GrowAndShrinkSizingHeightsRecursive(0);
+		expandAndFitComponent(0, 1);
 		PositionsAndAlignment(components[0], components[0].origin, true);
 
 		std::copy(&components[0], &components[componentCount], &previousComponents[0]);
