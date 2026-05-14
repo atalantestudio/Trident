@@ -33,9 +33,13 @@ namespace Trident {
 		float32 layoutOffset = 0_px;
 
 		float32 layoutSpacing = 0_px;
+
 		Color color = 0x00000000;
 		ImageID image = 0;
+
+		bool focusable = false;
 		PointerType pointerType = PointerType::INHERIT;
+
 		view<char8> debugName;
 	};
 }

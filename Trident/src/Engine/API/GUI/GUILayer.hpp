@@ -85,6 +85,12 @@ namespace Trident {
 			/// Returns whether the mouse pointer is clicking on the current component.
 			bool IsClicked();
 
+			/// Returns whether the current component is focused.
+			bool IsFocused() const;
+
+			/// Returns whether the next component is focused.
+			bool IsNextFocused() const;
+
 			vec2<float32> getMousePosition() const;
 
 		private:
@@ -102,6 +108,7 @@ namespace Trident {
 			void FlushWord(FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset) const;
 			void PositionsAndAlignment(GUIContainer& component, svec2<float32> origin, bool registerSubcomponents);
 
+			bool onKeyDown(KeyDownEvent& event);
 			bool onMouseDown(MouseDownEvent& event);
 			bool onMouseUp(MouseUpEvent& event);
 			bool onWindowResize(WindowResizeEvent& event);
@@ -109,6 +116,7 @@ namespace Trident {
 			bool IsHovered(uint32 componentIndex) const;
 			bool IsMouseDown(uint32 componentIndex) const;
 			bool IsMouseUp(uint32 componentIndex) const;
+			bool IsFocused(uint32 componentIndex) const;
 
 		public:
 			/// Shrink towards the layout direction.
@@ -132,23 +140,27 @@ namespace Trident {
 		private:
 			GUIRenderer renderer;
 
-			bool textureArrayFlushed = false;
-
 			std::array<FontData, MAX_FONT_COUNT> fonts;
 			uint32 fontCount = 0;
 
 			sequence<GUIContainer> components;
 			sequence<uint32> openContainerIndices;
+			sequence<uint32> focusableComponentIndexToComponentIndex;
 
 			/// Component tree from the previous frame.
 			sequence<GUIContainer> previousComponents;
 
 			uint32 componentCount = 0;
 			uint32 previousComponentCount = 0;
+			uint32 previousFocusableComponentCount = 0;
 			uint32 openContainerIndexCount = 0;
+			uint32 focusableComponentCount = 0;
 
-			uint32 hoveredComponentIndex = max<uint32>();
-			uint32 mouseDownComponentIndex = max<uint32>();
+			/// Index of the currently focused component.
+			uint32 focusedComponentIndex = max<uint32>();
+
+			/// Index of a component that was focused and received an Enter signal.
+			uint32 enterComponentIndex = max<uint32>();
 
 			bool mouseUp = false;
 			vec2<float32> lastMouseDownPosition = {-1.0f, -1.0f};

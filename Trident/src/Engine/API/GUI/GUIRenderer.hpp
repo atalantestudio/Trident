@@ -39,7 +39,7 @@ namespace Trident {
 
 			Extent2D getTextureArrayLayerExtent(uint32 layerIndex) const;
 
-			void flushTextureArrayStagingBuffer() const;
+			void flushTextureArrayStagingBuffer();
 
 			// Copies the image data to the texture array staging buffer.
 			// Returns the layer index of the image in the array.
@@ -54,6 +54,10 @@ namespace Trident {
 			void resize(WindowResizeEvent& event) final override;
 
 			void resetCounters();
+
+			inline bool isTextureArrayFlushed() const {
+				return textureArrayFlushed;
+			}
 
 		private:
 			void setupRenderPass();
@@ -127,5 +131,7 @@ namespace Trident {
 			uint32 subcomponentCount = 0;
 			uint32 glyphSubcomponentCount = 0;
 			uint32 textureArrayLayerCount = 0;
+
+			bool textureArrayFlushed = false;
 	};
 }

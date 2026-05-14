@@ -51,6 +51,24 @@ namespace Trident {
 				clearColor = primaryColor;
 			}
 
+			void Quote(view<char8> quote) {
+				Container({
+					.padding = {4_px, 0_px, 0_px, 0_px},
+					.color = secondaryColor,
+				}) {
+					Container({
+						.padding = {16_px, 16_px, 16_px, 16_px},
+						.color = primaryColor,
+					}) {
+						Text(quote, {
+							.color = secondaryColor,
+							.font = fontRegular,
+							.fontSize = 17.6_px,
+						});
+					}
+				}
+			}
+
 			void InfoNote(view<char8> note) {
 				Note(note, infoNoteColor, infoBorderColor);
 			}
@@ -67,13 +85,14 @@ namespace Trident {
 				bool clicked = false;
 				Color borderColor = secondaryColor;
 
-				if (IsNextMouseDown()) {
+				if (IsNextFocused()) {
 					borderColor = borderFocusColor;
 				}
 
 				Container({
 					.padding = {1_px, 1_px, 1_px, 1_px},
 					.color = borderColor,
+					.focusable = true,
 					.pointerType = PointerType::INTERACTIVE,
 				}) {
 					Color buttonColor = primaryColor;

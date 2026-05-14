@@ -10,23 +10,27 @@ namespace Trident {
 		public:
 			void registerAssets() override {
 				GUIDefaultTheme::registerAssets();
+
+				updateThemeColors(false);
 			}
 
 			void render() override {
-				const Extent2D extent = getApplication()->getWindow()->getExtent();
-
 				Container({
-					.size = {static_cast<float32>(extent.width - 16_px), static_cast<float32>(extent.height - 16_px)},
 					.padding = {8_px, 8_px, 8_px, 8_px},
 					.layoutDirection = LayoutDirection::VERTICAL,
 					.layoutSpacing = 8_px,
-					.color = primaryColor,
 				}) {
 					if (Button("Light")) {
-						verticalListScrollOffset += 10_px;
+						ENGINE_DEBUG("Light");
 					}
 
-					VerticalList({
+					InfoNote("I'm not focusable.");
+
+					if (Button("Dark")) {
+						ENGINE_DEBUG("Dark");
+					}
+
+					/* VerticalList({
 						.size = {300_px, 200_px},
 						.padding = {1_px, 1_px, 1_px, 1_px},
 						.layoutDirection = LayoutDirection::VERTICAL,
@@ -49,7 +53,7 @@ namespace Trident {
 								});
 							}
 						}
-					}
+					} */
 				}
 			}
 

@@ -34,16 +34,15 @@ namespace Trident {
 
 		renderer.flushTextureArrayStagingBuffer();
 
-		textureArrayFlushed = true;
-
 		components = sequence<GUIContainer>(MAX_COMPONENT_COUNT);
 		previousComponents = sequence<GUIContainer>(MAX_COMPONENT_COUNT);
 		openContainerIndices = sequence<uint32>(MAX_COMPONENT_COUNT);
+		focusableComponentIndexToComponentIndex = sequence<uint32>(MAX_COMPONENT_COUNT);
 	}
 
 	FontID GUILayer::loadFontAsset(view<char8> assetName) {
 		ENGINE_ASSERT(fontCount < MAX_FONT_COUNT, "Too many fonts loaded.");
-		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
+		ENGINE_ASSERT(!renderer.isTextureArrayFlushed(), "New fonts cannot be registered after flushing the GUI texture array.");
 
 		const ref<FontAsset> fontAsset = getApplication()->getAssetLibrary()->getAsset<FontAsset>(assetName);
 		const ref<ImageAsset> glyphMapImageAsset = fontAsset->getGlyphMapImage();
@@ -68,7 +67,7 @@ namespace Trident {
 	}
 
 	ImageID GUILayer::loadImageAsset(view<char8> assetName) {
-		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
+		ENGINE_ASSERT(!renderer.isTextureArrayFlushed(), "New images cannot be registered after flushing the GUI texture array.");
 
 		const ref<ImageAsset> imageAsset = getApplication()->getAssetLibrary()->getAsset<ImageAsset>(assetName);
 
@@ -106,6 +105,7 @@ namespace Trident {
 	void GUILayer::preRender() {
 		componentCount = 0;
 		openContainerIndexCount = 0;
+		focusableComponentCount = 0;
 
 		const Extent2D extent = getApplication()->getWindow()->getExtent();
 
@@ -158,6 +158,7 @@ namespace Trident {
 		std::copy(&components[0], &components[componentCount], &previousComponents[0]);
 
 		previousComponentCount = componentCount;
+		previousFocusableComponentCount = focusableComponentCount;
 	}
 
 	void GUILayer::render(ref<CommandEncoder> commandEncoder, float64 remainingFrameTime) const {
@@ -170,6 +171,7 @@ namespace Trident {
 
 	void GUILayer::onEvent(Event& event) {
 		EventDispatcher eventDispatcher(event);
+		eventDispatcher.dispatch<KeyDownEvent>(BIND(onKeyDown));
 		eventDispatcher.dispatch<MouseDownEvent>(BIND(onMouseDown));
 		eventDispatcher.dispatch<MouseUpEvent>(BIND(onMouseUp));
 		eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
@@ -247,6 +249,11 @@ namespace Trident {
 
 		openContainerIndices[openContainerIndexCount] = componentIndex;
 		openContainerIndexCount += 1;
+
+		if (style.focusable) {
+			focusableComponentIndexToComponentIndex[focusableComponentCount] = componentIndex;
+			focusableComponentCount += 1;
+		}
 
 		if (previousComponentCount >= componentCount) {
 			const GUIContainer& component = previousComponents[componentCount - 1];
@@ -359,9 +366,29 @@ namespace Trident {
 		openContainerIndexCount -= 1;
 	}
 
+	bool GUILayer::onKeyDown(KeyDownEvent& event) {
+		if (event.getKeyCode() == KeyCode::TAB) {
+			focusedComponentIndex = (focusedComponentIndex + 1) % (focusableComponentCount + 1);
+
+			return false;
+		}
+
+		if (event.getKeyCode() == KeyCode::ENTER) {
+			if (focusedComponentIndex < previousFocusableComponentCount) {
+				enterComponentIndex = focusableComponentIndexToComponentIndex[focusedComponentIndex];
+			}
+
+			return false;
+		}
+
+		return false;
+	}
+
 	bool GUILayer::onMouseDown(MouseDownEvent& event) {
 		mouseUp = false;
 		lastMouseDownPosition = getMousePosition();
+
+		focusedComponentIndex = max<uint32>();
 
 		return false;
 	}
@@ -387,6 +414,56 @@ namespace Trident {
 		}
 
 		return &previousComponents[componentCount - 1];
+	}
+
+	bool GUILayer::IsHovered() const {
+		return IsHovered(componentCount - 1);
+	}
+
+	bool GUILayer::IsNextHovered() const {
+		return IsHovered(componentCount);
+	}
+
+	bool GUILayer::IsMouseDown() const {
+		return IsMouseDown(componentCount - 1);
+	}
+
+	bool GUILayer::IsNextMouseDown() const {
+		return IsMouseDown(componentCount);
+	}
+
+	bool GUILayer::IsMouseUp() const {
+		return IsMouseUp(componentCount - 1);
+	}
+
+	bool GUILayer::IsClicked() {
+		if (previousComponentCount < componentCount || !mouseUp) {
+			return false;
+		}
+
+		if (enterComponentIndex == componentCount - 1) {
+			enterComponentIndex = max<uint32>();
+
+			return true;
+		}
+
+		const GUIContainer& component = previousComponents[componentCount - 1];
+		const bool intersecting = IsIntersecting(component, lastMouseDownPosition) && IsIntersecting(component, lastMouseUpPosition);
+
+		if (intersecting) {
+			lastMouseDownPosition = {-1.0f, -1.0f};
+			lastMouseUpPosition = {-1.0f, -1.0f};
+		}
+
+		return intersecting;
+	}
+
+	bool GUILayer::IsFocused() const {
+		return IsFocused(componentCount - 1);
+	}
+
+	bool GUILayer::IsNextFocused() const {
+		return IsFocused(componentCount);
 	}
 
 	bool GUILayer::IsHovered(uint32 componentIndex) const {
@@ -420,40 +497,14 @@ namespace Trident {
 		return IsIntersecting(component, lastMouseUpPosition);
 	}
 
-	bool GUILayer::IsHovered() const {
-		return IsHovered(componentCount - 1);
-	}
-
-	bool GUILayer::IsNextHovered() const {
-		return IsHovered(componentCount);
-	}
-
-	bool GUILayer::IsMouseDown() const {
-		return IsMouseDown(componentCount - 1);
-	}
-
-	bool GUILayer::IsNextMouseDown() const {
-		return IsMouseDown(componentCount);
-	}
-
-	bool GUILayer::IsMouseUp() const {
-		return IsMouseUp(componentCount - 1);
-	}
-
-	bool GUILayer::IsClicked() {
-		if (previousComponentCount < componentCount || !mouseUp) {
+	bool GUILayer::IsFocused(uint32 componentIndex) const {
+		if (focusedComponentIndex >= previousFocusableComponentCount) {
 			return false;
 		}
 
-		const GUIContainer& component = previousComponents[componentCount - 1];
-		const bool intersecting = IsIntersecting(component, lastMouseDownPosition) && IsIntersecting(component, lastMouseUpPosition);
+		const uint32 currentlyFocusedComponentIndex = focusableComponentIndexToComponentIndex[focusedComponentIndex];
 
-		if (intersecting) {
-			lastMouseDownPosition = {-1.0f, -1.0f};
-			lastMouseUpPosition = {-1.0f, -1.0f};
-		}
-
-		return intersecting;
+		return currentlyFocusedComponentIndex == componentIndex;
 	}
 
 	vec2<float32> GUILayer::getMousePosition() const {

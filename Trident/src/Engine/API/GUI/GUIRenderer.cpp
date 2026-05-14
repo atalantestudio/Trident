@@ -49,7 +49,8 @@ namespace Trident {
 		return textureArrayLayerExtents[layerIndex];
 	}
 
-	void GUIRenderer::flushTextureArrayStagingBuffer() const {
+	void GUIRenderer::flushTextureArrayStagingBuffer() {
+		DEBUG_ASSERT(!textureArrayFlushed);
 		DEBUG_ASSERT(textureArrayLayerCount > 0);
 
 		textureArrayStagingBuffer->unmap();
@@ -108,6 +109,8 @@ namespace Trident {
 		graphicsQueue->waitIdle();
 
 		textureArrayStagingBuffer.~shared_ptr();
+
+		textureArrayFlushed = true;
 	}
 
 	uint32 GUIRenderer::registerTextureArrayLayer(const TextureArrayLayer& layer) {

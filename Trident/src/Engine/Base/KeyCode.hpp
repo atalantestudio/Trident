@@ -9,6 +9,9 @@ namespace Trident {
 	#endif
 
 	enum class KeyCode : uint16 {
+		TAB				= 9,
+		ENTER			= 13,
+
 		ESCAPE			= 27,
 		SPACE			= 32,
 		APOSTROPHE		= 39, // '
@@ -60,8 +63,6 @@ namespace Trident {
 		GRAVE_ACCENT	= 96, // `
 		WORLD_1			= 161,
 		WORLD_2			= 162,
-		ENTER			= 257,
-		TAB				= 258,
 		BACKSPACE		= 259,
 		INSERT			= 260,
 		DELETE			= 261,
