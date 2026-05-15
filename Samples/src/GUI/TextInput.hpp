@@ -15,17 +15,46 @@ namespace Trident {
 			}
 
 			void render() override {
-				TextInput();
+				ExampleTextInput();
 			}
 
 		private:
-			void TextInput() {
-				Container({
-					.componentType = GUIComponentType::TEXT_INPUT,
-					.size = {256_px, 40_px},
-					.color = IsNextFocused() ? 0xde1818ff : 0xff9800ff,
-					.focusable = true,
-				});
+			void ExampleTextInput() {
+				Color color = secondaryColor;
+
+				if (IsNextFocused()) {
+					color = borderFocusColor;
+				}
+
+				TextInput({
+					.size = {EXPAND, FIT},
+					.padding = {1_px, 1_px, 1_px, 1_px},
+					.color = color,
+					.text = &text,
+				}) {
+					Color color = primaryColor;
+
+					if (IsHovered()) {
+						color = backgroundHoverColor;
+					}
+
+					Container({
+						.size = {EXPAND, FIT},
+						.padding = {4_px, 4_px, 4_px, 4_px},
+						.color = color,
+					}) {
+						const view<char8> textView(&text[0], text.size());
+
+						Text(textView, {
+							.color = textColor,
+							.font = fontRegular,
+							.fontSize = 16_px,
+						});
+					}
+				}
 			}
+
+		private:
+			std::string text;
 	};
 }

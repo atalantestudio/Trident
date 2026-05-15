@@ -63,6 +63,10 @@ namespace Trident {
 
 		// Exclusive to text components.
 		bool textComponent;
+
+		// TODO(gui/component/text-input): Merge this and GUIContainer::text.
+		std::string* inputText = nullptr;
+
 		sequence<char8> text;
 		std::vector<TextCharacter> characters;
 		FontID font;
