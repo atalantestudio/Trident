@@ -10,6 +10,7 @@
 #include "Engine/API/GUI/Style/ContainerStyle.hpp"
 #include "Engine/API/GUI/Style/TextInputStyle.hpp"
 #include "Engine/API/GUI/Style/TextStyle.hpp"
+#include "Engine/API/GUI/Style/VerticalListStyle.hpp"
 #include "Engine/Filesystem/Stream/UTF8Stream.hpp"
 #include "Engine/Layer/Layer.hpp"
 
@@ -59,13 +60,12 @@ namespace Trident {
 
 			void openComponent(GUIContainer& component, bool focusable);
 			void openContainer(const ContainerStyle& style, bool floating);
-			void openVerticalList(const ContainerStyle& style);
+			void openVerticalList(const VerticalListStyle& style);
+			void openTextInput(const TextInputStyle& style);
 
 			void closeContainer();
 
 			void Text(view<char8> text, const TextStyle& style);
-
-			void openTextInput(const TextInputStyle& style);
 
 			/// Returns the current component (computed on the previous frame).
 			const GUIContainer* CurrentComponent() const;
@@ -122,11 +122,13 @@ namespace Trident {
 			bool onMouseDown(MouseDownEvent& event);
 			bool onMouseMove(MouseMoveEvent& event);
 			bool onMouseUp(MouseUpEvent& event);
+			bool onMouseWheel(MouseWheelEvent& event);
 			bool onWindowResize(WindowResizeEvent& event);
 
 			void updateHoveredComponentIndex();
 
-			void updateTextInput(KeyDownEvent& event, GUIContainer& focusedComponent);
+			void updateTextInput(KeyDownEvent& event, GUIContainer& component);
+			void updateVerticalList(MouseWheelEvent& event, GUIContainer& component);
 
 			bool IsHovered(uint32 componentIndex) const;
 			bool IsMouseDown(uint32 componentIndex) const;
@@ -172,6 +174,7 @@ namespace Trident {
 			uint32 focusableComponentCount = 0;
 
 			uint32 hoveredComponentIndex = max<uint32>();
+			uint32 hoveredVerticalListIndex = max<uint32>();
 
 			/// Index of the currently focused component.
 			uint32 focusedComponentIndex = max<uint32>();

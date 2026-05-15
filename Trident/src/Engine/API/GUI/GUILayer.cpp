@@ -81,7 +81,7 @@ namespace Trident {
 		rootComponent.padding = {0_px, 0_px, 0_px, 0_px};
 		rootComponent.anchorPoint = AnchorPoint::TOP | AnchorPoint::LEFT;
 		rootComponent.layoutDirection = LayoutDirection::VERTICAL;
-		rootComponent.layoutOffset = 0_px;
+		rootComponent.layoutOffset = nullptr;
 		rootComponent.layoutSpacing = 0_px;
 		rootComponent.color = clearColor;
 		rootComponent.image = 0;
@@ -136,6 +136,7 @@ namespace Trident {
 		eventDispatcher.dispatch<MouseDownEvent>(BIND(onMouseDown));
 		eventDispatcher.dispatch<MouseMoveEvent>(BIND(onMouseMove));
 		eventDispatcher.dispatch<MouseUpEvent>(BIND(onMouseUp));
+		eventDispatcher.dispatch<MouseWheelEvent>(BIND(onMouseWheel));
 		eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
 	}
 
@@ -191,7 +192,7 @@ namespace Trident {
 		component.padding = style.padding;
 		component.anchorPoint = style.anchorPoint;
 		component.layoutDirection = style.layoutDirection;
-		component.layoutOffset = 0_px;
+		component.layoutOffset = nullptr;
 		component.layoutSpacing = style.layoutSpacing;
 		component.color = style.color;
 		component.image = style.image;
@@ -313,6 +314,16 @@ namespace Trident {
 		return false;
 	}
 
+	bool GUILayer::onMouseWheel(MouseWheelEvent& event) {
+		if (hoveredVerticalListIndex != max<uint32>()) {
+			GUIContainer& component = previousComponents[hoveredVerticalListIndex];
+
+			updateVerticalList(event, component);
+		}
+
+		return false;
+	}
+
 	bool GUILayer::onWindowResize(WindowResizeEvent& event) {
 		renderer.resize(event);
 
@@ -321,6 +332,7 @@ namespace Trident {
 
 	void GUILayer::updateHoveredComponentIndex() {
 		uint32 newHoveredComponentIndex = max<uint32>();
+		uint32 newHoveredVerticalListIndex = max<uint32>();
 		uint32 componentIndex = 0;
 
 		while (componentIndex < previousComponentCount) {
@@ -334,12 +346,17 @@ namespace Trident {
 
 			if (IsIntersecting(component, getMousePosition())) {
 				newHoveredComponentIndex = componentIndex;
+
+				if (component.type == GUIComponentType::VERTICAL_LIST) {
+					newHoveredVerticalListIndex = componentIndex;
+				}
 			}
 
 			componentIndex += 1;
 		}
 
 		hoveredComponentIndex = newHoveredComponentIndex;
+		hoveredVerticalListIndex = newHoveredVerticalListIndex;
 	}
 
 	const GUIContainer* GUILayer::CurrentComponent() const {

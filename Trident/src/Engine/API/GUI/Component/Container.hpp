@@ -52,7 +52,7 @@ namespace Trident {
 		// Exclusive to non-text components.
 		AnchorPoint anchorPoint;
 		LayoutDirection layoutDirection;
-		float32 layoutOffset;
+		float32* layoutOffset = nullptr;
 		float32 layoutSpacing;
 		ImageID image;
 

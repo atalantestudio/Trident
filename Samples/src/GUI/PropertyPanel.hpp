@@ -23,8 +23,7 @@ namespace Trident {
 					VerticalList({
 						.size = {300_px, 200_px},
 						.padding = {1_px, 1_px, 1_px, 1_px},
-						.layoutDirection = LayoutDirection::VERTICAL,
-						.layoutOffset = verticalListScrollOffset,
+						.scrollOffset = &scrollOffset,
 						.layoutSpacing = 1_px,
 						.color = secondaryColor,
 						.debugName = "VList",
@@ -48,6 +47,6 @@ namespace Trident {
 			}
 
 		private:
-			float32 verticalListScrollOffset = 0_px;
+			float32 scrollOffset = 0_px;
 	};
 }

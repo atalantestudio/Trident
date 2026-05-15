@@ -10,8 +10,8 @@ namespace Trident {
 		if (component.parentIndex != max<uint32>()) {
 			const GUIContainer& parent = components[component.parentIndex];
 
-			if (parent.type == GUIComponentType::VERTICAL_LIST) {
-				origin.y -= parent.layoutOffset;
+			if (parent.type == GUIComponentType::VERTICAL_LIST && parent.layoutOffset != nullptr) {
+				origin.y -= *(parent.layoutOffset);
 			}
 		}
 
@@ -149,13 +149,18 @@ namespace Trident {
 					return false;
 				}
 
-				const float32 clippedHeight = (parent.origin.y + parent.size.height.value) - component.origin.y;
-
-				if (clippedHeight < height) {
-					height = clippedHeight;
-				}
+				const float32 topClip = (component.origin.y + component.size.height.value) - parent.origin.y;
 
 				// TODO(gui/scroll-container/clipping): Finish clipping.
+				/* if (topClip < component.origin.y) {
+					y = topClip;
+				} */
+
+				const float32 bottomClip = (parent.origin.y + parent.size.height.value) - component.origin.y;
+
+				if (bottomClip < height) {
+					height = bottomClip;
+				}
 			}
 		}
 		else {

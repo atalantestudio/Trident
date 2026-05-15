@@ -6,9 +6,8 @@
 #include "Engine/API/GUI/GUILayer.hpp"
 
 namespace Trident {
-	void GUILayer::openVerticalList(const ContainerStyle& style) {
+	void GUILayer::openVerticalList(const VerticalListStyle& style) {
 		ENGINE_ASSERT(style.size.height.fillMode != FillMode::FIT, "FillMode::FIT cannot be used on the height of a vertical list.");
-		ENGINE_ASSERT(style.layoutDirection != LayoutDirection::HORIZONTAL, "Vertical lists must have a vertical layout direction.");
 
 		const uint32 parentIndex = openContainerIndices[openContainerIndexCount - 1];
 		const GUIContainer& parent = components[parentIndex];
@@ -18,7 +17,7 @@ namespace Trident {
 		component.parentIndex = parentIndex;
 		component.floating = false;
 		component.origin = parent.origin;
-		component.offset = style.offset;
+		component.offset = {0_px, 0_px};
 		component.size = style.size;
 		component.zIndex = parent.zIndex + style.zIndex;
 
@@ -26,23 +25,20 @@ namespace Trident {
 
 		component.padding = style.padding;
 		component.anchorPoint = style.anchorPoint;
-		component.layoutDirection = style.layoutDirection;
-		component.layoutOffset = style.layoutOffset;
+		component.layoutDirection = LayoutDirection::VERTICAL;
+		component.layoutOffset = style.scrollOffset;
 		component.layoutSpacing = style.layoutSpacing;
 		component.color = style.color;
 		component.image = style.image;
-
-		if (style.pointerType == PointerType::INHERIT) {
-			component.pointerType = parent.pointerType;
-		}
-		else {
-			component.pointerType = style.pointerType;
-		}
-
+		component.pointerType = parent.pointerType;
 		component.textComponent = false;
 		component.debugName = style.debugName;
 
 		// TODO(gui/component/vertical-list): Make focusable?
 		openComponent(component, false);
+	}
+
+	void GUILayer::updateVerticalList(MouseWheelEvent& event, GUIContainer& component) {
+		*component.layoutOffset -= event.getDelta() * 0.25f;
 	}
 }
