@@ -73,14 +73,29 @@ namespace Trident {
 
 		commandEncoder->begin();
 
-		BufferImageCopyRegion bufferImageCopyRegion;
-		uint64 bufferOffset = 0;
+		sequence<ImageMemoryBarrier> userImageMemoryBarriers(userImageCount);
 		uint32 userImageIndex = 0;
+		BufferImageCopyRegion userImageCopyRegion;
+		uint64 bufferOffset = 0;
+
+		while (userImageIndex < userImageCount) {
+			userImageMemoryBarriers[userImageIndex] = {
+				.image = userImages[userImageIndex],
+				.newLayout = ImageLayout::TRANSFER_DST_OPTIMAL,
+				.newAccess = Access::TRANSFER_WRITE,
+			};
+
+			userImageIndex += 1;
+		}
+
+		commandEncoder->insertMemoryBarriers({}, userImageMemoryBarriers);
+
+		userImageIndex = 0;
 
 		while (userImageIndex < userImageCount) {
 			const ref<Image> userImage = userImages[userImageIndex];
 
-			bufferImageCopyRegion = {
+			userImageCopyRegion = {
 				.bufferOffset = bufferOffset,
 				.imageOffsetX = 0,
 				.imageOffsetY = 0,
@@ -91,11 +106,16 @@ namespace Trident {
 				.imageLayerCount = 1,
 			};
 
-			commandEncoder->copyBufferToImage(userImageStagingBuffer, userImages[userImageIndex], bufferImageCopyRegion);
+			userImageMemoryBarriers[userImageIndex].newLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
+			userImageMemoryBarriers[userImageIndex].newAccess = Access::SHADER_READ;
+
+			commandEncoder->copyBufferToImage(userImageStagingBuffer, userImages[userImageIndex], userImageCopyRegion);
 
 			bufferOffset += userImage->getSize();
 			userImageIndex += 1;
 		}
+
+		commandEncoder->insertMemoryBarriers({}, userImageMemoryBarriers);
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -622,13 +642,13 @@ namespace Trident {
 			.size = cameraBuffer->getSize(),
 		};
 
-		sequence<DescriptorImage> userDescriptorImages(userImageCount);
+		sequence<DescriptorImage> userDescriptorImages(MAX_USER_IMAGE_COUNT);
 
 		uint32 userImageIndex = 0;
 
-		while (userImageIndex < userImageCount) {
+		while (userImageIndex < MAX_USER_IMAGE_COUNT) {
 			userDescriptorImages[userImageIndex] = {
-				.imageView = userImageViews[userImageIndex],
+				.imageView = userImageViews[userImageIndex % userImageCount],
 				.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
 
 				// TODO(gui/image/sampler): Let the user choose the sampler for each image.
