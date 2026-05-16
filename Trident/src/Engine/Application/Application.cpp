@@ -98,16 +98,33 @@ namespace Trident {
 		propertyFileReader.seekg(std::ios::beg);
 
 		const sequence<uint8> propertyFileData = propertyFileReader.read(propertyFileSize);
+		const view<char8> propertyFileDataView(pointer_cast<const char8*>(&propertyFileData[0]), propertyFileData.count());
 
-		propertyFile = new PropertyFile(*pointer_cast<const sequence<char8>*>(&propertyFileData));
+		propertyFile = new PropertyFile(propertyFileDataView);
 		propertyFile->readProperties(properties);
+
+		/* TODO(property-file/graphics-api): Implement.
+		Define sint32 selectedApiIndex
+		Get "GraphicsAPI" setting from file
+			If no setting
+				Set selectedApiIndex = default API for this platform
+			Else if the setting is unknown
+				Emit warn "Unknown graphics API '[]'. Using API []. Updated the property in the file to avoid future warnings."
+				Set selectedApiIndex = default API for this platform
+				Overwrite file setting with selectedApiIndex
+			Else
+				Set selectedApiIndex = setting
+		*/
 	}
 
 	void Application::initializeWindow(const ProjectDescriptor& projectDescriptor) {
-		sequence<char8> name = projectDescriptor.name;
+		sequence<char8> name;
 
 		if (sharedMemoryData->instanceCount > 0) {
 			name = Logger::format("[] ([])", projectDescriptor.name, static_cast<uint32>(sharedMemoryData->instanceCount));
+		}
+		else {
+			name = projectDescriptor.name;
 		}
 
 		window = new Window({

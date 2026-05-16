@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAPI.hpp"
+#include "Engine/Application/ApplicationProperties.hpp"
 #include "Engine/Filesystem/Reader.hpp"
 
 namespace Trident {
@@ -37,7 +38,7 @@ namespace Trident {
 			}
 
 		public:
-			explicit PropertyFile(const sequence<char8>& data) :
+			explicit PropertyFile(view<char8> data) :
 				data(data)
 			{}
 
@@ -54,7 +55,7 @@ namespace Trident {
 			}
 
 			template<typename T>
-			T getProperty(view<char8> propertyName) {
+			T getProperty(view<char8> propertyName) const {
 				const view<char8> lines = data;
 
 				index previousOffset = 0;
@@ -90,7 +91,7 @@ namespace Trident {
 	};
 
 	template<>
-	inline view<char8> PropertyFile::getProperty(view<char8> propertyName) {
+	inline view<char8> PropertyFile::getProperty(view<char8> propertyName) const {
 		const view<char8> lines = data;
 
 		index previousOffset = 0;
@@ -101,7 +102,7 @@ namespace Trident {
 
 			const view<char8> line(&lines[previousOffset], offset - previousOffset);
 
-			// TODO
+			// TODO(property-file)
 			// A false positive is returned if the line contains a word that matches the start of the property name,
 			// (e.g. "SampleGroup" vs. "Sample").
 			const index propertyNameOffset = line.find(propertyName, 0);

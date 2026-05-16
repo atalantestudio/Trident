@@ -8,7 +8,7 @@
 namespace Trident {
 	struct ProjectDescriptor {
 		ProjectType type;
-		sequence<char8> name;
+		view<char8> name;
 		VersionNumber version;
 
 		// TODO
