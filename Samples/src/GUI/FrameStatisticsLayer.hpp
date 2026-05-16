@@ -52,7 +52,7 @@ namespace Trident {
 			}
 
 			void GraphicsAPIName() {
-				Text(toString(getApplication()->getLayerCompositor()->adapter->getApi()), {
+				Text(serialize(getApplication()->getLayerCompositor()->adapter->getApi()), {
 					.color = 0x777777ff,
 					.font = fontRegular,
 					.fontSize = 14.2_px,

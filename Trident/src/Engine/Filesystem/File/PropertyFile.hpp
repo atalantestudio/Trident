@@ -7,6 +7,18 @@
 #include "Engine/Filesystem/Reader.hpp"
 
 namespace Trident {
+	template<typename T>
+	inline T deserialize(view<char8> text) {
+		uint64 value = 0;
+
+		for (const char8 character : text) {
+			value *= 10;
+			value += character - '0';
+		}
+
+		return static_cast<T>(value);
+	}
+
 	class PropertyFile final {
 		public:
 			static view<char8> getDefaultFileData() {
@@ -22,19 +34,6 @@ namespace Trident {
 					"\n"
 					"AssetName: test-regular"
 				);
-			}
-
-		private:
-			template<typename T>
-			T parseValueString(view<char8> valueString, view<char8> propertyName) {
-				uint32 value = 0;
-
-				for (const char8 character : valueString) {
-					value *= 10;
-					value += character - '0';
-				}
-
-				return static_cast<T>(value);
 			}
 
 		public:
@@ -74,7 +73,7 @@ namespace Trident {
 
 						const view<char8> value(&line[valueStartOffset], line.count() - valueStartOffset);
 
-						return parseValueString<T>(trim(value), propertyName);
+						return deserialize<T>(trim(value));
 					}
 
 					offset += 1;
@@ -89,25 +88,6 @@ namespace Trident {
 		private:
 			sequence<char8> data;
 	};
-
-	template<>
-	inline GraphicsAPI PropertyFile::parseValueString(view<char8> valueString, view<char8> propertyName) {
-		if (valueString == "DirectX12") {
-			return GraphicsAPI::DX12;
-		}
-
-		if (valueString == "OpenGL") {
-			return GraphicsAPI::GL;
-		}
-
-		if (valueString == "Vulkan") {
-			return GraphicsAPI::VK;
-		}
-
-		ENGINE_ASSERT(false, "Invalid value \"[]\" for property \"[]\".", valueString, propertyName);
-
-		return static_cast<GraphicsAPI>(0);
-	}
 
 	template<>
 	inline view<char8> PropertyFile::getProperty(view<char8> propertyName) {

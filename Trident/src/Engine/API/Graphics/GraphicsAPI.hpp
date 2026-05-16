@@ -17,16 +17,36 @@ namespace Trident {
 		count,
 	};
 
-	inline view<char8> toString(GraphicsAPI api) {
+	template<>
+	inline view<char8> serialize(GraphicsAPI object) {
 		static constexpr view<char8> GRAPHICS_API_NAMES[] = {
 			"DirectX12",
 			"OpenGL",
 			"Vulkan",
 		};
 
-		DEBUG_ASSERT(api < GraphicsAPI::count);
+		DEBUG_ASSERT(object < GraphicsAPI::count);
 
-		return GRAPHICS_API_NAMES[static_cast<uint8>(api)];
+		return GRAPHICS_API_NAMES[static_cast<uint8>(object)];
+	}
+
+	template<>
+	inline GraphicsAPI deserialize(view<char8> text) {
+		if (text == "DirectX12") {
+			return GraphicsAPI::DX12;
+		}
+
+		if (text == "OpenGL") {
+			return GraphicsAPI::GL;
+		}
+
+		if (text == "Vulkan") {
+			return GraphicsAPI::VK;
+		}
+
+		ENGINE_ASSERT(false, "Deserialization to GraphicsAPI failed for text \"[]\".", text);
+
+		return static_cast<GraphicsAPI>(0);
 	}
 
 	// TODO: Implement.
