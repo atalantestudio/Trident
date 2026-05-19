@@ -105,7 +105,9 @@ namespace Trident {
 				instanceBuffer = createInstanceBuffer();
 				instanceMappedRange = instanceBuffer->map(0, instanceBuffer->getSize());
 
-				debugHullWireframeBuffer = createDebugHullWireframeBuffer();
+				if (scene->getHullLineIndexCount() > 0) {
+					debugHullWireframeBuffer = createDebugHullWireframeBuffer();
+				}
 
 				const ComponentPool<RigidBody3DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody3DComponent>();
 
@@ -170,13 +172,15 @@ namespace Trident {
 
 				commandEncoder->copyBufferToBuffer(dataStagingBuffer, dataBuffer, copyRegion);
 
-				copyRegion = {
-					.sourceOffset = dataBuffer->getSize(),
-					.destinationOffset = 0,
-					.size = debugHullWireframeBuffer->getSize(),
-				};
+				if (scene->getHullLineIndexCount() > 0) {
+					copyRegion = {
+						.sourceOffset = dataBuffer->getSize(),
+						.destinationOffset = 0,
+						.size = debugHullWireframeBuffer->getSize(),
+					};
 
-				commandEncoder->copyBufferToBuffer(dataStagingBuffer, debugHullWireframeBuffer, copyRegion);
+					commandEncoder->copyBufferToBuffer(dataStagingBuffer, debugHullWireframeBuffer, copyRegion);
+				}
 
 				copyRegion = {
 					.sourceOffset = vertexPositionIndexRange.offset + scene->getHullLineIndexCount() * sizeof(uint16),
@@ -256,7 +260,7 @@ namespace Trident {
 					}
 				}
 
-				if (debugHullWireframe) {
+				if (scene->getHullLineIndexCount() > 0 && debugHullWireframe) {
 					commandEncoder->bindGraphicsPipeline(debugHullWireframePipeline);
 					commandEncoder->bindDescriptorSets(debugHullWireframePipelineLayout, 0, vertexDescriptorSet);
 					commandEncoder->bindVertexBuffer(0, instanceBuffer, 0, sizeof(Instance));

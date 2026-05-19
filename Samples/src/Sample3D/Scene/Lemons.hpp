@@ -9,7 +9,7 @@
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 
 namespace Trident::Lemons {
-	Scene3D initializeScene(Application* application, GraphicsAPI graphicsApi, uint64 minStorageBufferOffsetAlignment) {
+	inline Scene3D initializeScene(Application* application, GraphicsAPI graphicsApi, uint64 minStorageBufferOffsetAlignment) {
 		AssetLibrary* assetLibrary = application->getAssetLibrary();
 
 		assetLibrary->getAsset<GeometryAsset>("lemon_1k");
