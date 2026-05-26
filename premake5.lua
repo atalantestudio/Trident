@@ -165,7 +165,7 @@ project "tsllsp"
 	filter "toolset:msc-v142 or toolset:msc-v143 or toolset:msc-v145"
 		postbuildcommands {
 			-- TODO(debug-only): Test LSP server executable inside IDE.
-			-- "{COPYFILE} %[bin/" .. outputdir .. "/%{prj.name}/%{prj.name}.exe] C:/Users/Mattéo/.vscode/extensions/tsl/src/lsp.exe",
+			"{COPYFILE} %[bin/" .. OUTPUT_DIR .. "/%{prj.name}/%{prj.name}.exe] C:/Users/Mattéo/.vscode/extensions/tsl/src/lsp.exe",
 		}
 
 	filter "configurations:Debug"
