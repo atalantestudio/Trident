@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "AssetBuilder/API/Scene/StaticScene.hpp"
+
 #include "Engine/ECS/Component/GeometryComponent.hpp"
 #include "Engine/ECS/Component/MaterialComponent.hpp"
 #include "Engine/ECS/Component/RigidBody2DComponent.hpp"
@@ -11,8 +13,7 @@
 
 namespace Trident {
 	struct Scene2DData {
-		uint32 staticVertexCount;
-		uint32 staticIndexCount;
+		StaticScene2D staticScene;
 		uint32 entityCount;
 		sequence<uint32> geometryAssetIdentifiers;
 		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
@@ -20,8 +21,7 @@ namespace Trident {
 	};
 
 	struct Scene3DData {
-		uint32 staticVertexCount;
-		uint32 staticIndexCount;
+		StaticScene3D staticScene;
 		uint32 entityCount;
 		sequence<uint32> geometryAssetIdentifiers;
 		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;

@@ -19,10 +19,9 @@ namespace Trident {
 				return random<uint32>(min<uint32>(), max<uint32>());
 			}
 
-		private:
-			static std::filesystem::path getAbsolutePath(view<char8> base, view<char8> relativePath, view<char8> extension);
-
 		public:
+			explicit AssetLibrary(std::filesystem::path basePath);
+
 			template<typename AssetType>
 			ref<AssetType> getAsset(uint32 identifier) const {
 				const auto iterator = assetIdentifierToIndex.find(identifier);
@@ -61,19 +60,17 @@ namespace Trident {
 			}
 
 		private:
+			std::filesystem::path getAbsolutePath(view<char8> base, view<char8> relativePath, view<char8> extension) const;
+
+		private:
 			template<typename AssetType>
 			const std::unordered_map<sequence<char8>, uint32>& getAssetPathToIndexMap() const;
 
 			template<typename AssetType>
 			void loadAsset(view<char8> path);
 
-			ref<FontAsset> decodeFontAsset(view<char8> path, ByteStream<StreamOperation::READ>& byteStream);
-			ref<ImageAsset> decodeImageAsset(ByteStream<StreamOperation::READ>& byteStream) const;
-			ref<Scene2DAsset> decodeScene2DAsset(ByteStream<StreamOperation::READ>& stream) const;
-			ref<Scene3DAsset> decodeScene3DAsset(ByteStream<StreamOperation::READ>& stream) const;
-			ref<ShaderModuleAsset> decodeShaderModuleAsset(ByteStream<StreamOperation::READ>& byteStream) const;
-
 		private:
+			std::filesystem::path basePath;
 			std::vector<ref<Asset>> assets;
 			std::unordered_map<uint32, uint32> assetIdentifierToIndex;
 			std::unordered_map<sequence<char8>, uint32> fontAssetPathToIndex;

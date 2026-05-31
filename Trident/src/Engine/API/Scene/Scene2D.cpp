@@ -14,26 +14,24 @@
 namespace Trident {
 	Scene2D::Scene2D(ref<Scene2DAsset> sceneAsset) :
 		Scene({
-			.staticVertexCount = sceneAsset->getStaticVertexCount(),
-			.staticIndexCount = sceneAsset->getStaticIndexCount(),
 			.dynamicVertexCount = sceneAsset->getDynamicVertexPositionCount() + sceneAsset->getDynamicVertexTextureCoordinateCount(),
 			.dynamicIndexCount = sceneAsset->getDynamicVertexPositionIndexCount() + sceneAsset->getDynamicVertexTextureCoordinateIndexCount()
 		})
 	{
-		loadGeometries(sceneAsset);
-		loadEntityComponentMappings(sceneAsset);
+		loadGeometries();
+		loadEntityComponentMappings();
 	}
 
-	void Scene2D::loadGeometries(ref<Scene2DAsset> sceneAsset) {
-		const sequence<uint8>& staticBuffer = sceneAsset->getStaticBuffer();
-		const sequence<ref<GeometryAsset>>& geometryAssets = sceneAsset->getGeometryAssets();
-		const uint32 vertexComponentCount = static_cast<uint32>(staticVertexCount + dynamicVertexCount * 2);
-		const uint64 vertexByteCount = staticVertexCount + dynamicVertexCount * sizeof(svec2<float32>);
-		const uint64 indexByteCount = staticIndexCount + dynamicIndexCount * sizeof(uint32);
+	void Scene2D::loadGeometries() {
+		const sequence<uint8>& staticBuffer = asset->getStaticBuffer();
+		const sequence<ref<GeometryAsset>>& geometryAssets = asset->getGeometryAssets();
+		const uint32 vertexComponentCount = static_cast<uint32>(asset->getStaticVertices().count() + dynamicVertexCount * 2);
+		const uint64 vertexByteCount = asset->getStaticVertices().count() + dynamicVertexCount * sizeof(svec2<float32>);
+		const uint64 indexByteCount = asset->getStaticTriangles().count() * 3 + dynamicIndexCount * sizeof(uint32);
 
 		dataBuffer = sequence<uint8>(vertexByteCount + indexByteCount);
 		geometries = sequence<Geometry2D>(geometryAssets.count());
-		hulls = sequence<Hull2D>(sceneAsset->getHullCount());
+		hulls = sequence<Hull2D>(asset->getHullCount());
 
 		std::copy(staticBuffer.begin(), staticBuffer.end(), &dataBuffer[0]);
 
@@ -134,7 +132,7 @@ namespace Trident {
 		}
 	}
 
-	void Scene2D::loadEntityComponentMappings(ref<Scene2DAsset> sceneAsset) {
+	void Scene2D::loadEntityComponentMappings() {
 		ecs.registerComponentPool<GeometryComponent>();
 		ecs.registerComponentPool<MaterialComponent>();
 
@@ -148,21 +146,21 @@ namespace Trident {
 
 		Entity entity = 0;
 
-		while (entity < sceneAsset->getEntityCount()) {
+		while (entity < asset->getEntityCount()) {
 			ecs.createEntity();
 
 			entity += 1;
 		}
 
-		for (const EntityComponentMapping<GeometryComponent> geometryMapping : sceneAsset->getGeometryMappings()) {
+		for (const EntityComponentMapping<GeometryComponent> geometryMapping : asset->getGeometryMappings()) {
 			ecs.setComponent<GeometryComponent>(geometryMapping.entity, geometryMapping.component);
 		}
 
-		for (const EntityComponentMapping<MaterialComponent> materialMapping : sceneAsset->getMaterialMappings()) {
+		for (const EntityComponentMapping<MaterialComponent> materialMapping : asset->getMaterialMappings()) {
 			ecs.setComponent<MaterialComponent>(materialMapping.entity, materialMapping.component);
 		}
 
-		for (const EntityComponentMapping<RigidBody2DComponent>& rigidBodyMapping : sceneAsset->getRigidBodyMappings()) {
+		for (const EntityComponentMapping<RigidBody2DComponent>& rigidBodyMapping : asset->getRigidBodyMappings()) {
 			ecs.setComponent<RigidBody2DComponent>(rigidBodyMapping.entity, rigidBodyMapping.component);
 
 			const GeometryComponent geometryComponent = ecs.getComponent<GeometryComponent>(rigidBodyMapping.entity);

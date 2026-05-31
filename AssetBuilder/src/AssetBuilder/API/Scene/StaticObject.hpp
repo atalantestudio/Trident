@@ -3,7 +3,14 @@
 
 #pragma once
 
+#include "Engine/Filesystem/Asset/GeometryAsset.hpp"
+
 namespace Trident {
+	struct Transform {
+		vec3<float32> position;
+		vec3<float32> scale;
+	};
+
 	struct TextureFilteringDescriptor {
 		svec2<float32> translation;
 		float32 rotation;
@@ -12,12 +19,14 @@ namespace Trident {
 
 	struct StaticObjectDescriptor {
 		view<char8> label;
-		sequence<svec3<float32>> vertices;
+		view<char8> geometryAssetName;
+		Transform transform;
 		TextureFilteringDescriptor textureFiltering;
 	};
 
 	struct StaticObject {
-		sequence<uint16> vertexPositionIndices;
+		ref<GeometryAsset> geometryAsset;
+		Transform transform;
 		mat3x3<float32> texture;
 	};
 }

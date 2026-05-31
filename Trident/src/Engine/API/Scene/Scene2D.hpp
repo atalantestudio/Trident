@@ -13,6 +13,10 @@ namespace Trident {
 		public:
 			explicit Scene2D(ref<Scene2DAsset> sceneAsset);
 
+			inline ref<Scene2DAsset> getAsset() const {
+				return asset;
+			}
+
 			inline const sequence<Geometry2D>& getGeometries() const {
 				return geometries;
 			}
@@ -22,10 +26,11 @@ namespace Trident {
 			}
 
 		private:
-			void loadGeometries(ref<Scene2DAsset> sceneAsset);
-			void loadEntityComponentMappings(ref<Scene2DAsset> sceneAsset);
+			void loadGeometries();
+			void loadEntityComponentMappings();
 
 		private:
+			ref<Scene2DAsset> asset;
 			sequence<Geometry2D> geometries;
 			sequence<Hull2D> hulls;
 	};

@@ -12,8 +12,7 @@ namespace Trident {
 
 	Scene2DData createBoxesScene() {
 		return {
-			.staticVertexCount = 0,
-			.staticIndexCount = 0,
+			.staticScene = {},
 			.entityCount = 2,
 			.geometryAssetIdentifiers = {UNIT_SQUARE_GEOMETRY_ASSET_IDENTIFIER},
 			.geometryMappings = {
@@ -54,8 +53,7 @@ namespace Trident {
 
 	Scene2DData createCirclesScene() {
 		return {
-			.staticVertexCount = 0,
-			.staticIndexCount = 0,
+			.staticScene = {},
 			.entityCount = 3,
 			.geometryAssetIdentifiers = {UNIT_CIRCLE_GEOMETRY_ASSET_IDENTIFIER},
 			.geometryMappings = {
@@ -216,8 +214,7 @@ namespace Trident {
 		}
 
 		return {
-			.staticVertexCount = 0,
-			.staticIndexCount = 0,
+			.staticScene = {},
 			.entityCount = entityCount,
 			.geometryAssetIdentifiers = {UNIT_SQUARE_GEOMETRY_ASSET_IDENTIFIER},
 			.geometryMappings = geometryMappings,
@@ -227,8 +224,7 @@ namespace Trident {
 
 	Scene2DData createPolygonsScene() {
 		return {
-			.staticVertexCount = 0,
-			.staticIndexCount = 0,
+			.staticScene = {},
 			.entityCount = 3,
 			.geometryAssetIdentifiers = {
 				UNIT_SQUARE_GEOMETRY_ASSET_IDENTIFIER,
@@ -356,8 +352,7 @@ namespace Trident {
 		}
 
 		return {
-			.staticVertexCount = 0,
-			.staticIndexCount = 0,
+			.staticScene = {},
 			.entityCount = entityCount,
 			.geometryAssetIdentifiers = {UNIT_SQUARE_GEOMETRY_ASSET_IDENTIFIER},
 			.geometryMappings = geometryMappings,
@@ -367,8 +362,7 @@ namespace Trident {
 
 	Scene2DData createRollingBallScene() {
 		return {
-			.staticVertexCount = 0,
-			.staticIndexCount = 0,
+			.staticScene = {},
 			.entityCount = 4,
 			.geometryAssetIdentifiers = {
 				UNIT_SQUARE_GEOMETRY_ASSET_IDENTIFIER,
@@ -561,8 +555,7 @@ namespace Trident {
 		}
 
 		return {
-			.staticVertexCount = 0,
-			.staticIndexCount = 0,
+			.staticScene = {},
 			.entityCount = entityCount,
 			.geometryAssetIdentifiers = {UNIT_SQUARE_GEOMETRY_ASSET_IDENTIFIER},
 			.geometryMappings = geometryMappings,
@@ -619,8 +612,7 @@ namespace Trident {
 		}
 
 		return {
-			.staticVertexCount = 0,
-			.staticIndexCount = 0,
+			.staticScene = {},
 			.entityCount = entityCount,
 			.geometryAssetIdentifiers = {UNIT_SQUARE_GEOMETRY_ASSET_IDENTIFIER},
 			.geometryMappings = geometryMappings,
@@ -630,8 +622,7 @@ namespace Trident {
 
 	Scene2DData createSwingScene() {
 		return {
-			.staticVertexCount = 0,
-			.staticIndexCount = 0,
+			.staticScene = {},
 			.entityCount = 6,
 			.geometryAssetIdentifiers = {UNIT_SQUARE_GEOMETRY_ASSET_IDENTIFIER},
 			.geometryMappings = {

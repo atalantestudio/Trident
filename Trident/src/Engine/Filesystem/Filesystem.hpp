@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 #include "Engine/Filesystem/Asset/FontAsset.hpp"
 #include "Engine/Filesystem/Asset/ImageAsset.hpp"
 #include "Engine/Filesystem/File.hpp"
@@ -38,10 +39,10 @@ namespace Trident {
 
 		Writer openWriter(view<char8> path);
 
-		// TODO: Implement other asset types (GeometryAsset is already done).
+		// TODO(filesystem/asset-decoders): Implement remaining asset types.
 		template<typename AssetType>
-		ref<AssetType> decodeAsset(ByteStream<StreamOperation::READ>& byteStream);
+		ref<AssetType> decodeAsset(ByteStream<StreamOperation::READ>& byteStream, const AssetLibrary* assetLibrary);
 
-		void QOIDecoderContentOnly(ByteStream<StreamOperation::READ>& stream, sequence<uint8>& data, uint8 channelCount, uint32 footerByteSize);
+		void decodeQoiContent(ByteStream<StreamOperation::READ>& stream, sequence<uint8>& data, uint8 channelCount, uint32 footerByteSize);
 	};
 }

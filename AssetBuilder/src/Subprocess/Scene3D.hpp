@@ -6,10 +6,9 @@
 #include "RigidBody.hpp"
 
 namespace Trident {
-	Scene3DData createBoxes3DScene() {
+	Scene3DData createBoxes3DScene(std::filesystem::path rootOutputPath) {
 		return {
-			.staticVertexCount = 0,
-			.staticIndexCount = 0,
+			.staticScene = {},
 			.entityCount = 2,
 			.geometryAssetIdentifiers = {
 				// TODO(debug-only): UnitBox
@@ -75,10 +74,9 @@ namespace Trident {
 		};
 	}
 
-	Scene3DData createEdgeContactScene() {
+	Scene3DData createEdgeContactScene(std::filesystem::path rootOutputPath) {
 		return {
-			.staticVertexCount = 0,
-			.staticIndexCount = 0,
+			.staticScene = {},
 			.entityCount = 2,
 			.geometryAssetIdentifiers = {
 				// TODO(debug-only): UnitBox
@@ -125,10 +123,9 @@ namespace Trident {
 		};
 	}
 
-	Scene3DData createBoxStackingScene() {
+	Scene3DData createBoxStackingScene(std::filesystem::path rootOutputPath) {
 		return {
-			.staticVertexCount = 0,
-			.staticIndexCount = 0,
+			.staticScene = {},
 			.entityCount = 4,
 			.geometryAssetIdentifiers = {
 				// TODO(debug-only): RectangularCuboid
@@ -208,10 +205,9 @@ namespace Trident {
 		};
 	}
 
-	Scene3DData createLemonsScene() {
+	Scene3DData createLemonsScene(std::filesystem::path rootOutputPath) {
 		return {
-			.staticVertexCount = 0,
-			.staticIndexCount = 0,
+			.staticScene = {},
 			.entityCount = 2,
 			.geometryAssetIdentifiers = {
 				// TODO(debug-only): lemon_1k
@@ -255,10 +251,9 @@ namespace Trident {
 		};
 	}
 
-	Scene3DData createPlayerMovementScene() {
+	Scene3DData createPlayerMovementScene(std::filesystem::path rootOutputPath) {
 		return {
-			.staticVertexCount = 0,
-			.staticIndexCount = 0,
+			.staticScene = {},
 			.entityCount = 3,
 			.geometryAssetIdentifiers = {
 				// TODO(debug-only): UnitBox

@@ -3,8 +3,6 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-layout(location = 0) in uvec2 index;
-
 out Interstage {
 	layout(location = 0) vec3 normal;
 	layout(location = 1) vec2 textureCoordinate;
@@ -14,27 +12,36 @@ layout(set = 0, binding = 0) uniform readonly Camera {
 	mat4x4 projectionView;
 } camera;
 
-layout(set = 0, binding = 1) buffer readonly PositionBuffer {
-	float positionBuffer[];
+layout(set = 0, binding = 1) buffer readonly TriangleBuffer {
+	uint triangleBuffer[];
 };
 
-layout(set = 0, binding = 2) buffer readonly NormalBuffer {
+layout(set = 0, binding = 2) buffer readonly VertexBuffer {
+	float vertexBuffer[];
+};
+
+layout(set = 0, binding = 3) buffer readonly NormalBuffer {
 	float normalBuffer[];
 };
 
-layout(set = 0, binding = 3) buffer readonly TextureCoordinateBuffer {
+layout(set = 0, binding = 4) buffer readonly TextureCoordinateBuffer {
 	float textureCoordinateBuffer[];
 };
 
 void main() {
-	uint positionOffset = (index[0] & 0x00ffu) * 3u;
-	uint normalOffset = (index[0] & 0xff00u) * 3u;
-	uint textureCoordinateOffset = (index[1] & 0x00ffu) * 2u;
+	uint vertexIndex = uint(gl_VertexIndex);
+	uint triangleIndex = vertexIndex / 3u;
+	uint triangleOffset = triangleIndex * 7u;
+	uint triangleVertexIndex = vertexIndex - triangleIndex * 3u;
 
-	vec3 position = vec3(
-		positionBuffer[positionOffset + 0u],
-		positionBuffer[positionOffset + 1u],
-		positionBuffer[positionOffset + 2u]
+	uint positionOffset = triangleBuffer[triangleOffset + triangleVertexIndex] * 3u;
+	uint normalOffset = triangleBuffer[triangleOffset + 3u] * 3u;
+	uint textureCoordinateOffset = triangleBuffer[triangleOffset + 4u + triangleVertexIndex] * 2u;
+
+	vec3 vertex = vec3(
+		vertexBuffer[positionOffset + 0u],
+		vertexBuffer[positionOffset + 1u],
+		vertexBuffer[positionOffset + 2u]
 	);
 
 	vec3 normal = vec3(
@@ -48,7 +55,7 @@ void main() {
 		textureCoordinateBuffer[textureCoordinateOffset + 1u]
 	);
 
-	gl_Position = camera.projectionView * vec4(position, 1.0);
+	gl_Position = camera.projectionView * vec4(vertex, 1.0);
 
 	interstage.normal = normal;
 	interstage.textureCoordinate = textureCoordinate;

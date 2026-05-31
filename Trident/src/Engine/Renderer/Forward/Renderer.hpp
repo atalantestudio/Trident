@@ -81,14 +81,12 @@ namespace Trident {
 			void postSetScene() override {
 				createMaterialObjects();
 
-				staticPositionBuffer = createStaticPositionBuffer();
-				staticNormalBuffer = createStaticNormalBuffer();
-				staticTextureCoordinateBuffer = createStaticTextureCoordinateBuffer();
-				staticVertexBuffer = createStaticVertexBuffer();
-				staticIndexBuffer = createStaticIndexBuffer();
+				if (scene->getAsset()->getStaticTriangles().count() > 0) {
+					staticBuffer = createStaticBuffer();
 
-				staticMaterialPipelineLayout = createStaticMaterialPipelineLayout();
-				staticMaterialPipeline = createStaticMaterialPipeline();
+					staticMaterialPipelineLayout = createStaticMaterialPipelineLayout();
+					staticMaterialPipeline = createStaticMaterialPipeline();
+				}
 
 				// Write index buffer.
 				const view<uint8> sourceDataBuffer = scene->getDataBuffer();
@@ -100,7 +98,9 @@ namespace Trident {
 				// DEBUG_ASSERT(vertexPositionIndexRange.count == vertexNormalIndexRange.count && vertexPositionIndexRange.count == vertexTextureCoordinateIndexRange.count);
 				DEBUG_ASSERT(vertexNormalIndexRange.count == vertexTextureCoordinateIndexRange.count);
 
-				vertexBuffer = createVertexBuffer();
+				if (scene->getIndexCount() > 0) {
+					vertexBuffer = createVertexBuffer();
+				}
 
 				instanceBuffer = createInstanceBuffer();
 				instanceMappedRange = instanceBuffer->map(0, instanceBuffer->getSize());
@@ -123,36 +123,40 @@ namespace Trident {
 					componentIndex += 1;
 				}
 
-				// TODO: As of now the hull line indices are included twice.
-				const ref<Buffer<uint8>> dataStagingBuffer = createStagingBuffer<uint8>(sourceDataBuffer.count() + scene->getHullLineIndexCount() * sizeof(uint16));
+				ref<Buffer<uint8>> dataStagingBuffer;
 
-				uint8* vertexMappedRange = dataStagingBuffer->map(0, dataStagingBuffer->getSize());
+				if (scene->getIndexCount() > 0) {
+					// TODO: As of now the hull line indices are included twice.
+					dataStagingBuffer = createStagingBuffer<uint8>(sourceDataBuffer.count() + scene->getHullLineIndexCount() * sizeof(uint16));
 
-				std::copy_n(sourceDataBuffer.begin(), vertexPositionIndexRange.offset, vertexMappedRange);
-				std::copy_n(&sourceDataBuffer[scene->getHullLineIndexByteOffset()], scene->getHullLineIndexCount() * sizeof(uint16), vertexMappedRange + vertexPositionIndexRange.offset);
+					uint8* vertexMappedRange = dataStagingBuffer->map(0, dataStagingBuffer->getSize());
 
-				index vertexIndex = 0;
+					std::copy_n(sourceDataBuffer.begin(), vertexPositionIndexRange.offset, vertexMappedRange);
+					std::copy_n(&sourceDataBuffer[scene->getHullLineIndexByteOffset()], scene->getHullLineIndexCount() * sizeof(uint16), vertexMappedRange + vertexPositionIndexRange.offset);
 
-				while (vertexIndex < scene->getIndexCount()) {
-					Vertex& vertex = *pointer_cast<Vertex*>(vertexMappedRange + vertexPositionIndexRange.offset + scene->getHullLineIndexCount() * sizeof(uint16) + vertexIndex * sizeof(Vertex));
-					vertex.positionIndex = *pointer_cast<const uint32*>(&sourceDataBuffer[vertexPositionIndexRange.offset + vertexIndex * sizeof(uint32)]);
-					vertex.normalIndex = *pointer_cast<const uint32*>(&sourceDataBuffer[vertexNormalIndexRange.offset + vertexIndex * sizeof(uint32)]);
-					vertex.textureCoordinateIndex = *pointer_cast<const uint32*>(&sourceDataBuffer[vertexTextureCoordinateIndexRange.offset + vertexIndex * sizeof(uint32)]);
+					index vertexIndex = 0;
 
-					vertexIndex += 1;
+					while (vertexIndex < scene->getIndexCount()) {
+						Vertex& vertex = *pointer_cast<Vertex*>(vertexMappedRange + vertexPositionIndexRange.offset + scene->getHullLineIndexCount() * sizeof(uint16) + vertexIndex * sizeof(Vertex));
+						vertex.positionIndex = *pointer_cast<const uint32*>(&sourceDataBuffer[vertexPositionIndexRange.offset + vertexIndex * sizeof(uint32)]);
+						vertex.normalIndex = *pointer_cast<const uint32*>(&sourceDataBuffer[vertexNormalIndexRange.offset + vertexIndex * sizeof(uint32)]);
+						vertex.textureCoordinateIndex = *pointer_cast<const uint32*>(&sourceDataBuffer[vertexTextureCoordinateIndexRange.offset + vertexIndex * sizeof(uint32)]);
+
+						vertexIndex += 1;
+					}
+
+					dataStagingBuffer->unmap();
+
+					dataBuffer = createBuffer<uint8>({
+						.size = vertexPositionIndexRange.offset,
+						.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
+						.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+						.persistent = false,
+						#if defined(DEBUG_OBJECT_NAME)
+							.name = "Data",
+						#endif
+					});
 				}
-
-				dataStagingBuffer->unmap();
-
-				dataBuffer = createBuffer<uint8>({
-					.size = vertexPositionIndexRange.offset,
-					.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
-					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
-					.persistent = false,
-					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Data",
-					#endif
-				});
 
 				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
 				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
@@ -164,13 +168,17 @@ namespace Trident {
 
 				commandEncoder->begin();
 
-				BufferCopyRegion copyRegion = {
-					.sourceOffset = 0,
-					.destinationOffset = 0,
-					.size = dataBuffer->getSize(),
-				};
+				BufferCopyRegion copyRegion;
 
-				commandEncoder->copyBufferToBuffer(dataStagingBuffer, dataBuffer, copyRegion);
+				if (scene->getIndexCount() > 0) {
+					copyRegion = {
+						.sourceOffset = 0,
+						.destinationOffset = 0,
+						.size = dataBuffer->getSize(),
+					};
+
+					commandEncoder->copyBufferToBuffer(dataStagingBuffer, dataBuffer, copyRegion);
+				}
 
 				if (scene->getHullLineIndexCount() > 0) {
 					copyRegion = {
@@ -182,13 +190,15 @@ namespace Trident {
 					commandEncoder->copyBufferToBuffer(dataStagingBuffer, debugHullWireframeBuffer, copyRegion);
 				}
 
-				copyRegion = {
-					.sourceOffset = vertexPositionIndexRange.offset + scene->getHullLineIndexCount() * sizeof(uint16),
-					.destinationOffset = 0,
-					.size = vertexBuffer->getSize(),
-				};
+				if (scene->getIndexCount() > 0) {
+					copyRegion = {
+						.sourceOffset = vertexPositionIndexRange.offset + scene->getHullLineIndexCount() * sizeof(uint16),
+						.destinationOffset = 0,
+						.size = vertexBuffer->getSize(),
+					};
 
-				commandEncoder->copyBufferToBuffer(dataStagingBuffer, vertexBuffer, copyRegion);
+					commandEncoder->copyBufferToBuffer(dataStagingBuffer, vertexBuffer, copyRegion);
+				}
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -208,7 +218,7 @@ namespace Trident {
 					.clearValues = {
 						{0.0f, 0.0f, 0.0f, 1.0f},
 						{
-							.depth = 1.0f,
+							.depth = 0.0f,
 							.stencil = 0,
 						},
 						{0.0f, 0.0f, 0.0f, 1.0f},
@@ -217,7 +227,9 @@ namespace Trident {
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
 
-				renderStaticObjects(commandEncoder);
+				if (scene->getAsset()->getStaticTriangles().count() > 0) {
+					renderStaticObjects(commandEncoder);
+				}
 
 				// TODO(graphics/gl/bind-vertex-buffers): Allow vertex buffers to be bound before setting a graphics pipeline.
 
@@ -225,7 +237,7 @@ namespace Trident {
 				const ComponentPool<MaterialComponent>& materialComponentPool = scene->ecs.getComponentPool<MaterialComponent>();
 				const ComponentPool<RigidBody3DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody3DComponent>();
 
-				if (draw) {
+				if (scene->getIndexCount() > 0 && draw) {
 					sequence<ref<DescriptorSet>> descriptorSets = {vertexDescriptorSet, nullptr};
 					uint32 rigidBodyComponentIndex = 0;
 
@@ -377,17 +389,23 @@ namespace Trident {
 			ref<Buffer<Vertex>> createVertexBuffer() const;
 			ref<Buffer<uint16>> createDebugHullWireframeBuffer() const;
 			ref<Buffer<svec3<float32>>> createDebugContactManifoldBuffer() const;
-
-			// TODO: Use the static data from a scene asset.
-			ref<Buffer<svec3<float32>>> createStaticPositionBuffer() const;
-			ref<Buffer<svec3<float32>>> createStaticNormalBuffer() const;
-			ref<Buffer<svec2<float32>>> createStaticTextureCoordinateBuffer() const;
-			ref<Buffer<PackedVertex>> createStaticVertexBuffer() const;
-			ref<Buffer<uint16>> createStaticIndexBuffer() const;
+			ref<Buffer<uint8>> createStaticBuffer() const;
 
 			ref<Sampler> createImageSampler() const;
 
 			void updateDescriptorSets() const {
+				const ref<Device> device = getDevice();
+				const ref<Scene3DAsset> sceneAsset = scene->getAsset();
+				const uint64 minStorageBufferOffsetAlignment = device->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
+				const uint64 triangleRangeSize = sceneAsset->getStaticTriangles().count() * sizeof(StaticTriangle3D);
+				const uint64 vertexRangeSize = sceneAsset->getStaticVertices().count() * sizeof(svec3<float32>);
+				const uint64 normalRangeSize = sceneAsset->getStaticNormals().count() * sizeof(svec3<float32>);
+				const uint64 textureCoordinateRangeSize = sceneAsset->getStaticTextureCoordinates().count() * sizeof(svec2<float32>);
+				const uint64 triangleAlignedRangeSize = ceil(triangleRangeSize, minStorageBufferOffsetAlignment);
+				const uint64 vertexAlignedRangeSize = ceil(vertexRangeSize, minStorageBufferOffsetAlignment);
+				const uint64 normalAlignedRangeSize = ceil(normalRangeSize, minStorageBufferOffsetAlignment);
+				const uint64 textureCoordinateAlignedRangeSize = ceil(textureCoordinateRangeSize, minStorageBufferOffsetAlignment);
+
 				const sequence<DescriptorBuffer> descriptorBuffers = {
 					// Camera
 					{
@@ -420,57 +438,89 @@ namespace Trident {
 
 					// Static
 					{
-						.buffer = staticPositionBuffer,
+						.buffer = staticBuffer,
 						.offset = 0,
-						.size = staticPositionBuffer->getSize(),
+						.size = triangleRangeSize,
 					},
 					{
-						.buffer = staticNormalBuffer,
-						.offset = 0,
-						.size = staticNormalBuffer->getSize(),
+						.buffer = staticBuffer,
+						.offset = triangleAlignedRangeSize,
+						.size = vertexRangeSize,
 					},
 					{
-						.buffer = staticTextureCoordinateBuffer,
-						.offset = 0,
-						.size = staticTextureCoordinateBuffer->getSize(),
+						.buffer = staticBuffer,
+						.offset = triangleAlignedRangeSize + vertexAlignedRangeSize,
+						.size = normalRangeSize,
+					},
+					{
+						.buffer = staticBuffer,
+						.offset = triangleAlignedRangeSize + vertexAlignedRangeSize + normalAlignedRangeSize,
+						.size = textureCoordinateRangeSize,
 					},
 				};
 
-				sequence<WriteDescriptorSet> writeDescriptorSets(9);
-				index writeDescriptorSetIndex = 0;
+				uint64 writeDescriptorSetCount = 0;
 
-				while (writeDescriptorSetIndex < 5) {
-					writeDescriptorSets[writeDescriptorSetIndex] = {
-						.descriptorSet = vertexDescriptorSet,
-						.bindingIndex = static_cast<uint32>(writeDescriptorSetIndex),
-						.descriptorBuffers = descriptorBuffers[writeDescriptorSetIndex],
-					};
-
-					writeDescriptorSetIndex += 1;
+				if (scene->getIndexCount() > 0) {
+					writeDescriptorSetCount += 5;
 				}
 
-				writeDescriptorSets[5] = {
-					.descriptorSet = staticDescriptorSet,
-					.bindingIndex = 0,
-					.descriptorBuffers = descriptorBuffers[0],
-				};
-				writeDescriptorSets[6] = {
-					.descriptorSet = staticDescriptorSet,
-					.bindingIndex = 1,
-					.descriptorBuffers = descriptorBuffers[5],
-				};
-				writeDescriptorSets[7] = {
-					.descriptorSet = staticDescriptorSet,
-					.bindingIndex = 2,
-					.descriptorBuffers = descriptorBuffers[6],
-				};
-				writeDescriptorSets[8] = {
-					.descriptorSet = staticDescriptorSet,
-					.bindingIndex = 3,
-					.descriptorBuffers = descriptorBuffers[7],
-				};
+				if (scene->getAsset()->getStaticTriangles().count() > 0) {
+					writeDescriptorSetCount += 5;
+				}
 
-				getDevice()->updateDescriptorSets(writeDescriptorSets);
+				sequence<WriteDescriptorSet> writeDescriptorSets(writeDescriptorSetCount);
+				uint32 writeDescriptorSetOffset = 0;
+
+				if (scene->getIndexCount() > 0) {
+					constexpr uint32 descriptorBufferOffset = 0;
+
+					writeDescriptorSets[writeDescriptorSetOffset] = {
+						.descriptorSet = vertexDescriptorSet,
+						.bindingIndex = 0,
+						.descriptorBuffers = descriptorBuffers[0],
+					};
+
+					uint32 writeDescriptorSetIndex = 1;
+
+					while (writeDescriptorSetIndex < 5) {
+						writeDescriptorSets[writeDescriptorSetOffset + writeDescriptorSetIndex] = {
+							.descriptorSet = vertexDescriptorSet,
+							.bindingIndex = writeDescriptorSetIndex,
+							.descriptorBuffers = descriptorBuffers[writeDescriptorSetOffset + writeDescriptorSetIndex],
+						};
+
+						writeDescriptorSetIndex += 1;
+					}
+
+					writeDescriptorSetOffset += 5;
+				}
+
+				if (scene->getAsset()->getStaticTriangles().count() > 0) {
+					constexpr uint32 descriptorBufferOffset = 4;
+
+					writeDescriptorSets[writeDescriptorSetOffset] = {
+						.descriptorSet = staticDescriptorSet,
+						.bindingIndex = 0,
+						.descriptorBuffers = descriptorBuffers[0],
+					};
+
+					uint32 writeDescriptorSetIndex = 1;
+
+					while (writeDescriptorSetIndex < 5) {
+						writeDescriptorSets[writeDescriptorSetOffset + writeDescriptorSetIndex] = {
+							.descriptorSet = staticDescriptorSet,
+							.bindingIndex = writeDescriptorSetIndex,
+							.descriptorBuffers = descriptorBuffers[descriptorBufferOffset + writeDescriptorSetIndex],
+						};
+
+						writeDescriptorSetIndex += 1;
+					}
+
+					writeDescriptorSetOffset += 5;
+				}
+
+				device->updateDescriptorSets(writeDescriptorSets);
 			}
 
 			void postSetCameraController() override {}
@@ -513,11 +563,7 @@ namespace Trident {
 			ref<Buffer<Camera>> cameraBuffer;
 			ref<Buffer<uint16>> debugHullWireframeBuffer;
 			ref<Buffer<svec3<float32>>> debugContactManifoldBuffer;
-			ref<Buffer<svec3<float32>>> staticPositionBuffer;
-			ref<Buffer<svec3<float32>>> staticNormalBuffer;
-			ref<Buffer<svec2<float32>>> staticTextureCoordinateBuffer;
-			ref<Buffer<PackedVertex>> staticVertexBuffer;
-			ref<Buffer<uint16>> staticIndexBuffer;
+			ref<Buffer<uint8>> staticBuffer;
 
 			ref<Image> colorImage;
 			ref<Image> depthStencilImage;
@@ -538,8 +584,8 @@ namespace Trident {
 
 		private:
 			bool draw = false;
-			bool debugHullWireframe = true;
-			bool debugContactManifolds = true;
+			bool debugHullWireframe = false;
+			bool debugContactManifolds = false;
 
 		public:
 			// TODO(debug)

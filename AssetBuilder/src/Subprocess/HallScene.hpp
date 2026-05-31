@@ -5,16 +5,24 @@
 
 #include "AssetBuilder/API/Scene/StaticSceneBuilder.hpp"
 
+#include "Engine/Filesystem/Asset/AssetLibrary.hpp"
+
 namespace Trident {
-	inline void createHallScene(StaticSceneBuilder& builder) {
+	inline Scene3DData createHallScene(std::filesystem::path rootOutputPath) {
+		StaticSceneBuilder builder(rootOutputPath);
 		builder.createStaticObject({
 			.label = "hall_floor",
-			.vertices = {
+			.geometryAssetName = "UnitBox",
+			.transform = {
+				.position = {64.0f, 0.0f, 92.0f},
+				.scale = {144.0f, 8.0f, 200.0f},
+			},
+			/* .vertices = {
 				{-16.0f,  0.0f, -16.0f},
 				{-16.0f,  0.0f,  184.0f},
 				{ 128.0f, 0.0f,  184.0f},
 				{ 128.0f, 0.0f, -16.0f},
-			},
+			}, */
 			// .texture = "tile/tilefloor018a.jpg",
 			// .normalMap = "tile/tilefloor018a_normal.jpg",
 			.textureFiltering = {
@@ -65,5 +73,14 @@ namespace Trident {
 			"uv_rotation": 0,
 			"uv_scale": [-0.25, 0.25]
 		} */
+
+		return {
+			.staticScene = builder.build(),
+			.entityCount = 0,
+			.geometryAssetIdentifiers = {},
+			.geometryMappings = {},
+			.materialMappings = {},
+			.rigidBodyMappings = {},
+		};
 	}
 }

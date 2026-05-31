@@ -4,25 +4,24 @@
 #pragma once
 
 #include "AssetBuilder/API/Scene/StaticObject.hpp"
+#include "AssetBuilder/API/Scene/StaticScene.hpp"
+
+#include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 
 namespace Trident {
 	class StaticSceneBuilder {
 		public:
-			explicit StaticSceneBuilder();
+			explicit StaticSceneBuilder(std::filesystem::path rootOutputPath);
 
-			view<svec3<float32>> getVertexBuffer() const;
-
-			view<uint16> getIndexBuffer() const;
-
-			view<StaticObject> getObjects() const;
+			~StaticSceneBuilder();
 
 			void createStaticObject(const StaticObjectDescriptor& descriptor);
 
-			uint16 findVertex(svec3<float32> vertex) const;
+			/// Compiles and returns an optimized static scene.
+			StaticScene3D build() const;
 
 		private:
-			std::vector<svec3<float32>> vertexBuffer;
-			std::vector<uint16> indexBuffer;
+			AssetLibrary* assetLibrary;
 			std::vector<StaticObject> objects;
 	};
 }

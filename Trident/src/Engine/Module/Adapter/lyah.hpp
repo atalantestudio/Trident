@@ -436,10 +436,11 @@ namespace Trident {
 		};
 	}
 
-	// Returns a perspective projection matrix.
-	// - fieldOfView is in radians.
-	// - coordinateSystem is 1 for left-handed and -1 for right-handed.
-	// - bias defaults to pi / 2.
+	/// Calculates and returns a perspective projection matrix.
+	/// 
+	/// - `fieldOfView` must be in radians.
+	/// - `coordinateSystem` must be 1 for LH or -1 for RH.
+	/// - `bias` defaults to PI / 2.
 	inline mat4x4<float32> perspective(float32 fieldOfView, float32 aspectRatio, float32 nearPlane, float32 farPlane, float32 coordinateSystem, float32 bias = pi<float32>() * 0.5f) {
 		ENGINE_ASSERT(nearPlane > 0.0f, "Invalid near plane.");
 
@@ -451,6 +452,24 @@ namespace Trident {
 			0.0f,            f,     0.0f,                                            0.0f,
 			0.0f,            0.0f,  farPlane / range,                                coordinateSystem,
 			0.0f,            0.0f, -coordinateSystem * nearPlane * farPlane / range, 0.0f,
+		};
+	}
+
+	/// Calculates and returns a perspective projection matrix tailored for Reversed-Z rendering (flips the depth and defines an infinite far plane).
+	/// See https://nlguillemot.wordpress.com/2016/12/07/reversed-z-in-opengl.
+	/// 
+	/// - `fieldOfView` must be in radians.
+	/// - `coordinateSystem` must be 1 for LH or -1 for RH.
+	inline mat4x4<float32> reversedZ(float32 fieldOfView, float32 aspectRatio, float32 nearPlane, float32 coordinateSystem) {
+		ENGINE_ASSERT(nearPlane > 0.0f, "Invalid near plane.");
+
+		const float32 f = 1.0f / tan(fieldOfView * 0.5f);
+
+		return {
+			f / aspectRatio, 0.0f, 0.0f,      0.0f,
+			0.0f,            f,    0.0f,      0.0f,
+			0.0f,            0.0f, 0.0f,      coordinateSystem,
+			0.0f,            0.0f, nearPlane, 0.0f,
 		};
 	}
 

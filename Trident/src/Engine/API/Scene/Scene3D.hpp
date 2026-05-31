@@ -15,6 +15,10 @@ namespace Trident {
 		public:
 			explicit Scene3D(ref<Scene3DAsset> sceneAsset, uint64 minStorageBufferOffsetAlignment);
 
+			inline ref<Scene3DAsset> getAsset() const {
+				return asset;
+			}
+
 			inline uint32 getIndexCount() const {
 				return indexCount;
 			}
@@ -97,10 +101,12 @@ namespace Trident {
 			void updateRigidBodyFacePlanes();
 
 		private:
-			void loadGeometries(ref<Scene3DAsset> sceneAsset, uint64 minStorageBufferOffsetAlignment);
-			void loadEntityComponentMappings(ref<Scene3DAsset> sceneAsset);
+			void loadGeometries(uint64 minStorageBufferOffsetAlignment);
+			void loadEntityComponentMappings();
 
 		private:
+			ref<Scene3DAsset> asset;
+
 			/// Total number of indices.
 			uint32 indexCount;
 

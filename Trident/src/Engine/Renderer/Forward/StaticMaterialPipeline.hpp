@@ -7,9 +7,6 @@
 
 namespace Trident {
 	ref<GraphicsPipeline> ForwardRenderer::createStaticMaterialPipeline() const {
-		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<svec2<uint32>>();
-
 		const sequence<ColorBlendAttachment> colorBlendAttachments = {
 			{
 				.blend = false,
@@ -18,7 +15,7 @@ namespace Trident {
 
 		return createGraphicsPipeline({
 			.pipelineLayout = staticMaterialPipelineLayout,
-			.vertexInputBindings = {vertexInputBinding},
+			.vertexInputBindings = {},
 			.vertexShaderModule = loadInternalShaderModule(
 				{
 					.stage = ShaderStage::VERTEX,
@@ -51,7 +48,7 @@ namespace Trident {
 			.depthStencilState = {
 				.depthTest = true,
 				.depthWrite = true,
-				.compareOperation = CompareOperation::LESS,
+				.compareOperation = CompareOperation::GREATER,
 			},
 			.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT,
 			.renderPass = renderPass,

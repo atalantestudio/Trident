@@ -316,12 +316,10 @@ namespace Trident {
 	}
 
 	void ForwardRenderer::renderStaticObjects(ref<CommandEncoder> commandEncoder) const {
-		const uint32 indexCount = static_cast<uint32>(staticIndexBuffer->getSize() / 2);
+		const uint32 vertexCount = static_cast<uint32>(scene->getAsset()->getStaticTriangles().count()) * 3;
 
 		commandEncoder->bindGraphicsPipeline(staticMaterialPipeline);
-		commandEncoder->bindVertexBuffer(0, staticVertexBuffer, 0, sizeof(PackedVertex));
-		commandEncoder->bindIndexBuffer<uint16>(staticIndexBuffer, 0);
 		commandEncoder->bindDescriptorSets(staticMaterialPipelineLayout, 0, staticDescriptorSet);
-		commandEncoder->drawIndexed(indexCount, 1, 0, 0, 0);
+		commandEncoder->draw(vertexCount, 1, 0, 0);
 	}
 }

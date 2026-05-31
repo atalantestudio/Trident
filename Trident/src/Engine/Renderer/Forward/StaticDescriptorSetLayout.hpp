@@ -15,7 +15,14 @@ namespace Trident {
 				.shaderStages = ShaderStage::VERTEX,
 			},
 
-			// Position
+			// Triangle
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::VERTEX,
+			},
+
+			// Vertex
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,

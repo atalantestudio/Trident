@@ -7,18 +7,21 @@
 #include "Engine/API/Process/Process.hpp"
 
 #include "../Subprocess/SceneData.hpp"
+
 #include "../Subprocess/Scene2D.hpp"
+
+#include "../Subprocess/HallScene.hpp"
 #include "../Subprocess/Scene3D.hpp"
 
 namespace Trident {
 	class BuildSceneAssetProcess final : public Process {
 		private:
 			typedef Scene2DData (*CreateScene2DFunction)();
-			typedef Scene3DData (*CreateScene3DFunction)();
+			typedef Scene3DData (*CreateScene3DFunction)(std::filesystem::path rootOutputPath);
 
 		private:
 			static constexpr uint32 SCENE_2D_COUNT = 9;
-			static constexpr uint32 SCENE_3D_COUNT = 5;
+			static constexpr uint32 SCENE_3D_COUNT = 6;
 
 			inline static const view<char8> SCENE_2D_NAMES[SCENE_2D_COUNT] = {
 				"Boxes",
@@ -48,6 +51,7 @@ namespace Trident {
 				"Boxes3D",
 				"BoxStacking",
 				"EdgeContact",
+				"Hall",
 				"Lemons",
 				"PlayerMovement",
 			};
@@ -56,6 +60,7 @@ namespace Trident {
 				createBoxes3DScene,
 				createBoxStackingScene,
 				createEdgeContactScene,
+				createHallScene,
 				createLemonsScene,
 				createPlayerMovementScene,
 			};
@@ -66,8 +71,9 @@ namespace Trident {
 				header.signature = AssetSignature::SCENE;
 				header.identifier = identifier;
 				header.version = {0, 0, 0};
-				header.staticVertexCount = data.staticVertexCount;
-				header.staticIndexCount = data.staticIndexCount;
+				header.staticTriangleCount = static_cast<uint32>(data.staticScene.triangles.count());
+				header.staticVertexCount = static_cast<uint32>(data.staticScene.vertices.count());
+				header.staticTextureCoordinateCount = static_cast<uint32>(data.staticScene.textureCoordinates.count());
 				header.entityCount = data.entityCount;
 				header.geometryAssetCount = static_cast<uint32>(data.geometryAssetIdentifiers.count());
 				header.geometryMappingCount = static_cast<uint32>(data.geometryMappings.count());
@@ -76,8 +82,9 @@ namespace Trident {
 
 				const uint64 size =
 					sizeof(header) +
+					header.staticTriangleCount * sizeof(StaticTriangle2D) +
 					header.staticVertexCount * sizeof(svec2<float32>) +
-					header.staticIndexCount * sizeof(uint32) +
+					header.staticTextureCoordinateCount * sizeof(svec2<float32>) +
 					header.geometryAssetCount * sizeof(uint32) +
 					header.geometryMappingCount * (sizeof(Entity) + sizeof(uint32)) +
 					header.materialMappingCount * (sizeof(Entity) + sizeof(uint32)) +
@@ -88,6 +95,23 @@ namespace Trident {
 				std::copy_n(pointer_cast<const uint8*>(&header), sizeof(header), stream.getBytePosition());
 
 				stream.jump(sizeof(header));
+
+				for (const StaticTriangle2D& triangle : data.staticScene.triangles) {
+					stream.write<uint32>(triangle.aIndex);
+					stream.write<uint32>(triangle.bIndex);
+					stream.write<uint32>(triangle.cIndex);
+					stream.write<uint32>(triangle.aUvIndex);
+					stream.write<uint32>(triangle.bUvIndex);
+					stream.write<uint32>(triangle.cUvIndex);
+				}
+
+				for (const svec2<float32> vertex : data.staticScene.vertices) {
+					stream.write<svec2<float32>>(vertex);
+				}
+
+				for (const svec2<float32> textureCoordinate : data.staticScene.textureCoordinates) {
+					stream.write<svec2<float32>>(textureCoordinate);
+				}
 
 				for (const uint32 geometryAssetIdentifier : data.geometryAssetIdentifiers) {
 					stream.write<uint32>(geometryAssetIdentifier);
@@ -119,8 +143,10 @@ namespace Trident {
 				header.signature = AssetSignature::SCENE;
 				header.identifier = identifier;
 				header.version = {0, 0, 0};
-				header.staticVertexCount = data.staticVertexCount;
-				header.staticIndexCount = data.staticIndexCount;
+				header.staticTriangleCount = static_cast<uint32>(data.staticScene.triangles.count());
+				header.staticVertexCount = static_cast<uint32>(data.staticScene.vertices.count());
+				header.staticNormalCount = static_cast<uint32>(data.staticScene.normals.count());
+				header.staticTextureCoordinateCount = static_cast<uint32>(data.staticScene.textureCoordinates.count());
 				header.entityCount = data.entityCount;
 				header.geometryAssetCount = static_cast<uint32>(data.geometryAssetIdentifiers.count());
 				header.geometryMappingCount = static_cast<uint32>(data.geometryMappings.count());
@@ -129,8 +155,10 @@ namespace Trident {
 
 				const uint64 size =
 					sizeof(header) +
-					header.staticVertexCount * sizeof(svec2<float32>) +
-					header.staticIndexCount * sizeof(uint32) +
+					header.staticTriangleCount * sizeof(StaticTriangle3D) +
+					header.staticVertexCount * sizeof(svec3<float32>) +
+					header.staticNormalCount * sizeof(svec3<float32>) +
+					header.staticTextureCoordinateCount * sizeof(svec2<float32>) +
 					header.geometryAssetCount * sizeof(uint32) +
 					header.geometryMappingCount * (sizeof(Entity) + sizeof(uint32)) +
 					header.materialMappingCount * (sizeof(Entity) + sizeof(uint32)) +
@@ -141,6 +169,28 @@ namespace Trident {
 				std::copy_n(pointer_cast<const uint8*>(&header), sizeof(header), stream.getBytePosition());
 
 				stream.jump(sizeof(header));
+
+				for (const StaticTriangle3D& triangle : data.staticScene.triangles) {
+					stream.write<uint32>(triangle.aIndex);
+					stream.write<uint32>(triangle.bIndex);
+					stream.write<uint32>(triangle.cIndex);
+					stream.write<uint32>(triangle.normalIndex);
+					stream.write<uint32>(triangle.aUvIndex);
+					stream.write<uint32>(triangle.bUvIndex);
+					stream.write<uint32>(triangle.cUvIndex);
+				}
+
+				for (const svec3<float32> vertex : data.staticScene.vertices) {
+					stream.write<svec3<float32>>(vertex);
+				}
+
+				for (const svec3<float32> normal : data.staticScene.normals) {
+					stream.write<svec3<float32>>(normal);
+				}
+
+				for (const svec2<float32> textureCoordinate : data.staticScene.textureCoordinates) {
+					stream.write<svec2<float32>>(textureCoordinate);
+				}
 
 				for (const uint32 geometryAssetIdentifier : data.geometryAssetIdentifiers) {
 					stream.write<uint32>(geometryAssetIdentifier);
@@ -209,7 +259,7 @@ namespace Trident {
 
 				while (sceneIndex < SCENE_3D_COUNT) {
 					const uint32 identifier = AssetLibrary::createAssetIdentifier();
-					const Scene3DData sceneData = SCENE_3D_FUNCTIONS[sceneIndex]();
+					const Scene3DData sceneData = SCENE_3D_FUNCTIONS[sceneIndex](rootOutputPath);
 					const ByteStream<StreamOperation::WRITE> stream = encodeScene3DAsset(identifier, sceneData);
 
 					encodeSceneAsset(identifier, stream, SCENE_3D_NAMES[sceneIndex], assetOutputPath);

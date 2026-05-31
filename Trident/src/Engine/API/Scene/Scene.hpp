@@ -11,8 +11,6 @@ namespace Trident {
 
 	template<>
 	struct Descriptor<Scene> {
-		uint64 staticVertexCount;
-		uint64 staticIndexCount;
 		uint64 dynamicVertexCount;
 		uint64 dynamicIndexCount;
 	};
@@ -20,19 +18,9 @@ namespace Trident {
 	class Scene {
 		public:
 			explicit Scene(const Descriptor<Scene>& descriptor) :
-				staticVertexCount(descriptor.staticVertexCount),
-				staticIndexCount(descriptor.staticIndexCount),
 				dynamicVertexCount(descriptor.dynamicVertexCount),
 				dynamicIndexCount(descriptor.dynamicIndexCount)
 			{}
-
-			inline uint64 getStaticVertexCount() const {
-				return staticVertexCount;
-			}
-
-			inline uint64 getStaticIndexCount() const {
-				return staticIndexCount;
-			}
 
 			inline uint64 getDynamicVertexCount() const {
 				return dynamicVertexCount;
@@ -50,8 +38,6 @@ namespace Trident {
 			ECS ecs;
 
 		protected:
-			uint64 staticVertexCount;
-			uint64 staticIndexCount;
 			uint64 dynamicVertexCount;
 			uint64 dynamicIndexCount;
 
@@ -63,7 +49,7 @@ namespace Trident {
 			// - Vertex position indices of each hull, in order (LINE_STRIP for 2D, LINE_LIST for 3D)
 			// - Vertex normal indices of each geometry, in order
 			// - Vertex texture coordinate indices of each geometry, in order
-			/// Contains static (internal to the scene) and dynamic (external geometries) vertices and indices.
+			/// Contains dynamic (external geometries) vertices and indices.
 			sequence<uint8> dataBuffer;
 	};
 }

@@ -56,7 +56,7 @@ namespace Trident {
 		initializeGraphicsAdapter(projectDescriptor);
 
 		if (projectType == ProjectType::MAIN) {
-			assetLibrary = new AssetLibrary();
+			assetLibrary = new AssetLibrary(Filesystem::getProjectRootDirectory());
 		}
 	}
 

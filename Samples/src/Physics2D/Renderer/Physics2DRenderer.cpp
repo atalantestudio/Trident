@@ -1032,7 +1032,7 @@ namespace Trident {
 		stagingBuffer->unmap();
 
 		vertexBuffer = createBuffer<Vertex>({
-			.size = (scene->getStaticVertexCount() + scene->getDynamicVertexCount()) * sizeof(Vertex),
+			.size = scene->getDynamicVertexCount() * sizeof(Vertex),
 			.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
@@ -1041,7 +1041,7 @@ namespace Trident {
 			#endif
 		});
 		indexBuffer = createBuffer<uint32>({
-			.size = (scene->getStaticIndexCount() + scene->getDynamicIndexCount()) * sizeof(uint32),
+			.size = scene->getDynamicIndexCount() * sizeof(uint32),
 			.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
@@ -1291,9 +1291,9 @@ namespace Trident {
 		// Rigid body fill
 		{
 			commandEncoder->bindGraphicsPipeline(rigidBodyFillPipeline);
-			commandEncoder->bindVertexBuffer(0, vertexBuffer, scene->getStaticVertexCount() * sizeof(Vertex), sizeof(Vertex));
+			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 			commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0, sizeof(RigidBody));
-			commandEncoder->bindIndexBuffer<uint32>(indexBuffer, scene->getStaticIndexCount() * sizeof(uint32));
+			commandEncoder->bindIndexBuffer<uint32>(indexBuffer, 0);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
 
 			while (componentIndex < geometryComponentPool.componentCount) {
@@ -1313,9 +1313,9 @@ namespace Trident {
 		// Rigid body stroke
 		{
 			commandEncoder->bindGraphicsPipeline(rigidBodyStrokePipeline);
-			commandEncoder->bindVertexBuffer(0, vertexBuffer, scene->getStaticVertexCount() * sizeof(Vertex), sizeof(Vertex));
+			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 			commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0, sizeof(RigidBody));
-			commandEncoder->bindIndexBuffer<uint32>(indexBuffer, scene->getStaticIndexCount() * sizeof(uint32));
+			commandEncoder->bindIndexBuffer<uint32>(indexBuffer, 0);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
 
 			while (componentIndex < geometryComponentPool.componentCount) {
@@ -1368,9 +1368,9 @@ namespace Trident {
 			// Rigid body placeholder fill
 			{
 				commandEncoder->bindGraphicsPipeline(rigidBodyPlaceholderFillPipeline);
-				commandEncoder->bindVertexBuffer(0, vertexBuffer, scene->getStaticVertexCount() * sizeof(Vertex), sizeof(Vertex));
+				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 				commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0, sizeof(RigidBody));
-				commandEncoder->bindIndexBuffer<uint32>(indexBuffer, scene->getStaticIndexCount() * sizeof(uint32));
+				commandEncoder->bindIndexBuffer<uint32>(indexBuffer, 0);
 				commandEncoder->bindDescriptorSets(placeholderPipelineLayout, 0, descriptorSets);
 				commandEncoder->drawIndexed(geometry.getIndexRange().count, 1, geometry.getIndexRange().offset, geometry.getVertexPositionComponentRange().offset / 2, selectedEntity);
 			}
@@ -1378,9 +1378,9 @@ namespace Trident {
 			// Rigid body placeholder stroke
 			{
 				commandEncoder->bindGraphicsPipeline(rigidBodyPlaceholderStrokePipeline);
-				commandEncoder->bindVertexBuffer(0, vertexBuffer, scene->getStaticVertexCount() * sizeof(Vertex), sizeof(Vertex));
+				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 				commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0, sizeof(RigidBody));
-				commandEncoder->bindIndexBuffer<uint32>(indexBuffer, scene->getStaticIndexCount() * sizeof(uint32));
+				commandEncoder->bindIndexBuffer<uint32>(indexBuffer, 0);
 				commandEncoder->bindDescriptorSets(placeholderPipelineLayout, 0, descriptorSets);
 				commandEncoder->drawIndexed(hull.lineIndexRange.count, 1, hull.lineIndexRange.offset, geometry.getVertexPositionComponentRange().offset / 2, selectedEntity);
 			}

@@ -54,6 +54,10 @@ namespace Trident {
 				projection = perspective(fieldOfView, aspectRatio, nearPlane, farPlane, 1.0f);
 			}
 
+			void updateProjectionReversedZ() {
+				projection = reversedZ(fieldOfView, aspectRatio, nearPlane, 1.0f);
+			}
+
 			void updateView() {
 				const vec3<float32> eye = position - getForward() * distance;
 

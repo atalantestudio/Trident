@@ -12,11 +12,10 @@
 namespace Trident {
 	Scene3D::Scene3D(ref<Scene3DAsset> sceneAsset, uint64 minStorageBufferOffsetAlignment) :
 		Scene({
-			.staticVertexCount = sceneAsset->getStaticVertexCount(),
-			.staticIndexCount = sceneAsset->getStaticIndexCount(),
 			.dynamicVertexCount = sceneAsset->getDynamicVertexPositionCount() + sceneAsset->getDynamicVertexNormalCount() + sceneAsset->getDynamicVertexTextureCoordinateCount(),
 			.dynamicIndexCount = sceneAsset->getDynamicVertexPositionIndexCount() + sceneAsset->getDynamicVertexNormalIndexCount() + sceneAsset->getDynamicVertexTextureCoordinateIndexCount()
 		}),
+		asset(sceneAsset),
 		vertexPositionComponentRange(0, 0),
 		vertexNormalComponentRange(0, 0),
 		vertexTextureCoordinateComponentRange(0, 0),
@@ -25,36 +24,34 @@ namespace Trident {
 		vertexNormalIndexRange(0, 0),
 		vertexTextureCoordinateIndexRange(0, 0)
 	{
-		loadGeometries(sceneAsset, minStorageBufferOffsetAlignment);
-		loadEntityComponentMappings(sceneAsset);
+		loadGeometries(minStorageBufferOffsetAlignment);
+		loadEntityComponentMappings();
 		updateRigidBodyFacePlanes();
 	}
 
-	void Scene3D::loadGeometries(ref<Scene3DAsset> sceneAsset, uint64 minStorageBufferOffsetAlignment) {
-		const sequence<uint8>& staticBuffer = sceneAsset->getStaticBuffer();
-		const sequence<ref<GeometryAsset>>& geometryAssets = sceneAsset->getGeometryAssets();
+	void Scene3D::loadGeometries(uint64 minStorageBufferOffsetAlignment) {
+		const sequence<uint8>& staticBuffer = asset->getStaticBuffer();
+		const sequence<ref<GeometryAsset>>& geometryAssets = asset->getGeometryAssets();
 		const uint64 vertexComponentCount = (
-			sceneAsset->getStaticVertexCount() * 3 +
-			sceneAsset->getDynamicVertexPositionCount() * 3 +
-			sceneAsset->getDynamicVertexNormalCount() * 3 +
-			sceneAsset->getDynamicVertexTextureCoordinateCount() * 2
+			asset->getDynamicVertexPositionCount() * 3 +
+			asset->getDynamicVertexNormalCount() * 3 +
+			asset->getDynamicVertexTextureCoordinateCount() * 2
 		);
 
-		indexCount = static_cast<uint32>(sceneAsset->getDynamicVertexPositionIndexCount());
+		indexCount = static_cast<uint32>(asset->getDynamicVertexPositionIndexCount());
 
-		// TODO: Include static ranges.
-		vertexPositionComponentRange.count = ceil(sceneAsset->getDynamicVertexPositionCount() * sizeof(svec3<float32>), minStorageBufferOffsetAlignment);
-		vertexNormalComponentRange.count = ceil(sceneAsset->getDynamicVertexNormalCount() * sizeof(svec3<float32>), minStorageBufferOffsetAlignment);
-		vertexTextureCoordinateComponentRange.count = ceil(sceneAsset->getDynamicVertexTextureCoordinateCount() * sizeof(svec2<float32>), minStorageBufferOffsetAlignment);
-		triangleTangentComponentRange.count = ceil(sceneAsset->getDynamicTriangleTangentCount() * sizeof(svec3<float32>), minStorageBufferOffsetAlignment);
-		vertexPositionIndexRange.count = ceil(sceneAsset->getDynamicVertexPositionIndexCount() * sizeof(uint32) + sceneAsset->getHullLineIndexCount() * sizeof(uint16), minStorageBufferOffsetAlignment);
-		vertexNormalIndexRange.count = ceil(sceneAsset->getDynamicVertexNormalIndexCount() * sizeof(uint32), minStorageBufferOffsetAlignment);
-		vertexTextureCoordinateIndexRange.count = ceil(sceneAsset->getDynamicVertexTextureCoordinateIndexCount() * sizeof(uint32), minStorageBufferOffsetAlignment);
+		vertexPositionComponentRange.count = ceil(asset->getDynamicVertexPositionCount() * sizeof(svec3<float32>), minStorageBufferOffsetAlignment);
+		vertexNormalComponentRange.count = ceil(asset->getDynamicVertexNormalCount() * sizeof(svec3<float32>), minStorageBufferOffsetAlignment);
+		vertexTextureCoordinateComponentRange.count = ceil(asset->getDynamicVertexTextureCoordinateCount() * sizeof(svec2<float32>), minStorageBufferOffsetAlignment);
+		triangleTangentComponentRange.count = ceil(asset->getDynamicTriangleTangentCount() * sizeof(svec3<float32>), minStorageBufferOffsetAlignment);
+		vertexPositionIndexRange.count = ceil(asset->getDynamicVertexPositionIndexCount() * sizeof(uint32) + asset->getHullLineIndexCount() * sizeof(uint16), minStorageBufferOffsetAlignment);
+		vertexNormalIndexRange.count = ceil(asset->getDynamicVertexNormalIndexCount() * sizeof(uint32), minStorageBufferOffsetAlignment);
+		vertexTextureCoordinateIndexRange.count = ceil(asset->getDynamicVertexTextureCoordinateIndexCount() * sizeof(uint32), minStorageBufferOffsetAlignment);
 
-		hullLineIndexCount = sceneAsset->getHullLineIndexCount();
+		hullLineIndexCount = asset->getHullLineIndexCount();
 
 		range<uint64, uint64>* ranges = &vertexPositionComponentRange;
-		uint64 dataBufferSize = ceil(sceneAsset->getStaticVertexCount() * sizeof(svec3<float32>), minStorageBufferOffsetAlignment);
+		uint64 dataBufferSize = 0;
 
 		// Propagate the range offset.
 		while (ranges < &vertexTextureCoordinateIndexRange) {
@@ -68,11 +65,11 @@ namespace Trident {
 
 		dataBuffer = sequence<uint8>(dataBufferSize);
 		geometries = sequence<Geometry3D>(geometryAssets.count());
-		hulls = sequence<Hull3D>(sceneAsset->getHullCount());
-		hullEdges = sequence<Edge3D>(sceneAsset->getHullEdgeCount());
-		hullFaces = sequence<Plane3D>(sceneAsset->getHullFaceCount());
-		hullFaceEdgeIndices = sequence<uint16>(sceneAsset->getHullFaceEdgeIndexCount());
-		rigidBodyFacePlanes = sequence<Plane3D>(sceneAsset->getRigidBodyFacePlaneCount());
+		hulls = sequence<Hull3D>(asset->getHullCount());
+		hullEdges = sequence<Edge3D>(asset->getHullEdgeCount());
+		hullFaces = sequence<Plane3D>(asset->getHullFaceCount());
+		hullFaceEdgeIndices = sequence<uint16>(asset->getHullFaceEdgeIndexCount());
+		rigidBodyFacePlanes = sequence<Plane3D>(asset->getRigidBodyFacePlaneCount());
 
 		std::copy(staticBuffer.begin(), staticBuffer.end(), &dataBuffer[0]);
 
@@ -229,7 +226,7 @@ namespace Trident {
 		}
 	}
 
-	void Scene3D::loadEntityComponentMappings(ref<Scene3DAsset> sceneAsset) {
+	void Scene3D::loadEntityComponentMappings() {
 		ecs.registerComponentPool<GeometryComponent>();
 		ecs.registerComponentPool<MaterialComponent>();
 
@@ -238,23 +235,23 @@ namespace Trident {
 
 		Entity entity = 0;
 
-		while (entity < sceneAsset->getEntityCount()) {
+		while (entity < asset->getEntityCount()) {
 			ecs.createEntity();
 
 			entity += 1;
 		}
 
-		for (const EntityComponentMapping<GeometryComponent> geometryMapping : sceneAsset->getGeometryMappings()) {
+		for (const EntityComponentMapping<GeometryComponent> geometryMapping : asset->getGeometryMappings()) {
 			ecs.setComponent<GeometryComponent>(geometryMapping.entity, geometryMapping.component);
 		}
 
-		for (const EntityComponentMapping<MaterialComponent> materialMapping : sceneAsset->getMaterialMappings()) {
+		for (const EntityComponentMapping<MaterialComponent> materialMapping : asset->getMaterialMappings()) {
 			ecs.setComponent<MaterialComponent>(materialMapping.entity, materialMapping.component);
 		}
 
 		index rigidBodyFacePlaneOffset = 0;
 
-		for (const EntityComponentMapping<RigidBody3DComponent>& rigidBodyMapping : sceneAsset->getRigidBodyMappings()) {
+		for (const EntityComponentMapping<RigidBody3DComponent>& rigidBodyMapping : asset->getRigidBodyMappings()) {
 			ecs.setComponent<RigidBody3DComponent>(rigidBodyMapping.entity, rigidBodyMapping.component);
 
 			RigidBody3DComponent& rigidBodyComponent = ecs.getComponent<RigidBody3DComponent>(rigidBodyMapping.entity);

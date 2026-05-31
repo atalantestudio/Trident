@@ -16,11 +16,10 @@ namespace Trident {
 				camera.position = {0.0_m, 0.0_m, -0.4_m};
 				camera.fieldOfView = radians(60.0_deg);
 				camera.nearPlane = 0.01_m;
-				camera.farPlane = 2000.0_m;
 			}
 
 			void updateProjection() {
-				camera.updateProjection();
+				camera.updateProjectionReversedZ();
 			}
 
 			void update(float32 deltaTime) override {

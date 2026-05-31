@@ -60,7 +60,7 @@ namespace Trident {
 
 		file.data = sequence<uint8>(file.extent.width * file.extent.height * channelCount);
 
-		Filesystem::QOIDecoderContentOnly(stream, file.data, channelCount, 8);
+		Filesystem::decodeQoiContent(stream, file.data, channelCount, 8);
 
 		const uint8* footer = stream.getBytePosition();
 
@@ -69,7 +69,7 @@ namespace Trident {
 		return file;
 	}
 
-	void Filesystem::QOIDecoderContentOnly(ByteStream<StreamOperation::READ>& stream, sequence<uint8>& data, uint8 channelCount, uint32 footerByteSize) {
+	void Filesystem::decodeQoiContent(ByteStream<StreamOperation::READ>& stream, sequence<uint8>& data, uint8 channelCount, uint32 footerByteSize) {
 		qoi_rgba previousTexel = {0, 0, 0, 255};
 		qoi_rgba texelCache[64]{};
 		uint64 dataOffset = 0;

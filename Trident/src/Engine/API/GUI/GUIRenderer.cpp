@@ -533,7 +533,7 @@ namespace Trident {
 		return createGraphicsPipeline({
 			.pipelineLayout = subcomponentPipelineLayout,
 			.vertexInputBindings = {vertexInputBinding, instanceInputBinding},
-			.vertexShaderModule =  loadInternalShaderModule(
+			.vertexShaderModule = loadInternalShaderModule(
 				{
 					.stage = ShaderStage::VERTEX,
 					.entryPoint = "main",

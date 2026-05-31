@@ -3,6 +3,7 @@
 
 #include "pch.hpp"
 
+#include "Engine/API/Geometry/Geometry2D.hpp"
 #include "Engine/API/Geometry/Geometry3D.hpp"
 #include "Engine/Filesystem/Asset/GeometryAsset.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
@@ -142,7 +143,7 @@ namespace Trident {
 	}
 
 	template<>
-	ref<GeometryAsset> Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream) {
+	ref<GeometryAsset> Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, const AssetLibrary* assetLibrary) {
 		Descriptor<GeometryAsset> descriptor{};
 		descriptor.identifier = stream.read<uint32>();
 		descriptor.version = stream.read<VersionNumber>();
