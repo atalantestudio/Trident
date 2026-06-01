@@ -9,70 +9,77 @@
 
 namespace Trident {
 	inline Scene3DData createHallScene(std::filesystem::path rootOutputPath) {
-		StaticSceneBuilder builder(rootOutputPath);
-		builder.createStaticObject({
-			.label = "hall_floor",
-			.geometryAssetName = "UnitBox",
-			.transform = {
-				.position = {64.0f, 0.0f, 92.0f},
-				.scale = {144.0f, 8.0f, 200.0f},
-			},
-			/* .vertices = {
-				{-16.0f,  0.0f, -16.0f},
-				{-16.0f,  0.0f,  184.0f},
-				{ 128.0f, 0.0f,  184.0f},
-				{ 128.0f, 0.0f, -16.0f},
-			}, */
-			// .texture = "tile/tilefloor018a.jpg",
-			// .normalMap = "tile/tilefloor018a_normal.jpg",
-			.textureFiltering = {
-				.translation = {0.25f, 0.625f},
-				.rotation = 0.0f,
-				.scale = {-0.25f, 0.25f},
-			},
-		});
+		// TODO(test)
+		// Texture: "tile/tilefloor018a.jpg"
+		// Normal map: "tile/tilefloor018a_normal.jpg"
 
-		/* {
-			"label": "hall_floor",
-			"anchors": [-16, 0, -16, -16, 0, 184, 128, 0, 184],
-			"texture": "tile/tilefloor018a.jpg",
-			"normal_map": "tile/tilefloor018a_normal.jpg",
-			"uv": [0.25, 0.625],
-			"uv_rotation": 0,
-			"uv_scale": [-0.25, 0.25]
-		}, {
-			"label": "hall_to_bike_room_floor_connector",
-			"anchors": [-24, 0, 104, -24, 0, 152, -16, 0, 152],
-			"texture": "tile/tilefloor018a.jpg",
-			"normal_map": "tile/tilefloor018a_normal.jpg",
-			"uv": [0.375, 0.125],
-			"uv_rotation": 0,
-			"uv_scale": [-0.25, 0.25]
-		}, {
-			"label": "bike_room_floor",
-			"anchors": [-96, 0, 48, -96, 0, 184, -24, 0, 184],
-			"texture": "tile/tilefloor018a.jpg",
-			"normal_map": "tile/tilefloor018a_normal.jpg",
-			"uv": [0.5, 0.624],
-			"uv_rotation": 0,
-			"uv_scale": [-0.25, 0.25]
-		}, {
-			"label": "hall_to_main_floor_connector",
-			"anchors": [24, 0, 184, 24, 0, 192, 84, 0, 192],
-			"texture": "tile/tilefloor018a.jpg",
-			"normal_map": "tile/tilefloor018a_normal.jpg",
-			"uv": [0.625, 0.5],
-			"uv_rotation": 0,
-			"uv_scale": [-0.25, 0.25]
-		}, {
-			"label": "main_floor",
-			"anchors": [-168, 0, 192, -168, 0, 320, 128, 0, 320],
-			"texture": "tile/tilefloor018a.jpg",
-			"normal_map": "tile/tilefloor018a_normal.jpg",
-			"uv": [0.625, 0.5],
-			"uv_rotation": 0,
-			"uv_scale": [-0.25, 0.25]
-		} */
+		StaticSceneBuilder builder(rootOutputPath);
+		builder
+			.createStaticObject({
+				.label = "hall_floor",
+				.geometryAssetName = "UnitPlane",
+				.transform = {
+					.position = {56.0f, 0.0f, 84.0f},
+					.scale = {144.0f, 0.0f, 200.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.25f, 0.625f},
+					.rotation = 0.0f,
+					.scale = {-0.25f, 0.25f},
+				},
+			})
+			.createStaticObject({
+				.label = "hall_to_bike_room_floor_connector",
+				.geometryAssetName = "UnitPlane",
+				.transform = {
+					.position = {-20.0f, 0.0f, 128.0f},
+					.scale = {8.0f, 0.0f, 48.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.375f, 0.125f},
+					.rotation = 0.0f,
+					.scale = {-0.25f, 0.25f},
+				},
+			})
+			.createStaticObject({
+				.label = "bike_room_floor",
+				.geometryAssetName = "UnitPlane",
+				.transform = {
+					.position = {-60.0f, 0.0f, 116.0f},
+					.scale = {72.0f, 0.0f, 136.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.5f, 0.624f},
+					.rotation = 0.0f,
+					.scale = {-0.25f, 0.25f},
+				},
+			})
+			.createStaticObject({
+				.label = "hall_to_main_floor_connector",
+				.geometryAssetName = "UnitPlane",
+				.transform = {
+					.position = {54.0f, 0.0f, 188.0f},
+					.scale = {60.0f, 0.0f, 8.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.625f, 0.5f},
+					.rotation = 0.0f,
+					.scale = {-0.25f, 0.25f},
+				},
+			})
+			.createStaticObject({
+				.label = "main_floor",
+				.geometryAssetName = "UnitPlane",
+				.transform = {
+					.position = {-20.0f, 0.0f, 256.0f},
+					.scale = {296.0f, 0.0f, 128.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.625f, 0.5f},
+					.rotation = 0.0f,
+					.scale = {-0.25f, 0.25f},
+				},
+			});
 
 		return {
 			.staticScene = builder.build(),

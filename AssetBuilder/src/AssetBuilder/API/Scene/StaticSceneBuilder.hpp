@@ -15,7 +15,7 @@ namespace Trident {
 
 			~StaticSceneBuilder();
 
-			void createStaticObject(const StaticObjectDescriptor& descriptor);
+			StaticSceneBuilder& createStaticObject(const StaticObjectDescriptor& descriptor);
 
 			/// Compiles and returns an optimized static scene.
 			StaticScene3D build() const;

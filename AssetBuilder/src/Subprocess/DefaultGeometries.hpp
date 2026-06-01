@@ -128,6 +128,74 @@ namespace Trident {
 		};
 	}
 
+	static Geometry3DData createPlaneGeometry(vec2<float32> scale) {
+		const float32 x = scale[0];
+		const float32 z = scale[1];
+
+		Geometry3DData data = {
+			.vertexPositionComponents = {
+				-0.5f * x,  0.0f,  0.5f * z,
+				 0.5f * x,  0.0f,  0.5f * z,
+				-0.5f * x,  0.0f, -0.5f * z,
+				 0.5f * x,  0.0f, -0.5f * z,
+			},
+			.vertexNormalComponents = {
+				 0.0f,  1.0f,  0.0f,
+			},
+			.vertexTextureCoordinateComponents = {
+				0.0f, 0.0f,
+				1.0f, 0.0f,
+				0.0f, 1.0f,
+				1.0f, 1.0f,
+			},
+			.triangleTangentComponents = {
+				 1.0f,  0.0f,  0.0f,
+				 1.0f,  0.0f,  0.0f,
+			},
+			.vertexPositionIndices = {
+				0, 1, 2,
+				1, 3, 2,
+			},
+			.vertexNormalIndices = {
+				0, 0, 0,
+				0, 0, 0,
+			},
+			.vertexTextureCoordinateIndices = {
+				0, 1, 2,
+				1, 3, 2,
+			},
+			.flags = GeometryAssetFlags::HAS_HULL,
+			.hullLineIndices = {
+				0, 1,
+				1, 3,
+				3, 2,
+				2, 0,
+			},
+			.hullEdges = {
+				{.originVertexIndex = 0, .faceIndex = 0},
+				{.originVertexIndex = 1, .faceIndex = 1},
+				{.originVertexIndex = 1, .faceIndex = 0},
+				{.originVertexIndex = 3, .faceIndex = 1},
+				{.originVertexIndex = 3, .faceIndex = 0},
+				{.originVertexIndex = 2, .faceIndex = 1},
+				{.originVertexIndex = 2, .faceIndex = 0},
+				{.originVertexIndex = 0, .faceIndex = 1},
+			},
+			.hullFaceEdgeIndices = {
+				0, 2, 4, 6,
+				1, 3, 5, 7,
+			},
+			.hullFaces = {
+				{{ 0.0f,  1.0f,  0.0f}, 0.0f, {0, 4}},
+				{{ 0.0f, -1.0f,  0.0f}, 0.0f, {4, 4}},
+			},
+		};
+
+		data.hull = createHull<Hull3DType::POLYGON>(data.vertexPositionComponents);
+
+		return data;
+	}
+
 	static Geometry3DData createBoxGeometry(vec3<float32> scale) {
 		const float32 x = scale[0];
 		const float32 y = scale[1];
@@ -135,14 +203,14 @@ namespace Trident {
 
 		Geometry3DData data = {
 			.vertexPositionComponents = {
-				x *  0.5f, y *  0.5f, z *  0.5f,
-				x * -0.5f, y *  0.5f, z *  0.5f,
-				x *  0.5f, y * -0.5f, z *  0.5f,
-				x * -0.5f, y * -0.5f, z *  0.5f,
-				x * -0.5f, y *  0.5f, z * -0.5f,
-				x *  0.5f, y *  0.5f, z * -0.5f,
-				x * -0.5f, y * -0.5f, z * -0.5f,
-				x *  0.5f, y * -0.5f, z * -0.5f,
+				 0.5f * x,  0.5f * y,  0.5f * z,
+				-0.5f * x,  0.5f * y,  0.5f * z,
+				 0.5f * x, -0.5f * y,  0.5f * z,
+				-0.5f * x, -0.5f * y,  0.5f * z,
+				-0.5f * x,  0.5f * y, -0.5f * z,
+				 0.5f * x,  0.5f * y, -0.5f * z,
+				-0.5f * x, -0.5f * y, -0.5f * z,
+				 0.5f * x, -0.5f * y, -0.5f * z,
 			},
 			.vertexNormalComponents = {
 				 0.0f,  0.0f,  1.0f,
@@ -304,6 +372,10 @@ namespace Trident {
 
 	Geometry3DData createUnitBox() {
 		return createBoxGeometry({1.0f, 1.0f, 1.0f});
+	}
+
+	Geometry3DData createUnitPlane() {
+		return createPlaneGeometry({1.0f, 1.0f});
 	}
 
 	Geometry3DData createRectangularCuboid() {
