@@ -4,12 +4,14 @@
 #include "Trident.hpp"
 
 #include "Engine/entry_point.hpp"
+#include "Engine/Filesystem/Asset/AssetMap.hpp"
 
-#include "Process/BuildFontProcess.hpp"
-#include "Process/BuildGeometryProcess.hpp"
+#include "Process/BuildAssetMapProcess.hpp"
+#include "Process/BuildFontAssetProcess.hpp"
+#include "Process/BuildGeometryAssetProcess.hpp"
 #include "Process/BuildImageAssetProcess.hpp"
 #include "Process/BuildSceneAssetProcess.hpp"
-#include "Process/BuildShaderModuleProcess.hpp"
+#include "Process/BuildShaderModuleAssetProcess.hpp"
 
 namespace Trident {
 	class AssetBuilderApplication : public Application {
@@ -19,18 +21,23 @@ namespace Trident {
 			{
 				setConsoleArguments(argumentCount, argumentValues);
 
-				registerProcess<BuildGeometryProcess>();
-				registerProcess<BuildImageAssetProcess>();
-				registerProcess<BuildSceneAssetProcess>();
-				registerProcess<BuildShaderModuleProcess>();
+				registerProcess<BuildGeometryAssetProcess>(&assetMap);
+				registerProcess<BuildImageAssetProcess>(&assetMap);
+				registerProcess<BuildSceneAssetProcess>(&assetMap);
+				registerProcess<BuildShaderModuleAssetProcess>(&assetMap);
 
 				// NOTE: Font assets depend on image assets.
-				registerProcess<BuildFontProcess>();
+				registerProcess<BuildFontAssetProcess>(&assetMap);
+
+				registerProcess<BuildAssetMapProcess>(&assetMap);
 			}
 
 			~AssetBuilderApplication() override {
 				ENGINE_INFO("Done building assets.");
 			}
+
+		private:
+			AssetMap assetMap;
 	};
 
 	Application* createApplication(uint32 argumentCount, char8** argumentValues) {

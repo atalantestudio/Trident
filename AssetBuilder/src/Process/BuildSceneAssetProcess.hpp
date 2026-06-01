@@ -3,8 +3,9 @@
 
 #pragma once
 
-#include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 #include "Engine/API/Process/Process.hpp"
+#include "Engine/Filesystem/Asset/AssetLibrary.hpp"
+#include "Engine/Filesystem/Asset/AssetMap.hpp"
 
 #include "../Subprocess/SceneData.hpp"
 
@@ -224,7 +225,7 @@ namespace Trident {
 				return stream;
 			}
 
-			static void encodeSceneAsset(uint32 identifier, const ByteStream<StreamOperation::WRITE>& stream, view<char8> assetName, const std::filesystem::path& assetOutputPath) {
+			void encodeSceneAsset(uint32 identifier, const ByteStream<StreamOperation::WRITE>& stream, view<char8> assetName, const std::filesystem::path& assetOutputPath) {
 				const std::string assetOutputPathString = assetOutputPath.string();
 
 				sequence<char8> outputPath(assetOutputPathString.size() + assetName.count() + 5);
@@ -236,11 +237,17 @@ namespace Trident {
 				writer.write(stream.data, stream.size);
 
 				ENGINE_INFO("Generated scene asset \"[]\" (ID: []).", outputPath, identifier);
+
+				assetMap->add(identifier, AssetSignature::SCENE, assetName);
 			}
 
 		public:
+			explicit BuildSceneAssetProcess(AssetMap* assetMap) :
+				assetMap(assetMap)
+			{}
+
 			sint32 main(view<void*> arguments) override {
-				const std::filesystem::path rootOutputPath = pointer_cast<const char8*>(arguments[2]);
+				const std::filesystem::path rootOutputPath = static_cast<const char8*>(arguments[2]);
 				const std::filesystem::path assetOutputPath = rootOutputPath / "Asset/Scene/";
 
 				uint32 sceneIndex = 0;
@@ -271,5 +278,8 @@ namespace Trident {
 
 				return 0;
 			}
+
+		private:
+			AssetMap* assetMap;
 	};
 }

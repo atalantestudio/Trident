@@ -5,6 +5,7 @@
 
 namespace Trident {
 	enum class AssetSignature : uint32 {
+		ASSET_MAP = 0x63ca2532,
 		FONT = 0x491b9ec5,
 		GEOMETRY = 0xc13057a5,
 		IMAGE = 0x513f8fd2,

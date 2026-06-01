@@ -5,10 +5,29 @@
 
 #include "Engine/API/Process/Process.hpp"
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
+#include "Engine/Filesystem/Asset/AssetMap.hpp"
 #include "Engine/Filesystem/Decoder/Decoder.hpp"
 #include "Engine/Filesystem/File/QOI.hpp"
 
 namespace Trident {
+	template<>
+	void ByteStream<StreamOperation::WRITE>::write(const AssetHeader& header, bool swapEndianness) {
+		write<AssetSignature>(header.signature, swapEndianness);
+		write<uint32>(header.identifier, swapEndianness);
+		write<VersionNumber>(header.version, swapEndianness);
+	}
+
+	template<>
+	void ByteStream<StreamOperation::WRITE>::write(const ImageAssetHeader& header, bool swapEndianness) {
+		write<AssetHeader>(header, swapEndianness);
+		write<uint32>(header.format, swapEndianness);
+		write<uint32>(header.extent.width, swapEndianness);
+		write<uint32>(header.extent.height, swapEndianness);
+		write<uint32>(header.extent.depth, swapEndianness);
+		write<uint32>(header.mipLevelCount, swapEndianness);
+		write<uint32>(header.layerCount, swapEndianness);
+	}
+
 	class BuildImageAssetProcess final : public Process {
 		public:
 			static void encodeImageAsset(const std::filesystem::path& assetOutputPath, view<char8> assetName, ImageAssetDescriptor& descriptor) {
@@ -51,10 +70,7 @@ namespace Trident {
 				}
 
 				ByteStream<StreamOperation::WRITE> outputByteStream(sizeof(imageAssetHeader) + maxOutputDataSize, Endianness::LITTLE_ENDIAN);
-
-				std::copy_n(pointer_cast<const uint8*>(&imageAssetHeader), sizeof(imageAssetHeader), outputByteStream.getBytePosition());
-
-				outputByteStream.jump(sizeof(imageAssetHeader));
+				outputByteStream.write(imageAssetHeader);
 
 				switch (descriptor.format) {
 					case ImageFormat::R8_UNORM: {
@@ -222,7 +238,7 @@ namespace Trident {
 			}
 
 		private:
-			static void encodeImageAsset(const std::filesystem::directory_entry& directoryEntry, const std::filesystem::path& assetOutputPath) {
+			void encodeImageAsset(const std::filesystem::directory_entry& directoryEntry, const std::filesystem::path& assetOutputPath) {
 				std::filesystem::path finalAssetOutputPath = assetOutputPath / "Image" / directoryEntry.path().filename();
 				finalAssetOutputPath.replace_extension("tia");
 
@@ -260,9 +276,15 @@ namespace Trident {
 				}
 
 				encodeImageAsset(assetOutputPath, assetName, imageAssetDescriptor);
+
+				assetMap->add(imageAssetDescriptor.identifier, AssetSignature::IMAGE, assetName);
 			}
 
 		public:
+			explicit BuildImageAssetProcess(AssetMap* assetMap) :
+				assetMap(assetMap)
+			{}
+
 			sint32 main(view<void*> arguments) override {
 				const std::filesystem::path rootInputPath = static_cast<const char8*>(arguments[1]);
 				const std::filesystem::path rootOutputPath = static_cast<const char8*>(arguments[2]);
@@ -281,5 +303,8 @@ namespace Trident {
 
 				return 0;
 			}
+
+		private:
+			AssetMap* assetMap;
 	};
 }

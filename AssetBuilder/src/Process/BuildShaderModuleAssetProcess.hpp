@@ -4,13 +4,14 @@
 #pragma once
 
 #include "Engine/API/Process/Process.hpp"
+#include "Engine/Filesystem/Asset/AssetMap.hpp"
 
 #include "tsl/AST/ASTDebugger.hpp"
 #include "tsl/compile.hpp"
 #include "tsl/Generator/GLSLGenerator.hpp"
 
 namespace Trident {
-	class BuildShaderModuleProcess final : public Process {
+	class BuildShaderModuleAssetProcess final : public Process {
 		private:
 			sint32 processFile(const std::filesystem::directory_entry& directoryEntry, const std::filesystem::path& assetOutputPath) {
 				std::filesystem::path finalAssetOutputPath = assetOutputPath / "Shader" / directoryEntry.path().filename();
@@ -112,6 +113,8 @@ namespace Trident {
 				writer.write(outputByteStream.data, outputByteStream.size);
 
 				ENGINE_INFO("Generated shader module asset \"[]\" (ID: []).", outputPath, shaderModuleAssetDescriptor.identifier);
+
+				assetMap->add(shaderModuleAssetDescriptor.identifier, AssetSignature::SHADER_MODULE, view<char8>(&stem[0], stem.size()));
 
 				return 0;
 			}
@@ -224,13 +227,14 @@ namespace Trident {
 			static constexpr uint32 PROJECT_OUTPUT_PATH_ARGUMENT_INDEX = 2;
 
 		public:
-			explicit BuildShaderModuleProcess() :
+			explicit BuildShaderModuleAssetProcess(AssetMap* assetMap) :
+				assetMap(assetMap),
 				logger(std::cout, LogLevel::ALL, "")
 			{}
 
 			sint32 main(view<void*> arguments) override {
-				const std::filesystem::path rootInputPath = pointer_cast<const char8*>(arguments[PROJECT_INPUT_PATH_ARGUMENT_INDEX]);
-				const std::filesystem::path rootOutputPath = pointer_cast<const char8*>(arguments[PROJECT_OUTPUT_PATH_ARGUMENT_INDEX]);
+				const std::filesystem::path rootInputPath = static_cast<const char8*>(arguments[PROJECT_INPUT_PATH_ARGUMENT_INDEX]);
+				const std::filesystem::path rootOutputPath = static_cast<const char8*>(arguments[PROJECT_OUTPUT_PATH_ARGUMENT_INDEX]);
 				const std::filesystem::path assetOutputPath = rootOutputPath / "Asset/";
 				const std::filesystem::recursive_directory_iterator shaderDirectoryIterator(rootInputPath / "Asset/Shader");
 
@@ -275,6 +279,7 @@ namespace Trident {
 			}
 
 		private:
+			AssetMap* assetMap;
 			ConsoleLogger logger;
 	};
 }

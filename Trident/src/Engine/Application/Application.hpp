@@ -70,21 +70,20 @@ namespace Trident {
 			void registerLayer(Argument&&... arguments) {
 				PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-				const ref<Layer> layer = createRef<LayerType>(std::forward<Argument>(arguments)...);
-
+				ref<Layer> layer = createRef<LayerType>(std::forward<Argument>(arguments)...);
 				layer->setApplication(this);
 				layer->build();
 
 				layerCompositor->layers.emplace_back(layer);
 			}
 
-			template<typename ProcessType>
-			void registerProcess() {
+			template<typename ProcessType, typename... Argument>
+			void registerProcess(Argument&&... arguments) {
 				PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 				const uint32 processId = static_cast<uint32>(processes.size());
 
-				ref<Process> process = createRef<ProcessType>();
+				ref<Process> process = createRef<ProcessType>(std::forward<Argument>(arguments)...);
 				process->setId(processId);
 
 				processes.emplace_back(process);

@@ -4,13 +4,14 @@
 #pragma once
 
 #include "Engine/API/Process/Process.hpp"
+#include "Engine/Filesystem/Asset/AssetMap.hpp"
 
 #include "../Subprocess/GeometryData.hpp"
 #include "../Subprocess/DefaultGeometries.hpp"
 #include "../Subprocess/EncodeGeometryAssetSubprocess.hpp"
 
 namespace Trident {
-	class BuildGeometryProcess final : public Process {
+	class BuildGeometryAssetProcess final : public Process {
 		private:
 			typedef Geometry2DData (*CreateGeometry2DFunction)();
 			typedef Geometry3DData (*CreateGeometry3DFunction)();
@@ -229,7 +230,7 @@ namespace Trident {
 				return stream;
 			}
 
-			static void writeGeometryAsset(uint32 identifier, const ByteStream<StreamOperation::WRITE>& stream, view<char8> assetName, const std::filesystem::path& assetOutputPath) {
+			void writeGeometryAsset(uint32 identifier, const ByteStream<StreamOperation::WRITE>& stream, view<char8> assetName, const std::filesystem::path& assetOutputPath) {
 				const std::string assetOutputPathString = assetOutputPath.string();
 
 				sequence<char8> outputPath(assetOutputPathString.size() + assetName.count() + 5);
@@ -241,12 +242,18 @@ namespace Trident {
 				writer.write(stream.data, stream.size);
 
 				ENGINE_INFO("Generated geometry asset \"[]\" (ID: []).", outputPath, identifier);
+
+				assetMap->add(identifier, AssetSignature::GEOMETRY, assetName);
 			}
 
 		public:
+			explicit BuildGeometryAssetProcess(AssetMap* assetMap) :
+				assetMap(assetMap)
+			{}
+
 			sint32 main(view<void*> arguments) override {
-				const std::filesystem::path rootInputPath = pointer_cast<const char8*>(arguments[PROJECT_INPUT_PATH_ARGUMENT_INDEX]);
-				const std::filesystem::path rootOutputPath = pointer_cast<const char8*>(arguments[PROJECT_OUTPUT_PATH_ARGUMENT_INDEX]);
+				const std::filesystem::path rootInputPath = static_cast<const char8*>(arguments[PROJECT_INPUT_PATH_ARGUMENT_INDEX]);
+				const std::filesystem::path rootOutputPath = static_cast<const char8*>(arguments[PROJECT_OUTPUT_PATH_ARGUMENT_INDEX]);
 				const std::filesystem::path assetOutputPath = rootOutputPath / "Asset/Geometry/";
 				const std::filesystem::recursive_directory_iterator geometryDirectoryIterator(rootInputPath / "Asset/Geometry");
 
@@ -313,5 +320,8 @@ namespace Trident {
 
 				return 0;
 			}
+
+		private:
+			AssetMap* assetMap;
 	};
 }
