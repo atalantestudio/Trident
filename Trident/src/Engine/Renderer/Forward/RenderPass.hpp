@@ -14,7 +14,7 @@ namespace Trident {
 					.format = getSurface()->getFormat(),
 					.sampleCount = SAMPLE_COUNT,
 					.loadOperation = LoadOperation::CLEAR,
-					.storeOperation = StoreOperation::UNDEFINED,
+					.storeOperation = StoreOperation::STORE,
 					.finalLayout = ImageLayout::PRESENT_SRC,
 				},
 
@@ -41,6 +41,7 @@ namespace Trident {
 					},
 				}),
 			},
+			.subpassDependencies = {},
 		});
 	}
 }

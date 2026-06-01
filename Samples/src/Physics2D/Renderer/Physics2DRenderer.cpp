@@ -69,54 +69,59 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::setupRenderPass() {
-		Attachment swapchainAttachment{};
-		swapchainAttachment.format = getSurface()->getFormat();
-		swapchainAttachment.sampleCount = PHYSICS_2D_RENDERER_SAMPLE_COUNT;
-		swapchainAttachment.loadOperation = LoadOperation::CLEAR;
-		swapchainAttachment.storeOperation = StoreOperation::STORE;
+		ImageLayout colorFinalLayout;
 
 		switch (getGraphicsApi()) {
 			case GraphicsAPI::DX12: {
 				// TODO(DX12): The final layout must be PRESENT_SRC in order to have layer superposition working.
-				swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
+				colorFinalLayout = ImageLayout::PRESENT_SRC;
 
 				break;
 			}
 			case GraphicsAPI::GL:
 			case GraphicsAPI::VK: {
 				// TODO(layer-superposition)
-				swapchainAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+				colorFinalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 
 				break;
 			}
 		}
 
-		Attachment depthStencilAttachment{};
-		depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
-		depthStencilAttachment.sampleCount = PHYSICS_2D_RENDERER_SAMPLE_COUNT;
-		depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
-		depthStencilAttachment.storeOperation = StoreOperation::UNDEFINED;
-		depthStencilAttachment.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		renderPass = createRenderPass({
+			.attachments = {
+				// Color
+				{
+					.format = getSurface()->getFormat(),
+					.sampleCount = PHYSICS_2D_RENDERER_SAMPLE_COUNT,
+					.loadOperation = LoadOperation::CLEAR,
+					.storeOperation = StoreOperation::STORE,
+					.finalLayout = colorFinalLayout,
+				},
 
-		AttachmentReference swapchainAttachmentReference{};
-		swapchainAttachmentReference.index = 0;
-		swapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-
-		AttachmentReference depthStencilAttachmentReference{};
-		depthStencilAttachmentReference.index = 1;
-		depthStencilAttachmentReference.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-		SubpassDescriptor subpassDescriptor{};
-		subpassDescriptor.colorAttachmentReferences = {swapchainAttachmentReference};
-		subpassDescriptor.depthStencilAttachmentReference = depthStencilAttachmentReference;
-
-		const ref<Subpass> subpass = createSubpass(subpassDescriptor);
-
-		RenderPassDescriptor renderPassDescriptor{};
-		renderPassDescriptor.attachments = {swapchainAttachment, depthStencilAttachment};
-		renderPassDescriptor.subpasses = {subpass};
-
-		renderPass = createRenderPass(renderPassDescriptor);
+				// Depth stencil
+				{
+					.format = ImageFormat::D32_SFLOAT,
+					.sampleCount = PHYSICS_2D_RENDERER_SAMPLE_COUNT,
+					.loadOperation = LoadOperation::CLEAR,
+					.storeOperation = StoreOperation::UNDEFINED,
+					.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+				},
+			},
+			.subpasses = {
+				createSubpass({
+					.colorAttachmentReferences = {
+						{
+							.index = 0,
+							.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
+						},
+					},
+					.depthStencilAttachmentReference = {
+						.index = 1,
+						.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+					},
+				}),
+			},
+		});
 	}
 
 	void Physics2DRenderer::recreateMultisampleImage() {

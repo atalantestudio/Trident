@@ -318,6 +318,7 @@ namespace Trident {
 	void ForwardRenderer::renderStaticObjects(ref<CommandEncoder> commandEncoder) const {
 		const uint32 vertexCount = static_cast<uint32>(scene->getAsset()->getStaticTriangles().count()) * 3;
 
+		// TODO: See https://blog.tojicode.com/2011/09/source-engine-in-webgl-tech-talk.html.
 		commandEncoder->bindGraphicsPipeline(staticMaterialPipeline);
 		commandEncoder->bindDescriptorSets(staticMaterialPipelineLayout, 0, staticDescriptorSet);
 		commandEncoder->draw(vertexCount, 1, 0, 0);

@@ -11,19 +11,14 @@
 #include "Engine/Renderer/3D/SceneRenderer.hpp"
 
 namespace Trident {
+	#define SAMPLE_COUNT 4
+
 	class ForwardRenderer : public SceneRenderer<Scene3D> {
 		private:
 			struct Vertex {
 				uint32 positionIndex;
 				uint32 normalIndex;
 				uint32 textureCoordinateIndex;
-			};
-
-			struct PackedVertex {
-				uint16 positionIndex;
-				uint16 normalIndex;
-				uint16 textureCoordinateIndex;
-				uint16 _;
 			};
 
 			struct Camera {
@@ -37,20 +32,62 @@ namespace Trident {
 			};
 
 		public:
-			static constexpr uint8 SAMPLE_COUNT = 4;
 			static constexpr index DEBUG_MAX_CONTACTS = 16;
 
 		public:
+			// Called on startup and on window resize.
+			void initialize() {
+				#if SAMPLE_COUNT > 1
+					colorImage = createColorImage();
+					colorImageView = createColorImageView();
+				#endif
+
+				depthStencilImage = createDepthStencilImage();
+				depthStencilImageView = createDepthStencilImageView();
+
+				const ref<Swapchain> swapchain = getSwapchain();
+
+				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
+
+				FramebufferDescriptor framebufferDescriptor = {
+					.renderPass = renderPass,
+					#if SAMPLE_COUNT > 1
+						.imageViews = {colorImageView, depthStencilImageView, nullptr},
+					#else
+						.imageViews = {nullptr, depthStencilImageView},
+					#endif
+					.extent = swapchain->getExtent(),
+				};
+
+				#if defined(DEBUG_OBJECT_NAME)
+					sequence<char8> name;
+				#endif
+
+				uint32 framebufferIndex = 0;
+
+				while (framebufferIndex < framebuffers.count()) {
+					#if defined(DEBUG_OBJECT_NAME)
+						name = Logger::format("In flight framebuffer []", framebufferIndex);
+
+						framebufferDescriptor.name = name;
+					#endif
+
+					#if SAMPLE_COUNT > 1
+						framebufferDescriptor.imageViews[2] = swapchain->getImageView(framebufferIndex);
+					#else
+						framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
+					#endif
+
+					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
+
+					framebufferIndex += 1;
+				}
+			}
+
 			void build() override {
 				renderPass = createRenderPass();
 
-				colorImage = createColorImage();
-				depthStencilImage = createDepthStencilImage();
-
-				colorImageView = createColorImageView();
-				depthStencilImageView = createDepthStencilImageView();
-
-				createFramebuffers();
+				initialize();
 
 				staticDescriptorSetLayout = createStaticDescriptorSetLayout();
 				vertexDescriptorSetLayout = createVertexDescriptorSetLayout();
@@ -221,7 +258,9 @@ namespace Trident {
 							.depth = 0.0f,
 							.stencil = 0,
 						},
-						{0.0f, 0.0f, 0.0f, 1.0f},
+						#if SAMPLE_COUNT > 1
+							{0.0f, 0.0f, 0.0f, 1.0f},
+						#endif
 					},
 				});
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
@@ -311,13 +350,7 @@ namespace Trident {
 			}
 
 			void resize(WindowResizeEvent& event) override {
-				colorImage = createColorImage();
-				depthStencilImage = createDepthStencilImage();
-
-				colorImageView = createColorImageView();
-				depthStencilImageView = createDepthStencilImageView();
-
-				createFramebuffers();
+				initialize();
 				updateCamera();
 			}
 
@@ -334,38 +367,6 @@ namespace Trident {
 
 		private:
 			ref<RenderPass> createRenderPass() const;
-
-			void createFramebuffers() {
-				const ref<Swapchain> swapchain = getSwapchain();
-
-				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
-
-				FramebufferDescriptor framebufferDescriptor = {
-					.renderPass = renderPass,
-					.imageViews = {colorImageView, depthStencilImageView, nullptr},
-					.extent = swapchain->getExtent(),
-				};
-
-				#if defined(DEBUG_OBJECT_NAME)
-					sequence<char8> name;
-				#endif
-
-				uint32 framebufferIndex = 0;
-
-				while (framebufferIndex < framebuffers.count()) {
-					#if defined(DEBUG_OBJECT_NAME)
-						name = Logger::format("In flight framebuffer []", framebufferIndex);
-
-						framebufferDescriptor.name = name;
-					#endif
-
-					framebufferDescriptor.imageViews[2] = swapchain->getImageView(framebufferIndex);
-
-					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
-
-					framebufferIndex += 1;
-				}
-			}
 
 			ref<DescriptorSetLayout> createStaticDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createVertexDescriptorSetLayout() const;
@@ -527,7 +528,6 @@ namespace Trident {
 
 			void createMaterialObjects();
 
-			// See https://blog.tojicode.com/2011/09/source-engine-in-webgl-tech-talk.html.
 			void renderStaticObjects(ref<CommandEncoder> commandEncoder) const;
 
 		private:
@@ -569,7 +569,10 @@ namespace Trident {
 			ref<Image> depthStencilImage;
 			sequence<sequence<ref<Image>>> materialImages;
 
-			ref<ImageView> colorImageView;
+			#if SAMPLE_COUNT > 1
+				ref<ImageView> colorImageView;
+			#endif
+
 			ref<ImageView> depthStencilImageView;
 			sequence<ref<ImageView>> materialReferenceBindingImageViews;
 

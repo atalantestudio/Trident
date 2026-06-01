@@ -16,7 +16,8 @@ namespace Trident {
 		Scene({
 			.dynamicVertexCount = sceneAsset->getDynamicVertexPositionCount() + sceneAsset->getDynamicVertexTextureCoordinateCount(),
 			.dynamicIndexCount = sceneAsset->getDynamicVertexPositionIndexCount() + sceneAsset->getDynamicVertexTextureCoordinateIndexCount()
-		})
+		}),
+		asset(sceneAsset)
 	{
 		loadGeometries();
 		loadEntityComponentMappings();

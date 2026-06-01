@@ -241,7 +241,7 @@ namespace Trident {
 
 			bool onWindowResize(WindowResizeEvent& event) {
 				cameraController.getCamera().aspectRatio = getApplication()->getWindow()->getAspectRatio();
-				cameraController.getCamera().updateProjection();
+				cameraController.updateProjection();
 
 				renderer.resize(event);
 
