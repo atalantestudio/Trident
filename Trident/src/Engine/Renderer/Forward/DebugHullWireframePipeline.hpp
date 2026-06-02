@@ -56,7 +56,7 @@ namespace Trident {
 			.depthStencilState = {
 				.depthTest = true,
 				.depthWrite = true,
-				.compareOperation = CompareOperation::LESS_OR_EQUAL,
+				.compareOperation = CompareOperation::GREATER,
 			},
 			.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT,
 			.renderPass = renderPass,

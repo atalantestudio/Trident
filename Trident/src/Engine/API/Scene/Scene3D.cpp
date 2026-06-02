@@ -30,7 +30,6 @@ namespace Trident {
 	}
 
 	void Scene3D::loadGeometries(uint64 minStorageBufferOffsetAlignment) {
-		const sequence<uint8>& staticBuffer = asset->getStaticBuffer();
 		const sequence<ref<GeometryAsset>>& geometryAssets = asset->getGeometryAssets();
 		const uint64 vertexComponentCount = (
 			asset->getDynamicVertexPositionCount() * 3 +
@@ -71,9 +70,7 @@ namespace Trident {
 		hullFaceEdgeIndices = sequence<uint16>(asset->getHullFaceEdgeIndexCount());
 		rigidBodyFacePlanes = sequence<Plane3D>(asset->getRigidBodyFacePlaneCount());
 
-		std::copy(staticBuffer.begin(), staticBuffer.end(), &dataBuffer[0]);
-
-		uint64 byteOffset = staticBuffer.count() + vertexPositionComponentRange.offset;
+		uint64 byteOffset = vertexPositionComponentRange.offset;
 
 		for (const ref<GeometryAsset>& geometryAsset : geometryAssets) {
 			const sequence<float32>& vertexPositionComponents = geometryAsset->getVertexPositionComponents();

@@ -146,15 +146,15 @@ namespace Trident {
 		const sequence<char8> assetPath = absolutePath.string();
 		const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
 
-		ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
+		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-		if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::FONT) {
+		if (stream.getRemainingSize() < sizeof(AssetSignature) || stream.peek<AssetSignature>() != AssetSignature::FONT) {
 			return;
 		}
 
-		byteStream.jump(sizeof(AssetSignature));
+		stream.jump(sizeof(AssetSignature));
 
-		const ref<FontAsset> fontAsset = decodeFontAsset(byteStream, this, path);
+		const ref<FontAsset> fontAsset = decodeFontAsset(stream, this, path);
 		const uint32 assetIndex = static_cast<uint32>(assets.size());
 		const sequence<char8> stem = absolutePath.stem().string();
 
@@ -169,15 +169,15 @@ namespace Trident {
 		const sequence<char8> assetPath = absolutePath.string();
 		const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
 
-		ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
+		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-		if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::GEOMETRY) {
+		if (stream.getRemainingSize() < sizeof(AssetSignature) || stream.peek<AssetSignature>() != AssetSignature::GEOMETRY) {
 			return;
 		}
 
-		byteStream.jump(sizeof(AssetSignature));
+		stream.jump(sizeof(AssetSignature));
 
-		const ref<GeometryAsset> geometryAsset = Filesystem::decodeAsset<GeometryAsset>(byteStream, this);
+		const ref<GeometryAsset> geometryAsset = Filesystem::decodeAsset<GeometryAsset>(stream, this);
 		const uint32 assetIndex = static_cast<uint32>(assets.size());
 		const sequence<char8> stem = absolutePath.stem().string();
 
@@ -192,13 +192,15 @@ namespace Trident {
 		const sequence<char8> assetPath = absolutePath.string();
 		const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
 
-		ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
+		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-		if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::IMAGE) {
+		if (stream.getRemainingSize() < sizeof(AssetSignature) || stream.peek<AssetSignature>() != AssetSignature::IMAGE) {
 			return;
 		}
 
-		const ref<ImageAsset> imageAsset = Filesystem::decodeAsset<ImageAsset>(byteStream, this);
+		stream.jump(sizeof(AssetSignature));
+
+		const ref<ImageAsset> imageAsset = Filesystem::decodeAsset<ImageAsset>(stream, this);
 		const uint32 assetIndex = static_cast<uint32>(assets.size());
 		const sequence<char8> stem = absolutePath.stem().string();
 
@@ -213,15 +215,15 @@ namespace Trident {
 		const sequence<char8> assetPath = absolutePath.string();
 		const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
 
-		ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
+		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-		if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::SCENE) {
+		if (stream.getRemainingSize() < sizeof(AssetSignature) || stream.peek<AssetSignature>() != AssetSignature::SCENE) {
 			return;
 		}
 
-		byteStream.jump(sizeof(AssetSignature));
+		stream.jump(sizeof(AssetSignature));
 
-		const ref<Scene2DAsset> sceneAsset = Filesystem::decodeAsset<Scene2DAsset>(byteStream, this);
+		const ref<Scene2DAsset> sceneAsset = Filesystem::decodeAsset<Scene2DAsset>(stream, this);
 		const uint32 assetIndex = static_cast<uint32>(assets.size());
 		const sequence<char8> stem = absolutePath.stem().string();
 
@@ -236,15 +238,15 @@ namespace Trident {
 		const sequence<char8> assetPath = absolutePath.string();
 		const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
 
-		ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
+		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-		if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::SCENE) {
+		if (stream.getRemainingSize() < sizeof(AssetSignature) || stream.peek<AssetSignature>() != AssetSignature::SCENE) {
 			return;
 		}
 
-		byteStream.jump(sizeof(AssetSignature));
+		stream.jump(sizeof(AssetSignature));
 
-		const ref<Scene3DAsset> sceneAsset = Filesystem::decodeAsset<Scene3DAsset>(byteStream, this);
+		const ref<Scene3DAsset> sceneAsset = Filesystem::decodeAsset<Scene3DAsset>(stream, this);
 		const uint32 assetIndex = static_cast<uint32>(assets.size());
 		const sequence<char8> stem = absolutePath.stem().string();
 
@@ -259,15 +261,15 @@ namespace Trident {
 		const sequence<char8> assetPath = absolutePath.string();
 		const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
 
-		ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
+		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-		if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.peek<AssetSignature>() != AssetSignature::SHADER_MODULE) {
+		if (stream.getRemainingSize() < sizeof(AssetSignature) || stream.peek<AssetSignature>() != AssetSignature::SHADER_MODULE) {
 			return;
 		}
 
-		byteStream.jump(sizeof(AssetSignature));
+		stream.jump(sizeof(AssetSignature));
 
-		const ref<ShaderModuleAsset> shaderModuleAsset = Filesystem::decodeAsset<ShaderModuleAsset>(byteStream, this);
+		const ref<ShaderModuleAsset> shaderModuleAsset = Filesystem::decodeAsset<ShaderModuleAsset>(stream, this);
 		const uint32 assetIndex = static_cast<uint32>(assets.size());
 		const sequence<char8> stem = absolutePath.stem().string();
 

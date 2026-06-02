@@ -282,14 +282,6 @@ namespace Trident {
 
 					while (rigidBodyComponentIndex < rigidBodyComponentPool.componentCount) {
 						const Entity entity = rigidBodyComponentPool.componentIndexToEntity[rigidBodyComponentIndex];
-
-						// TODO(debug): Don't render the player entity.
-						if (entity == playerEntity) {
-							rigidBodyComponentIndex += 1;
-
-							continue;
-						}
-
 						const GeometryComponent geometryComponent = geometryComponentPool.components[geometryComponentPool.entityToComponentIndex[entity]];
 						const Geometry3D& geometry = scene->geometries[geometryComponent.geometryIndex];
 						const MaterialComponent materialComponent = materialComponentPool.components[materialComponentPool.entityToComponentIndex[entity]];
@@ -565,7 +557,10 @@ namespace Trident {
 			ref<Buffer<svec3<float32>>> debugContactManifoldBuffer;
 			ref<Buffer<uint8>> staticBuffer;
 
-			ref<Image> colorImage;
+			#if SAMPLE_COUNT > 1
+				ref<Image> colorImage;
+			#endif
+
 			ref<Image> depthStencilImage;
 			sequence<sequence<ref<Image>>> materialImages;
 
@@ -587,11 +582,7 @@ namespace Trident {
 
 		private:
 			bool draw = false;
-			bool debugHullWireframe = false;
+			bool debugHullWireframe = true;
 			bool debugContactManifolds = false;
-
-		public:
-			// TODO(debug)
-			Entity playerEntity;
 	};
 }

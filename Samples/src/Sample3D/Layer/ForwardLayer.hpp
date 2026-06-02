@@ -4,7 +4,6 @@
 #pragma once
 
 #define FORWARD_USE_NOCLIP_CAMERA
-#define TEST_STATIC_SCENE
 
 #if !defined(FORWARD_USE_NOCLIP_CAMERA)
 	#include "Engine/API/Camera/Controller/PlayerCameraController.hpp"
@@ -23,15 +22,8 @@ namespace Trident {
 	class Sample3DForwardLayer : public Layer {
 		private:
 			static constexpr float32 MOVEMENT_SPEED = 50.0f;
-
-			#if defined(TEST_STATIC_SCENE)
-				static constexpr Entity PLAYER_ENTITY = 0;
-			#else
-				static constexpr Entity PLAYER_ENTITY = 1;
-			#endif
-
+			static constexpr Entity PLAYER_ENTITY = 0;
 			static constexpr float32 LOOK_SENSITIVITY = 0.075f;
-
 			inline static const vec3<float32> PLAYER_CAMERA_OFFSET = {0.0f, 0.3f, 0.0f};
 
 			// Values taken from HL1.
@@ -53,38 +45,7 @@ namespace Trident {
 				renderer.setLayer(this);
 				renderer.build();
 
-				#if !defined(FORWARD_USE_NOCLIP_CAMERA)
-					renderer.playerEntity = PLAYER_ENTITY;
-				#else
-					renderer.playerEntity = max<Entity>();
-				#endif
-
 				scene = createScope<Scene3D>(FlatColor::initializeScene(getApplication(), renderer.getGraphicsApi(), renderer.getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment));
-
-				#if defined(TEST_STATIC_SCENE)
-					constexpr float32 m = 70.0_kg;
-					constexpr float32 w = 33.0f;
-					constexpr float32 h = 77.0f;
-					constexpr float32 d = 33.0f;
-
-					scene->ecs.createEntity();
-					scene->ecs.setComponent<RigidBody3DComponent>(PLAYER_ENTITY, {
-						.position = {0.0f, 128.0f, 0.0f},
-						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
-						.scale = 1.0f,
-						.linearVelocity = {0.0f, 0.0f, 0.0f},
-						.angularVelocity = {0.0f, 0.0f, 0.0f},
-						.inverseMass = 1.0f / m,
-						.inverseInertia = inverse(mat3x3<float32>{
-							m / 12.0f * (h * h + d * d), 0.0f, 0.0f,
-							0.0f, m / 12.0f * (w * w + d * d), 0.0f,
-							0.0f, 0.0f, m / 12.0f * (w * w + h * h),
-						}),
-						.friction = 0.2f,
-						.restitution = 0.0f,
-					});
-					scene->ecs.getComponent<RigidBody3DComponent>(PLAYER_ENTITY).updateWorld({0.0f, 0.0f, 0.0f});
-				#endif
 
 				physicsSimulation = createScope<PhysicsSimulation3D>(Descriptor<PhysicsSimulation3D>{
 					.scene = scene.get(),

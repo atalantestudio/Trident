@@ -15,7 +15,7 @@ namespace Trident {
 				38,
 
 				// TODO(debug): RectangularCuboid
-				39,
+				40,
 			},
 			.geometryMappings = {
 				{0, {1}},
@@ -129,7 +129,7 @@ namespace Trident {
 			.entityCount = 4,
 			.geometryAssetIdentifiers = {
 				// TODO(debug-only): RectangularCuboid
-				39,
+				40,
 			},
 			.geometryMappings = {
 				{0, {0}},
@@ -271,28 +271,28 @@ namespace Trident {
 				{2, {1}},
 			},
 			.rigidBodyMappings = {
-				/* // Floor
+				/* // Player
 				{
-					0,
+					2,
 					createRigidBody({
-						.position = {0.0_m, -0.05_m, 0.0_m},
+						.position = {0.0_m, 2.0_m, 0.0_m},
 						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
-						.scale = {10.0f, 0.1f, 10.0f},
-						.mass = max<float32>(),
+						.scale = {0.7f, 1.8f, 0.7f},
+						.mass = 70.0_kg,
 						.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
 						.friction = 0.2f,
 						.restitution = 0.0f,
 					}),
 				},
 
-				// Player
+				// Floor
 				{
 					1,
 					createRigidBody({
-						.position = {0.0_m, 2.0_m, 0.0_m},
+						.position = {0.0_m, -0.05_m, 0.0_m},
 						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
-						.scale = {0.7f, 1.8f, 0.7f},
-						.mass = 70.0_kg,
+						.scale = {10.0f, 0.1f, 10.0f},
+						.mass = max<float32>(),
 						.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
 						.friction = 0.2f,
 						.restitution = 0.0f,
@@ -313,28 +313,28 @@ namespace Trident {
 					}),
 				}, */
 
-				// Floor
+				// Player
 				{
 					0,
 					createRigidBody({
-						.position = {0.0f, -8.0f, 0.0f},
+						.position = {0.0f, 128.0f, 0.0f},
 						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
-						.scale = {512.0f, 16.0f, 512.0f},
-						.mass = max<float32>(),
+						.scale = {33.0f, 77.0f, 33.0f},
+						.mass = 70.0_kg,
 						.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
 						.friction = 0.2f,
 						.restitution = 0.0f,
 					}),
 				},
 
-				// Player
+				// Floor
 				{
 					1,
 					createRigidBody({
-						.position = {0.0f, 128.0f, 0.0f},
+						.position = {0.0f, -8.0f, 0.0f},
 						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
-						.scale = {33.0f, 77.0f, 33.0f},
-						.mass = 70.0_kg,
+						.scale = {512.0f, 16.0f, 512.0f},
+						.mass = max<float32>(),
 						.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
 						.friction = 0.2f,
 						.restitution = 0.0f,

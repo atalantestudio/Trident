@@ -79,7 +79,7 @@ namespace Trident {
 		materialPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
 		materialPipelineDescriptor.depthStencilState.depthTest = true;
 		materialPipelineDescriptor.depthStencilState.depthWrite = true;
-		materialPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::LESS;
+		materialPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER;
 		materialPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 		materialPipelineDescriptor.renderPass = renderPass;
 		materialPipelineDescriptor.subpassIndex = 0;

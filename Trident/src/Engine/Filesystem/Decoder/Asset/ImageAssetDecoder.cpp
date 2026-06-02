@@ -10,9 +10,15 @@
 namespace Trident {
 	template<>
 	ref<ImageAsset> Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, const AssetLibrary* assetLibrary) {
-		const ImageAssetHeader& imageAssetHeader = *pointer_cast<const ImageAssetHeader*>(stream.getBytePosition());
-
-		stream.jump(sizeof(imageAssetHeader));
+		ImageAssetHeader imageAssetHeader{};
+		imageAssetHeader.identifier = stream.read<uint32>();
+		imageAssetHeader.version = stream.read<VersionNumber>();
+		imageAssetHeader.format = stream.read<uint32>();
+		imageAssetHeader.extent.width = stream.read<uint32>();
+		imageAssetHeader.extent.height = stream.read<uint32>();
+		imageAssetHeader.extent.depth = stream.read<uint32>();
+		imageAssetHeader.mipLevelCount = stream.read<uint32>();
+		imageAssetHeader.layerCount = stream.read<uint32>();
 
 		ImageAssetDescriptor descriptor{};
 		descriptor.identifier = imageAssetHeader.identifier;
