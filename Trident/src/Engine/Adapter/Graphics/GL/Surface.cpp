@@ -28,6 +28,7 @@ namespace Trident {
 			LOAD_PROCEDURE(glDepthRange);
 			LOAD_PROCEDURE(glDetachShader);
 			LOAD_PROCEDURE(glDisable);
+			LOAD_PROCEDURE(glDrawBuffer);
 			LOAD_PROCEDURE(glEnable);
 			LOAD_PROCEDURE(glFrontFace);
 			LOAD_PROCEDURE(glFinish);
@@ -246,7 +247,6 @@ namespace Trident {
 				LOAD_PROCEDURE(glNamedFramebufferDrawBuffers);
 				LOAD_PROCEDURE(glNamedFramebufferReadBuffer);
 			#else
-				LOAD_PROCEDURE(glDrawBuffer);
 				LOAD_PROCEDURE(glDrawBuffers);
 				LOAD_PROCEDURE(glReadBuffer);
 			#endif

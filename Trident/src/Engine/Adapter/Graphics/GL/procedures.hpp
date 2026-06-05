@@ -18,6 +18,7 @@ namespace Trident {
 	extern PFNGLDEPTHRANGEPROC glDepthRange;
 	extern PFNGLDETACHSHADERPROC glDetachShader;
 	extern PFNGLDISABLEPROC glDisable;
+	extern PFNGLDRAWBUFFERPROC glDrawBuffer;
 	extern PFNGLENABLEPROC glEnable;
 	extern PFNGLFRONTFACEPROC glFrontFace;
 	extern PFNGLFINISHPROC glFinish;
@@ -237,7 +238,6 @@ namespace Trident {
 		extern PFNGLNAMEDFRAMEBUFFERDRAWBUFFERSPROC glNamedFramebufferDrawBuffers;
 		extern PFNGLNAMEDFRAMEBUFFERREADBUFFERPROC glNamedFramebufferReadBuffer;
 	#else
-		extern PFNGLDRAWBUFFERPROC glDrawBuffer;
 		extern PFNGLDRAWBUFFERSPROC glDrawBuffers;
 		extern PFNGLREADBUFFERPROC glReadBuffer;
 	#endif
