@@ -559,35 +559,32 @@ namespace Trident {
 	}
 
 	void GenerateSDFGlyphMapProcess::updateDescriptorSets() const {
-		DescriptorBuffer fontDescriptorBuffer{};
-		fontDescriptorBuffer.buffer = fontBuffer;
-		fontDescriptorBuffer.offset = offsetof(FontStorage, lineHeight);
-		fontDescriptorBuffer.size = sizeof(FontStorage::lineHeight);
+		const DescriptorBuffer fontDescriptorBuffer = {
+			.buffer = fontBuffer,
+			.offset = 0,
+			.size = sizeof(FontStorage),
+		};
+		const DescriptorBuffer glyphDescriptorBuffer = {
+			.buffer = glyphBuffer,
+			.offset = 0,
+			.size = glyphBuffer->getSize(),
+		};
+		const DescriptorBuffer glyphOffsetDescriptorBuffer = {
+			.buffer = glyphOffsetBuffer,
+			.offset = 0,
+			.size = glyphOffsetBuffer->getSize(),
+		};
 
-		DescriptorBuffer fontDescriptorOffsetBuffer{};
-		fontDescriptorOffsetBuffer.buffer = fontBuffer;
-		fontDescriptorOffsetBuffer.offset = 0;
-		fontDescriptorOffsetBuffer.size = sizeof(FontStorage::spreadFactor) + sizeof(FontStorage::outputGlyphSize);
-
-		DescriptorBuffer glyphDescriptorBuffer{};
-		glyphDescriptorBuffer.buffer = glyphBuffer;
-		glyphDescriptorBuffer.offset = 0;
-		glyphDescriptorBuffer.size = glyphBuffer->getSize();
-
-		DescriptorBuffer glyphOffsetDescriptorBuffer{};
-		glyphOffsetDescriptorBuffer.buffer = glyphOffsetBuffer;
-		glyphOffsetDescriptorBuffer.offset = 0;
-		glyphOffsetDescriptorBuffer.size = glyphOffsetBuffer->getSize();
-
-		DescriptorImage glyphDescriptorImage{};
-		glyphDescriptorImage.imageView = glyphImageView;
-		glyphDescriptorImage.imageLayout = ImageLayout::GENERAL;
-		glyphDescriptorImage.sampler = nullptr;
-
-		DescriptorImage glyphMapDescriptorImage{};
-		glyphMapDescriptorImage.imageView = glyphMapImageView;
-		glyphMapDescriptorImage.imageLayout = ImageLayout::GENERAL;
-		glyphMapDescriptorImage.sampler = nullptr;
+		const DescriptorImage glyphDescriptorImage = {
+			.imageView = glyphImageView,
+			.imageLayout = ImageLayout::GENERAL,
+			.sampler = nullptr,
+		};
+		const DescriptorImage glyphMapDescriptorImage = {
+			.imageView = glyphMapImageView,
+			.imageLayout = ImageLayout::GENERAL,
+			.sampler = nullptr,
+		};
 
 		const sequence<WriteDescriptorSet> writeDescriptorSets = {
 			{
@@ -618,7 +615,7 @@ namespace Trident {
 			{
 				.descriptorSet = glyphSdfDescriptorSet,
 				.bindingIndex = 2,
-				.descriptorBuffers = {fontDescriptorOffsetBuffer},
+				.descriptorBuffers = {fontDescriptorBuffer},
 			},
 			{
 				.descriptorSet = glyphSdfDescriptorSet,

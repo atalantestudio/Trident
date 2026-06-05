@@ -14,6 +14,7 @@ layout(set = 0, binding = 1, r8) uniform writeonly image2D glyphMapImage;
 layout(set = 0, binding = 2) buffer readonly Font {
 	uint spreadFactor;
 	uint outputGlyphSize;
+	int lineHeight;
 } font;
 
 layout(set = 0, binding = 3) buffer readonly Glyph {

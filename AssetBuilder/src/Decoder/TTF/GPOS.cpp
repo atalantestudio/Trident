@@ -588,7 +588,9 @@ namespace Trident {
 		void decodeGPOSTable(ByteStream<StreamOperation::READ>& stream, const std::unordered_map<uint32, uint32>& tableOffsetMap, File<FileFormat::TTF>& file) {
 			const std::unordered_map<uint32, uint32>::const_iterator tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("GPOS"));
 
-			ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'GPOS' table.");
+			if (tableOffset == tableOffsetMap.end()) {
+				return;
+			}
 
 			stream.seek(tableOffset->second);
 

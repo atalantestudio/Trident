@@ -37,7 +37,7 @@ void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 		return;
 	}
 
-	int fontLineHeight = asint(fontBuffer.Load(0));
+	int fontLineHeight = asint(fontBuffer.Load(8));
 	uint glyphEdgeCount = glyphBuffer.Load(0);
 
 	float2 p = float2(glyphImageCoordinate) / glyphImageSize * fontLineHeight;

@@ -653,6 +653,8 @@ namespace Trident {
 
 	void Device::updateDescriptorSets(view<WriteDescriptorSet> writeDescriptorSets) const {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+			const uint64 minStorageBufferOffsetAlignment = physicalDevice->getLimits().minStorageBufferOffsetAlignment;
+
 			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 			uint32 writeDescriptorSetIndex = 0;
@@ -664,6 +666,30 @@ namespace Trident {
 					ENGINE_ERROR("writeDescriptorSets[[]].descriptorSet must be a valid DescriptorSet object.", writeDescriptorSetIndex);
 
 					errorCount += 1;
+				}
+
+				uint32 descriptorBufferIndex = 0;
+
+				while (descriptorBufferIndex < writeDescriptorSet.descriptorBuffers.count()) {
+					const DescriptorBuffer& descriptorBuffer = writeDescriptorSet.descriptorBuffers[descriptorBufferIndex];
+					const ref<BaseBuffer> buffer = descriptorBuffer.buffer;
+
+					if (buffer == nullptr) {
+						ENGINE_ERROR("writeDescriptorSets[[]].descriptorBuffers[[]].buffer must be a valid Buffer object.", writeDescriptorSetIndex, descriptorBufferIndex);
+
+						errorCount += 1;
+					}
+					else {
+						if (buffer->getUsage() & (BufferUsage::READ_ONLY_STORAGE | BufferUsage::READ_WRITE_STORAGE)) {
+							if (descriptorBuffer.offset % minStorageBufferOffsetAlignment > 0) {
+								ENGINE_ERROR("writeDescriptorSets[[]].descriptorBuffers[[]].offset must be a multiple of the minStorageBufferOffsetAlignment physical device limit.", writeDescriptorSetIndex, descriptorBufferIndex);
+
+								errorCount += 1;
+							}
+						}
+					}
+
+					descriptorBufferIndex += 1;
 				}
 
 				writeDescriptorSetIndex += 1;

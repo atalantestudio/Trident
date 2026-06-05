@@ -15,6 +15,8 @@ struct Edge {
 };
 
 layout(set = 0, binding = 0) buffer readonly Font {
+	uint spreadFactor;
+	uint outputGlyphSize;
 	int lineHeight;
 } font;
 
