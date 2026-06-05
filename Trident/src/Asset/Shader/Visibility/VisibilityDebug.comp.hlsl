@@ -1,7 +1,7 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-struct VertexOutput {
+struct Interstage {
 	float4 position : SV_Position;
 	float2 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE1;
 };

@@ -49,9 +49,9 @@ layout(set = 2, binding = 1) buffer readonly GeometryBuffer {
 	Geometry geometryBuffer[];
 };
 
-out VertexOutput {
+out Interstage {
 	layout(location = 0) flat uint visibility;
-} vertexOutput;
+} interstage;
 
 vec3 loadVertexPosition(Geometry geometry, uint index) {
 	uint offset = (geometry.vertexOffset + index) * 3;
@@ -78,5 +78,5 @@ void main() {
 
 	gl_Position = camera.projectionView * instance.world * vec4(vertex, 1.0);
 
-	vertexOutput.visibility = ((clusterIndex + 1) << TRIANGLE_INDEX_BIT_COUNT) | triangleIndex;
+	interstage.visibility = ((clusterIndex + 1) << TRIANGLE_INDEX_BIT_COUNT) | triangleIndex;
 }

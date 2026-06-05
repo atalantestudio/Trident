@@ -7,7 +7,7 @@ struct VertexInput {
 	float3x3 normal : VERTEX_INPUT_ATTRIBUTE4;
 };
 
-struct VertexOutput {
+struct Interstage {
 	float4 position : SV_Position;
 };
 
@@ -21,11 +21,11 @@ cbuffer Camera : register(b0) {
 
 ByteAddressBuffer vertexPositionComponentBuffer : register(t0);
 
-VertexOutput main(VertexInput input) {
+Interstage main(VertexInput input) {
 	uint positionComponentOffset = input.vertexIndex * 3;
 	float3 position = asfloat(vertexPositionComponentBuffer.Load3(positionComponentOffset * 4));
 
-	VertexOutput output;
+	Interstage output;
 	output.position = mul(mul(camera.projectionView, input.world), float4(position, 1.0));
 
 	return output;

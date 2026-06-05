@@ -3,12 +3,12 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-in FragmentInput {
+in Interstage {
 	layout(location = 0) flat uint visibility;
-} fragmentInput;
+} interstage;
 
 layout(location = 0) out uint visibility;
 
 void main() {
-	visibility = fragmentInput.visibility;
+	visibility = interstage.visibility;
 }

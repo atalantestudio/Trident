@@ -5,7 +5,7 @@ struct VertexInput {
 	float3 contact : VERTEX_INPUT_ATTRIBUTE0;
 };
 
-struct VertexOutput {
+struct Interstage {
 	float4 position : SV_Position;
 };
 
@@ -17,8 +17,8 @@ cbuffer Camera : register(b0) {
 	Camera camera;
 }
 
-VertexOutput main(VertexInput input) {
-	VertexOutput output;
+Interstage main(VertexInput input) {
+	Interstage output;
 	output.position = mul(camera.projectionView, float4(input.contact, 1.0));
 
 	return output;

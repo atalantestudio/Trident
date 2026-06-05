@@ -1,7 +1,7 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-struct FragmentInput {
+struct Interstage {
 	float4 position : SV_Position;
 	float3 surface : VERTEX_OUTPUT_ATTRIBUTE1;
 	float2 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE2;
@@ -92,16 +92,16 @@ float3 gammaCorrect(float3 color) {
 	return pow(color, 1.0 / 2.2);
 }
 
-FragmentOutput main(FragmentInput input) {
+FragmentOutput main(Interstage interstage) {
 	// Convert from sRGB space to linear space.
-	float3 diffuse = pow(diffuseTexture.Sample(diffuseSamplerState, input.textureCoordinate).rgb, float3(2.2, 2.2, 2.2));
+	float3 diffuse = pow(diffuseTexture.Sample(diffuseSamplerState, interstage.textureCoordinate).rgb, float3(2.2, 2.2, 2.2));
 
-	float3 normal = normalize(mul(input.TBN, normalTexture.Sample(normalSamplerState, input.textureCoordinate).xyz * 2.0 - 1.0));
-	float3 arm = armTexture.Sample(armSamplerState, input.textureCoordinate).rgb;
+	float3 normal = normalize(mul(interstage.TBN, normalTexture.Sample(normalSamplerState, interstage.textureCoordinate).xyz * 2.0 - 1.0));
+	float3 arm = armTexture.Sample(armSamplerState, interstage.textureCoordinate).rgb;
 	float ao = arm[0];
 	float roughness = arm[1];
 	float metallic = arm[2];
-	float3 surface = input.surface;
+	float3 surface = interstage.surface;
 	float3 surfaceToViewDirection = normalize(camera.position - surface);
 	float3 baseReflectivity = lerp(float3(0.04, 0.04, 0.04), diffuse, metallic);
 	float3 L = float3(0.0, 0.0, 0.0);

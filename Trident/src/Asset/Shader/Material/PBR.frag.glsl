@@ -6,11 +6,11 @@
 // NOTE: "lowp" or "mediump" precision cause specular artifacts on integrated GPUs.
 precision highp float;
 
-in FragmentInput {
+in Interstage {
 	layout(location = 0) vec3 surface;
 	layout(location = 1) vec2 textureCoordinate;
 	layout(location = 2) mat3x3 TBN;
-} fragmentInput;
+} interstage;
 
 struct Light {
 	vec3 position;
@@ -80,14 +80,14 @@ vec3 gammaCorrect(vec3 color) {
 
 void main() {
 	// Convert from sRGB space to linear space.
-	vec3 diffuse = pow(texture(diffuseTexture, fragmentInput.textureCoordinate).rgb, vec3(2.2));
+	vec3 diffuse = pow(texture(diffuseTexture, interstage.textureCoordinate).rgb, vec3(2.2));
 
-	vec3 normal = normalize(fragmentInput.TBN * (texture(normalTexture, fragmentInput.textureCoordinate).xyz * 2.0 - 1.0));
-	vec3 arm = texture(armTexture, fragmentInput.textureCoordinate).rgb;
+	vec3 normal = normalize(interstage.TBN * (texture(normalTexture, interstage.textureCoordinate).xyz * 2.0 - 1.0));
+	vec3 arm = texture(armTexture, interstage.textureCoordinate).rgb;
 	float ao = arm[0];
 	float roughness = arm[1];
 	float metallic = arm[2];
-	vec3 surface = fragmentInput.surface;
+	vec3 surface = interstage.surface;
 	vec3 surfaceToViewDirection = normalize(camera.position - surface);
 	vec3 baseReflectivity = mix(vec3(0.04, 0.04, 0.04), diffuse, metallic);
 	vec3 L = vec3(0.0, 0.0, 0.0);

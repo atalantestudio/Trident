@@ -29,7 +29,7 @@ struct VertexInput {
 	uint instanceIndex : SV_InstanceID;
 };
 
-struct VertexOutput {
+struct Interstage {
 	float4 position : SV_Position;
 	nointerpolation uint visibility : VERTEX_OUTPUT_ATTRIBUTE1;
 };
@@ -73,7 +73,7 @@ float3 loadVertexPosition(Geometry geometry, uint index) {
 	return asfloat(vertexPositionComponentBuffer.Load3(offset * 4));
 }
 
-VertexOutput main(VertexInput input) {
+Interstage main(VertexInput input) {
 	uint indexIndex = input.vertexIndex;
 	uint triangleIndex = indexIndex / 3;
 	uint clusterIndex = input.instanceIndex;
@@ -86,7 +86,7 @@ VertexOutput main(VertexInput input) {
 	uint relativeVertexPositionIndex = vertexPositionIndexBuffer.Load((indexOffset + indexIndex) * 4);
 	float3 vertex = loadVertexPosition(geometry, relativeVertexPositionIndex);
 
-	VertexOutput output;
+	Interstage output;
 	output.position = mul(camera.projectionView, mul(instance.world, float4(vertex, 1.0)));
 	output.visibility = ((clusterIndex + 1) << TRIANGLE_INDEX_BIT_COUNT) | triangleIndex;
 

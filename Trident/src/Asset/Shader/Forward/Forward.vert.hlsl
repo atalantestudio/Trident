@@ -8,7 +8,7 @@ struct VertexInput {
 	float3x3 normal : VERTEX_INPUT_ATTRIBUTE5;
 };
 
-struct VertexOutput {
+struct Interstage {
 	float4 position : SV_Position;
 	float3 surface : VERTEX_OUTPUT_ATTRIBUTE1;
 	float2 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE2;
@@ -29,7 +29,7 @@ ByteAddressBuffer vertexNormalComponentBuffer : register(t1);
 ByteAddressBuffer vertexTextureCoordinateComponentBuffer : register(t2);
 ByteAddressBuffer triangleTangentComponentBuffer : register(t3);
 
-VertexOutput main(VertexInput input) {
+Interstage main(VertexInput input) {
 	uint positionComponentOffset = input.vertex[0] * 3;
 	uint normalComponentOffset = input.vertex[1] * 3;
 	uint textureCoordinateComponentOffset = input.vertex[2] * 2;
@@ -46,7 +46,7 @@ VertexOutput main(VertexInput input) {
 	float3 T = normalize(mul(input.normal, tangent));
 	float3 B = cross(N, T);
 
-	VertexOutput output;
+	Interstage output;
 	output.position = mul(camera.projectionView, surface);
 	output.surface = surface.xyz;
 	output.textureCoordinate = float2(textureCoordinate.x, 1.0 - textureCoordinate.y);
