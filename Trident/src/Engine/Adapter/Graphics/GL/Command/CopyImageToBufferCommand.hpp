@@ -22,7 +22,7 @@ namespace Trident {
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, destinationBuffer->buffer);
 
 				for (const BufferImageCopyRegion& copyRegion : copyRegions) {
-					// TODO: Move that switch out of the loop. The function to call must be known beforehand (maybe even when creating the image).
+					// TODO: Move that switch out of the loop. The function to call should be known beforehand (maybe even when creating the image).
 					switch (sourceImage->target) {
 						case GL_TEXTURE_1D:
 						case GL_TEXTURE_1D_ARRAY:

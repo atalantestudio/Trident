@@ -50,8 +50,8 @@ namespace Trident {
 				#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 					glNamedFramebufferReadBuffer(framebuffer->framebuffer, readBuffer);
 
-					// TODO(graphics/gl/bind-default-framebuffer)
-					// On some devices, glNamedFramebufferDrawBuffer generates a GL_INVALID_OPERATION
+					// TODO(graphics/gl/logs) (tested on HP Victus)
+					// glNamedFramebufferDrawBuffer may generate a GL_INVALID_OPERATION
 					// if the default framebuffer is not bound to GL_DRAW_FRAMEBUFFER.
 					// See https://github.com/atalantestudio/Trident/issues/67.
 					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);

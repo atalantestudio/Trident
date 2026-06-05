@@ -107,7 +107,7 @@ namespace Trident {
 				}
 			}
 
-			// TODO: Move that switch out of the loop. The function to call must be known beforehand (maybe even before creating the image).
+			// TODO: Move that switch out of the loop. The function to call should be known beforehand (maybe even before creating the image).
 			switch (glImage->target) {
 				case GL_TEXTURE_2D:
 				case GL_TEXTURE_2D_MULTISAMPLE:

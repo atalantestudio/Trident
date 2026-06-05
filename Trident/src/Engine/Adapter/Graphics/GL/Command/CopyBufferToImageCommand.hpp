@@ -27,20 +27,27 @@ namespace Trident {
 				#endif
 
 				switch (destinationImage->format) {
-					case GL_RGB:
+					case GL_RGB: {
 						glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 						break;
-					case GL_RGBA:
+					}
+					case GL_RGBA: {
 						glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
 						break;
+					}
 				}
 
 				for (const BufferImageCopyRegion& copyRegion : copyRegions) {
 					const GLvoid* pixels = (const GLvoid*) copyRegion.bufferOffset;
 
-					// TODO: Move that switch out of the loop. The function to call must be known beforehand (maybe even when creating the image).
+					// TODO(graphics/gl/logs) (tested on HP Victus)
+					// The buffer image copy may generate the following warning:
+					// "Pixel-path performance warning: Pixel transfer is synchronized with 3D rendering."
+					// See https://stackoverflow.com/a/49369531.
+
+					// TODO: Move that switch out of the loop. The function to call should be known beforehand (maybe even when creating the image).
 					switch (destinationImage->target) {
 						case GL_TEXTURE_1D:
 							#if OPENGL_VERSION >= OPENGL_VERSION_4_5
