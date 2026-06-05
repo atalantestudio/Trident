@@ -28,11 +28,11 @@ layout(set = 0, binding = 4) buffer readonly TriangleTangentComponent {
 	float triangleTangentComponentBuffer[];
 };
 
-out VertexOutput {
+out Interstage {
 	layout(location = 0) vec3 surface;
 	layout(location = 1) vec2 textureCoordinate;
 	layout(location = 2) mat3x3 TBN;
-} vertexOutput;
+} interstage;
 
 void main() {
 	uint positionComponentOffset = vertex[0] * 3u;
@@ -71,7 +71,7 @@ void main() {
 
 	gl_Position = camera.projectionView * surface;
 
-	vertexOutput.surface = surface.xyz;
-	vertexOutput.textureCoordinate = vec2(textureCoordinate.x, 1.0 - textureCoordinate.y);
-	vertexOutput.TBN = mat3x3(T, B, N);
+	interstage.surface = surface.xyz;
+	interstage.textureCoordinate = vec2(textureCoordinate.x, 1.0 - textureCoordinate.y);
+	interstage.TBN = mat3x3(T, B, N);
 }

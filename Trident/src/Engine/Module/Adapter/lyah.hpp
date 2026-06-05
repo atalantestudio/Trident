@@ -250,6 +250,14 @@ namespace Trident {
 		return a;
 	}
 
+	template<typename T>
+	constexpr svec<2, T> operator/(svec<2, T> a, svec<2, T> b) {
+		return {
+			a.x / b.x,
+			a.y / b.y,
+		};
+	}
+
 	template<std::size_t C, typename T>
 	constexpr svec<C, T> operator-(const svec<C, T>& a, const svec<C, T>& b);
 
@@ -399,6 +407,14 @@ namespace Trident {
 		const vec<4, T> r = vec<4, T>(a[0], a[1], a[2], 1.0f) * M;
 
 		return {r[0], r[1], r[2]};
+	}
+
+	template<typename T>
+	inline svec2<T> abs(svec2<T> a) {
+		return {
+			abs(a.x),
+			abs(a.y),
+		};
 	}
 
 	/// Calculates the signed distance between a point and an infinite line represented by two points.

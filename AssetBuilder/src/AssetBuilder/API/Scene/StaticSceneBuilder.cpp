@@ -3,6 +3,7 @@
 
 #include "pch.hpp"
 
+#include "AssetBuilder/API/Scene/Lightmap.hpp"
 #include "AssetBuilder/API/Scene/StaticSceneBuilder.hpp"
 
 namespace Trident {
@@ -49,6 +50,8 @@ namespace Trident {
 	}
 
 	StaticSceneBuilder& StaticSceneBuilder::createStaticObject(const StaticObjectDescriptor& descriptor) {
+		ENGINE_ASSERT(descriptor.lightmapPixelScale.x > 0.0f && descriptor.lightmapPixelScale.y > 0.0f, "The lightmap pixel scale must be positive.");
+
 		objects.emplace_back(StaticObject{
 			.geometryAsset = assetLibrary->getAsset<GeometryAsset>(descriptor.geometryAssetName),
 			.transform = descriptor.transform,
@@ -57,6 +60,7 @@ namespace Trident {
 				mat3x3<float32>::rotation(descriptor.textureFiltering.rotation) *
 				mat3x3<float32>::translation(descriptor.textureFiltering.translation)
 			),
+			.lightmapPixelScale = descriptor.lightmapPixelScale,
 		});
 
 		return *this;
@@ -187,18 +191,88 @@ namespace Trident {
 				);
 
 				triangles.emplace_back(StaticTriangle3D{
-					.aIndex = vertexRedirectionIndices[vertexPositionIndices[indexOffset + 0]],
-					.bIndex = vertexRedirectionIndices[vertexPositionIndices[indexOffset + 1]],
-					.cIndex = vertexRedirectionIndices[vertexPositionIndices[indexOffset + 2]],
+					.vertices = {
+						{
+							.vertexIndex = vertexRedirectionIndices[vertexPositionIndices[indexOffset + 0]],
+							.textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexTextureCoordinateIndices[indexOffset + 0]],
+							.lightmapCoordinateIndex = 0,
+						},
+						{
+							.vertexIndex = vertexRedirectionIndices[vertexPositionIndices[indexOffset + 1]],
+							.textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexTextureCoordinateIndices[indexOffset + 1]],
+							.lightmapCoordinateIndex = 0,
+						},
+						{
+							.vertexIndex = vertexRedirectionIndices[vertexPositionIndices[indexOffset + 2]],
+							.textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexTextureCoordinateIndices[indexOffset + 2]],
+							.lightmapCoordinateIndex = 0,
+						},
+					},
 					.normalIndex = normalRedirectionIndices[normalIndex],
-					.aUvIndex = textureCoordinateRedirectionIndices[vertexTextureCoordinateIndices[indexOffset + 0]],
-					.bUvIndex = textureCoordinateRedirectionIndices[vertexTextureCoordinateIndices[indexOffset + 1]],
-					.cUvIndex = textureCoordinateRedirectionIndices[vertexTextureCoordinateIndices[indexOffset + 2]],
 				});
 
 				indexOffset += 3;
 			}
+
+			const view<Edge3D> edges = object.geometryAsset->getHull3DEdges();
+			const view<Plane3D> faces = object.geometryAsset->getHull3DFaces();
+			const view<uint16> faceEdgeIndices = object.geometryAsset->getHull3DFaceEdgeIndices();
+
+			static const quat<float32> up = quat<float32>::axisAngle({0.0f, 1.0f, 0.0f}, 0.0f);
+
+			std::vector<Lightmap> lightmaps;
+
+			for (const Plane3D face : faces) {
+				Lightmap lightmap{};
+				svec2<float32> maxCoordinate = {min<float32>(), min<float32>()};
+				svec2<float32> minCoordinate = {max<float32>(), max<float32>()};
+				uint16 edgeIndexIndex = 0;
+
+				while (edgeIndexIndex < face.edgeIndexRange.count) {
+					const uint16 edgeIndex = faceEdgeIndices[face.edgeIndexRange.offset + edgeIndexIndex];
+					const Edge3D edge = edges[edgeIndex];
+
+					const vec3<float32> a = (vec3<float32>{
+						vertexPositionComponents[edge.originVertexIndex * 3 + 0],
+						vertexPositionComponents[edge.originVertexIndex * 3 + 1],
+						vertexPositionComponents[edge.originVertexIndex * 3 + 2],
+					} * object.transform.scale) * up;
+
+					const svec2<float32> lightmapCoordinate = svec2<float32>{a[0], a[2]} / object.lightmapPixelScale;
+
+					lightmap.coordinates.emplace_back(lightmapCoordinate);
+
+					maxCoordinate.x = max(maxCoordinate.x, lightmapCoordinate.x);
+					maxCoordinate.y = max(maxCoordinate.y, lightmapCoordinate.y);
+					minCoordinate.x = min(minCoordinate.x, lightmapCoordinate.x);
+					minCoordinate.y = min(minCoordinate.y, lightmapCoordinate.y);
+
+					edgeIndexIndex += 1;
+				}
+
+				lightmap.offset = {0.0f, 0.0f};
+				lightmap.size = abs(maxCoordinate - minCoordinate);
+				lightmap.area = lightmap.size.x * lightmap.size.y;
+
+				uint32 lightmapIndex = 0;
+
+				while (lightmapIndex < lightmaps.size()) {
+					if (lightmap.area > lightmaps[lightmapIndex].area) {
+						break;
+					}
+
+					lightmapIndex += 1;
+				}
+
+				lightmaps.insert(lightmaps.begin() + lightmapIndex, lightmap);
+			}
+
+			BREAKPOINT();
 		}
+
+		// TODO
+		// 1. Insert each rectangle into a 2048x2048 texture array using this packing algorithm: https://blackpawn.com/texts/lightmaps.
+		// 2. After inserting a rectangle, calculate store its final UVs into the static triangles composing the lightmapped face.
 
 		StaticScene3D staticScene{};
 		staticScene.triangles = sequence<StaticTriangle3D>(triangles.size());

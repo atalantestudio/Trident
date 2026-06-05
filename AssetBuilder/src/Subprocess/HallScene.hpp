@@ -9,10 +9,6 @@
 
 namespace Trident {
 	inline Scene3DData createHallScene(std::filesystem::path rootOutputPath) {
-		// TODO(test)
-		// Texture: "tile/tilefloor018a.jpg"
-		// Normal map: "tile/tilefloor018a_normal.jpg"
-
 		StaticSceneBuilder builder(rootOutputPath);
 		builder
 			.createStaticObject({
@@ -27,8 +23,9 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
+				.lightmapPixelScale = {1.0f, 1.0f},
 			})
-			.createStaticObject({
+			/* .createStaticObject({
 				.label = "hall_to_bike_room_floor_connector",
 				.geometryAssetName = "UnitPlane",
 				.transform = {
@@ -40,6 +37,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
+				.lightmapPixelScale = {1.0f, 1.0f},
 			})
 			.createStaticObject({
 				.label = "bike_room_floor",
@@ -53,6 +51,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
+				.lightmapPixelScale = {1.0f, 1.0f},
 			})
 			.createStaticObject({
 				.label = "hall_to_main_floor_connector",
@@ -66,6 +65,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
+				.lightmapPixelScale = {1.0f, 1.0f},
 			})
 			.createStaticObject({
 				.label = "main_floor",
@@ -79,7 +79,8 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
-			});
+				.lightmapPixelScale = {1.0f, 1.0f},
+			}) */;
 
 		return {
 			.staticScene = builder.build(),

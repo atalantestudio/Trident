@@ -172,13 +172,15 @@ namespace Trident {
 				stream.jump(sizeof(header));
 
 				for (const StaticTriangle3D& triangle : data.staticScene.triangles) {
-					stream.write<uint32>(triangle.aIndex);
-					stream.write<uint32>(triangle.bIndex);
-					stream.write<uint32>(triangle.cIndex);
+					const view<StaticVertex3D> vertices(&triangle.vertices[0], 3);
+
+					for (const StaticVertex3D& vertex : vertices) {
+						stream.write<uint32>(vertex.vertexIndex);
+						stream.write<uint32>(vertex.textureCoordinateIndex);
+						stream.write<uint32>(vertex.lightmapCoordinateIndex);
+					}
+
 					stream.write<uint32>(triangle.normalIndex);
-					stream.write<uint32>(triangle.aUvIndex);
-					stream.write<uint32>(triangle.bUvIndex);
-					stream.write<uint32>(triangle.cUvIndex);
 				}
 
 				for (const svec3<float32> vertex : data.staticScene.vertices) {

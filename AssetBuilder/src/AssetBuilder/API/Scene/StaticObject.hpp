@@ -22,11 +22,17 @@ namespace Trident {
 		view<char8> geometryAssetName;
 		Transform transform;
 		TextureFilteringDescriptor textureFiltering;
+
+		/// Applies to all faces.
+		svec2<float32> lightmapPixelScale;
 	};
 
 	struct StaticObject {
 		ref<GeometryAsset> geometryAsset;
 		Transform transform;
 		mat3x3<float32> texture;
+
+		/// Applies to all faces.
+		svec2<float32> lightmapPixelScale;
 	};
 }

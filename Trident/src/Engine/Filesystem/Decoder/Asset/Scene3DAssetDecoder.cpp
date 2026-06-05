@@ -49,13 +49,18 @@ namespace Trident {
 		descriptor.rigidBodyMappings = sequence<EntityComponentMapping<RigidBody3DComponent>>(rigidBodyMappingCount);
 
 		for (StaticTriangle3D& triangle : descriptor.staticTriangles) {
-			triangle.aIndex = stream.read<uint32>();
-			triangle.bIndex = stream.read<uint32>();
-			triangle.cIndex = stream.read<uint32>();
+			uint32 vertexIndex = 0;
+
+			while (vertexIndex < 3) {
+				StaticVertex3D& vertex = triangle.vertices[vertexIndex];
+				vertex.vertexIndex = stream.read<uint32>();
+				vertex.textureCoordinateIndex = stream.read<uint32>();
+				vertex.lightmapCoordinateIndex = stream.read<uint32>();
+
+				vertexIndex += 1;
+			}
+
 			triangle.normalIndex = stream.read<uint32>();
-			triangle.aUvIndex = stream.read<uint32>();
-			triangle.bUvIndex = stream.read<uint32>();
-			triangle.cUvIndex = stream.read<uint32>();
 		}
 
 		for (svec3<float32>& vertex : descriptor.staticVertices) {

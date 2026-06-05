@@ -44,7 +44,7 @@ namespace Trident {
 			mappedRange += normalRangeSize;
 		}
 
-		// Copy textureCoordinate.
+		// Copy texture coordinates.
 		{
 			std::copy(scene->getAsset()->getStaticTextureCoordinates().begin(), scene->getAsset()->getStaticTextureCoordinates().end(), pointer_cast<svec2<float32>*>(mappedRange));
 
