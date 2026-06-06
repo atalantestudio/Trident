@@ -22,9 +22,13 @@ namespace Trident {
 
 	static VkPresentModeKHR selectPresentMode(view<VkPresentModeKHR> presentModes, bool verticalSync) {
 		if (verticalSync) {
-			for (const VkPresentModeKHR presentMode : presentModes) {
-				if (presentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
-					return presentMode;
+			static constexpr bool PREFER_MAILBOX = false;
+
+			if constexpr (PREFER_MAILBOX) {
+				for (const VkPresentModeKHR presentMode : presentModes) {
+					if (presentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
+						return presentMode;
+					}
 				}
 			}
 
