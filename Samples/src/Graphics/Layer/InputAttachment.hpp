@@ -42,15 +42,17 @@ namespace Trident {
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
-				BeginRenderPassDescriptor beginRenderPassDescriptor{};
-				beginRenderPassDescriptor.framebuffer = framebuffers[getSwapchainImageIndex()];
-				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 1.0f}};
-
 				const Extent2D swapchainExtent = getSwapchain()->getExtent();
 				const float32 width = static_cast<float32>(swapchainExtent.width);
 				const float32 height = static_cast<float32>(swapchainExtent.height);
 
-				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
+				commandEncoder->beginRenderPass({
+					.framebuffer = framebuffers[getSwapchainImageIndex()],
+					.clearValues = {
+						{0.0f, 0.0f, 0.0f, 1.0f},
+						{0.0f, 0.0f, 0.0f, 1.0f},
+					},
+				});
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
 
@@ -83,79 +85,86 @@ namespace Trident {
 
 		private:
 			void setupRenderPass() {
-				Attachment swapchainAttachment{};
-				swapchainAttachment.format = getSurface()->getFormat();
-				swapchainAttachment.sampleCount = 1;
-				swapchainAttachment.loadOperation = LoadOperation::CLEAR;
-				swapchainAttachment.storeOperation = StoreOperation::STORE;
-				swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
+				renderPass = createRenderPass({
+					.attachments = {
+						// Swapchain
+						{
+							.format = getSurface()->getFormat(),
+							.sampleCount = 1,
+							.loadOperation = LoadOperation::CLEAR,
+							.storeOperation = StoreOperation::STORE,
+							.finalLayout = ImageLayout::PRESENT_SRC,
+						},
 
-				Attachment imageAttachment{};
-				imageAttachment.format = getSurface()->getFormat();
-				imageAttachment.sampleCount = 1;
-				imageAttachment.loadOperation = LoadOperation::CLEAR;
-				imageAttachment.storeOperation = StoreOperation::UNDEFINED;
-				imageAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+						// Input
+						{
+							.format = getSurface()->getFormat(),
+							.sampleCount = 1,
+							.loadOperation = LoadOperation::CLEAR,
+							.storeOperation = StoreOperation::UNDEFINED,
+							.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
+						},
+					},
+					.subpasses = {
+						// Write input
+						createSubpass({
+							.colorAttachmentReferences = {
+								// Write input
+								{
+									.index = 1,
+									.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
+								},
+							},
+						}),
 
-				AttachmentReference writeImageAttachmentReference{};
-				writeImageAttachmentReference.index = 1;
-				writeImageAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-
-				AttachmentReference writeSwapchainAttachmentReference{};
-				writeSwapchainAttachmentReference.index = 0;
-				writeSwapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-
-				AttachmentReference readImageAttachmentReference{};
-				readImageAttachmentReference.index = 1;
-				readImageAttachmentReference.layout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
-
-				SubpassDescriptor writeImageSubpassDescriptor{};
-				writeImageSubpassDescriptor.colorAttachmentReferences = {writeImageAttachmentReference};
-
-				SubpassDescriptor readImageSubpassDescriptor{};
-				readImageSubpassDescriptor.colorAttachmentReferences = {writeSwapchainAttachmentReference};
-				readImageSubpassDescriptor.inputAttachmentReferences = {readImageAttachmentReference};
-
-				const ref<Subpass> writeImageSubpass = createSubpass(writeImageSubpassDescriptor);
-				const ref<Subpass> readImageSubpass = createSubpass(readImageSubpassDescriptor);
-
-				RenderPassDescriptor renderPassDescriptor{};
-				renderPassDescriptor.attachments = {swapchainAttachment, imageAttachment};
-				renderPassDescriptor.subpasses = {writeImageSubpass, readImageSubpass};
-
-				renderPass = createRenderPass(renderPassDescriptor);
+						// Read input
+						createSubpass({
+							.colorAttachmentReferences = {
+								// Write swapchain
+								{
+									.index = 0,
+									.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
+								},
+							},
+							.inputAttachmentReferences = {
+								// Read input
+								{
+									.index = 1,
+									.layout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+								},
+							},
+						}),
+					},
+				});
 			}
 
 			void recreateImage() {
 				const Extent2D swapchainExtent = getSwapchain()->getExtent();
 
-				AttachmentImageDescriptor attachmentImageDescriptor{};
-				attachmentImageDescriptor.type = ImageType::TEXTURE_2D;
-				attachmentImageDescriptor.extent.width = swapchainExtent.width;
-				attachmentImageDescriptor.extent.height = swapchainExtent.height;
-				attachmentImageDescriptor.extent.depth = 1;
-				attachmentImageDescriptor.mipLevelCount = 1;
-				attachmentImageDescriptor.layerCount = 1;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					attachmentImageDescriptor.name = "Image";
-				#endif
-
-				image = renderPass->createInputAttachmentImage(attachmentImageDescriptor, 1);
+				image = renderPass->createInputAttachmentImage(
+					{
+						.type = ImageType::TEXTURE_2D,
+						.extent = {swapchainExtent.width, swapchainExtent.height, 1},
+						.mipLevelCount = 1,
+						.layerCount = 1,
+						#if defined(DEBUG_OBJECT_NAME)
+							.name = "Image",
+						#endif
+					},
+					1
+				);
 			}
 
 			void recreateImageView() {
-				ImageViewDescriptor imageViewDescriptor{};
-				imageViewDescriptor.mipLevelOffset = 0;
-				imageViewDescriptor.mipLevelCount = 1;
-				imageViewDescriptor.layerOffset = 0;
-				imageViewDescriptor.layerCount = 1;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					imageViewDescriptor.name = "Image view";
-				#endif
-
-				imageView = image->createView(imageViewDescriptor);
+				imageView = image->createView({
+					.mipLevelOffset = 0,
+					.mipLevelCount = 1,
+					.layerOffset = 0,
+					.layerCount = 1,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Image view",
+					#endif
+				});
 			}
 
 			void recreateFramebuffers() {
@@ -163,10 +172,11 @@ namespace Trident {
 
 				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
 
-				FramebufferDescriptor framebufferDescriptor{};
-				framebufferDescriptor.renderPass = renderPass;
-				framebufferDescriptor.imageViews = {nullptr, imageView};
-				framebufferDescriptor.extent = swapchain->getExtent();
+				FramebufferDescriptor framebufferDescriptor = {
+					.renderPass = renderPass,
+					.imageViews = {nullptr, imageView},
+					.extent = swapchain->getExtent(),
+				};
 
 				#if defined(DEBUG_OBJECT_NAME)
 					sequence<char8> name;
@@ -190,10 +200,11 @@ namespace Trident {
 			}
 
 			void createImageDescriptorSetLayout() {
-				DescriptorSetLayoutBinding imageBinding{};
-				imageBinding.descriptorType = DescriptorType::INPUT_ATTACHMENT;
-				imageBinding.descriptorCount = 1;
-				imageBinding.shaderStages = ShaderStage::FRAGMENT;
+				const DescriptorSetLayoutBinding imageBinding = {
+					.descriptorType = DescriptorType::INPUT_ATTACHMENT,
+					.descriptorCount = 1,
+					.shaderStages = ShaderStage::FRAGMENT,
+				};
 
 				imageDescriptorSetLayout = createDescriptorSetLayout({imageBinding});
 			}
@@ -205,27 +216,28 @@ namespace Trident {
 			}
 
 			void updateImageDescriptorSet() {
-				DescriptorImage descriptorImage{};
-				descriptorImage.imageView = imageView;
-				descriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
-				descriptorImage.sampler = nullptr;
+				const DescriptorImage descriptorImage = {
+					.imageView = imageView,
+					.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+					.sampler = nullptr,
+				};
 
-				WriteDescriptorSet imageWriteDescriptorSet{};
-				imageWriteDescriptorSet.descriptorSet = imageDescriptorSet;
-				imageWriteDescriptorSet.bindingIndex = 0;
-				imageWriteDescriptorSet.descriptorImages = {descriptorImage};
+				const WriteDescriptorSet imageWriteDescriptorSet = {
+					.descriptorSet = imageDescriptorSet,
+					.bindingIndex = 0,
+					.descriptorImages = {descriptorImage},
+				};
 
-				getDevice()->updateDescriptorSets({imageWriteDescriptorSet});
+				getDevice()->updateDescriptorSets(imageWriteDescriptorSet);
 			}
 
 			void createWriteImagePipelineLayout() {
-				PipelineLayoutDescriptor writeImagePipelineLayoutDescriptor{};
-
-				#if defined(DEBUG_OBJECT_NAME)
-					writeImagePipelineLayoutDescriptor.name = "Image write";
-				#endif
-
-				writeImagePipelineLayout = createPipelineLayout(writeImagePipelineLayoutDescriptor);
+				writeImagePipelineLayout = createPipelineLayout({
+					.descriptorSetLayouts = {},
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Image write",
+					#endif
+				});
 			}
 
 			void createWriteImageGraphicsPipeline() {
@@ -233,162 +245,156 @@ namespace Trident {
 				vertexInputBinding.registerAttribute<svec2<float32>>();
 				vertexInputBinding.registerAttribute<vec3<float32>>();
 
-				ShaderModuleDescriptor vertexShaderModuleDescriptor{};
-				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-				vertexShaderModuleDescriptor.entryPoint = "main";
-
-				#if defined(DEBUG_OBJECT_NAME)
-					vertexShaderModuleDescriptor.name = "Image write vertex";
-				#endif
-
-				ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
-				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-				fragmentShaderModuleDescriptor.entryPoint = "main";
-
-				#if defined(DEBUG_OBJECT_NAME)
-					fragmentShaderModuleDescriptor.name = "Image write fragment";
-				#endif
-
-				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/Triangle/Triangle.vert");
-				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/Triangle/Triangle.frag");
-
 				const sequence<ColorBlendAttachment> colorBlendAttachments = {
 					{
 						.blend = false,
 					},
 				};
 
-				GraphicsPipelineDescriptor writeImageGraphicsPipelineDescriptor{};
-				writeImageGraphicsPipelineDescriptor.pipelineLayout = writeImagePipelineLayout;
-				writeImageGraphicsPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
-				writeImageGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-				writeImageGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-				writeImageGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-				writeImageGraphicsPipelineDescriptor.polygonMode = PolygonMode::FILL;
-				writeImageGraphicsPipelineDescriptor.cullMode = CullMode::BACK;
-				writeImageGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-				writeImageGraphicsPipelineDescriptor.lineWidth = 1.0f;
-				writeImageGraphicsPipelineDescriptor.minSampleShading = 0.0f;
-				writeImageGraphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
-				writeImageGraphicsPipelineDescriptor.depthStencilState.depthTest = false;
-				writeImageGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-				writeImageGraphicsPipelineDescriptor.renderPass = renderPass;
-				writeImageGraphicsPipelineDescriptor.subpassIndex = WRITE_IMAGE_SUBPASS_INDEX;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					writeImageGraphicsPipelineDescriptor.name = "Image write";
-				#endif
-
-				writeImageGraphicsPipeline = createGraphicsPipeline(writeImageGraphicsPipelineDescriptor);
+				writeImageGraphicsPipeline = createGraphicsPipeline({
+					.pipelineLayout = writeImagePipelineLayout,
+					.vertexInputBindings = {vertexInputBinding},
+					.vertexShaderModule = loadShaderModule(
+						{
+							.stage = ShaderStage::VERTEX,
+							.entryPoint = "main",
+							#if defined(DEBUG_OBJECT_NAME)
+								.name = "Image write vertex",
+							#endif
+						},
+						"Sample/Triangle/Triangle.vert"
+					),
+					.fragmentShaderModule = loadShaderModule(
+						{
+							.stage = ShaderStage::FRAGMENT,
+							.entryPoint = "main",
+							#if defined(DEBUG_OBJECT_NAME)
+								.name = "Image write fragment",
+							#endif
+						},
+						"Sample/Triangle/Triangle.frag"
+					),
+					.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
+					.polygonMode = PolygonMode::FILL,
+					.cullMode = CullMode::BACK,
+					.frontFace = FrontFace::CLOCKWISE,
+					.lineWidth = 1.0f,
+					.minSampleShading = 0.0f,
+					.colorBlendState = {
+						.attachments = colorBlendAttachments,
+					},
+					.depthStencilState = {
+						.depthTest = false,
+					},
+					.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
+					.renderPass = renderPass,
+					.subpassIndex = WRITE_IMAGE_SUBPASS_INDEX,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Image write",
+					#endif
+				});
 			}
 
 			void createReadImagePipelineLayout() {
-				PipelineLayoutDescriptor readImagePipelineLayoutDescriptor{};
-				readImagePipelineLayoutDescriptor.descriptorSetLayouts = {imageDescriptorSetLayout};
-
-				#if defined(DEBUG_OBJECT_NAME)
-					readImagePipelineLayoutDescriptor.name = "Image read";
-				#endif
-
-				readImagePipelineLayout = createPipelineLayout(readImagePipelineLayoutDescriptor);
+				readImagePipelineLayout = createPipelineLayout({
+					.descriptorSetLayouts = {imageDescriptorSetLayout},
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Image read",
+					#endif
+				});
 			}
 
 			void createReadImageGraphicsPipeline() {
-				ShaderModuleDescriptor vertexShaderModuleDescriptor{};
-				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-				vertexShaderModuleDescriptor.entryPoint = "main";
-
-				#if defined(DEBUG_OBJECT_NAME)
-					vertexShaderModuleDescriptor.name = "Image read vertex";
-				#endif
-
-				ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
-				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-				fragmentShaderModuleDescriptor.entryPoint = "main";
-
-				#if defined(DEBUG_OBJECT_NAME)
-					fragmentShaderModuleDescriptor.name = "Image read fragment";
-				#endif
-
-				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/InputAttachment/InputAttachment.vert");
-				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/InputAttachment/InputAttachment.frag");
-
 				const sequence<ColorBlendAttachment> colorBlendAttachments = {
 					{
 						.blend = false,
 					},
 				};
 
-				GraphicsPipelineDescriptor readImageGraphicsPipelineDescriptor{};
-				readImageGraphicsPipelineDescriptor.pipelineLayout = readImagePipelineLayout;
-				readImageGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-				readImageGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-				readImageGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-				readImageGraphicsPipelineDescriptor.polygonMode = PolygonMode::FILL;
-				readImageGraphicsPipelineDescriptor.cullMode = CullMode::BACK;
-				readImageGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-				readImageGraphicsPipelineDescriptor.lineWidth = 1.0f;
-				readImageGraphicsPipelineDescriptor.minSampleShading = 0.0f;
-				readImageGraphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
-				readImageGraphicsPipelineDescriptor.depthStencilState.depthTest = false;
-				readImageGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-				readImageGraphicsPipelineDescriptor.renderPass = renderPass;
-				readImageGraphicsPipelineDescriptor.subpassIndex = READ_IMAGE_SUBPASS_INDEX;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					readImageGraphicsPipelineDescriptor.name = "Image read";
-				#endif
-
-				readImageGraphicsPipeline = createGraphicsPipeline(readImageGraphicsPipelineDescriptor);
+				readImageGraphicsPipeline = createGraphicsPipeline({
+					.pipelineLayout = readImagePipelineLayout,
+					.vertexShaderModule = loadShaderModule(
+						{
+							.stage = ShaderStage::VERTEX,
+							.entryPoint = "main",
+							#if defined(DEBUG_OBJECT_NAME)
+								.name = "Image read vertex",
+							#endif
+						},
+						"Sample/InputAttachment/InputAttachment.vert"
+					),
+					.fragmentShaderModule = loadShaderModule(
+						{
+							.stage = ShaderStage::FRAGMENT,
+							.entryPoint = "main",
+							#if defined(DEBUG_OBJECT_NAME)
+								.name = "Image read fragment",
+							#endif
+						},
+						"Sample/InputAttachment/InputAttachment.frag"
+					),
+					.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
+					.polygonMode = PolygonMode::FILL,
+					.cullMode = CullMode::BACK,
+					.frontFace = FrontFace::CLOCKWISE,
+					.lineWidth = 1.0f,
+					.minSampleShading = 0.0f,
+					.colorBlendState = {
+						.attachments = colorBlendAttachments,
+					},
+					.depthStencilState = {
+						.depthTest = false,
+					},
+					.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
+					.renderPass = renderPass,
+					.subpassIndex = READ_IMAGE_SUBPASS_INDEX,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Image read",
+					#endif
+				});
 			}
 
 			void createVertexBuffer() {
 				const ref<Buffer<Vertex>> vertexStagingBuffer = createStagingBuffer<Vertex>(3 * sizeof(Vertex));
 
 				Vertex* vertexStagingBufferMappedRange = vertexStagingBuffer->map(0, vertexStagingBuffer->getSize());
-				vertexStagingBufferMappedRange[0].vertex = {-0.5f, -0.5f};
-				vertexStagingBufferMappedRange[0].color = {1.0f, 0.0f, 0.0f};
-				vertexStagingBufferMappedRange[1].vertex = {0.0f, 0.5f};
-				vertexStagingBufferMappedRange[1].color = {0.0f, 1.0f, 0.0f};
-				vertexStagingBufferMappedRange[2].vertex = {0.5f, -0.5f};
-				vertexStagingBufferMappedRange[2].color = {0.0f, 0.0f, 1.0f};
+				vertexStagingBufferMappedRange[0] = {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}};
+				vertexStagingBufferMappedRange[1] = {{0.0f, 0.5f}, {0.0f, 1.0f, 0.0f}};
+				vertexStagingBufferMappedRange[2] = {{0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}};
 
 				vertexStagingBuffer->unmap();
 
-				BufferDescriptor vertexBufferDescriptor{};
-				vertexBufferDescriptor.size = vertexStagingBuffer->getSize();
-				vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
-				vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-				vertexBufferDescriptor.persistent = false;
+				vertexBuffer = createBuffer<Vertex>({
+					.size = vertexStagingBuffer->getSize(),
+					.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST,
+					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+					.persistent = false,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Vertex",
+					#endif
+				});
 
-				#if defined(DEBUG_OBJECT_NAME)
-					vertexBufferDescriptor.name = "Vertex buffer";
-				#endif
+				const BufferCopyRegion bufferCopyRegion = {
+					.sourceOffset = 0,
+					.destinationOffset = 0,
+					.size = vertexBuffer->getSize(),
+				};
 
-				vertexBuffer = createBuffer<Vertex>(vertexBufferDescriptor);
-
-				BufferCopyRegion vertexBufferCopyRegion{};
-				vertexBufferCopyRegion.sourceOffset = 0;
-				vertexBufferCopyRegion.destinationOffset = 0;
-				vertexBufferCopyRegion.size = vertexBuffer->getSize();
-
-				CommandBufferDescriptor commandBufferDescriptor{};
-				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					commandBufferDescriptor.name = "Buffer copy command buffer";
-				#endif
-
-				const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
-				const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
+				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
+				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
+					.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Copy buffer",
+					#endif
+				});
 
 				commandEncoder->begin();
-				commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, {vertexBufferCopyRegion});
+				commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, bufferCopyRegion);
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-				transferQueue->submit(commandBuffer);
-				transferQueue->waitIdle();
+				queue->submit(commandBuffer);
+				queue->waitIdle();
 			}
 
 		private:
