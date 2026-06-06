@@ -271,6 +271,7 @@ namespace Trident {
 
 				graphicsPipeline = createGraphicsPipeline({
 					.pipelineLayout = pipelineLayout,
+					.vertexInputBindings = {},
 					.vertexShaderModule = loadShaderModule(
 						{
 							.stage = ShaderStage::VERTEX,
