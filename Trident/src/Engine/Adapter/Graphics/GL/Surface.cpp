@@ -63,6 +63,7 @@ namespace Trident {
 				LOAD_PROCEDURE(glClientWaitSync);
 				LOAD_PROCEDURE(glDeleteSync);
 				LOAD_PROCEDURE(glFenceSync);
+				LOAD_PROCEDURE(glGetInteger64v);
 				LOAD_PROCEDURE(glProvokingVertex);
 				LOAD_PROCEDURE(glSamplerParameteri);
 			#endif
@@ -483,8 +484,20 @@ namespace Trident {
 		glGetIntegerv(GL_MAX_VERTEX_ATTRIB_BINDINGS, pointer_cast<GLint*>(&_physicalDevice->limits.maxVertexInputBindingCount));
 		glGetIntegerv(GL_MAX_VERTEX_ATTRIB_STRIDE, pointer_cast<GLint*>(&_physicalDevice->limits.maxVertexInputBindingStride));
 		glGetFloatv(GL_SMOOTH_POINT_SIZE_GRANULARITY, &_physicalDevice->limits.pointSizeGranularity);
-		glGetIntegerv(GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT, pointer_cast<GLint*>(&_physicalDevice->limits.minStorageBufferOffsetAlignment));
-		glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, pointer_cast<GLint*>(&_physicalDevice->limits.minUniformBufferOffsetAlignment));
+
+		#if OPENGL_VERSION >= OPENGL_VERSION_3_2
+			glGetInteger64v(GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT, pointer_cast<GLint64*>(&_physicalDevice->limits.minStorageBufferOffsetAlignment));
+			glGetInteger64v(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, pointer_cast<GLint64*>(&_physicalDevice->limits.minUniformBufferOffsetAlignment));
+		#else
+			GLint minStorageBufferOffsetAlignment;
+			GLint minUniformBufferOffsetAlignment;
+
+			glGetIntegerv(GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT, &minStorageBufferOffsetAlignment);
+			glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &minUniformBufferOffsetAlignment);
+
+			_physicalDevice->limits.minStorageBufferOffsetAlignment = minStorageBufferOffsetAlignment;
+			_physicalDevice->limits.minUniformBufferOffsetAlignment = minUniformBufferOffsetAlignment;
+		#endif
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_6
 			GLint shaderBinaryFormatCount;

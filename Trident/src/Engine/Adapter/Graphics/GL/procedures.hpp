@@ -53,6 +53,7 @@ namespace Trident {
 		extern PFNGLCLIENTWAITSYNCPROC glClientWaitSync;
 		extern PFNGLDELETESYNCPROC glDeleteSync;
 		extern PFNGLFENCESYNCPROC glFenceSync;
+		extern PFNGLGETINTEGER64VPROC glGetInteger64v;
 		extern PFNGLPROVOKINGVERTEXPROC glProvokingVertex;
 		extern PFNGLSAMPLERPARAMETERIPROC glSamplerParameteri;
 	#endif
