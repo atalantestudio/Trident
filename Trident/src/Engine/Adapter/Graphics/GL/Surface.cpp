@@ -504,21 +504,26 @@ namespace Trident {
 
 			glGetIntegerv(GL_NUM_SHADER_BINARY_FORMATS, &shaderBinaryFormatCount);
 
-			sequence<GLint> shaderBinaryFormats(shaderBinaryFormatCount);
+			// TODO(graphics/gl/spir-v)
+			// glGetIntegerv(GL_NUM_SHADER_BINARY_FORMATS) can return 0 even if SPIR-V binaries are supported.
+			// Tested on HP Victus laptop with Intel integrated GPU.
+			if (shaderBinaryFormatCount > 0) {
+				sequence<GLint> shaderBinaryFormats(shaderBinaryFormatCount);
 
-			glGetIntegerv(GL_SHADER_BINARY_FORMATS, &shaderBinaryFormats[0]);
+				glGetIntegerv(GL_SHADER_BINARY_FORMATS, &shaderBinaryFormats[0]);
 
-			uint32 spirvShaderBinaryFormatIndex = 0;
+				GLint spirvShaderBinaryFormatIndex = 0;
 
-			while (spirvShaderBinaryFormatIndex < shaderBinaryFormats.count()) {
-				if (shaderBinaryFormats[spirvShaderBinaryFormatIndex] == GL_SHADER_BINARY_FORMAT_SPIR_V) {
-					break;
+				while (spirvShaderBinaryFormatIndex < shaderBinaryFormats.count()) {
+					if (shaderBinaryFormats[spirvShaderBinaryFormatIndex] == GL_SHADER_BINARY_FORMAT_SPIR_V) {
+						break;
+					}
+
+					spirvShaderBinaryFormatIndex += 1;
 				}
 
-				spirvShaderBinaryFormatIndex += 1;
+				ADAPTER_ASSERT(spirvShaderBinaryFormatIndex < shaderBinaryFormatCount, "GL_SHADER_BINARY_FORMAT_SPIR_V is not supported.");
 			}
-
-			ADAPTER_ASSERT(spirvShaderBinaryFormatIndex < shaderBinaryFormats.count(), "GL_SHADER_BINARY_FORMAT_SPIR_V is not supported.");
 		#endif
 
 		return surface;
