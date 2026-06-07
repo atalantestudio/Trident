@@ -266,8 +266,6 @@ namespace Trident {
 
 				lightmaps.insert(lightmaps.begin() + lightmapIndex, lightmap);
 			}
-
-			BREAKPOINT();
 		}
 
 		// TODO

@@ -13,6 +13,9 @@ call "Trident/src/Asset/Shader/GUI/BuildShaders" %glslcpath%
 echo Building shaders in Trident/src/Asset/Shader/Material.
 call "Trident/src/Asset/Shader/Material/BuildShaders" %glslcpath%
 
+echo Building shaders in Trident/src/Asset/Shader/Scene.
+call "Trident/src/Asset/Shader/Scene/BuildShaders" %glslcpath%
+
 echo Building shaders in Trident/src/Asset/Shader/Visibility.
 call "Trident/src/Asset/Shader/Visibility/BuildShaders" %glslcpath%
 

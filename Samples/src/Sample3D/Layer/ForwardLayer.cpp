@@ -182,5 +182,7 @@ namespace Trident {
 		const vec3<float32> wishdir = normalized(wishvel) * MOVEMENT_SPEED * deltaTime;
 
 		camera.position += wishdir;
+
+		renderer.resetFrameIndex();
 	}
 }

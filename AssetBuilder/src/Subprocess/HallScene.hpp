@@ -82,6 +82,37 @@ namespace Trident {
 				.lightmapPixelScale = {1.0f, 1.0f},
 			}) */;
 
+		// TODO(test)
+		builder
+			.createStaticObject({
+				.label = "test_box",
+				.geometryAssetName = "UnitBox",
+				.transform = {
+					.position = {56.0f, 24.0f, 84.0f},
+					.scale = {48.0f, 32.0f, 16.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.25f, 0.625f},
+					.rotation = 0.0f,
+					.scale = {-0.25f, 0.25f},
+				},
+				.lightmapPixelScale = {1.0f, 1.0f},
+			})
+			.createStaticObject({
+				.label = "test_box_2",
+				.geometryAssetName = "UnitBox",
+				.transform = {
+					.position = {128.0f, 46.0f, 84.0f},
+					.scale = {128.0f, 8.0f, 256.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.25f, 0.625f},
+					.rotation = 0.0f,
+					.scale = {-0.25f, 0.25f},
+				},
+				.lightmapPixelScale = {1.0f, 1.0f},
+			});
+
 		return {
 			.staticScene = builder.build(),
 			.entityCount = 1,

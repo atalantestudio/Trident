@@ -368,9 +368,11 @@ namespace Trident {
 
 		_commandEncoder->commandList->SetDescriptorHeaps(2, &descriptorHeaps[0]);
 
-		UINT rootParameterIndex = 0;
+		UINT rootParameterIndex;
 
 		if (_commandEncoder->computePipelineBound) {
+			rootParameterIndex = 0;
+
 			while (rootParameterIndex < descriptorSets.count()) {
 				const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSets[rootParameterIndex]);
 
@@ -401,6 +403,8 @@ namespace Trident {
 			}
 		}
 		else {
+			rootParameterIndex = 0;
+
 			while (rootParameterIndex < descriptorSets.count()) {
 				const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSets[rootParameterIndex]);
 

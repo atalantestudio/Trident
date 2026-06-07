@@ -2,7 +2,7 @@
 // Distributed under the GNU GPL v3 License.
 
 struct Vertex {
-	uint vertexIndex;
+	uint index;
 	uint textureCoordinateIndex;
 	uint lightmapCoordinateIndex;
 };
@@ -37,18 +37,18 @@ ByteAddressBuffer textureCoordinateBuffer : register(t3);
 
 Triangle loadTriangle(uint triangleIndex) {
 	static const uint VERTEX_SIZE = 3 * 4;
-	static const uint TRIANGLE_SIZE = VERTEX_SIZE * 3 + 4;
+	static const uint TRIANGLE_SIZE = 3 * VERTEX_SIZE + 4;
 
 	uint triangleOffset = triangleIndex * TRIANGLE_SIZE;
 
 	Triangle triangle_;
-	triangle_.vertices[0].vertexIndex = triangleBuffer.Load(triangleOffset + 0 * VERTEX_SIZE + 0);
+	triangle_.vertices[0].index = triangleBuffer.Load(triangleOffset + 0 * VERTEX_SIZE + 0);
 	triangle_.vertices[0].textureCoordinateIndex = triangleBuffer.Load(triangleOffset + 0 * VERTEX_SIZE + 4);
 	triangle_.vertices[0].lightmapCoordinateIndex = triangleBuffer.Load(triangleOffset + 0 * VERTEX_SIZE + 8);
-	triangle_.vertices[1].vertexIndex = triangleBuffer.Load(triangleOffset + 1 * VERTEX_SIZE + 0);
+	triangle_.vertices[1].index = triangleBuffer.Load(triangleOffset + 1 * VERTEX_SIZE + 0);
 	triangle_.vertices[1].textureCoordinateIndex = triangleBuffer.Load(triangleOffset + 1 * VERTEX_SIZE + 4);
 	triangle_.vertices[1].lightmapCoordinateIndex = triangleBuffer.Load(triangleOffset + 1 * VERTEX_SIZE + 8);
-	triangle_.vertices[2].vertexIndex = triangleBuffer.Load(triangleOffset + 2 * VERTEX_SIZE + 0);
+	triangle_.vertices[2].index = triangleBuffer.Load(triangleOffset + 2 * VERTEX_SIZE + 0);
 	triangle_.vertices[2].textureCoordinateIndex = triangleBuffer.Load(triangleOffset + 2 * VERTEX_SIZE + 4);
 	triangle_.vertices[2].lightmapCoordinateIndex = triangleBuffer.Load(triangleOffset + 2 * VERTEX_SIZE + 8);
 
@@ -64,7 +64,7 @@ Interstage main(VertexInput input) {
 	Triangle triangle_ = loadTriangle(triangleIndex);
 	Vertex triangleVertex = triangle_.vertices[triangleVertexIndex];
 
-	uint vertexOffset = triangleVertex.vertexIndex * 3 * 4;
+	uint vertexOffset = triangleVertex.index * 3 * 4;
 	uint normalOffset = triangle_.normalIndex * 3 * 4;
 	uint textureCoordinateOffset = triangleVertex.textureCoordinateIndex * 2 * 4;
 

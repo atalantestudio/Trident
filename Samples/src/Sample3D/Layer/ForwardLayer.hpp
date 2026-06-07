@@ -14,7 +14,7 @@
 #include "Engine/API/Event/EventDispatcher.hpp"
 #include "Engine/API/Physics/3D/PhysicsSimulation3D.hpp"
 #include "Engine/Layer/Layer.hpp"
-#include "Engine/Renderer/Forward/Renderer.hpp"
+#include "Engine/Renderer/Scene/StaticSceneRayTracer/StaticSceneRayTracer.hpp"
 
 #include "../Scene/FlatColor.hpp"
 
@@ -111,7 +111,7 @@ namespace Trident {
 			}
 
 			void preRender() override {
-				const ComponentPool<RigidBody3DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody3DComponent>();
+				/* const ComponentPool<RigidBody3DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody3DComponent>();
 
 				uint32 componentIndex = 0;
 
@@ -147,7 +147,7 @@ namespace Trident {
 
 						break;
 					}
-				}
+				} */
 
 				renderer.updateCamera();
 			}
@@ -196,6 +196,10 @@ namespace Trident {
 				const float32 yaw = event.getX() * LOOK_SENSITIVITY;
 
 				cameraController.accumulateAngularMotion(radians(vec3<float32>{pitch, yaw, 0.0_deg}));
+
+				if (pitch != 0.0f || yaw != 0.0f) {
+					renderer.resetFrameIndex();
+				}
 
 				return true;
 			}
@@ -247,7 +251,7 @@ namespace Trident {
 			void noclipMove(float32 deltaTime);
 
 		private:
-			ForwardRenderer renderer;
+			StaticSceneRayTracer renderer;
 			scope<Scene3D> scene;
 			scope<PhysicsSimulation3D> physicsSimulation;
 

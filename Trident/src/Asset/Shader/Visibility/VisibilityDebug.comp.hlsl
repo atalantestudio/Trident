@@ -1,11 +1,6 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-struct Interstage {
-	float4 position : SV_Position;
-	float2 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE1;
-};
-
 struct Camera {
 	float4x4 projectionView;
 	float nearPlane;
@@ -101,6 +96,7 @@ static const uint VISUALIZATION_MODE = VISUALIZATION_MODE_TRIANGLE_INDEX;
 cbuffer CameraBuffer : register(b0) {
 	Camera camera;
 }
+
 Texture2D<uint> visibilityImage : register(t0);
 SamplerState depthStencilSamplerState : register(s0);
 Texture2D<float> depthStencilImage : register(t1);
