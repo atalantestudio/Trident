@@ -8,6 +8,9 @@
 namespace Trident {
 	struct Transform {
 		vec3<float32> position;
+		vec3<float32> rotation;
+
+		/// Applied after the rotation.
 		vec3<float32> scale;
 	};
 

@@ -13,6 +13,7 @@ struct Camera {
 	vec3 position;
 	uvec2 viewport;
 	uint frameIndex;
+	uint triangleCount;
 };
 
 struct Vertex {
@@ -175,14 +176,12 @@ Hit rmiss() {
 }
 
 Hit rint(Ray ray) {
-	const uint triangleCount = 26;
-
 	bool intersecting = false;
 	Triangle intersectingTriangle;
 	float closestT = FLOAT32_MAX;
 	uint triangleIndex = 0;
 
-	while (triangleIndex < triangleCount) {
+	while (triangleIndex < camera.triangleCount) {
 		Triangle triangle_ = triangleBuffer[triangleIndex];
 		float t;
 

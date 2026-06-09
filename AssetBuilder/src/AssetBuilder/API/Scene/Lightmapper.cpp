@@ -111,7 +111,5 @@ namespace Trident {
 
 			lightmapIndex += 1;
 		}
-
-		BREAKPOINT();
 	}
 }

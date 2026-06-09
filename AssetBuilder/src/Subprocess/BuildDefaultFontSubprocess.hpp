@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Process/Process.hpp"
+#include "Engine/Filesystem/Stream/UTF8Stream.hpp"
 
 #include "../File/PNG.hpp"
 #include "../Process/BuildImageAssetProcess.hpp"

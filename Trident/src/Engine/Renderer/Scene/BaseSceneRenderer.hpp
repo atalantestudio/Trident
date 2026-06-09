@@ -16,6 +16,7 @@ namespace Trident {
 				vec3<float32> position;
 				Extent2D viewport;
 				uint32 frameIndex;
+				uint32 triangleCount;
 			};
 
 		public:
@@ -32,9 +33,10 @@ namespace Trident {
 				const PerspectiveCamera3D& camera = getCameraController<PerspectiveCamera3D>().getCamera();
 
 				cameraMappedRange->inverseProjection = inverse(camera.getProjection());
-				cameraMappedRange->inverseView = inverse(camera.getView());
+				cameraMappedRange->inverseView = inverseFix(camera.getView());
 				cameraMappedRange->position = camera.position;
 				cameraMappedRange->viewport = getSwapchain()->getExtent();
+				cameraMappedRange->triangleCount = static_cast<uint32>(scene->getAsset()->getStaticTriangles().count());
 			}
 
 		protected:

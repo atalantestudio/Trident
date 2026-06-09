@@ -81,7 +81,12 @@ namespace Trident {
 			const uint64 vertexCount = vertexPositionComponents.count() / 3;
 			const uint64 normalCount = vertexNormalComponents.count() / 3;
 			const uint64 textureCoordinateCount = vertexTextureCoordinateComponents.count() / 2;
+			const quat<float32> pitch = quat<float32>::axisAngle(RIGHT, object.transform.rotation[0]);
+			const quat<float32> yaw = quat<float32>::axisAngle(UP, object.transform.rotation[1]);
+			const quat<float32> roll = quat<float32>::axisAngle(FORWARD, object.transform.rotation[2]);
+			const quat<float32> orientation = normalized(yaw * pitch * roll);
 			const mat4x4<float32> world = (
+				mat4x4<float32>(orientation) *
 				mat4x4<float32>::scaling(object.transform.scale) *
 				mat4x4<float32>::translation(object.transform.position)
 			);
@@ -95,11 +100,21 @@ namespace Trident {
 				uint32 vertexIndex = 0;
 
 				while (vertexIndex < vertexCount) {
-					const svec3<float32> vertex = svec3<float32>(multiplyTransform({
+					svec3<float32> vertex = svec3<float32>(multiplyTransform({
 						vertexPositionComponents[vertexIndex * 3 + 0],
 						vertexPositionComponents[vertexIndex * 3 + 1],
 						vertexPositionComponents[vertexIndex * 3 + 2],
 					}, world));
+
+					uint32 componentIndex = 0;
+
+					while (componentIndex < 3) {
+						if (abs(fract(vertex[componentIndex])) < 0.0001f) {
+							vertex[componentIndex] = round(vertex[componentIndex]);
+						}
+
+						componentIndex += 1;
+					}
 
 					view<svec3<float32>> vertexView{};
 

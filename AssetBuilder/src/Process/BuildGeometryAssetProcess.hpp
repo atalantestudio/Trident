@@ -5,6 +5,7 @@
 
 #include "Engine/API/Process/Process.hpp"
 #include "Engine/Filesystem/Asset/AssetMap.hpp"
+#include "Engine/Filesystem/Stream/BitStream.hpp"
 
 #include "../Subprocess/GeometryData.hpp"
 #include "../Subprocess/DefaultGeometries.hpp"

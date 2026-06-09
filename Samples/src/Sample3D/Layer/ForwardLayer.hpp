@@ -15,13 +15,14 @@
 #include "Engine/API/Physics/3D/PhysicsSimulation3D.hpp"
 #include "Engine/Layer/Layer.hpp"
 #include "Engine/Renderer/Scene/StaticSceneRayTracer/StaticSceneRayTracer.hpp"
+// #include "Engine/Renderer/Forward/Renderer.hpp"
 
 #include "../Scene/FlatColor.hpp"
 
 namespace Trident {
 	class Sample3DForwardLayer : public Layer {
 		private:
-			static constexpr float32 MOVEMENT_SPEED = 50.0f;
+			static constexpr float32 MOVEMENT_SPEED = 120.0f;
 			static constexpr Entity PLAYER_ENTITY = 0;
 			static constexpr float32 LOOK_SENSITIVITY = 0.075f;
 			inline static const vec3<float32> PLAYER_CAMERA_OFFSET = {0.0f, 0.3f, 0.0f};
@@ -70,7 +71,7 @@ namespace Trident {
 					camera.updateView();
 					camera.updateProjectionView();
 				#else
-					cameraController.getCamera().position = {0.0_m, 0.9_m, -4.0_m};
+					cameraController.getCamera().position = scene->ecs.getComponent<RigidBody3DComponent>(PLAYER_ENTITY).position;
 					cameraController.getCamera().aspectRatio = getApplication()->getWindow()->getAspectRatio();
 					cameraController.updateProjection();
 				#endif
@@ -252,6 +253,7 @@ namespace Trident {
 
 		private:
 			StaticSceneRayTracer renderer;
+			// ForwardRenderer renderer;
 			scope<Scene3D> scene;
 			scope<PhysicsSimulation3D> physicsSimulation;
 

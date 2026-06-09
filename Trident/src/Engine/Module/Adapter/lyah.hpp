@@ -231,6 +231,26 @@ namespace Trident {
 	}
 
 	template<std::size_t C, typename T>
+	constexpr svec<C, T>& operator*=(svec<C, T>& a, const svec<C, T>& b);
+
+	template<typename T>
+	constexpr svec<2, T>& operator*=(svec<2, T>& a, const svec<2, T>& b) {
+		a.x *= b.x;
+		a.y *= b.y;
+
+		return a;
+	}
+
+	template<typename T>
+	constexpr svec<3, T>& operator*=(svec<3, T>& a, const svec<3, T>& b) {
+		a.x *= b.x;
+		a.y *= b.y;
+		a.z *= b.z;
+
+		return a;
+	}
+
+	template<std::size_t C, typename T>
 	constexpr svec<C, T>& operator/=(svec<C, T>& a, T b);
 
 	template<typename T>
@@ -500,5 +520,67 @@ namespace Trident {
 
 	inline float32 fract(float32 a) {
 		return a - static_cast<sint32>(a);
+	}
+
+	// TODO(lyah): Fix crash when inverting the matrix below.
+	// {
+	//    -1.19209290e-07f,  0.197657436f,     0.980271161f,     0.00000000f,
+	//     7.45058060e-09f,  0.980271161f,    -0.197657421f,     0.00000000f,
+	//    -1.00000000f,     -2.98023224e-08f, -1.19209290e-07f,  0.00000000f,
+	//    -4.00000000f,     -0.882244110f,     0.177891061f,     1.00000000f,
+	// }
+	inline mat4x4<float32> inverseFix(mat4x4<float32> m) {
+		float32 Coef00 = m[2][2] * m[3][3] - m[3][2] * m[2][3];
+		float32 Coef02 = m[1][2] * m[3][3] - m[3][2] * m[1][3];
+		float32 Coef03 = m[1][2] * m[2][3] - m[2][2] * m[1][3];
+
+		float32 Coef04 = m[2][1] * m[3][3] - m[3][1] * m[2][3];
+		float32 Coef06 = m[1][1] * m[3][3] - m[3][1] * m[1][3];
+		float32 Coef07 = m[1][1] * m[2][3] - m[2][1] * m[1][3];
+
+		float32 Coef08 = m[2][1] * m[3][2] - m[3][1] * m[2][2];
+		float32 Coef10 = m[1][1] * m[3][2] - m[3][1] * m[1][2];
+		float32 Coef11 = m[1][1] * m[2][2] - m[2][1] * m[1][2];
+
+		float32 Coef12 = m[2][0] * m[3][3] - m[3][0] * m[2][3];
+		float32 Coef14 = m[1][0] * m[3][3] - m[3][0] * m[1][3];
+		float32 Coef15 = m[1][0] * m[2][3] - m[2][0] * m[1][3];
+
+		float32 Coef16 = m[2][0] * m[3][2] - m[3][0] * m[2][2];
+		float32 Coef18 = m[1][0] * m[3][2] - m[3][0] * m[1][2];
+		float32 Coef19 = m[1][0] * m[2][2] - m[2][0] * m[1][2];
+
+		float32 Coef20 = m[2][0] * m[3][1] - m[3][0] * m[2][1];
+		float32 Coef22 = m[1][0] * m[3][1] - m[3][0] * m[1][1];
+		float32 Coef23 = m[1][0] * m[2][1] - m[2][0] * m[1][1];
+
+		vec<4, float32> Fac0(Coef00, Coef00, Coef02, Coef03);
+		vec<4, float32> Fac1(Coef04, Coef04, Coef06, Coef07);
+		vec<4, float32> Fac2(Coef08, Coef08, Coef10, Coef11);
+		vec<4, float32> Fac3(Coef12, Coef12, Coef14, Coef15);
+		vec<4, float32> Fac4(Coef16, Coef16, Coef18, Coef19);
+		vec<4, float32> Fac5(Coef20, Coef20, Coef22, Coef23);
+
+		vec<4, float32> Vec0(m[1][0], m[0][0], m[0][0], m[0][0]);
+		vec<4, float32> Vec1(m[1][1], m[0][1], m[0][1], m[0][1]);
+		vec<4, float32> Vec2(m[1][2], m[0][2], m[0][2], m[0][2]);
+		vec<4, float32> Vec3(m[1][3], m[0][3], m[0][3], m[0][3]);
+
+		vec<4, float32> Inv0(Vec1 * Fac0 - Vec2 * Fac1 + Vec3 * Fac2);
+		vec<4, float32> Inv1(Vec0 * Fac0 - Vec2 * Fac3 + Vec3 * Fac4);
+		vec<4, float32> Inv2(Vec0 * Fac1 - Vec1 * Fac3 + Vec3 * Fac5);
+		vec<4, float32> Inv3(Vec0 * Fac2 - Vec1 * Fac4 + Vec2 * Fac5);
+
+		vec<4, float32> SignA(+1, -1, +1, -1);
+		vec<4, float32> SignB(-1, +1, -1, +1);
+		mat<4, 4, float32> Inverse(Inv0 * SignA, Inv1 * SignB, Inv2 * SignA, Inv3 * SignB);
+
+		vec<4, float32> Row0(Inverse[0][0], Inverse[1][0], Inverse[2][0], Inverse[3][0]);
+
+		vec<4, float32> Dot0(m[0] * Row0);
+		float32 Dot1 = (Dot0[0] + Dot0[1]) + (Dot0[2] + Dot0[3]);
+		float32 OneOverDeterminant = 1.0f / Dot1;
+
+		return Inverse * OneOverDeterminant;
 	}
 }
