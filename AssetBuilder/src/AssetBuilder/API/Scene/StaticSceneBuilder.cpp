@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "AssetBuilder/API/Scene/Lightmap.hpp"
+#include "AssetBuilder/API/Scene/Lightmapper.hpp"
 #include "AssetBuilder/API/Scene/StaticSceneBuilder.hpp"
 
 namespace Trident {
@@ -71,6 +72,7 @@ namespace Trident {
 		std::vector<svec3<float32>> vertices;
 		std::vector<svec3<float32>> normals;
 		std::vector<svec2<float32>> textureCoordinates;
+		std::vector<Lightmap> lightmaps;
 
 		for (const StaticObject& object : objects) {
 			const view<float32> vertexPositionComponents = object.geometryAsset->getVertexPositionComponents();
@@ -220,8 +222,6 @@ namespace Trident {
 
 			static const quat<float32> up = quat<float32>::axisAngle({0.0f, 1.0f, 0.0f}, 0.0f);
 
-			std::vector<Lightmap> lightmaps;
-
 			for (const Plane3D face : faces) {
 				Lightmap lightmap{};
 				svec2<float32> maxCoordinate = {min<float32>(), min<float32>()};
@@ -282,6 +282,8 @@ namespace Trident {
 		std::copy(vertices.begin(), vertices.end(), &staticScene.vertices[0]);
 		std::copy(normals.begin(), normals.end(), &staticScene.normals[0]);
 		std::copy(textureCoordinates.begin(), textureCoordinates.end(), &staticScene.textureCoordinates[0]);
+
+		Lightmapper::updateAtlasCoordinates(view<Lightmap>(&lightmaps[0], lightmaps.size()), staticScene.triangles);
 
 		return staticScene;
 	}

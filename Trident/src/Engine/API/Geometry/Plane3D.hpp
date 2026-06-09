@@ -8,7 +8,7 @@ namespace Trident {
 		svec3<float32> normal;
 		float32 distance;
 
-		// TODO: The count should be 8-bits, as a face cannot be referred by more than 255 edges.
+		// TODO: The count should be 8-bits, as a face cannot be referred to by more than 255 edges.
 		range<uint16, uint16> edgeIndexRange;
 	};
 
