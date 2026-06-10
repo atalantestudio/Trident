@@ -15,30 +15,25 @@ namespace Trident {
 				vec3<float32> color;
 			};
 
-		private:
-			static constexpr uint32 VERTEX_COUNT = 3;
-			static constexpr uint32 WRITE_IMAGE_SUBPASS_INDEX = 0;
-			static constexpr uint32 READ_IMAGE_SUBPASS_INDEX = 1;
-
 		public:
 			void build() override {
-				setupRenderPass();
+				renderPass = createRenderPass();
 
-				recreateImage();
-				recreateImageView();
-				recreateFramebuffers();
+				inputDescriptorSetLayout = createInputDescriptorSetLayout();
 
-				createImageDescriptorSetLayout();
-				allocateImageDescriptorSet();
-				updateImageDescriptorSet();
+				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(inputDescriptorSetLayout);
 
-				createWriteImagePipelineLayout();
-				createWriteImageGraphicsPipeline();
+				inputDescriptorSet = descriptorSets[0];
 
-				createReadImagePipelineLayout();
-				createReadImageGraphicsPipeline();
+				postResize();
 
-				createVertexBuffer();
+				trianglePipelineLayout = createTrianglePipelineLayout();
+				presentPipelineLayout = createPresentPipelineLayout();
+
+				trianglePipeline = createTrianglePipeline();
+				presentPipeline = createPresentPipeline();
+
+				vertexBuffer = createVertexBuffer();
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
@@ -56,19 +51,17 @@ namespace Trident {
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
 
-				// Write image subpass.
 				{
-					commandEncoder->bindGraphicsPipeline(writeImageGraphicsPipeline);
+					commandEncoder->bindGraphicsPipeline(trianglePipeline);
 					commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 					commandEncoder->draw(3, 1, 0, 0);
 				}
 
 				commandEncoder->nextSubpass();
 
-				// Read image subpass.
 				{
-					commandEncoder->bindGraphicsPipeline(readImageGraphicsPipeline);
-					commandEncoder->bindDescriptorSets(readImagePipelineLayout, 0, imageDescriptorSet);
+					commandEncoder->bindGraphicsPipeline(presentPipeline);
+					commandEncoder->bindDescriptorSets(presentPipelineLayout, 0, inputDescriptorSet);
 					commandEncoder->draw(3, 1, 0, 0);
 				}
 
@@ -76,16 +69,21 @@ namespace Trident {
 			}
 
 			void resize(WindowResizeEvent& event) override {
-				recreateImage();
-				recreateImageView();
-				recreateFramebuffers();
+				postResize();
+			}
+
+			void postResize() {
+				inputImage = createInputImage();
+				inputImageView = createInputImageView();
+
+				createFramebuffers();
 
 				updateImageDescriptorSet();
 			}
 
 		private:
-			void setupRenderPass() {
-				renderPass = createRenderPass({
+			ref<RenderPass> createRenderPass() const {
+				return Renderer::createRenderPass({
 					.attachments = {
 						// Swapchain
 						{
@@ -106,10 +104,9 @@ namespace Trident {
 						},
 					},
 					.subpasses = {
-						// Write input
+						// Triangle
 						createSubpass({
 							.colorAttachmentReferences = {
-								// Write input
 								{
 									.index = 1,
 									.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
@@ -117,17 +114,15 @@ namespace Trident {
 							},
 						}),
 
-						// Read input
+						// Present
 						createSubpass({
 							.colorAttachmentReferences = {
-								// Write swapchain
 								{
 									.index = 0,
 									.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
 								},
 							},
 							.inputAttachmentReferences = {
-								// Read input
 								{
 									.index = 1,
 									.layout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
@@ -138,43 +133,43 @@ namespace Trident {
 				});
 			}
 
-			void recreateImage() {
+			ref<Image> createInputImage() const {
 				const Extent2D swapchainExtent = getSwapchain()->getExtent();
 
-				image = renderPass->createInputAttachmentImage(
+				return renderPass->createInputAttachmentImage(
 					{
 						.type = ImageType::TEXTURE_2D,
 						.extent = {swapchainExtent.width, swapchainExtent.height, 1},
 						.mipLevelCount = 1,
 						.layerCount = 1,
 						#if defined(DEBUG_OBJECT_NAME)
-							.name = "Image",
+							.name = "Input",
 						#endif
 					},
 					1
 				);
 			}
 
-			void recreateImageView() {
-				imageView = image->createView({
+			ref<ImageView> createInputImageView() {
+				return inputImage->createView({
 					.mipLevelOffset = 0,
 					.mipLevelCount = 1,
 					.layerOffset = 0,
 					.layerCount = 1,
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Image view",
+						.name = "Input view",
 					#endif
 				});
 			}
 
-			void recreateFramebuffers() {
+			void createFramebuffers() {
 				const ref<Swapchain> swapchain = getSwapchain();
 
 				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
 
 				FramebufferDescriptor framebufferDescriptor = {
 					.renderPass = renderPass,
-					.imageViews = {nullptr, imageView},
+					.imageViews = {nullptr, inputImageView},
 					.extent = swapchain->getExtent(),
 				};
 
@@ -199,48 +194,54 @@ namespace Trident {
 				}
 			}
 
-			void createImageDescriptorSetLayout() {
-				const DescriptorSetLayoutBinding imageBinding = {
-					.descriptorType = DescriptorType::INPUT_ATTACHMENT,
-					.descriptorCount = 1,
-					.shaderStages = ShaderStage::FRAGMENT,
+			ref<DescriptorSetLayout> createInputDescriptorSetLayout() const {
+				const sequence<DescriptorSetLayoutBinding> bindings = {
+					// Input
+					{
+						.descriptorType = DescriptorType::INPUT_ATTACHMENT,
+						.descriptorCount = 1,
+						.shaderStages = ShaderStage::FRAGMENT,
+					},
 				};
 
-				imageDescriptorSetLayout = createDescriptorSetLayout({imageBinding});
-			}
-
-			void allocateImageDescriptorSet() {
-				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(imageDescriptorSetLayout);
-
-				imageDescriptorSet = descriptorSets[0];
+				return createDescriptorSetLayout(bindings);
 			}
 
 			void updateImageDescriptorSet() {
-				const DescriptorImage descriptorImage = {
-					.imageView = imageView,
+				const DescriptorImage inputDescriptorImage = {
+					.imageView = inputImageView,
 					.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
 					.sampler = nullptr,
 				};
 
-				const WriteDescriptorSet imageWriteDescriptorSet = {
-					.descriptorSet = imageDescriptorSet,
+				const WriteDescriptorSet inputWriteDescriptorSet = {
+					.descriptorSet = inputDescriptorSet,
 					.bindingIndex = 0,
-					.descriptorImages = {descriptorImage},
+					.descriptorImages = {inputDescriptorImage},
 				};
 
-				getDevice()->updateDescriptorSets(imageWriteDescriptorSet);
+				getDevice()->updateDescriptorSets(inputWriteDescriptorSet);
 			}
 
-			void createWriteImagePipelineLayout() {
-				writeImagePipelineLayout = createPipelineLayout({
+			ref<PipelineLayout> createTrianglePipelineLayout() const {
+				return createPipelineLayout({
 					.descriptorSetLayouts = {},
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Image write",
+						.name = "Triangle",
 					#endif
 				});
 			}
 
-			void createWriteImageGraphicsPipeline() {
+			ref<PipelineLayout> createPresentPipelineLayout() const {
+				return createPipelineLayout({
+					.descriptorSetLayouts = {inputDescriptorSetLayout},
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Present",
+					#endif
+				});
+			}
+
+			ref<GraphicsPipeline> createTrianglePipeline() const {
 				VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 				vertexInputBinding.registerAttribute<svec2<float32>>();
 				vertexInputBinding.registerAttribute<vec3<float32>>();
@@ -251,15 +252,15 @@ namespace Trident {
 					},
 				};
 
-				writeImageGraphicsPipeline = createGraphicsPipeline({
-					.pipelineLayout = writeImagePipelineLayout,
+				return createGraphicsPipeline({
+					.pipelineLayout = trianglePipelineLayout,
 					.vertexInputBindings = {vertexInputBinding},
 					.vertexShaderModule = loadShaderModule(
 						{
 							.stage = ShaderStage::VERTEX,
 							.entryPoint = "main",
 							#if defined(DEBUG_OBJECT_NAME)
-								.name = "Image write vertex",
+								.name = "Triangle vertex",
 							#endif
 						},
 						"Sample/Triangle/Triangle.vert"
@@ -269,7 +270,7 @@ namespace Trident {
 							.stage = ShaderStage::FRAGMENT,
 							.entryPoint = "main",
 							#if defined(DEBUG_OBJECT_NAME)
-								.name = "Image write fragment",
+								.name = "Triangle fragment",
 							#endif
 						},
 						"Sample/Triangle/Triangle.frag"
@@ -288,37 +289,29 @@ namespace Trident {
 					},
 					.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
 					.renderPass = renderPass,
-					.subpassIndex = WRITE_IMAGE_SUBPASS_INDEX,
+					.subpassIndex = 0,
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Image write",
+						.name = "Triangle",
 					#endif
 				});
 			}
 
-			void createReadImagePipelineLayout() {
-				readImagePipelineLayout = createPipelineLayout({
-					.descriptorSetLayouts = {imageDescriptorSetLayout},
-					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Image read",
-					#endif
-				});
-			}
-
-			void createReadImageGraphicsPipeline() {
+			ref<GraphicsPipeline> createPresentPipeline() const {
 				const sequence<ColorBlendAttachment> colorBlendAttachments = {
 					{
 						.blend = false,
 					},
 				};
 
-				readImageGraphicsPipeline = createGraphicsPipeline({
-					.pipelineLayout = readImagePipelineLayout,
+				return createGraphicsPipeline({
+					.pipelineLayout = presentPipelineLayout,
+					.vertexInputBindings = {},
 					.vertexShaderModule = loadShaderModule(
 						{
 							.stage = ShaderStage::VERTEX,
 							.entryPoint = "main",
 							#if defined(DEBUG_OBJECT_NAME)
-								.name = "Image read vertex",
+								.name = "Present vertex",
 							#endif
 						},
 						"Sample/InputAttachment/InputAttachment.vert"
@@ -328,7 +321,7 @@ namespace Trident {
 							.stage = ShaderStage::FRAGMENT,
 							.entryPoint = "main",
 							#if defined(DEBUG_OBJECT_NAME)
-								.name = "Image read fragment",
+								.name = "Present fragment",
 							#endif
 						},
 						"Sample/InputAttachment/InputAttachment.frag"
@@ -347,26 +340,26 @@ namespace Trident {
 					},
 					.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
 					.renderPass = renderPass,
-					.subpassIndex = READ_IMAGE_SUBPASS_INDEX,
+					.subpassIndex = 1,
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Image read",
+						.name = "Present",
 					#endif
 				});
 			}
 
-			void createVertexBuffer() {
+			ref<Buffer<Vertex>> createVertexBuffer() const {
 				const ref<Buffer<Vertex>> vertexStagingBuffer = createStagingBuffer<Vertex>(3 * sizeof(Vertex));
 
-				Vertex* vertexStagingBufferMappedRange = vertexStagingBuffer->map(0, vertexStagingBuffer->getSize());
-				vertexStagingBufferMappedRange[0] = {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}};
-				vertexStagingBufferMappedRange[1] = {{0.0f, 0.5f}, {0.0f, 1.0f, 0.0f}};
-				vertexStagingBufferMappedRange[2] = {{0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}};
+				Vertex* mappedRange = vertexStagingBuffer->map(0, vertexStagingBuffer->getSize());
+				mappedRange[0] = {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}};
+				mappedRange[1] = {{ 0.0f,  0.5f}, {0.0f, 1.0f, 0.0f}};
+				mappedRange[2] = {{ 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}};
 
 				vertexStagingBuffer->unmap();
 
-				vertexBuffer = createBuffer<Vertex>({
+				const ref<Buffer<Vertex>> vertexBuffer = createBuffer<Vertex>({
 					.size = vertexStagingBuffer->getSize(),
-					.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST,
+					.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX,
 					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 					.persistent = false,
 					#if defined(DEBUG_OBJECT_NAME)
@@ -374,40 +367,50 @@ namespace Trident {
 					#endif
 				});
 
+				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
+				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
+					.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Copy vertex buffer",
+					#endif
+				});
+
+				commandEncoder->begin();
+
 				const BufferCopyRegion bufferCopyRegion = {
 					.sourceOffset = 0,
 					.destinationOffset = 0,
 					.size = vertexBuffer->getSize(),
 				};
 
-				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
-				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
-					.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
-					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Copy buffer",
-					#endif
-				});
-
-				commandEncoder->begin();
 				commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, bufferCopyRegion);
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
 				queue->submit(commandBuffer);
 				queue->waitIdle();
+
+				return vertexBuffer;
 			}
 
 		private:
 			ref<RenderPass> renderPass;
-			ref<Image> image;
-			ref<ImageView> imageView;
+
+			ref<Image> inputImage;
+			ref<ImageView> inputImageView;
+
 			sequence<ref<Framebuffer>> framebuffers;
-			ref<DescriptorSetLayout> imageDescriptorSetLayout;
-			ref<DescriptorSet> imageDescriptorSet;
-			ref<PipelineLayout> writeImagePipelineLayout;
-			ref<PipelineLayout> readImagePipelineLayout;
-			ref<GraphicsPipeline> writeImageGraphicsPipeline;
-			ref<GraphicsPipeline> readImageGraphicsPipeline;
+
+			ref<DescriptorSetLayout> inputDescriptorSetLayout;
+
+			ref<DescriptorSet> inputDescriptorSet;
+
+			ref<PipelineLayout> trianglePipelineLayout;
+			ref<PipelineLayout> presentPipelineLayout;
+
+			ref<GraphicsPipeline> trianglePipeline;
+			ref<GraphicsPipeline> presentPipeline;
+
 			ref<Buffer<Vertex>> vertexBuffer;
 	};
 
