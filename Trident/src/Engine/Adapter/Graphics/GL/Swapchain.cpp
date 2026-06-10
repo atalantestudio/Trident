@@ -65,11 +65,17 @@ namespace Trident {
 		imageDescriptor.sampleCount = 1;
 		imageDescriptor.usage = static_cast<ImageUsage>(0);
 
+		#if defined(DEBUG_OBJECT_NAME)
+			sequence<char8> name;
+		#endif
+
 		uint32 imageIndex = 0;
 
 		while (imageIndex < swapchain->images.count()) {
 			#if defined(DEBUG_OBJECT_NAME)
-				imageDescriptor.name = Logger::format("Swapchain image []", imageIndex);
+				name = Logger::format("Swapchain []", imageIndex);
+
+				imageDescriptor.name = name;
 			#endif
 
 			swapchain->images[imageIndex] = createImage(device, imageDescriptor);

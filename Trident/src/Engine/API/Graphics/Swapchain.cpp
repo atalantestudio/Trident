@@ -63,6 +63,10 @@ namespace Trident {
 			.layerOffset = 0,
 		};
 
+		#if defined(DEBUG_OBJECT_NAME)
+			sequence<char8> name;
+		#endif
+
 		uint32 imageViewIndex = 0;
 
 		while (imageViewIndex < imageViews.count()) {
@@ -72,7 +76,9 @@ namespace Trident {
 			imageViewDescriptor.layerCount = image->getLayerCount();
 
 			#if defined(DEBUG_OBJECT_NAME)
-				imageViewDescriptor.name = Logger::format("Swapchain image view []", imageViewIndex);
+				name = Logger::format("Swapchain view []", imageViewIndex);
+
+				imageViewDescriptor.name = name;
 			#endif
 
 			imageViews[imageViewIndex] = image->createView(imageViewDescriptor);

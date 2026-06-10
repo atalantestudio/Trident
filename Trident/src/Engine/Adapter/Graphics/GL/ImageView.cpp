@@ -28,6 +28,12 @@ namespace Trident {
 			ENGINE_ERROR_UNSUPPORTED();
 		#endif
 
+		#if defined(DEBUG_OBJECT_NAME)
+			if (descriptor.name.count() > 0) {
+				glObjectLabel(GL_TEXTURE, imageView->texture, static_cast<GLsizei>(descriptor.name.count()), &descriptor.name[0]);
+			}
+		#endif
+
 		return imageView;
 	}
 
