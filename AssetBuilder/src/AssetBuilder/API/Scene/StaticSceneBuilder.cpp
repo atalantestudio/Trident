@@ -50,6 +50,22 @@ namespace Trident {
 		delete assetLibrary;
 	}
 
+	StaticSceneBuilder& StaticSceneBuilder::allocateMaterials(uint32 count) {
+		DEBUG_ASSERT(count > 0);
+
+		materials = sequence<StaticMaterial>(count);
+
+		return *this;
+	}
+
+	StaticSceneBuilder& StaticSceneBuilder::insertMaterial(uint32 index, const StaticMaterial& material) {
+		DEBUG_ASSERT(index < materials.count());
+
+		materials[index] = material;
+
+		return *this;
+	}
+
 	StaticSceneBuilder& StaticSceneBuilder::createStaticObject(const StaticObjectDescriptor& descriptor) {
 		ENGINE_ASSERT(descriptor.lightmapPixelScale.x > 0.0f && descriptor.lightmapPixelScale.y > 0.0f, "The lightmap pixel scale must be positive.");
 

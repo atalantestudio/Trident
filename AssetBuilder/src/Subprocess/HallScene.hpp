@@ -9,7 +9,25 @@
 
 namespace Trident {
 	inline Scene3DData createHallScene(std::filesystem::path rootOutputPath) {
+		static constexpr uint32 materialCount = 2;
+		static constexpr uint32 defaultMaterialIndex = 0;
+		static constexpr uint32 lightMaterialIndex = 1;
+
 		StaticSceneBuilder builder(rootOutputPath);
+
+		builder
+			.allocateMaterials(materialCount)
+			.insertMaterial(defaultMaterialIndex, {
+				.albedo = {0.8f, 0.8f, 0.8f, 1.0f},
+				.emissiveColor = {0.0f, 0.0f, 0.0f, 1.0f},
+				.emissiveStrength = 0.0f,
+			})
+			.insertMaterial(lightMaterialIndex, {
+				.albedo = {0.0f, 0.0f, 0.0f, 1.0f},
+				.emissiveColor = {1.0f, 1.0f, 1.0f, 1.0f},
+				.emissiveStrength = 16.0f,
+			});
+
 		builder
 			.createStaticObject({
 				.label = "hall_floor",
@@ -24,6 +42,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
+				.materialIndex = defaultMaterialIndex,
 				.lightmapPixelScale = {1.0f, 1.0f},
 			})
 			.createStaticObject({
@@ -39,6 +58,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
+				.materialIndex = defaultMaterialIndex,
 				.lightmapPixelScale = {1.0f, 1.0f},
 			})
 			.createStaticObject({
@@ -54,6 +74,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
+				.materialIndex = defaultMaterialIndex,
 				.lightmapPixelScale = {1.0f, 1.0f},
 			})
 			.createStaticObject({
@@ -69,6 +90,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
+				.materialIndex = defaultMaterialIndex,
 				.lightmapPixelScale = {1.0f, 1.0f},
 			})
 			.createStaticObject({
@@ -84,6 +106,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
+				.materialIndex = defaultMaterialIndex,
 				.lightmapPixelScale = {1.0f, 1.0f},
 			});
 
@@ -102,6 +125,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
+				.materialIndex = defaultMaterialIndex,
 				.lightmapPixelScale = {1.0f, 1.0f},
 			})
 			.createStaticObject({
@@ -117,6 +141,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
+				.materialIndex = defaultMaterialIndex,
 				.lightmapPixelScale = {1.0f, 1.0f},
 			})
 			.createStaticObject({
@@ -132,6 +157,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {0.25f, 0.25f},
 				},
+				.materialIndex = defaultMaterialIndex,
 				.lightmapPixelScale = {1.0f, 1.0f},
 			})
 			.createStaticObject({
@@ -147,6 +173,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {0.25f, 0.25f},
 				},
+				.materialIndex = defaultMaterialIndex,
 				.lightmapPixelScale = {1.0f, 1.0f},
 			})
 			.createStaticObject({
@@ -162,6 +189,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
+				.materialIndex = defaultMaterialIndex,
 				.lightmapPixelScale = {1.0f, 1.0f},
 			})
 			.createStaticObject({
@@ -177,6 +205,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
+				.materialIndex = defaultMaterialIndex,
 				.lightmapPixelScale = {1.0f, 1.0f},
 			})
 			.createStaticObject({
@@ -192,6 +221,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
+				.materialIndex = defaultMaterialIndex,
 				.lightmapPixelScale = {1.0f, 1.0f},
 			})
 			.createStaticObject({
@@ -207,6 +237,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
+				.materialIndex = defaultMaterialIndex,
 				.lightmapPixelScale = {1.0f, 1.0f},
 			})
 			.createStaticObject({
@@ -222,6 +253,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {0.25f, 0.25f},
 				},
+				.materialIndex = defaultMaterialIndex,
 				.lightmapPixelScale = {1.0f, 1.0f},
 			})
 			.createStaticObject({
@@ -237,6 +269,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
+				.materialIndex = defaultMaterialIndex,
 				.lightmapPixelScale = {1.0f, 1.0f},
 			})
 			.createStaticObject({
@@ -252,6 +285,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
+				.materialIndex = defaultMaterialIndex,
 				.lightmapPixelScale = {1.0f, 1.0f},
 			})
 			.createStaticObject({
@@ -267,6 +301,26 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
+				.materialIndex = defaultMaterialIndex,
+				.lightmapPixelScale = {1.0f, 1.0f},
+			});
+
+		// TODO(test)
+		builder
+			.createStaticObject({
+				.label = "test_light",
+				.geometryAssetName = "UnitBox",
+				.transform = {
+					.position = {-60.0f, 64.0f, 116.0f},
+					.rotation = {0.0f, 0.0f, 0.0f},
+					.scale = {4.0f, 2.0f, 4.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.0f, 0.0f},
+					.rotation = 0.0f,
+					.scale = {1.0f, 1.0f},
+				},
+				.materialIndex = lightMaterialIndex,
 				.lightmapPixelScale = {1.0f, 1.0f},
 			});
 

@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "AssetBuilder/API/Scene/StaticMaterial.hpp"
 #include "AssetBuilder/API/Scene/StaticObject.hpp"
 #include "AssetBuilder/API/Scene/StaticScene.hpp"
 
@@ -15,6 +16,10 @@ namespace Trident {
 
 			~StaticSceneBuilder();
 
+			StaticSceneBuilder& allocateMaterials(uint32 count);
+
+			StaticSceneBuilder& insertMaterial(uint32 index, const StaticMaterial& material);
+
 			StaticSceneBuilder& createStaticObject(const StaticObjectDescriptor& descriptor);
 
 			/// Compiles and returns an optimized static scene.
@@ -22,6 +27,7 @@ namespace Trident {
 
 		private:
 			AssetLibrary* assetLibrary;
+			sequence<StaticMaterial> materials;
 			std::vector<StaticObject> objects;
 	};
 }

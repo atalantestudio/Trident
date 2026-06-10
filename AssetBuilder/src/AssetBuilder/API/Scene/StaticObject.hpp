@@ -25,6 +25,7 @@ namespace Trident {
 		view<char8> geometryAssetName;
 		Transform transform;
 		TextureFilteringDescriptor textureFiltering;
+		uint32 materialIndex;
 
 		/// Applies to all faces.
 		svec2<float32> lightmapPixelScale;

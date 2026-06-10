@@ -39,8 +39,8 @@ struct Hit {
 };
 
 const float FLOAT32_MAX = 4294967295.0;
-const uint RAY_BOUNCE_COUNT = 8;
-const vec3 SKY_COLOR = vec3(1.0, 1.0, 1.0);
+const uint RAY_BOUNCE_COUNT = 4;
+const vec3 SKY_COLOR = uvec3(130, 200, 229) / 255.0;
 
 layout(set = 0, binding = 0) uniform readonly CameraBuffer {
 	Camera camera;
@@ -153,7 +153,9 @@ bool rayTriangleIntersection(Ray ray, Triangle triangle_, inout float t) {
 	return true;
 }
 
-Hit rchit(Ray ray, Triangle triangle_, float t) {
+Hit rchit(Ray ray, uint triangleIndex, float t) {
+	Triangle triangle_ = triangleBuffer[triangleIndex];
+
 	vec3 normal = vec3(
 		normalBuffer[triangle_.normalIndex * 3 + 0],
 		normalBuffer[triangle_.normalIndex * 3 + 1],
@@ -177,7 +179,7 @@ Hit rmiss() {
 
 Hit rint(Ray ray) {
 	bool intersecting = false;
-	Triangle intersectingTriangle;
+	uint intersectingTriangleIndex;
 	float closestT = FLOAT32_MAX;
 	uint triangleIndex = 0;
 
@@ -189,7 +191,7 @@ Hit rint(Ray ray) {
 			intersecting = true;
 
 			if (t < closestT) {
-				intersectingTriangle = triangle_;
+				intersectingTriangleIndex = triangleIndex;
 				closestT = t;
 			}
 		}
@@ -198,7 +200,7 @@ Hit rint(Ray ray) {
 	}
 
 	if (intersecting) {
-		return rchit(ray, intersectingTriangle, closestT);
+		return rchit(ray, intersectingTriangleIndex, closestT);
 	}
 
 	return rmiss();
