@@ -303,6 +303,25 @@ namespace Trident {
 					},
 				};
 
+				view<char8> vertexShaderModulePath;
+				view<char8> fragmentShaderModulePath;
+
+				switch (getGraphicsApi()) {
+					case GraphicsAPI::GL: {
+						// NOTE: subpassInput and subpassLoad are not supported in plain GLSL.
+						vertexShaderModulePath = "Sample/InputAttachment/InputAttachmentGL.vert";
+						fragmentShaderModulePath = "Sample/InputAttachment/InputAttachmentGL.frag";
+
+						break;
+					}
+					default: {
+						vertexShaderModulePath = "Sample/InputAttachment/InputAttachment.vert";
+						fragmentShaderModulePath = "Sample/InputAttachment/InputAttachment.frag";
+
+						break;
+					}
+				}
+
 				return createGraphicsPipeline({
 					.pipelineLayout = presentPipelineLayout,
 					.vertexInputBindings = {},
@@ -314,7 +333,7 @@ namespace Trident {
 								.name = "Present vertex",
 							#endif
 						},
-						"Sample/InputAttachment/InputAttachment.vert"
+						vertexShaderModulePath
 					),
 					.fragmentShaderModule = loadShaderModule(
 						{
@@ -324,7 +343,7 @@ namespace Trident {
 								.name = "Present fragment",
 							#endif
 						},
-						"Sample/InputAttachment/InputAttachment.frag"
+						fragmentShaderModulePath
 					),
 					.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
 					.polygonMode = PolygonMode::FILL,

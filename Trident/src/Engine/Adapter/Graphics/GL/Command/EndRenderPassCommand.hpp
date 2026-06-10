@@ -15,8 +15,8 @@ namespace Trident {
 			{}
 
 			void execute() const final override {
-				const Extent2D extent = framebuffer->getExtent();
 				const ref<GL::RenderPass> renderPass = std::static_pointer_cast<GL::RenderPass>(framebuffer->getRenderPass());
+				const Extent2D extent = framebuffer->getExtent();
 
 				if (renderPass->presentSourceAttachmentIndex == max<uint32>()) {
 					if (renderPass->multisample) {
@@ -43,13 +43,7 @@ namespace Trident {
 					return;
 				}
 
-				GLenum readBuffer = GL_COLOR_ATTACHMENT0;
-
-				if (renderPass->getSubpassCount() > 1) {
-					const ref<Subpass> penultimateSubpass = renderPass->subpasses[renderPass->getSubpassCount() - 2];
-
-					readBuffer += penultimateSubpass->getColorAttachmentReferences()[0].index;
-				}
+				const GLenum readBuffer = GL_COLOR_ATTACHMENT0 + renderPass->presentSourceAttachmentIndex;
 
 				#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 					glNamedFramebufferReadBuffer(framebuffer->framebuffer, readBuffer);
