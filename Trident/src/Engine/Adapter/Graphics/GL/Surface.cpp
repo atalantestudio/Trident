@@ -52,6 +52,7 @@ namespace Trident {
 				LOAD_PROCEDURE(glBindBufferRange);
 				LOAD_PROCEDURE(glBindFramebuffer);
 				LOAD_PROCEDURE(glBindVertexArray);
+				LOAD_PROCEDURE(glBlitFramebuffer);
 				LOAD_PROCEDURE(glDeleteFramebuffers);
 				LOAD_PROCEDURE(glDeleteVertexArrays);
 				LOAD_PROCEDURE(glDisablei);
@@ -160,8 +161,6 @@ namespace Trident {
 			#endif
 
 			#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-				LOAD_PROCEDURE(glBlitNamedFramebuffer);
-
 				#if defined(BUILD_MODE_DEBUG)
 					LOAD_PROCEDURE(glCheckNamedFramebufferStatus);
 				#endif
@@ -173,8 +172,6 @@ namespace Trident {
 				LOAD_PROCEDURE(glCreateFramebuffers);
 				LOAD_PROCEDURE(glNamedFramebufferTexture);
 			#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
-				LOAD_PROCEDURE(glBlitFramebuffer);
-
 				#if defined(BUILD_MODE_DEBUG)
 					LOAD_PROCEDURE(glCheckFramebufferStatus);
 				#endif

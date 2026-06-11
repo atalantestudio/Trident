@@ -44,6 +44,7 @@ namespace Trident {
 		PFNGLBINDBUFFERRANGEPROC glBindBufferRange;
 		PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer;
 		PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
+		PFNGLBLITFRAMEBUFFERPROC glBlitFramebuffer;
 		PFNGLDELETEFRAMEBUFFERSPROC glDeleteFramebuffers;
 		PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays;
 		PFNGLDISABLEIPROC glDisablei;
@@ -152,8 +153,6 @@ namespace Trident {
 	#endif
 
 	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-		PFNGLBLITNAMEDFRAMEBUFFERPROC glBlitNamedFramebuffer;
-
 		#if defined(BUILD_MODE_DEBUG)
 			PFNGLCHECKNAMEDFRAMEBUFFERSTATUSPROC glCheckNamedFramebufferStatus;
 		#endif
@@ -165,8 +164,6 @@ namespace Trident {
 		PFNGLCREATEFRAMEBUFFERSPROC glCreateFramebuffers;
 		PFNGLNAMEDFRAMEBUFFERTEXTUREPROC glNamedFramebufferTexture;
 	#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
-		PFNGLBLITFRAMEBUFFERPROC glBlitFramebuffer;
-
 		#if defined(BUILD_MODE_DEBUG)
 			PFNGLCHECKFRAMEBUFFERSTATUSPROC glCheckFramebufferStatus;
 		#endif
