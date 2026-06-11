@@ -59,6 +59,9 @@ namespace Trident {
 
 				commandEncoder->nextSubpass();
 
+				// TODO(graphics/gl)
+				// This pipeline won't write anything to the swapchain image because `gl_VertexIndex` is not incremented properly.
+				// Tested on HP Victus, RTX 3050, OpenGL.
 				{
 					commandEncoder->bindGraphicsPipeline(presentPipeline);
 					commandEncoder->bindDescriptorSets(presentPipelineLayout, 0, inputDescriptorSet);
