@@ -26,7 +26,9 @@ namespace Trident {
 			StaticScene3D build() const;
 
 		private:
+			std::filesystem::path rootOutputPath;
 			AssetLibrary* assetLibrary;
+
 			sequence<StaticMaterial> materials;
 			std::vector<StaticObject> objects;
 	};

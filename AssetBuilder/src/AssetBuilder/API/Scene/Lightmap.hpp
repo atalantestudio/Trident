@@ -3,11 +3,16 @@
 
 #pragma once
 
+#include "Engine/Filesystem/Asset/GeometryAsset.hpp"
+
 namespace Trident {
 	struct Lightmap {
-		std::vector<vec2<float32>> coordinates;
-		svec2<float32> offset;
-		svec2<float32> size;
-		float32 area;
+		vec3<float32> objectScale;
+		svec2<float32> pixelScale;
+		ref<GeometryAsset> geometryAsset;
+		range<uint16, uint16> edgeIndexRange;
+		Extent2D offset;
+		Extent2D size;
+		uint32 area;
 	};
 }

@@ -7,6 +7,9 @@
 #include "AssetBuilder/API/Scene/Lightmapper.hpp"
 #include "AssetBuilder/API/Scene/StaticSceneBuilder.hpp"
 
+#include "../../../File/PNG.hpp"
+#include "../../../Process/BuildImageAssetProcess.hpp"
+
 namespace Trident {
 	static bool compareDuplicate(svec2<float32> a, svec2<float32> b, float32 E) {
 		return (
@@ -43,6 +46,7 @@ namespace Trident {
 	}
 
 	StaticSceneBuilder::StaticSceneBuilder(std::filesystem::path rootOutputPath) :
+		rootOutputPath(rootOutputPath),
 		assetLibrary(new AssetLibrary(rootOutputPath))
 	{}
 
@@ -88,7 +92,32 @@ namespace Trident {
 		std::vector<svec3<float32>> vertices;
 		std::vector<svec3<float32>> normals;
 		std::vector<svec2<float32>> textureCoordinates;
+
+		uint64 lightmapCount = 0;
+		uint64 lightmapCoordinateCount = 0;
+
+		for (const StaticObject& object : objects) {
+			const view<Plane3D> faces = object.geometryAsset->getHull3DFaces();
+
+			for (const Plane3D face : faces) {
+				// One lightmap per face.
+				lightmapCount += 1;
+
+				// One coordinate per vertex on the face.
+				lightmapCoordinateCount += face.edgeIndexRange.count;
+
+				// TODO: Ignore other faces for now.
+				break;
+			}
+		}
+
 		std::vector<Lightmap> lightmaps;
+		lightmaps.reserve(lightmapCount);
+
+		StaticScene3D scene{};
+		scene.lightmapCoordinates = sequence<svec2<float32>>(lightmapCoordinateCount);
+
+		uint32 lightmapCoordinateOffset = 0;
 
 		for (const StaticObject& object : objects) {
 			const view<float32> vertexPositionComponents = object.geometryAsset->getVertexPositionComponents();
@@ -251,71 +280,112 @@ namespace Trident {
 			const view<Plane3D> faces = object.geometryAsset->getHull3DFaces();
 			const view<uint16> faceEdgeIndices = object.geometryAsset->getHull3DFaceEdgeIndices();
 
-			static const quat<float32> up = quat<float32>::axisAngle({0.0f, 1.0f, 0.0f}, 0.0f);
+			const vec3<float32> T = object.transform.scale * inverse(orientation) * quat<float32>::axisAngle({0.0f, 1.0f, 0.0f}, 0.0f);
 
 			for (const Plane3D face : faces) {
+				const uint32 lightmapCoordinateCount = face.edgeIndexRange.count;
+
 				Lightmap lightmap{};
+				lightmap.geometryAsset = object.geometryAsset;
+				lightmap.edgeIndexRange = face.edgeIndexRange;
+				lightmap.offset = {0, 0};
+				lightmap.objectScale = object.transform.scale;
+				lightmap.pixelScale = object.lightmapPixelScale;
+
 				svec2<float32> maxCoordinate = {min<float32>(), min<float32>()};
 				svec2<float32> minCoordinate = {max<float32>(), max<float32>()};
-				uint16 edgeIndexIndex = 0;
+				uint16 coordinateIndex = 0;
 
-				while (edgeIndexIndex < face.edgeIndexRange.count) {
-					const uint16 edgeIndex = faceEdgeIndices[face.edgeIndexRange.offset + edgeIndexIndex];
+				while (coordinateIndex < lightmapCoordinateCount) {
+					const uint16 edgeIndex = faceEdgeIndices[face.edgeIndexRange.offset + coordinateIndex];
 					const Edge3D edge = edges[edgeIndex];
+					const uint32 vertexPositionComponentOffset = edge.originVertexIndex * 3;
 
-					const vec3<float32> a = (vec3<float32>{
-						vertexPositionComponents[edge.originVertexIndex * 3 + 0],
-						vertexPositionComponents[edge.originVertexIndex * 3 + 1],
-						vertexPositionComponents[edge.originVertexIndex * 3 + 2],
-					} * object.transform.scale) * up;
+					vec3<float32> vertex = {
+						vertexPositionComponents[vertexPositionComponentOffset + 0],
+						vertexPositionComponents[vertexPositionComponentOffset + 1],
+						vertexPositionComponents[vertexPositionComponentOffset + 2],
+					};
+					vertex *= T;
 
-					const svec2<float32> lightmapCoordinate = svec2<float32>{a[0], a[2]} / object.lightmapPixelScale;
+					svec2<float32>& coordinate = scene.lightmapCoordinates[lightmapCoordinateOffset + edge.originVertexIndex];
+					coordinate = {vertex[0], vertex[2]};
+					coordinate /= lightmap.pixelScale;
 
-					lightmap.coordinates.emplace_back(lightmapCoordinate);
+					if (abs(fract(coordinate.x)) < 0.0001f || abs(fract(coordinate.x)) > 0.9999f) {
+						coordinate.x = round(coordinate.x);
+					}
 
-					maxCoordinate.x = max(maxCoordinate.x, lightmapCoordinate.x);
-					maxCoordinate.y = max(maxCoordinate.y, lightmapCoordinate.y);
-					minCoordinate.x = min(minCoordinate.x, lightmapCoordinate.x);
-					minCoordinate.y = min(minCoordinate.y, lightmapCoordinate.y);
+					if (abs(fract(coordinate.y)) < 0.0001f || abs(fract(coordinate.y)) > 0.9999f) {
+						coordinate.y = round(coordinate.y);
+					}
 
-					edgeIndexIndex += 1;
+					maxCoordinate.x = max(maxCoordinate.x, coordinate.x);
+					maxCoordinate.y = max(maxCoordinate.y, coordinate.y);
+					minCoordinate.x = min(minCoordinate.x, coordinate.x);
+					minCoordinate.y = min(minCoordinate.y, coordinate.y);
+
+					coordinateIndex += 1;
 				}
 
-				lightmap.offset = {0.0f, 0.0f};
-				lightmap.size = abs(maxCoordinate - minCoordinate);
-				lightmap.area = lightmap.size.x * lightmap.size.y;
+				coordinateIndex = 0;
 
-				uint32 lightmapIndex = 0;
+				while (coordinateIndex < lightmapCoordinateCount) {
+					svec2<float32>& coordinate = scene.lightmapCoordinates[lightmapCoordinateOffset + coordinateIndex];
+					coordinate.y *= -1.0f;
+					coordinate += maxCoordinate;
 
-				while (lightmapIndex < lightmaps.size()) {
-					if (lightmap.area > lightmaps[lightmapIndex].area) {
+					coordinateIndex += 1;
+				}
+
+				const svec2<float32> size = abs(maxCoordinate - minCoordinate);
+
+				lightmap.size = {static_cast<uint32>(size.x), static_cast<uint32>(size.y)};
+				lightmap.area = lightmap.size.width * lightmap.size.height;
+
+				uint32 lightmapInsertionIndex = 0;
+
+				while (lightmapInsertionIndex < lightmaps.size()) {
+					if (lightmap.area > lightmaps[lightmapInsertionIndex].area) {
 						break;
 					}
 
-					lightmapIndex += 1;
+					lightmapInsertionIndex += 1;
 				}
 
-				lightmaps.insert(lightmaps.begin() + lightmapIndex, lightmap);
+				lightmaps.insert(lightmaps.begin() + lightmapInsertionIndex, lightmap);
+
+				lightmapCoordinateOffset += lightmapCoordinateCount;
+
+				// TODO: Ignore other faces for now.
+				break;
 			}
 		}
 
-		// TODO
-		// 1. Insert each rectangle into a 2048x2048 texture array using this packing algorithm: https://blackpawn.com/texts/lightmaps.
-		// 2. After inserting a rectangle, calculate store its final UVs into the static triangles composing the lightmapped face.
+		scene.triangles = sequence<StaticTriangle3D>(triangles.size());
+		scene.vertices = sequence<svec3<float32>>(vertices.size());
+		scene.normals = sequence<svec3<float32>>(normals.size());
+		scene.textureCoordinates = sequence<svec2<float32>>(textureCoordinates.size());
 
-		StaticScene3D staticScene{};
-		staticScene.triangles = sequence<StaticTriangle3D>(triangles.size());
-		staticScene.vertices = sequence<svec3<float32>>(vertices.size());
-		staticScene.normals = sequence<svec3<float32>>(normals.size());
-		staticScene.textureCoordinates = sequence<svec2<float32>>(textureCoordinates.size());
+		std::copy(triangles.begin(), triangles.end(), &scene.triangles[0]);
+		std::copy(vertices.begin(), vertices.end(), &scene.vertices[0]);
+		std::copy(normals.begin(), normals.end(), &scene.normals[0]);
+		std::copy(textureCoordinates.begin(), textureCoordinates.end(), &scene.textureCoordinates[0]);
 
-		std::copy(triangles.begin(), triangles.end(), &staticScene.triangles[0]);
-		std::copy(vertices.begin(), vertices.end(), &staticScene.vertices[0]);
-		std::copy(normals.begin(), normals.end(), &staticScene.normals[0]);
-		std::copy(textureCoordinates.begin(), textureCoordinates.end(), &staticScene.textureCoordinates[0]);
+		Lightmapper::updateAtlasCoordinates(lightmaps, scene);
 
-		Lightmapper::updateAtlasCoordinates(view<Lightmap>(&lightmaps[0], lightmaps.size()), staticScene.triangles);
+		ImageAssetDescriptor lightmapAtlasImageAssetDescriptor{};
+		lightmapAtlasImageAssetDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
+		lightmapAtlasImageAssetDescriptor.extent = {Lightmapper::ATLAS_SIZE.width, Lightmapper::ATLAS_SIZE.width, 1};
+		lightmapAtlasImageAssetDescriptor.mipLevelCount = 1;
+		lightmapAtlasImageAssetDescriptor.layerCount = 1;
+		lightmapAtlasImageAssetDescriptor.data = sequence<uint8>(lightmapAtlasImageAssetDescriptor.layerCount * lightmapAtlasImageAssetDescriptor.extent.width * lightmapAtlasImageAssetDescriptor.extent.height * lightmapAtlasImageAssetDescriptor.extent.depth * getChannelCount(lightmapAtlasImageAssetDescriptor.format));
 
-		return staticScene;
+		Lightmapper lightmapper;
+		lightmapper.buildLightmapAtlas(scene, lightmapAtlasImageAssetDescriptor);
+
+		BuildImageAssetProcess::encodeImageAsset(rootOutputPath / "Asset/", "test_lightmap", lightmapAtlasImageAssetDescriptor);
+
+		return scene;
 	}
 }

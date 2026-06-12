@@ -210,6 +210,14 @@ namespace Trident {
 		}
 	};
 
+	template<typename T>
+	constexpr svec<2, T> operator-(svec<2, T> a) {
+		return {
+			-a.x,
+			-a.y,
+		};
+	}
+
 	template<std::size_t C, typename T>
 	constexpr svec<C, T>& operator+=(svec<C, T>& a, const svec<C, T>& b);
 
@@ -217,6 +225,14 @@ namespace Trident {
 	constexpr svec<2, T>& operator+=(svec<2, T>& a, const svec<2, T>& b) {
 		a.x += b.x;
 		a.y += b.y;
+
+		return a;
+	}
+
+	template<typename T>
+	constexpr svec<2, T>& operator-=(svec<2, T>& a, const svec<2, T>& b) {
+		a.x -= b.x;
+		a.y -= b.y;
 
 		return a;
 	}
@@ -250,6 +266,14 @@ namespace Trident {
 		return a;
 	}
 
+	template<typename T>
+	constexpr svec<2, T>& operator/=(svec<2, T>& a, svec<2, T> b) {
+		a.x /= b.x;
+		a.y /= b.y;
+
+		return a;
+	}
+
 	template<std::size_t C, typename T>
 	constexpr svec<C, T>& operator/=(svec<C, T>& a, T b);
 
@@ -272,10 +296,7 @@ namespace Trident {
 
 	template<typename T>
 	constexpr svec<2, T> operator/(svec<2, T> a, svec<2, T> b) {
-		return {
-			a.x / b.x,
-			a.y / b.y,
-		};
+		return a /= b;
 	}
 
 	template<std::size_t C, typename T>

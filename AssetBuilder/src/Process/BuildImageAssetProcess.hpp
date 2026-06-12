@@ -8,17 +8,18 @@
 #include "Engine/Filesystem/Asset/AssetMap.hpp"
 #include "Engine/Filesystem/Decoder/Decoder.hpp"
 #include "Engine/Filesystem/File/QOI.hpp"
+#include "Engine/Filesystem/Filesystem.hpp"
 
 namespace Trident {
 	template<>
-	void ByteStream<StreamOperation::WRITE>::write(const AssetHeader& header, bool swapEndianness) {
+	inline void ByteStream<StreamOperation::WRITE>::write(const AssetHeader& header, bool swapEndianness) {
 		write<AssetSignature>(header.signature, swapEndianness);
 		write<uint32>(header.identifier, swapEndianness);
 		write<VersionNumber>(header.version, swapEndianness);
 	}
 
 	template<>
-	void ByteStream<StreamOperation::WRITE>::write(const ImageAssetHeader& header, bool swapEndianness) {
+	inline void ByteStream<StreamOperation::WRITE>::write(const ImageAssetHeader& header, bool swapEndianness) {
 		write<AssetHeader>(header, swapEndianness);
 		write<uint32>(header.format, swapEndianness);
 		write<uint32>(header.extent.width, swapEndianness);
@@ -42,7 +43,8 @@ namespace Trident {
 				imageAssetHeader.mipLevelCount = descriptor.mipLevelCount;
 				imageAssetHeader.layerCount = descriptor.layerCount;
 
-				uint64 maxOutputDataSize = descriptor.extent.width * descriptor.extent.height * descriptor.extent.depth;
+				// TODO(asset-builder/image): Include mip levels.
+				uint64 maxOutputDataSize = descriptor.extent.width * descriptor.extent.height * descriptor.extent.depth * descriptor.layerCount;
 
 				switch (descriptor.format) {
 					case ImageFormat::R8_UNORM: {

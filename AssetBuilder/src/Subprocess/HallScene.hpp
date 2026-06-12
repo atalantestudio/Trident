@@ -45,7 +45,7 @@ namespace Trident {
 				.materialIndex = defaultMaterialIndex,
 				.lightmapPixelScale = {1.0f, 1.0f},
 			})
-			.createStaticObject({
+			/* .createStaticObject({
 				.label = "hall_to_bike_room_floor_connector",
 				.geometryAssetName = "UnitPlane",
 				.transform = {
@@ -60,8 +60,8 @@ namespace Trident {
 				},
 				.materialIndex = defaultMaterialIndex,
 				.lightmapPixelScale = {1.0f, 1.0f},
-			})
-			.createStaticObject({
+			}) */
+			/* .createStaticObject({
 				.label = "bike_room_floor",
 				.geometryAssetName = "UnitPlane",
 				.transform = {
@@ -76,8 +76,8 @@ namespace Trident {
 				},
 				.materialIndex = defaultMaterialIndex,
 				.lightmapPixelScale = {1.0f, 1.0f},
-			})
-			.createStaticObject({
+			}) */
+			/* .createStaticObject({
 				.label = "hall_to_main_floor_connector",
 				.geometryAssetName = "UnitPlane",
 				.transform = {
@@ -92,7 +92,7 @@ namespace Trident {
 				},
 				.materialIndex = defaultMaterialIndex,
 				.lightmapPixelScale = {1.0f, 1.0f},
-			})
+			}) */
 			.createStaticObject({
 				.label = "main_floor",
 				.geometryAssetName = "UnitPlane",
@@ -128,7 +128,7 @@ namespace Trident {
 				.materialIndex = defaultMaterialIndex,
 				.lightmapPixelScale = {1.0f, 1.0f},
 			})
-			.createStaticObject({
+			/* .createStaticObject({
 				.label = "hall_entrance_right_wall",
 				.geometryAssetName = "UnitPlane",
 				.transform = {
@@ -303,11 +303,11 @@ namespace Trident {
 				},
 				.materialIndex = defaultMaterialIndex,
 				.lightmapPixelScale = {1.0f, 1.0f},
-			});
+			}) */;
 
 		// TODO(test)
 		builder
-			.createStaticObject({
+			/* .createStaticObject({
 				.label = "test_light",
 				.geometryAssetName = "UnitBox",
 				.transform = {
@@ -322,7 +322,23 @@ namespace Trident {
 				},
 				.materialIndex = lightMaterialIndex,
 				.lightmapPixelScale = {1.0f, 1.0f},
-			});
+			}) */
+			/* .createStaticObject({
+				.label = "test_box",
+				.geometryAssetName = "UnitBox",
+				.transform = {
+					.position = {0.0f, 0.0f, 0.0f},
+					.rotation = {0.0f, 0.0f, 0.0f},
+					.scale = {128.0f, 128.0f, 128.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.0f, 0.0f},
+					.rotation = 0.0f,
+					.scale = {1.0f, 1.0f},
+				},
+				.materialIndex = defaultMaterialIndex,
+				.lightmapPixelScale = {1.0f, 1.0f},
+			}) */;
 
 		return {
 			.staticScene = builder.build(),
