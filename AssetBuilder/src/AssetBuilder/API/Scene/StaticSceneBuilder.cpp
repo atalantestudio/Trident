@@ -106,17 +106,23 @@ namespace Trident {
 				// One coordinate per vertex on the face.
 				lightmapCoordinateCount += face.edgeIndexRange.count;
 
-				// TODO: Ignore other faces for now.
-				break;
+				// TODO: Handle UnitPlane back face.
+				if (faces.count() == 2) {
+					break;
+				}
 			}
 		}
 
-		std::vector<Lightmap> lightmaps;
-		lightmaps.reserve(lightmapCount);
+		// Sorted by lightmap area (ascending).
+		std::vector<LightmapIndex> lightmapIndices;
+		lightmapIndices.reserve(lightmapCount);
+
+		sequence<Lightmap> lightmaps(lightmapCount);
 
 		StaticScene3D scene{};
 		scene.lightmapCoordinates = sequence<svec2<float32>>(lightmapCoordinateCount);
 
+		uint32 faceIndex = 0;
 		uint32 lightmapCoordinateOffset = 0;
 
 		for (const StaticObject& object : objects) {
@@ -279,22 +285,54 @@ namespace Trident {
 			const view<Edge3D> edges = object.geometryAsset->getHull3DEdges();
 			const view<Plane3D> faces = object.geometryAsset->getHull3DFaces();
 			const view<uint16> faceEdgeIndices = object.geometryAsset->getHull3DFaceEdgeIndices();
-
-			const vec3<float32> T = object.transform.scale * inverse(orientation) * quat<float32>::axisAngle({0.0f, 1.0f, 0.0f}, 0.0f);
+			const vec3<float32> rotatedScale = object.transform.scale * orientation;
 
 			for (const Plane3D face : faces) {
 				const uint32 lightmapCoordinateCount = face.edgeIndexRange.count;
 
-				Lightmap lightmap{};
+				Lightmap& lightmap = lightmaps[faceIndex];
 				lightmap.geometryAsset = object.geometryAsset;
 				lightmap.edgeIndexRange = face.edgeIndexRange;
 				lightmap.offset = {0, 0};
 				lightmap.objectScale = object.transform.scale;
 				lightmap.pixelScale = object.lightmapPixelScale;
+				lightmap.coordinateOffset = lightmapCoordinateOffset;
 
 				svec2<float32> maxCoordinate = {min<float32>(), min<float32>()};
 				svec2<float32> minCoordinate = {max<float32>(), max<float32>()};
 				uint16 coordinateIndex = 0;
+
+				{
+					// TODO(test)
+					const vec3<float32> normal = normalized(vec3<float32>{face.normal[0], face.normal[1], face.normal[2]} * orientation);
+					const float32 projection = dot(normal, UP);
+
+					quat<float32> R;
+
+					if (projection > 0.999999f) {
+						R = quat<float32>::identity();
+					}
+					else if (projection < -0.999999f) {
+						vec3<float32> axis = normalized(cross(normal, RIGHT));
+
+						if (length(axis) < 0.000001f) {
+							axis = normalized(cross(normal, FORWARD));
+						}
+
+						R = quat<float32>::axisAngle(axis, 0.0f);
+					}
+					else {
+						const vec3<float32> axis = cross(normal, UP);
+
+						R = {
+							projection + 1.0f,
+							axis[0],
+							axis[1],
+							axis[2],
+						};
+						R = normalized(R);
+					}
+				}
 
 				while (coordinateIndex < lightmapCoordinateCount) {
 					const uint16 edgeIndex = faceEdgeIndices[face.edgeIndexRange.offset + coordinateIndex];
@@ -306,7 +344,7 @@ namespace Trident {
 						vertexPositionComponents[vertexPositionComponentOffset + 1],
 						vertexPositionComponents[vertexPositionComponentOffset + 2],
 					};
-					vertex *= T;
+					vertex = ((vertex * orientation) * object.transform.scale) * R;
 
 					svec2<float32>& coordinate = scene.lightmapCoordinates[lightmapCoordinateOffset + edge.originVertexIndex];
 					coordinate = {vertex[0], vertex[2]};
@@ -341,24 +379,30 @@ namespace Trident {
 				const svec2<float32> size = abs(maxCoordinate - minCoordinate);
 
 				lightmap.size = {static_cast<uint32>(size.x), static_cast<uint32>(size.y)};
-				lightmap.area = lightmap.size.width * lightmap.size.height;
+
+				LightmapIndex lightmapIndex{};
+				lightmapIndex.index = faceIndex;
+				lightmapIndex.area = lightmap.size.width * lightmap.size.height;
 
 				uint32 lightmapInsertionIndex = 0;
 
-				while (lightmapInsertionIndex < lightmaps.size()) {
-					if (lightmap.area > lightmaps[lightmapInsertionIndex].area) {
+				while (lightmapInsertionIndex < lightmapIndices.size()) {
+					if (lightmapIndex.area > lightmapIndices[lightmapInsertionIndex].area) {
 						break;
 					}
 
 					lightmapInsertionIndex += 1;
 				}
 
-				lightmaps.insert(lightmaps.begin() + lightmapInsertionIndex, lightmap);
+				lightmapIndices.insert(lightmapIndices.begin() + lightmapInsertionIndex, lightmapIndex);
 
 				lightmapCoordinateOffset += lightmapCoordinateCount;
+				faceIndex += 1;
 
-				// TODO: Ignore other faces for now.
-				break;
+				// TODO: Handle UnitPlane back face.
+				if (faces.count() == 2) {
+					break;
+				}
 			}
 		}
 
@@ -372,7 +416,7 @@ namespace Trident {
 		std::copy(normals.begin(), normals.end(), &scene.normals[0]);
 		std::copy(textureCoordinates.begin(), textureCoordinates.end(), &scene.textureCoordinates[0]);
 
-		Lightmapper::updateAtlasCoordinates(lightmaps, scene);
+		Lightmapper::updateAtlasCoordinates(lightmaps, view<LightmapIndex>(&lightmapIndices[0], lightmapIndices.size()), scene);
 
 		ImageAssetDescriptor lightmapAtlasImageAssetDescriptor{};
 		lightmapAtlasImageAssetDescriptor.format = ImageFormat::R8G8B8A8_UNORM;

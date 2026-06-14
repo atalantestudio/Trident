@@ -3,21 +3,20 @@
 
 #include "pch.hpp"
 
-#include "Engine/API/GUI/LayoutDirection.hpp"
-
 #include "AssetBuilder/API/Scene/Lightmapper.hpp"
 
 namespace Trident {
+	struct Rectangle {
+		uint32 x;
+		uint32 y;
+		uint32 width;
+		uint32 height;
+	};
+
 	struct LightmapNode {
 		LightmapNode* children[2]{};
-
-		/// Direction in which to split the node.
-		LayoutDirection splitDirection;
-
-		/// Size along the split direction.
-		uint32 size;
-
-		uint32 lightmapIndex = max<uint32>();
+		Rectangle rectangle;
+		bool assigned = false;
 
 		~LightmapNode() {
 			delete children[0];
@@ -26,17 +25,6 @@ namespace Trident {
 
 		bool leaf() const {
 			return children[0] == nullptr && children[1] == nullptr;
-		}
-
-		bool canContain(Extent2D extent) const {
-			return size >= extent[splitDirection];
-		}
-
-		Extent2D getExtent() const {
-			Extent2D extent = Lightmapper::ATLAS_SIZE;
-			extent[splitDirection] = size;
-
-			return extent;
 		}
 	};
 
@@ -48,71 +36,80 @@ namespace Trident {
 				return newNode;
 			}
 
-			lightmap.offset[node->children[0]->splitDirection] += node->children[0]->size;
-
 			return insertNode(lightmap, node->children[1]);
 		}
 
-		if (node->lightmapIndex != max<uint32>()) {
+		if (node->assigned) {
 			return nullptr;
 		}
 
-		const Extent2D nodeSize = node->getExtent();
-
-		if (!node->canContain(lightmap.size)) {
+		if (
+			node->rectangle.width < lightmap.size.width ||
+			node->rectangle.height < lightmap.size.height
+		) {
 			return nullptr;
 		}
 
-		if (node->size == lightmap.size[node->splitDirection]) {
+		if (
+			node->rectangle.width == lightmap.size.width &&
+			node->rectangle.height == lightmap.size.height
+		) {
 			return node;
 		}
 
 		node->children[0] = new LightmapNode();
+		node->children[0]->rectangle = node->rectangle;
+
 		node->children[1] = new LightmapNode();
+		node->children[1]->rectangle = node->rectangle;
 
 		const Extent2D remainingSize = {
-			nodeSize.width - lightmap.size.width,
-			nodeSize.height - lightmap.size.height,
+			node->rectangle.width - lightmap.size.width,
+			node->rectangle.height - lightmap.size.height,
 		};
 
+		// Split towards the axis with the largest available space.
 		if (remainingSize.width > remainingSize.height) {
-			// TODO(lightmapper/packing/node-split-direction)
-			// Here the parent is split horizontally so its split direction is HORIZONTAL.
-			// Those of the children are not known yet so they shouldn't be set.
-			// node->splitDirection = LayoutDirection::HORIZONTAL;
-			node->children[0]->splitDirection = LayoutDirection::HORIZONTAL;
-			node->children[1]->splitDirection = LayoutDirection::HORIZONTAL;
+			node->children[0]->rectangle.width = lightmap.size.width;
 
-			node->children[0]->size = lightmap.size.width;
-			node->children[1]->size = ATLAS_SIZE[node->children[1]->splitDirection] - lightmap.size.width;
+			node->children[1]->rectangle.x += lightmap.size.width;
+			node->children[1]->rectangle.width -= lightmap.size.width;
 		}
 		else {
-			node->children[0]->splitDirection = LayoutDirection::VERTICAL;
-			node->children[1]->splitDirection = LayoutDirection::VERTICAL;
+			node->children[0]->rectangle.height = lightmap.size.height;
 
-			node->children[0]->size = lightmap.size.height;
-			node->children[1]->size = ATLAS_SIZE[node->children[1]->splitDirection] - lightmap.size.height;
+			node->children[1]->rectangle.y += lightmap.size.height;
+			node->children[1]->rectangle.height -= lightmap.size.height;
 		}
 
 		return insertNode(lightmap, node->children[0]);
 	}
 
-	void Lightmapper::updateAtlasCoordinates(std::vector<Lightmap>& lightmaps, StaticScene3D& scene) {
-		const svec2<float32> atlasSize = {static_cast<float32>(ATLAS_SIZE.width), static_cast<float32>(ATLAS_SIZE.height)};
+	void Lightmapper::updateAtlasCoordinates(sequence<Lightmap>& lightmaps, view<LightmapIndex> lightmapIndices, StaticScene3D& scene) {
+		const svec2<float32> atlasSize = {
+			static_cast<float32>(ATLAS_SIZE.width),
+			static_cast<float32>(ATLAS_SIZE.height),
+		};
 
 		LightmapNode rootNode{};
-		rootNode.splitDirection = LayoutDirection::HORIZONTAL;
-		rootNode.size = ATLAS_SIZE[rootNode.splitDirection];
+		rootNode.rectangle = {0, 0, ATLAS_SIZE.width, ATLAS_SIZE.height};
 
-		uint32 lightmapCoordinateOffset = 0;
-		uint32 lightmapIndex = 0;
+		uint32 unsortedLightmapIndex = 0;
 		uint32 triangleOffset = 0;
 
-		while (lightmapIndex < lightmaps.size()) {
-			Lightmap& lightmap = lightmaps[lightmapIndex];
+		while (unsortedLightmapIndex < lightmapIndices.count()) {
+			const uint32 sortedLightmapIndex = lightmapIndices[unsortedLightmapIndex].index;
+
+			Lightmap& lightmap = lightmaps[sortedLightmapIndex];
 
 			LightmapNode* node = insertNode(lightmap, &rootNode);
-			node->lightmapIndex = lightmapIndex;
+
+			lightmap.offset.width = node->rectangle.x;
+			lightmap.offset.height = node->rectangle.y;
+
+			DEBUG_ASSERT(node != nullptr);
+
+			node->assigned = true;
 
 			const view<Edge3D> edges = lightmap.geometryAsset->getHull3DEdges();
 			const view<uint16> faceEdgeIndices = lightmap.geometryAsset->getHull3DFaceEdgeIndices();
@@ -123,7 +120,7 @@ namespace Trident {
 				const uint16 edgeIndex = faceEdgeIndices[lightmap.edgeIndexRange.offset + coordinateIndex];
 				const Edge3D edge = edges[edgeIndex];
 
-				svec2<float32>& coordinate = scene.lightmapCoordinates[lightmapCoordinateOffset + edge.originVertexIndex];
+				svec2<float32>& coordinate = scene.lightmapCoordinates[lightmap.coordinateOffset + edge.originVertexIndex];
 				coordinate.x += lightmap.offset.width;
 				coordinate.y += lightmap.offset.height;
 				coordinate /= atlasSize;
@@ -131,27 +128,29 @@ namespace Trident {
 				coordinateIndex += 1;
 			}
 
+			const view<uint32> vertexPositionIndices = lightmap.geometryAsset->getVertexPositionIndices();
 			const uint32 triangleCount = lightmap.edgeIndexRange.count / 2;
 
+			uint32 vertexPositionIndexOffset = lightmap.edgeIndexRange.offset / 2 * 3;
 			uint32 triangleIndex = 0;
 
 			while (triangleIndex < triangleCount) {
 				StaticTriangle3D& triangle = scene.triangles[triangleOffset + triangleIndex];
-				triangle.vertices[0].lightmapCoordinateIndex = triangle.vertices[0].textureCoordinateIndex;
-				triangle.vertices[1].lightmapCoordinateIndex = triangle.vertices[1].textureCoordinateIndex;
-				triangle.vertices[2].lightmapCoordinateIndex = triangle.vertices[2].textureCoordinateIndex;
+				triangle.vertices[0].lightmapCoordinateIndex = lightmap.coordinateOffset + vertexPositionIndices[vertexPositionIndexOffset + 0];
+				triangle.vertices[1].lightmapCoordinateIndex = lightmap.coordinateOffset + vertexPositionIndices[vertexPositionIndexOffset + 1];
+				triangle.vertices[2].lightmapCoordinateIndex = lightmap.coordinateOffset + vertexPositionIndices[vertexPositionIndexOffset + 2];
 
 				triangleIndex += 1;
+				vertexPositionIndexOffset += 3;
 			}
 
-			lightmapCoordinateOffset += lightmap.edgeIndexRange.count;
-			lightmapIndex += 1;
+			unsortedLightmapIndex += 1;
 			triangleOffset += triangleCount;
 		}
 	}
 
-	void Lightmapper::buildLightmapAtlas(const StaticScene3D& staticScene, ImageAssetDescriptor& lightmapAtlasImageAssetDescriptor) {
-		const uint32 indexCount = static_cast<uint32>(staticScene.triangles.count() * 3);
+	void Lightmapper::buildLightmapAtlas(const StaticScene3D& scene, ImageAssetDescriptor& lightmapAtlasImageAssetDescriptor) {
+		const uint32 indexCount = static_cast<uint32>(scene.triangles.count() * 3);
 
 		renderPass = createRenderPass(lightmapAtlasImageAssetDescriptor.format);
 
@@ -164,10 +163,10 @@ namespace Trident {
 
 		lightmapAtlasPipeline = createLightmapAtlasPipeline();
 
-		coordinateBuffer = createCoordinateBuffer(staticScene.lightmapCoordinates.count() * sizeof(svec2<float32>));
+		coordinateBuffer = createCoordinateBuffer(scene.lightmapCoordinates.count() * sizeof(svec2<float32>));
 		coordinateIndexBuffer = createCoordinateIndexBuffer(indexCount * sizeof(uint32));
 
-		copyCoordinateBuffers(staticScene);
+		copyCoordinateBuffers(scene);
 
 		const Extent2D framebufferExtent = framebuffer->getExtent();
 		const float32 framebufferWidth = static_cast<float32>(framebufferExtent.width);
@@ -387,18 +386,18 @@ namespace Trident {
 		});
 	}
 
-	void Lightmapper::copyCoordinateBuffers(const StaticScene3D& staticScene) const {
+	void Lightmapper::copyCoordinateBuffers(const StaticScene3D& scene) const {
 		const ref<Buffer<uint8>> stagingBuffer = Renderer::createStagingBuffer<uint8>(coordinateBuffer->getSize() + coordinateIndexBuffer->getSize());
 
 		uint8* mappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
 		svec2<float32>* coordinateMappedRange = pointer_cast<svec2<float32>*>(mappedRange);
 
-		std::copy(staticScene.lightmapCoordinates.begin(), staticScene.lightmapCoordinates.end(), coordinateMappedRange);
+		std::copy(scene.lightmapCoordinates.begin(), scene.lightmapCoordinates.end(), coordinateMappedRange);
 
 		uint32* coordinateIndexMappedRange = pointer_cast<uint32*>(mappedRange + coordinateBuffer->getSize());
 		uint32 coordinateIndexIndex = 0;
 
-		for (const StaticTriangle3D& triangle : staticScene.triangles) {
+		for (const StaticTriangle3D& triangle : scene.triangles) {
 			coordinateIndexMappedRange[coordinateIndexIndex + 0] = triangle.vertices[0].lightmapCoordinateIndex;
 			coordinateIndexMappedRange[coordinateIndexIndex + 1] = triangle.vertices[1].lightmapCoordinateIndex;
 			coordinateIndexMappedRange[coordinateIndexIndex + 2] = triangle.vertices[2].lightmapCoordinateIndex;

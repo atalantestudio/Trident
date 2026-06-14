@@ -14,8 +14,8 @@
 #include "Engine/API/Event/EventDispatcher.hpp"
 #include "Engine/API/Physics/3D/PhysicsSimulation3D.hpp"
 #include "Engine/Layer/Layer.hpp"
-#include "Engine/Renderer/Scene/StaticSceneRayTracer/StaticSceneRayTracer.hpp"
-// #include "Engine/Renderer/Forward/Renderer.hpp"
+// #include "Engine/Renderer/Scene/StaticSceneRayTracer/StaticSceneRayTracer.hpp"
+#include "Engine/Renderer/Forward/Renderer.hpp"
 
 #include "../Scene/FlatColor.hpp"
 
@@ -198,9 +198,9 @@ namespace Trident {
 
 				cameraController.accumulateAngularMotion(radians(vec3<float32>{pitch, yaw, 0.0_deg}));
 
-				if (pitch != 0.0f || yaw != 0.0f) {
+				/* if (pitch != 0.0f || yaw != 0.0f) {
 					renderer.resetFrameIndex();
-				}
+				} */
 
 				return true;
 			}
@@ -252,8 +252,8 @@ namespace Trident {
 			void noclipMove(float32 deltaTime);
 
 		private:
-			StaticSceneRayTracer renderer;
-			// ForwardRenderer renderer;
+			// StaticSceneRayTracer renderer;
+			ForwardRenderer renderer;
 			scope<Scene3D> scene;
 			scope<PhysicsSimulation3D> physicsSimulation;
 

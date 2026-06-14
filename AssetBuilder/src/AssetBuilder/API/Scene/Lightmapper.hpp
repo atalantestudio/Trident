@@ -19,9 +19,9 @@ namespace Trident {
 		public:
 			static LightmapNode* insertNode(Lightmap& lightmap, LightmapNode* node);
 
-			static void updateAtlasCoordinates(std::vector<Lightmap>& lightmaps, StaticScene3D& scene);
+			static void updateAtlasCoordinates(sequence<Lightmap>& lightmaps, view<LightmapIndex> lightmapIndices, StaticScene3D& scene);
 
-			void buildLightmapAtlas(const StaticScene3D& staticScene, ImageAssetDescriptor& lightmapAtlasImageAssetDescriptor);
+			void buildLightmapAtlas(const StaticScene3D& scene, ImageAssetDescriptor& lightmapAtlasImageAssetDescriptor);
 
 		private:
 			ref<RenderPass> createRenderPass(ImageFormat lightmapAtlasImageFormat) const;
@@ -37,7 +37,7 @@ namespace Trident {
 			ref<Buffer<svec2<float32>>> createCoordinateBuffer(uint64 size) const;
 			ref<Buffer<uint32>> createCoordinateIndexBuffer(uint64 size) const;
 
-			void copyCoordinateBuffers(const StaticScene3D& staticScene) const;
+			void copyCoordinateBuffers(const StaticScene3D& scene) const;
 
 		private:
 			ref<RenderPass> renderPass;

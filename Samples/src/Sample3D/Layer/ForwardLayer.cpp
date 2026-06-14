@@ -183,6 +183,6 @@ namespace Trident {
 
 		camera.position += wishdir;
 
-		renderer.resetFrameIndex();
+		// renderer.resetFrameIndex();
 	}
 }
