@@ -4,13 +4,14 @@
 #pragma once
 
 namespace Trident {
-	// TODO: Use.
 	struct MemoryAllocation {
+		/// Opaque memory object handle.
+		void* memory;
+
+		uint32 memoryTypeIndex;
+
 		uint64 offset;
 		uint64 size;
-
-		/// Index of the memory type, used when mapping suballocations.
-		uint32 memoryTypeIndex;
 
 		/// Number of active suballocations.
 		uint32 suballocationCount;

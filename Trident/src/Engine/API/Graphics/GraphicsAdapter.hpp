@@ -44,6 +44,7 @@ namespace Trident {
 			CreateImageImplementation createImageImplementation;
 			CreateImageViewImplementation createImageViewImplementation;
 			CreateInstanceImplementation createInstanceImplementation;
+			CreateMemoryAllocationImplementation createMemoryAllocationImplementation;
 			CreateMemoryAllocatorImplementation createMemoryAllocatorImplementation;
 			CreatePipelineLayoutImplementation createPipelineLayoutImplementation;
 			CreateRenderPassImplementation createRenderPassImplementation;

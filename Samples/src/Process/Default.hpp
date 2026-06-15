@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Engine/API/Process/Process.hpp"
+
 namespace Trident {
 	class ProcessDefaultProcess final : public Process {
 		public:

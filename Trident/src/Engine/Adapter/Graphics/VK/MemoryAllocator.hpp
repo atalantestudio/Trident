@@ -13,27 +13,6 @@ namespace Trident {
 	#define DEBUG_ENUMERATE_HEAPS
 	#define DEBUG_ENUMERATE_TYPES
 
-	struct VK::MemoryAllocation {
-		VkDeviceMemory memory;
-		VkDeviceSize offset;
-		VkDeviceSize size;
-
-		// Index of the memory type. Used with memory mapping.
-		uint32 memoryTypeIndex;
-
-		// Number of active suballocations.
-		uint32 suballocationCount;
-
-		// Alignment of the most recent suballocation in this allocation.
-		VkDeviceSize lastSuballocationAlignment;
-
-		// Number of suballocations in the mapped state.
-		uint32 mappedSuballocationCount;
-
-		// Cached mapped range for multiple mapped suballocations in the same allocation.
-		void* mappedRange;
-	};
-
 	class VK::MemoryAllocator : public Trident::MemoryAllocator {
 		private:
 			// Memory allocations have a default size of 16Mb.
@@ -48,7 +27,10 @@ namespace Trident {
 				void enumerateMemoryTypes();
 			#endif
 
-			// Finds a suitable memory type for the requirements, and returns its index.
+			/// Finds and returns the index of a suitable memory type for the provided memory requirements,
+			/// or UNDEFINED_MEMORY_TYPE_INDEX if none was found.
+			/// Memory types having exactly the same flags as the requirements are prioritized.
+			/// Alignment and available size are ignored.
 			uint32 findSuitableMemoryType(const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags memoryPropertyFlags);
 
 			MemorySuballocation suballocateBuffer(VkBuffer buffer, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements);
@@ -62,18 +44,12 @@ namespace Trident {
 			void freeSuballocation(uint32 memoryAllocationIndex);
 
 		private:
-			// Creates a new memory allocation and returns its index.
-			uint32 createAllocation(uint32 memoryTypeIndex, VkDeviceSize size);
-
 			// Creates and returns a suballocation from a memory allocation.
 			MemorySuballocation suballocate(uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements, sequence<uint32>& currentMemoryAllocationIndices);
 
-		private:
-			const VK::Device* device;
+		// TODO: Don't expose.
+		public:
 			const VK::PhysicalDevice* physicalDevice;
-
-			// Allocated buffer and image memory allocations.
-			std::vector<VK::MemoryAllocation> memoryAllocations;
 
 			// TODO: Try merging with currentImageMemoryAllocationIndices.
 			// Indices of the currently active buffer memory allocations per memory type.
@@ -84,4 +60,8 @@ namespace Trident {
 
 			std::vector<uint32> freeMemoryAllocationIndices;
 	};
+
+	namespace VK {
+		uint32 createMemoryAllocation(Trident::MemoryAllocator* memoryAllocator, uint32 memoryTypeIndex, uint64 size);
+	}
 }

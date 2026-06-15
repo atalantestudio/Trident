@@ -12,6 +12,7 @@
 #include "Engine/Adapter/Graphics/GL/GraphicsPipeline.hpp"
 #include "Engine/Adapter/Graphics/GL/Image.hpp"
 #include "Engine/Adapter/Graphics/GL/ImageView.hpp"
+#include "Engine/Adapter/Graphics/GL/MemoryAllocator.hpp"
 #include "Engine/Adapter/Graphics/GL/RenderPass.hpp"
 #include "Engine/Adapter/Graphics/GL/Sampler.hpp"
 #include "Engine/Adapter/Graphics/GL/ShaderModule.hpp"
@@ -28,8 +29,8 @@ namespace Trident::GL {
 		return createRef<DescriptorSetLayout>(device, bindings);
 	}
 
-	static ref<MemoryAllocator> createMemoryAllocator(const Trident::Device* device) {
-		return createRef<MemoryAllocator>();
+	static ref<Trident::MemoryAllocator> createMemoryAllocator(const Trident::Device* device) {
+		return createRef<MemoryAllocator>(device);
 	}
 
 	static ref<PipelineLayout> createPipelineLayout(const Trident::Device* device, const PipelineLayoutDescriptor& descriptor) {
@@ -75,6 +76,7 @@ namespace Trident::GL {
 		adapter->createImageImplementation = GL::createImage;
 		adapter->createImageViewImplementation = GL::createImageView;
 		adapter->createInstanceImplementation = GL::createInstance;
+		adapter->createMemoryAllocationImplementation = GL::createMemoryAllocation;
 		adapter->createMemoryAllocatorImplementation = GL::createMemoryAllocator;
 		adapter->createPipelineLayoutImplementation = GL::createPipelineLayout;
 		adapter->createRenderPassImplementation = GL::createRenderPass;

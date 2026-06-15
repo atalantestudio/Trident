@@ -34,6 +34,7 @@
 #include "Process/Default.hpp"
 #include "Process/ECS.hpp"
 #include "Process/JSON.hpp"
+#include "Process/MemoryAllocation.hpp"
 #include "Process/SIMD.hpp"
 
 #include "Graphics/Layer/ArrayTexture.hpp"
@@ -140,6 +141,9 @@ namespace Trident {
 			}
 			else if (SampleNameProperty == "JSON") {
 				registerProcess<ProcessJSONProcess>();
+			}
+			else if (SampleNameProperty == "MemoryAllocation") {
+				registerProcess<MemoryAllocationProcess>();
 			}
 			else if (SampleNameProperty == "SIMD") {
 				registerProcess<ProcessSIMDProcess>();

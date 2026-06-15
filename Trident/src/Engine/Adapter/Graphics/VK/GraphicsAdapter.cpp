@@ -57,6 +57,7 @@ namespace Trident::VK {
 		adapter->createImageImplementation = VK::createImage;
 		adapter->createImageViewImplementation = VK::createImageView;
 		adapter->createInstanceImplementation = VK::createInstance;
+		adapter->createMemoryAllocationImplementation = VK::createMemoryAllocation;
 		adapter->createMemoryAllocatorImplementation = VK::createMemoryAllocator;
 		adapter->createPipelineLayoutImplementation = VK::createPipelineLayout;
 		adapter->createRenderPassImplementation = VK::createRenderPass;

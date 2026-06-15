@@ -70,8 +70,6 @@ namespace Trident {
 			UINT depthStencilViewDescriptorHandleIncrementSize;
 
 		private:
-			const DX12::Device* device;
-
 			std::vector<DX12::DescriptorHeapAllocation> descriptorHeapAllocations;
 
 			UINT currentViewDescriptorHeapAllocationIndex = UNDEFINED_ALLOCATION_INDEX;

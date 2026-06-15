@@ -3,11 +3,14 @@
 
 #pragma once
 
+#include "Engine/API/Process/Process.hpp"
+
 namespace Trident {
 	class ProcessSIMDProcess final : public Process {
 		public:
 			sint32 main(view<void*> arguments) override {
-				sequence<uint16> offsets = {0, 2, 5, 7, 9, 11, 14, 18, 22, 23, 29, 31};
+				const sequence<uint16> offsets = {0, 2, 5, 7, 9, 11, 14, 18, 22, 23, 29, 31};
+
 				sequence<uint16> lengths(offsets.count());
 
 				const uint64 regCount = lengths.count() / 8;

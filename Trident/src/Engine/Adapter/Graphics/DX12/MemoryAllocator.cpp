@@ -11,8 +11,7 @@
 
 namespace Trident {
 	DX12::MemoryAllocator::MemoryAllocator(const DX12::Device* device) :
-		Trident::MemoryAllocator(),
-		device(device)
+		Trident::MemoryAllocator(device)
 	{
 		viewDescriptorHandleIncrementSize = device->device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		samplerDescriptorHandleIncrementSize = device->device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
@@ -85,6 +84,8 @@ namespace Trident {
 	}
 
 	D3D12_CPU_DESCRIPTOR_HANDLE DX12::MemoryAllocator::allocateRenderTargetView(ID3D12Resource* resource, const D3D12_RENDER_TARGET_VIEW_DESC* descriptor) {
+		const DX12::Device* device = static_cast<const DX12::Device*>(this->device);
+
 		DX12::DescriptorHeapAllocation& descriptorHeapAllocation = getCurrentRenderTargetViewDescriptorHeapAllocation();
 
 		D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle = descriptorHeapAllocation.descriptorHeap->GetCPUDescriptorHandleForHeapStart();
@@ -98,6 +99,8 @@ namespace Trident {
 	}
 
 	D3D12_CPU_DESCRIPTOR_HANDLE DX12::MemoryAllocator::allocateDepthStencilView(ID3D12Resource* resource, const D3D12_DEPTH_STENCIL_VIEW_DESC* descriptor) {
+		const DX12::Device* device = static_cast<const DX12::Device*>(this->device);
+
 		DX12::DescriptorHeapAllocation& descriptorHeapAllocation = getCurrentDepthStencilViewDescriptorHeapAllocation();
 
 		D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle = descriptorHeapAllocation.descriptorHeap->GetCPUDescriptorHandleForHeapStart();
@@ -111,6 +114,7 @@ namespace Trident {
 	}
 
 	void DX12::MemoryAllocator::writeImage(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorImage& descriptorImage) const {
+		const DX12::Device* device = static_cast<const DX12::Device*>(this->device);
 		const DX12::Image* image = static_cast<const DX12::Image*>(descriptorImage.imageView->getImage());
 
 		ADAPTER_ASSERT(image->getType() == ImageType::TEXTURE_2D, "Images other than TEXTURE_2D are not supported.");
@@ -152,6 +156,7 @@ namespace Trident {
 	}
 
 	void DX12::MemoryAllocator::writeReadWriteStorageImage(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorImage& descriptorImage) const {
+		const DX12::Device* device = static_cast<const DX12::Device*>(this->device);
 		const DX12::Image* image = static_cast<const DX12::Image*>(descriptorImage.imageView->getImage());
 
 		ADAPTER_ASSERT(image->getType() == ImageType::TEXTURE_2D, "Images other than TEXTURE_2D are not supported.");
@@ -176,6 +181,7 @@ namespace Trident {
 	}
 
 	void DX12::MemoryAllocator::writeUniformBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorBuffer& descriptorBuffer) const {
+		const DX12::Device* device = static_cast<const DX12::Device*>(this->device);
 		const ref<DX12::BaseBuffer> buffer = std::static_pointer_cast<DX12::BaseBuffer>(descriptorBuffer.buffer);
 
 		D3D12_CONSTANT_BUFFER_VIEW_DESC constantBufferViewDescriptor{};
@@ -186,6 +192,7 @@ namespace Trident {
 	}
 
 	void DX12::MemoryAllocator::writeReadOnlyStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorBuffer& descriptorBuffer) const {
+		const DX12::Device* device = static_cast<const DX12::Device*>(this->device);
 		const ref<DX12::BaseBuffer> buffer = std::static_pointer_cast<DX12::BaseBuffer>(descriptorBuffer.buffer);
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDescriptor{};
@@ -201,6 +208,7 @@ namespace Trident {
 	}
 
 	void DX12::MemoryAllocator::writeReadWriteStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorBuffer& descriptorBuffer) const {
+		const DX12::Device* device = static_cast<const DX12::Device*>(this->device);
 		const ref<DX12::BaseBuffer> buffer = std::static_pointer_cast<DX12::BaseBuffer>(descriptorBuffer.buffer);
 
 		D3D12_UNORDERED_ACCESS_VIEW_DESC unorderedAccessViewDescriptor{};
@@ -216,6 +224,7 @@ namespace Trident {
 	}
 
 	void DX12::MemoryAllocator::writeInputAttachment(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorImage& descriptorImage) const {
+		const DX12::Device* device = static_cast<const DX12::Device*>(this->device);
 		const DX12::Image* image = static_cast<const DX12::Image*>(descriptorImage.imageView->getImage());
 
 		ADAPTER_ASSERT(image->getType() == ImageType::TEXTURE_2D, "Images other than TEXTURE_2D are not supported.");
@@ -256,10 +265,14 @@ namespace Trident {
 	}
 
 	void DX12::MemoryAllocator::writeSampler(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const D3D12_SAMPLER_DESC* descriptor) const {
+		const DX12::Device* device = static_cast<const DX12::Device*>(this->device);
+
 		device->device->CreateSampler(descriptor, descriptorHandle);
 	}
 
 	void DX12::MemoryAllocator::createViewDescriptorHeapAllocation() {
+		const DX12::Device* device = static_cast<const DX12::Device*>(this->device);
+
 		DX12::DescriptorHeapAllocation descriptorHeapAllocation{};
 		descriptorHeapAllocation.descriptorCount = maxViewDescriptorCountPerAllocation;
 		descriptorHeapAllocation.descriptorOffset = 0;
@@ -280,6 +293,8 @@ namespace Trident {
 	}
 
 	void DX12::MemoryAllocator::createSamplerDescriptorHeapAllocation() {
+		const DX12::Device* device = static_cast<const DX12::Device*>(this->device);
+
 		DX12::DescriptorHeapAllocation descriptorHeapAllocation{};
 		descriptorHeapAllocation.descriptorCount = maxSamplerDescriptorCountPerAllocation;
 		descriptorHeapAllocation.descriptorOffset = 0;
@@ -300,6 +315,8 @@ namespace Trident {
 	}
 
 	void DX12::MemoryAllocator::createRenderTargetViewDescriptorHeapAllocation() {
+		const DX12::Device* device = static_cast<const DX12::Device*>(this->device);
+
 		DX12::DescriptorHeapAllocation descriptorHeapAllocation{};
 		descriptorHeapAllocation.descriptorCount = maxRenderTargetViewDescriptorCountPerAllocation;
 		descriptorHeapAllocation.descriptorOffset = 0;
@@ -320,6 +337,8 @@ namespace Trident {
 	}
 
 	void DX12::MemoryAllocator::createDepthStencilViewDescriptorHeapAllocation() {
+		const DX12::Device* device = static_cast<const DX12::Device*>(this->device);
+
 		DX12::DescriptorHeapAllocation descriptorHeapAllocation{};
 		descriptorHeapAllocation.descriptorCount = maxDepthStencilViewDescriptorCountPerAllocation;
 		descriptorHeapAllocation.descriptorOffset = 0;

@@ -23,8 +23,6 @@
 #endif
 
 namespace Trident::VK {
-	struct MemoryAllocation;
-
 	class BaseBuffer;
 	class CommandBuffer;
 	class CommandEncoder;

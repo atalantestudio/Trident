@@ -68,6 +68,7 @@ namespace Trident::GL {
 	class Image;
 	class ImageView;
 	class Instance;
+	class MemoryAllocator;
 	class PhysicalDevice;
 	class Queue;
 	class RenderPass;
