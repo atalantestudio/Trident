@@ -301,13 +301,12 @@ namespace Trident {
 				svec2<float32> maxCoordinate = {min<float32>(), min<float32>()};
 				svec2<float32> minCoordinate = {max<float32>(), max<float32>()};
 				uint16 coordinateIndex = 0;
+				quat<float32> R;
 
 				{
 					// TODO(test)
 					const vec3<float32> normal = normalized(vec3<float32>{face.normal[0], face.normal[1], face.normal[2]} * orientation);
 					const float32 projection = dot(normal, UP);
-
-					quat<float32> R;
 
 					if (projection > 0.999999f) {
 						R = quat<float32>::identity();
