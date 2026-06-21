@@ -129,7 +129,6 @@ namespace Trident {
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to enumerate physical devices ([]).", string_VkResult(result));
 
-		VkPhysicalDeviceProperties physicalDeviceProperties;
 		uint32 maxPhysicalDeviceScore = 0;
 		uint32 bestPhysicalDeviceIndex = 0;
 		uint32 physicalDeviceIndex = 0;
@@ -141,9 +140,9 @@ namespace Trident {
 		while (physicalDeviceIndex < physicalDevices.count()) {
 			const VkPhysicalDevice physicalDevice = physicalDevices[physicalDeviceIndex];
 
-			_instance->vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
+			_instance->vkGetPhysicalDeviceProperties(physicalDevice, &_physicalDevice->properties);
 
-			const uint32 physicalDeviceScore = calculatePhysicalDeviceScore(physicalDeviceProperties, preferIntegratedGpu);
+			const uint32 physicalDeviceScore = calculatePhysicalDeviceScore(_physicalDevice->properties, preferIntegratedGpu);
 
 			if (physicalDeviceScore >= maxPhysicalDeviceScore) {
 				maxPhysicalDeviceScore = physicalDeviceScore;
@@ -151,9 +150,9 @@ namespace Trident {
 			}
 
 			#if defined(DEBUG_ENUMERATE_PHYSICAL_DEVICES)
-				const view<char8> physicalDeviceType = formatPhysicalDeviceType(physicalDeviceProperties.deviceType);
+				const view<char8> physicalDeviceType = formatPhysicalDeviceType(_physicalDevice->properties.deviceType);
 
-				ADAPTER_INFO("- [] []", physicalDeviceProperties.deviceName, physicalDeviceType);
+				ADAPTER_INFO("- [] []", _physicalDevice->properties.deviceName, physicalDeviceType);
 			#endif
 
 			physicalDeviceIndex += 1;
@@ -246,31 +245,31 @@ namespace Trident {
 		// Query limits.
 		{
 			PhysicalDeviceLimits& limits = _physicalDevice->limits;
-			limits.bufferImageGranularity = physicalDeviceProperties.limits.bufferImageGranularity;
-			limits.lineWidthGranularity = physicalDeviceProperties.limits.lineWidthGranularity;
-			limits.maxBoundDescriptorSetCount = physicalDeviceProperties.limits.maxBoundDescriptorSets;
-			limits.maxColorAttachmentCount = physicalDeviceProperties.limits.maxColorAttachments;
-			limits.maxComputeWorkgroupCount[0] = physicalDeviceProperties.limits.maxComputeWorkGroupCount[0];
-			limits.maxComputeWorkgroupCount[1] = physicalDeviceProperties.limits.maxComputeWorkGroupCount[1];
-			limits.maxComputeWorkgroupCount[2] = physicalDeviceProperties.limits.maxComputeWorkGroupCount[2];
-			limits.maxComputeWorkgroupSize[0] = physicalDeviceProperties.limits.maxComputeWorkGroupSize[0];
-			limits.maxComputeWorkgroupSize[1] = physicalDeviceProperties.limits.maxComputeWorkGroupSize[1];
-			limits.maxComputeWorkgroupSize[2] = physicalDeviceProperties.limits.maxComputeWorkGroupSize[2];
-			limits.maxFramebufferSize[0] = physicalDeviceProperties.limits.maxFramebufferWidth;
-			limits.maxFramebufferSize[1] = physicalDeviceProperties.limits.maxFramebufferHeight;
-			limits.maxFramebufferLayerCount = physicalDeviceProperties.limits.maxFramebufferLayers;
-			limits.maxImageDimension1D = physicalDeviceProperties.limits.maxImageDimension1D;
-			limits.maxImageDimension2D = physicalDeviceProperties.limits.maxImageDimension2D;
-			limits.maxImageDimension3D = physicalDeviceProperties.limits.maxImageDimension3D;
-			limits.maxImageLayerCount = physicalDeviceProperties.limits.maxImageArrayLayers;
-			limits.maxMemoryAllocationCount = physicalDeviceProperties.limits.maxMemoryAllocationCount;
-			limits.maxVertexInputAttributeCount = physicalDeviceProperties.limits.maxVertexInputAttributes;
-			limits.maxVertexInputAttributeOffset = physicalDeviceProperties.limits.maxVertexInputAttributeOffset;
-			limits.maxVertexInputBindingCount = physicalDeviceProperties.limits.maxVertexInputBindings;
-			limits.maxVertexInputBindingStride = physicalDeviceProperties.limits.maxVertexInputBindingStride;
-			limits.pointSizeGranularity = physicalDeviceProperties.limits.pointSizeGranularity;
-			limits.minStorageBufferOffsetAlignment = physicalDeviceProperties.limits.minStorageBufferOffsetAlignment;
-			limits.minUniformBufferOffsetAlignment = physicalDeviceProperties.limits.minUniformBufferOffsetAlignment;
+			limits.bufferImageGranularity = _physicalDevice->properties.limits.bufferImageGranularity;
+			limits.lineWidthGranularity = _physicalDevice->properties.limits.lineWidthGranularity;
+			limits.maxBoundDescriptorSetCount = _physicalDevice->properties.limits.maxBoundDescriptorSets;
+			limits.maxColorAttachmentCount = _physicalDevice->properties.limits.maxColorAttachments;
+			limits.maxComputeWorkgroupCount[0] = _physicalDevice->properties.limits.maxComputeWorkGroupCount[0];
+			limits.maxComputeWorkgroupCount[1] = _physicalDevice->properties.limits.maxComputeWorkGroupCount[1];
+			limits.maxComputeWorkgroupCount[2] = _physicalDevice->properties.limits.maxComputeWorkGroupCount[2];
+			limits.maxComputeWorkgroupSize[0] = _physicalDevice->properties.limits.maxComputeWorkGroupSize[0];
+			limits.maxComputeWorkgroupSize[1] = _physicalDevice->properties.limits.maxComputeWorkGroupSize[1];
+			limits.maxComputeWorkgroupSize[2] = _physicalDevice->properties.limits.maxComputeWorkGroupSize[2];
+			limits.maxFramebufferSize[0] = _physicalDevice->properties.limits.maxFramebufferWidth;
+			limits.maxFramebufferSize[1] = _physicalDevice->properties.limits.maxFramebufferHeight;
+			limits.maxFramebufferLayerCount = _physicalDevice->properties.limits.maxFramebufferLayers;
+			limits.maxImageDimension1D = _physicalDevice->properties.limits.maxImageDimension1D;
+			limits.maxImageDimension2D = _physicalDevice->properties.limits.maxImageDimension2D;
+			limits.maxImageDimension3D = _physicalDevice->properties.limits.maxImageDimension3D;
+			limits.maxImageLayerCount = _physicalDevice->properties.limits.maxImageArrayLayers;
+			limits.maxMemoryAllocationCount = _physicalDevice->properties.limits.maxMemoryAllocationCount;
+			limits.maxVertexInputAttributeCount = _physicalDevice->properties.limits.maxVertexInputAttributes;
+			limits.maxVertexInputAttributeOffset = _physicalDevice->properties.limits.maxVertexInputAttributeOffset;
+			limits.maxVertexInputBindingCount = _physicalDevice->properties.limits.maxVertexInputBindings;
+			limits.maxVertexInputBindingStride = _physicalDevice->properties.limits.maxVertexInputBindingStride;
+			limits.pointSizeGranularity = _physicalDevice->properties.limits.pointSizeGranularity;
+			limits.minStorageBufferOffsetAlignment = _physicalDevice->properties.limits.minStorageBufferOffsetAlignment;
+			limits.minUniformBufferOffsetAlignment = _physicalDevice->properties.limits.minUniformBufferOffsetAlignment;
 		}
 
 		return _physicalDevice;
