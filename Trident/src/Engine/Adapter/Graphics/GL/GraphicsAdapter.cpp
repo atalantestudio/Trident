@@ -54,6 +54,7 @@ namespace Trident::GL {
 
 		adapter->acquireNextImageImplementation = GL::acquireNextImage;
 		adapter->allocateDescriptorSetsImplementation = GL::allocateDescriptorSets;
+		adapter->allocateMemoryImplementation = GL::allocateMemory;
 		adapter->beginImplementation = GL::begin;
 		adapter->beginRenderPassImplementation = GL::beginRenderPass;
 		adapter->bindComputePipelineImplementation = GL::bindComputePipeline;
@@ -76,7 +77,6 @@ namespace Trident::GL {
 		adapter->createImageImplementation = GL::createImage;
 		adapter->createImageViewImplementation = GL::createImageView;
 		adapter->createInstanceImplementation = GL::createInstance;
-		adapter->createMemoryAllocationImplementation = GL::createMemoryAllocation;
 		adapter->createMemoryAllocatorImplementation = GL::createMemoryAllocator;
 		adapter->createPipelineLayoutImplementation = GL::createPipelineLayout;
 		adapter->createRenderPassImplementation = GL::createRenderPass;

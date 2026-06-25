@@ -57,7 +57,7 @@ namespace Trident::VK {
 		adapter->createImageImplementation = VK::createImage;
 		adapter->createImageViewImplementation = VK::createImageView;
 		adapter->createInstanceImplementation = VK::createInstance;
-		adapter->createMemoryAllocationImplementation = VK::createMemoryAllocation;
+		adapter->allocateMemoryImplementation = VK::allocateMemory;
 		adapter->createMemoryAllocatorImplementation = VK::createMemoryAllocator;
 		adapter->createPipelineLayoutImplementation = VK::createPipelineLayout;
 		adapter->createRenderPassImplementation = VK::createRenderPass;
@@ -109,6 +109,7 @@ namespace Trident::VK {
 		adapter->setLineWidthImplementation = VK::setLineWidth;
 		adapter->setScissorImplementation = VK::setScissor;
 		adapter->setViewportImplementation = VK::setViewport;
+		adapter->suballocateMemoryImplementation = VK::suballocateMemory;
 		adapter->submitImplementation = VK::submit;
 		adapter->submit2Implementation = VK::submit;
 		adapter->unmapBufferImplementation = VK::unmapBuffer;

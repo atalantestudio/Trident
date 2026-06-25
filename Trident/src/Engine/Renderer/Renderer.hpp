@@ -11,6 +11,7 @@
 #include "Engine/API/Graphics/Descriptor/ImageDescriptor.hpp"
 #include "Engine/API/Graphics/Descriptor/ImageViewDescriptor.hpp"
 #include "Engine/API/Graphics/Descriptor/PipelineLayoutDescriptor.hpp"
+#include "Engine/API/Graphics/Descriptor/StaticMemorySuballocationDescriptor.hpp"
 #include "Engine/API/Window/Window.hpp"
 #include "Engine/Application/Application.hpp"
 
@@ -23,6 +24,14 @@ namespace Trident {
 
 		public:
 			virtual void build() = 0;
+
+			/// Called after `build`.
+			virtual StaticMemoryDescriptor getStaticMemoryDescriptor() const {
+				return {};
+			}
+
+			/// Called after `build` and before rendering the first frame.
+			virtual void encodeOneTimeTransfers() const {}
 
 			virtual void render(ref<CommandEncoder> commandEncoder) const = 0;
 

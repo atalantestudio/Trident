@@ -13,6 +13,8 @@ namespace Trident {
 	};
 
 	namespace GL {
-		uint32 createMemoryAllocation(Trident::MemoryAllocator* memoryAllocator, uint32 memoryTypeIndex, uint64 size);
+		uint32 allocateMemory(Trident::MemoryAllocator* memoryAllocator, uint64 size, MemoryProperty memoryProperties);
+
+		MemorySuballocation suballocateMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, uint64 size, uint64 alignment);
 	}
 }

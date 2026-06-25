@@ -15,7 +15,12 @@ namespace Trident {
 				const ref<MemoryAllocator> memoryAllocator = device->getMemoryAllocator();
 
 				// Create an allocation of 1Kb.
-				const uint32 allocationIndex = memoryAllocator->createAllocation(0, 1000);
+				const uint32 allocationIndex = memoryAllocator->allocate(1000, MemoryProperty::DEVICE_LOCAL);
+
+				// Create a suballocation of 64b.
+				const MemorySuballocation suballocation = memoryAllocator->suballocate(allocationIndex, 64, 16);
+
+				const MemoryAllocation& allocation = memoryAllocator->allocations[allocationIndex];
 
 				BREAKPOINT();
 

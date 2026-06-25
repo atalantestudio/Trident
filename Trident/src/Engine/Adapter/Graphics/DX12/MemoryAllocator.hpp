@@ -77,4 +77,10 @@ namespace Trident {
 			UINT currentRenderTargetViewDescriptorHeapAllocationIndex = UNDEFINED_ALLOCATION_INDEX;
 			UINT currentDepthStencilViewDescriptorHeapAllocationIndex = UNDEFINED_ALLOCATION_INDEX;
 	};
+
+	namespace DX12 {
+		uint32 allocateMemory(Trident::MemoryAllocator* memoryAllocator, uint64 size, MemoryProperty memoryProperties);
+
+		MemorySuballocation suballocateMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, uint64 size, uint64 alignment);
+	}
 }

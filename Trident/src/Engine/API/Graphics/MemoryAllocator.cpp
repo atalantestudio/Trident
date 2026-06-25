@@ -10,7 +10,11 @@ namespace Trident {
 		device(device)
 	{}
 
-	uint32 MemoryAllocator::createAllocation(uint32 memoryTypeIndex, uint64 size) {
-		return device->adapter->createMemoryAllocationImplementation(this, memoryTypeIndex, size);
+	uint32 MemoryAllocator::allocate(uint64 size, MemoryProperty memoryProperties) {
+		return device->adapter->allocateMemoryImplementation(this, size, memoryProperties);
+	}
+
+	MemorySuballocation MemoryAllocator::suballocate(uint32 allocationIndex, uint64 size, uint64 alignment) {
+		return device->adapter->suballocateMemoryImplementation(this, allocationIndex, size, alignment);
 	}
 }

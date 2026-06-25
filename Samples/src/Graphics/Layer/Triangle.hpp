@@ -186,8 +186,8 @@ namespace Trident {
 
 				Vertex* mappedRange = vertexStagingBuffer->map(0, vertexStagingBuffer->getSize());
 				mappedRange[0] = {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}};
-				mappedRange[1] = {{0.0f, 0.5f}, {0.0f, 1.0f, 0.0f}};
-				mappedRange[2] = {{0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}};
+				mappedRange[1] = {{ 0.0f,  0.5f}, {0.0f, 1.0f, 0.0f}};
+				mappedRange[2] = {{ 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}};
 
 				vertexStagingBuffer->unmap();
 

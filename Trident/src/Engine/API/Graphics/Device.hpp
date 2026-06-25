@@ -24,6 +24,11 @@ namespace Trident {
 
 			sequence<ref<DescriptorSet>> allocateDescriptorSets(view<ref<DescriptorSetLayout>> descriptorSetLayouts);
 
+			/// Creates and returns a buffer object.
+			/// The returned buffer object is pre-allocated from a dynamic memory allocation.
+			// NOTE
+			// For most resources (excluding render pass attachments and other resources depending on the screen size),
+			// prefer createStaticBuffer over this method.
 			template<typename ElementType>
 			ref<Buffer<ElementType>> createBuffer(const BufferDescriptor& descriptor) const {
 				#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
@@ -45,9 +50,34 @@ namespace Trident {
 					ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
 				#endif
 
-				ref<BaseBuffer> buffer = adapter->createBufferImplementation(this, descriptor, static_cast<uint32>(sizeof(ElementType)));
+				const ref<BaseBuffer> buffer = adapter->createBufferImplementation(this, descriptor, static_cast<uint32>(sizeof(ElementType)));
 
 				return std::static_pointer_cast<Buffer<ElementType>>(buffer);
+			}
+
+			/// Creates and returns a buffer object.
+			/// The returned buffer object is to be allocated from a static memory allocation.
+			ref<BaseBuffer> createStaticBuffer(const BufferDescriptor& descriptor) const {
+				#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+					uint32 warningCount = 0;
+					uint32 errorCount = 0;
+
+					if (descriptor.size == 0) {
+						ENGINE_ERROR("descriptor.size must not be 0.");
+
+						errorCount += 1;
+					}
+
+					if (descriptor.name.count() == 0) {
+						ENGINE_WARNING("descriptor.name should provide a unique name to help identify this buffer.");
+
+						warningCount += 1;
+					}
+
+					ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+				#endif
+
+				return adapter->createStaticBufferImplementation(this, descriptor);
 			}
 
 			ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor) const;

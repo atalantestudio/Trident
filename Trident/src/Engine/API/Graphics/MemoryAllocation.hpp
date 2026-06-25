@@ -3,15 +3,25 @@
 
 #pragma once
 
+#include "Engine/API/Graphics/MemoryProperty.hpp"
+
 namespace Trident {
 	struct MemoryAllocation {
+		/// Whether the allocation was made on-demand or for an explicit user request.
+		bool dynamic;
+
 		/// Opaque memory object handle.
-		void* memory;
+		uint64 memory;
 
+		// TODO(graphics/memory-allocation): Also include memory property flags?
 		uint32 memoryTypeIndex;
+		MemoryProperty memoryProperties;
 
-		uint64 offset;
+		/// Size of the allocation, in bytes.
 		uint64 size;
+
+		/// Size of the used partition, in bytes.
+		uint64 usedOffset;
 
 		/// Number of active suballocations.
 		uint32 suballocationCount;

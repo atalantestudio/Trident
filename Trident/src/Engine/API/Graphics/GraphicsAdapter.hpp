@@ -23,6 +23,7 @@ namespace Trident {
 		public:
 			AcquireNextImageImplementation acquireNextImageImplementation;
 			AllocateDescriptorSetsImplementation allocateDescriptorSetsImplementation;
+			AllocateMemoryImplementation allocateMemoryImplementation;
 			BeginImplementation beginImplementation;
 			BeginRenderPassImplementation beginRenderPassImplementation;
 			BindComputePipelineImplementation bindComputePipelineImplementation;
@@ -41,18 +42,18 @@ namespace Trident {
 			CreateDeviceImplementation createDeviceImplementation;
 			CreateFenceImplementation createFenceImplementation;
 			CreateFramebufferImplementation createFramebufferImplementation;
+			CreateGraphicsPipelineImplementation createGraphicsPipelineImplementation;
 			CreateImageImplementation createImageImplementation;
 			CreateImageViewImplementation createImageViewImplementation;
 			CreateInstanceImplementation createInstanceImplementation;
-			CreateMemoryAllocationImplementation createMemoryAllocationImplementation;
 			CreateMemoryAllocatorImplementation createMemoryAllocatorImplementation;
 			CreatePipelineLayoutImplementation createPipelineLayoutImplementation;
 			CreateRenderPassImplementation createRenderPassImplementation;
-			CreateGraphicsPipelineImplementation createGraphicsPipelineImplementation;
 			CreateSamplerImplementation createSamplerImplementation;
 			CreateSemaphoreImplementation createSemaphoreImplementation;
 			CreateShaderModuleFromAssetImplementation createShaderModuleFromAssetImplementation;
 			CreateShaderModuleFromCodeImplementation createShaderModuleFromCodeImplementation;
+			CreateStaticBufferImplementation createStaticBufferImplementation;
 			CreateSurfaceImplementation createSurfaceImplementation;
 			CreateSwapchainImplementation createSwapchainImplementation;
 			DestroyBufferImplementation destroyBufferImplementation;
@@ -97,6 +98,7 @@ namespace Trident {
 			SetLineWidthImplementation setLineWidthImplementation;
 			SetScissorImplementation setScissorImplementation;
 			SetViewportImplementation setViewportImplementation;
+			SuballocateMemoryImplementation suballocateMemoryImplementation;
 			SubmitImplementation submitImplementation;
 			Submit2Implementation submit2Implementation;
 			UnmapBufferImplementation unmapBufferImplementation;

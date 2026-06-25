@@ -385,4 +385,76 @@ namespace Trident {
 
 		return descriptorHeapAllocations[currentDepthStencilViewDescriptorHeapAllocationIndex];
 	}
+
+	uint32 DX12::allocateMemory(Trident::MemoryAllocator* memoryAllocator, uint64 size, MemoryProperty memoryProperties) {
+		HRESULT result;
+
+		const DX12::Device* device = static_cast<const DX12::Device*>(memoryAllocator->device);
+
+		D3D12_HEAP_TYPE heapType{};
+
+		if (memoryProperties & MemoryProperty::DEVICE_LOCAL) {
+			heapType = D3D12_HEAP_TYPE_DEFAULT;
+		}
+
+		if (memoryProperties & MemoryProperty::HOST_VISIBLE) {
+			heapType = D3D12_HEAP_TYPE_UPLOAD;
+
+			/* if (usage == BufferUsage::TRANSFER_DST) {
+				heapType = D3D12_HEAP_TYPE_READBACK;
+			} */
+		}
+
+		ADAPTER_ASSERT(heapType > 0, "Invalid memory properties.");
+
+		D3D12_HEAP_DESC heapDescriptor{};
+		heapDescriptor.SizeInBytes = size;
+		heapDescriptor.Properties.Type = heapType;
+
+		// TODO(graphics/dx12/memory-allocator/cpu-page-property): Choose a suitable CPU page property.
+		heapDescriptor.Properties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+
+		heapDescriptor.Properties.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
+
+		// TODO(graphics/dx12/memory-allocator/numa): Also check that the device memory is not UMA.
+		if (memoryProperties == MemoryProperty::DEVICE_LOCAL) {
+			heapDescriptor.Properties.MemoryPoolPreference = D3D12_MEMORY_POOL_L1;
+		}
+
+		heapDescriptor.Properties.CreationNodeMask = 1;
+		heapDescriptor.Properties.VisibleNodeMask = 1;
+		heapDescriptor.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+		heapDescriptor.Flags = D3D12_HEAP_FLAG_NONE;
+
+		MemoryAllocation memoryAllocation{};
+
+		ID3D12Heap* heap = pointer_cast<ID3D12Heap*>(&memoryAllocation.memory);
+
+		result = device->device->CreateHeap(&heapDescriptor, IID_PPV_ARGS(&heap));
+
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create heap.");
+
+		memoryAllocation.memoryProperties = memoryProperties;
+		memoryAllocation.size = size;
+		memoryAllocation.usedOffset = 0;
+		memoryAllocation.suballocationCount = 0;
+		memoryAllocation.lastSuballocationAlignment = 0;
+		memoryAllocation.mappedSuballocationCount = 0;
+		memoryAllocation.mappedRange = nullptr;
+
+		// TODO(graphics/dx12/memory-allocator): Return new allocation index.
+		return 0;
+	}
+
+	MemorySuballocation DX12::suballocateMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, uint64 size, uint64 alignment) {
+		// TODO
+		const uint64 alignedSize = size;
+
+		MemorySuballocation memorySuballocation{};
+		memorySuballocation.allocationIndex = allocationIndex;
+		memorySuballocation.offset = 0;
+		memorySuballocation.size = alignedSize;
+
+		return memorySuballocation;
+	}
 }

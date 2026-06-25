@@ -14,10 +14,6 @@ namespace Trident {
 	#define DEBUG_ENUMERATE_TYPES
 
 	class VK::MemoryAllocator : public Trident::MemoryAllocator {
-		private:
-			// Memory allocations have a default size of 16Mb.
-			static constexpr VkDeviceSize DEFAULT_MEMORY_ALLOCATION_SIZE = 16000000;
-
 		public:
 			explicit MemoryAllocator(const Trident::Device* device);
 
@@ -30,7 +26,8 @@ namespace Trident {
 			/// Finds and returns the index of a suitable memory type for the provided memory requirements,
 			/// or UNDEFINED_MEMORY_TYPE_INDEX if none was found.
 			/// Memory types having exactly the same flags as the requirements are prioritized.
-			/// Alignment and available size are ignored.
+			/// In the second variant, alignment and available size are ignored.
+			uint32 findSuitableMemoryType(VkMemoryPropertyFlags memoryPropertyFlags);
 			uint32 findSuitableMemoryType(const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags memoryPropertyFlags);
 
 			MemorySuballocation suballocateBuffer(VkBuffer buffer, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements);
@@ -44,8 +41,9 @@ namespace Trident {
 			void freeSuballocation(uint32 memoryAllocationIndex);
 
 		private:
-			// Creates and returns a suballocation from a memory allocation.
-			MemorySuballocation suballocate(uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements, sequence<uint32>& currentMemoryAllocationIndices);
+			uint32 findAllocation(uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements, sequence<uint32>& currentMemoryAllocationIndices);
+
+			uint32 allocateMemoryDynamic(uint64 size, MemoryProperty memoryProperties);
 
 		// TODO: Don't expose.
 		public:
@@ -59,9 +57,14 @@ namespace Trident {
 			sequence<uint32> currentImageMemoryAllocationIndices;
 
 			std::vector<uint32> freeMemoryAllocationIndices;
+
+			// TODO(graphics/vk/memory-allocator): Refactor.
+			bool bufferOrImageMemoryAllocationIndices = false;
 	};
 
 	namespace VK {
-		uint32 createMemoryAllocation(Trident::MemoryAllocator* memoryAllocator, uint32 memoryTypeIndex, uint64 size);
+		uint32 allocateMemory(Trident::MemoryAllocator* memoryAllocator, uint64 size, MemoryProperty memoryProperties);
+
+		MemorySuballocation suballocateMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, uint64 size, uint64 alignment);
 	}
 }
