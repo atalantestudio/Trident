@@ -18,12 +18,11 @@ namespace Trident {
 				const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(MemoryProperty::DEVICE_LOCAL);
 
 				const uint32 allocationIndex = memoryAllocator->allocate(false, memoryTypeIndex, 1000);
-
 				const MemoryAllocation& allocation = memoryAllocator->allocations[allocationIndex];
 
 				const ref<BaseBuffer> buffer1 = device->createStaticBuffer({
-					.size = 909,
-					.usage = BufferUsage::TRANSFER_SRC,
+					.size = 256,
+					.usage = BufferUsage::UNIFORM,
 					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
 					.persistent = false,
 					#if defined(DEBUG_OBJECT_NAME)

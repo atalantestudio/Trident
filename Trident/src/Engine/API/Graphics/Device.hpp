@@ -53,7 +53,7 @@ namespace Trident {
 						const uint64 minStorageBufferOffsetAlignment = physicalDevice->getLimits().minStorageBufferOffsetAlignment;
 
 						if (descriptor.size % minStorageBufferOffsetAlignment > 0) {
-							ENGINE_ERROR("descriptor.size must be aligned to the value of minStorageBufferOffsetAlignment ([]).", minStorageBufferOffsetAlignment);
+							ENGINE_ERROR("descriptor.size must be a multiple of the minStorageBufferOffsetAlignment limit ([]).", minStorageBufferOffsetAlignment);
 
 							errorCount += 1;
 						}
@@ -63,7 +63,7 @@ namespace Trident {
 						const uint64 minUniformBufferOffsetAlignment = physicalDevice->getLimits().minUniformBufferOffsetAlignment;
 
 						if (descriptor.size % minUniformBufferOffsetAlignment > 0) {
-							ENGINE_ERROR("descriptor.size must be aligned to the value of minUniformBufferOffsetAlignment ([]).", minUniformBufferOffsetAlignment);
+							ENGINE_ERROR("descriptor.size must be a multiple of the minUniformBufferOffsetAlignment limit ([]).", minUniformBufferOffsetAlignment);
 
 							errorCount += 1;
 						}

@@ -13,13 +13,7 @@ namespace Trident {
 			name(descriptor.name),
 		#endif
 		Trident::BaseBuffer(device, descriptor)
-	{
-		// TODO(graphics/dx12/min-buffer-offset-alignment): Move to the engine side.
-		if (descriptor.usage & BufferUsage::UNIFORM) {
-			// NOTE: Constant buffer views need to be aligned to 256.
-			size = (descriptor.size + D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1) & ~(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1);
-		}
-	}
+	{}
 
 	ref<Trident::BaseBuffer> DX12::createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor) {
 		return createRef<DX12::BaseBuffer>(device, descriptor);

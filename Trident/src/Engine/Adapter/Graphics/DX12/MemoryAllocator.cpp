@@ -482,6 +482,9 @@ namespace Trident {
 		resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 		resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_NONE;
 
+		// TODO(graphics/dx12/memory-allocator)
+		// const D3D12_RESOURCE_ALLOCATION_INFO resourceAllocationInfo = _device->device->GetResourceAllocationInfo(0, 1, &resourceDescriptor);
+
 		D3D12_RESOURCE_STATES initialResourceStates = D3D12_RESOURCE_STATE_COMMON;
 
 		if (buffer->getMemorySuballocation().memoryProperties & MemoryProperty::DEVICE_LOCAL && buffer->getUsage() & BufferUsage::READ_WRITE_STORAGE) {
@@ -547,6 +550,9 @@ namespace Trident {
 		resourceDescriptor.SampleDesc.Quality = 0;
 		resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 		resourceDescriptor.Flags = getImageResourceFlags(usage);
+
+		// TODO(graphics/dx12/memory-allocator)
+		// const D3D12_RESOURCE_ALLOCATION_INFO resourceAllocationInfo = _device->device->GetResourceAllocationInfo(0, 1, &resourceDescriptor);
 
 		const D3D12_HEAP_TYPE heapType = static_cast<D3D12_HEAP_TYPE>(memoryAllocation.memoryTypeIndex + 1);
 
