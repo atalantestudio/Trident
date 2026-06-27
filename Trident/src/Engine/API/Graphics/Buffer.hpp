@@ -28,14 +28,14 @@ namespace Trident {
 			Access getAccess() const;
 
 			/// Unmaps the buffer.
-			void unmap() const;
+			void unmap();
 
 			template<typename T>
-			ref<BufferView<T>> createView(uint64 offset, uint64 size) const;
+			ref<BufferView<T>> createView(uint64 offset, uint64 size);
 
 			/// Maps a range of the buffer to host memory.
 			/// The offset and size must be provided in bytes.
-			void* map(uint64 offset, uint64 size) const;
+			void* map(uint64 offset, uint64 size);
 
 		protected:
 			explicit BaseBuffer(const Device* device, const BufferDescriptor& descriptor);
@@ -57,7 +57,7 @@ namespace Trident {
 		public:
 			/// Maps a range of the buffer to host memory.
 			/// The offset and size must be provided in bytes.
-			inline ElementType* map(uint64 offset, uint64 size) const {
+			inline ElementType* map(uint64 offset, uint64 size) {
 				return static_cast<ElementType*>(BaseBuffer::map(offset, size));
 			}
 	};

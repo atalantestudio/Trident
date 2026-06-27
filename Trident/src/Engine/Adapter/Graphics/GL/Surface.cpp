@@ -58,6 +58,7 @@ namespace Trident {
 				LOAD_PROCEDURE(glDisablei);
 				LOAD_PROCEDURE(glEnablei);
 				LOAD_PROCEDURE(glGetIntegeri_v);
+				LOAD_PROCEDURE(glMapBufferRange);
 			#endif
 
 			#if OPENGL_VERSION >= OPENGL_VERSION_3_2
@@ -218,12 +219,6 @@ namespace Trident {
 				LOAD_PROCEDURE(glEnableVertexArrayAttrib);
 			#else
 				LOAD_PROCEDURE(glEnableVertexAttribArray);
-			#endif
-
-			#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-				LOAD_PROCEDURE(glMapNamedBufferRange);
-			#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
-				LOAD_PROCEDURE(glMapBufferRange);
 			#endif
 
 			#if OPENGL_VERSION >= OPENGL_VERSION_4_3

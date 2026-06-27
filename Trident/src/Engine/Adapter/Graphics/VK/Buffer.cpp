@@ -94,13 +94,13 @@ namespace Trident {
 		memoryAllocator->freeSuballocation(buffer->getMemorySuballocation().allocationIndex);
 	}
 
-	void* VK::mapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer, uint64 offset, uint64 size) {
+	void* VK::mapBuffer(const Trident::Device* device, Trident::BaseBuffer* buffer, uint64 offset, uint64 size) {
 		const ref<VK::MemoryAllocator> memoryAllocator = std::static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
 
 		return memoryAllocator->mapSuballocation(buffer->getMemorySuballocation(), offset, size);
 	}
 
-	void VK::unmapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer) {
+	void VK::unmapBuffer(const Trident::Device* device, Trident::BaseBuffer* buffer) {
 		const ref<VK::MemoryAllocator> memoryAllocator = std::static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
 
 		memoryAllocator->unmapSuballocation(buffer->getMemorySuballocation().allocationIndex);

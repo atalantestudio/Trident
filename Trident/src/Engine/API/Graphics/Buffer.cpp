@@ -43,19 +43,19 @@ namespace Trident {
 		return access;
 	}
 
-	void* BaseBuffer::map(uint64 offset, uint64 size) const {
+	void* BaseBuffer::map(uint64 offset, uint64 size) {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 
-			if (offset >= size) {
-				ENGINE_ERROR("The mapped range offset must be less than its size.");
+			if (size == 0) {
+				ENGINE_ERROR("The mapped range size must not be 0.");
 
 				errorCount += 1;
 			}
 
-			if (size == 0) {
-				ENGINE_ERROR("The mapped range size must not be 0.");
+			if (memorySuballocation.allocationIndex == max<uint32>()) {
+				ENGINE_ERROR("The buffer hasn't been allocated yet.");
 
 				errorCount += 1;
 			}
@@ -77,10 +77,16 @@ namespace Trident {
 		return mappedRange;
 	}
 
-	void BaseBuffer::unmap() const {
+	void BaseBuffer::unmap() {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			uint32 warningCount = 0;
 			uint32 errorCount = 0;
+
+			if (memorySuballocation.allocationIndex == max<uint32>()) {
+				ENGINE_ERROR("The buffer hasn't been allocated yet.");
+
+				errorCount += 1;
+			}
 
 			{
 				const MemoryAllocation& memoryAllocation = device->memoryAllocator->allocations[memorySuballocation.allocationIndex];

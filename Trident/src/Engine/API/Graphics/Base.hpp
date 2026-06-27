@@ -150,7 +150,7 @@ namespace Trident {
 	typedef ref<Queue> (*GetQueueImplementation)(const Device* device, QueueFamilyCapability queueFamilyCapability);
 	typedef ImageFormat (*GetSurfaceFormatImplementation)(const Surface* surface);
 	typedef void (*InsertMemoryBarriersImplementation)(CommandEncoder* commandEncoder, view<BufferMemoryBarrier> bufferMemoryBarriers, view<ImageMemoryBarrier> imageMemoryBarriers);
-	typedef void* (*MapBufferImplementation)(const Device* device, const BaseBuffer* buffer, uint64 offset, uint64 size);
+	typedef void* (*MapBufferImplementation)(const Device* device, BaseBuffer* buffer, uint64 offset, uint64 size);
 	typedef void (*NextSubpassImplementation)(CommandEncoder* commandEncoder);
 	typedef PresentStatus (*PresentImplementation)(const Queue* queue, view<ref<Swapchain>> swapchains, view<uint32> presentableImageIndices, ref<Semaphore> waitSemaphore);
 	typedef void (*QueueWaitIdleImplementation)(const Queue* queue);
@@ -164,7 +164,7 @@ namespace Trident {
 	typedef MemorySuballocation (*SuballocateImageMemoryImplementation)(MemoryAllocator* memoryAllocator, uint32 allocationIndex, ref<Image> image);
 	typedef void (*SubmitImplementation)(const Queue* queue, view<ref<CommandBuffer>> commandBuffers);
 	typedef void (*Submit2Implementation)(const Queue* queue, view<ref<CommandBuffer>> commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<Fence> fence);
-	typedef void (*UnmapBufferImplementation)(const Device* device, const BaseBuffer* buffer);
+	typedef void (*UnmapBufferImplementation)(const Device* device, BaseBuffer* buffer);
 	typedef void (*UpdateDescriptorSetsImplementation)(const Device* device, view<WriteDescriptorSet> writeDescriptorSets);
 	typedef void (*UpdateSwapchainImplementation)(const Device* device, Swapchain* swapchain, const SwapchainDescriptor& descriptor);
 	typedef void (*WaitForFenceImplementation)(const Device* device, Fence* fence);

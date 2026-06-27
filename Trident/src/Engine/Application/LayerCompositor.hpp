@@ -116,8 +116,10 @@ namespace Trident {
 						const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(memorySuballocation.memoryProperties);
 						const MemoryRequirements memoryRequirements = memoryAllocator->getMemoryRequirements(buffer);
 
-						allocationSizesPerMemoryType[memoryTypeIndex] += memoryRequirements.size;
-						allocationAlignmentsPerMemoryType[memoryTypeIndex] = max(allocationAlignmentsPerMemoryType[memoryTypeIndex], memoryRequirements.alignment);
+						uint64& alignment = allocationAlignmentsPerMemoryType[memoryTypeIndex];
+						alignment = max(alignment, memoryRequirements.alignment);
+
+						allocationSizesPerMemoryType[memoryTypeIndex] += ceil(memoryRequirements.size, alignment);
 					}
 
 					for (const ref<Image>& image : staticMemoryDescriptor.images) {
@@ -128,8 +130,10 @@ namespace Trident {
 						const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(memorySuballocation.memoryProperties);
 						const MemoryRequirements memoryRequirements = memoryAllocator->getMemoryRequirements(image);
 
-						allocationSizesPerMemoryType[memoryTypeIndex] += memoryRequirements.size;
-						allocationAlignmentsPerMemoryType[memoryTypeIndex] = max(allocationAlignmentsPerMemoryType[memoryTypeIndex], memoryRequirements.alignment);
+						uint64& alignment = allocationAlignmentsPerMemoryType[memoryTypeIndex];
+						alignment = max(alignment, memoryRequirements.alignment);
+
+						allocationSizesPerMemoryType[memoryTypeIndex] += ceil(memoryRequirements.size, alignment);
 					}
 
 					layerIndex += 1;

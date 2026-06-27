@@ -11,7 +11,7 @@ namespace Trident {
 		public:
 			explicit BufferView(
 				/// The viewed buffer.
-				const BaseBuffer* buffer,
+				BaseBuffer* buffer,
 
 				/// The offset in bytes of the view.
 				uint64 offset,
@@ -21,7 +21,7 @@ namespace Trident {
 			);
 
 			/// Returns the viewed buffer.
-			const BaseBuffer* getBuffer() const;
+			BaseBuffer* getBuffer();
 
 			/// Returns the offset in bytes of the view.
 			inline uint64 getOffset() const;
@@ -30,10 +30,10 @@ namespace Trident {
 			inline uint64 getSize() const;
 
 			/// Maps the view's range to host memory.
-			inline T* map() const;
+			inline T* map();
 
 		private:
-			const BaseBuffer* buffer;
+			BaseBuffer* buffer;
 			uint64 offset;
 			uint64 size;
 	};

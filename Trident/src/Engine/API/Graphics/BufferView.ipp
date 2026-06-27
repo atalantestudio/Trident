@@ -3,7 +3,7 @@
 
 namespace Trident {
 	template<typename T>
-	inline BufferView<T>::BufferView(const BaseBuffer* buffer, uint64 offset, uint64 size) :
+	inline BufferView<T>::BufferView(BaseBuffer* buffer, uint64 offset, uint64 size) :
 		buffer(buffer),
 		offset(offset),
 		size(size)
@@ -11,7 +11,7 @@ namespace Trident {
 
 	/// Returns the viewed buffer.
 	template<typename T>
-	inline const BaseBuffer* BufferView<T>::getBuffer() const {
+	inline BaseBuffer* BufferView<T>::getBuffer() {
 		return buffer;
 	}
 
@@ -29,7 +29,7 @@ namespace Trident {
 
 	/// Maps the view's range to host memory.
 	template<typename T>
-	inline T* BufferView<T>::map() const {
+	inline T* BufferView<T>::map() {
 		return static_cast<T*>(buffer->map(offset, size));
 	}
 }

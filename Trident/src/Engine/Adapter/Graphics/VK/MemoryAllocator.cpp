@@ -111,7 +111,6 @@ namespace Trident {
 		ADAPTER_ASSERT(offset + size <= memoryAllocation.usedOffset, "The offsetted mapping size ([]) is larger than the size of the memory allocation active range ([]).", offset + size, memoryAllocation.usedOffset);
 
 		if (memoryAllocation.mappedSuballocationCount == 0) {
-			// TODO: (Static allocations only) Map the active suballocation range and not the whole memory block.
 			const VkResult result = _device->vkMapMemory(_device->device, *pointer_cast<const VkDeviceMemory*>(&memoryAllocation.memory), 0, memoryAllocation.size, 0, &memoryAllocation.mappedRange);
 
 			ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to map memory allocation. ([])", string_VkResult(result));
@@ -139,7 +138,7 @@ namespace Trident {
 			const VkMemoryType memoryType = _physicalDevice->memoryProperties.memoryTypes[memoryAllocation.memoryTypeIndex];
 
 			if (!(memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)) {
-				// TODO: Expose vkFlushMappedMemoryRanges to the graphics adapter.
+				// TODO(graphics/vk/memory-allocator/flush-mapped-ranges): Expose vkFlushMappedMemoryRanges to the graphics adapter.
 				ADAPTER_WARNING("Non-coherent memory must be manually flushed.");
 
 				/* VkMappedMemoryRange mappedMemoryRange{};

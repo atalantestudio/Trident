@@ -24,8 +24,8 @@ namespace Trident {
 
 		void destroyBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer);
 
-		void* mapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer, uint64 offset, uint64 size);
+		void* mapBuffer(const Trident::Device* device, Trident::BaseBuffer* buffer, uint64 offset, uint64 size);
 
-		void unmapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer);
+		void unmapBuffer(const Trident::Device* device, Trident::BaseBuffer* buffer);
 	}
 }

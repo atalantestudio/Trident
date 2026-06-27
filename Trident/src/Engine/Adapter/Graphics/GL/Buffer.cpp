@@ -4,11 +4,7 @@
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/GL/Buffer.hpp"
-
-#if OPENGL_VERSION < OPENGL_VERSION_4_5
-	#include "Engine/Adapter/Graphics/GL/BufferUsage.hpp"
-#endif
-
+#include "Engine/Adapter/Graphics/GL/BufferUsage.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
@@ -20,12 +16,11 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		ref<GL::BaseBuffer> buffer = createRef<GL::BaseBuffer>(device, descriptor);
+		buffer->target = getTarget(descriptor.usage);
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 			glCreateBuffers(1, &buffer->buffer);
 		#else
-			buffer->target = getTarget(descriptor.usage);
-
 			glGenBuffers(1, &buffer->buffer);
 			glBindBuffer(buffer->target, buffer->buffer);
 		#endif
@@ -92,32 +87,28 @@ namespace Trident {
 		glDeleteBuffers(1, &_buffer->buffer);
 	}
 
-	void* GL::mapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer, uint64 offset, uint64 size) {
+	void* GL::mapBuffer(const Trident::Device* device, Trident::BaseBuffer* buffer, uint64 offset, uint64 size) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		const GL::BaseBuffer* _buffer = static_cast<const GL::BaseBuffer*>(buffer);
-		void* mappedRange = nullptr;
+		GL::BaseBuffer* _buffer = static_cast<GL::BaseBuffer*>(buffer);
 
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			mappedRange = glMapNamedBufferRange(_buffer->buffer, offset, size, _buffer->mapAccessFlags);
-		#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
+		if (_buffer->mappedRange == nullptr) {
 			glBindBuffer(_buffer->target, _buffer->buffer);
 
-			mappedRange = glMapBufferRange(_buffer->target, offset, size, _buffer->mapAccessFlags);
-		#else
-			// TODO: Use glMapBuffer/glMapNamedBuffer.
-			ENGINE_ERROR_UNSUPPORTED();
-		#endif
+			_buffer->mappedRange = glMapBufferRange(_buffer->target, 0, _buffer->getSize(), _buffer->mapAccessFlags);
 
-		ADAPTER_ASSERT(mappedRange != nullptr, "Failed to map OpenGL buffer range.");
+			ADAPTER_ASSERT(_buffer->mappedRange != nullptr, "Failed to map OpenGL buffer range.");
+		}
 
-		return mappedRange;
+		uint8* mappedRange = static_cast<uint8*>(_buffer->mappedRange) + offset;
+
+		return static_cast<void*>(mappedRange);
 	}
 
-	void GL::unmapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer) {
+	void GL::unmapBuffer(const Trident::Device* device, Trident::BaseBuffer* buffer) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		const GL::BaseBuffer* _buffer = static_cast<const GL::BaseBuffer*>(buffer);
+		GL::BaseBuffer* _buffer = static_cast<GL::BaseBuffer*>(buffer);
 		GLboolean result = GL_FALSE;
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
@@ -129,5 +120,7 @@ namespace Trident {
 		#endif
 
 		ADAPTER_ASSERT(result == GL_TRUE, "Failed to unmap OpenGL buffer.");
+
+		_buffer->mappedRange = nullptr;
 	}
 }

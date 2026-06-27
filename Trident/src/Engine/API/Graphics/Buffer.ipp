@@ -3,7 +3,7 @@
 
 namespace Trident {
 	template<typename T>
-	inline ref<BufferView<T>> BaseBuffer::createView(uint64 offset, uint64 size) const {
+	inline ref<BufferView<T>> BaseBuffer::createView(uint64 offset, uint64 size) {
 		return createRef<BufferView<T>>(this, offset, size);
 	}
 }

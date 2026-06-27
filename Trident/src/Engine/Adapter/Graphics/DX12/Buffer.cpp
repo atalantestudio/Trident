@@ -29,23 +29,24 @@ namespace Trident {
 		}
 	}
 
-	void* DX12::mapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer, uint64 offset, uint64 size) {
+	void* DX12::mapBuffer(const Trident::Device* device, Trident::BaseBuffer* buffer, uint64 offset, uint64 size) {
 		const DX12::BaseBuffer* _buffer = static_cast<const DX12::BaseBuffer*>(buffer);
 		void* data;
 
-		// TODO(graphics/dx12/buffer/map): Use offset and size.
-		const HRESULT result = _buffer->resource->Map(0, nullptr, &data);
+		D3D12_RANGE readRange{};
+		readRange.Begin = offset;
+		readRange.End = offset + size;
+
+		const HRESULT result = _buffer->resource->Map(0, &readRange, &data);
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to map resource.");
 
-		// TODO(graphics/dx12/buffer/map)
-		// "When ppData is not NULL, the pointer returned is never offset by any values in pReadRange."
-		// Manually offset the data?
-		// See https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12resource-map.
-		return data;
+		uint8* mappedRange = static_cast<uint8*>(data) + offset;
+
+		return static_cast<void*>(mappedRange);
 	}
 
-	void DX12::unmapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer) {
+	void DX12::unmapBuffer(const Trident::Device* device, Trident::BaseBuffer* buffer) {
 		const DX12::BaseBuffer* _buffer = static_cast<const DX12::BaseBuffer*>(buffer);
 
 		_buffer->resource->Unmap(0, nullptr);

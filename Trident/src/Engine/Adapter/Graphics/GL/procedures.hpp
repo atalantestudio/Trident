@@ -48,6 +48,7 @@ namespace Trident {
 		extern PFNGLDISABLEIPROC glDisablei;
 		extern PFNGLENABLEIPROC glEnablei;
 		extern PFNGLGETINTEGERI_VPROC glGetIntegeri_v;
+		extern PFNGLMAPBUFFERRANGEPROC glMapBufferRange;
 	#endif
 
 	#if OPENGL_VERSION >= OPENGL_VERSION_3_2
@@ -209,12 +210,6 @@ namespace Trident {
 		extern PFNGLENABLEVERTEXARRAYATTRIBPROC glEnableVertexArrayAttrib;
 	#else
 		extern PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
-	#endif
-
-	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-		extern PFNGLMAPNAMEDBUFFERRANGEPROC glMapNamedBufferRange;
-	#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
-		extern PFNGLMAPBUFFERRANGEPROC glMapBufferRange;
 	#endif
 
 	#if OPENGL_VERSION >= OPENGL_VERSION_4_3

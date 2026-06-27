@@ -13,13 +13,10 @@ namespace Trident {
 
 		public:
 			GLuint buffer;
-
-			#if OPENGL_VERSION < OPENGL_VERSION_4_5
-				const GLenum target;
-			#endif
-
+			GLenum target;
 			GLbitfield storageAccessFlags = 0;
 			GLbitfield mapAccessFlags = 0;
+			void* mappedRange = nullptr;
 	};
 
 	namespace GL {
@@ -27,8 +24,8 @@ namespace Trident {
 
 		void destroyBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer);
 
-		void* mapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer, uint64 offset, uint64 size);
+		void* mapBuffer(const Trident::Device* device, Trident::BaseBuffer* buffer, uint64 offset, uint64 size);
 
-		void unmapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer);
+		void unmapBuffer(const Trident::Device* device, Trident::BaseBuffer* buffer);
 	}
 }
