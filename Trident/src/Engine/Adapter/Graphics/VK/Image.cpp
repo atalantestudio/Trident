@@ -126,7 +126,9 @@ namespace Trident {
 		ImageDescriptor descriptor = createSwapchainImageDescriptor(extent);
 
 		#if defined(DEBUG_OBJECT_NAME)
-			descriptor.name = Logger::format("Swapchain image []", index);
+			const sequence<char8> name = Logger::format("Swapchain image []", index);
+
+			descriptor.name = name;
 		#endif
 
 		ref<VK::Image> _image = createRef<VK::Image>(device, descriptor);

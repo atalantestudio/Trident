@@ -79,7 +79,6 @@ namespace Trident {
 
 	ref<ImageView> Image::createView(const ImageViewDescriptor& descriptor) {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 
 			if (descriptor.mipLevelOffset + descriptor.mipLevelCount > mipLevelCount) {
@@ -106,13 +105,17 @@ namespace Trident {
 				errorCount += 1;
 			}
 
-			if (descriptor.name.count() == 0) {
-				ENGINE_WARNING("descriptor.name should provide a unique name to help identify this image view.");
+			if (memorySuballocation.allocationIndex == max<uint32>()) {
+				ENGINE_ERROR("The image hasn't been allocated yet.");
 
-				warningCount += 1;
+				errorCount += 1;
 			}
 
-			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+			if (descriptor.name.count() == 0) {
+				ENGINE_WARNING("descriptor.name should provide a unique name to help identify this image view.");
+			}
+
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		return device->adapter->createImageViewImplementation(device, this, descriptor);

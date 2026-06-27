@@ -6,6 +6,7 @@
 #include "Engine/API/Graphics/PipelineStage.hpp"
 
 namespace Trident::VK {
+	// TODO(graphics/vk/pipeline-stage-flags): Use?
 	inline VkPipelineStageFlagBits getPipelineStageFlagBits(PipelineStage pipelineStage) {
 		static constexpr VkPipelineStageFlagBits PIPELINE_STAGES[] = {
 			VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,

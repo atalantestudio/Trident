@@ -30,6 +30,8 @@ namespace Trident {
 				return {};
 			}
 
+			virtual void postBuild() {}
+
 			/// Called after `build` and before rendering the first frame.
 			virtual void encodeOneTimeCommands() const {}
 
@@ -59,8 +61,6 @@ namespace Trident {
 				});
 			}
 
-			static ref<BaseBuffer> createStaticBuffer(const BufferDescriptor& descriptor);
-
 			static ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor);
 
 			static ref<DescriptorSetLayout> createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings);
@@ -80,6 +80,10 @@ namespace Trident {
 			static ref<Sampler> createSampler(const SamplerDescriptor& descriptor);
 
 			static ref<Semaphore> createSemaphore();
+
+			static ref<BaseBuffer> createStaticBuffer(const BufferDescriptor& descriptor);
+
+			static ref<Image> createStaticImage(const ImageDescriptor& descriptor);
 
 			static ref<Subpass> createSubpass(const SubpassDescriptor& descriptor);
 

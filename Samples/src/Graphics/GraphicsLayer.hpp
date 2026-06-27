@@ -18,6 +18,7 @@
 			} \
 			\
 			void encodeOneTimeCommands() override { \
+				renderer.postBuild(); \
 				renderer.encodeOneTimeCommands(); \
 			} \
 			\

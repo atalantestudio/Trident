@@ -100,6 +100,7 @@ namespace Trident {
 
 		while (imageIndex < swapchain->imageCount) {
 			swapchain->images[imageIndex] = createImage(device, _swapchain, imageIndex);
+			swapchain->images[imageIndex]->memorySuballocation.allocationIndex = 0;
 
 			imageIndex += 1;
 		}

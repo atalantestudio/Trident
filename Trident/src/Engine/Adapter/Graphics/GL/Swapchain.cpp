@@ -79,6 +79,7 @@ namespace Trident {
 			#endif
 
 			swapchain->images[imageIndex] = createImage(device, imageDescriptor);
+			swapchain->images[imageIndex]->memorySuballocation.allocationIndex = 0;
 
 			imageIndex += 1;
 		}

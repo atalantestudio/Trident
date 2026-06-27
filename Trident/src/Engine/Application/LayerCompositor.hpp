@@ -119,6 +119,7 @@ namespace Trident {
 						uint64& alignment = allocationAlignmentsPerMemoryType[memoryTypeIndex];
 						alignment = max(alignment, memoryRequirements.alignment);
 
+						allocationSizesPerMemoryType[memoryTypeIndex] = max(allocationSizesPerMemoryType[memoryTypeIndex], alignment);
 						allocationSizesPerMemoryType[memoryTypeIndex] += ceil(memoryRequirements.size, alignment);
 					}
 
@@ -133,6 +134,7 @@ namespace Trident {
 						uint64& alignment = allocationAlignmentsPerMemoryType[memoryTypeIndex];
 						alignment = max(alignment, memoryRequirements.alignment);
 
+						allocationSizesPerMemoryType[memoryTypeIndex] = max(allocationSizesPerMemoryType[memoryTypeIndex], alignment);
 						allocationSizesPerMemoryType[memoryTypeIndex] += ceil(memoryRequirements.size, alignment);
 					}
 

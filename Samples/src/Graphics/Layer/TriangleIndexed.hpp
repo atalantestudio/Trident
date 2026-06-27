@@ -15,10 +15,6 @@ namespace Trident {
 				vec3<float32> color;
 			};
 
-		private:
-			static constexpr uint32 VERTEX_COUNT = 3;
-			static constexpr uint32 INDEX_COUNT = 3;
-
 		public:
 			void build() override {
 				renderPass = createRenderPass();
