@@ -92,6 +92,11 @@ namespace Trident {
 		return createRef<DX12::PhysicalDevice>(_instance->adapter, adapter, bestAdapterDescriptor, _instance->factory);
 	}
 
+	uint32 DX12::getPhysicalDeviceMemoryTypeCountImplementation(const Trident::PhysicalDevice* physicalDevice) {
+		// Count DEFAULT, UPLOAD and READBACK.
+		return 3;
+	}
+
 	view<char8> DX12::getPhysicalDeviceName(const Trident::PhysicalDevice* physicalDevice) {
 		return static_cast<const DX12::PhysicalDevice*>(physicalDevice)->name;
 	}

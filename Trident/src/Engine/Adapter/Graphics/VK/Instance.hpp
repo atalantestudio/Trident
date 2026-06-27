@@ -7,10 +7,6 @@
 #include "Engine/Application/ApplicationProperties.hpp"
 #include "Engine/Application/ProjectDescriptor.hpp"
 
-#if defined(BUILD_MODE_DEBUG)
-	#define DEBUG_ENUMERATE_PHYSICAL_DEVICES
-#endif
-
 namespace Trident {
 	class VK::Instance final : public Trident::Instance {
 		public:

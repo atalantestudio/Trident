@@ -12,36 +12,56 @@ namespace Trident {
 		Trident::MemoryAllocator(device)
 	{}
 
-	uint32 GL::allocateMemory(Trident::MemoryAllocator* memoryAllocator, uint64 size, MemoryProperty memoryProperties) {
-		const uint32 allocationIndex = static_cast<uint32>(memoryAllocator->allocations.size());
-
+	MemoryAllocation GL::allocateMemory(Trident::MemoryAllocator* memoryAllocator, bool dynamic, uint32 memoryTypeIndex, uint64 size) {
 		MemoryAllocation memoryAllocation{};
+		memoryAllocation.dynamic = dynamic;
+		memoryAllocation.memory = 0;
 		memoryAllocation.memoryTypeIndex = 0;
 		memoryAllocation.size = size;
 		memoryAllocation.usedOffset = 0;
 		memoryAllocation.suballocationCount = 0;
-		memoryAllocation.lastSuballocationAlignment = 0;
 		memoryAllocation.mappedSuballocationCount = 0;
 		memoryAllocation.mappedRange = nullptr;
 
-		memoryAllocator->allocations.emplace_back(memoryAllocation);
-
-		return allocationIndex;
+		return memoryAllocation;
 	}
 
-	MemorySuballocation GL::suballocateMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, uint64 size, uint64 alignment) {
-		MemoryAllocation* memoryAllocation = &memoryAllocator->allocations[allocationIndex];
+	uint32 GL::findMemoryTypeIndex(const Trident::MemoryAllocator* memoryAllocator, MemoryProperty memoryProperties) {
+		return 0;
+	}
 
-		// TODO
-		const uint64 usedOffset = 0;
+	MemoryRequirements GL::getBufferMemoryRequirements(const Trident::MemoryAllocator* memoryAllocator, ref<Trident::BaseBuffer> buffer) {
+		MemoryRequirements memoryRequirements{};
+		memoryRequirements.size = buffer->getSize();
+		memoryRequirements.alignment = GL_RESOURCE_ALIGNMENT;
+		memoryRequirements.memoryTypeBits = 1;
 
-		MemorySuballocation memorySuballocation{};
-		memorySuballocation.allocationIndex = allocationIndex;
-		memorySuballocation.offset = usedOffset;
-		memorySuballocation.size = size;
+		return memoryRequirements;
+	}
 
-		memoryAllocation->usedOffset = memorySuballocation.offset + memorySuballocation.size;
-		memoryAllocation->suballocationCount += 1;
+	MemoryRequirements GL::getImageMemoryRequirements(const Trident::MemoryAllocator* memoryAllocator, ref<Trident::Image> image) {
+		MemoryRequirements memoryRequirements{};
+		memoryRequirements.size = image->getSize();
+		memoryRequirements.alignment = GL_RESOURCE_ALIGNMENT;
+		memoryRequirements.memoryTypeBits = 1;
+
+		return memoryRequirements;
+	}
+
+	MemorySuballocation GL::suballocateBufferMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, ref<Trident::BaseBuffer> buffer) {
+		const MemoryRequirements memoryRequirements = getBufferMemoryRequirements(memoryAllocator, buffer);
+
+		MemorySuballocation memorySuballocation = memoryAllocator->suballocate(allocationIndex, memoryRequirements.size, memoryRequirements.alignment);
+		memorySuballocation.memoryProperties = buffer->getMemorySuballocation().memoryProperties;
+
+		return memorySuballocation;
+	}
+
+	MemorySuballocation GL::suballocateImageMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, ref<Trident::Image> image) {
+		const MemoryRequirements memoryRequirements = getImageMemoryRequirements(memoryAllocator, image);
+
+		MemorySuballocation memorySuballocation = memoryAllocator->suballocate(allocationIndex, memoryRequirements.size, memoryRequirements.alignment);
+		memorySuballocation.memoryProperties = image->getMemorySuballocation().memoryProperties;
 
 		return memorySuballocation;
 	}

@@ -17,6 +17,10 @@ extern Trident::Application* createApplication(Trident::uint32 argumentCount, Tr
 
 			application = Trident::createApplication(static_cast<Trident::uint32>(argc), argv);
 			application->postConstruct();
+
+			if (application->hasLayers()) {
+				application->initializeLayers();
+			}
 		}
 
 		{

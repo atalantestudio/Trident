@@ -5,12 +5,13 @@
 
 #include "Engine/API/Event/Event.hpp"
 #include "Engine/API/Graphics/CommandEncoder.hpp"
+#include "Engine/API/Graphics/Descriptor/StaticMemoryDescriptor.hpp"
 #include "Engine/Layer/LayerInput.hpp"
 
 namespace Trident {
 	class Application;
 
-	// TODO: Rename to Subpass?
+	// TODO(layer): Rename to Subpass?
 	class Layer {
 		public:
 			virtual ~Layer() = default;
@@ -20,7 +21,23 @@ namespace Trident {
 
 			void setApplication(Application* application);
 
-			virtual void build() = 0;
+			// TODO(layer/initialize): Make pure virtual.
+			// virtual void initialize() = 0;
+			virtual void initialize() {}
+
+			// TODO(layer/initialize): Deprecate.
+			virtual void build() {}
+
+			/// Returns the layer's requirements regarding static memory allocations.
+			// TODO(layer/initialize): Make pure virtual.
+			// virtual StaticMemoryDescriptor getStaticMemoryDescriptor() const = 0;
+			virtual StaticMemoryDescriptor getStaticMemoryDescriptor() const {
+				return {};
+			}
+
+			// TODO(layer/initialize): Make pure virtual.
+			// virtual void encodeOneTimeCommands() = 0;
+			virtual void encodeOneTimeCommands() {}
 
 			virtual void postConstruct();
 

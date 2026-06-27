@@ -32,10 +32,9 @@ namespace Trident {
 			virtual ~Application();
 
 			void initializePropertyFile();
-
 			void initializeWindow(const ProjectDescriptor& projectDescriptor);
-
 			void initializeGraphicsAdapter(const ProjectDescriptor& projectDescriptor);
+			void initializeLayers();
 
 			const sequence<void*>& getConsoleArguments() const;
 

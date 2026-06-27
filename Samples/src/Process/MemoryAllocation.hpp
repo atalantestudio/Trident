@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/MemoryAllocator.hpp"
+#include "Engine/API/Graphics/MemoryRequirements.hpp"
 #include "Engine/API/Process/Process.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
@@ -14,13 +15,39 @@ namespace Trident {
 				const ref<Device> device = Renderer::getDevice();
 				const ref<MemoryAllocator> memoryAllocator = device->getMemoryAllocator();
 
-				// Create an allocation of 1Kb.
-				const uint32 allocationIndex = memoryAllocator->allocate(1000, MemoryProperty::DEVICE_LOCAL);
+				const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(MemoryProperty::DEVICE_LOCAL);
 
-				// Create a suballocation of 64b.
-				const MemorySuballocation suballocation = memoryAllocator->suballocate(allocationIndex, 64, 16);
+				const uint32 allocationIndex = memoryAllocator->allocate(false, memoryTypeIndex, 1000);
 
 				const MemoryAllocation& allocation = memoryAllocator->allocations[allocationIndex];
+
+				const ref<BaseBuffer> buffer1 = device->createStaticBuffer({
+					.size = 909,
+					.usage = BufferUsage::TRANSFER_SRC,
+					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
+					.persistent = false,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Buffer 1",
+					#endif
+				});
+
+				const MemoryRequirements buffer1MemoryRequirements = device->adapter->getBufferMemoryRequirementsImplementation(memoryAllocator.get(), buffer1);
+
+				memoryAllocator->suballocateStatic(allocationIndex, buffer1);
+
+				const ref<BaseBuffer> buffer2 = device->createStaticBuffer({
+					.size = 87,
+					.usage = BufferUsage::TRANSFER_SRC,
+					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
+					.persistent = false,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Buffer 2",
+					#endif
+				});
+
+				const MemoryRequirements buffer2MemoryRequirements = device->adapter->getBufferMemoryRequirementsImplementation(memoryAllocator.get(), buffer2);
+
+				memoryAllocator->suballocateStatic(allocationIndex, buffer2);
 
 				BREAKPOINT();
 

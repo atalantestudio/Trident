@@ -4,11 +4,12 @@
 #pragma once
 
 #include "Engine/API/Graphics/Buffer.hpp"
+#include "Engine/API/Graphics/Device.hpp"
 
 namespace Trident {
 	class GL::BaseBuffer final : public Trident::BaseBuffer {
 		public:
-			explicit BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, uint32 stride);
+			explicit BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor);
 
 		public:
 			GLuint buffer;
@@ -22,7 +23,7 @@ namespace Trident {
 	};
 
 	namespace GL {
-		ref<Trident::BaseBuffer> createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, uint32 stride);
+		ref<Trident::BaseBuffer> createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor);
 
 		void destroyBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer);
 

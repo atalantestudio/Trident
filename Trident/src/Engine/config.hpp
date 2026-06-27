@@ -30,6 +30,9 @@ namespace Trident {
 	// If disabled, they will be sourced from GLSL strings.
 	#define GL_SOURCE_FROM_SPIRV
 
+	/// (OpenGL) The alignment of a resource inside a memory allocation.
+	#define GL_RESOURCE_ALIGNMENT 4
+
 	// Toggle Vulkan graphics adapter.
 	#define ENABLE_VK_ADAPTER
 
@@ -40,6 +43,14 @@ namespace Trident {
 		// Toggle validation layers for graphics APIs that support them.
 		// TODO: Do not mix with ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER, which toggles a custom validation layer.
 		#define DEBUG_ENABLE_VALIDATION_LAYERS
+
+		/// Toggle to enumerate various Vulkan objects.
+		// #define DEBUG_ENUMERATE_DEVICE_EXTENSIONS
+		// #define DEBUG_ENUMERATE_MEMORY_HEAPS
+		// #define DEBUG_ENUMERATE_MEMORY_TYPES
+		// #define DEBUG_ENUMERATE_PHYSICAL_DEVICES
+		// #define DEBUG_ENUMERATE_QUEUE_FAMILY_PROPERTIES
+		// #define DEBUG_ENUMERATE_VALIDATION_LAYERS
 	#endif
 
 	#if defined(BUILD_MODE_DEBUG)

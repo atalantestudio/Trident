@@ -7,6 +7,7 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/API/Graphics/DescriptorSet.hpp"
 #include "Engine/API/Graphics/DescriptorSetLayout.hpp"
+#include "Engine/API/Graphics/MemoryAllocator.hpp"
 #include "Engine/API/Graphics/Queue.hpp"
 #include "Engine/API/Graphics/QueueFamilyCapability.hpp"
 #include "Engine/API/Graphics/Status.hpp"
@@ -19,44 +20,24 @@ namespace Trident {
 		public:
 			~Device();
 
-			// Acquires the next available swapchain image and writes its index to imageIndex.
+			/// Acquires the next available swapchain image.
 			AcquireNextImageStatus acquireNextImage(ref<Swapchain> swapchain, ref<Semaphore> semaphore, uint32& imageIndex) const;
 
 			sequence<ref<DescriptorSet>> allocateDescriptorSets(view<ref<DescriptorSetLayout>> descriptorSetLayouts);
 
-			/// Creates and returns a buffer object.
-			/// The returned buffer object is pre-allocated from a dynamic memory allocation.
-			// NOTE
-			// For most resources (excluding render pass attachments and other resources depending on the screen size),
-			// prefer createStaticBuffer over this method.
+			/// Creates and returns a buffer object which is pre-allocated from dynamic memory.
+			/// For most resources (excluding render pass attachments and other resources depending on the screen size),
+			/// prefer Device::createStaticBuffer over this method.
 			template<typename ElementType>
 			ref<Buffer<ElementType>> createBuffer(const BufferDescriptor& descriptor) const {
-				#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-					uint32 warningCount = 0;
-					uint32 errorCount = 0;
+				const ref<BaseBuffer> buffer = createStaticBuffer(descriptor);
 
-					if (descriptor.size == 0) {
-						ENGINE_ERROR("descriptor.size must not be 0.");
-
-						errorCount += 1;
-					}
-
-					if (descriptor.name.count() == 0) {
-						ENGINE_WARNING("descriptor.name should provide a unique name to help identify this buffer.");
-
-						warningCount += 1;
-					}
-
-					ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
-				#endif
-
-				const ref<BaseBuffer> buffer = adapter->createBufferImplementation(this, descriptor, static_cast<uint32>(sizeof(ElementType)));
+				memoryAllocator->suballocateDynamic(buffer);
 
 				return std::static_pointer_cast<Buffer<ElementType>>(buffer);
 			}
 
-			/// Creates and returns a buffer object.
-			/// The returned buffer object is to be allocated from a static memory allocation.
+			/// Creates and returns a buffer object which needs to be manually allocated.
 			ref<BaseBuffer> createStaticBuffer(const BufferDescriptor& descriptor) const {
 				#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 					uint32 warningCount = 0;
@@ -68,6 +49,26 @@ namespace Trident {
 						errorCount += 1;
 					}
 
+					if (descriptor.usage & (BufferUsage::READ_ONLY_STORAGE | BufferUsage::READ_WRITE_STORAGE)) {
+						const uint64 minStorageBufferOffsetAlignment = physicalDevice->getLimits().minStorageBufferOffsetAlignment;
+
+						if (descriptor.size % minStorageBufferOffsetAlignment > 0) {
+							ENGINE_ERROR("descriptor.size must be aligned to the value of minStorageBufferOffsetAlignment ([]).", minStorageBufferOffsetAlignment);
+
+							errorCount += 1;
+						}
+					}
+
+					if (descriptor.usage & BufferUsage::UNIFORM) {
+						const uint64 minUniformBufferOffsetAlignment = physicalDevice->getLimits().minUniformBufferOffsetAlignment;
+
+						if (descriptor.size % minUniformBufferOffsetAlignment > 0) {
+							ENGINE_ERROR("descriptor.size must be aligned to the value of minUniformBufferOffsetAlignment ([]).", minUniformBufferOffsetAlignment);
+
+							errorCount += 1;
+						}
+					}
+
 					if (descriptor.name.count() == 0) {
 						ENGINE_WARNING("descriptor.name should provide a unique name to help identify this buffer.");
 
@@ -77,7 +78,7 @@ namespace Trident {
 					ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
 				#endif
 
-				return adapter->createStaticBufferImplementation(this, descriptor);
+				return adapter->createBufferImplementation(this, descriptor);
 			}
 
 			ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor) const;

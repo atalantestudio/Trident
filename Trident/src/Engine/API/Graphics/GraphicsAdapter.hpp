@@ -53,7 +53,6 @@ namespace Trident {
 			CreateSemaphoreImplementation createSemaphoreImplementation;
 			CreateShaderModuleFromAssetImplementation createShaderModuleFromAssetImplementation;
 			CreateShaderModuleFromCodeImplementation createShaderModuleFromCodeImplementation;
-			CreateStaticBufferImplementation createStaticBufferImplementation;
 			CreateSurfaceImplementation createSurfaceImplementation;
 			CreateSwapchainImplementation createSwapchainImplementation;
 			DestroyBufferImplementation destroyBufferImplementation;
@@ -85,6 +84,10 @@ namespace Trident {
 			DrawIndexedIndirectImplementation drawIndexedIndirectImplementation;
 			EndImplementation endImplementation;
 			EndRenderPassImplementation endRenderPassImplementation;
+			FindMemoryTypeIndexImplementation findMemoryTypeIndexImplementation;
+			GetBufferMemoryRequirementsImplementation getBufferMemoryRequirementsImplementation;
+			GetImageMemoryRequirementsImplementation getImageMemoryRequirementsImplementation;
+			GetPhysicalDeviceMemoryTypeCountImplementation getPhysicalDeviceMemoryTypeCountImplementation;
 			GetPhysicalDeviceNameImplementation getPhysicalDeviceNameImplementation;
 			GetQueueImplementation getQueueImplementation;
 			InsertMemoryBarriersImplementation insertMemoryBarriersImplementation;
@@ -98,7 +101,8 @@ namespace Trident {
 			SetLineWidthImplementation setLineWidthImplementation;
 			SetScissorImplementation setScissorImplementation;
 			SetViewportImplementation setViewportImplementation;
-			SuballocateMemoryImplementation suballocateMemoryImplementation;
+			SuballocateBufferMemoryImplementation suballocateBufferMemoryImplementation;
+			SuballocateImageMemoryImplementation suballocateImageMemoryImplementation;
 			SubmitImplementation submitImplementation;
 			Submit2Implementation submit2Implementation;
 			UnmapBufferImplementation unmapBufferImplementation;

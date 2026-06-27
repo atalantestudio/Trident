@@ -50,6 +50,7 @@ namespace Trident::DX12 {
 
 		adapter->acquireNextImageImplementation = DX12::acquireNextImage;
 		adapter->allocateDescriptorSetsImplementation = DX12::allocateDescriptorSets;
+		adapter->allocateMemoryImplementation = DX12::allocateMemory;
 		adapter->beginImplementation = DX12::begin;
 		adapter->beginRenderPassImplementation = DX12::beginRenderPass;
 		adapter->bindComputePipelineImplementation = DX12::bindComputePipeline;
@@ -110,6 +111,10 @@ namespace Trident::DX12 {
 		adapter->drawIndexedIndirectImplementation = DX12::drawIndexedIndirect;
 		adapter->endImplementation = DX12::end;
 		adapter->endRenderPassImplementation = DX12::endRenderPass;
+		adapter->findMemoryTypeIndexImplementation = DX12::findMemoryTypeIndex;
+		adapter->getBufferMemoryRequirementsImplementation = DX12::getBufferMemoryRequirements;
+		adapter->getImageMemoryRequirementsImplementation = DX12::getImageMemoryRequirements;
+		adapter->getPhysicalDeviceMemoryTypeCountImplementation = DX12::getPhysicalDeviceMemoryTypeCountImplementation;
 		adapter->getPhysicalDeviceNameImplementation = DX12::getPhysicalDeviceName;
 		adapter->getQueueImplementation = DX12::getQueue;
 		adapter->insertMemoryBarriersImplementation = DX12::insertMemoryBarriers;
@@ -123,6 +128,8 @@ namespace Trident::DX12 {
 		adapter->setLineWidthImplementation = DX12::setLineWidth;
 		adapter->setScissorImplementation = DX12::setScissor;
 		adapter->setViewportImplementation = DX12::setViewport;
+		adapter->suballocateBufferMemoryImplementation = DX12::suballocateBufferMemory;
+		adapter->suballocateImageMemoryImplementation = DX12::suballocateImageMemory;
 		adapter->submitImplementation = DX12::submit;
 		adapter->submit2Implementation = DX12::submit;
 		adapter->unmapBufferImplementation = DX12::unmapBuffer;

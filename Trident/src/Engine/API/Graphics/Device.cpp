@@ -15,10 +15,12 @@ namespace Trident {
 				case 8:
 				case 16:
 				case 32:
-				case 64:
+				case 64: {
 					return true;
-				default:
+				}
+				default: {
 					return false;
+				}
 			}
 		}
 	#endif
@@ -32,7 +34,6 @@ namespace Trident {
 		adapter->destroyDeviceImplementation(this);
 	}
 
-	// Acquires the next available swapchain image and writes its index to imageIndex.
 	AcquireNextImageStatus Device::acquireNextImage(ref<Swapchain> swapchain, ref<Semaphore> semaphore, uint32& imageIndex) const {
 		return adapter->acquireNextImageImplementation(this, swapchain.get(), semaphore.get(), imageIndex);
 	}

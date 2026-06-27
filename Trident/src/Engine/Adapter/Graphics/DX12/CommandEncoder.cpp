@@ -15,7 +15,6 @@
 #include "Engine/Adapter/Graphics/DX12/Framebuffer.hpp"
 #include "Engine/Adapter/Graphics/DX12/GraphicsPipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/ImageView.hpp"
-#include "Engine/Adapter/Graphics/DX12/ResourceState.hpp"
 #include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/API/Graphics/DispatchIndirectCommand.hpp"
@@ -489,11 +488,13 @@ namespace Trident {
 
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 		const ref<DX12::BaseBuffer> _destinationBuffer = std::static_pointer_cast<DX12::BaseBuffer>(destinationBuffer);
+		const MemoryAllocation& memoryAllocation = commandEncoder->device->getMemoryAllocator()->allocations[_destinationBuffer->getMemorySuballocation().allocationIndex];
+		const D3D12_HEAP_TYPE destinationHeapType = static_cast<D3D12_HEAP_TYPE>(memoryAllocation.memoryTypeIndex + 1);
 
 		// NOTE
 		// D3D12_HEAP_TYPE_UPLOAD heaps only allow CPU writes.
 		// The source and destination buffers are mapped to emulate a GPU copy command.
-		if (_destinationBuffer->heapType == D3D12_HEAP_TYPE_UPLOAD) {
+		if (destinationHeapType == D3D12_HEAP_TYPE_UPLOAD) {
 			const uint8* sourceMappedRange = static_cast<const uint8*>(std::static_pointer_cast<Buffer<uint8>>(sourceBuffer)->map(0, sourceBuffer->getSize()));
 			uint8* destinationMappedRange = static_cast<uint8*>(std::static_pointer_cast<Buffer<uint8>>(destinationBuffer)->map(0, destinationBuffer->getSize()));
 

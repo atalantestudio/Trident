@@ -10,18 +10,18 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	VK::BaseBuffer::BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, uint32 stride) :
-		Trident::BaseBuffer(device, descriptor, stride)
+	VK::BaseBuffer::BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor) :
+		Trident::BaseBuffer(device, descriptor)
 	{}
 
-	ref<Trident::BaseBuffer> VK::createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, uint32 stride) {
+	ref<Trident::BaseBuffer> VK::createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		const ref<VK::MemoryAllocator> memoryAllocator = std::static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
 		VkResult result;
 
-		ref<VK::BaseBuffer> buffer = createRef<VK::BaseBuffer>(device, descriptor, stride);
+		ref<VK::BaseBuffer> buffer = createRef<VK::BaseBuffer>(device, descriptor);
 
 		VkBufferCreateInfo bufferCreateInfo{};
 		bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -41,30 +41,28 @@ namespace Trident {
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create buffer ([]).", string_VkResult(result));
 
-		VkMemoryRequirements memoryRequirements;
+		_device->vkGetBufferMemoryRequirements(_device->device, buffer->buffer, &buffer->memoryRequirements);
 
-		_device->vkGetBufferMemoryRequirements(_device->device, buffer->buffer, &memoryRequirements);
+		VkMemoryPropertyFlags memoryPropertyFlags = static_cast<VkMemoryPropertyFlags>(buffer->memorySuballocation.memoryProperties);
+		uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(buffer->memoryRequirements.memoryTypeBits, memoryPropertyFlags);
 
-		VkMemoryPropertyFlags memoryPropertyFlags = static_cast<VkMemoryPropertyFlags>(descriptor.memoryProperties);
-		uint32 memoryTypeIndex = memoryAllocator->findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
-
-		if ((memoryPropertyFlags == (VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) && memoryTypeIndex == UNDEFINED_MEMORY_TYPE_INDEX) {
-			ADAPTER_WARNING("Failed to find DEVICE_LOCAL|HOST_VISIBLE memory for image. Falling back to HOST_VISIBLE|HOST_COHERENT memory.");
+		if (memoryPropertyFlags == (VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) && memoryTypeIndex == max<uint32>()) {
+			ADAPTER_WARNING("Failed to find [] memory for buffer. Falling back to HOST_VISIBLE|HOST_COHERENT memory.", string_VkMemoryPropertyFlags(memoryPropertyFlags));
 
 			memoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-			memoryTypeIndex = memoryAllocator->findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
+			memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(buffer->memoryRequirements.memoryTypeBits, memoryPropertyFlags);
 		}
 
-		if ((memoryPropertyFlags == (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)) && memoryTypeIndex == UNDEFINED_MEMORY_TYPE_INDEX) {
-			ADAPTER_WARNING("Failed to find HOST_VISIBLE|HOST_COHERENT memory for image. Falling back to DEVICE_LOCAL memory.");
+		if (memoryPropertyFlags == (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) && memoryTypeIndex == max<uint32>()) {
+			ADAPTER_WARNING("Failed to find [] memory for buffer. Falling back to DEVICE_LOCAL memory.", string_VkMemoryPropertyFlags(memoryPropertyFlags));
 
 			memoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-			memoryTypeIndex = memoryAllocator->findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
+			memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(buffer->memoryRequirements.memoryTypeBits, memoryPropertyFlags);
 		}
 
-		ADAPTER_ASSERT(memoryTypeIndex != UNDEFINED_MEMORY_TYPE_INDEX, "Undefined memory type index.");
+		ADAPTER_ASSERT(memoryTypeIndex != max<uint32>(), "Undefined memory type index.");
 
-		buffer->memorySuballocation = memoryAllocator->suballocateBuffer(buffer->buffer, memoryTypeIndex, memoryRequirements);
+		buffer->memorySuballocation.memoryProperties = static_cast<MemoryProperty>(memoryPropertyFlags);
 
 		#if defined(DEBUG_OBJECT_NAME)
 			if (descriptor.name.count() > 0) {

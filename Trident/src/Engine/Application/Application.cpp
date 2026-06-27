@@ -148,6 +148,10 @@ namespace Trident {
 		Renderer::initialize(layerCompositor);
 	}
 
+	void Application::initializeLayers() {
+		layerCompositor->initializeLayers();
+	}
+
 	// TODO(application/destruction-leaks)
 	Application::~Application() {
 		delete propertyFile;

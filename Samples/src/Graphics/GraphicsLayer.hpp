@@ -8,9 +8,17 @@
 #define DEFINE_SAMPLE_LAYER(name) \
 	class name##Layer : public Layer { \
 		public: \
-			void build() override { \
+			void initialize() override { \
 				renderer.setLayer(this); \
 				renderer.build(); \
+			} \
+			\
+			StaticMemoryDescriptor getStaticMemoryDescriptor() const override { \
+				return renderer.getStaticMemoryDescriptor(); \
+			} \
+			\
+			void encodeOneTimeCommands() override { \
+				renderer.encodeOneTimeCommands(); \
 			} \
 			\
 			void render(ref<CommandEncoder> commandEncoder, float64 remainingFrameTime) const override { \

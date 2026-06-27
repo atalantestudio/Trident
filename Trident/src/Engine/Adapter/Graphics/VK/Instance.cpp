@@ -82,21 +82,22 @@ namespace Trident {
 		#define LOAD_PROCEDURE(instance, procedure) loadInstanceProcedure<decltype(procedure)>(instance, #procedure)
 
 		static PFN_vkCreateInstance vkCreateInstance = LOAD_PROCEDURE(nullptr, vkCreateInstance);
-		static PFN_vkEnumerateInstanceLayerProperties vkEnumerateInstanceLayerProperties = LOAD_PROCEDURE(nullptr, vkEnumerateInstanceLayerProperties);
 
-		#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
+		#if defined(DEBUG_ENUMERATE_VALIDATION_LAYERS)
 			{
+				PFN_vkEnumerateInstanceLayerProperties vkEnumerateInstanceLayerProperties = LOAD_PROCEDURE(nullptr, vkEnumerateInstanceLayerProperties);
 				uint32 layerPropertyCount;
 
 				result = vkEnumerateInstanceLayerProperties(&layerPropertyCount, nullptr);
 
 				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to find the number of instance layer properties ([]).", string_VkResult(result));
 
-				std::vector<VkLayerProperties> layerProperties(layerPropertyCount);
+				sequence<VkLayerProperties> layerProperties(layerPropertyCount);
 
-				result = vkEnumerateInstanceLayerProperties(&layerPropertyCount, layerProperties.data());
+				result = vkEnumerateInstanceLayerProperties(&layerPropertyCount, &layerProperties[0]);
 
 				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to enumerate instance layer properties ([]).", string_VkResult(result));
+				ADAPTER_INFO("Validation layers:");
 
 				for (const VkLayerProperties& layerProperties : layerProperties) {
 					ADAPTER_INFO("- []", layerProperties.layerName);

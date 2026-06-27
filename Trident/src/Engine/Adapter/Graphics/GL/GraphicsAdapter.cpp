@@ -115,6 +115,10 @@ namespace Trident::GL {
 		adapter->drawIndexedIndirectImplementation = GL::drawIndexedIndirect;
 		adapter->endImplementation = GL::end;
 		adapter->endRenderPassImplementation = GL::endRenderPass;
+		adapter->findMemoryTypeIndexImplementation = GL::findMemoryTypeIndex;
+		adapter->getBufferMemoryRequirementsImplementation = GL::getBufferMemoryRequirements;
+		adapter->getImageMemoryRequirementsImplementation = GL::getImageMemoryRequirements;
+		adapter->getPhysicalDeviceMemoryTypeCountImplementation = GL::getPhysicalDeviceMemoryTypeCountImplementation;
 		adapter->getPhysicalDeviceNameImplementation = GL::getPhysicalDeviceName;
 		adapter->getQueueImplementation = GL::getQueue;
 		adapter->insertMemoryBarriersImplementation = GL::insertMemoryBarriers;
@@ -128,6 +132,8 @@ namespace Trident::GL {
 		adapter->setLineWidthImplementation = GL::setLineWidth;
 		adapter->setScissorImplementation = GL::setScissor;
 		adapter->setViewportImplementation = GL::setViewport;
+		adapter->suballocateBufferMemoryImplementation = GL::suballocateBufferMemory;
+		adapter->suballocateImageMemoryImplementation = GL::suballocateImageMemory;
 		adapter->submitImplementation = GL::submit;
 		adapter->submit2Implementation = GL::submit;
 		adapter->unmapBufferImplementation = GL::unmapBuffer;

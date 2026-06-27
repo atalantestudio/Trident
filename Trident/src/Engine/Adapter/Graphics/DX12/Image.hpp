@@ -15,6 +15,10 @@ namespace Trident {
 			D3D12_BARRIER_ACCESS barrierAccess = D3D12_BARRIER_ACCESS_NO_ACCESS;
 			D3D12_BARRIER_LAYOUT barrierLayout = D3D12_BARRIER_LAYOUT_UNDEFINED;
 			ImageUsage usage;
+
+			#if defined(DEBUG_OBJECT_NAME)
+				sequence<char8> name;
+			#endif
 	};
 
 	namespace DX12 {

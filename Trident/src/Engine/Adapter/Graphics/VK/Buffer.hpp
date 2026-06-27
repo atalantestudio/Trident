@@ -8,14 +8,15 @@
 namespace Trident {
 	class VK::BaseBuffer final : public Trident::BaseBuffer {
 		public:
-			explicit BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, uint32 stride);
+			explicit BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor);
 
 		public:
 			VkBuffer buffer;
+			VkMemoryRequirements memoryRequirements;
 	};
 
 	namespace VK {
-		ref<Trident::BaseBuffer> createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor, uint32 stride);
+		ref<Trident::BaseBuffer> createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor);
 
 		void destroyBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer);
 

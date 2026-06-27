@@ -20,6 +20,8 @@ namespace Trident {
 	namespace DX12 {
 		ref<Trident::PhysicalDevice> selectPhysicalDevice(const Trident::Instance* instance, bool preferIntegratedGpu);
 
+		uint32 getPhysicalDeviceMemoryTypeCountImplementation(const Trident::PhysicalDevice* physicalDevice);
+
 		view<char8> getPhysicalDeviceName(const Trident::PhysicalDevice* physicalDevice);
 	}
 }

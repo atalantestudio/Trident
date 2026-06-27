@@ -19,6 +19,7 @@ namespace Trident {
 			VkImageAspectFlags aspectFlags;
 			MemorySuballocation memorySuballocation;
 			bool swapchainImage;
+			VkMemoryRequirements memoryRequirements;
 	};
 
 	namespace VK {

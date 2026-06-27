@@ -3,18 +3,167 @@
 
 #include "pch.hpp"
 
+#include "Engine/API/Graphics/Device.hpp"
 #include "Engine/API/Graphics/MemoryAllocator.hpp"
+#include "Engine/API/Graphics/MemoryRequirements.hpp"
 
 namespace Trident {
 	MemoryAllocator::MemoryAllocator(const Device* device) :
 		device(device)
 	{}
 
-	uint32 MemoryAllocator::allocate(uint64 size, MemoryProperty memoryProperties) {
-		return device->adapter->allocateMemoryImplementation(this, size, memoryProperties);
+	uint32 MemoryAllocator::allocate(bool dynamic, uint32 memoryTypeIndex, uint64 size) {
+		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+			uint32 warningCount = 0;
+			uint32 errorCount = 0;
+
+			if (size == 0) {
+				ENGINE_ERROR("The allocation size must not be 0.");
+
+				errorCount += 1;
+			}
+
+			const uint32 maxMemoryAllocationCount = device->getPhysicalDevice()->getLimits().maxMemoryAllocationCount;
+
+			if (allocations.size() >= maxMemoryAllocationCount) {
+				ENGINE_ERROR("There cannot be more memory allocations on this device.");
+
+				errorCount += 1;
+			}
+
+			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+		#endif
+
+		const MemoryAllocation allocation = device->adapter->allocateMemoryImplementation(this, dynamic, memoryTypeIndex, size);
+
+		uint32 allocationIndex;
+
+		if (freeableAllocationIndices.size() > 0) {
+			allocationIndex = freeableAllocationIndices.back();
+
+			freeableAllocationIndices.pop_back();
+		}
+		else {
+			allocationIndex = static_cast<uint32>(allocations.size());
+
+			allocations.resize(allocations.size() + 1);
+		}
+
+		allocations[allocationIndex] = allocation;
+
+		return allocationIndex;
+	}
+
+	uint32 MemoryAllocator::findMemoryTypeIndex(MemoryProperty memoryProperties) const {
+		return device->adapter->findMemoryTypeIndexImplementation(this, memoryProperties);
 	}
 
 	MemorySuballocation MemoryAllocator::suballocate(uint32 allocationIndex, uint64 size, uint64 alignment) {
-		return device->adapter->suballocateMemoryImplementation(this, allocationIndex, size, alignment);
+		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+			uint32 warningCount = 0;
+			uint32 errorCount = 0;
+
+			if (allocationIndex < allocations.size()) {
+				const MemoryAllocation& allocation = allocations[allocationIndex];
+				const uint64 offset = min(allocation.size, ceil(allocation.usedOffset, alignment));
+
+				if (allocation.size - offset < size) {
+					ENGINE_ERROR("The suballocation requires [] bytes, but there are only [] bytes remaining in the allocation.", size, allocation.size - offset);
+
+					errorCount += 1;
+				}
+			}
+			else {
+				ENGINE_ERROR("The allocation index is overflowing.");
+
+				errorCount += 1;
+			}
+
+			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+		#endif
+
+		MemoryAllocation& allocation = allocations[allocationIndex];
+
+		MemorySuballocation memorySuballocation{};
+		memorySuballocation.allocationIndex = allocationIndex;
+		memorySuballocation.offset = ceil(allocation.usedOffset, alignment);
+		memorySuballocation.size = size;
+
+		ENGINE_INFO("Created suballocation ([]) inside allocation [].", allocation.suballocationCount, memorySuballocation.allocationIndex);
+		ENGINE_DEBUG(
+			"- Offset = []\n"
+			"- Size = []",
+			memorySuballocation.offset,
+			memorySuballocation.size
+		);
+
+		allocation.usedOffset = min(allocation.size, memorySuballocation.offset + memorySuballocation.size);
+		allocation.suballocationCount += 1;
+
+		return memorySuballocation;
+	}
+
+	void MemoryAllocator::suballocateStatic(uint32 allocationIndex, ref<BaseBuffer> buffer) {
+		buffer->memorySuballocation = device->adapter->suballocateBufferMemoryImplementation(this, allocationIndex, buffer);
+	}
+
+	void MemoryAllocator::suballocateStatic(uint32 allocationIndex, ref<Image> image) {
+		image->memorySuballocation = device->adapter->suballocateImageMemoryImplementation(this, allocationIndex, image);
+	}
+
+	void MemoryAllocator::suballocateDynamic(ref<BaseBuffer> buffer) {
+		const MemoryRequirements memoryRequirements = device->adapter->getBufferMemoryRequirementsImplementation(this, buffer);
+		const uint32 memoryTypeIndex = findMemoryTypeIndex(buffer->getMemorySuballocation().memoryProperties);
+		const uint32 allocationIndex = findAllocationIndex(memoryTypeIndex, memoryRequirements);
+
+		if (allocationIndex >= allocations.size()) {
+			allocate(true, memoryTypeIndex, max(MIN_DYNAMIC_MEMORY_ALLOCATION_SIZE, memoryRequirements.size));
+		}
+
+		suballocateStatic(allocationIndex, buffer);
+	}
+
+	void MemoryAllocator::suballocateDynamic(ref<Image> image) {
+		const MemoryRequirements memoryRequirements = device->adapter->getImageMemoryRequirementsImplementation(this, image);
+		const uint32 memoryTypeIndex = findMemoryTypeIndex(image->getMemorySuballocation().memoryProperties);
+		const uint32 allocationIndex = findAllocationIndex(memoryTypeIndex, memoryRequirements);
+
+		if (allocationIndex >= allocations.size()) {
+			allocate(true, memoryTypeIndex, max(MIN_DYNAMIC_MEMORY_ALLOCATION_SIZE, memoryRequirements.size));
+		}
+
+		suballocateStatic(allocationIndex, image);
+	}
+
+	uint32 MemoryAllocator::findAllocationIndex(uint32 memoryTypeIndex, const MemoryRequirements& memoryRequirements) const {
+		uint32 allocationIndex = 0;
+
+		while (allocationIndex < allocations.size()) {
+			const MemoryAllocation& allocation = allocations[allocationIndex];
+
+			if (!allocation.dynamic) {
+				allocationIndex += 1;
+
+				continue;
+			}
+
+			if (allocation.memoryTypeIndex != memoryTypeIndex) {
+				allocationIndex += 1;
+
+				continue;
+			}
+
+			const uint64 offset = min(allocation.size, ceil(allocation.usedOffset, memoryRequirements.alignment));
+
+			if (allocation.size - offset < memoryRequirements.size) {
+				allocationIndex += 1;
+
+				continue;
+			}
+
+			break;
+		}
+
+		return allocationIndex;
 	}
 }

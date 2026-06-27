@@ -7,6 +7,8 @@
 #include "Engine/Adapter/Graphics/DX12/Format.hpp"
 #include "Engine/Adapter/Graphics/DX12/Image.hpp"
 #include "Engine/Adapter/Graphics/DX12/MemoryAllocator.hpp"
+#include "Engine/Adapter/Graphics/DX12/ResourceDimension.hpp"
+#include "Engine/Adapter/Graphics/DX12/ResourceFlags.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
@@ -195,13 +197,18 @@ namespace Trident {
 		const DX12::Device* device = static_cast<const DX12::Device*>(this->device);
 		const ref<DX12::BaseBuffer> buffer = std::static_pointer_cast<DX12::BaseBuffer>(descriptorBuffer.buffer);
 
+		// TODO(graphics/buffer/stride): Use the size of the template parameter in BufferView.
+		ENGINE_ERROR_UNIMPLEMENTED();
+
+		constexpr UINT stride = 1;
+
 		D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDescriptor{};
 		shaderResourceViewDescriptor.Format = DXGI_FORMAT_UNKNOWN;
 		shaderResourceViewDescriptor.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
 		shaderResourceViewDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		shaderResourceViewDescriptor.Buffer.FirstElement = descriptorBuffer.offset / buffer->getStride();
-		shaderResourceViewDescriptor.Buffer.NumElements = static_cast<UINT>(descriptorBuffer.size) / buffer->getStride();
-		shaderResourceViewDescriptor.Buffer.StructureByteStride = buffer->getStride();
+		shaderResourceViewDescriptor.Buffer.FirstElement = descriptorBuffer.offset / stride;
+		shaderResourceViewDescriptor.Buffer.NumElements = static_cast<UINT>(descriptorBuffer.size) / stride;
+		shaderResourceViewDescriptor.Buffer.StructureByteStride = stride;
 		shaderResourceViewDescriptor.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 
 		device->device->CreateShaderResourceView(buffer->resource, &shaderResourceViewDescriptor, descriptorHandle);
@@ -211,12 +218,17 @@ namespace Trident {
 		const DX12::Device* device = static_cast<const DX12::Device*>(this->device);
 		const ref<DX12::BaseBuffer> buffer = std::static_pointer_cast<DX12::BaseBuffer>(descriptorBuffer.buffer);
 
+		// TODO(graphics/buffer/stride): Use the size of the template parameter in BufferView instead.
+		ENGINE_ERROR_UNIMPLEMENTED();
+
+		constexpr UINT stride = 1;
+
 		D3D12_UNORDERED_ACCESS_VIEW_DESC unorderedAccessViewDescriptor{};
 		unorderedAccessViewDescriptor.Format = DXGI_FORMAT_UNKNOWN;
 		unorderedAccessViewDescriptor.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
-		unorderedAccessViewDescriptor.Buffer.FirstElement = descriptorBuffer.offset / buffer->getStride();
-		unorderedAccessViewDescriptor.Buffer.NumElements = static_cast<UINT>(descriptorBuffer.size) / buffer->getStride();
-		unorderedAccessViewDescriptor.Buffer.StructureByteStride = buffer->getStride();
+		unorderedAccessViewDescriptor.Buffer.FirstElement = descriptorBuffer.offset / stride;
+		unorderedAccessViewDescriptor.Buffer.NumElements = static_cast<UINT>(descriptorBuffer.size) / stride;
+		unorderedAccessViewDescriptor.Buffer.StructureByteStride = stride;
 		unorderedAccessViewDescriptor.Buffer.CounterOffsetInBytes = 0;
 		unorderedAccessViewDescriptor.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
 
@@ -386,74 +398,214 @@ namespace Trident {
 		return descriptorHeapAllocations[currentDepthStencilViewDescriptorHeapAllocationIndex];
 	}
 
-	uint32 DX12::allocateMemory(Trident::MemoryAllocator* memoryAllocator, uint64 size, MemoryProperty memoryProperties) {
-		HRESULT result;
-
-		const DX12::Device* device = static_cast<const DX12::Device*>(memoryAllocator->device);
-
-		D3D12_HEAP_TYPE heapType{};
-
-		if (memoryProperties & MemoryProperty::DEVICE_LOCAL) {
-			heapType = D3D12_HEAP_TYPE_DEFAULT;
-		}
-
-		if (memoryProperties & MemoryProperty::HOST_VISIBLE) {
-			heapType = D3D12_HEAP_TYPE_UPLOAD;
-
-			/* if (usage == BufferUsage::TRANSFER_DST) {
-				heapType = D3D12_HEAP_TYPE_READBACK;
-			} */
-		}
-
-		ADAPTER_ASSERT(heapType > 0, "Invalid memory properties.");
+	MemoryAllocation DX12::allocateMemory(Trident::MemoryAllocator* memoryAllocator, bool dynamic, uint32 memoryTypeIndex, uint64 size) {
+		const DX12::Device* _device = static_cast<const DX12::Device*>(memoryAllocator->device);
 
 		D3D12_HEAP_DESC heapDescriptor{};
 		heapDescriptor.SizeInBytes = size;
-		heapDescriptor.Properties.Type = heapType;
-
-		// TODO(graphics/dx12/memory-allocator/cpu-page-property): Choose a suitable CPU page property.
+		heapDescriptor.Properties.Type = static_cast<D3D12_HEAP_TYPE>(memoryTypeIndex + 1);
 		heapDescriptor.Properties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-
-		heapDescriptor.Properties.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
-
-		// TODO(graphics/dx12/memory-allocator/numa): Also check that the device memory is not UMA.
-		if (memoryProperties == MemoryProperty::DEVICE_LOCAL) {
-			heapDescriptor.Properties.MemoryPoolPreference = D3D12_MEMORY_POOL_L1;
-		}
-
+		heapDescriptor.Properties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
 		heapDescriptor.Properties.CreationNodeMask = 1;
 		heapDescriptor.Properties.VisibleNodeMask = 1;
 		heapDescriptor.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
 		heapDescriptor.Flags = D3D12_HEAP_FLAG_NONE;
 
-		MemoryAllocation memoryAllocation{};
+		ID3D12Heap* heap;
 
-		ID3D12Heap* heap = pointer_cast<ID3D12Heap*>(&memoryAllocation.memory);
-
-		result = device->device->CreateHeap(&heapDescriptor, IID_PPV_ARGS(&heap));
+		const HRESULT result = _device->device->CreateHeap(&heapDescriptor, IID_PPV_ARGS(&heap));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create heap.");
 
-		memoryAllocation.memoryProperties = memoryProperties;
+		MemoryAllocation memoryAllocation{};
+		memoryAllocation.dynamic = dynamic;
+		memoryAllocation.memory = (uint64) heap;
+		memoryAllocation.memoryTypeIndex = memoryTypeIndex;
 		memoryAllocation.size = size;
 		memoryAllocation.usedOffset = 0;
 		memoryAllocation.suballocationCount = 0;
-		memoryAllocation.lastSuballocationAlignment = 0;
 		memoryAllocation.mappedSuballocationCount = 0;
 		memoryAllocation.mappedRange = nullptr;
 
-		// TODO(graphics/dx12/memory-allocator): Return new allocation index.
-		return 0;
+		return memoryAllocation;
 	}
 
-	MemorySuballocation DX12::suballocateMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, uint64 size, uint64 alignment) {
-		// TODO
-		const uint64 alignedSize = size;
+	uint32 DX12::findMemoryTypeIndex(const Trident::MemoryAllocator* memoryAllocator, MemoryProperty memoryProperties) {
+		D3D12_HEAP_TYPE heapType = D3D12_HEAP_TYPE_DEFAULT;
 
-		MemorySuballocation memorySuballocation{};
-		memorySuballocation.allocationIndex = allocationIndex;
-		memorySuballocation.offset = 0;
-		memorySuballocation.size = alignedSize;
+		if (memoryProperties & MemoryProperty::HOST_VISIBLE) {
+			heapType = D3D12_HEAP_TYPE_UPLOAD;
+
+			// TODO(graphics/dx12/memory-allocator/readback-heap)
+			/* if (usage & TRANSFER_DST) {
+				heapType = D3D12_HEAP_TYPE_READBACK;
+			} */
+		}
+
+		return static_cast<uint32>(heapType) - 1;
+	}
+
+	MemoryRequirements DX12::getBufferMemoryRequirements(const Trident::MemoryAllocator* memoryAllocator, ref<Trident::BaseBuffer> buffer) {
+		MemoryRequirements memoryRequirements{};
+		memoryRequirements.size = buffer->getSize();
+		memoryRequirements.alignment = GL_RESOURCE_ALIGNMENT;
+		memoryRequirements.memoryTypeBits = 1;
+
+		return memoryRequirements;
+	}
+
+	MemoryRequirements DX12::getImageMemoryRequirements(const Trident::MemoryAllocator* memoryAllocator, ref<Trident::Image> image) {
+		MemoryRequirements memoryRequirements{};
+		memoryRequirements.size = image->getSize();
+		memoryRequirements.alignment = GL_RESOURCE_ALIGNMENT;
+		memoryRequirements.memoryTypeBits = 1;
+
+		return memoryRequirements;
+	}
+
+	MemorySuballocation DX12::suballocateBufferMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, ref<Trident::BaseBuffer> buffer) {
+		const DX12::Device* _device = static_cast<const DX12::Device*>(memoryAllocator->device);
+		const ref<DX12::BaseBuffer> _buffer = std::static_pointer_cast<DX12::BaseBuffer>(buffer);
+		const MemoryRequirements memoryRequirements = getBufferMemoryRequirements(memoryAllocator, buffer);
+		const MemoryAllocation& memoryAllocation = memoryAllocator->allocations[allocationIndex];
+
+		D3D12_RESOURCE_DESC resourceDescriptor{};
+		resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+		resourceDescriptor.Alignment = 0;
+		resourceDescriptor.Width = buffer->getSize();
+		resourceDescriptor.Height = 1;
+		resourceDescriptor.DepthOrArraySize = 1;
+		resourceDescriptor.MipLevels = 1;
+		resourceDescriptor.Format = DXGI_FORMAT_UNKNOWN;
+		resourceDescriptor.SampleDesc.Count = 1;
+		resourceDescriptor.SampleDesc.Quality = 0;
+		resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+		resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+		D3D12_RESOURCE_STATES initialResourceStates = D3D12_RESOURCE_STATE_COMMON;
+
+		if (buffer->getMemorySuballocation().memoryProperties & MemoryProperty::DEVICE_LOCAL && buffer->getUsage() & BufferUsage::READ_WRITE_STORAGE) {
+			resourceDescriptor.Flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+		}
+
+		if (buffer->getMemorySuballocation().memoryProperties & MemoryProperty::HOST_VISIBLE) {
+			initialResourceStates = D3D12_RESOURCE_STATE_GENERIC_READ;
+
+			if (buffer->getUsage() == BufferUsage::TRANSFER_DST) {
+				initialResourceStates = D3D12_RESOURCE_STATE_COPY_DEST;
+			}
+		}
+
+		MemorySuballocation memorySuballocation = memoryAllocator->suballocate(allocationIndex, memoryRequirements.size, memoryRequirements.alignment);
+		memorySuballocation.memoryProperties = buffer->getMemorySuballocation().memoryProperties;
+
+		HRESULT result;
+
+		{
+			PROFILE_SCOPE("ID3D12Device::CreatePlacedResource (buffer)");
+
+			// TODO(graphics/dx12/memory-allocator/resource-alignment)
+			result = _device->device->CreatePlacedResource((ID3D12Heap*) memoryAllocation.memory, memorySuballocation.offset, &resourceDescriptor, initialResourceStates, nullptr, IID_PPV_ARGS(&_buffer->resource));
+		}
+
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create placed buffer resource.");
+
+		#if defined(DEBUG_OBJECT_NAME)
+			if (_buffer->name.count() > 0) {
+				const LPWSTR name = ConvertUTF8ToUTF16(&_buffer->name[0]);
+
+				result = _buffer->resource->SetName(name);
+
+				ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set resource name.");
+
+				free(name);
+
+				_buffer->name = {};
+			}
+		#endif
+
+		return memorySuballocation;
+	}
+
+	MemorySuballocation DX12::suballocateImageMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, ref<Trident::Image> image) {
+		const DX12::Device* _device = static_cast<const DX12::Device*>(memoryAllocator->device);
+		const ref<DX12::Image> _image = std::static_pointer_cast<DX12::Image>(image);
+		const Extent3D extent = image->getExtent();
+		const ImageUsage usage = image->getUsage();
+		const MemoryRequirements memoryRequirements = getImageMemoryRequirements(memoryAllocator, image);
+		const MemoryAllocation& memoryAllocation = memoryAllocator->allocations[allocationIndex];
+
+		D3D12_RESOURCE_DESC resourceDescriptor{};
+		resourceDescriptor.Dimension = getImageResourceDimension(image->getType());
+		resourceDescriptor.Alignment = 0;
+		resourceDescriptor.Width = extent.width;
+		resourceDescriptor.Height = extent.height;
+		resourceDescriptor.DepthOrArraySize = extent.depth * image->getLayerCount();
+		resourceDescriptor.MipLevels = image->getMipLevelCount();
+		resourceDescriptor.Format = getImageFormat(image->getFormat());
+		resourceDescriptor.SampleDesc.Count = image->getSampleCount();
+		resourceDescriptor.SampleDesc.Quality = 0;
+		resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		resourceDescriptor.Flags = getImageResourceFlags(usage);
+
+		const D3D12_HEAP_TYPE heapType = static_cast<D3D12_HEAP_TYPE>(memoryAllocation.memoryTypeIndex + 1);
+
+		D3D12_RESOURCE_STATES initialResourceStates = D3D12_RESOURCE_STATE_COMMON;
+
+		if (heapType == D3D12_HEAP_TYPE_UPLOAD) {
+			initialResourceStates = D3D12_RESOURCE_STATE_GENERIC_READ;
+		}
+		else if (heapType == D3D12_HEAP_TYPE_READBACK) {
+			initialResourceStates = D3D12_RESOURCE_STATE_COPY_DEST;
+		}
+
+		const D3D12_CLEAR_VALUE* optimizedClearValuePointer = nullptr;
+
+		D3D12_CLEAR_VALUE optimizedClearValue{};
+		optimizedClearValue.Format = resourceDescriptor.Format;
+
+		if (usage & ImageUsage::COLOR_ATTACHMENT) {
+			optimizedClearValue.Color[0] = 0.0f;
+			optimizedClearValue.Color[1] = 0.0f;
+			optimizedClearValue.Color[2] = 0.0f;
+			optimizedClearValue.Color[3] = 1.0f;
+
+			optimizedClearValuePointer = &optimizedClearValue;
+		}
+		else if (usage & ImageUsage::DEPTH_STENCIL_ATTACHMENT) {
+			optimizedClearValue.DepthStencil.Depth = 1.0f;
+			optimizedClearValue.DepthStencil.Stencil = 0;
+
+			optimizedClearValuePointer = &optimizedClearValue;
+		}
+
+		MemorySuballocation memorySuballocation = memoryAllocator->suballocate(allocationIndex, memoryRequirements.size, memoryRequirements.alignment);
+		memorySuballocation.memoryProperties = image->getMemorySuballocation().memoryProperties;
+
+		HRESULT result;
+
+		{
+			PROFILE_SCOPE("ID3D12Device::CreatePlacedResource (image)");
+
+			// TODO(graphics/dx12/memory-allocator/resource-alignment)
+			result = _device->device->CreatePlacedResource((ID3D12Heap*) memoryAllocation.memory, memorySuballocation.offset, &resourceDescriptor, initialResourceStates, optimizedClearValuePointer, IID_PPV_ARGS(&_image->resource));
+		}
+
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create placed image resource.");
+
+		#if defined(DEBUG_OBJECT_NAME)
+			if (_image->name.count() > 0) {
+				const LPWSTR name = ConvertUTF8ToUTF16(&_image->name[0]);
+
+				result = _image->resource->SetName(name);
+
+				ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set resource name.");
+
+				free(name);
+
+				_image->name = {};
+			}
+		#endif
 
 		return memorySuballocation;
 	}

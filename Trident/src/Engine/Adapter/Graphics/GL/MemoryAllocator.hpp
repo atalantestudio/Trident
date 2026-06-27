@@ -5,6 +5,7 @@
 
 #include "Engine/API/Graphics/Device.hpp"
 #include "Engine/API/Graphics/MemoryAllocator.hpp"
+#include "Engine/API/Graphics/MemoryRequirements.hpp"
 
 namespace Trident {
 	class GL::MemoryAllocator : public Trident::MemoryAllocator {
@@ -13,8 +14,16 @@ namespace Trident {
 	};
 
 	namespace GL {
-		uint32 allocateMemory(Trident::MemoryAllocator* memoryAllocator, uint64 size, MemoryProperty memoryProperties);
+		MemoryAllocation allocateMemory(Trident::MemoryAllocator* memoryAllocator, bool dynamic, uint32 memoryTypeIndex, uint64 size);
 
-		MemorySuballocation suballocateMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, uint64 size, uint64 alignment);
+		uint32 findMemoryTypeIndex(const Trident::MemoryAllocator* memoryAllocator, MemoryProperty memoryProperties);
+
+		MemoryRequirements getBufferMemoryRequirements(const Trident::MemoryAllocator* memoryAllocator, ref<Trident::BaseBuffer> buffer);
+
+		MemoryRequirements getImageMemoryRequirements(const Trident::MemoryAllocator* memoryAllocator, ref<Trident::Image> image);
+
+		MemorySuballocation suballocateBufferMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, ref<Trident::BaseBuffer> buffer);
+
+		MemorySuballocation suballocateImageMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, ref<Trident::Image> image);
 	}
 }

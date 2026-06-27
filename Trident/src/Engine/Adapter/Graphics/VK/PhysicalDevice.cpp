@@ -85,24 +85,26 @@ namespace Trident {
 		return score;
 	}
 
-	static void enumerateQueueFamilyProperties(view<VkQueueFamilyProperties> queueFamilies) {
-		uint32 queueFamilyIndex = 0;
+	#if defined(DEBUG_ENUMERATE_QUEUE_FAMILY_PROPERTIES)
+		static void enumerateQueueFamilyProperties(view<VkQueueFamilyProperties> queueFamilies) {
+			uint32 queueFamilyIndex = 0;
 
-		while (queueFamilyIndex < queueFamilies.count()) {
-			const VkQueueFamilyProperties& queueFamily = queueFamilies[queueFamilyIndex];
+			while (queueFamilyIndex < queueFamilies.count()) {
+				const VkQueueFamilyProperties& queueFamily = queueFamilies[queueFamilyIndex];
 
-			ADAPTER_INFO(
-				"Properties for queue family []:\n"
-				"- Queue count: []\n"
-				"- Queue flags: []",
-				queueFamilyIndex,
-				queueFamily.queueCount,
-				string_VkQueueFlags(queueFamily.queueFlags)
-			);
+				ADAPTER_INFO(
+					"Properties for queue family []:\n"
+					"- Queue count: []\n"
+					"- Queue flags: []",
+					queueFamilyIndex,
+					queueFamily.queueCount,
+					string_VkQueueFlags(queueFamily.queueFlags)
+				);
 
-			queueFamilyIndex += 1;
+				queueFamilyIndex += 1;
+			}
 		}
-	}
+	#endif
 
 	VK::PhysicalDevice::PhysicalDevice(const Trident::GraphicsAdapter* adapter) :
 		Trident::PhysicalDevice(adapter)
@@ -176,7 +178,7 @@ namespace Trident {
 
 			_instance->vkGetPhysicalDeviceQueueFamilyProperties(_physicalDevice->physicalDevice, &queueFamilyCount, &queueFamilies[0]);
 
-			#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_ENUMERATE_QUEUE_FAMILY_PROPERTIES)
 				enumerateQueueFamilyProperties(queueFamilies);
 			#endif
 
@@ -273,6 +275,10 @@ namespace Trident {
 		}
 
 		return _physicalDevice;
+	}
+
+	uint32 VK::getPhysicalDeviceMemoryTypeCountImplementation(const Trident::PhysicalDevice* physicalDevice) {
+		return static_cast<const VK::PhysicalDevice*>(physicalDevice)->memoryProperties.memoryTypeCount;
 	}
 
 	view<char8> VK::getPhysicalDeviceName(const Trident::PhysicalDevice* physicalDevice) {

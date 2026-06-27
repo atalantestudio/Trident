@@ -20,7 +20,6 @@ namespace Trident {
 
 		ref<GL::Image> image = createRef<GL::Image>(device, descriptor);
 		image->target = getImageType(descriptor.type, image->sampleCount, image->layerCount);
-		image->usage = descriptor.usage;
 		image->internalFormat = getInternalFormat(descriptor.format);
 		image->format = GL::getFormat(descriptor.format);
 

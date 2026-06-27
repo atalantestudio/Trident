@@ -12,6 +12,9 @@ namespace Trident {
 			/// Returns the name of the physical device.
 			view<char8> getName() const;
 
+			/// Returns the number of supported memory types.
+			uint32 getMemoryTypeCount() const;
+
 			/// Returns a report of the physical device's limits.
 			const PhysicalDeviceLimits& getLimits() const;
 

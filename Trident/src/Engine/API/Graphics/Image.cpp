@@ -20,7 +20,13 @@ namespace Trident {
 		mipLevelCount(descriptor.mipLevelCount),
 		layerCount(descriptor.layerCount),
 		sampleCount(descriptor.sampleCount),
-		usage(descriptor.usage)
+		usage(descriptor.usage),
+		memorySuballocation({
+			.allocationIndex = max<uint32>(),
+			.memoryProperties = descriptor.memoryProperties,
+			.offset = 0,
+			.size = 0,
+		})
 	{}
 
 	Image::~Image() {
@@ -65,6 +71,10 @@ namespace Trident {
 
 	Access Image::getAccess() const {
 		return access;
+	}
+
+	MemorySuballocation Image::getMemorySuballocation() const {
+		return memorySuballocation;
 	}
 
 	ref<ImageView> Image::createView(const ImageViewDescriptor& descriptor) {

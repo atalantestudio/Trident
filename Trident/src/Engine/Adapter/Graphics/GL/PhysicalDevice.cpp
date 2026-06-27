@@ -26,6 +26,10 @@ namespace Trident {
 		return physicalDevice;
 	}
 
+	uint32 GL::getPhysicalDeviceMemoryTypeCountImplementation(const Trident::PhysicalDevice* physicalDevice) {
+		return 1;
+	}
+
 	view<char8> GL::getPhysicalDeviceName(const Trident::PhysicalDevice* physicalDevice) {
 		// TODO(graphics/gl/load-procedures): Find a way around this issue.
 		ADAPTER_ASSERT(glGetString != nullptr, "Procedures can only be loaded after a surface is created.");

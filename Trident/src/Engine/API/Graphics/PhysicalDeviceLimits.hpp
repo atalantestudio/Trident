@@ -46,7 +46,6 @@ namespace Trident {
 		uint32 maxImageLayerCount;
 
 		/// Maximum number of device memory allocations which can simultaneously exist.
-		/// Only relevant when using the Vulkan adapter.
 		uint32 maxMemoryAllocationCount;
 
 		/// Maximum number of vertex input attributes that can be specified for a graphics pipeline.
@@ -58,6 +57,7 @@ namespace Trident {
 		/// Maximum number of vertex buffers that can be specified for providing vertex input attributes to a graphics pipeline.
 		uint32 maxVertexInputBindingCount;
 
+		// TODO(graphics/device-limits/max-vertex-input-binding-stride): Use.
 		/// Maximum vertex input binding stride that can be specified in a vertex input binding.
 		uint32 maxVertexInputBindingStride;
 

@@ -65,44 +65,42 @@ namespace Trident {
 		imageCreateInfo.queueFamilyIndexCount = 0;
 		imageCreateInfo.pQueueFamilyIndices = nullptr;
 
-		// initialLayout must either be VK_IMAGE_LAYOUT_UNDEFINED or VK_IMAGE_LAYOUT_PREINITIALIZED.
+		// NOTE: The initial layout must either be UNDEFINED or PREINITIALIZED.
 		imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
 		result = _device->vkCreateImage(_device->device, &imageCreateInfo, nullptr, &image->image);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create image ([]).", string_VkResult(result));
 
-		VkMemoryRequirements memoryRequirements;
+		_device->vkGetImageMemoryRequirements(_device->device, image->image, &image->memoryRequirements);
 
-		_device->vkGetImageMemoryRequirements(_device->device, image->image, &memoryRequirements);
+		VkMemoryPropertyFlags memoryPropertyFlags = static_cast<VkMemoryPropertyFlags>(image->memorySuballocation.memoryProperties);
+		uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(image->memoryRequirements.memoryTypeBits, memoryPropertyFlags);
 
-		VkMemoryPropertyFlags memoryPropertyFlags = static_cast<VkMemoryPropertyFlags>(descriptor.memoryProperties);
-		uint32 memoryTypeIndex = memoryAllocator->findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
-
-		if ((memoryPropertyFlags == (VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT)) && memoryTypeIndex == UNDEFINED_MEMORY_TYPE_INDEX) {
-			ADAPTER_WARNING("Failed to find DEVICE_LOCAL|LAZILY_ALLOCATED memory for image. Falling back to DEVICE_LOCAL|HOST_VISIBLE memory.");
+		if (memoryPropertyFlags == (VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT) && memoryTypeIndex == max<uint32>()) {
+			ADAPTER_WARNING("Failed to find [] memory for image. Falling back to DEVICE_LOCAL|HOST_VISIBLE memory.", string_VkMemoryPropertyFlags(memoryPropertyFlags));
 
 			memoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
-			memoryTypeIndex = memoryAllocator->findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
+			memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(image->memoryRequirements.memoryTypeBits, memoryPropertyFlags);
 		}
 
-		if ((memoryPropertyFlags == (VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) && memoryTypeIndex == UNDEFINED_MEMORY_TYPE_INDEX) {
-			ADAPTER_WARNING("Failed to find DEVICE_LOCAL|HOST_VISIBLE memory for image. Falling back to HOST_VISIBLE|HOST_COHERENT memory.");
+		if (memoryPropertyFlags == (VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) && memoryTypeIndex == max<uint32>()) {
+			ADAPTER_WARNING("Failed to find [] memory for image. Falling back to HOST_VISIBLE|HOST_COHERENT memory.", string_VkMemoryPropertyFlags(memoryPropertyFlags));
 
 			memoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-			memoryTypeIndex = memoryAllocator->findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
+			memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(image->memoryRequirements.memoryTypeBits, memoryPropertyFlags);
 		}
 
-		if ((memoryPropertyFlags == (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)) && memoryTypeIndex == UNDEFINED_MEMORY_TYPE_INDEX) {
-			ADAPTER_WARNING("Failed to find DEVICE_LOCAL|HOST_VISIBLE memory for image. Falling back to DEVICE_LOCAL memory.");
+		if (memoryPropertyFlags == (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) && memoryTypeIndex == max<uint32>()) {
+			ADAPTER_WARNING("Failed to find [] memory for image. Falling back to DEVICE_LOCAL memory.", string_VkMemoryPropertyFlags(memoryPropertyFlags));
 
 			memoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-			memoryTypeIndex = memoryAllocator->findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
+			memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(image->memoryRequirements.memoryTypeBits, memoryPropertyFlags);
 		}
 
-		ADAPTER_ASSERT(memoryTypeIndex != UNDEFINED_MEMORY_TYPE_INDEX, "Undefined memory type index.");
+		ADAPTER_ASSERT(memoryTypeIndex != max<uint32>(), "Undefined memory type index.");
 
-		image->memorySuballocation = memoryAllocator->suballocateImage(image->image, memoryTypeIndex, memoryRequirements);
+		image->memorySuballocation.memoryProperties = static_cast<MemoryProperty>(memoryPropertyFlags);
 
 		#if defined(DEBUG_OBJECT_NAME)
 			if (descriptor.name.count() > 0) {

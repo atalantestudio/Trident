@@ -7,9 +7,17 @@
 #include "Engine/API/Graphics/PhysicalDevice.hpp"
 
 namespace Trident {
-	PhysicalDevice::PhysicalDevice(const GraphicsAdapter* adapter) :
-		adapter(adapter)
-	{}
+	view<char8> PhysicalDevice::getName() const {
+		return adapter->getPhysicalDeviceNameImplementation(this);
+	}
+
+	uint32 PhysicalDevice::getMemoryTypeCount() const {
+		return adapter->getPhysicalDeviceMemoryTypeCountImplementation(this);
+	}
+
+	const PhysicalDeviceLimits& PhysicalDevice::getLimits() const {
+		return limits;
+	}
 
 	ref<Device> PhysicalDevice::createDevice() const {
 		ref<Device> device = adapter->createDeviceImplementation(adapter, this);
@@ -18,11 +26,7 @@ namespace Trident {
 		return device;
 	}
 
-	const PhysicalDeviceLimits& PhysicalDevice::getLimits() const {
-		return limits;
-	}
-
-	view<char8> PhysicalDevice::getName() const {
-		return adapter->getPhysicalDeviceNameImplementation(this);
-	}
+	PhysicalDevice::PhysicalDevice(const GraphicsAdapter* adapter) :
+		adapter(adapter)
+	{}
 }

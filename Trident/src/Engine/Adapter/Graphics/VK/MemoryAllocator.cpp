@@ -3,59 +3,35 @@
 
 #include "pch.hpp"
 
+#include "Engine/Adapter/Graphics/VK/Buffer.hpp"
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
+#include "Engine/Adapter/Graphics/VK/Image.hpp"
 #include "Engine/Adapter/Graphics/VK/MemoryAllocator.hpp"
 #include "Engine/Adapter/Graphics/VK/PhysicalDevice.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	#if defined(BUILD_MODE_DEBUG)
-		static sequence<char8> formatSize(uint64 size) {
-			const float64 decimalSize = static_cast<float64>(size);
-
-			if (size >= 1000000000000) {
-				return Logger::format("[]Tb", decimalSize / 1000000000000.0);
-			}
-
-			if (size >= 1000000000) {
-				return Logger::format("[]Gb", decimalSize / 1000000000.0);
-			}
-
-			if (size >= 1000000) {
-				return Logger::format("[]Mb", decimalSize / 1000000.0);
-			}
-
-			const std::string formattedSize = toString(decimalSize);
-
-			return sequence<char8>(&formattedSize[0], formattedSize.size());
-		}
-	#endif
-
 	VK::MemoryAllocator::MemoryAllocator(const Trident::Device* device) :
-		Trident::MemoryAllocator(device),
-		physicalDevice(static_cast<const VK::PhysicalDevice*>(device->physicalDevice))
+		Trident::MemoryAllocator(device)
 	{
-		ADAPTER_DEBUG("Buffer image granularity: []", this->physicalDevice->properties.limits.bufferImageGranularity);
-		ADAPTER_DEBUG("Max. memory allocation count: []", this->physicalDevice->properties.limits.maxMemoryAllocationCount);
+		const VK::PhysicalDevice* _physicalDevice = static_cast<const VK::PhysicalDevice*>(device->physicalDevice);
 
-		currentBufferMemoryAllocationIndices = sequence<uint32>(this->physicalDevice->memoryProperties.memoryTypeCount);
-		std::fill(currentBufferMemoryAllocationIndices.begin(), currentBufferMemoryAllocationIndices.end(), UNDEFINED_MEMORY_ALLOCATION_INDEX);
+		currentBufferMemoryAllocationIndices = sequence<uint32>(_physicalDevice->memoryProperties.memoryTypeCount);
+		std::fill(currentBufferMemoryAllocationIndices.begin(), currentBufferMemoryAllocationIndices.end(), max<uint32>());
 
-		currentImageMemoryAllocationIndices = sequence<uint32>(this->physicalDevice->memoryProperties.memoryTypeCount);
-		std::fill(currentImageMemoryAllocationIndices.begin(), currentImageMemoryAllocationIndices.end(), UNDEFINED_MEMORY_ALLOCATION_INDEX);
+		currentImageMemoryAllocationIndices = sequence<uint32>(_physicalDevice->memoryProperties.memoryTypeCount);
+		std::fill(currentImageMemoryAllocationIndices.begin(), currentImageMemoryAllocationIndices.end(), max<uint32>());
 
-		#if defined(BUILD_MODE_DEBUG)
-			#if defined(DEBUG_ENUMERATE_HEAPS)
-				enumerateMemoryHeaps();
-			#endif
+		#if defined(DEBUG_ENUMERATE_MEMORY_HEAPS)
+			enumerateMemoryHeaps();
+		#endif
 
-			#if defined(DEBUG_ENUMERATE_TYPES)
-				enumerateMemoryTypes();
-			#endif
+		#if defined(DEBUG_ENUMERATE_MEMORY_TYPES)
+			enumerateMemoryTypes();
 		#endif
 	}
 
-	#if defined(BUILD_MODE_DEBUG)
+	#if defined(DEBUG_ENUMERATE_MEMORY_HEAPS)
 		void VK::MemoryAllocator::enumerateMemoryHeaps() {
 			uint32 memoryHeapIndex = 0;
 
@@ -64,20 +40,23 @@ namespace Trident {
 
 				ADAPTER_DEBUG(
 					"Memory heap []:\n"
-					"- Size: [] ([])\n"
+					"- Size: []\n"
 					"- Flags: []",
 					memoryHeapIndex,
 					memoryHeap.size,
-					formatSize(memoryHeap.size),
 					string_VkMemoryHeapFlags(memoryHeap.flags)
 				);
 
 				memoryHeapIndex += 1;
 			}
 		}
+	#endif
 
+	#if defined(DEBUG_ENUMERATE_MEMORY_TYPES)
 		void VK::MemoryAllocator::enumerateMemoryTypes() {
-			for (uint32 memoryTypeIndex = 0; memoryTypeIndex < physicalDevice->memoryProperties.memoryTypeCount; memoryTypeIndex += 1) {
+			uint32 memoryTypeIndex = 0;
+
+			while (memoryTypeIndex < physicalDevice->memoryProperties.memoryTypeCount) {
 				const VkMemoryType memoryType = physicalDevice->memoryProperties.memoryTypes[memoryTypeIndex];
 
 				ADAPTER_DEBUG(
@@ -88,12 +67,170 @@ namespace Trident {
 					string_VkMemoryPropertyFlags(memoryType.propertyFlags),
 					memoryType.heapIndex
 				);
+
+				memoryTypeIndex += 1;
 			}
 		}
 	#endif
 
-	uint32 VK::MemoryAllocator::findSuitableMemoryType(VkMemoryPropertyFlags memoryPropertyFlags) {
-		uint32 suitableMemoryTypeIndex = UNDEFINED_MEMORY_TYPE_INDEX;
+	uint32 VK::MemoryAllocator::findMemoryTypeIndex(uint32 memoryTypeBits, VkMemoryPropertyFlags memoryPropertyFlags) {
+		const VK::PhysicalDevice* _physicalDevice = static_cast<const VK::PhysicalDevice*>(device->physicalDevice);
+
+		uint32 suitableMemoryTypeIndex = max<uint32>();
+		uint32 memoryTypeIndex = 0;
+
+		while (memoryTypeIndex < _physicalDevice->memoryProperties.memoryTypeCount) {
+			if (memoryTypeBits & BIT(memoryTypeIndex)) {
+				const VkMemoryType memoryType = _physicalDevice->memoryProperties.memoryTypes[memoryTypeIndex];
+				const VkMemoryPropertyFlags matchingFlags = memoryType.propertyFlags & memoryPropertyFlags;
+
+				if (matchingFlags > 0) {
+					suitableMemoryTypeIndex = memoryTypeIndex;
+
+					if (matchingFlags == memoryPropertyFlags) {
+						break;
+					}
+				}
+			}
+
+			memoryTypeIndex += 1;
+		}
+
+		return suitableMemoryTypeIndex;
+	}
+
+	void* VK::MemoryAllocator::mapSuballocation(const MemorySuballocation& memorySuballocation, VkDeviceSize offset, VkDeviceSize size) {
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+
+		MemoryAllocation& memoryAllocation = allocations[memorySuballocation.allocationIndex];
+
+		ADAPTER_ASSERT(offset <= memoryAllocation.usedOffset, "The mapping offset is outside of the used range for the memory allocation.");
+		ADAPTER_ASSERT(offset + size <= memoryAllocation.usedOffset, "The offsetted mapping size ([]) is larger than the size of the memory allocation active range ([]).", offset + size, memoryAllocation.usedOffset);
+
+		if (memoryAllocation.mappedSuballocationCount == 0) {
+			// TODO: (Static allocations only) Map the active suballocation range and not the whole memory block.
+			const VkResult result = _device->vkMapMemory(_device->device, *pointer_cast<const VkDeviceMemory*>(&memoryAllocation.memory), 0, memoryAllocation.size, 0, &memoryAllocation.mappedRange);
+
+			ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to map memory allocation. ([])", string_VkResult(result));
+
+			ADAPTER_INFO(
+				"Mapped range ([], []) of memory allocation [].",
+				0,
+				memoryAllocation.size,
+				memorySuballocation.allocationIndex
+			);
+		}
+
+		uint8* mappedRange = static_cast<uint8*>(memoryAllocation.mappedRange) + memorySuballocation.offset + offset;
+
+		return static_cast<void*>(mappedRange);
+	}
+
+	void VK::MemoryAllocator::unmapSuballocation(uint32 memoryAllocationIndex) {
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		const VK::PhysicalDevice* _physicalDevice = static_cast<const VK::PhysicalDevice*>(device->physicalDevice);
+
+		MemoryAllocation& memoryAllocation = allocations[memoryAllocationIndex];
+
+		if (memoryAllocation.mappedSuballocationCount == 1) {
+			const VkMemoryType memoryType = _physicalDevice->memoryProperties.memoryTypes[memoryAllocation.memoryTypeIndex];
+
+			if (!(memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)) {
+				// TODO: Expose vkFlushMappedMemoryRanges to the graphics adapter.
+				ADAPTER_WARNING("Non-coherent memory must be manually flushed.");
+
+				/* VkMappedMemoryRange mappedMemoryRange{};
+				mappedMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+				mappedMemoryRange.pNext = nullptr;
+				mappedMemoryRange.memory = memoryAllocation.memory;
+				mappedMemoryRange.offset = 0;
+				mappedMemoryRange.size = memoryAllocation.offset;
+
+				// Manually flush the mapped range.
+				const VkResult result = _device->vkFlushMappedMemoryRanges(_device->device, 1, &mappedMemoryRange);
+
+				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to flush mapped memory allocation range ([]).", string_VkResult(result)); */
+			}
+
+			_device->vkUnmapMemory(_device->device, *pointer_cast<const VkDeviceMemory*>(&memoryAllocation.memory));
+
+			ADAPTER_INFO("Unmapped memory allocation [].", memoryAllocationIndex);
+
+			memoryAllocation.mappedRange = nullptr;
+		}
+	}
+
+	void VK::MemoryAllocator::freeSuballocation(uint32 memoryAllocationIndex) {
+		const VK::Device* _device = static_cast<const VK::Device*>(device);
+
+		MemoryAllocation& memoryAllocation = allocations[memoryAllocationIndex];
+
+		if (memoryAllocation.suballocationCount <= 1) {
+			_device->vkFreeMemory(_device->device, *pointer_cast<const VkDeviceMemory*>(&memoryAllocation.memory), nullptr);
+
+			memoryAllocation.suballocationCount = 0;
+
+			uint32 memoryAllocationIndexIndex = 0;
+
+			// Reset corresponding memory allocation index.
+			while (memoryAllocationIndexIndex < currentBufferMemoryAllocationIndices.count()) {
+				currentBufferMemoryAllocationIndices[memoryAllocationIndexIndex] = max<uint32>();
+				currentImageMemoryAllocationIndices[memoryAllocationIndexIndex] = max<uint32>();
+
+				memoryAllocationIndexIndex += 1;
+			}
+
+			ADAPTER_INFO("Freed memory allocation [].", memoryAllocationIndex);
+
+			freeableAllocationIndices.emplace_back(memoryAllocationIndex);
+
+			return;
+		}
+
+		memoryAllocation.suballocationCount -= 1;
+
+		ADAPTER_INFO("Freed suballocation from memory allocation []. The active suballocation count is now [].", memoryAllocationIndex, memoryAllocation.suballocationCount);
+	}
+
+	MemoryAllocation VK::allocateMemory(Trident::MemoryAllocator* memoryAllocator, bool dynamic, uint32 memoryTypeIndex, uint64 size) {
+		const VK::Device* _device = static_cast<const VK::Device*>(memoryAllocator->device);
+		const VK::PhysicalDevice* _physicalDevice = static_cast<const VK::PhysicalDevice*>(memoryAllocator->device->physicalDevice);
+
+		const VkMemoryType memoryType = _physicalDevice->memoryProperties.memoryTypes[memoryTypeIndex];
+		const VkMemoryHeap memoryHeap = _physicalDevice->memoryProperties.memoryHeaps[memoryType.heapIndex];
+
+		ADAPTER_ASSERT(size < memoryHeap.size, "The allocation size must be smaller than the memory heap's size.");
+
+		VkMemoryAllocateInfo memoryAllocateInfo{};
+		memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		memoryAllocateInfo.pNext = nullptr;
+		memoryAllocateInfo.allocationSize = size;
+		memoryAllocateInfo.memoryTypeIndex = memoryTypeIndex;
+
+		VkDeviceMemory memory;
+
+		const VkResult result = _device->vkAllocateMemory(_device->device, &memoryAllocateInfo, nullptr, &memory);
+
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to allocate memory ([]).", string_VkResult(result));
+
+		MemoryAllocation memoryAllocation{};
+		memoryAllocation.dynamic = dynamic;
+		memoryAllocation.memory = *pointer_cast<uint64*>(&memory);
+		memoryAllocation.memoryTypeIndex = memoryTypeIndex;
+		memoryAllocation.size = size;
+		memoryAllocation.usedOffset = 0;
+		memoryAllocation.suballocationCount = 0;
+		memoryAllocation.mappedSuballocationCount = 0;
+		memoryAllocation.mappedRange = nullptr;
+
+		return memoryAllocation;
+	}
+
+	uint32 VK::findMemoryTypeIndex(const Trident::MemoryAllocator* memoryAllocator, MemoryProperty memoryProperties) {
+		const VK::PhysicalDevice* physicalDevice = static_cast<const VK::PhysicalDevice*>(memoryAllocator->device->physicalDevice);
+		const VkMemoryPropertyFlags memoryPropertyFlags = static_cast<VkMemoryPropertyFlags>(memoryProperties);
+
+		uint32 suitableMemoryTypeIndex = max<uint32>();
 		uint32 memoryTypeIndex = 0;
 
 		while (memoryTypeIndex < physicalDevice->memoryProperties.memoryTypeCount) {
@@ -114,299 +251,44 @@ namespace Trident {
 		return suitableMemoryTypeIndex;
 	}
 
-	uint32 VK::MemoryAllocator::findSuitableMemoryType(const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags memoryPropertyFlags) {
-		uint32 suitableMemoryTypeIndex = UNDEFINED_MEMORY_TYPE_INDEX;
-		uint32 memoryTypeIndex = 0;
+	MemoryRequirements VK::getBufferMemoryRequirements(const Trident::MemoryAllocator* memoryAllocator, ref<Trident::BaseBuffer> buffer) {
+		const ref<VK::BaseBuffer> _buffer = std::static_pointer_cast<VK::BaseBuffer>(buffer);
 
-		while (memoryTypeIndex < physicalDevice->memoryProperties.memoryTypeCount) {
-			if (memoryRequirements.memoryTypeBits & BIT(memoryTypeIndex)) {
-				const VkMemoryType memoryType = physicalDevice->memoryProperties.memoryTypes[memoryTypeIndex];
-				const VkMemoryPropertyFlags matchingFlags = memoryType.propertyFlags & memoryPropertyFlags;
-
-				if (matchingFlags > 0) {
-					suitableMemoryTypeIndex = memoryTypeIndex;
-
-					if (matchingFlags == memoryPropertyFlags) {
-						break;
-					}
-				}
-			}
-
-			memoryTypeIndex += 1;
-		}
-
-		return suitableMemoryTypeIndex;
+		return *pointer_cast<const MemoryRequirements*>(&_buffer->memoryRequirements);
 	}
 
-	MemorySuballocation VK::MemoryAllocator::suballocateBuffer(VkBuffer buffer, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements) {
-		VkResult result;
+	MemoryRequirements VK::getImageMemoryRequirements(const Trident::MemoryAllocator* memoryAllocator, ref<Trident::Image> image) {
+		const ref<VK::Image> _image = std::static_pointer_cast<VK::Image>(image);
 
-		const VK::Device* device = static_cast<const VK::Device*>(this->device);
-
-		bufferOrImageMemoryAllocationIndices = false;
-
-		const uint32 allocationIndex = findAllocation(memoryTypeIndex, memoryRequirements, currentBufferMemoryAllocationIndices);
-		const MemorySuballocation memorySuballocation = suballocate(allocationIndex, memoryRequirements.size, memoryRequirements.alignment);
-		const MemoryAllocation& memoryAllocation = allocations[memorySuballocation.allocationIndex];
-
-		ADAPTER_INFO("Creating new memory suballocation ([]) for buffer resource inside memory allocation [].", memoryAllocation.suballocationCount, memorySuballocation.allocationIndex);
-		ADAPTER_DEBUG(
-			"- Offset = []\n"
-			"- Required size = []\n"
-			"- Size = [] ([])\n"
-			"- Alignment = []",
-			memorySuballocation.offset,
-			memoryRequirements.size,
-			memorySuballocation.size,
-			formatSize(memorySuballocation.size),
-			memoryRequirements.alignment
-		);
-
-		result = device->vkBindBufferMemory(device->device, buffer, *pointer_cast<const VkDeviceMemory*>(&memoryAllocation.memory), memorySuballocation.offset);
-
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Could not bind memory for buffer ([]).", string_VkResult(result));
-
-		return memorySuballocation;
+		return *pointer_cast<const MemoryRequirements*>(&_image->memoryRequirements);
 	}
 
-	MemorySuballocation VK::MemoryAllocator::suballocateImage(VkImage image, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements) {
-		VkResult result;
-
-		const VK::Device* device = static_cast<const VK::Device*>(this->device);
-
-		bufferOrImageMemoryAllocationIndices = true;
-
-		const uint32 allocationIndex = findAllocation(memoryTypeIndex, memoryRequirements, currentImageMemoryAllocationIndices);
-		const MemorySuballocation memorySuballocation = suballocate(allocationIndex, memoryRequirements.size, memoryRequirements.alignment);
-		const MemoryAllocation& memoryAllocation = allocations[memorySuballocation.allocationIndex];
-
-		ADAPTER_INFO("Created new memory suballocation ([]) for image resource inside memory allocation [].", memoryAllocation.suballocationCount, memorySuballocation.allocationIndex);
-		ADAPTER_DEBUG(
-			"- Offset = []\n"
-			"- Required size = []\n"
-			"- Size = [] ([])\n"
-			"- Alignment = []",
-			memorySuballocation.offset,
-			memoryRequirements.size,
-			memorySuballocation.size,
-			formatSize(memorySuballocation.size),
-			memoryRequirements.alignment
-		);
-
-		result = device->vkBindImageMemory(device->device, image, *pointer_cast<const VkDeviceMemory*>(&memoryAllocation.memory), memorySuballocation.offset);
-
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Could not bind memory for image ([]).", string_VkResult(result));
-
-		return memorySuballocation;
-	}
-
-	void* VK::MemoryAllocator::mapSuballocation(const MemorySuballocation& memorySuballocation, VkDeviceSize offset, VkDeviceSize size) {
-		const VK::Device* device = static_cast<const VK::Device*>(this->device);
-
-		MemoryAllocation& memoryAllocation = allocations[memorySuballocation.allocationIndex];
-		VkResult result;
-
-		ADAPTER_ASSERT(offset <= memoryAllocation.usedOffset, "The mapping offset is outside of the used range for the memory allocation.");
-		ADAPTER_ASSERT(offset + size <= memoryAllocation.usedOffset, "The offsetted mapping size ([]) is larger than the size of the memory allocation active range ([]).", offset + size, memoryAllocation.usedOffset);
-
-		if (memoryAllocation.mappedSuballocationCount == 0) {
-			// TODO: (Static allocations only) Map the active suballocation range and not the whole memory block.
-			result = device->vkMapMemory(device->device, *pointer_cast<const VkDeviceMemory*>(&memoryAllocation.memory), 0, memoryAllocation.size, 0, &memoryAllocation.mappedRange);
-
-			ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to map memory allocation. ([])", string_VkResult(result));
-
-			ADAPTER_INFO(
-				"Mapped range ([], []) of memory allocation [].",
-				0,
-				memoryAllocation.size,
-				memorySuballocation.allocationIndex
-			);
-		}
-
-		memoryAllocation.mappedSuballocationCount += 1;
-
-		uint8* mappedRange = static_cast<uint8*>(memoryAllocation.mappedRange) + memorySuballocation.offset + offset;
-
-		return static_cast<void*>(mappedRange);
-	}
-
-	void VK::MemoryAllocator::unmapSuballocation(uint32 memoryAllocationIndex) {
-		const VK::Device* device = static_cast<const VK::Device*>(this->device);
-
-		MemoryAllocation& memoryAllocation = allocations[memoryAllocationIndex];
-
-		if (memoryAllocation.mappedSuballocationCount <= 1) {
-			const VkMemoryType memoryType = physicalDevice->memoryProperties.memoryTypes[memoryAllocation.memoryTypeIndex];
-
-			if (!(memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)) {
-				// TODO: Expose vkFlushMappedMemoryRanges to the graphics adapter.
-				ADAPTER_WARNING("Non-coherent memory must be manually flushed.");
-
-				/* VkMappedMemoryRange mappedMemoryRange{};
-				mappedMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-				mappedMemoryRange.pNext = nullptr;
-				mappedMemoryRange.memory = memoryAllocation.memory;
-				mappedMemoryRange.offset = 0;
-				mappedMemoryRange.size = memoryAllocation.offset;
-
-				// Manually flush the mapped range.
-				const VkResult result = device->vkFlushMappedMemoryRanges(device->device, 1, &mappedMemoryRange);
-
-				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to flush mapped memory allocation range ([]).", string_VkResult(result)); */
-			}
-
-			device->vkUnmapMemory(device->device, *pointer_cast<const VkDeviceMemory*>(&memoryAllocation.memory));
-
-			ADAPTER_INFO("Unmapped memory allocation [].", memoryAllocationIndex);
-
-			memoryAllocation.mappedRange = nullptr;
-			memoryAllocation.mappedSuballocationCount = 0;
-
-			return;
-		}
-
-		memoryAllocation.mappedSuballocationCount -= 1;
-	}
-
-	void VK::MemoryAllocator::freeSuballocation(uint32 memoryAllocationIndex) {
-		const VK::Device* device = static_cast<const VK::Device*>(this->device);
-
-		MemoryAllocation& memoryAllocation = allocations[memoryAllocationIndex];
-
-		if (memoryAllocation.suballocationCount <= 1) {
-			device->vkFreeMemory(device->device, *pointer_cast<const VkDeviceMemory*>(&memoryAllocation.memory), nullptr);
-
-			memoryAllocation.suballocationCount = 0;
-
-			uint32 memoryAllocationIndexIndex = 0;
-
-			// Reset corresponding memory allocation index.
-			while (memoryAllocationIndexIndex < currentBufferMemoryAllocationIndices.count()) {
-				currentBufferMemoryAllocationIndices[memoryAllocationIndexIndex] = UNDEFINED_MEMORY_ALLOCATION_INDEX;
-				currentImageMemoryAllocationIndices[memoryAllocationIndexIndex] = UNDEFINED_MEMORY_ALLOCATION_INDEX;
-
-				memoryAllocationIndexIndex += 1;
-			}
-
-			ADAPTER_INFO("Freed memory allocation [].", memoryAllocationIndex);
-
-			freeMemoryAllocationIndices.emplace_back(memoryAllocationIndex);
-
-			return;
-		}
-
-		memoryAllocation.suballocationCount -= 1;
-
-		ADAPTER_INFO("Freed suballocation from memory allocation []. The active suballocation count is now [].", memoryAllocationIndex, memoryAllocation.suballocationCount);
-	}
-
-	uint32 VK::MemoryAllocator::findAllocation(uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements, sequence<uint32>& currentMemoryAllocationIndices) {
-		uint32 allocationIndex = currentMemoryAllocationIndices[memoryTypeIndex];
-
-		if (allocationIndex == UNDEFINED_MEMORY_ALLOCATION_INDEX) {
-			const VkDeviceSize alignedSize = max(memoryRequirements.size, memoryRequirements.alignment);
-
-			// TODO
-			// allocationIndex = allocateMemory(this, max(alignedSize, DYNAMIC_MEMORY_ALLOCATION_SIZE), nullptr);
-
-			currentMemoryAllocationIndices[memoryTypeIndex] = allocationIndex;
-		}
-
-		return allocationIndex;
-	}
-
-	uint32 VK::allocateMemory(Trident::MemoryAllocator* memoryAllocator, uint64 size, MemoryProperty memoryProperties) {
-		VK::MemoryAllocator* _memoryAllocator = static_cast<VK::MemoryAllocator*>(memoryAllocator);
+	MemorySuballocation VK::suballocateBufferMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, ref<Trident::BaseBuffer> buffer) {
 		const VK::Device* _device = static_cast<const VK::Device*>(memoryAllocator->device);
-		const uint32 memoryTypeIndex = _memoryAllocator->findSuitableMemoryType(static_cast<VkMemoryPropertyFlags>(memoryProperties));
+		const ref<VK::BaseBuffer> _buffer = std::static_pointer_cast<VK::BaseBuffer>(buffer);
+		const MemoryAllocation& memoryAllocation = memoryAllocator->allocations[allocationIndex];
 
-		uint32 memoryAllocationIndex = static_cast<uint32>(memoryAllocator->allocations.size());
+		MemorySuballocation memorySuballocation = memoryAllocator->suballocate(allocationIndex, _buffer->memoryRequirements.size, _buffer->memoryRequirements.alignment);
+		memorySuballocation.memoryProperties = buffer->getMemorySuballocation().memoryProperties;
 
-		if (_memoryAllocator->freeMemoryAllocationIndices.size() > 0) {
-			memoryAllocationIndex = _memoryAllocator->freeMemoryAllocationIndices.back();
+		const VkResult result = _device->vkBindBufferMemory(_device->device, _buffer->buffer, *pointer_cast<const VkDeviceMemory*>(&memoryAllocation.memory), memorySuballocation.offset);
 
-			_memoryAllocator->freeMemoryAllocationIndices.pop_back();
-		}
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to bind buffer memory ([]).", string_VkResult(result));
 
-		VkMemoryAllocateInfo memoryAllocateInfo{};
-		memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		memoryAllocateInfo.pNext = nullptr;
-		memoryAllocateInfo.allocationSize = size;
-		memoryAllocateInfo.memoryTypeIndex = memoryTypeIndex;
-
-		VkDeviceMemory memory;
-
-		const VkResult result = _device->vkAllocateMemory(_device->device, &memoryAllocateInfo, nullptr, &memory);
-
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to allocate memory ([]).", string_VkResult(result));
-
-		MemoryAllocation memoryAllocation{};
-		memoryAllocation.memory = *pointer_cast<uint64*>(&memory);
-		memoryAllocation.size = size;
-		memoryAllocation.usedOffset = 0;
-		memoryAllocation.memoryTypeIndex = memoryTypeIndex;
-		memoryAllocation.suballocationCount = 0;
-		memoryAllocation.lastSuballocationAlignment = 0;
-		memoryAllocation.mappedSuballocationCount = 0;
-
-		if (memoryAllocationIndex == memoryAllocator->allocations.size()) {
-			memoryAllocator->allocations.emplace_back(memoryAllocation);
-		}
-		else {
-			memoryAllocator->allocations[memoryAllocationIndex] = memoryAllocation;
-		}
-
-		return memoryAllocationIndex;
+		return memorySuballocation;
 	}
 
-	MemorySuballocation VK::suballocateMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, uint64 size, uint64 alignment) {
-		const VK::PhysicalDevice* physicalDevice = static_cast<const VK::PhysicalDevice*>(memoryAllocator->device->physicalDevice);
-		VK::MemoryAllocator* _memoryAllocator = static_cast<VK::MemoryAllocator*>(memoryAllocator);
-		MemoryAllocation* memoryAllocation = &memoryAllocator->allocations[allocationIndex];
-		uint64 usedOffset = memoryAllocation->usedOffset;
+	MemorySuballocation VK::suballocateImageMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, ref<Trident::Image> image) {
+		const VK::Device* _device = static_cast<const VK::Device*>(memoryAllocator->device);
+		const ref<VK::Image> _image = std::static_pointer_cast<VK::Image>(image);
+		const MemoryAllocation& memoryAllocation = memoryAllocator->allocations[allocationIndex];
 
-		const VkDeviceSize alignedSize = max(size, alignment);
-		const VkDeviceSize remainder = usedOffset % alignment;
+		MemorySuballocation memorySuballocation = memoryAllocator->suballocate(allocationIndex, _image->memoryRequirements.size, _image->memoryRequirements.alignment);
+		memorySuballocation.memoryProperties = image->getMemorySuballocation().memoryProperties;
 
-		if (remainder > 0) {
-			// Ensure that the offset meets the suballocation's alignment criteria.
-			usedOffset += alignment - remainder;
-		}
+		const VkResult result = _device->vkBindImageMemory(_device->device, _image->image, *pointer_cast<const VkDeviceMemory*>(&memoryAllocation.memory), memorySuballocation.offset);
 
-		// If the current memory allocation cannot fully hold this suballocation, close it and open a new one.
-		// In some cases the aligned offset can be larger than the allocation's size.
-		if (usedOffset > memoryAllocation->size || memoryAllocation->size - usedOffset < alignedSize) {
-			ADAPTER_WARNING(
-				"Remaining size in memory allocation [] ([]) is insufficient for suballocation with size [] and alignment [] (base size = []).",
-				allocationIndex,
-				memoryAllocation->size - usedOffset,
-				alignedSize,
-				alignment,
-				size
-			);
-
-			const VkMemoryPropertyFlags memoryPropertyFlags = physicalDevice->memoryProperties.memoryTypes[memoryAllocation->memoryTypeIndex].propertyFlags;
-
-			allocationIndex = allocateMemory(memoryAllocator, max(alignedSize, MemoryAllocator::DYNAMIC_MEMORY_ALLOCATION_SIZE), static_cast<MemoryProperty>(memoryPropertyFlags));
-
-			if (_memoryAllocator->bufferOrImageMemoryAllocationIndices) {
-				_memoryAllocator->currentImageMemoryAllocationIndices[memoryAllocation->memoryTypeIndex] = allocationIndex;
-			}
-			else {
-				_memoryAllocator->currentBufferMemoryAllocationIndices[memoryAllocation->memoryTypeIndex] = allocationIndex;
-			}
-
-			memoryAllocation = &memoryAllocator->allocations[allocationIndex];
-			usedOffset = 0;
-		}
-
-		MemorySuballocation memorySuballocation{};
-		memorySuballocation.allocationIndex = allocationIndex;
-		memorySuballocation.offset = usedOffset;
-		memorySuballocation.size = alignedSize;
-
-		memoryAllocation->usedOffset = memorySuballocation.offset + memorySuballocation.size;
-		memoryAllocation->suballocationCount += 1;
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to bind image memory ([]).", string_VkResult(result));
 
 		return memorySuballocation;
 	}

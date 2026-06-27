@@ -96,6 +96,10 @@ namespace Trident::VK {
 		adapter->drawIndexedIndirectImplementation = VK::drawIndexedIndirect;
 		adapter->endImplementation = VK::end;
 		adapter->endRenderPassImplementation = VK::endRenderPass;
+		adapter->findMemoryTypeIndexImplementation = VK::findMemoryTypeIndex;
+		adapter->getBufferMemoryRequirementsImplementation = VK::getBufferMemoryRequirements;
+		adapter->getImageMemoryRequirementsImplementation = VK::getImageMemoryRequirements;
+		adapter->getPhysicalDeviceMemoryTypeCountImplementation = VK::getPhysicalDeviceMemoryTypeCountImplementation;
 		adapter->getPhysicalDeviceNameImplementation = VK::getPhysicalDeviceName;
 		adapter->getQueueImplementation = VK::getQueue;
 		adapter->insertMemoryBarriersImplementation = VK::insertMemoryBarriers;
@@ -109,7 +113,8 @@ namespace Trident::VK {
 		adapter->setLineWidthImplementation = VK::setLineWidth;
 		adapter->setScissorImplementation = VK::setScissor;
 		adapter->setViewportImplementation = VK::setViewport;
-		adapter->suballocateMemoryImplementation = VK::suballocateMemory;
+		adapter->suballocateBufferMemoryImplementation = VK::suballocateBufferMemory;
+		adapter->suballocateImageMemoryImplementation = VK::suballocateImageMemory;
 		adapter->submitImplementation = VK::submit;
 		adapter->submit2Implementation = VK::submit;
 		adapter->unmapBufferImplementation = VK::unmapBuffer;

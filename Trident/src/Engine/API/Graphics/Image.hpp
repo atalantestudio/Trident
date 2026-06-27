@@ -7,6 +7,7 @@
 #include "Engine/API/Graphics/Access.hpp"
 #include "Engine/API/Graphics/Descriptor/ImageDescriptor.hpp"
 #include "Engine/API/Graphics/ImageLayout.hpp"
+#include "Engine/API/Graphics/MemorySuballocation.hpp"
 
 namespace Trident {
 	// TODO(architecture): Move inside utility folder?
@@ -46,6 +47,9 @@ namespace Trident {
 			/// Returns the current access flags for the image.
 			Access getAccess() const;
 
+			/// Returns the memory suballocation occupied by the image.
+			MemorySuballocation getMemorySuballocation() const;
+
 			ref<ImageView> createView(const ImageViewDescriptor& descriptor);
 
 		protected:
@@ -64,5 +68,6 @@ namespace Trident {
 			ImageUsage usage;
 			ImageLayout layout = ImageLayout::UNDEFINED;
 			Access access = Access::NONE;
+			MemorySuballocation memorySuballocation;
 	};
 }

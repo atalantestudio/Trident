@@ -21,6 +21,10 @@ namespace Trident {
 
 	void Renderer::onEvent(Event& event) {}
 
+	ref<BaseBuffer> Renderer::createStaticBuffer(const BufferDescriptor& descriptor) {
+		return layerCompositor->device->createStaticBuffer(descriptor);
+	}
+
 	ref<ComputePipeline> Renderer::createComputePipeline(const ComputePipelineDescriptor& descriptor) {
 		return layerCompositor->device->createComputePipeline(descriptor);
 	}

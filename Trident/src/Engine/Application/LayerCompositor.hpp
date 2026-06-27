@@ -9,6 +9,7 @@
 #include "Engine/API/Graphics/Device.hpp"
 #include "Engine/API/Graphics/Fence.hpp"
 #include "Engine/API/Graphics/Instance.hpp"
+#include "Engine/API/Graphics/MemoryAllocator.hpp"
 #include "Engine/API/Graphics/PhysicalDevice.hpp"
 #include "Engine/API/Graphics/Semaphore.hpp"
 #include "Engine/API/Graphics/Surface.hpp"
@@ -83,6 +84,84 @@ namespace Trident {
 					inFlightFences[frameInFlightIndex] = device->createFence(inFlightFenceDescriptor);
 
 					frameInFlightIndex += 1;
+				}
+			}
+
+			void initializeLayers() const {
+				PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+				const ref<MemoryAllocator> memoryAllocator = device->getMemoryAllocator();
+				const uint32 memoryTypeCount = physicalDevice->getMemoryTypeCount();
+
+				sequence<uint64> allocationSizesPerMemoryType(memoryTypeCount);
+				sequence<StaticMemoryDescriptor> staticMemoryDescriptors(layers.size());
+
+				uint32 layerIndex = 0;
+
+				while (layerIndex < layers.size()) {
+					const ref<Layer>& layer = layers[layerIndex];
+
+					layer->initialize();
+
+					StaticMemoryDescriptor& staticMemoryDescriptor = staticMemoryDescriptors[layerIndex];
+					staticMemoryDescriptor = layer->getStaticMemoryDescriptor();
+
+					for (const ref<BaseBuffer>& buffer : staticMemoryDescriptor.buffers) {
+						const MemorySuballocation memorySuballocation = buffer->getMemorySuballocation();
+
+						DEBUG_ASSERT(memorySuballocation.size == 0);
+
+						const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(memorySuballocation.memoryProperties);
+
+						allocationSizesPerMemoryType[memoryTypeIndex] += buffer->getSize();
+					}
+
+					for (const ref<Image>& image : staticMemoryDescriptor.images) {
+						const MemorySuballocation memorySuballocation = image->getMemorySuballocation();
+
+						DEBUG_ASSERT(memorySuballocation.size == 0);
+
+						const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(memorySuballocation.memoryProperties);
+
+						allocationSizesPerMemoryType[memoryTypeIndex] += image->getSize();
+					}
+
+					layerIndex += 1;
+				}
+
+				sequence<uint64>& allocationIndicesPerMemoryType = allocationSizesPerMemoryType;
+				uint32 memoryTypeIndex = 0;
+
+				while (memoryTypeIndex < memoryTypeCount) {
+					const uint64 allocationSize = allocationSizesPerMemoryType[memoryTypeIndex];
+
+					if (allocationSize > 0) {
+						allocationIndicesPerMemoryType[memoryTypeIndex] = memoryAllocator->allocate(false, memoryTypeIndex, allocationSize);
+					}
+
+					memoryTypeIndex += 1;
+				}
+
+				for (const StaticMemoryDescriptor& staticMemoryDescriptor : staticMemoryDescriptors) {
+					for (const ref<BaseBuffer>& buffer : staticMemoryDescriptor.buffers) {
+						const MemorySuballocation memorySuballocation = buffer->getMemorySuballocation();
+						const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(memorySuballocation.memoryProperties);
+						const uint32 allocationIndex = static_cast<uint32>(allocationIndicesPerMemoryType[memoryTypeIndex]);
+
+						memoryAllocator->suballocateStatic(allocationIndex, buffer);
+					}
+
+					for (const ref<Image>& image : staticMemoryDescriptor.images) {
+						const MemorySuballocation memorySuballocation = image->getMemorySuballocation();
+						const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(memorySuballocation.memoryProperties);
+						const uint32 allocationIndex = static_cast<uint32>(allocationIndicesPerMemoryType[memoryTypeIndex]);
+
+						memoryAllocator->suballocateStatic(allocationIndex, image);
+					}
+				}
+
+				for (const ref<Layer>& layer : layers) {
+					layer->encodeOneTimeCommands();
 				}
 			}
 

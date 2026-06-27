@@ -10,6 +10,7 @@ namespace Trident {
 	// - HOST_VISIBLE | HOST_COHERENT: CPU memory that is visible from the GPU. It is suited for data that changes every frame.
 	// - DEVICE_LOCAL | LAZILY_ALLOCATED: GPU memory that can be lazily allocated. Use for large attachments that are not stored to.
 	// - HOST_CACHED: CPU memory. Useful for reading back data written to by GPU.
+	// TODO(graphics/memory-allocator/memory-property): Valid memory properties must contain either DEVICE_LOCAL or HOST_VISIBLE.
 	enum class MemoryProperty : uint8 {
 		// Specifies that memory allocated with this type is the most efficient for device access.
 		DEVICE_LOCAL = BIT(0),

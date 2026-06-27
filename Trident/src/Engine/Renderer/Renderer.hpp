@@ -11,7 +11,7 @@
 #include "Engine/API/Graphics/Descriptor/ImageDescriptor.hpp"
 #include "Engine/API/Graphics/Descriptor/ImageViewDescriptor.hpp"
 #include "Engine/API/Graphics/Descriptor/PipelineLayoutDescriptor.hpp"
-#include "Engine/API/Graphics/Descriptor/StaticMemorySuballocationDescriptor.hpp"
+#include "Engine/API/Graphics/Descriptor/StaticMemoryDescriptor.hpp"
 #include "Engine/API/Window/Window.hpp"
 #include "Engine/Application/Application.hpp"
 
@@ -31,7 +31,7 @@ namespace Trident {
 			}
 
 			/// Called after `build` and before rendering the first frame.
-			virtual void encodeOneTimeTransfers() const {}
+			virtual void encodeOneTimeCommands() const {}
 
 			virtual void render(ref<CommandEncoder> commandEncoder) const = 0;
 
@@ -58,6 +58,8 @@ namespace Trident {
 					#endif
 				});
 			}
+
+			static ref<BaseBuffer> createStaticBuffer(const BufferDescriptor& descriptor);
 
 			static ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor);
 

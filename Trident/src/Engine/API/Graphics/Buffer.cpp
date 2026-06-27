@@ -4,15 +4,21 @@
 #include "pch.hpp"
 
 #include "Engine/API/Graphics/Buffer.hpp"
+#include "Engine/API/Graphics/BufferView.hpp"
 #include "Engine/API/Graphics/Device.hpp"
 #include "Engine/API/Graphics/MemoryAllocator.hpp"
 
 namespace Trident {
-	BaseBuffer::BaseBuffer(const Device* device, const BufferDescriptor& descriptor, uint32 stride) :
+	BaseBuffer::BaseBuffer(const Device* device, const BufferDescriptor& descriptor) :
 		device(device),
 		size(descriptor.size),
-		stride(stride),
-		usage(descriptor.usage)
+		usage(descriptor.usage),
+		memorySuballocation({
+			.allocationIndex = max<uint32>(),
+			.memoryProperties = descriptor.memoryProperties,
+			.offset = 0,
+			.size = 0,
+		})
 	{}
 
 	BaseBuffer::~BaseBuffer() {
@@ -21,10 +27,6 @@ namespace Trident {
 
 	uint64 BaseBuffer::getSize() const {
 		return size;
-	}
-
-	uint32 BaseBuffer::getStride() const {
-		return stride;
 	}
 
 	/// Returns the buffer usage flags.
@@ -58,24 +60,31 @@ namespace Trident {
 				errorCount += 1;
 			}
 
-			const MemoryAllocation& memoryAllocation = device->memoryAllocator->allocations[memorySuballocation.allocationIndex];
-
-			if (!(memoryAllocation.memoryProperties & MemoryProperty::HOST_VISIBLE)) {
+			if (!(memorySuballocation.memoryProperties & MemoryProperty::HOST_VISIBLE)) {
 				ENGINE_ERROR("The buffer isn't in a HOST_VISIBLE memory allocation.");
 
 				errorCount += 1;
 			}
 
-			if (memoryAllocation.mappedSuballocationCount > 0) {
-				ENGINE_ERROR("The buffer's parent memory allocation is already mapped.");
+			{
+				const MemoryAllocation& memoryAllocation = device->memoryAllocator->allocations[memorySuballocation.allocationIndex];
 
-				errorCount += 1;
+				if (memoryAllocation.mappedSuballocationCount > 0) {
+					ENGINE_ERROR("The buffer's parent memory allocation is already mapped.");
+
+					errorCount += 1;
+				}
 			}
 
 			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
 		#endif
 
-		return device->adapter->mapBufferImplementation(device, this, offset, size);
+		void* mappedRange = device->adapter->mapBufferImplementation(device, this, offset, size);
+
+		MemoryAllocation& memoryAllocation = device->memoryAllocator->allocations[memorySuballocation.allocationIndex];
+		memoryAllocation.mappedSuballocationCount += 1;
+
+		return mappedRange;
 	}
 
 	void BaseBuffer::unmap() const {
@@ -83,17 +92,22 @@ namespace Trident {
 			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 
-			const MemoryAllocation& memoryAllocation = device->memoryAllocator->allocations[memorySuballocation.allocationIndex];
+			{
+				const MemoryAllocation& memoryAllocation = device->memoryAllocator->allocations[memorySuballocation.allocationIndex];
 
-			if (memoryAllocation.mappedSuballocationCount == 0) {
-				ENGINE_ERROR("The buffer's parent memory allocation is not mapped.");
+				if (memoryAllocation.mappedSuballocationCount == 0) {
+					ENGINE_ERROR("The buffer's parent memory allocation is not mapped.");
 
-				errorCount += 1;
+					errorCount += 1;
+				}
 			}
 
 			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
 		#endif
 
 		device->adapter->unmapBufferImplementation(device, this);
+
+		MemoryAllocation& memoryAllocation = device->memoryAllocator->allocations[memorySuballocation.allocationIndex];
+		memoryAllocation.mappedSuballocationCount -= 1;
 	}
 }

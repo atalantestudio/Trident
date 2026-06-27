@@ -13,9 +13,8 @@ namespace Trident {
 		/// Opaque memory object handle.
 		uint64 memory;
 
-		// TODO(graphics/memory-allocation): Also include memory property flags?
+		/// The index of the memory type hosting the allocation.
 		uint32 memoryTypeIndex;
-		MemoryProperty memoryProperties;
 
 		/// Size of the allocation, in bytes.
 		uint64 size;
@@ -25,9 +24,6 @@ namespace Trident {
 
 		/// Number of active suballocations.
 		uint32 suballocationCount;
-
-		/// Alignment of the most recent suballocation in this allocation.
-		uint64 lastSuballocationAlignment;
 
 		/// Number of suballocations that are in the mapped state.
 		uint32 mappedSuballocationCount;
