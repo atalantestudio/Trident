@@ -91,20 +91,18 @@ namespace Trident {
 
 		_device->vkDestroyBuffer(_device->device, _buffer->buffer, nullptr);
 
-		memoryAllocator->freeSuballocation(_buffer->memorySuballocation.allocationIndex);
+		memoryAllocator->freeSuballocation(buffer->getMemorySuballocation().allocationIndex);
 	}
 
 	void* VK::mapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer, uint64 offset, uint64 size) {
 		const ref<VK::MemoryAllocator> memoryAllocator = std::static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
-		const VK::BaseBuffer* _buffer = static_cast<const VK::BaseBuffer*>(buffer);
 
-		return memoryAllocator->mapSuballocation(_buffer->memorySuballocation, offset, size);
+		return memoryAllocator->mapSuballocation(buffer->getMemorySuballocation(), offset, size);
 	}
 
 	void VK::unmapBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer) {
 		const ref<VK::MemoryAllocator> memoryAllocator = std::static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
-		const VK::BaseBuffer* _buffer = static_cast<const VK::BaseBuffer*>(buffer);
 
-		memoryAllocator->unmapSuballocation(_buffer->memorySuballocation.allocationIndex);
+		memoryAllocator->unmapSuballocation(buffer->getMemorySuballocation().allocationIndex);
 	}
 }

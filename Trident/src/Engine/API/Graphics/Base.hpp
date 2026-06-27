@@ -78,7 +78,7 @@ namespace Trident {
 
 	typedef AcquireNextImageStatus (*AcquireNextImageImplementation)(const Device* device, const Swapchain* swapchain, const Semaphore* semaphore, uint32& imageIndex);
 	typedef sequence<ref<DescriptorSet>> (*AllocateDescriptorSetsImplementation)(Device* device, view<ref<DescriptorSetLayout>> descriptorSetLayouts);
-	typedef MemoryAllocation (*AllocateMemoryImplementation)(MemoryAllocator* memoryAllocator, bool dynamic, uint32 memoryTypeIndex, uint64 size);
+	typedef MemoryAllocation (*AllocateMemoryImplementation)(MemoryAllocator* memoryAllocator, bool dynamic, uint32 memoryTypeIndex, uint64 size, uint64 alignment);
 	typedef void (*BeginImplementation)(const CommandEncoder* commandEncoder);
 	typedef void (*BeginRenderPassImplementation)(CommandEncoder* commandEncoder, const BeginRenderPassDescriptor& descriptor);
 	typedef void (*BindComputePipelineImplementation)(CommandEncoder* commandEncoder, ref<ComputePipeline> computePipeline);

@@ -66,16 +66,6 @@ namespace Trident {
 				errorCount += 1;
 			}
 
-			{
-				const MemoryAllocation& memoryAllocation = device->memoryAllocator->allocations[memorySuballocation.allocationIndex];
-
-				if (memoryAllocation.mappedSuballocationCount > 0) {
-					ENGINE_ERROR("The buffer's parent memory allocation is already mapped.");
-
-					errorCount += 1;
-				}
-			}
-
 			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
 		#endif
 

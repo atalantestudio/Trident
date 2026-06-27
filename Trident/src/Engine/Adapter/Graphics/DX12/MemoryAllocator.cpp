@@ -398,7 +398,7 @@ namespace Trident {
 		return descriptorHeapAllocations[currentDepthStencilViewDescriptorHeapAllocationIndex];
 	}
 
-	MemoryAllocation DX12::allocateMemory(Trident::MemoryAllocator* memoryAllocator, bool dynamic, uint32 memoryTypeIndex, uint64 size) {
+	MemoryAllocation DX12::allocateMemory(Trident::MemoryAllocator* memoryAllocator, bool dynamic, uint32 memoryTypeIndex, uint64 size, uint64 alignment) {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(memoryAllocator->device);
 
 		D3D12_HEAP_DESC heapDescriptor{};
@@ -408,7 +408,7 @@ namespace Trident {
 		heapDescriptor.Properties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
 		heapDescriptor.Properties.CreationNodeMask = 1;
 		heapDescriptor.Properties.VisibleNodeMask = 1;
-		heapDescriptor.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+		heapDescriptor.Alignment = alignment;
 		heapDescriptor.Flags = D3D12_HEAP_FLAG_NONE;
 
 		ID3D12Heap* heap;

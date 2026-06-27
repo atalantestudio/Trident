@@ -21,7 +21,7 @@ namespace Trident {
 
 		public:
 			/// Creates a memory allocation and returns its index in the allocation list.
-			uint32 allocate(bool dynamic, uint32 memoryTypeIndex, uint64 size);
+			uint32 allocate(bool dynamic, uint32 memoryTypeIndex, uint64 size, uint64 alignment);
 
 			/// Finds and returns the memory type index corresponding to the provided memory property flag.
 			uint32 findMemoryTypeIndex(MemoryProperty memoryProperties) const;

@@ -11,13 +11,18 @@ namespace Trident {
 		device(device)
 	{}
 
-	uint32 MemoryAllocator::allocate(bool dynamic, uint32 memoryTypeIndex, uint64 size) {
+	uint32 MemoryAllocator::allocate(bool dynamic, uint32 memoryTypeIndex, uint64 size, uint64 alignment) {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 
 			if (size == 0) {
 				ENGINE_ERROR("The allocation size must not be 0.");
+
+				errorCount += 1;
+			}
+
+			if (alignment == 0) {
+				ENGINE_ERROR("The allocation alignment must not be 0.");
 
 				errorCount += 1;
 			}
@@ -30,10 +35,10 @@ namespace Trident {
 				errorCount += 1;
 			}
 
-			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
-		const MemoryAllocation allocation = device->adapter->allocateMemoryImplementation(this, dynamic, memoryTypeIndex, size);
+		const MemoryAllocation allocation = device->adapter->allocateMemoryImplementation(this, dynamic, memoryTypeIndex, size, alignment);
 
 		uint32 allocationIndex;
 
@@ -75,7 +80,6 @@ namespace Trident {
 
 	MemorySuballocation MemoryAllocator::suballocate(uint32 allocationIndex, uint64 size, uint64 alignment) {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 
 			if (allocationIndex < allocations.size()) {
@@ -94,7 +98,7 @@ namespace Trident {
 				errorCount += 1;
 			}
 
-			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		MemoryAllocation& allocation = allocations[allocationIndex];
@@ -129,10 +133,11 @@ namespace Trident {
 	void MemoryAllocator::suballocateDynamic(ref<BaseBuffer> buffer) {
 		const MemoryRequirements memoryRequirements = getMemoryRequirements(buffer);
 		const uint32 memoryTypeIndex = findMemoryTypeIndex(buffer->getMemorySuballocation().memoryProperties);
-		const uint32 allocationIndex = findAllocationIndex(memoryTypeIndex, memoryRequirements);
+
+		uint32 allocationIndex = findAllocationIndex(memoryTypeIndex, memoryRequirements);
 
 		if (allocationIndex >= allocations.size()) {
-			allocate(true, memoryTypeIndex, max(MIN_DYNAMIC_MEMORY_ALLOCATION_SIZE, memoryRequirements.size));
+			allocationIndex = allocate(true, memoryTypeIndex, max(MIN_DYNAMIC_MEMORY_ALLOCATION_SIZE, memoryRequirements.size), memoryRequirements.alignment);
 		}
 
 		suballocateStatic(allocationIndex, buffer);
@@ -141,10 +146,11 @@ namespace Trident {
 	void MemoryAllocator::suballocateDynamic(ref<Image> image) {
 		const MemoryRequirements memoryRequirements = getMemoryRequirements(image);
 		const uint32 memoryTypeIndex = findMemoryTypeIndex(image->getMemorySuballocation().memoryProperties);
-		const uint32 allocationIndex = findAllocationIndex(memoryTypeIndex, memoryRequirements);
+
+		uint32 allocationIndex = findAllocationIndex(memoryTypeIndex, memoryRequirements);
 
 		if (allocationIndex >= allocations.size()) {
-			allocate(true, memoryTypeIndex, max(MIN_DYNAMIC_MEMORY_ALLOCATION_SIZE, memoryRequirements.size));
+			allocationIndex = allocate(true, memoryTypeIndex, max(MIN_DYNAMIC_MEMORY_ALLOCATION_SIZE, memoryRequirements.size), memoryRequirements.alignment);
 		}
 
 		suballocateStatic(allocationIndex, image);

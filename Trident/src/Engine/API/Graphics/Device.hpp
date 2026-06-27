@@ -25,7 +25,10 @@ namespace Trident {
 
 			sequence<ref<DescriptorSet>> allocateDescriptorSets(view<ref<DescriptorSetLayout>> descriptorSetLayouts);
 
-			/// Creates and returns a buffer object which is pre-allocated from dynamic memory.
+			/// Creates and returns a buffer which needs to be manually allocated.
+			ref<BaseBuffer> createStaticBuffer(const BufferDescriptor& descriptor) const;
+
+			/// Creates and returns a buffer which is pre-allocated from dynamic memory.
 			/// For most resources (excluding render pass attachments and other resources depending on the screen size),
 			/// prefer Device::createStaticBuffer over this method.
 			template<typename ElementType>
@@ -35,50 +38,6 @@ namespace Trident {
 				memoryAllocator->suballocateDynamic(buffer);
 
 				return std::static_pointer_cast<Buffer<ElementType>>(buffer);
-			}
-
-			/// Creates and returns a buffer object which needs to be manually allocated.
-			ref<BaseBuffer> createStaticBuffer(const BufferDescriptor& descriptor) const {
-				#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-					uint32 warningCount = 0;
-					uint32 errorCount = 0;
-
-					if (descriptor.size == 0) {
-						ENGINE_ERROR("descriptor.size must not be 0.");
-
-						errorCount += 1;
-					}
-
-					if (descriptor.usage & (BufferUsage::READ_ONLY_STORAGE | BufferUsage::READ_WRITE_STORAGE)) {
-						const uint64 minStorageBufferOffsetAlignment = physicalDevice->getLimits().minStorageBufferOffsetAlignment;
-
-						if (descriptor.size % minStorageBufferOffsetAlignment > 0) {
-							ENGINE_ERROR("descriptor.size must be a multiple of the minStorageBufferOffsetAlignment limit ([]).", minStorageBufferOffsetAlignment);
-
-							errorCount += 1;
-						}
-					}
-
-					if (descriptor.usage & BufferUsage::UNIFORM) {
-						const uint64 minUniformBufferOffsetAlignment = physicalDevice->getLimits().minUniformBufferOffsetAlignment;
-
-						if (descriptor.size % minUniformBufferOffsetAlignment > 0) {
-							ENGINE_ERROR("descriptor.size must be a multiple of the minUniformBufferOffsetAlignment limit ([]).", minUniformBufferOffsetAlignment);
-
-							errorCount += 1;
-						}
-					}
-
-					if (descriptor.name.count() == 0) {
-						ENGINE_WARNING("descriptor.name should provide a unique name to help identify this buffer.");
-
-						warningCount += 1;
-					}
-
-					ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
-				#endif
-
-				return adapter->createBufferImplementation(this, descriptor);
 			}
 
 			ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor) const;
@@ -92,6 +51,12 @@ namespace Trident {
 
 			ref<GraphicsPipeline> createGraphicsPipeline(const GraphicsPipelineDescriptor& descriptor) const;
 
+			/// Creates and returns an image which needs to be manually allocated.
+			ref<Image> createStaticImage(const ImageDescriptor& descriptor) const;
+
+			/// Creates and returns an image which is pre-allocated from dynamic memory.
+			/// For most resources (excluding render pass attachments and other resources depending on the screen size),
+			/// prefer Device::createStaticImage over this method.
 			ref<Image> createImage(const ImageDescriptor& descriptor) const;
 
 			ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const;

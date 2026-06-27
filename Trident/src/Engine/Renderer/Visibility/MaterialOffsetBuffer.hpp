@@ -7,9 +7,11 @@
 
 namespace Trident {
 	ref<Buffer<uint32>> VisibilityRenderer::createMaterialOffsetBuffer() const {
+		const uint64 minStorageBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
+
 		return createBuffer<uint32>({
 			// Ensure the buffer starts at 0 (a prefix sum will be applied on the offsets).
-			.size = (scene->materialShaders.size() + 1) * sizeof(uint32),
+			.size = ceil((scene->materialShaders.size() + 1) * sizeof(uint32), minStorageBufferOffsetAlignment),
 
 			.usage = BufferUsage::READ_WRITE_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,

@@ -76,16 +76,19 @@ namespace Trident {
 	uint32 VK::MemoryAllocator::findMemoryTypeIndex(uint32 memoryTypeBits, VkMemoryPropertyFlags memoryPropertyFlags) {
 		const VK::PhysicalDevice* _physicalDevice = static_cast<const VK::PhysicalDevice*>(device->physicalDevice);
 
-		uint32 suitableMemoryTypeIndex = max<uint32>();
+		uint32 bestMemoryTypeIndex = 0;
+		uint32 maxMemoryTypePropertyMatchingFlagCount = 0;
 		uint32 memoryTypeIndex = 0;
 
 		while (memoryTypeIndex < _physicalDevice->memoryProperties.memoryTypeCount) {
 			if (memoryTypeBits & BIT(memoryTypeIndex)) {
 				const VkMemoryType memoryType = _physicalDevice->memoryProperties.memoryTypes[memoryTypeIndex];
 				const VkMemoryPropertyFlags matchingFlags = memoryType.propertyFlags & memoryPropertyFlags;
+				const uint32 matchingFlagCount = countSetBits(matchingFlags);
 
-				if (matchingFlags > 0) {
-					suitableMemoryTypeIndex = memoryTypeIndex;
+				if (matchingFlagCount > maxMemoryTypePropertyMatchingFlagCount) {
+					maxMemoryTypePropertyMatchingFlagCount = matchingFlagCount;
+					bestMemoryTypeIndex = memoryTypeIndex;
 
 					if (matchingFlags == memoryPropertyFlags) {
 						break;
@@ -96,7 +99,7 @@ namespace Trident {
 			memoryTypeIndex += 1;
 		}
 
-		return suitableMemoryTypeIndex;
+		return bestMemoryTypeIndex;
 	}
 
 	void* VK::MemoryAllocator::mapSuballocation(const MemorySuballocation& memorySuballocation, VkDeviceSize offset, VkDeviceSize size) {
@@ -192,7 +195,7 @@ namespace Trident {
 		ADAPTER_INFO("Freed suballocation from memory allocation []. The active suballocation count is now [].", memoryAllocationIndex, memoryAllocation.suballocationCount);
 	}
 
-	MemoryAllocation VK::allocateMemory(Trident::MemoryAllocator* memoryAllocator, bool dynamic, uint32 memoryTypeIndex, uint64 size) {
+	MemoryAllocation VK::allocateMemory(Trident::MemoryAllocator* memoryAllocator, bool dynamic, uint32 memoryTypeIndex, uint64 size, uint64 alignment) {
 		const VK::Device* _device = static_cast<const VK::Device*>(memoryAllocator->device);
 		const VK::PhysicalDevice* _physicalDevice = static_cast<const VK::PhysicalDevice*>(memoryAllocator->device->physicalDevice);
 
@@ -230,15 +233,18 @@ namespace Trident {
 		const VK::PhysicalDevice* physicalDevice = static_cast<const VK::PhysicalDevice*>(memoryAllocator->device->physicalDevice);
 		const VkMemoryPropertyFlags memoryPropertyFlags = static_cast<VkMemoryPropertyFlags>(memoryProperties);
 
-		uint32 suitableMemoryTypeIndex = max<uint32>();
+		uint32 bestMemoryTypeIndex = 0;
+		uint32 maxMemoryTypePropertyMatchingFlagCount = 0;
 		uint32 memoryTypeIndex = 0;
 
 		while (memoryTypeIndex < physicalDevice->memoryProperties.memoryTypeCount) {
 			const VkMemoryType memoryType = physicalDevice->memoryProperties.memoryTypes[memoryTypeIndex];
 			const VkMemoryPropertyFlags matchingFlags = memoryType.propertyFlags & memoryPropertyFlags;
+			const uint32 matchingFlagCount = countSetBits(matchingFlags);
 
-			if (matchingFlags > 0) {
-				suitableMemoryTypeIndex = memoryTypeIndex;
+			if (matchingFlagCount > maxMemoryTypePropertyMatchingFlagCount) {
+				maxMemoryTypePropertyMatchingFlagCount = matchingFlagCount;
+				bestMemoryTypeIndex = memoryTypeIndex;
 
 				if (matchingFlags == memoryPropertyFlags) {
 					break;
@@ -248,7 +254,7 @@ namespace Trident {
 			memoryTypeIndex += 1;
 		}
 
-		return suitableMemoryTypeIndex;
+		return bestMemoryTypeIndex;
 	}
 
 	MemoryRequirements VK::getBufferMemoryRequirements(const Trident::MemoryAllocator* memoryAllocator, ref<Trident::BaseBuffer> buffer) {

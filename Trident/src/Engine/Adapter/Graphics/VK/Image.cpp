@@ -154,6 +154,6 @@ namespace Trident {
 
 		_device->vkDestroyImage(_device->device, _image->image, nullptr);
 
-		memoryAllocator->freeSuballocation(_image->memorySuballocation.allocationIndex);
+		memoryAllocator->freeSuballocation(image->getMemorySuballocation().allocationIndex);
 	}
 }

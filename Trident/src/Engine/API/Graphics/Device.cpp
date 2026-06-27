@@ -42,6 +42,49 @@ namespace Trident {
 		return adapter->allocateDescriptorSetsImplementation(this, descriptorSetLayouts);
 	}
 
+	ref<BaseBuffer> Device::createStaticBuffer(const BufferDescriptor& descriptor) const {
+		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+			uint32 warningCount = 0;
+			uint32 errorCount = 0;
+
+			if (descriptor.size == 0) {
+				ENGINE_ERROR("descriptor.size must not be 0.");
+
+				errorCount += 1;
+			}
+
+			if (descriptor.usage & (BufferUsage::READ_ONLY_STORAGE | BufferUsage::READ_WRITE_STORAGE)) {
+				const uint64 minStorageBufferOffsetAlignment = physicalDevice->getLimits().minStorageBufferOffsetAlignment;
+
+				if (descriptor.size % minStorageBufferOffsetAlignment > 0) {
+					ENGINE_ERROR("descriptor.size must be a multiple of the minStorageBufferOffsetAlignment limit ([]).", minStorageBufferOffsetAlignment);
+
+					errorCount += 1;
+				}
+			}
+
+			if (descriptor.usage & BufferUsage::UNIFORM) {
+				const uint64 minUniformBufferOffsetAlignment = physicalDevice->getLimits().minUniformBufferOffsetAlignment;
+
+				if (descriptor.size % minUniformBufferOffsetAlignment > 0) {
+					ENGINE_ERROR("descriptor.size must be a multiple of the minUniformBufferOffsetAlignment limit ([]).", minUniformBufferOffsetAlignment);
+
+					errorCount += 1;
+				}
+			}
+
+			if (descriptor.name.count() == 0) {
+				ENGINE_WARNING("descriptor.name should provide a unique name to help identify this buffer.");
+
+				warningCount += 1;
+			}
+
+			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+		#endif
+
+		return adapter->createBufferImplementation(this, descriptor);
+	}
+
 	ref<ComputePipeline> Device::createComputePipeline(const ComputePipelineDescriptor& descriptor) const {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			uint32 warningCount = 0;
@@ -349,7 +392,7 @@ namespace Trident {
 		return adapter->createGraphicsPipelineImplementation(this, descriptor);
 	}
 
-	ref<Image> Device::createImage(const ImageDescriptor& descriptor) const {
+	ref<Image> Device::createStaticImage(const ImageDescriptor& descriptor) const {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			const PhysicalDeviceLimits& limits = physicalDevice->getLimits();
 
@@ -452,6 +495,14 @@ namespace Trident {
 		#endif
 
 		return adapter->createImageImplementation(this, descriptor);
+	}
+
+	ref<Image> Device::createImage(const ImageDescriptor& descriptor) const {
+		const ref<Image> image = createStaticImage(descriptor);
+
+		memoryAllocator->suballocateDynamic(image);
+
+		return image;
 	}
 
 	ref<PipelineLayout> Device::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
@@ -681,6 +732,8 @@ namespace Trident {
 						errorCount += 1;
 					}
 					else {
+						// TODO(graphics/device/update-descriptor-sets)
+						// This validation breaks the Visibility sample, which offsets the Material Offset buffer from 4 bytes for the prefix sum.
 						if (buffer->getUsage() & (BufferUsage::READ_ONLY_STORAGE | BufferUsage::READ_WRITE_STORAGE)) {
 							if (descriptorBuffer.offset % minStorageBufferOffsetAlignment > 0) {
 								ENGINE_ERROR("writeDescriptorSets[[]].descriptorBuffers[[]].offset must be a multiple of the minStorageBufferOffsetAlignment physical device limit.", writeDescriptorSetIndex, descriptorBufferIndex);

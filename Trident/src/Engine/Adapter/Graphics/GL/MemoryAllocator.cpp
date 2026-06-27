@@ -12,7 +12,7 @@ namespace Trident {
 		Trident::MemoryAllocator(device)
 	{}
 
-	MemoryAllocation GL::allocateMemory(Trident::MemoryAllocator* memoryAllocator, bool dynamic, uint32 memoryTypeIndex, uint64 size) {
+	MemoryAllocation GL::allocateMemory(Trident::MemoryAllocator* memoryAllocator, bool dynamic, uint32 memoryTypeIndex, uint64 size, uint64 alignment) {
 		MemoryAllocation memoryAllocation{};
 		memoryAllocation.dynamic = dynamic;
 		memoryAllocation.memory = 0;
