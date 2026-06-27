@@ -51,7 +51,12 @@ namespace Trident {
 		allocations[allocationIndex] = allocation;
 
 		ENGINE_INFO("Created [] allocation ([]).", allocation.dynamic ? "dynamic" : "static", allocationIndex);
-		ENGINE_DEBUG("- Size = []", allocation.size);
+		ENGINE_DEBUG(
+			"- Memory type = []\n"
+			"- Size = []",
+			allocation.memoryTypeIndex,
+			allocation.size
+		);
 
 		return allocationIndex;
 	}
