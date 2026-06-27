@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/MemoryAllocation.hpp"
+#include "Engine/API/Graphics/MemoryRequirements.hpp"
 #include "Engine/API/Graphics/MemorySuballocation.hpp"
 
 namespace Trident {
@@ -24,6 +25,10 @@ namespace Trident {
 
 			/// Finds and returns the memory type index corresponding to the provided memory property flag.
 			uint32 findMemoryTypeIndex(MemoryProperty memoryProperties) const;
+
+			/// Returns the memory requirements for the provided buffer or image.
+			MemoryRequirements getMemoryRequirements(ref<BaseBuffer> buffer) const;
+			MemoryRequirements getMemoryRequirements(ref<Image> image) const;
 
 			// TODO: Make private.
 			/// Suballocates a memory allocation to fit the provided size, buffer or image.

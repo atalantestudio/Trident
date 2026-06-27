@@ -5,7 +5,6 @@
 
 #include "Engine/API/Graphics/Device.hpp"
 #include "Engine/API/Graphics/MemoryAllocator.hpp"
-#include "Engine/API/Graphics/MemoryRequirements.hpp"
 
 namespace Trident {
 	MemoryAllocator::MemoryAllocator(const Device* device) :
@@ -59,6 +58,14 @@ namespace Trident {
 
 	uint32 MemoryAllocator::findMemoryTypeIndex(MemoryProperty memoryProperties) const {
 		return device->adapter->findMemoryTypeIndexImplementation(this, memoryProperties);
+	}
+
+	MemoryRequirements MemoryAllocator::getMemoryRequirements(ref<BaseBuffer> buffer) const {
+		return device->adapter->getBufferMemoryRequirementsImplementation(this, buffer);
+	}
+
+	MemoryRequirements MemoryAllocator::getMemoryRequirements(ref<Image> image) const {
+		return device->adapter->getImageMemoryRequirementsImplementation(this, image);
 	}
 
 	MemorySuballocation MemoryAllocator::suballocate(uint32 allocationIndex, uint64 size, uint64 alignment) {
@@ -115,7 +122,7 @@ namespace Trident {
 	}
 
 	void MemoryAllocator::suballocateDynamic(ref<BaseBuffer> buffer) {
-		const MemoryRequirements memoryRequirements = device->adapter->getBufferMemoryRequirementsImplementation(this, buffer);
+		const MemoryRequirements memoryRequirements = getMemoryRequirements(buffer);
 		const uint32 memoryTypeIndex = findMemoryTypeIndex(buffer->getMemorySuballocation().memoryProperties);
 		const uint32 allocationIndex = findAllocationIndex(memoryTypeIndex, memoryRequirements);
 
@@ -127,7 +134,7 @@ namespace Trident {
 	}
 
 	void MemoryAllocator::suballocateDynamic(ref<Image> image) {
-		const MemoryRequirements memoryRequirements = device->adapter->getImageMemoryRequirementsImplementation(this, image);
+		const MemoryRequirements memoryRequirements = getMemoryRequirements(image);
 		const uint32 memoryTypeIndex = findMemoryTypeIndex(image->getMemorySuballocation().memoryProperties);
 		const uint32 allocationIndex = findAllocationIndex(memoryTypeIndex, memoryRequirements);
 

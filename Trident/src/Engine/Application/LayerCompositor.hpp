@@ -112,8 +112,9 @@ namespace Trident {
 						DEBUG_ASSERT(memorySuballocation.size == 0);
 
 						const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(memorySuballocation.memoryProperties);
+						const MemoryRequirements memoryRequirements = memoryAllocator->getMemoryRequirements(buffer);
 
-						allocationSizesPerMemoryType[memoryTypeIndex] += buffer->getSize();
+						allocationSizesPerMemoryType[memoryTypeIndex] += memoryRequirements.size;
 					}
 
 					for (const ref<Image>& image : staticMemoryDescriptor.images) {
@@ -122,8 +123,9 @@ namespace Trident {
 						DEBUG_ASSERT(memorySuballocation.size == 0);
 
 						const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(memorySuballocation.memoryProperties);
+						const MemoryRequirements memoryRequirements = memoryAllocator->getMemoryRequirements(image);
 
-						allocationSizesPerMemoryType[memoryTypeIndex] += image->getSize();
+						allocationSizesPerMemoryType[memoryTypeIndex] += memoryRequirements.size;
 					}
 
 					layerIndex += 1;

@@ -446,18 +446,54 @@ namespace Trident {
 	}
 
 	MemoryRequirements DX12::getBufferMemoryRequirements(const Trident::MemoryAllocator* memoryAllocator, ref<Trident::BaseBuffer> buffer) {
+		const DX12::Device* _device = static_cast<const DX12::Device*>(memoryAllocator->device);
+
+		D3D12_RESOURCE_DESC resourceDescriptor{};
+		resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+		resourceDescriptor.Alignment = 0;
+		resourceDescriptor.Width = buffer->getSize();
+		resourceDescriptor.Height = 1;
+		resourceDescriptor.DepthOrArraySize = 1;
+		resourceDescriptor.MipLevels = 1;
+		resourceDescriptor.Format = DXGI_FORMAT_UNKNOWN;
+		resourceDescriptor.SampleDesc.Count = 1;
+		resourceDescriptor.SampleDesc.Quality = 0;
+		resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+		resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+		const D3D12_RESOURCE_ALLOCATION_INFO resourceAllocationInfo = _device->device->GetResourceAllocationInfo(0, 1, &resourceDescriptor);
+
 		MemoryRequirements memoryRequirements{};
-		memoryRequirements.size = buffer->getSize();
-		memoryRequirements.alignment = GL_RESOURCE_ALIGNMENT;
+		memoryRequirements.size = resourceAllocationInfo.SizeInBytes;
+		memoryRequirements.alignment = resourceAllocationInfo.Alignment;
 		memoryRequirements.memoryTypeBits = 1;
 
 		return memoryRequirements;
 	}
 
 	MemoryRequirements DX12::getImageMemoryRequirements(const Trident::MemoryAllocator* memoryAllocator, ref<Trident::Image> image) {
+		const DX12::Device* _device = static_cast<const DX12::Device*>(memoryAllocator->device);
+		const Extent3D extent = image->getExtent();
+		const ImageUsage usage = image->getUsage();
+
+		D3D12_RESOURCE_DESC resourceDescriptor{};
+		resourceDescriptor.Dimension = getImageResourceDimension(image->getType());
+		resourceDescriptor.Alignment = 0;
+		resourceDescriptor.Width = extent.width;
+		resourceDescriptor.Height = extent.height;
+		resourceDescriptor.DepthOrArraySize = extent.depth * image->getLayerCount();
+		resourceDescriptor.MipLevels = image->getMipLevelCount();
+		resourceDescriptor.Format = getImageFormat(image->getFormat());
+		resourceDescriptor.SampleDesc.Count = image->getSampleCount();
+		resourceDescriptor.SampleDesc.Quality = 0;
+		resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		resourceDescriptor.Flags = getImageResourceFlags(usage);
+
+		const D3D12_RESOURCE_ALLOCATION_INFO resourceAllocationInfo = _device->device->GetResourceAllocationInfo(0, 1, &resourceDescriptor);
+
 		MemoryRequirements memoryRequirements{};
-		memoryRequirements.size = image->getSize();
-		memoryRequirements.alignment = GL_RESOURCE_ALIGNMENT;
+		memoryRequirements.size = resourceAllocationInfo.SizeInBytes;
+		memoryRequirements.alignment = resourceAllocationInfo.Alignment;
 		memoryRequirements.memoryTypeBits = 1;
 
 		return memoryRequirements;
@@ -466,7 +502,6 @@ namespace Trident {
 	MemorySuballocation DX12::suballocateBufferMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, ref<Trident::BaseBuffer> buffer) {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(memoryAllocator->device);
 		const ref<DX12::BaseBuffer> _buffer = std::static_pointer_cast<DX12::BaseBuffer>(buffer);
-		const MemoryRequirements memoryRequirements = getBufferMemoryRequirements(memoryAllocator, buffer);
 		const MemoryAllocation& memoryAllocation = memoryAllocator->allocations[allocationIndex];
 
 		D3D12_RESOURCE_DESC resourceDescriptor{};
@@ -482,8 +517,7 @@ namespace Trident {
 		resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 		resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-		// TODO(graphics/dx12/memory-allocator)
-		// const D3D12_RESOURCE_ALLOCATION_INFO resourceAllocationInfo = _device->device->GetResourceAllocationInfo(0, 1, &resourceDescriptor);
+		const D3D12_RESOURCE_ALLOCATION_INFO resourceAllocationInfo = _device->device->GetResourceAllocationInfo(0, 1, &resourceDescriptor);
 
 		D3D12_RESOURCE_STATES initialResourceStates = D3D12_RESOURCE_STATE_COMMON;
 
@@ -499,7 +533,7 @@ namespace Trident {
 			}
 		}
 
-		MemorySuballocation memorySuballocation = memoryAllocator->suballocate(allocationIndex, memoryRequirements.size, memoryRequirements.alignment);
+		MemorySuballocation memorySuballocation = memoryAllocator->suballocate(allocationIndex, resourceAllocationInfo.SizeInBytes, resourceAllocationInfo.Alignment);
 		memorySuballocation.memoryProperties = buffer->getMemorySuballocation().memoryProperties;
 
 		HRESULT result;
@@ -507,7 +541,6 @@ namespace Trident {
 		{
 			PROFILE_SCOPE("ID3D12Device::CreatePlacedResource (buffer)");
 
-			// TODO(graphics/dx12/memory-allocator/resource-alignment)
 			result = _device->device->CreatePlacedResource((ID3D12Heap*) memoryAllocation.memory, memorySuballocation.offset, &resourceDescriptor, initialResourceStates, nullptr, IID_PPV_ARGS(&_buffer->resource));
 		}
 
@@ -535,7 +568,6 @@ namespace Trident {
 		const ref<DX12::Image> _image = std::static_pointer_cast<DX12::Image>(image);
 		const Extent3D extent = image->getExtent();
 		const ImageUsage usage = image->getUsage();
-		const MemoryRequirements memoryRequirements = getImageMemoryRequirements(memoryAllocator, image);
 		const MemoryAllocation& memoryAllocation = memoryAllocator->allocations[allocationIndex];
 
 		D3D12_RESOURCE_DESC resourceDescriptor{};
@@ -551,8 +583,7 @@ namespace Trident {
 		resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 		resourceDescriptor.Flags = getImageResourceFlags(usage);
 
-		// TODO(graphics/dx12/memory-allocator)
-		// const D3D12_RESOURCE_ALLOCATION_INFO resourceAllocationInfo = _device->device->GetResourceAllocationInfo(0, 1, &resourceDescriptor);
+		const D3D12_RESOURCE_ALLOCATION_INFO resourceAllocationInfo = _device->device->GetResourceAllocationInfo(0, 1, &resourceDescriptor);
 
 		const D3D12_HEAP_TYPE heapType = static_cast<D3D12_HEAP_TYPE>(memoryAllocation.memoryTypeIndex + 1);
 
@@ -585,7 +616,7 @@ namespace Trident {
 			optimizedClearValuePointer = &optimizedClearValue;
 		}
 
-		MemorySuballocation memorySuballocation = memoryAllocator->suballocate(allocationIndex, memoryRequirements.size, memoryRequirements.alignment);
+		MemorySuballocation memorySuballocation = memoryAllocator->suballocate(allocationIndex, resourceAllocationInfo.SizeInBytes, resourceAllocationInfo.Alignment);
 		memorySuballocation.memoryProperties = image->getMemorySuballocation().memoryProperties;
 
 		HRESULT result;
@@ -593,7 +624,6 @@ namespace Trident {
 		{
 			PROFILE_SCOPE("ID3D12Device::CreatePlacedResource (image)");
 
-			// TODO(graphics/dx12/memory-allocator/resource-alignment)
 			result = _device->device->CreatePlacedResource((ID3D12Heap*) memoryAllocation.memory, memorySuballocation.offset, &resourceDescriptor, initialResourceStates, optimizedClearValuePointer, IID_PPV_ARGS(&_image->resource));
 		}
 
