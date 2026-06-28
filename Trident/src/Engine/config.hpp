@@ -37,6 +37,9 @@ namespace Trident {
 	#define ENABLE_VK_ADAPTER
 
 	#if defined(BUILD_MODE_DEBUG)
+		/// Keeps track of the size of the allocated memory.
+		#define DEBUG_COUNT_ALLOCATED_MEMORY_SIZE
+
 		// Toggle debug messages from the graphics API.
 		#define DEBUG_ENABLE_MESSENGER
 

@@ -16,12 +16,6 @@ namespace Trident {
 	{
 		const VK::PhysicalDevice* _physicalDevice = static_cast<const VK::PhysicalDevice*>(device->physicalDevice);
 
-		currentBufferMemoryAllocationIndices = sequence<uint32>(_physicalDevice->memoryProperties.memoryTypeCount);
-		std::fill(currentBufferMemoryAllocationIndices.begin(), currentBufferMemoryAllocationIndices.end(), max<uint32>());
-
-		currentImageMemoryAllocationIndices = sequence<uint32>(_physicalDevice->memoryProperties.memoryTypeCount);
-		std::fill(currentImageMemoryAllocationIndices.begin(), currentImageMemoryAllocationIndices.end(), max<uint32>());
-
 		#if defined(DEBUG_ENUMERATE_MEMORY_HEAPS)
 			enumerateMemoryHeaps();
 		#endif
@@ -138,8 +132,10 @@ namespace Trident {
 			const VkMemoryType memoryType = _physicalDevice->memoryProperties.memoryTypes[memoryAllocation.memoryTypeIndex];
 
 			if (!(memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)) {
-				// TODO(graphics/vk/memory-allocator/flush-mapped-ranges): Expose vkFlushMappedMemoryRanges to the graphics adapter.
 				ADAPTER_WARNING("Non-coherent memory must be manually flushed.");
+
+				// TODO(graphics/vk/memory-allocator/flush-mapped-ranges)
+				ENGINE_ERROR_UNIMPLEMENTED();
 
 				/* VkMappedMemoryRange mappedMemoryRange{};
 				mappedMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
@@ -148,7 +144,6 @@ namespace Trident {
 				mappedMemoryRange.offset = 0;
 				mappedMemoryRange.size = memoryAllocation.offset;
 
-				// Manually flush the mapped range.
 				const VkResult result = _device->vkFlushMappedMemoryRanges(_device->device, 1, &mappedMemoryRange);
 
 				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to flush mapped memory allocation range ([]).", string_VkResult(result)); */
@@ -171,16 +166,6 @@ namespace Trident {
 			_device->vkFreeMemory(_device->device, *pointer_cast<const VkDeviceMemory*>(&memoryAllocation.memory), nullptr);
 
 			memoryAllocation.suballocationCount = 0;
-
-			uint32 memoryAllocationIndexIndex = 0;
-
-			// Reset corresponding memory allocation index.
-			while (memoryAllocationIndexIndex < currentBufferMemoryAllocationIndices.count()) {
-				currentBufferMemoryAllocationIndices[memoryAllocationIndexIndex] = max<uint32>();
-				currentImageMemoryAllocationIndices[memoryAllocationIndexIndex] = max<uint32>();
-
-				memoryAllocationIndexIndex += 1;
-			}
 
 			ADAPTER_INFO("Freed memory allocation [].", memoryAllocationIndex);
 

@@ -63,12 +63,23 @@ namespace Trident {
 			allocation.size
 		);
 
+		#if defined(DEBUG_COUNT_ALLOCATED_MEMORY_SIZE)
+			// TODO(graphics/memory-allocator): Also decrease when the allocation is freed.
+			allocatedMemorySize += allocation.size;
+		#endif
+
 		return allocationIndex;
 	}
 
 	uint32 MemoryAllocator::findMemoryTypeIndex(MemoryProperty memoryProperties) const {
 		return device->adapter->findMemoryTypeIndexImplementation(this, memoryProperties);
 	}
+
+	#if defined(DEBUG_COUNT_ALLOCATED_MEMORY_SIZE)
+		uint64 MemoryAllocator::getAllocatedMemorySize() const {
+			return allocatedMemorySize;
+		}
+	#endif
 
 	MemoryRequirements MemoryAllocator::getMemoryRequirements(ref<BaseBuffer> buffer) const {
 		return device->adapter->getBufferMemoryRequirementsImplementation(this, buffer);

@@ -29,15 +29,6 @@ namespace Trident {
 			void unmapSuballocation(uint32 memoryAllocationIndex);
 
 			void freeSuballocation(uint32 memoryAllocationIndex);
-
-		// TODO: Don't expose.
-		public:
-			// TODO(graphics/vk/memory-allocator): Try merging with currentImageMemoryAllocationIndices.
-			// Indices of the currently active buffer memory allocations per memory type.
-			sequence<uint32> currentBufferMemoryAllocationIndices;
-
-			// Indices of the currently active image memory allocations per memory type.
-			sequence<uint32> currentImageMemoryAllocationIndices;
 	};
 
 	namespace VK {

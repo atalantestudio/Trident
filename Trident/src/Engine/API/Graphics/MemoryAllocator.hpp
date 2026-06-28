@@ -26,6 +26,11 @@ namespace Trident {
 			/// Finds and returns the memory type index corresponding to the provided memory property flag.
 			uint32 findMemoryTypeIndex(MemoryProperty memoryProperties) const;
 
+			#if defined(DEBUG_COUNT_ALLOCATED_MEMORY_SIZE)
+				/// Returns the total size of the allocated memory.
+				uint64 getAllocatedMemorySize() const;
+			#endif
+
 			/// Returns the memory requirements for the provided buffer or image.
 			MemoryRequirements getMemoryRequirements(ref<BaseBuffer> buffer) const;
 			MemoryRequirements getMemoryRequirements(ref<Image> image) const;
@@ -40,6 +45,10 @@ namespace Trident {
 			void suballocateDynamic(ref<BaseBuffer> buffer);
 			void suballocateDynamic(ref<Image> image);
 
+			// TODO(graphics/memory-allocator/map-memory)
+			// TODO(graphics/memory-allocator/unmap-memory)
+			// TODO(graphics/memory-allocator/free-memory)
+
 		private:
 			/// Finds and returns the index of the first memory allocation that can contain the provided size.
 			/// Returns the allocation count if no suitable allocation was found.
@@ -53,5 +62,9 @@ namespace Trident {
 			const Device* device;
 			std::vector<MemoryAllocation> allocations;
 			std::vector<uint32> freeableAllocationIndices;
+
+			#if defined(DEBUG_COUNT_ALLOCATED_MEMORY_SIZE)
+				uint64 allocatedMemorySize = 0;
+			#endif
 	};
 }
