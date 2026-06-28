@@ -41,17 +41,17 @@ namespace Trident {
 
 							uint32 descriptorBufferIndex = 0;
 
-							while (descriptorBufferIndex < descriptorSetBinding.descriptorBuffers.count()) {
-								const DescriptorBuffer& descriptorBuffer = descriptorSetBinding.descriptorBuffers[descriptorBufferIndex];
+							while (descriptorBufferIndex < descriptorSetBinding.descriptorBufferViews.count()) {
+								const ref<BaseBufferView> bufferView = descriptorSetBinding.descriptorBufferViews[descriptorBufferIndex];
 
-								if (descriptorBuffer.buffer == nullptr) {
+								if (bufferView->getBuffer() == nullptr) {
 									break;
 								}
 
 								const GLuint index = descriptorSetLayoutOffset + bindingIndex + descriptorBufferIndex;
 
 								#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-									glBindBufferRange(target, index, std::static_pointer_cast<GL::BaseBuffer>(descriptorBuffer.buffer)->buffer, descriptorBuffer.offset, descriptorBuffer.size);
+									glBindBufferRange(target, index, static_cast<const GL::BaseBuffer*>(bufferView->getBuffer())->buffer, bufferView->getOffset(), bufferView->getSize());
 								#else
 									ENGINE_ERROR_UNSUPPORTED();
 								#endif

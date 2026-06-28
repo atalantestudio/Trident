@@ -53,6 +53,12 @@ namespace Trident {
 				errorCount += 1;
 			}
 
+			if (descriptor.usage & BufferUsage::READ_WRITE_STORAGE && descriptor.memoryProperties & MemoryProperty::HOST_VISIBLE) {
+				ENGINE_ERROR("The READ_WRITE_STORAGE buffer usage is mutually exclusive with the HOST_VISIBLE memory property.");
+
+				errorCount += 1;
+			}
+
 			if (descriptor.usage & (BufferUsage::READ_ONLY_STORAGE | BufferUsage::READ_WRITE_STORAGE)) {
 				const uint64 minStorageBufferOffsetAlignment = physicalDevice->getLimits().minStorageBufferOffsetAlignment;
 

@@ -3,6 +3,7 @@
 
 #include "pch.hpp"
 
+#include "Engine/Adapter/Graphics/GL/Buffer.hpp"
 #include "Engine/Adapter/Graphics/GL/CommandBuffer.hpp"
 #include "Engine/Adapter/Graphics/GL/DescriptorSet.hpp"
 #include "Engine/Adapter/Graphics/GL/Device.hpp"
@@ -40,7 +41,7 @@ namespace Trident {
 				descriptorSetBinding.descriptorType = descriptorSetLayoutBinding.descriptorType;
 
 				if (isBufferDescriptorType(descriptorSetBinding.descriptorType)) {
-					descriptorSetBinding.descriptorBuffers = sequence<DescriptorBuffer>(descriptorSetLayoutBinding.descriptorCount);
+					descriptorSetBinding.descriptorBufferViews = sequence<ref<BaseBufferView>>(descriptorSetLayoutBinding.descriptorCount);
 				}
 				else if (isImageDescriptorType(descriptorSetBinding.descriptorType)) {
 					descriptorSetBinding.descriptorImages = sequence<DescriptorImage>(descriptorSetLayoutBinding.descriptorCount);
@@ -95,9 +96,24 @@ namespace Trident {
 			GL::DescriptorSet::DescriptorSetBinding& descriptorSetBinding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
 
 			if (isBufferDescriptorType(descriptorSetBinding.descriptorType)) {
-				DEBUG_ASSERT(writeDescriptorSet.descriptorBuffers.count() > 0);
+				// TODO(graphics/vk/descriptor-buffer-view)
+				DEBUG_ASSERT(writeDescriptorSet.descriptorBuffers.count() > 0 || writeDescriptorSet.descriptorBufferViews.count() > 0);
 
-				std::copy(writeDescriptorSet.descriptorBuffers.begin(), writeDescriptorSet.descriptorBuffers.end(), descriptorSetBinding.descriptorBuffers.begin());
+				// TODO(graphics/vk/descriptor-buffer-view)
+				if (writeDescriptorSet.descriptorBuffers.count() > 0) {
+					uint32 bufferViewIndex = 0;
+
+					while (bufferViewIndex < writeDescriptorSet.descriptorBufferViews.count()) {
+						const DescriptorBuffer& descriptorBuffer = writeDescriptorSet.descriptorBuffers[bufferViewIndex];
+
+						descriptorSetBinding.descriptorBufferViews[bufferViewIndex] = createRef<BaseBufferView>(descriptorBuffer.buffer.get(), descriptorBuffer.offset, descriptorBuffer.size, 1);
+
+						bufferViewIndex += 1;
+					}
+				}
+				else {
+					std::copy(writeDescriptorSet.descriptorBufferViews.begin(), writeDescriptorSet.descriptorBufferViews.end(), descriptorSetBinding.descriptorBufferViews.begin());
+				}
 
 				continue;
 			}

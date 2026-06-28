@@ -304,6 +304,55 @@ namespace Trident {
 		currentViewDescriptorHeapAllocationIndex = static_cast<UINT>(descriptorHeapAllocations.size() - 1);
 	}
 
+	void DX12::MemoryAllocator::writeUniformBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, ref<BaseBufferView> bufferView) const {
+		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
+		const DX12::BaseBuffer* _buffer = static_cast<const DX12::BaseBuffer*>(bufferView->getBuffer());
+
+		D3D12_CONSTANT_BUFFER_VIEW_DESC constantBufferViewDescriptor{};
+		constantBufferViewDescriptor.BufferLocation = _buffer->resource->GetGPUVirtualAddress() + bufferView->getOffset();
+		constantBufferViewDescriptor.SizeInBytes = static_cast<UINT>(bufferView->getSize());
+
+		_device->device->CreateConstantBufferView(&constantBufferViewDescriptor, descriptorHandle);
+	}
+
+	void DX12::MemoryAllocator::writeReadOnlyStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, ref<BaseBufferView> bufferView) const {
+		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
+		const DX12::BaseBuffer* _buffer = static_cast<const DX12::BaseBuffer*>(bufferView->getBuffer());
+
+		D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDescriptor{};
+		shaderResourceViewDescriptor.Format = DXGI_FORMAT_UNKNOWN;
+		shaderResourceViewDescriptor.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+		shaderResourceViewDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+
+		// TODO(graphics/dx12/memory-allocator/shader-resource-view): The offset is not guaranteed to be a multiple of the stride.
+		shaderResourceViewDescriptor.Buffer.FirstElement = bufferView->getOffset() / bufferView->getStride();
+
+		shaderResourceViewDescriptor.Buffer.NumElements = bufferView->getSize() / bufferView->getStride();
+		shaderResourceViewDescriptor.Buffer.StructureByteStride = bufferView->getStride();
+		shaderResourceViewDescriptor.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+
+		_device->device->CreateShaderResourceView(_buffer->resource, &shaderResourceViewDescriptor, descriptorHandle);
+	}
+
+	void DX12::MemoryAllocator::writeReadWriteStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, ref<BaseBufferView> bufferView) const {
+		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
+		const DX12::BaseBuffer* _buffer = static_cast<const DX12::BaseBuffer*>(bufferView->getBuffer());
+
+		D3D12_UNORDERED_ACCESS_VIEW_DESC unorderedAccessViewDescriptor{};
+		unorderedAccessViewDescriptor.Format = DXGI_FORMAT_UNKNOWN;
+		unorderedAccessViewDescriptor.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+
+		// TODO(graphics/dx12/memory-allocator/shader-resource-view): The offset is not guaranteed to be a multiple of the stride.
+		unorderedAccessViewDescriptor.Buffer.FirstElement = bufferView->getOffset() / bufferView->getStride();
+
+		unorderedAccessViewDescriptor.Buffer.NumElements = bufferView->getSize() / bufferView->getStride();
+		unorderedAccessViewDescriptor.Buffer.StructureByteStride = bufferView->getStride();
+		unorderedAccessViewDescriptor.Buffer.CounterOffsetInBytes = 0;
+		unorderedAccessViewDescriptor.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
+
+		_device->device->CreateUnorderedAccessView(_buffer->resource, nullptr, &unorderedAccessViewDescriptor, descriptorHandle);
+	}
+
 	void DX12::MemoryAllocator::createSamplerDescriptorHeapAllocation() {
 		const DX12::Device* device = static_cast<const DX12::Device*>(this->device);
 
@@ -440,6 +489,10 @@ namespace Trident {
 			/* if (usage & TRANSFER_DST) {
 				heapType = D3D12_HEAP_TYPE_READBACK;
 			} */
+		}
+
+		if (memoryProperties & MemoryProperty::DX12_FORCE_READBACK) {
+			heapType = D3D12_HEAP_TYPE_READBACK;
 		}
 
 		return static_cast<uint32>(heapType) - 1;

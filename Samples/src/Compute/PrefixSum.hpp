@@ -7,90 +7,88 @@ namespace Trident {
 	class ComputePrefixSumRenderer : public Renderer {
 		private:
 			static constexpr index ELEMENT_COUNT = 16;
-			static constexpr uint32 ELEMENT_COUNTS[ELEMENT_COUNT] = {
-				2, 5, 6, 14, 4, 4, 5, 10, 7, 0, 11, 3, 8, 4, 6, 5,
-			};
+			static constexpr uint32 ELEMENT_COUNTS[ELEMENT_COUNT] = {2, 5, 6, 14, 4, 4, 5, 10, 7, 0, 11, 3, 8, 4, 6, 5};
 
 		public:
 			void build() override {
 				const ref<Device> device = getDevice();
 
-				DescriptorSetLayoutBinding elementCountBinding{};
-				elementCountBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
-				elementCountBinding.descriptorCount = 1;
-				elementCountBinding.shaderStages = ShaderStage::COMPUTE;
+				const sequence<DescriptorSetLayoutBinding> prefixSumDescriptorSetLayoutBindings = {
+					// Element count
+					{
+						.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+						.descriptorCount = 1,
+						.shaderStages = ShaderStage::COMPUTE,
+					},
 
-				DescriptorSetLayoutBinding elementStartBinding{};
-				elementStartBinding.descriptorType = DescriptorType::READ_WRITE_STORAGE_BUFFER;
-				elementStartBinding.descriptorCount = 1;
-				elementStartBinding.shaderStages = ShaderStage::COMPUTE;
+					// Element start
+					{
+						.descriptorType = DescriptorType::READ_WRITE_STORAGE_BUFFER,
+						.descriptorCount = 1,
+						.shaderStages = ShaderStage::COMPUTE,
+					},
+				};
 
-				const ref<DescriptorSetLayout> prefixSumDescriptorSetLayout = createDescriptorSetLayout({elementCountBinding, elementStartBinding});
+				const ref<DescriptorSetLayout> prefixSumDescriptorSetLayout = createDescriptorSetLayout(prefixSumDescriptorSetLayoutBindings);
 
-				PipelineLayoutDescriptor prefixSumPipelineLayoutDescriptor{};
-				prefixSumPipelineLayoutDescriptor.descriptorSetLayouts = {prefixSumDescriptorSetLayout};
+				const ref<PipelineLayout> prefixSumPipelineLayout = createPipelineLayout({
+					.descriptorSetLayouts = {prefixSumDescriptorSetLayout},
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Prefix sum",
+					#endif
+				});
 
-				#if defined(DEBUG_OBJECT_NAME)
-					prefixSumPipelineLayoutDescriptor.name = "Prefix sum";
-				#endif
+				const ref<ComputePipeline> prefixSumPipeline = createComputePipeline({
+					.pipelineLayout = prefixSumPipelineLayout,
+					.computeShaderModule = loadShaderModule(
+						{
+							.stage = ShaderStage::COMPUTE,
+							.entryPoint = "main",
+							#if defined(DEBUG_OBJECT_NAME)
+								.name = "Prefix sum compute",
+							#endif
+						},
+						"Compute/PrefixSum/PrefixSum.comp"
+					),
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Prefix sum",
+					#endif
+				});
 
-				const ref<PipelineLayout> prefixSumPipelineLayout = createPipelineLayout(prefixSumPipelineLayoutDescriptor);
+				// TODO: Use static memory.
+				const ref<BaseBuffer> elementCountBuffer = createBuffer<uint32>({
+					.size = sizeof(uint32) * ELEMENT_COUNT,
+					.usage = BufferUsage::READ_ONLY_STORAGE,
+					.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
+					.persistent = false,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Element count",
+					#endif
+				});
+				const ref<BaseBuffer> elementStartBuffer = createBuffer<uint32>({
+					.size = elementCountBuffer->getSize(),
+					.usage = BufferUsage::TRANSFER_SRC | BufferUsage::READ_WRITE_STORAGE,
+					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+					.persistent = false,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Element start",
+					#endif
+				});
+				const ref<BaseBuffer> elementStartStagingBuffer = createBuffer<uint32>({
+					.size = elementStartBuffer->getSize(),
+					.usage = BufferUsage::TRANSFER_DST,
+					.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE | MemoryProperty::DX12_FORCE_READBACK,
+					.persistent = false,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Element start staging",
+					#endif
+				});
 
-				ShaderModuleDescriptor prefixSumShaderModuleDescriptor{};
-				prefixSumShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
-				prefixSumShaderModuleDescriptor.entryPoint = "main";
+				const ref<BufferView<uint32>> elementCountView = elementCountBuffer->createView<uint32>(0, elementCountBuffer->getSize());
+				const ref<BufferView<uint32>> elementStartView = elementStartBuffer->createView<uint32>(0, elementStartBuffer->getSize());
+				const ref<BufferView<uint32>> elementStartStagingView = elementStartStagingBuffer->createView<uint32>(0, elementStartStagingBuffer->getSize());
 
-				#if defined(DEBUG_OBJECT_NAME)
-					prefixSumShaderModuleDescriptor.name = "Prefix sum compute";
-				#endif
-
-				ComputePipelineDescriptor prefixSumPipelineDescriptor{};
-				prefixSumPipelineDescriptor.pipelineLayout = prefixSumPipelineLayout;
-				prefixSumPipelineDescriptor.computeShaderModule = loadShaderModule(prefixSumShaderModuleDescriptor, "Compute/PrefixSum/PrefixSum.comp");
-
-				#if defined(DEBUG_OBJECT_NAME)
-					prefixSumPipelineDescriptor.name = "Prefix sum";
-				#endif
-
-				const ref<ComputePipeline> prefixSumPipeline = createComputePipeline(prefixSumPipelineDescriptor);
-
-				BufferDescriptor elementCountBufferDescriptor{};
-				elementCountBufferDescriptor.size = sizeof(uint32) * ELEMENT_COUNT;
-				elementCountBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE;
-				elementCountBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-				elementCountBufferDescriptor.persistent = false;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					elementCountBufferDescriptor.name = "Element count";
-				#endif
-
-				const ref<Buffer<uint32>> elementCountBuffer = createBuffer<uint32>(elementCountBufferDescriptor);
-
-				BufferDescriptor elementStartBufferDescriptor{};
-				elementStartBufferDescriptor.size = sizeof(uint32) * ELEMENT_COUNT;
-				elementStartBufferDescriptor.usage = BufferUsage::READ_WRITE_STORAGE | BufferUsage::TRANSFER_SRC;
-				elementStartBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-				elementStartBufferDescriptor.persistent = false;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					elementStartBufferDescriptor.name = "Element start";
-				#endif
-
-				const ref<Buffer<uint32>> elementStartBuffer = createBuffer<uint32>(elementStartBufferDescriptor);
-
-				BufferDescriptor elementStartStagingBufferDescriptor{};
-				elementStartStagingBufferDescriptor.size = elementStartBuffer->getSize();
-				elementStartStagingBufferDescriptor.usage = BufferUsage::TRANSFER_DST;
-				elementStartStagingBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-				elementStartStagingBufferDescriptor.persistent = false;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					elementStartStagingBufferDescriptor.name = "Element start staging";
-				#endif
-
-				const ref<Buffer<uint32>> elementStartStagingBuffer = createBuffer<uint32>(elementStartStagingBufferDescriptor);
-
-				uint32* elementCountMappedRange = elementCountBuffer->map(0, elementCountBuffer->getSize());
+				uint32* elementCountMappedRange = elementCountView->map();
 
 				std::copy_n(ELEMENT_COUNTS, ELEMENT_COUNT, elementCountMappedRange);
 
@@ -98,92 +96,83 @@ namespace Trident {
 
 				const sequence<ref<DescriptorSet>> descriptorSets = device->allocateDescriptorSets(prefixSumDescriptorSetLayout);
 				const ref<DescriptorSet> prefixSumDescriptorSet = descriptorSets[0];
-
-				DescriptorBuffer elementCountDescriptorBuffer{};
-				elementCountDescriptorBuffer.buffer = elementCountBuffer;
-				elementCountDescriptorBuffer.offset = 0;
-				elementCountDescriptorBuffer.size = elementCountBuffer->getSize();
-
-				DescriptorBuffer elementStartDescriptorBuffer{};
-				elementStartDescriptorBuffer.buffer = elementStartBuffer;
-				elementStartDescriptorBuffer.offset = 0;
-				elementStartDescriptorBuffer.size = elementStartBuffer->getSize();
-
 				const sequence<WriteDescriptorSet> writeDescriptorSets = {
 					{
 						.descriptorSet = prefixSumDescriptorSet,
 						.bindingIndex = 0,
-						.descriptorBuffers = {elementCountDescriptorBuffer},
+						.descriptorBufferViews = elementCountView,
 					},
 					{
 						.descriptorSet = prefixSumDescriptorSet,
 						.bindingIndex = 1,
-						.descriptorBuffers = {elementStartDescriptorBuffer},
+						.descriptorBufferViews = elementStartView,
 					},
 				};
 
 				device->updateDescriptorSets(writeDescriptorSets);
 
-				CommandBufferDescriptor commandBufferDescriptor{};
-				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					commandBufferDescriptor.name = "Run prefix sum";
-				#endif
-
 				const ref<Queue> queue = device->getQueue(QueueFamilyCapability::COMPUTE);
-				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder(commandBufferDescriptor);
+				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
+					.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Prefix sum",
+					#endif
+				});
 
 				commandEncoder->begin();
 				commandEncoder->bindComputePipeline(prefixSumPipeline);
 				commandEncoder->bindDescriptorSets(prefixSumPipelineLayout, 0, prefixSumDescriptorSet);
 				commandEncoder->dispatch(1, 1, 1);
 
-				BufferMemoryBarrier elementStartMemoryBarrier{};
-				elementStartMemoryBarrier.buffer = elementStartBuffer;
-				elementStartMemoryBarrier.offset = 0;
-				elementStartMemoryBarrier.size = elementStartBuffer->getSize();
-				elementStartMemoryBarrier.newAccess = Access::TRANSFER_READ;
+				const BufferMemoryBarrier elementStartMemoryBarrier = {
+					.buffer = elementStartBuffer,
+					.offset = elementStartView->getOffset(),
+					.size = elementStartView->getSize(),
+					.newAccess = Access::TRANSFER_READ,
+				};
 
 				commandEncoder->insertMemoryBarriers(elementStartMemoryBarrier, {});
 
-				BufferCopyRegion elementStartCopyRegion{};
-				elementStartCopyRegion.sourceOffset = 0;
-				elementStartCopyRegion.destinationOffset = 0;
-				elementStartCopyRegion.size = elementStartBuffer->getSize();
+				const BufferCopyRegion elementStartCopyRegion = {
+					.sourceOffset = elementStartView->getOffset(),
+					.destinationOffset = 0,
+					.size = elementStartView->getSize(),
+				};
 
-				commandEncoder->copyBufferToBuffer(elementStartBuffer, elementStartStagingBuffer, {elementStartCopyRegion});
+				commandEncoder->copyBufferToBuffer(elementStartBuffer, elementStartStagingBuffer, elementStartCopyRegion);
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
 				queue->submit(commandBuffer);
 				queue->waitIdle();
 
-				const uint32* elementStartMappedRange = elementStartStagingBuffer->map(0, elementStartBuffer->getSize());
+				const uint32* elementStartMappedRange = elementStartStagingView->map();
 
 				ENGINE_DEBUG("Element count buffer:");
 
 				index elementIndex = 0;
 
 				while (elementIndex < ELEMENT_COUNT) {
-					std::cout << ELEMENT_COUNTS[elementIndex] << ' ';
+					engineLogger << ELEMENT_COUNTS[elementIndex] << ' ';
 
 					elementIndex += 1;
 				}
 
-				std::cout << '\n';
+				engineLogger << '\n';
 
 				ENGINE_DEBUG("Element start buffer:");
 
 				elementIndex = 0;
 
 				while (elementIndex < ELEMENT_COUNT) {
-					std::cout << elementStartMappedRange[elementIndex] << ' ';
+					engineLogger << elementStartMappedRange[elementIndex] << ' ';
 
 					elementIndex += 1;
 				}
 
-				std::cout << '\n';
+				engineLogger << '\n';
+
+				elementStartStagingBuffer->unmap();
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {}

@@ -344,7 +344,8 @@ namespace Trident {
 			const VK::DescriptorSet::DescriptorSetBinding& descriptorSetBinding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
 
 			if (isBufferDescriptorType(descriptorSetBinding.descriptorType)) {
-				descriptorBufferInfoCount += writeDescriptorSet.descriptorBuffers.count();
+				// TODO(graphics/vk/descriptor-buffer-view)
+				descriptorBufferInfoCount += max(writeDescriptorSet.descriptorBuffers.count(), writeDescriptorSet.descriptorBufferViews.count());
 			}
 			else if (isImageDescriptorType(descriptorSetBinding.descriptorType)) {
 				descriptorImageInfoCount += writeDescriptorSet.descriptorImages.count();
@@ -376,19 +377,35 @@ namespace Trident {
 			vkWriteDescriptorSet.descriptorType = getDescriptorType(descriptorSetBinding.descriptorType);
 
 			if (isBufferDescriptorType(descriptorSetBinding.descriptorType)) {
-				const uint32 descriptorBufferCount = static_cast<uint32>(writeDescriptorSet.descriptorBuffers.count());
+				// TODO(graphics/vk/descriptor-buffer-view)
+				const uint32 descriptorBufferCount = static_cast<uint32>(max(writeDescriptorSet.descriptorBuffers.count(), writeDescriptorSet.descriptorBufferViews.count()));
 
 				uint32 descriptorBufferIndex = 0;
 
-				while (descriptorBufferIndex < descriptorBufferCount) {
-					const DescriptorBuffer& descriptorBuffer = writeDescriptorSet.descriptorBuffers[descriptorBufferIndex];
+				// TODO(graphics/vk/descriptor-buffer-view)
+				if (writeDescriptorSet.descriptorBuffers.count() > 0) {
+					while (descriptorBufferIndex < descriptorBufferCount) {
+						const DescriptorBuffer& descriptorBuffer = writeDescriptorSet.descriptorBuffers[descriptorBufferIndex];
 
-					VkDescriptorBufferInfo& descriptorBufferInfo = descriptorBufferInfos[descriptorBufferInfoOffset + descriptorBufferIndex];
-					descriptorBufferInfo.buffer = std::static_pointer_cast<VK::BaseBuffer>(descriptorBuffer.buffer)->buffer;
-					descriptorBufferInfo.offset = descriptorBuffer.offset;
-					descriptorBufferInfo.range = descriptorBuffer.size;
+						VkDescriptorBufferInfo& descriptorBufferInfo = descriptorBufferInfos[descriptorBufferInfoOffset + descriptorBufferIndex];
+						descriptorBufferInfo.buffer = std::static_pointer_cast<VK::BaseBuffer>(descriptorBuffer.buffer)->buffer;
+						descriptorBufferInfo.offset = descriptorBuffer.offset;
+						descriptorBufferInfo.range = descriptorBuffer.size;
 
-					descriptorBufferIndex += 1;
+						descriptorBufferIndex += 1;
+					}
+				}
+				else {
+					while (descriptorBufferIndex < descriptorBufferCount) {
+						const ref<BaseBufferView> bufferView = writeDescriptorSet.descriptorBufferViews[descriptorBufferIndex];
+
+						VkDescriptorBufferInfo& descriptorBufferInfo = descriptorBufferInfos[descriptorBufferInfoOffset + descriptorBufferIndex];
+						descriptorBufferInfo.buffer = static_cast<const VK::BaseBuffer*>(bufferView->getBuffer())->buffer;
+						descriptorBufferInfo.offset = bufferView->getOffset();
+						descriptorBufferInfo.range = bufferView->getSize();
+
+						descriptorBufferIndex += 1;
+					}
 				}
 
 				vkWriteDescriptorSet.descriptorCount = descriptorBufferCount;

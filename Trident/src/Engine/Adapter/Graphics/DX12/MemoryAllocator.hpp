@@ -49,11 +49,22 @@ namespace Trident {
 
 			void writeImage(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorImage& descriptorImage) const;
 			void writeReadWriteStorageImage(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorImage& descriptorImage) const;
+
+			// TODO(graphics/dx12/memory-allocator): Deprecate.
 			void writeUniformBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorBuffer& descriptorBuffer) const;
+
+			// TODO(graphics/dx12/memory-allocator): Deprecate.
 			void writeReadOnlyStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorBuffer& descriptorBuffer) const;
+
+			// TODO(graphics/dx12/memory-allocator): Deprecate.
 			void writeReadWriteStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorBuffer& descriptorBuffer) const;
+
 			void writeInputAttachment(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorImage& descriptorImage) const;
 			void writeSampler(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const D3D12_SAMPLER_DESC* descriptor) const;
+
+			void writeUniformBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, ref<BaseBufferView> bufferView) const;
+			void writeReadOnlyStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, ref<BaseBufferView> bufferView) const;
+			void writeReadWriteStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, ref<BaseBufferView> bufferView) const;
 
 		private:
 			void createViewDescriptorHeapAllocation();
