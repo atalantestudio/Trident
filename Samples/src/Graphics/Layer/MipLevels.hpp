@@ -223,8 +223,11 @@ namespace Trident {
 					mipLevelIndex += 1;
 				}
 
+				const uint64 minStorageBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
+				const uint64 minUniformBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
+
 				const ref<Buffer<uint32>> atomicCounterBuffer = createBuffer<uint32>({
-					.size = sizeof(uint32),
+					.size = ceil(sizeof(uint32), minStorageBufferOffsetAlignment),
 					.usage = BufferUsage::READ_WRITE_STORAGE,
 					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 					.persistent = false,
@@ -232,9 +235,10 @@ namespace Trident {
 						.name = "Atomic counter",
 					#endif
 				});
+				const ref<BufferView<uint32>> atomicCounterView = atomicCounterBuffer->createView<uint32>(0, atomicCounterBuffer->getSize());
 
 				const ref<Buffer<MipLevelArguments>> argumentBuffer = createBuffer<MipLevelArguments>({
-					.size = sizeof(MipLevelArguments),
+					.size = ceil(sizeof(MipLevelArguments), minUniformBufferOffsetAlignment),
 					.usage = BufferUsage::UNIFORM,
 					.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 					.persistent = false,
@@ -242,6 +246,7 @@ namespace Trident {
 						.name = "Mip level arguments",
 					#endif
 				});
+				const ref<BufferView<MipLevelArguments>> argumentView = argumentBuffer->createView<MipLevelArguments>(0, argumentBuffer->getSize());
 
 				MipLevelArguments* arguments = argumentBuffer->map(0, argumentBuffer->getSize());
 				arguments->groupCount = groupCountX * groupCountY * groupCountZ;
@@ -283,22 +288,6 @@ namespace Trident {
 				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(descriptorSetLayout);
 				const ref<DescriptorSet> descriptorSet = descriptorSets[0];
 
-				const sequence<DescriptorBuffer> descriptorBuffers = {
-					// Arguments
-					{
-						.buffer = argumentBuffer,
-						.offset = 0,
-						.size = argumentBuffer->getSize(),
-					},
-
-					// Atomic counter
-					{
-						.buffer = atomicCounterBuffer,
-						.offset = 0,
-						.size = atomicCounterBuffer->getSize(),
-					},
-				};
-
 				sequence<DescriptorImage> descriptorImages(13);
 
 				mipLevelIndex = 0;
@@ -330,7 +319,7 @@ namespace Trident {
 					{
 						.descriptorSet = descriptorSet,
 						.bindingIndex = 0,
-						.descriptorBuffers = descriptorBuffers[0],
+						.descriptorBufferViews = argumentView,
 					},
 
 					// Source
@@ -351,7 +340,7 @@ namespace Trident {
 					{
 						.descriptorSet = descriptorSet,
 						.bindingIndex = 3,
-						.descriptorBuffers = descriptorBuffers[1],
+						.descriptorBufferViews = atomicCounterView,
 					},
 				};
 
@@ -477,8 +466,10 @@ namespace Trident {
 			}
 
 			ref<Buffer<uint32>> createMipLevelBuffer() const {
+				const uint64 minUniformBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
+
 				return createBuffer<uint32>({
-					.size = sizeof(uint32),
+					.size = ceil(sizeof(uint32), minUniformBufferOffsetAlignment),
 					.usage = BufferUsage::UNIFORM,
 					.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 					.persistent = true,
