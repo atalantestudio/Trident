@@ -11,8 +11,9 @@ namespace Trident {
 	class SampleClearColorRenderer : public Renderer {
 		public:
 			void build() override {
-				setupRenderPass();
-				recreateFramebuffers();
+				renderPass = createRenderPass();
+
+				createFramebuffers();
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
@@ -24,13 +25,14 @@ namespace Trident {
 			}
 
 			void resize(WindowResizeEvent& event) override {
-				recreateFramebuffers();
+				createFramebuffers();
 			}
 
 		private:
-			void setupRenderPass() {
-				renderPass = createRenderPass({
+			ref<RenderPass> createRenderPass() const {
+				return Renderer::createRenderPass({
 					.attachments = {
+						// Swapchain
 						{
 							.format = getSurface()->getFormat(),
 							.sampleCount = 1,
@@ -52,7 +54,7 @@ namespace Trident {
 				});
 			}
 
-			void recreateFramebuffers() {
+			void createFramebuffers() {
 				const ref<Swapchain> swapchain = getSwapchain();
 
 				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
