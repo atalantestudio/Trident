@@ -21,12 +21,6 @@ namespace Trident {
 				errorCount += 1;
 			}
 
-			if (alignment == 0) {
-				ENGINE_ERROR("The allocation alignment must not be 0.");
-
-				errorCount += 1;
-			}
-
 			const uint32 maxMemoryAllocationCount = device->getPhysicalDevice()->getLimits().maxMemoryAllocationCount;
 
 			if (allocations.size() >= maxMemoryAllocationCount) {
