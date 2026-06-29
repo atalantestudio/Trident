@@ -458,7 +458,7 @@ namespace Trident {
 		heapDescriptor.Properties.CreationNodeMask = 1;
 		heapDescriptor.Properties.VisibleNodeMask = 1;
 		heapDescriptor.Alignment = alignment;
-		heapDescriptor.Flags = D3D12_HEAP_FLAG_NONE;
+		heapDescriptor.Flags = D3D12_HEAP_FLAG_ALLOW_ALL_BUFFERS_AND_TEXTURES;
 
 		ID3D12Heap* heap;
 
@@ -468,7 +468,7 @@ namespace Trident {
 
 		MemoryAllocation memoryAllocation{};
 		memoryAllocation.dynamic = dynamic;
-		memoryAllocation.memory = (uint64) heap;
+		memoryAllocation.memory = reinterpret_cast<uint64>(heap);
 		memoryAllocation.memoryTypeIndex = memoryTypeIndex;
 		memoryAllocation.size = size;
 		memoryAllocation.usedOffset = 0;
@@ -589,7 +589,7 @@ namespace Trident {
 		{
 			PROFILE_SCOPE("ID3D12Device::CreatePlacedResource (buffer)");
 
-			result = _device->device->CreatePlacedResource((ID3D12Heap*) memoryAllocation.memory, memorySuballocation.offset, &resourceDescriptor, initialResourceStates, nullptr, IID_PPV_ARGS(&_buffer->resource));
+			result = _device->device->CreatePlacedResource(reinterpret_cast<ID3D12Heap*>(memoryAllocation.memory), memorySuballocation.offset, &resourceDescriptor, initialResourceStates, nullptr, IID_PPV_ARGS(&_buffer->resource));
 		}
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create placed buffer resource.");
@@ -672,7 +672,15 @@ namespace Trident {
 		{
 			PROFILE_SCOPE("ID3D12Device::CreatePlacedResource (image)");
 
-			result = _device->device->CreatePlacedResource((ID3D12Heap*) memoryAllocation.memory, memorySuballocation.offset, &resourceDescriptor, initialResourceStates, optimizedClearValuePointer, IID_PPV_ARGS(&_image->resource));
+			// TODO(graphics/dx12/placed-rtv-dsv): Fix initialization error when first clearing render targets and/or depth stencil images created with CreatePlacedResource.
+			if (usage & (ImageUsage::COLOR_ATTACHMENT | ImageUsage::DEPTH_STENCIL_ATTACHMENT)) {
+				const D3D12_HEAP_DESC heapDescriptor = ((ID3D12Heap*) memoryAllocation.memory)->GetDesc();
+
+				result = _device->device->CreateCommittedResource(&heapDescriptor.Properties, heapDescriptor.Flags, &resourceDescriptor, initialResourceStates, optimizedClearValuePointer, IID_PPV_ARGS(&_image->resource));
+			}
+			else {
+				result = _device->device->CreatePlacedResource(reinterpret_cast<ID3D12Heap*>(memoryAllocation.memory), memorySuballocation.offset, &resourceDescriptor, initialResourceStates, optimizedClearValuePointer, IID_PPV_ARGS(&_image->resource));
+			}
 		}
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create placed image resource.");
