@@ -71,8 +71,8 @@ namespace Trident {
 		return allocationIndex;
 	}
 
-	uint32 MemoryAllocator::findMemoryTypeIndex(MemoryProperty memoryProperties) const {
-		return device->adapter->findMemoryTypeIndexImplementation(this, memoryProperties);
+	uint32 MemoryAllocator::findMemoryTypeIndex(MemoryProperty memoryProperties, bool transferDestination) const {
+		return device->adapter->findMemoryTypeIndexImplementation(this, memoryProperties, transferDestination);
 	}
 
 	#if defined(DEBUG_COUNT_ALLOCATED_MEMORY_SIZE)
@@ -143,7 +143,7 @@ namespace Trident {
 
 	void MemoryAllocator::suballocateDynamic(ref<BaseBuffer> buffer) {
 		const MemoryRequirements memoryRequirements = getMemoryRequirements(buffer);
-		const uint32 memoryTypeIndex = findMemoryTypeIndex(buffer->getMemorySuballocation().memoryProperties);
+		const uint32 memoryTypeIndex = findMemoryTypeIndex(buffer->getMemorySuballocation().memoryProperties, buffer->getUsage() & BufferUsage::TRANSFER_DST);
 
 		uint32 allocationIndex = findAllocationIndex(memoryTypeIndex, memoryRequirements);
 
@@ -156,7 +156,7 @@ namespace Trident {
 
 	void MemoryAllocator::suballocateDynamic(ref<Image> image) {
 		const MemoryRequirements memoryRequirements = getMemoryRequirements(image);
-		const uint32 memoryTypeIndex = findMemoryTypeIndex(image->getMemorySuballocation().memoryProperties);
+		const uint32 memoryTypeIndex = findMemoryTypeIndex(image->getMemorySuballocation().memoryProperties, image->getUsage() & ImageUsage::TRANSFER_DST);
 
 		uint32 allocationIndex = findAllocationIndex(memoryTypeIndex, memoryRequirements);
 

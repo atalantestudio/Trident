@@ -113,7 +113,7 @@ namespace Trident {
 
 						DEBUG_ASSERT(memorySuballocation.size == 0);
 
-						const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(memorySuballocation.memoryProperties);
+						const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(memorySuballocation.memoryProperties, buffer->getUsage() & BufferUsage::TRANSFER_DST);
 						const MemoryRequirements memoryRequirements = memoryAllocator->getMemoryRequirements(buffer);
 
 						uint64& alignment = allocationAlignmentsPerMemoryType[memoryTypeIndex];
@@ -128,7 +128,7 @@ namespace Trident {
 
 						DEBUG_ASSERT(memorySuballocation.size == 0);
 
-						const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(memorySuballocation.memoryProperties);
+						const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(memorySuballocation.memoryProperties, image->getUsage() & ImageUsage::TRANSFER_DST);
 						const MemoryRequirements memoryRequirements = memoryAllocator->getMemoryRequirements(image);
 
 						uint64& alignment = allocationAlignmentsPerMemoryType[memoryTypeIndex];
@@ -158,7 +158,7 @@ namespace Trident {
 				for (const StaticMemoryDescriptor& staticMemoryDescriptor : staticMemoryDescriptors) {
 					for (const ref<BaseBuffer>& buffer : staticMemoryDescriptor.buffers) {
 						const MemorySuballocation memorySuballocation = buffer->getMemorySuballocation();
-						const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(memorySuballocation.memoryProperties);
+						const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(memorySuballocation.memoryProperties, buffer->getUsage() & BufferUsage::TRANSFER_DST);
 						const uint32 allocationIndex = allocationIndicesPerMemoryType[memoryTypeIndex];
 
 						memoryAllocator->suballocateStatic(allocationIndex, buffer);
@@ -166,7 +166,7 @@ namespace Trident {
 
 					for (const ref<Image>& image : staticMemoryDescriptor.images) {
 						const MemorySuballocation memorySuballocation = image->getMemorySuballocation();
-						const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(memorySuballocation.memoryProperties);
+						const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(memorySuballocation.memoryProperties, image->getUsage() & ImageUsage::TRANSFER_DST);
 						const uint32 allocationIndex = allocationIndicesPerMemoryType[memoryTypeIndex];
 
 						memoryAllocator->suballocateStatic(allocationIndex, image);

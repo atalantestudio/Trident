@@ -24,7 +24,7 @@ namespace Trident {
 			uint32 allocate(bool dynamic, uint32 memoryTypeIndex, uint64 size, uint64 alignment);
 
 			/// Finds and returns the memory type index corresponding to the provided memory property flag.
-			uint32 findMemoryTypeIndex(MemoryProperty memoryProperties) const;
+			uint32 findMemoryTypeIndex(MemoryProperty memoryProperties, bool transferDestination) const;
 
 			#if defined(DEBUG_COUNT_ALLOCATED_MEMORY_SIZE)
 				/// Returns the total size of the allocated memory.

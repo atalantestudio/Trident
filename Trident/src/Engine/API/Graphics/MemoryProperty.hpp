@@ -27,9 +27,6 @@ namespace Trident {
 
 		// Specifies that the memory type only allows device access to the memory.
 		LAZILY_ALLOCATED = BIT(4),
-
-		// TODO(graphics/memory-property): Hack to force READBACK heap creation on the DX12 adapter.
-		DX12_FORCE_READBACK = BIT(5),
 	};
 
 	AS_FLAG(MemoryProperty);

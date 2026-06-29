@@ -213,7 +213,7 @@ namespace Trident {
 		return memoryAllocation;
 	}
 
-	uint32 VK::findMemoryTypeIndex(const Trident::MemoryAllocator* memoryAllocator, MemoryProperty memoryProperties) {
+	uint32 VK::findMemoryTypeIndex(const Trident::MemoryAllocator* memoryAllocator, MemoryProperty memoryProperties, bool transferDestination) {
 		const VK::PhysicalDevice* physicalDevice = static_cast<const VK::PhysicalDevice*>(memoryAllocator->device->physicalDevice);
 		const VkMemoryPropertyFlags memoryPropertyFlags = static_cast<VkMemoryPropertyFlags>(memoryProperties);
 

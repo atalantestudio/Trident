@@ -479,20 +479,15 @@ namespace Trident {
 		return memoryAllocation;
 	}
 
-	uint32 DX12::findMemoryTypeIndex(const Trident::MemoryAllocator* memoryAllocator, MemoryProperty memoryProperties) {
+	uint32 DX12::findMemoryTypeIndex(const Trident::MemoryAllocator* memoryAllocator, MemoryProperty memoryProperties, bool transferDestination) {
 		D3D12_HEAP_TYPE heapType = D3D12_HEAP_TYPE_DEFAULT;
 
 		if (memoryProperties & MemoryProperty::HOST_VISIBLE) {
 			heapType = D3D12_HEAP_TYPE_UPLOAD;
 
-			// TODO(graphics/dx12/memory-allocator/readback-heap)
-			/* if (usage & TRANSFER_DST) {
+			if (transferDestination) {
 				heapType = D3D12_HEAP_TYPE_READBACK;
-			} */
-		}
-
-		if (memoryProperties & MemoryProperty::DX12_FORCE_READBACK) {
-			heapType = D3D12_HEAP_TYPE_READBACK;
+			}
 		}
 
 		return static_cast<uint32>(heapType) - 1;

@@ -15,7 +15,7 @@ namespace Trident {
 				const ref<Device> device = Renderer::getDevice();
 				const ref<MemoryAllocator> memoryAllocator = device->getMemoryAllocator();
 
-				const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(MemoryProperty::DEVICE_LOCAL);
+				const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(MemoryProperty::DEVICE_LOCAL, false);
 
 				const uint32 allocationIndex = memoryAllocator->allocate(false, memoryTypeIndex, 1000, 1);
 				const MemoryAllocation& allocation = memoryAllocator->allocations[allocationIndex];

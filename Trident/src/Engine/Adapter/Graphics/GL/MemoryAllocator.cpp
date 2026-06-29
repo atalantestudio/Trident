@@ -26,7 +26,7 @@ namespace Trident {
 		return memoryAllocation;
 	}
 
-	uint32 GL::findMemoryTypeIndex(const Trident::MemoryAllocator* memoryAllocator, MemoryProperty memoryProperties) {
+	uint32 GL::findMemoryTypeIndex(const Trident::MemoryAllocator* memoryAllocator, MemoryProperty memoryProperties, bool transferDestination) {
 		return 0;
 	}
 

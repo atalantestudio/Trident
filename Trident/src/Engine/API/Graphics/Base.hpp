@@ -142,7 +142,7 @@ namespace Trident {
 	typedef void (*DrawIndexedIndirectImplementation)(CommandEncoder* commandEncoder, ref<BaseBuffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride);
 	typedef ref<CommandBuffer> (*EndImplementation)(const CommandEncoder* commandEncoder);
 	typedef void (*EndRenderPassImplementation)(CommandEncoder* commandEncoder);
-	typedef uint32 (*FindMemoryTypeIndexImplementation)(const MemoryAllocator* memoryAllocator, MemoryProperty memoryProperties);
+	typedef uint32 (*FindMemoryTypeIndexImplementation)(const MemoryAllocator* memoryAllocator, MemoryProperty memoryProperties, bool transferDestination);
 	typedef MemoryRequirements (*GetBufferMemoryRequirementsImplementation)(const MemoryAllocator* memoryAllocator, ref<BaseBuffer> buffer);
 	typedef MemoryRequirements (*GetImageMemoryRequirementsImplementation)(const MemoryAllocator* memoryAllocator, ref<Image> image);
 	typedef uint32 (*GetPhysicalDeviceMemoryTypeCountImplementation)(const PhysicalDevice* physicalDevice);

@@ -77,7 +77,7 @@ namespace Trident {
 				const ref<BaseBuffer> elementStartStagingBuffer = createBuffer<uint32>({
 					.size = elementStartBuffer->getSize(),
 					.usage = BufferUsage::TRANSFER_DST,
-					.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE | MemoryProperty::DX12_FORCE_READBACK,
+					.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 					.persistent = false,
 					#if defined(DEBUG_OBJECT_NAME)
 						.name = "Element start staging",
