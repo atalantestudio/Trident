@@ -22,7 +22,9 @@ namespace Trident {
 	extern PFNGLENABLEPROC glEnable;
 	extern PFNGLFRONTFACEPROC glFrontFace;
 	extern PFNGLFINISHPROC glFinish;
+	extern PFNGLGENBUFFERSPROC glGenBuffers;
 	extern PFNGLGENTEXTURESPROC glGenTextures;
+	extern PFNGLGETBUFFERPARAMETERIVPROC glGetBufferParameteriv;
 	extern PFNGLGETFLOATVPROC glGetFloatv;
 	extern PFNGLGETINTEGERVPROC glGetIntegerv;
 	extern PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog;
@@ -35,6 +37,7 @@ namespace Trident {
 	extern PFNGLPIXELSTOREIPROC glPixelStorei;
 	extern PFNGLPOLYGONMODEPROC glPolygonMode;
 	extern PFNGLSCISSORPROC glScissor;
+	extern PFNGLUNMAPBUFFERPROC glUnmapBuffer;
 	extern PFNGLUSEPROGRAMPROC glUseProgram;
 	extern PFNGLVIEWPORTPROC glViewport;
 
@@ -49,6 +52,10 @@ namespace Trident {
 		extern PFNGLENABLEIPROC glEnablei;
 		extern PFNGLGETINTEGERI_VPROC glGetIntegeri_v;
 		extern PFNGLMAPBUFFERRANGEPROC glMapBufferRange;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_3_1
+		extern PFNGLCOPYBUFFERSUBDATAPROC glCopyBufferSubData;
 	#endif
 
 	#if OPENGL_VERSION >= OPENGL_VERSION_3_2
@@ -104,26 +111,8 @@ namespace Trident {
 			extern PFNGLSPECIALIZESHADERPROC glSpecializeShader;
 		#endif
 	#else
-		#if OPENGL_VERSION >= OPENGL_VERSION_2_0
-			extern PFNGLCOMPILESHADERPROC glCompileShader;
-			extern PFNGLSHADERSOURCEPROC glShaderSource;
-		#endif
-	#endif
-
-	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-		extern PFNGLCOPYNAMEDBUFFERSUBDATAPROC glCopyNamedBufferSubData;
-	#elif OPENGL_VERSION >= OPENGL_VERSION_3_1
-		extern PFNGLCOPYBUFFERSUBDATAPROC glCopyBufferSubData;
-	#endif
-
-	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-		extern PFNGLCREATEBUFFERSPROC glCreateBuffers;
-		extern PFNGLGETNAMEDBUFFERPARAMETERIVPROC glGetNamedBufferParameteriv;
-		extern PFNGLUNMAPNAMEDBUFFERPROC glUnmapNamedBuffer;
-	#else
-		extern PFNGLGENBUFFERSPROC glGenBuffers;
-		extern PFNGLGETBUFFERPARAMETERIVPROC glGetBufferParameteriv;
-		extern PFNGLUNMAPBUFFERPROC glUnmapBuffer;
+		extern PFNGLCOMPILESHADERPROC glCompileShader;
+		extern PFNGLSHADERSOURCEPROC glShaderSource;
 	#endif
 
 	#if OPENGL_VERSION >= OPENGL_VERSION_4_5

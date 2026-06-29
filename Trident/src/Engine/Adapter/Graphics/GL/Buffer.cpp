@@ -18,12 +18,8 @@ namespace Trident {
 		ref<GL::BaseBuffer> buffer = createRef<GL::BaseBuffer>(device, descriptor);
 		buffer->target = getTarget(descriptor.usage);
 
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			glCreateBuffers(1, &buffer->buffer);
-		#else
-			glGenBuffers(1, &buffer->buffer);
-			glBindBuffer(buffer->target, buffer->buffer);
-		#endif
+		glGenBuffers(1, &buffer->buffer);
+		glBindBuffer(buffer->target, buffer->buffer);
 
 		if (
 			(descriptor.memoryProperties & MemoryProperty::HOST_VISIBLE) ||
@@ -61,11 +57,7 @@ namespace Trident {
 		#if defined(BUILD_MODE_DEBUG)
 			GLint immutableStorage = GL_FALSE;
 
-			#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-				glGetNamedBufferParameteriv(buffer->buffer, GL_BUFFER_IMMUTABLE_STORAGE, &immutableStorage);
-			#else
-				glGetBufferParameteriv(buffer->target, GL_BUFFER_IMMUTABLE_STORAGE, &immutableStorage);
-			#endif
+			glGetBufferParameteriv(buffer->target, GL_BUFFER_IMMUTABLE_STORAGE, &immutableStorage);
 
 			ADAPTER_ASSERT(immutableStorage != GL_FALSE, "Only immutable buffer storage are not supported.");
 		#endif
@@ -109,15 +101,10 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		GL::BaseBuffer* _buffer = static_cast<GL::BaseBuffer*>(buffer);
-		GLboolean result = GL_FALSE;
 
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			result = glUnmapNamedBuffer(_buffer->buffer);
-		#else
-			glBindBuffer(_buffer->target, _buffer->buffer);
+		glBindBuffer(_buffer->target, _buffer->buffer);
 
-			result = glUnmapBuffer(_buffer->target);
-		#endif
+		const GLboolean result = glUnmapBuffer(_buffer->target);
 
 		ADAPTER_ASSERT(result == GL_TRUE, "Failed to unmap OpenGL buffer.");
 

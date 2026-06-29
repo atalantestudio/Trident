@@ -19,15 +19,11 @@ namespace Trident {
 			}
 
 			void execute() const final override {
-				#if OPENGL_VERSION < OPENGL_VERSION_4_5
-					glBindBuffer(GL_COPY_READ_BUFFER, sourceBuffer->buffer);
-					glBindBuffer(GL_COPY_WRITE_BUFFER, destinationBuffer->buffer);
-				#endif
+				glBindBuffer(GL_COPY_READ_BUFFER, sourceBuffer->buffer);
+				glBindBuffer(GL_COPY_WRITE_BUFFER, destinationBuffer->buffer);
 
 				for (const BufferCopyRegion& copyRegion : copyRegions) {
-					#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-						glCopyNamedBufferSubData(sourceBuffer->buffer, destinationBuffer->buffer, copyRegion.sourceOffset, copyRegion.destinationOffset, copyRegion.size);
-					#elif OPENGL_VERSION >= OPENGL_VERSION_3_1
+					#if OPENGL_VERSION >= OPENGL_VERSION_3_1
 						glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, copyRegion.sourceOffset, copyRegion.destinationOffset, copyRegion.size);
 					#else
 						ENGINE_ERROR_UNSUPPORTED();

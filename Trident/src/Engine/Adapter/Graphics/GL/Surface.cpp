@@ -32,7 +32,9 @@ namespace Trident {
 			LOAD_PROCEDURE(glEnable);
 			LOAD_PROCEDURE(glFrontFace);
 			LOAD_PROCEDURE(glFinish);
+			LOAD_PROCEDURE(glGenBuffers);
 			LOAD_PROCEDURE(glGenTextures);
+			LOAD_PROCEDURE(glGetBufferParameteriv);
 			LOAD_PROCEDURE(glGetFloatv);
 			LOAD_PROCEDURE(glGetIntegerv);
 			LOAD_PROCEDURE(glGetProgramInfoLog);
@@ -45,6 +47,7 @@ namespace Trident {
 			LOAD_PROCEDURE(glPixelStorei);
 			LOAD_PROCEDURE(glPolygonMode);
 			LOAD_PROCEDURE(glScissor);
+			LOAD_PROCEDURE(glUnmapBuffer);
 			LOAD_PROCEDURE(glUseProgram);
 			LOAD_PROCEDURE(glViewport);
 
@@ -59,6 +62,10 @@ namespace Trident {
 				LOAD_PROCEDURE(glEnablei);
 				LOAD_PROCEDURE(glGetIntegeri_v);
 				LOAD_PROCEDURE(glMapBufferRange);
+			#endif
+
+			#if OPENGL_VERSION >= OPENGL_VERSION_3_1
+				LOAD_PROCEDURE(glCopyBufferSubData);
 			#endif
 
 			#if OPENGL_VERSION >= OPENGL_VERSION_3_2
@@ -113,26 +120,8 @@ namespace Trident {
 					LOAD_PROCEDURE(glSpecializeShader);
 				#endif
 			#else
-				#if OPENGL_VERSION >= OPENGL_VERSION_2_0
-					LOAD_PROCEDURE(glCompileShader);
-					LOAD_PROCEDURE(glShaderSource);
-				#endif
-			#endif
-
-			#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-				LOAD_PROCEDURE(glCopyNamedBufferSubData);
-			#elif OPENGL_VERSION >= OPENGL_VERSION_3_1
-				LOAD_PROCEDURE(glCopyBufferSubData);
-			#endif
-
-			#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-				LOAD_PROCEDURE(glCreateBuffers);
-				LOAD_PROCEDURE(glGetNamedBufferParameteriv);
-				LOAD_PROCEDURE(glUnmapNamedBuffer);
-			#else
-				LOAD_PROCEDURE(glGenBuffers);
-				LOAD_PROCEDURE(glGetBufferParameteriv);
-				LOAD_PROCEDURE(glUnmapBuffer);
+				LOAD_PROCEDURE(glCompileShader);
+				LOAD_PROCEDURE(glShaderSource);
 			#endif
 
 			#if OPENGL_VERSION >= OPENGL_VERSION_4_5
