@@ -11,7 +11,7 @@ namespace Trident {
 	class SampleImageAssetRenderer : public Renderer {
 		public:
 			void build() override {
-				setupRenderPass();
+				renderPass = createRenderPass();
 
 				loadImageAsset();
 				setupImageView();
@@ -51,8 +51,8 @@ namespace Trident {
 			}
 
 		private:
-			void setupRenderPass() {
-				renderPass = createRenderPass({
+			ref<RenderPass> createRenderPass() const {
+				return Renderer::createRenderPass({
 					.attachments = {
 						{
 							.format = getSurface()->getFormat(),
@@ -63,14 +63,14 @@ namespace Trident {
 						},
 					},
 					.subpasses = {
-						createSubpass({
+						{
 							.colorAttachmentReferences = {
 								{
 									.index = 0,
 									.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
 								},
 							},
-						}),
+						},
 					},
 				});
 			}

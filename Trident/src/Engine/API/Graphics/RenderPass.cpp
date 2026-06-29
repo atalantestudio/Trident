@@ -56,10 +56,10 @@ namespace Trident {
 		attachments(descriptor.attachments),
 		subpasses(descriptor.subpasses)
 	{
-		for (ref<Subpass> subpass : subpasses) {
+		for (Subpass& subpass : subpasses) {
 			uint8 rasterizationSampleCount = 0;
 
-			for (const AttachmentReference& colorAttachmentReference : subpass->getColorAttachmentReferences()) {
+			for (const AttachmentReference& colorAttachmentReference : subpass.colorAttachmentReferences) {
 				if (colorAttachmentReference.index == AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
 					continue;
 				}
@@ -76,24 +76,22 @@ namespace Trident {
 					continue;
 				}
 
-				// TODO: There is no need for each attachment to have a sampleCount member.
+				// TODO(graphics/render-pass/attachment-sample-count): There is no need for each attachment to store a sample count.
 				ENGINE_ASSERT(rasterizationSampleCount == attachment.sampleCount, "All color and depth/stencil attachments in a subpass must have the same sample count.");
 			}
 
-			if (subpass->getDepthStencilAttachmentReference().index != AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
-				const AttachmentReference& depthStencilAttachmentReference = subpass->getDepthStencilAttachmentReference();
-
-				// TODO: There is no need for each attachment to have a sampleCount member.
-				ENGINE_ASSERT(rasterizationSampleCount == attachments[depthStencilAttachmentReference.index].sampleCount, "All color and depth/stencil attachments in a subpass must have the same sample count.");
+			if (subpass.depthStencilAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
+				// TODO(graphics/render-pass/attachment-sample-count): There is no need for each attachment to store a sample count.
+				ENGINE_ASSERT(rasterizationSampleCount == attachments[subpass.depthStencilAttachmentReference.index].sampleCount, "All color and depth/stencil attachments in a subpass must have the same sample count.");
 
 				attachmentReferenceCount += 1;
 			}
 
 			DEBUG_ASSERT(rasterizationSampleCount > 0);
 
-			subpass->setRasterizationSampleCount(rasterizationSampleCount);
+			subpass.rasterizationSampleCount = rasterizationSampleCount;
 
-			attachmentReferenceCount += subpass->getColorAttachmentReferenceCount() + subpass->getInputAttachmentReferenceCount();
+			attachmentReferenceCount += static_cast<uint32>(subpass.colorAttachmentReferences.count() + subpass.inputAttachmentReferences.count());
 		}
 	}
 
@@ -125,7 +123,11 @@ namespace Trident {
 		return static_cast<uint32>(subpasses.count());
 	}
 
-	ref<Subpass> RenderPass::getSubpass(uint32 subpassIndex) const {
+	const sequence<Subpass>& RenderPass::getSubpasses() const {
+		return subpasses;
+	}
+
+	const Subpass& RenderPass::getSubpass(uint32 subpassIndex) const {
 		DEBUG_ASSERT(subpassIndex < subpasses.count());
 
 		return subpasses[subpassIndex];
@@ -170,11 +172,11 @@ namespace Trident {
 
 		DEBUG_ASSERT(subpassIndex < subpasses.count());
 
-		const ref<Subpass> subpass = subpasses[subpassIndex];
+		const Subpass& subpass = subpasses[subpassIndex];
 
-		ENGINE_ASSERT(subpass->hasDepthStencilAttachmentReference(), "The subpass doesn't use a depth/stencil attachment.");
+		ENGINE_ASSERT(subpass.depthStencilAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX, "The subpass doesn't use a depth/stencil attachment.");
 
-		const uint32 attachmentIndex = subpass->getDepthStencilAttachmentReference().index;
+		const uint32 attachmentIndex = subpass.depthStencilAttachmentReference.index;
 
 		DEBUG_ASSERT(attachmentIndex < attachments.count());
 
@@ -192,9 +194,9 @@ namespace Trident {
 		bool isInputAttachment = false;
 
 		for (uint32 nextSubpassIndex = subpassIndex; nextSubpassIndex < subpasses.count(); nextSubpassIndex += 1) {
-			const ref<Subpass> subpass = subpasses[nextSubpassIndex];
+			const Subpass& subpass = subpasses[nextSubpassIndex];
 
-			for (const AttachmentReference& inputAttachmentReference : subpass->getInputAttachmentReferences()) {
+			for (const AttachmentReference& inputAttachmentReference : subpass.inputAttachmentReferences) {
 				if (inputAttachmentReference.index == attachmentIndex) {
 					isInputAttachment = true;
 

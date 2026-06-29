@@ -25,7 +25,7 @@ namespace Trident {
 
 		public:
 			void build() override {
-				setupRenderPass();
+				renderPass = createRenderPass();
 
 				recreateDepthStencilImage();
 				recreateDepthStencilImageView();
@@ -65,40 +65,42 @@ namespace Trident {
 			}
 
 		private:
-			void setupRenderPass() {
-				Attachment swapchainAttachment{};
-				swapchainAttachment.format = getSurface()->getFormat();
-				swapchainAttachment.sampleCount = 1;
-				swapchainAttachment.loadOperation = LoadOperation::CLEAR;
-				swapchainAttachment.storeOperation = StoreOperation::STORE;
-				swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
+			ref<RenderPass> createRenderPass() const {
+				return Renderer::createRenderPass({
+					.attachments = {
+						// Swapchain
+						{
+							.format = getSurface()->getFormat(),
+							.sampleCount = 1,
+							.loadOperation = LoadOperation::CLEAR,
+							.storeOperation = StoreOperation::STORE,
+							.finalLayout = ImageLayout::PRESENT_SRC,
+						},
 
-				Attachment depthStencilAttachment{};
-				depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
-				depthStencilAttachment.sampleCount = 1;
-				depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
-				depthStencilAttachment.storeOperation = StoreOperation::UNDEFINED;
-				depthStencilAttachment.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-				AttachmentReference swapchainAttachmentReference{};
-				swapchainAttachmentReference.index = 0;
-				swapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-
-				AttachmentReference depthStencilAttachmentReference{};
-				depthStencilAttachmentReference.index = 1;
-				depthStencilAttachmentReference.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-				SubpassDescriptor subpassDescriptor{};
-				subpassDescriptor.colorAttachmentReferences = {swapchainAttachmentReference};
-				subpassDescriptor.depthStencilAttachmentReference = depthStencilAttachmentReference;
-
-				const ref<Subpass> subpass = createSubpass(subpassDescriptor);
-
-				RenderPassDescriptor renderPassDescriptor{};
-				renderPassDescriptor.attachments = {swapchainAttachment, depthStencilAttachment};
-				renderPassDescriptor.subpasses = {subpass};
-
-				renderPass = createRenderPass(renderPassDescriptor);
+						// Depth stencil
+						{
+							.format = ImageFormat::D32_SFLOAT,
+							.sampleCount = 1,
+							.loadOperation = LoadOperation::CLEAR,
+							.storeOperation = StoreOperation::UNDEFINED,
+							.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+						},
+					},
+					.subpasses = {
+						{
+							.colorAttachmentReferences = {
+								{
+									.index = 0,
+									.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
+								},
+								{
+									.index = 1,
+									.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+								},
+							},
+						},
+					},
+				});
 			}
 
 			void recreateDepthStencilImage() {

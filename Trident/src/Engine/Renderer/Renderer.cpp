@@ -69,10 +69,6 @@ namespace Trident {
 		return layerCompositor->device->createStaticImage(descriptor);
 	}
 
-	ref<Subpass> Renderer::createSubpass(const SubpassDescriptor& descriptor) {
-		return createRef<Subpass>(descriptor);
-	}
-
 	ref<Device> Renderer::getDevice() {
 		return layerCompositor->device;
 	}

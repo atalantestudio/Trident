@@ -22,8 +22,9 @@ namespace Trident {
 
 		public:
 			void build() override {
-				setupRenderPass();
-				recreateFramebuffers();
+				renderPass = createRenderPass();
+
+				createFramebuffers();
 				setupGraphicsPipeline();
 				createBuffers();
 			}
@@ -48,32 +49,33 @@ namespace Trident {
 			}
 
 			void resize(WindowResizeEvent& event) override {
-				recreateFramebuffers();
+				createFramebuffers();
 			}
 
 		private:
-			void setupRenderPass() {
-				Attachment swapchainAttachment{};
-				swapchainAttachment.format = getSurface()->getFormat();
-				swapchainAttachment.sampleCount = 1;
-				swapchainAttachment.loadOperation = LoadOperation::CLEAR;
-				swapchainAttachment.storeOperation = StoreOperation::STORE;
-				swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
-
-				AttachmentReference swapchainAttachmentReference{};
-				swapchainAttachmentReference.index = 0;
-				swapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-
-				SubpassDescriptor subpassDescriptor{};
-				subpassDescriptor.colorAttachmentReferences = {swapchainAttachmentReference};
-
-				const ref<Subpass> subpass = createSubpass(subpassDescriptor);
-
-				RenderPassDescriptor renderPassDescriptor{};
-				renderPassDescriptor.attachments = {swapchainAttachment};
-				renderPassDescriptor.subpasses = {subpass};
-
-				renderPass = createRenderPass(renderPassDescriptor);
+			ref<RenderPass> createRenderPass() const {
+				return Renderer::createRenderPass({
+					.attachments = {
+						// Swapchain
+						{
+							.format = getSurface()->getFormat(),
+							.sampleCount = 1,
+							.loadOperation = LoadOperation::CLEAR,
+							.storeOperation = StoreOperation::STORE,
+							.finalLayout = ImageLayout::PRESENT_SRC,
+						},
+					},
+					.subpasses = {
+						{
+							.colorAttachmentReferences = {
+								{
+									.index = 0,
+									.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
+								},
+							},
+						},
+					},
+				});
 			}
 
 			void setupGraphicsPipeline() {
@@ -235,15 +237,16 @@ namespace Trident {
 				transferQueue->waitIdle();
 			}
 
-			void recreateFramebuffers() {
+			void createFramebuffers() {
 				const ref<Swapchain> swapchain = getSwapchain();
 
 				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
 
-				FramebufferDescriptor framebufferDescriptor{};
-				framebufferDescriptor.renderPass = renderPass;
-				framebufferDescriptor.imageViews = {nullptr};
-				framebufferDescriptor.extent = swapchain->getExtent();
+				FramebufferDescriptor framebufferDescriptor = {
+					.renderPass = renderPass,
+					.imageViews = {nullptr},
+					.extent = swapchain->getExtent(),
+				};
 
 				#if defined(DEBUG_OBJECT_NAME)
 					sequence<char8> name;

@@ -11,14 +11,14 @@ namespace Trident {
 	class GL::NextSubpassCommand final : public GL::Command {
 		public:
 			// Selects draw buffers on the currently bound framebuffer.
-			static void setDrawBuffers(ref<GL::Framebuffer> framebuffer, ref<Subpass> subpass) {
-				const view<AttachmentReference> colorAttachmentReferences = subpass->getColorAttachmentReferences();
+			static void setDrawBuffers(ref<GL::Framebuffer> framebuffer, uint32 subpassIndex) {
+				const Subpass& subpass = framebuffer->getRenderPass()->getSubpass(subpassIndex);
 
-				sequence<GLenum> bufs(colorAttachmentReferences.count());
+				sequence<GLenum> bufs(subpass.colorAttachmentReferences.count());
 				uint32 bufIndex = 0;
 
 				while (bufIndex < bufs.count()) {
-					const AttachmentReference& colorAttachmentReference = colorAttachmentReferences[bufIndex];
+					const AttachmentReference& colorAttachmentReference = subpass.colorAttachmentReferences[bufIndex];
 
 					if (colorAttachmentReference.index == AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
 						bufs[bufIndex] = GL_NONE;
@@ -39,17 +39,17 @@ namespace Trident {
 			}
 
 		public:
-			explicit NextSubpassCommand(ref<GL::Framebuffer> framebuffer, ref<Subpass> subpass) :
+			explicit NextSubpassCommand(ref<GL::Framebuffer> framebuffer, uint32 subpassIndex) :
 				framebuffer(framebuffer),
-				subpass(subpass)
+				subpassIndex(subpassIndex)
 			{}
 
 			void execute() const final override {
-				setDrawBuffers(framebuffer, subpass);
+				setDrawBuffers(framebuffer, subpassIndex);
 			}
 
 		private:
 			ref<GL::Framebuffer> framebuffer;
-			ref<Subpass> subpass;
+			uint32 subpassIndex;
 	};
 }

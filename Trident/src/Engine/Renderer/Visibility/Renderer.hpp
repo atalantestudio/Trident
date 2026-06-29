@@ -54,9 +54,6 @@ namespace Trident {
 
 			void createFrameResources();
 
-			ref<Subpass> createVisibilitySubpass() const;
-			ref<Subpass> createPresentSubpass() const;
-
 			ref<Framebuffer> createVisibilityFramebuffer() const;
 			void createPresentFramebuffers();
 

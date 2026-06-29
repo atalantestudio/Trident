@@ -26,8 +26,9 @@ namespace Trident {
 
 				generateMipLevels(image, mipLevelCount);
 
-				setupRenderPass();
-				recreateFramebuffers();
+				renderPass = createRenderPass();
+
+				createFramebuffers();
 
 				debugImageView = createDebugImageView();
 
@@ -95,7 +96,7 @@ namespace Trident {
 			}
 
 			void resize(WindowResizeEvent& event) override {
-				recreateFramebuffers();
+				createFramebuffers();
 			}
 
 		private:
@@ -390,8 +391,8 @@ namespace Trident {
 				queue->waitIdle();
 			}
 
-			void setupRenderPass() {
-				renderPass = createRenderPass({
+			ref<RenderPass> createRenderPass() const {
+				return Renderer::createRenderPass({
 					.attachments = {
 						{
 							.format = getSurface()->getFormat(),
@@ -402,19 +403,19 @@ namespace Trident {
 						},
 					},
 					.subpasses = {
-						createSubpass({
+						{
 							.colorAttachmentReferences = {
 								{
 									.index = 0,
 									.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
 								},
 							},
-						}),
+						},
 					},
 				});
 			}
 
-			void recreateFramebuffers() {
+			void createFramebuffers() {
 				const ref<Swapchain> swapchain = getSwapchain();
 
 				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());

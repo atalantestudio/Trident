@@ -108,7 +108,7 @@ namespace Trident {
 				},
 			},
 			.subpasses = {
-				createSubpass({
+				{
 					.colorAttachmentReferences = {
 						{
 							.index = 0,
@@ -119,7 +119,7 @@ namespace Trident {
 						.index = 1,
 						.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
 					},
-				}),
+				},
 			},
 		});
 	}

@@ -28,7 +28,7 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
-		const ref<Subpass> subpass = descriptor.renderPass->getSubpass(descriptor.subpassIndex);
+		const Subpass& subpass = descriptor.renderPass->getSubpass(descriptor.subpassIndex);
 		const ref<VK::RenderPass> renderPass = std::static_pointer_cast<VK::RenderPass>(descriptor.renderPass);
 
 		ref<VK::GraphicsPipeline> graphicsPipeline = createRef<VK::GraphicsPipeline>(device);
@@ -126,7 +126,7 @@ namespace Trident {
 		multisampleStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 		multisampleStateCreateInfo.pNext = nullptr;
 		multisampleStateCreateInfo.flags = 0;
-		multisampleStateCreateInfo.rasterizationSamples = static_cast<VkSampleCountFlagBits>(subpass->getRasterizationSampleCount());
+		multisampleStateCreateInfo.rasterizationSamples = static_cast<VkSampleCountFlagBits>(subpass.rasterizationSampleCount);
 
 		if (descriptor.minSampleShading == 0.0f) {
 			multisampleStateCreateInfo.sampleShadingEnable = VK_FALSE;

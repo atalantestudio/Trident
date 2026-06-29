@@ -6,25 +6,7 @@
 #include "Engine/Renderer/Visibility/Renderer.hpp"
 
 namespace Trident {
-	ref<Subpass> VisibilityRenderer::createVisibilitySubpass() const {
-		return createSubpass({
-			.colorAttachmentReferences = {
-				// Visibility
-				{
-					.index = 0,
-					.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
-				},
-			},
-			.depthStencilAttachmentReference = {
-				.index = 1,
-				.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-			},
-		});
-	}
-
 	ref<RenderPass> VisibilityRenderer::createVisibilityRenderPass() const {
-		const ref<Subpass> visibilitySubpass = createVisibilitySubpass();
-
 		return createRenderPass({
 			.attachments = {
 				// Visibility
@@ -45,7 +27,21 @@ namespace Trident {
 					.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
 				},
 			},
-			.subpasses = {visibilitySubpass},
+			.subpasses = {
+				// Visibility
+				{
+					.colorAttachmentReferences = {
+						{
+							.index = 0,
+							.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
+						},
+					},
+					.depthStencilAttachmentReference = {
+						.index = 1,
+						.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+					},
+				},
+			},
 			.subpassDependencies = {},
 		});
 	}

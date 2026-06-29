@@ -85,8 +85,6 @@ namespace Trident {
 
 			static ref<Image> createStaticImage(const ImageDescriptor& descriptor);
 
-			static ref<Subpass> createSubpass(const SubpassDescriptor& descriptor);
-
 			static ref<Device> getDevice();
 
 			static uint32 getSwapchainImageIndex();

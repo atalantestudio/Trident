@@ -119,14 +119,14 @@ namespace Trident {
 						},
 					},
 					.subpasses = {
-						createSubpass({
+						{
 							.colorAttachmentReferences = {
 								{
 									.index = 0,
 									.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
 								},
 							},
-						}),
+						},
 					},
 				});
 			}

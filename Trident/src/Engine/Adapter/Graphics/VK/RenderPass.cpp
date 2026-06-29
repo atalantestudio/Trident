@@ -11,9 +11,9 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	static bool isColorAttachment(view<ref<Subpass>> subpasses, uint32 attachmentIndex) {
-		for (const ref<Subpass>& subpass : subpasses) {
-			for (const AttachmentReference& colorAttachmentReference : subpass->getColorAttachmentReferences()) {
+	static bool isColorAttachment(view<Subpass> subpasses, uint32 attachmentIndex) {
+		for (const Subpass& subpass : subpasses) {
+			for (const AttachmentReference& colorAttachmentReference : subpass.colorAttachmentReferences) {
 				if (colorAttachmentReference.index == attachmentIndex) {
 					return true;
 				}
@@ -40,12 +40,13 @@ namespace Trident {
 
 		uint32 resolveAttachmentCount = 0;
 
-		for (const ref<Subpass>& subpass : renderPass->subpasses) {
-			if (subpass->getRasterizationSampleCount() == 1) {
+		for (const Subpass& subpass : renderPass->getSubpasses()) {
+			if (subpass.rasterizationSampleCount == 1) {
 				continue;
 			}
 
-			resolveAttachmentCount += subpass->getResolveAttachmentReferenceCount();
+			// TODO(graphics/subpass/resolve-attachment-count): Unused attachments shouldn't be included in the count.
+			resolveAttachmentCount += static_cast<uint32>(subpass.colorAttachmentReferences.count());
 		}
 
 		sequence<VkAttachmentDescription> attachmentDescriptions(renderPass->attachments.count() + resolveAttachmentCount);
@@ -79,7 +80,7 @@ namespace Trident {
 
 			attachmentDescription.finalLayout = getImageLayout(attachment.finalLayout);
 
-			if (isColorAttachment(renderPass->subpasses, attachmentIndex) && attachment.sampleCount > 1) {
+			if (isColorAttachment(renderPass->getSubpasses(), attachmentIndex) && attachment.sampleCount > 1) {
 				// Create resolve attachment description.
 				VkAttachmentDescription& resolveAttachmentDescription = attachmentDescriptions[renderPass->attachments.count() + resolveAttachmentIndex];
 				resolveAttachmentDescription.flags = 0;
@@ -100,80 +101,78 @@ namespace Trident {
 		}
 
 		sequence<VkAttachmentReference> attachmentReferences(renderPass->attachmentReferenceCount);
-		sequence<VkSubpassDescription> subpassDescriptions(descriptor.subpasses.count());
+		sequence<VkSubpassDescription> subpassDescriptions(renderPass->getSubpassCount());
 		uint32 attachmentReferenceOffset = 0;
 
-		for (uint32 subpassIndex = 0; subpassIndex < descriptor.subpasses.count(); subpassIndex += 1) {
-			const ref<Subpass> subpass = descriptor.subpasses[subpassIndex];
-			const uint32 depthStencilAttachmentCount = static_cast<uint32>(subpass->hasDepthStencilAttachmentReference());
+		for (uint32 subpassIndex = 0; subpassIndex < renderPass->getSubpassCount(); subpassIndex += 1) {
+			const Subpass& subpass = renderPass->getSubpasses()[subpassIndex];
+			const uint32 depthStencilAttachmentCount = static_cast<uint32>(subpass.depthStencilAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX);
 
 			uint32 relativeAttachmentReferenceOffset = attachmentReferenceOffset;
 
-			for (uint32 colorAttachmentReferenceIndex = 0; colorAttachmentReferenceIndex < subpass->getColorAttachmentReferenceCount(); colorAttachmentReferenceIndex += 1) {
-				const AttachmentReference& colorAttachmentReference = subpass->getColorAttachmentReferences()[colorAttachmentReferenceIndex];
+			for (uint32 colorAttachmentReferenceIndex = 0; colorAttachmentReferenceIndex < subpass.colorAttachmentReferences.count(); colorAttachmentReferenceIndex += 1) {
+				const AttachmentReference& colorAttachmentReference = subpass.colorAttachmentReferences[colorAttachmentReferenceIndex];
 
 				VkAttachmentReference& attachmentReference = attachmentReferences[relativeAttachmentReferenceOffset + colorAttachmentReferenceIndex];
 				attachmentReference.attachment = colorAttachmentReference.index;
 				attachmentReference.layout = getImageLayout(colorAttachmentReference.layout);
 			}
 
-			relativeAttachmentReferenceOffset += subpass->getColorAttachmentReferenceCount();
+			relativeAttachmentReferenceOffset += static_cast<uint32>(subpass.colorAttachmentReferences.count());
 
-			if (subpass->hasDepthStencilAttachmentReference()) {
-				const AttachmentReference& depthStencilAttachmentReference = subpass->getDepthStencilAttachmentReference();
-
+			if (subpass.depthStencilAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
 				VkAttachmentReference& attachmentReference = attachmentReferences[relativeAttachmentReferenceOffset];
-				attachmentReference.attachment = depthStencilAttachmentReference.index;
-				attachmentReference.layout = getImageLayout(depthStencilAttachmentReference.layout);
+				attachmentReference.attachment = subpass.depthStencilAttachmentReference.index;
+				attachmentReference.layout = getImageLayout(subpass.depthStencilAttachmentReference.layout);
 
 				relativeAttachmentReferenceOffset += 1;
 			}
 
-			if (subpass->getRasterizationSampleCount() > 1) {
+			if (subpass.rasterizationSampleCount > 1) {
 				// Create resolve attachment references.
-				for (uint32 resolveAttachmentReferenceIndex = 0; resolveAttachmentReferenceIndex < subpass->getColorAttachmentReferenceCount(); resolveAttachmentReferenceIndex += 1) {
+				for (uint32 resolveAttachmentReferenceIndex = 0; resolveAttachmentReferenceIndex < subpass.colorAttachmentReferences.count(); resolveAttachmentReferenceIndex += 1) {
 					VkAttachmentReference& attachmentReference = attachmentReferences[relativeAttachmentReferenceOffset + resolveAttachmentReferenceIndex];
 					attachmentReference.attachment = static_cast<uint32>(renderPass->attachments.count()) + resolveAttachmentReferenceIndex;
 					attachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 				}
 
-				relativeAttachmentReferenceOffset += subpass->getColorAttachmentReferenceCount();
+				relativeAttachmentReferenceOffset += static_cast<uint32>(subpass.colorAttachmentReferences.count());
 			}
 
-			for (uint32 inputAttachmentReferenceIndex = 0; inputAttachmentReferenceIndex < subpass->getInputAttachmentReferenceCount(); inputAttachmentReferenceIndex += 1) {
-				const AttachmentReference& inputAttachmentReference = subpass->getInputAttachmentReferences()[inputAttachmentReferenceIndex];
+			for (uint32 inputAttachmentReferenceIndex = 0; inputAttachmentReferenceIndex < subpass.inputAttachmentReferences.count(); inputAttachmentReferenceIndex += 1) {
+				const AttachmentReference& inputAttachmentReference = subpass.inputAttachmentReferences[inputAttachmentReferenceIndex];
 
 				VkAttachmentReference& attachmentReference = attachmentReferences[relativeAttachmentReferenceOffset + inputAttachmentReferenceIndex];
 				attachmentReference.attachment = inputAttachmentReference.index;
 				attachmentReference.layout = getImageLayout(inputAttachmentReference.layout);
 			}
 
-			relativeAttachmentReferenceOffset += subpass->getInputAttachmentReferenceCount();
+			relativeAttachmentReferenceOffset += static_cast<uint32>(subpass.inputAttachmentReferences.count());
 
 			VkSubpassDescription& subpassDescription = subpassDescriptions[subpassIndex];
 			subpassDescription.flags = 0;
 			subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-			subpassDescription.inputAttachmentCount = static_cast<uint32>(subpass->getInputAttachmentReferenceCount());
+			subpassDescription.inputAttachmentCount = static_cast<uint32>(subpass.inputAttachmentReferences.count());
 
-			if (subpass->getInputAttachmentReferenceCount() > 0) {
-				subpassDescription.pInputAttachments = &attachmentReferences[attachmentReferenceOffset + (subpass->getColorAttachmentReferenceCount() * (subpass->getRasterizationSampleCount() > 1 ? 2 : 1)) + depthStencilAttachmentCount];
+			if (subpass.inputAttachmentReferences.count() > 0) {
+				subpassDescription.pInputAttachments = &attachmentReferences[attachmentReferenceOffset + (subpass.colorAttachmentReferences.count() * (subpass.rasterizationSampleCount > 1 ? 2 : 1)) + depthStencilAttachmentCount];
 			}
 			else {
 				subpassDescription.pInputAttachments = nullptr;
 			}
 
-			subpassDescription.colorAttachmentCount = static_cast<uint32>(subpass->getColorAttachmentReferenceCount());
+			subpassDescription.colorAttachmentCount = static_cast<uint32>(subpass.colorAttachmentReferences.count());
 			subpassDescription.pColorAttachments = &attachmentReferences[attachmentReferenceOffset];
 
-			if (subpass->getRasterizationSampleCount() > 1) {
-				subpassDescription.pResolveAttachments = &attachmentReferences[attachmentReferenceOffset + subpass->getColorAttachmentReferenceCount() + depthStencilAttachmentCount];
+			if (subpass.rasterizationSampleCount > 1) {
+				subpassDescription.pResolveAttachments = &attachmentReferences[attachmentReferenceOffset + subpass.colorAttachmentReferences.count() + depthStencilAttachmentCount];
 			}
 			else {
 				subpassDescription.pResolveAttachments = nullptr;
 			}
 
-			if (subpass->hasDepthStencilAttachmentReference()) {
-				subpassDescription.pDepthStencilAttachment = &attachmentReferences[attachmentReferenceOffset + subpass->getColorAttachmentReferenceCount()];
+			if (subpass.depthStencilAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
+				subpassDescription.pDepthStencilAttachment = &attachmentReferences[attachmentReferenceOffset + subpass.colorAttachmentReferences.count()];
 			}
 			else {
 				subpassDescription.pDepthStencilAttachment = nullptr;
@@ -201,9 +200,9 @@ namespace Trident {
 			subpassDependency.dependencyFlags = 0;
 
 			/* if (dependency.destinationSubpassIndex != SubpassDependency::EXTERNAL_SUBPASS) {
-				const ref<Subpass> destinationSubpass = descriptor.subpasses[dependency.destinationSubpassIndex];
+				const Subpass& destinationSubpass = renderPass->getSubpass(dependency.destinationSubpassIndex);
 
-				if (destinationSubpass->hasDepthStencilAttachmentReference()) {
+				if (destinationSubpass->depthStencilAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
 					subpassDependency.srcStageMask |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 					subpassDependency.dstStageMask |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 					subpassDependency.dstAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;

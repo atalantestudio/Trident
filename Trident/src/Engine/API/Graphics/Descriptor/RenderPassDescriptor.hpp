@@ -3,13 +3,14 @@
 
 #pragma once
 
+#include "Engine/API/Graphics/Attachment.hpp"
 #include "Engine/API/Graphics/Subpass.hpp"
 #include "Engine/API/Graphics/SubpassDependency.hpp"
 
 namespace Trident {
 	struct RenderPassDescriptor {
 		sequence<Attachment> attachments;
-		sequence<ref<Subpass>> subpasses;
+		sequence<Subpass> subpasses;
 		sequence<SubpassDependency> subpassDependencies;
 	};
 }

@@ -7,6 +7,8 @@
 
 #include "../GraphicsLayer.hpp"
 
+#define MULTISAMPLING_SAMPLE_COUNT 4
+
 namespace Trident {
 	class SampleMultisamplingRenderer : public Renderer {
 		private:
@@ -16,17 +18,18 @@ namespace Trident {
 			};
 
 		private:
-			static constexpr uint8 SAMPLE_COUNT = 4;
 			static constexpr uint32 VERTEX_BUFFER_SIZE = 3 * sizeof(Vertex);
 
 		public:
 			void build() override {
-				setupRenderPass();
+				renderPass = createRenderPass();
 
-				recreateImage();
-				recreateImageView();
-				recreateFramebuffers();
+				#if MULTISAMPLING_SAMPLE_COUNT > 1
+					recreateImage();
+					recreateImageView();
+				#endif
 
+				createFramebuffers();
 				setupGraphicsPipeline();
 				createBuffers();
 			}
@@ -50,77 +53,88 @@ namespace Trident {
 			}
 
 			void resize(WindowResizeEvent& event) override {
-				recreateImage();
-				recreateImageView();
-				recreateFramebuffers();
+				#if MULTISAMPLING_SAMPLE_COUNT > 1
+					recreateImage();
+					recreateImageView();
+				#endif
+
+				createFramebuffers();
 			}
 
 		private:
-			void setupRenderPass() {
-				Attachment swapchainAttachment{};
-				swapchainAttachment.format = getSurface()->getFormat();
-				swapchainAttachment.sampleCount = SAMPLE_COUNT;
-				swapchainAttachment.loadOperation = LoadOperation::CLEAR;
-				swapchainAttachment.storeOperation = StoreOperation::STORE;
-				swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
-
-				AttachmentReference swapchainAttachmentReference{};
-				swapchainAttachmentReference.index = 0;
-				swapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-
-				SubpassDescriptor subpassDescriptor{};
-				subpassDescriptor.colorAttachmentReferences = {swapchainAttachmentReference};
-
-				const ref<Subpass> subpass = createSubpass(subpassDescriptor);
-
-				RenderPassDescriptor renderPassDescriptor{};
-				renderPassDescriptor.attachments = {swapchainAttachment};
-				renderPassDescriptor.subpasses = {subpass};
-
-				renderPass = createRenderPass(renderPassDescriptor);
+			ref<RenderPass> createRenderPass() const {
+				return Renderer::createRenderPass({
+					.attachments = {
+						// Swapchain
+						{
+							.format = getSurface()->getFormat(),
+							.sampleCount = MULTISAMPLING_SAMPLE_COUNT,
+							.loadOperation = LoadOperation::CLEAR,
+							.storeOperation = StoreOperation::STORE,
+							.finalLayout = ImageLayout::PRESENT_SRC,
+						},
+					},
+					.subpasses = {
+						{
+							.colorAttachmentReferences = {
+								{
+									.index = 0,
+									.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
+								},
+							},
+						},
+					},
+				});
 			}
 
-			void recreateImage() {
-				const Extent2D swapchainExtent = getSwapchain()->getExtent();
+			#if MULTISAMPLING_SAMPLE_COUNT > 1
+				void recreateImage() {
+					const Extent2D swapchainExtent = getSwapchain()->getExtent();
 
-				AttachmentImageDescriptor imageDescriptor{};
-				imageDescriptor.type = ImageType::TEXTURE_2D;
-				imageDescriptor.extent.width = swapchainExtent.width;
-				imageDescriptor.extent.height = swapchainExtent.height;
-				imageDescriptor.extent.depth = 1;
-				imageDescriptor.mipLevelCount = 1;
-				imageDescriptor.layerCount = 1;
+					AttachmentImageDescriptor imageDescriptor{};
+					imageDescriptor.type = ImageType::TEXTURE_2D;
+					imageDescriptor.extent.width = swapchainExtent.width;
+					imageDescriptor.extent.height = swapchainExtent.height;
+					imageDescriptor.extent.depth = 1;
+					imageDescriptor.mipLevelCount = 1;
+					imageDescriptor.layerCount = 1;
 
-				#if defined(DEBUG_OBJECT_NAME)
-					imageDescriptor.name = "Color attachment";
-				#endif
+					#if defined(DEBUG_OBJECT_NAME)
+						imageDescriptor.name = "Color attachment";
+					#endif
 
-				image = renderPass->createColorAttachmentImage(imageDescriptor, 0);
-			}
+					image = renderPass->createColorAttachmentImage(imageDescriptor, 0);
+				}
 
-			void recreateImageView() {
-				ImageViewDescriptor imageViewDescriptor{};
-				imageViewDescriptor.mipLevelOffset = 0;
-				imageViewDescriptor.mipLevelCount = 1;
-				imageViewDescriptor.layerOffset = 0;
-				imageViewDescriptor.layerCount = 1;
+				void recreateImageView() {
+					ImageViewDescriptor imageViewDescriptor{};
+					imageViewDescriptor.mipLevelOffset = 0;
+					imageViewDescriptor.mipLevelCount = 1;
+					imageViewDescriptor.layerOffset = 0;
+					imageViewDescriptor.layerCount = 1;
 
-				#if defined(DEBUG_OBJECT_NAME)
-					imageViewDescriptor.name = "Color attachment";
-				#endif
+					#if defined(DEBUG_OBJECT_NAME)
+						imageViewDescriptor.name = "Color attachment";
+					#endif
 
-				imageView = image->createView(imageViewDescriptor);
-			}
+					imageView = image->createView(imageViewDescriptor);
+				}
+			#endif
 
-			void recreateFramebuffers() {
+			void createFramebuffers() {
 				const ref<Swapchain> swapchain = getSwapchain();
 
 				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
 
-				FramebufferDescriptor framebufferDescriptor{};
-				framebufferDescriptor.renderPass = renderPass;
-				framebufferDescriptor.imageViews = {imageView, nullptr};
-				framebufferDescriptor.extent = swapchain->getExtent();
+				FramebufferDescriptor framebufferDescriptor = {
+					.renderPass = renderPass,
+					#if MULTISAMPLING_SAMPLE_COUNT > 1
+						.imageViews = {imageView, nullptr},
+					#else
+						.imageViews = {nullptr},
+					#endif
+					.extent = swapchain->getExtent(),
+				};
 
 				#if defined(DEBUG_OBJECT_NAME)
 					sequence<char8> name;
@@ -135,7 +149,11 @@ namespace Trident {
 						framebufferDescriptor.name = name;
 					#endif
 
-					framebufferDescriptor.imageViews[1] = swapchain->getImageView(framebufferIndex);
+					#if MULTISAMPLING_SAMPLE_COUNT > 1
+						framebufferDescriptor.imageViews[1] = swapchain->getImageView(framebufferIndex);
+					#else
+						framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
+					#endif
 
 					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
 
@@ -255,8 +273,12 @@ namespace Trident {
 
 		private:
 			ref<RenderPass> renderPass;
-			ref<Image> image;
-			ref<ImageView> imageView;
+
+			#if MULTISAMPLING_SAMPLE_COUNT > 1
+				ref<Image> image;
+				ref<ImageView> imageView;
+			#endif
+
 			sequence<ref<Framebuffer>> framebuffers;
 			ref<GraphicsPipeline> graphicsPipeline;
 			ref<Buffer<Vertex>> vertexBuffer;

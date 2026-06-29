@@ -11,7 +11,7 @@
 #include "Engine/Renderer/3D/SceneRenderer.hpp"
 
 namespace Trident {
-	#define SAMPLE_COUNT 4
+	#define FORWARD_SAMPLE_COUNT 4
 
 	class ForwardRenderer : public SceneRenderer<Scene3D> {
 		private:
@@ -37,7 +37,7 @@ namespace Trident {
 		public:
 			// Called on startup and on window resize.
 			void initialize() {
-				#if SAMPLE_COUNT > 1
+				#if FORWARD_SAMPLE_COUNT > 1
 					colorImage = createColorImage();
 					colorImageView = createColorImageView();
 				#endif
@@ -51,7 +51,7 @@ namespace Trident {
 
 				FramebufferDescriptor framebufferDescriptor = {
 					.renderPass = renderPass,
-					#if SAMPLE_COUNT > 1
+					#if FORWARD_SAMPLE_COUNT > 1
 						.imageViews = {colorImageView, depthStencilImageView, nullptr},
 					#else
 						.imageViews = {nullptr, depthStencilImageView},
@@ -72,7 +72,7 @@ namespace Trident {
 						framebufferDescriptor.name = name;
 					#endif
 
-					#if SAMPLE_COUNT > 1
+					#if FORWARD_SAMPLE_COUNT > 1
 						framebufferDescriptor.imageViews[2] = swapchain->getImageView(framebufferIndex);
 					#else
 						framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
@@ -258,7 +258,7 @@ namespace Trident {
 							.depth = 0.0f,
 							.stencil = 0,
 						},
-						#if SAMPLE_COUNT > 1
+						#if FORWARD_SAMPLE_COUNT > 1
 							{0.0f, 0.0f, 0.0f, 1.0f},
 						#endif
 					},
@@ -557,14 +557,14 @@ namespace Trident {
 			ref<Buffer<svec3<float32>>> debugContactManifoldBuffer;
 			ref<Buffer<uint8>> staticBuffer;
 
-			#if SAMPLE_COUNT > 1
+			#if FORWARD_SAMPLE_COUNT > 1
 				ref<Image> colorImage;
 			#endif
 
 			ref<Image> depthStencilImage;
 			sequence<sequence<ref<Image>>> materialImages;
 
-			#if SAMPLE_COUNT > 1
+			#if FORWARD_SAMPLE_COUNT > 1
 				ref<ImageView> colorImageView;
 			#endif
 

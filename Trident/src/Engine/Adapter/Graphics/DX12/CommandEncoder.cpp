@@ -29,17 +29,14 @@ namespace Trident {
 		commandEncoder->presentRenderTargetIndex = max<UINT>();
 
 		const ref<RenderPass> renderPass = commandEncoder->framebuffer->getRenderPass();
-		const ref<Subpass> subpass = renderPass->getSubpass(commandEncoder->subpassIndex);
-		const view<AttachmentReference> colorAttachmentReferences = subpass->getColorAttachmentReferences();
+		const Subpass& subpass = renderPass->getSubpass(commandEncoder->subpassIndex);
 
-		if (subpass->getInputAttachmentReferenceCount() > 0) {
-			const view<AttachmentReference> inputAttachmentReferences = subpass->getInputAttachmentReferences();
-
-			sequence<D3D12_TEXTURE_BARRIER> textureBarriers(subpass->getInputAttachmentReferenceCount());
+		if (subpass.inputAttachmentReferences.count() > 0) {
+			sequence<D3D12_TEXTURE_BARRIER> textureBarriers(subpass.inputAttachmentReferences.count());
 			UINT inputAttachmentReferenceIndex = 0;
 
-			while (inputAttachmentReferenceIndex < inputAttachmentReferences.count()) {
-				const AttachmentReference& inputAttachmentReference = inputAttachmentReferences[inputAttachmentReferenceIndex];
+			while (inputAttachmentReferenceIndex < subpass.inputAttachmentReferences.count()) {
+				const AttachmentReference& inputAttachmentReference = subpass.inputAttachmentReferences[inputAttachmentReferenceIndex];
 
 				if (inputAttachmentReference.index == AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
 					ENGINE_ERROR_UNIMPLEMENTED();
@@ -87,7 +84,7 @@ namespace Trident {
 
 		UINT renderTargetCount = 0;
 
-		for (const AttachmentReference& colorAttachmentReference : colorAttachmentReferences) {
+		for (const AttachmentReference& colorAttachmentReference : subpass.colorAttachmentReferences) {
 			if (colorAttachmentReference.index == AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
 				continue;
 			}
@@ -101,7 +98,7 @@ namespace Trident {
 		UINT colorAttachmentIndex = 0;
 
 		while (renderTargetIndex < renderTargetCount) {
-			const AttachmentReference& colorAttachmentReference = colorAttachmentReferences[renderTargetIndex];
+			const AttachmentReference& colorAttachmentReference = subpass.colorAttachmentReferences[renderTargetIndex];
 
 			if (colorAttachmentReference.index == AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
 				ENGINE_ERROR_UNIMPLEMENTED();
@@ -188,13 +185,12 @@ namespace Trident {
 
 		D3D12_CPU_DESCRIPTOR_HANDLE depthStencilViewHandle{};
 
-		if (subpass->hasDepthStencilAttachmentReference()) {
-			const AttachmentReference& depthStencilAttachmentReference = subpass->getDepthStencilAttachmentReference();
-			const ref<DX12::ImageView> imageView = std::static_pointer_cast<DX12::ImageView>(commandEncoder->framebuffer->imageViews[depthStencilAttachmentReference.index]);
+		if (subpass.depthStencilAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
+			const ref<DX12::ImageView> imageView = std::static_pointer_cast<DX12::ImageView>(commandEncoder->framebuffer->imageViews[subpass.depthStencilAttachmentReference.index]);
 
 			DX12::Image* image = static_cast<DX12::Image*>(imageView->getImage());
 
-			if (image->usage & ImageUsage::INPUT_ATTACHMENT && renderPass->getAttachment(depthStencilAttachmentReference.index).loadOperation != LoadOperation::CLEAR) {
+			if (image->usage & ImageUsage::INPUT_ATTACHMENT && renderPass->getAttachment(subpass.depthStencilAttachmentReference.index).loadOperation != LoadOperation::CLEAR) {
 				D3D12_TEXTURE_BARRIER textureBarrier{};
 				textureBarrier.SyncBefore = D3D12_BARRIER_SYNC_ALL;
 				textureBarrier.SyncAfter = D3D12_BARRIER_SYNC_ALL;
@@ -818,12 +814,15 @@ namespace Trident {
 			DX12::Image* presentImage = static_cast<DX12::Image*>(presentImageView->getImage());
 
 			if (presentImage->getSampleCount() > 1) {
-				const ref<Subpass> subpass = _commandEncoder->framebuffer->getRenderPass()->getSubpass(_commandEncoder->subpassIndex);
+				const Subpass& subpass = _commandEncoder->framebuffer->getRenderPass()->getSubpass(_commandEncoder->subpassIndex);
 				const ref<DX12::ImageView> resolveImageView = presentImageView;
 
 				DX12::Image* resolveImage = presentImage;
 
-				presentImageView = std::static_pointer_cast<DX12::ImageView>(_commandEncoder->framebuffer->imageViews[subpass->getResolveAttachmentReferenceCount() + (subpass->hasDepthStencilAttachmentReference() ? 1 : 0) + _commandEncoder->presentRenderTargetIndex]);
+				// TODO(graphics/subpass/resolve-attachment-count): Unused attachments shouldn't be included the count.
+				const uint32 resolveAttachmentCount = static_cast<uint32>(subpass.colorAttachmentReferences.count());
+
+				presentImageView = std::static_pointer_cast<DX12::ImageView>(_commandEncoder->framebuffer->imageViews[resolveAttachmentCount + (subpass.depthStencilAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX ? 1 : 0) + _commandEncoder->presentRenderTargetIndex]);
 				presentImage = static_cast<DX12::Image*>(presentImageView->getImage());
 
 				D3D12_TEXTURE_BARRIER textureBarriers[2];

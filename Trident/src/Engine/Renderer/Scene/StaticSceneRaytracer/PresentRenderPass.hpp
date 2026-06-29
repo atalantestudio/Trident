@@ -19,7 +19,7 @@ namespace Trident {
 				},
 			},
 			.subpasses = {
-				createSubpass({
+				{
 					.colorAttachmentReferences = {
 						// Write swapchain
 						{
@@ -27,7 +27,7 @@ namespace Trident {
 							.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
 						},
 					},
-				}),
+				},
 			},
 		});
 	}

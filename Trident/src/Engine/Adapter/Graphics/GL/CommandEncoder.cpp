@@ -289,7 +289,7 @@ namespace Trident {
 
 		ADAPTER_ASSERT(_commandEncoder->subpassIndex < _commandEncoder->renderPass->getSubpassCount(), "All subpasses have been executed.");
 
-		_commandEncoder->commands.emplace_back(createRef<GL::NextSubpassCommand>(_commandEncoder->framebuffer, _commandEncoder->renderPass->getSubpass(_commandEncoder->subpassIndex)));
+		_commandEncoder->commands.emplace_back(createRef<GL::NextSubpassCommand>(_commandEncoder->framebuffer, _commandEncoder->subpassIndex));
 	}
 
 	void GL::reset(Trident::CommandEncoder* commandEncoder) {

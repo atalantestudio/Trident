@@ -92,7 +92,7 @@ namespace Trident {
 					attachmentIndex += 1;
 				}
 
-				GL::NextSubpassCommand::setDrawBuffers(framebuffer, renderPass->getSubpass(0));
+				GL::NextSubpassCommand::setDrawBuffers(framebuffer, 0);
 			}
 
 		private:

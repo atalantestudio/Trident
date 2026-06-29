@@ -356,15 +356,15 @@ namespace Trident {
 					errorCount += 1;
 				}
 				else {
-					const ref<Subpass> subpass = descriptor.renderPass->getSubpass(descriptor.subpassIndex);
+					const Subpass& subpass = descriptor.renderPass->getSubpass(descriptor.subpassIndex);
 
-					if (descriptor.colorBlendState.attachments.count() != subpass->getColorAttachmentReferenceCount()) {
+					if (descriptor.colorBlendState.attachments.count() != subpass.colorAttachmentReferences.count()) {
 						ENGINE_ERROR("descriptor.colorBlendState.attachments must have one entry for each color attachment reference in the subpass.");
 
 						errorCount += 1;
 					}
 
-					if (descriptor.depthStencilState.depthTest && !subpass->hasDepthStencilAttachmentReference()) {
+					if (descriptor.depthStencilState.depthTest && subpass.depthStencilAttachmentReference.index == AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
 						ENGINE_WARNING("descriptor.depthStencilState.depthTest is true but the subpass does not contain a depth stencil attachment.");
 					}
 				}
@@ -535,13 +535,14 @@ namespace Trident {
 	ref<RenderPass> Device::createRenderPass(ref<Surface> surface, const RenderPassDescriptor& descriptor) const {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			uint32 errorCount = 0;
-			uint32 attachmentIndex = 0;
 
 			if (descriptor.attachments.count() == 0) {
-				errorCount += 1;
-
 				ENGINE_ERROR("descriptor.attachments must not be empty.");
+
+				errorCount += 1;
 			}
+
+			uint32 attachmentIndex = 0;
 
 			while (attachmentIndex < descriptor.attachments.count()) {
 				const Attachment& attachment = descriptor.attachments[attachmentIndex];
@@ -583,6 +584,67 @@ namespace Trident {
 				ENGINE_ERROR("descriptor.subpasses must not be empty.");
 
 				errorCount += 1;
+			}
+
+			uint32 subpassIndex = 0;
+
+			while (subpassIndex < descriptor.subpasses.count()) {
+				const Subpass& subpass = descriptor.subpasses[subpassIndex];
+
+				if (subpass.colorAttachmentReferences.count() == 0) {
+					ENGINE_ERROR("descriptor.subpasses[[]].colorAttachmentReferences must not be empty.", subpassIndex);
+
+					errorCount += 1;
+				}
+
+				uint32 colorAttachmentReferenceIndex = 0;
+				bool anyUsedColorAttachment = false;
+
+				while (colorAttachmentReferenceIndex < subpass.colorAttachmentReferences.count()) {
+					const AttachmentReference& colorAttachmentReference = subpass.colorAttachmentReferences[colorAttachmentReferenceIndex];
+
+					if (colorAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
+						anyUsedColorAttachment = true;
+
+						if (colorAttachmentReference.layout >= ImageLayout::count) {
+							ENGINE_ERROR("descriptor.subpasses[[]].colorAttachmentReferences[[]].layout must be a valid ImageLayout value.", subpassIndex, colorAttachmentReferenceIndex);
+
+							errorCount += 1;
+						}
+					}
+
+					colorAttachmentReferenceIndex += 1;
+				}
+
+				if (!anyUsedColorAttachment) {
+					ENGINE_ERROR("descriptor.subpasses[[]].colorAttachmentReferences must contain at least one used attachment.", subpassIndex);
+
+					errorCount += 1;
+				}
+
+				if (subpass.depthStencilAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX && subpass.depthStencilAttachmentReference.layout >= ImageLayout::count) {
+					ENGINE_ERROR("descriptor.subpasses[[]].depthStencilAttachmentReference.layout must be a valid ImageLayout value.", subpassIndex);
+
+					errorCount += 1;
+				}
+
+				uint32 inputAttachmentReferenceIndex = 0;
+
+				while (inputAttachmentReferenceIndex < subpass.inputAttachmentReferences.count()) {
+					const AttachmentReference& inputAttachmentReference = subpass.inputAttachmentReferences[inputAttachmentReferenceIndex];
+
+					if (inputAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
+						if (inputAttachmentReference.layout >= ImageLayout::count) {
+							ENGINE_ERROR("descriptor.subpasses[[]].inputAttachmentReferences[[]].layout must be a valid ImageLayout value.", subpassIndex, inputAttachmentReferenceIndex);
+
+							errorCount += 1;
+						}
+					}
+
+					inputAttachmentReferenceIndex += 1;
+				}
+
+				subpassIndex += 1;
 			}
 
 			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);

@@ -108,17 +108,17 @@ namespace Trident {
 					},
 					.subpasses = {
 						// Triangle
-						createSubpass({
+						{
 							.colorAttachmentReferences = {
 								{
 									.index = 1,
 									.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
 								},
 							},
-						}),
+						},
 
 						// Present
-						createSubpass({
+						{
 							.colorAttachmentReferences = {
 								{
 									.index = 0,
@@ -131,7 +131,7 @@ namespace Trident {
 									.layout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
 								},
 							},
-						}),
+						},
 					},
 				});
 			}

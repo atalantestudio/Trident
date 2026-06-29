@@ -25,7 +25,7 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
-		const ref<Subpass> subpass = descriptor.renderPass->getSubpass(descriptor.subpassIndex);
+		const Subpass& subpass = descriptor.renderPass->getSubpass(descriptor.subpassIndex);
 		const ref<DX12::ShaderModule> vertexShaderModule = std::static_pointer_cast<DX12::ShaderModule>(descriptor.vertexShaderModule);
 		const ref<DX12::ShaderModule> fragmentShaderModule = std::static_pointer_cast<DX12::ShaderModule>(descriptor.fragmentShaderModule);
 		HRESULT result;
@@ -34,7 +34,7 @@ namespace Trident {
 		graphicsPipeline->pipelineLayout = std::static_pointer_cast<DX12::PipelineLayout>(descriptor.pipelineLayout);
 		graphicsPipeline->primitiveTopology = getPrimitiveTopology(descriptor.primitiveTopology);
 
-		ADAPTER_ASSERT(subpass->getColorAttachmentReferenceCount() <= 8, "Too many color attachment references.");
+		ADAPTER_ASSERT(subpass.colorAttachmentReferences.count() <= 8, "Too many color attachment references.");
 		ADAPTER_ASSERT(descriptor.colorBlendState.attachments.count() <= 8, "Too many color blend attachments.");
 
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDescriptor{};
@@ -150,11 +150,11 @@ namespace Trident {
 		graphicsPipelineStateDescriptor.InputLayout.NumElements = static_cast<UINT>(inputElementDescriptors.count());
 		graphicsPipelineStateDescriptor.IBStripCutValue = D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED;
 		graphicsPipelineStateDescriptor.PrimitiveTopologyType = getPrimitiveTopologyType(descriptor.primitiveTopology);
-		graphicsPipelineStateDescriptor.NumRenderTargets = subpass->getColorAttachmentReferenceCount();
+		graphicsPipelineStateDescriptor.NumRenderTargets = static_cast<uint32>(subpass.colorAttachmentReferences.count());
 
 		UINT renderTargetIndex = 0;
 
-		for (const AttachmentReference& colorAttachmentReference : subpass->getColorAttachmentReferences()) {
+		for (const AttachmentReference& colorAttachmentReference : subpass.colorAttachmentReferences) {
 			if (colorAttachmentReference.index == AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
 				continue;
 			}
@@ -166,16 +166,15 @@ namespace Trident {
 			renderTargetIndex += 1;
 		}
 
-		if (subpass->hasDepthStencilAttachmentReference()) {
+		if (subpass.depthStencilAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
 			ADAPTER_ASSERT(graphicsPipelineStateDescriptor.DSVFormat == DXGI_FORMAT_UNKNOWN, "Depth stencil format is already provided.");
 
-			const AttachmentReference& depthStencilAttachmentReference = subpass->getDepthStencilAttachmentReference();
-			const Attachment& depthStencilAttachment = descriptor.renderPass->getAttachment(depthStencilAttachmentReference.index);
+			const Attachment& depthStencilAttachment = descriptor.renderPass->getAttachment(subpass.depthStencilAttachmentReference.index);
 
 			graphicsPipelineStateDescriptor.DSVFormat = getImageFormat(depthStencilAttachment.format);
 		}
 
-		graphicsPipelineStateDescriptor.SampleDesc.Count = static_cast<UINT>(subpass->getRasterizationSampleCount());
+		graphicsPipelineStateDescriptor.SampleDesc.Count = subpass.rasterizationSampleCount;
 		graphicsPipelineStateDescriptor.SampleDesc.Quality = 0;
 		graphicsPipelineStateDescriptor.NodeMask = 0;
 		graphicsPipelineStateDescriptor.CachedPSO.pCachedBlob = nullptr;

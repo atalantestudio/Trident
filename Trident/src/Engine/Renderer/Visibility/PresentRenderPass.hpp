@@ -6,45 +6,7 @@
 #include "Engine/Renderer/Visibility/Renderer.hpp"
 
 namespace Trident {
-	ref<Subpass> VisibilityRenderer::createPresentSubpass() const {
-		return createSubpass({
-			.colorAttachmentReferences = {
-				// Swapchain
-				{
-					.index = 0,
-					.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
-				},
-			},
-		});
-	}
-
-	// TODO(visibility/debug): Restore.
-	/* ref<Subpass> VisibilityRenderer::createDebugPresentSubpass() const {
-		AttachmentReference writeSwapchainAttachmentReference{};
-		writeSwapchainAttachmentReference.index = 0;
-		writeSwapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-
-		AttachmentReference readVisibilityAttachmentReference{};
-		readVisibilityAttachmentReference.index = 1;
-		readVisibilityAttachmentReference.layout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
-
-		AttachmentReference readDepthStencilAttachmentReference{};
-		readDepthStencilAttachmentReference.index = 2;
-		readDepthStencilAttachmentReference.layout = ImageLayout::DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-
-		SubpassDescriptor debugPresentSubpassDescriptor{};
-		debugPresentSubpassDescriptor.colorAttachmentReferences = {writeSwapchainAttachmentReference};
-		debugPresentSubpassDescriptor.inputAttachmentReferences = {readVisibilityAttachmentReference, readDepthStencilAttachmentReference};
-
-		return createSubpass(debugPresentSubpassDescriptor);
-	} */
-
 	ref<RenderPass> VisibilityRenderer::createPresentRenderPass() const {
-		const ref<Subpass> presentSubpass = createPresentSubpass();
-
-		// TODO(visibility/debug): Restore.
-		// const ref<Subpass> debugPresentSubpass = createDebugPresentSubpass();
-
 		return createRenderPass({
 			.attachments = {
 				// Swapchain
@@ -57,8 +19,36 @@ namespace Trident {
 				},
 			},
 			.subpasses = {
-				presentSubpass,
-				// debugPresentSubpass,
+				// Present
+				{
+					.colorAttachmentReferences = {
+						{
+							.index = 0,
+							.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
+						},
+					},
+				},
+
+				// TODO(visibility/debug): Restore.
+				// Debug present
+				/* {
+					.colorAttachmentReferences = {
+						{
+							.index = 0,
+							.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
+						},
+					},
+					.inputAttachmentReferences = {
+						{
+							.index = 1,
+							.layout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+						},
+						{
+							.index = 2,
+							.layout = ImageLayout::DEPTH_STENCIL_READ_ONLY_OPTIMAL,
+						},
+					},
+				}, */
 			},
 			.subpassDependencies = {},
 		});
