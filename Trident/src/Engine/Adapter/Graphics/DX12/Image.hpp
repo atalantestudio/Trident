@@ -14,7 +14,7 @@ namespace Trident {
 			ID3D12Resource* resource;
 			D3D12_BARRIER_ACCESS barrierAccess = D3D12_BARRIER_ACCESS_NO_ACCESS;
 			D3D12_BARRIER_LAYOUT barrierLayout = D3D12_BARRIER_LAYOUT_UNDEFINED;
-			ImageUsage usage;
+			D3D12_CLEAR_FLAGS clearFlags;
 
 			#if defined(DEBUG_OBJECT_NAME)
 				sequence<char8> name;

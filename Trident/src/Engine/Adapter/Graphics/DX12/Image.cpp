@@ -37,7 +37,15 @@ namespace Trident {
 			name(descriptor.name),
 		#endif
 		Trident::Image(device, descriptor)
-	{}
+	{
+		if (isDepthFormat(format)) {
+			clearFlags = D3D12_CLEAR_FLAG_DEPTH;
+		}
+
+		if (isStencilFormat(format)) {
+			clearFlags |= D3D12_CLEAR_FLAG_STENCIL;
+		}
+	}
 
 	ref<Trident::Image> DX12::createImage(const Trident::Device* device, const ImageDescriptor& descriptor) {
 		return createRef<DX12::Image>(device, descriptor);
@@ -56,6 +64,8 @@ namespace Trident {
 		#endif
 
 		ref<DX12::Image> image = createRef<DX12::Image>(device, descriptor);
+
+		// NOTE: Swapchain images have an usage of 0.
 		image->usage = static_cast<ImageUsage>(0);
 
 		result = _swapchain->swapChain->GetBuffer(index, IID_PPV_ARGS(&image->resource));

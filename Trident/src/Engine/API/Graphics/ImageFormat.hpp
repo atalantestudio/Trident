@@ -35,6 +35,14 @@ namespace Trident {
 		return imageFormat >= FIRST_DEPTH_FORMAT;
 	}
 
+	inline bool isStencilFormat(ImageFormat imageFormat) {
+		static constexpr ImageFormat FIRST_STENCIL_FORMAT = ImageFormat::D32_SFLOAT_S8_UINT;
+
+		DEBUG_ASSERT(imageFormat < ImageFormat::count);
+
+		return imageFormat >= FIRST_STENCIL_FORMAT;
+	}
+
 	inline bool isFixedOrFloatingPointColorFormat(ImageFormat imageFormat) {
 		static constexpr ImageFormat LAST_FIXED_OR_FLOATING_POINT_COLOR_FORMAT = ImageFormat::R8G8B8A8_UNORM;
 
@@ -99,9 +107,10 @@ namespace Trident {
 			4,
 			1,
 			2,
+			1,
 		};
 
-		ENGINE_ASSERT(imageFormat < ImageFormat::D32_SFLOAT, "Invalid image format");
+		ENGINE_ASSERT(imageFormat < ImageFormat::D32_SFLOAT_S8_UINT, "Invalid image format");
 
 		return CHANNEL_COUNTS[static_cast<uint32>(imageFormat)];
 	}

@@ -325,10 +325,11 @@ namespace Trident {
 			}
 
 			const ref<DX12::ImageView> imageView = std::static_pointer_cast<DX12::ImageView>(_commandEncoder->framebuffer->imageViews[attachmentIndex]);
+			const DX12::Image* image = static_cast<const DX12::Image*>(imageView->getImage());
 			const ClearValue& clearValue = descriptor.clearValues[attachmentIndex];
 
-			if (isDepthFormat(imageView->getImage()->getFormat())) {
-				_commandEncoder->commandList->ClearDepthStencilView(imageView->descriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, clearValue.depth, static_cast<UINT8>(clearValue.stencil), 1, &rectangle);
+			if (isDepthFormat(image->getFormat()) || isStencilFormat(image->getFormat())) {
+				_commandEncoder->commandList->ClearDepthStencilView(imageView->descriptorHandle, image->clearFlags, clearValue.depth, static_cast<UINT8>(clearValue.stencil), 1, &rectangle);
 			}
 			else {
 				_commandEncoder->commandList->ClearRenderTargetView(imageView->descriptorHandle, clearValue.color, 1, &rectangle);
