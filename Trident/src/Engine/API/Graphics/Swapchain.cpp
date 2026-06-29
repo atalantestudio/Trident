@@ -9,7 +9,6 @@
 namespace Trident {
 	#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 		static void validateSwapchainDescriptor(const SwapchainDescriptor& descriptor) {
-			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 
 			if (descriptor.extent.width == 0) {
@@ -24,7 +23,7 @@ namespace Trident {
 				errorCount += 1;
 			}
 
-			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		}
 	#endif
 

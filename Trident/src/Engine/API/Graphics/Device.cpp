@@ -44,7 +44,6 @@ namespace Trident {
 
 	ref<BaseBuffer> Device::createStaticBuffer(const BufferDescriptor& descriptor) const {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 
 			if (descriptor.size == 0) {
@@ -81,11 +80,9 @@ namespace Trident {
 
 			if (descriptor.name.count() == 0) {
 				ENGINE_WARNING("descriptor.name should provide a unique name to help identify this buffer.");
-
-				warningCount += 1;
 			}
 
-			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		return adapter->createBufferImplementation(this, descriptor);
@@ -93,7 +90,6 @@ namespace Trident {
 
 	ref<ComputePipeline> Device::createComputePipeline(const ComputePipelineDescriptor& descriptor) const {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 
 			if (descriptor.pipelineLayout == nullptr) {
@@ -110,11 +106,9 @@ namespace Trident {
 
 			if (descriptor.name.count() == 0) {
 				ENGINE_WARNING("descriptor.name should provide a unique name to help identify this compute pipeline.");
-
-				warningCount += 1;
 			}
 
-			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		return adapter->createComputePipelineImplementation(this, descriptor);
@@ -122,7 +116,6 @@ namespace Trident {
 
 	ref<DescriptorSetLayout> Device::createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 			uint32 descriptorSetLayoutBindingIndex = 0;
 
@@ -138,7 +131,7 @@ namespace Trident {
 				descriptorSetLayoutBindingIndex += 1;
 			}
 
-			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		return adapter->createDescriptorSetLayoutImplementation(this, bindings);
@@ -146,16 +139,13 @@ namespace Trident {
 
 	ref<Fence> Device::createFence(const FenceDescriptor& descriptor) const {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 
 			if (descriptor.name.count() == 0) {
 				ENGINE_WARNING("descriptor.name should provide a unique name to help identify this fence.");
-
-				warningCount += 1;
 			}
 
-			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		return adapter->createFenceImplementation(this, descriptor);
@@ -163,7 +153,6 @@ namespace Trident {
 
 	ref<Framebuffer> Device::createFramebuffer(const FramebufferDescriptor& descriptor) const {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 
 			if (descriptor.renderPass == nullptr) {
@@ -216,11 +205,9 @@ namespace Trident {
 
 			if (descriptor.name.count() == 0) {
 				ENGINE_WARNING("descriptor.name should provide a unique name to help identify this framebuffer.");
-
-				warningCount += 1;
 			}
 
-			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		return adapter->createFramebufferImplementation(this, descriptor);
@@ -228,7 +215,6 @@ namespace Trident {
 
 	ref<GraphicsPipeline> Device::createGraphicsPipeline(const GraphicsPipelineDescriptor& descriptor) const {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 			uint32 vertexInputBindingIndex = 0;
 			uint32 vertexInputAttributeIndex;
@@ -305,9 +291,9 @@ namespace Trident {
 			}
 
 			if (descriptor.lineWidth <= 0.0f) {
-				ENGINE_WARNING("descriptor.lineWidth should be greater than 0.");
+				ENGINE_ERROR("descriptor.lineWidth should be greater than 0.");
 
-				warningCount += 1;
+				errorCount += 1;
 			}
 
 			if (descriptor.minSampleShading < 0.0f || descriptor.minSampleShading > 1.0f) {
@@ -347,15 +333,15 @@ namespace Trident {
 			}
 
 			if (!(descriptor.dynamicState & DynamicState::SCISSOR)) {
-				ENGINE_WARNING("descriptor.dynamicState should include DynamicState::SCISSOR.");
+				ENGINE_ERROR("descriptor.dynamicState should include DynamicState::SCISSOR.");
 
-				warningCount += 1;
+				errorCount += 1;
 			}
 
 			if (!(descriptor.dynamicState & DynamicState::VIEWPORT)) {
-				ENGINE_WARNING("descriptor.dynamicState should include DynamicState::VIEWPORT.");
+				ENGINE_ERROR("descriptor.dynamicState should include DynamicState::VIEWPORT.");
 
-				warningCount += 1;
+				errorCount += 1;
 			}
 
 			if (descriptor.renderPass == nullptr) {
@@ -380,19 +366,15 @@ namespace Trident {
 
 					if (descriptor.depthStencilState.depthTest && !subpass->hasDepthStencilAttachmentReference()) {
 						ENGINE_WARNING("descriptor.depthStencilState.depthTest is true but the subpass does not contain a depth stencil attachment.");
-
-						warningCount += 1;
 					}
 				}
 			}
 
 			if (descriptor.name.count() == 0) {
 				ENGINE_WARNING("descriptor.name should provide a unique name to help identify this graphics pipeline.");
-
-				warningCount += 1;
 			}
 
-			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		return adapter->createGraphicsPipelineImplementation(this, descriptor);
@@ -402,7 +384,6 @@ namespace Trident {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			const PhysicalDeviceLimits& limits = physicalDevice->getLimits();
 
-			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 
 			if (descriptor.type >= ImageType::count) {
@@ -493,11 +474,9 @@ namespace Trident {
 
 			if (descriptor.name.count() == 0) {
 				ENGINE_WARNING("descriptor.name should provide a unique name to help identify this image.");
-
-				warningCount += 1;
 			}
 
-			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		return adapter->createImageImplementation(this, descriptor);
@@ -513,7 +492,6 @@ namespace Trident {
 
 	ref<PipelineLayout> Device::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 			uint32 descriptorSetLayoutIndex = 0;
 			uint32 descriptorSetLayoutBindingIndex;
@@ -546,11 +524,9 @@ namespace Trident {
 
 			if (descriptor.name.count() == 0) {
 				ENGINE_WARNING("descriptor.name should provide a unique name to help identify this pipeline layout.");
-
-				warningCount += 1;
 			}
 
-			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		return adapter->createPipelineLayoutImplementation(this, descriptor);
@@ -558,7 +534,6 @@ namespace Trident {
 
 	ref<RenderPass> Device::createRenderPass(ref<Surface> surface, const RenderPassDescriptor& descriptor) const {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 			uint32 attachmentIndex = 0;
 
@@ -610,7 +585,7 @@ namespace Trident {
 				errorCount += 1;
 			}
 
-			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		return adapter->createRenderPassImplementation(this, surface, descriptor);
@@ -618,7 +593,6 @@ namespace Trident {
 
 	ref<Sampler> Device::createSampler(const SamplerDescriptor& descriptor) const {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 
 			if (descriptor.magFilter >= SamplerFilter::count) {
@@ -633,7 +607,7 @@ namespace Trident {
 				errorCount += 1;
 			}
 
-			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		return adapter->createSamplerImplementation(this, descriptor);
@@ -645,7 +619,6 @@ namespace Trident {
 
 	ref<ShaderModule> Device::createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) const {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 
 			if (descriptor.entryPoint.count() == 0) {
@@ -656,11 +629,9 @@ namespace Trident {
 
 			if (descriptor.name.count() == 0) {
 				ENGINE_WARNING("descriptor.name should provide a unique name to help identify this shader module.");
-
-				warningCount += 1;
 			}
 
-			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		return adapter->createShaderModuleFromAssetImplementation(this, descriptor, asset);
@@ -668,7 +639,6 @@ namespace Trident {
 
 	ref<ShaderModule> Device::createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) const {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 
 			if (descriptor.entryPoint.count() == 0) {
@@ -679,11 +649,9 @@ namespace Trident {
 
 			if (descriptor.name.count() == 0) {
 				ENGINE_WARNING("descriptor.name should provide a unique name to help identify this shader module.");
-
-				warningCount += 1;
 			}
 
-			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		return adapter->createShaderModuleFromCodeImplementation(this, descriptor, code);
@@ -713,7 +681,6 @@ namespace Trident {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			const uint64 minStorageBufferOffsetAlignment = physicalDevice->getLimits().minStorageBufferOffsetAlignment;
 
-			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 			uint32 writeDescriptorSetIndex = 0;
 
@@ -755,7 +722,7 @@ namespace Trident {
 				writeDescriptorSetIndex += 1;
 			}
 
-			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		adapter->updateDescriptorSetsImplementation(this, writeDescriptorSets);

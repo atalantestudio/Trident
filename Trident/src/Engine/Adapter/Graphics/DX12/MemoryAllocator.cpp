@@ -327,7 +327,7 @@ namespace Trident {
 		// TODO(graphics/dx12/memory-allocator/shader-resource-view): The offset is not guaranteed to be a multiple of the stride.
 		shaderResourceViewDescriptor.Buffer.FirstElement = bufferView->getOffset() / bufferView->getStride();
 
-		shaderResourceViewDescriptor.Buffer.NumElements = bufferView->getSize() / bufferView->getStride();
+		shaderResourceViewDescriptor.Buffer.NumElements = static_cast<UINT>(bufferView->getSize()) / bufferView->getStride();
 		shaderResourceViewDescriptor.Buffer.StructureByteStride = bufferView->getStride();
 		shaderResourceViewDescriptor.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 
@@ -345,7 +345,7 @@ namespace Trident {
 		// TODO(graphics/dx12/memory-allocator/shader-resource-view): The offset is not guaranteed to be a multiple of the stride.
 		unorderedAccessViewDescriptor.Buffer.FirstElement = bufferView->getOffset() / bufferView->getStride();
 
-		unorderedAccessViewDescriptor.Buffer.NumElements = bufferView->getSize() / bufferView->getStride();
+		unorderedAccessViewDescriptor.Buffer.NumElements = static_cast<UINT>(bufferView->getSize()) / bufferView->getStride();
 		unorderedAccessViewDescriptor.Buffer.StructureByteStride = bufferView->getStride();
 		unorderedAccessViewDescriptor.Buffer.CounterOffsetInBytes = 0;
 		unorderedAccessViewDescriptor.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;

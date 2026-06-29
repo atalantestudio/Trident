@@ -45,7 +45,6 @@ namespace Trident {
 
 	void* BaseBuffer::map(uint64 offset, uint64 size) {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 
 			if (size == 0) {
@@ -66,7 +65,7 @@ namespace Trident {
 				errorCount += 1;
 			}
 
-			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		void* mappedRange = device->adapter->mapBufferImplementation(device, this, offset, size);
@@ -79,7 +78,6 @@ namespace Trident {
 
 	void BaseBuffer::unmap() {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 
 			if (memorySuballocation.allocationIndex == max<uint32>()) {
@@ -98,7 +96,7 @@ namespace Trident {
 				}
 			}
 
-			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		device->adapter->unmapBufferImplementation(device, this);

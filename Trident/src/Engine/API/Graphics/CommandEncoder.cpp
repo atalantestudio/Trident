@@ -21,7 +21,6 @@ namespace Trident {
 
 	void CommandEncoder::beginRenderPass(const BeginRenderPassDescriptor& descriptor) {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 
 			if (descriptor.framebuffer == nullptr) {
@@ -53,7 +52,7 @@ namespace Trident {
 				}
 			}
 
-			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		device->adapter->beginRenderPassImplementation(this, descriptor);
@@ -81,7 +80,6 @@ namespace Trident {
 
 	void CommandEncoder::copyBufferToBuffer(ref<BaseBuffer> sourceBuffer, ref<BaseBuffer> destinationBuffer, view<BufferCopyRegion> copyRegions) {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 
 			if (!(sourceBuffer->getUsage() & BufferUsage::TRANSFER_SRC)) {
@@ -96,9 +94,9 @@ namespace Trident {
 				errorCount += 1;
 			}
 
-			// TODO: Validate copy regions.
+			// TODO(graphics/command-encoder/copy-buffer-to-buffer): Validate copy regions.
 
-			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		device->adapter->copyBufferToBufferImplementation(this, sourceBuffer, destinationBuffer, copyRegions);
@@ -110,7 +108,6 @@ namespace Trident {
 
 	void CommandEncoder::copyImageToBuffer(ref<Image> sourceImage, ref<BaseBuffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 			uint32 copyRegionIndex = 0;
 
@@ -223,7 +220,7 @@ namespace Trident {
 				copyRegionIndex += 1;
 			}
 
-			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		device->adapter->copyImageToBufferImplementation(this, sourceImage, destinationBuffer, copyRegions);
@@ -267,7 +264,6 @@ namespace Trident {
 
 	void CommandEncoder::insertMemoryBarriers(view<BufferMemoryBarrier> bufferMemoryBarriers, view<ImageMemoryBarrier> imageMemoryBarriers) {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 			uint32 bufferMemoryBarrierIndex = 0;
 			uint32 imageMemoryBarrierIndex = 0;
@@ -290,8 +286,6 @@ namespace Trident {
 				if (imageMemoryBarrier.image != nullptr) {
 					if (imageMemoryBarrier.newLayout == imageMemoryBarrier.image->getLayout()) {
 						ENGINE_WARNING("imageMemoryBarriers[[]].newLayout is the same as the current image layout.", imageMemoryBarrierIndex);
-
-						warningCount += 1;
 					}
 				}
 				else {
@@ -303,7 +297,7 @@ namespace Trident {
 				imageMemoryBarrierIndex += 1;
 			}
 
-			ENGINE_ASSERT(warningCount == 0 && errorCount == 0, "Invalid argument(s) ([] warnings and [] errors).", warningCount, errorCount);
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		device->adapter->insertMemoryBarriersImplementation(this, bufferMemoryBarriers, imageMemoryBarriers);
