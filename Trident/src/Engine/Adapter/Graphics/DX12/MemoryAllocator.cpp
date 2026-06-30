@@ -485,7 +485,7 @@ namespace Trident {
 		if (memoryProperties & MemoryProperty::HOST_VISIBLE) {
 			heapType = D3D12_HEAP_TYPE_UPLOAD;
 
-			if (transferDestination) {
+			if (!(memoryProperties & MemoryProperty::DEVICE_LOCAL) && transferDestination) {
 				heapType = D3D12_HEAP_TYPE_READBACK;
 			}
 		}

@@ -331,8 +331,10 @@ namespace Trident {
 	}
 
 	ref<Buffer<GUIRenderer::Camera>> GUIRenderer::createCameraBuffer() const {
+		const uint64 minUniformBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
+
 		return createBuffer<Camera>({
-			.size = sizeof(Camera),
+			.size = ceil(sizeof(Camera), minUniformBufferOffsetAlignment),
 			.usage = BufferUsage::UNIFORM,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = true,

@@ -42,15 +42,18 @@ namespace Trident {
 			virtual void onEvent(Event& event);
 
 		public:
+			// TODO: Deprecate.
 			template<typename ElementType>
 			inline static ref<Buffer<ElementType>> createBuffer(const BufferDescriptor& descriptor) {
-				return layerCompositor->device->createBuffer<ElementType>(descriptor);
+				return std::static_pointer_cast<Buffer<ElementType>>(createDynamicBuffer(descriptor));
 			}
+
+			static ref<BaseBuffer> createDynamicBuffer(const BufferDescriptor& descriptor);
 
 			/// Creates and returns a buffer suitable for memory transfers from the CPU to the GPU.
 			template<typename ElementType>
 			inline static ref<Buffer<ElementType>> createStagingBuffer(uint64 size) {
-				return layerCompositor->device->createBuffer<ElementType>({
+				return createBuffer<ElementType>({
 					.size = size,
 					.usage = BufferUsage::TRANSFER_SRC,
 					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
@@ -69,7 +72,12 @@ namespace Trident {
 
 			static ref<Framebuffer> createFramebuffer(const FramebufferDescriptor& descriptor);
 
+			// TODO: Deprecate.
 			static ref<Image> createImage(const ImageDescriptor& descriptor);
+
+			static ref<Image> createDynamicImage(const ImageDescriptor& descriptor);
+
+			static ref<Image> createStaticImage(const ImageDescriptor& descriptor);
 
 			static ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor);
 
@@ -82,8 +90,6 @@ namespace Trident {
 			static ref<Semaphore> createSemaphore();
 
 			static ref<BaseBuffer> createStaticBuffer(const BufferDescriptor& descriptor);
-
-			static ref<Image> createStaticImage(const ImageDescriptor& descriptor);
 
 			static ref<Device> getDevice();
 

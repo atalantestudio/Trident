@@ -21,6 +21,10 @@ namespace Trident {
 
 	void Renderer::onEvent(Event& event) {}
 
+	ref<BaseBuffer> Renderer::createDynamicBuffer(const BufferDescriptor& descriptor) {
+		return layerCompositor->device->createDynamicBuffer(descriptor);
+	}
+
 	ref<ComputePipeline> Renderer::createComputePipeline(const ComputePipelineDescriptor& descriptor) {
 		return layerCompositor->device->createComputePipeline(descriptor);
 	}
@@ -38,7 +42,15 @@ namespace Trident {
 	}
 
 	ref<Image> Renderer::createImage(const ImageDescriptor& descriptor) {
-		return layerCompositor->device->createImage(descriptor);
+		return createDynamicImage(descriptor);
+	}
+
+	ref<Image> Renderer::createDynamicImage(const ImageDescriptor& descriptor) {
+		return layerCompositor->device->createDynamicImage(descriptor);
+	}
+
+	ref<Image> Renderer::createStaticImage(const ImageDescriptor& descriptor) {
+		return layerCompositor->device->createStaticImage(descriptor);
 	}
 
 	ref<PipelineLayout> Renderer::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) {
@@ -63,10 +75,6 @@ namespace Trident {
 
 	ref<BaseBuffer> Renderer::createStaticBuffer(const BufferDescriptor& descriptor) {
 		return layerCompositor->device->createStaticBuffer(descriptor);
-	}
-
-	ref<Image> Renderer::createStaticImage(const ImageDescriptor& descriptor) {
-		return layerCompositor->device->createStaticImage(descriptor);
 	}
 
 	ref<Device> Renderer::getDevice() {

@@ -232,8 +232,10 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::createCameraBuffer() {
+		const uint64 minUniformBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
+
 		cameraBuffer = createBuffer<Camera>({
-			.size = sizeof(Camera),
+			.size = ceil(sizeof(Camera), minUniformBufferOffsetAlignment),
 			.usage = BufferUsage::UNIFORM,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = true,
@@ -247,8 +249,10 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::createViewBuffer() {
+		const uint64 minUniformBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
+
 		viewBuffer = createBuffer<View>({
-			.size = sizeof(View),
+			.size = ceil(sizeof(View), minUniformBufferOffsetAlignment),
 			.usage = BufferUsage::UNIFORM,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = true,
@@ -261,8 +265,10 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::createPlaceholderBuffer() {
+		const uint64 minUniformBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
+
 		placeholderBuffer = createBuffer<Placeholder>({
-			.size = sizeof(Placeholder),
+			.size = ceil(sizeof(Placeholder), minUniformBufferOffsetAlignment),
 			.usage = BufferUsage::UNIFORM,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = true,
@@ -632,22 +638,28 @@ namespace Trident {
 			}
 		}
 
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(
+		const sequence<ColorBlendAttachment> colorBlendAttachments = {
 			{
-				.stage = ShaderStage::FRAGMENT,
-				.entryPoint = "main",
-				#if defined(DEBUG_OBJECT_NAME)
-					.name = "Rigid body placeholder fill fragment",
-				#endif
+				.blend = true,
+				.srcColorBlendFactor = BlendFactor::SRC_ALPHA,
+				.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA,
 			},
-			"Physics2D/FragmentRGBA.frag"
-		);
+		};
 
 		rigidBodyPlaceholderFillPipeline = createGraphicsPipeline({
 			.pipelineLayout = placeholderPipelineLayout,
 			.vertexInputBindings = {vertexInputBinding, instanceInputBinding},
 			.vertexShaderModule = vertexShaderModule,
-			.fragmentShaderModule = fragmentShaderModule,
+			.fragmentShaderModule = loadShaderModule(
+				{
+					.stage = ShaderStage::FRAGMENT,
+					.entryPoint = "main",
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Rigid body placeholder fill fragment",
+					#endif
+				},
+				"Physics2D/FragmentRGBA.frag"
+			),
 			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
 			.polygonMode = PolygonMode::FILL,
 			.cullMode = CullMode::BACK,
@@ -655,13 +667,7 @@ namespace Trident {
 			.lineWidth = 1.0f,
 			.minSampleShading = 0.0f,
 			.colorBlendState = {
-				.attachments = {
-					{
-						.blend = true,
-						.srcColorBlendFactor = BlendFactor::SRC_ALPHA,
-						.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA,
-					},
-				},
+				.attachments = colorBlendAttachments,
 			},
 			.depthStencilState = {
 				.depthTest = false,
@@ -683,21 +689,13 @@ namespace Trident {
 		instanceInputBinding.registerAttribute<mat3x3<float32>>();
 		instanceInputBinding.stride = sizeof(RigidBody);
 
-		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
-		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-		vertexShaderModuleDescriptor.entryPoint = "main";
-
-		#if defined(DEBUG_OBJECT_NAME)
-			vertexShaderModuleDescriptor.name = "Rigid body placeholder stroke vertex";
-		#endif
-
-		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
-		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-		fragmentShaderModuleDescriptor.entryPoint = "main";
-
-		#if defined(DEBUG_OBJECT_NAME)
-			fragmentShaderModuleDescriptor.name = "Rigid body placeholder stroke fragment";
-		#endif
+		const ShaderModuleDescriptor vertexShaderModuleDescriptor = {
+			.stage = ShaderStage::VERTEX,
+			.entryPoint = "main",
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Rigid body placeholder stroke vertex",
+			#endif
+		};
 
 		ref<ShaderModule> vertexShaderModule;
 
@@ -715,13 +713,28 @@ namespace Trident {
 			}
 		}
 
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/PlaceholderStroke.frag");
+		const sequence<ColorBlendAttachment> colorBlendAttachments = {
+			{
+				.blend = true,
+				.srcColorBlendFactor = BlendFactor::SRC_ALPHA,
+				.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA,
+			},
+		};
 
 		rigidBodyPlaceholderStrokePipeline = createGraphicsPipeline({
 			.pipelineLayout = placeholderPipelineLayout,
 			.vertexInputBindings = {vertexInputBinding, instanceInputBinding},
 			.vertexShaderModule = vertexShaderModule,
-			.fragmentShaderModule = fragmentShaderModule,
+			.fragmentShaderModule = loadShaderModule(
+				{
+					.stage = ShaderStage::FRAGMENT,
+					.entryPoint = "main",
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Rigid body placeholder stroke fragment",
+					#endif
+				},
+				"Physics2D/PlaceholderStroke.frag"
+			),
 			.primitiveTopology = PrimitiveTopology::LINE_STRIP,
 			.polygonMode = PolygonMode::LINE,
 			.cullMode = CullMode::BACK,
@@ -729,13 +742,7 @@ namespace Trident {
 			.lineWidth = 1.0f,
 			.minSampleShading = 0.0f,
 			.colorBlendState = {
-				.attachments = {
-					{
-						.blend = true,
-						.srcColorBlendFactor = BlendFactor::SRC_ALPHA,
-						.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA,
-					},
-				},
+				.attachments = colorBlendAttachments,
 			},
 			.depthStencilState = {
 				.depthTest = false,

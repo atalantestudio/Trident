@@ -336,16 +336,17 @@ namespace Trident {
 	}
 
 	void GenerateSDFGlyphMapProcess::createFontBuffer() {
-		BufferDescriptor fontBufferDescriptor{};
-		fontBufferDescriptor.size = sizeof(FontStorage);
-		fontBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
-		fontBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+		const uint64 minStorageBufferOffsetAlignment = Renderer::getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
 
-		#if defined(DEBUG_OBJECT_NAME)
-			fontBufferDescriptor.name = "Font";
-		#endif
-
-		fontBuffer = Renderer::createBuffer<FontStorage>(fontBufferDescriptor);
+		fontBuffer = Renderer::createBuffer<FontStorage>({
+			.size = ceil(sizeof(FontStorage), minStorageBufferOffsetAlignment),
+			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
+			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+			.persistent = false,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Font",
+			#endif
+		});
 	}
 
 	void GenerateSDFGlyphMapProcess::createGlyphBuffer(uint64 size) {

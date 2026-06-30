@@ -140,8 +140,22 @@ namespace Trident {
 		const uint32 memoryTypeIndex = findMemoryTypeIndex(buffer->getMemorySuballocation().memoryProperties, buffer->getUsage() & BufferUsage::TRANSFER_DST);
 
 		uint32 allocationIndex = findAllocationIndex(memoryTypeIndex, memoryRequirements);
+		bool needAllocation = false;
 
 		if (allocationIndex >= allocations.size()) {
+			needAllocation = true;
+		}
+		else {
+			for (const uint32 freeableAllocationIndex : freeableAllocationIndices) {
+				if (allocationIndex == freeableAllocationIndex) {
+					needAllocation = true;
+
+					break;
+				}
+			}
+		}
+
+		if (needAllocation) {
 			allocationIndex = allocate(true, memoryTypeIndex, max(MIN_DYNAMIC_MEMORY_ALLOCATION_SIZE, memoryRequirements.size), memoryRequirements.alignment);
 		}
 
@@ -153,8 +167,22 @@ namespace Trident {
 		const uint32 memoryTypeIndex = findMemoryTypeIndex(image->getMemorySuballocation().memoryProperties, image->getUsage() & ImageUsage::TRANSFER_DST);
 
 		uint32 allocationIndex = findAllocationIndex(memoryTypeIndex, memoryRequirements);
+		bool needAllocation = false;
 
 		if (allocationIndex >= allocations.size()) {
+			needAllocation = true;
+		}
+		else {
+			for (const uint32 freeableAllocationIndex : freeableAllocationIndices) {
+				if (allocationIndex == freeableAllocationIndex) {
+					needAllocation = true;
+
+					break;
+				}
+			}
+		}
+
+		if (needAllocation) {
 			allocationIndex = allocate(true, memoryTypeIndex, max(MIN_DYNAMIC_MEMORY_ALLOCATION_SIZE, memoryRequirements.size), memoryRequirements.alignment);
 		}
 

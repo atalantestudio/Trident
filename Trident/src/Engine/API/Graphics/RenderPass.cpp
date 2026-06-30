@@ -150,7 +150,7 @@ namespace Trident {
 			usage |= ImageUsage::TRANSIENT_ATTACHMENT;
 		}
 
-		return device->createImage({
+		return device->createDynamicImage({
 			.type = descriptor.type,
 			.format = attachment.format,
 			.extent = descriptor.extent,
@@ -219,7 +219,7 @@ namespace Trident {
 			imageDescriptor.name = descriptor.name;
 		#endif
 
-		return device->createImage(imageDescriptor);
+		return device->createDynamicImage(imageDescriptor);
 	}
 
 	ref<Image> RenderPass::createInputAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 attachmentIndex) const {
@@ -253,6 +253,6 @@ namespace Trident {
 			imageDescriptor.name = descriptor.name;
 		#endif
 
-		return device->createImage(imageDescriptor);
+		return device->createDynamicImage(imageDescriptor);
 	}
 }

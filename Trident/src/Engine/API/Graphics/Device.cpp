@@ -42,6 +42,14 @@ namespace Trident {
 		return adapter->allocateDescriptorSetsImplementation(this, descriptorSetLayouts);
 	}
 
+	ref<BaseBuffer> Device::createDynamicBuffer(const BufferDescriptor& descriptor) const {
+		const ref<BaseBuffer> buffer = createStaticBuffer(descriptor);
+
+		memoryAllocator->suballocateDynamic(buffer);
+
+		return buffer;
+	}
+
 	ref<BaseBuffer> Device::createStaticBuffer(const BufferDescriptor& descriptor) const {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			uint32 errorCount = 0;
@@ -380,6 +388,14 @@ namespace Trident {
 		return adapter->createGraphicsPipelineImplementation(this, descriptor);
 	}
 
+	ref<Image> Device::createDynamicImage(const ImageDescriptor& descriptor) const {
+		const ref<Image> image = createStaticImage(descriptor);
+
+		memoryAllocator->suballocateDynamic(image);
+
+		return image;
+	}
+
 	ref<Image> Device::createStaticImage(const ImageDescriptor& descriptor) const {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			const PhysicalDeviceLimits& limits = physicalDevice->getLimits();
@@ -480,14 +496,6 @@ namespace Trident {
 		#endif
 
 		return adapter->createImageImplementation(this, descriptor);
-	}
-
-	ref<Image> Device::createImage(const ImageDescriptor& descriptor) const {
-		const ref<Image> image = createStaticImage(descriptor);
-
-		memoryAllocator->suballocateDynamic(image);
-
-		return image;
 	}
 
 	ref<PipelineLayout> Device::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {

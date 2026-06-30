@@ -25,20 +25,13 @@ namespace Trident {
 
 			sequence<ref<DescriptorSet>> allocateDescriptorSets(view<ref<DescriptorSetLayout>> descriptorSetLayouts);
 
-			/// Creates and returns a buffer which needs to be manually allocated.
-			ref<BaseBuffer> createStaticBuffer(const BufferDescriptor& descriptor) const;
-
 			/// Creates and returns a buffer which is pre-allocated from dynamic memory.
 			/// For most resources (excluding render pass attachments and other resources depending on the screen size),
 			/// prefer Device::createStaticBuffer over this method.
-			template<typename ElementType>
-			ref<Buffer<ElementType>> createBuffer(const BufferDescriptor& descriptor) const {
-				const ref<BaseBuffer> buffer = createStaticBuffer(descriptor);
+			ref<BaseBuffer> createDynamicBuffer(const BufferDescriptor& descriptor) const;
 
-				memoryAllocator->suballocateDynamic(buffer);
-
-				return std::static_pointer_cast<Buffer<ElementType>>(buffer);
-			}
+			/// Creates and returns a buffer which needs to be manually allocated.
+			ref<BaseBuffer> createStaticBuffer(const BufferDescriptor& descriptor) const;
 
 			ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor) const;
 
@@ -51,13 +44,13 @@ namespace Trident {
 
 			ref<GraphicsPipeline> createGraphicsPipeline(const GraphicsPipelineDescriptor& descriptor) const;
 
-			/// Creates and returns an image which needs to be manually allocated.
-			ref<Image> createStaticImage(const ImageDescriptor& descriptor) const;
-
 			/// Creates and returns an image which is pre-allocated from dynamic memory.
 			/// For most resources (excluding render pass attachments and other resources depending on the screen size),
 			/// prefer Device::createStaticImage over this method.
-			ref<Image> createImage(const ImageDescriptor& descriptor) const;
+			ref<Image> createDynamicImage(const ImageDescriptor& descriptor) const;
+
+			/// Creates and returns an image which needs to be manually allocated.
+			ref<Image> createStaticImage(const ImageDescriptor& descriptor) const;
 
 			ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const;
 
