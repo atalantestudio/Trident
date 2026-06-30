@@ -763,14 +763,18 @@ namespace Trident {
 					errorCount += 1;
 				}
 
-				uint32 descriptorBufferIndex = 0;
+				// TODO(graphics/device/descriptor-set-layout)
+				// Expose a way to get the descriptor set layout from the descriptor set,
+				// then validate the number of buffer/image descriptors.
 
-				while (descriptorBufferIndex < writeDescriptorSet.descriptorBuffers.count()) {
-					const DescriptorBuffer& descriptorBuffer = writeDescriptorSet.descriptorBuffers[descriptorBufferIndex];
-					const ref<BaseBuffer> buffer = descriptorBuffer.buffer;
+				index descriptorBufferIndex = 0;
+
+				while (descriptorBufferIndex < writeDescriptorSet.descriptorBufferViews.count()) {
+					const ref<BaseBufferView> bufferView = writeDescriptorSet.descriptorBufferViews[descriptorBufferIndex];
+					const BaseBuffer* buffer = bufferView->getBuffer();
 
 					if (buffer == nullptr) {
-						ENGINE_ERROR("writeDescriptorSets[[]].descriptorBuffers[[]].buffer must be a valid Buffer object.", writeDescriptorSetIndex, descriptorBufferIndex);
+						ENGINE_ERROR("writeDescriptorSets[[]].descriptorBufferViews[[]].buffer must be a valid Buffer object.", writeDescriptorSetIndex, descriptorBufferIndex);
 
 						errorCount += 1;
 					}
@@ -778,8 +782,8 @@ namespace Trident {
 						// TODO(graphics/device/update-descriptor-sets)
 						// This validation breaks the Visibility sample, which offsets the Material Offset buffer from 4 bytes for the prefix sum.
 						if (buffer->getUsage() & (BufferUsage::READ_ONLY_STORAGE | BufferUsage::READ_WRITE_STORAGE)) {
-							if (descriptorBuffer.offset % minStorageBufferOffsetAlignment > 0) {
-								ENGINE_ERROR("writeDescriptorSets[[]].descriptorBuffers[[]].offset must be a multiple of the minStorageBufferOffsetAlignment physical device limit.", writeDescriptorSetIndex, descriptorBufferIndex);
+							if (bufferView->getOffset() % minStorageBufferOffsetAlignment > 0) {
+								ENGINE_ERROR("writeDescriptorSets[[]].descriptorBufferViews[[]].offset must be a multiple of the minStorageBufferOffsetAlignment physical device limit.", writeDescriptorSetIndex, descriptorBufferIndex);
 
 								errorCount += 1;
 							}

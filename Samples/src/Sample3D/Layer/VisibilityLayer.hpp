@@ -25,10 +25,12 @@ namespace Trident {
 
 				renderer.setScene(&clusteredScene);
 
-				cameraController.getCamera().aspectRatio = getApplication()->getWindow()->getAspectRatio();
-				cameraController.getCamera().updateProjection();
-				cameraController.getCamera().updateView();
-				cameraController.getCamera().updateProjectionView();
+				PerspectiveCamera3D& camera = cameraController.getCamera();
+				camera.aspectRatio = getApplication()->getWindow()->getAspectRatio();
+				camera.farPlane = 4096.0_m;
+				camera.updateProjection();
+				camera.updateView();
+				camera.updateProjectionView();
 
 				renderer.setCameraController<PerspectiveCamera3D>(&cameraController);
 			}

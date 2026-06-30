@@ -26,7 +26,7 @@ namespace Trident {
 			ref<AssetType> getAsset(uint32 identifier) const {
 				const auto iterator = assetIdentifierToIndex.find(identifier);
 
-				ENGINE_ASSERT(iterator != assetIdentifierToIndex.end(), "Asset is not loaded.");
+				ENGINE_ASSERT(iterator != assetIdentifierToIndex.end(), "Asset [] is not loaded.", identifier);
 
 				return std::static_pointer_cast<AssetType>(assets[iterator->second]);
 			}

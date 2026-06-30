@@ -501,11 +501,7 @@ namespace Trident {
 			}
 
 			void updateDebugImageDescriptorSet() {
-				const DescriptorBuffer mipLevelDescriptorBuffer = {
-					.buffer = mipLevelBuffer,
-					.offset = 0,
-					.size = mipLevelBuffer->getSize(),
-				};
+				const ref<BufferView<uint32>> mipLevelView = mipLevelBuffer->createView<uint32>(0, mipLevelBuffer->getSize());
 
 				const DescriptorImage debugDescriptorImage = {
 					.imageView = debugImageView,
@@ -517,7 +513,7 @@ namespace Trident {
 					{
 						.descriptorSet = debugImageDescriptorSet,
 						.bindingIndex = 0,
-						.descriptorBuffers = mipLevelDescriptorBuffer,
+						.descriptorBufferViews = mipLevelView,
 					},
 					{
 						.descriptorSet = debugImageDescriptorSet,

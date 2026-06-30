@@ -166,37 +166,16 @@ namespace Trident {
 				const uint64 triangleAlignedRangeSize = ceil(triangleRangeSize, minStorageBufferOffsetAlignment);
 				const uint64 vertexAlignedRangeSize = ceil(vertexRangeSize, minStorageBufferOffsetAlignment);
 				const uint64 normalAlignedRangeSize = ceil(normalRangeSize, minStorageBufferOffsetAlignment);
-				const uint64 textureCoordinateAlignedRangeSize = ceil(textureCoordinateRangeSize, minStorageBufferOffsetAlignment);
 
-				const sequence<DescriptorBuffer> descriptorBuffers = {
+				const sequence<ref<BaseBufferView>> descriptorBufferViews = {
 					// Camera
-					{
-						.buffer = cameraBuffer,
-						.offset = 0,
-						.size = cameraBuffer->getSize(),
-					},
+					cameraBuffer->createView<Camera>(0, cameraBuffer->getSize()),
 
 					// Static
-					{
-						.buffer = staticBuffer,
-						.offset = 0,
-						.size = triangleRangeSize,
-					},
-					{
-						.buffer = staticBuffer,
-						.offset = triangleAlignedRangeSize,
-						.size = vertexRangeSize,
-					},
-					{
-						.buffer = staticBuffer,
-						.offset = triangleAlignedRangeSize + vertexAlignedRangeSize,
-						.size = normalRangeSize,
-					},
-					{
-						.buffer = staticBuffer,
-						.offset = triangleAlignedRangeSize + vertexAlignedRangeSize + normalAlignedRangeSize,
-						.size = textureCoordinateRangeSize,
-					},
+					staticBuffer->createView<StaticTriangle3D>(0, triangleRangeSize),
+					staticBuffer->createView<svec3<float32>>(triangleAlignedRangeSize, vertexRangeSize),
+					staticBuffer->createView<svec3<float32>>(triangleAlignedRangeSize + vertexAlignedRangeSize, normalRangeSize),
+					staticBuffer->createView<svec2<float32>>(triangleAlignedRangeSize + vertexAlignedRangeSize + normalAlignedRangeSize, textureCoordinateRangeSize),
 				};
 
 				sequence<WriteDescriptorSet> writeDescriptorSets(5);
@@ -206,7 +185,7 @@ namespace Trident {
 					writeDescriptorSets[writeDescriptorSetIndex] = {
 						.descriptorSet = rayTracingDescriptorSet,
 						.bindingIndex = writeDescriptorSetIndex,
-						.descriptorBuffers = descriptorBuffers[writeDescriptorSetIndex],
+						.descriptorBufferViews = descriptorBufferViews[writeDescriptorSetIndex],
 					};
 
 					writeDescriptorSetIndex += 1;
@@ -216,11 +195,8 @@ namespace Trident {
 			}
 
 			void updateImageDescriptorSets() {
-				const DescriptorBuffer accumulateDescriptorBuffer = {
-					.buffer = accumulateBuffer,
-					.offset = 0,
-					.size = accumulateBuffer->getSize(),
-				};
+				const ref<BufferView<uint8>> accumulateView = accumulateBuffer->createView<uint8>(0, accumulateBuffer->getSize());
+
 				const DescriptorImage outputDescriptorImage = {
 					.imageView = outputImageView,
 					.imageLayout = ImageLayout::GENERAL,
@@ -231,7 +207,7 @@ namespace Trident {
 					{
 						.descriptorSet = rayTracingDescriptorSet,
 						.bindingIndex = 5,
-						.descriptorBuffers = accumulateDescriptorBuffer,
+						.descriptorBufferViews = accumulateView,
 					},
 					{
 						.descriptorSet = rayTracingDescriptorSet,

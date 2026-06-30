@@ -9,17 +9,12 @@
 namespace Trident {
 	class VK::DescriptorSet final : public Trident::DescriptorSet {
 		public:
-			struct DescriptorSetBinding {
-				DescriptorType descriptorType;
-			};
-
-		public:
 			explicit DescriptorSet(VkDescriptorSet descriptorSet) :
 				descriptorSet(descriptorSet)
 			{}
 
 		public:
 			VkDescriptorSet descriptorSet;
-			sequence<DescriptorSetBinding> bindings;
+			sequence<DescriptorSetLayoutBinding> bindings;
 	};
 }

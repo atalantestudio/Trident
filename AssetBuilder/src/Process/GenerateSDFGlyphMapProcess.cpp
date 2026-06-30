@@ -560,21 +560,9 @@ namespace Trident {
 	}
 
 	void GenerateSDFGlyphMapProcess::updateDescriptorSets() const {
-		const DescriptorBuffer fontDescriptorBuffer = {
-			.buffer = fontBuffer,
-			.offset = 0,
-			.size = sizeof(FontStorage),
-		};
-		const DescriptorBuffer glyphDescriptorBuffer = {
-			.buffer = glyphBuffer,
-			.offset = 0,
-			.size = glyphBuffer->getSize(),
-		};
-		const DescriptorBuffer glyphOffsetDescriptorBuffer = {
-			.buffer = glyphOffsetBuffer,
-			.offset = 0,
-			.size = glyphOffsetBuffer->getSize(),
-		};
+		const ref<BufferView<FontStorage>> fontView = fontBuffer->createView<FontStorage>(0, fontBuffer->getSize());
+		const ref<BufferView<GlyphBuffer>> glyphView = glyphBuffer->createView<GlyphBuffer>(0, glyphBuffer->getSize());
+		const ref<BufferView<uint32>> glyphOffsetView = glyphOffsetBuffer->createView<uint32>(0, glyphOffsetBuffer->getSize());
 
 		const DescriptorImage glyphDescriptorImage = {
 			.imageView = glyphImageView,
@@ -591,41 +579,41 @@ namespace Trident {
 			{
 				.descriptorSet = glyphImageDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorBuffers = {fontDescriptorBuffer},
+				.descriptorBufferViews = fontView,
 			},
 			{
 				.descriptorSet = glyphImageDescriptorSet,
 				.bindingIndex = 1,
-				.descriptorBuffers = {glyphDescriptorBuffer},
+				.descriptorBufferViews = glyphView,
 			},
 			{
 				.descriptorSet = glyphImageDescriptorSet,
 				.bindingIndex = 2,
-				.descriptorImages = {glyphDescriptorImage},
+				.descriptorImages = glyphDescriptorImage,
 			},
 			{
 				.descriptorSet = glyphSdfDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorImages = {glyphDescriptorImage},
+				.descriptorImages = glyphDescriptorImage,
 			},
 			{
 				.descriptorSet = glyphSdfDescriptorSet,
 				.bindingIndex = 1,
-				.descriptorImages = {glyphMapDescriptorImage},
+				.descriptorImages = glyphMapDescriptorImage,
 			},
 			{
 				.descriptorSet = glyphSdfDescriptorSet,
 				.bindingIndex = 2,
-				.descriptorBuffers = {fontDescriptorBuffer},
+				.descriptorBufferViews = fontView,
 			},
 			{
 				.descriptorSet = glyphSdfDescriptorSet,
 				.bindingIndex = 3,
-				.descriptorBuffers = {glyphOffsetDescriptorBuffer},
+				.descriptorBufferViews = glyphOffsetView,
 			},
 		};
 
-		// TODO: Obtain a device from LayerCompositor/GraphicsAdapter.
+		// TODO(asset-builder/sdf-generator/device): Obtain a device from LayerCompositor/GraphicsAdapter.
 		Renderer::getDevice()->updateDescriptorSets(writeDescriptorSets);
 	}
 }

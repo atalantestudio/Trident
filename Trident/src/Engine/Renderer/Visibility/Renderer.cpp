@@ -460,244 +460,192 @@ namespace Trident {
 	}
 
 	void VisibilityRenderer::updateBufferDescriptorSets(uint64 vertexPositionComponentRegionSize, uint64 vertexNormalComponentRegionSize, uint64 vertexTextureCoordinateComponentRegionSize, uint64 vertexPositionIndexRegionSize, uint64 vertexNormalIndexRegionSize, uint64 vertexTextureCoordinateIndexRegionSize, uint64 clusterRegionSize, uint64 geometryRegionSize) {
-		const DescriptorBuffer cameraDescriptorBuffer = {
-			.buffer = cameraBuffer,
-			.offset = 0,
-			.size = cameraBuffer->getSize(),
-		};
-		const DescriptorBuffer vertexPositionComponentDescriptorBuffer = {
-			.buffer = dataBuffer,
-			.offset = 0,
-			.size = vertexPositionComponentRegionSize,
-		};
-		const DescriptorBuffer vertexNormalComponentDescriptorBuffer = {
-			.buffer = dataBuffer,
-			.offset = vertexPositionComponentRegionSize,
-			.size = vertexNormalComponentRegionSize,
-		};
-		const DescriptorBuffer vertexTextureCoordinateComponentDescriptorBuffer = {
-			.buffer = dataBuffer,
-			.offset = vertexPositionComponentRegionSize + vertexNormalComponentRegionSize,
-			.size = vertexTextureCoordinateComponentRegionSize,
-		};
-		const DescriptorBuffer vertexPositionIndexDescriptorBuffer = {
-			.buffer = dataBuffer,
-			.offset = vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize,
-			.size = vertexPositionIndexRegionSize,
-		};
-		const DescriptorBuffer vertexNormalIndexDescriptorBuffer = {
-			.buffer = dataBuffer,
-			.offset = vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize + vertexPositionIndexRegionSize,
-			.size = vertexNormalIndexRegionSize,
-		};
-		const DescriptorBuffer vertexTextureCoordinateIndexDescriptorBuffer = {
-			.buffer = dataBuffer,
-			.offset = vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize + vertexPositionIndexRegionSize + vertexNormalIndexRegionSize,
-			.size = vertexTextureCoordinateIndexRegionSize,
-		};
-		const DescriptorBuffer clusterDescriptorBuffer = {
-			.buffer = dataBuffer,
-			.offset = vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize + vertexPositionIndexRegionSize + vertexNormalIndexRegionSize + vertexTextureCoordinateIndexRegionSize,
-			.size = clusterRegionSize,
-		};
-		const DescriptorBuffer geometryDescriptorBuffer = {
-			.buffer = dataBuffer,
-			.offset = vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize + vertexPositionIndexRegionSize + vertexNormalIndexRegionSize + vertexTextureCoordinateIndexRegionSize + clusterRegionSize,
-			.size = geometryRegionSize,
-		};
-		const DescriptorBuffer instanceDescriptorBuffer = {
-			.buffer = instanceBuffer,
-			.offset = 0,
-			.size = scene->instances.count() * sizeof(ClusteredInstance),
-		};
-		const DescriptorBuffer materialCountDescriptorBuffer = {
-			.buffer = materialCountBuffer,
-			.offset = 0,
-			.size = materialCountBuffer->getSize(),
-		};
-		const DescriptorBuffer materialOffsetDescriptorBuffer = {
-			.buffer = materialOffsetBuffer,
-			.offset = sizeof(uint32),
-			.size = materialOffsetBuffer->getSize() - sizeof(uint32),
-		};
-		const DescriptorBuffer materialShaderIndirectDescriptorBuffer = {
-			.buffer = materialShaderIndirectBuffer,
-			.offset = 0,
-			.size = materialShaderIndirectBuffer->getSize(),
-		};
+		const ref<BufferView<Camera>> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
+		const ref<BufferView<float32>> vertexPositionComponentView = dataBuffer->createView<float32>(0, vertexPositionComponentRegionSize);
+		const ref<BufferView<float32>> vertexNormalComponentView = dataBuffer->createView<float32>(vertexPositionComponentRegionSize, vertexNormalComponentRegionSize);
+		const ref<BufferView<float32>> vertexTextureCoordinateComponentView = dataBuffer->createView<float32>(vertexPositionComponentRegionSize + vertexNormalComponentRegionSize, vertexTextureCoordinateComponentRegionSize);
+		const ref<BufferView<uint32>> vertexPositionIndexView = dataBuffer->createView<uint32>(vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize, vertexPositionIndexRegionSize);
+		const ref<BufferView<uint32>> vertexNormalIndexView = dataBuffer->createView<uint32>(vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize + vertexPositionIndexRegionSize, vertexNormalIndexRegionSize);
+		const ref<BufferView<uint32>> vertexTextureCoordinateIndexView = dataBuffer->createView<uint32>(vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize + vertexPositionIndexRegionSize + vertexNormalIndexRegionSize, vertexTextureCoordinateIndexRegionSize);
+		const ref<BufferView<Cluster>> clusterView = dataBuffer->createView<Cluster>(vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize + vertexPositionIndexRegionSize + vertexNormalIndexRegionSize + vertexTextureCoordinateIndexRegionSize, clusterRegionSize);
+		const ref<BufferView<Geometry>> geometryView = dataBuffer->createView<Geometry>(vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize + vertexPositionIndexRegionSize + vertexNormalIndexRegionSize + vertexTextureCoordinateIndexRegionSize + clusterRegionSize, geometryRegionSize);
+		const ref<BufferView<ClusteredInstance>> instanceView = instanceBuffer->createView<ClusteredInstance>(0, scene->instances.count() * sizeof(ClusteredInstance));
+		const ref<BufferView<uint32>> materialCountView = materialCountBuffer->createView<uint32>(0, materialCountBuffer->getSize());
+		const ref<BufferView<uint32>> materialOffsetView = materialOffsetBuffer->createView<uint32>(sizeof(uint32), materialOffsetBuffer->getSize() - sizeof(uint32));
+		const ref<BufferView<DispatchIndirectCommand>> materialShaderIndirectView = materialShaderIndirectBuffer->createView<DispatchIndirectCommand>(0, materialShaderIndirectBuffer->getSize());
 
 		const sequence<WriteDescriptorSet> writeDescriptorSets = {
 			{
 				.descriptorSet = cameraDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorBuffers = cameraDescriptorBuffer,
+				.descriptorBufferViews = cameraView,
 			},
 			{
 				.descriptorSet = clusterDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorBuffers = vertexPositionComponentDescriptorBuffer,
+				.descriptorBufferViews = vertexPositionComponentView,
 			},
 			{
 				.descriptorSet = clusterDescriptorSet,
 				.bindingIndex = 1,
-				.descriptorBuffers = vertexPositionIndexDescriptorBuffer,
+				.descriptorBufferViews = vertexPositionIndexView,
 			},
 			{
 				.descriptorSet = clusterDescriptorSet,
 				.bindingIndex = 2,
-				.descriptorBuffers = clusterDescriptorBuffer,
+				.descriptorBufferViews = clusterView,
 			},
 			{
 				.descriptorSet = instanceDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorBuffers = instanceDescriptorBuffer,
+				.descriptorBufferViews = instanceView,
 			},
 			{
 				.descriptorSet = instanceDescriptorSet,
 				.bindingIndex = 1,
-				.descriptorBuffers = geometryDescriptorBuffer,
+				.descriptorBufferViews = geometryView,
 			},
 			{
 				.descriptorSet = materialCountDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorBuffers = cameraDescriptorBuffer,
+				.descriptorBufferViews = cameraView,
 			},
 			{
 				.descriptorSet = materialCountDescriptorSet,
 				.bindingIndex = 2,
-				.descriptorBuffers = clusterDescriptorBuffer,
+				.descriptorBufferViews = clusterView,
 			},
 			{
 				.descriptorSet = materialCountDescriptorSet,
 				.bindingIndex = 3,
-				.descriptorBuffers = instanceDescriptorBuffer,
+				.descriptorBufferViews = instanceView,
 			},
 			{
 				.descriptorSet = materialCountDescriptorSet,
 				.bindingIndex = 4,
-				.descriptorBuffers = materialCountDescriptorBuffer,
+				.descriptorBufferViews = materialCountView,
 			},
 			#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
 				{
 					.descriptorSet = visibilityDebugDescriptorSet,
 					.bindingIndex = 0,
-					.descriptorBuffers = cameraDescriptorBuffer,
+					.descriptorBufferViews = cameraView,
 				},
 				{
 					.descriptorSet = visibilityDebugDescriptorSet,
 					.bindingIndex = 3,
-					.descriptorBuffers = vertexPositionComponentDescriptorBuffer,
+					.descriptorBufferViews = vertexPositionComponentView,
 				},
 				{
 					.descriptorSet = visibilityDebugDescriptorSet,
 					.bindingIndex = 4,
-					.descriptorBuffers = vertexNormalComponentDescriptorBuffer,
+					.descriptorBufferViews = vertexNormalComponentView,
 				},
 				{
 					.descriptorSet = visibilityDebugDescriptorSet,
 					.bindingIndex = 5,
-					.descriptorBuffers = vertexTextureCoordinateComponentDescriptorBuffer,
+					.descriptorBufferViews = vertexTextureCoordinateComponentView,
 				},
 				{
 					.descriptorSet = visibilityDebugDescriptorSet,
 					.bindingIndex = 6,
-					.descriptorBuffers = vertexPositionIndexDescriptorBuffer,
+					.descriptorBufferViews = vertexPositionIndexView,
 				},
 				{
 					.descriptorSet = visibilityDebugDescriptorSet,
 					.bindingIndex = 7,
-					.descriptorBuffers = vertexNormalIndexDescriptorBuffer,
+					.descriptorBufferViews = vertexNormalIndexView,
 				},
 				{
 					.descriptorSet = visibilityDebugDescriptorSet,
 					.bindingIndex = 8,
-					.descriptorBuffers = vertexTextureCoordinateIndexDescriptorBuffer,
+					.descriptorBufferViews = vertexTextureCoordinateIndexView,
 				},
 			#endif
 			{
 				.descriptorSet = materialOffsetDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorBuffers = materialCountDescriptorBuffer,
+				.descriptorBufferViews = materialCountView,
 			},
 			{
 				.descriptorSet = materialOffsetDescriptorSet,
 				.bindingIndex = 1,
-				.descriptorBuffers = materialOffsetDescriptorBuffer,
+				.descriptorBufferViews = materialOffsetView,
 			},
 			{
 				.descriptorSet = materialOffsetDescriptorSet,
 				.bindingIndex = 2,
-				.descriptorBuffers = materialShaderIndirectDescriptorBuffer,
+				.descriptorBufferViews = materialShaderIndirectView,
 			},
 			{
 				.descriptorSet = materialCoordinateDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorBuffers = cameraDescriptorBuffer,
+				.descriptorBufferViews = cameraView,
 			},
 			{
 				.descriptorSet = materialCoordinateDescriptorSet,
 				.bindingIndex = 2,
-				.descriptorBuffers = clusterDescriptorBuffer,
+				.descriptorBufferViews = clusterView,
 			},
 			{
 				.descriptorSet = materialCoordinateDescriptorSet,
 				.bindingIndex = 3,
-				.descriptorBuffers = instanceDescriptorBuffer,
+				.descriptorBufferViews = instanceView,
 			},
 			{
 				.descriptorSet = materialCoordinateDescriptorSet,
 				.bindingIndex = 4,
-				.descriptorBuffers = materialOffsetDescriptorBuffer,
+				.descriptorBufferViews = materialOffsetView,
 			},
 			{
 				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorBuffers = cameraDescriptorBuffer,
+				.descriptorBufferViews = cameraView,
 			},
 			{
 				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 3,
-				.descriptorBuffers = vertexPositionComponentDescriptorBuffer,
+				.descriptorBufferViews = vertexPositionComponentView,
 			},
 			{
 				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 4,
-				.descriptorBuffers = vertexNormalComponentDescriptorBuffer,
+				.descriptorBufferViews = vertexNormalComponentView,
 			},
 			{
 				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 5,
-				.descriptorBuffers = vertexTextureCoordinateComponentDescriptorBuffer,
+				.descriptorBufferViews = vertexTextureCoordinateComponentView,
 			},
 			{
 				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 6,
-				.descriptorBuffers = vertexPositionIndexDescriptorBuffer,
+				.descriptorBufferViews = vertexPositionIndexView,
 			},
 			{
 				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 7,
-				.descriptorBuffers = vertexNormalIndexDescriptorBuffer,
+				.descriptorBufferViews = vertexNormalIndexView,
 			},
 			{
 				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 8,
-				.descriptorBuffers = vertexTextureCoordinateIndexDescriptorBuffer,
+				.descriptorBufferViews = vertexTextureCoordinateIndexView,
 			},
 			{
 				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 9,
-				.descriptorBuffers = clusterDescriptorBuffer,
+				.descriptorBufferViews = clusterView,
 			},
 			{
 				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 10,
-				.descriptorBuffers = instanceDescriptorBuffer,
+				.descriptorBufferViews = instanceView,
 			},
 			{
 				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 11,
-				.descriptorBuffers = geometryDescriptorBuffer,
+				.descriptorBufferViews = geometryView,
 			},
 		};
 
@@ -724,11 +672,7 @@ namespace Trident {
 			};
 		#endif
 
-		const DescriptorBuffer materialCoordinateDescriptorBuffer = {
-			.buffer = materialCoordinateBuffer,
-			.offset = 0,
-			.size = materialCoordinateBuffer->getSize(),
-		};
+		const ref<BufferView<uint32>> materialCoordinateView = materialCoordinateBuffer->createView<uint32>(0, materialCoordinateBuffer->getSize());
 
 		const sequence<WriteDescriptorSet> writeDescriptorSets = {
 			{
@@ -744,12 +688,12 @@ namespace Trident {
 			{
 				.descriptorSet = materialCoordinateDescriptorSet,
 				.bindingIndex = 5,
-				.descriptorBuffers = materialCoordinateDescriptorBuffer,
+				.descriptorBufferViews = materialCoordinateView,
 			},
 			{
 				.descriptorSet = materialBaseDescriptorSet,
 				.bindingIndex = 1,
-				.descriptorBuffers = materialCoordinateDescriptorBuffer,
+				.descriptorBufferViews = materialCoordinateView,
 			},
 			{
 				.descriptorSet = materialBaseDescriptorSet,

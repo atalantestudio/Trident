@@ -1173,28 +1173,19 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::updateCameraViewDescriptorSet() const {
-		const DescriptorBuffer cameraDescriptorBuffer = {
-			.buffer = cameraBuffer,
-			.offset = 0,
-			.size = cameraBuffer->getSize(),
-		};
-
-		const DescriptorBuffer viewDescriptorBuffer = {
-			.buffer = viewBuffer,
-			.offset = 0,
-			.size = viewBuffer->getSize(),
-		};
+		const ref<BufferView<Camera>> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
+		const ref<BufferView<View>> viewView = viewBuffer->createView<View>(0, viewBuffer->getSize());
 
 		const sequence<WriteDescriptorSet> writeDescriptorSets = {
 			{
 				.descriptorSet = cameraViewDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorBuffers = {cameraDescriptorBuffer},
+				.descriptorBufferViews = cameraView,
 			},
 			{
 				.descriptorSet = cameraViewDescriptorSet,
 				.bindingIndex = 1,
-				.descriptorBuffers = {viewDescriptorBuffer},
+				.descriptorBufferViews = viewView,
 			},
 		};
 
@@ -1202,17 +1193,13 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::updatePlaceholderDescriptorSet() const {
-		const DescriptorBuffer placeholderDescriptorBuffer = {
-			.buffer = placeholderBuffer,
-			.offset = 0,
-			.size = placeholderBuffer->getSize(),
-		};
+		const ref<BufferView<Placeholder>> placeholderView = placeholderBuffer->createView<Placeholder>(0, placeholderBuffer->getSize());
 
 		const sequence<WriteDescriptorSet> writeDescriptorSets = {
 			{
 				.descriptorSet = placeholderDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorBuffers = {placeholderDescriptorBuffer},
+				.descriptorBufferViews = placeholderView,
 			},
 		};
 

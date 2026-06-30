@@ -6,17 +6,11 @@
 #include "Engine/API/Material/Shader.hpp"
 
 namespace Trident {
-	struct MaterialDescriptorBuffer {
-		sequence<uint8> data;
-	};
-
 	struct MaterialDescriptorImage {
 		sequence<char8> assetPath;
 	};
 
 	struct MaterialWriteDescriptorSetBinding {
-		// TODO: Use an union.
-		sequence<MaterialDescriptorBuffer> descriptorBuffers;
 		sequence<MaterialDescriptorImage> descriptorImages;
 	};
 

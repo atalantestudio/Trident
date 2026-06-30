@@ -638,11 +638,7 @@ namespace Trident {
 	}
 
 	void GUIRenderer::updateDescriptorSets() const {
-		const DescriptorBuffer cameraDescriptorBuffer = {
-			.buffer = cameraBuffer,
-			.offset = 0,
-			.size = cameraBuffer->getSize(),
-		};
+		const ref<BufferView<Camera>> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
 
 		sequence<DescriptorImage> userDescriptorImages(MAX_USER_IMAGE_COUNT);
 
@@ -664,13 +660,13 @@ namespace Trident {
 			{
 				.descriptorSet = subcomponentDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorBuffers = cameraDescriptorBuffer,
+				.descriptorBufferViews = cameraView,
 			},
 			{
 				.descriptorSet = subcomponentDescriptorSet,
 				.bindingIndex = 1,
 
-				// TODO: Update all images in the descriptor (Vulkan and DX12).
+				// TODO(gui/user-images): Update all images in the descriptor (Vulkan and DX12).
 				.descriptorImages = userDescriptorImages,
 			},
 		};

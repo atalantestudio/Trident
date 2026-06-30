@@ -98,7 +98,7 @@ const uint VISUALIZATION_MODE_FLAT_SHADING = 10u;
 const uint VISUALIZATION_MODE_BLINN_PHONG_SHADING = 11u;
 
 // TODO: Use a value from a uniform buffer.
-const uint VISUALIZATION_MODE = VISUALIZATION_MODE_VERTEX_TEXTURE_COORDINATE;
+const uint VISUALIZATION_MODE = VISUALIZATION_MODE_BLINN_PHONG_SHADING;
 
 layout(set = 0, binding = 0) uniform readonly CameraBuffer {
 	Camera camera;

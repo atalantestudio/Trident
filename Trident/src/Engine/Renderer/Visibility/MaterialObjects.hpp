@@ -125,7 +125,7 @@ namespace Trident {
 	// - Initializes descriptor buffers (MaterialOffsetBuffer)
 	// - Initializes descriptor images
 	// - Initializes write descriptor sets for both descriptor buffers and descriptor images
-	void VisibilityRenderer::initializeMaterialImages(sequence<ImageMemoryBarrier>& imageMemoryBarriers, sequence<DescriptorBuffer>& materialOffsetDescriptorBuffers, sequence<DescriptorImage>& descriptorImages, sequence<WriteDescriptorSet>& writeDescriptorSets) {
+	void VisibilityRenderer::initializeMaterialImages(sequence<ImageMemoryBarrier>& imageMemoryBarriers, sequence<ref<BaseBufferView>>& materialOffsetViews, sequence<DescriptorImage>& descriptorImages, sequence<WriteDescriptorSet>& writeDescriptorSets) {
 		ImageDescriptor imageDescriptor = {
 			.type = ImageType::TEXTURE_2D,
 			.format = ImageFormat::R8G8B8A8_UNORM,
@@ -157,19 +157,12 @@ namespace Trident {
 			imageDescriptor.layerCount = static_cast<uint32>(materials.size());
 			imageViewDescriptor.layerCount = static_cast<uint32>(materials.size());
 
-			materialOffsetDescriptorBuffers[materialShaderIndex] = {
-				.buffer = materialOffsetBuffer,
-				.offset = materialShaderIndex * sizeof(uint32),
-				.size = 2 * sizeof(uint32),
-			};
-
-			// MSVC v142 (2019) emits an unresolved external symbol error when the view is defined on the fly when creating the WriteDescriptorSet.
-			const view<DescriptorBuffer> descriptorBuffers(&materialOffsetDescriptorBuffers[materialShaderIndex], 1);
+			materialOffsetViews[materialShaderIndex] = materialOffsetBuffer->createView<uint32>(materialShaderIndex * sizeof(uint32), 2 * sizeof(uint32));
 
 			writeDescriptorSets[writeDescriptorSetIndex] = {
 				.descriptorSet = materialShaderUserDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorBuffers = descriptorBuffers,
+				.descriptorBufferViews = materialOffsetViews[materialShaderIndex],
 			};
 
 			writeDescriptorSetIndex += 1;
@@ -272,11 +265,11 @@ namespace Trident {
 		materialShaderImageViews = sequence<ref<ImageView>>(imageCount);
 
 		sequence<ImageMemoryBarrier> imageMemoryBarriers(imageCount);
-		sequence<DescriptorBuffer> materialOffsetDescriptorBuffers(scene->materialShaders.size());
+		sequence<ref<BaseBufferView>> materialOffsetViews(scene->materialShaders.size());
 		sequence<DescriptorImage> descriptorImages(imageCount);
-		sequence<WriteDescriptorSet> writeDescriptorSets(materialOffsetDescriptorBuffers.count() + descriptorImages.count());
+		sequence<WriteDescriptorSet> writeDescriptorSets(materialOffsetViews.count() + descriptorImages.count());
 
-		initializeMaterialImages(imageMemoryBarriers, materialOffsetDescriptorBuffers, descriptorImages, writeDescriptorSets);
+		initializeMaterialImages(imageMemoryBarriers, materialOffsetViews, descriptorImages, writeDescriptorSets);
 
 		AssetLibrary* assetLibrary = getLayer()->getApplication()->getAssetLibrary();
 

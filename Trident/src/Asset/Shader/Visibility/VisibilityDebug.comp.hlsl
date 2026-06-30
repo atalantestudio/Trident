@@ -91,7 +91,7 @@ static const uint VISUALIZATION_MODE_FLAT_SHADING = 10;
 static const uint VISUALIZATION_MODE_BLINN_PHONG_SHADING = 11;
 
 // TODO: Use specialization constant.
-static const uint VISUALIZATION_MODE = VISUALIZATION_MODE_TRIANGLE_INDEX;
+static const uint VISUALIZATION_MODE = VISUALIZATION_MODE_BLINN_PHONG_SHADING;
 
 cbuffer CameraBuffer : register(b0) {
 	Camera camera;
@@ -100,32 +100,16 @@ cbuffer CameraBuffer : register(b0) {
 Texture2D<uint> visibilityImage : register(t0);
 SamplerState depthStencilSamplerState : register(s0);
 Texture2D<float> depthStencilImage : register(t1);
-ByteAddressBuffer vertexPositionComponentBuffer : register(t2);
-ByteAddressBuffer vertexNormalComponentBuffer : register(t3);
-ByteAddressBuffer vertexTextureCoordinateComponentBuffer : register(t4);
-ByteAddressBuffer vertexPositionIndexBuffer : register(t5);
-ByteAddressBuffer vertexNormalIndexBuffer : register(t6);
-ByteAddressBuffer vertexTextureCoordinateIndexBuffer : register(t7);
+StructuredBuffer<float> vertexPositionComponentBuffer : register(t2);
+StructuredBuffer<float> vertexNormalComponentBuffer : register(t3);
+StructuredBuffer<float> vertexTextureCoordinateComponentBuffer : register(t4);
+StructuredBuffer<uint> vertexPositionIndexBuffer : register(t5);
+StructuredBuffer<uint> vertexNormalIndexBuffer : register(t6);
+StructuredBuffer<uint> vertexTextureCoordinateIndexBuffer : register(t7);
 RWTexture2D<float4> outputImage : register(u0);
-ByteAddressBuffer clusterBuffer : register(t11);
-StructuredBuffer<Instance> instanceBuffer : register(t12);
-ByteAddressBuffer geometryBuffer : register(t13);
-
-Cluster loadCluster(uint clusterIndex) {
-	Cluster cluster;
-	cluster.instanceIndex = clusterBuffer.Load(clusterIndex * 4);
-
-	return cluster;
-}
-
-Geometry loadGeometry(uint geometryIndex) {
-	Geometry geometry;
-	geometry.vertexOffset = geometryBuffer.Load(geometryIndex * 12 + 0);
-	geometry.vertexTextureCoordinateOffset = geometryBuffer.Load(geometryIndex * 12 + 4);
-	geometry.clusterCount = geometryBuffer.Load(geometryIndex * 12 + 8);
-
-	return geometry;
-}
+StructuredBuffer<Cluster> clusterBuffer : register(t10);
+StructuredBuffer<Instance> instanceBuffer : register(t11);
+StructuredBuffer<Geometry> geometryBuffer : register(t12);
 
 Material createMaterial(float3 ambient, float3 diffuse, float3 specular, float shininess) {
 	Material material;
@@ -148,24 +132,35 @@ Light createLight(float3 position, float3 ambient, float3 diffuse, float3 specul
 }
 
 float3 loadVertexPosition(uint indexIndex, Geometry geometry) {
-	uint index = vertexPositionIndexBuffer.Load(indexIndex * 4);
+	uint index = vertexPositionIndexBuffer[indexIndex];
 	uint offset = (geometry.vertexOffset + index) * 3;
 
-	return asfloat(vertexPositionComponentBuffer.Load3(offset * 4));
+	return float3(
+		vertexPositionComponentBuffer[offset + 0],
+		vertexPositionComponentBuffer[offset + 1],
+		vertexPositionComponentBuffer[offset + 2]
+	);
 }
 
 float3 loadVertexNormal(uint indexIndex, Geometry geometry) {
-	uint index = vertexNormalIndexBuffer.Load(indexIndex * 4);
+	uint index = vertexNormalIndexBuffer[indexIndex];
 	uint offset = (geometry.vertexOffset + index) * 3;
 
-	return asfloat(vertexNormalComponentBuffer.Load3(offset * 4));
+	return float3(
+		vertexNormalComponentBuffer[offset + 0],
+		vertexNormalComponentBuffer[offset + 1],
+		vertexNormalComponentBuffer[offset + 2]
+	);
 }
 
 float2 loadVertexTextureCoordinate(uint indexIndex, Geometry geometry) {
-	uint index = vertexTextureCoordinateIndexBuffer.Load(indexIndex * 4);
+	uint index = vertexTextureCoordinateIndexBuffer[indexIndex];
 	uint offset = (geometry.vertexTextureCoordinateOffset + index) * 2;
 
-	return asfloat(vertexTextureCoordinateComponentBuffer.Load2(offset * 4));
+	return float2(
+		vertexTextureCoordinateComponentBuffer[offset + 0],
+		vertexTextureCoordinateComponentBuffer[offset + 1]
+	);
 }
 
 Triangle loadTriangle(uint triangleIndex, Instance instance, Geometry geometry) {
@@ -409,9 +404,9 @@ float4 VisibilityDebug(uint2 screenCoordinate) {
 		// Global triangle index.
 		uint triangleIndex = clusterIndex * CLUSTER_TRIANGLE_COUNT + clusterTriangleIndex;
 
-		Cluster cluster = loadCluster(clusterIndex);
+		Cluster cluster = clusterBuffer[clusterIndex];
 		Instance instance = instanceBuffer[cluster.instanceIndex];
-		Geometry geometry = loadGeometry(instance.geometryIndex);
+		Geometry geometry = geometryBuffer[instance.geometryIndex];
 
 		Triangle _triangle = loadTriangle(triangleIndex, instance, geometry);
 
@@ -427,7 +422,7 @@ float4 VisibilityDebug(uint2 screenCoordinate) {
 				break;
 			}
 			case VISUALIZATION_MODE_LINEAR_DEPTH: {
-				float nonLinearDepth = depthStencilImage.Sample(depthStencilSamplerState, float2(screenCoordinate / camera.viewport)).r;
+				float nonLinearDepth = depthStencilImage.SampleLevel(depthStencilSamplerState, float2(screenCoordinate / camera.viewport), 0).r;
 				float linearDepth = linearizeDepth(nonLinearDepth);
 
 				color = float4(linearDepth, linearDepth, linearDepth, 1.0);

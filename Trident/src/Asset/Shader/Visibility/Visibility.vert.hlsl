@@ -42,35 +42,20 @@ cbuffer CameraBuffer : register(b0) {
 	Camera camera;
 }
 
-// NOTE
-// These descriptors are part of a larger buffer.
-// Because their stride differ, they can't be represented as structured buffers.
-ByteAddressBuffer vertexPositionComponentBuffer : register(t0);
-ByteAddressBuffer vertexPositionIndexBuffer : register(t1);
-ByteAddressBuffer clusterBuffer : register(t2);
+StructuredBuffer<float> vertexPositionComponentBuffer : register(t0);
+StructuredBuffer<uint> vertexPositionIndexBuffer : register(t1);
+StructuredBuffer<Cluster> clusterBuffer : register(t2);
 StructuredBuffer<Instance> instanceBuffer : register(t3);
-ByteAddressBuffer geometryBuffer : register(t4);
-
-Cluster loadCluster(uint clusterIndex) {
-	Cluster cluster;
-	cluster.instanceIndex = clusterBuffer.Load(clusterIndex * 4);
-
-	return cluster;
-}
-
-Geometry loadGeometry(uint geometryIndex) {
-	Geometry geometry;
-	geometry.vertexOffset = geometryBuffer.Load(geometryIndex * 12 + 0);
-	geometry.vertexTextureCoordinateOffset = geometryBuffer.Load(geometryIndex * 12 + 4);
-	geometry.clusterCount = geometryBuffer.Load(geometryIndex * 12 + 8);
-
-	return geometry;
-}
+StructuredBuffer<Geometry> geometryBuffer : register(t4);
 
 float3 loadVertexPosition(Geometry geometry, uint index) {
 	uint offset = (geometry.vertexOffset + index) * 3;
 
-	return asfloat(vertexPositionComponentBuffer.Load3(offset * 4));
+	return float3(
+		vertexPositionComponentBuffer[offset + 0],
+		vertexPositionComponentBuffer[offset + 1],
+		vertexPositionComponentBuffer[offset + 2]
+	);
 }
 
 Interstage main(VertexInput input) {
@@ -78,12 +63,12 @@ Interstage main(VertexInput input) {
 	uint triangleIndex = indexIndex / 3;
 	uint clusterIndex = input.instanceIndex;
 
-	Cluster cluster = loadCluster(clusterIndex);
+	Cluster cluster = clusterBuffer[clusterIndex];
 	Instance instance = instanceBuffer[cluster.instanceIndex];
-	Geometry geometry = loadGeometry(instance.geometryIndex);
+	Geometry geometry = geometryBuffer[instance.geometryIndex];
 
 	uint indexOffset = (instance.clusterOffset + clusterIndex) * CLUSTER_INDEX_COUNT;
-	uint relativeVertexPositionIndex = vertexPositionIndexBuffer.Load((indexOffset + indexIndex) * 4);
+	uint relativeVertexPositionIndex = vertexPositionIndexBuffer[indexOffset + indexIndex];
 	float3 vertex = loadVertexPosition(geometry, relativeVertexPositionIndex);
 
 	Interstage output;

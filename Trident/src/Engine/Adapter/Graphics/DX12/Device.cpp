@@ -253,12 +253,6 @@ namespace Trident {
 		const ref<DX12::MemoryAllocator> memoryAllocator = std::static_pointer_cast<DX12::MemoryAllocator>(device->getMemoryAllocator());
 
 		for (const WriteDescriptorSet& writeDescriptorSet : writeDescriptorSets) {
-			// TODO(graphics/dx12/descriptor-buffer-view)
-			DEBUG_ASSERT(
-				writeDescriptorSet.descriptorImages.count() > 0 ||
-				writeDescriptorSet.descriptorBuffers.count() != writeDescriptorSet.descriptorBufferViews.count()
-			);
-
 			const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(writeDescriptorSet.descriptorSet);
 			const DX12::DescriptorSet::DescriptorSetBinding& binding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
 
@@ -311,26 +305,13 @@ namespace Trident {
 					break;
 				}
 				case DescriptorType::UNIFORM_BUFFER: {
-					// TODO(graphics/dx12/update-descriptor-buffers): Remove once buffer views are supported as descriptor buffers.
-					if (writeDescriptorSet.descriptorBuffers.count() > 0) {
-						while (descriptorIndex < binding.descriptorCount) {
-							const DescriptorBuffer& descriptorBuffer = writeDescriptorSet.descriptorBuffers[descriptorIndex];
+					while (descriptorIndex < binding.descriptorCount) {
+						const ref<BaseBufferView> bufferView = writeDescriptorSet.descriptorBufferViews[descriptorIndex];
 
-							memoryAllocator->writeUniformBuffer(viewDescriptorHandle, descriptorBuffer);
+						memoryAllocator->writeUniformBuffer(viewDescriptorHandle, bufferView);
 
-							viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-							descriptorIndex += 1;
-						}
-					}
-					else {
-						while (descriptorIndex < binding.descriptorCount) {
-							const ref<BaseBufferView> bufferView = writeDescriptorSet.descriptorBufferViews[descriptorIndex];
-
-							memoryAllocator->writeUniformBuffer(viewDescriptorHandle, bufferView);
-
-							viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-							descriptorIndex += 1;
-						}
+						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+						descriptorIndex += 1;
 					}
 
 					samplerDescriptorHandle.ptr += memoryAllocator->samplerDescriptorHandleIncrementSize * writeDescriptorSet.descriptorBufferViews.count();
@@ -338,26 +319,13 @@ namespace Trident {
 					break;
 				}
 				case DescriptorType::READ_ONLY_STORAGE_BUFFER: {
-					// TODO(graphics/dx12/update-descriptor-buffers): Remove once buffer views are supported as descriptor buffers.
-					if (writeDescriptorSet.descriptorBuffers.count() > 0) {
-						while (descriptorIndex < binding.descriptorCount) {
-							const DescriptorBuffer& descriptorBuffer = writeDescriptorSet.descriptorBuffers[descriptorIndex];
+					while (descriptorIndex < binding.descriptorCount) {
+						const ref<BaseBufferView> bufferView = writeDescriptorSet.descriptorBufferViews[descriptorIndex];
 
-							memoryAllocator->writeReadOnlyStorageBuffer(viewDescriptorHandle, descriptorBuffer);
+						memoryAllocator->writeReadOnlyStorageBuffer(viewDescriptorHandle, bufferView);
 
-							viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-							descriptorIndex += 1;
-						}
-					}
-					else {
-						while (descriptorIndex < binding.descriptorCount) {
-							const ref<BaseBufferView> bufferView = writeDescriptorSet.descriptorBufferViews[descriptorIndex];
-
-							memoryAllocator->writeReadOnlyStorageBuffer(viewDescriptorHandle, bufferView);
-
-							viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-							descriptorIndex += 1;
-						}
+						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+						descriptorIndex += 1;
 					}
 
 					samplerDescriptorHandle.ptr += memoryAllocator->samplerDescriptorHandleIncrementSize * writeDescriptorSet.descriptorBufferViews.count();
@@ -365,26 +333,13 @@ namespace Trident {
 					break;
 				}
 				case DescriptorType::READ_WRITE_STORAGE_BUFFER: {
-					// TODO(graphics/dx12/update-descriptor-buffers): Remove once buffer views are supported as descriptor buffers.
-					if (writeDescriptorSet.descriptorBuffers.count() > 0) {
-						while (descriptorIndex < binding.descriptorCount) {
-							const DescriptorBuffer& descriptorBuffer = writeDescriptorSet.descriptorBuffers[descriptorIndex];
+					while (descriptorIndex < binding.descriptorCount) {
+						const ref<BaseBufferView> bufferView = writeDescriptorSet.descriptorBufferViews[descriptorIndex];
 
-							memoryAllocator->writeReadWriteStorageBuffer(viewDescriptorHandle, descriptorBuffer);
+						memoryAllocator->writeReadWriteStorageBuffer(viewDescriptorHandle, bufferView);
 
-							viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-							descriptorIndex += 1;
-						}
-					}
-					else {
-						while (descriptorIndex < binding.descriptorCount) {
-							const ref<BaseBufferView> bufferView = writeDescriptorSet.descriptorBufferViews[descriptorIndex];
-
-							memoryAllocator->writeReadWriteStorageBuffer(viewDescriptorHandle, bufferView);
-
-							viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-							descriptorIndex += 1;
-						}
+						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+						descriptorIndex += 1;
 					}
 
 					samplerDescriptorHandle.ptr += memoryAllocator->samplerDescriptorHandleIncrementSize * writeDescriptorSet.descriptorBufferViews.count();

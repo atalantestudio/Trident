@@ -397,59 +397,22 @@ namespace Trident {
 				const uint64 triangleAlignedRangeSize = ceil(triangleRangeSize, minStorageBufferOffsetAlignment);
 				const uint64 vertexAlignedRangeSize = ceil(vertexRangeSize, minStorageBufferOffsetAlignment);
 				const uint64 normalAlignedRangeSize = ceil(normalRangeSize, minStorageBufferOffsetAlignment);
-				const uint64 textureCoordinateAlignedRangeSize = ceil(textureCoordinateRangeSize, minStorageBufferOffsetAlignment);
 
-				const sequence<DescriptorBuffer> descriptorBuffers = {
+				const sequence<ref<BaseBufferView>> descriptorBufferViews = {
 					// Camera
-					{
-						.buffer = cameraBuffer,
-						.offset = 0,
-						.size = cameraBuffer->getSize(),
-					},
+					cameraBuffer->createView<Camera>(0, cameraBuffer->getSize()),
 
 					// Vertex
-					{
-						.buffer = dataBuffer,
-						.offset = scene->getVertexPositionComponentRange().offset,
-						.size = scene->getVertexPositionComponentRange().count,
-					},
-					{
-						.buffer = dataBuffer,
-						.offset = scene->getVertexNormalComponentRange().offset,
-						.size = scene->getVertexNormalComponentRange().count,
-					},
-					{
-						.buffer = dataBuffer,
-						.offset = scene->getVertexTextureCoordinateComponentRange().offset,
-						.size = scene->getVertexTextureCoordinateComponentRange().count,
-					},
-					{
-						.buffer = dataBuffer,
-						.offset = scene->getTriangleTangentComponentRange().offset,
-						.size = scene->getTriangleTangentComponentRange().count,
-					},
+					dataBuffer->createView<uint8>(scene->getVertexPositionComponentRange().offset, scene->getVertexPositionComponentRange().count),
+					dataBuffer->createView<uint8>(scene->getVertexNormalComponentRange().offset, scene->getVertexNormalComponentRange().count),
+					dataBuffer->createView<uint8>(scene->getVertexTextureCoordinateComponentRange().offset, scene->getVertexTextureCoordinateComponentRange().count),
+					dataBuffer->createView<uint8>(scene->getTriangleTangentComponentRange().offset, scene->getTriangleTangentComponentRange().count),
 
 					// Static
-					{
-						.buffer = staticBuffer,
-						.offset = 0,
-						.size = triangleRangeSize,
-					},
-					{
-						.buffer = staticBuffer,
-						.offset = triangleAlignedRangeSize,
-						.size = vertexRangeSize,
-					},
-					{
-						.buffer = staticBuffer,
-						.offset = triangleAlignedRangeSize + vertexAlignedRangeSize,
-						.size = normalRangeSize,
-					},
-					{
-						.buffer = staticBuffer,
-						.offset = triangleAlignedRangeSize + vertexAlignedRangeSize + normalAlignedRangeSize,
-						.size = textureCoordinateRangeSize,
-					},
+					staticBuffer->createView<StaticTriangle3D>(0, triangleRangeSize),
+					staticBuffer->createView<svec3<float32>>(triangleAlignedRangeSize, vertexRangeSize),
+					staticBuffer->createView<svec3<float32>>(triangleAlignedRangeSize + vertexAlignedRangeSize, normalRangeSize),
+					staticBuffer->createView<svec2<float32>>(triangleAlignedRangeSize + vertexAlignedRangeSize + normalAlignedRangeSize, textureCoordinateRangeSize),
 				};
 
 				uint64 writeDescriptorSetCount = 0;
@@ -471,7 +434,7 @@ namespace Trident {
 					writeDescriptorSets[writeDescriptorSetOffset] = {
 						.descriptorSet = vertexDescriptorSet,
 						.bindingIndex = 0,
-						.descriptorBuffers = descriptorBuffers[0],
+						.descriptorBufferViews = descriptorBufferViews[0],
 					};
 
 					uint32 writeDescriptorSetIndex = 1;
@@ -480,7 +443,7 @@ namespace Trident {
 						writeDescriptorSets[writeDescriptorSetOffset + writeDescriptorSetIndex] = {
 							.descriptorSet = vertexDescriptorSet,
 							.bindingIndex = writeDescriptorSetIndex,
-							.descriptorBuffers = descriptorBuffers[writeDescriptorSetOffset + writeDescriptorSetIndex],
+							.descriptorBufferViews = descriptorBufferViews[writeDescriptorSetOffset + writeDescriptorSetIndex],
 						};
 
 						writeDescriptorSetIndex += 1;
@@ -495,7 +458,7 @@ namespace Trident {
 					writeDescriptorSets[writeDescriptorSetOffset] = {
 						.descriptorSet = staticDescriptorSet,
 						.bindingIndex = 0,
-						.descriptorBuffers = descriptorBuffers[0],
+						.descriptorBufferViews = descriptorBufferViews[0],
 					};
 
 					uint32 writeDescriptorSetIndex = 1;
@@ -504,7 +467,7 @@ namespace Trident {
 						writeDescriptorSets[writeDescriptorSetOffset + writeDescriptorSetIndex] = {
 							.descriptorSet = staticDescriptorSet,
 							.bindingIndex = writeDescriptorSetIndex,
-							.descriptorBuffers = descriptorBuffers[descriptorBufferOffset + writeDescriptorSetIndex],
+							.descriptorBufferViews = descriptorBufferViews[descriptorBufferOffset + writeDescriptorSetIndex],
 						};
 
 						writeDescriptorSetIndex += 1;

@@ -96,24 +96,7 @@ namespace Trident {
 			GL::DescriptorSet::DescriptorSetBinding& descriptorSetBinding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
 
 			if (isBufferDescriptorType(descriptorSetBinding.descriptorType)) {
-				// TODO(graphics/vk/descriptor-buffer-view)
-				DEBUG_ASSERT(writeDescriptorSet.descriptorBuffers.count() > 0 || writeDescriptorSet.descriptorBufferViews.count() > 0);
-
-				// TODO(graphics/vk/descriptor-buffer-view)
-				if (writeDescriptorSet.descriptorBuffers.count() > 0) {
-					uint32 bufferViewIndex = 0;
-
-					while (bufferViewIndex < writeDescriptorSet.descriptorBufferViews.count()) {
-						const DescriptorBuffer& descriptorBuffer = writeDescriptorSet.descriptorBuffers[bufferViewIndex];
-
-						descriptorSetBinding.descriptorBufferViews[bufferViewIndex] = createRef<BaseBufferView>(descriptorBuffer.buffer.get(), descriptorBuffer.offset, descriptorBuffer.size, 1);
-
-						bufferViewIndex += 1;
-					}
-				}
-				else {
-					std::copy(writeDescriptorSet.descriptorBufferViews.begin(), writeDescriptorSet.descriptorBufferViews.end(), descriptorSetBinding.descriptorBufferViews.begin());
-				}
+				std::copy(writeDescriptorSet.descriptorBufferViews.begin(), writeDescriptorSet.descriptorBufferViews.end(), descriptorSetBinding.descriptorBufferViews.begin());
 
 				continue;
 			}
