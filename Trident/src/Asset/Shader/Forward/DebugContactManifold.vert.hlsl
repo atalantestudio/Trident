@@ -18,8 +18,8 @@ cbuffer Camera : register(b0) {
 }
 
 Interstage main(VertexInput input) {
-	Interstage output;
-	output.position = mul(camera.projectionView, float4(input.contact, 1.0));
+	Interstage interstage;
+	interstage.position = mul(camera.projectionView, float4(input.contact, 1.0));
 
-	return output;
+	return interstage;
 }

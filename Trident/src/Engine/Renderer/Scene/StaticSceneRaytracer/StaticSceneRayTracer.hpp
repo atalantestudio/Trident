@@ -195,7 +195,7 @@ namespace Trident {
 			}
 
 			void updateImageDescriptorSets() {
-				const ref<BufferView<uint8>> accumulateView = accumulateBuffer->createView<uint8>(0, accumulateBuffer->getSize());
+				const ref<BufferView<vec4<float32>>> accumulateView = accumulateBuffer->createView<vec4<float32>>(0, accumulateBuffer->getSize());
 
 				const DescriptorImage outputDescriptorImage = {
 					.imageView = outputImageView,

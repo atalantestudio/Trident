@@ -254,7 +254,7 @@ void main() {
 		return;
 	}
 
-	uint coordinateIndex = (coordinate.y * camera.viewport.x + coordinate.x);
+	uint coordinateIndex = coordinate.y * camera.viewport.x + coordinate.x;
 	uint seed = coordinateIndex * camera.frameIndex;
 	vec4 sample_ = rgen(coordinate, seed);
 

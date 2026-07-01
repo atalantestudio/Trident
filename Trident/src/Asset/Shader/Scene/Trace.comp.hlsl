@@ -6,6 +6,8 @@ struct Camera {
 	float4x4 inverseView;
 	float3 position;
 	uint2 viewport;
+	uint frameIndex;
+	uint triangleCount;
 };
 
 struct Vertex {
@@ -60,43 +62,12 @@ cbuffer Camera : register(b0) {
 	Camera camera;
 }
 
-ByteAddressBuffer triangleBuffer : register(t0);
-ByteAddressBuffer vertexBuffer : register(t1);
-ByteAddressBuffer normalBuffer : register(t2);
-ByteAddressBuffer textureCoordinateBuffer : register(t3);
-RWTexture2D<float4> outputImage : register(u0);
-
-Triangle loadTriangle(uint triangleIndex) {
-	static const uint VERTEX_SIZE = 3 * 4;
-	static const uint TRIANGLE_SIZE = 3 * VERTEX_SIZE + 4;
-
-	uint triangleOffset = triangleIndex * TRIANGLE_SIZE;
-
-	Triangle triangle_;
-	triangle_.vertices[0].index = triangleBuffer.Load(triangleOffset + 0 * VERTEX_SIZE + 0);
-	triangle_.vertices[0].textureCoordinateIndex = triangleBuffer.Load(triangleOffset + 0 * VERTEX_SIZE + 4);
-	triangle_.vertices[0].lightmapCoordinateIndex = triangleBuffer.Load(triangleOffset + 0 * VERTEX_SIZE + 8);
-	triangle_.vertices[1].index = triangleBuffer.Load(triangleOffset + 1 * VERTEX_SIZE + 0);
-	triangle_.vertices[1].textureCoordinateIndex = triangleBuffer.Load(triangleOffset + 1 * VERTEX_SIZE + 4);
-	triangle_.vertices[1].lightmapCoordinateIndex = triangleBuffer.Load(triangleOffset + 1 * VERTEX_SIZE + 8);
-	triangle_.vertices[2].index = triangleBuffer.Load(triangleOffset + 2 * VERTEX_SIZE + 0);
-	triangle_.vertices[2].textureCoordinateIndex = triangleBuffer.Load(triangleOffset + 2 * VERTEX_SIZE + 4);
-	triangle_.vertices[2].lightmapCoordinateIndex = triangleBuffer.Load(triangleOffset + 2 * VERTEX_SIZE + 8);
-	triangle_.normalIndex = triangleBuffer.Load(triangleOffset + 3 * VERTEX_SIZE);
-
-	return triangle_;
-}
-
-uint3 loadTriangle2(uint triangleIndex) {
-	uint triangleOffset = triangleIndex * 3 * 3 * 4 + 4;
-
-	uint3 triangle_;
-	triangle_[0] = asuint(triangleBuffer.Load(triangleOffset + 0 * 3 * 4));
-	triangle_[1] = triangleBuffer.Load(triangleOffset + 1 * 3 * 4);
-	triangle_[2] = triangleBuffer.Load(triangleOffset + 2 * 3 * 4);
-
-	return triangle_;
-}
+StructuredBuffer<Triangle> triangleBuffer : register(t0);
+StructuredBuffer<float> vertexBuffer : register(t1);
+StructuredBuffer<float> normalBuffer : register(t2);
+StructuredBuffer<float> textureCoordinateBuffer : register(t3);
+RWStructuredBuffer<float4> accumulateBuffer : register(u0);
+RWTexture2D<float4> outputImage : register(u1);
 
 float2 ndc(float2 coordinate) {
 	float2 ndcCoordinate = coordinate / camera.viewport * 2.0 - 1.0;
@@ -123,10 +94,26 @@ float3 randomUnitDirection(inout uint seed) {
 }
 
 bool rayTriangleIntersection(Ray ray, Triangle triangle_, inout float t) {
-	float3 a = asfloat(vertexBuffer.Load3(triangle_.vertices[0].index * 3 * 4));
-	float3 b = asfloat(vertexBuffer.Load3(triangle_.vertices[1].index * 3 * 4));
-	float3 c = asfloat(vertexBuffer.Load3(triangle_.vertices[2].index * 3 * 4));
-	// float3 normal = asfloat(normalBuffer.Load3(triangle_.normalIndex * 3 * 4));
+	float3 a = float3(
+		vertexBuffer[triangle_.vertices[0].index * 3 + 0],
+		vertexBuffer[triangle_.vertices[0].index * 3 + 1],
+		vertexBuffer[triangle_.vertices[0].index * 3 + 2]
+	);
+	float3 b = float3(
+		vertexBuffer[triangle_.vertices[1].index * 3 + 0],
+		vertexBuffer[triangle_.vertices[1].index * 3 + 1],
+		vertexBuffer[triangle_.vertices[1].index * 3 + 2]
+	);
+	float3 c = float3(
+		vertexBuffer[triangle_.vertices[2].index * 3 + 0],
+		vertexBuffer[triangle_.vertices[2].index * 3 + 1],
+		vertexBuffer[triangle_.vertices[2].index * 3 + 2]
+	);
+	/* float3 normal = float3(
+		normalBuffer[triangle_.normalIndex * 3 + 0],
+		normalBuffer[triangle_.normalIndex * 3 + 1],
+		normalBuffer[triangle_.normalIndex * 3 + 2]
+	); */
 
 	float3 ab = b - a;
 	float3 ac = c - a;
@@ -221,7 +208,7 @@ Hit rint(Ray ray) {
 	Triangle intersectingTriangle;
 
 	while (triangleIndex < triangleCount) {
-		Triangle triangle_ = loadTriangle(triangleIndex);
+		Triangle triangle_ = triangleBuffer[triangleIndex];
 		// Triangle triangle_ = TRIS[triangleIndex];
 
 		float t = 0.0;
@@ -294,15 +281,18 @@ void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 		return;
 	}
 
-	uint3 tri = loadTriangle2(0);
+	uint coordinateIndex = coordinate.y * camera.viewport.x + coordinate.x;
+	uint seed = coordinateIndex * camera.frameIndex;
+	float4 sample_ = rgen(coordinate, seed);
 
-	if (tri[0] == 0 && tri[1] == 1 && tri[2] == 2) {
-		outputImage[coordinate] = float4(1.0, 0.2, 0.0, 1.0);
+	if (camera.frameIndex == 0) {
+		accumulateBuffer[coordinateIndex] = sample_;
+
+		outputImage[coordinate] = sample_;
 	}
+	else {
+		accumulateBuffer[coordinateIndex] += sample_;
 
-	return;
-
-	uint seed = coordinate.y * camera.viewport.x + coordinate.x;
-
-	outputImage[coordinate] = rgen(coordinate, seed);
+		outputImage[coordinate] = accumulateBuffer[coordinateIndex] / camera.frameIndex;
+	}
 }

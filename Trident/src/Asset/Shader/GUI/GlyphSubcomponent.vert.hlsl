@@ -30,13 +30,13 @@ Interstage main(VertexInput input) {
 	float3 vertex = float3(input.vertexAndTextureCoordinate.xy, 1.0);
 	float3 textureCoordinate = float3(input.vertexAndTextureCoordinate.zw, 1.0);
 
-	Interstage output;
-	output.position = float4(mul(camera.projection, mul(input.worldTransform, vertex)), 1.0);
-	output.position.z = float(input.zIndex) / 100.0;
-	output.color = input.color;
-	output.textureCoordinate = mul(input.textureTransform, textureCoordinate);
-	output.textureCoordinate.z = float(input.layerIndex);
-	output.fontSize = input.fontSize;
+	Interstage interstage;
+	interstage.position = float4(mul(camera.projection, mul(input.worldTransform, vertex)), 1.0);
+	interstage.position.z = float(input.zIndex) / 100.0;
+	interstage.color = input.color;
+	interstage.textureCoordinate = mul(input.textureTransform, textureCoordinate);
+	interstage.textureCoordinate.z = float(input.layerIndex);
+	interstage.fontSize = input.fontSize;
 
-	return output;
+	return interstage;
 }

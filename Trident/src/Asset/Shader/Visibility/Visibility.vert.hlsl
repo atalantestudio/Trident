@@ -71,9 +71,9 @@ Interstage main(VertexInput input) {
 	uint relativeVertexPositionIndex = vertexPositionIndexBuffer[indexOffset + indexIndex];
 	float3 vertex = loadVertexPosition(geometry, relativeVertexPositionIndex);
 
-	Interstage output;
-	output.position = mul(camera.projectionView, mul(instance.world, float4(vertex, 1.0)));
-	output.visibility = ((clusterIndex + 1) << TRIANGLE_INDEX_BIT_COUNT) | triangleIndex;
+	Interstage interstage;
+	interstage.position = mul(camera.projectionView, mul(instance.world, float4(vertex, 1.0)));
+	interstage.visibility = ((clusterIndex + 1) << TRIANGLE_INDEX_BIT_COUNT) | triangleIndex;
 
-	return output;
+	return interstage;
 }

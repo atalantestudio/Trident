@@ -46,11 +46,11 @@ Interstage main(VertexInput input) {
 	float3 T = normalize(mul(input.normal, tangent));
 	float3 B = cross(N, T);
 
-	Interstage output;
-	output.position = mul(camera.projectionView, surface);
-	output.surface = surface.xyz;
-	output.textureCoordinate = float2(textureCoordinate.x, 1.0 - textureCoordinate.y);
-	output.TBN = transpose(float3x3(T, B, N));
+	Interstage interstage;
+	interstage.position = mul(camera.projectionView, surface);
+	interstage.surface = surface.xyz;
+	interstage.textureCoordinate = float2(textureCoordinate.x, 1.0 - textureCoordinate.y);
+	interstage.TBN = transpose(float3x3(T, B, N));
 
-	return output;
+	return interstage;
 }
