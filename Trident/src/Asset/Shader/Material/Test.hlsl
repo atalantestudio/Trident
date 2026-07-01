@@ -79,15 +79,15 @@ cbuffer Camera : register(b0) {
 
 StructuredBuffer<uint> materialCoordinateBuffer : register(t0);
 Texture2D<uint> visibilityImage : register(t1);
-ByteAddressBuffer vertexPositionComponentBuffer : register(t2);
-ByteAddressBuffer vertexNormalComponentBuffer : register(t3);
-ByteAddressBuffer vertexTextureCoordinateComponentBuffer : register(t4);
-ByteAddressBuffer vertexPositionIndexBuffer : register(t5);
-ByteAddressBuffer vertexNormalIndexBuffer : register(t6);
-ByteAddressBuffer vertexTextureCoordinateIndexBuffer : register(t7);
-ByteAddressBuffer clusterBuffer : register(t8);
+StructuredBuffer<float> vertexPositionComponentBuffer : register(t2);
+StructuredBuffer<float> vertexNormalComponentBuffer : register(t3);
+StructuredBuffer<float> vertexTextureCoordinateComponentBuffer : register(t4);
+StructuredBuffer<uint> vertexPositionIndexBuffer : register(t5);
+StructuredBuffer<uint> vertexNormalIndexBuffer : register(t6);
+StructuredBuffer<uint> vertexTextureCoordinateIndexBuffer : register(t7);
+StructuredBuffer<Cluster> clusterBuffer : register(t8);
 StructuredBuffer<Instance> instanceBuffer : register(t9);
-ByteAddressBuffer geometryBuffer : register(t10);
+StructuredBuffer<Geometry> geometryBuffer : register(t10);
 RWTexture2D<float4> outputImage : register(u0);
 StructuredBuffer<uint> materialOffsetBuffer : register(t11);
 
@@ -98,22 +98,6 @@ Texture2DArray<float4> diffuseMap : register(t13);
 SamplerState normalSamplerState : register(s2);
 Texture2DArray<float4> normalMap : register(t14);
 
-Cluster loadCluster(uint clusterIndex) {
-	Cluster cluster;
-	cluster.instanceIndex = clusterBuffer.Load(clusterIndex * 4);
-
-	return cluster;
-}
-
-Geometry loadGeometry(uint geometryIndex) {
-	Geometry geometry;
-	geometry.vertexOffset = geometryBuffer.Load(geometryIndex * 12 + 0);
-	geometry.vertexTextureCoordinateOffset = geometryBuffer.Load(geometryIndex * 12 + 4);
-	geometry.clusterCount = geometryBuffer.Load(geometryIndex * 12 + 8);
-
-	return geometry;
-}
-
 float2 ndc(uint2 coordinate) {
 	float2 ndc = float2(coordinate) / float2(camera.viewport) * 2.0 - 1.0;
 	ndc.y *= -1.0;
@@ -122,24 +106,35 @@ float2 ndc(uint2 coordinate) {
 }
 
 float3 loadVertexPosition(Geometry geometry, uint indexIndex) {
-	uint index = vertexPositionIndexBuffer.Load(indexIndex * 4);
+	uint index = vertexPositionIndexBuffer[indexIndex];
 	uint offset = (geometry.vertexOffset + index) * 3u;
 
-	return asfloat(vertexPositionComponentBuffer.Load3(offset * 4));
+	return float3(
+		vertexPositionComponentBuffer[offset + 0],
+		vertexPositionComponentBuffer[offset + 1],
+		vertexPositionComponentBuffer[offset + 2]
+	);
 }
 
 float3 loadVertexNormal(Geometry geometry, uint indexIndex) {
-	uint index = vertexNormalIndexBuffer.Load(indexIndex * 4);
+	uint index = vertexNormalIndexBuffer[indexIndex];
 	uint offset = (geometry.vertexOffset + index) * 3u;
 
-	return asfloat(vertexNormalComponentBuffer.Load3(offset * 4));
+	return float3(
+		vertexNormalComponentBuffer[offset + 0],
+		vertexNormalComponentBuffer[offset + 1],
+		vertexNormalComponentBuffer[offset + 2]
+	);
 }
 
 float2 loadVertexTextureCoordinate(Geometry geometry, uint indexIndex) {
-	uint index = vertexTextureCoordinateIndexBuffer.Load(indexIndex * 4);
+	uint index = vertexTextureCoordinateIndexBuffer[indexIndex];
 	uint offset = (geometry.vertexTextureCoordinateOffset + index) * 2u;
 
-	return asfloat(vertexTextureCoordinateComponentBuffer.Load2(offset * 4));
+	return float2(
+		vertexTextureCoordinateComponentBuffer[offset + 0],
+		vertexTextureCoordinateComponentBuffer[offset + 1]
+	);
 }
 
 Primitive loadPrimitive(Instance instance, Geometry geometry, uint triangleIndex) {
@@ -240,10 +235,10 @@ Interpolators loadInterpolators(uint screenCoordinateIndex) {
 
 	uint visibility = visibilityImage[interpolators.screenCoordinate];
 	uint clusterIndex = (visibility >> TRIANGLE_INDEX_BIT_COUNT) - 1u;
-	Cluster cluster = loadCluster(clusterIndex);
 
+	Cluster cluster = clusterBuffer[clusterIndex];
 	interpolators.instance = instanceBuffer[cluster.instanceIndex];
-	interpolators.geometry = loadGeometry(interpolators.instance.geometryIndex);
+	interpolators.geometry = geometryBuffer[interpolators.instance.geometryIndex];
 
 	uint clusterTriangleIndex = visibility & TRIANGLE_INDEX_BIT_MASK;
 	uint triangleIndex = clusterIndex * CLUSTER_TRIANGLE_COUNT + clusterTriangleIndex;

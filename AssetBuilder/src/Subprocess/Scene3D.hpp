@@ -211,7 +211,7 @@ namespace Trident {
 			.entityCount = 2,
 			.geometryAssetIdentifiers = {
 				// TODO(debug-only): lemon_1k
-				41,
+				42,
 			},
 			.geometryMappings = {
 				{0, {0}},

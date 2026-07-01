@@ -92,7 +92,7 @@ namespace Trident::LemonAndStool {
 				{
 					.descriptorImages = {
 						{
-							// TODO: lemon_1k needs the PBRSeparatedAORoughness, or I must manually create the ARM map.
+							// TODO: lemon_1k must use PBRSeparatedAORoughness.
 							.assetPath = "lemon_ao_1k",
 						},
 					},
