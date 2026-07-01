@@ -3,7 +3,7 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-// TODO: Change to a generic distance field shader.
+// TODO(asset-builder/sdf-generator/distance-field): Change to a generic distance field shader.
 
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
@@ -14,7 +14,6 @@ layout(set = 0, binding = 1, r8) uniform writeonly image2D glyphMapImage;
 layout(set = 0, binding = 2) buffer readonly Font {
 	uint spreadFactor;
 	uint outputGlyphSize;
-	int lineHeight;
 } font;
 
 layout(set = 0, binding = 3) buffer readonly Glyph {

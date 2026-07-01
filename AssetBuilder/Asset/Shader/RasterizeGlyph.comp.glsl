@@ -6,7 +6,7 @@
 layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 
 struct Edge {
-	// TODO: Pack x/y into 1x int.
+	// TODO(asset-builder/sdf-generator/glyph-edge): Pack x/y into 1x int.
 	ivec2 start;
 	ivec2 end;
 	ivec2 control;

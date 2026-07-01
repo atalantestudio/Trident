@@ -1,8 +1,14 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
+struct FontBuffer {
+	uint spreadFactor;
+	uint outputGlyphSize;
+	int lineHeight;
+};
+
 struct Edge {
-	// TODO: Pack x/y into 1 int.
+	// TODO(asset-builder/sdf-generator/glyph-edge): Pack x/y into 1x int.
 	int2 start;
 	int2 end;
 	int2 control;
@@ -12,7 +18,7 @@ struct Edge {
 
 static const uint EDGE_STRIDE = 32;
 
-ByteAddressBuffer fontBuffer : register(t0);
+StructuredBuffer<FontBuffer> fontBuffer : register(t0);
 ByteAddressBuffer glyphBuffer : register(t1);
 RWTexture2D<float> glyphImage : register(u0);
 
@@ -37,7 +43,7 @@ void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 		return;
 	}
 
-	int fontLineHeight = asint(fontBuffer.Load(8));
+	int fontLineHeight = fontBuffer[0].lineHeight;
 	uint glyphEdgeCount = glyphBuffer.Load(0);
 
 	float2 p = float2(glyphImageCoordinate) / glyphImageSize * fontLineHeight;

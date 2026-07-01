@@ -34,7 +34,7 @@ namespace Trident::DX12 {
 	}
 
 	inline D3D12_BARRIER_ACCESS getImageBarrierAccess(Access access, ImageLayout newLayout) {
-		if (newLayout == ImageLayout::GENERAL && access & Access::SHADER_WRITE) {
+		if (newLayout == ImageLayout::GENERAL && access == Access::SHADER_WRITE) {
 			return D3D12_BARRIER_ACCESS_UNORDERED_ACCESS;
 		}
 
@@ -48,17 +48,17 @@ namespace Trident::DX12 {
 
 		D3D12_BARRIER_ACCESS barrierAccess = D3D12_BARRIER_ACCESS_COMMON;
 
-		if (access & Access::SHADER_READ) {
-			barrierAccess |= D3D12_BARRIER_ACCESS_SHADER_RESOURCE;
-		}
-
 		if (access & Access::SHADER_WRITE) {
 			if (newLayout == ImageLayout::GENERAL) {
-				barrierAccess |= D3D12_BARRIER_ACCESS_UNORDERED_ACCESS;
+				barrierAccess = D3D12_BARRIER_ACCESS_UNORDERED_ACCESS;
 			}
 			else {
-				barrierAccess |= D3D12_BARRIER_ACCESS_SHADER_RESOURCE;
+				barrierAccess = D3D12_BARRIER_ACCESS_SHADER_RESOURCE;
 			}
+		}
+
+		if (access & Access::SHADER_READ) {
+			barrierAccess = D3D12_BARRIER_ACCESS_SHADER_RESOURCE;
 		}
 
 		if (access & Access::TRANSFER_READ) {

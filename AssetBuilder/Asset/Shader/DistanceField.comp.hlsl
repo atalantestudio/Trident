@@ -3,31 +3,39 @@
 
 // TODO: Change to a generic distance field shader.
 
+struct FontBuffer {
+	uint spreadFactor;
+	uint outputGlyphSize;
+};
+
+struct GlyphBuffer {
+	uint2 offset;
+};
+
 Texture2D<float> glyphImage : register(t0);
 RWTexture2D<float> glyphMapImage : register(u0);
-ByteAddressBuffer fontBuffer : register(t1);
-ByteAddressBuffer glyphBuffer : register(t2);
+StructuredBuffer<FontBuffer> fontBuffer : register(t1);
+StructuredBuffer<GlyphBuffer> glyphBuffer : register(t2);
 
 [numthreads(8, 8, 1)]
 void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 	uint2 glyphImageCoordinate = globalInvocationIndex.xy;
-	uint fontOutputGlyphSize = fontBuffer.Load(4);
-	uint2 glyphSize = uint2(fontOutputGlyphSize, fontOutputGlyphSize);
+	uint outputGlyphSize = fontBuffer[0].outputGlyphSize;
+	uint2 glyphSize = uint2(outputGlyphSize, outputGlyphSize);
 
 	if (glyphImageCoordinate.x >= glyphSize.x || glyphImageCoordinate.y >= glyphSize.y) {
 		return;
 	}
 
-	uint fontSpreadFactor = fontBuffer.Load(0);
-	uint2 glyphOffset = glyphBuffer.Load2(0);
+	const uint spreadFactor = fontBuffer[0].spreadFactor;
+	const uint2 glyphOffset = glyphBuffer[0].offset;
+	const uint spread = spreadFactor * outputGlyphSize;
 
-	const uint spread = fontSpreadFactor * fontOutputGlyphSize;
-
-	int2 inputTexelCoordinate = int2((glyphImageCoordinate - fontSpreadFactor) * fontOutputGlyphSize);
+	int2 inputTexelCoordinate = int2((glyphImageCoordinate - spreadFactor) * outputGlyphSize);
 	float inputColor = glyphImage[inputTexelCoordinate];
 	uint closestSquareDistance = max(1, spread * spread);
 
-	if (fontSpreadFactor > 0) {
+	if (spreadFactor > 0) {
 		int2 sampleStart = inputTexelCoordinate - int(spread);
 		int2 sampleEnd = inputTexelCoordinate + int(spread);
 		int x;
@@ -41,7 +49,7 @@ void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 				float r = glyphImage[sampleCoordinate];
 
 				if (r == inputColor) {
-					x += int(fontSpreadFactor);
+					x += int(spreadFactor);
 
 					continue;
 				}
@@ -51,10 +59,10 @@ void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 
 				closestSquareDistance = min(closestSquareDistance, squareDistance);
 
-				x += int(fontSpreadFactor);
+				x += int(spreadFactor);
 			}
 
-			y += int(fontSpreadFactor);
+			y += int(spreadFactor);
 		}
 	}
 
