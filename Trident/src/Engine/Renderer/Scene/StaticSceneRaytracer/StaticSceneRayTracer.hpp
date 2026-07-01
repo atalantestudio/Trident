@@ -173,9 +173,9 @@ namespace Trident {
 
 					// Static
 					staticBuffer->createView<StaticTriangle3D>(0, triangleRangeSize),
-					staticBuffer->createView<svec3<float32>>(triangleAlignedRangeSize, vertexRangeSize),
-					staticBuffer->createView<svec3<float32>>(triangleAlignedRangeSize + vertexAlignedRangeSize, normalRangeSize),
-					staticBuffer->createView<svec2<float32>>(triangleAlignedRangeSize + vertexAlignedRangeSize + normalAlignedRangeSize, textureCoordinateRangeSize),
+					staticBuffer->createView<float32>(triangleAlignedRangeSize, vertexRangeSize),
+					staticBuffer->createView<float32>(triangleAlignedRangeSize + vertexAlignedRangeSize, normalRangeSize),
+					staticBuffer->createView<float32>(triangleAlignedRangeSize + vertexAlignedRangeSize + normalAlignedRangeSize, textureCoordinateRangeSize),
 				};
 
 				sequence<WriteDescriptorSet> writeDescriptorSets(5);

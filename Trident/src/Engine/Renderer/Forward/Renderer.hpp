@@ -403,16 +403,16 @@ namespace Trident {
 					cameraBuffer->createView<Camera>(0, cameraBuffer->getSize()),
 
 					// Vertex
-					dataBuffer->createView<uint8>(scene->getVertexPositionComponentRange().offset, scene->getVertexPositionComponentRange().count),
-					dataBuffer->createView<uint8>(scene->getVertexNormalComponentRange().offset, scene->getVertexNormalComponentRange().count),
-					dataBuffer->createView<uint8>(scene->getVertexTextureCoordinateComponentRange().offset, scene->getVertexTextureCoordinateComponentRange().count),
-					dataBuffer->createView<uint8>(scene->getTriangleTangentComponentRange().offset, scene->getTriangleTangentComponentRange().count),
+					dataBuffer->createView<float32>(scene->getVertexPositionComponentRange().offset, scene->getVertexPositionComponentRange().count),
+					dataBuffer->createView<float32>(scene->getVertexNormalComponentRange().offset, scene->getVertexNormalComponentRange().count),
+					dataBuffer->createView<float32>(scene->getVertexTextureCoordinateComponentRange().offset, scene->getVertexTextureCoordinateComponentRange().count),
+					dataBuffer->createView<float32>(scene->getTriangleTangentComponentRange().offset, scene->getTriangleTangentComponentRange().count),
 
 					// Static
 					staticBuffer->createView<StaticTriangle3D>(0, triangleRangeSize),
-					staticBuffer->createView<svec3<float32>>(triangleAlignedRangeSize, vertexRangeSize),
-					staticBuffer->createView<svec3<float32>>(triangleAlignedRangeSize + vertexAlignedRangeSize, normalRangeSize),
-					staticBuffer->createView<svec2<float32>>(triangleAlignedRangeSize + vertexAlignedRangeSize + normalAlignedRangeSize, textureCoordinateRangeSize),
+					staticBuffer->createView<float32>(triangleAlignedRangeSize, vertexRangeSize),
+					staticBuffer->createView<float32>(triangleAlignedRangeSize + vertexAlignedRangeSize, normalRangeSize),
+					staticBuffer->createView<float32>(triangleAlignedRangeSize + vertexAlignedRangeSize + normalAlignedRangeSize, textureCoordinateRangeSize),
 				};
 
 				uint64 writeDescriptorSetCount = 0;

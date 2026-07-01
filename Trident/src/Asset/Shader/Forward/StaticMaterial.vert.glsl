@@ -56,13 +56,11 @@ void main() {
 		vertexBuffer[vertexOffset + 1u],
 		vertexBuffer[vertexOffset + 2u]
 	);
-
 	vec3 normal = vec3(
 		normalBuffer[normalOffset + 0u],
 		normalBuffer[normalOffset + 1u],
 		normalBuffer[normalOffset + 2u]
 	);
-
 	vec2 textureCoordinate = vec2(
 		textureCoordinateBuffer[textureCoordinateOffset + 0u],
 		textureCoordinateBuffer[textureCoordinateOffset + 1u]

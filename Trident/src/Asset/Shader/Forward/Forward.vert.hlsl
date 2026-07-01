@@ -24,10 +24,10 @@ cbuffer Camera : register(b0) {
 	Camera camera;
 }
 
-ByteAddressBuffer vertexPositionComponentBuffer : register(t0);
-ByteAddressBuffer vertexNormalComponentBuffer : register(t1);
-ByteAddressBuffer vertexTextureCoordinateComponentBuffer : register(t2);
-ByteAddressBuffer triangleTangentComponentBuffer : register(t3);
+StructuredBuffer<float> vertexPositionComponentBuffer : register(t0);
+StructuredBuffer<float> vertexNormalComponentBuffer : register(t1);
+StructuredBuffer<float> vertexTextureCoordinateComponentBuffer : register(t2);
+StructuredBuffer<float> triangleTangentComponentBuffer : register(t3);
 
 Interstage main(VertexInput input) {
 	uint positionComponentOffset = input.vertex[0] * 3;
@@ -35,10 +35,25 @@ Interstage main(VertexInput input) {
 	uint textureCoordinateComponentOffset = input.vertex[2] * 2;
 	uint tangentComponentOffset = input.vertexIndex / 3 * 3;
 
-	float3 position = asfloat(vertexPositionComponentBuffer.Load3(positionComponentOffset * 4));
-	float3 normal = asfloat(vertexNormalComponentBuffer.Load3(normalComponentOffset * 4));
-	float2 textureCoordinate = asfloat(vertexTextureCoordinateComponentBuffer.Load2(textureCoordinateComponentOffset * 4));
-	float3 tangent = asfloat(triangleTangentComponentBuffer.Load3(tangentComponentOffset * 4));
+	float3 position = float3(
+		vertexPositionComponentBuffer[positionComponentOffset + 0],
+		vertexPositionComponentBuffer[positionComponentOffset + 1],
+		vertexPositionComponentBuffer[positionComponentOffset + 2]
+	);
+	float3 normal = float3(
+		vertexNormalComponentBuffer[normalComponentOffset + 0],
+		vertexNormalComponentBuffer[normalComponentOffset + 1],
+		vertexNormalComponentBuffer[normalComponentOffset + 2]
+	);
+	float2 textureCoordinate = float2(
+		vertexTextureCoordinateComponentBuffer[textureCoordinateComponentOffset + 0],
+		vertexTextureCoordinateComponentBuffer[textureCoordinateComponentOffset + 1]
+	);
+	float3 tangent = float3(
+		triangleTangentComponentBuffer[tangentComponentOffset + 0],
+		triangleTangentComponentBuffer[tangentComponentOffset + 1],
+		triangleTangentComponentBuffer[tangentComponentOffset + 2]
+	);
 
 	float4 surface = mul(input.world, float4(position, 1.0));
 

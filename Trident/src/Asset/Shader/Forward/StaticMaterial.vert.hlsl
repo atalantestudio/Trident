@@ -1,6 +1,10 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
+struct Camera {
+	float4x4 projectionView;
+};
+
 struct Vertex {
 	uint index;
 	uint textureCoordinateIndex;
@@ -22,55 +26,40 @@ struct Interstage {
 	float2 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE2;
 };
 
-struct Camera {
-	float4x4 projectionView;
-};
-
 cbuffer Camera : register(b0) {
 	Camera camera;
 }
 
-ByteAddressBuffer triangleBuffer : register(t0);
-ByteAddressBuffer vertexBuffer : register(t1);
-ByteAddressBuffer normalBuffer : register(t2);
-ByteAddressBuffer textureCoordinateBuffer : register(t3);
-
-Triangle loadTriangle(uint triangleIndex) {
-	static const uint VERTEX_SIZE = 3 * 4;
-	static const uint TRIANGLE_SIZE = 3 * VERTEX_SIZE + 4;
-
-	uint triangleOffset = triangleIndex * TRIANGLE_SIZE;
-
-	Triangle triangle_;
-	triangle_.vertices[0].index = triangleBuffer.Load(triangleOffset + 0 * VERTEX_SIZE + 0);
-	triangle_.vertices[0].textureCoordinateIndex = triangleBuffer.Load(triangleOffset + 0 * VERTEX_SIZE + 4);
-	triangle_.vertices[0].lightmapCoordinateIndex = triangleBuffer.Load(triangleOffset + 0 * VERTEX_SIZE + 8);
-	triangle_.vertices[1].index = triangleBuffer.Load(triangleOffset + 1 * VERTEX_SIZE + 0);
-	triangle_.vertices[1].textureCoordinateIndex = triangleBuffer.Load(triangleOffset + 1 * VERTEX_SIZE + 4);
-	triangle_.vertices[1].lightmapCoordinateIndex = triangleBuffer.Load(triangleOffset + 1 * VERTEX_SIZE + 8);
-	triangle_.vertices[2].index = triangleBuffer.Load(triangleOffset + 2 * VERTEX_SIZE + 0);
-	triangle_.vertices[2].textureCoordinateIndex = triangleBuffer.Load(triangleOffset + 2 * VERTEX_SIZE + 4);
-	triangle_.vertices[2].lightmapCoordinateIndex = triangleBuffer.Load(triangleOffset + 2 * VERTEX_SIZE + 8);
-
-	triangle_.normalIndex = triangleBuffer.Load(triangleOffset + 3 * VERTEX_SIZE);
-
-	return triangle_;
-}
+StructuredBuffer<Triangle> triangleBuffer : register(t0);
+StructuredBuffer<float> vertexBuffer : register(t1);
+StructuredBuffer<float> normalBuffer : register(t2);
+StructuredBuffer<float> textureCoordinateBuffer : register(t3);
 
 Interstage main(VertexInput input) {
 	uint triangleIndex = input.vertexIndex / 3;
 	uint triangleVertexIndex = input.vertexIndex - triangleIndex * 3;
 
-	Triangle triangle_ = loadTriangle(triangleIndex);
+	Triangle triangle_ = triangleBuffer[triangleIndex];
 	Vertex triangleVertex = triangle_.vertices[triangleVertexIndex];
 
-	uint vertexOffset = triangleVertex.index * 3 * 4;
-	uint normalOffset = triangle_.normalIndex * 3 * 4;
-	uint textureCoordinateOffset = triangleVertex.textureCoordinateIndex * 2 * 4;
+	uint vertexOffset = triangleVertex.index * 3;
+	uint normalOffset = triangle_.normalIndex * 3;
+	uint textureCoordinateOffset = triangleVertex.textureCoordinateIndex * 2;
 
-	float3 vertex = asfloat(vertexBuffer.Load3(vertexOffset));
-	float3 normal = asfloat(normalBuffer.Load3(normalOffset));
-	float2 textureCoordinate = asfloat(textureCoordinateBuffer.Load2(textureCoordinateOffset));
+	float3 vertex = float3(
+		vertexBuffer[vertexOffset + 0],
+		vertexBuffer[vertexOffset + 1],
+		vertexBuffer[vertexOffset + 2]
+	);
+	float3 normal = float3(
+		normalBuffer[normalOffset + 0],
+		normalBuffer[normalOffset + 1],
+		normalBuffer[normalOffset + 2]
+	);
+	float2 textureCoordinate = float2(
+		textureCoordinateBuffer[textureCoordinateOffset + 0],
+		textureCoordinateBuffer[textureCoordinateOffset + 1]
+	);
 
 	Interstage interstage;
 	interstage.position = mul(camera.projectionView, float4(vertex, 1.0));
