@@ -19,11 +19,16 @@ cbuffer Camera : register(b0) {
 	Camera camera;
 }
 
-ByteAddressBuffer vertexPositionComponentBuffer : register(t0);
+StructuredBuffer<float> vertexPositionComponentBuffer : register(t0);
 
 Interstage main(VertexInput input) {
 	uint positionComponentOffset = input.vertexIndex * 3;
-	float3 position = asfloat(vertexPositionComponentBuffer.Load3(positionComponentOffset * 4));
+
+	float3 position = float3(
+		vertexPositionComponentBuffer[positionComponentOffset + 0],
+		vertexPositionComponentBuffer[positionComponentOffset + 1],
+		vertexPositionComponentBuffer[positionComponentOffset + 2]
+	);
 
 	Interstage interstage;
 	interstage.position = mul(mul(camera.projectionView, input.world), float4(position, 1.0));
