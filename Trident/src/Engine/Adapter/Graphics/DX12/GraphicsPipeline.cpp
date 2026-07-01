@@ -85,10 +85,7 @@ namespace Trident {
 		graphicsPipelineStateDescriptor.RasterizerState.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
 		graphicsPipelineStateDescriptor.RasterizerState.SlopeScaledDepthBias = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
 		graphicsPipelineStateDescriptor.RasterizerState.DepthClipEnable = TRUE;
-
-		// TODO: Set correct multisample state (depends on the render pass).
-		graphicsPipelineStateDescriptor.RasterizerState.MultisampleEnable = FALSE;
-
+		graphicsPipelineStateDescriptor.RasterizerState.MultisampleEnable = subpass.rasterizationSampleCount > 1;
 		graphicsPipelineStateDescriptor.RasterizerState.AntialiasedLineEnable = FALSE;
 		graphicsPipelineStateDescriptor.RasterizerState.ForcedSampleCount = 0;
 		graphicsPipelineStateDescriptor.RasterizerState.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
@@ -122,7 +119,7 @@ namespace Trident {
 			const VertexInputBinding& vertexInputBinding = descriptor.vertexInputBindings[vertexInputBindingIndex];
 			const std::vector<VertexInputAttribute>& vertexInputAttributes = vertexInputBinding.getAttributes();
 
-			// TODO(vertex-input-binding/stride): Unlike with OpenGL or Vulkan, it is not possible to provide a custom stride for a binding.
+			// TODO(graphics/dx12/vertex-input-binding/stride): Unlike with OpenGL or Vulkan, it is not possible to provide a custom stride for a binding.
 			for (const VertexInputAttribute& vertexInputAttribute : vertexInputAttributes) {
 				D3D12_INPUT_ELEMENT_DESC& inputElementDescriptor = inputElementDescriptors[inputElementDescriptorIndex];
 				inputElementDescriptor.SemanticName = "VERTEX_INPUT_ATTRIBUTE";
