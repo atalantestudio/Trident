@@ -26,7 +26,9 @@ namespace Trident {
 			static constexpr sint16 ASCENT = 9;
 			static constexpr sint16 DESCENT = -3;
 			static constexpr sint16 LINE_GAP = 0;
-			static constexpr BitmapGlyph BITMAP_GLYPHS[] = {
+			static constexpr uint16 UNITS_PER_EM = 10;
+			static constexpr index BITMAP_GLYPH_COUNT = 144;
+			static constexpr BitmapGlyph BITMAP_GLYPHS[BITMAP_GLYPH_COUNT] = {
 				{"A", {0.0f, 0.0f}, 5, 7, 2},
 				{"B", {6.0f, 0.0f}, 5, 7, 2},
 				{"C", {12.0f, 0.0f}, 5, 7, 2},
@@ -197,37 +199,31 @@ namespace Trident {
 				fontAssetDescriptor.version = {1, 0, 0};
 				fontAssetDescriptor.glyphMapImage = nullptr;
 				fontAssetDescriptor.lineHeight = ASCENT - DESCENT + LINE_GAP;
-				fontAssetDescriptor.glyphs = sequence<Glyph>(144);
+				fontAssetDescriptor.glyphs = sequence<Glyph>(BITMAP_GLYPH_COUNT);
 
-				UTF8Stream stream;
+				uint32 glyphIndex = 0;
 
-				for (uint32 glyphIndex = 0; glyphIndex < fontAssetDescriptor.glyphs.count(); glyphIndex += 1) {
+				while (glyphIndex < fontAssetDescriptor.glyphs.count()) {
 					const BitmapGlyph& bitmapGlyph = BITMAP_GLYPHS[glyphIndex];
-
-					stream = UTF8Stream(view<char8>(bitmapGlyph.codePoint));
-
+					const UTF8Stream stream = UTF8Stream(view<char8>(bitmapGlyph.codePoint));
 					const uint32 codePoint = stream.peek();
 
 					Glyph& glyph = fontAssetDescriptor.glyphs[glyphIndex];
 					glyph.minCoordinate.x = bitmapGlyph.minCoordinate.x / file.extent.width;
 					glyph.minCoordinate.y = (bitmapGlyph.minCoordinate.y + bitmapGlyph.topSideBearing) / file.extent.height;
 					glyph.maxCoordinate.x = (bitmapGlyph.minCoordinate.x + bitmapGlyph.width) / file.extent.width;
-					glyph.maxCoordinate.y = (bitmapGlyph.minCoordinate.y + bitmapGlyph.topSideBearing + bitmapGlyph.height) / file.extent.height;
+					glyph.maxCoordinate.y = (bitmapGlyph.minCoordinate.y + bitmapGlyph.height + bitmapGlyph.topSideBearing) / file.extent.height;
 					glyph.width = bitmapGlyph.width;
 					glyph.advanceWidth = bitmapGlyph.width + 1;
 					glyph.height = bitmapGlyph.height;
 					glyph.leftSideBearing = 0;
-
-					// TODO(asset-builder/font/bitmap): Fix max Y being top side bearing.
-					glyph.yMax = bitmapGlyph.topSideBearing;
-
+					glyph.yMax = ASCENT - bitmapGlyph.topSideBearing;
 					glyph.whitespace = codePoint == ' ';
 
 					fontAssetDescriptor.unicodeMap.insert({static_cast<uint16>(codePoint), glyphIndex});
-				}
 
-				// TODO: Determine correct value for non-TTF fonts.
-				static constexpr uint16 UNITS_PER_EM = 1000;
+					glyphIndex += 1;
+				}
 
 				const uint32 glyphCount = static_cast<uint32>(fontAssetDescriptor.glyphs.count());
 				const uint32 unicodeEntryCount = static_cast<uint32>(fontAssetDescriptor.unicodeMap.size());
@@ -241,7 +237,7 @@ namespace Trident {
 				ByteStream<StreamOperation::WRITE> outputByteStream(outputSize, Endianness::LITTLE_ENDIAN);
 				outputByteStream.write<AssetSignature>(AssetSignature::FONT);
 				outputByteStream.write<uint32>(fontAssetDescriptor.identifier);
-				outputByteStream.write<VersionNumber>({1, 0, 0});
+				outputByteStream.write<VersionNumber>({0, 0, 0});
 				outputByteStream.write<uint32>(imageAssetDescriptor.identifier);
 				outputByteStream.write<sint16>(ASCENT);
 				outputByteStream.write<sint16>(DESCENT);
