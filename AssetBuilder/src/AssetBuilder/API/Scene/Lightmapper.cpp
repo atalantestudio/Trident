@@ -213,6 +213,18 @@ namespace Trident {
 		commandEncoder->bindIndexBuffer<uint32>(coordinateIndexBuffer, 0);
 		commandEncoder->drawIndexed(indexCount, 1, 0, 0, 0);
 		commandEncoder->endRenderPass();
+
+		// TODO(graphics/vk/copy-lightmap-atlas): Fix image memory barrier causing pixel grid artifacts.
+		if (Renderer::getGraphicsApi() != GraphicsAPI::VK) {
+			const ImageMemoryBarrier imageMemoryBarrier = {
+				.image = lightmapAtlasImage,
+				.newLayout = ImageLayout::TRANSFER_SRC_OPTIMAL,
+				.newAccess = Access::TRANSFER_READ,
+			};
+
+			commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
+		}
+
 		commandEncoder->copyImageToBuffer(lightmapAtlasImage, lightmapAtlasStagingBuffer, lightmapAtlasBufferImageCopyRegion);
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();

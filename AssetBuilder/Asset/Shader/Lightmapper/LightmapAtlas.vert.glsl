@@ -16,5 +16,5 @@ void main() {
 
 	gl_Position = vec4(lightmapCoordinate, 0.0, 1.0);
 
-	interstage.triangleIndex = uint(gl_VertexIndex + 1);
+	interstage.triangleIndex = uint(gl_VertexIndex);
 }
