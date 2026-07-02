@@ -34,6 +34,9 @@ namespace Trident {
 		public:
 			static constexpr index DEBUG_MAX_CONTACTS = 16;
 
+			// TODO(forward/lightmap-atlas): Conditionally load the lightmap atlas.
+			static constexpr view<char8> LIGHTMAP_ATLAS_IMAGE_ASSET_NAME = "test_lightmap";
+
 		public:
 			// Called on startup and on window resize.
 			void initialize() {
@@ -119,40 +122,47 @@ namespace Trident {
 			}
 
 			void postSetScene() override {
+				const ref<Scene3DAsset> sceneAsset = scene->getAsset();
+				const ref<Device> device = getDevice();
+
+				AssetLibrary* assetLibrary = getLayer()->getApplication()->getAssetLibrary();
+
 				createMaterialObjects();
-
-				if (scene->getAsset()->getStaticTriangles().count() > 0) {
-					staticBuffer = createStaticBuffer();
-
-					staticMaterialPipelineLayout = createStaticMaterialPipelineLayout();
-					staticMaterialPipeline = createStaticMaterialPipeline();
-				}
 
 				// Write index buffer.
 				const view<uint8> sourceDataBuffer = scene->getDataBuffer();
 				const range<uint64, uint64> vertexPositionIndexRange = scene->getVertexPositionIndexRange();
 				const range<uint64, uint64> vertexNormalIndexRange = scene->getVertexNormalIndexRange();
 				const range<uint64, uint64> vertexTextureCoordinateIndexRange = scene->getVertexTextureCoordinateIndexRange();
+				const ComponentPool<RigidBody3DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody3DComponent>();
 
 				// TODO(geometry/3d/vertex-position-indices): Separe hull line indices and vertex position indices for TRIANGLE_LIST.
 				// DEBUG_ASSERT(vertexPositionIndexRange.count == vertexNormalIndexRange.count && vertexPositionIndexRange.count == vertexTextureCoordinateIndexRange.count);
 				DEBUG_ASSERT(vertexNormalIndexRange.count == vertexTextureCoordinateIndexRange.count);
 
 				if (scene->getIndexCount() > 0) {
-					vertexBuffer = createVertexBuffer();
+					vertexBuffer = createVertexBuffer(scene->getIndexCount() * sizeof(ForwardRenderer::Vertex));
+
+					dataBuffer = createDynamicBuffer({
+						.size = vertexPositionIndexRange.offset,
+						.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
+						.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+						.persistent = false,
+						#if defined(DEBUG_OBJECT_NAME)
+							.name = "Data",
+						#endif
+					});
 				}
 
-				instanceBuffer = createInstanceBuffer();
+				instanceBuffer = createInstanceBuffer(rigidBodyComponentPool.componentCount * sizeof(Instance));
+
+				if (scene->getHullLineIndexCount() > 0) {
+					debugHullWireframeBuffer = createDebugHullWireframeBuffer(scene->getHullLineIndexCount() * sizeof(uint16));
+				}
 
 				const ref<BufferView<Instance>> instanceView = instanceBuffer->createView<Instance>(0, instanceBuffer->getSize());
 
 				instanceMappedRange = instanceView->map();
-
-				if (scene->getHullLineIndexCount() > 0) {
-					debugHullWireframeBuffer = createDebugHullWireframeBuffer();
-				}
-
-				const ComponentPool<RigidBody3DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody3DComponent>();
 
 				uint32 componentIndex = 0;
 
@@ -166,95 +176,176 @@ namespace Trident {
 					componentIndex += 1;
 				}
 
-				ref<Buffer> dataStagingBuffer;
+				uint64 stagingBufferSize = 0;
+
+				if (sceneAsset->getStaticTriangles().count() > 0) {
+					staticBuffer = createStaticBuffer();
+
+					staticMaterialPipelineLayout = createStaticMaterialPipelineLayout();
+					staticMaterialPipeline = createStaticMaterialPipeline();
+
+					const ref<ImageAsset> lightmapAtlasImageAsset = assetLibrary->getAsset<ImageAsset>(LIGHTMAP_ATLAS_IMAGE_ASSET_NAME);
+
+					stagingBufferSize += lightmapAtlasImageAsset->getSize();
+				}
 
 				if (scene->getIndexCount() > 0) {
 					// TODO: As of now the hull line indices are included twice.
-					dataStagingBuffer = createDynamicBuffer({
-						.size = sourceDataBuffer.count() + scene->getHullLineIndexCount() * sizeof(uint16),
-						.usage = BufferUsage::TRANSFER_SRC,
-						.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
-						.persistent = false,
-						#if defined(DEBUG_OBJECT_NAME)
-							.name = "Data staging",
-						#endif
-					});
+					stagingBufferSize += sourceDataBuffer.count();
+					stagingBufferSize += scene->getHullLineIndexCount() * sizeof(uint16);
+				}
 
-					uint8* vertexMappedRange = static_cast<uint8*>(dataStagingBuffer->map(0, dataStagingBuffer->getSize()));
+				const ref<Buffer> stagingBuffer = createDynamicBuffer({
+					.size = stagingBufferSize,
+					.usage = BufferUsage::TRANSFER_SRC,
+					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
+					.persistent = false,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Staging",
+					#endif
+				});
 
-					std::copy_n(sourceDataBuffer.begin(), vertexPositionIndexRange.offset, vertexMappedRange);
-					std::copy_n(&sourceDataBuffer[scene->getHullLineIndexByteOffset()], scene->getHullLineIndexCount() * sizeof(uint16), vertexMappedRange + vertexPositionIndexRange.offset);
+				ref<BufferView<uint8>> lightmapAtlasView;
+				ref<BufferView<uint8>> componentView;
+				ref<BufferView<uint8>> hullLineIndexView;
+				ref<BufferView<Vertex>> vertexView;
+				uint64 viewOffset = 0;
+				BufferCopyRegion bufferCopyRegion;
+				ImageMemoryBarrier imageMemoryBarrier;
 
+				if (sceneAsset->getStaticTriangles().count() > 0) {
+					const ref<ImageAsset> lightmapAtlasImageAsset = assetLibrary->getAsset<ImageAsset>(LIGHTMAP_ATLAS_IMAGE_ASSET_NAME);
+
+					lightmapAtlasView = stagingBuffer->createView<uint8>(viewOffset, lightmapAtlasImageAsset->getSize());
+					viewOffset += lightmapAtlasView->getSize();
+
+					lightmapAtlasImage = createLightmapAtlasImage(lightmapAtlasImageAsset);
+					lightmapAtlasImageView = createLightmapAtlasImageView();
+
+					std::copy_n(&lightmapAtlasImageAsset->getData()[0], lightmapAtlasView->getSize(), lightmapAtlasView->map());
+				}
+
+				if (scene->getIndexCount() > 0) {
+					componentView = stagingBuffer->createView<uint8>(viewOffset, vertexPositionIndexRange.offset);
+					viewOffset += componentView->getSize();
+
+					vertexView = stagingBuffer->createView<Vertex>(viewOffset, scene->getIndexCount() * sizeof(Vertex));
+					viewOffset += vertexView->getSize();
+
+					std::copy_n(sourceDataBuffer.begin(), componentView->getSize(), componentView->map());
+
+					Vertex* vertexMappedRange = vertexView->map();
 					index vertexIndex = 0;
 
 					while (vertexIndex < scene->getIndexCount()) {
-						Vertex& vertex = *pointer_cast<Vertex*>(vertexMappedRange + vertexPositionIndexRange.offset + scene->getHullLineIndexCount() * sizeof(uint16) + vertexIndex * sizeof(Vertex));
+						Vertex& vertex = vertexMappedRange[vertexIndex];
 						vertex.positionIndex = *pointer_cast<const uint32*>(&sourceDataBuffer[vertexPositionIndexRange.offset + vertexIndex * sizeof(uint32)]);
 						vertex.normalIndex = *pointer_cast<const uint32*>(&sourceDataBuffer[vertexNormalIndexRange.offset + vertexIndex * sizeof(uint32)]);
 						vertex.textureCoordinateIndex = *pointer_cast<const uint32*>(&sourceDataBuffer[vertexTextureCoordinateIndexRange.offset + vertexIndex * sizeof(uint32)]);
 
 						vertexIndex += 1;
 					}
-
-					dataStagingBuffer->unmap();
-
-					dataBuffer = createDynamicBuffer({
-						.size = vertexPositionIndexRange.offset,
-						.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
-						.memoryProperties = MemoryProperty::DEVICE_LOCAL,
-						.persistent = false,
-						#if defined(DEBUG_OBJECT_NAME)
-							.name = "Data",
-						#endif
-					});
-				}
-
-				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
-				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
-					.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
-					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Copy buffers",
-					#endif
-				});
-
-				commandEncoder->begin();
-
-				BufferCopyRegion copyRegion;
-
-				if (scene->getIndexCount() > 0) {
-					copyRegion = {
-						.sourceOffset = 0,
-						.destinationOffset = 0,
-						.size = dataBuffer->getSize(),
-					};
-
-					commandEncoder->copyBufferToBuffer(dataStagingBuffer, dataBuffer, copyRegion);
 				}
 
 				if (scene->getHullLineIndexCount() > 0) {
-					copyRegion = {
-						.sourceOffset = dataBuffer->getSize(),
-						.destinationOffset = 0,
-						.size = debugHullWireframeBuffer->getSize(),
+					hullLineIndexView = stagingBuffer->createView<uint8>(viewOffset, scene->getHullLineIndexCount() * sizeof(uint16));
+					viewOffset += hullLineIndexView->getSize();
+
+					std::copy_n(&sourceDataBuffer[scene->getHullLineIndexByteOffset()], hullLineIndexView->getSize(), hullLineIndexView->map());
+				}
+
+				stagingBuffer->unmap();
+
+				ref<Queue> queue = device->getQueue(QueueFamilyCapability::GRAPHICS);
+				ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
+					.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Copy resources",
+					#endif
+				});
+				ref<CommandBuffer> commandBuffer;
+
+				commandEncoder->begin();
+
+				if (sceneAsset->getStaticTriangles().count() > 0) {
+					imageMemoryBarrier = {
+						.image = lightmapAtlasImage,
+						.newLayout = ImageLayout::TRANSFER_DST_OPTIMAL,
+						.newAccess = Access::TRANSFER_WRITE,
 					};
 
-					commandEncoder->copyBufferToBuffer(dataStagingBuffer, debugHullWireframeBuffer, copyRegion);
+					commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
+
+					const BufferImageCopyRegion bufferImageCopyRegion = {
+						.bufferOffset = lightmapAtlasView->getOffset(),
+						.imageOffsetX = 0,
+						.imageOffsetY = 0,
+						.imageOffsetZ = 0,
+						.imageExtent = lightmapAtlasImage->getExtent(),
+						.imageMipLevel = lightmapAtlasImageView->getMipLevelOffset(),
+						.imageLayerOffset = lightmapAtlasImageView->getLayerOffset(),
+						.imageLayerCount = lightmapAtlasImageView->getLayerCount(),
+					};
+
+					commandEncoder->copyBufferToImage(stagingBuffer, lightmapAtlasImage, bufferImageCopyRegion);
 				}
 
 				if (scene->getIndexCount() > 0) {
-					copyRegion = {
-						.sourceOffset = vertexPositionIndexRange.offset + scene->getHullLineIndexCount() * sizeof(uint16),
+					bufferCopyRegion = {
+						.sourceOffset = componentView->getOffset(),
 						.destinationOffset = 0,
-						.size = vertexBuffer->getSize(),
+						.size = componentView->getSize(),
 					};
 
-					commandEncoder->copyBufferToBuffer(dataStagingBuffer, vertexBuffer, copyRegion);
+					commandEncoder->copyBufferToBuffer(stagingBuffer, dataBuffer, bufferCopyRegion);
+
+					bufferCopyRegion = {
+						.sourceOffset = vertexView->getOffset(),
+						.destinationOffset = 0,
+						.size = vertexView->getSize(),
+					};
+
+					commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegion);
 				}
 
-				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+				if (scene->getHullLineIndexCount() > 0) {
+					bufferCopyRegion = {
+						.sourceOffset = hullLineIndexView->getSize(),
+						.destinationOffset = 0,
+						.size = hullLineIndexView->getSize(),
+					};
+
+					commandEncoder->copyBufferToBuffer(stagingBuffer, debugHullWireframeBuffer, bufferCopyRegion);
+				}
+
+				commandBuffer = commandEncoder->end();
 
 				queue->submit(commandBuffer);
 				queue->waitIdle();
+
+				if (sceneAsset->getStaticTriangles().count() > 0) {
+					queue = device->getQueue(QueueFamilyCapability::GRAPHICS);
+					commandEncoder = queue->createCommandEncoder({
+						.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
+						#if defined(DEBUG_OBJECT_NAME)
+							.name = "Transition image",
+						#endif
+					});
+
+					imageMemoryBarrier = {
+						.image = lightmapAtlasImage,
+						.newLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+						.newAccess = Access::SHADER_READ,
+					};
+
+					commandEncoder->begin();
+					commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
+
+					commandBuffer = commandEncoder->end();
+
+					queue->submit(commandBuffer);
+					queue->waitIdle();
+				}
 
 				updateDescriptorSets();
 			}
@@ -387,14 +478,16 @@ namespace Trident {
 
 			ref<Image> createColorImage() const;
 			ref<Image> createDepthStencilImage() const;
+			ref<Image> createLightmapAtlasImage(ref<ImageAsset> imageAsset) const;
 
 			ref<ImageView> createColorImageView() const;
 			ref<ImageView> createDepthStencilImageView() const;
+			ref<ImageView> createLightmapAtlasImageView() const;
 
 			ref<Buffer> createCameraBuffer() const;
-			ref<Buffer> createInstanceBuffer() const;
-			ref<Buffer> createVertexBuffer() const;
-			ref<Buffer> createDebugHullWireframeBuffer() const;
+			ref<Buffer> createInstanceBuffer(uint64 size) const;
+			ref<Buffer> createVertexBuffer(uint64 size) const;
+			ref<Buffer> createDebugHullWireframeBuffer(uint64 size) const;
 			ref<Buffer> createDebugContactManifoldBuffer() const;
 			ref<Buffer> createStaticBuffer() const;
 
@@ -408,67 +501,45 @@ namespace Trident {
 				const uint64 vertexRangeSize = sceneAsset->getStaticVertices().count() * sizeof(svec3<float32>);
 				const uint64 normalRangeSize = sceneAsset->getStaticNormals().count() * sizeof(svec3<float32>);
 				const uint64 textureCoordinateRangeSize = sceneAsset->getStaticTextureCoordinates().count() * sizeof(svec2<float32>);
+				const uint64 lightmapCoordinateRangeSize = sceneAsset->getStaticLightmapCoordinates().count() * sizeof(svec2<float32>);
 				const uint64 triangleAlignedRangeSize = ceil(triangleRangeSize, minStorageBufferOffsetAlignment);
 				const uint64 vertexAlignedRangeSize = ceil(vertexRangeSize, minStorageBufferOffsetAlignment);
 				const uint64 normalAlignedRangeSize = ceil(normalRangeSize, minStorageBufferOffsetAlignment);
+				const uint64 textureCoordinateAlignedRangeSize = ceil(textureCoordinateRangeSize, minStorageBufferOffsetAlignment);
 
 				const sequence<ref<BaseBufferView>> descriptorBufferViews = {
 					// Camera
 					cameraBuffer->createView<Camera>(0, cameraBuffer->getSize()),
-
-					// Vertex
-					dataBuffer->createView<float32>(scene->getVertexPositionComponentRange().offset, scene->getVertexPositionComponentRange().count),
-					dataBuffer->createView<float32>(scene->getVertexNormalComponentRange().offset, scene->getVertexNormalComponentRange().count),
-					dataBuffer->createView<float32>(scene->getVertexTextureCoordinateComponentRange().offset, scene->getVertexTextureCoordinateComponentRange().count),
-					dataBuffer->createView<float32>(scene->getTriangleTangentComponentRange().offset, scene->getTriangleTangentComponentRange().count),
 
 					// Static
 					staticBuffer->createView<StaticTriangle3D>(0, triangleRangeSize),
 					staticBuffer->createView<float32>(triangleAlignedRangeSize, vertexRangeSize),
 					staticBuffer->createView<float32>(triangleAlignedRangeSize + vertexAlignedRangeSize, normalRangeSize),
 					staticBuffer->createView<float32>(triangleAlignedRangeSize + vertexAlignedRangeSize + normalAlignedRangeSize, textureCoordinateRangeSize),
+					staticBuffer->createView<float32>(triangleAlignedRangeSize + vertexAlignedRangeSize + normalAlignedRangeSize + textureCoordinateAlignedRangeSize, lightmapCoordinateRangeSize),
+
+					// Vertex
+					dataBuffer->createView<float32>(scene->getVertexPositionComponentRange().offset, scene->getVertexPositionComponentRange().count),
+					dataBuffer->createView<float32>(scene->getVertexNormalComponentRange().offset, scene->getVertexNormalComponentRange().count),
+					dataBuffer->createView<float32>(scene->getVertexTextureCoordinateComponentRange().offset, scene->getVertexTextureCoordinateComponentRange().count),
+					dataBuffer->createView<float32>(scene->getTriangleTangentComponentRange().offset, scene->getTriangleTangentComponentRange().count),
 				};
 
 				uint64 writeDescriptorSetCount = 0;
 
-				if (scene->getIndexCount() > 0) {
-					writeDescriptorSetCount += 5;
+				if (scene->getAsset()->getStaticTriangles().count() > 0) {
+					writeDescriptorSetCount += staticDescriptorSetLayout->bindings.count();
 				}
 
-				if (scene->getAsset()->getStaticTriangles().count() > 0) {
-					writeDescriptorSetCount += 5;
+				if (scene->getIndexCount() > 0) {
+					writeDescriptorSetCount += vertexDescriptorSetLayout->bindings.count();
 				}
 
 				sequence<WriteDescriptorSet> writeDescriptorSets(writeDescriptorSetCount);
 				uint32 writeDescriptorSetOffset = 0;
 
-				if (scene->getIndexCount() > 0) {
-					constexpr uint32 descriptorBufferOffset = 0;
-
-					writeDescriptorSets[writeDescriptorSetOffset] = {
-						.descriptorSet = vertexDescriptorSet,
-						.bindingIndex = 0,
-						.descriptorBufferViews = descriptorBufferViews[0],
-					};
-
-					uint32 writeDescriptorSetIndex = 1;
-
-					while (writeDescriptorSetIndex < 5) {
-						writeDescriptorSets[writeDescriptorSetOffset + writeDescriptorSetIndex] = {
-							.descriptorSet = vertexDescriptorSet,
-							.bindingIndex = writeDescriptorSetIndex,
-							.descriptorBufferViews = descriptorBufferViews[writeDescriptorSetOffset + writeDescriptorSetIndex],
-						};
-
-						writeDescriptorSetIndex += 1;
-					}
-
-					writeDescriptorSetOffset += 5;
-				}
-
 				if (scene->getAsset()->getStaticTriangles().count() > 0) {
-					constexpr uint32 descriptorBufferOffset = 4;
-
+					// Camera
 					writeDescriptorSets[writeDescriptorSetOffset] = {
 						.descriptorSet = staticDescriptorSet,
 						.bindingIndex = 0,
@@ -477,17 +548,53 @@ namespace Trident {
 
 					uint32 writeDescriptorSetIndex = 1;
 
-					while (writeDescriptorSetIndex < 5) {
+					while (writeDescriptorSetIndex < staticDescriptorSetLayout->bindings.count() - 1) {
 						writeDescriptorSets[writeDescriptorSetOffset + writeDescriptorSetIndex] = {
 							.descriptorSet = staticDescriptorSet,
 							.bindingIndex = writeDescriptorSetIndex,
-							.descriptorBufferViews = descriptorBufferViews[descriptorBufferOffset + writeDescriptorSetIndex],
+							.descriptorBufferViews = descriptorBufferViews[writeDescriptorSetOffset + writeDescriptorSetIndex],
 						};
 
 						writeDescriptorSetIndex += 1;
 					}
 
-					writeDescriptorSetOffset += 5;
+					const DescriptorImage lightmapAtlasDescriptorImage = {
+						.imageView = lightmapAtlasImageView,
+						.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+						.sampler = imageSampler,
+					};
+
+					writeDescriptorSets[writeDescriptorSetOffset + writeDescriptorSetIndex] = {
+						.descriptorSet = staticDescriptorSet,
+						.bindingIndex = writeDescriptorSetIndex,
+						.descriptorImages = lightmapAtlasDescriptorImage,
+					};
+
+					writeDescriptorSetIndex += 1;
+					writeDescriptorSetOffset += static_cast<uint32>(staticDescriptorSetLayout->bindings.count());
+				}
+
+				if (scene->getIndexCount() > 0) {
+					// Camera
+					writeDescriptorSets[writeDescriptorSetOffset] = {
+						.descriptorSet = vertexDescriptorSet,
+						.bindingIndex = 0,
+						.descriptorBufferViews = descriptorBufferViews[0],
+					};
+
+					uint32 writeDescriptorSetIndex = 1;
+
+					while (writeDescriptorSetIndex < vertexDescriptorSetLayout->bindings.count()) {
+						writeDescriptorSets[writeDescriptorSetOffset + writeDescriptorSetIndex] = {
+							.descriptorSet = vertexDescriptorSet,
+							.bindingIndex = writeDescriptorSetIndex,
+							.descriptorBufferViews = descriptorBufferViews[writeDescriptorSetIndex + 5],
+						};
+
+						writeDescriptorSetIndex += 1;
+					}
+
+					writeDescriptorSetOffset += static_cast<uint32>(vertexDescriptorSetLayout->bindings.count());
 				}
 
 				device->updateDescriptorSets(writeDescriptorSets);
@@ -540,6 +647,7 @@ namespace Trident {
 
 			ref<Image> depthStencilImage;
 			sequence<sequence<ref<Image>>> materialImages;
+			ref<Image> lightmapAtlasImage;
 
 			#if FORWARD_SAMPLE_COUNT > 1
 				ref<ImageView> colorImageView;
@@ -547,6 +655,7 @@ namespace Trident {
 
 			ref<ImageView> depthStencilImageView;
 			sequence<ref<ImageView>> materialReferenceBindingImageViews;
+			ref<ImageView> lightmapAtlasImageView;
 
 			ref<Sampler> imageSampler;
 

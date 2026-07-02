@@ -18,10 +18,13 @@ namespace Trident {
 		const uint32 staticTriangleCount = stream.read<uint32>();
 		const uint32 staticVertexCount = stream.read<uint32>();
 
-		// TODO(assets/scene/2d): This is the static normal count; don't include it in 2D scenes.
+		// TODO(assets/scene/2d): 2D scenes don't support normals.
 		stream.jump(sizeof(uint32));
 
 		const uint32 staticTextureCoordinateCount = stream.read<uint32>();
+
+		// TODO(assets/scene/2d): 2D scenes don't support lightmap coordinates.
+		stream.jump(sizeof(uint32));
 
 		descriptor.dynamicVertexPositionCount = 0;
 		descriptor.dynamicVertexTextureCoordinateCount = 0;

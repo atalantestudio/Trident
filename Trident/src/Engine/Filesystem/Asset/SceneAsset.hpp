@@ -23,6 +23,7 @@ namespace Trident {
 		uint32 staticVertexCount;
 		uint32 staticNormalCount;
 		uint32 staticTextureCoordinateCount;
+		uint32 staticLightmapCoordinateCount;
 		uint32 entityCount;
 		uint32 geometryAssetCount;
 		uint32 geometryMappingCount;
@@ -71,6 +72,7 @@ namespace Trident {
 		sequence<svec3<float32>> staticVertices;
 		sequence<svec3<float32>> staticNormals;
 		sequence<svec2<float32>> staticTextureCoordinates;
+		sequence<svec2<float32>> staticLightmapCoordinates;
 		sequence<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;
 	};
 
@@ -190,6 +192,7 @@ namespace Trident {
 				staticVertices(descriptor.staticVertices),
 				staticNormals(descriptor.staticNormals),
 				staticTextureCoordinates(descriptor.staticTextureCoordinates),
+				staticLightmapCoordinates(descriptor.staticLightmapCoordinates),
 				rigidBodyFacePlaneCount(descriptor.rigidBodyFacePlaneCount),
 				rigidBodyMappings(descriptor.rigidBodyMappings)
 			{}
@@ -208,6 +211,10 @@ namespace Trident {
 
 			inline const sequence<svec2<float32>>& getStaticTextureCoordinates() const {
 				return staticTextureCoordinates;
+			}
+
+			inline const sequence<svec2<float32>>& getStaticLightmapCoordinates() const {
+				return staticLightmapCoordinates;
 			}
 
 			inline uint64 getDynamicVertexNormalCount() const {
@@ -258,6 +265,7 @@ namespace Trident {
 			sequence<svec3<float32>> staticVertices;
 			sequence<svec3<float32>> staticNormals;
 			sequence<svec2<float32>> staticTextureCoordinates;
+			sequence<svec2<float32>> staticLightmapCoordinates;
 			uint32 rigidBodyFacePlaneCount;
 			sequence<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;
 	};

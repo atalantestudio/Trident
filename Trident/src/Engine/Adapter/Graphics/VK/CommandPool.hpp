@@ -12,6 +12,7 @@ namespace Trident {
 
 		public:
 			VkCommandPool commandPool;
+			VkPipelineStageFlags pipelineStageFlags;
 	};
 
 	namespace VK {

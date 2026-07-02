@@ -15,6 +15,7 @@
 #include "Engine/Renderer/Forward/DepthStencilImage.hpp"
 #include "Engine/Renderer/Forward/ImageSampler.hpp"
 #include "Engine/Renderer/Forward/InstanceBuffer.hpp"
+#include "Engine/Renderer/Forward/LightmapAtlasImage.hpp"
 #include "Engine/Renderer/Forward/Renderer.hpp"
 #include "Engine/Renderer/Forward/RenderPass.hpp"
 #include "Engine/Renderer/Forward/Static.hpp"

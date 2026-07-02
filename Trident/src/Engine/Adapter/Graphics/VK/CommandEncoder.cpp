@@ -444,6 +444,9 @@ namespace Trident {
 		static PFN_vkCmdPipelineBarrier vkCmdPipelineBarrier = loadDeviceProcedure<PFN_vkCmdPipelineBarrier>(static_cast<const VK::Device*>(commandEncoder->device)->device, "vkCmdPipelineBarrier");
 
 		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
+
+		const VK::CommandPool* _commandPool = static_cast<const VK::CommandPool*>(commandEncoder->commandPool);
+
 		sequence<VkBufferMemoryBarrier> vkBufferMemoryBarriers(bufferMemoryBarriers.count());
 		index bufferMemoryBarrierIndex = 0;
 
@@ -497,8 +500,8 @@ namespace Trident {
 
 		vkCmdPipelineBarrier(
 			_commandEncoder->commandBuffer,
-			VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-			VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+			_commandPool->pipelineStageFlags,
+			_commandPool->pipelineStageFlags,
 			0,
 			0,
 			nullptr,

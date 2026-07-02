@@ -28,5 +28,5 @@ vec3 uintToColor(uint value) {
 }
 
 void main() {
-	fragment = vec4(uintToColor(interstage.triangleIndex + 1), 1.0);
+	fragment = vec4(uintToColor(interstage.triangleIndex + 1u), 1.0);
 }

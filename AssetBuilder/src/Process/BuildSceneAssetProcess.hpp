@@ -75,6 +75,7 @@ namespace Trident {
 				header.staticTriangleCount = static_cast<uint32>(data.staticScene.triangles.count());
 				header.staticVertexCount = static_cast<uint32>(data.staticScene.vertices.count());
 				header.staticTextureCoordinateCount = static_cast<uint32>(data.staticScene.textureCoordinates.count());
+				header.staticLightmapCoordinateCount = 0;
 				header.entityCount = data.entityCount;
 				header.geometryAssetCount = static_cast<uint32>(data.geometryAssetIdentifiers.count());
 				header.geometryMappingCount = static_cast<uint32>(data.geometryMappings.count());
@@ -148,6 +149,7 @@ namespace Trident {
 				header.staticVertexCount = static_cast<uint32>(data.staticScene.vertices.count());
 				header.staticNormalCount = static_cast<uint32>(data.staticScene.normals.count());
 				header.staticTextureCoordinateCount = static_cast<uint32>(data.staticScene.textureCoordinates.count());
+				header.staticLightmapCoordinateCount = static_cast<uint32>(data.staticScene.lightmapCoordinates.count());
 				header.entityCount = data.entityCount;
 				header.geometryAssetCount = static_cast<uint32>(data.geometryAssetIdentifiers.count());
 				header.geometryMappingCount = static_cast<uint32>(data.geometryMappings.count());
@@ -160,6 +162,7 @@ namespace Trident {
 					header.staticVertexCount * sizeof(svec3<float32>) +
 					header.staticNormalCount * sizeof(svec3<float32>) +
 					header.staticTextureCoordinateCount * sizeof(svec2<float32>) +
+					header.staticLightmapCoordinateCount * sizeof(svec2<float32>) +
 					header.geometryAssetCount * sizeof(uint32) +
 					header.geometryMappingCount * (sizeof(Entity) + sizeof(uint32)) +
 					header.materialMappingCount * (sizeof(Entity) + sizeof(uint32)) +
@@ -193,6 +196,10 @@ namespace Trident {
 
 				for (const svec2<float32> textureCoordinate : data.staticScene.textureCoordinates) {
 					stream.write<svec2<float32>>(textureCoordinate);
+				}
+
+				for (const svec2<float32> lightmapCoordinate : data.staticScene.lightmapCoordinates) {
+					stream.write<svec2<float32>>(lightmapCoordinate);
 				}
 
 				for (const uint32 geometryAssetIdentifier : data.geometryAssetIdentifiers) {

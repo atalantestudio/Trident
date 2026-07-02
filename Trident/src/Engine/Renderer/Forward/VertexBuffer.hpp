@@ -6,9 +6,9 @@
 #include "Engine/Renderer/Forward/Renderer.hpp"
 
 namespace Trident {
-	ref<Buffer> ForwardRenderer::createVertexBuffer() const {
+	ref<Buffer> ForwardRenderer::createVertexBuffer(uint64 size) const {
 		return createDynamicBuffer({
-			.size = scene->getIndexCount() * sizeof(ForwardRenderer::Vertex),
+			.size = size,
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,

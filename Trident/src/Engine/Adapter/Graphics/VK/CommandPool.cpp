@@ -19,6 +19,11 @@ namespace Trident {
 		VkResult result;
 
 		ref<VK::CommandPool> commandPool = createRef<VK::CommandPool>(device);
+		commandPool->pipelineStageFlags = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+
+		if (queueFamilyCapability == QueueFamilyCapability::TRANSFER) {
+			commandPool->pipelineStageFlags = VK_PIPELINE_STAGE_TRANSFER_BIT;
+		}
 
 		VkCommandPoolCreateInfo commandPoolCreateInfo{};
 		commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;

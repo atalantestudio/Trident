@@ -6,9 +6,9 @@
 #include "Engine/Renderer/Forward/Renderer.hpp"
 
 namespace Trident {
-	ref<Buffer> ForwardRenderer::createDebugHullWireframeBuffer() const {
+	ref<Buffer> ForwardRenderer::createDebugHullWireframeBuffer(uint64 size) const {
 		return createDynamicBuffer({
-			.size = scene->getHullLineIndexCount() * sizeof(uint16),
+			.size = size,
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::INDEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
