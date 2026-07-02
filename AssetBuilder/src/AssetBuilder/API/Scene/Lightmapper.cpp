@@ -172,10 +172,10 @@ namespace Trident {
 		const float32 framebufferWidth = static_cast<float32>(framebufferExtent.width);
 		const float32 framebufferHeight = static_cast<float32>(framebufferExtent.height);
 
-		const ref<Buffer<uint8>> lightmapAtlasStagingBuffer = Renderer::createBuffer<uint8>({
+		const ref<Buffer> lightmapAtlasStagingBuffer = Renderer::createDynamicBuffer({
 			.size = lightmapAtlasImage->getSize(),
 			.usage = BufferUsage::TRANSFER_DST,
-			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
+			.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
 			.persistent = false,
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Lightmap atlas staging",
@@ -202,20 +202,17 @@ namespace Trident {
 		});
 
 		commandEncoder->begin();
-
 		commandEncoder->beginRenderPass({
 			.framebuffer = framebuffer,
 			.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}},
 		});
 		commandEncoder->setViewport({0.0f, framebufferHeight}, {framebufferWidth, -framebufferHeight}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, framebufferExtent);
-
 		commandEncoder->bindGraphicsPipeline(lightmapAtlasPipeline);
 		commandEncoder->bindVertexBuffer(0, coordinateBuffer, 0, sizeof(svec2<float32>));
 		commandEncoder->bindIndexBuffer<uint32>(coordinateIndexBuffer, 0);
 		commandEncoder->drawIndexed(indexCount, 1, 0, 0, 0);
 		commandEncoder->endRenderPass();
-
 		commandEncoder->copyImageToBuffer(lightmapAtlasImage, lightmapAtlasStagingBuffer, lightmapAtlasBufferImageCopyRegion);
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
@@ -223,7 +220,9 @@ namespace Trident {
 		queue->submit(commandBuffer);
 		queue->waitIdle();
 
-		uint8* lightmapAtlasMappedRange = lightmapAtlasStagingBuffer->map(0, lightmapAtlasStagingBuffer->getSize());
+		const ref<BufferView<uint8>> lightmapAtlasView = lightmapAtlasStagingBuffer->createView<uint8>(0, lightmapAtlasStagingBuffer->getSize());
+
+		uint8* lightmapAtlasMappedRange = lightmapAtlasView->map();
 
 		std::copy_n(lightmapAtlasMappedRange, lightmapAtlasImageAssetDescriptor.data.count(), &lightmapAtlasImageAssetDescriptor.data[0]);
 
@@ -362,8 +361,8 @@ namespace Trident {
 		});
 	}
 
-	ref<Buffer<svec2<float32>>> Lightmapper::createCoordinateBuffer(uint64 size) const {
-		return Renderer::createBuffer<svec2<float32>>({
+	ref<Buffer> Lightmapper::createCoordinateBuffer(uint64 size) const {
+		return Renderer::createDynamicBuffer({
 			.size = size,
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
@@ -374,8 +373,8 @@ namespace Trident {
 		});
 	}
 
-	ref<Buffer<uint32>> Lightmapper::createCoordinateIndexBuffer(uint64 size) const {
-		return Renderer::createBuffer<uint32>({
+	ref<Buffer> Lightmapper::createCoordinateIndexBuffer(uint64 size) const {
+		return Renderer::createDynamicBuffer({
 			.size = size,
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::INDEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
@@ -387,14 +386,23 @@ namespace Trident {
 	}
 
 	void Lightmapper::copyCoordinateBuffers(const StaticScene3D& scene) const {
-		const ref<Buffer<uint8>> stagingBuffer = Renderer::createStagingBuffer<uint8>(coordinateBuffer->getSize() + coordinateIndexBuffer->getSize());
+		const ref<Buffer> stagingBuffer = Renderer::createDynamicBuffer({
+			.size = coordinateBuffer->getSize() + coordinateIndexBuffer->getSize(),
+			.usage = BufferUsage::TRANSFER_SRC,
+			.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
+			.persistent = false,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Staging",
+			#endif
+		});
+		const ref<BufferView<svec2<float32>>> coordinateView = stagingBuffer->createView<svec2<float32>>(0, coordinateBuffer->getSize());
+		const ref<BufferView<uint32>> coordinateIndexView = stagingBuffer->createView<uint32>(coordinateBuffer->getSize(), coordinateIndexBuffer->getSize());
 
-		uint8* mappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
-		svec2<float32>* coordinateMappedRange = pointer_cast<svec2<float32>*>(mappedRange);
+		svec2<float32>* coordinateMappedRange = coordinateView->map();
 
 		std::copy(scene.lightmapCoordinates.begin(), scene.lightmapCoordinates.end(), coordinateMappedRange);
 
-		uint32* coordinateIndexMappedRange = pointer_cast<uint32*>(mappedRange + coordinateBuffer->getSize());
+		uint32* coordinateIndexMappedRange = coordinateIndexView->map();
 		uint32 coordinateIndexIndex = 0;
 
 		for (const StaticTriangle3D& triangle : scene.triangles) {

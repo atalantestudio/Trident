@@ -6,10 +6,10 @@
 #include "Engine/Renderer/Visibility/Renderer.hpp"
 
 namespace Trident {
-	ref<Buffer<VisibilityRenderer::Camera>> VisibilityRenderer::createCameraBuffer() const {
+	ref<Buffer> VisibilityRenderer::createCameraBuffer() const {
 		const uint64 minUniformBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
 
-		return createBuffer<Camera>({
+		return createDynamicBuffer({
 			.size = ceil(sizeof(Camera), minUniformBufferOffsetAlignment),
 			.usage = BufferUsage::UNIFORM,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,

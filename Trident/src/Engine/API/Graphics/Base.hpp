@@ -22,6 +22,7 @@ namespace Trident {
 	struct BufferMemoryBarrier;
 	struct CommandBufferDescriptor;
 	struct ComputePipelineDescriptor;
+	struct DescriptorSetLayoutBinding;
 	struct FenceDescriptor;
 	struct FramebufferDescriptor;
 	struct GraphicsPipelineDescriptor;
@@ -36,18 +37,11 @@ namespace Trident {
 	struct RenderPassDescriptor;
 	struct SamplerDescriptor;
 	struct ShaderModuleDescriptor;
-	struct SubpassDescriptor;
+	struct Subpass;
 	struct SwapchainDescriptor;
 	struct WriteDescriptorSet;
 
-	struct DescriptorSetLayoutBinding;
-	struct Subpass;
-
-	class BaseBuffer;
-
-	template<typename ElementType>
 	class Buffer;
-
 	class CommandBuffer;
 	class CommandEncoder;
 	class CommandPool;
@@ -84,12 +78,12 @@ namespace Trident {
 	typedef void (*BindComputePipelineImplementation)(CommandEncoder* commandEncoder, ref<ComputePipeline> computePipeline);
 	typedef void (*BindDescriptorSetsImplementation)(CommandEncoder* commandEncoder, ref<PipelineLayout> pipelineLayout, uint32 descriptorSetIndexOffset, view<ref<DescriptorSet>> descriptorSets);
 	typedef void (*BindGraphicsPipelineImplementation)(CommandEncoder* commandEncoder, ref<GraphicsPipeline> graphicsPipeline);
-	typedef void (*BindIndexBufferImplementation)(CommandEncoder* commandEncoder, ref<BaseBuffer> indexBuffer, uint64 offset, uint8 indexTypeSize);
-	typedef void (*BindVertexBufferImplementation)(CommandEncoder* commandEncoder, uint32 bindingIndex, ref<BaseBuffer> vertexBuffer, uint64 offset, uint32 stride);
-	typedef void (*CopyBufferToBufferImplementation)(CommandEncoder* commandEncoder, ref<BaseBuffer> sourceBuffer, ref<BaseBuffer> destinationBuffer, view<BufferCopyRegion> copyRegions);
-	typedef void (*CopyBufferToImageImplementation)(CommandEncoder* commandEncoder, ref<BaseBuffer> sourceBuffer, ref<Image> destinationImage, view<BufferImageCopyRegion> copyRegions);
-	typedef void (*CopyImageToBufferImplementation)(CommandEncoder* commandEncoder, ref<Image> sourceImage, ref<BaseBuffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions);
-	typedef ref<BaseBuffer> (*CreateBufferImplementation)(const Device* device, const BufferDescriptor& descriptor);
+	typedef void (*BindIndexBufferImplementation)(CommandEncoder* commandEncoder, ref<Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize);
+	typedef void (*BindVertexBufferImplementation)(CommandEncoder* commandEncoder, uint32 bindingIndex, ref<Buffer> vertexBuffer, uint64 offset, uint32 stride);
+	typedef void (*CopyBufferToBufferImplementation)(CommandEncoder* commandEncoder, ref<Buffer> sourceBuffer, ref<Buffer> destinationBuffer, view<BufferCopyRegion> copyRegions);
+	typedef void (*CopyBufferToImageImplementation)(CommandEncoder* commandEncoder, ref<Buffer> sourceBuffer, ref<Image> destinationImage, view<BufferImageCopyRegion> copyRegions);
+	typedef void (*CopyImageToBufferImplementation)(CommandEncoder* commandEncoder, ref<Image> sourceImage, ref<Buffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions);
+	typedef ref<Buffer> (*CreateBufferImplementation)(const Device* device, const BufferDescriptor& descriptor);
 	typedef ref<CommandEncoder> (*CreateCommandEncoderImplementation)(const Device* device, const CommandPool* commandPool, const CommandBufferDescriptor& descriptor);
 	typedef ref<CommandPool> (*CreateCommandPoolImplementation)(const Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability);
 	typedef ref<ComputePipeline> (*CreateComputePipelineImplementation)(const Device* device, const ComputePipelineDescriptor& descriptor);
@@ -113,7 +107,7 @@ namespace Trident {
 
 	typedef ref<Surface> (*CreateSurfaceImplementation)(const Instance* instance, ref<PhysicalDevice> physicalDevice, const Window* window);
 	typedef ref<Swapchain> (*CreateSwapchainImplementation)(const Device* device, const SwapchainDescriptor& descriptor);
-	typedef void (*DestroyBufferImplementation)(const Device* device, const BaseBuffer* buffer);
+	typedef void (*DestroyBufferImplementation)(const Device* device, const Buffer* buffer);
 	typedef void (*DestroyCommandEncoderImplementation)(const Device* device, const CommandPool* commandPool, const CommandEncoder* commandEncoder);
 	typedef void (*DestroyCommandPoolImplementation)(const Device* device, const CommandPool* commandPool);
 	typedef void (*DestroyComputePipelineImplementation)(const Device* device, const ComputePipeline* computePipeline);
@@ -135,22 +129,22 @@ namespace Trident {
 	typedef void (*DestroySwapchainImplementation)(const Device* device, const Swapchain* swapchain);
 	typedef void (*DeviceWaitIdleImplementation)(const Device* device);
 	typedef void (*DispatchImplementation)(CommandEncoder* commandEncoder, uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ);
-	typedef void (*DispatchIndirectImplementation)(CommandEncoder* commandEncoder, ref<BaseBuffer> buffer, uint64 bufferOffset);
+	typedef void (*DispatchIndirectImplementation)(CommandEncoder* commandEncoder, ref<Buffer> buffer, uint64 bufferOffset);
 	typedef void (*DrawImplementation)(CommandEncoder* commandEncoder, uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset, uint32 instanceOffset);
-	typedef void (*DrawIndirectImplementation)(CommandEncoder* commandEncoder, ref<BaseBuffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride);
+	typedef void (*DrawIndirectImplementation)(CommandEncoder* commandEncoder, ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride);
 	typedef void (*DrawIndexedImplementation)(CommandEncoder* commandEncoder, uint32 indexCount, uint32 instanceCount, uint32 indexOffset, sint32 indexBias, uint32 instanceOffset);
-	typedef void (*DrawIndexedIndirectImplementation)(CommandEncoder* commandEncoder, ref<BaseBuffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride);
+	typedef void (*DrawIndexedIndirectImplementation)(CommandEncoder* commandEncoder, ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride);
 	typedef ref<CommandBuffer> (*EndImplementation)(const CommandEncoder* commandEncoder);
 	typedef void (*EndRenderPassImplementation)(CommandEncoder* commandEncoder);
 	typedef uint32 (*FindMemoryTypeIndexImplementation)(const MemoryAllocator* memoryAllocator, MemoryProperty memoryProperties, bool transferDestination);
-	typedef MemoryRequirements (*GetBufferMemoryRequirementsImplementation)(const MemoryAllocator* memoryAllocator, ref<BaseBuffer> buffer);
+	typedef MemoryRequirements (*GetBufferMemoryRequirementsImplementation)(const MemoryAllocator* memoryAllocator, ref<Buffer> buffer);
 	typedef MemoryRequirements (*GetImageMemoryRequirementsImplementation)(const MemoryAllocator* memoryAllocator, ref<Image> image);
 	typedef uint32 (*GetPhysicalDeviceMemoryTypeCountImplementation)(const PhysicalDevice* physicalDevice);
 	typedef view<char8> (*GetPhysicalDeviceNameImplementation)(const PhysicalDevice* physicalDevice);
 	typedef ref<Queue> (*GetQueueImplementation)(const Device* device, QueueFamilyCapability queueFamilyCapability);
 	typedef ImageFormat (*GetSurfaceFormatImplementation)(const Surface* surface);
 	typedef void (*InsertMemoryBarriersImplementation)(CommandEncoder* commandEncoder, view<BufferMemoryBarrier> bufferMemoryBarriers, view<ImageMemoryBarrier> imageMemoryBarriers);
-	typedef void* (*MapBufferImplementation)(const Device* device, BaseBuffer* buffer, uint64 offset, uint64 size);
+	typedef void* (*MapBufferImplementation)(const Device* device, Buffer* buffer, uint64 offset, uint64 size);
 	typedef void (*NextSubpassImplementation)(CommandEncoder* commandEncoder);
 	typedef PresentStatus (*PresentImplementation)(const Queue* queue, view<ref<Swapchain>> swapchains, view<uint32> presentableImageIndices, ref<Semaphore> waitSemaphore);
 	typedef void (*QueueWaitIdleImplementation)(const Queue* queue);
@@ -160,11 +154,11 @@ namespace Trident {
 	typedef void (*SetLineWidthImplementation)(CommandEncoder* commandEncoder, float32 lineWidth);
 	typedef void (*SetScissorImplementation)(CommandEncoder* commandEncoder, sint32 xOffset, sint32 yOffset, Extent2D extent);
 	typedef void (*SetViewportImplementation)(CommandEncoder* commandEncoder, vec2<float32> origin, vec2<float32> size, float32 minDepth, float32 maxDepth);
-	typedef MemorySuballocation (*SuballocateBufferMemoryImplementation)(MemoryAllocator* memoryAllocator, uint32 allocationIndex, ref<BaseBuffer> buffer);
+	typedef MemorySuballocation (*SuballocateBufferMemoryImplementation)(MemoryAllocator* memoryAllocator, uint32 allocationIndex, ref<Buffer> buffer);
 	typedef MemorySuballocation (*SuballocateImageMemoryImplementation)(MemoryAllocator* memoryAllocator, uint32 allocationIndex, ref<Image> image);
 	typedef void (*SubmitImplementation)(const Queue* queue, view<ref<CommandBuffer>> commandBuffers);
 	typedef void (*Submit2Implementation)(const Queue* queue, view<ref<CommandBuffer>> commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<Fence> fence);
-	typedef void (*UnmapBufferImplementation)(const Device* device, BaseBuffer* buffer);
+	typedef void (*UnmapBufferImplementation)(const Device* device, Buffer* buffer);
 	typedef void (*UpdateDescriptorSetsImplementation)(const Device* device, view<WriteDescriptorSet> writeDescriptorSets);
 	typedef void (*UpdateSwapchainImplementation)(const Device* device, Swapchain* swapchain, const SwapchainDescriptor& descriptor);
 	typedef void (*WaitForFenceImplementation)(const Device* device, Fence* fence);

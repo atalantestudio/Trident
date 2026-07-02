@@ -448,7 +448,7 @@ namespace Trident {
 		_commandEncoder->commandCount += 1;
 	}
 
-	void DX12::bindIndexBuffer(Trident::CommandEncoder* commandEncoder, ref<Trident::BaseBuffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
+	void DX12::bindIndexBuffer(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		ADAPTER_ASSERT(offset < indexBuffer->getSize(), "The index buffer offset is overflowing.");
@@ -456,7 +456,7 @@ namespace Trident {
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 
 		D3D12_INDEX_BUFFER_VIEW indexBufferView{};
-		indexBufferView.BufferLocation = std::static_pointer_cast<DX12::BaseBuffer>(indexBuffer)->resource->GetGPUVirtualAddress() + offset;
+		indexBufferView.BufferLocation = std::static_pointer_cast<DX12::Buffer>(indexBuffer)->resource->GetGPUVirtualAddress() + offset;
 		indexBufferView.SizeInBytes = static_cast<UINT>(indexBuffer->getSize() - offset);
 		indexBufferView.Format = getIndexBufferFormat(indexTypeSize);
 
@@ -464,7 +464,7 @@ namespace Trident {
 		_commandEncoder->commandCount += 1;
 	}
 
-	void DX12::bindVertexBuffer(Trident::CommandEncoder* commandEncoder, uint32 bindingIndex, ref<Trident::BaseBuffer> vertexBuffer, uint64 offset, uint32 stride) {
+	void DX12::bindVertexBuffer(Trident::CommandEncoder* commandEncoder, uint32 bindingIndex, ref<Trident::Buffer> vertexBuffer, uint64 offset, uint32 stride) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		ADAPTER_ASSERT(offset < vertexBuffer->getSize(), "The vertex buffer offset is overflowing.");
@@ -472,7 +472,7 @@ namespace Trident {
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 
 		D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
-		vertexBufferView.BufferLocation = std::static_pointer_cast<DX12::BaseBuffer>(vertexBuffer)->resource->GetGPUVirtualAddress() + offset;
+		vertexBufferView.BufferLocation = std::static_pointer_cast<DX12::Buffer>(vertexBuffer)->resource->GetGPUVirtualAddress() + offset;
 		vertexBufferView.SizeInBytes = static_cast<UINT>(vertexBuffer->getSize() - offset);
 		vertexBufferView.StrideInBytes = stride;
 
@@ -480,20 +480,22 @@ namespace Trident {
 		_commandEncoder->commandCount += 1;
 	}
 
-	void DX12::copyBufferToBuffer(Trident::CommandEncoder* commandEncoder, ref<Trident::BaseBuffer> sourceBuffer, ref<Trident::BaseBuffer> destinationBuffer, view<BufferCopyRegion> copyRegions) {
+	void DX12::copyBufferToBuffer(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> sourceBuffer, ref<Trident::Buffer> destinationBuffer, view<BufferCopyRegion> copyRegions) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
-		const ref<DX12::BaseBuffer> _destinationBuffer = std::static_pointer_cast<DX12::BaseBuffer>(destinationBuffer);
+		const ref<DX12::Buffer> _destinationBuffer = std::static_pointer_cast<DX12::Buffer>(destinationBuffer);
 		const MemoryAllocation& memoryAllocation = commandEncoder->device->getMemoryAllocator()->allocations[_destinationBuffer->getMemorySuballocation().allocationIndex];
 		const D3D12_HEAP_TYPE destinationHeapType = static_cast<D3D12_HEAP_TYPE>(memoryAllocation.memoryTypeIndex + 1);
 
-		// NOTE
-		// D3D12_HEAP_TYPE_UPLOAD heaps only allow CPU writes.
-		// The source and destination buffers are mapped to emulate a GPU copy command.
 		if (destinationHeapType == D3D12_HEAP_TYPE_UPLOAD) {
-			const uint8* sourceMappedRange = static_cast<const uint8*>(std::static_pointer_cast<Buffer<uint8>>(sourceBuffer)->map(0, sourceBuffer->getSize()));
-			uint8* destinationMappedRange = static_cast<uint8*>(std::static_pointer_cast<Buffer<uint8>>(destinationBuffer)->map(0, destinationBuffer->getSize()));
+			// D3D12_HEAP_TYPE_UPLOAD heaps only allow CPU writes.
+			// The source and destination buffers are mapped to emulate a GPU copy command.
+			ADAPTER_WARNING("Destination buffer is in UPLOAD heap. Performing a CPU copy.");
+
+			const uint8* sourceMappedRange = static_cast<const uint8*>(sourceBuffer->map(0, sourceBuffer->getSize()));
+
+			uint8* destinationMappedRange = static_cast<uint8*>(destinationBuffer->map(0, destinationBuffer->getSize()));
 
 			for (const BufferCopyRegion& copyRegion : copyRegions) {
 				std::copy_n(sourceMappedRange + copyRegion.sourceOffset, copyRegion.size, destinationMappedRange + copyRegion.destinationOffset);
@@ -507,7 +509,7 @@ namespace Trident {
 			return;
 		}
 
-		const ref<DX12::BaseBuffer> _sourceBuffer = std::static_pointer_cast<DX12::BaseBuffer>(sourceBuffer);
+		const ref<DX12::Buffer> _sourceBuffer = std::static_pointer_cast<DX12::Buffer>(sourceBuffer);
 
 		for (const BufferCopyRegion& copyRegion : copyRegions) {
 			_commandEncoder->commandList->CopyBufferRegion(_destinationBuffer->resource, copyRegion.destinationOffset, _sourceBuffer->resource, copyRegion.sourceOffset, copyRegion.size);
@@ -516,10 +518,10 @@ namespace Trident {
 		_commandEncoder->commandCount += 1;
 	}
 
-	void DX12::copyBufferToImage(Trident::CommandEncoder* commandEncoder, ref<Trident::BaseBuffer> sourceBuffer, ref<Trident::Image> destinationImage, view<BufferImageCopyRegion> copyRegions) {
+	void DX12::copyBufferToImage(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> sourceBuffer, ref<Trident::Image> destinationImage, view<BufferImageCopyRegion> copyRegions) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		const ref<DX12::BaseBuffer> srcBuffer = std::static_pointer_cast<DX12::BaseBuffer>(sourceBuffer);
+		const ref<DX12::Buffer> srcBuffer = std::static_pointer_cast<DX12::Buffer>(sourceBuffer);
 		const ref<DX12::Image> dstImage = std::static_pointer_cast<DX12::Image>(destinationImage);
 		const D3D12_RESOURCE_DESC dstImageResourceDescriptor = dstImage->resource->GetDesc();
 		const UINT channelCount = getChannelCount(dstImage->getFormat());
@@ -559,11 +561,11 @@ namespace Trident {
 		_commandEncoder->commandCount += 1;
 	}
 
-	void DX12::copyImageToBuffer(Trident::CommandEncoder* commandEncoder, ref<Trident::Image> sourceImage, ref<Trident::BaseBuffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) {
+	void DX12::copyImageToBuffer(Trident::CommandEncoder* commandEncoder, ref<Trident::Image> sourceImage, ref<Trident::Buffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const ref<DX12::Image> srcImage = std::static_pointer_cast<DX12::Image>(sourceImage);
-		const ref<DX12::BaseBuffer> dstBuffer = std::static_pointer_cast<DX12::BaseBuffer>(destinationBuffer);
+		const ref<DX12::Buffer> dstBuffer = std::static_pointer_cast<DX12::Buffer>(destinationBuffer);
 		const D3D12_RESOURCE_DESC srcImageResourceDescriptor = srcImage->resource->GetDesc();
 		const UINT channelCount = getChannelCount(srcImage->getFormat());
 
@@ -663,14 +665,14 @@ namespace Trident {
 		_commandEncoder->commandCount += 1;
 	}
 
-	void DX12::dispatchIndirect(Trident::CommandEncoder* commandEncoder, ref<Trident::BaseBuffer> buffer, uint64 bufferOffset) {
+	void DX12::dispatchIndirect(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> buffer, uint64 bufferOffset) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		ADAPTER_ASSERT(buffer->getUsage() & BufferUsage::INDIRECT, "The buffer is not an indirect buffer.");
 
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 		const DX12::Device* _device = static_cast<const DX12::Device*>(commandEncoder->device);
-		const ref<DX12::BaseBuffer> indirectBuffer = std::static_pointer_cast<DX12::BaseBuffer>(buffer);
+		const ref<DX12::Buffer> indirectBuffer = std::static_pointer_cast<DX12::Buffer>(buffer);
 
 		// TODO: Create command signature when creating the buffer.
 		if (!indirectBuffer->commandSignature) {
@@ -719,14 +721,14 @@ namespace Trident {
 		_commandEncoder->commandCount += 1;
 	}
 
-	void DX12::drawIndexedIndirect(Trident::CommandEncoder* commandEncoder, ref<Trident::BaseBuffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
+	void DX12::drawIndexedIndirect(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		ADAPTER_ASSERT(buffer->getUsage() & BufferUsage::INDIRECT, "The buffer is not an indirect buffer.");
 
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 		const DX12::Device* _device = static_cast<const DX12::Device*>(commandEncoder->device);
-		const ref<DX12::BaseBuffer> indirectBuffer = std::static_pointer_cast<DX12::BaseBuffer>(buffer);
+		const ref<DX12::Buffer> indirectBuffer = std::static_pointer_cast<DX12::Buffer>(buffer);
 
 		// TODO: Create command signature when creating the buffer.
 		if (!indirectBuffer->commandSignature) {
@@ -755,14 +757,14 @@ namespace Trident {
 		_commandEncoder->commandCount += 1;
 	}
 
-	void DX12::drawIndirect(Trident::CommandEncoder* commandEncoder, ref<Trident::BaseBuffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
+	void DX12::drawIndirect(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		ADAPTER_ASSERT(buffer->getUsage() & BufferUsage::INDIRECT, "The buffer is not an indirect buffer.");
 
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 		const DX12::Device* _device = static_cast<const DX12::Device*>(commandEncoder->device);
-		const ref<DX12::BaseBuffer> indirectBuffer = std::static_pointer_cast<DX12::BaseBuffer>(buffer);
+		const ref<DX12::Buffer> indirectBuffer = std::static_pointer_cast<DX12::Buffer>(buffer);
 
 		// TODO: Create command signature when creating the buffer.
 		if (!indirectBuffer->commandSignature) {
@@ -937,7 +939,7 @@ namespace Trident {
 			bufferBarrier.SyncAfter = D3D12_BARRIER_SYNC_ALL;
 			bufferBarrier.AccessBefore = getBufferBarrierAccess(bufferMemoryBarrier.buffer->access);
 			bufferBarrier.AccessAfter = getBufferBarrierAccess(bufferMemoryBarrier.newAccess);
-			bufferBarrier.pResource = std::static_pointer_cast<DX12::BaseBuffer>(bufferMemoryBarrier.buffer)->resource;
+			bufferBarrier.pResource = std::static_pointer_cast<DX12::Buffer>(bufferMemoryBarrier.buffer)->resource;
 			bufferBarrier.Offset = bufferMemoryBarrier.offset;
 			bufferBarrier.Size = bufferMemoryBarrier.size;
 

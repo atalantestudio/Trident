@@ -33,6 +33,9 @@ namespace Trident {
 
 				setupPipelineLayout();
 				setupGraphicsPipeline();
+
+				vertexBuffer = createVertexBuffer();
+
 				createBuffers();
 
 				recreateFramebuffers();
@@ -79,7 +82,7 @@ namespace Trident {
 					imageDescriptor.name = "Output";
 				#endif
 
-				image = createImage(imageDescriptor);
+				image = createDynamicImage(imageDescriptor);
 			}
 
 			void setupImageView() {
@@ -214,49 +217,59 @@ namespace Trident {
 				graphicsPipeline = createGraphicsPipeline(graphicsPipelineDescriptor);
 			}
 
-			void createBuffers() {
-				const ref<Buffer<Vertex>> vertexStagingBuffer = createStagingBuffer<Vertex>(VERTEX_COUNT * sizeof(Vertex));
+			ref<Buffer> createVertexBuffer() const {
+				return createDynamicBuffer({
+					.size = VERTEX_COUNT * sizeof(Vertex),
+					.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX,
+					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+					.persistent = false,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Vertex",
+					#endif
+				});
+			}
 
-				Vertex* vertexMappedRange = vertexStagingBuffer->map(0, vertexStagingBuffer->getSize());
+			void createBuffers() {
+				const ref<Buffer> stagingBuffer = createDynamicBuffer({
+					.size = vertexBuffer->getSize(),
+					.usage = BufferUsage::TRANSFER_SRC,
+					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
+					.persistent = false,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Staging",
+					#endif
+				});
+				const ref<BufferView<Vertex>> vertexView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
+
+				Vertex* vertexMappedRange = vertexView->map();
 				vertexMappedRange[0].vertex = {-1.0f,  1.0f};
 				vertexMappedRange[1].vertex = { 3.0f,  1.0f};
 				vertexMappedRange[2].vertex = {-1.0f, -3.0f};
 
-				vertexStagingBuffer->unmap();
+				stagingBuffer->unmap();
 
-				BufferDescriptor vertexBufferDescriptor{};
-				vertexBufferDescriptor.size = vertexStagingBuffer->getSize();
-				vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
-				vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					vertexBufferDescriptor.name = "Vertex buffer";
-				#endif
-
-				vertexBuffer = createBuffer<Vertex>(vertexBufferDescriptor);
-
-				BufferCopyRegion vertexBufferCopyRegion{};
-				vertexBufferCopyRegion.sourceOffset = 0;
-				vertexBufferCopyRegion.destinationOffset = 0;
-				vertexBufferCopyRegion.size = vertexBuffer->getSize();
-
-				CommandBufferDescriptor commandBufferDescriptor{};
-				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					commandBufferDescriptor.name = "Buffer copy command buffer";
-				#endif
-
-				const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
-				const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
+				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
+				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
+					.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Copy buffers",
+					#endif
+				});
 
 				commandEncoder->begin();
-				commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, {vertexBufferCopyRegion});
+
+				const BufferCopyRegion bufferCopyRegion = {
+					.sourceOffset = vertexView->getOffset(),
+					.destinationOffset = 0,
+					.size = vertexView->getSize(),
+				};
+
+				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegion);
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-				transferQueue->submit(commandBuffer);
-				transferQueue->waitIdle();
+				queue->submit(commandBuffer);
+				queue->waitIdle();
 			}
 
 			void setupSampler() {
@@ -396,7 +409,7 @@ namespace Trident {
 			ref<DescriptorSet> imageDescriptorSet;
 			ref<PipelineLayout> pipelineLayout;
 			ref<GraphicsPipeline> graphicsPipeline;
-			ref<Buffer<Vertex>> vertexBuffer;
+			ref<Buffer> vertexBuffer;
 	};
 
 	DEFINE_SAMPLE_LAYER(SampleComputeShader);

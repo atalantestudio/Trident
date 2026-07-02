@@ -17,18 +17,20 @@ namespace Trident {
 
 		vertexBuffer = createVertexBuffer();
 		indexBuffer = createIndexBuffer();
-
 		cameraBuffer = createCameraBuffer();
-		cameraBufferMappedRange = cameraBuffer->map(0, cameraBuffer->getSize());
-
 		subcomponentBuffer = createSubcomponentBuffer();
-		subcomponentBufferMappedRange = subcomponentBuffer->map(0, subcomponentBuffer->getSize());
-
 		glyphSubcomponentBuffer = createGlyphSubcomponentBuffer();
-		glyphSubcomponentBufferMappedRange = glyphSubcomponentBuffer->map(0, glyphSubcomponentBuffer->getSize());
-
 		userImageStagingBuffer = createUserImageStagingBuffer();
-		userImageStagingBufferMappedRange = userImageStagingBuffer->map(0, userImageStagingBuffer->getSize());
+
+		const ref<BufferView<Camera>> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
+		const ref<BufferView<GUISubcomponent>> subcomponentView = subcomponentBuffer->createView<GUISubcomponent>(0, subcomponentBuffer->getSize());
+		const ref<BufferView<GUIGlyphSubcomponent>> glyphSubcomponentView = glyphSubcomponentBuffer->createView<GUIGlyphSubcomponent>(0, glyphSubcomponentBuffer->getSize());
+		const ref<BufferView<uint8>> userImageView = userImageStagingBuffer->createView<uint8>(0, userImageStagingBuffer->getSize());
+
+		cameraBufferMappedRange = cameraView->map();
+		subcomponentBufferMappedRange = subcomponentView->map();
+		glyphSubcomponentBufferMappedRange = glyphSubcomponentView->map();
+		userImageStagingBufferMappedRange = userImageView->map();
 
 		userImages = sequence<ref<Image>>(MAX_USER_IMAGE_COUNT);
 		userImageViews = sequence<ref<ImageView>>(MAX_USER_IMAGE_COUNT);
@@ -138,7 +140,7 @@ namespace Trident {
 			const sequence<char8> name = Logger::format("User image [] (default)", userImageIndex);
 		#endif
 
-		userImages[userImageIndex] = createImage({
+		userImages[userImageIndex] = createDynamicImage({
 			.type = ImageType::TEXTURE_2D,
 			.format = ImageFormat::R8G8B8A8_UNORM,
 			.extent = {1, 1, 1},
@@ -195,7 +197,7 @@ namespace Trident {
 			userImageStagingBufferMappedRange += imageAsset->getSize();
 		}
 
-		userImages[userImageIndex] = createImage({
+		userImages[userImageIndex] = createDynamicImage({
 			.type = ImageType::TEXTURE_2D,
 			.format = format,
 			.extent = imageAsset->getExtent(),
@@ -308,32 +310,34 @@ namespace Trident {
 		}
 	}
 
-	ref<Buffer<GUIRenderer::Vertex>> GUIRenderer::createVertexBuffer() const {
-		return createBuffer<Vertex>({
-			.size = sizeof(Vertex) * 4,
-			.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST,
+	ref<Buffer> GUIRenderer::createVertexBuffer() const {
+		return createDynamicBuffer({
+			.size = 4 * sizeof(Vertex),
+			.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+			.persistent = false,
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Vertex",
 			#endif
 		});
 	}
 
-	ref<Buffer<uint16>> GUIRenderer::createIndexBuffer() const {
-		return createBuffer<uint16>({
-			.size = sizeof(uint16) * 6,
-			.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST,
+	ref<Buffer> GUIRenderer::createIndexBuffer() const {
+		return createDynamicBuffer({
+			.size = 6 * sizeof(uint16),
+			.usage = BufferUsage::TRANSFER_DST | BufferUsage::INDEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+			.persistent = false,
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Index",
 			#endif
 		});
 	}
 
-	ref<Buffer<GUIRenderer::Camera>> GUIRenderer::createCameraBuffer() const {
+	ref<Buffer> GUIRenderer::createCameraBuffer() const {
 		const uint64 minUniformBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
 
-		return createBuffer<Camera>({
+		return createDynamicBuffer({
 			.size = ceil(sizeof(Camera), minUniformBufferOffsetAlignment),
 			.usage = BufferUsage::UNIFORM,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
@@ -344,10 +348,10 @@ namespace Trident {
 		});
 	}
 
-	ref<Buffer<GUISubcomponent>> GUIRenderer::createSubcomponentBuffer() const {
-		return createBuffer<GUISubcomponent>({
-			.size = sizeof(GUISubcomponent) * MAX_SUBCOMPONENT_COUNT,
-			.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST,
+	ref<Buffer> GUIRenderer::createSubcomponentBuffer() const {
+		return createDynamicBuffer({
+			.size = MAX_SUBCOMPONENT_COUNT * sizeof(GUISubcomponent),
+			.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = true,
 			#if defined(DEBUG_OBJECT_NAME)
@@ -356,10 +360,10 @@ namespace Trident {
 		});
 	}
 
-	ref<Buffer<GUIGlyphSubcomponent>> GUIRenderer::createGlyphSubcomponentBuffer() const {
-		return createBuffer<GUIGlyphSubcomponent>({
-			.size = sizeof(GUIGlyphSubcomponent) * MAX_GLYPH_SUBCOMPONENT_COUNT,
-			.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST,
+	ref<Buffer> GUIRenderer::createGlyphSubcomponentBuffer() const {
+		return createDynamicBuffer({
+			.size = MAX_GLYPH_SUBCOMPONENT_COUNT * sizeof(GUIGlyphSubcomponent),
+			.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = true,
 			#if defined(DEBUG_OBJECT_NAME)
@@ -397,9 +401,18 @@ namespace Trident {
 		});
 	}
 
-	ref<Buffer<uint8>> GUIRenderer::createUserImageStagingBuffer() const {
-		// Can accomodate for 8 2048x2048 RGBA textures.
-		return createStagingBuffer<uint8>(134217728);
+	ref<Buffer> GUIRenderer::createUserImageStagingBuffer() const {
+		return createDynamicBuffer({
+			// Can accomodate for 8 2048x2048 RGBA textures.
+			.size = 134217728,
+
+			.usage = BufferUsage::TRANSFER_SRC,
+			.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
+			.persistent = false,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "User image staging",
+			#endif
+		});
 	}
 
 	ref<Sampler> GUIRenderer::createNearestSampler() const {
@@ -581,11 +594,19 @@ namespace Trident {
 	}
 
 	void GUIRenderer::copyBuffers() const {
-		const ref<Buffer<uint8>> stagingBuffer = createStagingBuffer<uint8>(vertexBuffer->getSize() + indexBuffer->getSize());
+		const ref<Buffer> stagingBuffer = createDynamicBuffer({
+			.size = vertexBuffer->getSize() + indexBuffer->getSize(),
+			.usage = BufferUsage::TRANSFER_SRC,
+			.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
+			.persistent = false,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Staging",
+			#endif
+		});
+		const ref<BufferView<Vertex>> vertexView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
+		const ref<BufferView<uint16>> indexView = stagingBuffer->createView<uint16>(vertexBuffer->getSize(), indexBuffer->getSize());
 
-		uint8* mappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
-
-		Vertex* vertexMappedRange = pointer_cast<Vertex*>(mappedRange);
+		Vertex* vertexMappedRange = vertexView->map();
 		vertexMappedRange[0].position = {0.0f, 0.0f};
 		vertexMappedRange[0].textureCoordinate = {0.0f, 0.0f};
 		vertexMappedRange[1].position = {1.0f, 0.0f};
@@ -595,32 +616,16 @@ namespace Trident {
 		vertexMappedRange[3].position = {0.0f, 1.0f};
 		vertexMappedRange[3].textureCoordinate = {0.0f, 1.0f};
 
-		uint16* indexMappedRange = pointer_cast<uint16*>(mappedRange + vertexBuffer->getSize());
-
 		static constexpr uint16 INDICES[] = {0, 1, 2, 0, 2, 3};
+
+		uint16* indexMappedRange = indexView->map();
 
 		std::copy_n(INDICES, 6, indexMappedRange);
 
 		stagingBuffer->unmap();
 
-		const sequence<BufferCopyRegion> copyRegions = {
-			// Vertex
-			{
-				.sourceOffset = 0,
-				.destinationOffset = 0,
-				.size = vertexBuffer->getSize(),
-			},
-
-			// Index
-			{
-				.sourceOffset = vertexBuffer->getSize(),
-				.destinationOffset = 0,
-				.size = indexBuffer->getSize(),
-			},
-		};
-
-		const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
-		const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder({
+		const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
+		const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
 			.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Copy buffers",
@@ -628,13 +633,27 @@ namespace Trident {
 		});
 
 		commandEncoder->begin();
-		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, copyRegions[0]);
-		commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, copyRegions[1]);
+
+		BufferCopyRegion bufferCopyRegion = {
+			.sourceOffset = vertexView->getOffset(),
+			.destinationOffset = 0,
+			.size = vertexView->getSize(),
+		};
+
+		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegion);
+
+		bufferCopyRegion = {
+			.sourceOffset = indexView->getOffset(),
+			.destinationOffset = 0,
+			.size = indexView->getSize(),
+		};
+
+		commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, bufferCopyRegion);
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-		transferQueue->submit(commandBuffer);
-		transferQueue->waitIdle();
+		queue->submit(commandBuffer);
+		queue->waitIdle();
 	}
 
 	void GUIRenderer::updateDescriptorSets() const {

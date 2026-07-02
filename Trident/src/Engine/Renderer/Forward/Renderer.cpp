@@ -148,7 +148,7 @@ namespace Trident {
 					materialDescriptorSetLayoutBindingImageDescriptor.name = materialName;
 				#endif
 
-				materialImages[materialShaderIndex][bindingIndex] = createImage(materialDescriptorSetLayoutBindingImageDescriptor);
+				materialImages[materialShaderIndex][bindingIndex] = createDynamicImage(materialDescriptorSetLayoutBindingImageDescriptor);
 				materialImageAssets[materialShaderIndex][bindingIndex] = sequence<ref<ImageAsset>>(materials.size());
 
 				materialIndex = 0;
@@ -179,9 +179,18 @@ namespace Trident {
 			return;
 		}
 
-		const ref<Buffer<uint8>> imageStagingBuffer = createStagingBuffer<uint8>(imageStagingBufferSize);
+		const ref<Buffer> imageStagingBuffer = createDynamicBuffer({
+			.size = imageStagingBufferSize,
+			.usage = BufferUsage::TRANSFER_SRC,
+			.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
+			.persistent = false,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Image staging",
+			#endif
+		});
+		const ref<BufferView<uint8>> imageStagingView = imageStagingBuffer->createView<uint8>(0, imageStagingBuffer->getSize());
 
-		uint8* imageMappedRange = imageStagingBuffer->map(0, imageStagingBuffer->getSize());
+		uint8* imageMappedRange = imageStagingView->map();
 		uint64 imageMappedRangeOffset = 0;
 		uint32 materialReferenceBindingImageIndex = 0;
 

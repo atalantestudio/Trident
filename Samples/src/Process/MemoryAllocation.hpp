@@ -17,7 +17,7 @@ namespace Trident {
 				const ref<Device> device = Renderer::getDevice();
 				const ref<MemoryAllocator> memoryAllocator = device->getMemoryAllocator();
 
-				const ref<BaseBuffer> buffer1 = device->createStaticBuffer({
+				const ref<Buffer> buffer1 = device->createStaticBuffer({
 					.size = 256,
 					.usage = BufferUsage::UNIFORM,
 					.memoryProperties = memoryProperties,
@@ -26,7 +26,7 @@ namespace Trident {
 						.name = "Buffer 1",
 					#endif
 				});
-				const ref<BaseBuffer> buffer2 = device->createStaticBuffer({
+				const ref<Buffer> buffer2 = device->createStaticBuffer({
 					.size = 87,
 					.usage = BufferUsage::TRANSFER_SRC,
 					.memoryProperties = memoryProperties,

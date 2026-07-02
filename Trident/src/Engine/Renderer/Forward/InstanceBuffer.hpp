@@ -6,10 +6,10 @@
 #include "Engine/Renderer/Forward/Renderer.hpp"
 
 namespace Trident {
-	ref<Buffer<ForwardRenderer::Instance>> ForwardRenderer::createInstanceBuffer() const {
+	ref<Buffer> ForwardRenderer::createInstanceBuffer() const {
 		const ComponentPool<RigidBody3DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody3DComponent>();
 
-		return createBuffer<ForwardRenderer::Instance>({
+		return createDynamicBuffer({
 			.size = rigidBodyComponentPool.componentCount * sizeof(Instance),
 			.usage = BufferUsage::VERTEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,

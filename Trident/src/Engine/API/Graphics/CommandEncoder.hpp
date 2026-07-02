@@ -43,22 +43,22 @@ namespace Trident {
 			/// Binds the provided index buffer.
 			/// The offset is in bytes and must be a multiple of IndexType.
 			template<typename IndexType>
-			inline void bindIndexBuffer(ref<BaseBuffer> indexBuffer, uint64 offset) {
+			inline void bindIndexBuffer(ref<Buffer> indexBuffer, uint64 offset) {
 				bindIndexBuffer(indexBuffer, offset, sizeof(IndexType));
 			}
 
 			// NOTE: `stride` is only used by the OpenGL adapter (see glBindVertexBuffer).
-			void bindVertexBuffer(uint32 bindingIndex, ref<BaseBuffer> vertexBuffer, uint64 offset, uint32 stride);
+			void bindVertexBuffer(uint32 bindingIndex, ref<Buffer> vertexBuffer, uint64 offset, uint32 stride);
 
-			void copyBufferToBuffer(ref<BaseBuffer> sourceBuffer, ref<BaseBuffer> destinationBuffer, view<BufferCopyRegion> copyRegions);
+			void copyBufferToBuffer(ref<Buffer> sourceBuffer, ref<Buffer> destinationBuffer, view<BufferCopyRegion> copyRegions);
 
-			void copyBufferToImage(ref<BaseBuffer> sourceBuffer, ref<Image> destinationImage, view<BufferImageCopyRegion> copyRegions);
+			void copyBufferToImage(ref<Buffer> sourceBuffer, ref<Image> destinationImage, view<BufferImageCopyRegion> copyRegions);
 
-			void copyImageToBuffer(ref<Image> sourceImage, ref<BaseBuffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions);
+			void copyImageToBuffer(ref<Image> sourceImage, ref<Buffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions);
 
 			void dispatch(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ);
 
-			void dispatchIndirect(ref<BaseBuffer> buffer, uint64 bufferOffset);
+			void dispatchIndirect(ref<Buffer> buffer, uint64 bufferOffset);
 
 			// Draws primitives.
 			// - `vertexCount` is the number of vertices to draw per instance.
@@ -81,14 +81,14 @@ namespace Trident {
 			// - `bufferOffset` is the offset into `buffer` where arguments begin, in bytes.
 			// - `drawCount` is the number of draw calls to execute. Cannot be 0.
 			// - `stride` is the distance between successive sets of draw arguments, in bytes. Ignored if `drawCount` is 0 or 1.
-			void drawIndexedIndirect(ref<BaseBuffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride);
+			void drawIndexedIndirect(ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride);
 
 			// Draws primitives using arguments from an indirect buffer.
 			// - `buffer` is the buffer containing draw arguments.
 			// - `bufferOffset` is the offset into `buffer` where arguments begin, in bytes.
 			// - `drawCount` is the number of draw calls to execute. Cannot be 0.
 			// - `stride` is the distance between successive sets of draw arguments, in bytes. Ignored if `drawCount` is 0 or 1.
-			void drawIndirect(ref<BaseBuffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride);
+			void drawIndirect(ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride);
 
 			ref<CommandBuffer> end() const;
 
@@ -115,13 +115,13 @@ namespace Trident {
 			explicit CommandEncoder(const Device* device, const CommandPool* commandPool);
 
 		private:
-			void bindIndexBuffer(ref<BaseBuffer> indexBuffer, uint64 offset, uint8 indexTypeSize);
+			void bindIndexBuffer(ref<Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize);
 
 		public:
 			const Device* device;
 			const CommandPool* commandPool;
 	};
 
-	template void CommandEncoder::bindIndexBuffer<uint16>(ref<BaseBuffer> indexBuffer, uint64 offset);
-	template void CommandEncoder::bindIndexBuffer<uint32>(ref<BaseBuffer> indexBuffer, uint64 offset);
+	template void CommandEncoder::bindIndexBuffer<uint16>(ref<Buffer> indexBuffer, uint64 offset);
+	template void CommandEncoder::bindIndexBuffer<uint32>(ref<Buffer> indexBuffer, uint64 offset);
 }

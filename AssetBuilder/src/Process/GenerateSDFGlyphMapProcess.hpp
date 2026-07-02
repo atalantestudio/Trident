@@ -62,9 +62,9 @@ namespace Trident {
 			void updateDescriptorSets() const;
 
 		private:
-			ref<BaseBuffer> fontBuffer;
-			ref<BaseBuffer> glyphBuffer;
-			ref<BaseBuffer> glyphOffsetBuffer;
+			ref<Buffer> fontBuffer;
+			ref<Buffer> glyphBuffer;
+			ref<Buffer> glyphOffsetBuffer;
 
 			// Contains a high-resolution SDF for a single glyph.
 			ref<Image> glyphImage;

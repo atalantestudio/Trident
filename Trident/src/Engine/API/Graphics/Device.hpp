@@ -28,10 +28,10 @@ namespace Trident {
 			/// Creates and returns a buffer which is pre-allocated from dynamic memory.
 			/// For most resources (excluding render pass attachments and other resources depending on the screen size),
 			/// prefer Device::createStaticBuffer over this method.
-			ref<BaseBuffer> createDynamicBuffer(const BufferDescriptor& descriptor) const;
+			ref<Buffer> createDynamicBuffer(const BufferDescriptor& descriptor) const;
 
 			/// Creates and returns a buffer which needs to be manually allocated.
-			ref<BaseBuffer> createStaticBuffer(const BufferDescriptor& descriptor) const;
+			ref<Buffer> createStaticBuffer(const BufferDescriptor& descriptor) const;
 
 			ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor) const;
 

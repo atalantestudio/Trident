@@ -36,8 +36,10 @@ namespace Trident {
 
 				mipLevelBuffer = createMipLevelBuffer();
 
-				mipLevelMappedRange = mipLevelBuffer->map(0, mipLevelBuffer->getSize());
-				*mipLevelMappedRange = 0;
+				const ref<BufferView<uint32>> mipLevelView = mipLevelBuffer->createView<uint32>(0, mipLevelBuffer->getSize());
+
+				mipLevelMappedRange = mipLevelView->map();
+				mipLevelMappedRange[0] = 0;
 
 				debugImageDescriptorSetLayout = createImageDescriptorSetLayout();
 
@@ -104,9 +106,18 @@ namespace Trident {
 				const view<char8> assetName = ((Layer*) getLayer())->getApplication()->getPropertyFile()->getProperty<view<char8>>("AssetName");
 				const ref<ImageAsset> imageAsset = getLayer()->getApplication()->getAssetLibrary()->getAsset<ImageAsset>(assetName);
 				const Extent3D imageExtent = imageAsset->getExtent();
-				const ref<Buffer<uint8>> imageStagingBuffer = createStagingBuffer<uint8>(imageExtent.width * imageExtent.height * imageExtent.depth * imageAsset->getLayerCount() * getChannelCount(ImageFormat::R8G8B8A8_UNORM));
+				const ref<Buffer> imageStagingBuffer = createDynamicBuffer({
+					.size = imageExtent.width * imageExtent.height * imageExtent.depth * imageAsset->getLayerCount() * getChannelCount(ImageFormat::R8G8B8A8_UNORM),
+					.usage = BufferUsage::TRANSFER_SRC,
+					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
+					.persistent = false,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Image staging",
+					#endif
+				});
+				const ref<BufferView<uint8>> imageStagingView = imageStagingBuffer->createView<uint8>(0, imageStagingBuffer->getSize());
 
-				uint8* imageStagingBufferMappedRange = imageStagingBuffer->map(0, imageStagingBuffer->getSize());
+				uint8* imageStagingBufferMappedRange = imageStagingView->map();
 
 				switch (imageAsset->getFormat()) {
 					case ImageFormat::R8_UNORM: {
@@ -133,7 +144,7 @@ namespace Trident {
 
 				imageStagingBuffer->unmap();
 
-				image = createImage({
+				image = createDynamicImage({
 					.type = ImageType::TEXTURE_2D,
 					.format = ImageFormat::R8G8B8A8_UNORM,
 					.extent = imageAsset->getExtent(),
@@ -227,7 +238,7 @@ namespace Trident {
 				const uint64 minStorageBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
 				const uint64 minUniformBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
 
-				const ref<Buffer<uint32>> atomicCounterBuffer = createBuffer<uint32>({
+				const ref<Buffer> atomicCounterBuffer = createDynamicBuffer({
 					.size = ceil(sizeof(uint32), minStorageBufferOffsetAlignment),
 					.usage = BufferUsage::READ_WRITE_STORAGE,
 					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
@@ -236,9 +247,7 @@ namespace Trident {
 						.name = "Atomic counter",
 					#endif
 				});
-				const ref<BufferView<uint32>> atomicCounterView = atomicCounterBuffer->createView<uint32>(0, atomicCounterBuffer->getSize());
-
-				const ref<Buffer<MipLevelArguments>> argumentBuffer = createBuffer<MipLevelArguments>({
+				const ref<Buffer> argumentBuffer = createDynamicBuffer({
 					.size = ceil(sizeof(MipLevelArguments), minUniformBufferOffsetAlignment),
 					.usage = BufferUsage::UNIFORM,
 					.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
@@ -247,11 +256,13 @@ namespace Trident {
 						.name = "Mip level arguments",
 					#endif
 				});
+
+				const ref<BufferView<uint32>> atomicCounterView = atomicCounterBuffer->createView<uint32>(0, atomicCounterBuffer->getSize());
 				const ref<BufferView<MipLevelArguments>> argumentView = argumentBuffer->createView<MipLevelArguments>(0, argumentBuffer->getSize());
 
-				MipLevelArguments* arguments = argumentBuffer->map(0, argumentBuffer->getSize());
-				arguments->groupCount = groupCountX * groupCountY * groupCountZ;
-				arguments->mipLevelCount = mipLevelCount;
+				MipLevelArguments* arguments = argumentView->map();
+				arguments[0].groupCount = groupCountX * groupCountY * groupCountZ;
+				arguments[0].mipLevelCount = mipLevelCount;
 
 				argumentBuffer->unmap();
 
@@ -466,10 +477,10 @@ namespace Trident {
 				});
 			}
 
-			ref<Buffer<uint32>> createMipLevelBuffer() const {
+			ref<Buffer> createMipLevelBuffer() const {
 				const uint64 minUniformBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
 
-				return createBuffer<uint32>({
+				return createDynamicBuffer({
 					.size = ceil(sizeof(uint32), minUniformBufferOffsetAlignment),
 					.usage = BufferUsage::UNIFORM,
 					.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
@@ -593,7 +604,7 @@ namespace Trident {
 			ref<DescriptorSet> debugImageDescriptorSet;
 			ref<PipelineLayout> debugImagePipelineLayout;
 			ref<GraphicsPipeline> debugImagePipeline;
-			ref<Buffer<uint32>> mipLevelBuffer;
+			ref<Buffer> mipLevelBuffer;
 			ref<ImageView> debugImageView;
 			ref<Sampler> debugSampler;
 

@@ -11,9 +11,11 @@
 #include "Engine/API/Graphics/MemorySuballocation.hpp"
 
 namespace Trident {
-	class BaseBuffer {
+	class Buffer {
 		public:
-			~BaseBuffer();
+			/// Destroys the buffer.
+			/// TODO(graphics/dx12/buffer/automatic-heap-release): If the buffer was dynamically allocated, its suballocation will also be released.
+			~Buffer();
 
 			/// Returns the size in bytes of the buffer.
 			uint64 getSize() const;
@@ -38,7 +40,7 @@ namespace Trident {
 			void* map(uint64 offset, uint64 size);
 
 		protected:
-			explicit BaseBuffer(const Device* device, const BufferDescriptor& descriptor);
+			explicit Buffer(const Device* device, const BufferDescriptor& descriptor);
 
 		private:
 			const Device* device;
@@ -49,17 +51,6 @@ namespace Trident {
 			BufferUsage usage;
 			MemorySuballocation memorySuballocation;
 			Access access = Access::NONE;
-	};
-
-	// TODO(graphics/buffer): Deprecate (replace by BufferView).
-	template<typename ElementType>
-	class Buffer : public BaseBuffer {
-		public:
-			/// Maps a range of the buffer to host memory.
-			/// The offset and size must be provided in bytes.
-			inline ElementType* map(uint64 offset, uint64 size) {
-				return static_cast<ElementType*>(BaseBuffer::map(offset, size));
-			}
 	};
 }
 

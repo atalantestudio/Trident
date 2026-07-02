@@ -8,19 +8,19 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	DX12::BaseBuffer::BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor) :
+	DX12::Buffer::Buffer(const Trident::Device* device, const BufferDescriptor& descriptor) :
 		#if defined(DEBUG_OBJECT_NAME)
 			name(descriptor.name),
 		#endif
-		Trident::BaseBuffer(device, descriptor)
+		Trident::Buffer(device, descriptor)
 	{}
 
-	ref<Trident::BaseBuffer> DX12::createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor) {
-		return createRef<DX12::BaseBuffer>(device, descriptor);
+	ref<Trident::Buffer> DX12::createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor) {
+		return createRef<DX12::Buffer>(device, descriptor);
 	}
 
-	void DX12::destroyBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer) {
-		const DX12::BaseBuffer* _buffer = static_cast<const DX12::BaseBuffer*>(buffer);
+	void DX12::destroyBuffer(const Trident::Device* device, const Trident::Buffer* buffer) {
+		const DX12::Buffer* _buffer = static_cast<const DX12::Buffer*>(buffer);
 
 		_buffer->resource->Release();
 
@@ -29,8 +29,8 @@ namespace Trident {
 		}
 	}
 
-	void* DX12::mapBuffer(const Trident::Device* device, Trident::BaseBuffer* buffer, uint64 offset, uint64 size) {
-		const DX12::BaseBuffer* _buffer = static_cast<const DX12::BaseBuffer*>(buffer);
+	void* DX12::mapBuffer(const Trident::Device* device, Trident::Buffer* buffer, uint64 offset, uint64 size) {
+		const DX12::Buffer* _buffer = static_cast<const DX12::Buffer*>(buffer);
 		void* data;
 
 		D3D12_RANGE readRange{};
@@ -46,8 +46,8 @@ namespace Trident {
 		return static_cast<void*>(mappedRange);
 	}
 
-	void DX12::unmapBuffer(const Trident::Device* device, Trident::BaseBuffer* buffer) {
-		const DX12::BaseBuffer* _buffer = static_cast<const DX12::BaseBuffer*>(buffer);
+	void DX12::unmapBuffer(const Trident::Device* device, Trident::Buffer* buffer) {
+		const DX12::Buffer* _buffer = static_cast<const DX12::Buffer*>(buffer);
 
 		_buffer->resource->Unmap(0, nullptr);
 	}

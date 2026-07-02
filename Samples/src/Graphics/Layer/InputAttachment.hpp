@@ -36,6 +36,49 @@ namespace Trident {
 				vertexBuffer = createVertexBuffer();
 			}
 
+			void encodeOneTimeCommands() const override {
+				const ref<Buffer> stagingBuffer = createDynamicBuffer({
+					.size = vertexBuffer->getSize(),
+					.usage = BufferUsage::TRANSFER_SRC,
+					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
+					.persistent = false,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Staging",
+					#endif
+				});
+				const ref<BufferView<Vertex>> vertexView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
+
+				Vertex* vertexMappedRange = vertexView->map();
+				vertexMappedRange[0] = {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}};
+				vertexMappedRange[1] = {{ 0.0f,  0.5f}, {0.0f, 1.0f, 0.0f}};
+				vertexMappedRange[2] = {{ 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}};
+
+				stagingBuffer->unmap();
+
+				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
+				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
+					.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Copy buffers",
+					#endif
+				});
+
+				commandEncoder->begin();
+
+				const BufferCopyRegion bufferCopyRegion = {
+					.sourceOffset = 0,
+					.destinationOffset = 0,
+					.size = vertexBuffer->getSize(),
+				};
+
+				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegion);
+
+				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+				queue->submit(commandBuffer);
+				queue->waitIdle();
+			}
+
 			void render(ref<CommandEncoder> commandEncoder) const override {
 				const Extent2D swapchainExtent = getSwapchain()->getExtent();
 				const float32 width = static_cast<float32>(swapchainExtent.width);
@@ -369,18 +412,9 @@ namespace Trident {
 				});
 			}
 
-			ref<Buffer<Vertex>> createVertexBuffer() const {
-				const ref<Buffer<Vertex>> vertexStagingBuffer = createStagingBuffer<Vertex>(3 * sizeof(Vertex));
-
-				Vertex* mappedRange = vertexStagingBuffer->map(0, vertexStagingBuffer->getSize());
-				mappedRange[0] = {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}};
-				mappedRange[1] = {{ 0.0f,  0.5f}, {0.0f, 1.0f, 0.0f}};
-				mappedRange[2] = {{ 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}};
-
-				vertexStagingBuffer->unmap();
-
-				const ref<Buffer<Vertex>> vertexBuffer = createBuffer<Vertex>({
-					.size = vertexStagingBuffer->getSize(),
+			ref<Buffer> createVertexBuffer() const {
+				return createDynamicBuffer({
+					.size = 3 * sizeof(Vertex),
 					.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX,
 					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 					.persistent = false,
@@ -388,31 +422,6 @@ namespace Trident {
 						.name = "Vertex",
 					#endif
 				});
-
-				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
-				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
-					.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
-					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Copy vertex buffer",
-					#endif
-				});
-
-				commandEncoder->begin();
-
-				const BufferCopyRegion bufferCopyRegion = {
-					.sourceOffset = 0,
-					.destinationOffset = 0,
-					.size = vertexBuffer->getSize(),
-				};
-
-				commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, bufferCopyRegion);
-
-				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-				queue->submit(commandBuffer);
-				queue->waitIdle();
-
-				return vertexBuffer;
 			}
 
 		private:
@@ -433,7 +442,7 @@ namespace Trident {
 			ref<GraphicsPipeline> trianglePipeline;
 			ref<GraphicsPipeline> presentPipeline;
 
-			ref<Buffer<Vertex>> vertexBuffer;
+			ref<Buffer> vertexBuffer;
 	};
 
 	DEFINE_SAMPLE_LAYER(SampleInputAttachment);

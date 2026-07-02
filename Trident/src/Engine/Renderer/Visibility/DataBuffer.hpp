@@ -6,8 +6,8 @@
 #include "Engine/Renderer/Visibility/Renderer.hpp"
 
 namespace Trident {
-	ref<Buffer<uint8>> VisibilityRenderer::createDataBuffer(uint64 size) const {
-		return createBuffer<uint8>({
+	ref<Buffer> VisibilityRenderer::createDataBuffer(uint64 size) const {
+		return createDynamicBuffer({
 			.size = size,
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,

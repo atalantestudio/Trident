@@ -107,10 +107,13 @@ namespace Trident {
 				debugContactManifoldPipeline = createDebugContactManifoldPipeline();
 
 				cameraBuffer = createCameraBuffer();
-				cameraMappedRange = cameraBuffer->map(0, cameraBuffer->getSize());
-
 				debugContactManifoldBuffer = createDebugContactManifoldBuffer();
-				debugContactRange = debugContactManifoldBuffer->map(0, debugContactManifoldBuffer->getSize());
+
+				const ref<BufferView<Camera>> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
+				const ref<BufferView<svec3<float32>>> debugContactManifoldView = debugContactManifoldBuffer->createView<svec3<float32>>(0, debugContactManifoldBuffer->getSize());
+
+				cameraMappedRange = cameraView->map();
+				debugContactRange = debugContactManifoldView->map();
 
 				imageSampler = createImageSampler();
 			}
@@ -140,7 +143,10 @@ namespace Trident {
 				}
 
 				instanceBuffer = createInstanceBuffer();
-				instanceMappedRange = instanceBuffer->map(0, instanceBuffer->getSize());
+
+				const ref<BufferView<Instance>> instanceView = instanceBuffer->createView<Instance>(0, instanceBuffer->getSize());
+
+				instanceMappedRange = instanceView->map();
 
 				if (scene->getHullLineIndexCount() > 0) {
 					debugHullWireframeBuffer = createDebugHullWireframeBuffer();
@@ -160,13 +166,21 @@ namespace Trident {
 					componentIndex += 1;
 				}
 
-				ref<Buffer<uint8>> dataStagingBuffer;
+				ref<Buffer> dataStagingBuffer;
 
 				if (scene->getIndexCount() > 0) {
 					// TODO: As of now the hull line indices are included twice.
-					dataStagingBuffer = createStagingBuffer<uint8>(sourceDataBuffer.count() + scene->getHullLineIndexCount() * sizeof(uint16));
+					dataStagingBuffer = createDynamicBuffer({
+						.size = sourceDataBuffer.count() + scene->getHullLineIndexCount() * sizeof(uint16),
+						.usage = BufferUsage::TRANSFER_SRC,
+						.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
+						.persistent = false,
+						#if defined(DEBUG_OBJECT_NAME)
+							.name = "Data staging",
+						#endif
+					});
 
-					uint8* vertexMappedRange = dataStagingBuffer->map(0, dataStagingBuffer->getSize());
+					uint8* vertexMappedRange = static_cast<uint8*>(dataStagingBuffer->map(0, dataStagingBuffer->getSize()));
 
 					std::copy_n(sourceDataBuffer.begin(), vertexPositionIndexRange.offset, vertexMappedRange);
 					std::copy_n(&sourceDataBuffer[scene->getHullLineIndexByteOffset()], scene->getHullLineIndexCount() * sizeof(uint16), vertexMappedRange + vertexPositionIndexRange.offset);
@@ -184,7 +198,7 @@ namespace Trident {
 
 					dataStagingBuffer->unmap();
 
-					dataBuffer = createBuffer<uint8>({
+					dataBuffer = createDynamicBuffer({
 						.size = vertexPositionIndexRange.offset,
 						.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
 						.memoryProperties = MemoryProperty::DEVICE_LOCAL,
@@ -377,12 +391,12 @@ namespace Trident {
 			ref<ImageView> createColorImageView() const;
 			ref<ImageView> createDepthStencilImageView() const;
 
-			ref<Buffer<Camera>> createCameraBuffer() const;
-			ref<Buffer<Instance>> createInstanceBuffer() const;
-			ref<Buffer<Vertex>> createVertexBuffer() const;
-			ref<Buffer<uint16>> createDebugHullWireframeBuffer() const;
-			ref<Buffer<svec3<float32>>> createDebugContactManifoldBuffer() const;
-			ref<Buffer<uint8>> createStaticBuffer() const;
+			ref<Buffer> createCameraBuffer() const;
+			ref<Buffer> createInstanceBuffer() const;
+			ref<Buffer> createVertexBuffer() const;
+			ref<Buffer> createDebugHullWireframeBuffer() const;
+			ref<Buffer> createDebugContactManifoldBuffer() const;
+			ref<Buffer> createStaticBuffer() const;
 
 			ref<Sampler> createImageSampler() const;
 
@@ -512,13 +526,13 @@ namespace Trident {
 			// TODO: Use the same system as for the dynamic objects.
 			ref<GraphicsPipeline> staticMaterialPipeline;
 
-			ref<Buffer<Vertex>> vertexBuffer;
-			ref<Buffer<Instance>> instanceBuffer;
-			ref<Buffer<uint8>> dataBuffer;
-			ref<Buffer<Camera>> cameraBuffer;
-			ref<Buffer<uint16>> debugHullWireframeBuffer;
-			ref<Buffer<svec3<float32>>> debugContactManifoldBuffer;
-			ref<Buffer<uint8>> staticBuffer;
+			ref<Buffer> vertexBuffer;
+			ref<Buffer> instanceBuffer;
+			ref<Buffer> dataBuffer;
+			ref<Buffer> cameraBuffer;
+			ref<Buffer> debugHullWireframeBuffer;
+			ref<Buffer> debugContactManifoldBuffer;
+			ref<Buffer> staticBuffer;
 
 			#if FORWARD_SAMPLE_COUNT > 1
 				ref<Image> colorImage;

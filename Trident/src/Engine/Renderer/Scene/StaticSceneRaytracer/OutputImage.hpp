@@ -9,7 +9,7 @@ namespace Trident {
 	ref<Image> StaticSceneRayTracer::createOutputImage() const {
 		const Extent2D extent = getSwapchain()->getExtent();
 
-		return createImage({
+		return createDynamicImage({
 			.type = ImageType::TEXTURE_2D,
 			.format = ImageFormat::R8G8B8A8_UNORM,
 			.extent = {

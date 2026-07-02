@@ -10,7 +10,7 @@
 namespace Trident {
 	class GL::CopyImageToBufferCommand final : public GL::Command {
 		public:
-			explicit CopyImageToBufferCommand(ref<GL::Image> sourceImage, ref<GL::BaseBuffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) :
+			explicit CopyImageToBufferCommand(ref<GL::Image> sourceImage, ref<GL::Buffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) :
 				sourceImage(sourceImage),
 				destinationBuffer(destinationBuffer),
 				copyRegions(copyRegions.count())
@@ -62,7 +62,7 @@ namespace Trident {
 
 		private:
 			ref<GL::Image> sourceImage;
-			ref<GL::BaseBuffer> destinationBuffer;
+			ref<GL::Buffer> destinationBuffer;
 			sequence<BufferImageCopyRegion> copyRegions;
 	};
 }

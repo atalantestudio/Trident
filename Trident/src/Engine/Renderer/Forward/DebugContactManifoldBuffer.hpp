@@ -6,8 +6,8 @@
 #include "Engine/Renderer/Forward/Renderer.hpp"
 
 namespace Trident {
-	ref<Buffer<svec3<float32>>> ForwardRenderer::createDebugContactManifoldBuffer() const {
-		return createBuffer<svec3<float32>>({
+	ref<Buffer> ForwardRenderer::createDebugContactManifoldBuffer() const {
+		return createDynamicBuffer({
 			.size = DEBUG_MAX_CONTACTS * sizeof(svec3<float32>),
 			.usage = BufferUsage::VERTEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,

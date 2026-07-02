@@ -55,7 +55,7 @@ namespace Trident::GL {
 	class SetScissorCommand;
 	class SetViewportCommand;
 
-	class BaseBuffer;
+	class Buffer;
 	class CommandBuffer;
 	class CommandEncoder;
 	class ComputePipeline;

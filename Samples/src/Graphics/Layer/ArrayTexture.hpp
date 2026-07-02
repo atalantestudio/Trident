@@ -352,7 +352,7 @@ namespace Trident {
 				});
 			}
 
-			ref<BaseBuffer> createVertexBuffer() const {
+			ref<Buffer> createVertexBuffer() const {
 				return createStaticBuffer({
 					.size = 6 * sizeof(Vertex) + 4 * sizeof(Instance),
 					.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX,
@@ -400,7 +400,7 @@ namespace Trident {
 				});
 			}
 
-			ref<BaseBuffer> createStagingBuffer() const {
+			ref<Buffer> createStagingBuffer() const {
 				uint64 size = vertexBuffer->getSize();
 				uint32 imageIndex = 0;
 
@@ -453,10 +453,10 @@ namespace Trident {
 			ref<PipelineLayout> arrayTexturePipelineLayout;
 			ref<GraphicsPipeline> arrayTexturePipeline;
 			ref<DescriptorSet> arrayTextureDescriptorSet;
-			ref<BaseBuffer> vertexBuffer;
+			ref<Buffer> vertexBuffer;
 			ref<Image> images[IMAGE_COUNT];
 			ref<ImageView> imageViews[IMAGE_COUNT];
-			ref<BaseBuffer> stagingBuffer;
+			ref<Buffer> stagingBuffer;
 			ref<Sampler> sampler;
 	};
 

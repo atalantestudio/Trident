@@ -15,7 +15,7 @@
 namespace Trident::DX12 {
 	struct DescriptorHeapAllocation;
 
-	class BaseBuffer;
+	class Buffer;
 	class CommandBuffer;
 	class CommandEncoder;
 	class CommandPool;

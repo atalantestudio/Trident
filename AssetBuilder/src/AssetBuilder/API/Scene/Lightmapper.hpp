@@ -34,8 +34,8 @@ namespace Trident {
 			ref<Image> createLightmapAtlasImage(const ImageAssetDescriptor& lightmapAtlasImageAssetDescriptor) const;
 			ref<ImageView> createLightmapAtlasImageView();
 
-			ref<Buffer<svec2<float32>>> createCoordinateBuffer(uint64 size) const;
-			ref<Buffer<uint32>> createCoordinateIndexBuffer(uint64 size) const;
+			ref<Buffer> createCoordinateBuffer(uint64 size) const;
+			ref<Buffer> createCoordinateIndexBuffer(uint64 size) const;
 
 			void copyCoordinateBuffers(const StaticScene3D& scene) const;
 
@@ -51,7 +51,7 @@ namespace Trident {
 
 			ref<GraphicsPipeline> lightmapAtlasPipeline;
 
-			ref<Buffer<svec2<float32>>> coordinateBuffer;
-			ref<Buffer<uint32>> coordinateIndexBuffer;
+			ref<Buffer> coordinateBuffer;
+			ref<Buffer> coordinateIndexBuffer;
 	};
 }

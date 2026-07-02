@@ -3,7 +3,7 @@
 
 namespace Trident {
 	template<typename T>
-	inline BufferView<T>::BufferView(BaseBuffer* buffer, uint64 offset, uint64 size) :
+	inline BufferView<T>::BufferView(Buffer* buffer, uint64 offset, uint64 size) :
 		BaseBufferView(buffer, offset, size, sizeof(T))
 	{}
 

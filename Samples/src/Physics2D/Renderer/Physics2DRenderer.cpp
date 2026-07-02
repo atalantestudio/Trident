@@ -234,7 +234,7 @@ namespace Trident {
 	void Physics2DRenderer::createCameraBuffer() {
 		const uint64 minUniformBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
 
-		cameraBuffer = createBuffer<Camera>({
+		cameraBuffer = createDynamicBuffer({
 			.size = ceil(sizeof(Camera), minUniformBufferOffsetAlignment),
 			.usage = BufferUsage::UNIFORM,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
@@ -244,14 +244,16 @@ namespace Trident {
 			#endif
 		});
 
-		cameraMappedRange = cameraBuffer->map(0, cameraBuffer->getSize());
+		const ref<BufferView<Camera>> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
+
+		cameraMappedRange = cameraView->map();
 		cameraMappedRange->zoomLevel = DEFAULT_ZOOM_LEVEL;
 	}
 
 	void Physics2DRenderer::createViewBuffer() {
 		const uint64 minUniformBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
 
-		viewBuffer = createBuffer<View>({
+		viewBuffer = createDynamicBuffer({
 			.size = ceil(sizeof(View), minUniformBufferOffsetAlignment),
 			.usage = BufferUsage::UNIFORM,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
@@ -261,13 +263,15 @@ namespace Trident {
 			#endif
 		});
 
-		viewMappedRange = viewBuffer->map(0, viewBuffer->getSize());
+		const ref<BufferView<View>> viewView = viewBuffer->createView<View>(0, viewBuffer->getSize());
+
+		viewMappedRange = viewView->map();
 	}
 
 	void Physics2DRenderer::createPlaceholderBuffer() {
 		const uint64 minUniformBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
 
-		placeholderBuffer = createBuffer<Placeholder>({
+		placeholderBuffer = createDynamicBuffer({
 			.size = ceil(sizeof(Placeholder), minUniformBufferOffsetAlignment),
 			.usage = BufferUsage::UNIFORM,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
@@ -277,13 +281,15 @@ namespace Trident {
 			#endif
 		});
 
-		placeholderMappedRange = placeholderBuffer->map(0, placeholderBuffer->getSize());
+		const ref<BufferView<Placeholder>> placeholderView = placeholderBuffer->createView<Placeholder>(0, placeholderBuffer->getSize());
+
+		placeholderMappedRange = placeholderView->map();
 		placeholderMappedRange->offset = {0.0f, 0.0f};
 	}
 
 	#if defined(SHOW_DISTANCE)
 		void Physics2DRenderer::createClosestPointBuffer() {
-			closestPointBuffer = createBuffer<Vertex>({
+			closestPointBuffer = createDynamicBuffer({
 				.size = 2 * sizeof(Vertex),
 				.usage = BufferUsage::VERTEX,
 				.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
@@ -293,13 +299,15 @@ namespace Trident {
 				#endif
 			});
 
-			closestPointMappedRange = closestPointBuffer->map(0, closestPointBuffer->getSize());
+			const ref<BufferView<Vertex>> closestPointView = closestPointBuffer->createView<Vertex>(0, closestPointBuffer->getSize());
+
+			closestPointMappedRange = closestPointView->map();
 		}
 	#endif
 
 	#if defined(SHOW_FEATURES)
 		void Physics2DRenderer::createVertexFeatureBuffer() {
-			vertexFeatureBuffer = createBuffer<Vertex>({
+			vertexFeatureBuffer = createDynamicBuffer({
 				.size = 2 * sizeof(Vertex),
 				.usage = BufferUsage::VERTEX,
 				.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
@@ -309,11 +317,13 @@ namespace Trident {
 				#endif
 			});
 
-			vertexFeatureMappedRange = vertexFeatureBuffer->map(0, vertexFeatureBuffer->getSize());
+			const ref<BufferView<Vertex>> vertexFeatureView = vertexFeatureBuffer->createView<Vertex>(0, vertexFeatureBuffer->getSize());
+
+			vertexFeatureMappedRange = vertexFeatureView->map();
 		}
 
 		void Physics2DRenderer::createEdgeFeatureBuffer() {
-			edgeFeatureBuffer = createBuffer<Vertex>({
+			edgeFeatureBuffer = createDynamicBuffer({
 				.size = 4 * sizeof(Vertex),
 				.usage = BufferUsage::VERTEX,
 				.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
@@ -323,7 +333,9 @@ namespace Trident {
 				#endif
 			});
 
-			edgeFeatureMappedRange = edgeFeatureBuffer->map(0, edgeFeatureBuffer->getSize());
+			const ref<BufferView<Vertex>> edgeFeatureView = edgeFeatureBuffer->createView<Vertex>(0, edgeFeatureBuffer->getSize());
+
+			edgeFeatureMappedRange = edgeFeatureView->map();
 		}
 	#endif
 
@@ -1008,13 +1020,21 @@ namespace Trident {
 		const ComponentPool<RigidBody2DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
 		const ComponentPool<GeometryComponent>& geometryComponentPool = scene->ecs.getComponentPool<GeometryComponent>();
 		const uint64 rigidBodyBufferSize = rigidBodyComponentPool.componentCount * sizeof(RigidBody);
-		const ref<Buffer<uint8>> stagingBuffer = createStagingBuffer<uint8>(dataBuffer.count() + rigidBodyBufferSize);
+		const ref<Buffer> stagingBuffer = createDynamicBuffer({
+			.size = dataBuffer.count() + rigidBodyBufferSize,
+			.usage = BufferUsage::TRANSFER_SRC,
+			.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
+			.persistent = false,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Staging",
+			#endif
+		});
+		const ref<BufferView<uint8>> dataStagingView = stagingBuffer->createView<uint8>(0, dataBuffer.count());
+		const ref<BufferView<RigidBody>> rigidBodyStagingView = stagingBuffer->createView<RigidBody>(dataBuffer.count(), rigidBodyBufferSize);
 
-		uint8* mappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
+		std::copy(dataBuffer.begin(), dataBuffer.end(), dataStagingView->map());
 
-		std::copy(dataBuffer.begin(), dataBuffer.end(), &mappedRange[0]);
-
-		RigidBody* stagingRigidBodyMappedRange = pointer_cast<RigidBody*>(&mappedRange[dataBuffer.count()]);
+		RigidBody* stagingRigidBodyMappedRange = rigidBodyStagingView->map();
 		uint32 rigidBodyIndex = 0;
 
 		while (rigidBodyIndex < rigidBodyComponentPool.componentCount) {
@@ -1043,34 +1063,34 @@ namespace Trident {
 
 		stagingBuffer->unmap();
 
-		vertexBuffer = createBuffer<Vertex>({
+		vertexBuffer = createDynamicBuffer({
 			.size = scene->getDynamicVertexCount() * sizeof(Vertex),
-			.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST,
+			.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Vertex",
 			#endif
 		});
-		indexBuffer = createBuffer<uint32>({
+		indexBuffer = createDynamicBuffer({
 			.size = scene->getDynamicIndexCount() * sizeof(uint32),
-			.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST,
+			.usage = BufferUsage::TRANSFER_DST | BufferUsage::INDEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Index",
 			#endif
 		});
-		rigidBodyBuffer = createBuffer<RigidBody>({
+		rigidBodyBuffer = createDynamicBuffer({
 			.size = rigidBodyBufferSize,
-			.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST,
+			.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = true,
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Rigid body",
 			#endif
 		});
-		centerOfMassBuffer = createBuffer<CenterOfMass>({
+		centerOfMassBuffer = createDynamicBuffer({
 			.size = rigidBodyComponentPool.componentCount * sizeof(CenterOfMass),
 			.usage = BufferUsage::VERTEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
@@ -1080,8 +1100,11 @@ namespace Trident {
 			#endif
 		});
 
-		rigidBodyMappedRange = rigidBodyBuffer->map(0, rigidBodyBuffer->getSize());
-		centerOfMassMappedRange = centerOfMassBuffer->map(0, centerOfMassBuffer->getSize());
+		const ref<BufferView<RigidBody>> rigidBodyView = rigidBodyBuffer->createView<RigidBody>(0, rigidBodyBuffer->getSize());
+		const ref<BufferView<CenterOfMass>> centerOfMassView = centerOfMassBuffer->createView<CenterOfMass>(0, centerOfMassBuffer->getSize());
+
+		rigidBodyMappedRange = rigidBodyView->map();
+		centerOfMassMappedRange = centerOfMassView->map();
 
 		const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
 		const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder({

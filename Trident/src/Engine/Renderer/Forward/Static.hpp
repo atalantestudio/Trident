@@ -6,7 +6,7 @@
 #include "Engine/Renderer/Forward/Renderer.hpp"
 
 namespace Trident {
-	ref<Buffer<uint8>> ForwardRenderer::createStaticBuffer() const {
+	ref<Buffer> ForwardRenderer::createStaticBuffer() const {
 		const ref<Device> device = getDevice();
 		const ref<Scene3DAsset> sceneAsset = scene->getAsset();
 		const uint64 minStorageBufferOffsetAlignment = device->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
@@ -18,44 +18,30 @@ namespace Trident {
 		const uint64 vertexAlignedRangeSize = ceil(vertexRangeSize, minStorageBufferOffsetAlignment);
 		const uint64 normalAlignedRangeSize = ceil(normalRangeSize, minStorageBufferOffsetAlignment);
 		const uint64 textureCoordinateAlignedRangeSize = ceil(textureCoordinateRangeSize, minStorageBufferOffsetAlignment);
+		const ref<Buffer> staticStagingBuffer = createDynamicBuffer({
+			.size = triangleRangeSize + vertexRangeSize + normalRangeSize + textureCoordinateRangeSize,
+			.usage = BufferUsage::TRANSFER_SRC,
+			.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
+			.persistent = false,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Staging",
+			#endif
+		});
+		const ref<BufferView<StaticTriangle3D>> triangleView = staticStagingBuffer->createView<StaticTriangle3D>(0, triangleRangeSize);
+		const ref<BufferView<svec3<float32>>> vertexView = staticStagingBuffer->createView<svec3<float32>>(triangleRangeSize, vertexRangeSize);
+		const ref<BufferView<svec3<float32>>> normalView = staticStagingBuffer->createView<svec3<float32>>(triangleRangeSize + vertexRangeSize, normalRangeSize);
+		const ref<BufferView<svec2<float32>>> textureCoordinateView = staticStagingBuffer->createView<svec2<float32>>(triangleRangeSize + vertexRangeSize + normalRangeSize, textureCoordinateRangeSize);
 
-		const ref<Buffer<uint8>> staticStagingBuffer = createStagingBuffer<uint8>(triangleRangeSize + vertexRangeSize + normalRangeSize + textureCoordinateRangeSize);
-
-		uint8* mappedRange = staticStagingBuffer->map(0, staticStagingBuffer->getSize());
-
-		// Copy triangles.
-		{
-			std::copy(scene->getAsset()->getStaticTriangles().begin(), scene->getAsset()->getStaticTriangles().end(), pointer_cast<StaticTriangle3D*>(mappedRange));
-
-			mappedRange += triangleRangeSize;
-		}
-
-		// Copy vertices.
-		{
-			std::copy(scene->getAsset()->getStaticVertices().begin(), scene->getAsset()->getStaticVertices().end(), pointer_cast<svec3<float32>*>(mappedRange));
-
-			mappedRange += vertexRangeSize;
-		}
-
-		// Copy normals.
-		{
-			std::copy(scene->getAsset()->getStaticNormals().begin(), scene->getAsset()->getStaticNormals().end(), pointer_cast<svec3<float32>*>(mappedRange));
-
-			mappedRange += normalRangeSize;
-		}
-
-		// Copy texture coordinates.
-		{
-			std::copy(scene->getAsset()->getStaticTextureCoordinates().begin(), scene->getAsset()->getStaticTextureCoordinates().end(), pointer_cast<svec2<float32>*>(mappedRange));
-
-			mappedRange += textureCoordinateRangeSize;
-		}
+		std::copy(sceneAsset->getStaticTriangles().begin(), sceneAsset->getStaticTriangles().end(), triangleView->map());
+		std::copy(sceneAsset->getStaticVertices().begin(), sceneAsset->getStaticVertices().end(), vertexView->map());
+		std::copy(sceneAsset->getStaticNormals().begin(), sceneAsset->getStaticNormals().end(), normalView->map());
+		std::copy(sceneAsset->getStaticTextureCoordinates().begin(), sceneAsset->getStaticTextureCoordinates().end(), textureCoordinateView->map());
 
 		staticStagingBuffer->unmap();
 
-		const ref<Buffer<uint8>> staticBuffer = createBuffer<uint8>({
+		const ref<Buffer> staticBuffer = createDynamicBuffer({
 			.size = triangleAlignedRangeSize + vertexAlignedRangeSize + normalAlignedRangeSize + textureCoordinateAlignedRangeSize,
-			.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST,
+			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
 			#if defined(DEBUG_OBJECT_NAME)

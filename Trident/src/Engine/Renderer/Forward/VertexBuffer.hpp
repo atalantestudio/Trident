@@ -6,8 +6,8 @@
 #include "Engine/Renderer/Forward/Renderer.hpp"
 
 namespace Trident {
-	ref<Buffer<ForwardRenderer::Vertex>> ForwardRenderer::createVertexBuffer() const {
-		return createBuffer<ForwardRenderer::Vertex>({
+	ref<Buffer> ForwardRenderer::createVertexBuffer() const {
+		return createDynamicBuffer({
 			.size = scene->getIndexCount() * sizeof(ForwardRenderer::Vertex),
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,

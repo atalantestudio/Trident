@@ -108,7 +108,7 @@ namespace Trident {
 					StaticMemoryDescriptor& staticMemoryDescriptor = staticMemoryDescriptors[layerIndex];
 					staticMemoryDescriptor = layer->getStaticMemoryDescriptor();
 
-					for (const ref<BaseBuffer>& buffer : staticMemoryDescriptor.buffers) {
+					for (const ref<Buffer>& buffer : staticMemoryDescriptor.buffers) {
 						const MemorySuballocation memorySuballocation = buffer->getMemorySuballocation();
 
 						DEBUG_ASSERT(memorySuballocation.size == 0);
@@ -156,7 +156,7 @@ namespace Trident {
 				}
 
 				for (const StaticMemoryDescriptor& staticMemoryDescriptor : staticMemoryDescriptors) {
-					for (const ref<BaseBuffer>& buffer : staticMemoryDescriptor.buffers) {
+					for (const ref<Buffer>& buffer : staticMemoryDescriptor.buffers) {
 						const MemorySuballocation memorySuballocation = buffer->getMemorySuballocation();
 						const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(memorySuballocation.memoryProperties, buffer->getUsage() & BufferUsage::TRANSFER_DST);
 						const uint32 allocationIndex = allocationIndicesPerMemoryType[memoryTypeIndex];

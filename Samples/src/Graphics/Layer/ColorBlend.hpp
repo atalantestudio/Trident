@@ -29,6 +29,10 @@ namespace Trident {
 
 				recreateFramebuffers();
 				setupGraphicsPipeline();
+
+				vertexBuffer = createVertexBuffer();
+				instanceBuffer = createInstanceBuffer();
+
 				createBuffers();
 			}
 
@@ -90,10 +94,11 @@ namespace Trident {
 
 				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
 
-				FramebufferDescriptor framebufferDescriptor{};
-				framebufferDescriptor.renderPass = renderPass;
-				framebufferDescriptor.imageViews = {nullptr};
-				framebufferDescriptor.extent = swapchain->getExtent();
+				FramebufferDescriptor framebufferDescriptor = {
+					.renderPass = renderPass,
+					.imageViews = {nullptr},
+					.extent = swapchain->getExtent(),
+				};
 
 				#if defined(DEBUG_OBJECT_NAME)
 					sequence<char8> name;
@@ -182,12 +187,44 @@ namespace Trident {
 				graphicsPipeline = createGraphicsPipeline(graphicsPipelineDescriptor);
 			}
 
+			ref<Buffer> createVertexBuffer() const {
+				return createDynamicBuffer({
+					.size = VERTEX_BUFFER_SIZE,
+					.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX,
+					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+					.persistent = false,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Vertex",
+					#endif
+				});
+			}
+
+			ref<Buffer> createInstanceBuffer() const {
+				return createDynamicBuffer({
+					.size = INSTANCE_BUFFER_SIZE,
+					.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX,
+					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+					.persistent = false,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Instance",
+					#endif
+				});
+			}
+
 			void createBuffers() {
-				const ref<Buffer<uint8>> stagingBuffer = createStagingBuffer<uint8>(VERTEX_BUFFER_SIZE + INSTANCE_BUFFER_SIZE);
+				const ref<Buffer> stagingBuffer = createDynamicBuffer({
+					.size = vertexBuffer->getSize() + instanceBuffer->getSize(),
+					.usage = BufferUsage::TRANSFER_SRC,
+					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
+					.persistent = false,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Staging",
+					#endif
+				});
+				const ref<BufferView<Vertex>> vertexView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
+				const ref<BufferView<Instance>> instanceView = stagingBuffer->createView<Instance>(vertexBuffer->getSize(), instanceBuffer->getSize());
 
-				uint8* stagingBufferMappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
-
-				Vertex* vertexStagingBufferMappedRange = pointer_cast<Vertex*>(stagingBufferMappedRange);
+				Vertex* vertexStagingBufferMappedRange = vertexView->map();
 				vertexStagingBufferMappedRange[0].position = {-0.75f,  0.75f};
 				vertexStagingBufferMappedRange[1].position = { 0.25f,  0.75f};
 				vertexStagingBufferMappedRange[2].position = {-0.75f, -0.75f};
@@ -195,69 +232,50 @@ namespace Trident {
 				vertexStagingBufferMappedRange[4].position = { 0.5f,   0.5f};
 				vertexStagingBufferMappedRange[5].position = {-0.5f,  -0.5f};
 
-				Instance* instanceStagingBufferMappedRange = pointer_cast<Instance*>(stagingBufferMappedRange + VERTEX_BUFFER_SIZE);
+				Instance* instanceStagingBufferMappedRange = instanceView->map();
 				instanceStagingBufferMappedRange[0].color = {1.0f, 1.0f, 1.0f, 1.0f};
 				instanceStagingBufferMappedRange[1].color = {1.0f, 0.2f, 0.0f, 0.5f};
 
 				stagingBuffer->unmap();
 
-				BufferDescriptor vertexBufferDescriptor{};
-				vertexBufferDescriptor.size = VERTEX_BUFFER_SIZE;
-				vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
-				vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					vertexBufferDescriptor.name = "Vertex buffer";
-				#endif
-
-				BufferDescriptor instanceBufferDescriptor{};
-				instanceBufferDescriptor.size = INSTANCE_BUFFER_SIZE;
-				instanceBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
-				instanceBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					instanceBufferDescriptor.name = "Instance buffer";
-				#endif
-
-				vertexBuffer = createBuffer<Vertex>(vertexBufferDescriptor);
-				instanceBuffer = createBuffer<Instance>(instanceBufferDescriptor);
-
-				BufferCopyRegion vertexBufferCopyRegion{};
-				vertexBufferCopyRegion.sourceOffset = 0;
-				vertexBufferCopyRegion.destinationOffset = 0;
-				vertexBufferCopyRegion.size = vertexBuffer->getSize();
-
-				BufferCopyRegion instanceBufferCopyRegion{};
-				instanceBufferCopyRegion.sourceOffset = vertexBuffer->getSize();
-				instanceBufferCopyRegion.destinationOffset = 0;
-				instanceBufferCopyRegion.size = instanceBuffer->getSize();
-
-				CommandBufferDescriptor commandBufferDescriptor{};
-				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					commandBufferDescriptor.name = "Buffer copy command buffer";
-				#endif
-
-				const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
-				const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
+				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
+				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
+					.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Copy buffers",
+					#endif
+				});
 
 				commandEncoder->begin();
-				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, {vertexBufferCopyRegion});
-				commandEncoder->copyBufferToBuffer(stagingBuffer, instanceBuffer, {instanceBufferCopyRegion});
+
+				BufferCopyRegion bufferCopyRegion = {
+					.sourceOffset = vertexView->getOffset(),
+					.destinationOffset = 0,
+					.size = vertexView->getSize(),
+				};
+
+				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegion);
+
+				bufferCopyRegion = {
+					.sourceOffset = instanceView->getOffset(),
+					.destinationOffset = 0,
+					.size = instanceView->getSize(),
+				};
+
+				commandEncoder->copyBufferToBuffer(stagingBuffer, instanceBuffer, bufferCopyRegion);
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-				transferQueue->submit(commandBuffer);
-				transferQueue->waitIdle();
+				queue->submit(commandBuffer);
+				queue->waitIdle();
 			}
 
 		private:
 			ref<RenderPass> renderPass;
 			sequence<ref<Framebuffer>> framebuffers;
 			ref<GraphicsPipeline> graphicsPipeline;
-			ref<Buffer<Vertex>> vertexBuffer;
-			ref<Buffer<Instance>> instanceBuffer;
+			ref<Buffer> vertexBuffer;
+			ref<Buffer> instanceBuffer;
 	};
 
 	DEFINE_SAMPLE_LAYER(SampleColorBlend);

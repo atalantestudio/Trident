@@ -91,7 +91,10 @@ namespace Trident {
 				initialize();
 
 				cameraBuffer = createCameraBuffer();
-				cameraMappedRange = cameraBuffer->map(0, cameraBuffer->getSize());
+
+				const ref<BufferView<Camera>> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
+
+				cameraMappedRange = cameraView->map();
 
 				rayTracingPipelineLayout = createRayTracingPipelineLayout();
 				presentPipelineLayout = createPresentPipelineLayout();
@@ -150,7 +153,7 @@ namespace Trident {
 			ref<ComputePipeline> createRayTracingPipeline() const;
 			ref<GraphicsPipeline> createPresentPipeline() const;
 
-			ref<Buffer<uint8>> createAccumulateBuffer() const;
+			ref<Buffer> createAccumulateBuffer() const;
 
 			ref<Image> createOutputImage() const;
 			ref<ImageView> createOutputImageView();
@@ -240,7 +243,7 @@ namespace Trident {
 			ref<ComputePipeline> rayTracingPipeline;
 			ref<GraphicsPipeline> presentPipeline;
 
-			ref<Buffer<uint8>> accumulateBuffer;
+			ref<Buffer> accumulateBuffer;
 
 			ref<Image> outputImage;
 			ref<ImageView> outputImageView;

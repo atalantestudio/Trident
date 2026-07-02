@@ -117,7 +117,7 @@ namespace Trident {
 
 	void DX12::MemoryAllocator::writeUniformBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, ref<BaseBufferView> bufferView) const {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
-		const DX12::BaseBuffer* _buffer = static_cast<const DX12::BaseBuffer*>(bufferView->getBuffer());
+		const DX12::Buffer* _buffer = static_cast<const DX12::Buffer*>(bufferView->getBuffer());
 
 		D3D12_CONSTANT_BUFFER_VIEW_DESC constantBufferViewDescriptor{};
 		constantBufferViewDescriptor.BufferLocation = _buffer->resource->GetGPUVirtualAddress() + bufferView->getOffset();
@@ -128,7 +128,7 @@ namespace Trident {
 
 	void DX12::MemoryAllocator::writeReadOnlyStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, ref<BaseBufferView> bufferView) const {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
-		const DX12::BaseBuffer* _buffer = static_cast<const DX12::BaseBuffer*>(bufferView->getBuffer());
+		const DX12::Buffer* _buffer = static_cast<const DX12::Buffer*>(bufferView->getBuffer());
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDescriptor{};
 		shaderResourceViewDescriptor.Format = DXGI_FORMAT_UNKNOWN;
@@ -147,7 +147,7 @@ namespace Trident {
 
 	void DX12::MemoryAllocator::writeReadWriteStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, ref<BaseBufferView> bufferView) const {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
-		const DX12::BaseBuffer* _buffer = static_cast<const DX12::BaseBuffer*>(bufferView->getBuffer());
+		const DX12::Buffer* _buffer = static_cast<const DX12::Buffer*>(bufferView->getBuffer());
 
 		D3D12_UNORDERED_ACCESS_VIEW_DESC unorderedAccessViewDescriptor{};
 		unorderedAccessViewDescriptor.Format = DXGI_FORMAT_UNKNOWN;
@@ -440,7 +440,7 @@ namespace Trident {
 		return static_cast<uint32>(heapType) - 1;
 	}
 
-	MemoryRequirements DX12::getBufferMemoryRequirements(const Trident::MemoryAllocator* memoryAllocator, ref<Trident::BaseBuffer> buffer) {
+	MemoryRequirements DX12::getBufferMemoryRequirements(const Trident::MemoryAllocator* memoryAllocator, ref<Trident::Buffer> buffer) {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(memoryAllocator->device);
 
 		D3D12_RESOURCE_DESC resourceDescriptor{};
@@ -494,9 +494,9 @@ namespace Trident {
 		return memoryRequirements;
 	}
 
-	MemorySuballocation DX12::suballocateBufferMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, ref<Trident::BaseBuffer> buffer) {
+	MemorySuballocation DX12::suballocateBufferMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, ref<Trident::Buffer> buffer) {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(memoryAllocator->device);
-		const ref<DX12::BaseBuffer> _buffer = std::static_pointer_cast<DX12::BaseBuffer>(buffer);
+		const ref<DX12::Buffer> _buffer = std::static_pointer_cast<DX12::Buffer>(buffer);
 		const MemoryAllocation& memoryAllocation = memoryAllocator->allocations[allocationIndex];
 
 		D3D12_RESOURCE_DESC resourceDescriptor{};

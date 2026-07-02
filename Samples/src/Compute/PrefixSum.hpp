@@ -56,7 +56,7 @@ namespace Trident {
 				});
 
 				// TODO: Use static memory.
-				const ref<BaseBuffer> elementCountBuffer = createBuffer<uint32>({
+				const ref<Buffer> elementCountBuffer = createDynamicBuffer({
 					.size = sizeof(uint32) * ELEMENT_COUNT,
 					.usage = BufferUsage::READ_ONLY_STORAGE,
 					.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
@@ -65,7 +65,7 @@ namespace Trident {
 						.name = "Element count",
 					#endif
 				});
-				const ref<BaseBuffer> elementStartBuffer = createBuffer<uint32>({
+				const ref<Buffer> elementStartBuffer = createDynamicBuffer({
 					.size = elementCountBuffer->getSize(),
 					.usage = BufferUsage::TRANSFER_SRC | BufferUsage::READ_WRITE_STORAGE,
 					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
@@ -74,7 +74,7 @@ namespace Trident {
 						.name = "Element start",
 					#endif
 				});
-				const ref<BaseBuffer> elementStartStagingBuffer = createBuffer<uint32>({
+				const ref<Buffer> elementStartStagingBuffer = createDynamicBuffer({
 					.size = elementStartBuffer->getSize(),
 					.usage = BufferUsage::TRANSFER_DST,
 					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,

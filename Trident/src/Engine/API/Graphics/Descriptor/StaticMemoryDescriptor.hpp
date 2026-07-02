@@ -8,7 +8,7 @@
 
 namespace Trident {
 	struct StaticMemoryDescriptor {
-		sequence<ref<BaseBuffer>> buffers;
+		sequence<ref<Buffer>> buffers;
 		sequence<ref<Image>> images;
 	};
 }

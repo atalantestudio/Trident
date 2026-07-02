@@ -21,7 +21,7 @@ namespace Trident {
 
 	void Renderer::onEvent(Event& event) {}
 
-	ref<BaseBuffer> Renderer::createDynamicBuffer(const BufferDescriptor& descriptor) {
+	ref<Buffer> Renderer::createDynamicBuffer(const BufferDescriptor& descriptor) {
 		return layerCompositor->device->createDynamicBuffer(descriptor);
 	}
 
@@ -39,10 +39,6 @@ namespace Trident {
 
 	ref<Framebuffer> Renderer::createFramebuffer(const FramebufferDescriptor& descriptor) {
 		return layerCompositor->device->createFramebuffer(descriptor);
-	}
-
-	ref<Image> Renderer::createImage(const ImageDescriptor& descriptor) {
-		return createDynamicImage(descriptor);
 	}
 
 	ref<Image> Renderer::createDynamicImage(const ImageDescriptor& descriptor) {
@@ -73,7 +69,7 @@ namespace Trident {
 		return layerCompositor->device->createSemaphore();
 	}
 
-	ref<BaseBuffer> Renderer::createStaticBuffer(const BufferDescriptor& descriptor) {
+	ref<Buffer> Renderer::createStaticBuffer(const BufferDescriptor& descriptor) {
 		return layerCompositor->device->createStaticBuffer(descriptor);
 	}
 

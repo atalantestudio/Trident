@@ -8,14 +8,14 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	GL::BaseBuffer::BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor) :
-		Trident::BaseBuffer(device, descriptor)
+	GL::Buffer::Buffer(const Trident::Device* device, const BufferDescriptor& descriptor) :
+		Trident::Buffer(device, descriptor)
 	{}
 
-	ref<Trident::BaseBuffer> GL::createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor) {
+	ref<Trident::Buffer> GL::createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ref<GL::BaseBuffer> buffer = createRef<GL::BaseBuffer>(device, descriptor);
+		ref<GL::Buffer> buffer = createRef<GL::Buffer>(device, descriptor);
 		buffer->target = getTarget(descriptor.usage);
 
 		glGenBuffers(1, &buffer->buffer);
@@ -71,18 +71,18 @@ namespace Trident {
 		return buffer;
 	}
 
-	void GL::destroyBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer) {
+	void GL::destroyBuffer(const Trident::Device* device, const Trident::Buffer* buffer) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		const GL::BaseBuffer* _buffer = static_cast<const GL::BaseBuffer*>(buffer);
+		const GL::Buffer* _buffer = static_cast<const GL::Buffer*>(buffer);
 
 		glDeleteBuffers(1, &_buffer->buffer);
 	}
 
-	void* GL::mapBuffer(const Trident::Device* device, Trident::BaseBuffer* buffer, uint64 offset, uint64 size) {
+	void* GL::mapBuffer(const Trident::Device* device, Trident::Buffer* buffer, uint64 offset, uint64 size) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		GL::BaseBuffer* _buffer = static_cast<GL::BaseBuffer*>(buffer);
+		GL::Buffer* _buffer = static_cast<GL::Buffer*>(buffer);
 
 		if (_buffer->mappedRange == nullptr) {
 			glBindBuffer(_buffer->target, _buffer->buffer);
@@ -97,10 +97,10 @@ namespace Trident {
 		return static_cast<void*>(mappedRange);
 	}
 
-	void GL::unmapBuffer(const Trident::Device* device, Trident::BaseBuffer* buffer) {
+	void GL::unmapBuffer(const Trident::Device* device, Trident::Buffer* buffer) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		GL::BaseBuffer* _buffer = static_cast<GL::BaseBuffer*>(buffer);
+		GL::Buffer* _buffer = static_cast<GL::Buffer*>(buffer);
 
 		glBindBuffer(_buffer->target, _buffer->buffer);
 

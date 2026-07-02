@@ -6,10 +6,10 @@
 #include "Engine/Renderer/Visibility/Renderer.hpp"
 
 namespace Trident {
-	ref<Buffer<uint32>> VisibilityRenderer::createMaterialOffsetBuffer() const {
+	ref<Buffer> VisibilityRenderer::createMaterialOffsetBuffer() const {
 		const uint64 minStorageBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
 
-		return createBuffer<uint32>({
+		return createDynamicBuffer({
 			// Ensure the buffer starts at 0 (a prefix sum will be applied on the offsets).
 			.size = ceil((scene->materialShaders.size() + 1) * sizeof(uint32), minStorageBufferOffsetAlignment),
 

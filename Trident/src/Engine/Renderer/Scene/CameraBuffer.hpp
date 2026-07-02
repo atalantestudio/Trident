@@ -6,11 +6,11 @@
 #include "Engine/Renderer/Scene/BaseSceneRenderer.hpp"
 
 namespace Trident {
-	ref<Buffer<BaseSceneRenderer::Camera>> BaseSceneRenderer::createCameraBuffer() const {
+	ref<Buffer> BaseSceneRenderer::createCameraBuffer() const {
 		const uint64 minUniformBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
 
-		return createBuffer<BaseSceneRenderer::Camera>({
-			.size = ceil(sizeof(BaseSceneRenderer::Camera), minUniformBufferOffsetAlignment),
+		return createDynamicBuffer({
+			.size = ceil(sizeof(Camera), minUniformBufferOffsetAlignment),
 			.usage = BufferUsage::UNIFORM,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = true,

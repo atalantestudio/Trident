@@ -184,23 +184,23 @@ namespace Trident {
 				ref<GraphicsPipeline> edgeFeatureGraphicsPipeline;
 			#endif
 
-			ref<Buffer<Camera>> cameraBuffer;
-			ref<Buffer<View>> viewBuffer;
-			ref<Buffer<Placeholder>> placeholderBuffer;
+			ref<Buffer> cameraBuffer;
+			ref<Buffer> viewBuffer;
+			ref<Buffer> placeholderBuffer;
 
 			#if defined(SHOW_DISTANCE)
-				ref<Buffer<Vertex>> closestPointBuffer;
+				ref<Buffer> closestPointBuffer;
 			#endif
 
 			#if defined(SHOW_FEATURES)
-				ref<Buffer<Vertex>> vertexFeatureBuffer;
-				ref<Buffer<Vertex>> edgeFeatureBuffer;
+				ref<Buffer> vertexFeatureBuffer;
+				ref<Buffer> edgeFeatureBuffer;
 			#endif
 
-			ref<Buffer<Vertex>> vertexBuffer;
-			ref<Buffer<uint32>> indexBuffer;
-			ref<Buffer<RigidBody>> rigidBodyBuffer;
-			ref<Buffer<CenterOfMass>> centerOfMassBuffer;
+			ref<Buffer> vertexBuffer;
+			ref<Buffer> indexBuffer;
+			ref<Buffer> rigidBodyBuffer;
+			ref<Buffer> centerOfMassBuffer;
 
 			Camera* cameraMappedRange = nullptr;
 			View* viewMappedRange = nullptr;

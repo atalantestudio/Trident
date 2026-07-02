@@ -107,7 +107,15 @@ namespace Trident {
 		createGlyphSdfPipelineLayout();
 		createGlyphSdfComputePipeline();
 
-		const ref<Buffer<FontStorage>> fontStagingBuffer = Renderer::createStagingBuffer<FontStorage>(fontBuffer->getSize());
+		const ref<Buffer> fontStagingBuffer = Renderer::createDynamicBuffer({
+			.size = fontBuffer->getSize(),
+			.usage = BufferUsage::TRANSFER_SRC,
+			.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
+			.persistent = false,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Font staging",
+			#endif
+		});
 		const ref<BufferView<FontStorage>> fontStagingView = fontStagingBuffer->createView<FontStorage>(0, fontStagingBuffer->getSize());
 
 		FontStorage* fontStagingBufferMappedRange = fontStagingView->map();
@@ -279,7 +287,7 @@ namespace Trident {
 		glyphBuffer->unmap();
 		glyphOffsetBuffer->unmap();
 
-		const ref<BaseBuffer> glyphMapStagingBuffer = Renderer::createDynamicBuffer({
+		const ref<Buffer> glyphMapStagingBuffer = Renderer::createDynamicBuffer({
 			.size = output.extent.width * output.extent.height,
 			.usage = BufferUsage::TRANSFER_DST,
 			.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,

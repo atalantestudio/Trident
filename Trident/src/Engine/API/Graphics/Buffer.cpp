@@ -9,7 +9,7 @@
 #include "Engine/API/Graphics/MemoryAllocator.hpp"
 
 namespace Trident {
-	BaseBuffer::BaseBuffer(const Device* device, const BufferDescriptor& descriptor) :
+	Buffer::Buffer(const Device* device, const BufferDescriptor& descriptor) :
 		device(device),
 		size(descriptor.size),
 		usage(descriptor.usage),
@@ -21,29 +21,29 @@ namespace Trident {
 		})
 	{}
 
-	BaseBuffer::~BaseBuffer() {
+	Buffer::~Buffer() {
 		device->adapter->destroyBufferImplementation(device, this);
 	}
 
-	uint64 BaseBuffer::getSize() const {
+	uint64 Buffer::getSize() const {
 		return size;
 	}
 
 	/// Returns the buffer usage flags.
-	BufferUsage BaseBuffer::getUsage() const {
+	BufferUsage Buffer::getUsage() const {
 		return usage;
 	}
 
-	MemorySuballocation BaseBuffer::getMemorySuballocation() const {
+	MemorySuballocation Buffer::getMemorySuballocation() const {
 		return memorySuballocation;
 	}
 
 	/// Returns the current access flags for the buffer.
-	Access BaseBuffer::getAccess() const {
+	Access Buffer::getAccess() const {
 		return access;
 	}
 
-	void* BaseBuffer::map(uint64 offset, uint64 size) {
+	void* Buffer::map(uint64 offset, uint64 size) {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			uint32 errorCount = 0;
 
@@ -76,7 +76,7 @@ namespace Trident {
 		return mappedRange;
 	}
 
-	void BaseBuffer::unmap() {
+	void Buffer::unmap() {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			uint32 errorCount = 0;
 

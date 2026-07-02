@@ -75,7 +75,7 @@ namespace Trident {
 		}
 	#endif
 
-	MemoryRequirements MemoryAllocator::getMemoryRequirements(ref<BaseBuffer> buffer) const {
+	MemoryRequirements MemoryAllocator::getMemoryRequirements(ref<Buffer> buffer) const {
 		return device->adapter->getBufferMemoryRequirementsImplementation(this, buffer);
 	}
 
@@ -127,7 +127,7 @@ namespace Trident {
 		return memorySuballocation;
 	}
 
-	void MemoryAllocator::suballocateStatic(uint32 allocationIndex, ref<BaseBuffer> buffer) {
+	void MemoryAllocator::suballocateStatic(uint32 allocationIndex, ref<Buffer> buffer) {
 		buffer->memorySuballocation = device->adapter->suballocateBufferMemoryImplementation(this, allocationIndex, buffer);
 	}
 
@@ -135,7 +135,7 @@ namespace Trident {
 		image->memorySuballocation = device->adapter->suballocateImageMemoryImplementation(this, allocationIndex, image);
 	}
 
-	void MemoryAllocator::suballocateDynamic(ref<BaseBuffer> buffer) {
+	void MemoryAllocator::suballocateDynamic(ref<Buffer> buffer) {
 		const MemoryRequirements memoryRequirements = getMemoryRequirements(buffer);
 		const uint32 memoryTypeIndex = findMemoryTypeIndex(buffer->getMemorySuballocation().memoryProperties, buffer->getUsage() & BufferUsage::TRANSFER_DST);
 

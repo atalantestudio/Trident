@@ -70,15 +70,15 @@ namespace Trident {
 		device->adapter->bindGraphicsPipelineImplementation(this, graphicsPipeline);
 	}
 
-	void CommandEncoder::bindIndexBuffer(ref<BaseBuffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
+	void CommandEncoder::bindIndexBuffer(ref<Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
 		device->adapter->bindIndexBufferImplementation(this, indexBuffer, offset, indexTypeSize);
 	}
 
-	void CommandEncoder::bindVertexBuffer(uint32 bindingIndex, ref<BaseBuffer> vertexBuffer, uint64 offset, uint32 stride) {
+	void CommandEncoder::bindVertexBuffer(uint32 bindingIndex, ref<Buffer> vertexBuffer, uint64 offset, uint32 stride) {
 		device->adapter->bindVertexBufferImplementation(this, bindingIndex, vertexBuffer, offset, stride);
 	}
 
-	void CommandEncoder::copyBufferToBuffer(ref<BaseBuffer> sourceBuffer, ref<BaseBuffer> destinationBuffer, view<BufferCopyRegion> copyRegions) {
+	void CommandEncoder::copyBufferToBuffer(ref<Buffer> sourceBuffer, ref<Buffer> destinationBuffer, view<BufferCopyRegion> copyRegions) {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			uint32 errorCount = 0;
 
@@ -102,11 +102,11 @@ namespace Trident {
 		device->adapter->copyBufferToBufferImplementation(this, sourceBuffer, destinationBuffer, copyRegions);
 	}
 
-	void CommandEncoder::copyBufferToImage(ref<BaseBuffer> sourceBuffer, ref<Image> destinationImage, view<BufferImageCopyRegion> copyRegions) {
+	void CommandEncoder::copyBufferToImage(ref<Buffer> sourceBuffer, ref<Image> destinationImage, view<BufferImageCopyRegion> copyRegions) {
 		device->adapter->copyBufferToImageImplementation(this, sourceBuffer, destinationImage, copyRegions);
 	}
 
-	void CommandEncoder::copyImageToBuffer(ref<Image> sourceImage, ref<BaseBuffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) {
+	void CommandEncoder::copyImageToBuffer(ref<Image> sourceImage, ref<Buffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			uint32 errorCount = 0;
 			uint32 copyRegionIndex = 0;
@@ -230,7 +230,7 @@ namespace Trident {
 		device->adapter->dispatchImplementation(this, groupCountX, groupCountY, groupCountZ);
 	}
 
-	void CommandEncoder::dispatchIndirect(ref<BaseBuffer> buffer, uint64 bufferOffset) {
+	void CommandEncoder::dispatchIndirect(ref<Buffer> buffer, uint64 bufferOffset) {
 		device->adapter->dispatchIndirectImplementation(this, buffer, bufferOffset);
 	}
 
@@ -238,7 +238,7 @@ namespace Trident {
 		device->adapter->drawImplementation(this, vertexCount, instanceCount, vertexOffset, instanceOffset);
 	}
 
-	void CommandEncoder::drawIndirect(ref<BaseBuffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
+	void CommandEncoder::drawIndirect(ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
 		device->adapter->drawIndirectImplementation(this, buffer, bufferOffset, drawCount, stride);
 	}
 
@@ -246,7 +246,7 @@ namespace Trident {
 		device->adapter->drawIndexedImplementation(this, indexCount, instanceCount, indexOffset, indexBias, instanceOffset);
 	}
 
-	void CommandEncoder::drawIndexedIndirect(ref<BaseBuffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
+	void CommandEncoder::drawIndexedIndirect(ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
 		device->adapter->drawIndexedIndirectImplementation(this, buffer, bufferOffset, drawCount, stride);
 	}
 

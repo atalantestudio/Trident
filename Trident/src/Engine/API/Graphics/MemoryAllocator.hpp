@@ -8,7 +8,7 @@
 #include "Engine/API/Graphics/MemorySuballocation.hpp"
 
 namespace Trident {
-	class BaseBuffer;
+	class Buffer;
 	class Image;
 	class Device;
 
@@ -32,17 +32,17 @@ namespace Trident {
 			#endif
 
 			/// Returns the memory requirements for the provided buffer or image.
-			MemoryRequirements getMemoryRequirements(ref<BaseBuffer> buffer) const;
+			MemoryRequirements getMemoryRequirements(ref<Buffer> buffer) const;
 			MemoryRequirements getMemoryRequirements(ref<Image> image) const;
 
 			// TODO: Make private.
 			/// Suballocates a memory allocation to fit the provided size, buffer or image.
 			MemorySuballocation suballocate(uint32 allocationIndex, uint64 size, uint64 alignment);
 
-			void suballocateStatic(uint32 allocationIndex, ref<BaseBuffer> buffer);
+			void suballocateStatic(uint32 allocationIndex, ref<Buffer> buffer);
 			void suballocateStatic(uint32 allocationIndex, ref<Image> image);
 
-			void suballocateDynamic(ref<BaseBuffer> buffer);
+			void suballocateDynamic(ref<Buffer> buffer);
 			void suballocateDynamic(ref<Image> image);
 
 			// TODO(graphics/memory-allocator/map-memory)

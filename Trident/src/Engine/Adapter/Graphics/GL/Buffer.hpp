@@ -7,9 +7,9 @@
 #include "Engine/API/Graphics/Device.hpp"
 
 namespace Trident {
-	class GL::BaseBuffer final : public Trident::BaseBuffer {
+	class GL::Buffer final : public Trident::Buffer {
 		public:
-			explicit BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor);
+			explicit Buffer(const Trident::Device* device, const BufferDescriptor& descriptor);
 
 		public:
 			GLuint buffer;
@@ -20,12 +20,12 @@ namespace Trident {
 	};
 
 	namespace GL {
-		ref<Trident::BaseBuffer> createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor);
+		ref<Trident::Buffer> createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor);
 
-		void destroyBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer);
+		void destroyBuffer(const Trident::Device* device, const Trident::Buffer* buffer);
 
-		void* mapBuffer(const Trident::Device* device, Trident::BaseBuffer* buffer, uint64 offset, uint64 size);
+		void* mapBuffer(const Trident::Device* device, Trident::Buffer* buffer, uint64 offset, uint64 size);
 
-		void unmapBuffer(const Trident::Device* device, Trident::BaseBuffer* buffer);
+		void unmapBuffer(const Trident::Device* device, Trident::Buffer* buffer);
 	}
 }

@@ -30,7 +30,7 @@ namespace Trident {
 		return 0;
 	}
 
-	MemoryRequirements GL::getBufferMemoryRequirements(const Trident::MemoryAllocator* memoryAllocator, ref<Trident::BaseBuffer> buffer) {
+	MemoryRequirements GL::getBufferMemoryRequirements(const Trident::MemoryAllocator* memoryAllocator, ref<Trident::Buffer> buffer) {
 		MemoryRequirements memoryRequirements{};
 		memoryRequirements.size = buffer->getSize();
 		memoryRequirements.alignment = GL_RESOURCE_ALIGNMENT;
@@ -48,7 +48,7 @@ namespace Trident {
 		return memoryRequirements;
 	}
 
-	MemorySuballocation GL::suballocateBufferMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, ref<Trident::BaseBuffer> buffer) {
+	MemorySuballocation GL::suballocateBufferMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, ref<Trident::Buffer> buffer) {
 		const MemoryRequirements memoryRequirements = getBufferMemoryRequirements(memoryAllocator, buffer);
 
 		MemorySuballocation memorySuballocation = memoryAllocator->suballocate(allocationIndex, memoryRequirements.size, memoryRequirements.alignment);

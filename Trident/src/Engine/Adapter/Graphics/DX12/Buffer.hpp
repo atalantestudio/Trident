@@ -6,9 +6,9 @@
 #include "Engine/API/Graphics/Buffer.hpp"
 
 namespace Trident {
-	class DX12::BaseBuffer final : public Trident::BaseBuffer {
+	class DX12::Buffer final : public Trident::Buffer {
 		public:
-			explicit BaseBuffer(const Trident::Device* device, const BufferDescriptor& descriptor);
+			explicit Buffer(const Trident::Device* device, const BufferDescriptor& descriptor);
 
 		public:
 			ID3D12Resource* resource;
@@ -20,12 +20,12 @@ namespace Trident {
 	};
 
 	namespace DX12 {
-		ref<Trident::BaseBuffer> createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor);
+		ref<Trident::Buffer> createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor);
 
-		void destroyBuffer(const Trident::Device* device, const Trident::BaseBuffer* buffer);
+		void destroyBuffer(const Trident::Device* device, const Trident::Buffer* buffer);
 
-		void* mapBuffer(const Trident::Device* device, Trident::BaseBuffer* buffer, uint64 offset, uint64 size);
+		void* mapBuffer(const Trident::Device* device, Trident::Buffer* buffer, uint64 offset, uint64 size);
 
-		void unmapBuffer(const Trident::Device* device, Trident::BaseBuffer* buffer);
+		void unmapBuffer(const Trident::Device* device, Trident::Buffer* buffer);
 	}
 }

@@ -208,7 +208,7 @@ namespace Trident {
 				});
 			}
 
-			ref<BaseBuffer> createVertexBuffer() const {
+			ref<Buffer> createVertexBuffer() const {
 				return createStaticBuffer({
 					.size = sizeof(Vertex) * 3,
 					.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX,
@@ -220,7 +220,7 @@ namespace Trident {
 				});
 			}
 
-			ref<BaseBuffer> createStagingBuffer() const {
+			ref<Buffer> createStagingBuffer() const {
 				return createStaticBuffer({
 					.size = vertexBuffer->getSize(),
 					.usage = BufferUsage::TRANSFER_SRC,
@@ -236,8 +236,8 @@ namespace Trident {
 			ref<RenderPass> renderPass;
 			sequence<ref<Framebuffer>> framebuffers;
 			ref<GraphicsPipeline> trianglePipeline;
-			ref<BaseBuffer> vertexBuffer;
-			ref<BaseBuffer> stagingBuffer;
+			ref<Buffer> vertexBuffer;
+			ref<Buffer> stagingBuffer;
 	};
 
 	DEFINE_SAMPLE_LAYER(SampleTriangle);

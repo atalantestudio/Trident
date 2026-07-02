@@ -97,14 +97,14 @@ namespace Trident {
 			ref<ComputePipeline> createMaterialCoordinatePipeline() const;
 			ref<GraphicsPipeline> createOutputPipeline() const;
 
-			ref<Buffer<DrawIndirectCommand>> createVisibilityIndirectBuffer() const;
-			ref<Buffer<Camera>> createCameraBuffer() const;
-			ref<Buffer<uint8>> createDataBuffer(uint64 size) const;
-			ref<Buffer<ClusteredInstance>> createInstanceBuffer() const;
-			ref<Buffer<uint32>> createMaterialCountBuffer() const;
-			ref<Buffer<uint32>> createMaterialOffsetBuffer() const;
-			ref<Buffer<DispatchIndirectCommand>> createMaterialShaderIndirectBuffer() const;
-			ref<Buffer<uint32>> createMaterialCoordinateBuffer() const;
+			ref<Buffer> createVisibilityIndirectBuffer() const;
+			ref<Buffer> createCameraBuffer() const;
+			ref<Buffer> createDataBuffer(uint64 size) const;
+			ref<Buffer> createInstanceBuffer() const;
+			ref<Buffer> createMaterialCountBuffer() const;
+			ref<Buffer> createMaterialOffsetBuffer() const;
+			ref<Buffer> createMaterialShaderIndirectBuffer() const;
+			ref<Buffer> createMaterialCoordinateBuffer() const;
 
 			ref<Image> createVisibilityImage() const;
 			ref<Image> createDepthStencilImage() const;
@@ -187,27 +187,27 @@ namespace Trident {
 			sequence<ref<ComputePipeline>> materialShaderPipelines;
 			ref<GraphicsPipeline> outputPipeline;
 
-			ref<Buffer<DrawIndirectCommand>> visibilityIndirectBuffer;
-			ref<Buffer<Camera>> cameraBuffer;
+			ref<Buffer> visibilityIndirectBuffer;
+			ref<Buffer> cameraBuffer;
 
 			// Vertex position components, vertex normal components, vertex texture coordinate components,
 			// vertex position indices, vertex normal indices, vertex texture coordinate indices, clusters and geometries.
-			ref<Buffer<uint8>> dataBuffer;
+			ref<Buffer> dataBuffer;
 
-			ref<Buffer<ClusteredInstance>> instanceBuffer;
+			ref<Buffer> instanceBuffer;
 
 			// Number of pixels used per material.
-			ref<Buffer<uint32>> materialCountBuffer;
+			ref<Buffer> materialCountBuffer;
 
 			// Offset of the first pixel used per material.
-			ref<Buffer<uint32>> materialOffsetBuffer;
+			ref<Buffer> materialOffsetBuffer;
 
 			// Indirect arguments for material shader pipelines.
-			ref<Buffer<DispatchIndirectCommand>> materialShaderIndirectBuffer;
+			ref<Buffer> materialShaderIndirectBuffer;
 
 			// TODO: Use a 1D image instead.
 			// Screen pixels sorted by material index.
-			ref<Buffer<uint32>> materialCoordinateBuffer;
+			ref<Buffer> materialCoordinateBuffer;
 
 			ref<Image> visibilityImage;
 			ref<Image> depthStencilImage;

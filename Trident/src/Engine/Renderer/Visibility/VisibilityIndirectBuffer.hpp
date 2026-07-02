@@ -6,8 +6,8 @@
 #include "Engine/Renderer/Visibility/Renderer.hpp"
 
 namespace Trident {
-	ref<Buffer<DrawIndirectCommand>> VisibilityRenderer::createVisibilityIndirectBuffer() const {
-		return createBuffer<DrawIndirectCommand>({
+	ref<Buffer> VisibilityRenderer::createVisibilityIndirectBuffer() const {
+		return createDynamicBuffer({
 			.size = sizeof(DrawIndirectCommand),
 			.usage = BufferUsage::INDIRECT,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,

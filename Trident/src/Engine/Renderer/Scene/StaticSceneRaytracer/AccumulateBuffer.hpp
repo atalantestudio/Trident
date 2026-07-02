@@ -6,10 +6,10 @@
 #include "Engine/Renderer/Scene/StaticSceneRaytracer/StaticSceneRayTracer.hpp"
 
 namespace Trident {
-	ref<Buffer<uint8>> StaticSceneRayTracer::createAccumulateBuffer() const {
+	ref<Buffer> StaticSceneRayTracer::createAccumulateBuffer() const {
 		const Extent2D extent = getSwapchain()->getExtent();
 
-		return createBuffer<uint8>({
+		return createDynamicBuffer({
 			.size = extent.width * extent.height * sizeof(vec4<float32>),
 			.usage = BufferUsage::READ_WRITE_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,

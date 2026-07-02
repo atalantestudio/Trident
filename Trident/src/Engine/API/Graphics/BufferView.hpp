@@ -4,13 +4,13 @@
 #pragma once
 
 namespace Trident {
-	class BaseBuffer;
+	class Buffer;
 
 	class BaseBufferView {
 		public:
 			explicit BaseBufferView(
 				/// The viewed buffer.
-				BaseBuffer* buffer,
+				Buffer* buffer,
 
 				/// The offset in bytes of the view.
 				uint64 offset,
@@ -23,7 +23,7 @@ namespace Trident {
 			);
 
 			/// Returns the viewed buffer.
-			BaseBuffer* getBuffer();
+			Buffer* getBuffer();
 
 			/// Returns the offset in bytes of the view.
 			uint64 getOffset() const;
@@ -38,7 +38,11 @@ namespace Trident {
 			void* map();
 
 		protected:
-			BaseBuffer* buffer;
+			// TODO(graphics/buffer-view/explicit-mapping)
+			// Restore explicit buffer mapping. This will allow this member to be const.
+			// The BufferView::map method must be replaced with BufferView::getMappedRange, which returns a typed pointer with the view's offset.
+			Buffer* buffer;
+
 			uint64 offset;
 			uint64 size;
 			uint32 stride;
@@ -49,7 +53,7 @@ namespace Trident {
 		public:
 			explicit BufferView(
 				/// The viewed buffer.
-				BaseBuffer* buffer,
+				Buffer* buffer,
 
 				/// The offset in bytes of the view.
 				uint64 offset,

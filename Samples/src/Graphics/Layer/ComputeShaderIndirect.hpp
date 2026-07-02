@@ -21,6 +21,10 @@ namespace Trident {
 			void build() override {
 				createOutputImage();
 				createOutputImageView();
+
+				vertexBuffer = createVertexBuffer();
+				indirectBuffer = createIndirectBuffer();
+
 				createBuffers();
 				writeImage();
 
@@ -79,7 +83,7 @@ namespace Trident {
 					outputImageDescriptor.name = "Output";
 				#endif
 
-				outputImage = createImage(outputImageDescriptor);
+				outputImage = createDynamicImage(outputImageDescriptor);
 			}
 
 			void createOutputImageView() {
@@ -214,72 +218,85 @@ namespace Trident {
 				graphicsPipeline = createGraphicsPipeline(graphicsPipelineDescriptor);
 			}
 
+			ref<Buffer> createVertexBuffer() const {
+				return createDynamicBuffer({
+					.size = VERTEX_COUNT * sizeof(Vertex),
+					.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX,
+					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+					.persistent = false,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Vertex",
+					#endif
+				});
+			}
+
+			ref<Buffer> createIndirectBuffer() const {
+				return createDynamicBuffer({
+					.size = sizeof(DispatchIndirectCommand),
+					.usage = BufferUsage::TRANSFER_DST | BufferUsage::INDIRECT,
+					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+					.persistent = false,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Indirect",
+					#endif
+				});
+			}
+
 			void createBuffers() {
-				const ref<Buffer<uint8>> stagingBuffer = createStagingBuffer<uint8>(VERTEX_COUNT * sizeof(Vertex) + sizeof(DispatchIndirectCommand));
+				const ref<Buffer> stagingBuffer = createDynamicBuffer({
+					.size = vertexBuffer->getSize() + indirectBuffer->getSize(),
+					.usage = BufferUsage::TRANSFER_SRC,
+					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
+					.persistent = false,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Staging",
+					#endif
+				});
+				const ref<BufferView<Vertex>> vertexView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
+				const ref<BufferView<DispatchIndirectCommand>> indirectView = stagingBuffer->createView<DispatchIndirectCommand>(vertexBuffer->getSize(), indirectBuffer->getSize());
 
-				uint8* stagingBufferMappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
+				Vertex* vertexMappedRange = vertexView->map();
+				vertexMappedRange[0].vertex = {-1.0f,  1.0f};
+				vertexMappedRange[1].vertex = { 3.0f,  1.0f};
+				vertexMappedRange[2].vertex = {-1.0f, -3.0f};
 
-				Vertex* vertexStagingBufferMappedRange = pointer_cast<Vertex*>(stagingBufferMappedRange);
-				vertexStagingBufferMappedRange[0].vertex = {-1.0f,  1.0f};
-				vertexStagingBufferMappedRange[1].vertex = { 3.0f,  1.0f};
-				vertexStagingBufferMappedRange[2].vertex = {-1.0f, -3.0f};
-
-				DispatchIndirectCommand* indirectStagingBufferMappedRange = pointer_cast<DispatchIndirectCommand*>(stagingBufferMappedRange + VERTEX_COUNT * sizeof(Vertex));
-				indirectStagingBufferMappedRange[0].x = 2;
-				indirectStagingBufferMappedRange[0].y = 2;
-				indirectStagingBufferMappedRange[0].z = 1;
+				DispatchIndirectCommand* indirectMappedRange = indirectView->map();
+				indirectMappedRange[0].x = 2;
+				indirectMappedRange[0].y = 2;
+				indirectMappedRange[0].z = 1;
 
 				stagingBuffer->unmap();
 
-				BufferDescriptor vertexBufferDescriptor{};
-				vertexBufferDescriptor.size = VERTEX_COUNT * sizeof(Vertex);
-				vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
-				vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					vertexBufferDescriptor.name = "Vertex buffer";
-				#endif
-
-				BufferDescriptor indirectBufferDescriptor{};
-				indirectBufferDescriptor.size = sizeof(DispatchIndirectCommand);
-				indirectBufferDescriptor.usage = BufferUsage::INDIRECT | BufferUsage::TRANSFER_DST;
-				indirectBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					indirectBufferDescriptor.name = "Indirect buffer";
-				#endif
-
-				vertexBuffer = createBuffer<Vertex>(vertexBufferDescriptor);
-				indirectBuffer = createBuffer<DrawIndirectCommand>(indirectBufferDescriptor);
-
-				BufferCopyRegion vertexBufferCopyRegion{};
-				vertexBufferCopyRegion.sourceOffset = 0;
-				vertexBufferCopyRegion.destinationOffset = 0;
-				vertexBufferCopyRegion.size = vertexBuffer->getSize();
-
-				BufferCopyRegion indirectBufferCopyRegion{};
-				indirectBufferCopyRegion.sourceOffset = vertexBuffer->getSize();
-				indirectBufferCopyRegion.destinationOffset = 0;
-				indirectBufferCopyRegion.size = indirectBuffer->getSize();
-
-				CommandBufferDescriptor commandBufferDescriptor{};
-				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					commandBufferDescriptor.name = "Buffer copy command buffer";
-				#endif
-
-				const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
-				const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
+				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
+				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
+					.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Copy buffers",
+					#endif
+				});
 
 				commandEncoder->begin();
-				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, {vertexBufferCopyRegion});
-				commandEncoder->copyBufferToBuffer(stagingBuffer, indirectBuffer, {indirectBufferCopyRegion});
+
+				BufferCopyRegion bufferCopyRegion = {
+					.sourceOffset = vertexView->getOffset(),
+					.destinationOffset = 0,
+					.size = vertexView->getSize(),
+				};
+
+				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegion);
+
+				bufferCopyRegion = {
+					.sourceOffset = indirectView->getOffset(),
+					.destinationOffset = 0,
+					.size = indirectView->getSize(),
+				};
+
+				commandEncoder->copyBufferToBuffer(stagingBuffer, indirectBuffer, bufferCopyRegion);
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-				transferQueue->submit(commandBuffer);
-				transferQueue->waitIdle();
+				queue->submit(commandBuffer);
+				queue->waitIdle();
 			}
 
 			void setupSampler() {
@@ -419,8 +436,8 @@ namespace Trident {
 			ref<DescriptorSet> imageDescriptorSet;
 			ref<PipelineLayout> pipelineLayout;
 			ref<GraphicsPipeline> graphicsPipeline;
-			ref<Buffer<Vertex>> vertexBuffer;
-			ref<Buffer<DrawIndirectCommand>> indirectBuffer;
+			ref<Buffer> vertexBuffer;
+			ref<Buffer> indirectBuffer;
 	};
 
 	DEFINE_SAMPLE_LAYER(SampleComputeShaderIndirect);

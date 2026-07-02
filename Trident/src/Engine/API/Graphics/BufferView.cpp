@@ -6,14 +6,14 @@
 #include "Engine/API/Graphics/BufferView.hpp"
 
 namespace Trident {
-	BaseBufferView::BaseBufferView(BaseBuffer* buffer, uint64 offset, uint64 size, uint32 stride) :
+	BaseBufferView::BaseBufferView(Buffer* buffer, uint64 offset, uint64 size, uint32 stride) :
 		buffer(buffer),
 		offset(offset),
 		size(size),
 		stride(stride)
 	{}
 
-	BaseBuffer* BaseBufferView::getBuffer() {
+	Buffer* BaseBufferView::getBuffer() {
 		return buffer;
 	}
 

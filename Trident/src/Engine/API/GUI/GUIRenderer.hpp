@@ -66,12 +66,12 @@ namespace Trident {
 			ref<GraphicsPipeline> createSubcomponentGraphicsPipeline() const;
 			ref<GraphicsPipeline> createGlyphSubcomponentGraphicsPipeline() const;
 
-			ref<Buffer<Vertex>> createVertexBuffer() const;
-			ref<Buffer<uint16>> createIndexBuffer() const;
-			ref<Buffer<Camera>> createCameraBuffer() const;
-			ref<Buffer<uint8>> createUserImageStagingBuffer() const;
-			ref<Buffer<GUISubcomponent>> createSubcomponentBuffer() const;
-			ref<Buffer<GUIGlyphSubcomponent>> createGlyphSubcomponentBuffer() const;
+			ref<Buffer> createVertexBuffer() const;
+			ref<Buffer> createIndexBuffer() const;
+			ref<Buffer> createCameraBuffer() const;
+			ref<Buffer> createUserImageStagingBuffer() const;
+			ref<Buffer> createSubcomponentBuffer() const;
+			ref<Buffer> createGlyphSubcomponentBuffer() const;
 
 			ref<Image> createDepthStencilImage() const;
 
@@ -98,12 +98,12 @@ namespace Trident {
 			ref<GraphicsPipeline> subcomponentGraphicsPipeline;
 			ref<GraphicsPipeline> glyphSubcomponentGraphicsPipeline;
 
-			ref<Buffer<Camera>> cameraBuffer;
-			ref<Buffer<Vertex>> vertexBuffer;
-			ref<Buffer<uint16>> indexBuffer;
-			ref<Buffer<GUISubcomponent>> subcomponentBuffer;
-			ref<Buffer<GUIGlyphSubcomponent>> glyphSubcomponentBuffer;
-			ref<Buffer<uint8>> userImageStagingBuffer;
+			ref<Buffer> cameraBuffer;
+			ref<Buffer> vertexBuffer;
+			ref<Buffer> indexBuffer;
+			ref<Buffer> subcomponentBuffer;
+			ref<Buffer> glyphSubcomponentBuffer;
+			ref<Buffer> userImageStagingBuffer;
 
 			ref<Image> depthStencilImage;
 			sequence<ref<Image>> userImages;

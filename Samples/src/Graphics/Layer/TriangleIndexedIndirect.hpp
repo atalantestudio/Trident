@@ -26,7 +26,83 @@ namespace Trident {
 
 				createFramebuffers();
 				setupGraphicsPipeline();
-				createBuffers();
+
+				vertexBuffer = createVertexBuffer();
+				indexBuffer = createIndexBuffer();
+				indirectBuffer = createIndirectBuffer();
+			}
+
+			void encodeOneTimeCommands() const override {
+				const ref<Buffer> stagingBuffer = createDynamicBuffer({
+					.size = vertexBuffer->getSize() + indexBuffer->getSize() + indirectBuffer->getSize(),
+					.usage = BufferUsage::TRANSFER_SRC,
+					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
+					.persistent = false,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Staging",
+					#endif
+				});
+				const ref<BufferView<Vertex>> vertexView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
+				const ref<BufferView<uint16>> indexView = stagingBuffer->createView<uint16>(vertexBuffer->getSize(), indexBuffer->getSize());
+				const ref<BufferView<DrawIndexedIndirectCommand>> indirectView = stagingBuffer->createView<DrawIndexedIndirectCommand>(vertexBuffer->getSize() + indexBuffer->getSize(), indirectBuffer->getSize());
+
+				Vertex* vertexMappedRange = vertexView->map();
+				vertexMappedRange[0] = {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}};
+				vertexMappedRange[1] = {{ 0.0f,  0.5f}, {0.0f, 1.0f, 0.0f}};
+				vertexMappedRange[2] = {{ 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}};
+
+				uint16* indexMappedRange = indexView->map();
+				indexMappedRange[0] = 0;
+				indexMappedRange[1] = 1;
+				indexMappedRange[2] = 2;
+
+				DrawIndexedIndirectCommand* indirectMappedRange = indirectView->map();
+				indirectMappedRange[0].indexCount = 3;
+				indirectMappedRange[0].instanceCount = 1;
+				indirectMappedRange[0].indexOffset = 0;
+				indirectMappedRange[0].vertexBias = 0;
+				indirectMappedRange[0].instanceOffset = 0;
+
+				stagingBuffer->unmap();
+
+				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
+				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
+					.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Copy buffers",
+					#endif
+				});
+
+				commandEncoder->begin();
+
+				BufferCopyRegion bufferCopyRegion = {
+					.sourceOffset = vertexView->getOffset(),
+					.destinationOffset = 0,
+					.size = vertexView->getSize(),
+				};
+
+				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegion);
+
+				bufferCopyRegion = {
+					.sourceOffset = indexView->getOffset(),
+					.destinationOffset = 0,
+					.size = indexView->getSize(),
+				};
+
+				commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, bufferCopyRegion);
+
+				bufferCopyRegion = {
+					.sourceOffset = indirectView->getOffset(),
+					.destinationOffset = 0,
+					.size = indirectView->getSize(),
+				};
+
+				commandEncoder->copyBufferToBuffer(stagingBuffer, indirectBuffer, bufferCopyRegion);
+
+				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+				queue->submit(commandBuffer);
+				queue->waitIdle();
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
@@ -140,103 +216,6 @@ namespace Trident {
 				graphicsPipeline = createGraphicsPipeline(graphicsPipelineDescriptor);
 			}
 
-			void createBuffers() {
-				const ref<Buffer<uint8>> stagingBuffer = createStagingBuffer<uint8>(VERTEX_BUFFER_SIZE + INDEX_BUFFER_SIZE + INDIRECT_BUFFER_SIZE);
-
-				uint8* stagingBufferMappedRange = stagingBuffer->map(0, stagingBuffer->getSize());
-
-				Vertex* vertexStagingBufferMappedRange = pointer_cast<Vertex*>(stagingBufferMappedRange);
-				vertexStagingBufferMappedRange[0].position = {-0.5f, -0.5f};
-				vertexStagingBufferMappedRange[0].color = {1.0f, 0.0f, 0.0f};
-				vertexStagingBufferMappedRange[1].position = {0.0f, 0.5f};
-				vertexStagingBufferMappedRange[1].color = {0.0f, 1.0f, 0.0f};
-				vertexStagingBufferMappedRange[2].position = {0.5f, -0.5f};
-				vertexStagingBufferMappedRange[2].color = {0.0f, 0.0f, 1.0f};
-
-				uint16* indexStagingBufferMappedRange = pointer_cast<uint16*>(stagingBufferMappedRange + VERTEX_BUFFER_SIZE);
-				indexStagingBufferMappedRange[0] = 0;
-				indexStagingBufferMappedRange[1] = 1;
-				indexStagingBufferMappedRange[2] = 2;
-
-				DrawIndexedIndirectCommand* indirectStagingBufferMappedRange = pointer_cast<DrawIndexedIndirectCommand*>(stagingBufferMappedRange + VERTEX_BUFFER_SIZE + INDEX_BUFFER_SIZE);
-				indirectStagingBufferMappedRange[0].indexCount = 3;
-				indirectStagingBufferMappedRange[0].instanceCount = 1;
-				indirectStagingBufferMappedRange[0].indexOffset = 0;
-				indirectStagingBufferMappedRange[0].vertexBias = 0;
-				indirectStagingBufferMappedRange[0].instanceOffset = 0;
-
-				stagingBuffer->unmap();
-
-				BufferDescriptor vertexBufferDescriptor{};
-				vertexBufferDescriptor.size = VERTEX_BUFFER_SIZE;
-				vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
-				vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-				vertexBufferDescriptor.persistent = false;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					vertexBufferDescriptor.name = "Vertex buffer";
-				#endif
-
-				BufferDescriptor indexBufferDescriptor{};
-				indexBufferDescriptor.size = INDEX_BUFFER_SIZE;
-				indexBufferDescriptor.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST;
-				indexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-				indexBufferDescriptor.persistent = false;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					indexBufferDescriptor.name = "Index buffer";
-				#endif
-
-				BufferDescriptor indirectBufferDescriptor{};
-				indirectBufferDescriptor.size = INDIRECT_BUFFER_SIZE;
-				indirectBufferDescriptor.usage = BufferUsage::INDIRECT | BufferUsage::TRANSFER_DST;
-				indirectBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-				indirectBufferDescriptor.persistent = false;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					indirectBufferDescriptor.name = "Indirect buffer";
-				#endif
-
-				vertexBuffer = createBuffer<Vertex>(vertexBufferDescriptor);
-				indexBuffer = createBuffer<uint16>(indexBufferDescriptor);
-				indirectBuffer = createBuffer<DrawIndexedIndirectCommand>(indirectBufferDescriptor);
-
-				BufferCopyRegion vertexBufferCopyRegion{};
-				vertexBufferCopyRegion.sourceOffset = 0;
-				vertexBufferCopyRegion.destinationOffset = 0;
-				vertexBufferCopyRegion.size = vertexBuffer->getSize();
-
-				BufferCopyRegion indexBufferCopyRegion{};
-				indexBufferCopyRegion.sourceOffset = vertexBuffer->getSize();
-				indexBufferCopyRegion.destinationOffset = 0;
-				indexBufferCopyRegion.size = indexBuffer->getSize();
-
-				BufferCopyRegion indirectBufferCopyRegion{};
-				indirectBufferCopyRegion.sourceOffset = vertexBuffer->getSize() + indexBuffer->getSize();
-				indirectBufferCopyRegion.destinationOffset = 0;
-				indirectBufferCopyRegion.size = indirectBuffer->getSize();
-
-				CommandBufferDescriptor commandBufferDescriptor{};
-				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					commandBufferDescriptor.name = "Buffer copy command buffer";
-				#endif
-
-				const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
-				const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
-
-				commandEncoder->begin();
-				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, {vertexBufferCopyRegion});
-				commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, {indexBufferCopyRegion});
-				commandEncoder->copyBufferToBuffer(stagingBuffer, indirectBuffer, {indirectBufferCopyRegion});
-
-				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-				transferQueue->submit(commandBuffer);
-				transferQueue->waitIdle();
-			}
-
 			void createFramebuffers() {
 				const ref<Swapchain> swapchain = getSwapchain();
 
@@ -269,13 +248,49 @@ namespace Trident {
 				}
 			}
 
+			ref<Buffer> createVertexBuffer() const {
+				return createDynamicBuffer({
+					.size = VERTEX_BUFFER_SIZE,
+					.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX,
+					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+					.persistent = false,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Vertex",
+					#endif
+				});
+			}
+
+			ref<Buffer> createIndexBuffer() const {
+				return createDynamicBuffer({
+					.size = INDEX_BUFFER_SIZE,
+					.usage = BufferUsage::TRANSFER_DST | BufferUsage::INDEX,
+					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+					.persistent = false,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Index",
+					#endif
+				});
+			}
+
+			ref<Buffer> createIndirectBuffer() const {
+				return createDynamicBuffer({
+					.size = INDIRECT_BUFFER_SIZE,
+					.usage = BufferUsage::TRANSFER_DST | BufferUsage::INDIRECT,
+					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+					.persistent = false,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Indirect",
+					#endif
+				});
+			}
+
 		private:
 			ref<RenderPass> renderPass;
 			sequence<ref<Framebuffer>> framebuffers;
 			ref<GraphicsPipeline> graphicsPipeline;
-			ref<Buffer<Vertex>> vertexBuffer;
-			ref<Buffer<uint16>> indexBuffer;
-			ref<Buffer<DrawIndexedIndirectCommand>> indirectBuffer;
+			ref<Buffer> vertexBuffer;
+			ref<Buffer> indexBuffer;
+			ref<Buffer> indirectBuffer;
 	};
 
 	DEFINE_SAMPLE_LAYER(SampleTriangleIndexedIndirect);

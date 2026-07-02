@@ -40,12 +40,12 @@ namespace Trident {
 			}
 
 		protected:
-			ref<Buffer<Camera>> createCameraBuffer() const;
-			ref<Buffer<uint8>> createStaticBuffer() const;
-			ref<Buffer<uint8>> createStagingStaticBuffer() const;
+			ref<Buffer> createCameraBuffer() const;
+			ref<Buffer> createStaticBuffer() const;
+			ref<Buffer> createStagingStaticBuffer() const;
 
 			void copyBuffers() const {
-				const ref<Buffer<uint8>> staticStagingBuffer = createStagingStaticBuffer();
+				const ref<Buffer> staticStagingBuffer = createStagingStaticBuffer();
 
 				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
 				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
@@ -65,14 +65,14 @@ namespace Trident {
 				queue->waitIdle();
 			}
 
-			void copyStaticBuffer(ref<CommandEncoder> commandEncoder, ref<Buffer<uint8>> staticStagingBuffer) const;
+			void copyStaticBuffer(ref<CommandEncoder> commandEncoder, ref<Buffer> staticStagingBuffer) const;
 
 		protected:
 			/// Contains the view/camera data.
-			ref<Buffer<Camera>> cameraBuffer;
+			ref<Buffer> cameraBuffer;
 
 			/// Contains the static scene data.
-			ref<Buffer<uint8>> staticBuffer;
+			ref<Buffer> staticBuffer;
 
 			Camera* cameraMappedRange = nullptr;
 	};

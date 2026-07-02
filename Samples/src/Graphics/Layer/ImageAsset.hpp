@@ -98,9 +98,18 @@ namespace Trident {
 					}
 				}
 
-				const ref<Buffer<uint8>> imageStagingBuffer = createStagingBuffer<uint8>(imageAsset->getExtent().width * imageAsset->getExtent().height * imageAsset->getExtent().depth * imageAsset->getLayerCount() * getChannelCount(imageFormat));
+				const ref<Buffer> imageStagingBuffer = createDynamicBuffer({
+					.size = imageAsset->getExtent().width * imageAsset->getExtent().height * imageAsset->getExtent().depth * imageAsset->getLayerCount() * getChannelCount(imageFormat),
+					.usage = BufferUsage::TRANSFER_SRC,
+					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
+					.persistent = false,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Image staging",
+					#endif
+				});
+				const ref<BufferView<uint8>> imageStagingView = imageStagingBuffer->createView<uint8>(0, imageStagingBuffer->getSize());
 
-				uint8* imageStagingBufferMappedRange = imageStagingBuffer->map(0, imageStagingBuffer->getSize());
+				uint8* imageStagingBufferMappedRange = imageStagingView->map();
 
 				if (imageAsset->getFormat() == ImageFormat::R8G8B8_UNORM) {
 					convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(imageAsset->getData(), imageStagingBufferMappedRange, imageStagingBuffer->getSize());
@@ -111,7 +120,7 @@ namespace Trident {
 
 				imageStagingBuffer->unmap();
 
-				image = createImage({
+				image = createDynamicImage({
 					.type = ImageType::TEXTURE_2D,
 					.format = imageFormat,
 					.extent = imageAsset->getExtent(),

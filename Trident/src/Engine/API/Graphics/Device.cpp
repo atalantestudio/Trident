@@ -42,15 +42,15 @@ namespace Trident {
 		return adapter->allocateDescriptorSetsImplementation(this, descriptorSetLayouts);
 	}
 
-	ref<BaseBuffer> Device::createDynamicBuffer(const BufferDescriptor& descriptor) const {
-		const ref<BaseBuffer> buffer = createStaticBuffer(descriptor);
+	ref<Buffer> Device::createDynamicBuffer(const BufferDescriptor& descriptor) const {
+		const ref<Buffer> buffer = createStaticBuffer(descriptor);
 
 		memoryAllocator->suballocateDynamic(buffer);
 
 		return buffer;
 	}
 
-	ref<BaseBuffer> Device::createStaticBuffer(const BufferDescriptor& descriptor) const {
+	ref<Buffer> Device::createStaticBuffer(const BufferDescriptor& descriptor) const {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			uint32 errorCount = 0;
 
@@ -771,7 +771,7 @@ namespace Trident {
 
 				while (descriptorBufferIndex < writeDescriptorSet.descriptorBufferViews.count()) {
 					const ref<BaseBufferView> bufferView = writeDescriptorSet.descriptorBufferViews[descriptorBufferIndex];
-					const BaseBuffer* buffer = bufferView->getBuffer();
+					const Buffer* buffer = bufferView->getBuffer();
 
 					if (buffer == nullptr) {
 						ENGINE_ERROR("writeDescriptorSets[[]].descriptorBufferViews[[]].buffer must be a valid Buffer object.", writeDescriptorSetIndex, descriptorBufferIndex);

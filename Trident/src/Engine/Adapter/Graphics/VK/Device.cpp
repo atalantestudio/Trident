@@ -375,7 +375,7 @@ namespace Trident {
 					const ref<BaseBufferView> bufferView = writeDescriptorSet.descriptorBufferViews[descriptorBufferIndex];
 
 					VkDescriptorBufferInfo& descriptorBufferInfo = descriptorBufferInfos[descriptorBufferInfoOffset + descriptorBufferIndex];
-					descriptorBufferInfo.buffer = static_cast<const VK::BaseBuffer*>(bufferView->getBuffer())->buffer;
+					descriptorBufferInfo.buffer = static_cast<const VK::Buffer*>(bufferView->getBuffer())->buffer;
 					descriptorBufferInfo.offset = bufferView->getOffset();
 					descriptorBufferInfo.range = bufferView->getSize();
 
