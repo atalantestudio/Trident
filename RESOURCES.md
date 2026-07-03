@@ -291,8 +291,7 @@ If both creation and last update dates are provided, the Date field will indicat
 
 | Title | Author(s) | Date | Links |
 | - | - | - | - |
-| *The Visibility Buffer: A Cache-Friendly
-Approach to Deferred Shading* | Christopher A. Burns<br />Warren A. Hunt | August 12, 2013 | [Abstract](https://jcgt.org/published/0002/02/04)<br />[Paper](https://jcgt.org/published/0002/02/04/paper.pdf) |
+| *The Visibility Buffer: A Cache-Friendly Approach to Deferred Shading* | Christopher A. Burns<br />Warren A. Hunt | August 12, 2013 | [Abstract](https://jcgt.org/published/0002/02/04)<br />[Paper](https://jcgt.org/published/0002/02/04/paper.pdf) |
 | *Visibility Buffer Rendering with Material Graphs* | John Hable | July 5, 2021 | [Article](http://filmicworlds.com/blog/visibility-buffer-rendering-with-material-graphs) |
 
 ### Ray-marching
