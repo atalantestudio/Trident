@@ -190,11 +190,12 @@ namespace Trident {
 				uint32 normalIndex = 0;
 
 				while (normalIndex < normalCount) {
-					const svec3<float32> normal = {
+					// TODO(asset-builder/lightmapper): Fix normal orientation somethimes facing the opposite way.
+					svec3<float32> normal = (svec3<float32>(vec3<float32>{
 						vertexNormalComponents[normalIndex * 3 + 0],
 						vertexNormalComponents[normalIndex * 3 + 1],
 						vertexNormalComponents[normalIndex * 3 + 2],
-					};
+					} * orientation));
 
 					view<svec3<float32>> normalView{};
 

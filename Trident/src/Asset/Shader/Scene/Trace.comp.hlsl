@@ -32,31 +32,9 @@ struct Hit {
 	float3 normal;
 };
 
-Triangle createTri(uint a, uint b, uint c) {
-	Triangle tri;
-	tri.vertices[0].index = a;
-	tri.vertices[1].index = b;
-	tri.vertices[2].index = c;
-	tri.normalIndex = 0;
-
-	return tri;
-}
-
-static const Triangle TRIS[2] = {
-	createTri(0, 1, 2),
-	createTri(1, 3, 2),
-};
-
-static const float3 VTX[4] = {
-	float3(-16, 0, 184),
-	float3(128, 0, 184),
-	float3(-16, 0, -16),
-	float3(128, 0, -16),
-};
-
 static const float FLOAT32_MAX = 4294967295.0;
-static const uint RAY_BOUNCE_COUNT = 4;
-static const float3 SKY_COLOR = float3(0.6, 0.7, 0.9);
+static const uint RAY_BOUNCE_COUNT = 2;
+static const float3 SKY_COLOR = uint3(130, 200, 229) / 255.0;
 
 cbuffer Camera : register(b0) {
 	Camera camera;
@@ -77,16 +55,16 @@ float2 ndc(float2 coordinate) {
 }
 
 void pcgHash(inout uint seed) {
-	uint state = seed * 747796405u + 2891336453u;
-	uint word = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
+	uint state = seed * 747796405 + 2891336453;
+	uint word = ((state >> ((state >> 28) + 4)) ^ state) * 277803737;
 
-	seed = (word >> 22u) ^ word;
+	seed = (word >> 22) ^ word;
 }
 
 float randomFloat(inout uint seed) {
 	pcgHash(seed);
 
-	return asfloat(seed) / FLOAT32_MAX;
+	return seed / FLOAT32_MAX;
 }
 
 float3 randomUnitDirection(inout uint seed) {
@@ -109,11 +87,6 @@ bool rayTriangleIntersection(Ray ray, Triangle triangle_, inout float t) {
 		vertexBuffer[triangle_.vertices[2].index * 3 + 1],
 		vertexBuffer[triangle_.vertices[2].index * 3 + 2]
 	);
-	/* float3 normal = float3(
-		normalBuffer[triangle_.normalIndex * 3 + 0],
-		normalBuffer[triangle_.normalIndex * 3 + 1],
-		normalBuffer[triangle_.normalIndex * 3 + 2]
-	); */
 
 	float3 ab = b - a;
 	float3 ac = c - a;
@@ -141,53 +114,29 @@ bool rayTriangleIntersection(Ray ray, Triangle triangle_, inout float t) {
 
 	t = dot(ac, qvec) * invD;
 
-	return true;
-
-	/* float rayDirectionDotNormal = dot(ray.direction, normal);
-
-	if (abs(rayDirectionDotNormal) < 0.0001) {
-		// The ray and the triangle are parallel.
+	if (t < 0.0) {
 		return false;
 	}
-	else {
-		// Distance from the origin.
-		float d = -dot(a, normal);
 
-		t = -(dot(ray.origin, normal) + d) / rayDirectionDotNormal;
-
-		if (t < 0.0) {
-			// The triangle is behind the ray.
-			return false;
-		}
-		else {
-			float3 p = ray.origin + ray.direction * t;
-
-			float3 ab = b - a;
-			float3 bc = c - b;
-			float3 ca = a - c;
-			float3 ap = p - a;
-			float3 bp = p - b;
-			float3 cp = p - c;
-
-			if (
-				dot(cross(ab, ap), normal) > 0.0 &&
-				dot(cross(bc, bp), normal) > 0.0 &&
-				dot(cross(ca, cp), normal) > 0.0
-			) {
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-	} */
+	return true;
 }
 
-Hit rchit(Ray ray, Triangle triangle_, float t) {
+Hit rchit(Ray ray, uint triangleIndex, float t) {
+	Triangle triangle_ = triangleBuffer[triangleIndex];
+	float3 normal = float3(
+		normalBuffer[triangle_.normalIndex * 3 + 0],
+		normalBuffer[triangle_.normalIndex * 3 + 1],
+		normalBuffer[triangle_.normalIndex * 3 + 2]
+	);
+
 	Hit hit;
 	hit.t = t;
 	hit.position = ray.origin + ray.direction * t;
-	hit.normal = normalize(hit.position);
+	hit.normal = normal;
+
+	if (dot(ray.direction, normal) > 0.0) {
+		hit.normal = -normal;
+	}
 
 	return hit;
 }
@@ -200,48 +149,40 @@ Hit rmiss() {
 }
 
 Hit rint(Ray ray) {
-	static const uint triangleCount = 2;
-
 	float closestT = FLOAT32_MAX;
-	bool intersecting = false;
+	uint intersectingTriangleIndex;
 	uint triangleIndex = 0;
-	Triangle intersectingTriangle;
 
-	while (triangleIndex < triangleCount) {
+	while (triangleIndex < camera.triangleCount) {
 		Triangle triangle_ = triangleBuffer[triangleIndex];
-		// Triangle triangle_ = TRIS[triangleIndex];
+		float t;
 
-		float t = 0.0;
-
-		// if (t > 0.0 && t < closestT) {
 		if (rayTriangleIntersection(ray, triangle_, t)) {
-			intersecting = true;
-			intersectingTriangle = triangle_;
-			closestT = t;
-
-			break;
+			if (t < closestT) {
+				intersectingTriangleIndex = triangleIndex;
+				closestT = t;
+			}
 		}
 
 		triangleIndex += 1;
 	}
 
-	if (intersecting) {
-		return rchit(ray, intersectingTriangle, closestT);
+	if (closestT < FLOAT32_MAX) {
+		return rchit(ray, intersectingTriangleIndex, closestT);
 	}
 
 	return rmiss();
 }
 
-float4 rgen(uint2 coordinate, inout uint seed) {
-	float2 ndcTextureCoordinate = ndc(coordinate);
-	float4 position = float4(mul(camera.inverseProjection, float4(ndcTextureCoordinate, 0.0, 1.0)).xyz, 0.0);
-
+float4 rgen(uint2 coordinate, uint seed) {
+	float2 ndcCoordinate = ndc(coordinate);
+	float4 position = float4(mul(camera.inverseProjection, float4(ndcCoordinate, 0.0, 1.0)).xyz, 0.0);
 	float3 light = float3(0.0, 0.0, 0.0);
 	float3 throughput = float3(1.0, 1.0, 1.0);
 
 	Ray ray;
 	ray.origin = camera.position;
-	ray.direction = normalize(mul(camera.inverseView, position).xyz);
+	ray.direction = mul(camera.inverseView, position).xyz;
 
 	uint bounceIndex = 0;
 
@@ -261,11 +202,11 @@ float4 rgen(uint2 coordinate, inout uint seed) {
 
 		throughput *= albedo;
 
-		float3 diffuse = normalize(hit.normal + randomUnitDirection(seed));
-		float3 specular = reflect(ray.direction, hit.normal);
+		float3 diffuseDirection = normalize(hit.normal + randomUnitDirection(seed));
+		float3 specularDirection = reflect(ray.direction, hit.normal);
 
 		ray.origin = hit.position + hit.normal * 0.0001;
-		ray.direction = lerp(specular, diffuse, roughness);
+		ray.direction = lerp(specularDirection, diffuseDirection, roughness);
 
 		bounceIndex += 1;
 	}
