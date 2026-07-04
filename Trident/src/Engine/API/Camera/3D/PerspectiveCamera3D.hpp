@@ -39,10 +39,6 @@ namespace Trident {
 			} */
 
 			void updateOrientation(svec3<float32> offset) {
-				if (dot(getUp(), UP) < 0.0f) {
-					offset[1] *= -1.0f;
-				}
-
 				const quat<float32> pitch = quat<float32>::axisAngle(RIGHT, offset[0]);
 				const quat<float32> yaw = quat<float32>::axisAngle(UP, offset[1]);
 				const quat<float32> roll = quat<float32>::axisAngle(FORWARD, offset[2]);

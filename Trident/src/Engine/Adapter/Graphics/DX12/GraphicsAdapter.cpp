@@ -8,7 +8,6 @@
 #include "Engine/Adapter/Graphics/DX12/ComputePipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
 #include "Engine/Adapter/Graphics/DX12/Fence.hpp"
-#include "Engine/Adapter/Graphics/DX12/Framebuffer.hpp"
 #include "Engine/Adapter/Graphics/DX12/GraphicsAdapter.hpp"
 #include "Engine/Adapter/Graphics/DX12/GraphicsPipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/Image.hpp"
@@ -27,6 +26,10 @@ namespace Trident::DX12 {
 		return createRef<DescriptorSetLayout>(device, bindings);
 	}
 
+	static ref<Framebuffer> createFramebuffer(const Trident::Device* device, const FramebufferDescriptor& descriptor) {
+		return createRef<Framebuffer>(device, descriptor);
+	}
+
 	static ref<Trident::MemoryAllocator> createMemoryAllocator(const Trident::Device* device) {
 		return createRef<DX12::MemoryAllocator>(static_cast<const DX12::Device*>(device));
 	}
@@ -40,6 +43,8 @@ namespace Trident::DX12 {
 	}
 
 	static void destroyDescriptorSetLayout(const Trident::Device* device, const DescriptorSetLayout* descriptorSetLayout) {}
+
+	static void destroyFramebuffer(const Trident::Device* device, const Trident::Framebuffer* framebuffer) {}
 
 	static void destroySemaphore(const Trident::Device* device, const Semaphore* semaphore) {}
 

@@ -3,13 +3,13 @@
 
 #include "pch.hpp"
 
-#include "Engine/API/Graphics/Device.hpp"
 #include "Engine/API/Graphics/Framebuffer.hpp"
 
 namespace Trident {
 	Framebuffer::Framebuffer(const Device* device, const FramebufferDescriptor& descriptor) :
 		device(device),
 		renderPass(descriptor.renderPass),
+		imageViews(descriptor.imageViews),
 		extent(descriptor.extent)
 	{}
 
@@ -19,6 +19,10 @@ namespace Trident {
 
 	ref<RenderPass> Framebuffer::getRenderPass() const {
 		return renderPass;
+	}
+
+	const sequence<ref<ImageView>>& Framebuffer::getImageViews() const {
+		return imageViews;
 	}
 
 	Extent2D Framebuffer::getExtent() const {

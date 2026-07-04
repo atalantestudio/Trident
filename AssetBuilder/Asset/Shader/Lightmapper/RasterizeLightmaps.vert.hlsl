@@ -2,7 +2,7 @@
 // Distributed under the GNU GPL v3 License.
 
 struct VertexInput {
-	uint vertexIndex : SV_VertexID;
+	uint instanceIndex : SV_InstanceID;
 	float2 coordinate : VERTEX_INPUT_ATTRIBUTE0;
 };
 
@@ -18,7 +18,7 @@ Interstage main(VertexInput input) {
 
 	Interstage interstage;
 	interstage.position = float4(lightmapCoordinate, 0.0, 1.0);
-	interstage.triangleIndex = uint(input.vertexIndex);
+	interstage.triangleIndex = input.instanceIndex;
 
 	return interstage;
 }

@@ -15,5 +15,8 @@ namespace Trident {
 
 		protected:
 			const Device* device;
+
+			// TODO(graphics/pipeline/required-descriptor-sets)
+			// Validate that the pipeline layout is bound before using the pipeline.
 	};
 }

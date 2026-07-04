@@ -158,7 +158,9 @@ namespace Trident {
 						descriptorRange.BaseShaderRegister = unorderedAccessViewShaderRegister;
 
 						if (binding.shaderStages & ShaderStage::FRAGMENT) {
-							// UAV registers live in the same name space as outputs, so they must be bound to at least 'u1'.
+							// TODO(graphics/dx12/root-signature/fragment-uav): Handle multiple output registers
+							ENGINE_WARNING("UAV registers live in the same name space as outputs, so they must be bound to at least 'u1'. The BaseShaderRegister has been incremented.");
+
 							descriptorRange.BaseShaderRegister += 1;
 						}
 

@@ -19,6 +19,8 @@ namespace Trident {
 
 			uint32 getAttachmentCount() const;
 
+			uint32 getTotalAttachmentCount() const;
+
 			const Attachment& getAttachment(uint32 attachmentIndex) const;
 
 			uint32 getSubpassCount() const;
@@ -42,5 +44,8 @@ namespace Trident {
 
 		private:
 			sequence<Subpass> subpasses;
+
+			/// Includes the resolve attachment for the swapchain image.
+			uint32 totalAttachmentCount;
 	};
 }

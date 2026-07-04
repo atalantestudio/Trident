@@ -23,7 +23,6 @@ namespace Trident::DX12 {
 	class DescriptorSet;
 	class Device;
 	class Fence;
-	class Framebuffer;
 	class GraphicsAdapter;
 	class GraphicsPipeline;
 	class Image;

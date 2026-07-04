@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/CommandEncoder.hpp"
+#include "Engine/API/Graphics/Framebuffer.hpp"
 
 namespace Trident {
 	class DX12::CommandEncoder final : public Trident::CommandEncoder {
@@ -18,7 +19,7 @@ namespace Trident {
 			UINT samplerDescriptorTableRootParameterIndex = max<UINT>();
 			bool computeCommandList;
 			bool computePipelineBound = false;
-			ref<DX12::Framebuffer> framebuffer = nullptr;
+			ref<Framebuffer> framebuffer = nullptr;
 			UINT subpassIndex = 0;
 			UINT presentRenderTargetIndex = max<UINT>();
 	};

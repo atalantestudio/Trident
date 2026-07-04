@@ -54,8 +54,17 @@ namespace Trident {
 	RenderPass::RenderPass(const Device* device, const RenderPassDescriptor& descriptor) :
 		device(device),
 		attachments(descriptor.attachments),
-		subpasses(descriptor.subpasses)
+		subpasses(descriptor.subpasses),
+		totalAttachmentCount(static_cast<uint32>(descriptor.attachments.count()))
 	{
+		for (const Attachment& attachment : attachments) {
+			if (attachment.sampleCount > 1 && attachment.finalLayout == ImageLayout::PRESENT_SRC) {
+				totalAttachmentCount += 1;
+
+				break;
+			}
+		}
+
 		for (Subpass& subpass : subpasses) {
 			uint8 rasterizationSampleCount = 0;
 
@@ -105,6 +114,10 @@ namespace Trident {
 
 	uint32 RenderPass::getAttachmentCount() const {
 		return static_cast<uint32>(attachments.count());
+	}
+
+	uint32 RenderPass::getTotalAttachmentCount() const {
+		return totalAttachmentCount;
 	}
 
 	const Attachment& RenderPass::getAttachment(uint32 attachmentIndex) const {

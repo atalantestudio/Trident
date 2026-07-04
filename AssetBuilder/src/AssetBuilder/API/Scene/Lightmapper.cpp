@@ -150,27 +150,88 @@ namespace Trident {
 	}
 
 	void Lightmapper::buildLightmapAtlas(const StaticScene3D& scene, ImageAssetDescriptor& lightmapAtlasImageAssetDescriptor) {
-		const uint32 indexCount = static_cast<uint32>(scene.triangles.count() * 3);
+		const uint32 instanceCount = static_cast<uint32>(scene.triangles.count());
+		const uint32 indexCount = instanceCount * 3;
+		const ref<Device> device = Renderer::getDevice();
 
-		renderPass = createRenderPass(lightmapAtlasImageAssetDescriptor.format);
+		rasterizeLightmapsRenderPass = createRasterizeLightmapsRenderPass(lightmapAtlasImageAssetDescriptor.format);
 
 		lightmapAtlasImage = createLightmapAtlasImage(lightmapAtlasImageAssetDescriptor);
 		lightmapAtlasImageView = createLightmapAtlasImageView();
 
-		framebuffer = createFramebuffer();
+		rasterizeLightmapsFramebuffer = createRasterizeLightmapsFramebuffer();
 
-		lightmapAtlasPipelineLayout = createLightmapAtlasPipelineLayout();
+		const ref<DescriptorSetLayout> rasterizeLightmapsDescriptorSetLayout = createRasterizeLightmapsDescriptorSetLayout();
+		const ref<DescriptorSetLayout> traceRaysDescriptorSetLayout = createTraceRaysDescriptorSetLayout();
 
-		lightmapAtlasPipeline = createLightmapAtlasPipeline();
+		rasterizeLightmapsPipelineLayout = createRasterizeLightmapsPipelineLayout({rasterizeLightmapsDescriptorSetLayout});
+		traceRaysPipelineLayout = createTraceRaysPipelineLayout({traceRaysDescriptorSetLayout});
 
-		coordinateBuffer = createCoordinateBuffer(scene.lightmapCoordinates.count() * sizeof(svec2<float32>));
-		coordinateIndexBuffer = createCoordinateIndexBuffer(indexCount * sizeof(uint32));
+		rasterizeLightmapsPipeline = createRasterizeLightmapsPipeline();
+		traceRaysPipeline = createTraceRaysPipeline();
 
-		copyCoordinateBuffers(scene);
+		const sequence<ref<DescriptorSet>> descriptorSets = device->allocateDescriptorSets(sequence<ref<DescriptorSetLayout>>{rasterizeLightmapsDescriptorSetLayout, traceRaysDescriptorSetLayout});
 
-		const Extent2D framebufferExtent = framebuffer->getExtent();
+		rasterizeLightmapsDescriptorSet = descriptorSets[0];
+		traceRaysDescriptorSet = descriptorSets[1];
+
+		lightmapCoordinateBuffer = createLightmapCoordinateBuffer(scene.lightmapCoordinates.count() * sizeof(svec2<float32>));
+		lightmapCoordinateIndexBuffer = createLightmapCoordinateIndexBuffer(indexCount * sizeof(uint32));
+		traceRaysArgumentBuffer = createTraceRaysArgumentBuffer();
+		lightmapPixelBuffer = createLightmapPixelBuffer();
+		triangleBuffer = createTriangleBuffer(scene.triangles.count() * sizeof(StaticTriangle3D));
+		vertexComponentBuffer = createVertexComponentBuffer(scene.vertices.count() * sizeof(svec3<float32>));
+		normalComponentBuffer = createNormalComponentBuffer(scene.normals.count() * sizeof(svec3<float32>));
+
+		encodeOneTimeCommands(scene);
+
+		const Extent2D framebufferExtent = rasterizeLightmapsFramebuffer->getExtent();
 		const float32 framebufferWidth = static_cast<float32>(framebufferExtent.width);
 		const float32 framebufferHeight = static_cast<float32>(framebufferExtent.height);
+		const ref<Queue> queue = device->getQueue(QueueFamilyCapability::GRAPHICS);
+		const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
+			.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Build lightmap atlas",
+			#endif
+		});
+
+		commandEncoder->begin();
+		commandEncoder->beginRenderPass({
+			.framebuffer = rasterizeLightmapsFramebuffer,
+			.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}},
+		});
+		commandEncoder->setViewport({0.0f, framebufferHeight}, {framebufferWidth, -framebufferHeight}, 0.0f, 1.0f);
+		commandEncoder->setScissor(0, 0, framebufferExtent);
+		commandEncoder->bindGraphicsPipeline(rasterizeLightmapsPipeline);
+		commandEncoder->bindVertexBuffer(0, lightmapCoordinateBuffer, 0, sizeof(svec2<float32>));
+		commandEncoder->bindIndexBuffer<uint32>(lightmapCoordinateIndexBuffer, 0);
+		commandEncoder->bindDescriptorSets(rasterizeLightmapsPipelineLayout, 0, rasterizeLightmapsDescriptorSet);
+
+		// TODO(asset-builder/lightmapper/dx12): StartInstanceLocation isn't added to SV_InstanceID, so the triangle index is always 0.
+		// TODO(asset-builder/lightmapper/rasterize-lightmaps): Try to refactor to a single draw call.
+		{
+			uint32 instanceIndex = 0;
+
+			while (instanceIndex < instanceCount) {
+				commandEncoder->drawIndexed(3, 1, instanceIndex * 3, 0, instanceIndex);
+
+				instanceIndex += 1;
+			}
+		}
+
+		commandEncoder->endRenderPass();
+		commandEncoder->bindComputePipeline(traceRaysPipeline);
+		commandEncoder->bindDescriptorSets(traceRaysPipelineLayout, 0, traceRaysDescriptorSet);
+		commandEncoder->dispatchIndirect(traceRaysArgumentBuffer, 2 * sizeof(uint32));
+
+		const ImageMemoryBarrier imageMemoryBarrier = {
+			.image = lightmapAtlasImage,
+			.newLayout = ImageLayout::TRANSFER_SRC_OPTIMAL,
+			.newAccess = Access::TRANSFER_READ,
+		};
+
+		commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
 
 		const ref<Buffer> lightmapAtlasStagingBuffer = Renderer::createDynamicBuffer({
 			.size = lightmapAtlasImage->getSize(),
@@ -193,38 +254,6 @@ namespace Trident {
 			.imageLayerCount = lightmapAtlasImageView->getLayerCount(),
 		};
 
-		const ref<Queue> queue = Renderer::getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
-		const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
-			.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Build lightmap atlas",
-			#endif
-		});
-
-		commandEncoder->begin();
-		commandEncoder->beginRenderPass({
-			.framebuffer = framebuffer,
-			.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}},
-		});
-		commandEncoder->setViewport({0.0f, framebufferHeight}, {framebufferWidth, -framebufferHeight}, 0.0f, 1.0f);
-		commandEncoder->setScissor(0, 0, framebufferExtent);
-		commandEncoder->bindGraphicsPipeline(lightmapAtlasPipeline);
-		commandEncoder->bindVertexBuffer(0, coordinateBuffer, 0, sizeof(svec2<float32>));
-		commandEncoder->bindIndexBuffer<uint32>(coordinateIndexBuffer, 0);
-		commandEncoder->drawIndexed(indexCount, 1, 0, 0, 0);
-		commandEncoder->endRenderPass();
-
-		// TODO(graphics/vk/copy-lightmap-atlas): Fix image memory barrier causing pixel grid artifacts.
-		if (Renderer::getGraphicsApi() != GraphicsAPI::VK) {
-			const ImageMemoryBarrier imageMemoryBarrier = {
-				.image = lightmapAtlasImage,
-				.newLayout = ImageLayout::TRANSFER_SRC_OPTIMAL,
-				.newAccess = Access::TRANSFER_READ,
-			};
-
-			commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
-		}
-
 		commandEncoder->copyImageToBuffer(lightmapAtlasImage, lightmapAtlasStagingBuffer, lightmapAtlasBufferImageCopyRegion);
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
@@ -241,7 +270,7 @@ namespace Trident {
 		lightmapAtlasStagingBuffer->unmap();
 	}
 
-	ref<RenderPass> Lightmapper::createRenderPass(ImageFormat lightmapAtlasImageFormat) const {
+	ref<RenderPass> Lightmapper::createRasterizeLightmapsRenderPass(ImageFormat lightmapAtlasImageFormat) const {
 		return Renderer::createRenderPass({
 			.attachments = {
 				// Lightmap atlas
@@ -250,11 +279,10 @@ namespace Trident {
 					.sampleCount = 1,
 					.loadOperation = LoadOperation::CLEAR,
 					.storeOperation = StoreOperation::STORE,
-					.finalLayout = ImageLayout::TRANSFER_SRC_OPTIMAL,
+					.finalLayout = ImageLayout::GENERAL,
 				},
 			},
 			.subpasses = {
-				// Write to lightmap atlas
 				{
 					.colorAttachmentReferences = {
 						{
@@ -270,13 +298,13 @@ namespace Trident {
 	ref<Image> Lightmapper::createLightmapAtlasImage(const ImageAssetDescriptor& lightmapAtlasImageAssetDescriptor) const {
 		const Extent2D extent = Renderer::getSwapchain()->getExtent();
 
-		return renderPass->createInputAttachmentImage(
+		return rasterizeLightmapsRenderPass->createInputAttachmentImage(
 			{
 				.type = ImageType::TEXTURE_2D,
 				.extent = lightmapAtlasImageAssetDescriptor.extent,
 				.mipLevelCount = lightmapAtlasImageAssetDescriptor.mipLevelCount,
 				.layerCount = lightmapAtlasImageAssetDescriptor.layerCount,
-				.additionalUsage = ImageUsage::TRANSFER_SRC,
+				.additionalUsage = ImageUsage::TRANSFER_SRC | ImageUsage::STORAGE,
 				#if defined(DEBUG_OBJECT_NAME)
 					.name = "Lightmap atlas",
 				#endif
@@ -297,29 +325,109 @@ namespace Trident {
 		});
 	}
 
-	ref<Framebuffer> Lightmapper::createFramebuffer() const {
+	ref<Framebuffer> Lightmapper::createRasterizeLightmapsFramebuffer() const {
 		const Extent3D extent = lightmapAtlasImage->getExtent();
 
 		return Renderer::createFramebuffer({
-			.renderPass = renderPass,
+			.renderPass = rasterizeLightmapsRenderPass,
 			.imageViews = {lightmapAtlasImageView},
 			.extent = {extent.width, extent.height},
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Lightmap atlas",
+				.name = "Rasterize lightmaps",
 			#endif
 		});
 	}
 
-	ref<PipelineLayout> Lightmapper::createLightmapAtlasPipelineLayout() const {
+	ref<DescriptorSetLayout> Lightmapper::createRasterizeLightmapsDescriptorSetLayout() const {
+		return Renderer::createDescriptorSetLayout({
+			// Trace rays argument
+			{
+				.descriptorType = DescriptorType::READ_WRITE_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::FRAGMENT,
+			},
+
+			// Lightmap pixel
+			{
+				.descriptorType = DescriptorType::READ_WRITE_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::FRAGMENT,
+			},
+		});
+	}
+
+	ref<DescriptorSetLayout> Lightmapper::createTraceRaysDescriptorSetLayout() const {
+		return Renderer::createDescriptorSetLayout({
+			// Trace rays argument
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+
+			// Lightmap pixel
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+
+			// Triangle
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+
+			// Vertex component
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+
+			// Normal component
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+
+			// Lightmap coordinate
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+
+			// Lightmap atlas
+			{
+				.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+		});
+	}
+
+	ref<PipelineLayout> Lightmapper::createRasterizeLightmapsPipelineLayout(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) const {
 		return Renderer::createPipelineLayout({
-			.descriptorSetLayouts = {},
+			.descriptorSetLayouts = descriptorSetLayouts,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Lightmap atlas",
+				.name = "Rasterize lightmaps",
 			#endif
 		});
 	}
 
-	ref<GraphicsPipeline> Lightmapper::createLightmapAtlasPipeline() const {
+	ref<PipelineLayout> Lightmapper::createTraceRaysPipelineLayout(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) const {
+		return Renderer::createPipelineLayout({
+			.descriptorSetLayouts = descriptorSetLayouts,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Trace rays",
+			#endif
+		});
+	}
+
+	ref<GraphicsPipeline> Lightmapper::createRasterizeLightmapsPipeline() const {
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 		vertexInputBinding.registerAttribute<svec2<float32>>();
 
@@ -330,27 +438,27 @@ namespace Trident {
 		};
 
 		return Renderer::createGraphicsPipeline({
-			.pipelineLayout = lightmapAtlasPipelineLayout,
+			.pipelineLayout = rasterizeLightmapsPipelineLayout,
 			.vertexInputBindings = {vertexInputBinding},
 			.vertexShaderModule = Renderer::loadShaderModule(
 				{
 					.stage = ShaderStage::VERTEX,
 					.entryPoint = "main",
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Lightmap atlas vertex",
+						.name = "Rasterize lightmaps (vertex)",
 					#endif
 				},
-				"Lightmapper/LightmapAtlas.vert"
+				"Lightmapper/RasterizeLightmaps.vert"
 			),
 			.fragmentShaderModule = Renderer::loadShaderModule(
 				{
 					.stage = ShaderStage::FRAGMENT,
 					.entryPoint = "main",
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Lightmap atlas fragment",
+						.name = "Rasterize lightmaps (fragment)",
 					#endif
 				},
-				"Lightmapper/LightmapAtlas.frag"
+				"Lightmapper/RasterizeLightmaps.frag"
 			),
 			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
 			.polygonMode = PolygonMode::FILL,
@@ -365,41 +473,135 @@ namespace Trident {
 				.depthTest = false,
 			},
 			.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
-			.renderPass = renderPass,
+			.renderPass = rasterizeLightmapsRenderPass,
 			.subpassIndex = 0,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Lightmap atlas",
+				.name = "Rasterize lightmaps",
 			#endif
 		});
 	}
 
-	ref<Buffer> Lightmapper::createCoordinateBuffer(uint64 size) const {
+	ref<ComputePipeline> Lightmapper::createTraceRaysPipeline() const {
+		return Renderer::createComputePipeline({
+			.pipelineLayout = traceRaysPipelineLayout,
+			.computeShaderModule = Renderer::loadShaderModule(
+				{
+					.stage = ShaderStage::COMPUTE,
+					.entryPoint = "main",
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Trace rays (compute)",
+					#endif
+				},
+				"Lightmapper/TraceRays.comp"
+			),
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Trace rays",
+			#endif
+		});
+	}
+
+	ref<Buffer> Lightmapper::createLightmapCoordinateBuffer(uint64 size) const {
+		const uint64 minStorageBufferOffsetAlignment = Renderer::getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
+
 		return Renderer::createDynamicBuffer({
-			.size = size,
-			.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX,
+			.size = ceil(size, minStorageBufferOffsetAlignment),
+			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE | BufferUsage::VERTEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Coordinate",
+				.name = "Lightmap coordinate",
 			#endif
 		});
 	}
 
-	ref<Buffer> Lightmapper::createCoordinateIndexBuffer(uint64 size) const {
+	ref<Buffer> Lightmapper::createLightmapCoordinateIndexBuffer(uint64 size) const {
 		return Renderer::createDynamicBuffer({
 			.size = size,
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::INDEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Coordinate index",
+				.name = "Lightmap coordinate index",
 			#endif
 		});
 	}
 
-	void Lightmapper::copyCoordinateBuffers(const StaticScene3D& scene) const {
+	ref<Buffer> Lightmapper::createTraceRaysArgumentBuffer() const {
+		const uint64 minStorageBufferOffsetAlignment = Renderer::getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
+
+		return Renderer::createDynamicBuffer({
+			.size = ceil(sizeof(TraceRaysArguments), minStorageBufferOffsetAlignment),
+			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_WRITE_STORAGE | BufferUsage::INDIRECT,
+			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+			.persistent = false,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Trace rays argument",
+			#endif
+		});
+	}
+
+	ref<Buffer> Lightmapper::createLightmapPixelBuffer() const {
+		const Extent3D lightmapAtlasImageExtent = lightmapAtlasImage->getExtent();
+		const uint64 size = lightmapAtlasImageExtent.width * lightmapAtlasImageExtent.height * sizeof(LightmapPixel);
+		const uint64 minStorageBufferOffsetAlignment = Renderer::getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
+
+		return Renderer::createDynamicBuffer({
+			.size = ceil(size, minStorageBufferOffsetAlignment),
+			.usage = BufferUsage::READ_WRITE_STORAGE,
+			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+			.persistent = false,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Lightmap pixel",
+			#endif
+		});
+	}
+
+	ref<Buffer> Lightmapper::createTriangleBuffer(uint64 size) const {
+		const uint64 minStorageBufferOffsetAlignment = Renderer::getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
+
+		return Renderer::createDynamicBuffer({
+			.size = ceil(size, minStorageBufferOffsetAlignment),
+			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
+			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+			.persistent = false,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Triangle",
+			#endif
+		});
+	}
+
+	ref<Buffer> Lightmapper::createVertexComponentBuffer(uint64 size) const {
+		const uint64 minStorageBufferOffsetAlignment = Renderer::getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
+
+		return Renderer::createDynamicBuffer({
+			.size = ceil(size, minStorageBufferOffsetAlignment),
+			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
+			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+			.persistent = false,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Vertex component",
+			#endif
+		});
+	}
+
+	ref<Buffer> Lightmapper::createNormalComponentBuffer(uint64 size) const {
+		const uint64 minStorageBufferOffsetAlignment = Renderer::getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
+
+		return Renderer::createDynamicBuffer({
+			.size = ceil(size, minStorageBufferOffsetAlignment),
+			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
+			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+			.persistent = false,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Normal component",
+			#endif
+		});
+	}
+
+	void Lightmapper::encodeOneTimeCommands(const StaticScene3D& scene) const {
+		const ref<Device> device = Renderer::getDevice();
 		const ref<Buffer> stagingBuffer = Renderer::createDynamicBuffer({
-			.size = coordinateBuffer->getSize() + coordinateIndexBuffer->getSize(),
+			.size = lightmapCoordinateBuffer->getSize() + lightmapCoordinateIndexBuffer->getSize() + traceRaysArgumentBuffer->getSize() + triangleBuffer->getSize() + vertexComponentBuffer->getSize() + normalComponentBuffer->getSize(),
 			.usage = BufferUsage::TRANSFER_SRC,
 			.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
 			.persistent = false,
@@ -407,55 +609,163 @@ namespace Trident {
 				.name = "Staging",
 			#endif
 		});
-		const ref<BufferView<svec2<float32>>> coordinateView = stagingBuffer->createView<svec2<float32>>(0, coordinateBuffer->getSize());
-		const ref<BufferView<uint32>> coordinateIndexView = stagingBuffer->createView<uint32>(coordinateBuffer->getSize(), coordinateIndexBuffer->getSize());
+		const ref<BufferView<svec2<float32>>> lightmapCoordinateStagingView = stagingBuffer->createView<svec2<float32>>(0, lightmapCoordinateBuffer->getSize());
+		const ref<BufferView<uint32>> lightmapCoordinateIndexStagingView = stagingBuffer->createView<uint32>(lightmapCoordinateStagingView->getOffset() + lightmapCoordinateStagingView->getSize(), lightmapCoordinateIndexBuffer->getSize());
+		const ref<BufferView<TraceRaysArguments>> traceRaysArgumentStagingView = stagingBuffer->createView<TraceRaysArguments>(lightmapCoordinateIndexStagingView->getOffset() + lightmapCoordinateIndexStagingView->getSize(), traceRaysArgumentBuffer->getSize());
+		const ref<BufferView<StaticTriangle3D>> triangleStagingView = stagingBuffer->createView<StaticTriangle3D>(traceRaysArgumentStagingView->getOffset() + traceRaysArgumentStagingView->getSize(), triangleBuffer->getSize());
+		const ref<BufferView<svec3<float32>>> vertexComponentStagingView = stagingBuffer->createView<svec3<float32>>(triangleStagingView->getOffset() + triangleStagingView->getSize(), vertexComponentBuffer->getSize());
+		const ref<BufferView<svec3<float32>>> normalComponentStagingView = stagingBuffer->createView<svec3<float32>>(vertexComponentStagingView->getOffset() + vertexComponentStagingView->getSize(), normalComponentBuffer->getSize());
 
-		svec2<float32>* coordinateMappedRange = coordinateView->map();
+		std::copy(scene.lightmapCoordinates.begin(), scene.lightmapCoordinates.end(), lightmapCoordinateStagingView->map());
 
-		std::copy(scene.lightmapCoordinates.begin(), scene.lightmapCoordinates.end(), coordinateMappedRange);
-
-		uint32* coordinateIndexMappedRange = coordinateIndexView->map();
+		uint32* lightmapCoordinateIndexMappedRange = lightmapCoordinateIndexStagingView->map();
 		uint32 coordinateIndexIndex = 0;
 
 		for (const StaticTriangle3D& triangle : scene.triangles) {
-			coordinateIndexMappedRange[coordinateIndexIndex + 0] = triangle.vertices[0].lightmapCoordinateIndex;
-			coordinateIndexMappedRange[coordinateIndexIndex + 1] = triangle.vertices[1].lightmapCoordinateIndex;
-			coordinateIndexMappedRange[coordinateIndexIndex + 2] = triangle.vertices[2].lightmapCoordinateIndex;
+			lightmapCoordinateIndexMappedRange[coordinateIndexIndex + 0] = triangle.vertices[0].lightmapCoordinateIndex;
+			lightmapCoordinateIndexMappedRange[coordinateIndexIndex + 1] = triangle.vertices[1].lightmapCoordinateIndex;
+			lightmapCoordinateIndexMappedRange[coordinateIndexIndex + 2] = triangle.vertices[2].lightmapCoordinateIndex;
 
 			coordinateIndexIndex += 3;
 		}
 
+		TraceRaysArguments* traceRaysArguments = traceRaysArgumentStagingView->map();
+		traceRaysArguments->lightmapPixelCount = 0;
+		traceRaysArguments->triangleCount = static_cast<uint32>(scene.triangles.count());
+		traceRaysArguments->traceRaysCommand.x = 1;
+		traceRaysArguments->traceRaysCommand.y = 1;
+		traceRaysArguments->traceRaysCommand.z = 1;
+
+		std::copy(scene.triangles.begin(), scene.triangles.end(), triangleStagingView->map());
+		std::copy(scene.vertices.begin(), scene.vertices.end(), vertexComponentStagingView->map());
+		std::copy(scene.normals.begin(), scene.normals.end(), normalComponentStagingView->map());
+
 		stagingBuffer->unmap();
 
-		const ref<Queue> queue = Renderer::getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
+		const ref<Queue> queue = device->getQueue(QueueFamilyCapability::TRANSFER);
 		const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
 			.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Copy coordinate buffers",
+				.name = "Copy buffers",
 			#endif
 		});
 
 		commandEncoder->begin();
 
 		BufferCopyRegion bufferCopyRegion = {
-			.sourceOffset = 0,
+			.sourceOffset = lightmapCoordinateStagingView->getOffset(),
 			.destinationOffset = 0,
-			.size = coordinateBuffer->getSize(),
+			.size = lightmapCoordinateStagingView->getSize(),
 		};
 
-		commandEncoder->copyBufferToBuffer(stagingBuffer, coordinateBuffer, bufferCopyRegion);
+		commandEncoder->copyBufferToBuffer(stagingBuffer, lightmapCoordinateBuffer, bufferCopyRegion);
 
 		bufferCopyRegion = {
-			.sourceOffset = coordinateBuffer->getSize(),
+			.sourceOffset = lightmapCoordinateIndexStagingView->getOffset(),
 			.destinationOffset = 0,
-			.size = coordinateIndexBuffer->getSize(),
+			.size = lightmapCoordinateIndexStagingView->getSize(),
 		};
 
-		commandEncoder->copyBufferToBuffer(stagingBuffer, coordinateIndexBuffer, bufferCopyRegion);
+		commandEncoder->copyBufferToBuffer(stagingBuffer, lightmapCoordinateIndexBuffer, bufferCopyRegion);
+
+		bufferCopyRegion = {
+			.sourceOffset = traceRaysArgumentStagingView->getOffset(),
+			.destinationOffset = 0,
+			.size = traceRaysArgumentStagingView->getSize(),
+		};
+
+		commandEncoder->copyBufferToBuffer(stagingBuffer, traceRaysArgumentBuffer, bufferCopyRegion);
+
+		bufferCopyRegion = {
+			.sourceOffset = triangleStagingView->getOffset(),
+			.destinationOffset = 0,
+			.size = triangleStagingView->getSize(),
+		};
+
+		commandEncoder->copyBufferToBuffer(stagingBuffer, triangleBuffer, bufferCopyRegion);
+
+		bufferCopyRegion = {
+			.sourceOffset = vertexComponentStagingView->getOffset(),
+			.destinationOffset = 0,
+			.size = vertexComponentStagingView->getSize(),
+		};
+
+		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexComponentBuffer, bufferCopyRegion);
+
+		bufferCopyRegion = {
+			.sourceOffset = normalComponentStagingView->getOffset(),
+			.destinationOffset = 0,
+			.size = normalComponentStagingView->getSize(),
+		};
+
+		commandEncoder->copyBufferToBuffer(stagingBuffer, normalComponentBuffer, bufferCopyRegion);
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
 		queue->submit(commandBuffer);
 		queue->waitIdle();
+
+		const ref<BufferView<TraceRaysArguments>> traceRaysArgumentView = traceRaysArgumentBuffer->createView<TraceRaysArguments>(0, traceRaysArgumentBuffer->getSize());
+		const ref<BufferView<LightmapPixel>> lightmapPixelView = lightmapPixelBuffer->createView<LightmapPixel>(0, lightmapPixelBuffer->getSize());
+		const ref<BufferView<StaticTriangle3D>> triangleView = triangleBuffer->createView<StaticTriangle3D>(0, triangleBuffer->getSize());
+		const ref<BufferView<float32>> vertexComponentView = vertexComponentBuffer->createView<float32>(0, vertexComponentBuffer->getSize());
+		const ref<BufferView<float32>> normalComponentView = normalComponentBuffer->createView<float32>(0, normalComponentBuffer->getSize());
+		const ref<BufferView<svec2<float32>>> lightmapCoordinateView = lightmapCoordinateBuffer->createView<svec2<float32>>(0, lightmapCoordinateBuffer->getSize());
+
+		const DescriptorImage lightmapAtlasDescriptorImage = {
+			.imageView = lightmapAtlasImageView,
+			.imageLayout = ImageLayout::GENERAL,
+			.sampler = nullptr,
+		};
+
+		const sequence<WriteDescriptorSet> writeDescriptorSets = {
+			{
+				.descriptorSet = rasterizeLightmapsDescriptorSet,
+				.bindingIndex = 0,
+				.descriptorBufferViews = traceRaysArgumentView,
+			},
+			{
+				.descriptorSet = rasterizeLightmapsDescriptorSet,
+				.bindingIndex = 1,
+				.descriptorBufferViews = lightmapPixelView,
+			},
+			{
+				.descriptorSet = traceRaysDescriptorSet,
+				.bindingIndex = 0,
+				.descriptorBufferViews = traceRaysArgumentView,
+			},
+			{
+				.descriptorSet = traceRaysDescriptorSet,
+				.bindingIndex = 1,
+				.descriptorBufferViews = lightmapPixelView,
+			},
+			{
+				.descriptorSet = traceRaysDescriptorSet,
+				.bindingIndex = 2,
+				.descriptorBufferViews = triangleView,
+			},
+			{
+				.descriptorSet = traceRaysDescriptorSet,
+				.bindingIndex = 3,
+				.descriptorBufferViews = vertexComponentView,
+			},
+			{
+				.descriptorSet = traceRaysDescriptorSet,
+				.bindingIndex = 4,
+				.descriptorBufferViews = normalComponentView,
+			},
+			{
+				.descriptorSet = traceRaysDescriptorSet,
+				.bindingIndex = 5,
+				.descriptorBufferViews = lightmapCoordinateView,
+			},
+			{
+				.descriptorSet = traceRaysDescriptorSet,
+				.bindingIndex = 6,
+				.descriptorImages = lightmapAtlasDescriptorImage,
+			},
+		};
+
+		device->updateDescriptorSets(writeDescriptorSets);
 	}
 }

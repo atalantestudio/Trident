@@ -61,9 +61,7 @@ namespace Trident {
 			}
 
 			if (descriptor.usage & BufferUsage::READ_WRITE_STORAGE && descriptor.memoryProperties & MemoryProperty::HOST_VISIBLE) {
-				ENGINE_ERROR("The READ_WRITE_STORAGE buffer usage is mutually exclusive with the HOST_VISIBLE memory property.");
-
-				errorCount += 1;
+				ENGINE_WARNING("READ_WRITE_STORAGE buffers should not have the HOST_VISIBLE memory property.");
 			}
 
 			if (descriptor.usage & (BufferUsage::READ_ONLY_STORAGE | BufferUsage::READ_WRITE_STORAGE)) {

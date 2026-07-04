@@ -144,10 +144,11 @@ bool rayTriangleIntersection(Ray ray, Triangle triangle_, inout float t) {
 
 Hit rchit(Ray ray, uint triangleIndex, float t) {
 	Triangle triangle_ = triangleBuffer[triangleIndex];
+	uint normalOffset = triangle_.normalIndex * 3;
 	vec3 normal = vec3(
-		normalBuffer[triangle_.normalIndex * 3 + 0],
-		normalBuffer[triangle_.normalIndex * 3 + 1],
-		normalBuffer[triangle_.normalIndex * 3 + 2]
+		normalBuffer[normalOffset + 0],
+		normalBuffer[normalOffset + 1],
+		normalBuffer[normalOffset + 2]
 	);
 
 	Hit hit;
@@ -180,8 +181,8 @@ Hit rint(Ray ray) {
 
 		if (rayTriangleIntersection(ray, triangle_, t)) {
 			if (t < closestT) {
-				intersectingTriangleIndex = triangleIndex;
 				closestT = t;
+				intersectingTriangleIndex = triangleIndex;
 			}
 		}
 
@@ -208,12 +209,10 @@ vec4 rgen(uvec2 coordinate, uint seed) {
 	uint bounceIndex = 0;
 
 	while (bounceIndex < RAY_BOUNCE_COUNT) {
-		seed += bounceIndex;
-
 		Hit hit = rint(ray);
 
 		if (hit.t < 0.0) {
-			light += SKY_COLOR * throughput;
+			light += /* SKY_COLOR * */ throughput;
 
 			break;
 		}
@@ -246,14 +245,14 @@ void main() {
 	uint seed = coordinateIndex * camera.frameIndex;
 	vec4 sample_ = rgen(coordinate, seed);
 
-	if (camera.frameIndex == 0) {
-		accumulateBuffer[coordinateIndex] = sample_;
+	/* if (camera.frameIndex == 0) {
+		accumulateBuffer[coordinateIndex] = sample_; */
 
 		imageStore(outputImage, ivec2(coordinate), sample_);
-	}
+	/* }
 	else {
 		accumulateBuffer[coordinateIndex] += sample_;
 
 		imageStore(outputImage, ivec2(coordinate), accumulateBuffer[coordinateIndex] / camera.frameIndex);
-	}
+	} */
 }

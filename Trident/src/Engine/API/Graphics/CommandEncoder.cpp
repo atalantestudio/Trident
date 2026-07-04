@@ -37,6 +37,12 @@ namespace Trident {
 					errorCount += 1;
 				}
 				else {
+					if (descriptor.framebuffer->getImageViews().count() != renderPass->getTotalAttachmentCount()) {
+						ENGINE_ERROR("descriptor.framebuffer must have one ImageView object for each attachment in the render pass. This includes the implicit resolve attachment for the swapchain image.");
+
+						errorCount += 1;
+					}
+
 					if (descriptor.clearValues.count() < renderPass->getAttachmentCount()) {
 						ENGINE_ERROR("descriptor.clearValues.count must be greater than or equal to the number of attachments in descriptor.framebuffer.renderPass.");
 
@@ -56,6 +62,8 @@ namespace Trident {
 		#endif
 
 		device->adapter->beginRenderPassImplementation(this, descriptor);
+
+		currentFramebuffer = descriptor.framebuffer;
 	}
 
 	void CommandEncoder::bindComputePipeline(ref<ComputePipeline> computePipeline) {
@@ -256,6 +264,20 @@ namespace Trident {
 
 	void CommandEncoder::endRenderPass() {
 		device->adapter->endRenderPassImplementation(this);
+
+		const ref<RenderPass> renderPass = currentFramebuffer->getRenderPass();
+		const view<ref<ImageView>> imageViews = currentFramebuffer->getImageViews();
+
+		uint32 attachmentIndex = 0;
+
+		while (attachmentIndex < renderPass->getAttachmentCount()) {
+			const Attachment& attachment = renderPass->getAttachment(attachmentIndex);
+			const ref<ImageView> imageView = imageViews[attachmentIndex];
+
+			imageView->getImage()->layout = attachment.finalLayout;
+
+			attachmentIndex += 1;
+		}
 	}
 
 	void CommandEncoder::nextSubpass() {

@@ -12,7 +12,6 @@
 #include "Engine/Adapter/Graphics/DX12/ComputePipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/DescriptorSet.hpp"
 #include "Engine/Adapter/Graphics/DX12/Format.hpp"
-#include "Engine/Adapter/Graphics/DX12/Framebuffer.hpp"
 #include "Engine/Adapter/Graphics/DX12/GraphicsPipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/ImageView.hpp"
 #include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
@@ -238,7 +237,7 @@ namespace Trident {
 
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 
-		_commandEncoder->framebuffer = std::static_pointer_cast<DX12::Framebuffer>(descriptor.framebuffer);
+		_commandEncoder->framebuffer = descriptor.framebuffer;
 
 		const ref<RenderPass> renderPass = _commandEncoder->framebuffer->getRenderPass();
 

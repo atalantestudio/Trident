@@ -9,7 +9,7 @@ namespace Trident {
 	ref<RenderPass> ForwardRenderer::createRenderPass() const {
 		return Renderer::createRenderPass({
 			.attachments = {
-				// Color
+				// Swapchain
 				{
 					.format = getSurface()->getFormat(),
 					.sampleCount = FORWARD_SAMPLE_COUNT,

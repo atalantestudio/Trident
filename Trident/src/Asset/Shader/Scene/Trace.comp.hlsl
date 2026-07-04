@@ -123,10 +123,11 @@ bool rayTriangleIntersection(Ray ray, Triangle triangle_, inout float t) {
 
 Hit rchit(Ray ray, uint triangleIndex, float t) {
 	Triangle triangle_ = triangleBuffer[triangleIndex];
+	uint normalOffset = triangle_.normalIndex * 3;
 	float3 normal = float3(
-		normalBuffer[triangle_.normalIndex * 3 + 0],
-		normalBuffer[triangle_.normalIndex * 3 + 1],
-		normalBuffer[triangle_.normalIndex * 3 + 2]
+		normalBuffer[normalOffset + 0],
+		normalBuffer[normalOffset + 1],
+		normalBuffer[normalOffset + 2]
 	);
 
 	Hit hit;
@@ -159,8 +160,8 @@ Hit rint(Ray ray) {
 
 		if (rayTriangleIntersection(ray, triangle_, t)) {
 			if (t < closestT) {
-				intersectingTriangleIndex = triangleIndex;
 				closestT = t;
+				intersectingTriangleIndex = triangleIndex;
 			}
 		}
 
@@ -187,8 +188,6 @@ float4 rgen(uint2 coordinate, uint seed) {
 	uint bounceIndex = 0;
 
 	while (bounceIndex < RAY_BOUNCE_COUNT) {
-		seed += bounceIndex;
-
 		Hit hit = rint(ray);
 
 		if (hit.t < 0.0) {

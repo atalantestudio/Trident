@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Engine/API/Graphics/DispatchIndirectCommand.hpp"
 #include "Engine/Filesystem/Asset/ImageAsset.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
@@ -13,6 +14,18 @@ namespace Trident {
 	struct LightmapNode;
 
 	class Lightmapper {
+		private:
+			struct TraceRaysArguments {
+				uint32 lightmapPixelCount;
+				uint32 triangleCount;
+				DispatchIndirectCommand traceRaysCommand;
+			};
+
+			struct LightmapPixel {
+				uint32 triangleIndex;
+				uint32 coordinate;
+			};
+
 		public:
 			static constexpr Extent2D ATLAS_SIZE = {2048, 2048};
 
@@ -24,34 +37,55 @@ namespace Trident {
 			void buildLightmapAtlas(const StaticScene3D& scene, ImageAssetDescriptor& lightmapAtlasImageAssetDescriptor);
 
 		private:
-			ref<RenderPass> createRenderPass(ImageFormat lightmapAtlasImageFormat) const;
-			ref<Framebuffer> createFramebuffer() const;
-
-			ref<PipelineLayout> createLightmapAtlasPipelineLayout() const;
-
-			ref<GraphicsPipeline> createLightmapAtlasPipeline() const;
+			ref<RenderPass> createRasterizeLightmapsRenderPass(ImageFormat lightmapAtlasImageFormat) const;
 
 			ref<Image> createLightmapAtlasImage(const ImageAssetDescriptor& lightmapAtlasImageAssetDescriptor) const;
 			ref<ImageView> createLightmapAtlasImageView();
 
-			ref<Buffer> createCoordinateBuffer(uint64 size) const;
-			ref<Buffer> createCoordinateIndexBuffer(uint64 size) const;
+			ref<Framebuffer> createRasterizeLightmapsFramebuffer() const;
 
-			void copyCoordinateBuffers(const StaticScene3D& scene) const;
+			ref<DescriptorSetLayout> createRasterizeLightmapsDescriptorSetLayout() const;
+			ref<DescriptorSetLayout> createTraceRaysDescriptorSetLayout() const;
+
+			ref<PipelineLayout> createRasterizeLightmapsPipelineLayout(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) const;
+			ref<PipelineLayout> createTraceRaysPipelineLayout(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) const;
+
+			ref<GraphicsPipeline> createRasterizeLightmapsPipeline() const;
+			ref<ComputePipeline> createTraceRaysPipeline() const;
+
+			ref<Buffer> createLightmapCoordinateBuffer(uint64 size) const;
+			ref<Buffer> createLightmapCoordinateIndexBuffer(uint64 size) const;
+			ref<Buffer> createTraceRaysArgumentBuffer() const;
+			ref<Buffer> createLightmapPixelBuffer() const;
+			ref<Buffer> createTriangleBuffer(uint64 size) const;
+			ref<Buffer> createVertexComponentBuffer(uint64 size) const;
+			ref<Buffer> createNormalComponentBuffer(uint64 size) const;
+
+			void encodeOneTimeCommands(const StaticScene3D& scene) const;
 
 		private:
-			ref<RenderPass> renderPass;
+			ref<RenderPass> rasterizeLightmapsRenderPass;
 
 			ref<Image> lightmapAtlasImage;
 			ref<ImageView> lightmapAtlasImageView;
 
-			ref<Framebuffer> framebuffer;
+			ref<Framebuffer> rasterizeLightmapsFramebuffer;
 
-			ref<PipelineLayout> lightmapAtlasPipelineLayout;
+			ref<PipelineLayout> rasterizeLightmapsPipelineLayout;
+			ref<PipelineLayout> traceRaysPipelineLayout;
 
-			ref<GraphicsPipeline> lightmapAtlasPipeline;
+			ref<DescriptorSet> rasterizeLightmapsDescriptorSet;
+			ref<DescriptorSet> traceRaysDescriptorSet;
 
-			ref<Buffer> coordinateBuffer;
-			ref<Buffer> coordinateIndexBuffer;
+			ref<GraphicsPipeline> rasterizeLightmapsPipeline;
+			ref<ComputePipeline> traceRaysPipeline;
+
+			ref<Buffer> lightmapCoordinateBuffer;
+			ref<Buffer> lightmapCoordinateIndexBuffer;
+			ref<Buffer> traceRaysArgumentBuffer;
+			ref<Buffer> lightmapPixelBuffer;
+			ref<Buffer> triangleBuffer;
+			ref<Buffer> vertexComponentBuffer;
+			ref<Buffer> normalComponentBuffer;
 	};
 }
