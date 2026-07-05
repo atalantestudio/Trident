@@ -6,7 +6,6 @@
 #include "Engine/Adapter/Graphics/GL/Image.hpp"
 #include "Engine/Adapter/Graphics/GL/ImageFormat.hpp"
 #include "Engine/Adapter/Graphics/GL/ImageType.hpp"
-#include "Engine/Adapter/Graphics/GL/ImageUsage.hpp"
 #include "Engine/Adapter/Graphics/GL/ImageView.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
