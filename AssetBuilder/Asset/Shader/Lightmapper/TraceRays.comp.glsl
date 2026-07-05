@@ -100,6 +100,17 @@ vec3 randomUnitDirection(inout uint seed) {
 }
 
 bool rayTriangleIntersection(Ray ray, Triangle triangle_, inout float t) {
+	uint normalOffset = triangle_.normalIndex * 3;
+	vec3 normal = vec3(
+		normalComponents[normalOffset + 0],
+		normalComponents[normalOffset + 1],
+		normalComponents[normalOffset + 2]
+	);
+
+	if (dot(ray.direction, normal) > 0.0) {
+		return false;
+	}
+
 	uint vertexAOffset = triangle_.vertices[0].index * 3;
 	uint vertexBOffset = triangle_.vertices[1].index * 3;
 	uint vertexCOffset = triangle_.vertices[2].index * 3;
