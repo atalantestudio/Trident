@@ -34,16 +34,33 @@ namespace Trident {
 			/// Binds descriptor sets to the command buffer.
 			/// 
 			/// NOTE
-			/// The pipeline layout could have been taken from the current pipeline as well,
+			/// The pipeline layout could have been taken implicitly from the current pipeline as well,
 			/// but in Vulkan this operation requires a valid layout. This method asks for the pipeline layout to make sure the user keeps it around at runtime.
 			void bindDescriptorSets(ref<PipelineLayout> pipelineLayout, uint32 descriptorSetIndexOffset, view<ref<DescriptorSet>> descriptorSets);
 
 			void bindGraphicsPipeline(ref<GraphicsPipeline> graphicsPipeline);
 
-			/// Binds the provided index buffer.
-			/// The offset is in bytes and must be a multiple of IndexType.
+			/// Binds an index buffer.
 			template<typename IndexType>
-			inline void bindIndexBuffer(ref<Buffer> indexBuffer, uint64 offset) {
+			inline void bindIndexBuffer(
+				/// The index buffer to bind.
+				ref<Buffer> indexBuffer,
+				
+				/// The offset in bytes in the buffer. It must be a multiple of IndexType.
+				uint64 offset
+			) {
+				#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+					uint32 errorCount = 0;
+
+					if (offset % sizeof(IndexType) > 0) {
+						ENGINE_ERROR("The offset must be a multiple of [].", sizeof(IndexType));
+
+						errorCount += 1;
+					}
+
+					ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
+				#endif
+
 				bindIndexBuffer(indexBuffer, offset, sizeof(IndexType));
 			}
 
@@ -60,12 +77,20 @@ namespace Trident {
 
 			void dispatchIndirect(ref<Buffer> buffer, uint64 bufferOffset);
 
-			// Draws primitives.
-			// - `vertexCount` is the number of vertices to draw per instance.
-			// - `instanceCount` is the number of instances to draw.
-			// - `vertexOffset` is the offset in vertex units in vertex rate attributes at which to start drawing.
-			// - `instanceOffset` is the offset of the first instance, in instance units.
-			void draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset, uint32 instanceOffset);
+			/// Draws primitives.
+			void draw(
+				/// The number of vertices to draw per instance.
+				uint32 vertexCount,
+
+				/// The number of instances to draw.
+				uint32 instanceCount,
+
+				/// The index of the first vertex to draw.
+				uint32 vertexOffset,
+
+				/// The index of the first instance to draw.
+				uint32 instanceOffset
+			);
 
 			// Draws primitives with indexed vertices.
 			// - `indexCount` is the number of indices to draw per instance.

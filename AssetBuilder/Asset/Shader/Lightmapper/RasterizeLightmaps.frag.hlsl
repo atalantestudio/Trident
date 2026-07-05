@@ -24,6 +24,7 @@ struct Interstage {
 	float2 coordinate : VERTEX_OUTPUT_ATTRIBUTE2;
 };
 
+static const uint RAYTRACER_WORKGROUP_SIZE = 16;
 static const uint2 ATLAS_SIZE = uint2(2048, 2048);
 
 RWStructuredBuffer<TraceRaysArguments> traceRaysArguments : register(u1);
@@ -35,7 +36,7 @@ void main(Interstage interstage) {
 
 	InterlockedAdd(traceRaysArguments[0].lightmapPixelCount, 1, lightmapPixelIndex);
 
-	traceRaysArguments[0].traceRaysCommand.x = traceRaysArguments[0].lightmapPixelCount / 16;
+	traceRaysArguments[0].traceRaysCommand.x = traceRaysArguments[0].lightmapPixelCount / RAYTRACER_WORKGROUP_SIZE;
 
 	lightmapPixels[lightmapPixelIndex].triangleIndex = interstage.triangleIndex;
 	lightmapPixels[lightmapPixelIndex].coordinate = (coordinate.x << 16) | coordinate.y;

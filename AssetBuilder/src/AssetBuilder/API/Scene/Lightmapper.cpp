@@ -154,8 +154,8 @@ namespace Trident {
 	}
 
 	void Lightmapper::buildLightmapAtlas(const StaticScene3D& scene, ImageAssetDescriptor& lightmapAtlasImageAssetDescriptor) {
-		const uint32 instanceCount = static_cast<uint32>(scene.triangles.count());
-		const uint32 indexCount = instanceCount * 3;
+		const uint32 triangleCount = static_cast<uint32>(scene.triangles.count());
+		const uint32 vertexCount = triangleCount * 3;
 		const ref<Device> device = Renderer::getDevice();
 
 		rasterizeLightmapsRenderPass = createRasterizeLightmapsRenderPass(lightmapAtlasImageAssetDescriptor.format);
@@ -180,7 +180,7 @@ namespace Trident {
 		traceRaysDescriptorSet = descriptorSets[1];
 
 		lightmapCoordinateBuffer = createLightmapCoordinateBuffer(scene.lightmapCoordinates.count() * sizeof(svec2<float32>));
-		lightmapCoordinateIndexBuffer = createLightmapCoordinateIndexBuffer(indexCount * sizeof(uint32));
+		lightmapCoordinateIndexBuffer = createLightmapCoordinateIndexBuffer(vertexCount * sizeof(uint32));
 		traceRaysArgumentBuffer = createTraceRaysArgumentBuffer();
 		lightmapPixelBuffer = createLightmapPixelBuffer();
 		triangleBuffer = createTriangleBuffer(scene.triangles.count() * sizeof(StaticTriangle3D));
@@ -192,11 +192,12 @@ namespace Trident {
 		const Extent2D framebufferExtent = rasterizeLightmapsFramebuffer->getExtent();
 		const float32 framebufferWidth = static_cast<float32>(framebufferExtent.width);
 		const float32 framebufferHeight = static_cast<float32>(framebufferExtent.height);
+
 		const ref<Queue> queue = device->getQueue(QueueFamilyCapability::GRAPHICS);
 		const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
 			.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Build lightmap atlas",
+				.name = "Generate lightmaps",
 			#endif
 		});
 
@@ -208,23 +209,23 @@ namespace Trident {
 		commandEncoder->setViewport({0.0f, framebufferHeight}, {framebufferWidth, -framebufferHeight}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, framebufferExtent);
 		commandEncoder->bindGraphicsPipeline(rasterizeLightmapsPipeline);
-		commandEncoder->bindVertexBuffer(0, lightmapCoordinateBuffer, 0, sizeof(svec2<float32>));
-		commandEncoder->bindIndexBuffer<uint32>(lightmapCoordinateIndexBuffer, 0);
+		commandEncoder->bindVertexBuffer(0, lightmapCoordinateIndexBuffer, 0, sizeof(uint32));
 		commandEncoder->bindDescriptorSets(rasterizeLightmapsPipelineLayout, 0, rasterizeLightmapsDescriptorSet);
+		commandEncoder->draw(vertexCount, 1, 0, 0);
+		commandEncoder->endRenderPass();
 
-		// TODO(asset-builder/lightmapper/dx12): StartInstanceLocation isn't added to SV_InstanceID, so the triangle index is always 0.
-		// TODO(asset-builder/lightmapper/rasterize-lightmaps): Try to refactor to a single draw call.
-		{
-			uint32 instanceIndex = 0;
+		// TODO(graphics/dx12/end-render-pass): Automatically transition the attachments to their final layout.
+		if (Renderer::getGraphicsApi() == GraphicsAPI::DX12) {
+			const ImageMemoryBarrier imageMemoryBarrier = {
+				.image = lightmapAtlasImage,
+				.newLayout = ImageLayout::GENERAL,
+				.newAccess = Access::SHADER_READ | Access::SHADER_WRITE,
+			};
 
-			while (instanceIndex < instanceCount) {
-				commandEncoder->drawIndexed(3, 1, instanceIndex * 3, 0, instanceIndex);
-
-				instanceIndex += 1;
-			}
+			commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
 		}
 
-		commandEncoder->endRenderPass();
+		// TODO(graphics/dx12/dispatch): Fix artifacts on the lightmap atlas due to not enough threads being dispatched.
 		commandEncoder->bindComputePipeline(traceRaysPipeline);
 		commandEncoder->bindDescriptorSets(traceRaysPipelineLayout, 0, traceRaysDescriptorSet);
 		commandEncoder->dispatchIndirect(traceRaysArgumentBuffer, 2 * sizeof(uint32));
@@ -267,9 +268,7 @@ namespace Trident {
 
 		const ref<BufferView<uint8>> lightmapAtlasView = lightmapAtlasStagingBuffer->createView<uint8>(0, lightmapAtlasStagingBuffer->getSize());
 
-		uint8* lightmapAtlasMappedRange = lightmapAtlasView->map();
-
-		std::copy_n(lightmapAtlasMappedRange, lightmapAtlasImageAssetDescriptor.data.count(), &lightmapAtlasImageAssetDescriptor.data[0]);
+		std::copy_n(lightmapAtlasView->map(), lightmapAtlasImageAssetDescriptor.data.count(), &lightmapAtlasImageAssetDescriptor.data[0]);
 
 		lightmapAtlasStagingBuffer->unmap();
 	}
@@ -344,6 +343,13 @@ namespace Trident {
 
 	ref<DescriptorSetLayout> Lightmapper::createRasterizeLightmapsDescriptorSetLayout() const {
 		return Renderer::createDescriptorSetLayout({
+			// Lightmap coordinate
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::VERTEX,
+			},
+
 			// Trace rays argument
 			{
 				.descriptorType = DescriptorType::READ_WRITE_STORAGE_BUFFER,
@@ -433,7 +439,7 @@ namespace Trident {
 
 	ref<GraphicsPipeline> Lightmapper::createRasterizeLightmapsPipeline() const {
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<svec2<float32>>();
+		vertexInputBinding.registerAttribute<uint32>();
 
 		const sequence<ColorBlendAttachment> colorBlendAttachments = {
 			{
@@ -509,7 +515,7 @@ namespace Trident {
 
 		return Renderer::createDynamicBuffer({
 			.size = ceil(size, minStorageBufferOffsetAlignment),
-			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE | BufferUsage::VERTEX,
+			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
 			#if defined(DEBUG_OBJECT_NAME)
@@ -521,7 +527,7 @@ namespace Trident {
 	ref<Buffer> Lightmapper::createLightmapCoordinateIndexBuffer(uint64 size) const {
 		return Renderer::createDynamicBuffer({
 			.size = size,
-			.usage = BufferUsage::TRANSFER_DST | BufferUsage::INDEX,
+			.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
 			#if defined(DEBUG_OBJECT_NAME)
@@ -709,12 +715,12 @@ namespace Trident {
 		queue->submit(commandBuffer);
 		queue->waitIdle();
 
+		const ref<BufferView<svec2<float32>>> lightmapCoordinateView = lightmapCoordinateBuffer->createView<svec2<float32>>(0, lightmapCoordinateBuffer->getSize());
 		const ref<BufferView<TraceRaysArguments>> traceRaysArgumentView = traceRaysArgumentBuffer->createView<TraceRaysArguments>(0, traceRaysArgumentBuffer->getSize());
 		const ref<BufferView<LightmapPixel>> lightmapPixelView = lightmapPixelBuffer->createView<LightmapPixel>(0, lightmapPixelBuffer->getSize());
 		const ref<BufferView<StaticTriangle3D>> triangleView = triangleBuffer->createView<StaticTriangle3D>(0, triangleBuffer->getSize());
 		const ref<BufferView<float32>> vertexComponentView = vertexComponentBuffer->createView<float32>(0, vertexComponentBuffer->getSize());
 		const ref<BufferView<float32>> normalComponentView = normalComponentBuffer->createView<float32>(0, normalComponentBuffer->getSize());
-		const ref<BufferView<svec2<float32>>> lightmapCoordinateView = lightmapCoordinateBuffer->createView<svec2<float32>>(0, lightmapCoordinateBuffer->getSize());
 
 		const DescriptorImage lightmapAtlasDescriptorImage = {
 			.imageView = lightmapAtlasImageView,
@@ -726,11 +732,16 @@ namespace Trident {
 			{
 				.descriptorSet = rasterizeLightmapsDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorBufferViews = traceRaysArgumentView,
+				.descriptorBufferViews = lightmapCoordinateView,
 			},
 			{
 				.descriptorSet = rasterizeLightmapsDescriptorSet,
 				.bindingIndex = 1,
+				.descriptorBufferViews = traceRaysArgumentView,
+			},
+			{
+				.descriptorSet = rasterizeLightmapsDescriptorSet,
+				.bindingIndex = 2,
 				.descriptorBufferViews = lightmapPixelView,
 			},
 			{

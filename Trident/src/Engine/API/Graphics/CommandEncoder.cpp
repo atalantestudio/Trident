@@ -243,6 +243,20 @@ namespace Trident {
 	}
 
 	void CommandEncoder::draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset, uint32 instanceOffset) {
+		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+			uint32 errorCount = 0;
+
+			if (vertexCount == 0) {
+				ENGINE_WARNING("vertexCount should not be 0.");
+			}
+
+			if (instanceCount == 0) {
+				ENGINE_WARNING("instanceCount should not be 0.");
+			}
+
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
+		#endif
+
 		device->adapter->drawImplementation(this, vertexCount, instanceCount, vertexOffset, instanceOffset);
 	}
 
@@ -251,6 +265,20 @@ namespace Trident {
 	}
 
 	void CommandEncoder::drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset, sint32 indexBias, uint32 instanceOffset) {
+		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+			uint32 errorCount = 0;
+
+			if (indexCount == 0) {
+				ENGINE_WARNING("indexCount should not be 0.");
+			}
+
+			if (instanceCount == 0) {
+				ENGINE_WARNING("instanceCount should not be 0.");
+			}
+
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
+		#endif
+
 		device->adapter->drawIndexedImplementation(this, indexCount, instanceCount, indexOffset, indexBias, instanceOffset);
 	}
 

@@ -19,15 +19,16 @@ in Interstage {
 	layout(location = 1) vec2 coordinate;
 } interstage;
 
+const uint RAYTRACER_WORKGROUP_SIZE = 16;
 const uvec2 ATLAS_SIZE = uvec2(2048, 2048);
 
-layout(set = 0, binding = 0) buffer TraceRaysArgumentBuffer {
+layout(set = 0, binding = 1) buffer TraceRaysArgumentBuffer {
 	uint lightmapPixelCount;
 	uint triangleCount;
 	DispatchIndirectCommand traceRaysCommand;
 };
 
-layout(set = 0, binding = 1) buffer writeonly LightmapPixelBuffer {
+layout(set = 0, binding = 2) buffer writeonly LightmapPixelBuffer {
 	LightmapPixel lightmapPixels[];
 };
 
@@ -37,7 +38,7 @@ void main() {
 	uvec2 coordinate = uvec2(interstage.coordinate * ATLAS_SIZE);
 	uint lightmapPixelIndex = atomicAdd(lightmapPixelCount, 1);
 
-	traceRaysCommand.x = lightmapPixelCount / 16;
+	traceRaysCommand.x = lightmapPixelCount / RAYTRACER_WORKGROUP_SIZE;
 
 	lightmapPixels[lightmapPixelIndex].triangleIndex = interstage.triangleIndex;
 	lightmapPixels[lightmapPixelIndex].coordinate = (coordinate.x << 16) | coordinate.y;

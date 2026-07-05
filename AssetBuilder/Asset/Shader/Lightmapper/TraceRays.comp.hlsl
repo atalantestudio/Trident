@@ -34,8 +34,8 @@ struct Hit {
 };
 
 static const float FLOAT32_MAX = 4294967295.0;
-static const uint SAMPLE_COUNT = 512;
-static const uint BOUNCE_COUNT = 4;
+static const uint SAMPLE_COUNT = 1024;
+static const uint BOUNCE_COUNT = 32;
 static const uint2 ATLAS_SIZE = uint2(2048, 2048);
 
 StructuredBuffer<TraceRaysArguments> traceRaysArguments : register(t0);
@@ -184,24 +184,24 @@ Hit rint(Ray ray) {
 	return rmiss();
 }
 
-float3 rgen(Ray ray, inout uint seed) {
+float3 rgen(Hit hit, inout uint seed) {
+	Ray ray;
 	float3 light = float3(0.0, 0.0, 0.0);
 	uint bounceIndex = 0;
 
 	while (bounceIndex < BOUNCE_COUNT) {
-		ray.direction = normalize(ray.direction + randomUnitDirection(seed));
-		ray.origin += ray.direction * 0.0001;
+		ray.direction = normalize(hit.normal + randomUnitDirection(seed));
 
-		Hit hit = rint(ray);
+		// Smaller numbers like 0.0001 cause visual artifacts.
+		ray.origin = hit.position + ray.direction * 0.001;
+
+		hit = rint(ray);
 
 		if (hit.t < 0.0) {
 			light += float(BOUNCE_COUNT - bounceIndex) / BOUNCE_COUNT;
 
 			break;
 		}
-
-		ray.origin = hit.position;
-		ray.direction = hit.normal;
 
 		bounceIndex += 1;
 	}
@@ -250,18 +250,18 @@ void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 	float2 lightmapCoordinateA = lightmapCoordinates[triangle_.vertices[0].lightmapCoordinateIndex];
 	float2 lightmapCoordinateB = lightmapCoordinates[triangle_.vertices[1].lightmapCoordinateIndex];
 	float2 lightmapCoordinateC = lightmapCoordinates[triangle_.vertices[2].lightmapCoordinateIndex];
-	float2 pixelCoordinate = float2(coordinate) / ATLAS_SIZE;
+	float2 pixelCoordinate = (coordinate + float2(0.5, 0.5)) / ATLAS_SIZE;
 	float3 pixelBarycentricCoordinate = calculateBarycentricCoordinate(lightmapCoordinateA, lightmapCoordinateB, lightmapCoordinateC, pixelCoordinate);
 
-	Ray ray;
-	ray.origin = vertexA * pixelBarycentricCoordinate.x + vertexB * pixelBarycentricCoordinate.y + vertexC * pixelBarycentricCoordinate.z;
-	ray.direction = normal;
+	Hit hit;
+	hit.position = vertexA * pixelBarycentricCoordinate.x + vertexB * pixelBarycentricCoordinate.y + vertexC * pixelBarycentricCoordinate.z;
+	hit.normal = normal;
 
 	float3 light = float3(0.0, 0.0, 0.0);
 	uint sampleIndex = 0;
 
 	while (sampleIndex < SAMPLE_COUNT) {
-		light += rgen(ray, seed);
+		light += rgen(hit, seed);
 
 		sampleIndex += 1;
 	}

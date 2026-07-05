@@ -203,11 +203,11 @@ Hit rint(Ray ray) {
 }
 
 vec3 rgen(Hit hit, inout uint seed) {
+	Ray ray;
 	vec3 light = vec3(0.0, 0.0, 0.0);
 	uint bounceIndex = 0;
 
 	while (bounceIndex < BOUNCE_COUNT) {
-		Ray ray;
 		ray.direction = normalize(hit.normal + randomUnitDirection(seed));
 
 		// Smaller numbers like 0.0001 cause visual artifacts.
