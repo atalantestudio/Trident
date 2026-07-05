@@ -42,6 +42,9 @@ namespace Trident {
 			BREAKPOINT(); \
 		} \
 	}
+
+	#define VALIDATION_ERROR(...) (ENGINE_ERROR(__VA_ARGS__), validator.errorCount += 1)
+	#define VALIDATION_WARNING(...) ENGINE_WARNING(__VA_ARGS__)
 #else
 	#define ENGINE_TRACE(...)
 	#define ENGINE_DEBUG(...)

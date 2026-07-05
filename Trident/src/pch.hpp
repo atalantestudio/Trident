@@ -3,7 +3,7 @@
 
 #pragma once
 
-// TODO: Conditionally import per module.
+// TODO(include): Conditionally import per module.
 #include <array>
 #include <cstdint>
 #include <filesystem>
@@ -17,13 +17,13 @@
 #include <random>
 #include <sstream>
 
-// TODO: Conditionally import per module.
+// TODO(include): Conditionally import per module.
 #if defined(BUILD_MODE_DEBUG)
 	#include <chrono>
 	#include <iomanip>
 #endif
 
-// TODO: Conditionally import per module.
+// TODO(include): Conditionally import per module.
 #if defined(BUILD_MODE_PROFILE)
 	#include <algorithm>
 	#include <thread>
@@ -77,7 +77,7 @@
 #include "Engine/Module/Include/scroll.hpp"
 #include "Engine/Module/Include/tsl.hpp"
 
-// TODO
+// TODO(include)
 // The Scroll adapter must be included before Log.hpp because it includes the scroll namespace,
 // but Extent.hpp is a dependency of the Lyah adapter.
 #include "Engine/Module/Adapter/scroll.hpp"
@@ -98,6 +98,10 @@
 #include "Engine/Base/Transform.hpp"
 
 #include "Engine/Manifest.hpp"
+
+#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+	#include "Engine/Debug/Validator.hpp"
+#endif
 
 #if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
 	#include "Engine/Adapter/Window/Win32/base.hpp"
