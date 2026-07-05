@@ -7,6 +7,7 @@ layout(location = 0) in vec2 coordinate;
 
 out Interstage {
 	layout(location = 0) flat uint triangleIndex;
+	layout(location = 1) vec2 coordinate;
 } interstage;
 
 void main() {
@@ -17,4 +18,5 @@ void main() {
 	gl_Position = vec4(lightmapCoordinate, 0.0, 1.0);
 
 	interstage.triangleIndex = uint(gl_InstanceIndex);
+	interstage.coordinate = coordinate;
 }

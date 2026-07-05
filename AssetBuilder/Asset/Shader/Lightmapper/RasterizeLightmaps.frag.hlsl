@@ -21,13 +21,16 @@ struct LightmapPixel {
 struct Interstage {
 	float4 position : SV_Position;
 	nointerpolation uint triangleIndex : VERTEX_OUTPUT_ATTRIBUTE1;
+	float2 coordinate : VERTEX_OUTPUT_ATTRIBUTE2;
 };
+
+static const uint2 ATLAS_SIZE = uint2(2048, 2048);
 
 RWStructuredBuffer<TraceRaysArguments> traceRaysArguments : register(u1);
 RWStructuredBuffer<LightmapPixel> lightmapPixels : register(u2);
 
 void main(Interstage interstage) {
-	uint2 coordinate = uint2(interstage.position.xy);
+	uint2 coordinate = uint2(interstage.coordinate * ATLAS_SIZE);
 	uint lightmapPixelIndex;
 
 	InterlockedAdd(traceRaysArguments[0].lightmapPixelCount, 1, lightmapPixelIndex);

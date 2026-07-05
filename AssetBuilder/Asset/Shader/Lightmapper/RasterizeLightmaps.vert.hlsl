@@ -9,6 +9,7 @@ struct VertexInput {
 struct Interstage {
 	float4 position : SV_Position;
 	nointerpolation uint triangleIndex : VERTEX_OUTPUT_ATTRIBUTE1;
+	float2 coordinate : VERTEX_OUTPUT_ATTRIBUTE2;
 };
 
 Interstage main(VertexInput input) {
@@ -19,6 +20,7 @@ Interstage main(VertexInput input) {
 	Interstage interstage;
 	interstage.position = float4(lightmapCoordinate, 0.0, 1.0);
 	interstage.triangleIndex = input.instanceIndex;
+	interstage.coordinate = input.coordinate;
 
 	return interstage;
 }

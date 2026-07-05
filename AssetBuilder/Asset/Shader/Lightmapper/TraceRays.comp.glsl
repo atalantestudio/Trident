@@ -33,8 +33,8 @@ struct Hit {
 };
 
 const float FLOAT32_MAX = 4294967295.0;
-const uint SAMPLE_COUNT = 512;
-const uint BOUNCE_COUNT = 4;
+const uint SAMPLE_COUNT = 1024;
+const uint BOUNCE_COUNT = 32;
 const uvec2 ATLAS_SIZE = uvec2(2048, 2048);
 
 layout(set = 0, binding = 0) buffer readonly TraceRaysArgumentBuffer {
@@ -202,24 +202,24 @@ Hit rint(Ray ray) {
 	return rmiss();
 }
 
-vec3 rgen(Ray ray, inout uint seed) {
+vec3 rgen(Hit hit, inout uint seed) {
 	vec3 light = vec3(0.0, 0.0, 0.0);
 	uint bounceIndex = 0;
 
 	while (bounceIndex < BOUNCE_COUNT) {
-		ray.direction = normalize(ray.direction + randomUnitDirection(seed));
-		ray.origin += ray.direction * 0.0001;
+		Ray ray;
+		ray.direction = normalize(hit.normal + randomUnitDirection(seed));
 
-		Hit hit = rint(ray);
+		// Smaller numbers like 0.0001 cause visual artifacts.
+		ray.origin = hit.position + ray.direction * 0.001;
+
+		hit = rint(ray);
 
 		if (hit.t < 0.0) {
 			light += float(BOUNCE_COUNT - bounceIndex) / BOUNCE_COUNT;
 
 			break;
 		}
-
-		ray.origin = hit.position;
-		ray.direction = hit.normal;
 
 		bounceIndex += 1;
 	}
@@ -267,18 +267,18 @@ void main() {
 	vec2 lightmapCoordinateA = lightmapCoordinates[triangle_.vertices[0].lightmapCoordinateIndex];
 	vec2 lightmapCoordinateB = lightmapCoordinates[triangle_.vertices[1].lightmapCoordinateIndex];
 	vec2 lightmapCoordinateC = lightmapCoordinates[triangle_.vertices[2].lightmapCoordinateIndex];
-	vec2 pixelCoordinate = vec2(coordinate) / ATLAS_SIZE;
+	vec2 pixelCoordinate = (vec2(coordinate) + 0.5) / ATLAS_SIZE;
 	vec3 pixelBarycentricCoordinate = calculateBarycentricCoordinate(lightmapCoordinateA, lightmapCoordinateB, lightmapCoordinateC, pixelCoordinate);
 
-	Ray ray;
-	ray.origin = vertexA * pixelBarycentricCoordinate.x + vertexB * pixelBarycentricCoordinate.y + vertexC * pixelBarycentricCoordinate.z;
-	ray.direction = normal;
+	Hit hit;
+	hit.position = vertexA * pixelBarycentricCoordinate.x + vertexB * pixelBarycentricCoordinate.y + vertexC * pixelBarycentricCoordinate.z;
+	hit.normal = normal;
 
 	vec3 light = vec3(0.0, 0.0, 0.0);
 	uint sampleIndex = 0;
 
 	while (sampleIndex < SAMPLE_COUNT) {
-		light += rgen(ray, seed);
+		light += rgen(hit, seed);
 
 		sampleIndex += 1;
 	}

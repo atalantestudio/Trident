@@ -16,7 +16,10 @@ struct LightmapPixel {
 
 in Interstage {
 	layout(location = 0) flat uint triangleIndex;
+	layout(location = 1) vec2 coordinate;
 } interstage;
+
+const uvec2 ATLAS_SIZE = uvec2(2048, 2048);
 
 layout(set = 0, binding = 0) buffer TraceRaysArgumentBuffer {
 	uint lightmapPixelCount;
@@ -31,7 +34,7 @@ layout(set = 0, binding = 1) buffer writeonly LightmapPixelBuffer {
 layout(location = 0) out vec4 fragment;
 
 void main() {
-	uvec2 coordinate = uvec2(gl_FragCoord.xy);
+	uvec2 coordinate = uvec2(interstage.coordinate * ATLAS_SIZE);
 	uint lightmapPixelIndex = atomicAdd(lightmapPixelCount, 1);
 
 	traceRaysCommand.x = lightmapPixelCount / 16;

@@ -128,17 +128,21 @@ namespace Trident {
 				coordinateIndex += 1;
 			}
 
+			const Lightmap& unsortedLightmap = lightmaps[unsortedLightmapIndex];
 			const view<uint32> vertexPositionIndices = lightmap.geometryAsset->getVertexPositionIndices();
 			const uint32 triangleCount = lightmap.edgeIndexRange.count / 2;
+
+			// TODO: Why does the sorted lightmap's coordinate offset doesn't work here?
+			uint32 lightmapCoordinateOffset = unsortedLightmap.coordinateOffset;
 
 			uint32 vertexPositionIndexOffset = lightmap.edgeIndexRange.offset / 2 * 3;
 			uint32 triangleIndex = 0;
 
 			while (triangleIndex < triangleCount) {
 				StaticTriangle3D& triangle = scene.triangles[triangleOffset + triangleIndex];
-				triangle.vertices[0].lightmapCoordinateIndex = lightmap.coordinateOffset + vertexPositionIndices[vertexPositionIndexOffset + 0];
-				triangle.vertices[1].lightmapCoordinateIndex = lightmap.coordinateOffset + vertexPositionIndices[vertexPositionIndexOffset + 1];
-				triangle.vertices[2].lightmapCoordinateIndex = lightmap.coordinateOffset + vertexPositionIndices[vertexPositionIndexOffset + 2];
+				triangle.vertices[0].lightmapCoordinateIndex = lightmapCoordinateOffset + vertexPositionIndices[vertexPositionIndexOffset + 0];
+				triangle.vertices[1].lightmapCoordinateIndex = lightmapCoordinateOffset + vertexPositionIndices[vertexPositionIndexOffset + 1];
+				triangle.vertices[2].lightmapCoordinateIndex = lightmapCoordinateOffset + vertexPositionIndices[vertexPositionIndexOffset + 2];
 
 				triangleIndex += 1;
 				vertexPositionIndexOffset += 3;
