@@ -45,7 +45,7 @@ namespace Trident {
 			inline void bindIndexBuffer(
 				/// The index buffer to bind.
 				ref<Buffer> indexBuffer,
-				
+
 				/// The offset in bytes in the buffer. It must be a multiple of IndexType.
 				uint64 offset
 			) {

@@ -335,11 +335,6 @@ namespace Trident {
 
 		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
 
-		// TODO: Move in Trident::CommandEncoder::dispatch.
-		// ADAPTER_ASSERT(groupCountX <= limits.maxComputeWorkgroupCount[0], "Group count in the X axis must not exceed [].", limits.maxComputeWorkgroupCount[0]);
-		// ADAPTER_ASSERT(groupCountY <= limits.maxComputeWorkgroupCount[1], "Group count in the Y axis must not exceed [].", limits.maxComputeWorkgroupCount[1]);
-		// ADAPTER_ASSERT(groupCountZ <= limits.maxComputeWorkgroupCount[2], "Group count in the Z axis must not exceed [].", limits.maxComputeWorkgroupCount[2]);
-
 		vkCmdDispatch(_commandEncoder->commandBuffer, groupCountX, groupCountY, groupCountZ);
 
 		_commandEncoder->commandCount += 1;

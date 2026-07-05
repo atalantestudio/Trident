@@ -667,13 +667,11 @@ namespace Trident {
 	void DX12::dispatchIndirect(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> buffer, uint64 bufferOffset) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ADAPTER_ASSERT(buffer->getUsage() & BufferUsage::INDIRECT, "The buffer is not an indirect buffer.");
-
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 		const DX12::Device* _device = static_cast<const DX12::Device*>(commandEncoder->device);
 		const ref<DX12::Buffer> indirectBuffer = std::static_pointer_cast<DX12::Buffer>(buffer);
 
-		// TODO: Create command signature when creating the buffer.
+		// TODO(graphics/dx12/buffer/command-signature): Create the buffer and the command signature at the same time.
 		if (!indirectBuffer->commandSignature) {
 			HRESULT result;
 
@@ -723,13 +721,11 @@ namespace Trident {
 	void DX12::drawIndexedIndirect(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ADAPTER_ASSERT(buffer->getUsage() & BufferUsage::INDIRECT, "The buffer is not an indirect buffer.");
-
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 		const DX12::Device* _device = static_cast<const DX12::Device*>(commandEncoder->device);
 		const ref<DX12::Buffer> indirectBuffer = std::static_pointer_cast<DX12::Buffer>(buffer);
 
-		// TODO: Create command signature when creating the buffer.
+		// TODO(graphics/dx12/buffer/command-signature): Create the buffer and the command signature at the same time.
 		if (!indirectBuffer->commandSignature) {
 			D3D12_INDIRECT_ARGUMENT_DESC indirectArgumentDescriptor{};
 			indirectArgumentDescriptor.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
@@ -759,13 +755,11 @@ namespace Trident {
 	void DX12::drawIndirect(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ADAPTER_ASSERT(buffer->getUsage() & BufferUsage::INDIRECT, "The buffer is not an indirect buffer.");
-
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 		const DX12::Device* _device = static_cast<const DX12::Device*>(commandEncoder->device);
 		const ref<DX12::Buffer> indirectBuffer = std::static_pointer_cast<DX12::Buffer>(buffer);
 
-		// TODO: Create command signature when creating the buffer.
+		// TODO(graphics/dx12/buffer/command-signature): Create the buffer and the command signature at the same time.
 		if (!indirectBuffer->commandSignature) {
 			D3D12_INDIRECT_ARGUMENT_DESC indirectArgumentDescriptor{};
 			indirectArgumentDescriptor.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW;
@@ -820,7 +814,7 @@ namespace Trident {
 
 				DX12::Image* resolveImage = presentImage;
 
-				// TODO(graphics/subpass/resolve-attachment-count): Unused attachments shouldn't be included the count.
+				// TODO(graphics/subpass/resolve-attachment-count): Unused attachments shouldn't be included in the count.
 				const uint32 resolveAttachmentCount = static_cast<uint32>(subpass.colorAttachmentReferences.count());
 
 				presentImageView = std::static_pointer_cast<DX12::ImageView>(_commandEncoder->framebuffer->imageViews[resolveAttachmentCount + (subpass.depthStencilAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX ? 1 : 0) + _commandEncoder->presentRenderTargetIndex]);
@@ -925,7 +919,7 @@ namespace Trident {
 		UINT bufferBarrierIndex = 0;
 		index imageMemoryBarrierIndex = 0;
 
-		// TODO: Fix driver warning:
+		// TODO(graphics/dx12/barrier)
 		// "ExecuteCommandLists references command lists that have recorded only Barrier commands. Since there is no other GPU work to synchronize against,
 		// all barriers should use AccessAfter / AccessBefore = D3D12_BARRIER_ACCESS_NO_ACCESS and SyncBefore / SyncAfter = D3D12_BARRIER_SYNC_NONE.
 		// This information can be used as an optimization hint by some drivers."
@@ -1058,7 +1052,7 @@ namespace Trident {
 		D3D12_VIEWPORT viewport{};
 		viewport.TopLeftX = origin[0];
 
-		// TODO: Allow the origin's Y to be flipped similarly to Vulkan?
+		// TODO(graphics/dx12/viewport): Allow the origin's Y to be flipped similarly to Vulkan?
 		viewport.TopLeftY = 0.0f;
 
 		viewport.Width = abs(size[0]);

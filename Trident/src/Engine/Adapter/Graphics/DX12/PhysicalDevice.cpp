@@ -37,6 +37,11 @@ namespace Trident {
 		factory(factory),
 		name(ConvertUTF16ToUTF8(adapterDescriptor.Description))
 	{
+		static constexpr uint32 D3D11_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION = 65535;
+
+		limits.maxComputeWorkgroupCount[0] = D3D11_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION;
+		limits.maxComputeWorkgroupCount[1] = D3D11_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION;
+		limits.maxComputeWorkgroupCount[2] = D3D11_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION;
 		limits.minStorageBufferOffsetAlignment = D3D12_RAW_UAV_SRV_BYTE_ALIGNMENT;
 		limits.minUniformBufferOffsetAlignment = D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT;
 	}

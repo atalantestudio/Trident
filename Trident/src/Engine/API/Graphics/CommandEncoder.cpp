@@ -67,28 +67,94 @@ namespace Trident {
 	}
 
 	void CommandEncoder::bindComputePipeline(ref<ComputePipeline> computePipeline) {
+		// TODO(graphics/validation/null-object-guard)
+
 		device->adapter->bindComputePipelineImplementation(this, computePipeline);
 	}
 
 	void CommandEncoder::bindDescriptorSets(ref<PipelineLayout> pipelineLayout, uint32 descriptorSetIndexOffset, view<ref<DescriptorSet>> descriptorSets) {
+		// TODO(graphics/validation/null-object-guard)
+
 		device->adapter->bindDescriptorSetsImplementation(this, pipelineLayout, descriptorSetIndexOffset, descriptorSets);
 	}
 
 	void CommandEncoder::bindGraphicsPipeline(ref<GraphicsPipeline> graphicsPipeline) {
+		// TODO(graphics/validation/null-object-guard)
+
 		device->adapter->bindGraphicsPipelineImplementation(this, graphicsPipeline);
 	}
 
 	void CommandEncoder::bindIndexBuffer(ref<Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
+		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+			uint32 errorCount = 0;
+
+			if (indexBuffer == nullptr) {
+				ENGINE_ERROR("indexBuffer must be a valid Buffer object.");
+
+				errorCount += 1;
+			}
+			else {
+				if (!(indexBuffer->getUsage() & BufferUsage::INDEX)) {
+					ENGINE_ERROR("The buffer must have the INDEX usage flag.");
+
+					errorCount += 1;
+				}
+
+				if (offset > indexBuffer->getSize()) {
+					ENGINE_ERROR("The buffer offset is overflowing.");
+
+					errorCount += 1;
+				}
+			}
+
+			if (indexTypeSize == 0) {
+				ENGINE_ERROR("The index size must not be 0.");
+
+				errorCount += 1;
+			}
+
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
+		#endif
+
 		device->adapter->bindIndexBufferImplementation(this, indexBuffer, offset, indexTypeSize);
 	}
 
 	void CommandEncoder::bindVertexBuffer(uint32 bindingIndex, ref<Buffer> vertexBuffer, uint64 offset, uint32 stride) {
+		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+			uint32 errorCount = 0;
+
+			// TODO(graphics/validation/null-object-guard)
+			// TODO(graphics/command-encoder/bind-vertex-buffer): Validate the binding index.
+
+			if (!(vertexBuffer->getUsage() & BufferUsage::VERTEX)) {
+				ENGINE_ERROR("The buffer must have the VERTEX usage flag.");
+
+				errorCount += 1;
+			}
+
+			if (offset > vertexBuffer->getSize()) {
+				ENGINE_ERROR("The buffer offset is overflowing.");
+
+				errorCount += 1;
+			}
+
+			if (stride == 0) {
+				ENGINE_ERROR("The stride must not be 0.");
+
+				errorCount += 1;
+			}
+
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
+		#endif
+
 		device->adapter->bindVertexBufferImplementation(this, bindingIndex, vertexBuffer, offset, stride);
 	}
 
 	void CommandEncoder::copyBufferToBuffer(ref<Buffer> sourceBuffer, ref<Buffer> destinationBuffer, view<BufferCopyRegion> copyRegions) {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			uint32 errorCount = 0;
+
+			// TODO(graphics/validation/null-object-guard)
 
 			if (!(sourceBuffer->getUsage() & BufferUsage::TRANSFER_SRC)) {
 				ENGINE_ERROR("The source buffer must have the TRANSFER_SRC usage flag.");
@@ -111,6 +177,8 @@ namespace Trident {
 	}
 
 	void CommandEncoder::copyBufferToImage(ref<Buffer> sourceBuffer, ref<Image> destinationImage, view<BufferImageCopyRegion> copyRegions) {
+		// TODO(graphics/validation/null-object-guard)
+
 		device->adapter->copyBufferToImageImplementation(this, sourceBuffer, destinationImage, copyRegions);
 	}
 
@@ -118,6 +186,8 @@ namespace Trident {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			uint32 errorCount = 0;
 			uint32 copyRegionIndex = 0;
+
+			// TODO(graphics/validation/null-object-guard)
 
 			if (!(sourceImage->getUsage() & ImageUsage::TRANSFER_SRC)) {
 				ENGINE_ERROR("The source image must have the TRANSFER_SRC usage flag.");
@@ -235,10 +305,56 @@ namespace Trident {
 	}
 
 	void CommandEncoder::dispatch(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) {
+		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+			const vec3<uint32> maxComputeWorkgroupCount = device->getPhysicalDevice()->getLimits().maxComputeWorkgroupCount;
+
+			uint32 errorCount = 0;
+
+			if (groupCountX > maxComputeWorkgroupCount[0]) {
+				ENGINE_ERROR("The group count in the X axis must not exceed [].", maxComputeWorkgroupCount[0]);
+
+				errorCount += 1;
+			}
+
+			if (groupCountX > maxComputeWorkgroupCount[1]) {
+				ENGINE_ERROR("The group count in the Y axis must not exceed [].", maxComputeWorkgroupCount[1]);
+
+				errorCount += 1;
+			}
+
+			if (groupCountX > maxComputeWorkgroupCount[2]) {
+				ENGINE_ERROR("The group count in the Z axis must not exceed [].", maxComputeWorkgroupCount[2]);
+
+				errorCount += 1;
+			}
+
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
+		#endif
+
 		device->adapter->dispatchImplementation(this, groupCountX, groupCountY, groupCountZ);
 	}
 
 	void CommandEncoder::dispatchIndirect(ref<Buffer> buffer, uint64 bufferOffset) {
+		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+			uint32 errorCount = 0;
+
+			// TODO(graphics/validation/null-object-guard)
+
+			if (!(buffer->getUsage() & BufferUsage::INDIRECT)) {
+				ENGINE_ERROR("buffer must have the INDIRECT buffer usage flag.");
+
+				errorCount += 1;
+			}
+
+			if (bufferOffset > buffer->getSize()) {
+				ENGINE_ERROR("bufferOffset is overflowing the buffer.");
+
+				errorCount += 1;
+			}
+
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
+		#endif
+
 		device->adapter->dispatchIndirectImplementation(this, buffer, bufferOffset);
 	}
 
@@ -261,6 +377,38 @@ namespace Trident {
 	}
 
 	void CommandEncoder::drawIndirect(ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
+		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+			uint32 errorCount = 0;
+
+			// TODO(graphics/validation/null-object-guard)
+
+			if (!(buffer->getUsage() & BufferUsage::INDIRECT)) {
+				ENGINE_ERROR("buffer must have the INDIRECT buffer usage flag.");
+
+				errorCount += 1;
+			}
+
+			if (bufferOffset > buffer->getSize()) {
+				ENGINE_ERROR("bufferOffset is overflowing the buffer.");
+
+				errorCount += 1;
+			}
+
+			if (drawCount == 0) {
+				ENGINE_ERROR("drawCount must not be 0.");
+
+				errorCount += 1;
+			}
+
+			if (stride == 0) {
+				ENGINE_ERROR("stride must not be 0.");
+
+				errorCount += 1;
+			}
+
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
+		#endif
+
 		device->adapter->drawIndirectImplementation(this, buffer, bufferOffset, drawCount, stride);
 	}
 
@@ -283,6 +431,38 @@ namespace Trident {
 	}
 
 	void CommandEncoder::drawIndexedIndirect(ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
+		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+			uint32 errorCount = 0;
+
+			// TODO(graphics/validation/null-object-guard)
+
+			if (!(buffer->getUsage() & BufferUsage::INDIRECT)) {
+				ENGINE_ERROR("buffer must have the INDIRECT buffer usage flag.");
+
+				errorCount += 1;
+			}
+
+			if (bufferOffset > buffer->getSize()) {
+				ENGINE_ERROR("bufferOffset is overflowing the buffer.");
+
+				errorCount += 1;
+			}
+
+			if (drawCount == 0) {
+				ENGINE_ERROR("drawCount must not be 0.");
+
+				errorCount += 1;
+			}
+
+			if (stride == 0) {
+				ENGINE_ERROR("stride must not be 0.");
+
+				errorCount += 1;
+			}
+
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
+		#endif
+
 		device->adapter->drawIndexedIndirectImplementation(this, buffer, bufferOffset, drawCount, stride);
 	}
 
@@ -322,7 +502,7 @@ namespace Trident {
 				const BufferMemoryBarrier& bufferMemoryBarrier = bufferMemoryBarriers[bufferMemoryBarrierIndex];
 
 				if (bufferMemoryBarrier.buffer == nullptr) {
-					ENGINE_ERROR("bufferMemoryBarriers[[]].buffer must be a valid Buffer object.", bufferMemoryBarrierIndex);
+					ENGINE_ERROR("bufferMemoryBarriers[[]].buffer must be a valid BufferMemoryBarrier object.", bufferMemoryBarrierIndex);
 
 					errorCount += 1;
 				}

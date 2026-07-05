@@ -60,7 +60,7 @@ namespace Trident {
 
 		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
 
-		// TODO: Add support for `descriptorSetIndexOffset`.
+		// TODO(graphics/gl/descriptor-set/binding-offset)
 		_commandEncoder->commands.emplace_back(createRef<GL::BindDescriptorSetsCommand>(descriptorSets));
 	}
 
@@ -148,11 +148,6 @@ namespace Trident {
 	void GL::dispatch(Trident::CommandEncoder* commandEncoder, uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		// TODO: Move in Trident::CommandEncoder::dispatch.
-		// ADAPTER_ASSERT(groupCountX <= limits.maxComputeWorkgroupCount[0], "Group count in the X axis must not exceed [].", limits.maxComputeWorkgroupCount[0]);
-		// ADAPTER_ASSERT(groupCountY <= limits.maxComputeWorkgroupCount[1], "Group count in the Y axis must not exceed [].", limits.maxComputeWorkgroupCount[1]);
-		// ADAPTER_ASSERT(groupCountZ <= limits.maxComputeWorkgroupCount[2], "Group count in the Z axis must not exceed [].", limits.maxComputeWorkgroupCount[2]);
-
 		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
 		_commandEncoder->commands.emplace_back(createRef<GL::DispatchCommand>(groupCountX, groupCountY, groupCountZ));
 	}
@@ -197,10 +192,6 @@ namespace Trident {
 	void GL::drawIndexedIndirect(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		// TODO: Move in Trident::CommandEncoder::drawIndexedIndirect.
-		ADAPTER_ASSERT(buffer->usage & BufferUsage::INDIRECT, "This buffer cannot be used as an indirect buffer.");
-		ADAPTER_ASSERT(drawCount > 0, "A DrawIndirect command must result in at least 1 draw call.");
-
 		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
 		_commandEncoder->commands.emplace_back(createRef<GL::DrawIndexedIndirectCommand>(
 			_commandEncoder->graphicsPipeline->primitiveTopology,
@@ -214,10 +205,6 @@ namespace Trident {
 
 	void GL::drawIndirect(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		// TODO: Move in Trident::CommandEncoder::drawIndirect.
-		ADAPTER_ASSERT(buffer->usage & BufferUsage::INDIRECT, "This buffer cannot be used as an indirect buffer.");
-		ADAPTER_ASSERT(drawCount > 0, "A DrawIndirect command must result in at least 1 draw call.");
 
 		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
 		_commandEncoder->commands.emplace_back(createRef<GL::DrawIndirectCommand>(
