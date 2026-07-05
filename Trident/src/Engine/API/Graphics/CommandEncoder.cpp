@@ -67,7 +67,17 @@ namespace Trident {
 	}
 
 	void CommandEncoder::bindComputePipeline(ref<ComputePipeline> computePipeline) {
-		// TODO(graphics/validation/null-object-guard)
+		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+			uint32 errorCount = 0;
+
+			if (graphicsPipeline == nullptr) {
+				ENGINE_ERROR("computePipeline must be a valid ComputePipeline object.");
+
+				errorCount += 1;
+			}
+
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
+		#endif
 
 		device->adapter->bindComputePipelineImplementation(this, computePipeline);
 	}
@@ -79,7 +89,17 @@ namespace Trident {
 	}
 
 	void CommandEncoder::bindGraphicsPipeline(ref<GraphicsPipeline> graphicsPipeline) {
-		// TODO(graphics/validation/null-object-guard)
+		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+			uint32 errorCount = 0;
+
+			if (graphicsPipeline == nullptr) {
+				ENGINE_ERROR("graphicsPipeline must be a valid GraphicsPipeline object.");
+
+				errorCount += 1;
+			}
+
+			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
+		#endif
 
 		device->adapter->bindGraphicsPipelineImplementation(this, graphicsPipeline);
 	}
@@ -95,13 +115,13 @@ namespace Trident {
 			}
 			else {
 				if (!(indexBuffer->getUsage() & BufferUsage::INDEX)) {
-					ENGINE_ERROR("The buffer must have the INDEX usage flag.");
+					ENGINE_ERROR("indexBuffer must have the INDEX usage flag.");
 
 					errorCount += 1;
 				}
 
 				if (offset > indexBuffer->getSize()) {
-					ENGINE_ERROR("The buffer offset is overflowing.");
+					ENGINE_ERROR("bufferOffset exceeds the bounds of the buffer.");
 
 					errorCount += 1;
 				}
@@ -123,23 +143,29 @@ namespace Trident {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			uint32 errorCount = 0;
 
-			// TODO(graphics/validation/null-object-guard)
 			// TODO(graphics/command-encoder/bind-vertex-buffer): Validate the binding index.
 
-			if (!(vertexBuffer->getUsage() & BufferUsage::VERTEX)) {
-				ENGINE_ERROR("The buffer must have the VERTEX usage flag.");
+			if (vertexBuffer == nullptr) {
+				ENGINE_ERROR("vertexBuffer must be a valid Buffer object.");
 
 				errorCount += 1;
 			}
+			else {
+				if (!(vertexBuffer->getUsage() & BufferUsage::VERTEX)) {
+					ENGINE_ERROR("vertexBuffer must have the VERTEX usage flag.");
 
-			if (offset > vertexBuffer->getSize()) {
-				ENGINE_ERROR("The buffer offset is overflowing.");
+					errorCount += 1;
+				}
 
-				errorCount += 1;
+				if (offset > vertexBuffer->getSize()) {
+					ENGINE_ERROR("bufferOffset exceeds the bounds of the buffer.");
+
+					errorCount += 1;
+				}
 			}
 
 			if (stride == 0) {
-				ENGINE_ERROR("The stride must not be 0.");
+				ENGINE_ERROR("stride must not be 0.");
 
 				errorCount += 1;
 			}
@@ -185,7 +211,6 @@ namespace Trident {
 	void CommandEncoder::copyImageToBuffer(ref<Image> sourceImage, ref<Buffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			uint32 errorCount = 0;
-			uint32 copyRegionIndex = 0;
 
 			// TODO(graphics/validation/null-object-guard)
 
@@ -200,6 +225,8 @@ namespace Trident {
 
 				errorCount += 1;
 			}
+
+			uint32 copyRegionIndex = 0;
 
 			while (copyRegionIndex < copyRegions.count()) {
 				const BufferImageCopyRegion& copyRegion = copyRegions[copyRegionIndex];
@@ -338,18 +365,23 @@ namespace Trident {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			uint32 errorCount = 0;
 
-			// TODO(graphics/validation/null-object-guard)
-
-			if (!(buffer->getUsage() & BufferUsage::INDIRECT)) {
-				ENGINE_ERROR("buffer must have the INDIRECT buffer usage flag.");
+			if (buffer == nullptr) {
+				ENGINE_ERROR("buffer must be a valid Buffer object.");
 
 				errorCount += 1;
 			}
+			else {
+				if (!(buffer->getUsage() & BufferUsage::INDIRECT)) {
+					ENGINE_ERROR("buffer must have the INDIRECT buffer usage flag.");
 
-			if (bufferOffset > buffer->getSize()) {
-				ENGINE_ERROR("bufferOffset is overflowing the buffer.");
+					errorCount += 1;
+				}
 
-				errorCount += 1;
+				if (bufferOffset > buffer->getSize()) {
+					ENGINE_ERROR("bufferOffset exceeds the bounds of the buffer.");
+
+					errorCount += 1;
+				}
 			}
 
 			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
@@ -380,18 +412,23 @@ namespace Trident {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			uint32 errorCount = 0;
 
-			// TODO(graphics/validation/null-object-guard)
-
-			if (!(buffer->getUsage() & BufferUsage::INDIRECT)) {
-				ENGINE_ERROR("buffer must have the INDIRECT buffer usage flag.");
+			if (buffer == nullptr) {
+				ENGINE_ERROR("buffer must be a valid Buffer object.");
 
 				errorCount += 1;
 			}
+			else {
+				if (!(buffer->getUsage() & BufferUsage::INDIRECT)) {
+					ENGINE_ERROR("buffer must have the INDIRECT buffer usage flag.");
 
-			if (bufferOffset > buffer->getSize()) {
-				ENGINE_ERROR("bufferOffset is overflowing the buffer.");
+					errorCount += 1;
+				}
 
-				errorCount += 1;
+				if (bufferOffset > buffer->getSize()) {
+					ENGINE_ERROR("bufferOffset exceeds the bounds of the buffer.");
+
+					errorCount += 1;
+				}
 			}
 
 			if (drawCount == 0) {
@@ -434,18 +471,23 @@ namespace Trident {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			uint32 errorCount = 0;
 
-			// TODO(graphics/validation/null-object-guard)
-
-			if (!(buffer->getUsage() & BufferUsage::INDIRECT)) {
-				ENGINE_ERROR("buffer must have the INDIRECT buffer usage flag.");
+			if (buffer == nullptr) {
+				ENGINE_ERROR("buffer must be a valid Buffer object.");
 
 				errorCount += 1;
 			}
+			else {
+				if (!(buffer->getUsage() & BufferUsage::INDIRECT)) {
+					ENGINE_ERROR("buffer must have the INDIRECT buffer usage flag.");
 
-			if (bufferOffset > buffer->getSize()) {
-				ENGINE_ERROR("bufferOffset is overflowing the buffer.");
+					errorCount += 1;
+				}
 
-				errorCount += 1;
+				if (bufferOffset > buffer->getSize()) {
+					ENGINE_ERROR("bufferOffset exceeds the bounds of the buffer.");
+
+					errorCount += 1;
+				}
 			}
 
 			if (drawCount == 0) {

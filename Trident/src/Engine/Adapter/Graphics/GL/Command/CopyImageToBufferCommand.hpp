@@ -19,10 +19,12 @@ namespace Trident {
 			}
 
 			void execute() const final override {
+				const GLenum type = getType(sourceImage->getFormat());
+
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, destinationBuffer->buffer);
 
 				for (const BufferImageCopyRegion& copyRegion : copyRegions) {
-					// TODO: Move that switch out of the loop. The function to call should be known beforehand (maybe even when creating the image).
+					// TODO(graphics/gl/texture): Move that switch out of the loop. The function to call should be known beforehand (maybe even before creating the image).
 					switch (sourceImage->target) {
 						case GL_TEXTURE_1D:
 						case GL_TEXTURE_1D_ARRAY:
@@ -31,7 +33,7 @@ namespace Trident {
 						case GL_TEXTURE_3D:
 						case GL_TEXTURE_CUBE_MAP:
 						case GL_TEXTURE_CUBE_MAP_ARRAY:
-						case GL_TEXTURE_RECTANGLE:
+						case GL_TEXTURE_RECTANGLE: {
 							#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 								glGetTextureSubImage(
 									sourceImage->texture,
@@ -43,7 +45,7 @@ namespace Trident {
 									copyRegion.imageExtent.height,
 									copyRegion.imageExtent.depth * copyRegion.imageLayerCount,
 									sourceImage->format,
-									getType(sourceImage->getFormat()),
+									type,
 									static_cast<GLsizei>(destinationBuffer->getSize()),
 									(GLvoid*) copyRegion.bufferOffset
 								);
@@ -52,10 +54,12 @@ namespace Trident {
 							#endif
 
 							break;
-						default:
+						}
+						default: {
 							ADAPTER_ASSERT(false, "Unhandled image target ([]).", sourceImage->target);
 
 							break;
+						}
 					}
 				}
 			}

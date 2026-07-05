@@ -20,6 +20,8 @@ namespace Trident {
 			}
 
 			void execute() const final override {
+				const GLenum type = getType(destinationImage->getFormat());
+
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, sourceBuffer->buffer);
 
 				#if OPENGL_VERSION < OPENGL_VERSION_4_5
@@ -47,9 +49,9 @@ namespace Trident {
 					// "Pixel-path performance warning: Pixel transfer is synchronized with 3D rendering."
 					// See https://stackoverflow.com/a/49369531.
 
-					// TODO: Move that switch out of the loop. The function to call should be known beforehand (maybe even when creating the image).
+					// TODO(graphics/gl/texture): Move that switch out of the loop. The function to call should be known beforehand (maybe even before creating the image).
 					switch (destinationImage->target) {
-						case GL_TEXTURE_1D:
+						case GL_TEXTURE_1D: {
 							#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 								glTextureSubImage1D(
 									destinationImage->texture,
@@ -57,7 +59,7 @@ namespace Trident {
 									copyRegion.imageOffsetX,
 									copyRegion.imageExtent.width,
 									destinationImage->format,
-									getType(destinationImage->getFormat()),
+									type,
 									pixels
 								);
 							#else
@@ -67,12 +69,13 @@ namespace Trident {
 									copyRegion.imageOffsetX,
 									copyRegion.imageExtent.width,
 									destinationImage->format,
-									getType(destinationImage->getFormat()),
+									type,
 									pixels
 								);
 							#endif
 
 							break;
+						}
 						case GL_TEXTURE_1D_ARRAY:
 						case GL_TEXTURE_2D:
 						case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
@@ -80,7 +83,7 @@ namespace Trident {
 						case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
 						case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
 						case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
-						case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
+						case GL_TEXTURE_CUBE_MAP_POSITIVE_Z: {
 							#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 								glTextureSubImage2D(
 									destinationImage->texture,
@@ -90,7 +93,7 @@ namespace Trident {
 									copyRegion.imageExtent.width,
 									copyRegion.imageExtent.height * copyRegion.imageLayerCount,
 									destinationImage->format,
-									getType(destinationImage->getFormat()),
+									type,
 									pixels
 								);
 							#else
@@ -102,14 +105,15 @@ namespace Trident {
 									copyRegion.imageExtent.width,
 									copyRegion.imageExtent.height * copyRegion.imageLayerCount,
 									destinationImage->format,
-									getType(destinationImage->getFormat()),
+									type,
 									pixels
 								);
 							#endif
 
 							break;
+						}
 						case GL_TEXTURE_2D_ARRAY:
-						case GL_TEXTURE_3D:
+						case GL_TEXTURE_3D: {
 							#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 								glTextureSubImage3D(
 									destinationImage->texture,
@@ -121,7 +125,7 @@ namespace Trident {
 									copyRegion.imageExtent.height,
 									copyRegion.imageExtent.depth * copyRegion.imageLayerCount,
 									destinationImage->format,
-									getType(destinationImage->getFormat()),
+									type,
 									pixels
 								);
 							#else
@@ -135,16 +139,18 @@ namespace Trident {
 									copyRegion.imageExtent.height,
 									copyRegion.imageExtent.depth * copyRegion.imageLayerCount,
 									destinationImage->format,
-									getType(destinationImage->getFormat()),
+									type,
 									pixels
 								);
 							#endif
 
 							break;
-						default:
+						}
+						default: {
 							ADAPTER_ASSERT(false, "Unhandled image target ([]).", destinationImage->target);
 
 							break;
+						}
 					}
 				}
 			}
