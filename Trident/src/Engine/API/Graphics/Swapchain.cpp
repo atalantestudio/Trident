@@ -9,21 +9,17 @@
 namespace Trident {
 	#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 		static void validateSwapchainDescriptor(const SwapchainDescriptor& descriptor) {
-			uint32 errorCount = 0;
+			{
+				Validator validator;
 
-			if (descriptor.extent.width == 0) {
-				ENGINE_ERROR("descriptor.extent.width must not be 0.");
+				if (descriptor.extent.width == 0) {
+					VALIDATION_ERROR("descriptor.extent.width must not be 0.");
+				}
 
-				errorCount += 1;
+				if (descriptor.extent.height == 0) {
+					VALIDATION_ERROR("descriptor.extent.height must not be 0.");
+				}
 			}
-
-			if (descriptor.extent.height == 0) {
-				ENGINE_ERROR("descriptor.extent.height must not be 0.");
-
-				errorCount += 1;
-			}
-
-			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		}
 	#endif
 

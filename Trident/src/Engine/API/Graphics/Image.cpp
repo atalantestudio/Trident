@@ -79,43 +79,33 @@ namespace Trident {
 
 	ref<ImageView> Image::createView(const ImageViewDescriptor& descriptor) {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 errorCount = 0;
+			{
+				Validator validator;
 
-			if (descriptor.mipLevelOffset + descriptor.mipLevelCount > mipLevelCount) {
-				ENGINE_ERROR("descriptor.mipLevelOffset and descriptor.mipLevelCount must represent a valid mip level range.");
+				if (memorySuballocation.allocationIndex == max<uint32>()) {
+					VALIDATION_ERROR("The image hasn't been allocated yet.");
+				}
 
-				errorCount += 1;
+				if (descriptor.mipLevelOffset + descriptor.mipLevelCount > mipLevelCount) {
+					VALIDATION_ERROR("descriptor.mipLevelOffset and descriptor.mipLevelCount must represent a valid mip level range.");
+				}
+
+				if (descriptor.mipLevelCount == 0) {
+					VALIDATION_ERROR("descriptor.mipLevelCount must be greater than 0.");
+				}
+
+				if (descriptor.layerOffset + descriptor.layerCount > layerCount) {
+					VALIDATION_ERROR("descriptor.layerOffset and descriptor.layerCount must represent a valid layer range.");
+				}
+
+				if (descriptor.layerCount == 0) {
+					VALIDATION_ERROR("descriptor.layerCount must be greater than 0.");
+				}
+
+				if (descriptor.name.count() == 0) {
+					VALIDATION_WARNING("descriptor.name should provide a unique name to help identify this image view.");
+				}
 			}
-
-			if (descriptor.mipLevelCount == 0) {
-				ENGINE_ERROR("descriptor.mipLevelCount must be greater than 0.");
-
-				errorCount += 1;
-			}
-
-			if (descriptor.layerOffset + descriptor.layerCount > layerCount) {
-				ENGINE_ERROR("descriptor.layerOffset and descriptor.layerCount must represent a valid layer range.");
-
-				errorCount += 1;
-			}
-
-			if (descriptor.layerCount == 0) {
-				ENGINE_ERROR("descriptor.layerCount must be greater than 0.");
-
-				errorCount += 1;
-			}
-
-			if (memorySuballocation.allocationIndex == max<uint32>()) {
-				ENGINE_ERROR("The image hasn't been allocated yet.");
-
-				errorCount += 1;
-			}
-
-			if (descriptor.name.count() == 0) {
-				ENGINE_WARNING("descriptor.name should provide a unique name to help identify this image view.");
-			}
-
-			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		return device->adapter->createImageViewImplementation(device, this, descriptor);

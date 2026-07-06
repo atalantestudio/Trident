@@ -9,45 +9,31 @@
 namespace Trident {
 	#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 		static void validateAttachmentImageDescriptor(const AttachmentImageDescriptor& descriptor) {
-			uint32 errorCount = 0;
+			Validator validator;
 
 			if (descriptor.type >= ImageType::count) {
-				ENGINE_ERROR("descriptor.type must be a valid ImageType value.");
-
-				errorCount += 1;
+				VALIDATION_ERROR("descriptor.type must be a valid ImageType value.");
 			}
 
 			if (descriptor.extent.width == 0) {
-				ENGINE_ERROR("descriptor.extent.width must be greater than 0.");
-
-				errorCount += 1;
+				VALIDATION_ERROR("descriptor.extent.width must be greater than 0.");
 			}
 
 			if (descriptor.extent.height == 0) {
-				ENGINE_ERROR("descriptor.extent.height must be greater than 0.");
-
-				errorCount += 1;
+				VALIDATION_ERROR("descriptor.extent.height must be greater than 0.");
 			}
 
 			if (descriptor.extent.depth == 0) {
-				ENGINE_ERROR("descriptor.extent.depth must be greater than 0.");
-
-				errorCount += 1;
+				VALIDATION_ERROR("descriptor.extent.depth must be greater than 0.");
 			}
 
 			if (descriptor.mipLevelCount == 0) {
-				ENGINE_ERROR("descriptor.mipLevelCount must be greater than 0.");
-
-				errorCount += 1;
+				VALIDATION_ERROR("descriptor.mipLevelCount must be greater than 0.");
 			}
 
 			if (descriptor.layerCount == 0) {
-				ENGINE_ERROR("descriptor.layerCount must be greater than 0.");
-
-				errorCount += 1;
+				VALIDATION_ERROR("descriptor.layerCount must be greater than 0.");
 			}
-
-			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		}
 	#endif
 

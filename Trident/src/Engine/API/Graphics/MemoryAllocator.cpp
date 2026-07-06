@@ -13,23 +13,19 @@ namespace Trident {
 
 	uint32 MemoryAllocator::allocate(bool dynamic, uint32 memoryTypeIndex, uint64 size, uint64 alignment) {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 errorCount = 0;
+			{
+				Validator validator;
 
-			if (size == 0) {
-				ENGINE_ERROR("The allocation size must not be 0.");
+				if (size == 0) {
+					VALIDATION_ERROR("The allocation size must not be 0.");
+				}
 
-				errorCount += 1;
+				const uint32 maxMemoryAllocationCount = device->getPhysicalDevice()->getLimits().maxMemoryAllocationCount;
+
+				if (allocations.size() >= maxMemoryAllocationCount) {
+					VALIDATION_ERROR("There cannot be more than [] memory allocations on this device.", maxMemoryAllocationCount);
+				}
 			}
-
-			const uint32 maxMemoryAllocationCount = device->getPhysicalDevice()->getLimits().maxMemoryAllocationCount;
-
-			if (allocations.size() >= maxMemoryAllocationCount) {
-				ENGINE_ERROR("There cannot be more memory allocations on this device.");
-
-				errorCount += 1;
-			}
-
-			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		const MemoryAllocation allocation = device->adapter->allocateMemoryImplementation(this, dynamic, memoryTypeIndex, size, alignment);
@@ -85,25 +81,21 @@ namespace Trident {
 
 	MemorySuballocation MemoryAllocator::suballocate(uint32 allocationIndex, uint64 size, uint64 alignment) {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 errorCount = 0;
+			{
+				Validator validator;
 
-			if (allocationIndex < allocations.size()) {
-				const MemoryAllocation& allocation = allocations[allocationIndex];
-				const uint64 offset = min(allocation.size, ceil(allocation.usedOffset, alignment));
+				if (allocationIndex < allocations.size()) {
+					const MemoryAllocation& allocation = allocations[allocationIndex];
+					const uint64 offset = min(allocation.size, ceil(allocation.usedOffset, alignment));
 
-				if (allocation.size - offset < size) {
-					ENGINE_ERROR("The suballocation requires [] bytes, but there are only [] bytes remaining in the allocation.", size, allocation.size - offset);
-
-					errorCount += 1;
+					if (allocation.size - offset < size) {
+						VALIDATION_ERROR("The suballocation requires [] bytes, but there are only [] bytes remaining in the allocation.", size, allocation.size - offset);
+					}
+				}
+				else {
+					VALIDATION_ERROR("The allocation index is overflowing.");
 				}
 			}
-			else {
-				ENGINE_ERROR("The allocation index is overflowing.");
-
-				errorCount += 1;
-			}
-
-			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		MemoryAllocation& allocation = allocations[allocationIndex];

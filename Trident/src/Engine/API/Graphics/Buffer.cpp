@@ -45,27 +45,21 @@ namespace Trident {
 
 	void* Buffer::map(uint64 offset, uint64 size) {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 errorCount = 0;
+			{
+				Validator validator;
 
-			if (size == 0) {
-				ENGINE_ERROR("The mapped range size must not be 0.");
+				if (size == 0) {
+					VALIDATION_ERROR("The mapped range size must not be 0.");
+				}
 
-				errorCount += 1;
+				if (memorySuballocation.allocationIndex == max<uint32>()) {
+					VALIDATION_ERROR("The buffer hasn't been allocated yet.");
+				}
+
+				if (!(memorySuballocation.memoryProperties & MemoryProperty::HOST_VISIBLE)) {
+					VALIDATION_ERROR("The buffer isn't in a HOST_VISIBLE memory allocation.");
+				}
 			}
-
-			if (memorySuballocation.allocationIndex == max<uint32>()) {
-				ENGINE_ERROR("The buffer hasn't been allocated yet.");
-
-				errorCount += 1;
-			}
-
-			if (!(memorySuballocation.memoryProperties & MemoryProperty::HOST_VISIBLE)) {
-				ENGINE_ERROR("The buffer isn't in a HOST_VISIBLE memory allocation.");
-
-				errorCount += 1;
-			}
-
-			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		void* mappedRange = device->adapter->mapBufferImplementation(device, this, offset, size);
@@ -78,25 +72,20 @@ namespace Trident {
 
 	void Buffer::unmap() {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 errorCount = 0;
-
-			if (memorySuballocation.allocationIndex == max<uint32>()) {
-				ENGINE_ERROR("The buffer hasn't been allocated yet.");
-
-				errorCount += 1;
-			}
-
 			{
-				const MemoryAllocation& memoryAllocation = device->memoryAllocator->allocations[memorySuballocation.allocationIndex];
+				Validator validator;
 
-				if (memoryAllocation.mappedSuballocationCount == 0) {
-					ENGINE_ERROR("The buffer's parent memory allocation is not mapped.");
+				if (memorySuballocation.allocationIndex == max<uint32>()) {
+					VALIDATION_ERROR("The buffer hasn't been allocated yet.");
+				}
+				else {
+					const MemoryAllocation& memoryAllocation = device->memoryAllocator->allocations[memorySuballocation.allocationIndex];
 
-					errorCount += 1;
+					if (memoryAllocation.mappedSuballocationCount == 0) {
+						VALIDATION_ERROR("The buffer's parent memory allocation is not mapped.");
+					}
 				}
 			}
-
-			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		device->adapter->unmapBufferImplementation(device, this);

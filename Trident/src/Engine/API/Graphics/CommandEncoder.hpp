@@ -50,15 +50,13 @@ namespace Trident {
 				uint64 offset
 			) {
 				#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-					uint32 errorCount = 0;
+					{
+						Validator validator;
 
-					if (offset % sizeof(IndexType) > 0) {
-						ENGINE_ERROR("The offset must be a multiple of [].", sizeof(IndexType));
-
-						errorCount += 1;
+						if (offset % sizeof(IndexType) > 0) {
+							VALIDATION_ERROR("The offset must be a multiple of [].", sizeof(IndexType));
+						}
 					}
-
-					ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 				#endif
 
 				bindIndexBuffer(indexBuffer, offset, sizeof(IndexType));

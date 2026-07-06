@@ -17,13 +17,17 @@ namespace Trident {
 
 	ref<CommandEncoder> Queue::createCommandEncoder(const CommandBufferDescriptor& descriptor) const {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 errorCount = 0;
+			{
+				Validator validator;
 
-			if (descriptor.name.count() == 0) {
-				ENGINE_WARNING("descriptor.name should provide a unique name to help identify this command encoder.");
+				if (descriptor.usage >= CommandBufferUsage::count) {
+					VALIDATION_ERROR("descriptor.usage must be a valid CommandBufferUsage value.");
+				}
+
+				if (descriptor.name.count() == 0) {
+					VALIDATION_WARNING("descriptor.name should provide a unique name to help identify this command encoder.");
+				}
 			}
-
-			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		return device->adapter->createCommandEncoderImplementation(device, commandPool.get(), descriptor);

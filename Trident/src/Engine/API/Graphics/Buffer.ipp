@@ -5,15 +5,13 @@ namespace Trident {
 	template<typename T>
 	inline ref<BufferView<T>> Buffer::createView(uint64 offset, uint64 size) {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			uint32 errorCount = 0;
+			{
+				Validator validator;
 
-			if (offset + size > this->size) {
-				ENGINE_ERROR("The viewing range is overflowing the buffer's size.");
-
-				errorCount += 1;
+				if (size > this->size - offset) {
+					VALIDATION_ERROR("size must be less than or equal to the size of the buffer - offset.");
+				}
 			}
-
-			ENGINE_ASSERT(errorCount == 0, "Invalid argument(s) ([] errors).", errorCount);
 		#endif
 
 		return createRef<BufferView<T>>(this, offset, size);
