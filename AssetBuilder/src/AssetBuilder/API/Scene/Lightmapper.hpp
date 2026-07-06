@@ -46,12 +46,15 @@ namespace Trident {
 
 			ref<DescriptorSetLayout> createRasterizeLightmapsDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createTraceRaysDescriptorSetLayout() const;
+			ref<DescriptorSetLayout> createPostProcessingDescriptorSetLayout() const;
 
 			ref<PipelineLayout> createRasterizeLightmapsPipelineLayout(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) const;
 			ref<PipelineLayout> createTraceRaysPipelineLayout(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) const;
+			ref<PipelineLayout> createPostProcessingPipelineLayout(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) const;
 
 			ref<GraphicsPipeline> createRasterizeLightmapsPipeline() const;
 			ref<ComputePipeline> createTraceRaysPipeline() const;
+			ref<ComputePipeline> createPostProcessingPipeline() const;
 
 			ref<Buffer> createLightmapCoordinateBuffer(uint64 size) const;
 			ref<Buffer> createLightmapCoordinateIndexBuffer(uint64 size) const;
@@ -73,12 +76,15 @@ namespace Trident {
 
 			ref<PipelineLayout> rasterizeLightmapsPipelineLayout;
 			ref<PipelineLayout> traceRaysPipelineLayout;
+			ref<PipelineLayout> postProcessingPipelineLayout;
 
 			ref<DescriptorSet> rasterizeLightmapsDescriptorSet;
 			ref<DescriptorSet> traceRaysDescriptorSet;
+			ref<DescriptorSet> postProcessingDescriptorSet;
 
 			ref<GraphicsPipeline> rasterizeLightmapsPipeline;
 			ref<ComputePipeline> traceRaysPipeline;
+			ref<ComputePipeline> postProcessingPipeline;
 
 			ref<Buffer> lightmapCoordinateBuffer;
 			ref<Buffer> lightmapCoordinateIndexBuffer;

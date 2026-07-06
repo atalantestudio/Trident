@@ -8,5 +8,7 @@ set inputpath=%~dp0
 
 %glslcpath% -fshader-stage=comp "%inputpath%/Lightmapper/TraceRays.comp.glsl" -o "%inputpath%/Lightmapper/TraceRays.comp.spv"
 
+%glslcpath% -fshader-stage=comp "%inputpath%/Lightmapper/PostProcessing.comp.glsl" -o "%inputpath%/Lightmapper/PostProcessing.comp.spv"
+
 %glslcpath% -fshader-stage=comp "%inputpath%/DistanceField.comp.glsl" -o "%inputpath%/DistanceField.comp.spv"
 %glslcpath% -fshader-stage=comp "%inputpath%/RasterizeGlyph.comp.glsl" -o "%inputpath%/RasterizeGlyph.comp.spv"

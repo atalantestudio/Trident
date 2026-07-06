@@ -167,17 +167,25 @@ namespace Trident {
 
 		const ref<DescriptorSetLayout> rasterizeLightmapsDescriptorSetLayout = createRasterizeLightmapsDescriptorSetLayout();
 		const ref<DescriptorSetLayout> traceRaysDescriptorSetLayout = createTraceRaysDescriptorSetLayout();
+		const ref<DescriptorSetLayout> postProcessingDescriptorSetLayout = createPostProcessingDescriptorSetLayout();
 
 		rasterizeLightmapsPipelineLayout = createRasterizeLightmapsPipelineLayout({rasterizeLightmapsDescriptorSetLayout});
 		traceRaysPipelineLayout = createTraceRaysPipelineLayout({traceRaysDescriptorSetLayout});
+		postProcessingPipelineLayout = createPostProcessingPipelineLayout({postProcessingDescriptorSetLayout});
 
 		rasterizeLightmapsPipeline = createRasterizeLightmapsPipeline();
 		traceRaysPipeline = createTraceRaysPipeline();
+		postProcessingPipeline = createPostProcessingPipeline();
 
-		const sequence<ref<DescriptorSet>> descriptorSets = device->allocateDescriptorSets(sequence<ref<DescriptorSetLayout>>{rasterizeLightmapsDescriptorSetLayout, traceRaysDescriptorSetLayout});
+		const sequence<ref<DescriptorSet>> descriptorSets = device->allocateDescriptorSets(sequence<ref<DescriptorSetLayout>>{
+			rasterizeLightmapsDescriptorSetLayout,
+			traceRaysDescriptorSetLayout,
+			postProcessingDescriptorSetLayout,
+		});
 
 		rasterizeLightmapsDescriptorSet = descriptorSets[0];
 		traceRaysDescriptorSet = descriptorSets[1];
+		postProcessingDescriptorSet = descriptorSets[2];
 
 		lightmapCoordinateBuffer = createLightmapCoordinateBuffer(scene.lightmapCoordinates.count() * sizeof(svec2<float32>));
 		lightmapCoordinateIndexBuffer = createLightmapCoordinateIndexBuffer(vertexCount * sizeof(uint32));
@@ -225,10 +233,15 @@ namespace Trident {
 			commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
 		}
 
-		// TODO(graphics/dx12/dispatch): Fix artifacts on the lightmap atlas due to not enough threads being dispatched.
 		commandEncoder->bindComputePipeline(traceRaysPipeline);
 		commandEncoder->bindDescriptorSets(traceRaysPipelineLayout, 0, traceRaysDescriptorSet);
+
+		// TODO(graphics/dx12/dispatch): Fix artifacts on the lightmap atlas due to not enough threads being dispatched.
 		commandEncoder->dispatchIndirect(traceRaysArgumentBuffer, 2 * sizeof(uint32));
+
+		commandEncoder->bindComputePipeline(postProcessingPipeline);
+		commandEncoder->bindDescriptorSets(postProcessingPipelineLayout, 0, postProcessingDescriptorSet);
+		commandEncoder->dispatch(lightmapAtlasImageAssetDescriptor.extent.width / 32, lightmapAtlasImageAssetDescriptor.extent.height / 32, 1);
 
 		const ImageMemoryBarrier imageMemoryBarrier = {
 			.image = lightmapAtlasImage,
@@ -419,6 +432,17 @@ namespace Trident {
 		});
 	}
 
+	ref<DescriptorSetLayout> Lightmapper::createPostProcessingDescriptorSetLayout() const {
+		return Renderer::createDescriptorSetLayout({
+			// Lightmap atlas
+			{
+				.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+		});
+	}
+
 	ref<PipelineLayout> Lightmapper::createRasterizeLightmapsPipelineLayout(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) const {
 		return Renderer::createPipelineLayout({
 			.descriptorSetLayouts = descriptorSetLayouts,
@@ -433,6 +457,15 @@ namespace Trident {
 			.descriptorSetLayouts = descriptorSetLayouts,
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Trace rays",
+			#endif
+		});
+	}
+
+	ref<PipelineLayout> Lightmapper::createPostProcessingPipelineLayout(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) const {
+		return Renderer::createPipelineLayout({
+			.descriptorSetLayouts = descriptorSetLayouts,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Post processing",
 			#endif
 		});
 	}
@@ -506,6 +539,25 @@ namespace Trident {
 			),
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Trace rays",
+			#endif
+		});
+	}
+
+	ref<ComputePipeline> Lightmapper::createPostProcessingPipeline() const {
+		return Renderer::createComputePipeline({
+			.pipelineLayout = postProcessingPipelineLayout,
+			.computeShaderModule = Renderer::loadShaderModule(
+				{
+					.stage = ShaderStage::COMPUTE,
+					.entryPoint = "main",
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Post processing (compute)",
+					#endif
+				},
+				"Lightmapper/PostProcessing.comp"
+			),
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Post processing",
 			#endif
 		});
 	}
@@ -777,6 +829,11 @@ namespace Trident {
 			{
 				.descriptorSet = traceRaysDescriptorSet,
 				.bindingIndex = 6,
+				.descriptorImages = lightmapAtlasDescriptorImage,
+			},
+			{
+				.descriptorSet = postProcessingDescriptorSet,
+				.bindingIndex = 0,
 				.descriptorImages = lightmapAtlasDescriptorImage,
 			},
 		};
