@@ -197,7 +197,7 @@ namespace Trident {
 						vertexNormalComponents[normalIndex * 3 + 1],
 						vertexNormalComponents[normalIndex * 3 + 2],
 					};
-					n *= orientation;
+					n = normalized(n * orientation);
 
 					const svec3<float32> normal(n);
 
@@ -311,7 +311,7 @@ namespace Trident {
 				// TODO(test)
 				{
 					vec3<float32> normal(face.normal);
-					normal *= orientation;
+					normal = normalized(normal * orientation);
 
 					const float32 projection = dot(normal, UP);
 
