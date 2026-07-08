@@ -83,4 +83,6 @@ namespace Trident {
 			std::unordered_map<sequence<char8>, uint32> sceneAssetPathToIndex;
 			std::unordered_map<sequence<char8>, uint32> shaderModuleAssetPathToIndex;
 	};
+
+	ref<FontAsset> decodeFontAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary, view<char8> path);
 }
