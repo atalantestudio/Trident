@@ -65,4 +65,6 @@ vec4 sampleBicubic(sampler2D textureSampler, vec2 coordinate) {
 void main() {
 	fragment = sampleBicubic(lightmapAtlasSampler, interstage.lightmapCoordinate);
 	// fragment = texture(lightmapAtlasSampler, interstage.lightmapCoordinate);
+
+	fragment *= vec4(1.0, 0.2, 0.0, 1.0);
 }

@@ -34,6 +34,7 @@ namespace Trident {
 
 		// TODO(physics/3d/uniform-scaling): Deprecate.
 		svec3<float32> scale;
+		float32 uniformScale = 1.0f;
 
 		svec3<float32> linearVelocity = {0.0_m_s, 0.0_m_s, 0.0_m_s};
 		svec3<float32> angularVelocity = {0.0_w, 0.0_w, 0.0_w};

@@ -32,10 +32,10 @@ namespace Trident {
 		void updateWorld(vec3<float32> centroid) {
 			world =
 				// TODO(rigid-body/3d/centroid): Include the centroid in the world matrix?
-				// mat4x4<float32>::translation(-centroid) *
+				mat4x4<float32>::translation(-centroid) *
 
 				// TODO(rigid-body/3d/uniform-scaling)
-				// mat4x4<float32>::scaling({scale, scale, scale}) *
+				mat4x4<float32>::scaling({scale, scale, scale}) *
 
 				mat4x4<float32>(orientation) *
 				mat4x4<float32>::translation(position);

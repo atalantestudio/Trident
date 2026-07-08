@@ -101,6 +101,10 @@ namespace Trident {
 
 				// physicsSimulation->updateContactManifolds();
 				// physicsSimulation->applyImpulses();
+
+				// TODO(debug): Apply a rotational constraint to the player entity.
+				// scene->ecs.getComponent<RigidBody3DComponent>(PLAYER_ENTITY).angularVelocity = {0.0f, 0.0f, 0.0f};
+
 				// physicsSimulation->integrate();
 
 				#if !defined(FORWARD_USE_NOCLIP_CAMERA)

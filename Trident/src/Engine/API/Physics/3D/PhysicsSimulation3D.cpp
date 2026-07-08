@@ -228,8 +228,6 @@ namespace Trident {
 					rigidBodyB.applyImpulse(j, contact.rB);
 				#endif
 
-				if (isnan(rigidBodyA.linearVelocity[0]) || isnan(rigidBodyB.linearVelocity[0])) BREAKPOINT();
-
 				contactIndex += 1;
 			}
 		}
@@ -325,11 +323,6 @@ namespace Trident {
 
 					contactIndex += 1;
 				}
-			}
-
-			// TODO(debug): Apply a rotational constraint to the player entity.
-			if (playerEntity != max<Entity>()) {
-				scene->ecs.getComponent<RigidBody3DComponent>(playerEntity).angularVelocity = {0.0f, 0.0f, 0.0f};
 			}
 
 			iteration += 1;

@@ -359,9 +359,10 @@ namespace Trident {
 				{
 					0,
 					createRigidBody({
-						.position = {0.0f, 77.0f, 0.0f},
+						.position = {20.0f, 77.0f, 20.0f},
 						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
 						.scale = {33.0f, 77.0f, 33.0f},
+						.uniformScale = 33.0f,
 						.mass = 70.0_kg,
 						.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
 						.friction = 0.2f,

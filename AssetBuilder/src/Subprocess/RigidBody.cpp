@@ -75,7 +75,7 @@ namespace Trident {
 		RigidBody3DComponent component = {
 			.position = descriptor.position,
 			.rotation = descriptor.rotation,
-			.scale = 1.0f,
+			.scale = descriptor.uniformScale,
 			.linearVelocity = descriptor.linearVelocity,
 			.angularVelocity = descriptor.angularVelocity,
 			.inverseMass = 0.0_kg,
