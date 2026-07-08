@@ -3,9 +3,10 @@
 
 #pragma once
 
+#include "AssetBuilder/API/BuildAssetMap.hpp"
+
 #include "Engine/API/Process/Process.hpp"
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
-#include "Engine/Filesystem/Asset/AssetMap.hpp"
 #include "Engine/Filesystem/Decoder/Decoder.hpp"
 #include "Engine/Filesystem/File/QOI.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
@@ -279,11 +280,11 @@ namespace Trident {
 
 				encodeImageAsset(assetOutputPath, assetName, imageAssetDescriptor);
 
-				assetMap->add(imageAssetDescriptor.identifier, AssetSignature::IMAGE, assetName);
+				assetMap->insert({imageAssetDescriptor.identifier, assetName});
 			}
 
 		public:
-			explicit BuildImageAssetProcess(AssetMap* assetMap) :
+			explicit BuildImageAssetProcess(BuildAssetMap* assetMap) :
 				assetMap(assetMap)
 			{}
 
@@ -307,6 +308,6 @@ namespace Trident {
 			}
 
 		private:
-			AssetMap* assetMap;
+			BuildAssetMap* assetMap;
 	};
 }

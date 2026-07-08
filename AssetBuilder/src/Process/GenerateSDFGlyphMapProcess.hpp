@@ -5,6 +5,7 @@
 
 #include "Engine/Filesystem/File.hpp"
 #include "Engine/Font/Glyph.hpp"
+#include "Engine/Renderer/Renderer.hpp"
 
 namespace Trident {
 	struct SDFGlyphMap {

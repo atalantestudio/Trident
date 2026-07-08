@@ -3,8 +3,9 @@
 
 #pragma once
 
+#include "AssetBuilder/API/BuildAssetMap.hpp"
+
 #include "Engine/API/Process/Process.hpp"
-#include "Engine/Filesystem/Asset/AssetMap.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 
 namespace Trident {
@@ -13,7 +14,7 @@ namespace Trident {
 			static constexpr uint32 PROJECT_OUTPUT_PATH_ARGUMENT_INDEX = 2;
 
 		public:
-			explicit BuildAssetMapProcess(const AssetMap* assetMap) :
+			explicit BuildAssetMapProcess(const BuildAssetMap* assetMap) :
 				assetMap(assetMap)
 			{}
 
@@ -36,10 +37,11 @@ namespace Trident {
 				assetHeader.signature = AssetSignature::ASSET_MAP;
 				assetHeader.version = {0, 0, 0};
 
-				uint64 size = sizeof(AssetSignature) + sizeof(uint32);
+				// Asset maps don't have identifiers.
+				uint64 size = sizeof(AssetHeader) - sizeof(uint32);
 
-				for (const auto& asset : assetMap->newAssets) {
-					size += sizeof(uint32) * 2 + sizeof(AssetSignature) + asset.second.assetPath.count();
+				for (const auto& asset : *assetMap) {
+					size += sizeof(uint32) * 2 + asset.second.count();
 				}
 
 				ByteStream<StreamOperation::WRITE> stream(size, Endianness::LITTLE_ENDIAN);
@@ -47,14 +49,13 @@ namespace Trident {
 				stream.write<AssetSignature>(assetHeader.signature);
 				stream.write<VersionNumber>(assetHeader.version);
 
-				for (const auto& asset : assetMap->newAssets) {
+				for (const auto& asset : *assetMap) {
 					stream.write<uint32>(asset.first);
-					stream.write<AssetSignature>(asset.second.signature);
-					stream.write<uint32>(static_cast<uint32>(asset.second.assetPath.count()));
+					stream.write<uint32>(static_cast<uint32>(asset.second.count()));
 
-					std::copy(asset.second.assetPath.begin(), asset.second.assetPath.end(), stream.getBytePosition());
+					std::copy(asset.second.begin(), asset.second.end(), stream.getBytePosition());
 
-					stream.jump(asset.second.assetPath.count());
+					stream.jump(asset.second.count());
 				}
 
 				sequence<char8> outputPath(assetOutputPathString.size() + projectName.count() + 5);
@@ -72,6 +73,6 @@ namespace Trident {
 			}
 
 		private:
-			const AssetMap* assetMap;
+			const BuildAssetMap* assetMap;
 	};
 }

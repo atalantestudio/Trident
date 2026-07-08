@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Engine/Filesystem/Asset/AssetMap.hpp"
 #include "Engine/Filesystem/Asset/FontAsset.hpp"
 #include "Engine/Filesystem/Asset/GeometryAsset.hpp"
 #include "Engine/Filesystem/Asset/ImageAsset.hpp"
@@ -21,6 +22,8 @@ namespace Trident {
 
 		public:
 			explicit AssetLibrary(std::filesystem::path basePath);
+
+			void loadAssetMap();
 
 			template<typename AssetType>
 			ref<AssetType> getAsset(uint32 identifier) const {
@@ -71,6 +74,7 @@ namespace Trident {
 
 		private:
 			std::filesystem::path basePath;
+			AssetMap assetMap;
 			std::vector<ref<Asset>> assets;
 			std::unordered_map<uint32, uint32> assetIdentifierToIndex;
 			std::unordered_map<sequence<char8>, uint32> fontAssetPathToIndex;

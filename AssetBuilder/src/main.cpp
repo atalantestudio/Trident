@@ -3,15 +3,15 @@
 
 #include "pch.hpp"
 
-#include "Engine/entry_point.hpp"
-#include "Engine/Filesystem/Asset/AssetMap.hpp"
-
+#include "AssetBuilder/API/BuildAssetMap.hpp"
 #include "Process/BuildAssetMapProcess.hpp"
 #include "Process/BuildFontAssetProcess.hpp"
 #include "Process/BuildGeometryAssetProcess.hpp"
 #include "Process/BuildImageAssetProcess.hpp"
 #include "Process/BuildSceneAssetProcess.hpp"
 #include "Process/BuildShaderModuleAssetProcess.hpp"
+
+#include "Engine/entry_point.hpp"
 
 namespace Trident {
 	class AssetBuilderApplication : public Application {
@@ -37,7 +37,7 @@ namespace Trident {
 			}
 
 		private:
-			AssetMap assetMap;
+			BuildAssetMap assetMap;
 	};
 
 	Application* createApplication(uint32 argumentCount, char8** argumentValues) {

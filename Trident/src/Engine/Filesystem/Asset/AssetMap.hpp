@@ -4,39 +4,20 @@
 #pragma once
 
 namespace Trident {
-	struct AssetChunk {
-		AssetSignature signature;
-
-		/// Not including the file extension.
-		view<char8> assetPath;
-	};
-
-	struct NewAssetChunk {
-		AssetSignature signature;
-
-		/// Not including the file extension.
-		sequence<char8> assetPath;
-	};
-
 	class AssetMap {
 		public:
-			inline AssetChunk operator[](uint32 identifier) const {
-				auto chunk = map.find(identifier);
+			inline view<char8> operator[](uint32 identifier) const {
+				const auto asset = map.find(identifier);
 
-				DEBUG_ASSERT(chunk != map.end());
+				DEBUG_ASSERT(asset != map.end());
 
-				return chunk->second;
+				return asset->second;
 			}
-
-			inline void add(uint32 identifier, AssetSignature signature, view<char8> path) {
-				newAssets.insert({identifier, {signature, path}});
-			}
-
-		private:
-			sequence<char8> data;
-			std::unordered_map<uint32, AssetChunk> map;
 
 		public:
-			std::unordered_map<uint32, NewAssetChunk> newAssets;
+			sequence<uint8> data;
+
+			/// Not including the file extension.
+			std::unordered_map<uint32, view<char8>> map;
 	};
 }

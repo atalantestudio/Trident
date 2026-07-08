@@ -3,13 +3,13 @@
 
 #pragma once
 
-#include "Engine/API/Process/Process.hpp"
-#include "Engine/Filesystem/Asset/AssetMap.hpp"
-#include "Engine/Filesystem/Stream/BitStream.hpp"
-
+#include "AssetBuilder/API/BuildAssetMap.hpp"
 #include "../Subprocess/GeometryData.hpp"
 #include "../Subprocess/DefaultGeometries.hpp"
 #include "../Subprocess/EncodeGeometryAssetSubprocess.hpp"
+
+#include "Engine/API/Process/Process.hpp"
+#include "Engine/Filesystem/Stream/BitStream.hpp"
 
 namespace Trident {
 	class BuildGeometryAssetProcess final : public Process {
@@ -244,11 +244,11 @@ namespace Trident {
 
 				ENGINE_INFO("Generated geometry asset \"[]\" (ID: []).", outputPath, identifier);
 
-				assetMap->add(identifier, AssetSignature::GEOMETRY, assetName);
+				assetMap->insert({identifier, assetName});
 			}
 
 		public:
-			explicit BuildGeometryAssetProcess(AssetMap* assetMap) :
+			explicit BuildGeometryAssetProcess(BuildAssetMap* assetMap) :
 				assetMap(assetMap)
 			{}
 
@@ -323,6 +323,6 @@ namespace Trident {
 			}
 
 		private:
-			AssetMap* assetMap;
+			BuildAssetMap* assetMap;
 	};
 }

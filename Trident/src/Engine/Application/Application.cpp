@@ -57,6 +57,7 @@ namespace Trident {
 
 		if (projectType == ProjectType::MAIN) {
 			assetLibrary = new AssetLibrary(Filesystem::getProjectRootDirectory());
+			assetLibrary->loadAssetMap();
 		}
 	}
 

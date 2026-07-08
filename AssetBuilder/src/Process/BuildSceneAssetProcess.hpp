@@ -3,17 +3,15 @@
 
 #pragma once
 
-#include "Engine/API/Process/Process.hpp"
-#include "Engine/Filesystem/Asset/AssetLibrary.hpp"
-#include "Engine/Filesystem/Asset/AssetMap.hpp"
-
+#include "AssetBuilder/API/BuildAssetMap.hpp"
 #include "../Subprocess/SceneData.hpp"
-
 #include "../Subprocess/Scene2D.hpp"
-
 #include "../Subprocess/CabinScene.hpp"
 // #include "../Subprocess/HallScene.hpp"
 #include "../Subprocess/Scene3D.hpp"
+
+#include "Engine/API/Process/Process.hpp"
+#include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 
 namespace Trident {
 	class BuildSceneAssetProcess final : public Process {
@@ -250,11 +248,11 @@ namespace Trident {
 
 				ENGINE_INFO("Generated scene asset \"[]\" (ID: []).", outputPath, identifier);
 
-				assetMap->add(identifier, AssetSignature::SCENE, assetName);
+				assetMap->insert({identifier, assetName});
 			}
 
 		public:
-			explicit BuildSceneAssetProcess(AssetMap* assetMap) :
+			explicit BuildSceneAssetProcess(BuildAssetMap* assetMap) :
 				assetMap(assetMap)
 			{}
 
@@ -292,6 +290,6 @@ namespace Trident {
 			}
 
 		private:
-			AssetMap* assetMap;
+			BuildAssetMap* assetMap;
 	};
 }

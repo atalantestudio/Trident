@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include "Engine/API/Process/Process.hpp"
-#include "Engine/Filesystem/Asset/AssetMap.hpp"
-
+#include "AssetBuilder/API/BuildAssetMap.hpp"
 #include "../Subprocess/BuildDefaultFontSubprocess.hpp"
 #include "../Subprocess/BuildTrueTypeFontSubprocess.hpp"
+
+#include "Engine/API/Process/Process.hpp"
 
 namespace Trident {
 	class BuildFontAssetProcess final : public Process {
@@ -16,7 +16,7 @@ namespace Trident {
 			static constexpr uint32 PROJECT_OUTPUT_PATH_ARGUMENT_INDEX = 2;
 
 		public:
-			explicit BuildFontAssetProcess(AssetMap* assetMap) :
+			explicit BuildFontAssetProcess(BuildAssetMap* assetMap) :
 				assetMap(assetMap)
 			{}
 
@@ -42,6 +42,6 @@ namespace Trident {
 			}
 
 		private:
-			AssetMap* assetMap;
+			BuildAssetMap* assetMap;
 	};
 }

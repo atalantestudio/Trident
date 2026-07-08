@@ -99,6 +99,32 @@ namespace Trident {
 		basePath(basePath)
 	{}
 
+	void AssetLibrary::loadAssetMap() {
+		const std::string projectNameString = basePath.stem().string();
+		const view<char8> projectName(&projectNameString[0], projectNameString.size());
+		const std::filesystem::path absolutePath = getAbsolutePath("Asset", projectName, ".tam");
+		const sequence<char8> assetPath = absolutePath.string();
+
+		assetMap.data = Filesystem::openByteBuffer(assetPath);
+
+		ByteStream<StreamOperation::READ> stream(&assetMap.data[0], assetMap.data.count(), Endianness::LITTLE_ENDIAN);
+
+		ENGINE_ASSERT(stream.getRemainingSize() >= sizeof(AssetSignature), "The file is corrupted.");
+		ENGINE_ASSERT(stream.peek<AssetSignature>() == AssetSignature::ASSET_MAP, "The file format is invalid.");
+
+		stream.jump(sizeof(AssetSignature) + sizeof(VersionNumber));
+
+		while (stream.getRemainingSize() > 0) {
+			const uint32 identifier = stream.read<uint32>();
+			const uint32 pathCharacterCount = stream.read<uint32>();
+			const view<char8> path(pointer_cast<const char8*>(stream.getBytePosition()), pathCharacterCount);
+
+			stream.jump(pathCharacterCount);
+
+			assetMap.map.insert({identifier, path});
+		}
+	}
+
 	std::filesystem::path AssetLibrary::getAbsolutePath(view<char8> base, view<char8> relativePath, view<char8> extension) const {
 		sequence<char8> path(relativePath.count() + extension.count());
 
@@ -148,9 +174,8 @@ namespace Trident {
 
 		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-		if (stream.getRemainingSize() < sizeof(AssetSignature) || stream.peek<AssetSignature>() != AssetSignature::FONT) {
-			return;
-		}
+		ENGINE_ASSERT(stream.getRemainingSize() >= sizeof(AssetSignature), "The file is corrupted.");
+		ENGINE_ASSERT(stream.peek<AssetSignature>() == AssetSignature::FONT, "The file format is invalid.");
 
 		stream.jump(sizeof(AssetSignature));
 
@@ -171,9 +196,8 @@ namespace Trident {
 
 		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-		if (stream.getRemainingSize() < sizeof(AssetSignature) || stream.peek<AssetSignature>() != AssetSignature::GEOMETRY) {
-			return;
-		}
+		ENGINE_ASSERT(stream.getRemainingSize() >= sizeof(AssetSignature), "The file is corrupted.");
+		ENGINE_ASSERT(stream.peek<AssetSignature>() == AssetSignature::GEOMETRY, "The file format is invalid.");
 
 		stream.jump(sizeof(AssetSignature));
 
@@ -194,9 +218,8 @@ namespace Trident {
 
 		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-		if (stream.getRemainingSize() < sizeof(AssetSignature) || stream.peek<AssetSignature>() != AssetSignature::IMAGE) {
-			return;
-		}
+		ENGINE_ASSERT(stream.getRemainingSize() >= sizeof(AssetSignature), "The file is corrupted.");
+		ENGINE_ASSERT(stream.peek<AssetSignature>() == AssetSignature::IMAGE, "The file format is invalid.");
 
 		stream.jump(sizeof(AssetSignature));
 
@@ -217,9 +240,8 @@ namespace Trident {
 
 		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-		if (stream.getRemainingSize() < sizeof(AssetSignature) || stream.peek<AssetSignature>() != AssetSignature::SCENE) {
-			return;
-		}
+		ENGINE_ASSERT(stream.getRemainingSize() >= sizeof(AssetSignature), "The file is corrupted.");
+		ENGINE_ASSERT(stream.peek<AssetSignature>() == AssetSignature::SCENE, "The file format is invalid.");
 
 		stream.jump(sizeof(AssetSignature));
 
@@ -240,9 +262,8 @@ namespace Trident {
 
 		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-		if (stream.getRemainingSize() < sizeof(AssetSignature) || stream.peek<AssetSignature>() != AssetSignature::SCENE) {
-			return;
-		}
+		ENGINE_ASSERT(stream.getRemainingSize() >= sizeof(AssetSignature), "The file is corrupted.");
+		ENGINE_ASSERT(stream.peek<AssetSignature>() == AssetSignature::SCENE, "The file format is invalid.");
 
 		stream.jump(sizeof(AssetSignature));
 
@@ -263,9 +284,8 @@ namespace Trident {
 
 		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-		if (stream.getRemainingSize() < sizeof(AssetSignature) || stream.peek<AssetSignature>() != AssetSignature::SHADER_MODULE) {
-			return;
-		}
+		ENGINE_ASSERT(stream.getRemainingSize() >= sizeof(AssetSignature), "The file is corrupted.");
+		ENGINE_ASSERT(stream.peek<AssetSignature>() == AssetSignature::SHADER_MODULE, "The file format is invalid.");
 
 		stream.jump(sizeof(AssetSignature));
 

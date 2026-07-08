@@ -176,7 +176,7 @@ namespace Trident {
 			};
 
 		public:
-			explicit BuildDefaultFontSubprocess(const std::filesystem::path& assetOutputPath, AssetMap* assetMap) {
+			explicit BuildDefaultFontSubprocess(const std::filesystem::path& assetOutputPath, BuildAssetMap* assetMap) {
 				const sequence<uint8> buffer = Filesystem::openByteBuffer("../Trident/src/Asset/Image/quiver.png");
 				const File<FileFormat::PNG> file = Decoder<FileFormat::PNG>::decode(buffer);
 
@@ -296,7 +296,7 @@ namespace Trident {
 
 				ENGINE_INFO("Generated default (bitmap) font asset \"[]\" (ID: []).", outputPath, fontAssetDescriptor.identifier);
 
-				assetMap->add(fontAssetDescriptor.identifier, AssetSignature::FONT, DEFAULT_FONT_NAME);
+				assetMap->insert({fontAssetDescriptor.identifier, DEFAULT_FONT_NAME});
 			}
 	};
 }
