@@ -28,6 +28,7 @@ namespace Trident {
 				.emissiveStrength = 16.0f,
 			});
 
+		// Floors
 		builder
 			.createStaticObject({
 				.label = "hall_floor",
@@ -117,7 +118,7 @@ namespace Trident {
 				.geometryAssetName = "UnitPlane",
 				.transform = {
 					.position = {10.0f, 64.0f, -16.0f},
-					.rotation = {-pi<float32>() / 2.0f, 0.0f, 0.0f},
+					.rotation = {pi<float32>() * 0.5f, 0.0f, 0.0f},
 					.scale = {52.0f, 128.0f, 0.0f},
 				},
 				.textureFiltering = {
@@ -133,7 +134,7 @@ namespace Trident {
 				.geometryAssetName = "UnitPlane",
 				.transform = {
 					.position = {110.0f, 64.0f, -16.0f},
-					.rotation = {-pi<float32>() / 2.0f, 0.0f, 0.0f},
+					.rotation = {pi<float32>() * 0.5f, 0.0f, 0.0f},
 					.scale = {36.0f, 128.0f, 0.0f},
 				},
 				.textureFiltering = {
@@ -149,7 +150,7 @@ namespace Trident {
 				.geometryAssetName = "UnitPlane",
 				.transform = {
 					.position = {-16.0f, 64.0f, 42.0f},
-					.rotation = {0.0f, 0.0f, pi<float32>() / 2.0f},
+					.rotation = {0.0f, 0.0f, -pi<float32>() * 0.5f},
 					.scale = {0.0f, 128.0f, 116.0f},
 				},
 				.textureFiltering = {
@@ -165,7 +166,7 @@ namespace Trident {
 				.geometryAssetName = "UnitPlane",
 				.transform = {
 					.position = {-16.0f, 64.0f, 170.0f},
-					.rotation = {0.0f, 0.0f, pi<float32>() / 2.0f},
+					.rotation = {0.0f, 0.0f, -pi<float32>() * 0.5f},
 					.scale = {0.0f, 128.0f, 28.0f},
 				},
 				.textureFiltering = {
@@ -181,7 +182,7 @@ namespace Trident {
 				.geometryAssetName = "UnitPlane",
 				.transform = {
 					.position = {2.0f, 64.0f, 184.0f},
-					.rotation = {pi<float32>() / 2.0f, 0.0f, 0.0f},
+					.rotation = {-pi<float32>() * 0.5f, 0.0f, 0.0f},
 					.scale = {36.0f, 128.0f, 0.0f},
 				},
 				.textureFiltering = {
@@ -197,7 +198,7 @@ namespace Trident {
 				.geometryAssetName = "UnitPlane",
 				.transform = {
 					.position = {108.0f, 64.0f, 184.0f},
-					.rotation = {pi<float32>() / 2.0f, 0.0f, 0.0f},
+					.rotation = {-pi<float32>() * 0.5f, 0.0f, 0.0f},
 					.scale = {40.0f, 128.0f, 0.0f},
 				},
 				.textureFiltering = {
@@ -213,7 +214,7 @@ namespace Trident {
 				.geometryAssetName = "UnitPlane",
 				.transform = {
 					.position = {128.0f, 64.0f, 84.0f},
-					.rotation = {0.0f, 0.0f, -pi<float32>() / 2.0f},
+					.rotation = {0.0f, 0.0f, pi<float32>() * 0.5f},
 					.scale = {0.0f, 128.0f, 200.0f},
 				},
 				.textureFiltering = {
@@ -229,7 +230,7 @@ namespace Trident {
 				.geometryAssetName = "UnitPlane",
 				.transform = {
 					.position = {-60.0f, 64.0f, 48.0f},
-					.rotation = {-pi<float32>() / 2.0f, 0.0f, 0.0f},
+					.rotation = {pi<float32>() * 0.5f, 0.0f, 0.0f},
 					.scale = {72.0f, 128.0f, 0.0f},
 				},
 				.textureFiltering = {
@@ -245,7 +246,7 @@ namespace Trident {
 				.geometryAssetName = "UnitPlane",
 				.transform = {
 					.position = {-96.0f, 64.0f, 116.0f},
-					.rotation = {0.0f, 0.0f, pi<float32>() / 2.0f},
+					.rotation = {0.0f, 0.0f, -pi<float32>() * 0.5f},
 					.scale = {0.0f, 128.0f, 136.0f},
 				},
 				.textureFiltering = {
@@ -261,7 +262,7 @@ namespace Trident {
 				.geometryAssetName = "UnitPlane",
 				.transform = {
 					.position = {-60.0f, 64.0f, 184.0f},
-					.rotation = {pi<float32>() / 2.0f, 0.0f, 0.0f},
+					.rotation = {-pi<float32>() * 0.5f, 0.0f, 0.0f},
 					.scale = {72.0f, 128.0f, 0.0f},
 				},
 				.textureFiltering = {
@@ -277,7 +278,7 @@ namespace Trident {
 				.geometryAssetName = "UnitPlane",
 				.transform = {
 					.position = {-24.0f, 64.0f, 170.0f},
-					.rotation = {0.0f, 0.0f, -pi<float32>() / 2.0f},
+					.rotation = {0.0f, 0.0f, pi<float32>() * 0.5f},
 					.scale = {0.0f, 128.0f, 28.0f},
 				},
 				.textureFiltering = {
@@ -293,7 +294,7 @@ namespace Trident {
 				.geometryAssetName = "UnitPlane",
 				.transform = {
 					.position = {-24.0f, 64.0f, 74.0f},
-					.rotation = {0.0f, 0.0f, -pi<float32>() / 2.0f},
+					.rotation = {0.0f, 0.0f, pi<float32>() * 0.5f},
 					.scale = {0.0f, 128.0f, 52.0f},
 				},
 				.textureFiltering = {
