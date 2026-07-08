@@ -11,7 +11,8 @@
 
 #include "../Subprocess/Scene2D.hpp"
 
-#include "../Subprocess/HallScene.hpp"
+#include "../Subprocess/CabinScene.hpp"
+// #include "../Subprocess/HallScene.hpp"
 #include "../Subprocess/Scene3D.hpp"
 
 namespace Trident {
@@ -51,8 +52,9 @@ namespace Trident {
 			inline static const view<char8> SCENE_3D_NAMES[SCENE_3D_COUNT] = {
 				"Boxes3D",
 				"BoxStacking",
+				"Cabin",
 				"EdgeContact",
-				"Hall",
+				// "Hall",
 				"Lemons",
 				"PlayerMovement",
 			};
@@ -60,8 +62,9 @@ namespace Trident {
 			inline static constexpr CreateScene3DFunction SCENE_3D_FUNCTIONS[SCENE_3D_COUNT] = {
 				createBoxes3DScene,
 				createBoxStackingScene,
+				createCabinScene,
 				createEdgeContactScene,
-				createHallScene,
+				// createHallScene,
 				createLemonsScene,
 				createPlayerMovementScene,
 			};

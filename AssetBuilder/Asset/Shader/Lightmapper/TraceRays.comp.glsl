@@ -227,7 +227,7 @@ vec3 rgen(Hit hit, inout uint seed) {
 		hit = rint(ray);
 
 		if (hit.t < 0.0) {
-			light += float(BOUNCE_COUNT - bounceIndex) / BOUNCE_COUNT;
+			light += vec3(1.0, 1.0, 1.0);
 
 			break;
 		}

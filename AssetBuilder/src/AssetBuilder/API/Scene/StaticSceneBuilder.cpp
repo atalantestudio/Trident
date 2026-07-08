@@ -137,7 +137,7 @@ namespace Trident {
 			const quat<float32> roll = quat<float32>::axisAngle(FORWARD, object.transform.rotation[2]);
 			const quat<float32> orientation = normalized(yaw * pitch * roll);
 			const mat4x4<float32> world = (
-				mat4x4<float32>(orientation) *
+				mat4x4<float32>(inverse(orientation)) *
 				mat4x4<float32>::scaling(object.transform.scale) *
 				mat4x4<float32>::translation(object.transform.position)
 			);
@@ -151,12 +151,14 @@ namespace Trident {
 				uint32 vertexIndex = 0;
 
 				while (vertexIndex < vertexCount) {
-					svec3<float32> vertex = svec3<float32>(multiplyTransform({
+					vec3<float32> v = {
 						vertexPositionComponents[vertexIndex * 3 + 0],
 						vertexPositionComponents[vertexIndex * 3 + 1],
 						vertexPositionComponents[vertexIndex * 3 + 2],
-					}, world));
+					};
+					v = multiplyTransform(v, world);
 
+					svec3<float32> vertex(v);
 					uint32 componentIndex = 0;
 
 					while (componentIndex < 3) {
@@ -195,12 +197,7 @@ namespace Trident {
 						vertexNormalComponents[normalIndex * 3 + 1],
 						vertexNormalComponents[normalIndex * 3 + 2],
 					};
-					n = normalized(n) * orientation;
-
-					// TODO(asset-builder/lightmapper): Hack to fix normal orientation.
-					if (dot(n, UP) < 0.999f) {
-						n = -n;
-					}
+					n *= orientation;
 
 					const svec3<float32> normal(n);
 
@@ -311,9 +308,11 @@ namespace Trident {
 				uint16 coordinateIndex = 0;
 				quat<float32> R;
 
+				// TODO(test)
 				{
-					// TODO(test)
-					const vec3<float32> normal = normalized(vec3<float32>{face.normal[0], face.normal[1], face.normal[2]} * orientation);
+					vec3<float32> normal(face.normal);
+					normal *= orientation;
+
 					const float32 projection = dot(normal, UP);
 
 					if (projection > 0.999999f) {
@@ -326,7 +325,7 @@ namespace Trident {
 							axis = normalized(cross(normal, FORWARD));
 						}
 
-						R = quat<float32>::axisAngle(axis, 0.0f);
+						R = quat<float32>::axisAngle(axis, pi<float32>());
 					}
 					else {
 						const vec3<float32> axis = cross(normal, UP);
@@ -351,7 +350,9 @@ namespace Trident {
 						vertexPositionComponents[vertexPositionComponentOffset + 1],
 						vertexPositionComponents[vertexPositionComponentOffset + 2],
 					};
-					vertex = ((vertex * orientation) * object.transform.scale) * R;
+					vertex *= orientation;
+					vertex *= object.transform.scale;
+					vertex *= R;
 
 					svec2<float32>& coordinate = scene.lightmapCoordinates[lightmapCoordinateOffset + edge.originVertexIndex];
 					coordinate = {vertex[0], vertex[2]};
@@ -372,6 +373,9 @@ namespace Trident {
 
 					coordinateIndex += 1;
 				}
+
+				DEBUG_ASSERT(maxCoordinate.x > 0.0f);
+				DEBUG_ASSERT(maxCoordinate.y > 0.0f);
 
 				coordinateIndex = 0;
 

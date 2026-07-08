@@ -4,6 +4,11 @@
 #pragma once
 
 namespace lyah {
+	// TODO(lyah): See https://github.com/orgs/atalantestudio/projects/4/views/1?pane=issue&itemId=210334400&issue=atalantestudio%7Clyah%7C27.
+	inline std::float_t sum(vec<3, std::float_t> a) {
+		return a[0] + a[1] + a[2];
+	}
+
 	// vec<2, sint32> polyfill.
 	template<>
 	struct vec<2, std::int32_t> {
