@@ -5,6 +5,7 @@
 			"includePath": [
 				"AssetBuilder/src",
 				"Editor/src",
+				"Samples/src",
 				"Trident/src",
 				"Trident/vendor/API",
 				"Trident/vendor/Base",
@@ -24,6 +25,7 @@
 			"includePath": [
 				"AssetBuilder/src",
 				"Editor/src",
+				"Samples/src",
 				"Trident/src",
 				"Trident/vendor/API",
 				"Trident/vendor/Base",
@@ -43,6 +45,7 @@
 			"includePath": [
 				"AssetBuilder/src",
 				"Editor/src",
+				"Samples/src",
 				"Trident/src",
 				"Trident/vendor/API",
 				"Trident/vendor/Base",
