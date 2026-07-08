@@ -32,8 +32,6 @@ layout(set = 0, binding = 2) buffer writeonly LightmapPixelBuffer {
 	LightmapPixel lightmapPixels[];
 };
 
-layout(location = 0) out vec4 fragment;
-
 void main() {
 	uvec2 coordinate = uvec2(interstage.coordinate * ATLAS_SIZE);
 	uint lightmapPixelIndex = atomicAdd(lightmapPixelCount, 1);

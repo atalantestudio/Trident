@@ -43,7 +43,7 @@ namespace Trident {
 					.scale = {-0.25f, 0.25f},
 				},
 				.materialIndex = defaultMaterialIndex,
-				.lightmapPixelScale = {1.0f, 1.0f},
+				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
 				.label = "hall_to_bike_room_floor_connector",
@@ -59,7 +59,7 @@ namespace Trident {
 					.scale = {-0.25f, 0.25f},
 				},
 				.materialIndex = defaultMaterialIndex,
-				.lightmapPixelScale = {1.0f, 1.0f},
+				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
 				.label = "bike_room_floor",
@@ -75,7 +75,7 @@ namespace Trident {
 					.scale = {-0.25f, 0.25f},
 				},
 				.materialIndex = defaultMaterialIndex,
-				.lightmapPixelScale = {1.0f, 1.0f},
+				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
 				.label = "hall_to_main_floor_connector",
@@ -91,7 +91,7 @@ namespace Trident {
 					.scale = {-0.25f, 0.25f},
 				},
 				.materialIndex = defaultMaterialIndex,
-				.lightmapPixelScale = {1.0f, 1.0f},
+				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
 				.label = "main_floor",
@@ -107,7 +107,7 @@ namespace Trident {
 					.scale = {-0.25f, 0.25f},
 				},
 				.materialIndex = defaultMaterialIndex,
-				.lightmapPixelScale = {1.0f, 1.0f},
+				.lightmapPixelScale = {4.0f, 4.0f},
 			});
 
 		// Walls
@@ -126,7 +126,7 @@ namespace Trident {
 					.scale = {-0.25f, 0.25f},
 				},
 				.materialIndex = defaultMaterialIndex,
-				.lightmapPixelScale = {1.0f, 1.0f},
+				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
 				.label = "hall_entrance_right_wall",
@@ -142,7 +142,7 @@ namespace Trident {
 					.scale = {-0.25f, 0.25f},
 				},
 				.materialIndex = defaultMaterialIndex,
-				.lightmapPixelScale = {1.0f, 1.0f},
+				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
 				.label = "bike_room_entrance_left_wall",
@@ -158,7 +158,7 @@ namespace Trident {
 					.scale = {0.25f, 0.25f},
 				},
 				.materialIndex = defaultMaterialIndex,
-				.lightmapPixelScale = {1.0f, 1.0f},
+				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
 				.label = "bike_room_entrance_right_wall",
@@ -174,7 +174,7 @@ namespace Trident {
 					.scale = {0.25f, 0.25f},
 				},
 				.materialIndex = defaultMaterialIndex,
-				.lightmapPixelScale = {1.0f, 1.0f},
+				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
 				.label = "main_entrance_left_wall",
@@ -190,7 +190,7 @@ namespace Trident {
 					.scale = {-0.25f, 0.25f},
 				},
 				.materialIndex = defaultMaterialIndex,
-				.lightmapPixelScale = {1.0f, 1.0f},
+				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
 				.label = "main_entrance_right_wall",
@@ -206,7 +206,7 @@ namespace Trident {
 					.scale = {-0.25f, 0.25f},
 				},
 				.materialIndex = defaultMaterialIndex,
-				.lightmapPixelScale = {1.0f, 1.0f},
+				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
 				.label = "mailbox_wall",
@@ -222,7 +222,7 @@ namespace Trident {
 					.scale = {-0.25f, 0.25f},
 				},
 				.materialIndex = defaultMaterialIndex,
-				.lightmapPixelScale = {1.0f, 1.0f},
+				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
 				.label = "bike_room_inside_left_wall",
@@ -238,7 +238,7 @@ namespace Trident {
 					.scale = {-0.25f, 0.25f},
 				},
 				.materialIndex = defaultMaterialIndex,
-				.lightmapPixelScale = {1.0f, 1.0f},
+				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
 				.label = "bike_room_inside_back_wall",
@@ -254,7 +254,7 @@ namespace Trident {
 					.scale = {0.25f, 0.25f},
 				},
 				.materialIndex = defaultMaterialIndex,
-				.lightmapPixelScale = {1.0f, 1.0f},
+				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
 				.label = "bike_room_inside_right_wall",
@@ -270,7 +270,7 @@ namespace Trident {
 					.scale = {-0.25f, 0.25f},
 				},
 				.materialIndex = defaultMaterialIndex,
-				.lightmapPixelScale = {1.0f, 1.0f},
+				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
 				.label = "bike_room_inside_entrance_left_wall",
@@ -286,7 +286,7 @@ namespace Trident {
 					.scale = {-0.25f, 0.25f},
 				},
 				.materialIndex = defaultMaterialIndex,
-				.lightmapPixelScale = {1.0f, 1.0f},
+				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
 				.label = "bike_room_inside_entrance_right_wall",
@@ -302,7 +302,7 @@ namespace Trident {
 					.scale = {-0.25f, 0.25f},
 				},
 				.materialIndex = defaultMaterialIndex,
-				.lightmapPixelScale = {1.0f, 1.0f},
+				.lightmapPixelScale = {4.0f, 4.0f},
 			});
 
 		// TODO(test)

@@ -278,7 +278,7 @@ void main() {
 	vec2 lightmapCoordinateA = lightmapCoordinates[triangle_.vertices[0].lightmapCoordinateIndex];
 	vec2 lightmapCoordinateB = lightmapCoordinates[triangle_.vertices[1].lightmapCoordinateIndex];
 	vec2 lightmapCoordinateC = lightmapCoordinates[triangle_.vertices[2].lightmapCoordinateIndex];
-	vec2 pixelCoordinate = (vec2(coordinate) + 0.5) / ATLAS_SIZE;
+	vec2 pixelCoordinate = (coordinate + vec2(0.5, 0.5)) / ATLAS_SIZE;
 	vec3 pixelBarycentricCoordinate = calculateBarycentricCoordinate(lightmapCoordinateA, lightmapCoordinateB, lightmapCoordinateC, pixelCoordinate);
 
 	Hit hit;

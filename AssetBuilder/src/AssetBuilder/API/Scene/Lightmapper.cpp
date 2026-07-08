@@ -222,9 +222,11 @@ namespace Trident {
 		commandEncoder->draw(vertexCount, 1, 0, 0);
 		commandEncoder->endRenderPass();
 
+		ImageMemoryBarrier imageMemoryBarrier;
+
 		// TODO(graphics/dx12/end-render-pass): Automatically transition the attachments to their final layout.
 		if (Renderer::getGraphicsApi() == GraphicsAPI::DX12) {
-			const ImageMemoryBarrier imageMemoryBarrier = {
+			imageMemoryBarrier = {
 				.image = lightmapAtlasImage,
 				.newLayout = ImageLayout::GENERAL,
 				.newAccess = Access::SHADER_READ | Access::SHADER_WRITE,
@@ -239,11 +241,19 @@ namespace Trident {
 		// TODO(graphics/dx12/dispatch): Fix artifacts on the lightmap atlas due to not enough threads being dispatched.
 		commandEncoder->dispatchIndirect(traceRaysArgumentBuffer, 2 * sizeof(uint32));
 
+		imageMemoryBarrier = {
+			.image = lightmapAtlasImage,
+			.newLayout = ImageLayout::GENERAL,
+			.newAccess = Access::SHADER_READ | Access::SHADER_WRITE,
+		};
+
+		commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
+
 		commandEncoder->bindComputePipeline(postProcessingPipeline);
 		commandEncoder->bindDescriptorSets(postProcessingPipelineLayout, 0, postProcessingDescriptorSet);
-		commandEncoder->dispatch(lightmapAtlasImageAssetDescriptor.extent.width / 32, lightmapAtlasImageAssetDescriptor.extent.height / 32, 1);
+		commandEncoder->dispatch(lightmapAtlasImageAssetDescriptor.extent.width / 16, lightmapAtlasImageAssetDescriptor.extent.height / 16, 1);
 
-		const ImageMemoryBarrier imageMemoryBarrier = {
+		imageMemoryBarrier = {
 			.image = lightmapAtlasImage,
 			.newLayout = ImageLayout::TRANSFER_SRC_OPTIMAL,
 			.newAccess = Access::TRANSFER_READ,
