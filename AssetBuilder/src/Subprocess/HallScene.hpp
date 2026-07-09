@@ -306,6 +306,341 @@ namespace Trident {
 				.lightmapPixelScale = {4.0f, 4.0f},
 			});
 
+		// Top door walls
+		builder
+			.createStaticObject({
+				.label = "hall_entrance_door_wall",
+				.geometryAssetName = "UnitPlane",
+				.transform = {
+					.position = {64.0f, 120.0f, -16.0f},
+					.rotation = {pi<float32>() * 0.5f, 0.0f, 0.0f},
+					.scale = {56.0f, 16.0f, 0.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.71f, 0.0f},
+					.rotation = 0.0f,
+					.scale = {-0.25f, 0.25f},
+				},
+				.materialIndex = defaultMaterialIndex,
+				.lightmapPixelScale = {4.0f, 4.0f},
+			})
+			.createStaticObject({
+				.label = "bike_room_entrance_door_wall",
+				.geometryAssetName = "UnitPlane",
+				.transform = {
+					.position = {-16.0f, 120.0f, 128.0f},
+					.rotation = {0.0f, 0.0f, -pi<float32>() * 0.5f},
+					.scale = {0.0f, 16.0f, 56.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.36f, 0.0f},
+					.rotation = 0.0f,
+					.scale = {0.25f, 0.25f},
+				},
+				.materialIndex = defaultMaterialIndex,
+				.lightmapPixelScale = {4.0f, 4.0f},
+			})
+			.createStaticObject({
+				.label = "main_entrance_door_wall",
+				.geometryAssetName = "UnitPlane",
+				.transform = {
+					.position = {54.0f, 120.0f, 184.0f},
+					.rotation = {-pi<float32>() * 0.5f, 0.0f, 0.0f},
+					.scale = {68.0f, 16.0f, 0.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.53f, 0.0f},
+					.rotation = 0.0f,
+					.scale = {-0.25f, 0.25f},
+				},
+				.materialIndex = defaultMaterialIndex,
+				.lightmapPixelScale = {4.0f, 4.0f},
+			})
+			.createStaticObject({
+				.label = "bike_room_inside_entrance_door_wall",
+				.geometryAssetName = "UnitPlane",
+				.transform = {
+					.position = {-24.0f, 120.0f, 128.0f},
+					.rotation = {0.0f, 0.0f, pi<float32>() * 0.5f},
+					.scale = {0.0f, 16.0f, 56.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.797f, 0.0f},
+					.rotation = 0.0f,
+					.scale = {-0.25f, 0.25f},
+				},
+				.materialIndex = defaultMaterialIndex,
+				.lightmapPixelScale = {4.0f, 4.0f},
+			});
+
+		// Door frames
+		builder
+			.createStaticObject({
+				.label = "bike_room_entrance_door_frame_left",
+				.geometryAssetName = "UnitPlane",
+				.transform = {
+					.position = {-16.0f, 54.0f, 102.0f},
+					.rotation = {0.0f, 0.0f, -pi<float32>() * 0.5f},
+					.scale = {0.0f, 108.0f, 4.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.875f, 0.155f},
+					.rotation = 0.0f,
+					.scale = {-0.25f, 0.25f},
+				},
+				.materialIndex = defaultMaterialIndex,
+				.lightmapPixelScale = {4.0f, 4.0f},
+			})
+			.createStaticObject({
+				.label = "bike_room_entrance_door_frame_right",
+				.geometryAssetName = "UnitPlane",
+				.transform = {
+					.position = {-16.0f, 54.0f, 154.0f},
+					.rotation = {0.0f, 0.0f, -pi<float32>() * 0.5f},
+					.scale = {0.0f, 108.0f, 4.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.0625f, 0.155f},
+					.rotation = 0.0f,
+					.scale = {-0.25f, 0.25f},
+				},
+				.materialIndex = defaultMaterialIndex,
+				.lightmapPixelScale = {4.0f, 4.0f},
+			})
+			.createStaticObject({
+				.label = "bike_room_entrance_door_frame_top",
+				.geometryAssetName = "UnitPlane",
+				.transform = {
+					.position = {-16.0f, 110.0f, 128.0f},
+					.rotation = {0.0f, 0.0f, -pi<float32>() * 0.5f},
+					.scale = {0.0f, 4.0f, 56.0f},
+				},
+				.textureFiltering = {
+					.translation = {-0.125f, 0.125f},
+					.rotation = 0.0f,
+					.scale = {-0.25f, 0.25f},
+				},
+				.materialIndex = defaultMaterialIndex,
+				.lightmapPixelScale = {4.0f, 4.0f},
+			})
+			.createStaticObject({
+				.label = "bike_room_entrance_door_frame_left_inside",
+				.geometryAssetName = "UnitPlane",
+				.transform = {
+					.position = {-20.0f, 54.0f, 104.0f},
+					.rotation = {pi<float32>() * 0.5f, 0.0f, 0.0f},
+					.scale = {8.0f, 108.0f, 0.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.195f, 0.1575f},
+					.rotation = 0.0f,
+					.scale = {-0.25f, 0.25f},
+				},
+				.materialIndex = defaultMaterialIndex,
+				.lightmapPixelScale = {4.0f, 4.0f},
+			})
+			.createStaticObject({
+				.label = "bike_room_entrance_door_frame_right_inside",
+				.geometryAssetName = "UnitPlane",
+				.transform = {
+					.position = {-20.0f, 54.0f, 152.0f},
+					.rotation = {-pi<float32>() * 0.5f, 0.0f, 0.0f},
+					.scale = {8.0f, 108.0f, 0.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.0625f, 0.1575f},
+					.rotation = 0.0f,
+					.scale = {0.25f, 0.25f},
+				},
+				.materialIndex = defaultMaterialIndex,
+				.lightmapPixelScale = {4.0f, 4.0f},
+			})
+			.createStaticObject({
+				.label = "bike_room_entrance_door_frame_top_inside",
+				.geometryAssetName = "UnitPlane",
+				.transform = {
+					.position = {-20.0f, 108.0f, 128.0f},
+					.rotation = {pi<float32>(), 0.0f, 0.0f},
+					.scale = {8.0f, 0.0f, 48.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.0625f, 0.6075f},
+					.rotation = 0.0f,
+					.scale = {0.25f, 0.25f},
+				},
+				.materialIndex = defaultMaterialIndex,
+				.lightmapPixelScale = {4.0f, 4.0f},
+			})
+			.createStaticObject({
+				.label = "bike_room_inside_entrance_door_frame_left",
+				.geometryAssetName = "UnitPlane",
+				.transform = {
+					.position = {-24.0f, 54.0f, 154.0f},
+					.rotation = {0.0f, 0.0f, pi<float32>() * 0.5f},
+					.scale = {0.0f, 108.0f, 4.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.0f, 0.155f},
+					.rotation = 0.0f,
+					.scale = {0.25f, 0.25f},
+				},
+				.materialIndex = defaultMaterialIndex,
+				.lightmapPixelScale = {4.0f, 4.0f},
+			})
+			.createStaticObject({
+				.label = "bike_room_inside_entrance_door_frame_right",
+				.geometryAssetName = "UnitPlane",
+				.transform = {
+					.position = {-24.0f, 54.0f, 102.0f},
+					.rotation = {0.0f, 0.0f, pi<float32>() * 0.5f},
+					.scale = {0.0f, 108.0f, 4.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.8125f, 0.155f},
+					.rotation = 0.0f,
+					.scale = {0.25f, 0.25f},
+				},
+				.materialIndex = defaultMaterialIndex,
+				.lightmapPixelScale = {4.0f, 4.0f},
+			})
+			.createStaticObject({
+				.label = "bike_room_inside_entrance_door_frame_top",
+				.geometryAssetName = "UnitPlane",
+				.transform = {
+					.position = {-24.0f, 110.0f, 128.0f},
+					.rotation = {0.0f, 0.0f, pi<float32>() * 0.5f},
+					.scale = {0.0f, 4.0f, 56.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.0f, 0.155f},
+					.rotation = 0.0f,
+					.scale = {0.25f, 0.25f},
+				},
+				.materialIndex = defaultMaterialIndex,
+				.lightmapPixelScale = {4.0f, 4.0f},
+			});
+
+		// Doors
+		builder
+			.createStaticObject({
+				.label = "hall_entrance_door",
+				.geometryAssetName = "UnitPlane",
+				.transform = {
+					.position = {64.0f, 56.0f, -16.0f},
+					.rotation = {pi<float32>() * 0.5f, 0.0f, 0.0f},
+					.scale = {56.0f, 112.0f, 0.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.875f, 0.125f},
+					.rotation = 0.0f,
+					.scale = {-0.25f, 0.25f},
+				},
+				.materialIndex = defaultMaterialIndex,
+				.lightmapPixelScale = {4.0f, 4.0f},
+			});
+
+		// Top walls
+		builder
+			.createStaticObject({
+				.label = "hall_entrance_top_wall",
+				.geometryAssetName = "UnitPlane",
+				.transform = {
+					.position = {56.0f, 184.0f, -16.0f},
+					.rotation = {pi<float32>() * 0.5f, 0.0f, 0.0f},
+					.scale = {144.0f, 112.0f, 0.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.0f, 0.125f},
+					.rotation = 0.0f,
+					.scale = {-0.25f, 0.25f},
+				},
+				.materialIndex = defaultMaterialIndex,
+				.lightmapPixelScale = {4.0f, 4.0f},
+			})
+			.createStaticObject({
+				.label = "bike_room_entrance_top_wall",
+				.geometryAssetName = "UnitPlane",
+				.transform = {
+					.position = {-16.0f, 184.0f, 84.0f},
+					.rotation = {0.0f, 0.0f, -pi<float32>() * 0.5f},
+					.scale = {0.0f, 112.0f, 200.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.125f, 0.125f},
+					.rotation = 0.0f,
+					.scale = {0.25f, 0.25f},
+				},
+				.materialIndex = defaultMaterialIndex,
+				.lightmapPixelScale = {4.0f, 4.0f},
+			})
+			.createStaticObject({
+				.label = "main_entrance_top_wall",
+				.geometryAssetName = "UnitPlane",
+				.transform = {
+					.position = {56.0f, 184.0f, 184.0f},
+					.rotation = {-pi<float32>() * 0.5f, 0.0f, 0.0f},
+					.scale = {144.0f, 112.0f, 0.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.125f, 0.125f},
+					.rotation = 0.0f,
+					.scale = {-0.25f, 0.25f},
+				},
+				.materialIndex = defaultMaterialIndex,
+				.lightmapPixelScale = {4.0f, 4.0f},
+			})
+			.createStaticObject({
+				.label = "mailbox_top_wall",
+				.geometryAssetName = "UnitPlane",
+				.transform = {
+					.position = {128.0f, 184.0f, 84.0f},
+					.rotation = {0.0f, 0.0f, pi<float32>() * 0.5f},
+					.scale = {0.0f, 112.0f, 200.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.686f, 0.125f},
+					.rotation = 0.0f,
+					.scale = {-0.25f, 0.25f},
+				},
+				.materialIndex = defaultMaterialIndex,
+				.lightmapPixelScale = {4.0f, 4.0f},
+			});
+
+		// Ceilings
+		builder
+			.createStaticObject({
+				.label = "hall_ceiling",
+				.geometryAssetName = "UnitPlane",
+				.transform = {
+					.position = {56.0f, 240.0f, 84.0f},
+					.rotation = {pi<float32>(), 0.0f, 0.0f},
+					.scale = {144.0f, 0.0f, 200.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.498f, 0.875f},
+					.rotation = 0.5f,
+					.scale = {0.25f, -0.25f},
+				},
+				.materialIndex = defaultMaterialIndex,
+				.lightmapPixelScale = {4.0f, 4.0f},
+			})
+			.createStaticObject({
+				.label = "bike_room_ceiling",
+				.geometryAssetName = "UnitPlane",
+				.transform = {
+					.position = {-60.0f, 128.0f, 116.0f},
+					.rotation = {pi<float32>(), 0.0f, 0.0f},
+					.scale = {72.0f, 0.0f, 136.0f},
+				},
+				.textureFiltering = {
+					.translation = {0.69f, 0.258f},
+					.rotation = 0.5f,
+					.scale = {0.25f, -0.25f},
+				},
+				.materialIndex = defaultMaterialIndex,
+				.lightmapPixelScale = {4.0f, 4.0f},
+			});
+
 		// TODO(test)
 		builder
 			/* .createStaticObject({
