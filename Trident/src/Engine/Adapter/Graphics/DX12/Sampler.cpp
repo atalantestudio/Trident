@@ -16,11 +16,11 @@ namespace Trident {
 	ref<Trident::Sampler> DX12::createSampler(const Trident::Device* device, const SamplerDescriptor& descriptor) {
 		ref<DX12::Sampler> sampler = createRef<DX12::Sampler>(device);
 		sampler->descriptor.Filter = getFilter(descriptor.minFilter, descriptor.magFilter);
-		sampler->descriptor.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		sampler->descriptor.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		sampler->descriptor.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+		sampler->descriptor.AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+		sampler->descriptor.AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+		sampler->descriptor.AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
 		sampler->descriptor.MipLODBias = 0.0f;
-		sampler->descriptor.MaxAnisotropy = 0;
+		sampler->descriptor.MaxAnisotropy = 1;
 
 		#if COMPILER == COMPILER_GCC
 			// TODO(ci/gcc): D3D12_COMPARISON_FUNC_NONE does not seem to be in the header pulled by GCC.
@@ -34,7 +34,7 @@ namespace Trident {
 		sampler->descriptor.BorderColor[2] = 0.0f;
 		sampler->descriptor.BorderColor[3] = 1.0f;
 		sampler->descriptor.MinLOD = 0.0f;
-		sampler->descriptor.MaxLOD = max<FLOAT>();
+		sampler->descriptor.MaxLOD = 1000.0f;
 
 		return sampler;
 	}

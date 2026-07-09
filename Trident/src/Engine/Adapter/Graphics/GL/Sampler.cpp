@@ -24,12 +24,19 @@ namespace Trident {
 			ENGINE_ERROR_UNSUPPORTED();
 		#endif
 
-		#if OPENGL_VERSION >= OPENGL_VERSION_3_2
+		#if OPENGL_VERSION >= OPENGL_VERSION_3_3
+			static constexpr GLfloat BORDER_COLOR[] = {0.0f, 0.0f, 0.0f, 1.0f};
+
 			glSamplerParameteri(sampler->sampler, GL_TEXTURE_MAG_FILTER, getFilter(descriptor.magFilter));
 			glSamplerParameteri(sampler->sampler, GL_TEXTURE_MIN_FILTER, getFilter(descriptor.minFilter));
 			glSamplerParameteri(sampler->sampler, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 			glSamplerParameteri(sampler->sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glSamplerParameteri(sampler->sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glSamplerParameterf(sampler->sampler, GL_TEXTURE_MIN_LOD, 0.0f);
+			glSamplerParameterf(sampler->sampler, GL_TEXTURE_MAX_LOD, 1000.0f);
+			glSamplerParameterfv(sampler->sampler, GL_TEXTURE_BORDER_COLOR, BORDER_COLOR);
+			glSamplerParameteri(sampler->sampler, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+			glSamplerParameteri(sampler->sampler, GL_TEXTURE_COMPARE_FUNC, GL_NEVER);
 		#else
 			ENGINE_ERROR_UNSUPPORTED();
 		#endif

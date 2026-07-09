@@ -74,12 +74,14 @@ namespace Trident {
 				LOAD_PROCEDURE(glFenceSync);
 				LOAD_PROCEDURE(glGetInteger64v);
 				LOAD_PROCEDURE(glProvokingVertex);
-				LOAD_PROCEDURE(glSamplerParameteri);
 			#endif
 
 			#if OPENGL_VERSION >= OPENGL_VERSION_3_3
 				LOAD_PROCEDURE(glBindSampler);
 				LOAD_PROCEDURE(glDeleteSamplers);
+				LOAD_PROCEDURE(glSamplerParameterf);
+				LOAD_PROCEDURE(glSamplerParameterfv);
+				LOAD_PROCEDURE(glSamplerParameteri);
 			#endif
 
 			#if OPENGL_VERSION >= OPENGL_VERSION_4_0

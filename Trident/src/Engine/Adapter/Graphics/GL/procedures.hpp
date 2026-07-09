@@ -64,12 +64,14 @@ namespace Trident {
 		extern PFNGLFENCESYNCPROC glFenceSync;
 		extern PFNGLGETINTEGER64VPROC glGetInteger64v;
 		extern PFNGLPROVOKINGVERTEXPROC glProvokingVertex;
-		extern PFNGLSAMPLERPARAMETERIPROC glSamplerParameteri;
 	#endif
 
 	#if OPENGL_VERSION >= OPENGL_VERSION_3_3
 		extern PFNGLBINDSAMPLERPROC glBindSampler;
 		extern PFNGLDELETESAMPLERSPROC glDeleteSamplers;
+		extern PFNGLSAMPLERPARAMETERFPROC glSamplerParameterf;
+		extern PFNGLSAMPLERPARAMETERFVPROC glSamplerParameterfv;
+		extern PFNGLSAMPLERPARAMETERIPROC glSamplerParameteri;
 	#endif
 
 	#if OPENGL_VERSION >= OPENGL_VERSION_4_0
