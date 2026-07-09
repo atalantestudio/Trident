@@ -27,7 +27,7 @@ struct Ray {
 };
 
 struct Hit {
-	float t;
+	float distance;
 	vec3 position;
 	vec3 normal;
 };
@@ -72,9 +72,7 @@ vec3 calculateBarycentricCoordinate(vec2 a, vec2 b, vec2 c, vec2 p) {
 	vec2 ab = b - a;
 	vec2 ac = c - a;
 	vec2 ap = p - a;
-
 	float inverseArea = 1.0 / parallelogramArea(ab, ac);
-
 	float v = parallelogramArea(ap, ac) * inverseArea;
 	float w = parallelogramArea(ab, ap) * inverseArea;
 	float u = 1.0 - v - w;
@@ -99,13 +97,9 @@ vec3 randomUnitDirection(inout uint seed) {
 	return normalize(vec3(randomFloat(seed), randomFloat(seed), randomFloat(seed)) * 2.0 - 1.0);
 }
 
-bool rayTriangleIntersection(Ray ray, Triangle triangle_, inout float t) {
+bool rayTriangleIntersection(Ray ray, Triangle triangle_, inout float distance) {
 	uint normalOffset = triangle_.normalIndex * 3;
-	vec3 normal = vec3(
-		normalComponents[normalOffset + 0],
-		normalComponents[normalOffset + 1],
-		normalComponents[normalOffset + 2]
-	);
+	vec3 normal = vec3(normalComponents[normalOffset + 0], normalComponents[normalOffset + 1], normalComponents[normalOffset + 2]);
 
 	if (dot(ray.direction, normal) > 0.0) {
 		return false;
@@ -114,22 +108,9 @@ bool rayTriangleIntersection(Ray ray, Triangle triangle_, inout float t) {
 	uint vertexAOffset = triangle_.vertices[0].index * 3;
 	uint vertexBOffset = triangle_.vertices[1].index * 3;
 	uint vertexCOffset = triangle_.vertices[2].index * 3;
-	vec3 a = vec3(
-		vertexComponents[vertexAOffset + 0],
-		vertexComponents[vertexAOffset + 1],
-		vertexComponents[vertexAOffset + 2]
-	);
-	vec3 b = vec3(
-		vertexComponents[vertexBOffset + 0],
-		vertexComponents[vertexBOffset + 1],
-		vertexComponents[vertexBOffset + 2]
-	);
-	vec3 c = vec3(
-		vertexComponents[vertexCOffset + 0],
-		vertexComponents[vertexCOffset + 1],
-		vertexComponents[vertexCOffset + 2]
-	);
-
+	vec3 a = vec3(vertexComponents[vertexAOffset + 0], vertexComponents[vertexAOffset + 1], vertexComponents[vertexAOffset + 2]);
+	vec3 b = vec3(vertexComponents[vertexBOffset + 0], vertexComponents[vertexBOffset + 1], vertexComponents[vertexBOffset + 2]);
+	vec3 c = vec3(vertexComponents[vertexCOffset + 0], vertexComponents[vertexCOffset + 1], vertexComponents[vertexCOffset + 2]);
 	vec3 ab = b - a;
 	vec3 ac = c - a;
 	vec3 pvec = cross(ray.direction, ac);
@@ -154,27 +135,23 @@ bool rayTriangleIntersection(Ray ray, Triangle triangle_, inout float t) {
 		return false;
 	}
 
-	t = dot(ac, qvec) * invD;
+	distance = dot(ac, qvec) * invD;
 
-	if (t < 0.0) {
+	if (distance < 0.0) {
 		return false;
 	}
 
 	return true;
 }
 
-Hit rchit(Ray ray, uint triangleIndex, float t) {
+Hit rchit(Ray ray, uint triangleIndex, float distance) {
 	Triangle triangle_ = triangles[triangleIndex];
 	uint normalOffset = triangle_.normalIndex * 3;
-	vec3 normal = vec3(
-		normalComponents[normalOffset + 0],
-		normalComponents[normalOffset + 1],
-		normalComponents[normalOffset + 2]
-	);
+	vec3 normal = vec3(normalComponents[normalOffset + 0], normalComponents[normalOffset + 1], normalComponents[normalOffset + 2]);
 
 	Hit hit;
-	hit.t = t;
-	hit.position = ray.origin;
+	hit.distance = distance;
+	hit.position = ray.origin + ray.direction * distance;
 	hit.normal = normal;
 
 	return hit;
@@ -182,23 +159,23 @@ Hit rchit(Ray ray, uint triangleIndex, float t) {
 
 Hit rmiss() {
 	Hit hit;
-	hit.t = -1.0;
+	hit.distance = -1.0;
 
 	return hit;
 }
 
 Hit rint(Ray ray) {
-	float closestT = FLOAT32_MAX;
-	uint intersectingTriangleIndex;
+	float closestDistance = FLOAT32_MAX;
+	uint intersectingTriangleIndex = triangleCount;
 	uint triangleIndex = 0;
 
 	while (triangleIndex < triangleCount) {
 		Triangle triangle_ = triangles[triangleIndex];
-		float t;
+		float distance;
 
-		if (rayTriangleIntersection(ray, triangle_, t)) {
-			if (t < closestT) {
-				closestT = t;
+		if (rayTriangleIntersection(ray, triangle_, distance)) {
+			if (distance < closestDistance) {
+				closestDistance = distance;
 				intersectingTriangleIndex = triangleIndex;
 			}
 		}
@@ -206,8 +183,8 @@ Hit rint(Ray ray) {
 		triangleIndex += 1;
 	}
 
-	if (closestT < FLOAT32_MAX) {
-		return rchit(ray, intersectingTriangleIndex, closestT);
+	if (intersectingTriangleIndex < triangleCount) {
+		return rchit(ray, intersectingTriangleIndex, closestDistance);
 	}
 
 	return rmiss();
@@ -226,8 +203,8 @@ vec3 rgen(Hit hit, inout uint seed) {
 
 		hit = rint(ray);
 
-		if (hit.t < 0.0) {
-			light += float(BOUNCE_COUNT - bounceIndex) / BOUNCE_COUNT;
+		if (hit.distance < 0.0) {
+			light += vec3(1.0, 1.0, 1.0);
 
 			break;
 		}
@@ -249,44 +226,26 @@ void main() {
 
 	uvec2 coordinate = uvec2(pixel.coordinate >> 16, pixel.coordinate & 0xffff);
 	uint seed = coordinate.y * ATLAS_SIZE.x + coordinate.x;
-
 	Triangle triangle_ = triangles[pixel.triangleIndex];
 	uint normalOffset = triangle_.normalIndex * 3;
-	vec3 normal = vec3(
-		normalComponents[normalOffset + 0],
-		normalComponents[normalOffset + 1],
-		normalComponents[normalOffset + 2]
-	);
+	vec3 normal = vec3(normalComponents[normalOffset + 0], normalComponents[normalOffset + 1], normalComponents[normalOffset + 2]);
 	uint vertexAOffset = triangle_.vertices[0].index * 3;
 	uint vertexBOffset = triangle_.vertices[1].index * 3;
 	uint vertexCOffset = triangle_.vertices[2].index * 3;
-	vec3 vertexA = vec3(
-		vertexComponents[vertexAOffset + 0],
-		vertexComponents[vertexAOffset + 1],
-		vertexComponents[vertexAOffset + 2]
-	);
-	vec3 vertexB = vec3(
-		vertexComponents[vertexBOffset + 0],
-		vertexComponents[vertexBOffset + 1],
-		vertexComponents[vertexBOffset + 2]
-	);
-	vec3 vertexC = vec3(
-		vertexComponents[vertexCOffset + 0],
-		vertexComponents[vertexCOffset + 1],
-		vertexComponents[vertexCOffset + 2]
-	);
+	vec3 vertexA = vec3(vertexComponents[vertexAOffset + 0], vertexComponents[vertexAOffset + 1], vertexComponents[vertexAOffset + 2]);
+	vec3 vertexB = vec3(vertexComponents[vertexBOffset + 0], vertexComponents[vertexBOffset + 1], vertexComponents[vertexBOffset + 2]);
+	vec3 vertexC = vec3(vertexComponents[vertexCOffset + 0], vertexComponents[vertexCOffset + 1], vertexComponents[vertexCOffset + 2]);
 	vec2 lightmapCoordinateA = lightmapCoordinates[triangle_.vertices[0].lightmapCoordinateIndex];
 	vec2 lightmapCoordinateB = lightmapCoordinates[triangle_.vertices[1].lightmapCoordinateIndex];
 	vec2 lightmapCoordinateC = lightmapCoordinates[triangle_.vertices[2].lightmapCoordinateIndex];
 	vec2 pixelCoordinate = (coordinate + vec2(0.5, 0.5)) / ATLAS_SIZE;
 	vec3 pixelBarycentricCoordinate = calculateBarycentricCoordinate(lightmapCoordinateA, lightmapCoordinateB, lightmapCoordinateC, pixelCoordinate);
+	vec3 light = vec3(0.0, 0.0, 0.0);
+	uint sampleIndex = 0;
 
 	Hit hit;
 	hit.position = vertexA * pixelBarycentricCoordinate.x + vertexB * pixelBarycentricCoordinate.y + vertexC * pixelBarycentricCoordinate.z;
 	hit.normal = normal;
-
-	vec3 light = vec3(0.0, 0.0, 0.0);
-	uint sampleIndex = 0;
 
 	while (sampleIndex < SAMPLE_COUNT) {
 		light += rgen(hit, seed);
