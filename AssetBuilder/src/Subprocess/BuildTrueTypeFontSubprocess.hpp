@@ -138,7 +138,7 @@ namespace Trident {
 
 				ENGINE_INFO("Generated True-Type font asset \"[]\" (ID: []).", outputPath, fontAssetDescriptor.identifier);
 
-				assetMap->insert({fontAssetDescriptor.identifier, stem});
+				assetMap->insert(fontAssetDescriptor.identifier, stem);
 			}
 	};
 }

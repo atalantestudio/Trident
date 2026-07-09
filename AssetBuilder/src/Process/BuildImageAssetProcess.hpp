@@ -280,7 +280,7 @@ namespace Trident {
 
 				encodeImageAsset(assetOutputPath, assetName, imageAssetDescriptor);
 
-				assetMap->insert({imageAssetDescriptor.identifier, assetName});
+				assetMap->insert(imageAssetDescriptor.identifier, assetName);
 			}
 
 		public:

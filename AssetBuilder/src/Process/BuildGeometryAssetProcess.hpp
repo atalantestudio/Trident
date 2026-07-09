@@ -244,7 +244,7 @@ namespace Trident {
 
 				ENGINE_INFO("Generated geometry asset \"[]\" (ID: []).", outputPath, identifier);
 
-				assetMap->insert({identifier, assetName});
+				assetMap->insert(identifier, assetName);
 			}
 
 		public:

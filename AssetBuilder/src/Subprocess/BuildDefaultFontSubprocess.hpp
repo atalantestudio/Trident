@@ -296,7 +296,7 @@ namespace Trident {
 
 				ENGINE_INFO("Generated default (bitmap) font asset \"[]\" (ID: []).", outputPath, fontAssetDescriptor.identifier);
 
-				assetMap->insert({fontAssetDescriptor.identifier, DEFAULT_FONT_NAME});
+				assetMap->insert(fontAssetDescriptor.identifier, DEFAULT_FONT_NAME);
 			}
 	};
 }

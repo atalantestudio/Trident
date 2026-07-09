@@ -248,7 +248,7 @@ namespace Trident {
 
 				ENGINE_INFO("Generated scene asset \"[]\" (ID: []).", outputPath, identifier);
 
-				assetMap->insert({identifier, assetName});
+				assetMap->insert(identifier, assetName);
 			}
 
 		public:

@@ -24,13 +24,6 @@ namespace Trident {
 				const std::string projectNameString = rootOutputPath.filename().string();
 				const view<char8> projectName(&projectNameString[0], projectNameString.size());
 				const std::filesystem::path assetMapOutputPath = (assetOutputPath / projectNameString).replace_extension("tam");
-
-				if (std::filesystem::exists(assetMapOutputPath)) {
-					ENGINE_INFO("The asset map already exists for the project \"[]\".", projectName);
-
-					return 0;
-				}
-
 				const std::string assetOutputPathString = assetOutputPath.string();
 
 				AssetHeader assetHeader{};
@@ -40,7 +33,7 @@ namespace Trident {
 				// Asset maps don't have identifiers.
 				uint64 size = sizeof(AssetHeader) - sizeof(uint32);
 
-				for (const auto& asset : *assetMap) {
+				for (const auto& asset : assetMap->map) {
 					size += sizeof(uint32) * 2 + asset.second.count();
 				}
 
@@ -49,7 +42,7 @@ namespace Trident {
 				stream.write<AssetSignature>(assetHeader.signature);
 				stream.write<VersionNumber>(assetHeader.version);
 
-				for (const auto& asset : *assetMap) {
+				for (const auto& asset : assetMap->map) {
 					stream.write<uint32>(asset.first);
 					stream.write<uint32>(static_cast<uint32>(asset.second.count()));
 

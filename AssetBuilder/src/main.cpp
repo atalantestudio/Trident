@@ -21,6 +21,22 @@ namespace Trident {
 			{
 				setConsoleArguments(argumentCount, argumentValues);
 
+				const std::filesystem::path rootOutputPath = static_cast<const char8*>(argumentValues[2]);
+				const std::filesystem::path assetMapOutputPath = (rootOutputPath / "Asset" / rootOutputPath.filename()).replace_extension("tam");
+
+				if (std::filesystem::exists(assetMapOutputPath)) {
+					AssetLibrary assetLibrary(rootOutputPath);
+					assetLibrary.loadAssetMap();
+
+					const std::unordered_map<uint32, view<char8>>& loadedAssetMap = assetLibrary.getAssetMap();
+
+					for (const auto& loadedAsset : loadedAssetMap) {
+						assetMap.insert(loadedAsset.first, loadedAsset.second);
+
+						ENGINE_DEBUG("Asset [], path: []", loadedAsset.first, loadedAsset.second);
+					}
+				}
+
 				registerProcess<BuildGeometryAssetProcess>(&assetMap);
 				registerProcess<BuildImageAssetProcess>(&assetMap);
 				registerProcess<BuildSceneAssetProcess>(&assetMap);

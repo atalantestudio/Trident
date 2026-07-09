@@ -116,7 +116,7 @@ namespace Trident {
 
 				ENGINE_INFO("Generated shader module asset \"[]\" (ID: []).", outputPath, shaderModuleAssetDescriptor.identifier);
 
-				assetMap->insert({shaderModuleAssetDescriptor.identifier, stem});
+				assetMap->insert(shaderModuleAssetDescriptor.identifier, stem);
 
 				return 0;
 			}

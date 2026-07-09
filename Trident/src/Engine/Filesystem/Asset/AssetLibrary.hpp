@@ -23,6 +23,8 @@ namespace Trident {
 		public:
 			explicit AssetLibrary(std::filesystem::path basePath);
 
+			const std::unordered_map<uint32, view<char8>>& getAssetMap() const;
+
 			void loadAssetMap();
 
 			template<typename AssetType>

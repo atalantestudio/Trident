@@ -12,6 +12,10 @@ namespace Trident {
 		basePath(basePath)
 	{}
 
+	const std::unordered_map<uint32, view<char8>>& AssetLibrary::getAssetMap() const {
+		return assetMap.map;
+	}
+
 	void AssetLibrary::loadAssetMap() {
 		const std::string projectNameString = basePath.stem().string();
 		const view<char8> projectName(&projectNameString[0], projectNameString.size());
