@@ -8,7 +8,7 @@
 namespace Trident {
 	class InteriorSceneBuilder : public StaticSceneBuilder {
 		public:
-			explicit InteriorSceneBuilder(std::filesystem::path rootOutputPath);
+			explicit InteriorSceneBuilder(std::filesystem::path rootOutputPath, view<char8> assetName);
 
 			uint32 addFloorLevel(float32 level);
 

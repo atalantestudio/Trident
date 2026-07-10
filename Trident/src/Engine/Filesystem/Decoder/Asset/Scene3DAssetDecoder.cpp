@@ -10,7 +10,7 @@
 
 namespace Trident {
 	template<>
-	ref<Scene3DAsset> Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, const AssetLibrary* assetLibrary) {
+	ref<Scene3DAsset> Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary) {
 		Descriptor<Scene3DAsset> descriptor{};
 		descriptor.identifier = stream.read<uint32>();
 		descriptor.version = stream.read<VersionNumber>();
@@ -44,6 +44,12 @@ namespace Trident {
 		const uint32 geometryMappingCount = stream.read<uint32>();
 		const uint32 materialMappingCount = stream.read<uint32>();
 		const uint32 rigidBodyMappingCount = stream.read<uint32>();
+
+		const uint32 lightmapAtlasImageAssetIdentifier = stream.read<uint32>();
+
+		if (lightmapAtlasImageAssetIdentifier != max<uint32>()) {
+			descriptor.lightmapAtlasImageAsset = assetLibrary->getAsset<ImageAsset>(lightmapAtlasImageAssetIdentifier);
+		}
 
 		descriptor.geometryAssets = sequence<ref<GeometryAsset>>(geometryAssetCount);
 		descriptor.geometryMappings = sequence<EntityComponentMapping<GeometryComponent>>(geometryMappingCount);

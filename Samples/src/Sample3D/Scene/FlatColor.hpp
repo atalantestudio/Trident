@@ -14,7 +14,6 @@ namespace Trident::FlatColor {
 		// TODO(asset-library/recursive-asset-loading): Automatically preload the required assets.
 		assetLibrary->getAsset<GeometryAsset>("UnitBox");
 		assetLibrary->getAsset<GeometryAsset>("RectangularCuboid");
-		assetLibrary->getAsset<ImageAsset>("test_lightmap");
 
 		const view<char8> sceneAssetName = application->getPropertyFile()->getProperty<view<char8>>("AssetName");
 		const ref<Scene3DAsset> sceneAsset = assetLibrary->getAsset<Scene3DAsset>(sceneAssetName);

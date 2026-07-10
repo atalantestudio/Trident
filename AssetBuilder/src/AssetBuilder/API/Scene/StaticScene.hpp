@@ -18,5 +18,6 @@ namespace Trident {
 		sequence<svec3<float32>> normals;
 		sequence<svec2<float32>> textureCoordinates;
 		sequence<svec2<float32>> lightmapCoordinates;
+		uint32 lightmapAtlasImageAssetIdentifier = max<uint32>();
 	};
 }

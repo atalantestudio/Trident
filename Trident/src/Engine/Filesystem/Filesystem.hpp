@@ -39,9 +39,8 @@ namespace Trident {
 
 		Writer openWriter(view<char8> path);
 
-		// TODO(filesystem/asset-decoders): Implement remaining asset types.
 		template<typename AssetType>
-		ref<AssetType> decodeAsset(ByteStream<StreamOperation::READ>& byteStream, const AssetLibrary* assetLibrary);
+		ref<AssetType> decodeAsset(ByteStream<StreamOperation::READ>& byteStream, AssetLibrary* assetLibrary);
 
 		void decodeQoiContent(ByteStream<StreamOperation::READ>& stream, sequence<uint8>& data, uint8 channelCount, uint32 footerByteSize);
 	};

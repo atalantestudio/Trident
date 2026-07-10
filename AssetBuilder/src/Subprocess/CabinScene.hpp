@@ -13,7 +13,7 @@ namespace Trident {
 		static constexpr uint32 defaultMaterialIndex = 0;
 		static constexpr uint32 lightMaterialIndex = 1;
 
-		InteriorSceneBuilder builder(rootOutputPath);
+		InteriorSceneBuilder builder(rootOutputPath, "Cabin");
 
 		const uint32 floorLevel0 = builder.addFloorLevel(0.0f);
 		const uint32 floorLevel1 = builder.addFloorLevel(128.0f);

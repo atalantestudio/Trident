@@ -4,16 +4,18 @@
 #include "pch.hpp"
 
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
+#include "Engine/Filesystem/Filesystem.hpp"
 
 namespace Trident {
-	ref<FontAsset> decodeFontAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary, view<char8> path) {
+	template<>
+	ref<FontAsset> Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary) {
 		FontAssetDescriptor descriptor{};
 		descriptor.identifier = stream.read<uint32>();
 		descriptor.version = stream.read<VersionNumber>();
 
 		const uint32 glyphMapImageAssetIdentifier = stream.read<uint32>();
 
-		descriptor.glyphMapImage = assetLibrary->getAsset<ImageAsset>(glyphMapImageAssetIdentifier, path);
+		descriptor.glyphMapImage = assetLibrary->getAsset<ImageAsset>(glyphMapImageAssetIdentifier);
 
 		const sint16 ascent = stream.read<sint16>();
 		const sint16 descent = stream.read<sint16>();

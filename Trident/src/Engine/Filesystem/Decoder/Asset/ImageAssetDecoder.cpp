@@ -9,7 +9,7 @@
 
 namespace Trident {
 	template<>
-	ref<ImageAsset> Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, const AssetLibrary* assetLibrary) {
+	ref<ImageAsset> Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary) {
 		ImageAssetHeader imageAssetHeader{};
 		imageAssetHeader.identifier = stream.read<uint32>();
 		imageAssetHeader.version = stream.read<VersionNumber>();

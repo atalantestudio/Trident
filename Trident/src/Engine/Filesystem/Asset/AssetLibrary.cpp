@@ -96,7 +96,7 @@ namespace Trident {
 
 		stream.jump(sizeof(AssetSignature));
 
-		const ref<FontAsset> fontAsset = decodeFontAsset(stream, this, path);
+		const ref<FontAsset> fontAsset = Filesystem::decodeAsset<FontAsset>(stream, this);
 		const uint32 assetIndex = static_cast<uint32>(assets.size());
 		const sequence<char8> stem = absolutePath.stem().string();
 

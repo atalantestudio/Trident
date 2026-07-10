@@ -10,7 +10,7 @@
 
 namespace Trident {
 	template<>
-	ref<Scene2DAsset> Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, const AssetLibrary* assetLibrary) {
+	ref<Scene2DAsset> Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary) {
 		Descriptor<Scene2DAsset> descriptor{};
 		descriptor.identifier = stream.read<uint32>();
 		descriptor.version = stream.read<VersionNumber>();

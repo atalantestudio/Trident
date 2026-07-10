@@ -143,7 +143,7 @@ namespace Trident {
 	}
 
 	template<>
-	ref<GeometryAsset> Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, const AssetLibrary* assetLibrary) {
+	ref<GeometryAsset> Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary) {
 		Descriptor<GeometryAsset> descriptor{};
 		descriptor.identifier = stream.read<uint32>();
 		descriptor.version = stream.read<VersionNumber>();

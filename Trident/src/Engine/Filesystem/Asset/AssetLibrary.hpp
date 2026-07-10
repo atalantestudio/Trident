@@ -28,40 +28,37 @@ namespace Trident {
 			void loadAssetMap();
 
 			template<typename AssetType>
-			ref<AssetType> getAsset(uint32 identifier) const {
-				const auto iterator = assetIdentifierToIndex.find(identifier);
+			ref<AssetType> getAsset(uint32 identifier) {
+				const auto path = assetMap.map.find(identifier);
 
-				ENGINE_ASSERT(iterator != assetIdentifierToIndex.end(), "Asset [] is not loaded.", identifier);
+				ENGINE_ASSERT(path != assetMap.map.end(), "Asset [] is not registered in the asset map.", identifier);
 
-				return std::static_pointer_cast<AssetType>(assets[iterator->second]);
-			}
+				const std::unordered_map<sequence<char8>, uint32>& assetPathToIndexMap = getAssetPathToIndexMap<AssetType>();
 
-			template<typename AssetType>
-			ref<AssetType> getAsset(uint32 identifier, view<char8> path) {
-				auto iterator = assetIdentifierToIndex.find(identifier);
+				auto index = assetPathToIndexMap.find(path->second);
 
-				if (iterator == assetIdentifierToIndex.end()) {
-					loadAsset<AssetType>(path);
+				if (index == assetPathToIndexMap.end()) {
+					loadAsset<AssetType>(path->second);
 
-					iterator = assetIdentifierToIndex.find(identifier);
+					index = assetPathToIndexMap.find(path->second);
 				}
 
-				return std::static_pointer_cast<AssetType>(assets[iterator->second]);
+				return std::static_pointer_cast<AssetType>(assets[index->second]);
 			}
 
 			template<typename AssetType>
 			ref<AssetType> getAsset(view<char8> path) {
 				const std::unordered_map<sequence<char8>, uint32>& assetPathToIndexMap = getAssetPathToIndexMap<AssetType>();
 
-				auto iterator = assetPathToIndexMap.find(path);
+				auto index = assetPathToIndexMap.find(path);
 
-				if (iterator == assetPathToIndexMap.end()) {
+				if (index == assetPathToIndexMap.end()) {
 					loadAsset<AssetType>(path);
 
-					iterator = assetPathToIndexMap.find(path);
+					index = assetPathToIndexMap.find(path);
 				}
 
-				return std::static_pointer_cast<AssetType>(assets[iterator->second]);
+				return std::static_pointer_cast<AssetType>(assets[index->second]);
 			}
 
 		private:

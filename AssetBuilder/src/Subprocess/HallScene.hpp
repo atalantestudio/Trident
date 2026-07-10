@@ -13,7 +13,7 @@ namespace Trident {
 		static constexpr uint32 defaultMaterialIndex = 0;
 		static constexpr uint32 lightMaterialIndex = 1;
 
-		StaticSceneBuilder builder(rootOutputPath);
+		StaticSceneBuilder builder(rootOutputPath, "Hall");
 
 		builder
 			.allocateMaterials(materialCount)

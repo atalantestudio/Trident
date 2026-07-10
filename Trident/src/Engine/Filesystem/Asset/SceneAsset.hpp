@@ -12,6 +12,7 @@
 #include "Engine/ECS/EntityComponentMapping.hpp"
 #include "Engine/Filesystem/Asset/Asset.hpp"
 #include "Engine/Filesystem/Asset/GeometryAsset.hpp"
+#include "Engine/Filesystem/Asset/ImageAsset.hpp"
 
 namespace Trident {
 	class SceneAsset;
@@ -60,6 +61,7 @@ namespace Trident {
 
 	template<>
 	struct Descriptor<Scene3DAsset> : public Descriptor<SceneAsset> {
+		ref<ImageAsset> lightmapAtlasImageAsset;
 		uint64 dynamicVertexNormalCount;
 		uint64 dynamicTriangleTangentCount;
 		uint64 dynamicVertexNormalIndexCount;
@@ -181,6 +183,7 @@ namespace Trident {
 		public:
 			explicit Scene3DAsset(const Descriptor<Scene3DAsset>& descriptor) :
 				SceneAsset(descriptor),
+				lightmapAtlasImageAsset(descriptor.lightmapAtlasImageAsset),
 				dynamicVertexNormalCount(descriptor.dynamicVertexNormalCount),
 				dynamicTriangleTangentCount(descriptor.dynamicTriangleTangentCount),
 				dynamicVertexNormalIndexCount(descriptor.dynamicVertexNormalIndexCount),
@@ -196,6 +199,10 @@ namespace Trident {
 				rigidBodyFacePlaneCount(descriptor.rigidBodyFacePlaneCount),
 				rigidBodyMappings(descriptor.rigidBodyMappings)
 			{}
+
+			inline ref<ImageAsset> getLightmapAtlasImageAsset() const {
+				return lightmapAtlasImageAsset;
+			}
 
 			inline const sequence<StaticTriangle3D>& getStaticTriangles() const {
 				return staticTriangles;
@@ -254,6 +261,7 @@ namespace Trident {
 			}
 
 		private:
+			ref<ImageAsset> lightmapAtlasImageAsset;
 			uint64 dynamicVertexNormalCount;
 			uint64 dynamicTriangleTangentCount;
 			uint64 dynamicVertexNormalIndexCount;

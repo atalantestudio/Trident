@@ -12,7 +12,7 @@
 namespace Trident {
 	class StaticSceneBuilder {
 		public:
-			explicit StaticSceneBuilder(std::filesystem::path rootOutputPath);
+			explicit StaticSceneBuilder(std::filesystem::path rootOutputPath, view<char8> assetName);
 
 			~StaticSceneBuilder();
 
@@ -27,8 +27,8 @@ namespace Trident {
 
 		private:
 			std::filesystem::path rootOutputPath;
+			view<char8> assetName;
 			AssetLibrary* assetLibrary;
-
 			sequence<StaticMaterial> materials;
 			std::vector<StaticObject> objects;
 	};

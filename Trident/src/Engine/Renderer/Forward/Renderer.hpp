@@ -34,9 +34,6 @@ namespace Trident {
 		public:
 			static constexpr index DEBUG_MAX_CONTACTS = 16;
 
-			// TODO(forward/lightmap-atlas): Conditionally load the lightmap atlas.
-			static constexpr view<char8> LIGHTMAP_ATLAS_IMAGE_ASSET_NAME = "test_lightmap";
-
 		public:
 			// Called on startup and on window resize.
 			void initialize() {
@@ -125,8 +122,6 @@ namespace Trident {
 				const ref<Scene3DAsset> sceneAsset = scene->getAsset();
 				const ref<Device> device = getDevice();
 
-				AssetLibrary* assetLibrary = getLayer()->getApplication()->getAssetLibrary();
-
 				createMaterialObjects();
 
 				// Write index buffer.
@@ -184,7 +179,7 @@ namespace Trident {
 					staticMaterialPipelineLayout = createStaticMaterialPipelineLayout();
 					staticMaterialPipeline = createStaticMaterialPipeline();
 
-					const ref<ImageAsset> lightmapAtlasImageAsset = assetLibrary->getAsset<ImageAsset>(LIGHTMAP_ATLAS_IMAGE_ASSET_NAME);
+					const ref<ImageAsset> lightmapAtlasImageAsset = sceneAsset->getLightmapAtlasImageAsset();
 
 					stagingBufferSize += lightmapAtlasImageAsset->getSize();
 				}
@@ -214,7 +209,7 @@ namespace Trident {
 				ImageMemoryBarrier imageMemoryBarrier;
 
 				if (sceneAsset->getStaticTriangles().count() > 0) {
-					const ref<ImageAsset> lightmapAtlasImageAsset = assetLibrary->getAsset<ImageAsset>(LIGHTMAP_ATLAS_IMAGE_ASSET_NAME);
+					const ref<ImageAsset> lightmapAtlasImageAsset = sceneAsset->getLightmapAtlasImageAsset();
 
 					lightmapAtlasView = stagingBuffer->createView<uint8>(viewOffset, lightmapAtlasImageAsset->getSize());
 					viewOffset += lightmapAtlasView->getSize();

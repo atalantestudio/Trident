@@ -45,8 +45,9 @@ namespace Trident {
 		return index;
 	}
 
-	StaticSceneBuilder::StaticSceneBuilder(std::filesystem::path rootOutputPath) :
+	StaticSceneBuilder::StaticSceneBuilder(std::filesystem::path rootOutputPath, view<char8> assetName) :
 		rootOutputPath(rootOutputPath),
+		assetName(assetName),
 		assetLibrary(new AssetLibrary(rootOutputPath))
 	{}
 
@@ -439,7 +440,9 @@ namespace Trident {
 		Lightmapper lightmapper;
 		lightmapper.buildLightmapAtlas(scene, lightmapAtlasImageAssetDescriptor);
 
-		BuildImageAssetProcess::encodeImageAsset(rootOutputPath / "Asset/", "test_lightmap", lightmapAtlasImageAssetDescriptor);
+		BuildImageAssetProcess::encodeImageAsset(rootOutputPath / "Asset/", assetName, lightmapAtlasImageAssetDescriptor);
+
+		scene.lightmapAtlasImageAssetIdentifier = lightmapAtlasImageAssetDescriptor.identifier;
 
 		return scene;
 	}

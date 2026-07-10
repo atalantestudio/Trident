@@ -9,7 +9,7 @@
 
 namespace Trident {
 	template<>
-	ref<ShaderModuleAsset> Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, const AssetLibrary* assetLibrary) {
+	ref<ShaderModuleAsset> Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary) {
 		ShaderModuleAssetDescriptor descriptor{};
 		descriptor.identifier = stream.read<uint32>();
 		descriptor.version = stream.read<VersionNumber>();
