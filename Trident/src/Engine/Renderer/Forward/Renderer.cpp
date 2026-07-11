@@ -31,16 +31,16 @@ namespace Trident {
 		// TODO: Use a larger extent, e.g. 4096 * 4096 * 1.
 		static constexpr Extent3D IMAGE_EXTENT = {1024, 1024, 1};
 
-		const std::vector<Shader>& materialShaders = scene->getMaterialShaders();
+		const uint32 materialShaderCount = scene->getMaterialShaderCount();
 
-		// Each materialShader has N bindings. 1 image asset is specified per binding for each materialShader reference.
-		sequence<sequence<sequence<ref<ImageAsset>>>> materialImageAssets(materialShaders.size());
+		// Each material shader has N bindings. 1 image asset is specified per binding for each material shader reference.
+		sequence<sequence<sequence<ref<ImageAsset>>>> materialImageAssets(materialShaderCount);
 
-		materialDescriptorSetLayouts = sequence<ref<DescriptorSetLayout>>(materialShaders.size());
-		materialDescriptorSets = sequence<ref<DescriptorSet>>(materialShaders.size());
-		materialPipelineLayouts = sequence<ref<PipelineLayout>>(materialShaders.size());
-		materialPipelines = sequence<ref<GraphicsPipeline>>(materialShaders.size());
-		materialImages = sequence<sequence<ref<Image>>>(materialShaders.size());
+		materialDescriptorSetLayouts = sequence<ref<DescriptorSetLayout>>(materialShaderCount);
+		materialDescriptorSets = sequence<ref<DescriptorSet>>(materialShaderCount);
+		materialPipelineLayouts = sequence<ref<PipelineLayout>>(materialShaderCount);
+		materialPipelines = sequence<ref<GraphicsPipeline>>(materialShaderCount);
+		materialImages = sequence<sequence<ref<Image>>>(materialShaderCount);
 
 		PipelineLayoutDescriptor materialPipelineLayoutDescriptor{};
 
@@ -101,15 +101,12 @@ namespace Trident {
 		#endif
 
 		uint32 materialShaderIndex = 0;
-		uint32 bindingIndex = 0;
 		uint32 materialBindingCount = 0;
-		uint32 materialIndex = 0;
 		uint32 imageCopyRegionCount = 0;
 		uint64 imageStagingBufferSize = 0;
 
-		while (materialShaderIndex < materialShaders.size()) {
-			const Shader& materialShader = materialShaders[materialShaderIndex];
-			const std::vector<Material>& materials = scene->getMaterials()[materialShaderIndex];
+		while (materialShaderIndex < materialShaderCount) {
+			const std::vector<ref<MaterialAsset>>& materialAssets = scene->getMaterialAssets()[materialShaderIndex];
 
 			#if defined(DEBUG_OBJECT_NAME)
 				materialName = Logger::format("Material []", materialShaderIndex);
@@ -120,29 +117,45 @@ namespace Trident {
 				materialPipelineDescriptor.name = materialName;
 			#endif
 
-			materialDescriptorSetLayouts[materialShaderIndex] = createDescriptorSetLayout(materialShader.descriptorSetLayoutBindings);
+			sequence<DescriptorSetLayoutBinding> descriptorSetLayoutBindings(materialAssets[0]->descriptorBindingTypes.count());
+			uint32 descriptorSetLayoutBindingIndex = 0;
+
+			while (descriptorSetLayoutBindingIndex < descriptorSetLayoutBindings.count()) {
+				descriptorSetLayoutBindings[1 + descriptorSetLayoutBindingIndex] = {
+					.descriptorType = materialAssets[0]->descriptorBindingTypes[descriptorSetLayoutBindingIndex],
+					.descriptorCount = 1,
+					.shaderStages = materialAssets[0]->stage,
+				};
+
+				descriptorSetLayoutBindingIndex += 1;
+			}
+
+			materialDescriptorSetLayouts[materialShaderIndex] = createDescriptorSetLayout(descriptorSetLayoutBindings);
 
 			materialPipelineLayoutDescriptor.descriptorSetLayouts = {vertexDescriptorSetLayout, materialDescriptorSetLayouts[materialShaderIndex]};
 
 			materialPipelineLayouts[materialShaderIndex] = createPipelineLayout(materialPipelineLayoutDescriptor);
 
 			materialPipelineDescriptor.pipelineLayout = materialPipelineLayouts[materialShaderIndex];
-			materialPipelineDescriptor.fragmentShaderModule = loadInternalShaderModule(materialFragmentShaderModuleDescriptor, materialShader.modulePath);
+
+			sequence<char8> path(9 + materialAssets[0]->shaderModuleName.count());
+
+			std::copy_n("Material/", 9, &path[0]);
+			std::copy_n(&materialAssets[0]->shaderModuleName[0], materialAssets[0]->shaderModuleName.count(), &path[9]);
+
+			materialPipelineDescriptor.fragmentShaderModule = loadInternalShaderModule(materialFragmentShaderModuleDescriptor, path);
 
 			materialPipelines[materialShaderIndex] = createGraphicsPipeline(materialPipelineDescriptor);
 
-			materialImageAssets[materialShaderIndex] = sequence<sequence<ref<ImageAsset>>>(materialShader.descriptorSetLayoutBindings.count());
-			materialImages[materialShaderIndex] = sequence<ref<Image>>(materialShader.descriptorSetLayoutBindings.count());
+			materialImageAssets[materialShaderIndex] = sequence<sequence<ref<ImageAsset>>>(materialAssets[0]->descriptorBindingTypes.count());
+			materialImages[materialShaderIndex] = sequence<ref<Image>>(materialAssets[0]->descriptorBindingTypes.count());
 
-			bindingIndex = 0;
+			uint32 bindingIndex = 0;
 
-			while (bindingIndex < materialShader.descriptorSetLayoutBindings.count()) {
-				const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = materialShader.descriptorSetLayoutBindings[bindingIndex];
+			while (bindingIndex < materialAssets[0]->descriptorBindingTypes.count()) {
+				DEBUG_ASSERT(materialAssets[0]->descriptorBindingTypes[bindingIndex] == DescriptorType::COMBINED_IMAGE_SAMPLER);
 
-				DEBUG_ASSERT(descriptorSetLayoutBinding.descriptorType == DescriptorType::COMBINED_IMAGE_SAMPLER);
-				DEBUG_ASSERT(descriptorSetLayoutBinding.shaderStages == ShaderStage::FRAGMENT);
-
-				materialDescriptorSetLayoutBindingImageDescriptor.layerCount = descriptorSetLayoutBinding.descriptorCount;
+				materialDescriptorSetLayoutBindingImageDescriptor.layerCount = 1;
 
 				#if defined(DEBUG_OBJECT_NAME)
 					materialName = Logger::format("Material [], binding []", materialShaderIndex, bindingIndex);
@@ -151,20 +164,20 @@ namespace Trident {
 				#endif
 
 				materialImages[materialShaderIndex][bindingIndex] = createDynamicImage(materialDescriptorSetLayoutBindingImageDescriptor);
-				materialImageAssets[materialShaderIndex][bindingIndex] = sequence<ref<ImageAsset>>(materials.size());
+				materialImageAssets[materialShaderIndex][bindingIndex] = sequence<ref<ImageAsset>>(materialAssets.size());
 
-				materialIndex = 0;
+				uint32 materialAssetIndex = 0;
 
-				while (materialIndex < materials.size()) {
-					const Material& material = materials[materialIndex];
-					const ref<ImageAsset> imageAsset = getLayer()->getApplication()->getAssetLibrary()->getAsset<ImageAsset>(material.writeDescriptorSetBindings[bindingIndex].descriptorImages[0].assetPath);
+				while (materialAssetIndex < materialAssets.size()) {
+					const ref<MaterialAsset> materialAsset = materialAssets[materialAssetIndex];
+					const MaterialDescriptorImage& materialDescriptorImage = materialAsset->descriptorImages[bindingIndex];
+					const Extent3D extent = materialDescriptorImage.imageAsset->getExtent();
 
-					materialImageAssets[materialShaderIndex][bindingIndex][materialIndex] = imageAsset;
+					materialImageAssets[materialShaderIndex][bindingIndex][materialAssetIndex] = materialDescriptorImage.imageAsset;
 
-					imageStagingBufferSize += imageAsset->getExtent().width * imageAsset->getExtent().height * imageAsset->getExtent().depth * imageAsset->getLayerCount() * 4;
-
+					imageStagingBufferSize += extent.width * extent.height * extent.depth * materialDescriptorImage.layerCount * getByteSize(ImageFormat::R8G8B8A8_UNORM);
 					imageCopyRegionCount += 1;
-					materialIndex += 1;
+					materialAssetIndex += 1;
 				}
 
 				bindingIndex += 1;
@@ -221,21 +234,19 @@ namespace Trident {
 
 		commandEncoder->begin();
 
-		while (materialShaderIndex < materialShaders.size()) {
-			const Shader& materialShader = materialShaders[materialShaderIndex];
-			const std::vector<Material>& materials = scene->getMaterials()[materialShaderIndex];
+		while (materialShaderIndex < materialShaderCount) {
+			const std::vector<ref<MaterialAsset>>& materialAssets = scene->getMaterialAssets()[materialShaderIndex];
 
-			bindingIndex = 0;
+			uint32 bindingIndex = 0;
 
-			while (bindingIndex < materialShader.descriptorSetLayoutBindings.count()) {
+			while (bindingIndex < materialAssets[0]->descriptorBindingTypes.count()) {
 				const ref<Image> image = materialImages[materialShaderIndex][bindingIndex];
-				const view<DescriptorImage> bindingDescriptorImages(&descriptorImages[materialReferenceBindingImageIndex], materials.size());
+				const view<DescriptorImage> bindingDescriptorImages(&descriptorImages[materialReferenceBindingImageIndex], materialAssets.size());
 
-				sequence<BufferImageCopyRegion> imageCopyRegions(materials.size());
+				sequence<BufferImageCopyRegion> imageCopyRegions(materialAssets.size());
+				uint32 materialIndex = 0;
 
-				materialIndex = 0;
-
-				while (materialIndex < materials.size()) {
+				while (materialIndex < materialAssets.size()) {
 					const ref<ImageAsset> imageAsset = materialImageAssets[materialShaderIndex][bindingIndex][materialIndex];
 					const Extent3D imageAssetExtent = imageAsset->getExtent();
 					const uint64 imageAssetSize = getChannelCount(ImageFormat::R8G8B8A8_UNORM) * imageAssetExtent.width * imageAssetExtent.height * imageAssetExtent.depth * imageAsset->getLayerCount();
@@ -258,15 +269,16 @@ namespace Trident {
 						}
 					}
 
-					BufferImageCopyRegion& imageCopyRegion = imageCopyRegions[materialIndex];
-					imageCopyRegion.bufferOffset = imageMappedRangeOffset;
-					imageCopyRegion.imageOffsetX = 0;
-					imageCopyRegion.imageOffsetY = 0;
-					imageCopyRegion.imageOffsetZ = 0;
-					imageCopyRegion.imageExtent = imageAsset->getExtent();
-					imageCopyRegion.imageMipLevel = 0;
-					imageCopyRegion.imageLayerOffset = materialIndex;
-					imageCopyRegion.imageLayerCount = 1;
+					imageCopyRegions[materialIndex] = {
+						.bufferOffset = imageMappedRangeOffset,
+						.imageOffsetX = 0,
+						.imageOffsetY = 0,
+						.imageOffsetZ = 0,
+						.imageExtent = imageAsset->getExtent(),
+						.imageMipLevel = 0,
+						.imageLayerOffset = materialIndex,
+						.imageLayerCount = 1,
+					};
 
 					materialReferenceBindingImageViewDescriptor.layerOffset = materialIndex;
 
@@ -278,10 +290,11 @@ namespace Trident {
 
 					materialReferenceBindingImageViews[materialReferenceBindingImageIndex] = image->createView(materialReferenceBindingImageViewDescriptor);
 
-					DescriptorImage& descriptorImage = descriptorImages[materialReferenceBindingImageIndex];
-					descriptorImage.imageView = materialReferenceBindingImageViews[materialReferenceBindingImageIndex];
-					descriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
-					descriptorImage.sampler = materialSampler;
+					descriptorImages[materialReferenceBindingImageIndex] = {
+						.imageView = materialReferenceBindingImageViews[materialReferenceBindingImageIndex],
+						.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+						.sampler = materialSampler,
+					};
 
 					imageMappedRangeOffset += imageAssetSize;
 					materialIndex += 1;

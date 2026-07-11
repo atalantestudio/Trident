@@ -6,6 +6,7 @@
 #include "Engine/API/Graphics/GraphicsAPI.hpp"
 #include "Engine/API/Scene/Scene3D.hpp"
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
+#include "Engine/Filesystem/Asset/MaterialAsset.hpp"
 
 namespace Trident::FlatColor {
 	inline Scene3D initializeScene(Application* application, GraphicsAPI graphicsApi, uint64 minStorageBufferOffsetAlignment) {
@@ -19,13 +20,17 @@ namespace Trident::FlatColor {
 		const ref<Scene3DAsset> sceneAsset = assetLibrary->getAsset<Scene3DAsset>(sceneAssetName);
 
 		Scene3D scene(sceneAsset, minStorageBufferOffsetAlignment);
-		scene.registerMaterial({
-			.shaderIndex = scene.registerMaterialShader({
-				.modulePath = "Material/PBRFlatColor.frag",
-				.descriptorSetLayoutBindings = {},
-			}),
-			.writeDescriptorSetBindings = {},
-		});
+
+		const MaterialAsset materialAsset = {
+			.shaderModuleName = "PBRFlatColor.frag",
+			.stage = ShaderStage::FRAGMENT,
+			.entryPoint = "main",
+			.descriptorBindingTypes = {},
+			.descriptorImages = {},
+		};
+		const uint32 materialShaderIndex = scene.registerMaterialShader();
+
+		scene.registerMaterialAsset(createRef<MaterialAsset>(materialAsset), materialShaderIndex);
 
 		return scene;
 	}

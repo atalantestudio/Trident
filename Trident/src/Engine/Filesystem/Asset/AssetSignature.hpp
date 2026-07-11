@@ -9,6 +9,7 @@ namespace Trident {
 		FONT = 0x491b9ec5,
 		GEOMETRY = 0xc13057a5,
 		IMAGE = 0x513f8fd2,
+		MATERIAL = 0xbdf0f8b6,
 		SCENE = 0x026fd95d,
 		SHADER_MODULE = 0x3c4f90c5,
 	};

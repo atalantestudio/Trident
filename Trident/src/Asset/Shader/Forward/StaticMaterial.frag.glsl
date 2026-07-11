@@ -19,7 +19,6 @@ layout(location = 0) out vec4 fragment;
 vec4 cubic(float v) {
 	vec4 n = vec4(1.0, 2.0, 3.0, 4.0) - v;
 	vec4 s = n * n * n;
-
 	float x = s.x;
 	float y = s.y - 4.0 * s.x;
 	float z = s.z - 4.0 * s.y + 6.0 * s.x;

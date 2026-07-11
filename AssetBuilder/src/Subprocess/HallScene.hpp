@@ -9,24 +9,21 @@
 
 namespace Trident {
 	inline Scene3DData createHallScene(std::filesystem::path rootOutputPath) {
-		static constexpr uint32 materialCount = 2;
-		static constexpr uint32 defaultMaterialIndex = 0;
-		static constexpr uint32 lightMaterialIndex = 1;
+		static constexpr uint32 floorMaterialIndex = 0;
+		static constexpr uint32 wallMaterialIndex = 1;
+		static constexpr uint32 doorMaterialIndex = 2;
+		static constexpr uint32 topWallMaterialIndex = 3;
+		static constexpr uint32 ceilingMaterialIndex = 4;
 
 		StaticSceneBuilder builder(rootOutputPath, "Hall");
 
 		builder
-			.allocateMaterials(materialCount)
-			.insertMaterial(defaultMaterialIndex, {
-				.albedo = {0.8f, 0.8f, 0.8f, 1.0f},
-				.emissiveColor = {0.0f, 0.0f, 0.0f, 1.0f},
-				.emissiveStrength = 0.0f,
-			})
-			.insertMaterial(lightMaterialIndex, {
-				.albedo = {0.0f, 0.0f, 0.0f, 1.0f},
-				.emissiveColor = {1.0f, 1.0f, 1.0f, 1.0f},
-				.emissiveStrength = 16.0f,
-			});
+			.allocateMaterials(5)
+			.insertMaterial(floorMaterialIndex, {.identifier = 100 + floorMaterialIndex})
+			.insertMaterial(wallMaterialIndex, {.identifier = 100 + wallMaterialIndex})
+			.insertMaterial(doorMaterialIndex, {.identifier = 100 + doorMaterialIndex})
+			.insertMaterial(topWallMaterialIndex, {.identifier = 100 + topWallMaterialIndex})
+			.insertMaterial(ceilingMaterialIndex, {.identifier = 100 + ceilingMaterialIndex});
 
 		// Floors
 		builder
@@ -43,7 +40,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = floorMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -59,7 +56,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = floorMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -75,7 +72,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = floorMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -91,7 +88,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = floorMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -107,7 +104,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = floorMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			});
 
@@ -126,7 +123,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = wallMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -142,7 +139,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = wallMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -158,7 +155,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = wallMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -174,7 +171,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = wallMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -190,7 +187,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = wallMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -206,7 +203,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = wallMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -222,7 +219,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = wallMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -238,7 +235,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = wallMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -254,7 +251,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = wallMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -270,7 +267,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = wallMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -286,7 +283,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = wallMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -302,12 +299,9 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = wallMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
-			});
-
-		// Top door walls
-		builder
+			})
 			.createStaticObject({
 				.label = "hall_entrance_door_wall",
 				.geometryAssetName = "UnitPlane",
@@ -321,7 +315,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = wallMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -337,7 +331,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = wallMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -353,7 +347,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = wallMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -369,7 +363,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = wallMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			});
 
@@ -388,7 +382,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = doorMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -404,7 +398,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = doorMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -420,7 +414,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = doorMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -436,7 +430,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = doorMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -452,7 +446,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = doorMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -468,7 +462,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = doorMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -484,7 +478,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = doorMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -500,7 +494,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = doorMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -516,7 +510,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = doorMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			});
 
@@ -535,7 +529,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = topWallMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -551,7 +545,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = topWallMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -567,7 +561,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = topWallMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -583,7 +577,7 @@ namespace Trident {
 					.rotation = 0.0f,
 					.scale = {-0.25f, 0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = topWallMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			});
 
@@ -602,7 +596,7 @@ namespace Trident {
 					.rotation = 0.5f,
 					.scale = {0.25f, -0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = ceilingMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			})
 			.createStaticObject({
@@ -618,7 +612,7 @@ namespace Trident {
 					.rotation = 0.5f,
 					.scale = {0.25f, -0.25f},
 				},
-				.materialIndex = defaultMaterialIndex,
+				.materialIndex = ceilingMaterialIndex,
 				.lightmapPixelScale = {4.0f, 4.0f},
 			});
 

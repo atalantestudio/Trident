@@ -37,6 +37,7 @@ if not exist "%outputdir%/Samples/Asset" mkdir "%outputdir%/Samples/Asset"
 if not exist "%outputdir%/Samples/Asset/Font" mkdir "%outputdir%/Samples/Asset/Font"
 if not exist "%outputdir%/Samples/Asset/Geometry" mkdir "%outputdir%/Samples/Asset/Geometry"
 if not exist "%outputdir%/Samples/Asset/Image" mkdir "%outputdir%/Samples/Asset/Image"
+if not exist "%outputdir%/Samples/Asset/Material" mkdir "%outputdir%/Samples/Asset/Material"
 if not exist "%outputdir%/Samples/Asset/Scene" mkdir "%outputdir%/Samples/Asset/Scene"
 if not exist "%outputdir%/Samples/Asset/Shader" mkdir "%outputdir%/Samples/Asset/Shader"
 

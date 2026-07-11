@@ -12,12 +12,21 @@ namespace Trident {
 		sequence<svec2<float32>> textureCoordinates;
 	};
 
+	struct StaticMaterial3D {
+		uint32 identifier;
+
+		// TODO(asset-builder/lightmapper): Use when generating assets.
+		// vec4<float32> emissiveColor;
+		// float32 emissiveStrength;
+	};
+
 	struct StaticScene3D {
-		sequence<StaticTriangle3D> triangles;
 		sequence<svec3<float32>> vertices;
 		sequence<svec3<float32>> normals;
 		sequence<svec2<float32>> textureCoordinates;
 		sequence<svec2<float32>> lightmapCoordinates;
+		sequence<StaticTriangle3D> triangles;
+		sequence<StaticMaterial3D> materials;
 		uint32 lightmapAtlasImageAssetIdentifier = max<uint32>();
 	};
 }

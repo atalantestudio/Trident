@@ -150,6 +150,28 @@ namespace Trident {
 	}
 
 	template<>
+	void AssetLibrary::loadAsset<MaterialAsset>(view<char8> path) {
+		const std::filesystem::path absolutePath = getAbsolutePath("Asset/Material", path, ".tma");
+		const sequence<char8> assetPath = absolutePath.string();
+		const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
+
+		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
+
+		ENGINE_ASSERT(stream.getRemainingSize() >= sizeof(AssetSignature), "The file is corrupted.");
+		ENGINE_ASSERT(stream.peek<AssetSignature>() == AssetSignature::MATERIAL, "The file format is invalid.");
+
+		stream.jump(sizeof(AssetSignature));
+
+		const ref<MaterialAsset> materialAsset = Filesystem::decodeAsset<MaterialAsset>(stream, this);
+		const uint32 assetIndex = static_cast<uint32>(assets.size());
+		const sequence<char8> stem = absolutePath.stem().string();
+
+		assetIdentifierToIndex.insert({materialAsset->identifier, assetIndex});
+		materialAssetPathToIndex.insert({stem, assetIndex});
+		assets.emplace_back(materialAsset);
+	}
+
+	template<>
 	void AssetLibrary::loadAsset<Scene2DAsset>(view<char8> path) {
 		const std::filesystem::path absolutePath = getAbsolutePath("Asset/Scene", path, ".tsa");
 		const sequence<char8> assetPath = absolutePath.string();

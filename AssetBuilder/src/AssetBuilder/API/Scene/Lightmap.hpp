@@ -7,8 +7,6 @@
 
 namespace Trident {
 	struct Lightmap {
-		vec3<float32> objectScale;
-		svec2<float32> pixelScale;
 		ref<GeometryAsset> geometryAsset;
 		range<uint16, uint16> edgeIndexRange;
 		Extent2D offset;

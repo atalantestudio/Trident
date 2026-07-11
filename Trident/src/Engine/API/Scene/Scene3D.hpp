@@ -5,9 +5,8 @@
 
 #include "Engine/API/Geometry/Geometry3D.hpp"
 #include "Engine/API/Geometry/Hull3D.hpp"
-#include "Engine/API/Material/Material.hpp"
-#include "Engine/API/Material/Shader.hpp"
 #include "Engine/API/Scene/Scene.hpp"
+#include "Engine/Filesystem/Asset/MaterialAsset.hpp"
 #include "Engine/Filesystem/Asset/SceneAsset.hpp"
 
 namespace Trident {
@@ -59,39 +58,39 @@ namespace Trident {
 				return hullLineIndexByteOffset;
 			}
 
-			inline const std::vector<Shader>& getMaterialShaders() const {
-				return materialShaders;
+			inline uint32 getMaterialShaderCount() const {
+				return materialShaderCount;
 			}
 
-			inline const std::vector<std::vector<Material>>& getMaterials() const {
-				return materials;
+			inline const std::vector<std::vector<ref<MaterialAsset>>>& getMaterialAssets() const {
+				return materialAssets;
 			}
 
-			inline uint32 getMaterialShaderIndex(uint32 materialIndex) const {
-				return materialIndexToShaderIndex[materialIndex];
+			inline uint32 getMaterialShaderIndex(uint32 materialAssetIndex) const {
+				return materialAssetIndexToShaderIndex[materialAssetIndex];
 			}
 
 			/// Registers a new material shader and returns its index.
-			uint32 registerMaterialShader(const Shader& materialShader) {
-				const uint32 materialShaderIndex = static_cast<uint32>(materialShaders.size());
+			uint32 registerMaterialShader() {
+				const uint32 materialShaderIndex = materialShaderCount;
 
-				materialShaders.emplace_back(materialShader);
+				materialShaderCount += 1;
 
 				return materialShaderIndex;
 			}
 
 			/// Registers a new material and returns its index.
-			uint32 registerMaterial(const Material& material) {
-				ENGINE_ASSERT(material.shaderIndex < materialShaders.size(), "Material is using an unregistered shader (index []).", material.shaderIndex);
+			uint32 registerMaterialAsset(ref<MaterialAsset> materialAsset, uint32 shaderIndex) {
+				ENGINE_ASSERT(shaderIndex < materialShaderCount, "Material is using an unregistered shader (index []).", shaderIndex);
 
 				const uint32 materialIndex = currentMaterialIndex;
 
-				if (material.shaderIndex >= materials.size()) {
-					materials.resize(material.shaderIndex + 1);
+				if (shaderIndex >= materialAssets.size()) {
+					materialAssets.resize(shaderIndex + 1);
 				}
 
-				materials[material.shaderIndex].emplace_back(material);
-				materialIndexToShaderIndex.emplace_back(material.shaderIndex);
+				materialAssets[shaderIndex].emplace_back(materialAsset);
+				materialAssetIndexToShaderIndex.emplace_back(shaderIndex);
 
 				currentMaterialIndex += 1;
 
@@ -131,9 +130,9 @@ namespace Trident {
 			sequence<Plane3D> rigidBodyFacePlanes;
 
 		private:
-			std::vector<Shader> materialShaders;
-			std::vector<std::vector<Material>> materials;
-			std::vector<uint32> materialIndexToShaderIndex;
+			uint32 materialShaderCount = 0;
+			std::vector<std::vector<ref<MaterialAsset>>> materialAssets;
+			std::vector<uint32> materialAssetIndexToShaderIndex;
 			uint32 currentMaterialIndex = 0;
 	};
 }

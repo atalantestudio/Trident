@@ -58,12 +58,12 @@ namespace Trident {
 	StaticSceneBuilder& StaticSceneBuilder::allocateMaterials(uint32 count) {
 		DEBUG_ASSERT(count > 0);
 
-		materials = sequence<StaticMaterial>(count);
+		materials = sequence<StaticMaterial3D>(count);
 
 		return *this;
 	}
 
-	StaticSceneBuilder& StaticSceneBuilder::insertMaterial(uint32 index, const StaticMaterial& material) {
+	StaticSceneBuilder& StaticSceneBuilder::insertMaterial(uint32 index, const StaticMaterial3D& material) {
 		DEBUG_ASSERT(index < materials.count());
 
 		materials[index] = material;
@@ -82,6 +82,7 @@ namespace Trident {
 				mat3x3<float32>::rotation(descriptor.textureFiltering.rotation) *
 				mat3x3<float32>::translation(descriptor.textureFiltering.translation)
 			),
+			.materialIndex = descriptor.materialIndex,
 			.lightmapPixelScale = descriptor.lightmapPixelScale,
 		});
 
@@ -89,10 +90,10 @@ namespace Trident {
 	}
 
 	StaticScene3D StaticSceneBuilder::build() const {
-		std::vector<StaticTriangle3D> triangles;
 		std::vector<svec3<float32>> vertices;
 		std::vector<svec3<float32>> normals;
 		std::vector<svec2<float32>> textureCoordinates;
+		std::vector<StaticTriangle3D> triangles;
 
 		uint64 lightmapCount = 0;
 		uint64 lightmapCoordinateCount = 0;
@@ -300,8 +301,6 @@ namespace Trident {
 				lightmap.geometryAsset = object.geometryAsset;
 				lightmap.edgeIndexRange = face.edgeIndexRange;
 				lightmap.offset = {0, 0};
-				lightmap.objectScale = object.transform.scale;
-				lightmap.pixelScale = object.lightmapPixelScale;
 				lightmap.coordinateOffset = lightmapCoordinateOffset;
 
 				svec2<float32> maxCoordinate = {min<float32>(), min<float32>()};
@@ -357,7 +356,7 @@ namespace Trident {
 
 					svec2<float32>& coordinate = scene.lightmapCoordinates[lightmapCoordinateOffset + edge.originVertexIndex];
 					coordinate = {vertex[0], vertex[2]};
-					coordinate /= lightmap.pixelScale;
+					coordinate /= object.lightmapPixelScale;
 
 					if (abs(fract(coordinate.x)) < 0.0001f || abs(fract(coordinate.x)) > 0.9999f) {
 						coordinate.x = round(coordinate.x);
@@ -422,15 +421,16 @@ namespace Trident {
 			}
 		}
 
-		scene.triangles = sequence<StaticTriangle3D>(triangles.size());
 		scene.vertices = sequence<svec3<float32>>(vertices.size());
 		scene.normals = sequence<svec3<float32>>(normals.size());
 		scene.textureCoordinates = sequence<svec2<float32>>(textureCoordinates.size());
+		scene.triangles = sequence<StaticTriangle3D>(triangles.size());
+		scene.materials = materials;
 
-		std::copy(triangles.begin(), triangles.end(), &scene.triangles[0]);
 		std::copy(vertices.begin(), vertices.end(), &scene.vertices[0]);
 		std::copy(normals.begin(), normals.end(), &scene.normals[0]);
 		std::copy(textureCoordinates.begin(), textureCoordinates.end(), &scene.textureCoordinates[0]);
+		std::copy(triangles.begin(), triangles.end(), &scene.triangles[0]);
 
 		Lightmapper::updateAtlasCoordinates(lightmaps, view<LightmapIndex>(&lightmapIndices[0], lightmapIndices.size()), scene);
 

@@ -11,7 +11,7 @@ namespace Trident {
 
 		return createDynamicBuffer({
 			// Ensure the buffer starts at 0 (a prefix sum will be applied on the offsets).
-			.size = ceil((scene->materialShaders.size() + 1) * sizeof(uint32), minStorageBufferOffsetAlignment),
+			.size = ceil((scene->materialShaderCount + 1) * sizeof(uint32), minStorageBufferOffsetAlignment),
 
 			.usage = BufferUsage::READ_WRITE_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,

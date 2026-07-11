@@ -7,6 +7,7 @@
 #include "Engine/Filesystem/Asset/FontAsset.hpp"
 #include "Engine/Filesystem/Asset/GeometryAsset.hpp"
 #include "Engine/Filesystem/Asset/ImageAsset.hpp"
+#include "Engine/Filesystem/Asset/MaterialAsset.hpp"
 #include "Engine/Filesystem/Asset/SceneAsset.hpp"
 #include "Engine/Filesystem/Asset/ShaderModuleAsset.hpp"
 #include "Engine/Filesystem/Stream/ByteStream.hpp"
@@ -79,6 +80,7 @@ namespace Trident {
 			std::unordered_map<sequence<char8>, uint32> fontAssetPathToIndex;
 			std::unordered_map<sequence<char8>, uint32> geometryAssetPathToIndex;
 			std::unordered_map<sequence<char8>, uint32> imageAssetPathToIndex;
+			std::unordered_map<sequence<char8>, uint32> materialAssetPathToIndex;
 			std::unordered_map<sequence<char8>, uint32> sceneAssetPathToIndex;
 			std::unordered_map<sequence<char8>, uint32> shaderModuleAssetPathToIndex;
 	};

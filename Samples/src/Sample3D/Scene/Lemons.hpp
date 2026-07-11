@@ -4,7 +4,6 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAPI.hpp"
-#include "Engine/API/Material/Shader.hpp"
 #include "Engine/API/Scene/Scene3D.hpp"
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 

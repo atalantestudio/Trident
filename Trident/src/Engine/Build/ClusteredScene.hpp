@@ -3,11 +3,10 @@
 
 #pragma once
 
-#include "Engine/API/Material/Material.hpp"
-#include "Engine/API/Material/Shader.hpp"
 #include "Engine/Build/Cluster.hpp"
 #include "Engine/Build/ClusteredGeometry.hpp"
 #include "Engine/Build/ClusteredInstance.hpp"
+#include "Engine/Filesystem/Asset/MaterialAsset.hpp"
 
 namespace Trident {
 	struct ClusteredScene {
@@ -26,7 +25,7 @@ namespace Trident {
 		sequence<uint32> vertexNormalIndices;
 		sequence<uint32> vertexTextureCoordinateIndices;
 
-		std::vector<Shader> materialShaders;
-		std::vector<std::vector<Material>> materials;
+		uint32 materialShaderCount;
+		std::vector<std::vector<ref<MaterialAsset>>> materialAssets;
 	};
 }

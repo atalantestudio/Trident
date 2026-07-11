@@ -19,20 +19,25 @@ namespace Trident {
 
 	class Asset {
 		public:
+			Asset() = default;
+
+			// TODO(filesystem/asset): Keep the asset members public.
 			explicit Asset(const AssetDescriptor& descriptor) :
 				identifier(descriptor.identifier),
 				version(descriptor.version)
 			{}
 
+			// TODO(filesystem/asset): Keep the asset members public.
 			inline uint32 getIdentifier() const {
 				return identifier;
 			}
 
+			// TODO(filesystem/asset): Keep the asset members public.
 			inline VersionNumber getVersion() const {
 				return version;
 			}
 
-		private:
+		public:
 			uint32 identifier;
 			VersionNumber version;
 	};

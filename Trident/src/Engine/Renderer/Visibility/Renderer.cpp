@@ -327,7 +327,7 @@ namespace Trident {
 				sequence<ref<DescriptorSet>> descriptorSets = {materialBaseDescriptorSet, nullptr};
 				uint32 materialShaderIndex = 0;
 
-				while (materialShaderIndex < scene->materialShaders.size()) {
+				while (materialShaderIndex < scene->materialShaderCount) {
 					descriptorSets[1] = materialShaderUserDescriptorSets[materialShaderIndex];
 
 					commandEncoder->bindComputePipeline(materialShaderPipelines[materialShaderIndex]);

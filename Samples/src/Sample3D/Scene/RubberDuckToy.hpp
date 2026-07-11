@@ -56,7 +56,7 @@ namespace Trident {
 		MaterialReference pbrMaterialReference{};
 		pbrMaterialReference.materialIndex = pbrMaterialIndex;
 		pbrMaterialReference.descriptorImageAssetPaths = {
-			// TODO: Generate assets in the correct subdirectory.
+			// TODO(asset-builder): Restore subdirectories when generating assets.
 			// "rubber_duck_toy_1k/textures/rubber_duck_toy_arm_1k",
 			// "rubber_duck_toy_1k/textures/rubber_duck_toy_diff_1k",
 			// "rubber_duck_toy_1k/textures/rubber_duck_toy_nor_gl_1k",

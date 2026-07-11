@@ -8,6 +8,7 @@
 #include "Process/BuildFontAssetProcess.hpp"
 #include "Process/BuildGeometryAssetProcess.hpp"
 #include "Process/BuildImageAssetProcess.hpp"
+#include "Process/BuildMaterialAssetProcess.hpp"
 #include "Process/BuildSceneAssetProcess.hpp"
 #include "Process/BuildShaderModuleAssetProcess.hpp"
 
@@ -39,6 +40,7 @@ namespace Trident {
 
 				registerProcess<BuildGeometryAssetProcess>(&assetMap);
 				registerProcess<BuildImageAssetProcess>(&assetMap);
+				registerProcess<BuildMaterialAssetProcess>(&assetMap);
 				registerProcess<BuildSceneAssetProcess>(&assetMap);
 				registerProcess<BuildShaderModuleAssetProcess>(&assetMap);
 

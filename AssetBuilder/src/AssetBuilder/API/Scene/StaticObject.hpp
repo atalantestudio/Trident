@@ -35,6 +35,7 @@ namespace Trident {
 		ref<GeometryAsset> geometryAsset;
 		Transform transform;
 		mat3x3<float32> texture;
+		uint32 materialIndex;
 
 		/// Applies to all faces.
 		svec2<float32> lightmapPixelScale;

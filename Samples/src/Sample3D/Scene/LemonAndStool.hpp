@@ -4,7 +4,6 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAPI.hpp"
-#include "Engine/API/Material/Shader.hpp"
 #include "Engine/API/Scene/Scene3D.hpp"
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 
@@ -20,126 +19,116 @@ namespace Trident::LemonAndStool {
 
 		Scene3D scene(sceneAsset, minStorageBufferOffsetAlignment);
 
-		Shader defaultMaterialShader = {
-			.descriptorSetLayoutBindings = {},
+		const uint32 defaultMaterialShaderIndex = scene.registerMaterialShader();
+		const uint32 pbrMaterialShaderIndex = scene.registerMaterialShader();
+
+		MaterialAsset defaultMaterialAsset = {
+			.stage = ShaderStage::COMPUTE,
+			.entryPoint = "main",
+			.descriptorBindingTypes = {},
+			.descriptorImages = {},
 		};
 
 		switch (graphicsApi) {
 			case GraphicsAPI::DX12:
 			case GraphicsAPI::VK: {
-				defaultMaterialShader.modulePath = "Material/Default";
+				defaultMaterialAsset.shaderModuleName = "Default";
 
 				break;
 			}
 			case GraphicsAPI::GL: {
-				defaultMaterialShader.modulePath = "Material/DefaultGL";
+				defaultMaterialAsset.shaderModuleName = "DefaultGL";
 
 				break;
 			}
 		}
 
-		const uint32 defaultMaterialShaderIndex = scene.registerMaterialShader(defaultMaterialShader);
+		scene.registerMaterialAsset(createRef<MaterialAsset>(defaultMaterialAsset), defaultMaterialShaderIndex);
 
-		scene.registerMaterial({
-			.shaderIndex = defaultMaterialShaderIndex,
-			.writeDescriptorSetBindings = {},
-		});
-
-		Shader pbrMaterialShader = {
-			.descriptorSetLayoutBindings = {
+		MaterialAsset pbrMaterialAsset = {
+			.stage = ShaderStage::COMPUTE,
+			.entryPoint = "main",
+			.descriptorBindingTypes = {
 				// Ambient occlusion, roughness, metallic
-				{
-					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
-					.descriptorCount = 1,
-					.shaderStages = ShaderStage::COMPUTE,
-				},
+				DescriptorType::COMBINED_IMAGE_SAMPLER,
 
 				// Diffuse
-				{
-					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
-					.descriptorCount = 1,
-					.shaderStages = ShaderStage::COMPUTE,
-				},
+				DescriptorType::COMBINED_IMAGE_SAMPLER,
 
 				// Normal
-				{
-					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
-					.descriptorCount = 1,
-					.shaderStages = ShaderStage::COMPUTE,
-				},
+				DescriptorType::COMBINED_IMAGE_SAMPLER,
 			},
+			.descriptorImages = {},
 		};
 
 		switch (graphicsApi) {
 			case GraphicsAPI::DX12:
 			case GraphicsAPI::VK: {
-				pbrMaterialShader.modulePath = "Material/Test";
+				pbrMaterialAsset.shaderModuleName = "Test";
 
 				break;
 			}
 			case GraphicsAPI::GL: {
-				pbrMaterialShader.modulePath = "Material/TestGL";
+				pbrMaterialAsset.shaderModuleName = "TestGL";
 
 				break;
 			}
 		}
 
-		const uint32 pbrMaterialShaderIndex = scene.registerMaterialShader(pbrMaterialShader);
-
-		scene.registerMaterial({
-			.shaderIndex = pbrMaterialShaderIndex,
-			.writeDescriptorSetBindings = {
-				{
-					.descriptorImages = {
-						{
-							// TODO: lemon_1k must use PBRSeparatedAORoughness.
-							.assetPath = "lemon_ao_1k",
-						},
-					},
-				},
-				{
-					.descriptorImages = {
-						{
-							.assetPath = "lemon_diff_1k",
-						},
-					},
-				},
-				{
-					.descriptorImages = {
-						{
-							.assetPath = "lemon_nor_gl_1k",
-						},
-					},
-				},
+		MaterialAsset lemonMaterialAsset = pbrMaterialAsset;
+		lemonMaterialAsset.descriptorImages = {
+			{
+				// TODO: lemon_1k must use PBRSeparatedAORoughness.
+				.imageAsset = assetLibrary->getAsset<ImageAsset>("lemon_ao_1k"),
+				.mipLevelOffset = 0,
+				.mipLevelCount = 1,
+				.layerOffset = 0,
+				.layerCount = 1,
 			},
-		});
-
-		scene.registerMaterial({
-			.shaderIndex = pbrMaterialShaderIndex,
-			.writeDescriptorSetBindings = {
-				{
-					.descriptorImages = {
-						{
-							.assetPath = "folding_wooden_stool_arm_1k",
-						},
-					},
-				},
-				{
-					.descriptorImages = {
-						{
-							.assetPath = "folding_wooden_stool_diff_1k",
-						},
-					},
-				},
-				{
-					.descriptorImages = {
-						{
-							.assetPath = "folding_wooden_stool_nor_gl_1k",
-						},
-					},
-				},
+			{
+				.imageAsset = assetLibrary->getAsset<ImageAsset>("lemon_diff_1k"),
+				.mipLevelOffset = 0,
+				.mipLevelCount = 1,
+				.layerOffset = 0,
+				.layerCount = 1,
 			},
-		});
+			{
+				.imageAsset = assetLibrary->getAsset<ImageAsset>("lemon_nor_gl_1k"),
+				.mipLevelOffset = 0,
+				.mipLevelCount = 1,
+				.layerOffset = 0,
+				.layerCount = 1,
+			},
+		};
+
+		scene.registerMaterialAsset(createRef<MaterialAsset>(lemonMaterialAsset), pbrMaterialShaderIndex);
+
+		MaterialAsset stoolMaterialAsset = pbrMaterialAsset;
+		stoolMaterialAsset.descriptorImages = {
+			{
+				.imageAsset = assetLibrary->getAsset<ImageAsset>("folding_wooden_stool_arm_1k"),
+				.mipLevelOffset = 0,
+				.mipLevelCount = 1,
+				.layerOffset = 0,
+				.layerCount = 1,
+			},
+			{
+				.imageAsset = assetLibrary->getAsset<ImageAsset>("folding_wooden_stool_diff_1k"),
+				.mipLevelOffset = 0,
+				.mipLevelCount = 1,
+				.layerOffset = 0,
+				.layerCount = 1,
+			},
+			{
+				.imageAsset = assetLibrary->getAsset<ImageAsset>("folding_wooden_stool_nor_gl_1k"),
+				.mipLevelOffset = 0,
+				.mipLevelCount = 1,
+				.layerOffset = 0,
+				.layerCount = 1,
+			},
+		};
+
+		scene.registerMaterialAsset(createRef<MaterialAsset>(stoolMaterialAsset), pbrMaterialShaderIndex);
 
 		return scene;
 	}
