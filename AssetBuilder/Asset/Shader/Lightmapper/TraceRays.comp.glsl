@@ -35,9 +35,9 @@ struct Hit {
 const float FLOAT32_MAX = 4294967295.0;
 const uint SAMPLE_COUNT = 1024;
 const uint BOUNCE_COUNT = 32;
-const uvec2 ATLAS_SIZE = uvec2(2048, 2048);
 
 layout(set = 0, binding = 0) buffer readonly TraceRaysArgumentBuffer {
+	uvec2 atlasSize;
 	uint lightmapPixelCount;
 	uint triangleCount;
 };
@@ -225,7 +225,7 @@ void main() {
 	LightmapPixel pixel = lightmapPixels[pixelIndex];
 
 	uvec2 coordinate = uvec2(pixel.coordinate >> 16, pixel.coordinate & 0xffff);
-	uint seed = coordinate.y * ATLAS_SIZE.x + coordinate.x;
+	uint seed = coordinate.y * atlasSize.x + coordinate.x;
 	Triangle triangle_ = triangles[pixel.triangleIndex];
 	uint normalOffset = triangle_.normalIndex * 3;
 	vec3 normal = vec3(normalComponents[normalOffset + 0], normalComponents[normalOffset + 1], normalComponents[normalOffset + 2]);
@@ -238,7 +238,7 @@ void main() {
 	vec2 lightmapCoordinateA = lightmapCoordinates[triangle_.vertices[0].lightmapCoordinateIndex];
 	vec2 lightmapCoordinateB = lightmapCoordinates[triangle_.vertices[1].lightmapCoordinateIndex];
 	vec2 lightmapCoordinateC = lightmapCoordinates[triangle_.vertices[2].lightmapCoordinateIndex];
-	vec2 pixelCoordinate = (coordinate + vec2(0.5, 0.5)) / ATLAS_SIZE;
+	vec2 pixelCoordinate = (coordinate + vec2(0.5, 0.5)) / atlasSize;
 	vec3 pixelBarycentricCoordinate = calculateBarycentricCoordinate(lightmapCoordinateA, lightmapCoordinateB, lightmapCoordinateC, pixelCoordinate);
 	vec3 light = vec3(0.0, 0.0, 0.0);
 	uint sampleIndex = 0;

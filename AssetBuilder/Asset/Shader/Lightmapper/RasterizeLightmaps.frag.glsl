@@ -20,9 +20,9 @@ in Interstage {
 } interstage;
 
 const uint RAYTRACER_WORKGROUP_SIZE = 16;
-const uvec2 ATLAS_SIZE = uvec2(2048, 2048);
 
 layout(set = 0, binding = 1) buffer TraceRaysArgumentBuffer {
+	uvec2 atlasSize;
 	uint lightmapPixelCount;
 	uint triangleCount;
 	DispatchIndirectCommand traceRaysCommand;
@@ -33,7 +33,7 @@ layout(set = 0, binding = 2) buffer writeonly LightmapPixelBuffer {
 };
 
 void main() {
-	uvec2 coordinate = uvec2(interstage.coordinate * ATLAS_SIZE);
+	uvec2 coordinate = uvec2(interstage.coordinate * atlasSize);
 	uint lightmapPixelIndex = atomicAdd(lightmapPixelCount, 1);
 
 	traceRaysCommand.x = lightmapPixelCount / RAYTRACER_WORKGROUP_SIZE;

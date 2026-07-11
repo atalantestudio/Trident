@@ -16,6 +16,7 @@ namespace Trident {
 	class Lightmapper {
 		private:
 			struct TraceRaysArguments {
+				Extent2D atlasSize;
 				uint32 lightmapPixelCount;
 				uint32 triangleCount;
 				DispatchIndirectCommand traceRaysCommand;
@@ -27,7 +28,7 @@ namespace Trident {
 			};
 
 		public:
-			static constexpr Extent2D ATLAS_SIZE = {2048, 2048};
+			static constexpr Extent2D ATLAS_SIZE = {512, 512};
 
 		public:
 			static LightmapNode* insertNode(Lightmap& lightmap, LightmapNode* node);

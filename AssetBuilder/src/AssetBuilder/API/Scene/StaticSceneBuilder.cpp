@@ -107,7 +107,7 @@ namespace Trident {
 				// One coordinate per vertex on the face.
 				lightmapCoordinateCount += face.edgeIndexRange.count;
 
-				// TODO: Handle UnitPlane back face.
+				// TODO(asset-builder/lightmapper): Handle UnitPlane back face.
 				if (faces.count() == 2) {
 					break;
 				}
@@ -211,7 +211,7 @@ namespace Trident {
 					const uint32 normalRedirectionIndex = findDuplicate(normalView, normal);
 
 					if (normalRedirectionIndex >= normals.size()) {
-						// TODO: Don't add every vertex normal if only the face normals are used.
+						// TODO(asset-builder/lightmapper): Don't add every vertex normal if only the face normals are used.
 						normals.emplace_back(normal);
 					}
 
@@ -309,7 +309,7 @@ namespace Trident {
 				uint16 coordinateIndex = 0;
 				quat<float32> R;
 
-				// TODO(test)
+				// TODO(asset-builder/lightmapper)
 				{
 					vec3<float32> normal(face.normal);
 					normal = normalized(normal * orientation);
@@ -388,6 +388,10 @@ namespace Trident {
 					coordinateIndex += 1;
 				}
 
+				// Pad for dilation.
+				maxCoordinate.x += 2.0f;
+				maxCoordinate.y += 2.0f;
+
 				const svec2<float32> size = abs(maxCoordinate - minCoordinate);
 
 				lightmap.size = {static_cast<uint32>(size.x), static_cast<uint32>(size.y)};
@@ -411,7 +415,7 @@ namespace Trident {
 				lightmapCoordinateOffset += lightmapCoordinateCount;
 				faceIndex += 1;
 
-				// TODO: Handle UnitPlane back face.
+				// TODO(asset-builder/lightmapper): Handle UnitPlane back face.
 				if (faces.count() == 2) {
 					break;
 				}

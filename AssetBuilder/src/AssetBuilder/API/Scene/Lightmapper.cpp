@@ -239,7 +239,7 @@ namespace Trident {
 		commandEncoder->bindDescriptorSets(traceRaysPipelineLayout, 0, traceRaysDescriptorSet);
 
 		// TODO(graphics/dx12/dispatch): Fix artifacts on the lightmap atlas due to not enough threads being dispatched.
-		commandEncoder->dispatchIndirect(traceRaysArgumentBuffer, 2 * sizeof(uint32));
+		commandEncoder->dispatchIndirect(traceRaysArgumentBuffer, offsetof(TraceRaysArguments, TraceRaysArguments::traceRaysCommand));
 
 		imageMemoryBarrier = {
 			.image = lightmapAtlasImage,
@@ -702,6 +702,7 @@ namespace Trident {
 		}
 
 		TraceRaysArguments* traceRaysArguments = traceRaysArgumentStagingView->map();
+		traceRaysArguments->atlasSize = ATLAS_SIZE;
 		traceRaysArguments->lightmapPixelCount = 0;
 		traceRaysArguments->triangleCount = static_cast<uint32>(scene.triangles.count());
 		traceRaysArguments->traceRaysCommand.x = 1;

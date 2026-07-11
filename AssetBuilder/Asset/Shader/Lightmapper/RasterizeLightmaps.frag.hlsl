@@ -8,6 +8,7 @@ struct DispatchIndirectCommand {
 };
 
 struct TraceRaysArguments {
+	uint2 atlasSize;
 	uint lightmapPixelCount;
 	uint triangleCount;
 	DispatchIndirectCommand traceRaysCommand;
@@ -25,13 +26,12 @@ struct Interstage {
 };
 
 static const uint RAYTRACER_WORKGROUP_SIZE = 16;
-static const uint2 ATLAS_SIZE = uint2(2048, 2048);
 
 RWStructuredBuffer<TraceRaysArguments> traceRaysArguments : register(u1);
 RWStructuredBuffer<LightmapPixel> lightmapPixels : register(u2);
 
 void main(Interstage interstage) {
-	uint2 coordinate = uint2(interstage.coordinate * ATLAS_SIZE);
+	uint2 coordinate = uint2(interstage.coordinate * traceRaysArguments[0].atlasSize);
 	uint lightmapPixelIndex;
 
 	InterlockedAdd(traceRaysArguments[0].lightmapPixelCount, 1, lightmapPixelIndex);

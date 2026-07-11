@@ -2,6 +2,7 @@
 // Distributed under the GNU GPL v3 License.
 
 struct TraceRaysArguments {
+	uint2 atlasSize;
 	uint lightmapPixelCount;
 	uint triangleCount;
 };
@@ -36,7 +37,6 @@ struct Hit {
 static const float FLOAT32_MAX = 4294967295.0;
 static const uint SAMPLE_COUNT = 1024;
 static const uint BOUNCE_COUNT = 32;
-static const uint2 ATLAS_SIZE = uint2(2048, 2048);
 
 StructuredBuffer<TraceRaysArguments> traceRaysArguments : register(t0);
 StructuredBuffer<LightmapPixel> lightmapPixels : register(t1);
@@ -208,7 +208,7 @@ void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 	LightmapPixel pixel = lightmapPixels[pixelIndex];
 
 	uint2 coordinate = uint2(pixel.coordinate >> 16, pixel.coordinate & 0xffff);
-	uint seed = coordinate.y * ATLAS_SIZE.x + coordinate.x;
+	uint seed = coordinate.y * traceRaysArguments[0].atlasSize.x + coordinate.x;
 	Triangle triangle_ = triangles[pixel.triangleIndex];
 	uint normalOffset = triangle_.normalIndex * 3;
 	float3 normal = float3(normalComponents[normalOffset + 0], normalComponents[normalOffset + 1], normalComponents[normalOffset + 2]);
@@ -221,7 +221,7 @@ void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 	float2 lightmapCoordinateA = lightmapCoordinates[triangle_.vertices[0].lightmapCoordinateIndex];
 	float2 lightmapCoordinateB = lightmapCoordinates[triangle_.vertices[1].lightmapCoordinateIndex];
 	float2 lightmapCoordinateC = lightmapCoordinates[triangle_.vertices[2].lightmapCoordinateIndex];
-	float2 pixelCoordinate = (coordinate + float2(0.5, 0.5)) / ATLAS_SIZE;
+	float2 pixelCoordinate = (coordinate + float2(0.5, 0.5)) / traceRaysArguments[0].atlasSize;
 	float3 pixelBarycentricCoordinate = calculateBarycentricCoordinate(lightmapCoordinateA, lightmapCoordinateB, lightmapCoordinateC, pixelCoordinate);
 	float3 light = float3(0.0, 0.0, 0.0);
 	uint sampleIndex = 0;
