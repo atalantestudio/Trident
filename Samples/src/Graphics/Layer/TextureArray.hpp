@@ -322,11 +322,13 @@ namespace Trident {
 			}
 
 			void setupSampler() {
-				SamplerDescriptor samplerDescriptor{};
-				samplerDescriptor.magFilter = Filter::LINEAR;
-				samplerDescriptor.minFilter = Filter::NEAREST;
-
-				sampler = createSampler(samplerDescriptor);
+				sampler = createSampler({
+					.magFilter = Filter::LINEAR,
+					.minFilter = Filter::NEAREST,
+					.addressModeU = AddressMode::REPEAT,
+					.addressModeV = AddressMode::REPEAT,
+					.addressModeW = AddressMode::REPEAT,
+				});
 			}
 
 			void createTextureArrayImageDescriptorSetLayout() {

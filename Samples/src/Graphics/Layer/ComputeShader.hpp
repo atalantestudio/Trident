@@ -273,11 +273,13 @@ namespace Trident {
 			}
 
 			void setupSampler() {
-				SamplerDescriptor samplerDescriptor{};
-				samplerDescriptor.magFilter = Filter::NEAREST;
-				samplerDescriptor.minFilter = Filter::NEAREST;
-
-				sampler = createSampler(samplerDescriptor);
+				sampler = createSampler({
+					.magFilter = Filter::NEAREST,
+					.minFilter = Filter::NEAREST,
+					.addressModeU = AddressMode::REPEAT,
+					.addressModeV = AddressMode::REPEAT,
+					.addressModeW = AddressMode::REPEAT,
+				});
 			}
 
 			void writeImage() const {

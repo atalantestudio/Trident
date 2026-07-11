@@ -3,6 +3,7 @@
 
 #include "pch.hpp"
 
+#include "Engine/Adapter/Graphics/GL/AddressMode.hpp"
 #include "Engine/Adapter/Graphics/GL/Filter.hpp"
 #include "Engine/Adapter/Graphics/GL/Sampler.hpp"
 
@@ -29,9 +30,9 @@ namespace Trident {
 
 			glSamplerParameteri(sampler->sampler, GL_TEXTURE_MAG_FILTER, getFilter(descriptor.magFilter));
 			glSamplerParameteri(sampler->sampler, GL_TEXTURE_MIN_FILTER, getFilter(descriptor.minFilter));
-			glSamplerParameteri(sampler->sampler, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-			glSamplerParameteri(sampler->sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glSamplerParameteri(sampler->sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glSamplerParameteri(sampler->sampler, GL_TEXTURE_WRAP_R, getAddressMode(descriptor.addressModeU));
+			glSamplerParameteri(sampler->sampler, GL_TEXTURE_WRAP_S, getAddressMode(descriptor.addressModeV));
+			glSamplerParameteri(sampler->sampler, GL_TEXTURE_WRAP_T, getAddressMode(descriptor.addressModeW));
 			glSamplerParameterf(sampler->sampler, GL_TEXTURE_MIN_LOD, 0.0f);
 			glSamplerParameterf(sampler->sampler, GL_TEXTURE_MAX_LOD, 1000.0f);
 			glSamplerParameterfv(sampler->sampler, GL_TEXTURE_BORDER_COLOR, BORDER_COLOR);

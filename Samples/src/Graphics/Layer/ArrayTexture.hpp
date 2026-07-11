@@ -271,6 +271,9 @@ namespace Trident {
 				return Renderer::createSampler({
 					.magFilter = Filter::LINEAR,
 					.minFilter = Filter::NEAREST,
+					.addressModeU = AddressMode::REPEAT,
+					.addressModeV = AddressMode::REPEAT,
+					.addressModeW = AddressMode::REPEAT,
 				});
 			}
 

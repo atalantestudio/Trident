@@ -565,6 +565,18 @@ namespace Trident {
 				if (descriptor.minFilter >= Filter::count) {
 					VALIDATION_ERROR("descriptor.minFilter must be a valid Filter value.");
 				}
+
+				if (descriptor.addressModeU >= AddressMode::count) {
+					VALIDATION_ERROR("descriptor.addressModeU must be a valid AddressMode value.");
+				}
+
+				if (descriptor.addressModeV >= AddressMode::count) {
+					VALIDATION_ERROR("descriptor.addressModeV must be a valid AddressMode value.");
+				}
+
+				if (descriptor.addressModeW >= AddressMode::count) {
+					VALIDATION_ERROR("descriptor.addressModeW must be a valid AddressMode value.");
+				}
 			}
 		#endif
 

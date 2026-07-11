@@ -3,8 +3,8 @@
 
 #include "pch.hpp"
 
+#include "Engine/Adapter/Graphics/DX12/AddressMode.hpp"
 #include "Engine/Adapter/Graphics/DX12/Base.hpp"
-
 #include "Engine/Adapter/Graphics/DX12/Filter.hpp"
 #include "Engine/Adapter/Graphics/DX12/Sampler.hpp"
 
@@ -16,9 +16,9 @@ namespace Trident {
 	ref<Trident::Sampler> DX12::createSampler(const Trident::Device* device, const SamplerDescriptor& descriptor) {
 		ref<DX12::Sampler> sampler = createRef<DX12::Sampler>(device);
 		sampler->descriptor.Filter = getFilter(descriptor.minFilter, descriptor.magFilter);
-		sampler->descriptor.AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
-		sampler->descriptor.AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
-		sampler->descriptor.AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+		sampler->descriptor.AddressU = getAddressMode(descriptor.addressModeU);
+		sampler->descriptor.AddressV = getAddressMode(descriptor.addressModeV);
+		sampler->descriptor.AddressW = getAddressMode(descriptor.addressModeW);
 		sampler->descriptor.MipLODBias = 0.0f;
 		sampler->descriptor.MaxAnisotropy = 1;
 

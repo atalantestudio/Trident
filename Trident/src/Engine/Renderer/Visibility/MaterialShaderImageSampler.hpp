@@ -10,6 +10,9 @@ namespace Trident {
 		return createSampler({
 			.magFilter = Filter::LINEAR,
 			.minFilter = Filter::LINEAR,
+			.addressModeU = AddressMode::REPEAT,
+			.addressModeV = AddressMode::REPEAT,
+			.addressModeW = AddressMode::REPEAT,
 		});
 	}
 }

@@ -3,6 +3,7 @@
 
 #include "pch.hpp"
 
+#include "Engine/Adapter/Graphics/VK/AddressMode.hpp"
 #include "Engine/Adapter/Graphics/VK/Filter.hpp"
 #include "Engine/Adapter/Graphics/VK/Sampler.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
@@ -27,9 +28,9 @@ namespace Trident {
 		samplerCreateInfo.magFilter = getFilter(descriptor.magFilter);
 		samplerCreateInfo.minFilter = getFilter(descriptor.minFilter);
 		samplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
-		samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-		samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-		samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+		samplerCreateInfo.addressModeU = getAddressMode(descriptor.addressModeU);
+		samplerCreateInfo.addressModeV = getAddressMode(descriptor.addressModeV);
+		samplerCreateInfo.addressModeW = getAddressMode(descriptor.addressModeW);
 		samplerCreateInfo.mipLodBias = 0.0f;
 		samplerCreateInfo.anisotropyEnable = VK_FALSE;
 		samplerCreateInfo.maxAnisotropy = 1.0f;

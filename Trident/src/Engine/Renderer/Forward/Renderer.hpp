@@ -115,7 +115,8 @@ namespace Trident {
 				cameraMappedRange = cameraView->map();
 				debugContactRange = debugContactManifoldView->map();
 
-				imageSampler = createImageSampler();
+				materialSampler = createMaterialSampler();
+				lightmapSampler = createLightmapSampler();
 			}
 
 			void postSetScene() override {
@@ -486,7 +487,8 @@ namespace Trident {
 			ref<Buffer> createDebugContactManifoldBuffer() const;
 			ref<Buffer> createStaticBuffer() const;
 
-			ref<Sampler> createImageSampler() const;
+			ref<Sampler> createMaterialSampler() const;
+			ref<Sampler> createLightmapSampler() const;
 
 			void updateDescriptorSets() const {
 				const ref<Device> device = getDevice();
@@ -556,7 +558,7 @@ namespace Trident {
 					const DescriptorImage lightmapAtlasDescriptorImage = {
 						.imageView = lightmapAtlasImageView,
 						.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-						.sampler = imageSampler,
+						.sampler = lightmapSampler,
 					};
 
 					writeDescriptorSets[writeDescriptorSetOffset + writeDescriptorSetIndex] = {
@@ -652,7 +654,8 @@ namespace Trident {
 			sequence<ref<ImageView>> materialReferenceBindingImageViews;
 			ref<ImageView> lightmapAtlasImageView;
 
-			ref<Sampler> imageSampler;
+			ref<Sampler> materialSampler;
+			ref<Sampler> lightmapSampler;
 
 			Instance* instanceMappedRange = nullptr;
 			Camera* cameraMappedRange = nullptr;

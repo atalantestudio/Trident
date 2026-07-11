@@ -13,9 +13,10 @@
 #include "Engine/Renderer/Forward/DebugHullWireframePipeline.hpp"
 #include "Engine/Renderer/Forward/DebugHullWireframePipelineLayout.hpp"
 #include "Engine/Renderer/Forward/DepthStencilImage.hpp"
-#include "Engine/Renderer/Forward/ImageSampler.hpp"
 #include "Engine/Renderer/Forward/InstanceBuffer.hpp"
 #include "Engine/Renderer/Forward/LightmapAtlasImage.hpp"
+#include "Engine/Renderer/Forward/LightmapSampler.hpp"
+#include "Engine/Renderer/Forward/MaterialSampler.hpp"
 #include "Engine/Renderer/Forward/Renderer.hpp"
 #include "Engine/Renderer/Forward/RenderPass.hpp"
 #include "Engine/Renderer/Forward/Static.hpp"
@@ -280,7 +281,7 @@ namespace Trident {
 					DescriptorImage& descriptorImage = descriptorImages[materialReferenceBindingImageIndex];
 					descriptorImage.imageView = materialReferenceBindingImageViews[materialReferenceBindingImageIndex];
 					descriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
-					descriptorImage.sampler = imageSampler;
+					descriptorImage.sampler = materialSampler;
 
 					imageMappedRangeOffset += imageAssetSize;
 					materialIndex += 1;

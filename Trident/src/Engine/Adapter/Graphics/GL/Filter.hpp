@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/Filter.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident::GL {
 	inline GLenum getFilter(Filter filter) {
@@ -11,6 +12,8 @@ namespace Trident::GL {
 			GL_NEAREST,
 			GL_LINEAR,
 		};
+
+		ADAPTER_ASSERT(filter < Filter::count, "Invalid filter.");
 
 		return FILTERS[static_cast<uint32>(filter)];
 	}
