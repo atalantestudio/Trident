@@ -472,8 +472,8 @@ namespace Trident {
 
 			ref<Sampler> createDebugSampler() const {
 				return createSampler({
-					.magFilter = SamplerFilter::NEAREST,
-					.minFilter = SamplerFilter::NEAREST,
+					.magFilter = Filter::NEAREST,
+					.minFilter = Filter::NEAREST,
 				});
 			}
 

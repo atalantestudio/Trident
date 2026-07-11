@@ -3,15 +3,15 @@
 
 #pragma once
 
-#include "Engine/API/Graphics/SamplerFilter.hpp"
+#include "Engine/API/Graphics/Filter.hpp"
 
 namespace Trident::GL {
-	inline GLenum getFilter(SamplerFilter samplerFilter) {
+	inline GLenum getFilter(Filter filter) {
 		static constexpr GLenum FILTERS[] = {
 			GL_NEAREST,
 			GL_LINEAR,
 		};
 
-		return FILTERS[static_cast<uint32>(samplerFilter)];
+		return FILTERS[static_cast<uint32>(filter)];
 	}
 }

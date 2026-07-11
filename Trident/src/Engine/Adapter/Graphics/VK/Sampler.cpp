@@ -3,8 +3,8 @@
 
 #include "pch.hpp"
 
+#include "Engine/Adapter/Graphics/VK/Filter.hpp"
 #include "Engine/Adapter/Graphics/VK/Sampler.hpp"
-#include "Engine/Adapter/Graphics/VK/SamplerFilter.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {

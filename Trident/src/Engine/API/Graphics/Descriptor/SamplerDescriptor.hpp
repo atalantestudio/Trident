@@ -3,11 +3,14 @@
 
 #pragma once
 
-#include "Engine/API/Graphics/SamplerFilter.hpp"
+#include "Engine/API/Graphics/Filter.hpp"
 
 namespace Trident {
 	struct SamplerDescriptor {
-		SamplerFilter magFilter;
-		SamplerFilter minFilter;
+		/// The magnification filter used for texture lookups.
+		Filter magFilter;
+
+		/// The minification filter used for texture lookups.
+		Filter minFilter;
 	};
 }

@@ -3,8 +3,8 @@
 
 #include "pch.hpp"
 
+#include "Engine/Adapter/Graphics/GL/Filter.hpp"
 #include "Engine/Adapter/Graphics/GL/Sampler.hpp"
-#include "Engine/Adapter/Graphics/GL/SamplerFilter.hpp"
 
 namespace Trident {
 	GL::Sampler::Sampler(const Trident::Device* device) :

@@ -269,8 +269,8 @@ namespace Trident {
 
 			ref<Sampler> createSampler() const {
 				return Renderer::createSampler({
-					.magFilter = SamplerFilter::LINEAR,
-					.minFilter = SamplerFilter::NEAREST,
+					.magFilter = Filter::LINEAR,
+					.minFilter = Filter::NEAREST,
 				});
 			}
 

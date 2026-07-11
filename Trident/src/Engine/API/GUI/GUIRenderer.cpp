@@ -417,15 +417,15 @@ namespace Trident {
 
 	ref<Sampler> GUIRenderer::createNearestSampler() const {
 		return createSampler({
-			.magFilter = SamplerFilter::NEAREST,
-			.minFilter = SamplerFilter::NEAREST,
+			.magFilter = Filter::NEAREST,
+			.minFilter = Filter::NEAREST,
 		});
 	}
 
 	ref<Sampler> GUIRenderer::createLinearSampler() const {
 		return createSampler({
-			.magFilter = SamplerFilter::LINEAR,
-			.minFilter = SamplerFilter::LINEAR,
+			.magFilter = Filter::LINEAR,
+			.minFilter = Filter::LINEAR,
 		});
 	}
 

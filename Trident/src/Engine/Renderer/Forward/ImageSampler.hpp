@@ -8,8 +8,8 @@
 namespace Trident {
 	ref<Sampler> ForwardRenderer::createImageSampler() const {
 		return createSampler({
-			.magFilter = SamplerFilter::LINEAR,
-			.minFilter = SamplerFilter::LINEAR,
+			.magFilter = Filter::LINEAR,
+			.minFilter = Filter::LINEAR,
 		});
 	}
 }

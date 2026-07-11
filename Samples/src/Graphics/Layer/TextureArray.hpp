@@ -323,8 +323,8 @@ namespace Trident {
 
 			void setupSampler() {
 				SamplerDescriptor samplerDescriptor{};
-				samplerDescriptor.magFilter = SamplerFilter::LINEAR;
-				samplerDescriptor.minFilter = SamplerFilter::NEAREST;
+				samplerDescriptor.magFilter = Filter::LINEAR;
+				samplerDescriptor.minFilter = Filter::NEAREST;
 
 				sampler = createSampler(samplerDescriptor);
 			}

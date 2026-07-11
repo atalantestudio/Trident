@@ -558,12 +558,12 @@ namespace Trident {
 			{
 				Validator validator;
 
-				if (descriptor.magFilter >= SamplerFilter::count) {
-					VALIDATION_ERROR("descriptor.magFilter must be a valid SamplerFilter value.");
+				if (descriptor.magFilter >= Filter::count) {
+					VALIDATION_ERROR("descriptor.magFilter must be a valid Filter value.");
 				}
 
-				if (descriptor.minFilter >= SamplerFilter::count) {
-					VALIDATION_ERROR("descriptor.minFilter must be a valid SamplerFilter value.");
+				if (descriptor.minFilter >= Filter::count) {
+					VALIDATION_ERROR("descriptor.minFilter must be a valid Filter value.");
 				}
 			}
 		#endif
