@@ -34,7 +34,7 @@ struct Hit {
 
 const float FLOAT32_MAX = 4294967295.0;
 const uint SAMPLE_COUNT = 1024;
-const uint BOUNCE_COUNT = 32;
+const uint BOUNCE_COUNT = 4;
 
 layout(set = 0, binding = 0) buffer readonly TraceRaysArgumentBuffer {
 	uvec2 atlasSize;
@@ -197,9 +197,7 @@ vec3 rgen(Hit hit, inout uint seed) {
 
 	while (bounceIndex < BOUNCE_COUNT) {
 		ray.direction = normalize(hit.normal + randomUnitDirection(seed));
-
-		// Smaller numbers like 0.0001 cause visual artifacts.
-		ray.origin = hit.position + ray.direction * 0.001;
+		ray.origin = hit.position + ray.direction * 0.0001;
 
 		hit = rint(ray);
 

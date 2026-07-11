@@ -36,7 +36,7 @@ struct Hit {
 
 static const float FLOAT32_MAX = 4294967295.0;
 static const uint SAMPLE_COUNT = 1024;
-static const uint BOUNCE_COUNT = 32;
+static const uint BOUNCE_COUNT = 4;
 
 StructuredBuffer<TraceRaysArguments> traceRaysArguments : register(t0);
 StructuredBuffer<LightmapPixel> lightmapPixels : register(t1);
@@ -179,9 +179,7 @@ float3 rgen(Hit hit, inout uint seed) {
 
 	while (bounceIndex < BOUNCE_COUNT) {
 		ray.direction = normalize(hit.normal + randomUnitDirection(seed));
-
-		// Smaller numbers like 0.0001 cause visual artifacts.
-		ray.origin = hit.position + ray.direction * 0.001;
+		ray.origin = hit.position + ray.direction * 0.0001;
 
 		hit = rint(ray);
 

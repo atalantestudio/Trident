@@ -354,7 +354,7 @@ namespace Trident {
 				commandEncoder->beginRenderPass({
 					.framebuffer = framebuffers[getSwapchainImageIndex()],
 					.clearValues = {
-						{1.0f, 0.2f, 0.0f, 1.0f},
+						{1.0f, 1.0f, 1.0f, 1.0f},
 						{
 							.depth = 0.0f,
 							.stencil = 0,

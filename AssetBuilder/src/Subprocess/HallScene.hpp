@@ -520,25 +520,6 @@ namespace Trident {
 				.lightmapPixelScale = {4.0f, 4.0f},
 			});
 
-		// Doors
-		builder
-			.createStaticObject({
-				.label = "hall_entrance_door",
-				.geometryAssetName = "UnitPlane",
-				.transform = {
-					.position = {64.0f, 56.0f, -16.0f},
-					.rotation = {pi<float32>() * 0.5f, 0.0f, 0.0f},
-					.scale = {56.0f, 112.0f, 0.0f},
-				},
-				.textureFiltering = {
-					.translation = {0.875f, 0.125f},
-					.rotation = 0.0f,
-					.scale = {-0.25f, 0.25f},
-				},
-				.materialIndex = defaultMaterialIndex,
-				.lightmapPixelScale = {4.0f, 4.0f},
-			});
-
 		// Top walls
 		builder
 			.createStaticObject({

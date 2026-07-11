@@ -17,7 +17,12 @@ SamplerState lightmapAtlasSamplerState : register(s0);
 
 FragmentOutput main(Interstage interstage) {
 	FragmentOutput output;
+
+	// TODO: Add bicubic filtering.
 	output.color = lightmapAtlasImage.Sample(lightmapAtlasSamplerState, interstage.lightmapCoordinate);
+
+	output.color.rgb = output.color.rgb / (output.color.rgb + 1.0);
+	output.color.rgb = pow(output.color.rgb, 1.0 / 2.2);
 
 	return output;
 }
