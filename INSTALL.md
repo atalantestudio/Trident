@@ -99,4 +99,4 @@ Start by installing the [C/C++](https://marketplace.visualstudio.com/items?itemN
 
 Type `Ctrl` + `Shift` + `P` to open the command menu, then select "C/C++: Select a Configuration...".
 
-Type `F6` to open the task menu. Run a Configure task and a Build task according to your desired configuration. Go to the Run and Debug panel and select the project to run, then type `F5` to start debugging.
+Type `F6` to open the task menu. Run a Configure task and a Build task according to your selected configuration. Go to the Run and Debug panel and select the project to run, then type `F5` to start debugging.
