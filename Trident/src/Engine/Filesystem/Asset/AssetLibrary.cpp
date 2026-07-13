@@ -66,6 +66,11 @@ namespace Trident {
 		return imageAssetPathToIndex;
 	}
 
+	template<>
+	const std::unordered_map<sequence<char8>, uint32>& AssetLibrary::getAssetPathToIndexMap<MaterialAsset>() const {
+		return materialAssetPathToIndex;
+	}
+
 	// 2D and 3D scenes share the same index map.
 	template<>
 	const std::unordered_map<sequence<char8>, uint32>& AssetLibrary::getAssetPathToIndexMap<Scene2DAsset>() const {
