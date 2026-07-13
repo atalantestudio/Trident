@@ -58,15 +58,18 @@ namespace Trident {
 	StaticSceneBuilder& StaticSceneBuilder::allocateMaterials(uint32 count) {
 		DEBUG_ASSERT(count > 0);
 
-		materials = sequence<StaticMaterial3D>(count);
+		materials = sequence<BuildStaticMaterial3D>(count);
 
 		return *this;
 	}
 
-	StaticSceneBuilder& StaticSceneBuilder::insertMaterial(uint32 index, const StaticMaterial3D& material) {
+	StaticSceneBuilder& StaticSceneBuilder::insertMaterial(uint32 index, uint32 identifier) {
 		DEBUG_ASSERT(index < materials.count());
 
-		materials[index] = material;
+		materials[index] = {
+			.identifier = identifier,
+			.triangleRange = {0, 0},
+		};
 
 		return *this;
 	}
@@ -89,7 +92,7 @@ namespace Trident {
 		return *this;
 	}
 
-	StaticScene3D StaticSceneBuilder::build() const {
+	StaticScene3D StaticSceneBuilder::build() {
 		std::vector<svec3<float32>> vertices;
 		std::vector<svec3<float32>> normals;
 		std::vector<svec2<float32>> textureCoordinates;
@@ -143,6 +146,8 @@ namespace Trident {
 				mat4x4<float32>::scaling(object.transform.scale) *
 				mat4x4<float32>::translation(object.transform.position)
 			);
+
+			BuildStaticMaterial3D& material = materials[object.materialIndex];
 
 			sequence<uint32> vertexRedirectionIndices(vertexCount);
 			sequence<uint32> normalRedirectionIndices(normalCount);
@@ -286,7 +291,15 @@ namespace Trident {
 					.normalIndex = normalRedirectionIndices[normalIndex],
 				});
 
+				material.triangleRange.count += 1;
+
 				indexOffset += 3;
+			}
+
+			if (object.materialIndex > 0) {
+				const BuildStaticMaterial3D& previousMaterial = materials[object.materialIndex - 1];
+
+				material.triangleRange.offset = previousMaterial.triangleRange.offset + previousMaterial.triangleRange.count;
 			}
 
 			const view<Edge3D> edges = object.geometryAsset->getHull3DEdges();
@@ -432,14 +445,15 @@ namespace Trident {
 		std::copy(textureCoordinates.begin(), textureCoordinates.end(), &scene.textureCoordinates[0]);
 		std::copy(triangles.begin(), triangles.end(), &scene.triangles[0]);
 
-		Lightmapper::updateAtlasCoordinates(lightmaps, view<LightmapIndex>(&lightmapIndices[0], lightmapIndices.size()), scene);
+		Lightmapper::updateAtlasCoordinates(scene, lightmaps, view<LightmapIndex>(&lightmapIndices[0], lightmapIndices.size()));
 
-		ImageAssetDescriptor lightmapAtlasImageAssetDescriptor{};
-		lightmapAtlasImageAssetDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
-		lightmapAtlasImageAssetDescriptor.extent = {Lightmapper::ATLAS_SIZE.width, Lightmapper::ATLAS_SIZE.width, 1};
-		lightmapAtlasImageAssetDescriptor.mipLevelCount = 1;
-		lightmapAtlasImageAssetDescriptor.layerCount = 1;
-		lightmapAtlasImageAssetDescriptor.data = sequence<uint8>(lightmapAtlasImageAssetDescriptor.layerCount * lightmapAtlasImageAssetDescriptor.extent.width * lightmapAtlasImageAssetDescriptor.extent.height * lightmapAtlasImageAssetDescriptor.extent.depth * getChannelCount(lightmapAtlasImageAssetDescriptor.format));
+		ImageAssetDescriptor lightmapAtlasImageAssetDescriptor = {
+			.format = ImageFormat::R8G8B8A8_UNORM,
+			.extent = {Lightmapper::ATLAS_SIZE.width, Lightmapper::ATLAS_SIZE.width, 1},
+			.mipLevelCount = 1,
+			.layerCount = 1,
+			.data = sequence<uint8>(Lightmapper::ATLAS_SIZE.width * Lightmapper::ATLAS_SIZE.height * getByteSize(ImageFormat::R8G8B8A8_UNORM)),
+		};
 
 		Lightmapper lightmapper;
 		lightmapper.buildLightmapAtlas(scene, lightmapAtlasImageAssetDescriptor);

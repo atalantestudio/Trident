@@ -10,7 +10,7 @@ namespace Trident {
 		StaticSceneBuilder(rootOutputPath, assetName)
 	{
 		allocateMaterials(1);
-		insertMaterial(0, {.identifier = 100});
+		insertMaterial(0, 100);
 	}
 
 	uint32 InteriorSceneBuilder::addFloorLevel(float32 level) {

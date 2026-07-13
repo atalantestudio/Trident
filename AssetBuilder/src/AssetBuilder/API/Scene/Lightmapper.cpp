@@ -85,7 +85,7 @@ namespace Trident {
 		return insertNode(lightmap, node->children[0]);
 	}
 
-	void Lightmapper::updateAtlasCoordinates(sequence<Lightmap>& lightmaps, view<LightmapIndex> lightmapIndices, StaticScene3D& scene) {
+	void Lightmapper::updateAtlasCoordinates(StaticScene3D& scene, sequence<Lightmap>& lightmaps, view<LightmapIndex> lightmapIndices) {
 		const svec2<float32> atlasSize = {
 			static_cast<float32>(ATLAS_SIZE.width),
 			static_cast<float32>(ATLAS_SIZE.height),

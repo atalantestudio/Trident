@@ -340,11 +340,23 @@ namespace Trident {
 	}
 
 	void ForwardRenderer::renderStaticObjects(ref<CommandEncoder> commandEncoder) const {
-		const uint32 vertexCount = static_cast<uint32>(scene->getAsset()->getStaticTriangles().count()) * 3;
+		const ref<Scene3DAsset> sceneAsset = scene->getAsset();
+		const view<StaticMaterial3D> staticMaterials = sceneAsset->getStaticMaterials();
 
-		// TODO: See https://blog.tojicode.com/2011/09/source-engine-in-webgl-tech-talk.html.
-		commandEncoder->bindGraphicsPipeline(staticMaterialPipeline);
-		commandEncoder->bindDescriptorSets(staticMaterialPipelineLayout, 0, staticDescriptorSet);
-		commandEncoder->draw(vertexCount, 1, 0, 0);
+		uint32 staticMaterialIndex = 0;
+
+		while (staticMaterialIndex < staticMaterials.count()) {
+			const StaticMaterial3D& staticMaterial = staticMaterials[materialIndex];
+
+			// TODO
+			commandEncoder->bindGraphicsPipeline(staticMaterialPipeline);
+			// commandEncoder->bindGraphicsPipeline(staticMaterialPipelines[staticMaterialIndex]);
+			commandEncoder->bindDescriptorSets(staticMaterialPipelineLayout, 0, staticDescriptorSet);
+			// commandEncoder->bindDescriptorSets(staticMaterialPipelineLayouts[staticMaterialIndex], 0, staticMaterialDescriptorSets[staticMaterialIndex]);
+
+			commandEncoder->draw(staticMaterial.triangleRange.count * 3, 1, staticMaterial.triangleRange.offset * 3, 0);
+
+			staticMaterialIndex += 1;
+		}
 	}
 }

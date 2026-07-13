@@ -19,11 +19,11 @@ namespace Trident {
 
 		builder
 			.allocateMaterials(5)
-			.insertMaterial(floorMaterialIndex, {.identifier = 100 + floorMaterialIndex})
-			.insertMaterial(wallMaterialIndex, {.identifier = 100 + wallMaterialIndex})
-			.insertMaterial(doorMaterialIndex, {.identifier = 100 + doorMaterialIndex})
-			.insertMaterial(topWallMaterialIndex, {.identifier = 100 + topWallMaterialIndex})
-			.insertMaterial(ceilingMaterialIndex, {.identifier = 100 + ceilingMaterialIndex});
+			.insertMaterial(floorMaterialIndex, 100 + floorMaterialIndex)
+			.insertMaterial(wallMaterialIndex, 100 + wallMaterialIndex)
+			.insertMaterial(doorMaterialIndex, 100 + doorMaterialIndex)
+			.insertMaterial(topWallMaterialIndex, 100 + topWallMaterialIndex)
+			.insertMaterial(ceilingMaterialIndex, 100 + ceilingMaterialIndex);
 
 		// Floors
 		builder

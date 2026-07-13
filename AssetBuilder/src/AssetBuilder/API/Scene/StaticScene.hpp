@@ -6,18 +6,15 @@
 #include "Engine/API/Scene/StaticVertex.hpp"
 
 namespace Trident {
+	struct BuildStaticMaterial3D {
+		uint32 identifier;
+		range<uint32, uint32> triangleRange;
+	};
+
 	struct StaticScene2D {
 		sequence<StaticTriangle2D> triangles;
 		sequence<svec2<float32>> vertices;
 		sequence<svec2<float32>> textureCoordinates;
-	};
-
-	struct StaticMaterial3D {
-		uint32 identifier;
-
-		// TODO(asset-builder/lightmapper): Use when generating assets.
-		// vec4<float32> emissiveColor;
-		// float32 emissiveStrength;
 	};
 
 	struct StaticScene3D {
@@ -26,7 +23,7 @@ namespace Trident {
 		sequence<svec2<float32>> textureCoordinates;
 		sequence<svec2<float32>> lightmapCoordinates;
 		sequence<StaticTriangle3D> triangles;
-		sequence<StaticMaterial3D> materials;
+		sequence<BuildStaticMaterial3D> materials;
 		uint32 lightmapAtlasImageAssetIdentifier = max<uint32>();
 	};
 }

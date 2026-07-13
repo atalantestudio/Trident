@@ -601,6 +601,7 @@ namespace Trident {
 
 			void createMaterialObjects();
 
+			// TODO(forward): See https://blog.tojicode.com/2011/09/source-engine-in-webgl-tech-talk.html.
 			void renderStaticObjects(ref<CommandEncoder> commandEncoder) const;
 
 		private:

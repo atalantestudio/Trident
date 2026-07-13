@@ -48,8 +48,8 @@ namespace Trident {
 				ByteStream<StreamOperation::WRITE> stream(size, Endianness::LITTLE_ENDIAN);
 
 				stream.write<AssetSignature>(AssetSignature::MATERIAL);
-				stream.write<uint32>(asset.header.identifier);
-				stream.write<VersionNumber>(asset.header.version);
+				stream.write<uint32>(asset.identifier);
+				stream.write<VersionNumber>(asset.version);
 				stream.write<uint32>(static_cast<uint32>(asset.shaderModuleName.count()));
 
 				std::copy_n(pointer_cast<const uint8*>(&asset.shaderModuleName[0]), sizeof(asset.shaderModuleName.count()), stream.getBytePosition());

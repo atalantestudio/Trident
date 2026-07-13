@@ -19,8 +19,6 @@ namespace Trident {
 
 	class MaterialAsset : public Asset {
 		public:
-			AssetDescriptor header;
-
 			// TODO(tsl/shader-reflection): Replace by an asset identifier.
 			/// Path relative to the renderer being used.
 			sequence<char8> shaderModuleName;

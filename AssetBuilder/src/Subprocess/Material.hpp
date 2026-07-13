@@ -29,7 +29,7 @@ namespace Trident {
 
 	inline MaterialAsset createLightmappedFloorMaterial(AssetLibrary* assetLibrary) {
 		MaterialAsset asset{};
-		asset.header.identifier = 100;
+		asset.identifier = 100;
 		asset.descriptorImages = {
 			{
 				.imageAsset = assetLibrary->getAsset<ImageAsset>("white"),
@@ -48,7 +48,7 @@ namespace Trident {
 
 	inline MaterialAsset createLightmappedWallMaterial(AssetLibrary* assetLibrary) {
 		MaterialAsset asset{};
-		asset.header.identifier = 101;
+		asset.identifier = 101;
 		asset.descriptorImages = {
 			{
 				.imageAsset = assetLibrary->getAsset<ImageAsset>("normal"),
@@ -67,7 +67,7 @@ namespace Trident {
 
 	inline MaterialAsset createLightmappedDoorMaterial(AssetLibrary* assetLibrary) {
 		MaterialAsset asset{};
-		asset.header.identifier = 102;
+		asset.identifier = 102;
 		asset.descriptorImages = {
 			{
 				.imageAsset = assetLibrary->getAsset<ImageAsset>("blue"),
@@ -86,7 +86,7 @@ namespace Trident {
 
 	inline MaterialAsset createLightmappedTopWallMaterial(AssetLibrary* assetLibrary) {
 		MaterialAsset asset{};
-		asset.header.identifier = 103;
+		asset.identifier = 103;
 		asset.descriptorImages = {
 			{
 				.imageAsset = assetLibrary->getAsset<ImageAsset>("green"),
@@ -105,7 +105,7 @@ namespace Trident {
 
 	inline MaterialAsset createLightmappedCeilingMaterial(AssetLibrary* assetLibrary) {
 		MaterialAsset asset{};
-		asset.header.identifier = 104;
+		asset.identifier = 104;
 		asset.descriptorImages = {
 			{
 				.imageAsset = assetLibrary->getAsset<ImageAsset>("red"),

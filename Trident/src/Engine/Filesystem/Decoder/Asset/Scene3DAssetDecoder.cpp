@@ -34,16 +34,15 @@ namespace Trident {
 		descriptor.hullFaceCount = 0;
 		descriptor.hullFaceEdgeIndexCount = 0;
 		descriptor.rigidBodyFacePlaneCount = 0;
-		descriptor.staticTriangles = sequence<StaticTriangle3D>(staticTriangleCount);
 		descriptor.staticVertices = sequence<svec3<float32>>(staticVertexCount);
 		descriptor.staticNormals = sequence<svec3<float32>>(staticNormalCount);
 		descriptor.staticTextureCoordinates = sequence<svec2<float32>>(staticTextureCoordinateCount);
 		descriptor.staticLightmapCoordinates = sequence<svec2<float32>>(staticLightmapCoordinateCount);
-
-		const uint32 geometryAssetCount = stream.read<uint32>();
-		const uint32 geometryMappingCount = stream.read<uint32>();
-		const uint32 materialMappingCount = stream.read<uint32>();
-		const uint32 rigidBodyMappingCount = stream.read<uint32>();
+		descriptor.staticTriangles = sequence<StaticTriangle3D>(staticTriangleCount);
+		descriptor.geometryAssets = sequence<ref<GeometryAsset>>(stream.read<uint32>());
+		descriptor.geometryMappings = sequence<EntityComponentMapping<GeometryComponent>>(stream.read<uint32>());
+		descriptor.materialMappings = sequence<EntityComponentMapping<MaterialComponent>>(stream.read<uint32>());
+		descriptor.rigidBodyMappings = sequence<EntityComponentMapping<RigidBody3DComponent>>(stream.read<uint32>());
 
 		const uint32 lightmapAtlasImageAssetIdentifier = stream.read<uint32>();
 
@@ -51,10 +50,7 @@ namespace Trident {
 			descriptor.lightmapAtlasImageAsset = assetLibrary->getAsset<ImageAsset>(lightmapAtlasImageAssetIdentifier);
 		}
 
-		descriptor.geometryAssets = sequence<ref<GeometryAsset>>(geometryAssetCount);
-		descriptor.geometryMappings = sequence<EntityComponentMapping<GeometryComponent>>(geometryMappingCount);
-		descriptor.materialMappings = sequence<EntityComponentMapping<MaterialComponent>>(materialMappingCount);
-		descriptor.rigidBodyMappings = sequence<EntityComponentMapping<RigidBody3DComponent>>(rigidBodyMappingCount);
+		descriptor.staticMaterials = sequence<StaticMaterial3D>(stream.read<uint32>());
 
 		for (StaticTriangle3D& triangle : descriptor.staticTriangles) {
 			uint32 vertexIndex = 0;
@@ -85,6 +81,12 @@ namespace Trident {
 
 		for (svec2<float32>& lightmapCoordinate : descriptor.staticLightmapCoordinates) {
 			lightmapCoordinate = stream.read<svec2<float32>>();
+		}
+
+		for (StaticMaterial3D& staticMaterial : descriptor.staticMaterials) {
+			staticMaterial.materialAsset = assetLibrary->getAsset<MaterialAsset>(stream.read<uint32>());
+			staticMaterial.triangleRange.offset = stream.read<uint32>();
+			staticMaterial.triangleRange.count = stream.read<uint32>();
 		}
 
 		for (ref<GeometryAsset>& geometryAsset : descriptor.geometryAssets) {

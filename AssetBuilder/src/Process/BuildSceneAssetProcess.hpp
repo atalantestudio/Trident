@@ -158,13 +158,13 @@ namespace Trident {
 				header.rigidBodyMappingCount = static_cast<uint32>(data.rigidBodyMappings.count());
 
 				const uint64 size =
-					sizeof(header) +
-					sizeof(uint32) +
+					sizeof(header) + 2 * sizeof(uint32) +
 					header.staticTriangleCount * sizeof(StaticTriangle3D) +
 					header.staticVertexCount * sizeof(svec3<float32>) +
 					header.staticNormalCount * sizeof(svec3<float32>) +
 					header.staticTextureCoordinateCount * sizeof(svec2<float32>) +
 					header.staticLightmapCoordinateCount * sizeof(svec2<float32>) +
+					data.staticScene.materials.count() * sizeof(BuildStaticMaterial3D) +
 					header.geometryAssetCount * sizeof(uint32) +
 					header.geometryMappingCount * (sizeof(Entity) + sizeof(uint32)) +
 					header.materialMappingCount * (sizeof(Entity) + sizeof(uint32)) +
@@ -176,6 +176,7 @@ namespace Trident {
 
 				stream.jump(sizeof(header));
 				stream.write<uint32>(data.staticScene.lightmapAtlasImageAssetIdentifier);
+				stream.write<uint32>(static_cast<uint32>(data.staticScene.materials.count()));
 
 				for (const StaticTriangle3D& triangle : data.staticScene.triangles) {
 					const view<StaticVertex3D> vertices(&triangle.vertices[0], 3);
@@ -203,6 +204,12 @@ namespace Trident {
 
 				for (const svec2<float32> lightmapCoordinate : data.staticScene.lightmapCoordinates) {
 					stream.write<svec2<float32>>(lightmapCoordinate);
+				}
+
+				for (const BuildStaticMaterial3D& staticMaterial : data.staticScene.materials) {
+					stream.write<uint32>(staticMaterial.identifier);
+					stream.write<uint32>(staticMaterial.triangleRange.offset);
+					stream.write<uint32>(staticMaterial.triangleRange.count);
 				}
 
 				for (const uint32 geometryAssetIdentifier : data.geometryAssetIdentifiers) {

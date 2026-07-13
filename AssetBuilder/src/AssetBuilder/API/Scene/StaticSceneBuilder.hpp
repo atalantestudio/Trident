@@ -17,18 +17,18 @@ namespace Trident {
 
 			StaticSceneBuilder& allocateMaterials(uint32 count);
 
-			StaticSceneBuilder& insertMaterial(uint32 index, const StaticMaterial3D& material);
+			StaticSceneBuilder& insertMaterial(uint32 index, uint32 identifier);
 
 			StaticSceneBuilder& createStaticObject(const StaticObjectDescriptor& descriptor);
 
 			/// Compiles and returns an optimized static scene.
-			StaticScene3D build() const;
+			StaticScene3D build();
 
 		private:
 			std::filesystem::path rootOutputPath;
 			view<char8> assetName;
 			AssetLibrary* assetLibrary;
-			sequence<StaticMaterial3D> materials;
+			sequence<BuildStaticMaterial3D> materials;
 			std::vector<StaticObject> objects;
 	};
 }
