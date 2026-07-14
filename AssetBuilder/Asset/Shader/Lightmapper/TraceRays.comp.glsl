@@ -34,7 +34,7 @@ struct Hit {
 
 const float FLOAT32_MAX = 4294967295.0;
 const uint SAMPLE_COUNT = 1024;
-const uint BOUNCE_COUNT = 4;
+const uint BOUNCE_COUNT = 3;
 
 layout(set = 0, binding = 0) buffer readonly TraceRaysArgumentBuffer {
 	uvec2 atlasSize;
