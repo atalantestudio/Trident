@@ -123,7 +123,7 @@ namespace Trident {
 				const ref<Scene3DAsset> sceneAsset = scene->getAsset();
 				const ref<Device> device = getDevice();
 
-				createMaterialObjects();
+				createMaterialPipelines();
 
 				// Write index buffer.
 				const view<uint8> sourceDataBuffer = scene->getDataBuffer();
@@ -176,17 +176,10 @@ namespace Trident {
 
 				if (sceneAsset->getStaticTriangles().count() > 0) {
 					staticBuffer = createStaticBuffer();
-
-					staticMaterialPipelineLayout = createStaticMaterialPipelineLayout();
-					staticMaterialPipeline = createStaticMaterialPipeline();
-
-					const ref<ImageAsset> lightmapAtlasImageAsset = sceneAsset->getLightmapAtlasImageAsset();
-
-					stagingBufferSize += lightmapAtlasImageAsset->getSize();
 				}
 
 				if (scene->getIndexCount() > 0) {
-					// TODO: As of now the hull line indices are included twice.
+					// TODO(forward): As of now the hull line indices are included twice.
 					stagingBufferSize += sourceDataBuffer.count();
 					stagingBufferSize += scene->getHullLineIndexCount() * sizeof(uint16);
 				}
@@ -201,25 +194,12 @@ namespace Trident {
 					#endif
 				});
 
-				ref<BufferView<uint8>> lightmapAtlasView;
 				ref<BufferView<uint8>> componentView;
 				ref<BufferView<uint8>> hullLineIndexView;
 				ref<BufferView<Vertex>> vertexView;
 				uint64 viewOffset = 0;
 				BufferCopyRegion bufferCopyRegion;
 				ImageMemoryBarrier imageMemoryBarrier;
-
-				if (sceneAsset->getStaticTriangles().count() > 0) {
-					const ref<ImageAsset> lightmapAtlasImageAsset = sceneAsset->getLightmapAtlasImageAsset();
-
-					lightmapAtlasView = stagingBuffer->createView<uint8>(viewOffset, lightmapAtlasImageAsset->getSize());
-					viewOffset += lightmapAtlasView->getSize();
-
-					lightmapAtlasImage = createLightmapAtlasImage(lightmapAtlasImageAsset);
-					lightmapAtlasImageView = createLightmapAtlasImageView();
-
-					std::copy_n(&lightmapAtlasImageAsset->getData()[0], lightmapAtlasView->getSize(), lightmapAtlasView->map());
-				}
 
 				if (scene->getIndexCount() > 0) {
 					componentView = stagingBuffer->createView<uint8>(viewOffset, vertexPositionIndexRange.offset);
@@ -252,39 +232,15 @@ namespace Trident {
 
 				stagingBuffer->unmap();
 
-				ref<Queue> queue = device->getQueue(QueueFamilyCapability::GRAPHICS);
-				ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
+				const ref<Queue> queue = device->getQueue(QueueFamilyCapability::GRAPHICS);
+				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
 					.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
 					#if defined(DEBUG_OBJECT_NAME)
 						.name = "Copy resources",
 					#endif
 				});
-				ref<CommandBuffer> commandBuffer;
 
 				commandEncoder->begin();
-
-				if (sceneAsset->getStaticTriangles().count() > 0) {
-					imageMemoryBarrier = {
-						.image = lightmapAtlasImage,
-						.newLayout = ImageLayout::TRANSFER_DST_OPTIMAL,
-						.newAccess = Access::TRANSFER_WRITE,
-					};
-
-					commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
-
-					const BufferImageCopyRegion bufferImageCopyRegion = {
-						.bufferOffset = lightmapAtlasView->getOffset(),
-						.imageOffsetX = 0,
-						.imageOffsetY = 0,
-						.imageOffsetZ = 0,
-						.imageExtent = lightmapAtlasImage->getExtent(),
-						.imageMipLevel = lightmapAtlasImageView->getMipLevelOffset(),
-						.imageLayerOffset = lightmapAtlasImageView->getLayerOffset(),
-						.imageLayerCount = lightmapAtlasImageView->getLayerCount(),
-					};
-
-					commandEncoder->copyBufferToImage(stagingBuffer, lightmapAtlasImage, bufferImageCopyRegion);
-				}
 
 				if (scene->getIndexCount() > 0) {
 					bufferCopyRegion = {
@@ -314,34 +270,10 @@ namespace Trident {
 					commandEncoder->copyBufferToBuffer(stagingBuffer, debugHullWireframeBuffer, bufferCopyRegion);
 				}
 
-				commandBuffer = commandEncoder->end();
+				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
 				queue->submit(commandBuffer);
 				queue->waitIdle();
-
-				if (sceneAsset->getStaticTriangles().count() > 0) {
-					queue = device->getQueue(QueueFamilyCapability::GRAPHICS);
-					commandEncoder = queue->createCommandEncoder({
-						.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
-						#if defined(DEBUG_OBJECT_NAME)
-							.name = "Transition image",
-						#endif
-					});
-
-					imageMemoryBarrier = {
-						.image = lightmapAtlasImage,
-						.newLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-						.newAccess = Access::SHADER_READ,
-					};
-
-					commandEncoder->begin();
-					commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
-
-					commandBuffer = commandEncoder->end();
-
-					queue->submit(commandBuffer);
-					queue->waitIdle();
-				}
 
 				updateDescriptorSets();
 			}
@@ -545,7 +477,7 @@ namespace Trident {
 
 					uint32 writeDescriptorSetIndex = 1;
 
-					while (writeDescriptorSetIndex < staticDescriptorSetLayout->bindings.count() - 1) {
+					while (writeDescriptorSetIndex < staticDescriptorSetLayout->bindings.count()) {
 						writeDescriptorSets[writeDescriptorSetOffset + writeDescriptorSetIndex] = {
 							.descriptorSet = staticDescriptorSet,
 							.bindingIndex = writeDescriptorSetIndex,
@@ -555,19 +487,6 @@ namespace Trident {
 						writeDescriptorSetIndex += 1;
 					}
 
-					const DescriptorImage lightmapAtlasDescriptorImage = {
-						.imageView = lightmapAtlasImageView,
-						.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-						.sampler = lightmapSampler,
-					};
-
-					writeDescriptorSets[writeDescriptorSetOffset + writeDescriptorSetIndex] = {
-						.descriptorSet = staticDescriptorSet,
-						.bindingIndex = writeDescriptorSetIndex,
-						.descriptorImages = lightmapAtlasDescriptorImage,
-					};
-
-					writeDescriptorSetIndex += 1;
 					writeDescriptorSetOffset += static_cast<uint32>(staticDescriptorSetLayout->bindings.count());
 				}
 
@@ -599,9 +518,9 @@ namespace Trident {
 
 			void postSetCameraController() override {}
 
-			void createMaterialObjects();
+			// Creates material pipelines, pipeline layouts and descriptor sets.
+			void createMaterialPipelines();
 
-			// TODO(forward): See https://blog.tojicode.com/2011/09/source-engine-in-webgl-tech-talk.html.
 			void renderStaticObjects(ref<CommandEncoder> commandEncoder) const;
 
 		private:
@@ -611,7 +530,6 @@ namespace Trident {
 
 			ref<DescriptorSetLayout> staticDescriptorSetLayout;
 			ref<DescriptorSetLayout> vertexDescriptorSetLayout;
-			sequence<ref<DescriptorSetLayout>> materialDescriptorSetLayouts;
 
 			ref<DescriptorSet> staticDescriptorSet;
 			ref<DescriptorSet> vertexDescriptorSet;
@@ -621,15 +539,9 @@ namespace Trident {
 			ref<PipelineLayout> debugHullWireframePipelineLayout;
 			ref<PipelineLayout> debugContactManifoldPipelineLayout;
 
-			// TODO: Use the same system as for the dynamic objects.
-			ref<PipelineLayout> staticMaterialPipelineLayout;
-
 			sequence<ref<GraphicsPipeline>> materialPipelines;
 			ref<GraphicsPipeline> debugHullWireframePipeline;
 			ref<GraphicsPipeline> debugContactManifoldPipeline;
-
-			// TODO: Use the same system as for the dynamic objects.
-			ref<GraphicsPipeline> staticMaterialPipeline;
 
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> instanceBuffer;
@@ -644,7 +556,7 @@ namespace Trident {
 			#endif
 
 			ref<Image> depthStencilImage;
-			sequence<sequence<ref<Image>>> materialImages;
+			sequence<sequence<sequence<ref<Image>>>> materialImages;
 			ref<Image> lightmapAtlasImage;
 
 			#if FORWARD_SAMPLE_COUNT > 1
@@ -667,7 +579,7 @@ namespace Trident {
 
 		private:
 			bool draw = false;
-			bool debugHullWireframe = true;
+			bool debugHullWireframe = false;
 			bool debugContactManifolds = false;
 	};
 }

@@ -16,13 +16,12 @@ namespace Trident {
 			typedef MaterialAsset (*CreateMaterialFunction)(AssetLibrary* assetLibrary);
 
 		private:
-			static constexpr uint32 MATERIAL_COUNT = 5;
+			static constexpr uint32 MATERIAL_COUNT = 4;
 
 			inline static const view<char8> MATERIAL_NAMES[MATERIAL_COUNT] = {
 				"LightmappedFloor",
 				"LightmappedWall",
 				"LightmappedDoor",
-				"LightmappedTopWall",
 				"LightmappedCeiling",
 			};
 
@@ -30,7 +29,6 @@ namespace Trident {
 				createLightmappedFloorMaterial,
 				createLightmappedWallMaterial,
 				createLightmappedDoorMaterial,
-				createLightmappedTopWallMaterial,
 				createLightmappedCeilingMaterial,
 			};
 
@@ -38,11 +36,8 @@ namespace Trident {
 			static ByteStream<StreamOperation::WRITE> encodeMaterialAsset(const MaterialAsset& asset) {
 				const uint64 size = (
 					sizeof(AssetHeader) +
-					sizeof(uint32) + asset.shaderModuleName.count() +
-					sizeof(ShaderStage) +
-					sizeof(uint32) + asset.entryPoint.count() +
-					sizeof(uint32) + asset.descriptorBindingTypes.count() +
-					sizeof(uint32) + sizeof(MaterialDescriptorImage) * asset.descriptorImages.count()
+					sizeof(uint32) * 2 +
+					asset.descriptorImages.count() * (sizeof(uint32) * 5)
 				);
 
 				ByteStream<StreamOperation::WRITE> stream(size, Endianness::LITTLE_ENDIAN);
@@ -50,26 +45,11 @@ namespace Trident {
 				stream.write<AssetSignature>(AssetSignature::MATERIAL);
 				stream.write<uint32>(asset.identifier);
 				stream.write<VersionNumber>(asset.version);
-				stream.write<uint32>(static_cast<uint32>(asset.shaderModuleName.count()));
-
-				std::copy_n(pointer_cast<const uint8*>(&asset.shaderModuleName[0]), sizeof(asset.shaderModuleName.count()), stream.getBytePosition());
-
-				stream.jump(asset.shaderModuleName.count());
-				stream.write<ShaderStage>(asset.stage);
-				stream.write<uint32>(static_cast<uint32>(asset.entryPoint.count()));
-
-				std::copy_n(pointer_cast<const uint8*>(&asset.entryPoint[0]), sizeof(asset.entryPoint.count()), stream.getBytePosition());
-
-				stream.jump(asset.entryPoint.count());
-				stream.write<uint32>(static_cast<uint32>(asset.descriptorBindingTypes.count()));
-
-				std::copy_n(pointer_cast<const uint8*>(&asset.descriptorBindingTypes[0]), sizeof(asset.descriptorBindingTypes.count()), stream.getBytePosition());
-
-				stream.jump(asset.descriptorBindingTypes.count());
+				stream.write<uint32>(asset.shaderIndex);
 				stream.write<uint32>(static_cast<uint32>(asset.descriptorImages.count()));
 
 				for (const MaterialDescriptorImage& materialDescriptorImage : asset.descriptorImages) {
-					stream.write<uint32>(materialDescriptorImage.imageAsset->getIdentifier());
+					stream.write<uint32>(materialDescriptorImage.imageAsset->identifier);
 					stream.write<uint32>(materialDescriptorImage.mipLevelOffset);
 					stream.write<uint32>(materialDescriptorImage.mipLevelCount);
 					stream.write<uint32>(materialDescriptorImage.layerOffset);

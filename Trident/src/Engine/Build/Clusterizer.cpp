@@ -21,7 +21,7 @@ namespace Trident {
 
 		ClusteredScene clusteredScene{};
 		clusteredScene.geometries = sequence<ClusteredGeometry>(scene->geometries.count());
-		clusteredScene.materialShaderCount = scene->getMaterialShaderCount();
+		clusteredScene.materialShaders = scene->getAsset()->materialShaders;
 		clusteredScene.materialAssets = scene->getMaterialAssets();
 
 		uint64 totalVertexPositionComponentCount = 0;
@@ -31,7 +31,6 @@ namespace Trident {
 		uint32 totalIndexCount = 0;
 		uint32 totalClusterCount = 0;
 		uint32 totalInstanceCount = 0;
-
 		uint32 clusterOffset = 0;
 		uint32 geometryIndex = 0;
 

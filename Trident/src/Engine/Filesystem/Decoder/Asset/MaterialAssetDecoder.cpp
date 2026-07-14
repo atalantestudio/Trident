@@ -9,38 +9,25 @@
 namespace Trident {
 	template<>
 	ref<MaterialAsset> Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary) {
-		MaterialAsset materialAsset{};
-		materialAsset.identifier = stream.read<uint32>();
-		materialAsset.version = stream.read<VersionNumber>();
-		materialAsset.shaderModuleName = sequence<char8>(stream.read<uint32>());
+		MaterialAsset asset{};
+		asset.identifier = stream.read<uint32>();
+		asset.version = stream.read<VersionNumber>();
+		asset.shaderIndex = stream.read<uint32>();
 
-		std::copy_n(pointer_cast<const char8*>(stream.getBytePosition()), materialAsset.shaderModuleName.count(), &materialAsset.shaderModuleName[0]);
+		const uint32 descriptorImageCount = stream.read<uint32>();
 
-		stream.jump(materialAsset.shaderModuleName.count());
+		asset.descriptorImages = sequence<MaterialDescriptorImage>(descriptorImageCount);
 
-		materialAsset.stage = stream.read<ShaderStage>();
-		materialAsset.entryPoint = sequence<char8>(stream.read<uint32>());
+		for (MaterialDescriptorImage& materialDescriptorImage : asset.descriptorImages) {
+			const uint32 imageAssetIdentifier = stream.read<uint32>();
 
-		std::copy_n(pointer_cast<const char8*>(stream.getBytePosition()), materialAsset.entryPoint.count(), &materialAsset.entryPoint[0]);
-
-		stream.jump(materialAsset.entryPoint.count());
-
-		materialAsset.descriptorBindingTypes = sequence<DescriptorType>(stream.read<uint32>());
-
-		std::copy_n(pointer_cast<const DescriptorType*>(stream.getBytePosition()), materialAsset.descriptorBindingTypes.count(), &materialAsset.descriptorBindingTypes[0]);
-
-		stream.jump(materialAsset.descriptorBindingTypes.count());
-
-		materialAsset.descriptorImages = sequence<MaterialDescriptorImage>(stream.read<uint32>());
-
-		for (MaterialDescriptorImage& materialDescriptorImage : materialAsset.descriptorImages) {
-			materialDescriptorImage.imageAsset = assetLibrary->getAsset<ImageAsset>(stream.read<uint32>());
+			materialDescriptorImage.imageAsset = assetLibrary->getAsset<ImageAsset>(imageAssetIdentifier);
 			materialDescriptorImage.mipLevelOffset = stream.read<uint32>();
 			materialDescriptorImage.mipLevelCount = stream.read<uint32>();
 			materialDescriptorImage.layerOffset = stream.read<uint32>();
 			materialDescriptorImage.layerCount = stream.read<uint32>();
 		}
 
-		return createRef<MaterialAsset>(materialAsset);
+		return createRef<MaterialAsset>(asset);
 	}
 }

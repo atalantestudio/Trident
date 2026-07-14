@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Descriptor.hpp"
+#include "Engine/API/Material/MaterialShader.hpp"
 #include "Engine/API/Material/StaticMaterial.hpp"
 #include "Engine/API/Scene/StaticVertex.hpp"
 #include "Engine/ECS/Component/GeometryComponent.hpp"
@@ -16,9 +17,9 @@
 #include "Engine/Filesystem/Asset/ImageAsset.hpp"
 
 namespace Trident {
-	class SceneAsset;
-	class Scene2DAsset;
-	class Scene3DAsset;
+	struct SceneAsset;
+	struct Scene2DAsset;
+	struct Scene3DAsset;
 
 	struct SceneAssetHeader : public AssetHeader {
 		uint32 staticTriangleCount;
@@ -34,7 +35,7 @@ namespace Trident {
 	};
 
 	template<>
-	struct Descriptor<SceneAsset> : public AssetDescriptor {
+	struct Descriptor<SceneAsset> : public Asset {
 		uint64 dynamicVertexPositionCount;
 		uint64 dynamicVertexTextureCoordinateCount;
 
@@ -76,14 +77,16 @@ namespace Trident {
 		sequence<svec2<float32>> staticTextureCoordinates;
 		sequence<svec2<float32>> staticLightmapCoordinates;
 		sequence<StaticTriangle3D> staticTriangles;
+		sequence<MaterialShader> materialShaders;
 		sequence<StaticMaterial3D> staticMaterials;
+		sequence<ref<MaterialAsset>> materialAssets;
 		sequence<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;
 	};
 
-	class SceneAsset : public Asset {
+	struct SceneAsset : public Asset {
 		public:
 			explicit SceneAsset(const Descriptor<SceneAsset>& descriptor) :
-				Asset(descriptor),
+				Asset{descriptor.identifier, descriptor.version},
 				dynamicVertexPositionCount(descriptor.dynamicVertexPositionCount),
 				dynamicVertexTextureCoordinateCount(descriptor.dynamicVertexTextureCoordinateCount),
 				dynamicVertexPositionIndexCount(descriptor.dynamicVertexPositionIndexCount),
@@ -148,7 +151,7 @@ namespace Trident {
 			sequence<EntityComponentMapping<MaterialComponent>> materialMappings;
 	};
 
-	class Scene2DAsset : public SceneAsset {
+	struct Scene2DAsset : public SceneAsset {
 		public:
 			explicit Scene2DAsset(const Descriptor<Scene2DAsset>& descriptor) :
 				SceneAsset(descriptor),
@@ -181,10 +184,12 @@ namespace Trident {
 			sequence<EntityComponentMapping<RigidBody2DComponent>> rigidBodyMappings;
 	};
 
-	class Scene3DAsset : public SceneAsset {
+	struct Scene3DAsset : public SceneAsset {
 		public:
 			explicit Scene3DAsset(const Descriptor<Scene3DAsset>& descriptor) :
 				SceneAsset(descriptor),
+				materialShaders(descriptor.materialShaders),
+				materialAssets(descriptor.materialAssets),
 				staticVertices(descriptor.staticVertices),
 				staticNormals(descriptor.staticNormals),
 				staticTextureCoordinates(descriptor.staticTextureCoordinates),
@@ -266,6 +271,10 @@ namespace Trident {
 			inline const sequence<EntityComponentMapping<RigidBody3DComponent>>& getRigidBodyMappings() const {
 				return rigidBodyMappings;
 			}
+
+		public:
+			sequence<MaterialShader> materialShaders;
+			sequence<ref<MaterialAsset>> materialAssets;
 
 		private:
 			sequence<svec3<float32>> staticVertices;

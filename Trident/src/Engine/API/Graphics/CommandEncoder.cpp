@@ -205,7 +205,100 @@ namespace Trident {
 	}
 
 	void CommandEncoder::copyBufferToImage(ref<Buffer> sourceBuffer, ref<Image> destinationImage, view<BufferImageCopyRegion> copyRegions) {
-		// TODO(graphics/validation)
+		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+			{
+				Validator validator;
+
+				if (sourceBuffer == nullptr) {
+					VALIDATION_ERROR("sourceBuffer must be a valid Buffer object.");
+				}
+				else {
+					if (!(sourceBuffer->getUsage() & BufferUsage::TRANSFER_SRC)) {
+						VALIDATION_ERROR("sourceBuffer must have the TRANSFER_SRC usage flag.");
+					}
+				}
+
+				if (destinationImage == nullptr) {
+					VALIDATION_ERROR("destinationImage must be a valid Image object.");
+				}
+				else {
+					if (!(destinationImage->getUsage() & ImageUsage::TRANSFER_DST)) {
+						VALIDATION_ERROR("destinationImage must have the TRANSFER_DST usage flag.");
+					}
+				}
+
+				if (sourceBuffer != nullptr && destinationImage != nullptr) {
+					uint32 copyRegionIndex = 0;
+
+					while (copyRegionIndex < copyRegions.count()) {
+						const BufferImageCopyRegion& copyRegion = copyRegions[copyRegionIndex];
+						const uint64 copyRegionSize = copyRegion.imageExtent.width * copyRegion.imageExtent.height * copyRegion.imageExtent.depth * copyRegion.imageLayerCount * getByteSize(destinationImage->getFormat());
+
+						if (copyRegion.bufferOffset >= sourceBuffer->getSize()) {
+							VALIDATION_ERROR("copyRegions[[]].bufferOffset must be less than the size of sourceBuffer.", copyRegionIndex);
+						}
+
+						if (copyRegionSize > sourceBuffer->getSize() - copyRegion.bufferOffset) {
+							VALIDATION_ERROR("The area formed by copyRegions[[]] must be less than or equal to the size of sourceBuffer - copyRegions[[]].bufferOffset.", copyRegionIndex, copyRegionIndex);
+						}
+
+						if (copyRegion.imageOffsetX >= static_cast<sint32>(destinationImage->getExtent().width)) {
+							VALIDATION_ERROR("copyRegions[[]].imageOffsetX must be less than the width of destinationImage.", copyRegionIndex);
+						}
+
+						if (copyRegion.imageOffsetY >= static_cast<sint32>(destinationImage->getExtent().height)) {
+							VALIDATION_ERROR("copyRegions[[]].imageOffsetY must be less than the height of destinationImage.", copyRegionIndex);
+						}
+
+						if (copyRegion.imageOffsetZ >= static_cast<sint32>(destinationImage->getExtent().depth)) {
+							VALIDATION_ERROR("copyRegions[[]].imageOffsetZ must be less than the depth of destinationImage.", copyRegionIndex);
+						}
+
+						if (copyRegion.imageExtent.width == 0) {
+							VALIDATION_ERROR("copyRegions[[]].imageExtent.width must be greater than 0.", copyRegionIndex);
+						}
+
+						if (copyRegion.imageExtent.height == 0) {
+							VALIDATION_ERROR("copyRegions[[]].imageExtent.height must be greater than 0.", copyRegionIndex);
+						}
+
+						if (copyRegion.imageExtent.depth == 0) {
+							VALIDATION_ERROR("copyRegions[[]].imageExtent.depth must be greater than 0.", copyRegionIndex);
+						}
+
+						if (copyRegion.imageOffsetX + copyRegion.imageExtent.width > destinationImage->getExtent().width) {
+							VALIDATION_ERROR("The width formed by copyRegions[[]] must be less than or equal to the width of destinationImage.", copyRegionIndex);
+						}
+
+						if (copyRegion.imageOffsetY + copyRegion.imageExtent.height > destinationImage->getExtent().height) {
+							VALIDATION_ERROR("The height formed by copyRegions[[]] must be less than or equal to the height of destinationImage.", copyRegionIndex);
+						}
+
+						if (copyRegion.imageOffsetZ + copyRegion.imageExtent.depth > destinationImage->getExtent().depth) {
+							VALIDATION_ERROR("The depth formed by copyRegions[[]] must be less than or equal to the depth of destinationImage.", copyRegionIndex);
+						}
+
+						if (copyRegion.imageMipLevel >= destinationImage->getMipLevelCount()) {
+							VALIDATION_ERROR("copyRegions[[]].imageMipLevel must be less than the number of mip levels in destinationImage.", copyRegionIndex);
+						}
+
+						if (copyRegion.imageLayerOffset >= destinationImage->getLayerCount()) {
+							VALIDATION_ERROR("copyRegions[[]].imageLayerOffset must be less than the number of layers in destinationImage.", copyRegionIndex);
+						}
+
+						if (copyRegion.imageLayerCount == 0) {
+							VALIDATION_ERROR("copyRegions[[]].imageLayerCount must be greater than 0.", copyRegionIndex);
+						}
+
+						if (copyRegion.imageLayerCount > destinationImage->getLayerCount() - copyRegion.imageLayerOffset) {
+							VALIDATION_ERROR("copyRegions[[]].imageLayerCount must be less than or equal to the number of layers in destinationImage - copyRegions[[]].imageLayerOffset.", copyRegionIndex, copyRegionIndex);
+						}
+
+						copyRegionIndex += 1;
+					}
+				}
+			}
+		#endif
 
 		device->adapter->copyBufferToImageImplementation(this, sourceBuffer, destinationImage, copyRegions);
 	}
@@ -245,11 +338,7 @@ namespace Trident {
 						}
 
 						if (copyRegionSize > destinationBuffer->getSize() - copyRegion.bufferOffset) {
-							VALIDATION_ERROR("The area formed by copyRegions[[]] must be less than or equal to the size of destinationBuffer.", copyRegionIndex);
-						}
-
-						if (copyRegion.bufferOffset >= destinationBuffer->getSize()) {
-							VALIDATION_ERROR("copyRegions[[]].bufferOffset must be less than the size of destinationBuffer.", copyRegionIndex);
+							VALIDATION_ERROR("The area formed by copyRegions[[]] must be less than or equal to the size of destinationBuffer - copyRegions[[]].bufferOffset.", copyRegionIndex, copyRegionIndex);
 						}
 
 						if (copyRegion.imageOffsetX >= static_cast<sint32>(sourceImage->getExtent().width)) {
@@ -289,15 +378,19 @@ namespace Trident {
 						}
 
 						if (copyRegion.imageMipLevel >= sourceImage->getMipLevelCount()) {
-							VALIDATION_ERROR("copyRegions[[]].imageMipLevel must be less than the number of mip levels in the source image.", copyRegionIndex);
+							VALIDATION_ERROR("copyRegions[[]].imageMipLevel must be less than the number of mip levels in sourceImage.", copyRegionIndex);
 						}
 
 						if (copyRegion.imageLayerOffset >= sourceImage->getLayerCount()) {
-							VALIDATION_ERROR("copyRegions[[]].imageLayerOffset must be less than the number of layers in the source image.", copyRegionIndex);
+							VALIDATION_ERROR("copyRegions[[]].imageLayerOffset must be less than the number of layers in sourceImage.", copyRegionIndex);
 						}
 
 						if (copyRegion.imageLayerCount == 0) {
 							VALIDATION_ERROR("copyRegions[[]].imageLayerCount must be greater than 0.", copyRegionIndex);
+						}
+
+						if (copyRegion.imageLayerCount > sourceImage->getLayerCount() - copyRegion.imageLayerOffset) {
+							VALIDATION_ERROR("copyRegions[[]].imageLayerCount must be less than or equal to the number of layers in sourceImage - copyRegions[[]].imageLayerOffset.", copyRegionIndex, copyRegionIndex);
 						}
 
 						copyRegionIndex += 1;

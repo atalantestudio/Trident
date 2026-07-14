@@ -57,24 +57,10 @@ void main() {
 	uint textureCoordinateOffset = triangleVertex.textureCoordinateIndex * 2u;
 	uint lightmapCoordinateOffset = triangleVertex.lightmapCoordinateIndex * 2u;
 
-	vec3 vertex = vec3(
-		vertexBuffer[vertexOffset + 0u],
-		vertexBuffer[vertexOffset + 1u],
-		vertexBuffer[vertexOffset + 2u]
-	);
-	vec3 normal = vec3(
-		normalBuffer[normalOffset + 0u],
-		normalBuffer[normalOffset + 1u],
-		normalBuffer[normalOffset + 2u]
-	);
-	vec2 textureCoordinate = vec2(
-		textureCoordinateBuffer[textureCoordinateOffset + 0u],
-		textureCoordinateBuffer[textureCoordinateOffset + 1u]
-	);
-	vec2 lightmapCoordinate = vec2(
-		lightmapCoordinateBuffer[lightmapCoordinateOffset + 0u],
-		lightmapCoordinateBuffer[lightmapCoordinateOffset + 1u]
-	);
+	vec3 vertex = vec3(vertexBuffer[vertexOffset + 0u], vertexBuffer[vertexOffset + 1u], vertexBuffer[vertexOffset + 2u]);
+	vec3 normal = vec3(normalBuffer[normalOffset + 0u], normalBuffer[normalOffset + 1u], normalBuffer[normalOffset + 2u]);
+	vec2 textureCoordinate = vec2(textureCoordinateBuffer[textureCoordinateOffset + 0u], textureCoordinateBuffer[textureCoordinateOffset + 1u]);
+	vec2 lightmapCoordinate = vec2(lightmapCoordinateBuffer[lightmapCoordinateOffset + 0u], lightmapCoordinateBuffer[lightmapCoordinateOffset + 1u]);
 
 	gl_Position = camera.projectionView * vec4(vertex, 1.0);
 

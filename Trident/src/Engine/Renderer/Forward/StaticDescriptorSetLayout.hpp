@@ -49,13 +49,6 @@ namespace Trident {
 				.descriptorCount = 1,
 				.shaderStages = ShaderStage::VERTEX,
 			},
-
-			// Lightmap atlas
-			{
-				.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
-				.descriptorCount = 1,
-				.shaderStages = ShaderStage::FRAGMENT,
-			},
 		});
 	}
 }

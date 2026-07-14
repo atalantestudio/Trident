@@ -7,7 +7,7 @@
 #include "Engine/Font/Glyph.hpp"
 
 namespace Trident {
-	struct FontAssetDescriptor : public AssetDescriptor {
+	struct FontAssetDescriptor : public Asset {
 		ref<ImageAsset> glyphMapImage;
 		sint16 ascent;
 		sint32 lineHeight;
@@ -17,10 +17,10 @@ namespace Trident {
 		std::unordered_map<GlyphPair, sint16> kerningPairs;
 	};
 
-	class FontAsset : public Asset {
+	struct FontAsset : public Asset {
 		public:
 			explicit FontAsset(const FontAssetDescriptor& descriptor) :
-				Asset(descriptor),
+				Asset{descriptor.identifier, descriptor.version},
 				glyphMapImage(descriptor.glyphMapImage),
 				ascent(descriptor.ascent),
 				lineHeight(descriptor.lineHeight),

@@ -105,7 +105,7 @@ namespace Trident {
 		const uint32 assetIndex = static_cast<uint32>(assets.size());
 		const sequence<char8> stem = absolutePath.stem().string();
 
-		assetIdentifierToIndex.insert({fontAsset->getIdentifier(), assetIndex});
+		assetIdentifierToIndex.insert({fontAsset->identifier, assetIndex});
 		fontAssetPathToIndex.insert({stem, assetIndex});
 		assets.emplace_back(fontAsset);
 	}
@@ -127,7 +127,7 @@ namespace Trident {
 		const uint32 assetIndex = static_cast<uint32>(assets.size());
 		const sequence<char8> stem = absolutePath.stem().string();
 
-		assetIdentifierToIndex.insert({geometryAsset->getIdentifier(), assetIndex});
+		assetIdentifierToIndex.insert({geometryAsset->identifier, assetIndex});
 		geometryAssetPathToIndex.insert({stem, assetIndex});
 		assets.emplace_back(geometryAsset);
 	}
@@ -149,7 +149,7 @@ namespace Trident {
 		const uint32 assetIndex = static_cast<uint32>(assets.size());
 		const sequence<char8> stem = absolutePath.stem().string();
 
-		assetIdentifierToIndex.insert({imageAsset->getIdentifier(), assetIndex});
+		assetIdentifierToIndex.insert({imageAsset->identifier, assetIndex});
 		imageAssetPathToIndex.insert({stem, assetIndex});
 		assets.emplace_back(imageAsset);
 	}
@@ -193,7 +193,7 @@ namespace Trident {
 		const uint32 assetIndex = static_cast<uint32>(assets.size());
 		const sequence<char8> stem = absolutePath.stem().string();
 
-		assetIdentifierToIndex.insert({sceneAsset->getIdentifier(), assetIndex});
+		assetIdentifierToIndex.insert({sceneAsset->identifier, assetIndex});
 		sceneAssetPathToIndex.insert({stem, assetIndex});
 		assets.emplace_back(sceneAsset);
 	}
@@ -215,7 +215,7 @@ namespace Trident {
 		const uint32 assetIndex = static_cast<uint32>(assets.size());
 		const sequence<char8> stem = absolutePath.stem().string();
 
-		assetIdentifierToIndex.insert({sceneAsset->getIdentifier(), assetIndex});
+		assetIdentifierToIndex.insert({sceneAsset->identifier, assetIndex});
 		sceneAssetPathToIndex.insert({stem, assetIndex});
 		assets.emplace_back(sceneAsset);
 	}
@@ -237,7 +237,7 @@ namespace Trident {
 		const uint32 assetIndex = static_cast<uint32>(assets.size());
 		const sequence<char8> stem = absolutePath.stem().string();
 
-		assetIdentifierToIndex.insert({shaderModuleAsset->getIdentifier(), assetIndex});
+		assetIdentifierToIndex.insert({shaderModuleAsset->identifier, assetIndex});
 		shaderModuleAssetPathToIndex.insert({stem, assetIndex});
 		assets.emplace_back(shaderModuleAsset);
 	}

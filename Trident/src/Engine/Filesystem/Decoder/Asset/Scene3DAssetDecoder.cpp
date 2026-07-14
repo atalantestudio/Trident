@@ -50,7 +50,9 @@ namespace Trident {
 			descriptor.lightmapAtlasImageAsset = assetLibrary->getAsset<ImageAsset>(lightmapAtlasImageAssetIdentifier);
 		}
 
-		descriptor.staticMaterials = sequence<StaticMaterial3D>(stream.read<uint32>());
+		descriptor.materialShaders = sequence<MaterialShader>(stream.read<uint32>());
+		descriptor.materialAssets = sequence<ref<MaterialAsset>>(stream.read<uint32>());
+		descriptor.staticMaterials = sequence<StaticMaterial3D>(descriptor.materialAssets.count());
 
 		for (StaticTriangle3D& triangle : descriptor.staticTriangles) {
 			uint32 vertexIndex = 0;
@@ -83,8 +85,20 @@ namespace Trident {
 			lightmapCoordinate = stream.read<svec2<float32>>();
 		}
 
+		for (MaterialShader& materialShader : descriptor.materialShaders) {
+			materialShader.shaderModuleAsset = decodeAsset<ShaderModuleAsset>(stream, assetLibrary);
+			materialShader.materialAssetRange.offset = stream.read<uint32>();
+			materialShader.materialAssetRange.count = stream.read<uint32>();
+		}
+
+		for (ref<MaterialAsset>& materialAsset : descriptor.materialAssets) {
+			const uint32 identifier = stream.read<uint32>();
+
+			materialAsset = assetLibrary->getAsset<MaterialAsset>(identifier);
+		}
+
 		for (StaticMaterial3D& staticMaterial : descriptor.staticMaterials) {
-			staticMaterial.materialAsset = assetLibrary->getAsset<MaterialAsset>(stream.read<uint32>());
+			staticMaterial.index = stream.read<uint32>();
 			staticMaterial.triangleRange.offset = stream.read<uint32>();
 			staticMaterial.triangleRange.count = stream.read<uint32>();
 		}

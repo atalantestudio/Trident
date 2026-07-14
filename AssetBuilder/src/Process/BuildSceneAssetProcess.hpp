@@ -157,18 +157,30 @@ namespace Trident {
 				header.materialMappingCount = static_cast<uint32>(data.materialMappings.count());
 				header.rigidBodyMappingCount = static_cast<uint32>(data.rigidBodyMappings.count());
 
-				const uint64 size =
-					sizeof(header) + 2 * sizeof(uint32) +
+				uint64 size = (
+					sizeof(header) + 3 * sizeof(uint32) +
 					header.staticTriangleCount * sizeof(StaticTriangle3D) +
 					header.staticVertexCount * sizeof(svec3<float32>) +
 					header.staticNormalCount * sizeof(svec3<float32>) +
 					header.staticTextureCoordinateCount * sizeof(svec2<float32>) +
 					header.staticLightmapCoordinateCount * sizeof(svec2<float32>) +
-					data.staticScene.materials.count() * sizeof(BuildStaticMaterial3D) +
+					data.staticScene.materials.count() * (sizeof(uint32) * 4) +
 					header.geometryAssetCount * sizeof(uint32) +
 					header.geometryMappingCount * (sizeof(Entity) + sizeof(uint32)) +
 					header.materialMappingCount * (sizeof(Entity) + sizeof(uint32)) +
-					header.rigidBodyMappingCount * (sizeof(Entity) + sizeof(svec3<float32>) * 7 + sizeof(float32) * 4);
+					header.rigidBodyMappingCount * (sizeof(Entity) + sizeof(svec3<float32>) * 7 + sizeof(float32) * 4)
+				);
+
+				for (const BuildMaterialShader& materialShader : data.staticScene.materialShaders) {
+					size += (
+						6 * sizeof(uint32) +
+						sizeof(VersionNumber) +
+						materialShader.name.count() +
+						sizeof(ShaderStage) +
+						materialShader.entryPoint.count() +
+						materialShader.descriptorSetLayoutBindings.count() * (sizeof(DescriptorType) + sizeof(uint32) + sizeof(ShaderStage))
+					);
+				}
 
 				ByteStream<StreamOperation::WRITE> stream(size, Endianness::LITTLE_ENDIAN);
 
@@ -176,17 +188,19 @@ namespace Trident {
 
 				stream.jump(sizeof(header));
 				stream.write<uint32>(data.staticScene.lightmapAtlasImageAssetIdentifier);
+				stream.write<uint32>(static_cast<uint32>(data.staticScene.materialShaders.count()));
 				stream.write<uint32>(static_cast<uint32>(data.staticScene.materials.count()));
 
 				for (const StaticTriangle3D& triangle : data.staticScene.triangles) {
-					const view<StaticVertex3D> vertices(&triangle.vertices[0], 3);
-
-					for (const StaticVertex3D& vertex : vertices) {
-						stream.write<uint32>(vertex.vertexIndex);
-						stream.write<uint32>(vertex.textureCoordinateIndex);
-						stream.write<uint32>(vertex.lightmapCoordinateIndex);
-					}
-
+					stream.write<uint32>(triangle.vertices[0].vertexIndex);
+					stream.write<uint32>(triangle.vertices[0].textureCoordinateIndex);
+					stream.write<uint32>(triangle.vertices[0].lightmapCoordinateIndex);
+					stream.write<uint32>(triangle.vertices[1].vertexIndex);
+					stream.write<uint32>(triangle.vertices[1].textureCoordinateIndex);
+					stream.write<uint32>(triangle.vertices[1].lightmapCoordinateIndex);
+					stream.write<uint32>(triangle.vertices[2].vertexIndex);
+					stream.write<uint32>(triangle.vertices[2].textureCoordinateIndex);
+					stream.write<uint32>(triangle.vertices[2].lightmapCoordinateIndex);
 					stream.write<uint32>(triangle.normalIndex);
 				}
 
@@ -206,8 +220,38 @@ namespace Trident {
 					stream.write<svec2<float32>>(lightmapCoordinate);
 				}
 
+				for (const BuildMaterialShader& materialShader : data.staticScene.materialShaders) {
+					stream.write<uint32>(0);
+					stream.write<VersionNumber>({0, 0, 0});
+					stream.write<uint32>(static_cast<uint32>(materialShader.name.count()));
+
+					std::copy_n(&materialShader.name[0], materialShader.name.count(), pointer_cast<char8*>(stream.getBytePosition()));
+
+					stream.jump(materialShader.name.count());
+					stream.write<ShaderStage>(materialShader.stage);
+					stream.write<uint32>(static_cast<uint32>(materialShader.entryPoint.count()));
+
+					std::copy_n(&materialShader.entryPoint[0], materialShader.entryPoint.count(), pointer_cast<char8*>(stream.getBytePosition()));
+
+					stream.jump(materialShader.entryPoint.count());
+					stream.write<uint32>(static_cast<uint32>(materialShader.descriptorSetLayoutBindings.count()));
+
+					for (const DescriptorSetLayoutBinding& binding : materialShader.descriptorSetLayoutBindings) {
+						stream.write<DescriptorType>(binding.descriptorType);
+						stream.write<uint32>(binding.descriptorCount);
+						stream.write<ShaderStage>(binding.shaderStages);
+					}
+
+					stream.write<uint32>(materialShader.materialAssetRange.offset);
+					stream.write<uint32>(materialShader.materialAssetRange.count);
+				}
+
 				for (const BuildStaticMaterial3D& staticMaterial : data.staticScene.materials) {
 					stream.write<uint32>(staticMaterial.identifier);
+				}
+
+				for (const BuildStaticMaterial3D& staticMaterial : data.staticScene.materials) {
+					stream.write<uint32>(staticMaterial.shaderIndex);
 					stream.write<uint32>(staticMaterial.triangleRange.offset);
 					stream.write<uint32>(staticMaterial.triangleRange.count);
 				}

@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include "Engine/Filesystem/Asset/ShaderModuleAsset.hpp"
-
 namespace Trident {
 	enum class AcquireNextImageStatus : uint8;
 	enum class ImageLayout : uint8;
@@ -13,6 +11,8 @@ namespace Trident {
 	enum class PipelineStage : uint8;
 	enum class PresentStatus : uint8;
 	enum class QueueFamilyCapability : uint8;
+
+	struct ShaderModuleAsset;
 
 	struct AttachmentImageDescriptor;
 	struct BeginRenderPassDescriptor;

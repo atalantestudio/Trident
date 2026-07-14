@@ -7,7 +7,7 @@
 
 namespace Trident {
 	struct StaticMaterial3D {
-		ref<MaterialAsset> materialAsset;
+		uint32 index;
 		range<uint32, uint32> triangleRange;
 
 		// TODO(asset-builder/lightmapper): Use when generating the lightmaps.

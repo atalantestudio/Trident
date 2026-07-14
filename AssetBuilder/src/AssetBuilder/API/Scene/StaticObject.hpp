@@ -20,21 +20,11 @@ namespace Trident {
 		svec2<float32> scale;
 	};
 
-	struct StaticObjectDescriptor {
-		view<char8> label;
-		view<char8> geometryAssetName;
-		Transform transform;
-		TextureFilteringDescriptor textureFiltering;
-		uint32 materialIndex;
-
-		/// Applies to all faces.
-		svec2<float32> lightmapPixelScale;
-	};
-
 	struct StaticObject {
+		view<char8> label;
 		ref<GeometryAsset> geometryAsset;
 		Transform transform;
-		mat3x3<float32> texture;
+		TextureFilteringDescriptor textureFiltering;
 		uint32 materialIndex;
 
 		/// Applies to all faces.

@@ -9,8 +9,25 @@ namespace Trident {
 	InteriorSceneBuilder::InteriorSceneBuilder(std::filesystem::path rootOutputPath, view<char8> assetName) :
 		StaticSceneBuilder(rootOutputPath, assetName)
 	{
-		allocateMaterials(1);
-		insertMaterial(0, 100);
+		addMaterialShader(
+			"Lightmapped.frag",
+			ShaderStage::FRAGMENT,
+			"main",
+			{
+				{
+					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+					.descriptorCount = 1,
+					.shaderStages = ShaderStage::FRAGMENT,
+				},
+				{
+					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+					.descriptorCount = 1,
+					.shaderStages = ShaderStage::FRAGMENT,
+				},
+			}
+		);
+
+		addMaterial(100, 0);
 	}
 
 	uint32 InteriorSceneBuilder::addFloorLevel(float32 level) {
@@ -28,6 +45,9 @@ namespace Trident {
 	void InteriorSceneBuilder::addRoom(uint32 baseFloorLevelIndex, float32 sizeX, float32 sizeZ) {
 		DEBUG_ASSERT(floorLevels.size() > baseFloorLevelIndex + 1);
 
+		// Texture scale multiplier
+		constexpr float32 m1 = 1.0f / 256.0f;
+
 		const float32 floorLevel = floorLevels[baseFloorLevelIndex];
 		const float32 ceilingLevel = floorLevels[baseFloorLevelIndex + 1];
 		const float32 sizeY = ceilingLevel - floorLevel;
@@ -37,7 +57,6 @@ namespace Trident {
 
 		// Floor (towards +Y)
 		createStaticObject({
-			.geometryAssetName = "UnitPlane",
 			.transform = {
 				.position = {0.0f, floorLevel, 0.0f},
 				.rotation = {0.0f, 0.0f, 0.0f},
@@ -46,7 +65,7 @@ namespace Trident {
 			.textureFiltering = {
 				.translation = {0.0f, 0.0f},
 				.rotation = 0.0f,
-				.scale = {1.0f, 1.0f},
+				.scale = {m1 / 0.25f, m1 / 0.25f},
 			},
 			.materialIndex = 0,
 			.lightmapPixelScale = {4.0f, 4.0f},
@@ -54,16 +73,15 @@ namespace Trident {
 
 		// Ceiling (towards -Y)
 		createStaticObject({
-			.geometryAssetName = "UnitPlane",
 			.transform = {
 				.position = {0.0f, ceilingLevel, 0.0f},
-				.rotation = {pi<float32>(), 0.0f, 0.0f},
+				.rotation = {0.0f, 0.0f, pi<float32>()},
 				.scale = {sizeX, 0.0f, sizeZ},
 			},
 			.textureFiltering = {
 				.translation = {0.0f, 0.0f},
 				.rotation = 0.0f,
-				.scale = {1.0f, 1.0f},
+				.scale = {m1 / 0.25f, m1 / 0.25f},
 			},
 			.materialIndex = 0,
 			.lightmapPixelScale = {4.0f, 4.0f},
@@ -71,16 +89,15 @@ namespace Trident {
 
 		// Left wall (towards +X)
 		createStaticObject({
-			.geometryAssetName = "UnitPlane",
 			.transform = {
 				.position = {-halfSizeX, floorLevel + halfSizeY, 0.0f},
-				.rotation = {0.0f, 0.0f, -pi<float32>() * 0.5f},
-				.scale = {0.0f, sizeY, sizeZ},
+				.rotation = {0.0f, pi<float32>() * 0.5f, pi<float32>() * 0.5f},
+				.scale = {sizeZ, 0.0f, sizeY},
 			},
 			.textureFiltering = {
 				.translation = {0.0f, 0.0f},
 				.rotation = 0.0f,
-				.scale = {1.0f, 1.0f},
+				.scale = {m1 / 0.25f, m1 / 0.25f},
 			},
 			.materialIndex = 0,
 			.lightmapPixelScale = {4.0f, 4.0f},
@@ -88,16 +105,15 @@ namespace Trident {
 
 		// Right wall (towards -X)
 		createStaticObject({
-			.geometryAssetName = "UnitPlane",
 			.transform = {
 				.position = {halfSizeX, floorLevel + halfSizeY, 0.0f},
-				.rotation = {0.0f, 0.0f, pi<float32>() * 0.5f},
-				.scale = {0.0f, sizeY, sizeZ},
+				.rotation = {0.0f, -pi<float32>() * 0.5f, -pi<float32>() * 0.5f},
+				.scale = {sizeZ, 0.0f, sizeY},
 			},
 			.textureFiltering = {
 				.translation = {0.0f, 0.0f},
 				.rotation = 0.0f,
-				.scale = {1.0f, 1.0f},
+				.scale = {m1 / 0.25f, m1 / 0.25f},
 			},
 			.materialIndex = 0,
 			.lightmapPixelScale = {4.0f, 4.0f},
@@ -105,16 +121,15 @@ namespace Trident {
 
 		// Back wall (towards +Z)
 		createStaticObject({
-			.geometryAssetName = "UnitPlane",
 			.transform = {
 				.position = {0.0f, floorLevel + halfSizeY, -halfSizeZ},
-				.rotation = {pi<float32>() * 0.5f, 0.0f, 0.0f},
-				.scale = {sizeX, sizeY, 0.0f},
+				.rotation = {-pi<float32>() * 0.5f, 0.0f, pi<float32>()},
+				.scale = {sizeX, 0.0f, sizeY},
 			},
 			.textureFiltering = {
 				.translation = {0.0f, 0.0f},
 				.rotation = 0.0f,
-				.scale = {1.0f, 1.0f},
+				.scale = {m1 / 0.25f, m1 / 0.25f},
 			},
 			.materialIndex = 0,
 			.lightmapPixelScale = {4.0f, 4.0f},
@@ -122,16 +137,15 @@ namespace Trident {
 
 		// Front wall (towards -Z)
 		createStaticObject({
-			.geometryAssetName = "UnitPlane",
 			.transform = {
 				.position = {0.0f, floorLevel + halfSizeY, halfSizeZ},
-				.rotation = {-pi<float32>() * 0.5f, 0.0f, 0.0f},
-				.scale = {sizeX, sizeY, 0.0f},
+				.rotation = {pi<float32>() * 0.5f, 0.0f, 0.0f},
+				.scale = {sizeX, 0.0f, sizeY},
 			},
 			.textureFiltering = {
 				.translation = {0.0f, 0.0f},
 				.rotation = 0.0f,
-				.scale = {1.0f, 1.0f},
+				.scale = {m1 / 0.25f, m1 / 0.25f},
 			},
 			.materialIndex = 0,
 			.lightmapPixelScale = {4.0f, 4.0f},

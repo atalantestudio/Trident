@@ -25,7 +25,7 @@ namespace Trident {
 		sequence<uint32> vertexNormalIndices;
 		sequence<uint32> vertexTextureCoordinateIndices;
 
-		uint32 materialShaderCount;
+		sequence<MaterialShader> materialShaders;
 		std::vector<std::vector<ref<MaterialAsset>>> materialAssets;
 	};
 }

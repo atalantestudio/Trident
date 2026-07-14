@@ -36,7 +36,9 @@ namespace Trident {
 
 		uint32 materialShaderIndex = 0;
 
-		while (materialShaderIndex < scene->materialShaderCount) {
+		while (materialShaderIndex < scene->materialShaders.count()) {
+			const MaterialShader& materialShader = scene->materialShaders[materialShaderIndex];
+			const ref<ShaderModuleAsset> materialShaderModuleAsset = materialShader.shaderModuleAsset;
 			const std::vector<ref<MaterialAsset>>& materialAssets = scene->materialAssets[materialShaderIndex];
 
 			#if defined(DEBUG_OBJECT_NAME)
@@ -48,33 +50,23 @@ namespace Trident {
 				materialShaderPipelineDescriptor.name = materialShaderName;
 			#endif
 
-			/* sequence<DescriptorSetLayoutBinding> descriptorSetLayoutBindings(materialAssets[0]->descriptorBindingTypes.count());
+			/* sequence<DescriptorSetLayoutBinding> descriptorSetLayoutBindings(materialShaderModuleAsset->descriptorSetLayoutBindings.count());
 			uint32 descriptorSetLayoutBindingIndex = 0;
 
 			while (descriptorSetLayoutBindingIndex < descriptorSetLayoutBindings.count()) {
 				DescriptorSetLayoutBinding& descriptorSetLayoutBinding = descriptorSetLayoutBindings[descriptorSetLayoutBindingIndex];
-				descriptorSetLayoutBinding.descriptorType = materialAssets[0]->descriptorBindingTypes[descriptorSetLayoutBindingIndex];
+				descriptorSetLayoutBinding.descriptorType = materialShaderModuleAsset->descriptorSetLayoutBindings[descriptorSetLayoutBindingIndex];
 				descriptorSetLayoutBinding.descriptorCount = 1;
-				descriptorSetLayoutBinding.shaderStages = materialAssets[0]->stage;
+				descriptorSetLayoutBinding.shaderStages = materialShaderModuleAsset->stage;
 
 				descriptorSetLayoutBindingIndex += 1;
 			} */
 
-			sequence<DescriptorSetLayoutBinding> userDescriptorSetLayoutBindings(materialAssets[0]->descriptorBindingTypes.count() + 1);
+			sequence<DescriptorSetLayoutBinding> userDescriptorSetLayoutBindings(materialShaderModuleAsset->descriptorSetLayoutBindings.count() + 1);
 			userDescriptorSetLayoutBindings[0] = materialOffsetBinding;
 
-			if (materialAssets[0]->descriptorBindingTypes.count() > 0) {
-				uint32 descriptorSetLayoutBindingIndex = 0;
-
-				while (descriptorSetLayoutBindingIndex < materialAssets[0]->descriptorBindingTypes.count()) {
-					userDescriptorSetLayoutBindings[1 + descriptorSetLayoutBindingIndex] = {
-						.descriptorType = materialAssets[0]->descriptorBindingTypes[descriptorSetLayoutBindingIndex],
-						.descriptorCount = 1,
-						.shaderStages = materialAssets[0]->stage,
-					};
-
-					descriptorSetLayoutBindingIndex += 1;
-				}
+			if (materialShaderModuleAsset->descriptorSetLayoutBindings.count() > 0) {
+				std::copy(materialShaderModuleAsset->descriptorSetLayoutBindings.begin(), materialShaderModuleAsset->descriptorSetLayoutBindings.end(), &userDescriptorSetLayoutBindings[1]);
 			}
 
 			materialShaderUserDescriptorSetLayouts[materialShaderIndex] = createDescriptorSetLayout(userDescriptorSetLayoutBindings);
@@ -86,10 +78,10 @@ namespace Trident {
 
 			materialShaderPipelineDescriptor.pipelineLayout = materialShaderPipelineLayouts[materialShaderIndex];
 
-			sequence<char8> path(9 + materialAssets[0]->shaderModuleName.count());
+			sequence<char8> path(9 + materialShaderModuleAsset->name.count());
 
 			std::copy_n("Material/", 9, &path[0]);
-			std::copy_n(&materialAssets[0]->shaderModuleName[0], materialAssets[0]->shaderModuleName.count(), &path[9]);
+			std::copy_n(&materialShaderModuleAsset->name[0], materialShaderModuleAsset->name.count(), &path[9]);
 
 			materialShaderPipelineDescriptor.computeShaderModule = loadInternalShaderModule(materialShaderModuleDescriptor, path);
 
@@ -97,8 +89,8 @@ namespace Trident {
 
 			uint32 descriptorSetLayoutBindingIndex = 0;
 
-			while (descriptorSetLayoutBindingIndex < materialAssets[0]->descriptorBindingTypes.count()) {
-				const DescriptorType descriptorType = materialAssets[0]->descriptorBindingTypes[descriptorSetLayoutBindingIndex];
+			while (descriptorSetLayoutBindingIndex < materialShaderModuleAsset->descriptorSetLayoutBindings.count()) {
+				const DescriptorType descriptorType = materialShaderModuleAsset->descriptorSetLayoutBindings[descriptorSetLayoutBindingIndex].descriptorType;
 
 				switch (descriptorType) {
 					case DescriptorType::COMBINED_IMAGE_SAMPLER: {
@@ -129,7 +121,7 @@ namespace Trident {
 				descriptorSetLayoutBindingIndex += 1;
 			}
 
-			imageCount += static_cast<uint32>(materialAssets[0]->descriptorBindingTypes.count());
+			imageCount += static_cast<uint32>(materialShaderModuleAsset->descriptorSetLayoutBindings.count());
 
 			materialShaderIndex += 1;
 		}
@@ -165,7 +157,9 @@ namespace Trident {
 		uint32 imageIndex = 0;
 		uint32 writeDescriptorSetIndex = 0;
 
-		while (materialShaderIndex < scene->materialShaderCount) {
+		while (materialShaderIndex < scene->materialShaders.count()) {
+			const MaterialShader& materialShader = scene->materialShaders[materialShaderIndex];
+			const ref<ShaderModuleAsset> materialShaderModuleAsset = materialShader.shaderModuleAsset;
 			const std::vector<ref<MaterialAsset>>& materialAssets = scene->materialAssets[materialShaderIndex];
 			const ref<DescriptorSet> materialShaderUserDescriptorSet = materialShaderUserDescriptorSets[materialShaderIndex];
 
@@ -184,8 +178,8 @@ namespace Trident {
 
 			uint32 descriptorSetLayoutBindingIndex = 0;
 
-			while (descriptorSetLayoutBindingIndex < materialAssets[0]->descriptorBindingTypes.count()) {
-				const DescriptorType descriptorType = materialAssets[0]->descriptorBindingTypes[descriptorSetLayoutBindingIndex];
+			while (descriptorSetLayoutBindingIndex < materialShaderModuleAsset->descriptorSetLayoutBindings.count()) {
+				const DescriptorType descriptorType = materialShaderModuleAsset->descriptorSetLayoutBindings[descriptorSetLayoutBindingIndex].descriptorType;
 
 				switch (descriptorType) {
 					case DescriptorType::COMBINED_IMAGE_SAMPLER: {
@@ -251,11 +245,12 @@ namespace Trident {
 	/// This image is layered, with each layer corresponding to the actual image provided by a material, in order. This helps reduce the total number of images created.
 	void VisibilityRenderer::createMaterialObjects() {
 		const ref<Device> device = getDevice();
+		const uint32 materialShaderCount = static_cast<uint32>(scene->materialShaders.count());
 
-		materialShaderUserDescriptorSetLayouts = sequence<ref<DescriptorSetLayout>>(scene->materialShaderCount);
-		materialShaderUserDescriptorSets = sequence<ref<DescriptorSet>>(scene->materialShaderCount);
-		materialShaderPipelineLayouts = sequence<ref<PipelineLayout>>(scene->materialShaderCount);
-		materialShaderPipelines = sequence<ref<ComputePipeline>>(scene->materialShaderCount);
+		materialShaderUserDescriptorSetLayouts = sequence<ref<DescriptorSetLayout>>(materialShaderCount);
+		materialShaderUserDescriptorSets = sequence<ref<DescriptorSet>>(materialShaderCount);
+		materialShaderPipelineLayouts = sequence<ref<PipelineLayout>>(materialShaderCount);
+		materialShaderPipelines = sequence<ref<ComputePipeline>>(materialShaderCount);
 
 		uint32 imageCount = 0;
 		uint32 imageAssetCount = 0;
@@ -278,7 +273,7 @@ namespace Trident {
 		materialShaderImageViews = sequence<ref<ImageView>>(imageCount);
 
 		sequence<ImageMemoryBarrier> imageMemoryBarriers(imageCount);
-		sequence<ref<BaseBufferView>> materialOffsetViews(scene->materialShaderCount);
+		sequence<ref<BaseBufferView>> materialOffsetViews(materialShaderCount);
 		sequence<DescriptorImage> descriptorImages(imageCount);
 		sequence<WriteDescriptorSet> writeDescriptorSets(materialOffsetViews.count() + descriptorImages.count());
 
@@ -313,14 +308,16 @@ namespace Trident {
 		commandEncoder->begin();
 		commandEncoder->insertMemoryBarriers({}, imageMemoryBarriers);
 
-		while (materialShaderIndex < scene->materialShaderCount) {
+		while (materialShaderIndex < materialShaderCount) {
+			const MaterialShader& materialShader = scene->materialShaders[materialShaderIndex];
+			const ref<ShaderModuleAsset> materialShaderModuleAsset = materialShader.shaderModuleAsset;
 			const std::vector<ref<MaterialAsset>>& materialAssets = scene->materialAssets[materialShaderIndex];
 
 			sequence<BufferImageCopyRegion> copyRegions(materialAssets.size());
 			uint32 descriptorSetLayoutBindingIndex = 0;
 
-			while (descriptorSetLayoutBindingIndex < materialAssets[0]->descriptorBindingTypes.count()) {
-				const DescriptorType descriptorType = materialAssets[0]->descriptorBindingTypes[descriptorSetLayoutBindingIndex];
+			while (descriptorSetLayoutBindingIndex < materialShaderModuleAsset->descriptorSetLayoutBindings.count()) {
+				const DescriptorType descriptorType = materialShaderModuleAsset->descriptorSetLayoutBindings[descriptorSetLayoutBindingIndex].descriptorType;
 
 				switch (descriptorType) {
 					case DescriptorType::COMBINED_IMAGE_SAMPLER: {

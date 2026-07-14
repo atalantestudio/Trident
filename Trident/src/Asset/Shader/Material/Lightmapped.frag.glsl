@@ -11,7 +11,8 @@ in Interstage {
 	layout(location = 2) vec2 lightmapCoordinate;
 } interstage;
 
-layout(set = 0, binding = 6) uniform sampler2D lightmapAtlasSampler;
+layout(set = 1, binding = 0) uniform sampler2D diffuseSampler;
+layout(set = 1, binding = 1) uniform sampler2D lightmapAtlasSampler;
 
 layout(location = 0) out vec4 fragment;
 
@@ -62,7 +63,10 @@ vec4 sampleBicubic(sampler2D textureSampler, vec2 coordinate) {
 }
 
 void main() {
-	fragment = sampleBicubic(lightmapAtlasSampler, interstage.lightmapCoordinate);
+	vec4 diffuse = texture(diffuseSampler, interstage.textureCoordinate);
+	vec4 light = sampleBicubic(lightmapAtlasSampler, interstage.lightmapCoordinate);
+
+	fragment = diffuse * light;
 
 	fragment.rgb = fragment.rgb / (fragment.rgb + 1.0);
 	fragment.rgb = pow(fragment.rgb, vec3(1.0 / 2.2));

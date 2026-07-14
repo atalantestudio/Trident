@@ -40,13 +40,10 @@ namespace Trident {
 
 				registerProcess<BuildGeometryAssetProcess>(&assetMap);
 				registerProcess<BuildImageAssetProcess>(&assetMap);
-				registerProcess<BuildMaterialAssetProcess>(&assetMap);
 				registerProcess<BuildSceneAssetProcess>(&assetMap);
+				registerProcess<BuildMaterialAssetProcess>(&assetMap);
 				registerProcess<BuildShaderModuleAssetProcess>(&assetMap);
-
-				// NOTE: Font assets depend on image assets.
 				registerProcess<BuildFontAssetProcess>(&assetMap);
-
 				registerProcess<BuildAssetMapProcess>(&assetMap);
 			}
 

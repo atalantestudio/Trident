@@ -61,35 +61,35 @@ namespace Trident {
 					stream.close();
 				}
 
-				ShaderModuleAssetDescriptor shaderModuleAssetDescriptor{};
-				shaderModuleAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
-				shaderModuleAssetDescriptor.version = {1, 0, 0};
-				shaderModuleAssetDescriptor.glslCode = glslDescriptor.glslCode;
-				shaderModuleAssetDescriptor.glslEntryPointActivationOffsets = glslDescriptor.glslEntryPointActivationOffsets;
+				ShaderModuleAsset asset{};
+				asset.identifier = AssetLibrary::createAssetIdentifier();
+				asset.version = {1, 0, 0};
+				asset.glslCode = glslDescriptor.glslCode;
+				asset.glslEntryPointActivationOffsets = glslDescriptor.glslEntryPointActivationOffsets;
 
 				uint64 outputSize = sizeof(AssetSignature) + sizeof(VersionNumber) + 2 * sizeof(uint32);
 
-				for (const auto& glslEntryPointActivationOffsetEntry : shaderModuleAssetDescriptor.glslEntryPointActivationOffsets) {
+				for (const auto& glslEntryPointActivationOffsetEntry : asset.glslEntryPointActivationOffsets) {
 					outputSize += glslEntryPointActivationOffsetEntry.first.count() + 2 * sizeof(uint32);
 				}
 
-				outputSize += sizeof(uint32) + shaderModuleAssetDescriptor.glslCode.count();
+				outputSize += sizeof(uint32) + asset.glslCode.count();
 
-				const uint32 entryPointCount = static_cast<uint32>(shaderModuleAssetDescriptor.glslEntryPointActivationOffsets.size());
+				const uint32 entryPointCount = static_cast<uint32>(asset.glslEntryPointActivationOffsets.size());
 
 				ByteStream<StreamOperation::WRITE> outputByteStream(outputSize, Endianness::LITTLE_ENDIAN);
 				outputByteStream.write<AssetSignature>(AssetSignature::SHADER_MODULE);
-				outputByteStream.write<uint32>(shaderModuleAssetDescriptor.identifier);
+				outputByteStream.write<uint32>(asset.identifier);
 				outputByteStream.write<VersionNumber>({1, 0, 0});
-				outputByteStream.write<uint32>(static_cast<uint32>(shaderModuleAssetDescriptor.glslCode.count()));
+				outputByteStream.write<uint32>(static_cast<uint32>(asset.glslCode.count()));
 
-				for (const char8 character : shaderModuleAssetDescriptor.glslCode) {
+				for (const char8 character : asset.glslCode) {
 					outputByteStream.write<char8>(character);
 				}
 
 				outputByteStream.write<uint32>(entryPointCount);
 
-				for (const auto& glslEntryPointActivationOffsetEntry : shaderModuleAssetDescriptor.glslEntryPointActivationOffsets) {
+				for (const auto& glslEntryPointActivationOffsetEntry : asset.glslEntryPointActivationOffsets) {
 					outputByteStream.write<uint32>(static_cast<uint32>(glslEntryPointActivationOffsetEntry.first.count()));
 
 					for (const char8 character : glslEntryPointActivationOffsetEntry.first) {
@@ -97,7 +97,7 @@ namespace Trident {
 					}
 				}
 
-				for (const auto& glslEntryPointActivationOffsetEntry : shaderModuleAssetDescriptor.glslEntryPointActivationOffsets) {
+				for (const auto& glslEntryPointActivationOffsetEntry : asset.glslEntryPointActivationOffsets) {
 					outputByteStream.write<uint32>(glslEntryPointActivationOffsetEntry.second);
 				}
 
@@ -114,9 +114,9 @@ namespace Trident {
 				Writer writer = Filesystem::openWriter(outputPath);
 				writer.write(outputByteStream.data, outputByteStream.size);
 
-				ENGINE_INFO("Generated shader module asset \"[]\" (ID: []).", outputPath, shaderModuleAssetDescriptor.identifier);
+				ENGINE_INFO("Generated shader module asset \"[]\" (ID: []).", outputPath, asset.identifier);
 
-				assetMap->insert(shaderModuleAssetDescriptor.identifier, stem);
+				assetMap->insert(asset.identifier, stem);
 
 				return 0;
 			}

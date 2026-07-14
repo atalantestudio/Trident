@@ -7,7 +7,7 @@
 #include "Engine/Filesystem/Asset/Asset.hpp"
 
 namespace Trident {
-	struct ImageAssetDescriptor : public AssetDescriptor {
+	struct ImageAssetDescriptor : public Asset {
 		// The format and type of the texel blocks that will be contained in the image.
 		ImageFormat format;
 
@@ -32,11 +32,10 @@ namespace Trident {
 		uint32 layerCount;
 	};
 
-	// An image stored in CPU memory.
-	class ImageAsset : public Asset {
+	struct ImageAsset : public Asset {
 		public:
 			explicit ImageAsset(const ImageAssetDescriptor& descriptor) :
-				Asset(descriptor),
+				Asset{descriptor.identifier, descriptor.version},
 				format(descriptor.format),
 				extent(descriptor.extent),
 				mipLevelCount(descriptor.mipLevelCount),

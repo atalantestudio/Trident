@@ -19,7 +19,8 @@ namespace Trident::LemonAndStool {
 
 		Scene3D scene(sceneAsset, minStorageBufferOffsetAlignment);
 
-		const uint32 defaultMaterialShaderIndex = scene.registerMaterialShader();
+		// TODO: Restore materials in this scene.
+		/* const uint32 defaultMaterialShaderIndex = scene.registerMaterialShader();
 		const uint32 pbrMaterialShaderIndex = scene.registerMaterialShader();
 
 		MaterialAsset defaultMaterialAsset = {
@@ -128,7 +129,7 @@ namespace Trident::LemonAndStool {
 			},
 		};
 
-		scene.registerMaterialAsset(createRef<MaterialAsset>(stoolMaterialAsset), pbrMaterialShaderIndex);
+		scene.registerMaterialAsset(createRef<MaterialAsset>(stoolMaterialAsset), pbrMaterialShaderIndex); */
 
 		return scene;
 	}

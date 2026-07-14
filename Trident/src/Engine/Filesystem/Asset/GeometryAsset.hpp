@@ -13,10 +13,10 @@
 #include "Engine/Filesystem/Asset/GeometryAssetFlags.hpp"
 
 namespace Trident {
-	class GeometryAsset;
+	struct GeometryAsset;
 
 	template<>
-	struct Descriptor<GeometryAsset> : public AssetDescriptor {
+	struct Descriptor<GeometryAsset> : public Asset {
 		GeometryAssetFlags flags;
 
 		// Packed vertices.
@@ -89,10 +89,10 @@ namespace Trident {
 		Hull3DType hullType;
 	};
 
-	class GeometryAsset : public Asset {
+	struct GeometryAsset : public Asset {
 		public:
 			explicit GeometryAsset(const Descriptor<GeometryAsset>& descriptor) :
-				Asset(descriptor),
+				Asset{descriptor.identifier, descriptor.version},
 				flags(descriptor.flags),
 				vertexPositionComponents(descriptor.vertexPositionComponents),
 				vertexNormalComponents(descriptor.vertexNormalComponents),

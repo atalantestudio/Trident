@@ -19,19 +19,6 @@ namespace Trident::FlatColor {
 		const view<char8> sceneAssetName = application->getPropertyFile()->getProperty<view<char8>>("AssetName");
 		const ref<Scene3DAsset> sceneAsset = assetLibrary->getAsset<Scene3DAsset>(sceneAssetName);
 
-		Scene3D scene(sceneAsset, minStorageBufferOffsetAlignment);
-
-		const MaterialAsset materialAsset = {
-			.shaderModuleName = "PBRFlatColor.frag",
-			.stage = ShaderStage::FRAGMENT,
-			.entryPoint = "main",
-			.descriptorBindingTypes = {},
-			.descriptorImages = {},
-		};
-		const uint32 materialShaderIndex = scene.registerMaterialShader();
-
-		scene.registerMaterialAsset(createRef<MaterialAsset>(materialAsset), materialShaderIndex);
-
-		return scene;
+		return Scene3D(sceneAsset, minStorageBufferOffsetAlignment);
 	}
 }

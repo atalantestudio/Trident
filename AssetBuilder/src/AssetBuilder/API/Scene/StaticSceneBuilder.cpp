@@ -55,44 +55,43 @@ namespace Trident {
 		delete assetLibrary;
 	}
 
-	StaticSceneBuilder& StaticSceneBuilder::allocateMaterials(uint32 count) {
-		DEBUG_ASSERT(count > 0);
-
-		materials = sequence<BuildStaticMaterial3D>(count);
-
-		return *this;
-	}
-
-	StaticSceneBuilder& StaticSceneBuilder::insertMaterial(uint32 index, uint32 identifier) {
-		DEBUG_ASSERT(index < materials.count());
-
-		materials[index] = {
-			.identifier = identifier,
-			.triangleRange = {0, 0},
-		};
-
-		return *this;
-	}
-
-	StaticSceneBuilder& StaticSceneBuilder::createStaticObject(const StaticObjectDescriptor& descriptor) {
-		ENGINE_ASSERT(descriptor.lightmapPixelScale.x > 0.0f && descriptor.lightmapPixelScale.y > 0.0f, "The lightmap pixel scale must be positive.");
-
-		objects.emplace_back(StaticObject{
-			.geometryAsset = assetLibrary->getAsset<GeometryAsset>(descriptor.geometryAssetName),
-			.transform = descriptor.transform,
-			.texture = (
-				mat3x3<float32>::scaling(descriptor.textureFiltering.scale) *
-				mat3x3<float32>::rotation(descriptor.textureFiltering.rotation) *
-				mat3x3<float32>::translation(descriptor.textureFiltering.translation)
-			),
-			.materialIndex = descriptor.materialIndex,
-			.lightmapPixelScale = descriptor.lightmapPixelScale,
+	StaticSceneBuilder& StaticSceneBuilder::addMaterialShader(sequence<char8> name, ShaderStage stage, sequence<char8> entryPoint, sequence<DescriptorSetLayoutBinding> bindings) {
+		materialShaders.emplace_back(BuildMaterialShader{
+			.name = name,
+			.stage = stage,
+			.entryPoint = entryPoint,
+			.descriptorSetLayoutBindings = bindings,
+			.materialAssetRange = {0, 0},
 		});
 
 		return *this;
 	}
 
-	StaticScene3D StaticSceneBuilder::build() {
+	StaticSceneBuilder& StaticSceneBuilder::addMaterial(uint32 identifier, uint32 shaderIndex) {
+		DEBUG_ASSERT(shaderIndex < materialShaders.size());
+
+		materials.emplace_back(BuildStaticMaterial3D{
+			.identifier = identifier,
+			.shaderIndex = shaderIndex,
+			.triangleRange = {0, 0},
+		});
+
+		materialShaders[shaderIndex].materialAssetRange.count += 1;
+
+		return *this;
+	}
+
+	StaticSceneBuilder& StaticSceneBuilder::createStaticObject(StaticObject object) {
+		ENGINE_ASSERT(object.lightmapPixelScale.x > 0.0f && object.lightmapPixelScale.y > 0.0f, "The lightmap pixel scale must be positive.");
+
+		object.geometryAsset = assetLibrary->getAsset<GeometryAsset>("UnitPlane");
+
+		objects.emplace_back(object);
+
+		return *this;
+	}
+
+	StaticScene3D StaticSceneBuilder::build() const {
 		std::vector<svec3<float32>> vertices;
 		std::vector<svec3<float32>> normals;
 		std::vector<svec2<float32>> textureCoordinates;
@@ -126,6 +125,11 @@ namespace Trident {
 
 		StaticScene3D scene{};
 		scene.lightmapCoordinates = sequence<svec2<float32>>(lightmapCoordinateCount);
+		scene.materialShaders = sequence<BuildMaterialShader>(materialShaders.size());
+		scene.materials = sequence<BuildStaticMaterial3D>(materials.size());
+
+		std::copy(materialShaders.begin(), materialShaders.end(), &scene.materialShaders[0]);
+		std::copy(materials.begin(), materials.end(), &scene.materials[0]);
 
 		uint32 faceIndex = 0;
 		uint32 lightmapCoordinateOffset = 0;
@@ -142,12 +146,12 @@ namespace Trident {
 			const quat<float32> roll = quat<float32>::axisAngle(FORWARD, object.transform.rotation[2]);
 			const quat<float32> orientation = normalized(yaw * pitch * roll);
 			const mat4x4<float32> world = (
-				mat4x4<float32>(inverse(orientation)) *
 				mat4x4<float32>::scaling(object.transform.scale) *
+				mat4x4<float32>(orientation) *
 				mat4x4<float32>::translation(object.transform.position)
 			);
 
-			BuildStaticMaterial3D& material = materials[object.materialIndex];
+			BuildStaticMaterial3D& material = scene.materials[object.materialIndex];
 
 			sequence<uint32> vertexRedirectionIndices(vertexCount);
 			sequence<uint32> normalRedirectionIndices(normalCount);
@@ -165,16 +169,11 @@ namespace Trident {
 					};
 					v = multiplyTransform(v, world);
 
-					svec3<float32> vertex(v);
-					uint32 componentIndex = 0;
-
-					while (componentIndex < 3) {
-						if (abs(fract(vertex[componentIndex])) < 0.0001f) {
-							vertex[componentIndex] = round(vertex[componentIndex]);
-						}
-
-						componentIndex += 1;
-					}
+					const svec3<float32> vertex = {
+						round(v[0] * 100.0f) / 100.0f,
+						round(v[1] * 100.0f) / 100.0f,
+						round(v[2] * 100.0f) / 100.0f,
+					};
 
 					view<svec3<float32>> vertexView{};
 
@@ -204,7 +203,7 @@ namespace Trident {
 						vertexNormalComponents[normalIndex * 3 + 1],
 						vertexNormalComponents[normalIndex * 3 + 2],
 					};
-					n = normalized(n * orientation);
+					n = normalized(n * inverse(orientation));
 
 					const svec3<float32> normal(n);
 
@@ -227,6 +226,17 @@ namespace Trident {
 				}
 			}
 
+			const svec2<float32> textureScale = {
+				object.transform.scale[0] * object.textureFiltering.scale.x,
+				object.transform.scale[2] * object.textureFiltering.scale.y,
+			};
+
+			const mat3x3<float32> textureWorld = (
+				mat3x3<float32>::scaling(textureScale) *
+				mat3x3<float32>::rotation(pi<float32>() * object.textureFiltering.rotation) *
+				mat3x3<float32>::translation(object.textureFiltering.translation)
+			);
+
 			// Merge texture coordinate duplicates.
 			{
 				uint32 textureCoordinateIndex = 0;
@@ -235,7 +245,7 @@ namespace Trident {
 					const svec2<float32> textureCoordinate = svec2<float32>(multiplyTransform({
 						vertexTextureCoordinateComponents[textureCoordinateIndex * 2 + 0],
 						vertexTextureCoordinateComponents[textureCoordinateIndex * 2 + 1],
-					}, object.texture));
+					}, textureWorld));
 
 					view<svec2<float32>> textureCoordinateView{};
 
@@ -292,12 +302,11 @@ namespace Trident {
 				});
 
 				material.triangleRange.count += 1;
-
 				indexOffset += 3;
 			}
 
 			if (object.materialIndex > 0) {
-				const BuildStaticMaterial3D& previousMaterial = materials[object.materialIndex - 1];
+				const BuildStaticMaterial3D& previousMaterial = scene.materials[object.materialIndex - 1];
 
 				material.triangleRange.offset = previousMaterial.triangleRange.offset + previousMaterial.triangleRange.count;
 			}
@@ -305,7 +314,6 @@ namespace Trident {
 			const view<Edge3D> edges = object.geometryAsset->getHull3DEdges();
 			const view<Plane3D> faces = object.geometryAsset->getHull3DFaces();
 			const view<uint16> faceEdgeIndices = object.geometryAsset->getHull3DFaceEdgeIndices();
-			const vec3<float32> rotatedScale = object.transform.scale * orientation;
 
 			for (const Plane3D face : faces) {
 				const uint32 lightmapCoordinateCount = face.edgeIndexRange.count;
@@ -363,21 +371,15 @@ namespace Trident {
 						vertexPositionComponents[vertexPositionComponentOffset + 1],
 						vertexPositionComponents[vertexPositionComponentOffset + 2],
 					};
-					vertex *= orientation;
 					vertex *= object.transform.scale;
+					vertex *= orientation;
 					vertex *= R;
 
 					svec2<float32>& coordinate = scene.lightmapCoordinates[lightmapCoordinateOffset + edge.originVertexIndex];
 					coordinate = {vertex[0], vertex[2]};
 					coordinate /= object.lightmapPixelScale;
-
-					if (abs(fract(coordinate.x)) < 0.0001f || abs(fract(coordinate.x)) > 0.9999f) {
-						coordinate.x = round(coordinate.x);
-					}
-
-					if (abs(fract(coordinate.y)) < 0.0001f || abs(fract(coordinate.y)) > 0.9999f) {
-						coordinate.y = round(coordinate.y);
-					}
+					coordinate.x = round(coordinate.x * 100.0f) / 100.0f;
+					coordinate.y = round(coordinate.y * 100.0f) / 100.0f;
 
 					maxCoordinate.x = max(maxCoordinate.x, coordinate.x);
 					maxCoordinate.y = max(maxCoordinate.y, coordinate.y);
@@ -438,7 +440,6 @@ namespace Trident {
 		scene.normals = sequence<svec3<float32>>(normals.size());
 		scene.textureCoordinates = sequence<svec2<float32>>(textureCoordinates.size());
 		scene.triangles = sequence<StaticTriangle3D>(triangles.size());
-		scene.materials = materials;
 
 		std::copy(vertices.begin(), vertices.end(), &scene.vertices[0]);
 		std::copy(normals.begin(), normals.end(), &scene.normals[0]);
