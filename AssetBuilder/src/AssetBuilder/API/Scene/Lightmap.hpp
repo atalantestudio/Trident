@@ -7,7 +7,6 @@
 
 namespace Trident {
 	struct Lightmap {
-		ref<GeometryAsset> geometryAsset;
 		range<uint16, uint16> edgeIndexRange;
 		Extent2D offset;
 		Extent2D size;

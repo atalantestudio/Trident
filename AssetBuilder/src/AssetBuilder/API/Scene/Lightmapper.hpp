@@ -33,7 +33,7 @@ namespace Trident {
 		public:
 			static LightmapNode* insertNode(Lightmap& lightmap, LightmapNode* node);
 
-			static void updateAtlasCoordinates(StaticScene3D& scene, sequence<Lightmap>& lightmaps, view<LightmapIndex> lightmapIndices);
+			static void updateAtlasCoordinates(StaticScene3D& scene, sequence<Lightmap>& lightmaps, view<LightmapIndex> lightmapIndices, ref<GeometryAsset> geometryAsset);
 
 			void buildLightmapAtlas(const StaticScene3D& scene, ImageAssetDescriptor& lightmapAtlasImageAssetDescriptor);
 

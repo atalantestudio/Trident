@@ -7,11 +7,13 @@
 
 namespace Trident {
 	struct Transform {
+		/// Position of the center point in world-space.
 		vec3<float32> position;
+
+		/// Rotation in Euler angles.
 		vec3<float32> rotation;
 
-		/// Applied after the rotation.
-		vec3<float32> scale;
+		vec2<float32> scale;
 	};
 
 	struct TextureFilteringDescriptor {
@@ -20,14 +22,10 @@ namespace Trident {
 		svec2<float32> scale;
 	};
 
-	struct StaticObject {
-		view<char8> label;
-		ref<GeometryAsset> geometryAsset;
+	struct StaticSurface {
+		uint32 materialIndex;
 		Transform transform;
 		TextureFilteringDescriptor textureFiltering;
-		uint32 materialIndex;
-
-		/// Applies to all faces.
-		svec2<float32> lightmapPixelScale;
+		svec2<float32> lightmapScale;
 	};
 }

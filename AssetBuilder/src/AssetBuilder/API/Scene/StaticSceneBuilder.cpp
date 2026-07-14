@@ -55,7 +55,7 @@ namespace Trident {
 		delete assetLibrary;
 	}
 
-	StaticSceneBuilder& StaticSceneBuilder::addMaterialShader(sequence<char8> name, ShaderStage stage, sequence<char8> entryPoint, sequence<DescriptorSetLayoutBinding> bindings) {
+	void StaticSceneBuilder::addMaterialShader(sequence<char8> name, ShaderStage stage, sequence<char8> entryPoint, sequence<DescriptorSetLayoutBinding> bindings) {
 		materialShaders.emplace_back(BuildMaterialShader{
 			.name = name,
 			.stage = stage,
@@ -63,11 +63,9 @@ namespace Trident {
 			.descriptorSetLayoutBindings = bindings,
 			.materialAssetRange = {0, 0},
 		});
-
-		return *this;
 	}
 
-	StaticSceneBuilder& StaticSceneBuilder::addMaterial(uint32 identifier, uint32 shaderIndex) {
+	void StaticSceneBuilder::addMaterial(uint32 identifier, uint32 shaderIndex) {
 		DEBUG_ASSERT(shaderIndex < materialShaders.size());
 
 		materials.emplace_back(BuildStaticMaterial3D{
@@ -77,18 +75,12 @@ namespace Trident {
 		});
 
 		materialShaders[shaderIndex].materialAssetRange.count += 1;
-
-		return *this;
 	}
 
-	StaticSceneBuilder& StaticSceneBuilder::createStaticObject(StaticObject object) {
-		ENGINE_ASSERT(object.lightmapPixelScale.x > 0.0f && object.lightmapPixelScale.y > 0.0f, "The lightmap pixel scale must be positive.");
+	void StaticSceneBuilder::addSurface(const StaticSurface& surface) {
+		ENGINE_ASSERT(surface.lightmapScale.x > 0.0f && surface.lightmapScale.y > 0.0f, "The lightmap scale must be positive.");
 
-		object.geometryAsset = assetLibrary->getAsset<GeometryAsset>("UnitPlane");
-
-		objects.emplace_back(object);
-
-		return *this;
+		surfaces.emplace_back(surface);
 	}
 
 	StaticScene3D StaticSceneBuilder::build() const {
@@ -97,11 +89,13 @@ namespace Trident {
 		std::vector<svec2<float32>> textureCoordinates;
 		std::vector<StaticTriangle3D> triangles;
 
+		const ref<GeometryAsset> geometryAsset = assetLibrary->getAsset<GeometryAsset>("UnitPlane");
+
 		uint64 lightmapCount = 0;
 		uint64 lightmapCoordinateCount = 0;
 
-		for (const StaticObject& object : objects) {
-			const view<Plane3D> faces = object.geometryAsset->getHull3DFaces();
+		for (const StaticSurface& surface : surfaces) {
+			const view<Plane3D> faces = geometryAsset->getHull3DFaces();
 
 			for (const Plane3D face : faces) {
 				// One lightmap per face.
@@ -134,24 +128,25 @@ namespace Trident {
 		uint32 faceIndex = 0;
 		uint32 lightmapCoordinateOffset = 0;
 
-		for (const StaticObject& object : objects) {
-			const view<float32> vertexPositionComponents = object.geometryAsset->getVertexPositionComponents();
-			const view<float32> vertexNormalComponents = object.geometryAsset->getVertexNormalComponents();
-			const view<float32> vertexTextureCoordinateComponents = object.geometryAsset->getVertexTextureCoordinateComponents();
+		for (const StaticSurface& surface : surfaces) {
+			const view<float32> vertexPositionComponents = geometryAsset->getVertexPositionComponents();
+			const view<float32> vertexNormalComponents = geometryAsset->getVertexNormalComponents();
+			const view<float32> vertexTextureCoordinateComponents = geometryAsset->getVertexTextureCoordinateComponents();
 			const uint64 vertexCount = vertexPositionComponents.count() / 3;
 			const uint64 normalCount = vertexNormalComponents.count() / 3;
 			const uint64 textureCoordinateCount = vertexTextureCoordinateComponents.count() / 2;
-			const quat<float32> pitch = quat<float32>::axisAngle(RIGHT, object.transform.rotation[0]);
-			const quat<float32> yaw = quat<float32>::axisAngle(UP, object.transform.rotation[1]);
-			const quat<float32> roll = quat<float32>::axisAngle(FORWARD, object.transform.rotation[2]);
+			const vec3<float32> scale = {surface.transform.scale[0], 0.0f, surface.transform.scale[1]};
+			const quat<float32> pitch = quat<float32>::axisAngle(RIGHT, surface.transform.rotation[0]);
+			const quat<float32> yaw = quat<float32>::axisAngle(UP, surface.transform.rotation[1]);
+			const quat<float32> roll = quat<float32>::axisAngle(FORWARD, surface.transform.rotation[2]);
 			const quat<float32> orientation = normalized(yaw * pitch * roll);
 			const mat4x4<float32> world = (
-				mat4x4<float32>::scaling(object.transform.scale) *
+				mat4x4<float32>::scaling(scale) *
 				mat4x4<float32>(orientation) *
-				mat4x4<float32>::translation(object.transform.position)
+				mat4x4<float32>::translation(surface.transform.position)
 			);
 
-			BuildStaticMaterial3D& material = scene.materials[object.materialIndex];
+			BuildStaticMaterial3D& material = scene.materials[surface.materialIndex];
 
 			sequence<uint32> vertexRedirectionIndices(vertexCount);
 			sequence<uint32> normalRedirectionIndices(normalCount);
@@ -226,15 +221,10 @@ namespace Trident {
 				}
 			}
 
-			const svec2<float32> textureScale = {
-				object.transform.scale[0] * object.textureFiltering.scale.x,
-				object.transform.scale[2] * object.textureFiltering.scale.y,
-			};
-
 			const mat3x3<float32> textureWorld = (
-				mat3x3<float32>::scaling(textureScale) *
-				mat3x3<float32>::rotation(pi<float32>() * object.textureFiltering.rotation) *
-				mat3x3<float32>::translation(object.textureFiltering.translation)
+				mat3x3<float32>::scaling(surface.transform.scale * vec2<float32>(surface.textureFiltering.scale)) *
+				mat3x3<float32>::rotation(pi<float32>() * surface.textureFiltering.rotation) *
+				mat3x3<float32>::translation(surface.textureFiltering.translation)
 			);
 
 			// Merge texture coordinate duplicates.
@@ -265,9 +255,9 @@ namespace Trident {
 				}
 			}
 
-			const view<uint32> vertexPositionIndices = object.geometryAsset->getVertexPositionIndices();
-			const view<uint32> vertexNormalIndices = object.geometryAsset->getVertexNormalIndices();
-			const view<uint32> vertexTextureCoordinateIndices = object.geometryAsset->getVertexTextureCoordinateIndices();
+			const view<uint32> vertexPositionIndices = geometryAsset->getVertexPositionIndices();
+			const view<uint32> vertexNormalIndices = geometryAsset->getVertexNormalIndices();
+			const view<uint32> vertexTextureCoordinateIndices = geometryAsset->getVertexTextureCoordinateIndices();
 
 			uint32 indexOffset = 0;
 
@@ -305,21 +295,20 @@ namespace Trident {
 				indexOffset += 3;
 			}
 
-			if (object.materialIndex > 0) {
-				const BuildStaticMaterial3D& previousMaterial = scene.materials[object.materialIndex - 1];
+			if (surface.materialIndex > 0) {
+				const BuildStaticMaterial3D& previousMaterial = scene.materials[surface.materialIndex - 1];
 
 				material.triangleRange.offset = previousMaterial.triangleRange.offset + previousMaterial.triangleRange.count;
 			}
 
-			const view<Edge3D> edges = object.geometryAsset->getHull3DEdges();
-			const view<Plane3D> faces = object.geometryAsset->getHull3DFaces();
-			const view<uint16> faceEdgeIndices = object.geometryAsset->getHull3DFaceEdgeIndices();
+			const view<Edge3D> edges = geometryAsset->getHull3DEdges();
+			const view<Plane3D> faces = geometryAsset->getHull3DFaces();
+			const view<uint16> faceEdgeIndices = geometryAsset->getHull3DFaceEdgeIndices();
 
 			for (const Plane3D face : faces) {
 				const uint32 lightmapCoordinateCount = face.edgeIndexRange.count;
 
 				Lightmap& lightmap = lightmaps[faceIndex];
-				lightmap.geometryAsset = object.geometryAsset;
 				lightmap.edgeIndexRange = face.edgeIndexRange;
 				lightmap.offset = {0, 0};
 				lightmap.coordinateOffset = lightmapCoordinateOffset;
@@ -371,13 +360,13 @@ namespace Trident {
 						vertexPositionComponents[vertexPositionComponentOffset + 1],
 						vertexPositionComponents[vertexPositionComponentOffset + 2],
 					};
-					vertex *= object.transform.scale;
+					vertex *= scale;
 					vertex *= orientation;
 					vertex *= R;
 
 					svec2<float32>& coordinate = scene.lightmapCoordinates[lightmapCoordinateOffset + edge.originVertexIndex];
 					coordinate = {vertex[0], vertex[2]};
-					coordinate /= object.lightmapPixelScale;
+					coordinate /= surface.lightmapScale;
 					coordinate.x = round(coordinate.x * 100.0f) / 100.0f;
 					coordinate.y = round(coordinate.y * 100.0f) / 100.0f;
 
@@ -446,7 +435,7 @@ namespace Trident {
 		std::copy(textureCoordinates.begin(), textureCoordinates.end(), &scene.textureCoordinates[0]);
 		std::copy(triangles.begin(), triangles.end(), &scene.triangles[0]);
 
-		Lightmapper::updateAtlasCoordinates(scene, lightmaps, view<LightmapIndex>(&lightmapIndices[0], lightmapIndices.size()));
+		Lightmapper::updateAtlasCoordinates(scene, lightmaps, view<LightmapIndex>(&lightmapIndices[0], lightmapIndices.size()), geometryAsset);
 
 		ImageAssetDescriptor lightmapAtlasImageAssetDescriptor = {
 			.format = ImageFormat::R8G8B8A8_UNORM,

@@ -56,99 +56,99 @@ namespace Trident {
 		const float32 halfSizeZ = sizeZ * 0.5f;
 
 		// Floor (towards +Y)
-		createStaticObject({
+		addSurface({
+			.materialIndex = 0,
 			.transform = {
 				.position = {0.0f, floorLevel, 0.0f},
 				.rotation = {0.0f, 0.0f, 0.0f},
-				.scale = {sizeX, 0.0f, sizeZ},
+				.scale = {sizeX, sizeZ},
 			},
 			.textureFiltering = {
 				.translation = {0.0f, 0.0f},
 				.rotation = 0.0f,
 				.scale = {m1 / 0.25f, m1 / 0.25f},
 			},
-			.materialIndex = 0,
-			.lightmapPixelScale = {4.0f, 4.0f},
+			.lightmapScale = {4.0f, 4.0f},
 		});
 
 		// Ceiling (towards -Y)
-		createStaticObject({
+		addSurface({
+			.materialIndex = 0,
 			.transform = {
 				.position = {0.0f, ceilingLevel, 0.0f},
 				.rotation = {0.0f, 0.0f, pi<float32>()},
-				.scale = {sizeX, 0.0f, sizeZ},
+				.scale = {sizeX, sizeZ},
 			},
 			.textureFiltering = {
 				.translation = {0.0f, 0.0f},
 				.rotation = 0.0f,
 				.scale = {m1 / 0.25f, m1 / 0.25f},
 			},
-			.materialIndex = 0,
-			.lightmapPixelScale = {4.0f, 4.0f},
+			.lightmapScale = {4.0f, 4.0f},
 		});
 
 		// Left wall (towards +X)
-		createStaticObject({
+		addSurface({
+			.materialIndex = 0,
 			.transform = {
 				.position = {-halfSizeX, floorLevel + halfSizeY, 0.0f},
 				.rotation = {0.0f, pi<float32>() * 0.5f, pi<float32>() * 0.5f},
-				.scale = {sizeZ, 0.0f, sizeY},
+				.scale = {sizeZ, sizeY},
 			},
 			.textureFiltering = {
 				.translation = {0.0f, 0.0f},
 				.rotation = 0.0f,
 				.scale = {m1 / 0.25f, m1 / 0.25f},
 			},
-			.materialIndex = 0,
-			.lightmapPixelScale = {4.0f, 4.0f},
+			.lightmapScale = {4.0f, 4.0f},
 		});
 
 		// Right wall (towards -X)
-		createStaticObject({
+		addSurface({
+			.materialIndex = 0,
 			.transform = {
 				.position = {halfSizeX, floorLevel + halfSizeY, 0.0f},
 				.rotation = {0.0f, -pi<float32>() * 0.5f, -pi<float32>() * 0.5f},
-				.scale = {sizeZ, 0.0f, sizeY},
+				.scale = {sizeZ, sizeY},
 			},
 			.textureFiltering = {
 				.translation = {0.0f, 0.0f},
 				.rotation = 0.0f,
 				.scale = {m1 / 0.25f, m1 / 0.25f},
 			},
-			.materialIndex = 0,
-			.lightmapPixelScale = {4.0f, 4.0f},
+			.lightmapScale = {4.0f, 4.0f},
 		});
 
 		// Back wall (towards +Z)
-		createStaticObject({
+		addSurface({
+			.materialIndex = 0,
 			.transform = {
 				.position = {0.0f, floorLevel + halfSizeY, -halfSizeZ},
 				.rotation = {-pi<float32>() * 0.5f, 0.0f, pi<float32>()},
-				.scale = {sizeX, 0.0f, sizeY},
+				.scale = {sizeX, sizeY},
 			},
 			.textureFiltering = {
 				.translation = {0.0f, 0.0f},
 				.rotation = 0.0f,
 				.scale = {m1 / 0.25f, m1 / 0.25f},
 			},
-			.materialIndex = 0,
-			.lightmapPixelScale = {4.0f, 4.0f},
+			.lightmapScale = {4.0f, 4.0f},
 		});
 
 		// Front wall (towards -Z)
-		createStaticObject({
+		addSurface({
+			.materialIndex = 0,
 			.transform = {
 				.position = {0.0f, floorLevel + halfSizeY, halfSizeZ},
 				.rotation = {pi<float32>() * 0.5f, 0.0f, 0.0f},
-				.scale = {sizeX, 0.0f, sizeY},
+				.scale = {sizeX, sizeY},
 			},
 			.textureFiltering = {
 				.translation = {0.0f, 0.0f},
 				.rotation = 0.0f,
 				.scale = {m1 / 0.25f, m1 / 0.25f},
 			},
-			.materialIndex = 0,
-			.lightmapPixelScale = {4.0f, 4.0f},
+			.lightmapScale = {4.0f, 4.0f},
 		});
 	}
 }

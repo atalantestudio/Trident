@@ -85,11 +85,15 @@ namespace Trident {
 		return insertNode(lightmap, node->children[0]);
 	}
 
-	void Lightmapper::updateAtlasCoordinates(StaticScene3D& scene, sequence<Lightmap>& lightmaps, view<LightmapIndex> lightmapIndices) {
+	void Lightmapper::updateAtlasCoordinates(StaticScene3D& scene, sequence<Lightmap>& lightmaps, view<LightmapIndex> lightmapIndices, ref<GeometryAsset> geometryAsset) {
 		const svec2<float32> atlasSize = {
 			static_cast<float32>(ATLAS_SIZE.width),
 			static_cast<float32>(ATLAS_SIZE.height),
 		};
+
+		const view<Edge3D> edges = geometryAsset->getHull3DEdges();
+		const view<uint16> faceEdgeIndices = geometryAsset->getHull3DFaceEdgeIndices();
+		const view<uint32> vertexPositionIndices = geometryAsset->getVertexPositionIndices();
 
 		LightmapNode rootNode{};
 		rootNode.rectangle = {0, 0, ATLAS_SIZE.width, ATLAS_SIZE.height};
@@ -111,9 +115,6 @@ namespace Trident {
 
 			node->assigned = true;
 
-			const view<Edge3D> edges = lightmap.geometryAsset->getHull3DEdges();
-			const view<uint16> faceEdgeIndices = lightmap.geometryAsset->getHull3DFaceEdgeIndices();
-
 			uint16 coordinateIndex = 0;
 
 			while (coordinateIndex < lightmap.edgeIndexRange.count) {
@@ -129,7 +130,6 @@ namespace Trident {
 			}
 
 			const Lightmap& unsortedLightmap = lightmaps[unsortedLightmapIndex];
-			const view<uint32> vertexPositionIndices = lightmap.geometryAsset->getVertexPositionIndices();
 			const uint32 triangleCount = lightmap.edgeIndexRange.count / 2;
 
 			// TODO: Why does the sorted lightmap's coordinate offset doesn't work here?
