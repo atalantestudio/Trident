@@ -4,6 +4,7 @@
 #pragma once
 
 namespace Trident {
+	// TODO(filesystem/asset/material): Material assets shouldn't reference a scene's lightmap.
 	inline MaterialDescriptorImage getLightmapAtlas(AssetLibrary* assetLibrary) {
 		return {
 			.imageAsset = assetLibrary->getAsset<ImageAsset>("Hall"),

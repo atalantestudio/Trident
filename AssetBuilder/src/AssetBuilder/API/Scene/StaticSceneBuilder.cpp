@@ -196,11 +196,13 @@ namespace Trident {
 				}
 			}
 
+			sequence<uint32> vertexRedirectionIndices(quadCount * 4);
+
 			// Merge vertex duplicates.
 			{
 				const vec3<float32> origin = {vertexPositionComponents[0], vertexPositionComponents[1], vertexPositionComponents[2]};
 
-				sequence<uint32> vertexRedirectionIndices(vertexCount);
+				uint32 vertexOffset = 0;
 				uint32 quadIndex = 0;
 
 				while (quadIndex < surface.quads.size()) {
@@ -238,7 +240,7 @@ namespace Trident {
 							vertices.emplace_back(roundedVertex);
 						}
 
-						vertexRedirectionIndices[vertexIndex] = vertexRedirectionIndex;
+						vertexRedirectionIndices[vertexOffset + vertexIndex] = vertexRedirectionIndex;
 
 						vertexIndex += 1;
 					}
@@ -249,15 +251,15 @@ namespace Trident {
 						scene.triangles[triangleIndex] = {
 							.vertices = {
 								{
-									.vertexIndex = vertexRedirectionIndices[vertexPositionIndices[indexOffset + 0]],
+									.vertexIndex = vertexRedirectionIndices[vertexOffset + vertexPositionIndices[indexOffset + 0]],
 									// .textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexTextureCoordinateIndices[indexOffset + 0]],
 								},
 								{
-									.vertexIndex = vertexRedirectionIndices[vertexPositionIndices[indexOffset + 1]],
+									.vertexIndex = vertexRedirectionIndices[vertexOffset + vertexPositionIndices[indexOffset + 1]],
 									// .textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexTextureCoordinateIndices[indexOffset + 1]],
 								},
 								{
-									.vertexIndex = vertexRedirectionIndices[vertexPositionIndices[indexOffset + 2]],
+									.vertexIndex = vertexRedirectionIndices[vertexOffset + vertexPositionIndices[indexOffset + 2]],
 									// .textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexTextureCoordinateIndices[indexOffset + 2]],
 								},
 							},
@@ -269,6 +271,7 @@ namespace Trident {
 						triangleIndex += 1;
 					}
 
+					vertexOffset += 4;
 					quadIndex += 1;
 				}
 			}
@@ -282,40 +285,6 @@ namespace Trident {
 			const view<Edge3D> edges = surfaceGeometry->getHull3DEdges();
 			const view<uint16> faceEdgeIndices = surfaceGeometry->getHull3DFaceEdgeIndices();
 
-			/* quat<float32> R;
-
-			// TODO(asset-builder/lightmapper)
-			{
-				vec3<float32> normal(face.normal);
-				normal = normalized(normal * orientation);
-
-				const float32 projection = dot(normal, UP);
-
-				if (projection > 0.999999f) {
-					R = quat<float32>::identity();
-				}
-				else if (projection < -0.999999f) {
-					vec3<float32> axis = normalized(cross(normal, RIGHT));
-
-					if (length(axis) < 0.000001f) {
-						axis = normalized(cross(normal, FORWARD));
-					}
-
-					R = quat<float32>::axisAngle(axis, pi<float32>());
-				}
-				else {
-					const vec3<float32> axis = cross(normal, UP);
-
-					R = {
-						projection + 1.0f,
-						axis[0],
-						axis[1],
-						axis[2],
-					};
-					R = normalized(R);
-				}
-			} */
-
 			uint32 quadIndex = 0;
 
 			while (quadIndex < surface.quads.size()) {
@@ -324,67 +293,38 @@ namespace Trident {
 				pool<svec2<float32>, 4> vertices;
 				vertices.add({quad.start.x, quad.start.y});
 				vertices.add({quad.end.x, quad.start.y});
-				vertices.add({quad.end.x, quad.end.y});
 				vertices.add({quad.start.x, quad.end.y});
+				vertices.add({quad.end.x, quad.end.y});
 
-				Lightmap& lightmap = lightmaps[quadOffset];
-				lightmap.edgeIndexRange = face.edgeIndexRange;
+				Lightmap& lightmap = lightmaps[quadOffset + quadIndex];
+				lightmap.edgeIndexRange = {static_cast<uint16>(quadIndex * 4), 4};
 				lightmap.offset = {0, 0};
 				lightmap.coordinateOffset = lightmapCoordinateOffset;
 
 				svec2<float32> maxCoordinate = quad.end / surface.lightmapScale;
 				maxCoordinate.x = round(maxCoordinate.x * 100.0f) / 100.0f;
 				maxCoordinate.y = round(maxCoordinate.y * 100.0f) / 100.0f;
+
+				DEBUG_ASSERT(maxCoordinate.x > 0.0f);
+
 				svec2<float32> minCoordinate = quad.start / surface.lightmapScale;
 				minCoordinate.x = round(minCoordinate.x * 100.0f) / 100.0f;
 				minCoordinate.y = round(minCoordinate.y * 100.0f) / 100.0f;
+
+				DEBUG_ASSERT(maxCoordinate.y > 0.0f);
+
 				uint16 coordinateIndex = 0;
 
-				while (coordinateIndex < face.edgeIndexRange.count) {
-					/* const uint16 edgeIndex = faceEdgeIndices[face.edgeIndexRange.offset + coordinateIndex];
-					const Edge3D edge = edges[edgeIndex];
-					const uint32 vertexPositionComponentOffset = edge.originVertexIndex * 3;
-
-					vec3<float32> vertex = {
-						vertexPositionComponents[vertexPositionComponentOffset + 0],
-						vertexPositionComponents[vertexPositionComponentOffset + 1],
-						vertexPositionComponents[vertexPositionComponentOffset + 2],
-					};
-					vertex *= scale;
-					vertex *= orientation;
-					vertex *= R;
-
-					// svec2<float32>& coordinate = scene.lightmapCoordinates[lightmapCoordinateOffset + edge.originVertexIndex]; */
+				while (coordinateIndex < 4) {
 					svec2<float32>& coordinate = scene.lightmapCoordinates[lightmapCoordinateOffset + coordinateIndex];
-					// coordinate = {vertex[0], vertex[2]};
-					coordinate = vertices[coordinateIndex];
-					coordinate /= surface.lightmapScale;
-					coordinate.x = round(coordinate.x * 100.0f) / 100.0f;
-					coordinate.y = round(coordinate.y * 100.0f) / 100.0f;
-
-					coordinate.y *= -1.0f;
-					coordinate += maxCoordinate;
-
-					/* maxCoordinate.x = max(maxCoordinate.x, coordinate.x);
-					maxCoordinate.y = max(maxCoordinate.y, coordinate.y);
-					minCoordinate.x = min(minCoordinate.x, coordinate.x);
-					minCoordinate.y = min(minCoordinate.y, coordinate.y); */
+					coordinate = vertices[coordinateIndex] / surface.lightmapScale;
+					coordinate = {
+						round(coordinate.x * 100.0f) / 100.0f,
+						round(coordinate.y * 100.0f) / 100.0f,
+					};
 
 					coordinateIndex += 1;
 				}
-
-				DEBUG_ASSERT(maxCoordinate.x > 0.0f);
-				DEBUG_ASSERT(maxCoordinate.y > 0.0f);
-
-				coordinateIndex = 0;
-
-				/* while (coordinateIndex < face.edgeIndexRange.count) {
-					svec2<float32>& coordinate = scene.lightmapCoordinates[lightmapCoordinateOffset + coordinateIndex];
-					coordinate.y *= -1.0f;
-					coordinate += maxCoordinate;
-
-					coordinateIndex += 1;
-				} */
 
 				// Pad for dilation.
 				maxCoordinate.x += 2.0f;
@@ -395,7 +335,7 @@ namespace Trident {
 				lightmap.size = {static_cast<uint32>(size.x), static_cast<uint32>(size.y)};
 
 				LightmapIndex lightmapIndex{};
-				lightmapIndex.index = 0;
+				lightmapIndex.index = quadOffset + quadIndex;
 				lightmapIndex.area = lightmap.size.width * lightmap.size.height;
 
 				uint32 lightmapInsertionIndex = 0;
@@ -410,7 +350,7 @@ namespace Trident {
 
 				lightmapIndices.insert(lightmapIndices.begin() + lightmapInsertionIndex, lightmapIndex);
 
-				lightmapCoordinateOffset += face.edgeIndexRange.count;
+				lightmapCoordinateOffset += 4;
 				quadIndex += 1;
 			}
 

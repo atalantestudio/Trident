@@ -91,10 +91,6 @@ namespace Trident {
 			static_cast<float32>(ATLAS_SIZE.height),
 		};
 
-		const view<Edge3D> edges = geometryAsset->getHull3DEdges();
-		const view<uint16> faceEdgeIndices = geometryAsset->getHull3DFaceEdgeIndices();
-		const view<uint32> vertexPositionIndices = geometryAsset->getVertexPositionIndices();
-
 		LightmapNode rootNode{};
 		rootNode.rectangle = {0, 0, ATLAS_SIZE.width, ATLAS_SIZE.height};
 
@@ -103,25 +99,26 @@ namespace Trident {
 
 		while (unsortedLightmapIndex < lightmapIndices.count()) {
 			const uint32 sortedLightmapIndex = lightmapIndices[unsortedLightmapIndex].index;
+			const Lightmap& unsortedLightmap = lightmaps[unsortedLightmapIndex];
 
 			Lightmap& lightmap = lightmaps[sortedLightmapIndex];
 
 			LightmapNode* node = insertNode(lightmap, &rootNode);
 
-			lightmap.offset.width = node->rectangle.x;
-			lightmap.offset.height = node->rectangle.y;
-
 			DEBUG_ASSERT(node != nullptr);
 
 			node->assigned = true;
 
+			lightmap.offset.width = node->rectangle.x;
+			lightmap.offset.height = node->rectangle.y;
+
+			// TODO(asset-builder/lightmapper): Why does the sorted lightmap's coordinate offset doesn't work here?
+			const uint32 lightmapCoordinateOffset = unsortedLightmap.coordinateOffset;
+
 			uint16 coordinateIndex = 0;
 
-			while (coordinateIndex < lightmap.edgeIndexRange.count) {
-				const uint16 edgeIndex = faceEdgeIndices[lightmap.edgeIndexRange.offset + coordinateIndex];
-				const Edge3D edge = edges[edgeIndex];
-
-				svec2<float32>& coordinate = scene.lightmapCoordinates[lightmap.coordinateOffset + edge.originVertexIndex];
+			while (coordinateIndex < 4) {
+				svec2<float32>& coordinate = scene.lightmapCoordinates[lightmapCoordinateOffset + coordinateIndex];
 				coordinate.x += lightmap.offset.width;
 				coordinate.y += lightmap.offset.height;
 				coordinate /= atlasSize;
@@ -129,27 +126,18 @@ namespace Trident {
 				coordinateIndex += 1;
 			}
 
-			const Lightmap& unsortedLightmap = lightmaps[unsortedLightmapIndex];
-			const uint32 triangleCount = lightmap.edgeIndexRange.count / 2;
+			StaticTriangle3D& triangle1 = scene.triangles[triangleOffset + 0];
+			triangle1.vertices[0].lightmapCoordinateIndex = lightmapCoordinateOffset + 0;
+			triangle1.vertices[1].lightmapCoordinateIndex = lightmapCoordinateOffset + 1;
+			triangle1.vertices[2].lightmapCoordinateIndex = lightmapCoordinateOffset + 2;
 
-			// TODO: Why does the sorted lightmap's coordinate offset doesn't work here?
-			uint32 lightmapCoordinateOffset = unsortedLightmap.coordinateOffset;
-
-			uint32 vertexPositionIndexOffset = lightmap.edgeIndexRange.offset / 2 * 3;
-			uint32 triangleIndex = 0;
-
-			while (triangleIndex < triangleCount) {
-				StaticTriangle3D& triangle = scene.triangles[triangleOffset + triangleIndex];
-				triangle.vertices[0].lightmapCoordinateIndex = lightmapCoordinateOffset + vertexPositionIndices[vertexPositionIndexOffset + 0];
-				triangle.vertices[1].lightmapCoordinateIndex = lightmapCoordinateOffset + vertexPositionIndices[vertexPositionIndexOffset + 1];
-				triangle.vertices[2].lightmapCoordinateIndex = lightmapCoordinateOffset + vertexPositionIndices[vertexPositionIndexOffset + 2];
-
-				triangleIndex += 1;
-				vertexPositionIndexOffset += 3;
-			}
+			StaticTriangle3D& triangle2 = scene.triangles[triangleOffset + 1];
+			triangle2.vertices[0].lightmapCoordinateIndex = lightmapCoordinateOffset + 1;
+			triangle2.vertices[1].lightmapCoordinateIndex = lightmapCoordinateOffset + 3;
+			triangle2.vertices[2].lightmapCoordinateIndex = lightmapCoordinateOffset + 2;
 
 			unsortedLightmapIndex += 1;
-			triangleOffset += triangleCount;
+			triangleOffset += 2;
 		}
 	}
 
