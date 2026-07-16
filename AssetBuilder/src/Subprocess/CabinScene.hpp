@@ -24,7 +24,7 @@ namespace Trident {
 		StaticSurface surface = {
 			.materialIndex = 0,
 			.transform = {
-				.position = {0.0f, 16.0f, 144.0f},
+				.position = {100.0f, 50.0f, 100.0f},
 				.rotation = {pi<float32>() * 0.5f, 0.0f, 0.0f},
 				.scale = {200.0f, 100.0f},
 			},

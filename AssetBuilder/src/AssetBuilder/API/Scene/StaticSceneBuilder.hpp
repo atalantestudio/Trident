@@ -25,7 +25,7 @@ namespace Trident {
 			StaticScene3D build() const;
 
 		private:
-			void testCarve() const;
+			uint32 carveSurfaces(sequence<StaticSurface>& surfaces) const;
 
 		private:
 			std::filesystem::path rootOutputPath;
@@ -36,8 +36,5 @@ namespace Trident {
 			std::vector<StaticSurface> surfaces;
 
 			ref<GeometryAsset> surfaceGeometry;
-
-			uint32 lightmapCount = 0;
-			uint32 lightmapCoordinateCount = 0;
 	};
 }

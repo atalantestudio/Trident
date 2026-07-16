@@ -29,11 +29,17 @@ namespace Trident {
 		svec2<float32> scale;
 	};
 
+	struct Quad {
+		svec2<float32> start;
+		svec2<float32> end;
+	};
+
 	struct StaticSurface {
 		uint32 materialIndex;
 		Transform transform;
 		TextureFilteringDescriptor textureFiltering;
 		svec2<float32> lightmapScale;
 		std::vector<SurfaceCarving> carvings;
+		std::vector<Quad> quads;
 	};
 }

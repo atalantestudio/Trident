@@ -235,6 +235,16 @@ namespace Trident {
 	}
 
 	template<typename T>
+	constexpr bool operator==(svec<2, T> a, svec<2, T> b) {
+		return a.x == b.x && a.y == b.y;
+	}
+
+	template<typename T>
+	constexpr bool operator!=(svec<2, T> a, svec<2, T> b) {
+		return a.x != b.x || a.y != b.y;
+	}
+
+	template<typename T>
 	constexpr svec<2, T> operator+(svec<2, T> a, const svec<2, T>& b) {
 		return a += b;
 	}

@@ -82,43 +82,48 @@ namespace Trident {
 		ENGINE_ASSERT(surface.lightmapScale.x > 0.0f && surface.lightmapScale.y > 0.0f, "The lightmap scale must be positive.");
 
 		surfaces.emplace_back(surface);
-
-		lightmapCount += 1;
-		lightmapCoordinateCount = surfaceGeometry->getHull3DFaces()[0].edgeIndexRange.count;
 	}
 
 	StaticScene3D StaticSceneBuilder::build() const {
-		testCarve();
+		sequence<StaticSurface> surfaces(this->surfaces.size());
 
-		std::vector<svec3<float32>> vertices;
-		std::vector<svec3<float32>> normals;
-		std::vector<svec2<float32>> textureCoordinates;
-		std::vector<StaticTriangle3D> triangles;
+		std::copy(this->surfaces.begin(), this->surfaces.end(), &surfaces[0]);
 
-		// Sorted by lightmap area (ascending).
-		std::vector<LightmapIndex> lightmapIndices;
-		lightmapIndices.reserve(lightmapCount);
-
-		sequence<Lightmap> lightmaps(lightmapCount);
+		const Plane3D& face = surfaceGeometry->getHull3DFaces()[0];
+		const uint32 quadCount = carveSurfaces(surfaces);
+		const uint32 triangleCount = quadCount * 2;
+		const uint32 lightmapCoordinateCount = quadCount * 4;
 
 		StaticScene3D scene{};
 		scene.lightmapCoordinates = sequence<svec2<float32>>(lightmapCoordinateCount);
 		scene.materialShaders = sequence<BuildMaterialShader>(materialShaders.size());
 		scene.materials = sequence<BuildStaticMaterial3D>(materials.size());
+		scene.triangles = sequence<StaticTriangle3D>(triangleCount);
+
+		std::vector<svec3<float32>> vertices;
+		std::vector<svec3<float32>> normals;
+		std::vector<svec2<float32>> textureCoordinates;
+		sequence<Lightmap> lightmaps(quadCount);
+
+		// Sorted by ascending lightmap area.
+		std::vector<LightmapIndex> lightmapIndices;
+		lightmapIndices.reserve(quadCount);
 
 		std::copy(materialShaders.begin(), materialShaders.end(), &scene.materialShaders[0]);
 		std::copy(materials.begin(), materials.end(), &scene.materials[0]);
 
-		uint32 faceIndex = 0;
 		uint32 lightmapCoordinateOffset = 0;
+		uint32 triangleIndex = 0;
+		uint32 quadOffset = 0;
 
 		for (const StaticSurface& surface : surfaces) {
 			const view<float32> vertexPositionComponents = surfaceGeometry->getVertexPositionComponents();
-			const view<float32> vertexNormalComponents = surfaceGeometry->getVertexNormalComponents();
 			const view<float32> vertexTextureCoordinateComponents = surfaceGeometry->getVertexTextureCoordinateComponents();
 			const uint64 vertexCount = vertexPositionComponents.count() / 3;
-			const uint64 normalCount = vertexNormalComponents.count() / 3;
 			const uint64 textureCoordinateCount = vertexTextureCoordinateComponents.count() / 2;
+			const view<uint32> vertexPositionIndices = surfaceGeometry->getVertexPositionIndices();
+			const view<uint32> vertexNormalIndices = surfaceGeometry->getVertexNormalIndices();
+			const view<uint32> vertexTextureCoordinateIndices = surfaceGeometry->getVertexTextureCoordinateIndices();
 			const vec3<float32> scale = {surface.transform.scale[0], 0.0f, surface.transform.scale[1]};
 			const quat<float32> pitch = quat<float32>::axisAngle(RIGHT, surface.transform.rotation[0]);
 			const quat<float32> yaw = quat<float32>::axisAngle(UP, surface.transform.rotation[1]);
@@ -136,81 +141,34 @@ namespace Trident {
 			);
 
 			BuildStaticMaterial3D& material = scene.materials[surface.materialIndex];
-
-			sequence<uint32> vertexRedirectionIndices(vertexCount);
-			sequence<uint32> normalRedirectionIndices(normalCount);
-			sequence<uint32> textureCoordinateRedirectionIndices(textureCoordinateCount);
-
-			// Merge vertex duplicates.
-			{
-				uint32 vertexIndex = 0;
-
-				while (vertexIndex < vertexCount) {
-					vec3<float32> v = {
-						vertexPositionComponents[vertexIndex * 3 + 0],
-						vertexPositionComponents[vertexIndex * 3 + 1],
-						vertexPositionComponents[vertexIndex * 3 + 2],
-					};
-					v = multiplyTransform(v, world);
-
-					const svec3<float32> vertex = {
-						round(v[0] * 100.0f) / 100.0f,
-						round(v[1] * 100.0f) / 100.0f,
-						round(v[2] * 100.0f) / 100.0f,
-					};
-
-					view<svec3<float32>> vertexView{};
-
-					if (vertices.size() > 0) {
-						vertexView = view<svec3<float32>>(&vertices[0], vertices.size());
-					}
-
-					const uint32 vertexRedirectionIndex = findDuplicate(vertexView, vertex);
-
-					if (vertexRedirectionIndex >= vertices.size()) {
-						vertices.emplace_back(vertex);
-					}
-
-					vertexRedirectionIndices[vertexIndex] = vertexRedirectionIndex;
-
-					vertexIndex += 1;
-				}
-			}
+			uint32 normalIndex;
 
 			// Merge normal duplicates.
 			{
-				uint32 normalIndex = 0;
+				const svec3<float32> normal(normalized(vec3<float32>(face.normal) * inverse(orientation)));
 
-				while (normalIndex < normalCount) {
-					vec3<float32> n = {
-						vertexNormalComponents[normalIndex * 3 + 0],
-						vertexNormalComponents[normalIndex * 3 + 1],
-						vertexNormalComponents[normalIndex * 3 + 2],
-					};
-					n = normalized(n * inverse(orientation));
+				const svec3<float32> roundedNormal = {
+					round(normal.x * 100.0f) / 100.0f,
+					round(normal.y * 100.0f) / 100.0f,
+					round(normal.z * 100.0f) / 100.0f,
+				};
 
-					const svec3<float32> normal(n);
+				view<svec3<float32>> normalView{};
 
-					view<svec3<float32>> normalView{};
+				if (normals.size() > 0) {
+					normalView = view<svec3<float32>>(&normals[0], normals.size());
+				}
 
-					if (normals.size() > 0) {
-						normalView = view<svec3<float32>>(&normals[0], normals.size());
-					}
+				normalIndex = findDuplicate(normalView, roundedNormal);
 
-					const uint32 normalRedirectionIndex = findDuplicate(normalView, normal);
-
-					if (normalRedirectionIndex >= normals.size()) {
-						// TODO(asset-builder/lightmapper): Don't add every vertex normal if only the face normals are used.
-						normals.emplace_back(normal);
-					}
-
-					normalRedirectionIndices[normalIndex] = normalRedirectionIndex;
-
-					normalIndex += 1;
+				if (normalIndex >= normals.size()) {
+					normals.emplace_back(roundedNormal);
 				}
 			}
 
-			// Merge texture coordinate duplicates.
+			sequence<uint32> textureCoordinateRedirectionIndices(textureCoordinateCount);
+
+			// TODO: Merge texture coordinate duplicates.
 			{
 				uint32 textureCoordinateIndex = 0;
 
@@ -238,44 +196,81 @@ namespace Trident {
 				}
 			}
 
-			const view<uint32> vertexPositionIndices = surfaceGeometry->getVertexPositionIndices();
-			const view<uint32> vertexNormalIndices = surfaceGeometry->getVertexNormalIndices();
-			const view<uint32> vertexTextureCoordinateIndices = surfaceGeometry->getVertexTextureCoordinateIndices();
+			// Merge vertex duplicates.
+			{
+				const vec3<float32> origin = {vertexPositionComponents[0], vertexPositionComponents[1], vertexPositionComponents[2]};
 
-			uint32 indexOffset = 0;
+				sequence<uint32> vertexRedirectionIndices(vertexCount);
+				uint32 quadIndex = 0;
 
-			while (indexOffset < vertexPositionIndices.count()) {
-				const uint32 normalIndex = vertexNormalIndices[indexOffset];
+				while (quadIndex < surface.quads.size()) {
+					const Quad& quad = surface.quads[quadIndex];
+					const vec3<float32> quadScale = {quad.end.x - quad.start.x, 0.0f, quad.end.y - quad.start.y};
 
-				ENGINE_ASSERT(
-					normalIndex == vertexNormalIndices[indexOffset + 1] &&
-					normalIndex == vertexNormalIndices[indexOffset + 2],
-					"Static scenes must use face normals."
-				);
+					pool<svec2<float32>, 4> quadVertices;
+					quadVertices.add({quad.start.x, quad.start.y});
+					quadVertices.add({quad.end.x, quad.start.y});
+					quadVertices.add({quad.start.x, quad.end.y});
+					quadVertices.add({quad.end.x, quad.end.y});
 
-				triangles.emplace_back(StaticTriangle3D{
-					.vertices = {
-						{
-							.vertexIndex = vertexRedirectionIndices[vertexPositionIndices[indexOffset + 0]],
-							.textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexTextureCoordinateIndices[indexOffset + 0]],
-							.lightmapCoordinateIndex = 0,
-						},
-						{
-							.vertexIndex = vertexRedirectionIndices[vertexPositionIndices[indexOffset + 1]],
-							.textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexTextureCoordinateIndices[indexOffset + 1]],
-							.lightmapCoordinateIndex = 0,
-						},
-						{
-							.vertexIndex = vertexRedirectionIndices[vertexPositionIndices[indexOffset + 2]],
-							.textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexTextureCoordinateIndices[indexOffset + 2]],
-							.lightmapCoordinateIndex = 0,
-						},
-					},
-					.normalIndex = normalRedirectionIndices[normalIndex],
-				});
+					uint32 vertexIndex = 0;
 
-				material.triangleRange.count += 1;
-				indexOffset += 3;
+					while (vertexIndex < 4) {
+						vec3<float32> vertex = origin;
+						vertex += {quadVertices[vertexIndex].x / scale[0], 0.0f, -quadVertices[vertexIndex].y / scale[2]};
+						vertex = multiplyTransform(vertex, world);
+
+						const svec3<float32> roundedVertex = {
+							round(vertex[0] * 100.0f) / 100.0f,
+							round(vertex[1] * 100.0f) / 100.0f,
+							round(vertex[2] * 100.0f) / 100.0f,
+						};
+
+						view<svec3<float32>> vertexView{};
+
+						if (vertices.size() > 0) {
+							vertexView = view<svec3<float32>>(&vertices[0], vertices.size());
+						}
+
+						const uint32 vertexRedirectionIndex = findDuplicate(vertexView, roundedVertex);
+
+						if (vertexRedirectionIndex >= vertices.size()) {
+							vertices.emplace_back(roundedVertex);
+						}
+
+						vertexRedirectionIndices[vertexIndex] = vertexRedirectionIndex;
+
+						vertexIndex += 1;
+					}
+
+					uint32 indexOffset = 0;
+
+					while (indexOffset < vertexPositionIndices.count()) {
+						scene.triangles[triangleIndex] = {
+							.vertices = {
+								{
+									.vertexIndex = vertexRedirectionIndices[vertexPositionIndices[indexOffset + 0]],
+									// .textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexTextureCoordinateIndices[indexOffset + 0]],
+								},
+								{
+									.vertexIndex = vertexRedirectionIndices[vertexPositionIndices[indexOffset + 1]],
+									// .textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexTextureCoordinateIndices[indexOffset + 1]],
+								},
+								{
+									.vertexIndex = vertexRedirectionIndices[vertexPositionIndices[indexOffset + 2]],
+									// .textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexTextureCoordinateIndices[indexOffset + 2]],
+								},
+							},
+							.normalIndex = normalIndex,
+						};
+
+						material.triangleRange.count += 1;
+						indexOffset += 3;
+						triangleIndex += 1;
+					}
+
+					quadIndex += 1;
+				}
 			}
 
 			if (surface.materialIndex > 0) {
@@ -285,56 +280,68 @@ namespace Trident {
 			}
 
 			const view<Edge3D> edges = surfaceGeometry->getHull3DEdges();
-			const view<Plane3D> faces = surfaceGeometry->getHull3DFaces();
 			const view<uint16> faceEdgeIndices = surfaceGeometry->getHull3DFaceEdgeIndices();
 
-			for (const Plane3D face : faces) {
-				const uint32 lightmapCoordinateCount = face.edgeIndexRange.count;
+			/* quat<float32> R;
 
-				Lightmap& lightmap = lightmaps[faceIndex];
+			// TODO(asset-builder/lightmapper)
+			{
+				vec3<float32> normal(face.normal);
+				normal = normalized(normal * orientation);
+
+				const float32 projection = dot(normal, UP);
+
+				if (projection > 0.999999f) {
+					R = quat<float32>::identity();
+				}
+				else if (projection < -0.999999f) {
+					vec3<float32> axis = normalized(cross(normal, RIGHT));
+
+					if (length(axis) < 0.000001f) {
+						axis = normalized(cross(normal, FORWARD));
+					}
+
+					R = quat<float32>::axisAngle(axis, pi<float32>());
+				}
+				else {
+					const vec3<float32> axis = cross(normal, UP);
+
+					R = {
+						projection + 1.0f,
+						axis[0],
+						axis[1],
+						axis[2],
+					};
+					R = normalized(R);
+				}
+			} */
+
+			uint32 quadIndex = 0;
+
+			while (quadIndex < surface.quads.size()) {
+				const Quad& quad = surface.quads[quadIndex];
+
+				pool<svec2<float32>, 4> vertices;
+				vertices.add({quad.start.x, quad.start.y});
+				vertices.add({quad.end.x, quad.start.y});
+				vertices.add({quad.end.x, quad.end.y});
+				vertices.add({quad.start.x, quad.end.y});
+
+				Lightmap& lightmap = lightmaps[quadOffset];
 				lightmap.edgeIndexRange = face.edgeIndexRange;
 				lightmap.offset = {0, 0};
 				lightmap.coordinateOffset = lightmapCoordinateOffset;
 
-				svec2<float32> maxCoordinate = {min<float32>(), min<float32>()};
-				svec2<float32> minCoordinate = {max<float32>(), max<float32>()};
+				svec2<float32> maxCoordinate = quad.end / surface.lightmapScale;
+				maxCoordinate.x = round(maxCoordinate.x * 100.0f) / 100.0f;
+				maxCoordinate.y = round(maxCoordinate.y * 100.0f) / 100.0f;
+				svec2<float32> minCoordinate = quad.start / surface.lightmapScale;
+				minCoordinate.x = round(minCoordinate.x * 100.0f) / 100.0f;
+				minCoordinate.y = round(minCoordinate.y * 100.0f) / 100.0f;
 				uint16 coordinateIndex = 0;
-				quat<float32> R;
 
-				// TODO(asset-builder/lightmapper)
-				{
-					vec3<float32> normal(face.normal);
-					normal = normalized(normal * orientation);
-
-					const float32 projection = dot(normal, UP);
-
-					if (projection > 0.999999f) {
-						R = quat<float32>::identity();
-					}
-					else if (projection < -0.999999f) {
-						vec3<float32> axis = normalized(cross(normal, RIGHT));
-
-						if (length(axis) < 0.000001f) {
-							axis = normalized(cross(normal, FORWARD));
-						}
-
-						R = quat<float32>::axisAngle(axis, pi<float32>());
-					}
-					else {
-						const vec3<float32> axis = cross(normal, UP);
-
-						R = {
-							projection + 1.0f,
-							axis[0],
-							axis[1],
-							axis[2],
-						};
-						R = normalized(R);
-					}
-				}
-
-				while (coordinateIndex < lightmapCoordinateCount) {
-					const uint16 edgeIndex = faceEdgeIndices[face.edgeIndexRange.offset + coordinateIndex];
+				while (coordinateIndex < face.edgeIndexRange.count) {
+					/* const uint16 edgeIndex = faceEdgeIndices[face.edgeIndexRange.offset + coordinateIndex];
 					const Edge3D edge = edges[edgeIndex];
 					const uint32 vertexPositionComponentOffset = edge.originVertexIndex * 3;
 
@@ -347,16 +354,21 @@ namespace Trident {
 					vertex *= orientation;
 					vertex *= R;
 
-					svec2<float32>& coordinate = scene.lightmapCoordinates[lightmapCoordinateOffset + edge.originVertexIndex];
-					coordinate = {vertex[0], vertex[2]};
+					// svec2<float32>& coordinate = scene.lightmapCoordinates[lightmapCoordinateOffset + edge.originVertexIndex]; */
+					svec2<float32>& coordinate = scene.lightmapCoordinates[lightmapCoordinateOffset + coordinateIndex];
+					// coordinate = {vertex[0], vertex[2]};
+					coordinate = vertices[coordinateIndex];
 					coordinate /= surface.lightmapScale;
 					coordinate.x = round(coordinate.x * 100.0f) / 100.0f;
 					coordinate.y = round(coordinate.y * 100.0f) / 100.0f;
 
-					maxCoordinate.x = max(maxCoordinate.x, coordinate.x);
+					coordinate.y *= -1.0f;
+					coordinate += maxCoordinate;
+
+					/* maxCoordinate.x = max(maxCoordinate.x, coordinate.x);
 					maxCoordinate.y = max(maxCoordinate.y, coordinate.y);
 					minCoordinate.x = min(minCoordinate.x, coordinate.x);
-					minCoordinate.y = min(minCoordinate.y, coordinate.y);
+					minCoordinate.y = min(minCoordinate.y, coordinate.y); */
 
 					coordinateIndex += 1;
 				}
@@ -366,13 +378,13 @@ namespace Trident {
 
 				coordinateIndex = 0;
 
-				while (coordinateIndex < lightmapCoordinateCount) {
+				/* while (coordinateIndex < face.edgeIndexRange.count) {
 					svec2<float32>& coordinate = scene.lightmapCoordinates[lightmapCoordinateOffset + coordinateIndex];
 					coordinate.y *= -1.0f;
 					coordinate += maxCoordinate;
 
 					coordinateIndex += 1;
-				}
+				} */
 
 				// Pad for dilation.
 				maxCoordinate.x += 2.0f;
@@ -383,7 +395,7 @@ namespace Trident {
 				lightmap.size = {static_cast<uint32>(size.x), static_cast<uint32>(size.y)};
 
 				LightmapIndex lightmapIndex{};
-				lightmapIndex.index = faceIndex;
+				lightmapIndex.index = 0;
 				lightmapIndex.area = lightmap.size.width * lightmap.size.height;
 
 				uint32 lightmapInsertionIndex = 0;
@@ -398,22 +410,20 @@ namespace Trident {
 
 				lightmapIndices.insert(lightmapIndices.begin() + lightmapInsertionIndex, lightmapIndex);
 
-				lightmapCoordinateOffset += lightmapCoordinateCount;
-				faceIndex += 1;
-
-				break;
+				lightmapCoordinateOffset += face.edgeIndexRange.count;
+				quadIndex += 1;
 			}
+
+			quadOffset += quadIndex;
 		}
 
 		scene.vertices = sequence<svec3<float32>>(vertices.size());
 		scene.normals = sequence<svec3<float32>>(normals.size());
 		scene.textureCoordinates = sequence<svec2<float32>>(textureCoordinates.size());
-		scene.triangles = sequence<StaticTriangle3D>(triangles.size());
 
 		std::copy(vertices.begin(), vertices.end(), &scene.vertices[0]);
 		std::copy(normals.begin(), normals.end(), &scene.normals[0]);
 		std::copy(textureCoordinates.begin(), textureCoordinates.end(), &scene.textureCoordinates[0]);
-		std::copy(triangles.begin(), triangles.end(), &scene.triangles[0]);
 
 		Lightmapper::updateAtlasCoordinates(scene, lightmaps, view<LightmapIndex>(&lightmapIndices[0], lightmapIndices.size()), surfaceGeometry);
 
@@ -435,16 +445,12 @@ namespace Trident {
 		return scene;
 	}
 
-	static struct Quad {
-		svec2<float32> start;
-		svec2<float32> end;
-	};
+	uint32 StaticSceneBuilder::carveSurfaces(sequence<StaticSurface>& surfaces) const {
+		uint32 quadCount = 0;
 
-	void StaticSceneBuilder::testCarve() const {
-		for (const StaticSurface& surface : surfaces) {
+		for (StaticSurface& surface : surfaces) {
 			const svec2<float32> surfaceSize(surface.transform.scale);
 
-			std::vector<Quad> quads;
 			std::vector<Quad> queue = {
 				{
 					.start = {0.0f, 0.0f},
@@ -452,50 +458,53 @@ namespace Trident {
 				},
 			};
 
-			while (!queue.empty()) {
+			while (queue.size() > 0) {
 				Quad quad = queue.back();
 
 				queue.pop_back();
 
-				bool blockedHorizontally = false;
+				bool continueAfterBlockingCarving = false;
+				svec2<float32> blockingCarvingEnd;
 				float32 newOriginX = 0.0f;
-				float32 newQuadEndY = quad.end.y;
-				svec2<float32> carvingEnd = quad.end;
 				uint32 carvingIndex = 0;
 
 				while (carvingIndex < surface.carvings.size()) {
 					const SurfaceCarving& carving = surface.carvings[carvingIndex];
 
-					if (carving.offset.x > quad.end.x || carving.offset.x + carving.scale.x <= quad.start.x) {
+					// If the carving is not in the quad's horizontal bounds, continue.
+					if (carving.offset.x + carving.scale.x <= quad.start.x || carving.offset.x > quad.end.x) {
+						// If the carving was before the quad, at least adjust the quad's height.
+						if (carving.offset.x + carving.scale.x == quad.start.x) {
+							quad.end.y = min(quad.end.y, carving.offset.y + carving.scale.y);
+						}
+
 						carvingIndex += 1;
 
 						continue;
 					}
 
-					if (carving.offset.y > quad.end.y) {
+					// If the carving is not in the quad's vertical bounds, continue.
+					if (carving.offset.y + carving.scale.y <= quad.start.y || carving.offset.y > quad.end.y) {
 						carvingIndex += 1;
 
 						continue;
 					}
 
-					if (quad.start.y >= carving.offset.y && quad.start.y < carving.offset.y + carving.scale.y) {
+					// If the carving fully blocks the quad vertically, end the quad there.
+					if (carving.offset.y <= quad.start.y && carving.offset.y + carving.scale.y >= quad.start.y) {
 						quad.end.x = carving.offset.x;
-
-						// This value needs to be refined.
 						quad.end.y = min(quad.end.y, carving.offset.y + carving.scale.y);
 
 						if (carving.offset.y == quad.start.y) {
-							// The carving blocks and there is no quad after it.
-							blockedHorizontally = true;
+							// There is no quad after the carving.
+							continueAfterBlockingCarving = true;
 
-							carvingEnd = carving.offset + carving.scale;
+							blockingCarvingEnd = carving.offset + carving.scale;
 						}
 						else {
-							// The carving blocks but there is already a quad after it.
+							// There is already a quad after the carving.
+							// Force a new quad to be added right below the current quad.
 							newOriginX = quad.start.x;
-							newQuadEndY = carving.offset.y + carving.scale.y;
-
-							carvingEnd = {quad.start.x, quad.end.y};
 						}
 
 						carvingIndex += 1;
@@ -503,40 +512,34 @@ namespace Trident {
 						continue;
 					}
 
-					if (carving.offset.y + carving.scale.y <= quad.start.y) {
-						carvingIndex += 1;
-
-						continue;
-					}
-
-					// There is still space above the carving.
+					// There is some space above the carving.
 					quad.end.y = carving.offset.y;
 
 					carvingIndex += 1;
 				}
 
-				quads.emplace_back(quad);
+				surface.quads.emplace_back(quad);
 
-				if (quad.start.x == newOriginX && !(quad.end.x == surfaceSize.x && quad.end.y == surfaceSize.y)) {
+				quadCount += 1;
+
+				if (quad.start.x == newOriginX && quad.end != surfaceSize) {
 					// If the quad started at the X origin, prepare a quad right below.
 					queue.emplace_back(Quad{
 						.start = {newOriginX, quad.end.y},
-						.end = {surfaceSize.x, newQuadEndY},
+						.end = surfaceSize,
 					});
 				}
 
-				if (blockedHorizontally) {
+				if (continueAfterBlockingCarving) {
 					// Prepare a quad after the carving.
 					queue.emplace_back(Quad{
-						.start = {carvingEnd.x, quad.start.y},
-						.end = {surfaceSize.x, carvingEnd.y},
+						.start = {blockingCarvingEnd.x, quad.start.y},
+						.end = {surfaceSize.x, blockingCarvingEnd.y},
 					});
 				}
-
-				BREAKPOINT();
 			}
-
-			BREAKPOINT();
 		}
+
+		return quadCount;
 	}
 }
