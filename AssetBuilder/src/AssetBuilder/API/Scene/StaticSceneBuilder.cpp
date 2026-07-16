@@ -48,7 +48,8 @@ namespace Trident {
 	StaticSceneBuilder::StaticSceneBuilder(std::filesystem::path rootOutputPath, view<char8> assetName) :
 		rootOutputPath(rootOutputPath),
 		assetName(assetName),
-		assetLibrary(new AssetLibrary(rootOutputPath))
+		assetLibrary(new AssetLibrary(rootOutputPath)),
+		surfaceGeometry(assetLibrary->getAsset<GeometryAsset>("UnitPlane"))
 	{}
 
 	StaticSceneBuilder::~StaticSceneBuilder() {
@@ -81,35 +82,18 @@ namespace Trident {
 		ENGINE_ASSERT(surface.lightmapScale.x > 0.0f && surface.lightmapScale.y > 0.0f, "The lightmap scale must be positive.");
 
 		surfaces.emplace_back(surface);
+
+		lightmapCount += 1;
+		lightmapCoordinateCount = surfaceGeometry->getHull3DFaces()[0].edgeIndexRange.count;
 	}
 
 	StaticScene3D StaticSceneBuilder::build() const {
+		testCarve();
+
 		std::vector<svec3<float32>> vertices;
 		std::vector<svec3<float32>> normals;
 		std::vector<svec2<float32>> textureCoordinates;
 		std::vector<StaticTriangle3D> triangles;
-
-		const ref<GeometryAsset> geometryAsset = assetLibrary->getAsset<GeometryAsset>("UnitPlane");
-
-		uint64 lightmapCount = 0;
-		uint64 lightmapCoordinateCount = 0;
-
-		for (const StaticSurface& surface : surfaces) {
-			const view<Plane3D> faces = geometryAsset->getHull3DFaces();
-
-			for (const Plane3D face : faces) {
-				// One lightmap per face.
-				lightmapCount += 1;
-
-				// One coordinate per vertex on the face.
-				lightmapCoordinateCount += face.edgeIndexRange.count;
-
-				// TODO(asset-builder/lightmapper): Handle UnitPlane back face.
-				if (faces.count() == 2) {
-					break;
-				}
-			}
-		}
 
 		// Sorted by lightmap area (ascending).
 		std::vector<LightmapIndex> lightmapIndices;
@@ -129,9 +113,9 @@ namespace Trident {
 		uint32 lightmapCoordinateOffset = 0;
 
 		for (const StaticSurface& surface : surfaces) {
-			const view<float32> vertexPositionComponents = geometryAsset->getVertexPositionComponents();
-			const view<float32> vertexNormalComponents = geometryAsset->getVertexNormalComponents();
-			const view<float32> vertexTextureCoordinateComponents = geometryAsset->getVertexTextureCoordinateComponents();
+			const view<float32> vertexPositionComponents = surfaceGeometry->getVertexPositionComponents();
+			const view<float32> vertexNormalComponents = surfaceGeometry->getVertexNormalComponents();
+			const view<float32> vertexTextureCoordinateComponents = surfaceGeometry->getVertexTextureCoordinateComponents();
 			const uint64 vertexCount = vertexPositionComponents.count() / 3;
 			const uint64 normalCount = vertexNormalComponents.count() / 3;
 			const uint64 textureCoordinateCount = vertexTextureCoordinateComponents.count() / 2;
@@ -144,6 +128,11 @@ namespace Trident {
 				mat4x4<float32>::scaling(scale) *
 				mat4x4<float32>(orientation) *
 				mat4x4<float32>::translation(surface.transform.position)
+			);
+			const mat3x3<float32> textureWorld = (
+				mat3x3<float32>::scaling(surface.transform.scale * vec2<float32>(surface.textureFiltering.scale)) *
+				mat3x3<float32>::rotation(pi<float32>() * surface.textureFiltering.rotation) *
+				mat3x3<float32>::translation(surface.textureFiltering.translation)
 			);
 
 			BuildStaticMaterial3D& material = scene.materials[surface.materialIndex];
@@ -221,12 +210,6 @@ namespace Trident {
 				}
 			}
 
-			const mat3x3<float32> textureWorld = (
-				mat3x3<float32>::scaling(surface.transform.scale * vec2<float32>(surface.textureFiltering.scale)) *
-				mat3x3<float32>::rotation(pi<float32>() * surface.textureFiltering.rotation) *
-				mat3x3<float32>::translation(surface.textureFiltering.translation)
-			);
-
 			// Merge texture coordinate duplicates.
 			{
 				uint32 textureCoordinateIndex = 0;
@@ -255,9 +238,9 @@ namespace Trident {
 				}
 			}
 
-			const view<uint32> vertexPositionIndices = geometryAsset->getVertexPositionIndices();
-			const view<uint32> vertexNormalIndices = geometryAsset->getVertexNormalIndices();
-			const view<uint32> vertexTextureCoordinateIndices = geometryAsset->getVertexTextureCoordinateIndices();
+			const view<uint32> vertexPositionIndices = surfaceGeometry->getVertexPositionIndices();
+			const view<uint32> vertexNormalIndices = surfaceGeometry->getVertexNormalIndices();
+			const view<uint32> vertexTextureCoordinateIndices = surfaceGeometry->getVertexTextureCoordinateIndices();
 
 			uint32 indexOffset = 0;
 
@@ -301,9 +284,9 @@ namespace Trident {
 				material.triangleRange.offset = previousMaterial.triangleRange.offset + previousMaterial.triangleRange.count;
 			}
 
-			const view<Edge3D> edges = geometryAsset->getHull3DEdges();
-			const view<Plane3D> faces = geometryAsset->getHull3DFaces();
-			const view<uint16> faceEdgeIndices = geometryAsset->getHull3DFaceEdgeIndices();
+			const view<Edge3D> edges = surfaceGeometry->getHull3DEdges();
+			const view<Plane3D> faces = surfaceGeometry->getHull3DFaces();
+			const view<uint16> faceEdgeIndices = surfaceGeometry->getHull3DFaceEdgeIndices();
 
 			for (const Plane3D face : faces) {
 				const uint32 lightmapCoordinateCount = face.edgeIndexRange.count;
@@ -418,10 +401,7 @@ namespace Trident {
 				lightmapCoordinateOffset += lightmapCoordinateCount;
 				faceIndex += 1;
 
-				// TODO(asset-builder/lightmapper): Handle UnitPlane back face.
-				if (faces.count() == 2) {
-					break;
-				}
+				break;
 			}
 		}
 
@@ -435,7 +415,7 @@ namespace Trident {
 		std::copy(textureCoordinates.begin(), textureCoordinates.end(), &scene.textureCoordinates[0]);
 		std::copy(triangles.begin(), triangles.end(), &scene.triangles[0]);
 
-		Lightmapper::updateAtlasCoordinates(scene, lightmaps, view<LightmapIndex>(&lightmapIndices[0], lightmapIndices.size()), geometryAsset);
+		Lightmapper::updateAtlasCoordinates(scene, lightmaps, view<LightmapIndex>(&lightmapIndices[0], lightmapIndices.size()), surfaceGeometry);
 
 		ImageAssetDescriptor lightmapAtlasImageAssetDescriptor = {
 			.format = ImageFormat::R8G8B8A8_UNORM,
@@ -453,5 +433,110 @@ namespace Trident {
 		scene.lightmapAtlasImageAssetIdentifier = lightmapAtlasImageAssetDescriptor.identifier;
 
 		return scene;
+	}
+
+	static struct Quad {
+		svec2<float32> start;
+		svec2<float32> end;
+	};
+
+	void StaticSceneBuilder::testCarve() const {
+		for (const StaticSurface& surface : surfaces) {
+			const svec2<float32> surfaceSize(surface.transform.scale);
+
+			std::vector<Quad> quads;
+			std::vector<Quad> queue = {
+				{
+					.start = {0.0f, 0.0f},
+					.end = surfaceSize,
+				},
+			};
+
+			while (!queue.empty()) {
+				Quad quad = queue.back();
+
+				queue.pop_back();
+
+				bool blockedHorizontally = false;
+				float32 newOriginX = 0.0f;
+				float32 newQuadEndY = quad.end.y;
+				svec2<float32> carvingEnd = quad.end;
+				uint32 carvingIndex = 0;
+
+				while (carvingIndex < surface.carvings.size()) {
+					const SurfaceCarving& carving = surface.carvings[carvingIndex];
+
+					if (carving.offset.x > quad.end.x || carving.offset.x + carving.scale.x <= quad.start.x) {
+						carvingIndex += 1;
+
+						continue;
+					}
+
+					if (carving.offset.y > quad.end.y) {
+						carvingIndex += 1;
+
+						continue;
+					}
+
+					if (quad.start.y >= carving.offset.y && quad.start.y < carving.offset.y + carving.scale.y) {
+						quad.end.x = carving.offset.x;
+
+						// This value needs to be refined.
+						quad.end.y = min(quad.end.y, carving.offset.y + carving.scale.y);
+
+						if (carving.offset.y == quad.start.y) {
+							// The carving blocks and there is no quad after it.
+							blockedHorizontally = true;
+
+							carvingEnd = carving.offset + carving.scale;
+						}
+						else {
+							// The carving blocks but there is already a quad after it.
+							newOriginX = quad.start.x;
+							newQuadEndY = carving.offset.y + carving.scale.y;
+
+							carvingEnd = {quad.start.x, quad.end.y};
+						}
+
+						carvingIndex += 1;
+
+						continue;
+					}
+
+					if (carving.offset.y + carving.scale.y <= quad.start.y) {
+						carvingIndex += 1;
+
+						continue;
+					}
+
+					// There is still space above the carving.
+					quad.end.y = carving.offset.y;
+
+					carvingIndex += 1;
+				}
+
+				quads.emplace_back(quad);
+
+				if (quad.start.x == newOriginX && !(quad.end.x == surfaceSize.x && quad.end.y == surfaceSize.y)) {
+					// If the quad started at the X origin, prepare a quad right below.
+					queue.emplace_back(Quad{
+						.start = {newOriginX, quad.end.y},
+						.end = {surfaceSize.x, newQuadEndY},
+					});
+				}
+
+				if (blockedHorizontally) {
+					// Prepare a quad after the carving.
+					queue.emplace_back(Quad{
+						.start = {carvingEnd.x, quad.start.y},
+						.end = {surfaceSize.x, carvingEnd.y},
+					});
+				}
+
+				BREAKPOINT();
+			}
+
+			BREAKPOINT();
+		}
 	}
 }

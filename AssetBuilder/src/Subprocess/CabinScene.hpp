@@ -18,7 +18,36 @@ namespace Trident {
 		const uint32 floorLevel0 = builder.addFloorLevel(0.0f);
 		const uint32 floorLevel1 = builder.addFloorLevel(128.0f);
 
-		builder.addRoom(floorLevel0, 128.0f, 96.0f);
+		// builder.addRoom(floorLevel0, 128.0f, 96.0f);
+
+		// TODO(test)
+		StaticSurface surface = {
+			.materialIndex = 0,
+			.transform = {
+				.position = {0.0f, 16.0f, 144.0f},
+				.rotation = {pi<float32>() * 0.5f, 0.0f, 0.0f},
+				.scale = {200.0f, 100.0f},
+			},
+			.textureFiltering = {
+				.translation = {0.0f, 0.0f},
+				.rotation = 0.0f,
+				.scale = {(1.0f / 256.0f) / 0.25f, (1.0f / 256.0f) / 0.25f},
+			},
+			.lightmapScale = {4.0f, 4.0f},
+		};
+
+		surface.carvings = {
+			{
+				.offset = {20.0f, 20.0f},
+				.scale = {60.0f, 60.0f},
+			},
+			{
+				.offset = {100.0f, 0.0f},
+				.scale = {20.0f, 50.0f},
+			},
+		};
+
+		builder.addSurface(surface);
 
 		return {
 			.staticScene = builder.build(),

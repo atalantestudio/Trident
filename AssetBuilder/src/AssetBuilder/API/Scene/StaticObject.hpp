@@ -22,10 +22,18 @@ namespace Trident {
 		svec2<float32> scale;
 	};
 
+	struct SurfaceCarving {
+		/// Offset from the top left.
+		svec2<float32> offset;
+
+		svec2<float32> scale;
+	};
+
 	struct StaticSurface {
 		uint32 materialIndex;
 		Transform transform;
 		TextureFilteringDescriptor textureFiltering;
 		svec2<float32> lightmapScale;
+		std::vector<SurfaceCarving> carvings;
 	};
 }

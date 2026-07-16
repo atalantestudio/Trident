@@ -25,11 +25,19 @@ namespace Trident {
 			StaticScene3D build() const;
 
 		private:
+			void testCarve() const;
+
+		private:
 			std::filesystem::path rootOutputPath;
 			view<char8> assetName;
 			AssetLibrary* assetLibrary;
 			std::vector<BuildMaterialShader> materialShaders;
 			std::vector<BuildStaticMaterial3D> materials;
 			std::vector<StaticSurface> surfaces;
+
+			ref<GeometryAsset> surfaceGeometry;
+
+			uint32 lightmapCount = 0;
+			uint32 lightmapCoordinateCount = 0;
 	};
 }
