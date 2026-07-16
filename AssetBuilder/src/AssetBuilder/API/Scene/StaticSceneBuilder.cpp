@@ -166,33 +166,49 @@ namespace Trident {
 				}
 			}
 
-			sequence<uint32> textureCoordinateRedirectionIndices(textureCoordinateCount);
+			sequence<uint32> textureCoordinateRedirectionIndices(quadCount * 4);
 
-			// TODO: Merge texture coordinate duplicates.
+			// Merge texture coordinate duplicates.
 			{
+				const svec2<float32> quadScale(surface.transform.scale);
+
 				uint32 textureCoordinateIndex = 0;
+				uint32 textureCoordinateOffset = 0;
+				uint32 quadIndex = 0;
 
-				while (textureCoordinateIndex < textureCoordinateCount) {
-					const svec2<float32> textureCoordinate = svec2<float32>(multiplyTransform({
-						vertexTextureCoordinateComponents[textureCoordinateIndex * 2 + 0],
-						vertexTextureCoordinateComponents[textureCoordinateIndex * 2 + 1],
-					}, textureWorld));
+				while (quadIndex < surface.quads.size()) {
+					const Quad& quad = surface.quads[quadIndex];
 
-					view<svec2<float32>> textureCoordinateView{};
+					pool<svec2<float32>, 4> quadVertices;
+					quadVertices.add({quad.start.x, quad.start.y});
+					quadVertices.add({quad.end.x, quad.start.y});
+					quadVertices.add({quad.start.x, quad.end.y});
+					quadVertices.add({quad.end.x, quad.end.y});
 
-					if (textureCoordinates.size() > 0) {
-						textureCoordinateView = view<svec2<float32>>(&textureCoordinates[0], textureCoordinates.size());
+					uint32 textureCoordinateIndex = 0;
+
+					while (textureCoordinateIndex < 4) {
+						const svec2<float32> textureCoordinate = svec2<float32>(multiplyTransform(vec2<float32>(quadVertices[textureCoordinateIndex] / quadScale), textureWorld));
+
+						view<svec2<float32>> textureCoordinateView{};
+
+						if (textureCoordinates.size() > 0) {
+							textureCoordinateView = view<svec2<float32>>(&textureCoordinates[0], textureCoordinates.size());
+						}
+
+						const uint32 textureCoordinateRedirectionIndex = findDuplicate(textureCoordinateView, textureCoordinate);
+
+						if (textureCoordinateRedirectionIndex >= textureCoordinates.size()) {
+							textureCoordinates.emplace_back(textureCoordinate);
+						}
+
+						textureCoordinateRedirectionIndices[textureCoordinateOffset + textureCoordinateIndex] = textureCoordinateRedirectionIndex;
+
+						textureCoordinateIndex += 1;
 					}
 
-					const uint32 textureCoordinateRedirectionIndex = findDuplicate(textureCoordinateView, textureCoordinate);
-
-					if (textureCoordinateRedirectionIndex >= textureCoordinates.size()) {
-						textureCoordinates.emplace_back(textureCoordinate);
-					}
-
-					textureCoordinateRedirectionIndices[textureCoordinateIndex] = textureCoordinateRedirectionIndex;
-
-					textureCoordinateIndex += 1;
+					textureCoordinateOffset += 4;
+					quadIndex += 1;
 				}
 			}
 
@@ -252,15 +268,15 @@ namespace Trident {
 							.vertices = {
 								{
 									.vertexIndex = vertexRedirectionIndices[vertexOffset + vertexPositionIndices[indexOffset + 0]],
-									// .textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexTextureCoordinateIndices[indexOffset + 0]],
+									.textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexOffset + vertexTextureCoordinateIndices[indexOffset + 0]],
 								},
 								{
 									.vertexIndex = vertexRedirectionIndices[vertexOffset + vertexPositionIndices[indexOffset + 1]],
-									// .textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexTextureCoordinateIndices[indexOffset + 1]],
+									.textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexOffset + vertexTextureCoordinateIndices[indexOffset + 1]],
 								},
 								{
 									.vertexIndex = vertexRedirectionIndices[vertexOffset + vertexPositionIndices[indexOffset + 2]],
-									// .textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexTextureCoordinateIndices[indexOffset + 2]],
+									.textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexOffset + vertexTextureCoordinateIndices[indexOffset + 2]],
 								},
 							},
 							.normalIndex = normalIndex,
