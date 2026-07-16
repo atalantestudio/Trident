@@ -136,7 +136,7 @@ namespace Trident {
 		});
 
 		// Front wall (towards -Z)
-		/* addSurface({
+		addSurface({
 			.materialIndex = 0,
 			.transform = {
 				.position = {0.0f, floorLevel + halfSizeY, halfSizeZ},
@@ -149,36 +149,6 @@ namespace Trident {
 				.scale = {m1 / 0.25f, m1 / 0.25f},
 			},
 			.lightmapScale = {4.0f, 4.0f},
-		}); */
-
-		// TODO(asset-builder/scene/interior)
-		StaticSurface surface = {
-			.materialIndex = 0,
-			.transform = {
-				.position = {0.0f, floorLevel + halfSizeY, halfSizeZ},
-				.rotation = {pi<float32>() * 0.5f, 0.0f, 0.0f},
-				.scale = {sizeX, sizeY},
-			},
-			.textureFiltering = {
-				.translation = {0.0f, 0.0f},
-				.rotation = 0.0f,
-				.scale = {(1.0f / 256.0f) / 0.25f, (1.0f / 256.0f) / 0.25f},
-			},
-			.lightmapScale = {4.0f, 4.0f},
-		};
-
-		surface.carvings = {
-			{
-				.offset = {20.0f, 20.0f},
-				.scale = {30.0f, 30.0f},
-			},
-
-			{
-				.offset = {60.0f, 20.0f},
-				.scale = {50.0f, 108.0f},
-			},
-		};
-
-		addSurface(surface);
+		});
 	}
 }

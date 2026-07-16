@@ -297,7 +297,6 @@ namespace Trident {
 				vertices.add({quad.end.x, quad.end.y});
 
 				Lightmap& lightmap = lightmaps[quadOffset + quadIndex];
-				lightmap.edgeIndexRange = {static_cast<uint16>(quadIndex * 4), 4};
 				lightmap.offset = {0, 0};
 				lightmap.coordinateOffset = lightmapCoordinateOffset;
 
