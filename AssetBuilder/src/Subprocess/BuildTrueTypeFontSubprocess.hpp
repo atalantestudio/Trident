@@ -47,6 +47,8 @@ namespace Trident {
 
 				BuildImageAssetProcess::encodeImageAsset(assetOutputPath, assetName, imageAssetDescriptor);
 
+				assetMap->insert(imageAssetDescriptor.identifier, assetName);
+
 				FontAssetDescriptor fontAssetDescriptor{};
 				fontAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
 				fontAssetDescriptor.version = {1, 0, 0};

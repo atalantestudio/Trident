@@ -192,7 +192,9 @@ namespace Trident {
 
 				convert<ImageFormat::R8G8B8A8_UNORM, ImageFormat::R8_UNORM>(file.data, &imageAssetDescriptor.data[0], imageAssetDescriptor.data.count());
 
-				BuildImageAssetProcess::encodeImageAsset(assetOutputPath, "DefaultFont", imageAssetDescriptor);
+				BuildImageAssetProcess::encodeImageAsset(assetOutputPath, DEFAULT_FONT_NAME, imageAssetDescriptor);
+
+				assetMap->insert(imageAssetDescriptor.identifier, DEFAULT_FONT_NAME);
 
 				FontAssetDescriptor fontAssetDescriptor{};
 				fontAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
