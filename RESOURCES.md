@@ -7,6 +7,7 @@ If both creation and last update dates are provided, the Date field will indicat
 | Title | Author(s) | Date | Links |
 | - | - | - | - |
 | *PolyHaven* | - | - | [Website](https://polyhaven.com) |
+| *GPU Research Samples* | Intel | - | [Website](https://www.intel.com/content/www/us/en/developer/topic-technology/graphics-research/samples.html) |
 | *McGuire Computer Graphics Archive* | Morgan McGuire | - | [Website](https://casual-effects.com/data) |
 | *Rendering Resources* | Benedikt Bitterli | - | [Website](https://benedikt-bitterli.me/resources) |
 
