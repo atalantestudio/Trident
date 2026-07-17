@@ -10,8 +10,14 @@ namespace Trident {
 		/// Position of the center point in world-space.
 		vec3<float32> position;
 
+		// TODO: Deprecate.
 		/// Rotation in Euler angles.
 		vec3<float32> rotation;
+
+		bool legacyRotation = true;
+
+		vec3<float32> axis;
+		float32 angle;
 
 		vec2<float32> scale;
 	};

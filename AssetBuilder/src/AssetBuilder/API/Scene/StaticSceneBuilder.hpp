@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "AssetBuilder/API/Scene/StaticObject.hpp"
 #include "AssetBuilder/API/Scene/StaticScene.hpp"
+#include "AssetBuilder/API/Scene/StaticSurface.hpp"
 
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 

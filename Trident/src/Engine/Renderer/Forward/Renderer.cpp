@@ -25,7 +25,7 @@
 #include "Engine/Renderer/Forward/VertexBuffer.hpp"
 
 namespace Trident {
-	void ForwardRenderer::renderStaticObjects(ref<CommandEncoder> commandEncoder) const {
+	void ForwardRenderer::renderStaticGeometry(ref<CommandEncoder> commandEncoder) const {
 		const view<StaticMaterial3D> staticMaterials = scene->getAsset()->getStaticMaterials();
 
 		commandEncoder->bindGraphicsPipeline(materialPipelines[0]);

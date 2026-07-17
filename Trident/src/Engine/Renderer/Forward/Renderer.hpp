@@ -300,7 +300,7 @@ namespace Trident {
 				commandEncoder->setScissor(0, 0, swapchainExtent);
 
 				if (scene->getAsset()->getStaticTriangles().count() > 0) {
-					renderStaticObjects(commandEncoder);
+					renderStaticGeometry(commandEncoder);
 				}
 
 				// TODO(graphics/gl/bind-vertex-buffers): Allow vertex buffers to be bound before setting a graphics pipeline.
@@ -521,7 +521,7 @@ namespace Trident {
 			// Creates material pipelines, pipeline layouts and descriptor sets.
 			void createMaterialPipelines();
 
-			void renderStaticObjects(ref<CommandEncoder> commandEncoder) const;
+			void renderStaticGeometry(ref<CommandEncoder> commandEncoder) const;
 
 		private:
 			ref<RenderPass> renderPass;

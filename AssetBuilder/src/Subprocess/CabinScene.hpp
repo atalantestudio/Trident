@@ -9,16 +9,42 @@
 
 namespace Trident {
 	inline Scene3DData createCabinScene(std::filesystem::path rootOutputPath) {
-		static constexpr uint32 materialCount = 2;
-		static constexpr uint32 defaultMaterialIndex = 0;
-		static constexpr uint32 lightMaterialIndex = 1;
-
 		InteriorSceneBuilder builder(rootOutputPath, "Cabin");
 
-		const uint32 floorLevel0 = builder.addFloorLevel(0.0f);
-		const uint32 floorLevel1 = builder.addFloorLevel(128.0f);
+		builder.floorLevels = {
+			0.0f, // Floor
+			128.0f, // Bike room ceiling
+			240.0f, // Hall/main room ceiling
+		};
 
-		builder.addRoom(floorLevel0, 128.0f, 96.0f);
+		const RectangularRoom hallRoom(
+			{56.0f, 84.0f},
+			{144.0f, 200.0f},
+			builder.floorLevels[0],
+			builder.floorLevels[2],
+			{4.0f, 4.0f}
+		);
+
+		const RectangularRoom bikeRoom(
+			{-60.0f, 116.0f},
+			{72.0f, 136.0f},
+			builder.floorLevels[0],
+			builder.floorLevels[1],
+			{4.0f, 4.0f}
+		);
+
+		const RectangularRoom mainRoom(
+			{-20.0f, 256.0f},
+			{296.0f, 128.0f},
+			builder.floorLevels[0],
+			builder.floorLevels[2],
+			{4.0f, 4.0f}
+		);
+
+		// builder.addRoom(0, 128.0f, 96.0f);
+		builder.addRoom(hallRoom);
+		builder.addRoom(bikeRoom);
+		builder.addRoom(mainRoom);
 
 		return {
 			.staticScene = builder.build(),

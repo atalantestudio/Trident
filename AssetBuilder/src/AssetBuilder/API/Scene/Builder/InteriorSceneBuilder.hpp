@@ -4,17 +4,16 @@
 #pragma once
 
 #include "AssetBuilder/API/Scene/StaticSceneBuilder.hpp"
+#include "AssetBuilder/API/Scene/Interior/Room.hpp"
 
 namespace Trident {
 	class InteriorSceneBuilder : public StaticSceneBuilder {
 		public:
 			explicit InteriorSceneBuilder(std::filesystem::path rootOutputPath, view<char8> assetName);
 
-			uint32 addFloorLevel(float32 level);
+			void addRoom(const Room& room);
 
-			void addRoom(uint32 baseFloorLevelIndex, float32 sizeX, float32 sizeZ);
-
-		private:
-			std::vector<float32> floorLevels;
+		public:
+			sequence<float32> floorLevels;
 	};
 }
