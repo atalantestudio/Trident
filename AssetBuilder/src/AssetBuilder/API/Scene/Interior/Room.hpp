@@ -125,7 +125,7 @@ namespace Trident {
 					.lightmapScale = luxelScale,
 				},
 
-				// TODO: Ceiling (towards -Y)
+				// Ceiling (towards -Y)
 				{
 					.materialIndex = ceilingMaterialIndex,
 					.transform = {

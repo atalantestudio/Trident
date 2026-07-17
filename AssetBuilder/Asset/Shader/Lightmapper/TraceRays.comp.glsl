@@ -34,7 +34,8 @@ struct Hit {
 
 const float FLOAT32_MAX = 4294967295.0;
 const uint SAMPLE_COUNT = 1024;
-const uint BOUNCE_COUNT = 4;
+const uint BOUNCE_COUNT = 3;
+const vec3 SUN_DIRECTION = vec3(1.0, -1.0, 1.0);
 
 layout(set = 0, binding = 0) buffer readonly TraceRaysArgumentBuffer {
 	uvec2 atlasSize;
@@ -124,14 +125,14 @@ bool rayTriangleIntersection(Ray ray, Triangle triangle_, inout float distance) 
 	vec3 tvec = ray.origin - a;
 	float u = dot(tvec, pvec) * invD;
 
-	if (u < 0.0 || u > 1.0) {
+	if (u < -0.0001 || u > 1.0001) {
 		return false;
 	}
 
 	vec3 qvec = cross(tvec, ab);
 	float v = dot(ray.direction, qvec) * invD;
 
-	if (v < 0.0 || u + v > 1.0) {
+	if (v < -0.0001 || u + v > 1.0001) {
 		return false;
 	}
 
@@ -192,28 +193,39 @@ Hit rint(Ray ray) {
 
 vec3 rgen(Hit hit, inout uint seed) {
 	Ray ray;
-	vec3 light = vec3(0.0, 0.0, 0.0);
+
+	Ray shadowRay;
+	shadowRay.direction = normalize(-SUN_DIRECTION);
+
+	Hit shadowHit;
+
+	vec3 radiance = vec3(0.0, 0.0, 0.0);
 	vec3 throughput = vec3(1.0, 1.0, 1.0);
 	uint bounceIndex = 0;
 
 	while (bounceIndex < BOUNCE_COUNT) {
+		ray.origin = hit.position + hit.normal * 0.0001;
 		ray.direction = normalize(hit.normal + randomUnitDirection(seed));
-		ray.origin = hit.position + ray.direction * 0.0001;
 
 		hit = rint(ray);
 
 		if (hit.distance < 0.0) {
-			light += throughput;
+			radiance += throughput;
 
 			break;
 		}
 
+		shadowRay.origin = ray.origin;
+
+		shadowHit = rint(shadowRay);
+
+		radiance += throughput * float(shadowHit.distance < 0.0);
 		throughput *= 0.9;
 
 		bounceIndex += 1;
 	}
 
-	return light;
+	return radiance;
 }
 
 void main() {
@@ -241,7 +253,7 @@ void main() {
 	vec2 lightmapCoordinateC = lightmapCoordinates[triangle_.vertices[2].lightmapCoordinateIndex];
 	vec2 pixelCoordinate = (coordinate + vec2(0.5, 0.5)) / atlasSize;
 	vec3 pixelBarycentricCoordinate = calculateBarycentricCoordinate(lightmapCoordinateA, lightmapCoordinateB, lightmapCoordinateC, pixelCoordinate);
-	vec3 light = vec3(0.0, 0.0, 0.0);
+	vec3 radiance = vec3(0.0, 0.0, 0.0);
 	uint sampleIndex = 0;
 
 	Hit hit;
@@ -249,12 +261,12 @@ void main() {
 	hit.normal = normal;
 
 	while (sampleIndex < SAMPLE_COUNT) {
-		light += rgen(hit, seed);
+		radiance += rgen(hit, seed);
 
 		sampleIndex += 1;
 	}
 
-	vec3 averageLight = light / SAMPLE_COUNT;
+	vec3 light = radiance / SAMPLE_COUNT;
 
-	imageStore(lightmapAtlasImage, ivec2(coordinate), vec4(averageLight, 1.0));
+	imageStore(lightmapAtlasImage, ivec2(coordinate), vec4(light, 1.0));
 }

@@ -36,7 +36,8 @@ struct Hit {
 
 static const float FLOAT32_MAX = 4294967295.0;
 static const uint SAMPLE_COUNT = 1024;
-static const uint BOUNCE_COUNT = 4;
+static const uint BOUNCE_COUNT = 3;
+static const float3 SUN_DIRECTION = float3(1.0, -1.0, 1.0);
 
 StructuredBuffer<TraceRaysArguments> traceRaysArguments : register(t0);
 StructuredBuffer<LightmapPixel> lightmapPixels : register(t1);
@@ -106,14 +107,14 @@ bool rayTriangleIntersection(Ray ray, Triangle triangle_, inout float distance) 
 	float3 tvec = ray.origin - a;
 	float u = dot(tvec, pvec) * invD;
 
-	if (u < 0.0 || u > 1.0) {
+	if (u < 0.0001 || u > 1.0001) {
 		return false;
 	}
 
 	float3 qvec = cross(tvec, ab);
 	float v = dot(ray.direction, qvec) * invD;
 
-	if (v < 0.0 || u + v > 1.0) {
+	if (v < 0.0001 || u + v > 1.0001) {
 		return false;
 	}
 
@@ -174,28 +175,39 @@ Hit rint(Ray ray) {
 
 float3 rgen(Hit hit, inout uint seed) {
 	Ray ray;
-	float3 light = float3(0.0, 0.0, 0.0);
+
+	Ray shadowRay;
+	shadowRay.direction = normalize(-SUN_DIRECTION);
+
+	Hit shadowHit;
+
+	float3 radiance = float3(0.0, 0.0, 0.0);
 	float3 throughput = float3(1.0, 1.0, 1.0);
 	uint bounceIndex = 0;
 
 	while (bounceIndex < BOUNCE_COUNT) {
+		ray.origin = hit.position + hit.normal * 0.0001;
 		ray.direction = normalize(hit.normal + randomUnitDirection(seed));
-		ray.origin = hit.position + ray.direction * 0.0001;
 
 		hit = rint(ray);
 
 		if (hit.distance < 0.0) {
-			light += throughput;
+			radiance += throughput;
 
 			break;
 		}
 
+		shadowRay.origin = ray.origin;
+
+		shadowHit = rint(shadowRay);
+
+		radiance += throughput * (shadowHit.distance < 0.0);
 		throughput *= 0.9;
 
 		bounceIndex += 1;
 	}
 
-	return light;
+	return radiance;
 }
 
 [numthreads(16, 1, 1)]
@@ -224,7 +236,7 @@ void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 	float2 lightmapCoordinateC = lightmapCoordinates[triangle_.vertices[2].lightmapCoordinateIndex];
 	float2 pixelCoordinate = (coordinate + float2(0.5, 0.5)) / traceRaysArguments[0].atlasSize;
 	float3 pixelBarycentricCoordinate = calculateBarycentricCoordinate(lightmapCoordinateA, lightmapCoordinateB, lightmapCoordinateC, pixelCoordinate);
-	float3 light = float3(0.0, 0.0, 0.0);
+	float3 radiance = float3(0.0, 0.0, 0.0);
 	uint sampleIndex = 0;
 
 	Hit hit;
@@ -232,12 +244,12 @@ void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 	hit.normal = normal;
 
 	while (sampleIndex < SAMPLE_COUNT) {
-		light += rgen(hit, seed);
+		radiance += rgen(hit, seed);
 
 		sampleIndex += 1;
 	}
 
-	float3 averageLight = light / SAMPLE_COUNT;
+	float3 light = radiance / SAMPLE_COUNT;
 
-	lightmapAtlasImage[coordinate] = float4(averageLight, 1.0);
+	lightmapAtlasImage[coordinate] = float4(light, 1.0);
 }
