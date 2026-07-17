@@ -28,7 +28,7 @@ namespace Trident {
 			};
 
 		public:
-			static constexpr Extent2D ATLAS_SIZE = {512, 512};
+			static constexpr Extent2D ATLAS_SIZE = {1024, 1024};
 
 		public:
 			static LightmapNode* insertNode(Lightmap& lightmap, LightmapNode* node);

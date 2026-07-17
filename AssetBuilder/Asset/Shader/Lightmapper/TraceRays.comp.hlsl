@@ -36,7 +36,7 @@ struct Hit {
 
 static const float FLOAT32_MAX = 4294967295.0;
 static const uint SAMPLE_COUNT = 1024;
-static const uint BOUNCE_COUNT = 3;
+static const uint BOUNCE_COUNT = 4;
 
 StructuredBuffer<TraceRaysArguments> traceRaysArguments : register(t0);
 StructuredBuffer<LightmapPixel> lightmapPixels : register(t1);
@@ -175,6 +175,7 @@ Hit rint(Ray ray) {
 float3 rgen(Hit hit, inout uint seed) {
 	Ray ray;
 	float3 light = float3(0.0, 0.0, 0.0);
+	float3 throughput = float3(1.0, 1.0, 1.0);
 	uint bounceIndex = 0;
 
 	while (bounceIndex < BOUNCE_COUNT) {
@@ -184,10 +185,12 @@ float3 rgen(Hit hit, inout uint seed) {
 		hit = rint(ray);
 
 		if (hit.distance < 0.0) {
-			light += float3(1.0, 1.0, 1.0);
+			light += throughput;
 
 			break;
 		}
+
+		throughput *= 0.9;
 
 		bounceIndex += 1;
 	}

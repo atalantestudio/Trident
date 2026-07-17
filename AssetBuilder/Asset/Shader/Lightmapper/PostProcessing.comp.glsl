@@ -19,26 +19,6 @@ float gaussian(float x, float rms) {
 	return exp(-(x * x) / (2.0 * rms * rms));
 }
 
-void dilate(ivec2 coordinate) {
-	vec4 pixel = imageLoad(lightmapAtlasImage, coordinate);
-
-	// Horizontal
-	if (empty(pixel)) pixel = imageLoad(lightmapAtlasImage, coordinate + ivec2(-1,  0));
-	if (empty(pixel)) pixel = imageLoad(lightmapAtlasImage, coordinate + ivec2( 1,  0));
-
-	// Vertical
-	if (empty(pixel)) pixel = imageLoad(lightmapAtlasImage, coordinate + ivec2( 0,  1));
-	if (empty(pixel)) pixel = imageLoad(lightmapAtlasImage, coordinate + ivec2( 0, -1));
-
-	// Corners
-	if (empty(pixel)) pixel = imageLoad(lightmapAtlasImage, coordinate + ivec2(-1,  1));
-	if (empty(pixel)) pixel = imageLoad(lightmapAtlasImage, coordinate + ivec2( 1,  1));
-	if (empty(pixel)) pixel = imageLoad(lightmapAtlasImage, coordinate + ivec2( 1, -1));
-	if (empty(pixel)) pixel = imageLoad(lightmapAtlasImage, coordinate + ivec2(-1, -1));
-
-	imageStore(lightmapAtlasImage, coordinate, pixel);
-}
-
 void denoise(ivec2 coordinate) {
 	const int kernelRadius = (int(BILATERAL_FILTER_1D_SAMPLE_COUNT) - 1) / 2;
 
@@ -86,6 +66,38 @@ void denoise(ivec2 coordinate) {
 	imageStore(lightmapAtlasImage, coordinate, vec4(avg / w, 1.0));
 }
 
+void loadLightmapPixel(ivec2 coordinate, ivec2 atlasSize, inout vec4 pixel) {
+	if (coordinate.x < 0 || coordinate.x >= atlasSize.x) {
+		return;
+	}
+
+	if (coordinate.y < 0 || coordinate.y >= atlasSize.y) {
+		return;
+	}
+
+	pixel = imageLoad(lightmapAtlasImage, coordinate);
+}
+
+void dilate(ivec2 coordinate, ivec2 atlasSize) {
+	vec4 pixel = imageLoad(lightmapAtlasImage, coordinate);
+
+	// Horizontal
+	if (empty(pixel)) loadLightmapPixel(coordinate + ivec2(-1,  0), atlasSize, pixel);
+	if (empty(pixel)) loadLightmapPixel(coordinate + ivec2( 1,  0), atlasSize, pixel);
+
+	// Vertical
+	if (empty(pixel)) loadLightmapPixel(coordinate + ivec2( 0,  1), atlasSize, pixel);
+	if (empty(pixel)) loadLightmapPixel(coordinate + ivec2( 0, -1), atlasSize, pixel);
+
+	// Corners
+	if (empty(pixel)) loadLightmapPixel(coordinate + ivec2(-1,  1), atlasSize, pixel);
+	if (empty(pixel)) loadLightmapPixel(coordinate + ivec2( 1,  1), atlasSize, pixel);
+	if (empty(pixel)) loadLightmapPixel(coordinate + ivec2( 1, -1), atlasSize, pixel);
+	if (empty(pixel)) loadLightmapPixel(coordinate + ivec2(-1, -1), atlasSize, pixel);
+
+	imageStore(lightmapAtlasImage, coordinate, pixel);
+}
+
 void main() {
 	ivec2 coordinate = ivec2(gl_GlobalInvocationID.xy);
 	ivec2 atlasSize = imageSize(lightmapAtlasImage);
@@ -94,9 +106,9 @@ void main() {
 		return;
 	}
 
-	dilate(coordinate);
+	denoise(coordinate);
 
 	memoryBarrierImage();
 
-	denoise(coordinate);
+	dilate(coordinate, atlasSize);
 }

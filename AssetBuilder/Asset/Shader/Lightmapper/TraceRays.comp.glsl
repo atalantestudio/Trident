@@ -34,7 +34,7 @@ struct Hit {
 
 const float FLOAT32_MAX = 4294967295.0;
 const uint SAMPLE_COUNT = 1024;
-const uint BOUNCE_COUNT = 3;
+const uint BOUNCE_COUNT = 4;
 
 layout(set = 0, binding = 0) buffer readonly TraceRaysArgumentBuffer {
 	uvec2 atlasSize;
@@ -193,6 +193,7 @@ Hit rint(Ray ray) {
 vec3 rgen(Hit hit, inout uint seed) {
 	Ray ray;
 	vec3 light = vec3(0.0, 0.0, 0.0);
+	vec3 throughput = vec3(1.0, 1.0, 1.0);
 	uint bounceIndex = 0;
 
 	while (bounceIndex < BOUNCE_COUNT) {
@@ -202,10 +203,12 @@ vec3 rgen(Hit hit, inout uint seed) {
 		hit = rint(ray);
 
 		if (hit.distance < 0.0) {
-			light += vec3(1.0, 1.0, 1.0);
+			light += throughput;
 
 			break;
 		}
+
+		throughput *= 0.9;
 
 		bounceIndex += 1;
 	}

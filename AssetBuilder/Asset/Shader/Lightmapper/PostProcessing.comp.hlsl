@@ -15,26 +15,6 @@ float gaussian(float x, float rms) {
 	return exp(-(x * x) / (2.0 * rms * rms));
 }
 
-void dilate(int2 coordinate) {
-	float4 pixel = lightmapAtlasImage[coordinate];
-
-	// Horizontal
-	if (empty(pixel)) pixel = lightmapAtlasImage[coordinate + int2(-1,  0)];
-	if (empty(pixel)) pixel = lightmapAtlasImage[coordinate + int2( 1,  0)];
-
-	// Vertical
-	if (empty(pixel)) pixel = lightmapAtlasImage[coordinate + int2( 0,  1)];
-	if (empty(pixel)) pixel = lightmapAtlasImage[coordinate + int2( 0, -1)];
-
-	// Corners
-	if (empty(pixel)) pixel = lightmapAtlasImage[coordinate + int2(-1,  1)];
-	if (empty(pixel)) pixel = lightmapAtlasImage[coordinate + int2( 1,  1)];
-	if (empty(pixel)) pixel = lightmapAtlasImage[coordinate + int2( 1, -1)];
-	if (empty(pixel)) pixel = lightmapAtlasImage[coordinate + int2(-1, -1)];
-
-	lightmapAtlasImage[coordinate] = pixel;
-}
-
 void denoise(int2 coordinate) {
 	const int kernelRadius = (int(BILATERAL_FILTER_1D_SAMPLE_COUNT) - 1) / 2;
 
@@ -82,6 +62,38 @@ void denoise(int2 coordinate) {
 	lightmapAtlasImage[coordinate] = float4(avg / w, 1.0);
 }
 
+void loadLightmapPixel(int2 coordinate, int2 atlasSize, inout float4 pixel) {
+	if (coordinate.x < 0 || coordinate.x >= atlasSize.x) {
+		return;
+	}
+
+	if (coordinate.y < 0 || coordinate.y >= atlasSize.y) {
+		return;
+	}
+
+	pixel = lightmapAtlasImage[coordinate];
+}
+
+void dilate(int2 coordinate, int2 atlasSize) {
+	float4 pixel = lightmapAtlasImage[coordinate];
+
+	// Horizontal
+	if (empty(pixel)) loadLightmapPixel(coordinate + int2(-1,  0), atlasSize, pixel);
+	if (empty(pixel)) loadLightmapPixel(coordinate + int2( 1,  0), atlasSize, pixel);
+
+	// Vertical
+	if (empty(pixel)) loadLightmapPixel(coordinate + int2( 0,  1), atlasSize, pixel);
+	if (empty(pixel)) loadLightmapPixel(coordinate + int2( 0, -1), atlasSize, pixel);
+
+	// Corners
+	if (empty(pixel)) loadLightmapPixel(coordinate + int2(-1,  1), atlasSize, pixel);
+	if (empty(pixel)) loadLightmapPixel(coordinate + int2( 1,  1), atlasSize, pixel);
+	if (empty(pixel)) loadLightmapPixel(coordinate + int2( 1, -1), atlasSize, pixel);
+	if (empty(pixel)) loadLightmapPixel(coordinate + int2(-1, -1), atlasSize, pixel);
+
+	lightmapAtlasImage[coordinate] = pixel;
+}
+
 [numthreads(32, 32, 1)]
 void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 	uint2 coordinate = globalInvocationIndex.xy;
@@ -93,9 +105,9 @@ void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 		return;
 	}
 
-	dilate(coordinate);
+	denoise(coordinate);
 
 	GroupMemoryBarrierWithGroupSync();
 
-	denoise(coordinate);
+	dilate(coordinate, atlasSize);
 }

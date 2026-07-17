@@ -427,10 +427,10 @@ namespace Trident {
 					const SurfaceCarving& carving = surface.carvings[carvingIndex];
 
 					// If the carving is not in the quad's horizontal bounds, continue.
-					if (carving.offset.x + carving.scale.x <= quad.start.x || carving.offset.x > quad.end.x) {
+					if (carving.offset.x + carving.size.x <= quad.start.x || carving.offset.x > quad.end.x) {
 						// If the carving was before the quad, at least adjust the quad's height.
-						if (carving.offset.x + carving.scale.x == quad.start.x) {
-							quad.end.y = min(quad.end.y, carving.offset.y + carving.scale.y);
+						if (carving.offset.x + carving.size.x == quad.start.x) {
+							quad.end.y = min(quad.end.y, carving.offset.y + carving.size.y);
 						}
 
 						carvingIndex += 1;
@@ -439,22 +439,22 @@ namespace Trident {
 					}
 
 					// If the carving is not in the quad's vertical bounds, continue.
-					if (carving.offset.y + carving.scale.y <= quad.start.y || carving.offset.y > quad.end.y) {
+					if (carving.offset.y + carving.size.y <= quad.start.y || carving.offset.y > quad.end.y) {
 						carvingIndex += 1;
 
 						continue;
 					}
 
 					// If the carving fully blocks the quad vertically, end the quad there.
-					if (carving.offset.y <= quad.start.y && carving.offset.y + carving.scale.y >= quad.start.y) {
+					if (carving.offset.y <= quad.start.y && carving.offset.y + carving.size.y >= quad.start.y) {
 						quad.end.x = carving.offset.x;
-						quad.end.y = min(quad.end.y, carving.offset.y + carving.scale.y);
+						quad.end.y = min(quad.end.y, carving.offset.y + carving.size.y);
 
 						if (carving.offset.y == quad.start.y) {
 							// There is no quad after the carving.
 							continueAfterBlockingCarving = true;
 
-							blockingCarvingEnd = carving.offset + carving.scale;
+							blockingCarvingEnd = carving.offset + carving.size;
 						}
 						else {
 							// There is already a quad after the carving.

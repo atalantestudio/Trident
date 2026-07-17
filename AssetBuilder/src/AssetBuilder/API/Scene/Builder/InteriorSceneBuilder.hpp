@@ -4,6 +4,7 @@
 #pragma once
 
 #include "AssetBuilder/API/Scene/StaticSceneBuilder.hpp"
+#include "AssetBuilder/API/Scene/Interior/Frame.hpp"
 #include "AssetBuilder/API/Scene/Interior/Room.hpp"
 
 namespace Trident {
@@ -12,6 +13,8 @@ namespace Trident {
 			explicit InteriorSceneBuilder(std::filesystem::path rootOutputPath, view<char8> assetName);
 
 			void addRoom(const Room& room);
+
+			void addFrame(const Frame& frame);
 
 		public:
 			sequence<float32> floorLevels;

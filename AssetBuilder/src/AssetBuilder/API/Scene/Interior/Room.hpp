@@ -30,9 +30,10 @@ namespace Trident {
 	};
 
 	struct RectangularRoom : public Room {
-		explicit RectangularRoom(svec2<float32> position, svec2<float32> size, float32 floorLevel, float32 ceilingLevel, svec2<float32> luxelScale) {
+		explicit RectangularRoom(svec2<float32> position, svec2<float32> size, float32 floorLevel, float32 ceilingLevel, svec2<float32> luxelScale, uint32 floorMaterialIndex, uint32 wallMaterialIndex, uint32 ceilingMaterialIndex) {
 			// TODO(test)
 			constexpr float32 m1 = 1.0f / 256.0f;
+			constexpr float32 m2 = 1.0f / 512.0f;
 
 			const float32 positionX = position.x;
 			const float32 positionZ = position.y;
@@ -46,7 +47,7 @@ namespace Trident {
 			surfaces = {
 				// Floor (towards +Y)
 				{
-					.materialIndex = 0,
+					.materialIndex = floorMaterialIndex,
 					.transform = {
 						.position = {positionX, floorLevel, positionZ},
 						.rotation = {0.0f, 0.0f, 0.0f},
@@ -57,60 +58,12 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m1 / 0.25f, m1 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
-				},
-
-				// Left wall (towards +X)
-				{
-					.materialIndex = 0,
-					.transform = {
-						.position = {positionX - halfSizeX, floorLevel + halfSizeY, positionZ},
-						.rotation = {0.0f, pi<float32>() * 0.5f, pi<float32>() * 0.5f},
-						.scale = {sizeZ, sizeY},
-					},
-					.textureFiltering = {
-						.translation = {0.0f, 0.0f},
-						.rotation = 0.0f,
-						.scale = {m1 / 0.25f, m1 / 0.25f},
-					},
-					.lightmapScale = {4.0f, 4.0f},
-				},
-
-				// Right wall (towards -X)
-				{
-					.materialIndex = 0,
-					.transform = {
-						.position = {positionX + halfSizeX, floorLevel + halfSizeY, positionZ},
-						.rotation = {0.0f, -pi<float32>() * 0.5f, -pi<float32>() * 0.5f},
-						.scale = {sizeZ, sizeY},
-					},
-					.textureFiltering = {
-						.translation = {0.0f, 0.0f},
-						.rotation = 0.0f,
-						.scale = {m1 / 0.25f, m1 / 0.25f},
-					},
-					.lightmapScale = {4.0f, 4.0f},
-				},
-
-				// Back wall (towards +Z)
-				{
-					.materialIndex = 0,
-					.transform = {
-						.position = {positionX, floorLevel + halfSizeY, positionZ - halfSizeZ},
-						.rotation = {-pi<float32>() * 0.5f, 0.0f, pi<float32>()},
-						.scale = {sizeX, sizeY},
-					},
-					.textureFiltering = {
-						.translation = {0.0f, 0.0f},
-						.rotation = 0.0f,
-						.scale = {m1 / 0.25f, m1 / 0.25f},
-					},
-					.lightmapScale = {4.0f, 4.0f},
+					.lightmapScale = luxelScale,
 				},
 
 				// Front wall (towards -Z)
 				{
-					.materialIndex = 0,
+					.materialIndex = wallMaterialIndex,
 					.transform = {
 						.position = {positionX, floorLevel + halfSizeY, positionZ + halfSizeZ},
 						.rotation = {pi<float32>() * 0.5f, 0.0f, 0.0f},
@@ -119,14 +72,62 @@ namespace Trident {
 					.textureFiltering = {
 						.translation = {0.0f, 0.0f},
 						.rotation = 0.0f,
-						.scale = {m1 / 0.25f, m1 / 0.25f},
+						.scale = {m2 / 0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.lightmapScale = luxelScale,
+				},
+
+				// Back wall (towards +Z)
+				{
+					.materialIndex = wallMaterialIndex,
+					.transform = {
+						.position = {positionX, floorLevel + halfSizeY, positionZ - halfSizeZ},
+						.rotation = {-pi<float32>() * 0.5f, 0.0f, pi<float32>()},
+						.scale = {sizeX, sizeY},
+					},
+					.textureFiltering = {
+						.translation = {0.0f, 0.0f},
+						.rotation = 0.0f,
+						.scale = {m2 / 0.25f, m2 / 0.25f},
+					},
+					.lightmapScale = luxelScale,
+				},
+
+				// Left wall (towards +X)
+				{
+					.materialIndex = wallMaterialIndex,
+					.transform = {
+						.position = {positionX - halfSizeX, floorLevel + halfSizeY, positionZ},
+						.rotation = {0.0f, pi<float32>() * 0.5f, pi<float32>() * 0.5f},
+						.scale = {sizeZ, sizeY},
+					},
+					.textureFiltering = {
+						.translation = {0.0f, 0.0f},
+						.rotation = 0.0f,
+						.scale = {m2 / 0.25f, m2 / 0.25f},
+					},
+					.lightmapScale = luxelScale,
+				},
+
+				// Right wall (towards -X)
+				{
+					.materialIndex = wallMaterialIndex,
+					.transform = {
+						.position = {positionX + halfSizeX, floorLevel + halfSizeY, positionZ},
+						.rotation = {0.0f, -pi<float32>() * 0.5f, -pi<float32>() * 0.5f},
+						.scale = {sizeZ, sizeY},
+					},
+					.textureFiltering = {
+						.translation = {0.0f, 0.0f},
+						.rotation = 0.0f,
+						.scale = {m2 / 0.25f, m2 / 0.25f},
+					},
+					.lightmapScale = luxelScale,
 				},
 
 				// TODO: Ceiling (towards -Y)
-				/* {
-					.materialIndex = 0,
+				{
+					.materialIndex = ceilingMaterialIndex,
 					.transform = {
 						.position = {positionX, ceilingLevel, positionZ},
 						.rotation = {0.0f, 0.0f, pi<float32>()},
@@ -135,10 +136,10 @@ namespace Trident {
 					.textureFiltering = {
 						.translation = {0.0f, 0.0f},
 						.rotation = 0.0f,
-						.scale = {m1 / 0.25f, m1 / 0.25f},
+						.scale = {m2 / 0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
-				}, */
+					.lightmapScale = luxelScale,
+				},
 			};
 		}
 	};
