@@ -22,23 +22,18 @@ namespace Trident {
 
 				InteriorSceneBuilder builder(rootOutputPath);
 
-				builder.addMaterialShader(
-					"Lightmapped.frag",
-					ShaderStage::FRAGMENT,
-					"main",
+				builder.addMaterialShader("Lightmapped.frag", ShaderStage::FRAGMENT, "main", {
 					{
-						{
-							.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
-							.descriptorCount = 1,
-							.shaderStages = ShaderStage::FRAGMENT,
-						},
-						{
-							.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
-							.descriptorCount = 1,
-							.shaderStages = ShaderStage::FRAGMENT,
-						},
-					}
-				);
+						.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+						.descriptorCount = 1,
+						.shaderStages = ShaderStage::FRAGMENT,
+					},
+					{
+						.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+						.descriptorCount = 1,
+						.shaderStages = ShaderStage::FRAGMENT,
+					},
+				});
 
 				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + floorMaterialIndex, 0);
 				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + wallMaterialIndex, 0);
