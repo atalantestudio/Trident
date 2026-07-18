@@ -45,9 +45,8 @@ namespace Trident {
 		return index;
 	}
 
-	StaticSceneBuilder::StaticSceneBuilder(std::filesystem::path rootOutputPath, view<char8> assetName) :
+	StaticSceneBuilder::StaticSceneBuilder(std::filesystem::path rootOutputPath) :
 		rootOutputPath(rootOutputPath),
-		assetName(assetName),
 		assetLibrary(new AssetLibrary(rootOutputPath)),
 		surfaceGeometry(assetLibrary->getAsset<GeometryAsset>("UnitPlane"))
 	{}
@@ -388,20 +387,17 @@ namespace Trident {
 
 		Lightmapper::updateAtlasCoordinates(scene, lightmaps, view<LightmapIndex>(&lightmapIndices[0], lightmapIndices.size()), surfaceGeometry);
 
-		ImageAssetDescriptor lightmapAtlasImageAssetDescriptor = {
+		scene.lightmapAtlasImageAssetDescriptor = {
 			.format = ImageFormat::R8G8B8A8_UNORM,
 			.extent = {Lightmapper::ATLAS_SIZE.width, Lightmapper::ATLAS_SIZE.width, 1},
 			.mipLevelCount = 1,
 			.layerCount = 1,
 			.data = sequence<uint8>(Lightmapper::ATLAS_SIZE.width * Lightmapper::ATLAS_SIZE.height * getByteSize(ImageFormat::R8G8B8A8_UNORM)),
 		};
+		scene.lightmapAtlasImageAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
 
 		Lightmapper lightmapper;
-		lightmapper.buildLightmapAtlas(scene, lightmapAtlasImageAssetDescriptor);
-
-		BuildImageAssetProcess::encodeImageAsset(rootOutputPath / "Asset/", assetName, lightmapAtlasImageAssetDescriptor);
-
-		scene.lightmapAtlasImageAssetIdentifier = lightmapAtlasImageAssetDescriptor.identifier;
+		lightmapper.buildLightmapAtlas(scene, scene.lightmapAtlasImageAssetDescriptor);
 
 		return scene;
 	}

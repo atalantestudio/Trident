@@ -6,8 +6,8 @@
 #include "AssetBuilder/API/Scene/Builder/InteriorSceneBuilder.hpp"
 
 namespace Trident {
-	InteriorSceneBuilder::InteriorSceneBuilder(std::filesystem::path rootOutputPath, view<char8> assetName) :
-		StaticSceneBuilder(rootOutputPath, assetName)
+	InteriorSceneBuilder::InteriorSceneBuilder(std::filesystem::path rootOutputPath) :
+		StaticSceneBuilder(rootOutputPath)
 	{}
 
 	void InteriorSceneBuilder::addRoom(const Room& room) {

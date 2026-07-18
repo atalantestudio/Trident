@@ -4,6 +4,7 @@
 #pragma once
 
 #include "AssetBuilder/API/BuildAssetMap.hpp"
+#include "../File/PNG.hpp"
 
 #include "Engine/API/Process/Process.hpp"
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
@@ -33,7 +34,9 @@ namespace Trident {
 	class BuildImageAssetProcess final : public Process {
 		public:
 			static void encodeImageAsset(const std::filesystem::path& assetOutputPath, view<char8> assetName, ImageAssetDescriptor& descriptor) {
-				descriptor.identifier = AssetLibrary::createAssetIdentifier();
+				if (descriptor.identifier == max<uint32>()) {
+					descriptor.identifier = AssetLibrary::createAssetIdentifier();
+				}
 
 				ImageAssetHeader imageAssetHeader{};
 				imageAssetHeader.signature = AssetSignature::IMAGE;

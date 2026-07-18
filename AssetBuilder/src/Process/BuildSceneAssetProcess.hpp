@@ -6,14 +6,13 @@
 #include "AssetBuilder/API/BuildAssetMap.hpp"
 #include "../Subprocess/SceneData.hpp"
 #include "../Subprocess/Scene2D.hpp"
-#include "../Subprocess/CabinScene.hpp"
-#include "../Subprocess/HallScene.hpp"
 #include "../Subprocess/Scene3D.hpp"
 
 #include "Engine/API/Process/Process.hpp"
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 
 namespace Trident {
+	// TODO(asset-builder/scene): Deprecate. Use individual processes extending SceneProcess instead.
 	class BuildSceneAssetProcess final : public Process {
 		private:
 			typedef Scene2DData (*CreateScene2DFunction)();
@@ -21,7 +20,7 @@ namespace Trident {
 
 		private:
 			static constexpr uint32 SCENE_2D_COUNT = 9;
-			static constexpr uint32 SCENE_3D_COUNT = 7;
+			static constexpr uint32 SCENE_3D_COUNT = 5;
 
 			inline static const view<char8> SCENE_2D_NAMES[SCENE_2D_COUNT] = {
 				"Boxes",
@@ -50,9 +49,7 @@ namespace Trident {
 			inline static const view<char8> SCENE_3D_NAMES[SCENE_3D_COUNT] = {
 				"Boxes3D",
 				"BoxStacking",
-				"Cabin",
 				"EdgeContact",
-				"Hall",
 				"Lemons",
 				"PlayerMovement",
 			};
@@ -60,9 +57,7 @@ namespace Trident {
 			inline static constexpr CreateScene3DFunction SCENE_3D_FUNCTIONS[SCENE_3D_COUNT] = {
 				createBoxes3DScene,
 				createBoxStackingScene,
-				createCabinScene,
 				createEdgeContactScene,
-				createHallScene,
 				createLemonsScene,
 				createPlayerMovementScene,
 			};
@@ -187,7 +182,7 @@ namespace Trident {
 				std::copy_n(pointer_cast<const uint8*>(&header), sizeof(header), stream.getBytePosition());
 
 				stream.jump(sizeof(header));
-				stream.write<uint32>(data.staticScene.lightmapAtlasImageAssetIdentifier);
+				stream.write<uint32>(data.staticScene.lightmapAtlasImageAssetDescriptor.identifier);
 				stream.write<uint32>(static_cast<uint32>(data.staticScene.materialShaders.count()));
 				stream.write<uint32>(static_cast<uint32>(data.staticScene.materials.count()));
 
@@ -307,8 +302,8 @@ namespace Trident {
 			void encodeScene3DAsset(const Scene3DData& sceneData, uint32 identifier, const ByteStream<StreamOperation::WRITE>& stream, view<char8> assetName, const std::filesystem::path& assetOutputPath) {
 				encodeSceneAsset(identifier, stream, assetName, assetOutputPath);
 
-				if (sceneData.staticScene.lightmapAtlasImageAssetIdentifier != max<uint32>()) {
-					assetMap->insert(sceneData.staticScene.lightmapAtlasImageAssetIdentifier, assetName);
+				if (sceneData.staticScene.lightmapAtlasImageAssetDescriptor.identifier != max<uint32>()) {
+					assetMap->insert(sceneData.staticScene.lightmapAtlasImageAssetDescriptor.identifier, assetName);
 				}
 			}
 

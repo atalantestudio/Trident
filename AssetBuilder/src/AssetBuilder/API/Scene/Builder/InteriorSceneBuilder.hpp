@@ -10,7 +10,7 @@
 namespace Trident {
 	class InteriorSceneBuilder : public StaticSceneBuilder {
 		public:
-			explicit InteriorSceneBuilder(std::filesystem::path rootOutputPath, view<char8> assetName);
+			explicit InteriorSceneBuilder(std::filesystem::path rootOutputPath);
 
 			void addRoom(const Room& room);
 

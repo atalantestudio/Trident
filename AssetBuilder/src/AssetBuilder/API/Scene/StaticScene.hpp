@@ -6,6 +6,7 @@
 #include "Engine/API/Graphics/DescriptorSetLayout.hpp"
 #include "Engine/API/Graphics/ShaderStage.hpp"
 #include "Engine/API/Scene/StaticVertex.hpp"
+#include "Engine/Filesystem/Asset/ImageAsset.hpp"
 
 namespace Trident {
 	struct BuildMaterialShader {
@@ -36,6 +37,6 @@ namespace Trident {
 		sequence<StaticTriangle3D> triangles;
 		sequence<BuildMaterialShader> materialShaders;
 		sequence<BuildStaticMaterial3D> materials;
-		uint32 lightmapAtlasImageAssetIdentifier = max<uint32>();
+		ImageAssetDescriptor lightmapAtlasImageAssetDescriptor;
 	};
 }
