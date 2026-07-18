@@ -100,6 +100,7 @@ namespace Trident {
 		scene.materials = sequence<BuildStaticMaterial3D>(materials.size());
 		scene.triangles = sequence<StaticTriangle3D>(triangleCount);
 
+		sequence<std::vector<StaticTriangle3D>> trianglesPerMaterial(scene.materials.count());
 		std::vector<svec3<float32>> vertices;
 		std::vector<svec3<float32>> normals;
 		std::vector<svec2<float32>> textureCoordinates;
@@ -112,11 +113,7 @@ namespace Trident {
 		std::copy(materialShaders.begin(), materialShaders.end(), &scene.materialShaders[0]);
 		std::copy(materials.begin(), materials.end(), &scene.materials[0]);
 
-		uint32 lightmapCoordinateOffset = 0;
-		uint32 triangleIndex = 0;
-		uint32 quadOffset = 0;
-
-		for (const StaticSurface& surface : surfaces) {
+		for (StaticSurface& surface : surfaces) {
 			const view<float32> vertexPositionComponents = surfaceGeometry->getVertexPositionComponents();
 			const view<float32> vertexTextureCoordinateComponents = surfaceGeometry->getVertexTextureCoordinateComponents();
 			const uint64 vertexCount = vertexPositionComponents.count() / 3;
@@ -140,13 +137,14 @@ namespace Trident {
 				mat3x3<float32>::translation(surface.textureFiltering.translation)
 			);
 
+			surface.triangleOffset = static_cast<uint32>(trianglesPerMaterial[surface.materialIndex].size());
+
 			BuildStaticMaterial3D& material = scene.materials[surface.materialIndex];
 			uint32 normalIndex;
 
 			// Merge normal duplicates.
 			{
 				const svec3<float32> normal(normalized(vec3<float32>(face.normal) * inverse(orientation)));
-
 				const svec3<float32> roundedNormal = {
 					round(normal.x * 100.0f) / 100.0f,
 					round(normal.y * 100.0f) / 100.0f,
@@ -187,7 +185,7 @@ namespace Trident {
 
 					uint32 textureCoordinateIndex = 0;
 
-					while (textureCoordinateIndex < 4) {
+					while (textureCoordinateIndex < quadVertices.count()) {
 						const svec2<float32> textureCoordinate = svec2<float32>(multiplyTransform(vec2<float32>(quadVertices[textureCoordinateIndex] / quadScale), textureWorld));
 
 						view<svec2<float32>> textureCoordinateView{};
@@ -233,7 +231,7 @@ namespace Trident {
 
 					uint32 vertexIndex = 0;
 
-					while (vertexIndex < 4) {
+					while (vertexIndex < quadVertices.count()) {
 						vec3<float32> vertex = origin;
 						vertex += {quadVertices[vertexIndex].x / scale[0], 0.0f, -quadVertices[vertexIndex].y / scale[2]};
 						vertex = multiplyTransform(vertex, world);
@@ -264,7 +262,7 @@ namespace Trident {
 					uint32 indexOffset = 0;
 
 					while (indexOffset < vertexPositionIndices.count()) {
-						scene.triangles[triangleIndex] = {
+						trianglesPerMaterial[surface.materialIndex].emplace_back(StaticTriangle3D{
 							.vertices = {
 								{
 									.vertexIndex = vertexRedirectionIndices[vertexOffset + vertexPositionIndices[indexOffset + 0]],
@@ -280,26 +278,42 @@ namespace Trident {
 								},
 							},
 							.normalIndex = normalIndex,
-						};
+						});
 
 						material.triangleRange.count += 1;
 						indexOffset += 3;
-						triangleIndex += 1;
 					}
 
 					vertexOffset += 4;
 					quadIndex += 1;
 				}
 			}
+		}
 
-			if (surface.materialIndex > 0) {
-				const BuildStaticMaterial3D& previousMaterial = scene.materials[surface.materialIndex - 1];
+		uint32 materialIndex = 0;
+		uint32 triangleOffset = 0;
 
-				material.triangleRange.offset = previousMaterial.triangleRange.offset + previousMaterial.triangleRange.count;
+		while (materialIndex < scene.materials.count()) {
+			const std::vector<StaticTriangle3D>& triangles = trianglesPerMaterial[materialIndex];
+
+			if (triangles.size() == 0) {
+				materialIndex += 1;
+
+				continue;
 			}
 
-			const view<Edge3D> edges = surfaceGeometry->getHull3DEdges();
-			const view<uint16> faceEdgeIndices = surfaceGeometry->getHull3DFaceEdgeIndices();
+			std::copy(triangles.begin(), triangles.end(), &scene.triangles[triangleOffset]);
+
+			scene.materials[materialIndex].triangleRange.offset = triangleOffset;
+
+			triangleOffset += static_cast<uint32>(triangles.size());
+			materialIndex += 1;
+		}
+
+		uint32 quadOffset = 0;
+
+		for (const StaticSurface& surface : surfaces) {
+			const uint32 triangleOffset = scene.materials[surface.materialIndex].triangleRange.offset + surface.triangleOffset;
 
 			uint32 quadIndex = 0;
 
@@ -307,36 +321,29 @@ namespace Trident {
 				const Quad& quad = surface.quads[quadIndex];
 
 				pool<svec2<float32>, 4> vertices;
-				vertices.add({quad.start.x, quad.start.y});
-				vertices.add({quad.end.x, quad.start.y});
-				vertices.add({quad.start.x, quad.end.y});
-				vertices.add({quad.end.x, quad.end.y});
+				vertices.add({0.0f, 0.0f});
+				vertices.add({quad.end.x - quad.start.x, 0.0f});
+				vertices.add({0.0f, quad.end.y - quad.start.y});
+				vertices.add({quad.end - quad.start});
 
 				Lightmap& lightmap = lightmaps[quadOffset + quadIndex];
+				lightmap.triangleOffset = triangleOffset + quadIndex * 2;
 				lightmap.offset = {0, 0};
-				lightmap.coordinateOffset = lightmapCoordinateOffset;
+				lightmap.coordinateOffset = triangleOffset * 2 + quadIndex * 4;
 
-				svec2<float32> maxCoordinate = quad.end / surface.lightmapScale;
+				svec2<float32> maxCoordinate = (quad.end - quad.start) / surface.lightmapScale;
 				maxCoordinate.x = round(maxCoordinate.x * 100.0f) / 100.0f;
 				maxCoordinate.y = round(maxCoordinate.y * 100.0f) / 100.0f;
 
 				DEBUG_ASSERT(maxCoordinate.x > 0.0f);
 
-				svec2<float32> minCoordinate = quad.start / surface.lightmapScale;
-				minCoordinate.x = round(minCoordinate.x * 100.0f) / 100.0f;
-				minCoordinate.y = round(minCoordinate.y * 100.0f) / 100.0f;
-
-				DEBUG_ASSERT(maxCoordinate.y > 0.0f);
-
 				uint16 coordinateIndex = 0;
 
-				while (coordinateIndex < 4) {
-					svec2<float32>& coordinate = scene.lightmapCoordinates[lightmapCoordinateOffset + coordinateIndex];
+				while (coordinateIndex < vertices.count()) {
+					svec2<float32>& coordinate = scene.lightmapCoordinates[lightmap.coordinateOffset + coordinateIndex];
 					coordinate = vertices[coordinateIndex] / surface.lightmapScale;
-					coordinate = {
-						round(coordinate.x * 100.0f) / 100.0f,
-						round(coordinate.y * 100.0f) / 100.0f,
-					};
+					coordinate.x = round(coordinate.x * 100.0f) / 100.0f;
+					coordinate.y = round(coordinate.y * 100.0f) / 100.0f;
 
 					coordinateIndex += 1;
 				}
@@ -345,7 +352,7 @@ namespace Trident {
 				maxCoordinate.x += 2.0f;
 				maxCoordinate.y += 2.0f;
 
-				const svec2<float32> size = abs(maxCoordinate - minCoordinate);
+				const svec2<float32> size = abs(maxCoordinate);
 
 				lightmap.size = {static_cast<uint32>(size.x), static_cast<uint32>(size.y)};
 
@@ -365,7 +372,6 @@ namespace Trident {
 
 				lightmapIndices.insert(lightmapIndices.begin() + lightmapInsertionIndex, lightmapIndex);
 
-				lightmapCoordinateOffset += 4;
 				quadIndex += 1;
 			}
 

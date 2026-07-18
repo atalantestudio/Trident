@@ -36,6 +36,7 @@ namespace Trident {
 
 	struct StaticSurface {
 		uint32 materialIndex;
+		uint32 triangleOffset;
 		Transform transform;
 		TextureFilteringDescriptor textureFiltering;
 		svec2<float32> lightmapScale;

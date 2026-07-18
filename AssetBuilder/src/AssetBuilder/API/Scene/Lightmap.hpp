@@ -7,6 +7,7 @@
 
 namespace Trident {
 	struct Lightmap {
+		uint32 triangleOffset;
 		Extent2D offset;
 		Extent2D size;
 		uint32 coordinateOffset;

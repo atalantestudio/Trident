@@ -28,6 +28,7 @@ namespace Trident {
 		}
 	};
 
+	// See https://blackpawn.com/texts/lightmaps.
 	LightmapNode* Lightmapper::insertNode(Lightmap& lightmap, LightmapNode* node) {
 		if (!node->leaf()) {
 			LightmapNode* newNode = insertNode(lightmap, node->children[0]);
@@ -121,14 +122,12 @@ namespace Trident {
 				coordinateIndex += 1;
 			}
 
-			const uint32 triangleOffset = lightmap.coordinateOffset / 2;
-
-			StaticTriangle3D& triangle1 = scene.triangles[triangleOffset + 0];
+			StaticTriangle3D& triangle1 = scene.triangles[lightmap.triangleOffset + 0];
 			triangle1.vertices[0].lightmapCoordinateIndex = lightmap.coordinateOffset + 0;
 			triangle1.vertices[1].lightmapCoordinateIndex = lightmap.coordinateOffset + 1;
 			triangle1.vertices[2].lightmapCoordinateIndex = lightmap.coordinateOffset + 2;
 
-			StaticTriangle3D& triangle2 = scene.triangles[triangleOffset + 1];
+			StaticTriangle3D& triangle2 = scene.triangles[lightmap.triangleOffset + 1];
 			triangle2.vertices[0].lightmapCoordinateIndex = lightmap.coordinateOffset + 1;
 			triangle2.vertices[1].lightmapCoordinateIndex = lightmap.coordinateOffset + 3;
 			triangle2.vertices[2].lightmapCoordinateIndex = lightmap.coordinateOffset + 2;

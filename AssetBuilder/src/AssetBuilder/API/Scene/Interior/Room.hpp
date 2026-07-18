@@ -126,7 +126,7 @@ namespace Trident {
 				},
 
 				// Ceiling (towards -Y)
-				{
+				/* {
 					.materialIndex = ceilingMaterialIndex,
 					.transform = {
 						.position = {positionX, ceilingLevel, positionZ},
@@ -139,7 +139,7 @@ namespace Trident {
 						.scale = {m2 / 0.25f, m2 / 0.25f},
 					},
 					.lightmapScale = luxelScale,
-				},
+				}, */
 			};
 		}
 	};

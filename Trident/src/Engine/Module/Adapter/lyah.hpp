@@ -324,12 +324,12 @@ namespace Trident {
 
 	template<typename T>
 	constexpr svec<2, T> operator-(const svec<2, T>& a, const svec<2, T>& b) {
-		return {b.x - a.x, b.y - a.y};
+		return {a.x - b.x, a.y - b.y};
 	}
 
 	template<typename T>
 	constexpr svec<3, T> operator-(const svec<3, T>& a, const svec<3, T>& b) {
-		return {b.x - a.x, b.y - a.y, b.z - a.z};
+		return {a.x - b.x, a.y - b.y, a.z - b.z};
 	}
 
 	template<typename T>

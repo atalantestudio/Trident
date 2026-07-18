@@ -74,11 +74,9 @@ namespace Trident {
 		DoorFrame bikeRoomFrame(&hallRoom, &bikeRoom, 3, 4, {116.0f, 16.0f}, {30.0f, 16.0f}, {54.0f, 112.0f});
 
 		builder.addRoom(hallRoom);
-
-		// TODO(test)
-		// builder.addRoom(bikeRoom);
-		// builder.addRoom(mainRoom);
-		// builder.addFrame(bikeRoomFrame);
+		builder.addRoom(bikeRoom);
+		builder.addRoom(mainRoom);
+		builder.addFrame(bikeRoomFrame);
 
 		return {
 			.staticScene = builder.build(),
