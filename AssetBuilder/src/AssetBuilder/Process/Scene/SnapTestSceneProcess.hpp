@@ -10,9 +10,9 @@
 #include "../../../Subprocess/RigidBody.hpp"
 
 namespace Trident {
-	class BrushTestSceneProcess final : public Scene3DProcess {
+	class SnapTestSceneProcess final : public Scene3DProcess {
 		private:
-			static StaticGeometry3D createBrushGeometry(svec2<float32> scale) {
+			static StaticGeometry3D createWallGeometry(svec2<float32> scale) {
 				return {
 					.vertexComponents = {
 						-0.5f * scale.x,  0.5f * scale.y,  0.0f,
@@ -42,7 +42,7 @@ namespace Trident {
 
 		protected:
 			view<char8> getAssetName() const final override {
-				return "BrushTest";
+				return "SnapTest";
 			}
 
 			Scene3DData createScene(std::filesystem::path rootOutputPath) const final override {
@@ -62,11 +62,11 @@ namespace Trident {
 
 				builder.addMaterial(101, 0);
 
-				const StaticGeometry3D rectangleGeometry = createBrushGeometry({200.0f, 128.0f});
+				const StaticGeometry3D wallGeometry = createWallGeometry({200.0f, 128.0f});
 
 				builder.placeSurface(
 					{
-						.geometry = rectangleGeometry,
+						.geometry = wallGeometry,
 						.textureFiltering = {
 							.translation = {0.0f, 0.0f},
 							.rotation = 0.0f,
@@ -132,7 +132,7 @@ namespace Trident {
 			}
 
 		public:
-			explicit BrushTestSceneProcess(BuildAssetMap* assetMap) :
+			explicit SnapTestSceneProcess(BuildAssetMap* assetMap) :
 				Scene3DProcess(assetMap)
 			{}
 	};
