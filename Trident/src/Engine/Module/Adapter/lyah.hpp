@@ -319,6 +319,11 @@ namespace Trident {
 		return a /= b;
 	}
 
+	template<typename T>
+	constexpr svec<2, T> operator*(svec<2, T> a, svec<2, T> b) {
+		return a *= b;
+	}
+
 	template<std::size_t C, typename T>
 	constexpr svec<C, T> operator-(const svec<C, T>& a, const svec<C, T>& b);
 
@@ -413,10 +418,42 @@ namespace Trident {
 	using lyah::pi;
 	using lyah::pow;
 	using lyah::radians;
+	using std::round;
 	using lyah::sin;
 	using lyah::sqrt;
 	using lyah::tau;
 	using lyah::transpose;
+
+	template<typename T>
+	inline constexpr T pow_constexpr(T base, std::size_t exp) {
+		DEBUG_ASSERT(exp < 8);
+
+		if (exp == 0) {
+			return static_cast<T>(1);
+		}
+
+		return base * pow_constexpr(base, exp - 1);
+	}
+
+	template<std::size_t C, typename T>
+	inline vec<C, T> round(vec<C, T> a);
+
+	template<typename T>
+	inline vec<2, T> round(vec<2, T> a) {
+		return {round(a[0]), round(a[1])};
+	}
+
+	template<typename T>
+	inline vec<3, T> round(vec<3, T> a) {
+		return {round(a[0]), round(a[1]), round(a[2])};
+	}
+
+	template<std::size_t E, std::size_t C, typename T>
+	inline vec<C, T> round(vec<C, T> a) {
+		constexpr T p = pow_constexpr(static_cast<T>(10), E);
+
+		return round(a * p) / p;
+	}
 
 	// TODO
 	// Access the vertices using the indices provided by the geometry.

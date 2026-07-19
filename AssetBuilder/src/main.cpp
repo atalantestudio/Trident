@@ -5,8 +5,8 @@
 
 #include "AssetBuilder/API/BuildAssetMap.hpp"
 #include "AssetBuilder/Process/Scene/BrushTestSceneProcess.hpp"
-#include "AssetBuilder/Process/Scene/CabinSceneProcess.hpp"
-#include "AssetBuilder/Process/Scene/HallSceneProcess.hpp"
+// #include "AssetBuilder/Process/Scene/CabinSceneProcess.hpp"
+// #include "AssetBuilder/Process/Scene/HallSceneProcess.hpp"
 #include "Process/BuildAssetMapProcess.hpp"
 #include "Process/BuildFontAssetProcess.hpp"
 #include "Process/BuildGeometryAssetProcess.hpp"
@@ -46,8 +46,8 @@ namespace Trident {
 
 				registerProcess<BuildSceneAssetProcess>(&assetMap);
 				registerProcess<BrushTestSceneProcess>(&assetMap);
-				registerProcess<CabinSceneProcess>(&assetMap);
-				registerProcess<HallSceneProcess>(&assetMap);
+				// registerProcess<CabinSceneProcess>(&assetMap);
+				// registerProcess<HallSceneProcess>(&assetMap);
 
 				registerProcess<BuildMaterialAssetProcess>(&assetMap);
 				registerProcess<BuildShaderModuleAssetProcess>(&assetMap);

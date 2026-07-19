@@ -11,14 +11,16 @@ namespace Trident {
 	{}
 
 	void InteriorSceneBuilder::addRoom(const Room& room) {
-		for (const StaticSurface& surface : room.surfaces) {
+		// TODO(asset-builder/scene/interior): Restore.
+		/* for (const StaticSurface& surface : room.surfaces) {
 			addSurface(surface);
-		}
+		} */
 	}
 
 	void InteriorSceneBuilder::addFrame(const Frame& frame) {
-		for (const StaticSurface& surface : frame.surfaces) {
+		// TODO(asset-builder/scene/interior): Restore.
+		/* for (const StaticSurface& surface : frame.surfaces) {
 			addSurface(surface);
-		}
+		} */
 	}
 }

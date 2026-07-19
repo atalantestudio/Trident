@@ -15,7 +15,7 @@ namespace Trident {
 			while (surfaceIndex < surfaces.count()) {
 				const StaticSurface& surface = surfaces[surfaceIndex];
 
-				// TODO
+				// TODO(asset-builder/scene/surface-support)
 
 				surfaceIndex += 1;
 			}
@@ -44,7 +44,8 @@ namespace Trident {
 			const float32 halfSizeY = sizeY * 0.5f;
 			const float32 halfSizeZ = sizeZ * 0.5f;
 
-			surfaces = {
+			// TODO(asset-builder/scene/surface-snapping): Restore.
+			/* surfaces = {
 				// Floor (towards +Y)
 				{
 					.materialIndex = floorMaterialIndex,
@@ -58,7 +59,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m1 / 0.25f, m1 / 0.25f},
 					},
-					.lightmapScale = luxelScale,
+					.luxelScale = luxelScale,
 				},
 
 				// Front wall (towards -Z)
@@ -74,7 +75,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m2 / 0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = luxelScale,
+					.luxelScale = luxelScale,
 				},
 
 				// Back wall (towards +Z)
@@ -90,7 +91,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m2 / 0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = luxelScale,
+					.luxelScale = luxelScale,
 				},
 
 				// Left wall (towards +X)
@@ -106,7 +107,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m2 / 0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = luxelScale,
+					.luxelScale = luxelScale,
 				},
 
 				// Right wall (towards -X)
@@ -122,11 +123,11 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m2 / 0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = luxelScale,
+					.luxelScale = luxelScale,
 				},
 
 				// Ceiling (towards -Y)
-				/* {
+				{
 					.materialIndex = ceilingMaterialIndex,
 					.transform = {
 						.position = {positionX, ceilingLevel, positionZ},
@@ -138,9 +139,9 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m2 / 0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = luxelScale,
-				}, */
-			};
+					.luxelScale = luxelScale,
+				},
+			}; */
 		}
 	};
 }

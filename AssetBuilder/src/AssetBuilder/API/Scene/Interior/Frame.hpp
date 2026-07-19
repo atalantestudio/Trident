@@ -19,20 +19,19 @@ namespace Trident {
 			StaticSurface& firstSurface = firstRoom->surfaces[firstSurfaceIndex];
 			StaticSurface& secondSurface = secondRoom->surfaces[secondSurfaceIndex];
 
-			const SurfaceCarving firstCarving = {
+			const Carving firstCarving = {
 				.offset = firstOffset,
 				.size = size,
 			};
 
-			const SurfaceCarving secondCarving = {
+			const Carving secondCarving = {
 				.offset = secondOffset,
 				.size = size,
 			};
 
-			firstSurface.carvings.emplace_back(firstCarving);
-			secondSurface.carvings.emplace_back(secondCarving);
-
-			// TODO(asset-builder/interior/frame): Create surfaces.
+			// TODO(asset-builder/interior/frame): Create surfaces and carvings.
+			// firstSurface.carvings.emplace_back(firstCarving);
+			// secondSurface.carvings.emplace_back(secondCarving);
 		}
 	};
 }

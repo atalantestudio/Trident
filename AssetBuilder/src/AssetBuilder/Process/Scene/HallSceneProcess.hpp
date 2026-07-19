@@ -67,7 +67,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m1 / -0.25f, m1 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Hall to bike room floor connector
@@ -83,7 +83,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m1 / -0.25f, m1 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Bike room floor
@@ -99,7 +99,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m1 / -0.25f, m1 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Hall to main floor connector
@@ -115,7 +115,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m1 / -0.25f, m1 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Main floor
@@ -131,7 +131,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m1 / -0.25f, m1 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				/// Walls
@@ -149,7 +149,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m2 / -0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Hall entrance right wall
@@ -165,7 +165,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m2 / -0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Bike room entrance left wall
@@ -181,7 +181,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m2 / 0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Bike room entrance right wall
@@ -197,7 +197,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m2 / 0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Main entrance left wall
@@ -213,7 +213,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m2 / -0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Main entrance right wall
@@ -229,7 +229,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m2 / -0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Mailbox wall
@@ -245,7 +245,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m2 / -0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Bike room inside left wall
@@ -261,7 +261,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m2 / -0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Bike room inside back wall
@@ -277,7 +277,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m2 / 0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Bike room inside right wall
@@ -293,7 +293,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m2 / -0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Bike room inside entrance left wall
@@ -309,7 +309,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m2 / -0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Bike room inside entrance right wall
@@ -325,7 +325,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m2 / -0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Hall entrance door wall
@@ -341,7 +341,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m2 / -0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Bike room entrance door wall
@@ -357,7 +357,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m2 / 0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Main entrance door wall
@@ -373,7 +373,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m2 / -0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Bike room inside entrance door wall
@@ -389,7 +389,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m2 / -0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				/// Door frames
@@ -407,7 +407,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m1 / -0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Bike room entrance door frame right
@@ -423,7 +423,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m1 / -0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Bike room entrance door frame top
@@ -439,7 +439,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m1 / -0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Bike room entrance door frame left inside
@@ -455,7 +455,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m1 / -0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Bike room entrance door frame right inside
@@ -471,7 +471,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m1 / 0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Bike room entrance door frame top inside
@@ -487,7 +487,7 @@ namespace Trident {
 						.rotation = 1.0f,
 						.scale = {m1 / 0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Bike room inside entrance door frame left
@@ -503,7 +503,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m1 / 0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Bike room inside entrance door frame right
@@ -519,7 +519,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m1 / 0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Bike room inside entrance door frame top
@@ -535,7 +535,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m1 / 0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				/// Ceiling
@@ -553,7 +553,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m2 / -0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Bike room entrance top wall
@@ -569,7 +569,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m2 / 0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Main entrance top wall
@@ -585,7 +585,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m2 / -0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Mailbox top wall
@@ -601,7 +601,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m2 / -0.25f, m2 / 0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Hall ceiling
@@ -617,7 +617,7 @@ namespace Trident {
 						.rotation = 0.5f,
 						.scale = {m2 / 0.25f, m2 / -0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				// Bike room ceiling
@@ -633,7 +633,7 @@ namespace Trident {
 						.rotation = 0.5f,
 						.scale = {m2 / 0.25f, m2 / -0.25f},
 					},
-					.lightmapScale = {4.0f, 4.0f},
+					.luxelScale = {4.0f, 4.0f},
 				});
 
 				return {

@@ -27,13 +27,13 @@ namespace Trident {
 	}
 
 	template<typename T>
-	static uint32 findDuplicate(view<T> list, T a) {
+	static uint32 findDuplicate(const std::vector<T>& elements, T a) {
 		constexpr float32 E = 0.001f;
 
 		uint32 index = 0;
 
-		while (index < list.count()) {
-			const T b = list[index];
+		while (index < elements.size()) {
+			const T b = elements[index];
 
 			if (compareDuplicate(a, b, E)) {
 				break;
@@ -47,8 +47,7 @@ namespace Trident {
 
 	StaticSceneBuilder::StaticSceneBuilder(std::filesystem::path rootOutputPath) :
 		rootOutputPath(rootOutputPath),
-		assetLibrary(new AssetLibrary(rootOutputPath)),
-		surfaceGeometry(assetLibrary->getAsset<GeometryAsset>("UnitPlane"))
+		assetLibrary(new AssetLibrary(rootOutputPath))
 	{}
 
 	StaticSceneBuilder::~StaticSceneBuilder() {
@@ -75,12 +74,171 @@ namespace Trident {
 		});
 
 		materialShaders[shaderIndex].materialAssetRange.count += 1;
+
+		trianglesPerMaterial.resize(trianglesPerMaterial.size() + 1);
 	}
 
-	void StaticSceneBuilder::addSurface(const StaticSurface& surface) {
-		ENGINE_ASSERT(surface.lightmapScale.x > 0.0f && surface.lightmapScale.y > 0.0f, "The lightmap scale must be positive.");
+	void StaticSceneBuilder::placeSurface(const SurfaceDescriptor& descriptor, const Transform& transform) {
+		DEBUG_ASSERT(descriptor.geometry.scale.x > 0.0f && descriptor.geometry.scale.y > 0.0f);
+		DEBUG_ASSERT(descriptor.luxelScale.x > 0.0f && descriptor.luxelScale.y > 0.0f);
+		DEBUG_ASSERT(descriptor.carvings.size() == 0 || descriptor.geometry.vertexIndices.count() == 6);
+
+		const quat<float32> orientation = quat<float32>::axisAngle(transform.axis, transform.angle);
+
+		const mat4x4<float32> worldTransform = (
+			mat4x4<float32>(orientation) *
+			mat4x4<float32>::translation(transform.position)
+		);
+		const mat3x3<float32> textureTransform = (
+			mat3x3<float32>::scaling(descriptor.geometry.scale * descriptor.textureFiltering.scale) *
+			mat3x3<float32>::rotation(pi<float32>() * descriptor.textureFiltering.rotation) *
+			mat3x3<float32>::translation(descriptor.textureFiltering.translation)
+		);
+
+		BuildStaticMaterial3D& material = materials[descriptor.materialIndex];
+		std::vector<StaticTriangle3D>& triangles = trianglesPerMaterial[descriptor.materialIndex];
+
+		StaticSurface surface{};
+		surface.edges = descriptor.geometry.edges;
+
+		// TODO(lyah/scalar)
+		surface.normal = svec3<float32>(round<2>(normalized(descriptor.geometry.normal * inverse(orientation))));
+
+		surface.scale = descriptor.geometry.scale;
+		surface.subsurfaces = {};
+		surface.textureFiltering = descriptor.textureFiltering;
+		surface.triangleOffset = static_cast<uint32>(triangles.size());
+		surface.materialIndex = descriptor.materialIndex;
+		surface.luxelScale = descriptor.luxelScale;
+
+		uint32 surfaceVertexCount = 0;
+
+		if (descriptor.carvings.size() > 0) {
+			// TODO(asset-builder/scene): Restore.
+			// carveSurface(surface, descriptor.carvings, surfaceVertexCount);
+		}
+		else {
+			surface.subsurfaces = {
+				{
+					.vertexComponents = descriptor.geometry.vertexComponents,
+					.vertexTextureCoordinateComponents = descriptor.geometry.vertexTextureCoordinateComponents,
+					.vertexIndices = descriptor.geometry.vertexIndices,
+					.vertexTextureCoordinateIndices = descriptor.geometry.vertexTextureCoordinateIndices,
+					.scale = surface.scale,
+				},
+			};
+
+			surfaceVertexCount = static_cast<uint32>(surface.subsurfaces[0].vertexComponents.count() / 3);
+		}
+
+		const uint32 normalIndex = findDuplicate(normals, surface.normal);
+
+		if (normalIndex >= normals.size()) {
+			normals.emplace_back(surface.normal);
+		}
+
+		sequence<uint32> vertexRedirectionIndices(surfaceVertexCount);
+		sequence<uint32> textureCoordinateRedirectionIndices(surfaceVertexCount);
+		uint32 subsurfaceIndex = 0;
+		uint32 textureCoordinateOffset = 0;
+		uint32 vertexIndexOffset = 0;
+
+		while (subsurfaceIndex < surface.subsurfaces.size()) {
+			const StaticSubsurface& subsurface = surface.subsurfaces[subsurfaceIndex];
+			const uint32 vertexIndexCount = static_cast<uint32>(subsurface.vertexIndices.count());
+			const uint64 vertexCount = subsurface.vertexComponents.count() / 3;
+			const uint64 textureCoordinateCount = subsurface.vertexTextureCoordinateComponents.count() / 2;
+
+			uint32 textureCoordinateIndex = 0;
+
+			while (textureCoordinateIndex < textureCoordinateCount) {
+				// TODO(lyah/scalar)
+				const svec2<float32> textureCoordinate = svec2<float32>(multiplyTransform(vec2<float32>{
+					subsurface.vertexTextureCoordinateComponents[textureCoordinateIndex * 2 + 0],
+					subsurface.vertexTextureCoordinateComponents[textureCoordinateIndex * 2 + 1],
+				} / vec2<float32>(subsurface.scale), textureTransform));
+
+				const uint32 textureCoordinateRedirectionIndex = findDuplicate(textureCoordinates, textureCoordinate);
+
+				if (textureCoordinateRedirectionIndex >= textureCoordinates.size()) {
+					textureCoordinates.emplace_back(textureCoordinate);
+				}
+
+				textureCoordinateRedirectionIndices[textureCoordinateOffset + textureCoordinateIndex] = textureCoordinateRedirectionIndex;
+
+				textureCoordinateIndex += 1;
+			}
+
+			textureCoordinateOffset += textureCoordinateIndex;
+
+			uint32 vertexIndex = 0;
+
+			while (vertexIndex < vertexCount) {
+				// TODO(lyah/scalar)
+				const svec3<float32> vertex = svec3<float32>(round<2>(multiplyTransform({
+					subsurface.vertexComponents[vertexIndex * 3 + 0],
+					subsurface.vertexComponents[vertexIndex * 3 + 1],
+					subsurface.vertexComponents[vertexIndex * 3 + 2],
+				}, worldTransform)));
+
+				const uint32 vertexRedirectionIndex = findDuplicate(vertices, vertex);
+
+				if (vertexRedirectionIndex >= vertices.size()) {
+					vertices.emplace_back(vertex);
+				}
+
+				vertexRedirectionIndices[vertexIndexOffset + vertexIndex] = vertexRedirectionIndex;
+
+				vertexIndex += 1;
+			}
+
+			uint32 vertexIndexIndex = 0;
+
+			while (vertexIndexIndex < vertexIndexCount) {
+				const uint32 vertexIndexA = vertexIndexOffset + subsurface.vertexIndices[vertexIndexIndex + 0];
+				const uint32 vertexIndexB = vertexIndexOffset + subsurface.vertexIndices[vertexIndexIndex + 1];
+				const uint32 vertexIndexC = vertexIndexOffset + subsurface.vertexIndices[vertexIndexIndex + 2];
+
+				const uint32 textureCoordinateIndexA = vertexIndexOffset + subsurface.vertexTextureCoordinateIndices[vertexIndexIndex + 0];
+				const uint32 textureCoordinateIndexB = vertexIndexOffset + subsurface.vertexTextureCoordinateIndices[vertexIndexIndex + 1];
+				const uint32 textureCoordinateIndexC = vertexIndexOffset + subsurface.vertexTextureCoordinateIndices[vertexIndexIndex + 2];
+
+				const StaticTriangle3D triangle = {
+					.vertices = {
+						{
+							.vertexIndex = vertexRedirectionIndices[vertexIndexA],
+							.textureCoordinateIndex = textureCoordinateRedirectionIndices[textureCoordinateIndexA],
+							.lightmapCoordinateIndex = 0,
+						},
+						{
+							.vertexIndex = vertexRedirectionIndices[vertexIndexB],
+							.textureCoordinateIndex = textureCoordinateRedirectionIndices[textureCoordinateIndexB],
+							.lightmapCoordinateIndex = 0,
+						},
+						{
+							.vertexIndex = vertexRedirectionIndices[vertexIndexC],
+							.textureCoordinateIndex = textureCoordinateRedirectionIndices[textureCoordinateIndexC],
+							.lightmapCoordinateIndex = 0,
+						},
+					},
+					.normalIndex = normalIndex,
+				};
+
+				triangles.emplace_back(triangle);
+
+				vertexIndexIndex += 3;
+				subsurfaceIndex += 1;
+			}
+
+			material.triangleRange.count += vertexIndexCount / 3;
+			triangleCount += vertexIndexCount / 3;
+			vertexIndexOffset += vertexIndexCount;
+			subsurfaceIndex += 1;
+		}
 
 		surfaces.emplace_back(surface);
+
+		subsurfaceCount += static_cast<uint32>(surface.subsurfaces.size());
 	}
 
 	StaticScene3D StaticSceneBuilder::build() const {
@@ -88,206 +246,22 @@ namespace Trident {
 
 		std::copy(this->surfaces.begin(), this->surfaces.end(), &surfaces[0]);
 
-		const Plane3D& face = surfaceGeometry->getHull3DFaces()[0];
-		const uint32 quadCount = carveSurfaces(surfaces);
-		const uint32 triangleCount = quadCount * 2;
-		const uint32 lightmapCoordinateCount = quadCount * 4;
-
 		StaticScene3D scene{};
-		scene.lightmapCoordinates = sequence<svec2<float32>>(lightmapCoordinateCount);
+		scene.lightmapCoordinates = sequence<svec2<float32>>(subsurfaceCount * 4);
+		scene.triangles = sequence<StaticTriangle3D>(triangleCount);
 		scene.materialShaders = sequence<BuildMaterialShader>(materialShaders.size());
 		scene.materials = sequence<BuildStaticMaterial3D>(materials.size());
-		scene.triangles = sequence<StaticTriangle3D>(triangleCount);
 
-		sequence<std::vector<StaticTriangle3D>> trianglesPerMaterial(scene.materials.count());
-		std::vector<svec3<float32>> vertices;
-		std::vector<svec3<float32>> normals;
-		std::vector<svec2<float32>> textureCoordinates;
-		sequence<Lightmap> lightmaps(quadCount);
+		// TODO(asset-builder/scene): Restore.
+		/* sequence<std::vector<StaticTriangle3D>> trianglesPerMaterial(scene.materials.count());
+		sequence<Lightmap> lightmaps(subsurfaceCount);
 
 		// Sorted by ascending lightmap area.
 		std::vector<LightmapIndex> lightmapIndices;
-		lightmapIndices.reserve(quadCount);
+		lightmapIndices.reserve(subsurfaceCount); */
 
 		std::copy(materialShaders.begin(), materialShaders.end(), &scene.materialShaders[0]);
 		std::copy(materials.begin(), materials.end(), &scene.materials[0]);
-
-		for (StaticSurface& surface : surfaces) {
-			const view<float32> vertexPositionComponents = surfaceGeometry->getVertexPositionComponents();
-			const view<float32> vertexTextureCoordinateComponents = surfaceGeometry->getVertexTextureCoordinateComponents();
-			const uint64 vertexCount = vertexPositionComponents.count() / 3;
-			const uint64 textureCoordinateCount = vertexTextureCoordinateComponents.count() / 2;
-			const view<uint32> vertexPositionIndices = surfaceGeometry->getVertexPositionIndices();
-			const view<uint32> vertexNormalIndices = surfaceGeometry->getVertexNormalIndices();
-			const view<uint32> vertexTextureCoordinateIndices = surfaceGeometry->getVertexTextureCoordinateIndices();
-			const vec3<float32> scale = {surface.transform.scale[0], 0.0f, surface.transform.scale[1]};
-			const quat<float32> pitch = quat<float32>::axisAngle(RIGHT, surface.transform.rotation[0]);
-			const quat<float32> yaw = quat<float32>::axisAngle(UP, surface.transform.rotation[1]);
-			const quat<float32> roll = quat<float32>::axisAngle(FORWARD, surface.transform.rotation[2]);
-			const quat<float32> orientation = normalized(yaw * pitch * roll);
-			const mat4x4<float32> world = (
-				mat4x4<float32>::scaling(scale) *
-				mat4x4<float32>(orientation) *
-				mat4x4<float32>::translation(surface.transform.position)
-			);
-			const mat3x3<float32> textureWorld = (
-				mat3x3<float32>::scaling(surface.transform.scale * vec2<float32>(surface.textureFiltering.scale)) *
-				mat3x3<float32>::rotation(pi<float32>() * surface.textureFiltering.rotation) *
-				mat3x3<float32>::translation(surface.textureFiltering.translation)
-			);
-
-			surface.triangleOffset = static_cast<uint32>(trianglesPerMaterial[surface.materialIndex].size());
-
-			BuildStaticMaterial3D& material = scene.materials[surface.materialIndex];
-			uint32 normalIndex;
-
-			// Merge normal duplicates.
-			{
-				const svec3<float32> normal(normalized(vec3<float32>(face.normal) * inverse(orientation)));
-				const svec3<float32> roundedNormal = {
-					round(normal.x * 100.0f) / 100.0f,
-					round(normal.y * 100.0f) / 100.0f,
-					round(normal.z * 100.0f) / 100.0f,
-				};
-
-				view<svec3<float32>> normalView{};
-
-				if (normals.size() > 0) {
-					normalView = view<svec3<float32>>(&normals[0], normals.size());
-				}
-
-				normalIndex = findDuplicate(normalView, roundedNormal);
-
-				if (normalIndex >= normals.size()) {
-					normals.emplace_back(roundedNormal);
-				}
-			}
-
-			sequence<uint32> textureCoordinateRedirectionIndices(quadCount * 4);
-
-			// Merge texture coordinate duplicates.
-			{
-				const svec2<float32> quadScale(surface.transform.scale);
-
-				uint32 textureCoordinateIndex = 0;
-				uint32 textureCoordinateOffset = 0;
-				uint32 quadIndex = 0;
-
-				while (quadIndex < surface.quads.size()) {
-					const Quad& quad = surface.quads[quadIndex];
-
-					pool<svec2<float32>, 4> quadVertices;
-					quadVertices.add({quad.start.x, quad.start.y});
-					quadVertices.add({quad.end.x, quad.start.y});
-					quadVertices.add({quad.start.x, quad.end.y});
-					quadVertices.add({quad.end.x, quad.end.y});
-
-					uint32 textureCoordinateIndex = 0;
-
-					while (textureCoordinateIndex < quadVertices.count()) {
-						const svec2<float32> textureCoordinate = svec2<float32>(multiplyTransform(vec2<float32>(quadVertices[textureCoordinateIndex] / quadScale), textureWorld));
-
-						view<svec2<float32>> textureCoordinateView{};
-
-						if (textureCoordinates.size() > 0) {
-							textureCoordinateView = view<svec2<float32>>(&textureCoordinates[0], textureCoordinates.size());
-						}
-
-						const uint32 textureCoordinateRedirectionIndex = findDuplicate(textureCoordinateView, textureCoordinate);
-
-						if (textureCoordinateRedirectionIndex >= textureCoordinates.size()) {
-							textureCoordinates.emplace_back(textureCoordinate);
-						}
-
-						textureCoordinateRedirectionIndices[textureCoordinateOffset + textureCoordinateIndex] = textureCoordinateRedirectionIndex;
-
-						textureCoordinateIndex += 1;
-					}
-
-					textureCoordinateOffset += 4;
-					quadIndex += 1;
-				}
-			}
-
-			sequence<uint32> vertexRedirectionIndices(quadCount * 4);
-
-			// Merge vertex duplicates.
-			{
-				const vec3<float32> origin = {vertexPositionComponents[0], vertexPositionComponents[1], vertexPositionComponents[2]};
-
-				uint32 vertexOffset = 0;
-				uint32 quadIndex = 0;
-
-				while (quadIndex < surface.quads.size()) {
-					const Quad& quad = surface.quads[quadIndex];
-					const vec3<float32> quadScale = {quad.end.x - quad.start.x, 0.0f, quad.end.y - quad.start.y};
-
-					pool<svec2<float32>, 4> quadVertices;
-					quadVertices.add({quad.start.x, quad.start.y});
-					quadVertices.add({quad.end.x, quad.start.y});
-					quadVertices.add({quad.start.x, quad.end.y});
-					quadVertices.add({quad.end.x, quad.end.y});
-
-					uint32 vertexIndex = 0;
-
-					while (vertexIndex < quadVertices.count()) {
-						vec3<float32> vertex = origin;
-						vertex += {quadVertices[vertexIndex].x / scale[0], 0.0f, -quadVertices[vertexIndex].y / scale[2]};
-						vertex = multiplyTransform(vertex, world);
-
-						const svec3<float32> roundedVertex = {
-							round(vertex[0] * 100.0f) / 100.0f,
-							round(vertex[1] * 100.0f) / 100.0f,
-							round(vertex[2] * 100.0f) / 100.0f,
-						};
-
-						view<svec3<float32>> vertexView{};
-
-						if (vertices.size() > 0) {
-							vertexView = view<svec3<float32>>(&vertices[0], vertices.size());
-						}
-
-						const uint32 vertexRedirectionIndex = findDuplicate(vertexView, roundedVertex);
-
-						if (vertexRedirectionIndex >= vertices.size()) {
-							vertices.emplace_back(roundedVertex);
-						}
-
-						vertexRedirectionIndices[vertexOffset + vertexIndex] = vertexRedirectionIndex;
-
-						vertexIndex += 1;
-					}
-
-					uint32 indexOffset = 0;
-
-					while (indexOffset < vertexPositionIndices.count()) {
-						trianglesPerMaterial[surface.materialIndex].emplace_back(StaticTriangle3D{
-							.vertices = {
-								{
-									.vertexIndex = vertexRedirectionIndices[vertexOffset + vertexPositionIndices[indexOffset + 0]],
-									.textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexOffset + vertexTextureCoordinateIndices[indexOffset + 0]],
-								},
-								{
-									.vertexIndex = vertexRedirectionIndices[vertexOffset + vertexPositionIndices[indexOffset + 1]],
-									.textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexOffset + vertexTextureCoordinateIndices[indexOffset + 1]],
-								},
-								{
-									.vertexIndex = vertexRedirectionIndices[vertexOffset + vertexPositionIndices[indexOffset + 2]],
-									.textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexOffset + vertexTextureCoordinateIndices[indexOffset + 2]],
-								},
-							},
-							.normalIndex = normalIndex,
-						});
-
-						material.triangleRange.count += 1;
-						indexOffset += 3;
-					}
-
-					vertexOffset += 4;
-					quadIndex += 1;
-				}
-			}
-		}
 
 		uint32 materialIndex = 0;
 		uint32 triangleOffset = 0;
@@ -309,15 +283,16 @@ namespace Trident {
 			materialIndex += 1;
 		}
 
-		uint32 quadOffset = 0;
+		// TODO(asset-builder/scene): Restore.
+		/* uint32 quadOffset = 0;
 
 		for (const StaticSurface& surface : surfaces) {
 			const uint32 triangleOffset = scene.materials[surface.materialIndex].triangleRange.offset + surface.triangleOffset;
 
 			uint32 quadIndex = 0;
 
-			while (quadIndex < surface.quads.size()) {
-				const Quad& quad = surface.quads[quadIndex];
+			while (quadIndex < surface.subsurfaces.size()) {
+				const StaticSubsurface& quad = surface.subsurfaces[quadIndex];
 
 				pool<svec2<float32>, 4> vertices;
 				vertices.add({0.0f, 0.0f});
@@ -330,7 +305,7 @@ namespace Trident {
 				lightmap.offset = {0, 0};
 				lightmap.coordinateOffset = triangleOffset * 2 + quadIndex * 4;
 
-				svec2<float32> maxCoordinate = (quad.end - quad.start) / surface.lightmapScale;
+				svec2<float32> maxCoordinate = (quad.end - quad.start) / surface.luxelScale;
 				maxCoordinate.x = round(maxCoordinate.x * 100.0f) / 100.0f;
 				maxCoordinate.y = round(maxCoordinate.y * 100.0f) / 100.0f;
 
@@ -340,7 +315,7 @@ namespace Trident {
 
 				while (coordinateIndex < vertices.count()) {
 					svec2<float32>& coordinate = scene.lightmapCoordinates[lightmap.coordinateOffset + coordinateIndex];
-					coordinate = vertices[coordinateIndex] / surface.lightmapScale;
+					coordinate = vertices[coordinateIndex] / surface.luxelScale;
 					coordinate.x = round(coordinate.x * 100.0f) / 100.0f;
 					coordinate.y = round(coordinate.y * 100.0f) / 100.0f;
 
@@ -375,7 +350,7 @@ namespace Trident {
 			}
 
 			quadOffset += quadIndex;
-		}
+		} */
 
 		scene.vertices = sequence<svec3<float32>>(vertices.size());
 		scene.normals = sequence<svec3<float32>>(normals.size());
@@ -385,7 +360,8 @@ namespace Trident {
 		std::copy(normals.begin(), normals.end(), &scene.normals[0]);
 		std::copy(textureCoordinates.begin(), textureCoordinates.end(), &scene.textureCoordinates[0]);
 
-		Lightmapper::updateAtlasCoordinates(scene, lightmaps, view<LightmapIndex>(&lightmapIndices[0], lightmapIndices.size()), surfaceGeometry);
+		// TODO(asset-builder/scene): Restore.
+		/* Lightmapper::updateAtlasCoordinates(scene, lightmaps, view<LightmapIndex>(&lightmapIndices[0], lightmapIndices.size()));
 
 		scene.lightmapAtlasImageAssetDescriptor = {
 			.format = ImageFormat::R8G8B8A8_UNORM,
@@ -397,106 +373,98 @@ namespace Trident {
 		scene.lightmapAtlasImageAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
 
 		Lightmapper lightmapper;
-		lightmapper.buildLightmapAtlas(scene, scene.lightmapAtlasImageAssetDescriptor);
+		lightmapper.buildLightmapAtlas(scene, scene.lightmapAtlasImageAssetDescriptor); */
 
 		return scene;
 	}
 
-	uint32 StaticSceneBuilder::carveSurfaces(sequence<StaticSurface>& surfaces) const {
-		uint32 quadCount = 0;
+	// TODO(asset-builder/scene): Restore.
+	/* void StaticSceneBuilder::carveSurface(StaticSurface& surface, const std::vector<Carving>& carvings) const {
+		std::vector<SubsurfaceQuad> resultQuads;
+		std::vector<SubsurfaceQuad> queue = {
+			{
+				.start = {0.0f, 0.0f},
+				.end = surface.scale,
+			},
+		};
 
-		for (StaticSurface& surface : surfaces) {
-			const svec2<float32> surfaceSize(surface.transform.scale);
+		while (queue.size() > 0) {
+			SubsurfaceQuad quad = queue.back();
 
-			std::vector<Quad> queue = {
-				{
-					.start = {0.0f, 0.0f},
-					.end = surfaceSize,
-				},
-			};
+			queue.pop_back();
 
-			while (queue.size() > 0) {
-				Quad quad = queue.back();
+			bool continueAfterBlockingCarving = false;
+			svec2<float32> blockingCarvingEnd;
+			float32 newOriginX = 0.0f;
+			uint32 carvingIndex = 0;
 
-				queue.pop_back();
+			while (carvingIndex < carvings.size()) {
+				const Carving& carving = carvings[carvingIndex];
 
-				bool continueAfterBlockingCarving = false;
-				svec2<float32> blockingCarvingEnd;
-				float32 newOriginX = 0.0f;
-				uint32 carvingIndex = 0;
-
-				while (carvingIndex < surface.carvings.size()) {
-					const SurfaceCarving& carving = surface.carvings[carvingIndex];
-
-					// If the carving is not in the quad's horizontal bounds, continue.
-					if (carving.offset.x + carving.size.x <= quad.start.x || carving.offset.x > quad.end.x) {
-						// If the carving was before the quad, at least adjust the quad's height.
-						if (carving.offset.x + carving.size.x == quad.start.x) {
-							quad.end.y = min(quad.end.y, carving.offset.y + carving.size.y);
-						}
-
-						carvingIndex += 1;
-
-						continue;
-					}
-
-					// If the carving is not in the quad's vertical bounds, continue.
-					if (carving.offset.y + carving.size.y <= quad.start.y || carving.offset.y > quad.end.y) {
-						carvingIndex += 1;
-
-						continue;
-					}
-
-					// If the carving fully blocks the quad vertically, end the quad there.
-					if (carving.offset.y <= quad.start.y && carving.offset.y + carving.size.y >= quad.start.y) {
-						quad.end.x = carving.offset.x;
+				// If the carving is not in the quad's horizontal bounds, continue.
+				if (carving.offset.x + carving.size.x <= quad.start.x || carving.offset.x > quad.end.x) {
+					// If the carving was before the quad, at least adjust the quad's height.
+					if (carving.offset.x + carving.size.x == quad.start.x) {
 						quad.end.y = min(quad.end.y, carving.offset.y + carving.size.y);
-
-						if (carving.offset.y == quad.start.y) {
-							// There is no quad after the carving.
-							continueAfterBlockingCarving = true;
-
-							blockingCarvingEnd = carving.offset + carving.size;
-						}
-						else {
-							// There is already a quad after the carving.
-							// Force a new quad to be added right below the current quad.
-							newOriginX = quad.start.x;
-						}
-
-						carvingIndex += 1;
-
-						continue;
 					}
-
-					// There is some space above the carving.
-					quad.end.y = carving.offset.y;
 
 					carvingIndex += 1;
+
+					continue;
 				}
 
-				surface.quads.emplace_back(quad);
+				// If the carving is not in the quad's vertical bounds, continue.
+				if (carving.offset.y + carving.size.y <= quad.start.y || carving.offset.y > quad.end.y) {
+					carvingIndex += 1;
 
-				quadCount += 1;
-
-				if (quad.start.x == newOriginX && quad.end != surfaceSize) {
-					// If the quad started at the X origin, prepare a quad right below.
-					queue.emplace_back(Quad{
-						.start = {newOriginX, quad.end.y},
-						.end = surfaceSize,
-					});
+					continue;
 				}
 
-				if (continueAfterBlockingCarving) {
-					// Prepare a quad after the carving.
-					queue.emplace_back(Quad{
-						.start = {blockingCarvingEnd.x, quad.start.y},
-						.end = {surfaceSize.x, blockingCarvingEnd.y},
-					});
+				// If the carving fully blocks the quad vertically, end the quad there.
+				if (carving.offset.y <= quad.start.y && carving.offset.y + carving.size.y >= quad.start.y) {
+					quad.end.x = carving.offset.x;
+					quad.end.y = min(quad.end.y, carving.offset.y + carving.size.y);
+
+					if (carving.offset.y == quad.start.y) {
+						// There is no quad after the carving.
+						continueAfterBlockingCarving = true;
+
+						blockingCarvingEnd = carving.offset + carving.size;
+					}
+					else {
+						// There is already a quad after the carving.
+						// Force a new quad to be added right below the current quad.
+						newOriginX = quad.start.x;
+					}
+
+					carvingIndex += 1;
+
+					continue;
 				}
+
+				// There is some space above the carving.
+				quad.end.y = carving.offset.y;
+
+				carvingIndex += 1;
+			}
+
+			surface.subsurfaces.emplace_back(subsurface);
+
+			if (quad.start.x == newOriginX && quad.end != surface.scale) {
+				// If the quad started at the X origin, prepare a quad right below.
+				queue.emplace_back(SubsurfaceQuad{
+					.start = {newOriginX, quad.end.y},
+					.end = surface.scale,
+				});
+			}
+
+			if (continueAfterBlockingCarving) {
+				// Prepare a quad after the carving.
+				queue.emplace_back(SubsurfaceQuad{
+					.start = {blockingCarvingEnd.x, quad.start.y},
+					.end = {surface.scale.x, blockingCarvingEnd.y},
+				});
 			}
 		}
-
-		return quadCount;
-	}
+	} */
 }

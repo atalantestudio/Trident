@@ -1,0 +1,24 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
+#pragma once
+
+#include "Engine/API/Geometry/Edge.hpp"
+#include "Engine/API/Geometry/Hull3D.hpp"
+#include "Engine/API/Geometry/Plane3D.hpp"
+#include "Engine/Filesystem/Asset/GeometryAssetFlags.hpp"
+
+namespace Trident {
+	struct StaticGeometry3D {
+		sequence<float32> vertexComponents;
+		sequence<float32> vertexTextureCoordinateComponents;
+		sequence<uint32> vertexIndices;
+		sequence<uint32> vertexTextureCoordinateIndices;
+
+		/// Each edge has an origin vertex index.
+		sequence<uint16> edges;
+
+		vec3<float32> normal;
+		svec2<float32> scale;
+	};
+}
