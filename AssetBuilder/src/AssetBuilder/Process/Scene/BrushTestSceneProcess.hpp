@@ -60,9 +60,9 @@ namespace Trident {
 					},
 				});
 
-				builder.addMaterial(100, 0);
+				builder.addMaterial(101, 0);
 
-				const StaticGeometry3D rectangleGeometry = createBrushGeometry({192.0f, 128.0f});
+				const StaticGeometry3D rectangleGeometry = createBrushGeometry({200.0f, 128.0f});
 
 				builder.placeSurface(
 					{
@@ -70,11 +70,28 @@ namespace Trident {
 						.textureFiltering = {
 							.translation = {0.0f, 0.0f},
 							.rotation = 0.0f,
-							.scale = {1.0f, 1.0f},
+							.scale = {1.0f / 128.0f, 1.0f / 128.0f},
 						},
 						.materialIndex = 0,
 						.luxelScale = {1.0f, 1.0f},
-						.carvings = {},
+						.carvings = {
+							{
+								.offset = {8.0f, 8.0f},
+								.size = {40.0f, 84.0f},
+							},
+							{
+								.offset = {56.0f, 8.0f},
+								.size = {40.0f, 84.0f},
+							},
+							{
+								.offset = {104.0f, 8.0f},
+								.size = {40.0f, 84.0f},
+							},
+							{
+								.offset = {152.0f, 8.0f},
+								.size = {40.0f, 84.0f},
+							},
+						},
 					},
 					{
 						.position = {0.0f, 0.0f, 128.0f},

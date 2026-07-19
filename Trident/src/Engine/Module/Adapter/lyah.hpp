@@ -245,11 +245,6 @@ namespace Trident {
 	}
 
 	template<typename T>
-	constexpr svec<2, T> operator+(svec<2, T> a, const svec<2, T>& b) {
-		return a += b;
-	}
-
-	template<typename T>
 	constexpr svec<2, T>& operator-=(svec<2, T>& a, const svec<2, T>& b) {
 		a.x -= b.x;
 		a.y -= b.y;
@@ -319,8 +314,13 @@ namespace Trident {
 		return a /= b;
 	}
 
-	template<typename T>
-	constexpr svec<2, T> operator*(svec<2, T> a, svec<2, T> b) {
+	template<std::size_t C, typename T>
+	constexpr svec<C, T> operator+(svec<C, T> a, svec<C, T> b) {
+		return a += b;
+	}
+
+	template<std::size_t C, typename T>
+	constexpr svec<C, T> operator*(svec<C, T> a, svec<C, T> b) {
 		return a *= b;
 	}
 

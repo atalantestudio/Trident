@@ -28,8 +28,7 @@ namespace Trident {
 			StaticScene3D build() const;
 
 		private:
-			// TODO(asset-builder/scene): Restore.
-			// void carveSurface(StaticSurface& surface, const std::vector<Carving>& carvings) const;
+			void carveSurface(StaticSurface& surface, const std::vector<Carving>& carvings, uint32& surfaceVertexCount) const;
 
 		private:
 			std::filesystem::path rootOutputPath;

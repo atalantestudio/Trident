@@ -3,6 +3,7 @@
 
 #include "pch.hpp"
 
+#include "AssetBuilder/API/Scene/Builder/Carving.hpp"
 #include "AssetBuilder/API/Scene/Lightmap.hpp"
 #include "AssetBuilder/API/Scene/Lightmapper.hpp"
 #include "AssetBuilder/API/Scene/StaticSceneBuilder.hpp"
@@ -83,14 +84,18 @@ namespace Trident {
 		DEBUG_ASSERT(descriptor.luxelScale.x > 0.0f && descriptor.luxelScale.y > 0.0f);
 		DEBUG_ASSERT(descriptor.carvings.size() == 0 || descriptor.geometry.vertexIndices.count() == 6);
 
+		const vec3<float32> originVertex = {
+			descriptor.geometry.vertexComponents[0],
+			descriptor.geometry.vertexComponents[1],
+			descriptor.geometry.vertexComponents[2],
+		};
 		const quat<float32> orientation = quat<float32>::axisAngle(transform.axis, transform.angle);
-
 		const mat4x4<float32> worldTransform = (
 			mat4x4<float32>(orientation) *
 			mat4x4<float32>::translation(transform.position)
 		);
 		const mat3x3<float32> textureTransform = (
-			mat3x3<float32>::scaling(descriptor.geometry.scale * descriptor.textureFiltering.scale) *
+			mat3x3<float32>::scaling(descriptor.textureFiltering.scale) *
 			mat3x3<float32>::rotation(pi<float32>() * descriptor.textureFiltering.rotation) *
 			mat3x3<float32>::translation(descriptor.textureFiltering.translation)
 		);
@@ -114,8 +119,11 @@ namespace Trident {
 		uint32 surfaceVertexCount = 0;
 
 		if (descriptor.carvings.size() > 0) {
-			// TODO(asset-builder/scene): Restore.
-			// carveSurface(surface, descriptor.carvings, surfaceVertexCount);
+			for (const Carving& carving : descriptor.carvings) {
+				DEBUG_ASSERT(carving.size.x > 0.0f && carving.size.y > 0.0f);
+			}
+
+			carveSurface(surface, descriptor.carvings, surfaceVertexCount);
 		}
 		else {
 			surface.subsurfaces = {
@@ -137,26 +145,29 @@ namespace Trident {
 			normals.emplace_back(surface.normal);
 		}
 
+		// NOTE: The number of elements in these sequences isn't optimized for duplicate vertices/texture coordinates.
 		sequence<uint32> vertexRedirectionIndices(surfaceVertexCount);
 		sequence<uint32> textureCoordinateRedirectionIndices(surfaceVertexCount);
+
+		uint32 surfaceTriangleCount = 0;
 		uint32 subsurfaceIndex = 0;
 		uint32 textureCoordinateOffset = 0;
-		uint32 vertexIndexOffset = 0;
+		uint32 vertexOffset = 0;
 
 		while (subsurfaceIndex < surface.subsurfaces.size()) {
 			const StaticSubsurface& subsurface = surface.subsurfaces[subsurfaceIndex];
 			const uint32 vertexIndexCount = static_cast<uint32>(subsurface.vertexIndices.count());
-			const uint64 vertexCount = subsurface.vertexComponents.count() / 3;
+			const uint32 vertexCount = static_cast<uint32>(subsurface.vertexComponents.count() / 3);
 			const uint64 textureCoordinateCount = subsurface.vertexTextureCoordinateComponents.count() / 2;
 
 			uint32 textureCoordinateIndex = 0;
 
 			while (textureCoordinateIndex < textureCoordinateCount) {
 				// TODO(lyah/scalar)
-				const svec2<float32> textureCoordinate = svec2<float32>(multiplyTransform(vec2<float32>{
+				svec2<float32> textureCoordinate = svec2<float32>(multiplyTransform({
 					subsurface.vertexTextureCoordinateComponents[textureCoordinateIndex * 2 + 0],
 					subsurface.vertexTextureCoordinateComponents[textureCoordinateIndex * 2 + 1],
-				} / vec2<float32>(subsurface.scale), textureTransform));
+				}, textureTransform));
 
 				const uint32 textureCoordinateRedirectionIndex = findDuplicate(textureCoordinates, textureCoordinate);
 
@@ -175,7 +186,7 @@ namespace Trident {
 
 			while (vertexIndex < vertexCount) {
 				// TODO(lyah/scalar)
-				const svec3<float32> vertex = svec3<float32>(round<2>(multiplyTransform({
+				const svec3<float32> vertex = svec3<float32>(round<2>(multiplyTransform(originVertex + vec3<float32>{
 					subsurface.vertexComponents[vertexIndex * 3 + 0],
 					subsurface.vertexComponents[vertexIndex * 3 + 1],
 					subsurface.vertexComponents[vertexIndex * 3 + 2],
@@ -187,7 +198,7 @@ namespace Trident {
 					vertices.emplace_back(vertex);
 				}
 
-				vertexRedirectionIndices[vertexIndexOffset + vertexIndex] = vertexRedirectionIndex;
+				vertexRedirectionIndices[vertexOffset + vertexIndex] = vertexRedirectionIndex;
 
 				vertexIndex += 1;
 			}
@@ -195,29 +206,29 @@ namespace Trident {
 			uint32 vertexIndexIndex = 0;
 
 			while (vertexIndexIndex < vertexIndexCount) {
-				const uint32 vertexIndexA = vertexIndexOffset + subsurface.vertexIndices[vertexIndexIndex + 0];
-				const uint32 vertexIndexB = vertexIndexOffset + subsurface.vertexIndices[vertexIndexIndex + 1];
-				const uint32 vertexIndexC = vertexIndexOffset + subsurface.vertexIndices[vertexIndexIndex + 2];
+				const uint32 vertexIndexA = subsurface.vertexIndices[vertexIndexIndex + 0];
+				const uint32 vertexIndexB = subsurface.vertexIndices[vertexIndexIndex + 1];
+				const uint32 vertexIndexC = subsurface.vertexIndices[vertexIndexIndex + 2];
 
-				const uint32 textureCoordinateIndexA = vertexIndexOffset + subsurface.vertexTextureCoordinateIndices[vertexIndexIndex + 0];
-				const uint32 textureCoordinateIndexB = vertexIndexOffset + subsurface.vertexTextureCoordinateIndices[vertexIndexIndex + 1];
-				const uint32 textureCoordinateIndexC = vertexIndexOffset + subsurface.vertexTextureCoordinateIndices[vertexIndexIndex + 2];
+				const uint32 textureCoordinateIndexA = subsurface.vertexTextureCoordinateIndices[vertexIndexIndex + 0];
+				const uint32 textureCoordinateIndexB = subsurface.vertexTextureCoordinateIndices[vertexIndexIndex + 1];
+				const uint32 textureCoordinateIndexC = subsurface.vertexTextureCoordinateIndices[vertexIndexIndex + 2];
 
 				const StaticTriangle3D triangle = {
 					.vertices = {
 						{
-							.vertexIndex = vertexRedirectionIndices[vertexIndexA],
-							.textureCoordinateIndex = textureCoordinateRedirectionIndices[textureCoordinateIndexA],
+							.vertexIndex = vertexRedirectionIndices[vertexOffset + vertexIndexA],
+							.textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexOffset + textureCoordinateIndexA],
 							.lightmapCoordinateIndex = 0,
 						},
 						{
-							.vertexIndex = vertexRedirectionIndices[vertexIndexB],
-							.textureCoordinateIndex = textureCoordinateRedirectionIndices[textureCoordinateIndexB],
+							.vertexIndex = vertexRedirectionIndices[vertexOffset + vertexIndexB],
+							.textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexOffset + textureCoordinateIndexB],
 							.lightmapCoordinateIndex = 0,
 						},
 						{
-							.vertexIndex = vertexRedirectionIndices[vertexIndexC],
-							.textureCoordinateIndex = textureCoordinateRedirectionIndices[textureCoordinateIndexC],
+							.vertexIndex = vertexRedirectionIndices[vertexOffset + vertexIndexC],
+							.textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexOffset + textureCoordinateIndexC],
 							.lightmapCoordinateIndex = 0,
 						},
 					},
@@ -227,17 +238,17 @@ namespace Trident {
 				triangles.emplace_back(triangle);
 
 				vertexIndexIndex += 3;
-				subsurfaceIndex += 1;
 			}
 
-			material.triangleRange.count += vertexIndexCount / 3;
-			triangleCount += vertexIndexCount / 3;
-			vertexIndexOffset += vertexIndexCount;
+			surfaceTriangleCount += vertexIndexCount / 3;
+			vertexOffset += vertexCount;
 			subsurfaceIndex += 1;
 		}
 
 		surfaces.emplace_back(surface);
 
+		material.triangleRange.count += surfaceTriangleCount;
+		triangleCount += surfaceTriangleCount;
 		subsurfaceCount += static_cast<uint32>(surface.subsurfaces.size());
 	}
 
@@ -377,94 +388,4 @@ namespace Trident {
 
 		return scene;
 	}
-
-	// TODO(asset-builder/scene): Restore.
-	/* void StaticSceneBuilder::carveSurface(StaticSurface& surface, const std::vector<Carving>& carvings) const {
-		std::vector<SubsurfaceQuad> resultQuads;
-		std::vector<SubsurfaceQuad> queue = {
-			{
-				.start = {0.0f, 0.0f},
-				.end = surface.scale,
-			},
-		};
-
-		while (queue.size() > 0) {
-			SubsurfaceQuad quad = queue.back();
-
-			queue.pop_back();
-
-			bool continueAfterBlockingCarving = false;
-			svec2<float32> blockingCarvingEnd;
-			float32 newOriginX = 0.0f;
-			uint32 carvingIndex = 0;
-
-			while (carvingIndex < carvings.size()) {
-				const Carving& carving = carvings[carvingIndex];
-
-				// If the carving is not in the quad's horizontal bounds, continue.
-				if (carving.offset.x + carving.size.x <= quad.start.x || carving.offset.x > quad.end.x) {
-					// If the carving was before the quad, at least adjust the quad's height.
-					if (carving.offset.x + carving.size.x == quad.start.x) {
-						quad.end.y = min(quad.end.y, carving.offset.y + carving.size.y);
-					}
-
-					carvingIndex += 1;
-
-					continue;
-				}
-
-				// If the carving is not in the quad's vertical bounds, continue.
-				if (carving.offset.y + carving.size.y <= quad.start.y || carving.offset.y > quad.end.y) {
-					carvingIndex += 1;
-
-					continue;
-				}
-
-				// If the carving fully blocks the quad vertically, end the quad there.
-				if (carving.offset.y <= quad.start.y && carving.offset.y + carving.size.y >= quad.start.y) {
-					quad.end.x = carving.offset.x;
-					quad.end.y = min(quad.end.y, carving.offset.y + carving.size.y);
-
-					if (carving.offset.y == quad.start.y) {
-						// There is no quad after the carving.
-						continueAfterBlockingCarving = true;
-
-						blockingCarvingEnd = carving.offset + carving.size;
-					}
-					else {
-						// There is already a quad after the carving.
-						// Force a new quad to be added right below the current quad.
-						newOriginX = quad.start.x;
-					}
-
-					carvingIndex += 1;
-
-					continue;
-				}
-
-				// There is some space above the carving.
-				quad.end.y = carving.offset.y;
-
-				carvingIndex += 1;
-			}
-
-			surface.subsurfaces.emplace_back(subsurface);
-
-			if (quad.start.x == newOriginX && quad.end != surface.scale) {
-				// If the quad started at the X origin, prepare a quad right below.
-				queue.emplace_back(SubsurfaceQuad{
-					.start = {newOriginX, quad.end.y},
-					.end = surface.scale,
-				});
-			}
-
-			if (continueAfterBlockingCarving) {
-				// Prepare a quad after the carving.
-				queue.emplace_back(SubsurfaceQuad{
-					.start = {blockingCarvingEnd.x, quad.start.y},
-					.end = {surface.scale.x, blockingCarvingEnd.y},
-				});
-			}
-		}
-	} */
 }
