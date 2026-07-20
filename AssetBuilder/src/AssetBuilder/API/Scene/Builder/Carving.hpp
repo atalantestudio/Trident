@@ -57,6 +57,11 @@ namespace Trident {
 
 			rowIndex = findSortedIndex(rowOffsets, carving.offset.y + carving.size.y);
 			rowOffsets.insert(rowOffsets.begin() + rowIndex, carving.offset.y + carving.size.y);
+
+			quad.start = carving.offset;
+			quad.end = carving.offset + carving.size;
+
+			surface.hollowSubsurfaces.emplace_back(createSubsurface(quad, origin, surface.scale));
 		}
 
 		const uint32 rowCount = static_cast<uint32>(rowOffsets.size() - 1);

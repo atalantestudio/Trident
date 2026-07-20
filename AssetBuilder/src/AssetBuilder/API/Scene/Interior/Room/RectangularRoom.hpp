@@ -19,43 +19,53 @@ namespace Trident {
 	};
 
 	struct RectangularRoom : public Room {
+		static constexpr uint32 FRONT_WALL = 0;
+		static constexpr uint32 RIGHT_WALL = 1;
+		static constexpr uint32 BACK_WALL = 2;
+		static constexpr uint32 LEFT_WALL = 3;
+		static constexpr uint32 FLOOR = 4;
+		static constexpr uint32 CEILING = 5;
+
 		explicit RectangularRoom(const RectangularRoomDescriptor& descriptor) {
 			const float32 sizeX = descriptor.size.x;
 			const float32 sizeY = descriptor.ceilingLevel - descriptor.floorLevel;
 			const float32 sizeZ = descriptor.size.y;
 
-			frontWallTranslation = {descriptor.position.x, descriptor.floorLevel + sizeY * 0.5f, descriptor.position.y};
+			frontWallTranslation = {descriptor.position.x, descriptor.floorLevel + sizeY * 0.5f, descriptor.position.y + sizeZ * 0.5f};
 
 			const StaticGeometry3D floorGeometry = InteriorSceneBuilder::createWallGeometry({sizeX, sizeZ});
 			const StaticGeometry3D frontWallGeometry = InteriorSceneBuilder::createWallGeometry({sizeX, sizeY});
 			const StaticGeometry3D rightWallGeometry = InteriorSceneBuilder::createWallGeometry({sizeZ, sizeY});
 
 			// TODO(asset-builder/scene/interior/room): Expose properties per individual room surface.
-			const TextureFilteringDescriptor textureFiltering = {
-				.scale = {1.0f / 128.0f, 1.0f / 128.0f},
+			const TextureFilteringDescriptor textureFiltering256 = {
+				.scale = {1.0f / 256.0f / 0.25f, 1.0f / 256.0f / 0.25f},
+			};
+			const TextureFilteringDescriptor textureFiltering512 = {
+				.scale = {1.0f / 512.0f / 0.25f, 1.0f / 512.0f / 0.25f},
 			};
 
 			const SurfaceDescriptor frontWallDescriptor = {
 				.geometry = frontWallGeometry,
-				.textureFiltering = textureFiltering,
+				.textureFiltering = textureFiltering512,
 				.materialIndex = descriptor.wallMaterialIndex,
 				.luxelScale = descriptor.luxelScale,
 			};
 			const SurfaceDescriptor rightWallDescriptor = {
 				.geometry = rightWallGeometry,
-				.textureFiltering = textureFiltering,
+				.textureFiltering = textureFiltering512,
 				.materialIndex = descriptor.wallMaterialIndex,
 				.luxelScale = descriptor.luxelScale,
 			};
 			const SurfaceDescriptor floorDescriptor = {
 				.geometry = floorGeometry,
-				.textureFiltering = textureFiltering,
+				.textureFiltering = textureFiltering256,
 				.materialIndex = descriptor.floorMaterialIndex,
 				.luxelScale = descriptor.luxelScale,
 			};
 			const SurfaceDescriptor ceilingDescriptor = {
 				.geometry = floorGeometry,
-				.textureFiltering = textureFiltering,
+				.textureFiltering = textureFiltering512,
 				.materialIndex = descriptor.ceilingMaterialIndex,
 				.luxelScale = descriptor.luxelScale,
 			};
@@ -68,6 +78,7 @@ namespace Trident {
 				floorDescriptor,
 				ceilingDescriptor,
 			};
+			surfaceIndices = sequence<uint32>(surfaceDescriptors.count());
 		}
 
 		vec3<float32> frontWallTranslation;
@@ -75,18 +86,20 @@ namespace Trident {
 
 	template<>
 	inline void InteriorSceneBuilder::addRoom(RectangularRoom& room) {
-		const uint32 frontWallIndex = placeSurface(
-			room.surfaceDescriptors[0],
+		room.surfaceIndices[room.FRONT_WALL] = placeSurface(
+			room.surfaceDescriptors[room.FRONT_WALL],
 			{
 				.translation = room.frontWallTranslation,
 			}
 		);
 
-		const uint32 rightWallIndex = snapSurface(room.surfaceDescriptors[1], frontWallIndex, 1, 3, radians(90.0_deg));
+		// TODO(asset-builder/scene/interior/room): Don't copy.
+		const StaticSurface frontWall = surfaces[room.surfaceIndices[room.FRONT_WALL]];
 
-		snapSurface(room.surfaceDescriptors[2], rightWallIndex, 1, 3, radians(180.0_deg));
-		snapSurface(room.surfaceDescriptors[3], frontWallIndex, 3, 1, radians(90.0_deg));
-		snapSurface(room.surfaceDescriptors[4], frontWallIndex, 2, 0, radians(90.0_deg));
-		snapSurface(room.surfaceDescriptors[5], frontWallIndex, 0, 2, radians(90.0_deg));
+		room.surfaceIndices[room.RIGHT_WALL] = snapSurface(room.surfaceDescriptors[room.RIGHT_WALL], frontWall.getEdge(1), 3, radians(90.0_deg));
+		room.surfaceIndices[room.BACK_WALL] = snapSurface(room.surfaceDescriptors[room.BACK_WALL], surfaces[room.surfaceIndices[room.RIGHT_WALL]].getEdge(1), 3, radians(180.0_deg));
+		room.surfaceIndices[room.LEFT_WALL] = snapSurface(room.surfaceDescriptors[room.LEFT_WALL], frontWall.getEdge(3), 1, radians(90.0_deg));
+		room.surfaceIndices[room.FLOOR] = snapSurface(room.surfaceDescriptors[room.FLOOR], frontWall.getEdge(2), 0, radians(90.0_deg));
+		room.surfaceIndices[room.CEILING] = snapSurface(room.surfaceDescriptors[room.CEILING], frontWall.getEdge(0), 2, radians(90.0_deg));
 	}
 }

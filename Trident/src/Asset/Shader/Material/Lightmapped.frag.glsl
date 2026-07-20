@@ -68,7 +68,9 @@ void main() {
 
 	// fragment.rgb = diffuse * light;
 	fragment.rgb = diffuse;
+	// fragment.rgb = vec3(interstage.textureCoordinate, 0.0);
 
-	fragment.rgb /= fragment.rgb + 1.0;
-	fragment.rgb = pow(fragment.rgb, vec3(1.0 / 2.2));
+	// fragment.rgb /= fragment.rgb + 1.0;
+	// fragment.rgb = pow(fragment.rgb, vec3(1.0 / 2.2));
+	fragment.a = 1.0;
 }

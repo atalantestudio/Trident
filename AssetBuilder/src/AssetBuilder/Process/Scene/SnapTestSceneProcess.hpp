@@ -12,7 +12,6 @@
 namespace Trident {
 	class SnapTestSceneProcess final : public Scene3DProcess {
 		private:
-			// TODO(test)
 			static StaticGeometry3D createFloorGeometry(svec2<float32> scale) {
 				return {
 					.vertexComponents = {
@@ -132,7 +131,6 @@ namespace Trident {
 					}
 				);
 
-				// TODO(test)
 				const SurfaceDescriptor floorSurfaceDescriptor = {
 					.geometry = floorGeometry,
 					.textureFiltering = {
@@ -145,10 +143,12 @@ namespace Trident {
 					.carvings = {},
 				};
 
-				// TODO(test)
-				const uint32 wall2SurfaceIndex = builder.snapSurface(wallSurfaceDescriptor, wall1SurfaceIndex, 1, 3, radians(90.0_deg));
-				const uint32 wall3SurfaceIndex = builder.snapSurface(floorSurfaceDescriptor, wall1SurfaceIndex, 3, 1, radians(90.0_deg));
-				const uint32 floorSurfaceIndex = builder.snapSurface(wallSurfaceDescriptor, wall1SurfaceIndex, 2, 0, radians(90.0_deg));
+				// TODO(asset-builder/scene/interior/room): Don't copy.
+				const StaticSurface wall1 = builder.surfaces[wall1SurfaceIndex];
+
+				const uint32 wall2SurfaceIndex = builder.snapSurface(wallSurfaceDescriptor, wall1.getEdge(1), 3, radians(90.0_deg));
+				const uint32 wall3SurfaceIndex = builder.snapSurface(floorSurfaceDescriptor, wall1.getEdge(3), 1, radians(90.0_deg));
+				const uint32 floorSurfaceIndex = builder.snapSurface(wallSurfaceDescriptor, wall1.getEdge(2), 0, radians(90.0_deg));
 
 				return {
 					.staticScene = builder.build(),

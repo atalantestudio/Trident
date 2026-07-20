@@ -50,9 +50,9 @@ namespace Trident {
 		return {
 			.vertexComponents = {
 				-0.5f * scale.x,  0.5f * scale.y,  0.0f,
-					0.5f * scale.x,  0.5f * scale.y,  0.0f,
+				 0.5f * scale.x,  0.5f * scale.y,  0.0f,
 				-0.5f * scale.x, -0.5f * scale.y,  0.0f,
-					0.5f * scale.x, -0.5f * scale.y,  0.0f,
+				 0.5f * scale.x, -0.5f * scale.y,  0.0f,
 			},
 			.vertexTextureCoordinateComponents = {
 				0.0f, 0.0f,
@@ -130,24 +130,17 @@ namespace Trident {
 		return false;
 	}
 
-	uint32 StaticSceneBuilder::snapSurface(const SurfaceDescriptor& descriptor, uint32 parentSurfaceIndex, uint32 parentEdgeIndex, uint32 edgeIndex, float32 hingeAngle) {
+	uint32 StaticSceneBuilder::snapSurface(const SurfaceDescriptor& descriptor, const StaticEdge& parentEdge, uint32 edgeIndex, float32 hingeAngle) {
 		// TODO(asset-builder/scene): Better validation.
 		DEBUG_ASSERT(descriptor.geometry.scale.x > 0.0f && descriptor.geometry.scale.y > 0.0f);
 		DEBUG_ASSERT(descriptor.luxelScale.x > 0.0f && descriptor.luxelScale.y > 0.0f);
 		DEBUG_ASSERT(descriptor.carvings.size() == 0 || descriptor.geometry.vertexIndices.count() == 6);
-		DEBUG_ASSERT(parentSurfaceIndex < surfaces.size());
 
-		const StaticSurface& parentSurface = surfaces[parentSurfaceIndex];
-
-		DEBUG_ASSERT(parentEdgeIndex < parentSurface.edgeOriginVertexIndices.count());
-
-		const uint16 indexA = parentSurface.edgeOriginVertexIndices[parentEdgeIndex];
-		const uint16 indexB = parentSurface.edgeOriginVertexIndices[(parentEdgeIndex + 1) % parentSurface.edgeOriginVertexIndices.count()];
 		const uint16 indexC = descriptor.geometry.edgeOriginVertexIndices[edgeIndex];
 		const uint16 indexD = descriptor.geometry.edgeOriginVertexIndices[(edgeIndex + 1) % descriptor.geometry.edgeOriginVertexIndices.count()];
 
-		const vec3<float32> a = parentSurface.vertices[indexA];
-		const vec3<float32> b = parentSurface.vertices[indexB];
+		const vec3<float32> a = parentEdge.a;
+		const vec3<float32> b = parentEdge.b;
 		const vec3<float32> localC = {
 			descriptor.geometry.vertexComponents[indexC * 3 + 0],
 			descriptor.geometry.vertexComponents[indexC * 3 + 1],
@@ -185,6 +178,59 @@ namespace Trident {
 		const quat<float32> hingeRotation = quat<float32>::axisAngle(ab, hingeAngle);
 
 		return compileSurface(descriptor, transform, c, hingeRotation);
+	}
+
+	uint32 StaticSceneBuilder::snapSurface(const DualSnapSurfaceDescriptor& descriptor, const StaticEdge& edgeA, const StaticEdge& edgeB) {
+		// TODO(asset-builder/scene): Better validation.
+		DEBUG_ASSERT(descriptor.luxelScale.x > 0.0f && descriptor.luxelScale.y > 0.0f);
+
+		const vec3<float32> a = edgeA.a;
+		const vec3<float32> b = edgeA.b;
+		const vec3<float32> c = edgeB.a;
+		const vec3<float32> d = edgeB.b;
+
+		DEBUG_ASSERT(a != c && a != d && b != c && b != d);
+
+		const vec3<float32> ab = normalized(b - a);
+		const vec3<float32> cd = normalized(d - c);
+
+		DEBUG_ASSERT(dot(ab, cd) <= 0.0f);
+
+		StaticGeometry3D geometry{};
+		geometry.vertexComponents = {
+			c[0], c[1], c[2],
+			d[0], d[1], d[2],
+			b[0], b[1], b[2],
+			a[0], a[1], a[2],
+		};
+		geometry.vertexTextureCoordinateComponents = {
+			0.0f, 0.0f,
+			1.0f, 0.0f,
+			0.0f, 1.0f,
+			1.0f, 1.0f,
+		};
+		geometry.vertexIndices = {
+			0, 1, 2,
+			1, 3, 2,
+		};
+		geometry.vertexTextureCoordinateIndices = {
+			0, 1, 2,
+			1, 3, 2,
+		};
+		geometry.edgeOriginVertexIndices = {0, 1, 3, 2};
+		geometry.normal = normalized(cross(ab, c - b));
+		geometry.scale = {distance(a, b), distance(c, b)};
+
+		const SurfaceDescriptor surfaceDescriptor = {
+			.geometry = geometry,
+			.textureFiltering = descriptor.textureFiltering,
+			.materialIndex = descriptor.materialIndex,
+			.luxelScale = descriptor.luxelScale,
+			.carvings = descriptor.carvings,
+		};
+
+		// TODO(asset-builder/scene/dual-snapping): compileSurface overload without transform.
+		return compileSurface(surfaceDescriptor, {}, {0.0f, 0.0f, 0.0f}, quat<float32>::identity());
 	}
 
 	uint32 StaticSceneBuilder::compileSurface(const SurfaceDescriptor& descriptor, const Transform& transform, vec3<float32> hingeOffset, quat<float32> hingeRotation) {
@@ -246,6 +292,34 @@ namespace Trident {
 			};
 
 			carveSurface(surface, origin, descriptor.carvings, surfaceVertexCount);
+
+			uint32 hollowSubsurfaceIndex = 0;
+
+			while (hollowSubsurfaceIndex < surface.hollowSubsurfaces.size()) {
+				StaticSubsurface& subsurface = surface.hollowSubsurfaces[hollowSubsurfaceIndex];
+
+				const uint32 vertexCount = static_cast<uint32>(subsurface.vertexComponents.count() / 3);
+
+				uint32 vertexIndex = 0;
+
+				while (vertexIndex < vertexCount) {
+					// TODO(lyah/scalar)
+					const svec3<float32> vertex = svec3<float32>(round<2>(multiplyTransform(vec3<float32>{
+						subsurface.vertexComponents[vertexIndex * 3 + 0],
+						subsurface.vertexComponents[vertexIndex * 3 + 1],
+						subsurface.vertexComponents[vertexIndex * 3 + 2],
+					}, worldTransform)));
+
+					// Subsurfaces must have world space vertices for snapping.
+					subsurface.vertexComponents[vertexIndex * 3 + 0] = vertex.x;
+					subsurface.vertexComponents[vertexIndex * 3 + 1] = vertex.y;
+					subsurface.vertexComponents[vertexIndex * 3 + 2] = vertex.z;
+
+					vertexIndex += 1;
+				}
+
+				hollowSubsurfaceIndex += 1;
+			}
 		}
 		else {
 			surface.subsurfaces = {
@@ -277,7 +351,8 @@ namespace Trident {
 		uint32 vertexOffset = 0;
 
 		while (subsurfaceIndex < surface.subsurfaces.size()) {
-			const StaticSubsurface& subsurface = surface.subsurfaces[subsurfaceIndex];
+			StaticSubsurface& subsurface = surface.subsurfaces[subsurfaceIndex];
+
 			const uint32 vertexIndexCount = static_cast<uint32>(subsurface.vertexIndices.count());
 			const uint32 vertexCount = static_cast<uint32>(subsurface.vertexComponents.count() / 3);
 			const uint64 textureCoordinateCount = subsurface.vertexTextureCoordinateComponents.count() / 2;
@@ -313,6 +388,11 @@ namespace Trident {
 					subsurface.vertexComponents[vertexIndex * 3 + 1],
 					subsurface.vertexComponents[vertexIndex * 3 + 2],
 				}, worldTransform)));
+
+				// Subsurfaces must have world space vertices for snapping.
+				subsurface.vertexComponents[vertexIndex * 3 + 0] = vertex.x;
+				subsurface.vertexComponents[vertexIndex * 3 + 1] = vertex.y;
+				subsurface.vertexComponents[vertexIndex * 3 + 2] = vertex.z;
 
 				const uint32 vertexRedirectionIndex = findDuplicate(vertices, vertex);
 

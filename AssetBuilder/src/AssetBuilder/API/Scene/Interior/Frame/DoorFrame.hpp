@@ -5,15 +5,15 @@
 
 #include "AssetBuilder/API/Scene/Builder/InteriorSceneBuilder.hpp"
 #include "AssetBuilder/API/Scene/Interior/Frame/Frame.hpp"
-#include "AssetBuilder/API/Scene/Interior/Room/Room.hpp"
+#include "AssetBuilder/API/Scene/Interior/Room/RectangularRoom.hpp"
 
 namespace Trident {
 	struct DoorFrameDescriptor {
-		Room* entranceRoom;
+		RectangularRoom* entranceRoom;
 		uint32 entranceSurfaceIndex;
 		float32 entranceFloorOffset;
 		float32 entranceHorizontalOffset;
-		Room* exitRoom;
+		RectangularRoom* exitRoom;
 		uint32 exitSurfaceIndex;
 		float32 exitFloorOffset;
 		float32 exitHorizontalOffset;
@@ -22,9 +22,44 @@ namespace Trident {
 
 	// TODO(asset-builder/scene/interior/frame): Add trimmed variant with custom material index.
 	struct DoorFrame : public Frame {
+		static constexpr uint32 CEILING = 0;
+		static constexpr uint32 RIGHT_WALL = 1;
+		static constexpr uint32 FLOOR = 2;
+		static constexpr uint32 LEFT_WALL = 3;
+
 		explicit DoorFrame(const DoorFrameDescriptor& descriptor) {
 			DEBUG_ASSERT(descriptor.entranceRoom != nullptr);
 			DEBUG_ASSERT(descriptor.exitRoom != nullptr);
+
+			const SurfaceDescriptor& floorDescriptor = descriptor.entranceRoom->surfaceDescriptors[RectangularRoom::FLOOR];
+			const SurfaceDescriptor& wallDescriptor = descriptor.entranceRoom->surfaceDescriptors[RectangularRoom::FRONT_WALL];
+			const SurfaceDescriptor& ceilingDescriptor = descriptor.entranceRoom->surfaceDescriptors[RectangularRoom::CEILING];
+
+			surfaceDescriptors = {
+				{
+					.textureFiltering = ceilingDescriptor.textureFiltering,
+					.materialIndex = ceilingDescriptor.materialIndex,
+					.luxelScale = ceilingDescriptor.luxelScale,
+				},
+				{
+					.textureFiltering = wallDescriptor.textureFiltering,
+					.materialIndex = wallDescriptor.materialIndex,
+					.luxelScale = wallDescriptor.luxelScale,
+				},
+				{
+					.textureFiltering = floorDescriptor.textureFiltering,
+					.materialIndex = floorDescriptor.materialIndex,
+					.luxelScale = floorDescriptor.luxelScale,
+				},
+				{
+					.textureFiltering = wallDescriptor.textureFiltering,
+					.materialIndex = wallDescriptor.materialIndex,
+					.luxelScale = wallDescriptor.luxelScale,
+				},
+			};
+
+			entranceSurfaceIndex = &descriptor.entranceRoom->surfaceIndices[descriptor.entranceSurfaceIndex];
+			exitSurfaceIndex = &descriptor.exitRoom->surfaceIndices[descriptor.exitSurfaceIndex];
 
 			SurfaceDescriptor& entranceDescriptor = descriptor.entranceRoom->surfaceDescriptors[descriptor.entranceSurfaceIndex];
 			SurfaceDescriptor& exitDescriptor = descriptor.exitRoom->surfaceDescriptors[descriptor.exitSurfaceIndex];
@@ -41,10 +76,26 @@ namespace Trident {
 			entranceDescriptor.carvings.emplace_back(entranceCarving);
 			exitDescriptor.carvings.emplace_back(exitCarving);
 		}
-	};
+
+		sequence<DualSnapSurfaceDescriptor> surfaceDescriptors;
+		const uint32* entranceSurfaceIndex;
+		const uint32* exitSurfaceIndex;
+	}; 
 
 	template<>
 	inline void InteriorSceneBuilder::addFrame(DoorFrame& frame) {
-		// TODO(asset-builder/scene/interior/frame): Add support for multiple edge snapping.
+		const StaticSurface* entranceSurface = &surfaces[*frame.entranceSurfaceIndex];
+		const StaticSurface* exitSurface = &surfaces[*frame.exitSurfaceIndex];
+
+		const view<uint16> entranceEdges = entranceSurface->edgeOriginVertexIndices;
+		const view<uint16> exitEdges = exitSurface->edgeOriginVertexIndices;
+
+		const StaticSubsurface& entranceSubsurface = entranceSurface->hollowSubsurfaces.back();
+		const StaticSubsurface& exitSubsurface = exitSurface->hollowSubsurfaces.back();
+
+		snapSurface(frame.surfaceDescriptors[frame.CEILING], entranceSubsurface.getEdge(entranceEdges, 0), exitSubsurface.getEdge(exitEdges, 0));
+		snapSurface(frame.surfaceDescriptors[frame.RIGHT_WALL], entranceSubsurface.getEdge(entranceEdges, 1), exitSubsurface.getEdge(exitEdges, 3));
+		snapSurface(frame.surfaceDescriptors[frame.FLOOR], entranceSubsurface.getEdge(entranceEdges, 2), exitSubsurface.getEdge(exitEdges, 2));
+		snapSurface(frame.surfaceDescriptors[frame.LEFT_WALL], entranceSubsurface.getEdge(entranceEdges, 3), exitSubsurface.getEdge(exitEdges, 1));
 	}
 }

@@ -20,8 +20,9 @@ namespace Trident {
 				static constexpr uint32 MATERIAL_IDENTIFIER_OFFSET = 100;
 				static constexpr uint32 floorMaterialIndex = 0;
 				static constexpr uint32 wallMaterialIndex = 1;
-				static constexpr uint32 woodMaterialIndex = 2;
-				static constexpr uint32 ceilingMaterialIndex = 3;
+				// static constexpr uint32 woodMaterialIndex = 2;
+				// static constexpr uint32 ceilingMaterialIndex = 3;
+				static constexpr uint32 ceilingMaterialIndex = 2;
 
 				InteriorSceneBuilder builder(rootOutputPath);
 
@@ -40,8 +41,8 @@ namespace Trident {
 
 				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + floorMaterialIndex, 0);
 				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + wallMaterialIndex, 0);
-				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + woodMaterialIndex, 0);
-				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + ceilingMaterialIndex, 0);
+				// builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + woodMaterialIndex, 0);
+				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + 3, 0);
 
 				builder.floorLevels = {
 					0.0f, // Floor
@@ -88,7 +89,7 @@ namespace Trident {
 					.exitRoom = &bikeRoom,
 					.exitSurfaceIndex = 1,
 					.exitFloorOffset = 0.0f,
-					.exitHorizontalOffset = 62.0f,
+					.exitHorizontalOffset = 30.0f,
 					.size = {54.0f, 112.0f},
 				});
 
