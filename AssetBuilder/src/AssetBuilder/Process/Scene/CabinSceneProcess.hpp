@@ -4,6 +4,7 @@
 #pragma once
 
 #include "AssetBuilder/API/Scene/Builder/InteriorSceneBuilder.hpp"
+#include "AssetBuilder/API/Scene/Interior/Frame/DoorFrame.hpp"
 #include "AssetBuilder/API/Scene/Interior/Room/RectangularRoom.hpp"
 #include "AssetBuilder/Process/Scene/Scene3DProcess.hpp"
 #include "../../../Subprocess/RigidBody.hpp"
@@ -48,7 +49,7 @@ namespace Trident {
 					240.0f, // Top hall/main room ceiling
 				};
 
-				const RectangularRoom hallRoom = {
+				RectangularRoom hallRoom({
 					.position = {56.0f, 84.0f},
 					.size = {144.0f, 200.0f},
 					.floorLevel = builder.floorLevels[0],
@@ -57,9 +58,8 @@ namespace Trident {
 					.floorMaterialIndex = floorMaterialIndex,
 					.wallMaterialIndex = wallMaterialIndex,
 					.ceilingMaterialIndex = ceilingMaterialIndex,
-				};
-
-				const RectangularRoom bikeRoom = {
+				});
+				RectangularRoom bikeRoom({
 					.position = {-60.0f, 116.0f},
 					.size = {72.0f, 136.0f},
 					.floorLevel = builder.floorLevels[0],
@@ -68,9 +68,8 @@ namespace Trident {
 					.floorMaterialIndex = floorMaterialIndex,
 					.wallMaterialIndex = wallMaterialIndex,
 					.ceilingMaterialIndex = ceilingMaterialIndex,
-				};
-
-				const RectangularRoom mainRoom = {
+				});
+				RectangularRoom mainRoom({
 					.position = {-20.0f, 256.0f},
 					.size = {296.0f, 128.0f},
 					.floorLevel = builder.floorLevels[0],
@@ -79,15 +78,24 @@ namespace Trident {
 					.floorMaterialIndex = floorMaterialIndex,
 					.wallMaterialIndex = wallMaterialIndex,
 					.ceilingMaterialIndex = ceilingMaterialIndex,
-				};
+				});
+
+				DoorFrame bikeRoomFrame({
+					.entranceRoom = &hallRoom,
+					.entranceSurfaceIndex = 3,
+					.entranceFloorOffset = 0.0f,
+					.entranceHorizontalOffset = 116.0f,
+					.exitRoom = &bikeRoom,
+					.exitSurfaceIndex = 1,
+					.exitFloorOffset = 0.0f,
+					.exitHorizontalOffset = 62.0f,
+					.size = {54.0f, 112.0f},
+				});
 
 				builder.addRoom(hallRoom);
 				builder.addRoom(bikeRoom);
 				builder.addRoom(mainRoom);
-
-				// TODO(asset-builder/scene/frame)
-				// DoorFrame bikeRoomFrame(&hallRoom, &bikeRoom, 3, 4, {116.0f, 16.0f}, {30.0f, 16.0f}, {54.0f, 112.0f});
-				// builder.addFrame(bikeRoomFrame);
+				builder.addFrame(bikeRoomFrame);
 
 				return {
 					.staticScene = builder.build(),

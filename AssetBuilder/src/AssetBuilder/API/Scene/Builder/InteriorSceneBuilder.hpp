@@ -10,8 +10,11 @@ namespace Trident {
 		public:
 			explicit InteriorSceneBuilder(std::filesystem::path rootOutputPath);
 
+			template<typename FrameType>
+			void addFrame(FrameType& frame);
+
 			template<typename RoomType>
-			void addRoom(const RoomType& room);
+			void addRoom(RoomType& room);
 
 		public:
 			sequence<float32> floorLevels;

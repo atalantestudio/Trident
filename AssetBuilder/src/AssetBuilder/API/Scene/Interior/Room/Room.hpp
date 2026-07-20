@@ -4,5 +4,7 @@
 #pragma once
 
 namespace Trident {
-	struct Room {};
+	struct Room {
+		sequence<SurfaceDescriptor> surfaceDescriptors;
+	};
 }

@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "AssetBuilder/API/Scene/Builder/InteriorSceneBuilder.hpp"
+#include "AssetBuilder/API/Scene/Interior/Frame/DoorFrame.hpp"
 #include "AssetBuilder/API/Scene/Interior/Room/RectangularRoom.hpp"
 
 namespace Trident {
