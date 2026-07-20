@@ -46,6 +46,34 @@ namespace Trident {
 		return index;
 	}
 
+	StaticGeometry3D StaticSceneBuilder::createWallGeometry(svec2<float32> scale) {
+		return {
+			.vertexComponents = {
+				-0.5f * scale.x,  0.5f * scale.y,  0.0f,
+					0.5f * scale.x,  0.5f * scale.y,  0.0f,
+				-0.5f * scale.x, -0.5f * scale.y,  0.0f,
+					0.5f * scale.x, -0.5f * scale.y,  0.0f,
+			},
+			.vertexTextureCoordinateComponents = {
+				0.0f, 0.0f,
+				1.0f, 0.0f,
+				0.0f, 1.0f,
+				1.0f, 1.0f,
+			},
+			.vertexIndices = {
+				0, 1, 2,
+				1, 3, 2,
+			},
+			.vertexTextureCoordinateIndices = {
+				0, 1, 2,
+				1, 3, 2,
+			},
+			.edgeOriginVertexIndices = {0, 1, 3, 2},
+			.normal = {0.0f, 0.0f, -1.0f},
+			.scale = scale,
+		};
+	}
+
 	StaticSceneBuilder::StaticSceneBuilder(std::filesystem::path rootOutputPath) :
 		rootOutputPath(rootOutputPath),
 		assetLibrary(new AssetLibrary(rootOutputPath))

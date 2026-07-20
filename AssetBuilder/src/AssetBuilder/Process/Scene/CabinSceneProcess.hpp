@@ -4,6 +4,7 @@
 #pragma once
 
 #include "AssetBuilder/API/Scene/Builder/InteriorSceneBuilder.hpp"
+#include "AssetBuilder/API/Scene/Interior/Room/RectangularRoom.hpp"
 #include "AssetBuilder/Process/Scene/Scene3DProcess.hpp"
 #include "../../../Subprocess/RigidBody.hpp"
 
@@ -18,7 +19,8 @@ namespace Trident {
 				static constexpr uint32 MATERIAL_IDENTIFIER_OFFSET = 100;
 				static constexpr uint32 floorMaterialIndex = 0;
 				static constexpr uint32 wallMaterialIndex = 1;
-				static constexpr uint32 ceilingMaterialIndex = 2;
+				static constexpr uint32 woodMaterialIndex = 2;
+				static constexpr uint32 ceilingMaterialIndex = 3;
 
 				InteriorSceneBuilder builder(rootOutputPath);
 
@@ -37,60 +39,66 @@ namespace Trident {
 
 				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + floorMaterialIndex, 0);
 				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + wallMaterialIndex, 0);
-				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + 3, 0);
+				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + woodMaterialIndex, 0);
+				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + ceilingMaterialIndex, 0);
 
 				builder.floorLevels = {
 					0.0f, // Floor
 					128.0f, // Hall/bike room ceiling
-					240.0f, // Top hall room ceiling
+					240.0f, // Top hall/main room ceiling
 				};
 
-				RectangularRoom hallRoom(
-					{56.0f, 84.0f},
-					{144.0f, 200.0f},
-					builder.floorLevels[0],
-					builder.floorLevels[1],
-					{2.0f, 2.0f},
-					floorMaterialIndex, wallMaterialIndex, ceilingMaterialIndex
-				);
+				const RectangularRoom hallRoom = {
+					.position = {56.0f, 84.0f},
+					.size = {144.0f, 200.0f},
+					.floorLevel = builder.floorLevels[0],
+					.ceilingLevel = builder.floorLevels[1],
+					.luxelScale = {2.0f, 2.0f},
+					.floorMaterialIndex = floorMaterialIndex,
+					.wallMaterialIndex = wallMaterialIndex,
+					.ceilingMaterialIndex = ceilingMaterialIndex,
+				};
 
-				RectangularRoom bikeRoom(
-					{-60.0f, 116.0f},
-					{72.0f, 136.0f},
-					builder.floorLevels[0],
-					builder.floorLevels[1],
-					{2.0f, 2.0f},
-					floorMaterialIndex, wallMaterialIndex, ceilingMaterialIndex
-				);
+				const RectangularRoom bikeRoom = {
+					.position = {-60.0f, 116.0f},
+					.size = {72.0f, 136.0f},
+					.floorLevel = builder.floorLevels[0],
+					.ceilingLevel = builder.floorLevels[1],
+					.luxelScale = {2.0f, 2.0f},
+					.floorMaterialIndex = floorMaterialIndex,
+					.wallMaterialIndex = wallMaterialIndex,
+					.ceilingMaterialIndex = ceilingMaterialIndex,
+				};
 
-				RectangularRoom mainRoom(
-					{-20.0f, 256.0f},
-					{296.0f, 128.0f},
-					builder.floorLevels[0],
-					builder.floorLevels[2],
-					{2.0f, 2.0f},
-					floorMaterialIndex, wallMaterialIndex, ceilingMaterialIndex
-				);
-
-				DoorFrame bikeRoomFrame(&hallRoom, &bikeRoom, 3, 4, {116.0f, 16.0f}, {30.0f, 16.0f}, {54.0f, 112.0f});
+				const RectangularRoom mainRoom = {
+					.position = {-20.0f, 256.0f},
+					.size = {296.0f, 128.0f},
+					.floorLevel = builder.floorLevels[0],
+					.ceilingLevel = builder.floorLevels[2],
+					.luxelScale = {2.0f, 2.0f},
+					.floorMaterialIndex = floorMaterialIndex,
+					.wallMaterialIndex = wallMaterialIndex,
+					.ceilingMaterialIndex = ceilingMaterialIndex,
+				};
 
 				builder.addRoom(hallRoom);
 				builder.addRoom(bikeRoom);
 				builder.addRoom(mainRoom);
-				builder.addFrame(bikeRoomFrame);
+
+				// TODO(asset-builder/scene/frame)
+				// DoorFrame bikeRoomFrame(&hallRoom, &bikeRoom, 3, 4, {116.0f, 16.0f}, {30.0f, 16.0f}, {54.0f, 112.0f});
+				// builder.addFrame(bikeRoomFrame);
 
 				return {
 					.staticScene = builder.build(),
 					.entityCount = 1,
 					.geometryAssetIdentifiers = {
-						// TODO(debug-only): UnitBox
 						38,
 					},
 					.geometryMappings = {
 						{0, {0}},
 					},
 					.materialMappings = {
-						// NOTE: Counting default material for visibility rendering.
 						{0, {1}},
 					},
 					.rigidBodyMappings = {

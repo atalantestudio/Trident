@@ -11,6 +11,9 @@
 namespace Trident {
 	class StaticSceneBuilder {
 		public:
+			static StaticGeometry3D createWallGeometry(svec2<float32> scale);
+
+		public:
 			explicit StaticSceneBuilder(std::filesystem::path rootOutputPath);
 
 			~StaticSceneBuilder();

@@ -4,7 +4,7 @@
 #include "pch.hpp"
 
 #include "AssetBuilder/API/BuildAssetMap.hpp"
-// #include "AssetBuilder/Process/Scene/CabinSceneProcess.hpp"
+#include "AssetBuilder/Process/Scene/CabinSceneProcess.hpp"
 // #include "AssetBuilder/Process/Scene/HallSceneProcess.hpp"
 #include "AssetBuilder/Process/Scene/SnapTestSceneProcess.hpp"
 #include "Process/BuildAssetMapProcess.hpp"
@@ -45,7 +45,7 @@ namespace Trident {
 				registerProcess<BuildImageAssetProcess>(&assetMap);
 
 				registerProcess<BuildSceneAssetProcess>(&assetMap);
-				// registerProcess<CabinSceneProcess>(&assetMap);
+				registerProcess<CabinSceneProcess>(&assetMap);
 				// registerProcess<HallSceneProcess>(&assetMap);
 				registerProcess<SnapTestSceneProcess>(&assetMap);
 
