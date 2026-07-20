@@ -7,7 +7,7 @@ namespace Trident {
 	// TODO(filesystem/asset/material): Material assets shouldn't reference a scene's lightmap.
 	inline MaterialDescriptorImage getLightmapAtlas(AssetLibrary* assetLibrary) {
 		return {
-			.imageAsset = assetLibrary->getAsset<ImageAsset>("BrushTest"),
+			.imageAsset = assetLibrary->getAsset<ImageAsset>("SnapTest"),
 			.mipLevelOffset = 0,
 			.mipLevelCount = 1,
 			.layerOffset = 0,

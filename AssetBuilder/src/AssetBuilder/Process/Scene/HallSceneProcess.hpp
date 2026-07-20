@@ -58,7 +58,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = floorMaterialIndex,
 					.transform = {
-						.position = {56.0f, 0.0f, 84.0f},
+						.translation = {56.0f, 0.0f, 84.0f},
 						.rotation = upRotation,
 						.scale = {144.0f, 200.0f},
 					},
@@ -74,7 +74,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = floorMaterialIndex,
 					.transform = {
-						.position = {-20.0f, 0.0f, 128.0f},
+						.translation = {-20.0f, 0.0f, 128.0f},
 						.rotation = upRotation,
 						.scale = {8.0f, 48.0f},
 					},
@@ -90,7 +90,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = floorMaterialIndex,
 					.transform = {
-						.position = {-60.0f, 0.0f, 116.0f},
+						.translation = {-60.0f, 0.0f, 116.0f},
 						.rotation = upRotation,
 						.scale = {72.0f, 136.0f},
 					},
@@ -106,7 +106,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = floorMaterialIndex,
 					.transform = {
-						.position = {54.0f, 0.0f, 188.0f},
+						.translation = {54.0f, 0.0f, 188.0f},
 						.rotation = upRotation,
 						.scale = {60.0f, 8.0f},
 					},
@@ -122,7 +122,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = floorMaterialIndex,
 					.transform = {
-						.position = {-20.0f, 0.0f, 256.0f},
+						.translation = {-20.0f, 0.0f, 256.0f},
 						.rotation = upRotation,
 						.scale = {296.0f, 128.0f},
 					},
@@ -140,7 +140,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = wallMaterialIndex,
 					.transform = {
-						.position = {10.0f, 64.0f, -16.0f},
+						.translation = {10.0f, 64.0f, -16.0f},
 						.rotation = forwardRotation,
 						.scale = {52.0f, 128.0f},
 					},
@@ -156,7 +156,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = wallMaterialIndex,
 					.transform = {
-						.position = {110.0f, 64.0f, -16.0f},
+						.translation = {110.0f, 64.0f, -16.0f},
 						.rotation = forwardRotation,
 						.scale = {36.0f, 128.0f},
 					},
@@ -172,7 +172,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = wallMaterialIndex,
 					.transform = {
-						.position = {-16.0f, 64.0f, 42.0f},
+						.translation = {-16.0f, 64.0f, 42.0f},
 						.rotation = rightRotation,
 						.scale = {116.0f, 128.0f},
 					},
@@ -188,7 +188,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = wallMaterialIndex,
 					.transform = {
-						.position = {-16.0f, 64.0f, 170.0f},
+						.translation = {-16.0f, 64.0f, 170.0f},
 						.rotation = rightRotation,
 						.scale = {28.0f, 128.0f},
 					},
@@ -204,7 +204,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = wallMaterialIndex,
 					.transform = {
-						.position = {2.0f, 64.0f, 184.0f},
+						.translation = {2.0f, 64.0f, 184.0f},
 						.rotation = backwardRotation,
 						.scale = {36.0f, 128.0f},
 					},
@@ -220,7 +220,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = wallMaterialIndex,
 					.transform = {
-						.position = {108.0f, 64.0f, 184.0f},
+						.translation = {108.0f, 64.0f, 184.0f},
 						.rotation = backwardRotation,
 						.scale = {40.0f, 128.0f},
 					},
@@ -236,7 +236,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = wallMaterialIndex,
 					.transform = {
-						.position = {128.0f, 64.0f, 84.0f},
+						.translation = {128.0f, 64.0f, 84.0f},
 						.rotation = leftRotation,
 						.scale = {200.0f, 128.0f},
 					},
@@ -252,7 +252,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = wallMaterialIndex,
 					.transform = {
-						.position = {-60.0f, 64.0f, 48.0f},
+						.translation = {-60.0f, 64.0f, 48.0f},
 						.rotation = forwardRotation,
 						.scale = {72.0f, 128.0f},
 					},
@@ -268,7 +268,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = wallMaterialIndex,
 					.transform = {
-						.position = {-96.0f, 64.0f, 116.0f},
+						.translation = {-96.0f, 64.0f, 116.0f},
 						.rotation = rightRotation,
 						.scale = {136.0f, 128.0f},
 					},
@@ -284,7 +284,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = wallMaterialIndex,
 					.transform = {
-						.position = {-60.0f, 64.0f, 184.0f},
+						.translation = {-60.0f, 64.0f, 184.0f},
 						.rotation = backwardRotation,
 						.scale = {72.0f, 128.0f},
 					},
@@ -300,7 +300,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = wallMaterialIndex,
 					.transform = {
-						.position = {-24.0f, 64.0f, 170.0f},
+						.translation = {-24.0f, 64.0f, 170.0f},
 						.rotation = leftRotation,
 						.scale = {28.0f, 128.0f},
 					},
@@ -316,7 +316,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = wallMaterialIndex,
 					.transform = {
-						.position = {-24.0f, 64.0f, 74.0f},
+						.translation = {-24.0f, 64.0f, 74.0f},
 						.rotation = leftRotation,
 						.scale = {52.0f, 128.0f},
 					},
@@ -332,7 +332,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = wallMaterialIndex,
 					.transform = {
-						.position = {64.0f, 120.0f, -16.0f},
+						.translation = {64.0f, 120.0f, -16.0f},
 						.rotation = forwardRotation,
 						.scale = {56.0f, 16.0f},
 					},
@@ -348,7 +348,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = wallMaterialIndex,
 					.transform = {
-						.position = {-16.0f, 120.0f, 128.0f},
+						.translation = {-16.0f, 120.0f, 128.0f},
 						.rotation = rightRotation,
 						.scale = {56.0f, 16.0f},
 					},
@@ -364,7 +364,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = wallMaterialIndex,
 					.transform = {
-						.position = {54.0f, 120.0f, 184.0f},
+						.translation = {54.0f, 120.0f, 184.0f},
 						.rotation = backwardRotation,
 						.scale = {68.0f, 16.0f},
 					},
@@ -380,7 +380,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = wallMaterialIndex,
 					.transform = {
-						.position = {-24.0f, 120.0f, 128.0f},
+						.translation = {-24.0f, 120.0f, 128.0f},
 						.rotation = leftRotation,
 						.scale = {56.0f, 16.0f},
 					},
@@ -398,7 +398,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = doorMaterialIndex,
 					.transform = {
-						.position = {-16.0f, 54.0f, 102.0f},
+						.translation = {-16.0f, 54.0f, 102.0f},
 						.rotation = rightRotation,
 						.scale = {4.0f, 108.0f},
 					},
@@ -414,7 +414,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = doorMaterialIndex,
 					.transform = {
-						.position = {-16.0f, 54.0f, 154.0f},
+						.translation = {-16.0f, 54.0f, 154.0f},
 						.rotation = rightRotation,
 						.scale = {4.0f, 108.0f},
 					},
@@ -430,7 +430,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = doorMaterialIndex,
 					.transform = {
-						.position = {-16.0f, 110.0f, 128.0f},
+						.translation = {-16.0f, 110.0f, 128.0f},
 						.rotation = rightRotation,
 						.scale = {56.0f, 4.0f},
 					},
@@ -446,7 +446,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = doorMaterialIndex,
 					.transform = {
-						.position = {-20.0f, 54.0f, 104.0f},
+						.translation = {-20.0f, 54.0f, 104.0f},
 						.rotation = forwardRotation,
 						.scale = {8.0f, 108.0f},
 					},
@@ -462,7 +462,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = doorMaterialIndex,
 					.transform = {
-						.position = {-20.0f, 54.0f, 152.0f},
+						.translation = {-20.0f, 54.0f, 152.0f},
 						.rotation = backwardRotation,
 						.scale = {8.0f, 108.0f},
 					},
@@ -478,7 +478,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = doorMaterialIndex,
 					.transform = {
-						.position = {-20.0f, 108.0f, 128.0f},
+						.translation = {-20.0f, 108.0f, 128.0f},
 						.rotation = downRotation,
 						.scale = {8.0f, 48.0f},
 					},
@@ -494,7 +494,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = doorMaterialIndex,
 					.transform = {
-						.position = {-24.0f, 54.0f, 154.0f},
+						.translation = {-24.0f, 54.0f, 154.0f},
 						.rotation = leftRotation,
 						.scale = {4.0f, 108.0f},
 					},
@@ -510,7 +510,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = doorMaterialIndex,
 					.transform = {
-						.position = {-24.0f, 54.0f, 102.0f},
+						.translation = {-24.0f, 54.0f, 102.0f},
 						.rotation = leftRotation,
 						.scale = {4.0f, 108.0f},
 					},
@@ -526,7 +526,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = doorMaterialIndex,
 					.transform = {
-						.position = {-24.0f, 110.0f, 128.0f},
+						.translation = {-24.0f, 110.0f, 128.0f},
 						.rotation = leftRotation,
 						.scale = {56.0f, 4.0f},
 					},
@@ -544,7 +544,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = ceilingMaterialIndex,
 					.transform = {
-						.position = {56.0f, 184.0f, -16.0f},
+						.translation = {56.0f, 184.0f, -16.0f},
 						.rotation = forwardRotation,
 						.scale = {144.0f, 112.0f},
 					},
@@ -560,7 +560,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = ceilingMaterialIndex,
 					.transform = {
-						.position = {-16.0f, 184.0f, 84.0f},
+						.translation = {-16.0f, 184.0f, 84.0f},
 						.rotation = rightRotation,
 						.scale = {200.0f, 112.0f},
 					},
@@ -576,7 +576,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = ceilingMaterialIndex,
 					.transform = {
-						.position = {56.0f, 184.0f, 184.0f},
+						.translation = {56.0f, 184.0f, 184.0f},
 						.rotation = backwardRotation,
 						.scale = {144.0f, 112.0f},
 					},
@@ -592,7 +592,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = ceilingMaterialIndex,
 					.transform = {
-						.position = {128.0f, 184.0f, 84.0f},
+						.translation = {128.0f, 184.0f, 84.0f},
 						.rotation = leftRotation,
 						.scale = {200.0f, 112.0f},
 					},
@@ -608,7 +608,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = ceilingMaterialIndex,
 					.transform = {
-						.position = {56.0f, 240.0f, 84.0f},
+						.translation = {56.0f, 240.0f, 84.0f},
 						.rotation = downRotation,
 						.scale = {144.0f, 200.0f},
 					},
@@ -624,7 +624,7 @@ namespace Trident {
 				builder.addSurface({
 					.materialIndex = ceilingMaterialIndex,
 					.transform = {
-						.position = {-60.0f, 128.0f, 116.0f},
+						.translation = {-60.0f, 128.0f, 116.0f},
 						.rotation = downRotation,
 						.scale = {72.0f, 136.0f},
 					},

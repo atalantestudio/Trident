@@ -33,8 +33,8 @@ namespace Trident {
 	};
 
 	struct Transform {
-		/// Position of the center point in world-space.
-		vec3<float32> position;
+		/// Relative to the surface center.
+		vec3<float32> translation;
 
 		/// Rotation axis.
 		svec3<float32> axis;
@@ -52,9 +52,10 @@ namespace Trident {
 	};
 
 	struct StaticSurface {
-		/// Each edge has an origin vertex index.
-		sequence<uint16> edges;
+		/// Transformed vertices, used for snapping.
+		sequence<svec3<float32>> vertices;
 
+		sequence<uint16> edgeOriginVertexIndices;
 		svec3<float32> normal;
 		svec2<float32> scale;
 		std::vector<StaticSubsurface> subsurfaces;

@@ -14,10 +14,7 @@ namespace Trident {
 		sequence<float32> vertexTextureCoordinateComponents;
 		sequence<uint32> vertexIndices;
 		sequence<uint32> vertexTextureCoordinateIndices;
-
-		/// Each edge has an origin vertex index.
-		sequence<uint16> edges;
-
+		sequence<uint16> edgeOriginVertexIndices;
 		vec3<float32> normal;
 		svec2<float32> scale;
 	};

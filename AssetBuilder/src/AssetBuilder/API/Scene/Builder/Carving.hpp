@@ -20,19 +20,19 @@ namespace Trident {
 		return elementIndex;
 	}
 
-	static StaticSubsurface createSubsurface(SubsurfaceQuad quad) {
+	static StaticSubsurface createSubsurface(SubsurfaceQuad quad, svec3<float32> origin, svec2<float32> scale) {
 		return {
 			.vertexComponents = {
-				quad.start.x, -quad.start.y, 0.0f,
-				quad.end.x, -quad.start.y, 0.0f,
-				quad.start.x, -quad.end.y, 0.0f,
-				quad.end.x, -quad.end.y, 0.0f,
+				origin.x + quad.start.x, origin.y - quad.start.y, origin.z,
+				origin.x + quad.end.x, origin.y - quad.start.y, origin.z,
+				origin.x + quad.start.x, origin.y - quad.end.y, origin.z,
+				origin.x + quad.end.x, origin.y - quad.end.y, origin.z,
 			},
 			.vertexTextureCoordinateComponents = {
-				quad.start.x, quad.start.y,
-				quad.end.x, quad.start.y,
-				quad.start.x, quad.end.y,
-				quad.end.x, quad.end.y,
+				quad.start.x / scale.x, quad.start.y / scale.y,
+				quad.end.x / scale.x, quad.start.y / scale.y,
+				quad.start.x / scale.x, quad.end.y / scale.y,
+				quad.end.x / scale.x, quad.end.y / scale.y,
 			},
 			.vertexIndices = {
 				0, 1, 2,
@@ -46,7 +46,7 @@ namespace Trident {
 		};
 	}
 
-	void StaticSceneBuilder::carveSurface(StaticSurface& surface, const std::vector<Carving>& carvings, uint32& surfaceVertexCount) const {
+	void StaticSceneBuilder::carveSurface(StaticSurface& surface, svec3<float32> origin, const std::vector<Carving>& carvings, uint32& surfaceVertexCount) const {
 		std::vector<float32> rowOffsets = {0.0f, surface.scale.y};
 		SubsurfaceQuad quad;
 		uint32 rowIndex;
@@ -167,7 +167,7 @@ namespace Trident {
 					belowRowIndex += 1;
 				}
 
-				const StaticSubsurface& subsurface = createSubsurface(quad);
+				const StaticSubsurface& subsurface = createSubsurface(quad, origin, surface.scale);
 
 				surface.subsurfaces.emplace_back(subsurface);
 
@@ -180,7 +180,7 @@ namespace Trident {
 		}
 
 		for (const SubsurfaceQuad& quad : quadsPerRow[rowIndex]) {
-			const StaticSubsurface& subsurface = createSubsurface(quad);
+			const StaticSubsurface& subsurface = createSubsurface(quad, origin, surface.scale);
 
 			surface.subsurfaces.emplace_back(subsurface);
 

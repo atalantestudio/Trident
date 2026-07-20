@@ -19,16 +19,17 @@ namespace Trident {
 
 			void addMaterial(uint32 identifier, uint32 shaderIndex);
 
-			void placeSurface(const SurfaceDescriptor& descriptor, const Transform& transform);
+			uint32 placeSurface(const SurfaceDescriptor& descriptor, const Transform& transform);
 
-			// TODO(asset-builder/scene/surface-snapping)
-			// void snapSurface(const StaticGeometry3D& geometry, const SurfaceDescriptor& descriptor, uint32 existingEdgeIndex, uint32 newEdgeIndex);
+			uint32 snapSurface(const SurfaceDescriptor& descriptor, uint32 parentSurfaceIndex, uint32 parentEdgeIndex, uint32 edgeIndex, float32 hingeAngle);
 
 			/// Compiles and returns an optimized static scene.
 			StaticScene3D build() const;
 
 		private:
-			void carveSurface(StaticSurface& surface, const std::vector<Carving>& carvings, uint32& surfaceVertexCount) const;
+			uint32 compileSurface(const SurfaceDescriptor& descriptor, const Transform& transform, vec3<float32> hingeOffset, quat<float32> hingeRotation);
+
+			void carveSurface(StaticSurface& surface, svec3<float32> origin, const std::vector<Carving>& carvings, uint32& surfaceVertexCount) const;
 
 		private:
 			std::filesystem::path rootOutputPath;

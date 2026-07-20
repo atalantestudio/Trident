@@ -79,23 +79,97 @@ namespace Trident {
 		trianglesPerMaterial.resize(trianglesPerMaterial.size() + 1);
 	}
 
-	void StaticSceneBuilder::placeSurface(const SurfaceDescriptor& descriptor, const Transform& transform) {
+	uint32 StaticSceneBuilder::placeSurface(const SurfaceDescriptor& descriptor, const Transform& transform) {
+		// TODO(asset-builder/scene): Better validation.
 		DEBUG_ASSERT(descriptor.geometry.scale.x > 0.0f && descriptor.geometry.scale.y > 0.0f);
 		DEBUG_ASSERT(descriptor.luxelScale.x > 0.0f && descriptor.luxelScale.y > 0.0f);
 		DEBUG_ASSERT(descriptor.carvings.size() == 0 || descriptor.geometry.vertexIndices.count() == 6);
 
-		const vec3<float32> originVertex = {
-			descriptor.geometry.vertexComponents[0],
-			descriptor.geometry.vertexComponents[1],
-			descriptor.geometry.vertexComponents[2],
+		return compileSurface(descriptor, transform, {0.0f, 0.0f, 0.0f}, quat<float32>::identity());
+	}
+
+	static bool parallelOrOpposite(vec3<float32> a, vec3<float32> b) {
+		constexpr float32 E = 0.0001f;
+
+		if (dot(a, b) / sqrt(lengthSquared(a) * lengthSquared(b)) > 1.0f - E) {
+			return true;
+		}
+
+		if (dot(a, -b) / sqrt(lengthSquared(a) * lengthSquared(b)) > 1.0f - E) {
+			return true;
+		}
+
+		return false;
+	}
+
+	uint32 StaticSceneBuilder::snapSurface(const SurfaceDescriptor& descriptor, uint32 parentSurfaceIndex, uint32 parentEdgeIndex, uint32 edgeIndex, float32 hingeAngle) {
+		// TODO(asset-builder/scene): Better validation.
+		DEBUG_ASSERT(descriptor.geometry.scale.x > 0.0f && descriptor.geometry.scale.y > 0.0f);
+		DEBUG_ASSERT(descriptor.luxelScale.x > 0.0f && descriptor.luxelScale.y > 0.0f);
+		DEBUG_ASSERT(descriptor.carvings.size() == 0 || descriptor.geometry.vertexIndices.count() == 6);
+		DEBUG_ASSERT(parentSurfaceIndex < surfaces.size());
+
+		const StaticSurface& parentSurface = surfaces[parentSurfaceIndex];
+
+		DEBUG_ASSERT(parentEdgeIndex < parentSurface.edgeOriginVertexIndices.count());
+
+		const uint16 indexA = parentSurface.edgeOriginVertexIndices[parentEdgeIndex];
+		const uint16 indexB = parentSurface.edgeOriginVertexIndices[(parentEdgeIndex + 1) % parentSurface.edgeOriginVertexIndices.count()];
+		const uint16 indexC = descriptor.geometry.edgeOriginVertexIndices[edgeIndex];
+		const uint16 indexD = descriptor.geometry.edgeOriginVertexIndices[(edgeIndex + 1) % descriptor.geometry.edgeOriginVertexIndices.count()];
+
+		const vec3<float32> a = parentSurface.vertices[indexA];
+		const vec3<float32> b = parentSurface.vertices[indexB];
+		const vec3<float32> localC = {
+			descriptor.geometry.vertexComponents[indexC * 3 + 0],
+			descriptor.geometry.vertexComponents[indexC * 3 + 1],
+			descriptor.geometry.vertexComponents[indexC * 3 + 2],
 		};
+		const vec3<float32> localD = {
+			descriptor.geometry.vertexComponents[indexD * 3 + 0],
+			descriptor.geometry.vertexComponents[indexD * 3 + 1],
+			descriptor.geometry.vertexComponents[indexD * 3 + 2],
+		};
+
+		const vec3<float32> ab = normalized(b - a);
+		const vec3<float32> localCD = normalized(localD - localC);
+
+		DEBUG_ASSERT(lengthSquared(ab) == lengthSquared(localCD));
+
+		vec3<float32> snapAxis = ab;
+		float32 snapAngle = 0.0_rad;
+
+		if (!parallelOrOpposite(ab, localCD)) {
+			snapAxis = normalized(cross(localCD, ab));
+			snapAngle = std::acos(dot(snapAxis, descriptor.geometry.normal));
+		}
+
+		const quat<float32> snapOrientation = quat<float32>::axisAngle(snapAxis, snapAngle);
+		const vec3<float32> c = localC * inverse(snapOrientation);
+		const vec3<float32> cb = b - c;
+
+		const Transform transform = {
+			.translation = cb,
+			.axis = svec3<float32>(snapAxis),
+			.angle = snapAngle,
+		};
+
+		const quat<float32> hingeRotation = quat<float32>::axisAngle(ab, hingeAngle);
+
+		return compileSurface(descriptor, transform, c, hingeRotation);
+	}
+
+	uint32 StaticSceneBuilder::compileSurface(const SurfaceDescriptor& descriptor, const Transform& transform, vec3<float32> hingeOffset, quat<float32> hingeRotation) {
+		const uint32 surfaceIndex = static_cast<uint32>(surfaces.size());
 		const quat<float32> orientation = quat<float32>::axisAngle(transform.axis, transform.angle);
 		const mat4x4<float32> worldTransform = (
 			mat4x4<float32>(orientation) *
-			mat4x4<float32>::translation(transform.position)
+			mat4x4<float32>::translation(-hingeOffset) *
+			mat4x4<float32>(hingeRotation) *
+			mat4x4<float32>::translation(hingeOffset + transform.translation)
 		);
 		const mat3x3<float32> textureTransform = (
-			mat3x3<float32>::scaling(descriptor.textureFiltering.scale) *
+			mat3x3<float32>::scaling(descriptor.geometry.scale * descriptor.textureFiltering.scale) *
 			mat3x3<float32>::rotation(pi<float32>() * descriptor.textureFiltering.rotation) *
 			mat3x3<float32>::translation(descriptor.textureFiltering.translation)
 		);
@@ -104,7 +178,8 @@ namespace Trident {
 		std::vector<StaticTriangle3D>& triangles = trianglesPerMaterial[descriptor.materialIndex];
 
 		StaticSurface surface{};
-		surface.edges = descriptor.geometry.edges;
+		surface.vertices = sequence<svec3<float32>>(descriptor.geometry.vertexComponents.count() / 3);
+		surface.edgeOriginVertexIndices = descriptor.geometry.edgeOriginVertexIndices;
 
 		// TODO(lyah/scalar)
 		surface.normal = svec3<float32>(round<2>(normalized(descriptor.geometry.normal * inverse(orientation))));
@@ -116,6 +191,19 @@ namespace Trident {
 		surface.materialIndex = descriptor.materialIndex;
 		surface.luxelScale = descriptor.luxelScale;
 
+		uint32 vertexIndex = 0;
+
+		while (vertexIndex < surface.vertices.count()) {
+			// TODO(lyah/scalar)
+			surface.vertices[vertexIndex] = svec3<float32>(round<2>(multiplyTransform({
+				descriptor.geometry.vertexComponents[vertexIndex * 3 + 0],
+				descriptor.geometry.vertexComponents[vertexIndex * 3 + 1],
+				descriptor.geometry.vertexComponents[vertexIndex * 3 + 2],
+			}, worldTransform)));
+
+			vertexIndex += 1;
+		}
+
 		uint32 surfaceVertexCount = 0;
 
 		if (descriptor.carvings.size() > 0) {
@@ -123,7 +211,13 @@ namespace Trident {
 				DEBUG_ASSERT(carving.size.x > 0.0f && carving.size.y > 0.0f);
 			}
 
-			carveSurface(surface, descriptor.carvings, surfaceVertexCount);
+			const svec3<float32> origin = {
+				descriptor.geometry.vertexComponents[0],
+				descriptor.geometry.vertexComponents[1],
+				descriptor.geometry.vertexComponents[2],
+			};
+
+			carveSurface(surface, origin, descriptor.carvings, surfaceVertexCount);
 		}
 		else {
 			surface.subsurfaces = {
@@ -136,7 +230,7 @@ namespace Trident {
 				},
 			};
 
-			surfaceVertexCount = static_cast<uint32>(surface.subsurfaces[0].vertexComponents.count() / 3);
+			surfaceVertexCount = static_cast<uint32>(surface.vertices.count());
 		}
 
 		const uint32 normalIndex = findDuplicate(normals, surface.normal);
@@ -145,7 +239,7 @@ namespace Trident {
 			normals.emplace_back(surface.normal);
 		}
 
-		// NOTE: The number of elements in these sequences isn't optimized for duplicate vertices/texture coordinates.
+		// Worst-case allocation.
 		sequence<uint32> vertexRedirectionIndices(surfaceVertexCount);
 		sequence<uint32> textureCoordinateRedirectionIndices(surfaceVertexCount);
 
@@ -186,7 +280,7 @@ namespace Trident {
 
 			while (vertexIndex < vertexCount) {
 				// TODO(lyah/scalar)
-				const svec3<float32> vertex = svec3<float32>(round<2>(multiplyTransform(originVertex + vec3<float32>{
+				const svec3<float32> vertex = svec3<float32>(round<2>(multiplyTransform(vec3<float32>{
 					subsurface.vertexComponents[vertexIndex * 3 + 0],
 					subsurface.vertexComponents[vertexIndex * 3 + 1],
 					subsurface.vertexComponents[vertexIndex * 3 + 2],
@@ -250,6 +344,8 @@ namespace Trident {
 		material.triangleRange.count += surfaceTriangleCount;
 		triangleCount += surfaceTriangleCount;
 		subsurfaceCount += static_cast<uint32>(surface.subsurfaces.size());
+
+		return surfaceIndex;
 	}
 
 	StaticScene3D StaticSceneBuilder::build() const {
