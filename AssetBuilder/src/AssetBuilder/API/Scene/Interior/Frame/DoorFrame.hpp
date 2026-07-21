@@ -64,6 +64,9 @@ namespace Trident {
 			SurfaceDescriptor& entranceDescriptor = descriptor.entranceRoom->surfaceDescriptors[descriptor.entranceSurfaceIndex];
 			SurfaceDescriptor& exitDescriptor = descriptor.exitRoom->surfaceDescriptors[descriptor.exitSurfaceIndex];
 
+			entranceSubsurfaceIndex = static_cast<uint32>(entranceDescriptor.carvings.size());
+			exitSubsurfaceIndex = static_cast<uint32>(exitDescriptor.carvings.size());
+
 			const Carving entranceCarving = {
 				.offset = {descriptor.entranceHorizontalOffset, entranceDescriptor.geometry.scale.y - descriptor.size.y - descriptor.entranceFloorOffset},
 				.size = descriptor.size,
@@ -79,7 +82,9 @@ namespace Trident {
 
 		sequence<DualSnapSurfaceDescriptor> surfaceDescriptors;
 		const uint32* entranceSurfaceIndex;
+		uint32 entranceSubsurfaceIndex;
 		const uint32* exitSurfaceIndex;
+		uint32 exitSubsurfaceIndex;
 	}; 
 
 	template<>
@@ -90,8 +95,8 @@ namespace Trident {
 		const view<uint16> entranceEdges = entranceSurface->edgeOriginVertexIndices;
 		const view<uint16> exitEdges = exitSurface->edgeOriginVertexIndices;
 
-		const StaticSubsurface& entranceSubsurface = entranceSurface->hollowSubsurfaces.back();
-		const StaticSubsurface& exitSubsurface = exitSurface->hollowSubsurfaces.back();
+		const StaticSubsurface& entranceSubsurface = entranceSurface->hollowSubsurfaces[frame.entranceSubsurfaceIndex];
+		const StaticSubsurface& exitSubsurface = exitSurface->hollowSubsurfaces[frame.exitSubsurfaceIndex];
 
 		snapSurface(frame.surfaceDescriptors[frame.CEILING], entranceSubsurface.getEdge(entranceEdges, 0), exitSubsurface.getEdge(exitEdges, 0));
 		snapSurface(frame.surfaceDescriptors[frame.RIGHT_WALL], entranceSubsurface.getEdge(entranceEdges, 1), exitSubsurface.getEdge(exitEdges, 3));
