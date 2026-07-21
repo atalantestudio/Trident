@@ -92,15 +92,12 @@ namespace Trident {
 		const StaticSurface* entranceSurface = &surfaces[*frame.entranceSurfaceIndex];
 		const StaticSurface* exitSurface = &surfaces[*frame.exitSurfaceIndex];
 
-		const view<uint16> entranceEdges = entranceSurface->edgeOriginVertexIndices;
-		const view<uint16> exitEdges = exitSurface->edgeOriginVertexIndices;
-
 		const StaticSubsurface& entranceSubsurface = entranceSurface->hollowSubsurfaces[frame.entranceSubsurfaceIndex];
 		const StaticSubsurface& exitSubsurface = exitSurface->hollowSubsurfaces[frame.exitSubsurfaceIndex];
 
-		snapSurface(frame.surfaceDescriptors[frame.CEILING], entranceSubsurface.getEdge(entranceEdges, 0), exitSubsurface.getEdge(exitEdges, 0));
-		snapSurface(frame.surfaceDescriptors[frame.RIGHT_WALL], entranceSubsurface.getEdge(entranceEdges, 1), exitSubsurface.getEdge(exitEdges, 3));
-		snapSurface(frame.surfaceDescriptors[frame.FLOOR], entranceSubsurface.getEdge(entranceEdges, 2), exitSubsurface.getEdge(exitEdges, 2));
-		snapSurface(frame.surfaceDescriptors[frame.LEFT_WALL], entranceSubsurface.getEdge(entranceEdges, 3), exitSubsurface.getEdge(exitEdges, 1));
+		snapSurface(frame.surfaceDescriptors[frame.CEILING], entranceSubsurface.getEdge(0), exitSubsurface.getEdge(0));
+		snapSurface(frame.surfaceDescriptors[frame.RIGHT_WALL], entranceSubsurface.getEdge(1), exitSubsurface.getEdge(3));
+		snapSurface(frame.surfaceDescriptors[frame.FLOOR], entranceSubsurface.getEdge(2), exitSubsurface.getEdge(2));
+		snapSurface(frame.surfaceDescriptors[frame.LEFT_WALL], entranceSubsurface.getEdge(3), exitSubsurface.getEdge(1));
 	}
 }

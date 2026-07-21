@@ -54,26 +54,25 @@ namespace Trident {
 		/// Vertices in world space.
 		vec3<float32> a;
 		vec3<float32> b;
-
-		// TODO(asset-builder/scene/edge): Remove unused normal?
-		/// Outwards direction in regard to the parent surface.
-		vec3<float32> normal;
 	};
 
 	struct StaticSubsurface {
-		inline StaticEdge getEdge(view<uint16> edgeOriginVertexIndices, uint32 edgeIndex) const {
-			const uint16 offsetA = edgeOriginVertexIndices[edgeIndex] * 3;
-			const uint16 offsetB = edgeOriginVertexIndices[(edgeIndex + 1) % edgeOriginVertexIndices.count()] * 3;
+		inline StaticEdge getEdge(uint32 edgeIndex) const {
+			static constexpr uint16 edgeOriginVertexIndexCount = 4;
+			static constexpr uint16 edgeOriginVertexIndices[edgeOriginVertexIndexCount] = {0, 1, 3, 2};
+
+			const uint16 indexA = edgeOriginVertexIndices[edgeIndex];
+			const uint16 indexB = edgeOriginVertexIndices[(edgeIndex + 1) % edgeOriginVertexIndexCount];
 
 			return {
-				.a = {vertexComponents[offsetA + 0], vertexComponents[offsetA + 1], vertexComponents[offsetA + 2]},
-				.b = {vertexComponents[offsetB + 0], vertexComponents[offsetB + 1], vertexComponents[offsetB + 2]},
-
-				// TODO(asset-builder/scene/edge): Remove unused normal?
+				{vertexComponents[indexA * 3 + 0], vertexComponents[indexA * 3 + 1], vertexComponents[indexA * 3 + 2]},
+				{vertexComponents[indexB * 3 + 0], vertexComponents[indexB * 3 + 1], vertexComponents[indexB * 3 + 2]},
 			};
 		}
 
+		/// Vertices in world space, used for dual snapping.
 		sequence<float32> vertexComponents;
+
 		sequence<float32> vertexTextureCoordinateComponents;
 		sequence<uint32> vertexIndices;
 		sequence<uint32> vertexTextureCoordinateIndices;
@@ -84,17 +83,14 @@ namespace Trident {
 		inline StaticEdge getEdge(uint32 edgeIndex) const {
 			const uint16 indexA = edgeOriginVertexIndices[edgeIndex];
 			const uint16 indexB = edgeOriginVertexIndices[(edgeIndex + 1) % edgeOriginVertexIndices.count()];
-			const vec3<float32> a = vertices[indexA];
-			const vec3<float32> b = vertices[indexB];
 
 			return {
-				.a = a,
-				.b = b,
-				.normal = normalized(cross(b - a, normal)),
+				vertices[indexA],
+				vertices[indexB],
 			};
 		}
 
-		/// Vertices in world space, used for snapping.
+		/// Vertices in world space, used for single snapping.
 		sequence<svec3<float32>> vertices;
 
 		sequence<uint16> edgeOriginVertexIndices;
