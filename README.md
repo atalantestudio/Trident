@@ -35,7 +35,8 @@ Trident is a 2D/3D game engine developed by Atalante Studio, intended for techni
 
 ## Dependencies
 
-Most of the dependencies are managed by Atalante Studio. This allows fast iterations and bug fixing on isolated parts of the engine.
+Apart from the C++ standard, Trident only uses libraries managed by Atalante. This is mainly for fast iterations and bug fixing on isolated parts of the engine.
+On Windows, Premake and `glslc` are embedded as executables and used during the build steps.
 
 - [Premake 5.0.0 beta 8](https://github.com/premake/premake-core/releases/tag/v5.0.0-beta8)
 - glslc.exe (taken from Vulkan SDK 1.4.335.0)
