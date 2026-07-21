@@ -542,6 +542,20 @@ namespace Trident {
 		return perpendicularLeft(normalized(b - a));
 	}
 
+	inline bool parallelOrOpposite(vec3<float32> a, vec3<float32> b) {
+		constexpr float32 E = 0.0001f;
+
+		if (dot(a, b) / sqrt(lengthSquared(a) * lengthSquared(b)) > 1.0f - E) {
+			return true;
+		}
+
+		if (dot(a, -b) / sqrt(lengthSquared(a) * lengthSquared(b)) > 1.0f - E) {
+			return true;
+		}
+
+		return false;
+	}
+
 	inline mat3x3<float32> orthographicTopLeftOrigin(vec2<float32> viewport) {
 		return {
 			 2.0f / viewport[0],  0.0f,                0.0f,

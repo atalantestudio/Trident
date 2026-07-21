@@ -22,11 +22,11 @@ namespace Trident {
 
 	static StaticSubsurface createSubsurface(SubsurfaceQuad quad, svec3<float32> origin, svec2<float32> scale) {
 		return {
-			.vertexComponents = {
-				origin.x + quad.start.x, origin.y - quad.start.y, origin.z,
-				origin.x + quad.end.x, origin.y - quad.start.y, origin.z,
-				origin.x + quad.start.x, origin.y - quad.end.y, origin.z,
-				origin.x + quad.end.x, origin.y - quad.end.y, origin.z,
+			.vertices = {
+				{origin.x + quad.start.x, origin.y - quad.start.y, origin.z},
+				{origin.x + quad.end.x, origin.y - quad.start.y, origin.z},
+				{origin.x + quad.start.x, origin.y - quad.end.y, origin.z},
+				{origin.x + quad.end.x, origin.y - quad.end.y, origin.z},
 			},
 			.vertexTextureCoordinateComponents = {
 				quad.start.x / scale.x, quad.start.y / scale.y,
@@ -176,7 +176,7 @@ namespace Trident {
 
 				surface.subsurfaces.emplace_back(subsurface);
 
-				surfaceVertexCount += static_cast<uint32>(subsurface.vertexComponents.count() / 3);
+				surfaceVertexCount += static_cast<uint32>(subsurface.vertices.count());
 
 				quadIndex += 1;
 			}
@@ -189,7 +189,7 @@ namespace Trident {
 
 			surface.subsurfaces.emplace_back(subsurface);
 
-			surfaceVertexCount += static_cast<uint32>(subsurface.vertexComponents.count() / 3);
+			surfaceVertexCount += static_cast<uint32>(subsurface.vertices.count());
 		}
 	}
 }

@@ -116,20 +116,6 @@ namespace Trident {
 		return compileSurface(descriptor, transform, {0.0f, 0.0f, 0.0f}, quat<float32>::identity());
 	}
 
-	static bool parallelOrOpposite(vec3<float32> a, vec3<float32> b) {
-		constexpr float32 E = 0.0001f;
-
-		if (dot(a, b) / sqrt(lengthSquared(a) * lengthSquared(b)) > 1.0f - E) {
-			return true;
-		}
-
-		if (dot(a, -b) / sqrt(lengthSquared(a) * lengthSquared(b)) > 1.0f - E) {
-			return true;
-		}
-
-		return false;
-	}
-
 	uint32 StaticSceneBuilder::snapSurface(const SurfaceDescriptor& descriptor, const StaticEdge& parentEdge, uint32 edgeIndex, float32 hingeAngle) {
 		// TODO(asset-builder/scene): Better validation.
 		DEBUG_ASSERT(descriptor.geometry.scale.x > 0.0f && descriptor.geometry.scale.y > 0.0f);
@@ -285,11 +271,7 @@ namespace Trident {
 				DEBUG_ASSERT(carving.size.x > 0.0f && carving.size.y > 0.0f);
 			}
 
-			const svec3<float32> origin = {
-				descriptor.geometry.vertexComponents[0],
-				descriptor.geometry.vertexComponents[1],
-				descriptor.geometry.vertexComponents[2],
-			};
+			const svec3<float32> origin = {descriptor.geometry.vertexComponents[0], descriptor.geometry.vertexComponents[1], descriptor.geometry.vertexComponents[2]};
 
 			carveSurface(surface, origin, descriptor.carvings, surfaceVertexCount);
 
@@ -298,22 +280,14 @@ namespace Trident {
 			while (hollowSubsurfaceIndex < surface.hollowSubsurfaces.size()) {
 				StaticSubsurface& subsurface = surface.hollowSubsurfaces[hollowSubsurfaceIndex];
 
-				const uint32 vertexCount = static_cast<uint32>(subsurface.vertexComponents.count() / 3);
+				const uint32 vertexCount = static_cast<uint32>(subsurface.vertices.count());
 
 				uint32 vertexIndex = 0;
 
 				while (vertexIndex < vertexCount) {
 					// TODO(lyah/scalar)
-					const svec3<float32> vertex = svec3<float32>(round<2>(multiplyTransform(vec3<float32>{
-						subsurface.vertexComponents[vertexIndex * 3 + 0],
-						subsurface.vertexComponents[vertexIndex * 3 + 1],
-						subsurface.vertexComponents[vertexIndex * 3 + 2],
-					}, worldTransform)));
-
 					// Subsurfaces must have world space vertices for snapping.
-					subsurface.vertexComponents[vertexIndex * 3 + 0] = vertex.x;
-					subsurface.vertexComponents[vertexIndex * 3 + 1] = vertex.y;
-					subsurface.vertexComponents[vertexIndex * 3 + 2] = vertex.z;
+					subsurface.vertices[vertexIndex] = svec3<float32>(round<2>(multiplyTransform(vec3<float32>(subsurface.vertices[vertexIndex]), worldTransform)));
 
 					vertexIndex += 1;
 				}
@@ -324,13 +298,25 @@ namespace Trident {
 		else {
 			surface.subsurfaces = {
 				{
-					.vertexComponents = descriptor.geometry.vertexComponents,
+					.vertices = sequence<svec3<float32>>(surface.vertices.count()),
 					.vertexTextureCoordinateComponents = descriptor.geometry.vertexTextureCoordinateComponents,
 					.vertexIndices = descriptor.geometry.vertexIndices,
 					.vertexTextureCoordinateIndices = descriptor.geometry.vertexTextureCoordinateIndices,
 					.scale = surface.scale,
 				},
 			};
+
+			uint32 vertexIndex = 0;
+
+			while (vertexIndex < surface.vertices.count()) {
+				surface.subsurfaces[0].vertices[vertexIndex] = {
+					descriptor.geometry.vertexComponents[vertexIndex * 3 + 0],
+					descriptor.geometry.vertexComponents[vertexIndex * 3 + 1],
+					descriptor.geometry.vertexComponents[vertexIndex * 3 + 2],
+				};
+
+				vertexIndex += 1;
+			}
 
 			surfaceVertexCount = static_cast<uint32>(surface.vertices.count());
 		}
@@ -353,8 +339,8 @@ namespace Trident {
 		while (subsurfaceIndex < surface.subsurfaces.size()) {
 			StaticSubsurface& subsurface = surface.subsurfaces[subsurfaceIndex];
 
-			const uint32 vertexIndexCount = static_cast<uint32>(subsurface.vertexIndices.count());
-			const uint32 vertexCount = static_cast<uint32>(subsurface.vertexComponents.count() / 3);
+			const uint64 vertexIndexCount = subsurface.vertexIndices.count();
+			const uint64 vertexCount = subsurface.vertices.count();
 			const uint64 textureCoordinateCount = subsurface.vertexTextureCoordinateComponents.count() / 2;
 
 			uint32 textureCoordinateIndex = 0;
@@ -383,16 +369,10 @@ namespace Trident {
 
 			while (vertexIndex < vertexCount) {
 				// TODO(lyah/scalar)
-				const svec3<float32> vertex = svec3<float32>(round<2>(multiplyTransform(vec3<float32>{
-					subsurface.vertexComponents[vertexIndex * 3 + 0],
-					subsurface.vertexComponents[vertexIndex * 3 + 1],
-					subsurface.vertexComponents[vertexIndex * 3 + 2],
-				}, worldTransform)));
+				const svec3<float32> vertex = svec3<float32>(round<2>(multiplyTransform(vec3<float32>(subsurface.vertices[vertexIndex]), worldTransform)));
 
 				// Subsurfaces must have world space vertices for snapping.
-				subsurface.vertexComponents[vertexIndex * 3 + 0] = vertex.x;
-				subsurface.vertexComponents[vertexIndex * 3 + 1] = vertex.y;
-				subsurface.vertexComponents[vertexIndex * 3 + 2] = vertex.z;
+				subsurface.vertices[vertexIndex] = vertex;
 
 				const uint32 vertexRedirectionIndex = findDuplicate(vertices, vertex);
 
@@ -442,8 +422,8 @@ namespace Trident {
 				vertexIndexIndex += 3;
 			}
 
-			surfaceTriangleCount += vertexIndexCount / 3;
-			vertexOffset += vertexCount;
+			surfaceTriangleCount += static_cast<uint32>(vertexIndexCount / 3);
+			vertexOffset += static_cast<uint32>(vertexCount);
 			subsurfaceIndex += 1;
 		}
 

@@ -64,14 +64,11 @@ namespace Trident {
 			const uint16 indexA = edgeOriginVertexIndices[edgeIndex];
 			const uint16 indexB = edgeOriginVertexIndices[(edgeIndex + 1) % edgeOriginVertexIndexCount];
 
-			return {
-				{vertexComponents[indexA * 3 + 0], vertexComponents[indexA * 3 + 1], vertexComponents[indexA * 3 + 2]},
-				{vertexComponents[indexB * 3 + 0], vertexComponents[indexB * 3 + 1], vertexComponents[indexB * 3 + 2]},
-			};
+			return {vertices[indexA], vertices[indexB]};
 		}
 
 		/// Vertices in world space, used for dual snapping.
-		sequence<float32> vertexComponents;
+		sequence<svec3<float32>> vertices;
 
 		sequence<float32> vertexTextureCoordinateComponents;
 		sequence<uint32> vertexIndices;
@@ -84,10 +81,7 @@ namespace Trident {
 			const uint16 indexA = edgeOriginVertexIndices[edgeIndex];
 			const uint16 indexB = edgeOriginVertexIndices[(edgeIndex + 1) % edgeOriginVertexIndices.count()];
 
-			return {
-				vertices[indexA],
-				vertices[indexB],
-			};
+			return {vertices[indexA], vertices[indexB]};
 		}
 
 		/// Vertices in world space, used for single snapping.
