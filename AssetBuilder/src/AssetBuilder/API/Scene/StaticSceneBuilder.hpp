@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "AssetBuilder/API/Scene/Lightmap.hpp"
 #include "AssetBuilder/API/Scene/StaticScene.hpp"
 #include "AssetBuilder/API/Scene/StaticSurface.hpp"
 
@@ -10,8 +11,14 @@
 
 namespace Trident {
 	class StaticSceneBuilder {
+		private:
+			static constexpr Extent2D LIGHTMAP_ATLAS_EXTENT = {1024, 1024};
+
 		public:
 			static StaticGeometry3D createWallGeometry(svec2<float32> scale);
+
+		private:
+			static LightmapNode* insertLightmapNode(Lightmap& lightmap, LightmapNode* rootNode);
 
 		public:
 			explicit StaticSceneBuilder(std::filesystem::path rootOutputPath);
@@ -28,14 +35,18 @@ namespace Trident {
 			uint32 snapSurface(const DualSnapSurfaceDescriptor& descriptor, const StaticEdge& edgeA, const StaticEdge& edgeB);
 
 			/// Compiles and returns an optimized static scene.
-			StaticScene3D build() const;
+			StaticScene3D build();
 
 		private:
 			uint32 compileSurface(const SurfaceDescriptor& descriptor, const Transform& transform, vec3<float32> hingeOffset, quat<float32> hingeRotation);
 
 			void carveSurface(StaticSurface& surface, svec3<float32> origin, const std::vector<Carving>& carvings, uint32& surfaceVertexCount) const;
 
-			void generateLightmaps(StaticScene3D& scene) const;
+			void generateLightmaps(StaticScene3D& scene);
+
+			void createLightmaps(StaticScene3D& scene);
+
+			void updateLightmapCoordinates(StaticScene3D& scene);
 
 		// TODO(asset-builder/scene): Keep exposing?
 		public:
@@ -51,6 +62,11 @@ namespace Trident {
 			std::vector<std::vector<StaticTriangle3D>> trianglesPerMaterial;
 			std::vector<BuildMaterialShader> materialShaders;
 			std::vector<BuildStaticMaterial3D> materials;
+
+			sequence<Lightmap> lightmaps;
+
+			/// Sorted by ascending area.
+			std::vector<LightmapLookup> lightmapLookups;
 
 			uint32 triangleCount = 0;
 			uint32 subsurfaceCount = 0;

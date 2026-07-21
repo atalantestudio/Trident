@@ -6,135 +6,9 @@
 #include "AssetBuilder/API/Scene/Lightmapper.hpp"
 
 namespace Trident {
-	struct Rectangle {
-		uint32 x;
-		uint32 y;
-		uint32 width;
-		uint32 height;
-	};
-
-	struct LightmapNode {
-		LightmapNode* children[2]{};
-		Rectangle rectangle;
-		bool assigned = false;
-
-		~LightmapNode() {
-			delete children[0];
-			delete children[1];
-		}
-
-		bool leaf() const {
-			return children[0] == nullptr && children[1] == nullptr;
-		}
-	};
-
-	// See https://blackpawn.com/texts/lightmaps.
-	LightmapNode* Lightmapper::insertNode(Lightmap& lightmap, LightmapNode* node) {
-		if (!node->leaf()) {
-			LightmapNode* newNode = insertNode(lightmap, node->children[0]);
-
-			if (newNode != nullptr) {
-				return newNode;
-			}
-
-			return insertNode(lightmap, node->children[1]);
-		}
-
-		if (node->assigned) {
-			return nullptr;
-		}
-
-		if (
-			node->rectangle.width < lightmap.size.width ||
-			node->rectangle.height < lightmap.size.height
-		) {
-			return nullptr;
-		}
-
-		if (
-			node->rectangle.width == lightmap.size.width &&
-			node->rectangle.height == lightmap.size.height
-		) {
-			return node;
-		}
-
-		node->children[0] = new LightmapNode();
-		node->children[0]->rectangle = node->rectangle;
-
-		node->children[1] = new LightmapNode();
-		node->children[1]->rectangle = node->rectangle;
-
-		const Extent2D remainingSize = {
-			node->rectangle.width - lightmap.size.width,
-			node->rectangle.height - lightmap.size.height,
-		};
-
-		// Split towards the axis with the largest available space.
-		if (remainingSize.width > remainingSize.height) {
-			node->children[0]->rectangle.width = lightmap.size.width;
-
-			node->children[1]->rectangle.x += lightmap.size.width;
-			node->children[1]->rectangle.width -= lightmap.size.width;
-		}
-		else {
-			node->children[0]->rectangle.height = lightmap.size.height;
-
-			node->children[1]->rectangle.y += lightmap.size.height;
-			node->children[1]->rectangle.height -= lightmap.size.height;
-		}
-
-		return insertNode(lightmap, node->children[0]);
-	}
-
-	void Lightmapper::updateAtlasCoordinates(StaticScene3D& scene, sequence<Lightmap>& lightmaps, view<LightmapIndex> lightmapIndices) {
-		const svec2<float32> atlasSize = {
-			static_cast<float32>(ATLAS_SIZE.width),
-			static_cast<float32>(ATLAS_SIZE.height),
-		};
-
-		LightmapNode rootNode{};
-		rootNode.rectangle = {0, 0, ATLAS_SIZE.width, ATLAS_SIZE.height};
-
-		uint32 unsortedLightmapIndex = 0;
-
-		while (unsortedLightmapIndex < lightmapIndices.count()) {
-			const uint32 lightmapIndex = lightmapIndices[unsortedLightmapIndex].index;
-
-			Lightmap& lightmap = lightmaps[lightmapIndex];
-
-			LightmapNode* node = insertNode(lightmap, &rootNode);
-
-			DEBUG_ASSERT(node != nullptr);
-
-			node->assigned = true;
-
-			lightmap.offset.width = node->rectangle.x;
-			lightmap.offset.height = node->rectangle.y;
-
-			uint16 coordinateIndex = 0;
-
-			while (coordinateIndex < 4) {
-				svec2<float32>& coordinate = scene.lightmapCoordinates[lightmap.coordinateOffset + coordinateIndex];
-				coordinate.x += lightmap.offset.width;
-				coordinate.y += lightmap.offset.height;
-				coordinate /= atlasSize;
-
-				coordinateIndex += 1;
-			}
-
-			StaticTriangle3D& triangle1 = scene.triangles[lightmap.triangleOffset + 0];
-			triangle1.vertices[0].lightmapCoordinateIndex = lightmap.coordinateOffset + 0;
-			triangle1.vertices[1].lightmapCoordinateIndex = lightmap.coordinateOffset + 1;
-			triangle1.vertices[2].lightmapCoordinateIndex = lightmap.coordinateOffset + 2;
-
-			StaticTriangle3D& triangle2 = scene.triangles[lightmap.triangleOffset + 1];
-			triangle2.vertices[0].lightmapCoordinateIndex = lightmap.coordinateOffset + 1;
-			triangle2.vertices[1].lightmapCoordinateIndex = lightmap.coordinateOffset + 3;
-			triangle2.vertices[2].lightmapCoordinateIndex = lightmap.coordinateOffset + 2;
-
-			unsortedLightmapIndex += 1;
-		}
-	}
+	Lightmapper::Lightmapper(Extent2D atlasExtent) :
+		atlasExtent(atlasExtent)
+	{}
 
 	void Lightmapper::buildLightmapAtlas(const StaticScene3D& scene, ImageAssetDescriptor& lightmapAtlasImageAssetDescriptor) {
 		const uint32 triangleCount = static_cast<uint32>(scene.triangles.count());
@@ -685,7 +559,7 @@ namespace Trident {
 		}
 
 		TraceRaysArguments* traceRaysArguments = traceRaysArgumentStagingView->map();
-		traceRaysArguments->atlasSize = ATLAS_SIZE;
+		traceRaysArguments->atlasExtent = atlasExtent;
 		traceRaysArguments->lightmapPixelCount = 0;
 		traceRaysArguments->triangleCount = static_cast<uint32>(scene.triangles.count());
 		traceRaysArguments->traceRaysCommand.x = 1;

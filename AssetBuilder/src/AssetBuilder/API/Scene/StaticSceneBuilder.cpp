@@ -3,8 +3,8 @@
 
 #include "pch.hpp"
 
-#include "AssetBuilder/API/Scene/Builder/Carving.hpp"
-#include "AssetBuilder/API/Scene/Builder/Lightmap.hpp"
+#include "AssetBuilder/API/Scene/Builder/CarveSurface.hpp"
+#include "AssetBuilder/API/Scene/Builder/GenerateLightmaps.hpp"
 #include "AssetBuilder/API/Scene/Lightmap.hpp"
 #include "AssetBuilder/API/Scene/Lightmapper.hpp"
 #include "AssetBuilder/API/Scene/StaticSceneBuilder.hpp"
@@ -245,7 +245,7 @@ namespace Trident {
 		surface.edgeOriginVertexIndices = descriptor.geometry.edgeOriginVertexIndices;
 
 		// TODO(lyah/scalar)
-		surface.normal = svec3<float32>(round<2>(normalized(descriptor.geometry.normal * inverse(orientation))));
+		surface.normal = svec3<float32>(round<2>(normalized(descriptor.geometry.normal * inverse(orientation * hingeRotation))));
 
 		surface.scale = descriptor.geometry.scale;
 		surface.subsurfaces = {};
@@ -333,7 +333,6 @@ namespace Trident {
 		while (subsurfaceIndex < surface.subsurfaces.size()) {
 			StaticSubsurface& subsurface = surface.subsurfaces[subsurfaceIndex];
 
-			const uint64 vertexIndexCount = subsurface.vertexIndices.count();
 			const uint64 vertexCount = subsurface.vertices.count();
 			const uint64 textureCoordinateCount = subsurface.textureCoordinates.count();
 
@@ -378,7 +377,7 @@ namespace Trident {
 
 			uint32 vertexIndexIndex = 0;
 
-			while (vertexIndexIndex < vertexIndexCount) {
+			while (vertexIndexIndex < subsurface.vertexIndices.count()) {
 				const uint32 vertexIndexA = subsurface.vertexIndices[vertexIndexIndex + 0];
 				const uint32 vertexIndexB = subsurface.vertexIndices[vertexIndexIndex + 1];
 				const uint32 vertexIndexC = subsurface.vertexIndices[vertexIndexIndex + 2];
@@ -413,7 +412,7 @@ namespace Trident {
 				vertexIndexIndex += 3;
 			}
 
-			surfaceTriangleCount += static_cast<uint32>(vertexIndexCount / 3);
+			surfaceTriangleCount += subsurface.getTriangleCount();
 			vertexOffset += static_cast<uint32>(vertexCount);
 			subsurfaceTextureCoordinateCount += static_cast<uint32>(textureCoordinateCount);
 			subsurfaceIndex += 1;
@@ -428,7 +427,7 @@ namespace Trident {
 		return surfaceIndex;
 	}
 
-	StaticScene3D StaticSceneBuilder::build() const {
+	StaticScene3D StaticSceneBuilder::build() {
 		StaticScene3D scene{};
 		scene.vertices = sequence<svec3<float32>>(vertices.size());
 		scene.normals = sequence<svec3<float32>>(normals.size());

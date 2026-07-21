@@ -57,6 +57,10 @@ namespace Trident {
 	};
 
 	struct StaticSubsurface {
+		inline uint32 getTriangleCount() const {
+			return static_cast<uint32>(vertexIndices.count() / 3);
+		}
+
 		inline StaticEdge getEdge(uint32 edgeIndex) const {
 			static constexpr uint16 edgeOriginVertexIndexCount = 4;
 			static constexpr uint16 edgeOriginVertexIndices[edgeOriginVertexIndexCount] = {0, 1, 3, 2};

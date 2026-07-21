@@ -34,8 +34,8 @@ struct Hit {
 
 const float FLOAT32_MAX = 4294967295.0;
 const uint SAMPLE_COUNT = 1024;
-const uint BOUNCE_COUNT = 3;
-const vec3 SUN_DIRECTION = vec3(1.0, -1.0, 1.0);
+const uint BOUNCE_COUNT = 4;
+const vec3 SUN_DIRECTION = vec3(-1.0, -1.0, -1.0);
 
 layout(set = 0, binding = 0) buffer readonly TraceRaysArgumentBuffer {
 	uvec2 atlasSize;

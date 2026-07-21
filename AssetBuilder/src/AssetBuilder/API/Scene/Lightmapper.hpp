@@ -16,7 +16,7 @@ namespace Trident {
 	class Lightmapper {
 		private:
 			struct TraceRaysArguments {
-				Extent2D atlasSize;
+				Extent2D atlasExtent;
 				uint32 lightmapPixelCount;
 				uint32 triangleCount;
 				DispatchIndirectCommand traceRaysCommand;
@@ -28,12 +28,7 @@ namespace Trident {
 			};
 
 		public:
-			static constexpr Extent2D ATLAS_SIZE = {1024, 1024};
-
-		public:
-			static LightmapNode* insertNode(Lightmap& lightmap, LightmapNode* node);
-
-			static void updateAtlasCoordinates(StaticScene3D& scene, sequence<Lightmap>& lightmaps, view<LightmapIndex> lightmapIndices);
+			explicit Lightmapper(Extent2D atlasExtent);
 
 			void buildLightmapAtlas(const StaticScene3D& scene, ImageAssetDescriptor& lightmapAtlasImageAssetDescriptor);
 
@@ -68,6 +63,8 @@ namespace Trident {
 			void encodeOneTimeCommands(const StaticScene3D& scene) const;
 
 		private:
+			Extent2D atlasExtent;
+
 			ref<RenderPass> rasterizeLightmapsRenderPass;
 
 			ref<Image> lightmapAtlasImage;

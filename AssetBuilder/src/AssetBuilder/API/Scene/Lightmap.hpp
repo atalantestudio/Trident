@@ -6,15 +6,40 @@
 #include "Engine/Filesystem/Asset/GeometryAsset.hpp"
 
 namespace Trident {
+	struct StaticSubsurface;
+
 	struct Lightmap {
-		uint32 triangleOffset;
 		Extent2D offset;
 		Extent2D size;
-		uint32 coordinateOffset;
+		const StaticSubsurface* subsurface;
+		range<uint32, uint32> triangleRange;
+		range<uint32, uint32> coordinateRange;
 	};
 
-	struct LightmapIndex {
+	struct LightmapLookup {
 		uint32 index;
 		uint32 area;
+	};
+
+	struct Rectangle {
+		uint32 x;
+		uint32 y;
+		uint32 width;
+		uint32 height;
+	};
+
+	struct LightmapNode {
+		LightmapNode* children[2]{};
+		Rectangle rectangle;
+		bool assigned = false;
+
+		~LightmapNode() {
+			delete children[0];
+			delete children[1];
+		}
+
+		bool leaf() const {
+			return children[0] == nullptr && children[1] == nullptr;
+		}
 	};
 }

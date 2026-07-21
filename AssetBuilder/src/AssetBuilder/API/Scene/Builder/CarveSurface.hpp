@@ -6,21 +6,31 @@
 #include "AssetBuilder/API/Scene/StaticSceneBuilder.hpp"
 
 namespace Trident {
-	static uint32 findSortedIndex(const std::vector<float32>& elements, float32 element) {
-		uint32 elementIndex = 0;
+	static void emplaceSorted(std::vector<float32>& vector, float32 a) {
+		index i = 0;
 
-		while (elementIndex < elements.size()) {
-			if (elements[elementIndex] >= element) {
-				break;
+		while (i < vector.size()) {
+			const float32 b = vector[i];
+
+			if (a == b) {
+				return;
 			}
 
-			elementIndex += 1;
+			if (b > a) {
+				vector.insert(vector.begin() + i, a);
+
+				return;
+			}
+
+			i += 1;
 		}
 
-		return elementIndex;
+		vector.emplace_back(a);
 	}
 
-	static StaticSubsurface createSubsurface(SubsurfaceQuad quad, svec3<float32> origin, svec2<float32> scale) {
+	static StaticSubsurface createSubsurface(SubsurfaceQuad quad, svec3<float32> origin, svec2<float32> surfaceScale) {
+		DEBUG_ASSERT(quad.end.x > quad.start.x && quad.end.y > quad.start.y);
+
 		return {
 			.vertices = {
 				{origin.x + quad.start.x, origin.y - quad.start.y, origin.z},
@@ -29,10 +39,10 @@ namespace Trident {
 				{origin.x + quad.end.x, origin.y - quad.end.y, origin.z},
 			},
 			.textureCoordinates = {
-				{quad.start.x / scale.x, quad.start.y / scale.y},
-				{quad.end.x / scale.x, quad.start.y / scale.y},
-				{quad.start.x / scale.x, quad.end.y / scale.y},
-				{quad.end.x / scale.x, quad.end.y / scale.y},
+				{quad.start.x / surfaceScale.x, quad.start.y / surfaceScale.y},
+				{quad.end.x / surfaceScale.x, quad.start.y / surfaceScale.y},
+				{quad.start.x / surfaceScale.x, quad.end.y / surfaceScale.y},
+				{quad.end.x / surfaceScale.x, quad.end.y / surfaceScale.y},
 			},
 			.vertexIndices = {
 				0, 1, 2,
@@ -49,14 +59,10 @@ namespace Trident {
 	void StaticSceneBuilder::carveSurface(StaticSurface& surface, svec3<float32> origin, const std::vector<Carving>& carvings, uint32& surfaceVertexCount) const {
 		std::vector<float32> rowOffsets = {0.0f, surface.scale.y};
 		SubsurfaceQuad quad;
-		uint32 rowIndex;
 
 		for (const Carving& carving : carvings) {
-			rowIndex = findSortedIndex(rowOffsets, carving.offset.y);
-			rowOffsets.insert(rowOffsets.begin() + rowIndex, carving.offset.y);
-
-			rowIndex = findSortedIndex(rowOffsets, carving.offset.y + carving.size.y);
-			rowOffsets.insert(rowOffsets.begin() + rowIndex, carving.offset.y + carving.size.y);
+			emplaceSorted(rowOffsets, carving.offset.y);
+			emplaceSorted(rowOffsets, carving.offset.y + carving.size.y);
 
 			quad.start = carving.offset;
 			quad.end = carving.offset + carving.size;
@@ -68,8 +74,7 @@ namespace Trident {
 
 		sequence<std::vector<SubsurfaceQuad>> quadsPerRow(rowCount);
 		sequence<std::vector<float32>> columnOffsetsPerRow(rowCount);
-
-		rowIndex = 0;
+		uint32 rowIndex = 0;
 
 		while (rowIndex < rowCount) {
 			const float32 startY = rowOffsets[rowIndex];
@@ -81,25 +86,19 @@ namespace Trident {
 			bool excludeEnd = false;
 
 			for (const Carving& carving : carvings) {
-				if (
-					carving.offset.y > startY || carving.offset.y + carving.size.y < endY
-				) {
+				if (carving.offset.y > startY || carving.offset.y + carving.size.y < endY) {
 					continue;
 				}
 
-				uint32 columnIndex;
-
 				if (carving.offset.x > 0.0f) {
-					columnIndex = findSortedIndex(columnOffsets, carving.offset.x);
-					columnOffsets.insert(columnOffsets.begin() + columnIndex, carving.offset.x);
+					emplaceSorted(columnOffsets, carving.offset.x);
 				}
 				else {
 					excludeStart = true;
 				}
 
 				if (carving.offset.x + carving.size.x < surface.scale.x) {
-					columnIndex = findSortedIndex(columnOffsets, carving.offset.x + carving.size.x);
-					columnOffsets.insert(columnOffsets.begin() + columnIndex, carving.offset.x + carving.size.x);
+					emplaceSorted(columnOffsets, carving.offset.x + carving.size.x);
 				}
 				else {
 					excludeEnd = true;

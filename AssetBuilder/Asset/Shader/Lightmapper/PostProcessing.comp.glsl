@@ -106,9 +106,9 @@ void main() {
 		return;
 	}
 
-	denoise(coordinate);
+	dilate(coordinate, atlasSize);
 
 	memoryBarrierImage();
 
-	dilate(coordinate, atlasSize);
+	denoise(coordinate);
 }

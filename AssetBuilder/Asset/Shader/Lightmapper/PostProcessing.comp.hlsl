@@ -105,9 +105,9 @@ void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 		return;
 	}
 
-	denoise(coordinate);
+	dilate(coordinate, atlasSize);
 
 	GroupMemoryBarrierWithGroupSync();
 
-	dilate(coordinate, atlasSize);
+	denoise(coordinate);
 }

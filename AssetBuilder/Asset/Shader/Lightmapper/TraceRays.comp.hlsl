@@ -36,7 +36,7 @@ struct Hit {
 
 static const float FLOAT32_MAX = 4294967295.0;
 static const uint SAMPLE_COUNT = 1024;
-static const uint BOUNCE_COUNT = 3;
+static const uint BOUNCE_COUNT = 4;
 static const float3 SUN_DIRECTION = float3(1.0, -1.0, 1.0);
 
 StructuredBuffer<TraceRaysArguments> traceRaysArguments : register(t0);

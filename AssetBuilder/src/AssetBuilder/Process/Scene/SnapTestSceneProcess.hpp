@@ -107,7 +107,7 @@ namespace Trident {
 							.offset = {8.0f, 8.0f},
 							.size = {40.0f, 84.0f},
 						},
-						{
+						/* {
 							.offset = {56.0f, 8.0f},
 							.size = {40.0f, 84.0f},
 						},
@@ -118,7 +118,7 @@ namespace Trident {
 						{
 							.offset = {152.0f, 8.0f},
 							.size = {40.0f, 84.0f},
-						},
+						}, */
 					},
 				};
 
@@ -131,7 +131,7 @@ namespace Trident {
 					}
 				);
 
-				const SurfaceDescriptor floorSurfaceDescriptor = {
+				/* const SurfaceDescriptor floorSurfaceDescriptor = {
 					.geometry = floorGeometry,
 					.textureFiltering = {
 						.translation = {0.0f, 0.0f},
@@ -148,7 +148,7 @@ namespace Trident {
 
 				const uint32 wall2SurfaceIndex = builder.snapSurface(wallSurfaceDescriptor, wall1.getEdge(1), 3, radians(90.0_deg));
 				const uint32 wall3SurfaceIndex = builder.snapSurface(floorSurfaceDescriptor, wall1.getEdge(3), 1, radians(90.0_deg));
-				const uint32 floorSurfaceIndex = builder.snapSurface(wallSurfaceDescriptor, wall1.getEdge(2), 0, radians(90.0_deg));
+				const uint32 floorSurfaceIndex = builder.snapSurface(wallSurfaceDescriptor, wall1.getEdge(2), 0, radians(90.0_deg)); */
 
 				return {
 					.staticScene = builder.build(),

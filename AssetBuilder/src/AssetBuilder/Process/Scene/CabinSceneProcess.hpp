@@ -56,7 +56,7 @@ namespace Trident {
 					.size = {144.0f, 200.0f},
 					.floorLevel = builder.floorLevels[0],
 					.ceilingLevel = builder.floorLevels[1],
-					.luxelScale = {2.0f, 2.0f},
+					.luxelScale = {0.5f, 0.5f},
 					.floorMaterialIndex = floorMaterialIndex,
 					.wallMaterialIndex = wallMaterialIndex,
 					.ceilingMaterialIndex = ceilingMaterialIndex,
@@ -66,7 +66,7 @@ namespace Trident {
 					.size = {72.0f, 136.0f},
 					.floorLevel = builder.floorLevels[0],
 					.ceilingLevel = builder.floorLevels[1],
-					.luxelScale = {2.0f, 2.0f},
+					.luxelScale = {0.5f, 0.5f},
 					.floorMaterialIndex = floorMaterialIndex,
 					.wallMaterialIndex = wallMaterialIndex,
 					.ceilingMaterialIndex = ceilingMaterialIndex,
@@ -121,7 +121,7 @@ namespace Trident {
 						{
 							0,
 							createRigidBody({
-								.position = {0.0f, 16.5f, 0.0f},
+								.position = {56.0f, 77.0f, 84.0f},
 								.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
 								.scale = {33.0f, 77.0f, 33.0f},
 								.uniformScale = 33.0f,
