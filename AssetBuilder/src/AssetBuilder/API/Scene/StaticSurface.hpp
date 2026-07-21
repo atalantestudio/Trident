@@ -70,9 +70,9 @@ namespace Trident {
 		/// Vertices in world space, used for dual snapping.
 		sequence<svec3<float32>> vertices;
 
-		sequence<float32> vertexTextureCoordinateComponents;
+		sequence<svec2<float32>> textureCoordinates;
 		sequence<uint32> vertexIndices;
-		sequence<uint32> vertexTextureCoordinateIndices;
+		sequence<uint32> textureCoordinateIndices;
 		svec2<float32> scale;
 	};
 

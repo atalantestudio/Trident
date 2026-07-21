@@ -299,27 +299,18 @@ namespace Trident {
 			}
 		}
 		else {
-			surface.subsurfaces = {
-				{
-					.vertices = sequence<svec3<float32>>(surface.vertices.count()),
-					.vertexTextureCoordinateComponents = descriptor.geometry.vertexTextureCoordinateComponents,
-					.vertexIndices = descriptor.geometry.vertexIndices,
-					.vertexTextureCoordinateIndices = descriptor.geometry.vertexTextureCoordinateIndices,
-					.scale = surface.scale,
-				},
+			StaticSubsurface subsurface = {
+				.vertices = sequence<svec3<float32>>(surface.vertices.count()),
+				.textureCoordinates = sequence<svec2<float32>>(descriptor.geometry.vertexTextureCoordinateComponents.count() / 2),
+				.vertexIndices = descriptor.geometry.vertexIndices,
+				.textureCoordinateIndices = descriptor.geometry.vertexTextureCoordinateIndices,
+				.scale = surface.scale,
 			};
 
-			uint32 vertexIndex = 0;
+			std::copy(descriptor.geometry.vertexComponents.begin(), descriptor.geometry.vertexComponents.end(), &subsurface.vertices[0].x);
+			std::copy(descriptor.geometry.vertexTextureCoordinateComponents.begin(), descriptor.geometry.vertexTextureCoordinateComponents.end(), &subsurface.textureCoordinates[0].x);
 
-			while (vertexIndex < surface.vertices.count()) {
-				surface.subsurfaces[0].vertices[vertexIndex] = {
-					descriptor.geometry.vertexComponents[vertexIndex * 3 + 0],
-					descriptor.geometry.vertexComponents[vertexIndex * 3 + 1],
-					descriptor.geometry.vertexComponents[vertexIndex * 3 + 2],
-				};
-
-				vertexIndex += 1;
-			}
+			surface.subsurfaces = {subsurface};
 
 			surfaceVertexCount = static_cast<uint32>(surface.vertices.count());
 		}
@@ -344,16 +335,13 @@ namespace Trident {
 
 			const uint64 vertexIndexCount = subsurface.vertexIndices.count();
 			const uint64 vertexCount = subsurface.vertices.count();
-			const uint64 textureCoordinateCount = subsurface.vertexTextureCoordinateComponents.count() / 2;
+			const uint64 textureCoordinateCount = subsurface.textureCoordinates.count();
 
 			uint32 textureCoordinateIndex = 0;
 
 			while (textureCoordinateIndex < textureCoordinateCount) {
 				// TODO(lyah/scalar)
-				svec2<float32> textureCoordinate = svec2<float32>(multiplyTransform({
-					subsurface.vertexTextureCoordinateComponents[textureCoordinateIndex * 2 + 0],
-					subsurface.vertexTextureCoordinateComponents[textureCoordinateIndex * 2 + 1],
-				}, textureTransform));
+				svec2<float32> textureCoordinate = svec2<float32>(multiplyTransform(vec2<float32>(subsurface.textureCoordinates[textureCoordinateIndex]), textureTransform));
 
 				const uint32 textureCoordinateRedirectionIndex = findDuplicate(textureCoordinates, textureCoordinate);
 
@@ -395,9 +383,9 @@ namespace Trident {
 				const uint32 vertexIndexB = subsurface.vertexIndices[vertexIndexIndex + 1];
 				const uint32 vertexIndexC = subsurface.vertexIndices[vertexIndexIndex + 2];
 
-				const uint32 textureCoordinateIndexA = subsurface.vertexTextureCoordinateIndices[vertexIndexIndex + 0];
-				const uint32 textureCoordinateIndexB = subsurface.vertexTextureCoordinateIndices[vertexIndexIndex + 1];
-				const uint32 textureCoordinateIndexC = subsurface.vertexTextureCoordinateIndices[vertexIndexIndex + 2];
+				const uint32 textureCoordinateIndexA = subsurface.textureCoordinateIndices[vertexIndexIndex + 0];
+				const uint32 textureCoordinateIndexB = subsurface.textureCoordinateIndices[vertexIndexIndex + 1];
+				const uint32 textureCoordinateIndexC = subsurface.textureCoordinateIndices[vertexIndexIndex + 2];
 
 				const StaticTriangle3D triangle = {
 					.vertices = {

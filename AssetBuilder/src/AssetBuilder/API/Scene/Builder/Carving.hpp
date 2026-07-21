@@ -28,17 +28,17 @@ namespace Trident {
 				{origin.x + quad.start.x, origin.y - quad.end.y, origin.z},
 				{origin.x + quad.end.x, origin.y - quad.end.y, origin.z},
 			},
-			.vertexTextureCoordinateComponents = {
-				quad.start.x / scale.x, quad.start.y / scale.y,
-				quad.end.x / scale.x, quad.start.y / scale.y,
-				quad.start.x / scale.x, quad.end.y / scale.y,
-				quad.end.x / scale.x, quad.end.y / scale.y,
+			.textureCoordinates = {
+				{quad.start.x / scale.x, quad.start.y / scale.y},
+				{quad.end.x / scale.x, quad.start.y / scale.y},
+				{quad.start.x / scale.x, quad.end.y / scale.y},
+				{quad.end.x / scale.x, quad.end.y / scale.y},
 			},
 			.vertexIndices = {
 				0, 1, 2,
 				1, 3, 2,
 			},
-			.vertexTextureCoordinateIndices = {
+			.textureCoordinateIndices = {
 				0, 1, 2,
 				1, 3, 2,
 			},
