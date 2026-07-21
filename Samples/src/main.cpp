@@ -215,7 +215,7 @@ namespace Trident {
 	Application* createApplication(uint32 argumentCount, char8** argumentValues) {
 		ProjectDescriptor projectDescriptor{};
 		projectDescriptor.type = ProjectType::MAIN;
-		projectDescriptor.name = "Trident Sample";
+		projectDescriptor.name = "Trident";
 		projectDescriptor.version = {1, 0, 0};
 
 		return new SampleApplication(projectDescriptor);
