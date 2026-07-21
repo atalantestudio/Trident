@@ -5,6 +5,7 @@
 
 #include "AssetBuilder/API/Scene/Builder/InteriorSceneBuilder.hpp"
 #include "AssetBuilder/API/Scene/Interior/Frame/DoorFrame.hpp"
+#include "AssetBuilder/API/Scene/Interior/Frame/WindowFrame.hpp"
 #include "AssetBuilder/API/Scene/Interior/Room/RectangularRoom.hpp"
 #include "AssetBuilder/Process/Scene/Scene3DProcess.hpp"
 #include "../../../Subprocess/RigidBody.hpp"
@@ -46,8 +47,8 @@ namespace Trident {
 
 				builder.floorLevels = {
 					0.0f, // Floor
-					128.0f, // Hall/bike room ceiling
-					240.0f, // Top hall/main room ceiling
+					128.0f, // Bike room ceiling
+					240.0f, // Hall room ceiling
 				};
 
 				RectangularRoom hallRoom({
@@ -70,18 +71,15 @@ namespace Trident {
 					.wallMaterialIndex = wallMaterialIndex,
 					.ceilingMaterialIndex = ceilingMaterialIndex,
 				});
-				RectangularRoom mainRoom({
-					.position = {-20.0f, 256.0f},
-					.size = {296.0f, 128.0f},
-					.floorLevel = builder.floorLevels[0],
-					.ceilingLevel = builder.floorLevels[2],
-					.luxelScale = {2.0f, 2.0f},
-					.floorMaterialIndex = floorMaterialIndex,
-					.wallMaterialIndex = wallMaterialIndex,
-					.ceilingMaterialIndex = ceilingMaterialIndex,
-				});
 
-				DoorFrame bikeRoomFrame({
+				WindowFrame hallRoomDoorFrame({
+					.room = &hallRoom,
+					.surfaceIndex = 2,
+					.floorOffset = 0.0f,
+					.horizontalOffset = 52.0f,
+					.size = {56.0f, 112.0f},
+				});
+				DoorFrame bikeRoomDoorFrame({
 					.entranceRoom = &hallRoom,
 					.entranceSurfaceIndex = 3,
 					.entranceFloorOffset = 0.0f,
@@ -89,14 +87,22 @@ namespace Trident {
 					.exitRoom = &bikeRoom,
 					.exitSurfaceIndex = 1,
 					.exitFloorOffset = 0.0f,
-					.exitHorizontalOffset = 30.0f,
-					.size = {54.0f, 112.0f},
+					.exitHorizontalOffset = 28.0f,
+					.size = {56.0f, 112.0f},
+				});
+				WindowFrame mainRoomDoorFrame({
+					.room = &hallRoom,
+					.surfaceIndex = 0,
+					.floorOffset = 0.0f,
+					.horizontalOffset = 36.0f,
+					.size = {68.0f, 112.0f},
 				});
 
 				builder.addRoom(hallRoom);
 				builder.addRoom(bikeRoom);
-				builder.addRoom(mainRoom);
-				builder.addFrame(bikeRoomFrame);
+				builder.addFrame(hallRoomDoorFrame);
+				builder.addFrame(bikeRoomDoorFrame);
+				builder.addFrame(mainRoomDoorFrame);
 
 				return {
 					.staticScene = builder.build(),
