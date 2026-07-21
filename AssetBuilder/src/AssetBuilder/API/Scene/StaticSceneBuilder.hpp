@@ -35,20 +35,25 @@ namespace Trident {
 
 			void carveSurface(StaticSurface& surface, svec3<float32> origin, const std::vector<Carving>& carvings, uint32& surfaceVertexCount) const;
 
-		// TODO(asset-builder/scene): Expose?
+			void generateLightmaps(StaticScene3D& scene) const;
+
+		// TODO(asset-builder/scene): Keep exposing?
 		public:
 			std::vector<StaticSurface> surfaces;
 
 		private:
 			std::filesystem::path rootOutputPath;
 			AssetLibrary* assetLibrary;
-			std::vector<BuildMaterialShader> materialShaders;
-			std::vector<BuildStaticMaterial3D> materials;
+
 			std::vector<svec3<float32>> vertices;
 			std::vector<svec3<float32>> normals;
 			std::vector<svec2<float32>> textureCoordinates;
 			std::vector<std::vector<StaticTriangle3D>> trianglesPerMaterial;
-			uint32 subsurfaceCount = 0;
+			std::vector<BuildMaterialShader> materialShaders;
+			std::vector<BuildStaticMaterial3D> materials;
+
 			uint32 triangleCount = 0;
+			uint32 subsurfaceCount = 0;
+			uint32 subsurfaceTextureCoordinateCount = 0;
 	};
 }

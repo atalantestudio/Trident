@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "AssetBuilder/API/Scene/Builder/Carving.hpp"
+#include "AssetBuilder/API/Scene/Builder/Lightmap.hpp"
 #include "AssetBuilder/API/Scene/Lightmap.hpp"
 #include "AssetBuilder/API/Scene/Lightmapper.hpp"
 #include "AssetBuilder/API/Scene/StaticSceneBuilder.hpp"
@@ -148,6 +149,8 @@ namespace Trident {
 
 		if (!parallelOrOpposite(ab, localCD)) {
 			snapAxis = normalized(cross(localCD, ab));
+
+			// TODO(lyah/acos)
 			snapAngle = std::acos(dot(snapAxis, descriptor.geometry.normal));
 		}
 
@@ -424,6 +427,7 @@ namespace Trident {
 
 			surfaceTriangleCount += static_cast<uint32>(vertexIndexCount / 3);
 			vertexOffset += static_cast<uint32>(vertexCount);
+			subsurfaceTextureCoordinateCount += static_cast<uint32>(textureCoordinateCount);
 			subsurfaceIndex += 1;
 		}
 
@@ -437,138 +441,42 @@ namespace Trident {
 	}
 
 	StaticScene3D StaticSceneBuilder::build() const {
-		sequence<StaticSurface> surfaces(this->surfaces.size());
-
-		std::copy(this->surfaces.begin(), this->surfaces.end(), &surfaces[0]);
-
 		StaticScene3D scene{};
-		scene.lightmapCoordinates = sequence<svec2<float32>>(subsurfaceCount * 4);
-		scene.triangles = sequence<StaticTriangle3D>(triangleCount);
-		scene.materialShaders = sequence<BuildMaterialShader>(materialShaders.size());
-		scene.materials = sequence<BuildStaticMaterial3D>(materials.size());
-
-		// TODO(asset-builder/scene): Restore.
-		/* sequence<std::vector<StaticTriangle3D>> trianglesPerMaterial(scene.materials.count());
-		sequence<Lightmap> lightmaps(subsurfaceCount);
-
-		// Sorted by ascending lightmap area.
-		std::vector<LightmapIndex> lightmapIndices;
-		lightmapIndices.reserve(subsurfaceCount); */
-
-		std::copy(materialShaders.begin(), materialShaders.end(), &scene.materialShaders[0]);
-		std::copy(materials.begin(), materials.end(), &scene.materials[0]);
-
-		uint32 materialIndex = 0;
-		uint32 triangleOffset = 0;
-
-		while (materialIndex < scene.materials.count()) {
-			const std::vector<StaticTriangle3D>& triangles = trianglesPerMaterial[materialIndex];
-
-			if (triangles.size() == 0) {
-				materialIndex += 1;
-
-				continue;
-			}
-
-			std::copy(triangles.begin(), triangles.end(), &scene.triangles[triangleOffset]);
-
-			scene.materials[materialIndex].triangleRange.offset = triangleOffset;
-
-			triangleOffset += static_cast<uint32>(triangles.size());
-			materialIndex += 1;
-		}
-
-		// TODO(asset-builder/scene): Restore.
-		/* uint32 quadOffset = 0;
-
-		for (const StaticSurface& surface : surfaces) {
-			const uint32 triangleOffset = scene.materials[surface.materialIndex].triangleRange.offset + surface.triangleOffset;
-
-			uint32 quadIndex = 0;
-
-			while (quadIndex < surface.subsurfaces.size()) {
-				const StaticSubsurface& quad = surface.subsurfaces[quadIndex];
-
-				pool<svec2<float32>, 4> vertices;
-				vertices.add({0.0f, 0.0f});
-				vertices.add({quad.end.x - quad.start.x, 0.0f});
-				vertices.add({0.0f, quad.end.y - quad.start.y});
-				vertices.add({quad.end - quad.start});
-
-				Lightmap& lightmap = lightmaps[quadOffset + quadIndex];
-				lightmap.triangleOffset = triangleOffset + quadIndex * 2;
-				lightmap.offset = {0, 0};
-				lightmap.coordinateOffset = triangleOffset * 2 + quadIndex * 4;
-
-				svec2<float32> maxCoordinate = (quad.end - quad.start) / surface.luxelScale;
-				maxCoordinate.x = round(maxCoordinate.x * 100.0f) / 100.0f;
-				maxCoordinate.y = round(maxCoordinate.y * 100.0f) / 100.0f;
-
-				DEBUG_ASSERT(maxCoordinate.x > 0.0f);
-
-				uint16 coordinateIndex = 0;
-
-				while (coordinateIndex < vertices.count()) {
-					svec2<float32>& coordinate = scene.lightmapCoordinates[lightmap.coordinateOffset + coordinateIndex];
-					coordinate = vertices[coordinateIndex] / surface.luxelScale;
-					coordinate.x = round(coordinate.x * 100.0f) / 100.0f;
-					coordinate.y = round(coordinate.y * 100.0f) / 100.0f;
-
-					coordinateIndex += 1;
-				}
-
-				// Pad for dilation.
-				maxCoordinate.x += 2.0f;
-				maxCoordinate.y += 2.0f;
-
-				const svec2<float32> size = abs(maxCoordinate);
-
-				lightmap.size = {static_cast<uint32>(size.x), static_cast<uint32>(size.y)};
-
-				LightmapIndex lightmapIndex{};
-				lightmapIndex.index = quadOffset + quadIndex;
-				lightmapIndex.area = lightmap.size.width * lightmap.size.height;
-
-				uint32 lightmapInsertionIndex = 0;
-
-				while (lightmapInsertionIndex < lightmapIndices.size()) {
-					if (lightmapIndex.area > lightmapIndices[lightmapInsertionIndex].area) {
-						break;
-					}
-
-					lightmapInsertionIndex += 1;
-				}
-
-				lightmapIndices.insert(lightmapIndices.begin() + lightmapInsertionIndex, lightmapIndex);
-
-				quadIndex += 1;
-			}
-
-			quadOffset += quadIndex;
-		} */
-
 		scene.vertices = sequence<svec3<float32>>(vertices.size());
 		scene.normals = sequence<svec3<float32>>(normals.size());
 		scene.textureCoordinates = sequence<svec2<float32>>(textureCoordinates.size());
+		scene.lightmapCoordinates = sequence<svec2<float32>>(subsurfaceTextureCoordinateCount);
+		scene.triangles = sequence<StaticTriangle3D>(triangleCount);
+		scene.materialShaders = sequence<BuildMaterialShader>(materialShaders.size());
+		scene.materials = sequence<BuildStaticMaterial3D>(materials.size());
 
 		std::copy(vertices.begin(), vertices.end(), &scene.vertices[0]);
 		std::copy(normals.begin(), normals.end(), &scene.normals[0]);
 		std::copy(textureCoordinates.begin(), textureCoordinates.end(), &scene.textureCoordinates[0]);
 
-		// TODO(asset-builder/scene): Restore.
-		/* Lightmapper::updateAtlasCoordinates(scene, lightmaps, view<LightmapIndex>(&lightmapIndices[0], lightmapIndices.size()));
+		uint32 triangleOffset = 0;
+		uint32 materialIndex = 0;
 
-		scene.lightmapAtlasImageAssetDescriptor = {
-			.format = ImageFormat::R8G8B8A8_UNORM,
-			.extent = {Lightmapper::ATLAS_SIZE.width, Lightmapper::ATLAS_SIZE.width, 1},
-			.mipLevelCount = 1,
-			.layerCount = 1,
-			.data = sequence<uint8>(Lightmapper::ATLAS_SIZE.width * Lightmapper::ATLAS_SIZE.height * getByteSize(ImageFormat::R8G8B8A8_UNORM)),
-		};
-		scene.lightmapAtlasImageAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
+		while (materialIndex < scene.materials.count()) {
+			BuildStaticMaterial3D& material = scene.materials[materialIndex];
+			material = materials[materialIndex];
 
-		Lightmapper lightmapper;
-		lightmapper.buildLightmapAtlas(scene, scene.lightmapAtlasImageAssetDescriptor); */
+			const std::vector<StaticTriangle3D>& triangles = trianglesPerMaterial[materialIndex];
+
+			if (triangles.size() > 0) {
+				std::copy(triangles.begin(), triangles.end(), &scene.triangles[triangleOffset]);
+
+				material.triangleRange.offset = triangleOffset;
+
+				triangleOffset += static_cast<uint32>(triangles.size());
+			}
+
+			materialIndex += 1;
+		}
+
+		std::copy(materialShaders.begin(), materialShaders.end(), &scene.materialShaders[0]);
+
+		generateLightmaps(scene);
 
 		return scene;
 	}
