@@ -66,8 +66,7 @@ void main() {
 	vec3 diffuse = texture(diffuseSampler, interstage.textureCoordinate).rgb;
 	vec3 light = sampleBicubic(lightmapAtlasSampler, interstage.lightmapCoordinate).rgb;
 
-	// fragment.rgb = diffuse * light;
-	fragment.rgb = light;
+	fragment.rgb = diffuse * light;
 
 	fragment.rgb = pow(fragment.rgb, vec3(1.0 / 2.2));
 	fragment.a = 1.0;

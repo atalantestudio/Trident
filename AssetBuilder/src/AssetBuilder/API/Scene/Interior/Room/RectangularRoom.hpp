@@ -16,6 +16,7 @@ namespace Trident {
 		uint32 floorMaterialIndex;
 		uint32 wallMaterialIndex;
 		uint32 ceilingMaterialIndex;
+		TextureFilteringDescriptor floorTextureFiltering;
 	};
 
 	struct RectangularRoom : public Room {
@@ -26,7 +27,9 @@ namespace Trident {
 		static constexpr uint32 FLOOR = 4;
 		static constexpr uint32 CEILING = 5;
 
-		explicit RectangularRoom(const RectangularRoomDescriptor& descriptor) {
+		explicit RectangularRoom(const RectangularRoomDescriptor& descriptor) :
+			position(descriptor.position.x, descriptor.floorLevel, descriptor.position.y)
+		{
 			const float32 sizeX = descriptor.size.x;
 			const float32 sizeY = descriptor.ceilingLevel - descriptor.floorLevel;
 			const float32 sizeZ = descriptor.size.y;
@@ -38,34 +41,31 @@ namespace Trident {
 			const StaticGeometry3D rightWallGeometry = InteriorSceneBuilder::createWallGeometry({sizeZ, sizeY});
 
 			// TODO(asset-builder/scene/interior/room): Expose properties per individual room surface.
-			const TextureFilteringDescriptor textureFiltering256 = {
-				.scale = {1.0f / 256.0f / 0.25f, 1.0f / 256.0f / 0.25f},
-			};
-			const TextureFilteringDescriptor textureFiltering512 = {
-				.scale = {1.0f / 512.0f / 0.25f, 1.0f / 512.0f / 0.25f},
+			const TextureFilteringDescriptor textureFiltering = {
+				.scale = {0.25f * 512.0f, 0.25f * 512.0f},
 			};
 
 			const SurfaceDescriptor frontWallDescriptor = {
 				.geometry = frontWallGeometry,
-				.textureFiltering = textureFiltering512,
+				.textureFiltering = textureFiltering,
 				.materialIndex = descriptor.wallMaterialIndex,
 				.luxelScale = descriptor.luxelScale,
 			};
 			const SurfaceDescriptor rightWallDescriptor = {
 				.geometry = rightWallGeometry,
-				.textureFiltering = textureFiltering512,
+				.textureFiltering = textureFiltering,
 				.materialIndex = descriptor.wallMaterialIndex,
 				.luxelScale = descriptor.luxelScale,
 			};
 			const SurfaceDescriptor floorDescriptor = {
 				.geometry = floorGeometry,
-				.textureFiltering = textureFiltering256,
+				.textureFiltering = descriptor.floorTextureFiltering,
 				.materialIndex = descriptor.floorMaterialIndex,
 				.luxelScale = descriptor.luxelScale,
 			};
 			const SurfaceDescriptor ceilingDescriptor = {
 				.geometry = floorGeometry,
-				.textureFiltering = textureFiltering512,
+				.textureFiltering = textureFiltering,
 				.materialIndex = descriptor.ceilingMaterialIndex,
 				.luxelScale = descriptor.luxelScale,
 			};
@@ -81,6 +81,7 @@ namespace Trident {
 			surfaceIndices = sequence<uint32>(surfaceDescriptors.count());
 		}
 
+		vec3<float32> position;
 		vec3<float32> frontWallTranslation;
 	};
 

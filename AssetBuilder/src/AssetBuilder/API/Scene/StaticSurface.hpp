@@ -56,6 +56,16 @@ namespace Trident {
 		vec3<float32> b;
 	};
 
+	struct DualSnapEdge {
+		/// In world space.
+		vec3<float32> vertexA;
+		vec3<float32> vertexB;
+
+		/// In texture space.
+		vec2<float32> uvA;
+		vec2<float32> uvB;
+	};
+
 	struct StaticSubsurface {
 		inline uint32 getTriangleCount() const {
 			return static_cast<uint32>(vertexIndices.count() / 3);
@@ -71,7 +81,22 @@ namespace Trident {
 			return {vertices[indexA], vertices[indexB]};
 		}
 
-		/// Vertices in world space, used for dual snapping.
+		inline DualSnapEdge getDualSnapEdge(uint32 edgeIndex) const {
+			static constexpr uint16 edgeOriginVertexIndexCount = 4;
+			static constexpr uint16 edgeOriginVertexIndices[edgeOriginVertexIndexCount] = {0, 1, 3, 2};
+
+			const uint16 indexA = edgeOriginVertexIndices[edgeIndex];
+			const uint16 indexB = edgeOriginVertexIndices[(edgeIndex + 1) % edgeOriginVertexIndexCount];
+
+			return {
+				.vertexA = vertices[indexA],
+				.vertexB = vertices[indexB],
+				.uvA = textureCoordinates[indexA],
+				.uvB = textureCoordinates[indexB],
+			};
+		}
+
+		/// Vertices in world space, used in dual snapping.
 		sequence<svec3<float32>> vertices;
 
 		sequence<svec2<float32>> textureCoordinates;
@@ -88,9 +113,41 @@ namespace Trident {
 			return {vertices[indexA], vertices[indexB]};
 		}
 
-		/// Vertices in world space, used for single snapping.
+		inline DualSnapEdge getDualSnapEdge(vec3<float32> d) const {
+			float32 maxDistance = min<float32>();
+			uint32 edgeIndexA;
+			uint32 edgeIndexB;
+			uint32 vertexOffset = 0;
+
+			while (vertexOffset < edgeOriginVertexIndices.count()) {
+				const uint32 indexA = edgeOriginVertexIndices[vertexOffset];
+				const uint32 indexB = edgeOriginVertexIndices[(vertexOffset + 1) % edgeOriginVertexIndices.count()];
+				const vec3<float32> a = vertices[indexA];
+				const vec3<float32> b = vertices[indexB];
+				const vec3<float32> rightAB = cross(normal, normalized(a - b));
+				const float32 distance = dot(rightAB, d);
+
+				if (distance > maxDistance) {
+					maxDistance = distance;
+					edgeIndexA = indexA;
+					edgeIndexB = indexB;
+				}
+
+				vertexOffset += 1;
+			}
+
+			return {
+				.vertexA = vertices[edgeIndexA],
+				.vertexB = vertices[edgeIndexB],
+				.uvA = textureCoordinates[edgeIndexA],
+				.uvB = textureCoordinates[edgeIndexB],
+			};
+		}
+
+		/// Vertices in world space, used in single snapping.
 		sequence<svec3<float32>> vertices;
 
+		sequence<svec2<float32>> textureCoordinates;
 		sequence<uint16> edgeOriginVertexIndices;
 		svec3<float32> normal;
 		svec2<float32> scale;

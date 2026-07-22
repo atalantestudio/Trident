@@ -114,7 +114,7 @@ namespace Trident {
 		DEBUG_ASSERT(descriptor.luxelScale.x > 0.0f && descriptor.luxelScale.y > 0.0f);
 		DEBUG_ASSERT(descriptor.carvings.size() == 0 || descriptor.geometry.vertexIndices.count() == 6);
 
-		return compileSurface(descriptor, transform, {0.0f, 0.0f, 0.0f}, quat<float32>::identity());
+		return compileSurface(descriptor, transform, {0.0f, 0.0f, 0.0f}, quat<float32>::identity(), true);
 	}
 
 	uint32 StaticSceneBuilder::snapSurface(const SurfaceDescriptor& descriptor, const StaticEdge& parentEdge, uint32 edgeIndex, float32 hingeAngle) {
@@ -166,17 +166,17 @@ namespace Trident {
 
 		const quat<float32> hingeRotation = quat<float32>::axisAngle(ab, hingeAngle);
 
-		return compileSurface(descriptor, transform, c, hingeRotation);
+		return compileSurface(descriptor, transform, c, hingeRotation, true);
 	}
 
-	uint32 StaticSceneBuilder::snapSurface(const DualSnapSurfaceDescriptor& descriptor, const StaticEdge& edgeA, const StaticEdge& edgeB) {
+	uint32 StaticSceneBuilder::snapSurface(const DualSnapSurfaceDescriptor& descriptor, const DualSnapEdge& edgeA, const DualSnapEdge& edgeB) {
 		// TODO(asset-builder/scene): Better validation.
 		DEBUG_ASSERT(descriptor.luxelScale.x > 0.0f && descriptor.luxelScale.y > 0.0f);
 
-		const vec3<float32> a = edgeA.a;
-		const vec3<float32> b = edgeA.b;
-		const vec3<float32> c = edgeB.a;
-		const vec3<float32> d = edgeB.b;
+		const vec3<float32> a = edgeA.vertexA;
+		const vec3<float32> b = edgeA.vertexB;
+		const vec3<float32> c = edgeB.vertexA;
+		const vec3<float32> d = edgeB.vertexB;
 
 		DEBUG_ASSERT(a != c && a != d && b != c && b != d);
 
@@ -187,16 +187,16 @@ namespace Trident {
 
 		StaticGeometry3D geometry{};
 		geometry.vertexComponents = {
-			c[0], c[1], c[2],
 			d[0], d[1], d[2],
-			b[0], b[1], b[2],
 			a[0], a[1], a[2],
+			c[0], c[1], c[2],
+			b[0], b[1], b[2],
 		};
 		geometry.vertexTextureCoordinateComponents = {
-			0.0f, 0.0f,
-			1.0f, 0.0f,
-			0.0f, 1.0f,
-			1.0f, 1.0f,
+			edgeB.uvB[0], edgeB.uvB[1],
+			edgeA.uvA[0], edgeA.uvA[1],
+			edgeB.uvA[0], edgeB.uvA[1],
+			edgeA.uvB[0], edgeA.uvB[1],
 		};
 		geometry.vertexIndices = {
 			0, 1, 2,
@@ -218,11 +218,10 @@ namespace Trident {
 			.carvings = descriptor.carvings,
 		};
 
-		// TODO(asset-builder/scene/dual-snapping): compileSurface overload without transform.
-		return compileSurface(surfaceDescriptor, {}, {0.0f, 0.0f, 0.0f}, quat<float32>::identity());
+		return compileSurface(surfaceDescriptor, {}, {0.0f, 0.0f, 0.0f}, quat<float32>::identity(), false);
 	}
 
-	uint32 StaticSceneBuilder::compileSurface(const SurfaceDescriptor& descriptor, const Transform& transform, vec3<float32> hingeOffset, quat<float32> hingeRotation) {
+	uint32 StaticSceneBuilder::compileSurface(const SurfaceDescriptor& descriptor, const Transform& transform, vec3<float32> hingeOffset, quat<float32> hingeRotation, bool textureFilteringTransform) {
 		const uint32 surfaceIndex = static_cast<uint32>(surfaces.size());
 		const quat<float32> orientation = quat<float32>::axisAngle(transform.axis, transform.angle);
 		const mat4x4<float32> worldTransform = (
@@ -231,17 +230,23 @@ namespace Trident {
 			mat4x4<float32>(hingeRotation) *
 			mat4x4<float32>::translation(hingeOffset + transform.translation)
 		);
-		const mat3x3<float32> textureTransform = (
-			mat3x3<float32>::scaling(descriptor.geometry.scale * descriptor.textureFiltering.scale) *
-			mat3x3<float32>::rotation(pi<float32>() * descriptor.textureFiltering.rotation) *
-			mat3x3<float32>::translation(descriptor.textureFiltering.translation)
-		);
+
+		mat3x3<float32> textureTransform = mat3x3<float32>::identity();
+
+		if (textureFilteringTransform) {
+			textureTransform = (
+				mat3x3<float32>::scaling(descriptor.geometry.scale / descriptor.textureFiltering.scale) *
+				mat3x3<float32>::rotation(pi<float32>() * descriptor.textureFiltering.rotation) *
+				mat3x3<float32>::translation(descriptor.textureFiltering.translation)
+			);
+		}
 
 		BuildStaticMaterial3D& material = materials[descriptor.materialIndex];
 		std::vector<StaticTriangle3D>& triangles = trianglesPerMaterial[descriptor.materialIndex];
 
 		StaticSurface surface{};
 		surface.vertices = sequence<svec3<float32>>(descriptor.geometry.vertexComponents.count() / 3);
+		surface.textureCoordinates = sequence<svec2<float32>>(descriptor.geometry.vertexTextureCoordinateComponents.count() / 2);
 		surface.edgeOriginVertexIndices = descriptor.geometry.edgeOriginVertexIndices;
 
 		// TODO(lyah/scalar)
@@ -265,6 +270,18 @@ namespace Trident {
 			}, worldTransform)));
 
 			vertexIndex += 1;
+		}
+
+		uint32 textureCoordinateIndex = 0;
+
+		while (textureCoordinateIndex < surface.vertices.count()) {
+			// TODO(lyah/scalar)
+			surface.textureCoordinates[textureCoordinateIndex] = svec2<float32>(round<2, 2, float32>(multiplyTransform({
+				descriptor.geometry.vertexTextureCoordinateComponents[textureCoordinateIndex * 2 + 0],
+				descriptor.geometry.vertexTextureCoordinateComponents[textureCoordinateIndex * 2 + 1],
+			}, textureTransform)));
+
+			textureCoordinateIndex += 1;
 		}
 
 		uint32 surfaceVertexCount = 0;

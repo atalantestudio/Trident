@@ -98,7 +98,7 @@ namespace Trident {
 					.textureFiltering = {
 						.translation = {0.0f, 0.0f},
 						.rotation = 0.0f,
-						.scale = {1.0f / 128.0f, 1.0f / 128.0f},
+						.scale = {128.0f, 128.0f},
 					},
 					.materialIndex = 0,
 					.luxelScale = {1.0f, 1.0f},

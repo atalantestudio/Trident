@@ -32,13 +32,13 @@ namespace Trident {
 			uint32 placeSurface(const SurfaceDescriptor& descriptor, const Transform& transform);
 
 			uint32 snapSurface(const SurfaceDescriptor& descriptor, const StaticEdge& parentEdge, uint32 edgeIndex, float32 hingeAngle);
-			uint32 snapSurface(const DualSnapSurfaceDescriptor& descriptor, const StaticEdge& edgeA, const StaticEdge& edgeB);
+			uint32 snapSurface(const DualSnapSurfaceDescriptor& descriptor, const DualSnapEdge& edgeA, const DualSnapEdge& edgeB);
 
 			/// Compiles and returns an optimized static scene.
 			StaticScene3D build();
 
 		private:
-			uint32 compileSurface(const SurfaceDescriptor& descriptor, const Transform& transform, vec3<float32> hingeOffset, quat<float32> hingeRotation);
+			uint32 compileSurface(const SurfaceDescriptor& descriptor, const Transform& transform, vec3<float32> hingeOffset, quat<float32> hingeRotation, bool textureFilteringTransform);
 
 			void carveSurface(StaticSurface& surface, svec3<float32> origin, const std::vector<Carving>& carvings, uint32& surfaceVertexCount) const;
 

@@ -21,9 +21,8 @@ namespace Trident {
 				static constexpr uint32 MATERIAL_IDENTIFIER_OFFSET = 100;
 				static constexpr uint32 floorMaterialIndex = 0;
 				static constexpr uint32 wallMaterialIndex = 1;
-				// static constexpr uint32 woodMaterialIndex = 2;
-				// static constexpr uint32 ceilingMaterialIndex = 3;
-				static constexpr uint32 ceilingMaterialIndex = 2;
+				static constexpr uint32 woodMaterialIndex = 2;
+				static constexpr uint32 ceilingMaterialIndex = 3;
 
 				InteriorSceneBuilder builder(rootOutputPath);
 
@@ -42,8 +41,8 @@ namespace Trident {
 
 				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + floorMaterialIndex, 0);
 				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + wallMaterialIndex, 0);
-				// builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + woodMaterialIndex, 0);
-				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + 3, 0);
+				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + woodMaterialIndex, 0);
+				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + ceilingMaterialIndex, 0);
 
 				builder.floorLevels = {
 					0.0f, // Floor
@@ -60,6 +59,11 @@ namespace Trident {
 					.floorMaterialIndex = floorMaterialIndex,
 					.wallMaterialIndex = wallMaterialIndex,
 					.ceilingMaterialIndex = ceilingMaterialIndex,
+					.floorTextureFiltering = {
+						.translation = {0.25f, 0.625f},
+						.rotation = 0.0f,
+						.scale = {-0.25f * 256.0f, 0.25f * 256.0f},
+					},
 				});
 				RectangularRoom bikeRoom({
 					.position = {-60.0f, 116.0f},
@@ -70,6 +74,11 @@ namespace Trident {
 					.floorMaterialIndex = floorMaterialIndex,
 					.wallMaterialIndex = wallMaterialIndex,
 					.ceilingMaterialIndex = ceilingMaterialIndex,
+					.floorTextureFiltering = {
+						.translation = {0.5f, 0.624f},
+						.rotation = 0.0f,
+						.scale = {-0.25f * 256.0f, 0.25f * 256.0f},
+					},
 				});
 
 				WindowFrame hallRoomDoorFrame({
@@ -80,15 +89,18 @@ namespace Trident {
 					.size = {56.0f, 112.0f},
 				});
 				DoorFrame bikeRoomDoorFrame({
-					.entranceRoom = &hallRoom,
-					.entranceSurfaceIndex = 3,
-					.entranceFloorOffset = 0.0f,
-					.entranceHorizontalOffset = 116.0f,
-					.exitRoom = &bikeRoom,
-					.exitSurfaceIndex = 1,
-					.exitFloorOffset = 0.0f,
-					.exitHorizontalOffset = 28.0f,
-					.size = {56.0f, 112.0f},
+					.roomA = &hallRoom,
+					.surfaceIndexA = 3,
+					.horizontalOffsetA = 116.0f,
+
+					.roomB = &bikeRoom,
+					.surfaceIndexB = 1,
+					.horizontalOffsetB = 28.0f,
+
+					.doorSize = {48.0f, 108.0f},
+					.frameThickness = 4.0f,
+					.frameMaterialIndex = woodMaterialIndex,
+					.frameLuxelScale = {0.5f, 0.5f},
 				});
 				WindowFrame mainRoomDoorFrame({
 					.room = &hallRoom,
