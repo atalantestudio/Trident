@@ -260,6 +260,7 @@ namespace Trident {
 				const sequence<uint8> inputData = Filesystem::openByteBuffer(path);
 
 				ImageAssetDescriptor imageAssetDescriptor{};
+				imageAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
 				imageAssetDescriptor.mipLevelCount = 1;
 				imageAssetDescriptor.layerCount = 1;
 
