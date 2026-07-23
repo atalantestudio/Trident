@@ -4,7 +4,7 @@
 #pragma once
 
 #include "AssetBuilder/API/Geometry/StaticGeometry3D.hpp"
-#include "AssetBuilder/API/Scene/StaticSceneBuilder.hpp"
+#include "AssetBuilder/API/Scene/Builder/InteriorSceneBuilder.hpp"
 #include "AssetBuilder/Process/Scene/Scene3DProcess.hpp"
 #include "../../../Subprocess/Hull.hpp"
 #include "../../../Subprocess/RigidBody.hpp"
@@ -12,60 +12,43 @@
 namespace Trident {
 	class SnapTestSceneProcess final : public Scene3DProcess {
 		private:
-			static StaticGeometry3D createFloorGeometry(svec2<float32> scale) {
-				return {
-					.vertexComponents = {
-						-0.5f * scale.x, 0.0f,  0.5f * scale.y,
-						 0.5f * scale.x, 0.0f,  0.5f * scale.y,
-						-0.5f * scale.x, 0.0f, -0.5f * scale.y,
-						 0.5f * scale.x, 0.0f, -0.5f * scale.y,
+			static RectangularRoom createRoom(svec2<float32> position, const float32* floorLevel) {
+				return RectangularRoom({
+					.position = position,
+					.size = {200.0f, 200.0f},
+					.floorLevel = floorLevel[0],
+					.ceilingLevel = floorLevel[1],
+					.luxelScale = {4.0f, 4.0f},
+					.floorMaterialIndex = 0,
+					.wallMaterialIndex = 1,
+					.ceilingMaterialIndex = 3,
+					.floorTextureFiltering = {
+						.translation = {0.25f, 0.625f},
+						.rotation = 0.0f,
+						.scale = {-0.25f * 256.0f, 0.25f * 256.0f},
 					},
-					.vertexTextureCoordinateComponents = {
-						0.0f, 0.0f,
-						1.0f, 0.0f,
-						0.0f, 1.0f,
-						1.0f, 1.0f,
-					},
-					.vertexIndices = {
-						0, 1, 2,
-						1, 3, 2,
-					},
-					.vertexTextureCoordinateIndices = {
-						0, 1, 2,
-						1, 3, 2,
-					},
-					.edgeOriginVertexIndices = {0, 1, 3, 2},
-					.normal = {0.0f, 1.0f, 0.0f},
-					.scale = scale,
-				};
+				});
 			}
 
-			static StaticGeometry3D createWallGeometry(svec2<float32> scale) {
-				return {
-					.vertexComponents = {
-						-0.5f * scale.x,  0.5f * scale.y,  0.0f,
-						 0.5f * scale.x,  0.5f * scale.y,  0.0f,
-						-0.5f * scale.x, -0.5f * scale.y,  0.0f,
-						 0.5f * scale.x, -0.5f * scale.y,  0.0f,
-					},
-					.vertexTextureCoordinateComponents = {
-						0.0f, 0.0f,
-						1.0f, 0.0f,
-						0.0f, 1.0f,
-						1.0f, 1.0f,
-					},
-					.vertexIndices = {
-						0, 1, 2,
-						1, 3, 2,
-					},
-					.vertexTextureCoordinateIndices = {
-						0, 1, 2,
-						1, 3, 2,
-					},
-					.edgeOriginVertexIndices = {0, 1, 3, 2},
-					.normal = {0.0f, 0.0f, -1.0f},
-					.scale = scale,
-				};
+			static DoorFrame createFrame(RectangularRoom* roomA, RectangularRoom* roomB, uint32 surfaceIndexA, uint32 surfaceIndexB, float32 doorWidth, float32 horizontalOffset) {
+				return DoorFrame({
+					.roomA = roomA,
+					.surfaceIndexA = surfaceIndexA,
+					.horizontalOffsetA = horizontalOffset,
+					.roomB = roomB,
+					.surfaceIndexB = surfaceIndexB,
+					.horizontalOffsetB = horizontalOffset,
+					.doorSize = {doorWidth, 108.0f},
+					.frameThickness = 4.0f,
+					.frameMaterialIndex = 2,
+					.frameLuxelScale = {4.0f, 4.0f},
+				});
+			}
+
+			static DoorFrame createCenteredFrame(RectangularRoom* roomA, RectangularRoom* roomB, uint32 surfaceIndexA, uint32 surfaceIndexB, float32 doorWidth) {
+				const float32 horizontalOffset = (200.0f - (doorWidth + 8.0f)) * 0.5f;
+
+				return createFrame(roomA, roomB, surfaceIndexA, surfaceIndexB, doorWidth, horizontalOffset);
 			}
 
 		protected:
@@ -74,7 +57,14 @@ namespace Trident {
 			}
 
 			Scene3DData createScene(std::filesystem::path rootOutputPath) const final override {
-				StaticSceneBuilder builder(rootOutputPath);
+				static constexpr uint32 MATERIAL_IDENTIFIER_OFFSET = 100;
+				static constexpr uint32 floorMaterialIndex = 0;
+				static constexpr uint32 wallMaterialIndex = 1;
+				static constexpr uint32 woodMaterialIndex = 2;
+				static constexpr uint32 ceilingMaterialIndex = 3;
+
+				InteriorSceneBuilder builder(rootOutputPath);
+
 				builder.addMaterialShader("Lightmapped.frag", ShaderStage::FRAGMENT, "main", {
 					{
 						.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
@@ -88,67 +78,46 @@ namespace Trident {
 					},
 				});
 
-				builder.addMaterial(101, 0);
+				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + floorMaterialIndex, 0);
+				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + wallMaterialIndex, 0);
+				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + woodMaterialIndex, 0);
+				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + ceilingMaterialIndex, 0);
 
-				const StaticGeometry3D floorGeometry = createFloorGeometry({128.0f, 128.0f});
-				const StaticGeometry3D wallGeometry = createWallGeometry({200.0f, 128.0f});
-
-				const SurfaceDescriptor wallSurfaceDescriptor = {
-					.geometry = wallGeometry,
-					.textureFiltering = {
-						.translation = {0.0f, 0.0f},
-						.rotation = 0.0f,
-						.scale = {128.0f, 128.0f},
-					},
-					.materialIndex = 0,
-					.luxelScale = {1.0f, 1.0f},
-					.carvings = {
-						{
-							.offset = {8.0f, 8.0f},
-							.size = {40.0f, 84.0f},
-						},
-						/* {
-							.offset = {56.0f, 8.0f},
-							.size = {40.0f, 84.0f},
-						},
-						{
-							.offset = {104.0f, 8.0f},
-							.size = {40.0f, 84.0f},
-						},
-						{
-							.offset = {152.0f, 8.0f},
-							.size = {40.0f, 84.0f},
-						}, */
-					},
+				builder.floorLevels = {
+					0.0f, // Floor 1
+					128.0f, // Ceiling 1
+					136.0f, // Floor 2
+					264.0f, // Ceiling 2
 				};
 
-				const uint32 wall1SurfaceIndex = builder.placeSurface(
-					wallSurfaceDescriptor,
-					{
-						.translation = {0.0f, 0.0f, 128.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = 0.0f,
-					}
-				);
+				RectangularRoom room0 = createRoom({0.0f, 0.0f}, &builder.floorLevels[0]);
+				RectangularRoom room1 = createRoom({0.0f, 208.0f}, &builder.floorLevels[0]);
+				RectangularRoom room2 = createRoom({208.0f, 0.0f}, &builder.floorLevels[0]);
+				RectangularRoom room3 = createRoom({0.0f, -208.0f}, &builder.floorLevels[0]);
+				RectangularRoom room4 = createRoom({-208.0f, 0.0f}, &builder.floorLevels[0]);
+				// RectangularRoom room5 = createRoom({0.0f, 208.0f}, &builder.floorLevels[2]);
 
-				/* const SurfaceDescriptor floorSurfaceDescriptor = {
-					.geometry = floorGeometry,
-					.textureFiltering = {
-						.translation = {0.0f, 0.0f},
-						.rotation = 0.0f,
-						.scale = {1.0f / 128.0f, 1.0f / 128.0f},
-					},
-					.materialIndex = 0,
-					.luxelScale = {1.0f, 1.0f},
-					.carvings = {},
-				};
+				room0.surfaceDescriptors[room0.CEILING].carvings.emplace_back(Carving{
+					.offset = {32.0f, 32.0f},
+					.size = {136.0f, 136.0f},
+				});
 
-				// TODO(asset-builder/scene/interior/room): Don't copy.
-				const StaticSurface wall1 = builder.surfaces[wall1SurfaceIndex];
+				DoorFrame frame01 = createCenteredFrame(&room0, &room1, 0, 2, 48.0f);
+				DoorFrame frame02 = createCenteredFrame(&room0, &room2, 1, 3, 48.0f);
+				DoorFrame frame03 = createCenteredFrame(&room0, &room3, 2, 0, 48.0f);
+				DoorFrame frame04 = createCenteredFrame(&room0, &room4, 3, 1, 48.0f);
 
-				const uint32 wall2SurfaceIndex = builder.snapSurface(wallSurfaceDescriptor, wall1.getEdge(1), 3, radians(90.0_deg));
-				const uint32 wall3SurfaceIndex = builder.snapSurface(floorSurfaceDescriptor, wall1.getEdge(3), 1, radians(90.0_deg));
-				const uint32 floorSurfaceIndex = builder.snapSurface(wallSurfaceDescriptor, wall1.getEdge(2), 0, radians(90.0_deg)); */
+				builder.addRoom(room0);
+				builder.addRoom(room1);
+				builder.addRoom(room2);
+				builder.addRoom(room3);
+				builder.addRoom(room4);
+				// builder.addRoom(room5);
+
+				builder.addFrame(frame01);
+				builder.addFrame(frame02);
+				builder.addFrame(frame03);
+				builder.addFrame(frame04);
 
 				return {
 					.staticScene = builder.build(),
@@ -167,7 +136,7 @@ namespace Trident {
 						{
 							0,
 							createRigidBody({
-								.position = {0.0f, 0.0f, 0.0f},
+								.position = {0.0f, 77.0f, 0.0f},
 								.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
 								.scale = {33.0f, 77.0f, 33.0f},
 								.uniformScale = 33.0f,
