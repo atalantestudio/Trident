@@ -184,6 +184,7 @@ namespace Trident {
 				ENGINE_ASSERT(file.extent.depth == 1, "The default font bitmap must have a depth of 1.");
 
 				ImageAssetDescriptor imageAssetDescriptor{};
+				imageAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
 				imageAssetDescriptor.format = ImageFormat::R8_UNORM;
 				imageAssetDescriptor.extent = file.extent;
 				imageAssetDescriptor.mipLevelCount = 1;

@@ -39,6 +39,7 @@ namespace Trident {
 				GenerateSDFGlyphMapProcess(file, sdfGlyphMap);
 
 				ImageAssetDescriptor imageAssetDescriptor{};
+				imageAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
 				imageAssetDescriptor.format = ImageFormat::R8_UNORM;
 				imageAssetDescriptor.extent = {sdfGlyphMap.extent.width, sdfGlyphMap.extent.height, 1};
 				imageAssetDescriptor.mipLevelCount = 1;
