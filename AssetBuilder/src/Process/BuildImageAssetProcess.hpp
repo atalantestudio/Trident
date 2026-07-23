@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "AssetBuilder/API/BuildAssetMap.hpp"
+#include "AssetBuilder/API/AssetBuilderLibrary.hpp"
 #include "../File/PNG.hpp"
 
 #include "Engine/API/Process/Process.hpp"
@@ -34,10 +34,6 @@ namespace Trident {
 	class BuildImageAssetProcess final : public Process {
 		public:
 			static void encodeImageAsset(const std::filesystem::path& assetOutputPath, view<char8> assetName, ImageAssetDescriptor& descriptor) {
-				if (descriptor.identifier == max<uint32>()) {
-					descriptor.identifier = AssetLibrary::createAssetIdentifier();
-				}
-
 				ImageAssetHeader imageAssetHeader{};
 				imageAssetHeader.signature = AssetSignature::IMAGE;
 				imageAssetHeader.identifier = descriptor.identifier;
@@ -284,12 +280,12 @@ namespace Trident {
 
 				encodeImageAsset(assetOutputPath, assetName, imageAssetDescriptor);
 
-				assetMap->insert(imageAssetDescriptor.identifier, assetName);
+				assetLibrary->registerAsset(imageAssetDescriptor.identifier, assetName);
 			}
 
 		public:
-			explicit BuildImageAssetProcess(BuildAssetMap* assetMap) :
-				assetMap(assetMap)
+			explicit BuildImageAssetProcess(AssetBuilderLibrary* assetLibrary) :
+				assetLibrary(assetLibrary)
 			{}
 
 			sint32 main(view<void*> arguments) override {
@@ -312,6 +308,6 @@ namespace Trident {
 			}
 
 		private:
-			BuildAssetMap* assetMap;
+			AssetBuilderLibrary* assetLibrary;
 	};
 }

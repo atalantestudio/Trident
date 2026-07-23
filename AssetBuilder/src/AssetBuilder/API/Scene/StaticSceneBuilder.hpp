@@ -7,7 +7,7 @@
 #include "AssetBuilder/API/Scene/StaticScene.hpp"
 #include "AssetBuilder/API/Scene/StaticSurface.hpp"
 
-#include "Engine/Filesystem/Asset/AssetLibrary.hpp"
+#include "Engine/Filesystem/Asset/MaterialAsset.hpp"
 
 namespace Trident {
 	class StaticSceneBuilder {
@@ -21,13 +21,9 @@ namespace Trident {
 			static LightmapNode* insertLightmapNode(Lightmap& lightmap, LightmapNode* rootNode);
 
 		public:
-			explicit StaticSceneBuilder(std::filesystem::path rootOutputPath);
-
-			~StaticSceneBuilder();
-
 			void addMaterialShader(sequence<char8> name, ShaderStage stage, sequence<char8> entryPoint, sequence<DescriptorSetLayoutBinding> bindings);
 
-			void addMaterial(uint32 identifier, uint32 shaderIndex);
+			uint32 addMaterial(ref<MaterialAsset> materialAsset);
 
 			uint32 placeSurface(const SurfaceDescriptor& descriptor, const Transform& transform);
 
@@ -53,9 +49,6 @@ namespace Trident {
 			std::vector<StaticSurface> surfaces;
 
 		private:
-			std::filesystem::path rootOutputPath;
-			AssetLibrary* assetLibrary;
-
 			std::vector<svec3<float32>> vertices;
 			std::vector<svec3<float32>> normals;
 			std::vector<svec2<float32>> textureCoordinates;

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "AssetBuilder/API/BuildAssetMap.hpp"
+#include "AssetBuilder/API/AssetBuilderLibrary.hpp"
 #include "../Subprocess/BuildDefaultFontSubprocess.hpp"
 #include "../Subprocess/BuildTrueTypeFontSubprocess.hpp"
 
@@ -16,8 +16,8 @@ namespace Trident {
 			static constexpr uint32 PROJECT_OUTPUT_PATH_ARGUMENT_INDEX = 2;
 
 		public:
-			explicit BuildFontAssetProcess(BuildAssetMap* assetMap) :
-				assetMap(assetMap)
+			explicit BuildFontAssetProcess(AssetBuilderLibrary* assetLibrary) :
+				assetLibrary(assetLibrary)
 			{}
 
 			sint32 main(view<void*> arguments) override {
@@ -26,14 +26,14 @@ namespace Trident {
 				const std::filesystem::path assetOutputPath = rootOutputPath / "Asset/";
 				const std::filesystem::recursive_directory_iterator fontDirectoryIterator(rootInputPath / "Asset/Font");
 
-				BuildDefaultFontSubprocess _(assetOutputPath, assetMap);
+				BuildDefaultFontSubprocess _(assetOutputPath, assetLibrary);
 
 				for (const std::filesystem::directory_entry& directoryEntry : fontDirectoryIterator) {
 					if (directoryEntry.is_directory()) {
 						continue;
 					}
 
-					BuildTrueTypeFontSubprocess(directoryEntry, assetOutputPath, assetMap);
+					BuildTrueTypeFontSubprocess(directoryEntry, assetOutputPath, assetLibrary);
 				}
 
 				ENGINE_INFO("Done building font assets.");
@@ -42,6 +42,6 @@ namespace Trident {
 			}
 
 		private:
-			BuildAssetMap* assetMap;
+			AssetBuilderLibrary* assetLibrary;
 	};
 }

@@ -3,10 +3,9 @@
 
 #pragma once
 
-#include "AssetBuilder/API/BuildAssetMap.hpp"
+#include "AssetBuilder/API/AssetBuilderLibrary.hpp"
 
 #include "Engine/API/Process/Process.hpp"
-#include "Engine/Filesystem/Asset/AssetMap.hpp"
 
 #include "tsl/AST/ASTDebugger.hpp"
 #include "tsl/compile.hpp"
@@ -116,7 +115,7 @@ namespace Trident {
 
 				ENGINE_INFO("Generated shader module asset \"[]\" (ID: []).", outputPath, asset.identifier);
 
-				assetMap->insert(asset.identifier, stem);
+				assetLibrary->registerAsset(asset.identifier, stem);
 
 				return 0;
 			}
@@ -229,8 +228,8 @@ namespace Trident {
 			static constexpr uint32 PROJECT_OUTPUT_PATH_ARGUMENT_INDEX = 2;
 
 		public:
-			explicit BuildShaderModuleAssetProcess(BuildAssetMap* assetMap) :
-				assetMap(assetMap),
+			explicit BuildShaderModuleAssetProcess(AssetBuilderLibrary* assetLibrary) :
+				assetLibrary(assetLibrary),
 				logger(std::cout, LogLevel::ALL, "")
 			{}
 
@@ -281,7 +280,7 @@ namespace Trident {
 			}
 
 		private:
-			BuildAssetMap* assetMap;
+			AssetBuilderLibrary* assetLibrary;
 			ConsoleLogger logger;
 	};
 }

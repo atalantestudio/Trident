@@ -96,7 +96,6 @@ namespace Trident {
 		#endif
 
 		uint32 materialShaderIndex = 0;
-		uint32 materialBindingCount = 0;
 		uint32 imageCopyRegionCount = 0;
 		uint64 imageStagingBufferSize = 0;
 
@@ -136,7 +135,17 @@ namespace Trident {
 
 				while (assetIndex < assetCount) {
 					const ref<MaterialAsset> asset = sceneAsset->materialAssets[materialShader.materialAssetRange.offset + assetIndex];
-					const MaterialDescriptorImage& materialDescriptorImage = asset->descriptorImages[bindingIndex];
+
+					MaterialDescriptorImage materialDescriptorImage;
+
+					if (bindingIndex < asset->descriptorOffset) {
+						// TODO(forward): The behavior for non-material resources should be dependent on the shader used.
+						materialDescriptorImage.imageAsset = sceneAsset->getLightmapAtlasImageAsset();
+					}
+					else {
+						materialDescriptorImage = asset->descriptorImages[bindingIndex - asset->descriptorOffset];
+					}
+
 					const ref<ImageAsset> imageAsset = materialDescriptorImage.imageAsset;
 
 					ImageFormat format = imageAsset->getFormat();
@@ -165,7 +174,6 @@ namespace Trident {
 				}
 
 				bindingIndex += 1;
-				materialBindingCount += 1;
 			}
 
 			#if defined(DEBUG_OBJECT_NAME)
@@ -240,7 +248,6 @@ namespace Trident {
 
 		materialShaderIndex = 0;
 
-		// TODO(forward/materials): Use parameters from MaterialDescriptorImage.
 		ImageViewDescriptor materialReferenceBindingImageViewDescriptor = {
 			.mipLevelOffset = 0,
 			.mipLevelCount = 1,
@@ -322,7 +329,8 @@ namespace Trident {
 						.sampler = materialSampler,
 					};
 
-					if (bindingIndex > 0) {
+					// TODO(forward): The sampler should be dependent on the shader used.
+					if (bindingIndex == 0) {
 						descriptorImages[materialReferenceBindingImageIndex].sampler = lightmapSampler;
 					}
 

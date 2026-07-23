@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "AssetBuilder/API/BuildAssetMap.hpp"
+#include "AssetBuilder/API/AssetBuilderLibrary.hpp"
 
 #include "Engine/API/Process/Process.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
@@ -14,8 +14,8 @@ namespace Trident {
 			static constexpr uint32 PROJECT_OUTPUT_PATH_ARGUMENT_INDEX = 2;
 
 		public:
-			explicit BuildAssetMapProcess(const BuildAssetMap* assetMap) :
-				assetMap(assetMap)
+			explicit BuildAssetMapProcess(const AssetBuilderLibrary* assetLibrary) :
+				assetLibrary(assetLibrary)
 			{}
 
 			sint32 main(view<void*> arguments) override {
@@ -33,7 +33,7 @@ namespace Trident {
 				// Asset maps don't have identifiers.
 				uint64 size = sizeof(AssetHeader) - sizeof(uint32);
 
-				for (const auto& asset : assetMap->map) {
+				for (const auto& asset : assetLibrary->buildAssetMap.map) {
 					size += sizeof(uint32) * 2 + asset.second.count();
 				}
 
@@ -42,7 +42,7 @@ namespace Trident {
 				stream.write<AssetSignature>(assetHeader.signature);
 				stream.write<VersionNumber>(assetHeader.version);
 
-				for (const auto& asset : assetMap->map) {
+				for (const auto& asset : assetLibrary->buildAssetMap.map) {
 					stream.write<uint32>(asset.first);
 					stream.write<uint32>(static_cast<uint32>(asset.second.count()));
 
@@ -66,6 +66,6 @@ namespace Trident {
 			}
 
 		private:
-			const BuildAssetMap* assetMap;
+			const AssetBuilderLibrary* assetLibrary;
 	};
 }

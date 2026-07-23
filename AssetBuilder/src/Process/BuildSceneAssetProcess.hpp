@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "AssetBuilder/API/BuildAssetMap.hpp"
+#include "AssetBuilder/API/AssetBuilderLibrary.hpp"
 #include "../Subprocess/SceneData.hpp"
 #include "../Subprocess/Scene2D.hpp"
 #include "../Subprocess/Scene3D.hpp"
@@ -296,20 +296,20 @@ namespace Trident {
 
 				ENGINE_INFO("Generated scene asset \"[]\" (ID: []).", outputPath, identifier);
 
-				assetMap->insert(identifier, assetName);
+				assetLibrary->registerAsset(identifier, assetName);
 			}
 
 			void encodeScene3DAsset(const Scene3DData& sceneData, uint32 identifier, const ByteStream<StreamOperation::WRITE>& stream, view<char8> assetName, const std::filesystem::path& assetOutputPath) {
 				encodeSceneAsset(identifier, stream, assetName, assetOutputPath);
 
 				if (sceneData.staticScene.lightmapAtlasImageAssetDescriptor.identifier != max<uint32>()) {
-					assetMap->insert(sceneData.staticScene.lightmapAtlasImageAssetDescriptor.identifier, assetName);
+					assetLibrary->registerAsset(sceneData.staticScene.lightmapAtlasImageAssetDescriptor.identifier, assetName);
 				}
 			}
 
 		public:
-			explicit BuildSceneAssetProcess(BuildAssetMap* assetMap) :
-				assetMap(assetMap)
+			explicit BuildSceneAssetProcess(AssetBuilderLibrary* assetLibrary) :
+				assetLibrary(assetLibrary)
 			{}
 
 			sint32 main(view<void*> arguments) override {
@@ -346,6 +346,6 @@ namespace Trident {
 			}
 
 		private:
-			BuildAssetMap* assetMap;
+			AssetBuilderLibrary* assetLibrary;
 	};
 }

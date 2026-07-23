@@ -12,22 +12,22 @@ struct FragmentOutput {
 	float4 color : SV_Target;
 };
 
-Texture2D<float4> diffuseTexture : register(t5);
-Texture2D<float4> lightmapAtlasTexture : register(t6);
-SamplerState diffuseSamplerState : register(s0);
-SamplerState lightmapAtlasSamplerState : register(s1);
+Texture2D<float4> lightmapAtlasTexture : register(t5);
+Texture2D<float4> diffuseTexture : register(t6);
+SamplerState lightmapAtlasSamplerState : register(s0);
+SamplerState diffuseSamplerState : register(s1);
 
 FragmentOutput main(Interstage interstage) {
-	float4 diffuse = diffuseTexture.Sample(diffuseSamplerState, interstage.textureCoordinate);
+	float3 diffuse = diffuseTexture.Sample(diffuseSamplerState, interstage.textureCoordinate).rgb;
 
 	// TODO(forward/static): Sample the lightmap atlas with bicubic interpolation.
-	float4 light = lightmapAtlasTexture.Sample(lightmapAtlasSamplerState, interstage.lightmapCoordinate);
+	float3 light = lightmapAtlasTexture.Sample(lightmapAtlasSamplerState, interstage.lightmapCoordinate).rgb;
 
 	FragmentOutput output;
-	output.color = diffuse * light;
+	output.color.rgb = diffuse * light;
 
-	output.color.rgb = output.color.rgb / (output.color.rgb + 1.0);
 	output.color.rgb = pow(output.color.rgb, 1.0 / 2.2);
+	output.color.a = 1.0;
 
 	// TODO(dx12): Fix some materials not being rendered.
 	return output;

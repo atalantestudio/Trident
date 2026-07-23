@@ -3,15 +3,17 @@
 
 #include "pch.hpp"
 
-#include "AssetBuilder/API/BuildAssetMap.hpp"
+#include "AssetBuilder/API/AssetBuilderLibrary.hpp"
+#include "AssetBuilder/Process/Material/PlasterCeilingMaterialProcess.hpp"
+#include "AssetBuilder/Process/Material/PlasterWallMaterialProcess.hpp"
+#include "AssetBuilder/Process/Material/TileFloorMaterialProcess.hpp"
+#include "AssetBuilder/Process/Material/WoodDoorMaterialProcess.hpp"
 #include "AssetBuilder/Process/Scene/CabinSceneProcess.hpp"
-// #include "AssetBuilder/Process/Scene/HallSceneProcess.hpp"
 #include "AssetBuilder/Process/Scene/SnapTestSceneProcess.hpp"
 #include "Process/BuildAssetMapProcess.hpp"
 #include "Process/BuildFontAssetProcess.hpp"
 #include "Process/BuildGeometryAssetProcess.hpp"
 #include "Process/BuildImageAssetProcess.hpp"
-#include "Process/BuildMaterialAssetProcess.hpp"
 #include "Process/BuildSceneAssetProcess.hpp"
 #include "Process/BuildShaderModuleAssetProcess.hpp"
 
@@ -21,7 +23,8 @@ namespace Trident {
 	class AssetBuilderApplication : public Application {
 		public:
 			explicit AssetBuilderApplication(const ProjectDescriptor& projectDescriptor, uint32 argumentCount, char8** argumentValues) :
-				Application(projectDescriptor)
+				Application(projectDescriptor),
+				assetLibrary(static_cast<const char8*>(argumentValues[2]))
 			{
 				setConsoleArguments(argumentCount, argumentValues);
 
@@ -29,38 +32,37 @@ namespace Trident {
 				const std::filesystem::path assetMapOutputPath = (rootOutputPath / "Asset" / rootOutputPath.filename()).replace_extension("tam");
 
 				if (std::filesystem::exists(assetMapOutputPath)) {
-					AssetLibrary assetLibrary(rootOutputPath);
 					assetLibrary.loadAssetMap();
 
-					const std::unordered_map<uint32, view<char8>>& loadedAssetMap = assetLibrary.getAssetMap();
-
-					for (const auto& loadedAsset : loadedAssetMap) {
-						assetMap.insert(loadedAsset.first, loadedAsset.second);
-
-						ENGINE_DEBUG("Asset [], path: []", loadedAsset.first, loadedAsset.second);
+					for (const auto& loadedAsset : assetLibrary.getAssetMap()) {
+						assetLibrary.registerAsset(loadedAsset.first, loadedAsset.second);
 					}
 				}
 
-				registerProcess<BuildGeometryAssetProcess>(&assetMap);
-				registerProcess<BuildImageAssetProcess>(&assetMap);
+				registerProcess<BuildGeometryAssetProcess>(&assetLibrary);
 
-				registerProcess<BuildSceneAssetProcess>(&assetMap);
-				registerProcess<CabinSceneProcess>(&assetMap);
-				// registerProcess<HallSceneProcess>(&assetMap);
-				registerProcess<SnapTestSceneProcess>(&assetMap);
+				registerProcess<BuildImageAssetProcess>(&assetLibrary);
 
-				registerProcess<BuildMaterialAssetProcess>(&assetMap);
-				registerProcess<BuildShaderModuleAssetProcess>(&assetMap);
-				registerProcess<BuildFontAssetProcess>(&assetMap);
-				registerProcess<BuildAssetMapProcess>(&assetMap);
-			}
+				registerProcess<PlasterCeilingMaterialProcess>(&assetLibrary);
+				registerProcess<PlasterWallMaterialProcess>(&assetLibrary);
+				registerProcess<TileFloorMaterialProcess>(&assetLibrary);
+				registerProcess<WoodDoorMaterialProcess>(&assetLibrary);
 
-			~AssetBuilderApplication() override {
+				registerProcess<BuildSceneAssetProcess>(&assetLibrary);
+				registerProcess<CabinSceneProcess>(&assetLibrary);
+				registerProcess<SnapTestSceneProcess>(&assetLibrary);
+
+				registerProcess<BuildShaderModuleAssetProcess>(&assetLibrary);
+
+				registerProcess<BuildFontAssetProcess>(&assetLibrary);
+
+				registerProcess<BuildAssetMapProcess>(&assetLibrary);
+
 				ENGINE_INFO("Done building assets.");
 			}
 
 		private:
-			BuildAssetMap assetMap;
+			AssetBuilderLibrary assetLibrary;
 	};
 
 	Application* createApplication(uint32 argumentCount, char8** argumentValues) {

@@ -17,15 +17,8 @@ namespace Trident {
 				return "Cabin";
 			}
 
-			Scene3DData createScene(std::filesystem::path rootOutputPath) const final override {
-				static constexpr uint32 MATERIAL_IDENTIFIER_OFFSET = 100;
-				static constexpr uint32 floorMaterialIndex = 0;
-				static constexpr uint32 wallMaterialIndex = 1;
-				static constexpr uint32 woodMaterialIndex = 2;
-				static constexpr uint32 ceilingMaterialIndex = 3;
-
-				InteriorSceneBuilder builder(rootOutputPath);
-
+			Scene3DData createScene(AssetBuilderLibrary* assetLibrary) const final override {
+				InteriorSceneBuilder builder;
 				builder.addMaterialShader("Lightmapped.frag", ShaderStage::FRAGMENT, "main", {
 					{
 						.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
@@ -39,10 +32,10 @@ namespace Trident {
 					},
 				});
 
-				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + floorMaterialIndex, 0);
-				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + wallMaterialIndex, 0);
-				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + woodMaterialIndex, 0);
-				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + ceilingMaterialIndex, 0);
+				const uint32 plasterCeilingMaterialIndex = builder.addMaterial(assetLibrary->getAsset<MaterialAsset>("plasterceiling"));
+				const uint32 plasterWallMaterialIndex = builder.addMaterial(assetLibrary->getAsset<MaterialAsset>("plasterwall"));
+				const uint32 tileFloorMaterialIndex = builder.addMaterial(assetLibrary->getAsset<MaterialAsset>("tilefloor"));
+				const uint32 woodDoorMaterialIndex = builder.addMaterial(assetLibrary->getAsset<MaterialAsset>("wooddoor"));
 
 				builder.floorLevels = {
 					0.0f, // Floor
@@ -55,10 +48,10 @@ namespace Trident {
 					.size = {144.0f, 200.0f},
 					.floorLevel = builder.floorLevels[0],
 					.ceilingLevel = builder.floorLevels[1],
-					.luxelScale = {0.5f, 0.5f},
-					.floorMaterialIndex = floorMaterialIndex,
-					.wallMaterialIndex = wallMaterialIndex,
-					.ceilingMaterialIndex = ceilingMaterialIndex,
+					.luxelScale = {4.0f, 4.0f},
+					.floorMaterialIndex = tileFloorMaterialIndex,
+					.wallMaterialIndex = plasterWallMaterialIndex,
+					.ceilingMaterialIndex = plasterCeilingMaterialIndex,
 					.floorTextureFiltering = {
 						.translation = {0.25f, 0.625f},
 						.rotation = 0.0f,
@@ -70,10 +63,10 @@ namespace Trident {
 					.size = {72.0f, 136.0f},
 					.floorLevel = builder.floorLevels[0],
 					.ceilingLevel = builder.floorLevels[1],
-					.luxelScale = {0.5f, 0.5f},
-					.floorMaterialIndex = floorMaterialIndex,
-					.wallMaterialIndex = wallMaterialIndex,
-					.ceilingMaterialIndex = ceilingMaterialIndex,
+					.luxelScale = {4.0f, 4.0f},
+					.floorMaterialIndex = tileFloorMaterialIndex,
+					.wallMaterialIndex = plasterWallMaterialIndex,
+					.ceilingMaterialIndex = plasterCeilingMaterialIndex,
 					.floorTextureFiltering = {
 						.translation = {0.5f, 0.624f},
 						.rotation = 0.0f,
@@ -99,8 +92,8 @@ namespace Trident {
 
 					.doorSize = {48.0f, 108.0f},
 					.frameThickness = 4.0f,
-					.frameMaterialIndex = woodMaterialIndex,
-					.frameLuxelScale = {0.5f, 0.5f},
+					.frameMaterialIndex = woodDoorMaterialIndex,
+					.frameLuxelScale = {4.0f, 4.0f},
 				});
 				WindowFrame mainRoomDoorFrame({
 					.room = &hallRoom,
@@ -148,8 +141,8 @@ namespace Trident {
 			}
 
 		public:
-			explicit CabinSceneProcess(BuildAssetMap* assetMap) :
-				Scene3DProcess(assetMap)
+			explicit CabinSceneProcess(AssetBuilderLibrary* assetLibrary) :
+				Scene3DProcess(assetLibrary)
 			{}
 	};
 }

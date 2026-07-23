@@ -34,17 +34,7 @@ namespace Trident {
 
 				ENGINE_ASSERT(path != assetMap.map.end(), "Asset [] is not registered in the asset map.", identifier);
 
-				const std::unordered_map<sequence<char8>, uint32>& assetPathToIndexMap = getAssetPathToIndexMap<AssetType>();
-
-				auto index = assetPathToIndexMap.find(path->second);
-
-				if (index == assetPathToIndexMap.end()) {
-					loadAsset<AssetType>(path->second);
-
-					index = assetPathToIndexMap.find(path->second);
-				}
-
-				return std::static_pointer_cast<AssetType>(assets[index->second]);
+				return getAsset<AssetType>(path->second);
 			}
 
 			template<typename AssetType>
@@ -72,9 +62,11 @@ namespace Trident {
 			template<typename AssetType>
 			void loadAsset(view<char8> path);
 
+		protected:
+			AssetMap assetMap;
+
 		private:
 			std::filesystem::path basePath;
-			AssetMap assetMap;
 			std::vector<ref<Asset>> assets;
 			std::unordered_map<uint32, uint32> assetIdentifierToIndex;
 			std::unordered_map<sequence<char8>, uint32> fontAssetPathToIndex;
@@ -84,6 +76,4 @@ namespace Trident {
 			std::unordered_map<sequence<char8>, uint32> sceneAssetPathToIndex;
 			std::unordered_map<sequence<char8>, uint32> shaderModuleAssetPathToIndex;
 	};
-
-	ref<FontAsset> decodeFontAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary, view<char8> path);
 }

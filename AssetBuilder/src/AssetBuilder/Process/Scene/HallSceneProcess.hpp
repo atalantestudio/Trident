@@ -14,13 +14,7 @@ namespace Trident {
 				return "Hall";
 			}
 
-			Scene3DData createScene(std::filesystem::path rootOutputPath) const final override {
-				static constexpr uint32 MATERIAL_IDENTIFIER_OFFSET = 100;
-				static constexpr uint32 floorMaterialIndex = 0;
-				static constexpr uint32 wallMaterialIndex = 1;
-				static constexpr uint32 doorMaterialIndex = 2;
-				static constexpr uint32 ceilingMaterialIndex = 3;
-
+			Scene3DData createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				// Texture scale multipliers
 				static constexpr float32 m1 = 1.0f / 256.0f;
 				static constexpr float32 m2 = 1.0f / 512.0f;
@@ -32,8 +26,7 @@ namespace Trident {
 				const vec3<float32> forwardRotation = {-pi<float32>() * 0.5f, 0.0f, pi<float32>()};
 				const vec3<float32> backwardRotation = {pi<float32>() * 0.5f, 0.0f, 0.0f};
 
-				StaticSceneBuilder builder(rootOutputPath);
-
+				StaticSceneBuilder builder;
 				builder.addMaterialShader("Lightmapped.frag", ShaderStage::FRAGMENT, "main", {
 					{
 						.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
@@ -47,16 +40,16 @@ namespace Trident {
 					},
 				});
 
-				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + floorMaterialIndex, 0);
-				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + wallMaterialIndex, 0);
-				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + doorMaterialIndex, 0);
-				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + ceilingMaterialIndex, 0);
+				const uint32 plasterCeilingMaterialIndex = builder.addMaterial(assetLibrary->getAsset<MaterialAsset>("plasterceiling"));
+				const uint32 plasterWallMaterialIndex = builder.addMaterial(assetLibrary->getAsset<MaterialAsset>("plasterwall"));
+				const uint32 tileFloorMaterialIndex = builder.addMaterial(assetLibrary->getAsset<MaterialAsset>("tilefloor"));
+				const uint32 woodDoorMaterialIndex = builder.addMaterial(assetLibrary->getAsset<MaterialAsset>("wooddoor"));
 
 				/// Floors
 
 				// Hall floor
-				builder.addSurface({
-					.materialIndex = floorMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = tileFloorMaterialIndex,
 					.transform = {
 						.translation = {56.0f, 0.0f, 84.0f},
 						.rotation = upRotation,
@@ -71,8 +64,8 @@ namespace Trident {
 				});
 
 				// Hall to bike room floor connector
-				builder.addSurface({
-					.materialIndex = floorMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = tileFloorMaterialIndex,
 					.transform = {
 						.translation = {-20.0f, 0.0f, 128.0f},
 						.rotation = upRotation,
@@ -87,8 +80,8 @@ namespace Trident {
 				});
 
 				// Bike room floor
-				builder.addSurface({
-					.materialIndex = floorMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = tileFloorMaterialIndex,
 					.transform = {
 						.translation = {-60.0f, 0.0f, 116.0f},
 						.rotation = upRotation,
@@ -103,8 +96,8 @@ namespace Trident {
 				});
 
 				// Hall to main floor connector
-				builder.addSurface({
-					.materialIndex = floorMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = tileFloorMaterialIndex,
 					.transform = {
 						.translation = {54.0f, 0.0f, 188.0f},
 						.rotation = upRotation,
@@ -119,8 +112,8 @@ namespace Trident {
 				});
 
 				// Main floor
-				builder.addSurface({
-					.materialIndex = floorMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = tileFloorMaterialIndex,
 					.transform = {
 						.translation = {-20.0f, 0.0f, 256.0f},
 						.rotation = upRotation,
@@ -137,8 +130,8 @@ namespace Trident {
 				/// Walls
 
 				// Hall entrance left wall
-				builder.addSurface({
-					.materialIndex = wallMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = plasterWallMaterialIndex,
 					.transform = {
 						.translation = {10.0f, 64.0f, -16.0f},
 						.rotation = forwardRotation,
@@ -153,8 +146,8 @@ namespace Trident {
 				});
 
 				// Hall entrance right wall
-				builder.addSurface({
-					.materialIndex = wallMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = plasterWallMaterialIndex,
 					.transform = {
 						.translation = {110.0f, 64.0f, -16.0f},
 						.rotation = forwardRotation,
@@ -169,8 +162,8 @@ namespace Trident {
 				});
 
 				// Bike room entrance left wall
-				builder.addSurface({
-					.materialIndex = wallMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = plasterWallMaterialIndex,
 					.transform = {
 						.translation = {-16.0f, 64.0f, 42.0f},
 						.rotation = rightRotation,
@@ -185,8 +178,8 @@ namespace Trident {
 				});
 
 				// Bike room entrance right wall
-				builder.addSurface({
-					.materialIndex = wallMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = plasterWallMaterialIndex,
 					.transform = {
 						.translation = {-16.0f, 64.0f, 170.0f},
 						.rotation = rightRotation,
@@ -201,8 +194,8 @@ namespace Trident {
 				});
 
 				// Main entrance left wall
-				builder.addSurface({
-					.materialIndex = wallMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = plasterWallMaterialIndex,
 					.transform = {
 						.translation = {2.0f, 64.0f, 184.0f},
 						.rotation = backwardRotation,
@@ -217,8 +210,8 @@ namespace Trident {
 				});
 
 				// Main entrance right wall
-				builder.addSurface({
-					.materialIndex = wallMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = plasterWallMaterialIndex,
 					.transform = {
 						.translation = {108.0f, 64.0f, 184.0f},
 						.rotation = backwardRotation,
@@ -233,8 +226,8 @@ namespace Trident {
 				});
 
 				// Mailbox wall
-				builder.addSurface({
-					.materialIndex = wallMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = plasterWallMaterialIndex,
 					.transform = {
 						.translation = {128.0f, 64.0f, 84.0f},
 						.rotation = leftRotation,
@@ -249,8 +242,8 @@ namespace Trident {
 				});
 
 				// Bike room inside left wall
-				builder.addSurface({
-					.materialIndex = wallMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = plasterWallMaterialIndex,
 					.transform = {
 						.translation = {-60.0f, 64.0f, 48.0f},
 						.rotation = forwardRotation,
@@ -265,8 +258,8 @@ namespace Trident {
 				});
 
 				// Bike room inside back wall
-				builder.addSurface({
-					.materialIndex = wallMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = plasterWallMaterialIndex,
 					.transform = {
 						.translation = {-96.0f, 64.0f, 116.0f},
 						.rotation = rightRotation,
@@ -281,8 +274,8 @@ namespace Trident {
 				});
 
 				// Bike room inside right wall
-				builder.addSurface({
-					.materialIndex = wallMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = plasterWallMaterialIndex,
 					.transform = {
 						.translation = {-60.0f, 64.0f, 184.0f},
 						.rotation = backwardRotation,
@@ -297,8 +290,8 @@ namespace Trident {
 				});
 
 				// Bike room inside entrance left wall
-				builder.addSurface({
-					.materialIndex = wallMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = plasterWallMaterialIndex,
 					.transform = {
 						.translation = {-24.0f, 64.0f, 170.0f},
 						.rotation = leftRotation,
@@ -313,8 +306,8 @@ namespace Trident {
 				});
 
 				// Bike room inside entrance right wall
-				builder.addSurface({
-					.materialIndex = wallMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = plasterWallMaterialIndex,
 					.transform = {
 						.translation = {-24.0f, 64.0f, 74.0f},
 						.rotation = leftRotation,
@@ -329,8 +322,8 @@ namespace Trident {
 				});
 
 				// Hall entrance door wall
-				builder.addSurface({
-					.materialIndex = wallMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = plasterWallMaterialIndex,
 					.transform = {
 						.translation = {64.0f, 120.0f, -16.0f},
 						.rotation = forwardRotation,
@@ -345,8 +338,8 @@ namespace Trident {
 				});
 
 				// Bike room entrance door wall
-				builder.addSurface({
-					.materialIndex = wallMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = plasterWallMaterialIndex,
 					.transform = {
 						.translation = {-16.0f, 120.0f, 128.0f},
 						.rotation = rightRotation,
@@ -361,8 +354,8 @@ namespace Trident {
 				});
 
 				// Main entrance door wall
-				builder.addSurface({
-					.materialIndex = wallMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = plasterWallMaterialIndex,
 					.transform = {
 						.translation = {54.0f, 120.0f, 184.0f},
 						.rotation = backwardRotation,
@@ -377,8 +370,8 @@ namespace Trident {
 				});
 
 				// Bike room inside entrance door wall
-				builder.addSurface({
-					.materialIndex = wallMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = plasterWallMaterialIndex,
 					.transform = {
 						.translation = {-24.0f, 120.0f, 128.0f},
 						.rotation = leftRotation,
@@ -395,8 +388,8 @@ namespace Trident {
 				/// Door frames
 
 				// Bike room entrance door frame left
-				builder.addSurface({
-					.materialIndex = doorMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = woodDoorMaterialIndex,
 					.transform = {
 						.translation = {-16.0f, 54.0f, 102.0f},
 						.rotation = rightRotation,
@@ -411,8 +404,8 @@ namespace Trident {
 				});
 
 				// Bike room entrance door frame right
-				builder.addSurface({
-					.materialIndex = doorMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = woodDoorMaterialIndex,
 					.transform = {
 						.translation = {-16.0f, 54.0f, 154.0f},
 						.rotation = rightRotation,
@@ -427,8 +420,8 @@ namespace Trident {
 				});
 
 				// Bike room entrance door frame top
-				builder.addSurface({
-					.materialIndex = doorMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = woodDoorMaterialIndex,
 					.transform = {
 						.translation = {-16.0f, 110.0f, 128.0f},
 						.rotation = rightRotation,
@@ -443,8 +436,8 @@ namespace Trident {
 				});
 
 				// Bike room entrance door frame left inside
-				builder.addSurface({
-					.materialIndex = doorMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = woodDoorMaterialIndex,
 					.transform = {
 						.translation = {-20.0f, 54.0f, 104.0f},
 						.rotation = forwardRotation,
@@ -459,8 +452,8 @@ namespace Trident {
 				});
 
 				// Bike room entrance door frame right inside
-				builder.addSurface({
-					.materialIndex = doorMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = woodDoorMaterialIndex,
 					.transform = {
 						.translation = {-20.0f, 54.0f, 152.0f},
 						.rotation = backwardRotation,
@@ -475,8 +468,8 @@ namespace Trident {
 				});
 
 				// Bike room entrance door frame top inside
-				builder.addSurface({
-					.materialIndex = doorMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = woodDoorMaterialIndex,
 					.transform = {
 						.translation = {-20.0f, 108.0f, 128.0f},
 						.rotation = downRotation,
@@ -491,8 +484,8 @@ namespace Trident {
 				});
 
 				// Bike room inside entrance door frame left
-				builder.addSurface({
-					.materialIndex = doorMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = woodDoorMaterialIndex,
 					.transform = {
 						.translation = {-24.0f, 54.0f, 154.0f},
 						.rotation = leftRotation,
@@ -507,8 +500,8 @@ namespace Trident {
 				});
 
 				// Bike room inside entrance door frame right
-				builder.addSurface({
-					.materialIndex = doorMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = woodDoorMaterialIndex,
 					.transform = {
 						.translation = {-24.0f, 54.0f, 102.0f},
 						.rotation = leftRotation,
@@ -523,8 +516,8 @@ namespace Trident {
 				});
 
 				// Bike room inside entrance door frame top
-				builder.addSurface({
-					.materialIndex = doorMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = woodDoorMaterialIndex,
 					.transform = {
 						.translation = {-24.0f, 110.0f, 128.0f},
 						.rotation = leftRotation,
@@ -541,8 +534,8 @@ namespace Trident {
 				/// Ceiling
 
 				// Hall entrance top wall
-				builder.addSurface({
-					.materialIndex = ceilingMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = plasterCeilingMaterialIndex,
 					.transform = {
 						.translation = {56.0f, 184.0f, -16.0f},
 						.rotation = forwardRotation,
@@ -557,8 +550,8 @@ namespace Trident {
 				});
 
 				// Bike room entrance top wall
-				builder.addSurface({
-					.materialIndex = ceilingMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = plasterCeilingMaterialIndex,
 					.transform = {
 						.translation = {-16.0f, 184.0f, 84.0f},
 						.rotation = rightRotation,
@@ -573,8 +566,8 @@ namespace Trident {
 				});
 
 				// Main entrance top wall
-				builder.addSurface({
-					.materialIndex = ceilingMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = plasterCeilingMaterialIndex,
 					.transform = {
 						.translation = {56.0f, 184.0f, 184.0f},
 						.rotation = backwardRotation,
@@ -589,8 +582,8 @@ namespace Trident {
 				});
 
 				// Mailbox top wall
-				builder.addSurface({
-					.materialIndex = ceilingMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = plasterCeilingMaterialIndex,
 					.transform = {
 						.translation = {128.0f, 184.0f, 84.0f},
 						.rotation = leftRotation,
@@ -605,8 +598,8 @@ namespace Trident {
 				});
 
 				// Hall ceiling
-				builder.addSurface({
-					.materialIndex = ceilingMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = plasterCeilingMaterialIndex,
 					.transform = {
 						.translation = {56.0f, 240.0f, 84.0f},
 						.rotation = downRotation,
@@ -621,8 +614,8 @@ namespace Trident {
 				});
 
 				// Bike room ceiling
-				builder.addSurface({
-					.materialIndex = ceilingMaterialIndex,
+				builder.placeSurface({
+					.materialIndex = plasterCeilingMaterialIndex,
 					.transform = {
 						.translation = {-60.0f, 128.0f, 116.0f},
 						.rotation = downRotation,
@@ -670,8 +663,8 @@ namespace Trident {
 			}
 
 		public:
-			explicit HallSceneProcess(BuildAssetMap* assetMap) :
-				Scene3DProcess(assetMap)
+			explicit HallSceneProcess(AssetBuilderLibrary* assetLibrary) :
+				Scene3DProcess(assetLibrary)
 			{}
 	};
 }

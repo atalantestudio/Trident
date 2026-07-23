@@ -9,17 +9,14 @@
 namespace Trident {
 	struct MaterialDescriptorImage {
 		ref<ImageAsset> imageAsset;
-
-		// TODO(filesystem/asset/material): Use when decoding.
-		uint32 mipLevelOffset;
-		uint32 mipLevelCount;
-		uint32 layerOffset;
-		uint32 layerCount;
 	};
 
 	struct MaterialAsset : public Asset {
 		/// Index of the shader in the scene.
 		uint32 shaderIndex;
+
+		/// Offset in the descriptor set.
+		uint32 descriptorOffset;
 
 		sequence<MaterialDescriptorImage> descriptorImages;
 	};

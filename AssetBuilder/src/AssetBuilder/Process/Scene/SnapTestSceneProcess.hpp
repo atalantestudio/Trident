@@ -12,16 +12,16 @@
 namespace Trident {
 	class SnapTestSceneProcess final : public Scene3DProcess {
 		private:
-			static RectangularRoom createRoom(svec2<float32> position, const float32* floorLevel) {
+			static RectangularRoom createRoom(svec2<float32> position, const float32* floorLevel, uint32 floorMaterialIndex, uint32 wallMaterialIndex, uint32 ceilingMaterialIndex) {
 				return RectangularRoom({
 					.position = position,
 					.size = {200.0f, 200.0f},
 					.floorLevel = floorLevel[0],
 					.ceilingLevel = floorLevel[1],
 					.luxelScale = {4.0f, 4.0f},
-					.floorMaterialIndex = 0,
-					.wallMaterialIndex = 1,
-					.ceilingMaterialIndex = 3,
+					.floorMaterialIndex = floorMaterialIndex,
+					.wallMaterialIndex = wallMaterialIndex,
+					.ceilingMaterialIndex = ceilingMaterialIndex,
 					.floorTextureFiltering = {
 						.translation = {0.25f, 0.625f},
 						.rotation = 0.0f,
@@ -30,7 +30,7 @@ namespace Trident {
 				});
 			}
 
-			static DoorFrame createFrame(RectangularRoom* roomA, RectangularRoom* roomB, uint32 surfaceIndexA, uint32 surfaceIndexB, float32 doorWidth, float32 horizontalOffset) {
+			static DoorFrame createFrame(RectangularRoom* roomA, RectangularRoom* roomB, uint32 surfaceIndexA, uint32 surfaceIndexB, float32 doorWidth, float32 horizontalOffset, uint32 frameMaterialIndex) {
 				return DoorFrame({
 					.roomA = roomA,
 					.surfaceIndexA = surfaceIndexA,
@@ -40,15 +40,15 @@ namespace Trident {
 					.horizontalOffsetB = horizontalOffset,
 					.doorSize = {doorWidth, 108.0f},
 					.frameThickness = 4.0f,
-					.frameMaterialIndex = 2,
+					.frameMaterialIndex = frameMaterialIndex,
 					.frameLuxelScale = {4.0f, 4.0f},
 				});
 			}
 
-			static DoorFrame createCenteredFrame(RectangularRoom* roomA, RectangularRoom* roomB, uint32 surfaceIndexA, uint32 surfaceIndexB, float32 doorWidth) {
+			static DoorFrame createCenteredFrame(RectangularRoom* roomA, RectangularRoom* roomB, uint32 surfaceIndexA, uint32 surfaceIndexB, float32 doorWidth, uint32 frameMaterialIndex) {
 				const float32 horizontalOffset = (200.0f - (doorWidth + 8.0f)) * 0.5f;
 
-				return createFrame(roomA, roomB, surfaceIndexA, surfaceIndexB, doorWidth, horizontalOffset);
+				return createFrame(roomA, roomB, surfaceIndexA, surfaceIndexB, doorWidth, horizontalOffset, frameMaterialIndex);
 			}
 
 		protected:
@@ -56,15 +56,8 @@ namespace Trident {
 				return "SnapTest";
 			}
 
-			Scene3DData createScene(std::filesystem::path rootOutputPath) const final override {
-				static constexpr uint32 MATERIAL_IDENTIFIER_OFFSET = 100;
-				static constexpr uint32 floorMaterialIndex = 0;
-				static constexpr uint32 wallMaterialIndex = 1;
-				static constexpr uint32 woodMaterialIndex = 2;
-				static constexpr uint32 ceilingMaterialIndex = 3;
-
-				InteriorSceneBuilder builder(rootOutputPath);
-
+			Scene3DData createScene(AssetBuilderLibrary* assetLibrary) const final override {
+				InteriorSceneBuilder builder;
 				builder.addMaterialShader("Lightmapped.frag", ShaderStage::FRAGMENT, "main", {
 					{
 						.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
@@ -78,10 +71,10 @@ namespace Trident {
 					},
 				});
 
-				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + floorMaterialIndex, 0);
-				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + wallMaterialIndex, 0);
-				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + woodMaterialIndex, 0);
-				builder.addMaterial(MATERIAL_IDENTIFIER_OFFSET + ceilingMaterialIndex, 0);
+				const uint32 plasterCeilingMaterialIndex = builder.addMaterial(assetLibrary->getAsset<MaterialAsset>("plasterceiling"));
+				const uint32 plasterWallMaterialIndex = builder.addMaterial(assetLibrary->getAsset<MaterialAsset>("plasterwall"));
+				const uint32 tileFloorMaterialIndex = builder.addMaterial(assetLibrary->getAsset<MaterialAsset>("tilefloor"));
+				const uint32 woodDoorMaterialIndex = builder.addMaterial(assetLibrary->getAsset<MaterialAsset>("wooddoor"));
 
 				builder.floorLevels = {
 					0.0f, // Floor 1
@@ -90,22 +83,22 @@ namespace Trident {
 					264.0f, // Ceiling 2
 				};
 
-				RectangularRoom room0 = createRoom({0.0f, 0.0f}, &builder.floorLevels[0]);
-				RectangularRoom room1 = createRoom({0.0f, 208.0f}, &builder.floorLevels[0]);
-				RectangularRoom room2 = createRoom({208.0f, 0.0f}, &builder.floorLevels[0]);
-				RectangularRoom room3 = createRoom({0.0f, -208.0f}, &builder.floorLevels[0]);
-				RectangularRoom room4 = createRoom({-208.0f, 0.0f}, &builder.floorLevels[0]);
-				// RectangularRoom room5 = createRoom({0.0f, 208.0f}, &builder.floorLevels[2]);
+				RectangularRoom room0 = createRoom({0.0f, 0.0f}, &builder.floorLevels[0], tileFloorMaterialIndex, plasterWallMaterialIndex, plasterCeilingMaterialIndex);
+				RectangularRoom room1 = createRoom({0.0f, 208.0f}, &builder.floorLevels[0], tileFloorMaterialIndex, plasterWallMaterialIndex, plasterCeilingMaterialIndex);
+				RectangularRoom room2 = createRoom({208.0f, 0.0f}, &builder.floorLevels[0], tileFloorMaterialIndex, plasterWallMaterialIndex, plasterCeilingMaterialIndex);
+				RectangularRoom room3 = createRoom({0.0f, -208.0f}, &builder.floorLevels[0], tileFloorMaterialIndex, plasterWallMaterialIndex, plasterCeilingMaterialIndex);
+				RectangularRoom room4 = createRoom({-208.0f, 0.0f}, &builder.floorLevels[0], tileFloorMaterialIndex, plasterWallMaterialIndex, plasterCeilingMaterialIndex);
+				// RectangularRoom room5 = createRoom({0.0f, 208.0f}, &builder.floorLevels[2], tileFloorMaterialIndex, plasterWallMaterialIndex, plasterCeilingMaterialIndex);
 
 				room0.surfaceDescriptors[room0.CEILING].carvings.emplace_back(Carving{
 					.offset = {32.0f, 32.0f},
 					.size = {136.0f, 136.0f},
 				});
 
-				DoorFrame frame01 = createCenteredFrame(&room0, &room1, 0, 2, 48.0f);
-				DoorFrame frame02 = createCenteredFrame(&room0, &room2, 1, 3, 48.0f);
-				DoorFrame frame03 = createCenteredFrame(&room0, &room3, 2, 0, 48.0f);
-				DoorFrame frame04 = createCenteredFrame(&room0, &room4, 3, 1, 48.0f);
+				DoorFrame frame01 = createCenteredFrame(&room0, &room1, 0, 2, 48.0f, woodDoorMaterialIndex);
+				DoorFrame frame02 = createCenteredFrame(&room0, &room2, 1, 3, 48.0f, woodDoorMaterialIndex);
+				DoorFrame frame03 = createCenteredFrame(&room0, &room3, 2, 0, 48.0f, woodDoorMaterialIndex);
+				DoorFrame frame04 = createCenteredFrame(&room0, &room4, 3, 1, 48.0f, woodDoorMaterialIndex);
 
 				builder.addRoom(room0);
 				builder.addRoom(room1);
@@ -151,8 +144,8 @@ namespace Trident {
 			}
 
 		public:
-			explicit SnapTestSceneProcess(BuildAssetMap* assetMap) :
-				Scene3DProcess(assetMap)
+			explicit SnapTestSceneProcess(AssetBuilderLibrary* assetLibrary) :
+				Scene3DProcess(assetLibrary)
 			{}
 	};
 }

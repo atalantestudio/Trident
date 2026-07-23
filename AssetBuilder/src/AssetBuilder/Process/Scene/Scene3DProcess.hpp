@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "AssetBuilder/API/BuildAssetMap.hpp"
+#include "AssetBuilder/API/AssetBuilderLibrary.hpp"
 #include "../../../Process/BuildImageAssetProcess.hpp"
 #include "../../../Subprocess/SceneData.hpp"
 
@@ -173,21 +173,21 @@ namespace Trident {
 				Writer writer = Filesystem::openWriter(outputPath);
 				writer.write(stream.data, stream.size);
 
-				assetMap->insert(identifier, assetName);
+				assetLibrary->registerAsset(identifier, assetName);
 
 				BuildImageAssetProcess::encodeImageAsset(rootOutputPath / "Asset/", assetName, sceneData.staticScene.lightmapAtlasImageAssetDescriptor);
 
-				assetMap->insert(sceneData.staticScene.lightmapAtlasImageAssetDescriptor.identifier, assetName);
+				assetLibrary->registerAsset(sceneData.staticScene.lightmapAtlasImageAssetDescriptor.identifier, assetName);
 			}
 
 		protected:
-			explicit Scene3DProcess(BuildAssetMap* assetMap) :
-				assetMap(assetMap)
+			explicit Scene3DProcess(AssetBuilderLibrary* assetLibrary) :
+				assetLibrary(assetLibrary)
 			{}
 
 			virtual view<char8> getAssetName() const = 0;
 
-			virtual Scene3DData createScene(std::filesystem::path rootOutputPath) const = 0;
+			virtual Scene3DData createScene(AssetBuilderLibrary* assetLibrary) const = 0;
 
 		public:
 			sint32 main(view<void*> arguments) final override {
@@ -195,7 +195,7 @@ namespace Trident {
 				const uint32 assetIdentifier = AssetLibrary::createAssetIdentifier();
 				const view<char8> assetName = getAssetName();
 
-				Scene3DData scene = createScene(rootOutputPath);
+				Scene3DData scene = createScene(assetLibrary);
 
 				const ByteStream<StreamOperation::WRITE> stream = encodeScene3DAsset(assetIdentifier, scene);
 
@@ -207,6 +207,6 @@ namespace Trident {
 			}
 
 		private:
-			BuildAssetMap* assetMap;
+			AssetBuilderLibrary* assetLibrary;
 	};
 }

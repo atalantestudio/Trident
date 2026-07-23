@@ -8,8 +8,6 @@
 namespace Trident {
 	class InteriorSceneBuilder : public StaticSceneBuilder {
 		public:
-			explicit InteriorSceneBuilder(std::filesystem::path rootOutputPath);
-
 			template<typename FrameType>
 			void addFrame(FrameType& frame);
 

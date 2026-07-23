@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "AssetBuilder/API/BuildAssetMap.hpp"
+#include "AssetBuilder/API/AssetBuilderLibrary.hpp"
 #include "../../../Subprocess/SceneData.hpp"
 
 #include "Engine/API/Process/Process.hpp"
@@ -86,7 +86,8 @@ namespace Trident {
 				return stream;
 			}
 
-			void createSceneAsset(uint32 identifier, const ByteStream<StreamOperation::WRITE>& stream, view<char8> assetName, const std::filesystem::path& assetOutputPath) {
+			void createSceneAsset(uint32 identifier, const ByteStream<StreamOperation::WRITE>& stream, view<char8> assetName, const std::filesystem::path& rootOutputPath) {
+				const std::filesystem::path assetOutputPath = rootOutputPath / "Asset/Scene/";
 				const std::string assetOutputPathString = assetOutputPath.string();
 
 				sequence<char8> outputPath(assetOutputPathString.size() + assetName.count() + 5);
@@ -97,28 +98,27 @@ namespace Trident {
 				Writer writer = Filesystem::openWriter(outputPath);
 				writer.write(stream.data, stream.size);
 
-				assetMap->insert(identifier, assetName);
+				assetLibrary->registerAsset(identifier, assetName);
 			}
 
 		protected:
-			explicit Scene2DProcess(BuildAssetMap* assetMap) :
-				assetMap(assetMap)
+			explicit Scene2DProcess(AssetBuilderLibrary* assetLibrary) :
+				assetLibrary(assetLibrary)
 			{}
 
 			virtual view<char8> getAssetName() const = 0;
 
-			virtual Scene2DData createScene(std::filesystem::path rootOutputPath) const = 0;
+			virtual Scene2DData createScene(AssetBuilderLibrary* assetLibrary) const = 0;
 
 		public:
 			sint32 main(view<void*> arguments) final override {
 				const std::filesystem::path rootOutputPath = static_cast<const char8*>(arguments[2]);
-				const std::filesystem::path assetOutputPath = rootOutputPath / "Asset/Scene/";
 				const uint32 assetIdentifier = AssetLibrary::createAssetIdentifier();
 				const view<char8> assetName = getAssetName();
-				const Scene2DData scene = createScene(rootOutputPath);
+				const Scene2DData scene = createScene(assetLibrary);
 				const ByteStream<StreamOperation::WRITE> stream = encodeScene2DAsset(assetIdentifier, scene);
 
-				createSceneAsset(assetIdentifier, stream, assetName, assetOutputPath);
+				createSceneAsset(assetIdentifier, stream, assetName, rootOutputPath);
 
 				ENGINE_INFO("Generated 2D scene asset \"[]\" (ID: []).", assetName, assetIdentifier);
 
@@ -126,6 +126,6 @@ namespace Trident {
 			}
 
 		private:
-			BuildAssetMap* assetMap;
+			AssetBuilderLibrary* assetLibrary;
 	};
 }

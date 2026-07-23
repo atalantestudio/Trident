@@ -10,7 +10,7 @@
 namespace Trident {
 	class BuildTrueTypeFontSubprocess {
 		public:
-			explicit BuildTrueTypeFontSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::filesystem::path& assetOutputPath, BuildAssetMap* assetMap) {
+			explicit BuildTrueTypeFontSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::filesystem::path& assetOutputPath, AssetBuilderLibrary* assetLibrary) {
 				std::filesystem::path finalAssetOutputPath = assetOutputPath / "Font" / directoryEntry.path().filename();
 				finalAssetOutputPath.replace_extension("tfo");
 
@@ -47,7 +47,7 @@ namespace Trident {
 
 				BuildImageAssetProcess::encodeImageAsset(assetOutputPath, assetName, imageAssetDescriptor);
 
-				assetMap->insert(imageAssetDescriptor.identifier, assetName);
+				assetLibrary->registerAsset(imageAssetDescriptor.identifier, assetName);
 
 				FontAssetDescriptor fontAssetDescriptor{};
 				fontAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
@@ -140,7 +140,7 @@ namespace Trident {
 
 				ENGINE_INFO("Generated True-Type font asset \"[]\" (ID: []).", outputPath, fontAssetDescriptor.identifier);
 
-				assetMap->insert(fontAssetDescriptor.identifier, stem);
+				assetLibrary->registerAsset(fontAssetDescriptor.identifier, stem);
 			}
 	};
 }

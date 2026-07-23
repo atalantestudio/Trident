@@ -75,15 +75,6 @@ namespace Trident {
 		};
 	}
 
-	StaticSceneBuilder::StaticSceneBuilder(std::filesystem::path rootOutputPath) :
-		rootOutputPath(rootOutputPath),
-		assetLibrary(new AssetLibrary(rootOutputPath))
-	{}
-
-	StaticSceneBuilder::~StaticSceneBuilder() {
-		delete assetLibrary;
-	}
-
 	void StaticSceneBuilder::addMaterialShader(sequence<char8> name, ShaderStage stage, sequence<char8> entryPoint, sequence<DescriptorSetLayoutBinding> bindings) {
 		materialShaders.emplace_back(BuildMaterialShader{
 			.name = name,
@@ -94,18 +85,22 @@ namespace Trident {
 		});
 	}
 
-	void StaticSceneBuilder::addMaterial(uint32 identifier, uint32 shaderIndex) {
-		DEBUG_ASSERT(shaderIndex < materialShaders.size());
+	uint32 StaticSceneBuilder::addMaterial(ref<MaterialAsset> materialAsset) {
+		const uint32 materialIndex = static_cast<uint32>(materials.size());
+
+		DEBUG_ASSERT(materialAsset->shaderIndex < materialShaders.size());
 
 		materials.emplace_back(BuildStaticMaterial3D{
-			.identifier = identifier,
-			.shaderIndex = shaderIndex,
+			.identifier = materialAsset->identifier,
+			.shaderIndex = materialAsset->shaderIndex,
 			.triangleRange = {0, 0},
 		});
 
-		materialShaders[shaderIndex].materialAssetRange.count += 1;
+		materialShaders[materialAsset->shaderIndex].materialAssetRange.count += 1;
 
 		trianglesPerMaterial.resize(trianglesPerMaterial.size() + 1);
+
+		return materialIndex;
 	}
 
 	uint32 StaticSceneBuilder::placeSurface(const SurfaceDescriptor& descriptor, const Transform& transform) {

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "AssetBuilder/API/BuildAssetMap.hpp"
+#include "AssetBuilder/API/AssetBuilderLibrary.hpp"
 #include "../Subprocess/GeometryData.hpp"
 #include "../Subprocess/DefaultGeometries.hpp"
 #include "../Subprocess/EncodeGeometryAssetSubprocess.hpp"
@@ -244,12 +244,12 @@ namespace Trident {
 
 				ENGINE_INFO("Generated geometry asset \"[]\" (ID: []).", outputPath, identifier);
 
-				assetMap->insert(identifier, assetName);
+				assetLibrary->registerAsset(identifier, assetName);
 			}
 
 		public:
-			explicit BuildGeometryAssetProcess(BuildAssetMap* assetMap) :
-				assetMap(assetMap)
+			explicit BuildGeometryAssetProcess(AssetBuilderLibrary* assetLibrary) :
+				assetLibrary(assetLibrary)
 			{}
 
 			sint32 main(view<void*> arguments) override {
@@ -323,6 +323,6 @@ namespace Trident {
 			}
 
 		private:
-			BuildAssetMap* assetMap;
+			AssetBuilderLibrary* assetLibrary;
 	};
 }
