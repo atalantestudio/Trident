@@ -8,7 +8,7 @@ struct Camera {
 struct Vertex {
 	uint index;
 	uint textureCoordinateIndex;
-	uint lightmapCoordinateIndex;
+	float2 lightmapCoordinate;
 };
 
 struct Triangle {
@@ -35,7 +35,6 @@ StructuredBuffer<Triangle> triangleBuffer : register(t0);
 StructuredBuffer<float> vertexBuffer : register(t1);
 StructuredBuffer<float> normalBuffer : register(t2);
 StructuredBuffer<float> textureCoordinateBuffer : register(t3);
-StructuredBuffer<float> lightmapCoordinateBuffer : register(t4);
 
 Interstage main(VertexInput input) {
 	uint triangleIndex = input.vertexIndex / 3;
@@ -47,18 +46,16 @@ Interstage main(VertexInput input) {
 	uint vertexOffset = triangleVertex.index * 3;
 	uint normalOffset = triangle_.normalIndex * 3;
 	uint textureCoordinateOffset = triangleVertex.textureCoordinateIndex * 2;
-	uint lightmapCoordinateOffset = triangleVertex.lightmapCoordinateIndex * 2;
 
 	float3 vertex = float3(vertexBuffer[vertexOffset + 0], vertexBuffer[vertexOffset + 1], vertexBuffer[vertexOffset + 2]);
 	float3 normal = float3(normalBuffer[normalOffset + 0], normalBuffer[normalOffset + 1], normalBuffer[normalOffset + 2]);
 	float2 textureCoordinate = float2(textureCoordinateBuffer[textureCoordinateOffset + 0], textureCoordinateBuffer[textureCoordinateOffset + 1]);
-	float2 lightmapCoordinate = float2(lightmapCoordinateBuffer[lightmapCoordinateOffset + 0], lightmapCoordinateBuffer[lightmapCoordinateOffset + 1]);
 
 	Interstage interstage;
 	interstage.position = mul(camera.projectionView, float4(vertex, 1.0));
 	interstage.normal = normal;
 	interstage.textureCoordinate = textureCoordinate;
-	interstage.lightmapCoordinate = lightmapCoordinate;
+	interstage.lightmapCoordinate = triangleVertex.lightmapCoordinate;
 
 	return interstage;
 }

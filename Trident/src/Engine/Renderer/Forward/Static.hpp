@@ -14,14 +14,12 @@ namespace Trident {
 		const uint64 vertexRangeSize = sceneAsset->getStaticVertices().count() * sizeof(svec3<float32>);
 		const uint64 normalRangeSize = sceneAsset->getStaticNormals().count() * sizeof(svec3<float32>);
 		const uint64 textureCoordinateRangeSize = sceneAsset->getStaticTextureCoordinates().count() * sizeof(svec2<float32>);
-		const uint64 lightmapCoordinateRangeSize = sceneAsset->getStaticLightmapCoordinates().count() * sizeof(svec2<float32>);
 		const uint64 triangleAlignedRangeSize = ceil(triangleRangeSize, minStorageBufferOffsetAlignment);
 		const uint64 vertexAlignedRangeSize = ceil(vertexRangeSize, minStorageBufferOffsetAlignment);
 		const uint64 normalAlignedRangeSize = ceil(normalRangeSize, minStorageBufferOffsetAlignment);
 		const uint64 textureCoordinateAlignedRangeSize = ceil(textureCoordinateRangeSize, minStorageBufferOffsetAlignment);
-		const uint64 lightmapCoordinateAlignedRangeSize = ceil(lightmapCoordinateRangeSize, minStorageBufferOffsetAlignment);
 		const ref<Buffer> staticStagingBuffer = createDynamicBuffer({
-			.size = triangleRangeSize + vertexRangeSize + normalRangeSize + textureCoordinateRangeSize + lightmapCoordinateRangeSize,
+			.size = triangleRangeSize + vertexRangeSize + normalRangeSize + textureCoordinateRangeSize,
 			.usage = BufferUsage::TRANSFER_SRC,
 			.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
 			.persistent = false,
@@ -33,18 +31,16 @@ namespace Trident {
 		const ref<BufferView<svec3<float32>>> vertexView = staticStagingBuffer->createView<svec3<float32>>(triangleView->getOffset() + triangleView->getSize(), vertexRangeSize);
 		const ref<BufferView<svec3<float32>>> normalView = staticStagingBuffer->createView<svec3<float32>>(vertexView->getOffset() + vertexView->getSize(), normalRangeSize);
 		const ref<BufferView<svec2<float32>>> textureCoordinateView = staticStagingBuffer->createView<svec2<float32>>(normalView->getOffset() + normalView->getSize(), textureCoordinateRangeSize);
-		const ref<BufferView<svec2<float32>>> lightmapCoordinateView = staticStagingBuffer->createView<svec2<float32>>(textureCoordinateView->getOffset() + textureCoordinateView->getSize(), lightmapCoordinateAlignedRangeSize);
 
 		std::copy(sceneAsset->getStaticTriangles().begin(), sceneAsset->getStaticTriangles().end(), triangleView->map());
 		std::copy(sceneAsset->getStaticVertices().begin(), sceneAsset->getStaticVertices().end(), vertexView->map());
 		std::copy(sceneAsset->getStaticNormals().begin(), sceneAsset->getStaticNormals().end(), normalView->map());
 		std::copy(sceneAsset->getStaticTextureCoordinates().begin(), sceneAsset->getStaticTextureCoordinates().end(), textureCoordinateView->map());
-		std::copy(sceneAsset->getStaticLightmapCoordinates().begin(), sceneAsset->getStaticLightmapCoordinates().end(), lightmapCoordinateView->map());
 
 		staticStagingBuffer->unmap();
 
 		const ref<Buffer> staticBuffer = createDynamicBuffer({
-			.size = triangleAlignedRangeSize + vertexAlignedRangeSize + normalAlignedRangeSize + textureCoordinateAlignedRangeSize + lightmapCoordinateAlignedRangeSize,
+			.size = triangleAlignedRangeSize + vertexAlignedRangeSize + normalAlignedRangeSize + textureCoordinateAlignedRangeSize,
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
@@ -90,13 +86,6 @@ namespace Trident {
 				.sourceOffset = textureCoordinateView->getOffset(),
 				.destinationOffset = triangleAlignedRangeSize + vertexAlignedRangeSize + normalAlignedRangeSize,
 				.size = textureCoordinateView->getSize(),
-			},
-
-			// Lightmap coordinates
-			{
-				.sourceOffset = lightmapCoordinateView->getOffset(),
-				.destinationOffset = triangleAlignedRangeSize + vertexAlignedRangeSize + normalAlignedRangeSize + textureCoordinateAlignedRangeSize,
-				.size = lightmapCoordinateView->getSize(),
 			},
 		};
 

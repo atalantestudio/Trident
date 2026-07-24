@@ -57,6 +57,7 @@ namespace Trident {
 			std::vector<BuildStaticMaterial3D> materials;
 
 			sequence<Lightmap> lightmaps;
+			sequence<svec2<float32>> lightmapCoordinates;
 
 			/// Sorted by ascending area.
 			std::vector<LightmapLookup> lightmapLookups;

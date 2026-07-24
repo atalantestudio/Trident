@@ -13,7 +13,7 @@ struct LightmapPixel {
 struct Vertex {
 	uint index;
 	uint textureCoordinateIndex;
-	uint lightmapCoordinateIndex;
+	vec2 lightmapCoordinate;
 };
 
 struct Triangle {
@@ -59,11 +59,7 @@ layout(set = 0, binding = 4) buffer readonly NormalComponentBuffer {
 	float normalComponents[];
 };
 
-layout(set = 0, binding = 5) buffer readonly LightmapCoordinateBuffer {
-	vec2 lightmapCoordinates[];
-};
-
-layout(set = 0, binding = 6, rgba8) uniform writeonly image2D lightmapAtlasImage;
+layout(set = 0, binding = 5, rgba8) uniform writeonly image2D lightmapAtlasImage;
 
 float parallelogramArea(vec2 a, vec2 b) {
 	return a.x * b.y - a.y * b.x;
@@ -248,9 +244,9 @@ void main() {
 	vec3 vertexA = vec3(vertexComponents[vertexAOffset + 0], vertexComponents[vertexAOffset + 1], vertexComponents[vertexAOffset + 2]);
 	vec3 vertexB = vec3(vertexComponents[vertexBOffset + 0], vertexComponents[vertexBOffset + 1], vertexComponents[vertexBOffset + 2]);
 	vec3 vertexC = vec3(vertexComponents[vertexCOffset + 0], vertexComponents[vertexCOffset + 1], vertexComponents[vertexCOffset + 2]);
-	vec2 lightmapCoordinateA = lightmapCoordinates[triangle_.vertices[0].lightmapCoordinateIndex];
-	vec2 lightmapCoordinateB = lightmapCoordinates[triangle_.vertices[1].lightmapCoordinateIndex];
-	vec2 lightmapCoordinateC = lightmapCoordinates[triangle_.vertices[2].lightmapCoordinateIndex];
+	vec2 lightmapCoordinateA = triangle_.vertices[0].lightmapCoordinate;
+	vec2 lightmapCoordinateB = triangle_.vertices[1].lightmapCoordinate;
+	vec2 lightmapCoordinateC = triangle_.vertices[2].lightmapCoordinate;
 	vec2 pixelCoordinate = (coordinate + vec2(0.5, 0.5)) / atlasSize;
 	vec3 pixelBarycentricCoordinate = calculateBarycentricCoordinate(lightmapCoordinateA, lightmapCoordinateB, lightmapCoordinateC, pixelCoordinate);
 	vec3 radiance = vec3(0.0, 0.0, 0.0);

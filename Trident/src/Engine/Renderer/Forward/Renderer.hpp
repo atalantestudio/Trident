@@ -430,7 +430,6 @@ namespace Trident {
 				const uint64 vertexRangeSize = sceneAsset->getStaticVertices().count() * sizeof(svec3<float32>);
 				const uint64 normalRangeSize = sceneAsset->getStaticNormals().count() * sizeof(svec3<float32>);
 				const uint64 textureCoordinateRangeSize = sceneAsset->getStaticTextureCoordinates().count() * sizeof(svec2<float32>);
-				const uint64 lightmapCoordinateRangeSize = sceneAsset->getStaticLightmapCoordinates().count() * sizeof(svec2<float32>);
 				const uint64 triangleAlignedRangeSize = ceil(triangleRangeSize, minStorageBufferOffsetAlignment);
 				const uint64 vertexAlignedRangeSize = ceil(vertexRangeSize, minStorageBufferOffsetAlignment);
 				const uint64 normalAlignedRangeSize = ceil(normalRangeSize, minStorageBufferOffsetAlignment);
@@ -445,7 +444,6 @@ namespace Trident {
 					staticBuffer->createView<float32>(triangleAlignedRangeSize, vertexRangeSize),
 					staticBuffer->createView<float32>(triangleAlignedRangeSize + vertexAlignedRangeSize, normalRangeSize),
 					staticBuffer->createView<float32>(triangleAlignedRangeSize + vertexAlignedRangeSize + normalAlignedRangeSize, textureCoordinateRangeSize),
-					staticBuffer->createView<float32>(triangleAlignedRangeSize + vertexAlignedRangeSize + normalAlignedRangeSize + textureCoordinateAlignedRangeSize, lightmapCoordinateRangeSize),
 
 					// Vertex
 					dataBuffer->createView<float32>(scene->getVertexPositionComponentRange().offset, scene->getVertexPositionComponentRange().count),
@@ -504,7 +502,7 @@ namespace Trident {
 						writeDescriptorSets[writeDescriptorSetOffset + writeDescriptorSetIndex] = {
 							.descriptorSet = vertexDescriptorSet,
 							.bindingIndex = writeDescriptorSetIndex,
-							.descriptorBufferViews = descriptorBufferViews[writeDescriptorSetIndex + 5],
+							.descriptorBufferViews = descriptorBufferViews[writeDescriptorSetIndex + 4],
 						};
 
 						writeDescriptorSetIndex += 1;

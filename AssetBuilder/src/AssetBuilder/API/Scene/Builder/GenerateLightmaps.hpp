@@ -85,6 +85,7 @@ namespace Trident {
 
 	void StaticSceneBuilder::createLightmaps(StaticScene3D& scene) {
 		lightmaps = sequence<Lightmap>(subsurfaceCount);
+		lightmapCoordinates = sequence<svec2<float32>>(subsurfaceTextureCoordinateCount);
 
 		lightmapLookups.reserve(subsurfaceCount);
 
@@ -118,7 +119,7 @@ namespace Trident {
 					const vec3<float32> vertex = subsurface.vertices[textureCoordinateIndex] - a;
 					const svec2<float32> textureCoordinate = {dot(vertex, right), dot(vertex, down)};
 
-					scene.lightmapCoordinates[lightmap.coordinateOffset + textureCoordinateIndex] = textureCoordinate / surface.luxelScale;
+					lightmapCoordinates[lightmap.coordinateOffset + textureCoordinateIndex] = textureCoordinate / surface.luxelScale;
 
 					textureCoordinateIndex += 1;
 				}
@@ -178,7 +179,7 @@ namespace Trident {
 
 			while (coordinateIndex < lightmap.subsurface->textureCoordinates.count()) {
 				// TODO(lyah/scalar)
-				svec2<float32>& coordinate = scene.lightmapCoordinates[lightmap.coordinateOffset + coordinateIndex];
+				svec2<float32>& coordinate = lightmapCoordinates[lightmap.coordinateOffset + coordinateIndex];
 				coordinate.x += lightmap.offset.width;
 				coordinate.y += lightmap.offset.height;
 				coordinate /= svec2<float32>{static_cast<float32>(LIGHTMAP_ATLAS_EXTENT.width), static_cast<float32>(LIGHTMAP_ATLAS_EXTENT.height)};
@@ -193,9 +194,9 @@ namespace Trident {
 
 			while (triangleIndex < lightmap.subsurface->getTriangleCount()) {
 				StaticTriangle3D& triangle = scene.triangles[lightmap.triangleOffset + triangleIndex];
-				triangle.vertices[0].lightmapCoordinateIndex = lightmap.coordinateOffset + textureCoordinateIndices[textureCoordinateIndexOffset + 0];
-				triangle.vertices[1].lightmapCoordinateIndex = lightmap.coordinateOffset + textureCoordinateIndices[textureCoordinateIndexOffset + 1];
-				triangle.vertices[2].lightmapCoordinateIndex = lightmap.coordinateOffset + textureCoordinateIndices[textureCoordinateIndexOffset + 2];
+				triangle.vertices[0].lightmapCoordinate = lightmapCoordinates[lightmap.coordinateOffset + textureCoordinateIndices[textureCoordinateIndexOffset + 0]];
+				triangle.vertices[1].lightmapCoordinate = lightmapCoordinates[lightmap.coordinateOffset + textureCoordinateIndices[textureCoordinateIndexOffset + 1]];
+				triangle.vertices[2].lightmapCoordinate = lightmapCoordinates[lightmap.coordinateOffset + textureCoordinateIndices[textureCoordinateIndexOffset + 2]];
 
 				triangleIndex += 1;
 				textureCoordinateIndexOffset += 3;

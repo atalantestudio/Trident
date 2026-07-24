@@ -71,7 +71,6 @@ namespace Trident {
 				header.staticTriangleCount = static_cast<uint32>(data.staticScene.triangles.count());
 				header.staticVertexCount = static_cast<uint32>(data.staticScene.vertices.count());
 				header.staticTextureCoordinateCount = static_cast<uint32>(data.staticScene.textureCoordinates.count());
-				header.staticLightmapCoordinateCount = 0;
 				header.entityCount = data.entityCount;
 				header.geometryAssetCount = static_cast<uint32>(data.geometryAssetIdentifiers.count());
 				header.geometryMappingCount = static_cast<uint32>(data.geometryMappings.count());
@@ -145,7 +144,6 @@ namespace Trident {
 				header.staticVertexCount = static_cast<uint32>(data.staticScene.vertices.count());
 				header.staticNormalCount = static_cast<uint32>(data.staticScene.normals.count());
 				header.staticTextureCoordinateCount = static_cast<uint32>(data.staticScene.textureCoordinates.count());
-				header.staticLightmapCoordinateCount = static_cast<uint32>(data.staticScene.lightmapCoordinates.count());
 				header.entityCount = data.entityCount;
 				header.geometryAssetCount = static_cast<uint32>(data.geometryAssetIdentifiers.count());
 				header.geometryMappingCount = static_cast<uint32>(data.geometryMappings.count());
@@ -158,7 +156,6 @@ namespace Trident {
 					header.staticVertexCount * sizeof(svec3<float32>) +
 					header.staticNormalCount * sizeof(svec3<float32>) +
 					header.staticTextureCoordinateCount * sizeof(svec2<float32>) +
-					header.staticLightmapCoordinateCount * sizeof(svec2<float32>) +
 					data.staticScene.materials.count() * (sizeof(uint32) * 4) +
 					header.geometryAssetCount * sizeof(uint32) +
 					header.geometryMappingCount * (sizeof(Entity) + sizeof(uint32)) +
@@ -189,13 +186,13 @@ namespace Trident {
 				for (const StaticTriangle3D& triangle : data.staticScene.triangles) {
 					stream.write<uint32>(triangle.vertices[0].vertexIndex);
 					stream.write<uint32>(triangle.vertices[0].textureCoordinateIndex);
-					stream.write<uint32>(triangle.vertices[0].lightmapCoordinateIndex);
+					stream.write<svec2<float32>>(triangle.vertices[0].lightmapCoordinate);
 					stream.write<uint32>(triangle.vertices[1].vertexIndex);
 					stream.write<uint32>(triangle.vertices[1].textureCoordinateIndex);
-					stream.write<uint32>(triangle.vertices[1].lightmapCoordinateIndex);
+					stream.write<svec2<float32>>(triangle.vertices[1].lightmapCoordinate);
 					stream.write<uint32>(triangle.vertices[2].vertexIndex);
 					stream.write<uint32>(triangle.vertices[2].textureCoordinateIndex);
-					stream.write<uint32>(triangle.vertices[2].lightmapCoordinateIndex);
+					stream.write<svec2<float32>>(triangle.vertices[2].lightmapCoordinate);
 					stream.write<uint32>(triangle.normalIndex);
 				}
 
@@ -209,10 +206,6 @@ namespace Trident {
 
 				for (const svec2<float32> textureCoordinate : data.staticScene.textureCoordinates) {
 					stream.write<svec2<float32>>(textureCoordinate);
-				}
-
-				for (const svec2<float32> lightmapCoordinate : data.staticScene.lightmapCoordinates) {
-					stream.write<svec2<float32>>(lightmapCoordinate);
 				}
 
 				for (const BuildMaterialShader& materialShader : data.staticScene.materialShaders) {

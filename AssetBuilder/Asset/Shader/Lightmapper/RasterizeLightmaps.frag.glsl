@@ -21,14 +21,14 @@ in Interstage {
 
 const uint RAYTRACER_WORKGROUP_SIZE = 16;
 
-layout(set = 0, binding = 1) buffer TraceRaysArgumentBuffer {
+layout(set = 0, binding = 0) buffer TraceRaysArgumentBuffer {
 	uvec2 atlasSize;
 	uint lightmapPixelCount;
 	uint triangleCount;
 	DispatchIndirectCommand traceRaysCommand;
 };
 
-layout(set = 0, binding = 2) buffer writeonly LightmapPixelBuffer {
+layout(set = 0, binding = 1) buffer writeonly LightmapPixelBuffer {
 	LightmapPixel lightmapPixels[];
 };
 

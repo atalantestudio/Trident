@@ -6,7 +6,7 @@
 struct Vertex {
 	uint vertexIndex;
 	uint textureCoordinateIndex;
-	uint lightmapCoordinateIndex;
+	vec2 lightmapCoordinate;
 };
 
 struct Triangle {
@@ -40,10 +40,6 @@ layout(set = 0, binding = 4) buffer readonly TextureCoordinateBuffer {
 	float textureCoordinateBuffer[];
 };
 
-layout(set = 0, binding = 5) buffer readonly LightmapCoordinateBuffer {
-	float lightmapCoordinateBuffer[];
-};
-
 void main() {
 	uint vertexIndex = uint(gl_VertexIndex);
 	uint triangleIndex = vertexIndex / 3u;
@@ -55,16 +51,14 @@ void main() {
 	uint vertexOffset = triangleVertex.vertexIndex * 3u;
 	uint normalOffset = triangle.normalIndex * 3u;
 	uint textureCoordinateOffset = triangleVertex.textureCoordinateIndex * 2u;
-	uint lightmapCoordinateOffset = triangleVertex.lightmapCoordinateIndex * 2u;
 
 	vec3 vertex = vec3(vertexBuffer[vertexOffset + 0u], vertexBuffer[vertexOffset + 1u], vertexBuffer[vertexOffset + 2u]);
 	vec3 normal = vec3(normalBuffer[normalOffset + 0u], normalBuffer[normalOffset + 1u], normalBuffer[normalOffset + 2u]);
 	vec2 textureCoordinate = vec2(textureCoordinateBuffer[textureCoordinateOffset + 0u], textureCoordinateBuffer[textureCoordinateOffset + 1u]);
-	vec2 lightmapCoordinate = vec2(lightmapCoordinateBuffer[lightmapCoordinateOffset + 0u], lightmapCoordinateBuffer[lightmapCoordinateOffset + 1u]);
 
 	gl_Position = camera.projectionView * vec4(vertex, 1.0);
 
 	interstage.normal = normal;
 	interstage.textureCoordinate = textureCoordinate;
-	interstage.lightmapCoordinate = lightmapCoordinate;
+	interstage.lightmapCoordinate = triangleVertex.lightmapCoordinate;
 }

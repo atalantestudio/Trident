@@ -16,7 +16,7 @@ namespace Trident {
 	struct StaticVertex3D {
 		uint32 vertexIndex;
 		uint32 textureCoordinateIndex;
-		uint32 lightmapCoordinateIndex;
+		svec2<float32> lightmapCoordinate;
 	};
 
 	struct StaticTriangle3D {

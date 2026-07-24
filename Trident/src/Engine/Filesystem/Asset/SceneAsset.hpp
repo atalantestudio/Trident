@@ -26,7 +26,6 @@ namespace Trident {
 		uint32 staticVertexCount;
 		uint32 staticNormalCount;
 		uint32 staticTextureCoordinateCount;
-		uint32 staticLightmapCoordinateCount;
 		uint32 entityCount;
 		uint32 geometryAssetCount;
 		uint32 geometryMappingCount;
@@ -75,7 +74,6 @@ namespace Trident {
 		sequence<svec3<float32>> staticVertices;
 		sequence<svec3<float32>> staticNormals;
 		sequence<svec2<float32>> staticTextureCoordinates;
-		sequence<svec2<float32>> staticLightmapCoordinates;
 		sequence<StaticTriangle3D> staticTriangles;
 		sequence<MaterialShader> materialShaders;
 		sequence<StaticMaterial3D> staticMaterials;
@@ -193,7 +191,6 @@ namespace Trident {
 				staticVertices(descriptor.staticVertices),
 				staticNormals(descriptor.staticNormals),
 				staticTextureCoordinates(descriptor.staticTextureCoordinates),
-				staticLightmapCoordinates(descriptor.staticLightmapCoordinates),
 				staticTriangles(descriptor.staticTriangles),
 				staticMaterials(descriptor.staticMaterials),
 				lightmapAtlasImageAsset(descriptor.lightmapAtlasImageAsset),
@@ -218,10 +215,6 @@ namespace Trident {
 
 			inline const sequence<svec2<float32>>& getStaticTextureCoordinates() const {
 				return staticTextureCoordinates;
-			}
-
-			inline const sequence<svec2<float32>>& getStaticLightmapCoordinates() const {
-				return staticLightmapCoordinates;
 			}
 
 			inline const sequence<StaticTriangle3D>& getStaticTriangles() const {
@@ -280,7 +273,6 @@ namespace Trident {
 			sequence<svec3<float32>> staticVertices;
 			sequence<svec3<float32>> staticNormals;
 			sequence<svec2<float32>> staticTextureCoordinates;
-			sequence<svec2<float32>> staticLightmapCoordinates;
 			sequence<StaticTriangle3D> staticTriangles;
 			sequence<StaticMaterial3D> staticMaterials;
 			ref<ImageAsset> lightmapAtlasImageAsset;

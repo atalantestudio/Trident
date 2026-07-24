@@ -19,7 +19,6 @@ namespace Trident {
 		const uint32 staticVertexCount = stream.read<uint32>();
 		const uint32 staticNormalCount = stream.read<uint32>();
 		const uint32 staticTextureCoordinateCount = stream.read<uint32>();
-		const uint32 staticLightmapCoordinateCount = stream.read<uint32>();
 
 		descriptor.dynamicVertexPositionCount = 0;
 		descriptor.dynamicVertexNormalCount = 0;
@@ -37,7 +36,6 @@ namespace Trident {
 		descriptor.staticVertices = sequence<svec3<float32>>(staticVertexCount);
 		descriptor.staticNormals = sequence<svec3<float32>>(staticNormalCount);
 		descriptor.staticTextureCoordinates = sequence<svec2<float32>>(staticTextureCoordinateCount);
-		descriptor.staticLightmapCoordinates = sequence<svec2<float32>>(staticLightmapCoordinateCount);
 		descriptor.staticTriangles = sequence<StaticTriangle3D>(staticTriangleCount);
 		descriptor.geometryAssets = sequence<ref<GeometryAsset>>(stream.read<uint32>());
 		descriptor.geometryMappings = sequence<EntityComponentMapping<GeometryComponent>>(stream.read<uint32>());
@@ -61,7 +59,7 @@ namespace Trident {
 				StaticVertex3D& vertex = triangle.vertices[vertexIndex];
 				vertex.vertexIndex = stream.read<uint32>();
 				vertex.textureCoordinateIndex = stream.read<uint32>();
-				vertex.lightmapCoordinateIndex = stream.read<uint32>();
+				vertex.lightmapCoordinate = stream.read<svec2<float32>>();
 
 				vertexIndex += 1;
 			}
@@ -79,10 +77,6 @@ namespace Trident {
 
 		for (svec2<float32>& textureCoordinate : descriptor.staticTextureCoordinates) {
 			textureCoordinate = stream.read<svec2<float32>>();
-		}
-
-		for (svec2<float32>& lightmapCoordinate : descriptor.staticLightmapCoordinates) {
-			lightmapCoordinate = stream.read<svec2<float32>>();
 		}
 
 		for (MaterialShader& materialShader : descriptor.materialShaders) {

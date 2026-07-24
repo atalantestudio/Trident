@@ -13,7 +13,7 @@ struct Camera {
 struct Vertex {
 	uint index;
 	uint textureCoordinateIndex;
-	uint lightmapCoordinateIndex;
+	vec2 lightmapCoordinate;
 };
 
 struct Triangle {

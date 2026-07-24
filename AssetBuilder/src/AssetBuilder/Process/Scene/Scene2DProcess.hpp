@@ -21,7 +21,6 @@ namespace Trident {
 				header.staticTriangleCount = static_cast<uint32>(data.staticScene.triangles.count());
 				header.staticVertexCount = static_cast<uint32>(data.staticScene.vertices.count());
 				header.staticTextureCoordinateCount = static_cast<uint32>(data.staticScene.textureCoordinates.count());
-				header.staticLightmapCoordinateCount = 0;
 				header.entityCount = data.entityCount;
 				header.geometryAssetCount = static_cast<uint32>(data.geometryAssetIdentifiers.count());
 				header.geometryMappingCount = static_cast<uint32>(data.geometryMappings.count());

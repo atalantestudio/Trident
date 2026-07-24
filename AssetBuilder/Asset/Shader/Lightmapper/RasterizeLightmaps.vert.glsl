@@ -3,11 +3,7 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-layout(location = 0) in uint lightmapCoordinateIndex;
-
-layout(set = 0, binding = 0) buffer readonly LightmapCoordinateBuffer {
-	vec2 lightmapCoordinates[];
-};
+layout(location = 0) in vec2 lightmapCoordinate;
 
 out Interstage {
 	layout(location = 0) flat uint triangleIndex;
@@ -15,14 +11,11 @@ out Interstage {
 } interstage;
 
 void main() {
-	vec2 coordinate = lightmapCoordinates[lightmapCoordinateIndex];
+	vec2 coordinate = lightmapCoordinate;
+	coordinate.y = 1.0 - coordinate.y;
 
-	vec2 vertex = coordinate;
-	vertex.y = 1.0 - vertex.y;
-	vertex = vertex * 2.0 - 1.0;
-
-	gl_Position = vec4(vertex, 0.0, 1.0);
+	gl_Position = vec4(coordinate * 2.0 - 1.0, 0.0, 1.0);
 
 	interstage.triangleIndex = uint(gl_VertexIndex / 3);
-	interstage.coordinate = coordinate;
+	interstage.coordinate = lightmapCoordinate;
 }

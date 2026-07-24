@@ -403,17 +403,17 @@ namespace Trident {
 						{
 							.vertexIndex = vertexRedirectionIndices[vertexOffset + vertexIndexA],
 							.textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexOffset + textureCoordinateIndexA],
-							.lightmapCoordinateIndex = 0,
+							.lightmapCoordinate = {0.0f, 0.0f},
 						},
 						{
 							.vertexIndex = vertexRedirectionIndices[vertexOffset + vertexIndexB],
 							.textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexOffset + textureCoordinateIndexB],
-							.lightmapCoordinateIndex = 0,
+							.lightmapCoordinate = {0.0f, 0.0f},
 						},
 						{
 							.vertexIndex = vertexRedirectionIndices[vertexOffset + vertexIndexC],
 							.textureCoordinateIndex = textureCoordinateRedirectionIndices[vertexOffset + textureCoordinateIndexC],
-							.lightmapCoordinateIndex = 0,
+							.lightmapCoordinate = {0.0f, 0.0f},
 						},
 					},
 					.normalIndex = normalIndex,
@@ -444,7 +444,6 @@ namespace Trident {
 		scene.vertices = sequence<svec3<float32>>(vertices.size());
 		scene.normals = sequence<svec3<float32>>(normals.size());
 		scene.textureCoordinates = sequence<svec2<float32>>(textureCoordinates.size());
-		scene.lightmapCoordinates = sequence<svec2<float32>>(subsurfaceTextureCoordinateCount);
 		scene.triangles = sequence<StaticTriangle3D>(triangleCount);
 		scene.materialShaders = sequence<BuildMaterialShader>(materialShaders.size());
 		scene.materials = sequence<BuildStaticMaterial3D>(materials.size());

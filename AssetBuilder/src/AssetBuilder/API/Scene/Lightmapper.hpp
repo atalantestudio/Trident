@@ -53,7 +53,6 @@ namespace Trident {
 			ref<ComputePipeline> createPostProcessingPipeline() const;
 
 			ref<Buffer> createLightmapCoordinateBuffer(uint64 size) const;
-			ref<Buffer> createLightmapCoordinateIndexBuffer(uint64 size) const;
 			ref<Buffer> createTraceRaysArgumentBuffer() const;
 			ref<Buffer> createLightmapPixelBuffer() const;
 			ref<Buffer> createTriangleBuffer(uint64 size) const;
@@ -85,7 +84,6 @@ namespace Trident {
 			ref<ComputePipeline> postProcessingPipeline;
 
 			ref<Buffer> lightmapCoordinateBuffer;
-			ref<Buffer> lightmapCoordinateIndexBuffer;
 			ref<Buffer> traceRaysArgumentBuffer;
 			ref<Buffer> lightmapPixelBuffer;
 			ref<Buffer> triangleBuffer;

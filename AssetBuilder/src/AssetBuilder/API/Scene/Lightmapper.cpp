@@ -44,11 +44,10 @@ namespace Trident {
 		traceRaysDescriptorSet = descriptorSets[1];
 		postProcessingDescriptorSet = descriptorSets[2];
 
-		lightmapCoordinateBuffer = createLightmapCoordinateBuffer(scene.lightmapCoordinates.count() * sizeof(svec2<float32>));
-		lightmapCoordinateIndexBuffer = createLightmapCoordinateIndexBuffer(vertexCount * sizeof(uint32));
+		lightmapCoordinateBuffer = createLightmapCoordinateBuffer(triangleCount * sizeof(svec2<float32>) * 3);
 		traceRaysArgumentBuffer = createTraceRaysArgumentBuffer();
 		lightmapPixelBuffer = createLightmapPixelBuffer();
-		triangleBuffer = createTriangleBuffer(scene.triangles.count() * sizeof(StaticTriangle3D));
+		triangleBuffer = createTriangleBuffer(triangleCount * sizeof(StaticTriangle3D));
 		vertexComponentBuffer = createVertexComponentBuffer(scene.vertices.count() * sizeof(svec3<float32>));
 		normalComponentBuffer = createNormalComponentBuffer(scene.normals.count() * sizeof(svec3<float32>));
 
@@ -74,7 +73,7 @@ namespace Trident {
 		commandEncoder->setViewport({0.0f, framebufferHeight}, {framebufferWidth, -framebufferHeight}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, framebufferExtent);
 		commandEncoder->bindGraphicsPipeline(rasterizeLightmapsPipeline);
-		commandEncoder->bindVertexBuffer(0, lightmapCoordinateIndexBuffer, 0, sizeof(uint32));
+		commandEncoder->bindVertexBuffer(0, lightmapCoordinateBuffer, 0, sizeof(svec2<float32>));
 		commandEncoder->bindDescriptorSets(rasterizeLightmapsPipelineLayout, 0, rasterizeLightmapsDescriptorSet);
 		commandEncoder->draw(vertexCount, 1, 0, 0);
 		commandEncoder->endRenderPass();
@@ -223,13 +222,6 @@ namespace Trident {
 
 	ref<DescriptorSetLayout> Lightmapper::createRasterizeLightmapsDescriptorSetLayout() const {
 		return Renderer::createDescriptorSetLayout({
-			// Lightmap coordinate
-			{
-				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
-				.descriptorCount = 1,
-				.shaderStages = ShaderStage::VERTEX,
-			},
-
 			// Trace rays argument
 			{
 				.descriptorType = DescriptorType::READ_WRITE_STORAGE_BUFFER,
@@ -277,13 +269,6 @@ namespace Trident {
 			},
 
 			// Normal component
-			{
-				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
-				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
-			},
-
-			// Lightmap coordinate
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
@@ -339,7 +324,7 @@ namespace Trident {
 
 	ref<GraphicsPipeline> Lightmapper::createRasterizeLightmapsPipeline() const {
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<uint32>();
+		vertexInputBinding.registerAttribute<svec2<float32>>();
 
 		const sequence<ColorBlendAttachment> colorBlendAttachments = {
 			{
@@ -434,23 +419,11 @@ namespace Trident {
 
 		return Renderer::createDynamicBuffer({
 			.size = ceil(size, minStorageBufferOffsetAlignment),
-			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
+			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE | BufferUsage::VERTEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Lightmap coordinate",
-			#endif
-		});
-	}
-
-	ref<Buffer> Lightmapper::createLightmapCoordinateIndexBuffer(uint64 size) const {
-		return Renderer::createDynamicBuffer({
-			.size = size,
-			.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX,
-			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
-			.persistent = false,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Lightmap coordinate index",
 			#endif
 		});
 	}
@@ -530,7 +503,7 @@ namespace Trident {
 	void Lightmapper::encodeOneTimeCommands(const StaticScene3D& scene) const {
 		const ref<Device> device = Renderer::getDevice();
 		const ref<Buffer> stagingBuffer = Renderer::createDynamicBuffer({
-			.size = lightmapCoordinateBuffer->getSize() + lightmapCoordinateIndexBuffer->getSize() + traceRaysArgumentBuffer->getSize() + triangleBuffer->getSize() + vertexComponentBuffer->getSize() + normalComponentBuffer->getSize(),
+			.size = lightmapCoordinateBuffer->getSize() + traceRaysArgumentBuffer->getSize() + triangleBuffer->getSize() + vertexComponentBuffer->getSize() + normalComponentBuffer->getSize(),
 			.usage = BufferUsage::TRANSFER_SRC,
 			.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
 			.persistent = false,
@@ -539,23 +512,20 @@ namespace Trident {
 			#endif
 		});
 		const ref<BufferView<svec2<float32>>> lightmapCoordinateStagingView = stagingBuffer->createView<svec2<float32>>(0, lightmapCoordinateBuffer->getSize());
-		const ref<BufferView<uint32>> lightmapCoordinateIndexStagingView = stagingBuffer->createView<uint32>(lightmapCoordinateStagingView->getOffset() + lightmapCoordinateStagingView->getSize(), lightmapCoordinateIndexBuffer->getSize());
-		const ref<BufferView<TraceRaysArguments>> traceRaysArgumentStagingView = stagingBuffer->createView<TraceRaysArguments>(lightmapCoordinateIndexStagingView->getOffset() + lightmapCoordinateIndexStagingView->getSize(), traceRaysArgumentBuffer->getSize());
+		const ref<BufferView<TraceRaysArguments>> traceRaysArgumentStagingView = stagingBuffer->createView<TraceRaysArguments>(lightmapCoordinateStagingView->getOffset() + lightmapCoordinateStagingView->getSize(), traceRaysArgumentBuffer->getSize());
 		const ref<BufferView<StaticTriangle3D>> triangleStagingView = stagingBuffer->createView<StaticTriangle3D>(traceRaysArgumentStagingView->getOffset() + traceRaysArgumentStagingView->getSize(), triangleBuffer->getSize());
 		const ref<BufferView<svec3<float32>>> vertexComponentStagingView = stagingBuffer->createView<svec3<float32>>(triangleStagingView->getOffset() + triangleStagingView->getSize(), vertexComponentBuffer->getSize());
 		const ref<BufferView<svec3<float32>>> normalComponentStagingView = stagingBuffer->createView<svec3<float32>>(vertexComponentStagingView->getOffset() + vertexComponentStagingView->getSize(), normalComponentBuffer->getSize());
 
-		std::copy(scene.lightmapCoordinates.begin(), scene.lightmapCoordinates.end(), lightmapCoordinateStagingView->map());
-
-		uint32* lightmapCoordinateIndexMappedRange = lightmapCoordinateIndexStagingView->map();
-		uint32 coordinateIndexIndex = 0;
+		svec2<float32>* lightmapCoordinateMappedRange = lightmapCoordinateStagingView->map();
+		uint32 lightmapCoordinateIndex = 0;
 
 		for (const StaticTriangle3D& triangle : scene.triangles) {
-			lightmapCoordinateIndexMappedRange[coordinateIndexIndex + 0] = triangle.vertices[0].lightmapCoordinateIndex;
-			lightmapCoordinateIndexMappedRange[coordinateIndexIndex + 1] = triangle.vertices[1].lightmapCoordinateIndex;
-			lightmapCoordinateIndexMappedRange[coordinateIndexIndex + 2] = triangle.vertices[2].lightmapCoordinateIndex;
+			lightmapCoordinateMappedRange[lightmapCoordinateIndex + 0] = triangle.vertices[0].lightmapCoordinate;
+			lightmapCoordinateMappedRange[lightmapCoordinateIndex + 1] = triangle.vertices[1].lightmapCoordinate;
+			lightmapCoordinateMappedRange[lightmapCoordinateIndex + 2] = triangle.vertices[2].lightmapCoordinate;
 
-			coordinateIndexIndex += 3;
+			lightmapCoordinateIndex += 3;
 		}
 
 		TraceRaysArguments* traceRaysArguments = traceRaysArgumentStagingView->map();
@@ -589,14 +559,6 @@ namespace Trident {
 		};
 
 		commandEncoder->copyBufferToBuffer(stagingBuffer, lightmapCoordinateBuffer, bufferCopyRegion);
-
-		bufferCopyRegion = {
-			.sourceOffset = lightmapCoordinateIndexStagingView->getOffset(),
-			.destinationOffset = 0,
-			.size = lightmapCoordinateIndexStagingView->getSize(),
-		};
-
-		commandEncoder->copyBufferToBuffer(stagingBuffer, lightmapCoordinateIndexBuffer, bufferCopyRegion);
 
 		bufferCopyRegion = {
 			.sourceOffset = traceRaysArgumentStagingView->getOffset(),
@@ -652,16 +614,11 @@ namespace Trident {
 			{
 				.descriptorSet = rasterizeLightmapsDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorBufferViews = lightmapCoordinateView,
-			},
-			{
-				.descriptorSet = rasterizeLightmapsDescriptorSet,
-				.bindingIndex = 1,
 				.descriptorBufferViews = traceRaysArgumentView,
 			},
 			{
 				.descriptorSet = rasterizeLightmapsDescriptorSet,
-				.bindingIndex = 2,
+				.bindingIndex = 1,
 				.descriptorBufferViews = lightmapPixelView,
 			},
 			{
@@ -692,11 +649,6 @@ namespace Trident {
 			{
 				.descriptorSet = traceRaysDescriptorSet,
 				.bindingIndex = 5,
-				.descriptorBufferViews = lightmapCoordinateView,
-			},
-			{
-				.descriptorSet = traceRaysDescriptorSet,
-				.bindingIndex = 6,
 				.descriptorImages = lightmapAtlasDescriptorImage,
 			},
 			{
