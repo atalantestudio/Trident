@@ -1,7 +1,7 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-static const uint BILATERAL_FILTER_1D_SAMPLE_COUNT = 11;
+static const uint BILATERAL_FILTER_1D_SAMPLE_COUNT = 5;
 static const float BILATERAL_FILTER_SPATIAL_GAUSSIAN_RMS = 3.0;
 static const float BILATERAL_FILTER_BRIGHTNESS_GAUSSIAN_RMS = 0.1;
 
@@ -41,6 +41,7 @@ void denoise(int2 coordinate) {
 
 	GroupMemoryBarrierWithGroupSync();
 
+	center = avg / w;
 	avg = float3(0.0, 0.0, 0.0);
 	w = 0.0;
 	sampleIndex = -kernelRadius;

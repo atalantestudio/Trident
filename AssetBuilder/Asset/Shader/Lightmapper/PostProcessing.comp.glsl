@@ -5,7 +5,7 @@
 
 layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 
-const uint BILATERAL_FILTER_1D_SAMPLE_COUNT = 11;
+const uint BILATERAL_FILTER_1D_SAMPLE_COUNT = 5;
 const float BILATERAL_FILTER_SPATIAL_GAUSSIAN_RMS = 3.0;
 const float BILATERAL_FILTER_BRIGHTNESS_GAUSSIAN_RMS = 0.1;
 
@@ -45,6 +45,7 @@ void denoise(ivec2 coordinate) {
 
 	memoryBarrierImage();
 
+	center = avg / w;
 	avg = vec3(0.0, 0.0, 0.0);
 	w = 0.0;
 	sampleIndex = -kernelRadius;
@@ -107,8 +108,6 @@ void main() {
 	}
 
 	dilate(coordinate, atlasSize);
-
 	memoryBarrierImage();
-
 	denoise(coordinate);
 }

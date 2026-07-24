@@ -72,7 +72,7 @@ namespace Trident {
 
 		scene.lightmapAtlasImageAssetDescriptor = {
 			.format = ImageFormat::R8G8B8A8_UNORM,
-			.extent = {LIGHTMAP_ATLAS_EXTENT.width, LIGHTMAP_ATLAS_EXTENT.width, 1},
+			.extent = {LIGHTMAP_ATLAS_EXTENT.width, LIGHTMAP_ATLAS_EXTENT.height, 1},
 			.mipLevelCount = 1,
 			.layerCount = 1,
 			.data = sequence<uint8>(LIGHTMAP_ATLAS_EXTENT.width * LIGHTMAP_ATLAS_EXTENT.height * getByteSize(ImageFormat::R8G8B8A8_UNORM)),
@@ -98,31 +98,29 @@ namespace Trident {
 			const vec3<float32> normal = surface.normal;
 
 			for (const StaticSubsurface& subsurface : surface.subsurfaces) {
-				const uint32 triangleCount = subsurface.getTriangleCount();
 				const uint64 textureCoordinateCount = subsurface.textureCoordinates.count();
 
 				Lightmap& lightmap = lightmaps[lightmapIndex];
 				lightmap.offset = {0, 0};
+				lightmap.triangleOffset = triangleOffset;
+				lightmap.coordinateOffset = lightmapCoordinateOffset;
 				lightmap.subsurface = &subsurface;
-				lightmap.triangleRange = {triangleOffset, triangleCount};
-				lightmap.coordinateRange = {lightmapCoordinateOffset, static_cast<uint32>(textureCoordinateCount)};
 
+				// TODO(lyah/scalar)
 				const svec3<float32> a = subsurface.vertices[0];
 				const svec3<float32> b = subsurface.vertices[1];
 				const vec3<float32> down = normalized(cross(normal, b - a));
 				const vec3<float32> right = normalized(cross(down, normal));
 
-				uint32 coordinateIndex = 0;
+				uint32 textureCoordinateIndex = 0;
 
-				while (coordinateIndex < lightmap.coordinateRange.count) {
-					const vec3<float32> vertex = subsurface.vertices[coordinateIndex] - a;
+				while (textureCoordinateIndex < textureCoordinateCount) {
+					const vec3<float32> vertex = subsurface.vertices[textureCoordinateIndex] - a;
 					const svec2<float32> textureCoordinate = {dot(vertex, right), dot(vertex, down)};
 
-					// TODO(lyah/scalar)
-					svec2<float32>& coordinate = scene.lightmapCoordinates[lightmap.coordinateRange.offset + coordinateIndex];
-					coordinate = textureCoordinate / surface.luxelScale;
+					scene.lightmapCoordinates[lightmap.coordinateOffset + textureCoordinateIndex] = textureCoordinate / surface.luxelScale;
 
-					coordinateIndex += 1;
+					textureCoordinateIndex += 1;
 				}
 
 				// TODO(lyah/scalar)
@@ -132,9 +130,9 @@ namespace Trident {
 
 				DEBUG_ASSERT(lightmap.size.width > 0 && lightmap.size.height > 0);
 
-				// Pad for dilation.
-				lightmap.size.width += 2;
-				lightmap.size.height += 2;
+				// Pad for dilation and bicubic filtering.
+				lightmap.size.width += 4;
+				lightmap.size.height += 4;
 
 				const LightmapLookup lightmapLookup = {
 					.index = lightmapIndex,
@@ -153,7 +151,7 @@ namespace Trident {
 
 				lightmapLookups.insert(lightmapLookups.begin() + lightmapInsertionIndex, lightmapLookup);
 
-				triangleOffset += triangleCount;
+				triangleOffset += subsurface.getTriangleCount();
 				lightmapIndex += 1;
 				lightmapCoordinateOffset += static_cast<uint32>(textureCoordinateCount);
 			}
@@ -178,9 +176,9 @@ namespace Trident {
 
 			uint32 coordinateIndex = 0;
 
-			while (coordinateIndex < lightmap.coordinateRange.count) {
+			while (coordinateIndex < lightmap.subsurface->textureCoordinates.count()) {
 				// TODO(lyah/scalar)
-				svec2<float32>& coordinate = scene.lightmapCoordinates[lightmap.coordinateRange.offset + coordinateIndex];
+				svec2<float32>& coordinate = scene.lightmapCoordinates[lightmap.coordinateOffset + coordinateIndex];
 				coordinate.x += lightmap.offset.width;
 				coordinate.y += lightmap.offset.height;
 				coordinate /= svec2<float32>{static_cast<float32>(LIGHTMAP_ATLAS_EXTENT.width), static_cast<float32>(LIGHTMAP_ATLAS_EXTENT.height)};
@@ -193,11 +191,11 @@ namespace Trident {
 			uint32 triangleIndex = 0;
 			uint32 textureCoordinateIndexOffset = 0;
 
-			while (triangleIndex < lightmap.triangleRange.count) {
-				StaticTriangle3D& triangle = scene.triangles[lightmap.triangleRange.offset + triangleIndex];
-				triangle.vertices[0].lightmapCoordinateIndex = lightmap.coordinateRange.offset + textureCoordinateIndices[textureCoordinateIndexOffset + 0];
-				triangle.vertices[1].lightmapCoordinateIndex = lightmap.coordinateRange.offset + textureCoordinateIndices[textureCoordinateIndexOffset + 1];
-				triangle.vertices[2].lightmapCoordinateIndex = lightmap.coordinateRange.offset + textureCoordinateIndices[textureCoordinateIndexOffset + 2];
+			while (triangleIndex < lightmap.subsurface->getTriangleCount()) {
+				StaticTriangle3D& triangle = scene.triangles[lightmap.triangleOffset + triangleIndex];
+				triangle.vertices[0].lightmapCoordinateIndex = lightmap.coordinateOffset + textureCoordinateIndices[textureCoordinateIndexOffset + 0];
+				triangle.vertices[1].lightmapCoordinateIndex = lightmap.coordinateOffset + textureCoordinateIndices[textureCoordinateIndexOffset + 1];
+				triangle.vertices[2].lightmapCoordinateIndex = lightmap.coordinateOffset + textureCoordinateIndices[textureCoordinateIndexOffset + 2];
 
 				triangleIndex += 1;
 				textureCoordinateIndexOffset += 3;
