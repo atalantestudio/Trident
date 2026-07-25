@@ -8,8 +8,13 @@
 #include "AssetBuilder/Process/Material/PlasterWallMaterialProcess.hpp"
 #include "AssetBuilder/Process/Material/TileFloorMaterialProcess.hpp"
 #include "AssetBuilder/Process/Material/WoodDoorMaterialProcess.hpp"
+#include "AssetBuilder/Process/Scene/Boxes3DSceneProcess.hpp"
+#include "AssetBuilder/Process/Scene/BoxStackingSceneProcess.hpp"
 #include "AssetBuilder/Process/Scene/CabinSceneProcess.hpp"
+#include "AssetBuilder/Process/Scene/EdgeContactSceneProcess.hpp"
 #include "AssetBuilder/Process/Scene/HallSceneProcess.hpp"
+#include "AssetBuilder/Process/Scene/LemonsSceneProcess.hpp"
+#include "AssetBuilder/Process/Scene/PlayerMovementSceneProcess.hpp"
 #include "AssetBuilder/Process/Scene/SnapTestSceneProcess.hpp"
 #include "Process/BuildAssetMapProcess.hpp"
 #include "Process/BuildFontAssetProcess.hpp"
@@ -50,8 +55,13 @@ namespace Trident {
 				registerProcess<WoodDoorMaterialProcess>(&assetLibrary);
 
 				registerProcess<BuildSceneAssetProcess>(&assetLibrary);
+				registerProcess<Boxes3DSceneProcess>(&assetLibrary);
+				registerProcess<BoxStackingSceneProcess>(&assetLibrary);
 				registerProcess<CabinSceneProcess>(&assetLibrary);
+				registerProcess<EdgeContactSceneProcess>(&assetLibrary);
 				registerProcess<HallSceneProcess>(&assetLibrary);
+				registerProcess<LemonsSceneProcess>(&assetLibrary);
+				registerProcess<PlayerMovementSceneProcess>(&assetLibrary);
 				registerProcess<SnapTestSceneProcess>(&assetLibrary);
 
 				registerProcess<BuildShaderModuleAssetProcess>(&assetLibrary);

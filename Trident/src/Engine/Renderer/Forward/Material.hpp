@@ -217,9 +217,12 @@ namespace Trident {
 			materialShaderIndex += 1;
 		}
 
-		const sequence<ref<DescriptorSetLayout>> dsl = {materialDescriptorSetLayouts[0], materialDescriptorSetLayouts[0], materialDescriptorSetLayouts[0], materialDescriptorSetLayouts[0]};
-
-		materialDescriptorSets = device->allocateDescriptorSets(dsl);
+		materialDescriptorSets = device->allocateDescriptorSets(sequence<ref<DescriptorSetLayout>>{
+			materialDescriptorSetLayouts[0],
+			materialDescriptorSetLayouts[0],
+			materialDescriptorSetLayouts[0],
+			materialDescriptorSetLayouts[0],
+		});
 
 		if (imageStagingBufferSize == 0) {
 			// TODO(graphics/dx12/empty-descriptor-set): Fix crash in DX12 when binding empty descriptor sets.

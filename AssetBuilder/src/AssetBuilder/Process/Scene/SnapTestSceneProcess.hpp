@@ -6,7 +6,6 @@
 #include "AssetBuilder/API/Geometry/StaticGeometry3D.hpp"
 #include "AssetBuilder/API/Scene/Builder/InteriorSceneBuilder.hpp"
 #include "AssetBuilder/Process/Scene/Scene3DProcess.hpp"
-#include "../../../Subprocess/Hull.hpp"
 #include "../../../Subprocess/RigidBody.hpp"
 
 namespace Trident {
