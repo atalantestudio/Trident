@@ -26,9 +26,14 @@ namespace Trident {
 				return (
 					"GraphicsAPI: OpenGL\n"
 					"PreferIntegratedGPU: 0\n"
-					"WindowWidth: 1280\n"
-					"WindowHeight: 720\n"
+					"Window.Width: 1280\n"
+					"Window.Height: 720\n"
+					"Window.Maximized: 1\n"
 					"VerticalSync: 1\n"
+
+					// TODO(test)
+					// These values are used by the Samples application and are not part of the engine.
+					// Remove them when a separate generator is made for the samples.
 					"\n"
 					"SampleGroupName: Graphics\n"
 					"SampleName: Triangle\n"
@@ -49,8 +54,9 @@ namespace Trident {
 			void readProperties(ApplicationProperties* properties) {
 				properties->GraphicsAPI = getProperty<GraphicsAPI>("GraphicsAPI");
 				properties->PreferIntegratedGPU = getProperty<bool>("PreferIntegratedGPU");
-				properties->WindowWidth = getProperty<uint32>("WindowWidth");
-				properties->WindowHeight = getProperty<uint32>("WindowHeight");
+				properties->Window.Width = getProperty<uint32>("Window.Width");
+				properties->Window.Height = getProperty<uint32>("Window.Height");
+				properties->Window.Maximized = getProperty<bool>("Window.Maximized");
 				properties->VerticalSync = getProperty<bool>("VerticalSync");
 			}
 

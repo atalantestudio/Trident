@@ -119,6 +119,7 @@ namespace Trident {
 		WIN32_ASSERT(windowData->hDC != nullptr);
 
 		windowData->extent = descriptor.extent;
+		windowData->maximized = descriptor.maximized;
 		windowData->keyDownEventListener = descriptor.keyDownEventListener;
 		windowData->keyUpEventListener = descriptor.keyUpEventListener;
 		windowData->mouseDownEventListener = descriptor.mouseDownEventListener;
@@ -232,8 +233,13 @@ namespace Trident {
 	void Window::show() const {
 		Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
 
-		// The event loop starts after showing the window.
-		ShowWindow(windowData->hWnd, SW_NORMAL);
+		INT nCmdShow = SW_NORMAL;
+
+		if (windowData->maximized) {
+			nCmdShow = SW_MAXIMIZE;
+		}
+
+		ShowWindow(windowData->hWnd, nCmdShow);
 	}
 
 	void Window::lockPointer() const {

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAPI.hpp"
+#include "Engine/Application/WindowProperties.hpp"
 
 namespace Trident {
 	// The properties from this list can be edited in the project's property file (<project name>.tpr).
@@ -20,11 +21,7 @@ namespace Trident {
 		/// Whether to prefer integrated GPUs over discrete GPUs (if possible).
 		bool PreferIntegratedGPU;
 
-		/// Width of the window's client area in pixels.
-		uint32 WindowWidth;
-
-		/// Height of the window's client area in pixels.
-		uint32 WindowHeight;
+		WindowProperties Window;
 
 		/// Whether to enable vertical synchronization (V-Sync).
 		bool VerticalSync;

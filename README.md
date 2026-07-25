@@ -60,18 +60,17 @@ They share the project's name and end with `.tpr`. The application automatically
 
 Below is the list of currently used properties and their possible values.
 
-| Property | Values |
+| Property | Type |
 | - | - |
-| `GraphicsAPI` | "OpenGL", "Vulkan" or "DirectX12" |
-| `PreferIntegratedGPU` | 0 or 1 |
-| `WindowWidth` | Any unsigned integer |
-| `WindowHeight` | Any unsigned integer |
-| `VerticalSync` | 0 or 1 |
-| `SampleGroupName` | See [Samples/src/main.cpp](https://github.com/atalantestudio/Trident/blob/main/Samples/src/main.cpp) |
-| `SampleName` | See [Samples/src/main.cpp](https://github.com/atalantestudio/Trident/blob/main/Samples/src/main.cpp) |
+| `GraphicsAPI` | String ("DirectX12", "OpenGL" or "Vulkan") |
+| `PreferIntegratedGPU` | Boolean |
+| `Window.Width` | Unsigned integer |
+| `Window.Height` | Unsigned integer |
+| `Window.Maximized` | Boolean |
+| `VerticalSync` | Boolean |
 
 > [!NOTE]
-> Some samples may also require the `AssetName` property, for example to load an image or a scene. For these samples, the value of `AssetName` must be the name of the asset file to load, without the extension.
+> Some samples define their own properties. Make sure these are included in the property file before launching the application.
 
 
 

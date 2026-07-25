@@ -130,7 +130,8 @@ namespace Trident {
 
 		window = new Window({
 			.name = name,
-			.extent = {properties->WindowWidth, properties->WindowHeight},
+			.extent = {properties->Window.Width, properties->Window.Height},
+			.maximized = properties->Window.Maximized,
 			.keyDownEventListener = BIND(Application::propagateEventFrontToBack),
 			.keyUpEventListener = BIND(Application::propagateEventFrontToBack),
 			.mouseDownEventListener = BIND(Application::propagateEventFrontToBack),

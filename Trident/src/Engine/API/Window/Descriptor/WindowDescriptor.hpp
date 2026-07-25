@@ -17,6 +17,7 @@ namespace Trident {
 	struct WindowDescriptor {
 		view<char8> name;
 		Extent2D extent;
+		bool maximized;
 		EventListener<KeyDownEvent> keyDownEventListener;
 		EventListener<KeyUpEvent> keyUpEventListener;
 		EventListener<MouseDownEvent> mouseDownEventListener;
