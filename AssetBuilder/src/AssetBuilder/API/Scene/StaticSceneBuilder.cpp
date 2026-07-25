@@ -5,8 +5,6 @@
 
 #include "AssetBuilder/API/Scene/Builder/CarveSurface.hpp"
 #include "AssetBuilder/API/Scene/Builder/GenerateLightmaps.hpp"
-#include "AssetBuilder/API/Scene/Lightmap.hpp"
-#include "AssetBuilder/API/Scene/Lightmapper.hpp"
 #include "AssetBuilder/API/Scene/StaticSceneBuilder.hpp"
 
 #include "../../../File/PNG.hpp"
@@ -46,6 +44,8 @@ namespace Trident {
 
 		return index;
 	}
+
+	Lightmapper StaticSceneBuilder::lightmapper;
 
 	StaticGeometry3D StaticSceneBuilder::createWallGeometry(svec2<float32> scale) {
 		return {

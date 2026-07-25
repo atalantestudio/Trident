@@ -63,6 +63,10 @@ namespace Trident {
 				ENGINE_INFO("Done building assets.");
 			}
 
+			void release() final override {
+				StaticSceneBuilder::lightmapper.~Lightmapper();
+			}
+
 		private:
 			AssetBuilderLibrary assetLibrary;
 	};

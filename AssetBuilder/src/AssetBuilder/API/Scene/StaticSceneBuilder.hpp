@@ -3,7 +3,8 @@
 
 #pragma once
 
-#include "AssetBuilder/API/Scene/Lightmap.hpp"
+#include "AssetBuilder/API/Lightmapper/Lightmap.hpp"
+#include "AssetBuilder/API/Lightmapper/Lightmapper.hpp"
 #include "AssetBuilder/API/Scene/StaticScene.hpp"
 #include "AssetBuilder/API/Scene/StaticSurface.hpp"
 
@@ -11,6 +12,9 @@
 
 namespace Trident {
 	class StaticSceneBuilder {
+		public:
+			static Lightmapper lightmapper;
+
 		private:
 			static constexpr Extent2D LIGHTMAP_ATLAS_EXTENT = {1024, 1024};
 

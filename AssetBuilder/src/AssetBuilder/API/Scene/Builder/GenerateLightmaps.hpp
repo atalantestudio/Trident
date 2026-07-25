@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "AssetBuilder/API/Scene/Lightmap.hpp"
-#include "AssetBuilder/API/Scene/Lightmapper.hpp"
+#include "AssetBuilder/API/Lightmapper/Lightmap.hpp"
+#include "AssetBuilder/API/Lightmapper/Lightmapper.hpp"
 #include "AssetBuilder/API/Scene/StaticSceneBuilder.hpp"
 
 namespace Trident {
@@ -79,7 +79,10 @@ namespace Trident {
 		};
 		scene.lightmapAtlasImageAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
 
-		Lightmapper lightmapper(LIGHTMAP_ATLAS_EXTENT);
+		lightmapper.setOptions({
+			.format = scene.lightmapAtlasImageAssetDescriptor.format,
+			.atlasExtent = LIGHTMAP_ATLAS_EXTENT,
+		});
 		lightmapper.buildLightmapAtlas(scene, scene.lightmapAtlasImageAssetDescriptor);
 	}
 

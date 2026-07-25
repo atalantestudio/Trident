@@ -29,7 +29,7 @@ namespace Trident {
 		public:
 			explicit Application(const ProjectDescriptor& projectDescriptor);
 
-			virtual ~Application();
+			~Application();
 
 			void initializePropertyFile();
 			void initializeWindow(const ProjectDescriptor& projectDescriptor);
@@ -87,6 +87,8 @@ namespace Trident {
 
 				processes.emplace_back(process);
 			}
+
+			virtual void release() {}
 
 		private:
 			void loop();

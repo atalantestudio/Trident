@@ -155,6 +155,8 @@ namespace Trident {
 
 	// TODO(application/destruction-leaks)
 	Application::~Application() {
+		release();
+
 		delete propertyFile;
 
 		delete layerCompositor;
