@@ -13,8 +13,11 @@ struct Interstage {
 };
 
 Interstage main(VertexInput input) {
+	float2 coordinate = input.lightmapCoordinate;
+	coordinate.y = 1.0 - coordinate.y;
+
 	Interstage interstage;
-	interstage.position = float4(input.lightmapCoordinate * 2.0 - 1.0, 0.0, 1.0);
+	interstage.position = float4(coordinate * 2.0 - 1.0, 0.0, 1.0);
 	interstage.triangleIndex = input.vertexIndex / 3;
 	interstage.coordinate = input.lightmapCoordinate;
 

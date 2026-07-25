@@ -145,9 +145,10 @@ namespace Trident {
 
 		ImageUsage usage = ImageUsage::COLOR_ATTACHMENT | descriptor.additionalUsage;
 
-		if (!(usage & ImageUsage::STORAGE)) {
+		// TODO(graphics/render-pass): Let the user include TRANSIENT_ATTACHMENT.
+		/* if (!(usage & ImageUsage::STORAGE)) {
 			usage |= ImageUsage::TRANSIENT_ATTACHMENT;
-		}
+		} */
 
 		return device->createDynamicImage({
 			.type = descriptor.type,

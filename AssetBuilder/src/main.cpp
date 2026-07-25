@@ -9,6 +9,7 @@
 #include "AssetBuilder/Process/Material/TileFloorMaterialProcess.hpp"
 #include "AssetBuilder/Process/Material/WoodDoorMaterialProcess.hpp"
 #include "AssetBuilder/Process/Scene/CabinSceneProcess.hpp"
+#include "AssetBuilder/Process/Scene/HallSceneProcess.hpp"
 #include "AssetBuilder/Process/Scene/SnapTestSceneProcess.hpp"
 #include "Process/BuildAssetMapProcess.hpp"
 #include "Process/BuildFontAssetProcess.hpp"
@@ -50,6 +51,7 @@ namespace Trident {
 
 				registerProcess<BuildSceneAssetProcess>(&assetLibrary);
 				registerProcess<CabinSceneProcess>(&assetLibrary);
+				registerProcess<HallSceneProcess>(&assetLibrary);
 				registerProcess<SnapTestSceneProcess>(&assetLibrary);
 
 				registerProcess<BuildShaderModuleAssetProcess>(&assetLibrary);

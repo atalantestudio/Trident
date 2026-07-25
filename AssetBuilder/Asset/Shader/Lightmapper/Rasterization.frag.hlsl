@@ -9,12 +9,12 @@ struct DispatchIndirectCommand {
 
 struct TraceRaysArguments {
 	uint2 atlasSize;
-	uint lightmapPixelCount;
+	uint luxelCount;
 	uint triangleCount;
 	DispatchIndirectCommand traceRaysCommand;
 };
 
-struct LightmapPixel {
+struct Luxel {
 	uint triangleIndex;
 	uint coordinate;
 };
@@ -28,18 +28,22 @@ struct Interstage {
 static const uint RAYTRACER_WORKGROUP_SIZE = 16;
 
 RWStructuredBuffer<TraceRaysArguments> traceRaysArguments : register(u1);
-RWStructuredBuffer<LightmapPixel> lightmapPixels : register(u2);
+RWStructuredBuffer<Luxel> luxels : register(u2);
+
+uint ceil(uint value, uint multiplier) {
+	return (value + multiplier - 1) & ~(multiplier - 1);
+}
 
 void main(Interstage interstage) {
 	uint2 coordinate = uint2(interstage.coordinate * traceRaysArguments[0].atlasSize);
-	uint lightmapPixelIndex;
+	uint luxelIndex;
 
-	InterlockedAdd(traceRaysArguments[0].lightmapPixelCount, 1, lightmapPixelIndex);
+	InterlockedAdd(traceRaysArguments[0].luxelCount, 1, luxelIndex);
 
-	traceRaysArguments[0].traceRaysCommand.x = traceRaysArguments[0].lightmapPixelCount / RAYTRACER_WORKGROUP_SIZE;
+	traceRaysArguments[0].traceRaysCommand.x = ceil(traceRaysArguments[0].luxelCount / RAYTRACER_WORKGROUP_SIZE, RAYTRACER_WORKGROUP_SIZE);
 
-	lightmapPixels[lightmapPixelIndex].triangleIndex = interstage.triangleIndex;
-	lightmapPixels[lightmapPixelIndex].coordinate = (coordinate.x << 16) | coordinate.y;
+	luxels[luxelIndex].triangleIndex = interstage.triangleIndex;
+	luxels[luxelIndex].coordinate = (coordinate.x << 16) | coordinate.y;
 
 	discard;
 }

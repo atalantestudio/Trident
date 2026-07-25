@@ -12,112 +12,80 @@ namespace Trident {
 
 	void Lightmapper::buildLightmapAtlas(const StaticScene3D& scene, ImageAssetDescriptor& lightmapAtlasImageAssetDescriptor) {
 		const uint32 triangleCount = static_cast<uint32>(scene.triangles.count());
-		const uint32 vertexCount = triangleCount * 3;
 		const ref<Device> device = Renderer::getDevice();
 
-		rasterizeLightmapsRenderPass = createRasterizeLightmapsRenderPass(lightmapAtlasImageAssetDescriptor.format);
+		rasterizationRenderPass = createRasterizationRenderPass(lightmapAtlasImageAssetDescriptor.format);
+		dilationRenderPass = createDilationRenderPass(lightmapAtlasImageAssetDescriptor.format);
 
+		intermediateLightmapAtlasImage = createIntermediateLightmapAtlasImage(lightmapAtlasImageAssetDescriptor);
 		lightmapAtlasImage = createLightmapAtlasImage(lightmapAtlasImageAssetDescriptor);
+		intermediateLightmapAtlasImageView = createIntermediateLightmapAtlasImageView();
 		lightmapAtlasImageView = createLightmapAtlasImageView();
 
-		rasterizeLightmapsFramebuffer = createRasterizeLightmapsFramebuffer();
+		rasterizationFramebuffer = createRasterizationFramebuffer();
+		dilationFramebuffer = createDilationFramebuffer();
 
-		const ref<DescriptorSetLayout> rasterizeLightmapsDescriptorSetLayout = createRasterizeLightmapsDescriptorSetLayout();
+		const ref<DescriptorSetLayout> rasterizationDescriptorSetLayout = createRasterizationDescriptorSetLayout();
 		const ref<DescriptorSetLayout> traceRaysDescriptorSetLayout = createTraceRaysDescriptorSetLayout();
 		const ref<DescriptorSetLayout> postProcessingDescriptorSetLayout = createPostProcessingDescriptorSetLayout();
+		const ref<DescriptorSetLayout> dilationDescriptorSetLayout = createDilationDescriptorSetLayout();
 
-		rasterizeLightmapsPipelineLayout = createRasterizeLightmapsPipelineLayout({rasterizeLightmapsDescriptorSetLayout});
-		traceRaysPipelineLayout = createTraceRaysPipelineLayout({traceRaysDescriptorSetLayout});
-		postProcessingPipelineLayout = createPostProcessingPipelineLayout({postProcessingDescriptorSetLayout});
-
-		rasterizeLightmapsPipeline = createRasterizeLightmapsPipeline();
-		traceRaysPipeline = createTraceRaysPipeline();
-		postProcessingPipeline = createPostProcessingPipeline();
-
-		const sequence<ref<DescriptorSet>> descriptorSets = device->allocateDescriptorSets(sequence<ref<DescriptorSetLayout>>{
-			rasterizeLightmapsDescriptorSetLayout,
-			traceRaysDescriptorSetLayout,
-			postProcessingDescriptorSetLayout,
+		rasterizationPipelineLayout = Renderer::createPipelineLayout({
+			.descriptorSetLayouts = {rasterizationDescriptorSetLayout},
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Rasterization",
+			#endif
+		});
+		traceRaysPipelineLayout = Renderer::createPipelineLayout({
+			.descriptorSetLayouts = {traceRaysDescriptorSetLayout},
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Trace rays",
+			#endif
+		});
+		postProcessingPipelineLayout = Renderer::createPipelineLayout({
+			.descriptorSetLayouts = {postProcessingDescriptorSetLayout},
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Post processing",
+			#endif
+		});
+		dilationPipelineLayout = Renderer::createPipelineLayout({
+			.descriptorSetLayouts = {dilationDescriptorSetLayout},
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Dilation",
+			#endif
 		});
 
-		rasterizeLightmapsDescriptorSet = descriptorSets[0];
+		rasterizationPipeline = createRasterizationPipeline();
+		traceRaysPipeline = createTraceRaysPipeline();
+		intermediateDilationPipeline = createIntermediateDilationPipeline();
+		horizontalBilateralFilterPipeline = createHorizontalBilateralFilterPipeline();
+		verticalBilateralFilterPipeline = createVerticalBilateralFilterPipeline();
+		dilationPipeline = createDilationPipeline();
+
+		const sequence<ref<DescriptorSet>> descriptorSets = device->allocateDescriptorSets(sequence<ref<DescriptorSetLayout>>{
+			rasterizationDescriptorSetLayout,
+			traceRaysDescriptorSetLayout,
+			postProcessingDescriptorSetLayout,
+			dilationDescriptorSetLayout,
+		});
+
+		rasterizationDescriptorSet = descriptorSets[0];
 		traceRaysDescriptorSet = descriptorSets[1];
 		postProcessingDescriptorSet = descriptorSets[2];
+		dilationDescriptorSet = descriptorSets[3];
 
 		lightmapCoordinateBuffer = createLightmapCoordinateBuffer(triangleCount * sizeof(svec2<float32>) * 3);
 		traceRaysArgumentBuffer = createTraceRaysArgumentBuffer();
-		lightmapPixelBuffer = createLightmapPixelBuffer();
+		luxelBuffer = createLuxelBuffer();
 		triangleBuffer = createTriangleBuffer(triangleCount * sizeof(StaticTriangle3D));
 		vertexComponentBuffer = createVertexComponentBuffer(scene.vertices.count() * sizeof(svec3<float32>));
 		normalComponentBuffer = createNormalComponentBuffer(scene.normals.count() * sizeof(svec3<float32>));
 
+		intermediateLightmapAtlasSampler = createIntermediateLightmapAtlasSampler();
+
 		encodeOneTimeCommands(scene);
 
-		const Extent2D framebufferExtent = rasterizeLightmapsFramebuffer->getExtent();
-		const float32 framebufferWidth = static_cast<float32>(framebufferExtent.width);
-		const float32 framebufferHeight = static_cast<float32>(framebufferExtent.height);
-
-		const ref<Queue> queue = device->getQueue(QueueFamilyCapability::GRAPHICS);
-		const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
-			.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Generate lightmaps",
-			#endif
-		});
-
-		commandEncoder->begin();
-		commandEncoder->beginRenderPass({
-			.framebuffer = rasterizeLightmapsFramebuffer,
-			.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}},
-		});
-		commandEncoder->setViewport({0.0f, framebufferHeight}, {framebufferWidth, -framebufferHeight}, 0.0f, 1.0f);
-		commandEncoder->setScissor(0, 0, framebufferExtent);
-		commandEncoder->bindGraphicsPipeline(rasterizeLightmapsPipeline);
-		commandEncoder->bindVertexBuffer(0, lightmapCoordinateBuffer, 0, sizeof(svec2<float32>));
-		commandEncoder->bindDescriptorSets(rasterizeLightmapsPipelineLayout, 0, rasterizeLightmapsDescriptorSet);
-		commandEncoder->draw(vertexCount, 1, 0, 0);
-		commandEncoder->endRenderPass();
-
-		ImageMemoryBarrier imageMemoryBarrier;
-
-		// TODO(graphics/dx12/end-render-pass): Automatically transition the attachments to their final layout.
-		if (Renderer::getGraphicsApi() == GraphicsAPI::DX12) {
-			imageMemoryBarrier = {
-				.image = lightmapAtlasImage,
-				.newLayout = ImageLayout::GENERAL,
-				.newAccess = Access::SHADER_READ | Access::SHADER_WRITE,
-			};
-
-			commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
-		}
-
-		commandEncoder->bindComputePipeline(traceRaysPipeline);
-		commandEncoder->bindDescriptorSets(traceRaysPipelineLayout, 0, traceRaysDescriptorSet);
-
-		// TODO(graphics/dx12/dispatch): Fix artifacts on the lightmap atlas due to not enough threads being dispatched.
-		commandEncoder->dispatchIndirect(traceRaysArgumentBuffer, offsetof(TraceRaysArguments, TraceRaysArguments::traceRaysCommand));
-
-		imageMemoryBarrier = {
-			.image = lightmapAtlasImage,
-			.newLayout = ImageLayout::GENERAL,
-			.newAccess = Access::SHADER_READ | Access::SHADER_WRITE,
-		};
-
-		commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
-
-		commandEncoder->bindComputePipeline(postProcessingPipeline);
-		commandEncoder->bindDescriptorSets(postProcessingPipelineLayout, 0, postProcessingDescriptorSet);
-		commandEncoder->dispatch(lightmapAtlasImageAssetDescriptor.extent.width / 16, lightmapAtlasImageAssetDescriptor.extent.height / 16, 1);
-
-		imageMemoryBarrier = {
-			.image = lightmapAtlasImage,
-			.newLayout = ImageLayout::TRANSFER_SRC_OPTIMAL,
-			.newAccess = Access::TRANSFER_READ,
-		};
-
-		commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
-
-		const ref<Buffer> lightmapAtlasStagingBuffer = Renderer::createDynamicBuffer({
+		lightmapAtlasStagingBuffer = Renderer::createDynamicBuffer({
 			.size = lightmapAtlasImage->getSize(),
 			.usage = BufferUsage::TRANSFER_DST,
 			.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
@@ -127,23 +95,7 @@ namespace Trident {
 			#endif
 		});
 
-		const BufferImageCopyRegion lightmapAtlasBufferImageCopyRegion = {
-			.bufferOffset = 0,
-			.imageOffsetX = 0,
-			.imageOffsetY = 0,
-			.imageOffsetZ = 0,
-			.imageExtent = lightmapAtlasImage->getExtent(),
-			.imageMipLevel = lightmapAtlasImageView->getMipLevelOffset(),
-			.imageLayerOffset = lightmapAtlasImageView->getLayerOffset(),
-			.imageLayerCount = lightmapAtlasImageView->getLayerCount(),
-		};
-
-		commandEncoder->copyImageToBuffer(lightmapAtlasImage, lightmapAtlasStagingBuffer, lightmapAtlasBufferImageCopyRegion);
-
-		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-		queue->submit(commandBuffer);
-		queue->waitIdle();
+		generateLightmaps(triangleCount * 3);
 
 		const ref<BufferView<uint8>> lightmapAtlasView = lightmapAtlasStagingBuffer->createView<uint8>(0, lightmapAtlasStagingBuffer->getSize());
 
@@ -152,10 +104,10 @@ namespace Trident {
 		lightmapAtlasStagingBuffer->unmap();
 	}
 
-	ref<RenderPass> Lightmapper::createRasterizeLightmapsRenderPass(ImageFormat lightmapAtlasImageFormat) const {
+	ref<RenderPass> Lightmapper::createRasterizationRenderPass(ImageFormat lightmapAtlasImageFormat) const {
 		return Renderer::createRenderPass({
 			.attachments = {
-				// Lightmap atlas
+				// Intermediate lightmap atlas
 				{
 					.format = lightmapAtlasImageFormat,
 					.sampleCount = 1,
@@ -177,22 +129,73 @@ namespace Trident {
 		});
 	}
 
-	ref<Image> Lightmapper::createLightmapAtlasImage(const ImageAssetDescriptor& lightmapAtlasImageAssetDescriptor) const {
-		const Extent2D extent = Renderer::getSwapchain()->getExtent();
+	ref<RenderPass> Lightmapper::createDilationRenderPass(ImageFormat lightmapAtlasImageFormat) const {
+		return Renderer::createRenderPass({
+			.attachments = {
+				// Lightmap atlas
+				{
+					.format = lightmapAtlasImageFormat,
+					.sampleCount = 1,
+					.loadOperation = LoadOperation::CLEAR,
+					.storeOperation = StoreOperation::STORE,
+					.finalLayout = ImageLayout::TRANSFER_SRC_OPTIMAL,
+				},
+			},
+			.subpasses = {
+				{
+					.colorAttachmentReferences = {
+						{
+							.index = 0,
+							.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
+						},
+					},
+				},
+			},
+		});
+	}
 
-		return rasterizeLightmapsRenderPass->createInputAttachmentImage(
+	ref<Image> Lightmapper::createIntermediateLightmapAtlasImage(const ImageAssetDescriptor& lightmapAtlasImageAssetDescriptor) const {
+		return rasterizationRenderPass->createColorAttachmentImage(
 			{
 				.type = ImageType::TEXTURE_2D,
 				.extent = lightmapAtlasImageAssetDescriptor.extent,
 				.mipLevelCount = lightmapAtlasImageAssetDescriptor.mipLevelCount,
 				.layerCount = lightmapAtlasImageAssetDescriptor.layerCount,
-				.additionalUsage = ImageUsage::TRANSFER_SRC | ImageUsage::STORAGE,
+				.additionalUsage = ImageUsage::SAMPLED | ImageUsage::STORAGE,
+				#if defined(DEBUG_OBJECT_NAME)
+					.name = "Intermediate lightmap atlas",
+				#endif
+			},
+			0
+		);
+	}
+
+	ref<Image> Lightmapper::createLightmapAtlasImage(const ImageAssetDescriptor& lightmapAtlasImageAssetDescriptor) const {
+		return dilationRenderPass->createColorAttachmentImage(
+			{
+				.type = ImageType::TEXTURE_2D,
+				.extent = lightmapAtlasImageAssetDescriptor.extent,
+				.mipLevelCount = lightmapAtlasImageAssetDescriptor.mipLevelCount,
+				.layerCount = lightmapAtlasImageAssetDescriptor.layerCount,
+				.additionalUsage = ImageUsage::TRANSFER_SRC,
 				#if defined(DEBUG_OBJECT_NAME)
 					.name = "Lightmap atlas",
 				#endif
 			},
 			0
 		);
+	}
+
+	ref<ImageView> Lightmapper::createIntermediateLightmapAtlasImageView() {
+		return intermediateLightmapAtlasImage->createView({
+			.mipLevelOffset = 0,
+			.mipLevelCount = 1,
+			.layerOffset = 0,
+			.layerCount = 1,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Intermediate lightmap atlas view",
+			#endif
+		});
 	}
 
 	ref<ImageView> Lightmapper::createLightmapAtlasImageView() {
@@ -207,20 +210,33 @@ namespace Trident {
 		});
 	}
 
-	ref<Framebuffer> Lightmapper::createRasterizeLightmapsFramebuffer() const {
-		const Extent3D extent = lightmapAtlasImage->getExtent();
+	ref<Framebuffer> Lightmapper::createRasterizationFramebuffer() const {
+		const Extent3D extent = intermediateLightmapAtlasImage->getExtent();
 
 		return Renderer::createFramebuffer({
-			.renderPass = rasterizeLightmapsRenderPass,
-			.imageViews = {lightmapAtlasImageView},
+			.renderPass = rasterizationRenderPass,
+			.imageViews = {intermediateLightmapAtlasImageView},
 			.extent = {extent.width, extent.height},
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Rasterize lightmaps",
+				.name = "Rasterization",
 			#endif
 		});
 	}
 
-	ref<DescriptorSetLayout> Lightmapper::createRasterizeLightmapsDescriptorSetLayout() const {
+	ref<Framebuffer> Lightmapper::createDilationFramebuffer() const {
+		const Extent3D extent = lightmapAtlasImage->getExtent();
+
+		return Renderer::createFramebuffer({
+			.renderPass = dilationRenderPass,
+			.imageViews = {lightmapAtlasImageView},
+			.extent = {extent.width, extent.height},
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Dilation",
+			#endif
+		});
+	}
+
+	ref<DescriptorSetLayout> Lightmapper::createRasterizationDescriptorSetLayout() const {
 		return Renderer::createDescriptorSetLayout({
 			// Trace rays argument
 			{
@@ -229,7 +245,7 @@ namespace Trident {
 				.shaderStages = ShaderStage::FRAGMENT,
 			},
 
-			// Lightmap pixel
+			// Luxel
 			{
 				.descriptorType = DescriptorType::READ_WRITE_STORAGE_BUFFER,
 				.descriptorCount = 1,
@@ -247,7 +263,7 @@ namespace Trident {
 				.shaderStages = ShaderStage::COMPUTE,
 			},
 
-			// Lightmap pixel
+			// Luxel
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
@@ -275,7 +291,7 @@ namespace Trident {
 				.shaderStages = ShaderStage::COMPUTE,
 			},
 
-			// Lightmap atlas
+			// Intermediate lightmap atlas
 			{
 				.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE,
 				.descriptorCount = 1,
@@ -295,34 +311,18 @@ namespace Trident {
 		});
 	}
 
-	ref<PipelineLayout> Lightmapper::createRasterizeLightmapsPipelineLayout(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) const {
-		return Renderer::createPipelineLayout({
-			.descriptorSetLayouts = descriptorSetLayouts,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Rasterize lightmaps",
-			#endif
+	ref<DescriptorSetLayout> Lightmapper::createDilationDescriptorSetLayout() const {
+		return Renderer::createDescriptorSetLayout({
+			// Intermediate lightmap atlas
+			{
+				.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::FRAGMENT,
+			},
 		});
 	}
 
-	ref<PipelineLayout> Lightmapper::createTraceRaysPipelineLayout(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) const {
-		return Renderer::createPipelineLayout({
-			.descriptorSetLayouts = descriptorSetLayouts,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Trace rays",
-			#endif
-		});
-	}
-
-	ref<PipelineLayout> Lightmapper::createPostProcessingPipelineLayout(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) const {
-		return Renderer::createPipelineLayout({
-			.descriptorSetLayouts = descriptorSetLayouts,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Post processing",
-			#endif
-		});
-	}
-
-	ref<GraphicsPipeline> Lightmapper::createRasterizeLightmapsPipeline() const {
+	ref<GraphicsPipeline> Lightmapper::createRasterizationPipeline() const {
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 		vertexInputBinding.registerAttribute<svec2<float32>>();
 
@@ -333,27 +333,27 @@ namespace Trident {
 		};
 
 		return Renderer::createGraphicsPipeline({
-			.pipelineLayout = rasterizeLightmapsPipelineLayout,
+			.pipelineLayout = rasterizationPipelineLayout,
 			.vertexInputBindings = {vertexInputBinding},
 			.vertexShaderModule = Renderer::loadShaderModule(
 				{
 					.stage = ShaderStage::VERTEX,
 					.entryPoint = "main",
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Rasterize lightmaps (vertex)",
+						.name = "Rasterization vertex",
 					#endif
 				},
-				"Lightmapper/RasterizeLightmaps.vert"
+				"Lightmapper/Rasterization.vert"
 			),
 			.fragmentShaderModule = Renderer::loadShaderModule(
 				{
 					.stage = ShaderStage::FRAGMENT,
 					.entryPoint = "main",
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Rasterize lightmaps (fragment)",
+						.name = "Rasterization fragment",
 					#endif
 				},
-				"Lightmapper/RasterizeLightmaps.frag"
+				"Lightmapper/Rasterization.frag"
 			),
 			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
 			.polygonMode = PolygonMode::FILL,
@@ -368,10 +368,10 @@ namespace Trident {
 				.depthTest = false,
 			},
 			.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
-			.renderPass = rasterizeLightmapsRenderPass,
+			.renderPass = rasterizationRenderPass,
 			.subpassIndex = 0,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Rasterize lightmaps",
+				.name = "Rasterization",
 			#endif
 		});
 	}
@@ -384,7 +384,7 @@ namespace Trident {
 					.stage = ShaderStage::COMPUTE,
 					.entryPoint = "main",
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Trace rays (compute)",
+						.name = "Trace rays compute",
 					#endif
 				},
 				"Lightmapper/TraceRays.comp"
@@ -395,7 +395,7 @@ namespace Trident {
 		});
 	}
 
-	ref<ComputePipeline> Lightmapper::createPostProcessingPipeline() const {
+	ref<ComputePipeline> Lightmapper::createIntermediateDilationPipeline() const {
 		return Renderer::createComputePipeline({
 			.pipelineLayout = postProcessingPipelineLayout,
 			.computeShaderModule = Renderer::loadShaderModule(
@@ -403,13 +403,102 @@ namespace Trident {
 					.stage = ShaderStage::COMPUTE,
 					.entryPoint = "main",
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Post processing (compute)",
+						.name = "Intermediate dilation compute",
 					#endif
 				},
-				"Lightmapper/PostProcessing.comp"
+				"Lightmapper/IntermediateDilation.comp"
 			),
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Post processing",
+				.name = "Intermediate dilation",
+			#endif
+		});
+	}
+
+	ref<ComputePipeline> Lightmapper::createHorizontalBilateralFilterPipeline() const {
+		return Renderer::createComputePipeline({
+			.pipelineLayout = postProcessingPipelineLayout,
+			.computeShaderModule = Renderer::loadShaderModule(
+				{
+					.stage = ShaderStage::COMPUTE,
+					.entryPoint = "main",
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Horizontal bilateral filter compute",
+					#endif
+				},
+				"Lightmapper/HorizontalBilateralFilter.comp"
+			),
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Horizontal bilateral filter",
+			#endif
+		});
+	}
+
+	ref<ComputePipeline> Lightmapper::createVerticalBilateralFilterPipeline() const {
+		return Renderer::createComputePipeline({
+			.pipelineLayout = postProcessingPipelineLayout,
+			.computeShaderModule = Renderer::loadShaderModule(
+				{
+					.stage = ShaderStage::COMPUTE,
+					.entryPoint = "main",
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Vertical bilateral filter compute",
+					#endif
+				},
+				"Lightmapper/VerticalBilateralFilter.comp"
+			),
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Vertical bilateral filter",
+			#endif
+		});
+	}
+
+	ref<GraphicsPipeline> Lightmapper::createDilationPipeline() const {
+		const sequence<ColorBlendAttachment> colorBlendAttachments = {
+			{
+				.blend = false,
+			},
+		};
+
+		return Renderer::createGraphicsPipeline({
+			.pipelineLayout = dilationPipelineLayout,
+			.vertexInputBindings = {},
+			.vertexShaderModule = Renderer::loadShaderModule(
+				{
+					.stage = ShaderStage::VERTEX,
+					.entryPoint = "main",
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Dilation vertex",
+					#endif
+				},
+				"Lightmapper/Dilation.vert"
+			),
+			.fragmentShaderModule = Renderer::loadShaderModule(
+				{
+					.stage = ShaderStage::FRAGMENT,
+					.entryPoint = "main",
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Dilation fragment",
+					#endif
+				},
+				"Lightmapper/Dilation.frag"
+			),
+			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
+			.polygonMode = PolygonMode::FILL,
+			.cullMode = CullMode::BACK,
+			.frontFace = FrontFace::CLOCKWISE,
+			.lineWidth = 1.0f,
+			.minSampleShading = 0.0f,
+			.colorBlendState = {
+				.attachments = colorBlendAttachments,
+			},
+			.depthStencilState = {
+				.depthTest = false,
+			},
+			.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
+			.renderPass = dilationRenderPass,
+			.subpassIndex = 0,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Dilation",
 			#endif
 		});
 	}
@@ -442,9 +531,9 @@ namespace Trident {
 		});
 	}
 
-	ref<Buffer> Lightmapper::createLightmapPixelBuffer() const {
-		const Extent3D lightmapAtlasImageExtent = lightmapAtlasImage->getExtent();
-		const uint64 size = lightmapAtlasImageExtent.width * lightmapAtlasImageExtent.height * sizeof(LightmapPixel);
+	ref<Buffer> Lightmapper::createLuxelBuffer() const {
+		const Extent3D lightmapAtlasImageExtent = intermediateLightmapAtlasImage->getExtent();
+		const uint64 size = lightmapAtlasImageExtent.width * lightmapAtlasImageExtent.height * sizeof(Luxel);
 		const uint64 minStorageBufferOffsetAlignment = Renderer::getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
 
 		return Renderer::createDynamicBuffer({
@@ -453,7 +542,7 @@ namespace Trident {
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Lightmap pixel",
+				.name = "Luxel",
 			#endif
 		});
 	}
@@ -500,6 +589,16 @@ namespace Trident {
 		});
 	}
 
+	ref<Sampler> Lightmapper::createIntermediateLightmapAtlasSampler() const {
+		return Renderer::createSampler({
+			.magFilter = Filter::NEAREST,
+			.minFilter = Filter::NEAREST,
+			.addressModeU = AddressMode::REPEAT,
+			.addressModeV = AddressMode::REPEAT,
+			.addressModeW = AddressMode::REPEAT,
+		});
+	}
+
 	void Lightmapper::encodeOneTimeCommands(const StaticScene3D& scene) const {
 		const ref<Device> device = Renderer::getDevice();
 		const ref<Buffer> stagingBuffer = Renderer::createDynamicBuffer({
@@ -530,7 +629,7 @@ namespace Trident {
 
 		TraceRaysArguments* traceRaysArguments = traceRaysArgumentStagingView->map();
 		traceRaysArguments->atlasExtent = atlasExtent;
-		traceRaysArguments->lightmapPixelCount = 0;
+		traceRaysArguments->luxelCount = 0;
 		traceRaysArguments->triangleCount = static_cast<uint32>(scene.triangles.count());
 		traceRaysArguments->traceRaysCommand.x = 1;
 		traceRaysArguments->traceRaysCommand.y = 1;
@@ -599,27 +698,32 @@ namespace Trident {
 
 		const ref<BufferView<svec2<float32>>> lightmapCoordinateView = lightmapCoordinateBuffer->createView<svec2<float32>>(0, lightmapCoordinateBuffer->getSize());
 		const ref<BufferView<TraceRaysArguments>> traceRaysArgumentView = traceRaysArgumentBuffer->createView<TraceRaysArguments>(0, traceRaysArgumentBuffer->getSize());
-		const ref<BufferView<LightmapPixel>> lightmapPixelView = lightmapPixelBuffer->createView<LightmapPixel>(0, lightmapPixelBuffer->getSize());
+		const ref<BufferView<Luxel>> luxelView = luxelBuffer->createView<Luxel>(0, luxelBuffer->getSize());
 		const ref<BufferView<StaticTriangle3D>> triangleView = triangleBuffer->createView<StaticTriangle3D>(0, triangleBuffer->getSize());
 		const ref<BufferView<float32>> vertexComponentView = vertexComponentBuffer->createView<float32>(0, vertexComponentBuffer->getSize());
 		const ref<BufferView<float32>> normalComponentView = normalComponentBuffer->createView<float32>(0, normalComponentBuffer->getSize());
 
-		const DescriptorImage lightmapAtlasDescriptorImage = {
-			.imageView = lightmapAtlasImageView,
+		const DescriptorImage intermediateLightmapAtlasDescriptorImage = {
+			.imageView = intermediateLightmapAtlasImageView,
 			.imageLayout = ImageLayout::GENERAL,
 			.sampler = nullptr,
+		};
+		const DescriptorImage sampledIntermediateLightmapAtlasDescriptorImage = {
+			.imageView = intermediateLightmapAtlasImageView,
+			.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+			.sampler = intermediateLightmapAtlasSampler,
 		};
 
 		const sequence<WriteDescriptorSet> writeDescriptorSets = {
 			{
-				.descriptorSet = rasterizeLightmapsDescriptorSet,
+				.descriptorSet = rasterizationDescriptorSet,
 				.bindingIndex = 0,
 				.descriptorBufferViews = traceRaysArgumentView,
 			},
 			{
-				.descriptorSet = rasterizeLightmapsDescriptorSet,
+				.descriptorSet = rasterizationDescriptorSet,
 				.bindingIndex = 1,
-				.descriptorBufferViews = lightmapPixelView,
+				.descriptorBufferViews = luxelView,
 			},
 			{
 				.descriptorSet = traceRaysDescriptorSet,
@@ -629,7 +733,7 @@ namespace Trident {
 			{
 				.descriptorSet = traceRaysDescriptorSet,
 				.bindingIndex = 1,
-				.descriptorBufferViews = lightmapPixelView,
+				.descriptorBufferViews = luxelView,
 			},
 			{
 				.descriptorSet = traceRaysDescriptorSet,
@@ -649,15 +753,145 @@ namespace Trident {
 			{
 				.descriptorSet = traceRaysDescriptorSet,
 				.bindingIndex = 5,
-				.descriptorImages = lightmapAtlasDescriptorImage,
+				.descriptorImages = intermediateLightmapAtlasDescriptorImage,
 			},
 			{
 				.descriptorSet = postProcessingDescriptorSet,
 				.bindingIndex = 0,
-				.descriptorImages = lightmapAtlasDescriptorImage,
+				.descriptorImages = intermediateLightmapAtlasDescriptorImage,
+			},
+			{
+				.descriptorSet = dilationDescriptorSet,
+				.bindingIndex = 0,
+				.descriptorImages = sampledIntermediateLightmapAtlasDescriptorImage,
 			},
 		};
 
 		device->updateDescriptorSets(writeDescriptorSets);
+	}
+
+	void Lightmapper::generateLightmaps(uint32 vertexCount) const {
+		const ref<Device> device = Renderer::getDevice();
+		const Extent2D extent = atlasExtent;
+		const float32 width = static_cast<float32>(extent.width);
+		const float32 height = static_cast<float32>(extent.height);
+		const ref<Queue> queue = device->getQueue(QueueFamilyCapability::GRAPHICS);
+		const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
+			.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Generate lightmaps",
+			#endif
+		});
+
+		commandEncoder->begin();
+		commandEncoder->beginRenderPass({
+			.framebuffer = rasterizationFramebuffer,
+			.clearValues = {{0.0f, 0.0f, 0.0f, 0.0f}},
+		});
+		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
+		commandEncoder->setScissor(0, 0, extent);
+		commandEncoder->bindGraphicsPipeline(rasterizationPipeline);
+		commandEncoder->bindVertexBuffer(0, lightmapCoordinateBuffer, 0, sizeof(svec2<float32>));
+		commandEncoder->bindDescriptorSets(rasterizationPipelineLayout, 0, rasterizationDescriptorSet);
+		commandEncoder->draw(vertexCount, 1, 0, 0);
+		commandEncoder->endRenderPass();
+
+		ImageMemoryBarrier imageMemoryBarrier;
+
+		// TODO(graphics/dx12/end-render-pass): Automatically transition the attachments to their final layout.
+		if (Renderer::getGraphicsApi() == GraphicsAPI::DX12) {
+			imageMemoryBarrier = {
+				.image = intermediateLightmapAtlasImage,
+				.newLayout = ImageLayout::GENERAL,
+				.newAccess = Access::SHADER_WRITE,
+			};
+
+			commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
+		}
+
+		commandEncoder->bindComputePipeline(traceRaysPipeline);
+		commandEncoder->bindDescriptorSets(traceRaysPipelineLayout, 0, traceRaysDescriptorSet);
+
+		// TODO(graphics/dx12/dispatch): Fix artifacts on the lightmap atlas due to not enough threads being dispatched.
+		commandEncoder->dispatchIndirect(traceRaysArgumentBuffer, offsetof(TraceRaysArguments, TraceRaysArguments::traceRaysCommand));
+
+		const uint32 workGroupX = ceil(extent.width / 16, 16u);
+		const uint32 workGroupY = ceil(extent.height / 16, 16u);
+
+		// TODO(graphics/dx12/vulkan): This barrier's layout is the same as the current layout but Vulkan needs a sync point after the raytracing.
+		imageMemoryBarrier = {
+			.image = intermediateLightmapAtlasImage,
+			.newLayout = ImageLayout::GENERAL,
+			.newAccess = Access::SHADER_READ | Access::SHADER_WRITE,
+		};
+
+		// TODO(graphics/command-encoder): Add support for pipeline barriers.
+		commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
+
+		commandEncoder->bindComputePipeline(intermediateDilationPipeline);
+		commandEncoder->bindDescriptorSets(postProcessingPipelineLayout, 0, postProcessingDescriptorSet);
+		commandEncoder->dispatch(workGroupX, workGroupY, 1);
+
+		// TODO(graphics/command-encoder): Add support for pipeline barriers.
+		commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
+
+		commandEncoder->bindComputePipeline(horizontalBilateralFilterPipeline);
+		commandEncoder->bindDescriptorSets(postProcessingPipelineLayout, 0, postProcessingDescriptorSet);
+		commandEncoder->dispatch(workGroupX, workGroupY, 1);
+
+		// TODO(graphics/command-encoder): Add support for pipeline barriers.
+		commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
+
+		commandEncoder->bindComputePipeline(verticalBilateralFilterPipeline);
+		commandEncoder->bindDescriptorSets(postProcessingPipelineLayout, 0, postProcessingDescriptorSet);
+		commandEncoder->dispatch(workGroupX, workGroupY, 1);
+
+		imageMemoryBarrier = {
+			.image = intermediateLightmapAtlasImage,
+			.newLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+			.newAccess = Access::SHADER_READ,
+		};
+
+		commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
+
+		commandEncoder->beginRenderPass({
+			.framebuffer = dilationFramebuffer,
+			.clearValues = {{0.0f, 0.0f, 0.0f, 0.0f}},
+		});
+		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
+		commandEncoder->setScissor(0, 0, extent);
+		commandEncoder->bindGraphicsPipeline(dilationPipeline);
+		commandEncoder->bindDescriptorSets(dilationPipelineLayout, 0, dilationDescriptorSet);
+		commandEncoder->draw(3, 1, 0, 0);
+		commandEncoder->endRenderPass();
+
+		// TODO(graphics/dx12/end-render-pass): Automatically transition the attachments to their final layout.
+		if (Renderer::getGraphicsApi() == GraphicsAPI::DX12) {
+			imageMemoryBarrier = {
+				.image = lightmapAtlasImage,
+				.newLayout = ImageLayout::TRANSFER_SRC_OPTIMAL,
+				.newAccess = Access::TRANSFER_READ,
+			};
+
+			commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
+		}
+
+		const BufferImageCopyRegion lightmapAtlasBufferImageCopyRegion = {
+			.bufferOffset = 0,
+			.imageOffsetX = 0,
+			.imageOffsetY = 0,
+			.imageOffsetZ = 0,
+			.imageExtent = lightmapAtlasImage->getExtent(),
+			.imageMipLevel = lightmapAtlasImageView->getMipLevelOffset(),
+			.imageLayerOffset = lightmapAtlasImageView->getLayerOffset(),
+			.imageLayerCount = lightmapAtlasImageView->getLayerCount(),
+		};
+
+		commandEncoder->copyImageToBuffer(lightmapAtlasImage, lightmapAtlasStagingBuffer, lightmapAtlasBufferImageCopyRegion);
+
+		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+		queue->submit(commandBuffer);
+		queue->waitIdle();
 	}
 }

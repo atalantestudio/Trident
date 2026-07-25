@@ -5,7 +5,7 @@
 
 layout(local_size_x = 16, local_size_y = 1, local_size_z = 1) in;
 
-struct LightmapPixel {
+struct Luxel {
 	uint triangleIndex;
 	uint coordinate;
 };
@@ -39,12 +39,12 @@ const vec3 SUN_DIRECTION = vec3(-1.0, -1.0, -1.0);
 
 layout(set = 0, binding = 0) buffer readonly TraceRaysArgumentBuffer {
 	uvec2 atlasSize;
-	uint lightmapPixelCount;
+	uint luxelCount;
 	uint triangleCount;
 };
 
-layout(set = 0, binding = 1) buffer readonly LightmapPixelBuffer {
-	LightmapPixel lightmapPixels[];
+layout(set = 0, binding = 1) buffer readonly LuxelBuffer {
+	Luxel luxels[];
 };
 
 layout(set = 0, binding = 2) buffer readonly TriangleBuffer {
@@ -59,7 +59,7 @@ layout(set = 0, binding = 4) buffer readonly NormalComponentBuffer {
 	float normalComponents[];
 };
 
-layout(set = 0, binding = 5, rgba8) uniform writeonly image2D lightmapAtlasImage;
+layout(set = 0, binding = 5, rgba8) uniform writeonly image2D intermediateLightmapAtlas;
 
 float parallelogramArea(vec2 a, vec2 b) {
 	return a.x * b.y - a.y * b.x;
@@ -98,7 +98,7 @@ bool rayTriangleIntersection(Ray ray, Triangle triangle_, inout float distance) 
 	uint normalOffset = triangle_.normalIndex * 3;
 	vec3 normal = vec3(normalComponents[normalOffset + 0], normalComponents[normalOffset + 1], normalComponents[normalOffset + 2]);
 
-	if (dot(ray.direction, normal) > 0.0) {
+	if (dot(ray.direction, normal) > 1e-4) {
 		return false;
 	}
 
@@ -113,7 +113,7 @@ bool rayTriangleIntersection(Ray ray, Triangle triangle_, inout float distance) 
 	vec3 pvec = cross(ray.direction, ac);
 	float d = dot(ab, pvec);
 
-	if (abs(d) < 0.0001) {
+	if (abs(d) < 1e-4) {
 		return false;
 	}
 
@@ -121,24 +121,20 @@ bool rayTriangleIntersection(Ray ray, Triangle triangle_, inout float distance) 
 	vec3 tvec = ray.origin - a;
 	float u = dot(tvec, pvec) * invD;
 
-	if (u < -0.0001 || u > 1.0001) {
+	if (u < -1e-4 || u > 1.0 + 1e-4) {
 		return false;
 	}
 
 	vec3 qvec = cross(tvec, ab);
 	float v = dot(ray.direction, qvec) * invD;
 
-	if (v < -0.0001 || u + v > 1.0001) {
+	if (v < -1e-4 || u + v > 1.0 + 1e-4) {
 		return false;
 	}
 
 	distance = dot(ac, qvec) * invD;
 
-	if (distance < 0.0) {
-		return false;
-	}
-
-	return true;
+	return distance > 1e-4;
 }
 
 Hit rchit(Ray ray, uint triangleIndex, float distance) {
@@ -200,7 +196,7 @@ vec3 rgen(Hit hit, inout uint seed) {
 	uint bounceIndex = 0;
 
 	while (bounceIndex < BOUNCE_COUNT) {
-		ray.origin = hit.position + hit.normal * 0.0001;
+		ray.origin = hit.position + hit.normal * 1e-4;
 		ray.direction = normalize(hit.normal + randomUnitDirection(seed));
 
 		hit = rint(ray);
@@ -225,17 +221,17 @@ vec3 rgen(Hit hit, inout uint seed) {
 }
 
 void main() {
-	uint pixelIndex = gl_GlobalInvocationID.x;
+	uint luxelIndex = gl_GlobalInvocationID.x;
 
-	if (pixelIndex >= lightmapPixelCount) {
+	if (luxelIndex >= luxelCount) {
 		return;
 	}
 
-	LightmapPixel pixel = lightmapPixels[pixelIndex];
+	Luxel luxel = luxels[luxelIndex];
 
-	uvec2 coordinate = uvec2(pixel.coordinate >> 16, pixel.coordinate & 0xffff);
+	uvec2 coordinate = uvec2(luxel.coordinate >> 16, luxel.coordinate & 0xffff);
 	uint seed = coordinate.y * atlasSize.x + coordinate.x;
-	Triangle triangle_ = triangles[pixel.triangleIndex];
+	Triangle triangle_ = triangles[luxel.triangleIndex];
 	uint normalOffset = triangle_.normalIndex * 3;
 	vec3 normal = vec3(normalComponents[normalOffset + 0], normalComponents[normalOffset + 1], normalComponents[normalOffset + 2]);
 	uint vertexAOffset = triangle_.vertices[0].index * 3;
@@ -247,13 +243,13 @@ void main() {
 	vec2 lightmapCoordinateA = triangle_.vertices[0].lightmapCoordinate;
 	vec2 lightmapCoordinateB = triangle_.vertices[1].lightmapCoordinate;
 	vec2 lightmapCoordinateC = triangle_.vertices[2].lightmapCoordinate;
-	vec2 pixelCoordinate = (coordinate + vec2(0.5, 0.5)) / atlasSize;
-	vec3 pixelBarycentricCoordinate = calculateBarycentricCoordinate(lightmapCoordinateA, lightmapCoordinateB, lightmapCoordinateC, pixelCoordinate);
+	vec2 luxelCoordinate = (coordinate + vec2(0.5, 0.5)) / atlasSize;
+	vec3 luxelBarycentricCoordinate = calculateBarycentricCoordinate(lightmapCoordinateA, lightmapCoordinateB, lightmapCoordinateC, luxelCoordinate);
 	vec3 radiance = vec3(0.0, 0.0, 0.0);
 	uint sampleIndex = 0;
 
 	Hit hit;
-	hit.position = vertexA * pixelBarycentricCoordinate.x + vertexB * pixelBarycentricCoordinate.y + vertexC * pixelBarycentricCoordinate.z;
+	hit.position = vertexA * luxelBarycentricCoordinate.x + vertexB * luxelBarycentricCoordinate.y + vertexC * luxelBarycentricCoordinate.z;
 	hit.normal = normal;
 
 	while (sampleIndex < SAMPLE_COUNT) {
@@ -264,5 +260,5 @@ void main() {
 
 	vec3 light = radiance / SAMPLE_COUNT;
 
-	imageStore(lightmapAtlasImage, ivec2(coordinate), vec4(light, 1.0));
+	imageStore(intermediateLightmapAtlas, ivec2(coordinate), vec4(light, 1.0));
 }

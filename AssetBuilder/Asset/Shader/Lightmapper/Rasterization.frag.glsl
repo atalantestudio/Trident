@@ -9,7 +9,7 @@ struct DispatchIndirectCommand {
 	uint z;
 };
 
-struct LightmapPixel {
+struct Luxel {
 	uint triangleIndex;
 	uint coordinate;
 };
@@ -23,23 +23,27 @@ const uint RAYTRACER_WORKGROUP_SIZE = 16;
 
 layout(set = 0, binding = 0) buffer TraceRaysArgumentBuffer {
 	uvec2 atlasSize;
-	uint lightmapPixelCount;
+	uint luxelCount;
 	uint triangleCount;
 	DispatchIndirectCommand traceRaysCommand;
 };
 
-layout(set = 0, binding = 1) buffer writeonly LightmapPixelBuffer {
-	LightmapPixel lightmapPixels[];
+layout(set = 0, binding = 1) buffer writeonly LuxelBuffer {
+	Luxel luxels[];
 };
+
+uint ceil(uint value, uint multiplier) {
+	return (value + multiplier - 1) & ~(multiplier - 1);
+}
 
 void main() {
 	uvec2 coordinate = uvec2(interstage.coordinate * atlasSize);
-	uint lightmapPixelIndex = atomicAdd(lightmapPixelCount, 1);
+	uint luxelIndex = atomicAdd(luxelCount, 1);
 
-	traceRaysCommand.x = lightmapPixelCount / RAYTRACER_WORKGROUP_SIZE;
+	traceRaysCommand.x = ceil(luxelCount / RAYTRACER_WORKGROUP_SIZE, RAYTRACER_WORKGROUP_SIZE);
 
-	lightmapPixels[lightmapPixelIndex].triangleIndex = interstage.triangleIndex;
-	lightmapPixels[lightmapPixelIndex].coordinate = (coordinate.x << 16) | coordinate.y;
+	luxels[luxelIndex].triangleIndex = interstage.triangleIndex;
+	luxels[luxelIndex].coordinate = (coordinate.x << 16) | coordinate.y;
 
 	discard;
 }
