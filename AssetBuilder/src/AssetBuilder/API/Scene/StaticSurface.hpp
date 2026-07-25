@@ -4,14 +4,10 @@
 #pragma once
 
 #include "AssetBuilder/API/Geometry/StaticGeometry3D.hpp"
+#include "AssetBuilder/API/TextureFilteringDescriptor.hpp"
+#include "AssetBuilder/API/Transform.hpp"
 
 namespace Trident {
-	struct TextureFilteringDescriptor {
-		svec2<float32> translation;
-		float32 rotation;
-		svec2<float32> scale;
-	};
-
 	struct Carving {
 		/// Offset from the top left.
 		svec2<float32> offset;
@@ -37,17 +33,6 @@ namespace Trident {
 		uint32 materialIndex;
 		svec2<float32> luxelScale;
 		std::vector<Carving> carvings;
-	};
-
-	struct Transform {
-		/// Relative to the surface center.
-		vec3<float32> translation;
-
-		/// Rotation axis.
-		svec3<float32> axis;
-
-		/// Rotation angle in radians.
-		float32 angle;
 	};
 
 	struct StaticEdge {
@@ -157,5 +142,8 @@ namespace Trident {
 		uint32 triangleOffset;
 		uint32 materialIndex;
 		svec2<float32> luxelScale;
+
+		/// Used by 3D geometry.
+		svec2<float32> minCoordinate = {0.0f, 0.0f};
 	};
 }

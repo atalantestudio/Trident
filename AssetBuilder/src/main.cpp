@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "AssetBuilder/API/AssetBuilderLibrary.hpp"
+#include "AssetBuilder/Process/Material/LightmappedWhiteMaterialProcess.hpp"
 #include "AssetBuilder/Process/Material/PlasterCeilingMaterialProcess.hpp"
 #include "AssetBuilder/Process/Material/PlasterWallMaterialProcess.hpp"
 #include "AssetBuilder/Process/Material/TileFloorMaterialProcess.hpp"
@@ -24,6 +25,7 @@
 #include "AssetBuilder/Process/Scene/SlidingBoxesSceneProcess.hpp"
 #include "AssetBuilder/Process/Scene/SnapTestSceneProcess.hpp"
 #include "AssetBuilder/Process/Scene/StackingSceneProcess.hpp"
+#include "AssetBuilder/Process/Scene/SuzanneSceneProcess.hpp"
 #include "AssetBuilder/Process/Scene/SwingSceneProcess.hpp"
 #include "Process/BuildAssetMapProcess.hpp"
 #include "Process/BuildFontAssetProcess.hpp"
@@ -57,6 +59,7 @@ namespace Trident {
 
 				registerProcess<BuildImageAssetProcess>(&assetLibrary);
 
+				registerProcess<LightmappedWhiteMaterialProcess>(&assetLibrary);
 				registerProcess<PlasterCeilingMaterialProcess>(&assetLibrary);
 				registerProcess<PlasterWallMaterialProcess>(&assetLibrary);
 				registerProcess<TileFloorMaterialProcess>(&assetLibrary);
@@ -80,6 +83,7 @@ namespace Trident {
 				registerProcess<LemonsSceneProcess>(&assetLibrary);
 				registerProcess<PlayerMovementSceneProcess>(&assetLibrary);
 				registerProcess<SnapTestSceneProcess>(&assetLibrary);
+				registerProcess<SuzanneSceneProcess>(&assetLibrary);
 
 				registerProcess<BuildShaderModuleAssetProcess>(&assetLibrary);
 

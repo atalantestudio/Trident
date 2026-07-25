@@ -3,10 +3,9 @@
 
 #pragma once
 
-#include "Engine/API/Geometry/Edge.hpp"
-#include "Engine/API/Geometry/Hull3D.hpp"
-#include "Engine/API/Geometry/Plane3D.hpp"
-#include "Engine/Filesystem/Asset/GeometryAssetFlags.hpp"
+#include "AssetBuilder/API/Transform.hpp"
+
+#include "Engine/Filesystem/Asset/GeometryAsset.hpp"
 
 namespace Trident {
 	struct StaticGeometry3D {
@@ -17,5 +16,12 @@ namespace Trident {
 		sequence<uint16> edgeOriginVertexIndices;
 		vec3<float32> normal;
 		svec2<float32> scale;
+	};
+
+	struct StaticGeometryDescriptor {
+		ref<GeometryAsset> asset;
+		EulerTransform transform;
+		uint32 materialIndex;
+		svec2<float32> luxelScale;
 	};
 }

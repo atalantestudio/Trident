@@ -228,7 +228,7 @@ namespace Trident {
 		if (textureFilteringTransform) {
 			textureTransform = (
 				mat3x3<float32>::scaling(descriptor.geometry.scale / descriptor.textureFiltering.scale) *
-				mat3x3<float32>::rotation(pi<float32>() * descriptor.textureFiltering.rotation) *
+				mat3x3<float32>::rotation(descriptor.textureFiltering.rotation * pi<float32>()) *
 				mat3x3<float32>::translation(descriptor.textureFiltering.translation)
 			);
 		}

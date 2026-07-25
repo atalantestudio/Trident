@@ -99,8 +99,6 @@ namespace Trident {
 		for (const StaticSurface& surface : surfaces) {
 			triangleOffset = scene.materials[surface.materialIndex].triangleRange.offset + surface.triangleOffset;
 
-			const vec3<float32> normal = surface.normal;
-
 			for (const StaticSubsurface& subsurface : surface.subsurfaces) {
 				const uint64 textureCoordinateCount = subsurface.textureCoordinates.count();
 
@@ -110,19 +108,10 @@ namespace Trident {
 				lightmap.coordinateOffset = lightmapCoordinateOffset;
 				lightmap.subsurface = &subsurface;
 
-				// TODO(lyah/scalar)
-				const svec3<float32> a = subsurface.vertices[0];
-				const svec3<float32> b = subsurface.vertices[1];
-				const vec3<float32> down = normalized(cross(normal, b - a));
-				const vec3<float32> right = normalized(cross(down, normal));
-
 				uint32 textureCoordinateIndex = 0;
 
 				while (textureCoordinateIndex < textureCoordinateCount) {
-					const vec3<float32> vertex = subsurface.vertices[textureCoordinateIndex] - a;
-					const svec2<float32> textureCoordinate = {dot(vertex, right), dot(vertex, down)};
-
-					lightmapCoordinates[lightmap.coordinateOffset + textureCoordinateIndex] = textureCoordinate / surface.luxelScale;
+					lightmapCoordinates[lightmap.coordinateOffset + textureCoordinateIndex] = (subsurface.textureCoordinates[textureCoordinateIndex] - surface.minCoordinate) * subsurface.scale / surface.luxelScale;
 
 					textureCoordinateIndex += 1;
 				}

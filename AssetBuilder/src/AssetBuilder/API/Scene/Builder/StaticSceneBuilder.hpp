@@ -48,11 +48,9 @@ namespace Trident {
 
 			void updateLightmapCoordinates(StaticScene3D& scene);
 
-		// TODO(asset-builder/scene): Keep exposing?
-		public:
+		protected:
 			std::vector<StaticSurface> surfaces;
 
-		private:
 			std::vector<svec3<float32>> vertices;
 			std::vector<svec3<float32>> normals;
 			std::vector<svec2<float32>> textureCoordinates;
