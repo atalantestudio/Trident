@@ -8,19 +8,27 @@
 #include "AssetBuilder/Process/Material/PlasterWallMaterialProcess.hpp"
 #include "AssetBuilder/Process/Material/TileFloorMaterialProcess.hpp"
 #include "AssetBuilder/Process/Material/WoodDoorMaterialProcess.hpp"
+#include "AssetBuilder/Process/Scene/BoxesSceneProcess.hpp"
 #include "AssetBuilder/Process/Scene/Boxes3DSceneProcess.hpp"
 #include "AssetBuilder/Process/Scene/BoxStackingSceneProcess.hpp"
 #include "AssetBuilder/Process/Scene/CabinSceneProcess.hpp"
+#include "AssetBuilder/Process/Scene/CirclesSceneProcess.hpp"
+#include "AssetBuilder/Process/Scene/DominosSceneProcess.hpp"
 #include "AssetBuilder/Process/Scene/EdgeContactSceneProcess.hpp"
 #include "AssetBuilder/Process/Scene/HallSceneProcess.hpp"
 #include "AssetBuilder/Process/Scene/LemonsSceneProcess.hpp"
 #include "AssetBuilder/Process/Scene/PlayerMovementSceneProcess.hpp"
+#include "AssetBuilder/Process/Scene/PolygonsSceneProcess.hpp"
+#include "AssetBuilder/Process/Scene/PyramidSceneProcess.hpp"
+#include "AssetBuilder/Process/Scene/RollingBallSceneProcess.hpp"
+#include "AssetBuilder/Process/Scene/SlidingBoxesSceneProcess.hpp"
 #include "AssetBuilder/Process/Scene/SnapTestSceneProcess.hpp"
+#include "AssetBuilder/Process/Scene/StackingSceneProcess.hpp"
+#include "AssetBuilder/Process/Scene/SwingSceneProcess.hpp"
 #include "Process/BuildAssetMapProcess.hpp"
 #include "Process/BuildFontAssetProcess.hpp"
 #include "Process/BuildGeometryAssetProcess.hpp"
 #include "Process/BuildImageAssetProcess.hpp"
-#include "Process/BuildSceneAssetProcess.hpp"
 #include "Process/BuildShaderModuleAssetProcess.hpp"
 
 #include "Engine/entry_point.hpp"
@@ -54,7 +62,16 @@ namespace Trident {
 				registerProcess<TileFloorMaterialProcess>(&assetLibrary);
 				registerProcess<WoodDoorMaterialProcess>(&assetLibrary);
 
-				registerProcess<BuildSceneAssetProcess>(&assetLibrary);
+				registerProcess<BoxesSceneProcess>(&assetLibrary);
+				registerProcess<CirclesSceneProcess>(&assetLibrary);
+				registerProcess<DominosSceneProcess>(&assetLibrary);
+				registerProcess<PolygonsSceneProcess>(&assetLibrary);
+				registerProcess<PyramidSceneProcess>(&assetLibrary);
+				registerProcess<RollingBallSceneProcess>(&assetLibrary);
+				registerProcess<SlidingBoxesSceneProcess>(&assetLibrary);
+				registerProcess<StackingSceneProcess>(&assetLibrary);
+				registerProcess<SwingSceneProcess>(&assetLibrary);
+
 				registerProcess<Boxes3DSceneProcess>(&assetLibrary);
 				registerProcess<BoxStackingSceneProcess>(&assetLibrary);
 				registerProcess<CabinSceneProcess>(&assetLibrary);

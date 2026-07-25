@@ -4,14 +4,27 @@
 #pragma once
 
 #include "AssetBuilder/API/AssetBuilderLibrary.hpp"
+#include "AssetBuilder/API/Scene/StaticScene.hpp"
 #include "../../../Process/BuildImageAssetProcess.hpp"
-#include "../../../Subprocess/SceneData.hpp"
 
 #include "Engine/API/Process/Process.hpp"
+#include "Engine/ECS/Component/GeometryComponent.hpp"
+#include "Engine/ECS/Component/MaterialComponent.hpp"
+#include "Engine/ECS/Component/RigidBody3DComponent.hpp"
+#include "Engine/ECS/EntityComponentMapping.hpp"
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 
 namespace Trident {
+	struct Scene3DData {
+		StaticScene3D staticScene;
+		uint32 entityCount;
+		sequence<uint32> geometryAssetIdentifiers;
+		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
+		sequence<EntityComponentMapping<MaterialComponent>> materialMappings;
+		sequence<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;
+	};
+
 	class Scene3DProcess : public Process {
 		private:
 			static ByteStream<StreamOperation::WRITE> encodeScene3DAsset(uint32 identifier, const Scene3DData& data) {
