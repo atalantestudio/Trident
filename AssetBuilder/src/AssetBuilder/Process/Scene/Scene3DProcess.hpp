@@ -32,7 +32,7 @@ namespace Trident {
 				header.signature = AssetSignature::SCENE;
 				header.identifier = identifier;
 				header.version = {0, 0, 0};
-				header.staticTriangleCount = static_cast<uint32>(data.staticScene.triangles.count());
+				header.staticTriangleCount = static_cast<uint32>(data.staticScene.indices.count()) / 3;
 				header.staticVertexCount = static_cast<uint32>(data.staticScene.vertices.count());
 				header.staticNormalCount = static_cast<uint32>(data.staticScene.normals.count());
 				header.staticTextureCoordinateCount = static_cast<uint32>(data.staticScene.textureCoordinates.count());
@@ -44,7 +44,7 @@ namespace Trident {
 
 				uint64 size = (
 					sizeof(header) + 3 * sizeof(uint32) +
-					header.staticTriangleCount * sizeof(StaticTriangle3D) +
+					header.staticTriangleCount * (sizeof(StaticVertex3D) - sizeof(uint32)) * 3 +
 					header.staticVertexCount * sizeof(svec3<float32>) +
 					header.staticNormalCount * sizeof(svec3<float32>) +
 					header.staticTextureCoordinateCount * sizeof(svec2<float32>) +
@@ -75,17 +75,11 @@ namespace Trident {
 				stream.write<uint32>(static_cast<uint32>(data.staticScene.materialShaders.count()));
 				stream.write<uint32>(static_cast<uint32>(data.staticScene.materials.count()));
 
-				for (const StaticTriangle3D& triangle : data.staticScene.triangles) {
-					stream.write<uint32>(triangle.vertices[0].vertexIndex);
-					stream.write<uint32>(triangle.vertices[0].textureCoordinateIndex);
-					stream.write<svec2<float32>>(triangle.vertices[0].lightmapCoordinate);
-					stream.write<uint32>(triangle.vertices[1].vertexIndex);
-					stream.write<uint32>(triangle.vertices[1].textureCoordinateIndex);
-					stream.write<svec2<float32>>(triangle.vertices[1].lightmapCoordinate);
-					stream.write<uint32>(triangle.vertices[2].vertexIndex);
-					stream.write<uint32>(triangle.vertices[2].textureCoordinateIndex);
-					stream.write<svec2<float32>>(triangle.vertices[2].lightmapCoordinate);
-					stream.write<uint32>(triangle.normalIndex);
+				for (const StaticVertex3D& index : data.staticScene.indices) {
+					stream.write<svec2<float32>>(index.lightmapCoordinate);
+					stream.write<uint32>(index.vertexIndex);
+					stream.write<uint32>(index.normalIndex);
+					stream.write<uint32>(index.textureCoordinateIndex);
 				}
 
 				for (const svec3<float32> vertex : data.staticScene.vertices) {
@@ -132,8 +126,8 @@ namespace Trident {
 
 				for (const BuildStaticMaterial3D& staticMaterial : data.staticScene.materials) {
 					stream.write<uint32>(staticMaterial.shaderIndex);
-					stream.write<uint32>(staticMaterial.triangleRange.offset);
-					stream.write<uint32>(staticMaterial.triangleRange.count);
+					stream.write<uint32>(staticMaterial.indexRange.offset);
+					stream.write<uint32>(staticMaterial.indexRange.count);
 				}
 
 				for (const uint32 geometryAssetIdentifier : data.geometryAssetIdentifiers) {

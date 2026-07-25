@@ -16,9 +16,15 @@ namespace Trident {
 		descriptor.version = stream.read<VersionNumber>();
 
 		const uint32 staticTriangleCount = stream.read<uint32>();
+		const uint32 staticIndexCount = staticTriangleCount * 3;
 		const uint32 staticVertexCount = stream.read<uint32>();
 		const uint32 staticNormalCount = stream.read<uint32>();
 		const uint32 staticTextureCoordinateCount = stream.read<uint32>();
+
+		descriptor.staticIndexRange = {0, staticIndexCount * sizeof(StaticVertex3D)};
+		descriptor.staticVertexRange = {descriptor.staticIndexRange.offset + descriptor.staticIndexRange.count, staticVertexCount * sizeof(svec3<float32>)};
+		descriptor.staticNormalRange = {descriptor.staticVertexRange.offset + descriptor.staticVertexRange.count, staticNormalCount * sizeof(svec3<float32>)};
+		descriptor.staticTextureCoordinateRange = {descriptor.staticNormalRange.offset + descriptor.staticNormalRange.count, staticTextureCoordinateCount * sizeof(svec2<float32>)};
 
 		descriptor.dynamicVertexPositionCount = 0;
 		descriptor.dynamicVertexNormalCount = 0;
@@ -33,10 +39,7 @@ namespace Trident {
 		descriptor.hullFaceCount = 0;
 		descriptor.hullFaceEdgeIndexCount = 0;
 		descriptor.rigidBodyFacePlaneCount = 0;
-		descriptor.staticVertices = sequence<svec3<float32>>(staticVertexCount);
-		descriptor.staticNormals = sequence<svec3<float32>>(staticNormalCount);
-		descriptor.staticTextureCoordinates = sequence<svec2<float32>>(staticTextureCoordinateCount);
-		descriptor.staticTriangles = sequence<StaticTriangle3D>(staticTriangleCount);
+		descriptor.staticGeometryBuffer = sequence<uint8>(descriptor.staticIndexRange.count + descriptor.staticVertexRange.count + descriptor.staticNormalRange.count + descriptor.staticTextureCoordinateRange.count);
 		descriptor.geometryAssets = sequence<ref<GeometryAsset>>(stream.read<uint32>());
 		descriptor.geometryMappings = sequence<EntityComponentMapping<GeometryComponent>>(stream.read<uint32>());
 		descriptor.materialMappings = sequence<EntityComponentMapping<MaterialComponent>>(stream.read<uint32>());
@@ -52,31 +55,52 @@ namespace Trident {
 		descriptor.materialAssets = sequence<ref<MaterialAsset>>(stream.read<uint32>());
 		descriptor.staticMaterials = sequence<StaticMaterial3D>(descriptor.materialAssets.count());
 
-		for (StaticTriangle3D& triangle : descriptor.staticTriangles) {
-			uint32 vertexIndex = 0;
+		StaticVertex3D* staticIndex = pointer_cast<StaticVertex3D*>(&descriptor.staticGeometryBuffer[descriptor.staticIndexRange.offset]);
+		svec3<float32>* staticVertex = pointer_cast<svec3<float32>*>(&descriptor.staticGeometryBuffer[descriptor.staticVertexRange.offset]);
+		svec3<float32>* staticNormal = pointer_cast<svec3<float32>*>(&descriptor.staticGeometryBuffer[descriptor.staticNormalRange.offset]);
+		svec2<float32>* staticTextureCoordinate = pointer_cast<svec2<float32>*>(&descriptor.staticGeometryBuffer[descriptor.staticTextureCoordinateRange.offset]);
+		uint32 index = 0;
 
-			while (vertexIndex < 3) {
-				StaticVertex3D& vertex = triangle.vertices[vertexIndex];
-				vertex.vertexIndex = stream.read<uint32>();
-				vertex.textureCoordinateIndex = stream.read<uint32>();
-				vertex.lightmapCoordinate = stream.read<svec2<float32>>();
+		while (index < staticIndexCount) {
+			staticIndex->lightmapCoordinate = stream.read<svec2<float32>>();
+			staticIndex->vertexIndex = stream.read<uint32>();
+			staticIndex->normalIndex = stream.read<uint32>();
+			staticIndex->textureCoordinateIndex = stream.read<uint32>();
+			staticIndex += 1;
 
-				vertexIndex += 1;
-			}
-
-			triangle.normalIndex = stream.read<uint32>();
+			index += 1;
 		}
 
-		for (svec3<float32>& vertex : descriptor.staticVertices) {
-			vertex = stream.read<svec3<float32>>();
+		index = 0;
+
+		while (index < staticVertexCount) {
+			staticVertex->x = stream.read<float32>();
+			staticVertex->y = stream.read<float32>();
+			staticVertex->z = stream.read<float32>();
+			staticVertex += 1;
+
+			index += 1;
 		}
 
-		for (svec3<float32>& normal : descriptor.staticNormals) {
-			normal = stream.read<svec3<float32>>();
+		index = 0;
+
+		while (index < staticNormalCount) {
+			staticNormal->x = stream.read<float32>();
+			staticNormal->y = stream.read<float32>();
+			staticNormal->z = stream.read<float32>();
+			staticNormal += 1;
+
+			index += 1;
 		}
 
-		for (svec2<float32>& textureCoordinate : descriptor.staticTextureCoordinates) {
-			textureCoordinate = stream.read<svec2<float32>>();
+		index = 0;
+
+		while (index < staticTextureCoordinateCount) {
+			staticTextureCoordinate->x = stream.read<float32>();
+			staticTextureCoordinate->y = stream.read<float32>();
+			staticTextureCoordinate += 1;
+
+			index += 1;
 		}
 
 		for (MaterialShader& materialShader : descriptor.materialShaders) {
@@ -93,8 +117,7 @@ namespace Trident {
 
 		for (StaticMaterial3D& staticMaterial : descriptor.staticMaterials) {
 			staticMaterial.index = stream.read<uint32>();
-			staticMaterial.triangleRange.offset = stream.read<uint32>();
-			staticMaterial.triangleRange.count = stream.read<uint32>();
+			staticMaterial.indexRange = stream.read<range<uint32, uint32>>();
 		}
 
 		for (ref<GeometryAsset>& geometryAsset : descriptor.geometryAssets) {

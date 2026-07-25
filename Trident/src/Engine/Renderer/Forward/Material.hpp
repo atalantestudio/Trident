@@ -29,18 +29,18 @@ namespace Trident {
 		dynamicInstanceInputBinding.registerAttribute<mat4x4<float32>>();
 		dynamicInstanceInputBinding.registerAttribute<mat3x3<float32>>();
 
-		const sequence<VertexInputBinding> staticVertexInputBindings = {};
+		// TODO(forward)
 		const sequence<VertexInputBinding> dynamicVertexInputBindings = {dynamicVertexInputBinding, dynamicInstanceInputBinding};
 
-		const ref<ShaderModule> staticVertexShaderModule = loadInternalShaderModule(
+		const ref<ShaderModule> staticGeometryVertexShaderModule = loadInternalShaderModule(
 			{
 				.stage = ShaderStage::VERTEX,
 				.entryPoint = "main",
 				#if defined(DEBUG_OBJECT_NAME)
-					.name = "Static vertex",
+					.name = "Static geometry vertex",
 				#endif
 			},
-			"Forward/Static/Static.vert"
+			"Forward/StaticGeometry/StaticGeometry.vert"
 		);
 		const ref<ShaderModule> dynamicVertexShaderModule = loadInternalShaderModule(
 			{
@@ -82,6 +82,9 @@ namespace Trident {
 			.renderPass = renderPass,
 			.subpassIndex = 0,
 		};
+
+		// TODO(forward)
+		materialPipelineDescriptor.vertexInputBindings = {getStaticGeometryVertexInputBinding()};
 
 		ImageDescriptor materialImageDescriptor = {
 			.type = ImageType::TEXTURE_2D,
@@ -187,7 +190,7 @@ namespace Trident {
 			materialDescriptorSetLayouts[materialShaderIndex] = createDescriptorSetLayout(bindings);
 
 			// TODO(forward/materials): Use correct vertex descriptor set layouts.
-			materialPipelineLayoutDescriptor.descriptorSetLayouts = {staticDescriptorSetLayout, materialDescriptorSetLayouts[materialShaderIndex]};
+			materialPipelineLayoutDescriptor.descriptorSetLayouts = {staticGeometryDescriptorSetLayout, materialDescriptorSetLayouts[materialShaderIndex]};
 
 			materialPipelineLayouts[materialShaderIndex] = createPipelineLayout(materialPipelineLayoutDescriptor);
 
@@ -199,7 +202,7 @@ namespace Trident {
 			materialPipelineDescriptor.pipelineLayout = materialPipelineLayouts[materialShaderIndex];
 
 			// TODO(forward/materials): Use the correct vertex shader module.
-			materialPipelineDescriptor.vertexShaderModule = staticVertexShaderModule;
+			materialPipelineDescriptor.vertexShaderModule = staticGeometryVertexShaderModule;
 
 			materialPipelineDescriptor.fragmentShaderModule = loadInternalShaderModule(
 				{

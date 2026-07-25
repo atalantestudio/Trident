@@ -45,6 +45,7 @@ namespace Trident {
 			void build() override {
 				renderer.setLayer(this);
 				renderer.build();
+				renderer.postBuild();
 
 				scene = createScope<Scene3D>(FlatColor::initializeScene(getApplication(), renderer.getGraphicsApi(), renderer.getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment));
 
@@ -77,6 +78,10 @@ namespace Trident {
 				#endif
 
 				renderer.setCameraController<PerspectiveCamera3D>(&cameraController);
+			}
+
+			void encodeOneTimeCommands() override {
+				renderer.encodeOneTimeCommands();
 			}
 
 			void update(float32 deltaTime, float32 inverseDeltaTime) override {

@@ -8,72 +8,44 @@
 #include "Engine/Renderer/3D/SceneRenderer.hpp"
 
 namespace Trident {
+	template<typename CameraType>
 	class BaseSceneRenderer : public SceneRenderer<Scene3D> {
 		public:
-			struct Camera {
-				mat4x4<float32> inverseProjection;
-				mat4x4<float32> inverseView;
-				vec3<float32> position;
-				Extent2D viewport;
-				uint32 frameIndex;
-				uint32 triangleCount;
-			};
+			void build() final override;
 
-		public:
-			void postSetCameraController() override {}
+			void postSetScene() final override;
 
-			void resize(WindowResizeEvent& event) override {
+			void postSetCameraController() final override {}
+
+			virtual void initialize() = 0;
+
+			virtual void updateCamera() = 0;
+
+			void resize(WindowResizeEvent& event) final override {
 				initialize();
 				updateCamera();
 			}
 
-			virtual void initialize() = 0;
-
-			void updateCamera() {
-				const PerspectiveCamera3D& camera = getCameraController<PerspectiveCamera3D>().getCamera();
-
-				cameraMappedRange->inverseProjection = inverse(camera.getProjection());
-				cameraMappedRange->inverseView = inverseFix(camera.getView());
-				cameraMappedRange->position = camera.position;
-				cameraMappedRange->viewport = getSwapchain()->getExtent();
-				cameraMappedRange->triangleCount = static_cast<uint32>(scene->getAsset()->getStaticTriangles().count());
-			}
-
 		protected:
+			virtual void encodeSceneOneTimeCommands() = 0;
+
+			VertexInputBinding getStaticGeometryVertexInputBinding() const;
+
+		private:
 			ref<Buffer> createCameraBuffer() const;
-			ref<Buffer> createStaticBuffer() const;
-			ref<Buffer> createStagingStaticBuffer() const;
+			ref<Buffer> createStaticIndexBuffer() const;
+			ref<Buffer> createStaticGeometryBuffer() const;
+			ref<Buffer> createStaticGeometryStagingBuffer() const;
 
-			void copyBuffers() const {
-				const ref<Buffer> staticStagingBuffer = createStagingStaticBuffer();
-
-				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
-				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
-					.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
-					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Copy buffers",
-					#endif
-				});
-
-				commandEncoder->begin();
-
-				copyStaticBuffer(commandEncoder, staticStagingBuffer);
-
-				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-				queue->submit(commandBuffer);
-				queue->waitIdle();
-			}
-
-			void copyStaticBuffer(ref<CommandEncoder> commandEncoder, ref<Buffer> staticStagingBuffer) const;
+			void copyStaticGeometry(ref<CommandEncoder> commandEncoder, ref<Buffer> staticGeometryStagingBuffer) const;
 
 		protected:
-			/// Contains the view/camera data.
 			ref<Buffer> cameraBuffer;
+			ref<Buffer> staticIndexBuffer;
+			ref<Buffer> staticGeometryBuffer;
 
-			/// Contains the static scene data.
-			ref<Buffer> staticBuffer;
-
-			Camera* cameraMappedRange = nullptr;
+			CameraType* cameraMappedRange = nullptr;
 	};
 }
+
+#include "Engine/Renderer/Scene/BaseSceneRenderer.ipp"

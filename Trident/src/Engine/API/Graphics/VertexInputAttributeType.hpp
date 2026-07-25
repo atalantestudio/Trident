@@ -4,7 +4,7 @@
 #pragma once
 
 namespace Trident {
-	// TODO: Implement remaining types using scalar vectors.
+	// TODO(graphics/vertex-input-attribute): Implement remaining types using scalar vectors.
 	// NOTE: TSL only supports 32-bit and 64-bit floating-point formats.
 	enum class VertexInputAttributeType : uint8 {
 		R8_SINT,
@@ -21,7 +21,7 @@ namespace Trident {
 		R32G32B32_UINT,
 		R32G32B32_FLOAT,
 		// R32G32B32A32_SINT,
-		// R32G32B32A32_UINT,
+		R32G32B32A32_UINT,
 		R32G32B32A32_FLOAT,
 		R64_SINT,
 		R64_UINT,
@@ -117,10 +117,10 @@ namespace Trident {
 		return VertexInputAttributeType::R32G32B32A32_SINT;
 	} */
 
-	/* template<>
+	template<>
 	constexpr VertexInputAttributeType getVertexInputAttributeType<vec4<uint32>>() {
 		return VertexInputAttributeType::R32G32B32A32_UINT;
-	} */
+	}
 
 	template<>
 	constexpr VertexInputAttributeType getVertexInputAttributeType<vec4<float32>>() {

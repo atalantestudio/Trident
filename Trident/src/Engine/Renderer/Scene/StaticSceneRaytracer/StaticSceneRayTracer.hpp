@@ -6,7 +6,16 @@
 #include "Engine/Renderer/Scene/BaseSceneRenderer.hpp"
 
 namespace Trident {
-	class StaticSceneRayTracer : public BaseSceneRenderer {
+	struct StaticSceneRayTracerCamera {
+		mat4x4<float32> inverseProjection;
+		mat4x4<float32> inverseView;
+		vec3<float32> position;
+		Extent2D viewport;
+		uint32 frameIndex;
+		uint32 triangleCount;
+	};
+
+	class StaticSceneRayTracer : public BaseSceneRenderer<StaticSceneRayTracerCamera> {
 		public:
 			// Called on startup and on window resize.
 			void initialize() override {
@@ -74,7 +83,7 @@ namespace Trident {
 				updateImageDescriptorSets();
 			}
 
-			void build() override {
+			void postBuild() override {
 				presentRenderPass = createPresentRenderPass();
 
 				rayTracingDescriptorSetLayout = createRayTracingDescriptorSetLayout();
@@ -90,12 +99,6 @@ namespace Trident {
 
 				initialize();
 
-				cameraBuffer = createCameraBuffer();
-
-				const ref<BufferView<Camera>> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
-
-				cameraMappedRange = cameraView->map();
-
 				rayTracingPipelineLayout = createRayTracingPipelineLayout();
 				presentPipelineLayout = createPresentPipelineLayout();
 
@@ -103,10 +106,9 @@ namespace Trident {
 				presentPipeline = createPresentPipeline();
 			}
 
-			void postSetScene() override {
-				staticBuffer = createStaticBuffer();
+			void encodeSceneOneTimeCommands() override {
+				cameraMappedRange->triangleCount = static_cast<uint32>(scene->getAsset()->staticIndexRange.count / 3);
 
-				copyBuffers();
 				updateDescriptorSets();
 			}
 
@@ -137,6 +139,15 @@ namespace Trident {
 				commandEncoder->endRenderPass();
 			}
 
+			void updateCamera() override {
+				const PerspectiveCamera3D& camera = getCameraController<PerspectiveCamera3D>().getCamera();
+
+				cameraMappedRange->inverseProjection = inverse(camera.getProjection());
+				cameraMappedRange->inverseView = inverseFix(camera.getView());
+				cameraMappedRange->position = camera.position;
+				cameraMappedRange->viewport = getSwapchain()->getExtent();
+			}
+
 			void resetFrameIndex() const {
 				cameraMappedRange->frameIndex = 0;
 			}
@@ -160,25 +171,19 @@ namespace Trident {
 
 			void updateDescriptorSets() const {
 				const ref<Device> device = getDevice();
-				const ref<Scene3DAsset> sceneAsset = scene->getAsset();
 				const uint64 minStorageBufferOffsetAlignment = device->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
-				const uint64 triangleRangeSize = sceneAsset->getStaticTriangles().count() * sizeof(StaticTriangle3D);
-				const uint64 vertexRangeSize = sceneAsset->getStaticVertices().count() * sizeof(svec3<float32>);
-				const uint64 normalRangeSize = sceneAsset->getStaticNormals().count() * sizeof(svec3<float32>);
-				const uint64 textureCoordinateRangeSize = sceneAsset->getStaticTextureCoordinates().count() * sizeof(svec2<float32>);
-				const uint64 triangleAlignedRangeSize = ceil(triangleRangeSize, minStorageBufferOffsetAlignment);
-				const uint64 vertexAlignedRangeSize = ceil(vertexRangeSize, minStorageBufferOffsetAlignment);
-				const uint64 normalAlignedRangeSize = ceil(normalRangeSize, minStorageBufferOffsetAlignment);
+				const ref<Scene3DAsset> sceneAsset = scene->getAsset();
+				const uint64 staticVertexAlignedRangeSize = ceil(sceneAsset->staticVertexRange.count, minStorageBufferOffsetAlignment);
+				const uint64 staticNormalAlignedRangeSize = ceil(sceneAsset->staticNormalRange.count, minStorageBufferOffsetAlignment);
 
 				const sequence<ref<BaseBufferView>> descriptorBufferViews = {
 					// Camera
 					cameraBuffer->createView<Camera>(0, cameraBuffer->getSize()),
 
-					// Static
-					staticBuffer->createView<StaticTriangle3D>(0, triangleRangeSize),
-					staticBuffer->createView<float32>(triangleAlignedRangeSize, vertexRangeSize),
-					staticBuffer->createView<float32>(triangleAlignedRangeSize + vertexAlignedRangeSize, normalRangeSize),
-					staticBuffer->createView<float32>(triangleAlignedRangeSize + vertexAlignedRangeSize + normalAlignedRangeSize, textureCoordinateRangeSize),
+					// Static geometry
+					staticGeometryBuffer->createView<float32>(0, sceneAsset->staticVertexRange.count),
+					staticGeometryBuffer->createView<float32>(staticVertexAlignedRangeSize, sceneAsset->staticNormalRange.count),
+					staticGeometryBuffer->createView<float32>(staticVertexAlignedRangeSize + staticNormalAlignedRangeSize, sceneAsset->staticTextureCoordinateRange.count),
 				};
 
 				sequence<WriteDescriptorSet> writeDescriptorSets(5);

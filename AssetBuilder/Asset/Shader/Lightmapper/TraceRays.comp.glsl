@@ -11,14 +11,16 @@ struct Luxel {
 };
 
 struct Vertex {
-	uint index;
-	uint textureCoordinateIndex;
 	vec2 lightmapCoordinate;
+	uint vertexIndex;
+	uint normalIndex;
+	uint textureCoordinateIndex;
+	uint _;
 };
 
 struct Triangle {
 	Vertex vertices[3];
-	uint normalIndex;
+	vec3 normal;
 };
 
 struct Ray {
@@ -34,7 +36,7 @@ struct Hit {
 
 const float FLOAT32_MAX = 4294967295.0;
 const uint SAMPLE_COUNT = 1024;
-const uint BOUNCE_COUNT = 4;
+const uint BOUNCE_COUNT = 1;
 const vec3 SUN_DIRECTION = vec3(-1.0, -1.0, -1.0);
 
 layout(set = 0, binding = 0) buffer readonly TraceRaysArgumentBuffer {
@@ -47,11 +49,11 @@ layout(set = 0, binding = 1) buffer readonly LuxelBuffer {
 	Luxel luxels[];
 };
 
-layout(set = 0, binding = 2) buffer readonly TriangleBuffer {
-	Triangle triangles[];
+layout(set = 0, binding = 2) buffer readonly IndexBuffer {
+	Vertex indices[];
 };
 
-layout(set = 0, binding = 3) buffer readonly VertexComponents {
+layout(set = 0, binding = 3) buffer readonly VertexComponentBuffer {
 	float vertexComponents[];
 };
 
@@ -94,17 +96,34 @@ vec3 randomUnitDirection(inout uint seed) {
 	return normalize(vec3(randomFloat(seed), randomFloat(seed), randomFloat(seed)) * 2.0 - 1.0);
 }
 
-bool rayTriangleIntersection(Ray ray, Triangle triangle_, inout float distance) {
-	uint normalOffset = triangle_.normalIndex * 3;
-	vec3 normal = vec3(normalComponents[normalOffset + 0], normalComponents[normalOffset + 1], normalComponents[normalOffset + 2]);
+Triangle loadTriangle(uint triangleIndex) {
+	uint indexOffset = triangleIndex * 3;
 
-	if (dot(ray.direction, normal) > 1e-4) {
+	Triangle triangle_;
+	triangle_.vertices[0] = indices[indexOffset + 0];
+	triangle_.vertices[1] = indices[indexOffset + 1];
+	triangle_.vertices[2] = indices[indexOffset + 2];
+
+	uint vertexAOffset = triangle_.vertices[0].vertexIndex * 3;
+	uint vertexBOffset = triangle_.vertices[1].vertexIndex * 3;
+	uint vertexCOffset = triangle_.vertices[2].vertexIndex * 3;
+	vec3 a = vec3(vertexComponents[vertexAOffset + 0], vertexComponents[vertexAOffset + 1], vertexComponents[vertexAOffset + 2]);
+	vec3 b = vec3(vertexComponents[vertexBOffset + 0], vertexComponents[vertexBOffset + 1], vertexComponents[vertexBOffset + 2]);
+	vec3 c = vec3(vertexComponents[vertexCOffset + 0], vertexComponents[vertexCOffset + 1], vertexComponents[vertexCOffset + 2]);
+
+	triangle_.normal = normalize(cross(b - a, c - a));
+
+	return triangle_;
+}
+
+bool rayTriangleIntersection(Ray ray, Triangle triangle_, inout float distance) {
+	if (dot(ray.direction, triangle_.normal) > 1e-4) {
 		return false;
 	}
 
-	uint vertexAOffset = triangle_.vertices[0].index * 3;
-	uint vertexBOffset = triangle_.vertices[1].index * 3;
-	uint vertexCOffset = triangle_.vertices[2].index * 3;
+	uint vertexAOffset = triangle_.vertices[0].vertexIndex * 3;
+	uint vertexBOffset = triangle_.vertices[1].vertexIndex * 3;
+	uint vertexCOffset = triangle_.vertices[2].vertexIndex * 3;
 	vec3 a = vec3(vertexComponents[vertexAOffset + 0], vertexComponents[vertexAOffset + 1], vertexComponents[vertexAOffset + 2]);
 	vec3 b = vec3(vertexComponents[vertexBOffset + 0], vertexComponents[vertexBOffset + 1], vertexComponents[vertexBOffset + 2]);
 	vec3 c = vec3(vertexComponents[vertexCOffset + 0], vertexComponents[vertexCOffset + 1], vertexComponents[vertexCOffset + 2]);
@@ -137,15 +156,11 @@ bool rayTriangleIntersection(Ray ray, Triangle triangle_, inout float distance) 
 	return distance > 1e-4;
 }
 
-Hit rchit(Ray ray, uint triangleIndex, float distance) {
-	Triangle triangle_ = triangles[triangleIndex];
-	uint normalOffset = triangle_.normalIndex * 3;
-	vec3 normal = vec3(normalComponents[normalOffset + 0], normalComponents[normalOffset + 1], normalComponents[normalOffset + 2]);
-
+Hit rchit(Ray ray, Triangle triangle_, float distance) {
 	Hit hit;
 	hit.distance = distance;
 	hit.position = ray.origin + ray.direction * distance;
-	hit.normal = normal;
+	hit.normal = triangle_.normal;
 
 	return hit;
 }
@@ -160,16 +175,18 @@ Hit rmiss() {
 Hit rint(Ray ray) {
 	float closestDistance = FLOAT32_MAX;
 	uint intersectingTriangleIndex = triangleCount;
+	Triangle intersectingTriangle;
 	uint triangleIndex = 0;
 
 	while (triangleIndex < triangleCount) {
-		Triangle triangle_ = triangles[triangleIndex];
+		Triangle triangle_ = loadTriangle(triangleIndex);
 		float distance;
 
 		if (rayTriangleIntersection(ray, triangle_, distance)) {
 			if (distance < closestDistance) {
 				closestDistance = distance;
 				intersectingTriangleIndex = triangleIndex;
+				intersectingTriangle = triangle_;
 			}
 		}
 
@@ -177,7 +194,7 @@ Hit rint(Ray ray) {
 	}
 
 	if (intersectingTriangleIndex < triangleCount) {
-		return rchit(ray, intersectingTriangleIndex, closestDistance);
+		return rchit(ray, intersectingTriangle, closestDistance);
 	}
 
 	return rmiss();
@@ -231,26 +248,21 @@ void main() {
 
 	uvec2 coordinate = uvec2(luxel.coordinate >> 16, luxel.coordinate & 0xffff);
 	uint seed = coordinate.y * atlasSize.x + coordinate.x;
-	Triangle triangle_ = triangles[luxel.triangleIndex];
-	uint normalOffset = triangle_.normalIndex * 3;
-	vec3 normal = vec3(normalComponents[normalOffset + 0], normalComponents[normalOffset + 1], normalComponents[normalOffset + 2]);
-	uint vertexAOffset = triangle_.vertices[0].index * 3;
-	uint vertexBOffset = triangle_.vertices[1].index * 3;
-	uint vertexCOffset = triangle_.vertices[2].index * 3;
+	Triangle triangle_ = loadTriangle(luxel.triangleIndex);
+	uint vertexAOffset = triangle_.vertices[0].vertexIndex * 3;
+	uint vertexBOffset = triangle_.vertices[1].vertexIndex * 3;
+	uint vertexCOffset = triangle_.vertices[2].vertexIndex * 3;
 	vec3 vertexA = vec3(vertexComponents[vertexAOffset + 0], vertexComponents[vertexAOffset + 1], vertexComponents[vertexAOffset + 2]);
 	vec3 vertexB = vec3(vertexComponents[vertexBOffset + 0], vertexComponents[vertexBOffset + 1], vertexComponents[vertexBOffset + 2]);
 	vec3 vertexC = vec3(vertexComponents[vertexCOffset + 0], vertexComponents[vertexCOffset + 1], vertexComponents[vertexCOffset + 2]);
-	vec2 lightmapCoordinateA = triangle_.vertices[0].lightmapCoordinate;
-	vec2 lightmapCoordinateB = triangle_.vertices[1].lightmapCoordinate;
-	vec2 lightmapCoordinateC = triangle_.vertices[2].lightmapCoordinate;
 	vec2 luxelCoordinate = (coordinate + vec2(0.5, 0.5)) / atlasSize;
-	vec3 luxelBarycentricCoordinate = calculateBarycentricCoordinate(lightmapCoordinateA, lightmapCoordinateB, lightmapCoordinateC, luxelCoordinate);
+	vec3 luxelBarycentricCoordinate = calculateBarycentricCoordinate(triangle_.vertices[0].lightmapCoordinate, triangle_.vertices[1].lightmapCoordinate, triangle_.vertices[2].lightmapCoordinate, luxelCoordinate);
 	vec3 radiance = vec3(0.0, 0.0, 0.0);
 	uint sampleIndex = 0;
 
 	Hit hit;
 	hit.position = vertexA * luxelBarycentricCoordinate.x + vertexB * luxelBarycentricCoordinate.y + vertexC * luxelBarycentricCoordinate.z;
-	hit.normal = normal;
+	hit.normal = triangle_.normal;
 
 	while (sampleIndex < SAMPLE_COUNT) {
 		radiance += rgen(hit, seed);

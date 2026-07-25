@@ -85,8 +85,8 @@ namespace Trident {
 		context.rasterizationFramebuffer = createRasterizationFramebuffer();
 		context.dilationFramebuffer = createDilationFramebuffer();
 
-		context.lightmapCoordinateBuffer = createLightmapCoordinateBuffer(scene.triangles.count() * sizeof(svec2<float32>) * 3);
-		context.triangleBuffer = createTriangleBuffer(scene.triangles.count() * sizeof(StaticTriangle3D));
+		context.lightmapCoordinateBuffer = createLightmapCoordinateBuffer(scene.indices.count() * sizeof(svec2<float32>));
+		context.indexBuffer = createIndexBuffer(scene.indices.count() * sizeof(StaticVertex3D));
 		context.vertexComponentBuffer = createVertexComponentBuffer(scene.vertices.count() * sizeof(svec3<float32>));
 		context.normalComponentBuffer = createNormalComponentBuffer(scene.normals.count() * sizeof(svec3<float32>));
 
@@ -102,7 +102,7 @@ namespace Trident {
 			#endif
 		});
 
-		generateLightmaps(static_cast<uint32>(scene.triangles.count() * 3));
+		generateLightmaps(static_cast<uint32>(scene.indices.count()));
 
 		const ref<BufferView<uint8>> lightmapAtlasView = context.lightmapAtlasStagingBuffer->createView<uint8>(0, context.lightmapAtlasStagingBuffer->getSize());
 
@@ -511,10 +511,10 @@ namespace Trident {
 	}
 
 	ref<Buffer> Lightmapper::createLightmapCoordinateBuffer(uint64 size) const {
-		const uint64 minStorageBufferOffsetAlignment = Renderer::getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
+		const uint64 alignment = Renderer::getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
 
 		return Renderer::createDynamicBuffer({
-			.size = ceil(size, minStorageBufferOffsetAlignment),
+			.size = ceil(size, alignment),
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE | BufferUsage::VERTEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
@@ -525,10 +525,10 @@ namespace Trident {
 	}
 
 	ref<Buffer> Lightmapper::createTraceRaysArgumentBuffer() const {
-		const uint64 minStorageBufferOffsetAlignment = Renderer::getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
+		const uint64 alignment = Renderer::getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
 
 		return Renderer::createDynamicBuffer({
-			.size = ceil(sizeof(TraceRaysArguments), minStorageBufferOffsetAlignment),
+			.size = ceil(sizeof(TraceRaysArguments), alignment),
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_WRITE_STORAGE | BufferUsage::INDIRECT,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
@@ -540,10 +540,10 @@ namespace Trident {
 
 	ref<Buffer> Lightmapper::createLuxelBuffer() const {
 		const uint64 size = atlasExtent.width * atlasExtent.height * sizeof(Luxel);
-		const uint64 minStorageBufferOffsetAlignment = Renderer::getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
+		const uint64 alignment = Renderer::getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
 
 		return Renderer::createDynamicBuffer({
-			.size = ceil(size, minStorageBufferOffsetAlignment),
+			.size = ceil(size, alignment),
 			.usage = BufferUsage::READ_WRITE_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
@@ -553,25 +553,25 @@ namespace Trident {
 		});
 	}
 
-	ref<Buffer> Lightmapper::createTriangleBuffer(uint64 size) const {
-		const uint64 minStorageBufferOffsetAlignment = Renderer::getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
+	ref<Buffer> Lightmapper::createIndexBuffer(uint64 size) const {
+		const uint64 alignment = Renderer::getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
 
 		return Renderer::createDynamicBuffer({
-			.size = ceil(size, minStorageBufferOffsetAlignment),
+			.size = ceil(size, alignment),
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Triangle",
+				.name = "Index",
 			#endif
 		});
 	}
 
 	ref<Buffer> Lightmapper::createVertexComponentBuffer(uint64 size) const {
-		const uint64 minStorageBufferOffsetAlignment = Renderer::getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
+		const uint64 alignment = Renderer::getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
 
 		return Renderer::createDynamicBuffer({
-			.size = ceil(size, minStorageBufferOffsetAlignment),
+			.size = ceil(size, alignment),
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
@@ -582,10 +582,10 @@ namespace Trident {
 	}
 
 	ref<Buffer> Lightmapper::createNormalComponentBuffer(uint64 size) const {
-		const uint64 minStorageBufferOffsetAlignment = Renderer::getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
+		const uint64 alignment = Renderer::getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
 
 		return Renderer::createDynamicBuffer({
-			.size = ceil(size, minStorageBufferOffsetAlignment),
+			.size = ceil(size, alignment),
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
@@ -611,7 +611,7 @@ namespace Trident {
 			.size = (
 				context.lightmapCoordinateBuffer->getSize() +
 				traceRaysArgumentBuffer->getSize() +
-				context.triangleBuffer->getSize() +
+				context.indexBuffer->getSize() +
 				context.vertexComponentBuffer->getSize() +
 				context.normalComponentBuffer->getSize()
 			),
@@ -624,30 +624,28 @@ namespace Trident {
 		});
 		const ref<BufferView<svec2<float32>>> lightmapCoordinateStagingView = stagingBuffer->createView<svec2<float32>>(0, context.lightmapCoordinateBuffer->getSize());
 		const ref<BufferView<TraceRaysArguments>> traceRaysArgumentStagingView = stagingBuffer->createView<TraceRaysArguments>(lightmapCoordinateStagingView->getOffset() + lightmapCoordinateStagingView->getSize(), traceRaysArgumentBuffer->getSize());
-		const ref<BufferView<StaticTriangle3D>> triangleStagingView = stagingBuffer->createView<StaticTriangle3D>(traceRaysArgumentStagingView->getOffset() + traceRaysArgumentStagingView->getSize(), context.triangleBuffer->getSize());
-		const ref<BufferView<svec3<float32>>> vertexComponentStagingView = stagingBuffer->createView<svec3<float32>>(triangleStagingView->getOffset() + triangleStagingView->getSize(), context.vertexComponentBuffer->getSize());
+		const ref<BufferView<StaticVertex3D>> indexStagingView = stagingBuffer->createView<StaticVertex3D>(traceRaysArgumentStagingView->getOffset() + traceRaysArgumentStagingView->getSize(), context.indexBuffer->getSize());
+		const ref<BufferView<svec3<float32>>> vertexComponentStagingView = stagingBuffer->createView<svec3<float32>>(indexStagingView->getOffset() + indexStagingView->getSize(), context.vertexComponentBuffer->getSize());
 		const ref<BufferView<svec3<float32>>> normalComponentStagingView = stagingBuffer->createView<svec3<float32>>(vertexComponentStagingView->getOffset() + vertexComponentStagingView->getSize(), context.normalComponentBuffer->getSize());
 
 		svec2<float32>* lightmapCoordinateMappedRange = lightmapCoordinateStagingView->map();
 		uint32 lightmapCoordinateIndex = 0;
 
-		for (const StaticTriangle3D& triangle : scene.triangles) {
-			lightmapCoordinateMappedRange[lightmapCoordinateIndex + 0] = triangle.vertices[0].lightmapCoordinate;
-			lightmapCoordinateMappedRange[lightmapCoordinateIndex + 1] = triangle.vertices[1].lightmapCoordinate;
-			lightmapCoordinateMappedRange[lightmapCoordinateIndex + 2] = triangle.vertices[2].lightmapCoordinate;
+		for (const StaticVertex3D& index : scene.indices) {
+			lightmapCoordinateMappedRange[lightmapCoordinateIndex] = index.lightmapCoordinate;
 
-			lightmapCoordinateIndex += 3;
+			lightmapCoordinateIndex += 1;
 		}
 
 		TraceRaysArguments* traceRaysArguments = traceRaysArgumentStagingView->map();
 		traceRaysArguments->atlasExtent = atlasExtent;
 		traceRaysArguments->luxelCount = 0;
-		traceRaysArguments->triangleCount = static_cast<uint32>(scene.triangles.count());
+		traceRaysArguments->indexCount = static_cast<uint32>(scene.indices.count());
 		traceRaysArguments->traceRaysCommand.x = 1;
 		traceRaysArguments->traceRaysCommand.y = 1;
 		traceRaysArguments->traceRaysCommand.z = 1;
 
-		std::copy(scene.triangles.begin(), scene.triangles.end(), triangleStagingView->map());
+		std::copy(scene.indices.begin(), scene.indices.end(), indexStagingView->map());
 		std::copy(scene.vertices.begin(), scene.vertices.end(), vertexComponentStagingView->map());
 		std::copy(scene.normals.begin(), scene.normals.end(), normalComponentStagingView->map());
 
@@ -657,7 +655,7 @@ namespace Trident {
 		const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
 			.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Copy buffers",
+				.name = "One-time commands",
 			#endif
 		});
 
@@ -680,12 +678,12 @@ namespace Trident {
 		commandEncoder->copyBufferToBuffer(stagingBuffer, traceRaysArgumentBuffer, bufferCopyRegion);
 
 		bufferCopyRegion = {
-			.sourceOffset = triangleStagingView->getOffset(),
+			.sourceOffset = indexStagingView->getOffset(),
 			.destinationOffset = 0,
-			.size = triangleStagingView->getSize(),
+			.size = indexStagingView->getSize(),
 		};
 
-		commandEncoder->copyBufferToBuffer(stagingBuffer, context.triangleBuffer, bufferCopyRegion);
+		commandEncoder->copyBufferToBuffer(stagingBuffer, context.indexBuffer, bufferCopyRegion);
 
 		bufferCopyRegion = {
 			.sourceOffset = vertexComponentStagingView->getOffset(),
@@ -711,7 +709,7 @@ namespace Trident {
 		const ref<BufferView<svec2<float32>>> lightmapCoordinateView = context.lightmapCoordinateBuffer->createView<svec2<float32>>(0, context.lightmapCoordinateBuffer->getSize());
 		const ref<BufferView<TraceRaysArguments>> traceRaysArgumentView = traceRaysArgumentBuffer->createView<TraceRaysArguments>(0, traceRaysArgumentBuffer->getSize());
 		const ref<BufferView<Luxel>> luxelView = luxelBuffer->createView<Luxel>(0, luxelBuffer->getSize());
-		const ref<BufferView<StaticTriangle3D>> triangleView = context.triangleBuffer->createView<StaticTriangle3D>(0, context.triangleBuffer->getSize());
+		const ref<BufferView<StaticVertex3D>> indexView = context.indexBuffer->createView<StaticVertex3D>(0, context.indexBuffer->getSize());
 		const ref<BufferView<float32>> vertexComponentView = context.vertexComponentBuffer->createView<float32>(0, context.vertexComponentBuffer->getSize());
 		const ref<BufferView<float32>> normalComponentView = context.normalComponentBuffer->createView<float32>(0, context.normalComponentBuffer->getSize());
 
@@ -750,7 +748,7 @@ namespace Trident {
 			{
 				.descriptorSet = descriptorSets[1],
 				.bindingIndex = 2,
-				.descriptorBufferViews = triangleView,
+				.descriptorBufferViews = indexView,
 			},
 			{
 				.descriptorSet = descriptorSets[1],

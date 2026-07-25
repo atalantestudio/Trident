@@ -92,10 +92,10 @@ namespace Trident {
 		return 4 * sizeof(sint32);
 	} */
 
-	/* template<>
+	template<>
 	constexpr uint32 getAlignment<vec4<uint32>>() {
 		return 4 * sizeof(uint32);
-	} */
+	}
 
 	template<>
 	constexpr uint32 getAlignment<vec4<float32>>() {

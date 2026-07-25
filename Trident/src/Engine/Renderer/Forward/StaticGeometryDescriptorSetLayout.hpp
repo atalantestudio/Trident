@@ -6,18 +6,11 @@
 #include "Engine/Renderer/Forward/Renderer.hpp"
 
 namespace Trident {
-	ref<DescriptorSetLayout> ForwardRenderer::createStaticDescriptorSetLayout() const {
+	ref<DescriptorSetLayout> ForwardRenderer::createStaticGeometryDescriptorSetLayout() const {
 		return createDescriptorSetLayout({
 			// Camera
 			{
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
-				.descriptorCount = 1,
-				.shaderStages = ShaderStage::VERTEX,
-			},
-
-			// Triangle
-			{
-				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
 				.shaderStages = ShaderStage::VERTEX,
 			},

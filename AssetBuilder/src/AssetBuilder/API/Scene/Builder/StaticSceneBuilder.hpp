@@ -8,6 +8,7 @@
 #include "AssetBuilder/API/Scene/StaticScene.hpp"
 #include "AssetBuilder/API/Scene/StaticSurface.hpp"
 
+#include "Engine/API/Scene/StaticVertex.hpp"
 #include "Engine/Filesystem/Asset/MaterialAsset.hpp"
 
 namespace Trident {
@@ -51,10 +52,10 @@ namespace Trident {
 		protected:
 			std::vector<StaticSurface> surfaces;
 
+			std::vector<std::vector<StaticVertex3D>> indicesPerMaterial;
 			std::vector<svec3<float32>> vertices;
 			std::vector<svec3<float32>> normals;
 			std::vector<svec2<float32>> textureCoordinates;
-			std::vector<std::vector<StaticTriangle3D>> trianglesPerMaterial;
 			std::vector<BuildMaterialShader> materialShaders;
 			std::vector<BuildStaticMaterial3D> materials;
 
@@ -64,7 +65,7 @@ namespace Trident {
 			/// Sorted by ascending area.
 			std::vector<LightmapLookup> lightmapLookups;
 
-			uint32 triangleCount = 0;
+			uint32 indexCount = 0;
 			uint32 subsurfaceCount = 0;
 			uint32 subsurfaceTextureCoordinateCount = 0;
 	};

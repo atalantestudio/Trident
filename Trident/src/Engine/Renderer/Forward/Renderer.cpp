@@ -3,7 +3,6 @@
 
 #include "pch.hpp"
 
-#include "Engine/Renderer/Forward/CameraBuffer.hpp"
 #include "Engine/Renderer/Forward/ColorImage.hpp"
 #include "Engine/Renderer/Forward/DebugContactManifoldBuffer.hpp"
 #include "Engine/Renderer/Forward/DebugContactManifoldPipeline.hpp"
@@ -19,8 +18,7 @@
 #include "Engine/Renderer/Forward/MaterialSampler.hpp"
 #include "Engine/Renderer/Forward/Renderer.hpp"
 #include "Engine/Renderer/Forward/RenderPass.hpp"
-#include "Engine/Renderer/Forward/Static.hpp"
-#include "Engine/Renderer/Forward/StaticDescriptorSetLayout.hpp"
+#include "Engine/Renderer/Forward/StaticGeometryDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Forward/VertexDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Forward/VertexBuffer.hpp"
 
@@ -29,7 +27,8 @@ namespace Trident {
 		const view<StaticMaterial3D> staticMaterials = scene->getAsset()->getStaticMaterials();
 
 		commandEncoder->bindGraphicsPipeline(materialPipelines[0]);
-		commandEncoder->bindDescriptorSets(materialPipelineLayouts[0], 0, staticDescriptorSet);
+		commandEncoder->bindVertexBuffer(0, staticIndexBuffer, 0, sizeof(StaticVertex3D));
+		commandEncoder->bindDescriptorSets(materialPipelineLayouts[0], 0, staticGeometryDescriptorSet);
 
 		uint32 staticMaterialIndex = 0;
 
@@ -37,7 +36,7 @@ namespace Trident {
 			const StaticMaterial3D& staticMaterial = staticMaterials[staticMaterialIndex];
 
 			commandEncoder->bindDescriptorSets(materialPipelineLayouts[0], 1, materialDescriptorSets[staticMaterialIndex]);
-			commandEncoder->draw(staticMaterial.triangleRange.count * 3, 1, staticMaterial.triangleRange.offset * 3, 0);
+			commandEncoder->draw(staticMaterial.indexRange.count, 1, staticMaterial.indexRange.offset, 0);
 
 			staticMaterialIndex += 1;
 		}

@@ -11,7 +11,7 @@ namespace Trident {
 	struct Lightmap {
 		Extent2D offset;
 		Extent2D size;
-		uint32 triangleOffset;
+		uint32 indexOffset;
 		uint32 coordinateOffset;
 		const StaticSubsurface* subsurface;
 	};

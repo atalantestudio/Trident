@@ -52,10 +52,6 @@ namespace Trident {
 	};
 
 	struct StaticSubsurface {
-		inline uint32 getTriangleCount() const {
-			return static_cast<uint32>(vertexIndices.count() / 3);
-		}
-
 		inline StaticEdge getEdge(uint32 edgeIndex) const {
 			static constexpr uint16 edgeOriginVertexIndexCount = 4;
 			static constexpr uint16 edgeOriginVertexIndices[edgeOriginVertexIndexCount] = {0, 1, 3, 2};
@@ -81,11 +77,11 @@ namespace Trident {
 			};
 		}
 
-		/// Vertices in world space, used in dual snapping.
 		sequence<svec3<float32>> vertices;
-
+		sequence<svec3<float32>> normals;
 		sequence<svec2<float32>> textureCoordinates;
 		sequence<uint32> vertexIndices;
+		sequence<uint32> normalIndices;
 		sequence<uint32> textureCoordinateIndices;
 		svec2<float32> scale;
 	};
@@ -139,7 +135,7 @@ namespace Trident {
 		std::vector<StaticSubsurface> subsurfaces;
 		std::vector<StaticSubsurface> hollowSubsurfaces;
 		TextureFilteringDescriptor textureFiltering;
-		uint32 triangleOffset;
+		uint32 indexOffset;
 		uint32 materialIndex;
 		svec2<float32> luxelScale;
 

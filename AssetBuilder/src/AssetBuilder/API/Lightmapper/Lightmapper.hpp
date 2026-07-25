@@ -27,7 +27,7 @@ namespace Trident {
 		ref<Framebuffer> dilationFramebuffer;
 
 		ref<Buffer> lightmapCoordinateBuffer;
-		ref<Buffer> triangleBuffer;
+		ref<Buffer> indexBuffer;
 		ref<Buffer> vertexComponentBuffer;
 		ref<Buffer> normalComponentBuffer;
 		ref<Buffer> lightmapAtlasStagingBuffer;
@@ -39,7 +39,7 @@ namespace Trident {
 			struct TraceRaysArguments {
 				Extent2D atlasExtent;
 				uint32 luxelCount;
-				uint32 triangleCount;
+				uint32 indexCount;
 				DispatchIndirectCommand traceRaysCommand;
 			};
 
@@ -82,7 +82,7 @@ namespace Trident {
 			ref<Buffer> createLightmapCoordinateBuffer(uint64 size) const;
 			ref<Buffer> createTraceRaysArgumentBuffer() const;
 			ref<Buffer> createLuxelBuffer() const;
-			ref<Buffer> createTriangleBuffer(uint64 size) const;
+			ref<Buffer> createIndexBuffer(uint64 size) const;
 			ref<Buffer> createVertexComponentBuffer(uint64 size) const;
 			ref<Buffer> createNormalComponentBuffer(uint64 size) const;
 

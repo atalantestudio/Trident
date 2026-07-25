@@ -20,7 +20,7 @@ namespace Trident {
 	struct BuildStaticMaterial3D {
 		uint32 identifier;
 		uint32 shaderIndex;
-		range<uint32, uint32> triangleRange;
+		range<uint32, uint32> indexRange;
 	};
 
 	struct StaticScene2D {
@@ -30,10 +30,10 @@ namespace Trident {
 	};
 
 	struct StaticScene3D {
+		sequence<StaticVertex3D> indices;
 		sequence<svec3<float32>> vertices;
 		sequence<svec3<float32>> normals;
 		sequence<svec2<float32>> textureCoordinates;
-		sequence<StaticTriangle3D> triangles;
 		sequence<BuildMaterialShader> materialShaders;
 		sequence<BuildStaticMaterial3D> materials;
 		ImageAssetDescriptor lightmapAtlasImageAssetDescriptor;

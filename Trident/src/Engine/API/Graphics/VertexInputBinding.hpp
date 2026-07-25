@@ -13,8 +13,9 @@ namespace Trident {
 			// Needed for copying a sequence of bindings.
 			VertexInputBinding() = default;
 
-			explicit VertexInputBinding(InputRate inputRate) :
-				inputRate(inputRate)
+			explicit VertexInputBinding(InputRate inputRate, bool pad = true) :
+				inputRate(inputRate),
+				pad(pad)
 			{}
 
 			inline InputRate getInputRate() const {
@@ -35,7 +36,7 @@ namespace Trident {
 
 				uint32 remainder = offset % alignment;
 
-				if (remainder != 0) {
+				if (remainder != 0 && pad) {
 					// Pad so that the offset is a multiple of the alignment.
 					offset += alignment - remainder;
 				}
@@ -53,7 +54,7 @@ namespace Trident {
 				maxAlignment = max(maxAlignment, alignment);
 				remainder = stride % maxAlignment;
 
-				if (remainder != 0) {
+				if (remainder != 0 && pad) {
 					// Pad so that the stride is a multiple of the alignment.
 					stride += maxAlignment - remainder;
 				}
@@ -70,6 +71,10 @@ namespace Trident {
 			std::vector<VertexInputAttribute> attributes;
 			uint32 offset = 0;
 			uint32 maxAlignment = 0;
+
+			/// If true, attributes are automatically aligned.
+			/// If false, no padding is applied.
+			bool pad;
 	};
 
 	template<>

@@ -8,7 +8,7 @@
 namespace Trident {
 	struct StaticMaterial3D {
 		uint32 index;
-		range<uint32, uint32> triangleRange;
+		range<uint32, uint32> indexRange;
 
 		// TODO(asset-builder/lightmapper): Use when generating the lightmaps.
 		// vec4<float32> emissiveColor;

@@ -24,7 +24,6 @@ namespace Trident {
 	}
 
 	void Scene2D::loadGeometries() {
-		const sequence<uint8>& staticBuffer = asset->getStaticBuffer();
 		const sequence<ref<GeometryAsset>>& geometryAssets = asset->getGeometryAssets();
 		const uint32 vertexComponentCount = static_cast<uint32>(asset->getStaticVertices().count() + dynamicVertexCount * 2);
 		const uint64 vertexByteCount = asset->getStaticVertices().count() + dynamicVertexCount * sizeof(svec2<float32>);
@@ -34,9 +33,9 @@ namespace Trident {
 		geometries = sequence<Geometry2D>(geometryAssets.count());
 		hulls = sequence<Hull2D>(asset->getHullCount());
 
-		std::copy(staticBuffer.begin(), staticBuffer.end(), &dataBuffer[0]);
+		std::copy(asset->staticGeometryBuffer.begin(), asset->staticGeometryBuffer.end(), &dataBuffer[0]);
 
-		uint8* dynamicDataBuffer = &dataBuffer[staticBuffer.count()];
+		uint8* dynamicDataBuffer = &dataBuffer[asset->staticGeometryBuffer.count()];
 		uint64 offset = 0;
 
 		range<uint32, uint32> vertexPositionComponentRange = {static_cast<uint32>(offset), 0};

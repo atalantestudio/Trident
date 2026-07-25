@@ -16,7 +16,7 @@ namespace Trident {
 		const uint64 vertexCount = vertexComponents.count() / 3;
 		const uint64 normalCount = normalComponents.count() / 3;
 		const uint64 textureCoordinateCount = textureCoordinateComponents.count() / 2;
-		const uint32 triangleCount = static_cast<uint32>(vertexIndices.count() / 3);
+		const uint32 indexCount = static_cast<uint32>(vertexIndices.count());
 
 		const quat<float32> pitch = quat<float32>::axisAngle(RIGHT, descriptor.transform.eulerAngles[0]);
 		const quat<float32> yaw = quat<float32>::axisAngle(UP, descriptor.transform.eulerAngles[1]);
@@ -33,15 +33,17 @@ namespace Trident {
 		const uint32 textureCoordinateOffset = static_cast<uint32>(textureCoordinates.size());
 
 		BuildStaticMaterial3D& material = materials[descriptor.materialIndex];
-		std::vector<StaticTriangle3D>& triangles = trianglesPerMaterial[descriptor.materialIndex];
+		std::vector<StaticVertex3D>& indices = indicesPerMaterial[descriptor.materialIndex];
 
 		svec2<float32> maxCoordinate = {min<float32>(), min<float32>()};
 		svec2<float32> minCoordinate = {max<float32>(), max<float32>()};
 
 		StaticSubsurface subsurface{};
 		subsurface.vertices = sequence<svec3<float32>>(vertexCount);
+		subsurface.normals = sequence<svec3<float32>>(normalCount);
 		subsurface.textureCoordinates = sequence<svec2<float32>>(textureCoordinateCount);
 		subsurface.vertexIndices = descriptor.asset->getVertexPositionIndices();
+		subsurface.normalIndices = descriptor.asset->getVertexNormalIndices();
 		subsurface.textureCoordinateIndices = descriptor.asset->getVertexTextureCoordinateIndices();
 
 		uint32 vertexIndex = 0;
@@ -59,6 +61,23 @@ namespace Trident {
 			vertices.emplace_back(vertex);
 
 			vertexIndex += 1;
+		}
+
+		uint32 normalIndex = 0;
+
+		while (normalIndex < normalCount) {
+			// TODO(lyah/scalar)
+			const svec3<float32> normal = svec3<float32>(normalized(vec3<float32>{
+				normalComponents[normalIndex * 3 + 0],
+				normalComponents[normalIndex * 3 + 1],
+				normalComponents[normalIndex * 3 + 2],
+			} * inverse(orientation)));
+
+			subsurface.normals[normalIndex] = normal;
+
+			normals.emplace_back(normal);
+
+			normalIndex += 1;
 		}
 
 		uint32 textureCoordinateIndex = 0;
@@ -92,62 +111,34 @@ namespace Trident {
 		surface.scale = subsurface.scale;
 		surface.subsurfaces = {subsurface};
 		surface.textureFiltering = {};
-		surface.triangleOffset = static_cast<uint32>(triangles.size());
+		surface.indexOffset = static_cast<uint32>(indices.size());
 		surface.materialIndex = descriptor.materialIndex;
 		surface.luxelScale = descriptor.luxelScale;
 		surface.minCoordinate = minCoordinate;
 
-		uint32 triangleIndex = 0;
 		uint32 indexOffset = 0;
 
-		while (triangleIndex < triangleCount) {
-			const uint32 vertexIndexA = subsurface.vertexIndices[indexOffset + 0];
-			const uint32 vertexIndexB = subsurface.vertexIndices[indexOffset + 1];
-			const uint32 vertexIndexC = subsurface.vertexIndices[indexOffset + 2];
+		while (indexOffset < indexCount) {
+			const uint32 vertexIndex = subsurface.vertexIndices[indexOffset];
+			const uint32 normalIndex = subsurface.normalIndices[indexOffset];
+			const uint32 textureCoordinateIndex = subsurface.textureCoordinateIndices[indexOffset];
 
-			const vec3<float32> a = subsurface.vertices[vertexIndexA];
-			const vec3<float32> b = subsurface.vertices[vertexIndexB];
-			const vec3<float32> c = subsurface.vertices[vertexIndexC];
-
-			const vec3<float32> normal = normalized(cross(b - a, c - a));
-
-			normals.emplace_back(normal);
-
-			const uint32 textureCoordinateIndexA = subsurface.textureCoordinateIndices[indexOffset + 0];
-			const uint32 textureCoordinateIndexB = subsurface.textureCoordinateIndices[indexOffset + 1];
-			const uint32 textureCoordinateIndexC = subsurface.textureCoordinateIndices[indexOffset + 2];
-
-			const StaticTriangle3D triangle = {
-				.vertices = {
-					{
-						.vertexIndex = vertexOffset + vertexIndexA,
-						.textureCoordinateIndex = textureCoordinateOffset + textureCoordinateIndexA,
-						.lightmapCoordinate = {0.0f, 0.0f},
-					},
-					{
-						.vertexIndex = vertexOffset + vertexIndexB,
-						.textureCoordinateIndex = textureCoordinateOffset + textureCoordinateIndexB,
-						.lightmapCoordinate = {0.0f, 0.0f},
-					},
-					{
-						.vertexIndex = vertexOffset + vertexIndexC,
-						.textureCoordinateIndex = textureCoordinateOffset + textureCoordinateIndexC,
-						.lightmapCoordinate = {0.0f, 0.0f},
-					},
-				},
-				.normalIndex = normalOffset + triangleIndex,
+			const StaticVertex3D index = {
+				.lightmapCoordinate = {0.0f, 0.0f},
+				.vertexIndex = vertexOffset + vertexIndex,
+				.normalIndex = normalOffset + normalIndex,
+				.textureCoordinateIndex = textureCoordinateOffset + textureCoordinateIndex,
 			};
 
-			triangles.emplace_back(triangle);
+			indices.emplace_back(index);
 
-			triangleIndex += 1;
-			indexOffset += 3;
+			indexOffset += 1;
 		}
 
 		surfaces.emplace_back(surface);
 
-		material.triangleRange.count += triangleCount;
-		this->triangleCount += triangleCount;
+		material.indexRange.count += indexCount;
+		this->indexCount += indexCount;
 		subsurfaceTextureCoordinateCount += static_cast<uint32>(textureCoordinateCount);
 		subsurfaceCount += 1;
 	}

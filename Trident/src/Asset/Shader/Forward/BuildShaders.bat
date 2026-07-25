@@ -11,4 +11,4 @@ set inputpath=%~dp0
 %glslcpath% -fshader-stage=vert "%inputpath%/DebugContactManifold.vert.glsl" -o "%inputpath%/DebugContactManifold.vert.spv"
 %glslcpath% -fshader-stage=frag "%inputpath%/DebugContactManifold.frag.glsl" -o "%inputpath%/DebugContactManifold.frag.spv"
 
-%glslcpath% -fshader-stage=vert "%inputpath%/Static/Static.vert.glsl" -o "%inputpath%/Static/Static.vert.spv"
+%glslcpath% -fshader-stage=vert "%inputpath%/StaticGeometry/StaticGeometry.vert.glsl" -o "%inputpath%/StaticGeometry/StaticGeometry.vert.spv"
