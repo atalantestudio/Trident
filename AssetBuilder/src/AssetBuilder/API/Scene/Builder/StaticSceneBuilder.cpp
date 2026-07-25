@@ -5,10 +5,7 @@
 
 #include "AssetBuilder/API/Scene/Builder/CarveSurface.hpp"
 #include "AssetBuilder/API/Scene/Builder/GenerateLightmaps.hpp"
-#include "AssetBuilder/API/Scene/StaticSceneBuilder.hpp"
-
-#include "../../../File/PNG.hpp"
-#include "../../../Process/BuildImageAssetProcess.hpp"
+#include "AssetBuilder/API/Scene/Builder/StaticSceneBuilder.hpp"
 
 namespace Trident {
 	static bool compareDuplicate(svec2<float32> a, svec2<float32> b, float32 E) {

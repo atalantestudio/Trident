@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "AssetBuilder/API/Scene/StaticSceneBuilder.hpp"
+#include "AssetBuilder/API/Scene/Builder/StaticSceneBuilder.hpp"
 
 namespace Trident {
 	class InteriorSceneBuilder : public StaticSceneBuilder {

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "AssetBuilder/API/Scene/StaticSceneBuilder.hpp"
+#include "AssetBuilder/API/Scene/Builder/StaticSceneBuilder.hpp"
 #include "AssetBuilder/Process/Scene/Scene3DProcess.hpp"
 #include "../../../Subprocess/RigidBody.hpp"
 

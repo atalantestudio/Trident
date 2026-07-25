@@ -5,7 +5,7 @@
 
 #include "AssetBuilder/API/Lightmapper/Lightmap.hpp"
 #include "AssetBuilder/API/Lightmapper/Lightmapper.hpp"
-#include "AssetBuilder/API/Scene/StaticSceneBuilder.hpp"
+#include "AssetBuilder/API/Scene/Builder/StaticSceneBuilder.hpp"
 
 namespace Trident {
 	// See https://blackpawn.com/texts/lightmaps.
