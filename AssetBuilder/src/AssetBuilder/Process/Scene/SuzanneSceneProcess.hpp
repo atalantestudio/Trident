@@ -62,6 +62,7 @@ namespace Trident {
 						.scale = {256.0f, 256.0f, 256.0f},
 					},
 					.materialIndex = materialIndex,
+					.lightmapScale = {512.0f, 512.0f},
 					.luxelScale = {1.0f, 1.0f},
 				});
 

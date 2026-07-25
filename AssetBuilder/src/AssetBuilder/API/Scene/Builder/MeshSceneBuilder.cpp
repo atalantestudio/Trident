@@ -82,8 +82,7 @@ namespace Trident {
 			textureCoordinateIndex += 1;
 		}
 
-		// TODO(asset-builder/scene/mesh): Better scale calculation.
-		subsurface.scale = (maxCoordinate - minCoordinate) * 968.0f;
+		subsurface.scale = (maxCoordinate - minCoordinate) * descriptor.lightmapScale;
 
 		StaticSurface surface{};
 		surface.vertices = {};

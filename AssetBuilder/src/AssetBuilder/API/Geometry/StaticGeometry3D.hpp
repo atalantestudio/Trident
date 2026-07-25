@@ -22,6 +22,10 @@ namespace Trident {
 		ref<GeometryAsset> asset;
 		EulerTransform transform;
 		uint32 materialIndex;
+
+		/// Artificial scale multiplier in case the geometry is too small.
+		svec2<float32> lightmapScale = {1.0f, 1.0f};
+
 		svec2<float32> luxelScale;
 	};
 }
