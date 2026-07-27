@@ -4,6 +4,7 @@
 #pragma once
 
 #include "AssetBuilder/API/Geometry/StaticGeometry3D.hpp"
+#include "AssetBuilder/API/LightmapDescriptor.hpp"
 #include "AssetBuilder/API/TextureFilteringDescriptor.hpp"
 #include "AssetBuilder/API/Transform.hpp"
 
@@ -24,14 +25,14 @@ namespace Trident {
 		StaticGeometry3D geometry;
 		TextureFilteringDescriptor textureFiltering;
 		uint32 materialIndex;
-		svec2<float32> luxelScale;
+		LightmapDescriptor lightmap;
 		std::vector<Carving> carvings;
 	};
 
 	struct DualSnapSurfaceDescriptor {
 		TextureFilteringDescriptor textureFiltering;
 		uint32 materialIndex;
-		svec2<float32> luxelScale;
+		LightmapDescriptor lightmap;
 		std::vector<Carving> carvings;
 	};
 

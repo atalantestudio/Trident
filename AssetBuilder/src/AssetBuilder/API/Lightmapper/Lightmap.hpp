@@ -14,6 +14,9 @@ namespace Trident {
 		uint32 indexOffset;
 		uint32 coordinateOffset;
 		const StaticSubsurface* subsurface;
+		svec3<float32> emissiveColor;
+		float32 emissiveIntensity;
+		svec3<float32> tintColor;
 	};
 
 	struct LightmapLookup {

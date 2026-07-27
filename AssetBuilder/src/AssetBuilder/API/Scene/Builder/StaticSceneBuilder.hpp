@@ -12,6 +12,13 @@
 #include "Engine/Filesystem/Asset/MaterialAsset.hpp"
 
 namespace Trident {
+	struct SceneBuilderDescriptor {
+		svec3<float32> skyColor;
+		svec3<float32> sunDirection;
+		svec3<float32> sunColor;
+		float32 sunIntensity;
+	};
+
 	class StaticSceneBuilder {
 		public:
 			static Lightmapper lightmapper;
@@ -26,6 +33,8 @@ namespace Trident {
 			static LightmapNode* insertLightmapNode(Lightmap& lightmap, LightmapNode* rootNode);
 
 		public:
+			explicit StaticSceneBuilder(const SceneBuilderDescriptor& descriptor);
+
 			void addMaterialShader(sequence<char8> name, ShaderStage stage, sequence<char8> entryPoint, sequence<DescriptorSetLayoutBinding> bindings);
 
 			uint32 addMaterial(ref<MaterialAsset> materialAsset);
@@ -50,6 +59,11 @@ namespace Trident {
 			void updateLightmapCoordinates(StaticScene3D& scene);
 
 		protected:
+			svec3<float32> skyColor;
+			svec3<float32> sunDirection;
+			svec3<float32> sunColor;
+			float32 sunIntensity;
+
 			std::vector<StaticSurface> surfaces;
 
 			std::vector<std::vector<StaticVertex3D>> indicesPerMaterial;
@@ -59,7 +73,7 @@ namespace Trident {
 			std::vector<BuildMaterialShader> materialShaders;
 			std::vector<BuildStaticMaterial3D> materials;
 
-			sequence<Lightmap> lightmaps;
+			std::vector<Lightmap> lightmaps;
 			sequence<svec2<float32>> lightmapCoordinates;
 
 			/// Sorted by ascending area.

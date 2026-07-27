@@ -26,7 +26,12 @@ namespace Trident {
 				const svec3<float32> forwardRotation = {-pi<float32>() * 0.5f, 0.0f, pi<float32>()};
 				const svec3<float32> backwardRotation = {pi<float32>() * 0.5f, 0.0f, 0.0f};
 
-				StaticSceneBuilder builder;
+				StaticSceneBuilder builder({
+					.skyColor = {1.0f, 1.0f, 1.0f},
+					.sunDirection = {-1.0f, -1.0f, -1.0f},
+					.sunColor = {1.0f, 1.0f, 1.0f},
+					.sunIntensity = 1.0f,
+				});
 				builder.addMaterialShader("Lightmapped.frag", ShaderStage::FRAGMENT, "main", {
 					{
 						.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
@@ -57,7 +62,10 @@ namespace Trident {
 							.scale = {m1 * -0.25f, m1 * 0.25f},
 						},
 						.materialIndex = tileFloorMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {56.0f, 0.0f, 84.0f},
@@ -76,7 +84,10 @@ namespace Trident {
 							.scale = {m1 * -0.25f, m1 * 0.25f},
 						},
 						.materialIndex = tileFloorMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {-20.0f, 0.0f, 128.0f},
@@ -95,7 +106,10 @@ namespace Trident {
 							.scale = {m1 * -0.25f, m1 * 0.25f},
 						},
 						.materialIndex = tileFloorMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {-60.0f, 0.0f, 116.0f},
@@ -114,7 +128,10 @@ namespace Trident {
 							.scale = {m1 * -0.25f, m1 * 0.25f},
 						},
 						.materialIndex = tileFloorMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {54.0f, 0.0f, 188.0f},
@@ -133,7 +150,10 @@ namespace Trident {
 							.scale = {m1 * -0.25f, m1 * 0.25f},
 						},
 						.materialIndex = tileFloorMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {-20.0f, 0.0f, 256.0f},
@@ -154,7 +174,10 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.materialIndex = plasterWallMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {10.0f, 64.0f, -16.0f},
@@ -173,7 +196,10 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.materialIndex = plasterWallMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {110.0f, 64.0f, -16.0f},
@@ -192,7 +218,10 @@ namespace Trident {
 							.scale = {m2 * 0.25f, m2 * 0.25f},
 						},
 						.materialIndex = plasterWallMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {-16.0f, 64.0f, 42.0f},
@@ -211,7 +240,10 @@ namespace Trident {
 							.scale = {m2 * 0.25f, m2 * 0.25f},
 						},
 						.materialIndex = plasterWallMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {-16.0f, 64.0f, 170.0f},
@@ -230,7 +262,10 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.materialIndex = plasterWallMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {2.0f, 64.0f, 184.0f},
@@ -249,7 +284,10 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.materialIndex = plasterWallMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {108.0f, 64.0f, 184.0f},
@@ -268,7 +306,10 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.materialIndex = plasterWallMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {128.0f, 64.0f, 84.0f},
@@ -287,7 +328,10 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.materialIndex = plasterWallMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {-60.0f, 64.0f, 48.0f},
@@ -306,7 +350,10 @@ namespace Trident {
 							.scale = {m2 * 0.25f, m2 * 0.25f},
 						},
 						.materialIndex = plasterWallMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {-96.0f, 64.0f, 116.0f},
@@ -325,7 +372,10 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.materialIndex = plasterWallMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {-60.0f, 64.0f, 184.0f},
@@ -344,7 +394,10 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.materialIndex = plasterWallMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {-24.0f, 64.0f, 170.0f},
@@ -363,7 +416,10 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.materialIndex = plasterWallMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {-24.0f, 64.0f, 74.0f},
@@ -382,7 +438,10 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.materialIndex = plasterWallMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {64.0f, 120.0f, -16.0f},
@@ -401,7 +460,10 @@ namespace Trident {
 							.scale = {m2 * 0.25f, m2 * 0.25f},
 						},
 						.materialIndex = plasterWallMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {-16.0f, 120.0f, 128.0f},
@@ -420,7 +482,10 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.materialIndex = plasterWallMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {54.0f, 120.0f, 184.0f},
@@ -439,7 +504,10 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.materialIndex = plasterWallMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {-24.0f, 120.0f, 128.0f},
@@ -460,7 +528,10 @@ namespace Trident {
 							.scale = {m1 * -0.25f, m2 * 0.25f},
 						},
 						.materialIndex = woodDoorMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {-16.0f, 54.0f, 102.0f},
@@ -479,7 +550,10 @@ namespace Trident {
 							.scale = {m1 * -0.25f, m2 * 0.25f},
 						},
 						.materialIndex = woodDoorMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {-16.0f, 54.0f, 154.0f},
@@ -498,7 +572,10 @@ namespace Trident {
 							.scale = {m1 * -0.25f, m2 * 0.25f},
 						},
 						.materialIndex = woodDoorMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {-16.0f, 110.0f, 128.0f},
@@ -517,7 +594,10 @@ namespace Trident {
 							.scale = {m1 * -0.25f, m2 * 0.25f},
 						},
 						.materialIndex = woodDoorMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {-20.0f, 54.0f, 104.0f},
@@ -536,7 +616,10 @@ namespace Trident {
 							.scale = {m1 * 0.25f, m2 * 0.25f},
 						},
 						.materialIndex = woodDoorMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {-20.0f, 54.0f, 152.0f},
@@ -555,7 +638,10 @@ namespace Trident {
 							.scale = {m1 * 0.25f, m2 * 0.25f},
 						},
 						.materialIndex = woodDoorMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {-20.0f, 108.0f, 128.0f},
@@ -574,7 +660,10 @@ namespace Trident {
 							.scale = {m1 * 0.25f, m2 * 0.25f},
 						},
 						.materialIndex = woodDoorMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {-24.0f, 54.0f, 154.0f},
@@ -593,7 +682,10 @@ namespace Trident {
 							.scale = {m1 * 0.25f, m2 * 0.25f},
 						},
 						.materialIndex = woodDoorMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {-24.0f, 54.0f, 102.0f},
@@ -612,7 +704,10 @@ namespace Trident {
 							.scale = {m1 * 0.25f, m2 * 0.25f},
 						},
 						.materialIndex = woodDoorMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {-24.0f, 110.0f, 128.0f},
@@ -633,7 +728,10 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.materialIndex = plasterCeilingMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {56.0f, 184.0f, -16.0f},
@@ -652,7 +750,10 @@ namespace Trident {
 							.scale = {m2 * 0.25f, m2 * 0.25f},
 						},
 						.materialIndex = plasterCeilingMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {-16.0f, 184.0f, 84.0f},
@@ -671,7 +772,10 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.materialIndex = plasterCeilingMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {56.0f, 184.0f, 184.0f},
@@ -690,7 +794,10 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.materialIndex = plasterCeilingMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {128.0f, 184.0f, 84.0f},
@@ -709,7 +816,10 @@ namespace Trident {
 							.scale = {m2 * 0.25f, m2 * -0.25f},
 						},
 						.materialIndex = plasterCeilingMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {56.0f, 240.0f, 84.0f},
@@ -728,7 +838,10 @@ namespace Trident {
 							.scale = {m2 * 0.25f, m2 * -0.25f},
 						},
 						.materialIndex = plasterCeilingMaterialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 					},
 					{
 						.translation = {-60.0f, 128.0f, 116.0f},

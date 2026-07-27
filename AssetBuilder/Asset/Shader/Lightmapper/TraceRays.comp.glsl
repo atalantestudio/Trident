@@ -37,12 +37,17 @@ struct Hit {
 const float FLOAT32_MAX = 4294967295.0;
 const uint SAMPLE_COUNT = 1024;
 const uint BOUNCE_COUNT = 4;
-const vec3 SUN_DIRECTION = vec3(1.0, 1.0, 1.0);
-const vec3 SKY_COLOR = vec3(1.0, 1.0, 1.0);
 
 layout(set = 0, binding = 0) buffer readonly TraceRaysArgumentBuffer {
 	uvec2 atlasSize;
 	uint triangleCount;
+	uint _0;
+	vec3 skyColor;
+	uint _1;
+	vec3 sunDirection;
+	uint _2;
+	vec3 sunColor;
+	float sunIntensity;
 
 	// TODO(asset-builder/lightmapper): Move options such as sun direction and sky color here.
 };
@@ -210,7 +215,7 @@ Hit rint(uint originTriangleIndex, Ray ray) {
 
 vec3 rgen(Hit hit, inout uint seed) {
 	Ray shadowRay;
-	shadowRay.direction = normalize(SUN_DIRECTION);
+	shadowRay.direction = normalize(sunDirection);
 
 	vec3 radiance = vec3(0.0, 0.0, 0.0);
 	vec3 throughput = vec3(1.0, 1.0, 1.0);
@@ -226,7 +231,7 @@ vec3 rgen(Hit hit, inout uint seed) {
 		hit = rint(triangleIndex, ray);
 
 		if (hit.distance < 0.0) {
-			radiance += throughput * SKY_COLOR;
+			radiance += throughput * skyColor;
 
 			break;
 		}
@@ -235,7 +240,7 @@ vec3 rgen(Hit hit, inout uint seed) {
 
 		Hit shadowHit = rint(triangleIndex, shadowRay);
 
-		radiance += throughput * float(shadowHit.distance < 0.0);
+		radiance += throughput * float(shadowHit.distance < 0.0) * sunColor * sunIntensity;
 		throughput *= 0.9;
 
 		bounceIndex += 1;

@@ -9,6 +9,8 @@
 namespace Trident {
 	class MeshSceneBuilder : public StaticSceneBuilder {
 		public:
+			explicit MeshSceneBuilder(const SceneBuilderDescriptor& descriptor);
+
 			void placeMesh(const StaticGeometryDescriptor& descriptor);
 	};
 }

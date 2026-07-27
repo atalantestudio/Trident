@@ -8,6 +8,8 @@
 namespace Trident {
 	class InteriorSceneBuilder : public StaticSceneBuilder {
 		public:
+			explicit InteriorSceneBuilder(const SceneBuilderDescriptor& descriptor);
+
 			template<typename FrameType>
 			void addFrame(FrameType& frame);
 

@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "AssetBuilder/API/LightmapDescriptor.hpp"
 #include "AssetBuilder/API/Transform.hpp"
 
 #include "Engine/Filesystem/Asset/GeometryAsset.hpp"
@@ -22,10 +23,9 @@ namespace Trident {
 		ref<GeometryAsset> asset;
 		EulerTransform transform;
 		uint32 materialIndex;
+		LightmapDescriptor lightmap;
 
 		/// Artificial scale multiplier in case the geometry is too small.
 		svec2<float32> lightmapScale = {1.0f, 1.0f};
-
-		svec2<float32> luxelScale;
 	};
 }

@@ -15,6 +15,7 @@
 #include "Engine/Filesystem/Asset/Asset.hpp"
 #include "Engine/Filesystem/Asset/GeometryAsset.hpp"
 #include "Engine/Filesystem/Asset/ImageAsset.hpp"
+#include "Engine/Filesystem/Asset/MaterialAsset.hpp"
 
 namespace Trident {
 	struct SceneAsset;

@@ -15,7 +15,12 @@ namespace Trident {
 			}
 
 			Scene3DData createScene(AssetBuilderLibrary* assetLibrary) const final override {
-				MeshSceneBuilder builder;
+				MeshSceneBuilder builder({
+					.skyColor = {0.6f, 0.7f, 0.9f},
+					.sunDirection = {1.0f, 1.0f, 1.0f},
+					.sunColor = {1.0f, 1.0f, 1.0f},
+					.sunIntensity = 1.0f,
+				});
 				builder.addMaterialShader("Lightmapped.frag", ShaderStage::FRAGMENT, "main", {
 					{
 						.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
@@ -42,7 +47,10 @@ namespace Trident {
 							.scale = {1.0f, 1.0f},
 						},
 						.materialIndex = materialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 						.carvings = {},
 					},
 					{
@@ -61,7 +69,10 @@ namespace Trident {
 							.scale = {1.0f, 1.0f},
 						},
 						.materialIndex = materialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 						.carvings = {},
 					},
 					{
@@ -80,7 +91,10 @@ namespace Trident {
 							.scale = {1.0f, 1.0f},
 						},
 						.materialIndex = materialIndex,
-						.luxelScale = {4.0f, 4.0f},
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
 						.carvings = {},
 					},
 					{
@@ -98,8 +112,11 @@ namespace Trident {
 						.scale = {256.0f, 256.0f, 256.0f},
 					},
 					.materialIndex = materialIndex,
+					.lightmap = {
+						.luxelScale = {1.0f, 1.0f},
+						.tintColor = {1.0f, 1.0f, 1.0f},
+					},
 					.lightmapScale = {512.0f, 512.0f},
-					.luxelScale = {1.0f, 1.0f},
 				});
 
 				return {
@@ -147,7 +164,7 @@ namespace Trident {
 						{
 							0,
 							createRigidBody({
-								.position = {0.0f, 32.0f, -64.0f},
+								.position = {0.0f, 32.0f, -128.0f},
 								.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
 								.scale = {33.0f, 77.0f, 33.0f},
 								.uniformScale = 33.0f,

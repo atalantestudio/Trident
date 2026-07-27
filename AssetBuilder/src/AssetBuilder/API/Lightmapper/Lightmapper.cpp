@@ -9,6 +9,10 @@ namespace Trident {
 	void Lightmapper::setOptions(const LightmapperOptions& options) {
 		atlasFormat = options.atlasFormat;
 		atlasExtent = options.atlasExtent;
+		skyColor = options.skyColor;
+		sunDirection = options.sunDirection;
+		sunColor = options.sunColor;
+		sunIntensity = options.sunIntensity;
 	}
 
 	void Lightmapper::initialize() {
@@ -728,6 +732,10 @@ namespace Trident {
 		TraceRaysArguments* traceRaysArguments = traceRaysArgumentStagingView->map();
 		traceRaysArguments->atlasExtent = atlasExtent;
 		traceRaysArguments->triangleCount = static_cast<uint32>(scene.indices.count() / 3);
+		traceRaysArguments->skyColor = skyColor;
+		traceRaysArguments->sunDirection = sunDirection;
+		traceRaysArguments->sunColor = sunColor;
+		traceRaysArguments->sunIntensity = sunIntensity;
 
 		std::copy(scene.indices.begin(), scene.indices.end(), indexStagingView->map());
 		std::copy(scene.vertices.begin(), scene.vertices.end(), vertexComponentStagingView->map());

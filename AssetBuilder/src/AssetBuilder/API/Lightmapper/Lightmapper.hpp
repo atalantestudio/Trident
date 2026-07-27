@@ -14,6 +14,10 @@ namespace Trident {
 	struct LightmapperOptions {
 		ImageFormat atlasFormat;
 		Extent2D atlasExtent;
+		svec3<float32> skyColor;
+		svec3<float32> sunDirection;
+		svec3<float32> sunColor;
+		float32 sunIntensity;
 	};
 
 	struct LightmapperContext {
@@ -44,6 +48,13 @@ namespace Trident {
 			struct TraceRaysArguments {
 				Extent2D atlasExtent;
 				uint32 triangleCount;
+				uint32 _0;
+				svec3<float32> skyColor;
+				uint32 _1;
+				svec3<float32> sunDirection;
+				uint32 _2;
+				svec3<float32> sunColor;
+				float32 sunIntensity;
 			};
 
 		public:
@@ -98,6 +109,10 @@ namespace Trident {
 			bool initialized = false;
 			ImageFormat atlasFormat;
 			Extent2D atlasExtent;
+			svec3<float32> skyColor;
+			svec3<float32> sunDirection;
+			svec3<float32> sunColor;
+			float32 sunIntensity;
 
 			sequence<ref<DescriptorSet>> descriptorSets;
 

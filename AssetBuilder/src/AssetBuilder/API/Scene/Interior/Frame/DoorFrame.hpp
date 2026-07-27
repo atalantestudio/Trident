@@ -51,7 +51,10 @@ namespace Trident {
 			floorDescriptor = {
 				.textureFiltering = {},
 				.materialIndex = floorDescriptorA.materialIndex,
-				.luxelScale = floorDescriptorA.luxelScale,
+				.lightmap = {
+					.luxelScale = floorDescriptorA.lightmap.luxelScale,
+					.tintColor = {1.0f, 1.0f, 1.0f},
+				},
 			};
 
 			// TODO
@@ -158,7 +161,10 @@ namespace Trident {
 				.geometry = geometry,
 				.textureFiltering = frameTextureFilterings[index],
 				.materialIndex = frameMaterialIndex,
-				.luxelScale = frameLuxelScale,
+				.lightmap = {
+					.luxelScale = frameLuxelScale,
+					.tintColor = {1.0f, 1.0f, 1.0f},
+				},
 			};
 		}
 

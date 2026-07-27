@@ -6,6 +6,10 @@
 #include "AssetBuilder/API/Scene/Builder/MeshSceneBuilder.hpp"
 
 namespace Trident {
+	MeshSceneBuilder::MeshSceneBuilder(const SceneBuilderDescriptor& descriptor) :
+		StaticSceneBuilder(descriptor)
+	{}
+
 	void MeshSceneBuilder::placeMesh(const StaticGeometryDescriptor& descriptor) {
 		const view<float32> vertexComponents = descriptor.asset->getVertexPositionComponents();
 		const view<float32> normalComponents = descriptor.asset->getVertexNormalComponents();
@@ -113,7 +117,7 @@ namespace Trident {
 		surface.textureFiltering = {};
 		surface.indexOffset = static_cast<uint32>(indices.size());
 		surface.materialIndex = descriptor.materialIndex;
-		surface.luxelScale = descriptor.luxelScale;
+		surface.luxelScale = descriptor.lightmap.luxelScale;
 		surface.minCoordinate = minCoordinate;
 
 		uint32 indexOffset = 0;
@@ -136,6 +140,13 @@ namespace Trident {
 		}
 
 		surfaces.emplace_back(surface);
+
+		Lightmap lightmap{};
+		lightmap.emissiveColor = descriptor.lightmap.emissiveColor;
+		lightmap.emissiveIntensity = descriptor.lightmap.emissiveIntensity;
+		lightmap.tintColor = descriptor.lightmap.tintColor;
+
+		lightmaps.emplace_back(lightmap);
 
 		material.indexRange.count += indexCount;
 		this->indexCount += indexCount;

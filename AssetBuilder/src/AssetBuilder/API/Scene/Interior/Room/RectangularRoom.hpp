@@ -49,25 +49,37 @@ namespace Trident {
 				.geometry = frontWallGeometry,
 				.textureFiltering = textureFiltering,
 				.materialIndex = descriptor.wallMaterialIndex,
-				.luxelScale = descriptor.luxelScale,
+				.lightmap = {
+					.luxelScale = descriptor.luxelScale,
+					.tintColor = {1.0f, 1.0f, 1.0f},
+				},
 			};
 			const SurfaceDescriptor rightWallDescriptor = {
 				.geometry = rightWallGeometry,
 				.textureFiltering = textureFiltering,
 				.materialIndex = descriptor.wallMaterialIndex,
-				.luxelScale = descriptor.luxelScale,
+				.lightmap = {
+					.luxelScale = descriptor.luxelScale,
+					.tintColor = {1.0f, 1.0f, 1.0f},
+				},
 			};
 			const SurfaceDescriptor floorDescriptor = {
 				.geometry = floorGeometry,
 				.textureFiltering = descriptor.floorTextureFiltering,
 				.materialIndex = descriptor.floorMaterialIndex,
-				.luxelScale = descriptor.luxelScale,
+				.lightmap = {
+					.luxelScale = descriptor.luxelScale,
+					.tintColor = {1.0f, 1.0f, 1.0f},
+				},
 			};
 			const SurfaceDescriptor ceilingDescriptor = {
 				.geometry = floorGeometry,
 				.textureFiltering = textureFiltering,
 				.materialIndex = descriptor.ceilingMaterialIndex,
-				.luxelScale = descriptor.luxelScale,
+				.lightmap = {
+					.luxelScale = descriptor.luxelScale,
+					.tintColor = {1.0f, 1.0f, 1.0f},
+				},
 			};
 
 			surfaceDescriptors = {

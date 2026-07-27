@@ -82,12 +82,15 @@ namespace Trident {
 		lightmapper.setOptions({
 			.atlasFormat = scene.lightmapAtlasImageAssetDescriptor.format,
 			.atlasExtent = LIGHTMAP_ATLAS_EXTENT,
+			.skyColor = skyColor,
+			.sunDirection = sunDirection,
+			.sunColor = sunColor,
+			.sunIntensity = sunIntensity,
 		});
 		lightmapper.buildLightmapAtlas(scene, scene.lightmapAtlasImageAssetDescriptor);
 	}
 
 	void StaticSceneBuilder::createLightmaps(StaticScene3D& scene) {
-		lightmaps = sequence<Lightmap>(subsurfaceCount);
 		lightmapCoordinates = sequence<svec2<float32>>(subsurfaceTextureCoordinateCount);
 
 		lightmapLookups.reserve(subsurfaceCount);

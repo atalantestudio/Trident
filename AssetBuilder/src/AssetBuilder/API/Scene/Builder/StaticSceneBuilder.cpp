@@ -72,6 +72,13 @@ namespace Trident {
 		};
 	}
 
+	StaticSceneBuilder::StaticSceneBuilder(const SceneBuilderDescriptor& descriptor) :
+		skyColor(descriptor.skyColor),
+		sunDirection(descriptor.sunDirection),
+		sunColor(descriptor.sunColor),
+		sunIntensity(descriptor.sunIntensity)
+	{}
+
 	void StaticSceneBuilder::addMaterialShader(sequence<char8> name, ShaderStage stage, sequence<char8> entryPoint, sequence<DescriptorSetLayoutBinding> bindings) {
 		materialShaders.emplace_back(BuildMaterialShader{
 			.name = name,
@@ -103,7 +110,7 @@ namespace Trident {
 	uint32 StaticSceneBuilder::placeSurface(const SurfaceDescriptor& descriptor, const Transform& transform) {
 		// TODO(asset-builder/scene): Better validation.
 		DEBUG_ASSERT(descriptor.geometry.scale.x > 0.0f && descriptor.geometry.scale.y > 0.0f);
-		DEBUG_ASSERT(descriptor.luxelScale.x > 0.0f && descriptor.luxelScale.y > 0.0f);
+		DEBUG_ASSERT(descriptor.lightmap.luxelScale.x > 0.0f && descriptor.lightmap.luxelScale.y > 0.0f);
 		DEBUG_ASSERT(descriptor.carvings.size() == 0 || descriptor.geometry.vertexIndices.count() == 6);
 
 		return compileSurface(descriptor, transform, {0.0f, 0.0f, 0.0f}, quat<float32>::identity(), true);
@@ -112,7 +119,7 @@ namespace Trident {
 	uint32 StaticSceneBuilder::snapSurface(const SurfaceDescriptor& descriptor, const StaticEdge& parentEdge, uint32 edgeIndex, float32 hingeAngle) {
 		// TODO(asset-builder/scene): Better validation.
 		DEBUG_ASSERT(descriptor.geometry.scale.x > 0.0f && descriptor.geometry.scale.y > 0.0f);
-		DEBUG_ASSERT(descriptor.luxelScale.x > 0.0f && descriptor.luxelScale.y > 0.0f);
+		DEBUG_ASSERT(descriptor.lightmap.luxelScale.x > 0.0f && descriptor.lightmap.luxelScale.y > 0.0f);
 		DEBUG_ASSERT(descriptor.carvings.size() == 0 || descriptor.geometry.vertexIndices.count() == 6);
 
 		const uint16 indexC = descriptor.geometry.edgeOriginVertexIndices[edgeIndex];
@@ -163,7 +170,7 @@ namespace Trident {
 
 	uint32 StaticSceneBuilder::snapSurface(const DualSnapSurfaceDescriptor& descriptor, const DualSnapEdge& edgeA, const DualSnapEdge& edgeB) {
 		// TODO(asset-builder/scene): Better validation.
-		DEBUG_ASSERT(descriptor.luxelScale.x > 0.0f && descriptor.luxelScale.y > 0.0f);
+		DEBUG_ASSERT(descriptor.lightmap.luxelScale.x > 0.0f && descriptor.lightmap.luxelScale.y > 0.0f);
 
 		const vec3<float32> a = edgeA.vertexA;
 		const vec3<float32> b = edgeA.vertexB;
@@ -206,7 +213,7 @@ namespace Trident {
 			.geometry = geometry,
 			.textureFiltering = descriptor.textureFiltering,
 			.materialIndex = descriptor.materialIndex,
-			.luxelScale = descriptor.luxelScale,
+			.lightmap = descriptor.lightmap,
 			.carvings = descriptor.carvings,
 		};
 
@@ -249,7 +256,7 @@ namespace Trident {
 		surface.textureFiltering = descriptor.textureFiltering;
 		surface.indexOffset = static_cast<uint32>(indices.size());
 		surface.materialIndex = descriptor.materialIndex;
-		surface.luxelScale = descriptor.luxelScale;
+		surface.luxelScale = descriptor.lightmap.luxelScale;
 
 		uint32 vertexIndex = 0;
 
@@ -402,6 +409,13 @@ namespace Trident {
 
 				indexOffset += 1;
 			}
+
+			Lightmap lightmap{};
+			lightmap.emissiveColor = descriptor.lightmap.emissiveColor;
+			lightmap.emissiveIntensity = descriptor.lightmap.emissiveIntensity;
+			lightmap.tintColor = descriptor.lightmap.tintColor;
+
+			lightmaps.emplace_back(lightmap);
 
 			surfaceIndexCount += static_cast<uint32>(indexCount);
 			vertexOffset += static_cast<uint32>(vertexCount);
