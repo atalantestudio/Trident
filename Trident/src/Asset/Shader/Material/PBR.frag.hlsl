@@ -43,9 +43,9 @@ cbuffer Camera : register(b0) {
 	Camera camera;
 }
 
-Texture2D<float4> armTexture : register(t7);
-Texture2D<float4> diffuseTexture : register(t8);
-Texture2D<float4> normalTexture : register(t9);
+Texture2D<float4> armTexture : register(t4);
+Texture2D<float4> diffuseTexture : register(t5);
+Texture2D<float4> normalTexture : register(t6);
 
 SamplerState armSamplerState : register(s0);
 SamplerState diffuseSamplerState : register(s1);

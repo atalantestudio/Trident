@@ -29,13 +29,13 @@ layout(set = 0, binding = 3) buffer readonly TextureCoordinateBuffer {
 };
 
 void main() {
-	uint vertexIndex = index[0];
-	uint normalIndex = index[1];
-	uint textureCoordinateIndex = index[2];
+	uint vertexOffset = index[0] * 3u;
+	uint normalOffset = index[1] * 3u;
+	uint textureCoordinateOffset = index[2] * 2u;
 
-	vec3 vertex = vec3(vertexBuffer[vertexIndex * 3u + 0u], vertexBuffer[vertexIndex * 3u + 1u], vertexBuffer[vertexIndex * 3u + 2u]);
-	vec3 normal = vec3(normalBuffer[normalIndex * 3u + 0u], normalBuffer[normalIndex * 3u + 1u], normalBuffer[normalIndex * 3u + 2u]);
-	vec2 textureCoordinate = vec2(textureCoordinateBuffer[textureCoordinateIndex * 2u + 0u], textureCoordinateBuffer[textureCoordinateIndex * 2u + 1u]);
+	vec3 vertex = vec3(vertexBuffer[vertexOffset + 0u], vertexBuffer[vertexOffset + 1u], vertexBuffer[vertexOffset + 2u]);
+	vec3 normal = vec3(normalBuffer[normalOffset + 0u], normalBuffer[normalOffset + 1u], normalBuffer[normalOffset + 2u]);
+	vec2 textureCoordinate = vec2(textureCoordinateBuffer[textureCoordinateOffset + 0u], textureCoordinateBuffer[textureCoordinateOffset + 1u]);
 
 	gl_Position = camera.projectionView * vec4(vertex, 1.0);
 

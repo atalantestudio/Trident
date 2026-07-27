@@ -26,13 +26,13 @@ StructuredBuffer<float> normalBuffer : register(t1);
 StructuredBuffer<float> textureCoordinateBuffer : register(t2);
 
 Interstage main(VertexInput input) {
-	uint vertexIndex = input.index[0];
-	uint normalIndex = input.index[1];
-	uint textureCoordinateIndex = input.index[2];
+	uint vertexOffset = input.index[0] * 3;
+	uint normalOffset = input.index[1] * 3;
+	uint textureCoordinateOffset = input.index[2] * 2;
 
-	float3 vertex = float3(vertexBuffer[vertexIndex * 3 + 0], vertexBuffer[vertexIndex * 3 + 1], vertexBuffer[vertexIndex * 3 + 2]);
-	float3 normal = float3(normalBuffer[normalIndex * 3 + 0], normalBuffer[normalIndex * 3 + 1], normalBuffer[normalIndex * 3 + 2]);
-	float2 textureCoordinate = float2(textureCoordinateBuffer[textureCoordinateIndex * 2 + 0], textureCoordinateBuffer[textureCoordinateIndex * 2 + 1]);
+	float3 vertex = float3(vertexBuffer[vertexOffset + 0], vertexBuffer[vertexOffset + 1], vertexBuffer[vertexOffset + 2]);
+	float3 normal = float3(normalBuffer[normalOffset + 0], normalBuffer[normalOffset + 1], normalBuffer[normalOffset + 2]);
+	float2 textureCoordinate = float2(textureCoordinateBuffer[textureCoordinateOffset + 0], textureCoordinateBuffer[textureCoordinateOffset + 1]);
 
 	Interstage interstage;
 	interstage.position = mul(camera.projectionView, float4(vertex, 1.0));
