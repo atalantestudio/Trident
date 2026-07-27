@@ -11,6 +11,7 @@
 #include "Engine/Renderer/Forward/DebugHullWireframePipeline.hpp"
 #include "Engine/Renderer/Forward/DebugHullWireframePipelineLayout.hpp"
 #include "Engine/Renderer/Forward/DepthStencilImage.hpp"
+#include "Engine/Renderer/Forward/ForwardDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Forward/InstanceBuffer.hpp"
 #include "Engine/Renderer/Forward/LightmapAtlasImage.hpp"
 #include "Engine/Renderer/Forward/LightmapSampler.hpp"
@@ -19,7 +20,6 @@
 #include "Engine/Renderer/Forward/Renderer.hpp"
 #include "Engine/Renderer/Forward/RenderPass.hpp"
 #include "Engine/Renderer/Forward/StaticGeometryDescriptorSetLayout.hpp"
-#include "Engine/Renderer/Forward/VertexDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Forward/VertexBuffer.hpp"
 
 namespace Trident {
@@ -35,7 +35,9 @@ namespace Trident {
 		while (staticMaterialIndex < staticMaterials.count()) {
 			const StaticMaterial3D& staticMaterial = staticMaterials[staticMaterialIndex];
 
-			commandEncoder->bindDescriptorSets(materialPipelineLayouts[0], 1, materialDescriptorSets[staticMaterialIndex]);
+			// TODO(forward): Fix descriptor sets not being as many as the materials.
+			commandEncoder->bindDescriptorSets(materialPipelineLayouts[0], 1, materialDescriptorSets[0]);
+
 			commandEncoder->draw(staticMaterial.indexRange.count, 1, staticMaterial.indexRange.offset, 0);
 
 			staticMaterialIndex += 1;

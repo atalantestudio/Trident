@@ -18,14 +18,14 @@ namespace Trident {
 
 	struct LightmapperContext {
 		ref<ImageView> gBufferPositionImageView;
-		ref<ImageView> gBufferVertexNormalImageView;
 		ref<ImageView> gBufferTriangleNormalImageView;
+		ref<ImageView> gBufferVertexNormalImageView;
 		ref<ImageView> intermediateLightmapAtlasImageView;
 		ref<ImageView> lightmapAtlasImageView;
 
 		ref<Image> gBufferPositionImage;
-		ref<Image> gBufferVertexNormalImage;
 		ref<Image> gBufferTriangleNormalImage;
+		ref<Image> gBufferVertexNormalImage;
 		ref<Image> intermediateLightmapAtlasImage;
 		ref<Image> lightmapAtlasImage;
 
@@ -58,13 +58,13 @@ namespace Trident {
 			ref<RenderPass> createDilationRenderPass() const;
 
 			ref<Image> createGBufferPositionImage() const;
-			ref<Image> createGBufferVertexNormalImage() const;
 			ref<Image> createGBufferTriangleNormalImage() const;
+			ref<Image> createGBufferVertexNormalImage() const;
 			ref<Image> createIntermediateLightmapAtlasImage() const;
 			ref<Image> createLightmapAtlasImage() const;
 			ref<ImageView> createGBufferPositionImageView();
-			ref<ImageView> createGBufferVertexNormalImageView();
 			ref<ImageView> createGBufferTriangleNormalImageView();
+			ref<ImageView> createGBufferVertexNormalImageView();
 			ref<ImageView> createIntermediateLightmapAtlasImageView();
 			ref<ImageView> createLightmapAtlasImageView();
 

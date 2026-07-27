@@ -20,6 +20,8 @@ namespace Trident {
 		StaticScene3D staticScene;
 		uint32 entityCount;
 		sequence<uint32> geometryAssetIdentifiers;
+		sequence<BuildMaterialShader> materialShaders;
+		sequence<ref<MaterialAsset>> materialAssets;
 		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
 		sequence<EntityComponentMapping<MaterialComponent>> materialMappings;
 		sequence<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;
@@ -43,19 +45,31 @@ namespace Trident {
 				header.rigidBodyMappingCount = static_cast<uint32>(data.rigidBodyMappings.count());
 
 				uint64 size = (
-					sizeof(header) + 3 * sizeof(uint32) +
+					sizeof(header) + 4 * sizeof(uint32) +
 					header.staticTriangleCount * (sizeof(StaticVertex3D) - sizeof(uint32)) * 3 +
 					header.staticVertexCount * sizeof(svec3<float32>) +
 					header.staticNormalCount * sizeof(svec3<float32>) +
 					header.staticTextureCoordinateCount * sizeof(svec2<float32>) +
-					data.staticScene.materials.count() * (sizeof(uint32) * 4) +
+					(data.staticScene.materials.count() + data.materialAssets.count()) * sizeof(uint32) +
+					data.staticScene.materials.count() * sizeof(uint32) * 3 +
 					header.geometryAssetCount * sizeof(uint32) +
 					header.geometryMappingCount * (sizeof(Entity) + sizeof(uint32)) +
 					header.materialMappingCount * (sizeof(Entity) + sizeof(uint32)) +
 					header.rigidBodyMappingCount * (sizeof(Entity) + sizeof(svec3<float32>) * 7 + sizeof(float32) * 4)
 				);
 
-				for (const BuildMaterialShader& materialShader : data.staticScene.materialShaders) {
+				sequence<BuildMaterialShader> materialShaders(data.staticScene.materialShaders.count() + data.materialShaders.count());
+
+				std::copy(data.staticScene.materialShaders.begin(), data.staticScene.materialShaders.end(), &materialShaders[0]);
+
+				// TODO(asset-builder/scene): Ensure all scenes use materials.
+				if (data.materialShaders.count() > 0) {
+					ENGINE_WARNING("The scene doesn't use any material shaders.");
+
+					std::copy(data.materialShaders.begin(), data.materialShaders.end(), &materialShaders[data.staticScene.materialShaders.count()]);
+				}
+
+				for (const BuildMaterialShader& materialShader : materialShaders) {
 					size += (
 						6 * sizeof(uint32) +
 						sizeof(VersionNumber) +
@@ -72,7 +86,8 @@ namespace Trident {
 
 				stream.jump(sizeof(header));
 				stream.write<uint32>(data.staticScene.lightmapAtlasImageAssetDescriptor.identifier);
-				stream.write<uint32>(static_cast<uint32>(data.staticScene.materialShaders.count()));
+				stream.write<uint32>(static_cast<uint32>(materialShaders.count()));
+				stream.write<uint32>(static_cast<uint32>(data.materialAssets.count() + data.staticScene.materials.count()));
 				stream.write<uint32>(static_cast<uint32>(data.staticScene.materials.count()));
 
 				for (const StaticVertex3D& index : data.staticScene.indices) {
@@ -94,7 +109,7 @@ namespace Trident {
 					stream.write<svec2<float32>>(textureCoordinate);
 				}
 
-				for (const BuildMaterialShader& materialShader : data.staticScene.materialShaders) {
+				for (const BuildMaterialShader& materialShader : materialShaders) {
 					stream.write<uint32>(0);
 					stream.write<VersionNumber>({0, 0, 0});
 					stream.write<uint32>(static_cast<uint32>(materialShader.name.count()));
@@ -122,6 +137,10 @@ namespace Trident {
 
 				for (const BuildStaticMaterial3D& staticMaterial : data.staticScene.materials) {
 					stream.write<uint32>(staticMaterial.identifier);
+				}
+
+				for (const ref<MaterialAsset> materialAsset : data.materialAssets) {
+					stream.write<uint32>(materialAsset->identifier);
 				}
 
 				for (const BuildStaticMaterial3D& staticMaterial : data.staticScene.materials) {

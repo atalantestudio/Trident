@@ -6,18 +6,18 @@
 precision highp float;
 
 in Interstage {
-	layout(location = 0) flat uint triangleIndex;
-	layout(location = 1) vec3 position;
-	layout(location = 2) vec3 vertexNormal;
-	layout(location = 3) flat vec3 triangleNormal;
+	layout(location = 0) vec3 position;
+	layout(location = 1) flat uint triangleIndex;
+	layout(location = 2) flat vec3 triangleNormal;
+	layout(location = 3) vec3 vertexNormal;
 } interstage;
 
 layout(location = 0) out vec4 position;
-layout(location = 1) out vec4 vertexNormal;
-layout(location = 2) out vec4 triangleNormal;
+layout(location = 1) out vec4 triangleNormal;
+layout(location = 2) out vec4 vertexNormal;
 
 void main() {
-	position = vec4(interstage.position, interstage.triangleIndex + 1u);
-	vertexNormal = vec4(interstage.vertexNormal, 0.0);
-	triangleNormal = vec4(interstage.triangleNormal, 0.0);
+	position = vec4(interstage.position, interstage.triangleIndex);
+	triangleNormal = vec4(normalize(interstage.triangleNormal), 0.0);
+	vertexNormal = vec4(normalize(interstage.vertexNormal), 0.0);
 }

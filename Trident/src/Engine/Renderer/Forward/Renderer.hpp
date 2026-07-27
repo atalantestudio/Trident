@@ -31,6 +31,12 @@ namespace Trident {
 				mat3x3<float32> normal;
 			};
 
+			struct MaterialPipelineBase {
+				sequence<ref<DescriptorSetLayout>> descriptorSetLayouts;
+				sequence<VertexInputBinding> vertexInputBindings;
+				ref<ShaderModule> vertexShaderModule;
+			};
+
 		public:
 			static constexpr index DEBUG_MAX_CONTACTS = 16;
 
@@ -90,15 +96,15 @@ namespace Trident {
 				initialize();
 
 				staticGeometryDescriptorSetLayout = createStaticGeometryDescriptorSetLayout();
-				vertexDescriptorSetLayout = createVertexDescriptorSetLayout();
+				forwardDescriptorSetLayout = createForwardDescriptorSetLayout();
 
 				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(sequence<ref<DescriptorSetLayout>>{
 					staticGeometryDescriptorSetLayout,
-					vertexDescriptorSetLayout,
+					forwardDescriptorSetLayout,
 				});
 
 				staticGeometryDescriptorSet = descriptorSets[0];
-				vertexDescriptorSet = descriptorSets[1];
+				forwardDescriptorSet = descriptorSets[1];
 
 				debugHullWireframePipelineLayout = createDebugHullWireframePipelineLayout();
 				debugHullWireframePipeline = createDebugHullWireframePipeline();
@@ -298,17 +304,19 @@ namespace Trident {
 				const ComponentPool<RigidBody3DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody3DComponent>();
 
 				if (draw && scene->getIndexCount() > 0) {
-					sequence<ref<DescriptorSet>> descriptorSets = {vertexDescriptorSet, nullptr};
+					sequence<ref<DescriptorSet>> descriptorSets = {forwardDescriptorSet, nullptr};
 					uint32 rigidBodyComponentIndex = 0;
 
+					// TODO(forward): Sort by material shader, so that the vertex descriptor sets are not re-bound for every material of the same shader.
 					while (rigidBodyComponentIndex < rigidBodyComponentPool.componentCount) {
 						const Entity entity = rigidBodyComponentPool.componentIndexToEntity[rigidBodyComponentIndex];
 						const GeometryComponent geometryComponent = geometryComponentPool.components[geometryComponentPool.entityToComponentIndex[entity]];
 						const Geometry3D& geometry = scene->geometries[geometryComponent.geometryIndex];
 						const MaterialComponent materialComponent = materialComponentPool.components[materialComponentPool.entityToComponentIndex[entity]];
 
-						// NOTE: Material is incremented by 1 for visibility rendering.
-						const uint32 materialShaderIndex = scene->getMaterialShaderIndex(materialComponent.materialIndex - 1);
+						// TODO(forward): Fix retrieving the material shader index.
+						// const uint32 materialShaderIndex = scene->getMaterialShaderIndex(materialComponent.materialIndex - 1);
+						const uint32 materialShaderIndex = 1;
 
 						const range<uint32, uint32> indexRange = geometry.getVertexPositionIndexRange();
 
@@ -326,7 +334,7 @@ namespace Trident {
 
 				if (debugHullWireframe && scene->getHullLineIndexCount() > 0) {
 					commandEncoder->bindGraphicsPipeline(debugHullWireframePipeline);
-					commandEncoder->bindDescriptorSets(debugHullWireframePipelineLayout, 0, vertexDescriptorSet);
+					commandEncoder->bindDescriptorSets(debugHullWireframePipelineLayout, 0, forwardDescriptorSet);
 					commandEncoder->bindVertexBuffer(0, instanceBuffer, 0, sizeof(Instance));
 					commandEncoder->bindIndexBuffer<uint16>(debugHullWireframeBuffer, 0);
 
@@ -354,7 +362,7 @@ namespace Trident {
 
 				if (debugContactManifolds) {
 					commandEncoder->bindGraphicsPipeline(debugContactManifoldPipeline);
-					commandEncoder->bindDescriptorSets(debugContactManifoldPipelineLayout, 0, vertexDescriptorSet);
+					commandEncoder->bindDescriptorSets(debugContactManifoldPipelineLayout, 0, forwardDescriptorSet);
 					commandEncoder->bindVertexBuffer(0, debugContactManifoldBuffer, 0, sizeof(svec3<float32>));
 					commandEncoder->draw(contactCount, 1, 0, 0);
 				}
@@ -377,7 +385,7 @@ namespace Trident {
 			ref<RenderPass> createRenderPass() const;
 
 			ref<DescriptorSetLayout> createStaticGeometryDescriptorSetLayout() const;
-			ref<DescriptorSetLayout> createVertexDescriptorSetLayout() const;
+			ref<DescriptorSetLayout> createForwardDescriptorSetLayout() const;
 
 			ref<PipelineLayout> createDebugHullWireframePipelineLayout() const;
 			ref<PipelineLayout> createDebugContactManifoldPipelineLayout() const;
@@ -417,7 +425,7 @@ namespace Trident {
 					staticGeometryBuffer->createView<float32>(staticVertexAlignedRangeSize, sceneAsset->staticNormalRange.count),
 					staticGeometryBuffer->createView<float32>(staticVertexAlignedRangeSize + staticNormalAlignedRangeSize, sceneAsset->staticTextureCoordinateRange.count),
 
-					// Vertex
+					// Forward
 					dataBuffer->createView<float32>(scene->getVertexPositionComponentRange().offset, scene->getVertexPositionComponentRange().count),
 					dataBuffer->createView<float32>(scene->getVertexNormalComponentRange().offset, scene->getVertexNormalComponentRange().count),
 					dataBuffer->createView<float32>(scene->getVertexTextureCoordinateComponentRange().offset, scene->getVertexTextureCoordinateComponentRange().count),
@@ -429,7 +437,7 @@ namespace Trident {
 				writeDescriptorSetCount += staticGeometryDescriptorSetLayout->bindings.count();
 
 				if (scene->getIndexCount() > 0) {
-					writeDescriptorSetCount += vertexDescriptorSetLayout->bindings.count();
+					writeDescriptorSetCount += forwardDescriptorSetLayout->bindings.count();
 				}
 
 				sequence<WriteDescriptorSet> writeDescriptorSets(writeDescriptorSetCount);
@@ -459,16 +467,16 @@ namespace Trident {
 				if (scene->getIndexCount() > 0) {
 					// Camera
 					writeDescriptorSets[writeDescriptorSetOffset] = {
-						.descriptorSet = vertexDescriptorSet,
+						.descriptorSet = forwardDescriptorSet,
 						.bindingIndex = 0,
 						.descriptorBufferViews = descriptorBufferViews[0],
 					};
 
 					writeDescriptorSetIndex = 1;
 
-					while (writeDescriptorSetIndex < vertexDescriptorSetLayout->bindings.count()) {
+					while (writeDescriptorSetIndex < forwardDescriptorSetLayout->bindings.count()) {
 						writeDescriptorSets[writeDescriptorSetOffset + writeDescriptorSetIndex] = {
-							.descriptorSet = vertexDescriptorSet,
+							.descriptorSet = forwardDescriptorSet,
 							.bindingIndex = writeDescriptorSetIndex,
 							.descriptorBufferViews = descriptorBufferViews[writeDescriptorSetIndex + 3],
 						};
@@ -476,7 +484,7 @@ namespace Trident {
 						writeDescriptorSetIndex += 1;
 					}
 
-					writeDescriptorSetOffset += static_cast<uint32>(vertexDescriptorSetLayout->bindings.count());
+					writeDescriptorSetOffset += static_cast<uint32>(forwardDescriptorSetLayout->bindings.count());
 				}
 
 				device->updateDescriptorSets(writeDescriptorSets);
@@ -487,16 +495,18 @@ namespace Trident {
 
 			void renderStaticGeometry(ref<CommandEncoder> commandEncoder) const;
 
+			sequence<MaterialPipelineBase> getMaterialPipelineBases() const;
+
 		private:
 			ref<RenderPass> renderPass;
 
 			sequence<ref<Framebuffer>> framebuffers;
 
 			ref<DescriptorSetLayout> staticGeometryDescriptorSetLayout;
-			ref<DescriptorSetLayout> vertexDescriptorSetLayout;
+			ref<DescriptorSetLayout> forwardDescriptorSetLayout;
 
 			ref<DescriptorSet> staticGeometryDescriptorSet;
-			ref<DescriptorSet> vertexDescriptorSet;
+			ref<DescriptorSet> forwardDescriptorSet;
 			sequence<ref<DescriptorSet>> materialDescriptorSets;
 
 			sequence<ref<PipelineLayout>> materialPipelineLayouts;
@@ -539,8 +549,8 @@ namespace Trident {
 			uint32 contactCount = 0;
 
 		private:
-			bool draw = false;
-			bool debugHullWireframe = false;
+			bool draw = true;
+			bool debugHullWireframe = true;
 			bool debugContactManifolds = false;
 	};
 }

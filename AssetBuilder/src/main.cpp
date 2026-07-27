@@ -4,11 +4,12 @@
 #include "pch.hpp"
 
 #include "AssetBuilder/API/AssetBuilderLibrary.hpp"
-#include "AssetBuilder/Process/Material/LightmappedWhiteMaterialProcess.hpp"
-#include "AssetBuilder/Process/Material/PlasterCeilingMaterialProcess.hpp"
-#include "AssetBuilder/Process/Material/PlasterWallMaterialProcess.hpp"
-#include "AssetBuilder/Process/Material/TileFloorMaterialProcess.hpp"
-#include "AssetBuilder/Process/Material/WoodDoorMaterialProcess.hpp"
+#include "AssetBuilder/Process/Material/Lightmapped/PlasterCeilingMaterialProcess.hpp"
+#include "AssetBuilder/Process/Material/Lightmapped/PlasterWallMaterialProcess.hpp"
+#include "AssetBuilder/Process/Material/Lightmapped/TileFloorMaterialProcess.hpp"
+#include "AssetBuilder/Process/Material/Lightmapped/WhiteMaterialProcess.hpp"
+#include "AssetBuilder/Process/Material/Lightmapped/WoodDoorMaterialProcess.hpp"
+#include "AssetBuilder/Process/Material/PBR/RubberDuckToyMaterialProcess.hpp"
 #include "AssetBuilder/Process/Scene/BoxesSceneProcess.hpp"
 #include "AssetBuilder/Process/Scene/Boxes3DSceneProcess.hpp"
 #include "AssetBuilder/Process/Scene/BoxStackingSceneProcess.hpp"
@@ -59,10 +60,11 @@ namespace Trident {
 
 				registerProcess<BuildImageAssetProcess>(&assetLibrary);
 
-				registerProcess<LightmappedWhiteMaterialProcess>(&assetLibrary);
 				registerProcess<PlasterCeilingMaterialProcess>(&assetLibrary);
 				registerProcess<PlasterWallMaterialProcess>(&assetLibrary);
+				registerProcess<RubberDuckToyMaterialProcess>(&assetLibrary);
 				registerProcess<TileFloorMaterialProcess>(&assetLibrary);
+				registerProcess<WhiteMaterialProcess>(&assetLibrary);
 				registerProcess<WoodDoorMaterialProcess>(&assetLibrary);
 
 				registerProcess<BoxesSceneProcess>(&assetLibrary);

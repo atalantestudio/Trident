@@ -76,14 +76,14 @@ namespace Trident {
 		context = {};
 
 		context.gBufferPositionImage = createGBufferPositionImage();
-		context.gBufferVertexNormalImage = createGBufferVertexNormalImage();
 		context.gBufferTriangleNormalImage = createGBufferTriangleNormalImage();
+		context.gBufferVertexNormalImage = createGBufferVertexNormalImage();
 		context.intermediateLightmapAtlasImage = createIntermediateLightmapAtlasImage();
 		context.lightmapAtlasImage = createLightmapAtlasImage();
 
 		context.gBufferPositionImageView = createGBufferPositionImageView();
-		context.gBufferVertexNormalImageView = createGBufferVertexNormalImageView();
 		context.gBufferTriangleNormalImageView = createGBufferTriangleNormalImageView();
+		context.gBufferVertexNormalImageView = createGBufferVertexNormalImageView();
 		context.intermediateLightmapAtlasImageView = createIntermediateLightmapAtlasImageView();
 		context.lightmapAtlasImageView = createLightmapAtlasImageView();
 
@@ -127,7 +127,7 @@ namespace Trident {
 					.finalLayout = ImageLayout::GENERAL,
 				},
 
-				// G-Buffer vertex normal
+				// G-Buffer triangle normal
 				{
 					.format = ImageFormat::R32G32B32A32_SFLOAT,
 					.sampleCount = 1,
@@ -136,7 +136,7 @@ namespace Trident {
 					.finalLayout = ImageLayout::GENERAL,
 				},
 
-				// G-Buffer triangle normal
+				// G-Buffer vertex normal
 				{
 					.format = ImageFormat::R32G32B32A32_SFLOAT,
 					.sampleCount = 1,
@@ -207,22 +207,6 @@ namespace Trident {
 		);
 	}
 
-	ref<Image> Lightmapper::createGBufferVertexNormalImage() const {
-		return gBufferRenderPass->createColorAttachmentImage(
-			{
-				.type = ImageType::TEXTURE_2D,
-				.extent = {atlasExtent.width, atlasExtent.height, 1},
-				.mipLevelCount = 1,
-				.layerCount = 1,
-				.additionalUsage = ImageUsage::STORAGE,
-				#if defined(DEBUG_OBJECT_NAME)
-					.name = "G-Buffer vertex normal",
-				#endif
-			},
-			1
-		);
-	}
-
 	ref<Image> Lightmapper::createGBufferTriangleNormalImage() const {
 		return gBufferRenderPass->createColorAttachmentImage(
 			{
@@ -233,6 +217,22 @@ namespace Trident {
 				.additionalUsage = ImageUsage::STORAGE,
 				#if defined(DEBUG_OBJECT_NAME)
 					.name = "G-Buffer triangle normal",
+				#endif
+			},
+			1
+		);
+	}
+
+	ref<Image> Lightmapper::createGBufferVertexNormalImage() const {
+		return gBufferRenderPass->createColorAttachmentImage(
+			{
+				.type = ImageType::TEXTURE_2D,
+				.extent = {atlasExtent.width, atlasExtent.height, 1},
+				.mipLevelCount = 1,
+				.layerCount = 1,
+				.additionalUsage = ImageUsage::STORAGE,
+				#if defined(DEBUG_OBJECT_NAME)
+					.name = "G-Buffer vertex normal",
 				#endif
 			},
 			2
@@ -283,18 +283,6 @@ namespace Trident {
 		});
 	}
 
-	ref<ImageView> Lightmapper::createGBufferVertexNormalImageView() {
-		return context.gBufferVertexNormalImage->createView({
-			.mipLevelOffset = 0,
-			.mipLevelCount = 1,
-			.layerOffset = 0,
-			.layerCount = 1,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "G-Buffer vertex normal",
-			#endif
-		});
-	}
-
 	ref<ImageView> Lightmapper::createGBufferTriangleNormalImageView() {
 		return context.gBufferTriangleNormalImage->createView({
 			.mipLevelOffset = 0,
@@ -303,6 +291,18 @@ namespace Trident {
 			.layerCount = 1,
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "G-Buffer triangle normal",
+			#endif
+		});
+	}
+
+	ref<ImageView> Lightmapper::createGBufferVertexNormalImageView() {
+		return context.gBufferVertexNormalImage->createView({
+			.mipLevelOffset = 0,
+			.mipLevelCount = 1,
+			.layerOffset = 0,
+			.layerCount = 1,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "G-Buffer vertex normal",
 			#endif
 		});
 	}
@@ -336,8 +336,8 @@ namespace Trident {
 			.renderPass = gBufferRenderPass,
 			.imageViews = {
 				context.gBufferPositionImageView,
-				context.gBufferVertexNormalImageView,
 				context.gBufferTriangleNormalImageView,
+				context.gBufferVertexNormalImageView,
 			},
 			.extent = atlasExtent,
 			#if defined(DEBUG_OBJECT_NAME)
@@ -405,14 +405,14 @@ namespace Trident {
 				.shaderStages = ShaderStage::COMPUTE,
 			},
 
-			// G-Buffer vertex normal
+			// G-Buffer triangle normal
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE,
 				.descriptorCount = 1,
 				.shaderStages = ShaderStage::COMPUTE,
 			},
 
-			// G-Buffer triangle normal
+			// G-Buffer vertex normal
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE,
 				.descriptorCount = 1,
@@ -792,13 +792,13 @@ namespace Trident {
 			.imageLayout = ImageLayout::GENERAL,
 			.sampler = nullptr,
 		};
-		const DescriptorImage gBufferVertexNormalDescriptorImage = {
-			.imageView = context.gBufferVertexNormalImageView,
+		const DescriptorImage gBufferTriangleNormalDescriptorImage = {
+			.imageView = context.gBufferTriangleNormalImageView,
 			.imageLayout = ImageLayout::GENERAL,
 			.sampler = nullptr,
 		};
-		const DescriptorImage gBufferTriangleNormalDescriptorImage = {
-			.imageView = context.gBufferTriangleNormalImageView,
+		const DescriptorImage gBufferVertexNormalDescriptorImage = {
+			.imageView = context.gBufferVertexNormalImageView,
 			.imageLayout = ImageLayout::GENERAL,
 			.sampler = nullptr,
 		};
@@ -847,12 +847,12 @@ namespace Trident {
 			{
 				.descriptorSet = descriptorSets[1],
 				.bindingIndex = 4,
-				.descriptorImages = gBufferVertexNormalDescriptorImage,
+				.descriptorImages = gBufferTriangleNormalDescriptorImage,
 			},
 			{
 				.descriptorSet = descriptorSets[1],
 				.bindingIndex = 5,
-				.descriptorImages = gBufferTriangleNormalDescriptorImage,
+				.descriptorImages = gBufferVertexNormalDescriptorImage,
 			},
 			{
 				.descriptorSet = descriptorSets[1],
@@ -924,12 +924,12 @@ namespace Trident {
 					.newAccess = Access::SHADER_READ,
 				},
 				{
-					.image = context.gBufferVertexNormalImage,
+					.image = context.gBufferTriangleNormalImage,
 					.newLayout = ImageLayout::GENERAL,
 					.newAccess = Access::SHADER_READ,
 				},
 				{
-					.image = context.gBufferTriangleNormalImage,
+					.image = context.gBufferVertexNormalImage,
 					.newLayout = ImageLayout::GENERAL,
 					.newAccess = Access::SHADER_READ,
 				},
@@ -956,7 +956,7 @@ namespace Trident {
 		commandEncoder->bindDescriptorSets(postProcessingPipelineLayout, 0, descriptorSets[2]);
 		commandEncoder->dispatch(workGroupX, workGroupY, 1);
 
-		/* // TODO(graphics/command-encoder): Add support for pipeline barriers.
+		// TODO(graphics/command-encoder): Add support for pipeline barriers.
 		commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
 
 		commandEncoder->bindComputePipeline(horizontalBilateralFilterPipeline);
@@ -968,7 +968,7 @@ namespace Trident {
 
 		commandEncoder->bindComputePipeline(verticalBilateralFilterPipeline);
 		commandEncoder->bindDescriptorSets(postProcessingPipelineLayout, 0, descriptorSets[2]);
-		commandEncoder->dispatch(workGroupX, workGroupY, 1); */
+		commandEncoder->dispatch(workGroupX, workGroupY, 1);
 
 		imageMemoryBarrier = {
 			.image = context.intermediateLightmapAtlasImage,

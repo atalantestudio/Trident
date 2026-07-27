@@ -70,10 +70,10 @@ namespace Trident {
 					},
 				});
 
-				const uint32 plasterCeilingMaterialIndex = builder.addMaterial(assetLibrary->getAsset<MaterialAsset>("plasterceiling"));
-				const uint32 plasterWallMaterialIndex = builder.addMaterial(assetLibrary->getAsset<MaterialAsset>("plasterwall"));
-				const uint32 tileFloorMaterialIndex = builder.addMaterial(assetLibrary->getAsset<MaterialAsset>("tilefloor"));
-				const uint32 woodDoorMaterialIndex = builder.addMaterial(assetLibrary->getAsset<MaterialAsset>("wooddoor"));
+				const uint32 plasterCeilingMaterialIndex = builder.addMaterial(assetLibrary->getAsset<MaterialAsset>("plaster_ceiling"));
+				const uint32 plasterWallMaterialIndex = builder.addMaterial(assetLibrary->getAsset<MaterialAsset>("plaster_wall"));
+				const uint32 tileFloorMaterialIndex = builder.addMaterial(assetLibrary->getAsset<MaterialAsset>("tile_floor"));
+				const uint32 woodDoorMaterialIndex = builder.addMaterial(assetLibrary->getAsset<MaterialAsset>("wood_door"));
 
 				builder.floorLevels = {
 					0.0f, // Floor 1
@@ -116,6 +116,34 @@ namespace Trident {
 					.entityCount = 1,
 					.geometryAssetIdentifiers = {
 						38,
+					},
+					.materialShaders = {
+						{
+							.name = "PBR.frag",
+							.stage = ShaderStage::FRAGMENT,
+							.entryPoint = "main",
+							.descriptorSetLayoutBindings = {
+								{
+									.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+									.descriptorCount = 1,
+									.shaderStages = ShaderStage::FRAGMENT,
+								},
+								{
+									.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+									.descriptorCount = 1,
+									.shaderStages = ShaderStage::FRAGMENT,
+								},
+								{
+									.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+									.descriptorCount = 1,
+									.shaderStages = ShaderStage::FRAGMENT,
+								},
+							},
+							.materialAssetRange = {0, 0},
+						},
+					},
+					.materialAssets = {
+						assetLibrary->getAsset<MaterialAsset>("rubber_duck_toy_1k"),
 					},
 					.geometryMappings = {
 						{0, {0}},

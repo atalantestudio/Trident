@@ -6,16 +6,16 @@
 #include "AssetBuilder/Process/Material/MaterialShader/LightmappedMaterialShaderProcess.hpp"
 
 namespace Trident {
-	class WoodDoorMaterialProcess final : public LightmappedMaterialShaderProcess {
+	class PlasterWallMaterialProcess final : public LightmappedMaterialShaderProcess {
 		protected:
 			view<char8> getAssetName() const final override {
-				return "wooddoor";
+				return "plaster_wall";
 			}
 
 		public:
-			explicit WoodDoorMaterialProcess(AssetBuilderLibrary* assetLibrary) :
+			explicit PlasterWallMaterialProcess(AssetBuilderLibrary* assetLibrary) :
 				LightmappedMaterialShaderProcess(assetLibrary, {
-					.diffuseTexturePath = "wooddoor048a",
+					.diffuseTexturePath = "plasterwall030c",
 				})
 			{}
 	};

@@ -6,7 +6,7 @@
 #include "Engine/Renderer/Forward/Renderer.hpp"
 
 namespace Trident {
-	ref<DescriptorSetLayout> ForwardRenderer::createVertexDescriptorSetLayout() const {
+	ref<DescriptorSetLayout> ForwardRenderer::createForwardDescriptorSetLayout() const {
 		return createDescriptorSetLayout({
 			// Camera
 			{

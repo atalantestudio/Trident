@@ -15,26 +15,26 @@ layout(set = 0, binding = 1) buffer readonly NormalBuffer {
 };
 
 out Interstage {
-	layout(location = 0) flat uint triangleIndex;
-	layout(location = 1) vec3 position;
-	layout(location = 2) vec3 vertexNormal;
-	layout(location = 3) flat vec3 triangleNormal;
+	layout(location = 0) vec3 position;
+	layout(location = 1) flat uint triangleIndex;
+	layout(location = 2) flat vec3 triangleNormal;
+	layout(location = 3) vec3 vertexNormal;
 } interstage;
 
 void main() {
-	uint vertexIndex = index[0];
-	uint normalIndex = index[1];
+	uint vertexOffset = index[0] * 3u;
+	uint normalOffset = index[1] * 3u;
 
-	vec3 position = vec3(vertexBuffer[vertexIndex * 3u + 0u], vertexBuffer[vertexIndex * 3u + 1u], vertexBuffer[vertexIndex * 3u + 2u]);
-	vec3 vertexNormal = vec3(normalBuffer[normalIndex * 3u + 0u], normalBuffer[normalIndex * 3u + 1u], normalBuffer[normalIndex * 3u + 2u]);
+	vec3 position = vec3(vertexBuffer[vertexOffset + 0u], vertexBuffer[vertexOffset + 1u], vertexBuffer[vertexOffset + 2u]);
+	vec3 vertexNormal = vec3(normalBuffer[normalOffset + 0u], normalBuffer[normalOffset + 1u], normalBuffer[normalOffset + 2u]);
 
 	vec2 coordinate = lightmapCoordinate;
 	coordinate.y = 1.0 - coordinate.y;
 
 	gl_Position = vec4(coordinate * 2.0 - 1.0, 0.0, 1.0);
 
-	interstage.triangleIndex = uint(gl_VertexIndex / 3);
 	interstage.position = position;
-	interstage.vertexNormal = vertexNormal;
+	interstage.triangleIndex = uint(gl_VertexIndex / 3 + 1);
 	interstage.triangleNormal = vertexNormal;
+	interstage.vertexNormal = vertexNormal;
 }

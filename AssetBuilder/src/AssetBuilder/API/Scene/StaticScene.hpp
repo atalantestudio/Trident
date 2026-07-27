@@ -3,20 +3,14 @@
 
 #pragma once
 
+#include "AssetBuilder/API/Scene/BuildMaterialShader.hpp"
+
 #include "Engine/API/Graphics/DescriptorSetLayout.hpp"
 #include "Engine/API/Graphics/ShaderStage.hpp"
 #include "Engine/API/Scene/StaticVertex.hpp"
 #include "Engine/Filesystem/Asset/ImageAsset.hpp"
 
 namespace Trident {
-	struct BuildMaterialShader {
-		sequence<char8> name;
-		ShaderStage stage;
-		sequence<char8> entryPoint;
-		sequence<DescriptorSetLayoutBinding> descriptorSetLayoutBindings;
-		range<uint32, uint32> materialAssetRange;
-	};
-
 	struct BuildStaticMaterial3D {
 		uint32 identifier;
 		uint32 shaderIndex;

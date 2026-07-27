@@ -53,7 +53,7 @@ namespace Trident {
 
 		descriptor.materialShaders = sequence<MaterialShader>(stream.read<uint32>());
 		descriptor.materialAssets = sequence<ref<MaterialAsset>>(stream.read<uint32>());
-		descriptor.staticMaterials = sequence<StaticMaterial3D>(descriptor.materialAssets.count());
+		descriptor.staticMaterials = sequence<StaticMaterial3D>(stream.read<uint32>());
 
 		StaticVertex3D* staticIndex = pointer_cast<StaticVertex3D*>(&descriptor.staticGeometryBuffer[descriptor.staticIndexRange.offset]);
 		svec3<float32>* staticVertex = pointer_cast<svec3<float32>*>(&descriptor.staticGeometryBuffer[descriptor.staticVertexRange.offset]);

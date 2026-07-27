@@ -8,7 +8,7 @@
 namespace Trident {
 	ref<PipelineLayout> ForwardRenderer::createDebugContactManifoldPipelineLayout() const {
 		return createPipelineLayout({
-			.descriptorSetLayouts = {vertexDescriptorSetLayout},
+			.descriptorSetLayouts = {forwardDescriptorSetLayout},
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Debug contact manifold",
 			#endif
