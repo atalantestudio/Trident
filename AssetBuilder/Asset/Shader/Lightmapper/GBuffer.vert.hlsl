@@ -4,6 +4,7 @@
 struct VertexInput {
 	uint vertexIndex : SV_VertexID;
 	float2 lightmapCoordinate : VERTEX_INPUT_ATTRIBUTE0;
+	uint4 index : VERTEX_INPUT_ATTRIBUTE1;
 };
 
 struct Interstage {

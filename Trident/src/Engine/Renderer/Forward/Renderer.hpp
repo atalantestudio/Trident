@@ -297,7 +297,7 @@ namespace Trident {
 				const ComponentPool<MaterialComponent>& materialComponentPool = scene->ecs.getComponentPool<MaterialComponent>();
 				const ComponentPool<RigidBody3DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody3DComponent>();
 
-				if (scene->getIndexCount() > 0 && draw) {
+				if (draw && scene->getIndexCount() > 0) {
 					sequence<ref<DescriptorSet>> descriptorSets = {vertexDescriptorSet, nullptr};
 					uint32 rigidBodyComponentIndex = 0;
 
@@ -324,7 +324,7 @@ namespace Trident {
 					}
 				}
 
-				if (scene->getHullLineIndexCount() > 0 && debugHullWireframe) {
+				if (debugHullWireframe && scene->getHullLineIndexCount() > 0) {
 					commandEncoder->bindGraphicsPipeline(debugHullWireframePipeline);
 					commandEncoder->bindDescriptorSets(debugHullWireframePipelineLayout, 0, vertexDescriptorSet);
 					commandEncoder->bindVertexBuffer(0, instanceBuffer, 0, sizeof(Instance));
@@ -345,7 +345,7 @@ namespace Trident {
 
 						const Hull3D& hull = scene->hulls[geometry.hullIndex];
 
-						// TODO: DX12 doesn't pass the BaseVertexOffset to the vertex shader so indexing the vertex buffer doesn't return the same values as OpenGL/Vulkan.
+						// TODO(graphics/dx12/draw-indexed): DX12 doesn't pass the BaseVertexOffset to the vertex shader so indexing the vertex buffer doesn't return the same values as OpenGL/Vulkan.
 						commandEncoder->drawIndexed(hull.lineIndexRange.count, 1, hull.lineIndexRange.offset, geometry.getVertexPositionComponentRange().offset / 3, rigidBodyComponentIndex);
 
 						rigidBodyComponentIndex += 1;

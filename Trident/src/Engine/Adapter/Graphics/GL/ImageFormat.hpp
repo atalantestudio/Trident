@@ -15,6 +15,7 @@ namespace Trident::GL {
 			GL_BGRA,
 			GL_RGBA,
 			GL_RGBA,
+			GL_RGBA,
 			GL_RED_INTEGER,
 			GL_RG_INTEGER,
 			GL_DEPTH_COMPONENT,
@@ -35,6 +36,7 @@ namespace Trident::GL {
 			GL_BGRA8_EXT,
 			GL_SRGB8_ALPHA8,
 			GL_RGBA8,
+			GL_RGBA32F,
 			GL_R32UI,
 			GL_RG32UI,
 			GL_DEPTH_COMPONENT32F,
@@ -54,6 +56,7 @@ namespace Trident::GL {
 			GL_UNSIGNED_BYTE,
 			GL_UNSIGNED_BYTE,
 			GL_UNSIGNED_BYTE,
+			GL_FLOAT,
 			GL_UNSIGNED_INT,
 			GL_UNSIGNED_INT,
 		};
@@ -70,6 +73,7 @@ namespace Trident::GL {
 			case GL_BGRA8_EXT: return ImageFormat::B8G8R8A8_UNORM;
 			case GL_SRGB8_ALPHA8: return ImageFormat::R8G8B8A8_SRGB;
 			case GL_RGBA8: return ImageFormat::R8G8B8A8_UNORM;
+			case GL_RGBA32F: return ImageFormat::R32G32B32A32_SFLOAT;
 			case GL_R32UI: return ImageFormat::R32_UINT;
 			case GL_RG32UI: return ImageFormat::R32G32_UINT;
 			case GL_DEPTH_COMPONENT32F: return ImageFormat::D32_SFLOAT;

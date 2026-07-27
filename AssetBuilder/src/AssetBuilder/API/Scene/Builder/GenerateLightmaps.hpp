@@ -80,7 +80,7 @@ namespace Trident {
 		scene.lightmapAtlasImageAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
 
 		lightmapper.setOptions({
-			.format = scene.lightmapAtlasImageAssetDescriptor.format,
+			.atlasFormat = scene.lightmapAtlasImageAssetDescriptor.format,
 			.atlasExtent = LIGHTMAP_ATLAS_EXTENT,
 		});
 		lightmapper.buildLightmapAtlas(scene, scene.lightmapAtlasImageAssetDescriptor);

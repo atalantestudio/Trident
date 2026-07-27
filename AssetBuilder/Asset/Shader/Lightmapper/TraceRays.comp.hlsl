@@ -1,6 +1,8 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
+// TODO(asset-builder/lightmapper/dx12): Update to use the G-Buffer.
+
 struct TraceRaysArguments {
 	uint2 atlasSize;
 	uint luxelCount;
@@ -31,8 +33,8 @@ struct Ray {
 };
 
 struct Hit {
-	float distance;
 	float3 position;
+	float distance;
 	float3 normal;
 };
 
@@ -40,12 +42,12 @@ static const float FLOAT32_MAX = 4294967295.0;
 static const uint SAMPLE_COUNT = 1024;
 static const uint BOUNCE_COUNT = 4;
 static const float3 SUN_DIRECTION = float3(-1.0, -1.0, -1.0);
+static const float3 SKY_COLOR = float3(0.0, 0.0, 0.0);
 
 StructuredBuffer<TraceRaysArguments> traceRaysArguments : register(t0);
 StructuredBuffer<Luxel> luxels : register(t1);
-StructuredBuffer<Vertex> indices : register(t2);
-StructuredBuffer<float> vertexComponents : register(t3);
-StructuredBuffer<float> normalComponents : register(t4);
+StructuredBuffer<Vertex> indexBuffer : register(t2);
+StructuredBuffer<float> vertexBuffer : register(t3);
 RWTexture2D<float4> intermediateLightmapAtlas : register(u0);
 
 float parallelogramArea(float2 a, float2 b) {
@@ -85,16 +87,16 @@ Triangle loadTriangle(uint triangleIndex) {
 	uint indexOffset = triangleIndex * 3;
 
 	Triangle triangle_;
-	triangle_.vertices[0] = indices[indexOffset + 0];
-	triangle_.vertices[1] = indices[indexOffset + 1];
-	triangle_.vertices[2] = indices[indexOffset + 2];
+	triangle_.vertices[0] = indexBuffer[indexOffset + 0];
+	triangle_.vertices[1] = indexBuffer[indexOffset + 1];
+	triangle_.vertices[2] = indexBuffer[indexOffset + 2];
 
 	uint vertexAOffset = triangle_.vertices[0].vertexIndex * 3;
 	uint vertexBOffset = triangle_.vertices[1].vertexIndex * 3;
 	uint vertexCOffset = triangle_.vertices[2].vertexIndex * 3;
-	float3 a = float3(vertexComponents[vertexAOffset + 0], vertexComponents[vertexAOffset + 1], vertexComponents[vertexAOffset + 2]);
-	float3 b = float3(vertexComponents[vertexBOffset + 0], vertexComponents[vertexBOffset + 1], vertexComponents[vertexBOffset + 2]);
-	float3 c = float3(vertexComponents[vertexCOffset + 0], vertexComponents[vertexCOffset + 1], vertexComponents[vertexCOffset + 2]);
+	float3 a = float3(vertexBuffer[vertexAOffset + 0], vertexBuffer[vertexAOffset + 1], vertexBuffer[vertexAOffset + 2]);
+	float3 b = float3(vertexBuffer[vertexBOffset + 0], vertexBuffer[vertexBOffset + 1], vertexBuffer[vertexBOffset + 2]);
+	float3 c = float3(vertexBuffer[vertexCOffset + 0], vertexBuffer[vertexCOffset + 1], vertexBuffer[vertexCOffset + 2]);
 
 	triangle_.normal = normalize(cross(b - a, c - a));
 
@@ -109,9 +111,9 @@ bool rayTriangleIntersection(Ray ray, Triangle triangle_, inout float distance) 
 	uint vertexAOffset = triangle_.vertices[0].vertexIndex * 3;
 	uint vertexBOffset = triangle_.vertices[1].vertexIndex * 3;
 	uint vertexCOffset = triangle_.vertices[2].vertexIndex * 3;
-	float3 a = float3(vertexComponents[vertexAOffset + 0], vertexComponents[vertexAOffset + 1], vertexComponents[vertexAOffset + 2]);
-	float3 b = float3(vertexComponents[vertexBOffset + 0], vertexComponents[vertexBOffset + 1], vertexComponents[vertexBOffset + 2]);
-	float3 c = float3(vertexComponents[vertexCOffset + 0], vertexComponents[vertexCOffset + 1], vertexComponents[vertexCOffset + 2]);
+	float3 a = float3(vertexBuffer[vertexAOffset + 0], vertexBuffer[vertexAOffset + 1], vertexBuffer[vertexAOffset + 2]);
+	float3 b = float3(vertexBuffer[vertexBOffset + 0], vertexBuffer[vertexBOffset + 1], vertexBuffer[vertexBOffset + 2]);
+	float3 c = float3(vertexBuffer[vertexCOffset + 0], vertexBuffer[vertexCOffset + 1], vertexBuffer[vertexCOffset + 2]);
 	float3 ab = b - a;
 	float3 ac = c - a;
 	float3 pvec = cross(ray.direction, ac);
@@ -143,8 +145,8 @@ bool rayTriangleIntersection(Ray ray, Triangle triangle_, inout float distance) 
 
 Hit rchit(Ray ray, Triangle triangle_, float distance) {
 	Hit hit;
-	hit.distance = distance;
 	hit.position = ray.origin + ray.direction * distance;
+	hit.distance = distance;
 	hit.normal = triangle_.normal;
 
 	return hit;
@@ -204,7 +206,7 @@ float3 rgen(Hit hit, inout uint seed) {
 		hit = rint(ray);
 
 		if (hit.distance < 0.0) {
-			radiance += throughput;
+			radiance += throughput * SKY_COLOR;
 
 			break;
 		}
@@ -238,9 +240,9 @@ void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 	uint vertexAOffset = triangle_.vertices[0].vertexIndex * 3;
 	uint vertexBOffset = triangle_.vertices[1].vertexIndex * 3;
 	uint vertexCOffset = triangle_.vertices[2].vertexIndex * 3;
-	float3 vertexA = float3(vertexComponents[vertexAOffset + 0], vertexComponents[vertexAOffset + 1], vertexComponents[vertexAOffset + 2]);
-	float3 vertexB = float3(vertexComponents[vertexBOffset + 0], vertexComponents[vertexBOffset + 1], vertexComponents[vertexBOffset + 2]);
-	float3 vertexC = float3(vertexComponents[vertexCOffset + 0], vertexComponents[vertexCOffset + 1], vertexComponents[vertexCOffset + 2]);
+	float3 vertexA = float3(vertexBuffer[vertexAOffset + 0], vertexBuffer[vertexAOffset + 1], vertexBuffer[vertexAOffset + 2]);
+	float3 vertexB = float3(vertexBuffer[vertexBOffset + 0], vertexBuffer[vertexBOffset + 1], vertexBuffer[vertexBOffset + 2]);
+	float3 vertexC = float3(vertexBuffer[vertexCOffset + 0], vertexBuffer[vertexCOffset + 1], vertexBuffer[vertexCOffset + 2]);
 	float2 luxelCoordinate = (coordinate + float2(0.5, 0.5)) / traceRaysArguments[0].atlasSize;
 	float3 luxelBarycentricCoordinate = calculateBarycentricCoordinate(triangle_.vertices[0].lightmapCoordinate, triangle_.vertices[1].lightmapCoordinate, triangle_.vertices[2].lightmapCoordinate, luxelCoordinate);
 	float3 radiance = float3(0.0, 0.0, 0.0);

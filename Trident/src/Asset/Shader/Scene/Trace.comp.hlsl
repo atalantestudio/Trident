@@ -27,8 +27,8 @@ struct Ray {
 };
 
 struct Hit {
-	float t;
 	float3 position;
+	float t;
 	float3 normal;
 };
 
@@ -131,8 +131,8 @@ Hit rchit(Ray ray, uint triangleIndex, float t) {
 	);
 
 	Hit hit;
-	hit.t = t;
 	hit.position = ray.origin + ray.direction * t;
+	hit.t = t;
 	hit.normal = normal;
 
 	if (dot(ray.direction, normal) > 0.0) {

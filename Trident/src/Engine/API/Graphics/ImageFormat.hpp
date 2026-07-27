@@ -15,6 +15,8 @@ namespace Trident {
 		R8G8B8A8_SRGB,
 		R8G8B8A8_UNORM,
 
+		R32G32B32A32_SFLOAT,
+
 		// Unsigned integer formats.
 		R32_UINT,
 		R32G32_UINT,
@@ -44,7 +46,7 @@ namespace Trident {
 	}
 
 	inline bool isFixedOrFloatingPointColorFormat(ImageFormat imageFormat) {
-		static constexpr ImageFormat LAST_FIXED_OR_FLOATING_POINT_COLOR_FORMAT = ImageFormat::R8G8B8A8_UNORM;
+		static constexpr ImageFormat LAST_FIXED_OR_FLOATING_POINT_COLOR_FORMAT = ImageFormat::R32G32B32A32_SFLOAT;
 
 		DEBUG_ASSERT(imageFormat < ImageFormat::count);
 
@@ -86,6 +88,7 @@ namespace Trident {
 			sizeof(uint8) * 4,
 			sizeof(uint8) * 4,
 			sizeof(uint8) * 4,
+			sizeof(float32) * 4,
 			sizeof(uint32),
 			sizeof(uint32) * 2,
 			sizeof(float32),
@@ -102,6 +105,7 @@ namespace Trident {
 		static constexpr uint8 CHANNEL_COUNTS[] = {
 			1,
 			3,
+			4,
 			4,
 			4,
 			4,

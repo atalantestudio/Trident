@@ -12,21 +12,26 @@
 
 namespace Trident {
 	struct LightmapperOptions {
-		ImageFormat format;
+		ImageFormat atlasFormat;
 		Extent2D atlasExtent;
 	};
 
 	struct LightmapperContext {
+		ref<ImageView> gBufferPositionImageView;
+		ref<ImageView> gBufferVertexNormalImageView;
+		ref<ImageView> gBufferTriangleNormalImageView;
 		ref<ImageView> intermediateLightmapAtlasImageView;
 		ref<ImageView> lightmapAtlasImageView;
 
+		ref<Image> gBufferPositionImage;
+		ref<Image> gBufferVertexNormalImage;
+		ref<Image> gBufferTriangleNormalImage;
 		ref<Image> intermediateLightmapAtlasImage;
 		ref<Image> lightmapAtlasImage;
 
-		ref<Framebuffer> rasterizationFramebuffer;
+		ref<Framebuffer> gBufferFramebuffer;
 		ref<Framebuffer> dilationFramebuffer;
 
-		ref<Buffer> lightmapCoordinateBuffer;
 		ref<Buffer> indexBuffer;
 		ref<Buffer> vertexComponentBuffer;
 		ref<Buffer> normalComponentBuffer;
@@ -38,14 +43,7 @@ namespace Trident {
 		private:
 			struct TraceRaysArguments {
 				Extent2D atlasExtent;
-				uint32 luxelCount;
-				uint32 indexCount;
-				DispatchIndirectCommand traceRaysCommand;
-			};
-
-			struct Luxel {
-				uint32 triangleIndex;
-				uint32 coordinate;
+				uint32 triangleCount;
 			};
 
 		public:
@@ -56,32 +54,36 @@ namespace Trident {
 		private:
 			void initialize();
 
-			ref<RenderPass> createRasterizationRenderPass() const;
+			ref<RenderPass> createGBufferRenderPass() const;
 			ref<RenderPass> createDilationRenderPass() const;
 
+			ref<Image> createGBufferPositionImage() const;
+			ref<Image> createGBufferVertexNormalImage() const;
+			ref<Image> createGBufferTriangleNormalImage() const;
 			ref<Image> createIntermediateLightmapAtlasImage() const;
 			ref<Image> createLightmapAtlasImage() const;
+			ref<ImageView> createGBufferPositionImageView();
+			ref<ImageView> createGBufferVertexNormalImageView();
+			ref<ImageView> createGBufferTriangleNormalImageView();
 			ref<ImageView> createIntermediateLightmapAtlasImageView();
 			ref<ImageView> createLightmapAtlasImageView();
 
-			ref<Framebuffer> createRasterizationFramebuffer() const;
+			ref<Framebuffer> createGBufferFramebuffer() const;
 			ref<Framebuffer> createDilationFramebuffer() const;
 
-			ref<DescriptorSetLayout> createRasterizationDescriptorSetLayout() const;
+			ref<DescriptorSetLayout> createGBufferDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createTraceRaysDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createPostProcessingDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createDilationDescriptorSetLayout() const;
 
-			ref<GraphicsPipeline> createRasterizationPipeline() const;
+			ref<GraphicsPipeline> createGBufferPipeline() const;
 			ref<ComputePipeline> createTraceRaysPipeline() const;
 			ref<ComputePipeline> createIntermediateDilationPipeline() const;
 			ref<ComputePipeline> createHorizontalBilateralFilterPipeline() const;
 			ref<ComputePipeline> createVerticalBilateralFilterPipeline() const;
 			ref<GraphicsPipeline> createDilationPipeline() const;
 
-			ref<Buffer> createLightmapCoordinateBuffer(uint64 size) const;
 			ref<Buffer> createTraceRaysArgumentBuffer() const;
-			ref<Buffer> createLuxelBuffer() const;
 			ref<Buffer> createIndexBuffer(uint64 size) const;
 			ref<Buffer> createVertexComponentBuffer(uint64 size) const;
 			ref<Buffer> createNormalComponentBuffer(uint64 size) const;
@@ -94,36 +96,35 @@ namespace Trident {
 
 		private:
 			bool initialized = false;
-			ImageFormat format;
+			ImageFormat atlasFormat;
 			Extent2D atlasExtent;
 
 			sequence<ref<DescriptorSet>> descriptorSets;
 
 			ref<Buffer> traceRaysArgumentBuffer;
-			ref<Buffer> luxelBuffer;
 
 			ref<Sampler> intermediateLightmapAtlasSampler;
 
 			LightmapperContext context;
 
-			ref<GraphicsPipeline> rasterizationPipeline;
+			ref<GraphicsPipeline> gBufferPipeline;
 			ref<ComputePipeline> traceRaysPipeline;
 			ref<ComputePipeline> intermediateDilationPipeline;
 			ref<ComputePipeline> horizontalBilateralFilterPipeline;
 			ref<ComputePipeline> verticalBilateralFilterPipeline;
 			ref<GraphicsPipeline> dilationPipeline;
 
-			ref<PipelineLayout> rasterizationPipelineLayout;
+			ref<PipelineLayout> gBufferPipelineLayout;
 			ref<PipelineLayout> traceRaysPipelineLayout;
 			ref<PipelineLayout> postProcessingPipelineLayout;
 			ref<PipelineLayout> dilationPipelineLayout;
 
-			ref<DescriptorSetLayout> rasterizationDescriptorSetLayout;
+			ref<DescriptorSetLayout> gBufferDescriptorSetLayout;
 			ref<DescriptorSetLayout> traceRaysDescriptorSetLayout;
 			ref<DescriptorSetLayout> postProcessingDescriptorSetLayout;
 			ref<DescriptorSetLayout> dilationDescriptorSetLayout;
 
-			ref<RenderPass> rasterizationRenderPass;
+			ref<RenderPass> gBufferRenderPass;
 			ref<RenderPass> dilationRenderPass;
 	};
 }

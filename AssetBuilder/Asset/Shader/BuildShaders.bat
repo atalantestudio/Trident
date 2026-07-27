@@ -3,8 +3,8 @@
 set glslcpath=%1
 set inputpath=%~dp0
 
-%glslcpath% -fshader-stage=vert "%inputpath%/Lightmapper/Rasterization.vert.glsl" -o "%inputpath%/Lightmapper/Rasterization.vert.spv"
-%glslcpath% -fshader-stage=frag "%inputpath%/Lightmapper/Rasterization.frag.glsl" -o "%inputpath%/Lightmapper/Rasterization.frag.spv"
+%glslcpath% -fshader-stage=vert "%inputpath%/Lightmapper/GBuffer.vert.glsl" -o "%inputpath%/Lightmapper/GBuffer.vert.spv"
+%glslcpath% -fshader-stage=frag "%inputpath%/Lightmapper/GBuffer.frag.glsl" -o "%inputpath%/Lightmapper/GBuffer.frag.spv"
 
 %glslcpath% -fshader-stage=comp "%inputpath%/Lightmapper/TraceRays.comp.glsl" -o "%inputpath%/Lightmapper/TraceRays.comp.spv"
 %glslcpath% -fshader-stage=comp "%inputpath%/Lightmapper/IntermediateDilation.comp.glsl" -o "%inputpath%/Lightmapper/IntermediateDilation.comp.spv"

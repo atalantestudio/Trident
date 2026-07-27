@@ -193,6 +193,13 @@ namespace Trident {
 			VkSubpassDependency& subpassDependency = subpassDependencies[subpassDependencyIndex];
 			subpassDependency.srcSubpass = dependency.sourceSubpassIndex;
 			subpassDependency.dstSubpass = dependency.destinationSubpassIndex;
+
+			// TODO(graphics/vk/render-pass/subpass-dependency)
+			// Add support for dependencies between subpasses. E.g. if followed by a compute pass that reads the attachment:
+			// subpassDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			// subpassDependency.dstStageMask = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+			// subpassDependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+			// subpassDependency.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 			subpassDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 			subpassDependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 			subpassDependency.srcAccessMask = 0;
