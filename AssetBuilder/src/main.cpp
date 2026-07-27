@@ -9,6 +9,8 @@
 #include "AssetBuilder/Process/Material/Lightmapped/TileFloorMaterialProcess.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/WhiteMaterialProcess.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/WoodDoorMaterialProcess.hpp"
+#include "AssetBuilder/Process/Material/PBR/FoldingWoodenStoolMaterialProcess.hpp"
+#include "AssetBuilder/Process/Material/PBR/GallineraTableMaterialProcess.hpp"
 #include "AssetBuilder/Process/Material/PBR/RubberDuckToyMaterialProcess.hpp"
 #include "AssetBuilder/Process/Scene/BoxesSceneProcess.hpp"
 #include "AssetBuilder/Process/Scene/Boxes3DSceneProcess.hpp"
@@ -17,6 +19,7 @@
 #include "AssetBuilder/Process/Scene/CirclesSceneProcess.hpp"
 #include "AssetBuilder/Process/Scene/DominosSceneProcess.hpp"
 #include "AssetBuilder/Process/Scene/EdgeContactSceneProcess.hpp"
+#include "AssetBuilder/Process/Scene/GallineraTableSceneProcess.hpp"
 #include "AssetBuilder/Process/Scene/HallSceneProcess.hpp"
 #include "AssetBuilder/Process/Scene/LemonsSceneProcess.hpp"
 #include "AssetBuilder/Process/Scene/PlayerMovementSceneProcess.hpp"
@@ -60,6 +63,8 @@ namespace Trident {
 
 				registerProcess<BuildImageAssetProcess>(&assetLibrary);
 
+				registerProcess<FoldingWoodenStoolMaterialProcess>(&assetLibrary);
+				registerProcess<GallineraTableMaterialProcess>(&assetLibrary);
 				registerProcess<PlasterCeilingMaterialProcess>(&assetLibrary);
 				registerProcess<PlasterWallMaterialProcess>(&assetLibrary);
 				registerProcess<RubberDuckToyMaterialProcess>(&assetLibrary);
@@ -81,6 +86,7 @@ namespace Trident {
 				registerProcess<BoxStackingSceneProcess>(&assetLibrary);
 				registerProcess<CabinSceneProcess>(&assetLibrary);
 				registerProcess<EdgeContactSceneProcess>(&assetLibrary);
+				registerProcess<GallineraTableSceneProcess>(&assetLibrary);
 				registerProcess<HallSceneProcess>(&assetLibrary);
 				registerProcess<LemonsSceneProcess>(&assetLibrary);
 				registerProcess<PlayerMovementSceneProcess>(&assetLibrary);
