@@ -320,7 +320,7 @@ namespace Trident {
 
 						const range<uint32, uint32> indexRange = geometry.getVertexPositionIndexRange();
 
-						descriptorSets[1] = materialDescriptorSets[materialShaderIndex];
+						descriptorSets[1] = descriptorSetsPerMaterialShader[materialShaderIndex][materialComponent.materialIndex - 1];
 
 						commandEncoder->bindGraphicsPipeline(materialPipelines[materialShaderIndex]);
 						commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
@@ -507,7 +507,7 @@ namespace Trident {
 
 			ref<DescriptorSet> staticGeometryDescriptorSet;
 			ref<DescriptorSet> forwardDescriptorSet;
-			sequence<ref<DescriptorSet>> materialDescriptorSets;
+			sequence<sequence<ref<DescriptorSet>>> descriptorSetsPerMaterialShader;
 
 			sequence<ref<PipelineLayout>> materialPipelineLayouts;
 			ref<PipelineLayout> debugHullWireframePipelineLayout;

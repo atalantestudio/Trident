@@ -56,8 +56,9 @@ namespace Trident {
 		const sequence<MaterialPipelineBase> materialPipelineBases = getMaterialPipelineBases();
 
 		sequence<sequence<sequence<MaterialDescriptorImage>>> materialDescriptorImages(materialShaderCount);
-		sequence<ref<DescriptorSetLayout>> materialDescriptorSetLayouts(materialShaderCount);
+		std::vector<ref<DescriptorSetLayout>> materialDescriptorSetLayouts;
 
+		descriptorSetsPerMaterialShader = sequence<sequence<ref<DescriptorSet>>>(materialShaderCount);
 		materialPipelineLayouts = sequence<ref<PipelineLayout>>(materialShaderCount);
 		materialPipelines = sequence<ref<GraphicsPipeline>>(materialShaderCount);
 		materialImages = sequence<sequence<sequence<ref<Image>>>>(materialShaderCount);
@@ -210,12 +211,12 @@ namespace Trident {
 				materialPipelineDescriptor.name = materialName;
 			#endif
 
-			materialDescriptorSetLayouts[materialShaderIndex] = createDescriptorSetLayout(bindings);
+			const ref<DescriptorSetLayout> descriptorSetLayout = createDescriptorSetLayout(bindings);
 
 			materialPipelineLayoutDescriptor.descriptorSetLayouts = sequence<ref<DescriptorSetLayout>>(materialPipelineBase.descriptorSetLayouts.count() + 1);
 
 			std::copy(materialPipelineBase.descriptorSetLayouts.begin(), materialPipelineBase.descriptorSetLayouts.end(), &materialPipelineLayoutDescriptor.descriptorSetLayouts[0]);
-			std::copy_n(&materialDescriptorSetLayouts[materialShaderIndex], 1, &materialPipelineLayoutDescriptor.descriptorSetLayouts[materialPipelineBase.descriptorSetLayouts.count()]);
+			*(materialPipelineLayoutDescriptor.descriptorSetLayouts.end() - 1) = descriptorSetLayout;
 
 			materialPipelineLayouts[materialShaderIndex] = createPipelineLayout(materialPipelineLayoutDescriptor);
 
@@ -240,10 +241,39 @@ namespace Trident {
 
 			materialPipelines[materialShaderIndex] = createGraphicsPipeline(materialPipelineDescriptor);
 
+			const uint64 descriptorSetLayoutOffset = materialDescriptorSetLayouts.size();
+
+			materialDescriptorSetLayouts.resize(descriptorSetLayoutOffset + assetCount);
+
+			std::fill_n(&materialDescriptorSetLayouts[descriptorSetLayoutOffset], assetCount, descriptorSetLayout);
+
 			materialShaderIndex += 1;
 		}
 
-		materialDescriptorSets = device->allocateDescriptorSets(materialDescriptorSetLayouts);
+		const sequence<ref<DescriptorSet>> materialShaderDescriptorSets = device->allocateDescriptorSets(view<ref<DescriptorSetLayout>>(&materialDescriptorSetLayouts[0], materialDescriptorSetLayouts.size()));
+
+		uint32 descriptorSetOffset = 0;
+
+		materialShaderIndex = 0;
+
+		while (materialShaderIndex < materialShaderCount) {
+			const MaterialShader& materialShader = sceneAsset->materialShaders[materialShaderIndex];
+
+			uint32 assetCount = materialShader.materialAssetRange.count;
+
+			// TODO(forward): Get the correct number of materials per shader.
+			if (materialShaderIndex > 0) {
+				assetCount = max(1u, assetCount);
+			}
+
+			sequence<ref<DescriptorSet>>& descriptorSets = descriptorSetsPerMaterialShader[materialShaderIndex];
+			descriptorSets = sequence<ref<DescriptorSet>>(assetCount);
+
+			std::copy_n(&materialShaderDescriptorSets[descriptorSetOffset], assetCount, &descriptorSets[0]);
+
+			descriptorSetOffset += assetCount;
+			materialShaderIndex += 1;
+		}
 
 		if (imageStagingBufferSize == 0) {
 			// TODO(graphics/dx12/empty-descriptor-set): Fix crash in DX12 when binding empty descriptor sets.
@@ -368,7 +398,7 @@ namespace Trident {
 					}
 
 					WriteDescriptorSet& writeDescriptorSet = writeDescriptorSets[materialReferenceBindingImageIndex];
-					writeDescriptorSet.descriptorSet = materialDescriptorSets[materialShaderIndex];
+					writeDescriptorSet.descriptorSet = descriptorSetsPerMaterialShader[materialShaderIndex][materialIndex];
 					writeDescriptorSet.bindingIndex = bindingIndex;
 					writeDescriptorSet.descriptorImages = descriptorImages[materialReferenceBindingImageIndex];
 

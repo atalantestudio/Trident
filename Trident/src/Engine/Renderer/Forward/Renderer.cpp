@@ -25,22 +25,21 @@
 namespace Trident {
 	void ForwardRenderer::renderStaticGeometry(ref<CommandEncoder> commandEncoder) const {
 		const view<StaticMaterial3D> staticMaterials = scene->getAsset()->getStaticMaterials();
+		const view<ref<DescriptorSet>> materialShaderDescriptorSets = descriptorSetsPerMaterialShader[0];
 
 		commandEncoder->bindGraphicsPipeline(materialPipelines[0]);
 		commandEncoder->bindVertexBuffer(0, staticIndexBuffer, 0, sizeof(StaticVertex3D));
 		commandEncoder->bindDescriptorSets(materialPipelineLayouts[0], 0, staticGeometryDescriptorSet);
 
-		uint32 staticMaterialIndex = 0;
+		uint32 materialIndex = 0;
 
-		while (staticMaterialIndex < staticMaterials.count()) {
-			const StaticMaterial3D& staticMaterial = staticMaterials[staticMaterialIndex];
+		while (materialIndex < staticMaterials.count()) {
+			const StaticMaterial3D& staticMaterial = staticMaterials[materialIndex];
 
-			// TODO(forward): Fix descriptor sets not being as many as the materials.
-			commandEncoder->bindDescriptorSets(materialPipelineLayouts[0], 1, materialDescriptorSets[0]);
-
+			commandEncoder->bindDescriptorSets(materialPipelineLayouts[0], 1, materialShaderDescriptorSets[materialIndex]);
 			commandEncoder->draw(staticMaterial.indexRange.count, 1, staticMaterial.indexRange.offset, 0);
 
-			staticMaterialIndex += 1;
+			materialIndex += 1;
 		}
 	}
 }
