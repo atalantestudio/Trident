@@ -17,7 +17,10 @@ layout(location = 1) out vec4 triangleNormal;
 layout(location = 2) out vec4 vertexNormal;
 
 void main() {
+	vec3 luxelSize = max(abs(dFdx(interstage.position)), abs(dFdy(interstage.position)));
+	float diagonalLuxelSize = max(max(luxelSize.x, luxelSize.y), luxelSize.z) * sqrt(2.0);
+
 	position = vec4(interstage.position, interstage.triangleIndex);
-	triangleNormal = vec4(normalize(interstage.triangleNormal), 0.0);
+	triangleNormal = vec4(normalize(interstage.triangleNormal), diagonalLuxelSize);
 	vertexNormal = vec4(normalize(interstage.vertexNormal), 0.0);
 }

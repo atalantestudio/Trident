@@ -48,7 +48,7 @@ namespace Trident {
 						},
 						.materialIndex = materialIndex,
 						.lightmap = {
-							.luxelScale = {1.0f, 1.0f},
+							.luxelScale = {4.0f, 4.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 						.carvings = {},
@@ -56,6 +56,50 @@ namespace Trident {
 					{
 						.translation = {0.0f, 0.0f, 0.0f},
 						.axis = {1.0f, 0.0f, 0.0f},
+						.angle = radians(-90.0_deg),
+					}
+				);
+
+				builder.placeSurface(
+					{
+						.geometry = builder.createWallGeometry({128.0f, 64.0f}),
+						.textureFiltering = {
+							.translation = {0.0f, 0.0f},
+							.rotation = 0.0f,
+							.scale = {1.0f, 1.0f},
+						},
+						.materialIndex = materialIndex,
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
+						.carvings = {},
+					},
+					{
+						.translation = {0.0f, 32.0f, 64.0f},
+						.axis = {0.0f, 1.0f, 0.0f},
+						.angle = 0.0_rad,
+					}
+				);
+
+				builder.placeSurface(
+					{
+						.geometry = builder.createWallGeometry({128.0f, 64.0f}),
+						.textureFiltering = {
+							.translation = {0.0f, 0.0f},
+							.rotation = 0.0f,
+							.scale = {1.0f, 1.0f},
+						},
+						.materialIndex = materialIndex,
+						.lightmap = {
+							.luxelScale = {4.0f, 4.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
+						.carvings = {},
+					},
+					{
+						.translation = {64.0f, 32.0f, 0.0f},
+						.axis = {0.0f, 1.0f, 0.0f},
 						.angle = radians(-90.0_deg),
 					}
 				);

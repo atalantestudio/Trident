@@ -896,6 +896,7 @@ namespace Trident {
 			#endif
 		});
 
+		// TODO(graphics/command-encoder/bind-resources): Ensure that descriptor sets and vertex buffers, if any, are always bound after the pipeline.
 		commandEncoder->begin();
 		commandEncoder->beginRenderPass({
 			.framebuffer = context.gBufferFramebuffer,
@@ -910,20 +911,10 @@ namespace Trident {
 		commandEncoder->bindGraphicsPipeline(gBufferPipeline);
 		commandEncoder->bindVertexBuffer(0, context.indexBuffer, 0, sizeof(StaticVertex3D));
 		commandEncoder->bindDescriptorSets(gBufferPipelineLayout, 0, descriptorSets[0]);
-		commandEncoder->draw(vertexCount, 1, 0, 0);
+		commandEncoder->draw(vertexCount, 25, 0, 0);
 		commandEncoder->endRenderPass();
 
-		// TODO(graphics/dx12/end-render-pass): Automatically transition the attachments to their final layout.
-
-		ImageMemoryBarrier imageMemoryBarrier = {
-			.image = context.intermediateLightmapAtlasImage,
-			.newLayout = ImageLayout::GENERAL,
-			.newAccess = Access::SHADER_WRITE,
-		};
-
-		commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
-
-		// TODO(graphics/render-pass/subpass-dependency): Add support for subpass dependencies. Individual barriers are used for now.
+		// TODO(graphics/render-pass/subpass): Add support for subpass dependencies.
 		{
 			const sequence<ImageMemoryBarrier> imageMemoryBarriers = {
 				{
@@ -941,6 +932,11 @@ namespace Trident {
 					.newLayout = ImageLayout::GENERAL,
 					.newAccess = Access::SHADER_READ,
 				},
+				{
+					.image = context.intermediateLightmapAtlasImage,
+					.newLayout = ImageLayout::GENERAL,
+					.newAccess = Access::SHADER_WRITE,
+				},
 			};
 
 			commandEncoder->insertMemoryBarriers({}, imageMemoryBarriers);
@@ -950,28 +946,24 @@ namespace Trident {
 		commandEncoder->bindDescriptorSets(traceRaysPipelineLayout, 0, descriptorSets[1]);
 		commandEncoder->dispatch(workGroupX, workGroupY, 1);
 
-		// TODO(graphics/dx12/vulkan): This barrier's layout is the same as the current layout but Vulkan needs a sync point after the raytracing.
-		imageMemoryBarrier = {
+		ImageMemoryBarrier imageMemoryBarrier = {
 			.image = context.intermediateLightmapAtlasImage,
 			.newLayout = ImageLayout::GENERAL,
 			.newAccess = Access::SHADER_READ | Access::SHADER_WRITE,
 		};
 
-		// TODO(graphics/command-encoder): Add support for pipeline barriers.
 		commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
 
 		commandEncoder->bindComputePipeline(intermediateDilationPipeline);
 		commandEncoder->bindDescriptorSets(postProcessingPipelineLayout, 0, descriptorSets[2]);
 		commandEncoder->dispatch(workGroupX, workGroupY, 1);
 
-		// TODO(graphics/command-encoder): Add support for pipeline barriers.
 		commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
 
 		commandEncoder->bindComputePipeline(horizontalBilateralFilterPipeline);
 		commandEncoder->bindDescriptorSets(postProcessingPipelineLayout, 0, descriptorSets[2]);
 		commandEncoder->dispatch(workGroupX, workGroupY, 1);
 
-		// TODO(graphics/command-encoder): Add support for pipeline barriers.
 		commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
 
 		commandEncoder->bindComputePipeline(verticalBilateralFilterPipeline);
@@ -997,7 +989,7 @@ namespace Trident {
 		commandEncoder->draw(3, 1, 0, 0);
 		commandEncoder->endRenderPass();
 
-		// TODO(graphics/dx12/end-render-pass): Automatically transition the attachments to their final layout.
+		// TODO(graphics/render-pass/subpass): Add support for subpass dependencies.
 		if (Renderer::getGraphicsApi() == GraphicsAPI::DX12) {
 			imageMemoryBarrier = {
 				.image = context.lightmapAtlasImage,

@@ -595,8 +595,8 @@ namespace Trident {
 					const ImageMemoryBarrier& imageMemoryBarrier = imageMemoryBarriers[imageMemoryBarrierIndex];
 
 					if (imageMemoryBarrier.image != nullptr) {
-						if (imageMemoryBarrier.newLayout == imageMemoryBarrier.image->getLayout()) {
-							VALIDATION_WARNING("imageMemoryBarriers[[]].newLayout is the same as the current image layout.", imageMemoryBarrierIndex);
+						if (imageMemoryBarrier.newLayout == imageMemoryBarrier.image->getLayout() && imageMemoryBarrier.newAccess == imageMemoryBarrier.image->getAccess()) {
+							VALIDATION_WARNING("imageMemoryBarriers[[]] won't change the layout and access flags of the current image.", imageMemoryBarrierIndex);
 						}
 					}
 					else {

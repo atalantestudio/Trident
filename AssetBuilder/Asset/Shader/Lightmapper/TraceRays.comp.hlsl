@@ -1,17 +1,16 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-// TODO(asset-builder/lightmapper/dx12): Update to use the G-Buffer.
-
 struct TraceRaysArguments {
 	uint2 atlasSize;
-	uint luxelCount;
 	uint triangleCount;
-};
-
-struct Luxel {
-	uint triangleIndex;
-	uint coordinate;
+	uint _0;
+	float3 skyColor;
+	uint _1;
+	float3 sunDirection;
+	uint _2;
+	float3 sunColor;
+	float sunIntensity;
 };
 
 struct Vertex {
@@ -22,9 +21,13 @@ struct Vertex {
 	uint _;
 };
 
+struct TriangleVertex {
+	float2 lightmapCoordinate;
+	float3 position;
+};
+
 struct Triangle {
-	Vertex vertices[3];
-	float3 normal;
+	TriangleVertex vertices[3];
 };
 
 struct Ray {
@@ -35,35 +38,45 @@ struct Ray {
 struct Hit {
 	float3 position;
 	float distance;
-	float3 normal;
+	float3 triangleNormal;
+	float3 vertexNormal;
 };
 
 static const float FLOAT32_MAX = 4294967295.0;
 static const uint SAMPLE_COUNT = 1024;
 static const uint BOUNCE_COUNT = 4;
-static const float3 SUN_DIRECTION = float3(-1.0, -1.0, -1.0);
-static const float3 SKY_COLOR = float3(0.0, 0.0, 0.0);
+static const float ADAPTIVE_BIAS = 1e-4;
+static const uint FRONT_FACE = 0;
+static const uint BACK_FACE = 1;
 
 StructuredBuffer<TraceRaysArguments> traceRaysArguments : register(t0);
-StructuredBuffer<Luxel> luxels : register(t1);
-StructuredBuffer<Vertex> indexBuffer : register(t2);
-StructuredBuffer<float> vertexBuffer : register(t3);
+StructuredBuffer<Vertex> indexBuffer : register(t1);
+StructuredBuffer<float> vertexBuffer : register(t2);
+Texture2D<float4> gBufferPositionImage : register(t3);
+Texture2D<float4> gBufferTriangleNormalImage : register(t4);
+Texture2D<float4> gBufferVertexNormalImage : register(t5);
 RWTexture2D<float4> intermediateLightmapAtlas : register(u0);
 
-float parallelogramArea(float2 a, float2 b) {
-	return a.x * b.y - a.y * b.x;
-}
+Triangle loadTriangle(uint triangleIndex) {
+	uint indexOffset = triangleIndex * 3;
 
-float3 calculateBarycentricCoordinate(float2 a, float2 b, float2 c, float2 p) {
-	float2 ab = b - a;
-	float2 ac = c - a;
-	float2 ap = p - a;
-	float inverseArea = 1.0 / parallelogramArea(ab, ac);
-	float v = parallelogramArea(ap, ac) * inverseArea;
-	float w = parallelogramArea(ab, ap) * inverseArea;
-	float u = 1.0 - v - w;
+	Vertex indexA = indexBuffer[indexOffset + 0];
+	Vertex indexB = indexBuffer[indexOffset + 1];
+	Vertex indexC = indexBuffer[indexOffset + 2];
 
-	return float3(u, v, w);
+	uint vertexOffsetA = indexA.vertexIndex * 3;
+	uint vertexOffsetB = indexB.vertexIndex * 3;
+	uint vertexOffsetC = indexC.vertexIndex * 3;
+
+	Triangle triangle_;
+	triangle_.vertices[0].lightmapCoordinate = indexA.lightmapCoordinate;
+	triangle_.vertices[0].position = float3(vertexBuffer[vertexOffsetA + 0], vertexBuffer[vertexOffsetA + 1], vertexBuffer[vertexOffsetA + 2]);
+	triangle_.vertices[1].lightmapCoordinate = indexB.lightmapCoordinate;
+	triangle_.vertices[1].position = float3(vertexBuffer[vertexOffsetB + 0], vertexBuffer[vertexOffsetB + 1], vertexBuffer[vertexOffsetB + 2]);
+	triangle_.vertices[2].lightmapCoordinate = indexC.lightmapCoordinate;
+	triangle_.vertices[2].position = float3(vertexBuffer[vertexOffsetC + 0], vertexBuffer[vertexOffsetC + 1], vertexBuffer[vertexOffsetC + 2]);
+
+	return triangle_;
 }
 
 void pcgHash(inout uint seed) {
@@ -73,81 +86,87 @@ void pcgHash(inout uint seed) {
 	seed = (word >> 22) ^ word;
 }
 
-float randomFloat(inout uint seed) {
+float randomScalar(inout uint seed) {
 	pcgHash(seed);
 
 	return seed / FLOAT32_MAX;
 }
 
 float3 randomUnitDirection(inout uint seed) {
-	return normalize(float3(randomFloat(seed), randomFloat(seed), randomFloat(seed)) * 2.0 - 1.0);
+	return normalize(float3(randomScalar(seed), randomScalar(seed), randomScalar(seed)) * 2.0 - 1.0);
 }
 
-Triangle loadTriangle(uint triangleIndex) {
-	uint indexOffset = triangleIndex * 3;
+bool rayTriangleIntersection(Ray ray, Triangle triangle_, uint face, inout float distance, inout float3 barycentricCoordinate) {
+	const float E = 1e-8;
+	const float E2 = 1e-4;
 
-	Triangle triangle_;
-	triangle_.vertices[0] = indexBuffer[indexOffset + 0];
-	triangle_.vertices[1] = indexBuffer[indexOffset + 1];
-	triangle_.vertices[2] = indexBuffer[indexOffset + 2];
-
-	uint vertexAOffset = triangle_.vertices[0].vertexIndex * 3;
-	uint vertexBOffset = triangle_.vertices[1].vertexIndex * 3;
-	uint vertexCOffset = triangle_.vertices[2].vertexIndex * 3;
-	float3 a = float3(vertexBuffer[vertexAOffset + 0], vertexBuffer[vertexAOffset + 1], vertexBuffer[vertexAOffset + 2]);
-	float3 b = float3(vertexBuffer[vertexBOffset + 0], vertexBuffer[vertexBOffset + 1], vertexBuffer[vertexBOffset + 2]);
-	float3 c = float3(vertexBuffer[vertexCOffset + 0], vertexBuffer[vertexCOffset + 1], vertexBuffer[vertexCOffset + 2]);
-
-	triangle_.normal = normalize(cross(b - a, c - a));
-
-	return triangle_;
-}
-
-bool rayTriangleIntersection(Ray ray, Triangle triangle_, inout float distance) {
-	if (dot(ray.direction, triangle_.normal) > 1e-4) {
-		return false;
-	}
-
-	uint vertexAOffset = triangle_.vertices[0].vertexIndex * 3;
-	uint vertexBOffset = triangle_.vertices[1].vertexIndex * 3;
-	uint vertexCOffset = triangle_.vertices[2].vertexIndex * 3;
-	float3 a = float3(vertexBuffer[vertexAOffset + 0], vertexBuffer[vertexAOffset + 1], vertexBuffer[vertexAOffset + 2]);
-	float3 b = float3(vertexBuffer[vertexBOffset + 0], vertexBuffer[vertexBOffset + 1], vertexBuffer[vertexBOffset + 2]);
-	float3 c = float3(vertexBuffer[vertexCOffset + 0], vertexBuffer[vertexCOffset + 1], vertexBuffer[vertexCOffset + 2]);
+	float3 a = triangle_.vertices[0].position;
+	float3 b = triangle_.vertices[1].position;
+	float3 c = triangle_.vertices[2].position;
 	float3 ab = b - a;
 	float3 ac = c - a;
-	float3 pvec = cross(ray.direction, ac);
-	float d = dot(ab, pvec);
+	float3 p = cross(ray.direction, ac);
+	float d = dot(ab, p);
 
-	if (abs(d) < 1e-4) {
-		return false;
+	bool test;
+	bool faceTest;
+
+	// TODO(asset-builder/lightmapper): Refactor.
+	if (face == FRONT_FACE) {
+		faceTest = d < E;
+	}
+	else {
+		faceTest = d >= E;
 	}
 
-	float invD = 1.0 / d;
-	float3 tvec = ray.origin - a;
-	float u = dot(tvec, pvec) * invD;
+	if (faceTest) {
+		test = false;
+	}
+	else {
+		float inverseD = 1.0 / d;
+		float3 t = ray.origin - a;
+		float w = dot(t, p) * inverseD;
 
-	if (u < -1e-4 || u > 1.0 + 1e-4) {
-		return false;
+		if (w < -E2 || w > 1.0 + E2) {
+			test = false;
+		}
+		else {
+			float3 q = cross(t, ab);
+			float v = dot(ray.direction, q) * inverseD;
+
+			if (v < -E2 || v + w > 1.0 + E2) {
+				test = false;
+			}
+			else {
+				float u = 1.0 - v - w;
+
+				barycentricCoordinate = float3(u, v, w);
+
+				distance = dot(ac, q) * inverseD;
+
+				test = distance > 0.0;
+			}
+		}
 	}
 
-	float3 qvec = cross(tvec, ab);
-	float v = dot(ray.direction, qvec) * invD;
-
-	if (v < -1e-4 || u + v > 1.0 + 1e-4) {
-		return false;
-	}
-
-	distance = dot(ac, qvec) * invD;
-
-	return distance > 1e-4;
+	return test;
 }
 
-Hit rchit(Ray ray, Triangle triangle_, float distance) {
+Hit rchit(Ray ray, Triangle triangle_, float distance, float3 barycentricCoordinate) {
+	float2 lightmapCoordinate = (
+		triangle_.vertices[0].lightmapCoordinate * barycentricCoordinate.x +
+		triangle_.vertices[1].lightmapCoordinate * barycentricCoordinate.y +
+		triangle_.vertices[2].lightmapCoordinate * barycentricCoordinate.z
+	) * traceRaysArguments[0].atlasSize;
+
+	float4 triangleNormalData = gBufferTriangleNormalImage[lightmapCoordinate];
+	float4 vertexNormalData = gBufferVertexNormalImage[lightmapCoordinate];
+
 	Hit hit;
 	hit.position = ray.origin + ray.direction * distance;
 	hit.distance = distance;
-	hit.normal = triangle_.normal;
+	hit.triangleNormal = triangleNormalData.rgb;
+	hit.vertexNormal = vertexNormalData.rgb;
 
 	return hit;
 }
@@ -159,64 +178,71 @@ Hit rmiss() {
 	return hit;
 }
 
-Hit rint(Ray ray) {
+Hit rint(Ray ray, uint face) {
 	float closestDistance = FLOAT32_MAX;
 	uint intersectingTriangleIndex = traceRaysArguments[0].triangleCount;
 	Triangle intersectingTriangle;
+	float3 intersectingBarycentricCoordinate;
 	uint triangleIndex = 0;
 
 	while (triangleIndex < traceRaysArguments[0].triangleCount) {
 		Triangle triangle_ = loadTriangle(triangleIndex);
-		float distance;
+		float distance = 0.0;
+		float3 barycentricCoordinate = float3(0.0, 0.0, 0.0);
 
-		if (rayTriangleIntersection(ray, triangle_, distance)) {
+		if (rayTriangleIntersection(ray, triangle_, face, distance, barycentricCoordinate)) {
 			if (distance < closestDistance) {
 				closestDistance = distance;
 				intersectingTriangleIndex = triangleIndex;
 				intersectingTriangle = triangle_;
+				intersectingBarycentricCoordinate = barycentricCoordinate;
 			}
 		}
 
 		triangleIndex += 1;
 	}
 
-	if (intersectingTriangleIndex < traceRaysArguments[0].triangleCount) {
-		return rchit(ray, intersectingTriangle, closestDistance);
+	Hit hit;
+
+	if (intersectingTriangleIndex >= traceRaysArguments[0].triangleCount) {
+		hit = rmiss();
+	}
+	else {
+		hit = rchit(ray, intersectingTriangle, closestDistance, intersectingBarycentricCoordinate);
 	}
 
-	return rmiss();
+	return hit;
 }
 
-float3 rgen(Hit hit, inout uint seed) {
-	Ray ray;
-
-	Ray shadowRay;
-	shadowRay.direction = normalize(-SUN_DIRECTION);
-
-	Hit shadowHit;
+float3 rgen(Hit primaryHit, inout uint seed) {
+	// TODO(asset-builder/lightmapper): Use the albedo of the triangle being hit.
+	float3 albedo = traceRaysArguments[0].skyColor;
 
 	float3 radiance = float3(0.0, 0.0, 0.0);
 	float3 throughput = float3(1.0, 1.0, 1.0);
 	uint bounceIndex = 0;
 
 	while (bounceIndex < BOUNCE_COUNT) {
-		ray.origin = hit.position + hit.normal * 1e-4;
-		ray.direction = normalize(hit.normal + randomUnitDirection(seed));
+		Ray primaryRay;
+		primaryRay.origin = primaryHit.position + primaryHit.vertexNormal * ADAPTIVE_BIAS;
+		primaryRay.direction = normalize(primaryHit.vertexNormal + randomUnitDirection(seed));
 
-		hit = rint(ray);
+		primaryHit = rint(primaryRay, FRONT_FACE);
 
-		if (hit.distance < 0.0) {
-			radiance += throughput * SKY_COLOR;
+		Ray secondaryRay;
+		secondaryRay.origin = primaryRay.origin;
+		secondaryRay.direction = normalize(traceRaysArguments[0].sunDirection);
+
+		Hit secondaryHit = rint(secondaryRay, FRONT_FACE);
+
+		radiance += throughput * (secondaryHit.distance < 0.0) * traceRaysArguments[0].sunColor * traceRaysArguments[0].sunIntensity;
+		throughput *= albedo;
+
+		if (primaryHit.distance < 0.0) {
+			radiance += throughput * traceRaysArguments[0].skyColor;
 
 			break;
 		}
-
-		shadowRay.origin = ray.origin;
-
-		shadowHit = rint(shadowRay);
-
-		radiance += throughput * (shadowHit.distance < 0.0);
-		throughput *= 0.9;
 
 		bounceIndex += 1;
 	}
@@ -224,33 +250,76 @@ float3 rgen(Hit hit, inout uint seed) {
 	return radiance;
 }
 
-[numthreads(16, 1, 1)]
-void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
-	uint luxelIndex = globalInvocationIndex.x;
+float3 adjustSamplePosition(float3 position, float3 triangleNormal, float diagonalLuxelSize) {
+	float3 d0 = normalize(cross(position, triangleNormal));
+	float3 d1 = normalize(cross(d0, triangleNormal));
+	float rayLength = diagonalLuxelSize * 0.5;
 
-	if (luxelIndex >= traceRaysArguments[0].luxelCount) {
+	Ray ray;
+	ray.origin = position + triangleNormal * ADAPTIVE_BIAS;
+	ray.direction = d0;
+
+	Hit hit = rint(ray, BACK_FACE);
+
+	if (hit.distance > 0.0 && hit.distance < rayLength) {
+		return position + ray.direction * hit.distance + hit.triangleNormal * ADAPTIVE_BIAS;
+	}
+
+	ray.direction = d1;
+
+	hit = rint(ray, BACK_FACE);
+
+	if (hit.distance > 0.0 && hit.distance < rayLength) {
+		return position + ray.direction * hit.distance + hit.triangleNormal * ADAPTIVE_BIAS;
+	}
+
+	ray.direction = -d0;
+	hit = rint(ray, BACK_FACE);
+
+	if (hit.distance > 0.0 && hit.distance < rayLength) {
+		return position + ray.direction * hit.distance + hit.triangleNormal * ADAPTIVE_BIAS;
+	}
+
+	ray.direction = -d1;
+	hit = rint(ray, BACK_FACE);
+
+	if (hit.distance > 0.0 && hit.distance < rayLength) {
+		return position + ray.direction * hit.distance + hit.triangleNormal * ADAPTIVE_BIAS;
+	}
+
+	return position;
+}
+
+[numthreads(16, 16, 1)]
+void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
+	uint2 coordinate = globalInvocationIndex.xy;
+
+	if (coordinate.x >= traceRaysArguments[0].atlasSize.x || coordinate.y >= traceRaysArguments[0].atlasSize.y) {
 		return;
 	}
 
-	Luxel luxel = luxels[luxelIndex];
-
-	uint2 coordinate = uint2(luxel.coordinate >> 16, luxel.coordinate & 0xffff);
 	uint seed = coordinate.y * traceRaysArguments[0].atlasSize.x + coordinate.x;
-	Triangle triangle_ = loadTriangle(luxel.triangleIndex);
-	uint vertexAOffset = triangle_.vertices[0].vertexIndex * 3;
-	uint vertexBOffset = triangle_.vertices[1].vertexIndex * 3;
-	uint vertexCOffset = triangle_.vertices[2].vertexIndex * 3;
-	float3 vertexA = float3(vertexBuffer[vertexAOffset + 0], vertexBuffer[vertexAOffset + 1], vertexBuffer[vertexAOffset + 2]);
-	float3 vertexB = float3(vertexBuffer[vertexBOffset + 0], vertexBuffer[vertexBOffset + 1], vertexBuffer[vertexBOffset + 2]);
-	float3 vertexC = float3(vertexBuffer[vertexCOffset + 0], vertexBuffer[vertexCOffset + 1], vertexBuffer[vertexCOffset + 2]);
-	float2 luxelCoordinate = (coordinate + float2(0.5, 0.5)) / traceRaysArguments[0].atlasSize;
-	float3 luxelBarycentricCoordinate = calculateBarycentricCoordinate(triangle_.vertices[0].lightmapCoordinate, triangle_.vertices[1].lightmapCoordinate, triangle_.vertices[2].lightmapCoordinate, luxelCoordinate);
-	float3 radiance = float3(0.0, 0.0, 0.0);
-	uint sampleIndex = 0;
+	float4 positionData = gBufferPositionImage[coordinate];
+	float4 triangleNormalData = gBufferTriangleNormalImage[coordinate];
+	float4 vertexNormalData = gBufferVertexNormalImage[coordinate];
+
+	float3 position = positionData.rgb;
+	uint triangleIndex = uint(positionData.a);
+	float3 triangleNormal = triangleNormalData.rgb;
+	float diagonalLuxelSize = triangleNormalData.a;
+	float3 vertexNormal = vertexNormalData.rgb;
+
+	if (triangleIndex == 0) {
+		return;
+	}
 
 	Hit hit;
-	hit.position = vertexA * luxelBarycentricCoordinate.x + vertexB * luxelBarycentricCoordinate.y + vertexC * luxelBarycentricCoordinate.z;
-	hit.normal = triangle_.normal;
+	hit.position = adjustSamplePosition(position, triangleNormal, diagonalLuxelSize);
+	hit.triangleNormal = triangleNormal;
+	hit.vertexNormal = vertexNormal;
+
+	float3 radiance = float3(0.0, 0.0, 0.0);
+	uint sampleIndex = 0;
 
 	while (sampleIndex < SAMPLE_COUNT) {
 		radiance += rgen(hit, seed);

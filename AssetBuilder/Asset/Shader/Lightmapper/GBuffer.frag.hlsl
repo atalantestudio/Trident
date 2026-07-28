@@ -1,49 +1,28 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-struct DispatchIndirectCommand {
-	uint x;
-	uint y;
-	uint z;
-};
-
-struct TraceRaysArguments {
-	uint2 atlasSize;
-	uint luxelCount;
-	uint triangleCount;
-	DispatchIndirectCommand traceRaysCommand;
-};
-
-struct Luxel {
-	uint triangleIndex;
-	uint coordinate;
-};
-
 struct Interstage {
-	float4 position : SV_Position;
-	nointerpolation uint triangleIndex : VERTEX_OUTPUT_ATTRIBUTE1;
-	float2 coordinate : VERTEX_OUTPUT_ATTRIBUTE2;
+	float4 coordinate : SV_Position;
+	float3 position : VERTEX_OUTPUT_ATTRIBUTE1;
+	nointerpolation uint triangleIndex : VERTEX_OUTPUT_ATTRIBUTE2;
+	nointerpolation float3 triangleNormal : VERTEX_OUTPUT_ATTRIBUTE3;
+	float3 vertexNormal : VERTEX_OUTPUT_ATTRIBUTE4;
 };
 
-static const uint RAYTRACER_WORKGROUP_SIZE = 16;
+struct FragmentOutput {
+	float4 position : SV_Target0;
+	float4 triangleNormal : SV_Target1;
+	float4 vertexNormal : SV_Target2;
+};
 
-RWStructuredBuffer<TraceRaysArguments> traceRaysArguments : register(u1);
-RWStructuredBuffer<Luxel> luxels : register(u2);
+FragmentOutput main(Interstage interstage) {
+	float3 luxelSize = max(abs(ddx(interstage.position)), abs(ddy(interstage.position)));
+	float diagonalLuxelSize = max(max(luxelSize.x, luxelSize.y), luxelSize.z) * sqrt(2.0);
 
-uint ceil(uint value, uint multiplier) {
-	return (value + multiplier - 1) & ~(multiplier - 1);
-}
+	FragmentOutput output;
+	output.position = float4(interstage.position, interstage.triangleIndex);
+	output.triangleNormal = float4(interstage.triangleNormal, diagonalLuxelSize);
+	output.vertexNormal = float4(interstage.vertexNormal, 0.0);
 
-void main(Interstage interstage) {
-	uint2 coordinate = uint2(interstage.coordinate * traceRaysArguments[0].atlasSize);
-	uint luxelIndex;
-
-	InterlockedAdd(traceRaysArguments[0].luxelCount, 1, luxelIndex);
-
-	traceRaysArguments[0].traceRaysCommand.x = ceil(traceRaysArguments[0].luxelCount / RAYTRACER_WORKGROUP_SIZE, RAYTRACER_WORKGROUP_SIZE);
-
-	luxels[luxelIndex].triangleIndex = interstage.triangleIndex;
-	luxels[luxelIndex].coordinate = (coordinate.x << 16) | coordinate.y;
-
-	discard;
+	return output;
 }

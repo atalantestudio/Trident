@@ -24,7 +24,7 @@ namespace Trident::DX12 {
 		ADAPTER_ASSERT(imageLayout < ImageLayout::count, "Invalid image layout.");
 
 		if (imageLayout == ImageLayout::GENERAL) {
-			if (access == Access::SHADER_WRITE) {
+			if (access & Access::SHADER_WRITE) {
 				return D3D12_BARRIER_LAYOUT_UNORDERED_ACCESS;
 			}
 

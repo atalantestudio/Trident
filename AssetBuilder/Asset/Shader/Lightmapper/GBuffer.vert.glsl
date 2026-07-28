@@ -21,6 +21,34 @@ out Interstage {
 	layout(location = 3) vec3 vertexNormal;
 } interstage;
 
+const vec2 LIGHTMAP_COORDINATE_OFFSETS[25] = vec2[](
+	vec2(-2.0, -2.0),
+	vec2( 2.0, -2.0),
+	vec2(-2.0,  2.0),
+	vec2( 2.0,  2.0),
+	vec2(-1.0, -2.0),
+	vec2( 1.0, -2.0),
+	vec2(-2.0, -1.0),
+	vec2( 2.0, -1.0),
+	vec2(-2.0,  1.0),
+	vec2( 2.0,  1.0),
+	vec2(-1.0,  2.0),
+	vec2( 1.0,  2.0),
+	vec2(-2.0,  0.0),
+	vec2( 2.0,  0.0),
+	vec2( 0.0, -2.0),
+	vec2( 0.0,  2.0),
+	vec2(-1.0, -1.0),
+	vec2( 1.0, -1.0),
+	vec2(-1.0,  0.0),
+	vec2( 1.0,  0.0),
+	vec2(-1.0,  1.0),
+	vec2( 1.0,  1.0),
+	vec2( 0.0, -1.0),
+	vec2( 0.0,  1.0),
+	vec2( 0.0,  0.0)
+);
+
 void main() {
 	uint vertexOffset = index[0] * 3u;
 	uint normalOffset = index[1] * 3u;
@@ -29,9 +57,13 @@ void main() {
 	vec3 vertexNormal = vec3(normalBuffer[normalOffset + 0u], normalBuffer[normalOffset + 1u], normalBuffer[normalOffset + 2u]);
 
 	vec2 coordinate = lightmapCoordinate;
+
+	// TODO(asset-builder/lightmapper): Get the atlas size.
+	coordinate += LIGHTMAP_COORDINATE_OFFSETS[gl_InstanceIndex] * 0.5 / 1024.0;
+
 	coordinate.y = 1.0 - coordinate.y;
 
-	gl_Position = vec4(coordinate * 2.0 - 1.0, 0.0, 1.0);
+	gl_Position = vec4(coordinate * 2.0 - 1.0, 1.0, 1.0);
 
 	interstage.position = position;
 	interstage.triangleIndex = uint(gl_VertexIndex / 3 + 1);

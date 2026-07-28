@@ -30,13 +30,16 @@ struct Ray {
 struct Hit {
 	vec3 position;
 	float distance;
-	vec3 normal;
-	uint triangleIndex;
+	vec3 triangleNormal;
+	vec3 vertexNormal;
 };
 
 const float FLOAT32_MAX = 4294967295.0;
 const uint SAMPLE_COUNT = 1024;
 const uint BOUNCE_COUNT = 4;
+const float ADAPTIVE_BIAS = 1e-4;
+const uint FRONT_FACE = 0;
+const uint BACK_FACE = 1;
 
 layout(set = 0, binding = 0) buffer readonly TraceRaysArgumentBuffer {
 	uvec2 atlasSize;
@@ -48,12 +51,10 @@ layout(set = 0, binding = 0) buffer readonly TraceRaysArgumentBuffer {
 	uint _2;
 	vec3 sunColor;
 	float sunIntensity;
-
-	// TODO(asset-builder/lightmapper): Move options such as sun direction and sky color here.
 };
 
 layout(set = 0, binding = 1) buffer readonly IndexBuffer {
-	Vertex indices[];
+	Vertex indexBuffer[];
 };
 
 layout(set = 0, binding = 2) buffer readonly VertexBuffer {
@@ -71,9 +72,9 @@ layout(set = 0, binding = 6, rgba8) uniform writeonly image2D intermediateLightm
 Triangle loadTriangle(uint triangleIndex) {
 	uint indexOffset = triangleIndex * 3;
 
-	Vertex indexA = indices[indexOffset + 0];
-	Vertex indexB = indices[indexOffset + 1];
-	Vertex indexC = indices[indexOffset + 2];
+	Vertex indexA = indexBuffer[indexOffset + 0];
+	Vertex indexB = indexBuffer[indexOffset + 1];
+	Vertex indexC = indexBuffer[indexOffset + 2];
 
 	uint vertexOffsetA = indexA.vertexIndex * 3;
 	uint vertexOffsetB = indexB.vertexIndex * 3;
@@ -107,7 +108,7 @@ vec3 randomUnitDirection(inout uint seed) {
 	return normalize(vec3(randomScalar(seed), randomScalar(seed), randomScalar(seed)) * 2.0 - 1.0);
 }
 
-bool rayTriangleIntersection(Ray ray, Triangle triangle_, inout float distance, inout vec3 barycentricCoordinate) {
+bool rayTriangleIntersection(Ray ray, Triangle triangle_, uint face, inout float distance, inout vec3 barycentricCoordinate) {
 	const float E = 1e-8;
 	const float E2 = 1e-4;
 
@@ -119,12 +120,16 @@ bool rayTriangleIntersection(Ray ray, Triangle triangle_, inout float distance, 
 	vec3 p = cross(ray.direction, ac);
 	float d = dot(ab, p);
 
-	if (d < E) {
-		return false;
+	// TODO(asset-builder/lightmapper): Refactor.
+	if (face == FRONT_FACE) {
+		if (d < E) {
+			return false;
+		}
 	}
-
-	if (abs(d) < E) {
-		return false;
+	else {
+		if (d >= E) {
+			return false;
+		}
 	}
 
 	float inverseD = 1.0 / d;
@@ -151,20 +156,21 @@ bool rayTriangleIntersection(Ray ray, Triangle triangle_, inout float distance, 
 	return distance > 0.0;
 }
 
-Hit rchit(Ray ray, Triangle triangle_, uint triangleIndex, float distance, vec3 barycentricCoordinate) {
-	vec2 lightmapCoordinate = (
+Hit rchit(Ray ray, Triangle triangle_, float distance, vec3 barycentricCoordinate) {
+	ivec2 lightmapCoordinate = ivec2((
 		triangle_.vertices[0].lightmapCoordinate * barycentricCoordinate.x +
 		triangle_.vertices[1].lightmapCoordinate * barycentricCoordinate.y +
 		triangle_.vertices[2].lightmapCoordinate * barycentricCoordinate.z
-	);
+	) * atlasSize);
 
-	vec4 vertexNormalData = imageLoad(gBufferVertexNormalImage, ivec2(lightmapCoordinate * atlasSize));
+	vec4 triangleNormalData = imageLoad(gBufferTriangleNormalImage, lightmapCoordinate);
+	vec4 vertexNormalData = imageLoad(gBufferVertexNormalImage, lightmapCoordinate);
 
 	Hit hit;
 	hit.position = ray.origin + ray.direction * distance;
 	hit.distance = distance;
-	hit.normal = vertexNormalData.rgb;
-	hit.triangleIndex = triangleIndex;
+	hit.triangleNormal = triangleNormalData.rgb;
+	hit.vertexNormal = vertexNormalData.rgb;
 
 	return hit;
 }
@@ -176,7 +182,7 @@ Hit rmiss() {
 	return hit;
 }
 
-Hit rint(uint originTriangleIndex, Ray ray) {
+Hit rint(Ray ray, uint face) {
 	float closestDistance = FLOAT32_MAX;
 	uint intersectingTriangleIndex = triangleCount;
 	Triangle intersectingTriangle;
@@ -184,17 +190,11 @@ Hit rint(uint originTriangleIndex, Ray ray) {
 	uint triangleIndex = 0;
 
 	while (triangleIndex < triangleCount) {
-		/* if (triangleIndex == originTriangleIndex) {
-			triangleIndex += 1;
-
-			continue;
-		} */
-
 		Triangle triangle_ = loadTriangle(triangleIndex);
 		float distance;
 		vec3 barycentricCoordinate;
 
-		if (rayTriangleIntersection(ray, triangle_, distance, barycentricCoordinate)) {
+		if (rayTriangleIntersection(ray, triangle_, face, distance, barycentricCoordinate)) {
 			if (distance < closestDistance) {
 				closestDistance = distance;
 				intersectingTriangleIndex = triangleIndex;
@@ -207,46 +207,86 @@ Hit rint(uint originTriangleIndex, Ray ray) {
 	}
 
 	if (intersectingTriangleIndex < triangleCount) {
-		return rchit(ray, intersectingTriangle, intersectingTriangleIndex, closestDistance, intersectingBarycentricCoordinate);
+		return rchit(ray, intersectingTriangle, closestDistance, intersectingBarycentricCoordinate);
 	}
 
 	return rmiss();
 }
 
-vec3 rgen(Hit hit, inout uint seed) {
-	Ray shadowRay;
-	shadowRay.direction = normalize(sunDirection);
+vec3 rgen(Hit primaryHit, inout uint seed) {
+	// TODO(asset-builder/lightmapper): Use the albedo of the triangle being hit.
+	const vec3 albedo = skyColor;
 
 	vec3 radiance = vec3(0.0, 0.0, 0.0);
 	vec3 throughput = vec3(1.0, 1.0, 1.0);
 	uint bounceIndex = 0;
 
 	while (bounceIndex < BOUNCE_COUNT) {
-		uint triangleIndex = hit.triangleIndex;
+		Ray primaryRay;
+		primaryRay.origin = primaryHit.position + primaryHit.vertexNormal * ADAPTIVE_BIAS;
+		primaryRay.direction = normalize(primaryHit.vertexNormal + randomUnitDirection(seed));
 
-		Ray ray;
-		ray.origin = hit.position + hit.normal * 0.0001;
-		ray.direction = normalize(hit.normal + randomUnitDirection(seed));
+		primaryHit = rint(primaryRay, FRONT_FACE);
 
-		hit = rint(triangleIndex, ray);
+		Ray secondaryRay;
+		secondaryRay.origin = primaryRay.origin;
+		secondaryRay.direction = normalize(sunDirection);
 
-		if (hit.distance < 0.0) {
+		Hit secondaryHit = rint(secondaryRay, FRONT_FACE);
+
+		radiance += throughput * float(secondaryHit.distance < 0.0) * sunColor * sunIntensity;
+		throughput *= albedo;
+
+		if (primaryHit.distance < 0.0) {
 			radiance += throughput * skyColor;
 
 			break;
 		}
 
-		shadowRay.origin = ray.origin;
-
-		Hit shadowHit = rint(triangleIndex, shadowRay);
-
-		radiance += throughput * float(shadowHit.distance < 0.0) * sunColor * sunIntensity;
-		throughput *= 0.9;
-
 		bounceIndex += 1;
 	}
 
 	return radiance;
+}
+
+vec3 adjustSamplePosition(vec3 position, vec3 triangleNormal, float diagonalLuxelSize) {
+	vec3 d0 = normalize(cross(position, triangleNormal));
+	vec3 d1 = normalize(cross(d0, triangleNormal));
+	float rayLength = diagonalLuxelSize * 0.5;
+
+	Ray ray;
+	ray.origin = position + triangleNormal * ADAPTIVE_BIAS;
+	ray.direction = d0;
+
+	Hit hit = rint(ray, BACK_FACE);
+
+	if (hit.distance > 0.0 && hit.distance < rayLength) {
+		return position + ray.direction * hit.distance + hit.triangleNormal * ADAPTIVE_BIAS;
+	}
+
+	ray.direction = d1;
+
+	hit = rint(ray, BACK_FACE);
+
+	if (hit.distance > 0.0 && hit.distance < rayLength) {
+		return position + ray.direction * hit.distance + hit.triangleNormal * ADAPTIVE_BIAS;
+	}
+
+	ray.direction = -d0;
+	hit = rint(ray, BACK_FACE);
+
+	if (hit.distance > 0.0 && hit.distance < rayLength) {
+		return position + ray.direction * hit.distance + hit.triangleNormal * ADAPTIVE_BIAS;
+	}
+
+	ray.direction = -d1;
+	hit = rint(ray, BACK_FACE);
+
+	if (hit.distance > 0.0 && hit.distance < rayLength) {
+		return position + ray.direction * hit.distance + hit.triangleNormal * ADAPTIVE_BIAS;
+	}
+
+	return position;
 }
 
 void main() {
@@ -258,22 +298,23 @@ void main() {
 
 	uint seed = coordinate.y * atlasSize.x + coordinate.x;
 	vec4 positionData = imageLoad(gBufferPositionImage, coordinate);
+	vec4 triangleNormalData = imageLoad(gBufferTriangleNormalImage, coordinate);
 	vec4 vertexNormalData = imageLoad(gBufferVertexNormalImage, coordinate);
 
 	vec3 position = positionData.rgb;
 	uint triangleIndex = uint(positionData.a);
+	vec3 triangleNormal = triangleNormalData.rgb;
+	float diagonalLuxelSize = triangleNormalData.a;
 	vec3 vertexNormal = vertexNormalData.rgb;
 
 	if (triangleIndex == 0) {
 		return;
 	}
 
-	triangleIndex -= 1;
-
 	Hit hit;
-	hit.position = position;
-	hit.normal = vertexNormal;
-	hit.triangleIndex = triangleIndex;
+	hit.position = adjustSamplePosition(position, triangleNormal, diagonalLuxelSize);
+	hit.triangleNormal = triangleNormal;
+	hit.vertexNormal = vertexNormal;
 
 	vec3 radiance = vec3(0.0, 0.0, 0.0);
 	uint sampleIndex = 0;
