@@ -59,6 +59,7 @@ void main() {
 	vec2 coordinate = lightmapCoordinate;
 
 	// TODO(asset-builder/lightmapper): Get the atlas size.
+	// TODO(asset-builder/lightmapper): This fixes thin geometry receiving no light but adds leaks in larger geometry (e.g. floors and walls).
 	coordinate += LIGHTMAP_COORDINATE_OFFSETS[gl_InstanceIndex] * 0.5 / 1024.0;
 
 	coordinate.y = 1.0 - coordinate.y;

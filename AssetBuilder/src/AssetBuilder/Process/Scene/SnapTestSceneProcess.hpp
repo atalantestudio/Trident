@@ -58,7 +58,7 @@ namespace Trident {
 			Scene3DData createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				InteriorSceneBuilder builder({
 					.skyColor = {1.0f, 1.0f, 1.0f},
-					.sunDirection = {-1.0f, -1.0f, -1.0f},
+					.sunDirection = {1.0f, 1.0f, 1.0f},
 					.sunColor = {1.0f, 1.0f, 1.0f},
 					.sunIntensity = 1.0f,
 				});

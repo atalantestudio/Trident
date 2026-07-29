@@ -54,13 +54,13 @@ namespace Trident {
 			node->children[0]->rectangle.width = lightmap.size.width;
 
 			node->children[1]->rectangle.x += lightmap.size.width;
-			node->children[1]->rectangle.width -= lightmap.size.width;
+			node->children[1]->rectangle.width = remainingSize.width;
 		}
 		else {
 			node->children[0]->rectangle.height = lightmap.size.height;
 
 			node->children[1]->rectangle.y += lightmap.size.height;
-			node->children[1]->rectangle.height -= lightmap.size.height;
+			node->children[1]->rectangle.height = remainingSize.height;
 		}
 
 		return insertLightmapNode(lightmap, node->children[0]);
@@ -120,7 +120,8 @@ namespace Trident {
 				}
 
 				// TODO(lyah/scalar)
-				const vec2<float32> size = round<2, 2, float32>(vec2<float32>(subsurface.scale / surface.luxelScale));
+				vec2<float32> size = subsurface.scale / surface.luxelScale;
+				size = {ceil(size[0] / 4.0f) * 4.0f, ceil(size[1] / 4.0f) * 4.0f};
 
 				lightmap.size = {static_cast<uint32>(size[0]), static_cast<uint32>(size[1])};
 
