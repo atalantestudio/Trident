@@ -18,13 +18,7 @@ namespace Trident {
 		const uint32 staticTriangleCount = stream.read<uint32>();
 		const uint32 staticIndexCount = staticTriangleCount * 3;
 		const uint32 staticVertexCount = stream.read<uint32>();
-		const uint32 staticNormalCount = stream.read<uint32>();
 		const uint32 staticTextureCoordinateCount = stream.read<uint32>();
-
-		descriptor.staticIndexRange = {0, staticIndexCount * sizeof(StaticVertex3D)};
-		descriptor.staticVertexRange = {descriptor.staticIndexRange.offset + descriptor.staticIndexRange.count, staticVertexCount * sizeof(svec3<float32>)};
-		descriptor.staticNormalRange = {descriptor.staticVertexRange.offset + descriptor.staticVertexRange.count, staticNormalCount * sizeof(svec3<float32>)};
-		descriptor.staticTextureCoordinateRange = {descriptor.staticNormalRange.offset + descriptor.staticNormalRange.count, staticTextureCoordinateCount * sizeof(svec2<float32>)};
 
 		descriptor.dynamicVertexPositionCount = 0;
 		descriptor.dynamicVertexNormalCount = 0;
@@ -39,11 +33,18 @@ namespace Trident {
 		descriptor.hullFaceCount = 0;
 		descriptor.hullFaceEdgeIndexCount = 0;
 		descriptor.rigidBodyFacePlaneCount = 0;
-		descriptor.staticGeometryBuffer = sequence<uint8>(descriptor.staticIndexRange.count + descriptor.staticVertexRange.count + descriptor.staticNormalRange.count + descriptor.staticTextureCoordinateRange.count);
 		descriptor.geometryAssets = sequence<ref<GeometryAsset>>(stream.read<uint32>());
 		descriptor.geometryMappings = sequence<EntityComponentMapping<GeometryComponent>>(stream.read<uint32>());
 		descriptor.materialMappings = sequence<EntityComponentMapping<MaterialComponent>>(stream.read<uint32>());
 		descriptor.rigidBodyMappings = sequence<EntityComponentMapping<RigidBody3DComponent>>(stream.read<uint32>());
+
+		const uint32 staticNormalCount = stream.read<uint32>();
+
+		descriptor.staticIndexRange = {0, staticIndexCount * sizeof(StaticVertex3D)};
+		descriptor.staticVertexRange = {descriptor.staticIndexRange.offset + descriptor.staticIndexRange.count, staticVertexCount * sizeof(svec3<float32>)};
+		descriptor.staticNormalRange = {descriptor.staticVertexRange.offset + descriptor.staticVertexRange.count, staticNormalCount * sizeof(svec3<float32>)};
+		descriptor.staticTextureCoordinateRange = {descriptor.staticNormalRange.offset + descriptor.staticNormalRange.count, staticTextureCoordinateCount * sizeof(svec2<float32>)};
+		descriptor.staticGeometryBuffer = sequence<uint8>(descriptor.staticIndexRange.count + descriptor.staticVertexRange.count + descriptor.staticNormalRange.count + descriptor.staticTextureCoordinateRange.count);
 
 		const uint32 lightmapAtlasImageAssetIdentifier = stream.read<uint32>();
 

@@ -25,7 +25,6 @@ namespace Trident {
 	struct SceneAssetHeader : public AssetHeader {
 		uint32 staticTriangleCount;
 		uint32 staticVertexCount;
-		uint32 staticNormalCount;
 		uint32 staticTextureCoordinateCount;
 		uint32 entityCount;
 		uint32 geometryAssetCount;

@@ -36,7 +36,6 @@ namespace Trident {
 				header.version = {0, 0, 0};
 				header.staticTriangleCount = static_cast<uint32>(data.staticScene.indices.count()) / 3;
 				header.staticVertexCount = static_cast<uint32>(data.staticScene.vertices.count());
-				header.staticNormalCount = static_cast<uint32>(data.staticScene.normals.count());
 				header.staticTextureCoordinateCount = static_cast<uint32>(data.staticScene.textureCoordinates.count());
 				header.entityCount = data.entityCount;
 				header.geometryAssetCount = static_cast<uint32>(data.geometryAssetIdentifiers.count());
@@ -44,11 +43,13 @@ namespace Trident {
 				header.materialMappingCount = static_cast<uint32>(data.materialMappings.count());
 				header.rigidBodyMappingCount = static_cast<uint32>(data.rigidBodyMappings.count());
 
+				const uint32 staticNormalCount = static_cast<uint32>(data.staticScene.normals.count());
+
 				uint64 size = (
-					sizeof(header) + 4 * sizeof(uint32) +
+					sizeof(header) + 5 * sizeof(uint32) +
 					header.staticTriangleCount * (sizeof(StaticVertex3D) - sizeof(uint32)) * 3 +
 					header.staticVertexCount * sizeof(svec3<float32>) +
-					header.staticNormalCount * sizeof(svec3<float32>) +
+					staticNormalCount * sizeof(svec3<float32>) +
 					header.staticTextureCoordinateCount * sizeof(svec2<float32>) +
 					(data.staticScene.materials.count() + data.materialAssets.count()) * sizeof(uint32) +
 					data.staticScene.materials.count() * sizeof(uint32) * 3 +
@@ -85,6 +86,7 @@ namespace Trident {
 				std::copy_n(pointer_cast<const uint8*>(&header), sizeof(header), stream.getBytePosition());
 
 				stream.jump(sizeof(header));
+				stream.write<uint32>(staticNormalCount);
 				stream.write<uint32>(data.staticScene.lightmapAtlasImageAssetDescriptor.identifier);
 				stream.write<uint32>(static_cast<uint32>(materialShaders.count()));
 				stream.write<uint32>(static_cast<uint32>(data.materialAssets.count() + data.staticScene.materials.count()));
