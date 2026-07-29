@@ -888,6 +888,16 @@ namespace Trident {
 		const float32 height = static_cast<float32>(atlasExtent.height);
 		const uint32 workGroupX = ceil(atlasExtent.width / 16, 16u);
 		const uint32 workGroupY = ceil(atlasExtent.height / 16, 16u);
+		const BufferImageCopyRegion lightmapAtlasBufferImageCopyRegion = {
+			.bufferOffset = 0,
+			.imageOffsetX = 0,
+			.imageOffsetY = 0,
+			.imageOffsetZ = 0,
+			.imageExtent = context.lightmapAtlasImage->getExtent(),
+			.imageMipLevel = context.lightmapAtlasImageView->getMipLevelOffset(),
+			.imageLayerOffset = context.lightmapAtlasImageView->getLayerOffset(),
+			.imageLayerCount = context.lightmapAtlasImageView->getLayerCount(),
+		};
 		const ref<Queue> queue = device->getQueue(QueueFamilyCapability::GRAPHICS);
 		const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
 			.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
@@ -970,11 +980,7 @@ namespace Trident {
 		commandEncoder->bindDescriptorSets(postProcessingPipelineLayout, 0, descriptorSets[2]);
 		commandEncoder->dispatch(workGroupX, workGroupY, 1);
 
-		imageMemoryBarrier = {
-			.image = context.intermediateLightmapAtlasImage,
-			.newLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-			.newAccess = Access::SHADER_READ,
-		};
+		imageMemoryBarrier.newLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
 
 		commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
 
@@ -999,17 +1005,6 @@ namespace Trident {
 
 			commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
 		}
-
-		const BufferImageCopyRegion lightmapAtlasBufferImageCopyRegion = {
-			.bufferOffset = 0,
-			.imageOffsetX = 0,
-			.imageOffsetY = 0,
-			.imageOffsetZ = 0,
-			.imageExtent = context.lightmapAtlasImage->getExtent(),
-			.imageMipLevel = context.lightmapAtlasImageView->getMipLevelOffset(),
-			.imageLayerOffset = context.lightmapAtlasImageView->getLayerOffset(),
-			.imageLayerCount = context.lightmapAtlasImageView->getLayerCount(),
-		};
 
 		commandEncoder->copyImageToBuffer(context.lightmapAtlasImage, context.lightmapAtlasStagingBuffer, lightmapAtlasBufferImageCopyRegion);
 

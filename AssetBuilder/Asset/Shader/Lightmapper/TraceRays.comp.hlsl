@@ -45,9 +45,9 @@ struct Hit {
 static const float FLOAT32_MAX = 4294967295.0;
 static const uint SAMPLE_COUNT = 1024;
 static const uint BOUNCE_COUNT = 4;
-static const float ADAPTIVE_BIAS = 1e-4;
-static const uint FRONT_FACE = 0;
-static const uint BACK_FACE = 1;
+static const float ADAPTIVE_BIAS = 0.0000002;
+static const bool FRONT_FACE = true;
+static const bool BACK_FACE = false;
 
 StructuredBuffer<TraceRaysArguments> traceRaysArguments : register(t0);
 StructuredBuffer<Vertex> indexBuffer : register(t1);
@@ -96,7 +96,7 @@ float3 randomUnitDirection(inout uint seed) {
 	return normalize(float3(randomScalar(seed), randomScalar(seed), randomScalar(seed)) * 2.0 - 1.0);
 }
 
-bool rayTriangleIntersection(Ray ray, Triangle triangle_, uint face, inout float distance, inout float3 barycentricCoordinate) {
+bool rayTriangleIntersection(Ray ray, Triangle triangle_, bool face, inout float distance, inout float3 barycentricCoordinate) {
 	const float E = 1e-8;
 	const float E2 = 1e-4;
 
@@ -107,22 +107,13 @@ bool rayTriangleIntersection(Ray ray, Triangle triangle_, uint face, inout float
 	float3 ac = c - a;
 	float3 p = cross(ray.direction, ac);
 	float d = dot(ab, p);
+	bool test = d >= E;
 
-	bool test;
-	bool faceTest;
-
-	// TODO(asset-builder/lightmapper): Refactor.
-	if (face == FRONT_FACE) {
-		faceTest = d < E;
-	}
-	else {
-		faceTest = d >= E;
+	if (face == BACK_FACE) {
+		test = !test;
 	}
 
-	if (faceTest) {
-		test = false;
-	}
-	else {
+	if (test) {
 		float inverseD = 1.0 / d;
 		float3 t = ray.origin - a;
 		float w = dot(t, p) * inverseD;
@@ -178,7 +169,7 @@ Hit rmiss() {
 	return hit;
 }
 
-Hit rint(Ray ray, uint face) {
+Hit rint(Ray ray, bool face) {
 	float closestDistance = FLOAT32_MAX;
 	uint intersectingTriangleIndex = traceRaysArguments[0].triangleCount;
 	Triangle intersectingTriangle;
@@ -224,7 +215,7 @@ float3 rgen(Hit primaryHit, inout uint seed) {
 
 	while (bounceIndex < BOUNCE_COUNT) {
 		Ray primaryRay;
-		primaryRay.origin = primaryHit.position + primaryHit.vertexNormal * ADAPTIVE_BIAS;
+		primaryRay.origin = primaryHit.position + sign(primaryHit.vertexNormal) * abs(primaryHit.position * ADAPTIVE_BIAS);
 		primaryRay.direction = normalize(primaryHit.vertexNormal + randomUnitDirection(seed));
 
 		primaryHit = rint(primaryRay, FRONT_FACE);
@@ -251,18 +242,20 @@ float3 rgen(Hit primaryHit, inout uint seed) {
 }
 
 float3 adjustSamplePosition(float3 position, float3 triangleNormal, float diagonalLuxelSize) {
+	const float bias = 1e-4;
+
 	float3 d0 = normalize(cross(position, triangleNormal));
 	float3 d1 = normalize(cross(d0, triangleNormal));
 	float rayLength = diagonalLuxelSize * 0.5;
 
 	Ray ray;
-	ray.origin = position + triangleNormal * ADAPTIVE_BIAS;
+	ray.origin = position + triangleNormal * bias;
 	ray.direction = d0;
 
 	Hit hit = rint(ray, BACK_FACE);
 
 	if (hit.distance > 0.0 && hit.distance < rayLength) {
-		return position + ray.direction * hit.distance + hit.triangleNormal * ADAPTIVE_BIAS;
+		return hit.position + hit.triangleNormal * bias;
 	}
 
 	ray.direction = d1;
@@ -270,21 +263,21 @@ float3 adjustSamplePosition(float3 position, float3 triangleNormal, float diagon
 	hit = rint(ray, BACK_FACE);
 
 	if (hit.distance > 0.0 && hit.distance < rayLength) {
-		return position + ray.direction * hit.distance + hit.triangleNormal * ADAPTIVE_BIAS;
+		return hit.position + hit.triangleNormal * bias;
 	}
 
 	ray.direction = -d0;
 	hit = rint(ray, BACK_FACE);
 
 	if (hit.distance > 0.0 && hit.distance < rayLength) {
-		return position + ray.direction * hit.distance + hit.triangleNormal * ADAPTIVE_BIAS;
+		return hit.position + hit.triangleNormal * bias;
 	}
 
 	ray.direction = -d1;
 	hit = rint(ray, BACK_FACE);
 
 	if (hit.distance > 0.0 && hit.distance < rayLength) {
-		return position + ray.direction * hit.distance + hit.triangleNormal * ADAPTIVE_BIAS;
+		return hit.position + hit.triangleNormal * bias;
 	}
 
 	return position;
