@@ -164,10 +164,10 @@ namespace Trident {
 									.index = 0,
 									.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
 								},
-								{
-									.index = 1,
-									.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-								},
+							},
+							.depthStencilAttachmentReference = {
+								.index = 1,
+								.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
 							},
 						},
 					},
