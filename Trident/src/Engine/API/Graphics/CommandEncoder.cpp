@@ -488,10 +488,6 @@ namespace Trident {
 				if (drawCount == 0) {
 					VALIDATION_ERROR("drawCount must not be 0.");
 				}
-
-				if (stride == 0) {
-					VALIDATION_ERROR("stride must not be 0.");
-				}
 			}
 		#endif
 
@@ -536,10 +532,6 @@ namespace Trident {
 
 				if (drawCount == 0) {
 					VALIDATION_ERROR("drawCount must not be 0.");
-				}
-
-				if (stride == 0) {
-					VALIDATION_ERROR("stride must not be 0.");
 				}
 			}
 		#endif
