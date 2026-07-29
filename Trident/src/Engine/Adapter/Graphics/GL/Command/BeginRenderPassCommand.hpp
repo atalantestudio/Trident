@@ -33,11 +33,7 @@ namespace Trident {
 					bufIndex += 1;
 				}
 
-				#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-					glNamedFramebufferDrawBuffers(framebuffer->framebuffer, static_cast<GLsizei>(bufs.count()), &bufs[0]);
-				#else
-					glDrawBuffers(static_cast<GLsizei>(bufs.count()), &bufs[0]);
-				#endif
+				glDrawBuffers(static_cast<GLsizei>(bufs.count()), &bufs[0]);
 
 				uint32 attachmentIndex = 0;
 
@@ -53,36 +49,28 @@ namespace Trident {
 					const ClearValue& clearValue = descriptor.clearValues[attachmentIndex];
 
 					if (isDepthFormat(attachment.format)) {
-						#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-							glClearNamedFramebufferfi(framebuffer->framebuffer, GL_DEPTH_STENCIL, 0, clearValue.depth, clearValue.stencil);
-						#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
+						#if OPENGL_VERSION >= OPENGL_VERSION_3_0
 							glClearBufferfi(GL_DEPTH_STENCIL, 0, clearValue.depth, clearValue.stencil);
 						#else
 							ENGINE_ERROR_UNSUPPORTED();
 						#endif
 					}
 					else if (isSignedIntegerColorFormat(attachment.format)) {
-						#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-							glClearNamedFramebufferiv(framebuffer->framebuffer, GL_COLOR, attachmentIndex, clearValue.colorSigned);
-						#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
+						#if OPENGL_VERSION >= OPENGL_VERSION_3_0
 							glClearBufferiv(GL_COLOR, attachmentIndex, clearValue.colorSigned);
 						#else
 							ENGINE_ERROR_UNSUPPORTED();
 						#endif
 					}
 					else if (isUnsignedIntegerColorFormat(attachment.format)) {
-						#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-							glClearNamedFramebufferuiv(framebuffer->framebuffer, GL_COLOR, attachmentIndex, clearValue.colorUnsigned);
-						#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
+						#if OPENGL_VERSION >= OPENGL_VERSION_3_0
 							glClearBufferuiv(GL_COLOR, attachmentIndex, clearValue.colorUnsigned);
 						#else
 							ENGINE_ERROR_UNSUPPORTED();
 						#endif
 					}
 					else {
-						#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-							glClearNamedFramebufferfv(framebuffer->framebuffer, GL_COLOR, attachmentIndex, clearValue.color);
-						#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
+						#if OPENGL_VERSION >= OPENGL_VERSION_3_0
 							glClearBufferfv(GL_COLOR, attachmentIndex, clearValue.color);
 						#else
 							ENGINE_ERROR_UNSUPPORTED();

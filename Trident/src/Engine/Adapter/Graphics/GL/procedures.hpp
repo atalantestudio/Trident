@@ -4,8 +4,10 @@
 #pragma once
 
 namespace Trident {
+	extern PFNGLACTIVETEXTUREPROC glActiveTexture;
 	extern PFNGLATTACHSHADERPROC glAttachShader;
 	extern PFNGLBINDBUFFERPROC glBindBuffer;
+	extern PFNGLBINDTEXTUREPROC glBindTexture;
 	extern PFNGLCREATEPROGRAMPROC glCreateProgram;
 	extern PFNGLCREATESHADERPROC glCreateShader;
 	extern PFNGLCULLFACEPROC glCullFace;
@@ -19,7 +21,9 @@ namespace Trident {
 	extern PFNGLDETACHSHADERPROC glDetachShader;
 	extern PFNGLDISABLEPROC glDisable;
 	extern PFNGLDRAWBUFFERPROC glDrawBuffer;
+	extern PFNGLDRAWBUFFERSPROC glDrawBuffers;
 	extern PFNGLENABLEPROC glEnable;
+	extern PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
 	extern PFNGLFRONTFACEPROC glFrontFace;
 	extern PFNGLFINISHPROC glFinish;
 	extern PFNGLGENBUFFERSPROC glGenBuffers;
@@ -32,11 +36,21 @@ namespace Trident {
 	extern PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog;
 	extern PFNGLGETSHADERIVPROC glGetShaderiv;
 	extern PFNGLGETSTRINGPROC glGetString;
+
+	#if defined(BUILD_MODE_DEBUG)
+		extern PFNGLGETTEXPARAMETERIVPROC glGetTexParameteriv;
+	#endif
+
 	extern PFNGLLINEWIDTHPROC glLineWidth;
 	extern PFNGLLINKPROGRAMPROC glLinkProgram;
 	extern PFNGLPIXELSTOREIPROC glPixelStorei;
 	extern PFNGLPOLYGONMODEPROC glPolygonMode;
+	extern PFNGLREADBUFFERPROC glReadBuffer;
 	extern PFNGLSCISSORPROC glScissor;
+	extern PFNGLTEXPARAMETERIPROC glTexParameteri;
+	extern PFNGLTEXSUBIMAGE1DPROC glTexSubImage1D;
+	extern PFNGLTEXSUBIMAGE2DPROC glTexSubImage2D;
+	extern PFNGLTEXSUBIMAGE3DPROC glTexSubImage3D;
 	extern PFNGLUNMAPBUFFERPROC glUnmapBuffer;
 	extern PFNGLUSEPROGRAMPROC glUseProgram;
 	extern PFNGLVIEWPORTPROC glViewport;
@@ -46,10 +60,22 @@ namespace Trident {
 		extern PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer;
 		extern PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
 		extern PFNGLBLITFRAMEBUFFERPROC glBlitFramebuffer;
+
+		#if defined(BUILD_MODE_DEBUG)
+			extern PFNGLCHECKFRAMEBUFFERSTATUSPROC glCheckFramebufferStatus;
+		#endif
+
+		extern PFNGLCLEARBUFFERFIPROC glClearBufferfi;
+		extern PFNGLCLEARBUFFERFVPROC glClearBufferfv;
+		extern PFNGLCLEARBUFFERIVPROC glClearBufferiv;
+		extern PFNGLCLEARBUFFERUIVPROC glClearBufferuiv;
 		extern PFNGLDELETEFRAMEBUFFERSPROC glDeleteFramebuffers;
 		extern PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays;
 		extern PFNGLDISABLEIPROC glDisablei;
 		extern PFNGLENABLEIPROC glEnablei;
+		extern PFNGLFRAMEBUFFERTEXTURE2DPROC glFramebufferTexture2D;
+		extern PFNGLGENFRAMEBUFFERSPROC glGenFramebuffers;
+		extern PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
 		extern PFNGLGETINTEGERI_VPROC glGetIntegeri_v;
 		extern PFNGLMAPBUFFERRANGEPROC glMapBufferRange;
 	#endif
@@ -69,6 +95,7 @@ namespace Trident {
 	#if OPENGL_VERSION >= OPENGL_VERSION_3_3
 		extern PFNGLBINDSAMPLERPROC glBindSampler;
 		extern PFNGLDELETESAMPLERSPROC glDeleteSamplers;
+		extern PFNGLGENSAMPLERSPROC glGenSamplers;
 		extern PFNGLSAMPLERPARAMETERFPROC glSamplerParameterf;
 		extern PFNGLSAMPLERPARAMETERFVPROC glSamplerParameterfv;
 		extern PFNGLSAMPLERPARAMETERIPROC glSamplerParameteri;
@@ -82,9 +109,13 @@ namespace Trident {
 	#if OPENGL_VERSION >= OPENGL_VERSION_4_2
 		extern PFNGLBINDIMAGETEXTUREPROC glBindImageTexture;
 		extern PFNGLMEMORYBARRIERPROC glMemoryBarrier;
+		extern PFNGLTEXSTORAGE2DPROC glTexStorage2D;
+		extern PFNGLTEXSTORAGE3DPROC glTexStorage3D;
 	#endif
 
 	#if OPENGL_VERSION >= OPENGL_VERSION_4_3
+		extern PFNGLBINDVERTEXBUFFERPROC glBindVertexBuffer;
+
 		#if defined(DEBUG_ENABLE_MESSENGER)
 			extern PFNGLDEBUGMESSAGECALLBACKPROC glDebugMessageCallback;
 			extern PFNGLDEBUGMESSAGEINSERTPROC glDebugMessageInsert;
@@ -97,8 +128,18 @@ namespace Trident {
 			extern PFNGLOBJECTLABELPROC glObjectLabel;
 		#endif
 
-		// TODO: Write a texture view abstraction for older GL versions.
 		extern PFNGLTEXTUREVIEWPROC glTextureView;
+		extern PFNGLTEXSTORAGE2DMULTISAMPLEPROC glTexStorage2DMultisample;
+		extern PFNGLTEXSTORAGE3DMULTISAMPLEPROC glTexStorage3DMultisample;
+		extern PFNGLVERTEXATTRIBBINDINGPROC glVertexAttribBinding;
+		extern PFNGLVERTEXATTRIBFORMATPROC glVertexAttribFormat;
+		extern PFNGLVERTEXATTRIBIFORMATPROC glVertexAttribIFormat;
+		extern PFNGLVERTEXATTRIBLFORMATPROC glVertexAttribLFormat;
+		extern PFNGLVERTEXBINDINGDIVISORPROC glVertexBindingDivisor;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_4
+		extern PFNGLBUFFERSTORAGEPROC glBufferStorage;
 	#endif
 
 	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
@@ -115,68 +156,6 @@ namespace Trident {
 	#else
 		extern PFNGLCOMPILESHADERPROC glCompileShader;
 		extern PFNGLSHADERSOURCEPROC glShaderSource;
-	#endif
-
-	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-		extern PFNGLBINDTEXTUREUNITPROC glBindTextureUnit;
-		extern PFNGLCREATETEXTURESPROC glCreateTextures;
-
-		#if defined(BUILD_MODE_DEBUG)
-			extern PFNGLGETTEXTUREPARAMETERIVPROC glGetTextureParameteriv;
-		#endif
-
-		extern PFNGLTEXTUREPARAMETERIPROC glTextureParameteri;
-		extern PFNGLTEXTURESUBIMAGE1DPROC glTextureSubImage1D;
-		extern PFNGLTEXTURESUBIMAGE2DPROC glTextureSubImage2D;
-		extern PFNGLTEXTURESUBIMAGE3DPROC glTextureSubImage3D;
-	#else
-		extern PFNGLACTIVETEXTUREPROC glActiveTexture;
-		extern PFNGLBINDTEXTUREPROC glBindTexture;
-
-		#if defined(BUILD_MODE_DEBUG)
-			extern PFNGLGETTEXPARAMETERIVPROC glGetTexParameteriv;
-		#endif
-
-		extern PFNGLTEXPARAMETERIPROC glTexParameteri;
-		extern PFNGLTEXSUBIMAGE1DPROC glTexSubImage1D;
-		extern PFNGLTEXSUBIMAGE2DPROC glTexSubImage2D;
-		extern PFNGLTEXSUBIMAGE3DPROC glTexSubImage3D;
-	#endif
-
-	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-		#if defined(BUILD_MODE_DEBUG)
-			extern PFNGLCHECKNAMEDFRAMEBUFFERSTATUSPROC glCheckNamedFramebufferStatus;
-		#endif
-
-		extern PFNGLCLEARNAMEDFRAMEBUFFERFIPROC glClearNamedFramebufferfi;
-		extern PFNGLCLEARNAMEDFRAMEBUFFERFVPROC glClearNamedFramebufferfv;
-		extern PFNGLCLEARNAMEDFRAMEBUFFERIVPROC glClearNamedFramebufferiv;
-		extern PFNGLCLEARNAMEDFRAMEBUFFERUIVPROC glClearNamedFramebufferuiv;
-		extern PFNGLCREATEFRAMEBUFFERSPROC glCreateFramebuffers;
-		extern PFNGLNAMEDFRAMEBUFFERTEXTUREPROC glNamedFramebufferTexture;
-	#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
-		#if defined(BUILD_MODE_DEBUG)
-			extern PFNGLCHECKFRAMEBUFFERSTATUSPROC glCheckFramebufferStatus;
-		#endif
-
-		extern PFNGLCLEARBUFFERFIPROC glClearBufferfi;
-		extern PFNGLCLEARBUFFERFVPROC glClearBufferfv;
-		extern PFNGLCLEARBUFFERIVPROC glClearBufferiv;
-		extern PFNGLCLEARBUFFERUIVPROC glClearBufferuiv;
-		extern PFNGLFRAMEBUFFERTEXTURE2DPROC glFramebufferTexture2D;
-		extern PFNGLGENFRAMEBUFFERSPROC glGenFramebuffers;
-	#endif
-
-	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-		extern PFNGLCREATESAMPLERSPROC glCreateSamplers;
-	#elif OPENGL_VERSION >= OPENGL_VERSION_3_3
-		extern PFNGLGENSAMPLERSPROC glGenSamplers;
-	#endif
-
-	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-		extern PFNGLCREATEVERTEXARRAYSPROC glCreateVertexArrays;
-	#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
-		extern PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
 	#endif
 
 	#if OPENGL_VERSION >= OPENGL_VERSION_4_2
@@ -197,64 +176,11 @@ namespace Trident {
 		extern PFNGLDRAWELEMENTSPROC glDrawElements;
 	#endif
 
-	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-		extern PFNGLENABLEVERTEXARRAYATTRIBPROC glEnableVertexArrayAttrib;
-	#else
-		extern PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
-	#endif
-
 	#if OPENGL_VERSION >= OPENGL_VERSION_4_3
 		extern PFNGLMULTIDRAWARRAYSINDIRECTPROC glMultiDrawArraysIndirect;
 		extern PFNGLMULTIDRAWELEMENTSINDIRECTPROC glMultiDrawElementsIndirect;
 	#elif OPENGL_VERSION >= OPENGL_VERSION_4_0
 		extern PFNGLDRAWARRAYSINDIRECTPROC glDrawArraysIndirect;
 		extern PFNGLDRAWELEMENTSINDIRECTPROC glDrawElementsIndirect;
-	#endif
-
-	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-		extern PFNGLNAMEDBUFFERSTORAGEPROC glNamedBufferStorage;
-	#elif OPENGL_VERSION >= OPENGL_VERSION_4_4
-		extern PFNGLBUFFERSTORAGEPROC glBufferStorage;
-	#endif
-
-	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-		extern PFNGLNAMEDFRAMEBUFFERDRAWBUFFERPROC glNamedFramebufferDrawBuffer;
-		extern PFNGLNAMEDFRAMEBUFFERDRAWBUFFERSPROC glNamedFramebufferDrawBuffers;
-		extern PFNGLNAMEDFRAMEBUFFERREADBUFFERPROC glNamedFramebufferReadBuffer;
-	#else
-		extern PFNGLDRAWBUFFERSPROC glDrawBuffers;
-		extern PFNGLREADBUFFERPROC glReadBuffer;
-	#endif
-
-	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-		extern PFNGLTEXTURESTORAGE2DPROC glTextureStorage2D;
-		extern PFNGLTEXTURESTORAGE3DPROC glTextureStorage3D;
-	#elif OPENGL_VERSION >= OPENGL_VERSION_4_2
-		extern PFNGLTEXSTORAGE2DPROC glTexStorage2D;
-		extern PFNGLTEXSTORAGE3DPROC glTexStorage3D;
-	#endif
-
-	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-		extern PFNGLTEXTURESTORAGE2DMULTISAMPLEPROC glTextureStorage2DMultisample;
-		extern PFNGLTEXTURESTORAGE3DMULTISAMPLEPROC glTextureStorage3DMultisample;
-	#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
-		extern PFNGLTEXSTORAGE2DMULTISAMPLEPROC glTexStorage2DMultisample;
-		extern PFNGLTEXSTORAGE3DMULTISAMPLEPROC glTexStorage3DMultisample;
-	#endif
-
-	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-		extern PFNGLVERTEXARRAYATTRIBBINDINGPROC glVertexArrayAttribBinding;
-		extern PFNGLVERTEXARRAYATTRIBFORMATPROC glVertexArrayAttribFormat;
-		extern PFNGLVERTEXARRAYATTRIBIFORMATPROC glVertexArrayAttribIFormat;
-		extern PFNGLVERTEXARRAYATTRIBLFORMATPROC glVertexArrayAttribLFormat;
-		extern PFNGLVERTEXARRAYBINDINGDIVISORPROC glVertexArrayBindingDivisor;
-		extern PFNGLVERTEXARRAYVERTEXBUFFERPROC glVertexArrayVertexBuffer;
-	#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
-		extern PFNGLBINDVERTEXBUFFERPROC glBindVertexBuffer;
-		extern PFNGLVERTEXATTRIBBINDINGPROC glVertexAttribBinding;
-		extern PFNGLVERTEXATTRIBFORMATPROC glVertexAttribFormat;
-		extern PFNGLVERTEXATTRIBIFORMATPROC glVertexAttribIFormat;
-		extern PFNGLVERTEXATTRIBLFORMATPROC glVertexAttribLFormat;
-		extern PFNGLVERTEXBINDINGDIVISORPROC glVertexBindingDivisor;
 	#endif
 }

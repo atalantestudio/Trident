@@ -70,9 +70,7 @@ namespace Trident {
 		glDetachShader(graphicsPipeline->program, vertexShaderModule->shader);
 		glDetachShader(graphicsPipeline->program, fragmentShaderModule->shader);
 
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			glCreateVertexArrays(1, &graphicsPipeline->vertexArray);
-		#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
+		#if OPENGL_VERSION >= OPENGL_VERSION_3_0
 			glGenVertexArrays(1, &graphicsPipeline->vertexArray);
 			glBindVertexArray(graphicsPipeline->vertexArray);
 		#else
@@ -91,65 +89,55 @@ namespace Trident {
 				const GLuint relativeoffset = attribute.offset;
 
 				switch (type) {
-					case GL_FLOAT:
-						#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-							glVertexArrayAttribFormat(graphicsPipeline->vertexArray, attribindex, size, type, GL_FALSE, relativeoffset);
-						#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
+					case GL_FLOAT: {
+						#if OPENGL_VERSION >= OPENGL_VERSION_4_3
 							glVertexAttribFormat(attribindex, size, type, GL_FALSE, relativeoffset);
 						#else
 							ENGINE_ERROR_UNSUPPORTED();
 						#endif
 
 						break;
+					}
 					case GL_BYTE:
 					case GL_UNSIGNED_BYTE:
 					case GL_SHORT:
 					case GL_UNSIGNED_SHORT:
 					case GL_INT:
-					case GL_UNSIGNED_INT:
-						#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-							glVertexArrayAttribIFormat(graphicsPipeline->vertexArray, attribindex, size, type, relativeoffset);
-						#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
+					case GL_UNSIGNED_INT: {
+						#if OPENGL_VERSION >= OPENGL_VERSION_4_3
 							glVertexAttribIFormat(attribindex, size, type, relativeoffset);
 						#else
 							ENGINE_ERROR_UNSUPPORTED();
 						#endif
 
 						break;
-					case GL_DOUBLE:
-						#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-							glVertexArrayAttribLFormat(graphicsPipeline->vertexArray, attribindex, size, type, relativeoffset);
-						#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
+					}
+					case GL_DOUBLE: {
+						#if OPENGL_VERSION >= OPENGL_VERSION_4_3
 							glVertexAttribLFormat(attribindex, size, type, relativeoffset);
 						#else
 							ENGINE_ERROR_UNSUPPORTED();
 						#endif
 
 						break;
+					}
 					default:
 						ADAPTER_ASSERT(false, "Unsupported vertex input attribute type.");
 				}
 
-				#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-					glVertexArrayAttribBinding(graphicsPipeline->vertexArray, attribindex, bindingindex);
-				#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
+				#if OPENGL_VERSION >= OPENGL_VERSION_4_3
 					glVertexAttribBinding(attribindex, bindingindex);
 				#else
 					ENGINE_ERROR_UNSUPPORTED();
 				#endif
 
-				#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-					glEnableVertexArrayAttrib(graphicsPipeline->vertexArray, attribindex);
-				#else
-					glEnableVertexAttribArray(attribindex);
-				#endif
+				glEnableVertexAttribArray(attribindex);
 
 				if (vertexInputBinding.getInputRate() == InputRate::INSTANCE) {
-					#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-						glVertexArrayBindingDivisor(graphicsPipeline->vertexArray, bindingindex, 1);
-					#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
+					#if OPENGL_VERSION >= OPENGL_VERSION_4_3
 						glVertexBindingDivisor(bindingindex, 1);
 					#else
+						// TODO(graphics/gl/graphics-pipeline): Revert to glVertexAttribDivisor.
 						ENGINE_ERROR_UNSUPPORTED();
 					#endif
 				}

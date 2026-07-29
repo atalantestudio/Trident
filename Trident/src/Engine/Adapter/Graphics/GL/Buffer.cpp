@@ -45,21 +45,19 @@ namespace Trident {
 
 		buffer->storageAccessFlags |= buffer->mapAccessFlags;
 
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			glNamedBufferStorage(buffer->buffer, buffer->size, nullptr, buffer->storageAccessFlags);
-		#elif OPENGL_VERSION >= OPENGL_VERSION_4_4
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_4
 			glBufferStorage(buffer->target, buffer->size, nullptr, buffer->storageAccessFlags);
 		#else
+			// TODO(graphics/gl/buffer): Revert to glBufferData.
 			ENGINE_ERROR_UNSUPPORTED();
 		#endif
 
-		// Verify that the buffer has an immutable storage.
 		#if defined(BUILD_MODE_DEBUG)
 			GLint immutableStorage = GL_FALSE;
 
 			glGetBufferParameteriv(buffer->target, GL_BUFFER_IMMUTABLE_STORAGE, &immutableStorage);
 
-			ADAPTER_ASSERT(immutableStorage != GL_FALSE, "Only immutable buffer storage are not supported.");
+			ADAPTER_ASSERT(immutableStorage != GL_FALSE, "Buffer doesn't have immutable storage.");
 		#endif
 
 		#if defined(DEBUG_OBJECT_NAME)

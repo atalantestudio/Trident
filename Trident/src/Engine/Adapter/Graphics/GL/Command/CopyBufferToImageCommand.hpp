@@ -23,10 +23,7 @@ namespace Trident {
 				const GLenum type = getType(destinationImage->getFormat());
 
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, sourceBuffer->buffer);
-
-				#if OPENGL_VERSION < OPENGL_VERSION_4_5
-					glBindTexture(destinationImage->target, destinationImage->texture);
-				#endif
+				glBindTexture(destinationImage->target, destinationImage->texture);
 
 				switch (destinationImage->format) {
 					case GL_RGB: {
@@ -52,27 +49,15 @@ namespace Trident {
 					// TODO(graphics/gl/texture): Move that switch out of the loop. The function to call should be known beforehand (maybe even before creating the image).
 					switch (destinationImage->target) {
 						case GL_TEXTURE_1D: {
-							#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-								glTextureSubImage1D(
-									destinationImage->texture,
-									copyRegion.imageMipLevel,
-									copyRegion.imageOffsetX,
-									copyRegion.imageExtent.width,
-									destinationImage->format,
-									type,
-									pixels
-								);
-							#else
-								glTexSubImage1D(
-									destinationImage->target,
-									copyRegion.imageMipLevel,
-									copyRegion.imageOffsetX,
-									copyRegion.imageExtent.width,
-									destinationImage->format,
-									type,
-									pixels
-								);
-							#endif
+							glTexSubImage1D(
+								destinationImage->target,
+								copyRegion.imageMipLevel,
+								copyRegion.imageOffsetX,
+								copyRegion.imageExtent.width,
+								destinationImage->format,
+								type,
+								pixels
+							);
 
 							break;
 						}
@@ -84,65 +69,35 @@ namespace Trident {
 						case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
 						case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
 						case GL_TEXTURE_CUBE_MAP_POSITIVE_Z: {
-							#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-								glTextureSubImage2D(
-									destinationImage->texture,
-									copyRegion.imageMipLevel,
-									copyRegion.imageOffsetX,
-									copyRegion.imageOffsetY + copyRegion.imageLayerOffset,
-									copyRegion.imageExtent.width,
-									copyRegion.imageExtent.height * copyRegion.imageLayerCount,
-									destinationImage->format,
-									type,
-									pixels
-								);
-							#else
-								glTexSubImage2D(
-									destinationImage->target,
-									copyRegion.imageMipLevel,
-									copyRegion.imageOffsetX,
-									copyRegion.imageOffsetY + copyRegion.imageLayerOffset,
-									copyRegion.imageExtent.width,
-									copyRegion.imageExtent.height * copyRegion.imageLayerCount,
-									destinationImage->format,
-									type,
-									pixels
-								);
-							#endif
+							glTexSubImage2D(
+								destinationImage->target,
+								copyRegion.imageMipLevel,
+								copyRegion.imageOffsetX,
+								copyRegion.imageOffsetY + copyRegion.imageLayerOffset,
+								copyRegion.imageExtent.width,
+								copyRegion.imageExtent.height * copyRegion.imageLayerCount,
+								destinationImage->format,
+								type,
+								pixels
+							);
 
 							break;
 						}
 						case GL_TEXTURE_2D_ARRAY:
 						case GL_TEXTURE_3D: {
-							#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-								glTextureSubImage3D(
-									destinationImage->texture,
-									copyRegion.imageMipLevel,
-									copyRegion.imageOffsetX,
-									copyRegion.imageOffsetY,
-									copyRegion.imageOffsetZ + copyRegion.imageLayerOffset,
-									copyRegion.imageExtent.width,
-									copyRegion.imageExtent.height,
-									copyRegion.imageExtent.depth * copyRegion.imageLayerCount,
-									destinationImage->format,
-									type,
-									pixels
-								);
-							#else
-								glTexSubImage3D(
-									destinationImage->target,
-									copyRegion.imageMipLevel,
-									copyRegion.imageOffsetX,
-									copyRegion.imageOffsetY,
-									copyRegion.imageOffsetZ + copyRegion.imageLayerOffset,
-									copyRegion.imageExtent.width,
-									copyRegion.imageExtent.height,
-									copyRegion.imageExtent.depth * copyRegion.imageLayerCount,
-									destinationImage->format,
-									type,
-									pixels
-								);
-							#endif
+							glTexSubImage3D(
+								destinationImage->target,
+								copyRegion.imageMipLevel,
+								copyRegion.imageOffsetX,
+								copyRegion.imageOffsetY,
+								copyRegion.imageOffsetZ + copyRegion.imageLayerOffset,
+								copyRegion.imageExtent.width,
+								copyRegion.imageExtent.height,
+								copyRegion.imageExtent.depth * copyRegion.imageLayerCount,
+								destinationImage->format,
+								type,
+								pixels
+							);
 
 							break;
 						}

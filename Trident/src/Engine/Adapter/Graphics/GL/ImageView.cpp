@@ -19,12 +19,12 @@ namespace Trident {
 
 		const GL::Image* _image = static_cast<const GL::Image*>(image);
 
-		// NOTE: `glCreateTextures` cannot be used here because the texture view must not be bound or initialized.
 		glGenTextures(1, &imageView->texture);
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_3
 			glTextureView(imageView->texture, _image->target, _image->texture, _image->internalFormat, 0, _image->getMipLevelCount(), 0, _image->getLayerCount());
 		#else
+			// TODO(graphics/gl/image-view): Revert to a simple proxy of the parent image.
 			ENGINE_ERROR_UNSUPPORTED();
 		#endif
 

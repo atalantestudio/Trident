@@ -35,10 +35,8 @@ namespace Trident {
 
 		GLuint* framebuffers[] = {&framebuffer->framebuffer, &framebuffer->resolveFramebuffer};
 
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			glCreateFramebuffers(1 + resolve, *framebuffers);
-		#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
-			glGenFramebuffers(1 + resolve, framebuffers);
+		#if OPENGL_VERSION >= OPENGL_VERSION_3_0
+			glGenFramebuffers(1 + resolve, *framebuffers);
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer->framebuffer);
 
 			if (resolve) {
@@ -58,21 +56,8 @@ namespace Trident {
 			const GL::Image* glImage = static_cast<const GL::Image*>(imageView->getImage());
 
 			if (resolve && imageView->getImage()->getSampleCount() == 1) {
-				#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-					glNamedFramebufferTexture(
-						framebuffer->resolveFramebuffer,
-						GL_COLOR_ATTACHMENT0 + resolveAttachmentIndex,
-						glImageView->texture,
-						imageView->getMipLevelOffset()
-					);
-				#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
-					glFramebufferTexture2D(
-						GL_READ_FRAMEBUFFER,
-						GL_COLOR_ATTACHMENT0 + resolveAttachmentIndex,
-						glImage->target,
-						glImageView->texture,
-						imageView->getMipLevelOffset()
-					);
+				#if OPENGL_VERSION >= OPENGL_VERSION_3_0
+					glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + resolveAttachmentIndex, glImage->target, glImageView->texture, imageView->getMipLevelOffset());
 				#else
 					ENGINE_ERROR_UNSUPPORTED();
 				#endif
@@ -118,21 +103,8 @@ namespace Trident {
 				case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
 				case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
 				case GL_TEXTURE_RECTANGLE: {
-					#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-						glNamedFramebufferTexture(
-							framebuffer->framebuffer,
-							attachment,
-							glImageView->texture,
-							imageView->getMipLevelOffset()
-						);
-					#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
-						glFramebufferTexture2D(
-							GL_DRAW_FRAMEBUFFER,
-							attachment,
-							glImage->target,
-							glImageView->texture,
-							imageView->getMipLevelOffset()
-						);
+					#if OPENGL_VERSION >= OPENGL_VERSION_3_0
+						glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, attachment, glImage->target, glImageView->texture, imageView->getMipLevelOffset());
 					#else
 						ENGINE_ERROR_UNSUPPORTED();
 					#endif
@@ -150,13 +122,10 @@ namespace Trident {
 			imageViewIndex += 1;
 		}
 
-		// Verify the status of the framebuffer.
 		#if defined(BUILD_MODE_DEBUG)
 			GLenum status = 0;
 
-			#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-				status = glCheckNamedFramebufferStatus(framebuffer->framebuffer, GL_DRAW_FRAMEBUFFER);
-			#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
+			#if OPENGL_VERSION >= OPENGL_VERSION_3_0
 				status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
 			#else
 				ENGINE_ERROR_UNSUPPORTED();
@@ -165,9 +134,7 @@ namespace Trident {
 			ADAPTER_ASSERT(status == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete.");
 
 			if (resolve) {
-				#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-					status = glCheckNamedFramebufferStatus(framebuffer->resolveFramebuffer, GL_READ_FRAMEBUFFER);
-				#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
+				#if OPENGL_VERSION >= OPENGL_VERSION_3_0
 					status = glCheckFramebufferStatus(GL_READ_FRAMEBUFFER);
 				#else
 					ENGINE_ERROR_UNSUPPORTED();

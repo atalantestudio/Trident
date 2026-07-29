@@ -18,9 +18,7 @@ namespace Trident {
 			{}
 
 			void execute() const final override {
-				#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-					glVertexArrayVertexBuffer(vertexArray, bindingIndex, buffer, offset, stride);
-				#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
+				#if OPENGL_VERSION >= OPENGL_VERSION_4_3
 					glBindVertexArray(vertexArray);
 					glBindVertexBuffer(bindingIndex, buffer, offset, stride);
 				#else

@@ -18,74 +18,36 @@ namespace Trident {
 				const ref<GL::RenderPass> renderPass = std::static_pointer_cast<GL::RenderPass>(framebuffer->getRenderPass());
 				const Extent2D extent = framebuffer->getExtent();
 
-				glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer->framebuffer);
+				#if OPENGL_VERSION >= OPENGL_VERSION_3_0
+					glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer->framebuffer);
+				#else
+					ENGINE_ERROR_UNSUPPORTED();
+				#endif
 
 				if (renderPass->presentSourceAttachmentIndex == max<uint32>()) {
 					if (renderPass->multisample) {
 						glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer->resolveFramebuffer);
 
-						// TODO: Should we resolve all color attachments?
-						glNamedFramebufferReadBuffer(framebuffer->framebuffer, GL_COLOR_ATTACHMENT0);
-						glNamedFramebufferDrawBuffer(framebuffer->resolveFramebuffer, GL_COLOR_ATTACHMENT0);
-
-						glBlitFramebuffer(
-							0,
-							0,
-							extent.width,
-							extent.height,
-							0,
-							0,
-							extent.width,
-							extent.height,
-							GL_COLOR_BUFFER_BIT,
-							GL_NEAREST
-						);
+						#if OPENGL_VERSION >= OPENGL_VERSION_3_0
+							// TODO(graphics/gl/command-encoder/end-render-pass): Resolve all color attachments, not just the presented one.
+							glReadBuffer(GL_COLOR_ATTACHMENT0);
+							glDrawBuffer(GL_FRONT_LEFT);
+							glBlitFramebuffer(0, 0, extent.width, extent.height, 0, 0, extent.width, extent.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+						#else
+							ENGINE_ERROR_UNSUPPORTED();
+						#endif
 					}
 
 					return;
 				}
 
-				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-
 				const GLenum readBuffer = GL_COLOR_ATTACHMENT0 + renderPass->presentSourceAttachmentIndex;
 
-				#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-					glNamedFramebufferReadBuffer(framebuffer->framebuffer, readBuffer);
-
-					// TODO(graphics/gl/logs) (tested on HP Victus)
-					// glNamedFramebufferDrawBuffer may generate a GL_INVALID_OPERATION
-					// if the default framebuffer is not bound to GL_DRAW_FRAMEBUFFER.
-					// See https://github.com/atalantestudio/Trident/issues/67.
-					glDrawBuffer(GL_FRONT_LEFT);
-
-					glBlitFramebuffer(
-						0,
-						0,
-						extent.width,
-						extent.height,
-						0,
-						0,
-						extent.width,
-						extent.height,
-						GL_COLOR_BUFFER_BIT,
-						GL_NEAREST
-					);
-				#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
+				#if OPENGL_VERSION >= OPENGL_VERSION_3_0
+					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 					glReadBuffer(readBuffer);
 					glDrawBuffer(GL_FRONT_LEFT);
-
-					glBlitFramebuffer(
-						0,
-						0,
-						extent.width,
-						extent.height,
-						0,
-						0,
-						extent.width,
-						extent.height,
-						GL_COLOR_BUFFER_BIT,
-						GL_NEAREST
-					);
+					glBlitFramebuffer(0, 0, extent.width, extent.height, 0, 0, extent.width, extent.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 				#else
 					ENGINE_ERROR_UNSUPPORTED();
 				#endif

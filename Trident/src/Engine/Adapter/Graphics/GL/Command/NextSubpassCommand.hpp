@@ -31,11 +31,7 @@ namespace Trident {
 					bufIndex += 1;
 				}
 
-				#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-					glNamedFramebufferDrawBuffers(framebuffer->framebuffer, static_cast<GLsizei>(bufs.count()), &bufs[0]);
-				#else
-					glDrawBuffers(static_cast<GLsizei>(bufs.count()), &bufs[0]);
-				#endif
+				glDrawBuffers(static_cast<GLsizei>(bufs.count()), &bufs[0]);
 			}
 
 		public:

@@ -101,23 +101,19 @@ namespace Trident {
 									break;
 								}
 
-								#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-									glBindTextureUnit(descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex, imageView->texture);
-								#else
-									glActiveTexture(GL_TEXTURE0 + descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex);
-									glBindTexture(static_cast<const GL::Image*>(imageView->getImage())->target, imageView->texture);
-								#endif
+								glActiveTexture(GL_TEXTURE0 + descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex);
+								glBindTexture(static_cast<const GL::Image*>(imageView->getImage())->target, imageView->texture);
 
-								if (descriptorImage.sampler != nullptr) {
-									#if OPENGL_VERSION >= OPENGL_VERSION_3_3
-										glBindSampler(
-											descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex,
-											std::static_pointer_cast<GL::Sampler>(descriptorImage.sampler)->sampler
-										);
-									#else
-										ENGINE_ERROR_UNSUPPORTED();
-									#endif
-								}
+								#if OPENGL_VERSION >= OPENGL_VERSION_3_3
+									if (descriptorImage.sampler != nullptr) {
+										glBindSampler(descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex, std::static_pointer_cast<GL::Sampler>(descriptorImage.sampler)->sampler);
+									}
+									else {
+										glBindSampler(descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex, 0);
+									}
+								#else
+									ENGINE_ERROR_UNSUPPORTED();
+								#endif
 
 								descriptorImageIndex += 1;
 							}

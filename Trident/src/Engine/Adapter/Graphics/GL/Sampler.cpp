@@ -15,19 +15,13 @@ namespace Trident {
 	ref<Trident::Sampler> GL::createSampler(const Trident::Device* device, const SamplerDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		static constexpr GLfloat BORDER_COLOR[] = {0.0f, 0.0f, 0.0f, 1.0f};
+
 		ref<GL::Sampler> sampler = createRef<GL::Sampler>(device);
 
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			glCreateSamplers(1, &sampler->sampler);
-		#elif OPENGL_VERSION >= OPENGL_VERSION_3_3
-			glGenSamplers(1, &sampler->sampler);
-		#else
-			ENGINE_ERROR_UNSUPPORTED();
-		#endif
-
 		#if OPENGL_VERSION >= OPENGL_VERSION_3_3
-			static constexpr GLfloat BORDER_COLOR[] = {0.0f, 0.0f, 0.0f, 1.0f};
-
+			glGenSamplers(1, &sampler->sampler);
+			glBindSampler(0, sampler->sampler);
 			glSamplerParameteri(sampler->sampler, GL_TEXTURE_MAG_FILTER, getFilter(descriptor.magFilter));
 			glSamplerParameteri(sampler->sampler, GL_TEXTURE_MIN_FILTER, getFilter(descriptor.minFilter));
 			glSamplerParameteri(sampler->sampler, GL_TEXTURE_WRAP_R, getAddressMode(descriptor.addressModeU));

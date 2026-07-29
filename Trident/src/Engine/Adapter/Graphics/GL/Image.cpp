@@ -22,20 +22,17 @@ namespace Trident {
 		image->internalFormat = getInternalFormat(descriptor.format);
 		image->format = GL::getFormat(descriptor.format);
 
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			glCreateTextures(image->target, 1, &image->texture);
-		#else
-			glGenTextures(1, &image->texture);
-			glBindTexture(image->target, image->texture);
-		#endif
+		glGenTextures(1, &image->texture);
+		glBindTexture(image->target, image->texture);
 
 		switch (image->target) {
 			case GL_PROXY_TEXTURE_1D:
-			case GL_TEXTURE_1D:
-				// TODO: Implement 1D images.
+			case GL_TEXTURE_1D: {
+				// TODO(graphics/gl/image): Add support for 1D images.
 				ADAPTER_ASSERT(false, "1D images are not supported.");
 
 				break;
+			}
 			case GL_PROXY_TEXTURE_1D_ARRAY:
 			case GL_PROXY_TEXTURE_2D:
 			case GL_PROXY_TEXTURE_2D_MULTISAMPLE:
@@ -45,21 +42,17 @@ namespace Trident {
 			case GL_TEXTURE_2D:
 			case GL_TEXTURE_2D_MULTISAMPLE:
 			case GL_TEXTURE_CUBE_MAP:
-			case GL_TEXTURE_RECTANGLE:
-				// TODO: Decouple multisample from non-multisample images.
+			case GL_TEXTURE_RECTANGLE: {
+				// TODO(graphics/gl/image): Decouple multisampled from non-multisampled images.
 				if (image->sampleCount > 1) {
-					#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-						glTextureStorage2DMultisample(image->texture, image->sampleCount, image->internalFormat, image->extent.width, image->extent.height, GL_TRUE);
-					#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
+					#if OPENGL_VERSION >= OPENGL_VERSION_4_3
 						glTexStorage2DMultisample(image->target, image->sampleCount, image->internalFormat, image->extent.width, image->extent.height, GL_TRUE);
 					#else
 						ENGINE_ERROR_UNSUPPORTED();
 					#endif
 				}
 				else {
-					#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-						glTextureStorage2D(image->texture, image->mipLevelCount, image->internalFormat, image->extent.width, image->extent.height);
-					#elif OPENGL_VERSION >= OPENGL_VERSION_4_2
+					#if OPENGL_VERSION >= OPENGL_VERSION_4_2
 						glTexStorage2D(image->target, image->mipLevelCount, image->internalFormat, image->extent.width, image->extent.height);
 					#else
 						ENGINE_ERROR_UNSUPPORTED();
@@ -67,6 +60,7 @@ namespace Trident {
 				}
 
 				break;
+			}
 			case GL_PROXY_TEXTURE_2D_ARRAY:
 			case GL_PROXY_TEXTURE_2D_MULTISAMPLE_ARRAY:
 			case GL_PROXY_TEXTURE_3D:
@@ -74,21 +68,17 @@ namespace Trident {
 			case GL_TEXTURE_2D_ARRAY:
 			case GL_TEXTURE_2D_MULTISAMPLE_ARRAY:
 			case GL_TEXTURE_3D:
-			case GL_TEXTURE_CUBE_MAP_ARRAY:
-				// TODO: Decouple multisample from non-multisample images.
+			case GL_TEXTURE_CUBE_MAP_ARRAY: {
+				// TODO(graphics/gl/image): Decouple multisampled from non-multisampled images.
 				if (image->sampleCount > 1) {
-					#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-						glTextureStorage3DMultisample(image->texture, image->sampleCount, image->internalFormat, image->extent.width, image->extent.height, image->extent.depth * image->layerCount, GL_TRUE);
-					#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
+					#if OPENGL_VERSION >= OPENGL_VERSION_4_3
 						glTexStorage3DMultisample(image->target, image->sampleCount, image->internalFormat, image->extent.width, image->extent.height, image->extent.depth * image->layerCount, GL_TRUE);
 					#else
 						ENGINE_ERROR_UNSUPPORTED();
 					#endif
 				}
 				else {
-					#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-						glTextureStorage3D(image->texture, image->mipLevelCount, image->internalFormat, image->extent.width, image->extent.height, image->extent.depth * image->layerCount);
-					#elif OPENGL_VERSION >= OPENGL_VERSION_4_2
+					#if OPENGL_VERSION >= OPENGL_VERSION_4_2
 						glTexStorage3D(image->target, image->mipLevelCount, image->internalFormat, image->extent.width, image->extent.height, image->extent.depth * image->layerCount);
 					#else
 						ENGINE_ERROR_UNSUPPORTED();
@@ -96,38 +86,27 @@ namespace Trident {
 				}
 
 				break;
-			default:
+			}
+			default: {
 				ADAPTER_ASSERT(false, "Unhandled image target ([]).", image->target);
 
 				break;
+			}
 		}
 
-		// Verify that the texture has an immutable format.
 		#if defined(BUILD_MODE_DEBUG)
 			GLint immutableFormat = GL_FALSE;
 
-			#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-				glGetTextureParameteriv(image->texture, GL_TEXTURE_IMMUTABLE_FORMAT, &immutableFormat);
-			#else
-				glGetTexParameteriv(image->target, GL_TEXTURE_IMMUTABLE_FORMAT, &immutableFormat);
-			#endif
+			glGetTexParameteriv(image->target, GL_TEXTURE_IMMUTABLE_FORMAT, &immutableFormat);
 
 			ADAPTER_ASSERT(immutableFormat != GL_FALSE, "Only immutable image formats are not supported.");
 		#endif
 
-		// Set default texture parameters.
 		if (image->sampleCount == 1) {
-			#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-				glTextureParameteri(image->texture, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-				glTextureParameteri(image->texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				glTextureParameteri(image->texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-				glTextureParameteri(image->texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			#else
-				glTexParameteri(image->target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-				glTexParameteri(image->target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				glTexParameteri(image->target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-				glTexParameteri(image->target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			#endif
+			glTexParameteri(image->target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(image->target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(image->target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(image->target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		}
 
 		#if defined(DEBUG_OBJECT_NAME)
