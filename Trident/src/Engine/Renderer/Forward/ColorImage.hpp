@@ -6,32 +6,36 @@
 #include "Engine/Renderer/Forward/Renderer.hpp"
 
 namespace Trident {
-	ref<Image> ForwardRenderer::createColorImage() const {
-		const Extent2D extent = getSwapchain()->getExtent();
+	#if FORWARD_SAMPLE_COUNT > 1
+		ref<Image> ForwardRenderer::createColorImage() const {
+			const Extent2D extent = getSwapchain()->getExtent();
 
-		return renderPass->createColorAttachmentImage(
-			{
-				.type = ImageType::TEXTURE_2D,
-				.extent = {extent.width, extent.height, 1},
+			return renderPass->createColorAttachmentImage(
+				{
+					.type = ImageType::TEXTURE_2D,
+					.extent = {extent.width, extent.height, 1},
+					.mipLevelCount = 1,
+					.layerCount = 1,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Color",
+					#endif
+				},
+				0
+			);
+		}
+	#endif
+
+	#if FORWARD_SAMPLE_COUNT > 1
+		ref<ImageView> ForwardRenderer::createColorImageView() const {
+			return colorImage->createView({
+				.mipLevelOffset = 0,
 				.mipLevelCount = 1,
+				.layerOffset = 0,
 				.layerCount = 1,
 				#if defined(DEBUG_OBJECT_NAME)
 					.name = "Color",
 				#endif
-			},
-			0
-		);
-	}
-
-	ref<ImageView> ForwardRenderer::createColorImageView() const {
-		return colorImage->createView({
-			.mipLevelOffset = 0,
-			.mipLevelCount = 1,
-			.layerOffset = 0,
-			.layerCount = 1,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Color",
-			#endif
-		});
-	}
+			});
+		}
+	#endif
 }

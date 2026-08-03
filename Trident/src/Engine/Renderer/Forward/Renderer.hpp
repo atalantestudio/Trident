@@ -257,11 +257,17 @@ namespace Trident {
 			ref<GraphicsPipeline> createDebugHullWireframePipeline() const;
 			ref<GraphicsPipeline> createDebugContactManifoldPipeline() const;
 
-			ref<Image> createColorImage() const;
+			#if FORWARD_SAMPLE_COUNT > 1
+				ref<Image> createColorImage() const;
+			#endif
+
 			ref<Image> createDepthStencilImage() const;
 			ref<Image> createLightmapAtlasImage(ref<ImageAsset> imageAsset) const;
 
-			ref<ImageView> createColorImageView() const;
+			#if FORWARD_SAMPLE_COUNT > 1
+				ref<ImageView> createColorImageView() const;
+			#endif
+
 			ref<ImageView> createDepthStencilImageView() const;
 			ref<ImageView> createLightmapAtlasImageView() const;
 
