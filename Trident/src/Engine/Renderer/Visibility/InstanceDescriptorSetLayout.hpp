@@ -7,7 +7,7 @@
 
 namespace Trident {
 	ref<DescriptorSetLayout> VisibilityRenderer::createInstanceDescriptorSetLayout() const {
-		return createDescriptorSetLayout({
+		const sequence<DescriptorSetLayoutBinding> bindings = {
 			// Instance
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
@@ -31,6 +31,8 @@ namespace Trident {
 					#endif
 				),
 			},
-		});
+		};
+
+		return createDescriptorSetLayout(bindings);
 	}
 }

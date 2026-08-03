@@ -4,33 +4,34 @@
 #include "pch.hpp"
 
 #include "AssetBuilder/API/AssetBuilderLibrary.hpp"
-#include "AssetBuilder/Process/Material/Lightmapped/PlasterCeilingMaterialProcess.hpp"
-#include "AssetBuilder/Process/Material/Lightmapped/PlasterWallMaterialProcess.hpp"
-#include "AssetBuilder/Process/Material/Lightmapped/TileFloorMaterialProcess.hpp"
-#include "AssetBuilder/Process/Material/Lightmapped/WhiteMaterialProcess.hpp"
-#include "AssetBuilder/Process/Material/Lightmapped/WoodDoorMaterialProcess.hpp"
-#include "AssetBuilder/Process/Material/PBR/FoldingWoodenStoolMaterialProcess.hpp"
-#include "AssetBuilder/Process/Material/PBR/GallineraTableMaterialProcess.hpp"
-#include "AssetBuilder/Process/Material/PBR/RubberDuckToyMaterialProcess.hpp"
-#include "AssetBuilder/Process/Scene/BoxesSceneProcess.hpp"
-#include "AssetBuilder/Process/Scene/Boxes3DSceneProcess.hpp"
-#include "AssetBuilder/Process/Scene/BoxStackingSceneProcess.hpp"
-#include "AssetBuilder/Process/Scene/CabinSceneProcess.hpp"
-#include "AssetBuilder/Process/Scene/CirclesSceneProcess.hpp"
-#include "AssetBuilder/Process/Scene/DominosSceneProcess.hpp"
-#include "AssetBuilder/Process/Scene/EdgeContactSceneProcess.hpp"
-#include "AssetBuilder/Process/Scene/GallineraTableSceneProcess.hpp"
-#include "AssetBuilder/Process/Scene/HallSceneProcess.hpp"
-#include "AssetBuilder/Process/Scene/LemonsSceneProcess.hpp"
-#include "AssetBuilder/Process/Scene/PlayerMovementSceneProcess.hpp"
-#include "AssetBuilder/Process/Scene/PolygonsSceneProcess.hpp"
-#include "AssetBuilder/Process/Scene/PyramidSceneProcess.hpp"
-#include "AssetBuilder/Process/Scene/RollingBallSceneProcess.hpp"
-#include "AssetBuilder/Process/Scene/SlidingBoxesSceneProcess.hpp"
-#include "AssetBuilder/Process/Scene/SnapTestSceneProcess.hpp"
-#include "AssetBuilder/Process/Scene/StackingSceneProcess.hpp"
-#include "AssetBuilder/Process/Scene/SuzanneSceneProcess.hpp"
-#include "AssetBuilder/Process/Scene/SwingSceneProcess.hpp"
+#include "AssetBuilder/Process/Material/Lightmapped/PlasterCeiling.hpp"
+#include "AssetBuilder/Process/Material/Lightmapped/PlasterWall.hpp"
+#include "AssetBuilder/Process/Material/Lightmapped/TileFloor.hpp"
+#include "AssetBuilder/Process/Material/Lightmapped/White.hpp"
+#include "AssetBuilder/Process/Material/Lightmapped/WoodDoor.hpp"
+#include "AssetBuilder/Process/Material/LightmappedPBR/GallineraTable.hpp"
+#include "AssetBuilder/Process/Material/PBR/Debug.hpp"
+#include "AssetBuilder/Process/Material/PBR/FoldingWoodenStool.hpp"
+#include "AssetBuilder/Process/Material/PBR/GallineraTable.hpp"
+#include "AssetBuilder/Process/Material/PBR/Lemon.hpp"
+#include "AssetBuilder/Process/Material/PBR/RubberDuckToy.hpp"
+#include "AssetBuilder/Process/Scene/2D/Boxes.hpp"
+#include "AssetBuilder/Process/Scene/2D/Circles.hpp"
+#include "AssetBuilder/Process/Scene/2D/Dominos.hpp"
+#include "AssetBuilder/Process/Scene/2D/Polygons.hpp"
+#include "AssetBuilder/Process/Scene/2D/Pyramid.hpp"
+#include "AssetBuilder/Process/Scene/2D/RollingBall.hpp"
+#include "AssetBuilder/Process/Scene/2D/Sliding.hpp"
+#include "AssetBuilder/Process/Scene/2D/Stacking.hpp"
+#include "AssetBuilder/Process/Scene/2D/Swing.hpp"
+#include "AssetBuilder/Process/Scene/3D/EdgeContact.hpp"
+#include "AssetBuilder/Process/Scene/3D/GallineraTable.hpp"
+#include "AssetBuilder/Process/Scene/3D/Hall.hpp"
+#include "AssetBuilder/Process/Scene/3D/Lemons.hpp"
+#include "AssetBuilder/Process/Scene/3D/PlayerMovement.hpp"
+#include "AssetBuilder/Process/Scene/3D/Sliding.hpp"
+#include "AssetBuilder/Process/Scene/3D/Stacking.hpp"
+#include "AssetBuilder/Process/Scene/3D/Suzanne.hpp"
 #include "Process/BuildAssetMapProcess.hpp"
 #include "Process/BuildFontAssetProcess.hpp"
 #include "Process/BuildGeometryAssetProcess.hpp"
@@ -63,35 +64,36 @@ namespace Trident {
 
 				registerProcess<BuildImageAssetProcess>(&assetLibrary);
 
-				registerProcess<FoldingWoodenStoolMaterialProcess>(&assetLibrary);
-				registerProcess<GallineraTableMaterialProcess>(&assetLibrary);
-				registerProcess<PlasterCeilingMaterialProcess>(&assetLibrary);
-				registerProcess<PlasterWallMaterialProcess>(&assetLibrary);
-				registerProcess<RubberDuckToyMaterialProcess>(&assetLibrary);
-				registerProcess<TileFloorMaterialProcess>(&assetLibrary);
-				registerProcess<WhiteMaterialProcess>(&assetLibrary);
-				registerProcess<WoodDoorMaterialProcess>(&assetLibrary);
+				registerProcess<DebugMaterial>(&assetLibrary);
+				registerProcess<FoldingWoodenStoolMaterial>(&assetLibrary);
+				registerProcess<GallineraTableMaterial>(&assetLibrary);
+				registerProcess<LemonMaterial>(&assetLibrary);
+				registerProcess<LPBRGallineraTableMaterial>(&assetLibrary);
+				registerProcess<PlasterCeilingMaterial>(&assetLibrary);
+				registerProcess<PlasterWallMaterial>(&assetLibrary);
+				registerProcess<RubberDuckToyMaterial>(&assetLibrary);
+				registerProcess<TileFloorMaterial>(&assetLibrary);
+				registerProcess<WhiteMaterial>(&assetLibrary);
+				registerProcess<WoodDoorMaterial>(&assetLibrary);
 
-				registerProcess<BoxesSceneProcess>(&assetLibrary);
-				registerProcess<CirclesSceneProcess>(&assetLibrary);
-				registerProcess<DominosSceneProcess>(&assetLibrary);
-				registerProcess<PolygonsSceneProcess>(&assetLibrary);
-				registerProcess<PyramidSceneProcess>(&assetLibrary);
-				registerProcess<RollingBallSceneProcess>(&assetLibrary);
-				registerProcess<SlidingBoxesSceneProcess>(&assetLibrary);
-				registerProcess<StackingSceneProcess>(&assetLibrary);
-				registerProcess<SwingSceneProcess>(&assetLibrary);
+				registerProcess<BoxesScene2D>(&assetLibrary);
+				registerProcess<CirclesScene2D>(&assetLibrary);
+				registerProcess<DominosScene2D>(&assetLibrary);
+				registerProcess<PolygonsScene2D>(&assetLibrary);
+				registerProcess<PyramidScene2D>(&assetLibrary);
+				registerProcess<RollingBallScene2D>(&assetLibrary);
+				registerProcess<SlidingScene2D>(&assetLibrary);
+				registerProcess<StackingScene2D>(&assetLibrary);
+				registerProcess<SwingScene2D>(&assetLibrary);
 
-				registerProcess<Boxes3DSceneProcess>(&assetLibrary);
-				registerProcess<BoxStackingSceneProcess>(&assetLibrary);
-				registerProcess<CabinSceneProcess>(&assetLibrary);
-				registerProcess<EdgeContactSceneProcess>(&assetLibrary);
-				registerProcess<GallineraTableSceneProcess>(&assetLibrary);
-				registerProcess<HallSceneProcess>(&assetLibrary);
-				registerProcess<LemonsSceneProcess>(&assetLibrary);
-				registerProcess<PlayerMovementSceneProcess>(&assetLibrary);
-				registerProcess<SnapTestSceneProcess>(&assetLibrary);
-				registerProcess<SuzanneSceneProcess>(&assetLibrary);
+				registerProcess<EdgeContactScene3D>(&assetLibrary);
+				registerProcess<GallineraTableScene3D>(&assetLibrary);
+				registerProcess<HallScene3D>(&assetLibrary);
+				registerProcess<LemonsScene3D>(&assetLibrary);
+				registerProcess<PlayerMovementScene3D>(&assetLibrary);
+				registerProcess<SlidingScene3D>(&assetLibrary);
+				registerProcess<StackingScene3D>(&assetLibrary);
+				registerProcess<SuzanneScene3D>(&assetLibrary);
 
 				registerProcess<BuildShaderModuleAssetProcess>(&assetLibrary);
 
@@ -103,7 +105,7 @@ namespace Trident {
 			}
 
 			void release() final override {
-				StaticSceneBuilder::lightmapper.~Lightmapper();
+				SceneBuilder::release();
 			}
 
 		private:

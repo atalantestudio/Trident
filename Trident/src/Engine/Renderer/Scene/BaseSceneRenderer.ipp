@@ -3,7 +3,6 @@
 
 #include "Engine/Renderer/Scene/CameraBuffer.hpp"
 #include "Engine/Renderer/Scene/StaticGeometryBuffer.hpp"
-#include "Engine/Renderer/Scene/StaticIndexBuffer.hpp"
 
 namespace Trident {
 	template<typename CameraType>
@@ -17,79 +16,65 @@ namespace Trident {
 
 	template<typename CameraType>
 	void BaseSceneRenderer<CameraType>::postSetScene() {
-		staticIndexBuffer = createStaticIndexBuffer();
 		staticGeometryBuffer = createStaticGeometryBuffer();
 
-		const ref<Buffer> staticGeometryStagingBuffer = createStaticGeometryStagingBuffer();
+		if (scene->getAsset()->geometryData.count() > 0) {
+			const ref<Buffer> staticGeometryStagingBuffer = createStaticGeometryStagingBuffer();
 
-		const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
-		const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
-			.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Scene one-time commands",
-			#endif
-		});
+			const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
+			const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
+				.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
+				#if defined(DEBUG_OBJECT_NAME)
+					.name = "Scene one-time commands",
+				#endif
+			});
 
-		commandEncoder->begin();
+			commandEncoder->begin();
 
-		copyStaticGeometry(commandEncoder, staticGeometryStagingBuffer);
+			copyStaticGeometry(commandEncoder, staticGeometryStagingBuffer);
 
-		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-		queue->submit(commandBuffer);
-		queue->waitIdle();
+			queue->submit(commandBuffer);
+			queue->waitIdle();
+		}
 
 		// TODO(renderer): Reuse the same command encoder.
 		encodeSceneOneTimeCommands();
 	}
 
 	template<typename CameraType>
-	VertexInputBinding BaseSceneRenderer<CameraType>::getStaticGeometryVertexInputBinding() const {
-		VertexInputBinding vertexInputBinding(InputRate::VERTEX, false);
-
-		// Lightmap coordinate
-		vertexInputBinding.registerAttribute<svec2<float32>>();
-
-		// Vertex index, normal index, texture coordinate index
-		vertexInputBinding.registerAttribute<vec4<uint32>>();
-
-		return vertexInputBinding;
-	}
-
-	template<typename CameraType>
 	void BaseSceneRenderer<CameraType>::copyStaticGeometry(ref<CommandEncoder> commandEncoder, ref<Buffer> staticGeometryStagingBuffer) const {
 		const ref<Scene3DAsset> sceneAsset = scene->getAsset();
 		const uint64 alignment = getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
-		const uint64 vertexAlignedRangeSize = ceil(sceneAsset->staticVertexRange.count, alignment);
-		const uint64 normalAlignedRangeSize = ceil(sceneAsset->staticNormalRange.count, alignment);
+		const uint64 positionAlignedRangeSize = ceil(sceneAsset->geometryRanges[1].count, alignment);
+		const uint64 normalAlignedRangeSize = ceil(sceneAsset->geometryRanges[2].count, alignment);
 
 		const sequence<BufferCopyRegion> bufferCopyRegions = {
 			{
-				.sourceOffset = sceneAsset->staticIndexRange.offset,
+				.sourceOffset = 0,
 				.destinationOffset = 0,
-				.size = sceneAsset->staticIndexRange.count,
+				.size = sceneAsset->geometryRanges[1].count,
 			},
 			{
-				.sourceOffset = sceneAsset->staticVertexRange.offset,
+				.sourceOffset = sceneAsset->geometryRanges[1].count,
+				.destinationOffset = positionAlignedRangeSize,
+				.size = sceneAsset->geometryRanges[2].count,
+			},
+			{
+				.sourceOffset = sceneAsset->geometryRanges[1].count + sceneAsset->geometryRanges[2].count,
+				.destinationOffset = positionAlignedRangeSize + normalAlignedRangeSize,
+				.size = sceneAsset->geometryRanges[3].count,
+			},
+
+			// TODO(forward): Lightmap coordinate vertex buffer.
+			/* {
+				.sourceOffset = sceneAsset->geometryRanges[4].offset,
 				.destinationOffset = 0,
-				.size = sceneAsset->staticVertexRange.count,
-			},
-			{
-				.sourceOffset = sceneAsset->staticNormalRange.offset,
-				.destinationOffset = vertexAlignedRangeSize,
-				.size = sceneAsset->staticNormalRange.count,
-			},
-			{
-				.sourceOffset = sceneAsset->staticTextureCoordinateRange.offset,
-				.destinationOffset = vertexAlignedRangeSize + normalAlignedRangeSize,
-				.size = sceneAsset->staticTextureCoordinateRange.count,
-			},
+				.size = sceneAsset->geometryRanges[4].count,
+			}, */
 		};
 
-		commandEncoder->copyBufferToBuffer(staticGeometryStagingBuffer, staticIndexBuffer, bufferCopyRegions[0]);
-		// commandEncoder->copyBufferToBuffer(staticGeometryStagingBuffer, staticGeometryBuffer, view<BufferCopyRegion>(&bufferCopyRegions[1], 3));
-		commandEncoder->copyBufferToBuffer(staticGeometryStagingBuffer, staticGeometryBuffer, bufferCopyRegions[1]);
-		commandEncoder->copyBufferToBuffer(staticGeometryStagingBuffer, staticGeometryBuffer, bufferCopyRegions[2]);
-		commandEncoder->copyBufferToBuffer(staticGeometryStagingBuffer, staticGeometryBuffer, bufferCopyRegions[3]);
+		commandEncoder->copyBufferToBuffer(staticGeometryStagingBuffer, staticGeometryBuffer, view<BufferCopyRegion>(&bufferCopyRegions[0], 3));
 	}
 }

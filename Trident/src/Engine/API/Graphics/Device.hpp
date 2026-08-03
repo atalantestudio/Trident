@@ -33,15 +33,16 @@ namespace Trident {
 			/// Creates and returns a buffer which needs to be manually allocated.
 			ref<Buffer> createStaticBuffer(const BufferDescriptor& descriptor) const;
 
+			// TODO(graphics/device/create-compute-pipeline): Create multiple pipelines at once.
 			ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor) const;
 
-			// TODO: Use view<DescriptorSetLayoutBinding> instead.
-			ref<DescriptorSetLayout> createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const;
+			ref<DescriptorSetLayout> createDescriptorSetLayout(view<DescriptorSetLayoutBinding> bindings) const;
 
 			ref<Fence> createFence(const FenceDescriptor& descriptor) const;
 
 			ref<Framebuffer> createFramebuffer(const FramebufferDescriptor& descriptor) const;
 
+			// TODO(graphics/device/create-graphics-pipeline): Create multiple pipelines at once.
 			ref<GraphicsPipeline> createGraphicsPipeline(const GraphicsPipelineDescriptor& descriptor) const;
 
 			/// Creates and returns an image which is pre-allocated from dynamic memory.

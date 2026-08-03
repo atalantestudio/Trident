@@ -12,7 +12,7 @@
 namespace Trident {
 	class Scene3D : public Scene {
 		public:
-			explicit Scene3D(ref<Scene3DAsset> sceneAsset, uint64 minStorageBufferOffsetAlignment);
+			explicit Scene3D(ref<Scene3DAsset> sceneAsset, uint64 alignment);
 
 			inline ref<Scene3DAsset> getAsset() const {
 				return asset;
@@ -38,20 +38,8 @@ namespace Trident {
 				return triangleTangentComponentRange;
 			}
 
-			inline range<uint64, uint64> getVertexPositionIndexRange() const {
-				return vertexPositionIndexRange;
-			}
-
-			inline range<uint64, uint64> getVertexNormalIndexRange() const {
-				return vertexNormalIndexRange;
-			}
-
-			inline range<uint64, uint64> getVertexTextureCoordinateIndexRange() const {
-				return vertexTextureCoordinateIndexRange;
-			}
-
-			inline uint32 getHullLineIndexCount() const {
-				return hullLineIndexCount;
+			inline range<uint64, uint64> getIndexRange() const {
+				return indexRange;
 			}
 
 			inline uint64 getHullLineIndexByteOffset() const {
@@ -100,7 +88,7 @@ namespace Trident {
 			void updateRigidBodyFacePlanes();
 
 		private:
-			void loadGeometries(uint64 minStorageBufferOffsetAlignment);
+			void loadGeometries(uint64 alignment);
 			void loadEntityComponentMappings();
 
 		private:
@@ -114,11 +102,8 @@ namespace Trident {
 			range<uint64, uint64> vertexNormalComponentRange;
 			range<uint64, uint64> vertexTextureCoordinateComponentRange;
 			range<uint64, uint64> triangleTangentComponentRange;
-			range<uint64, uint64> vertexPositionIndexRange;
-			range<uint64, uint64> vertexNormalIndexRange;
-			range<uint64, uint64> vertexTextureCoordinateIndexRange;
+			range<uint64, uint64> indexRange;
 
-			uint32 hullLineIndexCount;
 			uint64 hullLineIndexByteOffset;
 
 		public:

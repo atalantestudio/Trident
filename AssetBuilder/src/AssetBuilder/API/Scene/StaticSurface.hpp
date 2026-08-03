@@ -23,8 +23,8 @@ namespace Trident {
 
 	struct SurfaceDescriptor {
 		StaticGeometry3D geometry;
+		MaterialReference material;
 		TextureFilteringDescriptor textureFiltering;
-		uint32 materialIndex;
 		LightmapDescriptor lightmap;
 		std::vector<Carving> carvings;
 	};
@@ -137,7 +137,7 @@ namespace Trident {
 		std::vector<StaticSubsurface> hollowSubsurfaces;
 		TextureFilteringDescriptor textureFiltering;
 		uint32 indexOffset;
-		uint32 materialIndex;
+		MaterialReference material;
 		svec2<float32> luxelScale;
 
 		/// Used by 3D geometry.

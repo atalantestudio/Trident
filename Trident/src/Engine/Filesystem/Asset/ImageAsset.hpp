@@ -53,7 +53,7 @@ namespace Trident {
 
 			/// Returns the byte size of the image data.
 			inline uint64 getSize() const {
-				return getChannelCount(format) * extent.width * extent.height * extent.depth * layerCount;
+				return getByteSize(format) * extent.width * extent.height * extent.depth * layerCount;
 			}
 
 			inline uint32 getMipLevelCount() const {

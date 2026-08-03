@@ -87,7 +87,7 @@ namespace Trident {
 	typedef ref<CommandEncoder> (*CreateCommandEncoderImplementation)(const Device* device, const CommandPool* commandPool, const CommandBufferDescriptor& descriptor);
 	typedef ref<CommandPool> (*CreateCommandPoolImplementation)(const Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability);
 	typedef ref<ComputePipeline> (*CreateComputePipelineImplementation)(const Device* device, const ComputePipelineDescriptor& descriptor);
-	typedef ref<DescriptorSetLayout> (*CreateDescriptorSetLayoutImplementation)(const Device* device, const sequence<DescriptorSetLayoutBinding>& bindings);
+	typedef ref<DescriptorSetLayout> (*CreateDescriptorSetLayoutImplementation)(const Device* device, view<DescriptorSetLayoutBinding> bindings);
 	typedef ref<Device> (*CreateDeviceImplementation)(const GraphicsAdapter* adapter, const PhysicalDevice* physicalDevice);
 	typedef ref<Fence> (*CreateFenceImplementation)(const Device* device, const FenceDescriptor& descriptor);
 	typedef ref<Framebuffer> (*CreateFramebufferImplementation)(const Device* device, const FramebufferDescriptor& descriptor);

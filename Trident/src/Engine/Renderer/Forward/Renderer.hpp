@@ -4,11 +4,9 @@
 #pragma once
 
 #include "Engine/API/Camera/3D/PerspectiveCamera3D.hpp"
-#include "Engine/API/Scene/Scene3D.hpp"
-#include "Engine/ECS/Component/GeometryComponent.hpp"
-#include "Engine/ECS/Component/MaterialComponent.hpp"
-#include "Engine/ECS/Component/RigidBody3DComponent.hpp"
+#include "Engine/API/Geometry/Index.hpp"
 #include "Engine/Renderer/Scene/BaseSceneRenderer.hpp"
+#include "Engine/Renderer/VisualizationMode.hpp"
 
 namespace Trident {
 	#define FORWARD_SAMPLE_COUNT 4
@@ -19,89 +17,24 @@ namespace Trident {
 	};
 
 	class ForwardRenderer : public BaseSceneRenderer<ForwardCamera> {
-		private:
-			struct Vertex {
-				uint32 positionIndex;
-				uint32 normalIndex;
-				uint32 textureCoordinateIndex;
-			};
-
-			struct Instance {
-				mat4x4<float32> world;
-				mat3x3<float32> normal;
-			};
-
-			struct MaterialPipelineBase {
-				sequence<ref<DescriptorSetLayout>> descriptorSetLayouts;
-				sequence<VertexInputBinding> vertexInputBindings;
-				ref<ShaderModule> vertexShaderModule;
-			};
-
 		public:
 			static constexpr index DEBUG_MAX_CONTACTS = 16;
 
 		public:
-			// Called on startup and on window resize.
-			void initialize() {
-				#if FORWARD_SAMPLE_COUNT > 1
-					colorImage = createColorImage();
-					colorImageView = createColorImageView();
-				#endif
-
-				depthStencilImage = createDepthStencilImage();
-				depthStencilImageView = createDepthStencilImageView();
-
-				const ref<Swapchain> swapchain = getSwapchain();
-
-				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
-
-				FramebufferDescriptor framebufferDescriptor = {
-					.renderPass = renderPass,
-					#if FORWARD_SAMPLE_COUNT > 1
-						.imageViews = {colorImageView, depthStencilImageView, nullptr},
-					#else
-						.imageViews = {nullptr, depthStencilImageView},
-					#endif
-					.extent = swapchain->getExtent(),
-				};
-
-				#if defined(DEBUG_OBJECT_NAME)
-					sequence<char8> name;
-				#endif
-
-				uint32 framebufferIndex = 0;
-
-				while (framebufferIndex < framebuffers.count()) {
-					#if defined(DEBUG_OBJECT_NAME)
-						name = Logger::format("In flight framebuffer []", framebufferIndex);
-
-						framebufferDescriptor.name = name;
-					#endif
-
-					#if FORWARD_SAMPLE_COUNT > 1
-						framebufferDescriptor.imageViews[2] = swapchain->getImageView(framebufferIndex);
-					#else
-						framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
-					#endif
-
-					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
-
-					framebufferIndex += 1;
-				}
-			}
-
 			void postBuild() override {
 				renderPass = createRenderPass();
 
-				initialize();
+				createFrameObjects();
 
 				staticGeometryDescriptorSetLayout = createStaticGeometryDescriptorSetLayout();
 				forwardDescriptorSetLayout = createForwardDescriptorSetLayout();
 
-				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(sequence<ref<DescriptorSetLayout>>{
+				const ref<DescriptorSetLayout> descriptorSetLayouts[] = {
 					staticGeometryDescriptorSetLayout,
 					forwardDescriptorSetLayout,
-				});
+				};
+
+				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(view<ref<DescriptorSetLayout>>(descriptorSetLayouts, 2));
 
 				staticGeometryDescriptorSet = descriptorSets[0];
 				forwardDescriptorSet = descriptorSets[1];
@@ -118,66 +51,33 @@ namespace Trident {
 
 				debugContactRange = debugContactManifoldView->map();
 
+				lightmapAtlasSampler = createLightmapAtlasSampler();
 				materialSampler = createMaterialSampler();
-				lightmapSampler = createLightmapSampler();
 			}
 
 			void encodeSceneOneTimeCommands() override {
-				createMaterialPipelines();
+				createMaterials();
 
-				// Write index buffer.
-				const view<uint8> sourceDataBuffer = scene->getDataBuffer();
-				const range<uint64, uint64> vertexPositionIndexRange = scene->getVertexPositionIndexRange();
-				const range<uint64, uint64> vertexNormalIndexRange = scene->getVertexNormalIndexRange();
-				const range<uint64, uint64> vertexTextureCoordinateIndexRange = scene->getVertexTextureCoordinateIndexRange();
-				const ComponentPool<RigidBody3DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody3DComponent>();
+				const ref<Scene3DAsset> sceneAsset = scene->getAsset();
 
-				// TODO(geometry/3d/vertex-position-indices): Separe hull line indices and vertex position indices for TRIANGLE_LIST.
-				// DEBUG_ASSERT(vertexPositionIndexRange.count == vertexNormalIndexRange.count && vertexPositionIndexRange.count == vertexTextureCoordinateIndexRange.count);
-				DEBUG_ASSERT(vertexNormalIndexRange.count == vertexTextureCoordinateIndexRange.count);
+				vertexBuffer = createVertexBuffer();
+				lightmapCoordinateBuffer = createLightmapCoordinateBuffer();
+				instanceBuffer = createInstanceBuffer();
 
-				if (scene->getIndexCount() > 0) {
-					vertexBuffer = createVertexBuffer(scene->getIndexCount() * sizeof(ForwardRenderer::Vertex));
+				// TODO(geometry/3d/vertex-position-indices): Separate hull line indices and vertex position indices for TRIANGLE_LIST.
+				/* if (sceneAsset->hullLineIndexCount > 0) {
+					debugHullWireframeBuffer = createDebugHullWireframeBuffer(sceneAsset->hullLineIndexCount * sizeof(uint16));
+				} */
 
-					dataBuffer = createDynamicBuffer({
-						.size = vertexPositionIndexRange.offset,
-						.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
-						.memoryProperties = MemoryProperty::DEVICE_LOCAL,
-						.persistent = false,
-						#if defined(DEBUG_OBJECT_NAME)
-							.name = "Data",
-						#endif
-					});
-				}
+				QueueFamilyCapability queueFamily = QueueFamilyCapability::TRANSFER;
+				uint64 stagingBufferSize = sceneAsset->geometryRanges[0].count;
 
-				instanceBuffer = createInstanceBuffer(rigidBodyComponentPool.componentCount * sizeof(Instance));
+				if (sceneAsset->lightmapAtlasImageAsset != nullptr) {
+					lightmapAtlasImage = createLightmapAtlasImage(sceneAsset->lightmapAtlasImageAsset);
+					lightmapAtlasImageView = createLightmapAtlasImageView();
 
-				if (scene->getHullLineIndexCount() > 0) {
-					debugHullWireframeBuffer = createDebugHullWireframeBuffer(scene->getHullLineIndexCount() * sizeof(uint16));
-				}
-
-				const ref<BufferView<Instance>> instanceView = instanceBuffer->createView<Instance>(0, instanceBuffer->getSize());
-
-				instanceMappedRange = instanceView->map();
-
-				uint32 componentIndex = 0;
-
-				while (componentIndex < rigidBodyComponentPool.componentCount) {
-					const RigidBody3DComponent& rigidBodyComponent = rigidBodyComponentPool.components[componentIndex];
-
-					Instance& instance = instanceMappedRange[componentIndex];
-					instance.world = rigidBodyComponent.world;
-					instance.normal = rigidBodyComponent.calculateNormal();
-
-					componentIndex += 1;
-				}
-
-				uint64 stagingBufferSize = 0;
-
-				if (scene->getIndexCount() > 0) {
-					// TODO(forward): As of now the hull line indices are included twice.
-					stagingBufferSize += sourceDataBuffer.count();
-					stagingBufferSize += scene->getHullLineIndexCount() * sizeof(uint16);
+					queueFamily = QueueFamilyCapability::GRAPHICS;
+					stagingBufferSize += sceneAsset->geometryRanges[4].count + lightmapAtlasImage->getSize();
 				}
 
 				const ref<Buffer> stagingBuffer = createDynamicBuffer({
@@ -190,73 +90,94 @@ namespace Trident {
 					#endif
 				});
 
-				ref<BufferView<uint8>> componentView;
-				ref<BufferView<uint8>> hullLineIndexView;
-				ref<BufferView<Vertex>> vertexView;
-				uint64 viewOffset = 0;
-				BufferCopyRegion bufferCopyRegion;
-				ImageMemoryBarrier imageMemoryBarrier;
+				const ref<BufferView<uint8>> vertexView = stagingBuffer->createView<uint8>(0, sceneAsset->geometryRanges[0].count);
 
-				if (scene->getIndexCount() > 0) {
-					componentView = stagingBuffer->createView<uint8>(viewOffset, vertexPositionIndexRange.offset);
-					viewOffset += componentView->getSize();
+				std::copy_n(&sceneAsset->geometryData[sceneAsset->geometryRanges[0].offset], vertexView->getSize(), vertexView->map());
 
-					vertexView = stagingBuffer->createView<Vertex>(viewOffset, scene->getIndexCount() * sizeof(Vertex));
-					viewOffset += vertexView->getSize();
+				ref<BufferView<uint8>> lightmapCoordinateView;
+				ref<BufferView<uint8>> lightmapAtlasView;
 
-					std::copy_n(sourceDataBuffer.begin(), componentView->getSize(), componentView->map());
+				if (sceneAsset->lightmapAtlasImageAsset != nullptr) {
+					lightmapCoordinateView = stagingBuffer->createView<uint8>(vertexView->getOffset() + vertexView->getSize(), sceneAsset->geometryRanges[4].count);
 
-					Vertex* vertexMappedRange = vertexView->map();
-					index vertexIndex = 0;
+					std::copy_n(&sceneAsset->geometryData[sceneAsset->geometryRanges[4].offset], lightmapCoordinateView->getSize(), lightmapCoordinateView->map());
 
-					while (vertexIndex < scene->getIndexCount()) {
-						Vertex& vertex = vertexMappedRange[vertexIndex];
-						vertex.positionIndex = *pointer_cast<const uint32*>(&sourceDataBuffer[vertexPositionIndexRange.offset + vertexIndex * sizeof(uint32)]);
-						vertex.normalIndex = *pointer_cast<const uint32*>(&sourceDataBuffer[vertexNormalIndexRange.offset + vertexIndex * sizeof(uint32)]);
-						vertex.textureCoordinateIndex = *pointer_cast<const uint32*>(&sourceDataBuffer[vertexTextureCoordinateIndexRange.offset + vertexIndex * sizeof(uint32)]);
+					lightmapAtlasView = stagingBuffer->createView<uint8>(lightmapCoordinateView->getOffset() + lightmapCoordinateView->getSize(), lightmapAtlasImage->getSize());
 
-						vertexIndex += 1;
-					}
+					const view<uint8> data = sceneAsset->lightmapAtlasImageAsset->getData();
+
+					std::copy(data.begin(), data.end(), lightmapAtlasView->map());
 				}
 
-				if (scene->getHullLineIndexCount() > 0) {
-					hullLineIndexView = stagingBuffer->createView<uint8>(viewOffset, scene->getHullLineIndexCount() * sizeof(uint16));
+				ref<BufferView<uint8>> hullLinevertexView;
+
+				/* if (sceneAsset->hullLineIndexCount > 0) {
+					hullLineIndexView = stagingBuffer->createView<uint8>(viewOffset, sceneAsset->hullLineIndexCount * sizeof(uint16));
 					viewOffset += hullLineIndexView->getSize();
 
 					std::copy_n(&sourceDataBuffer[scene->getHullLineIndexByteOffset()], hullLineIndexView->getSize(), hullLineIndexView->map());
-				}
+				} */
 
 				stagingBuffer->unmap();
 
-				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
+				const ref<Queue> queue = getDevice()->getQueue(queueFamily);
 				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
 					.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Copy buffers",
+						.name = "Initialize scene resources",
 					#endif
 				});
 
 				commandEncoder->begin();
 
-				if (scene->getIndexCount() > 0) {
+				BufferCopyRegion bufferCopyRegion = {
+					.sourceOffset = vertexView->getOffset(),
+					.destinationOffset = 0,
+					.size = vertexView->getSize(),
+				};
+
+				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegion);
+
+				if (sceneAsset->lightmapAtlasImageAsset != nullptr) {
 					bufferCopyRegion = {
-						.sourceOffset = componentView->getOffset(),
+						.sourceOffset = lightmapCoordinateView->getOffset(),
 						.destinationOffset = 0,
-						.size = componentView->getSize(),
+						.size = lightmapCoordinateView->getSize(),
 					};
 
-					commandEncoder->copyBufferToBuffer(stagingBuffer, dataBuffer, bufferCopyRegion);
+					commandEncoder->copyBufferToBuffer(stagingBuffer, lightmapCoordinateBuffer, bufferCopyRegion);
 
-					bufferCopyRegion = {
-						.sourceOffset = vertexView->getOffset(),
-						.destinationOffset = 0,
-						.size = vertexView->getSize(),
+					ImageMemoryBarrier imageMemoryBarrier = {
+						.image = lightmapAtlasImage,
+						.newLayout = ImageLayout::TRANSFER_DST_OPTIMAL,
+						.newAccess = Access::TRANSFER_WRITE,
 					};
 
-					commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegion);
+					commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
+
+					const BufferImageCopyRegion bufferImageCopyRegion = {
+						.bufferOffset = lightmapAtlasView->getOffset(),
+						.imageOffsetX = 0,
+						.imageOffsetY = 0,
+						.imageOffsetZ = 0,
+						.imageExtent = lightmapAtlasImage->getExtent(),
+						.imageMipLevel = lightmapAtlasImageView->getMipLevelOffset(),
+						.imageLayerOffset = lightmapAtlasImageView->getLayerOffset(),
+						.imageLayerCount = lightmapAtlasImageView->getLayerCount(),
+					};
+
+					commandEncoder->copyBufferToImage(stagingBuffer, lightmapAtlasImage, bufferImageCopyRegion);
+
+					imageMemoryBarrier = {
+						.image = lightmapAtlasImage,
+						.newLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+						.newAccess = Access::SHADER_READ,
+					};
+
+					commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
 				}
 
-				if (scene->getHullLineIndexCount() > 0) {
+				/* if (sceneAsset->hullLineIndexCount > 0) {
 					bufferCopyRegion = {
 						.sourceOffset = hullLineIndexView->getOffset(),
 						.destinationOffset = 0,
@@ -264,25 +185,35 @@ namespace Trident {
 					};
 
 					commandEncoder->copyBufferToBuffer(stagingBuffer, debugHullWireframeBuffer, bufferCopyRegion);
-				}
+				} */
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
 				queue->submit(commandBuffer);
 				queue->waitIdle();
 
-				updateDescriptorSets();
+				{
+					const ref<BufferView<Instance3D>> instanceView = instanceBuffer->createView<Instance3D>(0, instanceBuffer->getSize());
+
+					instanceMappedRange = instanceView->map();
+
+					std::copy(sceneAsset->instances.begin(), sceneAsset->instances.end(), instanceMappedRange);
+				}
+
+				updateGeometryDescriptorSets();
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
-				const Extent2D swapchainExtent = getSwapchain()->getExtent();
-				const float32 width = static_cast<float32>(swapchainExtent.width);
-				const float32 height = static_cast<float32>(swapchainExtent.height);
+				const ref<Framebuffer> framebuffer = framebuffers[getSwapchainImageIndex()];
+				const Extent2D extent = framebuffer->getExtent();
+				const float32 width = static_cast<float32>(extent.width);
+				const float32 height = static_cast<float32>(extent.height);
+				const float32* skyColor = scene->getAsset()->skyColor;
 
 				commandEncoder->beginRenderPass({
-					.framebuffer = framebuffers[getSwapchainImageIndex()],
+					.framebuffer = framebuffer,
 					.clearValues = {
-						{0.0f, 0.0f, 0.0f, 1.0f},
+						{skyColor[0], skyColor[1], skyColor[2], 1.0f},
 						{
 							.depth = 0.0f,
 							.stencil = 0,
@@ -293,96 +224,29 @@ namespace Trident {
 					},
 				});
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-				commandEncoder->setScissor(0, 0, swapchainExtent);
+				commandEncoder->setScissor(0, 0, extent);
 
-				renderStaticGeometry(commandEncoder);
-
-				// TODO(graphics/gl/bind-vertex-buffers): Allow vertex buffers to be bound before setting a graphics pipeline.
-
-				const ComponentPool<GeometryComponent>& geometryComponentPool = scene->ecs.getComponentPool<GeometryComponent>();
-				const ComponentPool<MaterialComponent>& materialComponentPool = scene->ecs.getComponentPool<MaterialComponent>();
-				const ComponentPool<RigidBody3DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody3DComponent>();
-
-				if (draw && scene->getIndexCount() > 0) {
-					sequence<ref<DescriptorSet>> descriptorSets = {forwardDescriptorSet, nullptr};
-					uint32 rigidBodyComponentIndex = 0;
-
-					// TODO(forward): Sort by material shader, so that the vertex descriptor sets are not re-bound for every material of the same shader.
-					while (rigidBodyComponentIndex < rigidBodyComponentPool.componentCount) {
-						const Entity entity = rigidBodyComponentPool.componentIndexToEntity[rigidBodyComponentIndex];
-						const GeometryComponent geometryComponent = geometryComponentPool.components[geometryComponentPool.entityToComponentIndex[entity]];
-						const Geometry3D& geometry = scene->geometries[geometryComponent.geometryIndex];
-						const MaterialComponent materialComponent = materialComponentPool.components[materialComponentPool.entityToComponentIndex[entity]];
-
-						// TODO(forward): Fix retrieving the material shader index.
-						// const uint32 materialShaderIndex = scene->getMaterialShaderIndex(materialComponent.materialIndex - 1);
-						const uint32 materialShaderIndex = 1;
-
-						const range<uint32, uint32> indexRange = geometry.getVertexPositionIndexRange();
-
-						descriptorSets[1] = descriptorSetsPerMaterialShader[materialShaderIndex][materialComponent.materialIndex - 1];
-
-						commandEncoder->bindGraphicsPipeline(materialPipelines[materialShaderIndex]);
-						commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
-						commandEncoder->bindVertexBuffer(1, instanceBuffer, 0, sizeof(Instance));
-						commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialShaderIndex], 0, descriptorSets);
-						commandEncoder->draw(indexRange.count, 1, indexRange.offset, rigidBodyComponentIndex);
-
-						rigidBodyComponentIndex += 1;
-					}
-				}
-
-				if (debugHullWireframe && scene->getHullLineIndexCount() > 0) {
-					commandEncoder->bindGraphicsPipeline(debugHullWireframePipeline);
-					commandEncoder->bindDescriptorSets(debugHullWireframePipelineLayout, 0, forwardDescriptorSet);
-					commandEncoder->bindVertexBuffer(0, instanceBuffer, 0, sizeof(Instance));
-					commandEncoder->bindIndexBuffer<uint16>(debugHullWireframeBuffer, 0);
-
-					uint32 rigidBodyComponentIndex = 0;
-
-					while (rigidBodyComponentIndex < rigidBodyComponentPool.componentCount) {
-						const Entity entity = rigidBodyComponentPool.componentIndexToEntity[rigidBodyComponentIndex];
-						const GeometryComponent geometryComponent = geometryComponentPool.components[geometryComponentPool.entityToComponentIndex[entity]];
-						const Geometry3D& geometry = scene->geometries[geometryComponent.geometryIndex];
-
-						if (geometry.hullIndex >= scene->hulls.count()) {
-							rigidBodyComponentIndex += 1;
-
-							continue;
-						}
-
-						const Hull3D& hull = scene->hulls[geometry.hullIndex];
-
-						// TODO(graphics/dx12/draw-indexed): DX12 doesn't pass the BaseVertexOffset to the vertex shader so indexing the vertex buffer doesn't return the same values as OpenGL/Vulkan.
-						commandEncoder->drawIndexed(hull.lineIndexRange.count, 1, hull.lineIndexRange.offset, geometry.getVertexPositionComponentRange().offset / 3, rigidBodyComponentIndex);
-
-						rigidBodyComponentIndex += 1;
-					}
-				}
-
-				if (debugContactManifolds) {
-					commandEncoder->bindGraphicsPipeline(debugContactManifoldPipeline);
-					commandEncoder->bindDescriptorSets(debugContactManifoldPipelineLayout, 0, forwardDescriptorSet);
-					commandEncoder->bindVertexBuffer(0, debugContactManifoldBuffer, 0, sizeof(svec3<float32>));
-					commandEncoder->draw(contactCount, 1, 0, 0);
-				}
+				renderScene(commandEncoder);
 
 				commandEncoder->endRenderPass();
 			}
 
-			void updateCamera() override {
-				const PerspectiveCamera3D& camera = getCameraController<PerspectiveCamera3D>().getCamera();
-
-				cameraMappedRange->projectionView = camera.getProjectionView();
-				cameraMappedRange->position = camera.position;
+			void setInstanceWorldTransform(Entity entity, const mat4x4<float32>& worldTransform) const {
+				instanceMappedRange[entity].worldTransform = worldTransform;
 			}
 
-			void setWorld(Entity entity, const mat4x4<float32>& world) const {
-				instanceMappedRange[entity].world = world;
+			void setInstanceNormalTransform(Entity entity, const mat3x3<float32>& normalTransform) const {
+				instanceMappedRange[entity].normalTransform = normalTransform;
 			}
+
+			void createFrameObjects() override;
+
+			void updateCamera() override;
 
 		private:
 			ref<RenderPass> createRenderPass() const;
+
+			void createFramebuffers();
 
 			ref<DescriptorSetLayout> createStaticGeometryDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createForwardDescriptorSetLayout() const;
@@ -401,101 +265,34 @@ namespace Trident {
 			ref<ImageView> createDepthStencilImageView() const;
 			ref<ImageView> createLightmapAtlasImageView() const;
 
-			ref<Buffer> createInstanceBuffer(uint64 size) const;
-			ref<Buffer> createVertexBuffer(uint64 size) const;
+			ref<Buffer> createVertexBuffer() const;
+			ref<Buffer> createLightmapCoordinateBuffer() const;
+			ref<Buffer> createInstanceBuffer() const;
 			ref<Buffer> createDebugHullWireframeBuffer(uint64 size) const;
 			ref<Buffer> createDebugContactManifoldBuffer() const;
 
 			ref<Sampler> createMaterialSampler() const;
-			ref<Sampler> createLightmapSampler() const;
+			ref<Sampler> createLightmapAtlasSampler() const;
 
-			void updateDescriptorSets() const {
-				const ref<Device> device = getDevice();
-				const uint64 alignment = device->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
-				const ref<Scene3DAsset> sceneAsset = scene->getAsset();
-				const uint64 staticVertexAlignedRangeSize = ceil(sceneAsset->staticVertexRange.count, alignment);
-				const uint64 staticNormalAlignedRangeSize = ceil(sceneAsset->staticNormalRange.count, alignment);
+			GraphicsPipelineDescriptor getStaticPipelineDescriptor() const;
+			GraphicsPipelineDescriptor getDynamicPipelineDescriptor() const;
 
-				const sequence<ref<BaseBufferView>> descriptorBufferViews = {
-					// Camera
-					cameraBuffer->createView<ForwardCamera>(0, cameraBuffer->getSize()),
+			void updateGeometryDescriptorSets() const;
 
-					// Static geometry
-					staticGeometryBuffer->createView<float32>(0, sceneAsset->staticVertexRange.count),
-					staticGeometryBuffer->createView<float32>(staticVertexAlignedRangeSize, sceneAsset->staticNormalRange.count),
-					staticGeometryBuffer->createView<float32>(staticVertexAlignedRangeSize + staticNormalAlignedRangeSize, sceneAsset->staticTextureCoordinateRange.count),
+			void createMaterialObjects(
+				uint32 materialShaderIndex,
+				PipelineLayoutDescriptor& pipelineLayoutDescriptor,
+				GraphicsPipelineDescriptor& pipelineDescriptor,
+				AssetLibrary& assetLibrary,
+				sequence<ref<DescriptorSetLayout>>& materialDescriptorSetLayouts,
+				uint32& writeDescriptorSetCount
+			);
 
-					// Forward
-					dataBuffer->createView<float32>(scene->getVertexPositionComponentRange().offset, scene->getVertexPositionComponentRange().count),
-					dataBuffer->createView<float32>(scene->getVertexNormalComponentRange().offset, scene->getVertexNormalComponentRange().count),
-					dataBuffer->createView<float32>(scene->getVertexTextureCoordinateComponentRange().offset, scene->getVertexTextureCoordinateComponentRange().count),
-					dataBuffer->createView<float32>(scene->getTriangleTangentComponentRange().offset, scene->getTriangleTangentComponentRange().count),
-				};
+			ref<Image> createMaterialImage(ref<ImageAsset> imageAsset, ImageDescriptor& imageDescriptor) const;
 
-				uint64 writeDescriptorSetCount = 0;
+			void createMaterials();
 
-				writeDescriptorSetCount += staticGeometryDescriptorSetLayout->bindings.count();
-
-				if (scene->getIndexCount() > 0) {
-					writeDescriptorSetCount += forwardDescriptorSetLayout->bindings.count();
-				}
-
-				sequence<WriteDescriptorSet> writeDescriptorSets(writeDescriptorSetCount);
-				uint32 writeDescriptorSetOffset = 0;
-
-				// Camera
-				writeDescriptorSets[writeDescriptorSetOffset] = {
-					.descriptorSet = staticGeometryDescriptorSet,
-					.bindingIndex = 0,
-					.descriptorBufferViews = descriptorBufferViews[0],
-				};
-
-				uint32 writeDescriptorSetIndex = 1;
-
-				while (writeDescriptorSetIndex < staticGeometryDescriptorSetLayout->bindings.count()) {
-					writeDescriptorSets[writeDescriptorSetOffset + writeDescriptorSetIndex] = {
-						.descriptorSet = staticGeometryDescriptorSet,
-						.bindingIndex = writeDescriptorSetIndex,
-						.descriptorBufferViews = descriptorBufferViews[writeDescriptorSetOffset + writeDescriptorSetIndex],
-					};
-
-					writeDescriptorSetIndex += 1;
-				}
-
-				writeDescriptorSetOffset += static_cast<uint32>(staticGeometryDescriptorSetLayout->bindings.count());
-
-				if (scene->getIndexCount() > 0) {
-					// Camera
-					writeDescriptorSets[writeDescriptorSetOffset] = {
-						.descriptorSet = forwardDescriptorSet,
-						.bindingIndex = 0,
-						.descriptorBufferViews = descriptorBufferViews[0],
-					};
-
-					writeDescriptorSetIndex = 1;
-
-					while (writeDescriptorSetIndex < forwardDescriptorSetLayout->bindings.count()) {
-						writeDescriptorSets[writeDescriptorSetOffset + writeDescriptorSetIndex] = {
-							.descriptorSet = forwardDescriptorSet,
-							.bindingIndex = writeDescriptorSetIndex,
-							.descriptorBufferViews = descriptorBufferViews[writeDescriptorSetIndex + 3],
-						};
-
-						writeDescriptorSetIndex += 1;
-					}
-
-					writeDescriptorSetOffset += static_cast<uint32>(forwardDescriptorSetLayout->bindings.count());
-				}
-
-				device->updateDescriptorSets(writeDescriptorSets);
-			}
-
-			/// Creates material pipelines, pipeline layouts and descriptor sets.
-			void createMaterialPipelines();
-
-			void renderStaticGeometry(ref<CommandEncoder> commandEncoder) const;
-
-			sequence<MaterialPipelineBase> getMaterialPipelineBases() const;
+			void renderScene(ref<CommandEncoder> commandEncoder) const;
 
 		private:
 			ref<RenderPass> renderPass;
@@ -507,7 +304,7 @@ namespace Trident {
 
 			ref<DescriptorSet> staticGeometryDescriptorSet;
 			ref<DescriptorSet> forwardDescriptorSet;
-			sequence<sequence<ref<DescriptorSet>>> descriptorSetsPerMaterialShader;
+			sequence<ref<DescriptorSet>> materialDescriptorSets;
 
 			sequence<ref<PipelineLayout>> materialPipelineLayouts;
 			ref<PipelineLayout> debugHullWireframePipelineLayout;
@@ -517,9 +314,15 @@ namespace Trident {
 			ref<GraphicsPipeline> debugHullWireframePipeline;
 			ref<GraphicsPipeline> debugContactManifoldPipeline;
 
+			/// Contains vertices for static and dynamic geometry.
 			ref<Buffer> vertexBuffer;
+
+			/// Contains lightmap coordinates for static geometry.
+			ref<Buffer> lightmapCoordinateBuffer;
+
+			/// Contains world and normal transforms for static and dynamic geometry.
 			ref<Buffer> instanceBuffer;
-			ref<Buffer> dataBuffer;
+
 			ref<Buffer> debugHullWireframeBuffer;
 			ref<Buffer> debugContactManifoldBuffer;
 
@@ -528,29 +331,26 @@ namespace Trident {
 			#endif
 
 			ref<Image> depthStencilImage;
-			sequence<sequence<sequence<ref<Image>>>> materialImages;
 			ref<Image> lightmapAtlasImage;
+			sequence<ref<Image>> materialImages;
 
 			#if FORWARD_SAMPLE_COUNT > 1
 				ref<ImageView> colorImageView;
 			#endif
 
 			ref<ImageView> depthStencilImageView;
-			sequence<ref<ImageView>> materialReferenceBindingImageViews;
 			ref<ImageView> lightmapAtlasImageView;
+			sequence<ref<ImageView>> materialImageViews;
 
+			ref<Sampler> lightmapAtlasSampler;
 			ref<Sampler> materialSampler;
-			ref<Sampler> lightmapSampler;
 
-			Instance* instanceMappedRange = nullptr;
+			Instance3D* instanceMappedRange = nullptr;
 
 		public:
 			svec3<float32>* debugContactRange = nullptr;
 			uint32 contactCount = 0;
 
-		private:
-			bool draw = true;
-			bool debugHullWireframe = true;
-			bool debugContactManifolds = false;
+			VisualizationMode visualizationMode;
 	};
 }

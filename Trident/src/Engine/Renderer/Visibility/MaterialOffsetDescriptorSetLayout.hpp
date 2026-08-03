@@ -7,7 +7,7 @@
 
 namespace Trident {
 	ref<DescriptorSetLayout> VisibilityRenderer::createMaterialOffsetDescriptorSetLayout() const {
-		return createDescriptorSetLayout({
+		const sequence<DescriptorSetLayoutBinding> bindings = {
 			// Material count
 			{
 				.descriptorType = DescriptorType::READ_WRITE_STORAGE_BUFFER,
@@ -28,6 +28,8 @@ namespace Trident {
 				.descriptorCount = 1,
 				.shaderStages = ShaderStage::COMPUTE,
 			},
-		});
+		};
+
+		return createDescriptorSetLayout(bindings);
 	}
 }

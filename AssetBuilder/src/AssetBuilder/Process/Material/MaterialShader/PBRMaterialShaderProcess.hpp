@@ -28,20 +28,13 @@ namespace Trident {
 
 				MaterialAsset asset{};
 
-				// TODO(asset-builder/material): Find another way of specifying the shader index that's not relative to the current scene.
-				asset.shaderIndex = 1;
+				// TODO(tsl): Use a real identifier when TSL is ready.
+				asset.shaderModuleAssetIdentifier = 402;
 
-				asset.descriptorOffset = 0;
-				asset.descriptorImages = {
-					{
-						.imageAsset = assetLibrary.getAsset<ImageAsset>(descriptor.armTexturePath),
-					},
-					{
-						.imageAsset = assetLibrary.getAsset<ImageAsset>(descriptor.diffuseTexturePath),
-					},
-					{
-						.imageAsset = assetLibrary.getAsset<ImageAsset>(descriptor.normalTexturePath),
-					},
+				asset.descriptorImageAssetIdentifiers = {
+					assetLibrary.getAsset<ImageAsset>(descriptor.armTexturePath)->identifier,
+					assetLibrary.getAsset<ImageAsset>(descriptor.diffuseTexturePath)->identifier,
+					assetLibrary.getAsset<ImageAsset>(descriptor.normalTexturePath)->identifier,
 				};
 
 				return asset;

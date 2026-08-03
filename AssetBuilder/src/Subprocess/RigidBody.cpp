@@ -93,9 +93,9 @@ namespace Trident {
 					// NOTE: The object is assumed to have a unit square geometry. The axis of rotation is at the center.
 
 					// TODO(physics/3d/inertia): Calculate the size without using the scale.
-					const float32 w = descriptor.scale[0] * component.scale;
-					const float32 h = descriptor.scale[1] * component.scale;
-					const float32 d = descriptor.scale[2] * component.scale;
+					const float32 w = descriptor.inertiaScale[0] * component.scale;
+					const float32 h = descriptor.inertiaScale[1] * component.scale;
+					const float32 d = descriptor.inertiaScale[2] * component.scale;
 
 					I = {
 						m / 12.0f * (h * h + d * d), 0.0f, 0.0f,

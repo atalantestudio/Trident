@@ -8,12 +8,12 @@ namespace Trident {
 		svec2<float32> luxelScale;
 
 		// TODO(asset-builder/lightmapper): Use.
+		svec3<float32> tintColor;
+
+		// TODO(asset-builder/lightmapper): Use.
 		svec3<float32> emissiveColor;
 
 		// TODO(asset-builder/lightmapper): Use.
 		float32 emissiveIntensity;
-
-		// TODO(asset-builder/lightmapper): Use.
-		svec3<float32> tintColor;
 	};
 }

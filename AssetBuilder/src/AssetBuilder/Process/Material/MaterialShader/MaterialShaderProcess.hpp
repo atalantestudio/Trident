@@ -16,19 +16,18 @@ namespace Trident {
 				const uint64 size = (
 					sizeof(AssetHeader) +
 					sizeof(uint32) * 2 +
-					asset.descriptorImages.count() * (sizeof(uint32) * 5)
+					asset.descriptorImageAssetIdentifiers.count() * sizeof(uint32)
 				);
 
 				ByteStream<StreamOperation::WRITE> stream(size, Endianness::LITTLE_ENDIAN);
 				stream.write<AssetSignature>(AssetSignature::MATERIAL);
 				stream.write<uint32>(asset.identifier);
 				stream.write<VersionNumber>(asset.version);
-				stream.write<uint32>(asset.shaderIndex);
-				stream.write<uint32>(asset.descriptorOffset);
-				stream.write<uint32>(static_cast<uint32>(asset.descriptorImages.count()));
+				stream.write<uint32>(asset.shaderModuleAssetIdentifier);
+				stream.write<uint32>(static_cast<uint32>(asset.descriptorImageAssetIdentifiers.count()));
 
-				for (const MaterialDescriptorImage& materialDescriptorImage : asset.descriptorImages) {
-					stream.write<uint32>(materialDescriptorImage.imageAsset->identifier);
+				for (const uint32 descriptorImageAssetIdentifier : asset.descriptorImageAssetIdentifiers) {
+					stream.write<uint32>(descriptorImageAssetIdentifier);
 				}
 
 				return stream;
@@ -62,6 +61,15 @@ namespace Trident {
 				const std::filesystem::path rootOutputPath = static_cast<const char8*>(arguments[2]);
 				const std::filesystem::path assetOutputPath = rootOutputPath / "Asset/Material/";
 				const view<char8> assetName = getAssetName();
+
+				std::filesystem::path finalAssetOutputPath = assetOutputPath / std::string(assetName);
+				finalAssetOutputPath.replace_extension("tma");
+
+				if (std::filesystem::exists(finalAssetOutputPath)) {
+					ENGINE_INFO("Material asset \"[]\" already exists.", finalAssetOutputPath.filename().string());
+
+					return 0;
+				}
 
 				MaterialAsset materialAsset = createMaterialAsset(rootOutputPath);
 				materialAsset.identifier = AssetLibrary::createAssetIdentifier();

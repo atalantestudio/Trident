@@ -6,9 +6,9 @@
 #include "Engine/Renderer/Forward/Renderer.hpp"
 
 namespace Trident {
-	ref<Buffer> ForwardRenderer::createInstanceBuffer(uint64 size) const {
+	ref<Buffer> ForwardRenderer::createInstanceBuffer() const {
 		return createDynamicBuffer({
-			.size = size,
+			.size = max(1ull, scene->getAsset()->instances.count()) * sizeof(Instance3D),
 			.usage = BufferUsage::VERTEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = true,

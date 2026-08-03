@@ -3,6 +3,7 @@
 
 #include "pch.hpp"
 
+#include "Engine/API/Geometry/Index.hpp"
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 #include "Engine/Filesystem/Asset/SceneAsset.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
@@ -11,179 +12,259 @@
 namespace Trident {
 	template<>
 	ref<Scene3DAsset> Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary) {
-		Descriptor<Scene3DAsset> descriptor{};
-		descriptor.identifier = stream.read<uint32>();
-		descriptor.version = stream.read<VersionNumber>();
+		Scene3DAsset asset{};
+		asset.identifier = stream.read<uint32>();
+		asset.version = stream.read<VersionNumber>();
 
-		const uint32 staticTriangleCount = stream.read<uint32>();
-		const uint32 staticIndexCount = staticTriangleCount * 3;
-		const uint32 staticVertexCount = stream.read<uint32>();
-		const uint32 staticTextureCoordinateCount = stream.read<uint32>();
+		const uint32 triangleCount = stream.read<uint32>();
+		const uint32 vertexCount = triangleCount * 3;
+		const uint32 positionCount = stream.read<uint32>();
+		const uint32 normalCount = stream.read<uint32>();
+		const uint32 textureCoordinateCount = stream.read<uint32>();
 
-		descriptor.dynamicVertexPositionCount = 0;
-		descriptor.dynamicVertexNormalCount = 0;
-		descriptor.dynamicVertexTextureCoordinateCount = 0;
-		descriptor.dynamicTriangleTangentCount = 0;
-		descriptor.dynamicVertexPositionIndexCount = 0;
-		descriptor.dynamicVertexNormalIndexCount = 0;
-		descriptor.dynamicVertexTextureCoordinateIndexCount = 0;
-		descriptor.entityCount = stream.read<uint32>();
-		descriptor.hullCount = 0;
-		descriptor.hullEdgeCount = 0;
-		descriptor.hullFaceCount = 0;
-		descriptor.hullFaceEdgeIndexCount = 0;
-		descriptor.rigidBodyFacePlaneCount = 0;
-		descriptor.geometryAssets = sequence<ref<GeometryAsset>>(stream.read<uint32>());
-		descriptor.geometryMappings = sequence<EntityComponentMapping<GeometryComponent>>(stream.read<uint32>());
-		descriptor.materialMappings = sequence<EntityComponentMapping<MaterialComponent>>(stream.read<uint32>());
-		descriptor.rigidBodyMappings = sequence<EntityComponentMapping<RigidBody3DComponent>>(stream.read<uint32>());
+		const uint32 bakedTriangleCount = stream.read<uint32>();
+		const uint32 bakedVertexCount = bakedTriangleCount * 3;
+		const uint32 bakedPositionCount = stream.read<uint32>();
+		const uint32 bakedNormalCount = stream.read<uint32>();
+		const uint32 bakedTextureCoordinateCount = stream.read<uint32>();
 
-		const uint32 staticNormalCount = stream.read<uint32>();
+		const uint32 lightmapCoordinateCount = stream.read<uint32>();
 
-		descriptor.staticIndexRange = {0, staticIndexCount * sizeof(StaticVertex3D)};
-		descriptor.staticVertexRange = {descriptor.staticIndexRange.offset + descriptor.staticIndexRange.count, staticVertexCount * sizeof(svec3<float32>)};
-		descriptor.staticNormalRange = {descriptor.staticVertexRange.offset + descriptor.staticVertexRange.count, staticNormalCount * sizeof(svec3<float32>)};
-		descriptor.staticTextureCoordinateRange = {descriptor.staticNormalRange.offset + descriptor.staticNormalRange.count, staticTextureCoordinateCount * sizeof(svec2<float32>)};
-		descriptor.staticGeometryBuffer = sequence<uint8>(descriptor.staticIndexRange.count + descriptor.staticVertexRange.count + descriptor.staticNormalRange.count + descriptor.staticTextureCoordinateRange.count);
+		asset.geometryRanges[0].count = vertexCount * sizeof(GeometryIndex3D);
+		asset.geometryRanges[1].count = positionCount * sizeof(svec3<float32>);
+		asset.geometryRanges[2].count = normalCount * sizeof(svec3<float32>);
+		asset.geometryRanges[3].count = textureCoordinateCount * sizeof(svec2<float32>);
+		asset.geometryRanges[4].count = lightmapCoordinateCount * sizeof(svec2<float32>);
+
+		// TODO(asset/scene/3d)
+		asset.staticVertexSize = asset.geometryRanges[0].count;
+		asset.staticPositionSize = asset.geometryRanges[1].count;
+		asset.staticNormalSize = asset.geometryRanges[2].count;
+		asset.staticTextureCoordinateSize = asset.geometryRanges[3].count;
+
+		uint64 geometrySize = 0;
+		uint32 rangeIndex = 0;
+
+		while (rangeIndex < 5) {
+			range<uint64, uint64>& range = asset.geometryRanges[rangeIndex];
+			range.offset = geometrySize;
+
+			geometrySize += range.count;
+
+			rangeIndex += 1;
+		}
+
+		asset.geometryData = sequence<uint8>(geometrySize);
+
+		const uint32 staticInstanceCount = stream.read<uint32>();
+		const uint32 geometryCount = stream.read<uint32>();
+
+		asset.geometryVertexRanges = sequence<range<uint32, uint32>>(geometryCount);
+
+		const uint32 materialGeometryCount = stream.read<uint32>();
+
+		asset.materialGeometries = sequence<MaterialGeometry>(materialGeometryCount);
+
+		const uint32 materialCount = stream.read<uint32>();
+
+		asset.materials = sequence<Material>(materialCount);
+
+		const uint32 staticMaterialShaderCount = stream.read<uint32>();
+		const uint32 dynamicMaterialShaderCount = stream.read<uint32>();
+
+		asset.dynamicMaterialShaderOffset = staticMaterialShaderCount;
+		asset.materialShaders = sequence<MaterialShader>(staticMaterialShaderCount + dynamicMaterialShaderCount);
+
+		asset.entityCount = stream.read<uint32>();
+		asset.instances = sequence<Instance3D>(staticInstanceCount + asset.entityCount);
+		asset.geometryMappings = sequence<EntityComponentMapping<GeometryComponent>>(asset.entityCount);
+		asset.rigidBodyMappings = sequence<EntityComponentMapping<RigidBody3DComponent>>(asset.entityCount);
 
 		const uint32 lightmapAtlasImageAssetIdentifier = stream.read<uint32>();
 
 		if (lightmapAtlasImageAssetIdentifier != max<uint32>()) {
-			descriptor.lightmapAtlasImageAsset = assetLibrary->getAsset<ImageAsset>(lightmapAtlasImageAssetIdentifier);
+			asset.lightmapAtlasImageAsset = assetLibrary->getAsset<ImageAsset>(lightmapAtlasImageAssetIdentifier);
 		}
 
-		descriptor.materialShaders = sequence<MaterialShader>(stream.read<uint32>());
-		descriptor.materialAssets = sequence<ref<MaterialAsset>>(stream.read<uint32>());
-		descriptor.staticMaterials = sequence<StaticMaterial3D>(stream.read<uint32>());
+		asset.skyColor[0] = stream.read<float32>();
+		asset.skyColor[1] = stream.read<float32>();
+		asset.skyColor[2] = stream.read<float32>();
 
-		StaticVertex3D* staticIndex = pointer_cast<StaticVertex3D*>(&descriptor.staticGeometryBuffer[descriptor.staticIndexRange.offset]);
-		svec3<float32>* staticVertex = pointer_cast<svec3<float32>*>(&descriptor.staticGeometryBuffer[descriptor.staticVertexRange.offset]);
-		svec3<float32>* staticNormal = pointer_cast<svec3<float32>*>(&descriptor.staticGeometryBuffer[descriptor.staticNormalRange.offset]);
-		svec2<float32>* staticTextureCoordinate = pointer_cast<svec2<float32>*>(&descriptor.staticGeometryBuffer[descriptor.staticTextureCoordinateRange.offset]);
-		uint32 index = 0;
+		GeometryIndex3D* vertices = pointer_cast<GeometryIndex3D*>(&asset.geometryData[asset.geometryRanges[0].offset]);
+		std::copy_n(pointer_cast<const GeometryIndex3D*>(stream.getBytePosition()), bakedVertexCount, vertices);
+		stream.jump(bakedVertexCount * sizeof(GeometryIndex3D));
 
-		while (index < staticIndexCount) {
-			staticIndex->lightmapCoordinate = stream.read<svec2<float32>>();
-			staticIndex->vertexIndex = stream.read<uint32>();
-			staticIndex->normalIndex = stream.read<uint32>();
-			staticIndex->textureCoordinateIndex = stream.read<uint32>();
-			staticIndex += 1;
+		svec3<float32>* positions = pointer_cast<svec3<float32>*>(&asset.geometryData[asset.geometryRanges[1].offset]);
+		std::copy_n(pointer_cast<const svec3<float32>*>(stream.getBytePosition()), bakedPositionCount, positions);
+		stream.jump(bakedPositionCount * sizeof(svec3<float32>));
 
-			index += 1;
+		svec3<float32>* normals = pointer_cast<svec3<float32>*>(&asset.geometryData[asset.geometryRanges[2].offset]);
+		std::copy_n(pointer_cast<const svec3<float32>*>(stream.getBytePosition()), bakedNormalCount, normals);
+		stream.jump(bakedNormalCount * sizeof(svec3<float32>));
+
+		svec2<float32>* textureCoordinates = pointer_cast<svec2<float32>*>(&asset.geometryData[asset.geometryRanges[3].offset]);
+		std::copy_n(pointer_cast<const svec2<float32>*>(stream.getBytePosition()), bakedTextureCoordinateCount, textureCoordinates);
+		stream.jump(bakedTextureCoordinateCount * sizeof(svec2<float32>));
+
+		const range<uint64, uint64> lightmapCoordinateRange = asset.geometryRanges[4];
+
+		if (lightmapCoordinateRange.count > 0) {
+			std::copy_n(stream.getBytePosition(), lightmapCoordinateRange.count, &asset.geometryData[lightmapCoordinateRange.offset]);
+
+			stream.jump(lightmapCoordinateRange.count);
 		}
 
-		index = 0;
+		uint32 vertexOffset = bakedVertexCount;
+		uint32 positionOffset = bakedPositionCount;
+		uint32 normalOffset = bakedNormalCount;
+		uint32 textureCoordinateOffset = bakedTextureCoordinateCount;
+		uint32 instanceIndex = 0;
 
-		while (index < staticVertexCount) {
-			staticVertex->x = stream.read<float32>();
-			staticVertex->y = stream.read<float32>();
-			staticVertex->z = stream.read<float32>();
-			staticVertex += 1;
+		while (instanceIndex < staticInstanceCount) {
+			const svec3<float32> position = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
+			const svec3<float32> rotation = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
+			const float32 scale = stream.read<float32>();
+			const quat<float32> orientation = normalized(
+				quat<float32>::axisAngle(UP, rotation[1]) *
+				quat<float32>::axisAngle(RIGHT, rotation[0]) *
+				quat<float32>::axisAngle(FORWARD, rotation[2])
+			);
 
-			index += 1;
+			Instance3D& instance = asset.instances[instanceIndex];
+			instance.worldTransform = (
+				mat4x4<float32>::scaling({scale, scale, scale}) *
+				mat4x4<float32>(orientation) *
+				mat4x4<float32>::translation(position)
+			);
+			instance.normalTransform = mat3x3<float32>::identity();
+
+			instanceIndex += 1;
 		}
 
-		index = 0;
+		sequence<ref<GeometryAsset>> geometryAssets(geometryCount);
+		uint32 geometryIndex = 0;
 
-		while (index < staticNormalCount) {
-			staticNormal->x = stream.read<float32>();
-			staticNormal->y = stream.read<float32>();
-			staticNormal->z = stream.read<float32>();
-			staticNormal += 1;
+		while (geometryIndex < geometryCount) {
+			asset.geometryVertexRanges[geometryIndex] = stream.read<range<uint32, uint32>>();
 
-			index += 1;
-		}
+			const uint32 geometryAssetIdentifier = stream.read<uint32>();
 
-		index = 0;
+			if (geometryAssetIdentifier == 0) {
+				geometryIndex += 1;
 
-		while (index < staticTextureCoordinateCount) {
-			staticTextureCoordinate->x = stream.read<float32>();
-			staticTextureCoordinate->y = stream.read<float32>();
-			staticTextureCoordinate += 1;
+				continue;
+			}
 
-			index += 1;
-		}
+			ref<GeometryAsset>& geometryAsset = geometryAssets[geometryIndex];
+			geometryAsset = assetLibrary->getAsset<GeometryAsset>(geometryAssetIdentifier);
 
-		for (MaterialShader& materialShader : descriptor.materialShaders) {
-			materialShader.shaderModuleAsset = decodeAsset<ShaderModuleAsset>(stream, assetLibrary);
-			materialShader.materialAssetRange.offset = stream.read<uint32>();
-			materialShader.materialAssetRange.count = stream.read<uint32>();
-		}
+			const view<float32> positionView = geometryAsset->getVertexPositionComponents();
+			const view<float32> normalView = geometryAsset->getVertexNormalComponents();
+			const view<float32> textureCoordinateView = geometryAsset->getVertexTextureCoordinateComponents();
+			const view<uint32> positionIndexView = geometryAsset->getVertexPositionIndices();
+			const view<uint32> normalIndexView = geometryAsset->getVertexPositionIndices();
+			const view<uint32> textureCoordinateIndexView = geometryAsset->getVertexTextureCoordinateIndices();
 
-		for (ref<MaterialAsset>& materialAsset : descriptor.materialAssets) {
-			const uint32 identifier = stream.read<uint32>();
+			uint32 vertexIndex = 0;
 
-			materialAsset = assetLibrary->getAsset<MaterialAsset>(identifier);
-		}
+			while (vertexIndex < geometryAsset->getIndexCount()) {
+				GeometryIndex3D& vertex = vertices[vertexOffset + vertexIndex];
+				vertex.positionIndex = positionOffset + positionIndexView[vertexIndex];
+				vertex.normalIndex = normalOffset + normalIndexView[vertexIndex];
+				vertex.textureCoordinateIndex = textureCoordinateOffset + textureCoordinateIndexView[vertexIndex];
 
-		for (StaticMaterial3D& staticMaterial : descriptor.staticMaterials) {
-			staticMaterial.index = stream.read<uint32>();
-			staticMaterial.indexRange = stream.read<range<uint32, uint32>>();
-		}
+				vertexIndex += 1;
+			}
 
-		for (ref<GeometryAsset>& geometryAsset : descriptor.geometryAssets) {
-			const uint32 identifier = stream.read<uint32>();
+			std::copy(positionView.begin(), positionView.end(), pointer_cast<float32*>(&positions[positionOffset]));
+			std::copy(normalView.begin(), normalView.end(), pointer_cast<float32*>(&normals[normalOffset]));
+			std::copy(textureCoordinateView.begin(), textureCoordinateView.end(), pointer_cast<float32*>(&textureCoordinates[textureCoordinateOffset]));
 
-			geometryAsset = assetLibrary->getAsset<GeometryAsset>(identifier);
-
-			descriptor.dynamicVertexPositionCount += geometryAsset->getVertexPositionComponents().count() / 3;
-			descriptor.dynamicVertexNormalCount += geometryAsset->getVertexNormalComponents().count() / 3;
-			descriptor.dynamicVertexTextureCoordinateCount += geometryAsset->getVertexTextureCoordinateComponents().count() / 2;
-			descriptor.dynamicTriangleTangentCount += geometryAsset->getTriangleTangentComponents().count() / 3;
-			descriptor.dynamicVertexPositionIndexCount += geometryAsset->getVertexPositionIndices().count();
-			descriptor.dynamicVertexNormalIndexCount += geometryAsset->getVertexNormalIndices().count();
-			descriptor.dynamicVertexTextureCoordinateIndexCount += geometryAsset->getVertexTextureCoordinateIndices().count();
+			vertexOffset += vertexIndex;
+			positionOffset += geometryAsset->getPositionCount();
+			normalOffset += geometryAsset->getNormalCount();
+			textureCoordinateOffset += geometryAsset->getTextureCoordinateCount();
 
 			if (geometryAsset->getFlags() & GeometryAssetFlags::HAS_HULL) {
-				descriptor.hullCount += 1;
-				descriptor.hullEdgeCount += static_cast<uint32>(geometryAsset->getHull3DEdges().count());
-				descriptor.hullFaceCount += static_cast<uint32>(geometryAsset->getHull3DFaces().count());
-				descriptor.hullFaceEdgeIndexCount += static_cast<uint16>(geometryAsset->getHull3DFaceEdgeIndices().count());
-				descriptor.hullLineIndexCount += static_cast<uint32>(geometryAsset->getHull3DLineIndices().count());
+				asset.hullCount += 1;
+				asset.hullEdgeCount += static_cast<uint32>(geometryAsset->getHull3DEdges().count());
+				asset.hullFaceCount += static_cast<uint32>(geometryAsset->getHull3DFaces().count());
+				asset.hullFaceEdgeIndexCount += static_cast<uint16>(geometryAsset->getHull3DFaceEdgeIndices().count());
+				asset.hullLineIndexCount += static_cast<uint32>(geometryAsset->getHull3DLineIndices().count());
 			}
+
+			geometryIndex += 1;
 		}
 
-		for (EntityComponentMapping<GeometryComponent>& geometryMapping : descriptor.geometryMappings) {
+		for (MaterialGeometry& materialGeometry : asset.materialGeometries) {
+			materialGeometry.instanceRange = stream.read<range<uint32, uint32>>();
+			materialGeometry.geometryIndex = stream.read<uint32>();
+		}
+
+		uint32 materialGeometryOffset = 0;
+
+		for (Material& material : asset.materials) {
+			const uint32 materialAssetIdentifier = stream.read<uint32>();
+
+			material.asset = assetLibrary->getAsset<MaterialAsset>(materialAssetIdentifier);
+			material.geometryRange.offset = materialGeometryOffset;
+			material.geometryRange.count = stream.read<uint32>();
+
+			materialGeometryOffset += material.geometryRange.count;
+		}
+
+		for (MaterialShader& materialShader : asset.materialShaders) {
+			stream.jump(sizeof(AssetSignature));
+
+			materialShader.shaderModuleAsset = decodeAsset<ShaderModuleAsset>(stream, assetLibrary);
+			materialShader.materialRange = stream.read<range<uint32, uint32>>();
+		}
+
+		for (EntityComponentMapping<GeometryComponent>& geometryMapping : asset.geometryMappings) {
 			geometryMapping.entity = stream.read<Entity>();
-			geometryMapping.component.geometryIndex = stream.read<uint32>();
+			geometryMapping.component = stream.read<GeometryComponent>();
 		}
 
-		for (EntityComponentMapping<MaterialComponent>& materialMapping : descriptor.materialMappings) {
-			materialMapping.entity = stream.read<Entity>();
-			materialMapping.component.materialIndex = stream.read<uint32>();
-		}
-
-		for (EntityComponentMapping<RigidBody3DComponent>& rigidBodyMapping : descriptor.rigidBodyMappings) {
+		for (EntityComponentMapping<RigidBody3DComponent>& rigidBodyMapping : asset.rigidBodyMappings) {
 			rigidBodyMapping.entity = stream.read<Entity>();
-			rigidBodyMapping.component.position = vec3<float32>(stream.read<svec3<float32>>());
-			rigidBodyMapping.component.rotation = vec3<float32>(stream.read<svec3<float32>>());
-			rigidBodyMapping.component.linearVelocity = vec3<float32>(stream.read<svec3<float32>>());
-			rigidBodyMapping.component.angularVelocity = vec3<float32>(stream.read<svec3<float32>>());
-			rigidBodyMapping.component.scale = stream.read<float32>();
-			rigidBodyMapping.component.inverseMass = stream.read<float32>();
-			rigidBodyMapping.component.inverseInertia = {
-				vec3<float32>(stream.read<svec3<float32>>()),
-				vec3<float32>(stream.read<svec3<float32>>()),
-				vec3<float32>(stream.read<svec3<float32>>()),
-			};
-			rigidBodyMapping.component.friction = stream.read<float32>();
-			rigidBodyMapping.component.restitution = stream.read<float32>();
 
-			for (const EntityComponentMapping<GeometryComponent>& geometryMapping : descriptor.geometryMappings) {
+			RigidBody3DComponent& component = rigidBodyMapping.component;
+			component.position = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
+			component.rotation = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
+			component.linearVelocity = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
+			component.angularVelocity = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
+			component.scale = stream.read<float32>();
+			component.inverseMass = stream.read<float32>();
+			component.inverseInertia = {
+				stream.read<float32>(), stream.read<float32>(), stream.read<float32>(),
+				stream.read<float32>(), stream.read<float32>(), stream.read<float32>(),
+				stream.read<float32>(), stream.read<float32>(), stream.read<float32>(),
+			};
+			component.friction = stream.read<float32>();
+			component.restitution = stream.read<float32>();
+
+			component.updateOrientation();
+			component.updateWorld({0.0_m, 0.0_m, 0.0_m});
+
+			for (const EntityComponentMapping<GeometryComponent>& geometryMapping : asset.geometryMappings) {
 				if (geometryMapping.entity != rigidBodyMapping.entity) {
 					continue;
 				}
 
-				const ref<GeometryAsset>& geometryAsset = descriptor.geometryAssets[geometryMapping.component.geometryIndex];
+				const ref<GeometryAsset> geometryAsset = geometryAssets[geometryMapping.component.geometryIndex];
 
 				if (!(geometryAsset->getFlags() & GeometryAssetFlags::HAS_HULL)) {
 					continue;
 				}
 
-				descriptor.rigidBodyFacePlaneCount += static_cast<uint32>(geometryAsset->getHull3DFaces().count());
+				asset.rigidBodyFacePlaneCount += static_cast<uint32>(geometryAsset->getHull3DFaces().count());
 			}
+
+			Instance3D& instance = asset.instances[instanceIndex + rigidBodyMapping.entity];
+			instance.worldTransform = component.world;
+			instance.normalTransform = component.calculateNormal();
 		}
 
-		return createRef<Scene3DAsset>(descriptor);
+		return createRef<Scene3DAsset>(asset);
 	}
 }

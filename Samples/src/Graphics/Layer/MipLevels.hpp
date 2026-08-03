@@ -107,7 +107,7 @@ namespace Trident {
 				const ref<ImageAsset> imageAsset = getLayer()->getApplication()->getAssetLibrary()->getAsset<ImageAsset>(assetName);
 				const Extent3D imageExtent = imageAsset->getExtent();
 				const ref<Buffer> imageStagingBuffer = createDynamicBuffer({
-					.size = imageExtent.width * imageExtent.height * imageExtent.depth * imageAsset->getLayerCount() * getChannelCount(ImageFormat::R8G8B8A8_UNORM),
+					.size = imageExtent.width * imageExtent.height * imageExtent.depth * imageAsset->getLayerCount() * getByteSize(ImageFormat::R8G8B8A8_UNORM),
 					.usage = BufferUsage::TRANSFER_SRC,
 					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
 					.persistent = false,

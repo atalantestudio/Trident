@@ -22,7 +22,7 @@ namespace Trident {
 			static constexpr uint32 PROJECT_OUTPUT_PATH_ARGUMENT_INDEX = 2;
 
 			static constexpr uint32 DEFAULT_GEOMETRY_2D_COUNT = 4;
-			static constexpr uint32 DEFAULT_GEOMETRY_3D_COUNT = 3;
+			static constexpr uint32 DEFAULT_GEOMETRY_3D_COUNT = 4;
 
 			inline static const view<char8> DEFAULT_GEOMETRY_2D_NAMES[DEFAULT_GEOMETRY_2D_COUNT] = {
 				"UnitCircle",
@@ -42,12 +42,14 @@ namespace Trident {
 				"UnitBox",
 				"UnitPlane",
 				"RectangularCuboid",
+				"SingleTextureUnitBox",
 			};
 
 			inline static constexpr CreateGeometry3DFunction DEFAULT_GEOMETRY_3D_FUNCTIONS[DEFAULT_GEOMETRY_3D_COUNT] = {
 				createUnitBox,
 				createUnitPlane,
 				createRectangularCuboid,
+				createSingleTextureUnitBox,
 			};
 
 		private:
@@ -258,18 +260,15 @@ namespace Trident {
 				const std::filesystem::path assetOutputPath = rootOutputPath / "Asset/Geometry/";
 				const std::filesystem::recursive_directory_iterator geometryDirectoryIterator(rootInputPath / "Asset/Geometry");
 
-				// TODO(debug-only)
-				uint32 identifier = 34;
-
 				uint32 defaultGeometryIndex = 0;
 
 				while (defaultGeometryIndex < DEFAULT_GEOMETRY_2D_COUNT) {
 					const Geometry2DData geometryData = DEFAULT_GEOMETRY_2D_FUNCTIONS[defaultGeometryIndex]();
+					const uint32 identifier = AssetLibrary::createAssetIdentifier();
 					const ByteStream<StreamOperation::WRITE> stream = encodeGeometryAsset2D(identifier, geometryData);
 
 					writeGeometryAsset(identifier, stream, DEFAULT_GEOMETRY_2D_NAMES[defaultGeometryIndex], assetOutputPath);
 
-					identifier += 1;
 					defaultGeometryIndex += 1;
 				}
 
@@ -277,11 +276,11 @@ namespace Trident {
 
 				while (defaultGeometryIndex < DEFAULT_GEOMETRY_3D_COUNT) {
 					const Geometry3DData geometryData = DEFAULT_GEOMETRY_3D_FUNCTIONS[defaultGeometryIndex]();
+					const uint32 identifier = AssetLibrary::createAssetIdentifier();
 					const ByteStream<StreamOperation::WRITE> stream = encodeGeometryAsset3D(identifier, geometryData);
 
 					writeGeometryAsset(identifier, stream, DEFAULT_GEOMETRY_3D_NAMES[defaultGeometryIndex], assetOutputPath);
 
-					identifier += 1;
 					defaultGeometryIndex += 1;
 				}
 
@@ -308,13 +307,12 @@ namespace Trident {
 						continue;
 					}
 
+					const uint32 identifier = AssetLibrary::createAssetIdentifier();
 					const std::string assetName = directoryEntry.path().stem().string();
 					const Geometry3DData geometryData = DecodeFBXGeometry(inputData, identifier);
 					const ByteStream<StreamOperation::WRITE> stream = encodeGeometryAsset3D(identifier, geometryData);
 
 					writeGeometryAsset(identifier, stream, view<char8>(&assetName[0], assetName.size()), assetOutputPath);
-
-					identifier += 1;
 				}
 
 				ENGINE_INFO("Done building geometry assets.");

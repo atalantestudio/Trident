@@ -9,7 +9,7 @@ precision highp float;
 in Interstage {
 	layout(location = 0) vec3 surface;
 	layout(location = 1) vec2 textureCoordinate;
-	layout(location = 2) mat3x3 TBN;
+	layout(location = 2) mat3x3 tbn;
 } interstage;
 
 struct Light {
@@ -81,7 +81,7 @@ vec3 gammaCorrect(vec3 color) {
 }
 
 void main() {
-	vec3 normal = interstage.TBN[2];
+	vec3 normal = interstage.tbn[2];
 	vec3 surface = interstage.surface;
 	vec3 surfaceToViewDirection = normalize(camera.position - surface);
 	vec3 baseReflectivity = mix(vec3(0.04, 0.04, 0.04), diffuse, metallic);

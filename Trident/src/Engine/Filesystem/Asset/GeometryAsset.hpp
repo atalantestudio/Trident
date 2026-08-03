@@ -115,6 +115,26 @@ namespace Trident {
 				return flags;
 			}
 
+			inline uint32 getPositionCount() const {
+				return static_cast<uint32>(vertexPositionComponents.count() / 3);
+			}
+
+			inline uint32 getNormalCount() const {
+				return static_cast<uint32>(vertexNormalComponents.count() / 3);
+			}
+
+			inline uint32 getTextureCoordinateCount() const {
+				return static_cast<uint32>(vertexTextureCoordinateComponents.count() / 2);
+			}
+
+			inline uint32 getIndexCount() const {
+				return static_cast<uint32>(vertexPositionIndices.count());
+			}
+
+			inline uint32 getTriangleCount() const {
+				return getIndexCount() / 3;
+			}
+
 			inline uint32 getClusterCount() const {
 				return static_cast<uint32>(ceil(static_cast<float32>(vertexPositionIndices.count()) / CLUSTER_INDEX_COUNT));
 			}

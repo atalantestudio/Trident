@@ -11,29 +11,41 @@ namespace Trident {
 		const uint32 nameCharacterCount = stream.read<uint32>();
 
 		asset.name = sequence<char8>(nameCharacterCount);
-
-		std::copy_n(pointer_cast<const char8*>(stream.getBytePosition()), nameCharacterCount, &asset.name[0]);
-
-		stream.jump(nameCharacterCount);
-
-		asset.stage = stream.read<ShaderStage>();
+		asset.stageFlags = stream.read<ShaderStage>();
 
 		const uint32 entryPointCharacterCount = stream.read<uint32>();
 
 		asset.entryPoint = sequence<char8>(entryPointCharacterCount);
 
+		const uint32 bindingCount = stream.read<uint32>();
+
+		asset.bindings = sequence<DescriptorSetLayoutBinding>(bindingCount);
+
+		const uint32 descriptorSetCount = stream.read<uint32>();
+
+		asset.descriptorSetBindingRanges = sequence<range<uint32, uint32>>(descriptorSetCount);
+
+		std::copy_n(pointer_cast<const char8*>(stream.getBytePosition()), nameCharacterCount, &asset.name[0]);
+
+		stream.jump(nameCharacterCount);
+
 		std::copy_n(pointer_cast<const char8*>(stream.getBytePosition()), entryPointCharacterCount, &asset.entryPoint[0]);
 
 		stream.jump(entryPointCharacterCount);
 
-		const uint32 descriptorSetLayoutBindingCount = stream.read<uint32>();
+		for (DescriptorSetLayoutBinding& binding : asset.bindings) {
+			binding.descriptorType = stream.read<DescriptorType>();
+			binding.descriptorCount = stream.read<uint32>();
+			binding.shaderStages = stream.read<ShaderStage>();
+		}
 
-		asset.descriptorSetLayoutBindings = sequence<DescriptorSetLayoutBinding>(descriptorSetLayoutBindingCount);
+		uint32 bindingOffset = 0;
 
-		for (DescriptorSetLayoutBinding& descriptorSetLayoutBinding : asset.descriptorSetLayoutBindings) {
-			descriptorSetLayoutBinding.descriptorType = stream.read<DescriptorType>();
-			descriptorSetLayoutBinding.descriptorCount = stream.read<uint32>();
-			descriptorSetLayoutBinding.shaderStages = stream.read<ShaderStage>();
+		for (range<uint32, uint32>& descriptorSetBindingRange : asset.descriptorSetBindingRanges) {
+			descriptorSetBindingRange.offset = bindingOffset;
+			descriptorSetBindingRange.count = stream.read<uint32>();
+
+			bindingOffset += descriptorSetBindingRange.count;
 		}
 
 		return createRef<ShaderModuleAsset>(asset);

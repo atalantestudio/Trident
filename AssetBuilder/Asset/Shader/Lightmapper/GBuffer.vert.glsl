@@ -4,7 +4,7 @@
 // Distributed under the GNU GPL v3 License.
 
 layout(location = 0) in vec2 lightmapCoordinate;
-layout(location = 1) in uvec4 index;
+layout(location = 1) in uvec2 index;
 
 layout(set = 0, binding = 0) buffer readonly VertexBuffer {
 	float vertexBuffer[];

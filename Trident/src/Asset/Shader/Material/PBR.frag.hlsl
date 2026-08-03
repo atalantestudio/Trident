@@ -5,7 +5,7 @@ struct Interstage {
 	float4 position : SV_Position;
 	float3 surface : VERTEX_OUTPUT_ATTRIBUTE1;
 	float2 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE2;
-	float3x3 TBN : VERTEX_OUTPUT_ATTRIBUTE3;
+	float3x3 tbn : VERTEX_OUTPUT_ATTRIBUTE3;
 };
 
 struct FragmentOutput {
@@ -96,7 +96,7 @@ FragmentOutput main(Interstage interstage) {
 	// Convert from sRGB space to linear space.
 	float3 diffuse = pow(diffuseTexture.Sample(diffuseSamplerState, interstage.textureCoordinate).rgb, float3(2.2, 2.2, 2.2));
 
-	float3 normal = normalize(mul(interstage.TBN, normalTexture.Sample(normalSamplerState, interstage.textureCoordinate).xyz * 2.0 - 1.0));
+	float3 normal = normalize(mul(interstage.tbn, normalTexture.Sample(normalSamplerState, interstage.textureCoordinate).xyz * 2.0 - 1.0));
 	float3 arm = armTexture.Sample(armSamplerState, interstage.textureCoordinate).rgb;
 	float ao = arm[0];
 	float roughness = arm[1];

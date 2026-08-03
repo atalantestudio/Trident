@@ -9,11 +9,11 @@
 #include "Engine/Adapter/Graphics/VK/ShaderStage.hpp"
 
 namespace Trident {
-	VK::DescriptorSetLayout::DescriptorSetLayout(const Trident::Device* device, const sequence<DescriptorSetLayoutBinding>& bindings) :
+	VK::DescriptorSetLayout::DescriptorSetLayout(const Trident::Device* device, view<DescriptorSetLayoutBinding> bindings) :
 		Trident::DescriptorSetLayout(device, bindings)
 	{}
 
-	ref<Trident::DescriptorSetLayout> VK::createDescriptorSetLayout(const Trident::Device* device, const sequence<DescriptorSetLayoutBinding>& bindings) {
+	ref<Trident::DescriptorSetLayout> VK::createDescriptorSetLayout(const Trident::Device* device, view<DescriptorSetLayoutBinding> bindings) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);

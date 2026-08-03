@@ -46,7 +46,7 @@ namespace Trident {
 	}
 
 	uint64 Image::getSize() const {
-		return getChannelCount(format) * extent.width * extent.height * extent.depth * layerCount;
+		return getByteSize(format) * extent.width * extent.height * extent.depth * layerCount;
 	}
 
 	uint32 Image::getMipLevelCount() const {

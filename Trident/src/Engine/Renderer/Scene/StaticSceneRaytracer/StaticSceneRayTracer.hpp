@@ -17,8 +17,7 @@ namespace Trident {
 
 	class StaticSceneRayTracer : public BaseSceneRenderer<StaticSceneRayTracerCamera> {
 		public:
-			// Called on startup and on window resize.
-			void initialize() override {
+			void createFrameObjects() override {
 				accumulateBuffer = createAccumulateBuffer();
 
 				outputImage = createOutputImage();
@@ -97,7 +96,7 @@ namespace Trident {
 				rayTracingDescriptorSet = descriptorSets[0];
 				presentDescriptorSet = descriptorSets[1];
 
-				initialize();
+				createFrameObjects();
 
 				rayTracingPipelineLayout = createRayTracingPipelineLayout();
 				presentPipelineLayout = createPresentPipelineLayout();
@@ -107,7 +106,7 @@ namespace Trident {
 			}
 
 			void encodeSceneOneTimeCommands() override {
-				cameraMappedRange->triangleCount = static_cast<uint32>(scene->getAsset()->staticIndexRange.count / 3);
+				cameraMappedRange->triangleCount = static_cast<uint32>(scene->getAsset()->geometryRanges[0].count / 3);
 
 				updateDescriptorSets();
 			}
@@ -173,17 +172,17 @@ namespace Trident {
 				const ref<Device> device = getDevice();
 				const uint64 minStorageBufferOffsetAlignment = device->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
 				const ref<Scene3DAsset> sceneAsset = scene->getAsset();
-				const uint64 staticVertexAlignedRangeSize = ceil(sceneAsset->staticVertexRange.count, minStorageBufferOffsetAlignment);
-				const uint64 staticNormalAlignedRangeSize = ceil(sceneAsset->staticNormalRange.count, minStorageBufferOffsetAlignment);
+				const uint64 staticVertexAlignedRangeSize = ceil(sceneAsset->geometryRanges[2].count, minStorageBufferOffsetAlignment);
+				const uint64 staticNormalAlignedRangeSize = ceil(sceneAsset->geometryRanges[3].count, minStorageBufferOffsetAlignment);
 
 				const sequence<ref<BaseBufferView>> descriptorBufferViews = {
 					// Camera
 					cameraBuffer->createView<Camera>(0, cameraBuffer->getSize()),
 
 					// Static geometry
-					staticGeometryBuffer->createView<float32>(0, sceneAsset->staticVertexRange.count),
-					staticGeometryBuffer->createView<float32>(staticVertexAlignedRangeSize, sceneAsset->staticNormalRange.count),
-					staticGeometryBuffer->createView<float32>(staticVertexAlignedRangeSize + staticNormalAlignedRangeSize, sceneAsset->staticTextureCoordinateRange.count),
+					staticGeometryBuffer->createView<float32>(0, sceneAsset->geometryRanges[2].count),
+					staticGeometryBuffer->createView<float32>(staticVertexAlignedRangeSize, sceneAsset->geometryRanges[3].count),
+					staticGeometryBuffer->createView<float32>(staticVertexAlignedRangeSize + staticNormalAlignedRangeSize, sceneAsset->geometryRanges[4].count),
 				};
 
 				sequence<WriteDescriptorSet> writeDescriptorSets(5);

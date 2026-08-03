@@ -4,7 +4,7 @@
 #pragma once
 
 #include "AssetBuilder/API/AssetBuilderLibrary.hpp"
-#include "AssetBuilder/API/Scene/StaticScene.hpp"
+#include "AssetBuilder/API/Scene/Scene2D.hpp"
 
 #include "Engine/API/Process/Process.hpp"
 #include "Engine/ECS/Component/GeometryComponent.hpp"
@@ -96,8 +96,7 @@ namespace Trident {
 				return stream;
 			}
 
-			void createSceneAsset(uint32 identifier, const ByteStream<StreamOperation::WRITE>& stream, view<char8> assetName, const std::filesystem::path& rootOutputPath) {
-				const std::filesystem::path assetOutputPath = rootOutputPath / "Asset/Scene/";
+			void createSceneAsset(uint32 identifier, const ByteStream<StreamOperation::WRITE>& stream, view<char8> assetName, const std::filesystem::path& assetOutputPath) {
 				const std::string assetOutputPathString = assetOutputPath.string();
 
 				sequence<char8> outputPath(assetOutputPathString.size() + assetName.count() + 5);
@@ -123,12 +122,23 @@ namespace Trident {
 		public:
 			sint32 main(view<void*> arguments) final override {
 				const std::filesystem::path rootOutputPath = static_cast<const char8*>(arguments[2]);
-				const uint32 assetIdentifier = AssetLibrary::createAssetIdentifier();
+				const std::filesystem::path assetOutputPath = rootOutputPath / "Asset/Scene/";
 				const view<char8> assetName = getAssetName();
+
+				std::filesystem::path finalAssetOutputPath = assetOutputPath / std::string(assetName);
+				finalAssetOutputPath.replace_extension("tsa");
+
+				if (std::filesystem::exists(finalAssetOutputPath)) {
+					ENGINE_INFO("Scene asset \"[]\" already exists.", finalAssetOutputPath.filename().string());
+
+					return 0;
+				}
+
+				const uint32 assetIdentifier = AssetLibrary::createAssetIdentifier();
 				const Scene2DData scene = createScene(assetLibrary);
 				const ByteStream<StreamOperation::WRITE> stream = encodeScene2DAsset(assetIdentifier, scene);
 
-				createSceneAsset(assetIdentifier, stream, assetName, rootOutputPath);
+				createSceneAsset(assetIdentifier, stream, assetName, assetOutputPath);
 
 				ENGINE_INFO("Generated 2D scene asset \"[]\" (ID: []).", assetName, assetIdentifier);
 

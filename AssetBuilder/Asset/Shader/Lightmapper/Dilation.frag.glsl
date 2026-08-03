@@ -16,14 +16,15 @@ layout(location = 0) out vec4 fragment;
 void main() {
 	vec4 color = texture(intermediateLightmapAtlas, interstage.textureCoordinate);
 
-	if (color.a == 0.0) color = textureOffset(intermediateLightmapAtlas, interstage.textureCoordinate, ivec2(-1, -1));
+	// TODO(asset-builder/lightmapper): Test if post-dilation is useful.
+	/* if (color.a == 0.0) color = textureOffset(intermediateLightmapAtlas, interstage.textureCoordinate, ivec2(-1, -1));
 	if (color.a == 0.0) color = textureOffset(intermediateLightmapAtlas, interstage.textureCoordinate, ivec2( 0, -1));
 	if (color.a == 0.0) color = textureOffset(intermediateLightmapAtlas, interstage.textureCoordinate, ivec2( 1, -1));
 	if (color.a == 0.0) color = textureOffset(intermediateLightmapAtlas, interstage.textureCoordinate, ivec2(-1,  0));
 	if (color.a == 0.0) color = textureOffset(intermediateLightmapAtlas, interstage.textureCoordinate, ivec2( 1,  0));
 	if (color.a == 0.0) color = textureOffset(intermediateLightmapAtlas, interstage.textureCoordinate, ivec2(-1,  1));
 	if (color.a == 0.0) color = textureOffset(intermediateLightmapAtlas, interstage.textureCoordinate, ivec2( 0,  1));
-	if (color.a == 0.0) color = textureOffset(intermediateLightmapAtlas, interstage.textureCoordinate, ivec2( 1,  1));
+	if (color.a == 0.0) color = textureOffset(intermediateLightmapAtlas, interstage.textureCoordinate, ivec2( 1,  1)); */
 
 	fragment = color;
 }

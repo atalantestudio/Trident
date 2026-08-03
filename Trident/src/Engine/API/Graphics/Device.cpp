@@ -126,7 +126,7 @@ namespace Trident {
 		return adapter->createComputePipelineImplementation(this, descriptor);
 	}
 
-	ref<DescriptorSetLayout> Device::createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const {
+	ref<DescriptorSetLayout> Device::createDescriptorSetLayout(view<DescriptorSetLayoutBinding> bindings) const {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;

@@ -14,15 +14,16 @@ namespace Trident {
 		/// Only used if the asset's version is below 1.0.0.
 		sequence<char8> name;
 
-		ShaderStage stage;
+		ShaderStage stageFlags;
 
-		// TODO(tsl/shader-reflection): Replace by an offset.
+		// TODO(tsl/multiple-entry-points): Use an entry point offset map instead.
 		/// Only used if the asset's version is below 1.0.0.
 		sequence<char8> entryPoint;
 
-		// TODO(filesystem/asset/shader): Add support for multiple descriptor set layouts.
-		/// The bindings of the descriptor set layout used by the shader module.
-		sequence<DescriptorSetLayoutBinding> descriptorSetLayoutBindings;
+		sequence<DescriptorSetLayoutBinding> bindings;
+
+		/// The bindings of the descriptor set layouts.
+		sequence<range<uint32, uint32>> descriptorSetBindingRanges;
 
 		/// Only used if the asset's version is 1.0.0 or later.
 		sequence<char8> glslCode;

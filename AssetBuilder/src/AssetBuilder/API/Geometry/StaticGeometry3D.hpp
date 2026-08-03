@@ -3,11 +3,6 @@
 
 #pragma once
 
-#include "AssetBuilder/API/LightmapDescriptor.hpp"
-#include "AssetBuilder/API/Transform.hpp"
-
-#include "Engine/Filesystem/Asset/GeometryAsset.hpp"
-
 namespace Trident {
 	struct StaticGeometry3D {
 		sequence<float32> vertexComponents;
@@ -17,15 +12,5 @@ namespace Trident {
 		sequence<uint16> edgeOriginVertexIndices;
 		vec3<float32> normal;
 		svec2<float32> scale;
-	};
-
-	struct StaticGeometryDescriptor {
-		ref<GeometryAsset> asset;
-		EulerTransform transform;
-		uint32 materialIndex;
-		LightmapDescriptor lightmap;
-
-		/// Artificial scale multiplier in case the geometry is too small.
-		svec2<float32> lightmapScale = {1.0f, 1.0f};
 	};
 }

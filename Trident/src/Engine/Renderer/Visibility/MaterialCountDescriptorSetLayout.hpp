@@ -7,7 +7,7 @@
 
 namespace Trident {
 	ref<DescriptorSetLayout> VisibilityRenderer::createMaterialCountDescriptorSetLayout() const {
-		return createDescriptorSetLayout({
+		const sequence<DescriptorSetLayoutBinding> bindings = {
 			// Camera
 			{
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
@@ -42,6 +42,8 @@ namespace Trident {
 				.descriptorCount = 1,
 				.shaderStages = ShaderStage::COMPUTE,
 			},
-		});
+		};
+
+		return createDescriptorSetLayout(bindings);
 	}
 }

@@ -11,12 +11,12 @@ in Interstage {
 	layout(location = 2) vec2 lightmapCoordinate;
 } interstage;
 
-layout(set = 1, binding = 0) uniform sampler2D lightmapAtlasSampler;
-layout(set = 1, binding = 1) uniform sampler2D diffuseSampler;
+layout(set = 0, binding = 4) uniform sampler2D lightmapAtlasSampler;
+
+layout(set = 1, binding = 0) uniform sampler2D diffuseSampler;
 
 layout(location = 0) out vec4 fragment;
 
-// See https://stackoverflow.com/questions/13501081/efficient-bicubic-filtering-code-in-glsl.
 vec4 cubic(float v) {
 	vec4 n = vec4(1.0, 2.0, 3.0, 4.0) - v;
 	vec4 s = n * n * n;

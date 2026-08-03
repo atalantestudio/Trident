@@ -4,6 +4,7 @@
 #pragma once
 
 #define FORWARD_USE_NOCLIP_CAMERA
+// #define FORWARD_ENABLE_PHYSICS
 
 #if !defined(FORWARD_USE_NOCLIP_CAMERA)
 	#include "Engine/API/Camera/Controller/PlayerCameraController.hpp"
@@ -14,10 +15,7 @@
 #include "Engine/API/Event/EventDispatcher.hpp"
 #include "Engine/API/Physics/3D/PhysicsSimulation3D.hpp"
 #include "Engine/Layer/Layer.hpp"
-// #include "Engine/Renderer/Scene/StaticSceneRayTracer/StaticSceneRayTracer.hpp"
 #include "Engine/Renderer/Forward/Renderer.hpp"
-
-#include "../Scene/FlatColor.hpp"
 
 namespace Trident {
 	class Sample3DForwardLayer : public Layer {
@@ -47,7 +45,15 @@ namespace Trident {
 				renderer.build();
 				renderer.postBuild();
 
-				scene = createScope<Scene3D>(FlatColor::initializeScene(getApplication(), renderer.getGraphicsApi(), renderer.getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment));
+				Application* application = getApplication();
+
+				const view<char8> sceneAssetName = application->getPropertyFile()->getProperty<view<char8>>("AssetName");
+				const ref<Scene3DAsset> sceneAsset = application->getAssetLibrary()->getAsset<Scene3DAsset>(sceneAssetName);
+
+				// TODO(forward): Don't use alignment outside of the renderer.
+				const uint64 alignment = renderer.getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
+
+				scene = createScope<Scene3D>(sceneAsset, alignment);
 
 				physicsSimulation = createScope<PhysicsSimulation3D>(Descriptor<PhysicsSimulation3D>{
 					.scene = scene.get(),
@@ -60,6 +66,7 @@ namespace Trident {
 				});
 
 				renderer.setScene(scene.get());
+				renderer.visualizationMode = VisualizationMode::DEFAULT;
 
 				#if !defined(FORWARD_USE_NOCLIP_CAMERA)
 					PerspectiveCamera3D& camera = cameraController.getCamera();
@@ -72,7 +79,9 @@ namespace Trident {
 					camera.updateView();
 					camera.updateProjectionView();
 				#else
-					cameraController.getCamera().position = scene->ecs.getComponent<RigidBody3DComponent>(PLAYER_ENTITY).position;
+					// TODO(forward/camera): Expose the position.
+					cameraController.getCamera().position = {0.0f, 1.0f, -3.0f};
+
 					cameraController.getCamera().aspectRatio = getApplication()->getWindow()->getAspectRatio();
 					cameraController.updateProjection();
 				#endif
@@ -85,18 +94,21 @@ namespace Trident {
 			}
 
 			void update(float32 deltaTime, float32 inverseDeltaTime) override {
-				RigidBody3DComponent& playerRigidBody = scene->ecs.getComponent<RigidBody3DComponent>(PLAYER_ENTITY);
+				#if !defined(FORWARD_USE_NOCLIP_CAMERA)
+					RigidBody3DComponent& playerRigidBody = scene->ecs.getComponent<RigidBody3DComponent>(PLAYER_ENTITY);
+				#endif
 
 				#if !defined(FORWARD_USE_NOCLIP_CAMERA)
 					handleInputs();
 				#endif
 
-				// physicsSimulation->tick();
+				#if defined(FORWARD_ENABLE_PHYSICS)
+					physicsSimulation->tick();
 
-				// TODO(debug)
-				// physicsSimulation->broadPhase();
-				// physicsSimulation->narrowPhase();
-				// physicsSimulation->applyForces();
+					physicsSimulation->broadPhase();
+					physicsSimulation->narrowPhase();
+					physicsSimulation->applyForces();
+				#endif
 
 				#if !defined(FORWARD_USE_NOCLIP_CAMERA)
 					playerMove(deltaTime);
@@ -104,13 +116,15 @@ namespace Trident {
 					noclipMove(deltaTime);
 				#endif
 
-				// physicsSimulation->updateContactManifolds();
-				// physicsSimulation->applyImpulses();
+				#if defined(FORWARD_ENABLE_PHYSICS)
+					physicsSimulation->updateContactManifolds();
+					physicsSimulation->applyImpulses();
 
-				// TODO(debug): Apply a rotational constraint to the player entity.
-				// scene->ecs.getComponent<RigidBody3DComponent>(PLAYER_ENTITY).angularVelocity = {0.0f, 0.0f, 0.0f};
+					// TODO(debug): Apply a rotational constraint to the player entity.
+					// scene->ecs.getComponent<RigidBody3DComponent>(PLAYER_ENTITY).angularVelocity = {0.0f, 0.0f, 0.0f};
 
-				// physicsSimulation->integrate();
+					physicsSimulation->integrate();
+				#endif
 
 				#if !defined(FORWARD_USE_NOCLIP_CAMERA)
 					PerspectiveCamera3D& camera = cameraController.getCamera();
@@ -121,43 +135,45 @@ namespace Trident {
 			}
 
 			void preRender() override {
-				/* const ComponentPool<RigidBody3DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody3DComponent>();
+				#if defined(FORWARD_ENABLE_PHYSICS)
+					const ComponentPool<RigidBody3DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody3DComponent>();
 
-				uint32 componentIndex = 0;
+					uint32 componentIndex = 0;
 
-				while (componentIndex < rigidBodyComponentPool.componentCount) {
-					const Entity entity = rigidBodyComponentPool.componentIndexToEntity[componentIndex];
-					const RigidBody3DComponent& rigidBodyComponent = rigidBodyComponentPool.components[componentIndex];
+					while (componentIndex < rigidBodyComponentPool.componentCount) {
+						const Entity entity = rigidBodyComponentPool.componentIndexToEntity[componentIndex];
+						const RigidBody3DComponent& rigidBodyComponent = rigidBodyComponentPool.components[componentIndex];
 
-					renderer.setWorld(entity, rigidBodyComponent.world);
+						renderer.setInstanceWorldTransform(entity, rigidBodyComponent.world);
+						renderer.setInstanceNormalTransform(entity, rigidBodyComponent.calculateNormal());
 
-					componentIndex += 1;
-				}
+						componentIndex += 1;
+					}
 
-				// Visualize contact manifolds.
-				{
-					renderer.contactCount = 0;
+					if (renderer.visualizationMode & VisualizationMode::CONTACT_MANIFOLDS) {
+						renderer.contactCount = 0;
 
-					for (const std::pair<EntityPair, ContactPair3D>& pair : physicsSimulation->contactPairs) {
-						if (pair.first.A != PLAYER_ENTITY && pair.first.B != PLAYER_ENTITY) {
-							continue;
-						}
+						for (const std::pair<EntityPair, ContactPair3D>& pair : physicsSimulation->contactPairs) {
+							if (pair.first.A != PLAYER_ENTITY && pair.first.B != PLAYER_ENTITY) {
+								continue;
+							}
 
-						uint8 contactIndex = 0;
+							uint8 contactIndex = 0;
 
-						while (contactIndex < pair.second.manifold.contactCount) {
-							renderer.debugContactRange[renderer.contactCount] = svec3<float32>(pair.second.manifold.contacts[contactIndex].position);
+							while (contactIndex < pair.second.manifold.contactCount) {
+								renderer.debugContactRange[renderer.contactCount] = svec3<float32>(pair.second.manifold.contacts[contactIndex].position);
+								renderer.contactCount += 1;
+
+								contactIndex += 1;
+							}
+
+							renderer.debugContactRange[renderer.contactCount] = svec3<float32>(pair.second.manifold.contacts[0].position);
 							renderer.contactCount += 1;
 
-							contactIndex += 1;
+							break;
 						}
-
-						renderer.debugContactRange[renderer.contactCount] = svec3<float32>(pair.second.manifold.contacts[0].position);
-						renderer.contactCount += 1;
-
-						break;
 					}
-				} */
+				#endif
 
 				renderer.updateCamera();
 			}
@@ -216,7 +232,12 @@ namespace Trident {
 
 			bool onWindowResize(WindowResizeEvent& event) {
 				cameraController.getCamera().aspectRatio = getApplication()->getWindow()->getAspectRatio();
-				cameraController.updateProjection();
+
+				#if !defined(FORWARD_USE_NOCLIP_CAMERA)
+					cameraController.getCamera().updateProjection();
+				#else
+					cameraController.updateProjection();
+				#endif
 
 				renderer.resize(event);
 
@@ -261,7 +282,6 @@ namespace Trident {
 			void noclipMove(float32 deltaTime);
 
 		private:
-			// StaticSceneRayTracer renderer;
 			ForwardRenderer renderer;
 			scope<Scene3D> scene;
 			scope<PhysicsSimulation3D> physicsSimulation;

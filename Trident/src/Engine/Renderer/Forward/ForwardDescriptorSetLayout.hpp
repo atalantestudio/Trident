@@ -7,7 +7,7 @@
 
 namespace Trident {
 	ref<DescriptorSetLayout> ForwardRenderer::createForwardDescriptorSetLayout() const {
-		return createDescriptorSetLayout({
+		const sequence<DescriptorSetLayoutBinding> bindings = {
 			// Camera
 			{
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
@@ -15,33 +15,35 @@ namespace Trident {
 				.shaderStages = ShaderStage::VERTEX | ShaderStage::FRAGMENT,
 			},
 
-			// Vertex position component
+			// Vertex
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
 				.shaderStages = ShaderStage::VERTEX,
 			},
 
-			// Vertex normal component
+			// Normal
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
 				.shaderStages = ShaderStage::VERTEX,
 			},
 
-			// Vertex texture coordinate component
+			// Texture coordinate
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
 				.shaderStages = ShaderStage::VERTEX,
 			},
 
-			// Triangle tangent component
+			// Triangle tangent
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
 				.shaderStages = ShaderStage::VERTEX,
 			},
-		});
+		};
+
+		return createDescriptorSetLayout(bindings);
 	}
 }

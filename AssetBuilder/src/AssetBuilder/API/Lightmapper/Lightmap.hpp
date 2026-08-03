@@ -9,14 +9,18 @@ namespace Trident {
 	struct StaticSubsurface;
 
 	struct Lightmap {
-		Extent2D offset;
-		Extent2D size;
-		uint32 indexOffset;
+		uint32 geometryIndex;
+		range<uint64, uint64> vertexRange;
 		uint32 coordinateOffset;
-		const StaticSubsurface* subsurface;
+
+		svec2<float32> scale;
+		svec2<float32> minCoordinate;
+		svec2<float32> luxelScale;
+		Extent2D size;
+
+		svec3<float32> tintColor;
 		svec3<float32> emissiveColor;
 		float32 emissiveIntensity;
-		svec3<float32> tintColor;
 	};
 
 	struct LightmapLookup {
@@ -34,7 +38,7 @@ namespace Trident {
 	struct LightmapNode {
 		LightmapNode* children[2]{};
 		Rectangle rectangle;
-		bool assigned = false;
+		uint32 index = max<uint32>();
 
 		~LightmapNode() {
 			delete children[0];

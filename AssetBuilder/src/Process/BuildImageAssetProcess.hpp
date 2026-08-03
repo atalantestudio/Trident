@@ -33,7 +33,7 @@ namespace Trident {
 
 	class BuildImageAssetProcess final : public Process {
 		public:
-			static void encodeImageAsset(const std::filesystem::path& assetOutputPath, view<char8> assetName, ImageAssetDescriptor& descriptor) {
+			static void encodeImageAsset(const std::filesystem::path& assetOutputPath, view<char8> assetName, const ImageAssetDescriptor& descriptor) {
 				ImageAssetHeader imageAssetHeader{};
 				imageAssetHeader.signature = AssetSignature::IMAGE;
 				imageAssetHeader.identifier = descriptor.identifier;

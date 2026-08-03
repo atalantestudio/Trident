@@ -12,66 +12,49 @@ layout(set = 0, binding = 0) uniform readonly Camera {
 	vec3 position;
 } camera;
 
-layout(set = 0, binding = 1) buffer readonly VertexPositionComponent {
-	float vertexPositionComponentBuffer[];
+layout(set = 0, binding = 1) buffer readonly PositionBuffer {
+	float positionBuffer[];
 };
 
-layout(set = 0, binding = 2) buffer readonly VertexNormalComponent {
-	float vertexNormalComponentBuffer[];
+layout(set = 0, binding = 2) buffer readonly NormalBuffer {
+	float normalBuffer[];
 };
 
-layout(set = 0, binding = 3) buffer readonly VertexTextureCoordinateComponent {
-	float vertexTextureCoordinateComponentBuffer[];
+layout(set = 0, binding = 3) buffer readonly TextureCoordinateBuffer {
+	float textureCoordinateBuffer[];
 };
 
-layout(set = 0, binding = 4) buffer readonly TriangleTangentComponent {
-	float triangleTangentComponentBuffer[];
+layout(set = 0, binding = 4) buffer readonly TangentBuffer {
+	float tangentBuffer[];
 };
 
 out Interstage {
 	layout(location = 0) vec3 surface;
 	layout(location = 1) vec2 textureCoordinate;
-	layout(location = 2) mat3x3 TBN;
+	layout(location = 2) mat3x3 tbn;
 } interstage;
 
 void main() {
-	uint positionComponentOffset = vertex[0] * 3u;
-	uint normalComponentOffset = vertex[1] * 3u;
-	uint textureCoordinateComponentOffset = vertex[2] * 2u;
-	uint tangentComponentOffset = uint(gl_VertexIndex / 3) * 3u;
+	uint positionOffset = vertex[0] * 3u;
+	uint normalOffset = vertex[1] * 3u;
+	uint textureCoordinateOffset = vertex[2] * 2u;
+	uint tangentOffset = uint(gl_VertexIndex / 3) * 3u;
 
-	vec3 position = vec3(
-		vertexPositionComponentBuffer[positionComponentOffset + 0u],
-		vertexPositionComponentBuffer[positionComponentOffset + 1u],
-		vertexPositionComponentBuffer[positionComponentOffset + 2u]
-	);
-
-	vec3 normal = vec3(
-		vertexNormalComponentBuffer[normalComponentOffset + 0u],
-		vertexNormalComponentBuffer[normalComponentOffset + 1u],
-		vertexNormalComponentBuffer[normalComponentOffset + 2u]
-	);
-
-	vec2 textureCoordinate = vec2(
-		vertexTextureCoordinateComponentBuffer[textureCoordinateComponentOffset + 0u],
-		vertexTextureCoordinateComponentBuffer[textureCoordinateComponentOffset + 1u]
-	);
-
-	vec3 tangent = vec3(
-		triangleTangentComponentBuffer[tangentComponentOffset + 0u],
-		triangleTangentComponentBuffer[tangentComponentOffset + 1u],
-		triangleTangentComponentBuffer[tangentComponentOffset + 2u]
-	);
+	vec3 position = vec3(positionBuffer[positionOffset + 0u], positionBuffer[positionOffset + 1u], positionBuffer[positionOffset + 2u]);
+	vec3 normal = vec3(normalBuffer[normalOffset + 0u], normalBuffer[normalOffset + 1u], normalBuffer[normalOffset + 2u]);
+	vec2 textureCoordinate = vec2(textureCoordinateBuffer[textureCoordinateOffset + 0u], textureCoordinateBuffer[textureCoordinateOffset + 1u]);
+	vec3 tangent = vec3(tangentBuffer[tangentOffset + 0u], tangentBuffer[tangentOffset + 1u], tangentBuffer[tangentOffset + 2u]);
 
 	vec4 surface = world * vec4(position, 1.0);
 
-	vec3 N = normalize(instanceNormal * normal);
-	vec3 T = normalize(instanceNormal * tangent);
-	vec3 B = cross(N, T);
+	vec3 n = normalize(instanceNormal * normal);
+	vec3 t = normalize(instanceNormal * tangent);
+	vec3 b = cross(n, t);
 
 	gl_Position = camera.projectionView * surface;
 
 	interstage.surface = surface.xyz;
-	interstage.textureCoordinate = vec2(textureCoordinate.x, 1.0 - textureCoordinate.y);
-	interstage.TBN = mat3x3(T, B, N);
+	interstage.textureCoordinate = textureCoordinate;
+	interstage.textureCoordinate.y = 1.0 - textureCoordinate.y;
+	interstage.tbn = mat3x3(t, b, n);
 }

@@ -17,23 +17,20 @@ namespace Trident {
 
 			void postSetCameraController() final override {}
 
-			virtual void initialize() = 0;
+			virtual void createFrameObjects() = 0;
 
 			virtual void updateCamera() = 0;
 
 			void resize(WindowResizeEvent& event) final override {
-				initialize();
+				createFrameObjects();
 				updateCamera();
 			}
 
 		protected:
 			virtual void encodeSceneOneTimeCommands() = 0;
 
-			VertexInputBinding getStaticGeometryVertexInputBinding() const;
-
 		private:
 			ref<Buffer> createCameraBuffer() const;
-			ref<Buffer> createStaticIndexBuffer() const;
 			ref<Buffer> createStaticGeometryBuffer() const;
 			ref<Buffer> createStaticGeometryStagingBuffer() const;
 
@@ -41,7 +38,9 @@ namespace Trident {
 
 		protected:
 			ref<Buffer> cameraBuffer;
-			ref<Buffer> staticIndexBuffer;
+
+			// TODO(renderer): Rename to "geometryBuffer" and move inside the Forward renderer.
+			/// Contains vertices, normals, texture coordinates and triangle tangents for static and dynamic geometry.
 			ref<Buffer> staticGeometryBuffer;
 
 			CameraType* cameraMappedRange = nullptr;

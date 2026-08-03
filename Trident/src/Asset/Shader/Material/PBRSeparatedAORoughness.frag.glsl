@@ -9,7 +9,7 @@ precision highp float;
 in Interstage {
 	layout(location = 0) vec3 surface;
 	layout(location = 1) vec2 textureCoordinate;
-	layout(location = 2) mat3x3 TBN;
+	layout(location = 2) mat3x3 tbn;
 } interstage;
 
 struct Light {
@@ -22,8 +22,8 @@ const vec3 AMBIENT_LIGHT = vec3(0.03, 0.03, 0.03);
 const float DENOMINATOR_TOLERANCE = 0.0001;
 const uint LIGHT_COUNT = 2u;
 const Light LIGHTS[LIGHT_COUNT] = Light[](
-	Light(vec3(-10.0, 10.0, -10.0), vec3(300.0, 300.0, 300.0)),
-	Light(vec3(5.0, 5.0, 10.0), vec3(300.0, 300.0, 300.0))
+	Light(vec3(-256.0, 256.0, -256.0), vec3(300000.0, 300000.0, 300000.0)),
+	Light(vec3(128.0, 128.0, 256.0), vec3(300000.0, 300000.0, 300000.0))
 );
 
 layout(set = 0, binding = 0) uniform readonly Camera {
@@ -83,7 +83,7 @@ void main() {
 	// Convert from sRGB space to linear space.
 	vec3 diffuse = pow(texture(diffuseTexture, interstage.textureCoordinate).rgb, vec3(2.2));
 
-	vec3 normal = normalize(interstage.TBN * (texture(normalTexture, interstage.textureCoordinate).xyz * 2.0 - 1.0));
+	vec3 normal = normalize(interstage.tbn * (texture(normalTexture, interstage.textureCoordinate).xyz * 2.0 - 1.0));
 	float ao = texture(aoTexture, interstage.textureCoordinate).r;
 	float roughness = texture(roughnessTexture, interstage.textureCoordinate).r;
 	float metallic = 0.0;

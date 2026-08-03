@@ -49,8 +49,28 @@ namespace Trident {
 					index = assetPathToIndexMap.find(path);
 				}
 
-				return std::static_pointer_cast<AssetType>(assets[index->second]);
+				return getLoadedAssets<AssetType>()[index->second];
 			}
+
+			template<typename AssetType>
+			void loadCachedAsset(uint32 identifier) {
+				const auto path = assetMap.map.find(identifier);
+
+				ENGINE_ASSERT(path != assetMap.map.end(), "Asset [] is not registered in the asset map.", identifier);
+
+				const std::unordered_map<sequence<char8>, uint32>& assetPathToIndexMap = getAssetPathToIndexMap<AssetType>();
+
+				auto index = assetPathToIndexMap.find(path->second);
+
+				if (index == assetPathToIndexMap.end()) {
+					loadAsset<AssetType>(path->second);
+				}
+			}
+
+			uint32 getLoadedAssetIndex(uint32 identifier) const;
+
+			template<typename AssetType>
+			view<ref<AssetType>> getLoadedAssets() const;
 
 		private:
 			std::filesystem::path getAbsolutePath(view<char8> base, view<char8> relativePath, view<char8> extension) const;
@@ -67,7 +87,13 @@ namespace Trident {
 
 		private:
 			std::filesystem::path basePath;
-			std::vector<ref<Asset>> assets;
+			std::vector<ref<FontAsset>> fontAssets;
+			std::vector<ref<GeometryAsset>> geometryAssets;
+			std::vector<ref<ImageAsset>> imageAssets;
+			std::vector<ref<MaterialAsset>> materialAssets;
+			std::vector<ref<Scene2DAsset>> scene2DAssets;
+			std::vector<ref<Scene3DAsset>> scene3DAssets;
+			std::vector<ref<ShaderModuleAsset>> shaderModuleAssets;
 			std::unordered_map<uint32, uint32> assetIdentifierToIndex;
 			std::unordered_map<sequence<char8>, uint32> fontAssetPathToIndex;
 			std::unordered_map<sequence<char8>, uint32> geometryAssetPathToIndex;

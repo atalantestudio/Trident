@@ -18,9 +18,7 @@ namespace Trident {
 		uint32 triangleTangentComponentOffset;
 
 		/// Indices for the default visualization mode (TRIANGLE_LIST).
-		uint32 vertexPositionIndexOffset;
-		uint32 vertexNormalIndexOffset;
-		uint32 vertexTextureCoordinateIndexOffset;
+		uint32 indexOffset;
 	};
 
 	class Geometry3D : public Geometry {
@@ -33,9 +31,7 @@ namespace Trident {
 				vertexNormalComponentRange(descriptor.vertexNormalComponentRange),
 				vertexTextureCoordinateComponentRange(descriptor.vertexTextureCoordinateComponentRange),
 				triangleTangentComponentOffset(descriptor.triangleTangentComponentOffset),
-				vertexPositionIndexOffset(descriptor.vertexPositionIndexOffset),
-				vertexNormalIndexOffset(descriptor.vertexNormalIndexOffset),
-				vertexTextureCoordinateIndexOffset(descriptor.vertexTextureCoordinateIndexOffset)
+				indexOffset(descriptor.indexOffset)
 			{}
 
 			inline range<uint32, uint32> getVertexPositionComponentRange() const {
@@ -54,16 +50,8 @@ namespace Trident {
 				return {triangleTangentComponentOffset, indexCount};
 			}
 
-			inline range<uint32, uint32> getVertexPositionIndexRange() const {
-				return {vertexPositionIndexOffset, indexCount};
-			}
-
-			inline range<uint32, uint32> getVertexNormalIndexRange() const {
-				return {vertexNormalIndexOffset, indexCount};
-			}
-
-			inline range<uint32, uint32> getVertexTextureCoordinateIndexRange() const {
-				return {vertexTextureCoordinateIndexOffset, indexCount};
+			inline range<uint32, uint32> getIndexRange() const {
+				return {indexOffset, indexCount};
 			}
 
 		protected:
@@ -74,8 +62,6 @@ namespace Trident {
 			uint32 triangleTangentComponentOffset;
 
 			/// Indices for the default visualization mode (TRIANGLE_LIST).
-			uint32 vertexPositionIndexOffset;
-			uint32 vertexNormalIndexOffset;
-			uint32 vertexTextureCoordinateIndexOffset;
+			uint32 indexOffset;
 	};
 }

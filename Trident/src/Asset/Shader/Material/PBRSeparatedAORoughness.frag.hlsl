@@ -5,7 +5,7 @@ struct Interstage {
 	float4 position : SV_Position;
 	float3 surface : VERTEX_OUTPUT_ATTRIBUTE1;
 	float2 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE2;
-	float3x3 TBN : VERTEX_OUTPUT_ATTRIBUTE3;
+	float3x3 tbn : VERTEX_OUTPUT_ATTRIBUTE3;
 };
 
 struct FragmentOutput {
@@ -35,18 +35,18 @@ static const float3 AMBIENT_LIGHT = float3(0.03, 0.03, 0.03);
 static const float DENOMINATOR_TOLERANCE = 0.0001;
 static const uint LIGHT_COUNT = 2;
 static const Light LIGHTS[LIGHT_COUNT] = {
-	createLight(float3(-10.0, 10.0, -10.0), float3(300.0, 300.0, 300.0)),
-	createLight(float3(5.0, 5.0, 10.0), float3(300.0, 300.0, 300.0)),
+	createLight(float3(-256.0, 256.0, -256.0), float3(300000.0, 300000.0, 300000.0)),
+	createLight(float3(128.0, 128.0, 256.0), float3(300000.0, 300000.0, 300000.0)),
 };
 
 cbuffer Camera : register(b0) {
 	Camera camera;
 }
 
-Texture2D<float4> aoTexture : register(t7);
-Texture2D<float4> roughnessTexture : register(t8);
-Texture2D<float4> diffuseTexture : register(t9);
-Texture2D<float4> normalTexture : register(t10);
+Texture2D<float4> aoTexture : register(t4);
+Texture2D<float4> roughnessTexture : register(t5);
+Texture2D<float4> diffuseTexture : register(t6);
+Texture2D<float4> normalTexture : register(t7);
 
 SamplerState aoSamplerState : register(s0);
 SamplerState roughnessSamplerState : register(s1);
@@ -98,7 +98,7 @@ FragmentOutput main(Interstage interstage) {
 	// Convert from sRGB space to linear space.
 	float3 diffuse = pow(diffuseTexture.Sample(diffuseSamplerState, interstage.textureCoordinate).rgb, float3(2.2, 2.2, 2.2));
 
-	float3 normal = normalize(mul(interstage.TBN, normalTexture.Sample(normalSamplerState, interstage.textureCoordinate).xyz * 2.0 - 1.0));
+	float3 normal = normalize(mul(interstage.tbn, normalTexture.Sample(normalSamplerState, interstage.textureCoordinate).xyz * 2.0 - 1.0));
 	float ao = aoTexture.Sample(aoSamplerState, interstage.textureCoordinate).r;
 	float roughness = roughnessTexture.Sample(roughnessSamplerState, interstage.textureCoordinate).r;
 	float metallic = 0.0;

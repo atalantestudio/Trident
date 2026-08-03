@@ -5,11 +5,11 @@
 
 #include "AssetBuilder/API/Lightmapper/Lightmap.hpp"
 #include "AssetBuilder/API/Lightmapper/Lightmapper.hpp"
-#include "AssetBuilder/API/Scene/Builder/StaticSceneBuilder.hpp"
+#include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
 
 namespace Trident {
 	// See https://blackpawn.com/texts/lightmaps.
-	LightmapNode* StaticSceneBuilder::insertLightmapNode(Lightmap& lightmap, LightmapNode* node) {
+	LightmapNode* SceneBuilder::insertLightmapNode(Lightmap& lightmap, LightmapNode* node) {
 		if (!node->leaf()) {
 			LightmapNode* newNode = insertLightmapNode(lightmap, node->children[0]);
 
@@ -20,7 +20,7 @@ namespace Trident {
 			return insertLightmapNode(lightmap, node->children[1]);
 		}
 
-		if (node->assigned) {
+		if (node->index < max<uint32>()) {
 			return nullptr;
 		}
 
@@ -66,96 +66,63 @@ namespace Trident {
 		return insertLightmapNode(lightmap, node->children[0]);
 	}
 
-	void StaticSceneBuilder::generateLightmaps(StaticScene3D& scene) {
-		createLightmaps(scene);
-		updateLightmapCoordinates(scene);
-
-		scene.lightmapAtlasImageAssetDescriptor = {
-			.format = ImageFormat::R8G8B8A8_UNORM,
-			.extent = {LIGHTMAP_ATLAS_EXTENT.width, LIGHTMAP_ATLAS_EXTENT.height, 1},
-			.mipLevelCount = 1,
-			.layerCount = 1,
-			.data = sequence<uint8>(LIGHTMAP_ATLAS_EXTENT.width * LIGHTMAP_ATLAS_EXTENT.height * getByteSize(ImageFormat::R8G8B8A8_UNORM)),
-		};
-		scene.lightmapAtlasImageAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
-
-		lightmapper.setOptions({
-			.atlasFormat = scene.lightmapAtlasImageAssetDescriptor.format,
-			.atlasExtent = LIGHTMAP_ATLAS_EXTENT,
-			.skyColor = skyColor,
-			.sunDirection = sunDirection,
-			.sunColor = sunColor,
-			.sunIntensity = sunIntensity,
-		});
-		lightmapper.buildLightmapAtlas(scene, scene.lightmapAtlasImageAssetDescriptor);
-	}
-
-	void StaticSceneBuilder::createLightmaps(StaticScene3D& scene) {
-		lightmapCoordinates = sequence<svec2<float32>>(subsurfaceTextureCoordinateCount);
-
-		lightmapLookups.reserve(subsurfaceCount);
-
-		uint32 indexOffset;
-		uint32 lightmapIndex = 0;
+	void SceneBuilder::createLightmaps(BuildScene3D& scene) {
 		uint32 lightmapCoordinateOffset = 0;
+		uint32 lightmapIndex = 0;
 
-		for (const StaticSurface& surface : surfaces) {
-			indexOffset = scene.materials[surface.materialIndex].indexRange.offset + surface.indexOffset;
+		while (lightmapIndex < lightmaps.size()) {
+			Lightmap& lightmap = lightmaps[lightmapIndex];
+			lightmap.coordinateOffset = lightmapCoordinateOffset;
 
-			for (const StaticSubsurface& subsurface : surface.subsurfaces) {
-				const uint64 textureCoordinateCount = subsurface.textureCoordinates.count();
+			const IntermediateGeometry& geometry = geometries[lightmap.geometryIndex];
+			const view<GeometryIndex3D> vertices(&geometry.vertices[lightmap.vertexRange.offset], lightmap.vertexRange.count);
 
-				Lightmap& lightmap = lightmaps[lightmapIndex];
-				lightmap.offset = {0, 0};
-				lightmap.indexOffset = indexOffset;
-				lightmap.coordinateOffset = lightmapCoordinateOffset;
-				lightmap.subsurface = &subsurface;
+			uint32 coordinateIndex = 0;
 
-				uint32 textureCoordinateIndex = 0;
+			while (coordinateIndex < lightmap.vertexRange.count) {
+				const uint32 textureCoordinateIndex = vertices[coordinateIndex].textureCoordinateIndex;
+				const svec2<float32> textureCoordinate = geometry.textureCoordinates[textureCoordinateIndex];
 
-				while (textureCoordinateIndex < textureCoordinateCount) {
-					lightmapCoordinates[lightmap.coordinateOffset + textureCoordinateIndex] = (subsurface.textureCoordinates[textureCoordinateIndex] - surface.minCoordinate) * subsurface.scale / surface.luxelScale;
+				scene.staticGeometry.lightmapCoordinates[lightmap.coordinateOffset + coordinateIndex] = (textureCoordinate - lightmap.minCoordinate) * lightmap.scale / lightmap.luxelScale;
 
-					textureCoordinateIndex += 1;
-				}
-
-				// TODO(lyah/scalar)
-				vec2<float32> size = subsurface.scale / surface.luxelScale;
-				size = {ceil(size[0] / 4.0f) * 4.0f, ceil(size[1] / 4.0f) * 4.0f};
-
-				lightmap.size = {static_cast<uint32>(size[0]), static_cast<uint32>(size[1])};
-
-				DEBUG_ASSERT(lightmap.size.width > 0 && lightmap.size.height > 0);
-
-				// Pad for dilation and bicubic filtering.
-				lightmap.size.width += 4;
-				lightmap.size.height += 4;
-
-				const LightmapLookup lightmapLookup = {
-					.index = lightmapIndex,
-					.area = lightmap.size.width * lightmap.size.height,
-				};
-
-				uint32 lightmapInsertionIndex = 0;
-
-				while (lightmapInsertionIndex < lightmapLookups.size()) {
-					if (lightmapLookup.area > lightmapLookups[lightmapInsertionIndex].area) {
-						break;
-					}
-
-					lightmapInsertionIndex += 1;
-				}
-
-				lightmapLookups.insert(lightmapLookups.begin() + lightmapInsertionIndex, lightmapLookup);
-
-				indexOffset += static_cast<uint32>(subsurface.vertexIndices.count());
-				lightmapIndex += 1;
-				lightmapCoordinateOffset += static_cast<uint32>(textureCoordinateCount);
+				coordinateIndex += 1;
 			}
+
+			// TODO(lyah/scalar)
+			vec2<float32> size = lightmap.scale / lightmap.luxelScale;
+			size = {ceil(size[0] / 4.0f) * 4.0f, ceil(size[1] / 4.0f) * 4.0f};
+
+			lightmap.size = {static_cast<uint32>(size[0]), static_cast<uint32>(size[1])};
+
+			DEBUG_ASSERT(lightmap.size.width > 0 && lightmap.size.height > 0);
+
+			// Dilation needs 1px padding on all sides, bicubic filtering needs 2.
+			lightmap.size.width += 4;
+			lightmap.size.height += 4;
+
+			const LightmapLookup lightmapLookup = {
+				.index = lightmapIndex,
+				.area = lightmap.size.width * lightmap.size.height,
+			};
+
+			uint32 lightmapInsertionIndex = 0;
+
+			while (lightmapInsertionIndex < lightmapLookups.size()) {
+				if (lightmapLookup.area > lightmapLookups[lightmapInsertionIndex].area) {
+					break;
+				}
+
+				lightmapInsertionIndex += 1;
+			}
+
+			lightmapLookups.insert(lightmapLookups.begin() + lightmapInsertionIndex, lightmapLookup);
+
+			lightmapCoordinateOffset += static_cast<uint32>(vertices.count());
+			lightmapIndex += 1;
 		}
 	}
 
-	void StaticSceneBuilder::updateLightmapCoordinates(StaticScene3D& scene) {
+	void SceneBuilder::updateLightmapCoordinates(BuildStaticSceneGeometry3D& staticGeometry) {
 		LightmapNode rootNode{};
 		rootNode.rectangle = {0, 0, LIGHTMAP_ATLAS_EXTENT.width, LIGHTMAP_ATLAS_EXTENT.height};
 
@@ -164,34 +131,20 @@ namespace Trident {
 
 			LightmapNode* node = insertLightmapNode(lightmap, &rootNode);
 
-			DEBUG_ASSERT(node != nullptr);
+			ENGINE_ASSERT(node != nullptr, "There isn't enough remaining space in the lightmap atlas to insert the node.");
 
-			node->assigned = true;
-
-			lightmap.offset.width = node->rectangle.x;
-			lightmap.offset.height = node->rectangle.y;
+			node->index = lightmapLookup.index;
 
 			uint32 coordinateIndex = 0;
 
-			while (coordinateIndex < lightmap.subsurface->textureCoordinates.count()) {
+			while (coordinateIndex < lightmap.vertexRange.count) {
 				// TODO(lyah/scalar)
-				svec2<float32>& coordinate = lightmapCoordinates[lightmap.coordinateOffset + coordinateIndex];
-				coordinate.x += lightmap.offset.width;
-				coordinate.y += lightmap.offset.height;
+				svec2<float32>& coordinate = staticGeometry.lightmapCoordinates[lightmap.coordinateOffset + coordinateIndex];
+				coordinate.x += node->rectangle.x;
+				coordinate.y += node->rectangle.y;
 				coordinate /= svec2<float32>{static_cast<float32>(LIGHTMAP_ATLAS_EXTENT.width), static_cast<float32>(LIGHTMAP_ATLAS_EXTENT.height)};
 
 				coordinateIndex += 1;
-			}
-
-			const view<uint32> textureCoordinateIndices = lightmap.subsurface->textureCoordinateIndices;
-
-			uint32 indexOffset = 0;
-
-			while (indexOffset < lightmap.subsurface->vertexIndices.count()) {
-				StaticVertex3D& index = scene.indices[lightmap.indexOffset + indexOffset];
-				index.lightmapCoordinate = lightmapCoordinates[lightmap.coordinateOffset + textureCoordinateIndices[indexOffset]];
-
-				indexOffset += 1;
 			}
 		}
 	}

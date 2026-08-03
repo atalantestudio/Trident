@@ -3,17 +3,14 @@
 
 #pragma once
 
-#include "Engine/API/Graphics/DispatchIndirectCommand.hpp"
+#include "AssetBuilder/API/Lightmapper/Lightmap.hpp"
+
+#include "Engine/API/Geometry/Index.hpp"
 #include "Engine/Filesystem/Asset/ImageAsset.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
-#include "AssetBuilder/API/Lightmapper/Lightmap.hpp"
-#include "AssetBuilder/API/Scene/StaticScene.hpp"
-
 namespace Trident {
-	struct LightmapperOptions {
-		ImageFormat atlasFormat;
-		Extent2D atlasExtent;
+	struct LightmapperArguments {
 		svec3<float32> skyColor;
 		svec3<float32> sunDirection;
 		svec3<float32> sunColor;
@@ -36,15 +33,21 @@ namespace Trident {
 		ref<Framebuffer> gBufferFramebuffer;
 		ref<Framebuffer> dilationFramebuffer;
 
-		ref<Buffer> indexBuffer;
-		ref<Buffer> vertexComponentBuffer;
-		ref<Buffer> normalComponentBuffer;
+		ref<Buffer> vertexBuffer;
+		ref<Buffer> positionBuffer;
+		ref<Buffer> normalBuffer;
 		ref<Buffer> lightmapAtlasStagingBuffer;
 	};
 
 	// TODO(application/destruction-leaks)
 	class Lightmapper {
 		private:
+			struct Vertex {
+				svec2<float32> lightmapCoordinate;
+				uint32 positionIndex;
+				uint32 normalIndex;
+			};
+
 			struct TraceRaysArguments {
 				Extent2D atlasExtent;
 				uint32 triangleCount;
@@ -58,9 +61,7 @@ namespace Trident {
 			};
 
 		public:
-			void setOptions(const LightmapperOptions& options);
-
-			void buildLightmapAtlas(const StaticScene3D& scene, ImageAssetDescriptor& lightmapAtlasImageAssetDescriptor);
+			void buildLightmapAtlas(view<GeometryIndex3D> vertices, view<svec3<float32>> positions, view<svec3<float32>> normals, view<svec2<float32>> lightmapCoordinates, const LightmapperArguments& lightmapperArguments, ImageAssetDescriptor& lightmapAtlasImageAssetDescriptor);
 
 		private:
 			void initialize();
@@ -95,24 +96,22 @@ namespace Trident {
 			ref<GraphicsPipeline> createDilationPipeline() const;
 
 			ref<Buffer> createTraceRaysArgumentBuffer() const;
-			ref<Buffer> createIndexBuffer(uint64 size) const;
-			ref<Buffer> createVertexComponentBuffer(uint64 size) const;
-			ref<Buffer> createNormalComponentBuffer(uint64 size) const;
+			ref<Buffer> createVertexBuffer(uint64 vertexCount) const;
+			ref<Buffer> createPositionBuffer(uint64 positionCount) const;
+			ref<Buffer> createNormalBuffer(uint64 normalCount) const;
 
 			ref<Sampler> createIntermediateLightmapAtlasSampler() const;
 
-			void encodeOneTimeCommands(const StaticScene3D& scene) const;
+			void encodeOneTimeCommands(view<GeometryIndex3D> vertices, view<svec3<float32>> positions, view<svec3<float32>> normals, view<svec2<float32>> lightmapCoordinates) const;
 
 			void generateLightmaps(uint32 vertexCount) const;
 
 		private:
 			bool initialized = false;
 			ImageFormat atlasFormat;
-			Extent2D atlasExtent;
-			svec3<float32> skyColor;
-			svec3<float32> sunDirection;
-			svec3<float32> sunColor;
-			float32 sunIntensity;
+			Extent3D atlasExtent;
+			ImageAssetDescriptor imageAssetDescriptor;
+			LightmapperArguments arguments;
 
 			sequence<ref<DescriptorSet>> descriptorSets;
 

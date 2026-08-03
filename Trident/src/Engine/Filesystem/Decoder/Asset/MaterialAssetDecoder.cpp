@@ -3,28 +3,25 @@
 
 #include "pch.hpp"
 
-#include "Engine/Filesystem/Asset/AssetLibrary.hpp"
+#include "Engine/Filesystem/Asset/MaterialAsset.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 
 namespace Trident {
 	template<>
 	ref<MaterialAsset> Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary) {
-		MaterialAsset asset{};
-		asset.identifier = stream.read<uint32>();
-		asset.version = stream.read<VersionNumber>();
-		asset.shaderIndex = stream.read<uint32>();
-		asset.descriptorOffset = stream.read<uint32>();
+		ref<MaterialAsset> asset = createRef<MaterialAsset>();
+		asset->identifier = stream.read<uint32>();
+		asset->version = stream.read<VersionNumber>();
+		asset->shaderModuleAssetIdentifier = stream.read<uint32>();
 
-		const uint32 descriptorImageCount = stream.read<uint32>();
+		const uint32 descriptorImageAssetIdentifierCount = stream.read<uint32>();
 
-		asset.descriptorImages = sequence<MaterialDescriptorImage>(descriptorImageCount);
+		asset->descriptorImageAssetIdentifiers = sequence<uint32>(descriptorImageAssetIdentifierCount);
 
-		for (MaterialDescriptorImage& materialDescriptorImage : asset.descriptorImages) {
-			const uint32 imageAssetIdentifier = stream.read<uint32>();
-
-			materialDescriptorImage.imageAsset = assetLibrary->getAsset<ImageAsset>(imageAssetIdentifier);
+		for (uint32& descriptorImageAssetIdentifier : asset->descriptorImageAssetIdentifiers) {
+			descriptorImageAssetIdentifier = stream.read<uint32>();
 		}
 
-		return createRef<MaterialAsset>(asset);
+		return asset;
 	}
 }

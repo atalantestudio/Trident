@@ -25,7 +25,7 @@ namespace Trident::GL {
 		return createRef<CommandPool>(device);
 	}
 
-	static ref<DescriptorSetLayout> createDescriptorSetLayout(const Trident::Device* device, const sequence<DescriptorSetLayoutBinding>& bindings) {
+	static ref<DescriptorSetLayout> createDescriptorSetLayout(const Trident::Device* device, view<DescriptorSetLayoutBinding> bindings) {
 		return createRef<DescriptorSetLayout>(device, bindings);
 	}
 

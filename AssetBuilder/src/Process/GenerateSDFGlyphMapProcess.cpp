@@ -412,39 +412,59 @@ namespace Trident {
 	}
 
 	void GenerateSDFGlyphMapProcess::createDescriptorSetLayoutsAndSets() {
-		const DescriptorSetLayoutBinding fontBufferBinding = {
-			.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
-			.descriptorCount = 1,
-			.shaderStages = ShaderStage::COMPUTE,
-		};
-		const DescriptorSetLayoutBinding glyphBufferBinding = {
-			.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
-			.descriptorCount = 1,
-			.shaderStages = ShaderStage::COMPUTE,
-		};
-		const DescriptorSetLayoutBinding readWriteGlyphImageBinding = {
-			.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE,
-			.descriptorCount = 1,
-			.shaderStages = ShaderStage::COMPUTE,
-		};
-		const DescriptorSetLayoutBinding readOnlyGlyphImageBinding = {
-			.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE,
-			.descriptorCount = 1,
-			.shaderStages = ShaderStage::COMPUTE,
-		};
-		const DescriptorSetLayoutBinding glyphMapImageBinding = {
-			.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE,
-			.descriptorCount = 1,
-			.shaderStages = ShaderStage::COMPUTE,
-		};
-		const DescriptorSetLayoutBinding glyphOffsetBufferBinding = {
-			.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
-			.descriptorCount = 1,
-			.shaderStages = ShaderStage::COMPUTE,
+		const sequence<DescriptorSetLayoutBinding> bindings = {
+			// Font
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+
+			// Glyph
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+
+			// Read-write glyph
+			{
+				.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+
+			// Read-only glyph
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+
+			// Glyph map
+			{
+				.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+
+			// Font
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+
+			// Glyph offset
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
 		};
 
-		glyphImageDescriptorSetLayout = Renderer::createDescriptorSetLayout({fontBufferBinding, glyphBufferBinding, readWriteGlyphImageBinding});
-		glyphSdfDescriptorSetLayout = Renderer::createDescriptorSetLayout({readOnlyGlyphImageBinding, glyphMapImageBinding, fontBufferBinding, glyphOffsetBufferBinding});
+		glyphImageDescriptorSetLayout = Renderer::createDescriptorSetLayout(view<DescriptorSetLayoutBinding>(&bindings[0], 3));
+		glyphSdfDescriptorSetLayout = Renderer::createDescriptorSetLayout(view<DescriptorSetLayoutBinding>(&bindings[3], 4));
 	}
 
 	void GenerateSDFGlyphMapProcess::createGlyphImagePipelineLayout() {

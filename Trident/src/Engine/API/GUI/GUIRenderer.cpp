@@ -185,7 +185,7 @@ namespace Trident {
 		if (format == ImageFormat::R8G8B8_UNORM) {
 			format = ImageFormat::R8G8B8A8_UNORM;
 
-			const uint64 size = imageAsset->getExtent().width * imageAsset->getExtent().height * imageAsset->getExtent().depth * imageAsset->getLayerCount() * getChannelCount(ImageFormat::R8G8B8A8_UNORM);
+			const uint64 size = imageAsset->getExtent().width * imageAsset->getExtent().height * imageAsset->getExtent().depth * imageAsset->getLayerCount() * getByteSize(ImageFormat::R8G8B8A8_UNORM);
 
 			convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(imageAsset->getData(), userImageStagingBufferMappedRange, size);
 

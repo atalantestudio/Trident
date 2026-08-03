@@ -88,6 +88,49 @@ namespace Trident {
 		return shaderModuleAssetPathToIndex;
 	}
 
+	uint32 AssetLibrary::getLoadedAssetIndex(uint32 identifier) const {
+		auto index = assetIdentifierToIndex.find(identifier);
+
+		ENGINE_ASSERT(index != assetIdentifierToIndex.end(), "Asset [] is not loaded.", identifier);
+
+		return index->second;
+	}
+
+	template<>
+	view<ref<FontAsset>> AssetLibrary::getLoadedAssets() const {
+		return view<ref<FontAsset>>(&fontAssets[0], fontAssets.size());
+	}
+
+	template<>
+	view<ref<GeometryAsset>> AssetLibrary::getLoadedAssets() const {
+		return view<ref<GeometryAsset>>(&geometryAssets[0], geometryAssets.size());
+	}
+
+	template<>
+	view<ref<ImageAsset>> AssetLibrary::getLoadedAssets() const {
+		return view<ref<ImageAsset>>(&imageAssets[0], imageAssets.size());
+	}
+
+	template<>
+	view<ref<MaterialAsset>> AssetLibrary::getLoadedAssets() const {
+		return view<ref<MaterialAsset>>(&materialAssets[0], materialAssets.size());
+	}
+
+	template<>
+	view<ref<Scene2DAsset>> AssetLibrary::getLoadedAssets() const {
+		return view<ref<Scene2DAsset>>(&scene2DAssets[0], scene2DAssets.size());
+	}
+
+	template<>
+	view<ref<Scene3DAsset>> AssetLibrary::getLoadedAssets() const {
+		return view<ref<Scene3DAsset>>(&scene3DAssets[0], scene3DAssets.size());
+	}
+
+	template<>
+	view<ref<ShaderModuleAsset>> AssetLibrary::getLoadedAssets() const {
+		return view<ref<ShaderModuleAsset>>(&shaderModuleAssets[0], shaderModuleAssets.size());
+	}
+
 	template<>
 	void AssetLibrary::loadAsset<FontAsset>(view<char8> path) {
 		const std::filesystem::path absolutePath = getAbsolutePath("Asset/Font", path, ".tfo");
@@ -102,12 +145,12 @@ namespace Trident {
 		stream.jump(sizeof(AssetSignature));
 
 		const ref<FontAsset> fontAsset = Filesystem::decodeAsset<FontAsset>(stream, this);
-		const uint32 assetIndex = static_cast<uint32>(assets.size());
+		const uint32 assetIndex = static_cast<uint32>(fontAssets.size());
 		const sequence<char8> stem = absolutePath.stem().string();
 
 		assetIdentifierToIndex.insert({fontAsset->identifier, assetIndex});
 		fontAssetPathToIndex.insert({stem, assetIndex});
-		assets.emplace_back(fontAsset);
+		fontAssets.emplace_back(fontAsset);
 	}
 
 	template<>
@@ -124,12 +167,12 @@ namespace Trident {
 		stream.jump(sizeof(AssetSignature));
 
 		const ref<GeometryAsset> geometryAsset = Filesystem::decodeAsset<GeometryAsset>(stream, this);
-		const uint32 assetIndex = static_cast<uint32>(assets.size());
+		const uint32 assetIndex = static_cast<uint32>(geometryAssets.size());
 		const sequence<char8> stem = absolutePath.stem().string();
 
 		assetIdentifierToIndex.insert({geometryAsset->identifier, assetIndex});
 		geometryAssetPathToIndex.insert({stem, assetIndex});
-		assets.emplace_back(geometryAsset);
+		geometryAssets.emplace_back(geometryAsset);
 	}
 
 	template<>
@@ -146,12 +189,12 @@ namespace Trident {
 		stream.jump(sizeof(AssetSignature));
 
 		const ref<ImageAsset> imageAsset = Filesystem::decodeAsset<ImageAsset>(stream, this);
-		const uint32 assetIndex = static_cast<uint32>(assets.size());
+		const uint32 assetIndex = static_cast<uint32>(imageAssets.size());
 		const sequence<char8> stem = absolutePath.stem().string();
 
 		assetIdentifierToIndex.insert({imageAsset->identifier, assetIndex});
 		imageAssetPathToIndex.insert({stem, assetIndex});
-		assets.emplace_back(imageAsset);
+		imageAssets.emplace_back(imageAsset);
 	}
 
 	template<>
@@ -168,12 +211,12 @@ namespace Trident {
 		stream.jump(sizeof(AssetSignature));
 
 		const ref<MaterialAsset> materialAsset = Filesystem::decodeAsset<MaterialAsset>(stream, this);
-		const uint32 assetIndex = static_cast<uint32>(assets.size());
+		const uint32 assetIndex = static_cast<uint32>(materialAssets.size());
 		const sequence<char8> stem = absolutePath.stem().string();
 
 		assetIdentifierToIndex.insert({materialAsset->identifier, assetIndex});
 		materialAssetPathToIndex.insert({stem, assetIndex});
-		assets.emplace_back(materialAsset);
+		materialAssets.emplace_back(materialAsset);
 	}
 
 	template<>
@@ -190,12 +233,12 @@ namespace Trident {
 		stream.jump(sizeof(AssetSignature));
 
 		const ref<Scene2DAsset> sceneAsset = Filesystem::decodeAsset<Scene2DAsset>(stream, this);
-		const uint32 assetIndex = static_cast<uint32>(assets.size());
+		const uint32 assetIndex = static_cast<uint32>(scene2DAssets.size());
 		const sequence<char8> stem = absolutePath.stem().string();
 
 		assetIdentifierToIndex.insert({sceneAsset->identifier, assetIndex});
 		sceneAssetPathToIndex.insert({stem, assetIndex});
-		assets.emplace_back(sceneAsset);
+		scene2DAssets.emplace_back(sceneAsset);
 	}
 
 	template<>
@@ -212,12 +255,12 @@ namespace Trident {
 		stream.jump(sizeof(AssetSignature));
 
 		const ref<Scene3DAsset> sceneAsset = Filesystem::decodeAsset<Scene3DAsset>(stream, this);
-		const uint32 assetIndex = static_cast<uint32>(assets.size());
+		const uint32 assetIndex = static_cast<uint32>(scene3DAssets.size());
 		const sequence<char8> stem = absolutePath.stem().string();
 
 		assetIdentifierToIndex.insert({sceneAsset->identifier, assetIndex});
 		sceneAssetPathToIndex.insert({stem, assetIndex});
-		assets.emplace_back(sceneAsset);
+		scene3DAssets.emplace_back(sceneAsset);
 	}
 
 	template<>
@@ -234,11 +277,11 @@ namespace Trident {
 		stream.jump(sizeof(AssetSignature));
 
 		const ref<ShaderModuleAsset> shaderModuleAsset = Filesystem::decodeAsset<ShaderModuleAsset>(stream, this);
-		const uint32 assetIndex = static_cast<uint32>(assets.size());
+		const uint32 assetIndex = static_cast<uint32>(shaderModuleAssets.size());
 		const sequence<char8> stem = absolutePath.stem().string();
 
 		assetIdentifierToIndex.insert({shaderModuleAsset->identifier, assetIndex});
 		shaderModuleAssetPathToIndex.insert({stem, assetIndex});
-		assets.emplace_back(shaderModuleAsset);
+		shaderModuleAssets.emplace_back(shaderModuleAsset);
 	}
 }

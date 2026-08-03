@@ -9,7 +9,7 @@ precision highp float;
 in Interstage {
 	layout(location = 0) vec3 surface;
 	layout(location = 1) vec2 textureCoordinate;
-	layout(location = 2) mat3x3 TBN;
+	layout(location = 2) mat3x3 tbn;
 } interstage;
 
 struct Light {
@@ -82,7 +82,7 @@ void main() {
 	// Convert from sRGB space to linear space.
 	vec3 diffuse = pow(texture(diffuseTexture, interstage.textureCoordinate).rgb, vec3(2.2));
 
-	vec3 normal = normalize(interstage.TBN * (texture(normalTexture, interstage.textureCoordinate).xyz * 2.0 - 1.0));
+	vec3 normal = normalize(interstage.tbn * (texture(normalTexture, interstage.textureCoordinate).xyz * 2.0 - 1.0));
 	vec3 arm = texture(armTexture, interstage.textureCoordinate).rgb;
 	float ao = arm[0];
 	float roughness = arm[1];

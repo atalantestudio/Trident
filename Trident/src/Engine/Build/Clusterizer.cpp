@@ -36,11 +36,7 @@ namespace Trident {
 
 		while (geometryIndex < scene->geometries.count()) {
 			const Geometry3D& geometry = scene->geometries[geometryIndex];
-			const uint64 indexCount = geometry.getVertexPositionIndexRange().count;
-
-			// There should be as many position indices as there are normal and texture coordinate indices.
-			DEBUG_ASSERT(indexCount == geometry.getVertexNormalIndexRange().count && indexCount == geometry.getVertexTextureCoordinateIndexRange().count);
-
+			const uint64 indexCount = geometry.getIndexRange().count;
 			const uint32 clusterCount = static_cast<uint32>(ceil(static_cast<float32>(indexCount) / CLUSTER_INDEX_COUNT));
 
 			uint32 instanceCount = 0;
@@ -135,20 +131,20 @@ namespace Trident {
 			);
 
 			std::copy_n(
-				pointer_cast<const uint32*>(&dataBuffer[scene->getVertexPositionIndexRange().offset + geometry.getVertexPositionIndexRange().offset * sizeof(uint32)]),
-				geometry.getVertexPositionIndexRange().count,
+				pointer_cast<const uint32*>(&dataBuffer[scene->getIndexRange().offset + geometry.getIndexRange().offset * sizeof(uint32)]),
+				geometry.getIndexRange().count,
 				&clusteredScene.vertexPositionIndices[indexOffset]
 			);
 
 			std::copy_n(
-				pointer_cast<const uint32*>(&dataBuffer[scene->getVertexNormalIndexRange().offset + geometry.getVertexNormalIndexRange().offset * sizeof(uint32)]),
-				geometry.getVertexNormalIndexRange().count,
+				pointer_cast<const uint32*>(&dataBuffer[scene->getIndexRange().offset + (geometry.getIndexRange().offset + geometry.getIndexRange().count) * sizeof(uint32)]),
+				geometry.getIndexRange().count,
 				&clusteredScene.vertexNormalIndices[indexOffset]
 			);
 
 			std::copy_n(
-				pointer_cast<const uint32*>(&dataBuffer[scene->getVertexTextureCoordinateIndexRange().offset + geometry.getVertexTextureCoordinateIndexRange().offset * sizeof(uint32)]),
-				geometry.getVertexTextureCoordinateIndexRange().count,
+				pointer_cast<const uint32*>(&dataBuffer[scene->getIndexRange().offset + (geometry.getIndexRange().offset + geometry.getIndexRange().count * 2) * sizeof(uint32)]),
+				geometry.getIndexRange().count,
 				&clusteredScene.vertexTextureCoordinateIndices[indexOffset]
 			);
 

@@ -13,8 +13,9 @@ struct FragmentOutput {
 };
 
 Texture2D<float4> lightmapAtlasTexture : register(t3);
-Texture2D<float4> diffuseTexture : register(t4);
 SamplerState lightmapAtlasSamplerState : register(s0);
+
+Texture2D<float4> diffuseTexture : register(t4);
 SamplerState diffuseSamplerState : register(s1);
 
 FragmentOutput main(Interstage interstage) {
@@ -29,6 +30,5 @@ FragmentOutput main(Interstage interstage) {
 	output.color.rgb = pow(output.color.rgb, 1.0 / 2.2);
 	output.color.a = 1.0;
 
-	// TODO(dx12): Fix some materials not being rendered.
 	return output;
 }

@@ -11,12 +11,14 @@ namespace Trident {
 	struct DescriptorSetLayoutBinding {
 		DescriptorType descriptorType;
 		uint32 descriptorCount;
+
+		// TODO(graphics/descriptor-set/layout/binding): Rename to "stageFlags".
 		ShaderStage shaderStages;
 	};
 
 	class DescriptorSetLayout {
 		public:
-			explicit DescriptorSetLayout(const Device* device, const sequence<DescriptorSetLayoutBinding>& bindings);
+			explicit DescriptorSetLayout(const Device* device, view<DescriptorSetLayoutBinding> bindings);
 
 			~DescriptorSetLayout();
 

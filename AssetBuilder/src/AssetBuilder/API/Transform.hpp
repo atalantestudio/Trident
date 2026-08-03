@@ -4,7 +4,17 @@
 #pragma once
 
 namespace Trident {
-	struct Transform {
+	struct BuildTransform3D {
+		svec3<float32> translation;
+
+		/// In Euler angles.
+		svec3<float32> rotation;
+
+		/// Uniform scaling multiplier.
+		float32 scale;
+	};
+
+	struct TransformAngleAxis3D {
 		/// Relative to the surface center.
 		vec3<float32> translation;
 
@@ -13,11 +23,5 @@ namespace Trident {
 
 		/// Rotation angle in radians.
 		float32 angle;
-	};
-
-	struct EulerTransform {
-		vec3<float32> translation;
-		vec3<float32> eulerAngles;
-		vec3<float32> scale;
 	};
 }

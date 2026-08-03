@@ -7,7 +7,9 @@
 
 namespace Trident {
 	struct ShaderModuleDescriptor {
+		// TODO(graphics/shader-module): Rename to "stageFlags".
 		ShaderStage stage;
+
 		view<char8> entryPoint;
 
 		#if defined(DEBUG_OBJECT_NAME)

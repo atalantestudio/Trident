@@ -62,11 +62,11 @@ namespace Trident {
 				descriptorSetLayoutBindingIndex += 1;
 			} */
 
-			sequence<DescriptorSetLayoutBinding> userDescriptorSetLayoutBindings(materialShaderModuleAsset->descriptorSetLayoutBindings.count() + 1);
+			sequence<DescriptorSetLayoutBinding> userDescriptorSetLayoutBindings(materialShaderModuleAsset->bindings.count() + 1);
 			userDescriptorSetLayoutBindings[0] = materialOffsetBinding;
 
-			if (materialShaderModuleAsset->descriptorSetLayoutBindings.count() > 0) {
-				std::copy(materialShaderModuleAsset->descriptorSetLayoutBindings.begin(), materialShaderModuleAsset->descriptorSetLayoutBindings.end(), &userDescriptorSetLayoutBindings[1]);
+			if (materialShaderModuleAsset->bindings.count() > 0) {
+				std::copy(materialShaderModuleAsset->bindings.begin(), materialShaderModuleAsset->bindings.end(), &userDescriptorSetLayoutBindings[1]);
 			}
 
 			materialShaderUserDescriptorSetLayouts[materialShaderIndex] = createDescriptorSetLayout(userDescriptorSetLayoutBindings);
@@ -89,8 +89,8 @@ namespace Trident {
 
 			uint32 descriptorSetLayoutBindingIndex = 0;
 
-			while (descriptorSetLayoutBindingIndex < materialShaderModuleAsset->descriptorSetLayoutBindings.count()) {
-				const DescriptorType descriptorType = materialShaderModuleAsset->descriptorSetLayoutBindings[descriptorSetLayoutBindingIndex].descriptorType;
+			while (descriptorSetLayoutBindingIndex < materialShaderModuleAsset->bindings.count()) {
+				const DescriptorType descriptorType = materialShaderModuleAsset->bindings[descriptorSetLayoutBindingIndex].descriptorType;
 
 				switch (descriptorType) {
 					case DescriptorType::COMBINED_IMAGE_SAMPLER: {
@@ -98,8 +98,7 @@ namespace Trident {
 
 						while (materialIndex < materialAssets.size()) {
 							const ref<MaterialAsset> materialAsset = materialAssets[materialIndex];
-							const MaterialDescriptorImage& materialDescriptorImage = materialAsset->descriptorImages[descriptorSetLayoutBindingIndex];
-							const ref<ImageAsset> imageAsset = materialDescriptorImage.imageAsset;
+							const ref<ImageAsset> imageAsset = assetLibrary->getAsset<ImageAsset>(materialAsset->descriptorImageAssetIdentifiers[descriptorSetLayoutBindingIndex]);
 							const Extent3D extent = imageAsset->getExtent();
 
 							// TODO(material-graph/formats): Add support for other image formats (mainly R8_UNORM and R8G8B8_UNORM).
@@ -122,7 +121,7 @@ namespace Trident {
 				descriptorSetLayoutBindingIndex += 1;
 			}
 
-			imageCount += static_cast<uint32>(materialShaderModuleAsset->descriptorSetLayoutBindings.count());
+			imageCount += static_cast<uint32>(materialShaderModuleAsset->bindings.count());
 
 			materialShaderIndex += 1;
 		}
@@ -179,8 +178,8 @@ namespace Trident {
 
 			uint32 descriptorSetLayoutBindingIndex = 0;
 
-			while (descriptorSetLayoutBindingIndex < materialShaderModuleAsset->descriptorSetLayoutBindings.count()) {
-				const DescriptorType descriptorType = materialShaderModuleAsset->descriptorSetLayoutBindings[descriptorSetLayoutBindingIndex].descriptorType;
+			while (descriptorSetLayoutBindingIndex < materialShaderModuleAsset->bindings.count()) {
+				const DescriptorType descriptorType = materialShaderModuleAsset->bindings[descriptorSetLayoutBindingIndex].descriptorType;
 
 				switch (descriptorType) {
 					case DescriptorType::COMBINED_IMAGE_SAMPLER: {
@@ -317,8 +316,8 @@ namespace Trident {
 			sequence<BufferImageCopyRegion> copyRegions(materialAssets.size());
 			uint32 descriptorSetLayoutBindingIndex = 0;
 
-			while (descriptorSetLayoutBindingIndex < materialShaderModuleAsset->descriptorSetLayoutBindings.count()) {
-				const DescriptorType descriptorType = materialShaderModuleAsset->descriptorSetLayoutBindings[descriptorSetLayoutBindingIndex].descriptorType;
+			while (descriptorSetLayoutBindingIndex < materialShaderModuleAsset->bindings.count()) {
+				const DescriptorType descriptorType = materialShaderModuleAsset->bindings[descriptorSetLayoutBindingIndex].descriptorType;
 
 				switch (descriptorType) {
 					case DescriptorType::COMBINED_IMAGE_SAMPLER: {
@@ -328,8 +327,7 @@ namespace Trident {
 
 						while (materialIndex < materialAssets.size()) {
 							const ref<MaterialAsset> materialAsset = materialAssets[materialIndex];
-							const MaterialDescriptorImage& materialDescriptorImage = materialAsset->descriptorImages[descriptorSetLayoutBindingIndex];
-							const ref<ImageAsset> imageAsset = materialDescriptorImage.imageAsset;
+							const ref<ImageAsset> imageAsset = assetLibrary->getAsset<ImageAsset>(materialAsset->descriptorImageAssetIdentifiers[descriptorSetLayoutBindingIndex]);
 							const Extent3D extent = imageAsset->getExtent();
 							const uint64 imageAssetSize = extent.width * extent.height * extent.depth * imageAsset->getLayerCount() * getByteSize(ImageFormat::R8G8B8A8_UNORM);
 

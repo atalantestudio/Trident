@@ -5,7 +5,7 @@ struct Interstage {
 	float4 position : SV_Position;
 	float3 surface : VERTEX_OUTPUT_ATTRIBUTE1;
 	float2 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE2;
-	float3x3 TBN : VERTEX_OUTPUT_ATTRIBUTE3;
+	float3x3 tbn : VERTEX_OUTPUT_ATTRIBUTE3;
 };
 
 struct FragmentOutput {
@@ -91,7 +91,7 @@ float3 gammaCorrect(float3 color) {
 }
 
 FragmentOutput main(Interstage interstage) {
-	float3 normal = interstage.TBN[2];
+	float3 normal = interstage.tbn[2];
 	float3 surface = interstage.surface;
 	float3 surfaceToViewDirection = normalize(camera.position - surface);
 	float3 baseReflectivity = lerp(float3(0.04, 0.04, 0.04), diffuse, metallic);
