@@ -143,13 +143,6 @@ namespace Trident {
 
 		DEBUG_ASSERT(attachment.sampleCount > 1 || (attachment.sampleCount == 1 && attachment.finalLayout != ImageLayout::PRESENT_SRC));
 
-		ImageUsage usage = ImageUsage::COLOR_ATTACHMENT | descriptor.additionalUsage;
-
-		// TODO(graphics/render-pass): Let the user include TRANSIENT_ATTACHMENT.
-		/* if (!(usage & ImageUsage::STORAGE)) {
-			usage |= ImageUsage::TRANSIENT_ATTACHMENT;
-		} */
-
 		return device->createDynamicImage({
 			.type = descriptor.type,
 			.format = attachment.format,
@@ -157,7 +150,7 @@ namespace Trident {
 			.mipLevelCount = descriptor.mipLevelCount,
 			.layerCount = descriptor.layerCount,
 			.sampleCount = attachment.sampleCount,
-			.usage = usage,
+			.usage = ImageUsage::COLOR_ATTACHMENT | descriptor.additionalUsage,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED,
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = descriptor.name,
