@@ -12,7 +12,7 @@ namespace Trident {
 			{
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::VERTEX,
+				.shaderStages = ShaderStage::VERTEX | ShaderStage::FRAGMENT,
 			},
 
 			// Vertex
