@@ -42,10 +42,6 @@ namespace Trident {
 	void VK::recreateSwapchain(const Trident::Device* device, Trident::Swapchain* swapchain, const SwapchainDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		for (const ref<Trident::ImageView>& imageView : swapchain->imageViews) {
-			imageView.~shared_ptr();
-		}
-
 		updateSwapchain(device, swapchain, descriptor);
 	}
 
