@@ -32,7 +32,7 @@ namespace Trident {
 
 		const ref<DescriptorSetLayout> descriptorSetLayout = createDescriptorSetLayout(bindings);
 
-		writeDescriptorSetCount += materialShader.materialRange.count * static_cast<uint32>(descriptorSetLayout->bindings.count());
+		writeDescriptorSetCount += materialShader.materialRange.count * bindingRange.count;
 
 		pipelineLayoutDescriptor.descriptorSetLayouts[1] = descriptorSetLayout;
 

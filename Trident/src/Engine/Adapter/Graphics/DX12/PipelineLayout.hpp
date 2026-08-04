@@ -14,6 +14,7 @@ namespace Trident {
 		public:
 			ID3D12RootSignature* rootSignature;
 			UINT samplerDescriptorTableRootParameterIndex = max<UINT>();
+			sequence<UINT> samplerOffsetsPerDescriptorSet;
 	};
 
 	namespace DX12 {

@@ -58,21 +58,30 @@ namespace Trident {
 			rootParameterCount += 1;
 		}
 
+		pipelineLayout->samplerOffsetsPerDescriptorSet = sequence<UINT>(descriptor.descriptorSetLayouts.count());
+
 		sequence<D3D12_ROOT_PARAMETER1> rootParameters(rootParameterCount);
 		sequence<D3D12_DESCRIPTOR_RANGE1> descriptorRanges(viewDescriptorRangeCount + samplerDescriptorRangeCount);
 
-		for (const ref<DescriptorSetLayout>& descriptorSetLayout : descriptor.descriptorSetLayouts) {
+		UINT samplerOffset = 0;
+		UINT descriptorSetLayoutIndex = 0;
+
+		while (descriptorSetLayoutIndex < descriptor.descriptorSetLayouts.count()) {
+			const ref<DescriptorSetLayout> descriptorSetLayout = descriptor.descriptorSetLayouts[descriptorSetLayoutIndex];
+
 			if (descriptorSetLayout->bindings.count() == 0) {
+				descriptorSetLayoutIndex += 1;
+
 				continue;
 			}
+
+			pipelineLayout->samplerOffsetsPerDescriptorSet[descriptorSetLayoutIndex] = samplerOffset;
 
 			const UINT descriptorRangeStart = descriptorRangeOffset;
 
 			ShaderStage viewShaderStages{};
 
 			for (const DescriptorSetLayoutBinding& binding : descriptorSetLayout->bindings) {
-				viewShaderStages |= binding.shaderStages;
-
 				switch (binding.descriptorType) {
 					case DescriptorType::COMBINED_IMAGE_SAMPLER: {
 						D3D12_DESCRIPTOR_RANGE1& imageDescriptorRange = descriptorRanges[descriptorRangeOffset];
@@ -93,6 +102,7 @@ namespace Trident {
 						samplerDescriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
 						samplerDescriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
+						samplerOffset += 1;
 						samplerDescriptorRangeOffset += 1;
 						samplerShaderRegister += binding.descriptorCount;
 						samplerShaderStages |= binding.shaderStages;
@@ -192,6 +202,8 @@ namespace Trident {
 					}
 				}
 
+				viewShaderStages |= binding.shaderStages;
+
 				descriptorRangeOffset += 1;
 			}
 
@@ -202,6 +214,7 @@ namespace Trident {
 			rootParameter.ShaderVisibility = getShaderVisibility(viewShaderStages);
 
 			rootParameterOffset += 1;
+			descriptorSetLayoutIndex += 1;
 		}
 
 		if (samplerDescriptorTable) {

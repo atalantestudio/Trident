@@ -90,7 +90,7 @@ namespace Trident {
 						.geometry = builder.createWallGeometry({72.0f, 136.0f}),
 						.material = tileFloorMaterial,
 						.textureFiltering = {
-							.translation = {0.5f, 0.624f},
+							.translation = {0.5f, 0.625f},
 							.rotation = 0.0f,
 							.scale = {m1 * -0.25f, m1 * 0.25f},
 						},
