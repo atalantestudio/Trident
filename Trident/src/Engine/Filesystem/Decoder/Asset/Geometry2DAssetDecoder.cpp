@@ -16,9 +16,13 @@ namespace Trident {
 
 		ENGINE_ASSERT(!(asset.flags & GeometryAssetFlags::IS_3D), "Geometry isn't 2D.");
 
-		const uint32 vertexCount = stream.read<uint32>();
+		const uint32 positionCount = stream.read<uint32>();
 
-		asset.vertexPositionComponents = sequence<float32>(vertexCount * 2);
+		asset.vertexPositionComponents = sequence<float32>(positionCount * 2);
+
+		const uint32 textureCoordinateCount = stream.read<uint32>();
+
+		asset.vertexTextureCoordinateComponents = sequence<float32>(textureCoordinateCount * 2);
 
 		const uint32 indexCount = stream.read<uint32>();
 
@@ -36,6 +40,10 @@ namespace Trident {
 
 		for (float32& positionComponent : asset.vertexPositionComponents) {
 			positionComponent = stream.read<float32>();
+		}
+
+		for (float32& textureCoordinateComponent : asset.vertexTextureCoordinateComponents) {
+			textureCoordinateComponent = stream.read<float32>();
 		}
 
 		for (uint32& positionIndex : asset.vertexPositionIndices) {

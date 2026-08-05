@@ -57,9 +57,10 @@ namespace Trident {
 				uint64 streamSize = (
 					sizeof(AssetHeader) +
 					sizeof(GeometryAssetFlags) +
-					sizeof(uint32) * 2 +
-					data.vertexComponentBuffer.size() * sizeof(float32) +
-					data.indexBuffer.size() * sizeof(uint32)
+					sizeof(uint32) * 3 +
+					data.geometry.getVertexPositionComponentRange().count * sizeof(float32) +
+					data.geometry.getVertexTextureCoordinateComponentRange().count * sizeof(float32) +
+					data.geometry.getIndexRange().count * sizeof(uint32)
 				);
 
 				if (data.flags & GeometryAssetFlags::HAS_HULL) {
@@ -104,6 +105,9 @@ namespace Trident {
 			}
 
 			static ByteStream<StreamOperation::WRITE> encodeGeometryAsset2D(uint32 identifier, const Geometry2DData& data) {
+				const range<uint32, uint32> positionComponentRange = data.geometry.getVertexPositionComponentRange();
+				const range<uint32, uint32> textureCoordinateComponentRange = data.geometry.getVertexTextureCoordinateComponentRange();
+				const range<uint32, uint32> indexRange = data.geometry.getIndexRange();
 				const uint64 streamSize = calculateStreamSize(data);
 
 				ByteStream<StreamOperation::WRITE> stream(streamSize, Endianness::LITTLE_ENDIAN);
@@ -111,8 +115,9 @@ namespace Trident {
 				stream.write<uint32>(identifier);
 				stream.write<VersionNumber>({0, 0, 0});
 				stream.write<GeometryAssetFlags>(data.flags);
-				stream.write<uint32>(static_cast<uint32>(data.vertexComponentBuffer.size() / 2));
-				stream.write<uint32>(static_cast<uint32>(data.indexBuffer.size()));
+				stream.write<uint32>(positionComponentRange.count / 2);
+				stream.write<uint32>(textureCoordinateComponentRange.count / 2);
+				stream.write<uint32>(indexRange.count);
 
 				if (data.flags & GeometryAssetFlags::HAS_HULL) {
 					stream.write<svec2<float32>>(data.hull.centroid);
@@ -121,12 +126,34 @@ namespace Trident {
 					stream.write<Hull2DType>(data.hull.type);
 				}
 
-				for (const float32 vertexComponent : data.vertexComponentBuffer) {
-					stream.write<float32>(vertexComponent);
+				uint32 positionComponentIndex = 0;
+
+				while (positionComponentIndex < positionComponentRange.count) {
+					const float32 positionComponent = data.vertexComponentBuffer[positionComponentRange.offset + positionComponentIndex];
+
+					stream.write<float32>(positionComponent);
+
+					positionComponentIndex += 1;
 				}
 
-				for (const uint32 index : data.indexBuffer) {
+				uint32 textureCoordinateComponentIndex = 0;
+
+				while (textureCoordinateComponentIndex < textureCoordinateComponentRange.count) {
+					const float32 textureCoordinateComponent = data.vertexComponentBuffer[textureCoordinateComponentRange.offset + textureCoordinateComponentIndex];
+
+					stream.write<float32>(textureCoordinateComponent);
+
+					textureCoordinateComponentIndex += 1;
+				}
+
+				uint32 indexOffset = 0;
+
+				while (indexOffset < indexRange.count) {
+					const uint32 index = data.indexBuffer[indexRange.offset + indexOffset];
+
 					stream.write<uint32>(index);
+
+					indexOffset += 1;
 				}
 
 				if (data.flags & GeometryAssetFlags::HAS_HULL) {

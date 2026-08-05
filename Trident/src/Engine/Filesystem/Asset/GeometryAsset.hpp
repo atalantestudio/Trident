@@ -22,10 +22,7 @@ namespace Trident {
 
 		GeometryAssetFlags flags;
 		sequence<float32> vertexPositionComponents;
-
-		// TODO(asset/geometry/2d): Parse texture coordinates.
 		sequence<float32> vertexTextureCoordinateComponents;
-
 		sequence<uint32> vertexPositionIndices;
 
 		Hull2DType hullType;
