@@ -76,7 +76,7 @@ namespace Trident {
 		lightmapperArguments(lightmapperArguments)
 	{}
 
-	uint32 SceneBuilder::loadGeometry(ref<GeometryAsset> asset) {
+	uint32 SceneBuilder::loadGeometry(ref<Geometry3DAsset> asset) {
 		uint32 geometryIndex = 0;
 
 		while (geometryIndex < geometries.size()) {
@@ -90,32 +90,28 @@ namespace Trident {
 		}
 
 		if (geometryIndex >= geometries.size()) {
-			const view<uint32> positionIndices = asset->getVertexPositionIndices();
-			const view<uint32> normalIndices = asset->getVertexNormalIndices();
-			const view<uint32> textureCoordinateIndices = asset->getVertexTextureCoordinateIndices();
-
 			IntermediateGeometry geometry{};
 			geometry.assetIdentifier = asset->identifier;
 			geometry.sharedInstanceCount = 0;
-			geometry.vertices = sequence<GeometryIndex3D>(asset->getIndexCount());
-			geometry.positions = sequence<svec3<float32>>(asset->getPositionCount());
-			geometry.normals = sequence<svec3<float32>>(asset->getNormalCount());
-			geometry.textureCoordinates = sequence<svec2<float32>>(asset->getTextureCoordinateCount());
+			geometry.vertices = sequence<GeometryIndex3D>(asset->indexCount);
+			geometry.positions = sequence<svec3<float32>>(asset->positions.count());
+			geometry.normals = sequence<svec3<float32>>(asset->normals.count());
+			geometry.textureCoordinates = sequence<svec2<float32>>(asset->textureCoordinates.count());
 
 			uint32 vertexIndex = 0;
 
 			while (vertexIndex < geometry.vertices.count()) {
 				GeometryIndex3D& vertex = geometry.vertices[vertexIndex];
-				vertex.positionIndex = positionIndices[vertexIndex];
-				vertex.normalIndex = normalIndices[vertexIndex];
-				vertex.textureCoordinateIndex = textureCoordinateIndices[vertexIndex];
+				vertex.positionIndex = asset->positionIndices[vertexIndex];
+				vertex.normalIndex = asset->normalIndices[vertexIndex];
+				vertex.textureCoordinateIndex = asset->textureCoordinateIndices[vertexIndex];
 
 				vertexIndex += 1;
 			}
 
-			std::copy_n(pointer_cast<const svec3<float32>*>(&asset->getVertexPositionComponents()[0]), geometry.positions.count(), &geometry.positions[0]);
-			std::copy_n(pointer_cast<const svec3<float32>*>(&asset->getVertexNormalComponents()[0]), geometry.normals.count(), &geometry.normals[0]);
-			std::copy_n(pointer_cast<const svec2<float32>*>(&asset->getVertexTextureCoordinateComponents()[0]), geometry.textureCoordinates.count(), &geometry.textureCoordinates[0]);
+			std::copy_n(&asset->positions[0], geometry.positions.count(), &geometry.positions[0]);
+			std::copy_n(&asset->normals[0], geometry.normals.count(), &geometry.normals[0]);
+			std::copy_n(&asset->textureCoordinates[0], geometry.textureCoordinates.count(), &geometry.textureCoordinates[0]);
 
 			geometry.transformedTextureCoordinates = geometry.textureCoordinates;
 

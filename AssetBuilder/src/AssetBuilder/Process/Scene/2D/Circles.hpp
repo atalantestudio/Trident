@@ -17,7 +17,9 @@ namespace Trident {
 				return {
 					.staticScene = {},
 					.entityCount = 3,
-					.geometryAssetIdentifiers = {34},
+					.geometryAssetIdentifiers = {
+						assetLibrary->getAsset<Geometry2DAsset>("UnitCircle")->identifier,
+					},
 					.geometryMappings = {
 						{0, {0}},
 						{1, {0}},

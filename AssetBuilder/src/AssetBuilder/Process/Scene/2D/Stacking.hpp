@@ -64,7 +64,9 @@ namespace Trident {
 				return {
 					.staticScene = {},
 					.entityCount = entityCount,
-					.geometryAssetIdentifiers = {35},
+					.geometryAssetIdentifiers = {
+						assetLibrary->getAsset<Geometry2DAsset>("UnitSquare")->identifier,
+					},
 					.geometryMappings = geometryMappings,
 					.rigidBodyMappings = rigidBodyMappings,
 				};

@@ -56,8 +56,15 @@ namespace Trident {
 		return fontAssetPathToIndex;
 	}
 
+	// 2D and 3D geometries share the same index map.
 	template<>
-	const std::unordered_map<sequence<char8>, uint32>& AssetLibrary::getAssetPathToIndexMap<GeometryAsset>() const {
+	const std::unordered_map<sequence<char8>, uint32>& AssetLibrary::getAssetPathToIndexMap<Geometry2DAsset>() const {
+		return geometryAssetPathToIndex;
+	}
+
+	// 2D and 3D geometries share the same index map.
+	template<>
+	const std::unordered_map<sequence<char8>, uint32>& AssetLibrary::getAssetPathToIndexMap<Geometry3DAsset>() const {
 		return geometryAssetPathToIndex;
 	}
 
@@ -102,8 +109,13 @@ namespace Trident {
 	}
 
 	template<>
-	view<ref<GeometryAsset>> AssetLibrary::getLoadedAssets() const {
-		return view<ref<GeometryAsset>>(&geometryAssets[0], geometryAssets.size());
+	view<ref<Geometry2DAsset>> AssetLibrary::getLoadedAssets() const {
+		return view<ref<Geometry2DAsset>>(&geometry2DAssets[0], geometry2DAssets.size());
+	}
+
+	template<>
+	view<ref<Geometry3DAsset>> AssetLibrary::getLoadedAssets() const {
+		return view<ref<Geometry3DAsset>>(&geometry3DAssets[0], geometry3DAssets.size());
 	}
 
 	template<>
@@ -132,7 +144,7 @@ namespace Trident {
 	}
 
 	template<>
-	void AssetLibrary::loadAsset<FontAsset>(view<char8> path) {
+	void AssetLibrary::loadCachedAsset<FontAsset>(view<char8> path) {
 		const std::filesystem::path absolutePath = getAbsolutePath("Asset/Font", path, ".tfo");
 		const sequence<char8> assetPath = absolutePath.string();
 		const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
@@ -154,7 +166,7 @@ namespace Trident {
 	}
 
 	template<>
-	void AssetLibrary::loadAsset<GeometryAsset>(view<char8> path) {
+	void AssetLibrary::loadCachedAsset<Geometry2DAsset>(view<char8> path) {
 		const std::filesystem::path absolutePath = getAbsolutePath("Asset/Geometry", path, ".tga");
 		const sequence<char8> assetPath = absolutePath.string();
 		const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
@@ -166,17 +178,39 @@ namespace Trident {
 
 		stream.jump(sizeof(AssetSignature));
 
-		const ref<GeometryAsset> geometryAsset = Filesystem::decodeAsset<GeometryAsset>(stream, this);
-		const uint32 assetIndex = static_cast<uint32>(geometryAssets.size());
+		const ref<Geometry2DAsset> geometryAsset = Filesystem::decodeAsset<Geometry2DAsset>(stream, this);
+		const uint32 assetIndex = static_cast<uint32>(geometry2DAssets.size());
 		const sequence<char8> stem = absolutePath.stem().string();
 
 		assetIdentifierToIndex.insert({geometryAsset->identifier, assetIndex});
 		geometryAssetPathToIndex.insert({stem, assetIndex});
-		geometryAssets.emplace_back(geometryAsset);
+		geometry2DAssets.emplace_back(geometryAsset);
 	}
 
 	template<>
-	void AssetLibrary::loadAsset<ImageAsset>(view<char8> path) {
+	void AssetLibrary::loadCachedAsset<Geometry3DAsset>(view<char8> path) {
+		const std::filesystem::path absolutePath = getAbsolutePath("Asset/Geometry", path, ".tga");
+		const sequence<char8> assetPath = absolutePath.string();
+		const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
+
+		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
+
+		ENGINE_ASSERT(stream.getRemainingSize() >= sizeof(AssetSignature), "The file is corrupted.");
+		ENGINE_ASSERT(stream.peek<AssetSignature>() == AssetSignature::GEOMETRY, "The file format is invalid.");
+
+		stream.jump(sizeof(AssetSignature));
+
+		const ref<Geometry3DAsset> geometryAsset = Filesystem::decodeAsset<Geometry3DAsset>(stream, this);
+		const uint32 assetIndex = static_cast<uint32>(geometry3DAssets.size());
+		const sequence<char8> stem = absolutePath.stem().string();
+
+		assetIdentifierToIndex.insert({geometryAsset->identifier, assetIndex});
+		geometryAssetPathToIndex.insert({stem, assetIndex});
+		geometry3DAssets.emplace_back(geometryAsset);
+	}
+
+	template<>
+	void AssetLibrary::loadCachedAsset<ImageAsset>(view<char8> path) {
 		const std::filesystem::path absolutePath = getAbsolutePath("Asset/Image", path, ".tia");
 		const sequence<char8> assetPath = absolutePath.string();
 		const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
@@ -198,7 +232,7 @@ namespace Trident {
 	}
 
 	template<>
-	void AssetLibrary::loadAsset<MaterialAsset>(view<char8> path) {
+	void AssetLibrary::loadCachedAsset<MaterialAsset>(view<char8> path) {
 		const std::filesystem::path absolutePath = getAbsolutePath("Asset/Material", path, ".tma");
 		const sequence<char8> assetPath = absolutePath.string();
 		const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
@@ -220,7 +254,7 @@ namespace Trident {
 	}
 
 	template<>
-	void AssetLibrary::loadAsset<Scene2DAsset>(view<char8> path) {
+	void AssetLibrary::loadCachedAsset<Scene2DAsset>(view<char8> path) {
 		const std::filesystem::path absolutePath = getAbsolutePath("Asset/Scene", path, ".tsa");
 		const sequence<char8> assetPath = absolutePath.string();
 		const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
@@ -242,7 +276,7 @@ namespace Trident {
 	}
 
 	template<>
-	void AssetLibrary::loadAsset<Scene3DAsset>(view<char8> path) {
+	void AssetLibrary::loadCachedAsset<Scene3DAsset>(view<char8> path) {
 		const std::filesystem::path absolutePath = getAbsolutePath("Asset/Scene", path, ".tsa");
 		const sequence<char8> assetPath = absolutePath.string();
 		const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
@@ -264,7 +298,7 @@ namespace Trident {
 	}
 
 	template<>
-	void AssetLibrary::loadAsset<ShaderModuleAsset>(view<char8> path) {
+	void AssetLibrary::loadCachedAsset<ShaderModuleAsset>(view<char8> path) {
 		const std::filesystem::path absolutePath = getAbsolutePath("Asset/Shader", path, ".tsm");
 		const sequence<char8> assetPath = absolutePath.string();
 		const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);

@@ -6,9 +6,11 @@
 #include "Engine/API/Geometry/Geometry2D.hpp"
 #include "Engine/API/Geometry/Hull2D.hpp"
 #include "Engine/API/Geometry/Hull3D.hpp"
+#include "Engine/Filesystem/Asset/GeometryAssetFlags.hpp"
 
 namespace Trident {
 	struct Geometry2DData {
+		GeometryAssetFlags flags;
 		std::vector<float32> vertexComponentBuffer;
 		std::vector<uint32> indexBuffer;
 		Geometry2D geometry;
@@ -16,15 +18,15 @@ namespace Trident {
 	};
 
 	struct Geometry3DData {
-		sequence<float32> vertexPositionComponents;
-		sequence<float32> vertexNormalComponents;
-		sequence<float32> vertexTextureCoordinateComponents;
-		sequence<float32> triangleTangentComponents;
-		sequence<uint32> vertexPositionIndices;
-		sequence<uint32> vertexNormalIndices;
-		sequence<uint32> vertexTextureCoordinateIndices;
-
 		GeometryAssetFlags flags;
+		sequence<svec3<float32>> positions;
+		sequence<svec3<float32>> normals;
+		sequence<svec2<float32>> textureCoordinates;
+		sequence<svec3<float32>> tangents;
+		sequence<uint32> positionIndices;
+		sequence<uint32> normalIndices;
+		sequence<uint32> textureCoordinateIndices;
+
 		sequence<uint16> hullLineIndices;
 		sequence<Edge3D> hullEdges;
 		sequence<uint16> hullFaceEdgeIndices;

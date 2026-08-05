@@ -3,10 +3,9 @@
 
 #pragma once
 
-#include "Engine/API/Geometry/Geometry2D.hpp"
-
 #include "Hull.hpp"
-#include "TriangleTangents.hpp"
+
+#include "Engine/API/Geometry/Geometry2D.hpp"
 
 namespace Trident {
 	/// Creates and returns a 2D geometry representing a unit circle.
@@ -58,6 +57,7 @@ namespace Trident {
 		const Hull2D hull = createHull<Hull2DType::CIRCLE>(geometry, vertexComponentBuffer, indexBuffer);
 
 		return {
+			.flags = GeometryAssetFlags::HAS_HULL,
 			.vertexComponentBuffer = vertexComponentBuffer,
 			.indexBuffer = indexBuffer,
 			.geometry = geometry,
@@ -104,6 +104,7 @@ namespace Trident {
 		const Hull2D hull = createHull<Hull2DType::POLYGON>(geometry, vertexComponentBuffer, indexBuffer);
 
 		return {
+			.flags = GeometryAssetFlags::HAS_HULL,
 			.vertexComponentBuffer = vertexComponentBuffer,
 			.indexBuffer = indexBuffer,
 			.geometry = geometry,
@@ -137,6 +138,7 @@ namespace Trident {
 		const Hull2D hull = createHull<Hull2DType::POLYGON>(geometry, vertexComponentBuffer, indexBuffer);
 
 		return {
+			.flags = GeometryAssetFlags::HAS_HULL,
 			.vertexComponentBuffer = vertexComponentBuffer,
 			.indexBuffer = indexBuffer,
 			.geometry = geometry,
@@ -173,6 +175,7 @@ namespace Trident {
 		const Hull2D hull = createHull<Hull2DType::POLYGON>(geometry, vertexComponentBuffer, indexBuffer);
 
 		return {
+			.flags = GeometryAssetFlags::HAS_HULL,
 			.vertexComponentBuffer = vertexComponentBuffer,
 			.indexBuffer = indexBuffer,
 			.geometry = geometry,
@@ -185,38 +188,38 @@ namespace Trident {
 		const float32 z = scale[1];
 
 		Geometry3DData data = {
-			.vertexPositionComponents = {
-				-0.5f * x,  0.0f,  0.5f * z,
-				 0.5f * x,  0.0f,  0.5f * z,
-				-0.5f * x,  0.0f, -0.5f * z,
-				 0.5f * x,  0.0f, -0.5f * z,
+			.flags = GeometryAssetFlags::IS_3D | GeometryAssetFlags::HAS_HULL,
+			.positions = {
+				{-0.5f * x,  0.0f,  0.5f * z},
+				{ 0.5f * x,  0.0f,  0.5f * z},
+				{-0.5f * x,  0.0f, -0.5f * z},
+				{ 0.5f * x,  0.0f, -0.5f * z},
 			},
-			.vertexNormalComponents = {
-				 0.0f,  1.0f,  0.0f,
+			.normals = {
+				{ 0.0f,  1.0f,  0.0f},
 			},
-			.vertexTextureCoordinateComponents = {
-				0.0f, 0.0f,
-				1.0f, 0.0f,
-				0.0f, 1.0f,
-				1.0f, 1.0f,
+			.textureCoordinates = {
+				{0.0f, 0.0f},
+				{1.0f, 0.0f},
+				{0.0f, 1.0f},
+				{1.0f, 1.0f},
 			},
-			.triangleTangentComponents = {
-				 1.0f,  0.0f,  0.0f,
-				 1.0f,  0.0f,  0.0f,
+			.tangents = {
+				 { 1.0f,  0.0f,  0.0f},
+				 { 1.0f,  0.0f,  0.0f},
 			},
-			.vertexPositionIndices = {
+			.positionIndices = {
 				0, 1, 2,
 				1, 3, 2,
 			},
-			.vertexNormalIndices = {
+			.normalIndices = {
 				0, 0, 0,
 				0, 0, 0,
 			},
-			.vertexTextureCoordinateIndices = {
+			.textureCoordinateIndices = {
 				0, 1, 2,
 				1, 3, 2,
 			},
-			.flags = GeometryAssetFlags::HAS_HULL,
 			.hullLineIndices = {
 				0, 1,
 				1, 3,
@@ -243,7 +246,7 @@ namespace Trident {
 			},
 		};
 
-		data.hull = createHull<Hull3DType::POLYGON>(data.vertexPositionComponents);
+		data.hull = createHull<Hull3DType::POLYGON>(data.positions);
 
 		return data;
 	}
@@ -254,51 +257,40 @@ namespace Trident {
 		const float32 z = scale[2];
 
 		Geometry3DData data = {
-			.vertexPositionComponents = {
-				 0.5f * x,  0.5f * y,  0.5f * z,
-				-0.5f * x,  0.5f * y,  0.5f * z,
-				 0.5f * x, -0.5f * y,  0.5f * z,
-				-0.5f * x, -0.5f * y,  0.5f * z,
-				-0.5f * x,  0.5f * y, -0.5f * z,
-				 0.5f * x,  0.5f * y, -0.5f * z,
-				-0.5f * x, -0.5f * y, -0.5f * z,
-				 0.5f * x, -0.5f * y, -0.5f * z,
+			.flags = GeometryAssetFlags::IS_3D | GeometryAssetFlags::HAS_HULL,
+			.positions = {
+				{ 0.5f * x,  0.5f * y,  0.5f * z},
+				{-0.5f * x,  0.5f * y,  0.5f * z},
+				{ 0.5f * x, -0.5f * y,  0.5f * z},
+				{-0.5f * x, -0.5f * y,  0.5f * z},
+				{-0.5f * x,  0.5f * y, -0.5f * z},
+				{ 0.5f * x,  0.5f * y, -0.5f * z},
+				{-0.5f * x, -0.5f * y, -0.5f * z},
+				{ 0.5f * x, -0.5f * y, -0.5f * z},
 			},
-			.vertexNormalComponents = {
-				 0.0f,  0.0f,  1.0f,
-				 0.0f,  0.0f, -1.0f,
-				-1.0f,  0.0f,  0.0f,
-				 1.0f,  0.0f,  0.0f,
-				 0.0f,  1.0f,  0.0f,
-				 0.0f, -1.0f,  0.0f,
+			.normals = {
+				{ 0.0f,  0.0f,  1.0f},
+				{ 0.0f,  0.0f, -1.0f},
+				{-1.0f,  0.0f,  0.0f},
+				{ 1.0f,  0.0f,  0.0f},
+				{ 0.0f,  1.0f,  0.0f},
+				{ 0.0f, -1.0f,  0.0f},
 			},
-			.vertexTextureCoordinateComponents = {
-				0.0f, 0.0f,
-				1.0f, 0.0f,
-				0.0f, 1.0f,
-				1.0f, 1.0f,
+			.textureCoordinates = {
+				{0.0f, 0.0f},
+				{1.0f, 0.0f},
+				{0.0f, 1.0f},
+				{1.0f, 1.0f},
 			},
-			.triangleTangentComponents = {
-				// Front (+Z)
-				-1.0f,  0.0f,  0.0f,
-				-1.0f,  0.0f,  0.0f,
-				// Back (-Z)
-				 1.0f,  0.0f,  0.0f,
-				 1.0f,  0.0f,  0.0f,
-				// Left (-X)
-				 0.0f,  0.0f, -1.0f,
-				 0.0f,  0.0f, -1.0f,
-				// Right (+X)
-				 0.0f,  0.0f,  1.0f,
-				 0.0f,  0.0f,  1.0f,
-				// Top (+Y)
-				 1.0f,  0.0f,  0.0f,
-				 1.0f,  0.0f,  0.0f,
-				// Bottom (-Y)
-				 1.0f,  0.0f,  0.0f,
-				 1.0f,  0.0f,  0.0f,
+			.tangents = {
+				{-1.0f,  0.0f,  0.0f},
+				{ 1.0f,  0.0f,  0.0f},
+				{ 0.0f,  0.0f, -1.0f},
+				{ 0.0f,  0.0f,  1.0f},
+				{ 1.0f,  0.0f,  0.0f},
+				{ 1.0f,  0.0f,  0.0f},
 			},
-			.vertexPositionIndices = {
+			.positionIndices = {
 				// Front (+Z)
 				0, 1, 2,
 				1, 3, 2,
@@ -318,7 +310,7 @@ namespace Trident {
 				2, 3, 7,
 				3, 6, 7,
 			},
-			.vertexNormalIndices = {
+			.normalIndices = {
 				// Front (+Z)
 				0, 0, 0,
 				0, 0, 0,
@@ -338,7 +330,7 @@ namespace Trident {
 				5, 5, 5,
 				5, 5, 5,
 			},
-			.vertexTextureCoordinateIndices = {
+			.textureCoordinateIndices = {
 				// Front (+Z)
 				0, 1, 2,
 				1, 3, 2,
@@ -358,7 +350,6 @@ namespace Trident {
 				0, 1, 2,
 				1, 3, 2,
 			},
-			.flags = GeometryAssetFlags::HAS_HULL,
 			.hullLineIndices = {
 				0, 1,
 				1, 3,
@@ -417,7 +408,7 @@ namespace Trident {
 			},
 		};
 
-		data.hull = createHull<Hull3DType::POLYGON>(data.vertexPositionComponents);
+		data.hull = createHull<Hull3DType::POLYGON>(data.positions);
 
 		return data;
 	}
@@ -428,76 +419,65 @@ namespace Trident {
 		const float32 z = scale[2];
 
 		Geometry3DData data = {
-			.vertexPositionComponents = {
-				 0.5f * x,  0.5f * y,  0.5f * z,
-				-0.5f * x,  0.5f * y,  0.5f * z,
-				 0.5f * x, -0.5f * y,  0.5f * z,
-				-0.5f * x, -0.5f * y,  0.5f * z,
-				-0.5f * x,  0.5f * y, -0.5f * z,
-				 0.5f * x,  0.5f * y, -0.5f * z,
-				-0.5f * x, -0.5f * y, -0.5f * z,
-				 0.5f * x, -0.5f * y, -0.5f * z,
+			.flags = GeometryAssetFlags::IS_3D | GeometryAssetFlags::HAS_HULL,
+			.positions = {
+				{ 0.5f * x,  0.5f * y,  0.5f * z},
+				{-0.5f * x,  0.5f * y,  0.5f * z},
+				{ 0.5f * x, -0.5f * y,  0.5f * z},
+				{-0.5f * x, -0.5f * y,  0.5f * z},
+				{-0.5f * x,  0.5f * y, -0.5f * z},
+				{ 0.5f * x,  0.5f * y, -0.5f * z},
+				{-0.5f * x, -0.5f * y, -0.5f * z},
+				{ 0.5f * x, -0.5f * y, -0.5f * z},
 			},
-			.vertexNormalComponents = {
-				 0.0f,  0.0f,  1.0f,
-				 0.0f,  0.0f, -1.0f,
-				-1.0f,  0.0f,  0.0f,
-				 1.0f,  0.0f,  0.0f,
-				 0.0f,  1.0f,  0.0f,
-				 0.0f, -1.0f,  0.0f,
+			.normals = {
+				{ 0.0f,  0.0f,  1.0f},
+				{ 0.0f,  0.0f, -1.0f},
+				{-1.0f,  0.0f,  0.0f},
+				{ 1.0f,  0.0f,  0.0f},
+				{ 0.0f,  1.0f,  0.0f},
+				{ 0.0f, -1.0f,  0.0f},
 			},
-			.vertexTextureCoordinateComponents = {
-				0.0f, 0.0f,
-				0.25f, 0.0f,
-				0.0f, 0.25f,
-				0.25f, 0.25f,
+			.textureCoordinates = {
+				{0.0f, 0.0f},
+				{0.25f, 0.0f},
+				{0.0f, 0.25f},
+				{0.25f, 0.25f},
 
-				0.25f, 0.0f,
-				0.5f, 0.0f,
-				0.25f, 0.25f,
-				0.5f, 0.25f,
+				{0.25f, 0.0f},
+				{0.5f, 0.0f},
+				{0.25f, 0.25f},
+				{0.5f, 0.25f},
 
-				0.5f, 0.0f,
-				0.75f, 0.0f,
-				0.5f, 0.25f,
-				0.75f, 0.25f,
+				{0.5f, 0.0f},
+				{0.75f, 0.0f},
+				{0.5f, 0.25f},
+				{0.75f, 0.25f},
 
-				0.0f, 0.25f,
-				0.25f, 0.25f,
-				0.0f, 0.5f,
-				0.25f, 0.5f,
+				{0.0f, 0.25f},
+				{0.25f, 0.25f},
+				{0.0f, 0.5f},
+				{0.25f, 0.5f},
 
-				0.25f, 0.25f,
-				0.5f, 0.25f,
-				0.25f, 0.5f,
-				0.5f, 0.5f,
+				{0.25f, 0.25f},
+				{0.5f, 0.25f},
+				{0.25f, 0.5f},
+				{0.5f, 0.5f},
 
-				0.5f, 0.25f,
-				0.75f, 0.25f,
-				0.5f, 0.5f,
-				0.75f, 0.5f,
+				{0.5f, 0.25f},
+				{0.75f, 0.25f},
+				{0.5f, 0.5f},
+				{0.75f, 0.5f},
 			},
-			.triangleTangentComponents = {
-				// Front (+Z)
-				-1.0f,  0.0f,  0.0f,
-				-1.0f,  0.0f,  0.0f,
-				// Back (-Z)
-				 1.0f,  0.0f,  0.0f,
-				 1.0f,  0.0f,  0.0f,
-				// Left (-X)
-				 0.0f,  0.0f, -1.0f,
-				 0.0f,  0.0f, -1.0f,
-				// Right (+X)
-				 0.0f,  0.0f,  1.0f,
-				 0.0f,  0.0f,  1.0f,
-				// Top (+Y)
-				 1.0f,  0.0f,  0.0f,
-				 1.0f,  0.0f,  0.0f,
-				// Bottom (-Y)
-				 1.0f,  0.0f,  0.0f,
-				 1.0f,  0.0f,  0.0f,
+			.tangents = {
+				{-1.0f,  0.0f,  0.0f},
+				{ 1.0f,  0.0f,  0.0f},
+				{ 0.0f,  0.0f, -1.0f},
+				{ 0.0f,  0.0f,  1.0f},
+				{ 1.0f,  0.0f,  0.0f},
+				{ 1.0f,  0.0f,  0.0f},
 			},
-			.vertexPositionIndices = {
+			.positionIndices = {
 				// Front (+Z)
 				0, 1, 2,
 				1, 3, 2,
@@ -517,7 +497,7 @@ namespace Trident {
 				2, 3, 7,
 				3, 6, 7,
 			},
-			.vertexNormalIndices = {
+			.normalIndices = {
 				// Front (+Z)
 				0, 0, 0,
 				0, 0, 0,
@@ -537,7 +517,7 @@ namespace Trident {
 				5, 5, 5,
 				5, 5, 5,
 			},
-			.vertexTextureCoordinateIndices = {
+			.textureCoordinateIndices = {
 				// Front (+Z)
 				0, 1, 2,
 				1, 3, 2,
@@ -557,7 +537,6 @@ namespace Trident {
 				20, 21, 22,
 				21, 23, 22,
 			},
-			.flags = GeometryAssetFlags::HAS_HULL,
 			.hullLineIndices = {
 				0, 1,
 				1, 3,
@@ -616,7 +595,7 @@ namespace Trident {
 			},
 		};
 
-		data.hull = createHull<Hull3DType::POLYGON>(data.vertexPositionComponents);
+		data.hull = createHull<Hull3DType::POLYGON>(data.positions);
 
 		return data;
 	}

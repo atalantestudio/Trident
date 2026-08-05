@@ -53,170 +53,179 @@ namespace Trident {
 			};
 
 		private:
+			static uint64 calculateStreamSize(const Geometry2DData& data) {
+				uint64 streamSize = (
+					sizeof(AssetHeader) +
+					sizeof(GeometryAssetFlags) +
+					sizeof(uint32) * 2 +
+					data.vertexComponentBuffer.size() * sizeof(float32) +
+					data.indexBuffer.size() * sizeof(uint32)
+				);
+
+				if (data.flags & GeometryAssetFlags::HAS_HULL) {
+					streamSize += (
+						sizeof(svec2<float32>) +
+						sizeof(float32) +
+						sizeof(uint32) +
+						sizeof(Hull2DType) +
+						data.hull.lineIndexRange.count * sizeof(uint32)
+					);
+				}
+
+				return streamSize;
+			}
+
+			static uint64 calculateStreamSize(const Geometry3DData& data, uint64 totalIndexByteCount) {
+				uint64 streamSize = (
+					sizeof(AssetHeader) +
+					sizeof(GeometryAssetFlags) +
+					sizeof(uint32) * 5 +
+					data.positions.count() * sizeof(svec3<float32>) +
+					data.normals.count() * sizeof(svec3<float32>) +
+					data.textureCoordinates.count() * sizeof(svec2<float32>) +
+					data.tangents.count() * sizeof(svec3<float32>) +
+					totalIndexByteCount
+				);
+
+				if (data.flags & GeometryAssetFlags::HAS_HULL) {
+					streamSize += (
+						sizeof(svec3<float32>) +
+						sizeof(float32) +
+						sizeof(uint16) * 4 +
+						sizeof(Hull3DType) +
+						data.hullEdges.count() * sizeof(Edge3D) +
+						data.hullFaces.count() * sizeof(Plane3D) +
+						data.hullFaceEdgeIndices.count() * sizeof(uint16) +
+						data.hullLineIndices.count() * sizeof(uint16)
+					);
+				}
+
+				return streamSize;
+			}
+
 			static ByteStream<StreamOperation::WRITE> encodeGeometryAsset2D(uint32 identifier, const Geometry2DData& data) {
-				GeometryAsset2DHeader geometryHeader{};
-				geometryHeader.signature = AssetSignature::GEOMETRY;
-				geometryHeader.identifier = identifier;
-				geometryHeader.version = {0, 0, 0};
-				geometryHeader.flags = GeometryAssetFlags::IS_2D | GeometryAssetFlags::HAS_HULL;
-				geometryHeader.vertexCount = data.geometry.getVertexPositionComponentRange().count / 2;
-				geometryHeader.indexCount = static_cast<uint32>(data.geometry.getIndexRange().count);
+				const uint64 streamSize = calculateStreamSize(data);
 
-				Hull2DHeader hullHeader{};
-				hullHeader.hullType = data.hull.type;
-				hullHeader.centroid = data.hull.centroid;
-				hullHeader.radius = data.hull.radius;
-				hullHeader.lineIndexCount = data.hull.lineIndexRange.count;
+				ByteStream<StreamOperation::WRITE> stream(streamSize, Endianness::LITTLE_ENDIAN);
+				stream.write<AssetSignature>(AssetSignature::GEOMETRY);
+				stream.write<uint32>(identifier);
+				stream.write<VersionNumber>({0, 0, 0});
+				stream.write<GeometryAssetFlags>(data.flags);
+				stream.write<uint32>(static_cast<uint32>(data.vertexComponentBuffer.size() / 2));
+				stream.write<uint32>(static_cast<uint32>(data.indexBuffer.size()));
 
-				const uint64 size =
-					sizeof(geometryHeader) +
-					geometryHeader.vertexCount * 2 * sizeof(svec2<float32>) +
-					geometryHeader.indexCount * sizeof(uint32) +
-					sizeof(hullHeader) +
-					data.hull.lineIndexRange.count * sizeof(uint32);
-
-				ByteStream<StreamOperation::WRITE> stream(size, Endianness::LITTLE_ENDIAN);
-
-				std::copy_n(pointer_cast<const uint8*>(&geometryHeader), sizeof(geometryHeader), stream.getBytePosition());
-
-				stream.jump(sizeof(geometryHeader));
-
-				if (data.vertexComponentBuffer.size() > 0) {
-					std::copy(data.vertexComponentBuffer.begin(), data.vertexComponentBuffer.end(), pointer_cast<float32*>(stream.getBytePosition()));
-
-					stream.jump(data.vertexComponentBuffer.size() * sizeof(float32));
+				if (data.flags & GeometryAssetFlags::HAS_HULL) {
+					stream.write<svec2<float32>>(data.hull.centroid);
+					stream.write<float32>(data.hull.radius);
+					stream.write<uint32>(data.hull.lineIndexRange.count);
+					stream.write<Hull2DType>(data.hull.type);
 				}
 
-				if (geometryHeader.indexCount > 0) {
-					std::copy_n(&data.indexBuffer[0], geometryHeader.indexCount, pointer_cast<uint32*>(stream.getBytePosition()));
-
-					stream.jump(geometryHeader.indexCount * sizeof(uint32));
+				for (const float32 vertexComponent : data.vertexComponentBuffer) {
+					stream.write<float32>(vertexComponent);
 				}
 
-				std::copy_n(pointer_cast<const uint8*>(&hullHeader), sizeof(hullHeader), stream.getBytePosition());
+				for (const uint32 index : data.indexBuffer) {
+					stream.write<uint32>(index);
+				}
 
-				stream.jump(sizeof(hullHeader));
+				if (data.flags & GeometryAssetFlags::HAS_HULL) {
+					uint32 hullLineIndexOffset = 0;
 
-				if (data.hull.lineIndexRange.count > 0) {
-					std::copy(&data.indexBuffer[data.hull.lineIndexRange.offset], &data.indexBuffer[data.hull.lineIndexRange.offset + data.hull.lineIndexRange.count - 1], pointer_cast<uint32*>(stream.getBytePosition()));
+					while (hullLineIndexOffset < data.hull.lineIndexRange.count) {
+						const uint32 hullLineIndex = data.indexBuffer[data.hull.lineIndexRange.offset + hullLineIndexOffset];
 
-					stream.jump(data.hull.lineIndexRange.count * sizeof(uint32));
+						stream.write<uint32>(hullLineIndex);
+
+						hullLineIndexOffset += 1;
+					}
 				}
 
 				return stream;
 			}
 
 			static ByteStream<StreamOperation::WRITE> encodeGeometryAsset3D(uint32 identifier, const Geometry3DData& data) {
-				Geometry3DAssetHeader header{};
-				header.signature = AssetSignature::GEOMETRY;
-				header.identifier = identifier;
-				header.version = {0, 0, 0};
-				header.flags = GeometryAssetFlags::IS_3D;
+				const uint64 positionCount = data.positions.count();
+				const uint64 normalCount = data.normals.count();
+				const uint64 textureCoordinateCount = data.textureCoordinates.count();
+				const uint64 indexCount = data.positionIndices.count();
+				const uint8 positionIndexBitCount = countBits(positionCount - 1);
+				const uint8 normalIndexBitCount = countBits(normalCount - 1);
+				const uint8 textureCoordinateIndexBitCount = countBits(textureCoordinateCount - 1);
+				const uint64 totalIndexByteCount = static_cast<uint64>(ceil(indexCount * (positionIndexBitCount + normalIndexBitCount + textureCoordinateIndexBitCount) / 8.0f));
+
+				const uint64 streamSize = calculateStreamSize(data, totalIndexByteCount);
+
+				ByteStream<StreamOperation::WRITE> stream(streamSize, Endianness::LITTLE_ENDIAN);
+				stream.write<AssetSignature>(AssetSignature::GEOMETRY);
+				stream.write<uint32>(identifier);
+				stream.write<VersionNumber>({0, 0, 0});
+				stream.write<GeometryAssetFlags>(data.flags);
+				stream.write<uint32>(static_cast<uint32>(data.positions.count()));
+				stream.write<uint32>(static_cast<uint32>(data.normals.count()));
+				stream.write<uint32>(static_cast<uint32>(data.textureCoordinates.count()));
+				stream.write<uint32>(static_cast<uint32>(data.tangents.count()));
+				stream.write<uint32>(static_cast<uint32>(data.positionIndices.count()));
 
 				if (data.flags & GeometryAssetFlags::HAS_HULL) {
-					header.flags |= GeometryAssetFlags::HAS_HULL;
+					stream.write<svec3<float32>>(data.hull.centroid);
+					stream.write<float32>(data.hull.radius);
+					stream.write<uint16>(static_cast<uint16>(data.hullEdges.count()));
+					stream.write<uint16>(static_cast<uint16>(data.hullFaces.count()));
+					stream.write<uint16>(static_cast<uint16>(data.hullFaceEdgeIndices.count()));
+					stream.write<uint16>(static_cast<uint16>(data.hullLineIndices.count()));
+					stream.write<Hull3DType>(data.hull.type);
 				}
 
-				header.vertexPositionCount = static_cast<uint32>(data.vertexPositionComponents.count()) / 3;
-				header.vertexNormalCount = static_cast<uint32>(data.vertexNormalComponents.count()) / 3;
-				header.vertexTextureCoordinateCount = static_cast<uint32>(data.vertexTextureCoordinateComponents.count()) / 2;
-				header.triangleTangentCount = static_cast<uint32>(data.triangleTangentComponents.count()) / 3;
-				header.indexCount = static_cast<uint32>(data.vertexPositionIndices.count());
-
-				Hull3DHeader hullHeader{};
-
-				const uint8 vertexPositionIndexBitCount = countBits(header.vertexPositionCount - 1);
-				const uint8 vertexNormalIndexBitCount = countBits(header.vertexNormalCount - 1);
-				const uint8 vertexTextureCoordinateIndexBitCount = countBits(header.vertexTextureCoordinateCount - 1);
-				const uint64 totalIndexByteCount = static_cast<uint64>(ceil(header.indexCount * (vertexPositionIndexBitCount + vertexNormalIndexBitCount + vertexTextureCoordinateIndexBitCount) / 8.0f));
-
-				uint64 outputSize =
-					sizeof(header) +
-					data.vertexPositionComponents.count() * sizeof(float32) +
-					data.vertexNormalComponents.count() * sizeof(float32) +
-					data.vertexTextureCoordinateComponents.count() * sizeof(float32) +
-					data.triangleTangentComponents.count() * sizeof(float32) +
-					totalIndexByteCount;
-
-				if (data.flags & GeometryAssetFlags::HAS_HULL) {
-					hullHeader.centroid = data.hull.centroid;
-					hullHeader.radius = data.hull.radius;
-					hullHeader.edgeCount = static_cast<uint16>(data.hullEdges.count());
-					hullHeader.faceCount = static_cast<uint16>(data.hullFaces.count());
-					hullHeader.faceEdgeIndexCount = static_cast<uint16>(data.hullFaceEdgeIndices.count());
-					hullHeader.lineIndexCount = static_cast<uint16>(data.hullLineIndices.count());
-					hullHeader.hullType = data.hull.type;
-
-					outputSize +=
-						sizeof(hullHeader) +
-						hullHeader.edgeCount * sizeof(Edge3D) +
-						hullHeader.faceCount * sizeof(Plane3D) +
-						hullHeader.faceEdgeIndexCount * sizeof(uint16) +
-						hullHeader.lineIndexCount * sizeof(uint16);
+				for (const svec3<float32> position : data.positions) {
+					stream.write<float32>(position.x);
+					stream.write<float32>(position.y);
+					stream.write<float32>(position.z);
 				}
 
-				ByteStream<StreamOperation::WRITE> stream(outputSize, Endianness::LITTLE_ENDIAN);
-				stream.write<AssetSignature>(header.signature);
-				stream.write<uint32>(header.identifier);
-				stream.write<VersionNumber>(header.version);
-				stream.write<GeometryAssetFlags>(header.flags);
-				stream.jump(sizeof(uint8) * 3);
-				stream.write<uint32>(header.vertexPositionCount);
-				stream.write<uint32>(header.vertexNormalCount);
-				stream.write<uint32>(header.vertexTextureCoordinateCount);
-				stream.write<uint32>(header.triangleTangentCount);
-				stream.write<uint32>(header.indexCount);
-
-				for (const float32 vertexPositionComponent : data.vertexPositionComponents) {
-					stream.write<float32>(vertexPositionComponent);
+				for (const svec3<float32> normal : data.normals) {
+					stream.write<float32>(normal.x);
+					stream.write<float32>(normal.y);
+					stream.write<float32>(normal.z);
 				}
 
-				for (const float32 vertexNormalComponent : data.vertexNormalComponents) {
-					stream.write<float32>(vertexNormalComponent);
+				for (const svec2<float32> textureCoordinate : data.textureCoordinates) {
+					stream.write<svec2<float32>>(textureCoordinate);
 				}
 
-				for (const float32 vertexTextureCoordinateComponent : data.vertexTextureCoordinateComponents) {
-					stream.write<float32>(vertexTextureCoordinateComponent);
-				}
-
-				for (const float32 triangleTangentComponent : data.triangleTangentComponents) {
-					stream.write<float32>(triangleTangentComponent);
+				for (const svec3<float32> tangent : data.tangents) {
+					stream.write<float32>(tangent.x);
+					stream.write<float32>(tangent.y);
+					stream.write<float32>(tangent.z);
 				}
 
 				{
 					BitStream<StreamOperation::WRITE> bitStream(stream.getBytePosition(), totalIndexByteCount, Endianness::LITTLE_ENDIAN);
 
-					for (const uint32 vertexPositionIndex : data.vertexPositionIndices) {
-						bitStream.write<uint32>(vertexPositionIndex, vertexPositionIndexBitCount);
+					for (const uint32 positionIndex : data.positionIndices) {
+						bitStream.write<uint32>(positionIndex, positionIndexBitCount);
 					}
 
-					for (const uint32 vertexNormalIndex : data.vertexNormalIndices) {
-						bitStream.write<uint32>(vertexNormalIndex, vertexNormalIndexBitCount);
+					for (const uint32 normalIndex : data.normalIndices) {
+						bitStream.write<uint32>(normalIndex, normalIndexBitCount);
 					}
 
-					for (const uint32 vertexTextureCoordinateIndex : data.vertexTextureCoordinateIndices) {
-						bitStream.write<uint32>(vertexTextureCoordinateIndex, vertexTextureCoordinateIndexBitCount);
+					for (const uint32 textureCoordinateIndex : data.textureCoordinateIndices) {
+						bitStream.write<uint32>(textureCoordinateIndex, textureCoordinateIndexBitCount);
 					}
 				}
 
+				stream.jump(totalIndexByteCount);
+
 				if (data.flags & GeometryAssetFlags::HAS_HULL) {
-					stream.jump(totalIndexByteCount);
-
-					stream.write<svec3<float32>>(hullHeader.centroid);
-					stream.write<float32>(hullHeader.radius);
-					stream.write<uint16>(hullHeader.edgeCount);
-					stream.write<uint16>(hullHeader.faceCount);
-					stream.write<uint16>(hullHeader.faceEdgeIndexCount);
-					stream.write<uint16>(hullHeader.lineIndexCount);
-					stream.write<Hull3DType>(hullHeader.hullType);
-					stream.jump(3 * sizeof(uint8));
-
 					for (const Edge3D edge : data.hullEdges) {
 						stream.write<Edge3D>(edge);
 					}
 
 					for (const Plane3D& face : data.hullFaces) {
-						stream.write<svec3<float32>>(face.normal);
+						stream.write<float32>(face.normal.x);
+						stream.write<float32>(face.normal.y);
+						stream.write<float32>(face.normal.z);
 						stream.write<float32>(face.distance);
 						stream.write<range<uint16, uint16>>(face.edgeIndexRange);
 					}
@@ -263,6 +272,17 @@ namespace Trident {
 				uint32 defaultGeometryIndex = 0;
 
 				while (defaultGeometryIndex < DEFAULT_GEOMETRY_2D_COUNT) {
+					std::filesystem::path finalAssetOutputPath = assetOutputPath / std::string(DEFAULT_GEOMETRY_2D_NAMES[defaultGeometryIndex]);
+					finalAssetOutputPath.replace_extension("tga");
+
+					if (std::filesystem::exists(finalAssetOutputPath)) {
+						ENGINE_INFO("2D geometry asset \"[]\" already exists.", finalAssetOutputPath.filename().string());
+
+						defaultGeometryIndex += 1;
+
+						continue;
+					}
+
 					const Geometry2DData geometryData = DEFAULT_GEOMETRY_2D_FUNCTIONS[defaultGeometryIndex]();
 					const uint32 identifier = AssetLibrary::createAssetIdentifier();
 					const ByteStream<StreamOperation::WRITE> stream = encodeGeometryAsset2D(identifier, geometryData);
@@ -275,6 +295,17 @@ namespace Trident {
 				defaultGeometryIndex = 0;
 
 				while (defaultGeometryIndex < DEFAULT_GEOMETRY_3D_COUNT) {
+					std::filesystem::path finalAssetOutputPath = assetOutputPath / std::string(DEFAULT_GEOMETRY_3D_NAMES[defaultGeometryIndex]);
+					finalAssetOutputPath.replace_extension("tga");
+
+					if (std::filesystem::exists(finalAssetOutputPath)) {
+						ENGINE_INFO("3D geometry asset \"[]\" already exists.", finalAssetOutputPath.filename().string());
+
+						defaultGeometryIndex += 1;
+
+						continue;
+					}
+
 					const Geometry3DData geometryData = DEFAULT_GEOMETRY_3D_FUNCTIONS[defaultGeometryIndex]();
 					const uint32 identifier = AssetLibrary::createAssetIdentifier();
 					const ByteStream<StreamOperation::WRITE> stream = encodeGeometryAsset3D(identifier, geometryData);

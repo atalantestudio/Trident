@@ -35,13 +35,6 @@ namespace Trident {
 				.descriptorCount = 1,
 				.shaderStages = ShaderStage::VERTEX,
 			},
-
-			// Triangle tangent
-			{
-				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
-				.descriptorCount = 1,
-				.shaderStages = ShaderStage::VERTEX,
-			},
 		};
 
 		return createDescriptorSetLayout(bindings);

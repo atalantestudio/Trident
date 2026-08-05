@@ -13,18 +13,8 @@
 
 namespace Trident {
 	void Physics2DSceneLayer::loadScene() {
-		AssetLibrary* assetLibrary = getApplication()->getAssetLibrary();
-
-		// TODO
-		// The geometry assets used by the scene should be loaded along with the scene asset.
-		// For now they must be loaded manually before loading the scene.
-		assetLibrary->getAsset<GeometryAsset>("UnitCircle");
-		assetLibrary->getAsset<GeometryAsset>("UnitSquare");
-		assetLibrary->getAsset<GeometryAsset>("Triangle");
-		assetLibrary->getAsset<GeometryAsset>("Polygon");
-
 		const view<char8> sceneAssetName = getApplication()->getPropertyFile()->getProperty<view<char8>>("AssetName");
-		const ref<Scene2DAsset> sceneAsset = assetLibrary->getAsset<Scene2DAsset>(sceneAssetName);
+		const ref<Scene2DAsset> sceneAsset = getApplication()->getAssetLibrary()->getAsset<Scene2DAsset>(sceneAssetName);
 
 		scene = createScope<Scene2D>(sceneAsset);
 

@@ -51,7 +51,7 @@ namespace Trident {
 							.scale = {m1 * -0.25f, m1 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -73,7 +73,7 @@ namespace Trident {
 							.scale = {m1 * -0.25f, m1 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -95,7 +95,7 @@ namespace Trident {
 							.scale = {m1 * -0.25f, m1 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -117,7 +117,7 @@ namespace Trident {
 							.scale = {m1 * -0.25f, m1 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -139,7 +139,7 @@ namespace Trident {
 							.scale = {m1 * -0.25f, m1 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -163,7 +163,7 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -185,7 +185,7 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -207,7 +207,7 @@ namespace Trident {
 							.scale = {m2 * 0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -229,7 +229,7 @@ namespace Trident {
 							.scale = {m2 * 0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -251,7 +251,7 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -273,7 +273,7 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -295,7 +295,7 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -317,7 +317,7 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -339,7 +339,7 @@ namespace Trident {
 							.scale = {m2 * 0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -361,7 +361,7 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -383,7 +383,7 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -405,7 +405,7 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -427,7 +427,7 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -449,7 +449,7 @@ namespace Trident {
 							.scale = {m2 * 0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -471,7 +471,7 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -493,7 +493,7 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -517,7 +517,7 @@ namespace Trident {
 							.scale = {m1 * -0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -539,7 +539,7 @@ namespace Trident {
 							.scale = {m1 * -0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -561,7 +561,7 @@ namespace Trident {
 							.scale = {m1 * -0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -583,7 +583,7 @@ namespace Trident {
 							.scale = {m1 * -0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -605,7 +605,7 @@ namespace Trident {
 							.scale = {m1 * 0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -627,7 +627,7 @@ namespace Trident {
 							.scale = {m1 * 0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -649,7 +649,7 @@ namespace Trident {
 							.scale = {m1 * 0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -671,7 +671,7 @@ namespace Trident {
 							.scale = {m1 * 0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -693,7 +693,7 @@ namespace Trident {
 							.scale = {m1 * 0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -717,7 +717,7 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -739,7 +739,7 @@ namespace Trident {
 							.scale = {m2 * 0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -761,7 +761,7 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -783,7 +783,7 @@ namespace Trident {
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -805,7 +805,7 @@ namespace Trident {
 							.scale = {m2 * 0.25f, m2 * -0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},
@@ -827,7 +827,7 @@ namespace Trident {
 							.scale = {m2 * 0.25f, m2 * -0.25f},
 						},
 						.lightmap = {
-							.luxelScale = {0.5f, 0.5f},
+							.luxelScale = {1.0f, 1.0f},
 							.tintColor = {1.0f, 1.0f, 1.0f},
 						},
 					},

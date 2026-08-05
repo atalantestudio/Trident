@@ -21,7 +21,7 @@ namespace Trident {
 					.sunIntensity = 1.0f,
 				});
 
-				const uint32 rectangularCuboidGeometry = builder.loadGeometry(assetLibrary->getAsset<GeometryAsset>("RectangularCuboid"));
+				const uint32 rectangularCuboidGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("RectangularCuboid"));
 
 				const MaterialReference debugMaterial = builder.loadDynamicMaterial(assetLibrary->getAsset<MaterialAsset>("debug"));
 

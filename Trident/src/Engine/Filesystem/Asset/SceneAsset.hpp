@@ -49,13 +49,13 @@ namespace Trident {
 		uint64 dynamicVertexTextureCoordinateIndexCount;
 		uint32 entityCount;
 		uint32 hullCount;
-		sequence<ref<GeometryAsset>> geometryAssets;
 		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
 		sequence<EntityComponentMapping<MaterialComponent>> materialMappings;
 	};
 
 	template<>
 	struct Descriptor<Scene2DAsset> : public Descriptor<SceneAsset> {
+		sequence<ref<Geometry2DAsset>> geometryAssets;
 		sequence<StaticTriangle2D> staticTriangles;
 		sequence<svec2<float32>> staticVertices;
 		sequence<svec2<float32>> staticTextureCoordinates;
@@ -73,7 +73,6 @@ namespace Trident {
 				dynamicVertexTextureCoordinateIndexCount(descriptor.dynamicVertexTextureCoordinateIndexCount),
 				entityCount(descriptor.entityCount),
 				hullCount(descriptor.hullCount),
-				geometryAssets(descriptor.geometryAssets),
 				geometryMappings(descriptor.geometryMappings),
 				materialMappings(descriptor.materialMappings)
 			{}
@@ -102,10 +101,6 @@ namespace Trident {
 				return hullCount;
 			}
 
-			inline const sequence<ref<GeometryAsset>>& getGeometryAssets() const {
-				return geometryAssets;
-			}
-
 			inline const sequence<EntityComponentMapping<GeometryComponent>>& getGeometryMappings() const {
 				return geometryMappings;
 			}
@@ -124,7 +119,6 @@ namespace Trident {
 			uint64 dynamicVertexTextureCoordinateIndexCount;
 			uint32 entityCount;
 			uint32 hullCount;
-			sequence<ref<GeometryAsset>> geometryAssets;
 			sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
 			sequence<EntityComponentMapping<MaterialComponent>> materialMappings;
 	};
@@ -133,6 +127,7 @@ namespace Trident {
 		public:
 			explicit Scene2DAsset(const Descriptor<Scene2DAsset>& descriptor) :
 				SceneAsset(descriptor),
+				geometryAssets(descriptor.geometryAssets),
 				staticTriangles(descriptor.staticTriangles),
 				staticVertices(descriptor.staticVertices),
 				staticTextureCoordinates(descriptor.staticTextureCoordinates),
@@ -154,6 +149,9 @@ namespace Trident {
 			inline const sequence<EntityComponentMapping<RigidBody2DComponent>>& getRigidBodyMappings() const {
 				return rigidBodyMappings;
 			}
+
+		public:
+			sequence<ref<Geometry2DAsset>> geometryAssets;
 
 		private:
 			sequence<StaticTriangle2D> staticTriangles;

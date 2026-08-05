@@ -9,7 +9,7 @@
 
 #include "../File/FBX.hpp"
 #include "EncodeGeometryAssetSubprocess.hpp"
-#include "TriangleTangents.hpp"
+#include "GenerateTangents.hpp"
 
 namespace Trident {
 	Geometry3DData DecodeFBXGeometry(view<uint8> inputData, uint32 identifier) {
@@ -329,49 +329,67 @@ namespace Trident {
 
 		ENGINE_ASSERT(vertexTextureCoordinateIndices.count() == vertexPositionIndices.count(), "Vertex texture coordinate index count is inconsistent with vertex position index count.");
 
-		sequence<float32> finalVertexPositionComponents(vertexPositionComponents.count());
-		sequence<float32> finalVertexNormalComponents(vertexNormalComponents.count());
-		sequence<float32> finalVertexTextureCoordinateComponents(vertexTextureCoordinateComponents.count());
-		index componentOffset = 0;
+		sequence<svec3<float32>> positions(vertexPositionComponents.count() / 3);
+		sequence<svec3<float32>> normals(vertexNormalComponents.count() / 3);
+		sequence<svec2<float32>> textureCoordinates(vertexTextureCoordinateComponents.count() / 2);
+		uint32 positionIndex = 0;
 
-		while (componentOffset < finalVertexPositionComponents.count()) {
-			finalVertexPositionComponents[componentOffset + 0] = static_cast<float32>(vertexPositionComponents[componentOffset + 0]);
-			finalVertexPositionComponents[componentOffset + 1] = static_cast<float32>(vertexPositionComponents[componentOffset + 1]);
-			finalVertexPositionComponents[componentOffset + 2] = static_cast<float32>(vertexPositionComponents[componentOffset + 2]);
+		while (positionIndex < positions.count()) {
+			positions[positionIndex] = {
+				static_cast<float32>(vertexPositionComponents[positionIndex * 3 + 0]),
+				static_cast<float32>(vertexPositionComponents[positionIndex * 3 + 1]),
+				static_cast<float32>(vertexPositionComponents[positionIndex * 3 + 2]),
+			};
 
-			componentOffset += 3;
+			positionIndex += 1;
 		}
 
-		componentOffset = 0;
+		uint32 normalIndex = 0;
 
-		while (componentOffset < finalVertexNormalComponents.count()) {
-			finalVertexNormalComponents[componentOffset + 0] = static_cast<float32>(vertexNormalComponents[componentOffset + 0]);
-			finalVertexNormalComponents[componentOffset + 1] = static_cast<float32>(vertexNormalComponents[componentOffset + 1]);
-			finalVertexNormalComponents[componentOffset + 2] = static_cast<float32>(vertexNormalComponents[componentOffset + 2]);
+		while (normalIndex < normals.count()) {
+			normals[normalIndex] = {
+				static_cast<float32>(vertexNormalComponents[normalIndex * 3 + 0]),
+				static_cast<float32>(vertexNormalComponents[normalIndex * 3 + 1]),
+				static_cast<float32>(vertexNormalComponents[normalIndex * 3 + 2]),
+			};
 
-			componentOffset += 3;
+			normalIndex += 1;
 		}
 
-		componentOffset = 0;
+		uint32 textureCoordinateIndex = 0;
 
-		while (componentOffset < finalVertexTextureCoordinateComponents.count()) {
-			finalVertexTextureCoordinateComponents[componentOffset + 0] = static_cast<float32>(vertexTextureCoordinateComponents[componentOffset + 0]);
-			finalVertexTextureCoordinateComponents[componentOffset + 1] = static_cast<float32>(vertexTextureCoordinateComponents[componentOffset + 1]);
+		while (textureCoordinateIndex < textureCoordinates.count()) {
+			textureCoordinates[textureCoordinateIndex] = {
+				static_cast<float32>(vertexTextureCoordinateComponents[textureCoordinateIndex * 2 + 0]),
+				static_cast<float32>(vertexTextureCoordinateComponents[textureCoordinateIndex * 2 + 1]),
+			};
 
-			componentOffset += 2;
+			textureCoordinateIndex += 1;
 		}
 
-		const sequence<float32> triangleTangentComponents = calculateTriangleTangentComponents(finalVertexPositionComponents, finalVertexTextureCoordinateComponents, vertexPositionIndices, vertexTextureCoordinateIndices);
+		sequence<GeometryIndex3D> vertices(indexCount);
+		uint32 vertexIndex = 0;
+
+		while (vertexIndex < vertices.count()) {
+			GeometryIndex3D& vertex = vertices[vertexIndex];
+			vertex.positionIndex = vertexPositionIndices[vertexIndex];
+			vertex.normalIndex = vertexNormalIndices[vertexIndex];
+			vertex.textureCoordinateIndex = vertexTextureCoordinateIndices[vertexIndex];
+
+			vertexIndex += 1;
+		}
+
+		const sequence<svec3<float32>> tangents = generateTangents(positions, normals, textureCoordinates, vertices);
 
 		return {
-			.vertexPositionComponents = finalVertexPositionComponents,
-			.vertexNormalComponents = finalVertexNormalComponents,
-			.vertexTextureCoordinateComponents = finalVertexTextureCoordinateComponents,
-			.triangleTangentComponents = triangleTangentComponents,
-			.vertexPositionIndices = vertexPositionIndices,
-			.vertexNormalIndices = vertexNormalIndices,
-			.vertexTextureCoordinateIndices = vertexTextureCoordinateIndices,
-			.flags = {},
+			.flags = GeometryAssetFlags::IS_3D,
+			.positions = positions,
+			.normals = normals,
+			.textureCoordinates = textureCoordinates,
+			.tangents = tangents,
+			.positionIndices = vertexPositionIndices,
+			.normalIndices = vertexNormalIndices,
+			.textureCoordinateIndices = vertexTextureCoordinateIndices,
 			.hullLineIndices = {},
 			.hullEdges = {},
 			.hullFaceEdgeIndices = {},

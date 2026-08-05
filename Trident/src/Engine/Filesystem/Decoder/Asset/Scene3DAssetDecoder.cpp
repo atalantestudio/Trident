@@ -141,7 +141,7 @@ namespace Trident {
 			instanceIndex += 1;
 		}
 
-		sequence<ref<GeometryAsset>> geometryAssets(geometryCount);
+		sequence<ref<Geometry3DAsset>> geometryAssets(geometryCount);
 		uint32 geometryIndex = 0;
 
 		while (geometryIndex < geometryCount) {
@@ -155,42 +155,35 @@ namespace Trident {
 				continue;
 			}
 
-			ref<GeometryAsset>& geometryAsset = geometryAssets[geometryIndex];
-			geometryAsset = assetLibrary->getAsset<GeometryAsset>(geometryAssetIdentifier);
-
-			const view<float32> positionView = geometryAsset->getVertexPositionComponents();
-			const view<float32> normalView = geometryAsset->getVertexNormalComponents();
-			const view<float32> textureCoordinateView = geometryAsset->getVertexTextureCoordinateComponents();
-			const view<uint32> positionIndexView = geometryAsset->getVertexPositionIndices();
-			const view<uint32> normalIndexView = geometryAsset->getVertexPositionIndices();
-			const view<uint32> textureCoordinateIndexView = geometryAsset->getVertexTextureCoordinateIndices();
+			ref<Geometry3DAsset>& geometryAsset = geometryAssets[geometryIndex];
+			geometryAsset = assetLibrary->getAsset<Geometry3DAsset>(geometryAssetIdentifier);
 
 			uint32 vertexIndex = 0;
 
-			while (vertexIndex < geometryAsset->getIndexCount()) {
+			while (vertexIndex < geometryAsset->indexCount) {
 				GeometryIndex3D& vertex = vertices[vertexOffset + vertexIndex];
-				vertex.positionIndex = positionOffset + positionIndexView[vertexIndex];
-				vertex.normalIndex = normalOffset + normalIndexView[vertexIndex];
-				vertex.textureCoordinateIndex = textureCoordinateOffset + textureCoordinateIndexView[vertexIndex];
+				vertex.positionIndex = positionOffset + geometryAsset->positionIndices[vertexIndex];
+				vertex.normalIndex = normalOffset + geometryAsset->normalIndices[vertexIndex];
+				vertex.textureCoordinateIndex = textureCoordinateOffset + geometryAsset->textureCoordinateIndices[vertexIndex];
 
 				vertexIndex += 1;
 			}
 
-			std::copy(positionView.begin(), positionView.end(), pointer_cast<float32*>(&positions[positionOffset]));
-			std::copy(normalView.begin(), normalView.end(), pointer_cast<float32*>(&normals[normalOffset]));
-			std::copy(textureCoordinateView.begin(), textureCoordinateView.end(), pointer_cast<float32*>(&textureCoordinates[textureCoordinateOffset]));
+			std::copy(geometryAsset->positions.begin(), geometryAsset->positions.end(), &positions[positionOffset]);
+			std::copy(geometryAsset->normals.begin(), geometryAsset->normals.end(), &normals[normalOffset]);
+			std::copy(geometryAsset->textureCoordinates.begin(), geometryAsset->textureCoordinates.end(), &textureCoordinates[textureCoordinateOffset]);
 
 			vertexOffset += vertexIndex;
-			positionOffset += geometryAsset->getPositionCount();
-			normalOffset += geometryAsset->getNormalCount();
-			textureCoordinateOffset += geometryAsset->getTextureCoordinateCount();
+			positionOffset += static_cast<uint32>(geometryAsset->positions.count());
+			normalOffset += static_cast<uint32>(geometryAsset->normals.count());
+			textureCoordinateOffset += static_cast<uint32>(geometryAsset->textureCoordinates.count());
 
-			if (geometryAsset->getFlags() & GeometryAssetFlags::HAS_HULL) {
+			if (geometryAsset->flags & GeometryAssetFlags::HAS_HULL) {
 				asset.hullCount += 1;
-				asset.hullEdgeCount += static_cast<uint32>(geometryAsset->getHull3DEdges().count());
-				asset.hullFaceCount += static_cast<uint32>(geometryAsset->getHull3DFaces().count());
-				asset.hullFaceEdgeIndexCount += static_cast<uint16>(geometryAsset->getHull3DFaceEdgeIndices().count());
-				asset.hullLineIndexCount += static_cast<uint32>(geometryAsset->getHull3DLineIndices().count());
+				asset.hullEdgeCount += static_cast<uint32>(geometryAsset->hullEdges.count());
+				asset.hullFaceCount += static_cast<uint32>(geometryAsset->hullFaces.count());
+				asset.hullFaceEdgeIndexCount += static_cast<uint16>(geometryAsset->hullFaceEdgeIndices.count());
+				asset.hullLineIndexCount += static_cast<uint32>(geometryAsset->hullLineIndices.count());
 			}
 
 			geometryIndex += 1;
@@ -251,13 +244,13 @@ namespace Trident {
 					continue;
 				}
 
-				const ref<GeometryAsset> geometryAsset = geometryAssets[geometryMapping.component.geometryIndex];
+				const ref<Geometry3DAsset> geometryAsset = geometryAssets[geometryMapping.component.geometryIndex];
 
-				if (!(geometryAsset->getFlags() & GeometryAssetFlags::HAS_HULL)) {
+				if (!(geometryAsset->flags & GeometryAssetFlags::HAS_HULL)) {
 					continue;
 				}
 
-				asset.rigidBodyFacePlaneCount += static_cast<uint32>(geometryAsset->getHull3DFaces().count());
+				asset.rigidBodyFacePlaneCount += static_cast<uint32>(geometryAsset->hullFaces.count());
 			}
 
 			Instance3D& instance = asset.instances[instanceIndex + rigidBodyMapping.entity];

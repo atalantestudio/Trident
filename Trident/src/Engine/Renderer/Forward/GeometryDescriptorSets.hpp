@@ -25,11 +25,6 @@ namespace Trident {
 
 			// Texture coordinate
 			staticGeometryBuffer->createView<float32>(staticPositionAlignedRangeSize + staticNormalAlignedRangeSize, sceneAsset->staticTextureCoordinateSize),
-
-			// TODO(forward)
-			// Dynamic triangle tangent
-			// geometryBuffer->createView<float32>(scene->getTriangleTangentComponentRange().offset, scene->getTriangleTangentComponentRange().count),
-			staticGeometryBuffer->createView<float32>(0, sceneAsset->staticPositionSize),
 		};
 
 		const DescriptorImage lightmapAtlasDescriptorImage = {
@@ -59,11 +54,6 @@ namespace Trident {
 				.descriptorSet = forwardDescriptorSet,
 				.bindingIndex = 3,
 				.descriptorBufferViews = descriptorBufferViews[3],
-			},
-			{
-				.descriptorSet = forwardDescriptorSet,
-				.bindingIndex = 4,
-				.descriptorBufferViews = descriptorBufferViews[4],
 			},
 
 			// Static geometry

@@ -5,7 +5,6 @@
 
 #include "Engine/Filesystem/Asset/ImageAsset.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
-#include "Engine/Filesystem/Stream/ByteStream.hpp"
 
 namespace Trident {
 	template<>

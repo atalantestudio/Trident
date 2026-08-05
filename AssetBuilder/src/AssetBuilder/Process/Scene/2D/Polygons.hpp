@@ -18,13 +18,9 @@ namespace Trident {
 					.staticScene = {},
 					.entityCount = 3,
 					.geometryAssetIdentifiers = {
-						35,
-
-						// TODO(debug-only): Polygon
-						37,
-
-						// TODO(debug-only): Triangle
-						36,
+						assetLibrary->getAsset<Geometry2DAsset>("UnitSquare")->identifier,
+						assetLibrary->getAsset<Geometry2DAsset>("Polygon")->identifier,
+						assetLibrary->getAsset<Geometry2DAsset>("Triangle")->identifier,
 					},
 					.geometryMappings = {
 						{0, {0}},

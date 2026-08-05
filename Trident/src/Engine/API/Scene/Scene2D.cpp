@@ -24,13 +24,12 @@ namespace Trident {
 	}
 
 	void Scene2D::loadGeometries() {
-		const sequence<ref<GeometryAsset>>& geometryAssets = asset->getGeometryAssets();
 		const uint32 vertexComponentCount = static_cast<uint32>(asset->getStaticVertices().count() + dynamicVertexCount * 2);
 		const uint64 vertexByteCount = asset->getStaticVertices().count() + dynamicVertexCount * sizeof(svec2<float32>);
 		const uint64 indexByteCount = asset->getStaticTriangles().count() * 3 + dynamicIndexCount * sizeof(uint32);
 
 		dataBuffer = sequence<uint8>(vertexByteCount + indexByteCount);
-		geometries = sequence<Geometry2D>(geometryAssets.count());
+		geometries = sequence<Geometry2D>(asset->geometryAssets.count());
 		hulls = sequence<Hull2D>(asset->getHullCount());
 
 		std::copy(asset->staticGeometryBuffer.begin(), asset->staticGeometryBuffer.end(), &dataBuffer[0]);
@@ -40,43 +39,37 @@ namespace Trident {
 
 		range<uint32, uint32> vertexPositionComponentRange = {static_cast<uint32>(offset), 0};
 
-		for (const ref<GeometryAsset>& geometryAsset : geometryAssets) {
-			const sequence<float32>& vertexPositionComponents = geometryAsset->getVertexPositionComponents();
+		for (const ref<Geometry2DAsset> geometryAsset : asset->geometryAssets) {
+			std::copy(geometryAsset->vertexPositionComponents.begin(), geometryAsset->vertexPositionComponents.end(), &pointer_cast<float32*>(dynamicDataBuffer)[offset]);
 
-			std::copy(vertexPositionComponents.begin(), vertexPositionComponents.end(), &pointer_cast<float32*>(dynamicDataBuffer)[offset]);
-
-			offset += vertexPositionComponents.count();
+			offset += geometryAsset->vertexPositionComponents.count();
 		}
 
 		range<uint32, uint32> vertexTextureCoordinateComponentRange = {static_cast<uint32>(offset), 0};
 
-		for (const ref<GeometryAsset>& geometryAsset : geometryAssets) {
-			const sequence<float32>& vertexTextureCoordinateComponents = geometryAsset->getVertexTextureCoordinateComponents();
+		for (const ref<Geometry2DAsset> geometryAsset : asset->geometryAssets) {
+			std::copy(geometryAsset->vertexTextureCoordinateComponents.begin(), geometryAsset->vertexTextureCoordinateComponents.end(), &pointer_cast<float32*>(dynamicDataBuffer)[offset]);
 
-			std::copy(vertexTextureCoordinateComponents.begin(), vertexTextureCoordinateComponents.end(), &pointer_cast<float32*>(dynamicDataBuffer)[offset]);
-
-			offset += vertexTextureCoordinateComponents.count();
+			offset += geometryAsset->vertexTextureCoordinateComponents.count();
 		}
 
 		range<uint32, uint32> vertexPositionIndexRange = {static_cast<uint32>(offset), 0};
 
-		for (const ref<GeometryAsset>& geometryAsset : geometryAssets) {
-			const sequence<uint32>& vertexPositionIndices = geometryAsset->getVertexPositionIndices();
+		for (const ref<Geometry2DAsset> geometryAsset : asset->geometryAssets) {
+			std::copy(geometryAsset->vertexPositionIndices.begin(), geometryAsset->vertexPositionIndices.end(), &pointer_cast<uint32*>(dynamicDataBuffer)[offset]);
 
-			std::copy(vertexPositionIndices.begin(), vertexPositionIndices.end(), &pointer_cast<uint32*>(dynamicDataBuffer)[offset]);
-
-			offset += vertexPositionIndices.count();
+			offset += geometryAsset->vertexPositionIndices.count();
 		}
 
 		uint32 geometryIndex = 0;
 		uint32 hullIndex = 0;
 
 		while (geometryIndex < geometries.count()) {
-			const ref<GeometryAsset> geometryAsset = geometryAssets[geometryIndex];
+			const ref<Geometry2DAsset> geometryAsset = asset->geometryAssets[geometryIndex];
 
-			vertexPositionComponentRange.count = static_cast<uint32>(geometryAsset->getVertexPositionComponents().count());
-			vertexTextureCoordinateComponentRange.count = static_cast<uint32>(geometryAsset->getVertexTextureCoordinateComponents().count());
-			vertexPositionIndexRange.count = static_cast<uint32>(geometryAsset->getVertexPositionIndices().count());
+			vertexPositionComponentRange.count = static_cast<uint32>(geometryAsset->vertexPositionComponents.count());
+			vertexTextureCoordinateComponentRange.count = static_cast<uint32>(geometryAsset->vertexTextureCoordinateComponents.count());
+			vertexPositionIndexRange.count = static_cast<uint32>(geometryAsset->vertexPositionIndices.count());
 
 			geometries[geometryIndex] = Geometry2D({
 				.vertexPositionComponentRange = {vertexPositionComponentRange.offset, vertexPositionComponentRange.count},
@@ -84,10 +77,8 @@ namespace Trident {
 				.indexRange = {vertexPositionIndexRange.offset - vertexComponentCount, vertexPositionIndexRange.count},
 			});
 
-			if (geometryAsset->getFlags() & GeometryAssetFlags::HAS_HULL) {
-				const sequence<uint32>& hullLineIndices = geometryAsset->getHull2DLineIndices();
-
-				std::copy(hullLineIndices.begin(), hullLineIndices.end(), &pointer_cast<uint32*>(dynamicDataBuffer)[offset]);
+			if (geometryAsset->flags & GeometryAssetFlags::HAS_HULL) {
+				std::copy(geometryAsset->hullLineIndices.begin(), geometryAsset->hullLineIndices.end(), &pointer_cast<uint32*>(dynamicDataBuffer)[offset]);
 
 				const view<svec2<float32>> vertices(pointer_cast<const svec2<float32>*>(&dynamicDataBuffer[vertexPositionComponentRange.offset * sizeof(float32)]), vertexPositionComponentRange.count / 2);
 
@@ -96,17 +87,17 @@ namespace Trident {
 				Hull2D& hull = hulls[hullIndex];
 
 				hull = {
-					.type = static_cast<Hull2DType>(geometryAsset->getHullType()),
-					.centroid = {geometryAsset->getHullCentroid()[0], geometryAsset->getHullCentroid()[1]},
-					.radius = geometryAsset->getHullRadius(),
+					.type = geometryAsset->hullType,
+					.centroid = geometryAsset->hullCentroid,
+					.radius = geometryAsset->hullRadius,
 					.vertices = vertices,
-					.lineIndexRange = {static_cast<uint32>(offset) - vertexComponentCount, static_cast<uint32>(geometryAsset->getHull2DLineIndices().count())},
+					.lineIndexRange = {static_cast<uint32>(offset) - vertexComponentCount, static_cast<uint32>(geometryAsset->hullLineIndices.count())},
 					.edges = {},
 				};
 
 				// TODO: Edges must be generated by the asset builder.
 				if (hull.type == Hull2DType::POLYGON) {
-					const uint32 edgeCount = static_cast<uint32>(geometryAsset->getHull2DLineIndices().count() - 1);
+					const uint32 edgeCount = static_cast<uint32>(geometryAsset->hullLineIndices.count() - 1);
 
 					hull.edges = sequence<Edge2D>(edgeCount);
 
@@ -119,7 +110,7 @@ namespace Trident {
 					}
 				}
 
-				offset += hullLineIndices.count();
+				offset += geometryAsset->hullLineIndices.count();
 
 				hullIndex += 1;
 			}

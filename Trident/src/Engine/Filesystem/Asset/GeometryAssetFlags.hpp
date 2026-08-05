@@ -5,12 +5,10 @@
 
 namespace Trident {
 	enum class GeometryAssetFlags : uint8 {
-		// TODO: Extract from this enum.
-		IS_2D = BIT(0),
-		IS_3D = BIT(1),
+		IS_3D = BIT(0),
 
-		/// If set, the geometry data is followed by a `Hull2DHeader` structure.
-		HAS_HULL = BIT(2),
+		/// If set, the asset contains a hull.
+		HAS_HULL = BIT(1),
 	};
 
 	AS_FLAG(GeometryAssetFlags);

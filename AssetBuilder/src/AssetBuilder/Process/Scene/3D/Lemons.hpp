@@ -21,7 +21,7 @@ namespace Trident {
 					.sunIntensity = 1.0f,
 				});
 
-				const uint32 lemonGeometry = builder.loadGeometry(assetLibrary->getAsset<GeometryAsset>("lemon_1k"));
+				const uint32 lemonGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("lemon"));
 
 				const MaterialReference lemonMaterial = builder.loadDynamicMaterial(assetLibrary->getAsset<MaterialAsset>("lemon_1k"));
 

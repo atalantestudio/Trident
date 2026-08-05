@@ -44,7 +44,7 @@ namespace Trident {
 				auto index = assetPathToIndexMap.find(path);
 
 				if (index == assetPathToIndexMap.end()) {
-					loadAsset<AssetType>(path);
+					loadCachedAsset<AssetType>(path);
 
 					index = assetPathToIndexMap.find(path);
 				}
@@ -63,7 +63,7 @@ namespace Trident {
 				auto index = assetPathToIndexMap.find(path->second);
 
 				if (index == assetPathToIndexMap.end()) {
-					loadAsset<AssetType>(path->second);
+					loadCachedAsset<AssetType>(path->second);
 				}
 			}
 
@@ -75,12 +75,11 @@ namespace Trident {
 		private:
 			std::filesystem::path getAbsolutePath(view<char8> base, view<char8> relativePath, view<char8> extension) const;
 
-		private:
 			template<typename AssetType>
 			const std::unordered_map<sequence<char8>, uint32>& getAssetPathToIndexMap() const;
 
 			template<typename AssetType>
-			void loadAsset(view<char8> path);
+			void loadCachedAsset(view<char8> path);
 
 		protected:
 			AssetMap assetMap;
@@ -88,7 +87,8 @@ namespace Trident {
 		private:
 			std::filesystem::path basePath;
 			std::vector<ref<FontAsset>> fontAssets;
-			std::vector<ref<GeometryAsset>> geometryAssets;
+			std::vector<ref<Geometry2DAsset>> geometry2DAssets;
+			std::vector<ref<Geometry3DAsset>> geometry3DAssets;
 			std::vector<ref<ImageAsset>> imageAssets;
 			std::vector<ref<MaterialAsset>> materialAssets;
 			std::vector<ref<Scene2DAsset>> scene2DAssets;

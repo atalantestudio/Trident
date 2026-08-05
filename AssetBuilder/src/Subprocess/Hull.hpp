@@ -14,7 +14,7 @@ namespace Trident {
 	Hull2D createHull(const Geometry2D& geometry, std::vector<float32>& vertexComponentBuffer, std::vector<uint32>& indexBuffer);
 
 	template<Hull3DType HullType>
-	Hull3D createHull(view<float32> vertexPositionComponents);
+	Hull3D createHull(view<svec3<float32>> positions);
 
 	template<>
 	Hull2D createHull<Hull2DType::CIRCLE>(const Geometry2D& geometry, std::vector<float32>& vertexComponentBuffer, std::vector<uint32>& indexBuffer) {
@@ -89,19 +89,17 @@ namespace Trident {
 	}
 
 	template<>
-	Hull3D createHull<Hull3DType::POLYGON>(view<float32> vertexPositionComponents) {
-		const view<svec3<float32>> vertices(pointer_cast<const svec3<float32>*>(&vertexPositionComponents[0]), vertexPositionComponents.count() / 3);
-
+	Hull3D createHull<Hull3DType::POLYGON>(view<svec3<float32>> positions) {
 		vec3<float32> centroid = {0.0f, 0.0f, 0.0f};
 		float32 radius = 0.0f;
 
-		for (const svec3<float32> vertex : vertices) {
-			centroid += vec3<float32>(vertex);
+		for (const svec3<float32> position : positions) {
+			centroid += vec3<float32>(position);
 		}
 
-		centroid /= static_cast<float32>(vertices.count());
+		centroid /= static_cast<float32>(positions.count());
 
-		for (const svec3<float32> vertex : vertices) {
+		for (const svec3<float32> vertex : positions) {
 			radius = max(radius, distanceSquared(vec3<float32>(vertex), centroid));
 		}
 

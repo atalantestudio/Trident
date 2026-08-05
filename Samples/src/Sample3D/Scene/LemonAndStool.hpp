@@ -9,13 +9,8 @@
 
 namespace Trident::LemonAndStool {
 	Scene3D initializeScene(Application* application, GraphicsAPI graphicsApi, uint64 minStorageBufferOffsetAlignment) {
-		AssetLibrary* assetLibrary = application->getAssetLibrary();
-
-		assetLibrary->getAsset<GeometryAsset>("lemon_1k");
-		assetLibrary->getAsset<GeometryAsset>("folding_wooden_stool");
-
 		const view<char8> sceneAssetName = application->getPropertyFile()->getProperty<view<char8>>("AssetName");
-		const ref<Scene3DAsset> sceneAsset = assetLibrary->getAsset<Scene3DAsset>(sceneAssetName);
+		const ref<Scene3DAsset> sceneAsset = application->getAssetLibrary()->getAsset<Scene3DAsset>(sceneAssetName);
 
 		Scene3D scene(sceneAsset, minStorageBufferOffsetAlignment);
 
@@ -79,7 +74,6 @@ namespace Trident::LemonAndStool {
 		MaterialAsset lemonMaterialAsset = pbrMaterialAsset;
 		lemonMaterialAsset.descriptorImages = {
 			{
-				// TODO: lemon_1k must use PBRSeparatedAORoughness.
 				.imageAsset = assetLibrary->getAsset<ImageAsset>("lemon_ao_1k"),
 				.mipLevelOffset = 0,
 				.mipLevelCount = 1,

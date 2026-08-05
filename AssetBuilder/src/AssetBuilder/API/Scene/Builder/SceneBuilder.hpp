@@ -47,7 +47,7 @@ namespace Trident {
 			explicit SceneBuilder(const LightmapperArguments& lightmapperArguments);
 
 			/// Loads a geometry asset and returns its index.
-			uint32 loadGeometry(ref<GeometryAsset> asset);
+			uint32 loadGeometry(ref<Geometry3DAsset> asset);
 
 			MaterialReference loadStaticMaterial(ref<MaterialAsset> asset);
 			MaterialReference loadDynamicMaterial(ref<MaterialAsset> asset);

@@ -82,7 +82,6 @@ namespace Trident {
 		clusteredScene.vertexPositionComponents = sequence<float32>(totalVertexPositionComponentCount);
 		clusteredScene.vertexNormalComponents = sequence<float32>(totalVertexNormalComponentCount);
 		clusteredScene.vertexTextureCoordinateComponents = sequence<float32>(totalVertexTextureCoordinateComponentCount);
-		clusteredScene.triangleTangentComponents = sequence<float32>(totalTriangleTangentComponentCount);
 		clusteredScene.vertexPositionIndices = sequence<uint32>(totalIndexCount);
 		clusteredScene.vertexNormalIndices = sequence<uint32>(totalIndexCount);
 		clusteredScene.vertexTextureCoordinateIndices = sequence<uint32>(totalIndexCount);
@@ -122,12 +121,6 @@ namespace Trident {
 				pointer_cast<const float32*>(&dataBuffer[scene->getVertexTextureCoordinateComponentRange().offset + geometry.getVertexTextureCoordinateComponentRange().offset * sizeof(float32)]),
 				geometry.getVertexTextureCoordinateComponentRange().count,
 				&clusteredScene.vertexTextureCoordinateComponents[vertexTextureCoordinateComponentOffset]
-			);
-
-			std::copy_n(
-				pointer_cast<const float32*>(&dataBuffer[scene->getTriangleTangentComponentRange().offset + geometry.getTriangleTangentComponentRange().offset * sizeof(float32)]),
-				geometry.getTriangleTangentComponentRange().count,
-				&clusteredScene.triangleTangentComponents[triangleTangentComponentOffset]
 			);
 
 			std::copy_n(

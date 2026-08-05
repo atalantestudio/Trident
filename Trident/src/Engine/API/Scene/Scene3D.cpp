@@ -16,12 +16,7 @@ namespace Trident {
 			.dynamicVertexCount = 0,
 			.dynamicIndexCount = 0
 		}),
-		asset(sceneAsset),
-		vertexPositionComponentRange(0, 0),
-		vertexNormalComponentRange(0, 0),
-		vertexTextureCoordinateComponentRange(0, 0),
-		triangleTangentComponentRange(0, 0),
-		indexRange(0, 0)
+		asset(sceneAsset)
 	{
 		loadGeometries(alignment);
 		loadEntityComponentMappings();
@@ -29,124 +24,14 @@ namespace Trident {
 	}
 
 	void Scene3D::loadGeometries(uint64 alignment) {
-		// TODO(scene/3d): Restore.
-		/* const sequence<ref<GeometryAsset>>& geometryAssets = asset->geometryAssets;
-		const uint64 vertexComponentCount = (
-			asset->dynamicVertexPositionCount * 3 +
-			asset->dynamicVertexNormalCount * 3 +
-			asset->dynamicVertexTextureCoordinateCount * 2
-		);
-
-		indexCount = static_cast<uint32>(asset->dynamicIndexCount);
-
-		vertexPositionComponentRange.count = ceil(asset->dynamicVertexPositionCount * sizeof(svec3<float32>), alignment);
-		vertexNormalComponentRange.count = ceil(asset->dynamicVertexNormalCount * sizeof(svec3<float32>), alignment);
-		vertexTextureCoordinateComponentRange.count = ceil(asset->dynamicVertexTextureCoordinateCount * sizeof(svec2<float32>), alignment);
-		triangleTangentComponentRange.count = ceil(asset->dynamicTriangleTangentCount * sizeof(svec3<float32>), alignment);
-		indexRange.count = ceil(asset->dynamicIndexCount * sizeof(GeometryIndex3D) + asset->hullLineIndexCount * sizeof(uint16), alignment);
-
-		range<uint64, uint64>* ranges = &vertexPositionComponentRange;
-		uint64 dataBufferSize = 0;
-
-		// Propagate the range offset.
-		while (ranges < &indexRange) {
-			ranges[1].offset = ranges[0].offset + ranges[0].count;
-			dataBufferSize += ranges[0].count;
-
-			ranges += 1;
-		}
-
-		dataBufferSize += ranges->count;
-
-		dataBuffer = sequence<uint8>(dataBufferSize);
-		geometries = sequence<Geometry3D>(geometryAssets.count());
 		hulls = sequence<Hull3D>(asset->hullCount);
 		hullEdges = sequence<Edge3D>(asset->hullEdgeCount);
 		hullFaces = sequence<Plane3D>(asset->hullFaceCount);
 		hullFaceEdgeIndices = sequence<uint16>(asset->hullFaceEdgeIndexCount);
 		rigidBodyFacePlanes = sequence<Plane3D>(asset->rigidBodyFacePlaneCount);
 
-		uint64 byteOffset = vertexPositionComponentRange.offset;
-
-		for (const ref<GeometryAsset>& geometryAsset : geometryAssets) {
-			const sequence<float32>& vertexPositionComponents = geometryAsset->getVertexPositionComponents();
-
-			std::copy(vertexPositionComponents.begin(), vertexPositionComponents.end(), pointer_cast<float32*>(&dataBuffer[byteOffset]));
-
-			byteOffset += vertexPositionComponents.count() * sizeof(float32);
-		}
-
-		byteOffset = vertexNormalComponentRange.offset;
-
-		for (const ref<GeometryAsset>& geometryAsset : geometryAssets) {
-			const sequence<float32>& vertexNormalComponents = geometryAsset->getVertexNormalComponents();
-
-			std::copy(vertexNormalComponents.begin(), vertexNormalComponents.end(), pointer_cast<float32*>(&dataBuffer[byteOffset]));
-
-			byteOffset += vertexNormalComponents.count() * sizeof(float32);
-		}
-
-		byteOffset = vertexTextureCoordinateComponentRange.offset;
-
-		for (const ref<GeometryAsset>& geometryAsset : geometryAssets) {
-			const sequence<float32>& vertexTextureCoordinateComponents = geometryAsset->getVertexTextureCoordinateComponents();
-
-			std::copy(vertexTextureCoordinateComponents.begin(), vertexTextureCoordinateComponents.end(), pointer_cast<float32*>(&dataBuffer[byteOffset]));
-
-			byteOffset += vertexTextureCoordinateComponents.count() * sizeof(float32);
-		}
-
-		byteOffset = triangleTangentComponentRange.offset;
-
-		for (const ref<GeometryAsset>& geometryAsset : geometryAssets) {
-			const sequence<float32>& triangleTangentComponents = geometryAsset->getTriangleTangentComponents();
-
-			std::copy(triangleTangentComponents.begin(), triangleTangentComponents.end(), pointer_cast<float32*>(&dataBuffer[byteOffset]));
-
-			byteOffset += triangleTangentComponents.count() * sizeof(float32);
-		}
-
-		byteOffset = indexRange.offset;
-
-		GeometryIndex3D* indices = pointer_cast<GeometryIndex3D*>(&dataBuffer[byteOffset]);
-		uint32 indexOffset = 0;
-		uint32 vertexIndexOffset = 0;
-		uint32 normalIndexOffset = 0;
-		uint32 textureCoordinateIndexOffset = 0;
-
-		for (const ref<GeometryAsset>& geometryAsset : geometryAssets) {
-			const view<uint32> vertexPositionIndices = geometryAsset->getVertexPositionIndices();
-			const view<uint32> vertexNormalIndices = geometryAsset->getVertexNormalIndices();
-			const view<uint32> vertexTextureCoordinateIndices = geometryAsset->getVertexTextureCoordinateIndices();
-
-			uint32 indexIndex = 0;
-
-			while (indexIndex < geometryAsset->getIndexCount()) {
-				GeometryIndex3D& index = indices[indexOffset + indexIndex];
-				index.positionIndex = vertexIndexOffset + vertexPositionIndices[indexIndex];
-				index.normalIndex = normalIndexOffset + vertexNormalIndices[indexIndex];
-				index.textureCoordinateIndex = textureCoordinateIndexOffset + vertexTextureCoordinateIndices[indexIndex];
-
-				indexIndex  += 1;
-			}
-
-			indexOffset += indexIndex;
-			vertexIndexOffset += static_cast<uint32>(geometryAsset->getVertexPositionComponents().count() / 3);
-			normalIndexOffset += static_cast<uint32>(geometryAsset->getVertexNormalComponents().count() / 3);
-			textureCoordinateIndexOffset += static_cast<uint32>(geometryAsset->getVertexTextureCoordinateComponents().count() / 2);
-			byteOffset += indexIndex * sizeof(GeometryIndex3D);
-		}
-
-		hullLineIndexByteOffset = byteOffset;
-
-		// NOTE: The offsets in these ranges are relative to the start of the corresponding descriptor buffer.
-		range<uint32, uint32> geometryVertexPositionComponentRange = {0, 0};
-		range<uint32, uint32> geometryVertexNormalComponentRange = {0, 0};
-		range<uint32, uint32> geometryVertexTextureCoordinateComponentRange = {0, 0};
-		range<uint32, uint32> geometryTriangleTangentComponentRange = {0, 0};
-		range<uint32, uint32> geometryIndexRange = {0, 0};
-
-		uint32 geometryIndex = 0;
+		// TODO(scene/3d): Restore.
+		/* uint32 geometryIndex = 0;
 		uint32 hullIndex = 0;
 		uint32 hullEdgeOffset = 0;
 		uint32 hullFaceOffset = 0;
@@ -154,13 +39,9 @@ namespace Trident {
 		uint32 hullLineIndexOffset = 0;
 
 		while (geometryIndex < geometries.count()) {
-			const ref<GeometryAsset> geometryAsset = geometryAssets[geometryIndex];
+			const ref<Geometry3DAsset> geometryAsset = geometryAssets[geometryIndex];
 
-			geometryVertexPositionComponentRange.count = static_cast<uint32>(geometryAsset->getVertexPositionComponents().count());
-			geometryVertexNormalComponentRange.count = static_cast<uint32>(geometryAsset->getVertexNormalComponents().count());
-			geometryVertexTextureCoordinateComponentRange.count = static_cast<uint32>(geometryAsset->getVertexTextureCoordinateComponents().count());
-			geometryTriangleTangentComponentRange.count = static_cast<uint32>(geometryAsset->getTriangleTangentComponents().count());
-			geometryIndexRange.count = static_cast<uint32>(geometryAsset->getVertexPositionIndices().count());
+			geometryTriangleTangentComponentRange.count = static_cast<uint32>(geometryAsset->tangents.count());
 
 			geometries[geometryIndex] = Geometry3D({
 				.triangleCount = geometryIndexRange.count / 3,
@@ -203,19 +84,14 @@ namespace Trident {
 				hullLineIndexOffset += lineIndexRange.count;
 			}
 
-			geometryVertexPositionComponentRange.offset += geometryVertexPositionComponentRange.count;
-			geometryVertexNormalComponentRange.offset += geometryVertexNormalComponentRange.count;
-			geometryVertexTextureCoordinateComponentRange.offset += geometryVertexTextureCoordinateComponentRange.count;
 			geometryTriangleTangentComponentRange.offset += geometryTriangleTangentComponentRange.count;
-			geometryIndexRange.offset += geometryIndexRange.count;
 
 			geometryIndex += 1;
 		} */
 	}
 
 	void Scene3D::loadEntityComponentMappings() {
-		// TODO(scene/3d): Restore.
-		/* ecs.registerComponentPool<GeometryComponent>();
+		ecs.registerComponentPool<GeometryComponent>();
 
 		// TODO(ecs/scene-components): Use Transform3DComponent for entities that are fixed in place?
 		ecs.registerComponentPool<RigidBody3DComponent>();
@@ -232,7 +108,8 @@ namespace Trident {
 			ecs.setComponent<GeometryComponent>(geometryMapping.entity, geometryMapping.component);
 		}
 
-		index rigidBodyFacePlaneOffset = 0;
+		// TODO(scene/3d): Restore.
+		/* index rigidBodyFacePlaneOffset = 0;
 
 		for (const EntityComponentMapping<RigidBody3DComponent>& rigidBodyMapping : asset->rigidBodyMappings) {
 			ecs.setComponent<RigidBody3DComponent>(rigidBodyMapping.entity, rigidBodyMapping.component);
@@ -256,8 +133,7 @@ namespace Trident {
 	}
 
 	void Scene3D::updateRigidBodyFacePlanes() {
-		// TODO(scene/3d): Restore.
-		/* ComponentPool<RigidBody3DComponent>& componentPool = ecs.getComponentPool<RigidBody3DComponent>();
+		ComponentPool<RigidBody3DComponent>& componentPool = ecs.getComponentPool<RigidBody3DComponent>();
 		index componentIndex = 0;
 		index rigidBodyFaceOffset = 0;
 
@@ -293,6 +169,6 @@ namespace Trident {
 
 			rigidBodyFaceOffset += hull.faces.count();
 			componentIndex += 1;
-		} */
+		}
 	}
 }

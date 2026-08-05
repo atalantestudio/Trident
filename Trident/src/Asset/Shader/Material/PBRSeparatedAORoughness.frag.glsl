@@ -75,10 +75,6 @@ vec3 FresnelSchlick(float angle, vec3 baseReflectivity) {
 	return baseReflectivity + (1.0 - baseReflectivity) * pow(clamp(1.0 - angle, 0.0, 1.0), 5.0);
 }
 
-vec3 gammaCorrect(vec3 color) {
-	return pow(color, vec3(1.0 / 2.2));
-}
-
 void main() {
 	// Convert from sRGB space to linear space.
 	vec3 diffuse = pow(texture(diffuseTexture, interstage.textureCoordinate).rgb, vec3(2.2));
@@ -86,7 +82,7 @@ void main() {
 	vec3 normal = normalize(interstage.tbn * (texture(normalTexture, interstage.textureCoordinate).xyz * 2.0 - 1.0));
 	float ao = texture(aoTexture, interstage.textureCoordinate).r;
 	float roughness = texture(roughnessTexture, interstage.textureCoordinate).r;
-	float metallic = 0.0;
+	const float metallic = 0.0;
 	vec3 surface = interstage.surface;
 	vec3 surfaceToViewDirection = normalize(camera.position - surface);
 	vec3 baseReflectivity = mix(vec3(0.04, 0.04, 0.04), diffuse, metallic);
@@ -125,10 +121,7 @@ void main() {
 		lightIndex += 1u;
 	}
 
-	vec3 color = AMBIENT_LIGHT * diffuse * ao + L;
-
-	color = color / (color + 1.0);
-	color = gammaCorrect(color);
-
-	fragment = vec4(color, 1.0);
+	fragment.rgb = AMBIENT_LIGHT * diffuse * ao + L;
+	fragment.rgb = pow(fragment.rgb, vec3(1.0 / 2.2));
+	fragment.a = 1.0;
 }

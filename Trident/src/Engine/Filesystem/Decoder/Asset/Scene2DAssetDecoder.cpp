@@ -34,7 +34,7 @@ namespace Trident {
 		const uint32 materialMappingCount = stream.read<uint32>();
 		const uint32 rigidBodyMappingCount = stream.read<uint32>();
 
-		descriptor.geometryAssets = sequence<ref<GeometryAsset>>(geometryAssetCount);
+		descriptor.geometryAssets = sequence<ref<Geometry2DAsset>>(geometryAssetCount);
 		descriptor.geometryMappings = sequence<EntityComponentMapping<GeometryComponent>>(geometryMappingCount);
 		descriptor.materialMappings = sequence<EntityComponentMapping<MaterialComponent>>(materialMappingCount);
 		descriptor.rigidBodyMappings = sequence<EntityComponentMapping<RigidBody2DComponent>>(rigidBodyMappingCount);
@@ -56,19 +56,18 @@ namespace Trident {
 			textureCoordinate = stream.read<svec2<float32>>();
 		}
 
-		for (ref<GeometryAsset>& geometryAsset : descriptor.geometryAssets) {
+		for (ref<Geometry2DAsset>& geometryAsset : descriptor.geometryAssets) {
 			const uint32 identifier = stream.read<uint32>();
 
-			geometryAsset = assetLibrary->getAsset<GeometryAsset>(identifier);
+			geometryAsset = assetLibrary->getAsset<Geometry2DAsset>(identifier);
 
-			descriptor.dynamicVertexPositionCount += geometryAsset->getVertexPositionComponents().count() / 2;
-			descriptor.dynamicVertexTextureCoordinateCount += geometryAsset->getVertexTextureCoordinateComponents().count() / 2;
-			descriptor.dynamicVertexPositionIndexCount += geometryAsset->getVertexPositionIndices().count();
-			descriptor.dynamicVertexTextureCoordinateIndexCount += geometryAsset->getVertexTextureCoordinateIndices().count();
+			descriptor.dynamicVertexPositionCount += geometryAsset->getPositionCount();
+			descriptor.dynamicVertexTextureCoordinateCount += geometryAsset->getTextureCoordinateCount();
+			descriptor.dynamicVertexPositionIndexCount += geometryAsset->vertexPositionIndices.count();
 
-			if (geometryAsset->getFlags() & GeometryAssetFlags::HAS_HULL) {
+			if (geometryAsset->flags & GeometryAssetFlags::HAS_HULL) {
 				// TODO: Don't mix triangle and line indices?
-				descriptor.dynamicVertexPositionIndexCount += geometryAsset->getHull2DLineIndices().count();
+				descriptor.dynamicVertexPositionIndexCount += geometryAsset->hullLineIndices.count();
 
 				descriptor.hullCount += 1;
 			}

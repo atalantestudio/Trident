@@ -24,10 +24,6 @@ layout(set = 0, binding = 3) buffer readonly TextureCoordinateBuffer {
 	float textureCoordinateBuffer[];
 };
 
-layout(set = 0, binding = 4) buffer readonly TangentBuffer {
-	float tangentBuffer[];
-};
-
 out Interstage {
 	layout(location = 0) vec3 surface;
 	layout(location = 1) vec2 textureCoordinate;
@@ -38,12 +34,13 @@ void main() {
 	uint positionOffset = vertex[0] * 3u;
 	uint normalOffset = vertex[1] * 3u;
 	uint textureCoordinateOffset = vertex[2] * 2u;
-	uint tangentOffset = uint(gl_VertexIndex / 3) * 3u;
 
 	vec3 position = vec3(positionBuffer[positionOffset + 0u], positionBuffer[positionOffset + 1u], positionBuffer[positionOffset + 2u]);
 	vec3 normal = vec3(normalBuffer[normalOffset + 0u], normalBuffer[normalOffset + 1u], normalBuffer[normalOffset + 2u]);
 	vec2 textureCoordinate = vec2(textureCoordinateBuffer[textureCoordinateOffset + 0u], textureCoordinateBuffer[textureCoordinateOffset + 1u]);
-	vec3 tangent = vec3(tangentBuffer[tangentOffset + 0u], tangentBuffer[tangentOffset + 1u], tangentBuffer[tangentOffset + 2u]);
+
+	// TODO(forward)
+	vec3 tangent = normal;
 
 	vec4 surface = world * vec4(position, 1.0);
 
