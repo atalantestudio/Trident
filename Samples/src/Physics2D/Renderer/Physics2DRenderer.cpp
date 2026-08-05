@@ -69,24 +69,6 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::setupRenderPass() {
-		ImageLayout colorFinalLayout;
-
-		switch (getGraphicsApi()) {
-			case GraphicsAPI::DX12: {
-				// TODO(DX12): The final layout must be PRESENT_SRC in order to have layer superposition working.
-				colorFinalLayout = ImageLayout::PRESENT_SRC;
-
-				break;
-			}
-			case GraphicsAPI::GL:
-			case GraphicsAPI::VK: {
-				// TODO(layer-superposition)
-				colorFinalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-
-				break;
-			}
-		}
-
 		renderPass = createRenderPass({
 			.attachments = {
 				// Color
@@ -95,7 +77,7 @@ namespace Trident {
 					.sampleCount = PHYSICS_2D_RENDERER_SAMPLE_COUNT,
 					.loadOperation = LoadOperation::CLEAR,
 					.storeOperation = StoreOperation::STORE,
-					.finalLayout = colorFinalLayout,
+					.finalLayout = ImageLayout::PRESENT_SRC,
 				},
 
 				// Depth stencil

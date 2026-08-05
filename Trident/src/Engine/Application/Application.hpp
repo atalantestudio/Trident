@@ -76,6 +76,17 @@ namespace Trident {
 				layerCompositor->layers.emplace_back(layer);
 			}
 
+			template<typename LayerGroupType, typename... Argument>
+			void registerLayerGroup(Argument&&... arguments) {
+				PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+				ref<LayerGroup> layerGroup = createRef<LayerGroupType>(std::forward<Argument>(arguments)...);
+				layerGroup->setApplication(this);
+				layerGroup->initialize();
+
+				layerCompositor->layerGroups.emplace_back(layerGroup);
+			}
+
 			template<typename ProcessType, typename... Argument>
 			void registerProcess(Argument&&... arguments) {
 				PROFILE_SCOPE(FUNCTION_SIGNATURE);

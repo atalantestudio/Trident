@@ -40,7 +40,14 @@ namespace Trident {
 	}
 
 	void DX12::recreateSwapchain(const Trident::Device* device, Trident::Swapchain* swapchain, const SwapchainDescriptor& descriptor) {
-		destroySwapchain(device, swapchain);
+		const DX12::Swapchain* _swapchain = static_cast<const DX12::Swapchain*>(swapchain);
+
+		for (const ref<Trident::Image>& image : _swapchain->images) {
+			image.~shared_ptr();
+		}
+
+		_swapchain->swapChain->Release();
+
 		updateSwapchain(device, swapchain, descriptor);
 	}
 

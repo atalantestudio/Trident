@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include "Engine/Layer/Layer.hpp"
+#include "Engine/API/Window/Layer/RenderPassLayer.hpp"
 
 #define DEFINE_SAMPLE_LAYER(name) \
-	class name##Layer : public Layer { \
+	class name##Layer : public RenderPassLayer { \
 		public: \
 			void initialize() override { \
 				renderer.setLayer(this); \

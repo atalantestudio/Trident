@@ -80,7 +80,7 @@ namespace Trident {
 				descriptorSetBinding.viewDescriptorHandleOffset = memoryAllocator->allocateViewDescriptors(binding.descriptorCount);
 
 				if (isSamplerDescriptorType(binding.descriptorType)) {
-					// TODO: The binding might not define the samplers.
+					// TODO(graphics/dx12/device/allocate-descriptor-sets): The binding might not define the samplers.
 					descriptorSetBinding.samplerDescriptorHandleOffset = memoryAllocator->allocateSamplerDescriptors(binding.descriptorCount);
 				}
 

@@ -151,6 +151,7 @@ namespace Trident {
 	}
 
 	void Application::initializeLayers() {
+		layerCompositor->initializeLayerGroups();
 		layerCompositor->initializeLayers();
 	}
 
@@ -159,7 +160,6 @@ namespace Trident {
 		release();
 
 		delete propertyFile;
-
 		delete layerCompositor;
 
 		if (lastLayerInput.swapchainImageView != nullptr) {

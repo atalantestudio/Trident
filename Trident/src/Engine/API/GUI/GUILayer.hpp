@@ -11,11 +11,11 @@
 #include "Engine/API/GUI/Style/TextInputStyle.hpp"
 #include "Engine/API/GUI/Style/TextStyle.hpp"
 #include "Engine/API/GUI/Style/VerticalListStyle.hpp"
+#include "Engine/API/Window/Layer/RenderPassLayer.hpp"
 #include "Engine/Filesystem/Stream/UTF8Stream.hpp"
-#include "Engine/Layer/Layer.hpp"
 
 namespace Trident {
-	class GUILayer : public Layer {
+	class GUILayer : public RenderPassLayer {
 		private:
 			struct FontData {
 				ref<FontAsset> fontAsset;

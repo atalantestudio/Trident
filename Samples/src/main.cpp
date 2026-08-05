@@ -27,6 +27,7 @@
 #include "GUI/TextDebug.hpp"
 #include "GUI/TextInput.hpp"
 #include "GUI/TextSmoothness.hpp"
+#include "GUI/UILayerGroup.hpp"
 #include "GUI/UTF8.hpp"
 
 #include "Physics2D/Layer/SceneLayer.hpp"
@@ -126,11 +127,16 @@ namespace Trident {
 				registerLayer<GUIUTF8Layer>();
 			}
 
-			// registerLayer<FrameStatisticsLayer>();
+			registerLayer<FrameStatisticsLayer>();
+
+			registerLayerGroup<UILayerGroup>(range<uint32, uint32>(0, 2));
 		}
 		else if (SampleGroupNameProperty == "Physics2D") {
 			registerLayer<Physics2DSceneLayer>();
-			registerLayer<FrameStatisticsLayer>();
+			// registerLayer<FrameStatisticsLayer>();
+
+			// TODO(window/layer-group): Multisampled UI layer group.
+			registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
 		}
 		else if (SampleGroupNameProperty == "Process") {
 			if (SampleNameProperty == "Default") {
@@ -201,6 +207,8 @@ namespace Trident {
 			else if (SampleNameProperty == "TriangleIndirect") {
 				registerLayer<SampleTriangleIndirectLayer>();
 			}
+
+			registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
 		}
 		else if (SampleGroupNameProperty == "Sample3D") {
 			if (SampleNameProperty == "Forward") {
@@ -209,6 +217,8 @@ namespace Trident {
 			else if (SampleNameProperty == "Visibility") {
 				registerLayer<Sample3DVisibilityLayer>();
 			}
+
+			registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
 		}
 	}
 

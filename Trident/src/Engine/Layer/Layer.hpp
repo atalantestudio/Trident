@@ -11,7 +11,6 @@
 namespace Trident {
 	class Application;
 
-	// TODO(layer): Rename to Subpass?
 	class Layer {
 		public:
 			virtual ~Layer() = default;

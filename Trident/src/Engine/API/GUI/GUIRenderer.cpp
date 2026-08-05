@@ -4,17 +4,11 @@
 #include "pch.hpp"
 
 #include "Engine/API/GUI/GUIRenderer.hpp"
+#include "Engine/API/Window/Layer/RenderPassLayer.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 
 namespace Trident {
 	void GUIRenderer::build() {
-		renderPass = createRenderPass();
-
-		depthStencilImage = createDepthStencilImage();
-		depthStencilImageView = createDepthStencilImageView();
-
-		recreateFramebuffers();
-
 		vertexBuffer = createVertexBuffer();
 		indexBuffer = createIndexBuffer();
 		cameraBuffer = createCameraBuffer();
@@ -239,77 +233,6 @@ namespace Trident {
 		glyphSubcomponentCount += 1;
 	}
 
-	ref<RenderPass> GUIRenderer::createRenderPass() const {
-		return Renderer::createRenderPass({
-			.attachments = {
-				{
-					.format = getSurface()->getFormat(),
-					.sampleCount = 1,
-
-					// TODO(layer-superposition): Using LOAD when this layer is the only one registered will generate non-blocking errors from the Vulkan validation layers.
-					.loadOperation = LoadOperation::LOAD,
-					// .loadOperation = LoadOperation::CLEAR,
-
-					.storeOperation = StoreOperation::STORE,
-					.finalLayout = ImageLayout::PRESENT_SRC,
-				},
-				{
-					.format = ImageFormat::D32_SFLOAT,
-					.sampleCount = 1,
-					.loadOperation = LoadOperation::CLEAR,
-					.storeOperation = StoreOperation::UNDEFINED,
-					.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-				},
-			},
-			.subpasses = {
-				{
-					.colorAttachmentReferences = {
-						{
-							.index = 0,
-							.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
-						},
-					},
-					.depthStencilAttachmentReference = {
-						.index = 1,
-						.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-					},
-				},
-			},
-		});
-	}
-
-	void GUIRenderer::recreateFramebuffers() {
-		const ref<Swapchain> swapchain = getSwapchain();
-
-		framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
-
-		FramebufferDescriptor framebufferDescriptor = {
-			.renderPass = renderPass,
-			.imageViews = {nullptr, depthStencilImageView},
-			.extent = swapchain->getExtent(),
-		};
-
-		#if defined(DEBUG_OBJECT_NAME)
-			sequence<char8> name;
-		#endif
-
-		uint32 framebufferIndex = 0;
-
-		while (framebufferIndex < framebuffers.count()) {
-			#if defined(DEBUG_OBJECT_NAME)
-				name = Logger::format("In flight framebuffer []", framebufferIndex);
-
-				framebufferDescriptor.name = name;
-			#endif
-
-			framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
-
-			framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
-
-			framebufferIndex += 1;
-		}
-	}
-
 	ref<Buffer> GUIRenderer::createVertexBuffer() const {
 		return createDynamicBuffer({
 			.size = 4 * sizeof(Vertex),
@@ -368,35 +291,6 @@ namespace Trident {
 			.persistent = true,
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Glyph subcomponent",
-			#endif
-		});
-	}
-
-	ref<Image> GUIRenderer::createDepthStencilImage() const {
-		const Extent2D swapchainExtent = getSwapchain()->getExtent();
-
-		return renderPass->createDepthStencilAttachmentImage(
-			{
-				.type = ImageType::TEXTURE_2D,
-				.extent = {swapchainExtent.width, swapchainExtent.height, 1},
-				.mipLevelCount = 1,
-				.layerCount = 1,
-				#if defined(DEBUG_OBJECT_NAME)
-					.name = "Depth stencil image",
-				#endif
-			},
-			0
-		);
-	}
-
-	ref<ImageView> GUIRenderer::createDepthStencilImageView() const {
-		return depthStencilImage->createView({
-			.mipLevelOffset = 0,
-			.mipLevelCount = 1,
-			.layerOffset = 0,
-			.layerCount = 1,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Depth stencil image view",
 			#endif
 		});
 	}
@@ -523,7 +417,7 @@ namespace Trident {
 				.compareOperation = CompareOperation::GREATER_OR_EQUAL,
 			},
 			.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
-			.renderPass = renderPass,
+			.renderPass = pointer_cast<const RenderPassLayer*>(getLayer())->renderPass,
 			.subpassIndex = 0,
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Subcomponent",
@@ -591,7 +485,7 @@ namespace Trident {
 				.compareOperation = CompareOperation::GREATER_OR_EQUAL,
 			},
 			.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
-			.renderPass = renderPass,
+			.renderPass = pointer_cast<const RenderPassLayer*>(getLayer())->renderPass,
 			.subpassIndex = 0,
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Glyph subcomponent",
@@ -711,21 +605,11 @@ namespace Trident {
 			return;
 		}
 
-		const Extent2D swapchainExtent = getSwapchain()->getExtent();
-		const float32 width = static_cast<float32>(swapchainExtent.width);
-		const float32 height = static_cast<float32>(swapchainExtent.height);
+		const Extent2D extent = getSwapchain()->getExtent();
+		const float32 width = static_cast<float32>(extent.width);
+		const float32 height = static_cast<float32>(extent.height);
 
-		commandEncoder->beginRenderPass({
-			.framebuffer = framebuffers[getSwapchainImageIndex()],
-			.clearValues = {
-				{0.0f, 0.0f, 0.0f, 1.0f},
-				{
-					.depth = 0.0f,
-					.stencil = 0,
-				},
-			},
-		});
-		commandEncoder->setScissor(0, 0, swapchainExtent);
+		commandEncoder->setScissor(0, 0, extent);
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 
 		if (subcomponentCount > 0) {
@@ -751,16 +635,9 @@ namespace Trident {
 			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 			commandEncoder->drawIndexed(6, glyphSubcomponentCount, 0, 0, 0);
 		}
-
-		commandEncoder->endRenderPass();
 	}
 
 	void GUIRenderer::resize(WindowResizeEvent& event) {
-		depthStencilImage = createDepthStencilImage();
-		depthStencilImageView = createDepthStencilImageView();
-
-		recreateFramebuffers();
-
 		updateCameraProjection();
 	}
 

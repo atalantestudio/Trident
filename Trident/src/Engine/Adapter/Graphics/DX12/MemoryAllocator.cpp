@@ -65,7 +65,7 @@ namespace Trident {
 		D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle = descriptorHeapAllocation.descriptorHeap->GetCPUDescriptorHandleForHeapStart();
 		descriptorHandle.ptr += descriptorHeapAllocation.descriptorOffset * viewDescriptorHandleIncrementSize;
 
-		ADAPTER_ASSERT(descriptorHeapAllocation.descriptorOffset + descriptorCount < descriptorHeapAllocation.descriptorCount, "Not enough space to reserve for [] view descriptor(s).", descriptorCount);
+		ADAPTER_ASSERT(descriptorHeapAllocation.descriptorOffset + descriptorCount <= descriptorHeapAllocation.descriptorCount, "Not enough space to reserve for [] view descriptor(s).", descriptorCount);
 
 		descriptorHeapAllocation.descriptorOffset += descriptorCount;
 
@@ -78,7 +78,7 @@ namespace Trident {
 		D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle = descriptorHeapAllocation.descriptorHeap->GetCPUDescriptorHandleForHeapStart();
 		descriptorHandle.ptr += descriptorHeapAllocation.descriptorOffset * samplerDescriptorHandleIncrementSize;
 
-		ADAPTER_ASSERT(descriptorHeapAllocation.descriptorOffset + descriptorCount < descriptorHeapAllocation.descriptorCount, "Not enough space to reserve for [] sampler descriptor(s).", descriptorCount);
+		ADAPTER_ASSERT(descriptorHeapAllocation.descriptorOffset + descriptorCount <= descriptorHeapAllocation.descriptorCount, "Not enough space to reserve for [] sampler descriptor(s).", descriptorCount);
 
 		descriptorHeapAllocation.descriptorOffset += descriptorCount;
 

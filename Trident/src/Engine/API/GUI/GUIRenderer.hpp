@@ -53,10 +53,6 @@ namespace Trident {
 			}
 
 		private:
-			ref<RenderPass> createRenderPass() const;
-
-			void recreateFramebuffers();
-
 			ref<DescriptorSetLayout> createSubcomponentDescriptorSetLayout() const;
 
 			void updateDescriptorSets() const;
@@ -73,10 +69,6 @@ namespace Trident {
 			ref<Buffer> createSubcomponentBuffer() const;
 			ref<Buffer> createGlyphSubcomponentBuffer() const;
 
-			ref<Image> createDepthStencilImage() const;
-
-			ref<ImageView> createDepthStencilImageView() const;
-
 			ref<Sampler> createNearestSampler() const;
 			ref<Sampler> createLinearSampler() const;
 
@@ -85,10 +77,6 @@ namespace Trident {
 			void updateCameraProjection() const;
 
 		private:
-			ref<RenderPass> renderPass;
-
-			sequence<ref<Framebuffer>> framebuffers;
-
 			ref<DescriptorSetLayout> subcomponentDescriptorSetLayout;
 
 			ref<DescriptorSet> subcomponentDescriptorSet;
@@ -105,10 +93,8 @@ namespace Trident {
 			ref<Buffer> glyphSubcomponentBuffer;
 			ref<Buffer> userImageStagingBuffer;
 
-			ref<Image> depthStencilImage;
 			sequence<ref<Image>> userImages;
 
-			ref<ImageView> depthStencilImageView;
 			sequence<ref<ImageView>> userImageViews;
 
 			ref<Sampler> nearestSampler;

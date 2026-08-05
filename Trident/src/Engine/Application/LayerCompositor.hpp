@@ -14,6 +14,7 @@
 #include "Engine/API/Graphics/Semaphore.hpp"
 #include "Engine/API/Graphics/Surface.hpp"
 #include "Engine/API/Graphics/Swapchain.hpp"
+#include "Engine/API/Window/LayerGroup/RenderPassLayerGroup.hpp"
 #include "Engine/Application/ApplicationProperties.hpp"
 #include "Engine/Application/ProjectDescriptor.hpp"
 #include "Engine/Layer/Layer.hpp"
@@ -84,6 +85,12 @@ namespace Trident {
 					inFlightFences[frameInFlightIndex] = device->createFence(inFlightFenceDescriptor);
 
 					frameInFlightIndex += 1;
+				}
+			}
+
+			void initializeLayerGroups() const {
+				for (const ref<LayerGroup> layerGroup : layerGroups) {
+					layerGroup->initialize();
 				}
 			}
 
@@ -197,10 +204,8 @@ namespace Trident {
 				commandEncoder->reset();
 				commandEncoder->begin();
 
-				for (const ref<Layer>& layer : layers) {
-					layer->preRender();
-					layer->render(commandEncoder, remainingFrameTime);
-					layer->postRender();
+				for (const ref<LayerGroup> layerGroup : layerGroups) {
+					layerGroup->render(commandEncoder, remainingFrameTime);
 				}
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
@@ -221,6 +226,10 @@ namespace Trident {
 					.extent = window->getExtent(),
 					.verticalSync = verticalSync,
 				});
+
+				for (const ref<LayerGroup> layerGroup : layerGroups) {
+					layerGroup->resize();
+				}
 			}
 
 		public:
@@ -251,5 +260,6 @@ namespace Trident {
 
 		public:
 			std::vector<ref<Layer>> layers;
+			std::vector<ref<LayerGroup>> layerGroups;
 	};
 }
