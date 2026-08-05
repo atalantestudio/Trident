@@ -23,6 +23,10 @@ namespace Trident {
 
 			material.geometries.emplace_back(materialGeometry);
 
+			dynamicVertexCount += geometry.vertices.count();
+			dynamicPositionCount += geometry.positions.count();
+			dynamicNormalCount += geometry.normals.count();
+			dynamicTextureCoordinateCount += geometry.textureCoordinates.count();
 			materialGeometryCount += 1;
 		}
 
@@ -56,10 +60,6 @@ namespace Trident {
 
 		rigidBodyMappings.emplace_back(rigidBodyMapping);
 
-		dynamicVertexCount += geometry.vertices.count();
-		dynamicPositionCount += geometry.positions.count();
-		dynamicNormalCount += geometry.normals.count();
-		dynamicTextureCoordinateCount += geometry.textureCoordinates.count();
 		entityCount += 1;
 	}
 }

@@ -19,6 +19,10 @@ namespace Trident {
 
 			material.geometries.emplace_back(materialGeometry);
 
+			staticVertexCount += geometry.vertices.count();
+			staticPositionCount += geometry.positions.count();
+			staticNormalCount += geometry.normals.count();
+			staticTextureCoordinateCount += geometry.textureCoordinates.count();
 			materialGeometryCount += 1;
 		}
 
@@ -76,10 +80,6 @@ namespace Trident {
 
 		lightmaps.emplace_back(lightmap);
 
-		staticVertexCount += geometry.vertices.count();
-		staticPositionCount += geometry.positions.count();
-		staticNormalCount += geometry.normals.count();
-		staticTextureCoordinateCount += geometry.textureCoordinates.count();
 		staticInstanceCount += 1;
 
 		// TODO(asset-builder/scene/lightmap): Create less coordinates (1 per texture coordinate per instance).

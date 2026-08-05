@@ -18,19 +18,6 @@
 namespace Trident {
 	class Scene3DProcess : public Process {
 		private:
-			static uint64 calculateMaterialShaderSize(const BuildMaterialShader& materialShader) {
-				return (
-					sizeof(AssetHeader) +
-					sizeof(uint32) * 4 +
-					sizeof(ShaderStage) +
-					materialShader.asset.name.count() +
-					materialShader.asset.entryPoint.count() +
-					materialShader.asset.bindings.count() * (sizeof(DescriptorType) + sizeof(uint32) + sizeof(ShaderStage)) +
-					materialShader.asset.descriptorSetBindingRanges.count() * sizeof(uint32) +
-					sizeof(range<uint32, uint32>)
-				);
-			}
-
 			static uint64 calculateStreamSize(const BuildScene3D& scene) {
 				uint64 size = (
 					sizeof(AssetHeader) +
@@ -58,6 +45,19 @@ namespace Trident {
 				}
 
 				return size;
+			}
+
+			static uint64 calculateMaterialShaderSize(const BuildMaterialShader& materialShader) {
+				return (
+					sizeof(AssetHeader) +
+					sizeof(uint32) * 4 +
+					sizeof(ShaderStage) +
+					materialShader.asset.name.count() +
+					materialShader.asset.entryPoint.count() +
+					materialShader.asset.bindings.count() * (sizeof(DescriptorType) + sizeof(uint32) + sizeof(ShaderStage)) +
+					materialShader.asset.descriptorSetBindingRanges.count() * sizeof(uint32) +
+					sizeof(range<uint32, uint32>)
+				);
 			}
 
 			static void writeMaterialShader(ByteStream<StreamOperation::WRITE>& stream, const BuildMaterialShader& materialShader) {
