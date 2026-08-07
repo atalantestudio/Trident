@@ -7,10 +7,8 @@
 
 namespace Trident {
 	void SceneBuilder::placeSurface(const SurfaceDescriptor& descriptor, const TransformAngleAxis3D& transform) {
-		const uint64 surfaceVertexCount = descriptor.geometry.vertexIndices.count();
-		const uint64 surfacePositionCount = descriptor.geometry.vertexComponents.count() / 3;
-		const uint64 surfaceNormalCount = 1;
-		const uint64 surfaceTextureCoordinateCount = descriptor.geometry.vertexTextureCoordinateComponents.count() / 2;
+		const uint64 surfaceVertexCount = descriptor.geometry.vertices.count();
+		const uint64 surfaceIndexCount = descriptor.geometry.indices.count();
 
 		IntermediateMaterial& material = getMaterial(descriptor.material);
 		IntermediateMaterialGeometry& materialGeometry = material.geometries[0];
@@ -29,16 +27,11 @@ namespace Trident {
 			staticInstanceCount += 1;
 		}
 
-		const uint64 vertexOffset = geometry.vertices.count();
-		const uint32 positionOffset = static_cast<uint32>(geometry.positions.count());
-		const uint32 normalOffset = static_cast<uint32>(geometry.normals.count());
-		const uint32 textureCoordinateOffset = static_cast<uint32>(geometry.textureCoordinates.count());
+		const uint32 vertexOffset = static_cast<uint32>(geometry.vertices.count());
+		const uint64 indexOffset = geometry.indices.count();
 
 		resizeBuffer(geometry.vertices, surfaceVertexCount);
-		resizeBuffer(geometry.positions, surfacePositionCount);
-		resizeBuffer(geometry.normals, surfaceNormalCount);
-		resizeBuffer(geometry.textureCoordinates, surfaceTextureCoordinateCount);
-		resizeBuffer(geometry.transformedTextureCoordinates, surfaceTextureCoordinateCount);
+		resizeBuffer(geometry.indices, surfaceIndexCount);
 
 		const quat<float32> orientation = quat<float32>::axisAngle(transform.axis, transform.angle);
 		const quat<float32> inverseOrientation = inverse(orientation);
@@ -55,52 +48,36 @@ namespace Trident {
 		svec2<float32> maxCoordinate = {min<float32>(), min<float32>()};
 		svec2<float32> minCoordinate = {max<float32>(), max<float32>()};
 
-		uint32 surfaceVertexIndex = 0;
+		uint32 vertexIndex = 0;
 
-		while (surfaceVertexIndex < surfaceVertexCount) {
-			geometry.vertices[vertexOffset + surfaceVertexIndex] = {
-				.positionIndex = positionOffset + descriptor.geometry.vertexIndices[surfaceVertexIndex],
-				.normalIndex = normalOffset,
-				.textureCoordinateIndex = textureCoordinateOffset + descriptor.geometry.vertexTextureCoordinateIndices[surfaceVertexIndex],
-			};
+		while (vertexIndex < surfaceVertexCount) {
+			const BuildVertex3D& surfaceVertex = descriptor.geometry.vertices[vertexIndex];
 
-			surfaceVertexIndex += 1;
-		}
-
-		uint32 surfacePositionIndex = 0;
-
-		while (surfacePositionIndex < surfacePositionCount) {
-			// TODO(lyah/scalar)
-			geometry.positions[positionOffset + surfacePositionIndex] = svec3<float32>(multiplyTransform({
-				descriptor.geometry.vertexComponents[surfacePositionIndex * 3 + 0],
-				descriptor.geometry.vertexComponents[surfacePositionIndex * 3 + 1],
-				descriptor.geometry.vertexComponents[surfacePositionIndex * 3 + 2],
-			}, worldTransform));
-
-			surfacePositionIndex += 1;
-		}
-
-		// TODO(lyah/scalar)
-		geometry.normals[normalOffset] = svec3<float32>(normalized(descriptor.geometry.normal * inverseOrientation));
-
-		uint32 surfaceTextureCoordinateIndex = 0;
-
-		while (surfaceTextureCoordinateIndex < surfaceTextureCoordinateCount) {
-			const svec2<float32> textureCoordinate = {
-				descriptor.geometry.vertexTextureCoordinateComponents[surfaceTextureCoordinateIndex * 2 + 0],
-				descriptor.geometry.vertexTextureCoordinateComponents[surfaceTextureCoordinateIndex * 2 + 1],
-			};
+			BuildVertex3D& vertex = geometry.vertices[vertexOffset + vertexIndex];
 
 			// TODO(lyah/scalar)
-			geometry.textureCoordinates[textureCoordinateOffset + surfaceTextureCoordinateIndex] = textureCoordinate;
-			geometry.transformedTextureCoordinates[textureCoordinateOffset + surfaceTextureCoordinateIndex] = svec2<float32>(multiplyTransform(vec2<float32>(textureCoordinate), textureTransform));
+			vertex.position = svec3<float32>(multiplyTransform(vec3<float32>(surfaceVertex.position), worldTransform));
+			vertex.normal = svec3<float32>(normalized(vec3<float32>(surfaceVertex.normal) * inverseOrientation));
+			vertex.tangent = svec3<float32>(normalized(vec3<float32>(surfaceVertex.tangent) * inverseOrientation));
 
-			maxCoordinate.x = max(maxCoordinate.x, textureCoordinate.x);
-			maxCoordinate.y = max(maxCoordinate.y, textureCoordinate.y);
-			minCoordinate.x = min(minCoordinate.x, textureCoordinate.x);
-			minCoordinate.y = min(minCoordinate.y, textureCoordinate.y);
+			// TODO(asset-builder/lightmapper)
+			// vertex.textureCoordinate = svec2<float32>(multiplyTransform(vec2<float32>(surfaceVertex.textureCoordinate), textureTransform));
+			vertex.textureCoordinate = surfaceVertex.textureCoordinate;
 
-			surfaceTextureCoordinateIndex += 1;
+			maxCoordinate.x = max(maxCoordinate.x, surfaceVertex.textureCoordinate.x);
+			maxCoordinate.y = max(maxCoordinate.y, surfaceVertex.textureCoordinate.y);
+			minCoordinate.x = min(minCoordinate.x, surfaceVertex.textureCoordinate.x);
+			minCoordinate.y = min(minCoordinate.y, surfaceVertex.textureCoordinate.y);
+
+			vertexIndex += 1;
+		}
+
+		uint32 indexIndex = 0;
+
+		while (indexIndex < surfaceIndexCount) {
+			geometry.indices[indexOffset + indexIndex] = vertexOffset + descriptor.geometry.indices[indexIndex];
+
+			indexIndex += 1;
 		}
 
 		Lightmap lightmap{};
@@ -116,16 +93,9 @@ namespace Trident {
 		lightmaps.emplace_back(lightmap);
 
 		bakedVertexCount += surfaceVertexCount;
-		bakedPositionCount += surfacePositionCount;
-		bakedNormalCount += surfaceNormalCount;
-		bakedTextureCoordinateCount += surfaceTextureCoordinateCount;
-
+		bakedIndexCount += surfaceIndexCount;
 		staticVertexCount += surfaceVertexCount;
-		staticPositionCount += surfacePositionCount;
-		staticNormalCount += surfaceNormalCount;
-		staticTextureCoordinateCount += surfaceTextureCoordinateCount;
-
-		// TODO(asset-builder/scene/lightmap): Create less coordinates (1 per texture coordinate per instance).
+		staticIndexCount += surfaceIndexCount;
 		lightmapCoordinateCount += surfaceVertexCount;
 	}
 }

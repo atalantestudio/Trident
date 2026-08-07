@@ -1,0 +1,20 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
+#pragma once
+
+#include "AssetBuilder/API/Lightmapper/Lightmapper.hpp"
+
+namespace Trident {
+	ref<DescriptorSetLayout> Lightmapper::createGBufferDescriptorSetLayout() const {
+		const DescriptorSetLayoutBinding bindings[1] = {
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::VERTEX,
+			},
+		};
+
+		return Renderer::createDescriptorSetLayout(view<DescriptorSetLayoutBinding>(bindings, 1));
+	}
+}

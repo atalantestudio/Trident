@@ -12,7 +12,7 @@
 #include "Engine/Adapter/Graphics/GL/PrimitiveTopology.hpp"
 #include "Engine/Adapter/Graphics/GL/RenderPass.hpp"
 #include "Engine/Adapter/Graphics/GL/ShaderModule.hpp"
-#include "Engine/Adapter/Graphics/GL/VertexInputAttributeType.hpp"
+#include "Engine/Adapter/Graphics/GL/VertexInputAttributeFormat.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
@@ -81,51 +81,47 @@ namespace Trident {
 
 		for (uint32 bindingindex = 0; bindingindex < descriptor.vertexInputBindings.count(); bindingindex += 1) {
 			const VertexInputBinding& vertexInputBinding = descriptor.vertexInputBindings[bindingindex];
-			const std::vector<VertexInputAttribute>& attributes = vertexInputBinding.getAttributes();
+			const std::vector<Trident::VertexInputAttribute>& attributes = vertexInputBinding.getAttributes();
 
-			for (const VertexInputAttribute& attribute : attributes) {
-				const GLenum type = getType(attribute.type);
-				const GLint size = getSize(attribute.type);
+			for (const Trident::VertexInputAttribute& attribute : attributes) {
+				const GL::VertexInputAttribute _attribute = getAttribute(attribute.format);
 				const GLuint relativeoffset = attribute.offset;
 
-				switch (type) {
-					case GL_FLOAT: {
-						#if OPENGL_VERSION >= OPENGL_VERSION_4_3
-							glVertexAttribFormat(attribindex, size, type, GL_FALSE, relativeoffset);
-						#else
-							ENGINE_ERROR_UNSUPPORTED();
-						#endif
-
-						break;
-					}
-					case GL_BYTE:
-					case GL_UNSIGNED_BYTE:
-					case GL_SHORT:
-					case GL_UNSIGNED_SHORT:
-					case GL_INT:
-					case GL_UNSIGNED_INT: {
-						#if OPENGL_VERSION >= OPENGL_VERSION_4_3
-							glVertexAttribIFormat(attribindex, size, type, relativeoffset);
-						#else
-							ENGINE_ERROR_UNSUPPORTED();
-						#endif
-
-						break;
-					}
-					case GL_DOUBLE: {
-						#if OPENGL_VERSION >= OPENGL_VERSION_4_3
-							glVertexAttribLFormat(attribindex, size, type, relativeoffset);
-						#else
-							ENGINE_ERROR_UNSUPPORTED();
-						#endif
-
-						break;
-					}
-					default:
-						ADAPTER_ASSERT(false, "Unsupported vertex input attribute type.");
-				}
-
 				#if OPENGL_VERSION >= OPENGL_VERSION_4_3
+					switch (_attribute.type) {
+						case GL_FLOAT: {
+							glVertexAttribFormat(attribindex, _attribute.size, _attribute.type, _attribute.normalized, relativeoffset);
+
+							break;
+						}
+						case GL_BYTE:
+						case GL_UNSIGNED_BYTE:
+						case GL_SHORT:
+						case GL_UNSIGNED_SHORT:
+						case GL_INT:
+						case GL_UNSIGNED_INT:
+						case GL_UNSIGNED_INT_2_10_10_10_REV: {
+							if (_attribute.normalized) {
+								glVertexAttribFormat(attribindex, _attribute.size, _attribute.type, _attribute.normalized, relativeoffset);
+							}
+							else {
+								glVertexAttribIFormat(attribindex, _attribute.size, _attribute.type, relativeoffset);
+							}
+
+							break;
+						}
+						case GL_DOUBLE: {
+							glVertexAttribLFormat(attribindex, _attribute.size, _attribute.type, relativeoffset);
+
+							break;
+						}
+						default: {
+							ADAPTER_ASSERT(false, "Unsupported vertex input attribute type.");
+
+							break;
+						}
+					}
+
 					glVertexAttribBinding(attribindex, bindingindex);
 				#else
 					ENGINE_ERROR_UNSUPPORTED();

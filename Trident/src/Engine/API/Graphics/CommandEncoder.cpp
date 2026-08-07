@@ -499,6 +499,8 @@ namespace Trident {
 			{
 				Validator validator;
 
+				// TODO(graphics/validation/command-encoder): Check that an index buffer is bound.
+
 				if (indexCount == 0) {
 					VALIDATION_WARNING("indexCount should not be 0.");
 				}
@@ -516,6 +518,8 @@ namespace Trident {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
+
+				// TODO(graphics/validation/command-encoder): Check that an index buffer is bound.
 
 				if (buffer == nullptr) {
 					VALIDATION_ERROR("buffer must be a valid Buffer object.");

@@ -3,16 +3,15 @@
 
 #include "pch.hpp"
 
+#include "AssetBuilder/API/Utilities/Utilities.hpp"
+#include "../../../File/FBX.hpp"
+
 #include "Engine/Filesystem/Asset/GeometryAsset.hpp"
 #include "Engine/Filesystem/Decoder/Decoder.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 
-#include "../File/FBX.hpp"
-#include "EncodeGeometryAssetSubprocess.hpp"
-#include "GenerateTangents.hpp"
-
 namespace Trident {
-	Geometry3DData DecodeFBXGeometry(view<uint8> inputData, uint32 identifier) {
+	BuildGeometry3D decodeFBXGeometry(view<uint8> inputData, uint32 identifier) {
 		const File<FileFormat::FBX> file = Decoder<FileFormat::FBX>::decode(inputData);
 
 		// TODO: Ensure that FBX nodes exist before using them.
@@ -367,34 +366,6 @@ namespace Trident {
 			textureCoordinateIndex += 1;
 		}
 
-		sequence<GeometryIndex3D> vertices(indexCount);
-		uint32 vertexIndex = 0;
-
-		while (vertexIndex < vertices.count()) {
-			GeometryIndex3D& vertex = vertices[vertexIndex];
-			vertex.positionIndex = vertexPositionIndices[vertexIndex];
-			vertex.normalIndex = vertexNormalIndices[vertexIndex];
-			vertex.textureCoordinateIndex = vertexTextureCoordinateIndices[vertexIndex];
-
-			vertexIndex += 1;
-		}
-
-		const sequence<svec3<float32>> tangents = generateTangents(positions, normals, textureCoordinates, vertices);
-
-		return {
-			.flags = GeometryAssetFlags::IS_3D,
-			.positions = positions,
-			.normals = normals,
-			.textureCoordinates = textureCoordinates,
-			.tangents = tangents,
-			.positionIndices = vertexPositionIndices,
-			.normalIndices = vertexNormalIndices,
-			.textureCoordinateIndices = vertexTextureCoordinateIndices,
-			.hullLineIndices = {},
-			.hullEdges = {},
-			.hullFaceEdgeIndices = {},
-			.hullFaces = {},
-			.hull = {},
-		};
+		return inflateFBXStreams(positions, normals, textureCoordinates, vertexPositionIndices, vertexNormalIndices, vertexTextureCoordinateIndices);
 	}
 }

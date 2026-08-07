@@ -3,8 +3,8 @@
 
 #pragma once
 
+#include "AssetBuilder/API/Utilities/Utilities.hpp"
 #include "AssetBuilder/Process/Scene/Scene2DProcess.hpp"
-#include "../../../../Subprocess/RigidBody.hpp"
 
 namespace Trident {
 	class RollingBallScene2D final : public Scene2DProcess {
@@ -13,75 +13,77 @@ namespace Trident {
 				return "2d_rolling_ball";
 			}
 
-			Scene2DData createScene(AssetBuilderLibrary* assetLibrary) const final override {
+			BuildScene2D createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				return {
-					.staticScene = {},
-					.entityCount = 4,
-					.geometryAssetIdentifiers = {
-						assetLibrary->getAsset<Geometry2DAsset>("UnitSquare")->identifier,
-						assetLibrary->getAsset<Geometry2DAsset>("UnitCircle")->identifier,
-					},
-					.geometryMappings = {
-						{0, {0}},
-						{1, {0}},
-						{2, {0}},
-						{3, {1}},
-					},
-					.rigidBodyMappings = {
-						// Floor
-						{
-							0,
-							createRigidBody({
-								.position = {0.0_m, -10.0_m},
-								.rotation = 0.0_rad,
-								.scale = {100.0f, 20.0f},
-								.mass = max<float32>(),
-								.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
-								.friction = 0.2f,
-								.restitution = 0.0f,
-							}),
+					.staticGeometry = {},
+					.dynamicGeometry = {
+						.entityCount = 4,
+						.geometryAssetIdentifiers = {
+							assetLibrary->getAsset<Geometry2DAsset>("2d_unit_square")->identifier,
+							assetLibrary->getAsset<Geometry2DAsset>("2d_unit_circle")->identifier,
 						},
-
-						// Slide 1
-						{
-							1,
-							createRigidBody({
-								.position = {-4.0_m, 3.2_m},
-								.rotation = radians(20.0_deg),
-								.scale = {20.0f, 0.5f},
-								.mass = max<float32>(),
-								.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
-								.friction = 0.2f,
-								.restitution = 0.0f,
-							}),
+						.geometryMappings = {
+							{0, {0}},
+							{1, {0}},
+							{2, {0}},
+							{3, {1}},
 						},
+						.rigidBodyMappings = {
+							// Floor
+							{
+								0,
+								createRigidBody({
+									.position = {0.0_m, -10.0_m},
+									.rotation = 0.0_rad,
+									.scale = {100.0f, 20.0f},
+									.mass = max<float32>(),
+									.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
+									.friction = 0.2f,
+									.restitution = 0.0f,
+								}),
+							},
 
-						// Slide 2
-						{
-							2,
-							createRigidBody({
-								.position = {8.0_m, 0.5_m},
-								.rotation = radians(-20.0_deg),
-								.scale = {5.0f, 0.5f},
-								.mass = max<float32>(),
-								.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
-								.friction = 0.2f,
-								.restitution = 0.0f,
-							}),
-						},
+							// Slide 1
+							{
+								1,
+								createRigidBody({
+									.position = {-4.0_m, 3.2_m},
+									.rotation = radians(20.0_deg),
+									.scale = {20.0f, 0.5f},
+									.mass = max<float32>(),
+									.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
+									.friction = 0.2f,
+									.restitution = 0.0f,
+								}),
+							},
 
-						// Ball
-						{
-							3,
-							createRigidBody({
-								.position = {-13.0_m, 10.0_m},
-								.rotation = 0.0_rad,
-								.scale = {1.0f, 1.0f},
-								.mass = 25.0_kg,
-								.momentOfInertia = MomentOfInertia2D::THIN_SOLID_DISK,
-								.friction = 0.2f,
-								.restitution = 0.0f,
-							}),
+							// Slide 2
+							{
+								2,
+								createRigidBody({
+									.position = {8.0_m, 0.5_m},
+									.rotation = radians(-20.0_deg),
+									.scale = {5.0f, 0.5f},
+									.mass = max<float32>(),
+									.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
+									.friction = 0.2f,
+									.restitution = 0.0f,
+								}),
+							},
+
+							// Ball
+							{
+								3,
+								createRigidBody({
+									.position = {-13.0_m, 10.0_m},
+									.rotation = 0.0_rad,
+									.scale = {1.0f, 1.0f},
+									.mass = 25.0_kg,
+									.momentOfInertia = MomentOfInertia2D::THIN_SOLID_DISK,
+									.friction = 0.2f,
+									.restitution = 0.0f,
+								}),
+							},
 						},
 					},
 				};

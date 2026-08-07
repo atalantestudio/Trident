@@ -15,6 +15,7 @@
 #include "Engine/Renderer/Forward/ForwardDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Forward/Framebuffers.hpp"
 #include "Engine/Renderer/Forward/GeometryDescriptorSets.hpp"
+#include "Engine/Renderer/Forward/IndexBuffer.hpp"
 #include "Engine/Renderer/Forward/InstanceBuffer.hpp"
 #include "Engine/Renderer/Forward/LightmapAtlasImage.hpp"
 #include "Engine/Renderer/Forward/LightmapAtlasSampler.hpp"
@@ -38,9 +39,10 @@ namespace Trident {
 				const MaterialShader& materialShader = sceneAsset->materialShaders[materialShaderIndex];
 
 				commandEncoder->bindGraphicsPipeline(materialPipelines[materialShaderIndex]);
-				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(GeometryIndex3D));
-				commandEncoder->bindVertexBuffer(1, lightmapCoordinateBuffer, 0, sizeof(svec2<float32>));
+				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex3D));
+				commandEncoder->bindVertexBuffer(1, lightmapCoordinateBuffer, 0, sizeof(uint32));
 				commandEncoder->bindVertexBuffer(2, instanceBuffer, 0, sizeof(Instance3D));
+				commandEncoder->bindIndexBuffer<uint32>(indexBuffer, 0);
 				commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialShaderIndex], 0, staticGeometryDescriptorSet);
 
 				uint32 materialIndex = 0;
@@ -54,9 +56,9 @@ namespace Trident {
 
 					while (materialGeometryIndex < material.geometryRange.count) {
 						const MaterialGeometry materialGeometry = sceneAsset->materialGeometries[material.geometryRange.offset + materialGeometryIndex];
-						const range<uint32, uint32> vertexRange = sceneAsset->geometryVertexRanges[materialGeometry.geometryIndex];
+						const range<uint32, uint32> indexRange = sceneAsset->geometryIndexRanges[materialGeometry.geometryIndex];
 
-						commandEncoder->draw(vertexRange.count, materialGeometry.instanceRange.count, vertexRange.offset, materialGeometry.instanceRange.offset);
+						commandEncoder->drawIndexed(indexRange.count, materialGeometry.instanceRange.count, indexRange.offset, 0, materialGeometry.instanceRange.offset);
 
 						materialGeometryIndex += 1;
 					}
@@ -71,8 +73,9 @@ namespace Trident {
 				const MaterialShader& materialShader = sceneAsset->materialShaders[materialShaderIndex];
 
 				commandEncoder->bindGraphicsPipeline(materialPipelines[materialShaderIndex]);
-				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(GeometryIndex3D));
+				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex3D));
 				commandEncoder->bindVertexBuffer(1, instanceBuffer, 0, sizeof(Instance3D));
+				commandEncoder->bindIndexBuffer<uint32>(indexBuffer, 0);
 				commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialShaderIndex], 0, forwardDescriptorSet);
 
 				uint32 materialIndex = 0;
@@ -86,9 +89,9 @@ namespace Trident {
 
 					while (materialGeometryIndex < material.geometryRange.count) {
 						const MaterialGeometry materialGeometry = sceneAsset->materialGeometries[material.geometryRange.offset + materialGeometryIndex];
-						const range<uint32, uint32> vertexRange = sceneAsset->geometryVertexRanges[materialGeometry.geometryIndex];
+						const range<uint32, uint32> indexRange = sceneAsset->geometryIndexRanges[materialGeometry.geometryIndex];
 
-						commandEncoder->draw(vertexRange.count, materialGeometry.instanceRange.count, vertexRange.offset, materialGeometry.instanceRange.offset);
+						commandEncoder->drawIndexed(indexRange.count, materialGeometry.instanceRange.count, indexRange.offset, 0, materialGeometry.instanceRange.offset);
 
 						materialGeometryIndex += 1;
 					}
@@ -101,7 +104,8 @@ namespace Trident {
 		}
 
 		if (visualizationMode & VisualizationMode::HULL_WIREFRAMES && debugHullWireframeBuffer != nullptr) {
-			commandEncoder->bindGraphicsPipeline(debugHullWireframePipeline);
+			// TODO(forward): Restore debug modes.
+			/* commandEncoder->bindGraphicsPipeline(debugHullWireframePipeline);
 			commandEncoder->bindDescriptorSets(debugHullWireframePipelineLayout, 0, forwardDescriptorSet);
 			commandEncoder->bindVertexBuffer(0, instanceBuffer, 0, sizeof(Instance3D));
 			commandEncoder->bindIndexBuffer<uint16>(debugHullWireframeBuffer, 0);
@@ -142,14 +146,15 @@ namespace Trident {
 				}
 
 				materialShaderIndex += 1;
-			}
+			} */
 		}
 
 		if (visualizationMode & VisualizationMode::CONTACT_MANIFOLDS) {
-			commandEncoder->bindGraphicsPipeline(debugContactManifoldPipeline);
+			// TODO(forward): Restore debug modes.
+			/* commandEncoder->bindGraphicsPipeline(debugContactManifoldPipeline);
 			commandEncoder->bindDescriptorSets(debugContactManifoldPipelineLayout, 0, forwardDescriptorSet);
 			commandEncoder->bindVertexBuffer(0, debugContactManifoldBuffer, 0, sizeof(svec3<float32>));
-			commandEncoder->draw(contactCount, 1, 0, 0);
+			commandEncoder->draw(contactCount, 1, 0, 0); */
 		}
 	}
 

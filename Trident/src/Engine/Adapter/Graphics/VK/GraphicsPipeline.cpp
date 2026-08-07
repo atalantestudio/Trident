@@ -14,7 +14,7 @@
 #include "Engine/Adapter/Graphics/VK/PrimitiveTopology.hpp"
 #include "Engine/Adapter/Graphics/VK/RenderPass.hpp"
 #include "Engine/Adapter/Graphics/VK/ShaderModule.hpp"
-#include "Engine/Adapter/Graphics/VK/VertexInputAttributeType.hpp"
+#include "Engine/Adapter/Graphics/VK/VertexInputAttributeFormat.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
@@ -59,7 +59,7 @@ namespace Trident {
 				VkVertexInputAttributeDescription vertexInputAttributeDescription{};
 				vertexInputAttributeDescription.location = location;
 				vertexInputAttributeDescription.binding = vertexInputBindingIndex;
-				vertexInputAttributeDescription.format = getFormat(attribute.type);
+				vertexInputAttributeDescription.format = getFormat(attribute.format);
 				vertexInputAttributeDescription.offset = attribute.offset;
 
 				vertexInputAttributeDescriptions.emplace_back(vertexInputAttributeDescription);

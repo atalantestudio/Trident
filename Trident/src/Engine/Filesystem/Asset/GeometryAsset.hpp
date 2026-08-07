@@ -7,6 +7,7 @@
 #include "Engine/API/Geometry/Hull2DType.hpp"
 #include "Engine/API/Geometry/Hull3DType.hpp"
 #include "Engine/API/Geometry/Plane3D.hpp"
+#include "Engine/API/Geometry/Vertex.hpp"
 #include "Engine/Filesystem/Asset/Asset.hpp"
 #include "Engine/Filesystem/Asset/GeometryAssetFlags.hpp"
 
@@ -33,16 +34,8 @@ namespace Trident {
 
 	struct Geometry3DAsset : public Asset {
 		GeometryAssetFlags flags;
-
-		// TODO(asset/geometry/3d): Replace with a Vertex3D sequence and an index sequence.
-		sequence<svec3<float32>> positions;
-		sequence<svec3<float32>> normals;
-		sequence<svec2<float32>> textureCoordinates;
-		sequence<svec3<float32>> tangents;
-		uint32 indexCount;
-		sequence<uint32> positionIndices;
-		sequence<uint32> normalIndices;
-		sequence<uint32> textureCoordinateIndices;
+		sequence<Vertex3D> vertices;
+		sequence<uint32> indices;
 
 		Hull3DType hullType;
 		float32 hullRadius;

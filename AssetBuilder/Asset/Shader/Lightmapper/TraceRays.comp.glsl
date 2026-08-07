@@ -6,18 +6,14 @@
 layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 
 struct Vertex {
-	vec2 lightmapCoordinate;
-	uint positionIndex;
-	uint normalIndex;
-};
-
-struct TriangleVertex {
-	vec2 lightmapCoordinate;
 	vec3 position;
+	vec3 normal;
+	vec3 tangent;
+	vec2 lightmapCoordinate;
 };
 
 struct Triangle {
-	TriangleVertex vertices[3];
+	Vertex vertices[3];
 };
 
 struct Ray {
@@ -55,8 +51,8 @@ layout(set = 0, binding = 1) buffer readonly VertexBuffer {
 	Vertex vertexBuffer[];
 };
 
-layout(set = 0, binding = 2) buffer readonly PositionBuffer {
-	float positionBuffer[];
+layout(set = 0, binding = 2) buffer readonly IndexBuffer {
+	uint indexBuffer[];
 };
 
 layout(set = 0, binding = 3, rgba32f) uniform readonly image2D gBufferPositionImage;
@@ -68,23 +64,15 @@ layout(set = 0, binding = 5, rgba32f) uniform readonly image2D gBufferVertexNorm
 layout(set = 0, binding = 6, rgba8) uniform writeonly image2D intermediateLightmapAtlas;
 
 Triangle loadTriangle(uint triangleIndex) {
-	uint vertexOffset = triangleIndex * 3;
-
-	Vertex vertexA = vertexBuffer[vertexOffset + 0];
-	Vertex vertexB = vertexBuffer[vertexOffset + 1];
-	Vertex vertexC = vertexBuffer[vertexOffset + 2];
-
-	uint positionOffsetA = vertexA.positionIndex * 3;
-	uint positionOffsetB = vertexB.positionIndex * 3;
-	uint positionOffsetC = vertexC.positionIndex * 3;
+	uint indexOffset = triangleIndex * 3;
+	uint indexA = indexBuffer[indexOffset + 0];
+	uint indexB = indexBuffer[indexOffset + 1];
+	uint indexC = indexBuffer[indexOffset + 2];
 
 	Triangle triangle_;
-	triangle_.vertices[0].lightmapCoordinate = vertexA.lightmapCoordinate;
-	triangle_.vertices[0].position = vec3(positionBuffer[positionOffsetA + 0], positionBuffer[positionOffsetA + 1], positionBuffer[positionOffsetA + 2]);
-	triangle_.vertices[1].lightmapCoordinate = vertexB.lightmapCoordinate;
-	triangle_.vertices[1].position = vec3(positionBuffer[positionOffsetB + 0], positionBuffer[positionOffsetB + 1], positionBuffer[positionOffsetB + 2]);
-	triangle_.vertices[2].lightmapCoordinate = vertexC.lightmapCoordinate;
-	triangle_.vertices[2].position = vec3(positionBuffer[positionOffsetC + 0], positionBuffer[positionOffsetC + 1], positionBuffer[positionOffsetC + 2]);
+	triangle_.vertices[0] = vertexBuffer[indexA];
+	triangle_.vertices[1] = vertexBuffer[indexB];
+	triangle_.vertices[2] = vertexBuffer[indexC];
 
 	return triangle_;
 }

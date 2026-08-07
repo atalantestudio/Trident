@@ -178,11 +178,6 @@ namespace Trident {
 				const sequence<ref<BaseBufferView>> descriptorBufferViews = {
 					// Camera
 					cameraBuffer->createView<Camera>(0, cameraBuffer->getSize()),
-
-					// Static geometry
-					staticGeometryBuffer->createView<float32>(0, sceneAsset->geometryRanges[2].count),
-					staticGeometryBuffer->createView<float32>(staticVertexAlignedRangeSize, sceneAsset->geometryRanges[3].count),
-					staticGeometryBuffer->createView<float32>(staticVertexAlignedRangeSize + staticNormalAlignedRangeSize, sceneAsset->geometryRanges[4].count),
 				};
 
 				sequence<WriteDescriptorSet> writeDescriptorSets(5);

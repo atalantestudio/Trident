@@ -22,8 +22,8 @@ const vec3 AMBIENT_LIGHT = vec3(0.03, 0.03, 0.03);
 const float DENOMINATOR_TOLERANCE = 0.0001;
 const uint LIGHT_COUNT = 2u;
 const Light LIGHTS[LIGHT_COUNT] = Light[](
-	Light(vec3(-10.0, 10.0, -10.0), vec3(300.0, 300.0, 300.0)),
-	Light(vec3(5.0, 5.0, 10.0), vec3(300.0, 300.0, 300.0))
+	Light(vec3(-256.0, 256.0, -256.0), vec3(300000.0, 300000.0, 300000.0)),
+	Light(vec3(128.0, 128.0, 256.0), vec3(300000.0, 300000.0, 300000.0))
 );
 
 layout(set = 0, binding = 0) uniform readonly Camera {

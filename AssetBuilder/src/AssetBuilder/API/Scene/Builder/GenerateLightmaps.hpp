@@ -66,7 +66,7 @@ namespace Trident {
 		return insertLightmapNode(lightmap, node->children[0]);
 	}
 
-	void SceneBuilder::createLightmaps(BuildScene3D& scene) {
+	void SceneBuilder::createLightmaps(BuildStaticSceneGeometry3D& staticGeometry) {
 		uint32 lightmapCoordinateOffset = 0;
 		uint32 lightmapIndex = 0;
 
@@ -75,15 +75,14 @@ namespace Trident {
 			lightmap.coordinateOffset = lightmapCoordinateOffset;
 
 			const IntermediateGeometry& geometry = geometries[lightmap.geometryIndex];
-			const view<GeometryIndex3D> vertices(&geometry.vertices[lightmap.vertexRange.offset], lightmap.vertexRange.count);
+			const view<BuildVertex3D> vertices(&geometry.vertices[lightmap.vertexRange.offset], lightmap.vertexRange.count);
 
 			uint32 coordinateIndex = 0;
 
 			while (coordinateIndex < lightmap.vertexRange.count) {
-				const uint32 textureCoordinateIndex = vertices[coordinateIndex].textureCoordinateIndex;
-				const svec2<float32> textureCoordinate = geometry.textureCoordinates[textureCoordinateIndex];
+				const svec2<float32> textureCoordinate = vertices[coordinateIndex].textureCoordinate;
 
-				scene.staticGeometry.lightmapCoordinates[lightmap.coordinateOffset + coordinateIndex] = (textureCoordinate - lightmap.minCoordinate) * lightmap.scale / lightmap.luxelScale;
+				staticGeometry.lightmapCoordinates[lightmap.coordinateOffset + coordinateIndex] = (textureCoordinate - lightmap.minCoordinate) * lightmap.scale / lightmap.luxelScale;
 
 				coordinateIndex += 1;
 			}

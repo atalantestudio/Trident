@@ -8,7 +8,7 @@
 namespace Trident {
 	ref<Buffer> ForwardRenderer::createLightmapCoordinateBuffer() const {
 		return createDynamicBuffer({
-			.size = max(sizeof(svec2<float32>), scene->getAsset()->geometryRanges[4].count),
+			.size = scene->getAsset()->geometryRanges[2].count,
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,

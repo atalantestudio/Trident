@@ -62,7 +62,7 @@ namespace Trident {
 				bindIndexBuffer(indexBuffer, offset, sizeof(IndexType));
 			}
 
-			// NOTE: `stride` is only used by the OpenGL adapter (see glBindVertexBuffer).
+			// TODO(graphics/command-encoder): The `stride` parameter is used by the OpenGL and DX12 adapters, but it could be retrieved from the vertex input binding or the buffer view.
 			void bindVertexBuffer(uint32 bindingIndex, ref<Buffer> vertexBuffer, uint64 offset, uint32 stride);
 
 			void copyBufferToBuffer(ref<Buffer> sourceBuffer, ref<Buffer> destinationBuffer, view<BufferCopyRegion> copyRegions);

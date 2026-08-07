@@ -3,10 +3,13 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-layout(location = 0) in uvec3 vertex;
-layout(location = 1) in vec2 lightmapCoordinate;
-layout(location = 2) in mat4x4 worldTransform;
-layout(location = 6) in mat3x3 normalTransform;
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec3 normal;
+layout(location = 2) in vec3 tangent;
+layout(location = 3) in vec2 textureCoordinate;
+layout(location = 4) in vec2 lightmapCoordinate;
+layout(location = 5) in mat4x4 worldTransform;
+layout(location = 9) in mat3x3 normalTransform;
 
 out Interstage {
 	layout(location = 0) vec3 normal;
@@ -18,30 +21,10 @@ layout(set = 0, binding = 0) uniform readonly Camera {
 	mat4x4 projectionView;
 } camera;
 
-layout(set = 0, binding = 1) buffer readonly PositionBuffer {
-	float positionBuffer[];
-};
-
-layout(set = 0, binding = 2) buffer readonly NormalBuffer {
-	float normalBuffer[];
-};
-
-layout(set = 0, binding = 3) buffer readonly TextureCoordinateBuffer {
-	float textureCoordinateBuffer[];
-};
-
 void main() {
-	uint positionOffset = vertex[0] * 3u;
-	uint normalOffset = vertex[1] * 3u;
-	uint textureCoordinateOffset = vertex[2] * 2u;
-
-	vec3 position = vec3(positionBuffer[positionOffset + 0u], positionBuffer[positionOffset + 1u], positionBuffer[positionOffset + 2u]);
-	vec3 normal = vec3(normalBuffer[normalOffset + 0u], normalBuffer[normalOffset + 1u], normalBuffer[normalOffset + 2u]);
-	vec2 textureCoordinate = vec2(textureCoordinateBuffer[textureCoordinateOffset + 0u], textureCoordinateBuffer[textureCoordinateOffset + 1u]);
-
 	gl_Position = camera.projectionView * worldTransform * vec4(position, 1.0);
 
-	interstage.normal = normal;
-	interstage.textureCoordinate = textureCoordinate;
-	interstage.lightmapCoordinate = lightmapCoordinate;
+	interstage.normal = normal * 2.0 - 1.0;
+	interstage.textureCoordinate = textureCoordinate * 2.0 - 1.0;
+	interstage.lightmapCoordinate = lightmapCoordinate * 2.0 - 1.0;
 }

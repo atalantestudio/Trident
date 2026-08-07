@@ -32,12 +32,12 @@ namespace Trident {
 	};
 
 	struct GlyphPair {
-		uint16 firstGlyph;
-		uint16 secondGlyph;
-
 		bool operator==(GlyphPair other) const {
 			return *pointer_cast<const uint32*>(this) == *pointer_cast<const uint32*>(&other);
 		}
+
+		uint16 firstGlyph;
+		uint16 secondGlyph;
 	};
 }
 

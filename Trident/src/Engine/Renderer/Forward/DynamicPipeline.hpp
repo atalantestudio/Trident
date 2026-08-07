@@ -8,7 +8,10 @@
 namespace Trident {
 	GraphicsPipelineDescriptor ForwardRenderer::getDynamicPipelineDescriptor() const {
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX, false);
-		vertexInputBinding.registerAttribute<svec3<uint32>>();
+		vertexInputBinding.registerAttribute<svec3<float32>>(VertexInputAttributeFormat::R32G32B32_FLOAT);
+		vertexInputBinding.registerAttribute<uint32>(VertexInputAttributeFormat::R10G10B10A2_UNORM);
+		vertexInputBinding.registerAttribute<uint32>(VertexInputAttributeFormat::R10G10B10A2_UNORM);
+		vertexInputBinding.registerAttribute<uint32>(VertexInputAttributeFormat::R16G16_UNORM);
 
 		VertexInputBinding instanceInputBinding(InputRate::INSTANCE, false);
 		instanceInputBinding.registerAttribute<mat4x4<float32>>();

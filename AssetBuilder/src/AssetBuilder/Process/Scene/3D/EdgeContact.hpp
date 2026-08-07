@@ -21,7 +21,7 @@ namespace Trident {
 					.sunIntensity = 1.0f,
 				});
 
-				const uint32 unitBoxGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("SingleTextureUnitBox"));
+				const uint32 unitBoxGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("3d_unit_box_st"));
 
 				const MaterialReference debugMaterial = builder.loadDynamicMaterial(assetLibrary->getAsset<MaterialAsset>("debug"));
 

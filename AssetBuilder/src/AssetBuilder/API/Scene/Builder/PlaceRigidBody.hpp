@@ -3,8 +3,8 @@
 
 #pragma once
 
+#include "AssetBuilder/API/Utilities/Utilities.hpp"
 #include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
-#include "../../../../Subprocess/RigidBody.hpp"
 
 namespace Trident {
 	void SceneBuilder::placeRigidBody(const EntityDescriptor& descriptor) {
@@ -24,9 +24,7 @@ namespace Trident {
 			material.geometries.emplace_back(materialGeometry);
 
 			dynamicVertexCount += geometry.vertices.count();
-			dynamicPositionCount += geometry.positions.count();
-			dynamicNormalCount += geometry.normals.count();
-			dynamicTextureCoordinateCount += geometry.textureCoordinates.count();
+			dynamicIndexCount += geometry.indices.count();
 			materialGeometryCount += 1;
 		}
 

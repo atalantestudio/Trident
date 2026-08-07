@@ -43,14 +43,13 @@ cbuffer Camera : register(b0) {
 	Camera camera;
 }
 
-Texture2D<float4> aoTexture : register(t4);
-Texture2D<float4> roughnessTexture : register(t5);
-Texture2D<float4> diffuseTexture : register(t6);
-Texture2D<float4> normalTexture : register(t7);
-
+Texture2D<float4> aoTexture : register(t0);
 SamplerState aoSamplerState : register(s0);
+Texture2D<float4> roughnessTexture : register(t1);
 SamplerState roughnessSamplerState : register(s1);
+Texture2D<float4> diffuseTexture : register(t2);
 SamplerState diffuseSamplerState : register(s2);
+Texture2D<float4> normalTexture : register(t3);
 SamplerState normalSamplerState : register(s3);
 
 float TrowbridgeReitzGGX(float3 normal, float3 halfway, float roughness) {
@@ -88,10 +87,6 @@ float Smith(float3 normal, float3 viewDirection, float3 lightDirection, float ro
 
 float3 FresnelSchlick(float angle, float3 baseReflectivity) {
 	return baseReflectivity + (1.0 - baseReflectivity) * pow(clamp(1.0 - angle, 0.0, 1.0), 5.0);
-}
-
-float3 gammaCorrect(float3 color) {
-	return pow(color, 1.0 / 2.2);
 }
 
 FragmentOutput main(Interstage interstage) {
@@ -140,13 +135,10 @@ FragmentOutput main(Interstage interstage) {
 		lightIndex += 1;
 	}
 
-	float3 color = AMBIENT_LIGHT * diffuse * ao + L;
-
-	color = color / (color + 1.0);
-	color = gammaCorrect(color);
-
 	FragmentOutput output;
-	output.color = float4(color, 1.0);
+	output.color.rgb = AMBIENT_LIGHT * diffuse * ao + L;
+	output.color.rgb = pow(output.color.rgb, 1.0 / 2.2);
+	output.color.a = 1.0;
 
 	return output;
 }

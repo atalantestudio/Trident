@@ -332,7 +332,7 @@ namespace Trident {
 		for (const WriteDescriptorSet& writeDescriptorSet : writeDescriptorSets) {
 			const ref<VK::DescriptorSet> descriptorSet = std::static_pointer_cast<VK::DescriptorSet>(writeDescriptorSet.descriptorSet);
 
-			ADAPTER_ASSERT(writeDescriptorSet.bindingIndex < descriptorSet->bindings.count(), "This descriptor set doesn't have binding index [].", writeDescriptorSet.bindingIndex);
+			ADAPTER_ASSERT(writeDescriptorSet.bindingIndex < descriptorSet->bindings.count(), "The write descriptor set uses invalid binding index [].", writeDescriptorSet.bindingIndex);
 
 			const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
 

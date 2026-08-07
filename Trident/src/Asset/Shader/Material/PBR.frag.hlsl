@@ -35,8 +35,8 @@ static const float3 AMBIENT_LIGHT = float3(0.03, 0.03, 0.03);
 static const float DENOMINATOR_TOLERANCE = 0.0001;
 static const uint LIGHT_COUNT = 2;
 static const Light LIGHTS[LIGHT_COUNT] = {
-	createLight(float3(-10.0, 10.0, -10.0), float3(300.0, 300.0, 300.0)),
-	createLight(float3(5.0, 5.0, 10.0), float3(300.0, 300.0, 300.0)),
+	createLight(float3(-256.0, 256.0, -256.0), float3(300000.0, 300000.0, 300000.0)),
+	createLight(float3(128.0, 128.0, 256.0), float3(300000.0, 300000.0, 300000.0)),
 };
 
 cbuffer Camera : register(b0) {

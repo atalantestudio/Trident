@@ -40,25 +40,18 @@ namespace Trident {
 		}
 	}
 
-	StaticGeometry3D SceneBuilder::createWallGeometry(svec2<float32> scale) {
+	BuildStaticGeometry3D SceneBuilder::createWallGeometry(svec2<float32> scale) {
+		const float32 x = scale.x;
+		const float32 y = scale.y;
+
 		return {
-			.vertexComponents = {
-				-0.5f * scale.x,  0.5f * scale.y,  0.0f,
-				 0.5f * scale.x,  0.5f * scale.y,  0.0f,
-				-0.5f * scale.x, -0.5f * scale.y,  0.0f,
-				 0.5f * scale.x, -0.5f * scale.y,  0.0f,
+			.vertices = {
+				{{-0.5f * x,  0.5f * y,  0.0f}, { 0.0f,  0.0f, -1.0f}, { 1.0f,  0.0f,  0.0f}, {0.0f, 0.0f}},
+				{{ 0.5f * x,  0.5f * y,  0.0f}, { 0.0f,  0.0f, -1.0f}, { 1.0f,  0.0f,  0.0f}, {1.0f, 0.0f}},
+				{{-0.5f * x, -0.5f * y,  0.0f}, { 0.0f,  0.0f, -1.0f}, { 1.0f,  0.0f,  0.0f}, {0.0f, 1.0f}},
+				{{ 0.5f * x, -0.5f * y,  0.0f}, { 0.0f,  0.0f, -1.0f}, { 1.0f,  0.0f,  0.0f}, {1.0f, 1.0f}},
 			},
-			.vertexTextureCoordinateComponents = {
-				0.0f, 0.0f,
-				1.0f, 0.0f,
-				0.0f, 1.0f,
-				1.0f, 1.0f,
-			},
-			.vertexIndices = {
-				0, 1, 2,
-				1, 3, 2,
-			},
-			.vertexTextureCoordinateIndices = {
+			.indices = {
 				0, 1, 2,
 				1, 3, 2,
 			},
@@ -72,8 +65,8 @@ namespace Trident {
 		lightmapper.~Lightmapper();
 	}
 
-	SceneBuilder::SceneBuilder(const LightmapperArguments& lightmapperArguments) :
-		lightmapperArguments(lightmapperArguments)
+	SceneBuilder::SceneBuilder(const SceneLightingDescriptor& lighting) :
+		lighting(lighting)
 	{}
 
 	uint32 SceneBuilder::loadGeometry(ref<Geometry3DAsset> asset) {
@@ -93,27 +86,28 @@ namespace Trident {
 			IntermediateGeometry geometry{};
 			geometry.assetIdentifier = asset->identifier;
 			geometry.sharedInstanceCount = 0;
-			geometry.vertices = sequence<GeometryIndex3D>(asset->indexCount);
-			geometry.positions = sequence<svec3<float32>>(asset->positions.count());
-			geometry.normals = sequence<svec3<float32>>(asset->normals.count());
-			geometry.textureCoordinates = sequence<svec2<float32>>(asset->textureCoordinates.count());
+			geometry.vertices = sequence<BuildVertex3D>(asset->vertices.count());
+			geometry.indices = sequence<uint32>(asset->indices.count());
+
+			const uint32 vertexCount = static_cast<uint32>(asset->vertices.count());
 
 			uint32 vertexIndex = 0;
 
-			while (vertexIndex < geometry.vertices.count()) {
-				GeometryIndex3D& vertex = geometry.vertices[vertexIndex];
-				vertex.positionIndex = asset->positionIndices[vertexIndex];
-				vertex.normalIndex = asset->normalIndices[vertexIndex];
-				vertex.textureCoordinateIndex = asset->textureCoordinateIndices[vertexIndex];
+			while (vertexIndex < vertexCount) {
+				const Vertex3D& packedVertex = asset->vertices[vertexIndex];
+
+				BuildVertex3D& vertex = geometry.vertices[vertexIndex];
+				vertex.position = packedVertex.position;
+
+				// TODO(lyah/scalar)
+				vertex.normal = unpack<VertexInputAttributeFormat::R10G10B10A2_UNORM, svec3<float32>>(packedVertex.normal) * 2.0f - svec3<float32>{1.0f, 1.0f, 1.0f};
+				vertex.tangent = unpack<VertexInputAttributeFormat::R10G10B10A2_UNORM, svec3<float32>>(packedVertex.tangent) * 2.0f - svec3<float32>{1.0f, 1.0f, 1.0f};
+				vertex.textureCoordinate = unpack<VertexInputAttributeFormat::R16G16_UNORM, svec2<float32>>(packedVertex.textureCoordinate);
 
 				vertexIndex += 1;
 			}
 
-			std::copy_n(&asset->positions[0], geometry.positions.count(), &geometry.positions[0]);
-			std::copy_n(&asset->normals[0], geometry.normals.count(), &geometry.normals[0]);
-			std::copy_n(&asset->textureCoordinates[0], geometry.textureCoordinates.count(), &geometry.textureCoordinates[0]);
-
-			geometry.transformedTextureCoordinates = geometry.textureCoordinates;
+			std::copy(asset->indices.begin(), asset->indices.end(), &geometry.indices[0]);
 
 			geometries.emplace_back(geometry);
 		}

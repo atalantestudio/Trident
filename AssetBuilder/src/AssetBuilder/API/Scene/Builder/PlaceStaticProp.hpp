@@ -20,9 +20,7 @@ namespace Trident {
 			material.geometries.emplace_back(materialGeometry);
 
 			staticVertexCount += geometry.vertices.count();
-			staticPositionCount += geometry.positions.count();
-			staticNormalCount += geometry.normals.count();
-			staticTextureCoordinateCount += geometry.textureCoordinates.count();
+			staticIndexCount += geometry.indices.count();
 			materialGeometryCount += 1;
 		}
 
@@ -30,34 +28,20 @@ namespace Trident {
 		geometry.sharedInstanceCount += 1;
 
 		IntermediateMaterialGeometry& materialGeometry = material.geometries[materialGeometryIndex];
-
-		const quat<float32> orientation = normalized(
-			quat<float32>::axisAngle(UP, descriptor.transform.rotation[1]) *
-			quat<float32>::axisAngle(RIGHT, descriptor.transform.rotation[0]) *
-			quat<float32>::axisAngle(FORWARD, descriptor.transform.rotation[2])
-		);
-		const quat<float32> inverseOrientation = inverse(orientation);
-		const mat4x4<float32> world = (
-			mat4x4<float32>::scaling({descriptor.transform.scale, descriptor.transform.scale, descriptor.transform.scale}) *
-			mat4x4<float32>(orientation) *
-			mat4x4<float32>::translation(descriptor.transform.translation)
-		);
-
 		svec2<float32> maxCoordinate = {min<float32>(), min<float32>()};
 		svec2<float32> minCoordinate = {max<float32>(), max<float32>()};
+		uint32 vertexIndex = 0;
 
-		uint32 textureCoordinateIndex = 0;
-
-		while (textureCoordinateIndex < geometry.textureCoordinates.count()) {
+		while (vertexIndex < geometry.vertices.count()) {
 			// TODO(lyah/scalar)
-			const svec2<float32> textureCoordinate = geometry.textureCoordinates[textureCoordinateIndex];
+			const svec2<float32> textureCoordinate = geometry.vertices[vertexIndex].textureCoordinate;
 
 			maxCoordinate.x = max(maxCoordinate.x, textureCoordinate.x);
 			maxCoordinate.y = max(maxCoordinate.y, textureCoordinate.y);
 			minCoordinate.x = min(minCoordinate.x, textureCoordinate.x);
 			minCoordinate.y = min(minCoordinate.y, textureCoordinate.y);
 
-			textureCoordinateIndex += 1;
+			vertexIndex += 1;
 		}
 
 		const BuildTransform3D instance = {
@@ -81,8 +65,6 @@ namespace Trident {
 		lightmaps.emplace_back(lightmap);
 
 		staticInstanceCount += 1;
-
-		// TODO(asset-builder/scene/lightmap): Create less coordinates (1 per texture coordinate per instance).
 		lightmapCoordinateCount += geometry.vertices.count();
 	}
 }

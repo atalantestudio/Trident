@@ -7,33 +7,12 @@
 
 namespace Trident {
 	ref<DescriptorSetLayout> ForwardRenderer::createStaticGeometryDescriptorSetLayout() const {
-		const sequence<DescriptorSetLayoutBinding> bindings = {
+		const DescriptorSetLayoutBinding bindings[2] = {
 			// Camera
 			{
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
 				.descriptorCount = 1,
 				.shaderStages = ShaderStage::VERTEX | ShaderStage::FRAGMENT,
-			},
-
-			// Vertex
-			{
-				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
-				.descriptorCount = 1,
-				.shaderStages = ShaderStage::VERTEX,
-			},
-
-			// Normal
-			{
-				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
-				.descriptorCount = 1,
-				.shaderStages = ShaderStage::VERTEX,
-			},
-
-			// Texture coordinate
-			{
-				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
-				.descriptorCount = 1,
-				.shaderStages = ShaderStage::VERTEX,
 			},
 
 			// Lightmap atlas
@@ -44,6 +23,6 @@ namespace Trident {
 			},
 		};
 
-		return createDescriptorSetLayout(bindings);
+		return createDescriptorSetLayout(view<DescriptorSetLayoutBinding>(bindings, 2));
 	}
 }

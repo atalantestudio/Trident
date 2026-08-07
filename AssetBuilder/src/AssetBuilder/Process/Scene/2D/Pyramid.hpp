@@ -3,8 +3,8 @@
 
 #pragma once
 
+#include "AssetBuilder/API/Utilities/Utilities.hpp"
 #include "AssetBuilder/Process/Scene/Scene2DProcess.hpp"
-#include "../../../../Subprocess/RigidBody.hpp"
 
 namespace Trident {
 	class PyramidScene2D final : public Scene2DProcess {
@@ -13,7 +13,7 @@ namespace Trident {
 				return "2d_pyramid";
 			}
 
-			Scene2DData createScene(AssetBuilderLibrary* assetLibrary) const final override {
+			BuildScene2D createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				static constexpr uint32 entityCount = 79;
 
 				sequence<EntityComponentMapping<GeometryComponent>> geometryMappings(entityCount);
@@ -78,13 +78,15 @@ namespace Trident {
 				}
 
 				return {
-					.staticScene = {},
-					.entityCount = entityCount,
-					.geometryAssetIdentifiers = {
-						assetLibrary->getAsset<Geometry2DAsset>("UnitSquare")->identifier,
+					.staticGeometry = {},
+					.dynamicGeometry = {
+						.entityCount = entityCount,
+						.geometryAssetIdentifiers = {
+							assetLibrary->getAsset<Geometry2DAsset>("2d_unit_square")->identifier,
+						},
+						.geometryMappings = geometryMappings,
+						.rigidBodyMappings = rigidBodyMappings,
 					},
-					.geometryMappings = geometryMappings,
-					.rigidBodyMappings = rigidBodyMappings,
 				};
 			}
 

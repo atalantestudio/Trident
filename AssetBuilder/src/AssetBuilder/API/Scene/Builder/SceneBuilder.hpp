@@ -24,7 +24,7 @@ namespace Trident {
 			static Lightmapper lightmapper;
 
 		public:
-			static StaticGeometry3D createWallGeometry(svec2<float32> scale);
+			static BuildStaticGeometry3D createWallGeometry(svec2<float32> scale);
 
 			static void release();
 
@@ -44,7 +44,7 @@ namespace Trident {
 			static LightmapNode* insertLightmapNode(Lightmap& lightmap, LightmapNode* node);
 
 		public:
-			explicit SceneBuilder(const LightmapperArguments& lightmapperArguments);
+			explicit SceneBuilder(const SceneLightingDescriptor& lighting);
 
 			/// Loads a geometry asset and returns its index.
 			uint32 loadGeometry(ref<Geometry3DAsset> asset);
@@ -75,29 +75,19 @@ namespace Trident {
 			void buildLightmaps(BuildScene3D& scene);
 			void buildEntityComponentMappings(BuildDynamicSceneGeometry3D& dynamicGeometry);
 
-			void createLightmaps(BuildScene3D& scene);
+			void createLightmaps(BuildStaticSceneGeometry3D& staticGeometry);
 			void updateLightmapCoordinates(BuildStaticSceneGeometry3D& staticGeometry);
-			void createLightmapperGeometryBuffers(const BuildScene3D& scene, sequence<GeometryIndex3D>& vertices, sequence<svec3<float32>>& positions, sequence<svec3<float32>>& normals);
+			void createLightmapperGeometryBuffers(const BuildScene3D& scene, sequence<BuildVertex3D>& vertices, sequence<uint32>& indices);
 
 		protected:
 			uint64 bakedVertexCount = 0;
-			uint64 bakedPositionCount = 0;
-			uint64 bakedNormalCount = 0;
-			uint64 bakedTextureCoordinateCount = 0;
-
+			uint64 bakedIndexCount = 0;
 			uint64 staticVertexCount = 0;
-			uint64 staticPositionCount = 0;
-			uint64 staticNormalCount = 0;
-			uint64 staticTextureCoordinateCount = 0;
+			uint64 staticIndexCount = 0;
 			uint64 staticInstanceCount = 0;
-
 			uint64 dynamicVertexCount = 0;
-			uint64 dynamicPositionCount = 0;
-			uint64 dynamicNormalCount = 0;
-			uint64 dynamicTextureCoordinateCount = 0;
-
+			uint64 dynamicIndexCount = 0;
 			uint64 lightmapCoordinateCount = 0;
-
 			uint64 materialGeometryCount = 0;
 			uint64 materialCount = 0;
 			uint32 entityCount = 0;
@@ -111,7 +101,7 @@ namespace Trident {
 			/// Sorted by ascending area.
 			std::vector<LightmapLookup> lightmapLookups;
 
-			LightmapperArguments lightmapperArguments;
+			SceneLightingDescriptor lighting;
 
 			std::vector<EntityComponentMapping<GeometryComponent>> geometryMappings;
 			std::vector<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;

@@ -8,26 +8,151 @@
 #include "../../../Process/BuildImageAssetProcess.hpp"
 
 #include "Engine/API/Process/Process.hpp"
-#include "Engine/ECS/Component/GeometryComponent.hpp"
-#include "Engine/ECS/Component/MaterialComponent.hpp"
-#include "Engine/ECS/Component/RigidBody3DComponent.hpp"
-#include "Engine/ECS/EntityComponentMapping.hpp"
-#include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 
 namespace Trident {
 	class Scene3DProcess : public Process {
 		private:
+			static ByteStream<StreamOperation::WRITE> encodeSceneAsset(const BuildScene3D& scene, uint32 identifier) {
+				const uint64 streamSize = calculateStreamSize(scene);
+
+				ByteStream<StreamOperation::WRITE> stream(streamSize, Endianness::LITTLE_ENDIAN);
+				stream.write<AssetSignature>(AssetSignature::SCENE);
+				stream.write<uint32>(identifier);
+				stream.write<VersionNumber>({0, 0, 0});
+				stream.write<uint8>(sizeof(uint32));
+				stream.write<uint32>(scene.vertexCount);
+				stream.write<uint32>(scene.staticGeometry.vertexCount);
+				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.bakedVertices.count()));
+				stream.write<uint32>(scene.triangleCount);
+				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.bakedIndices.count() / 3));
+				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.instances.count()));
+				stream.write<uint32>(static_cast<uint32>(scene.geometries.count()));
+				stream.write<uint32>(static_cast<uint32>(scene.materialGeometries.count()));
+				stream.write<uint32>(static_cast<uint32>(scene.materials.count()));
+				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.materialShaders.count()));
+				stream.write<uint32>(static_cast<uint32>(scene.dynamicGeometry.materialShaders.count()));
+				stream.write<uint32>(scene.dynamicGeometry.entityCount);
+				stream.write<uint32>(scene.staticGeometry.lightmapAtlasImageAssetDescriptor.identifier);
+				stream.write<float32>(scene.skyColor.x);
+				stream.write<float32>(scene.skyColor.y);
+				stream.write<float32>(scene.skyColor.z);
+
+				for (const BuildVertex3D& vertex : scene.staticGeometry.bakedVertices) {
+					stream.write<float32>(vertex.position.x);
+					stream.write<float32>(vertex.position.y);
+					stream.write<float32>(vertex.position.z);
+					stream.write<uint32>(pack<VertexInputAttributeFormat::R10G10B10A2_UNORM, uint32>(vertex.normal));
+					stream.write<uint32>(pack<VertexInputAttributeFormat::R10G10B10A2_UNORM, uint32>(vertex.tangent));
+					stream.write<uint32>(pack<VertexInputAttributeFormat::R16G16_UNORM, uint32>(vertex.textureCoordinate));
+				}
+
+				for (const uint32 index : scene.staticGeometry.bakedIndices) {
+					stream.write<uint32>(index);
+				}
+
+				for (const svec2<float32> lightmapCoordinate : scene.staticGeometry.lightmapCoordinates) {
+					stream.write<uint32>(pack<VertexInputAttributeFormat::R16G16_UNORM, uint32>(lightmapCoordinate));
+				}
+
+				for (const BuildTransform3D& instance : scene.staticGeometry.instances) {
+					stream.write<float32>(instance.translation.x);
+					stream.write<float32>(instance.translation.y);
+					stream.write<float32>(instance.translation.z);
+					stream.write<float32>(instance.rotation.x);
+					stream.write<float32>(instance.rotation.y);
+					stream.write<float32>(instance.rotation.z);
+					stream.write<float32>(instance.scale);
+				}
+
+				for (const BuildGeometry geometry : scene.geometries) {
+					stream.write<range<uint32, uint32>>(geometry.indexRange);
+					stream.write<uint32>(geometry.assetIdentifier);
+				}
+
+				for (const BuildMaterialGeometry materialGeometry : scene.materialGeometries) {
+					stream.write<range<uint32, uint32>>(materialGeometry.instanceRange);
+					stream.write<uint32>(materialGeometry.geometryIndex);
+				}
+
+				for (const BuildMaterial material : scene.materials) {
+					stream.write<uint32>(material.assetIdentifier);
+					stream.write<uint32>(material.geometryCount);
+				}
+
+				for (const BuildMaterialShader& materialShader : scene.staticGeometry.materialShaders) {
+					encodeMaterialShader(stream, materialShader);
+				}
+
+				for (const BuildMaterialShader& materialShader : scene.dynamicGeometry.materialShaders) {
+					encodeMaterialShader(stream, materialShader);
+				}
+
+				for (const EntityComponentMapping<GeometryComponent> geometryMapping : scene.dynamicGeometry.geometryMappings) {
+					stream.write<Entity>(geometryMapping.entity);
+					stream.write<GeometryComponent>(geometryMapping.component);
+				}
+
+				for (const EntityComponentMapping<RigidBody3DComponent>& rigidBodyMapping : scene.dynamicGeometry.rigidBodyMappings) {
+					const RigidBody3DComponent& component = rigidBodyMapping.component;
+
+					stream.write<Entity>(rigidBodyMapping.entity);
+					stream.write<svec3<float32>>(svec3<float32>(component.position));
+					stream.write<svec3<float32>>(svec3<float32>(component.rotation));
+					stream.write<svec3<float32>>(svec3<float32>(component.linearVelocity));
+					stream.write<svec3<float32>>(svec3<float32>(component.angularVelocity));
+					stream.write<float32>(component.scale);
+					stream.write<float32>(component.inverseMass);
+					stream.write<svec3<float32>>(svec3<float32>(component.inverseInertia[0]));
+					stream.write<svec3<float32>>(svec3<float32>(component.inverseInertia[1]));
+					stream.write<svec3<float32>>(svec3<float32>(component.inverseInertia[2]));
+					stream.write<float32>(component.friction);
+					stream.write<float32>(component.restitution);
+				}
+
+				return stream;
+			}
+
+			static void encodeMaterialShader(ByteStream<StreamOperation::WRITE>& stream, const BuildMaterialShader& materialShader) {
+				stream.write<AssetSignature>(AssetSignature::SHADER_MODULE);
+				stream.write<uint32>(materialShader.asset.identifier);
+				stream.write<VersionNumber>({0, 0, 0});
+				stream.write<uint32>(static_cast<uint32>(materialShader.asset.name.count()));
+				stream.write<ShaderStage>(materialShader.asset.stageFlags);
+				stream.write<uint32>(static_cast<uint32>(materialShader.asset.entryPoint.count()));
+				stream.write<uint32>(static_cast<uint32>(materialShader.asset.bindings.count()));
+				stream.write<uint32>(static_cast<uint32>(materialShader.asset.descriptorSetBindingRanges.count()));
+
+				for (const char8 character : materialShader.asset.name) {
+					stream.write(character);
+				}
+
+				for (const char8 character : materialShader.asset.entryPoint) {
+					stream.write(character);
+				}
+
+				for (const DescriptorSetLayoutBinding& binding : materialShader.asset.bindings) {
+					stream.write<DescriptorType>(binding.descriptorType);
+					stream.write<uint32>(binding.descriptorCount);
+					stream.write<ShaderStage>(binding.shaderStages);
+				}
+
+				for (const range<uint32, uint32> bindingRange : materialShader.asset.descriptorSetBindingRanges) {
+					stream.write<uint32>(bindingRange.count);
+				}
+
+				stream.write<range<uint32, uint32>>(materialShader.materialRange);
+			}
+
 			static uint64 calculateStreamSize(const BuildScene3D& scene) {
 				uint64 size = (
 					sizeof(AssetHeader) +
-					sizeof(uint32) * 17 +
+					sizeof(uint8) +
+					sizeof(uint32) * 13 +
 					sizeof(svec3<float32>) +
-					scene.staticGeometry.bakedVertices.count() * sizeof(GeometryIndex3D) +
-					scene.staticGeometry.bakedPositions.count() * sizeof(svec3<float32>) +
-					scene.staticGeometry.bakedNormals.count() * sizeof(svec3<float32>) +
-					scene.staticGeometry.bakedTextureCoordinates.count() * sizeof(svec2<float32>) +
-					scene.staticGeometry.lightmapCoordinates.count() * sizeof(svec2<float32>) +
+					scene.staticGeometry.bakedVertices.count() * sizeof(Vertex3D) +
+					scene.staticGeometry.bakedIndices.count() * sizeof(uint32) +
+					scene.staticGeometry.lightmapCoordinates.count() * sizeof(uint32) +
 					scene.staticGeometry.instances.count() * sizeof(BuildTransform3D) +
 					scene.geometries.count() * sizeof(BuildGeometry) +
 					scene.materialGeometries.count() * sizeof(BuildMaterialGeometry) +
@@ -60,149 +185,42 @@ namespace Trident {
 				);
 			}
 
-			static void writeMaterialShader(ByteStream<StreamOperation::WRITE>& stream, const BuildMaterialShader& materialShader) {
-				stream.write<AssetSignature>(AssetSignature::SHADER_MODULE);
-				stream.write<uint32>(materialShader.asset.identifier);
-				stream.write<VersionNumber>({0, 0, 0});
-				stream.write<uint32>(static_cast<uint32>(materialShader.asset.name.count()));
-				stream.write<ShaderStage>(materialShader.asset.stageFlags);
-				stream.write<uint32>(static_cast<uint32>(materialShader.asset.entryPoint.count()));
-				stream.write<uint32>(static_cast<uint32>(materialShader.asset.bindings.count()));
-				stream.write<uint32>(static_cast<uint32>(materialShader.asset.descriptorSetBindingRanges.count()));
+		public:
+			sint32 main(view<void*> arguments) final override {
+				const std::filesystem::path rootOutputPath = static_cast<const char8*>(arguments[2]);
+				const std::filesystem::path assetOutputPath = rootOutputPath / "Asset/Scene/";
+				const view<char8> assetName = getAssetName();
 
-				for (const char8 character : materialShader.asset.name) {
-					stream.write(character);
+				std::filesystem::path finalAssetOutputPath = assetOutputPath / std::string(assetName);
+				finalAssetOutputPath.replace_extension("tsa");
+
+				if (std::filesystem::exists(finalAssetOutputPath)) {
+					ENGINE_INFO("Scene asset \"[]\" already exists.", finalAssetOutputPath.filename().string());
+
+					return 0;
 				}
 
-				for (const char8 character : materialShader.asset.entryPoint) {
-					stream.write(character);
-				}
+				const uint32 assetIdentifier = AssetLibrary::createAssetIdentifier();
+				const BuildScene3D scene = createScene(assetLibrary);
+				const ByteStream<StreamOperation::WRITE> stream = encodeSceneAsset(scene, assetIdentifier);
 
-				for (const DescriptorSetLayoutBinding& binding : materialShader.asset.bindings) {
-					stream.write<DescriptorType>(binding.descriptorType);
-					stream.write<uint32>(binding.descriptorCount);
-					stream.write<ShaderStage>(binding.shaderStages);
-				}
+				createSceneAsset(scene, assetIdentifier, stream, assetName, rootOutputPath);
 
-				for (const range<uint32, uint32> bindingRange : materialShader.asset.descriptorSetBindingRanges) {
-					stream.write<uint32>(bindingRange.count);
-				}
+				ENGINE_INFO("Generated scene asset \"[]\" (ID: []).", assetName, assetIdentifier);
 
-				stream.write<range<uint32, uint32>>(materialShader.materialRange);
+				return 0;
 			}
 
-			static ByteStream<StreamOperation::WRITE> encodeScene3DAsset(const BuildScene3D& scene, uint32 identifier) {
-				const uint64 streamSize = calculateStreamSize(scene);
+		protected:
+			explicit Scene3DProcess(AssetBuilderLibrary* assetLibrary) :
+				assetLibrary(assetLibrary)
+			{}
 
-				ByteStream<StreamOperation::WRITE> stream(streamSize, Endianness::LITTLE_ENDIAN);
-				stream.write<AssetSignature>(AssetSignature::SCENE);
-				stream.write<uint32>(identifier);
-				stream.write<VersionNumber>({0, 0, 0});
-				stream.write<uint32>(scene.triangleCount);
-				stream.write<uint32>(scene.positionCount);
-				stream.write<uint32>(scene.normalCount);
-				stream.write<uint32>(scene.textureCoordinateCount);
-				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.bakedVertices.count() / 3));
-				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.bakedPositions.count()));
-				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.bakedNormals.count()));
-				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.bakedTextureCoordinates.count()));
-				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.lightmapCoordinates.count()));
-				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.instances.count()));
-				stream.write<uint32>(static_cast<uint32>(scene.geometries.count()));
-				stream.write<uint32>(static_cast<uint32>(scene.materialGeometries.count()));
-				stream.write<uint32>(static_cast<uint32>(scene.materials.count()));
-				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.materialShaders.count()));
-				stream.write<uint32>(static_cast<uint32>(scene.dynamicGeometry.materialShaders.count()));
-				stream.write<uint32>(scene.dynamicGeometry.entityCount);
-				stream.write<uint32>(scene.staticGeometry.lightmapAtlasImageAssetDescriptor.identifier);
-				stream.write<float32>(scene.skyColor.x);
-				stream.write<float32>(scene.skyColor.y);
-				stream.write<float32>(scene.skyColor.z);
+			virtual view<char8> getAssetName() const = 0;
 
-				for (const GeometryIndex3D vertex : scene.staticGeometry.bakedVertices) {
-					stream.write<uint32>(vertex.positionIndex);
-					stream.write<uint32>(vertex.normalIndex);
-					stream.write<uint32>(vertex.textureCoordinateIndex);
-				}
+			virtual BuildScene3D createScene(AssetBuilderLibrary* assetLibrary) const = 0;
 
-				for (const svec3<float32> position : scene.staticGeometry.bakedPositions) {
-					stream.write<float32>(position.x);
-					stream.write<float32>(position.y);
-					stream.write<float32>(position.z);
-				}
-
-				for (const svec3<float32> normal : scene.staticGeometry.bakedNormals) {
-					stream.write<float32>(normal.x);
-					stream.write<float32>(normal.y);
-					stream.write<float32>(normal.z);
-				}
-
-				for (const svec2<float32> textureCoordinate : scene.staticGeometry.bakedTextureCoordinates) {
-					stream.write<svec2<float32>>(textureCoordinate);
-				}
-
-				for (const svec2<float32> lightmapCoordinate : scene.staticGeometry.lightmapCoordinates) {
-					stream.write<svec2<float32>>(lightmapCoordinate);
-				}
-
-				for (const BuildTransform3D& instance : scene.staticGeometry.instances) {
-					stream.write<float32>(instance.translation.x);
-					stream.write<float32>(instance.translation.y);
-					stream.write<float32>(instance.translation.z);
-					stream.write<float32>(instance.rotation.x);
-					stream.write<float32>(instance.rotation.y);
-					stream.write<float32>(instance.rotation.z);
-					stream.write<float32>(instance.scale);
-				}
-
-				for (const BuildGeometry geometry : scene.geometries) {
-					stream.write<range<uint32, uint32>>(geometry.vertexRange);
-					stream.write<uint32>(geometry.assetIdentifier);
-				}
-
-				for (const BuildMaterialGeometry materialGeometry : scene.materialGeometries) {
-					stream.write<range<uint32, uint32>>(materialGeometry.instanceRange);
-					stream.write<uint32>(materialGeometry.geometryIndex);
-				}
-
-				for (const BuildMaterial material : scene.materials) {
-					stream.write<uint32>(material.assetIdentifier);
-					stream.write<uint32>(material.geometryCount);
-				}
-
-				for (const BuildMaterialShader& materialShader : scene.staticGeometry.materialShaders) {
-					writeMaterialShader(stream, materialShader);
-				}
-
-				for (const BuildMaterialShader& materialShader : scene.dynamicGeometry.materialShaders) {
-					writeMaterialShader(stream, materialShader);
-				}
-
-				for (const EntityComponentMapping<GeometryComponent> geometryMapping : scene.dynamicGeometry.geometryMappings) {
-					stream.write<Entity>(geometryMapping.entity);
-					stream.write<GeometryComponent>(geometryMapping.component);
-				}
-
-				for (const EntityComponentMapping<RigidBody3DComponent>& rigidBodyMapping : scene.dynamicGeometry.rigidBodyMappings) {
-					const RigidBody3DComponent& component = rigidBodyMapping.component;
-
-					stream.write<Entity>(rigidBodyMapping.entity);
-					stream.write<svec3<float32>>(svec3<float32>(component.position));
-					stream.write<svec3<float32>>(svec3<float32>(component.rotation));
-					stream.write<svec3<float32>>(svec3<float32>(component.linearVelocity));
-					stream.write<svec3<float32>>(svec3<float32>(component.angularVelocity));
-					stream.write<float32>(component.scale);
-					stream.write<float32>(component.inverseMass);
-					stream.write<svec3<float32>>(svec3<float32>(component.inverseInertia[0]));
-					stream.write<svec3<float32>>(svec3<float32>(component.inverseInertia[1]));
-					stream.write<svec3<float32>>(svec3<float32>(component.inverseInertia[2]));
-					stream.write<float32>(component.friction);
-					stream.write<float32>(component.restitution);
-				}
-
-				return stream;
-			}
-
+		private:
 			void createSceneAsset(const BuildScene3D& scene, uint32 identifier, const ByteStream<StreamOperation::WRITE>& stream, view<char8> assetName, const std::filesystem::path& rootOutputPath) {
 				const std::filesystem::path assetOutputPath = rootOutputPath / "Asset/Scene/";
 				const std::string assetOutputPathString = assetOutputPath.string();
@@ -222,41 +240,6 @@ namespace Trident {
 
 					assetLibrary->registerAsset(scene.staticGeometry.lightmapAtlasImageAssetDescriptor.identifier, assetName);
 				}
-			}
-
-		protected:
-			explicit Scene3DProcess(AssetBuilderLibrary* assetLibrary) :
-				assetLibrary(assetLibrary)
-			{}
-
-			virtual view<char8> getAssetName() const = 0;
-
-			virtual BuildScene3D createScene(AssetBuilderLibrary* assetLibrary) const = 0;
-
-		public:
-			sint32 main(view<void*> arguments) final override {
-				const std::filesystem::path rootOutputPath = static_cast<const char8*>(arguments[2]);
-				const std::filesystem::path assetOutputPath = rootOutputPath / "Asset/Scene/";
-				const view<char8> assetName = getAssetName();
-
-				std::filesystem::path finalAssetOutputPath = assetOutputPath / std::string(assetName);
-				finalAssetOutputPath.replace_extension("tsa");
-
-				if (std::filesystem::exists(finalAssetOutputPath)) {
-					ENGINE_INFO("Scene asset \"[]\" already exists.", finalAssetOutputPath.filename().string());
-
-					return 0;
-				}
-
-				const uint32 assetIdentifier = AssetLibrary::createAssetIdentifier();
-				const BuildScene3D scene = createScene(assetLibrary);
-				const ByteStream<StreamOperation::WRITE> stream = encodeScene3DAsset(scene, assetIdentifier);
-
-				createSceneAsset(scene, assetIdentifier, stream, assetName, rootOutputPath);
-
-				ENGINE_INFO("Generated 3D scene asset \"[]\" (ID: []).", assetName, assetIdentifier);
-
-				return 0;
 			}
 
 		private:

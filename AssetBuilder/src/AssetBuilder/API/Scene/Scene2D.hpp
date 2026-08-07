@@ -3,12 +3,27 @@
 
 #pragma once
 
-#include "Engine/API/Scene/StaticVertex.hpp"
+#include "Engine/API/Scene/StaticTriangle2D.hpp"
+#include "Engine/ECS/Component/GeometryComponent.hpp"
+#include "Engine/ECS/Component/RigidBody2DComponent.hpp"
+#include "Engine/ECS/EntityComponentMapping.hpp"
 
 namespace Trident {
-	struct StaticScene2D {
+	struct BuildStaticSceneGeometry2D {
 		sequence<StaticTriangle2D> triangles;
 		sequence<svec2<float32>> vertices;
 		sequence<svec2<float32>> textureCoordinates;
+	};
+
+	struct BuildDynamicSceneGeometry2D {
+		uint32 entityCount;
+		sequence<uint32> geometryAssetIdentifiers;
+		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
+		sequence<EntityComponentMapping<RigidBody2DComponent>> rigidBodyMappings;
+	};
+
+	struct BuildScene2D {
+		BuildStaticSceneGeometry2D staticGeometry;
+		BuildDynamicSceneGeometry2D dynamicGeometry;
 	};
 }

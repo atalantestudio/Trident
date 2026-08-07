@@ -3,7 +3,7 @@
 
 #include "pch.hpp"
 
-#include "RigidBody.hpp"
+#include "AssetBuilder/API/Utilities/Utilities.hpp"
 
 namespace Trident {
 	RigidBody2DComponent createRigidBody(const Descriptor<RigidBody2DComponent>& descriptor) {

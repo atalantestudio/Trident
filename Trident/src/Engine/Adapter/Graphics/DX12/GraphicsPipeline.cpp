@@ -12,7 +12,7 @@
 #include "Engine/Adapter/Graphics/DX12/PrimitiveTopology.hpp"
 #include "Engine/Adapter/Graphics/DX12/PrimitiveTopologyType.hpp"
 #include "Engine/Adapter/Graphics/DX12/ShaderModule.hpp"
-#include "Engine/Adapter/Graphics/DX12/VertexInputAttributeType.hpp"
+#include "Engine/Adapter/Graphics/DX12/VertexInputAttributeFormat.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/API/Graphics/Descriptor/GraphicsPipelineDescriptor.hpp"
 
@@ -124,7 +124,7 @@ namespace Trident {
 				D3D12_INPUT_ELEMENT_DESC& inputElementDescriptor = inputElementDescriptors[inputElementDescriptorIndex];
 				inputElementDescriptor.SemanticName = "VERTEX_INPUT_ATTRIBUTE";
 				inputElementDescriptor.SemanticIndex = inputElementDescriptorIndex;
-				inputElementDescriptor.Format = getVertexInputAttributeType(vertexInputAttribute.type);
+				inputElementDescriptor.Format = getVertexInputAttributeFormat(vertexInputAttribute.format);
 				inputElementDescriptor.InputSlot = vertexInputBindingIndex;
 				inputElementDescriptor.AlignedByteOffset = vertexInputAttribute.offset;
 

@@ -40,15 +40,17 @@ cbuffer Camera : register(b0) {
 	Camera camera;
 }
 
-Texture2D<float4> lightmapAtlasTexture : register(t3);
-Texture2D<float4> armTexture : register(t4);
-Texture2D<float4> diffuseTexture : register(t5);
-Texture2D<float4> normalTexture : register(t6);
+Texture2D<float4> lightmapAtlasTexture : register(t0);
+SamplerState lightmapAtlasSamplerState : register(s0);
 
-SamplerState lightmapAtlasSamplerState;
-SamplerState armSamplerState;
-SamplerState diffuseSamplerState;
-SamplerState normalSamplerState;
+Texture2D<float4> armTexture : register(t1);
+SamplerState armSamplerState : register(s1);
+
+Texture2D<float4> diffuseTexture : register(t2);
+SamplerState diffuseSamplerState : register(s2);
+
+Texture2D<float4> normalTexture : register(t3);
+SamplerState normalSamplerState : register(s3);
 
 FragmentOutput main(Interstage interstage) {
 	// Convert from sRGB space to linear space.
@@ -63,7 +65,6 @@ FragmentOutput main(Interstage interstage) {
 
 	FragmentOutput output;
 	output.color.rgb = diffuse * light * ao;
-
 	output.color.rgb = pow(output.color.rgb, 1.0 / 2.2);
 	output.color.a = 1.0;
 

@@ -39,7 +39,8 @@ namespace Trident {
 				staticGeometryDescriptorSet = descriptorSets[0];
 				forwardDescriptorSet = descriptorSets[1];
 
-				debugHullWireframePipelineLayout = createDebugHullWireframePipelineLayout();
+				// TODO(forward): Restore debug modes.
+				/* debugHullWireframePipelineLayout = createDebugHullWireframePipelineLayout();
 				debugHullWireframePipeline = createDebugHullWireframePipeline();
 
 				debugContactManifoldPipelineLayout = createDebugContactManifoldPipelineLayout();
@@ -49,7 +50,7 @@ namespace Trident {
 
 				const ref<BufferView<svec3<float32>>> debugContactManifoldView = debugContactManifoldBuffer->createView<svec3<float32>>(0, debugContactManifoldBuffer->getSize());
 
-				debugContactRange = debugContactManifoldView->map();
+				debugContactRange = debugContactManifoldView->map(); */
 
 				lightmapAtlasSampler = createLightmapAtlasSampler();
 				materialSampler = createMaterialSampler();
@@ -61,7 +62,7 @@ namespace Trident {
 				const ref<Scene3DAsset> sceneAsset = scene->getAsset();
 
 				vertexBuffer = createVertexBuffer();
-				lightmapCoordinateBuffer = createLightmapCoordinateBuffer();
+				indexBuffer = createIndexBuffer();
 				instanceBuffer = createInstanceBuffer();
 
 				// TODO(geometry/3d/vertex-position-indices): Separate hull line indices and vertex position indices for TRIANGLE_LIST.
@@ -70,14 +71,15 @@ namespace Trident {
 				} */
 
 				QueueFamilyCapability queueFamily = QueueFamilyCapability::TRANSFER;
-				uint64 stagingBufferSize = sceneAsset->geometryRanges[0].count;
+				uint64 stagingBufferSize = sceneAsset->geometryRanges[0].count + sceneAsset->geometryRanges[1].count + sceneAsset->geometryRanges[2].count;
 
 				if (sceneAsset->lightmapAtlasImageAsset != nullptr) {
+					lightmapCoordinateBuffer = createLightmapCoordinateBuffer();
 					lightmapAtlasImage = createLightmapAtlasImage(sceneAsset->lightmapAtlasImageAsset);
 					lightmapAtlasImageView = createLightmapAtlasImageView();
 
 					queueFamily = QueueFamilyCapability::GRAPHICS;
-					stagingBufferSize += sceneAsset->geometryRanges[4].count + lightmapAtlasImage->getSize();
+					stagingBufferSize += lightmapAtlasImage->getSize();
 				}
 
 				const ref<Buffer> stagingBuffer = createDynamicBuffer({
@@ -94,13 +96,17 @@ namespace Trident {
 
 				std::copy_n(&sceneAsset->geometryData[sceneAsset->geometryRanges[0].offset], vertexView->getSize(), vertexView->map());
 
+				const ref<BufferView<uint8>> indexView = stagingBuffer->createView<uint8>(vertexView->getOffset() + vertexView->getSize(), sceneAsset->geometryRanges[1].count);
+
+				std::copy_n(&sceneAsset->geometryData[sceneAsset->geometryRanges[1].offset], indexView->getSize(), indexView->map());
+
 				ref<BufferView<uint8>> lightmapCoordinateView;
 				ref<BufferView<uint8>> lightmapAtlasView;
 
 				if (sceneAsset->lightmapAtlasImageAsset != nullptr) {
-					lightmapCoordinateView = stagingBuffer->createView<uint8>(vertexView->getOffset() + vertexView->getSize(), sceneAsset->geometryRanges[4].count);
+					lightmapCoordinateView = stagingBuffer->createView<uint8>(indexView->getOffset() + indexView->getSize(), sceneAsset->geometryRanges[2].count);
 
-					std::copy_n(&sceneAsset->geometryData[sceneAsset->geometryRanges[4].offset], lightmapCoordinateView->getSize(), lightmapCoordinateView->map());
+					std::copy_n(&sceneAsset->geometryData[sceneAsset->geometryRanges[2].offset], lightmapCoordinateView->getSize(), lightmapCoordinateView->map());
 
 					lightmapAtlasView = stagingBuffer->createView<uint8>(lightmapCoordinateView->getOffset() + lightmapCoordinateView->getSize(), lightmapAtlasImage->getSize());
 
@@ -130,16 +136,24 @@ namespace Trident {
 
 				commandEncoder->begin();
 
-				BufferCopyRegion bufferCopyRegion = {
-					.sourceOffset = vertexView->getOffset(),
-					.destinationOffset = 0,
-					.size = vertexView->getSize(),
+				const BufferCopyRegion bufferCopyRegions[2] = {
+					{
+						.sourceOffset = vertexView->getOffset(),
+						.destinationOffset = 0,
+						.size = vertexView->getSize(),
+					},
+					{
+						.sourceOffset = indexView->getOffset(),
+						.destinationOffset = 0,
+						.size = indexView->getSize(),
+					},
 				};
 
-				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegion);
+				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegions[0]);
+				commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, bufferCopyRegions[1]);
 
 				if (sceneAsset->lightmapAtlasImageAsset != nullptr) {
-					bufferCopyRegion = {
+					const BufferCopyRegion bufferCopyRegion = {
 						.sourceOffset = lightmapCoordinateView->getOffset(),
 						.destinationOffset = 0,
 						.size = lightmapCoordinateView->getSize(),
@@ -272,6 +286,7 @@ namespace Trident {
 			ref<ImageView> createLightmapAtlasImageView() const;
 
 			ref<Buffer> createVertexBuffer() const;
+			ref<Buffer> createIndexBuffer() const;
 			ref<Buffer> createLightmapCoordinateBuffer() const;
 			ref<Buffer> createInstanceBuffer() const;
 			ref<Buffer> createDebugHullWireframeBuffer(uint64 size) const;
@@ -322,6 +337,9 @@ namespace Trident {
 
 			/// Contains vertices for static and dynamic geometry.
 			ref<Buffer> vertexBuffer;
+
+			/// Contains index for static and dynamic geometry.
+			ref<Buffer> indexBuffer;
 
 			/// Contains lightmap coordinates for static geometry.
 			ref<Buffer> lightmapCoordinateBuffer;

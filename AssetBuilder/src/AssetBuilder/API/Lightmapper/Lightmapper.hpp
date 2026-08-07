@@ -3,18 +3,25 @@
 
 #pragma once
 
+#include "AssetBuilder/API/Geometry/Geometry3D.hpp"
 #include "AssetBuilder/API/Lightmapper/Lightmap.hpp"
 
-#include "Engine/API/Geometry/Index.hpp"
 #include "Engine/Filesystem/Asset/ImageAsset.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace Trident {
-	struct LightmapperArguments {
+	struct SceneLightingDescriptor {
 		svec3<float32> skyColor;
 		svec3<float32> sunDirection;
 		svec3<float32> sunColor;
 		float32 sunIntensity;
+	};
+
+	struct LightmapperDescriptor {
+		view<BuildVertex3D> vertices;
+		view<svec2<float32>> lightmapCoordinates;
+		view<uint32> indices;
+		SceneLightingDescriptor lighting;
 	};
 
 	struct LightmapperContext {
@@ -34,21 +41,14 @@ namespace Trident {
 		ref<Framebuffer> dilationFramebuffer;
 
 		ref<Buffer> vertexBuffer;
-		ref<Buffer> positionBuffer;
-		ref<Buffer> normalBuffer;
+		ref<Buffer> indexBuffer;
 		ref<Buffer> lightmapAtlasStagingBuffer;
 	};
 
 	// TODO(application/destruction-leaks)
 	class Lightmapper {
 		private:
-			struct Vertex {
-				svec2<float32> lightmapCoordinate;
-				uint32 positionIndex;
-				uint32 normalIndex;
-			};
-
-			struct TraceRaysArguments {
+			struct Arguments {
 				Extent2D atlasExtent;
 				uint32 triangleCount;
 				uint32 _0;
@@ -61,7 +61,7 @@ namespace Trident {
 			};
 
 		public:
-			void buildLightmapAtlas(view<GeometryIndex3D> vertices, view<svec3<float32>> positions, view<svec3<float32>> normals, view<svec2<float32>> lightmapCoordinates, const LightmapperArguments& lightmapperArguments, ImageAssetDescriptor& lightmapAtlasImageAssetDescriptor);
+			void generateAtlas(ImageAssetDescriptor& imageAssetDescriptor, const LightmapperDescriptor& descriptor);
 
 		private:
 			void initialize();
@@ -95,14 +95,13 @@ namespace Trident {
 			ref<ComputePipeline> createVerticalBilateralFilterPipeline() const;
 			ref<GraphicsPipeline> createDilationPipeline() const;
 
-			ref<Buffer> createTraceRaysArgumentBuffer() const;
+			ref<Buffer> createArgumentBuffer() const;
 			ref<Buffer> createVertexBuffer(uint64 vertexCount) const;
-			ref<Buffer> createPositionBuffer(uint64 positionCount) const;
-			ref<Buffer> createNormalBuffer(uint64 normalCount) const;
+			ref<Buffer> createIndexBuffer(uint64 indexCount) const;
 
 			ref<Sampler> createIntermediateLightmapAtlasSampler() const;
 
-			void encodeOneTimeCommands(view<GeometryIndex3D> vertices, view<svec3<float32>> positions, view<svec3<float32>> normals, view<svec2<float32>> lightmapCoordinates) const;
+			void encodeOneTimeCommands(view<BuildVertex3D> vertices, view<svec2<float32>> lightmapCoordinates, view<uint32> indices) const;
 
 			void generateLightmaps(uint32 vertexCount) const;
 
@@ -111,11 +110,11 @@ namespace Trident {
 			ImageFormat atlasFormat;
 			Extent3D atlasExtent;
 			ImageAssetDescriptor imageAssetDescriptor;
-			LightmapperArguments arguments;
+			SceneLightingDescriptor lighting;
 
 			sequence<ref<DescriptorSet>> descriptorSets;
 
-			ref<Buffer> traceRaysArgumentBuffer;
+			ref<Buffer> argumentBuffer;
 
 			ref<Sampler> intermediateLightmapAtlasSampler;
 
@@ -133,10 +132,7 @@ namespace Trident {
 			ref<PipelineLayout> postProcessingPipelineLayout;
 			ref<PipelineLayout> dilationPipelineLayout;
 
-			ref<DescriptorSetLayout> gBufferDescriptorSetLayout;
-			ref<DescriptorSetLayout> traceRaysDescriptorSetLayout;
-			ref<DescriptorSetLayout> postProcessingDescriptorSetLayout;
-			ref<DescriptorSetLayout> dilationDescriptorSetLayout;
+			ref<DescriptorSetLayout> descriptorSetLayouts[4];
 
 			ref<RenderPass> gBufferRenderPass;
 			ref<RenderPass> dilationRenderPass;

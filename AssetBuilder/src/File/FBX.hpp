@@ -7,31 +7,43 @@
 
 namespace Trident {
 	enum class FBXPropertyTypeCode : char8 {
-		// 2-byte signed integer.
+		/// 2-byte signed integer.
 		Y = 'Y',
-		// 1-bit boolean (encoded as the LSB of a 1èbyte value).
+
+		/// 1-bit boolean (encoded as the LSB of a 1èbyte value).
 		C = 'C',
-		// 4-byte signed integer.
+
+		/// 4-byte signed integer.
 		I = 'I',
-		// 4-byte single-precision IEEE 754 number.
+
+		/// 4-byte single-precision IEEE 754 number.
 		F = 'F',
-		// 8-byte double-precision IEEE 754 number.
+
+		/// 8-byte double-precision IEEE 754 number.
 		D = 'D',
-		// 8-byte signed integer.
+
+		/// 8-byte signed integer.
 		L = 'L',
-		// Array of 4-byte single-precision IEEE 754 numbers.
+
+		/// Array of 4-byte single-precision IEEE 754 numbers.
 		f = 'f',
-		// Array of 8-byte double-precision IEEE 754 numbers.
+
+		/// Array of 8-byte double-precision IEEE 754 numbers.
 		d = 'd',
-		// Array of 8-byte signed integers.
+
+		/// Array of 8-byte signed integers.
 		l = 'l',
-		// Array of 4-byte signed integers.
+
+		/// Array of 4-byte signed integers.
 		i = 'i',
-		// Array of 1-byte booleans.
+
+		/// Array of 1-byte booleans.
 		b = 'b',
-		// String.
+
+		/// String.
 		S = 'S',
-		// Raw binary data.
+
+		/// Raw binary data.
 		R = 'R',
 	};
 
@@ -44,23 +56,23 @@ namespace Trident {
 		DataType Data;
 	};
 
-	template struct FBXPrimitiveProperty<sint16>;
 	template struct FBXPrimitiveProperty<bool>;
+	template struct FBXPrimitiveProperty<sint16>;
 	template struct FBXPrimitiveProperty<sint32>;
 	template struct FBXPrimitiveProperty<float32>;
-	template struct FBXPrimitiveProperty<float64>;
 	template struct FBXPrimitiveProperty<sint64>;
+	template struct FBXPrimitiveProperty<float64>;
 
 	template<typename DataType>
 	struct FBXArrayProperty : public FBXProperty {
 		sequence<DataType> Contents;
 	};
 
-	template struct FBXArrayProperty<float32>;
-	template struct FBXArrayProperty<float64>;
-	template struct FBXArrayProperty<sint64>;
-	template struct FBXArrayProperty<sint32>;
 	template struct FBXArrayProperty<bool>;
+	template struct FBXArrayProperty<sint32>;
+	template struct FBXArrayProperty<float32>;
+	template struct FBXArrayProperty<sint64>;
+	template struct FBXArrayProperty<float64>;
 
 	struct FBXSpecialProperty : public FBXProperty {
 		sequence<uint8> Data;

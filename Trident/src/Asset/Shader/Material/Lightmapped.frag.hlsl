@@ -12,10 +12,10 @@ struct FragmentOutput {
 	float4 color : SV_Target;
 };
 
-Texture2D<float4> lightmapAtlasTexture : register(t3);
+Texture2D<float4> lightmapAtlasTexture : register(t0);
 SamplerState lightmapAtlasSamplerState : register(s0);
 
-Texture2D<float4> diffuseTexture : register(t4);
+Texture2D<float4> diffuseTexture : register(t1);
 SamplerState diffuseSamplerState : register(s1);
 
 FragmentOutput main(Interstage interstage) {

@@ -11,7 +11,7 @@ in Interstage {
 	layout(location = 2) vec2 lightmapCoordinate;
 } interstage;
 
-layout(set = 0, binding = 4) uniform sampler2D lightmapAtlasSampler;
+layout(set = 0, binding = 1) uniform sampler2D lightmapAtlasSampler;
 
 layout(set = 1, binding = 0) uniform sampler2D diffuseSampler;
 

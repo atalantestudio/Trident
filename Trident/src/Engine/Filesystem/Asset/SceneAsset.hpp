@@ -8,9 +8,8 @@
 #include "Engine/API/Material/Material.hpp"
 #include "Engine/API/Material/MaterialShader.hpp"
 #include "Engine/API/Material/StaticMaterial.hpp"
-#include "Engine/API/Scene/StaticVertex.hpp"
+#include "Engine/API/Scene/StaticTriangle2D.hpp"
 #include "Engine/ECS/Component/GeometryComponent.hpp"
-#include "Engine/ECS/Component/MaterialComponent.hpp"
 #include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 #include "Engine/ECS/Component/RigidBody3DComponent.hpp"
 #include "Engine/ECS/EntityComponentMapping.hpp"
@@ -23,17 +22,6 @@ namespace Trident {
 	struct SceneAsset;
 	struct Scene2DAsset;
 	struct Scene3DAsset;
-
-	struct SceneAssetHeader : public AssetHeader {
-		uint32 staticTriangleCount;
-		uint32 staticVertexCount;
-		uint32 staticTextureCoordinateCount;
-		uint32 entityCount;
-		uint32 geometryAssetCount;
-		uint32 geometryMappingCount;
-		uint32 materialMappingCount;
-		uint32 rigidBodyMappingCount;
-	};
 
 	template<>
 	struct Descriptor<SceneAsset> : public Asset {
@@ -50,7 +38,6 @@ namespace Trident {
 		uint32 entityCount;
 		uint32 hullCount;
 		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
-		sequence<EntityComponentMapping<MaterialComponent>> materialMappings;
 	};
 
 	template<>
@@ -73,8 +60,7 @@ namespace Trident {
 				dynamicVertexTextureCoordinateIndexCount(descriptor.dynamicVertexTextureCoordinateIndexCount),
 				entityCount(descriptor.entityCount),
 				hullCount(descriptor.hullCount),
-				geometryMappings(descriptor.geometryMappings),
-				materialMappings(descriptor.materialMappings)
+				geometryMappings(descriptor.geometryMappings)
 			{}
 
 			inline uint64 getDynamicVertexPositionCount() const {
@@ -105,10 +91,6 @@ namespace Trident {
 				return geometryMappings;
 			}
 
-			inline const sequence<EntityComponentMapping<MaterialComponent>>& getMaterialMappings() const {
-				return materialMappings;
-			}
-
 		public:
 			sequence<uint8> staticGeometryBuffer;
 
@@ -120,7 +102,6 @@ namespace Trident {
 			uint32 entityCount;
 			uint32 hullCount;
 			sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
-			sequence<EntityComponentMapping<MaterialComponent>> materialMappings;
 	};
 
 	struct Scene2DAsset : public SceneAsset {
@@ -163,13 +144,8 @@ namespace Trident {
 	struct Scene3DAsset : public Asset {
 		sequence<uint8> geometryData;
 
-		/// The ranges are defined in the following order:
-		/// - Vertex
-		/// - Position
-		/// - Normal
-		/// - Texture coordinate
-		/// - Lightmap coordinate
-		range<uint64, uint64> geometryRanges[5];
+		/// Vertices, indices, lightmap coordinates.
+		range<uint64, uint64> geometryRanges[3];
 
 		uint64 staticVertexSize;
 		uint64 staticPositionSize;
@@ -177,7 +153,7 @@ namespace Trident {
 		uint64 staticTextureCoordinateSize;
 
 		sequence<Instance3D> instances;
-		sequence<range<uint32, uint32>> geometryVertexRanges;
+		sequence<range<uint32, uint32>> geometryIndexRanges;
 		sequence<MaterialGeometry> materialGeometries;
 		sequence<Material> materials;
 		sequence<MaterialShader> materialShaders;

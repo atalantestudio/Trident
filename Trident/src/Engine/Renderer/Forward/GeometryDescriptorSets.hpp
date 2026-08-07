@@ -7,56 +7,24 @@
 
 namespace Trident {
 	void ForwardRenderer::updateGeometryDescriptorSets() const {
-		const ref<Device> device = getDevice();
-		const uint64 alignment = device->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
-		const ref<Scene3DAsset> sceneAsset = scene->getAsset();
-		const uint64 staticPositionAlignedRangeSize = ceil(sceneAsset->geometryRanges[1].count, alignment);
-		const uint64 staticNormalAlignedRangeSize = ceil(sceneAsset->geometryRanges[2].count, alignment);
-
-		const ref<BaseBufferView> descriptorBufferViews[] = {
-			// Camera
+		const ref<BaseBufferView> descriptorBufferViews[1] = {
 			cameraBuffer->createView<ForwardCamera>(0, cameraBuffer->getSize()),
-
-			// Position
-			staticGeometryBuffer->createView<float32>(0, sceneAsset->staticPositionSize),
-
-			// Normal
-			staticGeometryBuffer->createView<float32>(staticPositionAlignedRangeSize, sceneAsset->staticNormalSize),
-
-			// Texture coordinate
-			staticGeometryBuffer->createView<float32>(staticPositionAlignedRangeSize + staticNormalAlignedRangeSize, sceneAsset->staticTextureCoordinateSize),
 		};
 
-		const DescriptorImage lightmapAtlasDescriptorImage = {
-			.imageView = lightmapAtlasImageView,
-			.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-			.sampler = lightmapAtlasSampler,
+		const DescriptorImage descriptorImages[1] = {
+			{
+				.imageView = lightmapAtlasImageView,
+				.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+				.sampler = lightmapAtlasSampler,
+			},
 		};
 
-		const WriteDescriptorSet writeDescriptorSets[] = {
-			// Dynamic geometry
+		const WriteDescriptorSet writeDescriptorSets[3] = {
 			{
 				.descriptorSet = forwardDescriptorSet,
 				.bindingIndex = 0,
 				.descriptorBufferViews = descriptorBufferViews[0],
 			},
-			{
-				.descriptorSet = forwardDescriptorSet,
-				.bindingIndex = 1,
-				.descriptorBufferViews = descriptorBufferViews[1],
-			},
-			{
-				.descriptorSet = forwardDescriptorSet,
-				.bindingIndex = 2,
-				.descriptorBufferViews = descriptorBufferViews[2],
-			},
-			{
-				.descriptorSet = forwardDescriptorSet,
-				.bindingIndex = 3,
-				.descriptorBufferViews = descriptorBufferViews[3],
-			},
-
-			// Static geometry
 			{
 				.descriptorSet = staticGeometryDescriptorSet,
 				.bindingIndex = 0,
@@ -65,31 +33,16 @@ namespace Trident {
 			{
 				.descriptorSet = staticGeometryDescriptorSet,
 				.bindingIndex = 1,
-				.descriptorBufferViews = descriptorBufferViews[1],
-			},
-			{
-				.descriptorSet = staticGeometryDescriptorSet,
-				.bindingIndex = 2,
-				.descriptorBufferViews = descriptorBufferViews[2],
-			},
-			{
-				.descriptorSet = staticGeometryDescriptorSet,
-				.bindingIndex = 3,
-				.descriptorBufferViews = descriptorBufferViews[3],
-			},
-			{
-				.descriptorSet = staticGeometryDescriptorSet,
-				.bindingIndex = 4,
-				.descriptorImages = lightmapAtlasDescriptorImage,
+				.descriptorImages = descriptorImages[0],
 			},
 		};
 
-		uint32 writeDescriptorSetCount = 5;
+		uint32 writeDescriptorSetCount = 2;
 
-		if (sceneAsset->lightmapAtlasImageAsset != nullptr) {
-			writeDescriptorSetCount = 10;
+		if (scene->getAsset()->lightmapAtlasImageAsset != nullptr) {
+			writeDescriptorSetCount = 3;
 		}
 
-		device->updateDescriptorSets(view<WriteDescriptorSet>(writeDescriptorSets, writeDescriptorSetCount));
+		getDevice()->updateDescriptorSets(view<WriteDescriptorSet>(writeDescriptorSets, writeDescriptorSetCount));
 	}
 }

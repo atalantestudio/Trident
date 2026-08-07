@@ -28,7 +28,7 @@ layout(set = 0, binding = 0) uniform readonly Camera {
 	vec3 position;
 } camera;
 
-layout(set = 0, binding = 4) uniform sampler2D lightmapAtlasSampler;
+layout(set = 0, binding = 1) uniform sampler2D lightmapAtlasSampler;
 
 layout(set = 1, binding = 0) uniform sampler2D armTexture;
 layout(set = 1, binding = 1) uniform sampler2D diffuseTexture;
@@ -90,7 +90,6 @@ void main() {
 	float ao = arm[0];
 
 	fragment.rgb = diffuse * light * ao;
-
 	fragment.rgb = pow(fragment.rgb, vec3(1.0 / 2.2));
 	fragment.a = 1.0;
 }

@@ -6,18 +6,15 @@
 #include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
 
 namespace Trident {
-	void SceneBuilder::createLightmapperGeometryBuffers(const BuildScene3D& scene, sequence<GeometryIndex3D>& vertices, sequence<svec3<float32>>& positions, sequence<svec3<float32>>& normals) {
-		vertices = sequence<GeometryIndex3D>(staticVertexCount);
-		positions = sequence<svec3<float32>>(staticPositionCount);
-		normals = sequence<svec3<float32>>(staticNormalCount);
+	void SceneBuilder::createLightmapperGeometryBuffers(const BuildScene3D& scene, sequence<BuildVertex3D>& vertices, sequence<uint32>& indices) {
+		vertices = sequence<BuildVertex3D>(staticVertexCount);
+		indices = sequence<uint32>(staticIndexCount);
 
 		std::copy(scene.staticGeometry.bakedVertices.begin(), scene.staticGeometry.bakedVertices.end(), &vertices[0]);
-		std::copy(scene.staticGeometry.bakedPositions.begin(), scene.staticGeometry.bakedPositions.end(), &positions[0]);
-		std::copy(scene.staticGeometry.bakedNormals.begin(), scene.staticGeometry.bakedNormals.end(), &normals[0]);
+		std::copy(scene.staticGeometry.bakedIndices.begin(), scene.staticGeometry.bakedIndices.end(), &indices[0]);
 
-		uint32 vertexOffset = static_cast<uint32>(scene.staticGeometry.bakedVertices.count());
-		uint32 positionOffset = static_cast<uint32>(scene.staticGeometry.bakedPositions.count());
-		uint32 normalOffset = static_cast<uint32>(scene.staticGeometry.bakedNormals.count());
+		uint32 vertexOffset = static_cast<uint32>(bakedVertexCount);
+		uint32 indexOffset = static_cast<uint32>(bakedIndexCount);
 
 		for (const IntermediateMaterialShader& materialShader : staticMaterialShaders) {
 			for (const IntermediateMaterial& material : materialShader.materials) {
@@ -35,7 +32,7 @@ namespace Trident {
 							quat<float32>::axisAngle(FORWARD, instance.rotation[2])
 						);
 						const quat<float32> inverseOrientation = inverse(orientation);
-						const mat4x4<float32> world = (
+						const mat4x4<float32> worldTransform = (
 							mat4x4<float32>::scaling({instance.scale, instance.scale, instance.scale}) *
 							mat4x4<float32>(orientation) *
 							mat4x4<float32>::translation(instance.translation)
@@ -44,38 +41,30 @@ namespace Trident {
 						uint32 vertexIndex = 0;
 
 						while (vertexIndex < geometry.vertices.count()) {
-							const GeometryIndex3D& vertex = geometry.vertices[vertexIndex];
+							const BuildVertex3D& geometryVertex = geometry.vertices[vertexIndex];
 
-							vertices[vertexOffset + vertexIndex] = {
-								.positionIndex = positionOffset + vertex.positionIndex,
-								.normalIndex = normalOffset + vertex.normalIndex,
-								.textureCoordinateIndex = 0,
-							};
+							BuildVertex3D& vertex = vertices[vertexOffset + vertexIndex];
+
+							// TODO(lyah/scalar)
+							vertex.position = svec3<float32>(multiplyTransform(vec3<float32>(geometryVertex.position), worldTransform));
+							vertex.normal = svec3<float32>(normalized(vec3<float32>(geometryVertex.normal) * inverseOrientation));
+							vertex.tangent = svec3<float32>(normalized(vec3<float32>(geometryVertex.tangent) * inverseOrientation));
+
+							vertex.textureCoordinate = geometryVertex.textureCoordinate;
 
 							vertexIndex += 1;
 						}
 
-						uint32 positionIndex = 0;
+						uint32 indexIndex = 0;
 
-						while (positionIndex < geometry.positions.count()) {
-							// TODO(lyah/scalar)
-							positions[positionOffset + positionIndex] = svec3<float32>(multiplyTransform(vec3<float32>(geometry.positions[positionIndex]), world));
+						while (indexIndex < geometry.indices.count()) {
+							indices[indexOffset + indexIndex] = vertexOffset + geometry.indices[indexIndex];
 
-							positionIndex += 1;
-						}
-
-						uint32 normalIndex = 0;
-
-						while (normalIndex < geometry.normals.count()) {
-							// TODO(lyah/scalar)
-							normals[normalOffset + normalIndex] = svec3<float32>(normalized(vec3<float32>(geometry.normals[normalIndex]) * inverseOrientation));
-
-							normalIndex += 1;
+							indexIndex += 1;
 						}
 
 						vertexOffset += vertexIndex;
-						positionOffset += positionIndex;
-						normalOffset += normalIndex;
+						indexOffset += indexIndex;
 					}
 				}
 			}

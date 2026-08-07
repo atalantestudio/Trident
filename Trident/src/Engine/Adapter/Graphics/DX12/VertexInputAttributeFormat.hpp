@@ -4,18 +4,21 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Graphics/VertexInputAttributeType.hpp"
+#include "Engine/API/Graphics/VertexInputAttributeFormat.hpp"
 
 namespace Trident::DX12 {
-	inline DXGI_FORMAT getVertexInputAttributeType(VertexInputAttributeType vertexInputAttributeType) {
-		static constexpr DXGI_FORMAT VERTEX_INPUT_ATTRIBUTE_TYPES[] = {
+	inline DXGI_FORMAT getVertexInputAttributeFormat(VertexInputAttributeFormat format) {
+		static constexpr DXGI_FORMAT FORMATS[static_cast<uint32>(VertexInputAttributeFormat::count)] = {
 			DXGI_FORMAT_R8_SINT,
 			DXGI_FORMAT_R8_UINT,
+			DXGI_FORMAT_R10G10B10A2_UNORM,
 			DXGI_FORMAT_R16_SINT,
 			DXGI_FORMAT_R16_UINT,
 			DXGI_FORMAT_R32_SINT,
 			DXGI_FORMAT_R32_UINT,
 			DXGI_FORMAT_R32_FLOAT,
+			DXGI_FORMAT_R16G16_UNORM,
+			DXGI_FORMAT_R16G16_FLOAT,
 			DXGI_FORMAT_R32G32_UINT,
 			DXGI_FORMAT_R32G32_FLOAT,
 			DXGI_FORMAT_R32G32B32_UINT,
@@ -30,12 +33,12 @@ namespace Trident::DX12 {
 			DXGI_FORMAT_UNKNOWN,
 		};
 
-		ADAPTER_ASSERT(vertexInputAttributeType < VertexInputAttributeType::count, "Invalid vertex attribute type.");
+		ADAPTER_ASSERT(format < VertexInputAttributeFormat::count, "Invalid format.");
 
-		const DXGI_FORMAT type = VERTEX_INPUT_ATTRIBUTE_TYPES[static_cast<uint32>(vertexInputAttributeType)];
+		const DXGI_FORMAT dxFormat = FORMATS[static_cast<uint32>(format)];
 
-		ADAPTER_ASSERT(type != DXGI_FORMAT_UNKNOWN, "Unsupported vertex attribute type.");
+		ADAPTER_ASSERT(dxFormat != DXGI_FORMAT_UNKNOWN, "Unsupported format.");
 
-		return type;
+		return dxFormat;
 	}
 }

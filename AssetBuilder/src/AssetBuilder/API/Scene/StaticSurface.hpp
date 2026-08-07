@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "AssetBuilder/API/Geometry/StaticGeometry3D.hpp"
+#include "AssetBuilder/API/Geometry/Geometry3D.hpp"
 #include "AssetBuilder/API/LightmapDescriptor.hpp"
 #include "AssetBuilder/API/TextureFilteringDescriptor.hpp"
 #include "AssetBuilder/API/Transform.hpp"
@@ -22,7 +22,7 @@ namespace Trident {
 	};
 
 	struct SurfaceDescriptor {
-		StaticGeometry3D geometry;
+		BuildStaticGeometry3D geometry;
 		MaterialReference material;
 		TextureFilteringDescriptor textureFiltering;
 		LightmapDescriptor lightmap;

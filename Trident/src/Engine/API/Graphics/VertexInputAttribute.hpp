@@ -3,14 +3,14 @@
 
 #pragma once
 
-#include "Engine/API/Graphics/VertexInputAttributeType.hpp"
+#include "Engine/API/Graphics/VertexInputAttributeFormat.hpp"
 
 namespace Trident {
 	struct VertexInputAttribute {
-		// Type of the attribute.
-		VertexInputAttributeType type;
+		/// Format of the attribute.
+		VertexInputAttributeFormat format;
 
-		// Offset relative to the start of an element in the vertex input binding, in bytes.
+		/// Offset relative to the start of the attribute in the input binding, in bytes.
 		uint32 offset;
 	};
 

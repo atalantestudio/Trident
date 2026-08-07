@@ -14,18 +14,14 @@ struct TraceRaysArguments {
 };
 
 struct Vertex {
-	float2 lightmapCoordinate;
-	uint positionIndex;
-	uint normalIndex;
-};
-
-struct TriangleVertex {
-	float2 lightmapCoordinate;
 	float3 position;
+	float3 normal;
+	float3 tangent;
+	float2 lightmapCoordinate;
 };
 
 struct Triangle {
-	TriangleVertex vertices[3];
+	Vertex vertices[3];
 };
 
 struct Ray {
@@ -49,30 +45,22 @@ static const bool BACK_FACE = false;
 
 StructuredBuffer<TraceRaysArguments> traceRaysArguments : register(t0);
 StructuredBuffer<Vertex> vertexBuffer : register(t1);
-StructuredBuffer<float> positionBuffer : register(t2);
+StructuredBuffer<uint> indexBuffer : register(t2);
 Texture2D<float4> gBufferPositionImage : register(t3);
 Texture2D<float4> gBufferTriangleNormalImage : register(t4);
 Texture2D<float4> gBufferVertexNormalImage : register(t5);
 RWTexture2D<float4> intermediateLightmapAtlas : register(u0);
 
 Triangle loadTriangle(uint triangleIndex) {
-	uint vertexOffset = triangleIndex * 3;
-
-	Vertex vertexA = vertexBuffer[vertexOffset + 0];
-	Vertex vertexB = vertexBuffer[vertexOffset + 1];
-	Vertex vertexC = vertexBuffer[vertexOffset + 2];
-
-	uint positionOffsetA = vertexA.positionIndex * 3;
-	uint positionOffsetB = vertexB.positionIndex * 3;
-	uint positionOffsetC = vertexC.positionIndex * 3;
+	uint indexOffset = triangleIndex * 3;
+	uint indexA = indexBuffer[indexOffset + 0];
+	uint indexB = indexBuffer[indexOffset + 1];
+	uint indexC = indexBuffer[indexOffset + 2];
 
 	Triangle triangle_;
-	triangle_.vertices[0].lightmapCoordinate = vertexA.lightmapCoordinate;
-	triangle_.vertices[0].position = float3(positionBuffer[positionOffsetA + 0], positionBuffer[positionOffsetA + 1], positionBuffer[positionOffsetA + 2]);
-	triangle_.vertices[1].lightmapCoordinate = vertexB.lightmapCoordinate;
-	triangle_.vertices[1].position = float3(positionBuffer[positionOffsetB + 0], positionBuffer[positionOffsetB + 1], positionBuffer[positionOffsetB + 2]);
-	triangle_.vertices[2].lightmapCoordinate = vertexC.lightmapCoordinate;
-	triangle_.vertices[2].position = float3(positionBuffer[positionOffsetC + 0], positionBuffer[positionOffsetC + 1], positionBuffer[positionOffsetC + 2]);
+	triangle_.vertices[0] = vertexBuffer[indexA];
+	triangle_.vertices[1] = vertexBuffer[indexB];
+	triangle_.vertices[2] = vertexBuffer[indexC];
 
 	return triangle_;
 }

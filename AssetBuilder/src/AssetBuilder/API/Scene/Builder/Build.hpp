@@ -16,11 +16,10 @@ namespace Trident {
 		}
 
 		BuildScene3D scene{};
-		scene.triangleCount = static_cast<uint32>((staticVertexCount + dynamicVertexCount) / 3);
-		scene.positionCount = static_cast<uint32>(staticPositionCount + dynamicPositionCount);
-		scene.normalCount = static_cast<uint32>(staticNormalCount + dynamicNormalCount);
-		scene.textureCoordinateCount = static_cast<uint32>(staticTextureCoordinateCount + dynamicTextureCoordinateCount);
-		scene.skyColor = lightmapperArguments.skyColor;
+		scene.vertexCount = static_cast<uint32>(staticVertexCount + dynamicVertexCount);
+		scene.staticGeometry.vertexCount = static_cast<uint32>(staticVertexCount);
+		scene.triangleCount = static_cast<uint32>((staticIndexCount + dynamicIndexCount) / 3);
+		scene.skyColor = lighting.skyColor;
 		scene.staticGeometry.lightmapAtlasImageAssetDescriptor.identifier = max<uint32>();
 		scene.dynamicGeometry.entityCount = entityCount;
 
@@ -38,7 +37,7 @@ namespace Trident {
 	void SceneBuilder::buildGeometries(BuildScene3D& scene) {
 		scene.geometries = sequence<BuildGeometry>(geometries.size());
 
-		uint32 vertexOffset = 0;
+		uint32 indexOffset = 0;
 		uint32 geometryIndex = 0;
 
 		while (geometryIndex < scene.geometries.count()) {
@@ -46,12 +45,12 @@ namespace Trident {
 
 			BuildGeometry& geometry = scene.geometries[geometryIndex];
 			geometry.assetIdentifier = intermediateGeometry.assetIdentifier;
-			geometry.vertexRange.count = static_cast<uint32>(intermediateGeometry.vertices.count());
+			geometry.indexRange.count = static_cast<uint32>(intermediateGeometry.indices.count());
 
 			if (geometry.assetIdentifier == 0) {
-				geometry.vertexRange.offset = vertexOffset;
+				geometry.indexRange.offset = indexOffset;
 
-				vertexOffset += geometry.vertexRange.count;
+				indexOffset += geometry.indexRange.count;
 			}
 
 			geometryIndex += 1;
@@ -59,9 +58,9 @@ namespace Trident {
 
 		for (BuildGeometry& geometry : scene.geometries) {
 			if (geometry.assetIdentifier > 0) {
-				geometry.vertexRange.offset = vertexOffset;
+				geometry.indexRange.offset = indexOffset;
 
-				vertexOffset += geometry.vertexRange.count;
+				indexOffset += geometry.indexRange.count;
 			}
 		}
 	}
@@ -189,15 +188,11 @@ namespace Trident {
 	}
 
 	void SceneBuilder::buildBakedGeometry(BuildStaticSceneGeometry3D& staticGeometry) {
-		staticGeometry.bakedVertices = sequence<GeometryIndex3D>(bakedVertexCount);
-		staticGeometry.bakedPositions = sequence<svec3<float32>>(bakedPositionCount);
-		staticGeometry.bakedNormals = sequence<svec3<float32>>(bakedNormalCount);
-		staticGeometry.bakedTextureCoordinates = sequence<svec2<float32>>(bakedTextureCoordinateCount);
+		staticGeometry.bakedVertices = sequence<BuildVertex3D>(bakedVertexCount);
+		staticGeometry.bakedIndices = sequence<uint32>(bakedIndexCount);
 
-		uint64 bakedVertexOffset = 0;
-		uint64 bakedPositionOffset = 0;
-		uint64 bakedNormalOffset = 0;
-		uint64 bakedTextureCoordinateOffset = 0;
+		uint32 bakedVertexOffset = 0;
+		uint64 bakedIndexOffset = 0;
 
 		while (bakedVertexOffset < bakedVertexCount) {
 			uint32 geometryIndex = 0;
@@ -211,28 +206,18 @@ namespace Trident {
 					continue;
 				}
 
-				uint32 vertexIndex = 0;
+				std::copy(geometry.vertices.begin(), geometry.vertices.end(), &staticGeometry.bakedVertices[bakedVertexOffset]);
 
-				while (vertexIndex < geometry.vertices.count()) {
-					const GeometryIndex3D intermediateVertex = geometry.vertices[vertexIndex];
+				uint32 indexIndex = 0;
 
-					GeometryIndex3D& vertex = staticGeometry.bakedVertices[bakedVertexOffset + vertexIndex];
-					vertex.positionIndex = static_cast<uint32>(bakedPositionOffset) + intermediateVertex.positionIndex;
-					vertex.normalIndex = static_cast<uint32>(bakedNormalOffset) + intermediateVertex.normalIndex;
-					vertex.textureCoordinateIndex = static_cast<uint32>(bakedTextureCoordinateOffset) + intermediateVertex.textureCoordinateIndex;
+				while (indexIndex < geometry.indices.count()) {
+					staticGeometry.bakedIndices[bakedIndexOffset + indexIndex] = bakedVertexOffset + geometry.indices[indexIndex];
 
-					vertexIndex += 1;
+					indexIndex += 1;
 				}
 
-				std::copy(geometry.positions.begin(), geometry.positions.end(), &staticGeometry.bakedPositions[bakedPositionOffset]);
-				std::copy(geometry.normals.begin(), geometry.normals.end(), &staticGeometry.bakedNormals[bakedNormalOffset]);
-				std::copy(geometry.transformedTextureCoordinates.begin(), geometry.transformedTextureCoordinates.end(), &staticGeometry.bakedTextureCoordinates[bakedTextureCoordinateOffset]);
-
-				bakedVertexOffset += geometry.vertices.count();
-				bakedPositionOffset += geometry.positions.count();
-				bakedNormalOffset += geometry.normals.count();
-				bakedTextureCoordinateOffset += geometry.textureCoordinates.count();
-
+				bakedVertexOffset += static_cast<uint32>(geometry.vertices.count());
+				bakedIndexOffset += geometry.indices.count();
 				geometryIndex += 1;
 			}
 		}
@@ -244,14 +229,13 @@ namespace Trident {
 		lightmapLookups.reserve(lightmaps.size());
 
 		if (lightmapCoordinateCount > 0) {
-			createLightmaps(scene);
+			createLightmaps(scene.staticGeometry);
 			updateLightmapCoordinates(scene.staticGeometry);
 
-			sequence<GeometryIndex3D> vertices;
-			sequence<svec3<float32>> positions;
-			sequence<svec3<float32>> normals;
+			sequence<BuildVertex3D> vertices;
+			sequence<uint32> indices;
 
-			createLightmapperGeometryBuffers(scene, vertices, positions, normals);
+			createLightmapperGeometryBuffers(scene, vertices, indices);
 
 			scene.staticGeometry.lightmapAtlasImageAssetDescriptor = {
 				.format = ImageFormat::R8G8B8A8_UNORM,
@@ -262,14 +246,12 @@ namespace Trident {
 			};
 			scene.staticGeometry.lightmapAtlasImageAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
 
-			lightmapper.buildLightmapAtlas(
-				vertices,
-				positions,
-				normals,
-				scene.staticGeometry.lightmapCoordinates,
-				lightmapperArguments,
-				scene.staticGeometry.lightmapAtlasImageAssetDescriptor
-			);
+			lightmapper.generateAtlas(scene.staticGeometry.lightmapAtlasImageAssetDescriptor, {
+				.vertices = vertices,
+				.lightmapCoordinates = scene.staticGeometry.lightmapCoordinates,
+				.indices = indices,
+				.lighting = lighting,
+			});
 		}
 	}
 

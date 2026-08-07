@@ -31,17 +31,9 @@ namespace Trident {
 
 		private:
 			ref<Buffer> createCameraBuffer() const;
-			ref<Buffer> createStaticGeometryBuffer() const;
-			ref<Buffer> createStaticGeometryStagingBuffer() const;
-
-			void copyStaticGeometry(ref<CommandEncoder> commandEncoder, ref<Buffer> staticGeometryStagingBuffer) const;
 
 		protected:
 			ref<Buffer> cameraBuffer;
-
-			// TODO(renderer): Rename to "geometryBuffer" and move inside the Forward renderer.
-			/// Contains vertices, normals, texture coordinates and triangle tangents for static and dynamic geometry.
-			ref<Buffer> staticGeometryBuffer;
 
 			CameraType* cameraMappedRange = nullptr;
 	};

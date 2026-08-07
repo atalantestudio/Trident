@@ -3,40 +3,56 @@
 
 #include "pch.hpp"
 
+#include "AssetBuilder/API/Lightmapper/ArgumentBuffer.hpp"
+#include "AssetBuilder/API/Lightmapper/BilateralFilterPipelines.hpp"
+#include "AssetBuilder/API/Lightmapper/GBufferDescriptorSetLayout.hpp"
+#include "AssetBuilder/API/Lightmapper/GBufferFramebuffer.hpp"
+#include "AssetBuilder/API/Lightmapper/GBufferPipeline.hpp"
+#include "AssetBuilder/API/Lightmapper/GBufferPositionImage.hpp"
+#include "AssetBuilder/API/Lightmapper/GBufferRenderPass.hpp"
+#include "AssetBuilder/API/Lightmapper/GBufferTriangleNormalImage.hpp"
+#include "AssetBuilder/API/Lightmapper/GBufferVertexNormalImage.hpp"
+#include "AssetBuilder/API/Lightmapper/IndexBuffer.hpp"
+#include "AssetBuilder/API/Lightmapper/IntermediateDilationPipeline.hpp"
+#include "AssetBuilder/API/Lightmapper/IntermediateLightmapAtlasImage.hpp"
+#include "AssetBuilder/API/Lightmapper/IntermediateLightmapAtlasSampler.hpp"
+#include "AssetBuilder/API/Lightmapper/LightmapAtlasImage.hpp"
 #include "AssetBuilder/API/Lightmapper/Lightmapper.hpp"
+#include "AssetBuilder/API/Lightmapper/PostProcessingDescriptorSetLayout.hpp"
+#include "AssetBuilder/API/Lightmapper/TraceRaysDescriptorSetLayout.hpp"
+#include "AssetBuilder/API/Lightmapper/TraceRaysPipeline.hpp"
+#include "AssetBuilder/API/Lightmapper/VertexBuffer.hpp"
 
 namespace Trident {
 	void Lightmapper::initialize() {
-		const ref<Device> device = Renderer::getDevice();
-
 		gBufferRenderPass = createGBufferRenderPass();
 		dilationRenderPass = createDilationRenderPass();
 
-		gBufferDescriptorSetLayout = createGBufferDescriptorSetLayout();
-		traceRaysDescriptorSetLayout = createTraceRaysDescriptorSetLayout();
-		postProcessingDescriptorSetLayout = createPostProcessingDescriptorSetLayout();
-		dilationDescriptorSetLayout = createDilationDescriptorSetLayout();
+		descriptorSetLayouts[0] = createGBufferDescriptorSetLayout();
+		descriptorSetLayouts[1] = createTraceRaysDescriptorSetLayout();
+		descriptorSetLayouts[2] = createPostProcessingDescriptorSetLayout();
+		descriptorSetLayouts[3] = createDilationDescriptorSetLayout();
 
 		gBufferPipelineLayout = Renderer::createPipelineLayout({
-			.descriptorSetLayouts = {gBufferDescriptorSetLayout},
+			.descriptorSetLayouts = {descriptorSetLayouts[0]},
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "G-Buffer",
 			#endif
 		});
 		traceRaysPipelineLayout = Renderer::createPipelineLayout({
-			.descriptorSetLayouts = {traceRaysDescriptorSetLayout},
+			.descriptorSetLayouts = {descriptorSetLayouts[1]},
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Trace rays",
 			#endif
 		});
 		postProcessingPipelineLayout = Renderer::createPipelineLayout({
-			.descriptorSetLayouts = {postProcessingDescriptorSetLayout},
+			.descriptorSetLayouts = {descriptorSetLayouts[2]},
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Post processing",
 			#endif
 		});
 		dilationPipelineLayout = Renderer::createPipelineLayout({
-			.descriptorSetLayouts = {dilationDescriptorSetLayout},
+			.descriptorSetLayouts = {descriptorSetLayouts[3]},
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Dilation",
 			#endif
@@ -49,27 +65,27 @@ namespace Trident {
 		verticalBilateralFilterPipeline = createVerticalBilateralFilterPipeline();
 		dilationPipeline = createDilationPipeline();
 
-		descriptorSets = device->allocateDescriptorSets(sequence<ref<DescriptorSetLayout>>{
-			gBufferDescriptorSetLayout,
-			traceRaysDescriptorSetLayout,
-			postProcessingDescriptorSetLayout,
-			dilationDescriptorSetLayout,
-		});
+		descriptorSets = Renderer::getDevice()->allocateDescriptorSets(view<ref<DescriptorSetLayout>>(descriptorSetLayouts, 4));
 
 		intermediateLightmapAtlasSampler = createIntermediateLightmapAtlasSampler();
 
-		traceRaysArgumentBuffer = createTraceRaysArgumentBuffer();
+		argumentBuffer = createArgumentBuffer();
 
 		initialized = true;
 	}
 
-	void Lightmapper::buildLightmapAtlas(view<GeometryIndex3D> vertices, view<svec3<float32>> positions, view<svec3<float32>> normals, view<svec2<float32>> lightmapCoordinates, const LightmapperArguments& lightmapperArguments, ImageAssetDescriptor& lightmapAtlasImageAssetDescriptor) {
-		imageAssetDescriptor = lightmapAtlasImageAssetDescriptor;
-		arguments = lightmapperArguments;
+	void Lightmapper::generateAtlas(ImageAssetDescriptor& imageAssetDescriptor, const LightmapperDescriptor& descriptor) {
+		DEBUG_ASSERT(descriptor.lightmapCoordinates.count() == descriptor.vertices.count());
+
+		this->imageAssetDescriptor = imageAssetDescriptor;
+		lighting = descriptor.lighting;
 
 		if (!initialized) {
 			initialize();
 		}
+
+		const uint32 vertexCount = static_cast<uint32>(descriptor.vertices.count());
+		const uint32 indexCount = static_cast<uint32>(descriptor.indices.count());
 
 		context = {};
 
@@ -88,11 +104,10 @@ namespace Trident {
 		context.gBufferFramebuffer = createGBufferFramebuffer();
 		context.dilationFramebuffer = createDilationFramebuffer();
 
-		context.vertexBuffer = createVertexBuffer(vertices.count());
-		context.positionBuffer = createPositionBuffer(positions.count());
-		context.normalBuffer = createNormalBuffer(normals.count());
+		context.vertexBuffer = createVertexBuffer(vertexCount);
+		context.indexBuffer = createIndexBuffer(indexCount);
 
-		encodeOneTimeCommands(vertices, positions, normals, lightmapCoordinates);
+		encodeOneTimeCommands(descriptor.vertices, descriptor.lightmapCoordinates, descriptor.indices);
 
 		context.lightmapAtlasStagingBuffer = Renderer::createDynamicBuffer({
 			.size = context.lightmapAtlasImage->getSize(),
@@ -104,64 +119,13 @@ namespace Trident {
 			#endif
 		});
 
-		generateLightmaps(static_cast<uint32>(vertices.count()));
+		generateLightmaps(indexCount);
 
 		const ref<BufferView<uint8>> lightmapAtlasView = context.lightmapAtlasStagingBuffer->createView<uint8>(0, context.lightmapAtlasStagingBuffer->getSize());
 
-		std::copy_n(lightmapAtlasView->map(), lightmapAtlasImageAssetDescriptor.data.count(), &lightmapAtlasImageAssetDescriptor.data[0]);
+		std::copy_n(lightmapAtlasView->map(), imageAssetDescriptor.data.count(), &imageAssetDescriptor.data[0]);
 
 		context.lightmapAtlasStagingBuffer->unmap();
-	}
-
-	ref<RenderPass> Lightmapper::createGBufferRenderPass() const {
-		return Renderer::createRenderPass({
-			.attachments = {
-				// G-Buffer position
-				{
-					.format = ImageFormat::R32G32B32A32_SFLOAT,
-					.sampleCount = 1,
-					.loadOperation = LoadOperation::CLEAR,
-					.storeOperation = StoreOperation::STORE,
-					.finalLayout = ImageLayout::GENERAL,
-				},
-
-				// G-Buffer triangle normal
-				{
-					.format = ImageFormat::R32G32B32A32_SFLOAT,
-					.sampleCount = 1,
-					.loadOperation = LoadOperation::CLEAR,
-					.storeOperation = StoreOperation::STORE,
-					.finalLayout = ImageLayout::GENERAL,
-				},
-
-				// G-Buffer vertex normal
-				{
-					.format = ImageFormat::R32G32B32A32_SFLOAT,
-					.sampleCount = 1,
-					.loadOperation = LoadOperation::CLEAR,
-					.storeOperation = StoreOperation::STORE,
-					.finalLayout = ImageLayout::GENERAL,
-				},
-			},
-			.subpasses = {
-				{
-					.colorAttachmentReferences = {
-						{
-							.index = 0,
-							.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
-						},
-						{
-							.index = 1,
-							.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
-						},
-						{
-							.index = 2,
-							.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
-						},
-					},
-				},
-			},
-		});
 	}
 
 	ref<RenderPass> Lightmapper::createDilationRenderPass() const {
@@ -189,161 +153,6 @@ namespace Trident {
 		});
 	}
 
-	ref<Image> Lightmapper::createGBufferPositionImage() const {
-		return gBufferRenderPass->createColorAttachmentImage(
-			{
-				.type = ImageType::TEXTURE_2D,
-				.extent = imageAssetDescriptor.extent,
-				.mipLevelCount = 1,
-				.layerCount = 1,
-				.additionalUsage = ImageUsage::STORAGE,
-				#if defined(DEBUG_OBJECT_NAME)
-					.name = "G-Buffer position",
-				#endif
-			},
-			0
-		);
-	}
-
-	ref<Image> Lightmapper::createGBufferTriangleNormalImage() const {
-		return gBufferRenderPass->createColorAttachmentImage(
-			{
-				.type = ImageType::TEXTURE_2D,
-				.extent = imageAssetDescriptor.extent,
-				.mipLevelCount = 1,
-				.layerCount = 1,
-				.additionalUsage = ImageUsage::STORAGE,
-				#if defined(DEBUG_OBJECT_NAME)
-					.name = "G-Buffer triangle normal",
-				#endif
-			},
-			1
-		);
-	}
-
-	ref<Image> Lightmapper::createGBufferVertexNormalImage() const {
-		return gBufferRenderPass->createColorAttachmentImage(
-			{
-				.type = ImageType::TEXTURE_2D,
-				.extent = imageAssetDescriptor.extent,
-				.mipLevelCount = 1,
-				.layerCount = 1,
-				.additionalUsage = ImageUsage::STORAGE,
-				#if defined(DEBUG_OBJECT_NAME)
-					.name = "G-Buffer vertex normal",
-				#endif
-			},
-			2
-		);
-	}
-
-	ref<Image> Lightmapper::createIntermediateLightmapAtlasImage() const {
-		return Renderer::createDynamicImage({
-			.type = ImageType::TEXTURE_2D,
-			.format = imageAssetDescriptor.format,
-			.extent = imageAssetDescriptor.extent,
-			.mipLevelCount = imageAssetDescriptor.mipLevelCount,
-			.layerCount = imageAssetDescriptor.layerCount,
-			.sampleCount = 1,
-			.usage = ImageUsage::SAMPLED | ImageUsage::STORAGE,
-			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Intermediate lightmap atlas",
-			#endif
-		});
-	}
-
-	ref<Image> Lightmapper::createLightmapAtlasImage() const {
-		return dilationRenderPass->createColorAttachmentImage(
-			{
-				.type = ImageType::TEXTURE_2D,
-				.extent = imageAssetDescriptor.extent,
-				.mipLevelCount = imageAssetDescriptor.mipLevelCount,
-				.layerCount = imageAssetDescriptor.layerCount,
-				.additionalUsage = ImageUsage::TRANSFER_SRC,
-				#if defined(DEBUG_OBJECT_NAME)
-					.name = "Lightmap atlas",
-				#endif
-			},
-			0
-		);
-	}
-
-	ref<ImageView> Lightmapper::createGBufferPositionImageView() {
-		return context.gBufferPositionImage->createView({
-			.mipLevelOffset = 0,
-			.mipLevelCount = 1,
-			.layerOffset = 0,
-			.layerCount = 1,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "G-Buffer position",
-			#endif
-		});
-	}
-
-	ref<ImageView> Lightmapper::createGBufferTriangleNormalImageView() {
-		return context.gBufferTriangleNormalImage->createView({
-			.mipLevelOffset = 0,
-			.mipLevelCount = 1,
-			.layerOffset = 0,
-			.layerCount = 1,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "G-Buffer triangle normal",
-			#endif
-		});
-	}
-
-	ref<ImageView> Lightmapper::createGBufferVertexNormalImageView() {
-		return context.gBufferVertexNormalImage->createView({
-			.mipLevelOffset = 0,
-			.mipLevelCount = 1,
-			.layerOffset = 0,
-			.layerCount = 1,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "G-Buffer vertex normal",
-			#endif
-		});
-	}
-
-	ref<ImageView> Lightmapper::createIntermediateLightmapAtlasImageView() {
-		return context.intermediateLightmapAtlasImage->createView({
-			.mipLevelOffset = 0,
-			.mipLevelCount = imageAssetDescriptor.mipLevelCount,
-			.layerOffset = 0,
-			.layerCount = imageAssetDescriptor.layerCount,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Intermediate lightmap atlas view",
-			#endif
-		});
-	}
-
-	ref<ImageView> Lightmapper::createLightmapAtlasImageView() {
-		return context.lightmapAtlasImage->createView({
-			.mipLevelOffset = 0,
-			.mipLevelCount = imageAssetDescriptor.mipLevelCount,
-			.layerOffset = 0,
-			.layerCount = imageAssetDescriptor.layerCount,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Lightmap atlas view",
-			#endif
-		});
-	}
-
-	ref<Framebuffer> Lightmapper::createGBufferFramebuffer() const {
-		return Renderer::createFramebuffer({
-			.renderPass = gBufferRenderPass,
-			.imageViews = {
-				context.gBufferPositionImageView,
-				context.gBufferTriangleNormalImageView,
-				context.gBufferVertexNormalImageView,
-			},
-			.extent = {imageAssetDescriptor.extent.width, imageAssetDescriptor.extent.height},
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "G-Buffer",
-			#endif
-		});
-	}
-
 	ref<Framebuffer> Lightmapper::createDilationFramebuffer() const {
 		return Renderer::createFramebuffer({
 			.renderPass = dilationRenderPass,
@@ -355,91 +164,6 @@ namespace Trident {
 		});
 	}
 
-	ref<DescriptorSetLayout> Lightmapper::createGBufferDescriptorSetLayout() const {
-		const sequence<DescriptorSetLayoutBinding> bindings = {
-			// Vertex
-			{
-				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
-				.descriptorCount = 1,
-				.shaderStages = ShaderStage::VERTEX,
-			},
-
-			// Normal
-			{
-				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
-				.descriptorCount = 1,
-				.shaderStages = ShaderStage::VERTEX,
-			},
-		};
-
-		return Renderer::createDescriptorSetLayout(bindings);
-	}
-
-	ref<DescriptorSetLayout> Lightmapper::createTraceRaysDescriptorSetLayout() const {
-		const sequence<DescriptorSetLayoutBinding> bindings = {
-			// Trace rays argument
-			{
-				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
-				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
-			},
-
-			// Index
-			{
-				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
-				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
-			},
-
-			// Vertex component
-			{
-				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
-				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
-			},
-
-			// G-Buffer position
-			{
-				.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE,
-				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
-			},
-
-			// G-Buffer triangle normal
-			{
-				.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE,
-				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
-			},
-
-			// G-Buffer vertex normal
-			{
-				.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE,
-				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
-			},
-
-			// Intermediate lightmap atlas
-			{
-				.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE,
-				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
-			},
-		};
-
-		return Renderer::createDescriptorSetLayout(bindings);
-	}
-
-	ref<DescriptorSetLayout> Lightmapper::createPostProcessingDescriptorSetLayout() const {
-		const DescriptorSetLayoutBinding lightmapAtlasBinding = {
-			.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE,
-			.descriptorCount = 1,
-			.shaderStages = ShaderStage::COMPUTE,
-		};
-
-		return Renderer::createDescriptorSetLayout(lightmapAtlasBinding);
-	}
-
 	ref<DescriptorSetLayout> Lightmapper::createDilationDescriptorSetLayout() const {
 		const DescriptorSetLayoutBinding intermediateLightmapAtlasBinding = {
 			.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
@@ -448,143 +172,6 @@ namespace Trident {
 		};
 
 		return Renderer::createDescriptorSetLayout(intermediateLightmapAtlasBinding);
-	}
-
-	ref<GraphicsPipeline> Lightmapper::createGBufferPipeline() const {
-		VertexInputBinding vertexInputBinding(InputRate::VERTEX, false);
-		vertexInputBinding.registerAttribute<svec2<float32>>();
-		vertexInputBinding.registerAttribute<svec2<uint32>>();
-
-		const sequence<ColorBlendAttachment> colorBlendAttachments = {
-			{
-				.blend = false,
-			},
-			{
-				.blend = false,
-			},
-			{
-				.blend = false,
-			},
-		};
-
-		return Renderer::createGraphicsPipeline({
-			.pipelineLayout = gBufferPipelineLayout,
-			.vertexInputBindings = {vertexInputBinding},
-			.vertexShaderModule = Renderer::loadShaderModule(
-				{
-					.stage = ShaderStage::VERTEX,
-					.entryPoint = "main",
-					#if defined(DEBUG_OBJECT_NAME)
-						.name = "G-Buffer vertex",
-					#endif
-				},
-				"Lightmapper/GBuffer.vert"
-			),
-			.fragmentShaderModule = Renderer::loadShaderModule(
-				{
-					.stage = ShaderStage::FRAGMENT,
-					.entryPoint = "main",
-					#if defined(DEBUG_OBJECT_NAME)
-						.name = "G-Buffer fragment",
-					#endif
-				},
-				"Lightmapper/GBuffer.frag"
-			),
-			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
-			.polygonMode = PolygonMode::FILL,
-			.cullMode = CullMode::NONE,
-			.frontFace = FrontFace::CLOCKWISE,
-			.lineWidth = 1.0f,
-			.minSampleShading = 0.0f,
-			.colorBlendState = {
-				.attachments = colorBlendAttachments,
-			},
-			.depthStencilState = {
-				.depthTest = false,
-			},
-			.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
-			.renderPass = gBufferRenderPass,
-			.subpassIndex = 0,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "G-Buffer",
-			#endif
-		});
-	}
-
-	ref<ComputePipeline> Lightmapper::createTraceRaysPipeline() const {
-		return Renderer::createComputePipeline({
-			.pipelineLayout = traceRaysPipelineLayout,
-			.computeShaderModule = Renderer::loadShaderModule(
-				{
-					.stage = ShaderStage::COMPUTE,
-					.entryPoint = "main",
-					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Trace rays compute",
-					#endif
-				},
-				"Lightmapper/TraceRays.comp"
-			),
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Trace rays",
-			#endif
-		});
-	}
-
-	ref<ComputePipeline> Lightmapper::createIntermediateDilationPipeline() const {
-		return Renderer::createComputePipeline({
-			.pipelineLayout = postProcessingPipelineLayout,
-			.computeShaderModule = Renderer::loadShaderModule(
-				{
-					.stage = ShaderStage::COMPUTE,
-					.entryPoint = "main",
-					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Intermediate dilation compute",
-					#endif
-				},
-				"Lightmapper/IntermediateDilation.comp"
-			),
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Intermediate dilation",
-			#endif
-		});
-	}
-
-	ref<ComputePipeline> Lightmapper::createHorizontalBilateralFilterPipeline() const {
-		return Renderer::createComputePipeline({
-			.pipelineLayout = postProcessingPipelineLayout,
-			.computeShaderModule = Renderer::loadShaderModule(
-				{
-					.stage = ShaderStage::COMPUTE,
-					.entryPoint = "main",
-					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Horizontal bilateral filter compute",
-					#endif
-				},
-				"Lightmapper/HorizontalBilateralFilter.comp"
-			),
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Horizontal bilateral filter",
-			#endif
-		});
-	}
-
-	ref<ComputePipeline> Lightmapper::createVerticalBilateralFilterPipeline() const {
-		return Renderer::createComputePipeline({
-			.pipelineLayout = postProcessingPipelineLayout,
-			.computeShaderModule = Renderer::loadShaderModule(
-				{
-					.stage = ShaderStage::COMPUTE,
-					.entryPoint = "main",
-					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Vertical bilateral filter compute",
-					#endif
-				},
-				"Lightmapper/VerticalBilateralFilter.comp"
-			),
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Vertical bilateral filter",
-			#endif
-		});
 	}
 
 	ref<GraphicsPipeline> Lightmapper::createDilationPipeline() const {
@@ -638,81 +225,10 @@ namespace Trident {
 		});
 	}
 
-	ref<Buffer> Lightmapper::createTraceRaysArgumentBuffer() const {
-		const uint64 alignment = Renderer::getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
-
-		return Renderer::createDynamicBuffer({
-			.size = ceil(sizeof(TraceRaysArguments), alignment),
-			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_WRITE_STORAGE,
-			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
-			.persistent = false,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Trace rays argument",
-			#endif
-		});
-	}
-
-	ref<Buffer> Lightmapper::createVertexBuffer(uint64 vertexCount) const {
-		const uint64 alignment = Renderer::getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
-
-		return Renderer::createDynamicBuffer({
-			.size = ceil(vertexCount * sizeof(Vertex), alignment),
-			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE | BufferUsage::VERTEX,
-			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
-			.persistent = false,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Vertex",
-			#endif
-		});
-	}
-
-	ref<Buffer> Lightmapper::createPositionBuffer(uint64 size) const {
-		const uint64 alignment = Renderer::getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
-
-		return Renderer::createDynamicBuffer({
-			.size = ceil(size * sizeof(svec3<float32>), alignment),
-			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
-			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
-			.persistent = false,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Position",
-			#endif
-		});
-	}
-
-	ref<Buffer> Lightmapper::createNormalBuffer(uint64 size) const {
-		const uint64 alignment = Renderer::getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
-
-		return Renderer::createDynamicBuffer({
-			.size = ceil(size * sizeof(svec3<float32>), alignment),
-			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
-			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
-			.persistent = false,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Normal",
-			#endif
-		});
-	}
-
-	ref<Sampler> Lightmapper::createIntermediateLightmapAtlasSampler() const {
-		return Renderer::createSampler({
-			.magFilter = Filter::NEAREST,
-			.minFilter = Filter::NEAREST,
-			.addressModeU = AddressMode::REPEAT,
-			.addressModeV = AddressMode::REPEAT,
-			.addressModeW = AddressMode::REPEAT,
-		});
-	}
-
-	void Lightmapper::encodeOneTimeCommands(view<GeometryIndex3D> vertices, view<svec3<float32>> positions, view<svec3<float32>> normals, view<svec2<float32>> lightmapCoordinates) const {
+	void Lightmapper::encodeOneTimeCommands(view<BuildVertex3D> vertices, view<svec2<float32>> lightmapCoordinates, view<uint32> indices) const {
 		const ref<Device> device = Renderer::getDevice();
 		const ref<Buffer> stagingBuffer = Renderer::createDynamicBuffer({
-			.size = (
-				traceRaysArgumentBuffer->getSize() +
-				context.vertexBuffer->getSize() +
-				context.positionBuffer->getSize() +
-				context.normalBuffer->getSize()
-			),
+			.size = argumentBuffer->getSize() + context.vertexBuffer->getSize() + context.indexBuffer->getSize(),
 			.usage = BufferUsage::TRANSFER_SRC,
 			.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
 			.persistent = false,
@@ -720,32 +236,29 @@ namespace Trident {
 				.name = "Staging",
 			#endif
 		});
-		const ref<BufferView<TraceRaysArguments>> traceRaysArgumentStagingView = stagingBuffer->createView<TraceRaysArguments>(0, traceRaysArgumentBuffer->getSize());
-		const ref<BufferView<Vertex>> vertexStagingView = stagingBuffer->createView<Vertex>(traceRaysArgumentStagingView->getOffset() + traceRaysArgumentStagingView->getSize(), context.vertexBuffer->getSize());
-		const ref<BufferView<svec3<float32>>> positionStagingView = stagingBuffer->createView<svec3<float32>>(vertexStagingView->getOffset() + vertexStagingView->getSize(), context.positionBuffer->getSize());
-		const ref<BufferView<svec3<float32>>> normalStagingView = stagingBuffer->createView<svec3<float32>>(positionStagingView->getOffset() + positionStagingView->getSize(), context.normalBuffer->getSize());
+		const ref<BufferView<Arguments>> argumentStagingView = stagingBuffer->createView<Arguments>(0, argumentBuffer->getSize());
+		const ref<BufferView<BuildVertex3D>> vertexStagingView = stagingBuffer->createView<BuildVertex3D>(argumentStagingView->getOffset() + argumentStagingView->getSize(), context.vertexBuffer->getSize());
+		const ref<BufferView<uint32>> indexStagingView = stagingBuffer->createView<uint32>(vertexStagingView->getOffset() + vertexStagingView->getSize(), context.indexBuffer->getSize());
 
-		TraceRaysArguments* traceRaysArguments = traceRaysArgumentStagingView->map();
-		traceRaysArguments->atlasExtent = {imageAssetDescriptor.extent.width, imageAssetDescriptor.extent.height};
-		traceRaysArguments->triangleCount = static_cast<uint32>(vertices.count() / 3);
-		traceRaysArguments->skyColor = arguments.skyColor;
-		traceRaysArguments->sunDirection = arguments.sunDirection;
-		traceRaysArguments->sunColor = arguments.sunColor;
-		traceRaysArguments->sunIntensity = arguments.sunIntensity;
+		Arguments* arguments = argumentStagingView->map();
+		arguments->atlasExtent = {imageAssetDescriptor.extent.width, imageAssetDescriptor.extent.height};
+		arguments->triangleCount = static_cast<uint32>(indices.count() / 3);
+		arguments->skyColor = lighting.skyColor;
+		arguments->sunDirection = lighting.sunDirection;
+		arguments->sunColor = lighting.sunColor;
+		arguments->sunIntensity = lighting.sunIntensity;
 
-		Vertex* vertexMappedRange = vertexStagingView->map();
+		BuildVertex3D* vertexMappedRange = vertexStagingView->map();
 		uint32 vertexIndex = 0;
 
 		while (vertexIndex < vertices.count()) {
-			vertexMappedRange[vertexIndex].lightmapCoordinate = lightmapCoordinates[vertexIndex];
-			vertexMappedRange[vertexIndex].positionIndex = vertices[vertexIndex].positionIndex;
-			vertexMappedRange[vertexIndex].normalIndex = vertices[vertexIndex].normalIndex;
+			vertexMappedRange[vertexIndex] = vertices[vertexIndex];
+			vertexMappedRange[vertexIndex].textureCoordinate = lightmapCoordinates[vertexIndex];
 
 			vertexIndex += 1;
 		}
 
-		std::copy(positions.begin(), positions.end(), positionStagingView->map());
-		std::copy(normals.begin(), normals.end(), normalStagingView->map());
+		std::copy(indices.begin(), indices.end(), indexStagingView->map());
 
 		stagingBuffer->unmap();
 
@@ -759,136 +272,124 @@ namespace Trident {
 
 		commandEncoder->begin();
 
-		BufferCopyRegion bufferCopyRegion = {
-			.sourceOffset = traceRaysArgumentStagingView->getOffset(),
-			.destinationOffset = 0,
-			.size = traceRaysArgumentStagingView->getSize(),
+		const BufferCopyRegion bufferCopyRegions[3] = {
+			{
+				.sourceOffset = argumentStagingView->getOffset(),
+				.destinationOffset = 0,
+				.size = argumentStagingView->getSize(),
+			},
+			{
+				.sourceOffset = vertexStagingView->getOffset(),
+				.destinationOffset = 0,
+				.size = vertexStagingView->getSize(),
+			},
+			{
+				.sourceOffset = indexStagingView->getOffset(),
+				.destinationOffset = 0,
+				.size = indexStagingView->getSize(),
+			},
 		};
 
-		commandEncoder->copyBufferToBuffer(stagingBuffer, traceRaysArgumentBuffer, bufferCopyRegion);
-
-		bufferCopyRegion = {
-			.sourceOffset = vertexStagingView->getOffset(),
-			.destinationOffset = 0,
-			.size = vertexStagingView->getSize(),
-		};
-
-		commandEncoder->copyBufferToBuffer(stagingBuffer, context.vertexBuffer, bufferCopyRegion);
-
-		bufferCopyRegion = {
-			.sourceOffset = positionStagingView->getOffset(),
-			.destinationOffset = 0,
-			.size = positionStagingView->getSize(),
-		};
-
-		commandEncoder->copyBufferToBuffer(stagingBuffer, context.positionBuffer, bufferCopyRegion);
-
-		bufferCopyRegion = {
-			.sourceOffset = normalStagingView->getOffset(),
-			.destinationOffset = 0,
-			.size = normalStagingView->getSize(),
-		};
-
-		commandEncoder->copyBufferToBuffer(stagingBuffer, context.normalBuffer, bufferCopyRegion);
+		commandEncoder->copyBufferToBuffer(stagingBuffer, argumentBuffer, bufferCopyRegions[0]);
+		commandEncoder->copyBufferToBuffer(stagingBuffer, context.vertexBuffer, bufferCopyRegions[1]);
+		commandEncoder->copyBufferToBuffer(stagingBuffer, context.indexBuffer, bufferCopyRegions[2]);
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
 		queue->submit(commandBuffer);
 		queue->waitIdle();
 
-		const ref<BufferView<TraceRaysArguments>> traceRaysArgumentView = traceRaysArgumentBuffer->createView<TraceRaysArguments>(0, traceRaysArgumentBuffer->getSize());
-		const ref<BufferView<Vertex>> vertexView = context.vertexBuffer->createView<Vertex>(0, context.vertexBuffer->getSize());
-		const ref<BufferView<float32>> positionView = context.positionBuffer->createView<float32>(0, context.positionBuffer->getSize());
-		const ref<BufferView<float32>> normalView = context.normalBuffer->createView<float32>(0, context.normalBuffer->getSize());
-
-		const DescriptorImage gBufferPositionDescriptorImage = {
-			.imageView = context.gBufferPositionImageView,
-			.imageLayout = ImageLayout::GENERAL,
-			.sampler = nullptr,
-		};
-		const DescriptorImage gBufferTriangleNormalDescriptorImage = {
-			.imageView = context.gBufferTriangleNormalImageView,
-			.imageLayout = ImageLayout::GENERAL,
-			.sampler = nullptr,
-		};
-		const DescriptorImage gBufferVertexNormalDescriptorImage = {
-			.imageView = context.gBufferVertexNormalImageView,
-			.imageLayout = ImageLayout::GENERAL,
-			.sampler = nullptr,
-		};
-		const DescriptorImage intermediateLightmapAtlasDescriptorImage = {
-			.imageView = context.intermediateLightmapAtlasImageView,
-			.imageLayout = ImageLayout::GENERAL,
-			.sampler = nullptr,
-		};
-		const DescriptorImage sampledIntermediateLightmapAtlasDescriptorImage = {
-			.imageView = context.intermediateLightmapAtlasImageView,
-			.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-			.sampler = intermediateLightmapAtlasSampler,
+		const ref<BaseBufferView> bufferViews[3] = {
+			argumentBuffer->createView<Arguments>(0, argumentBuffer->getSize()),
+			context.vertexBuffer->createView<BuildVertex3D>(0, context.vertexBuffer->getSize()),
+			context.indexBuffer->createView<uint32>(0, context.indexBuffer->getSize()),
 		};
 
-		const sequence<WriteDescriptorSet> writeDescriptorSets = {
+		const DescriptorImage descriptorImages[5] = {
+			{
+				.imageView = context.gBufferPositionImageView,
+				.imageLayout = ImageLayout::GENERAL,
+				.sampler = nullptr,
+			},
+			{
+				.imageView = context.gBufferTriangleNormalImageView,
+				.imageLayout = ImageLayout::GENERAL,
+				.sampler = nullptr,
+			},
+			{
+				.imageView = context.gBufferVertexNormalImageView,
+				.imageLayout = ImageLayout::GENERAL,
+				.sampler = nullptr,
+			},
+			{
+				.imageView = context.intermediateLightmapAtlasImageView,
+				.imageLayout = ImageLayout::GENERAL,
+				.sampler = nullptr,
+			},
+			{
+				.imageView = context.intermediateLightmapAtlasImageView,
+				.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+				.sampler = intermediateLightmapAtlasSampler,
+			},
+		};
+
+		const WriteDescriptorSet writeDescriptorSets[10] = {
 			{
 				.descriptorSet = descriptorSets[0],
 				.bindingIndex = 0,
-				.descriptorBufferViews = positionView,
-			},
-			{
-				.descriptorSet = descriptorSets[0],
-				.bindingIndex = 1,
-				.descriptorBufferViews = normalView,
+				.descriptorBufferViews = bufferViews[1],
 			},
 			{
 				.descriptorSet = descriptorSets[1],
 				.bindingIndex = 0,
-				.descriptorBufferViews = traceRaysArgumentView,
+				.descriptorBufferViews = bufferViews[0],
 			},
 			{
 				.descriptorSet = descriptorSets[1],
 				.bindingIndex = 1,
-				.descriptorBufferViews = vertexView,
+				.descriptorBufferViews = bufferViews[1],
 			},
 			{
 				.descriptorSet = descriptorSets[1],
 				.bindingIndex = 2,
-				.descriptorBufferViews = positionView,
+				.descriptorBufferViews = bufferViews[2],
 			},
 			{
 				.descriptorSet = descriptorSets[1],
 				.bindingIndex = 3,
-				.descriptorImages = gBufferPositionDescriptorImage,
+				.descriptorImages = descriptorImages[0],
 			},
 			{
 				.descriptorSet = descriptorSets[1],
 				.bindingIndex = 4,
-				.descriptorImages = gBufferTriangleNormalDescriptorImage,
+				.descriptorImages = descriptorImages[1],
 			},
 			{
 				.descriptorSet = descriptorSets[1],
 				.bindingIndex = 5,
-				.descriptorImages = gBufferVertexNormalDescriptorImage,
+				.descriptorImages = descriptorImages[2],
 			},
 			{
 				.descriptorSet = descriptorSets[1],
 				.bindingIndex = 6,
-				.descriptorImages = intermediateLightmapAtlasDescriptorImage,
+				.descriptorImages = descriptorImages[3],
 			},
 			{
 				.descriptorSet = descriptorSets[2],
 				.bindingIndex = 0,
-				.descriptorImages = intermediateLightmapAtlasDescriptorImage,
+				.descriptorImages = descriptorImages[3],
 			},
 			{
 				.descriptorSet = descriptorSets[3],
 				.bindingIndex = 0,
-				.descriptorImages = sampledIntermediateLightmapAtlasDescriptorImage,
+				.descriptorImages = descriptorImages[4],
 			},
 		};
 
-		device->updateDescriptorSets(writeDescriptorSets);
+		device->updateDescriptorSets(view<WriteDescriptorSet>(writeDescriptorSets, 10));
 	}
 
-	void Lightmapper::generateLightmaps(uint32 vertexCount) const {
+	void Lightmapper::generateLightmaps(uint32 indexCount) const {
 		const ref<Device> device = Renderer::getDevice();
 		const float32 width = static_cast<float32>(imageAssetDescriptor.extent.width);
 		const float32 height = static_cast<float32>(imageAssetDescriptor.extent.height);
@@ -915,14 +416,14 @@ namespace Trident {
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, context.gBufferFramebuffer->getExtent());
 		commandEncoder->bindGraphicsPipeline(gBufferPipeline);
-		commandEncoder->bindVertexBuffer(0, context.vertexBuffer, 0, sizeof(Vertex));
+		commandEncoder->bindVertexBuffer(0, context.indexBuffer, 0, sizeof(uint32));
 		commandEncoder->bindDescriptorSets(gBufferPipelineLayout, 0, descriptorSets[0]);
-		commandEncoder->draw(vertexCount, 25, 0, 0);
+		commandEncoder->draw(indexCount, 25, 0, 0);
 		commandEncoder->endRenderPass();
 
 		// TODO(graphics/render-pass/subpass): Add support for subpass dependencies.
 		{
-			const sequence<ImageMemoryBarrier> imageMemoryBarriers = {
+			const ImageMemoryBarrier imageMemoryBarriers[4] = {
 				{
 					.image = context.gBufferPositionImage,
 					.newLayout = ImageLayout::GENERAL,
@@ -945,7 +446,7 @@ namespace Trident {
 				},
 			};
 
-			commandEncoder->insertMemoryBarriers({}, imageMemoryBarriers);
+			commandEncoder->insertMemoryBarriers({}, view<ImageMemoryBarrier>(imageMemoryBarriers, 4));
 		}
 
 		commandEncoder->bindComputePipeline(traceRaysPipeline);

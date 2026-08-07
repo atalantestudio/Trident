@@ -3,10 +3,8 @@
 
 #pragma once
 
-#include "AssetBuilder/API/Scene/Scene3D.hpp"
-
-#include "Engine/API/Geometry/Index.hpp"
-#include "Engine/Filesystem/Asset/GeometryAsset.hpp"
+#include "AssetBuilder/API/Geometry/Geometry3D.hpp"
+#include "AssetBuilder/API/Transform.hpp"
 
 namespace Trident {
 	struct IntermediateGeometry {
@@ -16,11 +14,8 @@ namespace Trident {
 		/// Shared instance count across all associated material geometries.
 		uint32 sharedInstanceCount;
 
-		sequence<GeometryIndex3D> vertices;
-		sequence<svec3<float32>> positions;
-		sequence<svec3<float32>> normals;
-		sequence<svec2<float32>> textureCoordinates;
-		sequence<svec2<float32>> transformedTextureCoordinates;
+		sequence<BuildVertex3D> vertices;
+		sequence<uint32> indices;
 	};
 
 	struct IntermediateMaterialGeometry {

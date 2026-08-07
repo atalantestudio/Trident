@@ -16,50 +16,31 @@ namespace Trident {
 		asset.identifier = stream.read<uint32>();
 		asset.version = stream.read<VersionNumber>();
 
+		const uint8 indexByteSize = stream.read<uint8>();
+
+		ENGINE_ASSERT(indexByteSize == 4, "Only 32-bit indices are supported.");
+
+		const uint32 vertexCount = stream.read<uint32>();
+		const uint32 staticVertexCount = stream.read<uint32>();
+		const uint32 bakedVertexCount = stream.read<uint32>();
+
 		const uint32 triangleCount = stream.read<uint32>();
-		const uint32 vertexCount = triangleCount * 3;
-		const uint32 positionCount = stream.read<uint32>();
-		const uint32 normalCount = stream.read<uint32>();
-		const uint32 textureCoordinateCount = stream.read<uint32>();
-
+		const uint32 indexCount = triangleCount * 3;
 		const uint32 bakedTriangleCount = stream.read<uint32>();
-		const uint32 bakedVertexCount = bakedTriangleCount * 3;
-		const uint32 bakedPositionCount = stream.read<uint32>();
-		const uint32 bakedNormalCount = stream.read<uint32>();
-		const uint32 bakedTextureCoordinateCount = stream.read<uint32>();
+		const uint32 bakedIndexCount = bakedTriangleCount * 3;
 
-		const uint32 lightmapCoordinateCount = stream.read<uint32>();
+		asset.geometryRanges[0] = {0, vertexCount * sizeof(Vertex3D)};
+		asset.geometryRanges[1] = {asset.geometryRanges[0].count, indexCount * sizeof(uint32)};
+		asset.geometryRanges[2] = {asset.geometryRanges[1].offset + asset.geometryRanges[1].count, staticVertexCount * sizeof(uint32)};
 
-		asset.geometryRanges[0].count = vertexCount * sizeof(GeometryIndex3D);
-		asset.geometryRanges[1].count = positionCount * sizeof(svec3<float32>);
-		asset.geometryRanges[2].count = normalCount * sizeof(svec3<float32>);
-		asset.geometryRanges[3].count = textureCoordinateCount * sizeof(svec2<float32>);
-		asset.geometryRanges[4].count = lightmapCoordinateCount * sizeof(svec2<float32>);
-
-		// TODO(asset/scene/3d)
-		asset.staticVertexSize = asset.geometryRanges[0].count;
-		asset.staticPositionSize = asset.geometryRanges[1].count;
-		asset.staticNormalSize = asset.geometryRanges[2].count;
-		asset.staticTextureCoordinateSize = asset.geometryRanges[3].count;
-
-		uint64 geometrySize = 0;
-		uint32 rangeIndex = 0;
-
-		while (rangeIndex < 5) {
-			range<uint64, uint64>& range = asset.geometryRanges[rangeIndex];
-			range.offset = geometrySize;
-
-			geometrySize += range.count;
-
-			rangeIndex += 1;
-		}
+		const uint64 geometrySize = asset.geometryRanges[2].offset + asset.geometryRanges[2].count;
 
 		asset.geometryData = sequence<uint8>(geometrySize);
 
 		const uint32 staticInstanceCount = stream.read<uint32>();
 		const uint32 geometryCount = stream.read<uint32>();
 
-		asset.geometryVertexRanges = sequence<range<uint32, uint32>>(geometryCount);
+		asset.geometryIndexRanges = sequence<range<uint32, uint32>>(geometryCount);
 
 		const uint32 materialGeometryCount = stream.read<uint32>();
 
@@ -90,34 +71,24 @@ namespace Trident {
 		asset.skyColor[1] = stream.read<float32>();
 		asset.skyColor[2] = stream.read<float32>();
 
-		GeometryIndex3D* vertices = pointer_cast<GeometryIndex3D*>(&asset.geometryData[asset.geometryRanges[0].offset]);
-		std::copy_n(pointer_cast<const GeometryIndex3D*>(stream.getBytePosition()), bakedVertexCount, vertices);
-		stream.jump(bakedVertexCount * sizeof(GeometryIndex3D));
+		std::copy_n(stream.getBytePosition(), bakedVertexCount * sizeof(Vertex3D), &asset.geometryData[asset.geometryRanges[0].offset]);
 
-		svec3<float32>* positions = pointer_cast<svec3<float32>*>(&asset.geometryData[asset.geometryRanges[1].offset]);
-		std::copy_n(pointer_cast<const svec3<float32>*>(stream.getBytePosition()), bakedPositionCount, positions);
-		stream.jump(bakedPositionCount * sizeof(svec3<float32>));
+		stream.jump(bakedVertexCount * sizeof(Vertex3D));
 
-		svec3<float32>* normals = pointer_cast<svec3<float32>*>(&asset.geometryData[asset.geometryRanges[2].offset]);
-		std::copy_n(pointer_cast<const svec3<float32>*>(stream.getBytePosition()), bakedNormalCount, normals);
-		stream.jump(bakedNormalCount * sizeof(svec3<float32>));
+		std::copy_n(stream.getBytePosition(), bakedIndexCount * sizeof(uint32), &asset.geometryData[asset.geometryRanges[1].offset]);
 
-		svec2<float32>* textureCoordinates = pointer_cast<svec2<float32>*>(&asset.geometryData[asset.geometryRanges[3].offset]);
-		std::copy_n(pointer_cast<const svec2<float32>*>(stream.getBytePosition()), bakedTextureCoordinateCount, textureCoordinates);
-		stream.jump(bakedTextureCoordinateCount * sizeof(svec2<float32>));
+		stream.jump(bakedIndexCount * sizeof(uint32));
 
-		const range<uint64, uint64> lightmapCoordinateRange = asset.geometryRanges[4];
+		if (asset.geometryRanges[2].count > 0) {
+			std::copy_n(stream.getBytePosition(), asset.geometryRanges[2].count, &asset.geometryData[asset.geometryRanges[2].offset]);
 
-		if (lightmapCoordinateRange.count > 0) {
-			std::copy_n(stream.getBytePosition(), lightmapCoordinateRange.count, &asset.geometryData[lightmapCoordinateRange.offset]);
-
-			stream.jump(lightmapCoordinateRange.count);
+			stream.jump(asset.geometryRanges[2].count);
 		}
 
+		Vertex3D* vertices = pointer_cast<Vertex3D*>(&asset.geometryData[asset.geometryRanges[0].offset]);
+		uint32* indices = pointer_cast<uint32*>(&asset.geometryData[asset.geometryRanges[1].offset]);
 		uint32 vertexOffset = bakedVertexCount;
-		uint32 positionOffset = bakedPositionCount;
-		uint32 normalOffset = bakedNormalCount;
-		uint32 textureCoordinateOffset = bakedTextureCoordinateCount;
+		uint32 indexOffset = bakedIndexCount;
 		uint32 instanceIndex = 0;
 
 		while (instanceIndex < staticInstanceCount) {
@@ -145,7 +116,7 @@ namespace Trident {
 		uint32 geometryIndex = 0;
 
 		while (geometryIndex < geometryCount) {
-			asset.geometryVertexRanges[geometryIndex] = stream.read<range<uint32, uint32>>();
+			asset.geometryIndexRanges[geometryIndex] = stream.read<range<uint32, uint32>>();
 
 			const uint32 geometryAssetIdentifier = stream.read<uint32>();
 
@@ -158,25 +129,18 @@ namespace Trident {
 			ref<Geometry3DAsset>& geometryAsset = geometryAssets[geometryIndex];
 			geometryAsset = assetLibrary->getAsset<Geometry3DAsset>(geometryAssetIdentifier);
 
-			uint32 vertexIndex = 0;
+			std::copy(geometryAsset->vertices.begin(), geometryAsset->vertices.end(), &vertices[vertexOffset]);
 
-			while (vertexIndex < geometryAsset->indexCount) {
-				GeometryIndex3D& vertex = vertices[vertexOffset + vertexIndex];
-				vertex.positionIndex = positionOffset + geometryAsset->positionIndices[vertexIndex];
-				vertex.normalIndex = normalOffset + geometryAsset->normalIndices[vertexIndex];
-				vertex.textureCoordinateIndex = textureCoordinateOffset + geometryAsset->textureCoordinateIndices[vertexIndex];
+			uint32 indexIndex = 0;
 
-				vertexIndex += 1;
+			while (indexIndex < geometryAsset->indices.count()) {
+				indices[indexOffset + indexIndex] = vertexOffset + geometryAsset->indices[indexIndex];
+
+				indexIndex += 1;
 			}
 
-			std::copy(geometryAsset->positions.begin(), geometryAsset->positions.end(), &positions[positionOffset]);
-			std::copy(geometryAsset->normals.begin(), geometryAsset->normals.end(), &normals[normalOffset]);
-			std::copy(geometryAsset->textureCoordinates.begin(), geometryAsset->textureCoordinates.end(), &textureCoordinates[textureCoordinateOffset]);
-
-			vertexOffset += vertexIndex;
-			positionOffset += static_cast<uint32>(geometryAsset->positions.count());
-			normalOffset += static_cast<uint32>(geometryAsset->normals.count());
-			textureCoordinateOffset += static_cast<uint32>(geometryAsset->textureCoordinates.count());
+			indexOffset += indexIndex;
+			vertexOffset += static_cast<uint32>(geometryAsset->vertices.count());
 
 			if (geometryAsset->flags & GeometryAssetFlags::HAS_HULL) {
 				asset.hullCount += 1;

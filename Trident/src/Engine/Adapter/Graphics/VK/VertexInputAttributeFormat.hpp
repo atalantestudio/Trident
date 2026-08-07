@@ -3,18 +3,21 @@
 
 #pragma once
 
-#include "Engine/API/Graphics/VertexInputAttributeType.hpp"
+#include "Engine/API/Graphics/VertexInputAttributeFormat.hpp"
 
 namespace Trident::VK {
-	inline VkFormat getFormat(VertexInputAttributeType vertexInputAttributeType) {
-		static constexpr VkFormat FORMATS[] = {
+	inline VkFormat getFormat(VertexInputAttributeFormat format) {
+		static constexpr VkFormat FORMATS[static_cast<uint32>(VertexInputAttributeFormat::count)] = {
 			VK_FORMAT_R8_SINT,
 			VK_FORMAT_R8_UINT,
+			VK_FORMAT_A2B10G10R10_UNORM_PACK32,
 			VK_FORMAT_R16_SINT,
 			VK_FORMAT_R16_UINT,
 			VK_FORMAT_R32_SINT,
 			VK_FORMAT_R32_UINT,
 			VK_FORMAT_R32_SFLOAT,
+			VK_FORMAT_R16G16_UNORM,
+			VK_FORMAT_R16G16_SFLOAT,
 			VK_FORMAT_R32G32_UINT,
 			VK_FORMAT_R32G32_SFLOAT,
 			VK_FORMAT_R32G32B32_UINT,
@@ -29,8 +32,8 @@ namespace Trident::VK {
 			VK_FORMAT_R64G64B64A64_SFLOAT,
 		};
 
-		ADAPTER_ASSERT(vertexInputAttributeType < VertexInputAttributeType::count, "Invalid vertex input attribute type.");
+		ADAPTER_ASSERT(format < VertexInputAttributeFormat::count, "Invalid vertex input attribute type.");
 
-		return FORMATS[static_cast<uint32>(vertexInputAttributeType)];
+		return FORMATS[static_cast<uint32>(format)];
 	}
 }

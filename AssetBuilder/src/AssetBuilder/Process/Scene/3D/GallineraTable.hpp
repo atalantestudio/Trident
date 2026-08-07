@@ -21,8 +21,8 @@ namespace Trident {
 					.sunIntensity = 1.0f,
 				});
 
-				const uint32 gallineraTableGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("gallinera_table_1k"));
-				const uint32 boxGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("SingleTextureUnitBox"));
+				const uint32 gallineraTableGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("gallinera_table"));
+				const uint32 boxGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("3d_unit_box_st"));
 
 				const MaterialReference whiteMaterial = builder.loadStaticMaterial(assetLibrary->getAsset<MaterialAsset>("white"));
 				const MaterialReference gallineraTableMaterial = builder.loadStaticMaterial(assetLibrary->getAsset<MaterialAsset>("lpbr_gallinera_table_1k"));

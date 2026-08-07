@@ -4,6 +4,14 @@
 #include "pch.hpp"
 
 #include "AssetBuilder/API/AssetBuilderLibrary.hpp"
+#include "AssetBuilder/Process/Geometry/2D/Polygon.hpp"
+#include "AssetBuilder/Process/Geometry/2D/Triangle.hpp"
+#include "AssetBuilder/Process/Geometry/2D/UnitCircle.hpp"
+#include "AssetBuilder/Process/Geometry/2D/UnitSquare.hpp"
+#include "AssetBuilder/Process/Geometry/3D/RectangularCuboid.hpp"
+#include "AssetBuilder/Process/Geometry/3D/SingleTextureUnitBox.hpp"
+#include "AssetBuilder/Process/Geometry/3D/UnitBox.hpp"
+#include "AssetBuilder/Process/Geometry/3D/UnitPlane.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/PlasterCeiling.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/PlasterWall.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/TileFloor.hpp"
@@ -60,7 +68,28 @@ namespace Trident {
 					}
 				}
 
+				registerProcesses();
+
+				ENGINE_INFO("Done building assets.");
+			}
+
+			void release() final override {
+				SceneBuilder::release();
+			}
+
+		private:
+			void registerProcesses() {
 				registerProcess<BuildGeometryAssetProcess>(&assetLibrary);
+
+				registerProcess<PolygonGeometry2D>(&assetLibrary);
+				registerProcess<TriangleGeometry2D>(&assetLibrary);
+				registerProcess<UnitCircleGeometry2D>(&assetLibrary);
+				registerProcess<UnitSquareGeometry2D>(&assetLibrary);
+
+				registerProcess<RectangularCuboidGeometry3D>(&assetLibrary);
+				registerProcess<SingleTextureUnitBoxGeometry3D>(&assetLibrary);
+				registerProcess<UnitBoxGeometry3D>(&assetLibrary);
+				registerProcess<UnitPlaneGeometry3D>(&assetLibrary);
 
 				registerProcess<BuildImageAssetProcess>(&assetLibrary);
 
@@ -100,12 +129,6 @@ namespace Trident {
 				registerProcess<BuildFontAssetProcess>(&assetLibrary);
 
 				registerProcess<BuildAssetMapProcess>(&assetLibrary);
-
-				ENGINE_INFO("Done building assets.");
-			}
-
-			void release() final override {
-				SceneBuilder::release();
 			}
 
 		private:

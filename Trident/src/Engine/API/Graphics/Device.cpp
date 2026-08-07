@@ -234,8 +234,8 @@ namespace Trident {
 					while (vertexInputAttributeIndex < vertexInputAttributes.size()) {
 						const VertexInputAttribute& vertexInputAttribute = vertexInputAttributes[vertexInputAttributeIndex];
 
-						if (vertexInputAttribute.type >= VertexInputAttributeType::count) {
-							VALIDATION_ERROR("descriptor.vertexInputBindings[[]].attributes[[]].type must be a valid VertexInputAttributeType value.", vertexInputBindingIndex, vertexInputAttributeIndex);
+						if (vertexInputAttribute.format >= VertexInputAttributeFormat::count) {
+							VALIDATION_ERROR("descriptor.vertexInputBindings[[]].attributes[[]].format must be a valid VertexInputAttributeFormat value.", vertexInputBindingIndex, vertexInputAttributeIndex);
 						}
 
 						vertexInputAttributeIndex += 1;

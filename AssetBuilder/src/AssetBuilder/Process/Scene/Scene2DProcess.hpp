@@ -7,54 +7,27 @@
 #include "AssetBuilder/API/Scene/Scene2D.hpp"
 
 #include "Engine/API/Process/Process.hpp"
-#include "Engine/ECS/Component/GeometryComponent.hpp"
-#include "Engine/ECS/Component/RigidBody2DComponent.hpp"
-#include "Engine/ECS/EntityComponentMapping.hpp"
-#include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 
 namespace Trident {
-	struct Scene2DData {
-		StaticScene2D staticScene;
-		uint32 entityCount;
-		sequence<uint32> geometryAssetIdentifiers;
-		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
-		sequence<EntityComponentMapping<RigidBody2DComponent>> rigidBodyMappings;
-	};
-
 	class Scene2DProcess : public Process {
 		private:
-			static ByteStream<StreamOperation::WRITE> encodeScene2DAsset(uint32 identifier, const Scene2DData& data) {
-				SceneAssetHeader header{};
-				header.signature = AssetSignature::SCENE;
-				header.identifier = identifier;
-				header.version = {0, 0, 0};
-				header.staticTriangleCount = static_cast<uint32>(data.staticScene.triangles.count());
-				header.staticVertexCount = static_cast<uint32>(data.staticScene.vertices.count());
-				header.staticTextureCoordinateCount = static_cast<uint32>(data.staticScene.textureCoordinates.count());
-				header.entityCount = data.entityCount;
-				header.geometryAssetCount = static_cast<uint32>(data.geometryAssetIdentifiers.count());
-				header.geometryMappingCount = static_cast<uint32>(data.geometryMappings.count());
-				header.materialMappingCount = 0;
-				header.rigidBodyMappingCount = static_cast<uint32>(data.rigidBodyMappings.count());
+			static ByteStream<StreamOperation::WRITE> encodeSceneAsset(uint32 identifier, const BuildScene2D& scene) {
+				const uint64 streamSize = calculateStreamSize(scene);
 
-				const uint64 size =
-					sizeof(header) +
-					header.staticTriangleCount * sizeof(StaticTriangle2D) +
-					header.staticVertexCount * sizeof(svec2<float32>) +
-					header.staticTextureCoordinateCount * sizeof(svec2<float32>) +
-					header.geometryAssetCount * sizeof(uint32) +
-					header.geometryMappingCount * (sizeof(Entity) + sizeof(uint32)) +
-					header.materialMappingCount * (sizeof(Entity) + sizeof(uint32)) +
-					header.rigidBodyMappingCount * (sizeof(Entity) + sizeof(svec2<float32>) * 3 + sizeof(float32) * 6);
+				ByteStream<StreamOperation::WRITE> stream(streamSize, Endianness::LITTLE_ENDIAN);
+				stream.write<AssetSignature>(AssetSignature::SCENE);
+				stream.write<uint32>(identifier);
+				stream.write<VersionNumber>({0, 0, 0});
+				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.triangles.count()));
+				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.vertices.count()));
+				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.textureCoordinates.count()));
+				stream.write<uint32>(scene.dynamicGeometry.entityCount);
+				stream.write<uint32>(static_cast<uint32>(scene.dynamicGeometry.geometryAssetIdentifiers.count()));
+				stream.write<uint32>(static_cast<uint32>(scene.dynamicGeometry.geometryMappings.count()));
+				stream.write<uint32>(static_cast<uint32>(scene.dynamicGeometry.rigidBodyMappings.count()));
 
-				ByteStream<StreamOperation::WRITE> stream(size, Endianness::LITTLE_ENDIAN);
-
-				std::copy_n(pointer_cast<const uint8*>(&header), sizeof(header), stream.getBytePosition());
-
-				stream.jump(sizeof(header));
-
-				for (const StaticTriangle2D& triangle : data.staticScene.triangles) {
+				for (const StaticTriangle2D& triangle : scene.staticGeometry.triangles) {
 					stream.write<uint32>(triangle.aIndex);
 					stream.write<uint32>(triangle.bIndex);
 					stream.write<uint32>(triangle.cIndex);
@@ -63,24 +36,24 @@ namespace Trident {
 					stream.write<uint32>(triangle.cUvIndex);
 				}
 
-				for (const svec2<float32> vertex : data.staticScene.vertices) {
+				for (const svec2<float32> vertex : scene.staticGeometry.vertices) {
 					stream.write<svec2<float32>>(vertex);
 				}
 
-				for (const svec2<float32> textureCoordinate : data.staticScene.textureCoordinates) {
+				for (const svec2<float32> textureCoordinate : scene.staticGeometry.textureCoordinates) {
 					stream.write<svec2<float32>>(textureCoordinate);
 				}
 
-				for (const uint32 geometryAssetIdentifier : data.geometryAssetIdentifiers) {
+				for (const uint32 geometryAssetIdentifier : scene.dynamicGeometry.geometryAssetIdentifiers) {
 					stream.write<uint32>(geometryAssetIdentifier);
 				}
 
-				for (const EntityComponentMapping<GeometryComponent> geometryMapping : data.geometryMappings) {
+				for (const EntityComponentMapping<GeometryComponent> geometryMapping : scene.dynamicGeometry.geometryMappings) {
 					stream.write<Entity>(geometryMapping.entity);
-					stream.write<uint32>(geometryMapping.component.geometryIndex);
+					stream.write<GeometryComponent>(geometryMapping.component);
 				}
 
-				for (const EntityComponentMapping<RigidBody2DComponent>& rigidBodyMapping : data.rigidBodyMappings) {
+				for (const EntityComponentMapping<RigidBody2DComponent>& rigidBodyMapping : scene.dynamicGeometry.rigidBodyMappings) {
 					stream.write<Entity>(rigidBodyMapping.entity);
 					stream.write<svec2<float32>>(svec2<float32>(rigidBodyMapping.component.position));
 					stream.write<float32>(rigidBodyMapping.component.rotation);
@@ -96,28 +69,18 @@ namespace Trident {
 				return stream;
 			}
 
-			void createSceneAsset(uint32 identifier, const ByteStream<StreamOperation::WRITE>& stream, view<char8> assetName, const std::filesystem::path& assetOutputPath) {
-				const std::string assetOutputPathString = assetOutputPath.string();
-
-				sequence<char8> outputPath(assetOutputPathString.size() + assetName.count() + 5);
-				std::copy(assetOutputPathString.begin(), assetOutputPathString.end(), &outputPath[0]);
-				std::copy(assetName.begin(), assetName.end(), &outputPath[assetOutputPathString.size()]);
-				std::copy_n(".tsa", 4, &outputPath[assetOutputPathString.size() + assetName.count()]);
-
-				Writer writer = Filesystem::openWriter(outputPath);
-				writer.write(stream.data, stream.size);
-
-				assetLibrary->registerAsset(identifier, assetName);
+			static uint64 calculateStreamSize(const BuildScene2D& scene) {
+				return (
+					sizeof(AssetHeader) +
+					sizeof(uint32) * 7 +
+					scene.staticGeometry.triangles.count() * sizeof(StaticTriangle2D) +
+					scene.staticGeometry.vertices.count() * sizeof(svec2<float32>) +
+					scene.staticGeometry.textureCoordinates.count() * sizeof(svec2<float32>) +
+					scene.dynamicGeometry.geometryAssetIdentifiers.count() * sizeof(uint32) +
+					scene.dynamicGeometry.geometryMappings.count() * sizeof(EntityComponentMapping<GeometryComponent>) +
+					scene.dynamicGeometry.rigidBodyMappings.count() * (sizeof(Entity) + sizeof(svec2<float32>) * 3 + sizeof(float32) * 6)
+				);
 			}
-
-		protected:
-			explicit Scene2DProcess(AssetBuilderLibrary* assetLibrary) :
-				assetLibrary(assetLibrary)
-			{}
-
-			virtual view<char8> getAssetName() const = 0;
-
-			virtual Scene2DData createScene(AssetBuilderLibrary* assetLibrary) const = 0;
 
 		public:
 			sint32 main(view<void*> arguments) final override {
@@ -135,14 +98,38 @@ namespace Trident {
 				}
 
 				const uint32 assetIdentifier = AssetLibrary::createAssetIdentifier();
-				const Scene2DData scene = createScene(assetLibrary);
-				const ByteStream<StreamOperation::WRITE> stream = encodeScene2DAsset(assetIdentifier, scene);
+				const BuildScene2D scene = createScene(assetLibrary);
+				const ByteStream<StreamOperation::WRITE> stream = encodeSceneAsset(assetIdentifier, scene);
 
 				createSceneAsset(assetIdentifier, stream, assetName, assetOutputPath);
 
-				ENGINE_INFO("Generated 2D scene asset \"[]\" (ID: []).", assetName, assetIdentifier);
+				ENGINE_INFO("Generated scene asset \"[]\" (ID: []).", assetName, assetIdentifier);
 
 				return 0;
+			}
+
+		protected:
+			explicit Scene2DProcess(AssetBuilderLibrary* assetLibrary) :
+				assetLibrary(assetLibrary)
+			{}
+
+			virtual view<char8> getAssetName() const = 0;
+
+			virtual BuildScene2D createScene(AssetBuilderLibrary* assetLibrary) const = 0;
+
+		private:
+			void createSceneAsset(uint32 identifier, const ByteStream<StreamOperation::WRITE>& stream, view<char8> assetName, const std::filesystem::path& assetOutputPath) {
+				const std::string assetOutputPathString = assetOutputPath.string();
+
+				sequence<char8> outputPath(assetOutputPathString.size() + assetName.count() + 5);
+				std::copy(assetOutputPathString.begin(), assetOutputPathString.end(), &outputPath[0]);
+				std::copy(assetName.begin(), assetName.end(), &outputPath[assetOutputPathString.size()]);
+				std::copy_n(".tsa", 4, &outputPath[assetOutputPathString.size() + assetName.count()]);
+
+				Writer writer = Filesystem::openWriter(outputPath);
+				writer.write(stream.data, stream.size);
+
+				assetLibrary->registerAsset(identifier, assetName);
 			}
 
 		private:

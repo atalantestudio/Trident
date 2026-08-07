@@ -3,9 +3,9 @@
 
 #pragma once
 
+#include "AssetBuilder/API/Geometry/Geometry3D.hpp"
 #include "AssetBuilder/API/Transform.hpp"
 
-#include "Engine/API/Geometry/Index.hpp"
 #include "Engine/ECS/Component/GeometryComponent.hpp"
 #include "Engine/ECS/Component/RigidBody3DComponent.hpp"
 #include "Engine/ECS/EntityComponentMapping.hpp"
@@ -14,7 +14,7 @@
 
 namespace Trident {
 	struct BuildGeometry {
-		range<uint32, uint32> vertexRange;
+		range<uint32, uint32> indexRange;
 		uint32 assetIdentifier;
 	};
 
@@ -40,10 +40,11 @@ namespace Trident {
 	};
 
 	struct BuildStaticSceneGeometry3D {
-		sequence<GeometryIndex3D> bakedVertices;
-		sequence<svec3<float32>> bakedPositions;
-		sequence<svec3<float32>> bakedNormals;
-		sequence<svec2<float32>> bakedTextureCoordinates;
+		/// Baked and external vertices.
+		uint32 vertexCount;
+
+		sequence<BuildVertex3D> bakedVertices;
+		sequence<uint32> bakedIndices;
 
 		/// Baked coordinates, then coordinates from external assets.
 		sequence<svec2<float32>> lightmapCoordinates;
@@ -74,10 +75,8 @@ namespace Trident {
 		/// Grouped by material shader.
 		sequence<BuildMaterial> materials;
 
+		uint32 vertexCount;
 		uint32 triangleCount;
-		uint32 positionCount;
-		uint32 normalCount;
-		uint32 textureCoordinateCount;
 
 		BuildStaticSceneGeometry3D staticGeometry;
 		BuildDynamicSceneGeometry3D dynamicGeometry;

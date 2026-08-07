@@ -4,8 +4,8 @@
 #pragma once
 
 #include "Engine/API/Graphics/InputRate.hpp"
-#include "Engine/API/Graphics/VertexInputAttributeType.hpp"
 #include "Engine/API/Graphics/VertexInputAttribute.hpp"
+#include "Engine/API/Graphics/VertexInputAttributeFormat.hpp"
 
 namespace Trident {
 	class VertexInputBinding {
@@ -31,7 +31,7 @@ namespace Trident {
 			}
 
 			template<typename AttributeType>
-			constexpr void registerAttribute() {
+			constexpr void registerAttribute(VertexInputAttributeFormat format) {
 				constexpr uint32 alignment = getAlignment<AttributeType>();
 
 				uint32 remainder = offset % alignment;
@@ -41,9 +41,10 @@ namespace Trident {
 					offset += alignment - remainder;
 				}
 
-				VertexInputAttribute vertexInputAttribute{};
-				vertexInputAttribute.type = getVertexInputAttributeType<AttributeType>();
-				vertexInputAttribute.offset = offset;
+				const VertexInputAttribute vertexInputAttribute = {
+					.format = format,
+					.offset = offset,
+				};
 
 				attributes.emplace_back(vertexInputAttribute);
 
@@ -58,6 +59,13 @@ namespace Trident {
 					// Pad so that the stride is a multiple of the alignment.
 					stride += maxAlignment - remainder;
 				}
+			}
+
+			template<typename AttributeType>
+			constexpr void registerAttribute() {
+				const VertexInputAttributeFormat format = getVertexInputAttributeFormat<AttributeType>();
+
+				return registerAttribute<AttributeType>(format);
 			}
 
 		public:

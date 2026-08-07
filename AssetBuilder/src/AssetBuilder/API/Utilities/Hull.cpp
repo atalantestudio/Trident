@@ -1,21 +1,11 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-#pragma once
+#include "pch.hpp"
 
-#include "Engine/API/Geometry/Geometry2D.hpp"
-#include "Engine/API/Geometry/Hull2D.hpp"
-#include "Engine/API/Geometry/Hull3D.hpp"
-#include "Engine/API/Geometry/Hull2DType.hpp"
-#include "Engine/API/Geometry/Hull3DType.hpp"
+#include "AssetBuilder/API/Utilities/Utilities.hpp"
 
 namespace Trident {
-	template<Hull2DType HullType>
-	Hull2D createHull(const Geometry2D& geometry, std::vector<float32>& vertexComponentBuffer, std::vector<uint32>& indexBuffer);
-
-	template<Hull3DType HullType>
-	Hull3D createHull(view<svec3<float32>> positions);
-
 	template<>
 	Hull2D createHull<Hull2DType::CIRCLE>(const Geometry2D& geometry, std::vector<float32>& vertexComponentBuffer, std::vector<uint32>& indexBuffer) {
 		const range<uint32, uint32> vertexPositionComponentRange = geometry.getVertexPositionComponentRange();
@@ -89,24 +79,25 @@ namespace Trident {
 	}
 
 	template<>
-	Hull3D createHull<Hull3DType::POLYGON>(view<svec3<float32>> positions) {
-		vec3<float32> centroid = {0.0f, 0.0f, 0.0f};
+	Hull3D createHull<Hull3DType::POLYGON>(view<BuildVertex3D> vertices) {
+		svec3<float32> centroid = {0.0f, 0.0f, 0.0f};
 		float32 radius = 0.0f;
 
-		for (const svec3<float32> position : positions) {
-			centroid += vec3<float32>(position);
+		for (const BuildVertex3D& vertex : vertices) {
+			centroid += vertex.position;
 		}
 
-		centroid /= static_cast<float32>(positions.count());
+		centroid /= static_cast<float32>(vertices.count());
 
-		for (const svec3<float32> vertex : positions) {
-			radius = max(radius, distanceSquared(vec3<float32>(vertex), centroid));
+		for (const BuildVertex3D& vertex : vertices) {
+			// TODO(lyah/scalar)
+			radius = max(radius, distanceSquared(vec3<float32>(vertex.position), vec3<float32>(centroid)));
 		}
 
 		radius = sqrt(radius);
 
 		return {
-			.centroid = svec3<float32>(centroid),
+			.centroid = centroid,
 			.radius = radius,
 			.vertexPositions = {},
 			.edges = {},
