@@ -89,19 +89,17 @@ namespace Trident {
 			geometry.vertices = sequence<BuildVertex3D>(asset->vertices.count());
 			geometry.indices = sequence<uint32>(asset->indices.count());
 
-			const uint32 vertexCount = static_cast<uint32>(asset->vertices.count());
-
 			uint32 vertexIndex = 0;
 
-			while (vertexIndex < vertexCount) {
+			while (vertexIndex < geometry.vertices.count()) {
 				const Vertex3D& packedVertex = asset->vertices[vertexIndex];
 
 				BuildVertex3D& vertex = geometry.vertices[vertexIndex];
 				vertex.position = packedVertex.position;
+				vertex.normal = asset->vertexNormals[vertexIndex];
 
 				// TODO(lyah/scalar)
-				vertex.normal = unpack<VertexInputAttributeFormat::R10G10B10A2_UNORM, svec3<float32>>(packedVertex.normal) * 2.0f - svec3<float32>{1.0f, 1.0f, 1.0f};
-				vertex.tangent = unpack<VertexInputAttributeFormat::R10G10B10A2_UNORM, svec3<float32>>(packedVertex.tangent) * 2.0f - svec3<float32>{1.0f, 1.0f, 1.0f};
+				vertex.tangent = unpack<VertexInputAttributeFormat::R10G10B10A2_UNORM, svec3<float32>>(packedVertex.tangent);
 				vertex.textureCoordinate = unpack<VertexInputAttributeFormat::R16G16_UNORM, svec2<float32>>(packedVertex.textureCoordinate);
 
 				vertexIndex += 1;

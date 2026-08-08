@@ -11,9 +11,9 @@ namespace Trident {
 		static constexpr float32 scale = 0x3ff * 0.5f;
 
 		return (
-			(static_cast<uint32>((value.x + 1.0f) * scale) & 0x3ff) |
-			((static_cast<uint32>((value.y + 1.0f) * scale) & 0x3ff) << 10) |
-			((static_cast<uint32>((value.z + 1.0f) * scale) & 0x3ff) << 20)
+			static_cast<uint32>(round(clamp((value.x + 1.0f) * scale, 0.0f, 1023.0f))) |
+			(static_cast<uint32>(round(clamp((value.y + 1.0f) * scale, 0.0f, 1023.0f))) << 10) |
+			(static_cast<uint32>(round(clamp((value.z + 1.0f) * scale, 0.0f, 1023.0f))) << 20)
 		);
 	}
 

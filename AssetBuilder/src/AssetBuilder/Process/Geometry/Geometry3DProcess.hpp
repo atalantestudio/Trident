@@ -36,13 +36,19 @@ namespace Trident {
 					stream.write<uint16>(static_cast<uint16>(geometry.hullLineIndices.count()));
 				}
 
-				for (const BuildVertex3D vertex : geometry.vertices) {
+				for (const BuildVertex3D& vertex : geometry.vertices) {
 					stream.write<float32>(vertex.position.x);
 					stream.write<float32>(vertex.position.y);
 					stream.write<float32>(vertex.position.z);
 					stream.write<uint32>(pack<VertexInputAttributeFormat::R10G10B10A2_UNORM, uint32>(vertex.normal));
 					stream.write<uint32>(pack<VertexInputAttributeFormat::R10G10B10A2_UNORM, uint32>(vertex.tangent));
 					stream.write<uint32>(pack<VertexInputAttributeFormat::R16G16_UNORM, uint32>(vertex.textureCoordinate));
+				}
+
+				for (const BuildVertex3D& vertex : geometry.vertices) {
+					stream.write<float32>(vertex.normal.x);
+					stream.write<float32>(vertex.normal.y);
+					stream.write<float32>(vertex.normal.z);
 				}
 
 				for (const uint32 index : geometry.indices) {
@@ -81,7 +87,7 @@ namespace Trident {
 					sizeof(GeometryAssetFlags) +
 					sizeof(uint8) +
 					sizeof(uint32) * 2 +
-					geometry.vertices.count() * sizeof(Vertex3D) +
+					geometry.vertices.count() * (sizeof(Vertex3D) + sizeof(svec3<float32>)) +
 					geometry.indices.count() * sizeof(uint32)
 				);
 

@@ -35,6 +35,11 @@ namespace Trident {
 	struct Geometry3DAsset : public Asset {
 		GeometryAssetFlags flags;
 		sequence<Vertex3D> vertices;
+
+		// TODO(asset/geometry/3d): Don't store in the release asset.
+		/// High resolution normals for lightmap generation.
+		sequence<svec3<float32>> vertexNormals;
+
 		sequence<uint32> indices;
 
 		Hull3DType hullType;

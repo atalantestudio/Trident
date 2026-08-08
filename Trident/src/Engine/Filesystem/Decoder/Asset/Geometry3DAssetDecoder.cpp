@@ -20,6 +20,7 @@ namespace Trident {
 		const uint32 vertexCount = stream.read<uint32>();
 
 		asset.vertices = sequence<Vertex3D>(vertexCount);
+		asset.vertexNormals = sequence<svec3<float32>>(vertexCount);
 
 		const uint8 indexByteSize = stream.read<uint8>();
 
@@ -58,6 +59,12 @@ namespace Trident {
 			vertex.normal = stream.read<uint32>();
 			vertex.tangent = stream.read<uint32>();
 			vertex.textureCoordinate = stream.read<uint32>();
+		}
+
+		for (svec3<float32>& normal : asset.vertexNormals) {
+			normal.x = stream.read<float32>();
+			normal.y = stream.read<float32>();
+			normal.z = stream.read<float32>();
 		}
 
 		for (uint32& index : asset.indices) {
