@@ -87,7 +87,8 @@ namespace Trident {
 			uint64 staticInstanceCount = 0;
 			uint64 dynamicVertexCount = 0;
 			uint64 dynamicIndexCount = 0;
-			uint64 lightmapCoordinateCount = 0;
+			uint64 lightmapVertexCount = 0;
+			uint64 lightmapIndexCount = 0;
 			uint64 materialGeometryCount = 0;
 			uint64 materialCount = 0;
 			uint32 entityCount = 0;

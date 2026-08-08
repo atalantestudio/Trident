@@ -82,13 +82,17 @@ namespace Trident {
 			while (coordinateIndex < lightmap.vertexRange.count) {
 				const svec2<float32> textureCoordinate = vertices[coordinateIndex].textureCoordinate;
 
-				staticGeometry.lightmapCoordinates[lightmap.coordinateOffset + coordinateIndex] = (textureCoordinate - lightmap.minCoordinate) * lightmap.scale / lightmap.luxelScale;
+				// TODO(lyah/scalar)
+				svec2<float32>& coordinate = staticGeometry.lightmapCoordinates[lightmap.coordinateOffset + coordinateIndex];
+				coordinate = (textureCoordinate - lightmap.minCoordinate) * lightmap.scale / lightmap.luxelScale;
+				coordinate.x = round(coordinate.x);
+				coordinate.y = round(coordinate.y);
 
 				coordinateIndex += 1;
 			}
 
 			// TODO(lyah/scalar)
-			vec2<float32> size = lightmap.scale / lightmap.luxelScale;
+			vec2<float32> size = (lightmap.maxCoordinate - lightmap.minCoordinate) * lightmap.scale / lightmap.luxelScale;
 			size = {ceil(size[0] / 4.0f) * 4.0f, ceil(size[1] / 4.0f) * 4.0f};
 
 			lightmap.size = {static_cast<uint32>(size[0]), static_cast<uint32>(size[1])};

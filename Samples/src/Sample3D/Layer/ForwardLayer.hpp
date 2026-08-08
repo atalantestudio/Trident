@@ -80,7 +80,7 @@ namespace Trident {
 					camera.updateProjectionView();
 				#else
 					// TODO(forward/camera): Expose the position.
-					cameraController.getCamera().position = {0.0f, 1.0f, -3.0f};
+					cameraController.getCamera().position = {0.0f, 64.0f, 0.0f};
 
 					cameraController.getCamera().aspectRatio = getApplication()->getWindow()->getAspectRatio();
 					cameraController.updateProjection();

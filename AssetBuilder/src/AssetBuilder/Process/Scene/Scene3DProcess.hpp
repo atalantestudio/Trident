@@ -26,6 +26,7 @@ namespace Trident {
 				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.bakedVertices.count()));
 				stream.write<uint32>(scene.triangleCount);
 				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.bakedIndices.count() / 3));
+				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.lightmapCoordinates.count()));
 				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.instances.count()));
 				stream.write<uint32>(static_cast<uint32>(scene.geometries.count()));
 				stream.write<uint32>(static_cast<uint32>(scene.materialGeometries.count()));
@@ -148,7 +149,7 @@ namespace Trident {
 				uint64 size = (
 					sizeof(AssetHeader) +
 					sizeof(uint8) +
-					sizeof(uint32) * 13 +
+					sizeof(uint32) * 14 +
 					sizeof(svec3<float32>) +
 					scene.staticGeometry.bakedVertices.count() * sizeof(Vertex3D) +
 					scene.staticGeometry.bakedIndices.count() * sizeof(uint32) +

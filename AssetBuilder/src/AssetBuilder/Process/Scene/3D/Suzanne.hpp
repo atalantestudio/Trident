@@ -24,13 +24,13 @@ namespace Trident {
 				const uint32 suzanneGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("suzanne"));
 				const uint32 boxGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("3d_unit_box_st"));
 
-				const MaterialReference whiteMaterial = builder.loadStaticMaterial(assetLibrary->getAsset<MaterialAsset>("white"));
+				const MaterialReference lightmappedDefaultMaterial = builder.loadStaticMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
 				const MaterialReference debugMaterial = builder.loadDynamicMaterial(assetLibrary->getAsset<MaterialAsset>("debug"));
 
 				builder.placeSurface(
 					{
 						.geometry = builder.createWallGeometry({128.0f, 128.0f}),
-						.material = whiteMaterial,
+						.material = lightmappedDefaultMaterial,
 						.textureFiltering = {
 							.translation = {0.0f, 0.0f},
 							.rotation = 0.0f,
@@ -51,7 +51,7 @@ namespace Trident {
 				builder.placeSurface(
 					{
 						.geometry = builder.createWallGeometry({128.0f, 64.0f}),
-						.material = whiteMaterial,
+						.material = lightmappedDefaultMaterial,
 						.textureFiltering = {
 							.translation = {0.0f, 0.0f},
 							.rotation = 0.0f,
@@ -72,7 +72,7 @@ namespace Trident {
 				builder.placeSurface(
 					{
 						.geometry = builder.createWallGeometry({128.0f, 64.0f}),
-						.material = whiteMaterial,
+						.material = lightmappedDefaultMaterial,
 						.textureFiltering = {
 							.translation = {0.0f, 0.0f},
 							.rotation = 0.0f,
@@ -92,7 +92,7 @@ namespace Trident {
 
 				builder.placeStaticProp({
 					.geometryIndex = suzanneGeometry,
-					.material = whiteMaterial,
+					.material = lightmappedDefaultMaterial,
 					.transform = {
 						.translation = {0.0f, 32.0f, 0.0f},
 						.rotation = {radians(-90.0_deg), radians(180.0_deg), 0.0_rad},

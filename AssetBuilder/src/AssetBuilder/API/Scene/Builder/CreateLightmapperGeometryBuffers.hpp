@@ -7,8 +7,8 @@
 
 namespace Trident {
 	void SceneBuilder::createLightmapperGeometryBuffers(const BuildScene3D& scene, sequence<BuildVertex3D>& vertices, sequence<uint32>& indices) {
-		vertices = sequence<BuildVertex3D>(staticVertexCount);
-		indices = sequence<uint32>(staticIndexCount);
+		vertices = sequence<BuildVertex3D>(lightmapVertexCount);
+		indices = sequence<uint32>(lightmapIndexCount);
 
 		std::copy(scene.staticGeometry.bakedVertices.begin(), scene.staticGeometry.bakedVertices.end(), &vertices[0]);
 		std::copy(scene.staticGeometry.bakedIndices.begin(), scene.staticGeometry.bakedIndices.end(), &indices[0]);

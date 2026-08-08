@@ -28,10 +28,11 @@ namespace Trident {
 		const uint32 indexCount = triangleCount * 3;
 		const uint32 bakedTriangleCount = stream.read<uint32>();
 		const uint32 bakedIndexCount = bakedTriangleCount * 3;
+		const uint32 lightmapCoordinateCount = stream.read<uint32>();
 
 		asset.geometryRanges[0] = {0, vertexCount * sizeof(Vertex3D)};
 		asset.geometryRanges[1] = {asset.geometryRanges[0].count, indexCount * sizeof(uint32)};
-		asset.geometryRanges[2] = {asset.geometryRanges[1].offset + asset.geometryRanges[1].count, staticVertexCount * sizeof(uint32)};
+		asset.geometryRanges[2] = {asset.geometryRanges[1].offset + asset.geometryRanges[1].count, lightmapCoordinateCount * sizeof(uint32)};
 
 		const uint64 geometrySize = asset.geometryRanges[2].offset + asset.geometryRanges[2].count;
 
@@ -85,10 +86,6 @@ namespace Trident {
 			stream.jump(asset.geometryRanges[2].count);
 		}
 
-		Vertex3D* vertices = pointer_cast<Vertex3D*>(&asset.geometryData[asset.geometryRanges[0].offset]);
-		uint32* indices = pointer_cast<uint32*>(&asset.geometryData[asset.geometryRanges[1].offset]);
-		uint32 vertexOffset = bakedVertexCount;
-		uint32 indexOffset = bakedIndexCount;
 		uint32 instanceIndex = 0;
 
 		while (instanceIndex < staticInstanceCount) {
@@ -111,6 +108,11 @@ namespace Trident {
 
 			instanceIndex += 1;
 		}
+
+		Vertex3D* vertices = pointer_cast<Vertex3D*>(&asset.geometryData[asset.geometryRanges[0].offset]);
+		uint32* indices = pointer_cast<uint32*>(&asset.geometryData[asset.geometryRanges[1].offset]);
+		uint32 vertexOffset = bakedVertexCount;
+		uint32 indexOffset = bakedIndexCount;
 
 		sequence<ref<Geometry3DAsset>> geometryAssets(geometryCount);
 		uint32 geometryIndex = 0;

@@ -14,6 +14,7 @@ namespace Trident {
 		uint32 coordinateOffset;
 
 		svec2<float32> scale;
+		svec2<float32> maxCoordinate;
 		svec2<float32> minCoordinate;
 		svec2<float32> luxelScale;
 		Extent2D size;

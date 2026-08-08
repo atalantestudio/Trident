@@ -83,7 +83,8 @@ namespace Trident {
 		Lightmap lightmap{};
 		lightmap.geometryIndex = materialGeometry.geometryIndex;
 		lightmap.vertexRange = {vertexOffset, surfaceVertexCount};
-		lightmap.scale = (maxCoordinate - minCoordinate) * descriptor.geometry.scale;
+		lightmap.scale = descriptor.geometry.scale;
+		lightmap.maxCoordinate = maxCoordinate;
 		lightmap.minCoordinate = minCoordinate;
 		lightmap.luxelScale = descriptor.lightmap.luxelScale;
 		lightmap.tintColor = descriptor.lightmap.tintColor;
@@ -96,6 +97,7 @@ namespace Trident {
 		bakedIndexCount += surfaceIndexCount;
 		staticVertexCount += surfaceVertexCount;
 		staticIndexCount += surfaceIndexCount;
-		lightmapCoordinateCount += surfaceVertexCount;
+		lightmapVertexCount += surfaceVertexCount;
+		lightmapIndexCount += surfaceIndexCount;
 	}
 }

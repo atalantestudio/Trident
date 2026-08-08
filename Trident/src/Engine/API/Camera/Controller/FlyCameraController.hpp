@@ -14,7 +14,7 @@ namespace Trident {
 		public:
 			FlyCameraController() {
 				camera.position = {0.0_m, 0.0_m, -0.4_m};
-				camera.fieldOfView = radians(60.0_deg);
+				camera.fieldOfView = radians(75.0_deg);
 				camera.nearPlane = 0.01_m;
 			}
 

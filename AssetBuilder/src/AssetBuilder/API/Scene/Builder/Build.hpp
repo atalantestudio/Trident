@@ -224,11 +224,11 @@ namespace Trident {
 	}
 
 	void SceneBuilder::buildLightmaps(BuildScene3D& scene) {
-		scene.staticGeometry.lightmapCoordinates = sequence<svec2<float32>>(lightmapCoordinateCount);
+		scene.staticGeometry.lightmapCoordinates = sequence<svec2<float32>>(lightmapVertexCount);
 
 		lightmapLookups.reserve(lightmaps.size());
 
-		if (lightmapCoordinateCount > 0) {
+		if (lightmapVertexCount > 0) {
 			createLightmaps(scene.staticGeometry);
 			updateLightmapCoordinates(scene.staticGeometry);
 

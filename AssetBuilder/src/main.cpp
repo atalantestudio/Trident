@@ -12,13 +12,14 @@
 #include "AssetBuilder/Process/Geometry/3D/SingleTextureUnitBox.hpp"
 #include "AssetBuilder/Process/Geometry/3D/UnitBox.hpp"
 #include "AssetBuilder/Process/Geometry/3D/UnitPlane.hpp"
+#include "AssetBuilder/Process/Material/Lightmapped/Default.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/PlasterCeiling.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/PlasterWall.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/TileFloor.hpp"
-#include "AssetBuilder/Process/Material/Lightmapped/White.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/WoodDoor.hpp"
 #include "AssetBuilder/Process/Material/LightmappedPBR/GallineraTable.hpp"
 #include "AssetBuilder/Process/Material/PBR/Debug.hpp"
+#include "AssetBuilder/Process/Material/PBR/Default.hpp"
 #include "AssetBuilder/Process/Material/PBR/FoldingWoodenStool.hpp"
 #include "AssetBuilder/Process/Material/PBR/GallineraTable.hpp"
 #include "AssetBuilder/Process/Material/PBR/Lemon.hpp"
@@ -32,6 +33,7 @@
 #include "AssetBuilder/Process/Scene/2D/Sliding.hpp"
 #include "AssetBuilder/Process/Scene/2D/Stacking.hpp"
 #include "AssetBuilder/Process/Scene/2D/Swing.hpp"
+#include "AssetBuilder/Process/Scene/3D/Cubes.hpp"
 #include "AssetBuilder/Process/Scene/3D/EdgeContact.hpp"
 #include "AssetBuilder/Process/Scene/3D/GallineraTable.hpp"
 #include "AssetBuilder/Process/Scene/3D/Hall.hpp"
@@ -97,12 +99,13 @@ namespace Trident {
 				registerProcess<FoldingWoodenStoolMaterial>(&assetLibrary);
 				registerProcess<GallineraTableMaterial>(&assetLibrary);
 				registerProcess<LemonMaterial>(&assetLibrary);
+				registerProcess<LMDefaultMaterial>(&assetLibrary);
 				registerProcess<LPBRGallineraTableMaterial>(&assetLibrary);
+				registerProcess<PBRDefaultMaterial>(&assetLibrary);
 				registerProcess<PlasterCeilingMaterial>(&assetLibrary);
 				registerProcess<PlasterWallMaterial>(&assetLibrary);
 				registerProcess<RubberDuckToyMaterial>(&assetLibrary);
 				registerProcess<TileFloorMaterial>(&assetLibrary);
-				registerProcess<WhiteMaterial>(&assetLibrary);
 				registerProcess<WoodDoorMaterial>(&assetLibrary);
 
 				registerProcess<BoxesScene2D>(&assetLibrary);
@@ -115,6 +118,7 @@ namespace Trident {
 				registerProcess<StackingScene2D>(&assetLibrary);
 				registerProcess<SwingScene2D>(&assetLibrary);
 
+				registerProcess<CubesScene3D>(&assetLibrary);
 				registerProcess<EdgeContactScene3D>(&assetLibrary);
 				registerProcess<GallineraTableScene3D>(&assetLibrary);
 				registerProcess<HallScene3D>(&assetLibrary);

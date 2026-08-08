@@ -94,9 +94,9 @@ vec3 randomUnitDirection(inout uint seed) {
 	return normalize(vec3(randomScalar(seed), randomScalar(seed), randomScalar(seed)) * 2.0 - 1.0);
 }
 
-bool rayTriangleIntersection(Ray ray, Triangle triangle_, bool face, inout float distance, inout vec3 barycentricCoordinate) {
-	const float E = 1e-8;
-	const float E2 = 1e-4;
+bool rayTriangleIntersection(Ray ray, Triangle triangle_, bool face, inout float t, inout vec3 barycentricCoordinate) {
+	const float E = 1e-6;
+	const float F = 1e-8;
 
 	vec3 a = triangle_.vertices[0].position;
 	vec3 b = triangle_.vertices[1].position;
@@ -105,38 +105,47 @@ bool rayTriangleIntersection(Ray ray, Triangle triangle_, bool face, inout float
 	vec3 ac = c - a;
 	vec3 p = cross(ray.direction, ac);
 	float d = dot(ab, p);
-	bool faceTest = d < E;
 
-	if (face == BACK_FACE) {
-		faceTest = !faceTest;
+	if (face == FRONT_FACE) {
+		if (d <= E) {
+			return false;
+		}
 	}
-
-	if (faceTest) {
-		return false;
+	else {
+		if (d >= -E) {
+			return false;
+		}
 	}
 
 	float inverseD = 1.0 / d;
-	vec3 t = ray.origin - a;
-	float w = dot(t, p) * inverseD;
+	vec3 s = ray.origin - a;
+	float u = dot(s, p) * inverseD;
 
-	if (w < -E2 || w > 1.0 + E2) {
+	if (u < -F || u > 1.0 + F) {
 		return false;
 	}
 
-	vec3 q = cross(t, ab);
+	vec3 q = cross(s, ab);
 	float v = dot(ray.direction, q) * inverseD;
 
-	if (v < -E2 || v + w > 1.0 + E2) {
+	if (v < -F || u + v > 1.0 + F) {
 		return false;
 	}
 
-	float u = 1.0 - v - w;
+	t = dot(ac, q) * inverseD;
 
-	barycentricCoordinate = vec3(u, v, w);
+	if (t > E) {
+		float w = 1.0 - v - u;
 
-	distance = dot(ac, q) * inverseD;
+		barycentricCoordinate = vec3(u, w, v);
 
-	return distance > 0.0;
+		// TODO(asset-builder/lightmapper): This order also seems to work?
+		// barycentricCoordinate = vec3(v, w, u);
+
+		return true;
+	}
+
+	return false;
 }
 
 Hit rchit(Ray ray, Triangle triangle_, float distance, vec3 barycentricCoordinate) {
@@ -235,40 +244,40 @@ vec3 rgen(Hit primaryHit, inout uint seed) {
 vec3 adjustSamplePosition(vec3 position, vec3 triangleNormal, float diagonalLuxelSize) {
 	const float bias = 1e-4;
 
-	vec3 d0 = normalize(cross(position, triangleNormal));
-	vec3 d1 = normalize(cross(d0, triangleNormal));
+	vec3 a = normalize(cross(position, triangleNormal));
+	vec3 b = normalize(cross(a, triangleNormal));
 	float rayLength = diagonalLuxelSize * 0.5;
 
 	Ray ray;
-	ray.origin = position + triangleNormal * bias;
-	ray.direction = d0;
+	ray.origin = position + sign(triangleNormal) * abs(position * bias);
+	ray.direction = a;
 
 	Hit hit = rint(ray, BACK_FACE);
 
-	if (hit.distance > 0.0 && hit.distance < rayLength) {
-		return hit.position + hit.triangleNormal * bias;
+	if (hit.distance > 0.0 && hit.distance <= rayLength) {
+		return hit.position + sign(hit.triangleNormal) * abs(hit.position * bias);
 	}
 
-	ray.direction = d1;
+	ray.direction = b;
 
 	hit = rint(ray, BACK_FACE);
 
-	if (hit.distance > 0.0 && hit.distance < rayLength) {
-		return hit.position + hit.triangleNormal * bias;
+	if (hit.distance > 0.0 && hit.distance <= rayLength) {
+		return hit.position + sign(hit.triangleNormal) * abs(hit.position * bias);
 	}
 
-	ray.direction = -d0;
+	ray.direction = -a;
 	hit = rint(ray, BACK_FACE);
 
-	if (hit.distance > 0.0 && hit.distance < rayLength) {
-		return hit.position + hit.triangleNormal * bias;
+	if (hit.distance > 0.0 && hit.distance <= rayLength) {
+		return hit.position + sign(hit.triangleNormal) * abs(hit.position * bias);
 	}
 
-	ray.direction = -d1;
+	ray.direction = -b;
 	hit = rint(ray, BACK_FACE);
 
-	if (hit.distance > 0.0 && hit.distance < rayLength) {
-		return hit.position + hit.triangleNormal * bias;
+	if (hit.distance > 0.0 && hit.distance <= rayLength) {
+		return hit.position + sign(hit.triangleNormal) * abs(hit.position * bias);
 	}
 
 	return position;

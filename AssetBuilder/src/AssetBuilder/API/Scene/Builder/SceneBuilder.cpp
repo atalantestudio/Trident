@@ -99,7 +99,6 @@ namespace Trident {
 				vertex.normal = asset->vertexNormals[vertexIndex];
 
 				// TODO(lyah/scalar)
-				vertex.tangent = unpack<VertexInputAttributeFormat::R10G10B10A2_UNORM, svec3<float32>>(packedVertex.tangent);
 				vertex.textureCoordinate = unpack<VertexInputAttributeFormat::R16G16_UNORM, svec2<float32>>(packedVertex.textureCoordinate);
 
 				vertexIndex += 1;
