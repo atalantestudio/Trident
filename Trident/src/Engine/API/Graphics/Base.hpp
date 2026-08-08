@@ -79,7 +79,7 @@ namespace Trident {
 	typedef void (*BindDescriptorSetsImplementation)(CommandEncoder* commandEncoder, ref<PipelineLayout> pipelineLayout, uint32 descriptorSetIndexOffset, view<ref<DescriptorSet>> descriptorSets);
 	typedef void (*BindGraphicsPipelineImplementation)(CommandEncoder* commandEncoder, ref<GraphicsPipeline> graphicsPipeline);
 	typedef void (*BindIndexBufferImplementation)(CommandEncoder* commandEncoder, ref<Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize);
-	typedef void (*BindVertexBufferImplementation)(CommandEncoder* commandEncoder, uint32 bindingIndex, ref<Buffer> vertexBuffer, uint64 offset, uint32 stride);
+	typedef void (*BindVertexBufferImplementation)(CommandEncoder* commandEncoder, uint32 bindingIndex, ref<Buffer> vertexBuffer, uint64 offset);
 	typedef void (*CopyBufferToBufferImplementation)(CommandEncoder* commandEncoder, ref<Buffer> sourceBuffer, ref<Buffer> destinationBuffer, view<BufferCopyRegion> copyRegions);
 	typedef void (*CopyBufferToImageImplementation)(CommandEncoder* commandEncoder, ref<Buffer> sourceBuffer, ref<Image> destinationImage, view<BufferImageCopyRegion> copyRegions);
 	typedef void (*CopyImageToBufferImplementation)(CommandEncoder* commandEncoder, ref<Image> sourceImage, ref<Buffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions);

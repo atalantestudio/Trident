@@ -117,7 +117,7 @@ namespace Trident {
 		device->adapter->bindIndexBufferImplementation(this, indexBuffer, offset, indexTypeSize);
 	}
 
-	void CommandEncoder::bindVertexBuffer(uint32 bindingIndex, ref<Buffer> vertexBuffer, uint64 offset, uint32 stride) {
+	void CommandEncoder::bindVertexBuffer(uint32 bindingIndex, ref<Buffer> vertexBuffer, uint64 offset) {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
@@ -136,14 +136,10 @@ namespace Trident {
 						VALIDATION_ERROR("bufferOffset must be less than the size of vertexBuffer.");
 					}
 				}
-
-				if (stride == 0) {
-					VALIDATION_ERROR("stride must not be 0.");
-				}
 			}
 		#endif
 
-		device->adapter->bindVertexBufferImplementation(this, bindingIndex, vertexBuffer, offset, stride);
+		device->adapter->bindVertexBufferImplementation(this, bindingIndex, vertexBuffer, offset);
 	}
 
 	void CommandEncoder::copyBufferToBuffer(ref<Buffer> sourceBuffer, ref<Buffer> destinationBuffer, view<BufferCopyRegion> copyRegions) {

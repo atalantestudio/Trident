@@ -12,9 +12,10 @@ namespace Trident {
 			explicit GraphicsPipeline(const Trident::Device* device);
 
 		public:
-			ID3D12PipelineState* pipelineState;
+			sequence<UINT> vertexInputBindingStrides;
 			ref<DX12::PipelineLayout> pipelineLayout;
 			D3D_PRIMITIVE_TOPOLOGY primitiveTopology;
+			ID3D12PipelineState* pipelineState;
 	};
 
 	namespace DX12 {

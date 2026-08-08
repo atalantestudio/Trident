@@ -55,7 +55,7 @@ namespace Trident {
 				commandEncoder->setScissor(0, 0, swapchainExtent);
 				commandEncoder->bindGraphicsPipeline(graphicsPipeline);
 				commandEncoder->bindDescriptorSets(pipelineLayout, 0, imageDescriptorSet);
-				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
+				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
 				commandEncoder->draw(3, 1, 0, 0);
 				commandEncoder->endRenderPass();
 			}

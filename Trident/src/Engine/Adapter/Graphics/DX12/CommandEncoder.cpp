@@ -418,6 +418,7 @@ namespace Trident {
 		_commandEncoder->commandList->SetPipelineState(pipeline->pipelineState);
 		_commandEncoder->commandList->SetGraphicsRootSignature(pipeline->pipelineLayout->rootSignature);
 		_commandEncoder->commandList->IASetPrimitiveTopology(pipeline->primitiveTopology);
+		_commandEncoder->graphicsPipeline = pipeline.get();
 		_commandEncoder->samplerDescriptorTableRootParameterIndex = pipeline->pipelineLayout->samplerDescriptorTableRootParameterIndex;
 		_commandEncoder->computePipelineBound = false;
 		_commandEncoder->commandCount += 1;
@@ -425,8 +426,6 @@ namespace Trident {
 
 	void DX12::bindIndexBuffer(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		ADAPTER_ASSERT(offset < indexBuffer->getSize(), "The index buffer offset is overflowing.");
 
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 
@@ -439,17 +438,15 @@ namespace Trident {
 		_commandEncoder->commandCount += 1;
 	}
 
-	void DX12::bindVertexBuffer(Trident::CommandEncoder* commandEncoder, uint32 bindingIndex, ref<Trident::Buffer> vertexBuffer, uint64 offset, uint32 stride) {
+	void DX12::bindVertexBuffer(Trident::CommandEncoder* commandEncoder, uint32 bindingIndex, ref<Trident::Buffer> vertexBuffer, uint64 offset) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		ADAPTER_ASSERT(offset < vertexBuffer->getSize(), "The vertex buffer offset is overflowing.");
 
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 
 		D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
 		vertexBufferView.BufferLocation = std::static_pointer_cast<DX12::Buffer>(vertexBuffer)->resource->GetGPUVirtualAddress() + offset;
 		vertexBufferView.SizeInBytes = static_cast<UINT>(vertexBuffer->getSize() - offset);
-		vertexBufferView.StrideInBytes = stride;
+		vertexBufferView.StrideInBytes = _commandEncoder->graphicsPipeline->vertexInputBindingStrides[bindingIndex];
 
 		_commandEncoder->commandList->IASetVertexBuffers(bindingIndex, 1, &vertexBufferView);
 		_commandEncoder->commandCount += 1;
@@ -991,11 +988,12 @@ namespace Trident {
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to reset command list.");
 
 		_commandEncoder->commandCount = 0;
+		_commandEncoder->graphicsPipeline = nullptr;
+		_commandEncoder->samplerDescriptorTableRootParameterIndex = max<UINT>();
 		_commandEncoder->computePipelineBound = false;
 		_commandEncoder->framebuffer = nullptr;
 		_commandEncoder->subpassIndex = 0;
 		_commandEncoder->presentRenderTargetIndex = max<UINT>();
-		_commandEncoder->samplerDescriptorTableRootParameterIndex = max<UINT>();
 	}
 
 	void DX12::setLineWidth(Trident::CommandEncoder* commandEncoder, float32 lineWidth) {

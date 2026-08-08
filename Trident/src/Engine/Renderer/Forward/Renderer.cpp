@@ -39,9 +39,9 @@ namespace Trident {
 				const MaterialShader& materialShader = sceneAsset->materialShaders[materialShaderIndex];
 
 				commandEncoder->bindGraphicsPipeline(materialPipelines[materialShaderIndex]);
-				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex3D));
-				commandEncoder->bindVertexBuffer(1, lightmapCoordinateBuffer, 0, sizeof(uint32));
-				commandEncoder->bindVertexBuffer(2, instanceBuffer, 0, sizeof(Instance3D));
+				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
+				commandEncoder->bindVertexBuffer(1, lightmapCoordinateBuffer, 0);
+				commandEncoder->bindVertexBuffer(2, instanceBuffer, 0);
 				commandEncoder->bindIndexBuffer<uint32>(indexBuffer, 0);
 				commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialShaderIndex], 0, staticGeometryDescriptorSet);
 
@@ -73,8 +73,8 @@ namespace Trident {
 				const MaterialShader& materialShader = sceneAsset->materialShaders[materialShaderIndex];
 
 				commandEncoder->bindGraphicsPipeline(materialPipelines[materialShaderIndex]);
-				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex3D));
-				commandEncoder->bindVertexBuffer(1, instanceBuffer, 0, sizeof(Instance3D));
+				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
+				commandEncoder->bindVertexBuffer(1, instanceBuffer, 0);
 				commandEncoder->bindIndexBuffer<uint32>(indexBuffer, 0);
 				commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialShaderIndex], 0, forwardDescriptorSet);
 
@@ -107,7 +107,7 @@ namespace Trident {
 			// TODO(forward): Restore debug modes.
 			/* commandEncoder->bindGraphicsPipeline(debugHullWireframePipeline);
 			commandEncoder->bindDescriptorSets(debugHullWireframePipelineLayout, 0, forwardDescriptorSet);
-			commandEncoder->bindVertexBuffer(0, instanceBuffer, 0, sizeof(Instance3D));
+			commandEncoder->bindVertexBuffer(0, instanceBuffer, 0);
 			commandEncoder->bindIndexBuffer<uint16>(debugHullWireframeBuffer, 0);
 
 			uint32 materialShaderIndex = sceneAsset->dynamicMaterialShaderOffset;
@@ -153,7 +153,7 @@ namespace Trident {
 			// TODO(forward): Restore debug modes.
 			/* commandEncoder->bindGraphicsPipeline(debugContactManifoldPipeline);
 			commandEncoder->bindDescriptorSets(debugContactManifoldPipelineLayout, 0, forwardDescriptorSet);
-			commandEncoder->bindVertexBuffer(0, debugContactManifoldBuffer, 0, sizeof(svec3<float32>));
+			commandEncoder->bindVertexBuffer(0, debugContactManifoldBuffer, 0);
 			commandEncoder->draw(contactCount, 1, 0, 0); */
 		}
 	}

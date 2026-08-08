@@ -6,17 +6,14 @@
 #include "Engine/Renderer/Forward/Renderer.hpp"
 
 namespace Trident {
-	GraphicsPipelineDescriptor ForwardRenderer::getDynamicPipelineDescriptor() const {
-		VertexInputBinding vertexInputBindings[2] = {
-			VertexInputBinding(InputRate::VERTEX),
-			VertexInputBinding(InputRate::INSTANCE),
-		};
-
+	GraphicsPipelineDescriptor ForwardRenderer::getDynamicPipelineDescriptor(VertexInputBinding* vertexInputBindings) const {
+		vertexInputBindings[0] = VertexInputBinding(InputRate::VERTEX);
 		vertexInputBindings[0].registerAttribute<svec3<float32>>(VertexInputAttributeFormat::R32G32B32_FLOAT);
 		vertexInputBindings[0].registerAttribute<uint32>(VertexInputAttributeFormat::R10G10B10A2_UNORM);
 		vertexInputBindings[0].registerAttribute<uint32>(VertexInputAttributeFormat::R10G10B10A2_UNORM);
 		vertexInputBindings[0].registerAttribute<uint32>(VertexInputAttributeFormat::R16G16_UNORM);
 
+		vertexInputBindings[1] = VertexInputBinding(InputRate::INSTANCE);
 		vertexInputBindings[1].registerAttribute<mat4x4<float32>>();
 		vertexInputBindings[1].registerAttribute<mat3x3<float32>>();
 

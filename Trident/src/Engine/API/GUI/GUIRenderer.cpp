@@ -623,9 +623,9 @@ namespace Trident {
 			commandEncoder->bindDescriptorSets(subcomponentPipelineLayout, 0, subcomponentDescriptorSet);
 
 			// TODO: Remove vertex buffer.
-			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
+			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
 
-			commandEncoder->bindVertexBuffer(1, subcomponentBuffer, 0, sizeof(GUISubcomponent));
+			commandEncoder->bindVertexBuffer(1, subcomponentBuffer, 0);
 			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 			commandEncoder->drawIndexed(6, subcomponentCount, 0, 0, 0);
 		}
@@ -635,9 +635,9 @@ namespace Trident {
 			commandEncoder->bindDescriptorSets(subcomponentPipelineLayout, 0, subcomponentDescriptorSet);
 
 			// TODO: Remove vertex buffer.
-			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
+			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
 
-			commandEncoder->bindVertexBuffer(1, glyphSubcomponentBuffer, 0, sizeof(GUIGlyphSubcomponent));
+			commandEncoder->bindVertexBuffer(1, glyphSubcomponentBuffer, 0);
 			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 			commandEncoder->drawIndexed(6, glyphSubcomponentCount, 0, 0, 0);
 		}

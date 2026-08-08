@@ -95,7 +95,7 @@ namespace Trident {
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, extent);
 				commandEncoder->bindGraphicsPipeline(trianglePipeline);
-				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
+				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
 				commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 				commandEncoder->drawIndexed(3, 1, 0, 0, 0);
 				commandEncoder->endRenderPass();

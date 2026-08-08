@@ -199,8 +199,8 @@ namespace Trident {
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, extent);
 				commandEncoder->bindDescriptorSets(arrayTexturePipelineLayout, 0, arrayTextureDescriptorSet);
-				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
-				commandEncoder->bindVertexBuffer(1, vertexBuffer, 6 * sizeof(Vertex), sizeof(Instance));
+				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
+				commandEncoder->bindVertexBuffer(1, vertexBuffer, 6 * sizeof(Vertex));
 				commandEncoder->draw(6, 4, 0, 0);
 				commandEncoder->endRenderPass();
 			}

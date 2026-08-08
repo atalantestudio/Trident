@@ -49,10 +49,10 @@ namespace Trident {
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
 				commandEncoder->bindGraphicsPipeline(graphicsPipeline);
-				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
+				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
 
 				for (uint32 instanceIndex = 0; instanceIndex < INSTANCE_COUNT; instanceIndex += 1) {
-					commandEncoder->bindVertexBuffer(1, instanceBuffer, instanceIndex * sizeof(Instance), sizeof(Instance));
+					commandEncoder->bindVertexBuffer(1, instanceBuffer, instanceIndex * sizeof(Instance));
 					commandEncoder->draw(3, 1, instanceIndex * 3, 0);
 				}
 

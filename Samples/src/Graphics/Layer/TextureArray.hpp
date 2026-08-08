@@ -131,8 +131,8 @@ namespace Trident {
 				commandEncoder->setScissor(0, 0, swapchainExtent);
 				commandEncoder->bindGraphicsPipeline(graphicsPipeline);
 				commandEncoder->bindDescriptorSets(pipelineLayout, 0, textureArrayDescriptorSet);
-				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(svec2<float32>));
-				commandEncoder->bindVertexBuffer(1, instanceBuffer, 0, sizeof(Instance));
+				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
+				commandEncoder->bindVertexBuffer(1, instanceBuffer, 0);
 				commandEncoder->draw(6, 4, 0, 0);
 				commandEncoder->endRenderPass();
 			}

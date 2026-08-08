@@ -88,7 +88,7 @@ namespace Trident {
 		));
 	}
 
-	void GL::bindVertexBuffer(Trident::CommandEncoder* commandEncoder, uint32 bindingIndex, ref<Trident::Buffer> vertexBuffer, uint64 offset, uint32 stride) {
+	void GL::bindVertexBuffer(Trident::CommandEncoder* commandEncoder, uint32 bindingIndex, ref<Trident::Buffer> vertexBuffer, uint64 offset) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
@@ -97,7 +97,7 @@ namespace Trident {
 			bindingIndex,
 			std::static_pointer_cast<GL::Buffer>(vertexBuffer)->buffer,
 			offset,
-			stride
+			_commandEncoder->graphicsPipeline->vertexInputBindingStrides[bindingIndex]
 		));
 	}
 

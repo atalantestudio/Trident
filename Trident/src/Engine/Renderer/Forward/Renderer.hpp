@@ -295,8 +295,8 @@ namespace Trident {
 			ref<Sampler> createMaterialSampler() const;
 			ref<Sampler> createLightmapAtlasSampler() const;
 
-			GraphicsPipelineDescriptor getStaticPipelineDescriptor() const;
-			GraphicsPipelineDescriptor getDynamicPipelineDescriptor() const;
+			GraphicsPipelineDescriptor getStaticPipelineDescriptor(VertexInputBinding* vertexInputBindings) const;
+			GraphicsPipelineDescriptor getDynamicPipelineDescriptor(VertexInputBinding* vertexInputBindings) const;
 
 			void updateGeometryDescriptorSets() const;
 

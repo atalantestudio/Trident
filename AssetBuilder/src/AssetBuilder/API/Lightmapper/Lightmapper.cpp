@@ -416,7 +416,7 @@ namespace Trident {
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, context.gBufferFramebuffer->getExtent());
 		commandEncoder->bindGraphicsPipeline(gBufferPipeline);
-		commandEncoder->bindVertexBuffer(0, context.indexBuffer, 0, sizeof(uint32));
+		commandEncoder->bindVertexBuffer(0, context.indexBuffer, 0);
 		commandEncoder->bindDescriptorSets(gBufferPipelineLayout, 0, descriptorSets[0]);
 		commandEncoder->draw(indexCount, 25, 0, 0);
 		commandEncoder->endRenderPass();

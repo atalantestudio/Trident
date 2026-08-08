@@ -30,12 +30,13 @@ namespace Trident {
 		const ref<DX12::ShaderModule> fragmentShaderModule = std::static_pointer_cast<DX12::ShaderModule>(descriptor.fragmentShaderModule);
 		HRESULT result;
 
-		ref<DX12::GraphicsPipeline> graphicsPipeline = createRef<DX12::GraphicsPipeline>(device);
-		graphicsPipeline->pipelineLayout = std::static_pointer_cast<DX12::PipelineLayout>(descriptor.pipelineLayout);
-		graphicsPipeline->primitiveTopology = getPrimitiveTopology(descriptor.primitiveTopology);
-
 		ADAPTER_ASSERT(subpass.colorAttachmentReferences.count() <= 8, "Too many color attachment references.");
 		ADAPTER_ASSERT(descriptor.colorBlendState.attachments.count() <= 8, "Too many color blend attachments.");
+
+		ref<DX12::GraphicsPipeline> graphicsPipeline = createRef<DX12::GraphicsPipeline>(device);
+		graphicsPipeline->vertexInputBindingStrides = sequence<UINT>(descriptor.vertexInputBindings.count());
+		graphicsPipeline->pipelineLayout = std::static_pointer_cast<DX12::PipelineLayout>(descriptor.pipelineLayout);
+		graphicsPipeline->primitiveTopology = getPrimitiveTopology(descriptor.primitiveTopology);
 
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDescriptor{};
 		graphicsPipelineStateDescriptor.pRootSignature = graphicsPipeline->pipelineLayout->rootSignature;
@@ -139,6 +140,8 @@ namespace Trident {
 
 				inputElementDescriptorIndex += 1;
 			}
+
+			graphicsPipeline->vertexInputBindingStrides[vertexInputBindingIndex] = vertexInputBinding.stride;
 
 			vertexInputBindingIndex += 1;
 		}

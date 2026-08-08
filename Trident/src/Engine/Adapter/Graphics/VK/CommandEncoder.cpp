@@ -201,7 +201,7 @@ namespace Trident {
 		_commandEncoder->commandCount += 1;
 	}
 
-	void VK::bindVertexBuffer(Trident::CommandEncoder* commandEncoder, uint32 bindingIndex, ref<Trident::Buffer> vertexBuffer, uint64 offset, uint32 stride) {
+	void VK::bindVertexBuffer(Trident::CommandEncoder* commandEncoder, uint32 bindingIndex, ref<Trident::Buffer> vertexBuffer, uint64 offset) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		static PFN_vkCmdBindVertexBuffers vkCmdBindVertexBuffers = loadDeviceProcedure<PFN_vkCmdBindVertexBuffers>(static_cast<const VK::Device*>(commandEncoder->device)->device, "vkCmdBindVertexBuffers");

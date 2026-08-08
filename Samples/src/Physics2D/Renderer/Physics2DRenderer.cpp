@@ -1309,8 +1309,8 @@ namespace Trident {
 		// Rigid body fill
 		{
 			commandEncoder->bindGraphicsPipeline(rigidBodyFillPipeline);
-			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
-			commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0, sizeof(RigidBody));
+			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
+			commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0);
 			commandEncoder->bindIndexBuffer<uint32>(indexBuffer, 0);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
 
@@ -1331,8 +1331,8 @@ namespace Trident {
 		// Rigid body stroke
 		{
 			commandEncoder->bindGraphicsPipeline(rigidBodyStrokePipeline);
-			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
-			commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0, sizeof(RigidBody));
+			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
+			commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0);
 			commandEncoder->bindIndexBuffer<uint32>(indexBuffer, 0);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
 
@@ -1356,7 +1356,7 @@ namespace Trident {
 			updateCentersOfMass();
 
 			commandEncoder->bindGraphicsPipeline(centerOfMassPipeline);
-			commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, 0, sizeof(CenterOfMass));
+			commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, 0);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
 			commandEncoder->draw(rigidBodyComponentPool.componentCount, 1, 0, 0);
 		}
@@ -1378,7 +1378,7 @@ namespace Trident {
 			// Rigid body placeholder center of mass
 			{
 				commandEncoder->bindGraphicsPipeline(rigidBodyPlaceholderCenterOfMassPipeline);
-				commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, 0, sizeof(CenterOfMass));
+				commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, 0);
 				commandEncoder->bindDescriptorSets(placeholderPipelineLayout, 0, descriptorSets);
 				commandEncoder->draw(1, 1, selectedEntity, 0);
 			}
@@ -1386,8 +1386,8 @@ namespace Trident {
 			// Rigid body placeholder fill
 			{
 				commandEncoder->bindGraphicsPipeline(rigidBodyPlaceholderFillPipeline);
-				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
-				commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0, sizeof(RigidBody));
+				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
+				commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0);
 				commandEncoder->bindIndexBuffer<uint32>(indexBuffer, 0);
 				commandEncoder->bindDescriptorSets(placeholderPipelineLayout, 0, descriptorSets);
 				commandEncoder->drawIndexed(geometry.getIndexRange().count, 1, geometry.getIndexRange().offset, geometry.getVertexPositionComponentRange().offset / 2, selectedEntity);
@@ -1396,8 +1396,8 @@ namespace Trident {
 			// Rigid body placeholder stroke
 			{
 				commandEncoder->bindGraphicsPipeline(rigidBodyPlaceholderStrokePipeline);
-				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
-				commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0, sizeof(RigidBody));
+				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
+				commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0);
 				commandEncoder->bindIndexBuffer<uint32>(indexBuffer, 0);
 				commandEncoder->bindDescriptorSets(placeholderPipelineLayout, 0, descriptorSets);
 				commandEncoder->drawIndexed(hull.lineIndexRange.count, 1, hull.lineIndexRange.offset, geometry.getVertexPositionComponentRange().offset / 2, selectedEntity);
@@ -1411,7 +1411,7 @@ namespace Trident {
 		void Physics2DRenderer::renderDistance(ref<CommandEncoder> commandEncoder) const {
 			commandEncoder->bindGraphicsPipeline(distanceGraphicsPipeline);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
-			commandEncoder->bindVertexBuffer(0, closestPointBuffer, 0, sizeof(Vertex));
+			commandEncoder->bindVertexBuffer(0, closestPointBuffer, 0);
 			commandEncoder->draw(2, 1, 0, 0);
 		}
 	#endif
@@ -1421,14 +1421,14 @@ namespace Trident {
 			if (vertexFeatureCount > 0) {
 				commandEncoder->bindGraphicsPipeline(vertexFeatureGraphicsPipeline);
 				commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
-				commandEncoder->bindVertexBuffer(0, vertexFeatureBuffer, 0, sizeof(Vertex));
+				commandEncoder->bindVertexBuffer(0, vertexFeatureBuffer, 0);
 				commandEncoder->draw(vertexFeatureCount, 1, 0, 0);
 			}
 
 			if (edgeFeatureCount > 0) {
 				commandEncoder->bindGraphicsPipeline(edgeFeatureGraphicsPipeline);
 				commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
-				commandEncoder->bindVertexBuffer(0, edgeFeatureBuffer, 0, sizeof(Vertex));
+				commandEncoder->bindVertexBuffer(0, edgeFeatureBuffer, 0);
 				commandEncoder->draw(edgeFeatureCount * 2, 1, 0, 0);
 			}
 		}

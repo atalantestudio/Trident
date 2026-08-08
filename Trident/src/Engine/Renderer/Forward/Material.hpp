@@ -119,7 +119,13 @@ namespace Trident {
 				.descriptorSetLayouts = {staticGeometryDescriptorSetLayout, nullptr},
 			};
 
-			GraphicsPipelineDescriptor materialPipelineDescriptor = getStaticPipelineDescriptor();
+			VertexInputBinding vertexInputBindings[3] = {
+				VertexInputBinding(InputRate::VERTEX),
+				VertexInputBinding(InputRate::VERTEX),
+				VertexInputBinding(InputRate::INSTANCE),
+			};
+
+			GraphicsPipelineDescriptor materialPipelineDescriptor = getStaticPipelineDescriptor(vertexInputBindings);
 			materialPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
 
 			while (materialShaderIndex < sceneAsset->dynamicMaterialShaderOffset) {
@@ -135,7 +141,12 @@ namespace Trident {
 				.descriptorSetLayouts = {forwardDescriptorSetLayout, nullptr},
 			};
 
-			GraphicsPipelineDescriptor materialPipelineDescriptor = getDynamicPipelineDescriptor();
+			VertexInputBinding vertexInputBindings[2] = {
+				VertexInputBinding(InputRate::VERTEX),
+				VertexInputBinding(InputRate::INSTANCE),
+			};
+
+			GraphicsPipelineDescriptor materialPipelineDescriptor = getDynamicPipelineDescriptor(vertexInputBindings);
 			materialPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
 
 			while (materialShaderIndex < sceneAsset->materialShaders.count()) {

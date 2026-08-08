@@ -27,6 +27,7 @@ namespace Trident {
 			GLenum polygonMode;
 			GLfloat lineWidth;
 			GLfloat minSampleShading;
+			sequence<GLsizei> vertexInputBindingStrides;
 			sequence<DrawBuffer> drawBuffers;
 			GLboolean depthTest;
 			GLboolean depthWrite;

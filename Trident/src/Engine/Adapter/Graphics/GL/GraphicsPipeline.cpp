@@ -32,6 +32,7 @@ namespace Trident {
 		graphicsPipeline->polygonMode = getPolygonMode(descriptor.polygonMode);
 		graphicsPipeline->lineWidth = descriptor.lineWidth;
 		graphicsPipeline->minSampleShading = descriptor.minSampleShading;
+		graphicsPipeline->vertexInputBindingStrides = sequence<GLsizei>(descriptor.vertexInputBindings.count());
 		graphicsPipeline->drawBuffers = sequence<GL::GraphicsPipeline::DrawBuffer>(descriptor.colorBlendState.attachments.count());
 		graphicsPipeline->depthTest = descriptor.depthStencilState.depthTest;
 		graphicsPipeline->depthWrite = descriptor.depthStencilState.depthWrite;
@@ -77,9 +78,10 @@ namespace Trident {
 			ENGINE_ERROR_UNSUPPORTED();
 		#endif
 
+		GLuint bindingindex = 0;
 		GLuint attribindex = 0;
 
-		for (uint32 bindingindex = 0; bindingindex < descriptor.vertexInputBindings.count(); bindingindex += 1) {
+		while (bindingindex < descriptor.vertexInputBindings.count()) {
 			const VertexInputBinding& vertexInputBinding = descriptor.vertexInputBindings[bindingindex];
 			const std::vector<Trident::VertexInputAttribute>& attributes = vertexInputBinding.getAttributes();
 
@@ -140,6 +142,10 @@ namespace Trident {
 
 				attribindex += 1;
 			}
+
+			graphicsPipeline->vertexInputBindingStrides[bindingindex] = vertexInputBinding.stride;
+
+			bindingindex += 1;
 		}
 
 		for (uint32 colorBlendAttachmentIndex = 0; colorBlendAttachmentIndex < descriptor.colorBlendState.attachments.count(); colorBlendAttachmentIndex += 1) {

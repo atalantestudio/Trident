@@ -96,7 +96,7 @@ namespace Trident {
 
 				{
 					commandEncoder->bindGraphicsPipeline(trianglePipeline);
-					commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
+					commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
 					commandEncoder->draw(3, 1, 0, 0);
 				}
 
