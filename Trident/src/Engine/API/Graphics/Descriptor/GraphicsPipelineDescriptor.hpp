@@ -28,7 +28,7 @@ namespace Trident {
 
 	struct GraphicsPipelineDescriptor {
 		ref<PipelineLayout> pipelineLayout;
-		sequence<VertexInputBinding> vertexInputBindings;
+		view<VertexInputBinding> vertexInputBindings;
 		ref<ShaderModule> vertexShaderModule;
 		ref<ShaderModule> fragmentShaderModule;
 		PrimitiveTopology primitiveTopology;

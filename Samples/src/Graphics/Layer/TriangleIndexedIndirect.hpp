@@ -194,7 +194,7 @@ namespace Trident {
 
 				GraphicsPipelineDescriptor graphicsPipelineDescriptor{};
 				graphicsPipelineDescriptor.pipelineLayout = pipelineLayout;
-				graphicsPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
+				graphicsPipelineDescriptor.vertexInputBindings = vertexInputBinding;
 				graphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
 				graphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
 				graphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;

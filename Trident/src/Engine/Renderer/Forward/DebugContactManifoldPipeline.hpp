@@ -40,7 +40,7 @@ namespace Trident {
 
 		return createGraphicsPipeline({
 			.pipelineLayout = debugContactManifoldPipelineLayout,
-			.vertexInputBindings = {vertexInputBinding},
+			.vertexInputBindings = vertexInputBinding,
 			.vertexShaderModule = vertexShaderModule,
 			.fragmentShaderModule = fragmentShaderModule,
 			.primitiveTopology = PrimitiveTopology::LINE_STRIP,

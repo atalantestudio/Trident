@@ -7,9 +7,9 @@
 
 namespace Trident {
 	ref<GraphicsPipeline> ForwardRenderer::createDebugHullWireframePipeline() const {
-		VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-		instanceInputBinding.registerAttribute<mat4x4<float32>>();
-		instanceInputBinding.registerAttribute<mat3x3<float32>>();
+		VertexInputBinding vertexInputBinding(InputRate::INSTANCE);
+		vertexInputBinding.registerAttribute<mat4x4<float32>>();
+		vertexInputBinding.registerAttribute<mat3x3<float32>>();
 
 		const ref<ShaderModule> vertexShaderModule = loadInternalShaderModule(
 			{
@@ -41,7 +41,7 @@ namespace Trident {
 
 		return createGraphicsPipeline({
 			.pipelineLayout = debugHullWireframePipelineLayout,
-			.vertexInputBindings = {instanceInputBinding},
+			.vertexInputBindings = vertexInputBinding,
 			.vertexShaderModule = vertexShaderModule,
 			.fragmentShaderModule = fragmentShaderModule,
 			.primitiveTopology = PrimitiveTopology::LINE_LIST,

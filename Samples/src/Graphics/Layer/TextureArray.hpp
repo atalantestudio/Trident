@@ -372,12 +372,15 @@ namespace Trident {
 			}
 
 			void setupGraphicsPipeline() {
-				VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-				vertexInputBinding.registerAttribute<svec2<float32>>();
+				VertexInputBinding vertexInputBindings[2] = {
+					VertexInputBinding(InputRate::VERTEX),
+					VertexInputBinding(InputRate::INSTANCE),
+				};
 
-				VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-				instanceInputBinding.registerAttribute<svec2<float32>>();
-				instanceInputBinding.registerAttribute<uint32>();
+				vertexInputBindings[0].registerAttribute<svec2<float32>>();
+
+				vertexInputBindings[1].registerAttribute<svec2<float32>>();
+				vertexInputBindings[1].registerAttribute<uint32>();
 
 				ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -406,7 +409,7 @@ namespace Trident {
 
 				GraphicsPipelineDescriptor graphicsPipelineDescriptor{};
 				graphicsPipelineDescriptor.pipelineLayout = pipelineLayout;
-				graphicsPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
+				graphicsPipelineDescriptor.vertexInputBindings = view<VertexInputBinding>(vertexInputBindings, 2);
 				graphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
 				graphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
 				graphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;

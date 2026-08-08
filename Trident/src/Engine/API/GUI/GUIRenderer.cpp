@@ -359,15 +359,18 @@ namespace Trident {
 	}
 
 	ref<GraphicsPipeline> GUIRenderer::createSubcomponentGraphicsPipeline() const {
-		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<vec4<float32>>(); // Vertex position and texture coordinate
+		VertexInputBinding vertexInputBindings[2] = {
+			VertexInputBinding(InputRate::VERTEX),
+			VertexInputBinding(InputRate::INSTANCE),
+		};
 
-		VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-		instanceInputBinding.registerAttribute<mat3x3<float32>>(); // World transform
-		instanceInputBinding.registerAttribute<mat3x3<float32>>(); // Texture transform
-		instanceInputBinding.registerAttribute<vec4<float32>>(); // Color
-		instanceInputBinding.registerAttribute<uint32>(); // Z-index
-		instanceInputBinding.registerAttribute<uint32>(); // Texture array layer index
+		vertexInputBindings[0].registerAttribute<vec4<float32>>(); // Vertex position and texture coordinate
+
+		vertexInputBindings[1].registerAttribute<mat3x3<float32>>(); // World transform
+		vertexInputBindings[1].registerAttribute<mat3x3<float32>>(); // Texture transform
+		vertexInputBindings[1].registerAttribute<vec4<float32>>(); // Color
+		vertexInputBindings[1].registerAttribute<uint32>(); // Z-index
+		vertexInputBindings[1].registerAttribute<uint32>(); // Texture array layer index
 
 		const sequence<ColorBlendAttachment> colorBlendAttachments = {
 			{
@@ -379,7 +382,7 @@ namespace Trident {
 
 		return createGraphicsPipeline({
 			.pipelineLayout = subcomponentPipelineLayout,
-			.vertexInputBindings = {vertexInputBinding, instanceInputBinding},
+			.vertexInputBindings = view<VertexInputBinding>(vertexInputBindings, 2),
 			.vertexShaderModule = loadInternalShaderModule(
 				{
 					.stage = ShaderStage::VERTEX,
@@ -426,16 +429,19 @@ namespace Trident {
 	}
 
 	ref<GraphicsPipeline> GUIRenderer::createGlyphSubcomponentGraphicsPipeline() const {
-		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<vec4<float32>>(); // Vertex position and texture coordinate
+		VertexInputBinding vertexInputBindings[2] = {
+			VertexInputBinding(InputRate::VERTEX),
+			VertexInputBinding(InputRate::INSTANCE),
+		};
 
-		VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-		instanceInputBinding.registerAttribute<mat3x3<float32>>(); // World transform
-		instanceInputBinding.registerAttribute<mat3x3<float32>>(); // Texture transform
-		instanceInputBinding.registerAttribute<vec4<float32>>(); // Color
-		instanceInputBinding.registerAttribute<uint32>(); // Z-index
-		instanceInputBinding.registerAttribute<uint32>(); // Layer index
-		instanceInputBinding.registerAttribute<float32>(); // Font size
+		vertexInputBindings[0].registerAttribute<vec4<float32>>(); // Vertex position and texture coordinate
+
+		vertexInputBindings[1].registerAttribute<mat3x3<float32>>(); // World transform
+		vertexInputBindings[1].registerAttribute<mat3x3<float32>>(); // Texture transform
+		vertexInputBindings[1].registerAttribute<vec4<float32>>(); // Color
+		vertexInputBindings[1].registerAttribute<uint32>(); // Z-index
+		vertexInputBindings[1].registerAttribute<uint32>(); // Layer index
+		vertexInputBindings[1].registerAttribute<float32>(); // Font size
 
 		const sequence<ColorBlendAttachment> colorBlendAttachments = {
 			{
@@ -447,7 +453,7 @@ namespace Trident {
 
 		return createGraphicsPipeline({
 			.pipelineLayout = subcomponentPipelineLayout,
-			.vertexInputBindings = {vertexInputBinding, instanceInputBinding},
+			.vertexInputBindings = view<VertexInputBinding>(vertexInputBindings, 2),
 			.vertexShaderModule = loadInternalShaderModule(
 				{
 					.stage = ShaderStage::VERTEX,

@@ -24,7 +24,7 @@ namespace Trident {
 
 		return Renderer::createGraphicsPipeline({
 			.pipelineLayout = gBufferPipelineLayout,
-			.vertexInputBindings = {vertexInputBinding},
+			.vertexInputBindings = vertexInputBinding,
 			.vertexShaderModule = Renderer::loadShaderModule(
 				{
 					.stage = ShaderStage::VERTEX,

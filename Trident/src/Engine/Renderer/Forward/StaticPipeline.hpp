@@ -7,18 +7,21 @@
 
 namespace Trident {
 	GraphicsPipelineDescriptor ForwardRenderer::getStaticPipelineDescriptor() const {
-		VertexInputBinding vertexInputBinding(InputRate::VERTEX, false);
-		vertexInputBinding.registerAttribute<svec3<float32>>(VertexInputAttributeFormat::R32G32B32_FLOAT);
-		vertexInputBinding.registerAttribute<uint32>(VertexInputAttributeFormat::R10G10B10A2_UNORM);
-		vertexInputBinding.registerAttribute<uint32>(VertexInputAttributeFormat::R10G10B10A2_UNORM);
-		vertexInputBinding.registerAttribute<uint32>(VertexInputAttributeFormat::R16G16_UNORM);
+		VertexInputBinding vertexInputBindings[3] = {
+			VertexInputBinding(InputRate::VERTEX),
+			VertexInputBinding(InputRate::VERTEX),
+			VertexInputBinding(InputRate::INSTANCE),
+		};
 
-		VertexInputBinding lightmapCoordinateInputBinding(InputRate::VERTEX, false);
-		lightmapCoordinateInputBinding.registerAttribute<uint32>(VertexInputAttributeFormat::R16G16_UNORM);
+		vertexInputBindings[0].registerAttribute<svec3<float32>>(VertexInputAttributeFormat::R32G32B32_FLOAT);
+		vertexInputBindings[0].registerAttribute<uint32>(VertexInputAttributeFormat::R10G10B10A2_UNORM);
+		vertexInputBindings[0].registerAttribute<uint32>(VertexInputAttributeFormat::R10G10B10A2_UNORM);
+		vertexInputBindings[0].registerAttribute<uint32>(VertexInputAttributeFormat::R16G16_UNORM);
 
-		VertexInputBinding instanceInputBinding(InputRate::INSTANCE, false);
-		instanceInputBinding.registerAttribute<mat4x4<float32>>();
-		instanceInputBinding.registerAttribute<mat3x3<float32>>();
+		vertexInputBindings[1].registerAttribute<uint32>(VertexInputAttributeFormat::R16G16_UNORM);
+
+		vertexInputBindings[2].registerAttribute<mat4x4<float32>>();
+		vertexInputBindings[2].registerAttribute<mat3x3<float32>>();
 
 		const sequence<ColorBlendAttachment> colorBlendAttachments = {
 			{
@@ -27,7 +30,7 @@ namespace Trident {
 		};
 
 		return {
-			.vertexInputBindings = {vertexInputBinding, lightmapCoordinateInputBinding, instanceInputBinding},
+			.vertexInputBindings = view<VertexInputBinding>(vertexInputBindings, 3),
 			.vertexShaderModule = loadInternalShaderModule(
 				{
 					.stage = ShaderStage::VERTEX,

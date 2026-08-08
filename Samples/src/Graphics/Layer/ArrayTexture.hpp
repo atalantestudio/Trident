@@ -298,12 +298,15 @@ namespace Trident {
 			}
 
 			ref<GraphicsPipeline> createArrayTexturePipeline() const {
-				VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-				vertexInputBinding.registerAttribute<svec2<float32>>();
+				VertexInputBinding vertexInputBindings[2] = {
+					VertexInputBinding(InputRate::VERTEX),
+					VertexInputBinding(InputRate::INSTANCE),
+				};
 
-				VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-				instanceInputBinding.registerAttribute<svec2<float32>>();
-				instanceInputBinding.registerAttribute<uint32>();
+				vertexInputBindings[0].registerAttribute<svec2<float32>>();
+
+				vertexInputBindings[1].registerAttribute<svec2<float32>>();
+				vertexInputBindings[1].registerAttribute<uint32>();
 
 				const sequence<ColorBlendAttachment> colorBlendAttachments = {
 					{
@@ -313,7 +316,7 @@ namespace Trident {
 
 				return createGraphicsPipeline({
 					.pipelineLayout = arrayTexturePipelineLayout,
-					.vertexInputBindings = {vertexInputBinding, instanceInputBinding},
+					.vertexInputBindings = view<VertexInputBinding>(vertexInputBindings, 2),
 					.vertexShaderModule = loadShaderModule(
 						{
 							.stage = ShaderStage::VERTEX,

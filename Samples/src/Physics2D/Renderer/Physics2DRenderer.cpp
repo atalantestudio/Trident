@@ -422,14 +422,17 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::createRigidBodyFillPipeline() {
-		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<svec2<float32>>();
+		VertexInputBinding vertexInputBindings[2] = {
+			VertexInputBinding(InputRate::VERTEX),
+			VertexInputBinding(InputRate::INSTANCE),
+		};
 
-		VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-		instanceInputBinding.registerAttribute<mat3x3<float32>>();
-		instanceInputBinding.registerAttribute<vec4<float32>>();
-		instanceInputBinding.registerAttribute<vec4<float32>>();
-		instanceInputBinding.registerAttribute<float32>();
+		vertexInputBindings[0].registerAttribute<svec2<float32>>();
+
+		vertexInputBindings[1].registerAttribute<mat3x3<float32>>();
+		vertexInputBindings[1].registerAttribute<vec4<float32>>();
+		vertexInputBindings[1].registerAttribute<vec4<float32>>();
+		vertexInputBindings[1].registerAttribute<float32>();
 
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -457,7 +460,7 @@ namespace Trident {
 
 		rigidBodyFillPipeline = createGraphicsPipeline({
 			.pipelineLayout = cameraViewPipelineLayout,
-			.vertexInputBindings = {vertexInputBinding, instanceInputBinding},
+			.vertexInputBindings = view<VertexInputBinding>(vertexInputBindings, 2),
 			.vertexShaderModule = vertexShaderModule,
 			.fragmentShaderModule = fragmentShaderModule,
 			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
@@ -484,15 +487,18 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::createRigidBodyStrokePipeline() {
-		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<svec2<float32>>();
+		VertexInputBinding vertexInputBindings[2] = {
+			VertexInputBinding(InputRate::VERTEX),
+			VertexInputBinding(InputRate::INSTANCE),
+		};
 
-		VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-		instanceInputBinding.registerAttribute<mat3x3<float32>>();
-		instanceInputBinding.registerAttribute<vec4<float32>>();
-		instanceInputBinding.registerAttribute<vec4<float32>>();
-		instanceInputBinding.registerAttribute<float32>();
-		instanceInputBinding.registerAttribute<uint32>();
+		vertexInputBindings[0].registerAttribute<svec2<float32>>();
+
+		vertexInputBindings[1].registerAttribute<mat3x3<float32>>();
+		vertexInputBindings[1].registerAttribute<vec4<float32>>();
+		vertexInputBindings[1].registerAttribute<vec4<float32>>();
+		vertexInputBindings[1].registerAttribute<float32>();
+		vertexInputBindings[1].registerAttribute<uint32>();
 
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -520,7 +526,7 @@ namespace Trident {
 
 		rigidBodyStrokePipeline = createGraphicsPipeline({
 			.pipelineLayout = cameraViewPipelineLayout,
-			.vertexInputBindings = {vertexInputBinding, instanceInputBinding},
+			.vertexInputBindings = view<VertexInputBinding>(vertexInputBindings, 2),
 			.vertexShaderModule = vertexShaderModule,
 			.fragmentShaderModule = fragmentShaderModule,
 			.primitiveTopology = PrimitiveTopology::LINE_STRIP,
@@ -577,7 +583,7 @@ namespace Trident {
 
 		GraphicsPipelineDescriptor centerOfMassGraphicsPipelineDescriptor{};
 		centerOfMassGraphicsPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
-		centerOfMassGraphicsPipelineDescriptor.vertexInputBindings = {centerOfMassVertexInputBinding};
+		centerOfMassGraphicsPipelineDescriptor.vertexInputBindings = centerOfMassVertexInputBinding;
 		centerOfMassGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
 		centerOfMassGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
 		centerOfMassGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::POINT_LIST;
@@ -602,13 +608,16 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::createRigidBodyPlaceholderFillPipeline() {
-		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<svec2<float32>>();
+		VertexInputBinding vertexInputBindings[2] = {
+			VertexInputBinding(InputRate::VERTEX),
+			VertexInputBinding(InputRate::INSTANCE),
+		};
 
-		VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-		instanceInputBinding.registerAttribute<mat3x3<float32>>();
-		instanceInputBinding.registerAttribute<vec4<float32>>();
-		instanceInputBinding.stride = sizeof(RigidBody);
+		vertexInputBindings[0].registerAttribute<svec2<float32>>();
+
+		vertexInputBindings[1].registerAttribute<mat3x3<float32>>();
+		vertexInputBindings[1].registerAttribute<vec4<float32>>();
+		vertexInputBindings[1].stride = sizeof(RigidBody);
 
 		const ShaderModuleDescriptor vertexShaderModuleDescriptor = {
 			.stage = ShaderStage::VERTEX,
@@ -644,7 +653,7 @@ namespace Trident {
 
 		rigidBodyPlaceholderFillPipeline = createGraphicsPipeline({
 			.pipelineLayout = placeholderPipelineLayout,
-			.vertexInputBindings = {vertexInputBinding, instanceInputBinding},
+			.vertexInputBindings = view<VertexInputBinding>(vertexInputBindings, 2),
 			.vertexShaderModule = vertexShaderModule,
 			.fragmentShaderModule = loadShaderModule(
 				{
@@ -678,12 +687,15 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::createRigidBodyPlaceholderStrokePipeline() {
-		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<svec2<float32>>();
+		VertexInputBinding vertexInputBindings[2] = {
+			VertexInputBinding(InputRate::VERTEX),
+			VertexInputBinding(InputRate::INSTANCE),
+		};
 
-		VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-		instanceInputBinding.registerAttribute<mat3x3<float32>>();
-		instanceInputBinding.stride = sizeof(RigidBody);
+		vertexInputBindings[0].registerAttribute<svec2<float32>>();
+
+		vertexInputBindings[1].registerAttribute<mat3x3<float32>>();
+		vertexInputBindings[1].stride = sizeof(RigidBody);
 
 		const ShaderModuleDescriptor vertexShaderModuleDescriptor = {
 			.stage = ShaderStage::VERTEX,
@@ -719,7 +731,7 @@ namespace Trident {
 
 		rigidBodyPlaceholderStrokePipeline = createGraphicsPipeline({
 			.pipelineLayout = placeholderPipelineLayout,
-			.vertexInputBindings = {vertexInputBinding, instanceInputBinding},
+			.vertexInputBindings = view<VertexInputBinding>(vertexInputBindings, 2),
 			.vertexShaderModule = vertexShaderModule,
 			.fragmentShaderModule = loadShaderModule(
 				{
@@ -794,7 +806,7 @@ namespace Trident {
 
 		rigidBodyPlaceholderCenterOfMassPipeline = createGraphicsPipeline({
 			.pipelineLayout = placeholderPipelineLayout,
-			.vertexInputBindings = {vertexInputBinding},
+			.vertexInputBindings = vertexInputBinding,
 			.vertexShaderModule = vertexShaderModule,
 			.fragmentShaderModule = fragmentShaderModule,
 			.primitiveTopology = PrimitiveTopology::POINT_LIST,
@@ -854,7 +866,7 @@ namespace Trident {
 
 			GraphicsPipelineDescriptor distanceGraphicsPipelineDescriptor{};
 			distanceGraphicsPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
-			distanceGraphicsPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
+			distanceGraphicsPipelineDescriptor.vertexInputBindings = vertexInputBinding;
 			distanceGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
 			distanceGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
 			distanceGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_LIST;
@@ -909,7 +921,7 @@ namespace Trident {
 
 			GraphicsPipelineDescriptor vertexFeatureGraphicsPipelineDescriptor{};
 			vertexFeatureGraphicsPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
-			vertexFeatureGraphicsPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
+			vertexFeatureGraphicsPipelineDescriptor.vertexInputBindings = vertexInputBinding;
 			vertexFeatureGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
 			vertexFeatureGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
 			vertexFeatureGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::POINT_LIST;
@@ -962,7 +974,7 @@ namespace Trident {
 
 			GraphicsPipelineDescriptor edgeFeatureGraphicsPipelineDescriptor{};
 			edgeFeatureGraphicsPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
-			edgeFeatureGraphicsPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
+			edgeFeatureGraphicsPipelineDescriptor.vertexInputBindings = vertexInputBinding;
 			edgeFeatureGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
 			edgeFeatureGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
 			edgeFeatureGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_LIST;
