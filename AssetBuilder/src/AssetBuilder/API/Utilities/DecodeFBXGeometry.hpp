@@ -1,12 +1,11 @@
 ﻿// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-#include "pch.hpp"
+#pragma once
 
 #include "AssetBuilder/API/Utilities/Utilities.hpp"
 #include "../../../File/FBX.hpp"
 
-#include "Engine/Filesystem/Asset/GeometryAsset.hpp"
 #include "Engine/Filesystem/Decoder/Decoder.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 
