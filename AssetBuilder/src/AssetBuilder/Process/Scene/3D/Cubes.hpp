@@ -22,9 +22,10 @@ namespace Trident {
 				});
 
 				const uint32 boxGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("3d_unit_box"));
+				const uint32 boxGeometry2 = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("3d_unit_box_st"));
 
 				const MaterialReference lightmappedDefaultMaterial = builder.loadStaticMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
-				const MaterialReference pbrDefaultMaterial = builder.loadDynamicMaterial(assetLibrary->getAsset<MaterialAsset>("pbr_default"));
+				const MaterialReference debugMaterial = builder.loadDynamicMaterial(assetLibrary->getAsset<MaterialAsset>("debug"));
 
 				builder.placeSurface(
 					{
@@ -78,8 +79,8 @@ namespace Trident {
 				}); */
 
 				builder.placeRigidBody({
-					.geometryIndex = boxGeometry,
-					.material = pbrDefaultMaterial,
+					.geometryIndex = boxGeometry2,
+					.material = debugMaterial,
 					.position = {32.0f, 16.0f, 128.0f},
 					.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
 					.uniformScale = 32.0f,
