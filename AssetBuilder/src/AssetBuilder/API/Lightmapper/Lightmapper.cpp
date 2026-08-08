@@ -5,13 +5,11 @@
 
 #include "AssetBuilder/API/Lightmapper/ArgumentBuffer.hpp"
 #include "AssetBuilder/API/Lightmapper/BilateralFilterPipelines.hpp"
+#include "AssetBuilder/API/Lightmapper/GBuffer.hpp"
 #include "AssetBuilder/API/Lightmapper/GBufferDescriptorSetLayout.hpp"
 #include "AssetBuilder/API/Lightmapper/GBufferFramebuffer.hpp"
 #include "AssetBuilder/API/Lightmapper/GBufferPipeline.hpp"
-#include "AssetBuilder/API/Lightmapper/GBufferPositionImage.hpp"
 #include "AssetBuilder/API/Lightmapper/GBufferRenderPass.hpp"
-#include "AssetBuilder/API/Lightmapper/GBufferTriangleNormalImage.hpp"
-#include "AssetBuilder/API/Lightmapper/GBufferVertexNormalImage.hpp"
 #include "AssetBuilder/API/Lightmapper/IndexBuffer.hpp"
 #include "AssetBuilder/API/Lightmapper/IntermediateDilationPipeline.hpp"
 #include "AssetBuilder/API/Lightmapper/IntermediateLightmapAtlasImage.hpp"
@@ -90,14 +88,16 @@ namespace Trident {
 		context = {};
 
 		context.gBufferPositionImage = createGBufferPositionImage();
+		context.gBufferSmoothPositionImage = createGBufferSmoothPositionImage();
 		context.gBufferTriangleNormalImage = createGBufferTriangleNormalImage();
 		context.gBufferVertexNormalImage = createGBufferVertexNormalImage();
 		context.intermediateLightmapAtlasImage = createIntermediateLightmapAtlasImage();
 		context.lightmapAtlasImage = createLightmapAtlasImage();
 
-		context.gBufferPositionImageView = createGBufferPositionImageView();
-		context.gBufferTriangleNormalImageView = createGBufferTriangleNormalImageView();
-		context.gBufferVertexNormalImageView = createGBufferVertexNormalImageView();
+		context.gBufferPositionImageView = createGBufferImageView(context.gBufferPositionImage, "GBuffer position");
+		context.gBufferSmoothPositionImageView = createGBufferImageView(context.gBufferSmoothPositionImage, "GBuffer smooth position");
+		context.gBufferTriangleNormalImageView = createGBufferImageView(context.gBufferTriangleNormalImage, "GBuffer triangle normal");
+		context.gBufferVertexNormalImageView = createGBufferImageView(context.gBufferVertexNormalImage, "GBuffer vertex normal");
 		context.intermediateLightmapAtlasImageView = createIntermediateLightmapAtlasImageView();
 		context.lightmapAtlasImageView = createLightmapAtlasImageView();
 
@@ -299,15 +299,20 @@ namespace Trident {
 		queue->submit(commandBuffer);
 		queue->waitIdle();
 
-		const ref<BaseBufferView> bufferViews[3] = {
+		const ref<BaseBufferView> bufferViews[] = {
 			argumentBuffer->createView<Arguments>(0, argumentBuffer->getSize()),
 			context.vertexBuffer->createView<BuildVertex3D>(0, context.vertexBuffer->getSize()),
 			context.indexBuffer->createView<uint32>(0, context.indexBuffer->getSize()),
 		};
 
-		const DescriptorImage descriptorImages[5] = {
+		const DescriptorImage descriptorImages[] = {
 			{
 				.imageView = context.gBufferPositionImageView,
+				.imageLayout = ImageLayout::GENERAL,
+				.sampler = nullptr,
+			},
+			{
+				.imageView = context.gBufferSmoothPositionImageView,
 				.imageLayout = ImageLayout::GENERAL,
 				.sampler = nullptr,
 			},
@@ -333,11 +338,16 @@ namespace Trident {
 			},
 		};
 
-		const WriteDescriptorSet writeDescriptorSets[10] = {
+		const WriteDescriptorSet writeDescriptorSets[12] = {
 			{
 				.descriptorSet = descriptorSets[0],
 				.bindingIndex = 0,
 				.descriptorBufferViews = bufferViews[1],
+			},
+			{
+				.descriptorSet = descriptorSets[0],
+				.bindingIndex = 1,
+				.descriptorBufferViews = bufferViews[2],
 			},
 			{
 				.descriptorSet = descriptorSets[1],
@@ -375,18 +385,23 @@ namespace Trident {
 				.descriptorImages = descriptorImages[3],
 			},
 			{
+				.descriptorSet = descriptorSets[1],
+				.bindingIndex = 7,
+				.descriptorImages = descriptorImages[4],
+			},
+			{
 				.descriptorSet = descriptorSets[2],
 				.bindingIndex = 0,
-				.descriptorImages = descriptorImages[3],
+				.descriptorImages = descriptorImages[4],
 			},
 			{
 				.descriptorSet = descriptorSets[3],
 				.bindingIndex = 0,
-				.descriptorImages = descriptorImages[4],
+				.descriptorImages = descriptorImages[5],
 			},
 		};
 
-		device->updateDescriptorSets(view<WriteDescriptorSet>(writeDescriptorSets, 10));
+		device->updateDescriptorSets(view<WriteDescriptorSet>(writeDescriptorSets, 12));
 	}
 
 	void Lightmapper::generateLightmaps(uint32 indexCount) const {
@@ -411,21 +426,26 @@ namespace Trident {
 				{0.0f, 0.0f, 0.0f, 0.0f},
 				{0.0f, 0.0f, 0.0f, 0.0f},
 				{0.0f, 0.0f, 0.0f, 0.0f},
+				{0.0f, 0.0f, 0.0f, 0.0f},
 			},
 		});
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, context.gBufferFramebuffer->getExtent());
 		commandEncoder->bindGraphicsPipeline(gBufferPipeline);
-		commandEncoder->bindVertexBuffer(0, context.indexBuffer, 0);
 		commandEncoder->bindDescriptorSets(gBufferPipelineLayout, 0, descriptorSets[0]);
 		commandEncoder->draw(indexCount, 25, 0, 0);
 		commandEncoder->endRenderPass();
 
 		// TODO(graphics/render-pass/subpass): Add support for subpass dependencies.
 		{
-			const ImageMemoryBarrier imageMemoryBarriers[4] = {
+			const ImageMemoryBarrier imageMemoryBarriers[5] = {
 				{
 					.image = context.gBufferPositionImage,
+					.newLayout = ImageLayout::GENERAL,
+					.newAccess = Access::SHADER_READ,
+				},
+				{
+					.image = context.gBufferSmoothPositionImage,
 					.newLayout = ImageLayout::GENERAL,
 					.newAccess = Access::SHADER_READ,
 				},
@@ -446,7 +466,7 @@ namespace Trident {
 				},
 			};
 
-			commandEncoder->insertMemoryBarriers({}, view<ImageMemoryBarrier>(imageMemoryBarriers, 4));
+			commandEncoder->insertMemoryBarriers({}, view<ImageMemoryBarrier>(imageMemoryBarriers, 5));
 		}
 
 		commandEncoder->bindComputePipeline(traceRaysPipeline);

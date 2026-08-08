@@ -9,7 +9,7 @@ namespace Trident {
 	ref<RenderPass> Lightmapper::createGBufferRenderPass() const {
 		return Renderer::createRenderPass({
 			.attachments = {
-				// G-Buffer position
+				// Position
 				{
 					.format = ImageFormat::R32G32B32A32_SFLOAT,
 					.sampleCount = 1,
@@ -18,9 +18,7 @@ namespace Trident {
 					.finalLayout = ImageLayout::GENERAL,
 				},
 
-				// TODO(asset-builder/lightmapper): Smooth position.
-
-				// G-Buffer triangle normal
+				// Smooth position
 				{
 					.format = ImageFormat::R32G32B32A32_SFLOAT,
 					.sampleCount = 1,
@@ -29,7 +27,16 @@ namespace Trident {
 					.finalLayout = ImageLayout::GENERAL,
 				},
 
-				// G-Buffer vertex normal
+				// Triangle normal
+				{
+					.format = ImageFormat::R32G32B32A32_SFLOAT,
+					.sampleCount = 1,
+					.loadOperation = LoadOperation::CLEAR,
+					.storeOperation = StoreOperation::STORE,
+					.finalLayout = ImageLayout::GENERAL,
+				},
+
+				// Vertex normal
 				{
 					.format = ImageFormat::R32G32B32A32_SFLOAT,
 					.sampleCount = 1,
@@ -51,6 +58,10 @@ namespace Trident {
 						},
 						{
 							.index = 2,
+							.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
+						},
+						{
+							.index = 3,
 							.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
 						},
 					},

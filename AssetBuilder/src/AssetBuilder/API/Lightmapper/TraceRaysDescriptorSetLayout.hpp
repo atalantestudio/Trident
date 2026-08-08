@@ -7,7 +7,7 @@
 
 namespace Trident {
 	ref<DescriptorSetLayout> Lightmapper::createTraceRaysDescriptorSetLayout() const {
-		const DescriptorSetLayoutBinding bindings[7] = {
+		const DescriptorSetLayoutBinding bindings[8] = {
 			// Argument
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
@@ -36,6 +36,13 @@ namespace Trident {
 				.shaderStages = ShaderStage::COMPUTE,
 			},
 
+			// G-Buffer smooth position
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::COMPUTE,
+			},
+
 			// G-Buffer triangle normal
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE,
@@ -58,6 +65,6 @@ namespace Trident {
 			},
 		};
 
-		return Renderer::createDescriptorSetLayout(view<DescriptorSetLayoutBinding>(bindings, 7));
+		return Renderer::createDescriptorSetLayout(view<DescriptorSetLayoutBinding>(bindings, 8));
 	}
 }

@@ -7,7 +7,15 @@
 
 namespace Trident {
 	ref<DescriptorSetLayout> Lightmapper::createGBufferDescriptorSetLayout() const {
-		const DescriptorSetLayoutBinding bindings[1] = {
+		const DescriptorSetLayoutBinding bindings[2] = {
+			// Vertex
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.shaderStages = ShaderStage::VERTEX,
+			},
+
+			// Index
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
@@ -15,6 +23,6 @@ namespace Trident {
 			},
 		};
 
-		return Renderer::createDescriptorSetLayout(view<DescriptorSetLayoutBinding>(bindings, 1));
+		return Renderer::createDescriptorSetLayout(view<DescriptorSetLayoutBinding>(bindings, 2));
 	}
 }

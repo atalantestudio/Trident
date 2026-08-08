@@ -11,6 +11,7 @@ namespace Trident {
 			.renderPass = gBufferRenderPass,
 			.imageViews = {
 				context.gBufferPositionImageView,
+				context.gBufferSmoothPositionImageView,
 				context.gBufferTriangleNormalImageView,
 				context.gBufferVertexNormalImageView,
 			},

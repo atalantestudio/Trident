@@ -7,10 +7,10 @@
 
 namespace Trident {
 	ref<GraphicsPipeline> Lightmapper::createGBufferPipeline() const {
-		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<uint32>();
-
 		const sequence<ColorBlendAttachment> colorBlendAttachments = {
+			{
+				.blend = false,
+			},
 			{
 				.blend = false,
 			},
@@ -24,7 +24,7 @@ namespace Trident {
 
 		return Renderer::createGraphicsPipeline({
 			.pipelineLayout = gBufferPipelineLayout,
-			.vertexInputBindings = vertexInputBinding,
+			.vertexInputBindings = {},
 			.vertexShaderModule = Renderer::loadShaderModule(
 				{
 					.stage = ShaderStage::VERTEX,

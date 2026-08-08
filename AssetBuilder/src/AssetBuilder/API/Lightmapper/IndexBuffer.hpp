@@ -11,7 +11,7 @@ namespace Trident {
 
 		return Renderer::createDynamicBuffer({
 			.size = ceil(indexCount * sizeof(uint32), alignment),
-			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE | BufferUsage::VERTEX,
+			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
 			#if defined(DEBUG_OBJECT_NAME)
