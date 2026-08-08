@@ -40,7 +40,6 @@ Interstage main(VertexInput input) {
 	interstage.position = mul(camera.projectionView, surface);
 	interstage.surface = surface.xyz;
 	interstage.textureCoordinate = textureCoordinate;
-	interstage.textureCoordinate.y = 1.0 - textureCoordinate.y;
 	interstage.tbn = transpose(float3x3(t, b, n));
 
 	return interstage;

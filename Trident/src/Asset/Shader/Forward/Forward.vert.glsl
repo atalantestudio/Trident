@@ -32,6 +32,5 @@ void main() {
 
 	interstage.surface = surface.xyz;
 	interstage.textureCoordinate = textureCoordinate * 2.0 - 1.0;
-	interstage.textureCoordinate.y = 1.0 - interstage.textureCoordinate.y;
 	interstage.tbn = mat3x3(t, b, n);
 }

@@ -360,7 +360,7 @@ namespace Trident {
 		while (textureCoordinateIndex < textureCoordinates.count()) {
 			textureCoordinates[textureCoordinateIndex] = {
 				static_cast<float32>(vertexTextureCoordinateComponents[textureCoordinateIndex * 2 + 0]),
-				static_cast<float32>(vertexTextureCoordinateComponents[textureCoordinateIndex * 2 + 1]),
+				1.0f - static_cast<float32>(vertexTextureCoordinateComponents[textureCoordinateIndex * 2 + 1]),
 			};
 
 			textureCoordinateIndex += 1;
