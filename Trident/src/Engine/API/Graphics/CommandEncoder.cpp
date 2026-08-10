@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Engine/API/Graphics/CommandEncoder.hpp"
+#include "Engine/API/Graphics/PhysicalDevice.hpp"
 
 namespace Trident {
 	CommandEncoder::CommandEncoder(const Device* device, const CommandPool* commandPool) :

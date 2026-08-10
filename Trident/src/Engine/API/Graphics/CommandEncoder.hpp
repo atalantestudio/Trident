@@ -16,7 +16,6 @@
 #include "Engine/API/Graphics/Image.hpp"
 #include "Engine/API/Graphics/ImageLayout.hpp"
 #include "Engine/API/Graphics/ImageMemoryBarrier.hpp"
-#include "Engine/API/Graphics/PipelineStage.hpp"
 
 namespace Trident {
 	class CommandEncoder {

@@ -89,7 +89,7 @@ namespace Trident {
 			const GraphicsAdapter* adapter;
 			const PhysicalDevice* physicalDevice;
 
-			// The memory allocator is automatically created by the adapter after the API creation of the device.
+			/// Automatically created by the adapter.
 			ref<MemoryAllocator> memoryAllocator;
 	};
 }

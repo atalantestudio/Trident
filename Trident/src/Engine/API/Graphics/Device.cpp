@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Engine/API/Graphics/Device.hpp"
+#include "Engine/API/Graphics/PhysicalDevice.hpp"
 
 namespace Trident {
 	#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)

@@ -110,7 +110,7 @@ namespace Trident {
 		const VK::Queue* _queue = static_cast<const VK::Queue*>(queue);
 		VkResult result;
 
-		// TODO: One wait destination stage mask per wait semaphore, but the pipeline stage flags is stored into the command buffer.
+		// TODO(graphics/vk/queue/submit): One wait destination stage mask per wait semaphore, but the pipeline stage flags is stored into the command buffer.
 		const VkPipelineStageFlags waitDstStageMask = std::static_pointer_cast<VK::CommandBuffer>(commandBuffers[0])->pipelineStageFlags;
 
 		sequence<VkCommandBuffer> vkCommandBuffers(commandBuffers.count());

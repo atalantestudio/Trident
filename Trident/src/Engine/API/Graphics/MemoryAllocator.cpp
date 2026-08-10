@@ -5,6 +5,7 @@
 
 #include "Engine/API/Graphics/Device.hpp"
 #include "Engine/API/Graphics/MemoryAllocator.hpp"
+#include "Engine/API/Graphics/PhysicalDevice.hpp"
 
 namespace Trident {
 	MemoryAllocator::MemoryAllocator(const Device* device) :
