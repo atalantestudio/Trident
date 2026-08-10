@@ -6,6 +6,7 @@
 #include "AssetBuilder/API/Geometry/Geometry3D.hpp"
 #include "AssetBuilder/API/Transform.hpp"
 
+#include "Engine/API/Light/PointLight.hpp"
 #include "Engine/ECS/Component/GeometryComponent.hpp"
 #include "Engine/ECS/Component/RigidBody3DComponent.hpp"
 #include "Engine/ECS/EntityComponentMapping.hpp"
@@ -60,6 +61,8 @@ namespace Trident {
 	struct BuildDynamicSceneGeometry3D {
 		/// These are variants of the Forward shader.
 		sequence<BuildMaterialShader> materialShaders;
+
+		sequence<PointLight> pointLights;
 
 		uint32 entityCount;
 		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;

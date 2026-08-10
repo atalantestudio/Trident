@@ -41,6 +41,7 @@ namespace Trident {
 		const uint32 staticInstanceCount = stream.read<uint32>();
 		const uint32 geometryCount = stream.read<uint32>();
 
+		asset.geometryAssets = sequence<ref<Geometry3DAsset>>(geometryCount);
 		asset.geometryIndexRanges = sequence<range<uint32, uint32>>(geometryCount);
 
 		const uint32 materialGeometryCount = stream.read<uint32>();
@@ -61,6 +62,10 @@ namespace Trident {
 		asset.instances = sequence<Instance3D>(staticInstanceCount + asset.entityCount);
 		asset.geometryMappings = sequence<EntityComponentMapping<GeometryComponent>>(asset.entityCount);
 		asset.rigidBodyMappings = sequence<EntityComponentMapping<RigidBody3DComponent>>(asset.entityCount);
+
+		const uint32 pointLightCount = stream.read<uint32>();
+
+		asset.pointLights = sequence<PointLight>(pointLightCount);
 
 		const uint32 lightmapAtlasImageAssetIdentifier = stream.read<uint32>();
 
@@ -114,7 +119,6 @@ namespace Trident {
 		uint32 vertexOffset = bakedVertexCount;
 		uint32 indexOffset = bakedIndexCount;
 
-		sequence<ref<Geometry3DAsset>> geometryAssets(geometryCount);
 		uint32 geometryIndex = 0;
 
 		while (geometryIndex < geometryCount) {
@@ -128,7 +132,7 @@ namespace Trident {
 				continue;
 			}
 
-			ref<Geometry3DAsset>& geometryAsset = geometryAssets[geometryIndex];
+			ref<Geometry3DAsset>& geometryAsset = asset.geometryAssets[geometryIndex];
 			geometryAsset = assetLibrary->getAsset<Geometry3DAsset>(geometryAssetIdentifier);
 
 			std::copy(geometryAsset->vertices.begin(), geometryAsset->vertices.end(), &vertices[vertexOffset]);
@@ -179,6 +183,12 @@ namespace Trident {
 			materialShader.materialRange = stream.read<range<uint32, uint32>>();
 		}
 
+		for (PointLight& pointLight : asset.pointLights) {
+			pointLight.color = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
+			pointLight.intensity = stream.read<float32>();
+			pointLight.position = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
+		}
+
 		for (EntityComponentMapping<GeometryComponent>& geometryMapping : asset.geometryMappings) {
 			geometryMapping.entity = stream.read<Entity>();
 			geometryMapping.component = stream.read<GeometryComponent>();
@@ -210,7 +220,7 @@ namespace Trident {
 					continue;
 				}
 
-				const ref<Geometry3DAsset> geometryAsset = geometryAssets[geometryMapping.component.geometryIndex];
+				const ref<Geometry3DAsset> geometryAsset = asset.geometryAssets[geometryMapping.component.geometryIndex];
 
 				if (!(geometryAsset->flags & GeometryAssetFlags::HAS_HULL)) {
 					continue;

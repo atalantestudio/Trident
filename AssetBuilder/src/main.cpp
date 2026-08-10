@@ -23,6 +23,7 @@
 #include "AssetBuilder/Process/Material/PBR/FoldingWoodenStool.hpp"
 #include "AssetBuilder/Process/Material/PBR/GallineraTable.hpp"
 #include "AssetBuilder/Process/Material/PBR/Lemon.hpp"
+#include "AssetBuilder/Process/Material/PBR/RoundWoodenTable01.hpp"
 #include "AssetBuilder/Process/Material/PBR/RubberDuckToy.hpp"
 #include "AssetBuilder/Process/Scene/2D/Boxes.hpp"
 #include "AssetBuilder/Process/Scene/2D/Circles.hpp"
@@ -38,6 +39,7 @@
 #include "AssetBuilder/Process/Scene/3D/GallineraTable.hpp"
 #include "AssetBuilder/Process/Scene/3D/Hall.hpp"
 #include "AssetBuilder/Process/Scene/3D/Lemons.hpp"
+#include "AssetBuilder/Process/Scene/3D/PBRTest.hpp"
 #include "AssetBuilder/Process/Scene/3D/PlayerMovement.hpp"
 #include "AssetBuilder/Process/Scene/3D/Sliding.hpp"
 #include "AssetBuilder/Process/Scene/3D/Stacking.hpp"
@@ -104,6 +106,7 @@ namespace Trident {
 				registerProcess<PBRDefaultMaterial>(&assetLibrary);
 				registerProcess<PlasterCeilingMaterial>(&assetLibrary);
 				registerProcess<PlasterWallMaterial>(&assetLibrary);
+				registerProcess<RoundWoodenTable01Material>(&assetLibrary);
 				registerProcess<RubberDuckToyMaterial>(&assetLibrary);
 				registerProcess<TileFloorMaterial>(&assetLibrary);
 				registerProcess<WoodDoorMaterial>(&assetLibrary);
@@ -123,6 +126,7 @@ namespace Trident {
 				registerProcess<GallineraTableScene3D>(&assetLibrary);
 				registerProcess<HallScene3D>(&assetLibrary);
 				registerProcess<LemonsScene3D>(&assetLibrary);
+				registerProcess<PBRTestScene3D>(&assetLibrary);
 				registerProcess<PlayerMovementScene3D>(&assetLibrary);
 				registerProcess<SlidingScene3D>(&assetLibrary);
 				registerProcess<StackingScene3D>(&assetLibrary);

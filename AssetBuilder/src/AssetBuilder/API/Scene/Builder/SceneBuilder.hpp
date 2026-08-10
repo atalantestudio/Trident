@@ -12,6 +12,7 @@
 #include "AssetBuilder/API/Scene/Scene3D.hpp"
 #include "AssetBuilder/API/Scene/StaticSurface.hpp"
 
+#include "Engine/API/Light/PointLight.hpp"
 #include "Engine/Filesystem/Asset/GeometryAsset.hpp"
 #include "Engine/Filesystem/Asset/MaterialAsset.hpp"
 #include "Engine/Filesystem/Asset/ShaderModuleAsset.hpp"
@@ -58,6 +59,8 @@ namespace Trident {
 
 			void placeRigidBody(const EntityDescriptor& descriptor);
 
+			void placePointLight(const PointLight& pointLight);
+
 			BuildScene3D build();
 
 		private:
@@ -72,8 +75,9 @@ namespace Trident {
 			void buildMaterials(BuildScene3D& scene);
 			void buildMaterialShaders(BuildScene3D& scene);
 			void buildBakedGeometry(BuildStaticSceneGeometry3D& staticGeometry);
-			void buildLightmaps(BuildScene3D& scene);
 			void buildEntityComponentMappings(BuildDynamicSceneGeometry3D& dynamicGeometry);
+			void buildLights(BuildDynamicSceneGeometry3D& dynamicGeometry);
+			void buildLightmaps(BuildScene3D& scene);
 
 			void createLightmaps(BuildStaticSceneGeometry3D& staticGeometry);
 			void updateLightmapCoordinates(BuildStaticSceneGeometry3D& staticGeometry);
@@ -106,5 +110,7 @@ namespace Trident {
 
 			std::vector<EntityComponentMapping<GeometryComponent>> geometryMappings;
 			std::vector<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;
+
+			std::vector<PointLight> pointLights;
 	};
 }

@@ -25,11 +25,11 @@ namespace Trident {
 				const uint32 boxGeometry2 = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("3d_unit_box_st"));
 
 				const MaterialReference lightmappedDefaultMaterial = builder.loadStaticMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
-				const MaterialReference debugMaterial = builder.loadDynamicMaterial(assetLibrary->getAsset<MaterialAsset>("debug"));
+				const MaterialReference pbrDefaultMaterial = builder.loadDynamicMaterial(assetLibrary->getAsset<MaterialAsset>("pbr_default"));
 
 				builder.placeSurface(
 					{
-						.geometry = builder.createWallGeometry({144.0f, 256.0f}),
+						.geometry = builder.createWallGeometry({512.0f, 128.0f}),
 						.material = lightmappedDefaultMaterial,
 						.textureFiltering = {
 							.translation = {0.0f, 0.0f},
@@ -42,46 +42,40 @@ namespace Trident {
 						},
 					},
 					{
-						.translation = {0.0f, 0.0f, 48.0f},
+						.translation = {0.0f, 0.0f, 128.0f},
 						.axis = {1.0f, 0.0f, 0.0f},
 						.angle = radians(-90.0_deg),
 					}
 				);
 
-				builder.placeStaticProp({
-					.geometryIndex = boxGeometry,
-					.material = lightmappedDefaultMaterial,
-					.transform = {
-						.translation = {-32.0f, 16.0f, 128.0f},
-						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
-						.scale = 32.0f,
-					},
-					.lightmap = {
-						.luxelScale = {1.0f, 1.0f},
-						.tintColor = {1.0f, 1.0f, 1.0f},
-					},
-					.lightmapScale = {32.0f, 32.0f},
-				});
+				static constexpr float32 positionBias = 2.37f;
+				static constexpr float32 spacing = 48.0f;
 
-				/* builder.placeStaticProp({
-					.geometryIndex = boxGeometry,
-					.material = lightmappedDefaultMaterial,
-					.transform = {
-						.translation = {32.0f, 16.0f, 128.0f},
-						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
-						.scale = 32.0f,
-					},
-					.lightmap = {
-						.luxelScale = {1.0f, 1.0f},
-						.tintColor = {1.0f, 1.0f, 1.0f},
-					},
-					.lightmapScale = {32.0f, 32.0f},
-				}); */
+				uint32 boxIndex = 0;
+
+				while (boxIndex < 4) {
+					builder.placeStaticProp({
+						.geometryIndex = boxGeometry,
+						.material = lightmappedDefaultMaterial,
+						.transform = {
+							.translation = {(static_cast<sint32>(boxIndex) - 2) * spacing + positionBias, 16.0f, 128.0f},
+							.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
+							.scale = 32.0f,
+						},
+						.lightmap = {
+							.luxelScale = {1.0f, 1.0f},
+							.tintColor = {1.0f, 1.0f, 1.0f},
+						},
+						.lightmapScale = {32.0f, 32.0f},
+					});
+
+					boxIndex += 1;
+				}
 
 				builder.placeRigidBody({
 					.geometryIndex = boxGeometry2,
-					.material = debugMaterial,
-					.position = {32.0f, 16.0f, 128.0f},
+					.material = pbrDefaultMaterial,
+					.position = {(static_cast<sint32>(boxIndex) - 2) * spacing + positionBias, 16.0f, 128.0f},
 					.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
 					.uniformScale = 32.0f,
 					.mass = max<float32>(),
@@ -89,6 +83,12 @@ namespace Trident {
 					.inertiaScale = {1.0f, 1.0f, 1.0f},
 					.friction = 0.0f,
 					.restitution = 0.0f,
+				});
+
+				builder.placePointLight({
+					.color = {1.0f, 1.0f, 1.0f},
+					.intensity = 300.0f,
+					.position = {0.0f, 256.0f, 0.0f},
 				});
 
 				return builder.build();

@@ -34,6 +34,7 @@ namespace Trident {
 				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.materialShaders.count()));
 				stream.write<uint32>(static_cast<uint32>(scene.dynamicGeometry.materialShaders.count()));
 				stream.write<uint32>(scene.dynamicGeometry.entityCount);
+				stream.write<uint32>(static_cast<uint32>(scene.dynamicGeometry.pointLights.count()));
 				stream.write<uint32>(scene.staticGeometry.lightmapAtlasImageAssetDescriptor.identifier);
 				stream.write<float32>(scene.skyColor.x);
 				stream.write<float32>(scene.skyColor.y);
@@ -87,6 +88,16 @@ namespace Trident {
 
 				for (const BuildMaterialShader& materialShader : scene.dynamicGeometry.materialShaders) {
 					encodeMaterialShader(stream, materialShader);
+				}
+
+				for (const PointLight& pointLight : scene.dynamicGeometry.pointLights) {
+					stream.write<float32>(pointLight.color.x);
+					stream.write<float32>(pointLight.color.y);
+					stream.write<float32>(pointLight.color.z);
+					stream.write<float32>(pointLight.intensity);
+					stream.write<float32>(pointLight.position.x);
+					stream.write<float32>(pointLight.position.y);
+					stream.write<float32>(pointLight.position.z);
 				}
 
 				for (const EntityComponentMapping<GeometryComponent> geometryMapping : scene.dynamicGeometry.geometryMappings) {
@@ -149,7 +160,7 @@ namespace Trident {
 				uint64 size = (
 					sizeof(AssetHeader) +
 					sizeof(uint8) +
-					sizeof(uint32) * 14 +
+					sizeof(uint32) * 15 +
 					sizeof(svec3<float32>) +
 					scene.staticGeometry.bakedVertices.count() * sizeof(Vertex3D) +
 					scene.staticGeometry.bakedIndices.count() * sizeof(uint32) +
@@ -158,6 +169,7 @@ namespace Trident {
 					scene.geometries.count() * sizeof(BuildGeometry) +
 					scene.materialGeometries.count() * sizeof(BuildMaterialGeometry) +
 					scene.materials.count() * sizeof(BuildMaterial) +
+					scene.dynamicGeometry.pointLights.count() * (sizeof(svec3<float32>) * 2 + sizeof(float32)) +
 					scene.dynamicGeometry.geometryMappings.count() * sizeof(EntityComponentMapping<GeometryComponent>) +
 					scene.dynamicGeometry.rigidBodyMappings.count() * (sizeof(Entity) + sizeof(svec3<float32>) * 7 + sizeof(float32) * 4)
 				);

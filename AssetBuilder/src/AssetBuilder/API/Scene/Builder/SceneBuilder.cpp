@@ -139,6 +139,10 @@ namespace Trident {
 		return loadMaterial(asset, dynamicMaterialShaders);
 	}
 
+	void SceneBuilder::placePointLight(const PointLight& pointLight) {
+		pointLights.emplace_back(pointLight);
+	}
+
 	IntermediateMaterial& SceneBuilder::getMaterial(MaterialReference materialReference) {
 		const uint32 materialShaderIndex = materialReference >> 16;
 		const uint32 materialIndex = materialReference & 0xff;

@@ -5,6 +5,7 @@
 
 #include "Engine/API/Descriptor.hpp"
 #include "Engine/API/Geometry/Instance.hpp"
+#include "Engine/API/Light/PointLight.hpp"
 #include "Engine/API/Material/Material.hpp"
 #include "Engine/API/Material/MaterialShader.hpp"
 #include "Engine/API/Material/StaticMaterial.hpp"
@@ -153,10 +154,12 @@ namespace Trident {
 		uint64 staticTextureCoordinateSize;
 
 		sequence<Instance3D> instances;
+		sequence<ref<Geometry3DAsset>> geometryAssets;
 		sequence<range<uint32, uint32>> geometryIndexRanges;
 		sequence<MaterialGeometry> materialGeometries;
 		sequence<Material> materials;
 		sequence<MaterialShader> materialShaders;
+		sequence<PointLight> pointLights;
 
 		uint32 dynamicMaterialShaderOffset;
 

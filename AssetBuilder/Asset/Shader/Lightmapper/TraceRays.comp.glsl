@@ -98,7 +98,7 @@ vec3 randomUnitDirection(inout uint seed) {
 
 bool rayTriangleIntersection(Ray ray, Triangle triangle_, bool face, inout float t, inout vec3 barycentricCoordinate) {
 	const float E = 1e-6;
-	const float F = 1e-8;
+	const float F = 1e-6;
 
 	vec3 a = triangle_.vertices[0].position;
 	vec3 b = triangle_.vertices[1].position;

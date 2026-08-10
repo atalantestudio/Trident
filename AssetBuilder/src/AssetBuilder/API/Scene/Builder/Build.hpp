@@ -28,6 +28,7 @@ namespace Trident {
 		buildMaterials(scene);
 		buildMaterialShaders(scene);
 		buildBakedGeometry(scene.staticGeometry);
+		buildLights(scene.dynamicGeometry);
 		buildEntityComponentMappings(scene.dynamicGeometry);
 		buildLightmaps(scene);
 
@@ -253,6 +254,12 @@ namespace Trident {
 				.lighting = lighting,
 			});
 		}
+	}
+
+	void SceneBuilder::buildLights(BuildDynamicSceneGeometry3D& dynamicGeometry) {
+		dynamicGeometry.pointLights = sequence<PointLight>(pointLights.size());
+
+		std::copy(pointLights.begin(), pointLights.end(), &dynamicGeometry.pointLights[0]);
 	}
 
 	void SceneBuilder::buildEntityComponentMappings(BuildDynamicSceneGeometry3D& dynamicGeometry) {

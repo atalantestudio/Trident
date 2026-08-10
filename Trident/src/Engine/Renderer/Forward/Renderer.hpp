@@ -13,7 +13,8 @@ namespace Trident {
 
 	struct ForwardCamera {
 		mat4x4<float32> projectionView;
-		vec3<float32> position;
+		svec3<float32> position;
+		uint32 pointLightCount;
 	};
 
 	class ForwardRenderer : public BaseSceneRenderer<ForwardCamera> {
@@ -64,6 +65,7 @@ namespace Trident {
 				vertexBuffer = createVertexBuffer();
 				indexBuffer = createIndexBuffer();
 				instanceBuffer = createInstanceBuffer();
+				pointLightBuffer = createPointLightBuffer();
 
 				// TODO(geometry/3d/vertex-position-indices): Separate hull line indices and vertex position indices for TRIANGLE_LIST.
 				/* if (sceneAsset->hullLineIndexCount > 0) {
@@ -71,7 +73,7 @@ namespace Trident {
 				} */
 
 				QueueFamilyCapability queueFamily = QueueFamilyCapability::TRANSFER;
-				uint64 stagingBufferSize = sceneAsset->geometryRanges[0].count + sceneAsset->geometryRanges[1].count + sceneAsset->geometryRanges[2].count;
+				uint64 stagingBufferSize = sceneAsset->geometryRanges[0].count + sceneAsset->geometryRanges[1].count + sceneAsset->geometryRanges[2].count + sceneAsset->pointLights.count() * sizeof(PointLight);
 
 				if (sceneAsset->lightmapAtlasImageAsset != nullptr) {
 					lightmapCoordinateBuffer = createLightmapCoordinateBuffer();
@@ -100,11 +102,15 @@ namespace Trident {
 
 				std::copy_n(&sceneAsset->geometryData[sceneAsset->geometryRanges[1].offset], indexView->getSize(), indexView->map());
 
+				const ref<BufferView<PointLight>> pointLightView = stagingBuffer->createView<PointLight>(indexView->getOffset() + indexView->getSize(), sceneAsset->pointLights.count() * sizeof(PointLight));
+
+				std::copy(sceneAsset->pointLights.begin(), sceneAsset->pointLights.end(), pointLightView->map());
+
 				ref<BufferView<uint8>> lightmapCoordinateView;
 				ref<BufferView<uint8>> lightmapAtlasView;
 
 				if (sceneAsset->lightmapAtlasImageAsset != nullptr) {
-					lightmapCoordinateView = stagingBuffer->createView<uint8>(indexView->getOffset() + indexView->getSize(), sceneAsset->geometryRanges[2].count);
+					lightmapCoordinateView = stagingBuffer->createView<uint8>(pointLightView->getOffset() + pointLightView->getSize(), sceneAsset->geometryRanges[2].count);
 
 					std::copy_n(&sceneAsset->geometryData[sceneAsset->geometryRanges[2].offset], lightmapCoordinateView->getSize(), lightmapCoordinateView->map());
 
@@ -136,7 +142,7 @@ namespace Trident {
 
 				commandEncoder->begin();
 
-				const BufferCopyRegion bufferCopyRegions[2] = {
+				const BufferCopyRegion bufferCopyRegions[] = {
 					{
 						.sourceOffset = vertexView->getOffset(),
 						.destinationOffset = 0,
@@ -147,10 +153,16 @@ namespace Trident {
 						.destinationOffset = 0,
 						.size = indexView->getSize(),
 					},
+					{
+						.sourceOffset = pointLightView->getOffset(),
+						.destinationOffset = 0,
+						.size = pointLightView->getSize(),
+					},
 				};
 
 				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegions[0]);
 				commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, bufferCopyRegions[1]);
+				commandEncoder->copyBufferToBuffer(stagingBuffer, pointLightBuffer, bufferCopyRegions[2]);
 
 				if (sceneAsset->lightmapAtlasImageAsset != nullptr) {
 					const BufferCopyRegion bufferCopyRegion = {
@@ -215,6 +227,8 @@ namespace Trident {
 				}
 
 				updateGeometryDescriptorSets();
+
+				cameraMappedRange->pointLightCount = static_cast<uint32>(scene->getAsset()->pointLights.count());
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
@@ -289,6 +303,7 @@ namespace Trident {
 			ref<Buffer> createIndexBuffer() const;
 			ref<Buffer> createLightmapCoordinateBuffer() const;
 			ref<Buffer> createInstanceBuffer() const;
+			ref<Buffer> createPointLightBuffer() const;
 			ref<Buffer> createDebugHullWireframeBuffer(uint64 size) const;
 			ref<Buffer> createDebugContactManifoldBuffer() const;
 
@@ -347,6 +362,7 @@ namespace Trident {
 			/// Contains world and normal transforms for static and dynamic geometry.
 			ref<Buffer> instanceBuffer;
 
+			ref<Buffer> pointLightBuffer;
 			ref<Buffer> debugHullWireframeBuffer;
 			ref<Buffer> debugContactManifoldBuffer;
 

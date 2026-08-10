@@ -22,6 +22,7 @@
 #include "Engine/Renderer/Forward/LightmapCoordinateBuffer.hpp"
 #include "Engine/Renderer/Forward/Material.hpp"
 #include "Engine/Renderer/Forward/MaterialSampler.hpp"
+#include "Engine/Renderer/Forward/PointLightBuffer.hpp"
 #include "Engine/Renderer/Forward/Renderer.hpp"
 #include "Engine/Renderer/Forward/RenderPass.hpp"
 #include "Engine/Renderer/Forward/StaticGeometryDescriptorSetLayout.hpp"
@@ -40,7 +41,6 @@ namespace Trident {
 
 				commandEncoder->bindGraphicsPipeline(materialPipelines[materialShaderIndex]);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
-				commandEncoder->bindVertexBuffer(1, lightmapCoordinateBuffer, 0);
 				commandEncoder->bindVertexBuffer(2, instanceBuffer, 0);
 				commandEncoder->bindIndexBuffer<uint32>(indexBuffer, 0);
 				commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialShaderIndex], 0, staticGeometryDescriptorSet);
@@ -58,7 +58,23 @@ namespace Trident {
 						const MaterialGeometry materialGeometry = sceneAsset->materialGeometries[material.geometryRange.offset + materialGeometryIndex];
 						const range<uint32, uint32> indexRange = sceneAsset->geometryIndexRanges[materialGeometry.geometryIndex];
 
-						commandEncoder->drawIndexed(indexRange.count, materialGeometry.instanceRange.count, indexRange.offset, 0, materialGeometry.instanceRange.offset);
+						const ref<Geometry3DAsset> geometryAsset = sceneAsset->geometryAssets[materialGeometry.geometryIndex];
+
+						uint64 vertexCount = 0;
+						uint32 instanceIndex = 0;
+
+						if (geometryAsset) {
+							vertexCount = geometryAsset->vertices.count();
+						}
+
+						while (instanceIndex < materialGeometry.instanceRange.count) {
+							// TODO(forward) Don't rebind the lightmap coordinate buffer every time an instance is drawn.
+							commandEncoder->bindVertexBuffer(1, lightmapCoordinateBuffer, instanceIndex * vertexCount * sizeof(uint32));
+
+							commandEncoder->drawIndexed(indexRange.count, 1, indexRange.offset, 0, materialGeometry.instanceRange.offset + instanceIndex);
+
+							instanceIndex += 1;
+						}
 
 						materialGeometryIndex += 1;
 					}
@@ -174,6 +190,6 @@ namespace Trident {
 		const PerspectiveCamera3D& camera = getCameraController<PerspectiveCamera3D>().getCamera();
 
 		cameraMappedRange->projectionView = camera.getProjectionView();
-		cameraMappedRange->position = camera.position;
+		cameraMappedRange->position = svec3<float32>(camera.position);
 	}
 }
