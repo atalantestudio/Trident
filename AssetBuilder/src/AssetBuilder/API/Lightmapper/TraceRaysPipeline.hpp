@@ -7,9 +7,9 @@
 
 namespace Trident {
 	ref<ComputePipeline> Lightmapper::createTraceRaysPipeline() const {
-		return Renderer::createComputePipeline({
+		return device->createComputePipeline({
 			.pipelineLayout = traceRaysPipelineLayout,
-			.computeShaderModule = Renderer::loadShaderModule(
+			.computeShaderModule = loadShaderModule(
 				{
 					.stage = ShaderStage::COMPUTE,
 					.entryPoint = "main",

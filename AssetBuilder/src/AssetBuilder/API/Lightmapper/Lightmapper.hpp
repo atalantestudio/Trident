@@ -68,6 +68,8 @@ namespace Trident {
 		private:
 			void initialize();
 
+			ref<ShaderModule> loadShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> path) const;
+
 			ref<RenderPass> createGBufferRenderPass() const;
 			ref<RenderPass> createDilationRenderPass() const;
 
@@ -107,12 +109,19 @@ namespace Trident {
 
 			void generateLightmaps(uint32 vertexCount) const;
 
+		public:
+			static const GraphicsAdapter* adapter;
+
 		private:
 			bool initialized = false;
 			ImageFormat atlasFormat;
 			Extent3D atlasExtent;
 			ImageAssetDescriptor imageAssetDescriptor;
 			SceneLightingDescriptor lighting;
+
+			ref<Instance> instance;
+			ref<PhysicalDevice> physicalDevice;
+			ref<Device> device;
 
 			sequence<ref<DescriptorSet>> descriptorSets;
 

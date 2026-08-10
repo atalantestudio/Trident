@@ -143,6 +143,7 @@ namespace Trident {
 
 		protected:
 			PropertyFile* propertyFile = nullptr;
+			GraphicsAdapter* graphicsAdapter = nullptr;
 
 		private:
 			ApplicationProperties* properties = nullptr;
@@ -154,9 +155,8 @@ namespace Trident {
 			HighResolutionTimer timer;
 			AssetLibrary* assetLibrary = nullptr;
 			Window* window = nullptr;
-			GraphicsAdapter* graphicsAdapter;
 			LayerInput lastLayerInput;
-			LayerCompositor* layerCompositor;
+			LayerCompositor* layerCompositor = nullptr;
 			std::vector<ref<Process>> processes;
 
 			uint32 frameIndex = 0;

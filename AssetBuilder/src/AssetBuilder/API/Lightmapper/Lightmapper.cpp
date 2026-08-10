@@ -21,8 +21,19 @@
 #include "AssetBuilder/API/Lightmapper/TraceRaysPipeline.hpp"
 #include "AssetBuilder/API/Lightmapper/VertexBuffer.hpp"
 
+#include "Engine/Filesystem/Filesystem.hpp"
+
 namespace Trident {
+	const GraphicsAdapter* Lightmapper::adapter;
+
 	void Lightmapper::initialize() {
+		instance = adapter->createInstance({
+			.projectName = "Lightmapper",
+			.projectVersion = {0, 0, 1},
+		});
+		physicalDevice = instance->selectPhysicalDevice(false);
+		device = physicalDevice->createDevice();
+
 		gBufferRenderPass = createGBufferRenderPass();
 		dilationRenderPass = createDilationRenderPass();
 
@@ -31,25 +42,25 @@ namespace Trident {
 		descriptorSetLayouts[2] = createPostProcessingDescriptorSetLayout();
 		descriptorSetLayouts[3] = createDilationDescriptorSetLayout();
 
-		gBufferPipelineLayout = Renderer::createPipelineLayout({
+		gBufferPipelineLayout = device->createPipelineLayout({
 			.descriptorSetLayouts = {descriptorSetLayouts[0]},
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "G-Buffer",
 			#endif
 		});
-		traceRaysPipelineLayout = Renderer::createPipelineLayout({
+		traceRaysPipelineLayout = device->createPipelineLayout({
 			.descriptorSetLayouts = {descriptorSetLayouts[1]},
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Trace rays",
 			#endif
 		});
-		postProcessingPipelineLayout = Renderer::createPipelineLayout({
+		postProcessingPipelineLayout = device->createPipelineLayout({
 			.descriptorSetLayouts = {descriptorSetLayouts[2]},
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Post processing",
 			#endif
 		});
-		dilationPipelineLayout = Renderer::createPipelineLayout({
+		dilationPipelineLayout = device->createPipelineLayout({
 			.descriptorSetLayouts = {descriptorSetLayouts[3]},
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Dilation",
@@ -63,13 +74,51 @@ namespace Trident {
 		verticalBilateralFilterPipeline = createVerticalBilateralFilterPipeline();
 		dilationPipeline = createDilationPipeline();
 
-		descriptorSets = Renderer::getDevice()->allocateDescriptorSets(view<ref<DescriptorSetLayout>>(descriptorSetLayouts, 4));
+		descriptorSets = device->allocateDescriptorSets(view<ref<DescriptorSetLayout>>(descriptorSetLayouts, 4));
 
 		intermediateLightmapAtlasSampler = createIntermediateLightmapAtlasSampler();
 
 		argumentBuffer = createArgumentBuffer();
 
 		initialized = true;
+	}
+
+	ref<ShaderModule> Lightmapper::loadShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> path) const {
+		std::string pathString = "Asset/Shader/";
+		pathString += path;
+
+		switch (adapter->getApi()) {
+			case GraphicsAPI::DX12: {
+				pathString += ".hlsl";
+
+				break;
+			}
+			case GraphicsAPI::GL: {
+				#if defined(GL_SOURCE_FROM_SPIRV)
+					pathString += ".spv";
+				#else
+					pathString += ".glsl";
+				#endif
+
+				break;
+			}
+			case GraphicsAPI::VK: {
+				pathString += ".spv";
+
+				break;
+			}
+			default: {
+				ENGINE_ERROR_UNSUPPORTED();
+
+				break;
+			}
+		}
+
+		path = view<char8>(&pathString[0], pathString.size());
+
+		const sequence<char8> code = Filesystem::openTextBuffer(&path[0]);
+
+		return device->createShaderModule(descriptor, view<char8>(&code[0], code.count()));
 	}
 
 	void Lightmapper::generateAtlas(ImageAssetDescriptor& imageAssetDescriptor, const LightmapperDescriptor& descriptor) {
@@ -109,7 +158,7 @@ namespace Trident {
 
 		encodeOneTimeCommands(descriptor.vertices, descriptor.lightmapCoordinates, descriptor.indices);
 
-		context.lightmapAtlasStagingBuffer = Renderer::createDynamicBuffer({
+		context.lightmapAtlasStagingBuffer = device->createDynamicBuffer({
 			.size = context.lightmapAtlasImage->getSize(),
 			.usage = BufferUsage::TRANSFER_DST,
 			.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
@@ -129,7 +178,7 @@ namespace Trident {
 	}
 
 	ref<RenderPass> Lightmapper::createDilationRenderPass() const {
-		return Renderer::createRenderPass({
+		return device->createRenderPass({
 			.attachments = {
 				// Lightmap atlas
 				{
@@ -154,7 +203,7 @@ namespace Trident {
 	}
 
 	ref<Framebuffer> Lightmapper::createDilationFramebuffer() const {
-		return Renderer::createFramebuffer({
+		return device->createFramebuffer({
 			.renderPass = dilationRenderPass,
 			.imageViews = {context.lightmapAtlasImageView},
 			.extent = {imageAssetDescriptor.extent.width, imageAssetDescriptor.extent.height},
@@ -171,7 +220,7 @@ namespace Trident {
 			.shaderStages = ShaderStage::FRAGMENT,
 		};
 
-		return Renderer::createDescriptorSetLayout(intermediateLightmapAtlasBinding);
+		return device->createDescriptorSetLayout(intermediateLightmapAtlasBinding);
 	}
 
 	ref<GraphicsPipeline> Lightmapper::createDilationPipeline() const {
@@ -181,10 +230,10 @@ namespace Trident {
 			},
 		};
 
-		return Renderer::createGraphicsPipeline({
+		return device->createGraphicsPipeline({
 			.pipelineLayout = dilationPipelineLayout,
 			.vertexInputBindings = {},
-			.vertexShaderModule = Renderer::loadShaderModule(
+			.vertexShaderModule = loadShaderModule(
 				{
 					.stage = ShaderStage::VERTEX,
 					.entryPoint = "main",
@@ -194,7 +243,7 @@ namespace Trident {
 				},
 				"Lightmapper/Dilation.vert"
 			),
-			.fragmentShaderModule = Renderer::loadShaderModule(
+			.fragmentShaderModule = loadShaderModule(
 				{
 					.stage = ShaderStage::FRAGMENT,
 					.entryPoint = "main",
@@ -226,8 +275,7 @@ namespace Trident {
 	}
 
 	void Lightmapper::encodeOneTimeCommands(view<BuildVertex3D> vertices, view<svec2<float32>> lightmapCoordinates, view<uint32> indices) const {
-		const ref<Device> device = Renderer::getDevice();
-		const ref<Buffer> stagingBuffer = Renderer::createDynamicBuffer({
+		const ref<Buffer> stagingBuffer = device->createDynamicBuffer({
 			.size = argumentBuffer->getSize() + context.vertexBuffer->getSize() + context.indexBuffer->getSize(),
 			.usage = BufferUsage::TRANSFER_SRC,
 			.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
@@ -405,7 +453,6 @@ namespace Trident {
 	}
 
 	void Lightmapper::generateLightmaps(uint32 indexCount) const {
-		const ref<Device> device = Renderer::getDevice();
 		const float32 width = static_cast<float32>(imageAssetDescriptor.extent.width);
 		const float32 height = static_cast<float32>(imageAssetDescriptor.extent.height);
 		const uint32 workGroupX = ceil(imageAssetDescriptor.extent.width / 16, 16u);
@@ -513,7 +560,7 @@ namespace Trident {
 		commandEncoder->endRenderPass();
 
 		// TODO(graphics/render-pass/subpass): Add support for subpass dependencies.
-		if (Renderer::getGraphicsApi() == GraphicsAPI::DX12) {
+		if (adapter->getApi() == GraphicsAPI::DX12) {
 			imageMemoryBarrier = {
 				.image = context.lightmapAtlasImage,
 				.newLayout = ImageLayout::TRANSFER_SRC_OPTIMAL,

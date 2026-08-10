@@ -34,7 +34,7 @@ namespace Trident::DX12 {
 		return createRef<DX12::MemoryAllocator>(static_cast<const DX12::Device*>(device));
 	}
 
-	static ref<RenderPass> createRenderPass(const Trident::Device* device, ref<Trident::Surface> surface, const RenderPassDescriptor& descriptor) {
+	static ref<RenderPass> createRenderPass(const Trident::Device* device, const RenderPassDescriptor& descriptor) {
 		return createRef<RenderPass>(device, descriptor);
 	}
 

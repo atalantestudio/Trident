@@ -7,7 +7,7 @@
 
 namespace Trident {
 	ref<Framebuffer> Lightmapper::createGBufferFramebuffer() const {
-		return Renderer::createFramebuffer({
+		return device->createFramebuffer({
 			.renderPass = gBufferRenderPass,
 			.imageViews = {
 				context.gBufferPositionImageView,

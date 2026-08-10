@@ -7,9 +7,9 @@
 
 namespace Trident {
 	ref<Buffer> Lightmapper::createVertexBuffer(uint64 vertexCount) const {
-		const uint64 alignment = Renderer::getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
+		const uint64 alignment = physicalDevice->getLimits().minStorageBufferOffsetAlignment;
 
-		return Renderer::createDynamicBuffer({
+		return device->createDynamicBuffer({
 			.size = ceil(vertexCount * sizeof(BuildVertex3D), alignment),
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,

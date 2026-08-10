@@ -456,7 +456,7 @@ namespace Trident {
 		return adapter->createPipelineLayoutImplementation(this, descriptor);
 	}
 
-	ref<RenderPass> Device::createRenderPass(ref<Surface> surface, const RenderPassDescriptor& descriptor) const {
+	ref<RenderPass> Device::createRenderPass(const RenderPassDescriptor& descriptor) const {
 		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
@@ -550,7 +550,7 @@ namespace Trident {
 			}
 		#endif
 
-		return adapter->createRenderPassImplementation(this, surface, descriptor);
+		return adapter->createRenderPassImplementation(this, descriptor);
 	}
 
 	ref<Sampler> Device::createSampler(const SamplerDescriptor& descriptor) const {

@@ -7,9 +7,9 @@
 
 namespace Trident {
 	ref<ComputePipeline> Lightmapper::createIntermediateDilationPipeline() const {
-		return Renderer::createComputePipeline({
+		return device->createComputePipeline({
 			.pipelineLayout = postProcessingPipelineLayout,
-			.computeShaderModule = Renderer::loadShaderModule(
+			.computeShaderModule = loadShaderModule(
 				{
 					.stage = ShaderStage::COMPUTE,
 					.entryPoint = "main",

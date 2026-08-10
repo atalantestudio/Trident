@@ -11,7 +11,7 @@ namespace Trident {
 		Trident::RenderPass(device, descriptor)
 	{}
 
-	ref<Trident::RenderPass> GL::createRenderPass(const Trident::Device* device, ref<Trident::Surface> surface, const RenderPassDescriptor& descriptor) {
+	ref<Trident::RenderPass> GL::createRenderPass(const Trident::Device* device, const RenderPassDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		ref<GL::RenderPass> renderPass = createRef<GL::RenderPass>(device, descriptor);

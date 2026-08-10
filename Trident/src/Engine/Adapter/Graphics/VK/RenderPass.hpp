@@ -12,11 +12,10 @@ namespace Trident {
 
 		public:
 			VkRenderPass renderPass;
-			VkExtent2D surfaceExtent;
 	};
 
 	namespace VK {
-		ref<Trident::RenderPass> createRenderPass(const Trident::Device* device, ref<Trident::Surface> surface, const RenderPassDescriptor& descriptor);
+		ref<Trident::RenderPass> createRenderPass(const Trident::Device* device, const RenderPassDescriptor& descriptor);
 
 		void destroyRenderPass(const Trident::Device* device, const Trident::RenderPass* renderPass);
 	}

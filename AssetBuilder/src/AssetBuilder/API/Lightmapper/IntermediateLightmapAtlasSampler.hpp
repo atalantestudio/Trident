@@ -7,7 +7,7 @@
 
 namespace Trident {
 	ref<Sampler> Lightmapper::createIntermediateLightmapAtlasSampler() const {
-		return Renderer::createSampler({
+		return device->createSampler({
 			.magFilter = Filter::NEAREST,
 			.minFilter = Filter::NEAREST,
 			.addressModeU = AddressMode::REPEAT,

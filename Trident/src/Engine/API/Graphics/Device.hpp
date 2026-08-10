@@ -15,8 +15,6 @@
 
 namespace Trident {
 	class Device {
-		friend class GraphicsAdapter;
-
 		public:
 			~Device();
 
@@ -55,7 +53,7 @@ namespace Trident {
 
 			ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const;
 
-			ref<RenderPass> createRenderPass(ref<Surface> surface, const RenderPassDescriptor& descriptor) const;
+			ref<RenderPass> createRenderPass(const RenderPassDescriptor& descriptor) const;
 
 			ref<Sampler> createSampler(const SamplerDescriptor& descriptor) const;
 

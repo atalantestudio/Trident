@@ -22,10 +22,10 @@ namespace Trident {
 			},
 		};
 
-		return Renderer::createGraphicsPipeline({
+		return device->createGraphicsPipeline({
 			.pipelineLayout = gBufferPipelineLayout,
 			.vertexInputBindings = {},
-			.vertexShaderModule = Renderer::loadShaderModule(
+			.vertexShaderModule = loadShaderModule(
 				{
 					.stage = ShaderStage::VERTEX,
 					.entryPoint = "main",
@@ -35,7 +35,7 @@ namespace Trident {
 				},
 				"Lightmapper/GBuffer.vert"
 			),
-			.fragmentShaderModule = Renderer::loadShaderModule(
+			.fragmentShaderModule = loadShaderModule(
 				{
 					.stage = ShaderStage::FRAGMENT,
 					.entryPoint = "main",

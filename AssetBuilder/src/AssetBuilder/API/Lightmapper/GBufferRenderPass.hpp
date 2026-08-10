@@ -7,7 +7,7 @@
 
 namespace Trident {
 	ref<RenderPass> Lightmapper::createGBufferRenderPass() const {
-		return Renderer::createRenderPass({
+		return device->createRenderPass({
 			.attachments = {
 				// Position
 				{

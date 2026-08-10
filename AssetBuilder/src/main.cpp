@@ -72,6 +72,8 @@ namespace Trident {
 					}
 				}
 
+				Lightmapper::adapter = graphicsAdapter;
+
 				registerProcesses();
 
 				ENGINE_INFO("Done building assets.");

@@ -28,15 +28,13 @@ namespace Trident {
 		Trident::RenderPass(device, descriptor)
 	{}
 
-	ref<Trident::RenderPass> VK::createRenderPass(const Trident::Device* device, ref<Trident::Surface> surface, const RenderPassDescriptor& descriptor) {
+	ref<Trident::RenderPass> VK::createRenderPass(const Trident::Device* device, const RenderPassDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
-		const ref<VK::Surface> _surface = std::static_pointer_cast<VK::Surface>(surface);
 		VkResult result;
 
 		ref<VK::RenderPass> renderPass = createRef<VK::RenderPass>(device, descriptor);
-		renderPass->surfaceExtent = _surface->capabilities.currentExtent;
 
 		uint32 resolveAttachmentCount = 0;
 
@@ -84,7 +82,7 @@ namespace Trident {
 				// Create resolve attachment description.
 				VkAttachmentDescription& resolveAttachmentDescription = attachmentDescriptions[renderPass->attachments.count() + resolveAttachmentIndex];
 				resolveAttachmentDescription.flags = 0;
-				resolveAttachmentDescription.format = _surface->surfaceFormat.format;
+				resolveAttachmentDescription.format = attachmentDescription.format;
 				resolveAttachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
 				resolveAttachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 				resolveAttachmentDescription.storeOp = attachmentDescription.storeOp;

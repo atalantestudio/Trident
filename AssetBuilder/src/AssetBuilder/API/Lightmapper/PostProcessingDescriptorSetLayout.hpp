@@ -16,6 +16,6 @@ namespace Trident {
 			},
 		};
 
-		return Renderer::createDescriptorSetLayout(view<DescriptorSetLayoutBinding>(bindings, 1));
+		return device->createDescriptorSetLayout(view<DescriptorSetLayoutBinding>(bindings, 1));
 	}
 }

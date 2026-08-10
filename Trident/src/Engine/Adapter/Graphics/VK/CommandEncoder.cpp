@@ -114,13 +114,7 @@ namespace Trident {
 		renderPassBeginInfo.renderArea.offset.y = 0;
 		renderPassBeginInfo.renderArea.extent = *pointer_cast<const VkExtent2D*>(&renderAreaExtent);
 		renderPassBeginInfo.clearValueCount = static_cast<uint32>(clearValues.count());
-
-		if (clearValues.count() == 0) {
-			renderPassBeginInfo.pClearValues = nullptr;
-		}
-		else {
-			renderPassBeginInfo.pClearValues = &clearValues[0];
-		}
+		renderPassBeginInfo.pClearValues = &clearValues[0];
 
 		vkCmdBeginRenderPass(_commandEncoder->commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 

@@ -86,17 +86,20 @@ namespace Trident {
 		inputAssemblyStateCreateInfo.topology = getPrimitiveTopology(descriptor.primitiveTopology);
 		inputAssemblyStateCreateInfo.primitiveRestartEnable = VK_FALSE;
 
+		// TODO(graphics/vk/graphics-pipeline): Expose.
+		static constexpr VkExtent2D extent = {1920, 1080};
+
 		VkViewport viewport{};
 		viewport.x = 0.0f;
 		viewport.y = 0.0f;
-		viewport.width = static_cast<float32>(renderPass->surfaceExtent.width);
-		viewport.height = static_cast<float32>(renderPass->surfaceExtent.height);
+		viewport.width = static_cast<float32>(extent.width);
+		viewport.height = static_cast<float32>(extent.height);
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 
 		VkRect2D scissor{};
 		scissor.offset = {0, 0};
-		scissor.extent = renderPass->surfaceExtent;
+		scissor.extent = extent;
 
 		VkPipelineViewportStateCreateInfo viewportStateCreateInfo{};
 		viewportStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;

@@ -97,7 +97,7 @@ namespace Trident {
 	typedef ref<Instance> (*CreateInstanceImplementation)(const GraphicsAdapter* adapter, const InstanceDescriptor& instanceDescriptor);
 	typedef ref<MemoryAllocator> (*CreateMemoryAllocatorImplementation)(const Device* device);
 	typedef ref<PipelineLayout> (*CreatePipelineLayoutImplementation)(const Device* device, const PipelineLayoutDescriptor& descriptor);
-	typedef ref<RenderPass> (*CreateRenderPassImplementation)(const Device* device, ref<Surface> surface, const RenderPassDescriptor& descriptor);
+	typedef ref<RenderPass> (*CreateRenderPassImplementation)(const Device* device, const RenderPassDescriptor& descriptor);
 	typedef ref<Sampler> (*CreateSamplerImplementation)(const Device* device, const SamplerDescriptor& descriptor);
 	typedef ref<Semaphore> (*CreateSemaphoreImplementation)(const Device* device);
 	typedef ref<ShaderModule> (*CreateShaderModuleFromAssetImplementation)(const Device* device, const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset);

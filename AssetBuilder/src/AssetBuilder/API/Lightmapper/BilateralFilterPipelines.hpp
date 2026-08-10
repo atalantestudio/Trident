@@ -7,9 +7,9 @@
 
 namespace Trident {
 	ref<ComputePipeline> Lightmapper::createHorizontalBilateralFilterPipeline() const {
-		return Renderer::createComputePipeline({
+		return device->createComputePipeline({
 			.pipelineLayout = postProcessingPipelineLayout,
-			.computeShaderModule = Renderer::loadShaderModule(
+			.computeShaderModule = loadShaderModule(
 				{
 					.stage = ShaderStage::COMPUTE,
 					.entryPoint = "main",
@@ -26,9 +26,9 @@ namespace Trident {
 	}
 
 	ref<ComputePipeline> Lightmapper::createVerticalBilateralFilterPipeline() const {
-		return Renderer::createComputePipeline({
+		return device->createComputePipeline({
 			.pipelineLayout = postProcessingPipelineLayout,
-			.computeShaderModule = Renderer::loadShaderModule(
+			.computeShaderModule = loadShaderModule(
 				{
 					.stage = ShaderStage::COMPUTE,
 					.entryPoint = "main",
