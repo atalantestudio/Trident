@@ -21,7 +21,7 @@ namespace Trident {
 
 	ref<Device> PhysicalDevice::createDevice() const {
 		ref<Device> device = adapter->createDeviceImplementation(adapter, this);
-		device->memoryAllocator = adapter->createMemoryAllocatorImplementation(device.get());
+		device->memoryAllocator = adapter->createMemoryAllocatorImplementation(device);
 
 		return device;
 	}

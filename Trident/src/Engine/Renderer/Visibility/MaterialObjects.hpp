@@ -133,7 +133,7 @@ namespace Trident {
 	// - Initializes descriptor buffers (MaterialOffsetBuffer)
 	// - Initializes descriptor images
 	// - Initializes write descriptor sets for both descriptor buffers and descriptor images
-	void VisibilityRenderer::initializeMaterialImages(sequence<ImageMemoryBarrier>& imageMemoryBarriers, sequence<ref<BaseBufferView>>& materialOffsetViews, sequence<DescriptorImage>& descriptorImages, sequence<WriteDescriptorSet>& writeDescriptorSets) {
+	void VisibilityRenderer::initializeMaterialImages(sequence<ImageMemoryBarrier>& imageMemoryBarriers, sequence<BaseBufferView>& materialOffsetViews, sequence<DescriptorImage>& descriptorImages, sequence<WriteDescriptorSet>& writeDescriptorSets) {
 		ImageDescriptor imageDescriptor = {
 			.type = ImageType::TEXTURE_2D,
 			.format = ImageFormat::R8G8B8A8_UNORM,
@@ -273,7 +273,7 @@ namespace Trident {
 		materialShaderImageViews = sequence<ref<ImageView>>(imageCount);
 
 		sequence<ImageMemoryBarrier> imageMemoryBarriers(imageCount);
-		sequence<ref<BaseBufferView>> materialOffsetViews(materialShaderCount);
+		sequence<BaseBufferView> materialOffsetViews(materialShaderCount);
 		sequence<DescriptorImage> descriptorImages(imageCount);
 		sequence<WriteDescriptorSet> writeDescriptorSets(materialOffsetViews.count() + descriptorImages.count());
 
@@ -290,9 +290,9 @@ namespace Trident {
 				.name = "Image staging",
 			#endif
 		});
-		const ref<BufferView<uint8>> imageStagingView = imageStagingBuffer->createView<uint8>(0, imageStagingBuffer->getSize());
+		const BufferView<uint8> imageStagingView = imageStagingBuffer->createView<uint8>(0, imageStagingBuffer->getSize());
 
-		uint8* imageMappedRange = imageStagingView->map();
+		uint8* imageMappedRange = imageStagingView.map();
 		uint32 materialShaderIndex = 0;
 		uint32 imageIndex = 0;
 		uint64 imageMappedRangeOffset = 0;

@@ -38,10 +38,10 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
-		const ref<VK::MemoryAllocator> memoryAllocator = std::static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
+		const ref<VK::MemoryAllocator> memoryAllocator = static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
 		VkResult result;
 
-		ref<VK::Image> image = createRef<VK::Image>(device, descriptor);
+		ref<VK::Image> image = allocateRef<VK::Image>(device, descriptor);
 		image->type = getImageType(descriptor.type);
 		image->format = getFormat(descriptor.format);
 		image->aspectFlags = getImageAspectFlags(image->format);
@@ -78,21 +78,33 @@ namespace Trident {
 		uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(image->memoryRequirements.memoryTypeBits, memoryPropertyFlags);
 
 		if (memoryPropertyFlags == (VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT) && memoryTypeIndex == max<uint32>()) {
-			ADAPTER_WARNING("Failed to find [] memory for image. Falling back to DEVICE_LOCAL|HOST_VISIBLE memory.", string_VkMemoryPropertyFlags(memoryPropertyFlags));
+			#if defined(BUILD_MODE_DEBUG)
+				ADAPTER_WARNING("Failed to find [] memory for image. Falling back to DEVICE_LOCAL|HOST_VISIBLE memory.", string_VkMemoryPropertyFlags(memoryPropertyFlags));
+			#else
+				ADAPTER_WARNING("Failed to find adequate memory for image. Falling back to DEVICE_LOCAL|HOST_VISIBLE memory.");
+			#endif
 
 			memoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
 			memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(image->memoryRequirements.memoryTypeBits, memoryPropertyFlags);
 		}
 
 		if (memoryPropertyFlags == (VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) && memoryTypeIndex == max<uint32>()) {
-			ADAPTER_WARNING("Failed to find [] memory for image. Falling back to HOST_VISIBLE|HOST_COHERENT memory.", string_VkMemoryPropertyFlags(memoryPropertyFlags));
+			#if defined(BUILD_MODE_DEBUG)
+				ADAPTER_WARNING("Failed to find [] memory for image. Falling back to HOST_VISIBLE|HOST_COHERENT memory.", string_VkMemoryPropertyFlags(memoryPropertyFlags));
+			#else
+				ADAPTER_WARNING("Failed to find adequate memory for image. Falling back to HOST_VISIBLE|HOST_COHERENT memory.");
+			#endif
 
 			memoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 			memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(image->memoryRequirements.memoryTypeBits, memoryPropertyFlags);
 		}
 
 		if (memoryPropertyFlags == (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) && memoryTypeIndex == max<uint32>()) {
-			ADAPTER_WARNING("Failed to find [] memory for image. Falling back to DEVICE_LOCAL memory.", string_VkMemoryPropertyFlags(memoryPropertyFlags));
+			#if defined(BUILD_MODE_DEBUG)
+				ADAPTER_WARNING("Failed to find [] memory for image. Falling back to DEVICE_LOCAL memory.", string_VkMemoryPropertyFlags(memoryPropertyFlags));
+			#else
+				ADAPTER_WARNING("Failed to find adequate memory for image. Falling back to DEVICE_LOCAL memory.");
+			#endif
 
 			memoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 			memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(image->memoryRequirements.memoryTypeBits, memoryPropertyFlags);
@@ -120,7 +132,7 @@ namespace Trident {
 		return image;
 	}
 
-	ref<Trident::Image> VK::createImage(const Trident::Device* device, VkImage image, VkFormat format, Extent2D extent, uint32 index) {
+	ref<Trident::Image> VK::createImage(const Trident::Device* device, VkImage vkImage, VkFormat format, Extent2D extent, uint32 index) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		ImageDescriptor descriptor = createSwapchainImageDescriptor(extent);
@@ -131,15 +143,15 @@ namespace Trident {
 			descriptor.name = name;
 		#endif
 
-		ref<VK::Image> _image = createRef<VK::Image>(device, descriptor);
-		_image->image = image;
-		_image->type = VK_IMAGE_TYPE_2D;
-		_image->format = format;
-		_image->aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
-		_image->memorySuballocation = {};
-		_image->swapchainImage = true;
+		ref<VK::Image> image = allocateRef<VK::Image>(device, descriptor);
+		image->image = vkImage;
+		image->type = VK_IMAGE_TYPE_2D;
+		image->format = format;
+		image->aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
+		image->memorySuballocation = {};
+		image->swapchainImage = true;
 
-		return _image;
+		return image;
 	}
 
 	void VK::destroyImage(const Trident::Device* device, const Trident::Image* image) {
@@ -152,7 +164,7 @@ namespace Trident {
 		}
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
-		const ref<VK::MemoryAllocator> memoryAllocator = std::static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
+		const ref<VK::MemoryAllocator> memoryAllocator = static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
 
 		_device->vkDestroyImage(_device->device, _image->image, nullptr);
 

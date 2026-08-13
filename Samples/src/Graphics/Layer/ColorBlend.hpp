@@ -224,10 +224,10 @@ namespace Trident {
 						.name = "Staging",
 					#endif
 				});
-				const ref<BufferView<Vertex>> vertexView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
-				const ref<BufferView<Instance>> instanceView = stagingBuffer->createView<Instance>(vertexBuffer->getSize(), instanceBuffer->getSize());
+				const BufferView<Vertex> vertexView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
+				const BufferView<Instance> instanceView = stagingBuffer->createView<Instance>(vertexBuffer->getSize(), instanceBuffer->getSize());
 
-				Vertex* vertexStagingBufferMappedRange = vertexView->map();
+				Vertex* vertexStagingBufferMappedRange = vertexView.map();
 				vertexStagingBufferMappedRange[0].position = {-0.75f,  0.75f};
 				vertexStagingBufferMappedRange[1].position = { 0.25f,  0.75f};
 				vertexStagingBufferMappedRange[2].position = {-0.75f, -0.75f};
@@ -235,7 +235,7 @@ namespace Trident {
 				vertexStagingBufferMappedRange[4].position = { 0.5f,   0.5f};
 				vertexStagingBufferMappedRange[5].position = {-0.5f,  -0.5f};
 
-				Instance* instanceStagingBufferMappedRange = instanceView->map();
+				Instance* instanceStagingBufferMappedRange = instanceView.map();
 				instanceStagingBufferMappedRange[0].color = {1.0f, 1.0f, 1.0f, 1.0f};
 				instanceStagingBufferMappedRange[1].color = {1.0f, 0.2f, 0.0f, 0.5f};
 
@@ -252,17 +252,17 @@ namespace Trident {
 				commandEncoder->begin();
 
 				BufferCopyRegion bufferCopyRegion = {
-					.sourceOffset = vertexView->getOffset(),
+					.sourceOffset = vertexView.getOffset(),
 					.destinationOffset = 0,
-					.size = vertexView->getSize(),
+					.size = vertexView.getSize(),
 				};
 
 				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegion);
 
 				bufferCopyRegion = {
-					.sourceOffset = instanceView->getOffset(),
+					.sourceOffset = instanceView.getOffset(),
 					.destinationOffset = 0,
-					.size = instanceView->getSize(),
+					.size = instanceView.getSize(),
 				};
 
 				commandEncoder->copyBufferToBuffer(stagingBuffer, instanceBuffer, bufferCopyRegion);

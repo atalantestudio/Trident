@@ -17,7 +17,7 @@ namespace Trident {
 	ref<Trident::Image> GL::createImage(const Trident::Device* device, const ImageDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ref<GL::Image> image = createRef<GL::Image>(device, descriptor);
+		ref<GL::Image> image = allocateRef<GL::Image>(device, descriptor);
 		image->target = getImageType(descriptor.type, image->sampleCount, image->layerCount);
 		image->internalFormat = getInternalFormat(descriptor.format);
 		image->format = GL::getFormat(descriptor.format);

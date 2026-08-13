@@ -19,6 +19,8 @@ namespace Trident {
 
 	struct FontAsset : public Asset {
 		public:
+			FontAsset() = default;
+
 			explicit FontAsset(const FontAssetDescriptor& descriptor) :
 				Asset{descriptor.identifier, descriptor.version},
 				glyphMapImage(descriptor.glyphMapImage),

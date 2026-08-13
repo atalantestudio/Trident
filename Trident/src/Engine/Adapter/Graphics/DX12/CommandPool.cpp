@@ -16,7 +16,7 @@ namespace Trident {
 	ref<Trident::CommandPool> DX12::createCommandPool(const Trident::Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability) {
 		const D3D12_COMMAND_LIST_TYPE commandListType = getCommandListType(queueFamilyCapability);
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
-		ref<DX12::CommandPool> commandPool = createRef<DX12::CommandPool>(device, commandListType);
+		ref<DX12::CommandPool> commandPool = allocateRef<DX12::CommandPool>(device, commandListType);
 		HRESULT result;
 
 		result = _device->device->CreateCommandAllocator(commandListType, IID_PPV_ARGS(&commandPool->commandAllocator));

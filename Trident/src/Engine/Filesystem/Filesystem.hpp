@@ -40,7 +40,7 @@ namespace Trident {
 		Writer openWriter(view<char8> path);
 
 		template<typename AssetType>
-		ref<AssetType> decodeAsset(ByteStream<StreamOperation::READ>& byteStream, AssetLibrary* assetLibrary);
+		AssetType decodeAsset(ByteStream<StreamOperation::READ>& byteStream, AssetLibrary* assetLibrary);
 
 		void decodeQoiContent(ByteStream<StreamOperation::READ>& stream, sequence<uint8>& data, uint8 channelCount, uint32 footerByteSize);
 	};

@@ -17,7 +17,7 @@ namespace Trident {
 		clearValues = getClearValues();
 
 		for (const ref<Layer> layer : layers) {
-			ref<RenderPassLayer> renderPassLayer = std::dynamic_pointer_cast<RenderPassLayer>(layer);
+			ref<RenderPassLayer> renderPassLayer = *pointer_cast<const ref<RenderPassLayer>*>(&layer);
 			renderPassLayer->renderPass = renderPass;
 		}
 

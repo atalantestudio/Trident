@@ -14,7 +14,7 @@ namespace Trident {
 	ref<Trident::RenderPass> GL::createRenderPass(const Trident::Device* device, const RenderPassDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ref<GL::RenderPass> renderPass = createRef<GL::RenderPass>(device, descriptor);
+		ref<GL::RenderPass> renderPass = allocateRef<GL::RenderPass>(device, descriptor);
 
 		uint32 totalColorAttachmentCount = 0;
 		bool anyPresentedColorAttachment = false;

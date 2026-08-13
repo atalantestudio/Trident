@@ -69,7 +69,7 @@ namespace Trident {
 			void registerLayer(Argument&&... arguments) {
 				PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-				ref<Layer> layer = createRef<LayerType>(std::forward<Argument>(arguments)...);
+				ref<LayerType> layer = new LayerType(std::forward<Argument>(arguments)...);
 				layer->setApplication(this);
 				layer->build();
 
@@ -80,7 +80,7 @@ namespace Trident {
 			void registerLayerGroup(Argument&&... arguments) {
 				PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-				ref<LayerGroup> layerGroup = createRef<LayerGroupType>(std::forward<Argument>(arguments)...);
+				ref<LayerGroupType> layerGroup = new LayerGroupType(std::forward<Argument>(arguments)...);
 				layerGroup->setApplication(this);
 				layerGroup->initialize();
 
@@ -93,7 +93,7 @@ namespace Trident {
 
 				const uint32 processId = static_cast<uint32>(processes.size());
 
-				ref<Process> process = createRef<ProcessType>(std::forward<Argument>(arguments)...);
+				ref<ProcessType> process = new ProcessType(std::forward<Argument>(arguments)...);
 				process->setId(processId);
 
 				processes.emplace_back(process);
@@ -157,7 +157,7 @@ namespace Trident {
 			Window* window = nullptr;
 			LayerInput lastLayerInput;
 			LayerCompositor* layerCompositor = nullptr;
-			std::vector<ref<Process>> processes;
+			std::vector<private_ref<Process>> processes;
 
 			uint32 frameIndex = 0;
 

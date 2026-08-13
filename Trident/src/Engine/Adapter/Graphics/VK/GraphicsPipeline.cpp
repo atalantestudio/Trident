@@ -29,15 +29,14 @@ namespace Trident {
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		const Subpass& subpass = descriptor.renderPass->getSubpass(descriptor.subpassIndex);
-		const ref<VK::RenderPass> renderPass = std::static_pointer_cast<VK::RenderPass>(descriptor.renderPass);
+		const ref<VK::RenderPass> renderPass = static_pointer_cast<VK::RenderPass>(descriptor.renderPass);
 
-		ref<VK::GraphicsPipeline> graphicsPipeline = createRef<VK::GraphicsPipeline>(device);
-
+		ref<VK::GraphicsPipeline> graphicsPipeline = allocateRef<VK::GraphicsPipeline>(device);
 		VkResult result;
 
 		const sequence<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos = {
-			std::static_pointer_cast<VK::ShaderModule>(descriptor.vertexShaderModule)->createInfo,
-			std::static_pointer_cast<VK::ShaderModule>(descriptor.fragmentShaderModule)->createInfo,
+			static_pointer_cast<VK::ShaderModule>(descriptor.vertexShaderModule)->createInfo,
+			static_pointer_cast<VK::ShaderModule>(descriptor.fragmentShaderModule)->createInfo,
 		};
 
 		sequence<VkVertexInputBindingDescription> vertexInputBindingDescriptions(descriptor.vertexInputBindings.count());
@@ -219,7 +218,7 @@ namespace Trident {
 		graphicsPipelineCreateInfo.pDepthStencilState = &depthStencilStateCreateInfo;
 		graphicsPipelineCreateInfo.pColorBlendState = &colorBlendStateCreateInfo;
 		graphicsPipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
-		graphicsPipelineCreateInfo.layout = std::static_pointer_cast<VK::PipelineLayout>(descriptor.pipelineLayout)->pipelineLayout;
+		graphicsPipelineCreateInfo.layout = static_pointer_cast<VK::PipelineLayout>(descriptor.pipelineLayout)->pipelineLayout;
 		graphicsPipelineCreateInfo.renderPass = renderPass->renderPass;
 		graphicsPipelineCreateInfo.subpass = descriptor.subpassIndex;
 		graphicsPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;

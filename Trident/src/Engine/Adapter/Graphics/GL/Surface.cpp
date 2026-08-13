@@ -230,7 +230,7 @@ namespace Trident {
 
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ref<GL::Surface> surface = createRef<GL::Surface>(instance);
+		ref<GL::Surface> surface = allocateRef<GL::Surface>(instance);
 
 		#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
 			const Win32WindowData* windowData = static_cast<const Win32WindowData*>(window->data);
@@ -359,7 +359,7 @@ namespace Trident {
 
 		surface->format = ImageFormat::R8G8B8A8_UNORM;
 
-		ref<GL::PhysicalDevice> _physicalDevice = std::static_pointer_cast<GL::PhysicalDevice>(physicalDevice);
+		ref<GL::PhysicalDevice> _physicalDevice = static_pointer_cast<GL::PhysicalDevice>(physicalDevice);
 
 		_physicalDevice->limits.bufferImageGranularity = 0;
 

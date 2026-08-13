@@ -7,7 +7,7 @@
 
 namespace Trident {
 	#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
-		// Toggle DirectX 12 graphics adapter.
+		/// Toggles the DirectX 12 graphics adapter.
 		#define ENABLE_DX12_ADAPTER
 
 		// If enabled, DX12 shaders will be sourced from SPIR-V binaries.
@@ -18,7 +18,7 @@ namespace Trident {
 		// #define DX12_PREFER_SOFTWARE_ADAPTER
 	#endif
 
-	// Toggle OpenGL graphics adapter.
+	/// Toggles the OpenGL graphics adapter.
 	#define ENABLE_GL_ADAPTER
 
 	// Whether to prioritize integrated GPUs over discrete GPUs when using the OpenGL graphics adapter.
@@ -33,14 +33,17 @@ namespace Trident {
 	/// (OpenGL) The alignment of a resource inside a memory allocation.
 	#define GL_RESOURCE_ALIGNMENT 4
 
-	// Toggle Vulkan graphics adapter.
+	/// Toggles the Vulkan graphics adapter.
 	#define ENABLE_VK_ADAPTER
 
 	#if defined(BUILD_MODE_DEBUG)
+		/// Toggles tracking of memory leaks associated with refs.
+		#define DEBUG_TRACK_REF_LEAKS
+
 		/// Keeps track of the size of the allocated memory.
 		#define DEBUG_COUNT_ALLOCATED_MEMORY_SIZE
 
-		// Toggle debug messages from the graphics API.
+		/// Toggles debug messages from the graphics API.
 		#define DEBUG_ENABLE_MESSENGER
 
 		// Toggle validation layers for graphics APIs that support them.

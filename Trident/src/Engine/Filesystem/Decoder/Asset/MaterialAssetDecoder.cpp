@@ -8,17 +8,17 @@
 
 namespace Trident {
 	template<>
-	ref<MaterialAsset> Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary) {
-		ref<MaterialAsset> asset = createRef<MaterialAsset>();
-		asset->identifier = stream.read<uint32>();
-		asset->version = stream.read<VersionNumber>();
-		asset->shaderModuleAssetIdentifier = stream.read<uint32>();
+	MaterialAsset Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary) {
+		MaterialAsset asset{};
+		asset.identifier = stream.read<uint32>();
+		asset.version = stream.read<VersionNumber>();
+		asset.shaderModuleAssetIdentifier = stream.read<uint32>();
 
 		const uint32 descriptorImageAssetIdentifierCount = stream.read<uint32>();
 
-		asset->descriptorImageAssetIdentifiers = sequence<uint32>(descriptorImageAssetIdentifierCount);
+		asset.descriptorImageAssetIdentifiers = sequence<uint32>(descriptorImageAssetIdentifierCount);
 
-		for (uint32& descriptorImageAssetIdentifier : asset->descriptorImageAssetIdentifiers) {
+		for (uint32& descriptorImageAssetIdentifier : asset.descriptorImageAssetIdentifiers) {
 			descriptorImageAssetIdentifier = stream.read<uint32>();
 		}
 

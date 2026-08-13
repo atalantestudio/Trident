@@ -21,6 +21,9 @@ namespace Trident {
 				return random<uint32>(min<uint32>(), max<uint32>());
 			}
 
+		private:
+			static constexpr uint64 ASSET_COUNT_PER_TYPE = 16;
+
 		public:
 			explicit AssetLibrary(std::filesystem::path basePath);
 
@@ -70,7 +73,7 @@ namespace Trident {
 			uint32 getLoadedAssetIndex(uint32 identifier) const;
 
 			template<typename AssetType>
-			view<ref<AssetType>> getLoadedAssets() const;
+			view<AssetType> getLoadedAssets() const;
 
 		private:
 			std::filesystem::path getAbsolutePath(view<char8> base, view<char8> relativePath, view<char8> extension) const;
@@ -86,14 +89,22 @@ namespace Trident {
 
 		private:
 			std::filesystem::path basePath;
-			std::vector<ref<FontAsset>> fontAssets;
-			std::vector<ref<Geometry2DAsset>> geometry2DAssets;
-			std::vector<ref<Geometry3DAsset>> geometry3DAssets;
-			std::vector<ref<ImageAsset>> imageAssets;
-			std::vector<ref<MaterialAsset>> materialAssets;
-			std::vector<ref<Scene2DAsset>> scene2DAssets;
-			std::vector<ref<Scene3DAsset>> scene3DAssets;
-			std::vector<ref<ShaderModuleAsset>> shaderModuleAssets;
+			sequence<FontAsset> fontAssets;
+			sequence<Geometry2DAsset> geometry2DAssets;
+			sequence<Geometry3DAsset> geometry3DAssets;
+			sequence<ImageAsset> imageAssets;
+			sequence<MaterialAsset> materialAssets;
+			sequence<Scene2DAsset> scene2DAssets;
+			sequence<Scene3DAsset> scene3DAssets;
+			sequence<ShaderModuleAsset> shaderModuleAssets;
+			uint64 fontAssetCount = 0;
+			uint64 geometry2DAssetCount = 0;
+			uint64 geometry3DAssetCount = 0;
+			uint64 imageAssetCount = 0;
+			uint64 materialAssetCount = 0;
+			uint64 scene2DAssetCount = 0;
+			uint64 scene3DAssetCount = 0;
+			uint64 shaderModuleAssetCount = 0;
 			std::unordered_map<uint32, uint32> assetIdentifierToIndex;
 			std::unordered_map<sequence<char8>, uint32> fontAssetPathToIndex;
 			std::unordered_map<sequence<char8>, uint32> geometryAssetPathToIndex;

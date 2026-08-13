@@ -8,7 +8,7 @@ namespace Trident {
 	{}
 
 	template<typename T>
-	inline T* BufferView<T>::map() {
+	inline T* BufferView<T>::map() const {
 		return static_cast<T*>(buffer->map(offset, size));
 	}
 }

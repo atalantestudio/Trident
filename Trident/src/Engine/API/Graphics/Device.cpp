@@ -52,7 +52,7 @@ namespace Trident {
 	}
 
 	AcquireNextImageStatus Device::acquireNextImage(ref<Swapchain> swapchain, ref<Semaphore> semaphore, uint32& imageIndex) const {
-		return adapter->acquireNextImageImplementation(this, swapchain.get(), semaphore.get(), imageIndex);
+		return adapter->acquireNextImageImplementation(this, swapchain, semaphore, imageIndex);
 	}
 
 	sequence<ref<DescriptorSet>> Device::allocateDescriptorSets(view<ref<DescriptorSetLayout>> descriptorSetLayouts) {
@@ -621,7 +621,7 @@ namespace Trident {
 	}
 
 	void Device::resetFence(ref<Fence> fence) const {
-		adapter->resetFenceImplementation(this, fence.get());
+		adapter->resetFenceImplementation(this, fence);
 	}
 
 	void Device::updateDescriptorSets(view<WriteDescriptorSet> writeDescriptorSets) const {
@@ -646,8 +646,8 @@ namespace Trident {
 					uint32 descriptorBufferIndex = 0;
 
 					while (descriptorBufferIndex < writeDescriptorSet.descriptorBufferViews.count()) {
-						const ref<BaseBufferView> bufferView = writeDescriptorSet.descriptorBufferViews[descriptorBufferIndex];
-						const Buffer* buffer = bufferView->getBuffer();
+						const BaseBufferView& bufferView = writeDescriptorSet.descriptorBufferViews[descriptorBufferIndex];
+						const Buffer* buffer = bufferView.getBuffer();
 
 						if (buffer == nullptr) {
 							VALIDATION_ERROR("writeDescriptorSets[[]].descriptorBufferViews[[]].buffer must be a valid Buffer object.", writeDescriptorSetIndex, descriptorBufferIndex);
@@ -656,7 +656,7 @@ namespace Trident {
 							// TODO(graphics/device/update-descriptor-sets)
 							// This validation breaks the Visibility sample, which offsets the Material Offset buffer from 4 bytes for the prefix sum.
 							if (buffer->getUsage() & (BufferUsage::READ_ONLY_STORAGE | BufferUsage::READ_WRITE_STORAGE)) {
-								if (bufferView->getOffset() % minStorageBufferOffsetAlignment > 0) {
+								if (bufferView.getOffset() % minStorageBufferOffsetAlignment > 0) {
 									VALIDATION_ERROR("writeDescriptorSets[[]].descriptorBufferViews[[]].offset must be a multiple of the minStorageBufferOffsetAlignment physical device limit.", writeDescriptorSetIndex, descriptorBufferIndex);
 								}
 							}
@@ -674,7 +674,7 @@ namespace Trident {
 	}
 
 	void Device::waitForFence(ref<Fence> fence) const {
-		adapter->waitForFenceImplementation(this, fence.get());
+		adapter->waitForFenceImplementation(this, fence);
 	}
 
 	void Device::waitIdle() const {

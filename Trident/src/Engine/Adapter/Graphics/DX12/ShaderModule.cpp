@@ -20,7 +20,7 @@ namespace Trident {
 	ref<Trident::ShaderModule> DX12::createShaderModule(const Trident::Device* device, const ShaderModuleDescriptor& descriptor, view<char8> code) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ref<DX12::ShaderModule> shaderModule = createRef<DX12::ShaderModule>(device);
+		ref<DX12::ShaderModule> shaderModule = allocateRef<DX12::ShaderModule>(device);
 		HRESULT result;
 		UINT flags = 0;
 

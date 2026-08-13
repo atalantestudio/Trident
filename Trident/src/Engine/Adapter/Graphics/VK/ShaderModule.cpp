@@ -24,7 +24,7 @@ namespace Trident {
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		VkResult result;
 
-		ref<VK::ShaderModule> shaderModule = createRef<VK::ShaderModule>(device);
+		ref<VK::ShaderModule> shaderModule = allocateRef<VK::ShaderModule>(device);
 
 		VkShaderModuleCreateInfo shaderModuleCreateInfo{};
 		shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;

@@ -15,7 +15,7 @@ namespace Trident {
 	ref<Trident::ImageView> GL::createImageView(const Trident::Device* device, Trident::Image* image, const ImageViewDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ref<GL::ImageView> imageView = createRef<GL::ImageView>(device, image, descriptor);
+		ref<GL::ImageView> imageView = allocateRef<GL::ImageView>(device, image, descriptor);
 
 		const GL::Image* _image = static_cast<const GL::Image*>(image);
 

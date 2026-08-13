@@ -14,7 +14,7 @@ namespace Trident {
 	{}
 
 	ref<Trident::Sampler> DX12::createSampler(const Trident::Device* device, const SamplerDescriptor& descriptor) {
-		ref<DX12::Sampler> sampler = createRef<DX12::Sampler>(device);
+		ref<DX12::Sampler> sampler = allocateRef<DX12::Sampler>(device);
 		sampler->descriptor.Filter = getFilter(descriptor.minFilter, descriptor.magFilter);
 		sampler->descriptor.AddressU = getAddressMode(descriptor.addressModeU);
 		sampler->descriptor.AddressV = getAddressMode(descriptor.addressModeV);

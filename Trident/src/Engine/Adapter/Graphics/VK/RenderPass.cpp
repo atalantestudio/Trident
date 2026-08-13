@@ -34,7 +34,7 @@ namespace Trident {
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		VkResult result;
 
-		ref<VK::RenderPass> renderPass = createRef<VK::RenderPass>(device, descriptor);
+		ref<VK::RenderPass> renderPass = allocateRef<VK::RenderPass>(device, descriptor);
 
 		uint32 resolveAttachmentCount = 0;
 

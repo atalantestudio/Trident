@@ -23,7 +23,7 @@ namespace Trident {
 	ref<Trident::GraphicsPipeline> GL::createGraphicsPipeline(const Trident::Device* device, const GraphicsPipelineDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ref<GL::GraphicsPipeline> graphicsPipeline = createRef<GL::GraphicsPipeline>(device);
+		ref<GL::GraphicsPipeline> graphicsPipeline = allocateRef<GL::GraphicsPipeline>(device);
 		graphicsPipeline->program = glCreateProgram();
 		graphicsPipeline->primitiveTopology = getPrimitiveTopology(descriptor.primitiveTopology);
 		graphicsPipeline->frontFace = getFrontFace(descriptor.frontFace);
@@ -37,12 +37,12 @@ namespace Trident {
 		graphicsPipeline->depthTest = descriptor.depthStencilState.depthTest;
 		graphicsPipeline->depthWrite = descriptor.depthStencilState.depthWrite;
 		graphicsPipeline->depthFunc = getDepthFunc(descriptor.depthStencilState.compareOperation);
-		graphicsPipeline->multisample = std::static_pointer_cast<GL::RenderPass>(descriptor.renderPass)->multisample;
+		graphicsPipeline->multisample = static_pointer_cast<GL::RenderPass>(descriptor.renderPass)->multisample;
 		graphicsPipeline->dynamicLineWidth = descriptor.dynamicState & DynamicState::LINE_WIDTH;
 		graphicsPipeline->subpassIndex = descriptor.subpassIndex;
 
-		const ref<GL::ShaderModule> vertexShaderModule = std::static_pointer_cast<GL::ShaderModule>(descriptor.vertexShaderModule);
-		const ref<GL::ShaderModule> fragmentShaderModule = std::static_pointer_cast<GL::ShaderModule>(descriptor.fragmentShaderModule);
+		const ref<GL::ShaderModule> vertexShaderModule = static_pointer_cast<GL::ShaderModule>(descriptor.vertexShaderModule);
+		const ref<GL::ShaderModule> fragmentShaderModule = static_pointer_cast<GL::ShaderModule>(descriptor.fragmentShaderModule);
 
 		glAttachShader(graphicsPipeline->program, vertexShaderModule->shader);
 		glAttachShader(graphicsPipeline->program, fragmentShaderModule->shader);

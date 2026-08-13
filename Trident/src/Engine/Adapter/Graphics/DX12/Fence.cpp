@@ -16,7 +16,7 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
-		ref<DX12::Fence> fence = createRef<DX12::Fence>(device);
+		ref<DX12::Fence> fence = allocateRef<DX12::Fence>(device);
 		HRESULT result;
 
 		result = _device->device->CreateFence(descriptor.signaled, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence->fence));

@@ -24,7 +24,7 @@ namespace Trident {
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 
-		ref<VK::Queue> queue = createRef<VK::Queue>(device, queueFamilyIndex, queueFamilyCapability);
+		ref<VK::Queue> queue = allocateRef<VK::Queue>(device, queueFamilyIndex, queueFamilyCapability);
 		queue->commandPool = createCommandPool(device, queueFamilyIndex, queueFamilyCapability);
 
 		_device->vkGetDeviceQueue(_device->device, queueFamilyIndex, 0, &queue->queue);
@@ -42,14 +42,14 @@ namespace Trident {
 		const VK::Queue* _queue = static_cast<const VK::Queue*>(queue);
 		VkResult result;
 
-		// TODO: Move to the graphics adapter.
+		// TODO(graphics/vk/queue/present): Move to the graphics adapter.
 		// ADAPTER_ASSERT(swapchains.count() == presentableImageIndices.count(), "There must be 1 presentable image index per swapchain.");
 
 		sequence<const VkSwapchainKHR*> vkSwapchains(swapchains.count());
 		uint64 swapchainIndex = 0;
 
 		while (swapchainIndex < vkSwapchains.count()) {
-			vkSwapchains[swapchainIndex] = &std::static_pointer_cast<VK::Swapchain>(swapchains[swapchainIndex])->swapchain;
+			vkSwapchains[swapchainIndex] = &static_pointer_cast<VK::Swapchain>(swapchains[swapchainIndex])->swapchain;
 
 			swapchainIndex += 1;
 		}
@@ -58,7 +58,7 @@ namespace Trident {
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 		presentInfo.pNext = nullptr;
 		presentInfo.waitSemaphoreCount = 1;
-		presentInfo.pWaitSemaphores = &std::static_pointer_cast<VK::Semaphore>(waitSemaphore)->semaphore;
+		presentInfo.pWaitSemaphores = &static_pointer_cast<VK::Semaphore>(waitSemaphore)->semaphore;
 		presentInfo.swapchainCount = static_cast<uint32>(vkSwapchains.count());
 		presentInfo.pSwapchains = vkSwapchains[0];
 		presentInfo.pImageIndices = &presentableImageIndices[0];
@@ -81,7 +81,7 @@ namespace Trident {
 		uint32 commandBufferIndex = 0;
 
 		while (commandBufferIndex < commandBuffers.count()) {
-			vkCommandBuffers[commandBufferIndex] = std::static_pointer_cast<VK::CommandBuffer>(commandBuffers[commandBufferIndex])->commandBuffer;
+			vkCommandBuffers[commandBufferIndex] = static_pointer_cast<VK::CommandBuffer>(commandBuffers[commandBufferIndex])->commandBuffer;
 
 			commandBufferIndex += 1;
 		}
@@ -111,13 +111,13 @@ namespace Trident {
 		VkResult result;
 
 		// TODO(graphics/vk/queue/submit): One wait destination stage mask per wait semaphore, but the pipeline stage flags is stored into the command buffer.
-		const VkPipelineStageFlags waitDstStageMask = std::static_pointer_cast<VK::CommandBuffer>(commandBuffers[0])->pipelineStageFlags;
+		const VkPipelineStageFlags waitDstStageMask = static_pointer_cast<VK::CommandBuffer>(commandBuffers[0])->pipelineStageFlags;
 
 		sequence<VkCommandBuffer> vkCommandBuffers(commandBuffers.count());
 		uint32 commandBufferIndex = 0;
 
 		while (commandBufferIndex < commandBuffers.count()) {
-			vkCommandBuffers[commandBufferIndex] = std::static_pointer_cast<VK::CommandBuffer>(commandBuffers[commandBufferIndex])->commandBuffer;
+			vkCommandBuffers[commandBufferIndex] = static_pointer_cast<VK::CommandBuffer>(commandBuffers[commandBufferIndex])->commandBuffer;
 
 			commandBufferIndex += 1;
 		}
@@ -133,7 +133,7 @@ namespace Trident {
 		}
 		else {
 			submitInfo.waitSemaphoreCount = 1;
-			submitInfo.pWaitSemaphores = &std::static_pointer_cast<VK::Semaphore>(waitSemaphore)->semaphore;
+			submitInfo.pWaitSemaphores = &static_pointer_cast<VK::Semaphore>(waitSemaphore)->semaphore;
 			submitInfo.pWaitDstStageMask = &waitDstStageMask;
 		}
 
@@ -146,12 +146,12 @@ namespace Trident {
 		}
 		else {
 			submitInfo.signalSemaphoreCount = 1;
-			submitInfo.pSignalSemaphores = &std::static_pointer_cast<VK::Semaphore>(signalSemaphore)->semaphore;
+			submitInfo.pSignalSemaphores = &static_pointer_cast<VK::Semaphore>(signalSemaphore)->semaphore;
 		}
 
 		DEBUG_ASSERT(fence != nullptr);
 
-		result = vkQueueSubmit(_queue->queue, 1, &submitInfo, std::static_pointer_cast<VK::Fence>(fence)->fence);
+		result = vkQueueSubmit(_queue->queue, 1, &submitInfo, static_pointer_cast<VK::Fence>(fence)->fence);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to submit queue ([]).", string_VkResult(result));
 	}

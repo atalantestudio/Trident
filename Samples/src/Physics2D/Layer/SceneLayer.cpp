@@ -12,11 +12,16 @@
 #include "SceneLayer.hpp"
 
 namespace Trident {
+	Physics2DSceneLayer::~Physics2DSceneLayer() {
+		delete scene;
+		delete physicsSimulation;
+	}
+
 	void Physics2DSceneLayer::loadScene() {
 		const view<char8> sceneAssetName = getApplication()->getPropertyFile()->getProperty<view<char8>>("AssetName");
 		const ref<Scene2DAsset> sceneAsset = getApplication()->getAssetLibrary()->getAsset<Scene2DAsset>(sceneAssetName);
 
-		scene = createScope<Scene2D>(sceneAsset);
+		scene = new Scene2D(sceneAsset);
 
 		// TODO(physics/samples): Restore sample.
 		/* const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
@@ -88,15 +93,15 @@ namespace Trident {
 	void Physics2DSceneLayer::postConstruct() {
 		loadScene();
 
-		physicsSimulation = createScope<PhysicsSimulation2D>(Descriptor<PhysicsSimulation2D>{
-			.scene = scene.get(),
+		physicsSimulation = new PhysicsSimulation2D({
+			.scene = scene,
 			.deltaTime = getApplication()->getFixedDeltaTime(),
 		});
 
 		renderer.layerInput = input;
 		renderer.setLayer(this);
 		renderer.build();
-		renderer.setScene(scene.get());
+		renderer.setScene(scene);
 	}
 
 	void Physics2DSceneLayer::update(float32 deltaTime, float32 inverseDeltaTime) {

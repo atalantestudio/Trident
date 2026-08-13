@@ -9,7 +9,7 @@
 
 namespace Trident {
 	template<>
-	ref<Geometry3DAsset> Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary) {
+	Geometry3DAsset Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary) {
 		Geometry3DAsset asset{};
 		asset.identifier = stream.read<uint32>();
 		asset.version = stream.read<VersionNumber>();
@@ -89,6 +89,6 @@ namespace Trident {
 			lineIndex = stream.read<uint16>();
 		}
 
-		return createRef<Geometry3DAsset>(asset);
+		return asset;
 	}
 }

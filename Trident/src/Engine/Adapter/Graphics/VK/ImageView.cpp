@@ -21,7 +21,7 @@ namespace Trident {
 		const VK::Image* _image = static_cast<const VK::Image*>(image);
 		VkResult result;
 
-		ref<VK::ImageView> imageView = createRef<VK::ImageView>(device, image, descriptor);
+		ref<VK::ImageView> imageView = allocateRef<VK::ImageView>(device, image, descriptor);
 
 		VkImageViewCreateInfo imageViewCreateInfo{};
 		imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;

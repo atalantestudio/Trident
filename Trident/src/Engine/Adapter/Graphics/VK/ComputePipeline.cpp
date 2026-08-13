@@ -20,14 +20,14 @@ namespace Trident {
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		VkResult result;
 
-		ref<VK::ComputePipeline> computePipeline = createRef<VK::ComputePipeline>(device);
+		ref<VK::ComputePipeline> computePipeline = allocateRef<VK::ComputePipeline>(device);
 
 		VkComputePipelineCreateInfo computePipelineCreateInfo{};
 		computePipelineCreateInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
 		computePipelineCreateInfo.pNext = nullptr;
 		computePipelineCreateInfo.flags = 0;
-		computePipelineCreateInfo.stage = std::static_pointer_cast<VK::ShaderModule>(descriptor.computeShaderModule)->createInfo;
-		computePipelineCreateInfo.layout = std::static_pointer_cast<VK::PipelineLayout>(descriptor.pipelineLayout)->pipelineLayout;
+		computePipelineCreateInfo.stage = static_pointer_cast<VK::ShaderModule>(descriptor.computeShaderModule)->createInfo;
+		computePipelineCreateInfo.layout = static_pointer_cast<VK::PipelineLayout>(descriptor.pipelineLayout)->pipelineLayout;
 		computePipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 		computePipelineCreateInfo.basePipelineIndex = 0;
 

@@ -16,12 +16,12 @@ namespace Trident {
 
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ref<GL::Swapchain> swapchain = createRef<GL::Swapchain>(device, descriptor);
+		ref<GL::Swapchain> swapchain = allocateRef<GL::Swapchain>(device, descriptor);
 		swapchain->imageCount = IMAGE_COUNT;
-		swapchain->images = sequence<ref<Trident::Image>>(swapchain->imageCount);
-		swapchain->imageViews = sequence<ref<Trident::ImageView>>(swapchain->imageCount);
+		swapchain->images = sequence<private_ref<Trident::Image>>(swapchain->imageCount);
+		swapchain->imageViews = sequence<private_ref<Trident::ImageView>>(swapchain->imageCount);
 
-		updateSwapchain(device, swapchain.get(), descriptor);
+		updateSwapchain(device, swapchain, descriptor);
 
 		return swapchain;
 	}

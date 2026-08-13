@@ -16,15 +16,15 @@ namespace Trident {
 		glyphSubcomponentBuffer = createGlyphSubcomponentBuffer();
 		userImageStagingBuffer = createUserImageStagingBuffer();
 
-		const ref<BufferView<Camera>> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
-		const ref<BufferView<GUISubcomponent>> subcomponentView = subcomponentBuffer->createView<GUISubcomponent>(0, subcomponentBuffer->getSize());
-		const ref<BufferView<GUIGlyphSubcomponent>> glyphSubcomponentView = glyphSubcomponentBuffer->createView<GUIGlyphSubcomponent>(0, glyphSubcomponentBuffer->getSize());
-		const ref<BufferView<uint8>> userImageView = userImageStagingBuffer->createView<uint8>(0, userImageStagingBuffer->getSize());
+		const BufferView<Camera> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
+		const BufferView<GUISubcomponent> subcomponentView = subcomponentBuffer->createView<GUISubcomponent>(0, subcomponentBuffer->getSize());
+		const BufferView<GUIGlyphSubcomponent> glyphSubcomponentView = glyphSubcomponentBuffer->createView<GUIGlyphSubcomponent>(0, glyphSubcomponentBuffer->getSize());
+		const BufferView<uint8> userImageView = userImageStagingBuffer->createView<uint8>(0, userImageStagingBuffer->getSize());
 
-		cameraBufferMappedRange = cameraView->map();
-		subcomponentBufferMappedRange = subcomponentView->map();
-		glyphSubcomponentBufferMappedRange = glyphSubcomponentView->map();
-		userImageStagingBufferMappedRange = userImageView->map();
+		cameraBufferMappedRange = cameraView.map();
+		subcomponentBufferMappedRange = subcomponentView.map();
+		glyphSubcomponentBufferMappedRange = glyphSubcomponentView.map();
+		userImageStagingBufferMappedRange = userImageView.map();
 
 		userImages = sequence<ref<Image>>(MAX_USER_IMAGE_COUNT);
 		userImageViews = sequence<ref<ImageView>>(MAX_USER_IMAGE_COUNT);
@@ -118,7 +118,7 @@ namespace Trident {
 		graphicsQueue->submit(commandBuffer);
 		graphicsQueue->waitIdle();
 
-		userImageStagingBuffer.~shared_ptr();
+		userImageStagingBuffer.~ref();
 
 		updateDescriptorSets();
 
@@ -509,10 +509,10 @@ namespace Trident {
 				.name = "Staging",
 			#endif
 		});
-		const ref<BufferView<Vertex>> vertexView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
-		const ref<BufferView<uint16>> indexView = stagingBuffer->createView<uint16>(vertexBuffer->getSize(), indexBuffer->getSize());
+		const BufferView<Vertex> vertexView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
+		const BufferView<uint16> indexView = stagingBuffer->createView<uint16>(vertexBuffer->getSize(), indexBuffer->getSize());
 
-		Vertex* vertexMappedRange = vertexView->map();
+		Vertex* vertexMappedRange = vertexView.map();
 		vertexMappedRange[0].position = {0.0f, 0.0f};
 		vertexMappedRange[0].textureCoordinate = {0.0f, 0.0f};
 		vertexMappedRange[1].position = {1.0f, 0.0f};
@@ -524,7 +524,7 @@ namespace Trident {
 
 		static constexpr uint16 INDICES[] = {0, 1, 2, 0, 2, 3};
 
-		uint16* indexMappedRange = indexView->map();
+		uint16* indexMappedRange = indexView.map();
 
 		std::copy_n(INDICES, 6, indexMappedRange);
 
@@ -541,17 +541,17 @@ namespace Trident {
 		commandEncoder->begin();
 
 		BufferCopyRegion bufferCopyRegion = {
-			.sourceOffset = vertexView->getOffset(),
+			.sourceOffset = vertexView.getOffset(),
 			.destinationOffset = 0,
-			.size = vertexView->getSize(),
+			.size = vertexView.getSize(),
 		};
 
 		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegion);
 
 		bufferCopyRegion = {
-			.sourceOffset = indexView->getOffset(),
+			.sourceOffset = indexView.getOffset(),
 			.destinationOffset = 0,
-			.size = indexView->getSize(),
+			.size = indexView.getSize(),
 		};
 
 		commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, bufferCopyRegion);
@@ -563,7 +563,7 @@ namespace Trident {
 	}
 
 	void GUIRenderer::updateDescriptorSets() const {
-		const ref<BufferView<Camera>> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
+		const BufferView<Camera> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
 
 		sequence<DescriptorImage> userDescriptorImages(MAX_USER_IMAGE_COUNT);
 
@@ -581,7 +581,7 @@ namespace Trident {
 			userImageIndex += 1;
 		}
 
-		const sequence<WriteDescriptorSet> writeDescriptorSets = {
+		const WriteDescriptorSet writeDescriptorSets[2] = {
 			{
 				.descriptorSet = subcomponentDescriptorSet,
 				.bindingIndex = 0,
@@ -596,7 +596,7 @@ namespace Trident {
 			},
 		};
 
-		getDevice()->updateDescriptorSets(writeDescriptorSets);
+		getDevice()->updateDescriptorSets(view<WriteDescriptorSet>(writeDescriptorSets, 2));
 	}
 
 	void GUIRenderer::updateCameraProjection() const {

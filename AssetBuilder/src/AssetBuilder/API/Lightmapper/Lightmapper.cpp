@@ -170,9 +170,9 @@ namespace Trident {
 
 		generateLightmaps(indexCount);
 
-		const ref<BufferView<uint8>> lightmapAtlasView = context.lightmapAtlasStagingBuffer->createView<uint8>(0, context.lightmapAtlasStagingBuffer->getSize());
+		const BufferView<uint8> lightmapAtlasView = context.lightmapAtlasStagingBuffer->createView<uint8>(0, context.lightmapAtlasStagingBuffer->getSize());
 
-		std::copy_n(lightmapAtlasView->map(), imageAssetDescriptor.data.count(), &imageAssetDescriptor.data[0]);
+		std::copy_n(lightmapAtlasView.map(), imageAssetDescriptor.data.count(), &imageAssetDescriptor.data[0]);
 
 		context.lightmapAtlasStagingBuffer->unmap();
 	}
@@ -284,11 +284,11 @@ namespace Trident {
 				.name = "Staging",
 			#endif
 		});
-		const ref<BufferView<Arguments>> argumentStagingView = stagingBuffer->createView<Arguments>(0, argumentBuffer->getSize());
-		const ref<BufferView<BuildVertex3D>> vertexStagingView = stagingBuffer->createView<BuildVertex3D>(argumentStagingView->getOffset() + argumentStagingView->getSize(), context.vertexBuffer->getSize());
-		const ref<BufferView<uint32>> indexStagingView = stagingBuffer->createView<uint32>(vertexStagingView->getOffset() + vertexStagingView->getSize(), context.indexBuffer->getSize());
+		const BufferView<Arguments> argumentStagingView = stagingBuffer->createView<Arguments>(0, argumentBuffer->getSize());
+		const BufferView<BuildVertex3D> vertexStagingView = stagingBuffer->createView<BuildVertex3D>(argumentStagingView.getOffset() + argumentStagingView.getSize(), context.vertexBuffer->getSize());
+		const BufferView<uint32> indexStagingView = stagingBuffer->createView<uint32>(vertexStagingView.getOffset() + vertexStagingView.getSize(), context.indexBuffer->getSize());
 
-		Arguments* arguments = argumentStagingView->map();
+		Arguments* arguments = argumentStagingView.map();
 		arguments->atlasExtent = {imageAssetDescriptor.extent.width, imageAssetDescriptor.extent.height};
 		arguments->triangleCount = static_cast<uint32>(indices.count() / 3);
 		arguments->skyColor = lighting.skyColor;
@@ -296,7 +296,7 @@ namespace Trident {
 		arguments->sunColor = lighting.sunColor;
 		arguments->sunIntensity = lighting.sunIntensity;
 
-		BuildVertex3D* vertexMappedRange = vertexStagingView->map();
+		BuildVertex3D* vertexMappedRange = vertexStagingView.map();
 		uint32 vertexIndex = 0;
 
 		while (vertexIndex < vertices.count()) {
@@ -306,7 +306,7 @@ namespace Trident {
 			vertexIndex += 1;
 		}
 
-		std::copy(indices.begin(), indices.end(), indexStagingView->map());
+		std::copy(indices.begin(), indices.end(), indexStagingView.map());
 
 		stagingBuffer->unmap();
 
@@ -322,19 +322,19 @@ namespace Trident {
 
 		const BufferCopyRegion bufferCopyRegions[3] = {
 			{
-				.sourceOffset = argumentStagingView->getOffset(),
+				.sourceOffset = argumentStagingView.getOffset(),
 				.destinationOffset = 0,
-				.size = argumentStagingView->getSize(),
+				.size = argumentStagingView.getSize(),
 			},
 			{
-				.sourceOffset = vertexStagingView->getOffset(),
+				.sourceOffset = vertexStagingView.getOffset(),
 				.destinationOffset = 0,
-				.size = vertexStagingView->getSize(),
+				.size = vertexStagingView.getSize(),
 			},
 			{
-				.sourceOffset = indexStagingView->getOffset(),
+				.sourceOffset = indexStagingView.getOffset(),
 				.destinationOffset = 0,
-				.size = indexStagingView->getSize(),
+				.size = indexStagingView.getSize(),
 			},
 		};
 
@@ -347,7 +347,7 @@ namespace Trident {
 		queue->submit(commandBuffer);
 		queue->waitIdle();
 
-		const ref<BaseBufferView> bufferViews[] = {
+		const BaseBufferView bufferViews[] = {
 			argumentBuffer->createView<Arguments>(0, argumentBuffer->getSize()),
 			context.vertexBuffer->createView<BuildVertex3D>(0, context.vertexBuffer->getSize()),
 			context.indexBuffer->createView<uint32>(0, context.indexBuffer->getSize()),

@@ -6,7 +6,16 @@
 namespace Trident {
 	template<typename T, typename... U>
 	constexpr ref<T> createRef(U&&... arguments) {
-		return std::make_shared<T>(std::forward<U>(arguments)...);
+		ref<T> ref = new T(std::forward<U>(arguments)...);
+
+		return ref;
+	}
+
+	template<typename T, typename... U>
+	constexpr ref<T> allocateRef(U&&... arguments) {
+		ref<T> ref = new T(std::forward<U>(arguments)...);
+
+		return ref;
 	}
 
 	template<typename T, typename... U>

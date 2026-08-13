@@ -7,7 +7,7 @@
 #include "Engine/Filesystem/Stream/ByteStream.hpp"
 
 namespace Trident {
-	static ref<ShaderModuleAsset> decodeLegacyShaderModuleAsset(ByteStream<StreamOperation::READ>& stream, ShaderModuleAsset& asset) {
+	static ShaderModuleAsset decodeLegacyShaderModuleAsset(ByteStream<StreamOperation::READ>& stream, ShaderModuleAsset& asset) {
 		const uint32 nameCharacterCount = stream.read<uint32>();
 
 		asset.name = sequence<char8>(nameCharacterCount);
@@ -48,11 +48,11 @@ namespace Trident {
 			bindingOffset += descriptorSetBindingRange.count;
 		}
 
-		return createRef<ShaderModuleAsset>(asset);
+		return asset;
 	}
 
 	template<>
-	ref<ShaderModuleAsset> Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary) {
+	ShaderModuleAsset Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary) {
 		ShaderModuleAsset asset{};
 		asset.identifier = stream.read<uint32>();
 		asset.version = stream.read<VersionNumber>();
@@ -98,6 +98,6 @@ namespace Trident {
 			entryPointIndex += 1;
 		}
 
-		return createRef<ShaderModuleAsset>(asset);
+		return asset;
 	}
 }

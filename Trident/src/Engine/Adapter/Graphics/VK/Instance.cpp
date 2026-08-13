@@ -66,7 +66,7 @@ namespace Trident {
 	}
 
 	ref<Trident::Instance> VK::createInstance(const Trident::GraphicsAdapter* adapter, const InstanceDescriptor& descriptor) {
-		// TODO: Expose to the client side.
+		// TODO(graphics/vk/instance): Expose to the client side.
 		static const sequence<const char8*> ENABLED_LAYER_NAMES = {
 			#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
 				"VK_LAYER_KHRONOS_validation",
@@ -75,7 +75,7 @@ namespace Trident {
 
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ref<VK::Instance> instance = createRef<VK::Instance>(adapter);
+		ref<VK::Instance> instance = allocateRef<VK::Instance>(adapter);
 		VkResult result;
 
 		// Load instance procedures.

@@ -56,7 +56,7 @@ namespace Trident {
 	}
 
 	sequence<ref<Trident::DescriptorSet>> DX12::allocateDescriptorSets(Trident::Device* device, view<ref<DescriptorSetLayout>> descriptorSetLayouts) {
-		const ref<DX12::MemoryAllocator> memoryAllocator = std::static_pointer_cast<DX12::MemoryAllocator>(device->getMemoryAllocator());
+		const ref<DX12::MemoryAllocator> memoryAllocator = static_pointer_cast<DX12::MemoryAllocator>(device->getMemoryAllocator());
 
 		sequence<ref<Trident::DescriptorSet>> descriptorSets(descriptorSetLayouts.count());
 		UINT descriptorSetIndex = 0;
@@ -64,7 +64,7 @@ namespace Trident {
 		while (descriptorSetIndex < descriptorSetLayouts.count()) {
 			const ref<DescriptorSetLayout> descriptorSetLayout = descriptorSetLayouts[descriptorSetIndex];
 
-			ref<DX12::DescriptorSet> descriptorSet = createRef<DX12::DescriptorSet>();
+			ref<DX12::DescriptorSet> descriptorSet = allocateRef<DX12::DescriptorSet>();
 			descriptorSet->bindings = sequence<DX12::DescriptorSet::DescriptorSetBinding>(descriptorSetLayout->bindings.count());
 			descriptorSet->viewDescriptorHandleOffset = static_cast<UINT64>(memoryAllocator->getCurrentViewDescriptorHeapAllocation().descriptorOffset);
 			descriptorSet->samplerDescriptorHandleOffset = static_cast<UINT64>(memoryAllocator->getCurrentSamplerDescriptorHeapAllocation().descriptorOffset);
@@ -98,7 +98,7 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const DX12::PhysicalDevice* _physicalDevice = static_cast<const DX12::PhysicalDevice*>(physicalDevice);
-		ref<DX12::Device> device = createRef<DX12::Device>(adapter, physicalDevice);
+		ref<DX12::Device> device = allocateRef<DX12::Device>(adapter, physicalDevice);
 		HRESULT result = -1;
 
 		#if !defined(PREFER_SOFTWARE_ADAPTER)
@@ -131,12 +131,9 @@ namespace Trident {
 			adapter->Release();
 		}
 
-		const Trident::Device* _device = pointer_cast<const Trident::Device*>(device.get());
-
-		device->queues[0] = createQueue(_device, 0, QueueFamilyCapability::GRAPHICS);
-		device->queues[1] = createQueue(_device, 1, QueueFamilyCapability::COMPUTE);
-		device->queues[2] = createQueue(_device, 2, QueueFamilyCapability::TRANSFER);
-
+		device->queues[0] = createQueue(device, 0, QueueFamilyCapability::GRAPHICS);
+		device->queues[1] = createQueue(device, 1, QueueFamilyCapability::COMPUTE);
+		device->queues[2] = createQueue(device, 2, QueueFamilyCapability::TRANSFER);
 		device->waitEvent = CreateEvent(nullptr, false, false, L"Wait event");
 
 		WIN32_ASSERT(device->waitEvent != nullptr);
@@ -188,7 +185,7 @@ namespace Trident {
 
 	void DX12::destroyDevice(const Trident::Device* device) {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
-		const ref<DX12::MemoryAllocator> memoryAllocator = std::static_pointer_cast<DX12::MemoryAllocator>(device->getMemoryAllocator());
+		const ref<DX12::MemoryAllocator> memoryAllocator = static_pointer_cast<DX12::MemoryAllocator>(device->getMemoryAllocator());
 
 		HRESULT result;
 
@@ -250,10 +247,10 @@ namespace Trident {
 	}
 
 	void DX12::updateDescriptorSets(const Trident::Device* device, view<WriteDescriptorSet> writeDescriptorSets) {
-		const ref<DX12::MemoryAllocator> memoryAllocator = std::static_pointer_cast<DX12::MemoryAllocator>(device->getMemoryAllocator());
+		const ref<DX12::MemoryAllocator> memoryAllocator = static_pointer_cast<DX12::MemoryAllocator>(device->getMemoryAllocator());
 
 		for (const WriteDescriptorSet& writeDescriptorSet : writeDescriptorSets) {
-			const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(writeDescriptorSet.descriptorSet);
+			const ref<DX12::DescriptorSet> descriptorSet = static_pointer_cast<DX12::DescriptorSet>(writeDescriptorSet.descriptorSet);
 			const DX12::DescriptorSet::DescriptorSetBinding& binding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
 
 			D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = binding.viewDescriptorHandleOffset;
@@ -264,7 +261,7 @@ namespace Trident {
 				case DescriptorType::COMBINED_IMAGE_SAMPLER: {
 					while (descriptorIndex < binding.descriptorCount) {
 						const DescriptorImage& descriptorImage = writeDescriptorSet.descriptorImages[descriptorIndex];
-						const ref<DX12::Sampler> sampler = std::static_pointer_cast<DX12::Sampler>(descriptorImage.sampler);
+						const ref<DX12::Sampler> sampler = static_pointer_cast<DX12::Sampler>(descriptorImage.sampler);
 
 						memoryAllocator->writeImage(viewDescriptorHandle, descriptorImage);
 						memoryAllocator->writeSampler(samplerDescriptorHandle, &sampler->descriptor);
@@ -386,7 +383,7 @@ namespace Trident {
 	void DX12::waitIdle(const Trident::Device* device) {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
 
-		for (const ref<Trident::Queue>& queue : _device->queues) {
+		for (ref<Trident::Queue> queue : _device->queues) {
 			queue->waitIdle();
 		}
 	}

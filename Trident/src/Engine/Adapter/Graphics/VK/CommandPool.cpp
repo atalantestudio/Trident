@@ -18,7 +18,7 @@ namespace Trident {
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		VkResult result;
 
-		ref<VK::CommandPool> commandPool = createRef<VK::CommandPool>(device);
+		ref<VK::CommandPool> commandPool = allocateRef<VK::CommandPool>(device);
 		commandPool->pipelineStageFlags = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 
 		if (queueFamilyCapability == QueueFamilyCapability::TRANSFER) {

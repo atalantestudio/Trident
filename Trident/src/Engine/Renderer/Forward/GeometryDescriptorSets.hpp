@@ -7,7 +7,7 @@
 
 namespace Trident {
 	void ForwardRenderer::updateGeometryDescriptorSets() const {
-		const ref<BaseBufferView> descriptorBufferViews[] = {
+		const BaseBufferView descriptorBufferViews[] = {
 			cameraBuffer->createView<ForwardCamera>(0, cameraBuffer->getSize()),
 			pointLightBuffer->createView<PointLight>(0, pointLightBuffer->getSize()),
 		};

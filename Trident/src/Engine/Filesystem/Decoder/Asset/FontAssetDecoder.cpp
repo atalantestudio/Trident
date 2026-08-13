@@ -8,7 +8,7 @@
 
 namespace Trident {
 	template<>
-	ref<FontAsset> Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary) {
+	FontAsset Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary) {
 		FontAssetDescriptor descriptor{};
 		descriptor.identifier = stream.read<uint32>();
 		descriptor.version = stream.read<VersionNumber>();
@@ -92,6 +92,6 @@ namespace Trident {
 			entryIndex += 1;
 		}
 
-		return createRef<FontAsset>(descriptor);
+		return FontAsset(descriptor);
 	}
 }

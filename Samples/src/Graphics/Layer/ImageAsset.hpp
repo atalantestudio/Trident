@@ -107,9 +107,9 @@ namespace Trident {
 						.name = "Image staging",
 					#endif
 				});
-				const ref<BufferView<uint8>> imageStagingView = imageStagingBuffer->createView<uint8>(0, imageStagingBuffer->getSize());
+				const BufferView<uint8> imageStagingView = imageStagingBuffer->createView<uint8>(0, imageStagingBuffer->getSize());
 
-				uint8* imageStagingBufferMappedRange = imageStagingView->map();
+				uint8* imageStagingBufferMappedRange = imageStagingView.map();
 
 				if (imageAsset->getFormat() == ImageFormat::R8G8B8_UNORM) {
 					convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(imageAsset->getData(), imageStagingBufferMappedRange, imageStagingBuffer->getSize());

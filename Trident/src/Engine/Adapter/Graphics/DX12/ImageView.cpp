@@ -93,9 +93,9 @@ namespace Trident {
 
 	ref<Trident::ImageView> DX12::createImageView(const Trident::Device* device, Trident::Image* image, const ImageViewDescriptor& descriptor) {
 		const DX12::Image* _image = static_cast<const DX12::Image*>(image);
-		const ref<DX12::MemoryAllocator> memoryAllocator = std::static_pointer_cast<DX12::MemoryAllocator>(device->getMemoryAllocator());
+		const ref<DX12::MemoryAllocator> memoryAllocator = static_pointer_cast<DX12::MemoryAllocator>(device->getMemoryAllocator());
 
-		ref<DX12::ImageView> imageView = createRef<DX12::ImageView>(device, image, descriptor);
+		ref<DX12::ImageView> imageView = allocateRef<DX12::ImageView>(device, image, descriptor);
 
 		if (_image->usage == 0) {
 			createSwapchainRenderTargetView(imageView, _image, memoryAllocator);

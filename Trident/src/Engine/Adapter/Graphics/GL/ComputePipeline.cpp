@@ -15,10 +15,10 @@ namespace Trident {
 	ref<Trident::ComputePipeline> GL::createComputePipeline(const Trident::Device* device, const ComputePipelineDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ref<GL::ComputePipeline> computePipeline = createRef<GL::ComputePipeline>(device);
+		ref<GL::ComputePipeline> computePipeline = allocateRef<GL::ComputePipeline>(device);
 		computePipeline->program = glCreateProgram();
 
-		const ref<GL::ShaderModule> computeShaderModule = std::static_pointer_cast<GL::ShaderModule>(descriptor.computeShaderModule);
+		const ref<GL::ShaderModule> computeShaderModule = static_pointer_cast<GL::ShaderModule>(descriptor.computeShaderModule);
 
 		glAttachShader(computePipeline->program, computeShaderModule->shader);
 		glLinkProgram(computePipeline->program);

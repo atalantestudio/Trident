@@ -14,9 +14,9 @@ namespace Trident {
 	ref<Trident::Fence> GL::createFence(const Trident::Device* device, const FenceDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ref<GL::Fence> fence = createRef<GL::Fence>(device);
+		ref<GL::Fence> fence = allocateRef<GL::Fence>(device);
 
-		// TODO: Create sync object here?
+		// TODO(graphics/gl/fence): Create sync object here?
 		/* if (!descriptor.signaled) {
 			#if OPENGL_VERSION >= OPENGL_VERSION_3_2
 				fence->sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);

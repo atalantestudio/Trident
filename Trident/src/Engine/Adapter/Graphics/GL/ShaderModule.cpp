@@ -45,7 +45,7 @@ namespace Trident {
 
 		ADAPTER_ASSERT(descriptor.stage == ShaderStage::VERTEX, "Only vertex shaders can be loaded as .tsm assets.");
 
-		ref<GL::ShaderModule> shaderModule = createRef<GL::ShaderModule>(device, descriptor);
+		ref<GL::ShaderModule> shaderModule = allocateRef<GL::ShaderModule>(device, descriptor);
 
 		#if defined(GL_SOURCE_FROM_SPIRV)
 			// TODO
@@ -75,7 +75,7 @@ namespace Trident {
 	ref<Trident::ShaderModule> GL::createShaderModule(const Trident::Device* device, const ShaderModuleDescriptor& descriptor, view<char8> code) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ref<GL::ShaderModule> shaderModule = createRef<GL::ShaderModule>(device, descriptor);
+		ref<GL::ShaderModule> shaderModule = allocateRef<GL::ShaderModule>(device, descriptor);
 
 		GLsizei length = static_cast<GLsizei>(code.count());
 

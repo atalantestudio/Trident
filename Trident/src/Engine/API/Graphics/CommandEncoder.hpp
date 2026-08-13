@@ -143,7 +143,7 @@ namespace Trident {
 			const CommandPool* commandPool;
 
 		private:
-			ref<Framebuffer> currentFramebuffer = nullptr;
+			const Framebuffer* currentFramebuffer = nullptr;
 	};
 
 	template void CommandEncoder::bindIndexBuffer<uint16>(ref<Buffer> indexBuffer, uint64 offset);

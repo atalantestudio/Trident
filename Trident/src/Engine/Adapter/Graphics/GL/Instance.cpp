@@ -15,7 +15,7 @@ namespace Trident {
 	ref<Trident::Instance> GL::createInstance(const Trident::GraphicsAdapter* adapter, const InstanceDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ref<GL::Instance> instance = createRef<GL::Instance>(adapter);
+		ref<GL::Instance> instance = allocateRef<GL::Instance>(adapter);
 
 		return instance;
 	}

@@ -17,7 +17,7 @@ namespace Trident {
 	ref<Trident::Queue> GL::createQueue(const Trident::Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ref<GL::Queue> queue = createRef<GL::Queue>(device, queueFamilyIndex, queueFamilyCapability);
+		ref<GL::Queue> queue = allocateRef<GL::Queue>(device, queueFamilyIndex, queueFamilyCapability);
 
 		return queue;
 	}
@@ -52,7 +52,7 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		for (const ref<Trident::CommandBuffer>& commandBuffer : commandBuffers) {
-			const ref<GL::CommandBuffer> glCommandBuffer = std::static_pointer_cast<GL::CommandBuffer>(commandBuffer);
+			const ref<GL::CommandBuffer> glCommandBuffer = static_pointer_cast<GL::CommandBuffer>(commandBuffer);
 
 			for (const ref<GL::Command>& command : glCommandBuffer->commands) {
 				command->execute();
@@ -64,7 +64,7 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		for (const ref<Trident::CommandBuffer>& commandBuffer : commandBuffers) {
-			const ref<GL::CommandBuffer> glCommandBuffer = std::static_pointer_cast<GL::CommandBuffer>(commandBuffer);
+			const ref<GL::CommandBuffer> glCommandBuffer = static_pointer_cast<GL::CommandBuffer>(commandBuffer);
 
 			for (const ref<GL::Command>& command : glCommandBuffer->commands) {
 				command->execute();

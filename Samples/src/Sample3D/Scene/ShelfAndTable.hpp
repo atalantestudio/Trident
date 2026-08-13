@@ -9,14 +9,14 @@ namespace Trident {
 	Scene3D createShelfAndTableScene(AssetLibrary* assetLibrary) {
 		Scene3D scene;
 
-		const ref<Geometry3DAsset> shelfGeometryAsset = assetLibrary->getAsset<Geometry3DAsset>("shelf");
+		/* const ref<Geometry3DAsset> shelfGeometryAsset = assetLibrary->getAsset<Geometry3DAsset>("shelf");
 		const ref<Geometry3DAsset> tableGeometryAsset = assetLibrary->getAsset<Geometry3DAsset>("wooden_table_02");
 
 		const ref<Geometry3D> shelfGeometry = createRef<Geometry3D>(shelfGeometryAsset);
 		const ref<Geometry3D> tableGeometry = createRef<Geometry3D>(tableGeometryAsset);
 
 		const uint32 shelfGeometryIndex = scene.registerGeometry(shelfGeometry);
-		const uint32 tableGeometryIndex = scene.registerGeometry(tableGeometry);
+		const uint32 tableGeometryIndex = scene.registerGeometry(tableGeometry); */
 
 		/* SceneInstanceDescriptor shelf1InstanceDescriptor{};
 		shelf1InstanceDescriptor.geometryIndex = shelfGeometryIndex;

@@ -57,13 +57,12 @@ namespace Trident {
 					while (materialGeometryIndex < material.geometryRange.count) {
 						const MaterialGeometry materialGeometry = sceneAsset->materialGeometries[material.geometryRange.offset + materialGeometryIndex];
 						const range<uint32, uint32> indexRange = sceneAsset->geometryIndexRanges[materialGeometry.geometryIndex];
-
 						const ref<Geometry3DAsset> geometryAsset = sceneAsset->geometryAssets[materialGeometry.geometryIndex];
 
 						uint64 vertexCount = 0;
 						uint32 instanceIndex = 0;
 
-						if (geometryAsset) {
+						if (geometryAsset != nullptr) {
 							vertexCount = geometryAsset->vertices.count();
 						}
 

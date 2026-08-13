@@ -13,7 +13,7 @@ namespace Trident {
 	ref<Trident::Instance> DX12::createInstance(const Trident::GraphicsAdapter* adapter, const InstanceDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ref<DX12::Instance> instance = createRef<DX12::Instance>(adapter);
+		ref<DX12::Instance> instance = allocateRef<DX12::Instance>(adapter);
 		HRESULT result;
 		UINT flags = 0;
 

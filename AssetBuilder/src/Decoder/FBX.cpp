@@ -14,8 +14,8 @@ namespace Trident {
 
 	template<typename DataType>
 	static ref<FBXProperty> readPrimitiveProperty(ByteStream<StreamOperation::READ>& stream) {
-		ref<FBXPrimitiveProperty<DataType>> Property = createRef<FBXPrimitiveProperty<DataType>>();
-		Property->Data = stream.read<DataType>();
+		FBXPrimitiveProperty<DataType> Property{};
+		Property.Data = stream.read<DataType>();
 
 		return Property;
 	}
@@ -27,19 +27,19 @@ namespace Trident {
 		const bool Compressed = static_cast<bool>(Encoding);
 		const uint32 CompressedLength = stream.read<uint32>();
 
-		ref<FBXArrayProperty<DataType>> Property = createRef<FBXArrayProperty<DataType>>();
+		FBXArrayProperty<DataType> Property{};
 
 		if (Compressed) {
 			BitStream<StreamOperation::READ> bitStream(stream.getBytePosition(), CompressedLength, Endianness::LITTLE_ENDIAN);
 
-			Property->Contents = bitStream.inflate<DataType>(ArrayLength);
+			Property.Contents = bitStream.inflate<DataType>(ArrayLength);
 
 			stream.jump(CompressedLength);
 		}
 		else {
-			Property->Contents = sequence<DataType>(ArrayLength);
+			Property.Contents = sequence<DataType>(ArrayLength);
 
-			std::copy_n(stream.getBytePosition(), ArrayLength, Property->Contents.begin());
+			std::copy_n(stream.getBytePosition(), ArrayLength, Property.Contents.begin());
 
 			stream.jump(ArrayLength * sizeof(DataType));
 		}
@@ -50,13 +50,13 @@ namespace Trident {
 	static ref<FBXProperty> readSpecialProperty(ByteStream<StreamOperation::READ>& stream) {
 		const uint32 Length = stream.read<uint32>();
 
-		ref<FBXSpecialProperty> Property = createRef<FBXSpecialProperty>();
-		Property->Data = sequence<uint8>(Length);
+		FBXSpecialProperty Property{};
+		Property.Data = sequence<uint8>(Length);
 
-		// TODO: Add null terminator for the string case?
-		std::copy_n(stream.getBytePosition(), Length, Property->Data.begin());
+		// TODO(asset-builder/parser/fbx): Add null terminator for the string case?
+		std::copy_n(stream.getBytePosition(), Length, Property.Data.begin());
 
-		stream.jump(Property->Data.count());
+		stream.jump(Property.Data.count());
 
 		return Property;
 	}

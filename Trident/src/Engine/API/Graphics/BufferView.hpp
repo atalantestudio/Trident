@@ -8,6 +8,8 @@ namespace Trident {
 
 	class BaseBufferView {
 		public:
+			BaseBufferView() = default;
+
 			explicit BaseBufferView(
 				/// The viewed buffer.
 				Buffer* buffer,
@@ -23,7 +25,7 @@ namespace Trident {
 			);
 
 			/// Returns the viewed buffer.
-			Buffer* getBuffer();
+			Buffer* getBuffer() const;
 
 			/// Returns the offset in bytes of the view.
 			uint64 getOffset() const;
@@ -34,6 +36,7 @@ namespace Trident {
 			/// Returns the element stride in bytes.
 			uint32 getStride() const;
 
+			// TODO(graphics/buffer/view): Remove?
 			/// Maps the view's range to host memory.
 			void* map();
 
@@ -51,6 +54,8 @@ namespace Trident {
 	template<typename T>
 	class BufferView : public BaseBufferView {
 		public:
+			BufferView() = default;
+
 			explicit BufferView(
 				/// The viewed buffer.
 				Buffer* buffer,
@@ -63,6 +68,6 @@ namespace Trident {
 			);
 
 			/// Maps the view's range to host memory.
-			inline T* map();
+			inline T* map() const;
 	};
 }

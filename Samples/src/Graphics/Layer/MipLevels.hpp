@@ -36,9 +36,9 @@ namespace Trident {
 
 				mipLevelBuffer = createMipLevelBuffer();
 
-				const ref<BufferView<uint32>> mipLevelView = mipLevelBuffer->createView<uint32>(0, mipLevelBuffer->getSize());
+				const BufferView<uint32> mipLevelView = mipLevelBuffer->createView<uint32>(0, mipLevelBuffer->getSize());
 
-				mipLevelMappedRange = mipLevelView->map();
+				mipLevelMappedRange = mipLevelView.map();
 				mipLevelMappedRange[0] = 0;
 
 				debugImageDescriptorSetLayout = createImageDescriptorSetLayout();
@@ -115,9 +115,9 @@ namespace Trident {
 						.name = "Image staging",
 					#endif
 				});
-				const ref<BufferView<uint8>> imageStagingView = imageStagingBuffer->createView<uint8>(0, imageStagingBuffer->getSize());
+				const BufferView<uint8> imageStagingView = imageStagingBuffer->createView<uint8>(0, imageStagingBuffer->getSize());
 
-				uint8* imageStagingBufferMappedRange = imageStagingView->map();
+				uint8* imageStagingBufferMappedRange = imageStagingView.map();
 
 				switch (imageAsset->getFormat()) {
 					case ImageFormat::R8_UNORM: {
@@ -257,10 +257,10 @@ namespace Trident {
 					#endif
 				});
 
-				const ref<BufferView<uint32>> atomicCounterView = atomicCounterBuffer->createView<uint32>(0, atomicCounterBuffer->getSize());
-				const ref<BufferView<MipLevelArguments>> argumentView = argumentBuffer->createView<MipLevelArguments>(0, argumentBuffer->getSize());
+				const BufferView<uint32> atomicCounterView = atomicCounterBuffer->createView<uint32>(0, atomicCounterBuffer->getSize());
+				const BufferView<MipLevelArguments> argumentView = argumentBuffer->createView<MipLevelArguments>(0, argumentBuffer->getSize());
 
-				MipLevelArguments* arguments = argumentView->map();
+				MipLevelArguments* arguments = argumentView.map();
 				arguments[0].groupCount = groupCountX * groupCountY * groupCountZ;
 				arguments[0].mipLevelCount = mipLevelCount;
 
@@ -515,7 +515,7 @@ namespace Trident {
 			}
 
 			void updateDebugImageDescriptorSet() {
-				const ref<BufferView<uint32>> mipLevelView = mipLevelBuffer->createView<uint32>(0, mipLevelBuffer->getSize());
+				const BufferView<uint32> mipLevelView = mipLevelBuffer->createView<uint32>(0, mipLevelBuffer->getSize());
 
 				const DescriptorImage debugDescriptorImage = {
 					.imageView = debugImageView,

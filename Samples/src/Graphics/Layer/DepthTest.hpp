@@ -47,10 +47,10 @@ namespace Trident {
 						.name = "Staging",
 					#endif
 				});
-				const ref<BufferView<Vertex>> vertexView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
-				const ref<BufferView<Instance>> instanceView = stagingBuffer->createView<Instance>(vertexBuffer->getSize(), instanceBuffer->getSize());
+				const BufferView<Vertex> vertexView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
+				const BufferView<Instance> instanceView = stagingBuffer->createView<Instance>(vertexBuffer->getSize(), instanceBuffer->getSize());
 
-				Vertex* vertexMappedRange = vertexView->map();
+				Vertex* vertexMappedRange = vertexView.map();
 				vertexMappedRange[0] = {{-0.75f,  0.75f,  1.0f}};
 				vertexMappedRange[1] = {{ 0.25f,  0.75f,  1.0f}};
 				vertexMappedRange[2] = {{-0.75f, -0.75f,  1.0f}};
@@ -58,7 +58,7 @@ namespace Trident {
 				vertexMappedRange[4] = {{ 0.5f,   0.5f,   0.0f}};
 				vertexMappedRange[5] = {{-0.5f,  -0.5f,   0.0f}};
 
-				Instance* instanceMappedRange = instanceView->map();
+				Instance* instanceMappedRange = instanceView.map();
 				instanceMappedRange[0] = {{1.0f, 1.0f, 1.0f}};
 				instanceMappedRange[1] = {{1.0f, 0.2f, 0.0f}};
 
@@ -85,17 +85,17 @@ namespace Trident {
 				commandEncoder->begin();
 
 				BufferCopyRegion bufferCopyRegion = {
-					.sourceOffset = vertexView->getOffset(),
+					.sourceOffset = vertexView.getOffset(),
 					.destinationOffset = 0,
-					.size = vertexView->getSize(),
+					.size = vertexView.getSize(),
 				};
 
 				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegion);
 
 				bufferCopyRegion = {
-					.sourceOffset = instanceView->getOffset(),
+					.sourceOffset = instanceView.getOffset(),
 					.destinationOffset = 0,
-					.size = instanceView->getSize(),
+					.size = instanceView.getSize(),
 				};
 
 				commandEncoder->copyBufferToBuffer(stagingBuffer, instanceBuffer, bufferCopyRegion);

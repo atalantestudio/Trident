@@ -27,7 +27,7 @@
 
 namespace Trident::VK {
 	static ref<Trident::MemoryAllocator> createMemoryAllocator(const Trident::Device* device) {
-		return createRef<VK::MemoryAllocator>(device);
+		return allocateRef<VK::MemoryAllocator>(device);
 	}
 
 	void bindAdapter(Trident::GraphicsAdapter* adapter) {

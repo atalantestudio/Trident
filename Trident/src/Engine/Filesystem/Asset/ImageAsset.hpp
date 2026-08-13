@@ -34,6 +34,8 @@ namespace Trident {
 
 	struct ImageAsset : public Asset {
 		public:
+			ImageAsset() = default;
+
 			explicit ImageAsset(const ImageAssetDescriptor& descriptor) :
 				Asset{descriptor.identifier, descriptor.version},
 				format(descriptor.format),

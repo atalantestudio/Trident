@@ -49,7 +49,7 @@ namespace Trident {
 
 				debugContactManifoldBuffer = createDebugContactManifoldBuffer();
 
-				const ref<BufferView<svec3<float32>>> debugContactManifoldView = debugContactManifoldBuffer->createView<svec3<float32>>(0, debugContactManifoldBuffer->getSize());
+				const BufferView<svec3<float32>> debugContactManifoldView = debugContactManifoldBuffer->createView<svec3<float32>>(0, debugContactManifoldBuffer->getSize());
 
 				debugContactRange = debugContactManifoldView->map(); */
 
@@ -94,36 +94,36 @@ namespace Trident {
 					#endif
 				});
 
-				const ref<BufferView<uint8>> vertexView = stagingBuffer->createView<uint8>(0, sceneAsset->geometryRanges[0].count);
+				const BufferView<uint8> vertexView = stagingBuffer->createView<uint8>(0, sceneAsset->geometryRanges[0].count);
 
-				std::copy_n(&sceneAsset->geometryData[sceneAsset->geometryRanges[0].offset], vertexView->getSize(), vertexView->map());
+				std::copy_n(&sceneAsset->geometryData[sceneAsset->geometryRanges[0].offset], vertexView.getSize(), vertexView.map());
 
-				const ref<BufferView<uint8>> indexView = stagingBuffer->createView<uint8>(vertexView->getOffset() + vertexView->getSize(), sceneAsset->geometryRanges[1].count);
+				const BufferView<uint8> indexView = stagingBuffer->createView<uint8>(vertexView.getOffset() + vertexView.getSize(), sceneAsset->geometryRanges[1].count);
 
-				std::copy_n(&sceneAsset->geometryData[sceneAsset->geometryRanges[1].offset], indexView->getSize(), indexView->map());
+				std::copy_n(&sceneAsset->geometryData[sceneAsset->geometryRanges[1].offset], indexView.getSize(), indexView.map());
 
-				const ref<BufferView<PointLight>> pointLightView = stagingBuffer->createView<PointLight>(indexView->getOffset() + indexView->getSize(), sceneAsset->pointLights.count() * sizeof(PointLight));
+				const BufferView<PointLight> pointLightView = stagingBuffer->createView<PointLight>(indexView.getOffset() + indexView.getSize(), sceneAsset->pointLights.count() * sizeof(PointLight));
 
-				std::copy(sceneAsset->pointLights.begin(), sceneAsset->pointLights.end(), pointLightView->map());
+				std::copy(sceneAsset->pointLights.begin(), sceneAsset->pointLights.end(), pointLightView.map());
 
-				ref<BufferView<uint8>> lightmapCoordinateView;
-				ref<BufferView<uint8>> lightmapAtlasView;
+				BufferView<uint8> lightmapCoordinateView;
+				BufferView<uint8> lightmapAtlasView;
 
 				if (sceneAsset->lightmapAtlasImageAsset != nullptr) {
-					lightmapCoordinateView = stagingBuffer->createView<uint8>(pointLightView->getOffset() + pointLightView->getSize(), sceneAsset->geometryRanges[2].count);
+					lightmapCoordinateView = stagingBuffer->createView<uint8>(pointLightView.getOffset() + pointLightView.getSize(), sceneAsset->geometryRanges[2].count);
 
-					std::copy_n(&sceneAsset->geometryData[sceneAsset->geometryRanges[2].offset], lightmapCoordinateView->getSize(), lightmapCoordinateView->map());
+					std::copy_n(&sceneAsset->geometryData[sceneAsset->geometryRanges[2].offset], lightmapCoordinateView.getSize(), lightmapCoordinateView.map());
 
-					lightmapAtlasView = stagingBuffer->createView<uint8>(lightmapCoordinateView->getOffset() + lightmapCoordinateView->getSize(), lightmapAtlasImage->getSize());
+					lightmapAtlasView = stagingBuffer->createView<uint8>(lightmapCoordinateView.getOffset() + lightmapCoordinateView.getSize(), lightmapAtlasImage->getSize());
 
 					const view<uint8> data = sceneAsset->lightmapAtlasImageAsset->getData();
 
-					std::copy(data.begin(), data.end(), lightmapAtlasView->map());
+					std::copy(data.begin(), data.end(), lightmapAtlasView.map());
 				}
 
-				ref<BufferView<uint8>> hullLinevertexView;
+				/* BufferView<uint8> hullLineIndexView;
 
-				/* if (sceneAsset->hullLineIndexCount > 0) {
+				if (sceneAsset->hullLineIndexCount > 0) {
 					hullLineIndexView = stagingBuffer->createView<uint8>(viewOffset, sceneAsset->hullLineIndexCount * sizeof(uint16));
 					viewOffset += hullLineIndexView->getSize();
 
@@ -144,19 +144,19 @@ namespace Trident {
 
 				const BufferCopyRegion bufferCopyRegions[] = {
 					{
-						.sourceOffset = vertexView->getOffset(),
+						.sourceOffset = vertexView.getOffset(),
 						.destinationOffset = 0,
-						.size = vertexView->getSize(),
+						.size = vertexView.getSize(),
 					},
 					{
-						.sourceOffset = indexView->getOffset(),
+						.sourceOffset = indexView.getOffset(),
 						.destinationOffset = 0,
-						.size = indexView->getSize(),
+						.size = indexView.getSize(),
 					},
 					{
-						.sourceOffset = pointLightView->getOffset(),
+						.sourceOffset = pointLightView.getOffset(),
 						.destinationOffset = 0,
-						.size = pointLightView->getSize(),
+						.size = pointLightView.getSize(),
 					},
 				};
 
@@ -166,9 +166,9 @@ namespace Trident {
 
 				if (sceneAsset->lightmapAtlasImageAsset != nullptr) {
 					const BufferCopyRegion bufferCopyRegion = {
-						.sourceOffset = lightmapCoordinateView->getOffset(),
+						.sourceOffset = lightmapCoordinateView.getOffset(),
 						.destinationOffset = 0,
-						.size = lightmapCoordinateView->getSize(),
+						.size = lightmapCoordinateView.getSize(),
 					};
 
 					commandEncoder->copyBufferToBuffer(stagingBuffer, lightmapCoordinateBuffer, bufferCopyRegion);
@@ -182,7 +182,7 @@ namespace Trident {
 					commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
 
 					const BufferImageCopyRegion bufferImageCopyRegion = {
-						.bufferOffset = lightmapAtlasView->getOffset(),
+						.bufferOffset = lightmapAtlasView.getOffset(),
 						.imageOffsetX = 0,
 						.imageOffsetY = 0,
 						.imageOffsetZ = 0,
@@ -219,9 +219,9 @@ namespace Trident {
 				queue->waitIdle();
 
 				{
-					const ref<BufferView<Instance3D>> instanceView = instanceBuffer->createView<Instance3D>(0, instanceBuffer->getSize());
+					const BufferView<Instance3D> instanceView = instanceBuffer->createView<Instance3D>(0, instanceBuffer->getSize());
 
-					instanceMappedRange = instanceView->map();
+					instanceMappedRange = instanceView.map();
 
 					std::copy(sceneAsset->instances.begin(), sceneAsset->instances.end(), instanceMappedRange);
 				}
@@ -324,7 +324,7 @@ namespace Trident {
 				uint32& writeDescriptorSetCount
 			);
 
-			ref<Image> createMaterialImage(ref<ImageAsset> imageAsset, ImageDescriptor& imageDescriptor) const;
+			ref<Image> createMaterialImage(const ImageAsset& imageAsset, ImageDescriptor& imageDescriptor) const;
 
 			void createMaterials();
 

@@ -29,7 +29,7 @@ namespace Trident {
 	ref<Trident::Framebuffer> GL::createFramebuffer(const Trident::Device* device, const FramebufferDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ref<GL::Framebuffer> framebuffer = createRef<GL::Framebuffer>(device, descriptor);
+		ref<GL::Framebuffer> framebuffer = allocateRef<GL::Framebuffer>(device, descriptor);
 
 		const bool resolve = needsResolving(descriptor.imageViews);
 
@@ -52,7 +52,7 @@ namespace Trident {
 
 		while (imageViewIndex < descriptor.imageViews.count()) {
 			const ref<Trident::ImageView> imageView = descriptor.imageViews[imageViewIndex];
-			const ref<GL::ImageView> glImageView = std::static_pointer_cast<GL::ImageView>(imageView);
+			const ref<GL::ImageView> glImageView = static_pointer_cast<GL::ImageView>(imageView);
 			const GL::Image* glImage = static_cast<const GL::Image*>(imageView->getImage());
 
 			if (resolve && imageView->getImage()->getSampleCount() == 1) {

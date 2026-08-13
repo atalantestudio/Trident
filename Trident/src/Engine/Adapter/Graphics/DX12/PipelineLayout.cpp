@@ -16,7 +16,7 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
-		ref<DX12::PipelineLayout> pipelineLayout = createRef<DX12::PipelineLayout>(device);
+		ref<DX12::PipelineLayout> pipelineLayout = allocateRef<DX12::PipelineLayout>(device);
 		HRESULT result;
 
 		UINT rootParameterCount = 0;

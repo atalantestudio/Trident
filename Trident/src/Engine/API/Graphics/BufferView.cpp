@@ -13,7 +13,7 @@ namespace Trident {
 		stride(stride)
 	{}
 
-	Buffer* BaseBufferView::getBuffer() {
+	Buffer* BaseBufferView::getBuffer() const {
 		return buffer;
 	}
 

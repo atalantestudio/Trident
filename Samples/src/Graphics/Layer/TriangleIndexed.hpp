@@ -35,15 +35,15 @@ namespace Trident {
 			}
 
 			void encodeOneTimeCommands() const override {
-				const ref<BufferView<Vertex>> vertexStagingBufferView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
-				const ref<BufferView<uint16>> indexStagingBufferView = stagingBuffer->createView<uint16>(vertexBuffer->getSize(), indexBuffer->getSize());
+				const BufferView<Vertex> vertexStagingBufferView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
+				const BufferView<uint16> indexStagingBufferView = stagingBuffer->createView<uint16>(vertexBuffer->getSize(), indexBuffer->getSize());
 
-				Vertex* vertexMappedRange = vertexStagingBufferView->map();
+				Vertex* vertexMappedRange = vertexStagingBufferView.map();
 				vertexMappedRange[0] = {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}};
 				vertexMappedRange[1] = {{ 0.0f,  0.5f}, {0.0f, 1.0f, 0.0f}};
 				vertexMappedRange[2] = {{ 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}};
 
-				uint16* indexMappedRange = indexStagingBufferView->map();
+				uint16* indexMappedRange = indexStagingBufferView.map();
 				indexMappedRange[0] = 0;
 				indexMappedRange[1] = 1;
 				indexMappedRange[2] = 2;
@@ -61,17 +61,17 @@ namespace Trident {
 				commandEncoder->begin();
 
 				BufferCopyRegion bufferCopyRegion = {
-					.sourceOffset = vertexStagingBufferView->getOffset(),
+					.sourceOffset = vertexStagingBufferView.getOffset(),
 					.destinationOffset = 0,
-					.size = vertexStagingBufferView->getSize(),
+					.size = vertexStagingBufferView.getSize(),
 				};
 
 				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegion);
 
 				bufferCopyRegion = {
-					.sourceOffset = indexStagingBufferView->getOffset(),
+					.sourceOffset = indexStagingBufferView.getOffset(),
 					.destinationOffset = 0,
-					.size = indexStagingBufferView->getSize(),
+					.size = indexStagingBufferView.getSize(),
 				};
 
 				commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, bufferCopyRegion);

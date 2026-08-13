@@ -52,10 +52,10 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VK::Instance* _instance = static_cast<const VK::Instance*>(instance);
-		const VK::PhysicalDevice* _physicalDevice = std::static_pointer_cast<VK::PhysicalDevice>(physicalDevice).get();
-		VkResult result;
+		ref<VK::PhysicalDevice> _physicalDevice = static_pointer_cast<VK::PhysicalDevice>(physicalDevice);
 
-		ref<VK::Surface> surface = createRef<VK::Surface>(instance);
+		ref<VK::Surface> surface = allocateRef<VK::Surface>(instance);
+		VkResult result;
 
 		#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
 			VkWin32SurfaceCreateInfoKHR win32SurfaceCreateInfo{};

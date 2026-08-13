@@ -18,9 +18,9 @@ namespace Trident {
 	ref<Trident::Swapchain> DX12::createSwapchain(const Trident::Device* device, const SwapchainDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ref<DX12::Swapchain> swapchain = createRef<DX12::Swapchain>(device, descriptor);
+		ref<DX12::Swapchain> swapchain = allocateRef<DX12::Swapchain>(device, descriptor);
 
-		updateSwapchain(device, swapchain.get(), descriptor);
+		updateSwapchain(device, swapchain, descriptor);
 
 		return swapchain;
 	}
@@ -28,23 +28,11 @@ namespace Trident {
 	void DX12::destroySwapchain(const Trident::Device* device, const Trident::Swapchain* swapchain) {
 		const DX12::Swapchain* _swapchain = static_cast<const DX12::Swapchain*>(swapchain);
 
-		for (const ref<Trident::ImageView>& imageView : _swapchain->imageViews) {
-			imageView.~shared_ptr();
-		}
-
-		for (const ref<Trident::Image>& image : _swapchain->images) {
-			image.~shared_ptr();
-		}
-
 		_swapchain->swapChain->Release();
 	}
 
 	void DX12::recreateSwapchain(const Trident::Device* device, Trident::Swapchain* swapchain, const SwapchainDescriptor& descriptor) {
 		const DX12::Swapchain* _swapchain = static_cast<const DX12::Swapchain*>(swapchain);
-
-		for (const ref<Trident::Image>& image : _swapchain->images) {
-			image.~shared_ptr();
-		}
 
 		_swapchain->swapChain->Release();
 
@@ -55,7 +43,7 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
-		const ref<DX12::Surface> surface = std::static_pointer_cast<DX12::Surface>(descriptor.surface);
+		const ref<DX12::Surface> surface = static_pointer_cast<DX12::Surface>(descriptor.surface);
 		HRESULT result;
 
 		DX12::Swapchain* _swapchain = static_cast<DX12::Swapchain*>(swapchain);
@@ -63,6 +51,8 @@ namespace Trident {
 
 		swapchain->imageCount = descriptor.imageCount;
 		swapchain->extent = descriptor.extent;
+		swapchain->images = sequence<private_ref<Trident::Image>>(swapchain->imageCount);
+		swapchain->imageViews = sequence<private_ref<Trident::ImageView>>(swapchain->imageCount);
 
 		DXGI_SWAP_CHAIN_DESC1 swapchainDescriptor{};
 		swapchainDescriptor.Width = descriptor.extent.width;
@@ -82,7 +72,7 @@ namespace Trident {
 			swapchainDescriptor.Flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
 		}
 
-		const ref<DX12::Queue> graphicsQueue = std::static_pointer_cast<DX12::Queue>(device->getQueue(QueueFamilyCapability::GRAPHICS));
+		const ref<DX12::Queue> graphicsQueue = static_pointer_cast<DX12::Queue>(device->getQueue(QueueFamilyCapability::GRAPHICS));
 
 		IDXGISwapChain1* swapChain1;
 
@@ -100,14 +90,10 @@ namespace Trident {
 
 		swapChain1->Release();
 
-		swapchain->images = sequence<ref<Trident::Image>>(swapchain->imageCount);
-		swapchain->imageViews = sequence<ref<Trident::ImageView>>(swapchain->imageCount);
-
 		UINT imageIndex = 0;
 
 		while (imageIndex < swapchain->imageCount) {
 			swapchain->images[imageIndex] = createImage(device, _swapchain, imageIndex);
-			swapchain->images[imageIndex]->memorySuballocation.allocationIndex = 0;
 
 			imageIndex += 1;
 		}

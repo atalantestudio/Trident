@@ -18,13 +18,13 @@ namespace Trident {
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		VkResult result;
 
-		ref<VK::PipelineLayout> pipelineLayout = createRef<VK::PipelineLayout>(device);
+		ref<VK::PipelineLayout> pipelineLayout = allocateRef<VK::PipelineLayout>(device);
 
 		sequence<VkDescriptorSetLayout> vkDescriptorSetLayouts(descriptor.descriptorSetLayouts.count());
 		uint32 descriptorSetLayoutIndex = 0;
 
 		while (descriptorSetLayoutIndex < descriptor.descriptorSetLayouts.count()) {
-			vkDescriptorSetLayouts[descriptorSetLayoutIndex] = std::static_pointer_cast<VK::DescriptorSetLayout>(descriptor.descriptorSetLayouts[descriptorSetLayoutIndex])->descriptorSetLayout;
+			vkDescriptorSetLayouts[descriptorSetLayoutIndex] = static_pointer_cast<VK::DescriptorSetLayout>(descriptor.descriptorSetLayouts[descriptorSetLayoutIndex])->descriptorSetLayout;
 
 			descriptorSetLayoutIndex += 1;
 		}

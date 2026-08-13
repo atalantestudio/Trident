@@ -226,9 +226,9 @@ namespace Trident {
 			#endif
 		});
 
-		const ref<BufferView<Camera>> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
+		const BufferView<Camera> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
 
-		cameraMappedRange = cameraView->map();
+		cameraMappedRange = cameraView.map();
 		cameraMappedRange->zoomLevel = DEFAULT_ZOOM_LEVEL;
 	}
 
@@ -245,9 +245,9 @@ namespace Trident {
 			#endif
 		});
 
-		const ref<BufferView<View>> viewView = viewBuffer->createView<View>(0, viewBuffer->getSize());
+		const BufferView<View> viewView = viewBuffer->createView<View>(0, viewBuffer->getSize());
 
-		viewMappedRange = viewView->map();
+		viewMappedRange = viewView.map();
 	}
 
 	void Physics2DRenderer::createPlaceholderBuffer() {
@@ -263,9 +263,9 @@ namespace Trident {
 			#endif
 		});
 
-		const ref<BufferView<Placeholder>> placeholderView = placeholderBuffer->createView<Placeholder>(0, placeholderBuffer->getSize());
+		const BufferView<Placeholder> placeholderView = placeholderBuffer->createView<Placeholder>(0, placeholderBuffer->getSize());
 
-		placeholderMappedRange = placeholderView->map();
+		placeholderMappedRange = placeholderView.map();
 		placeholderMappedRange->offset = {0.0f, 0.0f};
 	}
 
@@ -281,9 +281,9 @@ namespace Trident {
 				#endif
 			});
 
-			const ref<BufferView<Vertex>> closestPointView = closestPointBuffer->createView<Vertex>(0, closestPointBuffer->getSize());
+			const BufferView<Vertex> closestPointView = closestPointBuffer->createView<Vertex>(0, closestPointBuffer->getSize());
 
-			closestPointMappedRange = closestPointView->map();
+			closestPointMappedRange = closestPointView.map();
 		}
 	#endif
 
@@ -299,9 +299,9 @@ namespace Trident {
 				#endif
 			});
 
-			const ref<BufferView<Vertex>> vertexFeatureView = vertexFeatureBuffer->createView<Vertex>(0, vertexFeatureBuffer->getSize());
+			const BufferView<Vertex> vertexFeatureView = vertexFeatureBuffer->createView<Vertex>(0, vertexFeatureBuffer->getSize());
 
-			vertexFeatureMappedRange = vertexFeatureView->map();
+			vertexFeatureMappedRange = vertexFeatureView.map();
 		}
 
 		void Physics2DRenderer::createEdgeFeatureBuffer() {
@@ -315,9 +315,9 @@ namespace Trident {
 				#endif
 			});
 
-			const ref<BufferView<Vertex>> edgeFeatureView = edgeFeatureBuffer->createView<Vertex>(0, edgeFeatureBuffer->getSize());
+			const BufferView<Vertex> edgeFeatureView = edgeFeatureBuffer->createView<Vertex>(0, edgeFeatureBuffer->getSize());
 
-			edgeFeatureMappedRange = edgeFeatureView->map();
+			edgeFeatureMappedRange = edgeFeatureView.map();
 		}
 	#endif
 
@@ -1025,12 +1025,12 @@ namespace Trident {
 				.name = "Staging",
 			#endif
 		});
-		const ref<BufferView<uint8>> dataStagingView = stagingBuffer->createView<uint8>(0, dataBuffer.count());
-		const ref<BufferView<RigidBody>> rigidBodyStagingView = stagingBuffer->createView<RigidBody>(dataBuffer.count(), rigidBodyBufferSize);
+		const BufferView<uint8> dataStagingView = stagingBuffer->createView<uint8>(0, dataBuffer.count());
+		const BufferView<RigidBody> rigidBodyStagingView = stagingBuffer->createView<RigidBody>(dataBuffer.count(), rigidBodyBufferSize);
 
-		std::copy(dataBuffer.begin(), dataBuffer.end(), dataStagingView->map());
+		std::copy(dataBuffer.begin(), dataBuffer.end(), dataStagingView.map());
 
-		RigidBody* stagingRigidBodyMappedRange = rigidBodyStagingView->map();
+		RigidBody* stagingRigidBodyMappedRange = rigidBodyStagingView.map();
 		uint32 rigidBodyIndex = 0;
 
 		while (rigidBodyIndex < rigidBodyComponentPool.componentCount) {
@@ -1096,11 +1096,11 @@ namespace Trident {
 			#endif
 		});
 
-		const ref<BufferView<RigidBody>> rigidBodyView = rigidBodyBuffer->createView<RigidBody>(0, rigidBodyBuffer->getSize());
-		const ref<BufferView<CenterOfMass>> centerOfMassView = centerOfMassBuffer->createView<CenterOfMass>(0, centerOfMassBuffer->getSize());
+		const BufferView<RigidBody> rigidBodyView = rigidBodyBuffer->createView<RigidBody>(0, rigidBodyBuffer->getSize());
+		const BufferView<CenterOfMass> centerOfMassView = centerOfMassBuffer->createView<CenterOfMass>(0, centerOfMassBuffer->getSize());
 
-		rigidBodyMappedRange = rigidBodyView->map();
-		centerOfMassMappedRange = centerOfMassView->map();
+		rigidBodyMappedRange = rigidBodyView.map();
+		centerOfMassMappedRange = centerOfMassView.map();
 
 		const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
 		const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder({
@@ -1192,8 +1192,8 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::updateCameraViewDescriptorSet() const {
-		const ref<BufferView<Camera>> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
-		const ref<BufferView<View>> viewView = viewBuffer->createView<View>(0, viewBuffer->getSize());
+		const BufferView<Camera> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
+		const BufferView<View> viewView = viewBuffer->createView<View>(0, viewBuffer->getSize());
 
 		const sequence<WriteDescriptorSet> writeDescriptorSets = {
 			{
@@ -1212,7 +1212,7 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::updatePlaceholderDescriptorSet() const {
-		const ref<BufferView<Placeholder>> placeholderView = placeholderBuffer->createView<Placeholder>(0, placeholderBuffer->getSize());
+		const BufferView<Placeholder> placeholderView = placeholderBuffer->createView<Placeholder>(0, placeholderBuffer->getSize());
 
 		const sequence<WriteDescriptorSet> writeDescriptorSets = {
 			{

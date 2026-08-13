@@ -26,16 +26,16 @@ namespace Trident {
 
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
 		const Subpass& subpass = descriptor.renderPass->getSubpass(descriptor.subpassIndex);
-		const ref<DX12::ShaderModule> vertexShaderModule = std::static_pointer_cast<DX12::ShaderModule>(descriptor.vertexShaderModule);
-		const ref<DX12::ShaderModule> fragmentShaderModule = std::static_pointer_cast<DX12::ShaderModule>(descriptor.fragmentShaderModule);
+		const ref<DX12::ShaderModule> vertexShaderModule = static_pointer_cast<DX12::ShaderModule>(descriptor.vertexShaderModule);
+		const ref<DX12::ShaderModule> fragmentShaderModule = static_pointer_cast<DX12::ShaderModule>(descriptor.fragmentShaderModule);
 		HRESULT result;
 
 		ADAPTER_ASSERT(subpass.colorAttachmentReferences.count() <= 8, "Too many color attachment references.");
 		ADAPTER_ASSERT(descriptor.colorBlendState.attachments.count() <= 8, "Too many color blend attachments.");
 
-		ref<DX12::GraphicsPipeline> graphicsPipeline = createRef<DX12::GraphicsPipeline>(device);
+		ref<DX12::GraphicsPipeline> graphicsPipeline = allocateRef<DX12::GraphicsPipeline>(device);
 		graphicsPipeline->vertexInputBindingStrides = sequence<UINT>(descriptor.vertexInputBindings.count());
-		graphicsPipeline->pipelineLayout = std::static_pointer_cast<DX12::PipelineLayout>(descriptor.pipelineLayout);
+		graphicsPipeline->pipelineLayout = static_pointer_cast<DX12::PipelineLayout>(descriptor.pipelineLayout);
 		graphicsPipeline->primitiveTopology = getPrimitiveTopology(descriptor.primitiveTopology);
 
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDescriptor{};

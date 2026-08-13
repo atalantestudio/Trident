@@ -66,10 +66,10 @@ namespace Trident {
 						.name = "Staging",
 					#endif
 				});
-				const ref<BufferView<Vertex>> vertexView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
-				const ref<BufferView<Instance>> instanceView = stagingBuffer->createView<Instance>(vertexBuffer->getSize(), instanceBuffer->getSize());
+				const BufferView<Vertex> vertexView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
+				const BufferView<Instance> instanceView = stagingBuffer->createView<Instance>(vertexBuffer->getSize(), instanceBuffer->getSize());
 
-				Vertex* vertexMappedRange = vertexView->map();
+				Vertex* vertexMappedRange = vertexView.map();
 				vertexMappedRange[0] = {{-0.5f,  0.5f}};
 				vertexMappedRange[1] = {{ 0.5f,  0.5f}};
 				vertexMappedRange[2] = {{ 0.5f, -0.5f}};
@@ -77,7 +77,7 @@ namespace Trident {
 				vertexMappedRange[4] = {{ 0.5f, -0.5f}};
 				vertexMappedRange[5] = {{-0.5f, -0.5f}};
 
-				Instance* instanceMappedRange = instanceView->map();
+				Instance* instanceMappedRange = instanceView.map();
 				instanceMappedRange[0] = {{-0.5f,  0.5f}, 0};
 				instanceMappedRange[1] = {{ 0.5f,  0.5f}, 1};
 				instanceMappedRange[2] = {{-0.5f, -0.5f}, 2};
@@ -96,17 +96,17 @@ namespace Trident {
 				commandEncoder->begin();
 
 				BufferCopyRegion bufferCopyRegion = {
-					.sourceOffset = vertexView->getOffset(),
+					.sourceOffset = vertexView.getOffset(),
 					.destinationOffset = 0,
-					.size = vertexView->getSize(),
+					.size = vertexView.getSize(),
 				};
 
 				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegion);
 
 				bufferCopyRegion = {
-					.sourceOffset = instanceView->getOffset(),
+					.sourceOffset = instanceView.getOffset(),
 					.destinationOffset = 0,
-					.size = instanceView->getSize(),
+					.size = instanceView.getSize(),
 				};
 
 				commandEncoder->copyBufferToBuffer(stagingBuffer, instanceBuffer, bufferCopyRegion);
@@ -226,9 +226,9 @@ namespace Trident {
 						.name = "Texture array staging",
 					#endif
 				});
-				const ref<BufferView<uint8>> textureArrayImageStagingView = textureArrayImageStagingBuffer->createView<uint8>(0, textureArrayImageStagingBuffer->getSize());
+				const BufferView<uint8> textureArrayImageStagingView = textureArrayImageStagingBuffer->createView<uint8>(0, textureArrayImageStagingBuffer->getSize());
 
-				uint8* textureArrayImageStagingBufferMappedRange = textureArrayImageStagingView->map();
+				uint8* textureArrayImageStagingBufferMappedRange = textureArrayImageStagingView.map();
 
 				assetIndex = 0;
 

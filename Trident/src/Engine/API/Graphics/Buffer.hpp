@@ -33,7 +33,7 @@ namespace Trident {
 			void unmap();
 
 			template<typename T>
-			ref<BufferView<T>> createView(uint64 offset, uint64 size);
+			BufferView<T> createView(uint64 offset, uint64 size);
 
 			/// Maps a range of the buffer to host memory.
 			/// The offset and size must be provided in bytes.

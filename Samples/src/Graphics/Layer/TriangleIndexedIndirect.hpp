@@ -42,21 +42,21 @@ namespace Trident {
 						.name = "Staging",
 					#endif
 				});
-				const ref<BufferView<Vertex>> vertexView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
-				const ref<BufferView<uint16>> indexView = stagingBuffer->createView<uint16>(vertexBuffer->getSize(), indexBuffer->getSize());
-				const ref<BufferView<DrawIndexedIndirectCommand>> indirectView = stagingBuffer->createView<DrawIndexedIndirectCommand>(vertexBuffer->getSize() + indexBuffer->getSize(), indirectBuffer->getSize());
+				const BufferView<Vertex> vertexView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
+				const BufferView<uint16> indexView = stagingBuffer->createView<uint16>(vertexBuffer->getSize(), indexBuffer->getSize());
+				const BufferView<DrawIndexedIndirectCommand> indirectView = stagingBuffer->createView<DrawIndexedIndirectCommand>(vertexBuffer->getSize() + indexBuffer->getSize(), indirectBuffer->getSize());
 
-				Vertex* vertexMappedRange = vertexView->map();
+				Vertex* vertexMappedRange = vertexView.map();
 				vertexMappedRange[0] = {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}};
 				vertexMappedRange[1] = {{ 0.0f,  0.5f}, {0.0f, 1.0f, 0.0f}};
 				vertexMappedRange[2] = {{ 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}};
 
-				uint16* indexMappedRange = indexView->map();
+				uint16* indexMappedRange = indexView.map();
 				indexMappedRange[0] = 0;
 				indexMappedRange[1] = 1;
 				indexMappedRange[2] = 2;
 
-				DrawIndexedIndirectCommand* indirectMappedRange = indirectView->map();
+				DrawIndexedIndirectCommand* indirectMappedRange = indirectView.map();
 				indirectMappedRange[0].indexCount = 3;
 				indirectMappedRange[0].instanceCount = 1;
 				indirectMappedRange[0].indexOffset = 0;
@@ -76,25 +76,25 @@ namespace Trident {
 				commandEncoder->begin();
 
 				BufferCopyRegion bufferCopyRegion = {
-					.sourceOffset = vertexView->getOffset(),
+					.sourceOffset = vertexView.getOffset(),
 					.destinationOffset = 0,
-					.size = vertexView->getSize(),
+					.size = vertexView.getSize(),
 				};
 
 				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegion);
 
 				bufferCopyRegion = {
-					.sourceOffset = indexView->getOffset(),
+					.sourceOffset = indexView.getOffset(),
 					.destinationOffset = 0,
-					.size = indexView->getSize(),
+					.size = indexView.getSize(),
 				};
 
 				commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, bufferCopyRegion);
 
 				bufferCopyRegion = {
-					.sourceOffset = indirectView->getOffset(),
+					.sourceOffset = indirectView.getOffset(),
 					.destinationOffset = 0,
-					.size = indirectView->getSize(),
+					.size = indirectView.getSize(),
 				};
 
 				commandEncoder->copyBufferToBuffer(stagingBuffer, indirectBuffer, bufferCopyRegion);

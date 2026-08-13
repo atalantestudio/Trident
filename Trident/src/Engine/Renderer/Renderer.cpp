@@ -128,7 +128,7 @@ namespace Trident {
 
 		const sequence<char8> code = Filesystem::openTextBuffer(&path[0]);
 
-		return layerCompositor->device->createShaderModule(descriptor, view<char8>(&code[0], code.count()));
+		return layerCompositor->device->createShaderModule(descriptor, code);
 	}
 
 	ref<ShaderModule> Renderer::loadInternalShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> path) {

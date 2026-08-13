@@ -19,7 +19,7 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
-		ref<DX12::Queue> queue = createRef<DX12::Queue>(_device, queueFamilyIndex, queueFamilyCapability);
+		ref<DX12::Queue> queue = allocateRef<DX12::Queue>(_device, queueFamilyIndex, queueFamilyCapability);
 		HRESULT result;
 
 		D3D12_COMMAND_QUEUE_DESC commandQueueDescriptor{};
@@ -68,7 +68,7 @@ namespace Trident {
 		HRESULT result;
 
 		for (const ref<Trident::Swapchain>& swapchain : swapchains) {
-			const ref<DX12::Swapchain> _swapchain = std::static_pointer_cast<DX12::Swapchain>(swapchain);
+			const ref<DX12::Swapchain> _swapchain = static_pointer_cast<DX12::Swapchain>(swapchain);
 
 			UINT presentFlags = 0;
 
@@ -92,7 +92,7 @@ namespace Trident {
 		UINT commandListIndex = 0;
 
 		while (commandListIndex < commandLists.count()) {
-			commandLists[commandListIndex] = std::static_pointer_cast<DX12::CommandBuffer>(commandBuffers[commandListIndex])->commandList;
+			commandLists[commandListIndex] = static_pointer_cast<DX12::CommandBuffer>(commandBuffers[commandListIndex])->commandList;
 
 			commandListIndex += 1;
 		}
@@ -109,7 +109,7 @@ namespace Trident {
 		UINT commandListIndex = 0;
 
 		while (commandListIndex < commandLists.count()) {
-			commandLists[commandListIndex] = std::static_pointer_cast<DX12::CommandBuffer>(commandBuffers[commandListIndex])->commandList;
+			commandLists[commandListIndex] = static_pointer_cast<DX12::CommandBuffer>(commandBuffers[commandListIndex])->commandList;
 
 			commandListIndex += 1;
 		}
@@ -118,7 +118,7 @@ namespace Trident {
 
 		DEBUG_ASSERT(fence != nullptr);
 
-		const ref<DX12::Fence> _fence = std::static_pointer_cast<DX12::Fence>(fence);
+		const ref<DX12::Fence> _fence = static_pointer_cast<DX12::Fence>(fence);
 
 		result = _queue->commandQueue->Signal(_fence->fence, 1);
 
@@ -135,11 +135,12 @@ namespace Trident {
 
 	void DX12::waitIdle(const Trident::Queue* queue) {
 		const DX12::Queue* _queue = static_cast<const DX12::Queue*>(queue);
-		const DX12::Fence* idleFence = static_cast<const DX12::Fence*>(_queue->idleFence.get());
+		const DX12::Fence* idleFence = static_cast<const DX12::Fence*>(static_cast<const Trident::Fence*>(_queue->idleFence));
+
 		HRESULT result;
 
 		// See https://github.com/gfx-rs/gfx/issues/1383.
-		// TODO: We may not even need the idle fence if the completion event is set right after submit().
+		// TODO(graphics/dx12/queue/wait-idle): We may not even need the idle fence if the completion event is set right after submit().
 		result = _queue->commandQueue->Signal(idleFence->fence, 1);
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to add signal to queue idle fence.");

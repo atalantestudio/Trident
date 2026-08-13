@@ -8,9 +8,9 @@ namespace Trident {
 	void BaseSceneRenderer<CameraType>::build() {
 		cameraBuffer = createCameraBuffer();
 
-		const ref<BufferView<CameraType>> cameraView = cameraBuffer->createView<CameraType>(0, sizeof(CameraType));
+		const BufferView<CameraType> cameraView = cameraBuffer->createView<CameraType>(0, sizeof(CameraType));
 
-		cameraMappedRange = cameraView->map();
+		cameraMappedRange = cameraView.map();
 	}
 
 	template<typename CameraType>

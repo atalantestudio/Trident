@@ -30,7 +30,7 @@ namespace Trident {
 			}
 		#endif
 
-		return device->adapter->createCommandEncoderImplementation(device, commandPool.get(), descriptor);
+		return device->adapter->createCommandEncoderImplementation(device, commandPool, descriptor);
 	}
 
 	void Queue::submit(view<ref<CommandBuffer>> commandBuffers) const {

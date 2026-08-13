@@ -496,7 +496,7 @@ namespace Trident {
 
 	MemorySuballocation DX12::suballocateBufferMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, ref<Trident::Buffer> buffer) {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(memoryAllocator->device);
-		const ref<DX12::Buffer> _buffer = std::static_pointer_cast<DX12::Buffer>(buffer);
+		const ref<DX12::Buffer> _buffer = static_pointer_cast<DX12::Buffer>(buffer);
 		const MemoryAllocation& memoryAllocation = memoryAllocator->allocations[allocationIndex];
 
 		D3D12_RESOURCE_DESC resourceDescriptor{};
@@ -560,7 +560,7 @@ namespace Trident {
 
 	MemorySuballocation DX12::suballocateImageMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, ref<Trident::Image> image) {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(memoryAllocator->device);
-		const ref<DX12::Image> _image = std::static_pointer_cast<DX12::Image>(image);
+		const ref<DX12::Image> _image = static_pointer_cast<DX12::Image>(image);
 		const Extent3D extent = image->getExtent();
 		const ImageUsage usage = image->getUsage();
 		const MemoryAllocation& memoryAllocation = memoryAllocator->allocations[allocationIndex];

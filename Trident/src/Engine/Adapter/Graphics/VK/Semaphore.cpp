@@ -16,7 +16,8 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
-		ref<VK::Semaphore> semaphore = createRef<VK::Semaphore>(device);
+
+		ref<VK::Semaphore> semaphore = allocateRef<VK::Semaphore>(device);
 		VkResult result;
 
 		VkSemaphoreCreateInfo semaphoreCreateInfo{};

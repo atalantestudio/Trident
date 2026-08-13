@@ -242,20 +242,20 @@ namespace Trident {
 	}
 
 	MemoryRequirements VK::getBufferMemoryRequirements(const Trident::MemoryAllocator* memoryAllocator, ref<Trident::Buffer> buffer) {
-		const ref<VK::Buffer> _buffer = std::static_pointer_cast<VK::Buffer>(buffer);
+		const ref<VK::Buffer> _buffer = static_pointer_cast<VK::Buffer>(buffer);
 
 		return *pointer_cast<const MemoryRequirements*>(&_buffer->memoryRequirements);
 	}
 
 	MemoryRequirements VK::getImageMemoryRequirements(const Trident::MemoryAllocator* memoryAllocator, ref<Trident::Image> image) {
-		const ref<VK::Image> _image = std::static_pointer_cast<VK::Image>(image);
+		const ref<VK::Image> _image = static_pointer_cast<VK::Image>(image);
 
 		return *pointer_cast<const MemoryRequirements*>(&_image->memoryRequirements);
 	}
 
 	MemorySuballocation VK::suballocateBufferMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, ref<Trident::Buffer> buffer) {
 		const VK::Device* _device = static_cast<const VK::Device*>(memoryAllocator->device);
-		const ref<VK::Buffer> _buffer = std::static_pointer_cast<VK::Buffer>(buffer);
+		const ref<VK::Buffer> _buffer = static_pointer_cast<VK::Buffer>(buffer);
 		const MemoryAllocation& memoryAllocation = memoryAllocator->allocations[allocationIndex];
 
 		MemorySuballocation memorySuballocation = memoryAllocator->suballocate(allocationIndex, _buffer->memoryRequirements.size, _buffer->memoryRequirements.alignment);
@@ -270,7 +270,7 @@ namespace Trident {
 
 	MemorySuballocation VK::suballocateImageMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, ref<Trident::Image> image) {
 		const VK::Device* _device = static_cast<const VK::Device*>(memoryAllocator->device);
-		const ref<VK::Image> _image = std::static_pointer_cast<VK::Image>(image);
+		const ref<VK::Image> _image = static_pointer_cast<VK::Image>(image);
 		const MemoryAllocation& memoryAllocation = memoryAllocator->allocations[allocationIndex];
 
 		MemorySuballocation memorySuballocation = memoryAllocator->suballocate(allocationIndex, _image->memoryRequirements.size, _image->memoryRequirements.alignment);

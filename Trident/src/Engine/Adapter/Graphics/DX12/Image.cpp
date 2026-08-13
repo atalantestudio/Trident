@@ -63,10 +63,11 @@ namespace Trident {
 			descriptor.name = Logger::format("Swapchain image []", index);
 		#endif
 
-		ref<DX12::Image> image = createRef<DX12::Image>(device, descriptor);
+		ref<DX12::Image> image = allocateRef<DX12::Image>(device, descriptor);
 
-		// NOTE: Swapchain images have an usage of 0.
+		// Properties specific to swapchain images.
 		image->usage = static_cast<ImageUsage>(0);
+		image->memorySuballocation.allocationIndex = 0;
 
 		result = _swapchain->swapChain->GetBuffer(index, IID_PPV_ARGS(&image->resource));
 

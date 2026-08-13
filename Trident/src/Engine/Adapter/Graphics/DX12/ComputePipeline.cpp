@@ -18,11 +18,11 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
-		const ref<DX12::ShaderModule> computeShaderModule = std::static_pointer_cast<DX12::ShaderModule>(descriptor.computeShaderModule);
+		const ref<DX12::ShaderModule> computeShaderModule = static_pointer_cast<DX12::ShaderModule>(descriptor.computeShaderModule);
 		HRESULT result;
 
-		ref<DX12::ComputePipeline> computePipeline = createRef<DX12::ComputePipeline>(device);
-		computePipeline->pipelineLayout = std::static_pointer_cast<DX12::PipelineLayout>(descriptor.pipelineLayout);
+		ref<DX12::ComputePipeline> computePipeline = allocateRef<DX12::ComputePipeline>(device);
+		computePipeline->pipelineLayout = static_pointer_cast<DX12::PipelineLayout>(descriptor.pipelineLayout);
 
 		D3D12_COMPUTE_PIPELINE_STATE_DESC computePipelineStateDescriptor{};
 		computePipelineStateDescriptor.pRootSignature = computePipeline->pipelineLayout->rootSignature;

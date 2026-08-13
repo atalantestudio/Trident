@@ -108,7 +108,7 @@ namespace Trident {
 			}
 
 			const Attachment& colorAttachment = renderPass->getAttachment(colorAttachmentReference.index);
-			const ref<DX12::ImageView> imageView = std::static_pointer_cast<DX12::ImageView>(commandEncoder->framebuffer->imageViews[colorAttachmentReference.index]);
+			const ref<DX12::ImageView> imageView = static_pointer_cast<DX12::ImageView>(commandEncoder->framebuffer->imageViews[colorAttachmentReference.index]);
 
 			DX12::Image* image = static_cast<DX12::Image*>(imageView->getImage());
 
@@ -185,7 +185,7 @@ namespace Trident {
 		D3D12_CPU_DESCRIPTOR_HANDLE depthStencilViewHandle{};
 
 		if (subpass.depthStencilAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
-			const ref<DX12::ImageView> imageView = std::static_pointer_cast<DX12::ImageView>(commandEncoder->framebuffer->imageViews[subpass.depthStencilAttachmentReference.index]);
+			const ref<DX12::ImageView> imageView = static_pointer_cast<DX12::ImageView>(commandEncoder->framebuffer->imageViews[subpass.depthStencilAttachmentReference.index]);
 
 			DX12::Image* image = static_cast<DX12::Image*>(imageView->getImage());
 
@@ -253,7 +253,7 @@ namespace Trident {
 		std::vector<D3D12_TEXTURE_BARRIER> textureBarriers;
 
 		while (attachmentIndex < renderPass->getAttachmentCount()) {
-			const ref<DX12::ImageView> imageView = std::static_pointer_cast<DX12::ImageView>(_commandEncoder->framebuffer->imageViews[attachmentIndex]);
+			const ref<DX12::ImageView> imageView = static_pointer_cast<DX12::ImageView>(_commandEncoder->framebuffer->imageViews[attachmentIndex]);
 
 			DX12::Image* image = static_cast<DX12::Image*>(imageView->getImage());
 
@@ -319,7 +319,7 @@ namespace Trident {
 				continue;
 			}
 
-			const ref<DX12::ImageView> imageView = std::static_pointer_cast<DX12::ImageView>(_commandEncoder->framebuffer->imageViews[attachmentIndex]);
+			const ref<DX12::ImageView> imageView = static_pointer_cast<DX12::ImageView>(_commandEncoder->framebuffer->imageViews[attachmentIndex]);
 			const DX12::Image* image = static_cast<const DX12::Image*>(imageView->getImage());
 			const ClearValue& clearValue = descriptor.clearValues[attachmentIndex];
 
@@ -341,9 +341,9 @@ namespace Trident {
 	void DX12::bindComputePipeline(Trident::CommandEncoder* commandEncoder, ref<Trident::ComputePipeline> computePipeline) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
-		const ref<DX12::ComputePipeline> pipeline = std::static_pointer_cast<DX12::ComputePipeline>(computePipeline);
+		const ref<DX12::ComputePipeline> pipeline = static_pointer_cast<DX12::ComputePipeline>(computePipeline);
 
+		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 		_commandEncoder->commandList->SetPipelineState(pipeline->pipelineState);
 		_commandEncoder->commandList->SetComputeRootSignature(pipeline->pipelineLayout->rootSignature);
 		_commandEncoder->computePipelineBound = true;
@@ -355,8 +355,8 @@ namespace Trident {
 
 		const DX12::Device* device = static_cast<const DX12::Device*>(commandEncoder->device);
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
-		const ref<DX12::MemoryAllocator> memoryAllocator = std::static_pointer_cast<DX12::MemoryAllocator>(device->getMemoryAllocator());
-		const ref<DX12::PipelineLayout> _pipelineLayout = std::static_pointer_cast<DX12::PipelineLayout>(pipelineLayout);
+		const ref<DX12::MemoryAllocator> memoryAllocator = static_pointer_cast<DX12::MemoryAllocator>(device->getMemoryAllocator());
+		const ref<DX12::PipelineLayout> _pipelineLayout = static_pointer_cast<DX12::PipelineLayout>(pipelineLayout);
 
 		ID3D12DescriptorHeap* viewDescriptorHeap = memoryAllocator->getCurrentViewDescriptorHeapAllocation().descriptorHeap;
 		ID3D12DescriptorHeap* samplerDescriptorHeap = memoryAllocator->getCurrentSamplerDescriptorHeapAllocation().descriptorHeap;
@@ -368,7 +368,7 @@ namespace Trident {
 
 		if (_commandEncoder->computePipelineBound) {
 			while (rootParameterIndex < descriptorSets.count()) {
-				const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSets[rootParameterIndex]);
+				const ref<DX12::DescriptorSet> descriptorSet = static_pointer_cast<DX12::DescriptorSet>(descriptorSets[rootParameterIndex]);
 
 				D3D12_GPU_DESCRIPTOR_HANDLE descriptorOffset = viewDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 				descriptorOffset.ptr += descriptorSet->viewDescriptorHandleOffset * memoryAllocator->viewDescriptorHandleIncrementSize;
@@ -380,7 +380,7 @@ namespace Trident {
 		}
 		else {
 			while (rootParameterIndex < descriptorSets.count()) {
-				const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSets[rootParameterIndex]);
+				const ref<DX12::DescriptorSet> descriptorSet = static_pointer_cast<DX12::DescriptorSet>(descriptorSets[rootParameterIndex]);
 
 				D3D12_GPU_DESCRIPTOR_HANDLE descriptorOffset = viewDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 				descriptorOffset.ptr += descriptorSet->viewDescriptorHandleOffset * memoryAllocator->viewDescriptorHandleIncrementSize;
@@ -394,7 +394,7 @@ namespace Trident {
 				UINT descriptorSetIndex = 0;
 
 				while (descriptorSetIndex < descriptorSets.count()) {
-					const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSets[descriptorSetIndex]);
+					const ref<DX12::DescriptorSet> descriptorSet = static_pointer_cast<DX12::DescriptorSet>(descriptorSets[descriptorSetIndex]);
 
 					D3D12_GPU_DESCRIPTOR_HANDLE descriptorOffset = samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 					descriptorOffset.ptr += _pipelineLayout->samplerOffsetsPerDescriptorSet[descriptorSetIndex] * memoryAllocator->samplerDescriptorHandleIncrementSize;
@@ -412,13 +412,13 @@ namespace Trident {
 	void DX12::bindGraphicsPipeline(Trident::CommandEncoder* commandEncoder, ref<Trident::GraphicsPipeline> graphicsPipeline) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
-		const ref<DX12::GraphicsPipeline> pipeline = std::static_pointer_cast<DX12::GraphicsPipeline>(graphicsPipeline);
+		const ref<DX12::GraphicsPipeline> pipeline = static_pointer_cast<DX12::GraphicsPipeline>(graphicsPipeline);
 
+		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 		_commandEncoder->commandList->SetPipelineState(pipeline->pipelineState);
 		_commandEncoder->commandList->SetGraphicsRootSignature(pipeline->pipelineLayout->rootSignature);
 		_commandEncoder->commandList->IASetPrimitiveTopology(pipeline->primitiveTopology);
-		_commandEncoder->graphicsPipeline = pipeline.get();
+		_commandEncoder->graphicsPipeline = pipeline;
 		_commandEncoder->samplerDescriptorTableRootParameterIndex = pipeline->pipelineLayout->samplerDescriptorTableRootParameterIndex;
 		_commandEncoder->computePipelineBound = false;
 		_commandEncoder->commandCount += 1;
@@ -430,7 +430,7 @@ namespace Trident {
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 
 		D3D12_INDEX_BUFFER_VIEW indexBufferView{};
-		indexBufferView.BufferLocation = std::static_pointer_cast<DX12::Buffer>(indexBuffer)->resource->GetGPUVirtualAddress() + offset;
+		indexBufferView.BufferLocation = static_pointer_cast<DX12::Buffer>(indexBuffer)->resource->GetGPUVirtualAddress() + offset;
 		indexBufferView.SizeInBytes = static_cast<UINT>(indexBuffer->getSize() - offset);
 		indexBufferView.Format = getIndexBufferFormat(indexTypeSize);
 
@@ -444,7 +444,7 @@ namespace Trident {
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 
 		D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
-		vertexBufferView.BufferLocation = std::static_pointer_cast<DX12::Buffer>(vertexBuffer)->resource->GetGPUVirtualAddress() + offset;
+		vertexBufferView.BufferLocation = static_pointer_cast<DX12::Buffer>(vertexBuffer)->resource->GetGPUVirtualAddress() + offset;
 		vertexBufferView.SizeInBytes = static_cast<UINT>(vertexBuffer->getSize() - offset);
 		vertexBufferView.StrideInBytes = _commandEncoder->graphicsPipeline->vertexInputBindingStrides[bindingIndex];
 
@@ -456,7 +456,7 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
-		const ref<DX12::Buffer> _destinationBuffer = std::static_pointer_cast<DX12::Buffer>(destinationBuffer);
+		const ref<DX12::Buffer> _destinationBuffer = static_pointer_cast<DX12::Buffer>(destinationBuffer);
 		const MemoryAllocation& memoryAllocation = commandEncoder->device->getMemoryAllocator()->allocations[_destinationBuffer->getMemorySuballocation().allocationIndex];
 		const D3D12_HEAP_TYPE destinationHeapType = static_cast<D3D12_HEAP_TYPE>(memoryAllocation.memoryTypeIndex + 1);
 
@@ -481,7 +481,7 @@ namespace Trident {
 			return;
 		}
 
-		const ref<DX12::Buffer> _sourceBuffer = std::static_pointer_cast<DX12::Buffer>(sourceBuffer);
+		const ref<DX12::Buffer> _sourceBuffer = static_pointer_cast<DX12::Buffer>(sourceBuffer);
 
 		for (const BufferCopyRegion& copyRegion : copyRegions) {
 			_commandEncoder->commandList->CopyBufferRegion(_destinationBuffer->resource, copyRegion.destinationOffset, _sourceBuffer->resource, copyRegion.sourceOffset, copyRegion.size);
@@ -493,8 +493,8 @@ namespace Trident {
 	void DX12::copyBufferToImage(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> sourceBuffer, ref<Trident::Image> destinationImage, view<BufferImageCopyRegion> copyRegions) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		const ref<DX12::Buffer> srcBuffer = std::static_pointer_cast<DX12::Buffer>(sourceBuffer);
-		const ref<DX12::Image> dstImage = std::static_pointer_cast<DX12::Image>(destinationImage);
+		const ref<DX12::Buffer> srcBuffer = static_pointer_cast<DX12::Buffer>(sourceBuffer);
+		const ref<DX12::Image> dstImage = static_pointer_cast<DX12::Image>(destinationImage);
 		const D3D12_RESOURCE_DESC dstImageResourceDescriptor = dstImage->resource->GetDesc();
 		const UINT channelCount = getChannelCount(dstImage->getFormat());
 
@@ -536,8 +536,8 @@ namespace Trident {
 	void DX12::copyImageToBuffer(Trident::CommandEncoder* commandEncoder, ref<Trident::Image> sourceImage, ref<Trident::Buffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		const ref<DX12::Image> srcImage = std::static_pointer_cast<DX12::Image>(sourceImage);
-		const ref<DX12::Buffer> dstBuffer = std::static_pointer_cast<DX12::Buffer>(destinationBuffer);
+		const ref<DX12::Image> srcImage = static_pointer_cast<DX12::Image>(sourceImage);
+		const ref<DX12::Buffer> dstBuffer = static_pointer_cast<DX12::Buffer>(destinationBuffer);
 		const D3D12_RESOURCE_DESC srcImageResourceDescriptor = srcImage->resource->GetDesc();
 		const UINT channelCount = getChannelCount(srcImage->getFormat());
 
@@ -591,7 +591,7 @@ namespace Trident {
 		const DX12::CommandPool* _commandPool = static_cast<const DX12::CommandPool*>(commandPool);
 		HRESULT result;
 
-		ref<DX12::CommandEncoder> commandEncoder = createRef<DX12::CommandEncoder>(device, commandPool);
+		ref<DX12::CommandEncoder> commandEncoder = allocateRef<DX12::CommandEncoder>(device, commandPool);
 		commandEncoder->commandAllocator = _commandPool->commandAllocator;
 		commandEncoder->usage = descriptor.usage;
 		commandEncoder->computeCommandList = _commandPool->commandListType == D3D12_COMMAND_LIST_TYPE_COMPUTE;
@@ -642,7 +642,7 @@ namespace Trident {
 
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 		const DX12::Device* _device = static_cast<const DX12::Device*>(commandEncoder->device);
-		const ref<DX12::Buffer> indirectBuffer = std::static_pointer_cast<DX12::Buffer>(buffer);
+		const ref<DX12::Buffer> indirectBuffer = static_pointer_cast<DX12::Buffer>(buffer);
 
 		// TODO(graphics/dx12/buffer/command-signature): Create the buffer and the command signature at the same time.
 		if (!indirectBuffer->commandSignature) {
@@ -696,7 +696,7 @@ namespace Trident {
 
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 		const DX12::Device* _device = static_cast<const DX12::Device*>(commandEncoder->device);
-		const ref<DX12::Buffer> indirectBuffer = std::static_pointer_cast<DX12::Buffer>(buffer);
+		const ref<DX12::Buffer> indirectBuffer = static_pointer_cast<DX12::Buffer>(buffer);
 
 		// TODO(graphics/dx12/buffer/command-signature): Create the buffer and the command signature at the same time.
 		if (!indirectBuffer->commandSignature) {
@@ -730,7 +730,7 @@ namespace Trident {
 
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 		const DX12::Device* _device = static_cast<const DX12::Device*>(commandEncoder->device);
-		const ref<DX12::Buffer> indirectBuffer = std::static_pointer_cast<DX12::Buffer>(buffer);
+		const ref<DX12::Buffer> indirectBuffer = static_pointer_cast<DX12::Buffer>(buffer);
 
 		// TODO(graphics/dx12/buffer/command-signature): Create the buffer and the command signature at the same time.
 		if (!indirectBuffer->commandSignature) {
@@ -778,7 +778,7 @@ namespace Trident {
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 
 		if (_commandEncoder->presentRenderTargetIndex < _commandEncoder->framebuffer->imageViews.count()) {
-			ref<DX12::ImageView> presentImageView = std::static_pointer_cast<DX12::ImageView>(_commandEncoder->framebuffer->imageViews[_commandEncoder->presentRenderTargetIndex]);
+			ref<DX12::ImageView> presentImageView = static_pointer_cast<DX12::ImageView>(_commandEncoder->framebuffer->imageViews[_commandEncoder->presentRenderTargetIndex]);
 			DX12::Image* presentImage = static_cast<DX12::Image*>(presentImageView->getImage());
 
 			if (presentImage->getSampleCount() > 1) {
@@ -790,7 +790,7 @@ namespace Trident {
 				// TODO(graphics/subpass/resolve-attachment-count): Unused attachments shouldn't be included in the count.
 				const uint32 resolveAttachmentCount = static_cast<uint32>(subpass.colorAttachmentReferences.count());
 
-				presentImageView = std::static_pointer_cast<DX12::ImageView>(_commandEncoder->framebuffer->imageViews[resolveAttachmentCount + (subpass.depthStencilAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX ? 1 : 0) + _commandEncoder->presentRenderTargetIndex]);
+				presentImageView = static_pointer_cast<DX12::ImageView>(_commandEncoder->framebuffer->imageViews[resolveAttachmentCount + (subpass.depthStencilAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX ? 1 : 0) + _commandEncoder->presentRenderTargetIndex]);
 				presentImage = static_cast<DX12::Image*>(presentImageView->getImage());
 
 				D3D12_TEXTURE_BARRIER textureBarriers[2];
@@ -905,7 +905,7 @@ namespace Trident {
 			bufferBarrier.SyncAfter = D3D12_BARRIER_SYNC_ALL;
 			bufferBarrier.AccessBefore = getBufferBarrierAccess(bufferMemoryBarrier.buffer->access);
 			bufferBarrier.AccessAfter = getBufferBarrierAccess(bufferMemoryBarrier.newAccess);
-			bufferBarrier.pResource = std::static_pointer_cast<DX12::Buffer>(bufferMemoryBarrier.buffer)->resource;
+			bufferBarrier.pResource = static_pointer_cast<DX12::Buffer>(bufferMemoryBarrier.buffer)->resource;
 			bufferBarrier.Offset = bufferMemoryBarrier.offset;
 			bufferBarrier.Size = bufferMemoryBarrier.size;
 
@@ -921,7 +921,7 @@ namespace Trident {
 
 		while (imageMemoryBarrierIndex < imageMemoryBarriers.count()) {
 			const ImageMemoryBarrier& imageMemoryBarrier = imageMemoryBarriers[imageMemoryBarrierIndex];
-			const ref<DX12::Image> dxImage = std::static_pointer_cast<DX12::Image>(imageMemoryBarrier.image);
+			const ref<DX12::Image> dxImage = static_pointer_cast<DX12::Image>(imageMemoryBarrier.image);
 
 			D3D12_TEXTURE_BARRIER& textureBarrier = textureBarriers[imageMemoryBarrierIndex];
 			textureBarrier.SyncBefore = D3D12_BARRIER_SYNC_ALL;
@@ -930,7 +930,7 @@ namespace Trident {
 			textureBarrier.AccessAfter = getImageBarrierAccess(imageMemoryBarrier.newAccess, imageMemoryBarrier.newLayout);
 			textureBarrier.LayoutBefore = dxImage->barrierLayout;
 			textureBarrier.LayoutAfter = getBarrierLayout(imageMemoryBarrier.newLayout, imageMemoryBarrier.newAccess);
-			textureBarrier.pResource = std::static_pointer_cast<DX12::Image>(imageMemoryBarrier.image)->resource;
+			textureBarrier.pResource = static_pointer_cast<DX12::Image>(imageMemoryBarrier.image)->resource;
 			textureBarrier.Subresources.IndexOrFirstMipLevel = 0;
 			textureBarrier.Subresources.NumMipLevels = imageMemoryBarrier.image->getMipLevelCount();
 			textureBarrier.Subresources.FirstArraySlice = 0;

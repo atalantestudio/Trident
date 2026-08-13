@@ -17,7 +17,7 @@ namespace Trident {
 
 		static constexpr GLfloat BORDER_COLOR[] = {0.0f, 0.0f, 0.0f, 1.0f};
 
-		ref<GL::Sampler> sampler = createRef<GL::Sampler>(device);
+		ref<GL::Sampler> sampler = allocateRef<GL::Sampler>(device);
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_3_3
 			glGenSamplers(1, &sampler->sampler);

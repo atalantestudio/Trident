@@ -16,7 +16,7 @@ namespace Trident {
 
 		public:
 			VkDevice device;
-			ref<Trident::Queue> queues[3];
+			private_ref<Trident::Queue> queues[3];
 
 			// TODO: Move in VK::MemoryAllocator.
 			std::vector<VkDescriptorPool> descriptorPools;

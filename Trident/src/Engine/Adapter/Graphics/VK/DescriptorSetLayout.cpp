@@ -17,8 +17,9 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
+
+		ref<VK::DescriptorSetLayout> descriptorSetLayout = allocateRef<VK::DescriptorSetLayout>(device, bindings);
 		sequence<VkDescriptorSetLayoutBinding> vkDescriptorSetLayoutBindings(bindings.count());
-		ref<VK::DescriptorSetLayout> descriptorSetLayout = createRef<VK::DescriptorSetLayout>(device, bindings);
 		VkResult result;
 
 		VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo{};

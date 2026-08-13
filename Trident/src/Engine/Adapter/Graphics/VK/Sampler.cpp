@@ -19,7 +19,7 @@ namespace Trident {
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		VkResult result;
 
-		ref<VK::Sampler> sampler = createRef<VK::Sampler>(device);
+		ref<VK::Sampler> sampler = allocateRef<VK::Sampler>(device);
 
 		VkSamplerCreateInfo samplerCreateInfo{};
 		samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;

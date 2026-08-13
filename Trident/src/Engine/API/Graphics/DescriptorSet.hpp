@@ -22,7 +22,7 @@ namespace Trident {
 		uint32 bindingIndex;
 
 		// TODO: Wrap in an union. Either fill the descriptor buffers or the descriptor images.
-		view<ref<BaseBufferView>> descriptorBufferViews;
+		view<BaseBufferView> descriptorBufferViews;
 		view<DescriptorImage> descriptorImages;
 	};
 }

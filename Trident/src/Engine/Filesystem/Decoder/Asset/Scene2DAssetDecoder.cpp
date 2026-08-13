@@ -10,7 +10,7 @@
 
 namespace Trident {
 	template<>
-	ref<Scene2DAsset> Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary) {
+	Scene2DAsset Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary) {
 		Descriptor<Scene2DAsset> descriptor{};
 		descriptor.identifier = stream.read<uint32>();
 		descriptor.version = stream.read<VersionNumber>();
@@ -89,6 +89,6 @@ namespace Trident {
 			rigidBodyMapping.component.restitution = stream.read<float32>();
 		}
 
-		return createRef<Scene2DAsset>(descriptor);
+		return Scene2DAsset(descriptor);
 	}
 }

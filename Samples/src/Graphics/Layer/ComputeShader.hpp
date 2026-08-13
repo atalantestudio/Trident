@@ -239,9 +239,9 @@ namespace Trident {
 						.name = "Staging",
 					#endif
 				});
-				const ref<BufferView<Vertex>> vertexView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
+				const BufferView<Vertex> vertexView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
 
-				Vertex* vertexMappedRange = vertexView->map();
+				Vertex* vertexMappedRange = vertexView.map();
 				vertexMappedRange[0].vertex = {-1.0f,  1.0f};
 				vertexMappedRange[1].vertex = { 3.0f,  1.0f};
 				vertexMappedRange[2].vertex = {-1.0f, -3.0f};
@@ -259,9 +259,9 @@ namespace Trident {
 				commandEncoder->begin();
 
 				const BufferCopyRegion bufferCopyRegion = {
-					.sourceOffset = vertexView->getOffset(),
+					.sourceOffset = vertexView.getOffset(),
 					.destinationOffset = 0,
-					.size = vertexView->getSize(),
+					.size = vertexView.getSize(),
 				};
 
 				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegion);

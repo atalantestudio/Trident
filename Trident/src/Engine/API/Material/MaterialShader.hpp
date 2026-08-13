@@ -7,7 +7,7 @@
 
 namespace Trident {
 	struct MaterialShader {
-		ref<ShaderModuleAsset> shaderModuleAsset;
+		ShaderModuleAsset shaderModuleAsset;
 		range<uint32, uint32> materialRange;
 	};
 }

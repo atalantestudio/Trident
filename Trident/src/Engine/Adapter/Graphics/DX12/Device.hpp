@@ -16,7 +16,7 @@ namespace Trident {
 		public:
 			IDXGIFactory4* factory;
 			ID3D12Device* device;
-			ref<Trident::Queue> queues[3];
+			private_ref<Trident::Queue> queues[3];
 			HANDLE waitEvent;
 
 			#if defined(DEBUG_ENABLE_MESSENGER)

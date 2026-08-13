@@ -15,7 +15,7 @@ namespace Trident {
 			{}
 
 			void execute() const final override {
-				const ref<GL::RenderPass> renderPass = std::static_pointer_cast<GL::RenderPass>(framebuffer->getRenderPass());
+				const ref<GL::RenderPass> renderPass = static_pointer_cast<GL::RenderPass>(framebuffer->getRenderPass());
 				const Extent2D extent = framebuffer->getExtent();
 
 				#if OPENGL_VERSION >= OPENGL_VERSION_3_0

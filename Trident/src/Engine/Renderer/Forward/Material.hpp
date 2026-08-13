@@ -45,13 +45,13 @@ namespace Trident {
 		pipelineDescriptor.pipelineLayout = pipelineLayout;
 		pipelineDescriptor.fragmentShaderModule = loadInternalShaderModule(
 			{
-				.stage = materialShader.shaderModuleAsset->stageFlags,
-				.entryPoint = materialShader.shaderModuleAsset->entryPoint,
+				.stage = materialShader.shaderModuleAsset.stageFlags,
+				.entryPoint = materialShader.shaderModuleAsset.entryPoint,
 				#if defined(DEBUG_OBJECT_NAME)
 					.name = materialFragmentName,
 				#endif
 			},
-			materialShader.shaderModuleAsset->name
+			materialShader.shaderModuleAsset.name
 		);
 
 		#if defined(DEBUG_OBJECT_NAME)
@@ -78,16 +78,16 @@ namespace Trident {
 		materialPipelines[materialShaderIndex] = pipeline;
 	}
 
-	ref<Image> ForwardRenderer::createMaterialImage(ref<ImageAsset> imageAsset, ImageDescriptor& imageDescriptor) const {
-		imageDescriptor.format = imageAsset->getFormat();
+	ref<Image> ForwardRenderer::createMaterialImage(const ImageAsset& imageAsset, ImageDescriptor& imageDescriptor) const {
+		imageDescriptor.format = imageAsset.getFormat();
 
 		if (imageDescriptor.format == ImageFormat::R8G8B8_UNORM) {
 			imageDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
 		}
 
-		imageDescriptor.extent = imageAsset->getExtent();
-		imageDescriptor.mipLevelCount = imageAsset->getMipLevelCount();
-		imageDescriptor.layerCount = imageAsset->getLayerCount();
+		imageDescriptor.extent = imageAsset.getExtent();
+		imageDescriptor.mipLevelCount = imageAsset.getMipLevelCount();
+		imageDescriptor.layerCount = imageAsset.getLayerCount();
 
 		return createDynamicImage(imageDescriptor);
 	}
@@ -158,7 +158,7 @@ namespace Trident {
 
 		materialDescriptorSets = device->allocateDescriptorSets(materialDescriptorSetLayouts);
 
-		const view<ref<ImageAsset>> imageAssets = assetLibrary.getLoadedAssets<ImageAsset>();
+		const view<ImageAsset> imageAssets = assetLibrary.getLoadedAssets<ImageAsset>();
 		const uint32 imageCount = static_cast<uint32>(imageAssets.count());
 
 		if (imageCount == 0) {
@@ -186,7 +186,7 @@ namespace Trident {
 		uint64 imageStagingBufferSize = 0;
 
 		while (imageIndex < imageCount) {
-			const ref<ImageAsset> imageAsset = imageAssets[imageIndex];
+			const ImageAsset& imageAsset = imageAssets[imageIndex];
 
 			#if defined(DEBUG_OBJECT_NAME)
 				materialName = Logger::format("Material []", imageIndex);
@@ -234,9 +234,9 @@ namespace Trident {
 			#endif
 		});
 
-		const ref<BufferView<uint8>> imageStagingView = imageStagingBuffer->createView<uint8>(0, imageStagingBuffer->getSize());
+		const BufferView<uint8> imageStagingView = imageStagingBuffer->createView<uint8>(0, imageStagingBuffer->getSize());
 
-		uint8* imageMappedRange = imageStagingView->map();
+		uint8* imageMappedRange = imageStagingView.map();
 		uint64 imageMappedRangeOffset = 0;
 
 		const ref<Queue> queue = device->getQueue(QueueFamilyCapability::GRAPHICS);

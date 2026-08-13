@@ -20,13 +20,17 @@
 #include "Engine/Filesystem/Asset/MaterialAsset.hpp"
 
 namespace Trident {
-	struct SceneAsset;
 	struct Scene2DAsset;
 	struct Scene3DAsset;
 
 	template<>
-	struct Descriptor<SceneAsset> : public Asset {
+	struct Descriptor<Scene2DAsset>: public Asset {
+		sequence<ref<Geometry2DAsset>> geometryAssets;
+		sequence<StaticTriangle2D> staticTriangles;
+		sequence<svec2<float32>> staticVertices;
+		sequence<svec2<float32>> staticTextureCoordinates;
 		sequence<uint8> staticGeometryBuffer;
+
 		uint64 dynamicVertexPositionCount;
 		uint64 dynamicVertexTextureCoordinateCount;
 
@@ -39,30 +43,33 @@ namespace Trident {
 		uint32 entityCount;
 		uint32 hullCount;
 		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
-	};
-
-	template<>
-	struct Descriptor<Scene2DAsset> : public Descriptor<SceneAsset> {
-		sequence<ref<Geometry2DAsset>> geometryAssets;
-		sequence<StaticTriangle2D> staticTriangles;
-		sequence<svec2<float32>> staticVertices;
-		sequence<svec2<float32>> staticTextureCoordinates;
 		sequence<EntityComponentMapping<RigidBody2DComponent>> rigidBodyMappings;
 	};
 
-	struct SceneAsset : public Asset {
+	struct Scene2DAsset : public Asset {
 		public:
-			explicit SceneAsset(const Descriptor<SceneAsset>& descriptor) :
-				Asset{descriptor.identifier, descriptor.version},
-				staticGeometryBuffer(descriptor.staticGeometryBuffer),
-				dynamicVertexPositionCount(descriptor.dynamicVertexPositionCount),
-				dynamicVertexTextureCoordinateCount(descriptor.dynamicVertexTextureCoordinateCount),
-				dynamicVertexPositionIndexCount(descriptor.dynamicVertexPositionIndexCount),
-				dynamicVertexTextureCoordinateIndexCount(descriptor.dynamicVertexTextureCoordinateIndexCount),
-				entityCount(descriptor.entityCount),
-				hullCount(descriptor.hullCount),
-				geometryMappings(descriptor.geometryMappings)
+			Scene2DAsset() = default;
+
+			explicit Scene2DAsset(const Descriptor<Scene2DAsset>& descriptor) :
+				Asset(descriptor),
+				geometryAssets(descriptor.geometryAssets),
+				staticTriangles(descriptor.staticTriangles),
+				staticVertices(descriptor.staticVertices),
+				staticTextureCoordinates(descriptor.staticTextureCoordinates),
+				rigidBodyMappings(descriptor.rigidBodyMappings)
 			{}
+
+			inline const sequence<StaticTriangle2D>& getStaticTriangles() const {
+				return staticTriangles;
+			}
+
+			inline const sequence<svec2<float32>>& getStaticVertices() const {
+				return staticVertices;
+			}
+
+			inline const sequence<svec2<float32>>& getStaticTextureCoordinates() const {
+				return staticTextureCoordinates;
+			}
 
 			inline uint64 getDynamicVertexPositionCount() const {
 				return dynamicVertexPositionCount;
@@ -92,10 +99,18 @@ namespace Trident {
 				return geometryMappings;
 			}
 
+			inline const sequence<EntityComponentMapping<RigidBody2DComponent>>& getRigidBodyMappings() const {
+				return rigidBodyMappings;
+			}
+
 		public:
 			sequence<uint8> staticGeometryBuffer;
+			sequence<ref<Geometry2DAsset>> geometryAssets;
 
 		private:
+			sequence<StaticTriangle2D> staticTriangles;
+			sequence<svec2<float32>> staticVertices;
+			sequence<svec2<float32>> staticTextureCoordinates;
 			uint64 dynamicVertexPositionCount;
 			uint64 dynamicVertexTextureCoordinateCount;
 			uint64 dynamicVertexPositionIndexCount;
@@ -103,42 +118,6 @@ namespace Trident {
 			uint32 entityCount;
 			uint32 hullCount;
 			sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
-	};
-
-	struct Scene2DAsset : public SceneAsset {
-		public:
-			explicit Scene2DAsset(const Descriptor<Scene2DAsset>& descriptor) :
-				SceneAsset(descriptor),
-				geometryAssets(descriptor.geometryAssets),
-				staticTriangles(descriptor.staticTriangles),
-				staticVertices(descriptor.staticVertices),
-				staticTextureCoordinates(descriptor.staticTextureCoordinates),
-				rigidBodyMappings(descriptor.rigidBodyMappings)
-			{}
-
-			inline const sequence<StaticTriangle2D>& getStaticTriangles() const {
-				return staticTriangles;
-			}
-
-			inline const sequence<svec2<float32>>& getStaticVertices() const {
-				return staticVertices;
-			}
-
-			inline const sequence<svec2<float32>>& getStaticTextureCoordinates() const {
-				return staticTextureCoordinates;
-			}
-
-			inline const sequence<EntityComponentMapping<RigidBody2DComponent>>& getRigidBodyMappings() const {
-				return rigidBodyMappings;
-			}
-
-		public:
-			sequence<ref<Geometry2DAsset>> geometryAssets;
-
-		private:
-			sequence<StaticTriangle2D> staticTriangles;
-			sequence<svec2<float32>> staticVertices;
-			sequence<svec2<float32>> staticTextureCoordinates;
 			sequence<EntityComponentMapping<RigidBody2DComponent>> rigidBodyMappings;
 	};
 

@@ -14,13 +14,13 @@ namespace Trident {
 	void LayerGroup::setApplication(Application* application) {
 		this->application = application;
 
-		layers = view<ref<Layer>>(&application->getLayerCompositor()->layers[layerRange.offset], layerRange.count);
+		layers = view<private_ref<Layer>>(&application->getLayerCompositor()->layers[layerRange.offset], layerRange.count);
 	}
 
 	void LayerGroup::initialize() {}
 
 	void LayerGroup::render(ref<CommandEncoder> commandEncoder, float64 remainingFrameTime) const {
-		for (const ref<Layer> layer : layers) {
+		for (ref<Layer> layer : layers) {
 			layer->preRender();
 			layer->render(commandEncoder, remainingFrameTime);
 			layer->postRender();

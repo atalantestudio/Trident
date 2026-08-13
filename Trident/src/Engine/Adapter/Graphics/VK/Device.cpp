@@ -28,6 +28,8 @@ namespace Trident {
 	{}
 
 	VK::Device::~Device() {
+		static PFN_vkDestroyDevice vkDestroyDevice = loadDeviceProcedure<PFN_vkDestroyDevice>(device, "vkDestroyDevice");
+
 		// TODO(graphics/device/free-descriptor-sets): Only if the pool has been created with the VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT flag.
 		/* result = vkFreeDescriptorSets(_device->device, descriptorPool, static_cast<uint32>(descriptorSets.count()), &descriptorSets[0]);
 
@@ -36,6 +38,8 @@ namespace Trident {
 		for (const VkDescriptorPool descriptorPool : descriptorPools) {
 			vkDestroyDescriptorPool(device, descriptorPool, nullptr);
 		}
+
+		vkDestroyDevice(device, nullptr);
 	}
 
 	void VK::Device::loadProcedures() {
@@ -137,7 +141,7 @@ namespace Trident {
 				descriptorCountPerType[static_cast<uint32>(descriptorSetLayoutBinding.descriptorType)] += descriptorSetLayoutBinding.descriptorCount;
 			}
 
-			vkDescriptorSetLayouts[descriptorSetLayoutIndex] = std::static_pointer_cast<VK::DescriptorSetLayout>(descriptorSetLayout)->descriptorSetLayout;
+			vkDescriptorSetLayouts[descriptorSetLayoutIndex] = static_pointer_cast<VK::DescriptorSetLayout>(descriptorSetLayout)->descriptorSetLayout;
 
 			descriptorSetLayoutIndex += 1;
 		}
@@ -205,12 +209,13 @@ namespace Trident {
 
 		while (descriptorSetIndex < descriptorSets.count()) {
 			const ref<Trident::DescriptorSetLayout> descriptorSetLayout = descriptorSetLayouts[descriptorSetIndex];
-			const ref<VK::DescriptorSet> descriptorSet = createRef<VK::DescriptorSet>(vkDescriptorSets[descriptorSetIndex]);
 
-			descriptorSet->bindings = sequence<DescriptorSetLayoutBinding>(descriptorSetLayout->bindings.count());
+			VK::DescriptorSet descriptorSet(vkDescriptorSets[descriptorSetIndex]);
+
+			descriptorSet.bindings = sequence<DescriptorSetLayoutBinding>(descriptorSetLayout->bindings.count());
 			descriptorSetBindingIndex = 0;
 
-			std::copy(descriptorSetLayout->bindings.begin(), descriptorSetLayout->bindings.end(), &descriptorSet->bindings[0]);
+			std::copy(descriptorSetLayout->bindings.begin(), descriptorSetLayout->bindings.end(), &descriptorSet.bindings[0]);
 
 			descriptorSets[descriptorSetIndex] = descriptorSet;
 			descriptorSetIndex += 1;
@@ -233,7 +238,7 @@ namespace Trident {
 		const VK::PhysicalDevice* _physicalDevice = static_cast<const VK::PhysicalDevice*>(physicalDevice);
 		VkResult result;
 
-		ref<VK::Device> device = createRef<VK::Device>(adapter, physicalDevice);
+		ref<VK::Device> device = allocateRef<VK::Device>(adapter, physicalDevice);
 
 		// TODO: Replace with sequence<T>.
 		std::vector<uint32> queueFamilyIndices = {
@@ -278,12 +283,9 @@ namespace Trident {
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create device ([]).", string_VkResult(result));
 
 		device->loadProcedures();
-
-		const Trident::Device* _device = pointer_cast<const Trident::Device*>(device.get());
-
-		device->queues[0] = createQueue(_device, _physicalDevice->graphicsQueueFamilyIndex, QueueFamilyCapability::GRAPHICS);
-		device->queues[1] = createQueue(_device, _physicalDevice->computeQueueFamilyIndex, QueueFamilyCapability::COMPUTE);
-		device->queues[2] = createQueue(_device, _physicalDevice->transferQueueFamilyIndex, QueueFamilyCapability::TRANSFER);
+		device->queues[0] = createQueue(device, _physicalDevice->graphicsQueueFamilyIndex, QueueFamilyCapability::GRAPHICS);
+		device->queues[1] = createQueue(device, _physicalDevice->computeQueueFamilyIndex, QueueFamilyCapability::COMPUTE);
+		device->queues[2] = createQueue(device, _physicalDevice->transferQueueFamilyIndex, QueueFamilyCapability::TRANSFER);
 
 		return device;
 	}
@@ -291,15 +293,10 @@ namespace Trident {
 	void VK::destroyDevice(const Trident::Device* device) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		static PFN_vkDestroyDevice vkDestroyDevice = loadDeviceProcedure<PFN_vkDestroyDevice>(static_cast<const VK::Device*>(device)->device, "vkDestroyDevice");
-
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
+		const VkDevice vkDevice = _device->device;
 
-		for (const ref<Trident::Queue>& queue : _device->queues) {
-			queue.~shared_ptr();
-		}
-
-		vkDestroyDevice(_device->device, nullptr);
+		_device->~Device();
 	}
 
 	ref<Trident::Queue> VK::getQueue(const Trident::Device* device, QueueFamilyCapability queueFamilyCapability) {
@@ -330,7 +327,7 @@ namespace Trident {
 		uint64 descriptorImageInfoCount = 0;
 
 		for (const WriteDescriptorSet& writeDescriptorSet : writeDescriptorSets) {
-			const ref<VK::DescriptorSet> descriptorSet = std::static_pointer_cast<VK::DescriptorSet>(writeDescriptorSet.descriptorSet);
+			const ref<VK::DescriptorSet> descriptorSet = static_pointer_cast<VK::DescriptorSet>(writeDescriptorSet.descriptorSet);
 
 			ADAPTER_ASSERT(writeDescriptorSet.bindingIndex < descriptorSet->bindings.count(), "The write descriptor set uses invalid binding index [].", writeDescriptorSet.bindingIndex);
 
@@ -357,13 +354,13 @@ namespace Trident {
 
 		while (writeDescriptorSetIndex < writeDescriptorSets.count()) {
 			const WriteDescriptorSet& writeDescriptorSet = writeDescriptorSets[writeDescriptorSetIndex];
-			const ref<VK::DescriptorSet> descriptorSet = std::static_pointer_cast<VK::DescriptorSet>(writeDescriptorSet.descriptorSet);
+			const ref<VK::DescriptorSet> descriptorSet = static_pointer_cast<VK::DescriptorSet>(writeDescriptorSet.descriptorSet);
 			const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
 
 			VkWriteDescriptorSet& vkWriteDescriptorSet = vkWriteDescriptorSets[writeDescriptorSetIndex];
 			vkWriteDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			vkWriteDescriptorSet.pNext = nullptr;
-			vkWriteDescriptorSet.dstSet = std::static_pointer_cast<VK::DescriptorSet>(writeDescriptorSet.descriptorSet)->descriptorSet;
+			vkWriteDescriptorSet.dstSet = static_pointer_cast<VK::DescriptorSet>(writeDescriptorSet.descriptorSet)->descriptorSet;
 			vkWriteDescriptorSet.dstBinding = writeDescriptorSet.bindingIndex;
 			vkWriteDescriptorSet.dstArrayElement = 0;
 			vkWriteDescriptorSet.descriptorType = getDescriptorType(descriptorSetLayoutBinding.descriptorType);
@@ -372,12 +369,12 @@ namespace Trident {
 				uint32 descriptorBufferIndex = 0;
 
 				while (descriptorBufferIndex < descriptorSetLayoutBinding.descriptorCount) {
-					const ref<BaseBufferView> bufferView = writeDescriptorSet.descriptorBufferViews[descriptorBufferIndex];
+					const BaseBufferView& bufferView = writeDescriptorSet.descriptorBufferViews[descriptorBufferIndex];
 
 					VkDescriptorBufferInfo& descriptorBufferInfo = descriptorBufferInfos[descriptorBufferInfoOffset + descriptorBufferIndex];
-					descriptorBufferInfo.buffer = static_cast<const VK::Buffer*>(bufferView->getBuffer())->buffer;
-					descriptorBufferInfo.offset = bufferView->getOffset();
-					descriptorBufferInfo.range = bufferView->getSize();
+					descriptorBufferInfo.buffer = static_cast<const VK::Buffer*>(bufferView.getBuffer())->buffer;
+					descriptorBufferInfo.offset = bufferView.getOffset();
+					descriptorBufferInfo.range = bufferView.getSize();
 
 					descriptorBufferIndex += 1;
 				}
@@ -391,13 +388,13 @@ namespace Trident {
 
 				while (descriptorImageIndex < descriptorSetLayoutBinding.descriptorCount) {
 					const DescriptorImage& descriptorImage = writeDescriptorSet.descriptorImages[descriptorImageIndex];
-					const ref<VK::ImageView> imageView = std::static_pointer_cast<VK::ImageView>(descriptorImage.imageView);
+					const ref<VK::ImageView> imageView = static_pointer_cast<VK::ImageView>(descriptorImage.imageView);
 
 					VkDescriptorImageInfo& descriptorImageInfo = descriptorImageInfos[descriptorImageInfoOffset + descriptorImageIndex];
 					descriptorImageInfo.sampler = nullptr;
 
 					if (descriptorImage.sampler != nullptr) {
-						descriptorImageInfo.sampler = std::static_pointer_cast<VK::Sampler>(descriptorImage.sampler)->sampler;
+						descriptorImageInfo.sampler = static_pointer_cast<VK::Sampler>(descriptorImage.sampler)->sampler;
 					}
 
 					descriptorImageInfo.imageView = imageView->imageView;

@@ -22,8 +22,8 @@ namespace Trident {
 		DEBUG_ASSERT(VerticesNode->PropertyList[0]->TypeCode == FBXPropertyTypeCode::d);
 		DEBUG_ASSERT(PolygonVertexIndexNode->PropertyList[0]->TypeCode == FBXPropertyTypeCode::i);
 
-		const ref<FBXArrayProperty<float64>> VerticesProperty = std::static_pointer_cast<FBXArrayProperty<float64>>(VerticesNode->PropertyList[0]);
-		const ref<FBXArrayProperty<sint32>> PolygonVertexIndexProperty = std::static_pointer_cast<FBXArrayProperty<sint32>>(PolygonVertexIndexNode->PropertyList[0]);
+		const ref<FBXArrayProperty<float64>> VerticesProperty = static_pointer_cast<FBXArrayProperty<float64>>(VerticesNode->PropertyList[0]);
+		const ref<FBXArrayProperty<sint32>> PolygonVertexIndexProperty = static_pointer_cast<FBXArrayProperty<sint32>>(PolygonVertexIndexNode->PropertyList[0]);
 
 		const sequence<float64>& vertexPositionComponents = VerticesProperty->Contents;
 
@@ -106,9 +106,9 @@ namespace Trident {
 			DEBUG_ASSERT(ReferenceInformationTypeNode->PropertyList[0]->TypeCode == FBXPropertyTypeCode::S);
 			DEBUG_ASSERT(NormalsNode->PropertyList[0]->TypeCode == FBXPropertyTypeCode::d);
 
-			const ref<FBXSpecialProperty> MappingInformationTypeProperty = std::static_pointer_cast<FBXSpecialProperty>(MappingInformationTypeNode->PropertyList[0]);
-			const ref<FBXSpecialProperty> ReferenceInformationTypeProperty = std::static_pointer_cast<FBXSpecialProperty>(ReferenceInformationTypeNode->PropertyList[0]);
-			const ref<FBXArrayProperty<float64>> NormalsProperty = std::static_pointer_cast<FBXArrayProperty<float64>>(NormalsNode->PropertyList[0]);
+			const ref<FBXSpecialProperty> MappingInformationTypeProperty = static_pointer_cast<FBXSpecialProperty>(MappingInformationTypeNode->PropertyList[0]);
+			const ref<FBXSpecialProperty> ReferenceInformationTypeProperty = static_pointer_cast<FBXSpecialProperty>(ReferenceInformationTypeNode->PropertyList[0]);
+			const ref<FBXArrayProperty<float64>> NormalsProperty = static_pointer_cast<FBXArrayProperty<float64>>(NormalsNode->PropertyList[0]);
 
 			const view<char8> MappingInformationType(pointer_cast<const char8*>(MappingInformationTypeProperty->Data.begin()), MappingInformationTypeProperty->Data.count());
 			const view<char8> ReferenceInformationType(pointer_cast<const char8*>(ReferenceInformationTypeProperty->Data.begin()), ReferenceInformationTypeProperty->Data.count());
@@ -145,7 +145,7 @@ namespace Trident {
 
 					DEBUG_ASSERT(NormalsIndexNode->PropertyList[0]->TypeCode == FBXPropertyTypeCode::i);
 
-					const ref<FBXArrayProperty<sint32>> NormalsIndexProperty = std::static_pointer_cast<FBXArrayProperty<sint32>>(NormalsIndexNode->PropertyList[0]);
+					const ref<FBXArrayProperty<sint32>> NormalsIndexProperty = static_pointer_cast<FBXArrayProperty<sint32>>(NormalsIndexNode->PropertyList[0]);
 
 					vertexNormalComponents = NormalsProperty->Contents;
 					vertexNormalIndices = sequence<uint32>(vertexPositionIndices.count());
@@ -196,7 +196,7 @@ namespace Trident {
 
 					DEBUG_ASSERT(NormalsIndexNode->PropertyList[0]->TypeCode == FBXPropertyTypeCode::i);
 
-					const ref<FBXArrayProperty<sint32>> NormalsIndexProperty = std::static_pointer_cast<FBXArrayProperty<sint32>>(NormalsIndexNode->PropertyList[0]);
+					const ref<FBXArrayProperty<sint32>> NormalsIndexProperty = static_pointer_cast<FBXArrayProperty<sint32>>(NormalsIndexNode->PropertyList[0]);
 
 					vertexNormalComponents = sequence<float64>(NormalsProperty->Contents.count());
 
@@ -242,9 +242,9 @@ namespace Trident {
 			DEBUG_ASSERT(ReferenceInformationTypeNode->PropertyList[0]->TypeCode == FBXPropertyTypeCode::S);
 			DEBUG_ASSERT(UVNode->PropertyList[0]->TypeCode == FBXPropertyTypeCode::d);
 
-			const ref<FBXSpecialProperty> MappingInformationTypeProperty = std::static_pointer_cast<FBXSpecialProperty>(MappingInformationTypeNode->PropertyList[0]);
-			const ref<FBXSpecialProperty> ReferenceInformationTypeProperty = std::static_pointer_cast<FBXSpecialProperty>(ReferenceInformationTypeNode->PropertyList[0]);
-			const ref<FBXArrayProperty<float64>> UVProperty = std::static_pointer_cast<FBXArrayProperty<float64>>(UVNode->PropertyList[0]);
+			const ref<FBXSpecialProperty> MappingInformationTypeProperty = static_pointer_cast<FBXSpecialProperty>(MappingInformationTypeNode->PropertyList[0]);
+			const ref<FBXSpecialProperty> ReferenceInformationTypeProperty = static_pointer_cast<FBXSpecialProperty>(ReferenceInformationTypeNode->PropertyList[0]);
+			const ref<FBXArrayProperty<float64>> UVProperty = static_pointer_cast<FBXArrayProperty<float64>>(UVNode->PropertyList[0]);
 
 			const view<char8> MappingInformationType(pointer_cast<const char8*>(MappingInformationTypeProperty->Data.begin()), MappingInformationTypeProperty->Data.count());
 			const view<char8> ReferenceInformationType(pointer_cast<const char8*>(ReferenceInformationTypeProperty->Data.begin()), ReferenceInformationTypeProperty->Data.count());
@@ -258,7 +258,7 @@ namespace Trident {
 
 					DEBUG_ASSERT(UVIndexNode->PropertyList[0]->TypeCode == FBXPropertyTypeCode::i);
 
-					const ref<FBXArrayProperty<sint32>> UVIndexProperty = std::static_pointer_cast<FBXArrayProperty<sint32>>(UVIndexNode->PropertyList[0]);
+					const ref<FBXArrayProperty<sint32>> UVIndexProperty = static_pointer_cast<FBXArrayProperty<sint32>>(UVIndexNode->PropertyList[0]);
 
 					vertexTextureCoordinateComponents = UVProperty->Contents;
 					vertexTextureCoordinateIndices = sequence<uint32>(vertexPositionIndices.count());

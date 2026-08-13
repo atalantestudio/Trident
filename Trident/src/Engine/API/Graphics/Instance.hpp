@@ -5,6 +5,7 @@
 
 #include "Engine/API/Graphics/Base.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
+#include "Engine/API/Graphics/PhysicalDevice.hpp"
 #include "Engine/API/Window/Window.hpp"
 
 namespace Trident {

@@ -40,6 +40,7 @@ namespace Trident {
 				physicalDevice = instance->selectPhysicalDevice(applicationProperties.PreferIntegratedGPU);
 				surface = instance->createSurface(physicalDevice, window);
 
+				// OpenGL requires setting the window before loading the procedures.
 				ENGINE_INFO("Using physical device \"[]\".", physicalDevice->getName());
 
 				device = physicalDevice->createDevice();
@@ -51,10 +52,10 @@ namespace Trident {
 					.verticalSync = verticalSync,
 				});
 
-				inFlightCommandEncoders = sequence<ref<CommandEncoder>>(MAX_FRAMES_IN_FLIGHT);
-				acquiredNextImageSemaphores = sequence<ref<Semaphore>>(MAX_FRAMES_IN_FLIGHT);
-				finishedExecutionSemaphores = sequence<ref<Semaphore>>(MAX_FRAMES_IN_FLIGHT);
-				inFlightFences = sequence<ref<Fence>>(MAX_FRAMES_IN_FLIGHT);
+				inFlightCommandEncoders = sequence<private_ref<CommandEncoder>>(MAX_FRAMES_IN_FLIGHT);
+				acquiredNextImageSemaphores = sequence<private_ref<Semaphore>>(MAX_FRAMES_IN_FLIGHT);
+				finishedExecutionSemaphores = sequence<private_ref<Semaphore>>(MAX_FRAMES_IN_FLIGHT);
+				inFlightFences = sequence<private_ref<Fence>>(MAX_FRAMES_IN_FLIGHT);
 
 				CommandBufferDescriptor inFlightCommandBufferDescriptor = {
 					.usage = CommandBufferUsage::AUTO,
@@ -64,19 +65,17 @@ namespace Trident {
 				};
 
 				#if defined(DEBUG_OBJECT_NAME)
-					sequence<char8> inFlightCommandEncoderName;
-					sequence<char8> inFlightFenceName;
+					sequence<char8> inFlightName;
 				#endif
 
 				uint32 frameInFlightIndex = 0;
 
 				while (frameInFlightIndex < MAX_FRAMES_IN_FLIGHT) {
 					#if defined(DEBUG_OBJECT_NAME)
-						inFlightCommandEncoderName = Logger::format("In flight command encoder []", frameInFlightIndex);
-						inFlightFenceName = Logger::format("In flight fence []", frameInFlightIndex);
+						inFlightName = Logger::format("In flight []", frameInFlightIndex);
 
-						inFlightCommandBufferDescriptor.name = inFlightCommandEncoderName;
-						inFlightFenceDescriptor.name = inFlightFenceName;
+						inFlightCommandBufferDescriptor.name = inFlightName;
+						inFlightFenceDescriptor.name = inFlightName;
 					#endif
 
 					inFlightCommandEncoders[frameInFlightIndex] = graphicsQueue->createCommandEncoder(inFlightCommandBufferDescriptor);
@@ -89,7 +88,7 @@ namespace Trident {
 			}
 
 			void initializeLayerGroups() const {
-				for (const ref<LayerGroup> layerGroup : layerGroups) {
+				for (ref<LayerGroup> layerGroup : layerGroups) {
 					layerGroup->initialize();
 				}
 			}
@@ -108,8 +107,7 @@ namespace Trident {
 				uint32 layerIndex = 0;
 
 				while (layerIndex < layers.size()) {
-					const ref<Layer>& layer = layers[layerIndex];
-
+					ref<Layer> layer = layers[layerIndex];
 					layer->initialize();
 
 					StaticMemoryDescriptor& staticMemoryDescriptor = staticMemoryDescriptors[layerIndex];
@@ -180,7 +178,7 @@ namespace Trident {
 					}
 				}
 
-				for (const ref<Layer>& layer : layers) {
+				for (ref<Layer> layer : layers) {
 					layer->encodeOneTimeCommands();
 				}
 			}
@@ -204,15 +202,15 @@ namespace Trident {
 				commandEncoder->reset();
 				commandEncoder->begin();
 
-				for (const ref<LayerGroup> layerGroup : layerGroups) {
+				for (ref<LayerGroup> layerGroup : layerGroups) {
 					layerGroup->render(commandEncoder, remainingFrameTime);
 				}
 
-				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+				const private_ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-				graphicsQueue->submit(commandBuffer, acquiredNextImageSemaphore, finishedExecutionSemaphore, inFlightFence);
+				graphicsQueue->submit({commandBuffer}, acquiredNextImageSemaphore, finishedExecutionSemaphore, inFlightFence);
 
-				return graphicsQueue->present(swapchain, swapchainImageIndex, finishedExecutionSemaphore);
+				return graphicsQueue->present({swapchain}, swapchainImageIndex, finishedExecutionSemaphore);
 			}
 
 			void resize() {
@@ -227,7 +225,7 @@ namespace Trident {
 					.verticalSync = verticalSync,
 				});
 
-				for (const ref<LayerGroup> layerGroup : layerGroups) {
+				for (ref<LayerGroup> layerGroup : layerGroups) {
 					layerGroup->resize();
 				}
 			}
@@ -239,18 +237,18 @@ namespace Trident {
 			const Window* window;
 
 		public:
-			ref<Instance> instance;
-			ref<PhysicalDevice> physicalDevice;
-			ref<Surface> surface;
-			ref<Device> device;
-			ref<Queue> graphicsQueue;
-			ref<Swapchain> swapchain;
+			private_ref<Instance> instance;
+			private_ref<PhysicalDevice> physicalDevice;
+			private_ref<Surface> surface;
+			private_ref<Device> device;
+			private_ref<Queue> graphicsQueue;
+			private_ref<Swapchain> swapchain;
 
 		private:
-			sequence<ref<CommandEncoder>> inFlightCommandEncoders;
-			sequence<ref<Semaphore>> acquiredNextImageSemaphores;
-			sequence<ref<Semaphore>> finishedExecutionSemaphores;
-			sequence<ref<Fence>> inFlightFences;
+			sequence<private_ref<CommandEncoder>> inFlightCommandEncoders;
+			sequence<private_ref<Semaphore>> acquiredNextImageSemaphores;
+			sequence<private_ref<Semaphore>> finishedExecutionSemaphores;
+			sequence<private_ref<Fence>> inFlightFences;
 
 		public:
 			uint32 swapchainImageIndex = 0;
@@ -259,7 +257,7 @@ namespace Trident {
 			bool verticalSync;
 
 		public:
-			std::vector<ref<Layer>> layers;
-			std::vector<ref<LayerGroup>> layerGroups;
+			std::vector<private_ref<Layer>> layers;
+			std::vector<private_ref<LayerGroup>> layerGroups;
 	};
 }

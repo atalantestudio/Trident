@@ -21,7 +21,7 @@ namespace Trident {
 			}
 		#endif
 
-		ref<GL::PhysicalDevice> physicalDevice = createRef<GL::PhysicalDevice>(instance->adapter);
+		ref<GL::PhysicalDevice> physicalDevice = allocateRef<GL::PhysicalDevice>(instance->adapter);
 
 		return physicalDevice;
 	}

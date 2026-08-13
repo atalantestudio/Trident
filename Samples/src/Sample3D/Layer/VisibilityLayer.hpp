@@ -16,12 +16,16 @@ namespace Trident {
 			static constexpr float32 LOOK_SENSITIVITY = 0.075f;
 
 		public:
+			~Sample3DVisibilityLayer() {
+				delete scene;
+			}
+
 			void build() override {
 				renderer.setLayer(this);
 				renderer.build();
 
-				scene = createScope<Scene3D>(LemonAndStool::initializeScene(getApplication(), renderer.getGraphicsApi(), renderer.getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment));
-				clusteredScene = clusterizeScene(scene.get());
+				scene = new Scene3D(LemonAndStool::initializeScene(getApplication(), renderer.getGraphicsApi(), renderer.getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment));
+				clusteredScene = clusterizeScene(scene);
 
 				renderer.setScene(&clusteredScene);
 
@@ -130,7 +134,7 @@ namespace Trident {
 
 		private:
 			VisibilityRenderer renderer;
-			scope<Scene3D> scene;
+			Scene3D* scene;
 			ClusteredScene clusteredScene;
 			FlyCameraController cameraController;
 	};

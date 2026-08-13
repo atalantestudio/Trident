@@ -25,7 +25,7 @@ namespace Trident {
 				uint32 descriptorSetLayoutOffset = 0;
 
 				for (const ref<Trident::DescriptorSet>& descriptorSet : descriptorSets) {
-					const ref<GL::DescriptorSet> glDescriptorSet = std::static_pointer_cast<GL::DescriptorSet>(descriptorSet);
+					const ref<GL::DescriptorSet> glDescriptorSet = static_pointer_cast<GL::DescriptorSet>(descriptorSet);
 
 					uint32 bindingIndex = 0;
 
@@ -64,7 +64,7 @@ namespace Trident {
 
 							while (descriptorImageIndex < descriptorSetBinding.descriptorImages.count()) {
 								const DescriptorImage& descriptorImage = descriptorSetBinding.descriptorImages[descriptorImageIndex];
-								const ref<GL::ImageView> imageView = std::static_pointer_cast<GL::ImageView>(descriptorImage.imageView);
+								const ref<GL::ImageView> imageView = static_pointer_cast<GL::ImageView>(descriptorImage.imageView);
 
 								if (imageView == nullptr) {
 									break;
@@ -95,7 +95,7 @@ namespace Trident {
 
 							while (descriptorImageIndex < descriptorSetBinding.descriptorImages.count()) {
 								const DescriptorImage& descriptorImage = descriptorSetBinding.descriptorImages[descriptorImageIndex];
-								const ref<GL::ImageView> imageView = std::static_pointer_cast<GL::ImageView>(descriptorImage.imageView);
+								const ref<GL::ImageView> imageView = static_pointer_cast<GL::ImageView>(descriptorImage.imageView);
 
 								if (imageView == nullptr) {
 									break;
@@ -106,7 +106,7 @@ namespace Trident {
 
 								#if OPENGL_VERSION >= OPENGL_VERSION_3_3
 									if (descriptorImage.sampler != nullptr) {
-										glBindSampler(descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex, std::static_pointer_cast<GL::Sampler>(descriptorImage.sampler)->sampler);
+										glBindSampler(descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex, static_pointer_cast<GL::Sampler>(descriptorImage.sampler)->sampler);
 									}
 									else {
 										glBindSampler(descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex, 0);

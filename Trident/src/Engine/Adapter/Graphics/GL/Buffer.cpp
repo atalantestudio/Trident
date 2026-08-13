@@ -15,7 +15,7 @@ namespace Trident {
 	ref<Trident::Buffer> GL::createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ref<GL::Buffer> buffer = createRef<GL::Buffer>(device, descriptor);
+		ref<GL::Buffer> buffer = allocateRef<GL::Buffer>(device, descriptor);
 		buffer->target = getTarget(descriptor.usage);
 
 		glGenBuffers(1, &buffer->buffer);

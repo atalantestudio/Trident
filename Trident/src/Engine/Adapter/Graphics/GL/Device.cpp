@@ -30,7 +30,7 @@ namespace Trident {
 
 		for (uint32 descriptorSetIndex = 0; descriptorSetIndex < descriptorSets.count(); descriptorSetIndex += 1) {
 			const ref<DescriptorSetLayout> descriptorSetLayout = descriptorSetLayouts[descriptorSetIndex];
-			const ref<GL::DescriptorSet> descriptorSet = createRef<GL::DescriptorSet>();
+			const ref<GL::DescriptorSet> descriptorSet = allocateRef<GL::DescriptorSet>();
 
 			descriptorSet->bindings = sequence<GL::DescriptorSet::DescriptorSetBinding>(descriptorSetLayout->bindings.count());
 
@@ -60,8 +60,8 @@ namespace Trident {
 	ref<Trident::Device> GL::createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ref<GL::Device> device = createRef<GL::Device>(adapter, physicalDevice);
-		device->queue = createQueue(device.get(), 0, QueueFamilyCapability::GRAPHICS);
+		ref<GL::Device> device = allocateRef<GL::Device>(adapter, physicalDevice);
+		device->queue = createQueue(device, 0, QueueFamilyCapability::GRAPHICS);
 
 		return device;
 	}
@@ -92,7 +92,7 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		for (const WriteDescriptorSet& writeDescriptorSet : writeDescriptorSets) {
-			const ref<GL::DescriptorSet> descriptorSet = std::static_pointer_cast<GL::DescriptorSet>(writeDescriptorSet.descriptorSet);
+			const ref<GL::DescriptorSet> descriptorSet = static_pointer_cast<GL::DescriptorSet>(writeDescriptorSet.descriptorSet);
 			GL::DescriptorSet::DescriptorSetBinding& descriptorSetBinding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
 
 			if (isBufferDescriptorType(descriptorSetBinding.descriptorType)) {

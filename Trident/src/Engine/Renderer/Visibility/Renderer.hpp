@@ -59,7 +59,7 @@ namespace Trident {
 
 			void createMaterialObjects();
 			void initializeMaterialShaders(uint32& imageCount, uint32& imageAssetCount, uint64& imageStagingBufferSize);
-			void initializeMaterialImages(sequence<ImageMemoryBarrier>& imageMemoryBarriers, sequence<ref<BaseBufferView>>& materialOffsetViews, sequence<DescriptorImage>& descriptorImages, sequence<WriteDescriptorSet>& writeDescriptorSets);
+			void initializeMaterialImages(sequence<ImageMemoryBarrier>& imageMemoryBarriers, sequence<BaseBufferView>& materialOffsetViews, sequence<DescriptorImage>& descriptorImages, sequence<WriteDescriptorSet>& writeDescriptorSets);
 
 			ref<DescriptorSetLayout> createCameraDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createClusterDescriptorSetLayout() const;

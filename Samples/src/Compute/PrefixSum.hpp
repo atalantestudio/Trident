@@ -84,11 +84,11 @@ namespace Trident {
 					#endif
 				});
 
-				const ref<BufferView<uint32>> elementCountView = elementCountBuffer->createView<uint32>(0, elementCountBuffer->getSize());
-				const ref<BufferView<uint32>> elementStartView = elementStartBuffer->createView<uint32>(0, elementStartBuffer->getSize());
-				const ref<BufferView<uint32>> elementStartStagingView = elementStartStagingBuffer->createView<uint32>(0, elementStartStagingBuffer->getSize());
+				const BufferView<uint32> elementCountView = elementCountBuffer->createView<uint32>(0, elementCountBuffer->getSize());
+				const BufferView<uint32> elementStartView = elementStartBuffer->createView<uint32>(0, elementStartBuffer->getSize());
+				const BufferView<uint32> elementStartStagingView = elementStartStagingBuffer->createView<uint32>(0, elementStartStagingBuffer->getSize());
 
-				uint32* elementCountMappedRange = elementCountView->map();
+				uint32* elementCountMappedRange = elementCountView.map();
 
 				std::copy_n(ELEMENT_COUNTS, ELEMENT_COUNT, elementCountMappedRange);
 
@@ -126,17 +126,17 @@ namespace Trident {
 
 				const BufferMemoryBarrier elementStartMemoryBarrier = {
 					.buffer = elementStartBuffer,
-					.offset = elementStartView->getOffset(),
-					.size = elementStartView->getSize(),
+					.offset = elementStartView.getOffset(),
+					.size = elementStartView.getSize(),
 					.newAccess = Access::TRANSFER_READ,
 				};
 
 				commandEncoder->insertMemoryBarriers(elementStartMemoryBarrier, {});
 
 				const BufferCopyRegion elementStartCopyRegion = {
-					.sourceOffset = elementStartView->getOffset(),
+					.sourceOffset = elementStartView.getOffset(),
 					.destinationOffset = 0,
-					.size = elementStartView->getSize(),
+					.size = elementStartView.getSize(),
 				};
 
 				commandEncoder->copyBufferToBuffer(elementStartBuffer, elementStartStagingBuffer, elementStartCopyRegion);
@@ -146,7 +146,7 @@ namespace Trident {
 				queue->submit(commandBuffer);
 				queue->waitIdle();
 
-				const uint32* elementStartMappedRange = elementStartStagingView->map();
+				const uint32* elementStartMappedRange = elementStartStagingView.map();
 
 				ENGINE_DEBUG("Element count buffer:");
 

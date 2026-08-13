@@ -17,7 +17,7 @@ namespace Trident {
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		VkResult result;
 
-		ref<VK::Fence> fence = createRef<VK::Fence>(device);
+		ref<VK::Fence> fence = allocateRef<VK::Fence>(device);
 
 		VkFenceCreateInfo fenceCreateInfo{};
 		fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;

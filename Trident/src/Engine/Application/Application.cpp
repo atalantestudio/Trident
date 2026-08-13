@@ -163,11 +163,11 @@ namespace Trident {
 		delete layerCompositor;
 
 		if (lastLayerInput.swapchainImageView != nullptr) {
-			lastLayerInput.swapchainImageView.~shared_ptr();
+			lastLayerInput.swapchainImageView.~ref();
 		}
 
 		if (lastLayerInput.swapchainImage != nullptr) {
-			lastLayerInput.swapchainImage.~shared_ptr();
+			lastLayerInput.swapchainImage.~ref();
 		}
 
 		delete graphicsAdapter;
@@ -228,7 +228,7 @@ namespace Trident {
 	void Application::postConstruct() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		for (const ref<Layer>& layer : layerCompositor->layers) {
+		for (ref<Layer> layer : layerCompositor->layers) {
 			layer->input = &lastLayerInput;
 			layer->postConstruct();
 		}
@@ -239,7 +239,7 @@ namespace Trident {
 
 		sint32 code = 0;
 
-		for (const ref<Process>& process : processes) {
+		for (ref<Process> process : processes) {
 			code = process->main(arguments);
 
 			if (code != 0) {
@@ -306,7 +306,7 @@ namespace Trident {
 	void Application::update(float64 deltaTime, float64 inverseDeltaTime) {
 		PROFILE_SCOPE("Application update/integrate");
 
-		for (const ref<Layer>& layer : layerCompositor->layers) {
+		for (ref<Layer> layer : layerCompositor->layers) {
 			layer->update(static_cast<float32>(deltaTime), static_cast<float32>(inverseDeltaTime));
 		}
 	}
@@ -328,8 +328,9 @@ namespace Trident {
 
 		layerCompositor->resize();
 
-		lastLayerInput.swapchainImage = nullptr;
-		lastLayerInput.swapchainImageView = nullptr;
+		// TODO(application/layer-input)
+		// lastLayerInput.swapchainImage = nullptr;
+		// lastLayerInput.swapchainImageView = nullptr;
 
 		const Extent2D extent = window->getExtent();
 
@@ -343,10 +344,11 @@ namespace Trident {
 		looping = false;
 	}
 
+	// TODO(application/event-propagation): Move to the layer compositor.
 	void Application::propagateEventFrontToBack(Event& event) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		for (std::vector<ref<Layer>>::const_reverse_iterator layerIterator = layerCompositor->layers.rbegin(); layerIterator != layerCompositor->layers.rend(); layerIterator += 1) {
+		for (std::vector<private_ref<Layer>>::const_reverse_iterator layerIterator = layerCompositor->layers.rbegin(); layerIterator != layerCompositor->layers.rend(); layerIterator += 1) {
 			if (event.handled) {
 				break;
 			}
@@ -355,10 +357,11 @@ namespace Trident {
 		}
 	}
 
+	// TODO(application/event-propagation): Move to the layer compositor.
 	void Application::propagateEventBackToFront(Event& event) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		for (std::vector<ref<Layer>>::const_iterator layerIterator = layerCompositor->layers.begin(); layerIterator != layerCompositor->layers.end(); layerIterator += 1) {
+		for (std::vector<private_ref<Layer>>::const_iterator layerIterator = layerCompositor->layers.begin(); layerIterator != layerCompositor->layers.end(); layerIterator += 1) {
 			// event.handled is ignored in back to front scenarios.
 			(*layerIterator)->onEvent(event);
 		}

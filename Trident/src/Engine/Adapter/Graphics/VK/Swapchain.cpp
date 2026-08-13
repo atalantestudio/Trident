@@ -18,9 +18,9 @@ namespace Trident {
 	ref<Trident::Swapchain> VK::createSwapchain(const Trident::Device* device, const SwapchainDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ref<VK::Swapchain> swapchain = createRef<VK::Swapchain>(device, descriptor);
+		ref<VK::Swapchain> swapchain = allocateRef<VK::Swapchain>(device, descriptor);
 
-		updateSwapchain(device, swapchain.get(), descriptor);
+		updateSwapchain(device, swapchain, descriptor);
 
 		return swapchain;
 	}
@@ -32,7 +32,7 @@ namespace Trident {
 		const VK::Swapchain* _swapchain = static_cast<const VK::Swapchain*>(swapchain);
 
 		for (const ref<Trident::ImageView>& imageView : _swapchain->imageViews) {
-			imageView.~shared_ptr();
+			imageView.~ref();
 		}
 
 		// The swapchain images are automatically destroyed with the swapchain.
@@ -51,7 +51,7 @@ namespace Trident {
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		const VK::PhysicalDevice* physicalDevice = static_cast<const VK::PhysicalDevice*>(device->physicalDevice);
 		VK::Swapchain* _swapchain = static_cast<VK::Swapchain*>(swapchain);
-		const ref<VK::Surface> surface = std::static_pointer_cast<VK::Surface>(descriptor.surface);
+		ref<VK::Surface> surface = static_pointer_cast<VK::Surface>(descriptor.surface);
 		const VK::Instance* instance = static_cast<const VK::Instance*>(surface->instance);
 		VkResult result;
 
@@ -127,8 +127,8 @@ namespace Trident {
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to get swapchain images ([]).", string_VkResult(result));
 
-		_swapchain->images = sequence<ref<Trident::Image>>(_swapchain->imageCount);
-		_swapchain->imageViews = sequence<ref<Trident::ImageView>>(_swapchain->imageCount);
+		_swapchain->images = sequence<private_ref<Trident::Image>>(_swapchain->imageCount);
+		_swapchain->imageViews = sequence<private_ref<Trident::ImageView>>(_swapchain->imageCount);
 
 		uint32 imageIndex = 0;
 

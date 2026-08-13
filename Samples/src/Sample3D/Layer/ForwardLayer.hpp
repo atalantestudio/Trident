@@ -42,6 +42,11 @@ namespace Trident {
 			static constexpr float32 PLAYER_FRICTION = 4.0f;
 
 		public:
+			~Sample3DForwardLayer() {
+				delete scene;
+				delete physicsSimulation;
+			}
+
 			void build() override {
 				renderer.setLayer(this);
 				renderer.build();
@@ -57,10 +62,10 @@ namespace Trident {
 				// TODO(forward): Don't use alignment outside of the renderer.
 				const uint64 alignment = renderer.getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
 
-				scene = createScope<Scene3D>(sceneAsset, alignment);
+				scene = new Scene3D(sceneAsset, alignment);
 
-				physicsSimulation = createScope<PhysicsSimulation3D>(Descriptor<PhysicsSimulation3D>{
-					.scene = scene.get(),
+				physicsSimulation = new PhysicsSimulation3D({
+					.scene = scene,
 					.deltaTime = getApplication()->getFixedDeltaTime(),
 					#if !defined(FORWARD_USE_NOCLIP_CAMERA)
 						.playerEntity = PLAYER_ENTITY,
@@ -69,7 +74,7 @@ namespace Trident {
 					#endif
 				});
 
-				renderer.setScene(scene.get());
+				renderer.setScene(scene);
 				renderer.visualizationMode = VisualizationMode::DEFAULT;
 
 				#if !defined(FORWARD_USE_NOCLIP_CAMERA)
@@ -287,8 +292,8 @@ namespace Trident {
 
 		private:
 			ForwardRenderer renderer;
-			scope<Scene3D> scene;
-			scope<PhysicsSimulation3D> physicsSimulation;
+			Scene3D* scene;
+			PhysicsSimulation3D* physicsSimulation;
 
 			#if !defined(FORWARD_USE_NOCLIP_CAMERA)
 				PlayerCameraController cameraController;

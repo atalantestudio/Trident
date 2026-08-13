@@ -60,6 +60,6 @@ namespace Trident {
 
 		public:
 			const Device* device;
-			ref<CommandPool> commandPool;
+			private_ref<CommandPool> commandPool;
 	};
 }

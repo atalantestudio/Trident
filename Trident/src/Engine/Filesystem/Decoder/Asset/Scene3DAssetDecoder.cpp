@@ -11,7 +11,7 @@
 
 namespace Trident {
 	template<>
-	ref<Scene3DAsset> Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary) {
+	Scene3DAsset Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary) {
 		Scene3DAsset asset{};
 		asset.identifier = stream.read<uint32>();
 		asset.version = stream.read<VersionNumber>();
@@ -234,6 +234,6 @@ namespace Trident {
 			instance.normalTransform = component.calculateNormal();
 		}
 
-		return createRef<Scene3DAsset>(asset);
+		return asset;
 	}
 }

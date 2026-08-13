@@ -10,7 +10,7 @@
 namespace Trident {
 	class Physics2DSceneLayer : public Layer {
 		public:
-			virtual ~Physics2DSceneLayer() = default;
+			~Physics2DSceneLayer();
 
 			void build() override {}
 
@@ -40,9 +40,8 @@ namespace Trident {
 			bool onEvent(WindowResizeEvent& event);
 
 		private:
-			scope<Scene2D> scene;
-
-			scope<PhysicsSimulation2D> physicsSimulation;
+			Scene2D* scene;
+			PhysicsSimulation2D* physicsSimulation;
 			Physics2DRenderer renderer;
 
 			Input keyMap;

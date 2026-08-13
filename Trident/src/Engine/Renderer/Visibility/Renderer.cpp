@@ -93,9 +93,9 @@ namespace Trident {
 
 		cameraBuffer = createCameraBuffer();
 
-		const ref<BufferView<Camera>> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
+		const BufferView<Camera> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
 
-		cameraMappedRange = cameraView->map();
+		cameraMappedRange = cameraView.map();
 
 		materialShaderImageSampler = createMaterialShaderImageSampler();
 
@@ -119,9 +119,9 @@ namespace Trident {
 		materialOffsetBuffer = createMaterialOffsetBuffer();
 		materialShaderIndirectBuffer = createMaterialShaderIndirectBuffer();
 
-		const ref<BufferView<ClusteredInstance>> instanceView = instanceBuffer->createView<ClusteredInstance>(0, instanceBuffer->getSize());
+		const BufferView<ClusteredInstance> instanceView = instanceBuffer->createView<ClusteredInstance>(0, instanceBuffer->getSize());
 
-		instanceMappedRange = instanceView->map();
+		instanceMappedRange = instanceView.map();
 
 		writeVisibilityIndirectCommand();
 
@@ -134,25 +134,25 @@ namespace Trident {
 				.name = "Staging",
 			#endif
 		});
-		const ref<BufferView<float32>> vertexPositionComponentView = stagingBuffer->createView<float32>(0, vertexPositionComponentRegionSize);
-		const ref<BufferView<float32>> vertexNormalComponentView = stagingBuffer->createView<float32>(vertexPositionComponentView->getOffset() + vertexPositionComponentView->getSize(), vertexNormalComponentRegionSize);
-		const ref<BufferView<float32>> vertexTextureCoordinateComponentView = stagingBuffer->createView<float32>(vertexNormalComponentView->getOffset() + vertexNormalComponentView->getSize(), vertexTextureCoordinateComponentRegionSize);
-		const ref<BufferView<uint32>> vertexPositionIndexView = stagingBuffer->createView<uint32>(vertexTextureCoordinateComponentView->getOffset() + vertexTextureCoordinateComponentView->getSize(), vertexPositionIndexRegionSize);
-		const ref<BufferView<uint32>> vertexNormalIndexView = stagingBuffer->createView<uint32>(vertexPositionIndexView->getOffset() + vertexPositionIndexView->getSize(), vertexNormalIndexRegionSize);
-		const ref<BufferView<uint32>> vertexTextureCoordinateIndexView = stagingBuffer->createView<uint32>(vertexNormalIndexView->getOffset() + vertexNormalIndexView->getSize(), vertexTextureCoordinateIndexRegionSize);
-		const ref<BufferView<Cluster>> clusterView = stagingBuffer->createView<Cluster>(vertexTextureCoordinateIndexView->getOffset() + vertexTextureCoordinateIndexView->getSize(), clusterRegionSize);
-		const ref<BufferView<Geometry>> geometryView = stagingBuffer->createView<Geometry>(clusterView->getOffset() + clusterView->getSize(), geometryRegionSize);
-		const ref<BufferView<ClusteredInstance>> instanceStagingView = stagingBuffer->createView<ClusteredInstance>(geometryView->getOffset() + geometryView->getSize(), instanceBuffer->getSize());
+		const BufferView<float32> vertexPositionComponentView = stagingBuffer->createView<float32>(0, vertexPositionComponentRegionSize);
+		const BufferView<float32> vertexNormalComponentView = stagingBuffer->createView<float32>(vertexPositionComponentView.getOffset() + vertexPositionComponentView.getSize(), vertexNormalComponentRegionSize);
+		const BufferView<float32> vertexTextureCoordinateComponentView = stagingBuffer->createView<float32>(vertexNormalComponentView.getOffset() + vertexNormalComponentView.getSize(), vertexTextureCoordinateComponentRegionSize);
+		const BufferView<uint32> vertexPositionIndexView = stagingBuffer->createView<uint32>(vertexTextureCoordinateComponentView.getOffset() + vertexTextureCoordinateComponentView.getSize(), vertexPositionIndexRegionSize);
+		const BufferView<uint32> vertexNormalIndexView = stagingBuffer->createView<uint32>(vertexPositionIndexView.getOffset() + vertexPositionIndexView.getSize(), vertexNormalIndexRegionSize);
+		const BufferView<uint32> vertexTextureCoordinateIndexView = stagingBuffer->createView<uint32>(vertexNormalIndexView.getOffset() + vertexNormalIndexView.getSize(), vertexTextureCoordinateIndexRegionSize);
+		const BufferView<Cluster> clusterView = stagingBuffer->createView<Cluster>(vertexTextureCoordinateIndexView.getOffset() + vertexTextureCoordinateIndexView.getSize(), clusterRegionSize);
+		const BufferView<Geometry> geometryView = stagingBuffer->createView<Geometry>(clusterView.getOffset() + clusterView.getSize(), geometryRegionSize);
+		const BufferView<ClusteredInstance> instanceStagingView = stagingBuffer->createView<ClusteredInstance>(geometryView.getOffset() + geometryView.getSize(), instanceBuffer->getSize());
 
-		std::copy(scene->vertexPositionComponents.begin(), scene->vertexPositionComponents.end(), vertexPositionComponentView->map());
-		std::copy(scene->vertexNormalComponents.begin(), scene->vertexNormalComponents.end(), vertexNormalComponentView->map());
-		std::copy(scene->vertexTextureCoordinateComponents.begin(), scene->vertexTextureCoordinateComponents.end(), vertexTextureCoordinateComponentView->map());
-		std::copy(scene->vertexPositionIndices.begin(), scene->vertexPositionIndices.end(), vertexPositionIndexView->map());
-		std::copy(scene->vertexNormalIndices.begin(), scene->vertexNormalIndices.end(), vertexNormalIndexView->map());
-		std::copy(scene->vertexTextureCoordinateIndices.begin(), scene->vertexTextureCoordinateIndices.end(), vertexTextureCoordinateIndexView->map());
-		std::copy(scene->clusters.begin(), scene->clusters.end(), clusterView->map());
+		std::copy(scene->vertexPositionComponents.begin(), scene->vertexPositionComponents.end(), vertexPositionComponentView.map());
+		std::copy(scene->vertexNormalComponents.begin(), scene->vertexNormalComponents.end(), vertexNormalComponentView.map());
+		std::copy(scene->vertexTextureCoordinateComponents.begin(), scene->vertexTextureCoordinateComponents.end(), vertexTextureCoordinateComponentView.map());
+		std::copy(scene->vertexPositionIndices.begin(), scene->vertexPositionIndices.end(), vertexPositionIndexView.map());
+		std::copy(scene->vertexNormalIndices.begin(), scene->vertexNormalIndices.end(), vertexNormalIndexView.map());
+		std::copy(scene->vertexTextureCoordinateIndices.begin(), scene->vertexTextureCoordinateIndices.end(), vertexTextureCoordinateIndexView.map());
+		std::copy(scene->clusters.begin(), scene->clusters.end(), clusterView.map());
 
-		Geometry* geometryMappedRange = geometryView->map();
+		Geometry* geometryMappedRange = geometryView.map();
 		uint32 geometryIndex = 0;
 
 		while (geometryIndex < scene->geometries.count()) {
@@ -163,7 +163,7 @@ namespace Trident {
 			geometryIndex += 1;
 		}
 
-		std::copy(scene->instances.begin(), scene->instances.end(), instanceStagingView->map());
+		std::copy(scene->instances.begin(), scene->instances.end(), instanceStagingView.map());
 
 		stagingBuffer->unmap();
 
@@ -453,9 +453,9 @@ namespace Trident {
 	}
 
 	void VisibilityRenderer::writeVisibilityIndirectCommand() const {
-		const ref<BufferView<DrawIndirectCommand>> visibilityIndirectView = visibilityIndirectBuffer->createView<DrawIndirectCommand>(0, visibilityIndirectBuffer->getSize());
+		const BufferView<DrawIndirectCommand> visibilityIndirectView = visibilityIndirectBuffer->createView<DrawIndirectCommand>(0, visibilityIndirectBuffer->getSize());
 
-		DrawIndirectCommand* visibilityIndirectMappedRange = visibilityIndirectView->map();
+		DrawIndirectCommand* visibilityIndirectMappedRange = visibilityIndirectView.map();
 		visibilityIndirectMappedRange[0].vertexCount = CLUSTER_INDEX_COUNT;
 		visibilityIndirectMappedRange[0].instanceCount = static_cast<uint32>(scene->clusters.count());
 		visibilityIndirectMappedRange[0].vertexOffset = 0;
@@ -465,19 +465,19 @@ namespace Trident {
 	}
 
 	void VisibilityRenderer::updateBufferDescriptorSets(uint64 vertexPositionComponentRegionSize, uint64 vertexNormalComponentRegionSize, uint64 vertexTextureCoordinateComponentRegionSize, uint64 vertexPositionIndexRegionSize, uint64 vertexNormalIndexRegionSize, uint64 vertexTextureCoordinateIndexRegionSize, uint64 clusterRegionSize, uint64 geometryRegionSize) {
-		const ref<BufferView<Camera>> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
-		const ref<BufferView<float32>> vertexPositionComponentView = dataBuffer->createView<float32>(0, vertexPositionComponentRegionSize);
-		const ref<BufferView<float32>> vertexNormalComponentView = dataBuffer->createView<float32>(vertexPositionComponentRegionSize, vertexNormalComponentRegionSize);
-		const ref<BufferView<float32>> vertexTextureCoordinateComponentView = dataBuffer->createView<float32>(vertexPositionComponentRegionSize + vertexNormalComponentRegionSize, vertexTextureCoordinateComponentRegionSize);
-		const ref<BufferView<uint32>> vertexPositionIndexView = dataBuffer->createView<uint32>(vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize, vertexPositionIndexRegionSize);
-		const ref<BufferView<uint32>> vertexNormalIndexView = dataBuffer->createView<uint32>(vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize + vertexPositionIndexRegionSize, vertexNormalIndexRegionSize);
-		const ref<BufferView<uint32>> vertexTextureCoordinateIndexView = dataBuffer->createView<uint32>(vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize + vertexPositionIndexRegionSize + vertexNormalIndexRegionSize, vertexTextureCoordinateIndexRegionSize);
-		const ref<BufferView<Cluster>> clusterView = dataBuffer->createView<Cluster>(vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize + vertexPositionIndexRegionSize + vertexNormalIndexRegionSize + vertexTextureCoordinateIndexRegionSize, clusterRegionSize);
-		const ref<BufferView<Geometry>> geometryView = dataBuffer->createView<Geometry>(vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize + vertexPositionIndexRegionSize + vertexNormalIndexRegionSize + vertexTextureCoordinateIndexRegionSize + clusterRegionSize, geometryRegionSize);
-		const ref<BufferView<ClusteredInstance>> instanceView = instanceBuffer->createView<ClusteredInstance>(0, scene->instances.count() * sizeof(ClusteredInstance));
-		const ref<BufferView<uint32>> materialCountView = materialCountBuffer->createView<uint32>(0, materialCountBuffer->getSize());
-		const ref<BufferView<uint32>> materialOffsetView = materialOffsetBuffer->createView<uint32>(sizeof(uint32), materialOffsetBuffer->getSize() - sizeof(uint32));
-		const ref<BufferView<DispatchIndirectCommand>> materialShaderIndirectView = materialShaderIndirectBuffer->createView<DispatchIndirectCommand>(0, materialShaderIndirectBuffer->getSize());
+		const BufferView<Camera> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
+		const BufferView<float32> vertexPositionComponentView = dataBuffer->createView<float32>(0, vertexPositionComponentRegionSize);
+		const BufferView<float32> vertexNormalComponentView = dataBuffer->createView<float32>(vertexPositionComponentRegionSize, vertexNormalComponentRegionSize);
+		const BufferView<float32> vertexTextureCoordinateComponentView = dataBuffer->createView<float32>(vertexPositionComponentRegionSize + vertexNormalComponentRegionSize, vertexTextureCoordinateComponentRegionSize);
+		const BufferView<uint32> vertexPositionIndexView = dataBuffer->createView<uint32>(vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize, vertexPositionIndexRegionSize);
+		const BufferView<uint32> vertexNormalIndexView = dataBuffer->createView<uint32>(vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize + vertexPositionIndexRegionSize, vertexNormalIndexRegionSize);
+		const BufferView<uint32> vertexTextureCoordinateIndexView = dataBuffer->createView<uint32>(vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize + vertexPositionIndexRegionSize + vertexNormalIndexRegionSize, vertexTextureCoordinateIndexRegionSize);
+		const BufferView<Cluster> clusterView = dataBuffer->createView<Cluster>(vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize + vertexPositionIndexRegionSize + vertexNormalIndexRegionSize + vertexTextureCoordinateIndexRegionSize, clusterRegionSize);
+		const BufferView<Geometry> geometryView = dataBuffer->createView<Geometry>(vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize + vertexPositionIndexRegionSize + vertexNormalIndexRegionSize + vertexTextureCoordinateIndexRegionSize + clusterRegionSize, geometryRegionSize);
+		const BufferView<ClusteredInstance> instanceView = instanceBuffer->createView<ClusteredInstance>(0, scene->instances.count() * sizeof(ClusteredInstance));
+		const BufferView<uint32> materialCountView = materialCountBuffer->createView<uint32>(0, materialCountBuffer->getSize());
+		const BufferView<uint32> materialOffsetView = materialOffsetBuffer->createView<uint32>(sizeof(uint32), materialOffsetBuffer->getSize() - sizeof(uint32));
+		const BufferView<DispatchIndirectCommand> materialShaderIndirectView = materialShaderIndirectBuffer->createView<DispatchIndirectCommand>(0, materialShaderIndirectBuffer->getSize());
 
 		const sequence<WriteDescriptorSet> writeDescriptorSets = {
 			{
@@ -677,7 +677,7 @@ namespace Trident {
 			};
 		#endif
 
-		const ref<BufferView<uint32>> materialCoordinateView = materialCoordinateBuffer->createView<uint32>(0, materialCoordinateBuffer->getSize());
+		const BufferView<uint32> materialCoordinateView = materialCoordinateBuffer->createView<uint32>(0, materialCoordinateBuffer->getSize());
 
 		const sequence<WriteDescriptorSet> writeDescriptorSets = {
 			{

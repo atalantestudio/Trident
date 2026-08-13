@@ -117,7 +117,7 @@ namespace Trident {
 		uint32 physicalDeviceCount;
 		VkResult result;
 
-		ref<VK::PhysicalDevice> _physicalDevice = createRef<VK::PhysicalDevice>(instance->adapter);
+		ref<VK::PhysicalDevice> _physicalDevice = allocateRef<VK::PhysicalDevice>(instance->adapter);
 		_physicalDevice->instance = _instance;
 
 		result = _instance->vkEnumeratePhysicalDevices(_instance->instance, &physicalDeviceCount, nullptr);
