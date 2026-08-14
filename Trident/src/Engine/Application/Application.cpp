@@ -132,27 +132,27 @@ namespace Trident {
 			.name = name,
 			.extent = {properties->Window.Width, properties->Window.Height},
 			.maximized = properties->Window.Maximized,
-			.keyDownEventListener = BIND(Application::propagateEventFrontToBack),
-			.keyUpEventListener = BIND(Application::propagateEventFrontToBack),
-			.mouseDownEventListener = BIND(Application::propagateEventFrontToBack),
-			.mouseMoveEventListener = BIND(Application::propagateEventFrontToBack),
-			.mouseUpEventListener = BIND(Application::propagateEventFrontToBack),
-			.mouseWheelEventListener = BIND(Application::propagateEventFrontToBack),
+			.keyDownEventListener = BIND(layerCompositor.propagateEventFrontToBack),
+			.keyUpEventListener = BIND(layerCompositor.propagateEventFrontToBack),
+			.mouseDownEventListener = BIND(layerCompositor.propagateEventFrontToBack),
+			.mouseMoveEventListener = BIND(layerCompositor.propagateEventFrontToBack),
+			.mouseUpEventListener = BIND(layerCompositor.propagateEventFrontToBack),
+			.mouseWheelEventListener = BIND(layerCompositor.propagateEventFrontToBack),
 			.windowCloseEventListener = BIND(Application::onWindowClose),
 			.windowResizeEventListener = BIND(Application::onWindowResize),
 		});
 	}
 
 	void Application::initializeGraphicsAdapter(const ProjectDescriptor& projectDescriptor) {
-		graphicsAdapter = new GraphicsAdapter(*properties);
-		layerCompositor = new LayerCompositor(window, graphicsAdapter, projectDescriptor, *properties);
+		graphicsAdapter = GraphicsAdapter(*properties);
+		layerCompositor = LayerCompositor(window, &graphicsAdapter, projectDescriptor, *properties);
 
-		Renderer::initialize(layerCompositor);
+		Renderer::initialize(&layerCompositor);
 	}
 
 	void Application::initializeLayers() {
-		layerCompositor->initializeLayerGroups();
-		layerCompositor->initializeLayers();
+		layerCompositor.initializeLayerGroups();
+		layerCompositor.initializeLayers();
 	}
 
 	// TODO(application/destruction-leaks)
@@ -160,7 +160,6 @@ namespace Trident {
 		release();
 
 		delete propertyFile;
-		delete layerCompositor;
 
 		if (lastLayerInput.swapchainImageView != nullptr) {
 			lastLayerInput.swapchainImageView.~ref();
@@ -169,8 +168,6 @@ namespace Trident {
 		if (lastLayerInput.swapchainImage != nullptr) {
 			lastLayerInput.swapchainImage.~ref();
 		}
-
-		delete graphicsAdapter;
 
 		mutex->acquire();
 
@@ -196,7 +193,7 @@ namespace Trident {
 	}
 
 	bool Application::hasLayers() const {
-		return layerCompositor->layers.size() > 0;
+		return layerCompositor.layerCount > 0;
 	}
 
 	float64 Application::getCurrentFrameTime() const {
@@ -228,7 +225,7 @@ namespace Trident {
 	void Application::postConstruct() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		for (ref<Layer> layer : layerCompositor->layers) {
+		for (ref<Layer> layer : layerCompositor.getLayers()) {
 			layer->input = &lastLayerInput;
 			layer->postConstruct();
 		}
@@ -306,13 +303,13 @@ namespace Trident {
 	void Application::update(float64 deltaTime, float64 inverseDeltaTime) {
 		PROFILE_SCOPE("Application update/integrate");
 
-		for (ref<Layer> layer : layerCompositor->layers) {
+		for (ref<Layer> layer : layerCompositor.getLayers()) {
 			layer->update(static_cast<float32>(deltaTime), static_cast<float32>(inverseDeltaTime));
 		}
 	}
 
 	void Application::render(float64 remainingFrameTime) {
-		const PresentStatus presentStatus = layerCompositor->render(frameInFlightIndex, remainingFrameTime);
+		const PresentStatus presentStatus = layerCompositor.render(frameInFlightIndex, remainingFrameTime);
 
 		if (presentStatus == PresentStatus::ERROR_OUT_OF_DATE || presentStatus == PresentStatus::SUBOPTIMAL || windowResized) {
 			resize();
@@ -326,7 +323,7 @@ namespace Trident {
 	void Application::resize() {
 		windowResized = false;
 
-		layerCompositor->resize();
+		layerCompositor.resize();
 
 		// TODO(application/layer-input)
 		// lastLayerInput.swapchainImage = nullptr;
@@ -336,35 +333,11 @@ namespace Trident {
 
 		WindowResizeEvent event(extent.width, extent.height);
 
-		// Propagate the event to the layer stack.
-		propagateEventBackToFront(event);
+		layerCompositor.propagateEventBackToFront(event);
 	}
 
 	void Application::close() {
 		looping = false;
-	}
-
-	// TODO(application/event-propagation): Move to the layer compositor.
-	void Application::propagateEventFrontToBack(Event& event) {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		for (std::vector<private_ref<Layer>>::const_reverse_iterator layerIterator = layerCompositor->layers.rbegin(); layerIterator != layerCompositor->layers.rend(); layerIterator += 1) {
-			if (event.handled) {
-				break;
-			}
-
-			(*layerIterator)->onEvent(event);
-		}
-	}
-
-	// TODO(application/event-propagation): Move to the layer compositor.
-	void Application::propagateEventBackToFront(Event& event) {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		for (std::vector<private_ref<Layer>>::const_iterator layerIterator = layerCompositor->layers.begin(); layerIterator != layerCompositor->layers.end(); layerIterator += 1) {
-			// event.handled is ignored in back to front scenarios.
-			(*layerIterator)->onEvent(event);
-		}
 	}
 
 	void Application::onWindowResize(WindowResizeEvent& event) {

@@ -9,7 +9,7 @@
 namespace Trident {
 	class GL::CommandBuffer final : public Trident::CommandBuffer {
 		public:
-			explicit CommandBuffer(const std::vector<ref<GL::Command>>& commands);
+			explicit CommandBuffer(view<ref<GL::Command>> commands);
 
 		public:
 			sequence<ref<GL::Command>> commands;

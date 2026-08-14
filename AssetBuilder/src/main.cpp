@@ -72,7 +72,7 @@ namespace Trident {
 					}
 				}
 
-				Lightmapper::adapter = graphicsAdapter;
+				Lightmapper::adapter = &graphicsAdapter;
 
 				registerProcesses();
 

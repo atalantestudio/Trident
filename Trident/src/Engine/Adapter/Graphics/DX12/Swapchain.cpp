@@ -51,8 +51,8 @@ namespace Trident {
 
 		swapchain->imageCount = descriptor.imageCount;
 		swapchain->extent = descriptor.extent;
-		swapchain->images = sequence<private_ref<Trident::Image>>(swapchain->imageCount);
-		swapchain->imageViews = sequence<private_ref<Trident::ImageView>>(swapchain->imageCount);
+		swapchain->images = sequence<ref<Trident::Image>>(swapchain->imageCount);
+		swapchain->imageViews = sequence<ref<Trident::ImageView>>(swapchain->imageCount);
 
 		DXGI_SWAP_CHAIN_DESC1 swapchainDescriptor{};
 		swapchainDescriptor.Width = descriptor.extent.width;

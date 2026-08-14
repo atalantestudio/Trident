@@ -10,13 +10,11 @@ namespace Trident {
 		public:
 			explicit Device(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice);
 
-			~Device();
-
 			void loadProcedures();
 
 		public:
 			VkDevice device;
-			private_ref<Trident::Queue> queues[3];
+			ref<Trident::Queue> queues[3];
 
 			// TODO: Move in VK::MemoryAllocator.
 			std::vector<VkDescriptorPool> descriptorPools;

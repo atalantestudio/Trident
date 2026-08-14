@@ -6,6 +6,9 @@
 #include "Engine/config_defines.hpp"
 
 namespace Trident {
+	#define MAX_LAYER_COUNT 4
+	#define MAX_LAYER_GROUP_COUNT 4
+
 	#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
 		/// Toggles the DirectX 12 graphics adapter.
 		#define ENABLE_DX12_ADAPTER
@@ -33,13 +36,16 @@ namespace Trident {
 	/// (OpenGL) The alignment of a resource inside a memory allocation.
 	#define GL_RESOURCE_ALIGNMENT 4
 
+	/// Whether to use a queuing system similar to Vulkan and DX12 or execute the commands immediately.
+	#define GL_QUEUE_COMMANDS
+
+	/// The max. number of commands that can simultaneously be stored in a queue.
+	#define GL_COMMAND_QUEUE_SIZE 16
+
 	/// Toggles the Vulkan graphics adapter.
 	#define ENABLE_VK_ADAPTER
 
 	#if defined(BUILD_MODE_DEBUG)
-		/// Toggles tracking of memory leaks associated with refs.
-		#define DEBUG_TRACK_REF_LEAKS
-
 		/// Keeps track of the size of the allocated memory.
 		#define DEBUG_COUNT_ALLOCATED_MEMORY_SIZE
 

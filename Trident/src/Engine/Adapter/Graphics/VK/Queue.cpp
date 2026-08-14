@@ -25,7 +25,6 @@ namespace Trident {
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 
 		ref<VK::Queue> queue = allocateRef<VK::Queue>(device, queueFamilyIndex, queueFamilyCapability);
-		queue->commandPool = createCommandPool(device, queueFamilyIndex, queueFamilyCapability);
 
 		_device->vkGetDeviceQueue(_device->device, queueFamilyIndex, 0, &queue->queue);
 

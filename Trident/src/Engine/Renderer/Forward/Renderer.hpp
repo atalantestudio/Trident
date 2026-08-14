@@ -324,7 +324,7 @@ namespace Trident {
 				uint32& writeDescriptorSetCount
 			);
 
-			ref<Image> createMaterialImage(const ImageAsset& imageAsset, ImageDescriptor& imageDescriptor) const;
+			ref<Image> createMaterialImage(ref<ImageAsset> imageAsset, ImageDescriptor& imageDescriptor) const;
 
 			void createMaterials();
 

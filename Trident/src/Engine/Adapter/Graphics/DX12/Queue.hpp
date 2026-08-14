@@ -15,7 +15,7 @@ namespace Trident {
 
 		public:
 			ID3D12CommandQueue* commandQueue;
-			private_ref<Trident::Fence> idleFence;
+			ref<Trident::Fence> idleFence;
 			HANDLE completionEvent;
 	};
 

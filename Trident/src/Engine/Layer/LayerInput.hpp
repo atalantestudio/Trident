@@ -7,6 +7,7 @@
 #include "Engine/API/Graphics/ImageView.hpp"
 
 namespace Trident {
+	// TODO(layer/input): Remove.
 	struct LayerInput {
 		ref<Image> swapchainImage;
 		ref<ImageView> swapchainImageView;

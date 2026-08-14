@@ -613,7 +613,7 @@ namespace Trident {
 	}
 
 	ref<PhysicalDevice> Device::getPhysicalDevice() const {
-		return createRef<PhysicalDevice>(*physicalDevice);
+		return physicalDevice;
 	}
 
 	ref<Queue> Device::getQueue(QueueFamilyCapability queueFamilyCapability) const {

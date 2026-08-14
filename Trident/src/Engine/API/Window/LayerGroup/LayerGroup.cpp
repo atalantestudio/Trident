@@ -14,7 +14,7 @@ namespace Trident {
 	void LayerGroup::setApplication(Application* application) {
 		this->application = application;
 
-		layers = view<private_ref<Layer>>(&application->getLayerCompositor()->layers[layerRange.offset], layerRange.count);
+		layers = view<ref<Layer>>(&application->getLayerCompositor()->getLayers()[layerRange.offset], layerRange.count);
 	}
 
 	void LayerGroup::initialize() {}

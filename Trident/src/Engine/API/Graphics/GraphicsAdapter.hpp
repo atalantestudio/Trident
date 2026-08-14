@@ -14,6 +14,8 @@ namespace Trident {
 			static ConsoleLogger logger;
 
 		public:
+			GraphicsAdapter() = default;
+
 			explicit GraphicsAdapter(const ApplicationProperties& properties);
 
 			GraphicsAPI getApi() const;

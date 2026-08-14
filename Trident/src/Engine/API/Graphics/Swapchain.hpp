@@ -32,7 +32,7 @@ namespace Trident {
 			const Device* device;
 			uint32 imageCount;
 			Extent2D extent;
-			sequence<private_ref<Image>> images;
-			sequence<private_ref<ImageView>> imageViews;
+			sequence<ref<Image>> images;
+			sequence<ref<ImageView>> imageViews;
 	};
 }

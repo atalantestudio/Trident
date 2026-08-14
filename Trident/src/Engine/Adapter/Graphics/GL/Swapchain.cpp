@@ -18,8 +18,6 @@ namespace Trident {
 
 		ref<GL::Swapchain> swapchain = allocateRef<GL::Swapchain>(device, descriptor);
 		swapchain->imageCount = IMAGE_COUNT;
-		swapchain->images = sequence<private_ref<Trident::Image>>(swapchain->imageCount);
-		swapchain->imageViews = sequence<private_ref<Trident::ImageView>>(swapchain->imageCount);
 
 		updateSwapchain(device, swapchain, descriptor);
 
@@ -38,6 +36,8 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		swapchain->extent = descriptor.extent;
+		swapchain->images = sequence<ref<Trident::Image>>(swapchain->imageCount);
+		swapchain->imageViews = sequence<ref<Trident::ImageView>>(swapchain->imageCount);
 
 		#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
 			static const PFNWGLGETEXTENSIONSSTRINGEXTPROC wglGetExtensionsStringEXT = loadProcedure<PFNWGLGETEXTENSIONSSTRINGEXTPROC>("wglGetExtensionsStringEXT");

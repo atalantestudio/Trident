@@ -28,10 +28,14 @@ namespace Trident {
 			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 3;
 
 		public:
+			LayerCompositor() = default;
+
 			explicit LayerCompositor(const Window* window, const GraphicsAdapter* adapter, const ProjectDescriptor& projectDescriptor, const ApplicationProperties& applicationProperties) :
 				adapter(adapter),
 				window(window),
-				verticalSync(applicationProperties.VerticalSync)
+				verticalSync(applicationProperties.VerticalSync),
+				layers(MAX_LAYER_COUNT),
+				layerGroups(MAX_LAYER_GROUP_COUNT)
 			{
 				instance = adapter->createInstance({
 					.projectName = projectDescriptor.name,
@@ -52,10 +56,10 @@ namespace Trident {
 					.verticalSync = verticalSync,
 				});
 
-				inFlightCommandEncoders = sequence<private_ref<CommandEncoder>>(MAX_FRAMES_IN_FLIGHT);
-				acquiredNextImageSemaphores = sequence<private_ref<Semaphore>>(MAX_FRAMES_IN_FLIGHT);
-				finishedExecutionSemaphores = sequence<private_ref<Semaphore>>(MAX_FRAMES_IN_FLIGHT);
-				inFlightFences = sequence<private_ref<Fence>>(MAX_FRAMES_IN_FLIGHT);
+				inFlightCommandEncoders = sequence<ref<CommandEncoder>>(MAX_FRAMES_IN_FLIGHT);
+				acquiredNextImageSemaphores = sequence<ref<Semaphore>>(MAX_FRAMES_IN_FLIGHT);
+				finishedExecutionSemaphores = sequence<ref<Semaphore>>(MAX_FRAMES_IN_FLIGHT);
+				inFlightFences = sequence<ref<Fence>>(MAX_FRAMES_IN_FLIGHT);
 
 				CommandBufferDescriptor inFlightCommandBufferDescriptor = {
 					.usage = CommandBufferUsage::AUTO,
@@ -87,8 +91,26 @@ namespace Trident {
 				}
 			}
 
+			view<ref<Layer>> getLayers() const {
+				return view<ref<Layer>>(&layers[0], layerCount);
+			}
+
+			view<ref<LayerGroup>> getLayerGroups() const {
+				return view<ref<LayerGroup>>(&layerGroups[0], layerGroupCount);
+			}
+
+			void addLayer(ref<Layer>&& layer) {
+				layers[layerCount] = layer;
+				layerCount += 1;
+			}
+
+			void addLayerGroup(ref<LayerGroup> layerGroup) {
+				layerGroups[layerGroupCount] = layerGroup;
+				layerGroupCount += 1;
+			}
+
 			void initializeLayerGroups() const {
-				for (ref<LayerGroup> layerGroup : layerGroups) {
+				for (ref<LayerGroup> layerGroup : getLayerGroups()) {
 					layerGroup->initialize();
 				}
 			}
@@ -98,22 +120,23 @@ namespace Trident {
 
 				const ref<MemoryAllocator> memoryAllocator = device->getMemoryAllocator();
 				const uint32 memoryTypeCount = physicalDevice->getMemoryTypeCount();
+				const view<ref<Layer>> layerView = getLayers();
 
 				sequence<uint64> allocationSizesPerMemoryType(memoryTypeCount);
 				sequence<uint64> allocationAlignmentsPerMemoryType(memoryTypeCount);
 				sequence<uint32> allocationIndicesPerMemoryType(memoryTypeCount);
-				sequence<StaticMemoryDescriptor> staticMemoryDescriptors(layers.size());
+				sequence<StaticMemoryDescriptor> staticMemoryDescriptors(layerView.count());
 
 				uint32 layerIndex = 0;
 
-				while (layerIndex < layers.size()) {
-					ref<Layer> layer = layers[layerIndex];
+				while (layerIndex < layerView.count()) {
+					ref<Layer> layer = layerView[layerIndex];
 					layer->initialize();
 
 					StaticMemoryDescriptor& staticMemoryDescriptor = staticMemoryDescriptors[layerIndex];
 					staticMemoryDescriptor = layer->getStaticMemoryDescriptor();
 
-					for (const ref<Buffer>& buffer : staticMemoryDescriptor.buffers) {
+					for (ref<Buffer> buffer : staticMemoryDescriptor.buffers) {
 						const MemorySuballocation memorySuballocation = buffer->getMemorySuballocation();
 
 						DEBUG_ASSERT(memorySuballocation.size == 0);
@@ -128,7 +151,7 @@ namespace Trident {
 						allocationSizesPerMemoryType[memoryTypeIndex] += ceil(memoryRequirements.size, alignment);
 					}
 
-					for (const ref<Image>& image : staticMemoryDescriptor.images) {
+					for (ref<Image> image : staticMemoryDescriptor.images) {
 						const MemorySuballocation memorySuballocation = image->getMemorySuballocation();
 
 						DEBUG_ASSERT(memorySuballocation.size == 0);
@@ -161,7 +184,7 @@ namespace Trident {
 				}
 
 				for (const StaticMemoryDescriptor& staticMemoryDescriptor : staticMemoryDescriptors) {
-					for (const ref<Buffer>& buffer : staticMemoryDescriptor.buffers) {
+					for (ref<Buffer> buffer : staticMemoryDescriptor.buffers) {
 						const MemorySuballocation memorySuballocation = buffer->getMemorySuballocation();
 						const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(memorySuballocation.memoryProperties, buffer->getUsage() & BufferUsage::TRANSFER_DST);
 						const uint32 allocationIndex = allocationIndicesPerMemoryType[memoryTypeIndex];
@@ -169,7 +192,7 @@ namespace Trident {
 						memoryAllocator->suballocateStatic(allocationIndex, buffer);
 					}
 
-					for (const ref<Image>& image : staticMemoryDescriptor.images) {
+					for (ref<Image> image : staticMemoryDescriptor.images) {
 						const MemorySuballocation memorySuballocation = image->getMemorySuballocation();
 						const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(memorySuballocation.memoryProperties, image->getUsage() & ImageUsage::TRANSFER_DST);
 						const uint32 allocationIndex = allocationIndicesPerMemoryType[memoryTypeIndex];
@@ -178,7 +201,7 @@ namespace Trident {
 					}
 				}
 
-				for (ref<Layer> layer : layers) {
+				for (ref<Layer> layer : layerView) {
 					layer->encodeOneTimeCommands();
 				}
 			}
@@ -186,6 +209,7 @@ namespace Trident {
 			PresentStatus render(uint32 frameInFlightIndex, float64 remainingFrameTime) {
 				PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+				const view<ref<LayerGroup>> layerGroupView = getLayerGroups();
 				const ref<CommandEncoder> commandEncoder = inFlightCommandEncoders[frameInFlightIndex];
 				const ref<Semaphore> acquiredNextImageSemaphore = acquiredNextImageSemaphores[frameInFlightIndex];
 				const ref<Semaphore> finishedExecutionSemaphore = finishedExecutionSemaphores[frameInFlightIndex];
@@ -202,15 +226,39 @@ namespace Trident {
 				commandEncoder->reset();
 				commandEncoder->begin();
 
-				for (ref<LayerGroup> layerGroup : layerGroups) {
+				for (ref<LayerGroup> layerGroup : layerGroupView) {
 					layerGroup->render(commandEncoder, remainingFrameTime);
 				}
 
-				const private_ref<CommandBuffer> commandBuffer = commandEncoder->end();
+				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-				graphicsQueue->submit({commandBuffer}, acquiredNextImageSemaphore, finishedExecutionSemaphore, inFlightFence);
+				graphicsQueue->submit(commandBuffer, acquiredNextImageSemaphore, finishedExecutionSemaphore, inFlightFence);
 
-				return graphicsQueue->present({swapchain}, swapchainImageIndex, finishedExecutionSemaphore);
+				return graphicsQueue->present(swapchain, swapchainImageIndex, finishedExecutionSemaphore);
+			}
+
+			void propagateEventFrontToBack(Event& event) {
+				uint32 layerIndex = 0;
+
+				while (layerIndex < layerCount) {
+					if (event.handled) {
+						break;
+					}
+
+					layers[layerIndex]->onEvent(event);
+
+					layerIndex += 1;
+				}
+			}
+
+			void propagateEventBackToFront(Event& event) {
+				sint32 layerIndex = static_cast<sint32>(layerCount) - 1;
+
+				while (layerIndex >= 0) {
+					layers[layerIndex]->onEvent(event);
+
+					layerIndex -= 1;
+				}
 			}
 
 			void resize() {
@@ -225,7 +273,9 @@ namespace Trident {
 					.verticalSync = verticalSync,
 				});
 
-				for (ref<LayerGroup> layerGroup : layerGroups) {
+				const view<ref<LayerGroup>> layerGroupView = getLayerGroups();
+
+				for (ref<LayerGroup> layerGroup : layerGroupView) {
 					layerGroup->resize();
 				}
 			}
@@ -237,18 +287,18 @@ namespace Trident {
 			const Window* window;
 
 		public:
-			private_ref<Instance> instance;
-			private_ref<PhysicalDevice> physicalDevice;
-			private_ref<Surface> surface;
-			private_ref<Device> device;
-			private_ref<Queue> graphicsQueue;
-			private_ref<Swapchain> swapchain;
+			ref<Instance> instance;
+			ref<PhysicalDevice> physicalDevice;
+			ref<Surface> surface;
+			ref<Device> device;
+			ref<Queue> graphicsQueue;
+			ref<Swapchain> swapchain;
 
 		private:
-			sequence<private_ref<CommandEncoder>> inFlightCommandEncoders;
-			sequence<private_ref<Semaphore>> acquiredNextImageSemaphores;
-			sequence<private_ref<Semaphore>> finishedExecutionSemaphores;
-			sequence<private_ref<Fence>> inFlightFences;
+			sequence<ref<CommandEncoder>> inFlightCommandEncoders;
+			sequence<ref<Semaphore>> acquiredNextImageSemaphores;
+			sequence<ref<Semaphore>> finishedExecutionSemaphores;
+			sequence<ref<Fence>> inFlightFences;
 
 		public:
 			uint32 swapchainImageIndex = 0;
@@ -256,8 +306,12 @@ namespace Trident {
 		private:
 			bool verticalSync;
 
+		private:
+			sequence<ref<Layer>> layers;
+			sequence<ref<LayerGroup>> layerGroups;
+
 		public:
-			std::vector<private_ref<Layer>> layers;
-			std::vector<private_ref<LayerGroup>> layerGroups;
+			uint64 layerCount = 0;
+			uint64 layerGroupCount = 0;
 	};
 }

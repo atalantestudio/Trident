@@ -39,11 +39,6 @@ namespace Trident {
 	}
 
 	void VK::destroyCommandPool(const Trident::Device* device, const Trident::CommandPool* commandPool) {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		const VK::Device* _device = static_cast<const VK::Device*>(device);
-		const VK::CommandPool* _commandPool = static_cast<const VK::CommandPool*>(commandPool);
-
-		_device->vkDestroyCommandPool(_device->device, _commandPool->commandPool, nullptr);
+		// The command pool is destroyed by the device.
 	}
 }

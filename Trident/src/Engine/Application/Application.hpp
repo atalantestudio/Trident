@@ -21,6 +21,8 @@ int main(int argc, char** argv);
 
 namespace Trident {
 	class Application {
+		friend int ::main(int argc, char** argv);
+
 		public:
 			static float64 getFixedDeltaTime();
 
@@ -57,7 +59,7 @@ namespace Trident {
 			AssetLibrary* getAssetLibrary() const;
 
 			inline const LayerCompositor* getLayerCompositor() const {
-				return layerCompositor;
+				return &layerCompositor;
 			}
 
 			void postConstruct();
@@ -69,22 +71,22 @@ namespace Trident {
 			void registerLayer(Argument&&... arguments) {
 				PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-				ref<LayerType> layer = new LayerType(std::forward<Argument>(arguments)...);
+				ref<LayerType> layer = allocateRef<LayerType>(std::forward<Argument>(arguments)...);
 				layer->setApplication(this);
 				layer->build();
 
-				layerCompositor->layers.emplace_back(layer);
+				layerCompositor.addLayer(std::move(layer));
 			}
 
 			template<typename LayerGroupType, typename... Argument>
 			void registerLayerGroup(Argument&&... arguments) {
 				PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-				ref<LayerGroupType> layerGroup = new LayerGroupType(std::forward<Argument>(arguments)...);
+				ref<LayerGroupType> layerGroup = allocateRef<LayerGroupType>(std::forward<Argument>(arguments)...);
 				layerGroup->setApplication(this);
 				layerGroup->initialize();
 
-				layerCompositor->layerGroups.emplace_back(layerGroup);
+				layerCompositor.addLayerGroup(std::move(layerGroup));
 			}
 
 			template<typename ProcessType, typename... Argument>
@@ -93,10 +95,10 @@ namespace Trident {
 
 				const uint32 processId = static_cast<uint32>(processes.size());
 
-				ref<ProcessType> process = new ProcessType(std::forward<Argument>(arguments)...);
+				ref<ProcessType> process = allocateRef<ProcessType>(std::forward<Argument>(arguments)...);
 				process->setId(processId);
 
-				processes.emplace_back(process);
+				processes.emplace_back(std::move(process));
 			}
 
 			virtual void release() {}
@@ -115,15 +117,9 @@ namespace Trident {
 
 			void close();
 
-			void propagateEventFrontToBack(Event& event);
-			void propagateEventBackToFront(Event& event);
-
 			void onWindowResize(WindowResizeEvent& event);
 
 			void onWindowClose(WindowCloseEvent& event);
-
-		private:
-			friend int ::main(int argc, char** argv);
 
 		private:
 			static constexpr uint8 MAX_PARALLEL_INSTANCES = 5;
@@ -143,7 +139,6 @@ namespace Trident {
 
 		protected:
 			PropertyFile* propertyFile = nullptr;
-			GraphicsAdapter* graphicsAdapter = nullptr;
 
 		private:
 			ApplicationProperties* properties = nullptr;
@@ -156,9 +151,13 @@ namespace Trident {
 			AssetLibrary* assetLibrary = nullptr;
 			Window* window = nullptr;
 			LayerInput lastLayerInput;
-			LayerCompositor* layerCompositor = nullptr;
-			std::vector<private_ref<Process>> processes;
 
+		protected:
+			GraphicsAdapter graphicsAdapter;
+
+		private:
+			LayerCompositor layerCompositor;
+			std::vector<ref<Process>> processes;
 			uint32 frameIndex = 0;
 
 			// In the range [0, MAX_FRAMES_IN_FLIGHT].

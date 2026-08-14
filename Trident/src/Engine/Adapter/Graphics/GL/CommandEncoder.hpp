@@ -16,11 +16,19 @@ namespace Trident {
 		public:
 			explicit CommandEncoder(const Trident::Device* device, const Trident::CommandPool* commandPool);
 
+			template<typename CommandType>
+			void addCommand(ref<CommandType> command);
+
 		public:
 			ref<GL::Framebuffer> framebuffer = nullptr;
 			ref<GL::RenderPass> renderPass = nullptr;
 			uint32 subpassIndex = 0;
-			std::vector<ref<GL::Command>> commands;
+
+			#if defined(GL_QUEUE_COMMANDS)
+				sequence<ref<GL::Command>> commands;
+				uint64 commandCount = 0;
+			#endif
+
 			ref<GL::ComputePipeline> computePipeline = nullptr;
 			ref<GL::GraphicsPipeline> graphicsPipeline = nullptr;
 			GLuint indexOffset = 0;

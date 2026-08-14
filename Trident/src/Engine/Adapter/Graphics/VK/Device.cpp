@@ -27,21 +27,6 @@ namespace Trident {
 		Trident::Device(adapter, physicalDevice)
 	{}
 
-	VK::Device::~Device() {
-		static PFN_vkDestroyDevice vkDestroyDevice = loadDeviceProcedure<PFN_vkDestroyDevice>(device, "vkDestroyDevice");
-
-		// TODO(graphics/device/free-descriptor-sets): Only if the pool has been created with the VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT flag.
-		/* result = vkFreeDescriptorSets(_device->device, descriptorPool, static_cast<uint32>(descriptorSets.count()), &descriptorSets[0]);
-
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to free descriptor sets ([]).", string_VkResult(result)); */
-
-		for (const VkDescriptorPool descriptorPool : descriptorPools) {
-			vkDestroyDescriptorPool(device, descriptorPool, nullptr);
-		}
-
-		vkDestroyDevice(device, nullptr);
-	}
-
 	void VK::Device::loadProcedures() {
 		#define LOAD_DEVICE_PROCEDURE(procedure) procedure = loadDeviceProcedure<decltype(procedure)>(device, #procedure)
 
@@ -205,17 +190,14 @@ namespace Trident {
 
 		sequence<ref<Trident::DescriptorSet>> descriptorSets(descriptorSetLayouts.count());
 		uint32 descriptorSetIndex = 0;
-		uint32 descriptorSetBindingIndex;
 
 		while (descriptorSetIndex < descriptorSets.count()) {
 			const ref<Trident::DescriptorSetLayout> descriptorSetLayout = descriptorSetLayouts[descriptorSetIndex];
 
-			VK::DescriptorSet descriptorSet(vkDescriptorSets[descriptorSetIndex]);
+			ref<VK::DescriptorSet> descriptorSet = allocateRef<VK::DescriptorSet>(vkDescriptorSets[descriptorSetIndex]);
+			descriptorSet->bindings = sequence<DescriptorSetLayoutBinding>(descriptorSetLayout->bindings.count());
 
-			descriptorSet.bindings = sequence<DescriptorSetLayoutBinding>(descriptorSetLayout->bindings.count());
-			descriptorSetBindingIndex = 0;
-
-			std::copy(descriptorSetLayout->bindings.begin(), descriptorSetLayout->bindings.end(), &descriptorSet.bindings[0]);
+			std::copy(descriptorSetLayout->bindings.begin(), descriptorSetLayout->bindings.end(), &descriptorSet->bindings[0]);
 
 			descriptorSets[descriptorSetIndex] = descriptorSet;
 			descriptorSetIndex += 1;
@@ -227,7 +209,7 @@ namespace Trident {
 	ref<Trident::Device> VK::createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice) {
 		static constexpr float32 DEFAULT_QUEUE_PRIORITY = 1.0f;
 
-		// TODO: Expose to the client side.
+		// TODO(graphics/vk/device/extensions): Expose to the client side.
 		static const sequence<const char8*> ENABLED_EXTENSION_NAMES = {
 			VK_KHR_MAINTENANCE_1_EXTENSION_NAME,
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
@@ -294,9 +276,24 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
-		const VkDevice vkDevice = _device->device;
+		const PFN_vkDestroyDevice vkDestroyDevice = loadDeviceProcedure<PFN_vkDestroyDevice>(_device->device, "vkDestroyDevice");
 
-		_device->~Device();
+		// TODO(graphics/device/free-descriptor-sets): Only if the pool has been created with the VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT flag.
+		/* result = _device->vkFreeDescriptorSets(_device->device, descriptorPool, static_cast<uint32>(descriptorSets.count()), &descriptorSets[0]);
+
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to free descriptor sets ([]).", string_VkResult(result)); */
+
+		for (const VkDescriptorPool descriptorPool : _device->descriptorPools) {
+			_device->vkDestroyDescriptorPool(_device->device, descriptorPool, nullptr);
+		}
+
+		for (const ref<Trident::Queue> queue : _device->queues) {
+			const VK::CommandPool* commandPool = static_cast<const VK::CommandPool*>(static_cast<const Trident::CommandPool*>(queue->commandPool));
+
+			_device->vkDestroyCommandPool(_device->device, commandPool->commandPool, nullptr);
+		}
+
+		vkDestroyDevice(_device->device, nullptr);
 	}
 
 	ref<Trident::Queue> VK::getQueue(const Trident::Device* device, QueueFamilyCapability queueFamilyCapability) {

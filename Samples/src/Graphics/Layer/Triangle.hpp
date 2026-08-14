@@ -44,7 +44,7 @@ namespace Trident {
 				stagingBuffer->unmap();
 
 				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
-				const private_ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
+				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
 					.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
 					#if defined(DEBUG_OBJECT_NAME)
 						.name = "One-time commands",
@@ -61,9 +61,9 @@ namespace Trident {
 
 				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegion);
 
-				const private_ref<CommandBuffer> commandBuffer = commandEncoder->end();
+				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-				queue->submit({commandBuffer});
+				queue->submit(commandBuffer);
 				queue->waitIdle();
 			}
 
@@ -118,7 +118,7 @@ namespace Trident {
 			void createFramebuffers() {
 				const ref<Swapchain> swapchain = getSwapchain();
 
-				framebuffers = sequence<private_ref<Framebuffer>>(swapchain->getImageCount());
+				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
 
 				FramebufferDescriptor framebufferDescriptor = {
 					.renderPass = renderPass,
@@ -167,33 +167,29 @@ namespace Trident {
 					},
 				};
 
-				const private_ref<ShaderModule> vertexShaderModule = loadShaderModule(
-					{
-						.stage = ShaderStage::VERTEX,
-						.entryPoint = "main",
-						#if defined(DEBUG_OBJECT_NAME)
-							.name = "Triangle vertex",
-						#endif
-					},
-					"Sample/Triangle/Triangle.vert"
-				);
-
-				const private_ref<ShaderModule> fragmentShaderModule = loadShaderModule(
-					{
-						.stage = ShaderStage::FRAGMENT,
-						.entryPoint = "main",
-						#if defined(DEBUG_OBJECT_NAME)
-							.name = "Triangle fragment",
-						#endif
-					},
-					"Sample/Triangle/Triangle.frag"
-				);
-
 				return createGraphicsPipeline({
 					.pipelineLayout = trianglePipelineLayout,
 					.vertexInputBindings = vertexInputBinding,
-					.vertexShaderModule = vertexShaderModule,
-					.fragmentShaderModule = fragmentShaderModule,
+					.vertexShaderModule = loadShaderModule(
+						{
+							.stage = ShaderStage::VERTEX,
+							.entryPoint = "main",
+							#if defined(DEBUG_OBJECT_NAME)
+								.name = "Triangle vertex",
+							#endif
+						},
+						"Sample/Triangle/Triangle.vert"
+					),
+					.fragmentShaderModule = loadShaderModule(
+						{
+							.stage = ShaderStage::FRAGMENT,
+							.entryPoint = "main",
+							#if defined(DEBUG_OBJECT_NAME)
+								.name = "Triangle fragment",
+							#endif
+						},
+						"Sample/Triangle/Triangle.frag"
+					),
 					.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
 					.polygonMode = PolygonMode::FILL,
 					.cullMode = CullMode::BACK,
@@ -240,12 +236,12 @@ namespace Trident {
 			}
 
 		private:
-			private_ref<RenderPass> renderPass;
-			sequence<private_ref<Framebuffer>> framebuffers;
-			private_ref<PipelineLayout> trianglePipelineLayout;
-			private_ref<GraphicsPipeline> trianglePipeline;
-			private_ref<Buffer> vertexBuffer;
-			private_ref<Buffer> stagingBuffer;
+			ref<RenderPass> renderPass;
+			sequence<ref<Framebuffer>> framebuffers;
+			ref<PipelineLayout> trianglePipelineLayout;
+			ref<GraphicsPipeline> trianglePipeline;
+			ref<Buffer> vertexBuffer;
+			ref<Buffer> stagingBuffer;
 	};
 
 	DEFINE_SAMPLE_LAYER(SampleTriangle);

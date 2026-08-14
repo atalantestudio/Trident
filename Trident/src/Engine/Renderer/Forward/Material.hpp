@@ -78,16 +78,16 @@ namespace Trident {
 		materialPipelines[materialShaderIndex] = pipeline;
 	}
 
-	ref<Image> ForwardRenderer::createMaterialImage(const ImageAsset& imageAsset, ImageDescriptor& imageDescriptor) const {
-		imageDescriptor.format = imageAsset.getFormat();
+	ref<Image> ForwardRenderer::createMaterialImage(ref<ImageAsset> imageAsset, ImageDescriptor& imageDescriptor) const {
+		imageDescriptor.format = imageAsset->getFormat();
 
 		if (imageDescriptor.format == ImageFormat::R8G8B8_UNORM) {
 			imageDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
 		}
 
-		imageDescriptor.extent = imageAsset.getExtent();
-		imageDescriptor.mipLevelCount = imageAsset.getMipLevelCount();
-		imageDescriptor.layerCount = imageAsset.getLayerCount();
+		imageDescriptor.extent = imageAsset->getExtent();
+		imageDescriptor.mipLevelCount = imageAsset->getMipLevelCount();
+		imageDescriptor.layerCount = imageAsset->getLayerCount();
 
 		return createDynamicImage(imageDescriptor);
 	}
@@ -186,7 +186,7 @@ namespace Trident {
 		uint64 imageStagingBufferSize = 0;
 
 		while (imageIndex < imageCount) {
-			const ImageAsset& imageAsset = imageAssets[imageIndex];
+			const ref<ImageAsset> imageAsset = imageAssets[imageIndex];
 
 			#if defined(DEBUG_OBJECT_NAME)
 				materialName = Logger::format("Material []", imageIndex);

@@ -21,7 +21,7 @@ namespace Trident {
 			virtual void resize();
 
 		protected:
-			view<private_ref<Layer>> layers;
+			view<ref<Layer>> layers;
 
 		private:
 			Application* application;

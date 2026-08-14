@@ -7,6 +7,7 @@ namespace Trident {
 	template<typename T, typename... U>
 	constexpr ref<T> createRef(U&&... arguments) {
 		ref<T> ref = new T(std::forward<U>(arguments)...);
+		ref.owning = true;
 
 		return ref;
 	}
@@ -14,6 +15,7 @@ namespace Trident {
 	template<typename T, typename... U>
 	constexpr ref<T> allocateRef(U&&... arguments) {
 		ref<T> ref = new T(std::forward<U>(arguments)...);
+		ref.owning = true;
 
 		return ref;
 	}

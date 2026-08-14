@@ -5,118 +5,96 @@
 
 namespace Trident {
 	template<typename T>
-	class private_ref;
-
-	template<typename T>
 	class ref {
-		friend class private_ref<T>;
-
 		public:
 			ref() = default;
 
+			ref(std::nullptr_t) {}
+
+			// When converting a loaded asset to a ref.
 			ref(const T& object) :
 				object(const_cast<T*>(&object))
 			{}
 
-			template<typename U, typename = std::enable_if<std::is_convertible<U*, T*>::value>::type>
-			ref(const ref<U>& other) :
-				object(static_cast<T*>(other))
+			ref(const T* object) :
+				object(const_cast<T*>(object))
 			{}
 
 			ref(T* object) :
 				object(object)
 			{}
 
+			ref(const ref& other) :
+				object(other.object),
+				owning(false)
+			{}
+
+			template<typename U, typename = std::enable_if<std::is_convertible<U*, T*>::value>::type>
+			ref(ref<U>&& other) :
+				object(static_cast<T*>(other)),
+				owning(other.owning)
+			{
+				other.owning = false;
+			}
+
 			/// Dynamically allocates T with the provided arguments.
 			/* template<typename... U>
 			explicit ref(U&&... arguments) :
 				object(new T(std::forward<U>(arguments)...))
-				#if defined(DEBUG_TRACK_REF_LEAKS)
-					, leak(true)
-				#endif
 			{} */
 
-			#if defined(DEBUG_TRACK_REF_LEAKS)
-				~ref() {
-					ASSERT(!leak);
+			~ref() {
+				if (owning) {
+					delete object;
 				}
-			#endif
-
-			T* operator->() const {
-				return object;
 			}
 
-			operator T*() const {
-				return object;
-			}
-
-			operator private_ref<T>() const {
-				return object;
-			}
-
-		private:
-			T* object;
-
-			#if defined(DEBUG_TRACK_REF_LEAKS)
-				bool leak = false;
-			#endif
-	};
-
-	template<typename T>
-	class private_ref {
-		public:
-			private_ref() = default;
-
-			private_ref(ref<T>&& other) :
-				object(other.object)
-			{}
-
-			/// For layers, layer groups and processes.
 			template<typename U, typename = std::enable_if<std::is_convertible<U*, T*>::value>::type>
-			private_ref(ref<U> other) :
-				object(static_cast<T*>(other))
-			{}
+			ref& operator=(ref<U>& other) {
+				if (owning) {
+					delete object;
+				}
 
-			~private_ref() {
-				delete object;
-			}
+				object = static_cast<T*>(other);
 
-			private_ref& operator=(ref<T>&& other) {
-				object = other.object;
-
-				#if defined(DEBUG_TRACK_REF_LEAKS)
-					other.leak = false;
-				#endif
+				owning = other.owning;
+				other.owning = false;
 
 				return *this;
 			}
 
-			operator T*() const {
-				return object;
-			}
+			template<typename U, typename = std::enable_if<std::is_convertible<U*, T*>::value>::type>
+			ref& operator=(ref<U>&& other) {
+				object = static_cast<T*>(other);
 
-			operator ref<T>() const {
-				return ref<T>(const_cast<T*>(object));
+				owning = other.owning;
+				other.owning = false;
+
+				return *this;
 			}
 
 			T* operator->() const {
 				return object;
 			}
 
+			operator T*() const {
+				return object;
+			}
+
 		private:
 			T* object;
 
-			#if defined(DEBUG_TRACK_REF_LEAKS)
-				// Padding to match ref's size.
-				uint8 _;
-			#endif
+		public:
+			// TODO: Make private.
+			bool owning = false;
 	};
 
 	template<typename T, typename U>
 	inline ref<T> static_pointer_cast(ref<U> r) {
-		T* a = pointer_cast<T*>(r);
+		ref<T> ref(pointer_cast<T*>(r));
+		ref.owning = false;
 
-		return a;
+		return ref;
 	}
 
 	template<typename T>

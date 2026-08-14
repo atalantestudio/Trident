@@ -87,7 +87,7 @@ namespace Trident {
 
 		public:
 			const GraphicsAdapter* adapter;
-			const PhysicalDevice* physicalDevice;
+			ref<PhysicalDevice> physicalDevice;
 
 			/// Automatically created by the adapter.
 			ref<MemoryAllocator> memoryAllocator;

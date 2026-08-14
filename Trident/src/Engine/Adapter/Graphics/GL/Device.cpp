@@ -30,8 +30,8 @@ namespace Trident {
 
 		for (uint32 descriptorSetIndex = 0; descriptorSetIndex < descriptorSets.count(); descriptorSetIndex += 1) {
 			const ref<DescriptorSetLayout> descriptorSetLayout = descriptorSetLayouts[descriptorSetIndex];
-			const ref<GL::DescriptorSet> descriptorSet = allocateRef<GL::DescriptorSet>();
 
+			ref<GL::DescriptorSet> descriptorSet = allocateRef<GL::DescriptorSet>();
 			descriptorSet->bindings = sequence<GL::DescriptorSet::DescriptorSetBinding>(descriptorSetLayout->bindings.count());
 
 			for (uint32 descriptorSetBindingIndex = 0; descriptorSetBindingIndex < descriptorSet->bindings.count(); descriptorSetBindingIndex += 1) {
