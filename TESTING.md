@@ -29,55 +29,41 @@
 
 ## Graphics APIs
 
-- OpenGL
-- Vulkan
 - DirectX 12
+- OpenGL 4.6
+- Vulkan 1.0
 
 ## AssetBuilder
 
 - Font assets
+	- Bitmap
+	- True-Type
 - Image assets
-- Geometry assets
-- Scene assets
+	- From PNG
+	- From QOI
+- 2D geometry assets
+- 3D geometry assets
+- Material assets
+- 2D scene assets
+- 3D scene assets
 - Shader modules assets
 
 ## Editor
+
+<!-- TODO(editor) -->
 
 ## Samples
 
 - Compute
 	- PrefixSum
-- GUI
-	- Card
-	- Demo1
-	- Demo2
-	- Demo3
-	- DropDownMenu
-	- EventTest
-	- OptionMenu
-	- Sample
-	- Text
-	- UTF8
-- Physics2D
-	- Scene
-		- Boxes
-		- Circles
-		- Dominos
-		- Pyramid
-		- RollingBall
-		- SlidingBoxes
-		- Stacking
-		- Swing
-- Process
-	- ECS
-	- SIMD
-- Sample
+- Graphics
 	- ArrayTexture
 	- ClearColor
 	- ColorBlend
 	- ComputeShader
 	- ComputeShaderIndirect
 	- DepthTest
+	- Empty
 	- Gradient
 	- ImageAsset
 	- InputAttachment
@@ -88,7 +74,34 @@
 	- TriangleIndexed
 	- TriangleIndexedIndirect
 	- TriangleIndirect
+- GUI
+	- Article
+	- Card
+	- Demo1
+	- Demo2
+	- Demo3
+	- DropDownMenu
+	- FrameStatisticsLayer
+	- Launch
+	- MenuBar
+	- OptionMenu
+	- PageMenu
+	- PropertyPanel
+	- SliderWidget
+	- Test
+	- Text
+	- TextDebug
+	- TextInput
+	- TextSmoothness
+	- UTF8
+- Physics2D
+	- Scene
+- Process
+	- Default
+	- ECS
+	- JSON
+	- MemoryAllocation
+	- SIMD
 - Sample3D
 	- Forward
-		- Lemons
 	- Visibility
