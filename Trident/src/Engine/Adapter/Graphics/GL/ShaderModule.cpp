@@ -5,6 +5,7 @@
 
 #include "Engine/Adapter/Graphics/GL/ShaderModule.hpp"
 #include "Engine/Adapter/Graphics/GL/ShaderStage.hpp"
+#include "Engine/API/Graphics/Descriptor/ShaderModuleDescriptor.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {

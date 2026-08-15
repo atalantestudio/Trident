@@ -6,6 +6,7 @@
 #include "Engine/Adapter/Graphics/GL/Base.hpp"
 #include "Engine/Adapter/Graphics/GL/PhysicalDevice.hpp"
 #include "Engine/Adapter/Graphics/GL/Surface.hpp"
+#include "Engine/API/Window/Window.hpp"
 
 namespace Trident {
 	static void loadProcedures() {

@@ -121,7 +121,6 @@ namespace Trident::DX12 {
 		adapter->getImageMemoryRequirementsImplementation = DX12::getImageMemoryRequirements;
 		adapter->getPhysicalDeviceMemoryTypeCountImplementation = DX12::getPhysicalDeviceMemoryTypeCountImplementation;
 		adapter->getPhysicalDeviceNameImplementation = DX12::getPhysicalDeviceName;
-		adapter->getQueueImplementation = DX12::getQueue;
 		adapter->insertMemoryBarriersImplementation = DX12::insertMemoryBarriers;
 		adapter->mapBufferImplementation = DX12::mapBuffer;
 		adapter->nextSubpassImplementation = DX12::nextSubpass;

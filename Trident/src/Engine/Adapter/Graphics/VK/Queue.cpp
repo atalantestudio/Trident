@@ -31,7 +31,9 @@ namespace Trident {
 		return queue;
 	}
 
-	void VK::destroyQueue(const Trident::Queue* queue) {}
+	void VK::destroyQueue(const Trident::Queue* queue) {
+		// The queue's command pool is destroyed by the device.
+	}
 
 	PresentStatus VK::present(const Trident::Queue* queue, view<ref<Trident::Swapchain>> swapchains, view<uint32> presentableImageIndices, ref<Trident::Semaphore> waitSemaphore) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);

@@ -3,6 +3,7 @@
 
 #include "pch.hpp"
 
+#include "Engine/API/Graphics/Descriptor/ShaderModuleDescriptor.hpp"
 #include "Engine/API/Graphics/Device.hpp"
 #include "Engine/API/Graphics/PhysicalDevice.hpp"
 
@@ -617,7 +618,17 @@ namespace Trident {
 	}
 
 	ref<Queue> Device::getQueue(QueueFamilyCapability queueFamilyCapability) const {
-		return adapter->getQueueImplementation(this, queueFamilyCapability);
+		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+			{
+				Validator validator;
+
+				if (queueFamilyCapability >= QueueFamilyCapability::count) {
+					VALIDATION_ERROR("queueFamilyCapability must be a valid QueueFamilyCapability value.");
+				}
+			}
+		#endif
+
+		return queues[static_cast<uint32>(queueFamilyCapability)];
 	}
 
 	void Device::resetFence(ref<Fence> fence) const {

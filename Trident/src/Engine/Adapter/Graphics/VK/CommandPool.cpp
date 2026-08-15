@@ -39,6 +39,6 @@ namespace Trident {
 	}
 
 	void VK::destroyCommandPool(const Trident::Device* device, const Trident::CommandPool* commandPool) {
-		// The command pool is destroyed by the device.
+		// The queue's command pool is destroyed by the device.
 	}
 }

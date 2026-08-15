@@ -4,8 +4,36 @@
 #pragma once
 
 #include "Engine/API/Graphics/Base.hpp"
+#include "Engine/API/Graphics/Buffer.hpp"
+#include "Engine/API/Graphics/BufferView.hpp"
+#include "Engine/API/Graphics/CommandBuffer.hpp"
+#include "Engine/API/Graphics/CommandEncoder.hpp"
+#include "Engine/API/Graphics/CommandPool.hpp"
+#include "Engine/API/Graphics/ComputePipeline.hpp"
 #include "Engine/API/Graphics/Descriptor/InstanceDescriptor.hpp"
+#include "Engine/API/Graphics/DescriptorSet.hpp"
+#include "Engine/API/Graphics/DescriptorSetLayout.hpp"
+#include "Engine/API/Graphics/Device.hpp"
+#include "Engine/API/Graphics/DispatchIndirectCommand.hpp"
+#include "Engine/API/Graphics/DrawIndexedIndirectCommand.hpp"
+#include "Engine/API/Graphics/DrawIndirectCommand.hpp"
+#include "Engine/API/Graphics/Fence.hpp"
+#include "Engine/API/Graphics/Framebuffer.hpp"
 #include "Engine/API/Graphics/GraphicsAPI.hpp"
+#include "Engine/API/Graphics/GraphicsPipeline.hpp"
+#include "Engine/API/Graphics/Image.hpp"
+#include "Engine/API/Graphics/ImageView.hpp"
+#include "Engine/API/Graphics/Instance.hpp"
+#include "Engine/API/Graphics/MemoryAllocator.hpp"
+#include "Engine/API/Graphics/PhysicalDevice.hpp"
+#include "Engine/API/Graphics/PipelineLayout.hpp"
+#include "Engine/API/Graphics/Queue.hpp"
+#include "Engine/API/Graphics/RenderPass.hpp"
+#include "Engine/API/Graphics/Sampler.hpp"
+#include "Engine/API/Graphics/Semaphore.hpp"
+#include "Engine/API/Graphics/ShaderModule.hpp"
+#include "Engine/API/Graphics/Status.hpp"
+#include "Engine/API/Graphics/Swapchain.hpp"
 #include "Engine/Application/ApplicationProperties.hpp"
 
 namespace Trident {
@@ -91,7 +119,6 @@ namespace Trident {
 			GetImageMemoryRequirementsImplementation getImageMemoryRequirementsImplementation;
 			GetPhysicalDeviceMemoryTypeCountImplementation getPhysicalDeviceMemoryTypeCountImplementation;
 			GetPhysicalDeviceNameImplementation getPhysicalDeviceNameImplementation;
-			GetQueueImplementation getQueueImplementation;
 			InsertMemoryBarriersImplementation insertMemoryBarriersImplementation;
 			MapBufferImplementation mapBufferImplementation;
 			NextSubpassImplementation nextSubpassImplementation;

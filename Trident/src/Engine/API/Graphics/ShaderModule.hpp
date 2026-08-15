@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "Engine/API/Graphics/Descriptor/ShaderModuleDescriptor.hpp"
 #include "Engine/API/Graphics/Device.hpp"
 
 namespace Trident {

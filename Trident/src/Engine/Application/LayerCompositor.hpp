@@ -30,7 +30,7 @@ namespace Trident {
 		public:
 			LayerCompositor() = default;
 
-			explicit LayerCompositor(const Window* window, const GraphicsAdapter* adapter, const ProjectDescriptor& projectDescriptor, const ApplicationProperties& applicationProperties) :
+			explicit LayerCompositor(const Window* window, ref<GraphicsAdapter> adapter, const ProjectDescriptor& projectDescriptor, const ApplicationProperties& applicationProperties) :
 				adapter(adapter),
 				window(window),
 				verticalSync(applicationProperties.VerticalSync),
@@ -281,7 +281,7 @@ namespace Trident {
 			}
 
 		public:
-			const GraphicsAdapter* adapter;
+			ref<GraphicsAdapter> adapter;
 
 		private:
 			const Window* window;

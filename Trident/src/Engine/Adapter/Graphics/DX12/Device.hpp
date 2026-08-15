@@ -16,7 +16,6 @@ namespace Trident {
 		public:
 			IDXGIFactory4* factory;
 			ID3D12Device* device;
-			ref<Trident::Queue> queues[3];
 			HANDLE waitEvent;
 
 			#if defined(DEBUG_ENABLE_MESSENGER)
@@ -33,8 +32,6 @@ namespace Trident {
 		ref<Trident::Device> createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice);
 
 		void destroyDevice(const Trident::Device* device);
-
-		ref<Trident::Queue> getQueue(const Trident::Device* device, QueueFamilyCapability queueFamilyCapability);
 
 		void resetFence(const Trident::Device* device, const Trident::Fence* fence);
 

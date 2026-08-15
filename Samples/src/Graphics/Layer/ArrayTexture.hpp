@@ -36,7 +36,8 @@ namespace Trident {
 
 				arrayTextureDescriptorSetLayout = createArrayTextureDescriptorSetLayout();
 
-				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(arrayTextureDescriptorSetLayout);
+				// TODO(graphics/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
+				sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(arrayTextureDescriptorSetLayout);
 
 				arrayTextureDescriptorSet = descriptorSets[0];
 				arrayTexturePipelineLayout = createArrayTexturePipelineLayout();
@@ -63,6 +64,10 @@ namespace Trident {
 				sequence<ref<Image>> staticImages(IMAGE_COUNT);
 
 				std::copy_n(&images[0], IMAGE_COUNT, &staticImages[0]);
+
+				for (ref<Image>& image : staticImages) {
+					image.owning = false;
+				}
 
 				return {
 					.buffers = {vertexBuffer, stagingBuffer},

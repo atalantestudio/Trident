@@ -141,7 +141,6 @@ namespace Trident {
 	typedef MemoryRequirements (*GetImageMemoryRequirementsImplementation)(const MemoryAllocator* memoryAllocator, ref<Image> image);
 	typedef uint32 (*GetPhysicalDeviceMemoryTypeCountImplementation)(const PhysicalDevice* physicalDevice);
 	typedef view<char8> (*GetPhysicalDeviceNameImplementation)(const PhysicalDevice* physicalDevice);
-	typedef ref<Queue> (*GetQueueImplementation)(const Device* device, QueueFamilyCapability queueFamilyCapability);
 	typedef ImageFormat (*GetSurfaceFormatImplementation)(const Surface* surface);
 	typedef void (*InsertMemoryBarriersImplementation)(CommandEncoder* commandEncoder, view<BufferMemoryBarrier> bufferMemoryBarriers, view<ImageMemoryBarrier> imageMemoryBarriers);
 	typedef void* (*MapBufferImplementation)(const Device* device, Buffer* buffer, uint64 offset, uint64 size);

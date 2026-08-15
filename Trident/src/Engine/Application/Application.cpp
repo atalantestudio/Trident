@@ -132,27 +132,27 @@ namespace Trident {
 			.name = name,
 			.extent = {properties->Window.Width, properties->Window.Height},
 			.maximized = properties->Window.Maximized,
-			.keyDownEventListener = BIND(layerCompositor.propagateEventFrontToBack),
-			.keyUpEventListener = BIND(layerCompositor.propagateEventFrontToBack),
-			.mouseDownEventListener = BIND(layerCompositor.propagateEventFrontToBack),
-			.mouseMoveEventListener = BIND(layerCompositor.propagateEventFrontToBack),
-			.mouseUpEventListener = BIND(layerCompositor.propagateEventFrontToBack),
-			.mouseWheelEventListener = BIND(layerCompositor.propagateEventFrontToBack),
+			.keyDownEventListener = BIND(layerCompositor->propagateEventFrontToBack),
+			.keyUpEventListener = BIND(layerCompositor->propagateEventFrontToBack),
+			.mouseDownEventListener = BIND(layerCompositor->propagateEventFrontToBack),
+			.mouseMoveEventListener = BIND(layerCompositor->propagateEventFrontToBack),
+			.mouseUpEventListener = BIND(layerCompositor->propagateEventFrontToBack),
+			.mouseWheelEventListener = BIND(layerCompositor->propagateEventFrontToBack),
 			.windowCloseEventListener = BIND(Application::onWindowClose),
 			.windowResizeEventListener = BIND(Application::onWindowResize),
 		});
 	}
 
 	void Application::initializeGraphicsAdapter(const ProjectDescriptor& projectDescriptor) {
-		graphicsAdapter = GraphicsAdapter(*properties);
-		layerCompositor = LayerCompositor(window, &graphicsAdapter, projectDescriptor, *properties);
+		graphicsAdapter = allocateRef<GraphicsAdapter>(*properties);
+		layerCompositor = allocateRef<LayerCompositor>(window, graphicsAdapter, projectDescriptor, *properties);
 
-		Renderer::initialize(&layerCompositor);
+		Renderer::initialize(layerCompositor);
 	}
 
 	void Application::initializeLayers() {
-		layerCompositor.initializeLayerGroups();
-		layerCompositor.initializeLayers();
+		layerCompositor->initializeLayerGroups();
+		layerCompositor->initializeLayers();
 	}
 
 	// TODO(application/destruction-leaks)
@@ -193,7 +193,7 @@ namespace Trident {
 	}
 
 	bool Application::hasLayers() const {
-		return layerCompositor.layerCount > 0;
+		return layerCompositor->layerCount > 0;
 	}
 
 	float64 Application::getCurrentFrameTime() const {
@@ -225,7 +225,7 @@ namespace Trident {
 	void Application::postConstruct() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		for (ref<Layer> layer : layerCompositor.getLayers()) {
+		for (ref<Layer> layer : layerCompositor->getLayers()) {
 			layer->input = &lastLayerInput;
 			layer->postConstruct();
 		}
@@ -303,13 +303,13 @@ namespace Trident {
 	void Application::update(float64 deltaTime, float64 inverseDeltaTime) {
 		PROFILE_SCOPE("Application update/integrate");
 
-		for (ref<Layer> layer : layerCompositor.getLayers()) {
+		for (ref<Layer> layer : layerCompositor->getLayers()) {
 			layer->update(static_cast<float32>(deltaTime), static_cast<float32>(inverseDeltaTime));
 		}
 	}
 
 	void Application::render(float64 remainingFrameTime) {
-		const PresentStatus presentStatus = layerCompositor.render(frameInFlightIndex, remainingFrameTime);
+		const PresentStatus presentStatus = layerCompositor->render(frameInFlightIndex, remainingFrameTime);
 
 		if (presentStatus == PresentStatus::ERROR_OUT_OF_DATE || presentStatus == PresentStatus::SUBOPTIMAL || windowResized) {
 			resize();
@@ -323,7 +323,7 @@ namespace Trident {
 	void Application::resize() {
 		windowResized = false;
 
-		layerCompositor.resize();
+		layerCompositor->resize();
 
 		// TODO(application/layer-input)
 		// lastLayerInput.swapchainImage = nullptr;
@@ -333,7 +333,7 @@ namespace Trident {
 
 		WindowResizeEvent event(extent.width, extent.height);
 
-		layerCompositor.propagateEventBackToFront(event);
+		layerCompositor->propagateEventBackToFront(event);
 	}
 
 	void Application::close() {

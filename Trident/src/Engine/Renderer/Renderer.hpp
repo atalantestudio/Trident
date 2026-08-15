@@ -11,6 +11,7 @@
 #include "Engine/API/Graphics/Descriptor/ImageDescriptor.hpp"
 #include "Engine/API/Graphics/Descriptor/ImageViewDescriptor.hpp"
 #include "Engine/API/Graphics/Descriptor/PipelineLayoutDescriptor.hpp"
+#include "Engine/API/Graphics/Descriptor/ShaderModuleDescriptor.hpp"
 #include "Engine/API/Graphics/Descriptor/StaticMemoryDescriptor.hpp"
 #include "Engine/API/Window/Window.hpp"
 #include "Engine/Application/Application.hpp"

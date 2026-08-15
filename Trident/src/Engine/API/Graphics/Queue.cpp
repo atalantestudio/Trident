@@ -3,6 +3,8 @@
 
 #include "pch.hpp"
 
+#include "Engine/API/Graphics/Descriptor/CommandBufferDescriptor.hpp"
+#include "Engine/API/Graphics/Device.hpp"
 #include "Engine/API/Graphics/Queue.hpp"
 
 namespace Trident {

@@ -175,6 +175,10 @@ namespace Trident {
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set severity breakpoint.");
 
+			result = device->infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set severity breakpoint.");
+
 			result = device->infoQueue->RegisterMessageCallback(messageCallback, D3D12_MESSAGE_CALLBACK_FLAG_NONE, nullptr, &device->messageCallbackCookie);
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to register message callback.");
@@ -185,11 +189,13 @@ namespace Trident {
 
 	void DX12::destroyDevice(const Trident::Device* device) {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
-		const ref<DX12::MemoryAllocator> memoryAllocator = static_pointer_cast<DX12::MemoryAllocator>(device->getMemoryAllocator());
+		const ref<DX12::PhysicalDevice> physicalDevice = static_pointer_cast<DX12::PhysicalDevice>(device->physicalDevice);
+		const ref<DX12::MemoryAllocator> memoryAllocator = static_pointer_cast<DX12::MemoryAllocator>(device->memoryAllocator);
 
 		HRESULT result;
 
 		memoryAllocator->destroyDescriptorHeaps();
+		memoryAllocator->destroyMemoryHeaps();
 
 		result = CloseHandle(_device->waitEvent);
 
@@ -203,38 +209,8 @@ namespace Trident {
 			_device->infoQueue->Release();
 		#endif
 
-		#if defined(DEBUG_DX12_REPORT_LIVE_OBJECTS)
-			typedef HRESULT (*DXGIGetDebugInterfaceProc)(REFIID riid, void** ppDebug);
-
-			IDXGIDebug* debug;
-
-			const HMODULE hModule = GetModuleHandle(L"Dxgidebug.dll");
-
-			WIN32_ASSERT(hModule != NULL);
-
-			const DXGIGetDebugInterfaceProc DXGIGetDebugInterface = function_cast<DXGIGetDebugInterfaceProc>(GetProcAddress(hModule, "DXGIGetDebugInterface"));
-
-			WIN32_ASSERT(DXGIGetDebugInterface != NULL);
-
-			result = DXGIGetDebugInterface(IID_PPV_ARGS(&debug));
-
-			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to query debug interface.");
-
-			result = debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_DETAIL);
-
-			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to report live objects.");
-		#endif
-
+		physicalDevice->adapter->Release();
 		_device->device->Release();
-	}
-
-	ref<Trident::Queue> DX12::getQueue(const Trident::Device* device, QueueFamilyCapability queueFamilyCapability) {
-		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
-		const uint32 queueIndex = static_cast<uint32>(queueFamilyCapability);
-
-		ADAPTER_ASSERT(queueIndex < 3, "Invalid queue family capability.");
-
-		return _device->queues[queueIndex];
 	}
 
 	void DX12::resetFence(const Trident::Device* device, const Trident::Fence* fence) {

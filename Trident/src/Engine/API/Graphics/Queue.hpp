@@ -3,12 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Graphics/CommandEncoder.hpp"
-#include "Engine/API/Graphics/Device.hpp"
-#include "Engine/API/Graphics/Fence.hpp"
-#include "Engine/API/Graphics/Semaphore.hpp"
-#include "Engine/API/Graphics/Status.hpp"
-#include "Engine/API/Graphics/Swapchain.hpp"
+#include "Engine/API/Graphics/Base.hpp"
 
 namespace Trident {
 	class Queue {

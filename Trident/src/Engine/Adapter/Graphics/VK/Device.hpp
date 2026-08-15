@@ -14,7 +14,6 @@ namespace Trident {
 
 		public:
 			VkDevice device;
-			ref<Trident::Queue> queues[3];
 
 			// TODO: Move in VK::MemoryAllocator.
 			std::vector<VkDescriptorPool> descriptorPools;
@@ -83,8 +82,6 @@ namespace Trident {
 		ref<Trident::Device> createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice);
 
 		void destroyDevice(const Trident::Device* device);
-
-		ref<Trident::Queue> getQueue(const Trident::Device* device, QueueFamilyCapability queueFamilyCapability);
 
 		void resetFence(const Trident::Device* device, const Trident::Fence* fence);
 

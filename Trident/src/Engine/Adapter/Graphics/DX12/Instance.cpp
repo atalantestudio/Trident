@@ -4,8 +4,36 @@
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/DX12/Instance.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
+	#if defined(DEBUG_DX12_REPORT_LIVE_OBJECTS)
+		static void reportLiveObjects() {
+			typedef HRESULT (*DXGIGetDebugInterfaceProc)(REFIID riid, void** ppDebug);
+
+			const HMODULE hModule = GetModuleHandle(L"Dxgidebug.dll");
+
+			WIN32_ASSERT(hModule != NULL);
+
+			const DXGIGetDebugInterfaceProc DXGIGetDebugInterface = function_cast<DXGIGetDebugInterfaceProc>(GetProcAddress(hModule, "DXGIGetDebugInterface"));
+
+			WIN32_ASSERT(DXGIGetDebugInterface != NULL);
+
+			IDXGIDebug* debug;
+			HRESULT result;
+
+			result = DXGIGetDebugInterface(IID_PPV_ARGS(&debug));
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to query debug interface.");
+
+			result = debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to report live objects.");
+
+			debug->Release();
+		}
+	#endif
+
 	DX12::Instance::Instance(const Trident::GraphicsAdapter* adapter) :
 		Trident::Instance(adapter)
 	{}
@@ -51,5 +79,9 @@ namespace Trident {
 		const DX12::Instance* _instance = static_cast<const DX12::Instance*>(instance);
 
 		_instance->factory->Release();
+
+		#if defined(DEBUG_DX12_REPORT_LIVE_OBJECTS)
+			reportLiveObjects();
+		#endif
 	}
 }

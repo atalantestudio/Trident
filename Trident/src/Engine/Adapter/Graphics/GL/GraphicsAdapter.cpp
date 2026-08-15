@@ -120,7 +120,6 @@ namespace Trident::GL {
 		adapter->getImageMemoryRequirementsImplementation = GL::getImageMemoryRequirements;
 		adapter->getPhysicalDeviceMemoryTypeCountImplementation = GL::getPhysicalDeviceMemoryTypeCountImplementation;
 		adapter->getPhysicalDeviceNameImplementation = GL::getPhysicalDeviceName;
-		adapter->getQueueImplementation = GL::getQueue;
 		adapter->insertMemoryBarriersImplementation = GL::insertMemoryBarriers;
 		adapter->mapBufferImplementation = GL::mapBuffer;
 		adapter->nextSubpassImplementation = GL::nextSubpass;

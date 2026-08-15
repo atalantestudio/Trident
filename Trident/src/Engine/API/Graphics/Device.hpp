@@ -70,6 +70,7 @@ namespace Trident {
 
 			ref<PhysicalDevice> getPhysicalDevice() const;
 
+			/// Returns a command queue corresponding to the provided queue family.
 			ref<Queue> getQueue(QueueFamilyCapability queueFamilyCapability) const;
 
 			void resetFence(ref<Fence> fence) const;
@@ -88,6 +89,9 @@ namespace Trident {
 		public:
 			const GraphicsAdapter* adapter;
 			ref<PhysicalDevice> physicalDevice;
+
+			/// Graphics, compute and transfer queues.
+			ref<Queue> queues[3];
 
 			/// Automatically created by the adapter.
 			ref<MemoryAllocator> memoryAllocator;

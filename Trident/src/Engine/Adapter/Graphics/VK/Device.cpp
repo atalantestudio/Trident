@@ -296,14 +296,6 @@ namespace Trident {
 		vkDestroyDevice(_device->device, nullptr);
 	}
 
-	ref<Trident::Queue> VK::getQueue(const Trident::Device* device, QueueFamilyCapability queueFamilyCapability) {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		const VK::Device* _device = static_cast<const VK::Device*>(device);
-
-		return _device->queues[static_cast<uint32>(queueFamilyCapability)];
-	}
-
 	void VK::resetFence(const Trident::Device* device, const Trident::Fence* fence) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 

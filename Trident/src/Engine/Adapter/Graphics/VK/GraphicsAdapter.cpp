@@ -101,7 +101,6 @@ namespace Trident::VK {
 		adapter->getImageMemoryRequirementsImplementation = VK::getImageMemoryRequirements;
 		adapter->getPhysicalDeviceMemoryTypeCountImplementation = VK::getPhysicalDeviceMemoryTypeCountImplementation;
 		adapter->getPhysicalDeviceNameImplementation = VK::getPhysicalDeviceName;
-		adapter->getQueueImplementation = VK::getQueue;
 		adapter->insertMemoryBarriersImplementation = VK::insertMemoryBarriers;
 		adapter->mapBufferImplementation = VK::mapBuffer;
 		adapter->nextSubpassImplementation = VK::nextSubpass;

@@ -90,6 +90,14 @@ namespace Trident {
 
 		swapChain1->Release();
 
+		{
+			PROFILE_SCOPE("MakeWindowAssociation");
+
+			result = _device->factory->MakeWindowAssociation(surface->window, DXGI_MWA_NO_ALT_ENTER);
+		}
+
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to make window association.");
+
 		UINT imageIndex = 0;
 
 		while (imageIndex < swapchain->imageCount) {

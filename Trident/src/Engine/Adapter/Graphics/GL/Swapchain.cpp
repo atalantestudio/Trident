@@ -5,6 +5,7 @@
 
 #include "Engine/Adapter/Graphics/GL/Image.hpp"
 #include "Engine/Adapter/Graphics/GL/Swapchain.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
 	GL::Swapchain::Swapchain(const Trident::Device* device, const SwapchainDescriptor& descriptor) :

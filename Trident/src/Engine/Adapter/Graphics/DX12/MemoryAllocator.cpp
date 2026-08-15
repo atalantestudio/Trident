@@ -31,6 +31,14 @@ namespace Trident {
 		}
 	}
 
+	void DX12::MemoryAllocator::destroyMemoryHeaps() {
+		for (const MemoryAllocation& allocation : allocations) {
+			ID3D12Heap* heap = reinterpret_cast<ID3D12Heap*>(allocation.memory);
+
+			heap->Release();
+		}
+	}
+
 	DX12::DescriptorHeapAllocation& DX12::MemoryAllocator::getCurrentViewDescriptorHeapAllocation() {
 		if (currentViewDescriptorHeapAllocationIndex >= descriptorHeapAllocations.size()) {
 			createViewDescriptorHeapAllocation();
@@ -621,7 +629,7 @@ namespace Trident {
 
 			// TODO(graphics/dx12/placed-rtv-dsv): Fix initialization error when first clearing render targets and/or depth stencil images created with CreatePlacedResource.
 			if (usage & (ImageUsage::COLOR_ATTACHMENT | ImageUsage::DEPTH_STENCIL_ATTACHMENT)) {
-				const D3D12_HEAP_DESC heapDescriptor = ((ID3D12Heap*) memoryAllocation.memory)->GetDesc();
+				const D3D12_HEAP_DESC heapDescriptor = reinterpret_cast<ID3D12Heap*>(memoryAllocation.memory)->GetDesc();
 
 				result = _device->device->CreateCommittedResource(&heapDescriptor.Properties, heapDescriptor.Flags, &resourceDescriptor, initialResourceStates, optimizedClearValuePointer, IID_PPV_ARGS(&_image->resource));
 			}

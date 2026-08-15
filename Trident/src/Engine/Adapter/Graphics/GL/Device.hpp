@@ -12,9 +12,6 @@ namespace Trident {
 	class GL::Device final : public Trident::Device {
 		public:
 			explicit Device(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice);
-
-		public:
-			ref<Trident::Queue> queue;
 	};
 
 	namespace GL {
@@ -25,8 +22,6 @@ namespace Trident {
 		ref<Trident::Device> createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice);
 
 		void destroyDevice(const Trident::Device* device);
-
-		ref<Trident::Queue> getQueue(const Trident::Device* device, QueueFamilyCapability queueFamilyCapability);
 
 		void resetFence(const Trident::Device* device, const Trident::Fence* fence);
 

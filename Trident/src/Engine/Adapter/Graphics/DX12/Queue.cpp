@@ -53,11 +53,15 @@ namespace Trident {
 
 	void DX12::destroyQueue(const Trident::Queue* queue) {
 		const DX12::Queue* _queue = static_cast<const DX12::Queue*>(queue);
+		const ref<DX12::Fence> idleFence = static_pointer_cast<DX12::Fence>(_queue->idleFence);
 		HRESULT result;
 
 		result = CloseHandle(_queue->completionEvent);
 
 		WIN32_ASSERT(result != 0);
+
+		// TODO(graphics/dx12/queue/idle-fence): Find a way to trigger the fence's destructor.
+		idleFence->fence->Release();
 
 		_queue->commandQueue->Release();
 	}

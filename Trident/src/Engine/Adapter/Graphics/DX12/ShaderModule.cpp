@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/DX12/ShaderModule.hpp"
+#include "Engine/API/Graphics/Descriptor/ShaderModuleDescriptor.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {

@@ -22,7 +22,6 @@ namespace Trident {
 		private:
 			static constexpr UINT UNDEFINED_ALLOCATION_INDEX = max<UINT>();
 
-			// NOTE
 			// Only one descriptor heap of each type can be bound at a time.
 			// See https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-setdescriptorheaps. 
 			static constexpr UINT maxViewDescriptorCountPerAllocation = 64;
@@ -34,6 +33,7 @@ namespace Trident {
 			explicit MemoryAllocator(const DX12::Device* device);
 
 			void destroyDescriptorHeaps();
+			void destroyMemoryHeaps();
 
 			DX12::DescriptorHeapAllocation& getCurrentViewDescriptorHeapAllocation();
 			DX12::DescriptorHeapAllocation& getCurrentSamplerDescriptorHeapAllocation();

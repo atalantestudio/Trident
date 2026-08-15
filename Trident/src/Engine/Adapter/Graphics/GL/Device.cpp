@@ -61,20 +61,15 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		ref<GL::Device> device = allocateRef<GL::Device>(adapter, physicalDevice);
-		device->queue = createQueue(device, 0, QueueFamilyCapability::GRAPHICS);
+		device->queues[0] = createQueue(device, 0, QueueFamilyCapability::GRAPHICS);
+		device->queues[1] = createQueue(device, 1, QueueFamilyCapability::COMPUTE);
+		device->queues[2] = createQueue(device, 2, QueueFamilyCapability::TRANSFER);
 
 		return device;
 	}
 
 	void GL::destroyDevice(const Trident::Device* device) {}
 
-	ref<Trident::Queue> GL::getQueue(const Trident::Device* device, QueueFamilyCapability queueFamilyCapability) {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		const GL::Device* _device = static_cast<const GL::Device*>(device);
-
-		return _device->queue;
-	}
 
 	void GL::resetFence(const Trident::Device* device, const Trident::Fence* fence) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);

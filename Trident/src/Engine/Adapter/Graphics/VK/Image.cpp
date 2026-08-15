@@ -164,7 +164,7 @@ namespace Trident {
 		}
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
-		const ref<VK::MemoryAllocator> memoryAllocator = static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
+		const ref<VK::MemoryAllocator> memoryAllocator = static_pointer_cast<VK::MemoryAllocator>(device->memoryAllocator);
 
 		_device->vkDestroyImage(_device->device, _image->image, nullptr);
 

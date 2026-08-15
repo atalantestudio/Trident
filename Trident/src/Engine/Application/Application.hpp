@@ -59,7 +59,7 @@ namespace Trident {
 			AssetLibrary* getAssetLibrary() const;
 
 			inline const LayerCompositor* getLayerCompositor() const {
-				return &layerCompositor;
+				return layerCompositor;
 			}
 
 			void postConstruct();
@@ -75,7 +75,7 @@ namespace Trident {
 				layer->setApplication(this);
 				layer->build();
 
-				layerCompositor.addLayer(std::move(layer));
+				layerCompositor->addLayer(std::move(layer));
 			}
 
 			template<typename LayerGroupType, typename... Argument>
@@ -86,7 +86,7 @@ namespace Trident {
 				layerGroup->setApplication(this);
 				layerGroup->initialize();
 
-				layerCompositor.addLayerGroup(std::move(layerGroup));
+				layerCompositor->addLayerGroup(std::move(layerGroup));
 			}
 
 			template<typename ProcessType, typename... Argument>
@@ -153,10 +153,10 @@ namespace Trident {
 			LayerInput lastLayerInput;
 
 		protected:
-			GraphicsAdapter graphicsAdapter;
+			ref<GraphicsAdapter> graphicsAdapter;
 
 		private:
-			LayerCompositor layerCompositor;
+			ref<LayerCompositor> layerCompositor;
 			std::vector<ref<Process>> processes;
 			uint32 frameIndex = 0;
 

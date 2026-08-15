@@ -34,8 +34,6 @@ namespace Trident {
 
 	Swapchain::~Swapchain() {
 		device->adapter->destroySwapchainImplementation(device, this);
-
-		// TODO(graphics/dx12/swapchain-image): The swapchain images are already deleted.
 	}
 
 	Extent2D Swapchain::getExtent() const {

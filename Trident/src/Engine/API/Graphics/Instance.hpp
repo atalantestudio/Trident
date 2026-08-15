@@ -4,33 +4,22 @@
 #pragma once
 
 #include "Engine/API/Graphics/Base.hpp"
-#include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Graphics/PhysicalDevice.hpp"
-#include "Engine/API/Window/Window.hpp"
 
 namespace Trident {
 	class Instance {
 		public:
-			~Instance() {
-				adapter->destroyInstanceImplementation(this);
-			}
+			~Instance();
 
-			// TODO: Use ref<Window> instead.
-			ref<Surface> createSurface(ref<PhysicalDevice> physicalDevice, const Window* window) const {
-				return adapter->createSurfaceImplementation(this, physicalDevice, window);
-			}
+			// TODO(graphics/instance): Use ref<Window> instead.
+			ref<Surface> createSurface(ref<PhysicalDevice> physicalDevice, const Window* window) const;
 
-			ref<PhysicalDevice> selectPhysicalDevice(bool preferIntegratedGpu) const {
-				return adapter->selectPhysicalDeviceImplementation(this, preferIntegratedGpu);
-			}
+			ref<PhysicalDevice> selectPhysicalDevice(bool preferIntegratedGpu) const;
 
 		protected:
-			explicit Instance(const GraphicsAdapter* adapter) :
-				adapter(adapter)
-			{}
+			explicit Instance(const GraphicsAdapter* adapter);
 
 		public:
-			// TODO: This should be a protected member.
+			// TODO(graphics/instance): This should be a protected member.
 			const GraphicsAdapter* adapter;
 	};
 }
