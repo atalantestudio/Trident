@@ -7,7 +7,7 @@
 
 namespace Trident {
 	ref<DescriptorSetLayout> Lightmapper::createGBufferDescriptorSetLayout() const {
-		const DescriptorSetLayoutBinding bindings[2] = {
+		const DescriptorSetLayoutBinding bindings[] = {
 			// Vertex
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
@@ -23,6 +23,6 @@ namespace Trident {
 			},
 		};
 
-		return device->createDescriptorSetLayout(view<DescriptorSetLayoutBinding>(bindings, 2));
+		return device->createDescriptorSetLayout(bindings);
 	}
 }

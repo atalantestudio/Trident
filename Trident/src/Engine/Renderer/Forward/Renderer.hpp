@@ -35,7 +35,7 @@ namespace Trident {
 					forwardDescriptorSetLayout,
 				};
 
-				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(view<ref<DescriptorSetLayout>>(descriptorSetLayouts, 2));
+				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(descriptorSetLayouts);
 
 				staticGeometryDescriptorSet = descriptorSets[0];
 				forwardDescriptorSet = descriptorSets[1];

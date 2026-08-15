@@ -581,7 +581,7 @@ namespace Trident {
 			userImageIndex += 1;
 		}
 
-		const WriteDescriptorSet writeDescriptorSets[2] = {
+		const WriteDescriptorSet writeDescriptorSets[] = {
 			{
 				.descriptorSet = subcomponentDescriptorSet,
 				.bindingIndex = 0,
@@ -596,7 +596,7 @@ namespace Trident {
 			},
 		};
 
-		getDevice()->updateDescriptorSets(view<WriteDescriptorSet>(writeDescriptorSets, 2));
+		getDevice()->updateDescriptorSets(writeDescriptorSets);
 	}
 
 	void GUIRenderer::updateCameraProjection() const {

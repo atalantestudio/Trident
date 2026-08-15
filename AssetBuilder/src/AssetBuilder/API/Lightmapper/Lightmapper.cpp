@@ -74,7 +74,7 @@ namespace Trident {
 		verticalBilateralFilterPipeline = createVerticalBilateralFilterPipeline();
 		dilationPipeline = createDilationPipeline();
 
-		descriptorSets = device->allocateDescriptorSets(view<ref<DescriptorSetLayout>>(descriptorSetLayouts, 4));
+		descriptorSets = device->allocateDescriptorSets(descriptorSetLayouts);
 
 		intermediateLightmapAtlasSampler = createIntermediateLightmapAtlasSampler();
 
@@ -320,7 +320,7 @@ namespace Trident {
 
 		commandEncoder->begin();
 
-		const BufferCopyRegion bufferCopyRegions[3] = {
+		const BufferCopyRegion bufferCopyRegions[] = {
 			{
 				.sourceOffset = argumentStagingView.getOffset(),
 				.destinationOffset = 0,
@@ -386,7 +386,7 @@ namespace Trident {
 			},
 		};
 
-		const WriteDescriptorSet writeDescriptorSets[12] = {
+		const WriteDescriptorSet writeDescriptorSets[] = {
 			{
 				.descriptorSet = descriptorSets[0],
 				.bindingIndex = 0,
@@ -449,7 +449,7 @@ namespace Trident {
 			},
 		};
 
-		device->updateDescriptorSets(view<WriteDescriptorSet>(writeDescriptorSets, 12));
+		device->updateDescriptorSets(writeDescriptorSets);
 	}
 
 	void Lightmapper::generateLightmaps(uint32 indexCount) const {

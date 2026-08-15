@@ -7,7 +7,7 @@
 
 namespace Trident {
 	ref<DescriptorSetLayout> ForwardRenderer::createForwardDescriptorSetLayout() const {
-		const DescriptorSetLayoutBinding bindings[2] = {
+		const DescriptorSetLayoutBinding bindings[] = {
 			// Camera
 			{
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
@@ -23,6 +23,6 @@ namespace Trident {
 			},
 		};
 
-		return createDescriptorSetLayout(view<DescriptorSetLayoutBinding>(bindings, 2));
+		return createDescriptorSetLayout(bindings);
 	}
 }

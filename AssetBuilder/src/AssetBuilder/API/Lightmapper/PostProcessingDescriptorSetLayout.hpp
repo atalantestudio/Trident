@@ -7,7 +7,7 @@
 
 namespace Trident {
 	ref<DescriptorSetLayout> Lightmapper::createPostProcessingDescriptorSetLayout() const {
-		const DescriptorSetLayoutBinding bindings[1] = {
+		const DescriptorSetLayoutBinding bindings[] = {
 			// Intermediate lightmap atlas
 			{
 				.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE,
@@ -16,6 +16,6 @@ namespace Trident {
 			},
 		};
 
-		return device->createDescriptorSetLayout(view<DescriptorSetLayoutBinding>(bindings, 1));
+		return device->createDescriptorSetLayout(bindings);
 	}
 }

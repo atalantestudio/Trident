@@ -7,7 +7,7 @@
 
 namespace Trident {
 	ref<DescriptorSetLayout> Lightmapper::createTraceRaysDescriptorSetLayout() const {
-		const DescriptorSetLayoutBinding bindings[8] = {
+		const DescriptorSetLayoutBinding bindings[] = {
 			// Argument
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
@@ -65,6 +65,6 @@ namespace Trident {
 			},
 		};
 
-		return device->createDescriptorSetLayout(view<DescriptorSetLayoutBinding>(bindings, 8));
+		return device->createDescriptorSetLayout(bindings);
 	}
 }

@@ -4,7 +4,7 @@
 #pragma once
 
 namespace Trident {
-	class ComputePrefixSumRenderer : public Renderer {
+	class PrefixSumSampleRenderer : public Renderer {
 		private:
 			static constexpr index ELEMENT_COUNT = 16;
 			static constexpr uint32 ELEMENT_COUNTS[ELEMENT_COUNT] = {2, 5, 6, 14, 4, 4, 5, 10, 7, 0, 11, 3, 8, 4, 6, 5};
@@ -13,7 +13,7 @@ namespace Trident {
 			void build() override {
 				const ref<Device> device = getDevice();
 
-				const sequence<DescriptorSetLayoutBinding> prefixSumDescriptorSetLayoutBindings = {
+				const DescriptorSetLayoutBinding prefixSumDescriptorSetLayoutBindings[] = {
 					// Element count
 					{
 						.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
@@ -55,7 +55,6 @@ namespace Trident {
 					#endif
 				});
 
-				// TODO: Use static memory.
 				const ref<Buffer> elementCountBuffer = createDynamicBuffer({
 					.size = sizeof(uint32) * ELEMENT_COUNT,
 					.usage = BufferUsage::READ_ONLY_STORAGE,
@@ -96,7 +95,8 @@ namespace Trident {
 
 				const sequence<ref<DescriptorSet>> descriptorSets = device->allocateDescriptorSets(prefixSumDescriptorSetLayout);
 				const ref<DescriptorSet> prefixSumDescriptorSet = descriptorSets[0];
-				const sequence<WriteDescriptorSet> writeDescriptorSets = {
+
+				const WriteDescriptorSet writeDescriptorSets[] = {
 					{
 						.descriptorSet = prefixSumDescriptorSet,
 						.bindingIndex = 0,
@@ -148,7 +148,7 @@ namespace Trident {
 
 				const uint32* elementStartMappedRange = elementStartStagingView.map();
 
-				ENGINE_DEBUG("Element count buffer:");
+				ENGINE_TRACE("Element count buffer:");
 
 				index elementIndex = 0;
 
@@ -160,7 +160,7 @@ namespace Trident {
 
 				engineLogger << '\n';
 
-				ENGINE_DEBUG("Element start buffer:");
+				ENGINE_TRACE("Element start buffer:");
 
 				elementIndex = 0;
 
@@ -178,7 +178,7 @@ namespace Trident {
 			void render(ref<CommandEncoder> commandEncoder) const override {}
 	};
 
-	class ComputePrefixSumProcess final : public Process {
+	class PrefixSumSampleProcess final : public Process {
 		public:
 			sint32 main(view<void*> arguments) override {
 				renderer.build();
@@ -187,6 +187,6 @@ namespace Trident {
 			}
 
 		private:
-			ComputePrefixSumRenderer renderer;
+			PrefixSumSampleRenderer renderer;
 	};
 }

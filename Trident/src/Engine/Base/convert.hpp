@@ -6,7 +6,7 @@
 #include "Engine/API/Graphics/ImageFormat.hpp"
 
 namespace Trident {
-	// NOTE: These utilities provide unoptimized image format conversion and are not meant to be used in production builds.
+	/// These utilities provide unoptimized image format conversion and are not meant to be used in production builds.
 	template<ImageFormat InputFormat, ImageFormat OutputFormat>
 	void convert(view<uint8> inputData, uint8* outputData, uint64 outputDataCount);
 

@@ -67,8 +67,10 @@ namespace Trident {
 		const view<char8> SampleNameProperty = propertyFile->getProperty<view<char8>>("SampleName");
 
 		if (SampleGroupNameProperty == "Compute") {
+			allocateProcesses(1);
+
 			if (SampleNameProperty == "PrefixSum") {
-				registerProcess<ComputePrefixSumProcess>();
+				registerProcess<PrefixSumSampleProcess>();
 			}
 			else {
 				ENGINE_ASSERT(false, "Unknown sample \"[]\".", SampleNameProperty);
@@ -145,6 +147,8 @@ namespace Trident {
 			registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
 		}
 		else if (SampleGroupNameProperty == "Process") {
+			allocateProcesses(1);
+
 			if (SampleNameProperty == "Default") {
 				registerProcess<ProcessDefaultProcess>();
 			}

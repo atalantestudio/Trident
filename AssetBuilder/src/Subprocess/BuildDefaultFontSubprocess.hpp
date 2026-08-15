@@ -208,7 +208,7 @@ namespace Trident {
 
 				while (glyphIndex < fontAssetDescriptor.glyphs.count()) {
 					const BitmapGlyph& bitmapGlyph = BITMAP_GLYPHS[glyphIndex];
-					const UTF8Stream stream = UTF8Stream(view<char8>(bitmapGlyph.codePoint));
+					const UTF8Stream stream = UTF8Stream(bitmapGlyph.codePoint);
 					const uint32 codePoint = stream.peek();
 
 					Glyph& glyph = fontAssetDescriptor.glyphs[glyphIndex];
