@@ -48,7 +48,7 @@ namespace Trident {
 				/// The offset in bytes in the buffer. It must be a multiple of IndexType.
 				uint64 offset
 			) {
-				#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+				#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 					{
 						Validator validator;
 

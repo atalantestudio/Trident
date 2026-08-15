@@ -49,12 +49,12 @@ namespace Trident {
 		ref<GL::ShaderModule> shaderModule = allocateRef<GL::ShaderModule>(device, descriptor);
 
 		#if defined(GL_SOURCE_FROM_SPIRV)
-			// TODO
+			// TODO(graphics/gl/shader-module)
 			ENGINE_ERROR_UNIMPLEMENTED();
 		#else
-			sequence<char8> code = shaderModuleAsset->getGlslCode();
+			sequence<char8> code = shaderModuleAsset->glslCode;
 
-			const std::unordered_map<sequence<char8>, uint32>& entryPointActivationOffsets = shaderModuleAsset->getGlslEntryPointActivationOffsets();
+			const std::unordered_map<sequence<char8>, uint32>& entryPointActivationOffsets = shaderModuleAsset->glslEntryPointActivationOffsets;
 			const std::unordered_map<sequence<char8>, uint32>::const_iterator entryPointActivationOffsetEntry = find(entryPointActivationOffsets, descriptor.entryPoint);
 
 			ADAPTER_ASSERT(entryPointActivationOffsetEntry != entryPointActivationOffsets.end(), "Entry point \"[]\" is not present in the shader module.", descriptor.entryPoint);
@@ -84,7 +84,7 @@ namespace Trident {
 			#if OPENGL_VERSION >= OPENGL_VERSION_4_6
 				glShaderBinary(1, &shaderModule->shader, GL_SHADER_BINARY_FORMAT_SPIR_V, &code[0], length);
 
-				// TODO: Expose specialization constants.
+				// TODO(graphics/gl/shader-module): Expose specialization constants.
 				glSpecializeShader(shaderModule->shader, &descriptor.entryPoint[0], 0, nullptr, nullptr);
 			#else
 				ENGINE_ERROR_UNSUPPORTED();

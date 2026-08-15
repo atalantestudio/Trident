@@ -21,7 +21,7 @@ namespace Trident {
 	}
 
 	void CommandEncoder::beginRenderPass(const BeginRenderPassDescriptor& descriptor) {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 
@@ -58,7 +58,7 @@ namespace Trident {
 	}
 
 	void CommandEncoder::bindComputePipeline(ref<ComputePipeline> computePipeline) {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 
@@ -78,7 +78,7 @@ namespace Trident {
 	}
 
 	void CommandEncoder::bindGraphicsPipeline(ref<GraphicsPipeline> graphicsPipeline) {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 
@@ -92,7 +92,7 @@ namespace Trident {
 	}
 
 	void CommandEncoder::bindIndexBuffer(ref<Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 
@@ -123,7 +123,7 @@ namespace Trident {
 	}
 
 	void CommandEncoder::bindVertexBuffer(uint32 bindingIndex, ref<Buffer> vertexBuffer, uint64 offset) {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 
@@ -152,7 +152,7 @@ namespace Trident {
 	}
 
 	void CommandEncoder::copyBufferToBuffer(ref<Buffer> sourceBuffer, ref<Buffer> destinationBuffer, view<BufferCopyRegion> copyRegions) {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 
@@ -218,7 +218,7 @@ namespace Trident {
 	}
 
 	void CommandEncoder::copyBufferToImage(ref<Buffer> sourceBuffer, ref<Image> destinationImage, view<BufferImageCopyRegion> copyRegions) {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 
@@ -321,7 +321,7 @@ namespace Trident {
 	}
 
 	void CommandEncoder::copyImageToBuffer(ref<Image> sourceImage, ref<Buffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 
@@ -424,7 +424,7 @@ namespace Trident {
 	}
 
 	void CommandEncoder::dispatch(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				const vec3<uint32> maxComputeWorkgroupCount = device->getPhysicalDevice()->getLimits().maxComputeWorkgroupCount;
 
@@ -448,7 +448,7 @@ namespace Trident {
 	}
 
 	void CommandEncoder::dispatchIndirect(ref<Buffer> buffer, uint64 bufferOffset) {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 
@@ -475,7 +475,7 @@ namespace Trident {
 	}
 
 	void CommandEncoder::draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset, uint32 instanceOffset) {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 
@@ -493,7 +493,7 @@ namespace Trident {
 	}
 
 	void CommandEncoder::drawIndirect(ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 
@@ -524,7 +524,7 @@ namespace Trident {
 	}
 
 	void CommandEncoder::drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset, sint32 indexBias, uint32 instanceOffset) {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 
@@ -544,7 +544,7 @@ namespace Trident {
 	}
 
 	void CommandEncoder::drawIndexedIndirect(ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 
@@ -603,7 +603,7 @@ namespace Trident {
 	}
 
 	void CommandEncoder::insertMemoryBarriers(view<BufferMemoryBarrier> bufferMemoryBarriers, view<ImageMemoryBarrier> imageMemoryBarriers) {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 				uint32 bufferMemoryBarrierIndex = 0;

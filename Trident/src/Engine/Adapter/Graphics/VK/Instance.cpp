@@ -68,7 +68,7 @@ namespace Trident {
 	ref<Trident::Instance> VK::createInstance(const Trident::GraphicsAdapter* adapter, const InstanceDescriptor& descriptor) {
 		// TODO(graphics/vk/instance): Expose to the client side.
 		static const sequence<const char8*> ENABLED_LAYER_NAMES = {
-			#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
+			#if defined(DEBUG_ENABLE_GRAPHICS_API_VALIDATION_LAYER)
 				"VK_LAYER_KHRONOS_validation",
 			#endif
 		};

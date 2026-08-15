@@ -13,7 +13,7 @@ namespace Trident {
 	{}
 
 	uint32 MemoryAllocator::allocate(bool dynamic, uint32 memoryTypeIndex, uint64 size, uint64 alignment) {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 
@@ -81,7 +81,7 @@ namespace Trident {
 	}
 
 	MemorySuballocation MemoryAllocator::suballocate(uint32 allocationIndex, uint64 size, uint64 alignment) {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 

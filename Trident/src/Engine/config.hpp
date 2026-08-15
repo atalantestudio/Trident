@@ -13,27 +13,27 @@ namespace Trident {
 		/// Toggles the DirectX 12 graphics adapter.
 		#define ENABLE_DX12_ADAPTER
 
-		// If enabled, DX12 shaders will be sourced from SPIR-V binaries.
-		// If disabled, they will be sourced from HLSL strings.
+		/// If enabled, DX12 shaders will be sourced from SPIR-V binaries.
+		/// If disabled, they will be sourced from HLSL strings.
 		#define DX12_SOURCE_FROM_SPIRV
 
-		// Prioritize CPU graphics adapters.
+		/// Prioritize CPU graphics adapters.
 		// #define DX12_PREFER_SOFTWARE_ADAPTER
 	#endif
 
 	/// Toggles the OpenGL graphics adapter.
 	#define ENABLE_GL_ADAPTER
 
-	// Whether to prioritize integrated GPUs over discrete GPUs when using the OpenGL graphics adapter.
-	// NOTE: Use this instead of the PreferIntegratedGPU project property. GPU selection for a GL context can't be done at runtime.
 	// TODO(graphics/gl/igpu): Fix OpenGL adapter never using integrated GPU (works on HP Victus laptop).
+	/// Whether to prioritize integrated GPUs over discrete GPUs when using the OpenGL graphics adapter.
+	/// Use this instead of the PreferIntegratedGPU project property. GPU selection for a GL context can't be done at runtime.
 	// #define GL_PREFER_INTEGRATED_GPU
 
-	// If enabled, OpenGL shaders will be sourced from SPIR-V binaries.
-	// If disabled, they will be sourced from GLSL strings.
+	/// If enabled, OpenGL shaders will be sourced from SPIR-V binaries.
+	/// If disabled, they will be sourced from GLSL strings.
 	#define GL_SOURCE_FROM_SPIRV
 
-	/// (OpenGL) The alignment of a resource inside a memory allocation.
+	/// The alignment of a resource inside a memory allocation.
 	#define GL_RESOURCE_ALIGNMENT 4
 
 	/// Whether to use a queuing system similar to Vulkan and DX12 or execute the commands immediately.
@@ -52,9 +52,12 @@ namespace Trident {
 		/// Toggles debug messages from the graphics API.
 		#define DEBUG_ENABLE_MESSENGER
 
-		// Toggle validation layers for graphics APIs that support them.
-		// TODO: Do not mix with ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER, which toggles a custom validation layer.
-		#define DEBUG_ENABLE_VALIDATION_LAYERS
+		/// Toggles validation layers provided by the graphics back-end.
+		#define DEBUG_ENABLE_GRAPHICS_API_VALIDATION_LAYER
+
+		/// Toggles validation layers provided by the graphics front-end.
+		/// If enabled, all graphics calls will be intercepted by the engine's internal validation layer.
+		#define DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER
 
 		/// Toggle to enumerate various Vulkan objects.
 		// #define DEBUG_ENUMERATE_DEVICE_EXTENSIONS
@@ -65,19 +68,14 @@ namespace Trident {
 		// #define DEBUG_ENUMERATE_VALIDATION_LAYERS
 	#endif
 
-	#if defined(BUILD_MODE_DEBUG)
-		/// If enabled, all graphics API function calls will be intercepted by the engine's internal validation layer.
-		#define ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER
-	#endif
-
-	// If enabled, glyphs with a single contour are checked to ensure that the contour is clockwise.
-	// If not, a warning is outputted and the contour's winding order is inverted.
+	/// If enabled, glyphs with a single contour are checked to ensure that the contour is clockwise.
+	/// Otherwise, a warning is outputted and the contour's winding order is inverted.
 	#define TTF_FIX_INVERTED_CONTOURS
 
-	// Desired OpenGL version. Runtime support is not guaranteed.
+	/// Desired OpenGL version. Runtime support is not guaranteed.
 	#define OPENGL_VERSION OPENGL_VERSION_4_6
 
-	// Desired Vulkan version. Runtime support is not guaranteed.
+	/// Desired Vulkan version. Runtime support is not guaranteed.
 	#define VULKAN_VERSION VULKAN_VERSION_1_0
 
 	#if defined(BUILD_MODE_DEBUG)
@@ -88,8 +86,8 @@ namespace Trident {
 	#define VULKAN_USE_VK_KHR_swapchain
 
 	#if defined(ENABLE_GL_ADAPTER)
-		#if OPENGL_VERSION < OPENGL_VERSION_2_0
-			#error "OpenGL versions older than 2.0 cannot be used."
+		#if OPENGL_VERSION < OPENGL_VERSION_3_0
+			#error "OpenGL versions older than 3.0 cannot be used."
 		#endif
 
 		#if OPENGL_VERSION < OPENGL_VERSION_4_3 && defined(DEBUG_ENABLE_MESSENGER)

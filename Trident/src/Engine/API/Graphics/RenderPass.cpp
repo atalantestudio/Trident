@@ -7,7 +7,7 @@
 #include "Engine/API/Graphics/RenderPass.hpp"
 
 namespace Trident {
-	#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+	#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 		static void validateAttachmentImageDescriptor(const AttachmentImageDescriptor& descriptor) {
 			Validator validator;
 
@@ -133,7 +133,7 @@ namespace Trident {
 	}
 
 	ref<Image> RenderPass::createColorAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 attachmentIndex) const {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			validateAttachmentImageDescriptor(descriptor);
 		#endif
 
@@ -159,7 +159,7 @@ namespace Trident {
 	}
 
 	ref<Image> RenderPass::createDepthStencilAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 subpassIndex) const {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			validateAttachmentImageDescriptor(descriptor);
 		#endif
 
@@ -216,7 +216,7 @@ namespace Trident {
 	}
 
 	ref<Image> RenderPass::createInputAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 attachmentIndex) const {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			validateAttachmentImageDescriptor(descriptor);
 		#endif
 

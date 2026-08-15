@@ -4,7 +4,7 @@
 namespace Trident {
 	template<typename T>
 	inline BufferView<T> Buffer::createView(uint64 offset, uint64 size) {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 

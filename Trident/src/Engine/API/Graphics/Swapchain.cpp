@@ -7,7 +7,7 @@
 #include "Engine/API/Graphics/Swapchain.hpp"
 
 namespace Trident {
-	#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+	#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 		static void validateSwapchainDescriptor(const SwapchainDescriptor& descriptor) {
 			{
 				Validator validator;
@@ -27,7 +27,7 @@ namespace Trident {
 		device(device),
 		extent(descriptor.extent)
 	{
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			validateSwapchainDescriptor(descriptor);
 		#endif
 	}
@@ -81,7 +81,7 @@ namespace Trident {
 	}
 
 	void Swapchain::update(const SwapchainDescriptor& descriptor) {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			validateSwapchainDescriptor(descriptor);
 		#endif
 

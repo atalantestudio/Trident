@@ -62,9 +62,6 @@ namespace Trident {
 			return decodeLegacyShaderModuleAsset(stream, asset);
 		}
 
-		// TODO(tsl): Update with the latest revision of ShaderModuleAsset.
-		ENGINE_ERROR_UNIMPLEMENTED();
-
 		asset.glslCode = sequence<char8>(stream.read<uint32>());
 
 		for (char8& character : asset.glslCode) {

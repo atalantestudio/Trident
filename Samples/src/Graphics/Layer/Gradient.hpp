@@ -1,4 +1,4 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
@@ -8,14 +8,18 @@
 #include "../GraphicsLayer.hpp"
 
 namespace Trident {
-	class SampleGradientRenderer : public Renderer {
+	class GradientSampleRenderer : public Renderer {
+		private:
+			// TODO(tsl)
+			static constexpr bool LOAD_TSL_SHADER_MODULE = false;
+
 		public:
 			void build() override {
 				renderPass = createRenderPass();
+				pipelineLayout = createPipelineLayout();
+				pipeline = createPipeline();
 
 				createFramebuffers();
-
-				gradientPipeline = createGradientPipeline();
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
@@ -30,7 +34,7 @@ namespace Trident {
 				});
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, extent);
-				commandEncoder->bindGraphicsPipeline(gradientPipeline);
+				commandEncoder->bindGraphicsPipeline(pipeline);
 				commandEncoder->draw(3, 1, 0, 0);
 				commandEncoder->endRenderPass();
 			}
@@ -43,7 +47,6 @@ namespace Trident {
 			ref<RenderPass> createRenderPass() const {
 				return Renderer::createRenderPass({
 					.attachments = {
-						// Swapchain
 						{
 							.format = getSurface()->getFormat(),
 							.sampleCount = 1,
@@ -97,26 +100,27 @@ namespace Trident {
 				}
 			}
 
-			ref<GraphicsPipeline> createGradientPipeline() const {
-				const ref<PipelineLayout> pipelineLayout = createPipelineLayout({
+			ref<PipelineLayout> createPipelineLayout() const {
+				return Renderer::createPipelineLayout({
 					.descriptorSetLayouts = {},
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Gradient",
+						.name = "Pipeline layout",
 					#endif
 				});
+			}
 
+			ref<GraphicsPipeline> createPipeline() const {
 				const ShaderModuleDescriptor vertexShaderModuleDescriptor = {
 					.stage = ShaderStage::VERTEX,
 					.entryPoint = "main",
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Gradient vertex",
+						.name = "Vertex",
 					#endif
 				};
 
 				ref<ShaderModule> vertexShaderModule;
 
-				// TODO(debug-only)
-				if (getGraphicsApi() == GraphicsAPI::GL) {
+				if (getGraphicsApi() == GraphicsAPI::GL && LOAD_TSL_SHADER_MODULE) {
 					const ref<ShaderModuleAsset> vertexShaderModuleAsset = getLayer()->getApplication()->getAssetLibrary()->getAsset<ShaderModuleAsset>("Screen");
 
 					vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, vertexShaderModuleAsset);
@@ -139,7 +143,7 @@ namespace Trident {
 							.stage = ShaderStage::FRAGMENT,
 							.entryPoint = "main",
 							#if defined(DEBUG_OBJECT_NAME)
-								.name = "Gradient fragment",
+								.name = "Fragment",
 							#endif
 						},
 						"Sample/Gradient/Gradient.frag"
@@ -168,8 +172,9 @@ namespace Trident {
 		private:
 			ref<RenderPass> renderPass;
 			sequence<ref<Framebuffer>> framebuffers;
-			ref<GraphicsPipeline> gradientPipeline;
+			ref<PipelineLayout> pipelineLayout;
+			ref<GraphicsPipeline> pipeline;
 	};
 
-	DEFINE_SAMPLE_LAYER(SampleGradient);
+	DEFINE_SAMPLE_LAYER(GradientSample);
 }

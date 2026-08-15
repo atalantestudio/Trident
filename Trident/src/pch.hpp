@@ -99,7 +99,7 @@
 
 #include "Engine/Manifest.hpp"
 
-#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 	#include "Engine/Debug/Validator.hpp"
 #endif
 

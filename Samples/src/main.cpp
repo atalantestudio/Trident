@@ -184,7 +184,7 @@ namespace Trident {
 				registerLayer<DispatchIndirectSampleLayer>();
 			}
 			else if (SampleNameProperty == "Gradient") {
-				registerLayer<SampleGradientLayer>();
+				registerLayer<GradientSampleLayer>();
 			}
 			else if (SampleNameProperty == "Image") {
 				registerLayer<ImageSampleLayer>();

@@ -9,7 +9,7 @@
 #include "Engine/Filesystem/Asset/ShaderModuleAsset.hpp"
 
 namespace Trident {
-	#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+	#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 		static bool validateSampleCount(uint8 sampleCount) {
 			switch (sampleCount) {
 				case 1:
@@ -70,7 +70,7 @@ namespace Trident {
 	}
 
 	ref<Buffer> Device::createStaticBuffer(const BufferDescriptor& descriptor) const {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 
@@ -108,7 +108,7 @@ namespace Trident {
 	}
 
 	ref<ComputePipeline> Device::createComputePipeline(const ComputePipelineDescriptor& descriptor) const {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 
@@ -130,7 +130,7 @@ namespace Trident {
 	}
 
 	ref<DescriptorSetLayout> Device::createDescriptorSetLayout(view<DescriptorSetLayoutBinding> bindings) const {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 				uint32 descriptorSetLayoutBindingIndex = 0;
@@ -151,7 +151,7 @@ namespace Trident {
 	}
 
 	ref<Fence> Device::createFence(const FenceDescriptor& descriptor) const {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 
@@ -165,7 +165,7 @@ namespace Trident {
 	}
 
 	ref<Framebuffer> Device::createFramebuffer(const FramebufferDescriptor& descriptor) const {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 
@@ -213,7 +213,7 @@ namespace Trident {
 	}
 
 	ref<GraphicsPipeline> Device::createGraphicsPipeline(const GraphicsPipelineDescriptor& descriptor) const {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 
@@ -349,7 +349,7 @@ namespace Trident {
 	}
 
 	ref<Image> Device::createStaticImage(const ImageDescriptor& descriptor) const {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 
@@ -423,7 +423,7 @@ namespace Trident {
 	}
 
 	ref<PipelineLayout> Device::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 				uint32 descriptorSetLayoutIndex = 0;
@@ -460,7 +460,7 @@ namespace Trident {
 	}
 
 	ref<RenderPass> Device::createRenderPass(const RenderPassDescriptor& descriptor) const {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 
@@ -557,7 +557,7 @@ namespace Trident {
 	}
 
 	ref<Sampler> Device::createSampler(const SamplerDescriptor& descriptor) const {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 
@@ -591,7 +591,7 @@ namespace Trident {
 	}
 
 	ref<ShaderModule> Device::createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) const {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			validateShaderModuleDescriptor(descriptor);
 		#endif
 
@@ -599,7 +599,7 @@ namespace Trident {
 	}
 
 	ref<ShaderModule> Device::createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) const {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			validateShaderModuleDescriptor(descriptor);
 		#endif
 
@@ -619,7 +619,7 @@ namespace Trident {
 	}
 
 	ref<Queue> Device::getQueue(QueueFamilyCapability queueFamilyCapability) const {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 
@@ -637,7 +637,7 @@ namespace Trident {
 	}
 
 	void Device::updateDescriptorSets(view<WriteDescriptorSet> writeDescriptorSets) const {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				const uint64 minStorageBufferOffsetAlignment = physicalDevice->getLimits().minStorageBufferOffsetAlignment;
 

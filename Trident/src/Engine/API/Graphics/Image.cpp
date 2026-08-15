@@ -78,7 +78,7 @@ namespace Trident {
 	}
 
 	ref<ImageView> Image::createView(const ImageViewDescriptor& descriptor) {
-		#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
 
