@@ -308,7 +308,7 @@ namespace Trident {
 
 				while (framebufferIndex < framebuffers.count()) {
 					#if defined(DEBUG_OBJECT_NAME)
-						name = Logger::format("In flight framebuffer []", framebufferIndex);
+						name = Logger::format("In flight []", framebufferIndex);
 
 						framebufferDescriptor.name = name;
 					#endif

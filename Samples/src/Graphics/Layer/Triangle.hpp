@@ -18,8 +18,8 @@ namespace Trident {
 		public:
 			void build() override {
 				renderPass = createRenderPass();
-				trianglePipelineLayout = createTrianglePipelineLayout();
-				trianglePipeline = createTrianglePipeline();
+				pipelineLayout = createPipelineLayout();
+				pipeline = createPipeline();
 				vertexBuffer = createVertexBuffer();
 				stagingBuffer = createStagingBuffer();
 
@@ -36,10 +36,10 @@ namespace Trident {
 			void encodeOneTimeCommands() const override {
 				const BufferView<Vertex> vertexStagingBufferView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
 
-				Vertex* mappedRange = vertexStagingBufferView.map();
-				mappedRange[0] = {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}};
-				mappedRange[1] = {{ 0.0f,  0.5f}, {0.0f, 1.0f, 0.0f}};
-				mappedRange[2] = {{ 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}};
+				Vertex* vertexMappedRange = vertexStagingBufferView.map();
+				vertexMappedRange[0] = {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}};
+				vertexMappedRange[1] = {{ 0.0f,  0.5f}, {0.0f, 1.0f, 0.0f}};
+				vertexMappedRange[2] = {{ 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}};
 
 				stagingBuffer->unmap();
 
@@ -79,7 +79,7 @@ namespace Trident {
 				});
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, extent);
-				commandEncoder->bindGraphicsPipeline(trianglePipeline);
+				commandEncoder->bindGraphicsPipeline(pipeline);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
 				commandEncoder->draw(3, 1, 0, 0);
 				commandEncoder->endRenderPass();
@@ -134,7 +134,7 @@ namespace Trident {
 
 				while (framebufferIndex < framebuffers.count()) {
 					#if defined(DEBUG_OBJECT_NAME)
-						name = Logger::format("In flight framebuffer []", framebufferIndex);
+						name = Logger::format("In flight []", framebufferIndex);
 
 						framebufferDescriptor.name = name;
 					#endif
@@ -147,16 +147,16 @@ namespace Trident {
 				}
 			}
 
-			ref<PipelineLayout> createTrianglePipelineLayout() const {
-				return createPipelineLayout({
+			ref<PipelineLayout> createPipelineLayout() const {
+				return Renderer::createPipelineLayout({
 					.descriptorSetLayouts = {},
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Triangle",
+						.name = "",
 					#endif
 				});
 			}
 
-			ref<GraphicsPipeline> createTrianglePipeline() const {
+			ref<GraphicsPipeline> createPipeline() const {
 				VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 				vertexInputBinding.registerAttribute<svec2<float32>>();
 				vertexInputBinding.registerAttribute<vec3<float32>>();
@@ -168,7 +168,7 @@ namespace Trident {
 				};
 
 				return createGraphicsPipeline({
-					.pipelineLayout = trianglePipelineLayout,
+					.pipelineLayout = pipelineLayout,
 					.vertexInputBindings = vertexInputBinding,
 					.vertexShaderModule = loadShaderModule(
 						{
@@ -206,7 +206,7 @@ namespace Trident {
 					.renderPass = renderPass,
 					.subpassIndex = 0,
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Triangle",
+						.name = "",
 					#endif
 				});
 			}
@@ -238,8 +238,8 @@ namespace Trident {
 		private:
 			ref<RenderPass> renderPass;
 			sequence<ref<Framebuffer>> framebuffers;
-			ref<PipelineLayout> trianglePipelineLayout;
-			ref<GraphicsPipeline> trianglePipeline;
+			ref<PipelineLayout> pipelineLayout;
+			ref<GraphicsPipeline> pipeline;
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> stagingBuffer;
 	};
