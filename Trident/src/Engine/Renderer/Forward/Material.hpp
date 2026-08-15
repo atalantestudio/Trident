@@ -95,7 +95,7 @@ namespace Trident {
 	void ForwardRenderer::createMaterials() {
 		const ref<Device> device = getDevice();
 		const ref<Scene3DAsset> sceneAsset = scene->getAsset();
-		const sequence<ColorBlendAttachment> colorBlendAttachments = {
+		const ColorBlendAttachment colorBlendAttachments[] = {
 			{
 				.blend = false,
 			},

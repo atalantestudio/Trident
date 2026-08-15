@@ -143,7 +143,7 @@ namespace Trident {
 		commandEncoder->begin();
 		commandEncoder->copyBufferToBuffer(fontStagingBuffer, fontBuffer, fontBufferCopyRegion);
 
-		const sequence<ImageMemoryBarrier> imageMemoryBarriers = {
+		const ImageMemoryBarrier imageMemoryBarriers[] = {
 			// Glyph
 			{
 				.image = glyphImage,
@@ -411,7 +411,7 @@ namespace Trident {
 	}
 
 	void GenerateSDFGlyphMapProcess::createDescriptorSetLayoutsAndSets() {
-		const sequence<DescriptorSetLayoutBinding> bindings = {
+		const DescriptorSetLayoutBinding bindings[] = {
 			// Font
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
@@ -551,10 +551,13 @@ namespace Trident {
 	}
 
 	void GenerateSDFGlyphMapProcess::allocateDescriptorSets() {
-		const sequence<ref<DescriptorSet>> descriptorSets = Renderer::getDevice()->allocateDescriptorSets(sequence<ref<DescriptorSetLayout>>{
+		const ref<DescriptorSetLayout> descriptorSetLayouts[] = {
 			glyphImageDescriptorSetLayout,
 			glyphSdfDescriptorSetLayout,
-		});
+		};
+
+		// TODO(graphics/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
+		sequence<ref<DescriptorSet>> descriptorSets = Renderer::getDevice()->allocateDescriptorSets(descriptorSetLayouts);
 
 		glyphImageDescriptorSet = descriptorSets[0];
 		glyphSdfDescriptorSet = descriptorSets[1];
@@ -576,7 +579,7 @@ namespace Trident {
 			.sampler = nullptr,
 		};
 
-		const sequence<WriteDescriptorSet> writeDescriptorSets = {
+		const WriteDescriptorSet writeDescriptorSets[] = {
 			// Glyph image
 			{
 				.descriptorSet = glyphImageDescriptorSet,

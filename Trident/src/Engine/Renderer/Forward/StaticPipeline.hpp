@@ -20,14 +20,14 @@ namespace Trident {
 		vertexInputBindings[2].registerAttribute<mat4x4<float32>>();
 		vertexInputBindings[2].registerAttribute<mat3x3<float32>>();
 
-		const sequence<ColorBlendAttachment> colorBlendAttachments = {
+		const ColorBlendAttachment colorBlendAttachments[] = {
 			{
 				.blend = false,
 			},
 		};
 
 		return {
-			.vertexInputBindings = view<VertexInputBinding>(vertexInputBindings, 3),
+			.vertexInputBindings = view<VertexInputBinding>(vertexInputBindings, 2),
 			.vertexShaderModule = loadInternalShaderModule(
 				{
 					.stage = ShaderStage::VERTEX,

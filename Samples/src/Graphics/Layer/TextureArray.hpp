@@ -341,7 +341,8 @@ namespace Trident {
 			}
 
 			void allocateTextureArrayImageDescriptorSet() {
-				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(textureArrayDescriptorSetLayout);
+				// TODO(graphics/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
+				sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(textureArrayDescriptorSetLayout);
 
 				textureArrayDescriptorSet = descriptorSets[0];
 			}
@@ -401,7 +402,7 @@ namespace Trident {
 				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/TextureArray/TextureArray.vert");
 				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/TextureArray/TextureArray.frag");
 
-				const sequence<ColorBlendAttachment> colorBlendAttachments = {
+				const ColorBlendAttachment colorBlendAttachments[] = {
 					{
 						.blend = false,
 					},
@@ -409,7 +410,7 @@ namespace Trident {
 
 				GraphicsPipelineDescriptor graphicsPipelineDescriptor{};
 				graphicsPipelineDescriptor.pipelineLayout = pipelineLayout;
-				graphicsPipelineDescriptor.vertexInputBindings = view<VertexInputBinding>(vertexInputBindings, 2);
+				graphicsPipelineDescriptor.vertexInputBindings = vertexInputBindings;
 				graphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
 				graphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
 				graphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;

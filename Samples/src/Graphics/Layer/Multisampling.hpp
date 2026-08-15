@@ -196,7 +196,7 @@ namespace Trident {
 				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/Multisampling/Multisampling.vert");
 				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/Multisampling/Multisampling.frag");
 
-				const sequence<ColorBlendAttachment> colorBlendAttachments = {
+				const ColorBlendAttachment colorBlendAttachments[] = {
 					{
 						.blend = false,
 					},

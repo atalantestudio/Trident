@@ -160,7 +160,7 @@ namespace Trident {
 				vertexInputBinding.registerAttribute<svec2<float32>>();
 				vertexInputBinding.registerAttribute<vec3<float32>>();
 
-				const sequence<ColorBlendAttachment> colorBlendAttachments = {
+				const ColorBlendAttachment colorBlendAttachments[] = {
 					{
 						.blend = false,
 					},

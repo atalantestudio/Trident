@@ -34,10 +34,11 @@ namespace Trident {
 		ref<VK::GraphicsPipeline> graphicsPipeline = allocateRef<VK::GraphicsPipeline>(device);
 		VkResult result;
 
-		const sequence<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos = {
+		const VkPipelineShaderStageCreateInfo shaderStageCreateInfos[] = {
 			static_pointer_cast<VK::ShaderModule>(descriptor.vertexShaderModule)->createInfo,
 			static_pointer_cast<VK::ShaderModule>(descriptor.fragmentShaderModule)->createInfo,
 		};
+		const view<VkPipelineShaderStageCreateInfo> shaderStageCreateInfoView = shaderStageCreateInfos;
 
 		sequence<VkVertexInputBindingDescription> vertexInputBindingDescriptions(descriptor.vertexInputBindings.count());
 		std::vector<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;
@@ -207,8 +208,8 @@ namespace Trident {
 		graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 		graphicsPipelineCreateInfo.pNext = nullptr;
 		graphicsPipelineCreateInfo.flags = 0;
-		graphicsPipelineCreateInfo.stageCount = static_cast<uint32>(shaderStageCreateInfos.count());
-		graphicsPipelineCreateInfo.pStages = &shaderStageCreateInfos[0];
+		graphicsPipelineCreateInfo.stageCount = static_cast<uint32>(shaderStageCreateInfoView.count());
+		graphicsPipelineCreateInfo.pStages = &shaderStageCreateInfoView[0];
 		graphicsPipelineCreateInfo.pVertexInputState = &vertexInputStateCreateInfo;
 		graphicsPipelineCreateInfo.pInputAssemblyState = &inputAssemblyStateCreateInfo;
 		graphicsPipelineCreateInfo.pTessellationState = nullptr;

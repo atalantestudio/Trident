@@ -322,7 +322,7 @@ namespace Trident {
 	#endif
 
 	void Physics2DRenderer::createCameraViewDescriptorSetLayout() {
-		const sequence<DescriptorSetLayoutBinding> bindings = {
+		const DescriptorSetLayoutBinding bindings[] = {
 			// Camera
 			{
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
@@ -388,7 +388,7 @@ namespace Trident {
 		const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/ScreenUVNDC.vert");
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/Grid.frag");
 
-		const sequence<ColorBlendAttachment> colorBlendAttachments = {
+		const ColorBlendAttachment colorBlendAttachments[] = {
 			{
 				.blend = true,
 				.srcColorBlendFactor = BlendFactor::SRC_ALPHA,
@@ -460,7 +460,7 @@ namespace Trident {
 
 		rigidBodyFillPipeline = createGraphicsPipeline({
 			.pipelineLayout = cameraViewPipelineLayout,
-			.vertexInputBindings = view<VertexInputBinding>(vertexInputBindings, 2),
+			.vertexInputBindings = vertexInputBindings,
 			.vertexShaderModule = vertexShaderModule,
 			.fragmentShaderModule = fragmentShaderModule,
 			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
@@ -526,7 +526,7 @@ namespace Trident {
 
 		rigidBodyStrokePipeline = createGraphicsPipeline({
 			.pipelineLayout = cameraViewPipelineLayout,
-			.vertexInputBindings = view<VertexInputBinding>(vertexInputBindings, 2),
+			.vertexInputBindings = vertexInputBindings,
 			.vertexShaderModule = vertexShaderModule,
 			.fragmentShaderModule = fragmentShaderModule,
 			.primitiveTopology = PrimitiveTopology::LINE_STRIP,
@@ -575,7 +575,7 @@ namespace Trident {
 		const ref<ShaderModule> vertexShaderModule = loadShaderModule(centerOfMassVertexShaderModuleDescriptor, "Physics2D/CenterOfMass.vert");
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(centerOfMassFragmentShaderModuleDescriptor, "Physics2D/CenterOfMass.frag");
 
-		const sequence<ColorBlendAttachment> colorBlendAttachments = {
+		const ColorBlendAttachment colorBlendAttachments[] = {
 			{
 				.blend = false,
 			},
@@ -643,7 +643,7 @@ namespace Trident {
 			}
 		}
 
-		const sequence<ColorBlendAttachment> colorBlendAttachments = {
+		const ColorBlendAttachment colorBlendAttachments[] = {
 			{
 				.blend = true,
 				.srcColorBlendFactor = BlendFactor::SRC_ALPHA,
@@ -653,7 +653,7 @@ namespace Trident {
 
 		rigidBodyPlaceholderFillPipeline = createGraphicsPipeline({
 			.pipelineLayout = placeholderPipelineLayout,
-			.vertexInputBindings = view<VertexInputBinding>(vertexInputBindings, 2),
+			.vertexInputBindings = vertexInputBindings,
 			.vertexShaderModule = vertexShaderModule,
 			.fragmentShaderModule = loadShaderModule(
 				{
@@ -721,7 +721,7 @@ namespace Trident {
 			}
 		}
 
-		const sequence<ColorBlendAttachment> colorBlendAttachments = {
+		const ColorBlendAttachment colorBlendAttachments[] = {
 			{
 				.blend = true,
 				.srcColorBlendFactor = BlendFactor::SRC_ALPHA,
@@ -731,7 +731,7 @@ namespace Trident {
 
 		rigidBodyPlaceholderStrokePipeline = createGraphicsPipeline({
 			.pipelineLayout = placeholderPipelineLayout,
-			.vertexInputBindings = view<VertexInputBinding>(vertexInputBindings, 2),
+			.vertexInputBindings = vertexInputBindings,
 			.vertexShaderModule = vertexShaderModule,
 			.fragmentShaderModule = loadShaderModule(
 				{
@@ -858,7 +858,7 @@ namespace Trident {
 			const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/Distance.vert");
 			const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/Distance.frag");
 
-			const sequence<ColorBlendAttachment> colorBlendAttachments = {
+			const ColorBlendAttachment colorBlendAttachments[] = {
 				{
 					.blend = false,
 				},
@@ -913,7 +913,7 @@ namespace Trident {
 			const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/VertexFeature.vert");
 			const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/VertexFeature.frag");
 
-			const sequence<ColorBlendAttachment> colorBlendAttachments = {
+			const ColorBlendAttachment colorBlendAttachments[] = {
 				{
 					.blend = false,
 				},
@@ -966,7 +966,7 @@ namespace Trident {
 			const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/EdgeFeature.vert");
 			const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/EdgeFeature.frag");
 
-			const sequence<ColorBlendAttachment> colorBlendAttachments = {
+			const ColorBlendAttachment colorBlendAttachments[] = {
 				{
 					.blend = false,
 				},
@@ -998,10 +998,13 @@ namespace Trident {
 	#endif
 
 	void Physics2DRenderer::allocateDescriptorSets() {
-		const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(sequence<ref<DescriptorSetLayout>>{
+		const ref<DescriptorSetLayout> descriptorSetLayouts[] = {
 			cameraViewDescriptorSetLayout,
 			placeholderDescriptorSetLayout,
-		});
+		};
+
+		// TODO(graphics/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
+		sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(descriptorSetLayouts);
 
 		cameraViewDescriptorSet = descriptorSets[0];
 		placeholderDescriptorSet = descriptorSets[1];
@@ -1010,9 +1013,9 @@ namespace Trident {
 	void Physics2DRenderer::setScene(const Scene2D* scene) {
 		this->scene = scene;
 
-		const sequence<uint8>& dataBuffer = scene->getDataBuffer();
-		const sequence<Geometry2D>& geometries = scene->getGeometries();
-		const sequence<Hull2D>& hulls = scene->getHulls();
+		const view<uint8> dataBuffer = scene->getDataBuffer();
+		const view<Geometry2D> geometries = scene->getGeometries();
+		const view<Hull2D> hulls = scene->getHulls();
 		const ComponentPool<RigidBody2DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
 		const ComponentPool<GeometryComponent>& geometryComponentPool = scene->ecs.getComponentPool<GeometryComponent>();
 		const uint64 rigidBodyBufferSize = rigidBodyComponentPool.componentCount * sizeof(RigidBody);
@@ -1195,7 +1198,7 @@ namespace Trident {
 		const BufferView<Camera> cameraView = cameraBuffer->createView<Camera>(0, cameraBuffer->getSize());
 		const BufferView<View> viewView = viewBuffer->createView<View>(0, viewBuffer->getSize());
 
-		const sequence<WriteDescriptorSet> writeDescriptorSets = {
+		const WriteDescriptorSet writeDescriptorSets[] = {
 			{
 				.descriptorSet = cameraViewDescriptorSet,
 				.bindingIndex = 0,
@@ -1214,7 +1217,7 @@ namespace Trident {
 	void Physics2DRenderer::updatePlaceholderDescriptorSet() const {
 		const BufferView<Placeholder> placeholderView = placeholderBuffer->createView<Placeholder>(0, placeholderBuffer->getSize());
 
-		const sequence<WriteDescriptorSet> writeDescriptorSets = {
+		const WriteDescriptorSet writeDescriptorSets[] = {
 			{
 				.descriptorSet = placeholderDescriptorSet,
 				.bindingIndex = 0,
@@ -1300,8 +1303,8 @@ namespace Trident {
 			commandEncoder->draw(3, 1, 0, 0);
 		}
 
-		const sequence<Geometry2D>& geometries = scene->getGeometries();
-		const sequence<Hull2D>& hulls = scene->getHulls();
+		const view<Geometry2D> geometries = scene->getGeometries();
+		const view<Hull2D> hulls = scene->getHulls();
 		const ComponentPool<GeometryComponent>& geometryComponentPool = scene->ecs.getComponentPool<GeometryComponent>();
 
 		uint32 componentIndex = 0;
@@ -1370,7 +1373,7 @@ namespace Trident {
 		#endif */
 
 		if (selectedEntity != max<Entity>()) {
-			const sequence<ref<DescriptorSet>> descriptorSets = {cameraViewDescriptorSet, placeholderDescriptorSet};
+			const ref<DescriptorSet> descriptorSets[2] = {cameraViewDescriptorSet, placeholderDescriptorSet};
 			const GeometryComponent geometryComponent = scene->ecs.getComponent<GeometryComponent>(selectedEntity);
 			const Geometry2D& geometry = geometries[geometryComponent.geometryIndex];
 			const Hull2D& hull = hulls[geometry.hullIndex];

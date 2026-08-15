@@ -224,7 +224,7 @@ namespace Trident {
 	}
 
 	ref<GraphicsPipeline> Lightmapper::createDilationPipeline() const {
-		const sequence<ColorBlendAttachment> colorBlendAttachments = {
+		const ColorBlendAttachment colorBlendAttachments[] = {
 			{
 				.blend = false,
 			},

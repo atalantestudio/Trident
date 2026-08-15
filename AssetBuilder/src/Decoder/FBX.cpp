@@ -39,7 +39,7 @@ namespace Trident {
 		else {
 			Property.Contents = sequence<DataType>(ArrayLength);
 
-			std::copy_n(stream.getBytePosition(), ArrayLength, Property.Contents.begin());
+			std::copy_n(stream.getBytePosition(), ArrayLength, &Property.Contents[0]);
 
 			stream.jump(ArrayLength * sizeof(DataType));
 		}
@@ -54,14 +54,14 @@ namespace Trident {
 		Property.Data = sequence<uint8>(Length);
 
 		// TODO(asset-builder/parser/fbx): Add null terminator for the string case?
-		std::copy_n(stream.getBytePosition(), Length, Property.Data.begin());
+		std::copy_n(stream.getBytePosition(), Length, &Property.Data[0]);
 
 		stream.jump(Property.Data.count());
 
 		return Property;
 	}
 
-	static inline const std::unordered_map<FBXPropertyTypeCode, std::function<ref<FBXProperty>(ByteStream<StreamOperation::READ>&)>> readProperty = {
+	inline static const std::unordered_map<FBXPropertyTypeCode, std::function<ref<FBXProperty>(ByteStream<StreamOperation::READ>&)>> readProperty = {
 		{FBXPropertyTypeCode::Y, readPrimitiveProperty<sint16>},
 		{FBXPropertyTypeCode::C, readPrimitiveProperty<bool>},
 		{FBXPropertyTypeCode::I, readPrimitiveProperty<sint32>},
@@ -137,31 +137,30 @@ namespace Trident {
 
 	template<>
 	bool Decoder<FileFormat::FBX>::validateSignature(const ByteStream<StreamOperation::READ>& stream) {
+		static constexpr view<char8> MAGIC("Kaydara FBX Binary  \x00", 22);
+
 		if (stream.getRemainingSize() < 22) {
 			return false;
 		}
 
-		const char8* magic = pointer_cast<const char8*>(stream.getBytePosition());
+		const view<char8> magic(pointer_cast<const char8*>(stream.getBytePosition()), 22);
 
-		return std::strcmp(magic, "Kaydara FBX Binary  \x00") == 0;
+		return magic == MAGIC;
 	}
 
 	// https://code.blender.org/2013/08/fbx-binary-file-format-specification
 	// https://banexdevblog.wordpress.com/2014/06/23/a-quick-tutorial-about-the-fbx-ascii-format
 	template<>
 	File<FileFormat::FBX> Decoder<FileFormat::FBX>::decode(view<uint8> data) {
-		File<FileFormat::FBX> file;
-
 		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
 		ENGINE_ASSERT(Decoder<FileFormat::FBX>::validateSignature(stream), "Invalid FBX file signature.");
 
-		stream.jump(21);
+		// The last 2 bytes [0x1a, 0x00] are unknown but appear in all observed files.
+		// See https://code.blender.org/2013/08/fbx-binary-file-format-specification/#binary-file-structure.
+		stream.jump(23);
 
-		// Skip bytes [0x1a, 0x00].
-		// NOTE: According to https://code.blender.org/2013/08/fbx-binary-file-format-specification/#binary-file-structure, they are unknown but do appear in all observed files.
-		stream.jump(2);
-
+		File<FileFormat::FBX> file{};
 		file.Version = stream.read<uint32>();
 
 		for (uint32 rootNodeIndex = 0; rootNodeIndex < MAX_ROOT_NODE_ITERATIONS; rootNodeIndex += 1) {

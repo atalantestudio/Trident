@@ -9,9 +9,10 @@ namespace Trident {
 	class ProcessSIMDProcess final : public Process {
 		public:
 			sint32 main(view<void*> arguments) override {
-				const sequence<uint16> offsets = {0, 2, 5, 7, 9, 11, 14, 18, 22, 23, 29, 31};
+				static constexpr uint16 offsets[] = {0, 2, 5, 7, 9, 11, 14, 18, 22, 23, 29, 31};
+				static constexpr view<uint16> offsetView = offsets;
 
-				sequence<uint16> lengths(offsets.count());
+				sequence<uint16> lengths(offsetView.count());
 
 				const uint64 regCount = lengths.count() / 8;
 
@@ -28,8 +29,8 @@ namespace Trident {
 				} */
 
 				while (regOffset < regCount * 8) {
-					const __m128i curr = _mm_load_si128(pointer_cast<const __m128i*>(&offsets[regOffset]));
-					const __m128i next = _mm_load_si128(pointer_cast<const __m128i*>(&offsets[regOffset + 1]));
+					const __m128i curr = _mm_load_si128(pointer_cast<const __m128i*>(&offsetView[regOffset]));
+					const __m128i next = _mm_load_si128(pointer_cast<const __m128i*>(&offsetView[regOffset + 1]));
 					const __m128i sub = _mm_sub_epi16(next, curr);
 
 					_mm_store_si128(pointer_cast<__m128i*>(&lengths[regOffset]), sub);
@@ -37,8 +38,8 @@ namespace Trident {
 					regOffset += 8;
 				}
 
-				while (regOffset < offsets.count() - 1) {
-					lengths[regOffset] = offsets[regOffset + 1] - offsets[regOffset];
+				while (regOffset < offsetView.count() - 1) {
+					lengths[regOffset] = offsetView[regOffset + 1] - offsetView[regOffset];
 
 					regOffset += 1;
 				}

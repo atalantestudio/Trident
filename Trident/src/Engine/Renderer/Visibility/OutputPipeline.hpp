@@ -29,7 +29,7 @@ namespace Trident {
 			"Visibility/Output.frag"
 		);
 
-		const sequence<ColorBlendAttachment> colorBlendAttachments = {
+		const ColorBlendAttachment colorBlendAttachments[] = {
 			{
 				.blend = false,
 			},

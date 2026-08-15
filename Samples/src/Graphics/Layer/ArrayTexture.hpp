@@ -314,7 +314,7 @@ namespace Trident {
 				vertexInputBindings[1].registerAttribute<svec2<float32>>();
 				vertexInputBindings[1].registerAttribute<uint32>();
 
-				const sequence<ColorBlendAttachment> colorBlendAttachments = {
+				const ColorBlendAttachment colorBlendAttachments[] = {
 					{
 						.blend = false,
 					},
@@ -322,7 +322,7 @@ namespace Trident {
 
 				return createGraphicsPipeline({
 					.pipelineLayout = arrayTexturePipelineLayout,
-					.vertexInputBindings = view<VertexInputBinding>(vertexInputBindings, 2),
+					.vertexInputBindings = vertexInputBindings,
 					.vertexShaderModule = loadShaderModule(
 						{
 							.stage = ShaderStage::VERTEX,

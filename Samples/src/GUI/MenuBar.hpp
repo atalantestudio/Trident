@@ -128,7 +128,7 @@ namespace Trident {
 			}
 
 			void ContextMenu(index menuIndex) {
-				const sequence<sequence<char8>>& contextMenuItems = CONTEXT_MENU_ITEMS[menuIndex];
+				const view<sequence<char8>> contextMenuItems = CONTEXT_MENU_ITEMS[menuIndex];
 
 				Floating({
 					.size = {FIT, FIT},

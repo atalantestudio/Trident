@@ -24,8 +24,7 @@ namespace Trident {
 
 		const ref<FBXArrayProperty<float64>> VerticesProperty = static_pointer_cast<FBXArrayProperty<float64>>(VerticesNode->PropertyList[0]);
 		const ref<FBXArrayProperty<sint32>> PolygonVertexIndexProperty = static_pointer_cast<FBXArrayProperty<sint32>>(PolygonVertexIndexNode->PropertyList[0]);
-
-		const sequence<float64>& vertexPositionComponents = VerticesProperty->Contents;
+		const view<float64> vertexPositionComponents = VerticesProperty->Contents;
 
 		ENGINE_ASSERT(vertexPositionComponents.count() >= 3, "Invalid vertex position component buffer length.");
 		ENGINE_ASSERT(PolygonVertexIndexProperty->Contents.count() >= 3, "Invalid vertex position index buffer length.");

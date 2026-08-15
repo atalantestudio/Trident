@@ -167,7 +167,7 @@ namespace Trident {
 
 		stagingBuffer->unmap();
 
-		const sequence<BufferCopyRegion> copyRegions = {
+		const BufferCopyRegion copyRegions[] = {
 			// Data
 			{
 				.sourceOffset = 0,
@@ -222,7 +222,7 @@ namespace Trident {
 
 		// Visibility render pass
 		{
-			const sequence<ref<DescriptorSet>> descriptorSets = {
+			const ref<DescriptorSet> descriptorSets[] = {
 				cameraDescriptorSet,
 				clusterDescriptorSet,
 				instanceDescriptorSet,
@@ -259,7 +259,7 @@ namespace Trident {
 		#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
 			// Visibility debug pass
 			{
-				const sequence<ImageMemoryBarrier> imageMemoryBarriers = {
+				const ImageMemoryBarrier imageMemoryBarriers[] = {
 					visibilityImageMemoryBarrier,
 					{
 						.image = depthStencilImage,
@@ -270,7 +270,7 @@ namespace Trident {
 
 				commandEncoder->insertMemoryBarriers({}, imageMemoryBarriers);
 
-				const sequence<ref<DescriptorSet>> descriptorSets = {
+				const ref<DescriptorSet> descriptorSets[] = {
 					visibilityDebugDescriptorSet,
 					clusterDescriptorSet,
 					instanceDescriptorSet,
@@ -397,7 +397,7 @@ namespace Trident {
 	}
 
 	void VisibilityRenderer::allocateDescriptorSets() {
-		const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(sequence<ref<DescriptorSetLayout>>{
+		const ref<DescriptorSetLayout> descriptorSetLayouts[] = {
 			cameraDescriptorSetLayout,
 			clusterDescriptorSetLayout,
 			instanceDescriptorSetLayout,
@@ -409,7 +409,10 @@ namespace Trident {
 			#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
 				visibilityDebugDescriptorSetLayout,
 			#endif
-		});
+		};
+
+		// TODO(graphics/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
+		sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(descriptorSetLayouts);
 
 		cameraDescriptorSet = descriptorSets[0];
 		clusterDescriptorSet = descriptorSets[1];
@@ -479,7 +482,7 @@ namespace Trident {
 		const BufferView<uint32> materialOffsetView = materialOffsetBuffer->createView<uint32>(sizeof(uint32), materialOffsetBuffer->getSize() - sizeof(uint32));
 		const BufferView<DispatchIndirectCommand> materialShaderIndirectView = materialShaderIndirectBuffer->createView<DispatchIndirectCommand>(0, materialShaderIndirectBuffer->getSize());
 
-		const sequence<WriteDescriptorSet> writeDescriptorSets = {
+		const WriteDescriptorSet writeDescriptorSets[] = {
 			{
 				.descriptorSet = cameraDescriptorSet,
 				.bindingIndex = 0,
@@ -679,7 +682,7 @@ namespace Trident {
 
 		const BufferView<uint32> materialCoordinateView = materialCoordinateBuffer->createView<uint32>(0, materialCoordinateBuffer->getSize());
 
-		const sequence<WriteDescriptorSet> writeDescriptorSets = {
+		const WriteDescriptorSet writeDescriptorSets[] = {
 			{
 				.descriptorSet = materialCountDescriptorSet,
 				.bindingIndex = 1,

@@ -35,7 +35,8 @@ namespace Trident {
 					forwardDescriptorSetLayout,
 				};
 
-				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(descriptorSetLayouts);
+				// TODO(graphics/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
+				sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(descriptorSetLayouts);
 
 				staticGeometryDescriptorSet = descriptorSets[0];
 				forwardDescriptorSet = descriptorSets[1];

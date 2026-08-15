@@ -7,7 +7,7 @@
 
 namespace Trident {
 	ref<GraphicsPipeline> Lightmapper::createGBufferPipeline() const {
-		const sequence<ColorBlendAttachment> colorBlendAttachments = {
+		const ColorBlendAttachment colorBlendAttachments[] = {
 			{
 				.blend = false,
 			},

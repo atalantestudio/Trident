@@ -34,7 +34,8 @@ namespace Trident {
 
 		subcomponentDescriptorSetLayout = createSubcomponentDescriptorSetLayout();
 
-		const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(subcomponentDescriptorSetLayout);
+		// TODO(graphics/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
+		sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(subcomponentDescriptorSetLayout);
 
 		subcomponentDescriptorSet = descriptorSets[0];
 
@@ -157,11 +158,12 @@ namespace Trident {
 			#endif
 		});
 
-		const sequence<uint8> data = {255, 255, 255, 255};
+		static constexpr uint8 data[] = {255, 255, 255, 255};
+		static constexpr view<uint8> dataView = data;
 
-		std::copy(data.begin(), data.end(), userImageStagingBufferMappedRange);
+		std::copy(dataView.begin(), dataView.end(), userImageStagingBufferMappedRange);
 
-		userImageStagingBufferMappedRange += data.count();
+		userImageStagingBufferMappedRange += dataView.count();
 		userImageCount += 1;
 	}
 
@@ -330,7 +332,7 @@ namespace Trident {
 	}
 
 	ref<DescriptorSetLayout> GUIRenderer::createSubcomponentDescriptorSetLayout() const {
-		const sequence<DescriptorSetLayoutBinding> bindings = {
+		const DescriptorSetLayoutBinding bindings[] = {
 			// Camera
 			{
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
@@ -372,7 +374,7 @@ namespace Trident {
 		vertexInputBindings[1].registerAttribute<uint32>(); // Z-index
 		vertexInputBindings[1].registerAttribute<uint32>(); // Texture array layer index
 
-		const sequence<ColorBlendAttachment> colorBlendAttachments = {
+		const ColorBlendAttachment colorBlendAttachments[] = {
 			{
 				.blend = true,
 				.srcColorBlendFactor = BlendFactor::SRC_ALPHA,
@@ -382,7 +384,7 @@ namespace Trident {
 
 		return createGraphicsPipeline({
 			.pipelineLayout = subcomponentPipelineLayout,
-			.vertexInputBindings = view<VertexInputBinding>(vertexInputBindings, 2),
+			.vertexInputBindings = vertexInputBindings,
 			.vertexShaderModule = loadInternalShaderModule(
 				{
 					.stage = ShaderStage::VERTEX,
@@ -443,7 +445,7 @@ namespace Trident {
 		vertexInputBindings[1].registerAttribute<uint32>(); // Layer index
 		vertexInputBindings[1].registerAttribute<float32>(); // Font size
 
-		const sequence<ColorBlendAttachment> colorBlendAttachments = {
+		const ColorBlendAttachment colorBlendAttachments[] = {
 			{
 				.blend = true,
 				.srcColorBlendFactor = BlendFactor::SRC_ALPHA,
@@ -453,7 +455,7 @@ namespace Trident {
 
 		return createGraphicsPipeline({
 			.pipelineLayout = subcomponentPipelineLayout,
-			.vertexInputBindings = view<VertexInputBinding>(vertexInputBindings, 2),
+			.vertexInputBindings = vertexInputBindings,
 			.vertexShaderModule = loadInternalShaderModule(
 				{
 					.stage = ShaderStage::VERTEX,

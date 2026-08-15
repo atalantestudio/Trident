@@ -129,7 +129,7 @@ namespace Trident {
 					vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/Gradient/Gradient.vert");
 				}
 
-				const sequence<ColorBlendAttachment> colorBlendAttachments = {
+				const ColorBlendAttachment colorBlendAttachments[] = {
 					{
 						.blend = false,
 					},

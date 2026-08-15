@@ -234,7 +234,7 @@ namespace Trident {
 				vertexInputBindings[1].registerAttribute<decltype(Instance::color)>();
 				vertexInputBindings[1].registerAttribute<decltype(Instance::translation)>();
 
-				const sequence<ColorBlendAttachment> colorBlendAttachments = {
+				const ColorBlendAttachment colorBlendAttachments[] = {
 					{
 						.blend = false,
 					},
@@ -242,7 +242,7 @@ namespace Trident {
 
 				return createGraphicsPipeline({
 					.pipelineLayout = pipelineLayout,
-					.vertexInputBindings = view<VertexInputBinding>(vertexInputBindings, 2),
+					.vertexInputBindings = vertexInputBindings,
 					.vertexShaderModule = loadShaderModule(
 						{
 							.stage = ShaderStage::VERTEX,

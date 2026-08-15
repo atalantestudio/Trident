@@ -7,7 +7,7 @@
 
 namespace Trident {
 	ref<DescriptorSetLayout> VisibilityRenderer::createClusterDescriptorSetLayout() const {
-		const sequence<DescriptorSetLayoutBinding> bindings = {
+		const DescriptorSetLayoutBinding bindings[] = {
 			// Vertex position component
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,

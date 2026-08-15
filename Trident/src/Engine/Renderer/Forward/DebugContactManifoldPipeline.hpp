@@ -32,7 +32,7 @@ namespace Trident {
 			"Forward/DebugContactManifold.frag"
 		);
 
-		const sequence<ColorBlendAttachment> colorBlendAttachments = {
+		const ColorBlendAttachment colorBlendAttachments[] = {
 			{
 				.blend = false,
 			},

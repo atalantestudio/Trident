@@ -43,7 +43,8 @@ namespace Trident {
 
 				debugImageDescriptorSetLayout = createImageDescriptorSetLayout();
 
-				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(debugImageDescriptorSetLayout);
+				// TODO(graphics/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
+				sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(debugImageDescriptorSetLayout);
 
 				debugImageDescriptorSet = descriptorSets[0];
 
@@ -266,7 +267,7 @@ namespace Trident {
 
 				argumentBuffer->unmap();
 
-				const sequence<DescriptorSetLayoutBinding> bindings = {
+				const DescriptorSetLayoutBinding bindings[] = {
 					// Arguments
 					{
 						.descriptorType = DescriptorType::UNIFORM_BUFFER,
@@ -297,7 +298,10 @@ namespace Trident {
 				};
 
 				const ref<DescriptorSetLayout> descriptorSetLayout = createDescriptorSetLayout(bindings);
-				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(descriptorSetLayout);
+
+				// TODO(graphics/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
+				sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(descriptorSetLayout);
+
 				const ref<DescriptorSet> descriptorSet = descriptorSets[0];
 
 				sequence<DescriptorImage> descriptorImages(13);
@@ -326,7 +330,7 @@ namespace Trident {
 
 				descriptorImages[0].imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
 
-				const sequence<WriteDescriptorSet> writeDescriptorSets = {
+				const WriteDescriptorSet writeDescriptorSets[] = {
 					// Arguments
 					{
 						.descriptorSet = descriptorSet,
@@ -495,7 +499,7 @@ namespace Trident {
 			}
 
 			ref<DescriptorSetLayout> createImageDescriptorSetLayout() const {
-				const sequence<DescriptorSetLayoutBinding> bindings = {
+				const DescriptorSetLayoutBinding bindings[] = {
 					// Mip level
 					{
 						.descriptorType = DescriptorType::UNIFORM_BUFFER,
@@ -523,7 +527,7 @@ namespace Trident {
 					.sampler = debugSampler,
 				};
 
-				const sequence<WriteDescriptorSet> writeDescriptorSets = {
+				const WriteDescriptorSet writeDescriptorSets[] = {
 					{
 						.descriptorSet = debugImageDescriptorSet,
 						.bindingIndex = 0,
@@ -549,7 +553,7 @@ namespace Trident {
 			}
 
 			ref<GraphicsPipeline> createDebugImagePipeline() const {
-				const sequence<ColorBlendAttachment> colorBlendAttachments = {
+				const ColorBlendAttachment colorBlendAttachments[] = {
 					{
 						.blend = false,
 					},

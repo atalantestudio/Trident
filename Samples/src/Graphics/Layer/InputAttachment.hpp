@@ -21,7 +21,8 @@ namespace Trident {
 
 				inputDescriptorSetLayout = createInputDescriptorSetLayout();
 
-				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(inputDescriptorSetLayout);
+				// TODO(graphics/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
+				sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(inputDescriptorSetLayout);
 
 				inputDescriptorSet = descriptorSets[0];
 
@@ -241,7 +242,7 @@ namespace Trident {
 			}
 
 			ref<DescriptorSetLayout> createInputDescriptorSetLayout() const {
-				const sequence<DescriptorSetLayoutBinding> bindings = {
+				const DescriptorSetLayoutBinding bindings[] = {
 					// Input
 					{
 						.descriptorType = DescriptorType::INPUT_ATTACHMENT,
@@ -292,7 +293,7 @@ namespace Trident {
 				vertexInputBinding.registerAttribute<svec2<float32>>();
 				vertexInputBinding.registerAttribute<vec3<float32>>();
 
-				const sequence<ColorBlendAttachment> colorBlendAttachments = {
+				const ColorBlendAttachment colorBlendAttachments[] = {
 					{
 						.blend = false,
 					},
@@ -343,7 +344,7 @@ namespace Trident {
 			}
 
 			ref<GraphicsPipeline> createPresentPipeline() const {
-				const sequence<ColorBlendAttachment> colorBlendAttachments = {
+				const ColorBlendAttachment colorBlendAttachments[] = {
 					{
 						.blend = false,
 					},

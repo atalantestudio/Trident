@@ -180,7 +180,7 @@ namespace Trident {
 				vertexInputBindings[1].registerAttribute<decltype(Instance::color)>();
 				vertexInputBindings[1].registerAttribute<decltype(Instance::translation)>();
 
-				const sequence<ColorBlendAttachment> colorBlendAttachments = {
+				const ColorBlendAttachment colorBlendAttachments[] = {
 					{
 						.blend = true,
 						.srcColorBlendFactor = BlendFactor::SRC_ALPHA,

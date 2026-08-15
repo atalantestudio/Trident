@@ -73,7 +73,7 @@ namespace Trident {
 				registerProcess<PrefixSumSampleProcess>();
 			}
 			else {
-				ENGINE_ASSERT(false, "Unknown sample \"[]\".", SampleNameProperty);
+				ENGINE_ASSERT(false, "Unknown sample \"[]\" in group [].", SampleNameProperty, SampleGroupNameProperty);
 			}
 		}
 		else if (SampleGroupNameProperty == "GUI") {
@@ -132,7 +132,7 @@ namespace Trident {
 				registerLayer<GUIUTF8Layer>();
 			}
 			else {
-				ENGINE_ASSERT(false, "Unknown sample \"[]\".", SampleNameProperty);
+				ENGINE_ASSERT(false, "Unknown sample \"[]\" in group [].", SampleNameProperty, SampleGroupNameProperty);
 			}
 
 			registerLayer<FrameStatisticsLayer>();
@@ -165,7 +165,7 @@ namespace Trident {
 				registerProcess<ProcessSIMDProcess>();
 			}
 			else {
-				ENGINE_ASSERT(false, "Unknown sample \"[]\".", SampleNameProperty);
+				ENGINE_ASSERT(false, "Unknown sample \"[]\" in group [].", SampleNameProperty, SampleGroupNameProperty);
 			}
 		}
 		else if (SampleGroupNameProperty == "Graphics") {
@@ -221,7 +221,7 @@ namespace Trident {
 				registerLayer<SampleTriangleIndirectLayer>();
 			}
 			else {
-				ENGINE_ASSERT(false, "Unknown sample \"[]\".", SampleNameProperty);
+				ENGINE_ASSERT(false, "Unknown sample \"[]\" in group [].", SampleNameProperty, SampleGroupNameProperty);
 			}
 
 			registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
@@ -234,7 +234,7 @@ namespace Trident {
 				registerLayer<Sample3DVisibilityLayer>();
 			}
 			else {
-				ENGINE_ASSERT(false, "Unknown sample \"[]\".", SampleNameProperty);
+				ENGINE_ASSERT(false, "Unknown sample \"[]\" in group [].", SampleNameProperty, SampleGroupNameProperty);
 			}
 
 			registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));

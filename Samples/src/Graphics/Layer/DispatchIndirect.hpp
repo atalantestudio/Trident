@@ -227,7 +227,7 @@ namespace Trident {
 				VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 				vertexInputBinding.registerAttribute<decltype(Vertex::position)>();
 
-				const sequence<ColorBlendAttachment> colorBlendAttachments = {
+				const ColorBlendAttachment colorBlendAttachments[] = {
 					{
 						.blend = false,
 					},

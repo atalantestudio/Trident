@@ -255,7 +255,7 @@ namespace Trident {
 			}
 
 			ref<GraphicsPipeline> createPipeline() const {
-				const sequence<ColorBlendAttachment> colorBlendAttachments = {
+				const ColorBlendAttachment colorBlendAttachments[] = {
 					{
 						.blend = true,
 						.srcColorBlendFactor = BlendFactor::SRC_ALPHA,
