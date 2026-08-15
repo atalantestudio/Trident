@@ -11,6 +11,7 @@ namespace Trident {
 		ref<Framebuffer> framebuffer;
 
 		// 1 clear value per attachment.
+		// TODO(graphics/command-encoder/begin-render-pass): Replace with a view.
 		sequence<ClearValue> clearValues;
 	};
 }

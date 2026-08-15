@@ -169,7 +169,7 @@ namespace Trident {
 				registerLayer<SampleArrayTextureLayer>();
 			}
 			else if (SampleNameProperty == "ClearColor") {
-				registerLayer<SampleClearColorLayer>();
+				registerLayer<ClearColorSampleLayer>();
 			}
 			else if (SampleNameProperty == "ColorBlend") {
 				registerLayer<ColorBlendSampleLayer>();

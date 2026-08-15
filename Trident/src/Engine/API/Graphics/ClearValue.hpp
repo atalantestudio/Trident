@@ -4,11 +4,11 @@
 #pragma once
 
 namespace Trident {
-	// TODO: Restore union.
+	// TODO(graphics/clear-value): Restore union.
 	struct ClearValue {
 		// The color image clear values to use when clearing a color image or attachment.
 		union {
-			// TODO: Replace by vec4<float32>.
+			// TODO(lyah/scalar): Replace with a vector.
 			float32 color[4];
 
 			sint32 colorSigned[4];

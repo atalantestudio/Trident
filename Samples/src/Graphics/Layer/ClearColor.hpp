@@ -8,7 +8,10 @@
 #include "../GraphicsLayer.hpp"
 
 namespace Trident {
-	class SampleClearColorRenderer : public Renderer {
+	class ClearColorSampleRenderer : public Renderer {
+		private:
+			inline static const Color color = 0x5cafe7ff;
+
 		public:
 			void build() override {
 				renderPass = createRenderPass();
@@ -19,7 +22,7 @@ namespace Trident {
 			void render(ref<CommandEncoder> commandEncoder) const override {
 				commandEncoder->beginRenderPass({
 					.framebuffer = framebuffers[getSwapchainImageIndex()],
-					.clearValues = {{1.0f, 0.2f, 0.0f, 1.0f}},
+					.clearValues = {{color.value[0], color.value[1], color.value[2], color.value[3]}},
 				});
 				commandEncoder->endRenderPass();
 			}
@@ -91,5 +94,5 @@ namespace Trident {
 			sequence<ref<Framebuffer>> framebuffers;
 	};
 
-	DEFINE_SAMPLE_LAYER(SampleClearColor);
+	DEFINE_SAMPLE_LAYER(ClearColorSample);
 }
