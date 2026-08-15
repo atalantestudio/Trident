@@ -1,4 +1,4 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
@@ -227,7 +227,7 @@ namespace Trident {
 
 			ref<GraphicsPipeline> createPipeline() const {
 				VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-				vertexInputBinding.registerAttribute<svec2<float32>>();
+				vertexInputBinding.registerAttribute<decltype(Vertex::position)>();
 
 				const sequence<ColorBlendAttachment> colorBlendAttachments = {
 					{

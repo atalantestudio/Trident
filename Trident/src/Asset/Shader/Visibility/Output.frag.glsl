@@ -3,8 +3,8 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-precision mediump float;
-precision mediump image2D;
+precision highp float;
+precision highp image2D;
 
 layout(set = 0, binding = 0, rgba8) uniform readonly image2D outputImage;
 

@@ -8,7 +8,7 @@
 #include "../GraphicsLayer.hpp"
 
 namespace Trident {
-	class SampleColorBlendRenderer : public Renderer {
+	class ColorBlendSampleRenderer : public Renderer {
 		private:
 			struct Vertex {
 				svec2<float32> position;
@@ -20,8 +20,8 @@ namespace Trident {
 			};
 
 		private:
-			static constexpr uint64 VERTEX_SIZE = 3 * sizeof(Vertex);
-			static constexpr uint64 INSTANCE_SIZE = 3 * sizeof(Instance);
+			static constexpr uint64 VERTEX_SIZE = sizeof(Vertex) * 3;
+			static constexpr uint64 INSTANCE_SIZE = sizeof(Instance) * 3;
 
 		public:
 			void build() override {
@@ -67,20 +67,13 @@ namespace Trident {
 
 				commandEncoder->begin();
 
-				const BufferCopyRegion bufferCopyRegions[2] = {
-					{
-						.sourceOffset = vertexView.getOffset(),
-						.destinationOffset = 0,
-						.size = vertexView.getSize(),
-					},
-					{
-						.sourceOffset = instanceView.getOffset(),
-						.destinationOffset = VERTEX_SIZE,
-						.size = instanceView.getSize(),
-					},
+				const BufferCopyRegion bufferCopyRegion = {
+					.sourceOffset = 0,
+					.destinationOffset = 0,
+					.size = vertexBuffer->getSize(),
 				};
 
-				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, view<BufferCopyRegion>(bufferCopyRegions, 2));
+				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegion);
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -184,9 +177,9 @@ namespace Trident {
 					VertexInputBinding(InputRate::INSTANCE),
 				};
 
-				vertexInputBindings[0].registerAttribute<svec2<float32>>();
-				vertexInputBindings[1].registerAttribute<vec4<float32>>();
-				vertexInputBindings[1].registerAttribute<svec2<float32>>();
+				vertexInputBindings[0].registerAttribute<decltype(Vertex::position)>();
+				vertexInputBindings[1].registerAttribute<decltype(Instance::color)>();
+				vertexInputBindings[1].registerAttribute<decltype(Instance::translation)>();
 
 				const sequence<ColorBlendAttachment> colorBlendAttachments = {
 					{
@@ -273,5 +266,5 @@ namespace Trident {
 			ref<Buffer> stagingBuffer;
 	};
 
-	DEFINE_SAMPLE_LAYER(SampleColorBlend);
+	DEFINE_SAMPLE_LAYER(ColorBlendSample);
 }

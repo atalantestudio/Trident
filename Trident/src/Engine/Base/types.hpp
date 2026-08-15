@@ -65,6 +65,10 @@ namespace Trident {
 
 			template<typename U, typename = std::enable_if<std::is_convertible<U*, T*>::value>::type>
 			ref& operator=(ref<U>&& other) {
+				if (owning) {
+					delete object;
+				}
+
 				object = static_cast<T*>(other);
 
 				owning = other.owning;
