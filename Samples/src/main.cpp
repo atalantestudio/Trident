@@ -41,9 +41,9 @@
 #include "Graphics/Layer/ArrayTexture.hpp"
 #include "Graphics/Layer/ClearColor.hpp"
 #include "Graphics/Layer/ColorBlend.hpp"
-#include "Graphics/Layer/ComputeShader.hpp"
-#include "Graphics/Layer/ComputeShaderIndirect.hpp"
 #include "Graphics/Layer/DepthTest.hpp"
+#include "Graphics/Layer/Dispatch.hpp"
+#include "Graphics/Layer/DispatchIndirect.hpp"
 #include "Graphics/Layer/Empty.hpp"
 #include "Graphics/Layer/Gradient.hpp"
 #include "Graphics/Layer/ImageAsset.hpp"
@@ -69,6 +69,9 @@ namespace Trident {
 		if (SampleGroupNameProperty == "Compute") {
 			if (SampleNameProperty == "PrefixSum") {
 				registerProcess<ComputePrefixSumProcess>();
+			}
+			else {
+				ENGINE_ASSERT(false, "Unknown sample name \"[]\".", SampleNameProperty);
 			}
 		}
 		else if (SampleGroupNameProperty == "GUI") {
@@ -126,6 +129,9 @@ namespace Trident {
 			else if (SampleNameProperty == "UTF8") {
 				registerLayer<GUIUTF8Layer>();
 			}
+			else {
+				ENGINE_ASSERT(false, "Unknown sample name \"[]\".", SampleNameProperty);
+			}
 
 			registerLayer<FrameStatisticsLayer>();
 
@@ -154,6 +160,9 @@ namespace Trident {
 			else if (SampleNameProperty == "SIMD") {
 				registerProcess<ProcessSIMDProcess>();
 			}
+			else {
+				ENGINE_ASSERT(false, "Unknown sample name \"[]\".", SampleNameProperty);
+			}
 		}
 		else if (SampleGroupNameProperty == "Graphics") {
 			if (SampleNameProperty == "ArrayTexture") {
@@ -165,14 +174,14 @@ namespace Trident {
 			else if (SampleNameProperty == "ColorBlend") {
 				registerLayer<SampleColorBlendLayer>();
 			}
-			else if (SampleNameProperty == "ComputeShader") {
-				registerLayer<SampleComputeShaderLayer>();
-			}
-			else if (SampleNameProperty == "ComputeShaderIndirect") {
-				registerLayer<SampleComputeShaderIndirectLayer>();
-			}
 			else if (SampleNameProperty == "DepthTest") {
 				registerLayer<SampleDepthTestLayer>();
+			}
+			else if (SampleNameProperty == "Dispatch") {
+				registerLayer<DispatchSampleLayer>();
+			}
+			else if (SampleNameProperty == "DispatchIndirect") {
+				registerLayer<DispatchIndirectSampleLayer>();
 			}
 			else if (SampleNameProperty == "Empty") {
 				registerLayer<SampleEmptyLayer>();
@@ -207,6 +216,9 @@ namespace Trident {
 			else if (SampleNameProperty == "TriangleIndirect") {
 				registerLayer<SampleTriangleIndirectLayer>();
 			}
+			else {
+				ENGINE_ASSERT(false, "Unknown sample name \"[]\".", SampleNameProperty);
+			}
 
 			registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
 		}
@@ -217,8 +229,14 @@ namespace Trident {
 			else if (SampleNameProperty == "Visibility") {
 				registerLayer<Sample3DVisibilityLayer>();
 			}
+			else {
+				ENGINE_ASSERT(false, "Unknown sample name \"[]\".", SampleNameProperty);
+			}
 
 			registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
+		}
+		else {
+			ENGINE_ASSERT(false, "Unknown sample group name \"[]\".", SampleGroupNameProperty);
 		}
 	}
 

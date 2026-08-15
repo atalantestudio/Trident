@@ -42,15 +42,15 @@ namespace Trident {
 			}
 
 			void encodeOneTimeCommands() const override {
-				const BufferView<Vertex> vertexStagingBufferView = stagingBuffer->createView<Vertex>(0, VERTEX_SIZE);
-				const BufferView<Instance> instanceStagingBufferView = stagingBuffer->createView<Instance>(vertexStagingBufferView.getOffset() + vertexStagingBufferView.getSize(), INSTANCE_SIZE);
+				const BufferView<Vertex> vertexView = stagingBuffer->createView<Vertex>(0, VERTEX_SIZE);
+				const BufferView<Instance> instanceView = stagingBuffer->createView<Instance>(vertexView.getOffset() + vertexView.getSize(), INSTANCE_SIZE);
 
-				Vertex* vertexMappedRange = vertexStagingBufferView.map();
+				Vertex* vertexMappedRange = vertexView.map();
 				vertexMappedRange[0] = {{-0.5f, -0.5f}};
 				vertexMappedRange[1] = {{ 0.0f,  0.5f}};
 				vertexMappedRange[2] = {{ 0.5f, -0.5f}};
 
-				Instance* instanceMappedRange = instanceStagingBufferView.map();
+				Instance* instanceMappedRange = instanceView.map();
 				instanceMappedRange[0] = {Color(0x8e1a237f).value, {-0.1f, -0.1f}};
 				instanceMappedRange[1] = {Color(0x80b5e77f).value, { 0.0f,  0.0f}};
 				instanceMappedRange[2] = {Color(0xeda0417f).value, { 0.1f,  0.1f}};
@@ -69,14 +69,14 @@ namespace Trident {
 
 				const BufferCopyRegion bufferCopyRegions[2] = {
 					{
-						.sourceOffset = vertexStagingBufferView.getOffset(),
+						.sourceOffset = vertexView.getOffset(),
 						.destinationOffset = 0,
-						.size = vertexStagingBufferView.getSize(),
+						.size = vertexView.getSize(),
 					},
 					{
-						.sourceOffset = instanceStagingBufferView.getOffset(),
+						.sourceOffset = instanceView.getOffset(),
 						.destinationOffset = VERTEX_SIZE,
-						.size = instanceStagingBufferView.getSize(),
+						.size = instanceView.getSize(),
 					},
 				};
 

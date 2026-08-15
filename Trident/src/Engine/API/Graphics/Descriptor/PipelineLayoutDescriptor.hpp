@@ -7,6 +7,7 @@
 
 namespace Trident {
 	struct PipelineLayoutDescriptor {
+		// TODO(graphics/pipeline-layout): Replace with a view.
 		sequence<ref<DescriptorSetLayout>> descriptorSetLayouts;
 
 		#if defined(DEBUG_OBJECT_NAME)

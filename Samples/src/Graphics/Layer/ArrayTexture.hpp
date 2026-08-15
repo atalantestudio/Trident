@@ -65,6 +65,7 @@ namespace Trident {
 
 				std::copy_n(&images[0], IMAGE_COUNT, &staticImages[0]);
 
+				// TODO(graphics/ref): Remove.
 				for (ref<Image>& image : staticImages) {
 					image.owning = false;
 				}

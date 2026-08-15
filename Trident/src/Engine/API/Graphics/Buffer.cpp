@@ -53,7 +53,7 @@ namespace Trident {
 				}
 
 				if (memorySuballocation.allocationIndex == max<uint32>()) {
-					VALIDATION_ERROR("The buffer hasn't been allocated yet.");
+					VALIDATION_ERROR("The buffer is not allocated.");
 				}
 
 				if (!(memorySuballocation.memoryProperties & MemoryProperty::HOST_VISIBLE)) {
@@ -76,7 +76,7 @@ namespace Trident {
 				Validator validator;
 
 				if (memorySuballocation.allocationIndex == max<uint32>()) {
-					VALIDATION_ERROR("The buffer hasn't been allocated yet.");
+					VALIDATION_ERROR("The buffer is not allocated.");
 				}
 				else {
 					const MemoryAllocation& memoryAllocation = device->memoryAllocator->allocations[memorySuballocation.allocationIndex];

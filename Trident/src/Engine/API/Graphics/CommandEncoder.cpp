@@ -100,6 +100,10 @@ namespace Trident {
 					VALIDATION_ERROR("indexBuffer must be a valid Buffer object.");
 				}
 				else {
+					if (indexBuffer->getMemorySuballocation().allocationIndex == max<uint32>()) {
+						VALIDATION_ERROR("indexBuffer is not allocated.");
+					}
+
 					if (!(indexBuffer->getUsage() & BufferUsage::INDEX)) {
 						VALIDATION_ERROR("indexBuffer must have the INDEX usage flag.");
 					}
@@ -129,6 +133,10 @@ namespace Trident {
 					VALIDATION_ERROR("vertexBuffer must be a valid Buffer object.");
 				}
 				else {
+					if (vertexBuffer->getMemorySuballocation().allocationIndex == max<uint32>()) {
+						VALIDATION_ERROR("vertexBuffer is not allocated.");
+					}
+
 					if (!(vertexBuffer->getUsage() & BufferUsage::VERTEX)) {
 						VALIDATION_ERROR("vertexBuffer must have the VERTEX usage flag.");
 					}
@@ -152,6 +160,10 @@ namespace Trident {
 					VALIDATION_ERROR("sourceBuffer must be a valid Buffer object.");
 				}
 				else {
+					if (sourceBuffer->getMemorySuballocation().allocationIndex == max<uint32>()) {
+						VALIDATION_ERROR("sourceBuffer is not allocated.");
+					}
+
 					if (!(sourceBuffer->getUsage() & BufferUsage::TRANSFER_SRC)) {
 						VALIDATION_ERROR("sourceBuffer must have the TRANSFER_SRC usage flag.");
 					}
@@ -161,6 +173,10 @@ namespace Trident {
 					VALIDATION_ERROR("destinationBuffer must be a valid Buffer object.");
 				}
 				else {
+					if (destinationBuffer->getMemorySuballocation().allocationIndex == max<uint32>()) {
+						VALIDATION_ERROR("destinationBuffer is not allocated.");
+					}
+
 					if (!(destinationBuffer->getUsage() & BufferUsage::TRANSFER_DST)) {
 						VALIDATION_ERROR("destinationBuffer must have the TRANSFER_DST usage flag.");
 					}
@@ -210,6 +226,10 @@ namespace Trident {
 					VALIDATION_ERROR("sourceBuffer must be a valid Buffer object.");
 				}
 				else {
+					if (sourceBuffer->getMemorySuballocation().allocationIndex == max<uint32>()) {
+						VALIDATION_ERROR("sourceBuffer is not allocated.");
+					}
+
 					if (!(sourceBuffer->getUsage() & BufferUsage::TRANSFER_SRC)) {
 						VALIDATION_ERROR("sourceBuffer must have the TRANSFER_SRC usage flag.");
 					}
@@ -318,6 +338,10 @@ namespace Trident {
 					VALIDATION_ERROR("destinationBuffer must be a valid Buffer object.");
 				}
 				else {
+					if (destinationBuffer->getMemorySuballocation().allocationIndex == max<uint32>()) {
+						VALIDATION_ERROR("destinationBuffer is not allocated.");
+					}
+
 					if (!(destinationBuffer->getUsage() & BufferUsage::TRANSFER_DST)) {
 						VALIDATION_ERROR("destinationBuffer must have the TRANSFER_DST usage flag.");
 					}
@@ -432,6 +456,10 @@ namespace Trident {
 					VALIDATION_ERROR("buffer must be a valid Buffer object.");
 				}
 				else {
+					if (buffer->getMemorySuballocation().allocationIndex == max<uint32>()) {
+						VALIDATION_ERROR("buffer is not allocated.");
+					}
+
 					if (!(buffer->getUsage() & BufferUsage::INDIRECT)) {
 						VALIDATION_ERROR("buffer must have the INDIRECT usage flag.");
 					}
@@ -473,6 +501,10 @@ namespace Trident {
 					VALIDATION_ERROR("buffer must be a valid Buffer object.");
 				}
 				else {
+					if (buffer->getMemorySuballocation().allocationIndex == max<uint32>()) {
+						VALIDATION_ERROR("buffer is not allocated.");
+					}
+
 					if (!(buffer->getUsage() & BufferUsage::INDIRECT)) {
 						VALIDATION_ERROR("buffer must have the INDIRECT usage flag.");
 					}
@@ -522,6 +554,10 @@ namespace Trident {
 					VALIDATION_ERROR("buffer must be a valid Buffer object.");
 				}
 				else {
+					if (buffer->getMemorySuballocation().allocationIndex == max<uint32>()) {
+						VALIDATION_ERROR("buffer is not allocated.");
+					}
+
 					if (!(buffer->getUsage() & BufferUsage::INDIRECT)) {
 						VALIDATION_ERROR("buffer must have the INDIRECT usage flag.");
 					}

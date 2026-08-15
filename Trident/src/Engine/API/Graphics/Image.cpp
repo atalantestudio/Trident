@@ -83,7 +83,7 @@ namespace Trident {
 				Validator validator;
 
 				if (memorySuballocation.allocationIndex == max<uint32>()) {
-					VALIDATION_ERROR("The image hasn't been allocated yet.");
+					VALIDATION_ERROR("The image is not allocated.");
 				}
 
 				if (descriptor.mipLevelOffset + descriptor.mipLevelCount > mipLevelCount) {

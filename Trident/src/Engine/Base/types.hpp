@@ -82,7 +82,7 @@ namespace Trident {
 			}
 
 		private:
-			T* object;
+			T* object = nullptr;
 
 		public:
 			// TODO: Make private.
