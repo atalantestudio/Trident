@@ -155,6 +155,11 @@ namespace Trident {
 		layerCompositor->initializeLayers();
 	}
 
+	void Application::allocateProcesses(uint64 count) {
+		processes = sequence<ref<Process>>(count);
+		processCount = 0;
+	}
+
 	// TODO(application/destruction-leaks)
 	Application::~Application() {
 		release();
@@ -186,6 +191,10 @@ namespace Trident {
 		for (uint32 consoleArgumentIndex = 0; consoleArgumentIndex < argumentCount; consoleArgumentIndex += 1) {
 			consoleArguments[consoleArgumentIndex] = static_cast<void*>(argumentValues[consoleArgumentIndex]);
 		}
+	}
+
+	const PropertyFile* Application::getPropertyFile() const {
+		return propertyFile;
 	}
 
 	PropertyFile* Application::getPropertyFile() {
@@ -233,10 +242,11 @@ namespace Trident {
 
 	sint32 Application::runProcesses() const {
 		const view<void*> arguments = consoleArguments;
+		const view<ref<Process>> processView(&processes[0], processCount);
 
 		sint32 code = 0;
 
-		for (ref<Process> process : processes) {
+		for (ref<Process> process : processView) {
 			code = process->main(arguments);
 
 			if (code != 0) {

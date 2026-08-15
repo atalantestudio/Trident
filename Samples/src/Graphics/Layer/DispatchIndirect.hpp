@@ -16,21 +16,20 @@ namespace Trident {
 
 		public:
 			void build() override {
-				outputImage = createOutputImage();
 				renderPass = createRenderPass();
-				sampler = createSampler();
+				outputImage = createOutputImage();
 				outputDescriptorSetLayout = createOutputDescriptorSetLayout();
 
 				// TODO(graphics/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
 				sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(outputDescriptorSetLayout);
 
 				outputDescriptorSet = descriptorSets[0];
-
 				pipelineLayout = createPipelineLayout();
 				pipeline = createPipeline();
 				vertexBuffer = createVertexBuffer();
 				indirectBuffer = createIndirectBuffer();
 				stagingBuffer = createStagingBuffer();
+				sampler = createSampler();
 			}
 
 			StaticMemoryDescriptor getStaticMemoryDescriptor() const override {
@@ -152,7 +151,6 @@ namespace Trident {
 			ref<RenderPass> createRenderPass() const {
 				return Renderer::createRenderPass({
 					.attachments = {
-						// Swapchain
 						{
 							.format = getSurface()->getFormat(),
 							.sampleCount = 1,
@@ -431,9 +429,9 @@ namespace Trident {
 			}
 
 		private:
+			ref<RenderPass> renderPass;
 			ref<Image> outputImage;
 			ref<ImageView> outputImageView;
-			ref<RenderPass> renderPass;
 			sequence<ref<Framebuffer>> framebuffers;
 			ref<DescriptorSetLayout> outputDescriptorSetLayout;
 			ref<DescriptorSet> outputDescriptorSet;

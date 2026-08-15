@@ -85,6 +85,8 @@ namespace Trident {
 
 		private:
 			void registerProcesses() {
+				allocateProcesses(45);
+
 				registerProcess<BuildGeometryAssetProcess>(&assetLibrary);
 
 				registerProcess<PolygonGeometry2D>(&assetLibrary);

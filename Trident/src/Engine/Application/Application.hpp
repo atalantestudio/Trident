@@ -38,10 +38,13 @@ namespace Trident {
 			void initializeGraphicsAdapter(const ProjectDescriptor& projectDescriptor);
 			void initializeLayers();
 
+			void allocateProcesses(uint64 count);
+
 			const sequence<void*>& getConsoleArguments() const;
 
 			void setConsoleArguments(uint32 argumentCount, char8** argumentValues);
 
+			const PropertyFile* getPropertyFile() const;
 			PropertyFile* getPropertyFile();
 
 			bool hasLayers() const;
@@ -93,12 +96,12 @@ namespace Trident {
 			void registerProcess(Argument&&... arguments) {
 				PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-				const uint32 processId = static_cast<uint32>(processes.size());
-
 				ref<ProcessType> process = allocateRef<ProcessType>(std::forward<Argument>(arguments)...);
-				process->setId(processId);
+				process->setId(processCount);
 
-				processes.emplace_back(std::move(process));
+				processes[processCount] = std::move(process);
+
+				processCount += 1;
 			}
 
 			virtual void release() {}
@@ -157,7 +160,8 @@ namespace Trident {
 
 		private:
 			ref<LayerCompositor> layerCompositor;
-			std::vector<ref<Process>> processes;
+			sequence<ref<Process>> processes;
+			uint32 processCount = 0;
 			uint32 frameIndex = 0;
 
 			// In the range [0, MAX_FRAMES_IN_FLIGHT].

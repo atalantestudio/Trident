@@ -45,7 +45,7 @@
 #include "Graphics/Layer/Dispatch.hpp"
 #include "Graphics/Layer/DispatchIndirect.hpp"
 #include "Graphics/Layer/Gradient.hpp"
-#include "Graphics/Layer/ImageAsset.hpp"
+#include "Graphics/Layer/Image.hpp"
 #include "Graphics/Layer/InputAttachment.hpp"
 #include "Graphics/Layer/MipLevels.hpp"
 #include "Graphics/Layer/Multisampling.hpp"
@@ -186,8 +186,8 @@ namespace Trident {
 			else if (SampleNameProperty == "Gradient") {
 				registerLayer<SampleGradientLayer>();
 			}
-			else if (SampleNameProperty == "ImageAsset") {
-				registerLayer<SampleImageAssetLayer>();
+			else if (SampleNameProperty == "Image") {
+				registerLayer<ImageSampleLayer>();
 			}
 			else if (SampleNameProperty == "InputAttachment") {
 				registerLayer<SampleInputAttachmentLayer>();
