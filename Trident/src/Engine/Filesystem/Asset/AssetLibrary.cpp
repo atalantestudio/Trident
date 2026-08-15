@@ -30,6 +30,12 @@ namespace Trident {
 		const std::filesystem::path absolutePath = getAbsolutePath("Asset", projectName, ".tam");
 		const sequence<char8> assetPath = absolutePath.string();
 
+		if (!std::filesystem::exists(absolutePath)) {
+			ENGINE_WARNING("Failed to locate asset map (looked in []).", assetPath);
+
+			return;
+		}
+
 		assetMap.data = Filesystem::openByteBuffer(assetPath);
 
 		ByteStream<StreamOperation::READ> stream(&assetMap.data[0], assetMap.data.count(), Endianness::LITTLE_ENDIAN);

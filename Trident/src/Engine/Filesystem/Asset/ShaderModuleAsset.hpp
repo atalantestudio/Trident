@@ -9,8 +9,6 @@
 
 namespace Trident {
 	struct ShaderModuleAsset : public Asset {
-		ShaderModuleAsset() = default;
-
 		// TODO(tsl/shader-reflection): Remove.
 		/// Path relative to the renderer being used.
 		/// Only used if the asset's version is below 1.0.0.

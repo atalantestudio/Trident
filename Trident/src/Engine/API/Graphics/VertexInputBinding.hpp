@@ -10,9 +10,6 @@
 namespace Trident {
 	class VertexInputBinding {
 		public:
-			// Needed for copying a sequence of bindings.
-			VertexInputBinding() = default;
-
 			explicit VertexInputBinding(InputRate inputRate, bool pad = true) :
 				inputRate(inputRate),
 				pad(pad)

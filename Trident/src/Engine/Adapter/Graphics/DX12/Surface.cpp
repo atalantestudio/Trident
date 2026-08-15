@@ -6,6 +6,7 @@
 #include "Engine/Adapter/Graphics/DX12/Instance.hpp"
 #include "Engine/Adapter/Graphics/DX12/Surface.hpp"
 #include "Engine/Adapter/Window/Win32/base.hpp"
+#include "Engine/API/Graphics/PhysicalDevice.hpp"
 
 namespace Trident {
 	DX12::Surface::Surface(const Trident::Instance* instance) :

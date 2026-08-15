@@ -9,8 +9,6 @@
 namespace Trident {
 	class Surface {
 		public:
-			Surface() = default;
-
 			~Surface();
 
 			/// Returns the format of the surface.

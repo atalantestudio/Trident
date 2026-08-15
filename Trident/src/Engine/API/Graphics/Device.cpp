@@ -6,6 +6,7 @@
 #include "Engine/API/Graphics/Descriptor/ShaderModuleDescriptor.hpp"
 #include "Engine/API/Graphics/Device.hpp"
 #include "Engine/API/Graphics/PhysicalDevice.hpp"
+#include "Engine/Filesystem/Asset/ShaderModuleAsset.hpp"
 
 namespace Trident {
 	#if defined(ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)

@@ -7,6 +7,7 @@
 #include "Engine/Adapter/Graphics/VK/ShaderStage.hpp"
 #include "Engine/API/Graphics/Descriptor/ShaderModuleDescriptor.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
+#include "Engine/Filesystem/Asset/ShaderModuleAsset.hpp"
 
 namespace Trident {
 	VK::ShaderModule::ShaderModule(const Trident::Device* device) :

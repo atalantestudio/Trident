@@ -41,9 +41,9 @@
 #include "Graphics/Layer/ArrayTexture.hpp"
 #include "Graphics/Layer/ClearColor.hpp"
 #include "Graphics/Layer/ColorBlend.hpp"
+#include "Graphics/Layer/Default.hpp"
 #include "Graphics/Layer/Dispatch.hpp"
 #include "Graphics/Layer/DispatchIndirect.hpp"
-#include "Graphics/Layer/Empty.hpp"
 #include "Graphics/Layer/Gradient.hpp"
 #include "Graphics/Layer/ImageAsset.hpp"
 #include "Graphics/Layer/InputAttachment.hpp"
@@ -174,14 +174,14 @@ namespace Trident {
 			else if (SampleNameProperty == "ColorBlend") {
 				registerLayer<ColorBlendSampleLayer>();
 			}
+			else if (SampleNameProperty == "Default") {
+				registerLayer<DefaultSampleLayer>();
+			}
 			else if (SampleNameProperty == "Dispatch") {
 				registerLayer<DispatchSampleLayer>();
 			}
 			else if (SampleNameProperty == "DispatchIndirect") {
 				registerLayer<DispatchIndirectSampleLayer>();
-			}
-			else if (SampleNameProperty == "Empty") {
-				registerLayer<SampleEmptyLayer>();
 			}
 			else if (SampleNameProperty == "Gradient") {
 				registerLayer<SampleGradientLayer>();
