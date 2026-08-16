@@ -15,7 +15,7 @@ namespace Trident {
 			{}
 
 			void execute() const final override {
-				const ref<GL::Framebuffer> framebuffer = static_pointer_cast<GL::Framebuffer>(descriptor.framebuffer);
+				const ref<GL::Framebuffer> framebuffer = ref_cast<GL::Framebuffer>(descriptor.framebuffer);
 				const ref<Trident::RenderPass> renderPass = framebuffer->getRenderPass();
 
 				#if OPENGL_VERSION >= OPENGL_VERSION_3_0

@@ -45,9 +45,9 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
-		const ref<VK::PhysicalDevice> physicalDevice = static_pointer_cast<VK::PhysicalDevice>(device->physicalDevice);
+		const ref<VK::PhysicalDevice> physicalDevice = ref_cast<VK::PhysicalDevice>(device->physicalDevice);
 		VK::Swapchain* _swapchain = static_cast<VK::Swapchain*>(swapchain);
-		ref<VK::Surface> surface = static_pointer_cast<VK::Surface>(descriptor.surface);
+		ref<VK::Surface> surface = ref_cast<VK::Surface>(descriptor.surface);
 		const VK::Instance* instance = static_cast<const VK::Instance*>(surface->instance);
 		VkResult result;
 

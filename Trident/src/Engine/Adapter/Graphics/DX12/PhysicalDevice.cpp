@@ -94,7 +94,7 @@ namespace Trident {
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to enumerate adapter.");
 
-		return createRef<DX12::PhysicalDevice>(_instance->adapter, adapter, bestAdapterDescriptor, _instance->factory);
+		return allocateRef<DX12::PhysicalDevice>(_instance->adapter, adapter, bestAdapterDescriptor, _instance->factory);
 	}
 
 	uint32 DX12::getPhysicalDeviceMemoryTypeCountImplementation(const Trident::PhysicalDevice* physicalDevice) {

@@ -50,7 +50,7 @@ namespace Trident {
 		uint64 swapchainIndex = 0;
 
 		while (swapchainIndex < vkSwapchains.count()) {
-			vkSwapchains[swapchainIndex] = &static_pointer_cast<VK::Swapchain>(swapchains[swapchainIndex])->swapchain;
+			vkSwapchains[swapchainIndex] = &ref_cast<VK::Swapchain>(swapchains[swapchainIndex])->swapchain;
 
 			swapchainIndex += 1;
 		}
@@ -59,7 +59,7 @@ namespace Trident {
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 		presentInfo.pNext = nullptr;
 		presentInfo.waitSemaphoreCount = 1;
-		presentInfo.pWaitSemaphores = &static_pointer_cast<VK::Semaphore>(waitSemaphore)->semaphore;
+		presentInfo.pWaitSemaphores = &ref_cast<VK::Semaphore>(waitSemaphore)->semaphore;
 		presentInfo.swapchainCount = static_cast<uint32>(vkSwapchains.count());
 		presentInfo.pSwapchains = vkSwapchains[0];
 		presentInfo.pImageIndices = &presentableImageIndices[0];
@@ -82,7 +82,7 @@ namespace Trident {
 		uint32 commandBufferIndex = 0;
 
 		while (commandBufferIndex < commandBuffers.count()) {
-			vkCommandBuffers[commandBufferIndex] = static_pointer_cast<VK::CommandBuffer>(commandBuffers[commandBufferIndex])->commandBuffer;
+			vkCommandBuffers[commandBufferIndex] = ref_cast<VK::CommandBuffer>(commandBuffers[commandBufferIndex])->commandBuffer;
 
 			commandBufferIndex += 1;
 		}
@@ -112,13 +112,13 @@ namespace Trident {
 		VkResult result;
 
 		// TODO(graphics/vk/queue/submit): One wait destination stage mask per wait semaphore, but the pipeline stage flags is stored into the command buffer.
-		const VkPipelineStageFlags waitDstStageMask = static_pointer_cast<VK::CommandBuffer>(commandBuffers[0])->pipelineStageFlags;
+		const VkPipelineStageFlags waitDstStageMask = ref_cast<VK::CommandBuffer>(commandBuffers[0])->pipelineStageFlags;
 
 		sequence<VkCommandBuffer> vkCommandBuffers(commandBuffers.count());
 		uint32 commandBufferIndex = 0;
 
 		while (commandBufferIndex < commandBuffers.count()) {
-			vkCommandBuffers[commandBufferIndex] = static_pointer_cast<VK::CommandBuffer>(commandBuffers[commandBufferIndex])->commandBuffer;
+			vkCommandBuffers[commandBufferIndex] = ref_cast<VK::CommandBuffer>(commandBuffers[commandBufferIndex])->commandBuffer;
 
 			commandBufferIndex += 1;
 		}
@@ -134,7 +134,7 @@ namespace Trident {
 		}
 		else {
 			submitInfo.waitSemaphoreCount = 1;
-			submitInfo.pWaitSemaphores = &static_pointer_cast<VK::Semaphore>(waitSemaphore)->semaphore;
+			submitInfo.pWaitSemaphores = &ref_cast<VK::Semaphore>(waitSemaphore)->semaphore;
 			submitInfo.pWaitDstStageMask = &waitDstStageMask;
 		}
 
@@ -147,12 +147,12 @@ namespace Trident {
 		}
 		else {
 			submitInfo.signalSemaphoreCount = 1;
-			submitInfo.pSignalSemaphores = &static_pointer_cast<VK::Semaphore>(signalSemaphore)->semaphore;
+			submitInfo.pSignalSemaphores = &ref_cast<VK::Semaphore>(signalSemaphore)->semaphore;
 		}
 
 		DEBUG_ASSERT(fence != nullptr);
 
-		result = vkQueueSubmit(_queue->queue, 1, &submitInfo, static_pointer_cast<VK::Fence>(fence)->fence);
+		result = vkQueueSubmit(_queue->queue, 1, &submitInfo, ref_cast<VK::Fence>(fence)->fence);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to submit queue ([]).", string_VkResult(result));
 	}

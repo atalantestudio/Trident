@@ -123,20 +123,20 @@ namespace Trident {
 		return descriptorHandle;
 	}
 
-	void DX12::MemoryAllocator::writeUniformBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, ref<BaseBufferView> bufferView) const {
+	void DX12::MemoryAllocator::writeUniformBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const BaseBufferView& bufferView) const {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
-		const DX12::Buffer* _buffer = static_cast<const DX12::Buffer*>(bufferView->getBuffer());
+		const DX12::Buffer* _buffer = static_cast<const DX12::Buffer*>(bufferView.getBuffer());
 
 		D3D12_CONSTANT_BUFFER_VIEW_DESC constantBufferViewDescriptor{};
-		constantBufferViewDescriptor.BufferLocation = _buffer->resource->GetGPUVirtualAddress() + bufferView->getOffset();
-		constantBufferViewDescriptor.SizeInBytes = static_cast<UINT>(bufferView->getSize());
+		constantBufferViewDescriptor.BufferLocation = _buffer->resource->GetGPUVirtualAddress() + bufferView.getOffset();
+		constantBufferViewDescriptor.SizeInBytes = static_cast<UINT>(bufferView.getSize());
 
 		_device->device->CreateConstantBufferView(&constantBufferViewDescriptor, descriptorHandle);
 	}
 
-	void DX12::MemoryAllocator::writeReadOnlyStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, ref<BaseBufferView> bufferView) const {
+	void DX12::MemoryAllocator::writeReadOnlyStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const BaseBufferView& bufferView) const {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
-		const DX12::Buffer* _buffer = static_cast<const DX12::Buffer*>(bufferView->getBuffer());
+		const DX12::Buffer* _buffer = static_cast<const DX12::Buffer*>(bufferView.getBuffer());
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDescriptor{};
 		shaderResourceViewDescriptor.Format = DXGI_FORMAT_UNKNOWN;
@@ -144,28 +144,28 @@ namespace Trident {
 		shaderResourceViewDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
 		// TODO(graphics/dx12/memory-allocator/shader-resource-view): The offset is not guaranteed to be a multiple of the stride.
-		shaderResourceViewDescriptor.Buffer.FirstElement = bufferView->getOffset() / bufferView->getStride();
+		shaderResourceViewDescriptor.Buffer.FirstElement = bufferView.getOffset() / bufferView.getStride();
 
-		shaderResourceViewDescriptor.Buffer.NumElements = static_cast<UINT>(bufferView->getSize()) / bufferView->getStride();
-		shaderResourceViewDescriptor.Buffer.StructureByteStride = bufferView->getStride();
+		shaderResourceViewDescriptor.Buffer.NumElements = static_cast<UINT>(bufferView.getSize()) / bufferView.getStride();
+		shaderResourceViewDescriptor.Buffer.StructureByteStride = bufferView.getStride();
 		shaderResourceViewDescriptor.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 
 		_device->device->CreateShaderResourceView(_buffer->resource, &shaderResourceViewDescriptor, descriptorHandle);
 	}
 
-	void DX12::MemoryAllocator::writeReadWriteStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, ref<BaseBufferView> bufferView) const {
+	void DX12::MemoryAllocator::writeReadWriteStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const BaseBufferView& bufferView) const {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
-		const DX12::Buffer* _buffer = static_cast<const DX12::Buffer*>(bufferView->getBuffer());
+		const DX12::Buffer* _buffer = static_cast<const DX12::Buffer*>(bufferView.getBuffer());
 
 		D3D12_UNORDERED_ACCESS_VIEW_DESC unorderedAccessViewDescriptor{};
 		unorderedAccessViewDescriptor.Format = DXGI_FORMAT_UNKNOWN;
 		unorderedAccessViewDescriptor.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
 
 		// TODO(graphics/dx12/memory-allocator/shader-resource-view): The offset is not guaranteed to be a multiple of the stride.
-		unorderedAccessViewDescriptor.Buffer.FirstElement = bufferView->getOffset() / bufferView->getStride();
+		unorderedAccessViewDescriptor.Buffer.FirstElement = bufferView.getOffset() / bufferView.getStride();
 
-		unorderedAccessViewDescriptor.Buffer.NumElements = static_cast<UINT>(bufferView->getSize()) / bufferView->getStride();
-		unorderedAccessViewDescriptor.Buffer.StructureByteStride = bufferView->getStride();
+		unorderedAccessViewDescriptor.Buffer.NumElements = static_cast<UINT>(bufferView.getSize()) / bufferView.getStride();
+		unorderedAccessViewDescriptor.Buffer.StructureByteStride = bufferView.getStride();
 		unorderedAccessViewDescriptor.Buffer.CounterOffsetInBytes = 0;
 		unorderedAccessViewDescriptor.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
 
@@ -504,7 +504,7 @@ namespace Trident {
 
 	MemorySuballocation DX12::suballocateBufferMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, ref<Trident::Buffer> buffer) {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(memoryAllocator->device);
-		const ref<DX12::Buffer> _buffer = static_pointer_cast<DX12::Buffer>(buffer);
+		const ref<DX12::Buffer> _buffer = ref_cast<DX12::Buffer>(buffer);
 		const MemoryAllocation& memoryAllocation = memoryAllocator->allocations[allocationIndex];
 
 		D3D12_RESOURCE_DESC resourceDescriptor{};
@@ -568,7 +568,7 @@ namespace Trident {
 
 	MemorySuballocation DX12::suballocateImageMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, ref<Trident::Image> image) {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(memoryAllocator->device);
-		const ref<DX12::Image> _image = static_pointer_cast<DX12::Image>(image);
+		const ref<DX12::Image> _image = ref_cast<DX12::Image>(image);
 		const Extent3D extent = image->getExtent();
 		const ImageUsage usage = image->getUsage();
 		const MemoryAllocation& memoryAllocation = memoryAllocator->allocations[allocationIndex];

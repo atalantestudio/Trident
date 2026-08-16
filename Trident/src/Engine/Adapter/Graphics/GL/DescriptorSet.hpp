@@ -11,7 +11,7 @@ namespace Trident {
 		public:
 			struct DescriptorSetBinding {
 				DescriptorType descriptorType;
-				sequence<ref<BaseBufferView>> descriptorBufferViews;
+				sequence<BaseBufferView> descriptorBufferViews;
 				sequence<DescriptorImage> descriptorImages;
 			};
 

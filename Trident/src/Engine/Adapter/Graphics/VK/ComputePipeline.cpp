@@ -26,8 +26,8 @@ namespace Trident {
 		computePipelineCreateInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
 		computePipelineCreateInfo.pNext = nullptr;
 		computePipelineCreateInfo.flags = 0;
-		computePipelineCreateInfo.stage = static_pointer_cast<VK::ShaderModule>(descriptor.computeShaderModule)->createInfo;
-		computePipelineCreateInfo.layout = static_pointer_cast<VK::PipelineLayout>(descriptor.pipelineLayout)->pipelineLayout;
+		computePipelineCreateInfo.stage = ref_cast<VK::ShaderModule>(descriptor.computeShaderModule)->createInfo;
+		computePipelineCreateInfo.layout = ref_cast<VK::PipelineLayout>(descriptor.pipelineLayout)->pipelineLayout;
 		computePipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 		computePipelineCreateInfo.basePipelineIndex = 0;
 

@@ -14,7 +14,7 @@ namespace Trident {
 	VK::MemoryAllocator::MemoryAllocator(const Trident::Device* device) :
 		Trident::MemoryAllocator(device)
 	{
-		const ref<VK::PhysicalDevice> _physicalDevice = static_pointer_cast<VK::PhysicalDevice>(device->physicalDevice);
+		const ref<VK::PhysicalDevice> _physicalDevice = ref_cast<VK::PhysicalDevice>(device->physicalDevice);
 
 		#if defined(DEBUG_ENUMERATE_MEMORY_HEAPS)
 			enumerateMemoryHeaps();
@@ -68,7 +68,7 @@ namespace Trident {
 	#endif
 
 	uint32 VK::MemoryAllocator::findMemoryTypeIndex(uint32 memoryTypeBits, VkMemoryPropertyFlags memoryPropertyFlags) {
-		const ref<VK::PhysicalDevice> _physicalDevice = static_pointer_cast<VK::PhysicalDevice>(device->physicalDevice);
+		const ref<VK::PhysicalDevice> _physicalDevice = ref_cast<VK::PhysicalDevice>(device->physicalDevice);
 
 		uint32 bestMemoryTypeIndex = 0;
 		uint32 maxMemoryTypePropertyMatchingFlagCount = 0;
@@ -124,7 +124,7 @@ namespace Trident {
 
 	void VK::MemoryAllocator::unmapSuballocation(uint32 memoryAllocationIndex) {
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
-		const ref<VK::PhysicalDevice> _physicalDevice = static_pointer_cast<VK::PhysicalDevice>(device->physicalDevice);
+		const ref<VK::PhysicalDevice> _physicalDevice = ref_cast<VK::PhysicalDevice>(device->physicalDevice);
 
 		MemoryAllocation& memoryAllocation = allocations[memoryAllocationIndex];
 
@@ -181,7 +181,7 @@ namespace Trident {
 
 	MemoryAllocation VK::allocateMemory(Trident::MemoryAllocator* memoryAllocator, bool dynamic, uint32 memoryTypeIndex, uint64 size, uint64 alignment) {
 		const VK::Device* _device = static_cast<const VK::Device*>(memoryAllocator->device);
-		const ref<VK::PhysicalDevice> _physicalDevice = static_pointer_cast<VK::PhysicalDevice>(memoryAllocator->device->physicalDevice);
+		const ref<VK::PhysicalDevice> _physicalDevice = ref_cast<VK::PhysicalDevice>(memoryAllocator->device->physicalDevice);
 		const VkMemoryType memoryType = _physicalDevice->memoryProperties.memoryTypes[memoryTypeIndex];
 		const VkMemoryHeap memoryHeap = _physicalDevice->memoryProperties.memoryHeaps[memoryType.heapIndex];
 
@@ -213,7 +213,7 @@ namespace Trident {
 	}
 
 	uint32 VK::findMemoryTypeIndex(const Trident::MemoryAllocator* memoryAllocator, MemoryProperty memoryProperties, bool transferDestination) {
-		const ref<VK::PhysicalDevice> physicalDevice = static_pointer_cast<VK::PhysicalDevice>(memoryAllocator->device->physicalDevice);
+		const ref<VK::PhysicalDevice> physicalDevice = ref_cast<VK::PhysicalDevice>(memoryAllocator->device->physicalDevice);
 		const VkMemoryPropertyFlags memoryPropertyFlags = static_cast<VkMemoryPropertyFlags>(memoryProperties);
 
 		uint32 bestMemoryTypeIndex = 0;
@@ -241,20 +241,20 @@ namespace Trident {
 	}
 
 	MemoryRequirements VK::getBufferMemoryRequirements(const Trident::MemoryAllocator* memoryAllocator, ref<Trident::Buffer> buffer) {
-		const ref<VK::Buffer> _buffer = static_pointer_cast<VK::Buffer>(buffer);
+		const ref<VK::Buffer> _buffer = ref_cast<VK::Buffer>(buffer);
 
 		return *pointer_cast<const MemoryRequirements*>(&_buffer->memoryRequirements);
 	}
 
 	MemoryRequirements VK::getImageMemoryRequirements(const Trident::MemoryAllocator* memoryAllocator, ref<Trident::Image> image) {
-		const ref<VK::Image> _image = static_pointer_cast<VK::Image>(image);
+		const ref<VK::Image> _image = ref_cast<VK::Image>(image);
 
 		return *pointer_cast<const MemoryRequirements*>(&_image->memoryRequirements);
 	}
 
 	MemorySuballocation VK::suballocateBufferMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, ref<Trident::Buffer> buffer) {
 		const VK::Device* _device = static_cast<const VK::Device*>(memoryAllocator->device);
-		const ref<VK::Buffer> _buffer = static_pointer_cast<VK::Buffer>(buffer);
+		const ref<VK::Buffer> _buffer = ref_cast<VK::Buffer>(buffer);
 		const MemoryAllocation& memoryAllocation = memoryAllocator->allocations[allocationIndex];
 
 		MemorySuballocation memorySuballocation = memoryAllocator->suballocate(allocationIndex, _buffer->memoryRequirements.size, _buffer->memoryRequirements.alignment);
@@ -269,7 +269,7 @@ namespace Trident {
 
 	MemorySuballocation VK::suballocateImageMemory(Trident::MemoryAllocator* memoryAllocator, uint32 allocationIndex, ref<Trident::Image> image) {
 		const VK::Device* _device = static_cast<const VK::Device*>(memoryAllocator->device);
-		const ref<VK::Image> _image = static_pointer_cast<VK::Image>(image);
+		const ref<VK::Image> _image = ref_cast<VK::Image>(image);
 		const MemoryAllocation& memoryAllocation = memoryAllocator->allocations[allocationIndex];
 
 		MemorySuballocation memorySuballocation = memoryAllocator->suballocate(allocationIndex, _image->memoryRequirements.size, _image->memoryRequirements.alignment);

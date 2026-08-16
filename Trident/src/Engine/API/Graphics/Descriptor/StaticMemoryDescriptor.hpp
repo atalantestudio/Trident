@@ -8,7 +8,10 @@
 
 namespace Trident {
 	struct StaticMemoryDescriptor {
-		sequence<ref<Buffer>> buffers;
-		sequence<ref<Image>> images;
+		/// Buffers that are statically allocated.
+		view<ref<Buffer>> buffers;
+
+		/// Images that are statically allocated.
+		view<ref<Image>> images;
 	};
 }

@@ -28,8 +28,10 @@ namespace Trident {
 			}
 
 			StaticMemoryDescriptor getStaticMemoryDescriptor() const override {
+				const ref<Buffer> buffers[] = {vertexBuffer, indexBuffer, stagingBuffer};
+
 				return {
-					.buffers = {vertexBuffer, indexBuffer, stagingBuffer},
+					.buffers = buffers,
 					.images = {},
 				};
 			}
@@ -109,7 +111,6 @@ namespace Trident {
 			ref<RenderPass> createRenderPass() const {
 				return Renderer::createRenderPass({
 					.attachments = {
-						// Swapchain
 						{
 							.format = getSurface()->getFormat(),
 							.sampleCount = 1,

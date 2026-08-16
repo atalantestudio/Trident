@@ -41,7 +41,7 @@ namespace Trident {
 				descriptorSetBinding.descriptorType = descriptorSetLayoutBinding.descriptorType;
 
 				if (isBufferDescriptorType(descriptorSetBinding.descriptorType)) {
-					descriptorSetBinding.descriptorBufferViews = sequence<ref<BaseBufferView>>(descriptorSetLayoutBinding.descriptorCount);
+					descriptorSetBinding.descriptorBufferViews = sequence<BaseBufferView>(descriptorSetLayoutBinding.descriptorCount);
 				}
 				else if (isImageDescriptorType(descriptorSetBinding.descriptorType)) {
 					descriptorSetBinding.descriptorImages = sequence<DescriptorImage>(descriptorSetLayoutBinding.descriptorCount);
@@ -87,7 +87,8 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		for (const WriteDescriptorSet& writeDescriptorSet : writeDescriptorSets) {
-			const ref<GL::DescriptorSet> descriptorSet = static_pointer_cast<GL::DescriptorSet>(writeDescriptorSet.descriptorSet);
+			const ref<GL::DescriptorSet> descriptorSet = ref_cast<GL::DescriptorSet>(writeDescriptorSet.descriptorSet);
+
 			GL::DescriptorSet::DescriptorSetBinding& descriptorSetBinding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
 
 			if (isBufferDescriptorType(descriptorSetBinding.descriptorType)) {

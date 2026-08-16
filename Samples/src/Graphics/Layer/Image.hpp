@@ -33,8 +33,8 @@ namespace Trident {
 
 			StaticMemoryDescriptor getStaticMemoryDescriptor() const override {
 				return {
-					.buffers = {stagingBuffer},
-					.images = {image},
+					.buffers = stagingBuffer,
+					.images = image,
 				};
 			}
 

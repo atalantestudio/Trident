@@ -32,7 +32,7 @@ Interstage main(VertexInput input) {
 	float2 lightmapCoordinate = input.lightmapCoordinate * 2.0 - 1.0;
 
 	Interstage interstage;
-	interstage.position = mul(camera.projectionView, mul(input.worldTransform, float4(position, 1.0)));
+	interstage.position = mul(camera.projectionView, mul(input.worldTransform, float4(input.position, 1.0)));
 	interstage.normal = normal;
 	interstage.textureCoordinate = textureCoordinate;
 	interstage.lightmapCoordinate = lightmapCoordinate;

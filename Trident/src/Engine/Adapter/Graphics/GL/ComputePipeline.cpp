@@ -18,7 +18,7 @@ namespace Trident {
 		ref<GL::ComputePipeline> computePipeline = allocateRef<GL::ComputePipeline>(device);
 		computePipeline->program = glCreateProgram();
 
-		const ref<GL::ShaderModule> computeShaderModule = static_pointer_cast<GL::ShaderModule>(descriptor.computeShaderModule);
+		const ref<GL::ShaderModule> computeShaderModule = ref_cast<GL::ShaderModule>(descriptor.computeShaderModule);
 
 		glAttachShader(computePipeline->program, computeShaderModule->shader);
 		glLinkProgram(computePipeline->program);

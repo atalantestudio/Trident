@@ -37,6 +37,7 @@ namespace Trident {
 				other.owning = false;
 			}
 
+			// TODO(base/ref): Restore?
 			/// Dynamically allocates T with the provided arguments.
 			/* template<typename... U>
 			explicit ref(U&&... arguments) :
@@ -89,17 +90,9 @@ namespace Trident {
 			T* object = nullptr;
 
 		public:
-			// TODO: Make private.
+			// TODO(base/ref): Make private.
 			bool owning = false;
 	};
-
-	template<typename T, typename U>
-	inline ref<T> static_pointer_cast(ref<U> r) {
-		ref<T> ref(pointer_cast<T*>(r));
-		ref.owning = false;
-
-		return ref;
-	}
 
 	template<typename T>
 	using scope = std::unique_ptr<T>;

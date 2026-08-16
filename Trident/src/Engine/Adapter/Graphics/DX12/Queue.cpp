@@ -53,7 +53,7 @@ namespace Trident {
 
 	void DX12::destroyQueue(const Trident::Queue* queue) {
 		const DX12::Queue* _queue = static_cast<const DX12::Queue*>(queue);
-		const ref<DX12::Fence> idleFence = static_pointer_cast<DX12::Fence>(_queue->idleFence);
+		const ref<DX12::Fence> idleFence = ref_cast<DX12::Fence>(_queue->idleFence);
 		HRESULT result;
 
 		result = CloseHandle(_queue->completionEvent);
@@ -72,7 +72,7 @@ namespace Trident {
 		HRESULT result;
 
 		for (const ref<Trident::Swapchain>& swapchain : swapchains) {
-			const ref<DX12::Swapchain> _swapchain = static_pointer_cast<DX12::Swapchain>(swapchain);
+			const ref<DX12::Swapchain> _swapchain = ref_cast<DX12::Swapchain>(swapchain);
 
 			UINT presentFlags = 0;
 
@@ -96,7 +96,7 @@ namespace Trident {
 		UINT commandListIndex = 0;
 
 		while (commandListIndex < commandLists.count()) {
-			commandLists[commandListIndex] = static_pointer_cast<DX12::CommandBuffer>(commandBuffers[commandListIndex])->commandList;
+			commandLists[commandListIndex] = ref_cast<DX12::CommandBuffer>(commandBuffers[commandListIndex])->commandList;
 
 			commandListIndex += 1;
 		}
@@ -113,7 +113,7 @@ namespace Trident {
 		UINT commandListIndex = 0;
 
 		while (commandListIndex < commandLists.count()) {
-			commandLists[commandListIndex] = static_pointer_cast<DX12::CommandBuffer>(commandBuffers[commandListIndex])->commandList;
+			commandLists[commandListIndex] = ref_cast<DX12::CommandBuffer>(commandBuffers[commandListIndex])->commandList;
 
 			commandListIndex += 1;
 		}
@@ -122,7 +122,7 @@ namespace Trident {
 
 		DEBUG_ASSERT(fence != nullptr);
 
-		const ref<DX12::Fence> _fence = static_pointer_cast<DX12::Fence>(fence);
+		const ref<DX12::Fence> _fence = ref_cast<DX12::Fence>(fence);
 
 		result = _queue->commandQueue->Signal(_fence->fence, 1);
 

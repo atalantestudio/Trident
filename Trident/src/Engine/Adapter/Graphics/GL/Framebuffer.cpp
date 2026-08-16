@@ -52,7 +52,7 @@ namespace Trident {
 
 		while (imageViewIndex < descriptor.imageViews.count()) {
 			const ref<Trident::ImageView> imageView = descriptor.imageViews[imageViewIndex];
-			const ref<GL::ImageView> glImageView = static_pointer_cast<GL::ImageView>(imageView);
+			const ref<GL::ImageView> glImageView = ref_cast<GL::ImageView>(imageView);
 			const GL::Image* glImage = static_cast<const GL::Image*>(imageView->getImage());
 
 			if (resolve && imageView->getImage()->getSampleCount() == 1) {

@@ -13,33 +13,33 @@ namespace Trident {
 	static constexpr uint32 MAX_CHILD_NODE_ITERATIONS = 11002;
 
 	template<typename DataType>
-	static ref<FBXProperty> readPrimitiveProperty(ByteStream<StreamOperation::READ>& stream) {
-		FBXPrimitiveProperty<DataType> Property{};
-		Property.Data = stream.read<DataType>();
+	static std::shared_ptr<FBXProperty> readPrimitiveProperty(ByteStream<StreamOperation::READ>& stream) {
+		std::shared_ptr<FBXPrimitiveProperty<DataType>> Property = std::make_shared<FBXPrimitiveProperty<DataType>>();
+		Property->Data = stream.read<DataType>();
 
 		return Property;
 	}
 
 	template<typename DataType>
-	static ref<FBXProperty> readArrayProperty(ByteStream<StreamOperation::READ>& stream) {
+	static std::shared_ptr<FBXProperty> readArrayProperty(ByteStream<StreamOperation::READ>& stream) {
 		const uint32 ArrayLength = stream.read<uint32>();
 		const uint32 Encoding = stream.read<uint32>();
 		const bool Compressed = static_cast<bool>(Encoding);
 		const uint32 CompressedLength = stream.read<uint32>();
 
-		FBXArrayProperty<DataType> Property{};
+		std::shared_ptr<FBXArrayProperty<DataType>> Property = std::make_shared<FBXArrayProperty<DataType>>();
 
 		if (Compressed) {
 			BitStream<StreamOperation::READ> bitStream(stream.getBytePosition(), CompressedLength, Endianness::LITTLE_ENDIAN);
 
-			Property.Contents = bitStream.inflate<DataType>(ArrayLength);
+			Property->Contents = bitStream.inflate<DataType>(ArrayLength);
 
 			stream.jump(CompressedLength);
 		}
 		else {
-			Property.Contents = sequence<DataType>(ArrayLength);
+			Property->Contents = sequence<DataType>(ArrayLength);
 
-			std::copy_n(stream.getBytePosition(), ArrayLength, &Property.Contents[0]);
+			std::copy_n(stream.getBytePosition(), ArrayLength, &Property->Contents[0]);
 
 			stream.jump(ArrayLength * sizeof(DataType));
 		}
@@ -47,21 +47,21 @@ namespace Trident {
 		return Property;
 	}
 
-	static ref<FBXProperty> readSpecialProperty(ByteStream<StreamOperation::READ>& stream) {
+	static std::shared_ptr<FBXProperty> readSpecialProperty(ByteStream<StreamOperation::READ>& stream) {
 		const uint32 Length = stream.read<uint32>();
 
-		FBXSpecialProperty Property{};
-		Property.Data = sequence<uint8>(Length);
+		std::shared_ptr<FBXSpecialProperty> Property = std::make_shared<FBXSpecialProperty>();
+		Property->Data = sequence<uint8>(Length);
 
 		// TODO(asset-builder/parser/fbx): Add null terminator for the string case?
-		std::copy_n(stream.getBytePosition(), Length, &Property.Data[0]);
+		std::copy_n(stream.getBytePosition(), Length, &Property->Data[0]);
 
-		stream.jump(Property.Data.count());
+		stream.jump(Property->Data.count());
 
 		return Property;
 	}
 
-	inline static const std::unordered_map<FBXPropertyTypeCode, std::function<ref<FBXProperty>(ByteStream<StreamOperation::READ>&)>> readProperty = {
+	inline static const std::unordered_map<FBXPropertyTypeCode, std::function<std::shared_ptr<FBXProperty>(ByteStream<StreamOperation::READ>&)>> readProperty = {
 		{FBXPropertyTypeCode::Y, readPrimitiveProperty<sint16>},
 		{FBXPropertyTypeCode::C, readPrimitiveProperty<bool>},
 		{FBXPropertyTypeCode::I, readPrimitiveProperty<sint32>},
@@ -105,7 +105,7 @@ namespace Trident {
 
 		stream.jump(NameLen);
 
-		Node.PropertyList = sequence<ref<FBXProperty>>(NumProperties);
+		Node.PropertyList = sequence<std::shared_ptr<FBXProperty>>(NumProperties);
 
 		for (uint32 propertyIndex = 0; propertyIndex < NumProperties; propertyIndex += 1) {
 			const FBXPropertyTypeCode TypeCode = stream.read<FBXPropertyTypeCode>();

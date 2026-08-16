@@ -18,7 +18,7 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
-		const ref<VK::MemoryAllocator> memoryAllocator = static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
+		const ref<VK::MemoryAllocator> memoryAllocator = ref_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
 		VkResult result;
 
 		ref<VK::Buffer> buffer = allocateRef<VK::Buffer>(device, descriptor);
@@ -94,7 +94,7 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
-		const ref<VK::MemoryAllocator> memoryAllocator = static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
+		const ref<VK::MemoryAllocator> memoryAllocator = ref_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
 		const VK::Buffer* _buffer = static_cast<const VK::Buffer*>(buffer);
 
 		_device->vkDestroyBuffer(_device->device, _buffer->buffer, nullptr);
@@ -103,13 +103,13 @@ namespace Trident {
 	}
 
 	void* VK::mapBuffer(const Trident::Device* device, Trident::Buffer* buffer, uint64 offset, uint64 size) {
-		const ref<VK::MemoryAllocator> memoryAllocator = static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
+		const ref<VK::MemoryAllocator> memoryAllocator = ref_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
 
 		return memoryAllocator->mapSuballocation(buffer->getMemorySuballocation(), offset, size);
 	}
 
 	void VK::unmapBuffer(const Trident::Device* device, Trident::Buffer* buffer) {
-		const ref<VK::MemoryAllocator> memoryAllocator = static_pointer_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
+		const ref<VK::MemoryAllocator> memoryAllocator = ref_cast<VK::MemoryAllocator>(device->getMemoryAllocator());
 
 		memoryAllocator->unmapSuballocation(buffer->getMemorySuballocation().allocationIndex);
 	}

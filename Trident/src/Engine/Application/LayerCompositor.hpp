@@ -118,26 +118,48 @@ namespace Trident {
 			void initializeLayers() const {
 				PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+				const view<ref<Layer>> layerView = getLayers();
 				const ref<MemoryAllocator> memoryAllocator = device->getMemoryAllocator();
 				const uint32 memoryTypeCount = physicalDevice->getMemoryTypeCount();
-				const view<ref<Layer>> layerView = getLayers();
 
 				sequence<uint64> allocationSizesPerMemoryType(memoryTypeCount);
 				sequence<uint64> allocationAlignmentsPerMemoryType(memoryTypeCount);
 				sequence<uint32> allocationIndicesPerMemoryType(memoryTypeCount);
-				sequence<StaticMemoryDescriptor> staticMemoryDescriptors(layerView.count());
+				uint64 staticBufferCount = 0;
+				uint64 staticImageCount = 0;
 
-				uint32 layerIndex = 0;
-
-				while (layerIndex < layerView.count()) {
-					ref<Layer> layer = layerView[layerIndex];
+				for (ref<Layer> layer : layerView) {
 					layer->initialize();
 
-					StaticMemoryDescriptor& staticMemoryDescriptor = staticMemoryDescriptors[layerIndex];
-					staticMemoryDescriptor = layer->getStaticMemoryDescriptor();
+					const StaticMemoryDescriptor staticMemoryDescriptor = layer->getStaticMemoryDescriptor();
+
+					staticBufferCount += staticMemoryDescriptor.buffers.count();
+					staticImageCount += staticMemoryDescriptor.images.count();
+				}
+
+				sequence<ref<Buffer>> staticBuffers(staticBufferCount);
+				sequence<ref<Image>> staticImages(staticImageCount);
+
+				staticBufferCount = 0;
+				staticImageCount = 0;
+
+				for (ref<Layer> layer : layerView) {
+					const StaticMemoryDescriptor staticMemoryDescriptor = layer->getStaticMemoryDescriptor();
+					const view<ref<Buffer>> buffers(&staticBuffers[staticBufferCount], staticMemoryDescriptor.buffers.count());
+					const view<ref<Image>> images(&staticImages[staticImageCount], staticMemoryDescriptor.images.count());
 
 					for (ref<Buffer> buffer : staticMemoryDescriptor.buffers) {
-						const MemorySuballocation memorySuballocation = buffer->getMemorySuballocation();
+						staticBuffers[staticBufferCount] = buffer;
+						staticBufferCount += 1;
+					}
+
+					for (ref<Image> image : staticMemoryDescriptor.images) {
+						staticImages[staticImageCount] = image;
+						staticImageCount += 1;
+					}
+
+					for (ref<Buffer> buffer : buffers) {
+						const MemorySuballocation& memorySuballocation = buffer->getMemorySuballocation();
 
 						DEBUG_ASSERT(memorySuballocation.size == 0);
 
@@ -151,8 +173,8 @@ namespace Trident {
 						allocationSizesPerMemoryType[memoryTypeIndex] += ceil(memoryRequirements.size, alignment);
 					}
 
-					for (ref<Image> image : staticMemoryDescriptor.images) {
-						const MemorySuballocation memorySuballocation = image->getMemorySuballocation();
+					for (ref<Image> image : images) {
+						const MemorySuballocation& memorySuballocation = image->getMemorySuballocation();
 
 						DEBUG_ASSERT(memorySuballocation.size == 0);
 
@@ -165,8 +187,6 @@ namespace Trident {
 						allocationSizesPerMemoryType[memoryTypeIndex] = max(allocationSizesPerMemoryType[memoryTypeIndex], alignment);
 						allocationSizesPerMemoryType[memoryTypeIndex] += ceil(memoryRequirements.size, alignment);
 					}
-
-					layerIndex += 1;
 				}
 
 				uint32 memoryTypeIndex = 0;
@@ -183,22 +203,20 @@ namespace Trident {
 					memoryTypeIndex += 1;
 				}
 
-				for (const StaticMemoryDescriptor& staticMemoryDescriptor : staticMemoryDescriptors) {
-					for (ref<Buffer> buffer : staticMemoryDescriptor.buffers) {
-						const MemorySuballocation memorySuballocation = buffer->getMemorySuballocation();
-						const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(memorySuballocation.memoryProperties, buffer->getUsage() & BufferUsage::TRANSFER_DST);
-						const uint32 allocationIndex = allocationIndicesPerMemoryType[memoryTypeIndex];
+				for (ref<Buffer> buffer : staticBuffers) {
+					const MemorySuballocation& memorySuballocation = buffer->getMemorySuballocation();
+					const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(memorySuballocation.memoryProperties, buffer->getUsage() & BufferUsage::TRANSFER_DST);
+					const uint32 allocationIndex = allocationIndicesPerMemoryType[memoryTypeIndex];
 
-						memoryAllocator->suballocateStatic(allocationIndex, buffer);
-					}
+					memoryAllocator->suballocateStatic(allocationIndex, buffer);
+				}
 
-					for (ref<Image> image : staticMemoryDescriptor.images) {
-						const MemorySuballocation memorySuballocation = image->getMemorySuballocation();
-						const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(memorySuballocation.memoryProperties, image->getUsage() & ImageUsage::TRANSFER_DST);
-						const uint32 allocationIndex = allocationIndicesPerMemoryType[memoryTypeIndex];
+				for (ref<Image> image : staticImages) {
+					const MemorySuballocation& memorySuballocation = image->getMemorySuballocation();
+					const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(memorySuballocation.memoryProperties, image->getUsage() & ImageUsage::TRANSFER_DST);
+					const uint32 allocationIndex = allocationIndicesPerMemoryType[memoryTypeIndex];
 
-						memoryAllocator->suballocateStatic(allocationIndex, image);
-					}
+					memoryAllocator->suballocateStatic(allocationIndex, image);
 				}
 
 				for (ref<Layer> layer : layerView) {

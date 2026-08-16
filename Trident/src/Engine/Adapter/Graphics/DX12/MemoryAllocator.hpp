@@ -47,9 +47,9 @@ namespace Trident {
 			D3D12_CPU_DESCRIPTOR_HANDLE allocateRenderTargetView(ID3D12Resource* resource, const D3D12_RENDER_TARGET_VIEW_DESC* descriptor);
 			D3D12_CPU_DESCRIPTOR_HANDLE allocateDepthStencilView(ID3D12Resource* resource, const D3D12_DEPTH_STENCIL_VIEW_DESC* descriptor);
 
-			void writeUniformBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, ref<BaseBufferView> bufferView) const;
-			void writeReadOnlyStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, ref<BaseBufferView> bufferView) const;
-			void writeReadWriteStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, ref<BaseBufferView> bufferView) const;
+			void writeUniformBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const BaseBufferView& bufferView) const;
+			void writeReadOnlyStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const BaseBufferView& bufferView) const;
+			void writeReadWriteStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const BaseBufferView& bufferView) const;
 			void writeImage(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorImage& descriptorImage) const;
 			void writeReadWriteStorageImage(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorImage& descriptorImage) const;
 			void writeInputAttachment(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorImage& descriptorImage) const;

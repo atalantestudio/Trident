@@ -16,7 +16,7 @@ namespace Trident {
 	{}
 
 	ref<Trident::Buffer> DX12::createBuffer(const Trident::Device* device, const BufferDescriptor& descriptor) {
-		return createRef<DX12::Buffer>(device, descriptor);
+		return allocateRef<DX12::Buffer>(device, descriptor);
 	}
 
 	void DX12::destroyBuffer(const Trident::Device* device, const Trident::Buffer* buffer) {

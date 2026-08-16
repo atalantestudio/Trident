@@ -37,12 +37,12 @@ namespace Trident {
 		graphicsPipeline->depthTest = descriptor.depthStencilState.depthTest;
 		graphicsPipeline->depthWrite = descriptor.depthStencilState.depthWrite;
 		graphicsPipeline->depthFunc = getDepthFunc(descriptor.depthStencilState.compareOperation);
-		graphicsPipeline->multisample = static_pointer_cast<GL::RenderPass>(descriptor.renderPass)->multisample;
+		graphicsPipeline->multisample = ref_cast<GL::RenderPass>(descriptor.renderPass)->multisample;
 		graphicsPipeline->dynamicLineWidth = descriptor.dynamicState & DynamicState::LINE_WIDTH;
 		graphicsPipeline->subpassIndex = descriptor.subpassIndex;
 
-		const ref<GL::ShaderModule> vertexShaderModule = static_pointer_cast<GL::ShaderModule>(descriptor.vertexShaderModule);
-		const ref<GL::ShaderModule> fragmentShaderModule = static_pointer_cast<GL::ShaderModule>(descriptor.fragmentShaderModule);
+		const ref<GL::ShaderModule> vertexShaderModule = ref_cast<GL::ShaderModule>(descriptor.vertexShaderModule);
+		const ref<GL::ShaderModule> fragmentShaderModule = ref_cast<GL::ShaderModule>(descriptor.fragmentShaderModule);
 
 		glAttachShader(graphicsPipeline->program, vertexShaderModule->shader);
 		glAttachShader(graphicsPipeline->program, fragmentShaderModule->shader);

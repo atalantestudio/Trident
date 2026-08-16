@@ -52,7 +52,7 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VK::Instance* _instance = static_cast<const VK::Instance*>(instance);
-		ref<VK::PhysicalDevice> _physicalDevice = static_pointer_cast<VK::PhysicalDevice>(physicalDevice);
+		ref<VK::PhysicalDevice> _physicalDevice = ref_cast<VK::PhysicalDevice>(physicalDevice);
 
 		ref<VK::Surface> surface = allocateRef<VK::Surface>(instance);
 		VkResult result;

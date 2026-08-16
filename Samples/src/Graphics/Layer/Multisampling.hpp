@@ -68,7 +68,6 @@ namespace Trident {
 			ref<RenderPass> createRenderPass() const {
 				return Renderer::createRenderPass({
 					.attachments = {
-						// Swapchain
 						{
 							.format = getSurface()->getFormat(),
 							.sampleCount = MULTISAMPLING_SAMPLE_COUNT,

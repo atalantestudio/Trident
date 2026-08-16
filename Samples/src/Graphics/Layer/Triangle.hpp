@@ -27,8 +27,10 @@ namespace Trident {
 			}
 
 			StaticMemoryDescriptor getStaticMemoryDescriptor() const override {
+				const ref<Buffer> buffers[] = {vertexBuffer, stagingBuffer};
+
 				return {
-					.buffers = {vertexBuffer, stagingBuffer},
+					.buffers = buffers,
 					.images = {},
 				};
 			}

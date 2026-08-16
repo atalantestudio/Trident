@@ -79,7 +79,7 @@ namespace Trident {
 		static PFN_vkCmdBeginRenderPass vkCmdBeginRenderPass = loadDeviceProcedure<PFN_vkCmdBeginRenderPass>(static_cast<const VK::Device*>(commandEncoder->device)->device, "vkCmdBeginRenderPass");
 
 		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
-		const ref<VK::Framebuffer> framebuffer = static_pointer_cast<VK::Framebuffer>(descriptor.framebuffer);
+		const ref<VK::Framebuffer> framebuffer = ref_cast<VK::Framebuffer>(descriptor.framebuffer);
 
 		sequence<VkClearValue> clearValues(descriptor.clearValues.count());
 		uint64 clearValueIndex = 0;
@@ -108,7 +108,7 @@ namespace Trident {
 		VkRenderPassBeginInfo renderPassBeginInfo{};
 		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		renderPassBeginInfo.pNext = nullptr;
-		renderPassBeginInfo.renderPass = static_pointer_cast<VK::RenderPass>(framebuffer->getRenderPass())->renderPass;
+		renderPassBeginInfo.renderPass = ref_cast<VK::RenderPass>(framebuffer->getRenderPass())->renderPass;
 		renderPassBeginInfo.framebuffer = framebuffer->framebuffer;
 		renderPassBeginInfo.renderArea.offset.x = 0;
 		renderPassBeginInfo.renderArea.offset.y = 0;
@@ -127,7 +127,7 @@ namespace Trident {
 		static PFN_vkCmdBindPipeline vkCmdBindPipeline = loadDeviceProcedure<PFN_vkCmdBindPipeline>(static_cast<const VK::Device*>(commandEncoder->device)->device, "vkCmdBindPipeline");
 
 		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
-		const ref<VK::ComputePipeline> _computePipeline = static_pointer_cast<VK::ComputePipeline>(computePipeline);
+		const ref<VK::ComputePipeline> _computePipeline = ref_cast<VK::ComputePipeline>(computePipeline);
 
 		vkCmdBindPipeline(_commandEncoder->commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _computePipeline->pipeline);
 
@@ -145,7 +145,7 @@ namespace Trident {
 		uint32 descriptorSetIndex = 0;
 
 		while (descriptorSetIndex < descriptorSets.count()) {
-			vkDescriptorSets[descriptorSetIndex] = static_pointer_cast<VK::DescriptorSet>(descriptorSets[descriptorSetIndex])->descriptorSet;
+			vkDescriptorSets[descriptorSetIndex] = ref_cast<VK::DescriptorSet>(descriptorSets[descriptorSetIndex])->descriptorSet;
 
 			descriptorSetIndex += 1;
 		}
@@ -153,7 +153,7 @@ namespace Trident {
 		vkCmdBindDescriptorSets(
 			_commandEncoder->commandBuffer,
 			_commandEncoder->pipelineBindPoint,
-			static_pointer_cast<VK::PipelineLayout>(pipelineLayout)->pipelineLayout,
+			ref_cast<VK::PipelineLayout>(pipelineLayout)->pipelineLayout,
 			descriptorSetIndexOffset,
 			static_cast<uint32>(vkDescriptorSets.count()),
 			&vkDescriptorSets[0],
@@ -170,7 +170,7 @@ namespace Trident {
 		static PFN_vkCmdBindPipeline vkCmdBindPipeline = loadDeviceProcedure<PFN_vkCmdBindPipeline>(static_cast<const VK::Device*>(commandEncoder->device)->device, "vkCmdBindPipeline");
 
 		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
-		const ref<VK::GraphicsPipeline> _graphicsPipeline = static_pointer_cast<VK::GraphicsPipeline>(graphicsPipeline);
+		const ref<VK::GraphicsPipeline> _graphicsPipeline = ref_cast<VK::GraphicsPipeline>(graphicsPipeline);
 
 		vkCmdBindPipeline(_commandEncoder->commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipeline->pipeline);
 
@@ -187,7 +187,7 @@ namespace Trident {
 
 		vkCmdBindIndexBuffer(
 			_commandEncoder->commandBuffer,
-			static_pointer_cast<VK::Buffer>(indexBuffer)->buffer,
+			ref_cast<VK::Buffer>(indexBuffer)->buffer,
 			offset,
 			getIndexType(indexTypeSize)
 		);
@@ -206,7 +206,7 @@ namespace Trident {
 			_commandEncoder->commandBuffer,
 			bindingIndex,
 			1,
-			&static_pointer_cast<VK::Buffer>(vertexBuffer)->buffer,
+			&ref_cast<VK::Buffer>(vertexBuffer)->buffer,
 			&offset
 		);
 
@@ -222,8 +222,8 @@ namespace Trident {
 
 		vkCmdCopyBuffer(
 			_commandEncoder->commandBuffer,
-			static_pointer_cast<VK::Buffer>(sourceBuffer)->buffer,
-			static_pointer_cast<VK::Buffer>(destinationBuffer)->buffer,
+			ref_cast<VK::Buffer>(sourceBuffer)->buffer,
+			ref_cast<VK::Buffer>(destinationBuffer)->buffer,
 			static_cast<uint32>(copyRegions.count()),
 			pointer_cast<const VkBufferCopy*>(&copyRegions[0])
 		);
@@ -237,12 +237,12 @@ namespace Trident {
 		static PFN_vkCmdCopyBufferToImage vkCmdCopyBufferToImage = loadDeviceProcedure<PFN_vkCmdCopyBufferToImage>(static_cast<const VK::Device*>(commandEncoder->device)->device, "vkCmdCopyBufferToImage");
 
 		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
-		const ref<VK::Image> vkImage = static_pointer_cast<VK::Image>(destinationImage);
+		const ref<VK::Image> vkImage = ref_cast<VK::Image>(destinationImage);
 		const sequence<VkBufferImageCopy> bufferImageCopies = parseBufferImageCopyRegions(copyRegions, vkImage->aspectFlags);
 
 		vkCmdCopyBufferToImage(
 			_commandEncoder->commandBuffer,
-			static_pointer_cast<VK::Buffer>(sourceBuffer)->buffer,
+			ref_cast<VK::Buffer>(sourceBuffer)->buffer,
 			vkImage->image,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			static_cast<uint32>(bufferImageCopies.count()),
@@ -258,14 +258,14 @@ namespace Trident {
 		static PFN_vkCmdCopyImageToBuffer vkCmdCopyImageToBuffer = loadDeviceProcedure<PFN_vkCmdCopyImageToBuffer>(static_cast<const VK::Device*>(commandEncoder->device)->device, "vkCmdCopyImageToBuffer");
 
 		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
-		const ref<VK::Image> vkImage = static_pointer_cast<VK::Image>(sourceImage);
+		const ref<VK::Image> vkImage = ref_cast<VK::Image>(sourceImage);
 		const sequence<VkBufferImageCopy> bufferImageCopies = parseBufferImageCopyRegions(copyRegions, vkImage->aspectFlags);
 
 		vkCmdCopyImageToBuffer(
 			_commandEncoder->commandBuffer,
 			vkImage->image,
 			VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-			static_pointer_cast<VK::Buffer>(destinationBuffer)->buffer,
+			ref_cast<VK::Buffer>(destinationBuffer)->buffer,
 			static_cast<uint32>(bufferImageCopies.count()),
 			&bufferImageCopies[0]
 		);
@@ -341,7 +341,7 @@ namespace Trident {
 
 		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
 
-		vkCmdDispatchIndirect(_commandEncoder->commandBuffer, static_pointer_cast<VK::Buffer>(buffer)->buffer, bufferOffset);
+		vkCmdDispatchIndirect(_commandEncoder->commandBuffer, ref_cast<VK::Buffer>(buffer)->buffer, bufferOffset);
 
 		_commandEncoder->commandCount += 1;
 	}
@@ -377,7 +377,7 @@ namespace Trident {
 
 		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
 
-		vkCmdDrawIndexedIndirect(_commandEncoder->commandBuffer, static_pointer_cast<VK::Buffer>(buffer)->buffer, bufferOffset, drawCount, stride);
+		vkCmdDrawIndexedIndirect(_commandEncoder->commandBuffer, ref_cast<VK::Buffer>(buffer)->buffer, bufferOffset, drawCount, stride);
 
 		_commandEncoder->commandCount += 1;
 	}
@@ -389,7 +389,7 @@ namespace Trident {
 
 		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
 
-		vkCmdDrawIndirect(_commandEncoder->commandBuffer, static_pointer_cast<VK::Buffer>(buffer)->buffer, bufferOffset, drawCount, stride);
+		vkCmdDrawIndirect(_commandEncoder->commandBuffer, ref_cast<VK::Buffer>(buffer)->buffer, bufferOffset, drawCount, stride);
 
 		_commandEncoder->commandCount += 1;
 	}
@@ -451,7 +451,7 @@ namespace Trident {
 			vkBufferMemoryBarrier.dstAccessMask = getAccessFlags(bufferMemoryBarrier.newAccess);
 			vkBufferMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 			vkBufferMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			vkBufferMemoryBarrier.buffer = static_pointer_cast<VK::Buffer>(bufferMemoryBarrier.buffer)->buffer;
+			vkBufferMemoryBarrier.buffer = ref_cast<VK::Buffer>(bufferMemoryBarrier.buffer)->buffer;
 			vkBufferMemoryBarrier.offset = bufferMemoryBarrier.offset;
 			vkBufferMemoryBarrier.size = bufferMemoryBarrier.size;
 
@@ -465,7 +465,7 @@ namespace Trident {
 
 		while (imageMemoryBarrierIndex < imageMemoryBarriers.count()) {
 			const ImageMemoryBarrier& imageMemoryBarrier = imageMemoryBarriers[imageMemoryBarrierIndex];
-			const ref<VK::Image> image = static_pointer_cast<VK::Image>(imageMemoryBarrier.image);
+			const ref<VK::Image> image = ref_cast<VK::Image>(imageMemoryBarrier.image);
 
 			VkImageMemoryBarrier& vkImageMemoryBarrier = vkImageMemoryBarriers[imageMemoryBarrierIndex];
 			vkImageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;

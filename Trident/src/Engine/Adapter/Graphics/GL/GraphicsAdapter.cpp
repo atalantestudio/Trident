@@ -22,23 +22,23 @@
 
 namespace Trident::GL {
 	static ref<CommandPool> createCommandPool(const Trident::Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability) {
-		return createRef<CommandPool>(device);
+		return allocateRef<CommandPool>(device);
 	}
 
 	static ref<DescriptorSetLayout> createDescriptorSetLayout(const Trident::Device* device, view<DescriptorSetLayoutBinding> bindings) {
-		return createRef<DescriptorSetLayout>(device, bindings);
+		return allocateRef<DescriptorSetLayout>(device, bindings);
 	}
 
 	static ref<Trident::MemoryAllocator> createMemoryAllocator(const Trident::Device* device) {
-		return createRef<MemoryAllocator>(device);
+		return allocateRef<MemoryAllocator>(device);
 	}
 
 	static ref<PipelineLayout> createPipelineLayout(const Trident::Device* device, const PipelineLayoutDescriptor& descriptor) {
-		return createRef<PipelineLayout>(device);
+		return allocateRef<PipelineLayout>(device);
 	}
 
 	static ref<Semaphore> createSemaphore(const Trident::Device* device) {
-		return createRef<Semaphore>(device);
+		return allocateRef<Semaphore>(device);
 	}
 
 	static void destroyCommandPool(const Trident::Device* device, const CommandPool* commandPool) {}

@@ -48,7 +48,7 @@ namespace Trident {
 	}
 
 	ref<Trident::Image> DX12::createImage(const Trident::Device* device, const ImageDescriptor& descriptor) {
-		return createRef<DX12::Image>(device, descriptor);
+		return allocateRef<DX12::Image>(device, descriptor);
 	}
 
 	ref<Trident::Image> DX12::createImage(const Trident::Device* device, const DX12::Swapchain* swapchain, UINT index) {

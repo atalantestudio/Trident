@@ -51,9 +51,9 @@ namespace Trident {
 	void GL::submit(const Trident::Queue* queue, view<ref<Trident::CommandBuffer>> commandBuffers) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		#if defined(GL_QUEUE_COMMANDS)
+		#if defined(DEBUG_GL_ENABLE_COMMAND_QUEUE)
 			for (const ref<Trident::CommandBuffer>& commandBuffer : commandBuffers) {
-				const ref<GL::CommandBuffer> glCommandBuffer = static_pointer_cast<GL::CommandBuffer>(commandBuffer);
+				const ref<GL::CommandBuffer> glCommandBuffer = ref_cast<GL::CommandBuffer>(commandBuffer);
 
 				for (ref<GL::Command> command : glCommandBuffer->commands) {
 					command->execute();
@@ -65,9 +65,9 @@ namespace Trident {
 	void GL::submit(const Trident::Queue* queue, view<ref<Trident::CommandBuffer>> commandBuffers, ref<Trident::Semaphore> waitSemaphore, ref<Trident::Semaphore> signalSemaphore, ref<Trident::Fence> fence) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		#if defined(GL_QUEUE_COMMANDS)
+		#if defined(DEBUG_GL_ENABLE_COMMAND_QUEUE)
 			for (const ref<Trident::CommandBuffer>& commandBuffer : commandBuffers) {
-				const ref<GL::CommandBuffer> glCommandBuffer = static_pointer_cast<GL::CommandBuffer>(commandBuffer);
+				const ref<GL::CommandBuffer> glCommandBuffer = ref_cast<GL::CommandBuffer>(commandBuffer);
 
 				for (ref<GL::Command> command : glCommandBuffer->commands) {
 					command->execute();

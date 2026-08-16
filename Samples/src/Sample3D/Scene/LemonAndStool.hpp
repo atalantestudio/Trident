@@ -39,7 +39,7 @@ namespace Trident::LemonAndStool {
 			}
 		}
 
-		scene.registerMaterialAsset(createRef<MaterialAsset>(defaultMaterialAsset), defaultMaterialShaderIndex);
+		scene.registerMaterialAsset(allocateRef<MaterialAsset>(defaultMaterialAsset), defaultMaterialShaderIndex);
 
 		MaterialAsset pbrMaterialAsset = {
 			.stage = ShaderStage::COMPUTE,
@@ -96,7 +96,7 @@ namespace Trident::LemonAndStool {
 			},
 		};
 
-		scene.registerMaterialAsset(createRef<MaterialAsset>(lemonMaterialAsset), pbrMaterialShaderIndex);
+		scene.registerMaterialAsset(allocateRef<MaterialAsset>(lemonMaterialAsset), pbrMaterialShaderIndex);
 
 		MaterialAsset stoolMaterialAsset = pbrMaterialAsset;
 		stoolMaterialAsset.descriptorImages = {
@@ -123,7 +123,7 @@ namespace Trident::LemonAndStool {
 			},
 		};
 
-		scene.registerMaterialAsset(createRef<MaterialAsset>(stoolMaterialAsset), pbrMaterialShaderIndex); */
+		scene.registerMaterialAsset(allocateRef<MaterialAsset>(stoolMaterialAsset), pbrMaterialShaderIndex); */
 
 		return scene;
 	}

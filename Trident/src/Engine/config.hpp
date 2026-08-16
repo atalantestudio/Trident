@@ -37,10 +37,10 @@ namespace Trident {
 	#define GL_RESOURCE_ALIGNMENT 4
 
 	/// Whether to use a queuing system similar to Vulkan and DX12 or execute the commands immediately.
-	#define GL_QUEUE_COMMANDS
+	// #define DEBUG_GL_ENABLE_COMMAND_QUEUE
 
-	/// The max. number of commands that can simultaneously be stored in a queue.
-	#define GL_COMMAND_QUEUE_SIZE 16
+	/// The maximum number of commands that can simultaneously be stored in a queue.
+	#define DEBUG_GL_COMMAND_QUEUE_SIZE 64
 
 	/// Toggles the Vulkan graphics adapter.
 	#define ENABLE_VK_ADAPTER

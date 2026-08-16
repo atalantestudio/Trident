@@ -16,16 +16,14 @@ namespace Trident {
 	class GL::BindDescriptorSetsCommand final : public GL::Command {
 		public:
 			explicit BindDescriptorSetsCommand(view<ref<Trident::DescriptorSet>> descriptorSets) :
-				descriptorSets(descriptorSets.count())
-			{
-				std::copy(descriptorSets.begin(), descriptorSets.end(), &this->descriptorSets[0]);
-			}
+				descriptorSets(descriptorSets)
+			{}
 
 			void execute() const final override {
 				uint32 descriptorSetLayoutOffset = 0;
 
-				for (const ref<Trident::DescriptorSet>& descriptorSet : descriptorSets) {
-					const ref<GL::DescriptorSet> glDescriptorSet = static_pointer_cast<GL::DescriptorSet>(descriptorSet);
+				for (const ref<Trident::DescriptorSet> descriptorSet : descriptorSets) {
+					const ref<GL::DescriptorSet> glDescriptorSet = ref_cast<GL::DescriptorSet>(descriptorSet);
 
 					uint32 bindingIndex = 0;
 
@@ -42,16 +40,16 @@ namespace Trident {
 							uint32 descriptorBufferIndex = 0;
 
 							while (descriptorBufferIndex < descriptorSetBinding.descriptorBufferViews.count()) {
-								const ref<BaseBufferView> bufferView = descriptorSetBinding.descriptorBufferViews[descriptorBufferIndex];
+								const BaseBufferView& bufferView = descriptorSetBinding.descriptorBufferViews[descriptorBufferIndex];
 
-								if (bufferView->getBuffer() == nullptr) {
+								if (bufferView.getBuffer() == nullptr) {
 									break;
 								}
 
 								const GLuint index = descriptorSetLayoutOffset + bindingIndex + descriptorBufferIndex;
 
 								#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-									glBindBufferRange(target, index, static_cast<const GL::Buffer*>(bufferView->getBuffer())->buffer, bufferView->getOffset(), bufferView->getSize());
+									glBindBufferRange(target, index, static_cast<const GL::Buffer*>(bufferView.getBuffer())->buffer, bufferView.getOffset(), bufferView.getSize());
 								#else
 									ENGINE_ERROR_UNSUPPORTED();
 								#endif
@@ -64,7 +62,7 @@ namespace Trident {
 
 							while (descriptorImageIndex < descriptorSetBinding.descriptorImages.count()) {
 								const DescriptorImage& descriptorImage = descriptorSetBinding.descriptorImages[descriptorImageIndex];
-								const ref<GL::ImageView> imageView = static_pointer_cast<GL::ImageView>(descriptorImage.imageView);
+								const ref<GL::ImageView> imageView = ref_cast<GL::ImageView>(descriptorImage.imageView);
 
 								if (imageView == nullptr) {
 									break;
@@ -95,7 +93,7 @@ namespace Trident {
 
 							while (descriptorImageIndex < descriptorSetBinding.descriptorImages.count()) {
 								const DescriptorImage& descriptorImage = descriptorSetBinding.descriptorImages[descriptorImageIndex];
-								const ref<GL::ImageView> imageView = static_pointer_cast<GL::ImageView>(descriptorImage.imageView);
+								const ref<GL::ImageView> imageView = ref_cast<GL::ImageView>(descriptorImage.imageView);
 
 								if (imageView == nullptr) {
 									break;
@@ -106,7 +104,7 @@ namespace Trident {
 
 								#if OPENGL_VERSION >= OPENGL_VERSION_3_3
 									if (descriptorImage.sampler != nullptr) {
-										glBindSampler(descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex, static_pointer_cast<GL::Sampler>(descriptorImage.sampler)->sampler);
+										glBindSampler(descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex, ref_cast<GL::Sampler>(descriptorImage.sampler)->sampler);
 									}
 									else {
 										glBindSampler(descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex, 0);
@@ -130,6 +128,6 @@ namespace Trident {
 			}
 
 		private:
-			sequence<ref<Trident::DescriptorSet>> descriptorSets;
+			view<ref<Trident::DescriptorSet>> descriptorSets;
 	};
 }

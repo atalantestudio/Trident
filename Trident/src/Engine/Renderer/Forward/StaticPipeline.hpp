@@ -27,7 +27,7 @@ namespace Trident {
 		};
 
 		return {
-			.vertexInputBindings = view<VertexInputBinding>(vertexInputBindings, 2),
+			.vertexInputBindings = view<VertexInputBinding>(vertexInputBindings, 3),
 			.vertexShaderModule = loadInternalShaderModule(
 				{
 					.stage = ShaderStage::VERTEX,

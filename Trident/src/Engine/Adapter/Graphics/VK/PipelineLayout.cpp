@@ -24,7 +24,7 @@ namespace Trident {
 		uint32 descriptorSetLayoutIndex = 0;
 
 		while (descriptorSetLayoutIndex < descriptor.descriptorSetLayouts.count()) {
-			vkDescriptorSetLayouts[descriptorSetLayoutIndex] = static_pointer_cast<VK::DescriptorSetLayout>(descriptor.descriptorSetLayouts[descriptorSetLayoutIndex])->descriptorSetLayout;
+			vkDescriptorSetLayouts[descriptorSetLayoutIndex] = ref_cast<VK::DescriptorSetLayout>(descriptor.descriptorSetLayouts[descriptorSetLayoutIndex])->descriptorSetLayout;
 
 			descriptorSetLayoutIndex += 1;
 		}

@@ -24,7 +24,7 @@ namespace Trident {
 			ref<GL::RenderPass> renderPass = nullptr;
 			uint32 subpassIndex = 0;
 
-			#if defined(GL_QUEUE_COMMANDS)
+			#if defined(DEBUG_GL_ENABLE_COMMAND_QUEUE)
 				sequence<ref<GL::Command>> commands;
 				uint64 commandCount = 0;
 			#endif

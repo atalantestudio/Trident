@@ -360,7 +360,7 @@ namespace Trident {
 
 		surface->format = ImageFormat::R8G8B8A8_UNORM;
 
-		ref<GL::PhysicalDevice> _physicalDevice = static_pointer_cast<GL::PhysicalDevice>(physicalDevice);
+		ref<GL::PhysicalDevice> _physicalDevice = ref_cast<GL::PhysicalDevice>(physicalDevice);
 
 		_physicalDevice->limits.bufferImageGranularity = 0;
 

@@ -23,23 +23,23 @@
 
 namespace Trident::DX12 {
 	static ref<DescriptorSetLayout> createDescriptorSetLayout(const Trident::Device* device, view<DescriptorSetLayoutBinding> bindings) {
-		return createRef<DescriptorSetLayout>(device, bindings);
+		return allocateRef<DescriptorSetLayout>(device, bindings);
 	}
 
 	static ref<Framebuffer> createFramebuffer(const Trident::Device* device, const FramebufferDescriptor& descriptor) {
-		return createRef<Framebuffer>(device, descriptor);
+		return allocateRef<Framebuffer>(device, descriptor);
 	}
 
 	static ref<Trident::MemoryAllocator> createMemoryAllocator(const Trident::Device* device) {
-		return createRef<DX12::MemoryAllocator>(static_cast<const DX12::Device*>(device));
+		return allocateRef<DX12::MemoryAllocator>(static_cast<const DX12::Device*>(device));
 	}
 
 	static ref<RenderPass> createRenderPass(const Trident::Device* device, const RenderPassDescriptor& descriptor) {
-		return createRef<RenderPass>(device, descriptor);
+		return allocateRef<RenderPass>(device, descriptor);
 	}
 
 	static ref<Semaphore> createSemaphore(const Trident::Device* device) {
-		return createRef<Semaphore>(device);
+		return allocateRef<Semaphore>(device);
 	}
 
 	static void destroyDescriptorSetLayout(const Trident::Device* device, const DescriptorSetLayout* descriptorSetLayout) {}

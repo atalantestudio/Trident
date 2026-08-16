@@ -30,17 +30,20 @@ namespace Trident {
 		const range<uint32, uint32> bindingRange = shaderModuleAsset->descriptorSetBindingRanges[0];
 		const view<DescriptorSetLayoutBinding> bindings(&shaderModuleAsset->bindings[bindingRange.offset], bindingRange.count);
 
-		const ref<DescriptorSetLayout> descriptorSetLayout = createDescriptorSetLayout(bindings);
+		ref<DescriptorSetLayout> descriptorSetLayout = createDescriptorSetLayout(bindings);
 
 		writeDescriptorSetCount += materialShader.materialRange.count * bindingRange.count;
 
 		pipelineLayoutDescriptor.descriptorSetLayouts[1] = descriptorSetLayout;
+		pipelineLayoutDescriptor.descriptorSetLayouts[1].owning = false;
 
 		#if defined(DEBUG_OBJECT_NAME)
 			pipelineLayoutDescriptor.name = materialName;
 		#endif
 
-		const ref<PipelineLayout> pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
+		ref<PipelineLayout> pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
+
+		materialPipelineLayouts[materialShaderIndex] = pipelineLayout;
 
 		pipelineDescriptor.pipelineLayout = pipelineLayout;
 		pipelineDescriptor.fragmentShaderModule = loadInternalShaderModule(
@@ -58,7 +61,7 @@ namespace Trident {
 			pipelineDescriptor.name = materialName;
 		#endif
 
-		const ref<GraphicsPipeline> pipeline = createGraphicsPipeline(pipelineDescriptor);
+		materialPipelines[materialShaderIndex] = createGraphicsPipeline(pipelineDescriptor);
 
 		uint32 materialIndex = 0;
 
@@ -70,12 +73,10 @@ namespace Trident {
 			}
 
 			materialDescriptorSetLayouts[materialShader.materialRange.offset + materialIndex] = descriptorSetLayout;
+			materialDescriptorSetLayouts[materialShader.materialRange.offset + materialIndex].owning = true;
 
 			materialIndex += 1;
 		}
-
-		materialPipelineLayouts[materialShaderIndex] = pipelineLayout;
-		materialPipelines[materialShaderIndex] = pipeline;
 	}
 
 	ref<Image> ForwardRenderer::createMaterialImage(ref<ImageAsset> imageAsset, ImageDescriptor& imageDescriptor) const {
@@ -195,8 +196,8 @@ namespace Trident {
 				imageDescriptor.name = materialName;
 			#endif
 
-			const ref<Image> image = createMaterialImage(imageAsset, imageDescriptor);
-			const ref<ImageView> imageView = image->createView({
+			ref<Image> image = createMaterialImage(imageAsset, imageDescriptor);
+			ref<ImageView> imageView = image->createView({
 				.mipLevelOffset = 0,
 				.mipLevelCount = image->getMipLevelCount(),
 				.layerOffset = 0,
@@ -313,11 +314,12 @@ namespace Trident {
 			uint32 bindingIndex = 0;
 
 			while (bindingIndex < material.asset->descriptorImageAssetIdentifiers.count()) {
+				const ref<DescriptorSet> descriptorSet = materialDescriptorSets[materialIndex];
 				const uint32 imageAssetIdentifier = material.asset->descriptorImageAssetIdentifiers[bindingIndex];
 				const uint32 imageIndex = assetLibrary.getLoadedAssetIndex(imageAssetIdentifier);
 
 				WriteDescriptorSet& writeDescriptorSet = writeDescriptorSets[bindingOffset + bindingIndex];
-				writeDescriptorSet.descriptorSet = materialDescriptorSets[materialIndex];
+				writeDescriptorSet.descriptorSet = descriptorSet;
 				writeDescriptorSet.bindingIndex = bindingIndex;
 				writeDescriptorSet.descriptorImages = descriptorImages[imageIndex];
 

@@ -81,7 +81,7 @@ namespace Trident {
 	struct FBXNode {
 		uint64 EndOffset;
 		sequence<char8> Name;
-		sequence<ref<FBXProperty>> PropertyList;
+		sequence<std::shared_ptr<FBXProperty>> PropertyList;
 		std::vector<FBXNode> NestedList;
 	};
 
@@ -89,9 +89,7 @@ namespace Trident {
 	struct File<FileFormat::FBX> {
 		static const FBXNode* searchNodeRecursive(const std::vector<FBXNode>& NestedList, view<char8> Name, const FBXNode* ResultNode = nullptr) {
 			for (const FBXNode& Node : NestedList) {
-				const view<char8> NodeName = Node.Name;
-
-				if (Name == NodeName) {
+				if (Name == Node.Name) {
 					ResultNode = &Node;
 
 					break;

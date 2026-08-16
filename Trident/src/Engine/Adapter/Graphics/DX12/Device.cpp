@@ -56,7 +56,7 @@ namespace Trident {
 	}
 
 	sequence<ref<Trident::DescriptorSet>> DX12::allocateDescriptorSets(Trident::Device* device, view<ref<DescriptorSetLayout>> descriptorSetLayouts) {
-		const ref<DX12::MemoryAllocator> memoryAllocator = static_pointer_cast<DX12::MemoryAllocator>(device->getMemoryAllocator());
+		const ref<DX12::MemoryAllocator> memoryAllocator = ref_cast<DX12::MemoryAllocator>(device->getMemoryAllocator());
 
 		sequence<ref<Trident::DescriptorSet>> descriptorSets(descriptorSetLayouts.count());
 		UINT descriptorSetIndex = 0;
@@ -189,8 +189,8 @@ namespace Trident {
 
 	void DX12::destroyDevice(const Trident::Device* device) {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
-		const ref<DX12::PhysicalDevice> physicalDevice = static_pointer_cast<DX12::PhysicalDevice>(device->physicalDevice);
-		const ref<DX12::MemoryAllocator> memoryAllocator = static_pointer_cast<DX12::MemoryAllocator>(device->memoryAllocator);
+		const ref<DX12::PhysicalDevice> physicalDevice = ref_cast<DX12::PhysicalDevice>(device->physicalDevice);
+		const ref<DX12::MemoryAllocator> memoryAllocator = ref_cast<DX12::MemoryAllocator>(device->memoryAllocator);
 
 		HRESULT result;
 
@@ -223,10 +223,10 @@ namespace Trident {
 	}
 
 	void DX12::updateDescriptorSets(const Trident::Device* device, view<WriteDescriptorSet> writeDescriptorSets) {
-		const ref<DX12::MemoryAllocator> memoryAllocator = static_pointer_cast<DX12::MemoryAllocator>(device->getMemoryAllocator());
+		const ref<DX12::MemoryAllocator> memoryAllocator = ref_cast<DX12::MemoryAllocator>(device->getMemoryAllocator());
 
 		for (const WriteDescriptorSet& writeDescriptorSet : writeDescriptorSets) {
-			const ref<DX12::DescriptorSet> descriptorSet = static_pointer_cast<DX12::DescriptorSet>(writeDescriptorSet.descriptorSet);
+			const ref<DX12::DescriptorSet> descriptorSet = ref_cast<DX12::DescriptorSet>(writeDescriptorSet.descriptorSet);
 			const DX12::DescriptorSet::DescriptorSetBinding& binding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
 
 			D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = binding.viewDescriptorHandleOffset;
@@ -237,7 +237,7 @@ namespace Trident {
 				case DescriptorType::COMBINED_IMAGE_SAMPLER: {
 					while (descriptorIndex < binding.descriptorCount) {
 						const DescriptorImage& descriptorImage = writeDescriptorSet.descriptorImages[descriptorIndex];
-						const ref<DX12::Sampler> sampler = static_pointer_cast<DX12::Sampler>(descriptorImage.sampler);
+						const ref<DX12::Sampler> sampler = ref_cast<DX12::Sampler>(descriptorImage.sampler);
 
 						memoryAllocator->writeImage(viewDescriptorHandle, descriptorImage);
 						memoryAllocator->writeSampler(samplerDescriptorHandle, &sampler->descriptor);
@@ -279,7 +279,7 @@ namespace Trident {
 				}
 				case DescriptorType::UNIFORM_BUFFER: {
 					while (descriptorIndex < binding.descriptorCount) {
-						const ref<BaseBufferView> bufferView = writeDescriptorSet.descriptorBufferViews[descriptorIndex];
+						const BaseBufferView& bufferView = writeDescriptorSet.descriptorBufferViews[descriptorIndex];
 
 						memoryAllocator->writeUniformBuffer(viewDescriptorHandle, bufferView);
 
@@ -293,7 +293,7 @@ namespace Trident {
 				}
 				case DescriptorType::READ_ONLY_STORAGE_BUFFER: {
 					while (descriptorIndex < binding.descriptorCount) {
-						const ref<BaseBufferView> bufferView = writeDescriptorSet.descriptorBufferViews[descriptorIndex];
+						const BaseBufferView& bufferView = writeDescriptorSet.descriptorBufferViews[descriptorIndex];
 
 						memoryAllocator->writeReadOnlyStorageBuffer(viewDescriptorHandle, bufferView);
 
@@ -307,7 +307,7 @@ namespace Trident {
 				}
 				case DescriptorType::READ_WRITE_STORAGE_BUFFER: {
 					while (descriptorIndex < binding.descriptorCount) {
-						const ref<BaseBufferView> bufferView = writeDescriptorSet.descriptorBufferViews[descriptorIndex];
+						const BaseBufferView& bufferView = writeDescriptorSet.descriptorBufferViews[descriptorIndex];
 
 						memoryAllocator->writeReadWriteStorageBuffer(viewDescriptorHandle, bufferView);
 

@@ -24,6 +24,13 @@ namespace Trident {
 			static constexpr uint64 INSTANCE_SIZE = sizeof(Instance) * 3;
 
 		public:
+			ReversedZSampleRenderer() {}
+
+			~ReversedZSampleRenderer() {
+				vertexBuffer.~ref();
+				stagingBuffer.~ref();
+			}
+
 			void build() override {
 				renderPass = createRenderPass();
 				depthStencilImage = createDepthStencilImage();
@@ -38,7 +45,7 @@ namespace Trident {
 
 			StaticMemoryDescriptor getStaticMemoryDescriptor() const override {
 				return {
-					.buffers = {vertexBuffer, stagingBuffer},
+					.buffers = staticBuffers,
 					.images = {},
 				};
 			}
@@ -317,8 +324,15 @@ namespace Trident {
 			sequence<ref<Framebuffer>> framebuffers;
 			ref<PipelineLayout> pipelineLayout;
 			ref<GraphicsPipeline> pipeline;
-			ref<Buffer> vertexBuffer;
-			ref<Buffer> stagingBuffer;
+
+			union {
+				struct {
+					ref<Buffer> vertexBuffer;
+					ref<Buffer> stagingBuffer;
+				};
+
+				ref<Buffer> staticBuffers[2];
+			};
 	};
 
 	DEFINE_SAMPLE_LAYER(ReversedZSample);

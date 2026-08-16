@@ -25,7 +25,7 @@ namespace Trident {
 		uint32 attachmentImageViewIndex = 0;
 
 		while (attachmentImageViewIndex < descriptor.imageViews.count()) {
-			imageViews[attachmentImageViewIndex] = static_pointer_cast<VK::ImageView>(descriptor.imageViews[attachmentImageViewIndex])->imageView;
+			imageViews[attachmentImageViewIndex] = ref_cast<VK::ImageView>(descriptor.imageViews[attachmentImageViewIndex])->imageView;
 
 			attachmentImageViewIndex += 1;
 		}
@@ -34,7 +34,7 @@ namespace Trident {
 		framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 		framebufferCreateInfo.pNext = nullptr;
 		framebufferCreateInfo.flags = 0;
-		framebufferCreateInfo.renderPass = static_pointer_cast<VK::RenderPass>(descriptor.renderPass)->renderPass;
+		framebufferCreateInfo.renderPass = ref_cast<VK::RenderPass>(descriptor.renderPass)->renderPass;
 		framebufferCreateInfo.attachmentCount = static_cast<uint32>(imageViews.count());
 		framebufferCreateInfo.pAttachments = &imageViews[0];
 		framebufferCreateInfo.width = descriptor.extent.width;

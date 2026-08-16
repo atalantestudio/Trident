@@ -15,9 +15,15 @@ namespace Trident {
 			};
 
 		public:
+			DispatchSampleRenderer() {}
+
+			~DispatchSampleRenderer() {
+				vertexBuffer.~ref();
+				stagingBuffer.~ref();
+			}
+
 			void build() override {
 				renderPass = createRenderPass();
-				outputImage = createOutputImage();
 				outputDescriptorSetLayout = createOutputDescriptorSetLayout();
 
 				// TODO(graphics/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
@@ -28,13 +34,14 @@ namespace Trident {
 				pipeline = createPipeline();
 				vertexBuffer = createVertexBuffer();
 				stagingBuffer = createStagingBuffer();
+				outputImage = createOutputImage();
 				sampler = createSampler();
 			}
 
 			StaticMemoryDescriptor getStaticMemoryDescriptor() const override {
 				return {
-					.buffers = {vertexBuffer, stagingBuffer},
-					.images = {outputImage},
+					.buffers = staticBuffers,
+					.images = outputImage,
 				};
 			}
 
@@ -105,34 +112,6 @@ namespace Trident {
 			}
 
 		private:
-			ref<Image> createOutputImage() const {
-				return createStaticImage({
-					.type = ImageType::TEXTURE_2D,
-					.format = ImageFormat::R8G8B8A8_UNORM,
-					.extent = {64, 64, 1},
-					.mipLevelCount = 1,
-					.layerCount = 1,
-					.sampleCount = 1,
-					.usage = ImageUsage::STORAGE | ImageUsage::SAMPLED,
-					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
-					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Output",
-					#endif
-				});
-			}
-
-			ref<ImageView> createOutputImageView() const {
-				return outputImage->createView({
-					.mipLevelOffset = 0,
-					.mipLevelCount = 1,
-					.layerOffset = 0,
-					.layerCount = 1,
-					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Output",
-					#endif
-				});
-			}
-
 			ref<RenderPass> createRenderPass() const {
 				return Renderer::createRenderPass({
 					.attachments = {
@@ -190,13 +169,15 @@ namespace Trident {
 			}
 
 			ref<DescriptorSetLayout> createOutputDescriptorSetLayout() const {
-				const DescriptorSetLayoutBinding binding = {
-					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
-					.descriptorCount = 1,
-					.shaderStages = ShaderStage::FRAGMENT,
+				const DescriptorSetLayoutBinding bindings[] = {
+					{
+						.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+						.descriptorCount = 1,
+						.shaderStages = ShaderStage::FRAGMENT,
+					},
 				};
 
-				return createDescriptorSetLayout(binding);
+				return createDescriptorSetLayout(bindings);
 			}
 
 			ref<PipelineLayout> createPipelineLayout() const {
@@ -282,6 +263,34 @@ namespace Trident {
 					.persistent = false,
 					#if defined(DEBUG_OBJECT_NAME)
 						.name = "Staging",
+					#endif
+				});
+			}
+
+			ref<Image> createOutputImage() const {
+				return createStaticImage({
+					.type = ImageType::TEXTURE_2D,
+					.format = ImageFormat::R8G8B8A8_UNORM,
+					.extent = {64, 64, 1},
+					.mipLevelCount = 1,
+					.layerCount = 1,
+					.sampleCount = 1,
+					.usage = ImageUsage::STORAGE | ImageUsage::SAMPLED,
+					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Output",
+					#endif
+				});
+			}
+
+			ref<ImageView> createOutputImageView() const {
+				return outputImage->createView({
+					.mipLevelOffset = 0,
+					.mipLevelCount = 1,
+					.layerOffset = 0,
+					.layerCount = 1,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Output",
 					#endif
 				});
 			}
@@ -403,15 +412,23 @@ namespace Trident {
 
 		private:
 			ref<RenderPass> renderPass;
-			ref<Image> outputImage;
-			ref<ImageView> outputImageView;
 			sequence<ref<Framebuffer>> framebuffers;
 			ref<DescriptorSetLayout> outputDescriptorSetLayout;
 			ref<DescriptorSet> outputDescriptorSet;
 			ref<PipelineLayout> pipelineLayout;
 			ref<GraphicsPipeline> pipeline;
-			ref<Buffer> vertexBuffer;
-			ref<Buffer> stagingBuffer;
+
+			union {
+				struct {
+					ref<Buffer> vertexBuffer;
+					ref<Buffer> stagingBuffer;
+				};
+
+				ref<Buffer> staticBuffers[2];
+			};
+
+			ref<Image> outputImage;
+			ref<ImageView> outputImageView;
 			ref<Sampler> sampler;
 	};
 
