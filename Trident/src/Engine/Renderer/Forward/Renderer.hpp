@@ -333,6 +333,7 @@ namespace Trident {
 				PipelineLayoutDescriptor& pipelineLayoutDescriptor,
 				GraphicsPipelineDescriptor& pipelineDescriptor,
 				AssetLibrary& assetLibrary,
+				sequence<ref<DescriptorSetLayout>>& uniqueMaterialDescriptorSetLayouts,
 				sequence<ref<DescriptorSetLayout>>& materialDescriptorSetLayouts,
 				uint32& writeDescriptorSetCount
 			);

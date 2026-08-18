@@ -13,6 +13,7 @@ namespace Trident {
 		PipelineLayoutDescriptor& pipelineLayoutDescriptor,
 		GraphicsPipelineDescriptor& pipelineDescriptor,
 		AssetLibrary& assetLibrary,
+		sequence<ref<DescriptorSetLayout>>& uniqueMaterialDescriptorSetLayouts,
 		sequence<ref<DescriptorSetLayout>>& materialDescriptorSetLayouts,
 		uint32& writeDescriptorSetCount
 	) {
@@ -32,10 +33,11 @@ namespace Trident {
 
 		ref<DescriptorSetLayout> descriptorSetLayout = createDescriptorSetLayout(bindings);
 
+		uniqueMaterialDescriptorSetLayouts[materialShaderIndex] = descriptorSetLayout;
+
 		writeDescriptorSetCount += materialShader.materialRange.count * bindingRange.count;
 
 		pipelineLayoutDescriptor.descriptorSetLayouts[1] = descriptorSetLayout;
-		pipelineLayoutDescriptor.descriptorSetLayouts[1].owning = false;
 
 		#if defined(DEBUG_OBJECT_NAME)
 			pipelineLayoutDescriptor.name = materialName;
@@ -73,7 +75,6 @@ namespace Trident {
 			}
 
 			materialDescriptorSetLayouts[materialShader.materialRange.offset + materialIndex] = descriptorSetLayout;
-			materialDescriptorSetLayouts[materialShader.materialRange.offset + materialIndex].owning = true;
 
 			materialIndex += 1;
 		}
@@ -105,7 +106,7 @@ namespace Trident {
 		materialPipelineLayouts = sequence<ref<PipelineLayout>>(sceneAsset->materialShaders.count());
 		materialPipelines = sequence<ref<GraphicsPipeline>>(sceneAsset->materialShaders.count());
 
-		// Used to allocate the material descriptor sets.
+		sequence<ref<DescriptorSetLayout>> uniqueMaterialDescriptorSetLayouts(sceneAsset->materialShaders.count());
 		sequence<ref<DescriptorSetLayout>> materialDescriptorSetLayouts(sceneAsset->materials.count());
 
 		AssetLibrary assetLibrary(Filesystem::getProjectRootDirectory());
@@ -130,7 +131,7 @@ namespace Trident {
 			materialPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
 
 			while (materialShaderIndex < sceneAsset->dynamicMaterialShaderOffset) {
-				createMaterialObjects(materialShaderIndex, materialPipelineLayoutDescriptor, materialPipelineDescriptor, assetLibrary, materialDescriptorSetLayouts, writeDescriptorSetCount);
+				createMaterialObjects(materialShaderIndex, materialPipelineLayoutDescriptor, materialPipelineDescriptor, assetLibrary, uniqueMaterialDescriptorSetLayouts, materialDescriptorSetLayouts, writeDescriptorSetCount);
 
 				materialShaderIndex += 1;
 			}
@@ -151,7 +152,7 @@ namespace Trident {
 			materialPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
 
 			while (materialShaderIndex < sceneAsset->materialShaders.count()) {
-				createMaterialObjects(materialShaderIndex, materialPipelineLayoutDescriptor, materialPipelineDescriptor, assetLibrary, materialDescriptorSetLayouts, writeDescriptorSetCount);
+				createMaterialObjects(materialShaderIndex, materialPipelineLayoutDescriptor, materialPipelineDescriptor, assetLibrary, uniqueMaterialDescriptorSetLayouts, materialDescriptorSetLayouts, writeDescriptorSetCount);
 
 				materialShaderIndex += 1;
 			}

@@ -24,7 +24,7 @@ namespace Trident {
 	/// Toggles the OpenGL graphics adapter.
 	#define ENABLE_GL_ADAPTER
 
-	// TODO(graphics/gl/igpu): Fix OpenGL adapter never using integrated GPU (works on HP Victus laptop).
+	// TODO(graphics/gl/integrated-gpu): Fix OpenGL adapter never using integrated GPU (works on HP Victus laptop).
 	/// Whether to prioritize integrated GPUs over discrete GPUs when using the OpenGL graphics adapter.
 	/// Use this instead of the PreferIntegratedGPU project property. GPU selection for a GL context can't be done at runtime.
 	// #define GL_PREFER_INTEGRATED_GPU
@@ -37,7 +37,7 @@ namespace Trident {
 	#define GL_RESOURCE_ALIGNMENT 4
 
 	/// Whether to use a queuing system similar to Vulkan and DX12 or execute the commands immediately.
-	// #define DEBUG_GL_ENABLE_COMMAND_QUEUE
+	#define DEBUG_GL_ENABLE_COMMAND_QUEUE
 
 	/// The maximum number of commands that can simultaneously be stored in a queue.
 	#define DEBUG_GL_COMMAND_QUEUE_SIZE 64
