@@ -12,6 +12,16 @@ namespace Trident {
 		return ref;
 	}
 
+	template<typename T, typename U>
+	inline ref<T> ref_owning_cast(ref<U>& r) {
+		ref<T> ref(pointer_cast<T*>(r));
+		ref.owning = true;
+
+		r.owning = false;
+
+		return ref;
+	}
+
 	template<typename T, typename... U>
 	constexpr ref<T> allocateRef(U&&... arguments) {
 		ref<T> ref = new T(std::forward<U>(arguments)...);

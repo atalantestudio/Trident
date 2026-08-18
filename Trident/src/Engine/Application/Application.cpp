@@ -145,14 +145,12 @@ namespace Trident {
 
 	void Application::initializeGraphicsAdapter(const ProjectDescriptor& projectDescriptor) {
 		graphicsAdapter = allocateRef<GraphicsAdapter>(*properties);
-		layerCompositor = allocateRef<LayerCompositor>(window, graphicsAdapter, projectDescriptor, *properties);
 
-		Renderer::initialize(layerCompositor);
-	}
+		if (projectType == ProjectType::MAIN) {
+			layerCompositor = allocateRef<LayerCompositor>(window, graphicsAdapter, projectDescriptor, *properties);
 
-	void Application::initializeLayers() {
-		layerCompositor->initializeLayerGroups();
-		layerCompositor->initializeLayers();
+			Renderer::initialize(layerCompositor);
+		}
 	}
 
 	void Application::allocateProcesses(uint64 count) {
@@ -202,6 +200,10 @@ namespace Trident {
 	}
 
 	bool Application::hasLayers() const {
+		if (projectType == ProjectType::BUILD) {
+			return false;
+		}
+
 		return layerCompositor->layerCount > 0;
 	}
 
@@ -234,9 +236,11 @@ namespace Trident {
 	void Application::postConstruct() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		for (ref<Layer> layer : layerCompositor->getLayers()) {
-			layer->input = &lastLayerInput;
-			layer->postConstruct();
+		if (projectType == ProjectType::MAIN) {
+			for (ref<Layer> layer : layerCompositor->getLayers()) {
+				layer->input = &lastLayerInput;
+				layer->postConstruct();
+			}
 		}
 	}
 

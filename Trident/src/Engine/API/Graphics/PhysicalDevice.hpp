@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Engine/API/Graphics/Device.hpp"
+#include "Engine/API/Graphics/ExtendedDevice.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/API/Graphics/PhysicalDeviceLimits.hpp"
 
@@ -19,7 +21,14 @@ namespace Trident {
 			const PhysicalDeviceLimits& getLimits() const;
 
 			/// Creates and returns a logical device from this physical device.
-			ref<Device> createDevice() const;
+			/// The resulting device exposes core and extension methods to the user.
+			template<DeviceExtensionName... Extensions>
+			inline ref<ExtendedDevice<Extensions...>> createDevice() const {
+				ref<Device> device = adapter->createDeviceImplementation(adapter, this);
+				device->memoryAllocator = adapter->createMemoryAllocatorImplementation(device);
+
+				return ref_owning_cast<ExtendedDevice<Extensions...>>(device);
+			}
 
 		protected:
 			explicit PhysicalDevice(const GraphicsAdapter* adapter);

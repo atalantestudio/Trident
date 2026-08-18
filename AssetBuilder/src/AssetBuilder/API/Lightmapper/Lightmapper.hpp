@@ -6,8 +6,12 @@
 #include "AssetBuilder/API/Geometry/Geometry3D.hpp"
 #include "AssetBuilder/API/Lightmapper/Lightmap.hpp"
 
+#include "Engine/API/Graphics/Descriptor/ShaderModuleDescriptor.hpp"
+#include "Engine/API/Graphics/PhysicalDevice.hpp"
 #include "Engine/Filesystem/Asset/ImageAsset.hpp"
-#include "Engine/Renderer/Renderer.hpp"
+
+// TODO(test/graphics/device/extension)
+#include "Engine/API/Graphics/DeviceExtension/Test_EXT.hpp"
 
 namespace Trident {
 	struct SceneLightingDescriptor {
@@ -63,11 +67,15 @@ namespace Trident {
 			};
 
 		public:
+			static const GraphicsAdapter* adapter;
+
+		public:
 			void generateAtlas(ImageAssetDescriptor& imageAssetDescriptor, const LightmapperDescriptor& descriptor);
 
 		private:
 			void initialize();
 
+			// TODO(asset-builder/scene/lightmapper): Move inside the engine.
 			ref<ShaderModule> loadShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> path) const;
 
 			ref<RenderPass> createGBufferRenderPass() const;
@@ -109,9 +117,6 @@ namespace Trident {
 
 			void generateLightmaps(uint32 vertexCount) const;
 
-		public:
-			static const GraphicsAdapter* adapter;
-
 		private:
 			bool initialized = false;
 			ImageFormat atlasFormat;
@@ -121,7 +126,9 @@ namespace Trident {
 
 			ref<Instance> instance;
 			ref<PhysicalDevice> physicalDevice;
-			ref<Device> device;
+
+			// TODO(test/graphics/device/extension)
+			ref<ExtendedDevice<Test_EXT>> device;
 
 			sequence<ref<DescriptorSet>> descriptorSets;
 

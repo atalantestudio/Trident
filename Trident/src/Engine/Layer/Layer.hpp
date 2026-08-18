@@ -20,12 +20,7 @@ namespace Trident {
 
 			void setApplication(Application* application);
 
-			// TODO(layer/initialize): Make pure virtual.
-			// virtual void initialize() = 0;
-			virtual void initialize() {}
-
-			// TODO(layer/initialize): Deprecate.
-			virtual void build() {}
+			virtual void initialize() = 0;
 
 			/// Returns the layer's requirements regarding static memory allocations.
 			// TODO(layer/initialize): Make pure virtual.

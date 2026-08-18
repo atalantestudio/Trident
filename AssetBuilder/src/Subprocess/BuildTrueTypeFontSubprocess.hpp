@@ -9,6 +9,12 @@
 
 namespace Trident {
 	class BuildTrueTypeFontSubprocess {
+		private:
+			static GenerateSDFGlyphMapProcess glyphRasterizer;
+
+		public:
+			static void release();
+
 		public:
 			explicit BuildTrueTypeFontSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::filesystem::path& assetOutputPath, AssetBuilderLibrary* assetLibrary) {
 				std::filesystem::path finalAssetOutputPath = assetOutputPath / "Font" / directoryEntry.path().filename();
@@ -36,7 +42,7 @@ namespace Trident {
 
 				SDFGlyphMap sdfGlyphMap;
 
-				GenerateSDFGlyphMapProcess(file, sdfGlyphMap);
+				glyphRasterizer.generateGlyphAtlas(file, sdfGlyphMap);
 
 				ImageAssetDescriptor imageAssetDescriptor{};
 				imageAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();

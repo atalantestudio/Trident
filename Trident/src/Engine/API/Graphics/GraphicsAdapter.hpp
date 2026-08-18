@@ -25,7 +25,6 @@
 #include "Engine/API/Graphics/ImageView.hpp"
 #include "Engine/API/Graphics/Instance.hpp"
 #include "Engine/API/Graphics/MemoryAllocator.hpp"
-#include "Engine/API/Graphics/PhysicalDevice.hpp"
 #include "Engine/API/Graphics/PipelineLayout.hpp"
 #include "Engine/API/Graphics/Queue.hpp"
 #include "Engine/API/Graphics/RenderPass.hpp"
@@ -136,6 +135,9 @@ namespace Trident {
 			UpdateDescriptorSetsImplementation updateDescriptorSetsImplementation;
 			UpdateSwapchainImplementation updateSwapchainImplementation;
 			WaitForFenceImplementation waitForFenceImplementation;
+
+			// TODO(test/graphics/device/extension)
+			Test_EXT_FooImplementation test_EXT_fooImplementation;
 
 		private:
 			GraphicsAPI api;

@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Engine/API/Graphics/Device.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/API/Graphics/PhysicalDevice.hpp"
 
 namespace Trident {
@@ -17,13 +18,6 @@ namespace Trident {
 
 	const PhysicalDeviceLimits& PhysicalDevice::getLimits() const {
 		return limits;
-	}
-
-	ref<Device> PhysicalDevice::createDevice() const {
-		ref<Device> device = adapter->createDeviceImplementation(adapter, this);
-		device->memoryAllocator = adapter->createMemoryAllocatorImplementation(device);
-
-		return device;
 	}
 
 	PhysicalDevice::PhysicalDevice(const GraphicsAdapter* adapter) :

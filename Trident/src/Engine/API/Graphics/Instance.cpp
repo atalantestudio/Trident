@@ -5,6 +5,7 @@
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/API/Graphics/Instance.hpp"
+#include "Engine/API/Graphics/PhysicalDevice.hpp"
 
 namespace Trident {
 	Instance::Instance(const GraphicsAdapter* adapter) :

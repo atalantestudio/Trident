@@ -72,6 +72,7 @@ namespace Trident {
 					}
 				}
 
+				GenerateSDFGlyphMapProcess::adapter = graphicsAdapter;
 				Lightmapper::adapter = graphicsAdapter;
 
 				registerProcesses();
@@ -80,6 +81,7 @@ namespace Trident {
 			}
 
 			void release() final override {
+				BuildTrueTypeFontSubprocess::release();
 				SceneBuilder::release();
 			}
 

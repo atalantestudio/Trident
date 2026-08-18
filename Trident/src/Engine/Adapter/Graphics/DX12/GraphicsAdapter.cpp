@@ -50,6 +50,11 @@ namespace Trident::DX12 {
 
 	static void destroyRenderPass(const Trident::Device* device, const RenderPass* renderPass) {}
 
+	// TODO(test/graphics/device/extension)
+	static void test_EXT_foo() {
+		ADAPTER_TRACE("dx12 foo");
+	}
+
 	void bindAdapter(Trident::GraphicsAdapter* adapter) {
 		adapter->logger = ConsoleLogger(std::cout, LogLevel::ALL, "DIRECTX 12");
 
@@ -140,5 +145,8 @@ namespace Trident::DX12 {
 		adapter->updateDescriptorSetsImplementation = DX12::updateDescriptorSets;
 		adapter->updateSwapchainImplementation = DX12::recreateSwapchain;
 		adapter->waitForFenceImplementation = DX12::waitForFence;
+
+		// TODO(test/graphics/device/extension)
+		adapter->test_EXT_fooImplementation = DX12::test_EXT_foo;
 	}
 }

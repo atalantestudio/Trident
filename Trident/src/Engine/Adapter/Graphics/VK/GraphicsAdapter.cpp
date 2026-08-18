@@ -30,6 +30,11 @@ namespace Trident::VK {
 		return allocateRef<VK::MemoryAllocator>(device);
 	}
 
+	// TODO(test/graphics/device/extension)
+	static void test_EXT_foo() {
+		ADAPTER_TRACE("vk foo");
+	}
+
 	void bindAdapter(Trident::GraphicsAdapter* adapter) {
 		adapter->logger = ConsoleLogger(std::cout, LogLevel::ALL, "VULKAN");
 
@@ -120,5 +125,8 @@ namespace Trident::VK {
 		adapter->updateDescriptorSetsImplementation = VK::updateDescriptorSets;
 		adapter->updateSwapchainImplementation = VK::recreateSwapchain;
 		adapter->waitForFenceImplementation = VK::waitForFence;
+
+		// TODO(test/graphics/device/extension)
+		adapter->test_EXT_fooImplementation = VK::test_EXT_foo;
 	}
 }

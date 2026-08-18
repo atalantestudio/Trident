@@ -5,6 +5,8 @@
 
 #include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
 
+#include "Engine/Filesystem/Asset/AssetLibrary.hpp"
+
 namespace Trident {
 	BuildScene3D SceneBuilder::build() {
 		for (IntermediateMaterialShader& materialShader : staticMaterialShaders) {

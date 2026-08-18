@@ -3,9 +3,10 @@
 
 #pragma once
 
+#include "Engine/API/Graphics/Descriptor/ShaderModuleDescriptor.hpp"
+#include "Engine/API/Graphics/PhysicalDevice.hpp"
 #include "Engine/Filesystem/File.hpp"
 #include "Engine/Font/Glyph.hpp"
-#include "Engine/Renderer/Renderer.hpp"
 
 namespace Trident {
 	struct SDFGlyphMap {
@@ -37,32 +38,45 @@ namespace Trident {
 			};
 
 		public:
-			explicit GenerateSDFGlyphMapProcess(const File<FileFormat::TTF>& file, SDFGlyphMap& sdfGlyphMap);
+			static const GraphicsAdapter* adapter;
+
+		public:
+			void generateGlyphAtlas(const File<FileFormat::TTF>& file, SDFGlyphMap& sdfGlyphMap);
 
 		private:
-			void createFontBuffer();
-			void createGlyphBuffer(uint64 size);
-			void createGlyphOffsetBuffer();
+			void initialize();
 
-			void createGlyphImage();
-			void createGlyphMapImage(Extent2D extent);
+			// TODO(asset-builder/font/sdf): Move inside the engine.
+			ref<ShaderModule> loadShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> path) const;
 
-			void createGlyphImageView();
-			void createGlyphMapImageView();
+			ref<Buffer> createFontBuffer() const;
+			ref<Buffer> createGlyphBuffer(uint64 size) const;
+			ref<Buffer> createGlyphOffsetBuffer() const;
 
-			void createDescriptorSetLayoutsAndSets();
+			ref<Image> createGlyphImage() const;
+			ref<Image> createGlyphMapImage(Extent2D extent) const;
 
-			void createGlyphImagePipelineLayout();
-			void createGlyphSdfPipelineLayout();
+			ref<ImageView> createGlyphImageView() const;
+			ref<ImageView> createGlyphMapImageView() const;
 
-			void createGlyphImageComputePipeline();
-			void createGlyphSdfComputePipeline();
+			ref<DescriptorSetLayout> createGlyphImageDescriptorSetLayout() const;
+			ref<DescriptorSetLayout> createGlyphSdfDescriptorSetLayout() const;
 
-			void allocateDescriptorSets();
+			ref<PipelineLayout> createGlyphImagePipelineLayout() const;
+			ref<PipelineLayout> createGlyphSdfPipelineLayout() const;
+
+			ref<ComputePipeline> createGlyphImageComputePipeline() const;
+			ref<ComputePipeline> createGlyphSdfComputePipeline() const;
 
 			void updateDescriptorSets() const;
 
 		private:
+			bool initialized = false;
+
+			ref<Instance> instance;
+			ref<PhysicalDevice> physicalDevice;
+			ref<ExtendedDevice<>> device;
+
 			ref<Buffer> fontBuffer;
 			ref<Buffer> glyphBuffer;
 			ref<Buffer> glyphOffsetBuffer;

@@ -29,7 +29,6 @@ namespace Trident {
 		return size;
 	}
 
-	/// Returns the buffer usage flags.
 	BufferUsage Buffer::getUsage() const {
 		return usage;
 	}
@@ -38,7 +37,6 @@ namespace Trident {
 		return memorySuballocation;
 	}
 
-	/// Returns the current access flags for the buffer.
 	Access Buffer::getAccess() const {
 		return access;
 	}

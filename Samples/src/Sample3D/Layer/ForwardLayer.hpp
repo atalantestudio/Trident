@@ -47,7 +47,7 @@ namespace Trident {
 				delete physicsSimulation;
 			}
 
-			void build() override {
+			void initialize() override {
 				renderer.setLayer(this);
 				renderer.build();
 				renderer.postBuild();

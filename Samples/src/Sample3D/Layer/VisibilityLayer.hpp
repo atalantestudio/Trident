@@ -20,7 +20,7 @@ namespace Trident {
 				delete scene;
 			}
 
-			void build() override {
+			void initialize() override {
 				renderer.setLayer(this);
 				renderer.build();
 

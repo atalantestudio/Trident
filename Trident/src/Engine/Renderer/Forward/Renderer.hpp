@@ -35,7 +35,7 @@ namespace Trident {
 					forwardDescriptorSetLayout,
 				};
 
-				// TODO(graphics/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
+				// TODO(base/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
 				sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(descriptorSetLayouts);
 
 				staticGeometryDescriptorSet = descriptorSets[0];
@@ -95,6 +95,8 @@ namespace Trident {
 					#endif
 				});
 
+				uint64 offset = 0;
+
 				const BufferView<uint8> vertexView = stagingBuffer->createView<uint8>(0, sceneAsset->geometryRanges[0].count);
 
 				std::copy_n(&sceneAsset->geometryData[sceneAsset->geometryRanges[0].offset], vertexView.getSize(), vertexView.map());
@@ -103,15 +105,23 @@ namespace Trident {
 
 				std::copy_n(&sceneAsset->geometryData[sceneAsset->geometryRanges[1].offset], indexView.getSize(), indexView.map());
 
-				const BufferView<PointLight> pointLightView = stagingBuffer->createView<PointLight>(indexView.getOffset() + indexView.getSize(), sceneAsset->pointLights.count() * sizeof(PointLight));
+				offset = indexView.getOffset() + indexView.getSize();
 
-				std::copy(sceneAsset->pointLights.begin(), sceneAsset->pointLights.end(), pointLightView.map());
+				BufferView<PointLight> pointLightView;
+
+				if (sceneAsset->pointLights.count() > 0) {
+					pointLightView = stagingBuffer->createView<PointLight>(offset, sceneAsset->pointLights.count() * sizeof(PointLight));
+
+					std::copy(sceneAsset->pointLights.begin(), sceneAsset->pointLights.end(), pointLightView.map());
+
+					offset = pointLightView.getOffset() + pointLightView.getSize();
+				}
 
 				BufferView<uint8> lightmapCoordinateView;
 				BufferView<uint8> lightmapAtlasView;
 
 				if (sceneAsset->lightmapAtlasImageAsset != nullptr) {
-					lightmapCoordinateView = stagingBuffer->createView<uint8>(pointLightView.getOffset() + pointLightView.getSize(), sceneAsset->geometryRanges[2].count);
+					lightmapCoordinateView = stagingBuffer->createView<uint8>(offset, sceneAsset->geometryRanges[2].count);
 
 					std::copy_n(&sceneAsset->geometryData[sceneAsset->geometryRanges[2].offset], lightmapCoordinateView.getSize(), lightmapCoordinateView.map());
 
@@ -159,20 +169,22 @@ namespace Trident {
 						.destinationOffset = 0,
 						.size = pointLightView.getSize(),
 					},
+					{
+						.sourceOffset = lightmapCoordinateView.getOffset(),
+						.destinationOffset = 0,
+						.size = lightmapCoordinateView.getSize(),
+					},
 				};
 
 				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegions[0]);
 				commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, bufferCopyRegions[1]);
-				commandEncoder->copyBufferToBuffer(stagingBuffer, pointLightBuffer, bufferCopyRegions[2]);
+
+				if (sceneAsset->pointLights.count() > 0) {
+					commandEncoder->copyBufferToBuffer(stagingBuffer, pointLightBuffer, bufferCopyRegions[2]);
+				}
 
 				if (sceneAsset->lightmapAtlasImageAsset != nullptr) {
-					const BufferCopyRegion bufferCopyRegion = {
-						.sourceOffset = lightmapCoordinateView.getOffset(),
-						.destinationOffset = 0,
-						.size = lightmapCoordinateView.getSize(),
-					};
-
-					commandEncoder->copyBufferToBuffer(stagingBuffer, lightmapCoordinateBuffer, bufferCopyRegion);
+					commandEncoder->copyBufferToBuffer(stagingBuffer, lightmapCoordinateBuffer, bufferCopyRegions[3]);
 
 					ImageMemoryBarrier imageMemoryBarrier = {
 						.image = lightmapAtlasImage,

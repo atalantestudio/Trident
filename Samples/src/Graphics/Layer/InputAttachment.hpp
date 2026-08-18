@@ -21,7 +21,7 @@ namespace Trident {
 
 				inputDescriptorSetLayout = createInputDescriptorSetLayout();
 
-				// TODO(graphics/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
+				// TODO(base/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
 				sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(inputDescriptorSetLayout);
 
 				inputDescriptorSet = descriptorSets[0];

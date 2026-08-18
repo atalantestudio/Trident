@@ -26,7 +26,7 @@ namespace Trident {
 				renderPass = createRenderPass();
 				outputDescriptorSetLayout = createOutputDescriptorSetLayout();
 
-				// TODO(graphics/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
+				// TODO(base/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
 				sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(outputDescriptorSetLayout);
 
 				outputDescriptorSet = descriptorSets[0];
@@ -332,7 +332,7 @@ namespace Trident {
 
 				const ref<DescriptorSetLayout> descriptorSetLayout = createDescriptorSetLayout(binding);
 
-				// TODO(graphics/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
+				// TODO(base/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
 				sequence<ref<DescriptorSet>> descriptorSets = device->allocateDescriptorSets(descriptorSetLayout);
 
 				const ref<DescriptorSet> descriptorSet = descriptorSets[0];

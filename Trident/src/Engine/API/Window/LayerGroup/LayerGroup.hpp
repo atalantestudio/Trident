@@ -12,6 +12,8 @@ namespace Trident {
 		public:
 			explicit LayerGroup(range<uint32, uint32> layerRange);
 
+			virtual ~LayerGroup() {}
+
 			void setApplication(Application* application);
 
 			virtual void initialize();

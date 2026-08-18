@@ -36,7 +36,6 @@ namespace Trident {
 			void initializePropertyFile();
 			void initializeWindow(const ProjectDescriptor& projectDescriptor);
 			void initializeGraphicsAdapter(const ProjectDescriptor& projectDescriptor);
-			void initializeLayers();
 
 			void allocateProcesses(uint64 count);
 
@@ -76,7 +75,6 @@ namespace Trident {
 
 				ref<LayerType> layer = allocateRef<LayerType>(std::forward<Argument>(arguments)...);
 				layer->setApplication(this);
-				layer->build();
 
 				layerCompositor->addLayer(std::move(layer));
 			}
@@ -87,7 +85,6 @@ namespace Trident {
 
 				ref<LayerGroupType> layerGroup = allocateRef<LayerGroupType>(std::forward<Argument>(arguments)...);
 				layerGroup->setApplication(this);
-				layerGroup->initialize();
 
 				layerCompositor->addLayerGroup(std::move(layerGroup));
 			}

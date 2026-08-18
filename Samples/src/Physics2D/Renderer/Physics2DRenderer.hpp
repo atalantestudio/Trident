@@ -16,6 +16,7 @@ namespace Trident {
 	// Toggle closest point distance rendering.
 	#define SHOW_DISTANCE
 
+	// TODO(physics/2d/renderer): Deprecate LayerInput (replaced by layer groups).
 	class Physics2DRenderer : public Renderer {
 		private:
 			struct Camera {

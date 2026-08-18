@@ -22,11 +22,18 @@ namespace Trident {
 		);
 	}
 
-	void GUILayer::postConstruct() {
+	void GUILayer::initialize() {
 		renderer.setLayer(this);
 		renderer.build();
 		renderer.registerDefaultUserImage();
+	}
 
+	void GUILayer::encodeOneTimeCommands() {
+		renderer.postBuild();
+		renderer.encodeOneTimeCommands();
+	}
+
+	void GUILayer::postConstruct() {
 		registerAssets();
 
 		renderer.flushUserImageStagingBuffer();

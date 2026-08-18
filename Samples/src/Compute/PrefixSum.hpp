@@ -93,7 +93,7 @@ namespace Trident {
 
 				elementCountBuffer->unmap();
 
-				// TODO(graphics/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
+				// TODO(base/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
 				sequence<ref<DescriptorSet>> descriptorSets = device->allocateDescriptorSets(prefixSumDescriptorSetLayout);
 
 				const ref<DescriptorSet> prefixSumDescriptorSet = descriptorSets[0];

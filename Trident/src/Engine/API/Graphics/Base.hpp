@@ -4,7 +4,10 @@
 #pragma once
 
 namespace Trident {
+	// TODO(graphics/api): Split into multiple API headers.
+
 	enum class AcquireNextImageStatus : uint8;
+	enum DeviceExtensionName : uint8;
 	enum class ImageLayout : uint8;
 	enum class ImageType : uint8;
 	enum class MemoryProperty : uint8;
@@ -49,6 +52,10 @@ namespace Trident {
 	class DescriptorSet;
 	class DescriptorSetLayout;
 	class Device;
+
+	template<DeviceExtensionName... Extensions>
+	class ExtendedDevice;
+
 	class Fence;
 	class Framebuffer;
 	class GraphicsAdapter;
@@ -161,4 +168,7 @@ namespace Trident {
 	typedef void (*UpdateDescriptorSetsImplementation)(const Device* device, view<WriteDescriptorSet> writeDescriptorSets);
 	typedef void (*UpdateSwapchainImplementation)(const Device* device, Swapchain* swapchain, const SwapchainDescriptor& descriptor);
 	typedef void (*WaitForFenceImplementation)(const Device* device, Fence* fence);
+
+	// TODO(test/graphics/device/extension)
+	typedef void (*Test_EXT_FooImplementation)();
 }

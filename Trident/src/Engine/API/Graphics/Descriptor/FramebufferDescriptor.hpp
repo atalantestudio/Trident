@@ -9,7 +9,10 @@
 namespace Trident {
 	struct FramebufferDescriptor {
 		ref<RenderPass> renderPass;
+
+		// TODO(graphics/framebuffer): Use a view instead.
 		sequence<ref<ImageView>> imageViews;
+
 		Extent2D extent;
 
 		#if defined(DEBUG_OBJECT_NAME)

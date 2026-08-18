@@ -13,13 +13,13 @@
 namespace Trident {
 	class GUIRenderer : public Renderer {
 		private:
-			struct Camera {
-				mat3x3<float32> projection;
-			};
-
 			struct Vertex {
 				svec2<float32> position;
 				svec2<float32> textureCoordinate;
+			};
+
+			struct Camera {
+				mat3x3<float32> projection;
 			};
 
 		public:
@@ -30,11 +30,19 @@ namespace Trident {
 		public:
 			void build() final override;
 
+			void encodeOneTimeCommands() const override;
+
+			void render(ref<CommandEncoder> commandEncoder) const final override;
+
+			void resize(WindowResizeEvent& event) final override;
+
+			bool doneFlushing() const;
+
 			ref<Image> getUserImage(uint32 imageIndex) const;
 
-			void registerDefaultUserImage();
-
 			ImageID registerUserImage(ref<ImageAsset> imageAsset);
+
+			void registerDefaultUserImage();
 
 			void flushUserImageStagingBuffer();
 
@@ -42,73 +50,55 @@ namespace Trident {
 
 			void registerGlyphSubcomponent(const GUIGlyphSubcomponent& glyphSubcomponent);
 
-			void render(ref<CommandEncoder> commandEncoder) const final override;
-
-			void resize(WindowResizeEvent& event) final override;
-
 			void resetCounters();
-
-			inline bool doneFlushing() const {
-				return userImagesFlushed;
-			}
 
 		private:
 			ref<DescriptorSetLayout> createSubcomponentDescriptorSetLayout() const;
-
-			void updateDescriptorSets() const;
-
 			ref<PipelineLayout> createSubcomponentPipelineLayout() const;
-
 			ref<GraphicsPipeline> createSubcomponentGraphicsPipeline() const;
 			ref<GraphicsPipeline> createGlyphSubcomponentGraphicsPipeline() const;
-
+			ref<Buffer> createCameraBuffer() const;
 			ref<Buffer> createVertexBuffer() const;
 			ref<Buffer> createIndexBuffer() const;
-			ref<Buffer> createCameraBuffer() const;
-			ref<Buffer> createUserImageStagingBuffer() const;
 			ref<Buffer> createSubcomponentBuffer() const;
 			ref<Buffer> createGlyphSubcomponentBuffer() const;
-
+			ref<Buffer> createUserImageStagingBuffer() const;
 			ref<Sampler> createNearestSampler() const;
 			ref<Sampler> createLinearSampler() const;
 
-			void copyBuffers() const;
-
+			void updateDescriptorSets() const;
 			void updateCameraProjection() const;
 
 		private:
 			ref<DescriptorSetLayout> subcomponentDescriptorSetLayout;
-
 			ref<DescriptorSet> subcomponentDescriptorSet;
-
 			ref<PipelineLayout> subcomponentPipelineLayout;
-
 			ref<GraphicsPipeline> subcomponentGraphicsPipeline;
 			ref<GraphicsPipeline> glyphSubcomponentGraphicsPipeline;
-
-			ref<Buffer> cameraBuffer;
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> indexBuffer;
+			ref<Buffer> cameraBuffer;
 			ref<Buffer> subcomponentBuffer;
 			ref<Buffer> glyphSubcomponentBuffer;
+
+			/// Can store up to 8 2048x2048 RGBA textures.
 			ref<Buffer> userImageStagingBuffer;
 
-			sequence<ref<Image>> userImages;
-
-			sequence<ref<ImageView>> userImageViews;
-
+			ref<Image> userImages[MAX_USER_IMAGE_COUNT];
+			ref<ImageView> userImageViews[MAX_USER_IMAGE_COUNT];
 			ref<Sampler> nearestSampler;
 			ref<Sampler> linearSampler;
 
-			Camera* cameraBufferMappedRange = nullptr;
-			GUISubcomponent* subcomponentBufferMappedRange = nullptr;
-			GUIGlyphSubcomponent* glyphSubcomponentBufferMappedRange = nullptr;
-			uint8* userImageStagingBufferMappedRange = nullptr;
+			BufferView<Camera> cameraView;
+
+			Camera* cameraMappedRange = nullptr;
+			GUISubcomponent* subcomponentMappedRange = nullptr;
+			GUIGlyphSubcomponent* glyphSubcomponentMappedRange = nullptr;
+			uint8* userImageStagingMappedRange = nullptr;
 
 			uint32 subcomponentCount = 0;
 			uint32 glyphSubcomponentCount = 0;
 			uint32 userImageCount = 0;
-
 			bool userImagesFlushed = false;
 	};
 }

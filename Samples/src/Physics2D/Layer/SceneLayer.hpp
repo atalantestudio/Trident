@@ -12,7 +12,7 @@ namespace Trident {
 		public:
 			~Physics2DSceneLayer();
 
-			void build() override {}
+			void initialize() override {}
 
 			void postConstruct() override;
 

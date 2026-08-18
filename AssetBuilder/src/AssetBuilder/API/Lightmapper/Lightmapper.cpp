@@ -32,7 +32,10 @@ namespace Trident {
 			.projectVersion = {0, 0, 1},
 		});
 		physicalDevice = instance->selectPhysicalDevice(false);
-		device = physicalDevice->createDevice();
+
+		// TODO(test/graphics/device/extension)
+		device = physicalDevice->createDevice<Test_EXT>();
+		device->test_EXT();
 
 		gBufferRenderPass = createGBufferRenderPass();
 		dilationRenderPass = createDilationRenderPass();
@@ -155,9 +158,6 @@ namespace Trident {
 
 		context.vertexBuffer = createVertexBuffer(vertexCount);
 		context.indexBuffer = createIndexBuffer(indexCount);
-
-		encodeOneTimeCommands(descriptor.vertices, descriptor.lightmapCoordinates, descriptor.indices);
-
 		context.lightmapAtlasStagingBuffer = device->createDynamicBuffer({
 			.size = context.lightmapAtlasImage->getSize(),
 			.usage = BufferUsage::TRANSFER_DST,
@@ -168,6 +168,7 @@ namespace Trident {
 			#endif
 		});
 
+		encodeOneTimeCommands(descriptor.vertices, descriptor.lightmapCoordinates, descriptor.indices);
 		generateLightmaps(indexCount);
 
 		const BufferView<uint8> lightmapAtlasView = context.lightmapAtlasStagingBuffer->createView<uint8>(0, context.lightmapAtlasStagingBuffer->getSize());

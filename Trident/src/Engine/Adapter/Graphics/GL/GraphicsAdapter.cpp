@@ -49,6 +49,11 @@ namespace Trident::GL {
 
 	static void destroySemaphore(const Trident::Device* device, const Semaphore* semaphore) {}
 
+	// TODO(test/graphics/device/extension)
+	static void test_EXT_foo() {
+		ADAPTER_TRACE("gl foo");
+	}
+
 	void bindAdapter(Trident::GraphicsAdapter* adapter) {
 		adapter->logger = ConsoleLogger(std::cout, LogLevel::ALL, "OPENGL");
 
@@ -139,5 +144,8 @@ namespace Trident::GL {
 		adapter->updateDescriptorSetsImplementation = GL::updateDescriptorSets;
 		adapter->updateSwapchainImplementation = GL::recreateSwapchain;
 		adapter->waitForFenceImplementation = GL::waitForFence;
+
+		// TODO(test/graphics/device/extension)
+		adapter->test_EXT_fooImplementation = GL::test_EXT_foo;
 	}
 }

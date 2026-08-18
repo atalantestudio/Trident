@@ -35,7 +35,9 @@ namespace Trident {
 			static float32 calculateTextMinimumWidth(UTF8Stream& stream, const FontAsset& fontAsset, float32 scale);
 
 		public:
-			void build() final override {}
+			void initialize() final override;
+
+			void encodeOneTimeCommands() final override;
 
 			virtual void registerAssets() {}
 

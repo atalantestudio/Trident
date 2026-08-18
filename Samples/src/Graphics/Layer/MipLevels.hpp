@@ -43,7 +43,7 @@ namespace Trident {
 
 				debugImageDescriptorSetLayout = createImageDescriptorSetLayout();
 
-				// TODO(graphics/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
+				// TODO(base/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
 				sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(debugImageDescriptorSetLayout);
 
 				debugImageDescriptorSet = descriptorSets[0];
@@ -299,7 +299,7 @@ namespace Trident {
 
 				const ref<DescriptorSetLayout> descriptorSetLayout = createDescriptorSetLayout(bindings);
 
-				// TODO(graphics/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
+				// TODO(base/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
 				sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(descriptorSetLayout);
 
 				const ref<DescriptorSet> descriptorSet = descriptorSets[0];

@@ -16,11 +16,13 @@ extern Trident::Application* createApplication(Trident::uint32 argumentCount, Tr
 			PROFILER("Trace/ApplicationStart.json");
 
 			application = Trident::createApplication(static_cast<Trident::uint32>(argc), argv);
-			application->postConstruct();
 
 			if (application->hasLayers()) {
-				application->initializeLayers();
+				application->layerCompositor->initializeLayerGroups();
+				application->layerCompositor->initializeLayers();
 			}
+
+			application->postConstruct();
 		}
 
 		{

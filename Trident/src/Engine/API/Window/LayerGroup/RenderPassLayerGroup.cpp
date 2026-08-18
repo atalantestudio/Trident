@@ -164,6 +164,11 @@ namespace Trident {
 			.extent = swapchain->getExtent(),
 		};
 
+		// TODO(graphics/framebuffer): Use a view to represent the framebuffer's image views.
+		for (ref<ImageView>& imageView : framebufferDescriptor.imageViews) {
+			imageView.owning = false;
+		}
+
 		#if defined(DEBUG_OBJECT_NAME)
 			sequence<char8> name;
 		#endif

@@ -210,10 +210,11 @@ namespace Trident {
 		static constexpr float32 DEFAULT_QUEUE_PRIORITY = 1.0f;
 
 		// TODO(graphics/vk/device/extensions): Expose to the client side.
-		static const sequence<const char8*> ENABLED_EXTENSION_NAMES = {
+		static constexpr const char8* ENABLED_EXTENSION_NAMES_[] = {
 			VK_KHR_MAINTENANCE_1_EXTENSION_NAME,
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 		};
+		static constexpr view<const char8*> ENABLED_EXTENSION_NAMES = ENABLED_EXTENSION_NAMES_;
 
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
@@ -237,15 +238,13 @@ namespace Trident {
 		uint32 queueFamilyIndexIndex = 0;
 
 		while (queueFamilyIndexIndex < queueFamilyIndices.size()) {
-			VkDeviceQueueCreateInfo deviceQueueCreateInfo{};
+			VkDeviceQueueCreateInfo& deviceQueueCreateInfo = deviceQueueCreateInfos[queueFamilyIndexIndex];
 			deviceQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 			deviceQueueCreateInfo.pNext = nullptr;
 			deviceQueueCreateInfo.flags = 0;
 			deviceQueueCreateInfo.queueFamilyIndex = queueFamilyIndices[queueFamilyIndexIndex];
 			deviceQueueCreateInfo.queueCount = 1;
 			deviceQueueCreateInfo.pQueuePriorities = &DEFAULT_QUEUE_PRIORITY;
-
-			deviceQueueCreateInfos[queueFamilyIndexIndex] = deviceQueueCreateInfo;
 
 			queueFamilyIndexIndex += 1;
 		}

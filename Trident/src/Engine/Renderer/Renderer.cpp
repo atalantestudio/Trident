@@ -74,7 +74,7 @@ namespace Trident {
 	}
 
 	ref<Device> Renderer::getDevice() {
-		return layerCompositor->device;
+		return ref_cast<Device>(layerCompositor->device);
 	}
 
 	uint32 Renderer::getSwapchainImageIndex() {

@@ -99,7 +99,7 @@ namespace Trident {
 				return view<ref<LayerGroup>>(&layerGroups[0], layerGroupCount);
 			}
 
-			void addLayer(ref<Layer>&& layer) {
+			void addLayer(ref<Layer> layer) {
 				layers[layerCount] = layer;
 				layerCount += 1;
 			}
@@ -308,7 +308,7 @@ namespace Trident {
 			ref<Instance> instance;
 			ref<PhysicalDevice> physicalDevice;
 			ref<Surface> surface;
-			ref<Device> device;
+			ref<ExtendedDevice<>> device;
 			ref<Queue> graphicsQueue;
 			ref<Swapchain> swapchain;
 
@@ -325,8 +325,8 @@ namespace Trident {
 			bool verticalSync;
 
 		private:
-			sequence<ref<Layer>> layers;
 			sequence<ref<LayerGroup>> layerGroups;
+			sequence<ref<Layer>> layers;
 
 		public:
 			uint64 layerCount = 0;

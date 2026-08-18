@@ -98,6 +98,7 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const DX12::PhysicalDevice* _physicalDevice = static_cast<const DX12::PhysicalDevice*>(physicalDevice);
+
 		ref<DX12::Device> device = allocateRef<DX12::Device>(adapter, physicalDevice);
 		HRESULT result = -1;
 
