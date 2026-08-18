@@ -32,8 +32,6 @@ const float FLOAT32_MAX = 4294967295.0;
 const uint SAMPLE_COUNT = 1024;
 const uint BOUNCE_COUNT = 4;
 const float ADAPTIVE_BIAS = 0.0000002;
-const bool FRONT_FACE = true;
-const bool BACK_FACE = false;
 
 layout(set = 0, binding = 0) buffer readonly TraceRaysArgumentBuffer {
 	uvec2 atlasSize;
@@ -96,7 +94,7 @@ vec3 randomUnitDirection(inout uint seed) {
 	return normalize(vec3(randomScalar(seed), randomScalar(seed), randomScalar(seed)) * 2.0 - 1.0);
 }
 
-bool rayTriangleIntersection(Ray ray, Triangle triangle_, bool face, inout float t, inout vec3 barycentricCoordinate) {
+bool rayTriangleIntersectionFrontFacing(Ray ray, Triangle triangle_, inout float t, inout vec3 barycentricCoordinate) {
 	const float E = 1e-6;
 	const float F = 1e-6;
 
@@ -108,15 +106,55 @@ bool rayTriangleIntersection(Ray ray, Triangle triangle_, bool face, inout float
 	vec3 p = cross(ray.direction, ac);
 	float d = dot(ab, p);
 
-	if (face == FRONT_FACE) {
-		if (d <= E) {
-			return false;
-		}
+	if (d <= E) {
+		return false;
 	}
-	else {
-		if (d >= -E) {
-			return false;
-		}
+
+	float inverseD = 1.0 / d;
+	vec3 s = ray.origin - a;
+	float u = dot(s, p) * inverseD;
+
+	if (u < -F || u > 1.0 + F) {
+		return false;
+	}
+
+	vec3 q = cross(s, ab);
+	float v = dot(ray.direction, q) * inverseD;
+
+	if (v < -F || u + v > 1.0 + F) {
+		return false;
+	}
+
+	t = dot(ac, q) * inverseD;
+
+	if (t > E) {
+		float w = 1.0 - v - u;
+
+		barycentricCoordinate = vec3(u, w, v);
+
+		// TODO(asset-builder/lightmapper): This order also seems to work?
+		// barycentricCoordinate = vec3(v, w, u);
+
+		return true;
+	}
+
+	return false;
+}
+
+bool rayTriangleIntersectionBackFacing(Ray ray, Triangle triangle_, inout float t, inout vec3 barycentricCoordinate) {
+	const float E = 1e-6;
+	const float F = 1e-6;
+
+	vec3 a = triangle_.vertices[0].position;
+	vec3 b = triangle_.vertices[1].position;
+	vec3 c = triangle_.vertices[2].position;
+	vec3 ab = b - a;
+	vec3 ac = c - a;
+	vec3 p = cross(ray.direction, ac);
+	float d = dot(ab, p);
+
+	if (d >= -E) {
+		return false;
 	}
 
 	float inverseD = 1.0 / d;
@@ -176,7 +214,7 @@ Hit rmiss() {
 	return hit;
 }
 
-Hit rint(Ray ray, bool face) {
+Hit rintFrontFacing(Ray ray) {
 	float closestDistance = FLOAT32_MAX;
 	uint intersectingTriangleIndex = triangleCount;
 	Triangle intersectingTriangle;
@@ -188,7 +226,38 @@ Hit rint(Ray ray, bool face) {
 		float distance;
 		vec3 barycentricCoordinate;
 
-		if (rayTriangleIntersection(ray, triangle_, face, distance, barycentricCoordinate)) {
+		if (rayTriangleIntersectionFrontFacing(ray, triangle_, distance, barycentricCoordinate)) {
+			if (distance < closestDistance) {
+				closestDistance = distance;
+				intersectingTriangleIndex = triangleIndex;
+				intersectingTriangle = triangle_;
+				intersectingBarycentricCoordinate = barycentricCoordinate;
+			}
+		}
+
+		triangleIndex += 1;
+	}
+
+	if (intersectingTriangleIndex < triangleCount) {
+		return rchit(ray, intersectingTriangle, closestDistance, intersectingBarycentricCoordinate);
+	}
+
+	return rmiss();
+}
+
+Hit rintBackFacing(Ray ray) {
+	float closestDistance = FLOAT32_MAX;
+	uint intersectingTriangleIndex = triangleCount;
+	Triangle intersectingTriangle;
+	vec3 intersectingBarycentricCoordinate;
+	uint triangleIndex = 0;
+
+	while (triangleIndex < triangleCount) {
+		Triangle triangle_ = loadTriangle(triangleIndex);
+		float distance;
+		vec3 barycentricCoordinate;
+
+		if (rayTriangleIntersectionBackFacing(ray, triangle_, distance, barycentricCoordinate)) {
 			if (distance < closestDistance) {
 				closestDistance = distance;
 				intersectingTriangleIndex = triangleIndex;
@@ -220,13 +289,13 @@ vec3 rgen(Hit primaryHit, inout uint seed) {
 		primaryRay.origin = primaryHit.position + sign(primaryHit.vertexNormal) * abs(primaryHit.position * ADAPTIVE_BIAS);
 		primaryRay.direction = normalize(primaryHit.vertexNormal + randomUnitDirection(seed));
 
-		primaryHit = rint(primaryRay, FRONT_FACE);
+		primaryHit = rintFrontFacing(primaryRay);
 
 		Ray secondaryRay;
 		secondaryRay.origin = primaryRay.origin;
 		secondaryRay.direction = normalize(sunDirection);
 
-		Hit secondaryHit = rint(secondaryRay, FRONT_FACE);
+		Hit secondaryHit = rintFrontFacing(secondaryRay);
 
 		radiance += throughput * float(secondaryHit.distance < 0.0) * sunColor * sunIntensity;
 		throughput *= albedo;
@@ -254,7 +323,7 @@ vec3 adjustSamplePosition(vec3 position, vec3 triangleNormal, float diagonalLuxe
 	ray.origin = position + sign(triangleNormal) * abs(position * bias);
 	ray.direction = a;
 
-	Hit hit = rint(ray, BACK_FACE);
+	Hit hit = rintBackFacing(ray);
 
 	if (hit.distance > 0.0 && hit.distance <= rayLength) {
 		return hit.position + sign(hit.triangleNormal) * abs(hit.position * bias);
@@ -262,21 +331,21 @@ vec3 adjustSamplePosition(vec3 position, vec3 triangleNormal, float diagonalLuxe
 
 	ray.direction = b;
 
-	hit = rint(ray, BACK_FACE);
+	hit = rintBackFacing(ray);
 
 	if (hit.distance > 0.0 && hit.distance <= rayLength) {
 		return hit.position + sign(hit.triangleNormal) * abs(hit.position * bias);
 	}
 
 	ray.direction = -a;
-	hit = rint(ray, BACK_FACE);
+	hit = rintBackFacing(ray);
 
 	if (hit.distance > 0.0 && hit.distance <= rayLength) {
 		return hit.position + sign(hit.triangleNormal) * abs(hit.position * bias);
 	}
 
 	ray.direction = -b;
-	hit = rint(ray, BACK_FACE);
+	hit = rintBackFacing(ray);
 
 	if (hit.distance > 0.0 && hit.distance <= rayLength) {
 		return hit.position + sign(hit.triangleNormal) * abs(hit.position * bias);
