@@ -10,7 +10,7 @@ namespace Trident {
 	struct BuildVertex3D {
 		alignas(16) svec3<float32> position;
 		alignas(16) svec3<float32> normal;
-		alignas(16) svec3<float32> tangent;
+		vec4<float32> tangent;
 		svec2<float32> textureCoordinate;
 	};
 

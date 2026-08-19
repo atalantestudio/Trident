@@ -48,7 +48,6 @@ namespace Trident {
 							// TODO(lyah/scalar)
 							vertex.position = svec3<float32>(multiplyTransform(vec3<float32>(geometryVertex.position), worldTransform));
 							vertex.normal = svec3<float32>(normalized(vec3<float32>(geometryVertex.normal) * inverseOrientation));
-							vertex.tangent = svec3<float32>(normalized(vec3<float32>(geometryVertex.tangent) * inverseOrientation));
 
 							vertex.textureCoordinate = geometryVertex.textureCoordinate;
 

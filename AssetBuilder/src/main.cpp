@@ -12,13 +12,16 @@
 #include "AssetBuilder/Process/Geometry/3D/SingleTextureUnitBox.hpp"
 #include "AssetBuilder/Process/Geometry/3D/UnitBox.hpp"
 #include "AssetBuilder/Process/Geometry/3D/UnitPlane.hpp"
+#include "AssetBuilder/Process/Geometry/3D/UnitSphere.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/Default.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/PlasterCeiling.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/PlasterWall.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/TileFloor.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/WoodDoor.hpp"
 #include "AssetBuilder/Process/Material/LightmappedPBR/GallineraTable.hpp"
+#include "AssetBuilder/Process/Material/PBR/BlueMetalPlate.hpp"
 #include "AssetBuilder/Process/Material/PBR/Debug.hpp"
+#include "AssetBuilder/Process/Material/PBR/DebugDefault.hpp"
 #include "AssetBuilder/Process/Material/PBR/Default.hpp"
 #include "AssetBuilder/Process/Material/PBR/FoldingWoodenStool.hpp"
 #include "AssetBuilder/Process/Material/PBR/GallineraTable.hpp"
@@ -87,7 +90,7 @@ namespace Trident {
 
 		private:
 			void registerProcesses() {
-				allocateProcesses(45);
+				allocateProcesses(48);
 
 				registerProcess<BuildGeometryAssetProcess>(&assetLibrary);
 
@@ -100,6 +103,7 @@ namespace Trident {
 				registerProcess<SingleTextureUnitBoxGeometry3D>(&assetLibrary);
 				registerProcess<UnitBoxGeometry3D>(&assetLibrary);
 				registerProcess<UnitPlaneGeometry3D>(&assetLibrary);
+				registerProcess<UnitSphereGeometry3D>(&assetLibrary);
 
 				registerProcess<BuildImageAssetProcess>(&assetLibrary);
 
@@ -109,6 +113,8 @@ namespace Trident {
 				registerProcess<LemonMaterial>(&assetLibrary);
 				registerProcess<LMDefaultMaterial>(&assetLibrary);
 				registerProcess<LPBRGallineraTableMaterial>(&assetLibrary);
+				registerProcess<PBRBlueMetalPlateMaterial>(&assetLibrary);
+				registerProcess<PBRDebugDefaultMaterial>(&assetLibrary);
 				registerProcess<PBRDefaultMaterial>(&assetLibrary);
 				registerProcess<PlasterCeilingMaterial>(&assetLibrary);
 				registerProcess<PlasterWallMaterial>(&assetLibrary);

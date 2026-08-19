@@ -15,24 +15,18 @@ namespace Trident {
 
 			BuildScene3D createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				SceneBuilder builder({
-					.skyColor = {0.6f, 0.7f, 0.9f},
+					.skyColor = {0.0f, 0.0f, 0.0f},
 					.sunDirection = {1.0f, 1.0f, 1.0f},
 					.sunColor = {1.0f, 1.0f, 1.0f},
-					.sunIntensity = 1.0f,
+					.sunIntensity = 0.0f,
 				});
 
-				const uint32 geometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("3d_sphere"));
+				const uint32 geometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("3d_unit_sphere"));
 
-				const MaterialReference material = builder.loadDynamicMaterial(assetLibrary->getAsset<MaterialAsset>("pbr_default"));
+				const MaterialReference material = builder.loadDynamicMaterial(assetLibrary->getAsset<MaterialAsset>("pbr_debug_default"));
 
 				static constexpr sint32 columnCount = 7;
 				static constexpr sint32 rowCount = 7;
-				static const svec3<float32> pointLightPositions[4] = {
-					{-256.0f,  256.0f, 256.0f},
-					{ 256.0f,  256.0f, 256.0f},
-					{-256.0f, -256.0f, 256.0f},
-					{ 256.0f, -256.0f, 256.0f},
-				};
 
 				sint32 columnIndex = 0;
 
@@ -43,9 +37,9 @@ namespace Trident {
 						builder.placeRigidBody({
 							.geometryIndex = geometry,
 							.material = material,
-							.position = {(columnIndex - (columnCount / 2)) * 32.0f, (rowIndex - (rowCount / 2)) * 32.0f, 128.0f},
+							.position = {(columnIndex - (columnCount / 2)) * 32.0f, (rowIndex - (rowCount / 2)) * 32.0f + 64.0f, 128.0f},
 							.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
-							.uniformScale = 0.15f,
+							.uniformScale = 26.0f,
 							.mass = max<float32>(),
 							.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
 							.inertiaScale = {1.0f, 1.0f, 1.0f},
@@ -59,12 +53,20 @@ namespace Trident {
 					columnIndex += 1;
 				}
 
+				static constexpr uint32 pointLightCount = 4;
+				static const svec3<float32> pointLightPositions[] = {
+					{-256.0f,  320.0f, 0.0f},
+					{ 256.0f,  320.0f, 0.0f},
+					{-256.0f, -192.0f, 0.0f},
+					{ 256.0f, -192.0f, 0.0f},
+				};
+
 				uint32 pointLightIndex = 0;
 
-				while (pointLightIndex < 4) {
+				while (pointLightIndex < pointLightCount) {
 					builder.placePointLight({
 						.color = {1.0f, 1.0f, 1.0f},
-						.intensity = 300.0f,
+						.intensity = 30000.0f,
 						.position = pointLightPositions[pointLightIndex],
 					});
 

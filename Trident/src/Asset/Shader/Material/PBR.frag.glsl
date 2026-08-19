@@ -3,33 +3,33 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-// NOTE: "lowp" or "mediump" precision cause specular artifacts on integrated GPUs.
 precision highp float;
+
+struct PointLight {
+	vec3 color;
+	float intensity;
+	vec3 position;
+};
 
 in Interstage {
 	layout(location = 0) vec3 surface;
 	layout(location = 1) vec2 textureCoordinate;
 	layout(location = 2) mat3x3 tbn;
+	layout(location = 5) flat uint instanceIndex;
 } interstage;
 
-struct Light {
-	vec3 position;
-	vec3 color;
-};
-
 const float PI = radians(180.0);
-const vec3 AMBIENT_LIGHT = vec3(0.03, 0.03, 0.03);
-const float DENOMINATOR_TOLERANCE = 0.0001;
-const uint LIGHT_COUNT = 2u;
-const Light LIGHTS[LIGHT_COUNT] = Light[](
-	Light(vec3(-256.0, 256.0, -256.0), vec3(300000.0, 300000.0, 300000.0)),
-	Light(vec3(128.0, 128.0, 256.0), vec3(300000.0, 300000.0, 300000.0))
-);
 
 layout(set = 0, binding = 0) uniform readonly Camera {
 	mat4x4 projectionView;
 	vec3 position;
+	uint pointLightCount;
+	vec3 ambientColor;
 } camera;
+
+layout(set = 0, binding = 1) buffer readonly PointLightBuffer {
+	PointLight pointLights[];
+};
 
 layout(set = 1, binding = 0) uniform sampler2D armTexture;
 layout(set = 1, binding = 1) uniform sampler2D diffuseTexture;
@@ -61,7 +61,7 @@ float SchlickGGX(float angle, float roughness) {
 	return numerator / denominator;
 }
 
-float Smith(vec3 normal, vec3 viewDirection, vec3 lightDirection, float roughness) {
+float GeometrySmith(vec3 normal, vec3 viewDirection, vec3 lightDirection, float roughness) {
 	float viewAngle = max(0.0, dot(normal, viewDirection));
 	float lightAngle = max(0.0, dot(normal, lightDirection));
 	float ggx1 = SchlickGGX(viewAngle, roughness);
@@ -70,65 +70,55 @@ float Smith(vec3 normal, vec3 viewDirection, vec3 lightDirection, float roughnes
 	return ggx1 * ggx2;
 }
 
-vec3 FresnelSchlick(float angle, vec3 baseReflectivity) {
-	return baseReflectivity + (1.0 - baseReflectivity) * pow(clamp(1.0 - angle, 0.0, 1.0), 5.0);
-}
-
-vec3 gammaCorrect(vec3 color) {
-	return pow(color, vec3(1.0 / 2.2));
+vec3 FresnelSchlick(float cosTheta, vec3 F0) {
+	return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
 void main() {
-	// Convert from sRGB space to linear space.
-	vec3 diffuse = pow(texture(diffuseTexture, interstage.textureCoordinate).rgb, vec3(2.2));
+	vec3 x = camera.position;
+	vec3 wo = normalize(camera.position - interstage.surface);
 
-	vec3 normal = normalize(interstage.tbn * (texture(normalTexture, interstage.textureCoordinate).xyz * 2.0 - 1.0));
-	vec3 arm = texture(armTexture, interstage.textureCoordinate).rgb;
-	float ao = arm[0];
-	float roughness = arm[1];
-	float metallic = arm[2];
-	vec3 surface = interstage.surface;
-	vec3 surfaceToViewDirection = normalize(camera.position - surface);
-	vec3 baseReflectivity = mix(vec3(0.04, 0.04, 0.04), diffuse, metallic);
-	vec3 L = vec3(0.0, 0.0, 0.0);
-	uint lightIndex = 0u;
+	// vec3 arm = texture(armTexture, interstage.textureCoordinate).rgb;
+	float ao = 1.0;
+	float roughness = texture(normalTexture, interstage.textureCoordinate).r;
+	float metallic = texture(armTexture, interstage.textureCoordinate).r;
 
-	while (lightIndex < LIGHT_COUNT) {
-		Light light = LIGHTS[lightIndex];
+	// TODO(pbr): Convert the albedo map to linear space while building?
+	vec3 c = pow(texture(diffuseTexture, interstage.textureCoordinate).rgb, vec3(2.2));
 
-		vec3 surfaceToLightDirection = normalize(light.position - surface);
-		vec3 surfaceHalfway = normalize(surfaceToViewDirection + surfaceToLightDirection);
-		float lightSurfaceDistance = length(light.position - surface);
+	// vec3 n = normalize(interstage.tbn * (texture(normalTexture, interstage.textureCoordinate).xyz * 2.0 - 1.0));
+	vec3 n = normalize(interstage.tbn * vec3(0.0, 0.0, 1.0));
 
-		// Attenuate using (physically correct) inverse-square law.
-		float attenuation = 1.0 / (lightSurfaceDistance * lightSurfaceDistance);
+	vec3 F0 = mix(vec3(0.04, 0.04, 0.04), c, metallic);
 
-		vec3 radiance = light.color * attenuation;
+	vec3 Le = vec3(0.0, 0.0, 0.0);
+	vec3 Lr = vec3(0.0, 0.0, 0.0);
+	uint pointLightIndex = 0u;
 
-		float NDF = TrowbridgeReitzGGX(normal, surfaceHalfway, roughness);
-		float G = Smith(normal, surfaceToViewDirection, surfaceToLightDirection, roughness);
-		vec3 F = FresnelSchlick(max(0.0, dot(surfaceHalfway, surfaceToViewDirection)), baseReflectivity);
+	while (pointLightIndex < camera.pointLightCount) {
+		PointLight pointLight = pointLights[pointLightIndex];
 
-		vec3 kS = F;
-		vec3 kD = 1.0 - kS;
+		vec3 surfaceToLight = pointLight.position - interstage.surface;
+		vec3 wi = normalize(surfaceToLight);
+		vec3 h = normalize(wo + wi);
+		float d = dot(surfaceToLight, surfaceToLight);
+		vec3 Li = (pointLight.color * pointLight.intensity) / d;
 
-		// Cancel if the surface is metallic (metallic = 1.0).
-		kD *= 1.0 - metallic;
+		vec3 F = FresnelSchlick(max(0.0, dot(wo, h)), F0);
+		float D = TrowbridgeReitzGGX(n, h, roughness);
+		float G = GeometrySmith(n, wo, wi, roughness);
+		vec3 kd = vec3(1.0, 1.0, 1.0) - F * (1.0 - metallic);
+		vec3 fr = kd * c / PI + ((D * F * G) / (4.0 * max(0.0, dot(wo, n)) * max(0.0, dot(wi, n)) + 1e-4));
 
-		vec3 numerator = NDF * G * F;
-		float denominator = 4.0 * max(0.0, dot(normal, surfaceToViewDirection)) * max(0.0, dot(normal, surfaceToLightDirection)) + DENOMINATOR_TOLERANCE;
-		vec3 specular = numerator / denominator;
-		float angle = max(0.0, dot(normal, surfaceToLightDirection));
+		Lr += fr * Li * max(0.0, dot(wi, n));
 
-		L += (kD * diffuse / PI + specular) * radiance * angle;
-
-		lightIndex += 1u;
+		pointLightIndex += 1u;
 	}
 
-	vec3 color = AMBIENT_LIGHT * diffuse * ao + L;
+	vec3 Lo = Le + Lr;
 
-	color = color / (color + 1.0);
-	color = gammaCorrect(color);
-
-	fragment = vec4(color, 1.0);
+	fragment.rgb = camera.ambientColor * c * ao + Lo;
+	fragment.rgb /= fragment.rgb + vec3(1.0);
+	fragment.rgb = pow(fragment.rgb, vec3(1.0 / 2.2));
+	fragment.a = 1.0;
 }

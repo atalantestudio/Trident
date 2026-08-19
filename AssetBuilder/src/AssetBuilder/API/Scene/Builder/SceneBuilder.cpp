@@ -13,6 +13,7 @@
 #include "AssetBuilder/Process/MaterialShader/Lightmapped.hpp"
 #include "AssetBuilder/Process/MaterialShader/LightmappedPBR.hpp"
 #include "AssetBuilder/Process/MaterialShader/PBR.hpp"
+#include "AssetBuilder/Process/MaterialShader/PBRDebug.hpp"
 #include "AssetBuilder/Process/MaterialShader/PBRSeparatedAORoughness.hpp"
 
 namespace Trident {
@@ -32,6 +33,9 @@ namespace Trident {
 			case 403: {
 				return PBRSeparatedAORoughnessShaderModuleAsset();
 			}
+			case 404: {
+				return PBRDebugShaderModuleAsset();
+			}
 			default: {
 				DEBUG_ASSERT(false);
 
@@ -46,10 +50,10 @@ namespace Trident {
 
 		return {
 			.vertices = {
-				{{-0.5f * x,  0.5f * y,  0.0f}, { 0.0f,  0.0f, -1.0f}, { 1.0f,  0.0f,  0.0f}, {0.0f, 0.0f}},
-				{{ 0.5f * x,  0.5f * y,  0.0f}, { 0.0f,  0.0f, -1.0f}, { 1.0f,  0.0f,  0.0f}, {1.0f, 0.0f}},
-				{{-0.5f * x, -0.5f * y,  0.0f}, { 0.0f,  0.0f, -1.0f}, { 1.0f,  0.0f,  0.0f}, {0.0f, 1.0f}},
-				{{ 0.5f * x, -0.5f * y,  0.0f}, { 0.0f,  0.0f, -1.0f}, { 1.0f,  0.0f,  0.0f}, {1.0f, 1.0f}},
+				{{-0.5f * x,  0.5f * y,  0.0f}, { 0.0f,  0.0f, -1.0f}, { 1.0f,  0.0f,  0.0f,  1.0f}, {0.0f, 0.0f}},
+				{{ 0.5f * x,  0.5f * y,  0.0f}, { 0.0f,  0.0f, -1.0f}, { 1.0f,  0.0f,  0.0f,  1.0f}, {1.0f, 0.0f}},
+				{{-0.5f * x, -0.5f * y,  0.0f}, { 0.0f,  0.0f, -1.0f}, { 1.0f,  0.0f,  0.0f,  1.0f}, {0.0f, 1.0f}},
+				{{ 0.5f * x, -0.5f * y,  0.0f}, { 0.0f,  0.0f, -1.0f}, { 1.0f,  0.0f,  0.0f,  1.0f}, {1.0f, 1.0f}},
 			},
 			.indices = {
 				0, 1, 2,

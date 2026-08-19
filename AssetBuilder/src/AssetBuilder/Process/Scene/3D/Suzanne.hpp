@@ -18,7 +18,7 @@ namespace Trident {
 					.skyColor = {0.6f, 0.7f, 0.9f},
 					.sunDirection = {1.0f, 1.0f, 1.0f},
 					.sunColor = {1.0f, 1.0f, 1.0f},
-					.sunIntensity = 1.0f,
+					.sunIntensity = 0.0f,
 				});
 
 				const uint32 suzanneGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("suzanne"));

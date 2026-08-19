@@ -144,7 +144,7 @@ namespace Trident {
 
 		ref<ImageAsset> lightmapAtlasImageAsset;
 
-		float32 skyColor[3];
+		svec3<float32> skyColor;
 
 		uint32 entityCount;
 		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;

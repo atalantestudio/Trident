@@ -52,13 +52,14 @@ namespace Trident {
 
 		while (vertexIndex < surfaceVertexCount) {
 			const BuildVertex3D& surfaceVertex = descriptor.geometry.vertices[vertexIndex];
+			const svec3<float32> tangent = svec3<float32>(normalized(vec3<float32>(surfaceVertex.tangent[0], surfaceVertex.tangent[1], surfaceVertex.tangent[2]) * inverseOrientation));
 
 			BuildVertex3D& vertex = geometry.vertices[vertexOffset + vertexIndex];
 
 			// TODO(lyah/scalar)
 			vertex.position = svec3<float32>(multiplyTransform(vec3<float32>(surfaceVertex.position), worldTransform));
 			vertex.normal = svec3<float32>(normalized(vec3<float32>(surfaceVertex.normal) * inverseOrientation));
-			vertex.tangent = svec3<float32>(normalized(vec3<float32>(surfaceVertex.tangent) * inverseOrientation));
+			vertex.tangent = {tangent.x, tangent.y, tangent.z, surfaceVertex.tangent[3]};
 
 			// TODO(asset-builder/lightmapper)
 			// vertex.textureCoordinate = svec2<float32>(multiplyTransform(vec2<float32>(surfaceVertex.textureCoordinate), textureTransform));

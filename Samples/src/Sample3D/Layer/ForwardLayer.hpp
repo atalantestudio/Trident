@@ -57,8 +57,6 @@ namespace Trident {
 				const view<char8> sceneAssetName = application->getPropertyFile()->getProperty<view<char8>>("AssetName");
 				const ref<Scene3DAsset> sceneAsset = application->getAssetLibrary()->getAsset<Scene3DAsset>(sceneAssetName);
 
-				std::filesystem::remove(Filesystem::getProjectRootDirectory() / "Asset/Scene/3d_suzanne.tsa");
-
 				// TODO(forward): Don't use alignment outside of the renderer.
 				const uint64 alignment = renderer.getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
 

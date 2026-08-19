@@ -15,6 +15,7 @@ namespace Trident {
 		mat4x4<float32> projectionView;
 		svec3<float32> position;
 		uint32 pointLightCount;
+		svec3<float32> ambientColor;
 	};
 
 	class ForwardRenderer : public BaseSceneRenderer<ForwardCamera> {
@@ -242,6 +243,7 @@ namespace Trident {
 				updateGeometryDescriptorSets();
 
 				cameraMappedRange->pointLightCount = static_cast<uint32>(scene->getAsset()->pointLights.count());
+				cameraMappedRange->ambientColor = scene->getAsset()->skyColor;
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
@@ -249,12 +251,12 @@ namespace Trident {
 				const Extent2D extent = framebuffer->getExtent();
 				const float32 width = static_cast<float32>(extent.width);
 				const float32 height = static_cast<float32>(extent.height);
-				const float32* skyColor = scene->getAsset()->skyColor;
+				const svec3<float32> skyColor = scene->getAsset()->skyColor;
 
 				commandEncoder->beginRenderPass({
 					.framebuffer = framebuffer,
 					.clearValues = {
-						{skyColor[0], skyColor[1], skyColor[2], 1.0f},
+						{skyColor.x, skyColor.y, skyColor.z, 1.0f},
 						{
 							.depth = 0.0f,
 							.stencil = 0,
