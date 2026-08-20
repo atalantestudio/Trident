@@ -584,6 +584,10 @@ namespace Trident {
 				if (descriptor.addressModeW >= AddressMode::count) {
 					VALIDATION_ERROR("descriptor.addressModeW must be a valid AddressMode value.");
 				}
+
+				if (descriptor.name.count() == 0) {
+					VALIDATION_WARNING("descriptor.name should provide a unique name to help identify this sampler.");
+				}
 			}
 		#endif
 

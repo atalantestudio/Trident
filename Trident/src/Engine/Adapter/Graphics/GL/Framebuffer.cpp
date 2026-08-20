@@ -144,7 +144,7 @@ namespace Trident {
 			}
 		#endif
 
-		#if defined(DEBUG_OBJECT_NAME)
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_3 && defined(DEBUG_OBJECT_NAME)
 			if (descriptor.name.count() > 0) {
 				glObjectLabel(GL_FRAMEBUFFER, framebuffer->framebuffer, static_cast<GLsizei>(descriptor.name.count()), &descriptor.name[0]);
 

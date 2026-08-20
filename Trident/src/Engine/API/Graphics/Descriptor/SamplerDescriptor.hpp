@@ -22,5 +22,9 @@ namespace Trident {
 
 		/// Wrapping operation for the W texture coordinate.
 		AddressMode addressModeW;
+
+		#if defined(DEBUG_OBJECT_NAME)
+			view<char8> name;
+		#endif
 	};
 }
