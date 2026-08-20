@@ -13,6 +13,9 @@ namespace Trident {
 			.addressModeU = AddressMode::CLAMP_TO_EDGE,
 			.addressModeV = AddressMode::CLAMP_TO_EDGE,
 			.addressModeW = AddressMode::CLAMP_TO_EDGE,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Lightmap atlas",
+			#endif
 		});
 	}
 }

@@ -418,6 +418,9 @@ namespace Trident {
 					.addressModeU = AddressMode::REPEAT,
 					.addressModeV = AddressMode::REPEAT,
 					.addressModeW = AddressMode::REPEAT,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Sampler",
+					#endif
 				});
 			}
 
