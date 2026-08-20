@@ -6,6 +6,7 @@ struct Interstage {
 	float3 surface : VERTEX_OUTPUT_ATTRIBUTE1;
 	float2 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE2;
 	float3x3 tbn : VERTEX_OUTPUT_ATTRIBUTE3;
+	nointerpolation uint instanceIndex : VERTEX_OUTPUT_ATTRIBUTE6;
 };
 
 struct FragmentOutput {

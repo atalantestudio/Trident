@@ -10,6 +10,7 @@ in Interstage {
 	layout(location = 0) vec3 surface;
 	layout(location = 1) vec2 textureCoordinate;
 	layout(location = 2) mat3x3 tbn;
+	layout(location = 5) flat uint instanceIndex;
 } interstage;
 
 struct Light {
