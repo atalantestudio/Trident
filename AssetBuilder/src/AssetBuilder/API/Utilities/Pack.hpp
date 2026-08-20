@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Engine/Base/Type/float16.hpp"
+
 #include "AssetBuilder/API/Utilities/Utilities.hpp"
 
 namespace Trident {
@@ -36,6 +38,14 @@ namespace Trident {
 		return (
 			static_cast<uint32>((value.x + 1.0f) * scale) |
 			(static_cast<uint32>((value.y + 1.0f) * scale) << 16)
+		);
+	}
+
+	template<>
+	uint32 pack<VertexInputAttributeFormat::R16G16_FLOAT>(svec2<float32> value) {
+		return (
+			float16(value.x) |
+			(float16(value.y) << 16)
 		);
 	}
 }

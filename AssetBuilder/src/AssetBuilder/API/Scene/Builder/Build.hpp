@@ -4,7 +4,9 @@
 #pragma once
 
 #include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
+#include "AssetBuilder/API/Utilities/Utilities.hpp"
 
+#include "Engine/Base/Type/float16.hpp"
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 
 namespace Trident {
@@ -209,7 +211,18 @@ namespace Trident {
 					continue;
 				}
 
-				std::copy(geometry.vertices.begin(), geometry.vertices.end(), &staticGeometry.bakedVertices[bakedVertexOffset]);
+				uint32 vertexIndex = 0;
+
+				while (vertexIndex < geometry.vertices.count()) {
+					BuildVertex3D& vertex = staticGeometry.bakedVertices[bakedVertexOffset + vertexIndex];
+					vertex = geometry.vertices[vertexIndex];
+
+					const float32 w = vertex.tangent[3];
+
+					vertex.textureCoordinate = unpack<VertexInputAttributeFormat::R16G16_FLOAT, svec2<float32>>(*pointer_cast<const uint32*>(&w));
+
+					vertexIndex += 1;
+				}
 
 				uint32 indexIndex = 0;
 

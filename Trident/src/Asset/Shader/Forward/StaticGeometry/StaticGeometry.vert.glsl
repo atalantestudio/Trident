@@ -25,6 +25,6 @@ void main() {
 	gl_Position = camera.projectionView * worldTransform * vec4(position, 1.0);
 
 	interstage.normal = normal * 2.0 - 1.0;
-	interstage.textureCoordinate = textureCoordinate * 2.0 - 1.0;
+	interstage.textureCoordinate = textureCoordinate;
 	interstage.lightmapCoordinate = lightmapCoordinate * 2.0 - 1.0;
 }

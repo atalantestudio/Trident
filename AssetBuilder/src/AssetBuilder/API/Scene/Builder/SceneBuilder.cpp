@@ -101,9 +101,7 @@ namespace Trident {
 				BuildVertex3D& vertex = geometry.vertices[vertexIndex];
 				vertex.position = packedVertex.position;
 				vertex.normal = asset->vertexNormals[vertexIndex];
-
-				// TODO(lyah/scalar)
-				vertex.textureCoordinate = unpack<VertexInputAttributeFormat::R16G16_UNORM, svec2<float32>>(packedVertex.textureCoordinate);
+				vertex.textureCoordinate = unpack<VertexInputAttributeFormat::R16G16_FLOAT, svec2<float32>>(packedVertex.textureCoordinate);
 
 				vertexIndex += 1;
 			}

@@ -46,7 +46,7 @@ namespace Trident {
 					stream.write<float32>(vertex.position.z);
 					stream.write<uint32>(pack<VertexInputAttributeFormat::R10G10B10A2_UNORM, uint32>(vertex.normal));
 					stream.write<uint32>(pack<VertexInputAttributeFormat::R10G10B10A2_UNORM, uint32>(vertex.tangent));
-					stream.write<uint32>(pack<VertexInputAttributeFormat::R16G16_UNORM, uint32>(vertex.textureCoordinate));
+					stream.write<uint32>(pack<VertexInputAttributeFormat::R16G16_FLOAT, uint32>(vertex.textureCoordinate));
 				}
 
 				for (const uint32 index : scene.staticGeometry.bakedIndices) {

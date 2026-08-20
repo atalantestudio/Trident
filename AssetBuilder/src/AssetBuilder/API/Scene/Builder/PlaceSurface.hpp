@@ -59,10 +59,11 @@ namespace Trident {
 			// TODO(lyah/scalar)
 			vertex.position = svec3<float32>(multiplyTransform(vec3<float32>(surfaceVertex.position), worldTransform));
 			vertex.normal = svec3<float32>(normalized(vec3<float32>(surfaceVertex.normal) * inverseOrientation));
-			vertex.tangent = {tangent.x, tangent.y, tangent.z, surfaceVertex.tangent[3]};
 
-			// TODO(asset-builder/lightmapper)
-			// vertex.textureCoordinate = svec2<float32>(multiplyTransform(vec2<float32>(surfaceVertex.textureCoordinate), textureTransform));
+			const svec2<float32> textureCoordinate = svec2<float32>(multiplyTransform(vec2<float32>(surfaceVertex.textureCoordinate), textureTransform));
+			const uint32 w = pack<VertexInputAttributeFormat::R16G16_FLOAT, uint32>(textureCoordinate);
+
+			vertex.tangent = {tangent.x, tangent.y, tangent.z, *pointer_cast<const float32*>(&w)};
 			vertex.textureCoordinate = surfaceVertex.textureCoordinate;
 
 			maxCoordinate.x = max(maxCoordinate.x, surfaceVertex.textureCoordinate.x);

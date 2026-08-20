@@ -11,7 +11,7 @@ namespace Trident {
 		vertexInputBindings[0].registerAttribute<svec3<float32>>(VertexInputAttributeFormat::R32G32B32_FLOAT);
 		vertexInputBindings[0].registerAttribute<uint32>(VertexInputAttributeFormat::R10G10B10A2_UNORM);
 		vertexInputBindings[0].registerAttribute<uint32>(VertexInputAttributeFormat::R10G10B10A2_UNORM);
-		vertexInputBindings[0].registerAttribute<uint32>(VertexInputAttributeFormat::R16G16_UNORM);
+		vertexInputBindings[0].registerAttribute<uint32>(VertexInputAttributeFormat::R16G16_FLOAT);
 
 		vertexInputBindings[1] = VertexInputBinding(InputRate::VERTEX);
 		vertexInputBindings[1].registerAttribute<uint32>(VertexInputAttributeFormat::R16G16_UNORM);
