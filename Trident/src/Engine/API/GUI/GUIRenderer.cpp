@@ -349,14 +349,14 @@ namespace Trident {
 			{
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::VERTEX,
+				.stageFlags = ShaderStage::VERTEX,
 			},
 
 			// User images
 			{
 				.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
 				.descriptorCount = MAX_USER_IMAGE_COUNT,
-				.shaderStages = ShaderStage::FRAGMENT,
+				.stageFlags = ShaderStage::FRAGMENT,
 			},
 		};
 

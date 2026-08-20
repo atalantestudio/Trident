@@ -32,7 +32,7 @@ namespace Trident {
 		UINT unorderedAccessViewShaderRegister = 0;
 		UINT samplerShaderRegister = 0;
 
-		ShaderStage samplerShaderStages{};
+		ShaderStage samplerStageFlags{};
 
 		for (const ref<DescriptorSetLayout>& descriptorSetLayout : descriptor.descriptorSetLayouts) {
 			if (descriptorSetLayout->bindings.count() == 0) {
@@ -79,7 +79,7 @@ namespace Trident {
 
 			const UINT descriptorRangeStart = descriptorRangeOffset;
 
-			ShaderStage viewShaderStages{};
+			ShaderStage viewStageFlags{};
 
 			for (const DescriptorSetLayoutBinding& binding : descriptorSetLayout->bindings) {
 				switch (binding.descriptorType) {
@@ -105,7 +105,7 @@ namespace Trident {
 						samplerOffset += 1;
 						samplerDescriptorRangeOffset += 1;
 						samplerShaderRegister += binding.descriptorCount;
-						samplerShaderStages |= binding.shaderStages;
+						samplerStageFlags |= binding.stageFlags;
 
 						break;
 					}
@@ -167,7 +167,7 @@ namespace Trident {
 						descriptorRange.NumDescriptors = binding.descriptorCount;
 						descriptorRange.BaseShaderRegister = unorderedAccessViewShaderRegister;
 
-						if (binding.shaderStages & ShaderStage::FRAGMENT) {
+						if (binding.stageFlags & ShaderStage::FRAGMENT) {
 							// TODO(graphics/dx12/root-signature/fragment-uav): Handle multiple output registers
 							ENGINE_WARNING("UAV registers live in the same name space as outputs, so they must be bound to at least 'u1'. The BaseShaderRegister has been incremented.");
 
@@ -202,7 +202,7 @@ namespace Trident {
 					}
 				}
 
-				viewShaderStages |= binding.shaderStages;
+				viewStageFlags |= binding.stageFlags;
 
 				descriptorRangeOffset += 1;
 			}
@@ -211,7 +211,7 @@ namespace Trident {
 			rootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 			rootParameter.DescriptorTable.NumDescriptorRanges = descriptorRangeOffset - descriptorRangeStart;
 			rootParameter.DescriptorTable.pDescriptorRanges = &descriptorRanges[descriptorRangeStart];
-			rootParameter.ShaderVisibility = getShaderVisibility(viewShaderStages);
+			rootParameter.ShaderVisibility = getShaderVisibility(viewStageFlags);
 
 			rootParameterOffset += 1;
 			descriptorSetLayoutIndex += 1;
@@ -222,7 +222,7 @@ namespace Trident {
 			samplerRootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 			samplerRootParameter.DescriptorTable.NumDescriptorRanges = samplerDescriptorRangeCount;
 			samplerRootParameter.DescriptorTable.pDescriptorRanges = &descriptorRanges[viewDescriptorRangeCount];
-			samplerRootParameter.ShaderVisibility = getShaderVisibility(samplerShaderStages);
+			samplerRootParameter.ShaderVisibility = getShaderVisibility(samplerStageFlags);
 		}
 
 		D3D12_VERSIONED_ROOT_SIGNATURE_DESC versionedRootSignatureDescriptor{};

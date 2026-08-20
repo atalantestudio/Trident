@@ -18,7 +18,7 @@ namespace Trident {
 				{
 					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
 					.descriptorCount = 1,
-					.shaderStages = ShaderStage::FRAGMENT,
+					.stageFlags = ShaderStage::FRAGMENT,
 				},
 			},
 		};

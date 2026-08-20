@@ -16,7 +16,7 @@ namespace Trident {
 		const DescriptorSetLayoutBinding materialOffsetBinding = {
 			.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 			.descriptorCount = 1,
-			.shaderStages = ShaderStage::COMPUTE,
+			.stageFlags = ShaderStage::COMPUTE,
 		};
 
 		AssetLibrary* assetLibrary = getLayer()->getApplication()->getAssetLibrary();
@@ -57,7 +57,7 @@ namespace Trident {
 				DescriptorSetLayoutBinding& descriptorSetLayoutBinding = descriptorSetLayoutBindings[descriptorSetLayoutBindingIndex];
 				descriptorSetLayoutBinding.descriptorType = materialShaderModuleAsset->descriptorSetLayoutBindings[descriptorSetLayoutBindingIndex];
 				descriptorSetLayoutBinding.descriptorCount = 1;
-				descriptorSetLayoutBinding.shaderStages = materialShaderModuleAsset->stage;
+				descriptorSetLayoutBinding.stageFlags = materialShaderModuleAsset->stage;
 
 				descriptorSetLayoutBindingIndex += 1;
 			} */

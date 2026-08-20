@@ -142,7 +142,7 @@ namespace Trident {
 				while (descriptorSetLayoutBindingIndex < bindings.count()) {
 					const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = bindings[descriptorSetLayoutBindingIndex];
 
-					if (descriptorSetLayoutBinding.descriptorType == DescriptorType::INPUT_ATTACHMENT && descriptorSetLayoutBinding.descriptorCount > 0 && !(descriptorSetLayoutBinding.shaderStages & ShaderStage::FRAGMENT)) {
+					if (descriptorSetLayoutBinding.descriptorType == DescriptorType::INPUT_ATTACHMENT && descriptorSetLayoutBinding.descriptorCount > 0 && !(descriptorSetLayoutBinding.stageFlags & ShaderStage::FRAGMENT)) {
 						VALIDATION_ERROR("If descriptorType is INPUT_ATTACHMENT and descriptorCount is not 0, then stageFlags must be FRAGMENT.", descriptorSetLayoutBindingIndex);
 					}
 

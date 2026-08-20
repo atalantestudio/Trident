@@ -331,12 +331,15 @@ namespace Trident {
 			}
 
 			void createTextureArrayImageDescriptorSetLayout() {
-				DescriptorSetLayoutBinding textureArrayBinding{};
-				textureArrayBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-				textureArrayBinding.descriptorCount = 1;
-				textureArrayBinding.shaderStages = ShaderStage::FRAGMENT;
+				const DescriptorSetLayoutBinding bindings[] = {
+					{
+						.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+						.descriptorCount = 1,
+						.stageFlags = ShaderStage::FRAGMENT,
+					},
+				};
 
-				textureArrayDescriptorSetLayout = createDescriptorSetLayout({textureArrayBinding});
+				textureArrayDescriptorSetLayout = createDescriptorSetLayout(bindings);
 			}
 
 			void allocateTextureArrayImageDescriptorSet() {

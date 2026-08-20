@@ -173,7 +173,7 @@ namespace Trident {
 					{
 						.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
 						.descriptorCount = 1,
-						.shaderStages = ShaderStage::FRAGMENT,
+						.stageFlags = ShaderStage::FRAGMENT,
 					},
 				};
 
@@ -327,7 +327,7 @@ namespace Trident {
 				const DescriptorSetLayoutBinding binding = {
 					.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE,
 					.descriptorCount = 1,
-					.shaderStages = ShaderStage::COMPUTE,
+					.stageFlags = ShaderStage::COMPUTE,
 				};
 
 				const ref<DescriptorSetLayout> descriptorSetLayout = createDescriptorSetLayout(binding);

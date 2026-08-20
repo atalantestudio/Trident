@@ -12,56 +12,56 @@ namespace Trident {
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
+				.stageFlags = ShaderStage::COMPUTE,
 			},
 
 			// Vertex component
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
+				.stageFlags = ShaderStage::COMPUTE,
 			},
 
 			// Index
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
+				.stageFlags = ShaderStage::COMPUTE,
 			},
 
 			// G-Buffer position
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
+				.stageFlags = ShaderStage::COMPUTE,
 			},
 
 			// G-Buffer smooth position
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
+				.stageFlags = ShaderStage::COMPUTE,
 			},
 
 			// G-Buffer triangle normal
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
+				.stageFlags = ShaderStage::COMPUTE,
 			},
 
 			// G-Buffer vertex normal
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
+				.stageFlags = ShaderStage::COMPUTE,
 			},
 
 			// Intermediate lightmap atlas
 			{
 				.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
+				.stageFlags = ShaderStage::COMPUTE,
 			},
 		};
 

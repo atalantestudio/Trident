@@ -511,21 +511,21 @@ namespace Trident {
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
+				.stageFlags = ShaderStage::COMPUTE,
 			},
 
 			// Glyph
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
+				.stageFlags = ShaderStage::COMPUTE,
 			},
 
 			// Read-write glyph
 			{
 				.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
+				.stageFlags = ShaderStage::COMPUTE,
 			},
 		};
 
@@ -538,28 +538,28 @@ namespace Trident {
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
+				.stageFlags = ShaderStage::COMPUTE,
 			},
 
 			// Glyph map
 			{
 				.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
+				.stageFlags = ShaderStage::COMPUTE,
 			},
 
 			// Font
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
+				.stageFlags = ShaderStage::COMPUTE,
 			},
 
 			// Glyph offset
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
+				.stageFlags = ShaderStage::COMPUTE,
 			},
 		};
 

@@ -18,14 +18,14 @@ namespace Trident {
 					{
 						.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 						.descriptorCount = 1,
-						.shaderStages = ShaderStage::COMPUTE,
+						.stageFlags = ShaderStage::COMPUTE,
 					},
 
 					// Element start
 					{
 						.descriptorType = DescriptorType::READ_WRITE_STORAGE_BUFFER,
 						.descriptorCount = 1,
-						.shaderStages = ShaderStage::COMPUTE,
+						.stageFlags = ShaderStage::COMPUTE,
 					},
 				};
 

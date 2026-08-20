@@ -327,14 +327,14 @@ namespace Trident {
 			{
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::VERTEX | ShaderStage::FRAGMENT,
+				.stageFlags = ShaderStage::VERTEX | ShaderStage::FRAGMENT,
 			},
 
 			// View
 			{
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::FRAGMENT,
+				.stageFlags = ShaderStage::FRAGMENT,
 			},
 		};
 
@@ -342,12 +342,15 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::createPlaceholderDescriptorSetLayout() {
-		DescriptorSetLayoutBinding placeholderBinding{};
-		placeholderBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-		placeholderBinding.descriptorCount = 1;
-		placeholderBinding.shaderStages = ShaderStage::VERTEX | ShaderStage::FRAGMENT;
+		const DescriptorSetLayoutBinding bindings[] = {
+			{
+				.descriptorType = DescriptorType::UNIFORM_BUFFER,
+				.descriptorCount = 1,
+				.stageFlags = ShaderStage::VERTEX | ShaderStage::FRAGMENT,
+			},
+		};
 
-		placeholderDescriptorSetLayout = createDescriptorSetLayout(placeholderBinding);
+		placeholderDescriptorSetLayout = createDescriptorSetLayout(bindings);
 	}
 
 	void Physics2DRenderer::createCameraViewPipelineLayout() {

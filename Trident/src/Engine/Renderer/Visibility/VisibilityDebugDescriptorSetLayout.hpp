@@ -10,70 +10,70 @@ namespace Trident {
 				{
 					.descriptorType = DescriptorType::UNIFORM_BUFFER,
 					.descriptorCount = 1,
-					.shaderStages = ShaderStage::COMPUTE,
+					.stageFlags = ShaderStage::COMPUTE,
 				},
 
 				// Visibility
 				{
 					.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE,
 					.descriptorCount = 1,
-					.shaderStages = ShaderStage::COMPUTE,
+					.stageFlags = ShaderStage::COMPUTE,
 				},
 
 				// Depth stencil
 				{
 					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
 					.descriptorCount = 1,
-					.shaderStages = ShaderStage::COMPUTE,
+					.stageFlags = ShaderStage::COMPUTE,
 				},
 
 				// Vertex position component
 				{
 					.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 					.descriptorCount = 1,
-					.shaderStages = ShaderStage::COMPUTE,
+					.stageFlags = ShaderStage::COMPUTE,
 				},
 
 				// Vertex normal component
 				{
 					.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 					.descriptorCount = 1,
-					.shaderStages = ShaderStage::COMPUTE,
+					.stageFlags = ShaderStage::COMPUTE,
 				},
 
 				// Vertex texture coordinate
 				{
 					.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 					.descriptorCount = 1,
-					.shaderStages = ShaderStage::COMPUTE,
+					.stageFlags = ShaderStage::COMPUTE,
 				},
 
 				// Vertex position index
 				{
 					.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 					.descriptorCount = 1,
-					.shaderStages = ShaderStage::COMPUTE,
+					.stageFlags = ShaderStage::COMPUTE,
 				},
 
 				// Vertex normal index
 				{
 					.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 					.descriptorCount = 1,
-					.shaderStages = ShaderStage::COMPUTE,
+					.stageFlags = ShaderStage::COMPUTE,
 				},
 
 				// Vertex texture coordinate index
 				{
 					.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 					.descriptorCount = 1,
-					.shaderStages = ShaderStage::COMPUTE,
+					.stageFlags = ShaderStage::COMPUTE,
 				},
 
 				// Output image
 				{
 					.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE,
 					.descriptorCount = 1,
-					.shaderStages = ShaderStage::COMPUTE,
+					.stageFlags = ShaderStage::COMPUTE,
 				},
 			});
 		}

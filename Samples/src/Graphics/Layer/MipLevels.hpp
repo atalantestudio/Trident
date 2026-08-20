@@ -272,28 +272,28 @@ namespace Trident {
 					{
 						.descriptorType = DescriptorType::UNIFORM_BUFFER,
 						.descriptorCount = 1,
-						.shaderStages = ShaderStage::COMPUTE,
+						.stageFlags = ShaderStage::COMPUTE,
 					},
 
 					// Source
 					{
 						.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE,
 						.descriptorCount = 1,
-						.shaderStages = ShaderStage::COMPUTE,
+						.stageFlags = ShaderStage::COMPUTE,
 					},
 
 					// Destination
 					{
 						.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE,
 						.descriptorCount = 12,
-						.shaderStages = ShaderStage::COMPUTE,
+						.stageFlags = ShaderStage::COMPUTE,
 					},
 
 					// Atomic counter
 					{
 						.descriptorType = DescriptorType::READ_WRITE_STORAGE_BUFFER,
 						.descriptorCount = 1,
-						.shaderStages = ShaderStage::COMPUTE,
+						.stageFlags = ShaderStage::COMPUTE,
 					},
 				};
 
@@ -504,14 +504,14 @@ namespace Trident {
 					{
 						.descriptorType = DescriptorType::UNIFORM_BUFFER,
 						.descriptorCount = 1,
-						.shaderStages = ShaderStage::FRAGMENT,
+						.stageFlags = ShaderStage::FRAGMENT,
 					},
 
 					// Image
 					{
 						.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
 						.descriptorCount = 1,
-						.shaderStages = ShaderStage::FRAGMENT,
+						.stageFlags = ShaderStage::FRAGMENT,
 					},
 				};
 

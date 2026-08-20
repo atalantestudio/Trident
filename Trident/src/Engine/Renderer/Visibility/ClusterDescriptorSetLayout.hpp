@@ -12,21 +12,21 @@ namespace Trident {
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::VERTEX,
+				.stageFlags = ShaderStage::VERTEX,
 			},
 
 			// Vertex position index
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::VERTEX,
+				.stageFlags = ShaderStage::VERTEX,
 			},
 
 			// Cluster
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
-				.shaderStages = (
+				.stageFlags = (
 					ShaderStage::VERTEX | ShaderStage::FRAGMENT
 					#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
 						| ShaderStage::COMPUTE

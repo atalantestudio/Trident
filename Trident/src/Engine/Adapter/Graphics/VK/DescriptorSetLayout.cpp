@@ -37,7 +37,7 @@ namespace Trident {
 			vkDescriptorSetLayoutBinding.binding = bindingIndex;
 			vkDescriptorSetLayoutBinding.descriptorType = getDescriptorType(binding.descriptorType);
 			vkDescriptorSetLayoutBinding.descriptorCount = binding.descriptorCount;
-			vkDescriptorSetLayoutBinding.stageFlags = getShaderStageFlagBits(binding.shaderStages);
+			vkDescriptorSetLayoutBinding.stageFlags = getShaderStageFlagBits(binding.stageFlags);
 			vkDescriptorSetLayoutBinding.pImmutableSamplers = nullptr;
 
 			bindingIndex += 1;

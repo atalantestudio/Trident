@@ -12,14 +12,14 @@ namespace Trident {
 			{
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::VERTEX | ShaderStage::FRAGMENT,
+				.stageFlags = ShaderStage::VERTEX | ShaderStage::FRAGMENT,
 			},
 
 			// Point light
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::FRAGMENT,
+				.stageFlags = ShaderStage::FRAGMENT,
 			},
 		};
 

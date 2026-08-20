@@ -36,7 +36,7 @@ namespace Trident {
 		for (DescriptorSetLayoutBinding& binding : asset.bindings) {
 			binding.descriptorType = stream.read<DescriptorType>();
 			binding.descriptorCount = stream.read<uint32>();
-			binding.shaderStages = stream.read<ShaderStage>();
+			binding.stageFlags = stream.read<ShaderStage>();
 		}
 
 		uint32 bindingOffset = 0;

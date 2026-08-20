@@ -11,9 +11,7 @@ namespace Trident {
 	struct DescriptorSetLayoutBinding {
 		DescriptorType descriptorType;
 		uint32 descriptorCount;
-
-		// TODO(graphics/descriptor-set/layout/binding): Rename to "stageFlags".
-		ShaderStage shaderStages;
+		ShaderStage stageFlags;
 	};
 
 	class DescriptorSetLayout {

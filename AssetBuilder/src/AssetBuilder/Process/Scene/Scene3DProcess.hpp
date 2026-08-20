@@ -146,7 +146,7 @@ namespace Trident {
 				for (const DescriptorSetLayoutBinding& binding : materialShader.asset.bindings) {
 					stream.write<DescriptorType>(binding.descriptorType);
 					stream.write<uint32>(binding.descriptorCount);
-					stream.write<ShaderStage>(binding.shaderStages);
+					stream.write<ShaderStage>(binding.stageFlags);
 				}
 
 				for (const range<uint32, uint32> bindingRange : materialShader.asset.descriptorSetBindingRanges) {

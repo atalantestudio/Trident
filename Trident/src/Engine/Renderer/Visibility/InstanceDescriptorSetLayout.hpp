@@ -12,7 +12,7 @@ namespace Trident {
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
-				.shaderStages = (
+				.stageFlags = (
 					ShaderStage::VERTEX | ShaderStage::FRAGMENT
 					#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
 						| ShaderStage::COMPUTE
@@ -24,7 +24,7 @@ namespace Trident {
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
-				.shaderStages = (
+				.stageFlags = (
 					ShaderStage::VERTEX | ShaderStage::FRAGMENT
 					#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
 						| ShaderStage::COMPUTE

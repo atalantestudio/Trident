@@ -12,14 +12,14 @@ namespace Trident {
 			{
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::VERTEX | ShaderStage::FRAGMENT,
+				.stageFlags = ShaderStage::VERTEX | ShaderStage::FRAGMENT,
 			},
 
 			// Lightmap atlas
 			{
 				.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::FRAGMENT,
+				.stageFlags = ShaderStage::FRAGMENT,
 			},
 		};
 

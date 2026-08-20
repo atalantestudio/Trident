@@ -12,7 +12,7 @@ namespace Trident {
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::FRAGMENT,
+				.stageFlags = ShaderStage::FRAGMENT,
 			},
 		});
 	}

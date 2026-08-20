@@ -12,14 +12,14 @@ namespace Trident {
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::VERTEX,
+				.stageFlags = ShaderStage::VERTEX,
 			},
 
 			// Index
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::VERTEX,
+				.stageFlags = ShaderStage::VERTEX,
 			},
 		};
 

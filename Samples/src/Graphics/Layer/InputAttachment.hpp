@@ -247,7 +247,7 @@ namespace Trident {
 					{
 						.descriptorType = DescriptorType::INPUT_ATTACHMENT,
 						.descriptorCount = 1,
-						.shaderStages = ShaderStage::FRAGMENT,
+						.stageFlags = ShaderStage::FRAGMENT,
 					},
 				};
 

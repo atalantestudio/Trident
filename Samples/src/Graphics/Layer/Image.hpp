@@ -239,7 +239,7 @@ namespace Trident {
 				const DescriptorSetLayoutBinding binding = {
 					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
 					.descriptorCount = 1,
-					.shaderStages = ShaderStage::FRAGMENT,
+					.stageFlags = ShaderStage::FRAGMENT,
 				};
 
 				return Renderer::createDescriptorSetLayout(binding);

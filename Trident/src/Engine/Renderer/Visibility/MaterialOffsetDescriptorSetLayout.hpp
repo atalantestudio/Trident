@@ -12,21 +12,21 @@ namespace Trident {
 			{
 				.descriptorType = DescriptorType::READ_WRITE_STORAGE_BUFFER,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
+				.stageFlags = ShaderStage::COMPUTE,
 			},
 
 			// Material offset
 			{
 				.descriptorType = DescriptorType::READ_WRITE_STORAGE_BUFFER,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
+				.stageFlags = ShaderStage::COMPUTE,
 			},
 
 			// Material indirect
 			{
 				.descriptorType = DescriptorType::READ_WRITE_STORAGE_BUFFER,
 				.descriptorCount = 1,
-				.shaderStages = ShaderStage::COMPUTE,
+				.stageFlags = ShaderStage::COMPUTE,
 			},
 		};
 
