@@ -29,18 +29,18 @@ namespace Trident {
 				createFrameObjects();
 
 				staticGeometryDescriptorSetLayout = createStaticGeometryDescriptorSetLayout();
-				forwardDescriptorSetLayout = createForwardDescriptorSetLayout();
+				dynamicDescriptorSetLayout = createDynamicDescriptorSetLayout();
 
 				const ref<DescriptorSetLayout> descriptorSetLayouts[] = {
 					staticGeometryDescriptorSetLayout,
-					forwardDescriptorSetLayout,
+					dynamicDescriptorSetLayout,
 				};
 
 				// TODO(base/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
 				sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(descriptorSetLayouts);
 
 				staticGeometryDescriptorSet = descriptorSets[0];
-				forwardDescriptorSet = descriptorSets[1];
+				dynamicDescriptorSet = descriptorSets[1];
 
 				// TODO(forward): Restore debug modes.
 				/* debugHullWireframePipelineLayout = createDebugHullWireframePipelineLayout();
@@ -292,7 +292,7 @@ namespace Trident {
 			void createFramebuffers();
 
 			ref<DescriptorSetLayout> createStaticGeometryDescriptorSetLayout() const;
-			ref<DescriptorSetLayout> createForwardDescriptorSetLayout() const;
+			ref<DescriptorSetLayout> createDynamicDescriptorSetLayout() const;
 
 			ref<PipelineLayout> createDebugHullWireframePipelineLayout() const;
 			ref<PipelineLayout> createDebugContactManifoldPipelineLayout() const;
@@ -352,10 +352,10 @@ namespace Trident {
 			sequence<ref<Framebuffer>> framebuffers;
 
 			ref<DescriptorSetLayout> staticGeometryDescriptorSetLayout;
-			ref<DescriptorSetLayout> forwardDescriptorSetLayout;
+			ref<DescriptorSetLayout> dynamicDescriptorSetLayout;
 
 			ref<DescriptorSet> staticGeometryDescriptorSet;
-			ref<DescriptorSet> forwardDescriptorSet;
+			ref<DescriptorSet> dynamicDescriptorSet;
 			sequence<ref<DescriptorSet>> materialDescriptorSets;
 
 			sequence<ref<PipelineLayout>> materialPipelineLayouts;

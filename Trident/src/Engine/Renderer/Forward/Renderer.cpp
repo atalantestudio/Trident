@@ -11,8 +11,8 @@
 #include "Engine/Renderer/Forward/DebugHullWireframePipeline.hpp"
 #include "Engine/Renderer/Forward/DebugHullWireframePipelineLayout.hpp"
 #include "Engine/Renderer/Forward/DepthStencilImage.hpp"
+#include "Engine/Renderer/Forward/DynamicDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Forward/DynamicPipeline.hpp"
-#include "Engine/Renderer/Forward/ForwardDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Forward/Framebuffers.hpp"
 #include "Engine/Renderer/Forward/GeometryDescriptorSets.hpp"
 #include "Engine/Renderer/Forward/IndexBuffer.hpp"
@@ -91,7 +91,7 @@ namespace Trident {
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
 				commandEncoder->bindVertexBuffer(1, instanceBuffer, 0);
 				commandEncoder->bindIndexBuffer<uint32>(indexBuffer, 0);
-				commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialShaderIndex], 0, forwardDescriptorSet);
+				commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialShaderIndex], 0, dynamicDescriptorSet);
 
 				uint32 materialIndex = 0;
 
@@ -121,7 +121,7 @@ namespace Trident {
 		if (visualizationMode & VisualizationMode::HULL_WIREFRAMES && debugHullWireframeBuffer != nullptr) {
 			// TODO(forward): Restore debug modes.
 			/* commandEncoder->bindGraphicsPipeline(debugHullWireframePipeline);
-			commandEncoder->bindDescriptorSets(debugHullWireframePipelineLayout, 0, forwardDescriptorSet);
+			commandEncoder->bindDescriptorSets(debugHullWireframePipelineLayout, 0, dynamicDescriptorSet);
 			commandEncoder->bindVertexBuffer(0, instanceBuffer, 0);
 			commandEncoder->bindIndexBuffer<uint16>(debugHullWireframeBuffer, 0);
 
@@ -167,7 +167,7 @@ namespace Trident {
 		if (visualizationMode & VisualizationMode::CONTACT_MANIFOLDS) {
 			// TODO(forward): Restore debug modes.
 			/* commandEncoder->bindGraphicsPipeline(debugContactManifoldPipeline);
-			commandEncoder->bindDescriptorSets(debugContactManifoldPipelineLayout, 0, forwardDescriptorSet);
+			commandEncoder->bindDescriptorSets(debugContactManifoldPipelineLayout, 0, dynamicDescriptorSet);
 			commandEncoder->bindVertexBuffer(0, debugContactManifoldBuffer, 0);
 			commandEncoder->draw(contactCount, 1, 0, 0); */
 		}

@@ -36,7 +36,7 @@ namespace Trident {
 						.name = "Static geometry vertex",
 					#endif
 				},
-				"Forward/StaticGeometry/StaticGeometry.vert"
+				"Forward/StaticGeometry.vert"
 			),
 			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
 			.polygonMode = PolygonMode::FILL,

@@ -24,10 +24,10 @@ namespace Trident {
 					.stage = ShaderStage::VERTEX,
 					.entryPoint = "main",
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Forward vertex",
+						.name = "Dynamic geometry vertex",
 					#endif
 				},
-				"Forward/Forward.vert"
+				"Forward/DynamicGeometry.vert"
 			),
 			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
 			.polygonMode = PolygonMode::FILL,

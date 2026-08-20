@@ -140,7 +140,7 @@ namespace Trident {
 		// Create dynamic material objects.
 		{
 			PipelineLayoutDescriptor materialPipelineLayoutDescriptor = {
-				.descriptorSetLayouts = {forwardDescriptorSetLayout, nullptr},
+				.descriptorSetLayouts = {dynamicDescriptorSetLayout, nullptr},
 			};
 
 			VertexInputBinding vertexInputBindings[2] = {

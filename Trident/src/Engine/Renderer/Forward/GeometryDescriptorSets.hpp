@@ -22,12 +22,12 @@ namespace Trident {
 
 		const WriteDescriptorSet writeDescriptorSets[4] = {
 			{
-				.descriptorSet = forwardDescriptorSet,
+				.descriptorSet = dynamicDescriptorSet,
 				.bindingIndex = 0,
 				.descriptorBufferViews = descriptorBufferViews[0],
 			},
 			{
-				.descriptorSet = forwardDescriptorSet,
+				.descriptorSet = dynamicDescriptorSet,
 				.bindingIndex = 1,
 				.descriptorBufferViews = descriptorBufferViews[1],
 			},
