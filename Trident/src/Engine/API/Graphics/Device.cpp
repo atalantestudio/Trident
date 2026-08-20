@@ -34,6 +34,10 @@ namespace Trident {
 				VALIDATION_ERROR("descriptor.state must be a valid ShaderStage flag combination.");
 			}
 
+			if (countSetBits(static_cast<uint32>(descriptor.stage)) != 1) {
+				VALIDATION_ERROR("descriptor.stage must not be a combination of different shader stages.");
+			}
+
 			if (descriptor.entryPoint.count() == 0) {
 				VALIDATION_ERROR("descriptor.entryPoint must not be empty.");
 			}
