@@ -91,6 +91,7 @@ namespace Trident {
 
 				#if OPENGL_VERSION >= OPENGL_VERSION_4_3
 					switch (_attribute.type) {
+						case GL_HALF_FLOAT:
 						case GL_FLOAT: {
 							glVertexAttribFormat(attribindex, _attribute.size, _attribute.type, _attribute.normalized, relativeoffset);
 
