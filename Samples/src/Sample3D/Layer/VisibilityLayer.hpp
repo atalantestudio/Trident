@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Camera/Controller/FlyCameraController.hpp"
+#include "Engine/API/Camera/Controller/NoClipCameraController.hpp"
 #include "Engine/Layer/Layer.hpp"
 #include "Engine/Renderer/Visibility/Renderer.hpp"
 
@@ -136,6 +136,6 @@ namespace Trident {
 			VisibilityRenderer renderer;
 			Scene3D* scene;
 			ClusteredScene clusteredScene;
-			FlyCameraController cameraController;
+			NoClipCameraController cameraController;
 	};
 }

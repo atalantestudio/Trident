@@ -1,18 +1,18 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
 
-#include "Engine/API/Camera/Controller/CameraController.hpp"
 #include "Engine/API/Camera/3D/PerspectiveCamera3D.hpp"
+#include "Engine/API/Camera/Controller/CameraController.hpp"
 
 namespace Trident {
-	class FlyCameraController : public CameraController<PerspectiveCamera3D> {
+	class NoClipCameraController : public CameraController<PerspectiveCamera3D> {
 		private:
 			static constexpr float32 ROTATION_SPEED = 5.0f;
 
 		public:
-			FlyCameraController() {
+			explicit NoClipCameraController() {
 				camera.position = {0.0_m, 0.0_m, -0.4_m};
 				camera.fieldOfView = radians(75.0_deg);
 				camera.nearPlane = 0.01_m;
@@ -25,7 +25,6 @@ namespace Trident {
 			void update(float32 deltaTime) override {
 				// camera.updatePosition(linearMotionOffset * deltaTime);
 				camera.updateOrientation(svec3<float32>(angularMotionOffset /* * deltaTime */));
-
 				camera.updateView();
 				camera.updateProjectionView();
 
@@ -33,13 +32,13 @@ namespace Trident {
 				angularMotionOffset = {0.0_rad, 0.0_rad, 0.0_rad};
 			}
 
-			/* void addLinearMotion(const vec3<float32>& motion) {
+			/* void addLinearMotion(vec3<float32> motion) {
 				linearMotionOffset += motion;
 			} */
 
 			// NOTE: `motion` must be given in radians.
-			void accumulateAngularMotion(const vec3<float32>& motion) {
-				angularMotionOffset += motion;// * ROTATION_SPEED;
+			void accumulateAngularMotion(vec3<float32> motion) {
+				angularMotionOffset += motion; // * ROTATION_SPEED;
 			}
 
 		private:

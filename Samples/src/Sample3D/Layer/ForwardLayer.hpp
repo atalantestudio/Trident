@@ -10,7 +10,7 @@
 #if !defined(FORWARD_USE_NOCLIP_CAMERA)
 	#include "Engine/API/Camera/Controller/PlayerCameraController.hpp"
 #else
-	#include "Engine/API/Camera/Controller/FlyCameraController.hpp"
+	#include "Engine/API/Camera/Controller/NoClipCameraController.hpp"
 #endif
 
 #include "Engine/API/Event/EventDispatcher.hpp"
@@ -307,7 +307,7 @@ namespace Trident {
 			#if !defined(FORWARD_USE_NOCLIP_CAMERA)
 				PlayerCameraController cameraController;
 			#else
-				FlyCameraController cameraController;
+				NoClipCameraController cameraController;
 			#endif
 
 			vec3<float32> desiredVelocity = {0.0f, 0.0f, 0.0f};

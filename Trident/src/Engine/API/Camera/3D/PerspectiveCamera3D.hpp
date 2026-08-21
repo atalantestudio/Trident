@@ -14,7 +14,7 @@ namespace Trident {
 			}
 
 			// NOTE: This requires recomputing the view and projection-view matrices.
-			void setOrientation(const quat<float32>& orientation) {
+			void setOrientation(quat<float32> orientation) {
 				this->orientation = normalized(orientation);
 			}
 
@@ -30,7 +30,7 @@ namespace Trident {
 				return FORWARD * orientation;
 			}
 
-			/* void updatePosition(const vec3<float32>& offset) {
+			/* void updatePosition(vec3<float32> offset) {
 				const vec3<float32> right = getRight() * offset[0];
 				const vec3<float32> up = getUp() * offset[1];
 				const vec3<float32> forward = getForward() * offset[2];
