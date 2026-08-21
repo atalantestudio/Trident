@@ -81,10 +81,10 @@ namespace Trident {
 
 			static BuildStaticGeometry3D createLeftWallGeometry() {
 				static constexpr svec3<float32> positions[] = {
-					{ 0.0f,  548.8f,  559.2f},
-					{ 0.0f,  548.8f,  0.0f  },
-					{ 0.0f,  0.0f,    559.2f},
-					{ 0.0f,  0.0f,    0.0f  },
+					{-556.0f,  548.8f,  0.0f  },
+					{-556.0f,  548.8f,  559.2f},
+					{-552.8f,  0.0f,    0.0f  },
+					{-549.6f,  0.0f,    559.2f},
 				};
 
 				return createGeometry(positions);
@@ -92,10 +92,10 @@ namespace Trident {
 
 			static BuildStaticGeometry3D createRightWallGeometry() {
 				static constexpr svec3<float32> positions[] = {
-					{-556.0f,  548.8f,  0.0f  },
-					{-556.0f,  548.8f,  559.2f},
-					{-552.8f,  0.0f,    0.0f  },
-					{-549.6f,  0.0f,    559.2f},
+					{ 0.0f,  548.8f,  559.2f},
+					{ 0.0f,  548.8f,  0.0f  },
+					{ 0.0f,  0.0f,    559.2f},
+					{ 0.0f,  0.0f,    0.0f  },
 				};
 
 				return createGeometry(positions);
