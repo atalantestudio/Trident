@@ -212,7 +212,7 @@ namespace Trident {
 				registerLayer<TriangleSampleLayer>();
 			}
 			else if (SampleNameProperty == "TriangleIndexed") {
-				registerLayer<SampleTriangleIndexedLayer>();
+				registerLayer<TriangleIndexedSampleLayer>();
 			}
 			else if (SampleNameProperty == "TriangleIndexedIndirect") {
 				registerLayer<SampleTriangleIndexedIndirectLayer>();

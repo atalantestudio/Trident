@@ -1,4 +1,4 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
@@ -8,7 +8,7 @@
 #include "../GraphicsLayer.hpp"
 
 namespace Trident {
-	class SampleTriangleIndexedRenderer : public Renderer {
+	class TriangleIndexedSampleRenderer : public Renderer {
 		private:
 			struct Vertex {
 				svec2<float32> position;
@@ -16,10 +16,18 @@ namespace Trident {
 			};
 
 		public:
+			explicit TriangleIndexedSampleRenderer() {}
+
+			~TriangleIndexedSampleRenderer() {
+				vertexBuffer.~ref();
+				indexBuffer.~ref();
+				stagingBuffer.~ref();
+			}
+
 			void build() override {
 				renderPass = createRenderPass();
-
-				trianglePipeline = createTrianglePipeline();
+				pipelineLayout = createPipelineLayout();
+				pipeline = createPipeline();
 				vertexBuffer = createVertexBuffer();
 				indexBuffer = createIndexBuffer();
 				stagingBuffer = createStagingBuffer();
@@ -28,24 +36,22 @@ namespace Trident {
 			}
 
 			StaticMemoryDescriptor getStaticMemoryDescriptor() const override {
-				const ref<Buffer> buffers[] = {vertexBuffer, indexBuffer, stagingBuffer};
-
 				return {
-					.buffers = buffers,
+					.buffers = staticBuffers,
 					.images = {},
 				};
 			}
 
 			void encodeOneTimeCommands() const override {
-				const BufferView<Vertex> vertexStagingBufferView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
-				const BufferView<uint16> indexStagingBufferView = stagingBuffer->createView<uint16>(vertexBuffer->getSize(), indexBuffer->getSize());
+				const BufferView<Vertex> vertexView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
+				const BufferView<uint16> indexView = stagingBuffer->createView<uint16>(vertexView.getOffset() + vertexView.getSize(), indexBuffer->getSize());
 
-				Vertex* vertexMappedRange = vertexStagingBufferView.map();
+				Vertex* vertexMappedRange = vertexView.map();
 				vertexMappedRange[0] = {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}};
 				vertexMappedRange[1] = {{ 0.0f,  0.5f}, {0.0f, 1.0f, 0.0f}};
 				vertexMappedRange[2] = {{ 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}};
 
-				uint16* indexMappedRange = indexStagingBufferView.map();
+				uint16* indexMappedRange = indexView.map();
 				indexMappedRange[0] = 0;
 				indexMappedRange[1] = 1;
 				indexMappedRange[2] = 2;
@@ -56,27 +62,27 @@ namespace Trident {
 				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
 					.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Copy buffers",
+						.name = "One-time commands",
 					#endif
 				});
 
 				commandEncoder->begin();
 
-				BufferCopyRegion bufferCopyRegion = {
-					.sourceOffset = vertexStagingBufferView.getOffset(),
-					.destinationOffset = 0,
-					.size = vertexStagingBufferView.getSize(),
+				const BufferCopyRegion bufferCopyRegions[] = {
+					{
+						.sourceOffset = vertexView.getOffset(),
+						.destinationOffset = 0,
+						.size = vertexView.getSize(),
+					},
+					{
+						.sourceOffset = indexView.getOffset(),
+						.destinationOffset = 0,
+						.size = indexView.getSize(),
+					},
 				};
 
-				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegion);
-
-				bufferCopyRegion = {
-					.sourceOffset = indexStagingBufferView.getOffset(),
-					.destinationOffset = 0,
-					.size = indexStagingBufferView.getSize(),
-				};
-
-				commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, bufferCopyRegion);
+				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegions[0]);
+				commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, bufferCopyRegions[1]);
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -96,7 +102,7 @@ namespace Trident {
 				});
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, extent);
-				commandEncoder->bindGraphicsPipeline(trianglePipeline);
+				commandEncoder->bindGraphicsPipeline(pipeline);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
 				commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 				commandEncoder->drawIndexed(3, 1, 0, 0, 0);
@@ -137,10 +143,11 @@ namespace Trident {
 
 				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
 
-				FramebufferDescriptor framebufferDescriptor{};
-				framebufferDescriptor.renderPass = renderPass;
-				framebufferDescriptor.imageViews = {nullptr};
-				framebufferDescriptor.extent = swapchain->getExtent();
+				FramebufferDescriptor framebufferDescriptor = {
+					.renderPass = renderPass,
+					.imageViews = {nullptr},
+					.extent = swapchain->getExtent(),
+				};
 
 				#if defined(DEBUG_OBJECT_NAME)
 					sequence<char8> name;
@@ -163,17 +170,22 @@ namespace Trident {
 				}
 			}
 
-			ref<GraphicsPipeline> createTrianglePipeline() const {
-				const ref<PipelineLayout> pipelineLayout = createPipelineLayout({
+			ref<PipelineLayout> createPipelineLayout() const {
+				return Renderer::createPipelineLayout({
 					.descriptorSetLayouts = {},
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Triangle",
+						.name = "Pipeline layout",
 					#endif
 				});
+			}
 
-				VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-				vertexInputBinding.registerAttribute<svec2<float32>>();
-				vertexInputBinding.registerAttribute<vec3<float32>>();
+			ref<GraphicsPipeline> createPipeline() const {
+				VertexInputBinding vertexInputBindings[] = {
+					VertexInputBinding(InputRate::VERTEX),
+				};
+
+				vertexInputBindings[0].registerAttribute<svec2<float32>>();
+				vertexInputBindings[0].registerAttribute<vec3<float32>>();
 
 				const ColorBlendAttachment colorBlendAttachments[] = {
 					{
@@ -183,7 +195,7 @@ namespace Trident {
 
 				return createGraphicsPipeline({
 					.pipelineLayout = pipelineLayout,
-					.vertexInputBindings = vertexInputBinding,
+					.vertexInputBindings = vertexInputBindings,
 					.vertexShaderModule = loadShaderModule(
 						{
 							.stage = ShaderStage::VERTEX,
@@ -220,7 +232,7 @@ namespace Trident {
 					.renderPass = renderPass,
 					.subpassIndex = 0,
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Triangle",
+						.name = "Pipeline",
 					#endif
 				});
 			}
@@ -264,11 +276,19 @@ namespace Trident {
 		private:
 			ref<RenderPass> renderPass;
 			sequence<ref<Framebuffer>> framebuffers;
-			ref<GraphicsPipeline> trianglePipeline;
-			ref<Buffer> vertexBuffer;
-			ref<Buffer> indexBuffer;
-			ref<Buffer> stagingBuffer;
+			ref<PipelineLayout> pipelineLayout;
+			ref<GraphicsPipeline> pipeline;
+
+			union {
+				struct {
+					ref<Buffer> vertexBuffer;
+					ref<Buffer> indexBuffer;
+					ref<Buffer> stagingBuffer;
+				};
+
+				ref<Buffer> staticBuffers[3];
+			};
 	};
 
-	DEFINE_SAMPLE_LAYER(SampleTriangleIndexed);
+	DEFINE_SAMPLE_LAYER(TriangleIndexedSample);
 }
