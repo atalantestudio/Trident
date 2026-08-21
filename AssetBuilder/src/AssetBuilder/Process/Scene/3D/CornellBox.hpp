@@ -104,9 +104,9 @@ namespace Trident {
 			static BuildStaticGeometry3D createShortBlockFrontGeometry() {
 				static constexpr svec3<float32> positions[] = {
 					{-290.0f,  165.0f,  114.0f},
-					{-130.0f,  165.0f,  64.0f},
+					{-130.0f,  165.0f,  65.0f},
 					{-290.0f,  0.0f,    114.0f},
-					{-130.0f,  0.0f,    64.0f},
+					{-130.0f,  0.0f,    65.0f},
 				};
 
 				return createGeometry(positions);
