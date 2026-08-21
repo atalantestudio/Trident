@@ -1,4 +1,4 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
@@ -8,40 +8,43 @@
 #include "../GraphicsLayer.hpp"
 
 namespace Trident {
-	class SampleTriangleIndirectRenderer : public Renderer {
+	class TriangleIndirectSampleRenderer : public Renderer {
 		private:
 			struct Vertex {
 				svec2<float32> position;
 				vec3<float32> color;
 			};
 
-		private:
-			static constexpr uint32 VERTEX_COUNT = 3;
-
 		public:
+			explicit TriangleIndirectSampleRenderer() {}
+
+			~TriangleIndirectSampleRenderer() {
+				vertexBuffer.~ref();
+				indirectBuffer.~ref();
+				stagingBuffer.~ref();
+			}
+
 			void build() override {
 				renderPass = createRenderPass();
-
-				setupGraphicsPipeline();
-
+				pipelineLayout = createPipelineLayout();
+				pipeline = createPipeline();
 				vertexBuffer = createVertexBuffer();
 				indirectBuffer = createIndirectBuffer();
+				stagingBuffer = createStagingBuffer();
 
 				createFramebuffers();
 			}
 
+			StaticMemoryDescriptor getStaticMemoryDescriptor() const override {
+				return {
+					.buffers = staticBuffers,
+					.images = {},
+				};
+			}
+
 			void encodeOneTimeCommands() const override {
-				const ref<Buffer> stagingBuffer = createDynamicBuffer({
-					.size = vertexBuffer->getSize() + indirectBuffer->getSize(),
-					.usage = BufferUsage::TRANSFER_SRC,
-					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
-					.persistent = false,
-					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Staging",
-					#endif
-				});
 				const BufferView<Vertex> vertexView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
-				const BufferView<DrawIndirectCommand> indirectView = stagingBuffer->createView<DrawIndirectCommand>(vertexBuffer->getSize(), indirectBuffer->getSize());
+				const BufferView<DrawIndirectCommand> indirectView = stagingBuffer->createView<DrawIndirectCommand>(vertexView.getOffset() + vertexView.getSize(), indirectBuffer->getSize());
 
 				Vertex* vertexMappedRange = vertexView.map();
 				vertexMappedRange[0] = {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}};
@@ -60,27 +63,27 @@ namespace Trident {
 				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
 					.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Copy buffers",
+						.name = "One-time commands",
 					#endif
 				});
 
 				commandEncoder->begin();
 
-				BufferCopyRegion bufferCopyRegion = {
-					.sourceOffset = vertexView.getOffset(),
-					.destinationOffset = 0,
-					.size = vertexView.getSize(),
+				const BufferCopyRegion bufferCopyRegions[] = {
+					{
+						.sourceOffset = vertexView.getOffset(),
+						.destinationOffset = 0,
+						.size = vertexView.getSize(),
+					},
+					{
+						.sourceOffset = indirectView.getOffset(),
+						.destinationOffset = 0,
+						.size = indirectView.getSize(),
+					},
 				};
 
-				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegion);
-
-				bufferCopyRegion = {
-					.sourceOffset = indirectView.getOffset(),
-					.destinationOffset = 0,
-					.size = indirectView.getSize(),
-				};
-
-				commandEncoder->copyBufferToBuffer(stagingBuffer, indirectBuffer, bufferCopyRegion);
+				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegions[0]);
+				commandEncoder->copyBufferToBuffer(stagingBuffer, indirectBuffer, bufferCopyRegions[1]);
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -100,7 +103,7 @@ namespace Trident {
 				});
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, extent);
-				commandEncoder->bindGraphicsPipeline(graphicsPipeline);
+				commandEncoder->bindGraphicsPipeline(pipeline);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
 				commandEncoder->drawIndirect(indirectBuffer, 0, 1, 0);
 				commandEncoder->endRenderPass();
@@ -135,68 +138,6 @@ namespace Trident {
 				});
 			}
 
-			void setupGraphicsPipeline() {
-				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
-
-				#if defined(DEBUG_OBJECT_NAME)
-					pipelineLayoutDescriptor.name = "Pipeline layout";
-				#endif
-
-				const ref<PipelineLayout> pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
-
-				VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-				vertexInputBinding.registerAttribute<svec2<float32>>();
-				vertexInputBinding.registerAttribute<vec3<float32>>();
-
-				ShaderModuleDescriptor vertexShaderModuleDescriptor{};
-				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-				vertexShaderModuleDescriptor.entryPoint = "main";
-
-				#if defined(DEBUG_OBJECT_NAME)
-					vertexShaderModuleDescriptor.name = "Vertex shader module";
-				#endif
-
-				ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
-				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-				fragmentShaderModuleDescriptor.entryPoint = "main";
-
-				#if defined(DEBUG_OBJECT_NAME)
-					fragmentShaderModuleDescriptor.name = "Fragment shader module";
-				#endif
-
-				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/Triangle/Triangle.vert");
-				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/Triangle/Triangle.frag");
-
-				const ColorBlendAttachment colorBlendAttachments[] = {
-					{
-						.blend = false,
-					},
-				};
-
-				GraphicsPipelineDescriptor graphicsPipelineDescriptor{};
-				graphicsPipelineDescriptor.pipelineLayout = pipelineLayout;
-				graphicsPipelineDescriptor.vertexInputBindings = vertexInputBinding;
-				graphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-				graphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-				graphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-				graphicsPipelineDescriptor.polygonMode = PolygonMode::FILL;
-				graphicsPipelineDescriptor.cullMode = CullMode::BACK;
-				graphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-				graphicsPipelineDescriptor.lineWidth = 1.0f;
-				graphicsPipelineDescriptor.minSampleShading = 0.0f;
-				graphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
-				graphicsPipelineDescriptor.depthStencilState.depthTest = false;
-				graphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-				graphicsPipelineDescriptor.renderPass = renderPass;
-				graphicsPipelineDescriptor.subpassIndex = 0;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					graphicsPipelineDescriptor.name = "Render pipeline";
-				#endif
-
-				graphicsPipeline = createGraphicsPipeline(graphicsPipelineDescriptor);
-			}
-
 			void createFramebuffers() {
 				const ref<Swapchain> swapchain = getSwapchain();
 
@@ -229,9 +170,76 @@ namespace Trident {
 				}
 			}
 
+			ref<PipelineLayout> createPipelineLayout() const {
+				return Renderer::createPipelineLayout({
+					.descriptorSetLayouts = {},
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Pipeline layout",
+					#endif
+				});
+			}
+
+			ref<GraphicsPipeline> createPipeline() const {
+				VertexInputBinding vertexInputBindings[] = {
+					VertexInputBinding(InputRate::VERTEX),
+				};
+
+				vertexInputBindings[0].registerAttribute<svec2<float32>>();
+				vertexInputBindings[0].registerAttribute<vec3<float32>>();
+
+				const ColorBlendAttachment colorBlendAttachments[] = {
+					{
+						.blend = false,
+					},
+				};
+
+				return createGraphicsPipeline({
+					.pipelineLayout = pipelineLayout,
+					.vertexInputBindings = vertexInputBindings,
+					.vertexShaderModule = loadShaderModule(
+						{
+							.stage = ShaderStage::VERTEX,
+							.entryPoint = "main",
+							#if defined(DEBUG_OBJECT_NAME)
+								.name = "Triangle vertex",
+							#endif
+						},
+						"Sample/Triangle/Triangle.vert"
+					),
+					.fragmentShaderModule = loadShaderModule(
+						{
+							.stage = ShaderStage::FRAGMENT,
+							.entryPoint = "main",
+							#if defined(DEBUG_OBJECT_NAME)
+								.name = "Triangle fragment",
+							#endif
+						},
+						"Sample/Triangle/Triangle.frag"
+					),
+					.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
+					.polygonMode = PolygonMode::FILL,
+					.cullMode = CullMode::BACK,
+					.frontFace = FrontFace::CLOCKWISE,
+					.lineWidth = 1.0f,
+					.minSampleShading = 0.0f,
+					.colorBlendState = {
+						.attachments = colorBlendAttachments,
+					},
+					.depthStencilState = {
+						.depthTest = false,
+					},
+					.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
+					.renderPass = renderPass,
+					.subpassIndex = 0,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Pipeline",
+					#endif
+				});
+			}
+
 			ref<Buffer> createVertexBuffer() const {
-				return createDynamicBuffer({
-					.size = VERTEX_COUNT * sizeof(Vertex),
+				return createStaticBuffer({
+					.size = sizeof(Vertex) * 3,
 					.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX,
 					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 					.persistent = false,
@@ -242,7 +250,7 @@ namespace Trident {
 			}
 
 			ref<Buffer> createIndirectBuffer() const {
-				return createDynamicBuffer({
+				return createStaticBuffer({
 					.size = sizeof(DrawIndirectCommand),
 					.usage = BufferUsage::TRANSFER_DST | BufferUsage::INDIRECT,
 					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
@@ -253,13 +261,34 @@ namespace Trident {
 				});
 			}
 
+			ref<Buffer> createStagingBuffer() const {
+				return createStaticBuffer({
+					.size = vertexBuffer->getSize() + indirectBuffer->getSize(),
+					.usage = BufferUsage::TRANSFER_SRC,
+					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
+					.persistent = false,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Staging",
+					#endif
+				});
+			}
+
 		private:
 			ref<RenderPass> renderPass;
 			sequence<ref<Framebuffer>> framebuffers;
-			ref<GraphicsPipeline> graphicsPipeline;
-			ref<Buffer> vertexBuffer;
-			ref<Buffer> indirectBuffer;
+			ref<PipelineLayout> pipelineLayout;
+			ref<GraphicsPipeline> pipeline;
+
+			union {
+				struct {
+					ref<Buffer> vertexBuffer;
+					ref<Buffer> indirectBuffer;
+					ref<Buffer> stagingBuffer;
+				};
+
+				ref<Buffer> staticBuffers[3];
+			};
 	};
 
-	DEFINE_SAMPLE_LAYER(SampleTriangleIndirect);
+	DEFINE_SAMPLE_LAYER(TriangleIndirectSample);
 }

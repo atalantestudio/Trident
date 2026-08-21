@@ -218,7 +218,7 @@ namespace Trident {
 				registerLayer<TriangleIndexedIndirectSampleLayer>();
 			}
 			else if (SampleNameProperty == "TriangleIndirect") {
-				registerLayer<SampleTriangleIndirectLayer>();
+				registerLayer<TriangleIndirectSampleLayer>();
 			}
 			else {
 				ENGINE_ASSERT(false, "Unknown sample \"[]\" in group [].", SampleNameProperty, SampleGroupNameProperty);
