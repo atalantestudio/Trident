@@ -29,6 +29,13 @@ namespace Trident {
 				.stageFlags = ShaderStage::COMPUTE,
 			},
 
+			// Face
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.stageFlags = ShaderStage::COMPUTE,
+			},
+
 			// G-Buffer position
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE,

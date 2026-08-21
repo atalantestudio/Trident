@@ -250,8 +250,9 @@ namespace Trident {
 
 			sequence<BuildVertex3D> vertices;
 			sequence<uint32> indices;
+			sequence<LightmapFace> faces(lightmapFaces.size());
 
-			createLightmapperGeometryBuffers(scene, vertices, indices);
+			createLightmapperGeometryBuffers(scene, vertices, indices, faces);
 
 			scene.staticGeometry.lightmapAtlasImageAssetDescriptor = {
 				.format = ImageFormat::R8G8B8A8_UNORM,
@@ -266,6 +267,7 @@ namespace Trident {
 				.vertices = vertices,
 				.lightmapCoordinates = scene.staticGeometry.lightmapCoordinates,
 				.indices = indices,
+				.faces = faces,
 				.lighting = lighting,
 			});
 		}

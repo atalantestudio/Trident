@@ -81,7 +81,7 @@ namespace Trident {
 
 			void createLightmaps(BuildStaticSceneGeometry3D& staticGeometry);
 			void updateLightmapCoordinates(BuildStaticSceneGeometry3D& staticGeometry);
-			void createLightmapperGeometryBuffers(const BuildScene3D& scene, sequence<BuildVertex3D>& vertices, sequence<uint32>& indices);
+			void createLightmapperGeometryBuffers(const BuildScene3D& scene, sequence<BuildVertex3D>& vertices, sequence<uint32>& indices, sequence<LightmapFace>& faces);
 
 		protected:
 			uint64 bakedVertexCount = 0;
@@ -102,6 +102,7 @@ namespace Trident {
 			std::vector<IntermediateMaterialShader> dynamicMaterialShaders;
 
 			std::vector<Lightmap> lightmaps;
+			std::vector<LightmapFace> lightmapFaces;
 
 			/// Sorted by ascending area.
 			std::vector<LightmapLookup> lightmapLookups;

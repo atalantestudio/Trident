@@ -89,11 +89,14 @@ namespace Trident {
 		lightmap.maxCoordinate = maxCoordinate;
 		lightmap.minCoordinate = minCoordinate;
 		lightmap.luxelScale = descriptor.lightmap.luxelScale;
-		lightmap.face.emissiveColor = descriptor.lightmap.emissiveColor;
-		lightmap.face.emissiveIntensity = descriptor.lightmap.emissiveIntensity;
-		lightmap.face.albedo = descriptor.lightmap.tintColor;
+
+		LightmapFace lightmapFace{};
+		lightmapFace.emissiveColor = descriptor.lightmap.emissiveColor;
+		lightmapFace.emissiveIntensity = descriptor.lightmap.emissiveIntensity;
+		lightmapFace.albedo = descriptor.lightmap.albedo;
 
 		lightmaps.emplace_back(lightmap);
+		lightmapFaces.emplace_back(lightmapFace);
 
 		bakedVertexCount += surfaceVertexCount;
 		bakedIndexCount += surfaceIndexCount;

@@ -36,7 +36,7 @@ struct Hit {
 };
 
 const float FLOAT32_MAX = 4294967295.0;
-const uint SAMPLE_COUNT = 64;
+const uint SAMPLE_COUNT = 1024;
 const uint BOUNCE_COUNT = 4;
 const float ADAPTIVE_BIAS = 0.0000002;
 
@@ -294,6 +294,11 @@ vec3 rgen(Hit primaryHit, inout uint seed) {
 	uint bounceIndex = 0;
 
 	while (bounceIndex < BOUNCE_COUNT) {
+		Face face = faceBuffer[primaryHit.faceIndex];
+
+		radiance += face.emissiveColor * face.emissiveIntensity;
+		throughput *= face.albedo;
+
 		Ray primaryRay;
 		primaryRay.origin = primaryHit.position + sign(primaryHit.vertexNormal) * abs(primaryHit.position * ADAPTIVE_BIAS);
 		primaryRay.direction = normalize(primaryHit.vertexNormal + randomUnitDirection(seed));
@@ -313,11 +318,6 @@ vec3 rgen(Hit primaryHit, inout uint seed) {
 
 			break;
 		}
-
-		Face face = faceBuffer[primaryHit.faceIndex];
-
-		radiance += face.emissiveColor * face.emissiveIntensity;
-		throughput *= face.albedo;
 
 		bounceIndex += 1;
 	}
@@ -392,6 +392,7 @@ void main() {
 	Hit hit;
 	hit.position = adjustSamplePosition(position, triangleNormal, diagonalLuxelSize);
 	hit.triangleNormal = triangleNormal;
+	hit.faceIndex = uint(vertexNormalData.w);
 	hit.vertexNormal = vertexNormal;
 
 	vec3 radiance = vec3(0.0, 0.0, 0.0);

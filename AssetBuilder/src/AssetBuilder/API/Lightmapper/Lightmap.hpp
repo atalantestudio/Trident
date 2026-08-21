@@ -20,7 +20,6 @@ namespace Trident {
 		svec2<float32> minCoordinate;
 		svec2<float32> luxelScale;
 		Extent2D size;
-		LightmapFace face;
 	};
 
 	struct LightmapLookup {

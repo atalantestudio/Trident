@@ -38,7 +38,7 @@ namespace Trident {
 						},
 						.lightmap = {
 							.luxelScale = {1.0f, 1.0f},
-							.tintColor = {1.0f, 1.0f, 1.0f},
+							.albedo = {1.0f, 1.0f, 1.0f},
 						},
 					},
 					{
@@ -64,7 +64,7 @@ namespace Trident {
 						},
 						.lightmap = {
 							.luxelScale = {1.0f, 1.0f},
-							.tintColor = {1.0f, 1.0f, 1.0f},
+							.albedo = {1.0f, 1.0f, 1.0f},
 						},
 						.lightmapScale = {32.0f, 32.0f},
 					});

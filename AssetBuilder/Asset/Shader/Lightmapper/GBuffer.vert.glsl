@@ -21,7 +21,7 @@ out Interstage {
 struct Vertex {
 	vec3 position;
 	vec3 normal;
-	vec3 tangent;
+	vec4 tangent;
 	vec2 lightmapCoordinate;
 };
 
@@ -89,7 +89,5 @@ void main() {
 	interstage.normalC = c.normal;
 	interstage.barycentricCoordinate = vec3(0.0);
 	interstage.barycentricCoordinate[gl_VertexIndex % 3] = 1.0;
-
-	// TODO(wip)
-	interstage.faceIndex = 0;
+	interstage.faceIndex = uint(vertex.tangent.w);
 }

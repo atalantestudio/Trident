@@ -46,5 +46,5 @@ void main() {
 	smoothPosition = vec4(mix(p2, p, 0.0001), 0.0);
 
 	triangleNormal = vec4(normalize(interstage.triangleNormal), diagonalLuxelSize);
-	vertexNormal = vec4(normalize(interstage.vertexNormal), interstage.faceIndex);
+	vertexNormal = vec4(normalize(interstage.vertexNormal), float(interstage.faceIndex));
 }

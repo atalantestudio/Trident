@@ -6,7 +6,7 @@
 #include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
 
 namespace Trident {
-	void SceneBuilder::createLightmapperGeometryBuffers(const BuildScene3D& scene, sequence<BuildVertex3D>& vertices, sequence<uint32>& indices) {
+	void SceneBuilder::createLightmapperGeometryBuffers(const BuildScene3D& scene, sequence<BuildVertex3D>& vertices, sequence<uint32>& indices, sequence<LightmapFace>& faces) {
 		vertices = sequence<BuildVertex3D>(lightmapVertexCount);
 		indices = sequence<uint32>(lightmapIndexCount);
 
@@ -68,5 +68,27 @@ namespace Trident {
 				}
 			}
 		}
+
+		{
+			uint32 lightmapIndex = 0;
+			uint64 vertexOffset = 0;
+
+			while (lightmapIndex < lightmaps.size()) {
+				const Lightmap& lightmap = lightmaps[lightmapIndex];
+
+				uint64 vertexIndex = 0;
+
+				while (vertexIndex < lightmap.vertexRange.count) {
+					vertices[vertexOffset + vertexIndex].tangent = {0.0f, 0.0f, 0.0f, static_cast<float32>(lightmapIndex)};
+
+					vertexIndex += 1;
+				}
+
+				vertexOffset += lightmap.vertexRange.count;
+				lightmapIndex += 1;
+			}
+		}
+
+		std::copy(lightmapFaces.begin(), lightmapFaces.end(), &faces[0]);
 	}
 }

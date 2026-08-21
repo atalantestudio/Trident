@@ -363,6 +363,7 @@ namespace Trident {
 			argumentBuffer->createView<Arguments>(0, argumentBuffer->getSize()),
 			context.vertexBuffer->createView<BuildVertex3D>(0, context.vertexBuffer->getSize()),
 			context.indexBuffer->createView<uint32>(0, context.indexBuffer->getSize()),
+			context.faceBuffer->createView<LightmapFace>(0, context.faceBuffer->getSize()),
 		};
 
 		const DescriptorImage descriptorImages[] = {
@@ -427,26 +428,31 @@ namespace Trident {
 			{
 				.descriptorSet = descriptorSets[1],
 				.bindingIndex = 3,
-				.descriptorImages = descriptorImages[0],
+				.descriptorBufferViews = bufferViews[3],
 			},
 			{
 				.descriptorSet = descriptorSets[1],
 				.bindingIndex = 4,
-				.descriptorImages = descriptorImages[1],
+				.descriptorImages = descriptorImages[0],
 			},
 			{
 				.descriptorSet = descriptorSets[1],
 				.bindingIndex = 5,
-				.descriptorImages = descriptorImages[2],
+				.descriptorImages = descriptorImages[1],
 			},
 			{
 				.descriptorSet = descriptorSets[1],
 				.bindingIndex = 6,
-				.descriptorImages = descriptorImages[3],
+				.descriptorImages = descriptorImages[2],
 			},
 			{
 				.descriptorSet = descriptorSets[1],
 				.bindingIndex = 7,
+				.descriptorImages = descriptorImages[3],
+			},
+			{
+				.descriptorSet = descriptorSets[1],
+				.bindingIndex = 8,
 				.descriptorImages = descriptorImages[4],
 			},
 			{
