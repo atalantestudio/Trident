@@ -3,25 +3,24 @@
 
 #pragma once
 
-#include "Engine/Filesystem/Asset/GeometryAsset.hpp"
-
 namespace Trident {
-	struct StaticSubsurface;
+	struct LightmapFace {
+		svec3<float32> emissiveColor;
+		float32 emissiveIntensity;
+		svec3<float32> albedo;
+		uint32 _;
+	};
 
 	struct Lightmap {
 		uint32 geometryIndex;
 		range<uint64, uint64> vertexRange;
 		uint32 coordinateOffset;
-
 		svec2<float32> scale;
 		svec2<float32> maxCoordinate;
 		svec2<float32> minCoordinate;
 		svec2<float32> luxelScale;
 		Extent2D size;
-
-		svec3<float32> tintColor;
-		svec3<float32> emissiveColor;
-		float32 emissiveIntensity;
+		LightmapFace face;
 	};
 
 	struct LightmapLookup {

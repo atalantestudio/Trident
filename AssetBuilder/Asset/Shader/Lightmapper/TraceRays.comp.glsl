@@ -16,6 +16,12 @@ struct Triangle {
 	Vertex vertices[3];
 };
 
+struct Face {
+	vec3 emissiveColor;
+	float emissiveIntensity;
+	vec3 albedo;
+};
+
 struct Ray {
 	vec3 origin;
 	vec3 direction;
@@ -25,11 +31,12 @@ struct Hit {
 	vec3 position;
 	float distance;
 	vec3 triangleNormal;
+	uint faceIndex;
 	vec3 vertexNormal;
 };
 
 const float FLOAT32_MAX = 4294967295.0;
-const uint SAMPLE_COUNT = 1024;
+const uint SAMPLE_COUNT = 64;
 const uint BOUNCE_COUNT = 4;
 const float ADAPTIVE_BIAS = 0.0000002;
 
@@ -53,15 +60,19 @@ layout(set = 0, binding = 2) buffer readonly IndexBuffer {
 	uint indexBuffer[];
 };
 
-layout(set = 0, binding = 3, rgba32f) uniform readonly image2D gBufferPositionImage;
+layout(set = 0, binding = 3) buffer readonly FaceBuffer {
+	Face faceBuffer[];
+};
 
-layout(set = 0, binding = 4, rgba32f) uniform readonly image2D gBufferSmoothPositionImage;
+layout(set = 0, binding = 4, rgba32f) uniform readonly image2D gBufferPositionImage;
 
-layout(set = 0, binding = 5, rgba32f) uniform readonly image2D gBufferTriangleNormalImage;
+layout(set = 0, binding = 5, rgba32f) uniform readonly image2D gBufferSmoothPositionImage;
 
-layout(set = 0, binding = 6, rgba32f) uniform readonly image2D gBufferVertexNormalImage;
+layout(set = 0, binding = 6, rgba32f) uniform readonly image2D gBufferTriangleNormalImage;
 
-layout(set = 0, binding = 7, rgba8) uniform writeonly image2D intermediateLightmapAtlas;
+layout(set = 0, binding = 7, rgba32f) uniform readonly image2D gBufferVertexNormalImage;
+
+layout(set = 0, binding = 8, rgba8) uniform writeonly image2D intermediateLightmapAtlas;
 
 Triangle loadTriangle(uint triangleIndex) {
 	uint indexOffset = triangleIndex * 3;
@@ -202,6 +213,7 @@ Hit rchit(Ray ray, Triangle triangle_, float distance, vec3 barycentricCoordinat
 	hit.position = ray.origin + ray.direction * distance;
 	hit.distance = distance;
 	hit.triangleNormal = triangleNormalData.rgb;
+	hit.faceIndex = uint(vertexNormalData.a);
 	hit.vertexNormal = vertexNormalData.rgb;
 
 	return hit;
@@ -277,9 +289,6 @@ Hit rintBackFacing(Ray ray) {
 }
 
 vec3 rgen(Hit primaryHit, inout uint seed) {
-	// TODO(asset-builder/lightmapper): Use the albedo of the triangle being hit.
-	const vec3 albedo = skyColor;
-
 	vec3 radiance = vec3(0.0, 0.0, 0.0);
 	vec3 throughput = vec3(1.0, 1.0, 1.0);
 	uint bounceIndex = 0;
@@ -298,13 +307,17 @@ vec3 rgen(Hit primaryHit, inout uint seed) {
 		Hit secondaryHit = rintFrontFacing(secondaryRay);
 
 		radiance += throughput * float(secondaryHit.distance < 0.0) * sunColor * sunIntensity;
-		throughput *= albedo;
 
 		if (primaryHit.distance < 0.0) {
 			radiance += throughput * skyColor;
 
 			break;
 		}
+
+		Face face = faceBuffer[primaryHit.faceIndex];
+
+		radiance += face.emissiveColor * face.emissiveIntensity;
+		throughput *= face.albedo;
 
 		bounceIndex += 1;
 	}

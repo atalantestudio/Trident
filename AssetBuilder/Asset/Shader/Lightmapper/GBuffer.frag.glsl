@@ -17,6 +17,7 @@ in Interstage {
 	layout(location = 8) flat vec3 normalB;
 	layout(location = 9) flat vec3 normalC;
 	layout(location = 10) vec3 barycentricCoordinate;
+	layout(location = 11) flat uint faceIndex;
 } interstage;
 
 layout(location = 0) out vec4 position;
@@ -41,9 +42,9 @@ void main() {
 	vec3 projectC = planeProjection(p, interstage.positionC, interstage.normalC);
 	vec3 p2 = b.x * projectA + b.y * projectB + b.z * projectC;
 
-	// TODO(asset-builder/lightmapper): Find good interpolant.
+	// TODO(asset-builder/lightmapper): Find a good interpolant.
 	smoothPosition = vec4(mix(p2, p, 0.0001), 0.0);
 
 	triangleNormal = vec4(normalize(interstage.triangleNormal), diagonalLuxelSize);
-	vertexNormal = vec4(normalize(interstage.vertexNormal), 0.0);
+	vertexNormal = vec4(normalize(interstage.vertexNormal), interstage.faceIndex);
 }

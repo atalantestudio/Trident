@@ -25,6 +25,7 @@ namespace Trident {
 		view<BuildVertex3D> vertices;
 		view<svec2<float32>> lightmapCoordinates;
 		view<uint32> indices;
+		view<LightmapFace> faces;
 		SceneLightingDescriptor lighting;
 	};
 
@@ -48,6 +49,7 @@ namespace Trident {
 
 		ref<Buffer> vertexBuffer;
 		ref<Buffer> indexBuffer;
+		ref<Buffer> faceBuffer;
 		ref<Buffer> lightmapAtlasStagingBuffer;
 	};
 
@@ -110,10 +112,11 @@ namespace Trident {
 			ref<Buffer> createArgumentBuffer() const;
 			ref<Buffer> createVertexBuffer(uint64 vertexCount) const;
 			ref<Buffer> createIndexBuffer(uint64 indexCount) const;
+			ref<Buffer> createFaceBuffer(uint64 faceCount) const;
 
 			ref<Sampler> createIntermediateLightmapAtlasSampler() const;
 
-			void encodeOneTimeCommands(view<BuildVertex3D> vertices, view<svec2<float32>> lightmapCoordinates, view<uint32> indices) const;
+			void encodeOneTimeCommands(const LightmapperDescriptor& descriptor) const;
 
 			void generateLightmaps(uint32 vertexCount) const;
 
