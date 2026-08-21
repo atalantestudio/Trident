@@ -1,4 +1,4 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
@@ -8,7 +8,7 @@
 #include "../GraphicsLayer.hpp"
 
 namespace Trident {
-	class SampleTriangleRenderer : public Renderer {
+	class TriangleSampleRenderer : public Renderer {
 		private:
 			struct Vertex {
 				svec2<float32> position;
@@ -16,6 +16,13 @@ namespace Trident {
 			};
 
 		public:
+			explicit TriangleSampleRenderer() {}
+
+			~TriangleSampleRenderer() {
+				vertexBuffer.~ref();
+				stagingBuffer.~ref();
+			}
+
 			void build() override {
 				renderPass = createRenderPass();
 				pipelineLayout = createPipelineLayout();
@@ -27,10 +34,8 @@ namespace Trident {
 			}
 
 			StaticMemoryDescriptor getStaticMemoryDescriptor() const override {
-				const ref<Buffer> buffers[] = {vertexBuffer, stagingBuffer};
-
 				return {
-					.buffers = buffers,
+					.buffers = staticBuffers,
 					.images = {},
 				};
 			}
@@ -152,7 +157,7 @@ namespace Trident {
 				return Renderer::createPipelineLayout({
 					.descriptorSetLayouts = {},
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "",
+						.name = "Pipeline layout",
 					#endif
 				});
 			}
@@ -207,7 +212,7 @@ namespace Trident {
 					.renderPass = renderPass,
 					.subpassIndex = 0,
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "",
+						.name = "Pipeline",
 					#endif
 				});
 			}
@@ -241,9 +246,16 @@ namespace Trident {
 			sequence<ref<Framebuffer>> framebuffers;
 			ref<PipelineLayout> pipelineLayout;
 			ref<GraphicsPipeline> pipeline;
-			ref<Buffer> vertexBuffer;
-			ref<Buffer> stagingBuffer;
+
+			union {
+				struct {
+					ref<Buffer> vertexBuffer;
+					ref<Buffer> stagingBuffer;
+				};
+
+				ref<Buffer> staticBuffers[2];
+			};
 	};
 
-	DEFINE_SAMPLE_LAYER(SampleTriangle);
+	DEFINE_SAMPLE_LAYER(TriangleSample);
 }

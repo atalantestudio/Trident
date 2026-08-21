@@ -24,7 +24,7 @@ namespace Trident {
 			static constexpr uint64 INSTANCE_SIZE = sizeof(Instance) * 3;
 
 		public:
-			ReversedZSampleRenderer() {}
+			explicit ReversedZSampleRenderer() {}
 
 			~ReversedZSampleRenderer() {
 				vertexBuffer.~ref();

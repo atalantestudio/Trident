@@ -32,7 +32,7 @@ namespace Trident {
 			static constexpr uint64 INSTANCE_SIZE = sizeof(Instance) * 4;
 
 		public:
-			SampleArrayTextureRenderer() {}
+			explicit SampleArrayTextureRenderer() {}
 
 			~SampleArrayTextureRenderer() {
 				vertexBuffer.~ref();

@@ -15,7 +15,7 @@ namespace Trident {
 			};
 
 		public:
-			DispatchSampleRenderer() {}
+			explicit DispatchSampleRenderer() {}
 
 			~DispatchSampleRenderer() {
 				vertexBuffer.~ref();

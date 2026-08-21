@@ -24,7 +24,7 @@ namespace Trident {
 			static constexpr uint64 INSTANCE_SIZE = sizeof(Instance) * 3;
 
 		public:
-			ColorBlendSampleRenderer() {}
+			explicit ColorBlendSampleRenderer() {}
 
 			~ColorBlendSampleRenderer() {
 				vertexBuffer.~ref();
