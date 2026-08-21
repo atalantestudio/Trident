@@ -137,6 +137,7 @@ namespace Trident {
 
 				return createGraphicsPipeline({
 					.pipelineLayout = pipelineLayout,
+					.vertexInputBindings = {},
 					.vertexShaderModule = vertexShaderModule,
 					.fragmentShaderModule = loadShaderModule(
 						{

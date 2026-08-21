@@ -206,8 +206,11 @@ namespace Trident {
 			}
 
 			ref<GraphicsPipeline> createPipeline() const {
-				VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-				vertexInputBinding.registerAttribute<decltype(Vertex::position)>();
+				VertexInputBinding vertexInputBindings[] = {
+					VertexInputBinding(InputRate::VERTEX),
+				};
+
+				vertexInputBindings[0].registerAttribute<decltype(Vertex::position)>();
 
 				const ColorBlendAttachment colorBlendAttachments[] = {
 					{
@@ -217,7 +220,7 @@ namespace Trident {
 
 				return createGraphicsPipeline({
 					.pipelineLayout = pipelineLayout,
-					.vertexInputBindings = vertexInputBinding,
+					.vertexInputBindings = vertexInputBindings,
 					.vertexShaderModule = loadShaderModule(
 						{
 							.stage = ShaderStage::VERTEX,
