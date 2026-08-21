@@ -230,10 +230,7 @@ namespace Trident {
 				};
 
 				SceneBuilder builder({
-					// TODO(wip)
-					// .skyColor = {0.0f, 0.0f, 0.0f},
-					.skyColor = {1.0f, 1.0f, 1.0f},
-
+					.skyColor = {0.0f, 0.0f, 0.0f},
 					.sunDirection = {0.0f, 0.0f, 0.0f},
 					.sunColor = {0.0f, 0.0f, 0.0f},
 					.sunIntensity = 0.0f,
@@ -259,7 +256,6 @@ namespace Trident {
 					},
 					transform
 				);
-
 				builder.placeSurface(
 					{
 						.geometry = createLightGeometry(),
@@ -274,7 +270,6 @@ namespace Trident {
 					},
 					transform
 				);
-
 				builder.placeSurface(
 					{
 						.geometry = createCeilingGeometry(),
@@ -287,7 +282,6 @@ namespace Trident {
 					},
 					transform
 				);
-
 				builder.placeSurface(
 					{
 						.geometry = createBackWallGeometry(),
@@ -300,7 +294,6 @@ namespace Trident {
 					},
 					transform
 				);
-
 				builder.placeSurface(
 					{
 						.geometry = createLeftWallGeometry(),
@@ -313,7 +306,6 @@ namespace Trident {
 					},
 					transform
 				);
-
 				builder.placeSurface(
 					{
 						.geometry = createRightWallGeometry(),
@@ -326,7 +318,6 @@ namespace Trident {
 					},
 					transform
 				);
-
 				builder.placeSurface(
 					{
 						.geometry = createShortBlockFrontGeometry(),
@@ -339,7 +330,6 @@ namespace Trident {
 					},
 					transform
 				);
-
 				builder.placeSurface(
 					{
 						.geometry = createShortBlockBackGeometry(),
@@ -352,7 +342,6 @@ namespace Trident {
 					},
 					transform
 				);
-
 				builder.placeSurface(
 					{
 						.geometry = createShortBlockLeftGeometry(),
@@ -365,7 +354,6 @@ namespace Trident {
 					},
 					transform
 				);
-
 				builder.placeSurface(
 					{
 						.geometry = createShortBlockRightGeometry(),
@@ -378,7 +366,6 @@ namespace Trident {
 					},
 					transform
 				);
-
 				builder.placeSurface(
 					{
 						.geometry = createShortBlockTopGeometry(),
@@ -391,7 +378,6 @@ namespace Trident {
 					},
 					transform
 				);
-
 				builder.placeSurface(
 					{
 						.geometry = createTallBlockFrontGeometry(),
@@ -404,7 +390,6 @@ namespace Trident {
 					},
 					transform
 				);
-
 				builder.placeSurface(
 					{
 						.geometry = createTallBlockBackGeometry(),
@@ -417,7 +402,6 @@ namespace Trident {
 					},
 					transform
 				);
-
 				builder.placeSurface(
 					{
 						.geometry = createTallBlockLeftGeometry(),
@@ -430,7 +414,6 @@ namespace Trident {
 					},
 					transform
 				);
-
 				builder.placeSurface(
 					{
 						.geometry = createTallBlockRightGeometry(),
@@ -443,7 +426,6 @@ namespace Trident {
 					},
 					transform
 				);
-
 				builder.placeSurface(
 					{
 						.geometry = createTallBlockTopGeometry(),
