@@ -5,6 +5,7 @@
 
 #define FORWARD_USE_NOCLIP_CAMERA
 // #define FORWARD_ENABLE_PHYSICS
+#define FORWARD_TEST_CORNELL_BOX
 
 #if !defined(FORWARD_USE_NOCLIP_CAMERA)
 	#include "Engine/API/Camera/Controller/PlayerCameraController.hpp"
@@ -22,7 +23,12 @@
 namespace Trident {
 	class Sample3DForwardLayer : public Layer {
 		private:
-			static constexpr float32 MOVEMENT_SPEED = 120.0f;
+			#if defined(FORWARD_TEST_CORNELL_BOX)
+				static constexpr float32 MOVEMENT_SPEED = 800.0f;
+			#else
+				static constexpr float32 MOVEMENT_SPEED = 120.0f;
+			#endif
+
 			static constexpr Entity PLAYER_ENTITY = 0;
 			static constexpr float32 LOOK_SENSITIVITY = 0.075f;
 			inline static const vec3<float32> PLAYER_CAMERA_OFFSET = {0.0f, 0.3f, 0.0f};
@@ -86,10 +92,15 @@ namespace Trident {
 					camera.updateView();
 					camera.updateProjectionView();
 				#else
-					// TODO(forward/camera): Expose the position.
-					cameraController.getCamera().position = {0.0f, 64.0f, 0.0f};
+					#if defined(FORWARD_TEST_CORNELL_BOX)
+						cameraController.getCamera().aspectRatio = 1.0f;
+						cameraController.getCamera().position = {-278.0f, 273.0f, -372.0f};
+					#else
+						// TODO(forward/camera): Expose the position.
+						cameraController.getCamera().position = {0.0f, 64.0f, 0.0f};
+						cameraController.getCamera().aspectRatio = getApplication()->getWindow()->getAspectRatio();
+					#endif
 
-					cameraController.getCamera().aspectRatio = getApplication()->getWindow()->getAspectRatio();
 					cameraController.updateProjection();
 				#endif
 

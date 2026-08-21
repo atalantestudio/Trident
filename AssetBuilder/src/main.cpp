@@ -37,6 +37,7 @@
 #include "AssetBuilder/Process/Scene/2D/Sliding.hpp"
 #include "AssetBuilder/Process/Scene/2D/Stacking.hpp"
 #include "AssetBuilder/Process/Scene/2D/Swing.hpp"
+#include "AssetBuilder/Process/Scene/3D/CornellBox.hpp"
 #include "AssetBuilder/Process/Scene/3D/Cubes.hpp"
 #include "AssetBuilder/Process/Scene/3D/EdgeContact.hpp"
 #include "AssetBuilder/Process/Scene/3D/GallineraTable.hpp"
@@ -90,7 +91,7 @@ namespace Trident {
 
 		private:
 			void registerProcesses() {
-				allocateProcesses(48);
+				allocateProcesses(49);
 
 				registerProcess<BuildGeometryAssetProcess>(&assetLibrary);
 
@@ -133,6 +134,7 @@ namespace Trident {
 				registerProcess<StackingScene2D>(&assetLibrary);
 				registerProcess<SwingScene2D>(&assetLibrary);
 
+				registerProcess<CornellBoxScene3D>(&assetLibrary);
 				registerProcess<CubesScene3D>(&assetLibrary);
 				registerProcess<EdgeContactScene3D>(&assetLibrary);
 				registerProcess<GallineraTableScene3D>(&assetLibrary);
