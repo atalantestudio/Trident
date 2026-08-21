@@ -11,33 +11,33 @@
 namespace Trident {
 	template<>
 	Scene2DAsset Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary) {
-		Descriptor<Scene2DAsset> descriptor{};
-		descriptor.identifier = stream.read<uint32>();
-		descriptor.version = stream.read<VersionNumber>();
+		Scene2DAsset asset{};
+		asset.identifier = stream.read<uint32>();
+		asset.version = stream.read<VersionNumber>();
 
 		const uint32 staticTriangleCount = stream.read<uint32>();
 		const uint32 staticVertexCount = stream.read<uint32>();
 		const uint32 staticTextureCoordinateCount = stream.read<uint32>();
 
-		descriptor.dynamicVertexPositionCount = 0;
-		descriptor.dynamicVertexTextureCoordinateCount = 0;
-		descriptor.dynamicVertexPositionIndexCount = 0;
-		descriptor.dynamicVertexTextureCoordinateIndexCount = 0;
-		descriptor.entityCount = stream.read<uint32>();
-		descriptor.hullCount = 0;
-		descriptor.staticTriangles = sequence<StaticTriangle2D>(staticTriangleCount);
-		descriptor.staticVertices = sequence<svec2<float32>>(staticVertexCount);
-		descriptor.staticTextureCoordinates = sequence<svec2<float32>>(staticTextureCoordinateCount);
+		asset.dynamicVertexPositionCount = 0;
+		asset.dynamicVertexTextureCoordinateCount = 0;
+		asset.dynamicVertexPositionIndexCount = 0;
+		asset.dynamicVertexTextureCoordinateIndexCount = 0;
+		asset.entityCount = stream.read<uint32>();
+		asset.hullCount = 0;
+		asset.staticTriangles = sequence<StaticTriangle2D>(staticTriangleCount);
+		asset.staticVertices = sequence<svec2<float32>>(staticVertexCount);
+		asset.staticTextureCoordinates = sequence<svec2<float32>>(staticTextureCoordinateCount);
 
 		const uint32 geometryAssetCount = stream.read<uint32>();
 		const uint32 geometryMappingCount = stream.read<uint32>();
 		const uint32 rigidBodyMappingCount = stream.read<uint32>();
 
-		descriptor.geometryAssets = sequence<ref<Geometry2DAsset>>(geometryAssetCount);
-		descriptor.geometryMappings = sequence<EntityComponentMapping<GeometryComponent>>(geometryMappingCount);
-		descriptor.rigidBodyMappings = sequence<EntityComponentMapping<RigidBody2DComponent>>(rigidBodyMappingCount);
+		asset.geometryAssets = sequence<ref<Geometry2DAsset>>(geometryAssetCount);
+		asset.geometryMappings = sequence<EntityComponentMapping<GeometryComponent>>(geometryMappingCount);
+		asset.rigidBodyMappings = sequence<EntityComponentMapping<RigidBody2DComponent>>(rigidBodyMappingCount);
 
-		for (StaticTriangle2D& triangle : descriptor.staticTriangles) {
+		for (StaticTriangle2D& triangle : asset.staticTriangles) {
 			triangle.aIndex = stream.read<uint32>();
 			triangle.bIndex = stream.read<uint32>();
 			triangle.cIndex = stream.read<uint32>();
@@ -46,37 +46,37 @@ namespace Trident {
 			triangle.cUvIndex = stream.read<uint32>();
 		}
 
-		for (svec2<float32>& vertex : descriptor.staticVertices) {
+		for (svec2<float32>& vertex : asset.staticVertices) {
 			vertex = stream.read<svec2<float32>>();
 		}
 
-		for (svec2<float32>& textureCoordinate : descriptor.staticTextureCoordinates) {
+		for (svec2<float32>& textureCoordinate : asset.staticTextureCoordinates) {
 			textureCoordinate = stream.read<svec2<float32>>();
 		}
 
-		for (ref<Geometry2DAsset>& geometryAsset : descriptor.geometryAssets) {
+		for (ref<Geometry2DAsset>& geometryAsset : asset.geometryAssets) {
 			const uint32 identifier = stream.read<uint32>();
 
 			geometryAsset = assetLibrary->getAsset<Geometry2DAsset>(identifier);
 
-			descriptor.dynamicVertexPositionCount += geometryAsset->getPositionCount();
-			descriptor.dynamicVertexTextureCoordinateCount += geometryAsset->getTextureCoordinateCount();
-			descriptor.dynamicVertexPositionIndexCount += geometryAsset->vertexPositionIndices.count();
+			asset.dynamicVertexPositionCount += geometryAsset->getPositionCount();
+			asset.dynamicVertexTextureCoordinateCount += geometryAsset->getTextureCoordinateCount();
+			asset.dynamicVertexPositionIndexCount += geometryAsset->vertexPositionIndices.count();
 
 			if (geometryAsset->flags & GeometryAssetFlags::HAS_HULL) {
 				// TODO: Don't mix triangle and line indices?
-				descriptor.dynamicVertexPositionIndexCount += geometryAsset->hullLineIndices.count();
+				asset.dynamicVertexPositionIndexCount += geometryAsset->hullLineIndices.count();
 
-				descriptor.hullCount += 1;
+				asset.hullCount += 1;
 			}
 		}
 
-		for (EntityComponentMapping<GeometryComponent>& geometryMapping : descriptor.geometryMappings) {
+		for (EntityComponentMapping<GeometryComponent>& geometryMapping : asset.geometryMappings) {
 			geometryMapping.entity = stream.read<Entity>();
 			geometryMapping.component.geometryIndex = stream.read<uint32>();
 		}
 
-		for (EntityComponentMapping<RigidBody2DComponent>& rigidBodyMapping : descriptor.rigidBodyMappings) {
+		for (EntityComponentMapping<RigidBody2DComponent>& rigidBodyMapping : asset.rigidBodyMappings) {
 			rigidBodyMapping.entity = stream.read<Entity>();
 			rigidBodyMapping.component.position = stream.read<svec2<float32>>();
 			rigidBodyMapping.component.rotation = stream.read<float32>();
@@ -89,6 +89,6 @@ namespace Trident {
 			rigidBodyMapping.component.restitution = stream.read<float32>();
 		}
 
-		return Scene2DAsset(descriptor);
+		return asset;
 	}
 }

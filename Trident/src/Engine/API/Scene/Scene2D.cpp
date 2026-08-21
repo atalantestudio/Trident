@@ -13,8 +13,8 @@
 namespace Trident {
 	Scene2D::Scene2D(ref<Scene2DAsset> sceneAsset) :
 		Scene({
-			.dynamicVertexCount = sceneAsset->getDynamicVertexPositionCount() + sceneAsset->getDynamicVertexTextureCoordinateCount(),
-			.dynamicIndexCount = sceneAsset->getDynamicVertexPositionIndexCount() + sceneAsset->getDynamicVertexTextureCoordinateIndexCount()
+			.dynamicVertexCount = sceneAsset->dynamicVertexPositionCount + sceneAsset->dynamicVertexTextureCoordinateCount,
+			.dynamicIndexCount = sceneAsset->dynamicVertexPositionIndexCount + sceneAsset->dynamicVertexTextureCoordinateIndexCount
 		}),
 		asset(sceneAsset)
 	{
@@ -23,13 +23,13 @@ namespace Trident {
 	}
 
 	void Scene2D::loadGeometries() {
-		const uint32 vertexComponentCount = static_cast<uint32>(asset->getStaticVertices().count() + dynamicVertexCount * 2);
-		const uint64 vertexByteCount = asset->getStaticVertices().count() + dynamicVertexCount * sizeof(svec2<float32>);
-		const uint64 indexByteCount = asset->getStaticTriangles().count() * 3 + dynamicIndexCount * sizeof(uint32);
+		const uint32 vertexComponentCount = static_cast<uint32>(asset->staticVertices.count() + dynamicVertexCount * 2);
+		const uint64 vertexByteCount = asset->staticVertices.count() + dynamicVertexCount * sizeof(svec2<float32>);
+		const uint64 indexByteCount = asset->staticTriangles.count() * 3 + dynamicIndexCount * sizeof(uint32);
 
 		dataBuffer = sequence<uint8>(vertexByteCount + indexByteCount);
 		geometries = sequence<Geometry2D>(asset->geometryAssets.count());
-		hulls = sequence<Hull2D>(asset->getHullCount());
+		hulls = sequence<Hull2D>(asset->hullCount);
 
 		std::copy(asset->staticGeometryBuffer.begin(), asset->staticGeometryBuffer.end(), &dataBuffer[0]);
 
@@ -135,17 +135,17 @@ namespace Trident {
 
 		Entity entity = 0;
 
-		while (entity < asset->getEntityCount()) {
+		while (entity < asset->entityCount) {
 			ecs.createEntity();
 
 			entity += 1;
 		}
 
-		for (const EntityComponentMapping<GeometryComponent> geometryMapping : asset->getGeometryMappings()) {
+		for (const EntityComponentMapping<GeometryComponent> geometryMapping : asset->geometryMappings) {
 			ecs.setComponent<GeometryComponent>(geometryMapping.entity, geometryMapping.component);
 		}
 
-		for (const EntityComponentMapping<RigidBody2DComponent>& rigidBodyMapping : asset->getRigidBodyMappings()) {
+		for (const EntityComponentMapping<RigidBody2DComponent>& rigidBodyMapping : asset->rigidBodyMappings) {
 			ecs.setComponent<RigidBody2DComponent>(rigidBodyMapping.entity, rigidBodyMapping.component);
 
 			const GeometryComponent geometryComponent = ecs.getComponent<GeometryComponent>(rigidBodyMapping.entity);
