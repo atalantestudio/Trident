@@ -25,13 +25,6 @@ namespace Trident {
 					.sunIntensity = 1.0f,
 				});
 
-				const svec3<float32> upRotation = {0.0f, 0.0f, 0.0f};
-				const svec3<float32> downRotation = {0.0f, 0.0f, pi<float32>()};
-				const svec3<float32> leftRotation = {0.0f, -pi<float32>() * 0.5f, -pi<float32>() * 0.5f};
-				const svec3<float32> rightRotation = {0.0f, pi<float32>() * 0.5f, pi<float32>() * 0.5f};
-				const svec3<float32> forwardRotation = {-pi<float32>() * 0.5f, 0.0f, pi<float32>()};
-				const svec3<float32> backwardRotation = {pi<float32>() * 0.5f, 0.0f, 0.0f};
-
 				// TODO(asset-builder/lightmapper): For now the materials must be loaded in the order they are used when placing static surfaces and props.
 				const MaterialReference tileFloorMaterial = builder.loadStaticMaterial(assetLibrary->getAsset<MaterialAsset>("tile_floor"));
 				const MaterialReference plasterWallMaterial = builder.loadStaticMaterial(assetLibrary->getAsset<MaterialAsset>("plaster_wall"));
