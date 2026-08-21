@@ -111,21 +111,21 @@ namespace Trident {
 			void createCameraViewPipelineLayout();
 			void createPlaceholderPipelineLayout();
 
-			void createGridPipeline();
-			void createRigidBodyFillPipeline();
-			void createRigidBodyStrokePipeline();
-			void createCenterOfMassPipeline();
-			void createRigidBodyPlaceholderFillPipeline();
-			void createRigidBodyPlaceholderStrokePipeline();
-			void createRigidBodyPlaceholderCenterOfMassPipeline();
+			ref<GraphicsPipeline> createGridPipeline() const;
+			ref<GraphicsPipeline> createRigidBodyFillPipeline() const;
+			ref<GraphicsPipeline> createRigidBodyStrokePipeline() const;
+			ref<GraphicsPipeline> createCenterOfMassPipeline() const;
+			ref<GraphicsPipeline> createRigidBodyPlaceholderFillPipeline() const;
+			ref<GraphicsPipeline> createRigidBodyPlaceholderStrokePipeline() const;
+			ref<GraphicsPipeline> createRigidBodyPlaceholderCenterOfMassPipeline() const;
 
 			#if defined(SHOW_DISTANCE)
-				void createDistanceGraphicsPipeline();
+				ref<GraphicsPipeline> createDistancePipeline() const;
 			#endif
 
 			#if defined(SHOW_FEATURES)
-				void createVertexFeatureGraphicsPipeline();
-				void createEdgeFeatureGraphicsPipeline();
+				ref<GraphicsPipeline> createVertexFeaturePipeline() const;
+				ref<GraphicsPipeline> createEdgeFeaturePipeline() const;
 			#endif
 
 			void allocateDescriptorSets();
@@ -177,12 +177,12 @@ namespace Trident {
 			ref<GraphicsPipeline> rigidBodyPlaceholderCenterOfMassPipeline;
 
 			#if defined(SHOW_DISTANCE)
-				ref<GraphicsPipeline> distanceGraphicsPipeline;
+				ref<GraphicsPipeline> distancePipeline;
 			#endif
 
 			#if defined(SHOW_FEATURES)
-				ref<GraphicsPipeline> vertexFeatureGraphicsPipeline;
-				ref<GraphicsPipeline> edgeFeatureGraphicsPipeline;
+				ref<GraphicsPipeline> vertexFeaturePipeline;
+				ref<GraphicsPipeline> edgeFeaturePipeline;
 			#endif
 
 			ref<Buffer> cameraBuffer;

@@ -3,10 +3,20 @@
 
 #include "pch.hpp"
 
-#include "Physics2DRenderer.hpp"
-
 #include "Engine/API/Geometry/Hull2D.hpp"
 #include "Engine/ECS/Component/RigidBody2DComponent.hpp"
+
+#include "../../Physics2D/Renderer/CenterOfMassPipeline.hpp"
+#include "../../Physics2D/Renderer/DistancePipeline.hpp"
+#include "../../Physics2D/Renderer/EdgeFeaturePipeline.hpp"
+#include "../../Physics2D/Renderer/GridPipeline.hpp"
+#include "../../Physics2D/Renderer/Physics2DRenderer.hpp"
+#include "../../Physics2D/Renderer/RigidBodyFillPipeline.hpp"
+#include "../../Physics2D/Renderer/RigidBodyPlaceholderCenterOfMassPipeline.hpp"
+#include "../../Physics2D/Renderer/RigidBodyPlaceholderFillPipeline.hpp"
+#include "../../Physics2D/Renderer/RigidBodyPlaceholderStrokePipeline.hpp"
+#include "../../Physics2D/Renderer/RigidBodyStrokePipeline.hpp"
+#include "../../Physics2D/Renderer/VertexFeaturePipeline.hpp"
 
 namespace Trident {
 	void Physics2DRenderer::build() {
@@ -47,21 +57,21 @@ namespace Trident {
 		createCameraViewPipelineLayout();
 		createPlaceholderPipelineLayout();
 
-		createGridPipeline();
-		createRigidBodyFillPipeline();
-		createRigidBodyStrokePipeline();
-		createCenterOfMassPipeline();
-		createRigidBodyPlaceholderFillPipeline();
-		createRigidBodyPlaceholderStrokePipeline();
-		createRigidBodyPlaceholderCenterOfMassPipeline();
+		gridPipeline = createGridPipeline();
+		rigidBodyFillPipeline = createRigidBodyFillPipeline();
+		rigidBodyStrokePipeline = createRigidBodyStrokePipeline();
+		centerOfMassPipeline = createCenterOfMassPipeline();
+		rigidBodyPlaceholderFillPipeline = createRigidBodyPlaceholderFillPipeline();
+		rigidBodyPlaceholderStrokePipeline = createRigidBodyPlaceholderStrokePipeline();
+		rigidBodyPlaceholderCenterOfMassPipeline = createRigidBodyPlaceholderCenterOfMassPipeline();
 
 		#if defined(SHOW_DISTANCE)
-			createDistanceGraphicsPipeline();
+			distancePipeline = createDistancePipeline();
 		#endif
 
 		#if defined(SHOW_FEATURES)
-			createVertexFeatureGraphicsPipeline();
-			createEdgeFeatureGraphicsPipeline();
+			vertexFeaturePipeline = createVertexFeaturePipeline();
+			edgeFeaturePipeline = createEdgeFeaturePipeline();
 		#endif
 
 		updateCameraProjection();
@@ -214,10 +224,10 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::createCameraBuffer() {
-		const uint64 minUniformBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
+		const uint64 alignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
 
 		cameraBuffer = createDynamicBuffer({
-			.size = ceil(sizeof(Camera), minUniformBufferOffsetAlignment),
+			.size = ceil(sizeof(Camera), alignment),
 			.usage = BufferUsage::UNIFORM,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = true,
@@ -233,10 +243,10 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::createViewBuffer() {
-		const uint64 minUniformBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
+		const uint64 alignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
 
 		viewBuffer = createDynamicBuffer({
-			.size = ceil(sizeof(View), minUniformBufferOffsetAlignment),
+			.size = ceil(sizeof(View), alignment),
 			.usage = BufferUsage::UNIFORM,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = true,
@@ -251,10 +261,10 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::createPlaceholderBuffer() {
-		const uint64 minUniformBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
+		const uint64 alignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
 
 		placeholderBuffer = createDynamicBuffer({
-			.size = ceil(sizeof(Placeholder), minUniformBufferOffsetAlignment),
+			.size = ceil(sizeof(Placeholder), alignment),
 			.usage = BufferUsage::UNIFORM,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = true,
@@ -370,635 +380,6 @@ namespace Trident {
 			#endif
 		});
 	}
-
-	void Physics2DRenderer::createGridPipeline() {
-		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
-		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-		vertexShaderModuleDescriptor.entryPoint = "main";
-
-		#if defined(DEBUG_OBJECT_NAME)
-			vertexShaderModuleDescriptor.name = "Grid vertex";
-		#endif
-
-		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
-		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-		fragmentShaderModuleDescriptor.entryPoint = "main";
-
-		#if defined(DEBUG_OBJECT_NAME)
-			fragmentShaderModuleDescriptor.name = "Grid fragment";
-		#endif
-
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/ScreenUVNDC.vert");
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/Grid.frag");
-
-		const ColorBlendAttachment colorBlendAttachments[] = {
-			{
-				.blend = true,
-				.srcColorBlendFactor = BlendFactor::SRC_ALPHA,
-				.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA,
-			},
-		};
-
-		GraphicsPipelineDescriptor gridGraphicsPipelineDescriptor{};
-		gridGraphicsPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
-		gridGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-		gridGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-		gridGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-		gridGraphicsPipelineDescriptor.polygonMode = PolygonMode::FILL;
-		gridGraphicsPipelineDescriptor.cullMode = CullMode::BACK;
-		gridGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-		gridGraphicsPipelineDescriptor.lineWidth = 1.0f;
-		gridGraphicsPipelineDescriptor.minSampleShading = 0.0f;
-		gridGraphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
-		gridGraphicsPipelineDescriptor.depthStencilState.depthTest = false;
-		gridGraphicsPipelineDescriptor.depthStencilState.depthWrite = false;
-		gridGraphicsPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::NEVER;
-		gridGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-		gridGraphicsPipelineDescriptor.renderPass = renderPass;
-		gridGraphicsPipelineDescriptor.subpassIndex = 0;
-
-		#if defined(DEBUG_OBJECT_NAME)
-			gridGraphicsPipelineDescriptor.name = "Grid";
-		#endif
-
-		gridPipeline = createGraphicsPipeline(gridGraphicsPipelineDescriptor);
-	}
-
-	void Physics2DRenderer::createRigidBodyFillPipeline() {
-		VertexInputBinding vertexInputBindings[2] = {
-			VertexInputBinding(InputRate::VERTEX),
-			VertexInputBinding(InputRate::INSTANCE),
-		};
-
-		vertexInputBindings[0].registerAttribute<svec2<float32>>();
-
-		vertexInputBindings[1].registerAttribute<mat3x3<float32>>();
-		vertexInputBindings[1].registerAttribute<vec4<float32>>();
-		vertexInputBindings[1].registerAttribute<vec4<float32>>();
-		vertexInputBindings[1].registerAttribute<float32>();
-
-		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
-		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-		vertexShaderModuleDescriptor.entryPoint = "main";
-
-		#if defined(DEBUG_OBJECT_NAME)
-			vertexShaderModuleDescriptor.name = "Fill vertex";
-		#endif
-
-		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
-		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-		fragmentShaderModuleDescriptor.entryPoint = "main";
-
-		#if defined(DEBUG_OBJECT_NAME)
-			fragmentShaderModuleDescriptor.name = "Fill fragment";
-		#endif
-
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/RigidBodyFill.vert");
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/FragmentRGBA.frag");
-
-		ColorBlendAttachment colorBlendAttachment{};
-		colorBlendAttachment.blend = true;
-		colorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
-		colorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
-
-		rigidBodyFillPipeline = createGraphicsPipeline({
-			.pipelineLayout = cameraViewPipelineLayout,
-			.vertexInputBindings = vertexInputBindings,
-			.vertexShaderModule = vertexShaderModule,
-			.fragmentShaderModule = fragmentShaderModule,
-			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
-			.polygonMode = PolygonMode::FILL,
-			.cullMode = CullMode::BACK,
-			.frontFace = FrontFace::CLOCKWISE,
-			.lineWidth = 1.0f,
-			.minSampleShading = 0.0f,
-			.colorBlendState = {
-				.attachments = {colorBlendAttachment},
-			},
-			.depthStencilState = {
-				.depthTest = true,
-				.depthWrite = true,
-				.compareOperation = CompareOperation::GREATER_OR_EQUAL,
-			},
-			.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
-			.renderPass = renderPass,
-			.subpassIndex = 0,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Rigid body fill",
-			#endif
-		});
-	}
-
-	void Physics2DRenderer::createRigidBodyStrokePipeline() {
-		VertexInputBinding vertexInputBindings[2] = {
-			VertexInputBinding(InputRate::VERTEX),
-			VertexInputBinding(InputRate::INSTANCE),
-		};
-
-		vertexInputBindings[0].registerAttribute<svec2<float32>>();
-
-		vertexInputBindings[1].registerAttribute<mat3x3<float32>>();
-		vertexInputBindings[1].registerAttribute<vec4<float32>>();
-		vertexInputBindings[1].registerAttribute<vec4<float32>>();
-		vertexInputBindings[1].registerAttribute<float32>();
-		vertexInputBindings[1].registerAttribute<uint32>();
-
-		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
-		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-		vertexShaderModuleDescriptor.entryPoint = "main";
-
-		#if defined(DEBUG_OBJECT_NAME)
-			vertexShaderModuleDescriptor.name = "Stroke vertex";
-		#endif
-
-		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
-		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-		fragmentShaderModuleDescriptor.entryPoint = "main";
-
-		#if defined(DEBUG_OBJECT_NAME)
-			fragmentShaderModuleDescriptor.name = "Stroke fragment";
-		#endif
-
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/RigidBodyStroke.vert");
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/RigidBodyStroke.frag");
-
-		ColorBlendAttachment colorBlendAttachment{};
-		colorBlendAttachment.blend = true;
-		colorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
-		colorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
-
-		rigidBodyStrokePipeline = createGraphicsPipeline({
-			.pipelineLayout = cameraViewPipelineLayout,
-			.vertexInputBindings = vertexInputBindings,
-			.vertexShaderModule = vertexShaderModule,
-			.fragmentShaderModule = fragmentShaderModule,
-			.primitiveTopology = PrimitiveTopology::LINE_STRIP,
-			.polygonMode = PolygonMode::LINE,
-			.cullMode = CullMode::BACK,
-			.frontFace = FrontFace::CLOCKWISE,
-			.lineWidth = 1.0f,
-			.minSampleShading = 0.0f,
-			.colorBlendState = {
-				.attachments = {colorBlendAttachment},
-			},
-			.depthStencilState = {
-				.depthTest = true,
-				.depthWrite = true,
-				.compareOperation = CompareOperation::GREATER_OR_EQUAL,
-			},
-			.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR /* | DynamicState::LINE_WIDTH */,
-			.renderPass = renderPass,
-			.subpassIndex = 0,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Rigid body stroke",
-			#endif
-		});
-	}
-
-	void Physics2DRenderer::createCenterOfMassPipeline() {
-		VertexInputBinding centerOfMassVertexInputBinding(InputRate::VERTEX);
-		centerOfMassVertexInputBinding.registerAttribute<vec3<float32>>();
-
-		ShaderModuleDescriptor centerOfMassVertexShaderModuleDescriptor{};
-		centerOfMassVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-		centerOfMassVertexShaderModuleDescriptor.entryPoint = "main";
-
-		#if defined(DEBUG_OBJECT_NAME)
-			centerOfMassVertexShaderModuleDescriptor.name = "Center of mass vertex";
-		#endif
-
-		ShaderModuleDescriptor centerOfMassFragmentShaderModuleDescriptor{};
-		centerOfMassFragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-		centerOfMassFragmentShaderModuleDescriptor.entryPoint = "main";
-
-		#if defined(DEBUG_OBJECT_NAME)
-			centerOfMassFragmentShaderModuleDescriptor.name = "Center of mass fragment";
-		#endif
-
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule(centerOfMassVertexShaderModuleDescriptor, "Physics2D/CenterOfMass.vert");
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(centerOfMassFragmentShaderModuleDescriptor, "Physics2D/CenterOfMass.frag");
-
-		const ColorBlendAttachment colorBlendAttachments[] = {
-			{
-				.blend = false,
-			},
-		};
-
-		GraphicsPipelineDescriptor centerOfMassGraphicsPipelineDescriptor{};
-		centerOfMassGraphicsPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
-		centerOfMassGraphicsPipelineDescriptor.vertexInputBindings = centerOfMassVertexInputBinding;
-		centerOfMassGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-		centerOfMassGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-		centerOfMassGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::POINT_LIST;
-		centerOfMassGraphicsPipelineDescriptor.polygonMode = PolygonMode::POINT;
-		centerOfMassGraphicsPipelineDescriptor.cullMode = CullMode::BACK;
-		centerOfMassGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-		centerOfMassGraphicsPipelineDescriptor.lineWidth = 1.0f;
-		centerOfMassGraphicsPipelineDescriptor.minSampleShading = 1.0f;
-		centerOfMassGraphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
-		centerOfMassGraphicsPipelineDescriptor.depthStencilState.depthTest = true;
-		centerOfMassGraphicsPipelineDescriptor.depthStencilState.depthWrite = true;
-		centerOfMassGraphicsPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
-		centerOfMassGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-		centerOfMassGraphicsPipelineDescriptor.renderPass = renderPass;
-		centerOfMassGraphicsPipelineDescriptor.subpassIndex = 0;
-
-		#if defined(DEBUG_OBJECT_NAME)
-			centerOfMassGraphicsPipelineDescriptor.name = "Center of mass";
-		#endif
-
-		centerOfMassPipeline = createGraphicsPipeline(centerOfMassGraphicsPipelineDescriptor);
-	}
-
-	void Physics2DRenderer::createRigidBodyPlaceholderFillPipeline() {
-		VertexInputBinding vertexInputBindings[2] = {
-			VertexInputBinding(InputRate::VERTEX),
-			VertexInputBinding(InputRate::INSTANCE),
-		};
-
-		vertexInputBindings[0].registerAttribute<svec2<float32>>();
-
-		vertexInputBindings[1].registerAttribute<mat3x3<float32>>();
-		vertexInputBindings[1].registerAttribute<vec4<float32>>();
-		vertexInputBindings[1].stride = sizeof(RigidBody);
-
-		const ShaderModuleDescriptor vertexShaderModuleDescriptor = {
-			.stage = ShaderStage::VERTEX,
-			.entryPoint = "main",
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Rigid body placeholder fill vertex",
-			#endif
-		};
-
-		ref<ShaderModule> vertexShaderModule;
-
-		switch (getGraphicsApi()) {
-			case GraphicsAPI::DX12:
-			case GraphicsAPI::VK: {
-				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/PlaceholderFill.vert");
-
-				break;
-			}
-			case GraphicsAPI::GL: {
-				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/PlaceholderFillSingleSet.vert");
-
-				break;
-			}
-		}
-
-		const ColorBlendAttachment colorBlendAttachments[] = {
-			{
-				.blend = true,
-				.srcColorBlendFactor = BlendFactor::SRC_ALPHA,
-				.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA,
-			},
-		};
-
-		rigidBodyPlaceholderFillPipeline = createGraphicsPipeline({
-			.pipelineLayout = placeholderPipelineLayout,
-			.vertexInputBindings = vertexInputBindings,
-			.vertexShaderModule = vertexShaderModule,
-			.fragmentShaderModule = loadShaderModule(
-				{
-					.stage = ShaderStage::FRAGMENT,
-					.entryPoint = "main",
-					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Rigid body placeholder fill fragment",
-					#endif
-				},
-				"Physics2D/FragmentRGBA.frag"
-			),
-			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
-			.polygonMode = PolygonMode::FILL,
-			.cullMode = CullMode::BACK,
-			.frontFace = FrontFace::CLOCKWISE,
-			.lineWidth = 1.0f,
-			.minSampleShading = 0.0f,
-			.colorBlendState = {
-				.attachments = colorBlendAttachments,
-			},
-			.depthStencilState = {
-				.depthTest = false,
-			},
-			.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
-			.renderPass = renderPass,
-			.subpassIndex = 0,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Rigid body placeholder fill",
-			#endif
-		});
-	}
-
-	void Physics2DRenderer::createRigidBodyPlaceholderStrokePipeline() {
-		VertexInputBinding vertexInputBindings[2] = {
-			VertexInputBinding(InputRate::VERTEX),
-			VertexInputBinding(InputRate::INSTANCE),
-		};
-
-		vertexInputBindings[0].registerAttribute<svec2<float32>>();
-
-		vertexInputBindings[1].registerAttribute<mat3x3<float32>>();
-		vertexInputBindings[1].stride = sizeof(RigidBody);
-
-		const ShaderModuleDescriptor vertexShaderModuleDescriptor = {
-			.stage = ShaderStage::VERTEX,
-			.entryPoint = "main",
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Rigid body placeholder stroke vertex",
-			#endif
-		};
-
-		ref<ShaderModule> vertexShaderModule;
-
-		switch (getGraphicsApi()) {
-			case GraphicsAPI::DX12:
-			case GraphicsAPI::VK: {
-				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/PlaceholderStroke.vert");
-
-				break;
-			}
-			case GraphicsAPI::GL: {
-				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/PlaceholderStrokeSingleSet.vert");
-
-				break;
-			}
-		}
-
-		const ColorBlendAttachment colorBlendAttachments[] = {
-			{
-				.blend = true,
-				.srcColorBlendFactor = BlendFactor::SRC_ALPHA,
-				.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA,
-			},
-		};
-
-		rigidBodyPlaceholderStrokePipeline = createGraphicsPipeline({
-			.pipelineLayout = placeholderPipelineLayout,
-			.vertexInputBindings = vertexInputBindings,
-			.vertexShaderModule = vertexShaderModule,
-			.fragmentShaderModule = loadShaderModule(
-				{
-					.stage = ShaderStage::FRAGMENT,
-					.entryPoint = "main",
-					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Rigid body placeholder stroke fragment",
-					#endif
-				},
-				"Physics2D/PlaceholderStroke.frag"
-			),
-			.primitiveTopology = PrimitiveTopology::LINE_STRIP,
-			.polygonMode = PolygonMode::LINE,
-			.cullMode = CullMode::BACK,
-			.frontFace = FrontFace::CLOCKWISE,
-			.lineWidth = 1.0f,
-			.minSampleShading = 0.0f,
-			.colorBlendState = {
-				.attachments = colorBlendAttachments,
-			},
-			.depthStencilState = {
-				.depthTest = false,
-			},
-			.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
-			.renderPass = renderPass,
-			.subpassIndex = 0,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Rigid body placeholder stroke",
-			#endif
-		});
-	}
-
-	void Physics2DRenderer::createRigidBodyPlaceholderCenterOfMassPipeline() {
-		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<svec2<float32>>();
-		vertexInputBinding.stride = sizeof(CenterOfMass);
-
-		const ShaderModuleDescriptor vertexShaderModuleDescriptor = {
-			.stage = ShaderStage::VERTEX,
-			.entryPoint = "main",
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Rigid body placeholder center of mass vertex",
-			#endif
-		};
-
-		ref<ShaderModule> vertexShaderModule;
-
-		switch (getGraphicsApi()) {
-			case GraphicsAPI::DX12:
-			case GraphicsAPI::VK: {
-				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/PlaceholderCenterOfMass.vert");
-
-				break;
-			}
-			case GraphicsAPI::GL: {
-				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/PlaceholderCenterOfMassSingleSet.vert");
-
-				break;
-			}
-		}
-
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(
-			{
-				.stage = ShaderStage::FRAGMENT,
-				.entryPoint = "main",
-				#if defined(DEBUG_OBJECT_NAME)
-					.name = "Rigid body placeholder center of mass fragment",
-				#endif
-			},
-			"Physics2D/CenterOfMass.frag"
-		);
-
-		rigidBodyPlaceholderCenterOfMassPipeline = createGraphicsPipeline({
-			.pipelineLayout = placeholderPipelineLayout,
-			.vertexInputBindings = vertexInputBinding,
-			.vertexShaderModule = vertexShaderModule,
-			.fragmentShaderModule = fragmentShaderModule,
-			.primitiveTopology = PrimitiveTopology::POINT_LIST,
-			.polygonMode = PolygonMode::POINT,
-			.cullMode = CullMode::BACK,
-			.frontFace = FrontFace::CLOCKWISE,
-			.lineWidth = 1.0f,
-			.minSampleShading = 1.0f,
-			.colorBlendState = {
-				.attachments = {
-					{
-						.blend = false,
-					},
-				},
-			},
-			.depthStencilState = {
-				.depthTest = false,
-			},
-			.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
-			.renderPass = renderPass,
-			.subpassIndex = 0,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Rigid body placeholder center of mass",
-			#endif
-		});
-	}
-
-	#if defined(SHOW_DISTANCE)
-		void Physics2DRenderer::createDistanceGraphicsPipeline() {
-			VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-			vertexInputBinding.registerAttribute<svec2<float32>>();
-
-			ShaderModuleDescriptor vertexShaderModuleDescriptor{};
-			vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-			vertexShaderModuleDescriptor.entryPoint = "main";
-
-			#if defined(DEBUG_OBJECT_NAME)
-				vertexShaderModuleDescriptor.name = "Distance vertex";
-			#endif
-
-			ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
-			fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-			fragmentShaderModuleDescriptor.entryPoint = "main";
-
-			#if defined(DEBUG_OBJECT_NAME)
-				fragmentShaderModuleDescriptor.name = "Distance fragment";
-			#endif
-
-			const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/Distance.vert");
-			const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/Distance.frag");
-
-			const ColorBlendAttachment colorBlendAttachments[] = {
-				{
-					.blend = false,
-				},
-			};
-
-			GraphicsPipelineDescriptor distanceGraphicsPipelineDescriptor{};
-			distanceGraphicsPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
-			distanceGraphicsPipelineDescriptor.vertexInputBindings = vertexInputBinding;
-			distanceGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-			distanceGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-			distanceGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_LIST;
-			distanceGraphicsPipelineDescriptor.polygonMode = PolygonMode::LINE;
-			distanceGraphicsPipelineDescriptor.cullMode = CullMode::BACK;
-			distanceGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-			distanceGraphicsPipelineDescriptor.lineWidth = 1.0f;
-			distanceGraphicsPipelineDescriptor.minSampleShading = 0.0f;
-			distanceGraphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
-			distanceGraphicsPipelineDescriptor.depthStencilState.depthTest = false;
-			distanceGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-			distanceGraphicsPipelineDescriptor.renderPass = renderPass;
-			distanceGraphicsPipelineDescriptor.subpassIndex = 0;
-
-			#if defined(DEBUG_OBJECT_NAME)
-				distanceGraphicsPipelineDescriptor.name = "Distance";
-			#endif
-
-			distanceGraphicsPipeline = createGraphicsPipeline(distanceGraphicsPipelineDescriptor);
-		}
-	#endif
-
-	#if defined(SHOW_FEATURES)
-		void Physics2DRenderer::createVertexFeatureGraphicsPipeline() {
-			VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-			vertexInputBinding.registerAttribute<svec2<float32>>();
-
-			ShaderModuleDescriptor vertexShaderModuleDescriptor{};
-			vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-			vertexShaderModuleDescriptor.entryPoint = "main";
-
-			#if defined(DEBUG_OBJECT_NAME)
-				vertexShaderModuleDescriptor.name = "Vertex feature vertex";
-			#endif
-
-			ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
-			fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-			fragmentShaderModuleDescriptor.entryPoint = "main";
-
-			#if defined(DEBUG_OBJECT_NAME)
-				fragmentShaderModuleDescriptor.name = "Vertex feature fragment";
-			#endif
-
-			const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/VertexFeature.vert");
-			const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/VertexFeature.frag");
-
-			const ColorBlendAttachment colorBlendAttachments[] = {
-				{
-					.blend = false,
-				},
-			};
-
-			GraphicsPipelineDescriptor vertexFeatureGraphicsPipelineDescriptor{};
-			vertexFeatureGraphicsPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
-			vertexFeatureGraphicsPipelineDescriptor.vertexInputBindings = vertexInputBinding;
-			vertexFeatureGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-			vertexFeatureGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-			vertexFeatureGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::POINT_LIST;
-			vertexFeatureGraphicsPipelineDescriptor.polygonMode = PolygonMode::POINT;
-			vertexFeatureGraphicsPipelineDescriptor.cullMode = CullMode::BACK;
-			vertexFeatureGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-			vertexFeatureGraphicsPipelineDescriptor.lineWidth = 1.0f;
-			vertexFeatureGraphicsPipelineDescriptor.minSampleShading = 1.0f;
-			vertexFeatureGraphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
-			vertexFeatureGraphicsPipelineDescriptor.depthStencilState.depthTest = false;
-			vertexFeatureGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-			vertexFeatureGraphicsPipelineDescriptor.renderPass = renderPass;
-			vertexFeatureGraphicsPipelineDescriptor.subpassIndex = 0;
-
-			#if defined(DEBUG_OBJECT_NAME)
-				vertexFeatureGraphicsPipelineDescriptor.name = "Vertex feature";
-			#endif
-
-			vertexFeatureGraphicsPipeline = createGraphicsPipeline(vertexFeatureGraphicsPipelineDescriptor);
-		}
-
-		void Physics2DRenderer::createEdgeFeatureGraphicsPipeline() {
-			VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-			vertexInputBinding.registerAttribute<svec2<float32>>();
-
-			ShaderModuleDescriptor vertexShaderModuleDescriptor{};
-			vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-			vertexShaderModuleDescriptor.entryPoint = "main";
-
-			#if defined(DEBUG_OBJECT_NAME)
-				vertexShaderModuleDescriptor.name = "Edge feature vertex";
-			#endif
-
-			ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
-			fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-			fragmentShaderModuleDescriptor.entryPoint = "main";
-
-			#if defined(DEBUG_OBJECT_NAME)
-				fragmentShaderModuleDescriptor.name = "Edge feature fragment";
-			#endif
-
-			const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/EdgeFeature.vert");
-			const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/EdgeFeature.frag");
-
-			const ColorBlendAttachment colorBlendAttachments[] = {
-				{
-					.blend = false,
-				},
-			};
-
-			GraphicsPipelineDescriptor edgeFeatureGraphicsPipelineDescriptor{};
-			edgeFeatureGraphicsPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
-			edgeFeatureGraphicsPipelineDescriptor.vertexInputBindings = vertexInputBinding;
-			edgeFeatureGraphicsPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-			edgeFeatureGraphicsPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-			edgeFeatureGraphicsPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_LIST;
-			edgeFeatureGraphicsPipelineDescriptor.polygonMode = PolygonMode::LINE;
-			edgeFeatureGraphicsPipelineDescriptor.cullMode = CullMode::BACK;
-			edgeFeatureGraphicsPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-			edgeFeatureGraphicsPipelineDescriptor.lineWidth = 3.0f;
-			edgeFeatureGraphicsPipelineDescriptor.minSampleShading = 0.0f;
-			edgeFeatureGraphicsPipelineDescriptor.colorBlendState.attachments = colorBlendAttachments;
-			edgeFeatureGraphicsPipelineDescriptor.depthStencilState.depthTest = false;
-			edgeFeatureGraphicsPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-			edgeFeatureGraphicsPipelineDescriptor.renderPass = renderPass;
-			edgeFeatureGraphicsPipelineDescriptor.subpassIndex = 0;
-
-			#if defined(DEBUG_OBJECT_NAME)
-				edgeFeatureGraphicsPipelineDescriptor.name = "Edge feature";
-			#endif
-
-			edgeFeatureGraphicsPipeline = createGraphicsPipeline(edgeFeatureGraphicsPipelineDescriptor);
-		}
-	#endif
 
 	void Physics2DRenderer::allocateDescriptorSets() {
 		const ref<DescriptorSetLayout> descriptorSetLayouts[] = {
@@ -1415,7 +796,7 @@ namespace Trident {
 
 	#if defined(SHOW_DISTANCE)
 		void Physics2DRenderer::renderDistance(ref<CommandEncoder> commandEncoder) const {
-			commandEncoder->bindGraphicsPipeline(distanceGraphicsPipeline);
+			commandEncoder->bindGraphicsPipeline(distancePipeline);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
 			commandEncoder->bindVertexBuffer(0, closestPointBuffer, 0);
 			commandEncoder->draw(2, 1, 0, 0);
@@ -1425,14 +806,14 @@ namespace Trident {
 	#if defined(SHOW_FEATURES)
 		void Physics2DRenderer::renderFeatures(ref<CommandEncoder> commandEncoder) const {
 			if (vertexFeatureCount > 0) {
-				commandEncoder->bindGraphicsPipeline(vertexFeatureGraphicsPipeline);
+				commandEncoder->bindGraphicsPipeline(vertexFeaturePipeline);
 				commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
 				commandEncoder->bindVertexBuffer(0, vertexFeatureBuffer, 0);
 				commandEncoder->draw(vertexFeatureCount, 1, 0, 0);
 			}
 
 			if (edgeFeatureCount > 0) {
-				commandEncoder->bindGraphicsPipeline(edgeFeatureGraphicsPipeline);
+				commandEncoder->bindGraphicsPipeline(edgeFeaturePipeline);
 				commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
 				commandEncoder->bindVertexBuffer(0, edgeFeatureBuffer, 0);
 				commandEncoder->draw(edgeFeatureCount * 2, 1, 0, 0);
