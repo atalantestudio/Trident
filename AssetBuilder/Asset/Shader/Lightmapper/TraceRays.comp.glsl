@@ -437,7 +437,7 @@ vec3 rgen(Hit primaryHit, inout uint seed) {
 	return incomingLight;
 }
 
-vec3 adjustSamplePosition(vec3 position, vec3 triangleNormal, float diagonalLuxelSize) {
+bool adjustSamplePosition(inout vec3 position, vec3 triangleNormal, float diagonalLuxelSize) {
 	const float bias = 1e-4;
 
 	vec3 a = normalize(cross(position, triangleNormal));
@@ -450,33 +450,57 @@ vec3 adjustSamplePosition(vec3 position, vec3 triangleNormal, float diagonalLuxe
 
 	Hit hit = rintBackFacing(ray);
 
-	if (hit.distance > 0.0 && hit.distance <= rayLength) {
-		return hit.position + sign(hit.triangleNormal) * abs(hit.position * bias);
+	uint obstacleCount = uint(hit.distance > 0.0);
+
+	if (hit.distance > 0.0) {
+		if (hit.distance <= rayLength) {
+			position = hit.position + sign(hit.triangleNormal) * abs(hit.position * bias);
+
+			return false;
+		}
 	}
 
 	ray.direction = b;
 
 	hit = rintBackFacing(ray);
 
-	if (hit.distance > 0.0 && hit.distance <= rayLength) {
-		return hit.position + sign(hit.triangleNormal) * abs(hit.position * bias);
+	obstacleCount += uint(hit.distance > 0.0);
+
+	if (hit.distance > 0.0) {
+		if (hit.distance <= rayLength) {
+			position = hit.position + sign(hit.triangleNormal) * abs(hit.position * bias);
+
+			return false;
+		}
 	}
 
 	ray.direction = -a;
 	hit = rintBackFacing(ray);
 
-	if (hit.distance > 0.0 && hit.distance <= rayLength) {
-		return hit.position + sign(hit.triangleNormal) * abs(hit.position * bias);
+	obstacleCount += uint(hit.distance > 0.0);
+
+	if (hit.distance > 0.0) {
+		if (hit.distance <= rayLength) {
+			position = hit.position + sign(hit.triangleNormal) * abs(hit.position * bias);
+
+			return false;
+		}
 	}
 
 	ray.direction = -b;
 	hit = rintBackFacing(ray);
 
-	if (hit.distance > 0.0 && hit.distance <= rayLength) {
-		return hit.position + sign(hit.triangleNormal) * abs(hit.position * bias);
+	obstacleCount += uint(hit.distance > 0.0);
+
+	if (hit.distance > 0.0) {
+		if (hit.distance <= rayLength) {
+			position = hit.position + sign(hit.triangleNormal) * abs(hit.position * bias);
+
+			return false;
+		}
 	}
 
-	return position;
+	return obstacleCount == 4;
 }
 
 void main() {
@@ -501,8 +525,12 @@ void main() {
 		return;
 	}
 
+	if (!adjustSamplePosition(position, triangleNormal, diagonalLuxelSize)) {
+		return;
+	}
+
 	Hit hit;
-	hit.position = adjustSamplePosition(position, triangleNormal, diagonalLuxelSize);
+	hit.position = position;
 	hit.triangleNormal = triangleNormal;
 	hit.faceIndex = uint(vertexNormalData.w);
 	hit.vertexNormal = vertexNormal;
