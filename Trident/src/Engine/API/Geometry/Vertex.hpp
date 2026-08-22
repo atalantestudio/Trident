@@ -19,8 +19,7 @@ namespace Trident {
 		/// R10G10B10A2_SNORM would be better but it's not supported on DX12.
 		uint32 tangent;
 
-		// TODO(geometry/vertex-compression): Use R16G16_FLOAT instead. Values can go outside of [0, 1].
-		/// Stored as R16G16_UNORM.
+		/// Stored as R16G16_FLOAT.
 		uint32 textureCoordinate;
 	};
 }
