@@ -131,9 +131,57 @@ float balanceHeuristic(float pdf1, float pdf2) {
 	return pdf1 / (pdf1 + pdf2);
 }
 
+// TODO(asset-builder/lightmapper): Compare with previous function.
+bool rayTriangleTest(Ray ray, Triangle triangle_, inout float t, inout vec3 barycentricCoordinate) {
+	const float E = 1e-8;
+
+	vec3 a = triangle_.vertices[0].position;
+	vec3 b = triangle_.vertices[1].position;
+	vec3 c = triangle_.vertices[2].position;
+	vec3 ab = b - a;
+	vec3 ac = c - a;
+	vec3 normal = cross(ab, ac);
+	float d = -dot(normal, ray.direction);
+
+	if (d < E) {
+		return false;
+	}
+
+	vec3 ao = ray.origin - a;
+	float inverseD = 1.0 / d;
+
+	t = dot(ao, normal) * inverseD;
+
+	if (t < 0.0) {
+		return false;
+	}
+
+	vec3 dao = cross(ao, ray.direction);
+	float u = dot(ac, dao) * inverseD;
+
+	if (u < 0.0) {
+		return false;
+	}
+
+	float v = -dot(ab, dao) * inverseD;
+
+	if (v < 0.0) {
+		return false;
+	}
+
+	float w = 1 - u - v;
+
+	if (w < 0.0) {
+		return false;
+	}
+
+	barycentricCoordinate = vec3(w, u, v);
+
+	return true;
+}
 
 bool rayTriangleIntersectionFrontFacing(Ray ray, Triangle triangle_, inout float t, inout vec3 barycentricCoordinate) {
-	const float E = 1e-6;
+	/* const float E = 1e-6;
 	const float F = 1e-6;
 
 	vec3 a = triangle_.vertices[0].position;
@@ -176,7 +224,8 @@ bool rayTriangleIntersectionFrontFacing(Ray ray, Triangle triangle_, inout float
 		return true;
 	}
 
-	return false;
+	return false; */
+	return rayTriangleTest(ray, triangle_, t, barycentricCoordinate);
 }
 
 bool rayTriangleIntersectionBackFacing(Ray ray, Triangle triangle_, inout float t, inout vec3 barycentricCoordinate) {
