@@ -33,12 +33,12 @@ namespace Trident {
 
 	template<>
 	svec2<float32> unpack<VertexInputAttributeFormat::R16G16_UNORM>(uint32 value) {
-		static constexpr float32 scale = 1.0f / (0xffff * 0.5f);
+		static constexpr float32 scale = 1.0f / 0xffff;
 
-		return {
-			(value & 0xffff) * scale - 1.0f,
-			((value >> 16) & 0xffff) * scale - 1.0f,
-		};
+		const float32 x = (value & 0xffff) * scale;
+		const float32 y = ((value >> 16) & 0xffff) * scale;
+
+		return {x, y};
 	}
 
 	template<>

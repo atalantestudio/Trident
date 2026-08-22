@@ -26,5 +26,5 @@ void main() {
 
 	interstage.normal = normal * 2.0 - 1.0;
 	interstage.textureCoordinate = textureCoordinate;
-	interstage.lightmapCoordinate = lightmapCoordinate * 2.0 - 1.0;
+	interstage.lightmapCoordinate = lightmapCoordinate;
 }
