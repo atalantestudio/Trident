@@ -315,8 +315,6 @@ namespace Trident {
 					mipLevelIndex += 1;
 				}
 
-				descriptorImages[0].imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
-
 				const WriteDescriptorSet writeDescriptorSets[] = {
 					// Arguments
 					{
