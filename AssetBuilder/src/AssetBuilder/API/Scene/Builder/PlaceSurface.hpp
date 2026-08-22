@@ -84,8 +84,8 @@ namespace Trident {
 
 		Lightmap lightmap{};
 		lightmap.geometryIndex = materialGeometry.geometryIndex;
+		lightmap.triangleRange = {static_cast<uint32>(indexOffset / 3), 2};
 		lightmap.vertexRange = {vertexOffset, surfaceVertexCount};
-		lightmap.triangleOffset = static_cast<uint32>(indexOffset / 3);
 		lightmap.scale = descriptor.geometry.scale;
 		lightmap.maxCoordinate = maxCoordinate;
 		lightmap.minCoordinate = minCoordinate;

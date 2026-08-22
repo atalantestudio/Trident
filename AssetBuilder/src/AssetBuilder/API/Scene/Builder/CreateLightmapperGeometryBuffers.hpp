@@ -89,12 +89,11 @@ namespace Trident {
 
 				if (lightmapMaterials[lightmapIndex].emissiveIntensity > 0.0f) {
 					const uint32 geometryTriangleOffset = scene.geometries[lightmap.geometryIndex].indexRange.offset / 3;
-					const uint32 triangleCount = static_cast<uint32>(lightmap.vertexRange.count / 2);
 
 					uint32 triangleIndex = 0;
 
-					while (triangleIndex < triangleCount) {
-						emissiveTriangleIndices_.emplace_back(geometryTriangleOffset + lightmap.triangleOffset + triangleIndex);
+					while (triangleIndex < lightmap.triangleRange.count) {
+						emissiveTriangleIndices_.emplace_back(geometryTriangleOffset + lightmap.triangleRange.offset + triangleIndex);
 
 						triangleIndex += 1;
 					}
