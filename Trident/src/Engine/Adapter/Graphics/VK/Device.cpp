@@ -207,14 +207,14 @@ namespace Trident {
 	}
 
 	ref<Trident::Device> VK::createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice) {
-		static constexpr float32 DEFAULT_QUEUE_PRIORITY = 1.0f;
-
 		// TODO(graphics/vk/device/extensions): Expose to the client side.
 		static constexpr const char8* ENABLED_EXTENSION_NAMES_[] = {
 			VK_KHR_MAINTENANCE_1_EXTENSION_NAME,
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 		};
 		static constexpr view<const char8*> ENABLED_EXTENSION_NAMES = ENABLED_EXTENSION_NAMES_;
+
+		static constexpr float32 DEFAULT_QUEUE_PRIORITY = 1.0f;
 
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
@@ -300,7 +300,6 @@ namespace Trident {
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		const VK::Fence* _fence = static_cast<const VK::Fence*>(fence);
-
 		const VkResult result = _device->vkResetFences(_device->device, 1, &_fence->fence);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to reset fence ([]).", string_VkResult(result));

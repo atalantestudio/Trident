@@ -66,19 +66,19 @@ namespace Trident {
 	}
 
 	ref<Trident::Instance> VK::createInstance(const Trident::GraphicsAdapter* adapter, const InstanceDescriptor& descriptor) {
-		// TODO(graphics/vk/instance): Expose to the client side.
-		static const sequence<const char8*> ENABLED_LAYER_NAMES = {
+		// TODO(graphics/vk/instance/extensions): Expose to the client side.
+		static constexpr const char8* ENABLED_LAYER_NAMES_[] = {
 			#if defined(DEBUG_ENABLE_GRAPHICS_API_VALIDATION_LAYER)
 				"VK_LAYER_KHRONOS_validation",
 			#endif
 		};
+		static constexpr view<const char8*> ENABLED_LAYER_NAMES = ENABLED_LAYER_NAMES_;
 
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		ref<VK::Instance> instance = allocateRef<VK::Instance>(adapter);
 		VkResult result;
 
-		// Load instance procedures.
 		#define LOAD_PROCEDURE(instance, procedure) loadInstanceProcedure<decltype(procedure)>(instance, #procedure)
 
 		static PFN_vkCreateInstance vkCreateInstance = LOAD_PROCEDURE(nullptr, vkCreateInstance);
