@@ -505,7 +505,7 @@ bool adjustSamplePosition(inout vec3 position, vec3 triangleNormal, float diagon
 		if (hit.distance <= rayLength) {
 			position = hit.position + sign(hit.triangleNormal) * abs(hit.position * bias);
 
-			return false;
+			return true;
 		}
 	}
 
@@ -519,7 +519,7 @@ bool adjustSamplePosition(inout vec3 position, vec3 triangleNormal, float diagon
 		if (hit.distance <= rayLength) {
 			position = hit.position + sign(hit.triangleNormal) * abs(hit.position * bias);
 
-			return false;
+			return true;
 		}
 	}
 
@@ -532,7 +532,7 @@ bool adjustSamplePosition(inout vec3 position, vec3 triangleNormal, float diagon
 		if (hit.distance <= rayLength) {
 			position = hit.position + sign(hit.triangleNormal) * abs(hit.position * bias);
 
-			return false;
+			return true;
 		}
 	}
 
@@ -545,11 +545,11 @@ bool adjustSamplePosition(inout vec3 position, vec3 triangleNormal, float diagon
 		if (hit.distance <= rayLength) {
 			position = hit.position + sign(hit.triangleNormal) * abs(hit.position * bias);
 
-			return false;
+			return true;
 		}
 	}
 
-	return obstacleCount == 4;
+	return obstacleCount < 4;
 }
 
 void main() {
