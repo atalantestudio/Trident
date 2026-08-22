@@ -81,8 +81,9 @@ namespace Trident {
 				renderer.setScene(scene);
 				renderer.visualizationMode = VisualizationMode::DEFAULT;
 
+				PerspectiveCamera3D& camera = cameraController.getCamera();
+
 				#if !defined(FORWARD_USE_NOCLIP_CAMERA)
-					PerspectiveCamera3D& camera = cameraController.getCamera();
 					// camera.distance = 128.0_m;
 					camera.fieldOfView = radians(70.0_deg);
 					camera.aspectRatio = getApplication()->getWindow()->getAspectRatio();
@@ -93,12 +94,12 @@ namespace Trident {
 					camera.updateProjectionView();
 				#else
 					#if defined(FORWARD_TEST_CORNELL_BOX)
-						cameraController.getCamera().aspectRatio = 1.0f;
-						cameraController.getCamera().position = {-278.0f, 273.0f, -372.0f};
+						camera.position = {-278.0f, 273.0f, -800.0f};
+						camera.fieldOfView = radians(40.0_deg);
 					#else
 						// TODO(forward/camera): Expose the position.
-						cameraController.getCamera().position = {0.0f, 64.0f, 0.0f};
-						cameraController.getCamera().aspectRatio = getApplication()->getWindow()->getAspectRatio();
+						camera.position = {0.0f, 64.0f, 0.0f};
+						camera.aspectRatio = getApplication()->getWindow()->getAspectRatio();
 					#endif
 
 					cameraController.updateProjection();

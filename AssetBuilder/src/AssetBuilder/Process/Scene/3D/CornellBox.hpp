@@ -47,11 +47,12 @@ namespace Trident {
 			}
 
 			static BuildStaticGeometry3D createLightGeometry() {
+				static constexpr float32 ceilingBias = 0.01f;
 				static constexpr svec3<float32> positions[] = {
-					{-343.0f,  548.8f - 0.01f,  227.0f},
-					{-213.0f,  548.8f - 0.01f,  227.0f},
-					{-343.0f,  548.8f - 0.01f,  332.0f},
-					{-213.0f,  548.8f - 0.01f,  332.0f},
+					{-343.0f,  548.8f - ceilingBias,  227.0f},
+					{-213.0f,  548.8f - ceilingBias,  227.0f},
+					{-343.0f,  548.8f - ceilingBias,  332.0f},
+					{-213.0f,  548.8f - ceilingBias,  332.0f},
 				};
 
 				return createGeometry(positions);
