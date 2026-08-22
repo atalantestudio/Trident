@@ -5,7 +5,7 @@
 
 #include "AssetBuilder/API/Lightmapper/ArgumentBuffer.hpp"
 #include "AssetBuilder/API/Lightmapper/BilateralFilterPipelines.hpp"
-#include "AssetBuilder/API/Lightmapper/FaceBuffer.hpp"
+#include "AssetBuilder/API/Lightmapper/EmissiveTriangleIndexBuffer.hpp"
 #include "AssetBuilder/API/Lightmapper/GBuffer.hpp"
 #include "AssetBuilder/API/Lightmapper/GBufferDescriptorSetLayout.hpp"
 #include "AssetBuilder/API/Lightmapper/GBufferFramebuffer.hpp"
@@ -17,6 +17,7 @@
 #include "AssetBuilder/API/Lightmapper/IntermediateLightmapAtlasSampler.hpp"
 #include "AssetBuilder/API/Lightmapper/LightmapAtlasImage.hpp"
 #include "AssetBuilder/API/Lightmapper/Lightmapper.hpp"
+#include "AssetBuilder/API/Lightmapper/MaterialBuffer.hpp"
 #include "AssetBuilder/API/Lightmapper/PostProcessingDescriptorSetLayout.hpp"
 #include "AssetBuilder/API/Lightmapper/TraceRaysDescriptorSetLayout.hpp"
 #include "AssetBuilder/API/Lightmapper/TraceRaysPipeline.hpp"
@@ -135,9 +136,10 @@ namespace Trident {
 			initialize();
 		}
 
-		const uint32 vertexCount = static_cast<uint32>(descriptor.vertices.count());
-		const uint32 indexCount = static_cast<uint32>(descriptor.indices.count());
-		const uint32 faceCount = static_cast<uint32>(descriptor.faces.count());
+		const uint64 vertexCount = descriptor.vertices.count();
+		const uint64 indexCount = descriptor.indices.count();
+		const uint64 materialCount = descriptor.materials.count();
+		const uint64 emissiveTriangleIndexCount = descriptor.emissiveTriangleIndices.count();
 
 		context = {};
 
@@ -160,7 +162,8 @@ namespace Trident {
 
 		context.vertexBuffer = createVertexBuffer(vertexCount);
 		context.indexBuffer = createIndexBuffer(indexCount);
-		context.faceBuffer = createFaceBuffer(faceCount);
+		context.materialBuffer = createMaterialBuffer(materialCount);
+		context.emissiveTriangleIndexBuffer = createEmissiveTriangleIndexBuffer(emissiveTriangleIndexCount);
 		context.lightmapAtlasStagingBuffer = device->createDynamicBuffer({
 			.size = context.lightmapAtlasImage->getSize(),
 			.usage = BufferUsage::TRANSFER_DST,
@@ -172,7 +175,7 @@ namespace Trident {
 		});
 
 		encodeOneTimeCommands(descriptor);
-		generateLightmaps(indexCount);
+		generateLightmaps(static_cast<uint32>(indexCount));
 
 		const BufferView<uint8> lightmapAtlasView = context.lightmapAtlasStagingBuffer->createView<uint8>(0, context.lightmapAtlasStagingBuffer->getSize());
 
@@ -280,7 +283,7 @@ namespace Trident {
 
 	void Lightmapper::encodeOneTimeCommands(const LightmapperDescriptor& descriptor) const {
 		const ref<Buffer> stagingBuffer = device->createDynamicBuffer({
-			.size = argumentBuffer->getSize() + context.vertexBuffer->getSize() + context.indexBuffer->getSize() + context.faceBuffer->getSize(),
+			.size = argumentBuffer->getSize() + context.vertexBuffer->getSize() + context.indexBuffer->getSize() + context.materialBuffer->getSize() + context.emissiveTriangleIndexBuffer->getSize(),
 			.usage = BufferUsage::TRANSFER_SRC,
 			.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
 			.persistent = false,
@@ -291,11 +294,13 @@ namespace Trident {
 		const BufferView<Arguments> argumentStagingView = stagingBuffer->createView<Arguments>(0, argumentBuffer->getSize());
 		const BufferView<BuildVertex3D> vertexStagingView = stagingBuffer->createView<BuildVertex3D>(argumentStagingView.getOffset() + argumentStagingView.getSize(), context.vertexBuffer->getSize());
 		const BufferView<uint32> indexStagingView = stagingBuffer->createView<uint32>(vertexStagingView.getOffset() + vertexStagingView.getSize(), context.indexBuffer->getSize());
-		const BufferView<LightmapFace> faceStagingView = stagingBuffer->createView<LightmapFace>(indexStagingView.getOffset() + indexStagingView.getSize(), context.faceBuffer->getSize());
+		const BufferView<LightmapMaterial> materialStagingView = stagingBuffer->createView<LightmapMaterial>(indexStagingView.getOffset() + indexStagingView.getSize(), context.materialBuffer->getSize());
+		const BufferView<uint32> emissiveTriangleIndexStagingView = stagingBuffer->createView<uint32>(materialStagingView.getOffset() + materialStagingView.getSize(), context.emissiveTriangleIndexBuffer->getSize());
 
 		Arguments* arguments = argumentStagingView.map();
 		arguments->atlasExtent = {imageAssetDescriptor.extent.width, imageAssetDescriptor.extent.height};
 		arguments->triangleCount = static_cast<uint32>(descriptor.indices.count() / 3);
+		arguments->emissiveTriangleCount = static_cast<uint32>(descriptor.emissiveTriangleIndices.count());
 		arguments->skyColor = lighting.skyColor;
 		arguments->sunDirection = lighting.sunDirection;
 		arguments->sunColor = lighting.sunColor;
@@ -312,7 +317,8 @@ namespace Trident {
 		}
 
 		std::copy(descriptor.indices.begin(), descriptor.indices.end(), indexStagingView.map());
-		std::copy(descriptor.faces.begin(), descriptor.faces.end(), faceStagingView.map());
+		std::copy(descriptor.materials.begin(), descriptor.materials.end(), materialStagingView.map());
+		std::copy(descriptor.emissiveTriangleIndices.begin(), descriptor.emissiveTriangleIndices.end(), emissiveTriangleIndexStagingView.map());
 
 		stagingBuffer->unmap();
 
@@ -343,16 +349,22 @@ namespace Trident {
 				.size = indexStagingView.getSize(),
 			},
 			{
-				.sourceOffset = faceStagingView.getOffset(),
+				.sourceOffset = materialStagingView.getOffset(),
 				.destinationOffset = 0,
-				.size = faceStagingView.getSize(),
+				.size = materialStagingView.getSize(),
+			},
+			{
+				.sourceOffset = emissiveTriangleIndexStagingView.getOffset(),
+				.destinationOffset = 0,
+				.size = emissiveTriangleIndexStagingView.getSize(),
 			},
 		};
 
 		commandEncoder->copyBufferToBuffer(stagingBuffer, argumentBuffer, bufferCopyRegions[0]);
 		commandEncoder->copyBufferToBuffer(stagingBuffer, context.vertexBuffer, bufferCopyRegions[1]);
 		commandEncoder->copyBufferToBuffer(stagingBuffer, context.indexBuffer, bufferCopyRegions[2]);
-		commandEncoder->copyBufferToBuffer(stagingBuffer, context.faceBuffer, bufferCopyRegions[3]);
+		commandEncoder->copyBufferToBuffer(stagingBuffer, context.materialBuffer, bufferCopyRegions[3]);
+		commandEncoder->copyBufferToBuffer(stagingBuffer, context.emissiveTriangleIndexBuffer, bufferCopyRegions[4]);
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -363,7 +375,8 @@ namespace Trident {
 			argumentBuffer->createView<Arguments>(0, argumentBuffer->getSize()),
 			context.vertexBuffer->createView<BuildVertex3D>(0, context.vertexBuffer->getSize()),
 			context.indexBuffer->createView<uint32>(0, context.indexBuffer->getSize()),
-			context.faceBuffer->createView<LightmapFace>(0, context.faceBuffer->getSize()),
+			context.materialBuffer->createView<LightmapMaterial>(0, context.materialBuffer->getSize()),
+			context.emissiveTriangleIndexBuffer->createView<uint32>(0, context.emissiveTriangleIndexBuffer->getSize()),
 		};
 
 		const DescriptorImage descriptorImages[] = {
@@ -433,26 +446,31 @@ namespace Trident {
 			{
 				.descriptorSet = descriptorSets[1],
 				.bindingIndex = 4,
-				.descriptorImages = descriptorImages[0],
+				.descriptorBufferViews = bufferViews[4],
 			},
 			{
 				.descriptorSet = descriptorSets[1],
 				.bindingIndex = 5,
-				.descriptorImages = descriptorImages[1],
+				.descriptorImages = descriptorImages[0],
 			},
 			{
 				.descriptorSet = descriptorSets[1],
 				.bindingIndex = 6,
-				.descriptorImages = descriptorImages[2],
+				.descriptorImages = descriptorImages[1],
 			},
 			{
 				.descriptorSet = descriptorSets[1],
 				.bindingIndex = 7,
-				.descriptorImages = descriptorImages[3],
+				.descriptorImages = descriptorImages[2],
 			},
 			{
 				.descriptorSet = descriptorSets[1],
 				.bindingIndex = 8,
+				.descriptorImages = descriptorImages[3],
+			},
+			{
+				.descriptorSet = descriptorSets[1],
+				.bindingIndex = 9,
 				.descriptorImages = descriptorImages[4],
 			},
 			{

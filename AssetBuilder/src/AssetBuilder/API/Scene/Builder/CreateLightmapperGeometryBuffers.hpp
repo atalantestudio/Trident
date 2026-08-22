@@ -6,9 +6,10 @@
 #include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
 
 namespace Trident {
-	void SceneBuilder::createLightmapperGeometryBuffers(const BuildScene3D& scene, sequence<BuildVertex3D>& vertices, sequence<uint32>& indices, sequence<LightmapFace>& faces) {
+	void SceneBuilder::createLightmapperGeometryBuffers(const BuildScene3D& scene, sequence<BuildVertex3D>& vertices, sequence<uint32>& indices, sequence<LightmapMaterial>& materials, sequence<uint32>& emissiveTriangleIndices) {
 		vertices = sequence<BuildVertex3D>(lightmapVertexCount);
 		indices = sequence<uint32>(lightmapIndexCount);
+		materials = sequence<LightmapMaterial>(lightmapMaterials.size());
 
 		std::copy(scene.staticGeometry.bakedVertices.begin(), scene.staticGeometry.bakedVertices.end(), &vertices[0]);
 		std::copy(scene.staticGeometry.bakedIndices.begin(), scene.staticGeometry.bakedIndices.end(), &indices[0]);
@@ -69,6 +70,8 @@ namespace Trident {
 			}
 		}
 
+		std::vector<uint32> emissiveTriangleIndices_;
+
 		{
 			uint32 lightmapIndex = 0;
 			uint64 vertexOffset = 0;
@@ -84,11 +87,27 @@ namespace Trident {
 					vertexIndex += 1;
 				}
 
+				if (lightmapMaterials[lightmapIndex].emissiveIntensity > 0.0f) {
+					const uint32 geometryTriangleOffset = scene.geometries[lightmap.geometryIndex].indexRange.offset / 3;
+					const uint32 triangleCount = static_cast<uint32>(lightmap.vertexRange.count / 2);
+
+					uint32 triangleIndex = 0;
+
+					while (triangleIndex < triangleCount) {
+						emissiveTriangleIndices_.emplace_back(geometryTriangleOffset + lightmap.triangleOffset + triangleIndex);
+
+						triangleIndex += 1;
+					}
+				}
+
 				vertexOffset += lightmap.vertexRange.count;
 				lightmapIndex += 1;
 			}
 		}
 
-		std::copy(lightmapFaces.begin(), lightmapFaces.end(), &faces[0]);
+		emissiveTriangleIndices = sequence<uint32>(emissiveTriangleIndices_.size());
+
+		std::copy(lightmapMaterials.begin(), lightmapMaterials.end(), &materials[0]);
+		std::copy(emissiveTriangleIndices_.begin(), emissiveTriangleIndices_.end(), &emissiveTriangleIndices[0]);
 	}
 }

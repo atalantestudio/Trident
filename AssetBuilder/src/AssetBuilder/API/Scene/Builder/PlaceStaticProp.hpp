@@ -55,18 +55,19 @@ namespace Trident {
 		Lightmap lightmap{};
 		lightmap.geometryIndex = materialGeometry.geometryIndex;
 		lightmap.vertexRange = {0, geometry.vertices.count()};
+		lightmap.triangleOffset = 0;
 		lightmap.scale = descriptor.lightmapScale;
 		lightmap.maxCoordinate = maxCoordinate;
 		lightmap.minCoordinate = minCoordinate;
 		lightmap.luxelScale = descriptor.lightmap.luxelScale;
 
-		LightmapFace lightmapFace{};
-		lightmapFace.emissiveColor = descriptor.lightmap.emissiveColor;
-		lightmapFace.emissiveIntensity = descriptor.lightmap.emissiveIntensity;
-		lightmapFace.albedo = descriptor.lightmap.albedo;
+		LightmapMaterial lightmapMaterial{};
+		lightmapMaterial.emissiveColor = descriptor.lightmap.emissiveColor;
+		lightmapMaterial.emissiveIntensity = descriptor.lightmap.emissiveIntensity;
+		lightmapMaterial.albedo = descriptor.lightmap.albedo;
 
 		lightmaps.emplace_back(lightmap);
-		lightmapFaces.emplace_back(lightmapFace);
+		lightmapMaterials.emplace_back(lightmapMaterial);
 
 		lightmapVertexCount += geometry.vertices.count();
 		lightmapIndexCount += geometry.indices.count();

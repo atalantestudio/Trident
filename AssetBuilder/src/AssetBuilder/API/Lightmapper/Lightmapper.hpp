@@ -25,7 +25,8 @@ namespace Trident {
 		view<BuildVertex3D> vertices;
 		view<svec2<float32>> lightmapCoordinates;
 		view<uint32> indices;
-		view<LightmapFace> faces;
+		view<LightmapMaterial> materials;
+		view<uint32> emissiveTriangleIndices;
 		SceneLightingDescriptor lighting;
 	};
 
@@ -49,7 +50,8 @@ namespace Trident {
 
 		ref<Buffer> vertexBuffer;
 		ref<Buffer> indexBuffer;
-		ref<Buffer> faceBuffer;
+		ref<Buffer> materialBuffer;
+		ref<Buffer> emissiveTriangleIndexBuffer;
 		ref<Buffer> lightmapAtlasStagingBuffer;
 	};
 
@@ -59,7 +61,7 @@ namespace Trident {
 			struct Arguments {
 				Extent2D atlasExtent;
 				uint32 triangleCount;
-				uint32 _0;
+				uint32 emissiveTriangleCount;
 				svec3<float32> skyColor;
 				uint32 _1;
 				svec3<float32> sunDirection;
@@ -112,7 +114,8 @@ namespace Trident {
 			ref<Buffer> createArgumentBuffer() const;
 			ref<Buffer> createVertexBuffer(uint64 vertexCount) const;
 			ref<Buffer> createIndexBuffer(uint64 indexCount) const;
-			ref<Buffer> createFaceBuffer(uint64 faceCount) const;
+			ref<Buffer> createMaterialBuffer(uint64 materialCount) const;
+			ref<Buffer> createEmissiveTriangleIndexBuffer(uint64 emissiveTriangleIndexCount) const;
 
 			ref<Sampler> createIntermediateLightmapAtlasSampler() const;
 

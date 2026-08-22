@@ -16,7 +16,7 @@ struct Triangle {
 	Vertex vertices[3];
 };
 
-struct Face {
+struct Material {
 	vec3 emissiveColor;
 	float emissiveIntensity;
 	vec3 albedo;
@@ -31,7 +31,7 @@ struct Hit {
 	vec3 position;
 	float distance;
 	vec3 triangleNormal;
-	uint faceIndex;
+	uint materialIndex;
 	vec3 vertexNormal;
 	uint triangleIndex;
 };
@@ -48,16 +48,10 @@ const uint SAMPLE_COUNT = 1024;
 const uint BOUNCE_COUNT = 4;
 const float ADAPTIVE_BIAS = 0.0000002;
 
-// TODO(wip)
-#if 1
-	const uint emissiveTriangleCount = 2;
-	const uint emissiveTriangleIndexBuffer[emissiveTriangleCount] = {2, 3};
-#endif
-
 layout(set = 0, binding = 0) buffer readonly TraceRaysArgumentBuffer {
 	uvec2 atlasSize;
 	uint triangleCount;
-	uint _0;
+	uint emissiveTriangleCount;
 	vec3 skyColor;
 	uint _1;
 	vec3 sunDirection;
@@ -74,19 +68,23 @@ layout(set = 0, binding = 2) buffer readonly IndexBuffer {
 	uint indexBuffer[];
 };
 
-layout(set = 0, binding = 3) buffer readonly FaceBuffer {
-	Face faceBuffer[];
+layout(set = 0, binding = 3) buffer readonly MaterialBuffer {
+	Material materialBuffer[];
 };
 
-layout(set = 0, binding = 4, rgba32f) uniform readonly image2D gBufferPositionImage;
+layout(set = 0, binding = 4) buffer readonly EmissiveTriangleIndexBuffer {
+	uint emissiveTriangleIndexBuffer[];
+};
 
-layout(set = 0, binding = 5, rgba32f) uniform readonly image2D gBufferSmoothPositionImage;
+layout(set = 0, binding = 5, rgba32f) uniform readonly image2D gBufferPositionImage;
 
-layout(set = 0, binding = 6, rgba32f) uniform readonly image2D gBufferTriangleNormalImage;
+layout(set = 0, binding = 6, rgba32f) uniform readonly image2D gBufferSmoothPositionImage;
 
-layout(set = 0, binding = 7, rgba32f) uniform readonly image2D gBufferVertexNormalImage;
+layout(set = 0, binding = 7, rgba32f) uniform readonly image2D gBufferTriangleNormalImage;
 
-layout(set = 0, binding = 8, rgba8) uniform writeonly image2D intermediateLightmapAtlas;
+layout(set = 0, binding = 8, rgba32f) uniform readonly image2D gBufferVertexNormalImage;
+
+layout(set = 0, binding = 9, rgba8) uniform writeonly image2D intermediateLightmapAtlas;
 
 Triangle loadTriangle(uint triangleIndex) {
 	uint indexOffset = triangleIndex * 3;
@@ -131,7 +129,7 @@ float balanceHeuristic(float pdf1, float pdf2) {
 	return pdf1 / (pdf1 + pdf2);
 }
 
-// TODO(asset-builder/lightmapper): Compare with previous function.
+// TODO(asset-builder/lightmapper): Compare with previous ray-triangle intersection.
 bool rayTriangleTest(Ray ray, Triangle triangle_, inout float t, inout vec3 barycentricCoordinate) {
 	const float E = 1e-8;
 
@@ -289,7 +287,7 @@ Hit rchit(Ray ray, uint triangleIndex, Triangle triangle_, float distance, vec3 
 	hit.position = ray.origin + ray.direction * distance;
 	hit.distance = distance;
 	hit.triangleNormal = triangleNormalData.rgb;
-	hit.faceIndex = uint(vertexNormalData.a);
+	hit.materialIndex = uint(vertexNormalData.a);
 	hit.vertexNormal = vertexNormalData.rgb;
 	hit.triangleIndex = triangleIndex;
 
@@ -365,8 +363,6 @@ Hit rintBackFacing(Ray ray) {
 	return rmiss();
 }
 
-/// Generate ray info for a random emissive triangle.
-/// The sample point is returned in `p`.
 void DirectLightSampling(inout uint emissiveTriangleIndex, inout vec3 p, inout float pdf, inout uint seed) {
 	uint emissiveTriangleIndexIndex = uint(randomScalar(seed) * emissiveTriangleCount);
 
@@ -407,8 +403,8 @@ float PDFLight(uint triangleIndex) {
 	return 1.0 / emissiveTriangleCount / abc;
 }
 
-vec3 evaluatePhongMaterial(Face face) {
-	return face.albedo / PI;
+vec3 evaluatePhongMaterial(Material material) {
+	return material.albedo / PI;
 }
 
 vec3 rgen(Hit primaryHit, inout uint seed) {
@@ -419,37 +415,50 @@ vec3 rgen(Hit primaryHit, inout uint seed) {
 	uint bounceIndex = 0;
 
 	while (bounceIndex < BOUNCE_COUNT) {
-		Face material = faceBuffer[primaryHit.faceIndex];
+		Material material = materialBuffer[primaryHit.materialIndex];
 
+		vec3 directLight = vec3(0.0, 0.0, 0.0);
 		vec3 o = primaryHit.position + sign(primaryHit.vertexNormal) * abs(primaryHit.position * ADAPTIVE_BIAS);
 
 		Ray secondaryRay;
 		secondaryRay.origin = o;
 
-		uint emissiveTriangleIndex;
-		vec3 p;
-		float pdfLight;
+		if (emissiveTriangleCount > 0) {
+			uint emissiveTriangleIndex;
+			vec3 p;
+			float pdfLight;
 
-		DirectLightSampling(emissiveTriangleIndex, p, pdfLight, seed);
+			DirectLightSampling(emissiveTriangleIndex, p, pdfLight, seed);
 
-		vec3 op = p - o;
+			vec3 op = p - o;
 
-		secondaryRay.direction = normalize(op);
+			secondaryRay.direction = normalize(op);
 
-		vec3 directLight = vec3(0.0, 0.0, 0.0);
+			if (dot(primaryHit.vertexNormal, secondaryRay.direction) > 0.001) {
+				Hit secondaryHit = rintFrontFacing(secondaryRay);
 
-		if (dot(primaryHit.vertexNormal, secondaryRay.direction) > 0.001) {
-			Hit secondaryHit = rintFrontFacing(secondaryRay);
+				if (secondaryHit.triangleIndex == emissiveTriangleIndex) {
+					Material material = materialBuffer[secondaryHit.materialIndex];
 
-			if (secondaryHit.triangleIndex == emissiveTriangleIndex) {
-				Face material = faceBuffer[secondaryHit.faceIndex];
+					float angleA = dot(secondaryRay.direction, primaryHit.vertexNormal);
+					float angleB = dot(secondaryRay.direction, secondaryHit.vertexNormal);
+					float G = 1.0 / lengthSquared(op) * angleA * max(0.001, abs(angleB));
+					float w = balanceHeuristic(pdfLight, pdfDiffuse * G);
 
-				float angleA = dot(secondaryRay.direction, primaryHit.vertexNormal);
-				float angleB = max(0.001, abs(dot(secondaryRay.direction, secondaryHit.vertexNormal)));
-				float G = 1.0 / lengthSquared(op) * angleA * angleB;
-				float w = balanceHeuristic(pdfLight, pdfDiffuse * G);
+					directLight += material.emissiveColor * material.emissiveIntensity * G / pdfLight * w;
+				}
+			}
+		}
 
-				directLight = material.emissiveColor * material.emissiveIntensity * G / pdfLight * w;
+		if (sunIntensity > 0.0) {
+			secondaryRay.direction = normalize(sunDirection);
+
+			if (dot(primaryHit.vertexNormal, secondaryRay.direction) > 0.001) {
+				Hit secondaryHit = rintFrontFacing(secondaryRay);
+
+				if (secondaryHit.distance < 0.0) {
+					directLight += sunColor * sunIntensity;
+				}
 			}
 		}
 
@@ -581,7 +590,7 @@ void main() {
 	Hit hit;
 	hit.position = position;
 	hit.triangleNormal = triangleNormal;
-	hit.faceIndex = uint(vertexNormalData.w);
+	hit.materialIndex = uint(vertexNormalData.w);
 	hit.vertexNormal = vertexNormal;
 
 	vec3 radiance = vec3(0.0, 0.0, 0.0);

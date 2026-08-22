@@ -4,7 +4,7 @@
 #pragma once
 
 namespace Trident {
-	struct LightmapFace {
+	struct LightmapMaterial {
 		svec3<float32> emissiveColor;
 		float32 emissiveIntensity;
 		svec3<float32> albedo;
@@ -15,6 +15,7 @@ namespace Trident {
 		uint32 geometryIndex;
 		range<uint64, uint64> vertexRange;
 		uint32 coordinateOffset;
+		uint32 triangleOffset;
 		svec2<float32> scale;
 		svec2<float32> maxCoordinate;
 		svec2<float32> minCoordinate;

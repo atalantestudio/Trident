@@ -250,9 +250,10 @@ namespace Trident {
 
 			sequence<BuildVertex3D> vertices;
 			sequence<uint32> indices;
-			sequence<LightmapFace> faces(lightmapFaces.size());
+			sequence<LightmapMaterial> materials;
+			sequence<uint32> emissiveTriangleIndices;
 
-			createLightmapperGeometryBuffers(scene, vertices, indices, faces);
+			createLightmapperGeometryBuffers(scene, vertices, indices, materials, emissiveTriangleIndices);
 
 			scene.staticGeometry.lightmapAtlasImageAssetDescriptor = {
 				.format = ImageFormat::R8G8B8A8_UNORM,
@@ -267,7 +268,8 @@ namespace Trident {
 				.vertices = vertices,
 				.lightmapCoordinates = scene.staticGeometry.lightmapCoordinates,
 				.indices = indices,
-				.faces = faces,
+				.materials = materials,
+				.emissiveTriangleIndices = emissiveTriangleIndices,
 				.lighting = lighting,
 			});
 		}

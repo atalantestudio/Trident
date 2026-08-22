@@ -218,6 +218,11 @@ namespace Trident {
 			}
 
 			BuildScene3D createScene(AssetBuilderLibrary* assetLibrary) const final override {
+				static constexpr svec2<float32> luxelScale = {4.0f, 4.0f};
+				static constexpr svec3<float32> emissive = {17.0f, 12.0f, 4.0f};
+				static constexpr svec3<float32> green = {0.14f, 0.45f, 0.091f};
+				static constexpr svec3<float32> red = {0.63f, 0.065f, 0.05f};
+				static constexpr svec3<float32> white = {0.725f, 0.71f, 0.68f};
 				static constexpr TextureFilteringDescriptor textureFiltering = {
 					.translation = {0.0f, 0.0f},
 					.rotation = 0.0f,
@@ -226,7 +231,7 @@ namespace Trident {
 
 				static const TransformAngleAxis3D transform = {
 					.translation = {0.0f, 0.0f, 0.0f},
-					.axis = {0.0f, 1.0f, 0.0f},
+					.axis = {0.0f, 0.0f, 0.0f},
 					.angle = 0.0_rad,
 				};
 
@@ -239,12 +244,6 @@ namespace Trident {
 
 				const MaterialReference staticMaterial = builder.loadStaticMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
 
-				const svec2<float32> luxelScale = {4.0f, 4.0f};
-				const svec3<float32> greenAlbedo = {0.14f, 0.45f, 0.091f};
-				const svec3<float32> redAlbedo = {0.63f, 0.065f, 0.05f};
-				const svec3<float32> whiteAlbedo = {0.725f, 0.71f, 0.68f};
-				const svec3<float32> lightEmissiveColor = {17.0f, 12.0f, 4.0f};
-
 				builder.placeSurface(
 					{
 						.geometry = createFloorGeometry(),
@@ -252,7 +251,7 @@ namespace Trident {
 						.textureFiltering = textureFiltering,
 						.lightmap = {
 							.luxelScale = luxelScale,
-							.albedo = whiteAlbedo,
+							.albedo = white,
 						},
 					},
 					transform
@@ -264,9 +263,9 @@ namespace Trident {
 						.textureFiltering = textureFiltering,
 						.lightmap = {
 							.luxelScale = luxelScale,
-							.emissiveColor = lightEmissiveColor,
+							.emissiveColor = emissive,
 							.emissiveIntensity = 1.0f,
-							.albedo = whiteAlbedo,
+							.albedo = white,
 						},
 					},
 					transform
@@ -278,7 +277,7 @@ namespace Trident {
 						.textureFiltering = textureFiltering,
 						.lightmap = {
 							.luxelScale = luxelScale,
-							.albedo = whiteAlbedo,
+							.albedo = white,
 						},
 					},
 					transform
@@ -290,7 +289,7 @@ namespace Trident {
 						.textureFiltering = textureFiltering,
 						.lightmap = {
 							.luxelScale = luxelScale,
-							.albedo = whiteAlbedo,
+							.albedo = white,
 						},
 					},
 					transform
@@ -302,7 +301,7 @@ namespace Trident {
 						.textureFiltering = textureFiltering,
 						.lightmap = {
 							.luxelScale = luxelScale,
-							.albedo = redAlbedo,
+							.albedo = red,
 						},
 					},
 					transform
@@ -314,7 +313,7 @@ namespace Trident {
 						.textureFiltering = textureFiltering,
 						.lightmap = {
 							.luxelScale = luxelScale,
-							.albedo = greenAlbedo,
+							.albedo = green,
 						},
 					},
 					transform
@@ -326,7 +325,7 @@ namespace Trident {
 						.textureFiltering = textureFiltering,
 						.lightmap = {
 							.luxelScale = luxelScale,
-							.albedo = whiteAlbedo,
+							.albedo = white,
 						},
 					},
 					transform
@@ -338,7 +337,7 @@ namespace Trident {
 						.textureFiltering = textureFiltering,
 						.lightmap = {
 							.luxelScale = luxelScale,
-							.albedo = whiteAlbedo,
+							.albedo = white,
 						},
 					},
 					transform
@@ -350,7 +349,7 @@ namespace Trident {
 						.textureFiltering = textureFiltering,
 						.lightmap = {
 							.luxelScale = luxelScale,
-							.albedo = whiteAlbedo,
+							.albedo = white,
 						},
 					},
 					transform
@@ -362,7 +361,7 @@ namespace Trident {
 						.textureFiltering = textureFiltering,
 						.lightmap = {
 							.luxelScale = luxelScale,
-							.albedo = whiteAlbedo,
+							.albedo = white,
 						},
 					},
 					transform
@@ -374,7 +373,7 @@ namespace Trident {
 						.textureFiltering = textureFiltering,
 						.lightmap = {
 							.luxelScale = luxelScale,
-							.albedo = whiteAlbedo,
+							.albedo = white,
 						},
 					},
 					transform
@@ -386,7 +385,7 @@ namespace Trident {
 						.textureFiltering = textureFiltering,
 						.lightmap = {
 							.luxelScale = luxelScale,
-							.albedo = whiteAlbedo,
+							.albedo = white,
 						},
 					},
 					transform
@@ -398,7 +397,7 @@ namespace Trident {
 						.textureFiltering = textureFiltering,
 						.lightmap = {
 							.luxelScale = luxelScale,
-							.albedo = whiteAlbedo,
+							.albedo = white,
 						},
 					},
 					transform
@@ -410,7 +409,7 @@ namespace Trident {
 						.textureFiltering = textureFiltering,
 						.lightmap = {
 							.luxelScale = luxelScale,
-							.albedo = whiteAlbedo,
+							.albedo = white,
 						},
 					},
 					transform
@@ -422,7 +421,7 @@ namespace Trident {
 						.textureFiltering = textureFiltering,
 						.lightmap = {
 							.luxelScale = luxelScale,
-							.albedo = whiteAlbedo,
+							.albedo = white,
 						},
 					},
 					transform
@@ -434,7 +433,7 @@ namespace Trident {
 						.textureFiltering = textureFiltering,
 						.lightmap = {
 							.luxelScale = luxelScale,
-							.albedo = whiteAlbedo,
+							.albedo = white,
 						},
 					},
 					transform

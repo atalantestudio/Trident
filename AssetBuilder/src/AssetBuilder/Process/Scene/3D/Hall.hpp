@@ -14,6 +14,8 @@ namespace Trident {
 			}
 
 			BuildScene3D createScene(AssetBuilderLibrary* assetLibrary) const final override {
+				static constexpr svec2<float32> luxelScale = {1.0f, 1.0f};
+
 				// Texture scale multipliers
 				static constexpr float32 m1 = 256.0f;
 				static constexpr float32 m2 = 512.0f;
@@ -30,8 +32,6 @@ namespace Trident {
 				const MaterialReference plasterWallMaterial = builder.loadStaticMaterial(assetLibrary->getAsset<MaterialAsset>("plaster_wall"));
 				const MaterialReference woodDoorMaterial = builder.loadStaticMaterial(assetLibrary->getAsset<MaterialAsset>("wood_door"));
 				const MaterialReference plasterCeilingMaterial = builder.loadStaticMaterial(assetLibrary->getAsset<MaterialAsset>("plaster_ceiling"));
-
-				const svec2<float32> luxelScale = {1.0f, 1.0f};
 
 				/// Floors
 

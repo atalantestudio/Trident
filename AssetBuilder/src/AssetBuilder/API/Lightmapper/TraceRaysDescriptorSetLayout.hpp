@@ -29,7 +29,14 @@ namespace Trident {
 				.stageFlags = ShaderStage::COMPUTE,
 			},
 
-			// Face
+			// Material
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.stageFlags = ShaderStage::COMPUTE,
+			},
+
+			// Emissive triangle index
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,

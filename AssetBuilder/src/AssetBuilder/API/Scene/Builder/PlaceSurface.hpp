@@ -85,18 +85,19 @@ namespace Trident {
 		Lightmap lightmap{};
 		lightmap.geometryIndex = materialGeometry.geometryIndex;
 		lightmap.vertexRange = {vertexOffset, surfaceVertexCount};
+		lightmap.triangleOffset = static_cast<uint32>(indexOffset / 3);
 		lightmap.scale = descriptor.geometry.scale;
 		lightmap.maxCoordinate = maxCoordinate;
 		lightmap.minCoordinate = minCoordinate;
 		lightmap.luxelScale = descriptor.lightmap.luxelScale;
 
-		LightmapFace lightmapFace{};
-		lightmapFace.emissiveColor = descriptor.lightmap.emissiveColor;
-		lightmapFace.emissiveIntensity = descriptor.lightmap.emissiveIntensity;
-		lightmapFace.albedo = descriptor.lightmap.albedo;
+		LightmapMaterial lightmapMaterial{};
+		lightmapMaterial.emissiveColor = descriptor.lightmap.emissiveColor;
+		lightmapMaterial.emissiveIntensity = descriptor.lightmap.emissiveIntensity;
+		lightmapMaterial.albedo = descriptor.lightmap.albedo;
 
 		lightmaps.emplace_back(lightmap);
-		lightmapFaces.emplace_back(lightmapFace);
+		lightmapMaterials.emplace_back(lightmapMaterial);
 
 		bakedVertexCount += surfaceVertexCount;
 		bakedIndexCount += surfaceIndexCount;

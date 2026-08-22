@@ -15,7 +15,7 @@ out Interstage {
 	layout(location = 8) flat vec3 normalB;
 	layout(location = 9) flat vec3 normalC;
 	layout(location = 10) vec3 barycentricCoordinate;
-	layout(location = 11) flat uint faceIndex;
+	layout(location = 11) flat uint materialIndex;
 } interstage;
 
 struct Vertex {
@@ -89,5 +89,5 @@ void main() {
 	interstage.normalC = c.normal;
 	interstage.barycentricCoordinate = vec3(0.0);
 	interstage.barycentricCoordinate[gl_VertexIndex % 3] = 1.0;
-	interstage.faceIndex = uint(vertex.tangent.w);
+	interstage.materialIndex = uint(vertex.tangent.w);
 }
