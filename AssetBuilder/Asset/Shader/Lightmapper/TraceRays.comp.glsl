@@ -33,12 +33,26 @@ struct Hit {
 	vec3 triangleNormal;
 	uint faceIndex;
 	vec3 vertexNormal;
+	uint triangleIndex;
 };
 
+struct BarycentricCoordinate {
+	float u;
+	float v;
+	float w;
+};
+
+const float PI = radians(180.0);
 const float FLOAT32_MAX = 4294967295.0;
 const uint SAMPLE_COUNT = 1024;
 const uint BOUNCE_COUNT = 4;
 const float ADAPTIVE_BIAS = 0.0000002;
+
+// TODO(wip)
+#if 1
+	const uint emissiveTriangleCount = 2;
+	const uint emissiveTriangleIndexBuffer[emissiveTriangleCount] = {2, 3};
+#endif
 
 layout(set = 0, binding = 0) buffer readonly TraceRaysArgumentBuffer {
 	uvec2 atlasSize;
@@ -104,6 +118,19 @@ float randomScalar(inout uint seed) {
 vec3 randomUnitDirection(inout uint seed) {
 	return normalize(vec3(randomScalar(seed), randomScalar(seed), randomScalar(seed)) * 2.0 - 1.0);
 }
+
+float lengthSquared(vec3 a) {
+	return dot(a, a);
+}
+
+vec3 interpolate3x3(BarycentricCoordinate coordinate, vec3 a, vec3 b, vec3 c) {
+	return a * coordinate.u + b * coordinate.v + c * coordinate.w;
+}
+
+float balanceHeuristic(float pdf1, float pdf2) {
+	return pdf1 / (pdf1 + pdf2);
+}
+
 
 bool rayTriangleIntersectionFrontFacing(Ray ray, Triangle triangle_, inout float t, inout vec3 barycentricCoordinate) {
 	const float E = 1e-6;
@@ -199,7 +226,7 @@ bool rayTriangleIntersectionBackFacing(Ray ray, Triangle triangle_, inout float 
 	return false;
 }
 
-Hit rchit(Ray ray, Triangle triangle_, float distance, vec3 barycentricCoordinate) {
+Hit rchit(Ray ray, uint triangleIndex, Triangle triangle_, float distance, vec3 barycentricCoordinate) {
 	ivec2 lightmapCoordinate = ivec2((
 		triangle_.vertices[0].lightmapCoordinate * barycentricCoordinate.x +
 		triangle_.vertices[1].lightmapCoordinate * barycentricCoordinate.y +
@@ -215,6 +242,7 @@ Hit rchit(Ray ray, Triangle triangle_, float distance, vec3 barycentricCoordinat
 	hit.triangleNormal = triangleNormalData.rgb;
 	hit.faceIndex = uint(vertexNormalData.a);
 	hit.vertexNormal = vertexNormalData.rgb;
+	hit.triangleIndex = triangleIndex;
 
 	return hit;
 }
@@ -251,7 +279,7 @@ Hit rintFrontFacing(Ray ray) {
 	}
 
 	if (intersectingTriangleIndex < triangleCount) {
-		return rchit(ray, intersectingTriangle, closestDistance, intersectingBarycentricCoordinate);
+		return rchit(ray, intersectingTriangleIndex, intersectingTriangle, closestDistance, intersectingBarycentricCoordinate);
 	}
 
 	return rmiss();
@@ -282,47 +310,131 @@ Hit rintBackFacing(Ray ray) {
 	}
 
 	if (intersectingTriangleIndex < triangleCount) {
-		return rchit(ray, intersectingTriangle, closestDistance, intersectingBarycentricCoordinate);
+		return rchit(ray, intersectingTriangleIndex, intersectingTriangle, closestDistance, intersectingBarycentricCoordinate);
 	}
 
 	return rmiss();
 }
 
+/// Generate ray info for a random emissive triangle.
+/// The sample point is returned in `p`.
+void DirectLightSampling(inout uint emissiveTriangleIndex, inout vec3 p, inout float pdf, inout uint seed) {
+	uint emissiveTriangleIndexIndex = uint(randomScalar(seed) * emissiveTriangleCount);
+
+	emissiveTriangleIndex = emissiveTriangleIndexBuffer[emissiveTriangleIndexIndex];
+
+	Triangle emissiveTriangle = loadTriangle(emissiveTriangleIndex);
+
+	vec3 a = emissiveTriangle.vertices[0].position;
+	vec3 b = emissiveTriangle.vertices[1].position;
+	vec3 c = emissiveTriangle.vertices[2].position;
+
+	float u = randomScalar(seed);
+	float v = randomScalar(seed);
+
+	if (u + v > 1.0) {
+		u = 1.0 - u;
+		v = 1.0 - v;
+	}
+
+	BarycentricCoordinate coordinate = {u, v, 1.0 - u - v};
+
+	p = interpolate3x3(coordinate, a, b, c);
+
+	float abc = length(cross(b - a, c - a)) * 0.5;
+
+	pdf = 1.0 / emissiveTriangleCount / abc;
+}
+
+float PDFLight(uint triangleIndex) {
+	Triangle triangle_ = loadTriangle(triangleIndex);
+
+	vec3 a = triangle_.vertices[0].position;
+	vec3 b = triangle_.vertices[1].position;
+	vec3 c = triangle_.vertices[2].position;
+
+	float abc = length(cross(b - a, c - a)) * 0.5;
+
+	return 1.0 / emissiveTriangleCount / abc;
+}
+
+vec3 evaluatePhongMaterial(Face face) {
+	return face.albedo / PI;
+}
+
 vec3 rgen(Hit primaryHit, inout uint seed) {
-	vec3 radiance = vec3(0.0, 0.0, 0.0);
+	const float pdfDiffuse = 1.0 / (4.0 * PI);
+
+	vec3 incomingLight = vec3(0.0, 0.0, 0.0);
 	vec3 throughput = vec3(1.0, 1.0, 1.0);
 	uint bounceIndex = 0;
 
 	while (bounceIndex < BOUNCE_COUNT) {
-		Face face = faceBuffer[primaryHit.faceIndex];
+		Face material = faceBuffer[primaryHit.faceIndex];
 
-		radiance += face.emissiveColor * face.emissiveIntensity;
-		throughput *= face.albedo;
-
-		Ray primaryRay;
-		primaryRay.origin = primaryHit.position + sign(primaryHit.vertexNormal) * abs(primaryHit.position * ADAPTIVE_BIAS);
-		primaryRay.direction = normalize(primaryHit.vertexNormal + randomUnitDirection(seed));
-
-		primaryHit = rintFrontFacing(primaryRay);
+		vec3 o = primaryHit.position + sign(primaryHit.vertexNormal) * abs(primaryHit.position * ADAPTIVE_BIAS);
 
 		Ray secondaryRay;
-		secondaryRay.origin = primaryRay.origin;
-		secondaryRay.direction = normalize(sunDirection);
+		secondaryRay.origin = o;
 
-		Hit secondaryHit = rintFrontFacing(secondaryRay);
+		uint emissiveTriangleIndex;
+		vec3 p;
+		float pdfLight;
 
-		radiance += throughput * float(secondaryHit.distance < 0.0) * sunColor * sunIntensity;
+		DirectLightSampling(emissiveTriangleIndex, p, pdfLight, seed);
 
-		if (primaryHit.distance < 0.0) {
-			radiance += throughput * skyColor;
+		vec3 op = p - o;
+
+		secondaryRay.direction = normalize(op);
+
+		vec3 directLight = vec3(0.0, 0.0, 0.0);
+
+		if (dot(primaryHit.vertexNormal, secondaryRay.direction) > 0.001) {
+			Hit secondaryHit = rintFrontFacing(secondaryRay);
+
+			if (secondaryHit.triangleIndex == emissiveTriangleIndex) {
+				Face material = faceBuffer[secondaryHit.faceIndex];
+
+				float angleA = dot(secondaryRay.direction, primaryHit.vertexNormal);
+				float angleB = max(0.001, abs(dot(secondaryRay.direction, secondaryHit.vertexNormal)));
+				float G = 1.0 / lengthSquared(op) * angleA * angleB;
+				float w = balanceHeuristic(pdfLight, pdfDiffuse * G);
+
+				directLight = material.emissiveColor * material.emissiveIntensity * G / pdfLight * w;
+			}
+		}
+
+		if (material.emissiveIntensity > 0.0) {
+			if (bounceIndex == 0) {
+				incomingLight += material.emissiveColor * material.emissiveIntensity * throughput;
+			}
 
 			break;
 		}
 
+		Ray primaryRay;
+		primaryRay.origin = o;
+		primaryRay.direction = normalize(primaryHit.vertexNormal + randomUnitDirection(seed));
+
+		float cosTheta = max(0.001, dot(primaryHit.vertexNormal, primaryRay.direction));
+
+		primaryHit = rintFrontFacing(primaryRay);
+
+		if (primaryHit.distance < 0.0) {
+			incomingLight += skyColor * throughput;
+
+			break;
+		}
+
+		vec3 brdf = evaluatePhongMaterial(material);
+
+		incomingLight += directLight * throughput * brdf;
+		throughput *= material.albedo;
+
 		bounceIndex += 1;
 	}
 
-	return radiance;
+	return incomingLight;
 }
 
 vec3 adjustSamplePosition(vec3 position, vec3 triangleNormal, float diagonalLuxelSize) {
