@@ -82,14 +82,13 @@ vec4 sampleBicubic(sampler2D textureSampler, vec2 coordinate) {
 }
 
 void main() {
-	// Convert from sRGB space to linear space.
-	vec3 diffuse = pow(texture(diffuseTexture, interstage.textureCoordinate).rgb, vec3(2.2));
+	vec3 diffuse = texture(diffuseTexture, interstage.textureCoordinate).rgb;
 	vec3 light = sampleBicubic(lightmapAtlasSampler, interstage.lightmapCoordinate).rgb;
-
 	vec3 arm = texture(armTexture, interstage.textureCoordinate).rgb;
-	float ao = arm[0];
+	float ao = arm.r;
+
+	diffuse = pow(diffuse, vec3(1.0 / 2.2));
 
 	fragment.rgb = diffuse * light * ao;
-	fragment.rgb = pow(fragment.rgb, vec3(1.0 / 2.2));
 	fragment.a = 1.0;
 }

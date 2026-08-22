@@ -87,7 +87,7 @@ void main() {
 	interstage.normalA = a.normal;
 	interstage.normalB = b.normal;
 	interstage.normalC = c.normal;
-	interstage.barycentricCoordinate = vec3(0.0);
+	interstage.barycentricCoordinate = vec3(0.0, 0.0, 0.0);
 	interstage.barycentricCoordinate[gl_VertexIndex % 3] = 1.0;
 	interstage.materialIndex = uint(vertex.tangent.w);
 }

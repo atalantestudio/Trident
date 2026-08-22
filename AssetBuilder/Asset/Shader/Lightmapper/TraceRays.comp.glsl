@@ -8,7 +8,7 @@ layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 struct Vertex {
 	vec3 position;
 	vec3 normal;
-	vec3 tangent;
+	vec4 tangent;
 	vec2 lightmapCoordinate;
 };
 
@@ -570,11 +570,13 @@ void main() {
 
 	uint seed = coordinate.y * atlasSize.x + coordinate.x;
 	vec4 positionData = imageLoad(gBufferPositionImage, coordinate);
+	vec4 smoothPositionData = imageLoad(gBufferSmoothPositionImage, coordinate);
 	vec4 triangleNormalData = imageLoad(gBufferTriangleNormalImage, coordinate);
 	vec4 vertexNormalData = imageLoad(gBufferVertexNormalImage, coordinate);
 
 	vec3 position = positionData.rgb;
 	uint triangleIndex = uint(positionData.a);
+	vec3 smoothPosition = smoothPositionData.rgb;
 	vec3 triangleNormal = triangleNormalData.rgb;
 	float diagonalLuxelSize = triangleNormalData.a;
 	vec3 vertexNormal = vertexNormalData.rgb;

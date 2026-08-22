@@ -16,7 +16,13 @@ namespace Trident {
 			{}
 
 			float16(float32 a) {
-				static constexpr uint32 exp2_11 = 2048;
+				// TODO(base/float16): Fix scalar conversion.
+				const __m128 m = _mm_set1_ps(a);
+				const __m128i mi = _mm_cvtps_ph(m, _MM_FROUND_TO_NEAREST_INT);
+
+				std::memcpy(&value, &mi, sizeof(uint16));
+
+				/* static constexpr uint32 exp2_11 = 2048;
 				static constexpr uint32 exp2_12 = 4096;
 				static constexpr uint32 exp2_13 = 8192;
 				static constexpr uint32 exp2_23 = 8388608;
@@ -106,7 +112,7 @@ namespace Trident {
 
 				value |= sign << 15;
 				value |= (exponent & 0x1f) << 10;
-				value |= (significand >> 13) & 0x3ff;
+				value |= (significand >> 13) & 0x3ff; */
 			}
 
 			operator uint16() const {
@@ -124,18 +130,4 @@ namespace Trident {
 		private:
 			uint16 value = 0;
 	};
-
-	// TODO(test)
-	/* float16 a = 0.0f; // OK
-	float16 a = -0.0f; // OK
-	float16 a = 1.0f; // OK
-	float16 a = -1.0f; // OK
-	float16 a = 3.140625f; // OK
-	float16 a = 0.15625f; // OK
-	float16 a = FLT_MAX;
-	float16 a = FLT_MIN;
-	float16 a = infinity<float32>();
-	float16 a = -infinity<float32>();
-	float16 a = lyah::nan<float32>(); // OK
-	float16 a = length(normalized(vec2<float32>{})); // -nan(ind), OK */
 }
