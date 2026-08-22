@@ -31,12 +31,16 @@ namespace Trident {
 			const Attachment& attachment = renderPass->attachments[attachmentIndex];
 
 			if (attachment.format == surfaceFormat && attachment.finalLayout == ImageLayout::PRESENT_SRC) {
+				ENGINE_ASSERT(swapchainAttachmentIndex == max<uint32>(), "Only one present attachment can be referenced.");
+
 				swapchainAttachmentIndex = attachmentIndex;
 				swapchainImageIndex = attachmentIndex;
 
 				if (attachment.sampleCount > 1) {
-					swapchainImageIndex = renderPass->getAttachmentCount();
+					swapchainAttachmentIndex += renderPass->getAttachmentCount();
+					swapchainImageIndex += renderPass->getAttachmentCount();
 
+					imageCount += 1;
 					imageViewCount += 1;
 				}
 			}
@@ -78,7 +82,7 @@ namespace Trident {
 			while (colorAttachmentReferenceIndex < subpass.colorAttachmentReferences.count()) {
 				const AttachmentReference colorAttachmentReference = subpass.colorAttachmentReferences[colorAttachmentReferenceIndex];
 
-				if (colorAttachmentReference.index == swapchainAttachmentIndex || colorAttachmentReference.index == AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
+				if (colorAttachmentReference.index == AttachmentReference::UNUSED_ATTACHMENT_INDEX || colorAttachmentReference.index == swapchainAttachmentIndex) {
 					colorAttachmentReferenceIndex += 1;
 
 					continue;

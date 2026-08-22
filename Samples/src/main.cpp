@@ -169,62 +169,83 @@ namespace Trident {
 			}
 		}
 		else if (SampleGroupNameProperty == "Graphics") {
-			if (SampleNameProperty == "ArrayTexture") {
-				registerLayer<SampleArrayTextureLayer>();
-			}
-			else if (SampleNameProperty == "ClearColor") {
-				registerLayer<ClearColorSampleLayer>();
-			}
-			else if (SampleNameProperty == "ColorBlend") {
-				registerLayer<ColorBlendSampleLayer>();
-			}
-			else if (SampleNameProperty == "Default") {
-				registerLayer<DefaultSampleLayer>();
-			}
-			else if (SampleNameProperty == "Dispatch") {
-				registerLayer<DispatchSampleLayer>();
-			}
-			else if (SampleNameProperty == "DispatchIndirect") {
-				registerLayer<DispatchIndirectSampleLayer>();
-			}
-			else if (SampleNameProperty == "Gradient") {
-				registerLayer<GradientSampleLayer>();
-			}
-			else if (SampleNameProperty == "Image") {
-				registerLayer<ImageSampleLayer>();
-			}
-			else if (SampleNameProperty == "InputAttachment") {
-				registerLayer<SampleInputAttachmentLayer>();
-			}
-			else if (SampleNameProperty == "MipLevels") {
-				registerLayer<SampleMipLevelsLayer>();
-			}
-			else if (SampleNameProperty == "Multisampling") {
-				registerLayer<SampleMultisamplingLayer>();
-			}
-			else if (SampleNameProperty == "ReversedZ") {
-				registerLayer<ReversedZSampleLayer>();
-			}
-			else if (SampleNameProperty == "TextureArray") {
-				registerLayer<SampleTextureArrayLayer>();
-			}
-			else if (SampleNameProperty == "Triangle") {
-				registerLayer<TriangleSampleLayer>();
-			}
-			else if (SampleNameProperty == "TriangleIndexed") {
-				registerLayer<TriangleIndexedSampleLayer>();
-			}
-			else if (SampleNameProperty == "TriangleIndexedIndirect") {
-				registerLayer<TriangleIndexedIndirectSampleLayer>();
-			}
-			else if (SampleNameProperty == "TriangleIndirect") {
-				registerLayer<TriangleIndirectSampleLayer>();
+			if (SampleNameProperty == "Multisampling") {
+				registerLayer<MultisamplingSampleLayer>();
+				registerLayerGroup<MultisamplingLayerGroup>(range<uint32, uint32>(0, 1));
 			}
 			else {
-				ENGINE_ASSERT(false, "Unknown sample \"[]\" in group [].", SampleNameProperty, SampleGroupNameProperty);
+				if (SampleNameProperty == "ArrayTexture") {
+					registerLayer<SampleArrayTextureLayer>();
+					registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
+				}
+				else if (SampleNameProperty == "ClearColor") {
+					registerLayer<ClearColorSampleLayer>();
+					registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
+				}
+				else if (SampleNameProperty == "ColorBlend") {
+					registerLayer<ColorBlendSampleLayer>();
+					registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
+				}
+				else if (SampleNameProperty == "Default") {
+					registerLayer<DefaultSampleLayer>();
+					registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
+				}
+				else if (SampleNameProperty == "Dispatch") {
+					registerLayer<DispatchSampleLayer>();
+					registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
+				}
+				else if (SampleNameProperty == "DispatchIndirect") {
+					registerLayer<DispatchIndirectSampleLayer>();
+					registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
+				}
+				else if (SampleNameProperty == "Gradient") {
+					registerLayer<GradientSampleLayer>();
+					registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
+				}
+				else if (SampleNameProperty == "Image") {
+					registerLayer<ImageSampleLayer>();
+					registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
+				}
+				else if (SampleNameProperty == "InputAttachment") {
+					registerLayer<SampleInputAttachmentLayer>();
+					registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
+				}
+				else if (SampleNameProperty == "MipLevels") {
+					registerLayer<SampleMipLevelsLayer>();
+					registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
+				}
+				else if (SampleNameProperty == "Multisampling") {
+					registerLayer<MultisamplingSampleLayer>();
+					registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
+				}
+				else if (SampleNameProperty == "ReversedZ") {
+					registerLayer<ReversedZSampleLayer>();
+					registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
+				}
+				else if (SampleNameProperty == "TextureArray") {
+					registerLayer<SampleTextureArrayLayer>();
+					registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
+				}
+				else if (SampleNameProperty == "Triangle") {
+					registerLayer<TriangleSampleLayer>();
+					registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
+				}
+				else if (SampleNameProperty == "TriangleIndexed") {
+					registerLayer<TriangleIndexedSampleLayer>();
+					registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
+				}
+				else if (SampleNameProperty == "TriangleIndexedIndirect") {
+					registerLayer<TriangleIndexedIndirectSampleLayer>();
+					registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
+				}
+				else if (SampleNameProperty == "TriangleIndirect") {
+					registerLayer<TriangleIndirectSampleLayer>();
+					registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
+				}
+				else {
+					ENGINE_ASSERT(false, "Unknown sample \"[]\" in group [].", SampleNameProperty, SampleGroupNameProperty);
+				}
 			}
-
-			registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
 		}
 		else if (SampleGroupNameProperty == "Sample3D") {
 			if (SampleNameProperty == "Forward") {
