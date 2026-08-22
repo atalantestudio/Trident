@@ -26,10 +26,6 @@ namespace Trident {
 
 				generateMipLevels(image, mipLevelCount);
 
-				renderPass = createRenderPass();
-
-				createFramebuffers();
-
 				debugImageView = createDebugImageView();
 
 				debugSampler = createDebugSampler();
@@ -56,20 +52,15 @@ namespace Trident {
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
-				const Extent2D swapchainExtent = getSwapchain()->getExtent();
-				const float32 width = static_cast<float32>(swapchainExtent.width);
-				const float32 height = static_cast<float32>(swapchainExtent.height);
+				const Extent2D extent = getSwapchain()->getExtent();
+				const float32 width = static_cast<float32>(extent.width);
+				const float32 height = static_cast<float32>(extent.height);
 
-				commandEncoder->beginRenderPass({
-					.framebuffer = framebuffers[getSwapchainImageIndex()],
-					.clearValues = {{1.0f, 1.0f, 1.0f, 1.0f}},
-				});
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-				commandEncoder->setScissor(0, 0, swapchainExtent);
+				commandEncoder->setScissor(0, 0, extent);
 				commandEncoder->bindGraphicsPipeline(debugImagePipeline);
 				commandEncoder->bindDescriptorSets(debugImagePipelineLayout, 0, debugImageDescriptorSet);
 				commandEncoder->draw(3, 1, 0, 0);
-				commandEncoder->endRenderPass();
 			}
 
 			void onEvent(Event& event) override {
@@ -96,10 +87,6 @@ namespace Trident {
 				}
 
 				return true;
-			}
-
-			void resize(WindowResizeEvent& event) override {
-				createFramebuffers();
 			}
 
 		private:
@@ -174,7 +161,7 @@ namespace Trident {
 				const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder({
 					.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Image copy command buffer",
+						.name = "Copy image",
 					#endif
 				});
 
@@ -406,62 +393,6 @@ namespace Trident {
 				queue->waitIdle();
 			}
 
-			ref<RenderPass> createRenderPass() const {
-				return Renderer::createRenderPass({
-					.attachments = {
-						{
-							.format = getSurface()->getFormat(),
-							.sampleCount = 1,
-							.loadOperation = LoadOperation::CLEAR,
-							.storeOperation = StoreOperation::STORE,
-							.finalLayout = ImageLayout::PRESENT_SRC,
-						},
-					},
-					.subpasses = {
-						{
-							.colorAttachmentReferences = {
-								{
-									.index = 0,
-									.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
-								},
-							},
-						},
-					},
-				});
-			}
-
-			void createFramebuffers() {
-				const ref<Swapchain> swapchain = getSwapchain();
-
-				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
-
-				FramebufferDescriptor framebufferDescriptor = {
-					.renderPass = renderPass,
-					.imageViews = {nullptr},
-					.extent = swapchain->getExtent(),
-				};
-
-				#if defined(DEBUG_OBJECT_NAME)
-					sequence<char8> name;
-				#endif
-
-				uint32 framebufferIndex = 0;
-
-				while (framebufferIndex < framebuffers.count()) {
-					#if defined(DEBUG_OBJECT_NAME)
-						name = Logger::format("In flight []", framebufferIndex);
-
-						framebufferDescriptor.name = name;
-					#endif
-
-					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
-
-					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
-
-					framebufferIndex += 1;
-				}
-			}
-
 			ref<ImageView> createDebugImageView() const {
 				return image->createView({
 					.mipLevelOffset = 0,
@@ -597,7 +528,7 @@ namespace Trident {
 						.depthTest = false,
 					},
 					.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
-					.renderPass = renderPass,
+					.renderPass = pointer_cast<const RenderPassLayer*>(getLayer())->renderPass,
 					.subpassIndex = 0,
 					#if defined(DEBUG_OBJECT_NAME)
 						.name = "Debug image",
@@ -607,9 +538,6 @@ namespace Trident {
 
 		private:
 			ref<Image> image;
-
-			ref<RenderPass> renderPass;
-			sequence<ref<Framebuffer>> framebuffers;
 			ref<DescriptorSetLayout> debugImageDescriptorSetLayout;
 			ref<DescriptorSet> debugImageDescriptorSet;
 			ref<PipelineLayout> debugImagePipelineLayout;

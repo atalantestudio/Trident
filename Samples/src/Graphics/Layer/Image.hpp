@@ -11,8 +11,6 @@ namespace Trident {
 	class ImageSampleRenderer : public Renderer {
 		public:
 			void build() override {
-				renderPass = createRenderPass();
-
 				const ref<Application> application = getLayer()->getApplication();
 				const view<char8> assetName = application->getPropertyFile()->getProperty<view<char8>>("AssetName");
 
@@ -41,7 +39,6 @@ namespace Trident {
 			void postBuild() override {
 				imageView = createImageView();
 
-				createFramebuffers();
 				updateDescriptorSets();
 			}
 
@@ -106,52 +103,18 @@ namespace Trident {
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
-				const ref<Framebuffer> framebuffer = framebuffers[getSwapchainImageIndex()];
-				const Extent2D extent = framebuffer->getExtent();
+				const Extent2D extent = getSwapchain()->getExtent();
 				const float32 width = static_cast<float32>(extent.width);
 				const float32 height = static_cast<float32>(extent.height);
 
-				commandEncoder->beginRenderPass({
-					.framebuffer = framebuffer,
-					.clearValues = {{1.0f, 1.0f, 1.0f, 1.0f}},
-				});
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, extent);
 				commandEncoder->bindGraphicsPipeline(pipeline);
 				commandEncoder->bindDescriptorSets(pipelineLayout, 0, descriptorSet);
 				commandEncoder->draw(3, 1, 0, 0);
-				commandEncoder->endRenderPass();
-			}
-
-			void resize(WindowResizeEvent& event) override {
-				createFramebuffers();
 			}
 
 		private:
-			ref<RenderPass> createRenderPass() const {
-				return Renderer::createRenderPass({
-					.attachments = {
-						{
-							.format = getSurface()->getFormat(),
-							.sampleCount = 1,
-							.loadOperation = LoadOperation::CLEAR,
-							.storeOperation = StoreOperation::STORE,
-							.finalLayout = ImageLayout::PRESENT_SRC,
-						},
-					},
-					.subpasses = {
-						{
-							.colorAttachmentReferences = {
-								{
-									.index = 0,
-									.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
-								},
-							},
-						},
-					},
-				});
-			}
-
 			ImageFormat getImageFormat() const {
 				ImageFormat format = imageAsset->getFormat();
 
@@ -201,38 +164,6 @@ namespace Trident {
 						.name = "Image",
 					#endif
 				});
-			}
-
-			void createFramebuffers() {
-				const ref<Swapchain> swapchain = getSwapchain();
-
-				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
-
-				FramebufferDescriptor framebufferDescriptor = {
-					.renderPass = renderPass,
-					.imageViews = {nullptr},
-					.extent = swapchain->getExtent(),
-				};
-
-				uint32 framebufferIndex = 0;
-
-				#if defined(DEBUG_OBJECT_NAME)
-					sequence<char8> name;
-				#endif
-
-				while (framebufferIndex < framebuffers.count()) {
-					#if defined(DEBUG_OBJECT_NAME)
-						name = Logger::format("In flight []", framebufferIndex);
-
-						framebufferDescriptor.name = name;
-					#endif
-
-					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
-
-					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
-
-					framebufferIndex += 1;
-				}
 			}
 
 			ref<DescriptorSetLayout> createDescriptorSetLayout() const {
@@ -299,7 +230,7 @@ namespace Trident {
 						.depthTest = false,
 					},
 					.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
-					.renderPass = renderPass,
+					.renderPass = pointer_cast<const RenderPassLayer*>(getLayer())->renderPass,
 					.subpassIndex = 0,
 					#if defined(DEBUG_OBJECT_NAME)
 						.name = "Pipeline",
@@ -349,12 +280,10 @@ namespace Trident {
 			}
 
 		private:
-			ref<RenderPass> renderPass;
 			ref<ImageAsset> imageAsset;
 			ImageFormat imageFormat;
 			ref<Image> image;
 			ref<ImageView> imageView;
-			sequence<ref<Framebuffer>> framebuffers;
 			ref<DescriptorSetLayout> descriptorSetLayout;
 			ref<DescriptorSet> descriptorSet;
 			ref<PipelineLayout> pipelineLayout;
