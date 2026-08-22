@@ -220,7 +220,7 @@ namespace Trident {
 				}
 				else if (SampleNameProperty == "ReversedZ") {
 					registerLayer<ReversedZSampleLayer>();
-					registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
+					registerLayerGroup<ReversedZLayerGroup>(range<uint32, uint32>(0, 1));
 				}
 				else if (SampleNameProperty == "TextureArray") {
 					registerLayer<SampleTextureArrayLayer>();

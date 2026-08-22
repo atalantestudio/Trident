@@ -8,6 +8,61 @@
 #include "../GraphicsLayer.hpp"
 
 namespace Trident {
+	class ReversedZLayerGroup : public RenderPassLayerGroup {
+		public:
+			explicit ReversedZLayerGroup(range<uint32, uint32> layerRange) :
+				RenderPassLayerGroup(layerRange)
+			{}
+
+			RenderPassDescriptor getRenderPassDescriptor() const override {
+				return {
+					.attachments = {
+						// Swapchain
+						{
+							.format = Renderer::getSurface()->getFormat(),
+							.sampleCount = 1,
+							.loadOperation = LoadOperation::CLEAR,
+							.storeOperation = StoreOperation::STORE,
+							.finalLayout = ImageLayout::PRESENT_SRC,
+						},
+
+						// Depth stencil
+						{
+							.format = ImageFormat::D32_SFLOAT,
+							.sampleCount = 1,
+							.loadOperation = LoadOperation::CLEAR,
+							.storeOperation = StoreOperation::UNDEFINED,
+							.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+						},
+					},
+					.subpasses = {
+						{
+							.colorAttachmentReferences = {
+								{
+									.index = 0,
+									.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
+								},
+							},
+							.depthStencilAttachmentReference = {
+								.index = 1,
+								.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+							},
+						},
+					},
+				};
+			}
+
+			sequence<ClearValue> getClearValues() const override {
+				return {
+					{0.0f, 0.0f, 0.0f, 1.0f},
+					{
+						.depth = 0.0f,
+						.stencil = 0,
+					},
+				};
+			}
+	};
+
 	class ReversedZSampleRenderer : public Renderer {
 		private:
 			struct Vertex {
@@ -32,15 +87,10 @@ namespace Trident {
 			}
 
 			void build() override {
-				renderPass = createRenderPass();
-				depthStencilImage = createDepthStencilImage();
-				depthStencilImageView = createDepthStencilImageView();
 				pipelineLayout = createPipelineLayout();
 				pipeline = createPipeline();
 				vertexBuffer = createVertexBuffer();
 				stagingBuffer = createStagingBuffer();
-
-				createFramebuffers();
 			}
 
 			StaticMemoryDescriptor getStaticMemoryDescriptor() const override {
@@ -91,137 +141,19 @@ namespace Trident {
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
-				const ref<Framebuffer> framebuffer = framebuffers[getSwapchainImageIndex()];
-				const Extent2D extent = framebuffer->getExtent();
+				const Extent2D extent = getSwapchain()->getExtent();
 				const float32 width = static_cast<float32>(extent.width);
 				const float32 height = static_cast<float32>(extent.height);
 
-				commandEncoder->beginRenderPass({
-					.framebuffer = framebuffer,
-					.clearValues = {
-						{0.0f, 0.0f, 0.0f, 1.0f},
-						{
-							.depth = 0.0f,
-							.stencil = 0,
-						},
-					},
-				});
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, extent);
 				commandEncoder->bindGraphicsPipeline(pipeline);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
 				commandEncoder->bindVertexBuffer(1, vertexBuffer, VERTEX_SIZE);
 				commandEncoder->draw(3, 3, 0, 0);
-				commandEncoder->endRenderPass();
-			}
-
-			void resize(WindowResizeEvent& event) override {
-				depthStencilImage = createDepthStencilImage();
-				depthStencilImageView = createDepthStencilImageView();
-
-				createFramebuffers();
 			}
 
 		private:
-			ref<RenderPass> createRenderPass() const {
-				return Renderer::createRenderPass({
-					.attachments = {
-						// Swapchain
-						{
-							.format = getSurface()->getFormat(),
-							.sampleCount = 1,
-							.loadOperation = LoadOperation::CLEAR,
-							.storeOperation = StoreOperation::STORE,
-							.finalLayout = ImageLayout::PRESENT_SRC,
-						},
-
-						// Depth stencil
-						{
-							.format = ImageFormat::D32_SFLOAT,
-							.sampleCount = 1,
-							.loadOperation = LoadOperation::CLEAR,
-							.storeOperation = StoreOperation::UNDEFINED,
-							.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-						},
-					},
-					.subpasses = {
-						{
-							.colorAttachmentReferences = {
-								{
-									.index = 0,
-									.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
-								},
-							},
-							.depthStencilAttachmentReference = {
-								.index = 1,
-								.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-							},
-						},
-					},
-				});
-			}
-
-			ref<Image> createDepthStencilImage() const {
-				const Extent2D extent = getSwapchain()->getExtent();
-
-				return renderPass->createDepthStencilAttachmentImage(
-					{
-						.type = ImageType::TEXTURE_2D,
-						.extent = {extent.width, extent.height, 1},
-						.mipLevelCount = 1,
-						.layerCount = 1,
-						#if defined(DEBUG_OBJECT_NAME)
-							.name = "Depth stencil",
-						#endif
-					},
-					0
-				);
-			}
-
-			ref<ImageView> createDepthStencilImageView() const {
-				return depthStencilImage->createView({
-					.mipLevelOffset = 0,
-					.mipLevelCount = 1,
-					.layerOffset = 0,
-					.layerCount = 1,
-					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Depth stencil",
-					#endif
-				});
-			}
-
-			void createFramebuffers() {
-				const ref<Swapchain> swapchain = getSwapchain();
-
-				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
-
-				FramebufferDescriptor framebufferDescriptor = {
-					.renderPass = renderPass,
-					.imageViews = {nullptr, depthStencilImageView},
-					.extent = swapchain->getExtent(),
-				};
-
-				#if defined(DEBUG_OBJECT_NAME)
-					sequence<char8> name;
-				#endif
-
-				uint32 framebufferIndex = 0;
-
-				while (framebufferIndex < framebuffers.count()) {
-					#if defined(DEBUG_OBJECT_NAME)
-						name = Logger::format("In flight []", framebufferIndex);
-
-						framebufferDescriptor.name = name;
-					#endif
-
-					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
-
-					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
-
-					framebufferIndex += 1;
-				}
-			}
-
 			ref<PipelineLayout> createPipelineLayout() const {
 				return Renderer::createPipelineLayout({
 					.descriptorSetLayouts = {},
@@ -285,7 +217,7 @@ namespace Trident {
 						.compareOperation = CompareOperation::GREATER,
 					},
 					.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
-					.renderPass = renderPass,
+					.renderPass = pointer_cast<const RenderPassLayer*>(getLayer())->renderPass,
 					.subpassIndex = 0,
 					#if defined(DEBUG_OBJECT_NAME)
 						.name = "Pipeline",
@@ -318,10 +250,6 @@ namespace Trident {
 			}
 
 		private:
-			ref<Image> depthStencilImage;
-			ref<ImageView> depthStencilImageView;
-			ref<RenderPass> renderPass;
-			sequence<ref<Framebuffer>> framebuffers;
 			ref<PipelineLayout> pipelineLayout;
 			ref<GraphicsPipeline> pipeline;
 
