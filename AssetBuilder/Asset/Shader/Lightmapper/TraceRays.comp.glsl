@@ -517,6 +517,7 @@ void main() {
 	}
 
 	vec3 light = radiance / SAMPLE_COUNT;
+	light = pow(light, vec3(1.0 / 2.2));
 
 	imageStore(intermediateLightmapAtlas, coordinate, vec4(light, 1.0));
 }
