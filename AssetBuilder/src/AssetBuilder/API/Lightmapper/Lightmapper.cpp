@@ -130,7 +130,7 @@ namespace Trident {
 		DEBUG_ASSERT(descriptor.lightmapCoordinates.count() == descriptor.vertices.count());
 
 		this->imageAssetDescriptor = imageAssetDescriptor;
-		lighting = descriptor.lighting;
+		sceneDescriptor = descriptor.sceneDescriptor;
 
 		if (!initialized) {
 			initialize();
@@ -309,10 +309,13 @@ namespace Trident {
 		arguments->atlasExtent = {imageAssetDescriptor.extent.width, imageAssetDescriptor.extent.height};
 		arguments->triangleCount = static_cast<uint32>(descriptor.indices.count() / 3);
 		arguments->emissiveTriangleCount = static_cast<uint32>(descriptor.emissiveTriangleIndices.count());
-		arguments->skyColor = lighting.skyColor;
-		arguments->sunDirection = lighting.sunDirection;
-		arguments->sunColor = lighting.sunColor;
-		arguments->sunIntensity = lighting.sunIntensity;
+		arguments->skyColor = descriptor.sceneDescriptor.skyColor;
+
+		if (descriptor.sceneDescriptor.flags & Scene3DBuildFlags::LIGHTMAP_SUN_CONTRIBUTION) {
+			arguments->sunDirection = descriptor.sceneDescriptor.sunDirection;
+			arguments->sunColor = descriptor.sceneDescriptor.sunColor;
+			arguments->sunIntensity = descriptor.sceneDescriptor.sunIntensity;
+		}
 
 		BuildVertex3D* vertexMappedRange = vertexStagingView.map();
 		uint32 vertexIndex = 0;

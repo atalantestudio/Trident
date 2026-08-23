@@ -69,8 +69,8 @@ namespace Trident {
 		lightmapper.~Lightmapper();
 	}
 
-	SceneBuilder::SceneBuilder(const SceneLightingDescriptor& lighting) :
-		lighting(lighting)
+	SceneBuilder::SceneBuilder(const Scene3DDescriptor& descriptor) :
+		descriptor(descriptor)
 	{}
 
 	uint32 SceneBuilder::loadGeometry(ref<Geometry3DAsset> asset) {

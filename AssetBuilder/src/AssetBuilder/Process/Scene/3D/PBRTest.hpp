@@ -15,6 +15,7 @@ namespace Trident {
 
 			BuildScene3D createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				SceneBuilder builder({
+					.flags = Scene3DBuildFlags::LIGHTMAP_SUN_CONTRIBUTION,
 					.skyColor = {0.0f, 0.0f, 0.0f},
 					.sunDirection = {1.0f, 1.0f, 1.0f},
 					.sunColor = {1.0f, 1.0f, 1.0f},

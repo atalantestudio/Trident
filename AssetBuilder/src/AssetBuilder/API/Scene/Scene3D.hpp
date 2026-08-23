@@ -4,6 +4,7 @@
 #pragma once
 
 #include "AssetBuilder/API/Geometry/Geometry3D.hpp"
+#include "AssetBuilder/API/Scene/Scene3DBuildFlags.hpp"
 #include "AssetBuilder/API/Transform.hpp"
 
 #include "Engine/API/Light/PointLight.hpp"
@@ -14,6 +15,14 @@
 #include "Engine/Filesystem/Asset/ShaderModuleAsset.hpp"
 
 namespace Trident {
+	struct Scene3DDescriptor {
+		Scene3DBuildFlags flags;
+		svec3<float32> skyColor;
+		svec3<float32> sunDirection;
+		svec3<float32> sunColor;
+		float32 sunIntensity;
+	};
+
 	struct BuildGeometry {
 		range<uint32, uint32> indexRange;
 		uint32 assetIdentifier;

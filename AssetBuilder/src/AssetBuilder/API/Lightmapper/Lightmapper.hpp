@@ -5,6 +5,7 @@
 
 #include "AssetBuilder/API/Geometry/Geometry3D.hpp"
 #include "AssetBuilder/API/Lightmapper/Lightmap.hpp"
+#include "AssetBuilder/API/Scene/Scene3D.hpp"
 
 #include "Engine/API/Graphics/Descriptor/ShaderModuleDescriptor.hpp"
 #include "Engine/API/Graphics/PhysicalDevice.hpp"
@@ -14,20 +15,13 @@
 #include "Engine/API/Graphics/DeviceExtension/Test_EXT.hpp"
 
 namespace Trident {
-	struct SceneLightingDescriptor {
-		svec3<float32> skyColor;
-		svec3<float32> sunDirection;
-		svec3<float32> sunColor;
-		float32 sunIntensity;
-	};
-
 	struct LightmapperDescriptor {
 		view<BuildVertex3D> vertices;
 		view<svec2<float32>> lightmapCoordinates;
 		view<uint32> indices;
 		view<LightmapMaterial> materials;
 		view<uint32> emissiveTriangleIndices;
-		SceneLightingDescriptor lighting;
+		Scene3DDescriptor sceneDescriptor;
 	};
 
 	struct LightmapperContext {
@@ -128,7 +122,7 @@ namespace Trident {
 			ImageFormat atlasFormat;
 			Extent3D atlasExtent;
 			ImageAssetDescriptor imageAssetDescriptor;
-			SceneLightingDescriptor lighting;
+			Scene3DDescriptor sceneDescriptor;
 
 			ref<Instance> instance;
 			ref<PhysicalDevice> physicalDevice;

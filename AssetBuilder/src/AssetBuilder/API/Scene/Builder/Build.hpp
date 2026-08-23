@@ -23,7 +23,7 @@ namespace Trident {
 		scene.vertexCount = static_cast<uint32>(staticVertexCount + dynamicVertexCount);
 		scene.staticGeometry.vertexCount = static_cast<uint32>(staticVertexCount);
 		scene.triangleCount = static_cast<uint32>((staticIndexCount + dynamicIndexCount) / 3);
-		scene.skyColor = lighting.skyColor;
+		scene.skyColor = descriptor.skyColor;
 		scene.staticGeometry.lightmapAtlasImageAssetDescriptor.identifier = max<uint32>();
 		scene.dynamicGeometry.entityCount = entityCount;
 
@@ -270,7 +270,7 @@ namespace Trident {
 				.indices = indices,
 				.materials = materials,
 				.emissiveTriangleIndices = emissiveTriangleIndices,
-				.lighting = lighting,
+				.sceneDescriptor = descriptor,
 			});
 		}
 	}

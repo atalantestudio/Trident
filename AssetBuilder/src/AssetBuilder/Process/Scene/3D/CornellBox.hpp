@@ -236,6 +236,7 @@ namespace Trident {
 				};
 
 				SceneBuilder builder({
+					.flags = {},
 					.skyColor = {0.0f, 0.0f, 0.0f},
 					.sunDirection = {0.0f, 0.0f, 0.0f},
 					.sunColor = {0.0f, 0.0f, 0.0f},

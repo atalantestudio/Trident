@@ -45,7 +45,7 @@ namespace Trident {
 			static LightmapNode* insertLightmapNode(Lightmap& lightmap, LightmapNode* node);
 
 		public:
-			explicit SceneBuilder(const SceneLightingDescriptor& lighting);
+			explicit SceneBuilder(const Scene3DDescriptor& descriptor);
 
 			/// Loads a geometry asset and returns its index.
 			uint32 loadGeometry(ref<Geometry3DAsset> asset);
@@ -107,7 +107,7 @@ namespace Trident {
 			/// Sorted by ascending area.
 			std::vector<LightmapLookup> lightmapLookups;
 
-			SceneLightingDescriptor lighting;
+			Scene3DDescriptor descriptor;
 
 			std::vector<EntityComponentMapping<GeometryComponent>> geometryMappings;
 			std::vector<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;
