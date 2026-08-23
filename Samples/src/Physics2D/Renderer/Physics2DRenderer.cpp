@@ -122,11 +122,7 @@ namespace Trident {
 		layerInput->swapchainImage = renderPass->createColorAttachmentImage(
 			{
 				.type = ImageType::TEXTURE_2D,
-				.extent = {
-					.width = swapchainExtent.width,
-					.height = swapchainExtent.height,
-					.depth = 1,
-				},
+				.extent = {swapchainExtent.width, swapchainExtent.height, 1},
 				.mipLevelCount = 1,
 				.layerCount = 1,
 				#if defined(DEBUG_OBJECT_NAME)
@@ -155,11 +151,7 @@ namespace Trident {
 		depthStencilImage = renderPass->createDepthStencilAttachmentImage(
 			{
 				.type = ImageType::TEXTURE_2D,
-				.extent = {
-					.width = swapchainExtent.width,
-					.height = swapchainExtent.height,
-					.depth = 1,
-				},
+				.extent = {swapchainExtent.width, swapchainExtent.height, 1},
 				.mipLevelCount = 1,
 				.layerCount = 1,
 				#if defined(DEBUG_OBJECT_NAME)

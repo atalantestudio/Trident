@@ -12,11 +12,7 @@ namespace Trident {
 		return visibilityRenderPass->createInputAttachmentImage(
 			{
 				.type = ImageType::TEXTURE_2D,
-				.extent = {
-					.width = extent.width,
-					.height = extent.height,
-					.depth = 1,
-				},
+				.extent = {extent.width, extent.height, 1},
 				.mipLevelCount = 1,
 				.layerCount = 1,
 				.additionalUsage = ImageUsage::STORAGE,

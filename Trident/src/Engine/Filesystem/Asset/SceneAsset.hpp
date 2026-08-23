@@ -46,7 +46,6 @@ namespace Trident {
 		uint64 staticPositionSize;
 		uint64 staticNormalSize;
 		uint64 staticTextureCoordinateSize;
-
 		sequence<Instance3D> instances;
 		sequence<ref<Geometry3DAsset>> geometryAssets;
 		sequence<range<uint32, uint32>> geometryIndexRanges;
@@ -54,17 +53,13 @@ namespace Trident {
 		sequence<Material> materials;
 		sequence<MaterialShader> materialShaders;
 		sequence<PointLight> pointLights;
-
 		uint32 dynamicMaterialShaderOffset;
-
 		ref<ImageAsset> lightmapAtlasImageAsset;
-
 		svec3<float32> skyColor;
-
+		svec3<float32> sunDirection;
 		uint32 entityCount;
 		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
 		sequence<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;
-
 		uint32 hullCount = 0;
 		uint32 hullEdgeCount = 0;
 		uint32 hullFaceCount = 0;

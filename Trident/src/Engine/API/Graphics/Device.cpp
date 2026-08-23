@@ -513,29 +513,18 @@ namespace Trident {
 				while (subpassIndex < descriptor.subpasses.count()) {
 					const Subpass& subpass = descriptor.subpasses[subpassIndex];
 
-					if (subpass.colorAttachmentReferences.count() == 0) {
-						VALIDATION_ERROR("descriptor.subpasses[[]].colorAttachmentReferences must not be empty.", subpassIndex);
-					}
-
 					uint32 colorAttachmentReferenceIndex = 0;
-					bool anyUsedColorAttachment = false;
 
 					while (colorAttachmentReferenceIndex < subpass.colorAttachmentReferences.count()) {
 						const AttachmentReference& colorAttachmentReference = subpass.colorAttachmentReferences[colorAttachmentReferenceIndex];
 
 						if (colorAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
-							anyUsedColorAttachment = true;
-
 							if (colorAttachmentReference.layout >= ImageLayout::count) {
 								VALIDATION_ERROR("descriptor.subpasses[[]].colorAttachmentReferences[[]].layout must be a valid ImageLayout value.", subpassIndex, colorAttachmentReferenceIndex);
 							}
 						}
 
 						colorAttachmentReferenceIndex += 1;
-					}
-
-					if (!anyUsedColorAttachment) {
-						VALIDATION_ERROR("descriptor.subpasses[[]].colorAttachmentReferences must contain at least one used attachment.", subpassIndex);
 					}
 
 					if (subpass.depthStencilAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX && subpass.depthStencilAttachmentReference.layout >= ImageLayout::count) {

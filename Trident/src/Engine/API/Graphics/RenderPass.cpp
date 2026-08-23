@@ -76,8 +76,13 @@ namespace Trident {
 			}
 
 			if (subpass.depthStencilAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
-				// TODO(graphics/render-pass/attachment-sample-count): There is no need for each attachment to store a sample count.
-				ENGINE_ASSERT(rasterizationSampleCount == attachments[subpass.depthStencilAttachmentReference.index].sampleCount, "All color and depth/stencil attachments in a subpass must have the same sample count.");
+				if (rasterizationSampleCount == 0) {
+					rasterizationSampleCount = attachments[subpass.depthStencilAttachmentReference.index].sampleCount;
+				}
+				else {
+					// TODO(graphics/render-pass/attachment-sample-count): There is no need for each attachment to store a sample count.
+					ENGINE_ASSERT(rasterizationSampleCount == attachments[subpass.depthStencilAttachmentReference.index].sampleCount, "All color and depth/stencil attachments in a subpass must have the same sample count.");
+				}
 
 				attachmentReferenceCount += 1;
 			}

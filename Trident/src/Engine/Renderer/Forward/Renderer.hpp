@@ -19,15 +19,18 @@ namespace Trident {
 	};
 
 	class ForwardRenderer : public BaseSceneRenderer<ForwardCamera> {
+		private:
+			struct DirectionalLightView {
+				mat4x4<float32> projection;
+			};
+
 		public:
 			static constexpr index DEBUG_MAX_CONTACTS = 16;
 
 		public:
 			void postBuild() override {
 				renderPass = createRenderPass();
-
-				createFrameObjects();
-
+				directionalShadowMapRenderPass = createDirectionalShadowMapRenderPass();
 				staticGeometryDescriptorSetLayout = createStaticGeometryDescriptorSetLayout();
 				dynamicDescriptorSetLayout = createDynamicDescriptorSetLayout();
 
@@ -41,6 +44,10 @@ namespace Trident {
 
 				staticGeometryDescriptorSet = descriptorSets[0];
 				dynamicDescriptorSet = descriptorSets[1];
+
+				directionalLightViewBuffer = createDirectionalLightViewBuffer();
+				directionalShadowMapImage = createDirectionalShadowMapImage();
+				directionalShadowMapImageView = createDirectionalShadowMapImageView();
 
 				// TODO(forward): Restore debug modes.
 				/* debugHullWireframePipelineLayout = createDebugHullWireframePipelineLayout();
@@ -57,6 +64,13 @@ namespace Trident {
 
 				lightmapAtlasSampler = createLightmapAtlasSampler();
 				materialSampler = createMaterialSampler();
+
+				createFrameObjects();
+				createDirectionalShadowMapFramebuffers();
+
+				const BufferView<DirectionalLightView> directionalLightViewView = directionalLightViewBuffer->createView<DirectionalLightView>(0, sizeof(DirectionalLightView));
+
+				directionalLightViewRange = directionalLightViewView.map();
 			}
 
 			void encodeSceneOneTimeCommands() override {
@@ -244,6 +258,11 @@ namespace Trident {
 
 				cameraMappedRange->pointLightCount = static_cast<uint32>(scene->getAsset()->pointLights.count());
 				cameraMappedRange->ambientColor = scene->getAsset()->skyColor;
+
+				const mat4x4<float32> lightProjection = mat4x4<float32>::orthographic(-256.0f, 256.0f, -256.0f, 256.0f, 1.0f, 128.0f);
+				const mat4x4<float32> lightView = mat4x4<float32>::lookAt({0.0f, 0.0f, 0.0f}, vec3<float32>(scene->getAsset()->sunDirection), UP);
+
+				directionalLightViewRange->projection = lightProjection * lightView;
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
@@ -288,8 +307,10 @@ namespace Trident {
 
 		private:
 			ref<RenderPass> createRenderPass() const;
+			ref<RenderPass> createDirectionalShadowMapRenderPass() const;
 
 			void createFramebuffers();
+			void createDirectionalShadowMapFramebuffers();
 
 			ref<DescriptorSetLayout> createStaticGeometryDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createDynamicDescriptorSetLayout() const;
@@ -306,6 +327,7 @@ namespace Trident {
 
 			ref<Image> createDepthStencilImage() const;
 			ref<Image> createLightmapAtlasImage(ref<ImageAsset> imageAsset) const;
+			ref<Image> createDirectionalShadowMapImage() const;
 
 			#if FORWARD_SAMPLE_COUNT > 1
 				ref<ImageView> createColorImageView() const;
@@ -313,12 +335,14 @@ namespace Trident {
 
 			ref<ImageView> createDepthStencilImageView() const;
 			ref<ImageView> createLightmapAtlasImageView() const;
+			ref<ImageView> createDirectionalShadowMapImageView() const;
 
 			ref<Buffer> createVertexBuffer() const;
 			ref<Buffer> createIndexBuffer() const;
 			ref<Buffer> createLightmapCoordinateBuffer() const;
 			ref<Buffer> createInstanceBuffer() const;
 			ref<Buffer> createPointLightBuffer() const;
+			ref<Buffer> createDirectionalLightViewBuffer() const;
 			ref<Buffer> createDebugHullWireframeBuffer(uint64 size) const;
 			ref<Buffer> createDebugContactManifoldBuffer() const;
 
@@ -348,8 +372,10 @@ namespace Trident {
 
 		private:
 			ref<RenderPass> renderPass;
+			ref<RenderPass> directionalShadowMapRenderPass;
 
 			sequence<ref<Framebuffer>> framebuffers;
+			sequence<ref<Framebuffer>> directionalShadowMapFramebuffers;
 
 			ref<DescriptorSetLayout> staticGeometryDescriptorSetLayout;
 			ref<DescriptorSetLayout> dynamicDescriptorSetLayout;
@@ -379,6 +405,7 @@ namespace Trident {
 			ref<Buffer> instanceBuffer;
 
 			ref<Buffer> pointLightBuffer;
+			ref<Buffer> directionalLightViewBuffer;
 			ref<Buffer> debugHullWireframeBuffer;
 			ref<Buffer> debugContactManifoldBuffer;
 
@@ -389,6 +416,7 @@ namespace Trident {
 			ref<Image> depthStencilImage;
 			ref<Image> lightmapAtlasImage;
 			sequence<ref<Image>> materialImages;
+			ref<Image> directionalShadowMapImage;
 
 			#if FORWARD_SAMPLE_COUNT > 1
 				ref<ImageView> colorImageView;
@@ -397,10 +425,12 @@ namespace Trident {
 			ref<ImageView> depthStencilImageView;
 			ref<ImageView> lightmapAtlasImageView;
 			sequence<ref<ImageView>> materialImageViews;
+			ref<ImageView> directionalShadowMapImageView;
 
 			ref<Sampler> lightmapAtlasSampler;
 			ref<Sampler> materialSampler;
 
+			DirectionalLightView* directionalLightViewRange = nullptr;
 			Instance3D* instanceMappedRange = nullptr;
 
 		public:

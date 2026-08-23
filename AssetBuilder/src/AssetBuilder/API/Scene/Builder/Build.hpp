@@ -24,6 +24,7 @@ namespace Trident {
 		scene.staticGeometry.vertexCount = static_cast<uint32>(staticVertexCount);
 		scene.triangleCount = static_cast<uint32>((staticIndexCount + dynamicIndexCount) / 3);
 		scene.skyColor = descriptor.skyColor;
+		scene.sunDirection = descriptor.sunDirection;
 		scene.staticGeometry.lightmapAtlasImageAssetDescriptor.identifier = max<uint32>();
 		scene.dynamicGeometry.entityCount = entityCount;
 

@@ -89,10 +89,9 @@ namespace Trident {
 
 		uint32 vertexCount;
 		uint32 triangleCount;
-
 		BuildStaticSceneGeometry3D staticGeometry;
 		BuildDynamicSceneGeometry3D dynamicGeometry;
-
 		svec3<float32> skyColor;
+		svec3<float32> sunDirection;
 	};
 }

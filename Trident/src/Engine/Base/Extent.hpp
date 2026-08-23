@@ -5,9 +5,6 @@
 
 namespace Trident {
 	struct Extent2D {
-		uint32 width;
-		uint32 height;
-
 		inline uint32 operator[](std::size_t index) const {
 			ENGINE_ASSERT(index < 2, "Index overflow.");
 
@@ -19,12 +16,19 @@ namespace Trident {
 
 			return pointer_cast<uint32*>(this)[index];
 		}
+
+		uint32 width;
+		uint32 height;
 	};
 
 	struct Extent3D {
-		uint32 width;
-		uint32 height;
-		uint32 depth;
+		Extent3D() = default;
+
+		Extent3D(uint32 width, uint32 height, uint32 depth) :
+			width(width),
+			height(height),
+			depth(depth)
+		{}
 
 		inline uint32 operator[](std::size_t index) const {
 			ENGINE_ASSERT(index < 3, "Index overflow.");
@@ -37,5 +41,9 @@ namespace Trident {
 
 			return pointer_cast<uint32*>(this)[index];
 		}
+
+		uint32 width;
+		uint32 height;
+		uint32 depth;
 	};
 }

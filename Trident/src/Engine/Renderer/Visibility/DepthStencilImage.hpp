@@ -12,11 +12,7 @@ namespace Trident {
 		return visibilityRenderPass->createDepthStencilAttachmentImage(
 			{
 				.type = ImageType::TEXTURE_2D,
-				.extent = {
-					.width = swapchainExtent.width,
-					.height = swapchainExtent.height,
-					.depth = 1,
-				},
+				.extent = {swapchainExtent.width, swapchainExtent.height, 1},
 				.mipLevelCount = 1,
 				.layerCount = 1,
 				#if defined(ENABLE_VISIBILITY_DEBUG_PASS)
