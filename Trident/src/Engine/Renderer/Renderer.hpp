@@ -47,7 +47,7 @@ namespace Trident {
 
 			static ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor);
 
-			static ref<DescriptorSetLayout> createDescriptorSetLayout(view<DescriptorSetLayoutBinding> bindings);
+			static ref<DescriptorSetLayout> createDescriptorSetLayout(const DescriptorSetLayoutDescriptor& descriptor);
 
 			static ref<Fence> createFence(const FenceDescriptor& descriptor);
 

@@ -13,7 +13,7 @@ namespace Trident {
 			void build() override {
 				const ref<Device> device = getDevice();
 
-				const DescriptorSetLayoutBinding prefixSumDescriptorSetLayoutBindings[] = {
+				const DescriptorSetLayoutBinding bindings[] = {
 					// Element count
 					{
 						.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
@@ -29,7 +29,12 @@ namespace Trident {
 					},
 				};
 
-				const ref<DescriptorSetLayout> prefixSumDescriptorSetLayout = createDescriptorSetLayout(prefixSumDescriptorSetLayoutBindings);
+				const ref<DescriptorSetLayout> prefixSumDescriptorSetLayout = createDescriptorSetLayout({
+					.bindings = bindings,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Prefix sum",
+					#endif
+				});
 
 				const ref<PipelineLayout> prefixSumPipelineLayout = createPipelineLayout({
 					.descriptorSetLayouts = {prefixSumDescriptorSetLayout},

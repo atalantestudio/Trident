@@ -34,7 +34,7 @@ namespace Trident {
 			// TODO(graphics/device/create-compute-pipeline): Create multiple pipelines at once.
 			ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor) const;
 
-			ref<DescriptorSetLayout> createDescriptorSetLayout(view<DescriptorSetLayoutBinding> bindings) const;
+			ref<DescriptorSetLayout> createDescriptorSetLayout(const DescriptorSetLayoutDescriptor& descriptor) const;
 
 			ref<Fence> createFence(const FenceDescriptor& descriptor) const;
 

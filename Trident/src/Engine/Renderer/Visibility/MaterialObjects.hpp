@@ -69,7 +69,12 @@ namespace Trident {
 				std::copy(materialShaderModuleAsset->bindings.begin(), materialShaderModuleAsset->bindings.end(), &userDescriptorSetLayoutBindings[1]);
 			}
 
-			materialShaderUserDescriptorSetLayouts[materialShaderIndex] = createDescriptorSetLayout(userDescriptorSetLayoutBindings);
+			materialShaderUserDescriptorSetLayouts[materialShaderIndex] = createDescriptorSetLayout({
+				.bindings = userDescriptorSetLayoutBindings,
+				#if defined(DEBUG_OBJECT_NAME)
+					.name = "Material shader user",
+				#endif
+			});
 
 			materialShaderPipelineLayoutDescriptor.descriptorSetLayouts[0] = materialBaseDescriptorSetLayout;
 			materialShaderPipelineLayoutDescriptor.descriptorSetLayouts[1] = materialShaderUserDescriptorSetLayouts[materialShaderIndex];

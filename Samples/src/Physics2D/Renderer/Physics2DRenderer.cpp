@@ -348,7 +348,12 @@ namespace Trident {
 			},
 		};
 
-		cameraViewDescriptorSetLayout = createDescriptorSetLayout(bindings);
+		cameraViewDescriptorSetLayout = createDescriptorSetLayout({
+			.bindings = bindings,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Camera",
+			#endif
+		});
 	}
 
 	void Physics2DRenderer::createPlaceholderDescriptorSetLayout() {
@@ -360,7 +365,12 @@ namespace Trident {
 			},
 		};
 
-		placeholderDescriptorSetLayout = createDescriptorSetLayout(bindings);
+		placeholderDescriptorSetLayout = createDescriptorSetLayout({
+			.bindings = bindings,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Placeholder",
+			#endif
+		});
 	}
 
 	void Physics2DRenderer::createCameraViewPipelineLayout() {

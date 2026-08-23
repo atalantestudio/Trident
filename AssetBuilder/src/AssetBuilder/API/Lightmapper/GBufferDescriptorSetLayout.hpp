@@ -23,6 +23,11 @@ namespace Trident {
 			},
 		};
 
-		return device->createDescriptorSetLayout(bindings);
+		return device->createDescriptorSetLayout({
+			.bindings = bindings,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "G-Buffer",
+			#endif
+		});
 	}
 }

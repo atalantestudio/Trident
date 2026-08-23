@@ -9,17 +9,17 @@
 #include "Engine/Adapter/Graphics/VK/ShaderStage.hpp"
 
 namespace Trident {
-	VK::DescriptorSetLayout::DescriptorSetLayout(const Trident::Device* device, view<DescriptorSetLayoutBinding> bindings) :
-		Trident::DescriptorSetLayout(device, bindings)
+	VK::DescriptorSetLayout::DescriptorSetLayout(const Trident::Device* device, const DescriptorSetLayoutDescriptor& descriptor) :
+		Trident::DescriptorSetLayout(device, descriptor)
 	{}
 
-	ref<Trident::DescriptorSetLayout> VK::createDescriptorSetLayout(const Trident::Device* device, view<DescriptorSetLayoutBinding> bindings) {
+	ref<Trident::DescriptorSetLayout> VK::createDescriptorSetLayout(const Trident::Device* device, const DescriptorSetLayoutDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 
-		ref<VK::DescriptorSetLayout> descriptorSetLayout = allocateRef<VK::DescriptorSetLayout>(device, bindings);
-		sequence<VkDescriptorSetLayoutBinding> vkDescriptorSetLayoutBindings(bindings.count());
+		ref<VK::DescriptorSetLayout> descriptorSetLayout = allocateRef<VK::DescriptorSetLayout>(device, descriptor);
+		sequence<VkDescriptorSetLayoutBinding> vkDescriptorSetLayoutBindings(descriptor.bindings.count());
 		VkResult result;
 
 		VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo{};
@@ -30,8 +30,8 @@ namespace Trident {
 
 		uint32 bindingIndex = 0;
 
-		while (bindingIndex < bindings.count()) {
-			const DescriptorSetLayoutBinding& binding = bindings[bindingIndex];
+		while (bindingIndex < descriptor.bindings.count()) {
+			const DescriptorSetLayoutBinding& binding = descriptor.bindings[bindingIndex];
 
 			VkDescriptorSetLayoutBinding& vkDescriptorSetLayoutBinding = vkDescriptorSetLayoutBindings[bindingIndex];
 			vkDescriptorSetLayoutBinding.binding = bindingIndex;
@@ -48,6 +48,21 @@ namespace Trident {
 		result = _device->vkCreateDescriptorSetLayout(_device->device, &descriptorSetLayoutCreateInfo, nullptr, &descriptorSetLayout->descriptorSetLayout);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create descriptor set layout ([]).", string_VkResult(result));
+
+		#if defined(DEBUG_OBJECT_NAME)
+			if (descriptor.name.count() > 0) {
+				VkDebugUtilsObjectNameInfoEXT debugUtilsObjectNameInfo{};
+				debugUtilsObjectNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+				debugUtilsObjectNameInfo.pNext = nullptr;
+				debugUtilsObjectNameInfo.objectType = VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT;
+				debugUtilsObjectNameInfo.objectHandle = (uint64) descriptorSetLayout->descriptorSetLayout;
+				debugUtilsObjectNameInfo.pObjectName = &descriptor.name[0];
+
+				result = _device->vkSetDebugUtilsObjectNameEXT(_device->device, &debugUtilsObjectNameInfo);
+
+				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to set object name ([]).", string_VkResult(result));
+			}
+		#endif
 
 		return descriptorSetLayout;
 	}

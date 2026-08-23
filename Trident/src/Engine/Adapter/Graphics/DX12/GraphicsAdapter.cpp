@@ -22,8 +22,8 @@
 #include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
 
 namespace Trident::DX12 {
-	static ref<DescriptorSetLayout> createDescriptorSetLayout(const Trident::Device* device, view<DescriptorSetLayoutBinding> bindings) {
-		return allocateRef<DescriptorSetLayout>(device, bindings);
+	static ref<DescriptorSetLayout> createDescriptorSetLayout(const Trident::Device* device, const DescriptorSetLayoutDescriptor& descriptor) {
+		return allocateRef<DescriptorSetLayout>(device, descriptor);
 	}
 
 	static ref<Framebuffer> createFramebuffer(const Trident::Device* device, const FramebufferDescriptor& descriptor) {

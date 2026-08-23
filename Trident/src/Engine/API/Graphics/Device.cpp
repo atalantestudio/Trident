@@ -133,25 +133,29 @@ namespace Trident {
 		return adapter->createComputePipelineImplementation(this, descriptor);
 	}
 
-	ref<DescriptorSetLayout> Device::createDescriptorSetLayout(view<DescriptorSetLayoutBinding> bindings) const {
+	ref<DescriptorSetLayout> Device::createDescriptorSetLayout(const DescriptorSetLayoutDescriptor& descriptor) const {
 		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
-				uint32 descriptorSetLayoutBindingIndex = 0;
+				uint32 bindingIndex = 0;
 
-				while (descriptorSetLayoutBindingIndex < bindings.count()) {
-					const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = bindings[descriptorSetLayoutBindingIndex];
+				while (bindingIndex < descriptor.bindings.count()) {
+					const DescriptorSetLayoutBinding& binding = descriptor.bindings[bindingIndex];
 
-					if (descriptorSetLayoutBinding.descriptorType == DescriptorType::INPUT_ATTACHMENT && descriptorSetLayoutBinding.descriptorCount > 0 && !(descriptorSetLayoutBinding.stageFlags & ShaderStage::FRAGMENT)) {
-						VALIDATION_ERROR("If descriptorType is INPUT_ATTACHMENT and descriptorCount is not 0, then stageFlags must be FRAGMENT.", descriptorSetLayoutBindingIndex);
+					if (binding.descriptorType == DescriptorType::INPUT_ATTACHMENT && binding.descriptorCount > 0 && !(binding.stageFlags & ShaderStage::FRAGMENT)) {
+						VALIDATION_ERROR("For descriptor.bindings[[]], if descriptorType is INPUT_ATTACHMENT and descriptorCount is not 0, then stageFlags must be FRAGMENT.", bindingIndex);
 					}
 
-					descriptorSetLayoutBindingIndex += 1;
+					bindingIndex += 1;
+				}
+
+				if (descriptor.name.count() == 0) {
+					VALIDATION_WARNING("descriptor.name should provide a unique name to help identify this descriptor set layout.");
 				}
 			}
 		#endif
 
-		return adapter->createDescriptorSetLayoutImplementation(this, bindings);
+		return adapter->createDescriptorSetLayoutImplementation(this, descriptor);
 	}
 
 	ref<Fence> Device::createFence(const FenceDescriptor& descriptor) const {

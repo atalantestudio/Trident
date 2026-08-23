@@ -29,8 +29,8 @@ namespace Trident {
 		return layerCompositor->device->createComputePipeline(descriptor);
 	}
 
-	ref<DescriptorSetLayout> Renderer::createDescriptorSetLayout(view<DescriptorSetLayoutBinding> bindings) {
-		return layerCompositor->device->createDescriptorSetLayout(bindings);
+	ref<DescriptorSetLayout> Renderer::createDescriptorSetLayout(const DescriptorSetLayoutDescriptor& descriptor) {
+		return layerCompositor->device->createDescriptorSetLayout(descriptor);
 	}
 
 	ref<Fence> Renderer::createFence(const FenceDescriptor& descriptor) {

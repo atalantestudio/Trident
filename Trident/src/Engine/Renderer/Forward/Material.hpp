@@ -29,9 +29,13 @@ namespace Trident {
 		ENGINE_ASSERT(shaderModuleAsset->descriptorSetBindingRanges.count() == 1, "Material shaders must have a single descriptor set.");
 
 		const range<uint32, uint32> bindingRange = shaderModuleAsset->descriptorSetBindingRanges[0];
-		const view<DescriptorSetLayoutBinding> bindings(&shaderModuleAsset->bindings[bindingRange.offset], bindingRange.count);
 
-		ref<DescriptorSetLayout> descriptorSetLayout = createDescriptorSetLayout(bindings);
+		ref<DescriptorSetLayout> descriptorSetLayout = createDescriptorSetLayout({
+			.bindings = view<DescriptorSetLayoutBinding>(&shaderModuleAsset->bindings[bindingRange.offset], bindingRange.count),
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = materialName,
+			#endif
+		});
 
 		uniqueMaterialDescriptorSetLayouts[materialShaderIndex] = descriptorSetLayout;
 

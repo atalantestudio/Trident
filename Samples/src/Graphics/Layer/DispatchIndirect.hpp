@@ -125,7 +125,12 @@ namespace Trident {
 					},
 				};
 
-				return createDescriptorSetLayout(bindings);
+				return createDescriptorSetLayout({
+					.bindings = bindings,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Output",
+					#endif
+				});
 			}
 
 			ref<PipelineLayout> createPipelineLayout() const {
@@ -289,14 +294,20 @@ namespace Trident {
 
 			void computeOutputImage() const {
 				const ref<Device> device = getDevice();
-
-				const DescriptorSetLayoutBinding binding = {
-					.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE,
-					.descriptorCount = 1,
-					.stageFlags = ShaderStage::COMPUTE,
+				const DescriptorSetLayoutBinding bindings[] = {
+					{
+						.descriptorType = DescriptorType::READ_WRITE_STORAGE_IMAGE,
+						.descriptorCount = 1,
+						.stageFlags = ShaderStage::COMPUTE,
+					},
 				};
 
-				const ref<DescriptorSetLayout> descriptorSetLayout = createDescriptorSetLayout(binding);
+				const ref<DescriptorSetLayout> descriptorSetLayout = createDescriptorSetLayout({
+					.bindings = bindings,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Descriptor set layout",
+					#endif
+				});
 
 				// TODO(base/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
 				sequence<ref<DescriptorSet>> descriptorSets = device->allocateDescriptorSets(descriptorSetLayout);

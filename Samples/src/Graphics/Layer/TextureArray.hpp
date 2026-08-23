@@ -268,7 +268,12 @@ namespace Trident {
 					},
 				};
 
-				textureArrayDescriptorSetLayout = createDescriptorSetLayout(bindings);
+				textureArrayDescriptorSetLayout = createDescriptorSetLayout({
+					.bindings = bindings,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Texture array",
+					#endif
+				});
 			}
 
 			void allocateTextureArrayImageDescriptorSet() {

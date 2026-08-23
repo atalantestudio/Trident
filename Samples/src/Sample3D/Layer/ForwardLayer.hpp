@@ -5,7 +5,7 @@
 
 #define FORWARD_USE_NOCLIP_CAMERA
 // #define FORWARD_ENABLE_PHYSICS
-#define FORWARD_TEST_CORNELL_BOX
+// #define FORWARD_TEST_CORNELL_BOX
 
 #if !defined(FORWARD_USE_NOCLIP_CAMERA)
 	#include "Engine/API/Camera/Controller/PlayerCameraController.hpp"

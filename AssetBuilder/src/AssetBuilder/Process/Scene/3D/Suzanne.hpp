@@ -15,13 +15,16 @@ namespace Trident {
 
 			BuildScene3D createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				SceneBuilder builder({
-					.skyColor = {0.6f, 0.7f, 0.9f},
+					// .skyColor = {0.6f, 0.7f, 0.9f},
+					.skyColor = {0.0f, 0.0f, 0.0f},
 					.sunDirection = {1.0f, 1.0f, 1.0f},
 					.sunColor = {1.0f, 1.0f, 1.0f},
-					.sunIntensity = 0.0f,
+					// .sunIntensity = 0.0f,
+					.sunIntensity = 1.0f,
 				});
 
-				const uint32 suzanneGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("suzanne"));
+				// const uint32 suzanneGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("suzanne"));
+				const uint32 suzanneGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("teapot"));
 				const uint32 boxGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("3d_unit_box_st"));
 
 				const MaterialReference lightmappedDefaultMaterial = builder.loadStaticMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
@@ -94,15 +97,18 @@ namespace Trident {
 					.geometryIndex = suzanneGeometry,
 					.material = lightmappedDefaultMaterial,
 					.transform = {
-						.translation = {0.0f, 32.0f, 0.0f},
+						// .translation = {0.0f, 32.0f, 0.0f},
+						.translation = {0.0f, 8.0f, 0.0f},
 						.rotation = {radians(-90.0_deg), radians(180.0_deg), 0.0_rad},
-						.scale = 256.0f,
+						// .scale = 256.0f,
+						.scale = 1.0f,
 					},
 					.lightmap = {
 						.luxelScale = {1.0f, 1.0f},
 						.albedo = {1.0f, 1.0f, 1.0f},
 					},
-					.lightmapScale = {512.0f, 512.0f},
+					// .lightmapScale = {512.0f, 512.0f},
+					.lightmapScale = {256.0f, 256.0f},
 				});
 
 				builder.placeRigidBody({

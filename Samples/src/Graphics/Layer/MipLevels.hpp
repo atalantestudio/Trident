@@ -284,7 +284,12 @@ namespace Trident {
 					},
 				};
 
-				const ref<DescriptorSetLayout> descriptorSetLayout = createDescriptorSetLayout(bindings);
+				const ref<DescriptorSetLayout> descriptorSetLayout = createDescriptorSetLayout({
+					.bindings = bindings,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Descriptor set layout",
+					#endif
+				});
 
 				// TODO(base/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
 				sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(descriptorSetLayout);
@@ -447,7 +452,12 @@ namespace Trident {
 					},
 				};
 
-				return createDescriptorSetLayout(bindings);
+				return createDescriptorSetLayout({
+					.bindings = bindings,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Image",
+					#endif
+				});
 			}
 
 			void updateDebugImageDescriptorSet() {

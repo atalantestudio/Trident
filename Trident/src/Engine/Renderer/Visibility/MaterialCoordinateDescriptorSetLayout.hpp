@@ -48,6 +48,11 @@ namespace Trident {
 			},
 		};
 
-		return createDescriptorSetLayout(bindings);
+		return createDescriptorSetLayout({
+			.bindings = bindings,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Material coordinate",
+			#endif
+		});
 	}
 }

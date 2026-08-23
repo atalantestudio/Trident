@@ -529,7 +529,12 @@ namespace Trident {
 			},
 		};
 
-		return device->createDescriptorSetLayout(bindings);
+		return device->createDescriptorSetLayout({
+			.bindings = bindings,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Glyph image",
+			#endif
+		});
 	}
 
 	ref<DescriptorSetLayout> GenerateSDFGlyphMapProcess::createGlyphSdfDescriptorSetLayout() const {
@@ -563,7 +568,12 @@ namespace Trident {
 			},
 		};
 
-		return device->createDescriptorSetLayout(bindings);
+		return device->createDescriptorSetLayout({
+			.bindings = bindings,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Glyph SDF",
+			#endif
+		});
 	}
 
 	ref<PipelineLayout> GenerateSDFGlyphMapProcess::createGlyphImagePipelineLayout() const {

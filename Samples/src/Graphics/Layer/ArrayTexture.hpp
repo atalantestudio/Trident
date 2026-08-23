@@ -210,7 +210,12 @@ namespace Trident {
 					},
 				};
 
-				return Renderer::createDescriptorSetLayout(bindings);
+				return Renderer::createDescriptorSetLayout({
+					.bindings = bindings,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Descriptor set layout",
+					#endif
+				});
 			}
 
 			ref<PipelineLayout> createPipelineLayout() const {

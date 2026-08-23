@@ -9,14 +9,14 @@
 namespace Trident {
 	class VK::DescriptorSetLayout final : public Trident::DescriptorSetLayout {
 		public:
-			explicit DescriptorSetLayout(const Trident::Device* device, view<DescriptorSetLayoutBinding> bindings);
+			explicit DescriptorSetLayout(const Trident::Device* device, const DescriptorSetLayoutDescriptor& descriptor);
 
 		public:
 			VkDescriptorSetLayout descriptorSetLayout;
 	};
 
 	namespace VK {
-		ref<Trident::DescriptorSetLayout> createDescriptorSetLayout(const Trident::Device* device, view<DescriptorSetLayoutBinding> bindings);
+		ref<Trident::DescriptorSetLayout> createDescriptorSetLayout(const Trident::Device* device, const DescriptorSetLayoutDescriptor& descriptor);
 
 		void destroyDescriptorSetLayout(const Trident::Device* device, const Trident::DescriptorSetLayout* descriptorSetLayout);
 	}

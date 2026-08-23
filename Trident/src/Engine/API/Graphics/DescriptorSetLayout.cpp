@@ -7,11 +7,11 @@
 #include "Engine/API/Graphics/Device.hpp"
 
 namespace Trident {
-	DescriptorSetLayout::DescriptorSetLayout(const Device* device, view<DescriptorSetLayoutBinding> bindings) :
+	DescriptorSetLayout::DescriptorSetLayout(const Device* device, const DescriptorSetLayoutDescriptor& descriptor) :
 		device(device),
-		bindings(bindings.count())
+		bindings(descriptor.bindings.count())
 	{
-		std::copy(bindings.begin(), bindings.end(), &this->bindings[0]);
+		std::copy(descriptor.bindings.begin(), descriptor.bindings.end(), &bindings[0]);
 	}
 
 	DescriptorSetLayout::~DescriptorSetLayout() {

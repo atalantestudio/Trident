@@ -25,8 +25,8 @@ namespace Trident::GL {
 		return allocateRef<CommandPool>(device);
 	}
 
-	static ref<DescriptorSetLayout> createDescriptorSetLayout(const Trident::Device* device, view<DescriptorSetLayoutBinding> bindings) {
-		return allocateRef<DescriptorSetLayout>(device, bindings);
+	static ref<DescriptorSetLayout> createDescriptorSetLayout(const Trident::Device* device, const DescriptorSetLayoutDescriptor& descriptor) {
+		return allocateRef<DescriptorSetLayout>(device, descriptor);
 	}
 
 	static ref<Trident::MemoryAllocator> createMemoryAllocator(const Trident::Device* device) {

@@ -360,7 +360,12 @@ namespace Trident {
 			},
 		};
 
-		return createDescriptorSetLayout(bindings);
+		return createDescriptorSetLayout({
+			.bindings = bindings,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Subcomponent",
+			#endif
+		});
 	}
 
 	ref<PipelineLayout> GUIRenderer::createSubcomponentPipelineLayout() const {

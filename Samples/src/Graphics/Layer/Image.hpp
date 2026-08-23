@@ -167,13 +167,20 @@ namespace Trident {
 			}
 
 			ref<DescriptorSetLayout> createDescriptorSetLayout() const {
-				const DescriptorSetLayoutBinding binding = {
-					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
-					.descriptorCount = 1,
-					.stageFlags = ShaderStage::FRAGMENT,
+				const DescriptorSetLayoutBinding bindings[] = {
+					{
+						.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+						.descriptorCount = 1,
+						.stageFlags = ShaderStage::FRAGMENT,
+					},
 				};
 
-				return Renderer::createDescriptorSetLayout(binding);
+				return Renderer::createDescriptorSetLayout({
+					.bindings = bindings,
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Descriptor set layout",
+					#endif
+				});
 			}
 
 			ref<PipelineLayout> createPipelineLayout() const {
