@@ -33,12 +33,19 @@ namespace Trident {
 
 		ref<VK::GraphicsPipeline> graphicsPipeline = allocateRef<VK::GraphicsPipeline>(device);
 		VkResult result;
-
-		const VkPipelineShaderStageCreateInfo shaderStageCreateInfos[] = {
+		uint32 shaderStageCount = 1;
+		VkPipelineShaderStageCreateInfo shaderStageCreateInfos[2] = {
 			ref_cast<VK::ShaderModule>(descriptor.vertexShaderModule)->createInfo,
-			ref_cast<VK::ShaderModule>(descriptor.fragmentShaderModule)->createInfo,
+			{},
 		};
-		const view<VkPipelineShaderStageCreateInfo> shaderStageCreateInfoView = shaderStageCreateInfos;
+
+		if (descriptor.fragmentShaderModule != nullptr) {
+			shaderStageCount += 1;
+
+			shaderStageCreateInfos[1] = ref_cast<VK::ShaderModule>(descriptor.fragmentShaderModule)->createInfo;
+		}
+
+		const view<VkPipelineShaderStageCreateInfo> shaderStageCreateInfoView = view<VkPipelineShaderStageCreateInfo>(shaderStageCreateInfos, shaderStageCount);
 
 		sequence<VkVertexInputBindingDescription> vertexInputBindingDescriptions(descriptor.vertexInputBindings.count());
 		std::vector<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;

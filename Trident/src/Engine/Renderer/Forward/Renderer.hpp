@@ -20,8 +20,8 @@ namespace Trident {
 
 	class ForwardRenderer : public BaseSceneRenderer<ForwardCamera> {
 		private:
-			struct DirectionalLightView {
-				mat4x4<float32> projection;
+			struct DirectionalLight {
+				mat4x4<float32> projectionView;
 			};
 
 		public:
@@ -33,10 +33,12 @@ namespace Trident {
 				directionalShadowMapRenderPass = createDirectionalShadowMapRenderPass();
 				staticGeometryDescriptorSetLayout = createStaticGeometryDescriptorSetLayout();
 				dynamicDescriptorSetLayout = createDynamicDescriptorSetLayout();
+				directionalShadowMapDescriptorSetLayout = createDirectionalShadowMapDescriptorSetLayout();
 
 				const ref<DescriptorSetLayout> descriptorSetLayouts[] = {
 					staticGeometryDescriptorSetLayout,
 					dynamicDescriptorSetLayout,
+					directionalShadowMapDescriptorSetLayout,
 				};
 
 				// TODO(base/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
@@ -44,8 +46,11 @@ namespace Trident {
 
 				staticGeometryDescriptorSet = descriptorSets[0];
 				dynamicDescriptorSet = descriptorSets[1];
+				directionalShadowMapDescriptorSet = descriptorSets[2];
 
-				directionalLightViewBuffer = createDirectionalLightViewBuffer();
+				directionalShadowMapPipelineLayout = createDirectionalShadowMapPipelineLayout();
+				directionalShadowMapPipeline = createDirectionalShadowMapPipeline();
+				directionalLightBuffer = createDirectionalLightBuffer();
 				directionalShadowMapImage = createDirectionalShadowMapImage();
 				directionalShadowMapImageView = createDirectionalShadowMapImageView();
 
@@ -68,9 +73,9 @@ namespace Trident {
 				createFrameObjects();
 				createDirectionalShadowMapFramebuffers();
 
-				const BufferView<DirectionalLightView> directionalLightViewView = directionalLightViewBuffer->createView<DirectionalLightView>(0, sizeof(DirectionalLightView));
+				const BufferView<DirectionalLight> directionalLightView = directionalLightBuffer->createView<DirectionalLight>(0, sizeof(DirectionalLight));
 
-				directionalLightViewRange = directionalLightViewView.map();
+				directionalLightRange = directionalLightView.map();
 			}
 
 			void encodeSceneOneTimeCommands() override {
@@ -262,7 +267,7 @@ namespace Trident {
 				const mat4x4<float32> lightProjection = mat4x4<float32>::orthographic(-256.0f, 256.0f, -256.0f, 256.0f, 1.0f, 128.0f);
 				const mat4x4<float32> lightView = mat4x4<float32>::lookAt({0.0f, 0.0f, 0.0f}, vec3<float32>(scene->getAsset()->sunDirection), UP);
 
-				directionalLightViewRange->projection = lightProjection * lightView;
+				directionalLightRange->projectionView = lightProjection * lightView;
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
@@ -314,12 +319,15 @@ namespace Trident {
 
 			ref<DescriptorSetLayout> createStaticGeometryDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createDynamicDescriptorSetLayout() const;
+			ref<DescriptorSetLayout> createDirectionalShadowMapDescriptorSetLayout() const;
 
 			ref<PipelineLayout> createDebugHullWireframePipelineLayout() const;
 			ref<PipelineLayout> createDebugContactManifoldPipelineLayout() const;
+			ref<PipelineLayout> createDirectionalShadowMapPipelineLayout() const;
 
 			ref<GraphicsPipeline> createDebugHullWireframePipeline() const;
 			ref<GraphicsPipeline> createDebugContactManifoldPipeline() const;
+			ref<GraphicsPipeline> createDirectionalShadowMapPipeline() const;
 
 			#if FORWARD_SAMPLE_COUNT > 1
 				ref<Image> createColorImage() const;
@@ -342,7 +350,7 @@ namespace Trident {
 			ref<Buffer> createLightmapCoordinateBuffer() const;
 			ref<Buffer> createInstanceBuffer() const;
 			ref<Buffer> createPointLightBuffer() const;
-			ref<Buffer> createDirectionalLightViewBuffer() const;
+			ref<Buffer> createDirectionalLightBuffer() const;
 			ref<Buffer> createDebugHullWireframeBuffer(uint64 size) const;
 			ref<Buffer> createDebugContactManifoldBuffer() const;
 
@@ -379,18 +387,22 @@ namespace Trident {
 
 			ref<DescriptorSetLayout> staticGeometryDescriptorSetLayout;
 			ref<DescriptorSetLayout> dynamicDescriptorSetLayout;
+			ref<DescriptorSetLayout> directionalShadowMapDescriptorSetLayout;
 
 			ref<DescriptorSet> staticGeometryDescriptorSet;
 			ref<DescriptorSet> dynamicDescriptorSet;
 			sequence<ref<DescriptorSet>> materialDescriptorSets;
+			ref<DescriptorSet> directionalShadowMapDescriptorSet;
 
 			sequence<ref<PipelineLayout>> materialPipelineLayouts;
 			ref<PipelineLayout> debugHullWireframePipelineLayout;
 			ref<PipelineLayout> debugContactManifoldPipelineLayout;
+			ref<PipelineLayout> directionalShadowMapPipelineLayout;
 
 			sequence<ref<GraphicsPipeline>> materialPipelines;
 			ref<GraphicsPipeline> debugHullWireframePipeline;
 			ref<GraphicsPipeline> debugContactManifoldPipeline;
+			ref<GraphicsPipeline> directionalShadowMapPipeline;
 
 			/// Contains vertices for static and dynamic geometry.
 			ref<Buffer> vertexBuffer;
@@ -405,7 +417,7 @@ namespace Trident {
 			ref<Buffer> instanceBuffer;
 
 			ref<Buffer> pointLightBuffer;
-			ref<Buffer> directionalLightViewBuffer;
+			ref<Buffer> directionalLightBuffer;
 			ref<Buffer> debugHullWireframeBuffer;
 			ref<Buffer> debugContactManifoldBuffer;
 
@@ -430,7 +442,7 @@ namespace Trident {
 			ref<Sampler> lightmapAtlasSampler;
 			ref<Sampler> materialSampler;
 
-			DirectionalLightView* directionalLightViewRange = nullptr;
+			DirectionalLight* directionalLightRange = nullptr;
 			Instance3D* instanceMappedRange = nullptr;
 
 		public:

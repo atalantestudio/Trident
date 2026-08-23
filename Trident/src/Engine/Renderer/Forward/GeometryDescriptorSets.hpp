@@ -10,6 +10,7 @@ namespace Trident {
 		const BaseBufferView descriptorBufferViews[] = {
 			cameraBuffer->createView<ForwardCamera>(0, cameraBuffer->getSize()),
 			pointLightBuffer->createView<PointLight>(0, pointLightBuffer->getSize()),
+			directionalLightBuffer->createView<DirectionalLight>(0, directionalLightBuffer->getSize()),
 		};
 
 		const DescriptorImage descriptorImages[] = {
@@ -20,7 +21,7 @@ namespace Trident {
 			},
 		};
 
-		const WriteDescriptorSet writeDescriptorSets[4] = {
+		const WriteDescriptorSet writeDescriptorSets[] = {
 			{
 				.descriptorSet = dynamicDescriptorSet,
 				.bindingIndex = 0,
@@ -30,6 +31,11 @@ namespace Trident {
 				.descriptorSet = dynamicDescriptorSet,
 				.bindingIndex = 1,
 				.descriptorBufferViews = descriptorBufferViews[1],
+			},
+			{
+				.descriptorSet = directionalShadowMapDescriptorSet,
+				.bindingIndex = 0,
+				.descriptorBufferViews = descriptorBufferViews[2],
 			},
 			{
 				.descriptorSet = staticGeometryDescriptorSet,
@@ -43,10 +49,10 @@ namespace Trident {
 			},
 		};
 
-		uint32 writeDescriptorSetCount = 3;
+		uint32 writeDescriptorSetCount = 4;
 
 		if (scene->getAsset()->lightmapAtlasImageAsset != nullptr) {
-			writeDescriptorSetCount = 4;
+			writeDescriptorSetCount = 5;
 		}
 
 		getDevice()->updateDescriptorSets(view<WriteDescriptorSet>(writeDescriptorSets, writeDescriptorSetCount));

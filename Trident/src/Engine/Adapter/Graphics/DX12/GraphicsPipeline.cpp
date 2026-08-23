@@ -42,8 +42,12 @@ namespace Trident {
 		graphicsPipelineStateDescriptor.pRootSignature = graphicsPipeline->pipelineLayout->rootSignature;
 		graphicsPipelineStateDescriptor.VS.pShaderBytecode = vertexShaderModule->blob->GetBufferPointer();
 		graphicsPipelineStateDescriptor.VS.BytecodeLength = vertexShaderModule->blob->GetBufferSize();
-		graphicsPipelineStateDescriptor.PS.pShaderBytecode = fragmentShaderModule->blob->GetBufferPointer();
-		graphicsPipelineStateDescriptor.PS.BytecodeLength = fragmentShaderModule->blob->GetBufferSize();
+
+		if (fragmentShaderModule != nullptr) {
+			graphicsPipelineStateDescriptor.PS.pShaderBytecode = fragmentShaderModule->blob->GetBufferPointer();
+			graphicsPipelineStateDescriptor.PS.BytecodeLength = fragmentShaderModule->blob->GetBufferSize();
+		}
+
 		graphicsPipelineStateDescriptor.DS.pShaderBytecode = nullptr;
 		graphicsPipelineStateDescriptor.DS.BytecodeLength = 0;
 		graphicsPipelineStateDescriptor.HS.pShaderBytecode = nullptr;

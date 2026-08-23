@@ -259,8 +259,8 @@ namespace Trident {
 					VALIDATION_ERROR("descriptor.vertexShaderModule must be a valid ShaderModule object.");
 				}
 
-				if (descriptor.fragmentShaderModule == nullptr) {
-					VALIDATION_ERROR("descriptor.fragmentShaderModule must be a valid ShaderModule object.");
+				if (descriptor.fragmentShaderModule == nullptr && descriptor.colorBlendState.attachments.count() > 0) {
+					VALIDATION_ERROR("descriptor.fragmentShaderModule must be a valid ShaderModule object if the pipeline references color attachments.");
 				}
 
 				if (descriptor.primitiveTopology >= PrimitiveTopology::count) {

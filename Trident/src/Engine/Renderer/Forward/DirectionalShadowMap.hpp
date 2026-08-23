@@ -34,7 +34,7 @@ namespace Trident {
 		directionalShadowMapFramebuffers = sequence<ref<Framebuffer>>(getSwapchain()->getImageCount());
 
 		FramebufferDescriptor framebufferDescriptor = {
-			.renderPass = renderPass,
+			.renderPass = directionalShadowMapRenderPass,
 			.imageViews = {directionalShadowMapImageView},
 			.extent = {extent.width, extent.height},
 		};
@@ -56,6 +56,81 @@ namespace Trident {
 
 			framebufferIndex += 1;
 		}
+	}
+
+	ref<DescriptorSetLayout> ForwardRenderer::createDirectionalShadowMapDescriptorSetLayout() const {
+		const DescriptorSetLayoutBinding bindings[] = {
+			// Directional light view
+			{
+				.descriptorType = DescriptorType::UNIFORM_BUFFER,
+				.descriptorCount = 1,
+				.stageFlags = ShaderStage::VERTEX,
+			},
+		};
+
+		return createDescriptorSetLayout({
+			.bindings = bindings,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Directional shadow map",
+			#endif
+		});
+	}
+
+	ref<PipelineLayout> ForwardRenderer::createDirectionalShadowMapPipelineLayout() const {
+		return createPipelineLayout({
+			.descriptorSetLayouts = {directionalShadowMapDescriptorSetLayout},
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Directional shadow map",
+			#endif
+		});
+	}
+
+	ref<GraphicsPipeline> ForwardRenderer::createDirectionalShadowMapPipeline() const {
+		VertexInputBinding vertexInputBindings[] = {
+			VertexInputBinding(InputRate::VERTEX),
+			VertexInputBinding(InputRate::INSTANCE),
+		};
+
+		vertexInputBindings[0].registerAttribute<svec3<float32>>(VertexInputAttributeFormat::R32G32B32_FLOAT);
+		vertexInputBindings[0].stride = sizeof(Vertex3D);
+		vertexInputBindings[1].registerAttribute<mat4x4<float32>>();
+		vertexInputBindings[1].stride = sizeof(Instance3D);
+
+		return createGraphicsPipeline({
+			.pipelineLayout = directionalShadowMapPipelineLayout,
+			.vertexInputBindings = vertexInputBindings,
+			.vertexShaderModule = loadInternalShaderModule(
+				{
+					.stage = ShaderStage::VERTEX,
+					.entryPoint = "main",
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Directional shadow map vertex",
+					#endif
+				},
+				"Forward/DirectionalShadowMap.vert"
+			),
+			.fragmentShaderModule = nullptr,
+			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
+			.polygonMode = PolygonMode::FILL,
+			.cullMode = CullMode::BACK,
+			.frontFace = FrontFace::CLOCKWISE,
+			.lineWidth = 1.0f,
+			.minSampleShading = 0.0f,
+			.colorBlendState = {
+				.attachments = {},
+			},
+			.depthStencilState = {
+				.depthTest = true,
+				.depthWrite = true,
+				.compareOperation = CompareOperation::GREATER,
+			},
+			.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT,
+			.renderPass = directionalShadowMapRenderPass,
+			.subpassIndex = 0,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Directional shadow map",
+			#endif
+		});
 	}
 
 	ref<Image> ForwardRenderer::createDirectionalShadowMapImage() const {

@@ -7,7 +7,7 @@ namespace Trident {
 	/// See https://paroj.github.io/gltut/Optimize%20Vertex%20Format.html
 	/// and https://stackoverflow.com/a/49460793/17136841.
 	struct Vertex3D {
-		// TODO(geometry/vertex-compression): Replace with 3 16-bit signed normalized shorts.
+		// TODO(geometry/vertex-compression): Replace with R16G16B16_SNORM?
 		/// Stored as R32G32B32_SFLOAT.
 		svec3<float32> position;
 

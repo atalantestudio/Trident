@@ -45,7 +45,11 @@ namespace Trident {
 		const ref<GL::ShaderModule> fragmentShaderModule = ref_cast<GL::ShaderModule>(descriptor.fragmentShaderModule);
 
 		glAttachShader(graphicsPipeline->program, vertexShaderModule->shader);
-		glAttachShader(graphicsPipeline->program, fragmentShaderModule->shader);
+
+		if (fragmentShaderModule != nullptr) {
+			glAttachShader(graphicsPipeline->program, fragmentShaderModule->shader);
+		}
+
 		glLinkProgram(graphicsPipeline->program);
 
 		GLint linkStatus;
@@ -69,7 +73,10 @@ namespace Trident {
 		}
 
 		glDetachShader(graphicsPipeline->program, vertexShaderModule->shader);
-		glDetachShader(graphicsPipeline->program, fragmentShaderModule->shader);
+
+		if (fragmentShaderModule != nullptr) {
+			glDetachShader(graphicsPipeline->program, fragmentShaderModule->shader);
+		}
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_3_0
 			glGenVertexArrays(1, &graphicsPipeline->vertexArray);
