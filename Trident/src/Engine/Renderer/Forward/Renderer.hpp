@@ -25,6 +25,7 @@ namespace Trident {
 			};
 
 		public:
+			static constexpr Extent2D DIRECTIONAL_SHADOW_MAP_EXTENT = {1024, 1024};
 			static constexpr index DEBUG_MAX_CONTACTS = 16;
 
 		public:
@@ -69,13 +70,14 @@ namespace Trident {
 
 				lightmapAtlasSampler = createLightmapAtlasSampler();
 				materialSampler = createMaterialSampler();
+				directionalShadowMapSampler = createDirectionalShadowMapSampler();
 
 				createFrameObjects();
 				createDirectionalShadowMapFramebuffers();
 
 				const BufferView<DirectionalLight> directionalLightView = directionalLightBuffer->createView<DirectionalLight>(0, sizeof(DirectionalLight));
 
-				directionalLightRange = directionalLightView.map();
+				directionalLightMappedRange = directionalLightView.map();
 			}
 
 			void encodeSceneOneTimeCommands() override {
@@ -264,39 +266,10 @@ namespace Trident {
 				cameraMappedRange->pointLightCount = static_cast<uint32>(scene->getAsset()->pointLights.count());
 				cameraMappedRange->ambientColor = scene->getAsset()->skyColor;
 
-				const mat4x4<float32> lightProjection = mat4x4<float32>::orthographic(-256.0f, 256.0f, -256.0f, 256.0f, 1.0f, 128.0f);
-				const mat4x4<float32> lightView = mat4x4<float32>::lookAt({0.0f, 0.0f, 0.0f}, vec3<float32>(scene->getAsset()->sunDirection), UP);
-
-				directionalLightRange->projectionView = lightProjection * lightView;
+				initializeLightProjectionView();
 			}
 
-			void render(ref<CommandEncoder> commandEncoder) const override {
-				const ref<Framebuffer> framebuffer = framebuffers[getSwapchainImageIndex()];
-				const Extent2D extent = framebuffer->getExtent();
-				const float32 width = static_cast<float32>(extent.width);
-				const float32 height = static_cast<float32>(extent.height);
-				const svec3<float32> skyColor = scene->getAsset()->skyColor;
-
-				commandEncoder->beginRenderPass({
-					.framebuffer = framebuffer,
-					.clearValues = {
-						{skyColor.x, skyColor.y, skyColor.z, 1.0f},
-						{
-							.depth = 0.0f,
-							.stencil = 0,
-						},
-						#if FORWARD_SAMPLE_COUNT > 1
-							{0.0f, 0.0f, 0.0f, 1.0f},
-						#endif
-					},
-				});
-				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-				commandEncoder->setScissor(0, 0, extent);
-
-				renderScene(commandEncoder);
-
-				commandEncoder->endRenderPass();
-			}
+			void render(ref<CommandEncoder> commandEncoder) const override;
 
 			void setInstanceWorldTransform(Entity entity, const mat4x4<float32>& worldTransform) const {
 				instanceMappedRange[entity].worldTransform = worldTransform;
@@ -356,6 +329,7 @@ namespace Trident {
 
 			ref<Sampler> createMaterialSampler() const;
 			ref<Sampler> createLightmapAtlasSampler() const;
+			ref<Sampler> createDirectionalShadowMapSampler() const;
 
 			GraphicsPipelineDescriptor getStaticPipelineDescriptor(VertexInputBinding* vertexInputBindings) const;
 			GraphicsPipelineDescriptor getDynamicPipelineDescriptor(VertexInputBinding* vertexInputBindings) const;
@@ -376,7 +350,9 @@ namespace Trident {
 
 			void createMaterials();
 
-			void renderScene(ref<CommandEncoder> commandEncoder) const;
+			void initializeLightProjectionView() const;
+
+			void encodeDirectionalShadowMapPass(ref<CommandEncoder> commandEncoder) const;
 
 		private:
 			ref<RenderPass> renderPass;
@@ -441,8 +417,9 @@ namespace Trident {
 
 			ref<Sampler> lightmapAtlasSampler;
 			ref<Sampler> materialSampler;
+			ref<Sampler> directionalShadowMapSampler;
 
-			DirectionalLight* directionalLightRange = nullptr;
+			DirectionalLight* directionalLightMappedRange = nullptr;
 			Instance3D* instanceMappedRange = nullptr;
 
 		public:

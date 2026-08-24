@@ -13,6 +13,7 @@
 #include "Engine/Renderer/Forward/DepthStencilImage.hpp"
 #include "Engine/Renderer/Forward/DirectionalLightBuffer.hpp"
 #include "Engine/Renderer/Forward/DirectionalShadowMap.hpp"
+#include "Engine/Renderer/Forward/DirectionalShadowMapSampler.hpp"
 #include "Engine/Renderer/Forward/DynamicDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Forward/DynamicPipeline.hpp"
 #include "Engine/Renderer/Forward/Framebuffers.hpp"
@@ -32,8 +33,32 @@
 #include "Engine/Renderer/Forward/VertexBuffer.hpp"
 
 namespace Trident {
-	void ForwardRenderer::renderScene(ref<CommandEncoder> commandEncoder) const {
+	void ForwardRenderer::render(ref<CommandEncoder> commandEncoder) const {
 		const ref<Scene3DAsset> sceneAsset = scene->getAsset();
+
+		encodeDirectionalShadowMapPass(commandEncoder);
+
+		const ref<Framebuffer> framebuffer = framebuffers[getSwapchainImageIndex()];
+		const Extent2D extent = framebuffer->getExtent();
+		const float32 width = static_cast<float32>(extent.width);
+		const float32 height = static_cast<float32>(extent.height);
+		const svec3<float32> skyColor = scene->getAsset()->skyColor;
+
+		commandEncoder->beginRenderPass({
+			.framebuffer = framebuffer,
+			.clearValues = {
+				{skyColor.x, skyColor.y, skyColor.z, 1.0f},
+				{
+					.depth = 0.0f,
+					.stencil = 0,
+				},
+				#if FORWARD_SAMPLE_COUNT > 1
+					{0.0f, 0.0f, 0.0f, 1.0f},
+				#endif
+			},
+		});
+		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
+		commandEncoder->setScissor(0, 0, extent);
 
 		if (visualizationMode & VisualizationMode::DEFAULT) {
 			uint32 materialShaderIndex = 0;
@@ -50,7 +75,7 @@ namespace Trident {
 				uint32 materialIndex = 0;
 
 				while (materialIndex < materialShader.materialRange.count) {
-					const Material& material = sceneAsset->materials[materialShader.materialRange.offset + materialIndex];
+					const Material material = sceneAsset->materials[materialShader.materialRange.offset + materialIndex];
 
 					commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialShaderIndex], 1, materialDescriptorSets[materialShader.materialRange.offset + materialIndex]);
 
@@ -98,7 +123,7 @@ namespace Trident {
 				uint32 materialIndex = 0;
 
 				while (materialIndex < materialShader.materialRange.count) {
-					const Material& material = sceneAsset->materials[materialShader.materialRange.offset + materialIndex];
+					const Material material = sceneAsset->materials[materialShader.materialRange.offset + materialIndex];
 
 					commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialShaderIndex], 1, materialDescriptorSets[materialShader.materialRange.offset + materialIndex]);
 
@@ -173,6 +198,56 @@ namespace Trident {
 			commandEncoder->bindVertexBuffer(0, debugContactManifoldBuffer, 0);
 			commandEncoder->draw(contactCount, 1, 0, 0); */
 		}
+
+		commandEncoder->endRenderPass();
+	}
+
+	void ForwardRenderer::encodeDirectionalShadowMapPass(ref<CommandEncoder> commandEncoder) const {
+		const ref<Framebuffer> framebuffer = directionalShadowMapFramebuffers[getSwapchainImageIndex()];
+		const Extent2D extent = framebuffer->getExtent();
+		const float32 width = static_cast<float32>(extent.width);
+		const float32 height = static_cast<float32>(extent.height);
+		const ref<Scene3DAsset> sceneAsset = scene->getAsset();
+
+		commandEncoder->beginRenderPass({
+			.framebuffer = framebuffer,
+			.clearValues = {
+				{
+					.depth = 0.0f,
+					.stencil = 0,
+				},
+			},
+		});
+		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
+		commandEncoder->setScissor(0, 0, extent);
+		commandEncoder->bindGraphicsPipeline(directionalShadowMapPipeline);
+		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
+		commandEncoder->bindVertexBuffer(1, instanceBuffer, 0);
+		commandEncoder->bindIndexBuffer<uint32>(indexBuffer, 0);
+		commandEncoder->bindDescriptorSets(directionalShadowMapPipelineLayout, 0, directionalShadowMapDescriptorSet);
+
+		for (const MaterialShader& materialShader : sceneAsset->materialShaders) {
+			uint32 materialIndex = 0;
+
+			while (materialIndex < materialShader.materialRange.count) {
+				const Material material = sceneAsset->materials[materialShader.materialRange.offset + materialIndex];
+
+				uint32 materialGeometryIndex = 0;
+
+				while (materialGeometryIndex < material.geometryRange.count) {
+					const MaterialGeometry materialGeometry = sceneAsset->materialGeometries[material.geometryRange.offset + materialGeometryIndex];
+					const range<uint32, uint32> indexRange = sceneAsset->geometryIndexRanges[materialGeometry.geometryIndex];
+
+					commandEncoder->drawIndexed(indexRange.count, materialGeometry.instanceRange.count, indexRange.offset, 0, materialGeometry.instanceRange.offset);
+
+					materialGeometryIndex += 1;
+				}
+
+				materialIndex += 1;
+			}
+		}
+
+		commandEncoder->endRenderPass();
 	}
 
 	void ForwardRenderer::createFrameObjects() {
@@ -192,5 +267,25 @@ namespace Trident {
 
 		cameraMappedRange->projectionView = camera.getProjectionView();
 		cameraMappedRange->position = svec3<float32>(camera.position);
+	}
+
+	void ForwardRenderer::initializeLightProjectionView() const {
+		static constexpr float32 width = 512.0f;
+		static constexpr float32 height = 512.0f;
+		static constexpr float32 depth = 512.0f;
+
+		const vec3<float32> position = normalized(vec3<float32>(scene->getAsset()->sunDirection)) * 256.0f;
+
+		// TODO(lyah): orthoLH_ZO
+		const mat4x4<float32> projection = {
+				2.0f / width,  0.0f,           0.0f,          0.0f,
+				0.0f,          2.0f / height,  0.0f,          0.0f,
+				0.0f,          0.0f,          -1.0f / depth,  0.0f,
+				0.0f,          0.0f,           1.0f,          1.0f,
+		};
+
+		const mat4x4<float32> view = mat4x4<float32>::lookAt(position, {0.0f, 0.0f, 0.0f}, UP);
+
+		directionalLightMappedRange->projectionView = view * projection;
 	}
 }

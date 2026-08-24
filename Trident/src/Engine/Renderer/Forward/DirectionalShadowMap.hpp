@@ -13,8 +13,11 @@ namespace Trident {
 					.format = ImageFormat::D32_SFLOAT,
 					.sampleCount = 1,
 					.loadOperation = LoadOperation::CLEAR,
+
+					// TODO(renderer/forward/directional-shadow-map): Use UNDEFINED instead?
 					.storeOperation = StoreOperation::STORE,
-					.finalLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+
+					.finalLayout = ImageLayout::DEPTH_STENCIL_READ_ONLY_OPTIMAL,
 				},
 			},
 			.subpasses = {
@@ -29,14 +32,12 @@ namespace Trident {
 	}
 
 	void ForwardRenderer::createDirectionalShadowMapFramebuffers() {
-		const Extent3D extent = directionalShadowMapImage->getExtent();
-
 		directionalShadowMapFramebuffers = sequence<ref<Framebuffer>>(getSwapchain()->getImageCount());
 
 		FramebufferDescriptor framebufferDescriptor = {
 			.renderPass = directionalShadowMapRenderPass,
 			.imageViews = {directionalShadowMapImageView},
-			.extent = {extent.width, extent.height},
+			.extent = DIRECTIONAL_SHADOW_MAP_EXTENT,
 		};
 
 		#if defined(DEBUG_OBJECT_NAME)
@@ -137,7 +138,7 @@ namespace Trident {
 		return directionalShadowMapRenderPass->createDepthStencilAttachmentImage(
 			{
 				.type = ImageType::TEXTURE_2D,
-				.extent = {1024, 1024, 1},
+				.extent = {DIRECTIONAL_SHADOW_MAP_EXTENT.width, DIRECTIONAL_SHADOW_MAP_EXTENT.height, 1},
 				.mipLevelCount = 1,
 				.layerCount = 1,
 				.additionalUsage = ImageUsage::SAMPLED,

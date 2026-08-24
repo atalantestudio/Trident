@@ -7,31 +7,12 @@
 
 namespace Trident {
 	ref<GraphicsPipeline> ForwardRenderer::createDebugHullWireframePipeline() const {
-		VertexInputBinding vertexInputBinding(InputRate::INSTANCE);
-		vertexInputBinding.registerAttribute<mat4x4<float32>>();
-		vertexInputBinding.registerAttribute<mat3x3<float32>>();
+		VertexInputBinding vertexInputBindings[] = {
+			VertexInputBinding(InputRate::INSTANCE),
+		};
 
-		const ref<ShaderModule> vertexShaderModule = loadInternalShaderModule(
-			{
-				.stage = ShaderStage::VERTEX,
-				.entryPoint = "main",
-				#if defined(DEBUG_OBJECT_NAME)
-					.name = "Debug hull wireframe vertex",
-				#endif
-			},
-			"Forward/DebugHullWireframe.vert"
-		);
-
-		const ref<ShaderModule> fragmentShaderModule = loadInternalShaderModule(
-			{
-				.stage = ShaderStage::FRAGMENT,
-				.entryPoint = "main",
-				#if defined(DEBUG_OBJECT_NAME)
-					.name = "Debug hull wireframe fragment",
-				#endif
-			},
-			"Forward/DebugHullWireframe.frag"
-		);
+		vertexInputBindings[0].registerAttribute<mat4x4<float32>>();
+		vertexInputBindings[0].registerAttribute<mat3x3<float32>>();
 
 		const ColorBlendAttachment colorBlendAttachments[] = {
 			{
@@ -41,9 +22,27 @@ namespace Trident {
 
 		return createGraphicsPipeline({
 			.pipelineLayout = debugHullWireframePipelineLayout,
-			.vertexInputBindings = vertexInputBinding,
-			.vertexShaderModule = vertexShaderModule,
-			.fragmentShaderModule = fragmentShaderModule,
+			.vertexInputBindings = vertexInputBindings,
+			.vertexShaderModule = loadInternalShaderModule(
+				{
+					.stage = ShaderStage::VERTEX,
+					.entryPoint = "main",
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Debug hull wireframe vertex",
+					#endif
+				},
+				"Forward/DebugHullWireframe.vert"
+			),
+			.fragmentShaderModule = loadInternalShaderModule(
+				{
+					.stage = ShaderStage::FRAGMENT,
+					.entryPoint = "main",
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Debug hull wireframe fragment",
+					#endif
+				},
+				"Forward/DebugHullWireframe.frag"
+			),
 			.primitiveTopology = PrimitiveTopology::LINE_LIST,
 			.polygonMode = PolygonMode::FILL,
 			.cullMode = CullMode::BACK,

@@ -82,28 +82,25 @@ namespace Trident {
 				renderer.visualizationMode = VisualizationMode::DEFAULT;
 
 				PerspectiveCamera3D& camera = cameraController.getCamera();
+				camera.nearPlane = 0.01f;
+				camera.farPlane = 2048.0f;
+				camera.fieldOfView = radians(70.0_deg);
+				camera.aspectRatio = getApplication()->getWindow()->getAspectRatio();
 
-				#if !defined(FORWARD_USE_NOCLIP_CAMERA)
-					// camera.distance = 128.0_m;
-					camera.fieldOfView = radians(70.0_deg);
-					camera.aspectRatio = getApplication()->getWindow()->getAspectRatio();
-					camera.nearPlane = 0.01_m;
-					camera.farPlane = 4096.0_m;
-					camera.updateProjection();
-					camera.updateView();
-					camera.updateProjectionView();
-				#else
+				#if defined(FORWARD_USE_NOCLIP_CAMERA)
 					#if defined(FORWARD_TEST_CORNELL_BOX)
 						camera.position = {-278.0f, 273.0f, -800.0f};
 						camera.fieldOfView = radians(40.0_deg);
 					#else
 						// TODO(forward/camera): Expose the position.
 						camera.position = {0.0f, 64.0f, 0.0f};
-						camera.aspectRatio = getApplication()->getWindow()->getAspectRatio();
 					#endif
-
-					cameraController.updateProjection();
 				#endif
+
+				cameraController.updateProjection();
+
+				camera.updateView();
+				camera.updateProjectionView();
 
 				renderer.setCameraController<PerspectiveCamera3D>(&cameraController);
 			}

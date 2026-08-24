@@ -21,6 +21,20 @@ namespace Trident {
 				.descriptorCount = 1,
 				.stageFlags = ShaderStage::FRAGMENT,
 			},
+
+			// Directional light
+			{
+				.descriptorType = DescriptorType::UNIFORM_BUFFER,
+				.descriptorCount = 1,
+				.stageFlags = ShaderStage::VERTEX,
+			},
+
+			// Directional shadow map
+			{
+				.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+				.descriptorCount = 1,
+				.stageFlags = ShaderStage::FRAGMENT,
+			},
 		};
 
 		return createDescriptorSetLayout({

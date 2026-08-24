@@ -80,7 +80,7 @@ namespace Trident {
 			float32 aspectRatio = 1.0f / 1.0f;
 
 			/// Updating this member requires recomputing the projection and projection-view matrices.
-			float32 nearPlane = 0.001f;
+			float32 nearPlane = 0.01f;
 
 			/// Updating this member requires recomputing the projection and projection-view matrices.
 			float32 farPlane = 1.0f;

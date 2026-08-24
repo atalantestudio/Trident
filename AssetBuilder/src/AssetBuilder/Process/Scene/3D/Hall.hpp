@@ -21,7 +21,7 @@ namespace Trident {
 				static constexpr float32 m2 = 512.0f;
 
 				SceneBuilder builder({
-					.flags = Scene3DBuildFlags::LIGHTMAP_SUN_CONTRIBUTION,
+					.flags = {},
 					.skyColor = {0.6f, 0.7f, 0.9f},
 					.sunDirection = {1.0f, 1.0f, 1.0f},
 					.sunColor = {1.0f, 1.0f, 1.0f},

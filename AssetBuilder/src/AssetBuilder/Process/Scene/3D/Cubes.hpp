@@ -30,7 +30,7 @@ namespace Trident {
 
 				builder.placeSurface(
 					{
-						.geometry = builder.createWallGeometry({512.0f, 128.0f}),
+						.geometry = builder.createWallGeometry({512.0f, 512.0f}),
 						.material = lightmappedDefaultMaterial,
 						.textureFiltering = {
 							.translation = {0.0f, 0.0f},
@@ -43,7 +43,7 @@ namespace Trident {
 						},
 					},
 					{
-						.translation = {0.0f, 0.0f, 128.0f},
+						.translation = {0.0f, 0.0f, 0.0f},
 						.axis = {1.0f, 0.0f, 0.0f},
 						.angle = radians(-90.0_deg),
 					}

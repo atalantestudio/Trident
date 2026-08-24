@@ -15,16 +15,24 @@ out Interstage {
 	layout(location = 0) vec3 normal;
 	layout(location = 1) vec2 textureCoordinate;
 	layout(location = 2) vec2 lightmapCoordinate;
+	layout(location = 3) vec4 lightSpacePosition;
 } interstage;
 
 layout(set = 0, binding = 0) uniform readonly Camera {
 	mat4x4 projectionView;
 } camera;
 
+layout(set = 0, binding = 2) uniform readonly DirectionalLight {
+	mat4x4 projectionView;
+} directionalLight;
+
 void main() {
-	gl_Position = camera.projectionView * worldTransform * vec4(position, 1.0);
+	vec4 vertex = worldTransform * vec4(position, 1.0);
+
+	gl_Position = camera.projectionView * vertex;
 
 	interstage.normal = normal * 2.0 - 1.0;
 	interstage.textureCoordinate = textureCoordinate;
 	interstage.lightmapCoordinate = lightmapCoordinate;
+	interstage.lightSpacePosition = directionalLight.projectionView * vertex;
 }
