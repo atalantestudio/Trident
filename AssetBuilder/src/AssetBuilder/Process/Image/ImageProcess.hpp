@@ -38,124 +38,128 @@ namespace Trident {
 					case ImageFormat::R8G8B8A8_UNORM: {
 						const uint32 channelCount = getChannelCount(image.format);
 
-						uint32 x;
-						uint32 y;
-						uint32 z = 0;
 						uint32 texelIndex = 0;
 						qoi_rgba texelCache[64]{};
 						qoi_rgba previousTexel = {0, 0, 0, 255};
 						qoi_index previousTexelHash = rgbaHash(previousTexel);
 						uint8 runLength = 0;
+						uint32 layerIndex = 0;
 
-						while (z < image.extent.depth) {
-							y = 0;
+						while (layerIndex < image.layerCount) {
+							uint32 z = 0;
 
-							while (y < image.extent.height) {
-								x = 0;
+							while (z < image.extent.depth) {
+								uint32 y = 0;
 
-								while (x < image.extent.width) {
-									qoi_rgba texel = *pointer_cast<const qoi_rgba*>(&image.data[texelIndex * channelCount]);
+								while (y < image.extent.height) {
+									uint32 x = 0;
 
-									if (image.format == ImageFormat::R8G8B8_UNORM) {
-										texel.a = previousTexel.a;
-									}
+									while (x < image.extent.width) {
+										qoi_rgba texel = *pointer_cast<const qoi_rgba*>(&image.data[texelIndex * channelCount]);
 
-									if (texel == previousTexel && runLength < 62) {
-										runLength += 1;
-										x += 1;
-										texelIndex += 1;
+										if (image.format == ImageFormat::R8G8B8_UNORM) {
+											texel.a = previousTexel.a;
+										}
 
-										continue;
-									}
-
-									if (runLength > 0) {
-										qoi_run run{};
-										run.tag = 0b11;
-										run.run = runLength - 1;
-
-										stream.write<qoi_run>(run);
-
-										runLength = 0;
-
-										if (texel == previousTexel) {
-											runLength = 1;
+										if (texel == previousTexel && runLength < 62) {
+											runLength += 1;
 											x += 1;
 											texelIndex += 1;
 
 											continue;
 										}
-									}
 
-									const qoi_index texelHash = rgbaHash(texel);
+										if (runLength > 0) {
+											qoi_run run{};
+											run.tag = 0b11;
+											run.run = runLength - 1;
 
-									if (texel == texelCache[texelHash.index]) {
-										qoi_index index{};
-										index.tag = 0b00;
-										index.index = texelHash.index;
+											stream.write<qoi_run>(run);
 
-										stream.write<qoi_index>(index);
+											runLength = 0;
+
+											if (texel == previousTexel) {
+												runLength = 1;
+												x += 1;
+												texelIndex += 1;
+
+												continue;
+											}
+										}
+
+										const qoi_index texelHash = rgbaHash(texel);
+
+										if (texel == texelCache[texelHash.index]) {
+											qoi_index index{};
+											index.tag = 0b00;
+											index.index = texelHash.index;
+
+											stream.write<qoi_index>(index);
+
+											previousTexel = texel;
+											previousTexelHash = texelHash;
+											x += 1;
+											texelIndex += 1;
+
+											continue;
+										}
+										else {
+											texelCache[texelHash.index] = texel;
+
+											if (texel.a == previousTexel.a) {
+												const sint8 dr = texel.r - previousTexel.r;
+												const sint8 dg = texel.g - previousTexel.g;
+												const sint8 db = texel.b - previousTexel.b;
+												const sint8 dr_dg = dr - dg;
+												const sint8 db_dg = db - dg;
+
+												if (dr >= -2 && dr <= 1 && dg >= -2 && dg <= 1 && db >= -2 && db <= 1) {
+													qoi_diff diff{};
+													diff.tag = 0b01;
+													diff.dr = dr + 2;
+													diff.dg = dg + 2;
+													diff.db = db + 2;
+
+													stream.write<qoi_diff>(diff);
+												}
+												else if (dr_dg >= -8 && dr_dg <= 7 && dg >= -32 && dg <= 31 && db_dg >= -8 && db_dg <= 7) {
+													qoi_luma luma{};
+													luma.tag = 0b10;
+													luma.dg = dg + 32;
+													luma.dr_dg = dr_dg + 8;
+													luma.db_dg = db_dg + 8;
+
+													stream.write<qoi_luma>(luma);
+												}
+												else {
+													qoi_rgb rgb{};
+													rgb.r = texel.r;
+													rgb.g = texel.g;
+													rgb.b = texel.b;
+
+													stream.write<uint8>(0b11111110);
+													stream.write<qoi_rgb>(rgb);
+												}
+											}
+											else {
+												stream.write<uint8>(0b11111111);
+												stream.write<qoi_rgba>(texel);
+											}
+										}
 
 										previousTexel = texel;
 										previousTexelHash = texelHash;
 										x += 1;
 										texelIndex += 1;
-
-										continue;
-									}
-									else {
-										texelCache[texelHash.index] = texel;
-
-										if (texel.a == previousTexel.a) {
-											const sint8 dr = texel.r - previousTexel.r;
-											const sint8 dg = texel.g - previousTexel.g;
-											const sint8 db = texel.b - previousTexel.b;
-											const sint8 dr_dg = dr - dg;
-											const sint8 db_dg = db - dg;
-
-											if (dr >= -2 && dr <= 1 && dg >= -2 && dg <= 1 && db >= -2 && db <= 1) {
-												qoi_diff diff{};
-												diff.tag = 0b01;
-												diff.dr = dr + 2;
-												diff.dg = dg + 2;
-												diff.db = db + 2;
-
-												stream.write<qoi_diff>(diff);
-											}
-											else if (dr_dg >= -8 && dr_dg <= 7 && dg >= -32 && dg <= 31 && db_dg >= -8 && db_dg <= 7) {
-												qoi_luma luma{};
-												luma.tag = 0b10;
-												luma.dg = dg + 32;
-												luma.dr_dg = dr_dg + 8;
-												luma.db_dg = db_dg + 8;
-
-												stream.write<qoi_luma>(luma);
-											}
-											else {
-												qoi_rgb rgb{};
-												rgb.r = texel.r;
-												rgb.g = texel.g;
-												rgb.b = texel.b;
-
-												stream.write<uint8>(0b11111110);
-												stream.write<qoi_rgb>(rgb);
-											}
-										}
-										else {
-											stream.write<uint8>(0b11111111);
-											stream.write<qoi_rgba>(texel);
-										}
 									}
 
-									previousTexel = texel;
-									previousTexelHash = texelHash;
-									x += 1;
-									texelIndex += 1;
+									y += 1;
 								}
 
-								y += 1;
+								z += 1;
 							}
 
-							z += 1;
+							layerIndex += 1;
 						}
 
 						if (runLength > 0) {

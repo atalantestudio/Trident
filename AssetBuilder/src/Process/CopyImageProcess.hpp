@@ -25,6 +25,15 @@ namespace Trident {
 						continue;
 					}
 
+					std::filesystem::path outputPath = outputDirectoryPath / directoryEntry.path().filename();
+					outputPath.replace_extension("tia");
+
+					if (std::filesystem::exists(outputPath)) {
+						ENGINE_INFO("Image asset \"[]\" already exists.", outputPath.filename().string());
+
+						continue;
+					}
+
 					const std::filesystem::path directoryEntryPath = directoryEntry.path();
 					const std::string path = directoryEntryPath.string();
 					const std::string stem = directoryEntryPath.stem().string();
