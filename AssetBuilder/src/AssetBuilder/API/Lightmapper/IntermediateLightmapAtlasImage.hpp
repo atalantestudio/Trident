@@ -8,7 +8,7 @@
 namespace Trident {
 	ref<Image> Lightmapper::createIntermediateLightmapAtlasImage() const {
 		return device->createDynamicImage({
-			.type = ImageType::TEXTURE_2D,
+			.type = ImageType::TYPE_2D,
 			.format = imageAssetDescriptor.format,
 			.extent = imageAssetDescriptor.extent,
 			.mipLevelCount = imageAssetDescriptor.mipLevelCount,

@@ -237,7 +237,7 @@ namespace Trident {
 
 			ref<Image> createOutputImage() const {
 				return createStaticImage({
-					.type = ImageType::TEXTURE_2D,
+					.type = ImageType::TYPE_2D,
 					.format = ImageFormat::R8G8B8A8_UNORM,
 					.extent = {64, 64, 1},
 					.mipLevelCount = 1,

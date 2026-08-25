@@ -11,7 +11,7 @@ namespace Trident {
 
 		return renderPass->createDepthStencilAttachmentImage(
 			{
-				.type = ImageType::TEXTURE_2D,
+				.type = ImageType::TYPE_2D,
 				.extent = {extent.width, extent.height, 1},
 				.mipLevelCount = 1,
 				.layerCount = 1,

@@ -133,7 +133,7 @@ namespace Trident {
 				imageStagingBuffer->unmap();
 
 				image = createDynamicImage({
-					.type = ImageType::TEXTURE_2D,
+					.type = ImageType::TYPE_2D,
 					.format = ImageFormat::R8G8B8A8_UNORM,
 					.extent = imageAsset->getExtent(),
 					.mipLevelCount = calculateMaxMipLevelCount(imageAsset->getExtent()),

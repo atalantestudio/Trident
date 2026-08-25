@@ -8,20 +8,20 @@
 
 namespace Trident {
 	struct ImageAssetDescriptor : public Asset {
-		// The format and type of the texel blocks that will be contained in the image.
+		/// The format and type of the texel blocks that will be contained in the image.
 		ImageFormat format;
 
-		// The number of texels in each dimension of the base level of the image.
+		/// The number of texels in each dimension of the base level of the image.
 		Extent3D extent;
 
-		// The number of LOD available for minified sampling of the image.
 		// TODO: Mip level count is not handled at the moment and must be set to 1.
+		/// The number of LOD available for minified sampling of the image.
 		uint32 mipLevelCount;
 
-		// The number of layers in the image.
+		/// The number of layers in the image.
 		uint32 layerCount;
 
-		// Uncompressed image data.
+		/// The uncompressed image data.
 		sequence<uint8> data;
 	};
 

@@ -17,7 +17,7 @@ namespace Trident {
 		renderTargetViewDescriptor.Format = DX12::getImageFormat(image->getFormat());
 
 		switch (image->getType()) {
-			case ImageType::TEXTURE_2D: {
+			case ImageType::TYPE_2D: {
 				if (image->getSampleCount() > 1) {
 					if (imageView->layerCount > 1) {
 						renderTargetViewDescriptor.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMSARRAY;
@@ -56,7 +56,7 @@ namespace Trident {
 		depthStencilViewDescriptor.Flags = D3D12_DSV_FLAG_NONE;
 
 		switch (image->getType()) {
-			case ImageType::TEXTURE_2D: {
+			case ImageType::TYPE_2D: {
 				if (image->getSampleCount() > 1) {
 					if (imageView->layerCount > 1) {
 						depthStencilViewDescriptor.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMSARRAY;

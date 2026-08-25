@@ -23,7 +23,7 @@ namespace Trident {
 		imageDescriptor.layerCount = 1;
 
 		// These properties aren't used when creating a swapchain image.
-		imageDescriptor.type = ImageType::TEXTURE_2D;
+		imageDescriptor.type = ImageType::TYPE_2D;
 		imageDescriptor.format = ImageFormat::B8G8R8A8_UNORM;
 		imageDescriptor.sampleCount = 1;
 		imageDescriptor.usage = static_cast<ImageUsage>(0);

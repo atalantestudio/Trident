@@ -176,7 +176,7 @@ namespace Trident {
 		const DX12::Device* device = static_cast<const DX12::Device*>(this->device);
 		const DX12::Image* image = static_cast<const DX12::Image*>(descriptorImage.imageView->getImage());
 
-		ADAPTER_ASSERT(image->getType() == ImageType::TEXTURE_2D, "Images other than TEXTURE_2D are not supported.");
+		ADAPTER_ASSERT(image->getType() == ImageType::TYPE_2D, "Images other than TYPE_2D are not supported.");
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDescriptor{};
 
@@ -218,7 +218,7 @@ namespace Trident {
 		const DX12::Device* device = static_cast<const DX12::Device*>(this->device);
 		const DX12::Image* image = static_cast<const DX12::Image*>(descriptorImage.imageView->getImage());
 
-		ADAPTER_ASSERT(image->getType() == ImageType::TEXTURE_2D, "Images other than TEXTURE_2D are not supported.");
+		ADAPTER_ASSERT(image->getType() == ImageType::TYPE_2D, "Images other than TYPE_2D are not supported.");
 
 		D3D12_UNORDERED_ACCESS_VIEW_DESC unorderedAccessViewDescriptor{};
 		unorderedAccessViewDescriptor.Format = getImageFormat(image->getFormat());
@@ -243,7 +243,7 @@ namespace Trident {
 		const DX12::Device* device = static_cast<const DX12::Device*>(this->device);
 		const DX12::Image* image = static_cast<const DX12::Image*>(descriptorImage.imageView->getImage());
 
-		ADAPTER_ASSERT(image->getType() == ImageType::TEXTURE_2D, "Images other than TEXTURE_2D are not supported.");
+		ADAPTER_ASSERT(image->getType() == ImageType::TYPE_2D, "Images other than TYPE_2D are not supported.");
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDescriptor{};
 		shaderResourceViewDescriptor.Format = getImageFormat(image->getFormat());

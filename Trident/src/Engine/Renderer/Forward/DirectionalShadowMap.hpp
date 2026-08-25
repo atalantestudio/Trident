@@ -140,7 +140,7 @@ namespace Trident {
 	ref<Image> ForwardRenderer::createDirectionalShadowMapImage() const {
 		return directionalShadowMapRenderPass->createDepthStencilAttachmentImage(
 			{
-				.type = ImageType::TEXTURE_2D,
+				.type = ImageType::TYPE_2D,
 				.extent = {DIRECTIONAL_SHADOW_MAP_EXTENT.width, DIRECTIONAL_SHADOW_MAP_EXTENT.height, 1},
 				.mipLevelCount = 1,
 				.layerCount = 1,

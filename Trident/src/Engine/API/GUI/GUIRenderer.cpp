@@ -183,7 +183,7 @@ namespace Trident {
 		}
 
 		userImages[userImageIndex] = createDynamicImage({
-			.type = ImageType::TEXTURE_2D,
+			.type = ImageType::TYPE_2D,
 			.format = format,
 			.extent = imageAsset->getExtent(),
 			.mipLevelCount = 1,
@@ -220,7 +220,7 @@ namespace Trident {
 		#endif
 
 		userImages[userImageIndex] = createDynamicImage({
-			.type = ImageType::TEXTURE_2D,
+			.type = ImageType::TYPE_2D,
 			.format = ImageFormat::R8G8B8A8_UNORM,
 			.extent = {1, 1, 1},
 			.mipLevelCount = 1,

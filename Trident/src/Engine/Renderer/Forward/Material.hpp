@@ -177,7 +177,7 @@ namespace Trident {
 		sequence<DescriptorImage> descriptorImages(imageCount);
 		sequence<ImageMemoryBarrier> imageMemoryBarriers(imageCount);
 		ImageDescriptor imageDescriptor = {
-			.type = ImageType::TEXTURE_2D,
+			.type = ImageType::TYPE_2D,
 			.sampleCount = 1,
 			.usage = ImageUsage::TRANSFER_DST | ImageUsage::SAMPLED,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,

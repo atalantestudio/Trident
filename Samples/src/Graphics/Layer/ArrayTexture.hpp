@@ -317,7 +317,7 @@ namespace Trident {
 				#endif
 
 				return Renderer::createStaticImage({
-					.type = ImageType::TEXTURE_2D,
+					.type = ImageType::TYPE_2D,
 					.format = ImageFormat::R8G8B8A8_UNORM,
 					.extent = imageAsset->getExtent(),
 					.mipLevelCount = 1,

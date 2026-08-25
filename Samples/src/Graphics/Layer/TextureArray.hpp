@@ -126,7 +126,7 @@ namespace Trident {
 		private:
 			void createTextureArrayImage() {
 				ImageDescriptor textureArrayImageDescriptor{};
-				textureArrayImageDescriptor.type = ImageType::TEXTURE_2D;
+				textureArrayImageDescriptor.type = ImageType::TYPE_2D;
 				textureArrayImageDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
 				textureArrayImageDescriptor.extent.width = TEXTURE_ARRAY_IMAGE_WIDTH;
 				textureArrayImageDescriptor.extent.height = TEXTURE_ARRAY_IMAGE_HEIGHT;

@@ -8,7 +8,7 @@
 namespace Trident {
 	ref<Image> ForwardRenderer::createLightmapAtlasImage(ref<ImageAsset> imageAsset) const {
 		return createDynamicImage({
-			.type = ImageType::TEXTURE_2D,
+			.type = ImageType::TYPE_2D,
 			.format = imageAsset->getFormat(),
 			.extent = imageAsset->getExtent(),
 			.mipLevelCount = imageAsset->getMipLevelCount(),

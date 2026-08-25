@@ -451,7 +451,7 @@ namespace Trident {
 
 	ref<Image> GenerateSDFGlyphMapProcess::createGlyphImage() const {
 		return device->createDynamicImage({
-			.type = ImageType::TEXTURE_2D,
+			.type = ImageType::TYPE_2D,
 			.format = ImageFormat::R8_UNORM,
 			.extent = {4096, 4096, 1},
 			.mipLevelCount = 1,
@@ -467,7 +467,7 @@ namespace Trident {
 
 	ref<Image> GenerateSDFGlyphMapProcess::createGlyphMapImage(Extent2D extent) const {
 		return device->createDynamicImage({
-			.type = ImageType::TEXTURE_2D,
+			.type = ImageType::TYPE_2D,
 			.format = ImageFormat::R8_UNORM,
 			.extent = {extent.width, extent.height, 1},
 			.mipLevelCount = 1,

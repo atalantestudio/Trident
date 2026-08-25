@@ -9,7 +9,7 @@ namespace Trident {
 	ref<Image> Lightmapper::createLightmapAtlasImage() const {
 		return dilationRenderPass->createColorAttachmentImage(
 			{
-				.type = ImageType::TEXTURE_2D,
+				.type = ImageType::TYPE_2D,
 				.extent = imageAssetDescriptor.extent,
 				.mipLevelCount = imageAssetDescriptor.mipLevelCount,
 				.layerCount = imageAssetDescriptor.layerCount,

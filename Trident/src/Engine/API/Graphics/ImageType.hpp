@@ -5,7 +5,7 @@
 
 namespace Trident {
 	enum class ImageType : uint8 {
-		TEXTURE_2D,
+		TYPE_2D,
 
 		count,
 	};

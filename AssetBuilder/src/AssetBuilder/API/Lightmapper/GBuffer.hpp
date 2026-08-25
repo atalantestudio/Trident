@@ -9,7 +9,7 @@ namespace Trident {
 	ref<Image> Lightmapper::createGBufferPositionImage() const {
 		return gBufferRenderPass->createColorAttachmentImage(
 			{
-				.type = ImageType::TEXTURE_2D,
+				.type = ImageType::TYPE_2D,
 				.extent = imageAssetDescriptor.extent,
 				.mipLevelCount = 1,
 				.layerCount = 1,
@@ -25,7 +25,7 @@ namespace Trident {
 	ref<Image> Lightmapper::createGBufferSmoothPositionImage() const {
 		return gBufferRenderPass->createColorAttachmentImage(
 			{
-				.type = ImageType::TEXTURE_2D,
+				.type = ImageType::TYPE_2D,
 				.extent = imageAssetDescriptor.extent,
 				.mipLevelCount = 1,
 				.layerCount = 1,
@@ -41,7 +41,7 @@ namespace Trident {
 	ref<Image> Lightmapper::createGBufferTriangleNormalImage() const {
 		return gBufferRenderPass->createColorAttachmentImage(
 			{
-				.type = ImageType::TEXTURE_2D,
+				.type = ImageType::TYPE_2D,
 				.extent = imageAssetDescriptor.extent,
 				.mipLevelCount = 1,
 				.layerCount = 1,
@@ -57,7 +57,7 @@ namespace Trident {
 	ref<Image> Lightmapper::createGBufferVertexNormalImage() const {
 		return gBufferRenderPass->createColorAttachmentImage(
 			{
-				.type = ImageType::TEXTURE_2D,
+				.type = ImageType::TYPE_2D,
 				.extent = imageAssetDescriptor.extent,
 				.mipLevelCount = 1,
 				.layerCount = 1,

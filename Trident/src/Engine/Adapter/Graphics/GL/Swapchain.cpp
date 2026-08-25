@@ -56,7 +56,7 @@ namespace Trident {
 		#endif
 
 		ImageDescriptor imageDescriptor{};
-		imageDescriptor.type = ImageType::TEXTURE_2D;
+		imageDescriptor.type = ImageType::TYPE_2D;
 		imageDescriptor.format = descriptor.surface->getFormat();
 		imageDescriptor.extent.width = swapchain->extent.width;
 		imageDescriptor.extent.height = swapchain->extent.height;

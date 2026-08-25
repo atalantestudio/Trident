@@ -140,7 +140,7 @@ namespace Trident {
 
 			ref<Image> createImage() const {
 				return createStaticImage({
-					.type = ImageType::TEXTURE_2D,
+					.type = ImageType::TYPE_2D,
 					.format = imageFormat,
 					.extent = imageAsset->getExtent(),
 					.mipLevelCount = imageAsset->getMipLevelCount(),

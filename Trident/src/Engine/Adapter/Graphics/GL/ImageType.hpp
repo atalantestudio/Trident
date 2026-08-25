@@ -7,7 +7,7 @@
 
 namespace Trident::GL {
 	inline GLenum getImageType(ImageType imageType, uint8 sampleCount, uint32 layerCount) {
-		if (imageType == ImageType::TEXTURE_2D) {
+		if (imageType == ImageType::TYPE_2D) {
 			if (sampleCount > 1) {
 				return GL_TEXTURE_2D_MULTISAMPLE;
 
