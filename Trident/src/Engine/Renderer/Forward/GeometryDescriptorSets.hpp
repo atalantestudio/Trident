@@ -23,7 +23,7 @@ namespace Trident {
 			},
 			{
 				.imageView = directionalShadowMapImageView,
-				.imageLayout = ImageLayout::DEPTH_STENCIL_READ_ONLY_OPTIMAL,
+				.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
 				.sampler = directionalShadowMapSampler,
 			},
 		};

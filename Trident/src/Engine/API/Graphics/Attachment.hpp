@@ -10,20 +10,23 @@
 
 namespace Trident {
 	struct Attachment {
-		// The format of the image view that will be used for the attachment.
+		/// The format of the image view that will be used for the attachment.
 		ImageFormat format;
 
-		// The number of samples of the image.
-		// NOTE: The sample count must either be 1 or a power of 2 (up to 64).
+		/// The number of samples of the image.
+		/// The sample count must either be 1 or a power of 2 (up to 64).
 		uint8 sampleCount : 7;
 
-		// Specifies how the attachment's contents are treated at the beginning of the subpass where it is first used.
+		/// Specifies how the attachment's contents are treated at the beginning of the subpass where it is first used.
 		LoadOperation loadOperation;
 
-		// Specifies how the attachment's contents are treated at the end of the subpass where it is last used.
+		/// Specifies how the attachment's contents are treated at the end of the subpass where it is last used.
 		StoreOperation storeOperation;
 
-		// The layout the attachment image will be transitioned to when the render pass ends.
+		// TODO(graphics/dx12/render-pass)
+		// In Vulkan the DEPTH_STENCIL_READ_ONLY_OPTIMAL layout can be used for depth stencil attachment reads and SRV reads.
+		// It seems that in DX12 it is not compatible with SRV reads and in this case a specific SRV access must be used.
+		/// The layout the attachment image will be transitioned to when the render pass ends.
 		ImageLayout finalLayout;
 	};
 }

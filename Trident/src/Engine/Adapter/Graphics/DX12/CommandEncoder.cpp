@@ -838,47 +838,102 @@ namespace Trident {
 				D3D12_BARRIER_GROUP barrierGroup{};
 				barrierGroup.Type = D3D12_BARRIER_TYPE_TEXTURE;
 				barrierGroup.NumBarriers = 2;
-				barrierGroup.pTextureBarriers = &textureBarriers[0];
+				barrierGroup.pTextureBarriers = textureBarriers;
 
 				_commandEncoder->commandList->Barrier(1, &barrierGroup);
-				_commandEncoder->commandList->ResolveSubresource(
-					presentImage->resource,
-					presentImageView->getLayerOffset(),
-					resolveImage->resource,
-					resolveImageView->getLayerOffset(),
-					getImageFormat(presentImage->getFormat())
-				);
+				_commandEncoder->commandList->ResolveSubresource(presentImage->resource, presentImageView->getLayerOffset(), resolveImage->resource, resolveImageView->getLayerOffset(), getImageFormat(presentImage->getFormat()));
+			}
+		}
+
+		const ref<RenderPass> renderPass = _commandEncoder->framebuffer->getRenderPass();
+		const view<ref<Trident::ImageView>> imageViews = _commandEncoder->framebuffer->getImageViews();
+
+		sequence<D3D12_TEXTURE_BARRIER> textureBarriers(renderPass->getAttachmentCount());
+		uint32 attachmentIndex = 0;
+
+		while (attachmentIndex < renderPass->getAttachmentCount()) {
+			const Attachment& attachment = renderPass->getAttachment(attachmentIndex);
+			ref<Trident::ImageView> imageView = imageViews[attachmentIndex];
+
+			if (attachmentIndex == _commandEncoder->presentRenderTargetIndex && attachment.sampleCount > 1) {
+				const Subpass& subpass = _commandEncoder->framebuffer->getRenderPass()->getSubpass(_commandEncoder->subpassIndex);
+
+				// TODO(graphics/subpass/resolve-attachment-count): Unused attachments shouldn't be included in the count.
+				const uint32 resolveAttachmentCount = static_cast<uint32>(subpass.colorAttachmentReferences.count());
+
+				imageView = imageViews[resolveAttachmentCount + (subpass.depthStencilAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX ? 1 : 0) + _commandEncoder->presentRenderTargetIndex];
 			}
 
-			D3D12_TEXTURE_BARRIER textureBarrier{};
+			DX12::Image* image = static_cast<DX12::Image*>(imageView->getImage());
+
+			// TODO(graphics/dx12/command-encoder/end-render-pass): Transition all attachments.
+			Access finalAccess = Access::NONE;
+
+			switch (attachment.finalLayout) {
+				case ImageLayout::DEPTH_STENCIL_READ_ONLY_OPTIMAL:
+				case ImageLayout::SHADER_READ_ONLY_OPTIMAL: {
+					finalAccess |= Access::SHADER_READ;
+
+					break;
+				}
+				case ImageLayout::TRANSFER_SRC_OPTIMAL: {
+					finalAccess |= Access::TRANSFER_READ;
+
+					break;
+				}
+				case ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+				case ImageLayout::PRESENT_SRC: {
+					break;
+				}
+				default: {
+					ADAPTER_ASSERT(false, "Unsupported image layout.");
+
+					break;
+				}
+			}
+
+			D3D12_TEXTURE_BARRIER& textureBarrier = textureBarriers[attachmentIndex];
 			textureBarrier.SyncBefore = D3D12_BARRIER_SYNC_ALL;
 			textureBarrier.SyncAfter = D3D12_BARRIER_SYNC_ALL;
-			textureBarrier.AccessBefore = presentImage->barrierAccess;
-			textureBarrier.AccessAfter = D3D12_BARRIER_ACCESS_COMMON;
-			textureBarrier.LayoutBefore = presentImage->barrierLayout;
-			textureBarrier.LayoutAfter = D3D12_BARRIER_LAYOUT_PRESENT;
-			textureBarrier.pResource = presentImage->resource;
-			textureBarrier.Subresources.IndexOrFirstMipLevel = presentImageView->getMipLevelOffset();
-			textureBarrier.Subresources.NumMipLevels = presentImageView->getMipLevelCount();
-			textureBarrier.Subresources.FirstArraySlice = presentImageView->getLayerOffset();
-			textureBarrier.Subresources.NumArraySlices = presentImageView->getLayerCount();
+			textureBarrier.AccessBefore = image->barrierAccess;
+
+			if (finalAccess == Access::NONE) {
+				if (attachment.finalLayout == ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+					textureBarrier.AccessAfter = D3D12_BARRIER_ACCESS_DEPTH_STENCIL_WRITE;
+				}
+				else {
+					textureBarrier.AccessAfter = D3D12_BARRIER_ACCESS_COMMON;
+				}
+			}
+			else {
+				textureBarrier.AccessAfter = getImageBarrierAccess(finalAccess, attachment.finalLayout);
+			}
+
+			textureBarrier.LayoutBefore = image->barrierLayout;
+			textureBarrier.LayoutAfter = getBarrierLayout(attachment.finalLayout, finalAccess);
+			textureBarrier.pResource = image->resource;
+			textureBarrier.Subresources.IndexOrFirstMipLevel = imageView->getMipLevelOffset();
+			textureBarrier.Subresources.NumMipLevels = imageView->getMipLevelCount();
+			textureBarrier.Subresources.FirstArraySlice = imageView->getLayerOffset();
+			textureBarrier.Subresources.NumArraySlices = imageView->getLayerCount();
 			textureBarrier.Subresources.FirstPlane = 0;
 			textureBarrier.Subresources.NumPlanes = 1;
 			textureBarrier.Flags = D3D12_TEXTURE_BARRIER_FLAG_NONE; 
 
-			presentImage->barrierAccess = textureBarrier.AccessAfter;
-			presentImage->barrierLayout = textureBarrier.LayoutAfter;
+			image->barrierAccess = textureBarrier.AccessAfter;
+			image->barrierLayout = textureBarrier.LayoutAfter;
+			image->layout = attachment.finalLayout;
+			image->access = finalAccess;
 
-			presentImage->layout = ImageLayout::PRESENT_SRC;
-
-			D3D12_BARRIER_GROUP barrierGroup{};
-			barrierGroup.Type = D3D12_BARRIER_TYPE_TEXTURE;
-			barrierGroup.NumBarriers = 1;
-			barrierGroup.pTextureBarriers = &textureBarrier;
-
-			_commandEncoder->commandList->Barrier(1, &barrierGroup);
+			attachmentIndex += 1;
 		}
 
+		D3D12_BARRIER_GROUP barrierGroup{};
+		barrierGroup.Type = D3D12_BARRIER_TYPE_TEXTURE;
+		barrierGroup.NumBarriers = static_cast<UINT>(textureBarriers.count());
+		barrierGroup.pTextureBarriers = &textureBarriers[0];
+
+		_commandEncoder->commandList->Barrier(1, &barrierGroup);
 		_commandEncoder->commandCount += 1;
 	}
 

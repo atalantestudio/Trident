@@ -55,15 +55,10 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const DX12::Swapchain* _swapchain = static_cast<const DX12::Swapchain*>(swapchain);
-		HRESULT result;
-
-		ImageDescriptor descriptor = createSwapchainImageDescriptor(_swapchain->getExtent(), index);
-
-		#if defined(DEBUG_OBJECT_NAME)
-			descriptor.name = Logger::format("Swapchain image []", index);
-		#endif
+		const ImageDescriptor descriptor = createSwapchainImageDescriptor(_swapchain->getExtent(), index);
 
 		ref<DX12::Image> image = allocateRef<DX12::Image>(device, descriptor);
+		HRESULT result;
 
 		// Properties specific to swapchain images.
 		image->usage = static_cast<ImageUsage>(0);

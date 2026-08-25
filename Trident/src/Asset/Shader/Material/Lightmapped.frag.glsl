@@ -74,7 +74,7 @@ vec4 sampleBicubic(sampler2D textureSampler, vec2 coordinate) {
 }
 
 float calculateShadow(vec4 lightSpacePosition) {
-	const float texelSize = 1.0 / 1024.0;
+	// const float texelSize = 1.0 / 1024.0;
 
 	vec3 projectedPosition = lightSpacePosition.xyz / lightSpacePosition.w;
 

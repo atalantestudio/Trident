@@ -17,7 +17,7 @@ namespace Trident {
 					// TODO(renderer/forward/directional-shadow-map): Use UNDEFINED instead?
 					.storeOperation = StoreOperation::STORE,
 
-					.finalLayout = ImageLayout::DEPTH_STENCIL_READ_ONLY_OPTIMAL,
+					.finalLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
 				},
 			},
 			.subpasses = {
