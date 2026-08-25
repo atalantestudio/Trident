@@ -5,6 +5,11 @@
 
 #include "Engine/Adapter/Graphics/VK/BlendFactor.hpp"
 #include "Engine/Adapter/Graphics/VK/CullMode.hpp"
+
+#if defined(DEBUG_OBJECT_NAME)
+	#include "Engine/Adapter/Graphics/VK/Debug/ObjectName.hpp"
+#endif
+
 #include "Engine/Adapter/Graphics/VK/DynamicState.hpp"
 #include "Engine/Adapter/Graphics/VK/FrontFace.hpp"
 #include "Engine/Adapter/Graphics/VK/GraphicsPipeline.hpp"
@@ -237,18 +242,7 @@ namespace Trident {
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create graphics pipeline ([]).", string_VkResult(result));
 
 		#if defined(DEBUG_OBJECT_NAME)
-			if (descriptor.name.count() > 0) {
-				VkDebugUtilsObjectNameInfoEXT debugUtilsObjectNameInfo{};
-				debugUtilsObjectNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
-				debugUtilsObjectNameInfo.pNext = nullptr;
-				debugUtilsObjectNameInfo.objectType = VK_OBJECT_TYPE_PIPELINE;
-				debugUtilsObjectNameInfo.objectHandle = (uint64) graphicsPipeline->pipeline;
-				debugUtilsObjectNameInfo.pObjectName = &descriptor.name[0];
-
-				result = _device->vkSetDebugUtilsObjectNameEXT(_device->device, &debugUtilsObjectNameInfo);
-
-				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to set object name ([]).", string_VkResult(result));
-			}
+			setObjectName(_device, (uint64) graphicsPipeline->pipeline, VK_OBJECT_TYPE_PIPELINE, descriptor.name);
 		#endif
 
 		return graphicsPipeline;

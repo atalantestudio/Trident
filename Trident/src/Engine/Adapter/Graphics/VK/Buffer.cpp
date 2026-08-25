@@ -5,6 +5,11 @@
 
 #include "Engine/Adapter/Graphics/VK/Buffer.hpp"
 #include "Engine/Adapter/Graphics/VK/BufferUsage.hpp"
+
+#if defined(DEBUG_OBJECT_NAME)
+	#include "Engine/Adapter/Graphics/VK/Debug/ObjectName.hpp"
+#endif
+
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/Adapter/Graphics/VK/MemoryAllocator.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
@@ -73,18 +78,7 @@ namespace Trident {
 		buffer->memorySuballocation.memoryProperties = static_cast<MemoryProperty>(memoryPropertyFlags);
 
 		#if defined(DEBUG_OBJECT_NAME)
-			if (descriptor.name.count() > 0) {
-				VkDebugUtilsObjectNameInfoEXT debugUtilsObjectNameInfo{};
-				debugUtilsObjectNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
-				debugUtilsObjectNameInfo.pNext = nullptr;
-				debugUtilsObjectNameInfo.objectType = VK_OBJECT_TYPE_BUFFER;
-				debugUtilsObjectNameInfo.objectHandle = (uint64) buffer->buffer;
-				debugUtilsObjectNameInfo.pObjectName = &descriptor.name[0];
-
-				result = _device->vkSetDebugUtilsObjectNameEXT(_device->device, &debugUtilsObjectNameInfo);
-
-				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to set object name ([]).", string_VkResult(result));
-			}
+			setObjectName(_device, (uint64) buffer->buffer, VK_OBJECT_TYPE_BUFFER, descriptor.name);
 		#endif
 
 		return buffer;

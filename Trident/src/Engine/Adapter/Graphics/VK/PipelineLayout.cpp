@@ -3,6 +3,10 @@
 
 #include "pch.hpp"
 
+#if defined(DEBUG_OBJECT_NAME)
+	#include "Engine/Adapter/Graphics/VK/Debug/ObjectName.hpp"
+#endif
+
 #include "Engine/Adapter/Graphics/VK/DescriptorSetLayout.hpp"
 #include "Engine/Adapter/Graphics/VK/PipelineLayout.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
@@ -43,18 +47,7 @@ namespace Trident {
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create pipeline layout ([]).", string_VkResult(result));
 
 		#if defined(DEBUG_OBJECT_NAME)
-			if (descriptor.name.count() > 0) {
-				VkDebugUtilsObjectNameInfoEXT debugUtilsObjectNameInfo{};
-				debugUtilsObjectNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
-				debugUtilsObjectNameInfo.pNext = nullptr;
-				debugUtilsObjectNameInfo.objectType = VK_OBJECT_TYPE_PIPELINE_LAYOUT;
-				debugUtilsObjectNameInfo.objectHandle = (uint64) pipelineLayout->pipelineLayout;
-				debugUtilsObjectNameInfo.pObjectName = &descriptor.name[0];
-
-				result = _device->vkSetDebugUtilsObjectNameEXT(_device->device, &debugUtilsObjectNameInfo);
-
-				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to set object name ([]).", string_VkResult(result));
-			}
+			setObjectName(_device, (uint64) pipelineLayout->pipelineLayout, VK_OBJECT_TYPE_PIPELINE_LAYOUT, descriptor.name);
 		#endif
 
 		return pipelineLayout;

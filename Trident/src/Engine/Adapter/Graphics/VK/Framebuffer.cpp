@@ -3,6 +3,10 @@
 
 #include "pch.hpp"
 
+#if defined(DEBUG_OBJECT_NAME)
+	#include "Engine/Adapter/Graphics/VK/Debug/ObjectName.hpp"
+#endif
+
 #include "Engine/Adapter/Graphics/VK/Framebuffer.hpp"
 #include "Engine/Adapter/Graphics/VK/ImageView.hpp"
 #include "Engine/Adapter/Graphics/VK/RenderPass.hpp"
@@ -46,18 +50,7 @@ namespace Trident {
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create framebuffer ([]).", string_VkResult(result));
 
 		#if defined(DEBUG_OBJECT_NAME)
-			if (descriptor.name.count() > 0) {
-				VkDebugUtilsObjectNameInfoEXT debugUtilsObjectNameInfo{};
-				debugUtilsObjectNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
-				debugUtilsObjectNameInfo.pNext = nullptr;
-				debugUtilsObjectNameInfo.objectType = VK_OBJECT_TYPE_FRAMEBUFFER;
-				debugUtilsObjectNameInfo.objectHandle = (uint64) framebuffer->framebuffer;
-				debugUtilsObjectNameInfo.pObjectName = &descriptor.name[0];
-
-				result = _device->vkSetDebugUtilsObjectNameEXT(_device->device, &debugUtilsObjectNameInfo);
-
-				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to set object name ([]).", string_VkResult(result));
-			}
+			setObjectName(_device, (uint64) framebuffer->framebuffer, VK_OBJECT_TYPE_FRAMEBUFFER, descriptor.name);
 		#endif
 
 		return framebuffer;

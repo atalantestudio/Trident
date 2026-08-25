@@ -3,6 +3,10 @@
 
 #include "pch.hpp"
 
+#if defined(DEBUG_OBJECT_NAME)
+	#include "Engine/Adapter/Graphics/VK/Debug/ObjectName.hpp"
+#endif
+
 #include "Engine/Adapter/Graphics/VK/Image.hpp"
 #include "Engine/Adapter/Graphics/VK/ImageAspectFlags.hpp"
 #include "Engine/Adapter/Graphics/VK/ImageFormat.hpp"
@@ -115,18 +119,7 @@ namespace Trident {
 		image->memorySuballocation.memoryProperties = static_cast<MemoryProperty>(memoryPropertyFlags);
 
 		#if defined(DEBUG_OBJECT_NAME)
-			if (descriptor.name.count() > 0) {
-				VkDebugUtilsObjectNameInfoEXT debugUtilsObjectNameInfo{};
-				debugUtilsObjectNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
-				debugUtilsObjectNameInfo.pNext = nullptr;
-				debugUtilsObjectNameInfo.objectType = VK_OBJECT_TYPE_IMAGE;
-				debugUtilsObjectNameInfo.objectHandle = (uint64) image->image;
-				debugUtilsObjectNameInfo.pObjectName = &descriptor.name[0];
-
-				result = _device->vkSetDebugUtilsObjectNameEXT(_device->device, &debugUtilsObjectNameInfo);
-
-				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to set object name ([]).", string_VkResult(result));
-			}
+			setObjectName(_device, (uint64) image->image, VK_OBJECT_TYPE_IMAGE, descriptor.name);
 		#endif
 
 		return image;
