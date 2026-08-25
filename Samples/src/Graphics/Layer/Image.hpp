@@ -37,7 +37,7 @@ namespace Trident {
 			}
 
 			void postBuild() override {
-				imageView = createImageView();
+				imageView = createImageView(0);
 
 				updateDescriptorSets();
 			}
@@ -83,7 +83,7 @@ namespace Trident {
 					.imageExtent = image->getExtent(),
 					.imageMipLevel = 0,
 					.imageLayerOffset = 0,
-					.imageLayerCount = 1,
+					.imageLayerCount = image->getLayerCount(),
 				};
 
 				commandEncoder->copyBufferToImage(stagingBuffer, image, bufferImageCopyRegion);
@@ -112,6 +112,13 @@ namespace Trident {
 				commandEncoder->bindGraphicsPipeline(pipeline);
 				commandEncoder->bindDescriptorSets(pipelineLayout, 0, descriptorSet);
 				commandEncoder->draw(3, 1, 0, 0);
+			}
+
+			void onEvent(Event& event) override {
+				EventDispatcher eventDispatcher(event);
+				eventDispatcher.dispatch<KeyDownEvent>(BIND(onKeyDown));
+
+				Renderer::onEvent(event);
 			}
 
 		private:
@@ -154,14 +161,15 @@ namespace Trident {
 				});
 			}
 
-			ref<ImageView> createImageView() const {
+			ref<ImageView> createImageView(uint32 layerOffset) const {
 				return image->createView({
+					.type = ImageViewType::TYPE_2D,
 					.mipLevelOffset = 0,
 					.mipLevelCount = 1,
-					.layerOffset = 0,
+					.layerOffset = layerOffset,
 					.layerCount = 1,
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Image",
+						.name = "Image view",
 					#endif
 				});
 			}
@@ -246,8 +254,10 @@ namespace Trident {
 			}
 
 			ref<Buffer> createStagingBuffer() const {
+				const Extent3D extent = imageAsset->getExtent();
+
 				return createStaticBuffer({
-					.size = imageAsset->getExtent().width * imageAsset->getExtent().height * imageAsset->getExtent().depth * imageAsset->getLayerCount() * getByteSize(imageFormat),
+					.size = getByteSize(imageFormat) * extent.width * extent.height * extent.depth * imageAsset->getLayerCount(),
 					.usage = BufferUsage::TRANSFER_SRC,
 					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
 					.persistent = false,
@@ -284,6 +294,42 @@ namespace Trident {
 				};
 
 				getDevice()->updateDescriptorSets(writeDescriptorSet);
+			}
+
+			bool onKeyDown(KeyDownEvent& event) {
+				const KeyCode keyCode = event.getKeyCode();
+
+				uint32 layerOffset = 0;
+
+				if (keyCode >= KeyCode::DIGIT_0 && keyCode <= KeyCode::DIGIT_9) {
+					layerOffset = static_cast<uint32>(keyCode) - static_cast<uint32>(KeyCode::DIGIT_0);
+				}
+				else if (keyCode == KeyCode::A) {
+					layerOffset = 10;
+				}
+				else if (keyCode == KeyCode::Z) {
+					layerOffset = 11;
+				}
+				else if (keyCode == KeyCode::E) {
+					layerOffset = 12;
+				}
+				else {
+					return true;
+				}
+
+				if (layerOffset >= image->getLayerCount()) {
+					return true;
+				}
+
+				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
+
+				queue->waitIdle();
+
+				imageView = createImageView(layerOffset);
+
+				updateDescriptorSets();
+
+				return true;
 			}
 
 		private:
