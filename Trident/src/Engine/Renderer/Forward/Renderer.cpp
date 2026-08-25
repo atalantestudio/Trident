@@ -16,6 +16,7 @@
 #include "Engine/Renderer/Forward/DirectionalShadowMapSampler.hpp"
 #include "Engine/Renderer/Forward/DynamicDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Forward/DynamicPipeline.hpp"
+#include "Engine/Renderer/Forward/EnvironmentMap.hpp"
 #include "Engine/Renderer/Forward/Framebuffers.hpp"
 #include "Engine/Renderer/Forward/GeometryDescriptorSets.hpp"
 #include "Engine/Renderer/Forward/IndexBuffer.hpp"

@@ -51,6 +51,9 @@ namespace Trident {
 				dynamicDescriptorSet = descriptorSets[1];
 				directionalShadowMapDescriptorSet = descriptorSets[2];
 
+				environmentMapImage = createEnvironmentMapImage();
+				environmentMapImageView = createEnvironmentMapImageView();
+
 				directionalShadowMapPipelineLayout = createDirectionalShadowMapPipelineLayout();
 				directionalShadowMapPipeline = createDirectionalShadowMapPipeline();
 				directionalLightBuffer = createDirectionalLightBuffer();
@@ -309,6 +312,7 @@ namespace Trident {
 				ref<Image> createColorImage() const;
 			#endif
 
+			ref<Image> createEnvironmentMapImage() const;
 			ref<Image> createDepthStencilImage() const;
 			ref<Image> createLightmapAtlasImage(ref<ImageAsset> imageAsset) const;
 			ref<Image> createDirectionalShadowMapImage() const;
@@ -317,6 +321,7 @@ namespace Trident {
 				ref<ImageView> createColorImageView() const;
 			#endif
 
+			ref<ImageView> createEnvironmentMapImageView() const;
 			ref<ImageView> createDepthStencilImageView() const;
 			ref<ImageView> createLightmapAtlasImageView() const;
 			ref<ImageView> createDirectionalShadowMapImageView() const;
@@ -404,6 +409,7 @@ namespace Trident {
 				ref<Image> colorImage;
 			#endif
 
+			ref<Image> environmentMapImage;
 			ref<Image> depthStencilImage;
 			ref<Image> lightmapAtlasImage;
 			sequence<ref<Image>> materialImages;
@@ -413,6 +419,7 @@ namespace Trident {
 				ref<ImageView> colorImageView;
 			#endif
 
+			ref<ImageView> environmentMapImageView;
 			ref<ImageView> depthStencilImageView;
 			ref<ImageView> lightmapAtlasImageView;
 			sequence<ref<ImageView>> materialImageViews;
