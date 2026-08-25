@@ -42,7 +42,7 @@ namespace Trident {
 				std::copy_n(".tma", 4, &outputPath[assetOutputPathString.size() + assetName.count()]);
 
 				Writer writer = Filesystem::openWriter(outputPath);
-				writer.write(stream.data, stream.size);
+				writer.write(stream.data, stream.getByteOffset());
 
 				assetLibrary->registerAsset(identifier, assetName);
 			}
@@ -62,11 +62,11 @@ namespace Trident {
 				const std::filesystem::path assetOutputPath = rootOutputPath / "Asset/Material/";
 				const view<char8> assetName = getAssetName();
 
-				std::filesystem::path finalAssetOutputPath = assetOutputPath / std::string(assetName);
-				finalAssetOutputPath.replace_extension("tma");
+				std::filesystem::path outputPath = assetOutputPath / std::string(assetName);
+				outputPath.replace_extension("tma");
 
-				if (std::filesystem::exists(finalAssetOutputPath)) {
-					ENGINE_INFO("Material asset \"[]\" already exists.", finalAssetOutputPath.filename().string());
+				if (std::filesystem::exists(outputPath)) {
+					ENGINE_INFO("Material asset \"[]\" already exists.", outputPath.filename().string());
 
 					return 0;
 				}

@@ -9,39 +9,29 @@
 namespace Trident {
 	template<>
 	ImageAsset Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary) {
-		ImageAssetHeader imageAssetHeader{};
-		imageAssetHeader.identifier = stream.read<uint32>();
-		imageAssetHeader.version = stream.read<VersionNumber>();
-		imageAssetHeader.format = stream.read<uint32>();
-		imageAssetHeader.extent.width = stream.read<uint32>();
-		imageAssetHeader.extent.height = stream.read<uint32>();
-		imageAssetHeader.extent.depth = stream.read<uint32>();
-		imageAssetHeader.mipLevelCount = stream.read<uint32>();
-		imageAssetHeader.layerCount = stream.read<uint32>();
+		ImageAsset asset{};
+		asset.identifier = stream.read<uint32>();
+		asset.version = stream.read<VersionNumber>();
+		asset.format = stream.read<ImageFormat>();
+		asset.extent = {stream.read<uint32>(), stream.read<uint32>(), stream.read<uint32>()};
+		asset.mipLevelCount = stream.read<uint32>();
+		asset.layerCount = stream.read<uint32>();
 
-		ImageAssetDescriptor descriptor{};
-		descriptor.identifier = imageAssetHeader.identifier;
-		descriptor.version = imageAssetHeader.version;
-		descriptor.format = static_cast<ImageFormat>(imageAssetHeader.format);
-		descriptor.extent = imageAssetHeader.extent;
-		descriptor.mipLevelCount = imageAssetHeader.mipLevelCount;
-		descriptor.layerCount = imageAssetHeader.layerCount;
+		const uint8 channelCount = getChannelCount(asset.format);
 
-		const uint8 channelCount = getChannelCount(descriptor.format);
+		asset.data = sequence<uint8>(getByteSize(asset.format) * asset.extent.width * asset.extent.height * asset.extent.depth * asset.layerCount);
 
-		descriptor.data = sequence<uint8>(descriptor.extent.width * descriptor.extent.height * descriptor.extent.depth * descriptor.layerCount * channelCount);
-
-		switch (descriptor.format) {
+		switch (asset.format) {
 			case ImageFormat::R8_UNORM: {
-				std::copy_n(stream.getBytePosition(), descriptor.data.count(), &descriptor.data[0]);
+				std::copy_n(stream.getBytePosition(), asset.data.count(), &asset.data[0]);
 
-				stream.jump(descriptor.data.count());
+				stream.jump(asset.data.count());
 
 				break;
 			}
 			case ImageFormat::R8G8B8_UNORM:
 			case ImageFormat::R8G8B8A8_UNORM: {
-				Filesystem::decodeQoiContent(stream, descriptor.data, channelCount, 0);
+				Filesystem::decodeQoiContent(stream, asset.data, channelCount, 0);
 
 				break;
 			}
@@ -52,6 +42,6 @@ namespace Trident {
 			}
 		}
 
-		return ImageAsset(descriptor);
+		return asset;
 	}
 }

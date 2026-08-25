@@ -12,6 +12,7 @@
 #include "Engine/API/Geometry/Hull3D.hpp"
 #include "Engine/API/Geometry/Index.hpp"
 #include "Engine/API/Graphics/VertexInputAttributeFormat.hpp"
+#include "Engine/Filesystem/Asset/ImageAsset.hpp"
 
 namespace Trident {
 	BuildGeometry3D decodeFBXGeometry(view<uint8> inputData, uint32 identifier);
@@ -40,6 +41,8 @@ namespace Trident {
 
 	RigidBody2DComponent createRigidBody(const Descriptor<RigidBody2DComponent>& descriptor);
 	RigidBody3DComponent createRigidBody(const Descriptor<RigidBody3DComponent>& descriptor);
+
+	ImageAssetDescriptor openImage(view<char8> path);
 
 	template<VertexInputAttributeFormat Format, typename Output, typename Input>
 	Output pack(Input value);

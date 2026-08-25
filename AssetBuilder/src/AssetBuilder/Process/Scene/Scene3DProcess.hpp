@@ -3,12 +3,12 @@
 
 #pragma once
 
-#include "AssetBuilder/API/AssetBuilderLibrary.hpp"
-#include "AssetBuilder/API/Scene/Scene3D.hpp"
-#include "../../../Process/BuildImageAssetProcess.hpp"
-
 #include "Engine/API/Process/Process.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
+
+#include "AssetBuilder/API/AssetBuilderLibrary.hpp"
+#include "AssetBuilder/API/Scene/Scene3D.hpp"
+#include "AssetBuilder/Process/Image/ImageProcess.hpp"
 
 namespace Trident {
 	class Scene3DProcess : public Process {
@@ -210,11 +210,11 @@ namespace Trident {
 				const std::filesystem::path assetOutputPath = rootOutputPath / "Asset/Scene/";
 				const view<char8> assetName = getAssetName();
 
-				std::filesystem::path finalAssetOutputPath = assetOutputPath / std::string(assetName);
-				finalAssetOutputPath.replace_extension("tsa");
+				std::filesystem::path outputPath = assetOutputPath / std::string(assetName);
+				outputPath.replace_extension("tsa");
 
-				if (std::filesystem::exists(finalAssetOutputPath)) {
-					ENGINE_INFO("Scene asset \"[]\" already exists.", finalAssetOutputPath.filename().string());
+				if (std::filesystem::exists(outputPath)) {
+					ENGINE_INFO("Scene asset \"[]\" already exists.", outputPath.filename().string());
 
 					return 0;
 				}
@@ -250,14 +250,14 @@ namespace Trident {
 				std::copy_n(".tsa", 4, &outputPath[assetOutputPathString.size() + assetName.count()]);
 
 				Writer writer = Filesystem::openWriter(outputPath);
-				writer.write(stream.data, stream.size);
+				writer.write(stream.data, stream.getByteOffset());
 
 				assetLibrary->registerAsset(identifier, assetName);
 
 				if (scene.staticGeometry.lightmapAtlasImageAssetDescriptor.identifier != max<uint32>()) {
-					BuildImageAssetProcess::encodeImageAsset(rootOutputPath / "Asset/", assetName, scene.staticGeometry.lightmapAtlasImageAssetDescriptor);
+					const ByteStream<StreamOperation::WRITE> stream = ImageProcess::encodeImageAsset(scene.staticGeometry.lightmapAtlasImageAssetDescriptor);
 
-					assetLibrary->registerAsset(scene.staticGeometry.lightmapAtlasImageAssetDescriptor.identifier, assetName);
+					ImageProcess::createImageAsset(scene.staticGeometry.lightmapAtlasImageAssetDescriptor, stream, assetName, rootOutputPath / "Asset/Image/", assetLibrary);
 				}
 			}
 

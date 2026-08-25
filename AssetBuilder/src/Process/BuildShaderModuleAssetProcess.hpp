@@ -15,11 +15,11 @@ namespace Trident {
 	class BuildShaderModuleAssetProcess final : public Process {
 		private:
 			sint32 processFile(const std::filesystem::directory_entry& directoryEntry, const std::filesystem::path& assetOutputPath) {
-				std::filesystem::path finalAssetOutputPath = assetOutputPath / "Shader" / directoryEntry.path().filename();
-				finalAssetOutputPath.replace_extension("tsm");
+				std::filesystem::path outputPath = assetOutputPath / "Shader" / directoryEntry.path().filename();
+				outputPath.replace_extension("tsm");
 
-				if (std::filesystem::exists(finalAssetOutputPath)) {
-					ENGINE_INFO("Shader module asset \"[]\" already exists.", finalAssetOutputPath.filename().string());
+				if (std::filesystem::exists(outputPath)) {
+					ENGINE_INFO("Shader module asset \"[]\" already exists.", outputPath.filename().string());
 
 					return 0;
 				}
@@ -103,19 +103,21 @@ namespace Trident {
 				const std::string stem = directoryEntry.path().stem().string();
 				const std::string assetOutputPathString = assetOutputPath.string();
 
-				// Count '\0'.
-				sequence<char8> outputPath(assetOutputPathString.size() + stem.size() + 12);
-				std::copy(assetOutputPathString.begin(), assetOutputPathString.end(), &outputPath[0]);
-				std::copy_n("Shader/", 7, &outputPath[assetOutputPathString.size()]);
-				std::copy(stem.begin(), stem.end(), &outputPath[assetOutputPathString.size() + 7]);
-				std::copy_n(".tsm", 4, &outputPath[assetOutputPathString.size() + stem.size() + 7]);
+				{
+					// Count '\0'.
+					sequence<char8> outputPath(assetOutputPathString.size() + stem.size() + 12);
+					std::copy(assetOutputPathString.begin(), assetOutputPathString.end(), &outputPath[0]);
+					std::copy_n("Shader/", 7, &outputPath[assetOutputPathString.size()]);
+					std::copy(stem.begin(), stem.end(), &outputPath[assetOutputPathString.size() + 7]);
+					std::copy_n(".tsm", 4, &outputPath[assetOutputPathString.size() + stem.size() + 7]);
 
-				Writer writer = Filesystem::openWriter(outputPath);
-				writer.write(outputByteStream.data, outputByteStream.size);
+					Writer writer = Filesystem::openWriter(outputPath);
+					writer.write(outputByteStream.data, outputByteStream.size);
 
-				ENGINE_INFO("Generated shader module asset \"[]\" (ID: []).", outputPath, asset.identifier);
+					ENGINE_INFO("Generated shader module asset \"[]\" (ID: []).", outputPath, asset.identifier);
 
-				assetLibrary->registerAsset(asset.identifier, stem);
+					assetLibrary->registerAsset(asset.identifier, stem);
+				}
 
 				return 0;
 			}

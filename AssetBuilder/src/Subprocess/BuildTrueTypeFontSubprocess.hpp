@@ -3,7 +3,9 @@
 
 #pragma once
 
-#include "../Process/BuildImageAssetProcess.hpp"
+#include "Engine/Filesystem/Decoder/Decoder.hpp"
+
+#include "AssetBuilder/Process/Image/ImageProcess.hpp"
 #include "../Process/GenerateSDFGlyphMapProcess.hpp"
 #include "../File/TTF.hpp"
 
@@ -17,11 +19,11 @@ namespace Trident {
 
 		public:
 			explicit BuildTrueTypeFontSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::filesystem::path& assetOutputPath, AssetBuilderLibrary* assetLibrary) {
-				std::filesystem::path finalAssetOutputPath = assetOutputPath / "Font" / directoryEntry.path().filename();
-				finalAssetOutputPath.replace_extension("tfo");
+				std::filesystem::path outputPath = assetOutputPath / "Font" / directoryEntry.path().filename();
+				outputPath.replace_extension("tfo");
 
-				if (std::filesystem::exists(finalAssetOutputPath)) {
-					ENGINE_INFO("Font asset \"[]\" already exists.", finalAssetOutputPath.filename().string());
+				if (std::filesystem::exists(outputPath)) {
+					ENGINE_INFO("Font asset \"[]\" already exists.", outputPath.filename().string());
 
 					return;
 				}
@@ -52,9 +54,9 @@ namespace Trident {
 				imageAssetDescriptor.layerCount = 1;
 				imageAssetDescriptor.data = sdfGlyphMap.data;
 
-				BuildImageAssetProcess::encodeImageAsset(assetOutputPath, assetName, imageAssetDescriptor);
+				const ByteStream<StreamOperation::WRITE> stream = ImageProcess::encodeImageAsset(imageAssetDescriptor);
 
-				assetLibrary->registerAsset(imageAssetDescriptor.identifier, assetName);
+				ImageProcess::createImageAsset(imageAssetDescriptor, stream, assetName, assetOutputPath / "Image/", assetLibrary);
 
 				FontAssetDescriptor fontAssetDescriptor{};
 				fontAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
@@ -135,19 +137,21 @@ namespace Trident {
 				const std::string stem = directoryEntry.path().stem().string();
 				const std::string assetOutputPathString = assetOutputPath.string();
 
-				// Count '\0'.
-				sequence<char8> outputPath(assetOutputPathString.size() + stem.size() + 10);
-				std::copy(assetOutputPathString.begin(), assetOutputPathString.end(), &outputPath[0]);
-				std::copy_n("Font/", 5, &outputPath[assetOutputPathString.size()]);
-				std::copy(stem.begin(), stem.end(), &outputPath[assetOutputPathString.size() + 5]);
-				std::copy_n(".tfo", 4, &outputPath[assetOutputPathString.size() + stem.size() + 5]);
+				{
+					// Count '\0'.
+					sequence<char8> outputPath(assetOutputPathString.size() + stem.size() + 10);
+					std::copy(assetOutputPathString.begin(), assetOutputPathString.end(), &outputPath[0]);
+					std::copy_n("Font/", 5, &outputPath[assetOutputPathString.size()]);
+					std::copy(stem.begin(), stem.end(), &outputPath[assetOutputPathString.size() + 5]);
+					std::copy_n(".tfo", 4, &outputPath[assetOutputPathString.size() + stem.size() + 5]);
 
-				Writer writer = Filesystem::openWriter(outputPath);
-				writer.write(outputByteStream.data, outputByteStream.size);
+					Writer writer = Filesystem::openWriter(outputPath);
+					writer.write(outputByteStream.data, outputByteStream.size);
 
-				ENGINE_INFO("Generated True-Type font asset \"[]\" (ID: []).", outputPath, fontAssetDescriptor.identifier);
+					ENGINE_INFO("Generated True-Type font asset \"[]\" (ID: []).", outputPath, fontAssetDescriptor.identifier);
 
-				assetLibrary->registerAsset(fontAssetDescriptor.identifier, stem);
+					assetLibrary->registerAsset(fontAssetDescriptor.identifier, stem);
+				}
 			}
 	};
 }

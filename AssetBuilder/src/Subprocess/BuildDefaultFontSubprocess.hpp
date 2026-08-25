@@ -4,10 +4,11 @@
 #pragma once
 
 #include "Engine/API/Process/Process.hpp"
+#include "Engine/Filesystem/Decoder/Decoder.hpp"
 #include "Engine/Filesystem/Stream/UTF8Stream.hpp"
 
+#include "AssetBuilder/Process/Image/ImageProcess.hpp"
 #include "../File/PNG.hpp"
-#include "../Process/BuildImageAssetProcess.hpp"
 
 namespace Trident {
 	class BuildDefaultFontSubprocess {
@@ -193,9 +194,9 @@ namespace Trident {
 
 				convert<ImageFormat::R8G8B8A8_UNORM, ImageFormat::R8_UNORM>(file.data, &imageAssetDescriptor.data[0], imageAssetDescriptor.data.count());
 
-				BuildImageAssetProcess::encodeImageAsset(assetOutputPath, DEFAULT_FONT_NAME, imageAssetDescriptor);
+				const ByteStream<StreamOperation::WRITE> stream = ImageProcess::encodeImageAsset(imageAssetDescriptor);
 
-				assetLibrary->registerAsset(imageAssetDescriptor.identifier, DEFAULT_FONT_NAME);
+				ImageProcess::createImageAsset(imageAssetDescriptor, stream, DEFAULT_FONT_NAME, assetOutputPath / "Image/", assetLibrary);
 
 				FontAssetDescriptor fontAssetDescriptor{};
 				fontAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();

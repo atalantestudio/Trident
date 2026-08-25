@@ -5,6 +5,14 @@
 
 namespace Trident {
 	struct Extent2D {
+		inline bool operator==(Extent2D other) const {
+			return width == other.width && height == other.height;
+		}
+
+		inline bool operator!=(Extent2D other) const {
+			return width != other.width || height != other.height;
+		}
+
 		inline uint32 operator[](std::size_t index) const {
 			ENGINE_ASSERT(index < 2, "Index overflow.");
 
@@ -29,6 +37,14 @@ namespace Trident {
 			height(height),
 			depth(depth)
 		{}
+
+		inline bool operator==(Extent3D other) const {
+			return width == other.width && height == other.height && depth == other.depth;
+		}
+
+		inline bool operator!=(Extent3D other) const {
+			return width != other.width || height != other.height || depth != other.depth;
+		}
 
 		inline uint32 operator[](std::size_t index) const {
 			ENGINE_ASSERT(index < 3, "Index overflow.");

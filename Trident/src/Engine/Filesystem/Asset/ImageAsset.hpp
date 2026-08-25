@@ -1,4 +1,4 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
@@ -14,7 +14,7 @@ namespace Trident {
 		/// The number of texels in each dimension of the base level of the image.
 		Extent3D extent;
 
-		// TODO: Mip level count is not handled at the moment and must be set to 1.
+		// TODO(asset/image): The mip level count is not handled at the moment and is always set to 1.
 		/// The number of LOD available for minified sampling of the image.
 		uint32 mipLevelCount;
 
@@ -25,56 +25,36 @@ namespace Trident {
 		sequence<uint8> data;
 	};
 
-	struct ImageAssetHeader : public AssetHeader {
-		uint32 format;
+	struct ImageAsset : public Asset {
+		inline ImageFormat getFormat() const {
+			return format;
+		}
+
+		inline const Extent3D& getExtent() const {
+			return extent;
+		}
+
+		/// Returns the byte size of the image data.
+		inline uint64 getSize() const {
+			return getByteSize(format) * extent.width * extent.height * extent.depth * layerCount;
+		}
+
+		inline uint32 getMipLevelCount() const {
+			return mipLevelCount;
+		}
+
+		inline uint32 getLayerCount() const {
+			return layerCount;
+		}
+
+		inline const sequence<uint8>& getData() const {
+			return data;
+		}
+
+		ImageFormat format;
 		Extent3D extent;
 		uint32 mipLevelCount;
 		uint32 layerCount;
-	};
-
-	struct ImageAsset : public Asset {
-		public:
-			ImageAsset() = default;
-
-			explicit ImageAsset(const ImageAssetDescriptor& descriptor) :
-				Asset{descriptor.identifier, descriptor.version},
-				format(descriptor.format),
-				extent(descriptor.extent),
-				mipLevelCount(descriptor.mipLevelCount),
-				layerCount(descriptor.layerCount),
-				data(descriptor.data)
-			{}
-
-			inline ImageFormat getFormat() const {
-				return format;
-			}
-
-			inline const Extent3D& getExtent() const {
-				return extent;
-			}
-
-			/// Returns the byte size of the image data.
-			inline uint64 getSize() const {
-				return getByteSize(format) * extent.width * extent.height * extent.depth * layerCount;
-			}
-
-			inline uint32 getMipLevelCount() const {
-				return mipLevelCount;
-			}
-
-			inline uint32 getLayerCount() const {
-				return layerCount;
-			}
-
-			inline const sequence<uint8>& getData() const {
-				return data;
-			}
-
-		private:
-			ImageFormat format;
-			Extent3D extent;
-			uint32 mipLevelCount;
-			uint32 layerCount;
-			sequence<uint8> data;
+		sequence<uint8> data;
 	};
 }

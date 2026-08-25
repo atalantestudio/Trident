@@ -30,11 +30,11 @@ namespace Trident {
 					const sequence<char8> path = directoryEntry.path().string();
 					const sequence<uint8> inputData = Filesystem::openByteBuffer(path);
 
-					std::filesystem::path finalAssetOutputPath = assetOutputPath / directoryEntry.path().filename();
-					finalAssetOutputPath.replace_extension("tga");
+					std::filesystem::path outputPath = assetOutputPath / directoryEntry.path().filename();
+					outputPath.replace_extension("tga");
 
-					if (std::filesystem::exists(finalAssetOutputPath)) {
-						ENGINE_INFO("Geometry asset \"[]\" already exists.", finalAssetOutputPath.filename().string());
+					if (std::filesystem::exists(outputPath)) {
+						ENGINE_INFO("Geometry asset \"[]\" already exists.", outputPath.filename().string());
 
 						continue;
 					}
@@ -72,7 +72,7 @@ namespace Trident {
 				std::copy_n(".tga", 4, &outputPath[assetOutputPathString.size() + assetName.count()]);
 
 				Writer writer = Filesystem::openWriter(outputPath);
-				writer.write(stream.data, stream.size);
+				writer.write(stream.data, stream.getByteOffset());
 
 				assetLibrary->registerAsset(identifier, assetName);
 			}

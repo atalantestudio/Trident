@@ -6,6 +6,7 @@
 #include "AssetBuilder/API/Utilities/DecodeFBXGeometry.hpp"
 #include "AssetBuilder/API/Utilities/GenerateTangents.hpp"
 #include "AssetBuilder/API/Utilities/Hull.hpp"
+#include "AssetBuilder/API/Utilities/Image.hpp"
 #include "AssetBuilder/API/Utilities/InflateFBXStreams.hpp"
 #include "AssetBuilder/API/Utilities/Pack.hpp"
 #include "AssetBuilder/API/Utilities/RigidBody.hpp"

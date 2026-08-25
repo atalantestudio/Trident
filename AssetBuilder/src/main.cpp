@@ -13,6 +13,7 @@
 #include "AssetBuilder/Process/Geometry/3D/UnitBox.hpp"
 #include "AssetBuilder/Process/Geometry/3D/UnitPlane.hpp"
 #include "AssetBuilder/Process/Geometry/3D/UnitSphere.hpp"
+#include "AssetBuilder/Process/Image/EveningRoad01.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/Default.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/PlasterCeiling.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/PlasterWall.hpp"
@@ -51,8 +52,8 @@
 #include "Process/BuildAssetMapProcess.hpp"
 #include "Process/BuildFontAssetProcess.hpp"
 #include "Process/BuildGeometryAssetProcess.hpp"
-#include "Process/BuildImageAssetProcess.hpp"
 #include "Process/BuildShaderModuleAssetProcess.hpp"
+#include "Process/CopyImageProcess.hpp"
 
 #include "Engine/entry_point.hpp"
 
@@ -91,7 +92,7 @@ namespace Trident {
 
 		private:
 			void registerProcesses() {
-				allocateProcesses(49);
+				allocateProcesses(50);
 
 				registerProcess<BuildGeometryAssetProcess>(&assetLibrary);
 
@@ -106,7 +107,8 @@ namespace Trident {
 				registerProcess<UnitPlaneGeometry3D>(&assetLibrary);
 				registerProcess<UnitSphereGeometry3D>(&assetLibrary);
 
-				registerProcess<BuildImageAssetProcess>(&assetLibrary);
+				registerProcess<CopyImageProcess>(&assetLibrary);
+				registerProcess<EveningRoad01Process>(&assetLibrary);
 
 				registerProcess<DebugMaterial>(&assetLibrary);
 				registerProcess<FoldingWoodenStoolMaterial>(&assetLibrary);
