@@ -113,7 +113,10 @@ namespace Trident {
 			.fragmentShaderModule = nullptr,
 			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
 			.polygonMode = PolygonMode::FILL,
-			.cullMode = CullMode::BACK,
+
+			// TODO(forward/directional-shadow-map): Cull front faces.
+			.cullMode = CullMode::NONE,
+
 			.frontFace = FrontFace::CLOCKWISE,
 			.lineWidth = 1.0f,
 			.minSampleShading = 0.0f,

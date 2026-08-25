@@ -16,6 +16,8 @@ namespace Trident {
 		svec3<float32> position;
 		uint32 pointLightCount;
 		svec3<float32> ambientColor;
+		uint32 _0;
+		svec3<float32> sunColor;
 	};
 
 	class ForwardRenderer : public BaseSceneRenderer<ForwardCamera> {
@@ -263,8 +265,9 @@ namespace Trident {
 
 				updateGeometryDescriptorSets();
 
-				cameraMappedRange->pointLightCount = static_cast<uint32>(scene->getAsset()->pointLights.count());
-				cameraMappedRange->ambientColor = scene->getAsset()->skyColor;
+				cameraMappedRange->pointLightCount = static_cast<uint32>(sceneAsset->pointLights.count());
+				cameraMappedRange->ambientColor = sceneAsset->skyColor;
+				cameraMappedRange->sunColor = sceneAsset->sunColor;
 
 				initializeLightProjectionView();
 			}

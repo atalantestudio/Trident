@@ -93,5 +93,8 @@ namespace Trident {
 		BuildDynamicSceneGeometry3D dynamicGeometry;
 		svec3<float32> skyColor;
 		svec3<float32> sunDirection;
+
+		/// Pre-multiplied by the sun intensity.
+		svec3<float32> sunColor;
 	};
 }

@@ -75,6 +75,7 @@ namespace Trident {
 
 		asset.skyColor = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
 		asset.sunDirection = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
+		asset.sunColor = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
 
 		std::copy_n(stream.getBytePosition(), bakedVertexCount * sizeof(Vertex3D), &asset.geometryData[asset.geometryRanges[0].offset]);
 

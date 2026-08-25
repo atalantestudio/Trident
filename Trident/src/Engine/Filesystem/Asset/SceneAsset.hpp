@@ -57,6 +57,7 @@ namespace Trident {
 		ref<ImageAsset> lightmapAtlasImageAsset;
 		svec3<float32> skyColor;
 		svec3<float32> sunDirection;
+		svec3<float32> sunColor;
 		uint32 entityCount;
 		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
 		sequence<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;

@@ -12,6 +12,15 @@ in Interstage {
 	layout(location = 3) vec4 lightSpacePosition;
 } interstage;
 
+layout(set = 0, binding = 0) uniform readonly Camera {
+	mat4x4 projectionView;
+	vec3 position;
+	uint pointLightCount;
+	vec3 ambientColor;
+	uint _0;
+	vec3 sunColor;
+} camera;
+
 layout(set = 0, binding = 1) uniform sampler2D lightmapAtlasSampler;
 layout(set = 0, binding = 3) uniform sampler2D directionalShadowMapSampler;
 
@@ -112,23 +121,12 @@ float calculateShadow(vec4 lightSpacePosition) {
 }
 
 void main() {
-	const vec3 sunColor = vec3(1.0, 1.0, 1.0);
-
 	float inShadow = calculateShadow(interstage.lightSpacePosition);
 	vec3 directDiffuse = texture(diffuseSampler, interstage.textureCoordinate).rgb;
+	vec3 indirectDiffuse = sampleBicubic(lightmapAtlasSampler, interstage.lightmapCoordinate).rgb;
 
-	pow(directDiffuse, vec3(1.0 / 2.2));
+	directDiffuse = pow(directDiffuse, vec3(1.0 / 2.2));
 
-	fragment.rgb = directDiffuse;
+	fragment.rgb = indirectDiffuse * directDiffuse * inShadow + directDiffuse * camera.sunColor * (1.0 - inShadow);
 	fragment.a = 1.0;
-
-	if (inShadow > 0.0) {
-		vec3 indirectDiffuse = sampleBicubic(lightmapAtlasSampler, interstage.lightmapCoordinate).rgb;
-
-		fragment.rgb *= indirectDiffuse;
-
-		return;
-	}
-
-	fragment.rgb *= sunColor;
 }
