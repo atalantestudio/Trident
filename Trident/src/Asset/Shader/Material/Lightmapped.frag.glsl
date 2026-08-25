@@ -113,6 +113,7 @@ float calculateShadow(vec4 lightSpacePosition) {
 
 	return inShadow / 9.0; */
 
+	// TODO(forward/directional-shadow-map): Only for Vulkan.
 	coordinate.y = 1.0 - coordinate.y;
 
 	float closestDepth = texture(directionalShadowMapSampler, coordinate).r;
