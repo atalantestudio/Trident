@@ -4,9 +4,11 @@
 #pragma once
 
 #include "Engine/API/Graphics/Image.hpp"
+#include "Engine/API/Graphics/ImageViewType.hpp"
 
 namespace Trident {
 	struct ImageViewDescriptor {
+		ImageViewType type;
 		uint32 mipLevelOffset;
 		uint32 mipLevelCount;
 		uint32 layerOffset;

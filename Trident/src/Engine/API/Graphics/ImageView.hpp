@@ -13,6 +13,8 @@ namespace Trident {
 
 			Image* getImage();
 
+			ImageViewType getType() const;
+
 			uint32 getMipLevelOffset() const;
 
 			uint32 getMipLevelCount() const;
@@ -28,7 +30,7 @@ namespace Trident {
 		public:
 			const Device* device;
 			Image* image;
-
+			ImageViewType type;
 			uint32 mipLevelOffset;
 			uint32 mipLevelCount;
 			uint32 layerOffset;

@@ -20,6 +20,9 @@ namespace Trident {
 			/// Returns the type of the image.
 			ImageType getType() const;
 
+			/// Returns the flags used when creating the image.
+			ImageFlags getFlags() const;
+
 			/// Returns the format of the image.
 			ImageFormat getFormat() const;
 
@@ -60,6 +63,7 @@ namespace Trident {
 			const Device* device;
 
 			ImageType type;
+			ImageFlags flags;
 			ImageFormat format;
 			Extent3D extent;
 			uint32 mipLevelCount;

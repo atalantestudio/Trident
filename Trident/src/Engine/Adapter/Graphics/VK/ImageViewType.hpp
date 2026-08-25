@@ -4,19 +4,21 @@
 #pragma once
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
+#include "Engine/API/Graphics/ImageViewType.hpp"
 
 namespace Trident::VK {
-	inline VkImageViewType getImageViewType(VkImageType vkImageType, uint32 layerCount) {
-		if (vkImageType == VK_IMAGE_TYPE_2D) {
-			if (layerCount > 1) {
-				return VK_IMAGE_VIEW_TYPE_2D_ARRAY;
-			}
+	inline VkImageViewType getImageViewType(ImageViewType imageViewType, bool array) {
+		static constexpr VkImageViewType IMAGE_VIEW_TYPES[] = {
+			VK_IMAGE_VIEW_TYPE_2D,
+			VK_IMAGE_VIEW_TYPE_CUBE,
+			VK_IMAGE_VIEW_TYPE_2D_ARRAY,
+			VK_IMAGE_VIEW_TYPE_CUBE_ARRAY,
+		};
 
-			return VK_IMAGE_VIEW_TYPE_2D;
-		}
+		ADAPTER_ASSERT(imageViewType < ImageViewType::count, "Invalid image view type.");
 
-		ADAPTER_ASSERT(false, "Unsupported image type.");
+		const uint32 index = static_cast<uint32>(imageViewType) + array * static_cast<uint32>(ImageViewType::count);
 
-		return VK_IMAGE_VIEW_TYPE_MAX_ENUM;
+		return IMAGE_VIEW_TYPES[index];
 	}
 }

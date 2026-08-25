@@ -10,6 +10,7 @@ namespace Trident {
 	ImageView::ImageView(const Device* device, Image* image, const ImageViewDescriptor& descriptor) :
 		device(device),
 		image(image),
+		type(descriptor.type),
 		mipLevelOffset(descriptor.mipLevelOffset),
 		mipLevelCount(descriptor.mipLevelCount),
 		layerOffset(descriptor.layerOffset),
@@ -22,6 +23,10 @@ namespace Trident {
 
 	Image* ImageView::getImage() {
 		return image;
+	}
+
+	ImageViewType ImageView::getType() const {
+		return type;
 	}
 
 	uint32 ImageView::getMipLevelOffset() const {

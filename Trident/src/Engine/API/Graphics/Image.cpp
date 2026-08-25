@@ -15,6 +15,7 @@ namespace Trident {
 	Image::Image(const Device* device, const ImageDescriptor& descriptor) :
 		device(device),
 		type(descriptor.type),
+		flags(descriptor.flags),
 		format(descriptor.format),
 		extent(descriptor.extent),
 		mipLevelCount(descriptor.mipLevelCount),
@@ -35,6 +36,10 @@ namespace Trident {
 
 	ImageType Image::getType() const {
 		return type;
+	}
+
+	ImageFlags Image::getFlags() const {
+		return flags;
 	}
 
 	ImageFormat Image::getFormat() const {
@@ -84,6 +89,25 @@ namespace Trident {
 
 				if (memorySuballocation.allocationIndex == max<uint32>()) {
 					VALIDATION_ERROR("The image is not allocated.");
+				}
+
+				if (descriptor.type >= ImageViewType::count) {
+					VALIDATION_ERROR("descriptor.type must be a valid ImageViewType value.");
+				}
+
+				if (descriptor.type == ImageViewType::TYPE_CUBE) {
+					if (!(flags & ImageFlags::CUBE_COMPATIBLE)) {
+						VALIDATION_ERROR("descriptor.type is TYPE_CUBE but the image was not created with the CUBE_COMPATIBLE flag.");
+					}
+					else {
+						if (descriptor.layerCount != 6) {
+							VALIDATION_ERROR("descriptor.layerCount must be 6 if descriptor.type is TYPE_CUBE.");
+						}
+					}
+				}
+
+				if (descriptor.type == ImageViewType::TYPE_CUBE && !(flags & ImageFlags::CUBE_COMPATIBLE)) {
+					VALIDATION_ERROR("descriptor.type is TYPE_CUBE but the image was not created with the CUBE_COMPATIBLE flag.");
 				}
 
 				if (descriptor.mipLevelOffset + descriptor.mipLevelCount > mipLevelCount) {

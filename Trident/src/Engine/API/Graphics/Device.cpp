@@ -365,6 +365,12 @@ namespace Trident {
 					VALIDATION_ERROR("descriptor.type must be a valid ImageType value.");
 				}
 
+				if (descriptor.flags & ImageFlags::CUBE_COMPATIBLE) {
+					if (descriptor.layerCount != 6) {
+						VALIDATION_ERROR("descriptor.layerCount must be 6 if the image has the CUBE_COMPATIBLE flag.");
+					}
+				}
+
 				if (descriptor.format >= ImageFormat::count) {
 					VALIDATION_ERROR("descriptor.format must be a valid ImageFormat value.");
 				}

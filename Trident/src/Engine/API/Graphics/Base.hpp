@@ -10,6 +10,7 @@ namespace Trident {
 	enum DeviceExtensionName : uint8;
 	enum class ImageLayout : uint8;
 	enum class ImageType : uint8;
+	enum class ImageViewType : uint8;
 	enum class MemoryProperty : uint8;
 	enum class PipelineStage : uint8;
 	enum class PresentStatus : uint8;
