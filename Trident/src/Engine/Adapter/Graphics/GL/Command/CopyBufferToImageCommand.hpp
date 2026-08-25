@@ -21,6 +21,7 @@ namespace Trident {
 
 			void execute() const final override {
 				const GLenum type = getType(destinationImage->getFormat());
+				const Extent3D extent = destinationImage->getExtent();
 
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, sourceBuffer->buffer);
 				glBindTexture(destinationImage->target, destinationImage->texture);
@@ -73,7 +74,7 @@ namespace Trident {
 								destinationImage->target,
 								copyRegion.imageMipLevel,
 								copyRegion.imageOffsetX,
-								copyRegion.imageOffsetY + copyRegion.imageLayerOffset,
+								copyRegion.imageOffsetY + copyRegion.imageLayerOffset * extent.width * extent.height,
 								copyRegion.imageExtent.width,
 								copyRegion.imageExtent.height * copyRegion.imageLayerCount,
 								destinationImage->format,
@@ -90,7 +91,7 @@ namespace Trident {
 								copyRegion.imageMipLevel,
 								copyRegion.imageOffsetX,
 								copyRegion.imageOffsetY,
-								copyRegion.imageOffsetZ + copyRegion.imageLayerOffset,
+								copyRegion.imageOffsetZ + copyRegion.imageLayerOffset * extent.width * extent.height * extent.depth,
 								copyRegion.imageExtent.width,
 								copyRegion.imageExtent.height,
 								copyRegion.imageExtent.depth * copyRegion.imageLayerCount,

@@ -70,7 +70,7 @@ namespace Trident {
 
 								const GLuint unit = descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex;
 
-								// TODO: Use correct access.
+								// TODO(graphics/gl/command-bind-descriptor-sets/storage-image): Use correct access.
 								constexpr GLenum access = GL_READ_WRITE;
 
 								GLenum format = static_cast<const GL::Image*>(imageView->getImage())->internalFormat;
@@ -80,7 +80,7 @@ namespace Trident {
 								}
 
 								#if OPENGL_VERSION >= OPENGL_VERSION_4_2
-									glBindImageTexture(unit, imageView->texture, imageView->getMipLevelOffset(), GL_FALSE, imageView->getLayerOffset(), access, format);
+									glBindImageTexture(unit, imageView->texture, 0, GL_TRUE, 0, access, format);
 								#else
 									ENGINE_ERROR_UNSUPPORTED();
 								#endif
@@ -100,7 +100,7 @@ namespace Trident {
 								}
 
 								glActiveTexture(GL_TEXTURE0 + descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex);
-								glBindTexture(static_cast<const GL::Image*>(imageView->getImage())->target, imageView->texture);
+								glBindTexture(imageView->target, imageView->texture);
 
 								#if OPENGL_VERSION >= OPENGL_VERSION_3_3
 									if (descriptorImage.sampler != nullptr) {

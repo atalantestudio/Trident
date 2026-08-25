@@ -32,17 +32,17 @@ namespace Trident {
 		imageViewCreateInfo.pNext = nullptr;
 		imageViewCreateInfo.flags = 0;
 		imageViewCreateInfo.image = _image->image;
-		imageViewCreateInfo.viewType = getImageViewType(descriptor.type, image->getLayerCount() > 1);
+		imageViewCreateInfo.viewType = getImageViewType(descriptor.type, descriptor.layerCount > 1);
 		imageViewCreateInfo.format = _image->format;
 		imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.subresourceRange.aspectMask = _image->aspectFlags;
-		imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
-		imageViewCreateInfo.subresourceRange.levelCount = image->getMipLevelCount();
-		imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
-		imageViewCreateInfo.subresourceRange.layerCount = image->getLayerCount();
+		imageViewCreateInfo.subresourceRange.baseMipLevel = descriptor.mipLevelOffset;
+		imageViewCreateInfo.subresourceRange.levelCount = descriptor.mipLevelCount;
+		imageViewCreateInfo.subresourceRange.baseArrayLayer = descriptor.layerOffset;
+		imageViewCreateInfo.subresourceRange.layerCount = descriptor.layerCount;
 
 		result = _device->vkCreateImageView(_device->device, &imageViewCreateInfo, nullptr, &imageView->imageView);
 

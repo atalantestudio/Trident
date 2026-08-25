@@ -12,6 +12,7 @@ namespace Trident {
 
 		public:
 			GLuint texture;
+			GLenum target;
 	};
 
 	namespace GL {
