@@ -29,6 +29,13 @@ Trident is a 2D/3D game engine developed by Atalante Studio, intended for techni
 - Many GUI samples
 - 2D physics simulation
 - 3D Forward renderer
+	- FPS camera
+	- Skybox
+	- Lightmapping for static geometry
+	- PBR pipeline
+	- Point lights
+	- Directional shadow mapping
+	- MSAA
 - 3D Visibility renderer
 
 
