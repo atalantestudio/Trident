@@ -22,7 +22,7 @@ namespace Trident {
 
 		glGenTextures(1, &imageView->texture);
 
-		imageView->target = getImageViewType(_image->target, _image->layerCount, descriptor.layerCount);
+		imageView->target = getImageViewType(_image->target, descriptor.type, _image->flags, descriptor.layerCount);
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_3
 			glTextureView(imageView->texture, imageView->target, _image->texture, _image->internalFormat, descriptor.mipLevelOffset, descriptor.mipLevelCount, descriptor.layerOffset, descriptor.layerCount);

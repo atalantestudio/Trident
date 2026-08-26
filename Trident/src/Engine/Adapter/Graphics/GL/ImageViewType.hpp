@@ -3,28 +3,27 @@
 
 #pragma once
 
-#include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Graphics/ImageType.hpp"
+#include "Engine/API/Graphics/ImageFlags.hpp"
+#include "Engine/API/Graphics/ImageViewType.hpp"
 
 namespace Trident::GL {
-	inline GLenum getImageViewType(GLenum target, uint32 layerCount, uint32 viewLayerCount) {
-		if (layerCount > 1 && viewLayerCount == 1) {
-			// Demote to a non-array target.
-			switch (target) {
-				case GL_TEXTURE_2D_MULTISAMPLE_ARRAY: {
-					return GL_TEXTURE_2D_MULTISAMPLE;
-				}
-				case GL_TEXTURE_2D_ARRAY: {
-					return GL_TEXTURE_2D;
-				}
-				default: {
-					ADAPTER_ASSERT(false, "Unsupported image type.");
-
-					break;
-				}
+	inline GLenum getImageViewType(GLenum target, ImageViewType type, ImageFlags flags, uint32 viewLayerCount) {
+		if (type == ImageViewType::TYPE_CUBE) {
+			if (viewLayerCount > 6) {
+				return GL_TEXTURE_CUBE_MAP_ARRAY;
 			}
 
-			return GL_NONE;
+			return GL_TEXTURE_CUBE_MAP;
+		}
+
+		if (viewLayerCount == 1) {
+			if (target == GL_TEXTURE_2D_MULTISAMPLE_ARRAY) {
+				return GL_TEXTURE_2D_MULTISAMPLE;
+			}
+
+			if (target == GL_TEXTURE_2D_ARRAY) {
+				return GL_TEXTURE_2D;
+			}
 		}
 
 		return target;

@@ -194,6 +194,15 @@ namespace Trident {
 
 		if (image->getLayerCount() > 1) {
 			shaderResourceViewDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
+
+			if (image->getFlags() & ImageFlags::CUBE_COMPATIBLE) {
+				shaderResourceViewDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
+
+				if (image->getLayerCount() > 6) {
+					shaderResourceViewDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBEARRAY;
+				}
+			}
+
 			shaderResourceViewDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 			shaderResourceViewDescriptor.Texture2DArray.MostDetailedMip = descriptorImage.imageView->getMipLevelOffset();
 			shaderResourceViewDescriptor.Texture2DArray.MipLevels = descriptorImage.imageView->getMipLevelCount();

@@ -6,28 +6,22 @@
 #include "Engine/API/Graphics/ImageType.hpp"
 
 namespace Trident::GL {
-	inline GLenum getImageType(ImageType imageType, uint8 sampleCount, uint32 layerCount) {
-		if (imageType == ImageType::TYPE_2D) {
-			if (sampleCount > 1) {
-				return GL_TEXTURE_2D_MULTISAMPLE;
-
-				if (layerCount > 1) {
-					// TODO: Implement multisampled 2D texture arrays.
-					ENGINE_ERROR_UNIMPLEMENTED();
-
-					return GL_TEXTURE_2D_MULTISAMPLE_ARRAY;
-				}
-			}
+	inline GLenum getImageType(ImageType type, uint8 sampleCount, uint32 layerCount) {
+		if (sampleCount > 1) {
+			return GL_TEXTURE_2D_MULTISAMPLE;
 
 			if (layerCount > 1) {
-				return GL_TEXTURE_2D_ARRAY;
-			}
+				// TODO(graphics/gl/image): Implement multisampled 2D texture arrays.
+				ENGINE_ERROR_UNIMPLEMENTED();
 
-			return GL_TEXTURE_2D;
+				return GL_TEXTURE_2D_MULTISAMPLE_ARRAY;
+			}
 		}
 
-		ENGINE_ERROR_UNSUPPORTED();
+		if (layerCount > 1) {
+			return GL_TEXTURE_2D_ARRAY;
+		}
 
-		return 0;
+		return GL_TEXTURE_2D;
 	}
 }
