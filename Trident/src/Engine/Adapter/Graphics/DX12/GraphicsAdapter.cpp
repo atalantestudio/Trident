@@ -7,6 +7,7 @@
 #include "Engine/Adapter/Graphics/DX12/CommandEncoder.hpp"
 #include "Engine/Adapter/Graphics/DX12/ComputePipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
+#include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/BLASTriangleGeometry.hpp"
 #include "Engine/Adapter/Graphics/DX12/Fence.hpp"
 #include "Engine/Adapter/Graphics/DX12/GraphicsAdapter.hpp"
 #include "Engine/Adapter/Graphics/DX12/GraphicsPipeline.hpp"
@@ -140,5 +141,7 @@ namespace Trident::DX12 {
 		adapter->updateDescriptorSetsImplementation = DX12::updateDescriptorSets;
 		adapter->updateSwapchainImplementation = DX12::recreateSwapchain;
 		adapter->waitForFenceImplementation = DX12::waitForFence;
+
+		adapter->testCreateBLASTriangleGeometryImplementation = DX12::testCreateBLASTriangleGeometryImplementation;
 	}
 }

@@ -136,8 +136,7 @@ namespace Trident {
 			UpdateSwapchainImplementation updateSwapchainImplementation;
 			WaitForFenceImplementation waitForFenceImplementation;
 
-			// TODO(test/graphics/device/extension)
-			Test_EXT_FooImplementation test_EXT_fooImplementation;
+			TestCreateBLASTriangleGeometryImplementation testCreateBLASTriangleGeometryImplementation;
 
 		private:
 			GraphicsAPI api;

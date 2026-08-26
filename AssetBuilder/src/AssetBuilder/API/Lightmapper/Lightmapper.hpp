@@ -8,7 +8,7 @@
 #include "AssetBuilder/API/Scene/Scene3D.hpp"
 
 #include "Engine/API/Graphics/Descriptor/ShaderModuleDescriptor.hpp"
-#include "Engine/API/Graphics/DeviceExtension/EXT_hardware_ray_tracing.hpp"
+#include "Engine/API/Graphics/DeviceExtension/EXT_hardware_ray_tracing/EXT_hardware_ray_tracing.hpp"
 #include "Engine/API/Graphics/PhysicalDevice.hpp"
 #include "Engine/Filesystem/Asset/ImageAsset.hpp"
 

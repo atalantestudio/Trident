@@ -35,6 +35,7 @@ namespace Trident {
 		});
 		physicalDevice = instance->selectPhysicalDevice(false);
 		device = physicalDevice->createDevice<EXT_hardware_ray_tracing>();
+
 		gBufferRenderPass = createGBufferRenderPass();
 		dilationRenderPass = createDilationRenderPass();
 
@@ -158,6 +159,41 @@ namespace Trident {
 
 		context.vertexBuffer = createVertexBuffer(vertexCount);
 		context.indexBuffer = createIndexBuffer(indexCount);
+
+		// TODO(asset-builder/lightmapper/tlas)
+		{
+			const BLASTriangleGeometryDescriptor blasTriangleGeometryDescriptor = {
+				.vertexBuffer = context.vertexBuffer,
+				.indexBuffer = context.indexBuffer,
+			};
+
+			device->testCreateBLASTriangleGeometry(blasTriangleGeometryDescriptor);
+
+			/* TODO(asset-builder/lightmapper/tlas)
+				For each geometry
+					Create VkAccelerationStructureGeometryKHR
+					Create VkAccelerationStructureBuildRangeInfoKHR
+					Create corresponding BLAS
+
+				For each instance
+					Create VkAccelerationStructureInstanceKHR
+
+				Create TLAS instance buffer
+				Copy instances to TLAS instance buffer
+
+				Create VkAccelerationStructureGeometryInstancesDataKHR
+				Create TLAS
+
+
+
+				On release:
+					For each BLAS
+						Destroy BLAS
+
+					Destroy TLAS
+			*/
+		}
+
 		context.materialBuffer = createMaterialBuffer(materialCount);
 		context.emissiveTriangleIndexBuffer = createEmissiveTriangleIndexBuffer(emissiveTriangleIndexCount);
 		context.lightmapAtlasStagingBuffer = device->createDynamicBuffer({
