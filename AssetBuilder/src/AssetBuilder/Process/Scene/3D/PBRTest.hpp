@@ -15,7 +15,7 @@ namespace Trident {
 
 			BuildScene3D createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				SceneBuilder builder({
-					.flags = Scene3DBuildFlags::LIGHTMAP_SUN_CONTRIBUTION,
+					.flags = {},
 					.skyColor = {0.0f, 0.0f, 0.0f},
 					.sunDirection = {1.0f, 1.0f, 1.0f},
 					.sunColor = {1.0f, 1.0f, 1.0f},
@@ -38,7 +38,7 @@ namespace Trident {
 						builder.placeRigidBody({
 							.geometryIndex = geometry,
 							.material = material,
-							.position = {(columnIndex - (columnCount / 2)) * 32.0f, (rowIndex - (rowCount / 2)) * 32.0f + 64.0f, 128.0f},
+							.position = {(columnIndex - (columnCount / 2)) * 32.0f, (rowIndex - (rowCount / 2)) * 32.0f + 64.0f, 192.0f},
 							.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
 							.uniformScale = 26.0f,
 							.mass = max<float32>(),

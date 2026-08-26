@@ -6,10 +6,11 @@
 precision highp float;
 
 in Interstage {
-	layout(location = 0) vec3 normal;
-	layout(location = 1) vec2 textureCoordinate;
-	layout(location = 2) vec2 lightmapCoordinate;
-	layout(location = 3) vec4 lightSpacePosition;
+	layout(location = 0) vec3 surface;
+	layout(location = 1) mat3x3 tbn;
+	layout(location = 4) vec2 textureCoordinate;
+	layout(location = 5) vec4 lightSpacePosition;
+	layout(location = 6) vec2 lightmapCoordinate;
 } interstage;
 
 layout(set = 0, binding = 0) uniform readonly Camera {
@@ -21,10 +22,11 @@ layout(set = 0, binding = 0) uniform readonly Camera {
 	vec3 sunColor;
 } camera;
 
-layout(set = 0, binding = 1) uniform sampler2D lightmapAtlasSampler;
 layout(set = 0, binding = 3) uniform sampler2D directionalShadowMapSampler;
 
-layout(set = 1, binding = 0) uniform sampler2D diffuseSampler;
+layout(set = 1, binding = 0) uniform sampler2D lightmapAtlasSampler;
+
+layout(set = 2, binding = 0) uniform sampler2D diffuseSampler;
 
 layout(location = 0) out vec4 fragment;
 
@@ -74,51 +76,24 @@ vec4 sampleBicubic(sampler2D textureSampler, vec2 coordinate) {
 }
 
 float calculateShadow(vec4 lightSpacePosition) {
-	// const float texelSize = 1.0 / 1024.0;
-
 	vec3 projectedPosition = lightSpacePosition.xyz / lightSpacePosition.w;
 
 	if (projectedPosition.z < 0.0) {
 		return 0.0;
 	}
 
+	const vec3 sunDirection = normalize(vec3(1.0, 1.0, 1.0));
+
 	vec2 coordinate = projectedPosition.xy * 0.5 + 0.5;
-
-	// TODO(forward/directional-shadow-map): Find a better bias.
-	float depthBias = 0.0005;
-	// float depthBias = max(0.05 * (1.0 - dot(interstage.normal, normalize(vec3(1.0,1.0, 1.0)))), 0.005);
-
+	float depthBias = 0.0005 * dot(interstage.tbn[2], sunDirection);
 	float depth = projectedPosition.z;
-
-	// TODO(forward/directional-shadow-map): Fix.
-	/* float inShadow = 0.0;
-	ivec2 offset = ivec2(-1, -1);
-
-	while (offset.y <= 1) {
-		offset.x = -1;
-
-		while (offset.x <= 1) {
-			vec2 c = coordinate + vec2(offset) * texelSize;
-			c.y = 1.0 - c.y;
-
-			float closestDepth = texture(directionalShadowMapSampler, c).r;
-
-			inShadow += float(depth + depthBias <= closestDepth);
-
-			offset.x += 1;
-		}
-
-		offset.y += 1;
-	}
-
-	return inShadow / 9.0; */
 
 	// TODO(forward/directional-shadow-map): Only for Vulkan.
 	coordinate.y = 1.0 - coordinate.y;
 
 	float closestDepth = texture(directionalShadowMapSampler, coordinate).r;
 
-	return float(depth + depthBias <= closestDepth);
+	return float(depth + depthBias < closestDepth);
 }
 
 void main() {

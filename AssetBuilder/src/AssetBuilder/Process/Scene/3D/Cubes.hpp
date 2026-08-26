@@ -23,10 +23,10 @@ namespace Trident {
 				});
 
 				const uint32 boxGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("3d_unit_box"));
-				// const uint32 boxGeometry2 = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("3d_unit_box_st"));
+				const uint32 boxGeometry2 = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("3d_unit_box_st"));
 
 				const MaterialReference lightmappedDefaultMaterial = builder.loadStaticMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
-				// const MaterialReference pbrDefaultMaterial = builder.loadDynamicMaterial(assetLibrary->getAsset<MaterialAsset>("pbr_default"));
+				const MaterialReference pbrDefaultMaterial = builder.loadDynamicMaterial(assetLibrary->getAsset<MaterialAsset>("pbr_default"));
 
 				builder.placeSurface(
 					{
@@ -54,7 +54,7 @@ namespace Trident {
 
 				uint32 boxIndex = 0;
 
-				while (boxIndex < 5) {
+				while (boxIndex < 4) {
 					builder.placeStaticProp({
 						.geometryIndex = boxGeometry,
 						.material = lightmappedDefaultMaterial,
@@ -73,7 +73,7 @@ namespace Trident {
 					boxIndex += 1;
 				}
 
-				/* builder.placeRigidBody({
+				builder.placeRigidBody({
 					.geometryIndex = boxGeometry2,
 					.material = pbrDefaultMaterial,
 					.position = {(static_cast<sint32>(boxIndex) - 2) * spacing + positionBias, 16.0f, 128.0f},
@@ -84,13 +84,13 @@ namespace Trident {
 					.inertiaScale = {1.0f, 1.0f, 1.0f},
 					.friction = 0.0f,
 					.restitution = 0.0f,
-				}); */
+				});
 
-				/* builder.placePointLight({
+				builder.placePointLight({
 					.color = {1.0f, 1.0f, 1.0f},
 					.intensity = 300.0f,
 					.position = {0.0f, 256.0f, 0.0f},
-				}); */
+				});
 
 				return builder.build();
 			}

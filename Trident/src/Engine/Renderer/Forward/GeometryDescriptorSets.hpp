@@ -11,8 +11,8 @@ namespace Trident {
 
 		const BaseBufferView descriptorBufferViews[] = {
 			cameraBuffer->createView<ForwardCamera>(0, cameraBuffer->getSize()),
-			pointLightBuffer->createView<PointLight>(0, pointLightBuffer->getSize()),
 			directionalLightBuffer->createView<DirectionalLight>(0, directionalLightBuffer->getSize()),
+			pointLightBuffer->createView<PointLight>(0, pointLightBuffer->getSize()),
 		};
 
 		const DescriptorImage descriptorImages[] = {
@@ -24,11 +24,6 @@ namespace Trident {
 				.sampler = directionalShadowMapSampler,
 			},
 			{
-				.imageView = lightmapAtlasImageView,
-				.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-				.sampler = lightmapAtlasSampler,
-			},
-			{
 				.imageView = directionalShadowMapImageView,
 				.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
 				.sampler = directionalShadowMapSampler,
@@ -36,60 +31,72 @@ namespace Trident {
 		};
 
 		const WriteDescriptorSet writeDescriptorSets[] = {
+			// Camera
 			{
 				.descriptorSet = skyBoxDescriptorSet,
 				.bindingIndex = 0,
 				.descriptorBufferViews = descriptorBufferViews[0],
 			},
+
+			// Skybox
 			{
 				.descriptorSet = skyBoxDescriptorSet,
 				.bindingIndex = 1,
 				.descriptorImages = descriptorImages[0],
 			},
+
+			// Camera
 			{
-				.descriptorSet = dynamicDescriptorSet,
+				.descriptorSet = sceneDescriptorSet,
 				.bindingIndex = 0,
 				.descriptorBufferViews = descriptorBufferViews[0],
 			},
+
+			// Directional light
 			{
-				.descriptorSet = dynamicDescriptorSet,
+				.descriptorSet = sceneDescriptorSet,
 				.bindingIndex = 1,
 				.descriptorBufferViews = descriptorBufferViews[1],
 			},
+
+			// Point light
 			{
-				.descriptorSet = directionalShadowMapDescriptorSet,
-				.bindingIndex = 0,
-				.descriptorBufferViews = descriptorBufferViews[2],
-			},
-			{
-				.descriptorSet = staticGeometryDescriptorSet,
-				.bindingIndex = 0,
-				.descriptorBufferViews = descriptorBufferViews[0],
-			},
-			{
-				.descriptorSet = staticGeometryDescriptorSet,
+				.descriptorSet = sceneDescriptorSet,
 				.bindingIndex = 2,
 				.descriptorBufferViews = descriptorBufferViews[2],
 			},
+
+			// Directional shadow map
 			{
-				.descriptorSet = staticGeometryDescriptorSet,
+				.descriptorSet = sceneDescriptorSet,
 				.bindingIndex = 3,
-				.descriptorImages = descriptorImages[2],
+				.descriptorImages = descriptorImages[1],
+			},
+
+			// Point light
+			{
+				.descriptorSet = directionalShadowMapDescriptorSet,
+				.bindingIndex = 0,
+				.descriptorBufferViews = descriptorBufferViews[1],
 			},
 		};
 
 		device->updateDescriptorSets(writeDescriptorSets);
 
 		if (scene->getAsset()->lightmapAtlasImageAsset != nullptr) {
-			const WriteDescriptorSet writeDescriptorSets[] = {
-				{
-					.descriptorSet = staticGeometryDescriptorSet,
-					.bindingIndex = 1,
-					.descriptorImages = descriptorImages[1],
-				},
+			const DescriptorImage lightmapAtlasDescriptorImage = {
+				.imageView = lightmapAtlasImageView,
+				.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+				.sampler = lightmapAtlasSampler,
 			};
 
-			device->updateDescriptorSets(writeDescriptorSets);
+			const WriteDescriptorSet lightmapAtlasWriteDescriptorSet = {
+				.descriptorSet = lightmapAtlasDescriptorSet,
+				.bindingIndex = 0,
+				.descriptorImages = lightmapAtlasDescriptorImage,
+			};
+
+			device->updateDescriptorSets(lightmapAtlasWriteDescriptorSet);
 		}
 	}
 }

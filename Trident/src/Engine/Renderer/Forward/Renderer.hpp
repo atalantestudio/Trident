@@ -37,14 +37,14 @@ namespace Trident {
 				renderPass = createRenderPass();
 				directionalShadowMapRenderPass = createDirectionalShadowMapRenderPass();
 				skyBoxDescriptorSetLayout = createSkyBoxDescriptorSetLayout();
-				staticGeometryDescriptorSetLayout = createStaticGeometryDescriptorSetLayout();
-				dynamicDescriptorSetLayout = createDynamicDescriptorSetLayout();
+				sceneDescriptorSetLayout = createSceneDescriptorSetLayout();
+				lightmapAtlasDescriptorSetLayout = createLightmapAtlasDescriptorSetLayout();
 				directionalShadowMapDescriptorSetLayout = createDirectionalShadowMapDescriptorSetLayout();
 
 				const ref<DescriptorSetLayout> descriptorSetLayouts[] = {
 					skyBoxDescriptorSetLayout,
-					staticGeometryDescriptorSetLayout,
-					dynamicDescriptorSetLayout,
+					sceneDescriptorSetLayout,
+					lightmapAtlasDescriptorSetLayout,
 					directionalShadowMapDescriptorSetLayout,
 				};
 
@@ -52,8 +52,8 @@ namespace Trident {
 				sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(descriptorSetLayouts);
 
 				skyBoxDescriptorSet = descriptorSets[0];
-				staticGeometryDescriptorSet = descriptorSets[1];
-				dynamicDescriptorSet = descriptorSets[2];
+				sceneDescriptorSet = descriptorSets[1];
+				lightmapAtlasDescriptorSet = descriptorSets[2];
 				directionalShadowMapDescriptorSet = descriptorSets[3];
 
 				skyBoxPipelineLayout = createSkyBoxPipelineLayout();
@@ -347,8 +347,8 @@ namespace Trident {
 			void createDirectionalShadowMapFramebuffers();
 
 			ref<DescriptorSetLayout> createSkyBoxDescriptorSetLayout() const;
-			ref<DescriptorSetLayout> createStaticGeometryDescriptorSetLayout() const;
-			ref<DescriptorSetLayout> createDynamicDescriptorSetLayout() const;
+			ref<DescriptorSetLayout> createSceneDescriptorSetLayout() const;
+			ref<DescriptorSetLayout> createLightmapAtlasDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createDirectionalShadowMapDescriptorSetLayout() const;
 
 			ref<PipelineLayout> createSkyBoxPipelineLayout() const;
@@ -424,13 +424,13 @@ namespace Trident {
 			sequence<ref<Framebuffer>> directionalShadowMapFramebuffers;
 
 			ref<DescriptorSetLayout> skyBoxDescriptorSetLayout;
-			ref<DescriptorSetLayout> staticGeometryDescriptorSetLayout;
-			ref<DescriptorSetLayout> dynamicDescriptorSetLayout;
+			ref<DescriptorSetLayout> sceneDescriptorSetLayout;
+			ref<DescriptorSetLayout> lightmapAtlasDescriptorSetLayout;
 			ref<DescriptorSetLayout> directionalShadowMapDescriptorSetLayout;
 
 			ref<DescriptorSet> skyBoxDescriptorSet;
-			ref<DescriptorSet> staticGeometryDescriptorSet;
-			ref<DescriptorSet> dynamicDescriptorSet;
+			ref<DescriptorSet> sceneDescriptorSet;
+			ref<DescriptorSet> lightmapAtlasDescriptorSet;
 			sequence<ref<DescriptorSet>> materialDescriptorSets;
 			ref<DescriptorSet> directionalShadowMapDescriptorSet;
 

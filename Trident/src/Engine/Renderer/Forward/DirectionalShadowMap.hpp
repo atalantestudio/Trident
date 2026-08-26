@@ -61,7 +61,7 @@ namespace Trident {
 
 	ref<DescriptorSetLayout> ForwardRenderer::createDirectionalShadowMapDescriptorSetLayout() const {
 		const DescriptorSetLayoutBinding bindings[] = {
-			// Directional light view
+			// Directional light
 			{
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
 				.descriptorCount = 1,

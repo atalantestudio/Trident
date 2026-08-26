@@ -12,10 +12,11 @@ struct Camera {
 
 struct Interstage {
 	float4 position : SV_Position;
-	float3 normal : VERTEX_OUTPUT_ATTRIBUTE1;
-	float2 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE2;
-	float2 lightmapCoordinate : VERTEX_OUTPUT_ATTRIBUTE3;
-	float4 lightSpacePosition : VERTEX_OUTPUT_ATTRIBUTE4;
+	float3 surface : VERTEX_OUTPUT_ATTRIBUTE1;
+	float3 normal : VERTEX_OUTPUT_ATTRIBUTE2;
+	float2 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE3;
+	float2 lightmapCoordinate : VERTEX_OUTPUT_ATTRIBUTE4;
+	float4 lightSpacePosition : VERTEX_OUTPUT_ATTRIBUTE5;
 };
 
 struct FragmentOutput {
@@ -45,9 +46,10 @@ float calculateShadow(float4 lightSpacePosition) {
 		float2 coordinate = projectedPosition.xy * 0.5 + 0.5;
 		coordinate.y = 1.0 - coordinate.y;
 
-		float depthBias = 0.0005;
-		float depth = projectedPosition.z;
+		const float3 sunDirection = normalize(float3(1.0, 1.0, 1.0));
 
+		float depthBias = 0.0005 * dot(interstage.tbn[2], sunDirection);
+		float depth = projectedPosition.z;
 		float closestDepth = directionalShadowMapTexture.Sample(directionalShadowMapSamplerState, coordinate);
 
 		return depth + depthBias <= closestDepth;

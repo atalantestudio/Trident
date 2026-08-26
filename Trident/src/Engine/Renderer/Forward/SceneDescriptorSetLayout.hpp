@@ -6,7 +6,7 @@
 #include "Engine/Renderer/Forward/Renderer.hpp"
 
 namespace Trident {
-	ref<DescriptorSetLayout> ForwardRenderer::createStaticGeometryDescriptorSetLayout() const {
+	ref<DescriptorSetLayout> ForwardRenderer::createSceneDescriptorSetLayout() const {
 		const DescriptorSetLayoutBinding bindings[] = {
 			// Camera
 			{
@@ -15,18 +15,19 @@ namespace Trident {
 				.stageFlags = ShaderStage::VERTEX | ShaderStage::FRAGMENT,
 			},
 
-			// Lightmap atlas
-			{
-				.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
-				.descriptorCount = 1,
-				.stageFlags = ShaderStage::FRAGMENT,
-			},
-
 			// Directional light
+			// TODO(forward): Merge with ForwardCamera.
 			{
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
 				.descriptorCount = 1,
 				.stageFlags = ShaderStage::VERTEX,
+			},
+
+			// Point light
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.stageFlags = ShaderStage::FRAGMENT,
 			},
 
 			// Directional shadow map
@@ -40,7 +41,7 @@ namespace Trident {
 		return createDescriptorSetLayout({
 			.bindings = bindings,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Static geometry",
+				.name = "Scene",
 			#endif
 		});
 	}

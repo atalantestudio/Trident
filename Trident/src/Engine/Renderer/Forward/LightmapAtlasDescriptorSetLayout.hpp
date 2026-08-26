@@ -6,18 +6,11 @@
 #include "Engine/Renderer/Forward/Renderer.hpp"
 
 namespace Trident {
-	ref<DescriptorSetLayout> ForwardRenderer::createDynamicDescriptorSetLayout() const {
+	ref<DescriptorSetLayout> ForwardRenderer::createLightmapAtlasDescriptorSetLayout() const {
 		const DescriptorSetLayoutBinding bindings[] = {
-			// Camera
+			// Lightmap atlas
 			{
-				.descriptorType = DescriptorType::UNIFORM_BUFFER,
-				.descriptorCount = 1,
-				.stageFlags = ShaderStage::VERTEX | ShaderStage::FRAGMENT,
-			},
-
-			// Point light
-			{
-				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
 				.descriptorCount = 1,
 				.stageFlags = ShaderStage::FRAGMENT,
 			},
@@ -26,7 +19,7 @@ namespace Trident {
 		return createDescriptorSetLayout({
 			.bindings = bindings,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Dynamic geometry",
+				.name = "Lightmap atlas",
 			#endif
 		});
 	}

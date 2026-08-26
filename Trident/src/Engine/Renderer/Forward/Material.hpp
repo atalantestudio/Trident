@@ -41,7 +41,7 @@ namespace Trident {
 
 		writeDescriptorSetCount += materialShader.materialRange.count * bindingRange.count;
 
-		pipelineLayoutDescriptor.descriptorSetLayouts[1] = descriptorSetLayout;
+		pipelineLayoutDescriptor.descriptorSetLayouts[pipelineLayoutDescriptor.descriptorSetLayouts.count() - 1] = descriptorSetLayout;
 
 		#if defined(DEBUG_OBJECT_NAME)
 			pipelineLayoutDescriptor.name = materialName;
@@ -122,7 +122,7 @@ namespace Trident {
 		// Create static material objects.
 		{
 			PipelineLayoutDescriptor materialPipelineLayoutDescriptor = {
-				.descriptorSetLayouts = {staticGeometryDescriptorSetLayout, nullptr},
+				.descriptorSetLayouts = {sceneDescriptorSetLayout, lightmapAtlasDescriptorSetLayout, nullptr},
 			};
 
 			VertexInputBinding vertexInputBindings[3] = {
@@ -144,7 +144,7 @@ namespace Trident {
 		// Create dynamic material objects.
 		{
 			PipelineLayoutDescriptor materialPipelineLayoutDescriptor = {
-				.descriptorSetLayouts = {dynamicDescriptorSetLayout, nullptr},
+				.descriptorSetLayouts = {sceneDescriptorSetLayout, nullptr},
 			};
 
 			VertexInputBinding vertexInputBindings[2] = {

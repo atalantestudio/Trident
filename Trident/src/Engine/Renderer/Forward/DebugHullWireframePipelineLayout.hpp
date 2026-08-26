@@ -8,7 +8,7 @@
 namespace Trident {
 	ref<PipelineLayout> ForwardRenderer::createDebugHullWireframePipelineLayout() const {
 		return createPipelineLayout({
-			.descriptorSetLayouts = {dynamicDescriptorSetLayout},
+			.descriptorSetLayouts = {sceneDescriptorSetLayout},
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Debug hull wireframe",
 			#endif

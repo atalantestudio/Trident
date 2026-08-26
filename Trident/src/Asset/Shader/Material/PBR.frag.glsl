@@ -13,29 +13,34 @@ struct PointLight {
 
 in Interstage {
 	layout(location = 0) vec3 surface;
-	layout(location = 1) vec2 textureCoordinate;
-	layout(location = 2) mat3x3 tbn;
-	layout(location = 5) flat uint instanceIndex;
+	layout(location = 1) mat3x3 tbn;
+	layout(location = 4) vec2 textureCoordinate;
+	layout(location = 5) vec4 lightSpacePosition;
+	layout(location = 6) flat uint instanceIndex;
 } interstage;
-
-const float PI = radians(180.0);
 
 layout(set = 0, binding = 0) uniform readonly Camera {
 	mat4x4 projectionView;
 	vec3 position;
 	uint pointLightCount;
 	vec3 ambientColor;
+	uint _0;
+	vec3 sunColor;
 } camera;
 
-layout(set = 0, binding = 1) buffer readonly PointLightBuffer {
+layout(set = 0, binding = 2) buffer readonly PointLightBuffer {
 	PointLight pointLights[];
 };
+
+layout(set = 0, binding = 3) uniform sampler2D directionalShadowMapSampler;
 
 layout(set = 1, binding = 0) uniform sampler2D armTexture;
 layout(set = 1, binding = 1) uniform sampler2D diffuseTexture;
 layout(set = 1, binding = 2) uniform sampler2D normalTexture;
 
 layout(location = 0) out vec4 fragment;
+
+const float PI = radians(180.0);
 
 float TrowbridgeReitzGGX(vec3 normal, vec3 halfway, float roughness) {
 	float a = roughness * roughness;
@@ -74,20 +79,42 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0) {
 	return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
+float calculateShadow(vec4 lightSpacePosition) {
+	vec3 projectedPosition = lightSpacePosition.xyz / lightSpacePosition.w;
+
+	if (projectedPosition.z < 0.0) {
+		return 0.0;
+	}
+
+	const vec3 sunDirection = normalize(vec3(1.0, 1.0, 1.0));
+
+	vec2 coordinate = projectedPosition.xy * 0.5 + 0.5;
+	float depthBias = 0.0005 * dot(interstage.tbn[2], sunDirection);
+	float depth = projectedPosition.z;
+
+	// TODO(forward/directional-shadow-map): Only for Vulkan.
+	coordinate.y = 1.0 - coordinate.y;
+
+	float closestDepth = texture(directionalShadowMapSampler, coordinate).r;
+
+	return float(depth + depthBias <= closestDepth);
+}
+
 void main() {
+	float inShadow = calculateShadow(interstage.lightSpacePosition);
+
 	vec3 x = camera.position;
 	vec3 wo = normalize(camera.position - interstage.surface);
 
-	// vec3 arm = texture(armTexture, interstage.textureCoordinate).rgb;
-	float ao = 1.0;
-	float roughness = texture(normalTexture, interstage.textureCoordinate).r;
-	float metallic = texture(armTexture, interstage.textureCoordinate).r;
+	vec3 arm = texture(armTexture, interstage.textureCoordinate).rgb;
+	float ao = arm.r;
+	float roughness = arm.g;
+	float metallic = arm.b;
 
 	// TODO(pbr): Convert the albedo map to linear space while building?
 	vec3 c = pow(texture(diffuseTexture, interstage.textureCoordinate).rgb, vec3(2.2));
 
-	// vec3 n = normalize(interstage.tbn * (texture(normalTexture, interstage.textureCoordinate).xyz * 2.0 - 1.0));
-	vec3 n = normalize(interstage.tbn * vec3(0.0, 0.0, 1.0));
+	vec3 n = normalize(interstage.tbn * (texture(normalTexture, interstage.textureCoordinate).xyz * 2.0 - 1.0));
 
 	vec3 F0 = mix(vec3(0.04, 0.04, 0.04), c, metallic);
 
@@ -117,8 +144,7 @@ void main() {
 
 	vec3 Lo = Le + Lr;
 
-	fragment.rgb = camera.ambientColor * c * ao + Lo;
-	fragment.rgb /= fragment.rgb + vec3(1.0);
+	fragment.rgb = camera.ambientColor * c * ao * inShadow + c * camera.sunColor * (1.0 - inShadow) + Lo;
 	fragment.rgb = pow(fragment.rgb, vec3(1.0 / 2.2));
 	fragment.a = 1.0;
 }

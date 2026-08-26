@@ -4,22 +4,22 @@
 #include "pch.hpp"
 
 #include "Engine/Renderer/Forward/ColorImage.hpp"
-#include "Engine/Renderer/Forward/DebugContactManifoldBuffer.hpp"
-#include "Engine/Renderer/Forward/DebugContactManifoldPipeline.hpp"
-#include "Engine/Renderer/Forward/DebugContactManifoldPipelineLayout.hpp"
-#include "Engine/Renderer/Forward/DebugHullWireframeBuffer.hpp"
-#include "Engine/Renderer/Forward/DebugHullWireframePipeline.hpp"
-#include "Engine/Renderer/Forward/DebugHullWireframePipelineLayout.hpp"
+// #include "Engine/Renderer/Forward/DebugContactManifoldBuffer.hpp"
+// #include "Engine/Renderer/Forward/DebugContactManifoldPipeline.hpp"
+// #include "Engine/Renderer/Forward/DebugContactManifoldPipelineLayout.hpp"
+// #include "Engine/Renderer/Forward/DebugHullWireframeBuffer.hpp"
+// #include "Engine/Renderer/Forward/DebugHullWireframePipeline.hpp"
+// #include "Engine/Renderer/Forward/DebugHullWireframePipelineLayout.hpp"
 #include "Engine/Renderer/Forward/DepthStencilImage.hpp"
 #include "Engine/Renderer/Forward/DirectionalLightBuffer.hpp"
 #include "Engine/Renderer/Forward/DirectionalShadowMap.hpp"
 #include "Engine/Renderer/Forward/DirectionalShadowMapSampler.hpp"
-#include "Engine/Renderer/Forward/DynamicDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Forward/DynamicPipeline.hpp"
 #include "Engine/Renderer/Forward/Framebuffers.hpp"
 #include "Engine/Renderer/Forward/GeometryDescriptorSets.hpp"
 #include "Engine/Renderer/Forward/IndexBuffer.hpp"
 #include "Engine/Renderer/Forward/InstanceBuffer.hpp"
+#include "Engine/Renderer/Forward/LightmapAtlasDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Forward/LightmapAtlasImage.hpp"
 #include "Engine/Renderer/Forward/LightmapAtlasSampler.hpp"
 #include "Engine/Renderer/Forward/LightmapCoordinateBuffer.hpp"
@@ -28,8 +28,8 @@
 #include "Engine/Renderer/Forward/PointLightBuffer.hpp"
 #include "Engine/Renderer/Forward/Renderer.hpp"
 #include "Engine/Renderer/Forward/RenderPass.hpp"
+#include "Engine/Renderer/Forward/SceneDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Forward/SkyBox.hpp"
-#include "Engine/Renderer/Forward/StaticGeometryDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Forward/StaticPipeline.hpp"
 #include "Engine/Renderer/Forward/VertexBuffer.hpp"
 
@@ -64,6 +64,8 @@ namespace Trident {
 		encodeSkyBoxPass(commandEncoder);
 
 		if (visualizationMode & VisualizationMode::DEFAULT) {
+			const ref<DescriptorSet> descriptorSets[] = {sceneDescriptorSet, lightmapAtlasDescriptorSet};
+
 			uint32 materialShaderIndex = 0;
 
 			while (materialShaderIndex < sceneAsset->dynamicMaterialShaderOffset) {
@@ -73,14 +75,14 @@ namespace Trident {
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
 				commandEncoder->bindVertexBuffer(2, instanceBuffer, 0);
 				commandEncoder->bindIndexBuffer<uint32>(indexBuffer, 0);
-				commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialShaderIndex], 0, staticGeometryDescriptorSet);
+				commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialShaderIndex], 0, descriptorSets);
 
 				uint32 materialIndex = 0;
 
 				while (materialIndex < materialShader.materialRange.count) {
 					const Material material = sceneAsset->materials[materialShader.materialRange.offset + materialIndex];
 
-					commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialShaderIndex], 1, materialDescriptorSets[materialShader.materialRange.offset + materialIndex]);
+					commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialShaderIndex], 2, materialDescriptorSets[materialShader.materialRange.offset + materialIndex]);
 
 					uint32 materialGeometryIndex = 0;
 
@@ -121,7 +123,7 @@ namespace Trident {
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
 				commandEncoder->bindVertexBuffer(1, instanceBuffer, 0);
 				commandEncoder->bindIndexBuffer<uint32>(indexBuffer, 0);
-				commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialShaderIndex], 0, dynamicDescriptorSet);
+				commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialShaderIndex], 0, sceneDescriptorSet);
 
 				uint32 materialIndex = 0;
 
@@ -285,9 +287,9 @@ namespace Trident {
 	void ForwardRenderer::initializeLightProjectionView() const {
 		static constexpr float32 width = 512.0f;
 		static constexpr float32 height = 512.0f;
-		static constexpr float32 depth = 512.0f;
+		static constexpr float32 depth = 1024.0f;
 
-		const vec3<float32> position = normalized(vec3<float32>(scene->getAsset()->sunDirection)) * 256.0f;
+		const vec3<float32> position = normalized(vec3<float32>(scene->getAsset()->sunDirection)) * 512.0f;
 
 		// TODO(lyah): orthoLH_ZO
 		const mat4x4<float32> projection = {
