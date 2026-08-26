@@ -59,6 +59,15 @@ namespace Trident {
 			}
 
 		protected:
+			/// Returns the 6 faces composing the cube map, in the following order:
+			/// - Front
+			/// - Back
+			/// - Up
+			/// - Down
+			/// - Right
+			/// - Left
+			/// 
+			/// The up and down faces must be vertically flipped.
 			virtual view<view<char8>> getFacePaths() const = 0;
 
 		private:

@@ -55,6 +55,11 @@ namespace Trident {
 		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageCreateInfo.pNext = nullptr;
 		imageCreateInfo.flags = 0;
+
+		if (descriptor.flags & ImageFlags::CUBE_COMPATIBLE) {
+			imageCreateInfo.flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+		}
+
 		imageCreateInfo.imageType = image->type;
 		imageCreateInfo.format = image->format;
 		imageCreateInfo.extent.width = descriptor.extent.width;

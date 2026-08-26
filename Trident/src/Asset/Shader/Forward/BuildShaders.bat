@@ -3,6 +3,9 @@
 set glslcpath=%1
 set inputpath=%~dp0
 
+%glslcpath% -fshader-stage=vert "%inputpath%/SkyBox.vert.glsl" -o "%inputpath%/SkyBox.vert.spv"
+%glslcpath% -fshader-stage=frag "%inputpath%/SkyBox.frag.glsl" -o "%inputpath%/SkyBox.frag.spv"
+
 %glslcpath% -fshader-stage=vert "%inputpath%/StaticGeometry.vert.glsl" -o "%inputpath%/StaticGeometry.vert.spv"
 
 %glslcpath% -fshader-stage=vert "%inputpath%/DynamicGeometry.vert.glsl" -o "%inputpath%/DynamicGeometry.vert.spv"

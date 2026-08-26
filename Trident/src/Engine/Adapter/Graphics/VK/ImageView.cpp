@@ -32,7 +32,7 @@ namespace Trident {
 		imageViewCreateInfo.pNext = nullptr;
 		imageViewCreateInfo.flags = 0;
 		imageViewCreateInfo.image = _image->image;
-		imageViewCreateInfo.viewType = getImageViewType(descriptor.type, descriptor.layerCount > 1);
+		imageViewCreateInfo.viewType = getImageViewType(descriptor.type, descriptor.layerCount);
 		imageViewCreateInfo.format = _image->format;
 		imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;

@@ -14,12 +14,12 @@ namespace Trident {
 
 			view<view<char8>> getFacePaths() const final override {
 				static constexpr view<char8> paths[] = {
-					"evening_road_01_2k/evening_road_01_2k_back.png",
-					"evening_road_01_2k/evening_road_01_2k_down.png",
-					"evening_road_01_2k/evening_road_01_2k_front.png",
-					"evening_road_01_2k/evening_road_01_2k_left.png",
-					"evening_road_01_2k/evening_road_01_2k_right.png",
-					"evening_road_01_2k/evening_road_01_2k_up.png",
+					"evening_road_01_2k/front.png",
+					"evening_road_01_2k/back.png",
+					"evening_road_01_2k/up.png",
+					"evening_road_01_2k/down.png",
+					"evening_road_01_2k/right.png",
+					"evening_road_01_2k/left.png",
 				};
 
 				return paths;

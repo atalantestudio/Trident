@@ -16,7 +16,6 @@
 #include "Engine/Renderer/Forward/DirectionalShadowMapSampler.hpp"
 #include "Engine/Renderer/Forward/DynamicDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Forward/DynamicPipeline.hpp"
-#include "Engine/Renderer/Forward/EnvironmentMap.hpp"
 #include "Engine/Renderer/Forward/Framebuffers.hpp"
 #include "Engine/Renderer/Forward/GeometryDescriptorSets.hpp"
 #include "Engine/Renderer/Forward/IndexBuffer.hpp"
@@ -29,6 +28,7 @@
 #include "Engine/Renderer/Forward/PointLightBuffer.hpp"
 #include "Engine/Renderer/Forward/Renderer.hpp"
 #include "Engine/Renderer/Forward/RenderPass.hpp"
+#include "Engine/Renderer/Forward/SkyBox.hpp"
 #include "Engine/Renderer/Forward/StaticGeometryDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Forward/StaticPipeline.hpp"
 #include "Engine/Renderer/Forward/VertexBuffer.hpp"
@@ -60,6 +60,8 @@ namespace Trident {
 		});
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, extent);
+
+		encodeSkyBoxPass(commandEncoder);
 
 		if (visualizationMode & VisualizationMode::DEFAULT) {
 			uint32 materialShaderIndex = 0;
@@ -251,6 +253,12 @@ namespace Trident {
 		commandEncoder->endRenderPass();
 	}
 
+	void ForwardRenderer::encodeSkyBoxPass(ref<CommandEncoder> commandEncoder) const {
+		commandEncoder->bindGraphicsPipeline(skyBoxPipeline);
+		commandEncoder->bindDescriptorSets(skyBoxPipelineLayout, 0, skyBoxDescriptorSet);
+		commandEncoder->draw(36, 1, 0, 0);
+	}
+
 	void ForwardRenderer::createFrameObjects() {
 		#if FORWARD_SAMPLE_COUNT > 1
 			colorImage = createColorImage();
@@ -266,8 +274,12 @@ namespace Trident {
 	void ForwardRenderer::updateCamera() {
 		const PerspectiveCamera3D& camera = getCameraController<PerspectiveCamera3D>().getCamera();
 
+		mat4x4<float32> view = camera.getView();
+		view[3] = {0.0f, 0.0f, 0.0f, 1.0f};
+
 		cameraMappedRange->projectionView = camera.getProjectionView();
 		cameraMappedRange->position = svec3<float32>(camera.position);
+		cameraMappedRange->skyBoxProjectionView = view * camera.getProjection();
 	}
 
 	void ForwardRenderer::initializeLightProjectionView() const {

@@ -17,6 +17,13 @@ namespace Trident {
 
 		const DescriptorImage descriptorImages[] = {
 			{
+				.imageView = skyBoxImageView,
+				.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+
+				// TODO(forward/environment-map): Use a different sampler?
+				.sampler = directionalShadowMapSampler,
+			},
+			{
 				.imageView = lightmapAtlasImageView,
 				.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
 				.sampler = lightmapAtlasSampler,
@@ -29,6 +36,16 @@ namespace Trident {
 		};
 
 		const WriteDescriptorSet writeDescriptorSets[] = {
+			{
+				.descriptorSet = skyBoxDescriptorSet,
+				.bindingIndex = 0,
+				.descriptorBufferViews = descriptorBufferViews[0],
+			},
+			{
+				.descriptorSet = skyBoxDescriptorSet,
+				.bindingIndex = 1,
+				.descriptorImages = descriptorImages[0],
+			},
 			{
 				.descriptorSet = dynamicDescriptorSet,
 				.bindingIndex = 0,
@@ -57,7 +74,7 @@ namespace Trident {
 			{
 				.descriptorSet = staticGeometryDescriptorSet,
 				.bindingIndex = 3,
-				.descriptorImages = descriptorImages[1],
+				.descriptorImages = descriptorImages[2],
 			},
 		};
 
@@ -68,7 +85,7 @@ namespace Trident {
 				{
 					.descriptorSet = staticGeometryDescriptorSet,
 					.bindingIndex = 1,
-					.descriptorImages = descriptorImages[0],
+					.descriptorImages = descriptorImages[1],
 				},
 			};
 

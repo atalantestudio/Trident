@@ -46,13 +46,11 @@ namespace Trident {
 				const BufferView<uint8> imageView = stagingBuffer->createView<uint8>(0, stagingBuffer->getSize());
 				const view<uint8> data = imageAsset->getData();
 
-				uint8* imageMappedRange = imageView.map();
-
 				if (imageAsset->getFormat() == ImageFormat::R8G8B8_UNORM) {
-					convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(data, imageMappedRange, imageView.getSize());
+					convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(data, imageView.map(), imageView.getSize());
 				}
 				else {
-					std::copy(data.begin(), data.end(), imageMappedRange);
+					std::copy(data.begin(), data.end(), imageView.map());
 				}
 
 				stagingBuffer->unmap();
