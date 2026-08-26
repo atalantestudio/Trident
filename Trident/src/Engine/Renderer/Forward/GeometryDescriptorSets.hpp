@@ -17,7 +17,7 @@ namespace Trident {
 
 		const DescriptorImage descriptorImages[] = {
 			{
-				.imageView = skyBoxImageView,
+				.imageView = skyboxImageView,
 				.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
 
 				// TODO(forward/environment-map): Use a different sampler?
@@ -33,14 +33,14 @@ namespace Trident {
 		const WriteDescriptorSet writeDescriptorSets[] = {
 			// Camera
 			{
-				.descriptorSet = skyBoxDescriptorSet,
+				.descriptorSet = skyboxDescriptorSet,
 				.bindingIndex = 0,
 				.descriptorBufferViews = descriptorBufferViews[0],
 			},
 
 			// Skybox
 			{
-				.descriptorSet = skyBoxDescriptorSet,
+				.descriptorSet = skyboxDescriptorSet,
 				.bindingIndex = 1,
 				.descriptorImages = descriptorImages[0],
 			},

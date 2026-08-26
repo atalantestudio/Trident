@@ -11,7 +11,7 @@ layout(set = 0, binding = 0) uniform readonly Camera {
 	uint _0;
 	vec3 sunColor;
 	uint _1;
-	mat4x4 skyBoxProjectionView;
+	mat4x4 skyboxProjectionView;
 } camera;
 
 out Interstage {
@@ -71,7 +71,7 @@ const vec3 POSITIONS[36] = vec3[](
 void main() {
 	vec3 position = POSITIONS[gl_VertexIndex];
 
-	gl_Position = camera.skyBoxProjectionView * vec4(position, 1.0);
+	gl_Position = camera.skyboxProjectionView * vec4(position, 1.0);
 
 	interstage.direction = position;
 }

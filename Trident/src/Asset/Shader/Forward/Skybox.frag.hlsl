@@ -6,9 +6,9 @@ struct Interstage {
 	float3 direction : VERTEX_OUTPUT_ATTRIBUTE1;
 };
 
-TextureCube skyBoxTexture : register(t0);
-SamplerState skyBoxSamplerState : register(s0);
+TextureCube skyboxTexture : register(t0);
+SamplerState skyboxSamplerState : register(s0);
 
 float4 main(Interstage interstage) : SV_Target0 {
-	return skyBoxTexture.Sample(skyBoxSamplerState, interstage.direction);
+	return skyboxTexture.Sample(skyboxSamplerState, interstage.direction);
 }

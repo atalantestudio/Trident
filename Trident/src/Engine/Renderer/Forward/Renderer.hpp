@@ -19,7 +19,7 @@ namespace Trident {
 		uint32 _0;
 		svec3<float32> sunColor;
 		uint32 _1;
-		mat4x4<float32> skyBoxProjectionView;
+		mat4x4<float32> skyboxProjectionView;
 	};
 
 	class ForwardRenderer : public BaseSceneRenderer<ForwardCamera> {
@@ -36,13 +36,13 @@ namespace Trident {
 			void postBuild() override {
 				renderPass = createRenderPass();
 				directionalShadowMapRenderPass = createDirectionalShadowMapRenderPass();
-				skyBoxDescriptorSetLayout = createSkyBoxDescriptorSetLayout();
+				skyboxDescriptorSetLayout = createSkyboxDescriptorSetLayout();
 				sceneDescriptorSetLayout = createSceneDescriptorSetLayout();
 				lightmapAtlasDescriptorSetLayout = createLightmapAtlasDescriptorSetLayout();
 				directionalShadowMapDescriptorSetLayout = createDirectionalShadowMapDescriptorSetLayout();
 
 				const ref<DescriptorSetLayout> descriptorSetLayouts[] = {
-					skyBoxDescriptorSetLayout,
+					skyboxDescriptorSetLayout,
 					sceneDescriptorSetLayout,
 					lightmapAtlasDescriptorSetLayout,
 					directionalShadowMapDescriptorSetLayout,
@@ -51,15 +51,15 @@ namespace Trident {
 				// TODO(base/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
 				sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets(descriptorSetLayouts);
 
-				skyBoxDescriptorSet = descriptorSets[0];
+				skyboxDescriptorSet = descriptorSets[0];
 				sceneDescriptorSet = descriptorSets[1];
 				lightmapAtlasDescriptorSet = descriptorSets[2];
 				directionalShadowMapDescriptorSet = descriptorSets[3];
 
-				skyBoxPipelineLayout = createSkyBoxPipelineLayout();
-				skyBoxPipeline = createSkyBoxPipeline();
-				skyBoxImage = createSkyBoxImage();
-				skyBoxImageView = createSkyBoxImageView();
+				skyboxPipelineLayout = createSkyboxPipelineLayout();
+				skyboxPipeline = createSkyboxPipeline();
+				skyboxImage = createSkyboxImage();
+				skyboxImageView = createSkyboxImageView();
 
 				directionalShadowMapPipelineLayout = createDirectionalShadowMapPipelineLayout();
 				directionalShadowMapPipeline = createDirectionalShadowMapPipeline();
@@ -108,7 +108,7 @@ namespace Trident {
 				} */
 
 				uint64 stagingBufferSize = (
-					skyBoxImage->getSize() +
+					skyboxImage->getSize() +
 					sceneAsset->geometryRanges[0].count +
 					sceneAsset->geometryRanges[1].count +
 					sceneAsset->geometryRanges[2].count +
@@ -135,18 +135,18 @@ namespace Trident {
 
 				uint64 offset = 0;
 
-				const BufferView<uint8> skyBoxView = stagingBuffer->createView<uint8>(0, skyBoxImage->getSize());
-				const ref<ImageAsset> skyBoxImageAsset = getLayer()->getApplication()->getAssetLibrary()->getAsset<ImageAsset>("evening_road_01_2k");
-				const view<uint8> skyBoxData = skyBoxImageAsset->getData();
+				const BufferView<uint8> skyboxView = stagingBuffer->createView<uint8>(0, skyboxImage->getSize());
+				const ref<ImageAsset> skyboxImageAsset = getLayer()->getApplication()->getAssetLibrary()->getAsset<ImageAsset>("evening_road_01_2k");
+				const view<uint8> skyboxData = skyboxImageAsset->getData();
 
-				if (skyBoxImageAsset->getFormat() == ImageFormat::R8G8B8_UNORM) {
-					convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(skyBoxData, skyBoxView.map(), skyBoxView.getSize());
+				if (skyboxImageAsset->getFormat() == ImageFormat::R8G8B8_UNORM) {
+					convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(skyboxData, skyboxView.map(), skyboxView.getSize());
 				}
 				else {
-					std::copy(skyBoxData.begin(), skyBoxData.end(), skyBoxView.map());
+					std::copy(skyboxData.begin(), skyboxData.end(), skyboxView.map());
 				}
 
-				const BufferView<uint8> vertexView = stagingBuffer->createView<uint8>(skyBoxView.getOffset() + skyBoxView.getSize(), sceneAsset->geometryRanges[0].count);
+				const BufferView<uint8> vertexView = stagingBuffer->createView<uint8>(skyboxView.getOffset() + skyboxView.getSize(), sceneAsset->geometryRanges[0].count);
 
 				std::copy_n(&sceneAsset->geometryData[sceneAsset->geometryRanges[0].offset], vertexView.getSize(), vertexView.map());
 
@@ -202,33 +202,33 @@ namespace Trident {
 
 				commandEncoder->begin();
 
-				const BufferImageCopyRegion skyBoxImageCopyRegion = {
-					.bufferOffset = skyBoxView.getOffset(),
+				const BufferImageCopyRegion skyboxImageCopyRegion = {
+					.bufferOffset = skyboxView.getOffset(),
 					.imageOffsetX = 0,
 					.imageOffsetY = 0,
 					.imageOffsetZ = 0,
-					.imageExtent = skyBoxImage->getExtent(),
-					.imageMipLevel = skyBoxImageView->getMipLevelOffset(),
-					.imageLayerOffset = skyBoxImageView->getLayerOffset(),
-					.imageLayerCount = skyBoxImageView->getLayerCount(),
+					.imageExtent = skyboxImage->getExtent(),
+					.imageMipLevel = skyboxImageView->getMipLevelOffset(),
+					.imageLayerOffset = skyboxImageView->getLayerOffset(),
+					.imageLayerCount = skyboxImageView->getLayerCount(),
 				};
 
-				ImageMemoryBarrier skyBoxImageMemoryBarrier = {
-					.image = skyBoxImage,
+				ImageMemoryBarrier skyboxImageMemoryBarrier = {
+					.image = skyboxImage,
 					.newLayout = ImageLayout::TRANSFER_DST_OPTIMAL,
 					.newAccess = Access::TRANSFER_WRITE,
 				};
 
-				commandEncoder->insertMemoryBarriers({}, skyBoxImageMemoryBarrier);
-				commandEncoder->copyBufferToImage(stagingBuffer, skyBoxImage, skyBoxImageCopyRegion);
+				commandEncoder->insertMemoryBarriers({}, skyboxImageMemoryBarrier);
+				commandEncoder->copyBufferToImage(stagingBuffer, skyboxImage, skyboxImageCopyRegion);
 
-				skyBoxImageMemoryBarrier = {
-					.image = skyBoxImage,
+				skyboxImageMemoryBarrier = {
+					.image = skyboxImage,
 					.newLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
 					.newAccess = Access::SHADER_READ,
 				};
 
-				commandEncoder->insertMemoryBarriers({}, skyBoxImageMemoryBarrier);
+				commandEncoder->insertMemoryBarriers({}, skyboxImageMemoryBarrier);
 
 				const BufferCopyRegion bufferCopyRegions[] = {
 					{
@@ -346,17 +346,17 @@ namespace Trident {
 			void createFramebuffers();
 			void createDirectionalShadowMapFramebuffers();
 
-			ref<DescriptorSetLayout> createSkyBoxDescriptorSetLayout() const;
+			ref<DescriptorSetLayout> createSkyboxDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createSceneDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createLightmapAtlasDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createDirectionalShadowMapDescriptorSetLayout() const;
 
-			ref<PipelineLayout> createSkyBoxPipelineLayout() const;
+			ref<PipelineLayout> createSkyboxPipelineLayout() const;
 			ref<PipelineLayout> createDebugHullWireframePipelineLayout() const;
 			ref<PipelineLayout> createDebugContactManifoldPipelineLayout() const;
 			ref<PipelineLayout> createDirectionalShadowMapPipelineLayout() const;
 
-			ref<GraphicsPipeline> createSkyBoxPipeline() const;
+			ref<GraphicsPipeline> createSkyboxPipeline() const;
 			ref<GraphicsPipeline> createDebugHullWireframePipeline() const;
 			ref<GraphicsPipeline> createDebugContactManifoldPipeline() const;
 			ref<GraphicsPipeline> createDirectionalShadowMapPipeline() const;
@@ -365,7 +365,7 @@ namespace Trident {
 				ref<Image> createColorImage() const;
 			#endif
 
-			ref<Image> createSkyBoxImage() const;
+			ref<Image> createSkyboxImage() const;
 			ref<Image> createDepthStencilImage() const;
 			ref<Image> createLightmapAtlasImage(ref<ImageAsset> imageAsset) const;
 			ref<Image> createDirectionalShadowMapImage() const;
@@ -374,7 +374,7 @@ namespace Trident {
 				ref<ImageView> createColorImageView() const;
 			#endif
 
-			ref<ImageView> createSkyBoxImageView() const;
+			ref<ImageView> createSkyboxImageView() const;
 			ref<ImageView> createDepthStencilImageView() const;
 			ref<ImageView> createLightmapAtlasImageView() const;
 			ref<ImageView> createDirectionalShadowMapImageView() const;
@@ -414,7 +414,7 @@ namespace Trident {
 			void initializeLightProjectionView() const;
 
 			void encodeDirectionalShadowMapPass(ref<CommandEncoder> commandEncoder) const;
-			void encodeSkyBoxPass(ref<CommandEncoder> commandEncoder) const;
+			void encodeSkyboxPass(ref<CommandEncoder> commandEncoder) const;
 
 		private:
 			ref<RenderPass> renderPass;
@@ -423,24 +423,24 @@ namespace Trident {
 			sequence<ref<Framebuffer>> framebuffers;
 			sequence<ref<Framebuffer>> directionalShadowMapFramebuffers;
 
-			ref<DescriptorSetLayout> skyBoxDescriptorSetLayout;
+			ref<DescriptorSetLayout> skyboxDescriptorSetLayout;
 			ref<DescriptorSetLayout> sceneDescriptorSetLayout;
 			ref<DescriptorSetLayout> lightmapAtlasDescriptorSetLayout;
 			ref<DescriptorSetLayout> directionalShadowMapDescriptorSetLayout;
 
-			ref<DescriptorSet> skyBoxDescriptorSet;
+			ref<DescriptorSet> skyboxDescriptorSet;
 			ref<DescriptorSet> sceneDescriptorSet;
 			ref<DescriptorSet> lightmapAtlasDescriptorSet;
 			sequence<ref<DescriptorSet>> materialDescriptorSets;
 			ref<DescriptorSet> directionalShadowMapDescriptorSet;
 
-			ref<PipelineLayout> skyBoxPipelineLayout;
+			ref<PipelineLayout> skyboxPipelineLayout;
 			sequence<ref<PipelineLayout>> materialPipelineLayouts;
 			ref<PipelineLayout> debugHullWireframePipelineLayout;
 			ref<PipelineLayout> debugContactManifoldPipelineLayout;
 			ref<PipelineLayout> directionalShadowMapPipelineLayout;
 
-			ref<GraphicsPipeline> skyBoxPipeline;
+			ref<GraphicsPipeline> skyboxPipeline;
 			sequence<ref<GraphicsPipeline>> materialPipelines;
 			ref<GraphicsPipeline> debugHullWireframePipeline;
 			ref<GraphicsPipeline> debugContactManifoldPipeline;
@@ -467,7 +467,7 @@ namespace Trident {
 				ref<Image> colorImage;
 			#endif
 
-			ref<Image> skyBoxImage;
+			ref<Image> skyboxImage;
 			ref<Image> depthStencilImage;
 			ref<Image> lightmapAtlasImage;
 			sequence<ref<Image>> materialImages;
@@ -477,7 +477,7 @@ namespace Trident {
 				ref<ImageView> colorImageView;
 			#endif
 
-			ref<ImageView> skyBoxImageView;
+			ref<ImageView> skyboxImageView;
 			ref<ImageView> depthStencilImageView;
 			ref<ImageView> lightmapAtlasImageView;
 			sequence<ref<ImageView>> materialImageViews;

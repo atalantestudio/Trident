@@ -6,7 +6,7 @@
 #include "Engine/Renderer/Forward/Renderer.hpp"
 
 namespace Trident {
-	ref<DescriptorSetLayout> ForwardRenderer::createSkyBoxDescriptorSetLayout() const {
+	ref<DescriptorSetLayout> ForwardRenderer::createSkyboxDescriptorSetLayout() const {
 		const DescriptorSetLayoutBinding bindings[] = {
 			// Camera
 			{
@@ -15,7 +15,7 @@ namespace Trident {
 				.stageFlags = ShaderStage::VERTEX,
 			},
 
-			// Sky box
+			// Skybox
 			{
 				.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
 				.descriptorCount = 1,
@@ -26,21 +26,21 @@ namespace Trident {
 		return createDescriptorSetLayout({
 			.bindings = bindings,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Sky box",
+				.name = "Skybox",
 			#endif
 		});
 	}
 
-	ref<PipelineLayout> ForwardRenderer::createSkyBoxPipelineLayout() const {
+	ref<PipelineLayout> ForwardRenderer::createSkyboxPipelineLayout() const {
 		return createPipelineLayout({
-			.descriptorSetLayouts = {skyBoxDescriptorSetLayout},
+			.descriptorSetLayouts = {skyboxDescriptorSetLayout},
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Sky box",
+				.name = "Skybox",
 			#endif
 		});
 	}
 
-	ref<GraphicsPipeline> ForwardRenderer::createSkyBoxPipeline() const {
+	ref<GraphicsPipeline> ForwardRenderer::createSkyboxPipeline() const {
 		const ColorBlendAttachment colorBlendAttachments[] = {
 			{
 				.blend = false,
@@ -48,27 +48,27 @@ namespace Trident {
 		};
 
 		return createGraphicsPipeline({
-			.pipelineLayout = skyBoxPipelineLayout,
+			.pipelineLayout = skyboxPipelineLayout,
 			.vertexInputBindings = {},
 			.vertexShaderModule = loadInternalShaderModule(
 				{
 					.stage = ShaderStage::VERTEX,
 					.entryPoint = "main",
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Sky box vertex",
+						.name = "Skybox vertex",
 					#endif
 				},
-				"Forward/SkyBox.vert"
+				"Forward/Skybox.vert"
 			),
 			.fragmentShaderModule = loadInternalShaderModule(
 				{
 					.stage = ShaderStage::FRAGMENT,
 					.entryPoint = "main",
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Sky box fragment",
+						.name = "Skybox fragment",
 					#endif
 				},
-				"Forward/SkyBox.frag"
+				"Forward/Skybox.frag"
 			),
 			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
 			.polygonMode = PolygonMode::FILL,
@@ -86,12 +86,12 @@ namespace Trident {
 			.renderPass = renderPass,
 			.subpassIndex = 0,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Sky box",
+				.name = "Skybox",
 			#endif
 		});
 	}
 
-	ref<Image> ForwardRenderer::createSkyBoxImage() const {
+	ref<Image> ForwardRenderer::createSkyboxImage() const {
 		return createDynamicImage({
 			.type = ImageType::TYPE_2D,
 			.flags = ImageFlags::CUBE_COMPATIBLE,
@@ -103,20 +103,20 @@ namespace Trident {
 			.usage = ImageUsage::TRANSFER_DST | ImageUsage::SAMPLED,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Sky box",
+				.name = "Skybox",
 			#endif
 		});
 	}
 
-	ref<ImageView> ForwardRenderer::createSkyBoxImageView() const {
-		return skyBoxImage->createView({
+	ref<ImageView> ForwardRenderer::createSkyboxImageView() const {
+		return skyboxImage->createView({
 			.type = ImageViewType::TYPE_CUBE,
 			.mipLevelOffset = 0,
 			.mipLevelCount = 1,
 			.layerOffset = 0,
 			.layerCount = 6,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Sky box view",
+				.name = "Skybox view",
 			#endif
 		});
 	}

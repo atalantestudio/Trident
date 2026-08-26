@@ -9,7 +9,7 @@ struct Camera {
 	uint _0;
 	float3 sunColor;
 	uint _1;
-	float4x4 skyBoxProjectionView;
+	float4x4 skyboxProjectionView;
 };
 
 struct Interstage {
@@ -75,7 +75,7 @@ Interstage main(uint vertexIndex : SV_VertexID) {
 	float3 position = POSITIONS[vertexIndex];
 
 	Interstage interstage;
-	interstage.position = mul(camera.skyBoxProjectionView, float4(position, 1.0));
+	interstage.position = mul(camera.skyboxProjectionView, float4(position, 1.0));
 	interstage.direction = position;
 
 	return interstage;

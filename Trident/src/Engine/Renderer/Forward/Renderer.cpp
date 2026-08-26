@@ -29,7 +29,7 @@
 #include "Engine/Renderer/Forward/Renderer.hpp"
 #include "Engine/Renderer/Forward/RenderPass.hpp"
 #include "Engine/Renderer/Forward/SceneDescriptorSetLayout.hpp"
-#include "Engine/Renderer/Forward/SkyBox.hpp"
+#include "Engine/Renderer/Forward/Skybox.hpp"
 #include "Engine/Renderer/Forward/StaticPipeline.hpp"
 #include "Engine/Renderer/Forward/VertexBuffer.hpp"
 
@@ -61,7 +61,7 @@ namespace Trident {
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, extent);
 
-		encodeSkyBoxPass(commandEncoder);
+		encodeSkyboxPass(commandEncoder);
 
 		if (visualizationMode & VisualizationMode::DEFAULT) {
 			const ref<DescriptorSet> descriptorSets[] = {sceneDescriptorSet, lightmapAtlasDescriptorSet};
@@ -255,9 +255,9 @@ namespace Trident {
 		commandEncoder->endRenderPass();
 	}
 
-	void ForwardRenderer::encodeSkyBoxPass(ref<CommandEncoder> commandEncoder) const {
-		commandEncoder->bindGraphicsPipeline(skyBoxPipeline);
-		commandEncoder->bindDescriptorSets(skyBoxPipelineLayout, 0, skyBoxDescriptorSet);
+	void ForwardRenderer::encodeSkyboxPass(ref<CommandEncoder> commandEncoder) const {
+		commandEncoder->bindGraphicsPipeline(skyboxPipeline);
+		commandEncoder->bindDescriptorSets(skyboxPipelineLayout, 0, skyboxDescriptorSet);
 		commandEncoder->draw(36, 1, 0, 0);
 	}
 
@@ -281,7 +281,7 @@ namespace Trident {
 
 		cameraMappedRange->projectionView = camera.getProjectionView();
 		cameraMappedRange->position = svec3<float32>(camera.position);
-		cameraMappedRange->skyBoxProjectionView = view * camera.getProjection();
+		cameraMappedRange->skyboxProjectionView = view * camera.getProjection();
 	}
 
 	void ForwardRenderer::initializeLightProjectionView() const {

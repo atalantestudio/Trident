@@ -9,10 +9,10 @@ in Interstage {
 	layout(location = 0) vec3 direction;
 } interstage;
 
-layout(set = 0, binding = 1) uniform samplerCube skyBox;
+layout(set = 0, binding = 1) uniform samplerCube skybox;
 
 layout(location = 0) out vec4 fragment;
 
 void main() {
-	fragment = texture(skyBox, interstage.direction);
+	fragment = texture(skybox, interstage.direction);
 }
