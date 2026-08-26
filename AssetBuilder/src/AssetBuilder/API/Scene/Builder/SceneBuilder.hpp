@@ -27,8 +27,6 @@ namespace Trident {
 		public:
 			static BuildStaticGeometry3D createWallGeometry(svec2<float32> scale);
 
-			static void release();
-
 		private:
 			template<typename T>
 			static void resizeBuffer(sequence<T>& buffer, uint64 additionalCount) {

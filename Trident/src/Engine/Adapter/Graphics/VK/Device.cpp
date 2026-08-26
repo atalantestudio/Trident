@@ -9,6 +9,7 @@
 #include "Engine/Adapter/Graphics/VK/DescriptorSetLayout.hpp"
 #include "Engine/Adapter/Graphics/VK/DescriptorType.hpp"
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
+#include "Engine/Adapter/Graphics/VK/DeviceExtension.hpp"
 #include "Engine/Adapter/Graphics/VK/Fence.hpp"
 #include "Engine/Adapter/Graphics/VK/GraphicsAdapter.hpp"
 #include "Engine/Adapter/Graphics/VK/ImageLayout.hpp"
@@ -206,14 +207,7 @@ namespace Trident {
 		return descriptorSets;
 	}
 
-	ref<Trident::Device> VK::createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice) {
-		// TODO(graphics/vk/device/extensions): Expose to the client side.
-		static constexpr const char8* ENABLED_EXTENSION_NAMES_[] = {
-			VK_KHR_MAINTENANCE_1_EXTENSION_NAME,
-			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-		};
-		static constexpr view<const char8*> ENABLED_EXTENSION_NAMES = ENABLED_EXTENSION_NAMES_;
-
+	ref<Trident::Device> VK::createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice, view<DeviceExtensionName> enabledExtensions) {
 		static constexpr float32 DEFAULT_QUEUE_PRIORITY = 1.0f;
 
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
@@ -222,6 +216,15 @@ namespace Trident {
 		VkResult result;
 
 		ref<VK::Device> device = allocateRef<VK::Device>(adapter, physicalDevice);
+
+		std::vector<const char8*> enabledExtensionNames = {
+			VK_KHR_MAINTENANCE_1_EXTENSION_NAME,
+			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+		};
+
+		for (const DeviceExtensionName extension : enabledExtensions) {
+			enableDeviceExtension(extension, enabledExtensionNames);
+		}
 
 		// TODO: Replace with sequence<T>.
 		std::vector<uint32> queueFamilyIndices = {
@@ -255,8 +258,8 @@ namespace Trident {
 		deviceCreateInfo.flags = 0;
 		deviceCreateInfo.queueCreateInfoCount = static_cast<uint32>(deviceQueueCreateInfos.count());
 		deviceCreateInfo.pQueueCreateInfos = &deviceQueueCreateInfos[0];
-		deviceCreateInfo.enabledExtensionCount = static_cast<uint32>(ENABLED_EXTENSION_NAMES.count());
-		deviceCreateInfo.ppEnabledExtensionNames = &ENABLED_EXTENSION_NAMES[0];
+		deviceCreateInfo.enabledExtensionCount = static_cast<uint32>(enabledExtensionNames.size());
+		deviceCreateInfo.ppEnabledExtensionNames = enabledExtensionNames.data();
 		deviceCreateInfo.pEnabledFeatures = nullptr;
 
 		result = _physicalDevice->instance->vkCreateDevice(_physicalDevice->physicalDevice, &deviceCreateInfo, nullptr, &device->device);

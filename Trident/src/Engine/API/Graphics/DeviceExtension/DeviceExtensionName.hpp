@@ -5,7 +5,6 @@
 
 namespace Trident {
 	enum DeviceExtensionName : uint8 {
-		// TODO(test/graphics/device/extension)
-		Test_EXT,
+		EXT_hardware_ray_tracing,
 	};
 }

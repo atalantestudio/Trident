@@ -83,11 +83,6 @@ namespace Trident {
 				registerProcesses();
 			}
 
-			void release() final override {
-				BuildTrueTypeFontSubprocess::release();
-				SceneBuilder::release();
-			}
-
 		private:
 			void registerProcesses() {
 				allocateProcesses(50);

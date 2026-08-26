@@ -6,6 +6,7 @@
 #include "Engine/Adapter/Graphics/DX12/Buffer.hpp"
 #include "Engine/Adapter/Graphics/DX12/DescriptorSet.hpp"
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
+#include "Engine/Adapter/Graphics/DX12/DeviceExtension.hpp"
 #include "Engine/Adapter/Graphics/DX12/Format.hpp"
 #include "Engine/Adapter/Graphics/DX12/ImageView.hpp"
 #include "Engine/Adapter/Graphics/DX12/Queue.hpp"
@@ -94,7 +95,7 @@ namespace Trident {
 		return descriptorSets;
 	}
 
-	ref<Trident::Device> DX12::createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice) {
+	ref<Trident::Device> DX12::createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice, view<DeviceExtensionName> enabledExtensions) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const DX12::PhysicalDevice* _physicalDevice = static_cast<const DX12::PhysicalDevice*>(physicalDevice);
@@ -130,6 +131,10 @@ namespace Trident {
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create device using the WARP adapter.");
 
 			adapter->Release();
+		}
+
+		for (const DeviceExtensionName extension : enabledExtensions) {
+			enableDeviceExtension(extension, device->device);
 		}
 
 		device->queues[0] = createQueue(device, 0, QueueFamilyCapability::GRAPHICS);

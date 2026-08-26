@@ -97,7 +97,7 @@ namespace Trident {
 	typedef ref<CommandPool> (*CreateCommandPoolImplementation)(const Device* device, uint32 queueFamilyIndex, QueueFamilyCapability queueFamilyCapability);
 	typedef ref<ComputePipeline> (*CreateComputePipelineImplementation)(const Device* device, const ComputePipelineDescriptor& descriptor);
 	typedef ref<DescriptorSetLayout> (*CreateDescriptorSetLayoutImplementation)(const Device* device, const DescriptorSetLayoutDescriptor& descriptor);
-	typedef ref<Device> (*CreateDeviceImplementation)(const GraphicsAdapter* adapter, const PhysicalDevice* physicalDevice);
+	typedef ref<Device> (*CreateDeviceImplementation)(const GraphicsAdapter* adapter, const PhysicalDevice* physicalDevice, view<DeviceExtensionName> enabledExtensions);
 	typedef ref<Fence> (*CreateFenceImplementation)(const Device* device, const FenceDescriptor& descriptor);
 	typedef ref<Framebuffer> (*CreateFramebufferImplementation)(const Device* device, const FramebufferDescriptor& descriptor);
 	typedef ref<GraphicsPipeline> (*CreateGraphicsPipelineImplementation)(const Device* device, const GraphicsPipelineDescriptor& descriptor);
@@ -110,10 +110,7 @@ namespace Trident {
 	typedef ref<Sampler> (*CreateSamplerImplementation)(const Device* device, const SamplerDescriptor& descriptor);
 	typedef ref<Semaphore> (*CreateSemaphoreImplementation)(const Device* device);
 	typedef ref<ShaderModule> (*CreateShaderModuleFromAssetImplementation)(const Device* device, const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset);
-
-	// TODO: Deprecate (replace with CreateShaderModuleFromAssetImplementation).
 	typedef ref<ShaderModule> (*CreateShaderModuleFromCodeImplementation)(const Device* device, const ShaderModuleDescriptor& descriptor, view<char8> code);
-
 	typedef ref<Surface> (*CreateSurfaceImplementation)(const Instance* instance, ref<PhysicalDevice> physicalDevice, const Window* window);
 	typedef ref<Swapchain> (*CreateSwapchainImplementation)(const Device* device, const SwapchainDescriptor& descriptor);
 	typedef void (*DestroyBufferImplementation)(const Device* device, const Buffer* buffer);

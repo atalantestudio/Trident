@@ -127,7 +127,9 @@ namespace Trident {
 		applicationInfo.applicationVersion = VK_MAKE_API_VERSION(0, descriptor.projectVersion.major, descriptor.projectVersion.minor, descriptor.projectVersion.patch);
 		applicationInfo.pEngineName = ENGINE_NAME;
 		applicationInfo.engineVersion = VK_MAKE_API_VERSION(0, ENGINE_VERSION_MAJOR, ENGINE_VERSION_MINOR, ENGINE_VERSION_PATCH);
-		applicationInfo.apiVersion = VK_API_VERSION_1_0;
+
+		// TODO(graphics/vk/api-version): Expose.
+		applicationInfo.apiVersion = VK_API_VERSION_1_3;
 
 		VkInstanceCreateInfo instanceCreateInfo{};
 		instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;

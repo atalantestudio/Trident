@@ -24,7 +24,10 @@ namespace Trident {
 			/// The resulting device exposes core and extension methods to the user.
 			template<DeviceExtensionName... Extensions>
 			inline ref<ExtendedDevice<Extensions...>> createDevice() const {
-				ref<Device> device = adapter->createDeviceImplementation(adapter, this);
+				static constexpr DeviceExtensionName extensions[] = {Extensions..., static_cast<DeviceExtensionName>(0)};
+				static constexpr view<DeviceExtensionName> extensionView(extensions, sizeof...(Extensions));
+
+				ref<Device> device = adapter->createDeviceImplementation(adapter, this, extensionView);
 				device->memoryAllocator = adapter->createMemoryAllocatorImplementation(device);
 
 				return ref_owning_cast<ExtendedDevice<Extensions...>>(device);

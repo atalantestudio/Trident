@@ -57,7 +57,7 @@ namespace Trident {
 		return descriptorSets;
 	}
 
-	ref<Trident::Device> GL::createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice) {
+	ref<Trident::Device> GL::createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice, view<DeviceExtensionName> enabledExtensions) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		ref<GL::Device> device = allocateRef<GL::Device>(adapter, physicalDevice);

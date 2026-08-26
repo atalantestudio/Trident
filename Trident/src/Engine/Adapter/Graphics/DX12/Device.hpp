@@ -29,7 +29,7 @@ namespace Trident {
 
 		sequence<ref<Trident::DescriptorSet>> allocateDescriptorSets(Trident::Device* device, view<ref<DescriptorSetLayout>> descriptorSetLayouts);
 
-		ref<Trident::Device> createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice);
+		ref<Trident::Device> createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice, view<DeviceExtensionName> enabledExtensions);
 
 		void destroyDevice(const Trident::Device* device);
 

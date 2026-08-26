@@ -15,9 +15,6 @@ namespace Trident {
 			static GenerateSDFGlyphMapProcess glyphRasterizer;
 
 		public:
-			static void release();
-
-		public:
 			explicit BuildTrueTypeFontSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::filesystem::path& assetOutputPath, AssetBuilderLibrary* assetLibrary) {
 				std::filesystem::path outputPath = assetOutputPath / "Font" / directoryEntry.path().filename();
 				outputPath.replace_extension("tfo");

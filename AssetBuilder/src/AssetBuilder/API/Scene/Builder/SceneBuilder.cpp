@@ -65,10 +65,6 @@ namespace Trident {
 		};
 	}
 
-	void SceneBuilder::release() {
-		lightmapper.~Lightmapper();
-	}
-
 	SceneBuilder::SceneBuilder(const Scene3DDescriptor& descriptor) :
 		descriptor(descriptor)
 	{}

@@ -7,8 +7,4 @@
 
 namespace Trident {
 	GenerateSDFGlyphMapProcess BuildTrueTypeFontSubprocess::glyphRasterizer;
-
-	void BuildTrueTypeFontSubprocess::release() {
-		glyphRasterizer.~GenerateSDFGlyphMapProcess();
-	}
 }

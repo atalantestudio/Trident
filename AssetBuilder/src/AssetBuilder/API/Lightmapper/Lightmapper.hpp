@@ -8,11 +8,9 @@
 #include "AssetBuilder/API/Scene/Scene3D.hpp"
 
 #include "Engine/API/Graphics/Descriptor/ShaderModuleDescriptor.hpp"
+#include "Engine/API/Graphics/DeviceExtension/EXT_hardware_ray_tracing.hpp"
 #include "Engine/API/Graphics/PhysicalDevice.hpp"
 #include "Engine/Filesystem/Asset/ImageAsset.hpp"
-
-// TODO(test/graphics/device/extension)
-#include "Engine/API/Graphics/DeviceExtension/Test_EXT.hpp"
 
 namespace Trident {
 	struct LightmapperDescriptor {
@@ -126,17 +124,19 @@ namespace Trident {
 
 			ref<Instance> instance;
 			ref<PhysicalDevice> physicalDevice;
+			ref<ExtendedDevice<EXT_hardware_ray_tracing>> device;
 
-			// TODO(test/graphics/device/extension)
-			ref<ExtendedDevice<Test_EXT>> device;
+			ref<RenderPass> gBufferRenderPass;
+			ref<RenderPass> dilationRenderPass;
+
+			ref<DescriptorSetLayout> descriptorSetLayouts[4];
 
 			sequence<ref<DescriptorSet>> descriptorSets;
 
-			ref<Buffer> argumentBuffer;
-
-			ref<Sampler> intermediateLightmapAtlasSampler;
-
-			LightmapperContext context;
+			ref<PipelineLayout> gBufferPipelineLayout;
+			ref<PipelineLayout> traceRaysPipelineLayout;
+			ref<PipelineLayout> postProcessingPipelineLayout;
+			ref<PipelineLayout> dilationPipelineLayout;
 
 			ref<GraphicsPipeline> gBufferPipeline;
 			ref<ComputePipeline> traceRaysPipeline;
@@ -145,14 +145,9 @@ namespace Trident {
 			ref<ComputePipeline> verticalBilateralFilterPipeline;
 			ref<GraphicsPipeline> dilationPipeline;
 
-			ref<PipelineLayout> gBufferPipelineLayout;
-			ref<PipelineLayout> traceRaysPipelineLayout;
-			ref<PipelineLayout> postProcessingPipelineLayout;
-			ref<PipelineLayout> dilationPipelineLayout;
+			LightmapperContext context;
 
-			ref<DescriptorSetLayout> descriptorSetLayouts[4];
-
-			ref<RenderPass> gBufferRenderPass;
-			ref<RenderPass> dilationRenderPass;
+			ref<Buffer> argumentBuffer;
+			ref<Sampler> intermediateLightmapAtlasSampler;
 	};
 }

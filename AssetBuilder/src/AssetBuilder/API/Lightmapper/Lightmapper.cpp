@@ -34,11 +34,7 @@ namespace Trident {
 			.projectVersion = {0, 0, 1},
 		});
 		physicalDevice = instance->selectPhysicalDevice(false);
-
-		// TODO(test/graphics/device/extension)
-		device = physicalDevice->createDevice<Test_EXT>();
-		device->test_EXT();
-
+		device = physicalDevice->createDevice<EXT_hardware_ray_tracing>();
 		gBufferRenderPass = createGBufferRenderPass();
 		dilationRenderPass = createDilationRenderPass();
 
