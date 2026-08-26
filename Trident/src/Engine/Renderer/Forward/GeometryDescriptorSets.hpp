@@ -20,7 +20,7 @@ namespace Trident {
 				.imageView = skyboxImageView,
 				.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
 
-				// TODO(forward/environment-map): Use a different sampler?
+				// TODO(forward/skybox): Use a different sampler?
 				.sampler = directionalShadowMapSampler,
 			},
 			{
