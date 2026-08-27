@@ -237,8 +237,8 @@ namespace Trident {
 
 				SceneBuilder builder({
 					.flags = {},
-					.skyboxImageAsset = nullptr,
 					.skyColor = {0.0f, 0.0f, 0.0f},
+					.skyboxImageAsset = nullptr,
 					.sunDirection = {1.0f, 1.0f, 1.0f},
 					.sunColor = {0.0f, 0.0f, 0.0f},
 					.sunIntensity = 0.0f,

@@ -20,6 +20,7 @@ namespace Trident {
 		}
 
 		BuildScene3D scene{};
+		scene.skyColor = descriptor.skyColor;
 
 		if (descriptor.skyboxImageAsset != nullptr) {
 			scene.skyboxAssetIdentifier = descriptor.skyboxImageAsset->identifier;
@@ -28,7 +29,6 @@ namespace Trident {
 			scene.skyboxAssetIdentifier = max<uint32>();
 		}
 
-		scene.skyColor = descriptor.skyColor;
 		scene.sunDirection = descriptor.sunDirection;
 		scene.sunColor = descriptor.sunColor * descriptor.sunIntensity;
 		scene.vertexCount = static_cast<uint32>(staticVertexCount + dynamicVertexCount);

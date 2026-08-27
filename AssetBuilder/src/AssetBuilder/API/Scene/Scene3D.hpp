@@ -17,8 +17,8 @@
 namespace Trident {
 	struct Scene3DDescriptor {
 		Scene3DBuildFlags flags;
-		ref<ImageAsset> skyboxImageAsset;
 		svec3<float32> skyColor;
+		ref<ImageAsset> skyboxImageAsset;
 		svec3<float32> sunDirection;
 		svec3<float32> sunColor;
 		float32 sunIntensity;
@@ -80,9 +80,8 @@ namespace Trident {
 	};
 
 	struct BuildScene3D {
-		uint32 skyboxAssetIdentifier;
 		svec3<float32> skyColor;
-
+		uint32 skyboxAssetIdentifier;
 		svec3<float32> sunDirection;
 
 		/// Pre-multiplied by the sun intensity.
