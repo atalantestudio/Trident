@@ -160,7 +160,7 @@ void main() {
 	float roughness = arm.g;
 	float metallic = arm.b;
 	vec3 c = texture(diffuseTexture, interstage.textureCoordinate).rgb;
-	vec3 n = normalize(interstage.tbn * (texture(normalTexture, interstage.textureCoordinate).xyz * 2.0 - 1.0));
+	vec3 n = normalize(interstage.tbn * (texture(normalTexture, interstage.textureCoordinate).rgb * 2.0 - 1.0));
 	vec3 F0 = mix(vec3(0.04, 0.04, 0.04), c, metallic);
 
 	vec3 Le = vec3(0.0, 0.0, 0.0);

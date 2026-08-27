@@ -81,7 +81,7 @@ void main() {
 	// Convert from sRGB space to linear space.
 	vec3 diffuse = pow(texture(diffuseTexture, interstage.textureCoordinate).rgb, vec3(2.2));
 
-	vec3 normal = normalize(interstage.tbn * (texture(normalTexture, interstage.textureCoordinate).xyz * 2.0 - 1.0));
+	vec3 normal = normalize(interstage.tbn * (texture(normalTexture, interstage.textureCoordinate).rgb * 2.0 - 1.0));
 	vec3 arm = texture(armTexture, interstage.textureCoordinate).rgb;
 	float ao = arm[0];
 	float roughness = arm[1];
