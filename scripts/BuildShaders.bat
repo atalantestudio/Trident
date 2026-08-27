@@ -7,6 +7,9 @@ set glslcpath="vendor/glslc/glslc"
 echo Building shaders in AssetBuilder/Asset/Shader.
 call "AssetBuilder/Asset/Shader/BuildShaders" %glslcpath%
 
+echo Building shaders in Trident/src/Asset/Shader/Debug.
+call "Trident/src/Asset/Shader/Debug/BuildShaders" %glslcpath%
+
 echo Building shaders in Trident/src/Asset/Shader/Forward.
 call "Trident/src/Asset/Shader/Forward/BuildShaders" %glslcpath%
 

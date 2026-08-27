@@ -57,6 +57,7 @@
 #include "Graphics/Layer/TriangleIndirect.hpp"
 #include "Graphics/SampleLayerGroup.hpp"
 
+#include "Sample3D/Layer/DebugLayer.hpp"
 #include "Sample3D/Layer/ForwardLayer.hpp"
 #include "Sample3D/Layer/VisibilityLayer.hpp"
 
@@ -235,7 +236,10 @@ namespace Trident {
 			}
 		}
 		else if (SampleGroupNameProperty == "Sample3D") {
-			if (SampleNameProperty == "Forward") {
+			if (SampleNameProperty == "Debug") {
+				registerLayer<Sample3DDebugLayer>();
+			}
+			else if (SampleNameProperty == "Forward") {
 				registerLayer<Sample3DForwardLayer>();
 			}
 			else if (SampleNameProperty == "Visibility") {
