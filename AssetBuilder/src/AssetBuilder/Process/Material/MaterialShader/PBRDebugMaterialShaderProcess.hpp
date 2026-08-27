@@ -19,7 +19,7 @@ namespace Trident {
 				MaterialAsset asset{};
 
 				// TODO(tsl): Use a real identifier when TSL is ready.
-				asset.shaderModuleAssetIdentifier = 404;
+				asset.shaderModuleAssetIdentifier = 403;
 
 				asset.descriptorImageAssetIdentifiers = {
 					assetLibrary.getAsset<ImageAsset>(descriptor.armTexturePath)->identifier,

@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include "AssetBuilder/Process/Material/MaterialShader/PBRSeparatedAORoughnessMaterialShaderProcess.hpp"
+#include "AssetBuilder/Process/Material/MaterialShader/PBRMaterialShaderProcess.hpp"
 
 namespace Trident {
-	class LemonMaterial final : public PBRSeparatedAORoughnessMaterialShaderProcess {
+	class LemonMaterial final : public PBRMaterialShaderProcess {
 		protected:
 			view<char8> getAssetName() const final override {
 				return "lemon_1k";
@@ -14,9 +14,8 @@ namespace Trident {
 
 		public:
 			explicit LemonMaterial(AssetBuilderLibrary* assetLibrary) :
-				PBRSeparatedAORoughnessMaterialShaderProcess(assetLibrary, {
-					.aoTexturePath = "lemon_ao_1k",
-					.roughnessTexturePath = "lemon_rough_1k",
+				PBRMaterialShaderProcess(assetLibrary, {
+					.armTexturePath = "lemon_arm_1k",
 					.diffuseTexturePath = "lemon_diff_1k",
 					.normalTexturePath = "lemon_nor_gl_1k",
 				})

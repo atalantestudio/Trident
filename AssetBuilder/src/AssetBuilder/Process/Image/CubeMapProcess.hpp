@@ -67,6 +67,7 @@ namespace Trident {
 			/// - Right
 			/// - Left
 			/// 
+			/// The paths are relative to the Asset/External directory.
 			/// The up and down faces must be vertically flipped.
 			virtual view<view<char8>> getFacePaths() const = 0;
 

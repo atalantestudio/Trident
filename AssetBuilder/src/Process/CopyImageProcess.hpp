@@ -46,27 +46,12 @@ namespace Trident {
 
 					ImageProcess::createImageAsset(image, stream, assetName, outputDirectoryPath, assetLibrary);
 
-					ENGINE_INFO("Generated image asset \"[]\" (ID: []).", assetName, image.identifier);
+					ENGINE_INFO("Copied image asset \"[]\" (ID: []).", assetName, image.identifier);
 				}
 
 				ENGINE_INFO("Done building image assets.");
 
 				return 0;
-			}
-
-		private:
-			void createImageAsset(const ImageAssetDescriptor& image, const ByteStream<StreamOperation::WRITE>& stream, view<char8> assetName, const std::filesystem::path& outputDirectoryPath) {
-				const std::string assetOutputPathString = outputDirectoryPath.string();
-
-				sequence<char8> outputPath(assetOutputPathString.size() + assetName.count() + 5);
-				std::copy(assetOutputPathString.begin(), assetOutputPathString.end(), &outputPath[0]);
-				std::copy(assetName.begin(), assetName.end(), &outputPath[assetOutputPathString.size()]);
-				std::copy_n(".tia", 4, &outputPath[assetOutputPathString.size() + assetName.count()]);
-
-				Writer writer = Filesystem::openWriter(outputPath);
-				writer.write(stream.data, stream.getByteOffset());
-
-				assetLibrary->registerAsset(image.identifier, assetName);
 			}
 
 		private:

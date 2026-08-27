@@ -14,7 +14,6 @@
 #include "AssetBuilder/Process/MaterialShader/LightmappedPBR.hpp"
 #include "AssetBuilder/Process/MaterialShader/PBR.hpp"
 #include "AssetBuilder/Process/MaterialShader/PBRDebug.hpp"
-#include "AssetBuilder/Process/MaterialShader/PBRSeparatedAORoughness.hpp"
 
 namespace Trident {
 	Lightmapper SceneBuilder::lightmapper;
@@ -31,9 +30,6 @@ namespace Trident {
 				return PBRShaderModuleAsset();
 			}
 			case 403: {
-				return PBRSeparatedAORoughnessShaderModuleAsset();
-			}
-			case 404: {
 				return PBRDebugShaderModuleAsset();
 			}
 			default: {

@@ -255,9 +255,7 @@ namespace Trident {
 					return 0;
 				}
 
-				ImageAssetDescriptor image = createImage(rootInputPath);
-				image.identifier = AssetLibrary::createAssetIdentifier();
-
+				const ImageAssetDescriptor image = createImage(rootInputPath);
 				const ByteStream<StreamOperation::WRITE> stream = encodeImageAsset(image);
 
 				createImageAsset(image, stream, assetName, outputDirectoryPath, assetLibrary);
