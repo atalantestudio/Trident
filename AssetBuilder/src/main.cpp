@@ -42,6 +42,7 @@
 #include "AssetBuilder/Process/Scene/3D/CornellBox.hpp"
 #include "AssetBuilder/Process/Scene/3D/Cubes.hpp"
 #include "AssetBuilder/Process/Scene/3D/EdgeContact.hpp"
+#include "AssetBuilder/Process/Scene/3D/FaceTest.hpp"
 #include "AssetBuilder/Process/Scene/3D/GallineraTable.hpp"
 #include "AssetBuilder/Process/Scene/3D/Hall.hpp"
 #include "AssetBuilder/Process/Scene/3D/Lemons.hpp"
@@ -86,7 +87,7 @@ namespace Trident {
 
 		private:
 			void registerProcesses() {
-				allocateProcesses(51);
+				allocateProcesses(52);
 
 				registerProcess<BuildGeometryAssetProcess>(&assetLibrary);
 
@@ -134,6 +135,7 @@ namespace Trident {
 				registerProcess<CornellBoxScene3D>(&assetLibrary);
 				registerProcess<CubesScene3D>(&assetLibrary);
 				registerProcess<EdgeContactScene3D>(&assetLibrary);
+				registerProcess<FaceTestScene3D>(&assetLibrary);
 				registerProcess<GallineraTableScene3D>(&assetLibrary);
 				registerProcess<HallScene3D>(&assetLibrary);
 				registerProcess<LemonsScene3D>(&assetLibrary);

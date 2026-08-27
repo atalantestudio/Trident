@@ -61,19 +61,13 @@ namespace Trident {
 		sequence<svec2<float32>> lightmapCoordinates;
 
 		sequence<BuildTransform3D> instances;
-
-		/// These are variants of the Lightmapped shader.
 		sequence<BuildMaterialShader> materialShaders;
-
 		ImageAssetDescriptor lightmapAtlasImageAssetDescriptor;
 	};
 
 	struct BuildDynamicSceneGeometry3D {
-		/// These are variants of the Forward shader.
 		sequence<BuildMaterialShader> materialShaders;
-
 		sequence<PointLight> pointLights;
-
 		uint32 entityCount;
 		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
 		sequence<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;
