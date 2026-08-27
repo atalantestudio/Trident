@@ -8,7 +8,6 @@ set inputpath=%~dp0
 
 %glslcpath% -fshader-stage=frag "%inputpath%/PBR.frag.glsl" -o "%inputpath%/PBR.frag.spv"
 %glslcpath% -fshader-stage=frag "%inputpath%/PBRDebug.frag.glsl" -o "%inputpath%/PBRDebug.frag.spv"
-%glslcpath% -fshader-stage=frag "%inputpath%/PBRSingleSet.frag.glsl" -o "%inputpath%/PBRSingleSet.frag.spv"
 
 %glslcpath% -fshader-stage=comp "%inputpath%/Default.glsl" -o "%inputpath%/Default.spv"
 %glslcpath% -fshader-stage=comp "%inputpath%/DefaultGL.glsl" -o "%inputpath%/DefaultGL.spv"
