@@ -45,6 +45,10 @@ namespace Trident {
 
 		stream.jump(sizeof(AssetSignature) + sizeof(VersionNumber));
 
+		#if defined(DEBUG_ENUMERATE_ASSET_MAP_DATA)
+			ENGINE_DEBUG("Data for asset map \"[]\":", projectName);
+		#endif
+
 		while (stream.getRemainingSize() > 0) {
 			const uint32 identifier = stream.read<uint32>();
 			const uint32 pathCharacterCount = stream.read<uint32>();
@@ -53,6 +57,10 @@ namespace Trident {
 			stream.jump(pathCharacterCount);
 
 			assetMap.map.insert({identifier, path});
+
+			#if defined(DEBUG_ENUMERATE_ASSET_MAP_DATA)
+				ENGINE_DEBUG("- [] (ID: [])", path, identifier);
+			#endif
 		}
 	}
 

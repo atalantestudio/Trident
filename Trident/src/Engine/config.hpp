@@ -66,6 +66,8 @@ namespace Trident {
 		// #define DEBUG_ENUMERATE_PHYSICAL_DEVICES
 		// #define DEBUG_ENUMERATE_QUEUE_FAMILY_PROPERTIES
 		// #define DEBUG_ENUMERATE_VALIDATION_LAYERS
+
+		#define DEBUG_ENUMERATE_ASSET_MAP_DATA
 	#endif
 
 	/// If enabled, glyphs with a single contour are checked to ensure that the contour is clockwise.
