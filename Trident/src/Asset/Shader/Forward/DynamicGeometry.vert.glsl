@@ -29,7 +29,7 @@ out Interstage {
 void main() {
 	vec4 surface = worldTransform * vec4(position, 1.0);
 	vec3 n = normalize(normalTransform * (normal * 2.0 - 1.0));
-	vec3 t = normalize(normalTransform * tangent.xyz * 2.0 - 1.0);
+	vec3 t = normalize(normalTransform * (tangent.xyz * 2.0 - 1.0));
 	vec3 b = cross(n, t);
 
 	gl_Position = camera.projectionView * surface;
