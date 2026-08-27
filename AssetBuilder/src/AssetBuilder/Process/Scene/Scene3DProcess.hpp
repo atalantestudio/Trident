@@ -20,6 +20,10 @@ namespace Trident {
 				stream.write<AssetSignature>(AssetSignature::SCENE);
 				stream.write<uint32>(identifier);
 				stream.write<VersionNumber>({0, 0, 0});
+				stream.write<float32>(scene.skyColor.x);
+				stream.write<float32>(scene.skyColor.y);
+				stream.write<float32>(scene.skyColor.z);
+				stream.write<uint32>(scene.skyboxAssetIdentifier);
 				stream.write<uint8>(sizeof(uint32));
 				stream.write<uint32>(scene.vertexCount);
 				stream.write<uint32>(scene.staticGeometry.vertexCount);
@@ -34,17 +38,14 @@ namespace Trident {
 				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.materialShaders.count()));
 				stream.write<uint32>(static_cast<uint32>(scene.dynamicGeometry.materialShaders.count()));
 				stream.write<uint32>(scene.dynamicGeometry.entityCount);
-				stream.write<uint32>(static_cast<uint32>(scene.dynamicGeometry.pointLights.count()));
-				stream.write<uint32>(scene.staticGeometry.lightmapAtlasImageAssetDescriptor.identifier);
-				stream.write<float32>(scene.skyColor.x);
-				stream.write<float32>(scene.skyColor.y);
-				stream.write<float32>(scene.skyColor.z);
 				stream.write<float32>(scene.sunDirection.x);
 				stream.write<float32>(scene.sunDirection.y);
 				stream.write<float32>(scene.sunDirection.z);
 				stream.write<float32>(scene.sunColor.x);
 				stream.write<float32>(scene.sunColor.y);
 				stream.write<float32>(scene.sunColor.z);
+				stream.write<uint32>(static_cast<uint32>(scene.dynamicGeometry.pointLights.count()));
+				stream.write<uint32>(scene.staticGeometry.lightmapAtlasImageAssetDescriptor.identifier);
 
 				for (const BuildVertex3D& vertex : scene.staticGeometry.bakedVertices) {
 					stream.write<float32>(vertex.position.x);
@@ -166,7 +167,7 @@ namespace Trident {
 				uint64 size = (
 					sizeof(AssetHeader) +
 					sizeof(uint8) +
-					sizeof(uint32) * 15 +
+					sizeof(uint32) * 16 +
 					sizeof(svec3<float32>) * 3 +
 					scene.staticGeometry.bakedVertices.count() * sizeof(Vertex3D) +
 					scene.staticGeometry.bakedIndices.count() * sizeof(uint32) +

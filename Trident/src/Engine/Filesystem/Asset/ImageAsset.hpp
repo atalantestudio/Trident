@@ -51,6 +51,16 @@ namespace Trident {
 			return data;
 		}
 
+		inline bool isEligibleForCubeMap() const {
+			return (
+				(format == ImageFormat::R8G8B8_UNORM || format == ImageFormat::R8G8B8A8_UNORM) &&
+				extent.width == extent.height &&
+				extent.depth == 1 &&
+				mipLevelCount == 1 &&
+				layerCount == 6
+			);
+		}
+
 		ImageFormat format;
 		Extent3D extent;
 		uint32 mipLevelCount;

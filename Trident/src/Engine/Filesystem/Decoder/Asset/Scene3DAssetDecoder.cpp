@@ -15,6 +15,13 @@ namespace Trident {
 		Scene3DAsset asset{};
 		asset.identifier = stream.read<uint32>();
 		asset.version = stream.read<VersionNumber>();
+		asset.skyColor = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
+
+		const uint32 skyboxAssetIdentifier = stream.read<uint32>();
+
+		if (skyboxAssetIdentifier != max<uint32>()) {
+			asset.skyboxImageAsset = assetLibrary->getAsset<ImageAsset>(skyboxAssetIdentifier);
+		}
 
 		const uint8 indexByteSize = stream.read<uint8>();
 
@@ -62,20 +69,18 @@ namespace Trident {
 		asset.instances = sequence<Instance3D>(staticInstanceCount + asset.entityCount);
 		asset.geometryMappings = sequence<EntityComponentMapping<GeometryComponent>>(asset.entityCount);
 		asset.rigidBodyMappings = sequence<EntityComponentMapping<RigidBody3DComponent>>(asset.entityCount);
+		asset.sunDirection = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
+		asset.sunColor = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
 
 		const uint32 pointLightCount = stream.read<uint32>();
 
 		asset.pointLights = sequence<PointLight>(pointLightCount);
 
-		const uint32 lightmapAtlasImageAssetIdentifier = stream.read<uint32>();
+		const uint32 lightmapAtlasAssetIdentifier = stream.read<uint32>();
 
-		if (lightmapAtlasImageAssetIdentifier != max<uint32>()) {
-			asset.lightmapAtlasImageAsset = assetLibrary->getAsset<ImageAsset>(lightmapAtlasImageAssetIdentifier);
+		if (lightmapAtlasAssetIdentifier != max<uint32>()) {
+			asset.lightmapAtlasImageAsset = assetLibrary->getAsset<ImageAsset>(lightmapAtlasAssetIdentifier);
 		}
-
-		asset.skyColor = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
-		asset.sunDirection = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
-		asset.sunColor = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
 
 		std::copy_n(stream.getBytePosition(), bakedVertexCount * sizeof(Vertex3D), &asset.geometryData[asset.geometryRanges[0].offset]);
 

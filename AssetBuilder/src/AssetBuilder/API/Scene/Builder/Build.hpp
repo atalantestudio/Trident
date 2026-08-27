@@ -20,12 +20,20 @@ namespace Trident {
 		}
 
 		BuildScene3D scene{};
-		scene.vertexCount = static_cast<uint32>(staticVertexCount + dynamicVertexCount);
-		scene.staticGeometry.vertexCount = static_cast<uint32>(staticVertexCount);
-		scene.triangleCount = static_cast<uint32>((staticIndexCount + dynamicIndexCount) / 3);
+
+		if (descriptor.skyboxImageAsset != nullptr) {
+			scene.skyboxAssetIdentifier = descriptor.skyboxImageAsset->identifier;
+		}
+		else {
+			scene.skyboxAssetIdentifier = max<uint32>();
+		}
+
 		scene.skyColor = descriptor.skyColor;
 		scene.sunDirection = descriptor.sunDirection;
 		scene.sunColor = descriptor.sunColor * descriptor.sunIntensity;
+		scene.vertexCount = static_cast<uint32>(staticVertexCount + dynamicVertexCount);
+		scene.staticGeometry.vertexCount = static_cast<uint32>(staticVertexCount);
+		scene.triangleCount = static_cast<uint32>((staticIndexCount + dynamicIndexCount) / 3);
 		scene.staticGeometry.lightmapAtlasImageAssetDescriptor.identifier = max<uint32>();
 		scene.dynamicGeometry.entityCount = entityCount;
 

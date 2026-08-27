@@ -37,6 +37,11 @@ namespace Trident {
 	};
 
 	struct Scene3DAsset : public Asset {
+		svec3<float32> skyColor;
+		ref<ImageAsset> skyboxImageAsset;
+		svec3<float32> sunDirection;
+		svec3<float32> sunColor;
+
 		sequence<uint8> geometryData;
 
 		/// Vertices, indices, lightmap coordinates.
@@ -55,9 +60,6 @@ namespace Trident {
 		sequence<PointLight> pointLights;
 		uint32 dynamicMaterialShaderOffset;
 		ref<ImageAsset> lightmapAtlasImageAsset;
-		svec3<float32> skyColor;
-		svec3<float32> sunDirection;
-		svec3<float32> sunColor;
 		uint32 entityCount;
 		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
 		sequence<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;

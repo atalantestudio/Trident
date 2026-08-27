@@ -61,7 +61,9 @@ namespace Trident {
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, extent);
 
-		encodeSkyboxPass(commandEncoder);
+		if (sceneAsset->skyboxImageAsset != nullptr) {
+			encodeSkyboxPass(commandEncoder);
+		}
 
 		if (visualizationMode & VisualizationMode::DEFAULT) {
 			const ref<DescriptorSet> descriptorSets[] = {sceneDescriptorSet, lightmapAtlasDescriptorSet};

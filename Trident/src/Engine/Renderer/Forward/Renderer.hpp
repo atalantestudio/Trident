@@ -58,8 +58,6 @@ namespace Trident {
 
 				skyboxPipelineLayout = createSkyboxPipelineLayout();
 				skyboxPipeline = createSkyboxPipeline();
-				skyboxImage = createSkyboxImage();
-				skyboxImageView = createSkyboxImageView();
 
 				directionalShadowMapPipelineLayout = createDirectionalShadowMapPipelineLayout();
 				directionalShadowMapPipeline = createDirectionalShadowMapPipeline();
@@ -108,12 +106,18 @@ namespace Trident {
 				} */
 
 				uint64 stagingBufferSize = (
-					skyboxImage->getSize() +
 					sceneAsset->geometryRanges[0].count +
 					sceneAsset->geometryRanges[1].count +
 					sceneAsset->geometryRanges[2].count +
 					sceneAsset->pointLights.count() * sizeof(PointLight)
 				);
+
+				if (sceneAsset->skyboxImageAsset != nullptr) {
+					skyboxImage = createSkyboxImage(sceneAsset->skyboxImageAsset);
+					skyboxImageView = createSkyboxImageView();
+
+					stagingBufferSize += skyboxImage->getSize();
+				}
 
 				if (sceneAsset->lightmapAtlasImageAsset != nullptr) {
 					lightmapCoordinateBuffer = createLightmapCoordinateBuffer();
@@ -135,18 +139,7 @@ namespace Trident {
 
 				uint64 offset = 0;
 
-				const BufferView<uint8> skyboxView = stagingBuffer->createView<uint8>(0, skyboxImage->getSize());
-				const ref<ImageAsset> skyboxImageAsset = getLayer()->getApplication()->getAssetLibrary()->getAsset<ImageAsset>("evening_road_01_2k");
-				const view<uint8> skyboxData = skyboxImageAsset->getData();
-
-				if (skyboxImageAsset->getFormat() == ImageFormat::R8G8B8_UNORM) {
-					convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(skyboxData, skyboxView.map(), skyboxView.getSize());
-				}
-				else {
-					std::copy(skyboxData.begin(), skyboxData.end(), skyboxView.map());
-				}
-
-				const BufferView<uint8> vertexView = stagingBuffer->createView<uint8>(skyboxView.getOffset() + skyboxView.getSize(), sceneAsset->geometryRanges[0].count);
+				const BufferView<uint8> vertexView = stagingBuffer->createView<uint8>(offset, sceneAsset->geometryRanges[0].count);
 
 				std::copy_n(&sceneAsset->geometryData[sceneAsset->geometryRanges[0].offset], vertexView.getSize(), vertexView.map());
 
@@ -164,6 +157,23 @@ namespace Trident {
 					std::copy(sceneAsset->pointLights.begin(), sceneAsset->pointLights.end(), pointLightView.map());
 
 					offset = pointLightView.getOffset() + pointLightView.getSize();
+				}
+
+				BufferView<uint8> skyboxView;
+
+				if (sceneAsset->skyboxImageAsset != nullptr) {
+					skyboxView = stagingBuffer->createView<uint8>(offset, skyboxImage->getSize());
+
+					const view<uint8> data = sceneAsset->skyboxImageAsset->getData();
+
+					if (sceneAsset->skyboxImageAsset->getFormat() == ImageFormat::R8G8B8_UNORM) {
+						convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(data, skyboxView.map(), skyboxView.getSize());
+					}
+					else {
+						std::copy(data.begin(), data.end(), skyboxView.map());
+					}
+
+					offset = skyboxView.getOffset() + skyboxView.getSize();
 				}
 
 				BufferView<uint8> lightmapCoordinateView;
@@ -196,39 +206,11 @@ namespace Trident {
 				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
 					.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Initialize scene resources",
+						.name = "One-time commands",
 					#endif
 				});
 
 				commandEncoder->begin();
-
-				const BufferImageCopyRegion skyboxImageCopyRegion = {
-					.bufferOffset = skyboxView.getOffset(),
-					.imageOffsetX = 0,
-					.imageOffsetY = 0,
-					.imageOffsetZ = 0,
-					.imageExtent = skyboxImage->getExtent(),
-					.imageMipLevel = skyboxImageView->getMipLevelOffset(),
-					.imageLayerOffset = skyboxImageView->getLayerOffset(),
-					.imageLayerCount = skyboxImageView->getLayerCount(),
-				};
-
-				ImageMemoryBarrier skyboxImageMemoryBarrier = {
-					.image = skyboxImage,
-					.newLayout = ImageLayout::TRANSFER_DST_OPTIMAL,
-					.newAccess = Access::TRANSFER_WRITE,
-				};
-
-				commandEncoder->insertMemoryBarriers({}, skyboxImageMemoryBarrier);
-				commandEncoder->copyBufferToImage(stagingBuffer, skyboxImage, skyboxImageCopyRegion);
-
-				skyboxImageMemoryBarrier = {
-					.image = skyboxImage,
-					.newLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-					.newAccess = Access::SHADER_READ,
-				};
-
-				commandEncoder->insertMemoryBarriers({}, skyboxImageMemoryBarrier);
 
 				const BufferCopyRegion bufferCopyRegions[] = {
 					{
@@ -258,6 +240,37 @@ namespace Trident {
 
 				if (sceneAsset->pointLights.count() > 0) {
 					commandEncoder->copyBufferToBuffer(stagingBuffer, pointLightBuffer, bufferCopyRegions[2]);
+				}
+
+				if (sceneAsset->skyboxImageAsset != nullptr) {
+					ImageMemoryBarrier imageMemoryBarrier = {
+						.image = skyboxImage,
+						.newLayout = ImageLayout::TRANSFER_DST_OPTIMAL,
+						.newAccess = Access::TRANSFER_WRITE,
+					};
+
+					commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
+
+					const BufferImageCopyRegion bufferImageCopyRegion = {
+						.bufferOffset = skyboxView.getOffset(),
+						.imageOffsetX = 0,
+						.imageOffsetY = 0,
+						.imageOffsetZ = 0,
+						.imageExtent = skyboxImage->getExtent(),
+						.imageMipLevel = skyboxImageView->getMipLevelOffset(),
+						.imageLayerOffset = skyboxImageView->getLayerOffset(),
+						.imageLayerCount = skyboxImageView->getLayerCount(),
+					};
+
+					commandEncoder->copyBufferToImage(stagingBuffer, skyboxImage, bufferImageCopyRegion);
+
+					imageMemoryBarrier = {
+						.image = skyboxImage,
+						.newLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+						.newAccess = Access::SHADER_READ,
+					};
+
+					commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
 				}
 
 				if (sceneAsset->lightmapAtlasImageAsset != nullptr) {
@@ -365,7 +378,7 @@ namespace Trident {
 				ref<Image> createColorImage() const;
 			#endif
 
-			ref<Image> createSkyboxImage() const;
+			ref<Image> createSkyboxImage(ref<ImageAsset> imageAsset) const;
 			ref<Image> createDepthStencilImage() const;
 			ref<Image> createLightmapAtlasImage(ref<ImageAsset> imageAsset) const;
 			ref<Image> createDirectionalShadowMapImage() const;

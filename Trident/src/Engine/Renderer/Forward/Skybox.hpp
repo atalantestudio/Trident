@@ -91,12 +91,12 @@ namespace Trident {
 		});
 	}
 
-	ref<Image> ForwardRenderer::createSkyboxImage() const {
+	ref<Image> ForwardRenderer::createSkyboxImage(ref<ImageAsset> imageAsset) const {
 		return createDynamicImage({
 			.type = ImageType::TYPE_2D,
 			.flags = ImageFlags::CUBE_COMPATIBLE,
 			.format = ImageFormat::R8G8B8A8_UNORM,
-			.extent = {512, 512, 1},
+			.extent = imageAsset->getExtent(),
 			.mipLevelCount = 1,
 			.layerCount = 6,
 			.sampleCount = 1,

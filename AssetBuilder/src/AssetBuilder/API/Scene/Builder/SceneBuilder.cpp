@@ -67,7 +67,11 @@ namespace Trident {
 
 	SceneBuilder::SceneBuilder(const Scene3DDescriptor& descriptor) :
 		descriptor(descriptor)
-	{}
+	{
+		if (descriptor.skyboxImageAsset != nullptr) {
+			ENGINE_ASSERT(descriptor.skyboxImageAsset->isEligibleForCubeMap(), "Skybox image asset is not eligible for a cube map.");
+		}
+	}
 
 	uint32 SceneBuilder::loadGeometry(ref<Geometry3DAsset> asset) {
 		uint32 geometryIndex = 0;

@@ -17,6 +17,7 @@
 namespace Trident {
 	struct Scene3DDescriptor {
 		Scene3DBuildFlags flags;
+		ref<ImageAsset> skyboxImageAsset;
 		svec3<float32> skyColor;
 		svec3<float32> sunDirection;
 		svec3<float32> sunColor;
@@ -79,6 +80,14 @@ namespace Trident {
 	};
 
 	struct BuildScene3D {
+		uint32 skyboxAssetIdentifier;
+		svec3<float32> skyColor;
+
+		svec3<float32> sunDirection;
+
+		/// Pre-multiplied by the sun intensity.
+		svec3<float32> sunColor;
+
 		sequence<BuildGeometry> geometries;
 
 		/// Grouped by material.
@@ -91,10 +100,5 @@ namespace Trident {
 		uint32 triangleCount;
 		BuildStaticSceneGeometry3D staticGeometry;
 		BuildDynamicSceneGeometry3D dynamicGeometry;
-		svec3<float32> skyColor;
-		svec3<float32> sunDirection;
-
-		/// Pre-multiplied by the sun intensity.
-		svec3<float32> sunColor;
 	};
 }

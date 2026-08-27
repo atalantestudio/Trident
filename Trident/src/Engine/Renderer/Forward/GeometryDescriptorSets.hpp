@@ -8,6 +8,7 @@
 namespace Trident {
 	void ForwardRenderer::updateGeometryDescriptorSets() const {
 		const ref<Device> device = getDevice();
+		const ref<Scene3DAsset> sceneAsset = scene->getAsset();
 
 		const BaseBufferView descriptorBufferViews[] = {
 			cameraBuffer->createView<ForwardCamera>(0, cameraBuffer->getSize()),
@@ -17,13 +18,6 @@ namespace Trident {
 
 		const DescriptorImage descriptorImages[] = {
 			{
-				.imageView = skyboxImageView,
-				.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-
-				// TODO(forward/skybox): Use a different sampler?
-				.sampler = directionalShadowMapSampler,
-			},
-			{
 				.imageView = directionalShadowMapImageView,
 				.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
 				.sampler = directionalShadowMapSampler,
@@ -31,20 +25,6 @@ namespace Trident {
 		};
 
 		const WriteDescriptorSet writeDescriptorSets[] = {
-			// Camera
-			{
-				.descriptorSet = skyboxDescriptorSet,
-				.bindingIndex = 0,
-				.descriptorBufferViews = descriptorBufferViews[0],
-			},
-
-			// Skybox
-			{
-				.descriptorSet = skyboxDescriptorSet,
-				.bindingIndex = 1,
-				.descriptorImages = descriptorImages[0],
-			},
-
 			// Camera
 			{
 				.descriptorSet = sceneDescriptorSet,
@@ -70,7 +50,7 @@ namespace Trident {
 			{
 				.descriptorSet = sceneDescriptorSet,
 				.bindingIndex = 3,
-				.descriptorImages = descriptorImages[1],
+				.descriptorImages = descriptorImages[0],
 			},
 
 			// Point light
@@ -83,7 +63,35 @@ namespace Trident {
 
 		device->updateDescriptorSets(writeDescriptorSets);
 
-		if (scene->getAsset()->lightmapAtlasImageAsset != nullptr) {
+		if (sceneAsset->skyboxImageAsset != nullptr) {
+			const DescriptorImage skyboxDescriptorImage = {
+				.imageView = skyboxImageView,
+				.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+
+				// TODO(forward/skybox): Use a different sampler?
+				.sampler = directionalShadowMapSampler,
+			};
+
+			const WriteDescriptorSet writeDescriptorSets[] = {
+				// Camera
+				{
+					.descriptorSet = skyboxDescriptorSet,
+					.bindingIndex = 0,
+					.descriptorBufferViews = descriptorBufferViews[0],
+				},
+
+				// Skybox
+				{
+					.descriptorSet = skyboxDescriptorSet,
+					.bindingIndex = 1,
+					.descriptorImages = skyboxDescriptorImage,
+				},
+			};
+
+			device->updateDescriptorSets(writeDescriptorSets);
+		}
+
+		if (sceneAsset->lightmapAtlasImageAsset != nullptr) {
 			const DescriptorImage lightmapAtlasDescriptorImage = {
 				.imageView = lightmapAtlasImageView,
 				.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,

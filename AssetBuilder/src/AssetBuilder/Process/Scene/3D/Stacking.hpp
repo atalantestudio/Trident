@@ -15,7 +15,8 @@ namespace Trident {
 
 			BuildScene3D createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				SceneBuilder builder({
-					.flags = Scene3DBuildFlags::LIGHTMAP_SUN_CONTRIBUTION,
+					.flags = {},
+					.skyboxImageAsset = assetLibrary->getAsset<ImageAsset>("evening_road_01_2k"),
 					.skyColor = {0.6f, 0.7f, 0.9f},
 					.sunDirection = {1.0f, 1.0f, 1.0f},
 					.sunColor = {1.0f, 1.0f, 1.0f},
