@@ -12,6 +12,10 @@ namespace Trident {
 	class MapBuilder {
 		friend Face;
 
+		private:
+			static constexpr uint32 MAX_FACE_POSITIONS = 65535;
+			static constexpr uint32 MAX_FACE_TEXTURE_COORDINATES = 65535;
+
 		public:
 			explicit MapBuilder(const MapDescriptor& descriptor);
 
@@ -22,8 +26,12 @@ namespace Trident {
 		private:
 			MapDescriptor descriptor;
 
-			std::vector<svec3<float32>> facePositions;
+			sequence<svec3<float32>> facePositions;
+			sequence<svec2<float32>> faceTextureCoordinates;
 
 			uint32 lightmapCount = 0;
+			uint32 facePositionCount = 0;
+			uint32 faceTextureCoordinateCount = 0;
+			uint32 faceIndexCount = 0;
 	};
 }

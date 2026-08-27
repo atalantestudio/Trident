@@ -8,6 +8,10 @@
 #include "Engine/Filesystem/Asset/MaterialAsset.hpp"
 
 namespace Trident {
+	struct SunLight {
+		// TODO(asset-builder/map)
+	};
+
 	struct MapDescriptor {
 		ref<ImageAsset> skyboxImageAsset;
 
@@ -15,5 +19,7 @@ namespace Trident {
 
 		sequence<ref<MaterialAsset>> staticMaterialAssets;
 		sequence<ref<MaterialAsset>> dynamicMaterialAssets;
+
+		SunLight sunLight;
 	};
 }

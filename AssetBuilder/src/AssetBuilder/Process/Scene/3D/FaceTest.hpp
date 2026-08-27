@@ -23,7 +23,15 @@ namespace Trident {
 					.dynamicMaterialAssets = {},
 				});
 
-				// TODO(asset-builder/map)
+				const FaceVertex vertices[] = {
+					{{-32.0f,  32.0f,  92.0f }, {0.0f, 0.0f}},
+					{{ 0.0f,   32.0f,  112.0f}, {0.0f, 0.0f}},
+					{{ 32.0f,  32.0f,  92.0f }, {0.0f, 0.0f}},
+					{{ 16.0f,  32.0f,  64.0f }, {0.0f, 0.0f}},
+					{{-16.0f,  32.0f,  64.0f }, {0.0f, 0.0f}},
+				};
+
+				builder.createFace(vertices, {0.0f, 1.0f, 0.0f});
 
 				return builder.build();
 			}

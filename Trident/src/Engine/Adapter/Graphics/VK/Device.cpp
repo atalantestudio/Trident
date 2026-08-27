@@ -260,7 +260,9 @@ namespace Trident {
 		deviceCreateInfo.pQueueCreateInfos = &deviceQueueCreateInfos[0];
 		deviceCreateInfo.enabledExtensionCount = static_cast<uint32>(enabledExtensionNames.size());
 		deviceCreateInfo.ppEnabledExtensionNames = enabledExtensionNames.data();
-		deviceCreateInfo.pEnabledFeatures = nullptr;
+
+		// TODO(graphics/vk/device/features): Let the user select the features.
+		deviceCreateInfo.pEnabledFeatures = &_physicalDevice->features;
 
 		result = _physicalDevice->instance->vkCreateDevice(_physicalDevice->physicalDevice, &deviceCreateInfo, nullptr, &device->device);
 

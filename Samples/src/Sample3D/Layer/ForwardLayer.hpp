@@ -18,8 +18,6 @@
 #include "Engine/Layer/Layer.hpp"
 #include "Engine/Renderer/Forward/Renderer.hpp"
 
-#include "Engine/Filesystem/Filesystem.hpp"
-
 namespace Trident {
 	class Sample3DForwardLayer : public Layer {
 		private:
@@ -238,10 +236,6 @@ namespace Trident {
 				const float32 yaw = event.getX() * LOOK_SENSITIVITY;
 
 				cameraController.accumulateAngularMotion(radians(vec3<float32>{pitch, yaw, 0.0_deg}));
-
-				/* if (pitch != 0.0f || yaw != 0.0f) {
-					renderer.resetFrameIndex();
-				} */
 
 				return true;
 			}

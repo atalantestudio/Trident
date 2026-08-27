@@ -29,7 +29,7 @@ namespace Trident {
 
 		public:
 			/// One texture coordinate per vertex.
-			std::vector<svec2<float32>> textureCoordinates;
+			view<svec2<float32>> textureCoordinates;
 
 			svec3<float32> normal;
 

@@ -4,7 +4,6 @@
 #pragma once
 
 #include "Engine/API/Camera/3D/PerspectiveCamera3D.hpp"
-#include "Engine/API/Geometry/Index.hpp"
 #include "Engine/Renderer/Scene/BaseSceneRenderer.hpp"
 #include "Engine/Renderer/VisualizationMode.hpp"
 

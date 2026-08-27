@@ -31,10 +31,24 @@ namespace Trident {
 		const uint32 staticVertexCount = stream.read<uint32>();
 		const uint32 bakedVertexCount = stream.read<uint32>();
 
-		const uint32 triangleCount = stream.read<uint32>();
-		const uint32 indexCount = triangleCount * 3;
-		const uint32 bakedTriangleCount = stream.read<uint32>();
-		const uint32 bakedIndexCount = bakedTriangleCount * 3;
+		uint32 indexCount;
+		uint32 bakedIndexCount;
+
+		// TODO(asset-builder/scene): Map building WIP.
+		if (asset.version.minor == 1) {
+			indexCount = stream.read<uint32>();
+			bakedIndexCount = indexCount;
+
+			stream.jump(sizeof(uint32));
+		}
+		else {
+			const uint32 triangleCount = stream.read<uint32>();
+			const uint32 bakedTriangleCount = stream.read<uint32>();
+
+			indexCount = triangleCount * 3;
+			bakedIndexCount = bakedTriangleCount * 3;
+		}
+
 		const uint32 lightmapCoordinateCount = stream.read<uint32>();
 
 		asset.geometryRanges[0] = {0, vertexCount * sizeof(Vertex3D)};
