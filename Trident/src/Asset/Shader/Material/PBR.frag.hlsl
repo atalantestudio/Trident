@@ -1,55 +1,49 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-struct Interstage {
-	float4 position : SV_Position;
-	float3 surface : VERTEX_OUTPUT_ATTRIBUTE1;
-	float2 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE2;
-	float3x3 tbn : VERTEX_OUTPUT_ATTRIBUTE3;
-};
-
-struct FragmentOutput {
-	float4 color : SV_Target;
-};
-
 struct Camera {
 	float4x4 projectionView;
 	float3 position;
+	uint pointLightCount;
+	float3 ambientColor;
+	uint _0;
+	float3 sunColor;
 };
 
-struct Light {
-	float3 position;
+struct PointLight {
 	float3 color;
+	float intensity;
+	float3 position;
 };
 
-Light createLight(float3 position, float3 color) {
-	Light light;
-	light.position = position;
-	light.color = color;
-
-	return light;
-}
-
-static const float PI = radians(180.0);
-static const float3 AMBIENT_LIGHT = float3(0.03, 0.03, 0.03);
-static const float DENOMINATOR_TOLERANCE = 0.0001;
-static const uint LIGHT_COUNT = 2;
-static const Light LIGHTS[LIGHT_COUNT] = {
-	createLight(float3(-256.0, 256.0, -256.0), float3(300000.0, 300000.0, 300000.0)),
-	createLight(float3(128.0, 128.0, 256.0), float3(300000.0, 300000.0, 300000.0)),
+struct Interstage {
+	float4 position : SV_Position;
+	float3 surface : VERTEX_OUTPUT_ATTRIBUTE1;
+	float3x3 tbn : VERTEX_OUTPUT_ATTRIBUTE2;
+	float2 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE5;
+	float4 lightSpacePosition : VERTEX_OUTPUT_ATTRIBUTE6;
+	nointerpolation uint instanceIndex : VERTEX_OUTPUT_ATTRIBUTE7;
 };
 
-cbuffer Camera : register(b0) {
+cbuffer Camera {
 	Camera camera;
 }
 
-Texture2D<float4> armTexture : register(t4);
-Texture2D<float4> diffuseTexture : register(t5);
-Texture2D<float4> normalTexture : register(t6);
+StructuredBuffer<PointLight> pointLights;
 
-SamplerState armSamplerState : register(s0);
-SamplerState diffuseSamplerState : register(s1);
-SamplerState normalSamplerState : register(s2);
+Texture2D<float> directionalShadowMapTexture;
+SamplerState directionalShadowMapSamplerState;
+
+Texture2D<float4> armTexture;
+SamplerState armSamplerState;
+
+Texture2D<float4> diffuseTexture;
+SamplerState diffuseSamplerState;
+
+Texture2D<float4> normalTexture;
+SamplerState normalSamplerState;
+
+static const float PI = radians(180.0);
 
 float TrowbridgeReitzGGX(float3 normal, float3 halfway, float roughness) {
 	float a = roughness * roughness;
@@ -75,7 +69,7 @@ float SchlickGGX(float angle, float roughness) {
 	return numerator / denominator;
 }
 
-float Smith(float3 normal, float3 viewDirection, float3 lightDirection, float roughness) {
+float GeometrySmith(float3 normal, float3 viewDirection, float3 lightDirection, float roughness) {
 	float viewAngle = max(0.0, dot(normal, viewDirection));
 	float lightAngle = max(0.0, dot(normal, lightDirection));
 	float ggx1 = SchlickGGX(viewAngle, roughness);
@@ -84,68 +78,77 @@ float Smith(float3 normal, float3 viewDirection, float3 lightDirection, float ro
 	return ggx1 * ggx2;
 }
 
-float3 FresnelSchlick(float angle, float3 baseReflectivity) {
-	return baseReflectivity + (1.0 - baseReflectivity) * pow(clamp(1.0 - angle, 0.0, 1.0), 5.0);
+float3 FresnelSchlick(float cosTheta, float3 F0) {
+	return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
-float3 gammaCorrect(float3 color) {
-	return pow(color, 1.0 / 2.2);
+float calculateShadow(float4 lightSpacePosition, float3 normal) {
+	float3 projectedPosition = lightSpacePosition.xyz / lightSpacePosition.w;
+
+	if (projectedPosition.z < 0.0) {
+		return 0.0;
+	}
+	else {
+		float2 coordinate = projectedPosition.xy * 0.5 + 0.5;
+		coordinate.y = 1.0 - coordinate.y;
+
+		const float3 sunDirection = normalize(float3(1.0, 1.0, 1.0));
+
+		float depthBias = 0.0005 * dot(normal, sunDirection);
+		float depth = projectedPosition.z;
+		float closestDepth = directionalShadowMapTexture.Sample(directionalShadowMapSamplerState, coordinate);
+
+		return depth + depthBias <= closestDepth;
+	}
 }
 
-FragmentOutput main(Interstage interstage) {
-	// Convert from sRGB space to linear space.
-	float3 diffuse = pow(diffuseTexture.Sample(diffuseSamplerState, interstage.textureCoordinate).rgb, float3(2.2, 2.2, 2.2));
+float4 main(Interstage interstage) : SV_Target0 {
+	float inShadow = calculateShadow(interstage.lightSpacePosition, interstage.tbn[2]);
 
-	float3 normal = normalize(mul(interstage.tbn, normalTexture.Sample(normalSamplerState, interstage.textureCoordinate).xyz * 2.0 - 1.0));
+	float3 x = camera.position;
+	float3 wo = normalize(camera.position - interstage.surface);
+
 	float3 arm = armTexture.Sample(armSamplerState, interstage.textureCoordinate).rgb;
-	float ao = arm[0];
-	float roughness = arm[1];
-	float metallic = arm[2];
-	float3 surface = interstage.surface;
-	float3 surfaceToViewDirection = normalize(camera.position - surface);
-	float3 baseReflectivity = lerp(float3(0.04, 0.04, 0.04), diffuse, metallic);
-	float3 L = float3(0.0, 0.0, 0.0);
-	uint lightIndex = 0;
+	float ao = arm.r;
+	float roughness = arm.g;
+	float metallic = arm.b;
 
-	while (lightIndex < LIGHT_COUNT) {
-		Light light = LIGHTS[lightIndex];
+	// TODO(pbr): Convert the albedo map to linear space while building?
+	float3 c = pow(diffuseTexture.Sample(diffuseSamplerState, interstage.textureCoordinate).rgb, 2.2);
 
-		float3 surfaceToLightDirection = normalize(light.position - surface);
-		float3 surfaceHalfway = normalize(surfaceToViewDirection + surfaceToLightDirection);
-		float lightSurfaceDistance = length(light.position - surface);
+	float3 n = normalize(mul(interstage.tbn, normalTexture.Sample(normalSamplerState, interstage.textureCoordinate).rgb * 2.0 - 1.0));
+	float3 F0 = lerp(float3(0.04, 0.04, 0.04), c, metallic);
 
-		// Attenuate using (physically correct) inverse-square law.
-		float attenuation = 1.0 / (lightSurfaceDistance * lightSurfaceDistance);
+	float3 Le = float3(0.0, 0.0, 0.0);
+	float3 Lr = float3(0.0, 0.0, 0.0);
+	uint pointLightIndex = 0u;
 
-		float3 radiance = light.color * attenuation;
+	while (pointLightIndex < camera.pointLightCount) {
+		PointLight pointLight = pointLights[pointLightIndex];
 
-		float NDF = TrowbridgeReitzGGX(normal, surfaceHalfway, roughness);
-		float G = Smith(normal, surfaceToViewDirection, surfaceToLightDirection, roughness);
-		float3 F = FresnelSchlick(max(0.0, dot(surfaceHalfway, surfaceToViewDirection)), baseReflectivity);
+		float3 surfaceToLight = pointLight.position - interstage.surface;
+		float3 wi = normalize(surfaceToLight);
+		float3 h = normalize(wo + wi);
+		float d = dot(surfaceToLight, surfaceToLight);
+		float3 Li = (pointLight.color * pointLight.intensity) / d;
 
-		float3 kS = F;
-		float3 kD = 1.0 - kS;
+		float3 F = FresnelSchlick(max(0.0, dot(wo, h)), F0);
+		float D = TrowbridgeReitzGGX(n, h, roughness);
+		float G = GeometrySmith(n, wo, wi, roughness);
+		float3 kd = float3(1.0, 1.0, 1.0) - F * (1.0 - metallic);
+		float3 fr = kd * c / PI + ((D * F * G) / (4.0 * max(0.0, dot(wo, n)) * max(0.0, dot(wi, n)) + 1e-4));
 
-		// Cancel if the surface is metallic (metallic = 1.0).
-		kD *= 1.0 - metallic;
+		Lr += fr * Li * max(0.0, dot(wi, n));
 
-		float3 numerator = NDF * G * F;
-		float denominator = 4.0 * max(0.0, dot(normal, surfaceToViewDirection)) * max(0.0, dot(normal, surfaceToLightDirection)) + DENOMINATOR_TOLERANCE;
-		float3 specular = numerator / denominator;
-		float angle = max(0.0, dot(normal, surfaceToLightDirection));
-
-		L += (kD * diffuse / PI + specular) * radiance * angle;
-
-		lightIndex += 1;
+		pointLightIndex += 1u;
 	}
 
-	float3 color = AMBIENT_LIGHT * diffuse * ao + L;
+	float3 Lo = Le + Lr;
 
-	color = color / (color + 1.0);
-	color = gammaCorrect(color);
+	float4 fragment;
+	fragment.rgb = camera.ambientColor * c * ao * inShadow + c * camera.sunColor * (1.0 - inShadow) + Lo;
+	fragment.rgb = pow(fragment.rgb, 1.0 / 2.2);
+	fragment.a = 1.0;
 
-	FragmentOutput output;
-	output.color = float4(color, 1.0);
-
-	return output;
+	return fragment;
 }

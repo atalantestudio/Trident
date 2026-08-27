@@ -13,30 +13,30 @@ struct Camera {
 struct Interstage {
 	float4 position : SV_Position;
 	float3 surface : VERTEX_OUTPUT_ATTRIBUTE1;
-	float3 normal : VERTEX_OUTPUT_ATTRIBUTE2;
-	float2 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE3;
-	float2 lightmapCoordinate : VERTEX_OUTPUT_ATTRIBUTE4;
-	float4 lightSpacePosition : VERTEX_OUTPUT_ATTRIBUTE5;
+	float3x3 tbn : VERTEX_OUTPUT_ATTRIBUTE2;
+	float2 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE5;
+	float4 lightSpacePosition : VERTEX_OUTPUT_ATTRIBUTE6;
+	float2 lightmapCoordinate : VERTEX_OUTPUT_ATTRIBUTE7;
 };
 
 struct FragmentOutput {
-	float4 color : SV_Target;
+	float4 color : SV_Target0;
 };
 
-cbuffer Camera : register(b0) {
+cbuffer Camera {
 	Camera camera;
 }
 
-Texture2D<float4> lightmapAtlasTexture : register(t0);
-SamplerState lightmapAtlasSamplerState : register(s0);
-
 Texture2D<float> directionalShadowMapTexture : register(t1);
-SamplerState directionalShadowMapSamplerState : register(s1);
+SamplerState directionalShadowMapSamplerState;
 
-Texture2D<float4> diffuseTexture : register(t2);
-SamplerState diffuseSamplerState : register(s2);
+Texture2D<float4> lightmapAtlasTexture : register(t2);
+SamplerState lightmapAtlasSamplerState;
 
-float calculateShadow(float4 lightSpacePosition) {
+Texture2D<float4> diffuseTexture : register(t3);
+SamplerState diffuseSamplerState;
+
+float calculateShadow(float4 lightSpacePosition, float3 normal) {
 	float3 projectedPosition = lightSpacePosition.xyz / lightSpacePosition.w;
 
 	if (projectedPosition.z < 0.0) {
@@ -48,7 +48,7 @@ float calculateShadow(float4 lightSpacePosition) {
 
 		const float3 sunDirection = normalize(float3(1.0, 1.0, 1.0));
 
-		float depthBias = 0.0005 * dot(interstage.tbn[2], sunDirection);
+		float depthBias = 0.0005 * dot(normal, sunDirection);
 		float depth = projectedPosition.z;
 		float closestDepth = directionalShadowMapTexture.Sample(directionalShadowMapSamplerState, coordinate);
 
@@ -57,7 +57,7 @@ float calculateShadow(float4 lightSpacePosition) {
 }
 
 FragmentOutput main(Interstage interstage) {
-	float inShadow = calculateShadow(interstage.lightSpacePosition);
+	float inShadow = calculateShadow(interstage.lightSpacePosition, interstage.tbn[2]);
 	float3 directDiffuse = diffuseTexture.Sample(diffuseSamplerState, interstage.textureCoordinate).rgb;
 
 	// TODO(forward/static): Sample the lightmap atlas with bicubic interpolation.

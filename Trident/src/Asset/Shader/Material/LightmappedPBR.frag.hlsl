@@ -1,72 +1,156 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-struct Interstage {
-	float4 position : SV_Position;
-	float3 normal : VERTEX_OUTPUT_ATTRIBUTE1;
-	float2 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE2;
-	float2 lightmapCoordinate : VERTEX_OUTPUT_ATTRIBUTE3;
-};
-
-struct FragmentOutput {
-	float4 color : SV_Target;
-};
-
 struct Camera {
 	float4x4 projectionView;
 	float3 position;
+	uint pointLightCount;
+	float3 ambientColor;
+	uint _0;
+	float3 sunColor;
 };
 
-struct Light {
-	float3 position;
+struct PointLight {
 	float3 color;
+	float intensity;
+	float3 position;
 };
 
-Light createLight(float3 position, float3 color) {
-	Light light;
-	light.position = position;
-	light.color = color;
-
-	return light;
-}
-
-static const uint LIGHT_COUNT = 2;
-static const Light LIGHTS[LIGHT_COUNT] = {
-	createLight(float3(-128.0, 128.0, -128.0), float3(300000.0, 300000.0, 300000.0)),
-	createLight(float3(128.0, 128.0, 128.0), float3(300000.0, 300000.0, 300000.0)),
+struct Interstage {
+	float4 position : SV_Position;
+	float3 surface : VERTEX_OUTPUT_ATTRIBUTE1;
+	float3x3 tbn : VERTEX_OUTPUT_ATTRIBUTE2;
+	float2 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE5;
+	float4 lightSpacePosition : VERTEX_OUTPUT_ATTRIBUTE6;
+	float2 lightmapCoordinate : VERTEX_OUTPUT_ATTRIBUTE7;
 };
 
-cbuffer Camera : register(b0) {
+cbuffer Camera {
 	Camera camera;
 }
 
-Texture2D<float4> lightmapAtlasTexture : register(t0);
-SamplerState lightmapAtlasSamplerState : register(s0);
+StructuredBuffer<PointLight> pointLights;
 
-Texture2D<float4> armTexture : register(t1);
-SamplerState armSamplerState : register(s1);
+Texture2D<float> directionalShadowMapTexture;
+SamplerState directionalShadowMapSamplerState;
 
-Texture2D<float4> diffuseTexture : register(t2);
-SamplerState diffuseSamplerState : register(s2);
+Texture2D<float4> lightmapAtlasTexture;
+SamplerState lightmapAtlasSamplerState;
 
-Texture2D<float4> normalTexture : register(t3);
-SamplerState normalSamplerState : register(s3);
+Texture2D<float4> armTexture;
+SamplerState armSamplerState;
 
-FragmentOutput main(Interstage interstage) {
-	// Convert from sRGB space to linear space.
-	float3 diffuse = pow(diffuseTexture.Sample(diffuseSamplerState, interstage.textureCoordinate).rgb, float3(2.2, 2.2, 2.2));
+Texture2D<float4> diffuseTexture;
+SamplerState diffuseSamplerState;
+
+Texture2D<float4> normalTexture;
+SamplerState normalSamplerState;
+
+static const float PI = radians(180.0);
+
+float TrowbridgeReitzGGX(float3 normal, float3 halfway, float roughness) {
+	float a = roughness * roughness;
+	float a2 = a * a;
+	float dotProduct = max(0.0, dot(normal, halfway));
+	float dotProduct2 = dotProduct * dotProduct;
+	float numerator = a2;
+
+	float denominator = dotProduct2 * (a2 - 1.0) + 1.0;
+	denominator = PI * denominator * denominator;
+
+	return numerator / denominator;
+}
+
+float SchlickGGX(float angle, float roughness) {
+	// Remap roughness.
+	float r = roughness + 1.0;
+	float k = (r * r) / 8.0;
+
+	float numerator = angle;
+	float denominator = angle * (1.0 - k) + k;
+
+	return numerator / denominator;
+}
+
+float GeometrySmith(float3 normal, float3 viewDirection, float3 lightDirection, float roughness) {
+	float viewAngle = max(0.0, dot(normal, viewDirection));
+	float lightAngle = max(0.0, dot(normal, lightDirection));
+	float ggx1 = SchlickGGX(viewAngle, roughness);
+	float ggx2 = SchlickGGX(lightAngle, roughness);
+
+	return ggx1 * ggx2;
+}
+
+float3 FresnelSchlick(float cosTheta, float3 F0) {
+	return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+
+float calculateShadow(float4 lightSpacePosition, float3 normal) {
+	float3 projectedPosition = lightSpacePosition.xyz / lightSpacePosition.w;
+
+	if (projectedPosition.z < 0.0) {
+		return 0.0;
+	}
+	else {
+		float2 coordinate = projectedPosition.xy * 0.5 + 0.5;
+		coordinate.y = 1.0 - coordinate.y;
+
+		const float3 sunDirection = normalize(float3(1.0, 1.0, 1.0));
+
+		float depthBias = 0.0005 * dot(normal, sunDirection);
+		float depth = projectedPosition.z;
+		float closestDepth = directionalShadowMapTexture.Sample(directionalShadowMapSamplerState, coordinate);
+
+		return depth + depthBias <= closestDepth;
+	}
+}
+
+float4 main(Interstage interstage) : SV_Target0 {
+	float inShadow = calculateShadow(interstage.lightSpacePosition, interstage.tbn[2]);
+
+	float3 x = camera.position;
+	float3 wo = normalize(camera.position - interstage.surface);
 
 	// TODO(forward/static): Sample the lightmap atlas with bicubic interpolation.
-	float3 light = lightmapAtlasTexture.Sample(lightmapAtlasSamplerState, interstage.lightmapCoordinate).rgb;
+	float3 indirectDiffuse = lightmapAtlasTexture.Sample(lightmapAtlasSamplerState, interstage.lightmapCoordinate).rgb;
 
 	float3 arm = armTexture.Sample(armSamplerState, interstage.textureCoordinate).rgb;
-	float ao = arm[0];
-	float roughness = arm[1];
+	float ao = arm.r;
+	float roughness = arm.g;
+	float metallic = arm.b;
+	float3 c = diffuseTexture.Sample(diffuseSamplerState, interstage.textureCoordinate).rgb;
+	float3 n = normalize(mul(interstage.tbn, normalTexture.Sample(normalSamplerState, interstage.textureCoordinate).rgb * 2.0 - 1.0));
+	float3 F0 = lerp(float3(0.04, 0.04, 0.04), c, metallic);
 
-	FragmentOutput output;
-	output.color.rgb = diffuse * light * ao;
-	output.color.rgb = pow(output.color.rgb, 1.0 / 2.2);
-	output.color.a = 1.0;
+	float3 Le = float3(0.0, 0.0, 0.0);
+	float3 Lr = float3(0.0, 0.0, 0.0);
+	uint pointLightIndex = 0u;
 
-	return output;
+	while (pointLightIndex < camera.pointLightCount) {
+		PointLight pointLight = pointLights[pointLightIndex];
+
+		float3 surfaceToLight = pointLight.position - interstage.surface;
+		float3 wi = normalize(surfaceToLight);
+		float3 h = normalize(wo + wi);
+		float d = dot(surfaceToLight, surfaceToLight);
+		float3 Li = (pointLight.color * pointLight.intensity) / d;
+
+		float3 F = FresnelSchlick(max(0.0, dot(wo, h)), F0);
+		float D = TrowbridgeReitzGGX(n, h, roughness);
+		float G = GeometrySmith(n, wo, wi, roughness);
+		float3 kd = float3(1.0, 1.0, 1.0) - F * (1.0 - metallic);
+		float3 fr = kd * c / PI + ((D * F * G) / (4.0 * max(0.0, dot(wo, n)) * max(0.0, dot(wi, n)) + 1e-4));
+
+		Lr += fr * Li * max(0.0, dot(wi, n));
+
+		pointLightIndex += 1u;
+	}
+
+	float3 Lo = Le + Lr;
+
+	float4 fragment;
+	fragment.rgb = indirectDiffuse * c * ao * inShadow + c * camera.sunColor * (1.0 - inShadow) + Lo;
+	fragment.a = 1.0;
+
+	return fragment;
 }
