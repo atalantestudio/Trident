@@ -30,8 +30,8 @@ namespace Trident {
 				builder.placeRigidBody({
 					.geometryIndex = lemonGeometry,
 					.material = lemonMaterial,
-					.position = {3.84f, 0.0f, 16.0f},
-					.rotation = {radians(90.0_deg), -0.2_rad, radians(180.0_deg)},
+					.position = {3.97f, 64.0f, 16.0f},
+					.rotation = {radians(-45.0_deg), radians(83.0_deg), radians(63.0_deg)},
 					.uniformScale = 128.0f,
 					.mass = max<float32>(),
 					.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
@@ -43,7 +43,7 @@ namespace Trident {
 				builder.placeRigidBody({
 					.geometryIndex = lemonGeometry,
 					.material = lemonMaterial,
-					.position = {-4.48f, -2.56f, 16.0f},
+					.position = {-4.63f, 61.44f, 16.0f},
 					.rotation = {-0.3_rad, -0.3_rad, radians(90.0_deg)},
 					.uniformScale = 128.0f,
 					.mass = max<float32>(),
@@ -51,6 +51,17 @@ namespace Trident {
 					.inertiaScale = {1.0f, 1.0f, 1.0f},
 					.friction = 0.2f,
 					.restitution = 0.0f,
+				});
+
+				builder.placePointLight({
+					.color = {1.0f, 1.0f, 1.0f},
+					.intensity = 300000.0f,
+					.position = {-256.0f, 256.0f, -256.0f},
+				});
+				builder.placePointLight({
+					.color = {1.0f, 1.0f, 1.0f},
+					.intensity = 300000.0f,
+					.position = {128.0f, 128.0f, 256.0f},
 				});
 
 				return builder.build();
