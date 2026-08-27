@@ -276,7 +276,8 @@ namespace Trident {
 		commandEncoder->bindIndexBuffer<uint32>(indexBuffer, 0);
 		commandEncoder->bindDescriptorSets(geometryPipelineLayout, 0, descriptorSets[1]);
 
-		// TODO(renderer/debug)
-		commandEncoder->drawIndexed(5, 1, 0, 0, 0);
+		const uint32 indexCount = static_cast<uint32>(scene->geometryRanges[1].count / sizeof(uint32));
+
+		commandEncoder->drawIndexed(indexCount, 1, 0, 0, 0);
 	}
 }

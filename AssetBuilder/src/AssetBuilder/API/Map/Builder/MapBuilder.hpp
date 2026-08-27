@@ -19,19 +19,25 @@ namespace Trident {
 		public:
 			explicit MapBuilder(const MapDescriptor& descriptor);
 
-			Face createFace(view<FaceVertex> vertices, svec3<float32> normal);
+			Face& createFace(view<FaceVertex> vertices, svec3<float32> normal);
 
 			BuildScene3D build();
 
 		private:
 			MapDescriptor descriptor;
 
+			std::vector<Face> faces;
 			sequence<svec3<float32>> facePositions;
 			sequence<svec2<float32>> faceTextureCoordinates;
 
 			uint32 lightmapCount = 0;
 			uint32 facePositionCount = 0;
+			uint32 faceVertexCount = 0;
 			uint32 faceTextureCoordinateCount = 0;
+
+			/// Total face triangle count.
+			uint32 triangleCount = 0;
+
 			uint32 faceIndexCount = 0;
 	};
 }

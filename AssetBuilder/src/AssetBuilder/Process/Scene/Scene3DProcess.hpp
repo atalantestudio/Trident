@@ -19,10 +19,7 @@ namespace Trident {
 				ByteStream<StreamOperation::WRITE> stream(streamSize, Endianness::LITTLE_ENDIAN);
 				stream.write<AssetSignature>(AssetSignature::SCENE);
 				stream.write<uint32>(identifier);
-
-				// TODO(asset-builder/scene): Map building WIP.
-				stream.write<VersionNumber>({0, 1, 0});
-
+				stream.write<VersionNumber>({0, 0, 0});
 				stream.write<float32>(scene.skyColor.x);
 				stream.write<float32>(scene.skyColor.y);
 				stream.write<float32>(scene.skyColor.z);

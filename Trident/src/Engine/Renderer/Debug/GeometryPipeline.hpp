@@ -45,8 +45,8 @@ namespace Trident {
 				},
 				"Debug/Geometry.frag"
 			),
-			.primitiveTopology = PrimitiveTopology::POINT_LIST,
-			.polygonMode = PolygonMode::POINT,
+			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
+			.polygonMode = PolygonMode::FILL,
 			.cullMode = CullMode::BACK,
 			.frontFace = FrontFace::CLOCKWISE,
 			.lineWidth = 1.0f,
