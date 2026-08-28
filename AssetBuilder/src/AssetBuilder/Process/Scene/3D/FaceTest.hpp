@@ -23,7 +23,7 @@ namespace Trident {
 					.dynamicMaterialAssets = {},
 				});
 
-				const FaceVertex vertices[] = {
+				const FaceVertex pentagonVertices[] = {
 					{{-32.0f,  32.0f,  92.0f }, {0.0f, 0.0f}},
 					{{ 0.0f,   32.0f,  112.0f}, {0.0f, 0.0f}},
 					{{ 32.0f,  32.0f,  92.0f }, {0.0f, 0.0f}},
@@ -31,7 +31,22 @@ namespace Trident {
 					{{-16.0f,  32.0f,  64.0f }, {0.0f, 0.0f}},
 				};
 
-				builder.createFace(vertices, {0.0f, 1.0f, 0.0f});
+				Face& pentagon = builder.createFace(pentagonVertices, {0.0f, 1.0f, 0.0f});
+
+				builder.extrudeFace(pentagon, 32.0f);
+
+				builder.extrudeFace(builder.getFace(3), 48.0f);
+
+				const FaceVertex squareVertices[] = {
+					{{ 64.0f,  48.0f,  128.0f}, {0.0f, 0.0f}},
+					{{ 96.0f,  48.0f,  128.0f}, {0.0f, 0.0f}},
+					{{ 96.0f,  24.0f,  128.0f}, {0.0f, 0.0f}},
+					{{ 64.0f,  24.0f,  128.0f}, {0.0f, 0.0f}},
+				};
+
+				Face& square = builder.createFace(squareVertices, {0.0f, 0.0f, -1.0f});
+
+				builder.extrudeFace(square, -32.0f);
 
 				return builder.build();
 			}
