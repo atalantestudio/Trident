@@ -79,7 +79,7 @@ namespace Trident {
 			extrudedFace.indexRange.offset = faceIndexCount + indexA * 4;
 
 			// TODO(lyah/scalar)
-			extrudedFace.normal = svec3<float32>(normalized(cross(b - a, face.normal)));
+			extrudedFace.normal = svec3<float32>(normalized(cross(b - a, face.normal * scale)));
 
 			indices[extrudedFace.indexRange.offset + 0] = facePositionCount + indexB;
 			indices[extrudedFace.indexRange.offset + 1] = facePositionCount + indexA;
