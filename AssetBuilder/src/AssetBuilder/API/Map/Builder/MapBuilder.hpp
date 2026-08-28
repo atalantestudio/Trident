@@ -13,9 +13,6 @@ namespace Trident {
 		friend Face;
 
 		private:
-			static uint32 calculateTriangleCount(uint32 vertexCount);
-
-		private:
 			static constexpr uint32 MAX_FACE_POSITIONS = 65535;
 			static constexpr uint32 MAX_INDICES = 65535;
 			static constexpr uint32 MAX_FACES = 256;

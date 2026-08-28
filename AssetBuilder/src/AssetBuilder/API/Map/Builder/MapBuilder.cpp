@@ -8,16 +8,6 @@
 #include "AssetBuilder/API/Map/Builder/MapBuilder.hpp"
 
 namespace Trident {
-	uint32 MapBuilder::calculateTriangleCount(uint32 vertexCount) {
-		ENGINE_ASSERT(vertexCount >= 3, "Not enough vertices.");
-
-		if (vertexCount == 3) {
-			return 1;
-		}
-
-		return vertexCount / 2 + vertexCount % 2;
-	}
-
 	MapBuilder::MapBuilder(const MapDescriptor& descriptor) :
 		descriptor(descriptor),
 		facePositions(MAX_FACE_POSITIONS),
@@ -30,6 +20,8 @@ namespace Trident {
 	}
 
 	Face& MapBuilder::createFace(view<FaceVertex> vertices, svec3<float32> normal) {
+		ENGINE_ASSERT(vertices.count() >= 3, "Not enough vertices.");
+
 		Face face(this);
 		face.vertexCount = static_cast<uint32>(vertices.count());
 		face.indexRange.offset = faceIndexCount;
@@ -49,7 +41,7 @@ namespace Trident {
 		faces[faceCount] = face;
 
 		vertexCount += face.vertexCount;
-		triangleCount += calculateTriangleCount(face.vertexCount);
+		triangleCount += face.vertexCount - 2;
 		faceCount += 1;
 
 		facePositionCount += face.vertexCount;
@@ -142,7 +134,7 @@ namespace Trident {
 
 		while (faceIndex < faceCount) {
 			const Face& face = faces[faceIndex];
-			const uint32 triangleCount = calculateTriangleCount(face.vertexCount);
+			const uint32 triangleCount = face.vertexCount - 2;
 
 			uint32 vertexIndex = 0;
 			uint32 triangleIndex = 0;
