@@ -105,9 +105,9 @@ namespace Trident {
 				} */
 
 				uint64 stagingBufferSize = (
-					sceneAsset->geometryRanges[0].count +
-					sceneAsset->geometryRanges[1].count +
-					sceneAsset->geometryRanges[2].count +
+					sceneAsset->vertexRange.count +
+					sceneAsset->indexRange.count +
+					sceneAsset->lightmapCoordinateRange.count +
 					sceneAsset->pointLights.count() * sizeof(PointLight)
 				);
 
@@ -138,13 +138,13 @@ namespace Trident {
 
 				uint64 offset = 0;
 
-				const BufferView<uint8> vertexView = stagingBuffer->createView<uint8>(offset, sceneAsset->geometryRanges[0].count);
+				const BufferView<uint8> vertexView = stagingBuffer->createView<uint8>(offset, sceneAsset->vertexRange.count);
 
-				std::copy_n(&sceneAsset->geometryData[sceneAsset->geometryRanges[0].offset], vertexView.getSize(), vertexView.map());
+				std::copy_n(&sceneAsset->geometryData[sceneAsset->vertexRange.offset], vertexView.getSize(), vertexView.map());
 
-				const BufferView<uint8> indexView = stagingBuffer->createView<uint8>(vertexView.getOffset() + vertexView.getSize(), sceneAsset->geometryRanges[1].count);
+				const BufferView<uint8> indexView = stagingBuffer->createView<uint8>(vertexView.getOffset() + vertexView.getSize(), sceneAsset->indexRange.count);
 
-				std::copy_n(&sceneAsset->geometryData[sceneAsset->geometryRanges[1].offset], indexView.getSize(), indexView.map());
+				std::copy_n(&sceneAsset->geometryData[sceneAsset->indexRange.offset], indexView.getSize(), indexView.map());
 
 				offset = indexView.getOffset() + indexView.getSize();
 
@@ -179,9 +179,9 @@ namespace Trident {
 				BufferView<uint8> lightmapAtlasView;
 
 				if (sceneAsset->lightmapAtlasImageAsset != nullptr) {
-					lightmapCoordinateView = stagingBuffer->createView<uint8>(offset, sceneAsset->geometryRanges[2].count);
+					lightmapCoordinateView = stagingBuffer->createView<uint8>(offset, sceneAsset->lightmapCoordinateRange.count);
 
-					std::copy_n(&sceneAsset->geometryData[sceneAsset->geometryRanges[2].offset], lightmapCoordinateView.getSize(), lightmapCoordinateView.map());
+					std::copy_n(&sceneAsset->geometryData[sceneAsset->lightmapCoordinateRange.offset], lightmapCoordinateView.getSize(), lightmapCoordinateView.map());
 
 					lightmapAtlasView = stagingBuffer->createView<uint8>(lightmapCoordinateView.getOffset() + lightmapCoordinateView.getSize(), lightmapAtlasImage->getSize());
 

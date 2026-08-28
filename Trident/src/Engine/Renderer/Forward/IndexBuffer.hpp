@@ -8,7 +8,7 @@
 namespace Trident {
 	ref<Buffer> ForwardRenderer::createIndexBuffer() const {
 		return createDynamicBuffer({
-			.size = scene->getAsset()->geometryRanges[1].count,
+			.size = scene->getAsset()->indexRange.count,
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::INDEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,

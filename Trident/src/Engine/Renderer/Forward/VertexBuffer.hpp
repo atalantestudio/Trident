@@ -8,7 +8,7 @@
 namespace Trident {
 	ref<Buffer> ForwardRenderer::createVertexBuffer() const {
 		return createDynamicBuffer({
-			.size = scene->getAsset()->geometryRanges[0].count,
+			.size = scene->getAsset()->vertexRange.count,
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,

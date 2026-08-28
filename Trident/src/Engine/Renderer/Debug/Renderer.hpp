@@ -47,7 +47,8 @@ namespace Trident {
 			ref<PipelineLayout> createGeometryPipelineLayout() const;
 
 			ref<GraphicsPipeline> createSkyboxPipeline() const;
-			ref<GraphicsPipeline> createGeometryPipeline() const;
+			ref<GraphicsPipeline> createGeometryFillPipeline() const;
+			ref<GraphicsPipeline> createGeometryLinePipeline() const;
 
 			ref<Image> createSkyboxImage(ref<ImageAsset> imageAsset) const;
 			ref<Image> createDepthStencilImage() const;
@@ -67,7 +68,8 @@ namespace Trident {
 			void encodeSceneOneTimeCommands() const;
 
 			void encodeSkyboxPass(ref<CommandEncoder> commandEncoder) const;
-			void encodeGeometryPass(ref<CommandEncoder> commandEncoder) const;
+			void encodeGeometryFillPass(ref<CommandEncoder> commandEncoder) const;
+			void encodeGeometryLinePass(ref<CommandEncoder> commandEncoder) const;
 
 		private:
 			ref<RenderPass> renderPass;
@@ -83,7 +85,8 @@ namespace Trident {
 			ref<PipelineLayout> geometryPipelineLayout;
 
 			ref<GraphicsPipeline> skyboxPipeline;
-			ref<GraphicsPipeline> geometryPipeline;
+			ref<GraphicsPipeline> geometryFillPipeline;
+			ref<GraphicsPipeline> geometryLinePipeline;
 
 			ref<Buffer> skyboxCameraBuffer;
 			ref<Buffer> cameraBuffer;

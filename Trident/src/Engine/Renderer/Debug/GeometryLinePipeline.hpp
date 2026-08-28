@@ -6,15 +6,13 @@
 #include "Engine/Renderer/Debug/Renderer.hpp"
 
 namespace Trident {
-	ref<GraphicsPipeline> DebugRenderer::createGeometryPipeline() const {
+	ref<GraphicsPipeline> DebugRenderer::createGeometryLinePipeline() const {
 		VertexInputBinding vertexInputBindings[] = {
 			VertexInputBinding(InputRate::VERTEX),
 		};
 
 		vertexInputBindings[0].registerAttribute<svec3<float32>>(VertexInputAttributeFormat::R32G32B32_FLOAT);
-		vertexInputBindings[0].registerAttribute<uint32>(VertexInputAttributeFormat::R10G10B10A2_UNORM);
-		vertexInputBindings[0].registerAttribute<uint32>(VertexInputAttributeFormat::R10G10B10A2_UNORM);
-		vertexInputBindings[0].registerAttribute<uint32>(VertexInputAttributeFormat::R16G16_FLOAT);
+		vertexInputBindings[0].stride = sizeof(Vertex3D);
 
 		const ColorBlendAttachment colorBlendAttachments[] = {
 			{
@@ -30,23 +28,23 @@ namespace Trident {
 					.stage = ShaderStage::VERTEX,
 					.entryPoint = "main",
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Geometry vertex",
+						.name = "Geometry line vertex",
 					#endif
 				},
-				"Debug/Geometry.vert"
+				"Debug/GeometryLine.vert"
 			),
 			.fragmentShaderModule = loadInternalShaderModule(
 				{
 					.stage = ShaderStage::FRAGMENT,
 					.entryPoint = "main",
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Geometry fragment",
+						.name = "Geometry line fragment",
 					#endif
 				},
-				"Debug/Geometry.frag"
+				"Debug/GeometryLine.frag"
 			),
-			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
-			.polygonMode = PolygonMode::FILL,
+			.primitiveTopology = PrimitiveTopology::LINE_LIST,
+			.polygonMode = PolygonMode::LINE,
 			.cullMode = CullMode::BACK,
 			.frontFace = FrontFace::CLOCKWISE,
 			.lineWidth = 1.0f,
@@ -55,15 +53,13 @@ namespace Trident {
 				.attachments = colorBlendAttachments,
 			},
 			.depthStencilState = {
-				.depthTest = true,
-				.depthWrite = true,
-				.compareOperation = CompareOperation::GREATER,
+				.depthTest = false,
 			},
 			.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT,
 			.renderPass = renderPass,
 			.subpassIndex = 0,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Geometry",
+				.name = "Geometry line",
 			#endif
 		});
 	}

@@ -9,7 +9,8 @@
 #include "Engine/Renderer/Debug/DepthStencilImageView.hpp"
 #include "Engine/Renderer/Debug/Framebuffer.hpp"
 #include "Engine/Renderer/Debug/GeometryDescriptorSetLayout.hpp"
-#include "Engine/Renderer/Debug/GeometryPipeline.hpp"
+#include "Engine/Renderer/Debug/GeometryFillPipeline.hpp"
+#include "Engine/Renderer/Debug/GeometryLinePipeline.hpp"
 #include "Engine/Renderer/Debug/GeometryPipelineLayout.hpp"
 #include "Engine/Renderer/Debug/IndexBuffer.hpp"
 #include "Engine/Renderer/Debug/Renderer.hpp"
@@ -39,7 +40,8 @@ namespace Trident {
 		skyboxPipelineLayout = createSkyboxPipelineLayout();
 		geometryPipelineLayout = createGeometryPipelineLayout();
 		skyboxPipeline = createSkyboxPipeline();
-		geometryPipeline = createGeometryPipeline();
+		geometryFillPipeline = createGeometryFillPipeline();
+		geometryLinePipeline = createGeometryLinePipeline();
 		skyboxCameraBuffer = createSkyboxCameraBuffer();
 		cameraBuffer = createCameraBuffer();
 		skyboxSampler = createSkyboxSampler();
@@ -96,7 +98,8 @@ namespace Trident {
 			encodeSkyboxPass(commandEncoder);
 		}
 
-		encodeGeometryPass(commandEncoder);
+		encodeGeometryFillPass(commandEncoder);
+		encodeGeometryLinePass(commandEncoder);
 
 		commandEncoder->endRenderPass();
 	}
@@ -157,7 +160,7 @@ namespace Trident {
 	}
 
 	void DebugRenderer::encodeSceneOneTimeCommands() const {
-		uint64 stagingBufferSize = scene->geometryRanges[0].count + scene->geometryRanges[1].count;
+		uint64 stagingBufferSize = scene->vertexRange.count + scene->indexRange.count + scene->faceLineIndexRange.count;
 
 		if (scene->skyboxImageAsset != nullptr) {
 			stagingBufferSize += skyboxImage->getSize();
@@ -178,14 +181,14 @@ namespace Trident {
 		BufferView<uint8> skyboxView;
 		uint64 viewOffset = 0;
 
-		vertexView = stagingBuffer->createView<uint8>(viewOffset, scene->geometryRanges[0].count);
+		vertexView = stagingBuffer->createView<uint8>(viewOffset, scene->vertexRange.count);
 
-		std::copy_n(&scene->geometryData[scene->geometryRanges[0].offset], vertexView.getSize(), vertexView.map());
+		std::copy_n(&scene->geometryData[scene->vertexRange.offset], vertexView.getSize(), vertexView.map());
 
 		viewOffset += vertexView.getSize();
-		indexView = stagingBuffer->createView<uint8>(viewOffset, scene->geometryRanges[1].count);
+		indexView = stagingBuffer->createView<uint8>(viewOffset, scene->indexRange.count + scene->faceLineIndexRange.count);
 
-		std::copy_n(&scene->geometryData[scene->geometryRanges[1].offset], indexView.getSize(), indexView.map());
+		std::copy_n(&scene->geometryData[scene->indexRange.offset], indexView.getSize(), indexView.map());
 
 		viewOffset += indexView.getSize();
 
@@ -272,13 +275,24 @@ namespace Trident {
 		commandEncoder->draw(36, 1, 0, 0);
 	}
 
-	void DebugRenderer::encodeGeometryPass(ref<CommandEncoder> commandEncoder) const {
-		commandEncoder->bindGraphicsPipeline(geometryPipeline);
+	void DebugRenderer::encodeGeometryFillPass(ref<CommandEncoder> commandEncoder) const {
+		commandEncoder->bindGraphicsPipeline(geometryFillPipeline);
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
 		commandEncoder->bindIndexBuffer<uint32>(indexBuffer, 0);
 		commandEncoder->bindDescriptorSets(geometryPipelineLayout, 0, descriptorSets[1]);
 
-		const uint32 indexCount = static_cast<uint32>(scene->geometryRanges[1].count / sizeof(uint32));
+		const uint32 indexCount = static_cast<uint32>(scene->indexRange.count / sizeof(uint32));
+
+		commandEncoder->drawIndexed(indexCount, 1, 0, 0, 0);
+	}
+
+	void DebugRenderer::encodeGeometryLinePass(ref<CommandEncoder> commandEncoder) const {
+		commandEncoder->bindGraphicsPipeline(geometryLinePipeline);
+		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
+		commandEncoder->bindIndexBuffer<uint32>(indexBuffer, scene->indexRange.count);
+		commandEncoder->bindDescriptorSets(geometryPipelineLayout, 0, descriptorSets[1]);
+
+		const uint32 indexCount = static_cast<uint32>(scene->faceLineIndexRange.count / sizeof(uint32));
 
 		commandEncoder->drawIndexed(indexCount, 1, 0, 0, 0);
 	}

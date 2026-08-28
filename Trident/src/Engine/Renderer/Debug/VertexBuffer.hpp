@@ -8,7 +8,7 @@
 namespace Trident {
 	ref<Buffer> DebugRenderer::createVertexBuffer() const {
 		return createDynamicBuffer({
-			.size = scene->geometryRanges[0].count,
+			.size = scene->vertexRange.count,
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
