@@ -13,11 +13,13 @@ layout(set = 0, binding = 0) uniform readonly Camera {
 } camera;
 
 out Interstage {
-	layout(location = 0) vec3 normal;
+	layout(location = 0) vec3 surface;
+	layout(location = 1) vec3 normal;
 } interstage;
 
 void main() {
 	gl_Position = camera.projectionView * vec4(position, 1.0);
 
+	interstage.surface = position;
 	interstage.normal = normal * 2.0 - 1.0;
 }

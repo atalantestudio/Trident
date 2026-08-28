@@ -11,6 +11,7 @@ namespace Trident {
 		private:
 			struct Camera {
 				mat4x4<float32> projectionView;
+				svec3<float32> position;
 			};
 
 			struct SkyboxCamera {
