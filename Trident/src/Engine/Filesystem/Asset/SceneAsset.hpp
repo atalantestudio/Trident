@@ -44,8 +44,10 @@ namespace Trident {
 
 		sequence<uint8> geometryData;
 
-		/// Vertices, indices, lightmap coordinates.
-		range<uint64, uint64> geometryRanges[3];
+		range<uint64, uint64> vertexRange;
+		range<uint64, uint64> indexRange;
+		range<uint64, uint64> faceLineIndexRange;
+		range<uint64, uint64> lightmapCoordinateRange;
 
 		uint64 staticVertexSize;
 		uint64 staticPositionSize;

@@ -54,8 +54,14 @@ namespace Trident {
 		/// Baked and external vertices.
 		uint32 vertexCount;
 
+		/// Used to visualize face wireframes.
+		uint32 lineIndexCount;
+
 		sequence<BuildVertex3D> bakedVertices;
 		sequence<uint32> bakedIndices;
+
+		/// Used to visualize face wireframes.
+		sequence<uint32> lineIndices;
 
 		/// Baked coordinates, then coordinates from external assets.
 		sequence<svec2<float32>> lightmapCoordinates;

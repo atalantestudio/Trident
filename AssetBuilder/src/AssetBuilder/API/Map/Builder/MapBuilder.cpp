@@ -127,15 +127,18 @@ namespace Trident {
 		scene.vertexCount = vertexCount;
 		scene.triangleCount = triangleCount;
 		scene.staticGeometry.vertexCount = vertexCount;
+		scene.staticGeometry.lineIndexCount = vertexCount * 2;
 		scene.staticGeometry.bakedVertices = sequence<BuildVertex3D>(vertexCount);
 
 		const uint32 triangulatedIndexCount = triangleCount * 3;
 
 		scene.staticGeometry.bakedIndices = sequence<uint32>(triangulatedIndexCount);
+		scene.staticGeometry.lineIndices = sequence<uint32>(scene.staticGeometry.lineIndexCount);
 
 		uint32 faceIndex = 0;
 		uint32 vertexOffset = 0;
 		uint32 indexOffset = 0;
+		uint32 lineIndexOffset = 0;
 
 		while (faceIndex < faceCount) {
 			const Face& face = faces[faceIndex];
@@ -153,6 +156,9 @@ namespace Trident {
 				vertex.tangent = {0.0f, 0.0f, 0.0f, 0.0f};
 				vertex.textureCoordinate = {0.0f, 0.0f};
 
+				scene.staticGeometry.lineIndices[lineIndexOffset + vertexIndex * 2 + 0] = face.indexRange.offset + vertexIndex;
+				scene.staticGeometry.lineIndices[lineIndexOffset + vertexIndex * 2 + 1] = face.indexRange.offset + (vertexIndex + 1) % face.vertexCount;
+
 				vertexIndex += 1;
 			}
 
@@ -167,6 +173,7 @@ namespace Trident {
 
 			vertexOffset += vertexIndex;
 			indexOffset += triangleCount * 3;
+			lineIndexOffset += face.vertexCount * 2;
 			faceIndex += 1;
 		}
 

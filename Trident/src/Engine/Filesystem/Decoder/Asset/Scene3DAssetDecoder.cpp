@@ -34,13 +34,15 @@ namespace Trident {
 		const uint32 indexCount = triangleCount * 3;
 		const uint32 bakedTriangleCount = stream.read<uint32>();
 		const uint32 bakedIndexCount = bakedTriangleCount * 3;
+		const uint32 faceLineIndexCount = stream.read<uint32>();
 		const uint32 lightmapCoordinateCount = stream.read<uint32>();
 
-		asset.geometryRanges[0] = {0, vertexCount * sizeof(Vertex3D)};
-		asset.geometryRanges[1] = {asset.geometryRanges[0].count, indexCount * sizeof(uint32)};
-		asset.geometryRanges[2] = {asset.geometryRanges[1].offset + asset.geometryRanges[1].count, lightmapCoordinateCount * sizeof(uint32)};
+		asset.vertexRange = {0, vertexCount * sizeof(Vertex3D)};
+		asset.indexRange = {asset.vertexRange.count, indexCount * sizeof(uint32)};
+		asset.faceLineIndexRange = {asset.indexRange.offset + asset.indexRange.count, faceLineIndexCount * sizeof(uint32)};
+		asset.lightmapCoordinateRange = {asset.faceLineIndexRange.offset + asset.faceLineIndexRange.count, lightmapCoordinateCount * sizeof(uint32)};
 
-		const uint64 geometrySize = asset.geometryRanges[2].offset + asset.geometryRanges[2].count;
+		const uint64 geometrySize = asset.lightmapCoordinateRange.offset + asset.lightmapCoordinateRange.count;
 
 		asset.geometryData = sequence<uint8>(geometrySize);
 
@@ -81,18 +83,24 @@ namespace Trident {
 			asset.lightmapAtlasImageAsset = assetLibrary->getAsset<ImageAsset>(lightmapAtlasAssetIdentifier);
 		}
 
-		std::copy_n(stream.getBytePosition(), bakedVertexCount * sizeof(Vertex3D), &asset.geometryData[asset.geometryRanges[0].offset]);
+		std::copy_n(stream.getBytePosition(), bakedVertexCount * sizeof(Vertex3D), &asset.geometryData[asset.vertexRange.offset]);
 
 		stream.jump(bakedVertexCount * sizeof(Vertex3D));
 
-		std::copy_n(stream.getBytePosition(), bakedIndexCount * sizeof(uint32), &asset.geometryData[asset.geometryRanges[1].offset]);
+		std::copy_n(stream.getBytePosition(), bakedIndexCount * sizeof(uint32), &asset.geometryData[asset.indexRange.offset]);
 
 		stream.jump(bakedIndexCount * sizeof(uint32));
 
-		if (asset.geometryRanges[2].count > 0) {
-			std::copy_n(stream.getBytePosition(), asset.geometryRanges[2].count, &asset.geometryData[asset.geometryRanges[2].offset]);
+		if (asset.faceLineIndexRange.count > 0) {
+			std::copy_n(stream.getBytePosition(), faceLineIndexCount * sizeof(uint32), &asset.geometryData[asset.faceLineIndexRange.offset]);
 
-			stream.jump(asset.geometryRanges[2].count);
+			stream.jump(faceLineIndexCount * sizeof(uint32));
+		}
+
+		if (asset.lightmapCoordinateRange.count > 0) {
+			std::copy_n(stream.getBytePosition(), asset.lightmapCoordinateRange.count, &asset.geometryData[asset.lightmapCoordinateRange.offset]);
+
+			stream.jump(asset.lightmapCoordinateRange.count);
 		}
 
 		uint32 instanceIndex = 0;
@@ -118,8 +126,8 @@ namespace Trident {
 			instanceIndex += 1;
 		}
 
-		Vertex3D* vertices = pointer_cast<Vertex3D*>(&asset.geometryData[asset.geometryRanges[0].offset]);
-		uint32* indices = pointer_cast<uint32*>(&asset.geometryData[asset.geometryRanges[1].offset]);
+		Vertex3D* vertices = pointer_cast<Vertex3D*>(&asset.geometryData[asset.vertexRange.offset]);
+		uint32* indices = pointer_cast<uint32*>(&asset.geometryData[asset.indexRange.offset]);
 		uint32 vertexOffset = bakedVertexCount;
 		uint32 indexOffset = bakedIndexCount;
 

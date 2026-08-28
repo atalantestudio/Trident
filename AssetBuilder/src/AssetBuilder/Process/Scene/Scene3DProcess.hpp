@@ -30,6 +30,7 @@ namespace Trident {
 				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.bakedVertices.count()));
 				stream.write<uint32>(scene.triangleCount);
 				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.bakedIndices.count() / 3));
+				stream.write<uint32>(scene.staticGeometry.lineIndexCount);
 				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.lightmapCoordinates.count()));
 				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.instances.count()));
 				stream.write<uint32>(static_cast<uint32>(scene.geometries.count()));
@@ -57,6 +58,10 @@ namespace Trident {
 				}
 
 				for (const uint32 index : scene.staticGeometry.bakedIndices) {
+					stream.write<uint32>(index);
+				}
+
+				for (const uint32 index : scene.staticGeometry.lineIndices) {
 					stream.write<uint32>(index);
 				}
 
@@ -167,10 +172,11 @@ namespace Trident {
 				uint64 size = (
 					sizeof(AssetHeader) +
 					sizeof(uint8) +
-					sizeof(uint32) * 16 +
+					sizeof(uint32) * 17 +
 					sizeof(svec3<float32>) * 3 +
 					scene.staticGeometry.bakedVertices.count() * sizeof(Vertex3D) +
 					scene.staticGeometry.bakedIndices.count() * sizeof(uint32) +
+					scene.staticGeometry.lineIndices.count() * sizeof(uint32) +
 					scene.staticGeometry.lightmapCoordinates.count() * sizeof(uint32) +
 					scene.staticGeometry.instances.count() * sizeof(BuildTransform3D) +
 					scene.geometries.count() * sizeof(BuildGeometry) +
