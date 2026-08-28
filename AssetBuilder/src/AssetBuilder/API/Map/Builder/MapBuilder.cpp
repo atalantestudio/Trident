@@ -6,6 +6,7 @@
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 
 #include "AssetBuilder/API/Map/Builder/MapBuilder.hpp"
+#include "AssetBuilder/API/Map/Builder/Triangulation.hpp"
 
 namespace Trident {
 	MapBuilder::MapBuilder(const MapDescriptor& descriptor) :
@@ -22,7 +23,7 @@ namespace Trident {
 	Face& MapBuilder::createFace(view<FaceVertex> vertices, svec3<float32> normal) {
 		ENGINE_ASSERT(vertices.count() >= 3, "Not enough vertices.");
 
-		Face face(this);
+		Face face{};
 		face.vertexCount = static_cast<uint32>(vertices.count());
 		face.indexRange.offset = faceIndexCount;
 		face.normal = normal;
@@ -55,8 +56,7 @@ namespace Trident {
 			return;
 		}
 
-		vec3<float32> a = face.getPosition(0);
-
+		vec3<float32> a = facePositions[indices[face.indexRange.offset]];
 		uint32 indexA = 0;
 
 		while (indexA < face.vertexCount) {
@@ -64,9 +64,9 @@ namespace Trident {
 			facePositions[facePositionCount + indexA] = svec3<float32>(a) + face.normal * scale;
 
 			const uint32 indexB = (indexA + 1) % face.vertexCount;
-			const vec3<float32> b = face.getPosition(indexB);
+			const vec3<float32> b = facePositions[indices[face.indexRange.offset + indexB]];
 
-			Face extrudedFace(this);
+			Face extrudedFace{};
 			extrudedFace.vertexCount = 4;
 			extrudedFace.indexRange.offset = faceIndexCount + indexA * 4;
 
@@ -121,54 +121,8 @@ namespace Trident {
 		scene.staticGeometry.vertexCount = vertexCount;
 		scene.staticGeometry.lineIndexCount = vertexCount * 2;
 		scene.staticGeometry.bakedVertices = sequence<BuildVertex3D>(vertexCount);
-
-		const uint32 triangulatedIndexCount = triangleCount * 3;
-
-		scene.staticGeometry.bakedIndices = sequence<uint32>(triangulatedIndexCount);
+		scene.staticGeometry.bakedIndices = sequence<uint32>(triangleCount * 3);
 		scene.staticGeometry.lineIndices = sequence<uint32>(scene.staticGeometry.lineIndexCount);
-
-		uint32 faceIndex = 0;
-		uint32 vertexOffset = 0;
-		uint32 indexOffset = 0;
-		uint32 lineIndexOffset = 0;
-
-		while (faceIndex < faceCount) {
-			const Face& face = faces[faceIndex];
-			const uint32 triangleCount = face.vertexCount - 2;
-
-			uint32 vertexIndex = 0;
-			uint32 triangleIndex = 0;
-
-			while (vertexIndex < face.vertexCount) {
-				BuildVertex3D& vertex = scene.staticGeometry.bakedVertices[vertexOffset + vertexIndex];
-				vertex.position = facePositions[indices[face.indexRange.offset + vertexIndex]];
-				vertex.normal = face.normal;
-
-				// TODO(asset-builder/map): Calculate face tangent and vertex texture coordinates.
-				vertex.tangent = {0.0f, 0.0f, 0.0f, 0.0f};
-				vertex.textureCoordinate = {0.0f, 0.0f};
-
-				scene.staticGeometry.lineIndices[lineIndexOffset + vertexIndex * 2 + 0] = face.indexRange.offset + vertexIndex;
-				scene.staticGeometry.lineIndices[lineIndexOffset + vertexIndex * 2 + 1] = face.indexRange.offset + (vertexIndex + 1) % face.vertexCount;
-
-				vertexIndex += 1;
-			}
-
-			while (triangleIndex < triangleCount) {
-				// TODO(asset-builder/map): Faces are assumed to be convex and have their vertices laid out in a clockwise order.
-				scene.staticGeometry.bakedIndices[indexOffset + triangleIndex * 3 + 0] = face.indexRange.offset;
-				scene.staticGeometry.bakedIndices[indexOffset + triangleIndex * 3 + 1] = face.indexRange.offset + triangleIndex + 1;
-				scene.staticGeometry.bakedIndices[indexOffset + triangleIndex * 3 + 2] = face.indexRange.offset + triangleIndex + 2;
-
-				triangleIndex += 1;
-			}
-
-			vertexOffset += vertexIndex;
-			indexOffset += triangleCount * 3;
-			lineIndexOffset += face.vertexCount * 2;
-			faceIndex += 1;
-		}
-
 		scene.staticGeometry.lightmapCoordinates = {};
 		scene.staticGeometry.instances = {};
 		scene.staticGeometry.materialShaders = {};
@@ -184,6 +138,8 @@ namespace Trident {
 		scene.dynamicGeometry.entityCount = 0;
 		scene.dynamicGeometry.geometryMappings = {};
 		scene.dynamicGeometry.rigidBodyMappings = {};
+
+		triangulateFaces(scene);
 
 		return scene;
 	}

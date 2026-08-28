@@ -22,6 +22,9 @@ namespace Trident {
 
 			Face& getFace(uint32 index);
 
+			/// Creates and returns a new face.
+			/// The face must have at least 3 vertices laid out in clockwise order.
+			/// Degenerate vertices and edge-crossing vertices are not allowed.
 			Face& createFace(view<FaceVertex> vertices, svec3<float32> normal);
 
 			/// Extrudes the face `scale` units towards its normal.
@@ -31,6 +34,9 @@ namespace Trident {
 			void extrudeFace(Face& face, float32 scale);
 
 			BuildScene3D build();
+
+		private:
+			void triangulateFaces(BuildScene3D& scene) const;
 
 		private:
 			MapDescriptor descriptor;

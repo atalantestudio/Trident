@@ -23,7 +23,7 @@ namespace Trident {
 					.dynamicMaterialAssets = {},
 				});
 
-				/* const FaceVertex pentagonVertices[] = {
+				const FaceVertex pentagonVertices[] = {
 					{{-32.0f,  32.0f,  92.0f }, {0.0f, 0.0f}},
 					{{ 0.0f,   32.0f,  112.0f}, {0.0f, 0.0f}},
 					{{ 32.0f,  32.0f,  92.0f }, {0.0f, 0.0f}},
@@ -35,8 +35,6 @@ namespace Trident {
 
 				builder.extrudeFace(pentagon, 32.0f);
 
-				builder.extrudeFace(builder.getFace(3), 48.0f);
-
 				const FaceVertex squareVertices[] = {
 					{{ 64.0f,  48.0f,  128.0f}, {0.0f, 0.0f}},
 					{{ 96.0f,  48.0f,  128.0f}, {0.0f, 0.0f}},
@@ -46,7 +44,7 @@ namespace Trident {
 
 				Face& square = builder.createFace(squareVertices, {0.0f, 0.0f, -1.0f});
 
-				builder.extrudeFace(square, -32.0f); */
+				builder.extrudeFace(square, -32.0f);
 
 				const FaceVertex roomVertices[] = {
 					{{-64.0f,  128.0f,  128.0f}, {0.0f, 0.0f}},
@@ -58,6 +56,19 @@ namespace Trident {
 				Face& room = builder.createFace(roomVertices, {0.0f, 1.0f, 0.0f});
 
 				builder.extrudeFace(room, -128.0f);
+
+				const FaceVertex concaveFaceVertices[] = {
+					{{-48.0f,  24.0f,  128.0f}, {0.0f, 0.0f}},
+					{{ 48.0f,  24.0f,  128.0f}, {0.0f, 0.0f}},
+					{{ 48.0f,  24.0f,  112.0f}, {0.0f, 0.0f}},
+					{{ 16.0f,  24.0f,  112.0f}, {0.0f, 0.0f}},
+					{{ 16.0f,  24.0f,  92.0f }, {0.0f, 0.0f}},
+					{{ 48.0f,  24.0f,  92.0f }, {0.0f, 0.0f}},
+					{{ 48.0f,  24.0f,  64.0f }, {0.0f, 0.0f}},
+					{{-48.0f,  24.0f,  64.0f }, {0.0f, 0.0f}},
+				};
+
+				Face& concaveFace = builder.createFace(concaveFaceVertices, {0.0f, 1.0f, 0.0f});
 
 				return builder.build();
 			}
