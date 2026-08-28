@@ -55,7 +55,9 @@ namespace Trident {
 				.attachments = colorBlendAttachments,
 			},
 			.depthStencilState = {
-				.depthTest = false,
+				.depthTest = true,
+				.depthWrite = true,
+				.compareOperation = CompareOperation::GREATER,
 			},
 			.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT,
 			.renderPass = renderPass,
