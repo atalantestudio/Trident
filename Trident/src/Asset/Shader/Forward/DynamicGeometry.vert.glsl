@@ -35,7 +35,7 @@ void main() {
 	gl_Position = camera.projectionView * surface;
 
 	interstage.surface = surface.xyz;
-	interstage.tbn = transpose(mat3x3(t, b, n));
+	interstage.tbn = mat3x3(t, b, n);
 	interstage.textureCoordinate = textureCoordinate;
 	interstage.lightSpacePosition = directionalLight.projectionView * surface;
 	interstage.instanceIndex = uint(gl_InstanceIndex);

@@ -3,6 +3,11 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
+// TODO(forward/pbr)
+// Decouple GLSL/GLSL for Vulkan shaders. Reasons:
+// - Multiple descriptor sets
+// - No shadow map Y flipping in GLSL
+
 precision highp float;
 
 struct PointLight {
@@ -20,6 +25,7 @@ in Interstage {
 } interstage;
 
 const float PI = radians(180.0);
+const vec3 SUN_DIRECTION = normalize(vec3(1.0, 1.0, 1.0));
 
 layout(set = 0, binding = 0) uniform readonly Camera {
 	mat4x4 projectionView;
@@ -86,13 +92,10 @@ float calculateShadow(vec4 lightSpacePosition) {
 		return 0.0;
 	}
 
-	const vec3 sunDirection = normalize(vec3(1.0, 1.0, 1.0));
-
 	vec2 coordinate = projectedPosition.xy * 0.5 + 0.5;
-	float depthBias = 0.0005 * dot(interstage.tbn[2], sunDirection);
+	float depthBias = 0.0005 * dot(interstage.tbn[2], SUN_DIRECTION);
 	float depth = projectedPosition.z;
 
-	// TODO(forward/directional-shadow-map): Only for Vulkan.
 	coordinate.y = 1.0 - coordinate.y;
 
 	float closestDepth = texture(directionalShadowMapSampler, coordinate).r;
@@ -114,6 +117,7 @@ void main() {
 	vec3 c = pow(texture(diffuseTexture, interstage.textureCoordinate).rgb, vec3(2.2));
 
 	vec3 n = normalize(interstage.tbn * (texture(normalTexture, interstage.textureCoordinate).rgb * 2.0 - 1.0));
+	float surfaceToSunLight = dot(n, SUN_DIRECTION);
 	vec3 F0 = mix(vec3(0.04, 0.04, 0.04), c, metallic);
 
 	vec3 Le = vec3(0.0, 0.0, 0.0);
@@ -142,8 +146,7 @@ void main() {
 
 	vec3 Lo = Le + Lr;
 
-	fragment.rgb = camera.ambientColor * c * ao * inShadow + c * camera.sunColor * (1.0 - inShadow) + Lo;
-	fragment.rgb /= fragment.rgb + vec3(1.0);
+	fragment.rgb = mix(camera.ambientColor * c * ao, c * camera.sunColor, max(0.0, max(0.0, surfaceToSunLight) - inShadow)) + Lo;
 	fragment.rgb = pow(fragment.rgb, vec3(1.0 / 2.2));
 	fragment.a = 1.0;
 }

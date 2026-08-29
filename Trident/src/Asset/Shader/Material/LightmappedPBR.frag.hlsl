@@ -31,22 +31,23 @@ cbuffer Camera {
 
 StructuredBuffer<PointLight> pointLights;
 
-Texture2D<float> directionalShadowMapTexture;
-SamplerState directionalShadowMapSamplerState;
+Texture2D<float> directionalShadowMapTexture : register(t1);
+SamplerState directionalShadowMapSamplerState : register(s0);
 
-Texture2D<float4> lightmapAtlasTexture;
-SamplerState lightmapAtlasSamplerState;
+Texture2D<float4> lightmapAtlasTexture : register(t2);
+SamplerState lightmapAtlasSamplerState : register(s1);
 
-Texture2D<float4> armTexture;
-SamplerState armSamplerState;
+Texture2D<float4> armTexture : register(t3);
+SamplerState armSamplerState : register(s2);
 
-Texture2D<float4> diffuseTexture;
-SamplerState diffuseSamplerState;
+Texture2D<float4> diffuseTexture : register(t4);
+SamplerState diffuseSamplerState : register(s3);
 
-Texture2D<float4> normalTexture;
-SamplerState normalSamplerState;
+Texture2D<float4> normalTexture : register(t5);
+SamplerState normalSamplerState : register(s4);
 
 static const float PI = radians(180.0);
+static const float3 SUN_DIRECTION = normalize(float3(1.0, 1.0, 1.0));
 
 float TrowbridgeReitzGGX(float3 normal, float3 halfway, float roughness) {
 	float a = roughness * roughness;
@@ -95,9 +96,7 @@ float calculateShadow(float4 lightSpacePosition, float3 normal) {
 		float2 coordinate = projectedPosition.xy * 0.5 + 0.5;
 		coordinate.y = 1.0 - coordinate.y;
 
-		const float3 sunDirection = normalize(float3(1.0, 1.0, 1.0));
-
-		float depthBias = 0.0005 * dot(normal, sunDirection);
+		float depthBias = 0.0005 * dot(normal, SUN_DIRECTION);
 		float depth = projectedPosition.z;
 		float closestDepth = directionalShadowMapTexture.Sample(directionalShadowMapSamplerState, coordinate);
 
@@ -120,6 +119,7 @@ float4 main(Interstage interstage) : SV_Target0 {
 	float metallic = arm.b;
 	float3 c = diffuseTexture.Sample(diffuseSamplerState, interstage.textureCoordinate).rgb;
 	float3 n = normalize(mul(interstage.tbn, normalTexture.Sample(normalSamplerState, interstage.textureCoordinate).rgb * 2.0 - 1.0));
+	float surfaceToSunLight = dot(n, SUN_DIRECTION);
 	float3 F0 = lerp(float3(0.04, 0.04, 0.04), c, metallic);
 
 	float3 Le = float3(0.0, 0.0, 0.0);
@@ -149,7 +149,7 @@ float4 main(Interstage interstage) : SV_Target0 {
 	float3 Lo = Le + Lr;
 
 	float4 fragment;
-	fragment.rgb = indirectDiffuse * c * ao * inShadow + c * camera.sunColor * (1.0 - inShadow) + Lo;
+	fragment.rgb = lerp(indirectDiffuse * c * ao, c * camera.sunColor, max(0.0, max(0.0, surfaceToSunLight) - inShadow)) + Lo;
 	fragment.a = 1.0;
 
 	return fragment;

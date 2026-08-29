@@ -45,7 +45,7 @@ Interstage main(VertexInput input) {
 	Interstage interstage;
 	interstage.position = mul(camera.projectionView, surface);
 	interstage.surface = surface.xyz;
-	interstage.tbn = transpose(float3x3(t, b, n));
+	interstage.tbn = float3x3(t, b, n);
 	interstage.textureCoordinate = input.textureCoordinate;
 	interstage.lightSpacePosition = mul(directionalLight.projectionView, surface);
 	interstage.instanceIndex = input.instanceIndex;

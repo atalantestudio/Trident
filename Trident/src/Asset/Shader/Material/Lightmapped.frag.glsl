@@ -3,6 +3,11 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
+// TODO(forward/pbr)
+// Decouple GLSL/GLSL for Vulkan shaders. Reasons:
+// - Multiple descriptor sets
+// - No shadow map Y flipping in GLSL
+
 precision highp float;
 
 in Interstage {
@@ -29,6 +34,8 @@ layout(set = 1, binding = 0) uniform sampler2D lightmapAtlasSampler;
 layout(set = 2, binding = 0) uniform sampler2D diffuseSampler;
 
 layout(location = 0) out vec4 fragment;
+
+const vec3 SUN_DIRECTION = normalize(vec3(1.0, 1.0, 1.0));
 
 vec4 cubic(float v) {
 	vec4 n = vec4(1.0, 2.0, 3.0, 4.0) - v;
@@ -82,13 +89,10 @@ float calculateShadow(vec4 lightSpacePosition) {
 		return 0.0;
 	}
 
-	const vec3 sunDirection = normalize(vec3(1.0, 1.0, 1.0));
-
 	vec2 coordinate = projectedPosition.xy * 0.5 + 0.5;
-	float depthBias = 0.0005 * dot(interstage.tbn[2], sunDirection);
+	float depthBias = 0.0005 * dot(interstage.tbn[2], SUN_DIRECTION);
 	float depth = projectedPosition.z;
 
-	// TODO(forward/directional-shadow-map): Only for Vulkan.
 	coordinate.y = 1.0 - coordinate.y;
 
 	float closestDepth = texture(directionalShadowMapSampler, coordinate).r;
@@ -97,12 +101,14 @@ float calculateShadow(vec4 lightSpacePosition) {
 }
 
 void main() {
+	float surfaceToSunLight = dot(interstage.tbn[2], SUN_DIRECTION);
 	float inShadow = calculateShadow(interstage.lightSpacePosition);
+
 	vec3 directDiffuse = texture(diffuseSampler, interstage.textureCoordinate).rgb;
 	vec3 indirectDiffuse = sampleBicubic(lightmapAtlasSampler, interstage.lightmapCoordinate).rgb;
 
 	directDiffuse = pow(directDiffuse, vec3(1.0 / 2.2));
 
-	fragment.rgb = indirectDiffuse * directDiffuse * inShadow + directDiffuse * camera.sunColor * (1.0 - inShadow);
+	fragment.rgb = mix(indirectDiffuse * directDiffuse, directDiffuse * camera.sunColor, max(0.0, max(0.0, surfaceToSunLight) - inShadow));
 	fragment.a = 1.0;
 }

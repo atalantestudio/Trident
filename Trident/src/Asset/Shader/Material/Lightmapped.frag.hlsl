@@ -19,22 +19,20 @@ struct Interstage {
 	float2 lightmapCoordinate : VERTEX_OUTPUT_ATTRIBUTE7;
 };
 
-struct FragmentOutput {
-	float4 color : SV_Target0;
-};
-
 cbuffer Camera {
 	Camera camera;
 }
 
 Texture2D<float> directionalShadowMapTexture : register(t1);
-SamplerState directionalShadowMapSamplerState;
+SamplerState directionalShadowMapSamplerState : register(s0);
 
 Texture2D<float4> lightmapAtlasTexture : register(t2);
-SamplerState lightmapAtlasSamplerState;
+SamplerState lightmapAtlasSamplerState : register(s1);
 
 Texture2D<float4> diffuseTexture : register(t3);
-SamplerState diffuseSamplerState;
+SamplerState diffuseSamplerState : register(s2);
+
+static const float3 SUN_DIRECTION = normalize(float3(1.0, 1.0, 1.0));
 
 float calculateShadow(float4 lightSpacePosition, float3 normal) {
 	float3 projectedPosition = lightSpacePosition.xyz / lightSpacePosition.w;
@@ -46,9 +44,7 @@ float calculateShadow(float4 lightSpacePosition, float3 normal) {
 		float2 coordinate = projectedPosition.xy * 0.5 + 0.5;
 		coordinate.y = 1.0 - coordinate.y;
 
-		const float3 sunDirection = normalize(float3(1.0, 1.0, 1.0));
-
-		float depthBias = 0.0005 * dot(normal, sunDirection);
+		float depthBias = 0.0005 * dot(normal, SUN_DIRECTION);
 		float depth = projectedPosition.z;
 		float closestDepth = directionalShadowMapTexture.Sample(directionalShadowMapSamplerState, coordinate);
 
@@ -56,8 +52,11 @@ float calculateShadow(float4 lightSpacePosition, float3 normal) {
 	}
 }
 
-FragmentOutput main(Interstage interstage) {
+float4 main(Interstage interstage) : SV_Target0 {
+	float surfaceToSunLight = dot(interstage.tbn[2], SUN_DIRECTION);
 	float inShadow = calculateShadow(interstage.lightSpacePosition, interstage.tbn[2]);
+
+	// TODO(graphics/dx12/sampler-descriptor-heap): Fix wrong sampler being used.
 	float3 directDiffuse = diffuseTexture.Sample(diffuseSamplerState, interstage.textureCoordinate).rgb;
 
 	// TODO(forward/static): Sample the lightmap atlas with bicubic interpolation.
@@ -65,9 +64,9 @@ FragmentOutput main(Interstage interstage) {
 
 	directDiffuse = pow(directDiffuse, 1.0 / 2.2);
 
-	FragmentOutput output;
-	output.color.rgb = indirectDiffuse * directDiffuse * inShadow + directDiffuse * camera.sunColor * (1.0 - inShadow);
-	output.color.a = 1.0;
+	float4 fragment;
+	fragment.rgb = lerp(indirectDiffuse * directDiffuse, directDiffuse * camera.sunColor, max(0.0, max(0.0, surfaceToSunLight) - inShadow));
+	fragment.a = 1.0;
 
-	return output;
+	return fragment;
 }
