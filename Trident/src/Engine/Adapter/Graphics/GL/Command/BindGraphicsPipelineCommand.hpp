@@ -14,14 +14,7 @@ namespace Trident {
 			{}
 
 			void execute() const final override {
-				DEBUG_ASSERT(graphicsPipeline->minSampleShading >= 0.0f && graphicsPipeline->minSampleShading <= 1.0f);
-
-				#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-					glBindVertexArray(graphicsPipeline->vertexArray);
-				#else
-					ENGINE_ERROR_UNSUPPORTED();
-				#endif
-
+				glBindVertexArray(graphicsPipeline->vertexArray);
 				glUseProgram(graphicsPipeline->program);
 				glFrontFace(graphicsPipeline->frontFace);
 
@@ -68,15 +61,13 @@ namespace Trident {
 					glDisable(GL_MULTISAMPLE);
 				}
 
-				for (uint32 drawBufferIndex = 0; drawBufferIndex < graphicsPipeline->drawBuffers.count(); drawBufferIndex += 1) {
-					const GL::GraphicsPipeline::DrawBuffer& drawBuffer = graphicsPipeline->drawBuffers[drawBufferIndex];
+				uint32 drawBufferIndex = 0;
+
+				while (drawBufferIndex < graphicsPipeline->drawBuffers.count()) {
+					const GL::GraphicsPipeline::DrawBuffer drawBuffer = graphicsPipeline->drawBuffers[drawBufferIndex];
 
 					if (drawBuffer.blend) {
-						#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-							glEnablei(GL_BLEND, drawBufferIndex);
-						#else
-							ENGINE_ERROR_UNSUPPORTED();
-						#endif
+						glEnablei(GL_BLEND, drawBufferIndex);
 
 						#if OPENGL_VERSION >= OPENGL_VERSION_4_0
 							glBlendFunci(drawBufferIndex, drawBuffer.srcColorBlendFactor, drawBuffer.dstColorBlendFactor);
@@ -85,12 +76,10 @@ namespace Trident {
 						#endif
 					}
 					else {
-						#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-							glDisablei(GL_BLEND, drawBufferIndex);
-						#else
-							ENGINE_ERROR_UNSUPPORTED();
-						#endif
+						glDisablei(GL_BLEND, drawBufferIndex);
 					}
+
+					drawBufferIndex += 1;
 				}
 
 				if (graphicsPipeline->depthTest) {
@@ -102,7 +91,7 @@ namespace Trident {
 					glDisable(GL_DEPTH_TEST);
 				}
 
-				// TODO: Handle SRGB with GL_FRAMEBUFFER_SRGB.
+				// TODO(graphics/gl/srgb-framebuffer): Handle SRGB with GL_FRAMEBUFFER_SRGB.
 			}
 
 		private:

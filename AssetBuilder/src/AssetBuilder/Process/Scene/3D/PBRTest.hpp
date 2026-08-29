@@ -36,6 +36,7 @@ namespace Trident {
 					sint32 rowIndex = 0;
 
 					while (rowIndex < rowCount) {
+						// TODO(renderer/forward/pbr): Fix tangent artifact at the highest point.
 						builder.placeRigidBody({
 							.geometryIndex = geometry,
 							.material = material,

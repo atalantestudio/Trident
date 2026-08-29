@@ -35,16 +35,12 @@ namespace Trident {
 
 		GLuint* framebuffers[] = {&framebuffer->framebuffer, &framebuffer->resolveFramebuffer};
 
-		#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-			glGenFramebuffers(1 + resolve, *framebuffers);
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer->framebuffer);
+		glGenFramebuffers(1 + resolve, *framebuffers);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer->framebuffer);
 
-			if (resolve) {
-				glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer->resolveFramebuffer);
-			}
-		#else
-			ENGINE_ERROR_UNSUPPORTED();
-		#endif
+		if (resolve) {
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer->resolveFramebuffer);
+		}
 
 		uint32 imageViewIndex = 0;
 		uint32 boundAttachmentIndex = 0;
@@ -56,11 +52,7 @@ namespace Trident {
 			const GL::Image* glImage = static_cast<const GL::Image*>(imageView->getImage());
 
 			if (resolve && imageView->getImage()->getSampleCount() == 1) {
-				#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-					glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + resolveAttachmentIndex, glImage->target, glImageView->texture, imageView->getMipLevelOffset());
-				#else
-					ENGINE_ERROR_UNSUPPORTED();
-				#endif
+				glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + resolveAttachmentIndex, glImage->target, glImageView->texture, imageView->getMipLevelOffset());
 
 				imageViewIndex += 1;
 				resolveAttachmentIndex += 1;
@@ -103,11 +95,7 @@ namespace Trident {
 				case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
 				case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
 				case GL_TEXTURE_RECTANGLE: {
-					#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-						glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, attachment, glImage->target, glImageView->texture, imageView->getMipLevelOffset());
-					#else
-						ENGINE_ERROR_UNSUPPORTED();
-					#endif
+					glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, attachment, glImage->target, glImageView->texture, imageView->getMipLevelOffset());
 
 					break;
 				}
@@ -123,22 +111,12 @@ namespace Trident {
 		}
 
 		#if defined(BUILD_MODE_DEBUG)
-			GLenum status = 0;
-
-			#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-				status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
-			#else
-				ENGINE_ERROR_UNSUPPORTED();
-			#endif
+			GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
 
 			ADAPTER_ASSERT(status == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete.");
 
 			if (resolve) {
-				#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-					status = glCheckFramebufferStatus(GL_READ_FRAMEBUFFER);
-				#else
-					ENGINE_ERROR_UNSUPPORTED();
-				#endif
+				status = glCheckFramebufferStatus(GL_READ_FRAMEBUFFER);
 
 				ADAPTER_ASSERT(status == GL_FRAMEBUFFER_COMPLETE, "Resolve framebuffer is incomplete.");
 			}
@@ -169,10 +147,6 @@ namespace Trident {
 		const GLuint framebuffers[] = {_framebuffer->framebuffer, _framebuffer->resolveFramebuffer};
 		const bool resolve = _framebuffer->resolveFramebuffer > 0;
 
-		#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-			glDeleteFramebuffers(1 + resolve, framebuffers);
-		#else
-			ENGINE_ERROR_UNSUPPORTED();
-		#endif
+		glDeleteFramebuffers(1 + resolve, framebuffers);
 	}
 }

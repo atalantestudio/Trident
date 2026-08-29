@@ -78,12 +78,8 @@ namespace Trident {
 			glDetachShader(graphicsPipeline->program, fragmentShaderModule->shader);
 		}
 
-		#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-			glGenVertexArrays(1, &graphicsPipeline->vertexArray);
-			glBindVertexArray(graphicsPipeline->vertexArray);
-		#else
-			ENGINE_ERROR_UNSUPPORTED();
-		#endif
+		glGenVertexArrays(1, &graphicsPipeline->vertexArray);
+		glBindVertexArray(graphicsPipeline->vertexArray);
 
 		GLuint bindingindex = 0;
 		GLuint attribindex = 0;
@@ -180,11 +176,6 @@ namespace Trident {
 		const GL::GraphicsPipeline* _graphicsPipeline = static_cast<const GL::GraphicsPipeline*>(graphicsPipeline);
 
 		glDeleteProgram(_graphicsPipeline->program);
-
-		#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-			glDeleteVertexArrays(1, &_graphicsPipeline->vertexArray);
-		#else
-			ENGINE_ERROR_UNSUPPORTED();
-		#endif
+		glDeleteVertexArrays(1, &_graphicsPipeline->vertexArray);
 	}
 }

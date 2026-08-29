@@ -7,29 +7,50 @@ namespace Trident {
 	extern PFNGLACTIVETEXTUREPROC glActiveTexture;
 	extern PFNGLATTACHSHADERPROC glAttachShader;
 	extern PFNGLBINDBUFFERPROC glBindBuffer;
+	extern PFNGLBINDBUFFERRANGEPROC glBindBufferRange;
+	extern PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer;
 	extern PFNGLBINDTEXTUREPROC glBindTexture;
+	extern PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
+	extern PFNGLBLITFRAMEBUFFERPROC glBlitFramebuffer;
+
+	#if defined(BUILD_MODE_DEBUG)
+		extern PFNGLCHECKFRAMEBUFFERSTATUSPROC glCheckFramebufferStatus;
+	#endif
+
+	extern PFNGLCLEARBUFFERFIPROC glClearBufferfi;
+	extern PFNGLCLEARBUFFERFVPROC glClearBufferfv;
+	extern PFNGLCLEARBUFFERIVPROC glClearBufferiv;
+	extern PFNGLCLEARBUFFERUIVPROC glClearBufferuiv;
 	extern PFNGLCREATEPROGRAMPROC glCreateProgram;
 	extern PFNGLCREATESHADERPROC glCreateShader;
 	extern PFNGLCULLFACEPROC glCullFace;
 	extern PFNGLDELETEBUFFERSPROC glDeleteBuffers;
+	extern PFNGLDELETEFRAMEBUFFERSPROC glDeleteFramebuffers;
 	extern PFNGLDELETEPROGRAMPROC glDeleteProgram;
 	extern PFNGLDELETESHADERPROC glDeleteShader;
 	extern PFNGLDELETETEXTURESPROC glDeleteTextures;
+	extern PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays;
 	extern PFNGLDEPTHFUNCPROC glDepthFunc;
 	extern PFNGLDEPTHMASKPROC glDepthMask;
 	extern PFNGLDEPTHRANGEPROC glDepthRange;
 	extern PFNGLDETACHSHADERPROC glDetachShader;
 	extern PFNGLDISABLEPROC glDisable;
+	extern PFNGLDISABLEIPROC glDisablei;
 	extern PFNGLDRAWBUFFERPROC glDrawBuffer;
 	extern PFNGLDRAWBUFFERSPROC glDrawBuffers;
 	extern PFNGLENABLEPROC glEnable;
+	extern PFNGLENABLEIPROC glEnablei;
 	extern PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
-	extern PFNGLFRONTFACEPROC glFrontFace;
 	extern PFNGLFINISHPROC glFinish;
+	extern PFNGLFRAMEBUFFERTEXTURE2DPROC glFramebufferTexture2D;
+	extern PFNGLFRONTFACEPROC glFrontFace;
 	extern PFNGLGENBUFFERSPROC glGenBuffers;
+	extern PFNGLGENFRAMEBUFFERSPROC glGenFramebuffers;
 	extern PFNGLGENTEXTURESPROC glGenTextures;
+	extern PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
 	extern PFNGLGETBUFFERPARAMETERIVPROC glGetBufferParameteriv;
 	extern PFNGLGETFLOATVPROC glGetFloatv;
+	extern PFNGLGETINTEGERI_VPROC glGetIntegeri_v;
 	extern PFNGLGETINTEGERVPROC glGetIntegerv;
 	extern PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog;
 	extern PFNGLGETPROGRAMIVPROC glGetProgramiv;
@@ -43,6 +64,7 @@ namespace Trident {
 
 	extern PFNGLLINEWIDTHPROC glLineWidth;
 	extern PFNGLLINKPROGRAMPROC glLinkProgram;
+	extern PFNGLMAPBUFFERRANGEPROC glMapBufferRange;
 	extern PFNGLPIXELSTOREIPROC glPixelStorei;
 	extern PFNGLPOLYGONMODEPROC glPolygonMode;
 	extern PFNGLREADBUFFERPROC glReadBuffer;
@@ -54,31 +76,6 @@ namespace Trident {
 	extern PFNGLUNMAPBUFFERPROC glUnmapBuffer;
 	extern PFNGLUSEPROGRAMPROC glUseProgram;
 	extern PFNGLVIEWPORTPROC glViewport;
-
-	#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-		extern PFNGLBINDBUFFERRANGEPROC glBindBufferRange;
-		extern PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer;
-		extern PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
-		extern PFNGLBLITFRAMEBUFFERPROC glBlitFramebuffer;
-
-		#if defined(BUILD_MODE_DEBUG)
-			extern PFNGLCHECKFRAMEBUFFERSTATUSPROC glCheckFramebufferStatus;
-		#endif
-
-		extern PFNGLCLEARBUFFERFIPROC glClearBufferfi;
-		extern PFNGLCLEARBUFFERFVPROC glClearBufferfv;
-		extern PFNGLCLEARBUFFERIVPROC glClearBufferiv;
-		extern PFNGLCLEARBUFFERUIVPROC glClearBufferuiv;
-		extern PFNGLDELETEFRAMEBUFFERSPROC glDeleteFramebuffers;
-		extern PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays;
-		extern PFNGLDISABLEIPROC glDisablei;
-		extern PFNGLENABLEIPROC glEnablei;
-		extern PFNGLFRAMEBUFFERTEXTURE2DPROC glFramebufferTexture2D;
-		extern PFNGLGENFRAMEBUFFERSPROC glGenFramebuffers;
-		extern PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
-		extern PFNGLGETINTEGERI_VPROC glGetIntegeri_v;
-		extern PFNGLMAPBUFFERRANGEPROC glMapBufferRange;
-	#endif
 
 	#if OPENGL_VERSION >= OPENGL_VERSION_3_1
 		extern PFNGLCOPYBUFFERSUBDATAPROC glCopyBufferSubData;

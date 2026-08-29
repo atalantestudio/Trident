@@ -18,11 +18,7 @@ namespace Trident {
 				const ref<GL::Framebuffer> framebuffer = ref_cast<GL::Framebuffer>(descriptor.framebuffer);
 				const ref<Trident::RenderPass> renderPass = framebuffer->getRenderPass();
 
-				#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer->framebuffer);
-				#else
-					ENGINE_ERROR_UNSUPPORTED();
-				#endif
+				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer->framebuffer);
 
 				sequence<GLenum> bufs(renderPass->getAttachmentCount());
 				uint32 bufIndex = 0;
@@ -49,32 +45,16 @@ namespace Trident {
 					const ClearValue& clearValue = descriptor.clearValues[attachmentIndex];
 
 					if (isDepthFormat(attachment.format)) {
-						#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-							glClearBufferfi(GL_DEPTH_STENCIL, 0, clearValue.depth, clearValue.stencil);
-						#else
-							ENGINE_ERROR_UNSUPPORTED();
-						#endif
+						glClearBufferfi(GL_DEPTH_STENCIL, 0, clearValue.depth, clearValue.stencil);
 					}
 					else if (isSignedIntegerColorFormat(attachment.format)) {
-						#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-							glClearBufferiv(GL_COLOR, attachmentIndex, clearValue.colorSigned);
-						#else
-							ENGINE_ERROR_UNSUPPORTED();
-						#endif
+						glClearBufferiv(GL_COLOR, attachmentIndex, clearValue.colorSigned);
 					}
 					else if (isUnsignedIntegerColorFormat(attachment.format)) {
-						#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-							glClearBufferuiv(GL_COLOR, attachmentIndex, clearValue.colorUnsigned);
-						#else
-							ENGINE_ERROR_UNSUPPORTED();
-						#endif
+						glClearBufferuiv(GL_COLOR, attachmentIndex, clearValue.colorUnsigned);
 					}
 					else {
-						#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-							glClearBufferfv(GL_COLOR, attachmentIndex, clearValue.color);
-						#else
-							ENGINE_ERROR_UNSUPPORTED();
-						#endif
+						glClearBufferfv(GL_COLOR, attachmentIndex, clearValue.color);
 					}
 
 					attachmentIndex += 1;

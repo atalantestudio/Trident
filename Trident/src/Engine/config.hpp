@@ -94,7 +94,7 @@ namespace Trident {
 		#endif
 
 		#if OPENGL_VERSION < OPENGL_VERSION_4_3 && defined(DEBUG_ENABLE_MESSENGER)
-			#error "Debug messenger cannot be enabled below OpenGL 4.3."
+			#error "The debug messenger cannot be enabled below OpenGL 4.3."
 		#endif
 
 		#if OPENGL_VERSION < OPENGL_VERSION_4_6 && defined(GL_SOURCE_FROM_SPIRV)

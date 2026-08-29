@@ -18,24 +18,15 @@ namespace Trident {
 				const ref<GL::RenderPass> renderPass = ref_cast<GL::RenderPass>(framebuffer->getRenderPass());
 				const Extent2D extent = framebuffer->getExtent();
 
-				#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-					glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer->framebuffer);
-				#else
-					ENGINE_ERROR_UNSUPPORTED();
-				#endif
+				glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer->framebuffer);
 
 				if (renderPass->presentSourceAttachmentIndex == max<uint32>()) {
 					if (renderPass->multisample) {
+						// TODO(graphics/gl/command-encoder/end-render-pass): Resolve all color attachments, not just the presented one.
 						glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer->resolveFramebuffer);
-
-						#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-							// TODO(graphics/gl/command-encoder/end-render-pass): Resolve all color attachments, not just the presented one.
-							glReadBuffer(GL_COLOR_ATTACHMENT0);
-							glDrawBuffer(GL_FRONT_LEFT);
-							glBlitFramebuffer(0, 0, extent.width, extent.height, 0, 0, extent.width, extent.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-						#else
-							ENGINE_ERROR_UNSUPPORTED();
-						#endif
+						glReadBuffer(GL_COLOR_ATTACHMENT0);
+						glDrawBuffer(GL_FRONT_LEFT);
+						glBlitFramebuffer(0, 0, extent.width, extent.height, 0, 0, extent.width, extent.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 					}
 
 					return;
@@ -43,14 +34,10 @@ namespace Trident {
 
 				const GLenum readBuffer = GL_COLOR_ATTACHMENT0 + renderPass->presentSourceAttachmentIndex;
 
-				#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-					glReadBuffer(readBuffer);
-					glDrawBuffer(GL_FRONT_LEFT);
-					glBlitFramebuffer(0, 0, extent.width, extent.height, 0, 0, extent.width, extent.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-				#else
-					ENGINE_ERROR_UNSUPPORTED();
-				#endif
+				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+				glReadBuffer(readBuffer);
+				glDrawBuffer(GL_FRONT_LEFT);
+				glBlitFramebuffer(0, 0, extent.width, extent.height, 0, 0, extent.width, extent.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 			}
 
 		private:

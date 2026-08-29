@@ -18,29 +18,50 @@ namespace Trident {
 			LOAD_PROCEDURE(glActiveTexture);
 			LOAD_PROCEDURE(glAttachShader);
 			LOAD_PROCEDURE(glBindBuffer);
+			LOAD_PROCEDURE(glBindBufferRange);
+			LOAD_PROCEDURE(glBindFramebuffer);
 			LOAD_PROCEDURE(glBindTexture);
+			LOAD_PROCEDURE(glBindVertexArray);
+			LOAD_PROCEDURE(glBlitFramebuffer);
+
+			#if defined(BUILD_MODE_DEBUG)
+				LOAD_PROCEDURE(glCheckFramebufferStatus);
+			#endif
+
+			LOAD_PROCEDURE(glClearBufferfi);
+			LOAD_PROCEDURE(glClearBufferfv);
+			LOAD_PROCEDURE(glClearBufferiv);
+			LOAD_PROCEDURE(glClearBufferuiv);
 			LOAD_PROCEDURE(glCreateProgram);
 			LOAD_PROCEDURE(glCreateShader);
 			LOAD_PROCEDURE(glCullFace);
 			LOAD_PROCEDURE(glDeleteBuffers);
+			LOAD_PROCEDURE(glDeleteFramebuffers);
 			LOAD_PROCEDURE(glDeleteProgram);
 			LOAD_PROCEDURE(glDeleteShader);
 			LOAD_PROCEDURE(glDeleteTextures);
+			LOAD_PROCEDURE(glDeleteVertexArrays);
 			LOAD_PROCEDURE(glDepthFunc);
 			LOAD_PROCEDURE(glDepthMask);
 			LOAD_PROCEDURE(glDepthRange);
 			LOAD_PROCEDURE(glDetachShader);
 			LOAD_PROCEDURE(glDisable);
+			LOAD_PROCEDURE(glDisablei);
 			LOAD_PROCEDURE(glDrawBuffer);
 			LOAD_PROCEDURE(glDrawBuffers);
 			LOAD_PROCEDURE(glEnable);
+			LOAD_PROCEDURE(glEnablei);
 			LOAD_PROCEDURE(glEnableVertexAttribArray);
-			LOAD_PROCEDURE(glFrontFace);
 			LOAD_PROCEDURE(glFinish);
+			LOAD_PROCEDURE(glFramebufferTexture2D);
+			LOAD_PROCEDURE(glFrontFace);
 			LOAD_PROCEDURE(glGenBuffers);
+			LOAD_PROCEDURE(glGenFramebuffers);
 			LOAD_PROCEDURE(glGenTextures);
+			LOAD_PROCEDURE(glGenVertexArrays);
 			LOAD_PROCEDURE(glGetBufferParameteriv);
 			LOAD_PROCEDURE(glGetFloatv);
+			LOAD_PROCEDURE(glGetIntegeri_v);
 			LOAD_PROCEDURE(glGetIntegerv);
 			LOAD_PROCEDURE(glGetProgramInfoLog);
 			LOAD_PROCEDURE(glGetProgramiv);
@@ -54,6 +75,7 @@ namespace Trident {
 
 			LOAD_PROCEDURE(glLineWidth);
 			LOAD_PROCEDURE(glLinkProgram);
+			LOAD_PROCEDURE(glMapBufferRange);
 			LOAD_PROCEDURE(glPixelStorei);
 			LOAD_PROCEDURE(glPolygonMode);
 			LOAD_PROCEDURE(glReadBuffer);
@@ -65,31 +87,6 @@ namespace Trident {
 			LOAD_PROCEDURE(glUnmapBuffer);
 			LOAD_PROCEDURE(glUseProgram);
 			LOAD_PROCEDURE(glViewport);
-
-			#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-				LOAD_PROCEDURE(glBindBufferRange);
-				LOAD_PROCEDURE(glBindFramebuffer);
-				LOAD_PROCEDURE(glBindVertexArray);
-				LOAD_PROCEDURE(glBlitFramebuffer);
-
-				#if defined(BUILD_MODE_DEBUG)
-					LOAD_PROCEDURE(glCheckFramebufferStatus);
-				#endif
-
-				LOAD_PROCEDURE(glClearBufferfi);
-				LOAD_PROCEDURE(glClearBufferfv);
-				LOAD_PROCEDURE(glClearBufferiv);
-				LOAD_PROCEDURE(glClearBufferuiv);
-				LOAD_PROCEDURE(glDeleteFramebuffers);
-				LOAD_PROCEDURE(glDeleteVertexArrays);
-				LOAD_PROCEDURE(glDisablei);
-				LOAD_PROCEDURE(glEnablei);
-				LOAD_PROCEDURE(glFramebufferTexture2D);
-				LOAD_PROCEDURE(glGenFramebuffers);
-				LOAD_PROCEDURE(glGenVertexArrays);
-				LOAD_PROCEDURE(glGetIntegeri_v);
-				LOAD_PROCEDURE(glMapBufferRange);
-			#endif
 
 			#if OPENGL_VERSION >= OPENGL_VERSION_3_1
 				LOAD_PROCEDURE(glCopyBufferSubData);
@@ -369,17 +366,12 @@ namespace Trident {
 
 		_physicalDevice->limits.maxBoundDescriptorSetCount = max<uint32>();
 
-		#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, pointer_cast<GLint*>(&_physicalDevice->limits.maxComputeWorkgroupCount[0]));
-			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1, pointer_cast<GLint*>(&_physicalDevice->limits.maxComputeWorkgroupCount[1]));
-			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2, pointer_cast<GLint*>(&_physicalDevice->limits.maxComputeWorkgroupCount[2]));
-			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, pointer_cast<GLint*>(&_physicalDevice->limits.maxComputeWorkgroupSize[0]));
-			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, pointer_cast<GLint*>(&_physicalDevice->limits.maxComputeWorkgroupSize[1]));
-			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, pointer_cast<GLint*>(&_physicalDevice->limits.maxComputeWorkgroupSize[2]));
-		#else
-			ENGINE_ERROR_UNSUPPORTED();
-		#endif
-
+		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, pointer_cast<GLint*>(&_physicalDevice->limits.maxComputeWorkgroupCount[0]));
+		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1, pointer_cast<GLint*>(&_physicalDevice->limits.maxComputeWorkgroupCount[1]));
+		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2, pointer_cast<GLint*>(&_physicalDevice->limits.maxComputeWorkgroupCount[2]));
+		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, pointer_cast<GLint*>(&_physicalDevice->limits.maxComputeWorkgroupSize[0]));
+		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, pointer_cast<GLint*>(&_physicalDevice->limits.maxComputeWorkgroupSize[1]));
+		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, pointer_cast<GLint*>(&_physicalDevice->limits.maxComputeWorkgroupSize[2]));
 		glGetIntegerv(GL_MAX_FRAMEBUFFER_WIDTH, pointer_cast<GLint*>(&_physicalDevice->limits.maxFramebufferSize[0]));
 		glGetIntegerv(GL_MAX_FRAMEBUFFER_HEIGHT, pointer_cast<GLint*>(&_physicalDevice->limits.maxFramebufferSize[1]));
 		glGetIntegerv(GL_MAX_FRAMEBUFFER_LAYERS, pointer_cast<GLint*>(&_physicalDevice->limits.maxFramebufferLayerCount));

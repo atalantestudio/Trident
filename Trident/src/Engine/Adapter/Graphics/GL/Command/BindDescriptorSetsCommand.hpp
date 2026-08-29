@@ -48,11 +48,7 @@ namespace Trident {
 
 								const GLuint index = descriptorSetLayoutOffset + bindingIndex + descriptorBufferIndex;
 
-								#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-									glBindBufferRange(target, index, static_cast<const GL::Buffer*>(bufferView.getBuffer())->buffer, bufferView.getOffset(), bufferView.getSize());
-								#else
-									ENGINE_ERROR_UNSUPPORTED();
-								#endif
+								glBindBufferRange(target, index, static_cast<const GL::Buffer*>(bufferView.getBuffer())->buffer, bufferView.getOffset(), bufferView.getSize());
 
 								descriptorBufferIndex += 1;
 							}
