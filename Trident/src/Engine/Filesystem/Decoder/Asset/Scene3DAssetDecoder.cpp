@@ -83,6 +83,9 @@ namespace Trident {
 			asset.lightmapAtlasImageAsset = assetLibrary->getAsset<ImageAsset>(lightmapAtlasAssetIdentifier);
 		}
 
+		asset.spawnPosition = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
+		asset.spawnDirection = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
+
 		std::copy_n(stream.getBytePosition(), bakedVertexCount * sizeof(Vertex3D), &asset.geometryData[asset.vertexRange.offset]);
 
 		stream.jump(bakedVertexCount * sizeof(Vertex3D));

@@ -21,6 +21,10 @@ namespace Trident {
 					.sunDirection = {1.0f, 1.0f, 1.0f},
 					.sunColor = {1.0f, 1.0f, 1.0f},
 					.sunIntensity = 1.0f,
+					.spawn = {
+						.position = {0.0f, 0.0f, 0.0f},
+						.direction = {0.0f, 0.0f, 1.0f},
+					},
 				});
 
 				const uint32 rectangularCuboidGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("3d_rectangular_cuboid"));

@@ -9,6 +9,32 @@
 namespace Trident {
 	class PerspectiveCamera3D : public Camera {
 		public:
+			// See https://stackoverflow.com/a/17654730/17136841.
+			static quat<float32> lookAt(vec3<float32> direction) {
+				static constexpr float32 e = 1e-5f;
+
+				const float32 angle = dot(FORWARD, direction);
+
+				if (abs(angle + 1.0f) < e) {
+					return quat<float32>(UP[0], UP[1], UP[2], pi<float32>());
+				}
+
+				if (abs(angle - 1.0f) < e) {
+					return quat<float32>::identity();
+				}
+
+				const float32 rotationAngle = acos(angle);
+
+				vec3<float32> rotationAxis = cross(FORWARD, direction);
+
+				if (lengthSquared(rotationAxis) > e) {
+					rotationAxis = normalized(rotationAxis);
+				}
+
+				return quat<float32>::axisAngle(rotationAxis, rotationAngle);
+			}
+
+		public:
 			const quat<float32>& getOrientation() const {
 				return orientation;
 			}

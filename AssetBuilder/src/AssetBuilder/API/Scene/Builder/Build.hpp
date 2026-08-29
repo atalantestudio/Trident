@@ -36,6 +36,7 @@ namespace Trident {
 		scene.triangleCount = static_cast<uint32>((staticIndexCount + dynamicIndexCount) / 3);
 		scene.staticGeometry.lightmapAtlasImageAssetDescriptor.identifier = max<uint32>();
 		scene.dynamicGeometry.entityCount = entityCount;
+		scene.spawn = descriptor.spawn;
 
 		buildGeometries(scene);
 		buildMaterialGeometries(scene);

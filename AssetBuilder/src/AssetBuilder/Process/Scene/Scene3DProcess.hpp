@@ -47,6 +47,12 @@ namespace Trident {
 				stream.write<float32>(scene.sunColor.z);
 				stream.write<uint32>(static_cast<uint32>(scene.dynamicGeometry.pointLights.count()));
 				stream.write<uint32>(scene.staticGeometry.lightmapAtlasImageAssetDescriptor.identifier);
+				stream.write<float32>(scene.spawn.position.x);
+				stream.write<float32>(scene.spawn.position.y);
+				stream.write<float32>(scene.spawn.position.z);
+				stream.write<float32>(scene.spawn.direction.x);
+				stream.write<float32>(scene.spawn.direction.y);
+				stream.write<float32>(scene.spawn.direction.z);
 
 				for (const BuildVertex3D& vertex : scene.staticGeometry.bakedVertices) {
 					stream.write<float32>(vertex.position.x);
@@ -173,7 +179,7 @@ namespace Trident {
 					sizeof(AssetHeader) +
 					sizeof(uint8) +
 					sizeof(uint32) * 17 +
-					sizeof(svec3<float32>) * 3 +
+					sizeof(svec3<float32>) * 5 +
 					scene.staticGeometry.bakedVertices.count() * sizeof(Vertex3D) +
 					scene.staticGeometry.bakedIndices.count() * sizeof(uint32) +
 					scene.staticGeometry.lineIndices.count() * sizeof(uint32) +

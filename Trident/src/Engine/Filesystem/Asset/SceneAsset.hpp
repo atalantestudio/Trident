@@ -71,5 +71,8 @@ namespace Trident {
 		uint16 hullFaceEdgeIndexCount = 0;
 		uint32 hullLineIndexCount = 0;
 		uint32 rigidBodyFacePlaneCount = 0;
+
+		svec3<float32> spawnPosition;
+		svec3<float32> spawnDirection;
 	};
 }

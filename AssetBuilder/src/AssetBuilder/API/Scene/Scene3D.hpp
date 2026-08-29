@@ -15,6 +15,13 @@
 #include "Engine/Filesystem/Asset/ShaderModuleAsset.hpp"
 
 namespace Trident {
+	struct SpawnDescriptor {
+		svec3<float32> position;
+
+		/// In Euler angles.
+		svec3<float32> direction;
+	};
+
 	struct Scene3DDescriptor {
 		Scene3DBuildFlags flags;
 		svec3<float32> skyColor;
@@ -22,6 +29,7 @@ namespace Trident {
 		svec3<float32> sunDirection;
 		svec3<float32> sunColor;
 		float32 sunIntensity;
+		SpawnDescriptor spawn;
 	};
 
 	struct BuildGeometry {
@@ -99,5 +107,7 @@ namespace Trident {
 		uint32 triangleCount;
 		BuildStaticSceneGeometry3D staticGeometry;
 		BuildDynamicSceneGeometry3D dynamicGeometry;
+
+		SpawnDescriptor spawn;
 	};
 }

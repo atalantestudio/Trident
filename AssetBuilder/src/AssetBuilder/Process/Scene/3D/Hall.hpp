@@ -27,6 +27,10 @@ namespace Trident {
 					.sunDirection = {1.0f, 1.0f, 1.0f},
 					.sunColor = {1.0f, 1.0f, 1.0f},
 					.sunIntensity = 1.0f,
+					.spawn = {
+						.position = {100.0f, 0.0f, 32.0f},
+						.direction = svec3<float32>(normalized(vec3<float32>{radians(-40.0_deg), 0.0f, radians(50.0_deg)})),
+					},
 				});
 
 				// TODO(asset-builder/lightmapper): For now the materials must be loaded in the order they are used when placing static surfaces and props.

@@ -30,6 +30,7 @@ namespace Trident {
 			static constexpr Entity PLAYER_ENTITY = 0;
 			static constexpr float32 LOOK_SENSITIVITY = 0.075f;
 			inline static const vec3<float32> PLAYER_CAMERA_OFFSET = {0.0f, 0.3f, 0.0f};
+			static constexpr svec3<float32> CAMERA_OFFSET = {0.0f, 64.0f, 0.0f};
 
 			// Values taken from HL1.
 			// See https://github.com/valvesoftware/halflife.
@@ -80,20 +81,18 @@ namespace Trident {
 				renderer.visualizationMode = VisualizationMode::DEFAULT;
 
 				PerspectiveCamera3D& camera = cameraController.getCamera();
+				camera.position = sceneAsset->spawnPosition + CAMERA_OFFSET;
 				camera.nearPlane = 0.01f;
 				camera.farPlane = 2048.0f;
-				camera.fieldOfView = radians(70.0_deg);
-				camera.aspectRatio = getApplication()->getWindow()->getAspectRatio();
 
-				#if defined(FORWARD_USE_NOCLIP_CAMERA)
-					#if defined(FORWARD_TEST_CORNELL_BOX)
-						camera.position = {-278.0f, 273.0f, -800.0f};
-						camera.fieldOfView = radians(40.0_deg);
-					#else
-						// TODO(forward/camera): Expose the position.
-						camera.position = {0.0f, 64.0f, 0.0f};
-					#endif
+				#if defined(FORWARD_USE_NOCLIP_CAMERA) and defined(FORWARD_TEST_CORNELL_BOX)
+					camera.fieldOfView = radians(40.0_deg);
+				#else
+					camera.fieldOfView = radians(70.0_deg);
 				#endif
+
+				camera.aspectRatio = getApplication()->getWindow()->getAspectRatio();
+				camera.setOrientation(camera.lookAt(sceneAsset->spawnDirection));
 
 				cameraController.updateProjection();
 
