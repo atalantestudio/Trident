@@ -33,20 +33,25 @@ namespace Trident {
 			/// If `scale` is 0, the operation is ignored.
 			void extrudeFace(Face& face, float32 scale);
 
+			// TODO(asset-builder/map/carve-face): Implement face carving.
+			/// Carves a new face inside an existing face.
+			/// This operation modifies the vertices of the current face.
+			// Face& carve(view<svec3<float32>> vertices);
+
 			BuildScene3D build();
 
 		private:
 			void triangulateFaces(BuildScene3D& scene) const;
 
-		private:
-			MapDescriptor descriptor;
-
+		protected:
 			sequence<svec3<float32>> facePositions;
 			sequence<uint32> indices;
 			sequence<Face> faces;
 
 			/// Total unique position count.
 			uint32 facePositionCount = 0;
+
+			uint32 faceIndexCount = 0;
 
 			/// Total face vertex count.
 			uint32 vertexCount = 0;
@@ -57,6 +62,7 @@ namespace Trident {
 			/// Total face count.
 			uint32 faceCount = 0;
 
-			uint32 faceIndexCount = 0;
+		private:
+			MapDescriptor descriptor;
 	};
 }

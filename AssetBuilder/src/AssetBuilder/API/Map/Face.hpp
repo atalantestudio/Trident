@@ -4,15 +4,12 @@
 #pragma once
 
 namespace Trident {
-	class Face {
-		public:
-			/// Carves and returns a new face.
-			/// This operation modifies the current face.
-			Face carve(view<svec3<float32>> vertices);
+	struct Face {
+		uint32 vertexCount;
 
-		public:
-			uint32 vertexCount;
-			range<uint32, uint32> indexRange;
-			svec3<float32> normal;
+		// The range's count is not used (equal to the vertex count).
+		range<uint32, uint32> indexRange;
+
+		svec3<float32> normal;
 	};
 }
