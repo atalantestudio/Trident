@@ -15,7 +15,8 @@ namespace Trident {
 		public:
 			explicit WoodDoorMaterial(AssetBuilderLibrary* assetLibrary) :
 				LightmappedMaterialShaderProcess(assetLibrary, {
-					.diffuseTexturePath = "wooddoor048a",
+					.diffuseMapPath = "wooddoor048a",
+					.normalMapPath = "wooddoor048a_normal",
 				})
 			{}
 	};

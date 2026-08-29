@@ -15,7 +15,8 @@ namespace Trident {
 		public:
 			explicit TileFloorMaterial(AssetBuilderLibrary* assetLibrary) :
 				LightmappedMaterialShaderProcess(assetLibrary, {
-					.diffuseTexturePath = "tilefloor018a",
+					.diffuseMapPath = "tilefloor018a",
+					.normalMapPath = "tilefloor018a_normal",
 				})
 			{}
 	};

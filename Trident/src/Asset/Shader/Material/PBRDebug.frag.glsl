@@ -40,11 +40,11 @@ layout(set = 0, binding = 2) buffer readonly PointLightBuffer {
 	PointLight pointLights[];
 };
 
-layout(set = 0, binding = 3) uniform sampler2D directionalShadowMapSampler;
+layout(set = 0, binding = 3) uniform sampler2D directionalShadowMap;
 
-layout(set = 1, binding = 0) uniform sampler2D armTexture;
-layout(set = 1, binding = 1) uniform sampler2D diffuseTexture;
-layout(set = 1, binding = 2) uniform sampler2D normalTexture;
+layout(set = 1, binding = 0) uniform sampler2D armMap;
+layout(set = 1, binding = 1) uniform sampler2D diffuseMap;
+layout(set = 1, binding = 2) uniform sampler2D normalMap;
 
 layout(location = 0) out vec4 fragment;
 
@@ -98,7 +98,7 @@ float calculateShadow(vec4 lightSpacePosition) {
 
 	coordinate.y = 1.0 - coordinate.y;
 
-	float closestDepth = texture(directionalShadowMapSampler, coordinate).r;
+	float closestDepth = texture(directionalShadowMap, coordinate).r;
 
 	return float(depth + depthBias <= closestDepth);
 }
@@ -114,9 +114,9 @@ void main() {
 	float metallic = float(interstage.instanceIndex % 7u) / 7.0;
 
 	// TODO(pbr): Convert the albedo map to linear space while building?
-	vec3 c = pow(texture(diffuseTexture, interstage.textureCoordinate).rgb, vec3(2.2));
+	vec3 c = pow(texture(diffuseMap, interstage.textureCoordinate).rgb, vec3(2.2));
 
-	vec3 n = normalize(interstage.tbn * (texture(normalTexture, interstage.textureCoordinate).rgb * 2.0 - 1.0));
+	vec3 n = normalize(interstage.tbn * (texture(normalMap, interstage.textureCoordinate).rgb * 2.0 - 1.0));
 	float surfaceToSunLight = dot(n, SUN_DIRECTION);
 	vec3 F0 = mix(vec3(0.04, 0.04, 0.04), c, metallic);
 

@@ -37,13 +37,13 @@ layout(set = 0, binding = 2) buffer readonly PointLightBuffer {
 	PointLight pointLights[];
 };
 
-layout(set = 0, binding = 3) uniform sampler2D directionalShadowMapSampler;
+layout(set = 0, binding = 3) uniform sampler2D directionalShadowMap;
 
-layout(set = 1, binding = 0) uniform sampler2D lightmapAtlasSampler;
+layout(set = 1, binding = 0) uniform sampler2D lightmapAtlasMap;
 
-layout(set = 2, binding = 0) uniform sampler2D armTexture;
-layout(set = 2, binding = 1) uniform sampler2D diffuseTexture;
-layout(set = 2, binding = 2) uniform sampler2D normalTexture;
+layout(set = 2, binding = 0) uniform sampler2D armMap;
+layout(set = 2, binding = 1) uniform sampler2D diffuseMap;
+layout(set = 2, binding = 2) uniform sampler2D normalMap;
 
 layout(location = 0) out vec4 fragment;
 
@@ -145,7 +145,7 @@ float calculateShadow(vec4 lightSpacePosition) {
 
 	coordinate.y = 1.0 - coordinate.y;
 
-	float closestDepth = texture(directionalShadowMapSampler, coordinate).r;
+	float closestDepth = texture(directionalShadowMap, coordinate).r;
 
 	return float(depth + depthBias <= closestDepth);
 }
@@ -156,14 +156,14 @@ void main() {
 	vec3 x = camera.position;
 	vec3 wo = normalize(camera.position - interstage.surface);
 
-	vec3 indirectDiffuse = sampleBicubic(lightmapAtlasSampler, interstage.lightmapCoordinate).rgb;
+	vec3 indirectDiffuse = sampleBicubic(lightmapAtlasMap, interstage.lightmapCoordinate).rgb;
 
-	vec3 arm = texture(armTexture, interstage.textureCoordinate).rgb;
+	vec3 arm = texture(armMap, interstage.textureCoordinate).rgb;
 	float ao = arm.r;
 	float roughness = arm.g;
 	float metallic = arm.b;
-	vec3 c = texture(diffuseTexture, interstage.textureCoordinate).rgb;
-	vec3 n = normalize(interstage.tbn * (texture(normalTexture, interstage.textureCoordinate).rgb * 2.0 - 1.0));
+	vec3 c = texture(diffuseMap, interstage.textureCoordinate).rgb;
+	vec3 n = normalize(interstage.tbn * (texture(normalMap, interstage.textureCoordinate).rgb * 2.0 - 1.0));
 	float surfaceToSunLight = dot(n, SUN_DIRECTION);
 	vec3 F0 = mix(vec3(0.04, 0.04, 0.04), c, metallic);
 

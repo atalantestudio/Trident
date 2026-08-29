@@ -115,7 +115,7 @@ float4 main(Interstage interstage) : SV_Target0 {
 	// TODO(pbr): Convert the albedo map to linear space while building?
 	float3 c = pow(diffuseTexture.Sample(diffuseSamplerState, interstage.textureCoordinate).rgb, 2.2);
 
-	float3 n = normalize(mul(interstage.tbn, normalTexture.Sample(normalSamplerState, interstage.textureCoordinate).rgb * 2.0 - 1.0));
+	float3 n = normalize(mul(transpose(interstage.tbn), normalTexture.Sample(normalSamplerState, interstage.textureCoordinate).rgb * 2.0 - 1.0));
 	float surfaceToSunLight = dot(n, SUN_DIRECTION);
 	float3 F0 = lerp(float3(0.04, 0.04, 0.04), c, metallic);
 

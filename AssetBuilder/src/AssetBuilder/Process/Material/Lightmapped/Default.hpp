@@ -15,7 +15,8 @@ namespace Trident {
 		public:
 			explicit LMDefaultMaterial(AssetBuilderLibrary* assetLibrary) :
 				LightmappedMaterialShaderProcess(assetLibrary, {
-					.diffuseTexturePath = "white",
+					.diffuseMapPath = "white",
+					.normalMapPath = "normal",
 				})
 			{}
 	};

@@ -9,7 +9,10 @@
 
 namespace Trident {
 	struct LightmappedMaterialDescriptor {
-		view<char8> diffuseTexturePath;
+		view<char8> diffuseMapPath;
+
+		/// Must be specified in GL format.
+		view<char8> normalMapPath;
 	};
 
 	class LightmappedMaterialShaderProcess : public MaterialShaderProcess {
@@ -28,7 +31,8 @@ namespace Trident {
 				asset.shaderModuleAssetIdentifier = 400;
 
 				asset.descriptorImageAssetIdentifiers = {
-					assetLibrary.getAsset<ImageAsset>(descriptor.diffuseTexturePath)->identifier,
+					assetLibrary.getAsset<ImageAsset>(descriptor.diffuseMapPath)->identifier,
+					assetLibrary.getAsset<ImageAsset>(descriptor.normalMapPath)->identifier,
 				};
 
 				return asset;

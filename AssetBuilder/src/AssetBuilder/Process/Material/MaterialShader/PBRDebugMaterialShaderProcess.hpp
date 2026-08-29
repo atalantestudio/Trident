@@ -22,9 +22,9 @@ namespace Trident {
 				asset.shaderModuleAssetIdentifier = 403;
 
 				asset.descriptorImageAssetIdentifiers = {
-					assetLibrary.getAsset<ImageAsset>(descriptor.armTexturePath)->identifier,
-					assetLibrary.getAsset<ImageAsset>(descriptor.diffuseTexturePath)->identifier,
-					assetLibrary.getAsset<ImageAsset>(descriptor.normalTexturePath)->identifier,
+					assetLibrary.getAsset<ImageAsset>(descriptor.armMapPath)->identifier,
+					assetLibrary.getAsset<ImageAsset>(descriptor.diffuseMapPath)->identifier,
+					assetLibrary.getAsset<ImageAsset>(descriptor.normalMapPath)->identifier,
 				};
 
 				return asset;

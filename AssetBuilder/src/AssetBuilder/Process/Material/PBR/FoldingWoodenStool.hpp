@@ -15,9 +15,9 @@ namespace Trident {
 		public:
 			explicit FoldingWoodenStoolMaterial(AssetBuilderLibrary* assetLibrary) :
 				PBRMaterialShaderProcess(assetLibrary, {
-					.armTexturePath = "folding_wooden_stool_arm_1k",
-					.diffuseTexturePath = "folding_wooden_stool_diff_1k",
-					.normalTexturePath = "folding_wooden_stool_nor_gl_1k",
+					.armMapPath = "folding_wooden_stool_arm_1k",
+					.diffuseMapPath = "folding_wooden_stool_diff_1k",
+					.normalMapPath = "folding_wooden_stool_nor_gl_1k",
 				})
 			{}
 	};

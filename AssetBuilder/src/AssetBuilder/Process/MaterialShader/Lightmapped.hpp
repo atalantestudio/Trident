@@ -20,10 +20,17 @@ namespace Trident {
 					.descriptorCount = 1,
 					.stageFlags = ShaderStage::FRAGMENT,
 				},
+
+				// Normal
+				{
+					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+					.descriptorCount = 1,
+					.stageFlags = ShaderStage::FRAGMENT,
+				},
 			},
 		};
 		asset.descriptorSetBindingRanges = {
-			{0, 1},
+			{0, 2},
 		};
 
 		return asset;

@@ -27,11 +27,12 @@ layout(set = 0, binding = 0) uniform readonly Camera {
 	vec3 sunColor;
 } camera;
 
-layout(set = 0, binding = 3) uniform sampler2D directionalShadowMapSampler;
+layout(set = 0, binding = 3) uniform sampler2D directionalShadowMap;
 
-layout(set = 1, binding = 0) uniform sampler2D lightmapAtlasSampler;
+layout(set = 1, binding = 0) uniform sampler2D lightmapAtlasMap;
 
-layout(set = 2, binding = 0) uniform sampler2D diffuseSampler;
+layout(set = 2, binding = 0) uniform sampler2D diffuseMap;
+layout(set = 2, binding = 1) uniform sampler2D normalMap;
 
 layout(location = 0) out vec4 fragment;
 
@@ -95,17 +96,18 @@ float calculateShadow(vec4 lightSpacePosition) {
 
 	coordinate.y = 1.0 - coordinate.y;
 
-	float closestDepth = texture(directionalShadowMapSampler, coordinate).r;
+	float closestDepth = texture(directionalShadowMap, coordinate).r;
 
 	return float(depth + depthBias < closestDepth);
 }
 
 void main() {
-	float surfaceToSunLight = dot(interstage.tbn[2], SUN_DIRECTION);
 	float inShadow = calculateShadow(interstage.lightSpacePosition);
 
-	vec3 directDiffuse = texture(diffuseSampler, interstage.textureCoordinate).rgb;
-	vec3 indirectDiffuse = sampleBicubic(lightmapAtlasSampler, interstage.lightmapCoordinate).rgb;
+	vec3 directDiffuse = texture(diffuseMap, interstage.textureCoordinate).rgb;
+	vec3 indirectDiffuse = sampleBicubic(lightmapAtlasMap, interstage.lightmapCoordinate).rgb;
+	vec3 normal = normalize(interstage.tbn * (texture(normalMap, interstage.textureCoordinate).rgb * 2.0 - 1.0));
+	float surfaceToSunLight = dot(normal, SUN_DIRECTION);
 
 	directDiffuse = pow(directDiffuse, vec3(1.0 / 2.2));
 

@@ -15,9 +15,9 @@ namespace Trident {
 		public:
 			explicit RubberDuckToyMaterial(AssetBuilderLibrary* assetLibrary) :
 				PBRMaterialShaderProcess(assetLibrary, {
-					.armTexturePath = "rubber_duck_toy_arm_1k",
-					.diffuseTexturePath = "rubber_duck_toy_diff_1k",
-					.normalTexturePath = "rubber_duck_toy_nor_gl_1k",
+					.armMapPath = "rubber_duck_toy_arm_1k",
+					.diffuseMapPath = "rubber_duck_toy_diff_1k",
+					.normalMapPath = "rubber_duck_toy_nor_gl_1k",
 				})
 			{}
 	};

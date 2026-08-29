@@ -32,6 +32,9 @@ SamplerState lightmapAtlasSamplerState : register(s1);
 Texture2D<float4> diffuseTexture : register(t3);
 SamplerState diffuseSamplerState : register(s2);
 
+Texture2D<float4> normalTexture : register(t4);
+SamplerState normalSamplerState : register(s3);
+
 static const float3 SUN_DIRECTION = normalize(float3(1.0, 1.0, 1.0));
 
 float calculateShadow(float4 lightSpacePosition, float3 normal) {
@@ -53,7 +56,6 @@ float calculateShadow(float4 lightSpacePosition, float3 normal) {
 }
 
 float4 main(Interstage interstage) : SV_Target0 {
-	float surfaceToSunLight = dot(interstage.tbn[2], SUN_DIRECTION);
 	float inShadow = calculateShadow(interstage.lightSpacePosition, interstage.tbn[2]);
 
 	// TODO(graphics/dx12/sampler-descriptor-heap): Fix wrong sampler being used.
@@ -61,6 +63,9 @@ float4 main(Interstage interstage) : SV_Target0 {
 
 	// TODO(forward/static): Sample the lightmap atlas with bicubic interpolation.
 	float3 indirectDiffuse = lightmapAtlasTexture.Sample(lightmapAtlasSamplerState, interstage.lightmapCoordinate).rgb;
+
+	float3 normal = normalize(mul(transpose(interstage.tbn), normalTexture.Sample(normalSamplerState, interstage.textureCoordinate).rgb * 2.0 - 1.0));
+	float surfaceToSunLight = dot(normal, SUN_DIRECTION);
 
 	directDiffuse = pow(directDiffuse, 1.0 / 2.2);
 

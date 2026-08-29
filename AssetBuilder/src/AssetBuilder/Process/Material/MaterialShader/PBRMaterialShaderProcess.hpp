@@ -9,11 +9,11 @@
 
 namespace Trident {
 	struct PBRMaterialDescriptor {
-		view<char8> armTexturePath;
-		view<char8> diffuseTexturePath;
+		view<char8> armMapPath;
+		view<char8> diffuseMapPath;
 
 		/// Must be specified in GL format.
-		view<char8> normalTexturePath;
+		view<char8> normalMapPath;
 	};
 
 	class PBRMaterialShaderProcess : public MaterialShaderProcess {
@@ -32,9 +32,9 @@ namespace Trident {
 				asset.shaderModuleAssetIdentifier = 402;
 
 				asset.descriptorImageAssetIdentifiers = {
-					assetLibrary.getAsset<ImageAsset>(descriptor.armTexturePath)->identifier,
-					assetLibrary.getAsset<ImageAsset>(descriptor.diffuseTexturePath)->identifier,
-					assetLibrary.getAsset<ImageAsset>(descriptor.normalTexturePath)->identifier,
+					assetLibrary.getAsset<ImageAsset>(descriptor.armMapPath)->identifier,
+					assetLibrary.getAsset<ImageAsset>(descriptor.diffuseMapPath)->identifier,
+					assetLibrary.getAsset<ImageAsset>(descriptor.normalMapPath)->identifier,
 				};
 
 				return asset;

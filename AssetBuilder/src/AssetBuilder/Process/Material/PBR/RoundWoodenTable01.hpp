@@ -15,9 +15,9 @@ namespace Trident {
 		public:
 			explicit RoundWoodenTable01Material(AssetBuilderLibrary* assetLibrary) :
 				PBRMaterialShaderProcess(assetLibrary, {
-					.armTexturePath = "round_wooden_table_01_arm_1k",
-					.diffuseTexturePath = "round_wooden_table_01_diff_1k",
-					.normalTexturePath = "round_wooden_table_01_nor_gl_1k",
+					.armMapPath = "round_wooden_table_01_arm_1k",
+					.diffuseMapPath = "round_wooden_table_01_diff_1k",
+					.normalMapPath = "round_wooden_table_01_nor_gl_1k",
 				})
 			{}
 	};

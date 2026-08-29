@@ -9,11 +9,11 @@
 
 namespace Trident {
 	struct LightmappedPBRMaterialDescriptor {
-		view<char8> armTexturePath;
-		view<char8> diffuseTexturePath;
+		view<char8> armMapPath;
+		view<char8> diffuseMapPath;
 
 		/// Must be specified in GL format.
-		view<char8> normalTexturePath;
+		view<char8> normalMapPath;
 	};
 
 	class LightmappedPBRMaterialShaderProcess : public MaterialShaderProcess {
@@ -32,9 +32,9 @@ namespace Trident {
 				asset.shaderModuleAssetIdentifier = 401;
 
 				asset.descriptorImageAssetIdentifiers = {
-					assetLibrary.getAsset<ImageAsset>(descriptor.armTexturePath)->identifier,
-					assetLibrary.getAsset<ImageAsset>(descriptor.diffuseTexturePath)->identifier,
-					assetLibrary.getAsset<ImageAsset>(descriptor.normalTexturePath)->identifier,
+					assetLibrary.getAsset<ImageAsset>(descriptor.armMapPath)->identifier,
+					assetLibrary.getAsset<ImageAsset>(descriptor.diffuseMapPath)->identifier,
+					assetLibrary.getAsset<ImageAsset>(descriptor.normalMapPath)->identifier,
 				};
 
 				return asset;

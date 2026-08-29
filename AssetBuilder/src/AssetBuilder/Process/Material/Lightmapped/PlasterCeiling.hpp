@@ -15,7 +15,8 @@ namespace Trident {
 		public:
 			explicit PlasterCeilingMaterial(AssetBuilderLibrary* assetLibrary) :
 				LightmappedMaterialShaderProcess(assetLibrary, {
-					.diffuseTexturePath = "plasterwall030a",
+					.diffuseMapPath = "plasterwall030a",
+					.normalMapPath = "normal",
 				})
 			{}
 	};

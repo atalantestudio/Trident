@@ -15,9 +15,9 @@ namespace Trident {
 		public:
 			explicit LPBRGallineraTableMaterial(AssetBuilderLibrary* assetLibrary) :
 				LightmappedPBRMaterialShaderProcess(assetLibrary, {
-					.armTexturePath = "gallinera_table_arm_1k",
-					.diffuseTexturePath = "gallinera_table_diff_1k",
-					.normalTexturePath = "gallinera_table_nor_gl_1k",
+					.armMapPath = "gallinera_table_arm_1k",
+					.diffuseMapPath = "gallinera_table_diff_1k",
+					.normalMapPath = "gallinera_table_nor_gl_1k",
 				})
 			{}
 	};

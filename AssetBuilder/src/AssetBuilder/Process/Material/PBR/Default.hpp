@@ -15,9 +15,9 @@ namespace Trident {
 		public:
 			explicit PBRDefaultMaterial(AssetBuilderLibrary* assetLibrary) :
 				PBRMaterialShaderProcess(assetLibrary, {
-					.armTexturePath = "white",
-					.diffuseTexturePath = "white",
-					.normalTexturePath = "normal",
+					.armMapPath = "white",
+					.diffuseMapPath = "white",
+					.normalMapPath = "normal",
 				})
 			{}
 	};

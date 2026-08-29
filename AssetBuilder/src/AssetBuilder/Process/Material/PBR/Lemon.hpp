@@ -15,9 +15,9 @@ namespace Trident {
 		public:
 			explicit LemonMaterial(AssetBuilderLibrary* assetLibrary) :
 				PBRMaterialShaderProcess(assetLibrary, {
-					.armTexturePath = "lemon_arm_1k",
-					.diffuseTexturePath = "lemon_diff_1k",
-					.normalTexturePath = "lemon_nor_gl_1k",
+					.armMapPath = "lemon_arm_1k",
+					.diffuseMapPath = "lemon_diff_1k",
+					.normalMapPath = "lemon_nor_gl_1k",
 				})
 			{}
 	};

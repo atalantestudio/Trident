@@ -15,9 +15,9 @@ namespace Trident {
 		public:
 			explicit PBRBlueMetalPlateMaterial(AssetBuilderLibrary* assetLibrary) :
 				PBRMaterialShaderProcess(assetLibrary, {
-					.armTexturePath = "blue_metal_plate_arm_1k",
-					.diffuseTexturePath = "blue_metal_plate_diff_1k",
-					.normalTexturePath = "blue_metal_plate_nor_gl_1k",
+					.armMapPath = "blue_metal_plate_arm_1k",
+					.diffuseMapPath = "blue_metal_plate_diff_1k",
+					.normalMapPath = "blue_metal_plate_nor_gl_1k",
 				})
 			{}
 	};
