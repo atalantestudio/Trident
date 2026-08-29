@@ -121,7 +121,11 @@ namespace Trident {
 				mat4x4<float32>(orientation) *
 				mat4x4<float32>::translation(position)
 			);
-			instance.normalTransform = mat3x3<float32>::identity();
+			instance.normalTransform = transpose(inverse(mat3x3<float32>(
+				instance.worldTransform[0][0], instance.worldTransform[0][1], instance.worldTransform[0][2],
+				instance.worldTransform[1][0], instance.worldTransform[1][1], instance.worldTransform[1][2],
+				instance.worldTransform[2][0], instance.worldTransform[2][1], instance.worldTransform[2][2]
+			)));
 
 			instanceIndex += 1;
 		}
