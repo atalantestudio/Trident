@@ -250,8 +250,6 @@ namespace Trident {
 				outputPath.replace_extension("tia");
 
 				if (std::filesystem::exists(outputPath)) {
-					ENGINE_INFO("Image asset \"[]\" already exists.", outputPath.filename().string());
-
 					return 0;
 				}
 

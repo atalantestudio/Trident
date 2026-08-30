@@ -117,8 +117,6 @@ namespace Trident {
 				outputPath.replace_extension("tga");
 
 				if (std::filesystem::exists(outputPath)) {
-					ENGINE_INFO("Geometry asset \"[]\" already exists.", outputPath.filename().string());
-
 					return 0;
 				}
 

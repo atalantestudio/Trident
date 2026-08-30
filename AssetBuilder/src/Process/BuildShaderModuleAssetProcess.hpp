@@ -19,8 +19,6 @@ namespace Trident {
 				outputPath.replace_extension("tsm");
 
 				if (std::filesystem::exists(outputPath)) {
-					ENGINE_INFO("Shader module asset \"[]\" already exists.", outputPath.filename().string());
-
 					return 0;
 				}
 

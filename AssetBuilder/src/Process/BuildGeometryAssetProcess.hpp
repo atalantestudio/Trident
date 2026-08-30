@@ -34,14 +34,10 @@ namespace Trident {
 					outputPath.replace_extension("tga");
 
 					if (std::filesystem::exists(outputPath)) {
-						ENGINE_INFO("Geometry asset \"[]\" already exists.", outputPath.filename().string());
-
 						continue;
 					}
 
 					if (!Decoder<FileFormat::FBX>::validateSignature(ByteStream<StreamOperation::READ>(&inputData[0], inputData.count(), Endianness::LITTLE_ENDIAN))) {
-						ENGINE_INFO("Ignoring non-FBX file \"[]\".", path);
-
 						continue;
 					}
 

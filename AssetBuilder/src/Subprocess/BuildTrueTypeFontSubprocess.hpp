@@ -20,8 +20,6 @@ namespace Trident {
 				outputPath.replace_extension("tfo");
 
 				if (std::filesystem::exists(outputPath)) {
-					ENGINE_INFO("Font asset \"[]\" already exists.", outputPath.filename().string());
-
 					return;
 				}
 

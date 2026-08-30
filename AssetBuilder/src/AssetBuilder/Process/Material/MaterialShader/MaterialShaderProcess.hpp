@@ -66,8 +66,6 @@ namespace Trident {
 				outputPath.replace_extension("tma");
 
 				if (std::filesystem::exists(outputPath)) {
-					ENGINE_INFO("Material asset \"[]\" already exists.", outputPath.filename().string());
-
 					return 0;
 				}
 
