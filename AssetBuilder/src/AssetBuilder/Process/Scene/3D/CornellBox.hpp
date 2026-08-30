@@ -248,7 +248,7 @@ namespace Trident {
 					},
 				});
 
-				const MaterialReference staticMaterial = builder.loadStaticMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
+				const MaterialReference staticMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
 
 				builder.placeSurface(
 					{

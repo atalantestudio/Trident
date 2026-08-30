@@ -34,10 +34,10 @@ namespace Trident {
 				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.lightmapCoordinates.count()));
 				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.instances.count()));
 				stream.write<uint32>(static_cast<uint32>(scene.geometries.count()));
+				stream.write<uint32>(scene.dynamicGeometry.materialShaderOffset);
+				stream.write<uint32>(static_cast<uint32>(scene.materialShaders.count()) - scene.dynamicGeometry.materialShaderOffset);
 				stream.write<uint32>(static_cast<uint32>(scene.materialGeometries.count()));
 				stream.write<uint32>(static_cast<uint32>(scene.materials.count()));
-				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.materialShaders.count()));
-				stream.write<uint32>(static_cast<uint32>(scene.dynamicGeometry.materialShaders.count()));
 				stream.write<uint32>(scene.dynamicGeometry.entityCount);
 				stream.write<float32>(scene.sunDirection.x);
 				stream.write<float32>(scene.sunDirection.y);
@@ -100,11 +100,7 @@ namespace Trident {
 					stream.write<uint32>(material.geometryCount);
 				}
 
-				for (const BuildMaterialShader& materialShader : scene.staticGeometry.materialShaders) {
-					encodeMaterialShader(stream, materialShader);
-				}
-
-				for (const BuildMaterialShader& materialShader : scene.dynamicGeometry.materialShaders) {
+				for (const BuildMaterialShader& materialShader : scene.materialShaders) {
 					encodeMaterialShader(stream, materialShader);
 				}
 
@@ -193,11 +189,7 @@ namespace Trident {
 					scene.dynamicGeometry.rigidBodyMappings.count() * (sizeof(Entity) + sizeof(svec3<float32>) * 7 + sizeof(float32) * 4)
 				);
 
-				for (const BuildMaterialShader& materialShader : scene.staticGeometry.materialShaders) {
-					size += calculateMaterialShaderSize(materialShader);
-				}
-
-				for (const BuildMaterialShader& materialShader : scene.dynamicGeometry.materialShaders) {
+				for (const BuildMaterialShader& materialShader : scene.materialShaders) {
 					size += calculateMaterialShaderSize(materialShader);
 				}
 

@@ -16,13 +16,23 @@ namespace Trident {
 
 		uint32 vertexOffset = static_cast<uint32>(bakedVertexCount);
 		uint32 indexOffset = static_cast<uint32>(bakedIndexCount);
+		uint32 materialShaderIndex = 0;
 
-		for (const IntermediateMaterialShader& materialShader : staticMaterialShaders) {
+		while (materialShaderIndex < materialShaders.size()) {
+			const IntermediateMaterialShader& materialShader = materialShaders[materialShaderIndex];
+
+			if (materialShader.asset.geometryType != GeometryType::STATIC) {
+				materialShaderIndex += 1;
+
+				continue;
+			}
+
+
 			for (const IntermediateMaterial& material : materialShader.materials) {
 				for (const IntermediateMaterialGeometry& materialGeometry : material.geometries) {
 					const IntermediateGeometry& geometry = geometries[materialGeometry.geometryIndex];
 
-					if (geometry.assetIdentifier == 0) {
+					if (geometry.assetIdentifier == max<uint32>()) {
 						continue;
 					}
 
@@ -68,6 +78,8 @@ namespace Trident {
 					}
 				}
 			}
+
+			materialShaderIndex += 1;
 		}
 
 		std::vector<uint32> emissiveTriangleIndices_;

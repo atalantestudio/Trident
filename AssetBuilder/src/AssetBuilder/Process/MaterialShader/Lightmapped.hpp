@@ -9,6 +9,8 @@ namespace Trident {
 	// TODO(tsl): Replace by a TSL shader module.
 	inline ShaderModuleAsset LightmappedShaderModuleAsset() {
 		ShaderModuleAsset asset{};
+		asset.identifier = 400;
+		asset.version = {0, 0, 0};
 		asset.name = "Material/Lightmapped.frag";
 		asset.stageFlags = ShaderStage::FRAGMENT;
 		asset.entryPoint = "main";
@@ -32,6 +34,7 @@ namespace Trident {
 		asset.descriptorSetBindingRanges = {
 			{0, 2},
 		};
+		asset.geometryType = GeometryType::STATIC;
 
 		return asset;
 	}

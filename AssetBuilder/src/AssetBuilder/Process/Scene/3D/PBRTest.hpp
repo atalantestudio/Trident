@@ -29,7 +29,7 @@ namespace Trident {
 
 				const uint32 geometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("3d_unit_sphere"));
 
-				const MaterialReference material = builder.loadDynamicMaterial(assetLibrary->getAsset<MaterialAsset>("pbr_debug_default"));
+				const MaterialReference material = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("pbr_debug_default"));
 
 				static constexpr sint32 columnCount = 7;
 				static constexpr sint32 rowCount = 7;
@@ -40,7 +40,7 @@ namespace Trident {
 					sint32 rowIndex = 0;
 
 					while (rowIndex < rowCount) {
-						// TODO(renderer/forward/pbr): Fix tangent artifact at the highest point.
+						// TODO(renderer/forward/pbr): Fix tangent artifact at the poles.
 						builder.placeRigidBody({
 							.geometryIndex = geometry,
 							.material = material,

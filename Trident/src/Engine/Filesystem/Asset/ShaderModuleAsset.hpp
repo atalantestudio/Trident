@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Engine/API/Geometry/GeometryType.hpp"
 #include "Engine/API/Graphics/DescriptorSetLayout.hpp"
 #include "Engine/API/Graphics/ShaderStage.hpp"
 #include "Engine/Filesystem/Asset/Asset.hpp"
@@ -19,6 +20,9 @@ namespace Trident {
 		// TODO(tsl/multiple-entry-points): Use an entry point offset map instead.
 		/// Only used if the asset's version is below 1.0.0.
 		sequence<char8> entryPoint;
+
+		/// Whether the shader is used for static or dynamic geometry.
+		GeometryType geometryType;
 
 		sequence<DescriptorSetLayoutBinding> bindings;
 

@@ -52,6 +52,12 @@ namespace Trident {
 		asset.geometryAssets = sequence<ref<Geometry3DAsset>>(geometryCount);
 		asset.geometryIndexRanges = sequence<range<uint32, uint32>>(geometryCount);
 
+		const uint32 staticMaterialShaderCount = stream.read<uint32>();
+		const uint32 dynamicMaterialShaderCount = stream.read<uint32>();
+
+		asset.dynamicMaterialShaderOffset = staticMaterialShaderCount;
+		asset.materialShaders = sequence<MaterialShader>(staticMaterialShaderCount + dynamicMaterialShaderCount);
+
 		const uint32 materialGeometryCount = stream.read<uint32>();
 
 		asset.materialGeometries = sequence<MaterialGeometry>(materialGeometryCount);
@@ -59,13 +65,6 @@ namespace Trident {
 		const uint32 materialCount = stream.read<uint32>();
 
 		asset.materials = sequence<Material>(materialCount);
-
-		const uint32 staticMaterialShaderCount = stream.read<uint32>();
-		const uint32 dynamicMaterialShaderCount = stream.read<uint32>();
-
-		asset.dynamicMaterialShaderOffset = staticMaterialShaderCount;
-		asset.materialShaders = sequence<MaterialShader>(staticMaterialShaderCount + dynamicMaterialShaderCount);
-
 		asset.entityCount = stream.read<uint32>();
 		asset.instances = sequence<Instance3D>(staticInstanceCount + asset.entityCount);
 		asset.geometryMappings = sequence<EntityComponentMapping<GeometryComponent>>(asset.entityCount);
@@ -124,6 +123,8 @@ namespace Trident {
 				mat4x4<float32>(orientation) *
 				mat4x4<float32>::translation(position)
 			);
+
+			// TODO(asset/scene/3d/instance): See https://marti.works/posts/post-normal-matrix-optimization/post.
 			instance.normalTransform = transpose(inverse(mat3x3<float32>(
 				instance.worldTransform[0][0], instance.worldTransform[0][1], instance.worldTransform[0][2],
 				instance.worldTransform[1][0], instance.worldTransform[1][1], instance.worldTransform[1][2],
@@ -137,7 +138,6 @@ namespace Trident {
 		uint32* indices = pointer_cast<uint32*>(&asset.geometryData[asset.indexRange.offset]);
 		uint32 vertexOffset = bakedVertexCount;
 		uint32 indexOffset = bakedIndexCount;
-
 		uint32 geometryIndex = 0;
 
 		while (geometryIndex < geometryCount) {
@@ -145,7 +145,7 @@ namespace Trident {
 
 			const uint32 geometryAssetIdentifier = stream.read<uint32>();
 
-			if (geometryAssetIdentifier == 0) {
+			if (geometryAssetIdentifier == max<uint32>()) {
 				geometryIndex += 1;
 
 				continue;

@@ -43,7 +43,7 @@ namespace Trident {
 	};
 
 	struct BuildMaterial {
-		// TODO(filesystem/asset/material): Material assets are too small and could be merged with other materials or baked into the scene.
+		// TODO(filesystem/asset/material): Material assets are too small and could be merged with other materials or even baked into the scene.
 		uint32 assetIdentifier;
 
 		/// Affected range in the geometry array.
@@ -75,12 +75,11 @@ namespace Trident {
 		sequence<svec2<float32>> lightmapCoordinates;
 
 		sequence<BuildTransform3D> instances;
-		sequence<BuildMaterialShader> materialShaders;
 		ImageAssetDescriptor lightmapAtlasImageAssetDescriptor;
 	};
 
 	struct BuildDynamicSceneGeometry3D {
-		sequence<BuildMaterialShader> materialShaders;
+		uint32 materialShaderOffset;
 		sequence<PointLight> pointLights;
 		uint32 entityCount;
 		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
@@ -97,11 +96,14 @@ namespace Trident {
 
 		sequence<BuildGeometry> geometries;
 
-		/// Grouped by material.
-		sequence<BuildMaterialGeometry> materialGeometries;
+		/// Static and dynamic material shaders.
+		sequence<BuildMaterialShader> materialShaders;
 
 		/// Grouped by material shader.
 		sequence<BuildMaterial> materials;
+
+		/// Grouped by material.
+		sequence<BuildMaterialGeometry> materialGeometries;
 
 		uint32 vertexCount;
 		uint32 triangleCount;

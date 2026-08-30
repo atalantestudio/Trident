@@ -30,8 +30,8 @@ namespace Trident {
 				const uint32 boxGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("3d_unit_box"));
 				const uint32 boxGeometry2 = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("3d_unit_box_st"));
 
-				const MaterialReference lightmappedDefaultMaterial = builder.loadStaticMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
-				const MaterialReference pbrDefaultMaterial = builder.loadDynamicMaterial(assetLibrary->getAsset<MaterialAsset>("pbr_default"));
+				const MaterialReference lightmappedDefaultMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
+				const MaterialReference pbrDefaultMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("pbr_default"));
 
 				builder.placeSurface(
 					{

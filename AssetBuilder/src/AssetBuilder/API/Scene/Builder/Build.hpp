@@ -10,14 +10,62 @@
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 
 namespace Trident {
-	BuildScene3D SceneBuilder::build() {
-		for (IntermediateMaterialShader& materialShader : staticMaterialShaders) {
-			for (IntermediateMaterial& material : materialShader.materials) {
-				const IntermediateMaterialGeometry& materialGeometry = material.geometries[0];
-
-				ENGINE_ASSERT(materialGeometry.instances.size() > 0, "Baked geometry is unused.");
+	inline void countGeometries(view<IntermediateGeometry> geometries, uint32& geometryCount) {
+		for (const IntermediateGeometry& geometry : geometries) {
+			if (geometry.sharedInstanceCount == 0) {
+				continue;
 			}
+
+			geometryCount += 1;
 		}
+	}
+
+	inline void countMaterialRelatedObjects(view<IntermediateMaterialShader> materialShaders, uint32 materialShaderCounts[2], uint32& materialCount, uint32& materialGeometryCount, uint32& staticInstanceCount) {
+		for (const IntermediateMaterialShader& materialShader : materialShaders) {
+			const uint32 previousMaterialCount = materialCount;
+
+			for (const IntermediateMaterial& material : materialShader.materials) {
+				const uint32 previousMaterialGeometryCount = materialGeometryCount;
+
+				for (const IntermediateMaterialGeometry& materialGeometry : material.geometries) {
+					if (materialGeometry.instances.size() == 0) {
+						continue;
+					}
+
+					if (materialShader.asset.geometryType == GeometryType::STATIC) {
+						staticInstanceCount += static_cast<uint32>(materialGeometry.instances.size());
+					}
+
+					materialGeometryCount += 1;
+				}
+
+				if (materialGeometryCount == previousMaterialGeometryCount) {
+					continue;
+				}
+
+				materialCount += 1;
+			}
+
+			if (materialCount == previousMaterialCount) {
+				continue;
+			}
+
+			materialShaderCounts[static_cast<uint32>(materialShader.asset.geometryType)] += 1;
+		}
+	}
+
+	BuildScene3D SceneBuilder::build() {
+		const view<IntermediateGeometry> preFilteredGeometries(geometries.data(), geometries.size());
+		const view<IntermediateMaterialShader> preFilteredMaterialShaders(materialShaders.data(), materialShaders.size());
+
+		uint32 geometryCount = 0;
+		uint32 materialShaderCounts[static_cast<uint32>(GeometryType::count)] = {0, 0};
+		uint32 materialCount = 0;
+		uint32 materialGeometryCount = 0;
+		uint32 staticInstanceCount = 0;
+
+		countGeometries(preFilteredGeometries, geometryCount);
+		countMaterialRelatedObjects(preFilteredMaterialShaders, materialShaderCounts, materialCount, materialGeometryCount, staticInstanceCount);
 
 		BuildScene3D scene{};
 		scene.skyColor = descriptor.skyColor;
@@ -37,12 +85,142 @@ namespace Trident {
 		scene.staticGeometry.lightmapAtlasImageAssetDescriptor.identifier = max<uint32>();
 		scene.dynamicGeometry.entityCount = entityCount;
 		scene.spawn = descriptor.spawn;
+		scene.geometries = sequence<BuildGeometry>(geometryCount);
 
-		buildGeometries(scene);
-		buildMaterialGeometries(scene);
-		buildMaterials(scene);
-		buildMaterialShaders(scene);
-		buildBakedGeometry(scene.staticGeometry);
+		uint32 indexOffset = 0;
+		uint32 intermediateGeometryIndex = 0;
+		uint32 buildGeometryOffset = 0;
+
+		while (intermediateGeometryIndex < geometries.size()) {
+			IntermediateGeometry& intermediateGeometry = geometries[intermediateGeometryIndex];
+
+			if (intermediateGeometry.sharedInstanceCount == 0) {
+				intermediateGeometryIndex += 1;
+
+				continue;
+			}
+
+			BuildGeometry& geometry = scene.geometries[buildGeometryOffset];
+			geometry.indexRange.offset = 0;
+			geometry.indexRange.count = static_cast<uint32>(intermediateGeometry.indices.count());
+			geometry.assetIdentifier = intermediateGeometry.assetIdentifier;
+
+			intermediateGeometry.filteredIndex = buildGeometryOffset;
+
+			// TODO(wip)
+			if (geometry.assetIdentifier == max<uint32>()) {
+				geometry.indexRange.offset = indexOffset;
+
+				indexOffset += geometry.indexRange.count;
+			}
+
+			intermediateGeometryIndex += 1;
+			buildGeometryOffset += 1;
+		}
+
+		// TODO(wip): Refactor.
+		for (BuildGeometry& geometry : scene.geometries) {
+			if (geometry.assetIdentifier != max<uint32>()) {
+				geometry.indexRange.offset = indexOffset;
+
+				indexOffset += geometry.indexRange.count;
+			}
+		}
+
+		// TODO(wip): Merge with buildGeometries.
+		buildBakedGeometry(scene);
+
+		scene.materialShaders = sequence<BuildMaterialShader>(materialShaderCounts[0] + materialShaderCounts[1]);
+		scene.materials = sequence<BuildMaterial>(materialCount);
+		scene.materialGeometries = sequence<BuildMaterialGeometry>(materialGeometryCount);
+		scene.staticGeometry.instances = sequence<BuildTransform3D>(staticInstanceCount);
+
+		uint32 intermediateMaterialShaderIndex = 0;
+		uint32 buildMaterialShaderOffsets[static_cast<uint32>(GeometryType::count)] = {0, materialShaderCounts[0]};
+		uint32 buildMaterialOffset = 0;
+		uint32 buildMaterialGeometryOffset = 0;
+		uint32 buildInstanceOffset = 0;
+
+		while (intermediateMaterialShaderIndex < materialShaders.size()) {
+			const IntermediateMaterialShader& intermediateMaterialShader = materialShaders[intermediateMaterialShaderIndex];
+			const uint32 currentMaterialOffset = buildMaterialOffset;
+
+			uint32 intermediateMaterialIndex = 0;
+
+			while (intermediateMaterialIndex < intermediateMaterialShader.materials.size()) {
+				const IntermediateMaterial& intermediateMaterial = intermediateMaterialShader.materials[intermediateMaterialIndex];
+				const uint32 currentMaterialGeometryOffset = buildMaterialGeometryOffset;
+
+				uint32 intermediateMaterialGeometryIndex = 0;
+
+				while (intermediateMaterialGeometryIndex < intermediateMaterial.geometries.size()) {
+					const IntermediateMaterialGeometry& intermediateMaterialGeometry = intermediateMaterial.geometries[intermediateMaterialGeometryIndex];
+
+					if (intermediateMaterialGeometry.instances.size() == 0) {
+						intermediateMaterialGeometryIndex += 1;
+
+						continue;
+					}
+
+					BuildMaterialGeometry& materialGeometry = scene.materialGeometries[buildMaterialGeometryOffset];
+					materialGeometry.instanceRange.offset = max<uint32>();
+					materialGeometry.instanceRange.count = static_cast<uint32>(intermediateMaterialGeometry.instances.size());
+					materialGeometry.geometryIndex = geometries[intermediateMaterialGeometry.geometryIndex].filteredIndex;
+
+					if (intermediateMaterialShader.asset.geometryType == GeometryType::STATIC) {
+						materialGeometry.instanceRange.offset = buildInstanceOffset;
+
+						std::copy(intermediateMaterialGeometry.instances.begin(), intermediateMaterialGeometry.instances.end(), &scene.staticGeometry.instances[buildInstanceOffset]);
+
+						buildInstanceOffset += materialGeometry.instanceRange.count;
+					}
+
+					buildMaterialGeometryOffset += 1;
+					intermediateMaterialGeometryIndex += 1;
+				}
+
+				if (buildMaterialGeometryOffset - currentMaterialGeometryOffset == 0) {
+					intermediateMaterialIndex += 1;
+
+					continue;
+				}
+
+				BuildMaterial& material = scene.materials[buildMaterialOffset];
+				material.assetIdentifier = intermediateMaterial.assetIdentifier;
+				material.geometryCount = static_cast<uint32>(intermediateMaterial.geometries.size());
+
+				intermediateMaterialIndex += 1;
+				buildMaterialOffset += 1;
+			}
+
+			if (buildMaterialOffset - currentMaterialOffset == 0) {
+				intermediateMaterialShaderIndex += 1;
+
+				continue;
+			}
+
+			uint32& buildMaterialShaderOffset = buildMaterialShaderOffsets[static_cast<uint32>(intermediateMaterialShader.asset.geometryType)];
+
+			BuildMaterialShader& materialShader = scene.materialShaders[buildMaterialShaderOffset];
+			materialShader.asset = intermediateMaterialShader.asset;
+			materialShader.materialRange.offset = currentMaterialOffset;
+			materialShader.materialRange.count = buildMaterialOffset - currentMaterialOffset;
+
+			intermediateMaterialShaderIndex += 1;
+			buildMaterialShaderOffset += 1;
+		}
+
+		// TODO(wip): Refactor.
+		for (BuildMaterialGeometry& materialGeometry : scene.materialGeometries) {
+			if (materialGeometry.instanceRange.offset == max<uint32>()) {
+				materialGeometry.instanceRange.offset = buildInstanceOffset;
+
+				buildInstanceOffset += materialGeometry.instanceRange.count;
+			}
+		}
+
+		scene.dynamicGeometry.materialShaderOffset = materialShaderCounts[0];
+
 		buildLights(scene.dynamicGeometry);
 		buildEntityComponentMappings(scene.dynamicGeometry);
 		buildLightmaps(scene);
@@ -50,162 +228,9 @@ namespace Trident {
 		return scene;
 	}
 
-	void SceneBuilder::buildGeometries(BuildScene3D& scene) {
-		scene.geometries = sequence<BuildGeometry>(geometries.size());
-
-		uint32 indexOffset = 0;
-		uint32 geometryIndex = 0;
-
-		while (geometryIndex < scene.geometries.count()) {
-			const IntermediateGeometry& intermediateGeometry = geometries[geometryIndex];
-
-			BuildGeometry& geometry = scene.geometries[geometryIndex];
-			geometry.assetIdentifier = intermediateGeometry.assetIdentifier;
-			geometry.indexRange.count = static_cast<uint32>(intermediateGeometry.indices.count());
-
-			if (geometry.assetIdentifier == 0) {
-				geometry.indexRange.offset = indexOffset;
-
-				indexOffset += geometry.indexRange.count;
-			}
-
-			geometryIndex += 1;
-		}
-
-		for (BuildGeometry& geometry : scene.geometries) {
-			if (geometry.assetIdentifier > 0) {
-				geometry.indexRange.offset = indexOffset;
-
-				indexOffset += geometry.indexRange.count;
-			}
-		}
-	}
-
-	void SceneBuilder::buildMaterialGeometries(BuildScene3D& scene) {
-		scene.materialGeometries = sequence<BuildMaterialGeometry>(materialGeometryCount);
-		scene.staticGeometry.instances = sequence<BuildTransform3D>(staticInstanceCount);
-
-		uint32 instanceOffset = 0;
-		uint32 materialGeometryOffset = 0;
-
-		for (const IntermediateMaterialShader& materialShader : staticMaterialShaders) {
-			for (const IntermediateMaterial& material : materialShader.materials) {
-				uint32 materialGeometryIndex = 0;
-
-				while (materialGeometryIndex < material.geometries.size()) {
-					const IntermediateMaterialGeometry& intermediateMaterialGeometry = material.geometries[materialGeometryIndex];
-
-					BuildMaterialGeometry& materialGeometry = scene.materialGeometries[materialGeometryOffset + materialGeometryIndex];
-					materialGeometry.instanceRange.offset = instanceOffset;
-					materialGeometry.instanceRange.count = static_cast<uint32>(intermediateMaterialGeometry.instances.size());
-					materialGeometry.geometryIndex = intermediateMaterialGeometry.geometryIndex;
-
-					std::copy(intermediateMaterialGeometry.instances.begin(), intermediateMaterialGeometry.instances.end(), &scene.staticGeometry.instances[instanceOffset]);
-
-					instanceOffset += materialGeometry.instanceRange.count;
-					materialGeometryIndex += 1;
-				}
-
-				materialGeometryOffset += materialGeometryIndex;
-			}
-		}
-
-		for (const IntermediateMaterialShader& materialShader : dynamicMaterialShaders) {
-			for (const IntermediateMaterial& material : materialShader.materials) {
-				uint32 materialGeometryIndex = 0;
-
-				while (materialGeometryIndex < material.geometries.size()) {
-					const IntermediateMaterialGeometry& intermediateMaterialGeometry = material.geometries[materialGeometryIndex];
-
-					BuildMaterialGeometry& materialGeometry = scene.materialGeometries[materialGeometryOffset + materialGeometryIndex];
-					materialGeometry.instanceRange.offset = instanceOffset;
-					materialGeometry.instanceRange.count = static_cast<uint32>(intermediateMaterialGeometry.instances.size());
-					materialGeometry.geometryIndex = intermediateMaterialGeometry.geometryIndex;
-
-					instanceOffset += materialGeometry.instanceRange.count;
-					materialGeometryIndex += 1;
-				}
-
-				materialGeometryOffset += materialGeometryIndex;
-			}
-		}
-	}
-
-	void SceneBuilder::buildMaterials(BuildScene3D& scene) {
-		scene.materials = sequence<BuildMaterial>(materialCount);
-
-		uint64 materialOffset = 0;
-
-		for (const IntermediateMaterialShader& materialShader : staticMaterialShaders) {
-			uint32 materialIndex = 0;
-
-			while (materialIndex < materialShader.materials.size()) {
-				const IntermediateMaterial& intermediateMaterial = materialShader.materials[materialIndex];
-
-				BuildMaterial& material = scene.materials[materialOffset + materialIndex];
-				material.assetIdentifier = intermediateMaterial.assetIdentifier;
-				material.geometryCount = static_cast<uint32>(intermediateMaterial.geometries.size());
-
-				materialIndex += 1;
-			}
-
-			materialOffset += materialShader.materials.size();
-		}
-
-		for (const IntermediateMaterialShader& materialShader : dynamicMaterialShaders) {
-			uint32 materialIndex = 0;
-
-			while (materialIndex < materialShader.materials.size()) {
-				const IntermediateMaterial& intermediateMaterial = materialShader.materials[materialIndex];
-
-				BuildMaterial& material = scene.materials[materialOffset + materialIndex];
-				material.assetIdentifier = intermediateMaterial.assetIdentifier;
-				material.geometryCount = static_cast<uint32>(intermediateMaterial.geometries.size());
-
-				materialIndex += 1;
-			}
-
-			materialOffset += materialShader.materials.size();
-		}
-	}
-
-	void SceneBuilder::buildMaterialShaders(BuildScene3D& scene) {
-		scene.staticGeometry.materialShaders = sequence<BuildMaterialShader>(staticMaterialShaders.size());
-		scene.dynamicGeometry.materialShaders = sequence<BuildMaterialShader>(dynamicMaterialShaders.size());
-
-		uint32 materialOffset = 0;
-		uint32 materialShaderIndex = 0;
-
-		while (materialShaderIndex < scene.staticGeometry.materialShaders.count()) {
-			const IntermediateMaterialShader& intermediateMaterialShader = staticMaterialShaders[materialShaderIndex];
-
-			BuildMaterialShader& materialShader = scene.staticGeometry.materialShaders[materialShaderIndex];
-			materialShader.asset = getMaterialShaderModuleAsset(intermediateMaterialShader.assetIdentifier);
-			materialShader.materialRange.offset = materialOffset;
-			materialShader.materialRange.count = static_cast<uint32>(intermediateMaterialShader.materials.size());
-
-			materialOffset += materialShader.materialRange.count;
-			materialShaderIndex += 1;
-		}
-
-		materialShaderIndex = 0;
-
-		while (materialShaderIndex < scene.dynamicGeometry.materialShaders.count()) {
-			const IntermediateMaterialShader& intermediateMaterialShader = dynamicMaterialShaders[materialShaderIndex];
-
-			BuildMaterialShader& materialShader = scene.dynamicGeometry.materialShaders[materialShaderIndex];
-			materialShader.asset = getMaterialShaderModuleAsset(intermediateMaterialShader.assetIdentifier);
-			materialShader.materialRange.offset = materialOffset;
-			materialShader.materialRange.count = static_cast<uint32>(intermediateMaterialShader.materials.size());
-
-			materialOffset += materialShader.materialRange.count;
-			materialShaderIndex += 1;
-		}
-	}
-
-	void SceneBuilder::buildBakedGeometry(BuildStaticSceneGeometry3D& staticGeometry) {
-		staticGeometry.bakedVertices = sequence<BuildVertex3D>(bakedVertexCount);
-		staticGeometry.bakedIndices = sequence<uint32>(bakedIndexCount);
+	void SceneBuilder::buildBakedGeometry(BuildScene3D& scene) {
+		scene.staticGeometry.bakedVertices = sequence<BuildVertex3D>(bakedVertexCount);
+		scene.staticGeometry.bakedIndices = sequence<uint32>(bakedIndexCount);
 
 		uint32 bakedVertexOffset = 0;
 		uint64 bakedIndexOffset = 0;
@@ -216,7 +241,7 @@ namespace Trident {
 			while (geometryIndex < geometries.size()) {
 				const IntermediateGeometry& geometry = geometries[geometryIndex];
 
-				if (geometry.assetIdentifier > 0 || geometry.vertices.count() == 0) {
+				if (geometry.assetIdentifier != max<uint32>() || geometry.vertices.count() == 0 || geometry.sharedInstanceCount == 0) {
 					geometryIndex += 1;
 
 					continue;
@@ -225,7 +250,7 @@ namespace Trident {
 				uint32 vertexIndex = 0;
 
 				while (vertexIndex < geometry.vertices.count()) {
-					BuildVertex3D& vertex = staticGeometry.bakedVertices[bakedVertexOffset + vertexIndex];
+					BuildVertex3D& vertex = scene.staticGeometry.bakedVertices[bakedVertexOffset + vertexIndex];
 					vertex = geometry.vertices[vertexIndex];
 
 					const float32 w = vertex.tangent[3];
@@ -238,7 +263,7 @@ namespace Trident {
 				uint32 indexIndex = 0;
 
 				while (indexIndex < geometry.indices.count()) {
-					staticGeometry.bakedIndices[bakedIndexOffset + indexIndex] = bakedVertexOffset + geometry.indices[indexIndex];
+					scene.staticGeometry.bakedIndices[bakedIndexOffset + indexIndex] = bakedVertexOffset + geometry.indices[indexIndex];
 
 					indexIndex += 1;
 				}
@@ -297,6 +322,11 @@ namespace Trident {
 		dynamicGeometry.rigidBodyMappings = sequence<EntityComponentMapping<RigidBody3DComponent>>(rigidBodyMappings.size());
 
 		std::copy(geometryMappings.begin(), geometryMappings.end(), &dynamicGeometry.geometryMappings[0]);
+
 		std::copy(rigidBodyMappings.begin(), rigidBodyMappings.end(), &dynamicGeometry.rigidBodyMappings[0]);
+
+		for (EntityComponentMapping<GeometryComponent>& geometryMapping : dynamicGeometry.geometryMappings) {
+			geometryMapping.component.geometryIndex = geometries[geometryMapping.component.geometryIndex].filteredIndex;
+		}
 	}
 }

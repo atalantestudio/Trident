@@ -7,11 +7,34 @@
 
 namespace Trident {
 	void SceneBuilder::placeSurface(const SurfaceDescriptor& descriptor, const TransformAngleAxis3D& transform) {
-		const uint64 surfaceVertexCount = descriptor.geometry.vertices.count();
-		const uint64 surfaceIndexCount = descriptor.geometry.indices.count();
+		const uint32 materialShaderIndex = descriptor.material >> 16;
+		const uint32 materialIndex = descriptor.material & 0xff;
 
-		IntermediateMaterial& material = getMaterial(descriptor.material);
-		IntermediateMaterialGeometry& materialGeometry = material.geometries[0];
+		IntermediateMaterialShader& materialShader = materialShaders[materialShaderIndex];
+
+		ENGINE_ASSERT(materialShader.asset.geometryType == GeometryType::STATIC, "Cannot place a static surface with a dynamic material.");
+
+		IntermediateMaterial& material = materialShader.materials[materialIndex];
+
+		if (material.bakedGeometryIndex >= material.geometries.size()) {
+			const uint32 geometryIndex = static_cast<uint32>(geometries.size());
+
+			IntermediateGeometry geometry{};
+			geometry.assetIdentifier = max<uint32>();
+			geometry.sharedInstanceCount = 0;
+
+			geometries.emplace_back(geometry);
+
+			IntermediateMaterialGeometry materialGeometry{};
+			materialGeometry.geometryIndex = geometryIndex;
+
+			material.bakedGeometryIndex = static_cast<uint32>(material.geometries.size());
+			material.geometries.emplace_back(materialGeometry);
+
+			materialGeometryCount += 1;
+		}
+
+		IntermediateMaterialGeometry& materialGeometry = material.geometries[material.bakedGeometryIndex];
 		IntermediateGeometry& geometry = geometries[materialGeometry.geometryIndex];
 
 		if (geometry.sharedInstanceCount == 0) {
@@ -27,6 +50,8 @@ namespace Trident {
 			staticInstanceCount += 1;
 		}
 
+		const uint64 surfaceVertexCount = descriptor.geometry.vertices.count();
+		const uint64 surfaceIndexCount = descriptor.geometry.indices.count();
 		const uint32 vertexOffset = static_cast<uint32>(geometry.vertices.count());
 		const uint64 indexOffset = geometry.indices.count();
 

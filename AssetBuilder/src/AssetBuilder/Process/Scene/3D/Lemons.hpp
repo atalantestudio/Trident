@@ -29,7 +29,7 @@ namespace Trident {
 
 				const uint32 lemonGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("lemon"));
 
-				const MaterialReference lemonMaterial = builder.loadDynamicMaterial(assetLibrary->getAsset<MaterialAsset>("lemon_1k"));
+				const MaterialReference lemonMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lemon_1k"));
 
 				builder.placeRigidBody({
 					.geometryIndex = lemonGeometry,

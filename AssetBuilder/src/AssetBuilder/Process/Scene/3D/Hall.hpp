@@ -33,11 +33,10 @@ namespace Trident {
 					},
 				});
 
-				// TODO(asset-builder/lightmapper): For now the materials must be loaded in the order they are used when placing static surfaces and props.
-				const MaterialReference tileFloorMaterial = builder.loadStaticMaterial(assetLibrary->getAsset<MaterialAsset>("tile_floor"));
-				const MaterialReference plasterWallMaterial = builder.loadStaticMaterial(assetLibrary->getAsset<MaterialAsset>("plaster_wall"));
-				const MaterialReference woodDoorMaterial = builder.loadStaticMaterial(assetLibrary->getAsset<MaterialAsset>("wood_door"));
-				const MaterialReference plasterCeilingMaterial = builder.loadStaticMaterial(assetLibrary->getAsset<MaterialAsset>("plaster_ceiling"));
+				const MaterialReference tileFloorMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("tile_floor"));
+				const MaterialReference plasterWallMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("plaster_wall"));
+				const MaterialReference woodDoorMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("wood_door"));
+				const MaterialReference plasterCeilingMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("plaster_ceiling"));
 
 				/// Floors
 

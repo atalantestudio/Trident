@@ -11,7 +11,11 @@ namespace Trident {
 		const uint32 materialShaderIndex = descriptor.material >> 16;
 		const uint32 materialIndex = descriptor.material & 0xff;
 
-		IntermediateMaterial& material = dynamicMaterialShaders[materialShaderIndex].materials[materialIndex];
+		IntermediateMaterialShader& materialShader = materialShaders[materialShaderIndex];
+
+		ENGINE_ASSERT(materialShader.asset.geometryType == GeometryType::DYNAMIC, "Cannot create dynamic geometry under a static material.");
+
+		IntermediateMaterial& material = materialShader.materials[materialIndex];
 
 		const uint32 materialGeometryIndex = findMaterialGeometryIndex(material, descriptor.geometryIndex);
 

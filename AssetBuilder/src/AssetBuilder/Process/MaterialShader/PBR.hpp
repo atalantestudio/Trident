@@ -9,6 +9,8 @@ namespace Trident {
 	// TODO(tsl): Replace by a TSL shader module.
 	inline ShaderModuleAsset PBRShaderModuleAsset() {
 		ShaderModuleAsset asset{};
+		asset.identifier = 402;
+		asset.version = {0, 0, 0};
 		asset.name = "Material/PBR.frag";
 		asset.stageFlags = ShaderStage::FRAGMENT;
 		asset.entryPoint = "main";
@@ -39,6 +41,7 @@ namespace Trident {
 		asset.descriptorSetBindingRanges = {
 			{0, 3},
 		};
+		asset.geometryType = GeometryType::DYNAMIC;
 
 		return asset;
 	}

@@ -110,60 +110,12 @@ namespace Trident {
 		return geometryIndex;
 	}
 
-	MaterialReference SceneBuilder::loadStaticMaterial(ref<MaterialAsset> asset) {
-		const uint32 geometryIndex = static_cast<uint32>(geometries.size());
-
-		IntermediateGeometry geometry{};
-		geometry.assetIdentifier = 0;
-		geometry.sharedInstanceCount = 0;
-
-		geometries.emplace_back(geometry);
-
-		const MaterialReference materialReference = loadMaterial(asset, staticMaterialShaders);
-
-		IntermediateMaterial& material = getMaterial(materialReference);
-
-		IntermediateMaterialGeometry materialGeometry{};
-		materialGeometry.geometryIndex = geometryIndex;
-
-		material.geometries.emplace_back(materialGeometry);
-
-		materialGeometryCount += 1;
-
-		return materialReference;
-	}
-
-	MaterialReference SceneBuilder::loadDynamicMaterial(ref<MaterialAsset> asset) {
-		return loadMaterial(asset, dynamicMaterialShaders);
-	}
-
-	void SceneBuilder::placePointLight(const PointLight& pointLight) {
-		pointLights.emplace_back(pointLight);
-	}
-
-	IntermediateMaterial& SceneBuilder::getMaterial(MaterialReference materialReference) {
-		const uint32 materialShaderIndex = materialReference >> 16;
-		const uint32 materialIndex = materialReference & 0xff;
-
-		return staticMaterialShaders[materialShaderIndex].materials[materialIndex];
-	}
-
-	MaterialReference SceneBuilder::loadMaterial(ref<MaterialAsset> asset, std::vector<IntermediateMaterialShader>& materialShaders) {
-		uint32 materialShaderIndex = 0;
-
-		while (materialShaderIndex < materialShaders.size()) {
-			const IntermediateMaterialShader& materialShader = materialShaders[materialShaderIndex];
-
-			if (asset->shaderModuleAssetIdentifier == materialShader.assetIdentifier) {
-				break;
-			}
-
-			materialShaderIndex += 1;
-		}
+	MaterialReference SceneBuilder::loadMaterial(ref<MaterialAsset> asset) {
+		const uint32 materialShaderIndex = findMaterialShaderIndex(asset->shaderModuleAssetIdentifier);
 
 		if (materialShaderIndex >= materialShaders.size()) {
 			IntermediateMaterialShader materialShader{};
-			materialShader.assetIdentifier = asset->shaderModuleAssetIdentifier;
+			materialShader.asset = getMaterialShaderModuleAsset(asset->shaderModuleAssetIdentifier);
 
 			materialShaders.emplace_back(materialShader);
 		}
@@ -174,6 +126,7 @@ namespace Trident {
 
 		IntermediateMaterial material{};
 		material.assetIdentifier = asset->identifier;
+		material.bakedGeometryIndex = max<uint32>();
 
 		materialShader.materials.emplace_back(material);
 
@@ -182,7 +135,27 @@ namespace Trident {
 		return (materialShaderIndex << 16) | materialIndex;
 	}
 
-	uint32 SceneBuilder::findMaterialGeometryIndex(const IntermediateMaterial& material, uint32 geometryIndex) {
+	void SceneBuilder::placePointLight(const PointLight& pointLight) {
+		pointLights.emplace_back(pointLight);
+	}
+
+	uint32 SceneBuilder::findMaterialShaderIndex(uint32 assetIdentifier) const {
+		uint32 materialShaderIndex = 0;
+
+		while (materialShaderIndex < materialShaders.size()) {
+			const IntermediateMaterialShader& materialShader = materialShaders[materialShaderIndex];
+
+			if (assetIdentifier == materialShader.asset.identifier) {
+				break;
+			}
+
+			materialShaderIndex += 1;
+		}
+
+		return materialShaderIndex;
+	}
+
+	uint32 SceneBuilder::findMaterialGeometryIndex(const IntermediateMaterial& material, uint32 geometryIndex) const {
 		uint32 materialGeometryIndex = 0;
 
 		while (materialGeometryIndex < material.geometries.size()) {

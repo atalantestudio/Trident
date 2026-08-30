@@ -48,8 +48,7 @@ namespace Trident {
 			/// Loads a geometry asset and returns its index.
 			uint32 loadGeometry(ref<Geometry3DAsset> asset);
 
-			MaterialReference loadStaticMaterial(ref<MaterialAsset> asset);
-			MaterialReference loadDynamicMaterial(ref<MaterialAsset> asset);
+			MaterialReference loadMaterial(ref<MaterialAsset> asset);
 
 			void placeSurface(const SurfaceDescriptor& descriptor, const TransformAngleAxis3D& transform);
 
@@ -62,17 +61,10 @@ namespace Trident {
 			BuildScene3D build();
 
 		private:
-			IntermediateMaterial& getMaterial(MaterialReference materialReference);
+			uint32 findMaterialShaderIndex(uint32 assetIdentifier) const;
+			uint32 findMaterialGeometryIndex(const IntermediateMaterial& material, uint32 geometryIndex) const;
 
-			MaterialReference loadMaterial(ref<MaterialAsset> asset, std::vector<IntermediateMaterialShader>& materialShaders);
-
-			uint32 findMaterialGeometryIndex(const IntermediateMaterial& material, uint32 geometryIndex);
-
-			void buildGeometries(BuildScene3D& scene);
-			void buildMaterialGeometries(BuildScene3D& scene);
-			void buildMaterials(BuildScene3D& scene);
-			void buildMaterialShaders(BuildScene3D& scene);
-			void buildBakedGeometry(BuildStaticSceneGeometry3D& staticGeometry);
+			void buildBakedGeometry(BuildScene3D& scene);
 			void buildEntityComponentMappings(BuildDynamicSceneGeometry3D& dynamicGeometry);
 			void buildLights(BuildDynamicSceneGeometry3D& dynamicGeometry);
 			void buildLightmaps(BuildScene3D& scene);
@@ -96,8 +88,7 @@ namespace Trident {
 			uint32 entityCount = 0;
 
 			std::vector<IntermediateGeometry> geometries;
-			std::vector<IntermediateMaterialShader> staticMaterialShaders;
-			std::vector<IntermediateMaterialShader> dynamicMaterialShaders;
+			std::vector<IntermediateMaterialShader> materialShaders;
 
 			std::vector<Lightmap> lightmaps;
 			std::vector<LightmapMaterial> lightmapMaterials;

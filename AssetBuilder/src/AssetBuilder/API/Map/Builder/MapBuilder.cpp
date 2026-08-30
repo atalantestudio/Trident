@@ -114,8 +114,9 @@ namespace Trident {
 		scene.sunDirection = {0.0f, 0.0f, 0.0f};
 		scene.sunColor = {0.0f, 0.0f, 0.0f};
 		scene.geometries = {};
-		scene.materialGeometries = {};
+		scene.materialShaders = {};
 		scene.materials = {};
+		scene.materialGeometries = {};
 		scene.vertexCount = vertexCount;
 		scene.triangleCount = triangleCount;
 		scene.staticGeometry.vertexCount = vertexCount;
@@ -125,7 +126,6 @@ namespace Trident {
 		scene.staticGeometry.lineIndices = sequence<uint32>(scene.staticGeometry.lineIndexCount);
 		scene.staticGeometry.lightmapCoordinates = {};
 		scene.staticGeometry.instances = {};
-		scene.staticGeometry.materialShaders = {};
 		scene.staticGeometry.lightmapAtlasImageAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
 		scene.staticGeometry.lightmapAtlasImageAssetDescriptor.version = {0, 0, 0};
 		scene.staticGeometry.lightmapAtlasImageAssetDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
@@ -133,7 +133,6 @@ namespace Trident {
 		scene.staticGeometry.lightmapAtlasImageAssetDescriptor.mipLevelCount = 1;
 		scene.staticGeometry.lightmapAtlasImageAssetDescriptor.layerCount = 1;
 		scene.staticGeometry.lightmapAtlasImageAssetDescriptor.data = {0, 0, 0, 1};
-		scene.dynamicGeometry.materialShaders = {};
 		scene.dynamicGeometry.pointLights = {};
 		scene.dynamicGeometry.entityCount = 0;
 		scene.dynamicGeometry.geometryMappings = {};

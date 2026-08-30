@@ -12,6 +12,7 @@ namespace Trident {
 			return {position, orientation};
 		}
 
+		// TODO(asset/scene/3d/instance): See https://marti.works/posts/post-normal-matrix-optimization/post.
 		/// Returns a 3x3 normal matrix calculated from the world matrix of this component.
 		inline mat3x3<float32> calculateNormal() const {
 			return transpose(inverse(mat3x3<float32>(

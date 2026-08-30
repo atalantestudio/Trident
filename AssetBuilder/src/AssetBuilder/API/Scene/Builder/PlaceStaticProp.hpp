@@ -7,7 +7,14 @@
 
 namespace Trident {
 	void SceneBuilder::placeStaticProp(const MeshDescriptor& descriptor) {
-		IntermediateMaterial& material = getMaterial(descriptor.material);
+		const uint32 materialShaderIndex = descriptor.material >> 16;
+		const uint32 materialIndex = descriptor.material & 0xff;
+
+		IntermediateMaterialShader& materialShader = materialShaders[materialShaderIndex];
+
+		ENGINE_ASSERT(materialShader.asset.geometryType == GeometryType::STATIC, "Cannot place a static prop with a dynamic material.");
+
+		IntermediateMaterial& material = materialShader.materials[materialIndex];
 
 		const uint32 materialGeometryIndex = findMaterialGeometryIndex(material, descriptor.geometryIndex);
 

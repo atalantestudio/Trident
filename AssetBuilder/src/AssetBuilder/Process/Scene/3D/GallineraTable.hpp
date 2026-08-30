@@ -30,9 +30,9 @@ namespace Trident {
 				const uint32 gallineraTableGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("gallinera_table"));
 				const uint32 boxGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("3d_unit_box_st"));
 
-				const MaterialReference lightmappedDefaultMaterial = builder.loadStaticMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
-				const MaterialReference gallineraTableMaterial = builder.loadStaticMaterial(assetLibrary->getAsset<MaterialAsset>("lpbr_gallinera_table_1k"));
-				const MaterialReference debugMaterial = builder.loadDynamicMaterial(assetLibrary->getAsset<MaterialAsset>("debug"));
+				const MaterialReference lightmappedDefaultMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
+				const MaterialReference gallineraTableMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lpbr_gallinera_table_1k"));
+				const MaterialReference debugMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("debug"));
 
 				builder.placeSurface(
 					{
