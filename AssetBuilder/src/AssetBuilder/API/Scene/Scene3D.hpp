@@ -3,16 +3,17 @@
 
 #pragma once
 
-#include "AssetBuilder/API/Geometry/Geometry3D.hpp"
-#include "AssetBuilder/API/Scene/Scene3DBuildFlags.hpp"
-#include "AssetBuilder/API/Transform.hpp"
-
 #include "Engine/API/Light/PointLight.hpp"
+#include "Engine/API/Material/Material.hpp"
 #include "Engine/ECS/Component/GeometryComponent.hpp"
 #include "Engine/ECS/Component/RigidBody3DComponent.hpp"
 #include "Engine/ECS/EntityComponentMapping.hpp"
 #include "Engine/Filesystem/Asset/ImageAsset.hpp"
 #include "Engine/Filesystem/Asset/ShaderModuleAsset.hpp"
+
+#include "AssetBuilder/API/Geometry/Geometry3D.hpp"
+#include "AssetBuilder/API/Scene/Scene3DBuildFlags.hpp"
+#include "AssetBuilder/API/Transform.hpp"
 
 namespace Trident {
 	struct SpawnDescriptor {
@@ -35,11 +36,6 @@ namespace Trident {
 	struct BuildGeometry {
 		range<uint32, uint32> indexRange;
 		uint32 assetIdentifier;
-	};
-
-	struct BuildMaterialGeometry {
-		range<uint32, uint32> instanceRange;
-		uint32 geometryIndex;
 	};
 
 	struct BuildMaterial {
@@ -103,7 +99,7 @@ namespace Trident {
 		sequence<BuildMaterial> materials;
 
 		/// Grouped by material.
-		sequence<BuildMaterialGeometry> materialGeometries;
+		sequence<MaterialGeometry> materialGeometries;
 
 		uint32 vertexCount;
 		uint32 triangleCount;

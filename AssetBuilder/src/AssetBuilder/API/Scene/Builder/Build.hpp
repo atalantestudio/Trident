@@ -132,7 +132,7 @@ namespace Trident {
 
 		scene.materialShaders = sequence<BuildMaterialShader>(materialShaderCounts[0] + materialShaderCounts[1]);
 		scene.materials = sequence<BuildMaterial>(materialCount);
-		scene.materialGeometries = sequence<BuildMaterialGeometry>(materialGeometryCount);
+		scene.materialGeometries = sequence<MaterialGeometry>(materialGeometryCount);
 		scene.staticGeometry.instances = sequence<BuildTransform3D>(staticInstanceCount);
 
 		uint32 intermediateMaterialShaderIndex = 0;
@@ -162,7 +162,7 @@ namespace Trident {
 						continue;
 					}
 
-					BuildMaterialGeometry& materialGeometry = scene.materialGeometries[buildMaterialGeometryOffset];
+					MaterialGeometry& materialGeometry = scene.materialGeometries[buildMaterialGeometryOffset];
 					materialGeometry.instanceRange.offset = max<uint32>();
 					materialGeometry.instanceRange.count = static_cast<uint32>(intermediateMaterialGeometry.instances.size());
 					materialGeometry.geometryIndex = geometries[intermediateMaterialGeometry.geometryIndex].filteredIndex;
@@ -211,7 +211,7 @@ namespace Trident {
 		}
 
 		// TODO(wip): Refactor.
-		for (BuildMaterialGeometry& materialGeometry : scene.materialGeometries) {
+		for (MaterialGeometry& materialGeometry : scene.materialGeometries) {
 			if (materialGeometry.instanceRange.offset == max<uint32>()) {
 				materialGeometry.instanceRange.offset = buildInstanceOffset;
 

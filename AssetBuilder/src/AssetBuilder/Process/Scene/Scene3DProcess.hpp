@@ -90,7 +90,7 @@ namespace Trident {
 					stream.write<uint32>(geometry.assetIdentifier);
 				}
 
-				for (const BuildMaterialGeometry materialGeometry : scene.materialGeometries) {
+				for (const MaterialGeometry materialGeometry : scene.materialGeometries) {
 					stream.write<range<uint32, uint32>>(materialGeometry.instanceRange);
 					stream.write<uint32>(materialGeometry.geometryIndex);
 				}
@@ -182,7 +182,7 @@ namespace Trident {
 					scene.staticGeometry.lightmapCoordinates.count() * sizeof(uint32) +
 					scene.staticGeometry.instances.count() * sizeof(BuildTransform3D) +
 					scene.geometries.count() * sizeof(BuildGeometry) +
-					scene.materialGeometries.count() * sizeof(BuildMaterialGeometry) +
+					scene.materialGeometries.count() * sizeof(MaterialGeometry) +
 					scene.materials.count() * sizeof(BuildMaterial) +
 					scene.dynamicGeometry.pointLights.count() * (sizeof(svec3<float32>) * 2 + sizeof(float32)) +
 					scene.dynamicGeometry.geometryMappings.count() * sizeof(EntityComponentMapping<GeometryComponent>) +
