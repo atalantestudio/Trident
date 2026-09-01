@@ -248,11 +248,6 @@ namespace Trident {
 		vulkan11Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES;
 		vulkan11Features.pNext = &vulkan12Features;
 
-		VkPhysicalDeviceFeatures2 features2{};
-		features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-		features2.pNext = &vulkan11Features;
-		features2.features = _physicalDevice->features;
-
 		for (const DeviceExtensionName extension : enabledExtensions) {
 			enableDeviceExtension(extension, enabledExtensionNames, &vulkan14Features.pNext);
 		}
@@ -287,7 +282,7 @@ namespace Trident {
 		deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 
 		if (enabledExtensions.count() > 0) {
-			deviceCreateInfo.pNext = &features2;
+			deviceCreateInfo.pNext = &vulkan11Features;
 		}
 
 		deviceCreateInfo.flags = 0;
@@ -295,10 +290,7 @@ namespace Trident {
 		deviceCreateInfo.pQueueCreateInfos = &deviceQueueCreateInfos[0];
 		deviceCreateInfo.enabledExtensionCount = static_cast<uint32>(enabledExtensionNames.size());
 		deviceCreateInfo.ppEnabledExtensionNames = enabledExtensionNames.data();
-
-		if (enabledExtensions.count() == 0) {
-			deviceCreateInfo.pEnabledFeatures = &_physicalDevice->features;
-		}
+		deviceCreateInfo.pEnabledFeatures = &_physicalDevice->features;
 
 		result = _physicalDevice->instance->vkCreateDevice(_physicalDevice->physicalDevice, &deviceCreateInfo, nullptr, &device->device);
 
