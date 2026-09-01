@@ -64,7 +64,6 @@ namespace Trident {
 			uint32 findMaterialShaderIndex(uint32 assetIdentifier) const;
 			uint32 findMaterialGeometryIndex(const IntermediateMaterial& material, uint32 geometryIndex) const;
 
-			void buildBakedGeometry(BuildScene3D& scene);
 			void buildEntityComponentMappings(BuildDynamicSceneGeometry3D& dynamicGeometry);
 			void buildLights(BuildDynamicSceneGeometry3D& dynamicGeometry);
 			void buildLightmaps(BuildScene3D& scene);

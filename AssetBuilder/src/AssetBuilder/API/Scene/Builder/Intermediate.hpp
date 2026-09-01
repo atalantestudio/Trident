@@ -16,6 +16,8 @@ namespace Trident {
 		/// Shared instance count across all material geometries.
 		uint32 sharedInstanceCount;
 
+		bool staticUsage = false;
+
 		sequence<BuildVertex3D> vertices;
 		sequence<uint32> indices;
 

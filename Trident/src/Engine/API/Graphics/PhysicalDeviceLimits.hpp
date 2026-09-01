@@ -57,12 +57,16 @@ namespace Trident {
 		/// Maximum number of vertex buffers that can be specified for providing vertex input attributes to a graphics pipeline.
 		uint32 maxVertexInputBindingCount;
 
-		// TODO(graphics/device-limits/max-vertex-input-binding-stride): Use.
+		// TODO(graphics/physical-device/limits/max-vertex-input-binding-stride): Use.
 		/// Maximum vertex input binding stride that can be specified in a vertex input binding.
 		uint32 maxVertexInputBindingStride;
 
 		/// Granularity of supported point sizes.
 		float32 pointSizeGranularity;
+
+		// TODO(graphics/physical-device/limits/scratch-offset-alignment): Move in PhysicalDeviceLimits<EXT_hardware_ray_tracing>.
+		/// The minimum required alignment for scratch buffers.
+		uint64 minAccelerationStructureScratchOffsetAlignment;
 
 		/// The minimum required alignment for storage buffers.
 		/// 

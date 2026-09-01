@@ -13,9 +13,10 @@ namespace Trident {
 
 				while (geometryIndex < descriptor.geometries.count()) {
 					const AccelerationStructureTriangleGeometryDescriptor& geometry = descriptor.geometries[geometryIndex];
+					const uint32 indexStride = geometry.indexView.getStride();
 
-					if (geometry.vertex.count == 0) {
-						VALIDATION_ERROR("descriptor.geometries[[]].count must not be 0.", geometryIndex);
+					if (indexStride == sizeof(uint16) && indexStride == sizeof(uint16)) {
+						VALIDATION_ERROR("descriptor.geometries[[]].indexView must either have a 2 or 4 byte stride.", geometryIndex);
 					}
 
 					geometryIndex += 1;

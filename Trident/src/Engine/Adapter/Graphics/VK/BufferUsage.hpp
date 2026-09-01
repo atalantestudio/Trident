@@ -42,6 +42,10 @@ namespace Trident::VK {
 			bufferUsageFlags |= VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
 		}
 
+		if (bufferUsage & BufferUsage::ACCELERATION_STRUCTURE_STORAGE) {
+			bufferUsageFlags |= VK_BUFFER_USAGE_2_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR;
+		}
+
 		ADAPTER_ASSERT(bufferUsageFlags != 0, "Unknown buffer usage flag combination.");
 
 		return static_cast<VkBufferUsageFlagBits>(bufferUsageFlags);

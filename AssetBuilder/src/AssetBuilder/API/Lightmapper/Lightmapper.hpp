@@ -19,6 +19,7 @@ namespace Trident {
 		view<uint32> indices;
 		view<LightmapMaterial> materials;
 		view<uint32> emissiveTriangleIndices;
+		const BuildScene3D* scene;
 		Scene3DDescriptor sceneDescriptor;
 	};
 
@@ -110,6 +111,8 @@ namespace Trident {
 			ref<Buffer> createEmissiveTriangleIndexBuffer(uint64 emissiveTriangleIndexCount) const;
 
 			ref<Sampler> createIntermediateLightmapAtlasSampler() const;
+
+			void buildAccelerationStructures(const BuildScene3D& scene);
 
 			void encodeOneTimeCommands(const LightmapperDescriptor& descriptor) const;
 

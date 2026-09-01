@@ -4,7 +4,7 @@
 #pragma once
 
 namespace Trident {
-	enum class BufferUsage : uint8 {
+	enum class BufferUsage : uint16 {
 		/// Indicates a buffer used as the source of a transfer command.
 		TRANSFER_SRC = BIT(0),
 
@@ -28,6 +28,9 @@ namespace Trident {
 
 		/// Indicates an indirect buffer.
 		INDIRECT = BIT(7),
+
+		/// Provided by the EXT_hardware_ray_tracing device extension.
+		ACCELERATION_STRUCTURE_STORAGE = BIT(8),
 	};
 
 	AS_FLAG(BufferUsage);

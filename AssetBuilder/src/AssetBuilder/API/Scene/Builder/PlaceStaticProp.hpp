@@ -19,7 +19,8 @@ namespace Trident {
 		const uint32 materialGeometryIndex = findMaterialGeometryIndex(material, descriptor.geometryIndex);
 
 		if (materialGeometryIndex >= material.geometries.size()) {
-			const IntermediateGeometry& geometry = geometries[descriptor.geometryIndex];
+			IntermediateGeometry& geometry = geometries[descriptor.geometryIndex];
+			geometry.staticUsage = true;
 
 			IntermediateMaterialGeometry materialGeometry{};
 			materialGeometry.geometryIndex = descriptor.geometryIndex;

@@ -53,14 +53,13 @@ namespace Trident {
 
 						while (vertexIndex < geometry.vertices.count()) {
 							const BuildVertex3D& geometryVertex = geometry.vertices[vertexIndex];
-
-							BuildVertex3D& vertex = vertices[vertexOffset + vertexIndex];
+							const float32 textureCoordinate = geometryVertex.tangent[3];
 
 							// TODO(lyah/scalar)
+							BuildVertex3D& vertex = vertices[vertexOffset + vertexIndex];
 							vertex.position = svec3<float32>(multiplyTransform(vec3<float32>(geometryVertex.position), worldTransform));
 							vertex.normal = svec3<float32>(normalized(vec3<float32>(geometryVertex.normal) * inverseOrientation));
-
-							vertex.textureCoordinate = geometryVertex.textureCoordinate;
+							vertex.textureCoordinate = unpack<VertexInputAttributeFormat::R16G16_FLOAT, svec2<float32>>(*pointer_cast<const uint32*>(&textureCoordinate));
 
 							vertexIndex += 1;
 						}

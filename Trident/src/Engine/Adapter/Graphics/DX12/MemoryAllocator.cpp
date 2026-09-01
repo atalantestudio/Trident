@@ -533,7 +533,10 @@ namespace Trident {
 
 		D3D12_RESOURCE_STATES initialResourceStates = D3D12_RESOURCE_STATE_COMMON;
 
-		if (buffer->getMemorySuballocation().memoryProperties & MemoryProperty::DEVICE_LOCAL && buffer->getUsage() & BufferUsage::READ_WRITE_STORAGE) {
+		if (
+			buffer->getMemorySuballocation().memoryProperties & MemoryProperty::DEVICE_LOCAL &&
+			(buffer->getUsage() & BufferUsage::READ_WRITE_STORAGE || buffer->getUsage() & BufferUsage::ACCELERATION_STRUCTURE_STORAGE)
+		) {
 			resourceDescriptor.Flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 		}
 

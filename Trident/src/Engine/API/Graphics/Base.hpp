@@ -46,7 +46,12 @@ namespace Trident {
 	struct SwapchainDescriptor;
 	struct WriteDescriptorSet;
 
+	class BaseBufferView;
 	class Buffer;
+
+	template<typename T>
+	class BufferView;
+
 	class CommandBuffer;
 	class CommandEncoder;
 	class CommandPool;

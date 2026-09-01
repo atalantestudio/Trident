@@ -21,18 +21,22 @@ namespace Trident::DX12 {
 
 		while (GeometryIndex < GeometryDescs.count()) {
 			const AccelerationStructureTriangleGeometryDescriptor& geometry = descriptor.geometries[GeometryIndex];
+			const BaseBufferView& VertexView = geometry.vertexView;
+			const BaseBufferView& IndexView = geometry.indexView;
+			const UINT VertexStride = VertexView.getStride();
+			const UINT IndexStride = IndexView.getStride();
 
 			D3D12_RAYTRACING_GEOMETRY_DESC& GeometryDesc = GeometryDescs[GeometryIndex];
 			GeometryDesc.Type = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
 			GeometryDesc.Flags = translateGeometryFlags(geometry.flags);
 			GeometryDesc.Triangles.Transform3x4 = 0;
-			GeometryDesc.Triangles.IndexFormat = getIndexBufferFormat(geometry.index.byteSize);
-			GeometryDesc.Triangles.VertexFormat = getVertexInputAttributeFormat(geometry.vertex.format);
-			GeometryDesc.Triangles.IndexCount = geometry.index.count;
-			GeometryDesc.Triangles.VertexCount = geometry.vertex.count;
-			GeometryDesc.Triangles.IndexBuffer = ref_cast<DX12::Buffer>(geometry.index.buffer)->resource->GetGPUVirtualAddress();
-			GeometryDesc.Triangles.VertexBuffer.StartAddress = ref_cast<DX12::Buffer>(geometry.vertex.buffer)->resource->GetGPUVirtualAddress();
-			GeometryDesc.Triangles.VertexBuffer.StrideInBytes = geometry.vertex.stride;
+			GeometryDesc.Triangles.IndexFormat = getIndexBufferFormat(IndexStride);
+			GeometryDesc.Triangles.VertexFormat = getVertexInputAttributeFormat(geometry.vertexFormat);
+			GeometryDesc.Triangles.IndexCount = static_cast<UINT>(IndexView.getSize()) / IndexStride;
+			GeometryDesc.Triangles.VertexCount = static_cast<UINT>(VertexView.getSize()) / VertexStride;
+			GeometryDesc.Triangles.IndexBuffer = pointer_cast<const DX12::Buffer*>(IndexView.getBuffer())->resource->GetGPUVirtualAddress() + IndexView.getOffset();
+			GeometryDesc.Triangles.VertexBuffer.StartAddress = pointer_cast<const DX12::Buffer*>(VertexView.getBuffer())->resource->GetGPUVirtualAddress() + VertexView.getOffset();
+			GeometryDesc.Triangles.VertexBuffer.StrideInBytes = VertexStride;
 
 			GeometryIndex += 1;
 		}

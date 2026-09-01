@@ -34,6 +34,7 @@ namespace Trident {
 	};
 
 	struct BuildGeometry {
+		range<uint32, uint32> vertexRange;
 		range<uint32, uint32> indexRange;
 		uint32 assetIdentifier;
 	};
@@ -55,6 +56,8 @@ namespace Trident {
 	};
 
 	struct BuildStaticSceneGeometry3D {
+		uint32 geometryCount;
+
 		/// Baked and external vertices.
 		uint32 vertexCount;
 

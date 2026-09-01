@@ -22,6 +22,10 @@ namespace Trident::VK {
 
 		while (geometryIndex < descriptor.geometries.count()) {
 			const AccelerationStructureTriangleGeometryDescriptor& geometry = descriptor.geometries[geometryIndex];
+			const BaseBufferView& vertexView = geometry.vertexView;
+			const BaseBufferView& indexView = geometry.indexView;
+			const uint32 vertexStride = vertexView.getStride();
+			const uint32 indexStride = indexView.getStride();
 
 			VkAccelerationStructureGeometryKHR& accelerationStructureGeometry = accelerationStructureGeometries[geometryIndex];
 			accelerationStructureGeometry.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
@@ -29,19 +33,19 @@ namespace Trident::VK {
 			accelerationStructureGeometry.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
 			accelerationStructureGeometry.geometry.triangles.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
 			accelerationStructureGeometry.geometry.triangles.pNext = nullptr;
-			accelerationStructureGeometry.geometry.triangles.vertexFormat = getFormat(geometry.vertex.format);
-			accelerationStructureGeometry.geometry.triangles.vertexData.deviceAddress = VkDeviceAddress(ref_cast<VK::Buffer>(geometry.vertex.buffer)->buffer);
+			accelerationStructureGeometry.geometry.triangles.vertexFormat = getFormat(geometry.vertexFormat);
+			accelerationStructureGeometry.geometry.triangles.vertexData.deviceAddress = VkDeviceAddress(pointer_cast<const VK::Buffer*>(vertexView.getBuffer())->buffer) + vertexView.getOffset();
 			accelerationStructureGeometry.geometry.triangles.vertexData.hostAddress = nullptr;
-			accelerationStructureGeometry.geometry.triangles.vertexStride = geometry.vertex.stride;
-			accelerationStructureGeometry.geometry.triangles.maxVertex = geometry.vertex.count - 1;
-			accelerationStructureGeometry.geometry.triangles.indexType = getIndexType(geometry.index.byteSize);
-			accelerationStructureGeometry.geometry.triangles.indexData.deviceAddress = VkDeviceAddress(ref_cast<VK::Buffer>(geometry.index.buffer)->buffer);
+			accelerationStructureGeometry.geometry.triangles.vertexStride = vertexStride;
+			accelerationStructureGeometry.geometry.triangles.maxVertex = static_cast<uint32>(vertexView.getSize()) / vertexStride - 1;
+			accelerationStructureGeometry.geometry.triangles.indexType = getIndexType(indexStride);
+			accelerationStructureGeometry.geometry.triangles.indexData.deviceAddress = VkDeviceAddress(pointer_cast<const VK::Buffer*>(indexView.getBuffer())->buffer) + indexView.getOffset();
 			accelerationStructureGeometry.geometry.triangles.indexData.hostAddress = nullptr;
 			accelerationStructureGeometry.geometry.triangles.transformData.deviceAddress = 0;
 			accelerationStructureGeometry.geometry.triangles.transformData.hostAddress = nullptr;
 			accelerationStructureGeometry.flags = translateGeometryFlags(geometry.flags);
 
-			maxPrimitiveCounts[geometryIndex] = geometry.index.count / 3;
+			maxPrimitiveCounts[geometryIndex] = static_cast<uint32>(indexView.getSize()) / indexStride / 3;
 
 			geometryIndex += 1;
 		}

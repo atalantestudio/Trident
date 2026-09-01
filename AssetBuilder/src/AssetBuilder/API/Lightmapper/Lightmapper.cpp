@@ -3,6 +3,9 @@
 
 #include "pch.hpp"
 
+#include "Engine/Filesystem/Filesystem.hpp"
+
+#include "AssetBuilder/API/Lightmapper/AccelerationStructure.hpp"
 #include "AssetBuilder/API/Lightmapper/ArgumentBuffer.hpp"
 #include "AssetBuilder/API/Lightmapper/BilateralFilterPipelines.hpp"
 #include "AssetBuilder/API/Lightmapper/EmissiveTriangleIndexBuffer.hpp"
@@ -22,8 +25,6 @@
 #include "AssetBuilder/API/Lightmapper/TraceRaysDescriptorSetLayout.hpp"
 #include "AssetBuilder/API/Lightmapper/TraceRaysPipeline.hpp"
 #include "AssetBuilder/API/Lightmapper/VertexBuffer.hpp"
-
-#include "Engine/Filesystem/Filesystem.hpp"
 
 namespace Trident {
 	const GraphicsAdapter* Lightmapper::adapter;
@@ -148,10 +149,10 @@ namespace Trident {
 		context.intermediateLightmapAtlasImage = createIntermediateLightmapAtlasImage();
 		context.lightmapAtlasImage = createLightmapAtlasImage();
 
-		context.gBufferPositionImageView = createGBufferImageView(context.gBufferPositionImage, "GBuffer position");
-		context.gBufferSmoothPositionImageView = createGBufferImageView(context.gBufferSmoothPositionImage, "GBuffer smooth position");
-		context.gBufferTriangleNormalImageView = createGBufferImageView(context.gBufferTriangleNormalImage, "GBuffer triangle normal");
-		context.gBufferVertexNormalImageView = createGBufferImageView(context.gBufferVertexNormalImage, "GBuffer vertex normal");
+		context.gBufferPositionImageView = createGBufferImageView(context.gBufferPositionImage, "G-Buffer position");
+		context.gBufferSmoothPositionImageView = createGBufferImageView(context.gBufferSmoothPositionImage, "G-Buffer smooth position");
+		context.gBufferTriangleNormalImageView = createGBufferImageView(context.gBufferTriangleNormalImage, "G-Buffer triangle normal");
+		context.gBufferVertexNormalImageView = createGBufferImageView(context.gBufferVertexNormalImage, "G-Buffer vertex normal");
 		context.intermediateLightmapAtlasImageView = createIntermediateLightmapAtlasImageView();
 		context.lightmapAtlasImageView = createLightmapAtlasImageView();
 
@@ -161,64 +162,7 @@ namespace Trident {
 		context.vertexBuffer = createVertexBuffer(vertexCount);
 		context.indexBuffer = createIndexBuffer(indexCount);
 
-		// TODO(asset-builder/lightmapper/tlas)
-		{
-			const AccelerationStructureTriangleGeometryDescriptor geometries[] = {
-				{
-					.flags = GeometryFlags::OPAQUE | GeometryFlags::NO_DUPLICATE_ANY_HIT_INVOCATION,
-					.vertex = {
-						.buffer = context.vertexBuffer,
-						.format = VertexInputAttributeFormat::R32G32B32_FLOAT,
-						.stride = sizeof(BuildVertex3D),
-						.count = static_cast<uint32>(vertexCount),
-					},
-					.index = {
-						.buffer = context.indexBuffer,
-						.byteSize = sizeof(uint32),
-						.count = static_cast<uint32>(indexCount),
-					},
-				},
-			};
-
-			const AccelerationStructureBuildGeometryDescriptor build = {
-				.type = AccelerationStructureType::BOTTOM_LEVEL,
-				.flags = AccelerationStructureBuildFlags::ALLOW_COMPACTION,
-				.geometries = geometries,
-			};
-
-			const AccelerationStructureBuildSizes buildSizes = device->getAccelerationStructureBuildSizes(build);
-
-			BREAKPOINT();
-
-			// - Create aligned scratch buffer with STORAGE, SHADER_DEVICE_ADDRESS and ACCELERATION_STRUCTURE_STORAGE usage bits
-			// - (Vulkan) Create acceleration structure
-			// - Build acceleration structure in command buffer
-			// - Destroy scratch buffer
-
-			/* TODO(asset-builder/lightmapper/tlas)
-				For each geometry
-					Create VkAccelerationStructureGeometryKHR
-					Create VkAccelerationStructureBuildRangeInfoKHR
-					Create corresponding BLAS
-
-				For each instance
-					Create VkAccelerationStructureInstanceKHR
-
-				Create TLAS instance buffer
-				Copy instances to TLAS instance buffer
-
-				Create VkAccelerationStructureGeometryInstancesDataKHR
-				Create TLAS
-
-
-
-				On release:
-					For each BLAS
-						Destroy BLAS
-
-					Destroy TLAS
-			*/
-		}
+		buildAccelerationStructures(*descriptor.scene);
 
 		context.materialBuffer = createMaterialBuffer(materialCount);
 		context.emissiveTriangleIndexBuffer = createEmissiveTriangleIndexBuffer(emissiveTriangleIndexCount);

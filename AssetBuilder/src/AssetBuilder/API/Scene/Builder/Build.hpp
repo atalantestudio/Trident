@@ -10,13 +10,26 @@
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 
 namespace Trident {
-	inline void countGeometries(view<IntermediateGeometry> geometries, uint32& geometryCount) {
+	inline uint32 getOffsetIndex(const IntermediateGeometry& geometry) {
+		if (geometry.assetIdentifier == max<uint32>()) {
+			return 0;
+		}
+
+		return 1 + !geometry.staticUsage;
+	}
+
+	inline void countGeometries(view<IntermediateGeometry> geometries, uint32 geometryCounts[2], uint32 vertexCounts[3], uint32 indexCounts[3]) {
 		for (const IntermediateGeometry& geometry : geometries) {
 			if (geometry.sharedInstanceCount == 0) {
 				continue;
 			}
 
-			geometryCount += 1;
+			geometryCounts[!geometry.staticUsage] += 1;
+
+			const uint32 offsetIndex = getOffsetIndex(geometry);
+
+			vertexCounts[offsetIndex] += static_cast<uint32>(geometry.vertices.count());
+			indexCounts[offsetIndex] += static_cast<uint32>(geometry.indices.count());
 		}
 	}
 
@@ -58,13 +71,19 @@ namespace Trident {
 		const view<IntermediateGeometry> preFilteredGeometries(geometries.data(), geometries.size());
 		const view<IntermediateMaterialShader> preFilteredMaterialShaders(materialShaders.data(), materialShaders.size());
 
-		uint32 geometryCount = 0;
+		uint32 geometryCounts[static_cast<uint32>(GeometryType::count)] = {0, 0};
+
+		// Static (baked), static (external), dynamic.
+		uint32 vertexCounts[] = {0, 0, 0};
+		uint32 indexCounts[] = {0, 0, 0};
+
+		countGeometries(preFilteredGeometries, geometryCounts, vertexCounts, indexCounts);
+
 		uint32 materialShaderCounts[static_cast<uint32>(GeometryType::count)] = {0, 0};
 		uint32 materialCount = 0;
 		uint32 materialGeometryCount = 0;
 		uint32 staticInstanceCount = 0;
 
-		countGeometries(preFilteredGeometries, geometryCount);
 		countMaterialRelatedObjects(preFilteredMaterialShaders, materialShaderCounts, materialCount, materialGeometryCount, staticInstanceCount);
 
 		BuildScene3D scene{};
@@ -79,17 +98,21 @@ namespace Trident {
 
 		scene.sunDirection = descriptor.sunDirection;
 		scene.sunColor = descriptor.sunColor * descriptor.sunIntensity;
-		scene.vertexCount = static_cast<uint32>(staticVertexCount + dynamicVertexCount);
-		scene.staticGeometry.vertexCount = static_cast<uint32>(staticVertexCount);
-		scene.triangleCount = static_cast<uint32>((staticIndexCount + dynamicIndexCount) / 3);
+		scene.vertexCount = static_cast<uint32>(vertexCounts[0] + vertexCounts[1] + vertexCounts[2]);
+		scene.staticGeometry.geometryCount = geometryCounts[0];
+		scene.staticGeometry.vertexCount = static_cast<uint32>(vertexCounts[0] + vertexCounts[1]);
+		scene.staticGeometry.bakedVertices = sequence<BuildVertex3D>(vertexCounts[0]);
+		scene.staticGeometry.bakedIndices = sequence<uint32>(indexCounts[0]);
+		scene.triangleCount = static_cast<uint32>((indexCounts[0] + indexCounts[1] + indexCounts[2]) / 3);
 		scene.staticGeometry.lightmapAtlasImageAssetDescriptor.identifier = max<uint32>();
 		scene.dynamicGeometry.entityCount = entityCount;
 		scene.spawn = descriptor.spawn;
-		scene.geometries = sequence<BuildGeometry>(geometryCount);
+		scene.geometries = sequence<BuildGeometry>(geometryCounts[0] + geometryCounts[1]);
 
-		uint32 indexOffset = 0;
 		uint32 intermediateGeometryIndex = 0;
-		uint32 buildGeometryOffset = 0;
+		uint32 buildGeometryOffsets[] = {0, geometryCounts[0]};
+		uint32 vertexOffsets[] = {0, vertexCounts[0], vertexCounts[1]};
+		uint32 indexOffsets[] = {0, indexCounts[0], indexCounts[1]};
 
 		while (intermediateGeometryIndex < geometries.size()) {
 			IntermediateGeometry& intermediateGeometry = geometries[intermediateGeometryIndex];
@@ -100,35 +123,39 @@ namespace Trident {
 				continue;
 			}
 
+			uint32& buildGeometryOffset = buildGeometryOffsets[!intermediateGeometry.staticUsage];
+
+			const uint32 offsetIndex = getOffsetIndex(intermediateGeometry);
+
+			uint32& vertexOffset = vertexOffsets[offsetIndex];
+			uint32& indexOffset = indexOffsets[offsetIndex];
+
 			BuildGeometry& geometry = scene.geometries[buildGeometryOffset];
-			geometry.indexRange.offset = 0;
+			geometry.vertexRange.offset = vertexOffset;
+			geometry.vertexRange.count = static_cast<uint32>(intermediateGeometry.vertices.count());
+			geometry.indexRange.offset = indexOffset;
 			geometry.indexRange.count = static_cast<uint32>(intermediateGeometry.indices.count());
 			geometry.assetIdentifier = intermediateGeometry.assetIdentifier;
 
 			intermediateGeometry.filteredIndex = buildGeometryOffset;
 
-			// TODO(wip)
 			if (geometry.assetIdentifier == max<uint32>()) {
-				geometry.indexRange.offset = indexOffset;
+				std::copy(intermediateGeometry.vertices.begin(), intermediateGeometry.vertices.end(), &scene.staticGeometry.bakedVertices[geometry.vertexRange.offset]);
 
-				indexOffset += geometry.indexRange.count;
+				uint32 indexIndex = 0;
+
+				while (indexIndex < geometry.indexRange.count) {
+					scene.staticGeometry.bakedIndices[geometry.indexRange.offset + indexIndex] = geometry.vertexRange.offset + intermediateGeometry.indices[indexIndex];
+
+					indexIndex += 1;
+				}
 			}
 
+			vertexOffset += geometry.vertexRange.count;
+			indexOffset += geometry.indexRange.count;
 			intermediateGeometryIndex += 1;
 			buildGeometryOffset += 1;
 		}
-
-		// TODO(wip): Refactor.
-		for (BuildGeometry& geometry : scene.geometries) {
-			if (geometry.assetIdentifier != max<uint32>()) {
-				geometry.indexRange.offset = indexOffset;
-
-				indexOffset += geometry.indexRange.count;
-			}
-		}
-
-		// TODO(wip): Merge with buildGeometries.
-		buildBakedGeometry(scene);
 
 		scene.materialShaders = sequence<BuildMaterialShader>(materialShaderCounts[0] + materialShaderCounts[1]);
 		scene.materials = sequence<BuildMaterial>(materialCount);
@@ -210,7 +237,7 @@ namespace Trident {
 			buildMaterialShaderOffset += 1;
 		}
 
-		// TODO(wip): Refactor.
+		// TODO(asset-builder/scene/build): Refactor.
 		for (MaterialGeometry& materialGeometry : scene.materialGeometries) {
 			if (materialGeometry.instanceRange.offset == max<uint32>()) {
 				materialGeometry.instanceRange.offset = buildInstanceOffset;
@@ -226,53 +253,6 @@ namespace Trident {
 		buildLightmaps(scene);
 
 		return scene;
-	}
-
-	void SceneBuilder::buildBakedGeometry(BuildScene3D& scene) {
-		scene.staticGeometry.bakedVertices = sequence<BuildVertex3D>(bakedVertexCount);
-		scene.staticGeometry.bakedIndices = sequence<uint32>(bakedIndexCount);
-
-		uint32 bakedVertexOffset = 0;
-		uint64 bakedIndexOffset = 0;
-
-		while (bakedVertexOffset < bakedVertexCount) {
-			uint32 geometryIndex = 0;
-
-			while (geometryIndex < geometries.size()) {
-				const IntermediateGeometry& geometry = geometries[geometryIndex];
-
-				if (geometry.assetIdentifier != max<uint32>() || geometry.vertices.count() == 0 || geometry.sharedInstanceCount == 0) {
-					geometryIndex += 1;
-
-					continue;
-				}
-
-				uint32 vertexIndex = 0;
-
-				while (vertexIndex < geometry.vertices.count()) {
-					BuildVertex3D& vertex = scene.staticGeometry.bakedVertices[bakedVertexOffset + vertexIndex];
-					vertex = geometry.vertices[vertexIndex];
-
-					const float32 w = vertex.tangent[3];
-
-					vertex.textureCoordinate = unpack<VertexInputAttributeFormat::R16G16_FLOAT, svec2<float32>>(*pointer_cast<const uint32*>(&w));
-
-					vertexIndex += 1;
-				}
-
-				uint32 indexIndex = 0;
-
-				while (indexIndex < geometry.indices.count()) {
-					scene.staticGeometry.bakedIndices[bakedIndexOffset + indexIndex] = bakedVertexOffset + geometry.indices[indexIndex];
-
-					indexIndex += 1;
-				}
-
-				bakedVertexOffset += static_cast<uint32>(geometry.vertices.count());
-				bakedIndexOffset += geometry.indices.count();
-				geometryIndex += 1;
-			}
-		}
 	}
 
 	void SceneBuilder::buildLightmaps(BuildScene3D& scene) {
@@ -306,6 +286,7 @@ namespace Trident {
 				.indices = indices,
 				.materials = materials,
 				.emissiveTriangleIndices = emissiveTriangleIndices,
+				.scene = &scene,
 				.sceneDescriptor = descriptor,
 			});
 		}
@@ -322,7 +303,6 @@ namespace Trident {
 		dynamicGeometry.rigidBodyMappings = sequence<EntityComponentMapping<RigidBody3DComponent>>(rigidBodyMappings.size());
 
 		std::copy(geometryMappings.begin(), geometryMappings.end(), &dynamicGeometry.geometryMappings[0]);
-
 		std::copy(rigidBodyMappings.begin(), rigidBodyMappings.end(), &dynamicGeometry.rigidBodyMappings[0]);
 
 		for (EntityComponentMapping<GeometryComponent>& geometryMapping : dynamicGeometry.geometryMappings) {

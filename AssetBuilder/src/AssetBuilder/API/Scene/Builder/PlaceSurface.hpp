@@ -22,6 +22,7 @@ namespace Trident {
 			IntermediateGeometry geometry{};
 			geometry.assetIdentifier = max<uint32>();
 			geometry.sharedInstanceCount = 0;
+			geometry.staticUsage = true;
 
 			geometries.emplace_back(geometry);
 
@@ -78,18 +79,14 @@ namespace Trident {
 		while (vertexIndex < surfaceVertexCount) {
 			const BuildVertex3D& surfaceVertex = descriptor.geometry.vertices[vertexIndex];
 			const svec3<float32> tangent = svec3<float32>(normalized(vec3<float32>(surfaceVertex.tangent[0], surfaceVertex.tangent[1], surfaceVertex.tangent[2]) * inverseOrientation));
-
-			BuildVertex3D& vertex = geometry.vertices[vertexOffset + vertexIndex];
+			const uint32 initialTextureCoordinate = pack<VertexInputAttributeFormat::R16G16_FLOAT, uint32>(surfaceVertex.textureCoordinate);
 
 			// TODO(lyah/scalar)
+			BuildVertex3D& vertex = geometry.vertices[vertexOffset + vertexIndex];
 			vertex.position = svec3<float32>(multiplyTransform(vec3<float32>(surfaceVertex.position), worldTransform));
 			vertex.normal = svec3<float32>(normalized(vec3<float32>(surfaceVertex.normal) * inverseOrientation));
-
-			const svec2<float32> textureCoordinate = svec2<float32>(multiplyTransform(vec2<float32>(surfaceVertex.textureCoordinate), textureTransform));
-			const uint32 w = pack<VertexInputAttributeFormat::R16G16_FLOAT, uint32>(textureCoordinate);
-
-			vertex.tangent = {tangent.x, tangent.y, tangent.z, *pointer_cast<const float32*>(&w)};
-			vertex.textureCoordinate = surfaceVertex.textureCoordinate;
+			vertex.tangent = {tangent.x, tangent.y, tangent.z, *pointer_cast<const float32*>(&initialTextureCoordinate)};
+			vertex.textureCoordinate = svec2<float32>(multiplyTransform(vec2<float32>(surfaceVertex.textureCoordinate), textureTransform));
 
 			maxCoordinate.x = max(maxCoordinate.x, surfaceVertex.textureCoordinate.x);
 			maxCoordinate.y = max(maxCoordinate.y, surfaceVertex.textureCoordinate.y);
