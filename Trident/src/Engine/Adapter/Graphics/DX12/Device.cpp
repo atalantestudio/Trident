@@ -134,7 +134,7 @@ namespace Trident {
 		}
 
 		for (const DeviceExtensionName extension : enabledExtensions) {
-			enableDeviceExtension(extension, device->device);
+			enableDeviceExtension(extension, device);
 		}
 
 		device->queues[0] = createQueue(device, 0, QueueFamilyCapability::GRAPHICS);

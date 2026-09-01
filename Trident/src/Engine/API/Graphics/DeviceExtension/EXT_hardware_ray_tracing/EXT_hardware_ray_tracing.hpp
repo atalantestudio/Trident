@@ -3,18 +3,16 @@
 
 #pragma once
 
-#include "Engine/API/Graphics/Device.hpp"
 #include "Engine/API/Graphics/DeviceExtension/DeviceExtension.hpp"
-#include "Engine/API/Graphics/DeviceExtension/EXT_hardware_ray_tracing/BLASTriangleGeometryDescriptor.hpp"
+#include "Engine/API/Graphics/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructureBuildGeometryDescriptor.hpp"
+#include "Engine/API/Graphics/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructureBuildSizes.hpp"
 
 namespace Trident {
 	template<typename Device>
 	class DeviceExtension<EXT_hardware_ray_tracing, Device> {
 		public:
-			void testCreateBLASTriangleGeometry(const BLASTriangleGeometryDescriptor& descriptor) {
-				Device* device = static_cast<Device*>(this);
-
-				device->adapter->testCreateBLASTriangleGeometryImplementation(device, descriptor);
-			}
+			AccelerationStructureBuildSizes getAccelerationStructureBuildSizes(const AccelerationStructureBuildGeometryDescriptor& descriptor) const;
 	};
 }
+
+#include "Engine/API/Graphics/DeviceExtension/EXT_hardware_ray_tracing/Device.ipp"

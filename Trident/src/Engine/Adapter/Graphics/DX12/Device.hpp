@@ -16,6 +16,7 @@ namespace Trident {
 		public:
 			IDXGIFactory4* factory;
 			ID3D12Device* device;
+			ID3D12Device5* device5;
 			HANDLE waitEvent;
 
 			#if defined(DEBUG_ENABLE_MESSENGER)

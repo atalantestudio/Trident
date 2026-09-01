@@ -28,7 +28,7 @@ namespace Trident {
 		Trident::Device(adapter, physicalDevice)
 	{}
 
-	void VK::Device::loadProcedures() {
+	void VK::Device::loadProcedures(view<DeviceExtensionName> enabledExtensions) {
 		#define LOAD_DEVICE_PROCEDURE(procedure) procedure = loadDeviceProcedure<decltype(procedure)>(device, #procedure)
 
 		LOAD_DEVICE_PROCEDURE(vkAcquireNextImageKHR);
@@ -85,6 +85,16 @@ namespace Trident {
 		LOAD_DEVICE_PROCEDURE(vkUnmapMemory);
 		LOAD_DEVICE_PROCEDURE(vkUpdateDescriptorSets);
 		LOAD_DEVICE_PROCEDURE(vkWaitForFences);
+
+		for (const DeviceExtensionName extension : enabledExtensions) {
+			switch (extension) {
+				case EXT_hardware_ray_tracing: {
+					LOAD_DEVICE_PROCEDURE(vkGetAccelerationStructureBuildSizesKHR);
+
+					break;
+				}
+			}
+		}
 
 		#undef LOAD_DEVICE_PROCEDURE
 	}
@@ -222,8 +232,29 @@ namespace Trident {
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 		};
 
+		VkPhysicalDeviceVulkan14Features vulkan14Features{};
+		vulkan14Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_4_FEATURES;
+		vulkan14Features.pNext = nullptr;
+
+		VkPhysicalDeviceVulkan13Features vulkan13Features{};
+		vulkan13Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+		vulkan13Features.pNext = &vulkan14Features;
+
+		VkPhysicalDeviceVulkan12Features vulkan12Features{};
+		vulkan12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+		vulkan12Features.pNext = &vulkan13Features;
+
+		VkPhysicalDeviceVulkan11Features vulkan11Features{};
+		vulkan11Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES;
+		vulkan11Features.pNext = &vulkan12Features;
+
+		VkPhysicalDeviceFeatures2 features2{};
+		features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+		features2.pNext = &vulkan11Features;
+		features2.features = _physicalDevice->features;
+
 		for (const DeviceExtensionName extension : enabledExtensions) {
-			enableDeviceExtension(extension, enabledExtensionNames);
+			enableDeviceExtension(extension, enabledExtensionNames, &vulkan14Features.pNext);
 		}
 
 		// TODO: Replace with sequence<T>.
@@ -254,21 +285,26 @@ namespace Trident {
 
 		VkDeviceCreateInfo deviceCreateInfo{};
 		deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-		deviceCreateInfo.pNext = nullptr;
+
+		if (enabledExtensions.count() > 0) {
+			deviceCreateInfo.pNext = &features2;
+		}
+
 		deviceCreateInfo.flags = 0;
 		deviceCreateInfo.queueCreateInfoCount = static_cast<uint32>(deviceQueueCreateInfos.count());
 		deviceCreateInfo.pQueueCreateInfos = &deviceQueueCreateInfos[0];
 		deviceCreateInfo.enabledExtensionCount = static_cast<uint32>(enabledExtensionNames.size());
 		deviceCreateInfo.ppEnabledExtensionNames = enabledExtensionNames.data();
 
-		// TODO(graphics/vk/device/features): Let the user select the features.
-		deviceCreateInfo.pEnabledFeatures = &_physicalDevice->features;
+		if (enabledExtensions.count() == 0) {
+			deviceCreateInfo.pEnabledFeatures = &_physicalDevice->features;
+		}
 
 		result = _physicalDevice->instance->vkCreateDevice(_physicalDevice->physicalDevice, &deviceCreateInfo, nullptr, &device->device);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create device ([]).", string_VkResult(result));
 
-		device->loadProcedures();
+		device->loadProcedures(enabledExtensions);
 		device->queues[0] = createQueue(device, _physicalDevice->graphicsQueueFamilyIndex, QueueFamilyCapability::GRAPHICS);
 		device->queues[1] = createQueue(device, _physicalDevice->computeQueueFamilyIndex, QueueFamilyCapability::COMPUTE);
 		device->queues[2] = createQueue(device, _physicalDevice->transferQueueFamilyIndex, QueueFamilyCapability::TRANSFER);

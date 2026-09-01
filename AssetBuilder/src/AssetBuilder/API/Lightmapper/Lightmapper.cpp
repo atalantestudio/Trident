@@ -69,12 +69,13 @@ namespace Trident {
 			#endif
 		});
 
-		gBufferPipeline = createGBufferPipeline();
+		// TODO(asset-builder/lightmapper/dx12): Restore pipeline creation.
+		/* gBufferPipeline = createGBufferPipeline();
 		traceRaysPipeline = createTraceRaysPipeline();
 		intermediateDilationPipeline = createIntermediateDilationPipeline();
 		horizontalBilateralFilterPipeline = createHorizontalBilateralFilterPipeline();
 		verticalBilateralFilterPipeline = createVerticalBilateralFilterPipeline();
-		dilationPipeline = createDilationPipeline();
+		dilationPipeline = createDilationPipeline(); */
 
 		descriptorSets = device->allocateDescriptorSets(descriptorSetLayouts);
 
@@ -162,12 +163,39 @@ namespace Trident {
 
 		// TODO(asset-builder/lightmapper/tlas)
 		{
-			const BLASTriangleGeometryDescriptor blasTriangleGeometryDescriptor = {
-				.vertexBuffer = context.vertexBuffer,
-				.indexBuffer = context.indexBuffer,
+			const AccelerationStructureTriangleGeometryDescriptor geometries[] = {
+				{
+					.flags = GeometryFlags::OPAQUE | GeometryFlags::NO_DUPLICATE_ANY_HIT_INVOCATION,
+					.vertex = {
+						.buffer = context.vertexBuffer,
+						.format = VertexInputAttributeFormat::R32G32B32_FLOAT,
+						.stride = sizeof(BuildVertex3D),
+						.count = static_cast<uint32>(vertexCount),
+					},
+					.index = {
+						.buffer = context.indexBuffer,
+						.byteSize = sizeof(uint32),
+						.count = static_cast<uint32>(indexCount),
+					},
+				},
 			};
 
-			device->testCreateBLASTriangleGeometry(blasTriangleGeometryDescriptor);
+			const AccelerationStructureBuildGeometryDescriptor build = {
+				.type = AccelerationStructureType::BOTTOM_LEVEL,
+				.flags = AccelerationStructureBuildFlags::ALLOW_COMPACTION,
+				.geometries = geometries,
+			};
+
+			// vk: 720, 288, 0
+			// dx: 8532, 8384, 0
+			const AccelerationStructureBuildSizes buildSizes = device->getAccelerationStructureBuildSizes(build);
+
+			BREAKPOINT();
+
+			// - Create aligned scratch buffer with STORAGE, SHADER_DEVICE_ADDRESS and ACCELERATION_STRUCTURE_STORAGE usage bits
+			// - (Vulkan) Create acceleration structure
+			// - Build acceleration structure in command buffer
+			// - Destroy scratch buffer
 
 			/* TODO(asset-builder/lightmapper/tlas)
 				For each geometry

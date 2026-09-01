@@ -168,9 +168,10 @@ namespace Trident {
 	typedef void (*UpdateSwapchainImplementation)(const Device* device, Swapchain* swapchain, const SwapchainDescriptor& descriptor);
 	typedef void (*WaitForFenceImplementation)(const Device* device, Fence* fence);
 
-	/// Extension APIs
+	// EXT_hardware_ray_tracing
 
-	struct BLASTriangleGeometryDescriptor;
+	struct AccelerationStructureBuildGeometryDescriptor;
+	struct AccelerationStructureBuildSizes;
 
-	typedef void (*TestCreateBLASTriangleGeometryImplementation)(const Device* device, const BLASTriangleGeometryDescriptor& descriptor);
+	typedef AccelerationStructureBuildSizes (*GetAccelerationStructureBuildSizesImplementation)(const Device* device, const AccelerationStructureBuildGeometryDescriptor& descriptor);
 }

@@ -136,7 +136,8 @@ namespace Trident {
 			UpdateSwapchainImplementation updateSwapchainImplementation;
 			WaitForFenceImplementation waitForFenceImplementation;
 
-			TestCreateBLASTriangleGeometryImplementation testCreateBLASTriangleGeometryImplementation;
+			// EXT_hardware_ray_tracing
+			GetAccelerationStructureBuildSizesImplementation getAccelerationStructureBuildSizesImplementation;
 
 		private:
 			GraphicsAPI api;

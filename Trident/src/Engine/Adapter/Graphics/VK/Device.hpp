@@ -10,7 +10,7 @@ namespace Trident {
 		public:
 			explicit Device(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice);
 
-			void loadProcedures();
+			void loadProcedures(view<DeviceExtensionName> enabledExtensions);
 
 		public:
 			VkDevice device;
@@ -72,6 +72,9 @@ namespace Trident {
 			PFN_vkUnmapMemory vkUnmapMemory;
 			PFN_vkUpdateDescriptorSets vkUpdateDescriptorSets;
 			PFN_vkWaitForFences vkWaitForFences;
+
+			// EXT_hardware_ray_tracing
+			PFN_vkGetAccelerationStructureBuildSizesKHR vkGetAccelerationStructureBuildSizesKHR;
 	};
 
 	namespace VK {
