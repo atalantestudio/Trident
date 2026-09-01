@@ -186,8 +186,6 @@ namespace Trident {
 				.geometries = geometries,
 			};
 
-			// vk: 720, 288, 0
-			// dx: 8532, 8384, 0
 			const AccelerationStructureBuildSizes buildSizes = device->getAccelerationStructureBuildSizes(build);
 
 			BREAKPOINT();

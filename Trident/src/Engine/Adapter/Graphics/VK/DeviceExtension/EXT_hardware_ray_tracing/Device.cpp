@@ -17,6 +17,7 @@ namespace Trident::VK {
 		const VK::Device* vkDevice = static_cast<const VK::Device*>(device);
 
 		sequence<VkAccelerationStructureGeometryKHR> accelerationStructureGeometries(descriptor.geometries.count());
+		sequence<uint32> maxPrimitiveCounts(descriptor.geometries.count());
 		uint32 geometryIndex = 0;
 
 		while (geometryIndex < descriptor.geometries.count()) {
@@ -39,6 +40,8 @@ namespace Trident::VK {
 			accelerationStructureGeometry.geometry.triangles.transformData.deviceAddress = 0;
 			accelerationStructureGeometry.geometry.triangles.transformData.hostAddress = nullptr;
 			accelerationStructureGeometry.flags = translateGeometryFlags(geometry.flags);
+
+			maxPrimitiveCounts[geometryIndex] = geometry.index.count / 3;
 
 			geometryIndex += 1;
 		}
@@ -63,14 +66,11 @@ namespace Trident::VK {
 		accelerationStructureBuildGeometryInfo.scratchData.deviceAddress = 0;
 		accelerationStructureBuildGeometryInfo.scratchData.hostAddress = nullptr;
 
-		// TODO(graphics/vk/ext_hardware_ray_tracing/primitive-counts): Expose.
-		static constexpr uint32 maxPrimitiveCounts[] = {1};
-
 		VkAccelerationStructureBuildSizesInfoKHR sizeInfo{};
 		sizeInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
 		sizeInfo.pNext = nullptr;
 
-		vkDevice->vkGetAccelerationStructureBuildSizesKHR(vkDevice->device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &accelerationStructureBuildGeometryInfo, maxPrimitiveCounts, &sizeInfo);
+		vkDevice->vkGetAccelerationStructureBuildSizesKHR(vkDevice->device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &accelerationStructureBuildGeometryInfo, &maxPrimitiveCounts[0], &sizeInfo);
 
 		AccelerationStructureBuildSizes buildSizes{};
 		buildSizes.accelerationStructureSize = sizeInfo.accelerationStructureSize;
