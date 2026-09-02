@@ -80,7 +80,9 @@ namespace Trident {
 			uint32 coordinateIndex = 0;
 
 			while (coordinateIndex < lightmap.vertexRange.count) {
-				const svec2<float32> textureCoordinate = vertices[coordinateIndex].textureCoordinate;
+				const BuildVertex3D& vertex = vertices[coordinateIndex];
+				const float32 packedTextureCoordinate = vertex.tangent[3];
+				const svec2<float32> textureCoordinate = unpack<VertexInputAttributeFormat::R16G16_FLOAT, svec2<float32>>(*pointer_cast<const uint32*>(&packedTextureCoordinate));
 
 				// TODO(lyah/scalar)
 				svec2<float32>& coordinate = staticGeometry.lightmapCoordinates[lightmap.coordinateOffset + coordinateIndex];

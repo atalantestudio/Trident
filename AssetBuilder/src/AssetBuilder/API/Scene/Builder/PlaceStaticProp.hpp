@@ -41,13 +41,16 @@ namespace Trident {
 		uint32 vertexIndex = 0;
 
 		while (vertexIndex < geometry.vertices.count()) {
-			// TODO(lyah/scalar)
-			const svec2<float32> textureCoordinate = geometry.vertices[vertexIndex].textureCoordinate;
+			BuildVertex3D& vertex = geometry.vertices[vertexIndex];
 
-			maxCoordinate.x = max(maxCoordinate.x, textureCoordinate.x);
-			maxCoordinate.y = max(maxCoordinate.y, textureCoordinate.y);
-			minCoordinate.x = min(minCoordinate.x, textureCoordinate.x);
-			minCoordinate.y = min(minCoordinate.y, textureCoordinate.y);
+			const uint32 textureCoordinate = pack<VertexInputAttributeFormat::R16G16_FLOAT, uint32>(vertex.textureCoordinate);
+
+			vertex.tangent = {vertex.tangent[0], vertex.tangent[1], vertex.tangent[2], *pointer_cast<const float32*>(&textureCoordinate)};
+
+			maxCoordinate.x = max(maxCoordinate.x, vertex.textureCoordinate.x);
+			maxCoordinate.y = max(maxCoordinate.y, vertex.textureCoordinate.y);
+			minCoordinate.x = min(minCoordinate.x, vertex.textureCoordinate.x);
+			minCoordinate.y = min(minCoordinate.y, vertex.textureCoordinate.y);
 
 			vertexIndex += 1;
 		}
