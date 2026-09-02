@@ -20,6 +20,7 @@ namespace Trident::DX12 {
 		const BaseBufferView view = descriptor.view;
 
 		ref<DX12::AccelerationStructure> accelerationStructure = allocateRef<DX12::AccelerationStructure>();
+		accelerationStructure->device = device;
 		accelerationStructure->Descriptor.DestAccelerationStructureData = pointer_cast<const DX12::Buffer*>(view.getBuffer())->resource->GetGPUVirtualAddress() + view.getOffset();
 		accelerationStructure->Descriptor.Inputs = ref_cast<DX12::AccelerationStructureBuildTriangleGeometry>(descriptor.buildTriangleGeometry)->BuildInputs;
 		accelerationStructure->Descriptor.SourceAccelerationStructureData = NULL;

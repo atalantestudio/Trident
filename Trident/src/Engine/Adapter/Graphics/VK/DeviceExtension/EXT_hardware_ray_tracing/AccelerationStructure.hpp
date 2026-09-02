@@ -12,4 +12,6 @@ namespace Trident::VK {
 			VkAccelerationStructureBuildGeometryInfoKHR buildGeometryInfo;
 			const VkAccelerationStructureBuildRangeInfoKHR* buildRangeInfos;
 	};
+
+	uint64 getAccelerationStructureDeviceAddress(const Trident::Device* device, const Trident::AccelerationStructure* accelerationStructure);
 }

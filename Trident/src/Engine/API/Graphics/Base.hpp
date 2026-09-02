@@ -190,4 +190,5 @@ namespace Trident {
 	typedef ref<AccelerationStructureBuildTriangleGeometry> (*CreateAccelerationStructureBuildTriangleGeometryImplementation)(const Device* device, const AccelerationStructureBuildTriangleGeometryDescriptor& descriptor);
 	typedef ref<AccelerationStructure> (*CreateAccelerationStructureImplementation)(const Device* device, const AccelerationStructureDescriptor& descriptor);
 	typedef AccelerationStructureBuildSizes (*GetAccelerationStructureBuildSizesImplementation)(const Device* device, ref<AccelerationStructureBuildTriangleGeometry> buildTriangleGeometry);
+	typedef uint64 (*GetAccelerationStructureDeviceAddressImplementation)(const Device* device, const AccelerationStructure* accelerationStructure);
 }

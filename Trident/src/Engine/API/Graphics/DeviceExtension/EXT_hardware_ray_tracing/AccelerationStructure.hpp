@@ -3,6 +3,14 @@
 
 #pragma once
 
+#include "Engine/API/Graphics/Base.hpp"
+
 namespace Trident {
-	class AccelerationStructure {};
+	class AccelerationStructure {
+		public:
+			uint64 getDeviceAddress() const;
+
+		public:
+			ref<Device> device;
+	};
 }

@@ -77,6 +77,7 @@ namespace Trident {
 			PFN_vkCmdBuildAccelerationStructuresKHR vkCmdBuildAccelerationStructuresKHR;
 			PFN_vkCreateAccelerationStructureKHR vkCreateAccelerationStructureKHR;
 			PFN_vkGetAccelerationStructureBuildSizesKHR vkGetAccelerationStructureBuildSizesKHR;
+			PFN_vkGetAccelerationStructureDeviceAddressKHR vkGetAccelerationStructureDeviceAddressKHR;
 			PFN_vkGetBufferDeviceAddress vkGetBufferDeviceAddress;
 	};
 

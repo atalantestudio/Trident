@@ -92,6 +92,7 @@ namespace Trident {
 					LOAD_DEVICE_PROCEDURE(vkCmdBuildAccelerationStructuresKHR);
 					LOAD_DEVICE_PROCEDURE(vkCreateAccelerationStructureKHR);
 					LOAD_DEVICE_PROCEDURE(vkGetAccelerationStructureBuildSizesKHR);
+					LOAD_DEVICE_PROCEDURE(vkGetAccelerationStructureDeviceAddressKHR);
 					LOAD_DEVICE_PROCEDURE(vkGetBufferDeviceAddress);
 
 					break;

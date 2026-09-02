@@ -113,6 +113,7 @@ namespace Trident {
 			CreateAccelerationStructureBuildTriangleGeometryImplementation createAccelerationStructureBuildTriangleGeometryImplementation;
 			CreateAccelerationStructureImplementation createAccelerationStructureImplementation;
 			GetAccelerationStructureBuildSizesImplementation getAccelerationStructureBuildSizesImplementation;
+			GetAccelerationStructureDeviceAddressImplementation getAccelerationStructureDeviceAddressImplementation;
 
 		private:
 			GraphicsAPI api;

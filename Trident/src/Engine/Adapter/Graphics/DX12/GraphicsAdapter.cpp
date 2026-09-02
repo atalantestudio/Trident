@@ -7,6 +7,7 @@
 #include "Engine/Adapter/Graphics/DX12/CommandEncoder.hpp"
 #include "Engine/Adapter/Graphics/DX12/ComputePipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
+#include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructure.hpp"
 #include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/CommandEncoder.hpp"
 #include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/Device.hpp"
 #include "Engine/Adapter/Graphics/DX12/Fence.hpp"
@@ -149,5 +150,6 @@ namespace Trident::DX12 {
 		adapter->createAccelerationStructureBuildTriangleGeometryImplementation = DX12::createAccelerationStructureBuildTriangleGeometry;
 		adapter->createAccelerationStructureImplementation = DX12::createAccelerationStructure;
 		adapter->getAccelerationStructureBuildSizesImplementation = DX12::getAccelerationStructureBuildSizes;
+		adapter->getAccelerationStructureDeviceAddressImplementation = DX12::getAccelerationStructureDeviceAddress;
 	}
 }

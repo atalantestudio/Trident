@@ -21,6 +21,7 @@ namespace Trident::VK {
 		const ref<VK::AccelerationStructureBuildTriangleGeometry> buildTriangleGeometry = ref_cast<VK::AccelerationStructureBuildTriangleGeometry>(descriptor.buildTriangleGeometry);
 
 		ref<VK::AccelerationStructure> accelerationStructure = allocateRef<VK::AccelerationStructure>();
+		accelerationStructure->device = device;
 		accelerationStructure->buildGeometryInfo = buildTriangleGeometry->buildGeometryInfo;
 		accelerationStructure->buildRangeInfos = &buildTriangleGeometry->buildRangeInfos[0];
 
