@@ -5,6 +5,7 @@
 
 #include "Engine/API/Graphics/CommandPool.hpp"
 #include "Engine/API/Graphics/Device.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
 	CommandPool::CommandPool(const Device* device) :

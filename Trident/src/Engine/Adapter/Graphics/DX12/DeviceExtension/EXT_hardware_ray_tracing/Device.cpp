@@ -5,7 +5,9 @@
 
 #include "Engine/Adapter/Graphics/DX12/Buffer.hpp"
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
+#include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructure.hpp"
 #include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructureBuildFlags.hpp"
+#include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructureBuildTriangleGeometry.hpp"
 #include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructureType.hpp"
 #include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/Device.hpp"
 #include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/GeometryFlags.hpp"
@@ -13,10 +15,35 @@
 #include "Engine/Adapter/Graphics/DX12/VertexInputAttributeFormat.hpp"
 
 namespace Trident::DX12 {
-	AccelerationStructureBuildSizes getAccelerationStructureBuildSizesImplementation(const Trident::Device* device, const AccelerationStructureBuildGeometryDescriptor& descriptor) {
+	ref<Trident::AccelerationStructure> createAccelerationStructure(const Trident::Device* device, const AccelerationStructureDescriptor& descriptor) {
+		const DX12::Device* Device = static_cast<const DX12::Device*>(device);
+		const BaseBufferView view = descriptor.view;
+
+		ref<DX12::AccelerationStructure> accelerationStructure = allocateRef<DX12::AccelerationStructure>();
+		accelerationStructure->Descriptor.DestAccelerationStructureData = pointer_cast<const DX12::Buffer*>(view.getBuffer())->resource->GetGPUVirtualAddress() + view.getOffset();
+		accelerationStructure->Descriptor.Inputs = ref_cast<DX12::AccelerationStructureBuildTriangleGeometry>(descriptor.buildTriangleGeometry)->BuildInputs;
+		accelerationStructure->Descriptor.SourceAccelerationStructureData = NULL;
+
+		return accelerationStructure;
+	}
+
+	ref<Trident::AccelerationStructureBuildTriangleGeometry> createAccelerationStructureBuildTriangleGeometry(const Trident::Device* device, const AccelerationStructureBuildTriangleGeometryDescriptor& descriptor) {
 		const DX12::Device* Device = static_cast<const DX12::Device*>(device);
 
-		sequence<D3D12_RAYTRACING_GEOMETRY_DESC> GeometryDescs(descriptor.geometries.count());
+		ref<DX12::AccelerationStructureBuildTriangleGeometry> accelerationStructureBuildTriangleGeometry = allocateRef<DX12::AccelerationStructureBuildTriangleGeometry>();
+
+		sequence<D3D12_RAYTRACING_GEOMETRY_DESC>& GeometryDescs = accelerationStructureBuildTriangleGeometry->GeometryDescs;
+		GeometryDescs = sequence<D3D12_RAYTRACING_GEOMETRY_DESC>(descriptor.geometries.count());
+
+		D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS& BuildInputs = accelerationStructureBuildTriangleGeometry->BuildInputs;
+		BuildInputs.Type = translateAccelerationStructureType(descriptor.type);
+		BuildInputs.Flags = translateAccelerationStructureBuildFlags(descriptor.flags);
+		BuildInputs.NumDescs = static_cast<uint32>(GeometryDescs.count());
+		BuildInputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
+
+		// TODO(graphics/dx12/ext_hardware_ray_tracing/geometry-pointers): Expose both pGeometryDescs and ppGeometryDescs?
+		BuildInputs.pGeometryDescs = &GeometryDescs[0];
+
 		UINT GeometryIndex = 0;
 
 		while (GeometryIndex < GeometryDescs.count()) {
@@ -41,14 +68,12 @@ namespace Trident::DX12 {
 			GeometryIndex += 1;
 		}
 
-		D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS BuildInputs{};
-		BuildInputs.Type = translateAccelerationStructureType(descriptor.type);
-		BuildInputs.Flags = translateAccelerationStructureBuildFlags(descriptor.flags);
-		BuildInputs.NumDescs = static_cast<uint32>(GeometryDescs.count());
-		BuildInputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
+		return accelerationStructureBuildTriangleGeometry;
+	}
 
-		// TODO(graphics/dx12/ext_hardware_ray_tracing/geometry-pointers): Expose both pGeometryDescs and ppGeometryDescs?
-		BuildInputs.pGeometryDescs = &GeometryDescs[0];
+	AccelerationStructureBuildSizes getAccelerationStructureBuildSizes(const Trident::Device* device, ref<Trident::AccelerationStructureBuildTriangleGeometry> buildTriangleGeometry) {
+		const DX12::Device* Device = static_cast<const DX12::Device*>(device);
+		const D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS& BuildInputs = ref_cast<DX12::AccelerationStructureBuildTriangleGeometry>(buildTriangleGeometry)->BuildInputs;
 
 		D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO PrebuildInfo;
 

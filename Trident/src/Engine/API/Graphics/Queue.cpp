@@ -3,8 +3,8 @@
 
 #include "pch.hpp"
 
-#include "Engine/API/Graphics/Descriptor/CommandBufferDescriptor.hpp"
 #include "Engine/API/Graphics/Device.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/API/Graphics/Queue.hpp"
 
 namespace Trident {
@@ -15,24 +15,6 @@ namespace Trident {
 
 	Queue::~Queue() {
 		device->adapter->destroyQueueImplementation(this);
-	}
-
-	ref<CommandEncoder> Queue::createCommandEncoder(const CommandBufferDescriptor& descriptor) const {
-		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
-			{
-				Validator validator;
-
-				if (descriptor.usage >= CommandBufferUsage::count) {
-					VALIDATION_ERROR("descriptor.usage must be a valid CommandBufferUsage value.");
-				}
-
-				if (descriptor.name.count() == 0) {
-					VALIDATION_WARNING("descriptor.name should provide a unique name to help identify this command encoder.");
-				}
-			}
-		#endif
-
-		return device->adapter->createCommandEncoderImplementation(device, commandPool, descriptor);
 	}
 
 	void Queue::submit(view<ref<CommandBuffer>> commandBuffers) const {

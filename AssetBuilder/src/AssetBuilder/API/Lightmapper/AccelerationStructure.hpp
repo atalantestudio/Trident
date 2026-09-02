@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Engine/API/Graphics/Queue.hpp"
+
 #include "AssetBuilder/API/Lightmapper/Lightmapper.hpp"
 
 namespace Trident {
@@ -23,18 +25,28 @@ namespace Trident {
 			geometryIndex += 1;
 		}
 
-		const AccelerationStructureBuildGeometryDescriptor build = {
+		const ref<AccelerationStructureBuildTriangleGeometry> buildTriangleGeometry = device->createAccelerationStructureBuildTriangleGeometry({
 			.type = AccelerationStructureType::BOTTOM_LEVEL,
 			.flags = {},
 			.geometries = geometries,
-		};
+		});
 
-		const AccelerationStructureBuildSizes buildSizes = device->getAccelerationStructureBuildSizes(build);
+		const AccelerationStructureBuildSizes buildSizes = device->getAccelerationStructureBuildSizes(buildTriangleGeometry);
 		const uint64 alignment = physicalDevice->getLimits().minAccelerationStructureScratchOffsetAlignment;
 
-		const ref<Buffer> scratchBuffer = device->createDynamicBuffer({
+		accelerationStructureBuffer = device->createStaticBuffer({
+			.size = ceil(buildSizes.accelerationStructureSize, 256ull),
+			.usage = BufferUsage::SHADER_DEVICE_ADDRESS | BufferUsage::ACCELERATION_STRUCTURE_STORAGE,
+			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+			.persistent = false,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Acceleration structure",
+			#endif
+		});
+
+		const ref<Buffer> scratchBuffer = device->createStaticBuffer({
 			.size = ceil(buildSizes.scratchBuildSize, alignment),
-			.usage = BufferUsage::ACCELERATION_STRUCTURE_STORAGE,
+			.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::SHADER_DEVICE_ADDRESS,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
 			#if defined(DEBUG_OBJECT_NAME)
@@ -42,18 +54,51 @@ namespace Trident {
 			#endif
 		});
 
+		ref<MemoryAllocator> memoryAllocator = device->getMemoryAllocator();
+		uint64 allocationSize = 0;
+		uint64 allocationAlignment = 0;
+
+		const MemoryRequirements accelerationStructureBufferMemoryRequirements = memoryAllocator->getMemoryRequirements(accelerationStructureBuffer);
+
+		allocationAlignment = max(allocationAlignment, accelerationStructureBufferMemoryRequirements.alignment);
+		allocationSize += ceil(accelerationStructureBufferMemoryRequirements.size, allocationAlignment);
+
+		const MemoryRequirements scratchBufferMemoryRequirements = memoryAllocator->getMemoryRequirements(scratchBuffer);
+
+		allocationAlignment = max(allocationAlignment, scratchBufferMemoryRequirements.alignment);
+		allocationSize += ceil(scratchBufferMemoryRequirements.size, allocationAlignment);
+
+		const uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(MemoryProperty::DEVICE_LOCAL, false);
+		const uint32 allocationIndex = memoryAllocator->allocate(false, memoryTypeIndex, allocationSize, allocationAlignment, true);
+
+		memoryAllocator->suballocateStatic(allocationIndex, accelerationStructureBuffer);
+		memoryAllocator->suballocateStatic(allocationIndex, scratchBuffer);
+
+		const BufferView<uint8> accelerationStructureView = accelerationStructureBuffer->createView<uint8>(0, accelerationStructureBuffer->getSize());
+		const BufferView<uint8> scratchView = scratchBuffer->createView<uint8>(0, scratchBuffer->getSize());
+
+		accelerationStructure = device->createAccelerationStructure({
+			.view = accelerationStructureView,
+			.buildTriangleGeometry = buildTriangleGeometry,
+		});
+
+		const ref<Queue> queue = device->getQueue(QueueFamilyCapability::GRAPHICS);
+		const ref<ExtendedCommandEncoder<EXT_hardware_ray_tracing>> commandEncoder = queue->createCommandEncoder<EXT_hardware_ray_tracing>({
+			.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Build acceleration structures",
+			#endif
+		});
+
+		commandEncoder->begin();
+		commandEncoder->buildAccelerationStructures(accelerationStructure, accelerationStructureView, scratchView);
+
+		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+		queue->submit(commandBuffer);
+		queue->waitIdle();
+
 		/*
-
-		- Create aligned scratch buffer with STORAGE, SHADER_DEVICE_ADDRESS and ACCELERATION_STRUCTURE_STORAGE usage bits
-		- (Vulkan) Create acceleration structure
-		- Build acceleration structure in command buffer
-		- Destroy scratch buffer
-
-		For each geometry
-			Create VkAccelerationStructureGeometryKHR
-			Create VkAccelerationStructureBuildRangeInfoKHR
-			Create corresponding BLAS
-
 		For each instance
 			Create VkAccelerationStructureInstanceKHR
 
@@ -62,8 +107,6 @@ namespace Trident {
 
 		Create VkAccelerationStructureGeometryInstancesDataKHR
 		Create TLAS
-
-
 
 		On release:
 			For each BLAS

@@ -5,7 +5,9 @@
 
 #include "Engine/Adapter/Graphics/VK/Buffer.hpp"
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
+#include "Engine/Adapter/Graphics/VK/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructure.hpp"
 #include "Engine/Adapter/Graphics/VK/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructureBuildFlags.hpp"
+#include "Engine/Adapter/Graphics/VK/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructureBuildTriangleGeometry.hpp"
 #include "Engine/Adapter/Graphics/VK/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructureType.hpp"
 #include "Engine/Adapter/Graphics/VK/DeviceExtension/EXT_hardware_ray_tracing/Device.hpp"
 #include "Engine/Adapter/Graphics/VK/DeviceExtension/EXT_hardware_ray_tracing/GeometryFlags.hpp"
@@ -13,68 +15,122 @@
 #include "Engine/Adapter/Graphics/VK/VertexInputAttributeFormat.hpp"
 
 namespace Trident::VK {
-	AccelerationStructureBuildSizes getAccelerationStructureBuildSizesImplementation(const Trident::Device* device, const AccelerationStructureBuildGeometryDescriptor& descriptor) {
+	ref<Trident::AccelerationStructure> createAccelerationStructure(const Trident::Device* device, const AccelerationStructureDescriptor& descriptor) {
+		const VK::Device* vkDevice = static_cast<const VK::Device*>(device);
+		const BaseBufferView& view = descriptor.view;
+		const ref<VK::AccelerationStructureBuildTriangleGeometry> buildTriangleGeometry = ref_cast<VK::AccelerationStructureBuildTriangleGeometry>(descriptor.buildTriangleGeometry);
+
+		ref<VK::AccelerationStructure> accelerationStructure = allocateRef<VK::AccelerationStructure>();
+		accelerationStructure->buildGeometryInfo = buildTriangleGeometry->buildGeometryInfo;
+		accelerationStructure->buildRangeInfos = &buildTriangleGeometry->buildRangeInfos[0];
+
+		VkAccelerationStructureCreateInfoKHR accelerationStructureCreateInfo{};
+		accelerationStructureCreateInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
+		accelerationStructureCreateInfo.pNext = nullptr;
+		accelerationStructureCreateInfo.createFlags = 0;
+		accelerationStructureCreateInfo.buffer = pointer_cast<const VK::Buffer*>(view.getBuffer())->buffer;
+		accelerationStructureCreateInfo.offset = view.getOffset();
+		accelerationStructureCreateInfo.size = view.getSize();
+		accelerationStructureCreateInfo.type = accelerationStructure->buildGeometryInfo.type;
+		accelerationStructureCreateInfo.deviceAddress = 0;
+
+		const VkResult result = vkDevice->vkCreateAccelerationStructureKHR(vkDevice->device, &accelerationStructureCreateInfo, nullptr, &accelerationStructure->accelerationStructure);
+
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create acceleration structure.");
+
+		return accelerationStructure;
+	}
+
+	ref<Trident::AccelerationStructureBuildTriangleGeometry> createAccelerationStructureBuildTriangleGeometry(const Trident::Device* device, const AccelerationStructureBuildTriangleGeometryDescriptor& descriptor) {
 		const VK::Device* vkDevice = static_cast<const VK::Device*>(device);
 
-		sequence<VkAccelerationStructureGeometryKHR> accelerationStructureGeometries(descriptor.geometries.count());
-		sequence<uint32> maxPrimitiveCounts(descriptor.geometries.count());
+		ref<VK::AccelerationStructureBuildTriangleGeometry> accelerationStructureBuildTriangleGeometry = allocateRef<VK::AccelerationStructureBuildTriangleGeometry>();
+
+		sequence<VkAccelerationStructureGeometryKHR>& geometries = accelerationStructureBuildTriangleGeometry->geometries;
+		geometries = sequence<VkAccelerationStructureGeometryKHR>(descriptor.geometries.count());
+
+		sequence<VkAccelerationStructureBuildRangeInfoKHR>& buildRangeInfos = accelerationStructureBuildTriangleGeometry->buildRangeInfos;
+		buildRangeInfos = sequence<VkAccelerationStructureBuildRangeInfoKHR>(descriptor.geometries.count());
+
+		sequence<uint32>& maxPrimitiveCounts = accelerationStructureBuildTriangleGeometry->maxPrimitiveCounts;
+		maxPrimitiveCounts = sequence<uint32>(descriptor.geometries.count());
+
+		VkBufferDeviceAddressInfo bufferDeviceAddressInfo{};
+		bufferDeviceAddressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+		bufferDeviceAddressInfo.pNext = nullptr;
+
 		uint32 geometryIndex = 0;
 
 		while (geometryIndex < descriptor.geometries.count()) {
-			const AccelerationStructureTriangleGeometryDescriptor& geometry = descriptor.geometries[geometryIndex];
-			const BaseBufferView& vertexView = geometry.vertexView;
-			const BaseBufferView& indexView = geometry.indexView;
+			const AccelerationStructureTriangleGeometryDescriptor& triangleGeometryDescriptor = descriptor.geometries[geometryIndex];
+			const BaseBufferView& vertexView = triangleGeometryDescriptor.vertexView;
+			const BaseBufferView& indexView = triangleGeometryDescriptor.indexView;
 			const uint32 vertexStride = vertexView.getStride();
 			const uint32 indexStride = indexView.getStride();
 
-			VkAccelerationStructureGeometryKHR& accelerationStructureGeometry = accelerationStructureGeometries[geometryIndex];
-			accelerationStructureGeometry.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
-			accelerationStructureGeometry.pNext = nullptr;
-			accelerationStructureGeometry.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
-			accelerationStructureGeometry.geometry.triangles.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
-			accelerationStructureGeometry.geometry.triangles.pNext = nullptr;
-			accelerationStructureGeometry.geometry.triangles.vertexFormat = getFormat(geometry.vertexFormat);
-			accelerationStructureGeometry.geometry.triangles.vertexData.deviceAddress = VkDeviceAddress(pointer_cast<const VK::Buffer*>(vertexView.getBuffer())->buffer) + vertexView.getOffset();
-			accelerationStructureGeometry.geometry.triangles.vertexData.hostAddress = nullptr;
-			accelerationStructureGeometry.geometry.triangles.vertexStride = vertexStride;
-			accelerationStructureGeometry.geometry.triangles.maxVertex = static_cast<uint32>(vertexView.getSize()) / vertexStride - 1;
-			accelerationStructureGeometry.geometry.triangles.indexType = getIndexType(indexStride);
-			accelerationStructureGeometry.geometry.triangles.indexData.deviceAddress = VkDeviceAddress(pointer_cast<const VK::Buffer*>(indexView.getBuffer())->buffer) + indexView.getOffset();
-			accelerationStructureGeometry.geometry.triangles.indexData.hostAddress = nullptr;
-			accelerationStructureGeometry.geometry.triangles.transformData.deviceAddress = 0;
-			accelerationStructureGeometry.geometry.triangles.transformData.hostAddress = nullptr;
-			accelerationStructureGeometry.flags = translateGeometryFlags(geometry.flags);
+			VkAccelerationStructureGeometryKHR& geometry = geometries[geometryIndex];
+			geometry.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
+			geometry.pNext = nullptr;
+			geometry.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
+			geometry.geometry.triangles.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
+			geometry.geometry.triangles.pNext = nullptr;
+			geometry.geometry.triangles.vertexFormat = getFormat(triangleGeometryDescriptor.vertexFormat);
 
-			maxPrimitiveCounts[geometryIndex] = static_cast<uint32>(indexView.getSize()) / indexStride / 3;
+			bufferDeviceAddressInfo.buffer = pointer_cast<const VK::Buffer*>(vertexView.getBuffer())->buffer;
+
+			geometry.geometry.triangles.vertexData.deviceAddress = vkDevice->vkGetBufferDeviceAddress(vkDevice->device, &bufferDeviceAddressInfo);
+			geometry.geometry.triangles.vertexStride = vertexStride;
+			geometry.geometry.triangles.maxVertex = static_cast<uint32>(vertexView.getSize()) / vertexStride - 1;
+			geometry.geometry.triangles.indexType = getIndexType(indexStride);
+
+			bufferDeviceAddressInfo.buffer = pointer_cast<const VK::Buffer*>(indexView.getBuffer())->buffer;
+
+			geometry.geometry.triangles.indexData.deviceAddress = vkDevice->vkGetBufferDeviceAddress(vkDevice->device, &bufferDeviceAddressInfo);
+			geometry.geometry.triangles.transformData.deviceAddress = 0;
+			geometry.flags = translateGeometryFlags(triangleGeometryDescriptor.flags);
+
+			VkAccelerationStructureBuildRangeInfoKHR& buildRangeInfo = buildRangeInfos[geometryIndex];
+			buildRangeInfo.primitiveCount = static_cast<uint32>(indexView.getSize()) / (indexStride * 3);
+			buildRangeInfo.primitiveOffset = static_cast<uint32>(indexView.getOffset());
+			buildRangeInfo.firstVertex = static_cast<uint32>(vertexView.getOffset()) / vertexStride;
+			buildRangeInfo.transformOffset = 0;
+
+			maxPrimitiveCounts[geometryIndex] = buildRangeInfo.primitiveCount;
 
 			geometryIndex += 1;
 		}
 
-		VkAccelerationStructureBuildGeometryInfoKHR accelerationStructureBuildGeometryInfo{};
-		accelerationStructureBuildGeometryInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
-		accelerationStructureBuildGeometryInfo.pNext = nullptr;
-		accelerationStructureBuildGeometryInfo.type = translateAccelerationStructureType(descriptor.type);
-		accelerationStructureBuildGeometryInfo.flags = translateAccelerationStructureBuildFlags(descriptor.flags);
+		VkAccelerationStructureBuildGeometryInfoKHR& buildGeometryInfo = accelerationStructureBuildTriangleGeometry->buildGeometryInfo;
+		buildGeometryInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
+		buildGeometryInfo.pNext = nullptr;
+		buildGeometryInfo.type = translateAccelerationStructureType(descriptor.type);
+		buildGeometryInfo.flags = translateAccelerationStructureBuildFlags(descriptor.flags);
 
 		// TODO(graphics/vk/ext_hardware_ray_tracing/build-mode): Expose the build mode?
-		accelerationStructureBuildGeometryInfo.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
+		buildGeometryInfo.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
 
-		accelerationStructureBuildGeometryInfo.srcAccelerationStructure = nullptr;
-		accelerationStructureBuildGeometryInfo.dstAccelerationStructure = nullptr;
-		accelerationStructureBuildGeometryInfo.geometryCount = static_cast<uint32>(accelerationStructureGeometries.count());
+		buildGeometryInfo.srcAccelerationStructure = nullptr;
+		buildGeometryInfo.dstAccelerationStructure = nullptr;
+		buildGeometryInfo.geometryCount = static_cast<uint32>(geometries.count());
+		buildGeometryInfo.pGeometries = &geometries[0];
 
 		// TODO(graphics/vk/ext_hardware_ray_tracing/geometry-pointers): Expose both members?
-		accelerationStructureBuildGeometryInfo.pGeometries = &accelerationStructureGeometries[0];
-		accelerationStructureBuildGeometryInfo.ppGeometries = nullptr;
+		buildGeometryInfo.ppGeometries = nullptr;
 
-		accelerationStructureBuildGeometryInfo.scratchData.deviceAddress = 0;
-		accelerationStructureBuildGeometryInfo.scratchData.hostAddress = nullptr;
+		buildGeometryInfo.scratchData.deviceAddress = 0;
+
+		return accelerationStructureBuildTriangleGeometry;
+	}
+
+	AccelerationStructureBuildSizes getAccelerationStructureBuildSizes(const Trident::Device* device, ref<Trident::AccelerationStructureBuildTriangleGeometry> buildTriangleGeometry) {
+		const VK::Device* vkDevice = static_cast<const VK::Device*>(device);
+		const ref<VK::AccelerationStructureBuildTriangleGeometry> geometry = ref_cast<VK::AccelerationStructureBuildTriangleGeometry>(buildTriangleGeometry);
 
 		VkAccelerationStructureBuildSizesInfoKHR sizeInfo{};
 		sizeInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
 		sizeInfo.pNext = nullptr;
 
-		vkDevice->vkGetAccelerationStructureBuildSizesKHR(vkDevice->device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &accelerationStructureBuildGeometryInfo, &maxPrimitiveCounts[0], &sizeInfo);
+		vkDevice->vkGetAccelerationStructureBuildSizesKHR(vkDevice->device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &geometry->buildGeometryInfo, &geometry->maxPrimitiveCounts[0], &sizeInfo);
 
 		AccelerationStructureBuildSizes buildSizes{};
 		buildSizes.accelerationStructureSize = sizeInfo.accelerationStructureSize;

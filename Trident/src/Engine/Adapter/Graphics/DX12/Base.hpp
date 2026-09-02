@@ -12,6 +12,8 @@
 	#include <dxgidebug.h>
 #endif
 
+#include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/EXT_hardware_ray_tracing.hpp"
+
 namespace Trident::DX12 {
 	struct DescriptorHeapAllocation;
 

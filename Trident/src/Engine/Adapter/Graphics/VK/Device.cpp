@@ -89,7 +89,10 @@ namespace Trident {
 		for (const DeviceExtensionName extension : enabledExtensions) {
 			switch (extension) {
 				case EXT_hardware_ray_tracing: {
+					LOAD_DEVICE_PROCEDURE(vkCmdBuildAccelerationStructuresKHR);
+					LOAD_DEVICE_PROCEDURE(vkCreateAccelerationStructureKHR);
 					LOAD_DEVICE_PROCEDURE(vkGetAccelerationStructureBuildSizesKHR);
+					LOAD_DEVICE_PROCEDURE(vkGetBufferDeviceAddress);
 
 					break;
 				}
@@ -249,7 +252,7 @@ namespace Trident {
 		vulkan11Features.pNext = &vulkan12Features;
 
 		for (const DeviceExtensionName extension : enabledExtensions) {
-			enableDeviceExtension(extension, enabledExtensionNames, &vulkan14Features.pNext);
+			enableDeviceExtension(extension, enabledExtensionNames, vulkan11Features, &vulkan14Features.pNext);
 		}
 
 		// TODO: Replace with sequence<T>.

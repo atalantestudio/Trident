@@ -22,6 +22,8 @@
 	}
 #endif
 
+#include "Engine/Adapter/Graphics/VK/DeviceExtension/EXT_hardware_ray_tracing/EXT_hardware_ray_tracing.hpp"
+
 namespace Trident::VK {
 	class Buffer;
 	class CommandBuffer;

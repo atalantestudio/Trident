@@ -30,5 +30,9 @@ namespace Trident {
 
 		/// Cached mapped range for multiple mapped suballocations in the same allocation.
 		void* mappedRange;
+
+		// TODO(graphics/memory-allocation): Merge `dynamic` and `shaderDeviceAddress` in a flag enum.
+		/// Whether the allocation contains buffers with the SHADER_DEVICE_ADDRESS flag.
+		bool shaderDeviceAddress;
 	};
 }

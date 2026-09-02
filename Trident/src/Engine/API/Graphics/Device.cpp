@@ -3,9 +3,11 @@
 
 #include "pch.hpp"
 
+#include "Engine/API/Graphics/Descriptor/FenceDescriptor.hpp"
 #include "Engine/API/Graphics/Descriptor/ShaderModuleDescriptor.hpp"
 #include "Engine/API/Graphics/Device.hpp"
 #include "Engine/API/Graphics/PhysicalDevice.hpp"
+#include "Engine/API/Graphics/Queue.hpp"
 #include "Engine/Filesystem/Asset/ShaderModuleAsset.hpp"
 
 namespace Trident {

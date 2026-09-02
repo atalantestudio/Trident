@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Engine/API/Graphics/Framebuffer.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
 	Framebuffer::Framebuffer(const Device* device, const FramebufferDescriptor& descriptor) :

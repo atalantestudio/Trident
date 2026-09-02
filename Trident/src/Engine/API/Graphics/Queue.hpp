@@ -4,6 +4,9 @@
 #pragma once
 
 #include "Engine/API/Graphics/Base.hpp"
+#include "Engine/API/Graphics/Descriptor/CommandBufferDescriptor.hpp"
+#include "Engine/API/Graphics/Device.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
 	class Queue {
@@ -12,7 +15,8 @@ namespace Trident {
 			~Queue();
 
 			/// Creates and returns a command encoder with the capabilities of the queue.
-			ref<CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const;
+			template<DeviceExtensionName... Extensions>
+			ref<ExtendedCommandEncoder<Extensions...>> createCommandEncoder(const CommandBufferDescriptor& descriptor) const;
 
 			/// Executes the provided command buffers.
 			void submit(view<ref<CommandBuffer>> commandBuffers) const;
@@ -58,3 +62,5 @@ namespace Trident {
 			ref<CommandPool> commandPool;
 	};
 }
+
+#include "Engine/API/Graphics/Queue.ipp"

@@ -42,8 +42,16 @@ namespace Trident::VK {
 			bufferUsageFlags |= VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
 		}
 
+		if (bufferUsage & BufferUsage::SHADER_DEVICE_ADDRESS) {
+			bufferUsageFlags |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+		}
+
 		if (bufferUsage & BufferUsage::ACCELERATION_STRUCTURE_STORAGE) {
-			bufferUsageFlags |= VK_BUFFER_USAGE_2_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR;
+			bufferUsageFlags |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR;
+		}
+
+		if (bufferUsage & BufferUsage::READ_ONLY_ACCELERATION_STRUCTURE_INPUT) {
+			bufferUsageFlags |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
 		}
 
 		ADAPTER_ASSERT(bufferUsageFlags != 0, "Unknown buffer usage flag combination.");

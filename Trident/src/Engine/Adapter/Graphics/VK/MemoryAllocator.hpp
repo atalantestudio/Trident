@@ -32,7 +32,7 @@ namespace Trident {
 	};
 
 	namespace VK {
-		MemoryAllocation allocateMemory(Trident::MemoryAllocator* memoryAllocator, bool dynamic, uint32 memoryTypeIndex, uint64 size, uint64 alignment);
+		MemoryAllocation allocateMemory(Trident::MemoryAllocator* memoryAllocator, bool dynamic, uint32 memoryTypeIndex, uint64 size, uint64 alignment, bool shaderDeviceAddress);
 
 		uint32 findMemoryTypeIndex(const Trident::MemoryAllocator* memoryAllocator, MemoryProperty memoryProperties, bool transferDestination);
 

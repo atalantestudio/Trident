@@ -21,7 +21,7 @@ namespace Trident {
 
 		public:
 			/// Creates a memory allocation and returns its index in the allocation list.
-			uint32 allocate(bool dynamic, uint32 memoryTypeIndex, uint64 size, uint64 alignment);
+			uint32 allocate(bool dynamic, uint32 memoryTypeIndex, uint64 size, uint64 alignment, bool shaderDeviceAddress);
 
 			/// Finds and returns the memory type index corresponding to the provided memory property flag.
 			uint32 findMemoryTypeIndex(MemoryProperty memoryProperties, bool transferDestination) const;
@@ -52,7 +52,7 @@ namespace Trident {
 		private:
 			/// Finds and returns the index of the first memory allocation that can contain the provided size.
 			/// Returns the allocation count if no suitable allocation was found.
-			uint32 findAllocationIndex(uint32 memoryTypeIndex, const MemoryRequirements& memoryRequirements) const;
+			uint32 findAllocationIndex(uint32 memoryTypeIndex, const MemoryRequirements& memoryRequirements, bool shaderDeviceAddress) const;
 
 		protected:
 			explicit MemoryAllocator(const Device* device);

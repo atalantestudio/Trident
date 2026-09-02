@@ -8,4 +8,7 @@
 namespace Trident {
 	template<DeviceExtensionName Name, typename Device>
 	class DeviceExtension;
+
+	template<DeviceExtensionName Name, typename CommandEncoder>
+	class CommandEncoderDeviceExtension;
 }

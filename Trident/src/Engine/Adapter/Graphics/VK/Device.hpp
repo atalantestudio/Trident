@@ -74,7 +74,10 @@ namespace Trident {
 			PFN_vkWaitForFences vkWaitForFences;
 
 			// EXT_hardware_ray_tracing
+			PFN_vkCmdBuildAccelerationStructuresKHR vkCmdBuildAccelerationStructuresKHR;
+			PFN_vkCreateAccelerationStructureKHR vkCreateAccelerationStructureKHR;
 			PFN_vkGetAccelerationStructureBuildSizesKHR vkGetAccelerationStructureBuildSizesKHR;
+			PFN_vkGetBufferDeviceAddress vkGetBufferDeviceAddress;
 	};
 
 	namespace VK {

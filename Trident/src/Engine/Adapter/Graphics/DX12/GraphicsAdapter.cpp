@@ -7,6 +7,7 @@
 #include "Engine/Adapter/Graphics/DX12/CommandEncoder.hpp"
 #include "Engine/Adapter/Graphics/DX12/ComputePipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
+#include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/CommandEncoder.hpp"
 #include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/Device.hpp"
 #include "Engine/Adapter/Graphics/DX12/Fence.hpp"
 #include "Engine/Adapter/Graphics/DX12/GraphicsAdapter.hpp"
@@ -21,6 +22,7 @@
 #include "Engine/Adapter/Graphics/DX12/ShaderModule.hpp"
 #include "Engine/Adapter/Graphics/DX12/Surface.hpp"
 #include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
+#include "Engine/API/Graphics/Semaphore.hpp"
 
 namespace Trident::DX12 {
 	static ref<DescriptorSetLayout> createDescriptorSetLayout(const Trident::Device* device, const DescriptorSetLayoutDescriptor& descriptor) {
@@ -142,6 +144,10 @@ namespace Trident::DX12 {
 		adapter->updateSwapchainImplementation = DX12::recreateSwapchain;
 		adapter->waitForFenceImplementation = DX12::waitForFence;
 
-		adapter->getAccelerationStructureBuildSizesImplementation = DX12::getAccelerationStructureBuildSizesImplementation;
+		// EXT_hardware_ray_tracing
+		adapter->buildAccelerationStructuresImplementation = DX12::buildAccelerationStructures;
+		adapter->createAccelerationStructureBuildTriangleGeometryImplementation = DX12::createAccelerationStructureBuildTriangleGeometry;
+		adapter->createAccelerationStructureImplementation = DX12::createAccelerationStructure;
+		adapter->getAccelerationStructureBuildSizesImplementation = DX12::getAccelerationStructureBuildSizes;
 	}
 }

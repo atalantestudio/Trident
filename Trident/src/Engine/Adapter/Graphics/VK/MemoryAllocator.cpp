@@ -179,7 +179,7 @@ namespace Trident {
 		ADAPTER_INFO("Freed suballocation from memory allocation []. The active suballocation count is now [].", memoryAllocationIndex, memoryAllocation.suballocationCount);
 	}
 
-	MemoryAllocation VK::allocateMemory(Trident::MemoryAllocator* memoryAllocator, bool dynamic, uint32 memoryTypeIndex, uint64 size, uint64 alignment) {
+	MemoryAllocation VK::allocateMemory(Trident::MemoryAllocator* memoryAllocator, bool dynamic, uint32 memoryTypeIndex, uint64 size, uint64 alignment, bool shaderDeviceAddress) {
 		const VK::Device* _device = static_cast<const VK::Device*>(memoryAllocator->device);
 		const ref<VK::PhysicalDevice> _physicalDevice = ref_cast<VK::PhysicalDevice>(memoryAllocator->device->physicalDevice);
 		const VkMemoryType memoryType = _physicalDevice->memoryProperties.memoryTypes[memoryTypeIndex];
@@ -192,6 +192,17 @@ namespace Trident {
 		memoryAllocateInfo.pNext = nullptr;
 		memoryAllocateInfo.allocationSize = size;
 		memoryAllocateInfo.memoryTypeIndex = memoryTypeIndex;
+
+		VkMemoryAllocateFlagsInfo memoryAllocateFlagsInfo;
+
+		if (shaderDeviceAddress) {
+			memoryAllocateFlagsInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO;
+			memoryAllocateFlagsInfo.pNext = nullptr;
+			memoryAllocateFlagsInfo.flags = VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT;
+			memoryAllocateFlagsInfo.deviceMask = 0;
+
+			memoryAllocateInfo.pNext = &memoryAllocateFlagsInfo;
+		}
 
 		VkDeviceMemory memory;
 

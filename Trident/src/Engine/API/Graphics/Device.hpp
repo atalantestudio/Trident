@@ -6,14 +6,15 @@
 #include "Engine/API/Graphics/Base.hpp"
 #include "Engine/API/Graphics/DescriptorSet.hpp"
 #include "Engine/API/Graphics/DescriptorSetLayout.hpp"
-#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/API/Graphics/MemoryAllocator.hpp"
-#include "Engine/API/Graphics/Queue.hpp"
 #include "Engine/API/Graphics/QueueFamilyCapability.hpp"
 #include "Engine/API/Graphics/Status.hpp"
 #include "Engine/API/Graphics/Swapchain.hpp"
 
 namespace Trident {
+	class GraphicsAdapter;
+	class Queue;
+
 	class Device {
 		public:
 			~Device();

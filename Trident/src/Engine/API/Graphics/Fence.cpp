@@ -5,6 +5,7 @@
 
 #include "Engine/API/Graphics/Device.hpp"
 #include "Engine/API/Graphics/Fence.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
 	Fence::Fence(const Device* device) :

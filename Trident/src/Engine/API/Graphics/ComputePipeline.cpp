@@ -5,6 +5,7 @@
 
 #include "Engine/API/Graphics/ComputePipeline.hpp"
 #include "Engine/API/Graphics/Device.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
 	ComputePipeline::ComputePipeline(const Device* device) :

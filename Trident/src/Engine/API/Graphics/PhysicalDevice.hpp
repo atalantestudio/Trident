@@ -20,7 +20,7 @@ namespace Trident {
 			/// Returns a report of the physical device's limits.
 			const PhysicalDeviceLimits& getLimits() const;
 
-			/// Creates and returns a logical device from this physical device.
+			/// Creates and returns a logical device linked to this physical device.
 			/// The resulting device exposes core and extension methods to the user.
 			template<DeviceExtensionName... Extensions>
 			inline ref<ExtendedDevice<Extensions...>> createDevice() const {

@@ -1,11 +1,26 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-#pragma once
-
 namespace Trident {
 	template<typename Device>
-	AccelerationStructureBuildSizes DeviceExtension<EXT_hardware_ray_tracing, Device>::getAccelerationStructureBuildSizes(const AccelerationStructureBuildGeometryDescriptor& descriptor) const {
+	ref<AccelerationStructure> DeviceExtension<EXT_hardware_ray_tracing, Device>::createAccelerationStructure(const AccelerationStructureDescriptor& descriptor) const {
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+			{
+				Validator validator;
+
+				if (descriptor.view.getSize() % 256 > 0) {
+					VALIDATION_ERROR("descriptor.view.size must be a multiple of 256.");
+				}
+			}
+		#endif
+
+		const Device* device = static_cast<const Device*>(this);
+
+		return device->adapter->createAccelerationStructureImplementation(device, descriptor);
+	}
+
+	template<typename Device>
+	ref<AccelerationStructureBuildTriangleGeometry> DeviceExtension<EXT_hardware_ray_tracing, Device>::createAccelerationStructureBuildTriangleGeometry(const AccelerationStructureBuildTriangleGeometryDescriptor& descriptor) const {
 		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
@@ -26,6 +41,13 @@ namespace Trident {
 
 		const Device* device = static_cast<const Device*>(this);
 
-		return device->adapter->getAccelerationStructureBuildSizesImplementation(device, descriptor);
+		return device->adapter->createAccelerationStructureBuildTriangleGeometryImplementation(device, descriptor);
+	}
+
+	template<typename Device>
+	AccelerationStructureBuildSizes DeviceExtension<EXT_hardware_ray_tracing, Device>::getAccelerationStructureBuildSizes(ref<AccelerationStructureBuildTriangleGeometry> buildTriangleGeometry) const {
+		const Device* device = static_cast<const Device*>(this);
+
+		return device->adapter->getAccelerationStructureBuildSizesImplementation(device, buildTriangleGeometry);
 	}
 }

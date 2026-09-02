@@ -42,7 +42,7 @@ namespace Trident {
 				const uint32 allocationMemoryTypeIndex = memoryAllocator->findMemoryTypeIndex(memoryProperties, false);
 				const uint64 allocationAlignment = max(buffer1memoryRequirements.alignment, buffer2memoryRequirements.alignment);
 				const uint64 allocationSize = ceil(buffer1memoryRequirements.size + buffer2memoryRequirements.size, allocationAlignment);
-				const uint32 allocationIndex = memoryAllocator->allocate(false, allocationMemoryTypeIndex, allocationSize, allocationAlignment);
+				const uint32 allocationIndex = memoryAllocator->allocate(false, allocationMemoryTypeIndex, allocationSize, allocationAlignment, false);
 				const MemoryAllocation& allocation = memoryAllocator->allocations[allocationIndex];
 
 				memoryAllocator->suballocateStatic(allocationIndex, buffer1);

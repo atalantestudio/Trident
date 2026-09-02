@@ -12,7 +12,7 @@ namespace Trident {
 		device(device)
 	{}
 
-	uint32 MemoryAllocator::allocate(bool dynamic, uint32 memoryTypeIndex, uint64 size, uint64 alignment) {
+	uint32 MemoryAllocator::allocate(bool dynamic, uint32 memoryTypeIndex, uint64 size, uint64 alignment, bool shaderDeviceAddress) {
 		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
@@ -29,7 +29,7 @@ namespace Trident {
 			}
 		#endif
 
-		const MemoryAllocation allocation = device->adapter->allocateMemoryImplementation(this, dynamic, memoryTypeIndex, size, alignment);
+		const MemoryAllocation allocation = device->adapter->allocateMemoryImplementation(this, dynamic, memoryTypeIndex, size, alignment, shaderDeviceAddress);
 
 		uint32 allocationIndex;
 
@@ -131,8 +131,9 @@ namespace Trident {
 	void MemoryAllocator::suballocateDynamic(ref<Buffer> buffer) {
 		const MemoryRequirements memoryRequirements = getMemoryRequirements(buffer);
 		const uint32 memoryTypeIndex = findMemoryTypeIndex(buffer->getMemorySuballocation().memoryProperties, buffer->getUsage() & BufferUsage::TRANSFER_DST);
+		const bool shaderDeviceAddress = buffer->getUsage() & BufferUsage::SHADER_DEVICE_ADDRESS;
 
-		uint32 allocationIndex = findAllocationIndex(memoryTypeIndex, memoryRequirements);
+		uint32 allocationIndex = findAllocationIndex(memoryTypeIndex, memoryRequirements, shaderDeviceAddress);
 		bool needAllocation = false;
 
 		if (allocationIndex >= allocations.size()) {
@@ -149,7 +150,7 @@ namespace Trident {
 		}
 
 		if (needAllocation) {
-			allocationIndex = allocate(true, memoryTypeIndex, max(MIN_DYNAMIC_MEMORY_ALLOCATION_SIZE, memoryRequirements.size), memoryRequirements.alignment);
+			allocationIndex = allocate(true, memoryTypeIndex, max(MIN_DYNAMIC_MEMORY_ALLOCATION_SIZE, memoryRequirements.size), memoryRequirements.alignment, shaderDeviceAddress);
 		}
 
 		suballocateStatic(allocationIndex, buffer);
@@ -159,7 +160,9 @@ namespace Trident {
 		const MemoryRequirements memoryRequirements = getMemoryRequirements(image);
 		const uint32 memoryTypeIndex = findMemoryTypeIndex(image->getMemorySuballocation().memoryProperties, image->getUsage() & ImageUsage::TRANSFER_DST);
 
-		uint32 allocationIndex = findAllocationIndex(memoryTypeIndex, memoryRequirements);
+		// TODO(graphics/memory-allocator/image-shader-device-address): Add support for SHADER_DEVICE_ADDRESS for images?
+		uint32 allocationIndex = findAllocationIndex(memoryTypeIndex, memoryRequirements, false);
+
 		bool needAllocation = false;
 
 		if (allocationIndex >= allocations.size()) {
@@ -176,13 +179,14 @@ namespace Trident {
 		}
 
 		if (needAllocation) {
-			allocationIndex = allocate(true, memoryTypeIndex, max(MIN_DYNAMIC_MEMORY_ALLOCATION_SIZE, memoryRequirements.size), memoryRequirements.alignment);
+			// TODO(graphics/memory-allocator/image-shader-device-address): Add support for SHADER_DEVICE_ADDRESS for images?
+			allocationIndex = allocate(true, memoryTypeIndex, max(MIN_DYNAMIC_MEMORY_ALLOCATION_SIZE, memoryRequirements.size), memoryRequirements.alignment, false);
 		}
 
 		suballocateStatic(allocationIndex, image);
 	}
 
-	uint32 MemoryAllocator::findAllocationIndex(uint32 memoryTypeIndex, const MemoryRequirements& memoryRequirements) const {
+	uint32 MemoryAllocator::findAllocationIndex(uint32 memoryTypeIndex, const MemoryRequirements& memoryRequirements, bool shaderDeviceAddress) const {
 		uint32 allocationIndex = 0;
 
 		while (allocationIndex < allocations.size()) {
@@ -195,6 +199,12 @@ namespace Trident {
 			}
 
 			if (allocation.memoryTypeIndex != memoryTypeIndex) {
+				allocationIndex += 1;
+
+				continue;
+			}
+
+			if (allocation.shaderDeviceAddress != shaderDeviceAddress) {
 				allocationIndex += 1;
 
 				continue;

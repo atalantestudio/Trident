@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Engine/API/Graphics/Device.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/API/Graphics/PipelineLayout.hpp"
 
 namespace Trident {

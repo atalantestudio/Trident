@@ -29,8 +29,13 @@ namespace Trident {
 		/// Indicates an indirect buffer.
 		INDIRECT = BIT(7),
 
-		/// Provided by the EXT_hardware_ray_tracing device extension.
-		ACCELERATION_STRUCTURE_STORAGE = BIT(8),
+		// EXT_hardware_ray_tracing
+
+		SHADER_DEVICE_ADDRESS = BIT(8),
+
+		ACCELERATION_STRUCTURE_STORAGE = BIT(9),
+
+		READ_ONLY_ACCELERATION_STRUCTURE_INPUT = BIT(10),
 	};
 
 	AS_FLAG(BufferUsage);

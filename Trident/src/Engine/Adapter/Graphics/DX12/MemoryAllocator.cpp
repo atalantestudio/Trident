@@ -9,6 +9,7 @@
 #include "Engine/Adapter/Graphics/DX12/MemoryAllocator.hpp"
 #include "Engine/Adapter/Graphics/DX12/ResourceDimension.hpp"
 #include "Engine/Adapter/Graphics/DX12/ResourceFlags.hpp"
+#include "Engine/Adapter/Graphics/DX12/ResourceState.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
@@ -411,7 +412,7 @@ namespace Trident {
 		return descriptorHeapAllocations[currentDepthStencilViewDescriptorHeapAllocationIndex];
 	}
 
-	MemoryAllocation DX12::allocateMemory(Trident::MemoryAllocator* memoryAllocator, bool dynamic, uint32 memoryTypeIndex, uint64 size, uint64 alignment) {
+	MemoryAllocation DX12::allocateMemory(Trident::MemoryAllocator* memoryAllocator, bool dynamic, uint32 memoryTypeIndex, uint64 size, uint64 alignment, bool shaderDeviceAddress) {
 		const DX12::Device* _device = static_cast<const DX12::Device*>(memoryAllocator->device);
 
 		D3D12_HEAP_DESC heapDescriptor{};
@@ -530,22 +531,13 @@ namespace Trident {
 		resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_NONE;
 
 		const D3D12_RESOURCE_ALLOCATION_INFO resourceAllocationInfo = _device->device->GetResourceAllocationInfo(0, 1, &resourceDescriptor);
-
-		D3D12_RESOURCE_STATES initialResourceStates = D3D12_RESOURCE_STATE_COMMON;
+		const D3D12_RESOURCE_STATES initialResourceStates = translateBufferUsage(buffer->getUsage(), buffer->getMemorySuballocation().memoryProperties);
 
 		if (
 			buffer->getMemorySuballocation().memoryProperties & MemoryProperty::DEVICE_LOCAL &&
 			(buffer->getUsage() & BufferUsage::READ_WRITE_STORAGE || buffer->getUsage() & BufferUsage::ACCELERATION_STRUCTURE_STORAGE)
 		) {
 			resourceDescriptor.Flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
-		}
-
-		if (buffer->getMemorySuballocation().memoryProperties & MemoryProperty::HOST_VISIBLE) {
-			initialResourceStates = D3D12_RESOURCE_STATE_GENERIC_READ;
-
-			if (buffer->getUsage() == BufferUsage::TRANSFER_DST) {
-				initialResourceStates = D3D12_RESOURCE_STATE_COPY_DEST;
-			}
 		}
 
 		MemorySuballocation memorySuballocation = memoryAllocator->suballocate(allocationIndex, resourceAllocationInfo.SizeInBytes, resourceAllocationInfo.Alignment);

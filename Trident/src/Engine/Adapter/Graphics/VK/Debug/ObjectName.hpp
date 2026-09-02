@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident::VK {
 	inline void setObjectName(const VK::Device* device, uint64 handle, VkObjectType type, view<char8> name) {

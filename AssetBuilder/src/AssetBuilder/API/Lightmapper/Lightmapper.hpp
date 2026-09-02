@@ -151,6 +151,8 @@ namespace Trident {
 			LightmapperContext context;
 
 			ref<Buffer> argumentBuffer;
+			ref<Buffer> accelerationStructureBuffer;
+			ref<AccelerationStructure> accelerationStructure;
 			ref<Sampler> intermediateLightmapAtlasSampler;
 	};
 }

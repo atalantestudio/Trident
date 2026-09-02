@@ -6,6 +6,7 @@
 #include "Engine/API/Graphics/Buffer.hpp"
 #include "Engine/API/Graphics/BufferView.hpp"
 #include "Engine/API/Graphics/Device.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/API/Graphics/MemoryAllocator.hpp"
 
 namespace Trident {

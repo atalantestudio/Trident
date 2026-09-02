@@ -8,6 +8,7 @@
 #include "Engine/Adapter/Graphics/VK/CommandPool.hpp"
 #include "Engine/Adapter/Graphics/VK/ComputePipeline.hpp"
 #include "Engine/Adapter/Graphics/VK/DescriptorSetLayout.hpp"
+#include "Engine/Adapter/Graphics/VK/DeviceExtension/EXT_hardware_ray_tracing/CommandEncoder.hpp"
 #include "Engine/Adapter/Graphics/VK/DeviceExtension/EXT_hardware_ray_tracing/Device.hpp"
 #include "Engine/Adapter/Graphics/VK/Fence.hpp"
 #include "Engine/Adapter/Graphics/VK/Framebuffer.hpp"
@@ -122,6 +123,10 @@ namespace Trident::VK {
 		adapter->updateSwapchainImplementation = VK::recreateSwapchain;
 		adapter->waitForFenceImplementation = VK::waitForFence;
 
-		adapter->getAccelerationStructureBuildSizesImplementation = VK::getAccelerationStructureBuildSizesImplementation;
+		// EXT_hardware_ray_tracing
+		adapter->buildAccelerationStructuresImplementation = VK::buildAccelerationStructures;
+		adapter->createAccelerationStructureBuildTriangleGeometryImplementation = VK::createAccelerationStructureBuildTriangleGeometry;
+		adapter->createAccelerationStructureImplementation = VK::createAccelerationStructure;
+		adapter->getAccelerationStructureBuildSizesImplementation = VK::getAccelerationStructureBuildSizes;
 	}
 }

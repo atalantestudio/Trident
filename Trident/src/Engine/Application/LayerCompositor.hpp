@@ -11,6 +11,7 @@
 #include "Engine/API/Graphics/Instance.hpp"
 #include "Engine/API/Graphics/MemoryAllocator.hpp"
 #include "Engine/API/Graphics/PhysicalDevice.hpp"
+#include "Engine/API/Graphics/Queue.hpp"
 #include "Engine/API/Graphics/Semaphore.hpp"
 #include "Engine/API/Graphics/Surface.hpp"
 #include "Engine/API/Graphics/Swapchain.hpp"
@@ -197,7 +198,7 @@ namespace Trident {
 					if (allocationSize > 0) {
 						const uint64 allocationAlignment = allocationAlignmentsPerMemoryType[memoryTypeIndex];
 
-						allocationIndicesPerMemoryType[memoryTypeIndex] = memoryAllocator->allocate(false, memoryTypeIndex, allocationSize, allocationAlignment);
+						allocationIndicesPerMemoryType[memoryTypeIndex] = memoryAllocator->allocate(false, memoryTypeIndex, allocationSize, allocationAlignment, false);
 					}
 
 					memoryTypeIndex += 1;

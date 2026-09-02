@@ -8,6 +8,7 @@ namespace Trident {
 
 	enum class AcquireNextImageStatus : uint8;
 	enum DeviceExtensionName : uint8;
+	enum class GraphicsAPI : uint8;
 	enum class ImageLayout : uint8;
 	enum class ImageType : uint8;
 	enum class ImageViewType : uint8;
@@ -61,6 +62,9 @@ namespace Trident {
 	class Device;
 
 	template<DeviceExtensionName... Extensions>
+	class ExtendedCommandEncoder;
+
+	template<DeviceExtensionName... Extensions>
 	class ExtendedDevice;
 
 	class Fence;
@@ -86,7 +90,7 @@ namespace Trident {
 
 	typedef AcquireNextImageStatus (*AcquireNextImageImplementation)(const Device* device, const Swapchain* swapchain, const Semaphore* semaphore, uint32& imageIndex);
 	typedef sequence<ref<DescriptorSet>> (*AllocateDescriptorSetsImplementation)(Device* device, view<ref<DescriptorSetLayout>> descriptorSetLayouts);
-	typedef MemoryAllocation (*AllocateMemoryImplementation)(MemoryAllocator* memoryAllocator, bool dynamic, uint32 memoryTypeIndex, uint64 size, uint64 alignment);
+	typedef MemoryAllocation (*AllocateMemoryImplementation)(MemoryAllocator* memoryAllocator, bool dynamic, uint32 memoryTypeIndex, uint64 size, uint64 alignment, bool shaderDeviceAddress);
 	typedef void (*BeginImplementation)(const CommandEncoder* commandEncoder);
 	typedef void (*BeginRenderPassImplementation)(CommandEncoder* commandEncoder, const BeginRenderPassDescriptor& descriptor);
 	typedef void (*BindComputePipelineImplementation)(CommandEncoder* commandEncoder, ref<ComputePipeline> computePipeline);
@@ -175,8 +179,15 @@ namespace Trident {
 
 	// EXT_hardware_ray_tracing
 
-	struct AccelerationStructureBuildGeometryDescriptor;
+	struct AccelerationStructureBuildTriangleGeometryDescriptor;
 	struct AccelerationStructureBuildSizes;
+	struct AccelerationStructureDescriptor;
 
-	typedef AccelerationStructureBuildSizes (*GetAccelerationStructureBuildSizesImplementation)(const Device* device, const AccelerationStructureBuildGeometryDescriptor& descriptor);
+	class AccelerationStructure;
+	class AccelerationStructureBuildTriangleGeometry;
+
+	typedef void (*BuildAccelerationStructuresImplementation)(CommandEncoder* commandEncoder, view<ref<AccelerationStructure>> accelerationStructures, view<BaseBufferView> accelerationStructureViews, view<BaseBufferView> scratchViews);
+	typedef ref<AccelerationStructureBuildTriangleGeometry> (*CreateAccelerationStructureBuildTriangleGeometryImplementation)(const Device* device, const AccelerationStructureBuildTriangleGeometryDescriptor& descriptor);
+	typedef ref<AccelerationStructure> (*CreateAccelerationStructureImplementation)(const Device* device, const AccelerationStructureDescriptor& descriptor);
+	typedef AccelerationStructureBuildSizes (*GetAccelerationStructureBuildSizesImplementation)(const Device* device, ref<AccelerationStructureBuildTriangleGeometry> buildTriangleGeometry);
 }

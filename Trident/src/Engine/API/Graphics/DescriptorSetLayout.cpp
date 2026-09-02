@@ -5,6 +5,7 @@
 
 #include "Engine/API/Graphics/DescriptorSetLayout.hpp"
 #include "Engine/API/Graphics/Device.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
 	DescriptorSetLayout::DescriptorSetLayout(const Device* device, const DescriptorSetLayoutDescriptor& descriptor) :
