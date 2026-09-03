@@ -8,6 +8,10 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
+	AccelerationStructure::~AccelerationStructure() {
+		device->adapter->destroyAccelerationStructureImplementation(device, this);
+	}
+
 	uint64 AccelerationStructure::getDeviceAddress() const {
 		return device->adapter->getAccelerationStructureDeviceAddressImplementation(device, this);
 	}

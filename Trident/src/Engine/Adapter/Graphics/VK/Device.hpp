@@ -76,6 +76,7 @@ namespace Trident {
 			// EXT_hardware_ray_tracing
 			PFN_vkCmdBuildAccelerationStructuresKHR vkCmdBuildAccelerationStructuresKHR;
 			PFN_vkCreateAccelerationStructureKHR vkCreateAccelerationStructureKHR;
+			PFN_vkDestroyAccelerationStructureKHR vkDestroyAccelerationStructureKHR;
 			PFN_vkGetAccelerationStructureBuildSizesKHR vkGetAccelerationStructureBuildSizesKHR;
 			PFN_vkGetAccelerationStructureDeviceAddressKHR vkGetAccelerationStructureDeviceAddressKHR;
 			PFN_vkGetBufferDeviceAddress vkGetBufferDeviceAddress;

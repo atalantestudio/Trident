@@ -11,5 +11,7 @@ namespace Trident::DX12 {
 			D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC BuildDesc;
 	};
 
+	void destroyAccelerationStructure(const Trident::Device* device, const Trident::AccelerationStructure* accelerationStructure);
+
 	uint64 getAccelerationStructureDeviceAddress(const Trident::Device* device, const Trident::AccelerationStructure* accelerationStructure);
 }

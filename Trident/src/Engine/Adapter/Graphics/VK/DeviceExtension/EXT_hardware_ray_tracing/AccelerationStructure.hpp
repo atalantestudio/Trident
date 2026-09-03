@@ -13,5 +13,7 @@ namespace Trident::VK {
 			const VkAccelerationStructureBuildRangeInfoKHR* buildRangeInfos;
 	};
 
+	void destroyAccelerationStructure(const Trident::Device* device, const Trident::AccelerationStructure* accelerationStructure);
+
 	uint64 getAccelerationStructureDeviceAddress(const Trident::Device* device, const Trident::AccelerationStructure* accelerationStructure);
 }

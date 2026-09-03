@@ -8,6 +8,8 @@
 namespace Trident {
 	class AccelerationStructure {
 		public:
+			~AccelerationStructure();
+
 			uint64 getDeviceAddress() const;
 
 		public:

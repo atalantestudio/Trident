@@ -150,6 +150,7 @@ namespace Trident::DX12 {
 		adapter->createAccelerationStructureBuildInstanceGeometryImplementation = DX12::createAccelerationStructureBuildInstanceGeometry;
 		adapter->createAccelerationStructureBuildTriangleGeometryImplementation = DX12::createAccelerationStructureBuildTriangleGeometry;
 		adapter->createAccelerationStructureImplementation = DX12::createAccelerationStructure;
+		adapter->destroyAccelerationStructureImplementation = DX12::destroyAccelerationStructure;
 		adapter->getAccelerationStructureBuildSizesImplementation = DX12::getAccelerationStructureBuildSizes;
 		adapter->getAccelerationStructureDeviceAddressImplementation = DX12::getAccelerationStructureDeviceAddress;
 	}

@@ -129,6 +129,7 @@ namespace Trident::VK {
 		adapter->createAccelerationStructureBuildInstanceGeometryImplementation = VK::createAccelerationStructureBuildInstanceGeometry;
 		adapter->createAccelerationStructureBuildTriangleGeometryImplementation = VK::createAccelerationStructureBuildTriangleGeometry;
 		adapter->createAccelerationStructureImplementation = VK::createAccelerationStructure;
+		adapter->destroyAccelerationStructureImplementation = VK::destroyAccelerationStructure;
 		adapter->getAccelerationStructureBuildSizesImplementation = VK::getAccelerationStructureBuildSizes;
 		adapter->getAccelerationStructureDeviceAddressImplementation = VK::getAccelerationStructureDeviceAddress;
 	}
