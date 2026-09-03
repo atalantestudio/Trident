@@ -54,6 +54,7 @@ namespace Trident {
 			void writeReadWriteStorageImage(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorImage& descriptorImage) const;
 			void writeInputAttachment(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorImage& descriptorImage) const;
 			void writeSampler(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const D3D12_SAMPLER_DESC* descriptor) const;
+			void writeAccelerationStructure(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, ref<Trident::AccelerationStructure> accelerationStructure) const;
 
 		private:
 			void createViewDescriptorHeapAllocation();

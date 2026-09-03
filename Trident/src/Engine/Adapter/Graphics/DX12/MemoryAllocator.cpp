@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/DX12/Buffer.hpp"
+#include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructure.hpp"
 #include "Engine/Adapter/Graphics/DX12/Format.hpp"
 #include "Engine/Adapter/Graphics/DX12/Image.hpp"
 #include "Engine/Adapter/Graphics/DX12/MemoryAllocator.hpp"
@@ -294,6 +295,19 @@ namespace Trident {
 		const DX12::Device* device = static_cast<const DX12::Device*>(this->device);
 
 		device->device->CreateSampler(descriptor, descriptorHandle);
+	}
+
+	void DX12::MemoryAllocator::writeAccelerationStructure(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, ref<Trident::AccelerationStructure> accelerationStructure) const {
+		const DX12::Device* dxDevice = static_cast<const DX12::Device*>(device);
+		const ref<DX12::AccelerationStructure> dxAccelerationStructure = ref_cast<DX12::AccelerationStructure>(accelerationStructure);
+
+		D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDescriptor{};
+		shaderResourceViewDescriptor.Format = DXGI_FORMAT_UNKNOWN;
+		shaderResourceViewDescriptor.ViewDimension = D3D12_SRV_DIMENSION_RAYTRACING_ACCELERATION_STRUCTURE;
+		shaderResourceViewDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		shaderResourceViewDescriptor.RaytracingAccelerationStructure.Location = dxAccelerationStructure->BuildDesc.DestAccelerationStructureData;
+
+		dxDevice->device->CreateShaderResourceView(nullptr, &shaderResourceViewDescriptor, descriptorHandle);
 	}
 
 	void DX12::MemoryAllocator::createViewDescriptorHeapAllocation() {

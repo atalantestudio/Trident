@@ -54,6 +54,10 @@ namespace Trident::VK {
 			bufferUsageFlags |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
 		}
 
+		if (bufferUsage & BufferUsage::SHADER_BINDING_TABLE) {
+			bufferUsageFlags |= VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR;
+		}
+
 		ADAPTER_ASSERT(bufferUsageFlags != 0, "Unknown buffer usage flag combination.");
 
 		return static_cast<VkBufferUsageFlagBits>(bufferUsageFlags);

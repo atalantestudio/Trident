@@ -41,8 +41,6 @@ namespace Trident {
 		ref<Framebuffer> gBufferFramebuffer;
 		ref<Framebuffer> dilationFramebuffer;
 
-		ref<Buffer> vertexBuffer;
-		ref<Buffer> indexBuffer;
 		ref<Buffer> materialBuffer;
 		ref<Buffer> emissiveTriangleIndexBuffer;
 		ref<Buffer> lightmapAtlasStagingBuffer;
@@ -165,6 +163,8 @@ namespace Trident {
 			LightmapperContext context;
 
 			ref<Buffer> argumentBuffer;
+			ref<Buffer> vertexBuffer;
+			ref<Buffer> indexBuffer;
 			ref<Buffer> accelerationStructureBuffer;
 			ref<AccelerationStructure> bottomLevelAccelerationStructure;
 			ref<AccelerationStructure> topLevelAccelerationStructure;

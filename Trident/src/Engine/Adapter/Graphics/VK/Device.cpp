@@ -10,6 +10,7 @@
 #include "Engine/Adapter/Graphics/VK/DescriptorType.hpp"
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/Adapter/Graphics/VK/DeviceExtension.hpp"
+#include "Engine/Adapter/Graphics/VK/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructure.hpp"
 #include "Engine/Adapter/Graphics/VK/Fence.hpp"
 #include "Engine/Adapter/Graphics/VK/GraphicsAdapter.hpp"
 #include "Engine/Adapter/Graphics/VK/ImageLayout.hpp"
@@ -347,33 +348,58 @@ namespace Trident {
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 
-		uint64 descriptorBufferInfoCount = 0;
-		uint64 descriptorImageInfoCount = 0;
+		uint64 accelerationStructureCount = 0;
+		uint64 descriptorBufferCount = 0;
+		uint64 descriptorImageCount = 0;
+		uint64 writeDescriptorSetAccelerationStructureCount = 0;
 
 		for (const WriteDescriptorSet& writeDescriptorSet : writeDescriptorSets) {
 			const ref<VK::DescriptorSet> descriptorSet = ref_cast<VK::DescriptorSet>(writeDescriptorSet.descriptorSet);
 
 			ADAPTER_ASSERT(writeDescriptorSet.bindingIndex < descriptorSet->bindings.count(), "The write descriptor set uses invalid binding index [].", writeDescriptorSet.bindingIndex);
 
-			const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
+			const DescriptorSetLayoutBinding& binding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
 
-			if (isBufferDescriptorType(descriptorSetLayoutBinding.descriptorType)) {
-				descriptorBufferInfoCount += descriptorSetLayoutBinding.descriptorCount;
-			}
-			else if (isImageDescriptorType(descriptorSetLayoutBinding.descriptorType)) {
-				descriptorImageInfoCount += descriptorSetLayoutBinding.descriptorCount;
-			}
-			else {
-				ADAPTER_ASSERT(false, "Unsupported descriptor type.");
+			switch (binding.descriptorType) {
+				case DescriptorType::COMBINED_IMAGE_SAMPLER:
+				case DescriptorType::READ_ONLY_STORAGE_IMAGE:
+				case DescriptorType::READ_WRITE_STORAGE_IMAGE:
+				case DescriptorType::INPUT_ATTACHMENT: {
+					descriptorImageCount += binding.descriptorCount;
+
+					break;
+				}
+				case DescriptorType::UNIFORM_BUFFER:
+				case DescriptorType::READ_ONLY_STORAGE_BUFFER:
+				case DescriptorType::READ_WRITE_STORAGE_BUFFER: {
+					descriptorBufferCount += binding.descriptorCount;
+
+					break;
+				}
+				case DescriptorType::ACCELERATION_STRUCTURE: {
+					accelerationStructureCount += binding.descriptorCount;
+					writeDescriptorSetAccelerationStructureCount += 1;
+
+					break;
+				}
+				default: {
+					ADAPTER_ASSERT(false, "Unsupported descriptor type.");
+
+					break;
+				}
 			}
 		}
 
-		sequence<VkDescriptorBufferInfo> descriptorBufferInfos(descriptorBufferInfoCount);
-		sequence<VkDescriptorImageInfo> descriptorImageInfos(descriptorImageInfoCount);
+		sequence<VkAccelerationStructureKHR> accelerationStructures(accelerationStructureCount);
+		sequence<VkDescriptorBufferInfo> descriptorBufferInfos(descriptorBufferCount);
+		sequence<VkDescriptorImageInfo> descriptorImageInfos(descriptorImageCount);
 		sequence<VkWriteDescriptorSet> vkWriteDescriptorSets(writeDescriptorSets.count());
+		sequence<VkWriteDescriptorSetAccelerationStructureKHR> writeDescriptorSetAccelerationStructures(writeDescriptorSetAccelerationStructureCount);
 
-		uint32 descriptorBufferInfoOffset = 0;
-		uint32 descriptorImageInfoOffset = 0;
+		uint32 writeDescriptorSetAccelerationStructureOffset = 0;
+		uint32 accelerationStructureOffset = 0;
+		uint32 descriptorBufferOffset = 0;
+		uint32 descriptorImageOffset = 0;
 		uint32 writeDescriptorSetIndex = 0;
 
 		while (writeDescriptorSetIndex < writeDescriptorSets.count()) {
@@ -387,56 +413,92 @@ namespace Trident {
 			vkWriteDescriptorSet.dstSet = descriptorSet->descriptorSet;
 			vkWriteDescriptorSet.dstBinding = writeDescriptorSet.bindingIndex;
 			vkWriteDescriptorSet.dstArrayElement = 0;
+			vkWriteDescriptorSet.descriptorCount = binding.descriptorCount;
 			vkWriteDescriptorSet.descriptorType = getDescriptorType(binding.descriptorType);
+			vkWriteDescriptorSet.pTexelBufferView = nullptr;
 
-			if (isBufferDescriptorType(binding.descriptorType)) {
-				uint32 descriptorBufferIndex = 0;
+			switch (binding.descriptorType) {
+				case DescriptorType::COMBINED_IMAGE_SAMPLER:
+				case DescriptorType::READ_ONLY_STORAGE_IMAGE:
+				case DescriptorType::READ_WRITE_STORAGE_IMAGE:
+				case DescriptorType::INPUT_ATTACHMENT: {
+					uint32 descriptorImageIndex = 0;
 
-				while (descriptorBufferIndex < binding.descriptorCount) {
-					const BaseBufferView& bufferView = writeDescriptorSet.descriptorBufferViews[descriptorBufferIndex];
+					while (descriptorImageIndex < binding.descriptorCount) {
+						const DescriptorImage& descriptorImage = writeDescriptorSet.descriptorImages[descriptorImageIndex];
+						const ref<VK::ImageView> imageView = ref_cast<VK::ImageView>(descriptorImage.imageView);
 
-					VkDescriptorBufferInfo& descriptorBufferInfo = descriptorBufferInfos[descriptorBufferInfoOffset + descriptorBufferIndex];
-					descriptorBufferInfo.buffer = static_cast<const VK::Buffer*>(bufferView.getBuffer())->buffer;
-					descriptorBufferInfo.offset = bufferView.getOffset();
-					descriptorBufferInfo.range = bufferView.getSize();
+						VkDescriptorImageInfo& descriptorImageInfo = descriptorImageInfos[descriptorImageOffset + descriptorImageIndex];
+						descriptorImageInfo.sampler = nullptr;
 
-					descriptorBufferIndex += 1;
-				}
+						if (descriptorImage.sampler != nullptr) {
+							descriptorImageInfo.sampler = ref_cast<VK::Sampler>(descriptorImage.sampler)->sampler;
+						}
 
-				vkWriteDescriptorSet.pBufferInfo = &descriptorBufferInfos[descriptorBufferInfoOffset];
+						descriptorImageInfo.imageView = imageView->imageView;
+						descriptorImageInfo.imageLayout = getImageLayout(descriptorImage.imageLayout);
 
-				descriptorBufferInfoOffset += binding.descriptorCount;
-			}
-			else if (isImageDescriptorType(binding.descriptorType)) {
-				uint32 descriptorImageIndex = 0;
-
-				while (descriptorImageIndex < binding.descriptorCount) {
-					const DescriptorImage& descriptorImage = writeDescriptorSet.descriptorImages[descriptorImageIndex];
-					const ref<VK::ImageView> imageView = ref_cast<VK::ImageView>(descriptorImage.imageView);
-
-					VkDescriptorImageInfo& descriptorImageInfo = descriptorImageInfos[descriptorImageInfoOffset + descriptorImageIndex];
-					descriptorImageInfo.sampler = nullptr;
-
-					if (descriptorImage.sampler != nullptr) {
-						descriptorImageInfo.sampler = ref_cast<VK::Sampler>(descriptorImage.sampler)->sampler;
+						descriptorImageIndex += 1;
 					}
 
-					descriptorImageInfo.imageView = imageView->imageView;
-					descriptorImageInfo.imageLayout = getImageLayout(descriptorImage.imageLayout);
+					vkWriteDescriptorSet.pImageInfo = &descriptorImageInfos[descriptorImageOffset];
 
-					descriptorImageIndex += 1;
+					descriptorImageOffset += binding.descriptorCount;
+
+					break;
 				}
+				case DescriptorType::UNIFORM_BUFFER:
+				case DescriptorType::READ_ONLY_STORAGE_BUFFER:
+				case DescriptorType::READ_WRITE_STORAGE_BUFFER: {
+					uint32 descriptorBufferIndex = 0;
 
-				vkWriteDescriptorSet.pImageInfo = &descriptorImageInfos[descriptorImageInfoOffset];
+					while (descriptorBufferIndex < binding.descriptorCount) {
+						const BaseBufferView& bufferView = writeDescriptorSet.descriptorBufferViews[descriptorBufferIndex];
 
-				descriptorImageInfoOffset += binding.descriptorCount;
+						VkDescriptorBufferInfo& descriptorBufferInfo = descriptorBufferInfos[descriptorBufferOffset + descriptorBufferIndex];
+						descriptorBufferInfo.buffer = static_cast<const VK::Buffer*>(bufferView.getBuffer())->buffer;
+						descriptorBufferInfo.offset = bufferView.getOffset();
+						descriptorBufferInfo.range = bufferView.getSize();
+
+						descriptorBufferIndex += 1;
+					}
+
+					vkWriteDescriptorSet.pBufferInfo = &descriptorBufferInfos[descriptorBufferOffset];
+
+					descriptorBufferOffset += binding.descriptorCount;
+
+					break;
+				}
+				case DescriptorType::ACCELERATION_STRUCTURE: {
+					uint32 accelerationStructureIndex = 0;
+
+					while (accelerationStructureIndex < binding.descriptorCount) {
+						const ref<Trident::AccelerationStructure> accelerationStructure = writeDescriptorSet.accelerationStructures[accelerationStructureIndex];
+
+						accelerationStructures[accelerationStructureOffset + accelerationStructureIndex] = ref_cast<VK::AccelerationStructure>(accelerationStructure)->accelerationStructure;
+
+						accelerationStructureIndex += 1;
+					}
+
+					VkWriteDescriptorSetAccelerationStructureKHR& writeDescriptorSetAccelerationStructure = writeDescriptorSetAccelerationStructures[writeDescriptorSetAccelerationStructureOffset];
+					writeDescriptorSetAccelerationStructure.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
+					writeDescriptorSetAccelerationStructure.pNext = nullptr;
+					writeDescriptorSetAccelerationStructure.accelerationStructureCount = binding.descriptorCount;
+					writeDescriptorSetAccelerationStructure.pAccelerationStructures = &accelerationStructures[accelerationStructureOffset];
+
+					vkWriteDescriptorSet.pNext = &writeDescriptorSetAccelerationStructure;
+
+					accelerationStructureOffset += binding.descriptorCount;
+					writeDescriptorSetAccelerationStructureOffset += 1;
+
+					break;
+				}
+				default: {
+					ADAPTER_ASSERT(false, "Unsupported descriptor type.");
+
+					break;
+				}
 			}
-			else {
-				ADAPTER_ASSERT(false, "Unsupported descriptor type.");
-			}
-
-			vkWriteDescriptorSet.descriptorCount = binding.descriptorCount;
-			vkWriteDescriptorSet.pTexelBufferView = nullptr;
 
 			writeDescriptorSetIndex += 1;
 		}

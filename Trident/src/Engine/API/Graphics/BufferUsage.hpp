@@ -30,11 +30,8 @@ namespace Trident {
 		INDIRECT = BIT(7),
 
 		// EXT_hardware_ray_tracing
-
 		SHADER_DEVICE_ADDRESS = BIT(8),
-
 		ACCELERATION_STRUCTURE_STORAGE = BIT(9),
-
 		READ_ONLY_ACCELERATION_STRUCTURE_INPUT = BIT(10),
 	};
 

@@ -339,6 +339,20 @@ namespace Trident {
 
 					break;
 				}
+				case DescriptorType::ACCELERATION_STRUCTURE: {
+					while (descriptorIndex < binding.descriptorCount) {
+						const ref<Trident::AccelerationStructure> accelerationStructure = writeDescriptorSet.accelerationStructures[descriptorIndex];
+
+						memoryAllocator->writeAccelerationStructure(viewDescriptorHandle, accelerationStructure);
+
+						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+						descriptorIndex += 1;
+					}
+
+					samplerDescriptorHandle.ptr += memoryAllocator->samplerDescriptorHandleIncrementSize * writeDescriptorSet.accelerationStructures.count();
+
+					break;
+				}
 				default: {
 					ADAPTER_ASSERT(false, "Unsupported descriptor type.");
 

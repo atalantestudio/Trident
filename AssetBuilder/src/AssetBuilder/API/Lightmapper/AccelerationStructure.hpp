@@ -15,9 +15,9 @@ namespace Trident {
 
 		const uint32 instanceCount = static_cast<uint32>(scene.staticGeometry.instances.count());
 
-		const ref<Buffer> vertexBuffer = device->createDynamicBuffer({
+		vertexBuffer = device->createDynamicBuffer({
 			.size = ceil(scene.staticGeometry.vertexCount * sizeof(BuildVertex3D), storageBufferAlignment),
-			.usage = BufferUsage::TRANSFER_DST | BufferUsage::SHADER_DEVICE_ADDRESS | BufferUsage::READ_ONLY_ACCELERATION_STRUCTURE_INPUT,
+			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE | BufferUsage::SHADER_DEVICE_ADDRESS | BufferUsage::READ_ONLY_ACCELERATION_STRUCTURE_INPUT,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
 			#if defined(DEBUG_OBJECT_NAME)
@@ -25,9 +25,9 @@ namespace Trident {
 			#endif
 		});
 
-		const ref<Buffer> indexBuffer = device->createDynamicBuffer({
+		indexBuffer = device->createDynamicBuffer({
 			.size = ceil(scene.staticGeometry.indexCount * sizeof(uint32), storageBufferAlignment),
-			.usage = BufferUsage::TRANSFER_DST | BufferUsage::SHADER_DEVICE_ADDRESS | BufferUsage::READ_ONLY_ACCELERATION_STRUCTURE_INPUT,
+			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE | BufferUsage::SHADER_DEVICE_ADDRESS | BufferUsage::READ_ONLY_ACCELERATION_STRUCTURE_INPUT,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
 			#if defined(DEBUG_OBJECT_NAME)
@@ -212,7 +212,5 @@ namespace Trident {
 
 		queue->submit(commandBuffer);
 		queue->waitIdle();
-
-		ENGINE_ERROR_UNIMPLEMENTED();
 	}
 }

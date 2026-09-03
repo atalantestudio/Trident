@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/Buffer.hpp"
+#include "Engine/API/Graphics/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructure.hpp"
 #include "Engine/API/Graphics/ImageLayout.hpp"
 #include "Engine/API/Graphics/ImageView.hpp"
 #include "Engine/API/Graphics/Sampler.hpp"
@@ -21,7 +22,8 @@ namespace Trident {
 		ref<DescriptorSet> descriptorSet;
 		uint32 bindingIndex;
 
-		// TODO: Wrap in an union. Either fill the descriptor buffers or the descriptor images.
+		// TODO(graphics/write-descriptor-set): Wrap in an union.
+		view<ref<AccelerationStructure>> accelerationStructures;
 		view<BaseBufferView> descriptorBufferViews;
 		view<DescriptorImage> descriptorImages;
 	};
