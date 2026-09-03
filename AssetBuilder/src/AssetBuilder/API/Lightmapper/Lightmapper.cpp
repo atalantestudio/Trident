@@ -21,11 +21,18 @@
 #include "AssetBuilder/API/Lightmapper/Lightmapper.hpp"
 #include "AssetBuilder/API/Lightmapper/MaterialBuffer.hpp"
 #include "AssetBuilder/API/Lightmapper/PostProcessingDescriptorSetLayout.hpp"
-#include "AssetBuilder/API/Lightmapper/TraceRaysDescriptorSetLayout.hpp"
+#include "AssetBuilder/API/Lightmapper/RayTracingDescriptorSetLayout.hpp"
 #include "AssetBuilder/API/Lightmapper/TraceRaysPipeline.hpp"
 
 namespace Trident {
 	const GraphicsAdapter* Lightmapper::adapter;
+
+	Lightmapper::~Lightmapper() {
+		gBufferDescriptorSetLayout.~ref();
+		rayTracingDescriptorSetLayout.~ref();
+		postProcessingDescriptorSetLayout.~ref();
+		dilationDescriptorSetLayout.~ref();
+	}
 
 	void Lightmapper::initialize() {
 		instance = adapter->createInstance({
@@ -39,10 +46,10 @@ namespace Trident {
 		gBufferRenderPass = createGBufferRenderPass();
 		dilationRenderPass = createDilationRenderPass();
 
-		descriptorSetLayouts[0] = createGBufferDescriptorSetLayout();
-		descriptorSetLayouts[1] = createTraceRaysDescriptorSetLayout();
-		descriptorSetLayouts[2] = createPostProcessingDescriptorSetLayout();
-		descriptorSetLayouts[3] = createDilationDescriptorSetLayout();
+		gBufferDescriptorSetLayout = createGBufferDescriptorSetLayout();
+		rayTracingDescriptorSetLayout = createRayTracingDescriptorSetLayout();
+		postProcessingDescriptorSetLayout = createPostProcessingDescriptorSetLayout();
+		dilationDescriptorSetLayout = createDilationDescriptorSetLayout();
 
 		gBufferPipelineLayout = device->createPipelineLayout({
 			.descriptorSetLayouts = {descriptorSetLayouts[0]},

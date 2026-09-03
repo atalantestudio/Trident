@@ -109,19 +109,6 @@ namespace Trident {
 
 						break;
 					}
-					case DescriptorType::READ_ONLY_STORAGE_IMAGE: {
-						D3D12_DESCRIPTOR_RANGE1& descriptorRange = descriptorRanges[descriptorRangeOffset];
-						descriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-						descriptorRange.NumDescriptors = binding.descriptorCount;
-						descriptorRange.BaseShaderRegister = shaderResourceViewShaderRegister;
-						descriptorRange.RegisterSpace = 0;
-						descriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
-						descriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-
-						shaderResourceViewShaderRegister += binding.descriptorCount;
-
-						break;
-					}
 					case DescriptorType::READ_WRITE_STORAGE_IMAGE: {
 						D3D12_DESCRIPTOR_RANGE1& descriptorRange = descriptorRanges[descriptorRangeOffset];
 						descriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
@@ -148,19 +135,6 @@ namespace Trident {
 
 						break;
 					}
-					case DescriptorType::READ_ONLY_STORAGE_BUFFER: {
-						D3D12_DESCRIPTOR_RANGE1& descriptorRange = descriptorRanges[descriptorRangeOffset];
-						descriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-						descriptorRange.NumDescriptors = binding.descriptorCount;
-						descriptorRange.BaseShaderRegister = shaderResourceViewShaderRegister;
-						descriptorRange.RegisterSpace = 0;
-						descriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
-						descriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-
-						shaderResourceViewShaderRegister += binding.descriptorCount;
-
-						break;
-					}
 					case DescriptorType::READ_WRITE_STORAGE_BUFFER: {
 						D3D12_DESCRIPTOR_RANGE1& descriptorRange = descriptorRanges[descriptorRangeOffset];
 						descriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
@@ -182,7 +156,10 @@ namespace Trident {
 
 						break;
 					}
-					case DescriptorType::INPUT_ATTACHMENT: {
+					case DescriptorType::READ_ONLY_STORAGE_IMAGE:
+					case DescriptorType::READ_ONLY_STORAGE_BUFFER:
+					case DescriptorType::INPUT_ATTACHMENT:
+					case DescriptorType::ACCELERATION_STRUCTURE: {
 						D3D12_DESCRIPTOR_RANGE1& descriptorRange = descriptorRanges[descriptorRangeOffset];
 						descriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 						descriptorRange.NumDescriptors = binding.descriptorCount;

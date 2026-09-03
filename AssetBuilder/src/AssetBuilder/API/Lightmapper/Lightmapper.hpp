@@ -67,6 +67,10 @@ namespace Trident {
 			static const GraphicsAdapter* adapter;
 
 		public:
+			explicit Lightmapper() {}
+
+			~Lightmapper();
+
 			void generateAtlas(ImageAssetDescriptor& imageAssetDescriptor, const LightmapperDescriptor& descriptor);
 
 		private:
@@ -93,7 +97,7 @@ namespace Trident {
 			ref<Framebuffer> createDilationFramebuffer() const;
 
 			ref<DescriptorSetLayout> createGBufferDescriptorSetLayout() const;
-			ref<DescriptorSetLayout> createTraceRaysDescriptorSetLayout() const;
+			ref<DescriptorSetLayout> createRayTracingDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createPostProcessingDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createDilationDescriptorSetLayout() const;
 
@@ -133,7 +137,16 @@ namespace Trident {
 			ref<RenderPass> gBufferRenderPass;
 			ref<RenderPass> dilationRenderPass;
 
-			ref<DescriptorSetLayout> descriptorSetLayouts[4];
+			union {
+				struct {
+					ref<DescriptorSetLayout> gBufferDescriptorSetLayout;
+					ref<DescriptorSetLayout> rayTracingDescriptorSetLayout;
+					ref<DescriptorSetLayout> postProcessingDescriptorSetLayout;
+					ref<DescriptorSetLayout> dilationDescriptorSetLayout;
+				};
+
+				ref<DescriptorSetLayout> descriptorSetLayouts[4];
+			};
 
 			sequence<ref<DescriptorSet>> descriptorSets;
 

@@ -14,28 +14,30 @@ namespace Trident {
 		READ_ONLY_STORAGE_BUFFER,
 		READ_WRITE_STORAGE_BUFFER,
 
+		// EXT_hardware_ray_tracing
+		ACCELERATION_STRUCTURE,
+
 		count,
 	};
 
 	inline bool isBufferDescriptorType(DescriptorType descriptorType) {
-		static constexpr DescriptorType firstBufferDescriptorType = DescriptorType::UNIFORM_BUFFER;
+		static constexpr DescriptorType start = DescriptorType::UNIFORM_BUFFER;
+		static constexpr DescriptorType end = DescriptorType::READ_WRITE_STORAGE_BUFFER;
 
-		DEBUG_ASSERT(descriptorType < DescriptorType::count);
-
-		return descriptorType >= firstBufferDescriptorType;
+		return descriptorType >= start && descriptorType <= end;
 	}
 
 	inline bool isImageDescriptorType(DescriptorType descriptorType) {
-		static constexpr DescriptorType lastImageDescriptorType = DescriptorType::INPUT_ATTACHMENT;
+		static constexpr DescriptorType start = DescriptorType::COMBINED_IMAGE_SAMPLER;
+		static constexpr DescriptorType end = DescriptorType::INPUT_ATTACHMENT;
 
-		DEBUG_ASSERT(descriptorType < DescriptorType::count);
-
-		return descriptorType <= lastImageDescriptorType;
+		return descriptorType >= start && descriptorType <= end;
 	}
 
 	inline bool isSamplerDescriptorType(DescriptorType descriptorType) {
-		DEBUG_ASSERT(descriptorType < DescriptorType::count);
+		static constexpr DescriptorType start = DescriptorType::COMBINED_IMAGE_SAMPLER;
+		static constexpr DescriptorType end = DescriptorType::COMBINED_IMAGE_SAMPLER;
 
-		return descriptorType == DescriptorType::COMBINED_IMAGE_SAMPLER;
+		return descriptorType >= start && descriptorType <= end;
 	}
 }
