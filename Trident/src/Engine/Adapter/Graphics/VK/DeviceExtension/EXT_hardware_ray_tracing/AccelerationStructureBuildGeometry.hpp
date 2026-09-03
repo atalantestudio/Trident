@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include "Engine/API/Graphics/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructureBuildTriangleGeometry.hpp"
+#include "Engine/API/Graphics/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructureBuildGeometry.hpp"
 
 namespace Trident::VK {
-	class AccelerationStructureBuildTriangleGeometry final : public Trident::AccelerationStructureBuildTriangleGeometry {
+	class AccelerationStructureBuildGeometry final : public Trident::AccelerationStructureBuildGeometry {
 		public:
 			sequence<VkAccelerationStructureGeometryKHR> geometries;
 			sequence<VkAccelerationStructureBuildRangeInfoKHR> buildRangeInfos;

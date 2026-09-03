@@ -5,5 +5,5 @@
 
 namespace Trident::VK {
 	class AccelerationStructure;
-	class AccelerationStructureBuildTriangleGeometry;
+	class AccelerationStructureBuildGeometry;
 }

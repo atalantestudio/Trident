@@ -127,6 +127,7 @@ namespace Trident {
 
 			ref<Instance> instance;
 			ref<PhysicalDevice> physicalDevice;
+			const PhysicalDeviceLimits* limits;
 			ref<ExtendedDevice<EXT_hardware_ray_tracing>> device;
 
 			ref<RenderPass> gBufferRenderPass;
@@ -152,7 +153,8 @@ namespace Trident {
 
 			ref<Buffer> argumentBuffer;
 			ref<Buffer> accelerationStructureBuffer;
-			ref<AccelerationStructure> accelerationStructure;
+			ref<AccelerationStructure> bottomLevelAccelerationStructure;
+			ref<AccelerationStructure> topLevelAccelerationStructure;
 			ref<Sampler> intermediateLightmapAtlasSampler;
 	};
 }

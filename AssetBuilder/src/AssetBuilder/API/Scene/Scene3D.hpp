@@ -61,7 +61,10 @@ namespace Trident {
 		/// Baked and external vertices.
 		uint32 vertexCount;
 
-		/// Used to visualize face wireframes.
+		/// Baked and external indices for TRIANGLE_LIST primitives.
+		uint32 indexCount;
+
+		/// Baked and external indices for LINE_LIST primitives.
 		uint32 lineIndexCount;
 
 		sequence<BuildVertex3D> bakedVertices;

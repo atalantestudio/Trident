@@ -11,6 +11,6 @@ namespace Trident::DX12 {
 		const DX12::Device* Device = static_cast<const DX12::Device*>(device);
 		const DX12::AccelerationStructure* AccelerationStructure = static_cast<const DX12::AccelerationStructure*>(accelerationStructure);
 
-		return AccelerationStructure->Descriptor.DestAccelerationStructureData;
+		return AccelerationStructure->BuildDesc.DestAccelerationStructureData;
 	}
 }

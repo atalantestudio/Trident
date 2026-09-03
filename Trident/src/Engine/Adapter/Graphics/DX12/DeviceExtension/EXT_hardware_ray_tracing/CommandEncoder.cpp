@@ -22,10 +22,10 @@ namespace Trident::DX12 {
 			const BaseBufferView& ScratchView = scratchViews[AccelerationStructureIndex];
 
 			ref<DX12::AccelerationStructure> accelerationStructure = ref_cast<DX12::AccelerationStructure>(accelerationStructures[AccelerationStructureIndex]);
-			accelerationStructure->Descriptor.DestAccelerationStructureData = pointer_cast<const DX12::Buffer*>(AccelerationStructureView.getBuffer())->resource->GetGPUVirtualAddress() + AccelerationStructureView.getOffset();
-			accelerationStructure->Descriptor.ScratchAccelerationStructureData = pointer_cast<const DX12::Buffer*>(ScratchView.getBuffer())->resource->GetGPUVirtualAddress() + ScratchView.getOffset();
+			accelerationStructure->BuildDesc.DestAccelerationStructureData = pointer_cast<const DX12::Buffer*>(AccelerationStructureView.getBuffer())->resource->GetGPUVirtualAddress() + AccelerationStructureView.getOffset();
+			accelerationStructure->BuildDesc.ScratchAccelerationStructureData = pointer_cast<const DX12::Buffer*>(ScratchView.getBuffer())->resource->GetGPUVirtualAddress() + ScratchView.getOffset();
 
-			dxCommandEncoder->commandList->BuildRaytracingAccelerationStructure(&accelerationStructure->Descriptor, 0, nullptr);
+			dxCommandEncoder->commandList->BuildRaytracingAccelerationStructure(&accelerationStructure->BuildDesc, 0, nullptr);
 
 			AccelerationStructureIndex += 1;
 		}

@@ -8,7 +8,7 @@
 namespace Trident::DX12 {
 	class AccelerationStructure final : public Trident::AccelerationStructure {
 		public:
-			D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC Descriptor;
+			D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC BuildDesc;
 	};
 
 	uint64 getAccelerationStructureDeviceAddress(const Trident::Device* device, const Trident::AccelerationStructure* accelerationStructure);

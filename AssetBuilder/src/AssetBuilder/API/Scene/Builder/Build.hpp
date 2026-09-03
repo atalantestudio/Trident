@@ -98,9 +98,10 @@ namespace Trident {
 
 		scene.sunDirection = descriptor.sunDirection;
 		scene.sunColor = descriptor.sunColor * descriptor.sunIntensity;
-		scene.vertexCount = static_cast<uint32>(vertexCounts[0] + vertexCounts[1] + vertexCounts[2]);
+		scene.vertexCount = vertexCounts[0] + vertexCounts[1] + vertexCounts[2];
 		scene.staticGeometry.geometryCount = geometryCounts[0];
-		scene.staticGeometry.vertexCount = static_cast<uint32>(vertexCounts[0] + vertexCounts[1]);
+		scene.staticGeometry.vertexCount = vertexCounts[0] + vertexCounts[1];
+		scene.staticGeometry.indexCount = indexCounts[0] + indexCounts[1];
 		scene.staticGeometry.bakedVertices = sequence<BuildVertex3D>(vertexCounts[0]);
 		scene.staticGeometry.bakedIndices = sequence<uint32>(indexCounts[0]);
 		scene.triangleCount = static_cast<uint32>((indexCounts[0] + indexCounts[1] + indexCounts[2]) / 3);

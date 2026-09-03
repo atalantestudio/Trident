@@ -5,5 +5,5 @@
 
 namespace Trident::DX12 {
 	class AccelerationStructure;
-	class AccelerationStructureBuildTriangleGeometry;
+	class AccelerationStructureBuildGeometry;
 }

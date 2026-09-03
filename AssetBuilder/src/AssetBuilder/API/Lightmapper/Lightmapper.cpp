@@ -14,7 +14,6 @@
 #include "AssetBuilder/API/Lightmapper/GBufferFramebuffer.hpp"
 #include "AssetBuilder/API/Lightmapper/GBufferPipeline.hpp"
 #include "AssetBuilder/API/Lightmapper/GBufferRenderPass.hpp"
-#include "AssetBuilder/API/Lightmapper/IndexBuffer.hpp"
 #include "AssetBuilder/API/Lightmapper/IntermediateDilationPipeline.hpp"
 #include "AssetBuilder/API/Lightmapper/IntermediateLightmapAtlasImage.hpp"
 #include "AssetBuilder/API/Lightmapper/IntermediateLightmapAtlasSampler.hpp"
@@ -24,7 +23,6 @@
 #include "AssetBuilder/API/Lightmapper/PostProcessingDescriptorSetLayout.hpp"
 #include "AssetBuilder/API/Lightmapper/TraceRaysDescriptorSetLayout.hpp"
 #include "AssetBuilder/API/Lightmapper/TraceRaysPipeline.hpp"
-#include "AssetBuilder/API/Lightmapper/VertexBuffer.hpp"
 
 namespace Trident {
 	const GraphicsAdapter* Lightmapper::adapter;
@@ -35,6 +33,7 @@ namespace Trident {
 			.projectVersion = {0, 0, 1},
 		});
 		physicalDevice = instance->selectPhysicalDevice(false);
+		limits = &physicalDevice->getLimits();
 		device = physicalDevice->createDevice<EXT_hardware_ray_tracing>();
 
 		gBufferRenderPass = createGBufferRenderPass();
@@ -135,35 +134,30 @@ namespace Trident {
 			initialize();
 		}
 
+		buildAccelerationStructures(*descriptor.scene);
+
+		ENGINE_ERROR_UNSUPPORTED();
+
 		const uint64 vertexCount = descriptor.vertices.count();
 		const uint64 indexCount = descriptor.indices.count();
 		const uint64 materialCount = descriptor.materials.count();
 		const uint64 emissiveTriangleIndexCount = descriptor.emissiveTriangleIndices.count();
 
 		context = {};
-
 		context.gBufferPositionImage = createGBufferPositionImage();
 		context.gBufferSmoothPositionImage = createGBufferSmoothPositionImage();
 		context.gBufferTriangleNormalImage = createGBufferTriangleNormalImage();
 		context.gBufferVertexNormalImage = createGBufferVertexNormalImage();
 		context.intermediateLightmapAtlasImage = createIntermediateLightmapAtlasImage();
 		context.lightmapAtlasImage = createLightmapAtlasImage();
-
 		context.gBufferPositionImageView = createGBufferImageView(context.gBufferPositionImage, "G-Buffer position");
 		context.gBufferSmoothPositionImageView = createGBufferImageView(context.gBufferSmoothPositionImage, "G-Buffer smooth position");
 		context.gBufferTriangleNormalImageView = createGBufferImageView(context.gBufferTriangleNormalImage, "G-Buffer triangle normal");
 		context.gBufferVertexNormalImageView = createGBufferImageView(context.gBufferVertexNormalImage, "G-Buffer vertex normal");
 		context.intermediateLightmapAtlasImageView = createIntermediateLightmapAtlasImageView();
 		context.lightmapAtlasImageView = createLightmapAtlasImageView();
-
 		context.gBufferFramebuffer = createGBufferFramebuffer();
 		context.dilationFramebuffer = createDilationFramebuffer();
-
-		context.vertexBuffer = createVertexBuffer(vertexCount);
-		context.indexBuffer = createIndexBuffer(indexCount);
-
-		buildAccelerationStructures(*descriptor.scene);
-
 		context.materialBuffer = createMaterialBuffer(materialCount);
 		context.emissiveTriangleIndexBuffer = createEmissiveTriangleIndexBuffer(emissiveTriangleIndexCount);
 		context.lightmapAtlasStagingBuffer = device->createDynamicBuffer({

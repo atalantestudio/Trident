@@ -3,12 +3,12 @@
 
 #pragma once
 
-#include "Engine/API/Graphics/Base.hpp"
-#include "Engine/API/Graphics/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructureBuildTriangleGeometry.hpp"
+#include "Engine/API/Graphics/BufferView.hpp"
+#include "Engine/API/Graphics/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructureBuildGeometry.hpp"
 
 namespace Trident {
 	struct AccelerationStructureDescriptor {
 		BaseBufferView view;
-		ref<AccelerationStructureBuildTriangleGeometry> buildTriangleGeometry;
+		ref<AccelerationStructureBuildGeometry> buildGeometry;
 	};
 }

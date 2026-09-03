@@ -126,6 +126,7 @@ namespace Trident::VK {
 
 		// EXT_hardware_ray_tracing
 		adapter->buildAccelerationStructuresImplementation = VK::buildAccelerationStructures;
+		adapter->createAccelerationStructureBuildInstanceGeometryImplementation = VK::createAccelerationStructureBuildInstanceGeometry;
 		adapter->createAccelerationStructureBuildTriangleGeometryImplementation = VK::createAccelerationStructureBuildTriangleGeometry;
 		adapter->createAccelerationStructureImplementation = VK::createAccelerationStructure;
 		adapter->getAccelerationStructureBuildSizesImplementation = VK::getAccelerationStructureBuildSizes;

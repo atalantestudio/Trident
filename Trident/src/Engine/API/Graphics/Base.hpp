@@ -179,16 +179,18 @@ namespace Trident {
 
 	// EXT_hardware_ray_tracing
 
-	struct AccelerationStructureBuildTriangleGeometryDescriptor;
+	struct AccelerationStructureBuildInstanceGeometryDescriptor;
 	struct AccelerationStructureBuildSizes;
+	struct AccelerationStructureBuildTriangleGeometryDescriptor;
 	struct AccelerationStructureDescriptor;
 
 	class AccelerationStructure;
-	class AccelerationStructureBuildTriangleGeometry;
+	class AccelerationStructureBuildGeometry;
 
 	typedef void (*BuildAccelerationStructuresImplementation)(CommandEncoder* commandEncoder, view<ref<AccelerationStructure>> accelerationStructures, view<BaseBufferView> accelerationStructureViews, view<BaseBufferView> scratchViews);
-	typedef ref<AccelerationStructureBuildTriangleGeometry> (*CreateAccelerationStructureBuildTriangleGeometryImplementation)(const Device* device, const AccelerationStructureBuildTriangleGeometryDescriptor& descriptor);
+	typedef ref<AccelerationStructureBuildGeometry> (*CreateAccelerationStructureBuildInstanceGeometryImplementation)(const Device* device, const AccelerationStructureBuildInstanceGeometryDescriptor& descriptor);
+	typedef ref<AccelerationStructureBuildGeometry> (*CreateAccelerationStructureBuildTriangleGeometryImplementation)(const Device* device, const AccelerationStructureBuildTriangleGeometryDescriptor& descriptor);
 	typedef ref<AccelerationStructure> (*CreateAccelerationStructureImplementation)(const Device* device, const AccelerationStructureDescriptor& descriptor);
-	typedef AccelerationStructureBuildSizes (*GetAccelerationStructureBuildSizesImplementation)(const Device* device, ref<AccelerationStructureBuildTriangleGeometry> buildTriangleGeometry);
+	typedef AccelerationStructureBuildSizes (*GetAccelerationStructureBuildSizesImplementation)(const Device* device, ref<AccelerationStructureBuildGeometry> buildGeometry);
 	typedef uint64 (*GetAccelerationStructureDeviceAddressImplementation)(const Device* device, const AccelerationStructure* accelerationStructure);
 }

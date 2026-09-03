@@ -147,6 +147,7 @@ namespace Trident::DX12 {
 
 		// EXT_hardware_ray_tracing
 		adapter->buildAccelerationStructuresImplementation = DX12::buildAccelerationStructures;
+		adapter->createAccelerationStructureBuildInstanceGeometryImplementation = DX12::createAccelerationStructureBuildInstanceGeometry;
 		adapter->createAccelerationStructureBuildTriangleGeometryImplementation = DX12::createAccelerationStructureBuildTriangleGeometry;
 		adapter->createAccelerationStructureImplementation = DX12::createAccelerationStructure;
 		adapter->getAccelerationStructureBuildSizesImplementation = DX12::getAccelerationStructureBuildSizes;

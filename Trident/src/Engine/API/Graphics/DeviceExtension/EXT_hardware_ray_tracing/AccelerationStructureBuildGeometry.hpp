@@ -4,5 +4,5 @@
 #pragma once
 
 namespace Trident {
-	class AccelerationStructureBuildTriangleGeometry {};
+	class AccelerationStructureBuildGeometry {};
 }
