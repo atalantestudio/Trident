@@ -30,6 +30,10 @@ namespace Trident::DX12 {
 			barrierAccess |= D3D12_BARRIER_ACCESS_COPY_DEST;
 		}
 
+		if (access & Access::ACCELERATION_STRUCTURE) {
+			barrierAccess |= D3D12_BARRIER_ACCESS_SHADER_RESOURCE;
+		}
+
 		return barrierAccess;
 	}
 

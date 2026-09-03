@@ -196,10 +196,16 @@ namespace Trident {
 		};
 
 		commandEncoder->copyBufferToBuffer(instanceStagingBuffer, instanceBuffer, instanceCopyRegion);
+
+		const BufferMemoryBarrier instanceMemoryBarrier = {
+			.buffer = instanceBuffer,
+			.offset = instanceView.getOffset(),
+			.size = instanceView.getSize(),
+			.newAccess = Access::ACCELERATION_STRUCTURE,
+		};
+
+		commandEncoder->insertMemoryBarriers(instanceMemoryBarrier, {});
 		commandEncoder->buildAccelerationStructures(bottomLevelAccelerationStructure, bottomLevelAccelerationStructureView, bottomLevelScratchView);
-
-		// TODO(asset-builder/lightmapper/tlas): Insert pipeline barrier.
-
 		commandEncoder->buildAccelerationStructures(topLevelAccelerationStructure, topLevelAccelerationStructureView, topLevelScratchView);
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();

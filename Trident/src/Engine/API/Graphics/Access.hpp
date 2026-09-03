@@ -10,6 +10,9 @@ namespace Trident {
 		SHADER_WRITE = BIT(1),
 		TRANSFER_READ = BIT(2),
 		TRANSFER_WRITE = BIT(3),
+
+		// EXT_hardware_ray_tracing
+		ACCELERATION_STRUCTURE = BIT(4),
 	};
 
 	AS_FLAG(Access);

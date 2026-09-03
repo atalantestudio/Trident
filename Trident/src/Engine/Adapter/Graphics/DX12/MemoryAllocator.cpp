@@ -591,7 +591,6 @@ namespace Trident {
 		resourceDescriptor.Flags = getImageResourceFlags(usage);
 
 		const D3D12_RESOURCE_ALLOCATION_INFO resourceAllocationInfo = _device->device->GetResourceAllocationInfo(0, 1, &resourceDescriptor);
-
 		const D3D12_HEAP_TYPE heapType = static_cast<D3D12_HEAP_TYPE>(memoryAllocation.memoryTypeIndex + 1);
 
 		D3D12_RESOURCE_STATES initialResourceStates = D3D12_RESOURCE_STATE_COMMON;
