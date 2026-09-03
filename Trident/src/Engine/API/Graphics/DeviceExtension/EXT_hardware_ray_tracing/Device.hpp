@@ -10,6 +10,8 @@
 #include "Engine/API/Graphics/DeviceExtension/EXT_hardware_ray_tracing/Descriptor/AccelerationStructureBuildInstanceGeometryDescriptor.hpp"
 #include "Engine/API/Graphics/DeviceExtension/EXT_hardware_ray_tracing/Descriptor/AccelerationStructureBuildTriangleGeometryDescriptor.hpp"
 #include "Engine/API/Graphics/DeviceExtension/EXT_hardware_ray_tracing/Descriptor/AccelerationStructureDescriptor.hpp"
+#include "Engine/API/Graphics/DeviceExtension/EXT_hardware_ray_tracing/Descriptor/RayTracingPipelineDescriptor.hpp"
+#include "Engine/API/Graphics/DeviceExtension/EXT_hardware_ray_tracing/RayTracingPipeline.hpp"
 
 namespace Trident {
 	template<typename Device>
@@ -23,6 +25,9 @@ namespace Trident {
 
 			/// Creates and returns a build geometry for bottom-level acceleration structures.
 			ref<AccelerationStructureBuildGeometry> createAccelerationStructureBuildGeometry(const AccelerationStructureBuildTriangleGeometryDescriptor& descriptor) const;
+
+			/// Creates and returns a ray tracing pipeline.
+			ref<RayTracingPipeline> createPipeline(const RayTracingPipelineDescriptor& descriptor) const;
 
 			/// Calculates and returns the required sizes for acceleration structure related buffers:
 			/// - Acceleration structure buffer

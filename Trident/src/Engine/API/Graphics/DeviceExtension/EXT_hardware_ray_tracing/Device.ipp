@@ -76,6 +76,13 @@ namespace Trident {
 	}
 
 	template<typename Device>
+	ref<RayTracingPipeline> DeviceExtension<EXT_hardware_ray_tracing, Device>::createPipeline(const RayTracingPipelineDescriptor& descriptor) const {
+		const Device* device = static_cast<const Device*>(this);
+
+		return device->adapter->createRayTracingPipelineImplementation(device, descriptor);
+	}
+
+	template<typename Device>
 	AccelerationStructureBuildSizes DeviceExtension<EXT_hardware_ray_tracing, Device>::getAccelerationStructureBuildSizes(ref<AccelerationStructureBuildGeometry> buildGeometry) const {
 		const Device* device = static_cast<const Device*>(this);
 

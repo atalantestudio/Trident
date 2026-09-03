@@ -86,6 +86,13 @@ namespace Trident::DX12 {
 		return accelerationStructureBuildGeometry;
 	}
 
+	ref<Trident::RayTracingPipeline> createRayTracingPipeline(const Trident::Device* device, const RayTracingPipelineDescriptor& descriptor) {
+		// TODO(graphics/dx12/ext_hardware_ray_tracing/ray-tracing-pipeline)
+		ENGINE_ERROR_UNIMPLEMENTED();
+
+		return nullptr;
+	}
+
 	AccelerationStructureBuildSizes getAccelerationStructureBuildSizes(const Trident::Device* device, ref<Trident::AccelerationStructureBuildGeometry> buildGeometry) {
 		const DX12::Device* dxDevice = static_cast<const DX12::Device*>(device);
 		const D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS& BuildInputs = ref_cast<DX12::AccelerationStructureBuildGeometry>(buildGeometry)->BuildInputs;

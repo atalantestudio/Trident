@@ -10,6 +10,7 @@
 #include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructure.hpp"
 #include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/CommandEncoder.hpp"
 #include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/Device.hpp"
+#include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/RayTracingPipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/Fence.hpp"
 #include "Engine/Adapter/Graphics/DX12/GraphicsAdapter.hpp"
 #include "Engine/Adapter/Graphics/DX12/GraphicsPipeline.hpp"
@@ -150,7 +151,9 @@ namespace Trident::DX12 {
 		adapter->createAccelerationStructureBuildInstanceGeometryImplementation = DX12::createAccelerationStructureBuildInstanceGeometry;
 		adapter->createAccelerationStructureBuildTriangleGeometryImplementation = DX12::createAccelerationStructureBuildTriangleGeometry;
 		adapter->createAccelerationStructureImplementation = DX12::createAccelerationStructure;
+		adapter->createRayTracingPipelineImplementation = DX12::createRayTracingPipeline;
 		adapter->destroyAccelerationStructureImplementation = DX12::destroyAccelerationStructure;
+		adapter->destroyRayTracingPipelineImplementation = DX12::destroyRayTracingPipeline;
 		adapter->getAccelerationStructureBuildSizesImplementation = DX12::getAccelerationStructureBuildSizes;
 		adapter->getAccelerationStructureDeviceAddressImplementation = DX12::getAccelerationStructureDeviceAddress;
 	}

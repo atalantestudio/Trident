@@ -11,6 +11,7 @@
 #include "Engine/Adapter/Graphics/VK/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructure.hpp"
 #include "Engine/Adapter/Graphics/VK/DeviceExtension/EXT_hardware_ray_tracing/CommandEncoder.hpp"
 #include "Engine/Adapter/Graphics/VK/DeviceExtension/EXT_hardware_ray_tracing/Device.hpp"
+#include "Engine/Adapter/Graphics/VK/DeviceExtension/EXT_hardware_ray_tracing/RayTracingPipeline.hpp"
 #include "Engine/Adapter/Graphics/VK/Fence.hpp"
 #include "Engine/Adapter/Graphics/VK/Framebuffer.hpp"
 #include "Engine/Adapter/Graphics/VK/GraphicsAdapter.hpp"
@@ -129,7 +130,9 @@ namespace Trident::VK {
 		adapter->createAccelerationStructureBuildInstanceGeometryImplementation = VK::createAccelerationStructureBuildInstanceGeometry;
 		adapter->createAccelerationStructureBuildTriangleGeometryImplementation = VK::createAccelerationStructureBuildTriangleGeometry;
 		adapter->createAccelerationStructureImplementation = VK::createAccelerationStructure;
+		adapter->createRayTracingPipelineImplementation = VK::createRayTracingPipeline;
 		adapter->destroyAccelerationStructureImplementation = VK::destroyAccelerationStructure;
+		adapter->destroyRayTracingPipelineImplementation = VK::destroyRayTracingPipeline;
 		adapter->getAccelerationStructureBuildSizesImplementation = VK::getAccelerationStructureBuildSizes;
 		adapter->getAccelerationStructureDeviceAddressImplementation = VK::getAccelerationStructureDeviceAddress;
 	}
