@@ -76,6 +76,7 @@ namespace Trident {
 
 			// TODO(asset-builder/scene/lightmapper): Move inside the engine.
 			ref<ShaderModule> loadShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> path) const;
+			ref<ShaderModule> loadCompiledShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> path) const;
 
 			ref<RenderPass> createGBufferRenderPass() const;
 			ref<RenderPass> createDilationRenderPass() const;

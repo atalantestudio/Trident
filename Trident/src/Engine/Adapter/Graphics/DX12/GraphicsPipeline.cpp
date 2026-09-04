@@ -40,12 +40,10 @@ namespace Trident {
 
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDescriptor{};
 		graphicsPipelineStateDescriptor.pRootSignature = graphicsPipeline->pipelineLayout->rootSignature;
-		graphicsPipelineStateDescriptor.VS.pShaderBytecode = vertexShaderModule->blob->GetBufferPointer();
-		graphicsPipelineStateDescriptor.VS.BytecodeLength = vertexShaderModule->blob->GetBufferSize();
+		graphicsPipelineStateDescriptor.VS = vertexShaderModule->bytecode;
 
 		if (fragmentShaderModule != nullptr) {
-			graphicsPipelineStateDescriptor.PS.pShaderBytecode = fragmentShaderModule->blob->GetBufferPointer();
-			graphicsPipelineStateDescriptor.PS.BytecodeLength = fragmentShaderModule->blob->GetBufferSize();
+			graphicsPipelineStateDescriptor.PS = fragmentShaderModule->bytecode;
 		}
 
 		graphicsPipelineStateDescriptor.DS.pShaderBytecode = nullptr;

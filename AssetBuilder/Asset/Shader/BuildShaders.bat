@@ -22,3 +22,7 @@ set inputpath=%~dp0
 
 %glslcpath% -fshader-stage=comp "%inputpath%/DistanceField.comp.glsl" -o "%inputpath%/DistanceField.comp.spv"
 %glslcpath% -fshader-stage=comp "%inputpath%/RasterizeGlyph.comp.glsl" -o "%inputpath%/RasterizeGlyph.comp.spv"
+
+dxc "%inputpath%/Lightmapper/Lightmap.rgen.hlsl" -T lib_6_3 -Fo "%inputpath%/Lightmapper/Lightmap.rgen.dxil"
+dxc "%inputpath%/Lightmapper/Lightmap.rchit.hlsl" -T lib_6_3 -Fo "%inputpath%/Lightmapper/Lightmap.rchit.dxil"
+dxc "%inputpath%/Lightmapper/Lightmap.rmiss.hlsl" -T lib_6_3 -Fo "%inputpath%/Lightmapper/Lightmap.rmiss.dxil"

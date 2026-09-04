@@ -26,8 +26,7 @@ namespace Trident {
 
 		D3D12_COMPUTE_PIPELINE_STATE_DESC computePipelineStateDescriptor{};
 		computePipelineStateDescriptor.pRootSignature = computePipeline->pipelineLayout->rootSignature;
-		computePipelineStateDescriptor.CS.pShaderBytecode = computeShaderModule->blob->GetBufferPointer();
-		computePipelineStateDescriptor.CS.BytecodeLength = computeShaderModule->blob->GetBufferSize();
+		computePipelineStateDescriptor.CS = computeShaderModule->bytecode;
 		computePipelineStateDescriptor.NodeMask = 0;
 		computePipelineStateDescriptor.CachedPSO.pCachedBlob = nullptr;
 		computePipelineStateDescriptor.CachedPSO.CachedBlobSizeInBytes = 0;

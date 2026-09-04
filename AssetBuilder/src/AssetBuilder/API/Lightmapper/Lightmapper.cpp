@@ -24,6 +24,7 @@
 #include "AssetBuilder/API/Lightmapper/RayTracingDescriptorSetLayout.hpp"
 #include "AssetBuilder/API/Lightmapper/RayTracingPipeline.hpp"
 #include "AssetBuilder/API/Lightmapper/ShaderBindingTableBuffer.hpp"
+#include "AssetBuilder/API/Lightmapper/ShaderModule.hpp"
 
 namespace Trident {
 	const GraphicsAdapter* Lightmapper::adapter;
@@ -93,44 +94,6 @@ namespace Trident {
 		createShaderBindingTableBuffer();
 
 		initialized = true;
-	}
-
-	ref<ShaderModule> Lightmapper::loadShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> path) const {
-		std::string pathString = "Asset/Shader/";
-		pathString += path;
-
-		switch (adapter->getApi()) {
-			case GraphicsAPI::DX12: {
-				pathString += ".hlsl";
-
-				break;
-			}
-			case GraphicsAPI::GL: {
-				#if defined(GL_SOURCE_FROM_SPIRV)
-					pathString += ".spv";
-				#else
-					pathString += ".glsl";
-				#endif
-
-				break;
-			}
-			case GraphicsAPI::VK: {
-				pathString += ".spv";
-
-				break;
-			}
-			default: {
-				ENGINE_ERROR_UNSUPPORTED();
-
-				break;
-			}
-		}
-
-		path = view<char8>(&pathString[0], pathString.size());
-
-		const sequence<char8> code = Filesystem::openTextBuffer(&path[0]);
-
-		return device->createShaderModule(descriptor, view<char8>(&code[0], code.count()));
 	}
 
 	void Lightmapper::generateAtlas(ImageAssetDescriptor& imageAssetDescriptor, const LightmapperDescriptor& descriptor) {

@@ -1,7 +1,7 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-struct TraceRaysArguments {
+struct Arguments {
 	uint2 atlasSize;
 	uint triangleCount;
 	uint _0;
@@ -30,12 +30,12 @@ Texture2D<float4> gBufferVertexNormalImage : register(t7);
 RWTexture2D<float4> intermediateLightmapAtlas : register(u0);
 
 struct Payload {
-	[[vk::location(0)]] float3 hitValue;
+	/* [[vk::location(0)]] */ float3 hitValue;
 };
 
 [shader("raygeneration")]
 void main() {
-	uint2 coordinate = DispatchRaysIndex();
+	uint2 coordinate = DispatchRaysIndex().xy;
 
-	intermediateLightmapAtlas[coordinate] = float4(1.0, 0.2, 0.0, 1.0));
+	intermediateLightmapAtlas[coordinate] = float4(1.0, 0.2, 0.0, 1.0);
 }
