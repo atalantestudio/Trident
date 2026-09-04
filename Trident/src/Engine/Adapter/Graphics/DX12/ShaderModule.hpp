@@ -13,9 +13,6 @@ namespace Trident {
 		public:
 			sequence<uint8> code;
 			D3D12_SHADER_BYTECODE bytecode;
-
-			// TODO(graphics/dx12/shader-module): Deprecate (use the bytecode instead).
-			ID3DBlob* blob = nullptr;
 	};
 
 	namespace DX12 {
