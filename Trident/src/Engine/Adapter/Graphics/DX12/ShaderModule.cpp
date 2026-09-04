@@ -25,8 +25,8 @@ namespace Trident {
 
 		ref<DX12::ShaderModule> shaderModule = allocateRef<DX12::ShaderModule>(device);
 		shaderModule->code = code;
-		shaderModule->bytecode.pShaderBytecode = &code[0];
-		shaderModule->bytecode.BytecodeLength = code.count();
+		shaderModule->bytecode.pShaderBytecode = &shaderModule->code[0];
+		shaderModule->bytecode.BytecodeLength = shaderModule->code.count();
 
 		return shaderModule;
 	}
