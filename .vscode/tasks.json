@@ -116,7 +116,7 @@
 		{
 			"label": "Build all shaders",
 			"type": "process",
-			"command": "scripts/BuildShaders.bat",
+			"command": "scripts/BuildAllShaders.bat",
 			"group": {
 				"kind": "build"
 			},
