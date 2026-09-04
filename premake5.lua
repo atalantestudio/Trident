@@ -22,10 +22,6 @@ workspace "Trident"
 
 		links {
 			"d3d12",
-
-			-- TODO(graphics/dx12/shader-compilation): Remove when finishing TSL shader modules (they will embed DXIL output).
-			"d3dcompiler",
-
 			"dxgi",
 
 			-- TODO(graphics/dx12/report-live-objects): Don't include when DEBUG_DX12_REPORT_LIVE_OBJECTS is not defined.
