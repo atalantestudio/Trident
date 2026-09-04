@@ -26,16 +26,16 @@ namespace Trident::VK {
 			shaderStageFlags |= VK_SHADER_STAGE_RAYGEN_BIT_KHR;
 		}
 
-		if (shaderStage & ShaderStage::RAY_ANY_HIT) {
-			shaderStageFlags |= VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
-		}
-
 		if (shaderStage & ShaderStage::RAY_CLOSEST_HIT) {
 			shaderStageFlags |= VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
 		}
 
 		if (shaderStage & ShaderStage::RAY_MISS) {
 			shaderStageFlags |= VK_SHADER_STAGE_MISS_BIT_KHR;
+		}
+
+		if (shaderStage & ShaderStage::RAY_ANY_HIT) {
+			shaderStageFlags |= VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
 		}
 
 		if (shaderStage & ShaderStage::RAY_INTERSECTION) {

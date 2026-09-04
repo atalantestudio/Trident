@@ -22,7 +22,7 @@
 #include "AssetBuilder/API/Lightmapper/MaterialBuffer.hpp"
 #include "AssetBuilder/API/Lightmapper/PostProcessingDescriptorSetLayout.hpp"
 #include "AssetBuilder/API/Lightmapper/RayTracingDescriptorSetLayout.hpp"
-#include "AssetBuilder/API/Lightmapper/TraceRaysPipeline.hpp"
+#include "AssetBuilder/API/Lightmapper/RayTracingPipeline.hpp"
 
 namespace Trident {
 	const GraphicsAdapter* Lightmapper::adapter;
@@ -57,10 +57,10 @@ namespace Trident {
 				.name = "G-Buffer",
 			#endif
 		});
-		traceRaysPipelineLayout = device->createPipelineLayout({
+		rayTracingPipelineLayout = device->createPipelineLayout({
 			.descriptorSetLayouts = {descriptorSetLayouts[1]},
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Trace rays",
+				.name = "Ray tracing",
 			#endif
 		});
 		postProcessingPipelineLayout = device->createPipelineLayout({
@@ -76,13 +76,12 @@ namespace Trident {
 			#endif
 		});
 
-		// TODO(asset-builder/lightmapper/dx12): Restore pipeline creation.
-		/* gBufferPipeline = createGBufferPipeline();
-		traceRaysPipeline = createTraceRaysPipeline();
+		gBufferPipeline = createGBufferPipeline();
+		rayTracingPipeline = createRayTracingPipeline();
 		intermediateDilationPipeline = createIntermediateDilationPipeline();
 		horizontalBilateralFilterPipeline = createHorizontalBilateralFilterPipeline();
 		verticalBilateralFilterPipeline = createVerticalBilateralFilterPipeline();
-		dilationPipeline = createDilationPipeline(); */
+		dilationPipeline = createDilationPipeline();
 
 		descriptorSets = device->allocateDescriptorSets(descriptorSetLayouts);
 
@@ -561,9 +560,10 @@ namespace Trident {
 			commandEncoder->insertMemoryBarriers({}, view<ImageMemoryBarrier>(imageMemoryBarriers, 5));
 		}
 
-		commandEncoder->bindComputePipeline(traceRaysPipeline);
-		commandEncoder->bindDescriptorSets(traceRaysPipelineLayout, 0, descriptorSets[1]);
-		commandEncoder->dispatch(workGroupX, workGroupY, 1);
+		// TODO(asset-builder/lightmapper): Connect to the ray tracing pipeline.
+		/* commandEncoder->bindComputePipeline(rayTracingPipeline);
+		commandEncoder->bindDescriptorSets(rayTracingPipelineLayout, 0, descriptorSets[1]);
+		commandEncoder->dispatch(workGroupX, workGroupY, 1); */
 
 		ImageMemoryBarrier imageMemoryBarrier = {
 			.image = context.intermediateLightmapAtlasImage,

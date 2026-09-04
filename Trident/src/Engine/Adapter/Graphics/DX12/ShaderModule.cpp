@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/DX12/ShaderModule.hpp"
+#include "Engine/Adapter/Graphics/DX12/ShaderTarget.hpp"
 #include "Engine/API/Graphics/Descriptor/ShaderModuleDescriptor.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/Filesystem/Asset/ShaderModuleAsset.hpp"
@@ -30,25 +31,7 @@ namespace Trident {
 			flags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 		#endif
 
-		LPCSTR target;
-
-		switch (descriptor.stage) {
-			case ShaderStage::VERTEX: {
-				target = "vs_5_0";
-
-				break;
-			}
-			case ShaderStage::FRAGMENT: {
-				target = "ps_5_0";
-
-				break;
-			}
-			case ShaderStage::COMPUTE: {
-				target = "cs_5_0";
-
-				break;
-			}
-		}
+		const LPCSTR target = getShaderTarget(descriptor.stage);
 
 		#if defined(BUILD_MODE_DEBUG)
 			ID3DBlob* errorBlob;
@@ -78,7 +61,10 @@ namespace Trident {
 
 		#if defined(DEBUG_OBJECT_NAME)
 			if (errorBlob) {
-				const view<char8> error(pointer_cast<const char8*>(errorBlob->GetBufferPointer()), errorBlob->GetBufferSize());
+				// TODO(graphics/dx12/shader-module): Get the TextBuffer limit.
+				static constexpr uint64 MAX_ERROR_SIZE = 1096;
+
+				const view<char8> error(pointer_cast<const char8*>(errorBlob->GetBufferPointer()), min(MAX_ERROR_SIZE, errorBlob->GetBufferSize()));
 
 				ADAPTER_ASSERT(false, "Failed to compile shader: []", error);
 

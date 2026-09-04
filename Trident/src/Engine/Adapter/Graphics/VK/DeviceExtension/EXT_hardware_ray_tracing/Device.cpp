@@ -10,7 +10,10 @@
 #include "Engine/Adapter/Graphics/VK/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructureBuildGeometry.hpp"
 #include "Engine/Adapter/Graphics/VK/DeviceExtension/EXT_hardware_ray_tracing/Device.hpp"
 #include "Engine/Adapter/Graphics/VK/DeviceExtension/EXT_hardware_ray_tracing/GeometryFlags.hpp"
+#include "Engine/Adapter/Graphics/VK/DeviceExtension/EXT_hardware_ray_tracing/RayTracingPipeline.hpp"
 #include "Engine/Adapter/Graphics/VK/IndexType.hpp"
+#include "Engine/Adapter/Graphics/VK/PipelineLayout.hpp"
+#include "Engine/Adapter/Graphics/VK/ShaderModule.hpp"
 #include "Engine/Adapter/Graphics/VK/VertexInputAttributeFormat.hpp"
 
 namespace Trident::VK {
@@ -184,10 +187,99 @@ namespace Trident::VK {
 	}
 
 	ref<Trident::RayTracingPipeline> createRayTracingPipeline(const Trident::Device* device, const RayTracingPipelineDescriptor& descriptor) {
-		// TODO(graphics/vk/ext_hardware_ray_tracing/ray-tracing-pipeline)
-		ENGINE_ERROR_UNIMPLEMENTED();
+		const VK::Device* vkDevice = static_cast<const VK::Device*>(device);
+		const ref<VK::PipelineLayout> pipelineLayout = ref_cast<VK::PipelineLayout>(descriptor.layout);
 
-		return nullptr;
+		ref<VK::RayTracingPipeline> rayTracingPipeline = allocateRef<VK::RayTracingPipeline>();
+		rayTracingPipeline->device = device;
+
+		VkRayTracingShaderGroupCreateInfoKHR rayTracingShaderGroupCreateInfo{};
+		rayTracingShaderGroupCreateInfo.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
+		rayTracingShaderGroupCreateInfo.pNext = nullptr;
+		rayTracingShaderGroupCreateInfo.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR;
+		rayTracingShaderGroupCreateInfo.generalShader = VK_SHADER_UNUSED_KHR; // VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR
+		rayTracingShaderGroupCreateInfo.closestHitShader = VK_SHADER_UNUSED_KHR; // VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR
+		rayTracingShaderGroupCreateInfo.anyHitShader = VK_SHADER_UNUSED_KHR; // VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR
+		rayTracingShaderGroupCreateInfo.intersectionShader = VK_SHADER_UNUSED_KHR;
+		rayTracingShaderGroupCreateInfo.pShaderGroupCaptureReplayHandle = nullptr;
+
+		sequence<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos(descriptor.shaderModules.count());
+		sequence<VkRayTracingShaderGroupCreateInfoKHR> shaderGroupCreateInfos(descriptor.shaderModules.count());
+		uint32 shaderModuleIndex = 0;
+
+		while (shaderModuleIndex < descriptor.shaderModules.count()) {
+			const ref<VK::ShaderModule> shaderModule = ref_cast<VK::ShaderModule>(descriptor.shaderModules[shaderModuleIndex]);
+
+			shaderStageCreateInfos[shaderModuleIndex] = shaderModule->createInfo;
+
+			VkRayTracingShaderGroupCreateInfoKHR& shaderGroupCreateInfo = shaderGroupCreateInfos[shaderModuleIndex];
+			shaderGroupCreateInfo.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
+			shaderGroupCreateInfo.pNext = nullptr;
+			shaderGroupCreateInfo.generalShader = VK_SHADER_UNUSED_KHR;
+			shaderGroupCreateInfo.closestHitShader = VK_SHADER_UNUSED_KHR;
+			shaderGroupCreateInfo.anyHitShader = VK_SHADER_UNUSED_KHR;
+			shaderGroupCreateInfo.intersectionShader = VK_SHADER_UNUSED_KHR;
+			shaderGroupCreateInfo.pShaderGroupCaptureReplayHandle = nullptr;
+
+			switch (shaderModule->createInfo.stage) {
+				case VK_SHADER_STAGE_RAYGEN_BIT_KHR: {
+					shaderGroupCreateInfo.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR;
+
+					// TODO(graphics/ext_hardware_ray_tracing)
+					shaderGroupCreateInfo.generalShader = 0;
+
+					break;
+				}
+				case VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR: {
+					shaderGroupCreateInfo.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR;
+
+					// TODO(graphics/ext_hardware_ray_tracing)
+					shaderGroupCreateInfo.closestHitShader = 0;
+
+					break;
+				}
+				case VK_SHADER_STAGE_MISS_BIT_KHR: {
+					shaderGroupCreateInfo.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR;
+
+					// TODO(graphics/ext_hardware_ray_tracing)
+					shaderGroupCreateInfo.generalShader = 0;
+
+					break;
+				}
+				default: {
+					ADAPTER_ASSERT(false, "Unsupported shader stage.");
+
+					break;
+				}
+			}
+
+			shaderModuleIndex += 1;
+		}
+
+		// TODO(graphics/ext_hardware_ray_tracing): Create shader binding table buffer in client
+		// TODO(graphics/ext_hardware_ray_tracing): Add push constant in pipeline layout
+
+		VkRayTracingPipelineCreateInfoKHR createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_KHR;
+		createInfo.pNext = nullptr;
+		createInfo.flags = 0;
+		createInfo.stageCount = static_cast<uint32>(shaderStageCreateInfos.count());
+		createInfo.pStages = &shaderStageCreateInfos[0];
+		createInfo.groupCount = static_cast<uint32>(shaderGroupCreateInfos.count());
+		createInfo.pGroups = &shaderGroupCreateInfos[0];
+		createInfo.maxPipelineRayRecursionDepth = descriptor.maxRecursionDepth;
+		createInfo.pLibraryInfo = nullptr;
+		createInfo.pLibraryInterface = nullptr;
+		createInfo.pDynamicState = nullptr;
+		createInfo.layout = pipelineLayout->pipelineLayout;
+		createInfo.basePipelineHandle = VK_NULL_HANDLE;
+		createInfo.basePipelineIndex = -1;
+
+		const VkResult result = vkDevice->vkCreateRayTracingPipelinesKHR(vkDevice->device, VK_NULL_HANDLE, VK_NULL_HANDLE, 1, &createInfo, nullptr, &rayTracingPipeline->pipeline);
+
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create ray tracing pipeline.");
+
+		return rayTracingPipeline;
 	}
 
 	AccelerationStructureBuildSizes getAccelerationStructureBuildSizes(const Trident::Device* device, ref<Trident::AccelerationStructureBuildGeometry> buildGeometry) {

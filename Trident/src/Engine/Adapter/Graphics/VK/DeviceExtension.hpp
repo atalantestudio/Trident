@@ -17,13 +17,18 @@ namespace Trident::VK {
 
 				vulkan12Features->bufferDeviceAddress = true;
 
-				static VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeature{};
-				accelerationStructureFeature.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
-				accelerationStructureFeature.pNext = nullptr;
-				accelerationStructureFeature.accelerationStructure = true;
+				static VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeatures{};
+				accelerationStructureFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+				accelerationStructureFeatures.pNext = nullptr;
+				accelerationStructureFeatures.accelerationStructure = true;
 
-				*nextFeature = &accelerationStructureFeature;
-				nextFeature = &accelerationStructureFeature.pNext;
+				static VkPhysicalDeviceRayTracingPipelineFeaturesKHR rayTracingPipelineFeatures{};
+				rayTracingPipelineFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
+				rayTracingPipelineFeatures.pNext = &accelerationStructureFeatures;
+				rayTracingPipelineFeatures.rayTracingPipeline = true;
+
+				*nextFeature = &rayTracingPipelineFeatures;
+				nextFeature = &rayTracingPipelineFeatures.pNext;
 
 				break;
 			}

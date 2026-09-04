@@ -48,8 +48,5 @@ layout(location = 0) rayPayloadEXT vec3 hitValue;
 void main() {
 	ivec2 coordinate = ivec2(gl_LaunchIDEXT.xy);
 
-	// gl_LaunchSizeEXT.xy;
-
-	// TODO
 	imageStore(intermediateLightmapAtlas, ivec2(gl_LaunchIDEXT.xy), vec4(1.0, 0.2, 0.0, 1.0));
 }

@@ -100,7 +100,7 @@ namespace Trident {
 			ref<DescriptorSetLayout> createDilationDescriptorSetLayout() const;
 
 			ref<GraphicsPipeline> createGBufferPipeline() const;
-			ref<ComputePipeline> createTraceRaysPipeline() const;
+			ref<RayTracingPipeline> createRayTracingPipeline() const;
 			ref<ComputePipeline> createIntermediateDilationPipeline() const;
 			ref<ComputePipeline> createHorizontalBilateralFilterPipeline() const;
 			ref<ComputePipeline> createVerticalBilateralFilterPipeline() const;
@@ -149,12 +149,12 @@ namespace Trident {
 			sequence<ref<DescriptorSet>> descriptorSets;
 
 			ref<PipelineLayout> gBufferPipelineLayout;
-			ref<PipelineLayout> traceRaysPipelineLayout;
+			ref<PipelineLayout> rayTracingPipelineLayout;
 			ref<PipelineLayout> postProcessingPipelineLayout;
 			ref<PipelineLayout> dilationPipelineLayout;
 
 			ref<GraphicsPipeline> gBufferPipeline;
-			ref<ComputePipeline> traceRaysPipeline;
+			ref<RayTracingPipeline> rayTracingPipeline;
 			ref<ComputePipeline> intermediateDilationPipeline;
 			ref<ComputePipeline> horizontalBilateralFilterPipeline;
 			ref<ComputePipeline> verticalBilateralFilterPipeline;

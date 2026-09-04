@@ -92,6 +92,7 @@ namespace Trident {
 				case EXT_hardware_ray_tracing: {
 					LOAD_DEVICE_PROCEDURE(vkCmdBuildAccelerationStructuresKHR);
 					LOAD_DEVICE_PROCEDURE(vkCreateAccelerationStructureKHR);
+					LOAD_DEVICE_PROCEDURE(vkCreateRayTracingPipelinesKHR);
 					LOAD_DEVICE_PROCEDURE(vkDestroyAccelerationStructureKHR);
 					LOAD_DEVICE_PROCEDURE(vkGetAccelerationStructureBuildSizesKHR);
 					LOAD_DEVICE_PROCEDURE(vkGetAccelerationStructureDeviceAddressKHR);
