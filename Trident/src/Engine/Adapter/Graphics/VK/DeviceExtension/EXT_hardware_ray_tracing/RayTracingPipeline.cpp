@@ -10,10 +10,9 @@
 namespace Trident::VK {
 	void destroyRayTracingPipeline(const Trident::Device* device, const Trident::RayTracingPipeline* rayTracingPipeline) {
 		const VK::Device* vkDevice = static_cast<const VK::Device*>(device);
-		const VK::RayTracingPipeline* vkRayTracingPipeline = static_cast<const VK::RayTracingPipeline*>(rayTracingPipeline);
+		const VK::RayTracingPipeline* vkPipeline = static_cast<const VK::RayTracingPipeline*>(rayTracingPipeline);
 
-		// TODO(graphics/vk/ext_hardware_ray_tracing/ray-tracing-pipeline)
-		// vkDevice->vkDestroyRayTracingPipelineKHR(vkDevice->device, vkRayTracingPipeline->rayTracingPipeline, nullptr);
+		vkDevice->vkDestroyPipeline(vkDevice->device, vkPipeline->pipeline, nullptr);
 	}
 
 	void getRayTracingShaderGroupHandles(const Trident::Device* device, const Trident::RayTracingPipeline* pipeline, range<uint32, uint32> groupRange, void* mappedRange) {
