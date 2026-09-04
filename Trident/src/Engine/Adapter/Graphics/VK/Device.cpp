@@ -97,6 +97,7 @@ namespace Trident {
 					LOAD_DEVICE_PROCEDURE(vkGetAccelerationStructureBuildSizesKHR);
 					LOAD_DEVICE_PROCEDURE(vkGetAccelerationStructureDeviceAddressKHR);
 					LOAD_DEVICE_PROCEDURE(vkGetBufferDeviceAddress);
+					LOAD_DEVICE_PROCEDURE(vkGetRayTracingShaderGroupHandlesKHR);
 
 					break;
 				}
@@ -239,6 +240,8 @@ namespace Trident {
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 		};
 
+		bool hardwareRayTracingExtension = false;
+
 		VkPhysicalDeviceVulkan14Features vulkan14Features{};
 		vulkan14Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_4_FEATURES;
 		vulkan14Features.pNext = nullptr;
@@ -257,6 +260,10 @@ namespace Trident {
 
 		for (const DeviceExtensionName extension : enabledExtensions) {
 			enableDeviceExtension(extension, enabledExtensionNames, vulkan11Features, &vulkan14Features.pNext);
+
+			if (extension == EXT_hardware_ray_tracing) {
+				hardwareRayTracingExtension = true;
+			}
 		}
 
 		// TODO: Replace with sequence<T>.
@@ -307,6 +314,32 @@ namespace Trident {
 		device->queues[0] = createQueue(device, _physicalDevice->graphicsQueueFamilyIndex, QueueFamilyCapability::GRAPHICS);
 		device->queues[1] = createQueue(device, _physicalDevice->computeQueueFamilyIndex, QueueFamilyCapability::COMPUTE);
 		device->queues[2] = createQueue(device, _physicalDevice->transferQueueFamilyIndex, QueueFamilyCapability::TRANSFER);
+
+		// TODO(graphics/vk/physical-device/extension-limits): Query the limits when selecting the physical device.
+		if (hardwareRayTracingExtension) {
+			VkPhysicalDeviceAccelerationStructurePropertiesKHR accelerationStructureProperties{};
+			accelerationStructureProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR;
+			accelerationStructureProperties.pNext = nullptr;
+
+			VkPhysicalDeviceRayTracingPipelinePropertiesKHR rayTracingPipelineProperties{};
+			rayTracingPipelineProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR;
+			rayTracingPipelineProperties.pNext = &accelerationStructureProperties;
+
+			static const PFN_vkGetPhysicalDeviceProperties2 vkGetPhysicalDeviceProperties2 = loadInstanceProcedure<PFN_vkGetPhysicalDeviceProperties2>(_physicalDevice->instance->instance, "vkGetPhysicalDeviceProperties2");
+
+			VkPhysicalDeviceProperties2 properties{};
+			properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+			properties.pNext = &rayTracingPipelineProperties;
+
+			vkGetPhysicalDeviceProperties2(_physicalDevice->physicalDevice, &properties);
+
+			PhysicalDeviceLimits& limits = *const_cast<PhysicalDeviceLimits*>(&_physicalDevice->limits);
+			limits.minAccelerationStructureScratchOffsetAlignment = accelerationStructureProperties.minAccelerationStructureScratchOffsetAlignment;
+			limits.shaderGroupBaseAlignment = rayTracingPipelineProperties.shaderGroupBaseAlignment;
+			limits.shaderGroupHandleAlignment = rayTracingPipelineProperties.shaderGroupHandleAlignment;
+			limits.shaderGroupHandleSize = rayTracingPipelineProperties.shaderGroupHandleSize;
+			limits.maxRayRecursionDepth = rayTracingPipelineProperties.maxRayRecursionDepth;
+		}
 
 		return device;
 	}

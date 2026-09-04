@@ -6,6 +6,8 @@
 namespace Trident {
 	template<typename Device>
 	ref<AccelerationStructure> DeviceExtension<EXT_hardware_ray_tracing, Device>::createAccelerationStructure(const AccelerationStructureDescriptor& descriptor) const {
+		const Device* device = static_cast<const Device*>(this);
+
 		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
@@ -20,13 +22,13 @@ namespace Trident {
 			}
 		#endif
 
-		const Device* device = static_cast<const Device*>(this);
-
 		return device->adapter->createAccelerationStructureImplementation(device, descriptor);
 	}
 
 	template<typename Device>
 	ref<AccelerationStructureBuildGeometry> DeviceExtension<EXT_hardware_ray_tracing, Device>::createAccelerationStructureBuildGeometry(const AccelerationStructureBuildInstanceGeometryDescriptor& descriptor) const {
+		const Device* device = static_cast<const Device*>(this);
+
 		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
@@ -37,13 +39,13 @@ namespace Trident {
 			}
 		#endif
 
-		const Device* device = static_cast<const Device*>(this);
-
 		return device->adapter->createAccelerationStructureBuildInstanceGeometryImplementation(device, descriptor);
 	}
 
 	template<typename Device>
 	ref<AccelerationStructureBuildGeometry> DeviceExtension<EXT_hardware_ray_tracing, Device>::createAccelerationStructureBuildGeometry(const AccelerationStructureBuildTriangleGeometryDescriptor& descriptor) const {
+		const Device* device = static_cast<const Device*>(this);
+
 		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
@@ -70,13 +72,13 @@ namespace Trident {
 			}
 		#endif
 
-		const Device* device = static_cast<const Device*>(this);
-
 		return device->adapter->createAccelerationStructureBuildTriangleGeometryImplementation(device, descriptor);
 	}
 
 	template<typename Device>
 	ref<RayTracingPipeline> DeviceExtension<EXT_hardware_ray_tracing, Device>::createPipeline(const RayTracingPipelineDescriptor& descriptor) const {
+		const Device* device = static_cast<const Device*>(this);
+
 		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
@@ -85,13 +87,15 @@ namespace Trident {
 					VALIDATION_ERROR("descriptor.layout must be a valid PipelineLayout object.");
 				}
 
+				if (descriptor.maxRecursionDepth > device->getPhysicalDevice()->getLimits().maxRayRecursionDepth) {
+					VALIDATION_ERROR("descriptor.maxRecursionDepth must be less than or equal to the maximum ray recursion depth.");
+				}
+
 				if (descriptor.name.count() == 0) {
 					VALIDATION_WARNING("descriptor.name should provide a unique name to help identify this ray tracing pipeline.");
 				}
 			}
 		#endif
-
-		const Device* device = static_cast<const Device*>(this);
 
 		return device->adapter->createRayTracingPipelineImplementation(device, descriptor);
 	}

@@ -89,7 +89,8 @@ namespace Trident {
 		intermediateLightmapAtlasSampler = createIntermediateLightmapAtlasSampler();
 
 		argumentBuffer = createArgumentBuffer();
-		shaderBindingTableBuffer = createShaderBindingTableBuffer();
+
+		createShaderBindingTableBuffer();
 
 		initialized = true;
 	}

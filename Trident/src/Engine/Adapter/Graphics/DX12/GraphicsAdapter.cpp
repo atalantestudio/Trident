@@ -156,5 +156,6 @@ namespace Trident::DX12 {
 		adapter->destroyRayTracingPipelineImplementation = DX12::destroyRayTracingPipeline;
 		adapter->getAccelerationStructureBuildSizesImplementation = DX12::getAccelerationStructureBuildSizes;
 		adapter->getAccelerationStructureDeviceAddressImplementation = DX12::getAccelerationStructureDeviceAddress;
+		adapter->getRayTracingShaderGroupHandlesImplementation = DX12::getRayTracingShaderGroupHandles;
 	}
 }

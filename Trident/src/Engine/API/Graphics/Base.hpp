@@ -198,4 +198,5 @@ namespace Trident {
 	typedef void (*DestroyRayTracingPipelineImplementation)(const Device* device, const RayTracingPipeline* rayTracingPipeline);
 	typedef AccelerationStructureBuildSizes (*GetAccelerationStructureBuildSizesImplementation)(const Device* device, ref<AccelerationStructureBuildGeometry> buildGeometry);
 	typedef uint64 (*GetAccelerationStructureDeviceAddressImplementation)(const Device* device, const AccelerationStructure* accelerationStructure);
+	typedef void (*GetRayTracingShaderGroupHandlesImplementation)(const Device* device, const RayTracingPipeline* pipeline, range<uint32, uint32> groupRange, void* mappedRange);
 }

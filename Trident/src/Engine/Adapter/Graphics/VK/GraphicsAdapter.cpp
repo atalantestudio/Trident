@@ -135,5 +135,6 @@ namespace Trident::VK {
 		adapter->destroyRayTracingPipelineImplementation = VK::destroyRayTracingPipeline;
 		adapter->getAccelerationStructureBuildSizesImplementation = VK::getAccelerationStructureBuildSizes;
 		adapter->getAccelerationStructureDeviceAddressImplementation = VK::getAccelerationStructureDeviceAddress;
+		adapter->getRayTracingShaderGroupHandlesImplementation = VK::getRayTracingShaderGroupHandles;
 	}
 }

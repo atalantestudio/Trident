@@ -270,10 +270,6 @@ namespace Trident {
 			limits.maxVertexInputBindingCount = _physicalDevice->properties.limits.maxVertexInputBindings;
 			limits.maxVertexInputBindingStride = _physicalDevice->properties.limits.maxVertexInputBindingStride;
 			limits.pointSizeGranularity = _physicalDevice->properties.limits.pointSizeGranularity;
-
-			// TODO(graphics/ext_hardware_ray_tracing/scratch-offset-alignment): Get from the physical device.
-			limits.minAccelerationStructureScratchOffsetAlignment = 256;
-
 			limits.minStorageBufferOffsetAlignment = _physicalDevice->properties.limits.minStorageBufferOffsetAlignment;
 			limits.minUniformBufferOffsetAlignment = _physicalDevice->properties.limits.minUniformBufferOffsetAlignment;
 		}

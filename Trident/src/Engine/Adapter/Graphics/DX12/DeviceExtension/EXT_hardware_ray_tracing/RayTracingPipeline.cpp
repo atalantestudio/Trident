@@ -13,4 +13,8 @@ namespace Trident::DX12 {
 
 		// TODO(graphics/dx12/ext_hardware_ray_tracing/ray-tracing-pipeline)
 	}
+
+	void getRayTracingShaderGroupHandles(const Trident::Device* device, const Trident::RayTracingPipeline* pipeline, range<uint32, uint32> groupRange, void* mappedRange) {
+		// TODO(graphics/dx12/ext_hardware_ray_tracing/ray-tracing-pipeline)
+	}
 }

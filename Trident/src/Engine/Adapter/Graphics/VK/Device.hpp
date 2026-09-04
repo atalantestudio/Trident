@@ -81,6 +81,7 @@ namespace Trident {
 			PFN_vkGetAccelerationStructureBuildSizesKHR vkGetAccelerationStructureBuildSizesKHR;
 			PFN_vkGetAccelerationStructureDeviceAddressKHR vkGetAccelerationStructureDeviceAddressKHR;
 			PFN_vkGetBufferDeviceAddress vkGetBufferDeviceAddress;
+			PFN_vkGetRayTracingShaderGroupHandlesKHR vkGetRayTracingShaderGroupHandlesKHR;
 	};
 
 	namespace VK {

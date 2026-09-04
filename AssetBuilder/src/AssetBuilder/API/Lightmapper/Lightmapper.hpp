@@ -106,7 +106,7 @@ namespace Trident {
 			ref<ComputePipeline> createVerticalBilateralFilterPipeline() const;
 			ref<GraphicsPipeline> createDilationPipeline() const;
 
-			ref<Buffer> createShaderBindingTableBuffer() const;
+			void createShaderBindingTableBuffer();
 			ref<Buffer> createArgumentBuffer() const;
 			ref<Buffer> createVertexBuffer(uint64 vertexCount) const;
 			ref<Buffer> createIndexBuffer(uint64 indexCount) const;

@@ -64,10 +64,6 @@ namespace Trident {
 		/// Granularity of supported point sizes.
 		float32 pointSizeGranularity;
 
-		// TODO(graphics/physical-device/limits/scratch-offset-alignment): Move in PhysicalDeviceLimits<EXT_hardware_ray_tracing>.
-		/// The minimum required alignment for scratch buffers.
-		uint64 minAccelerationStructureScratchOffsetAlignment;
-
 		/// The minimum required alignment for storage buffers.
 		/// 
 		/// NOTE: In Vulkan, this value applies to the `VkDescriptorBufferInfo::offset` member.
@@ -77,5 +73,18 @@ namespace Trident {
 		/// 
 		/// NOTE: In Vulkan, this value applies to the `VkDescriptorBufferInfo::offset` member.
 		uint64 minUniformBufferOffsetAlignment;
+
+
+
+		// EXT_hardware_ray_tracing
+
+		// TODO(graphics/physical-device/limits/scratch-offset-alignment): Move in PhysicalDeviceLimits<EXT_hardware_ray_tracing>.
+		/// The minimum required alignment for scratch buffers.
+		uint64 minAccelerationStructureScratchOffsetAlignment;
+
+		uint32 shaderGroupBaseAlignment;
+		uint32 shaderGroupHandleAlignment;
+		uint32 shaderGroupHandleSize;
+		uint32 maxRayRecursionDepth;
 	};
 }

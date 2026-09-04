@@ -118,6 +118,7 @@ namespace Trident {
 			DestroyRayTracingPipelineImplementation destroyRayTracingPipelineImplementation;
 			GetAccelerationStructureBuildSizesImplementation getAccelerationStructureBuildSizesImplementation;
 			GetAccelerationStructureDeviceAddressImplementation getAccelerationStructureDeviceAddressImplementation;
+			GetRayTracingShaderGroupHandlesImplementation getRayTracingShaderGroupHandlesImplementation;
 
 		private:
 			GraphicsAPI api;
