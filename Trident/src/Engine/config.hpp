@@ -79,7 +79,7 @@ namespace Trident {
 	#define OPENGL_VERSION OPENGL_VERSION_4_6
 
 	/// Desired Vulkan version. Runtime support is not guaranteed.
-	#define VULKAN_VERSION VULKAN_VERSION_1_0
+	#define VULKAN_VERSION VULKAN_VERSION_1_3
 
 	#if defined(BUILD_MODE_DEBUG)
 		#define VULKAN_USE_VK_EXT_debug_utils
