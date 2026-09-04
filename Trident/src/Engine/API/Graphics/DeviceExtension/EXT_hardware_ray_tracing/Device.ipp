@@ -77,6 +77,20 @@ namespace Trident {
 
 	template<typename Device>
 	ref<RayTracingPipeline> DeviceExtension<EXT_hardware_ray_tracing, Device>::createPipeline(const RayTracingPipelineDescriptor& descriptor) const {
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+			{
+				Validator validator;
+
+				if (descriptor.layout == nullptr) {
+					VALIDATION_ERROR("descriptor.layout must be a valid PipelineLayout object.");
+				}
+
+				if (descriptor.name.count() == 0) {
+					VALIDATION_WARNING("descriptor.name should provide a unique name to help identify this ray tracing pipeline.");
+				}
+			}
+		#endif
+
 		const Device* device = static_cast<const Device*>(this);
 
 		return device->adapter->createRayTracingPipelineImplementation(device, descriptor);

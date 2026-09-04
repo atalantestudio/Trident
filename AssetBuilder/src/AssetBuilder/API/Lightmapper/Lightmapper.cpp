@@ -23,6 +23,7 @@
 #include "AssetBuilder/API/Lightmapper/PostProcessingDescriptorSetLayout.hpp"
 #include "AssetBuilder/API/Lightmapper/RayTracingDescriptorSetLayout.hpp"
 #include "AssetBuilder/API/Lightmapper/RayTracingPipeline.hpp"
+#include "AssetBuilder/API/Lightmapper/ShaderBindingTableBuffer.hpp"
 
 namespace Trident {
 	const GraphicsAdapter* Lightmapper::adapter;
@@ -88,6 +89,7 @@ namespace Trident {
 		intermediateLightmapAtlasSampler = createIntermediateLightmapAtlasSampler();
 
 		argumentBuffer = createArgumentBuffer();
+		shaderBindingTableBuffer = createShaderBindingTableBuffer();
 
 		initialized = true;
 	}

@@ -4,6 +4,11 @@
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/VK/Buffer.hpp"
+
+#if defined(DEBUG_OBJECT_NAME)
+	#include "Engine/Adapter/Graphics/VK/Debug/ObjectName.hpp"
+#endif
+
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/Adapter/Graphics/VK/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructure.hpp"
 #include "Engine/Adapter/Graphics/VK/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructureBuildFlags.hpp"
@@ -224,25 +229,19 @@ namespace Trident::VK {
 			switch (shaderModule->createInfo.stage) {
 				case VK_SHADER_STAGE_RAYGEN_BIT_KHR: {
 					shaderGroupCreateInfo.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR;
-
-					// TODO(graphics/ext_hardware_ray_tracing)
-					shaderGroupCreateInfo.generalShader = 0;
+					shaderGroupCreateInfo.generalShader = shaderModuleIndex;
 
 					break;
 				}
 				case VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR: {
 					shaderGroupCreateInfo.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR;
-
-					// TODO(graphics/ext_hardware_ray_tracing)
-					shaderGroupCreateInfo.closestHitShader = 0;
+					shaderGroupCreateInfo.closestHitShader = shaderModuleIndex;
 
 					break;
 				}
 				case VK_SHADER_STAGE_MISS_BIT_KHR: {
 					shaderGroupCreateInfo.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR;
-
-					// TODO(graphics/ext_hardware_ray_tracing)
-					shaderGroupCreateInfo.generalShader = 0;
+					shaderGroupCreateInfo.generalShader = shaderModuleIndex;
 
 					break;
 				}
@@ -278,6 +277,10 @@ namespace Trident::VK {
 		const VkResult result = vkDevice->vkCreateRayTracingPipelinesKHR(vkDevice->device, VK_NULL_HANDLE, VK_NULL_HANDLE, 1, &createInfo, nullptr, &rayTracingPipeline->pipeline);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create ray tracing pipeline.");
+
+		#if defined(DEBUG_OBJECT_NAME)
+			setObjectName(vkDevice, (uint64) rayTracingPipeline->pipeline, VK_OBJECT_TYPE_PIPELINE, descriptor.name);
+		#endif
 
 		return rayTracingPipeline;
 	}

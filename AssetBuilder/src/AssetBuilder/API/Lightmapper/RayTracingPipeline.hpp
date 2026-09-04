@@ -41,7 +41,7 @@ namespace Trident {
 		};
 
 		return device->createPipeline({
-			.layout = nullptr,
+			.layout = rayTracingPipelineLayout,
 			.shaderModules = shaderModules,
 			.maxRecursionDepth = 3,
 			#if defined(DEBUG_OBJECT_NAME)
