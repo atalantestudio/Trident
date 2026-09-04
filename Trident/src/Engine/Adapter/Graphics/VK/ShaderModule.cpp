@@ -24,7 +24,7 @@ namespace Trident {
 		return nullptr;
 	}
 
-	ref<Trident::ShaderModule> VK::createShaderModule(const Trident::Device* device, const ShaderModuleDescriptor& descriptor, view<char8> code) {
+	ref<Trident::ShaderModule> VK::createShaderModule(const Trident::Device* device, const ShaderModuleDescriptor& descriptor, const sequence<uint8>& code) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);

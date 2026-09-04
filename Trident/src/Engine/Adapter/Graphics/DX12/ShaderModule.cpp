@@ -15,87 +15,21 @@ namespace Trident {
 	{}
 
 	ref<Trident::ShaderModule> DX12::createShaderModule(const Trident::Device* device, const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> shaderModuleAsset) {
-		ADAPTER_ASSERT(false, "Shader module assets are not supported by the DirectX 12 adapter.");
+		ADAPTER_ASSERT(false, "Shader module assets are not currently supported by the DirectX 12 adapter.");
 
 		return nullptr;
 	}
 
-	ref<Trident::ShaderModule> DX12::createShaderModule(const Trident::Device* device, const ShaderModuleDescriptor& descriptor, view<char8> code) {
+	ref<Trident::ShaderModule> DX12::createShaderModule(const Trident::Device* device, const ShaderModuleDescriptor& descriptor, const sequence<uint8>& code) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		ref<DX12::ShaderModule> shaderModule = allocateRef<DX12::ShaderModule>(device);
-
-		if (descriptor.stage & ShaderStage::VERTEX || descriptor.stage & ShaderStage::FRAGMENT || descriptor.stage & ShaderStage::COMPUTE) {
-			HRESULT result;
-			UINT flags = 0;
-
-			#if defined(BUILD_MODE_DEBUG)
-				flags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-			#endif
-
-			const LPCSTR target = getShaderTarget(descriptor.stage);
-
-			#if defined(BUILD_MODE_DEBUG)
-				ID3DBlob* errorBlob;
-			#endif
-
-			result = D3DCompile(
-				&code[0],
-				code.count(),
-				#if defined(BUILD_MODE_DEBUG)
-					&descriptor.name[0],
-				#else
-					nullptr,
-				#endif
-				nullptr,
-				nullptr,
-				&descriptor.entryPoint[0],
-				target,
-				flags,
-				0,
-				&shaderModule->blob,
-				#if defined(BUILD_MODE_DEBUG)
-					&errorBlob
-				#else
-					nullptr
-				#endif
-			);
-
-			#if defined(DEBUG_OBJECT_NAME)
-				if (errorBlob) {
-					// TODO(graphics/dx12/shader-module): Get the TextBuffer limit.
-					static constexpr uint64 MAX_ERROR_SIZE = 1096;
-
-					const view<char8> error(pointer_cast<const char8*>(errorBlob->GetBufferPointer()), min(MAX_ERROR_SIZE, errorBlob->GetBufferSize()));
-
-					ADAPTER_ASSERT(false, "Failed to compile shader: []", error);
-
-					errorBlob->Release();
-				}
-			#else
-				ADAPTER_ASSERT(SUCCEEDED(result), "Failed to compile shader.");
-			#endif
-
-			shaderModule->bytecode.pShaderBytecode = shaderModule->blob->GetBufferPointer();
-			shaderModule->bytecode.BytecodeLength = shaderModule->blob->GetBufferSize();
-		}
-		else {
-			shaderModule->code = sequence<uint8>(code.count());
-
-			std::copy_n(pointer_cast<const uint8*>(&code[0]), code.count(), &shaderModule->code[0]);
-
-			shaderModule->bytecode.pShaderBytecode = &code[0];
-			shaderModule->bytecode.BytecodeLength = code.count();
-		}
+		shaderModule->code = code;
+		shaderModule->bytecode.pShaderBytecode = &code[0];
+		shaderModule->bytecode.BytecodeLength = code.count();
 
 		return shaderModule;
 	}
 
-	void DX12::destroyShaderModule(const Trident::Device* device, const Trident::ShaderModule* shaderModule) {
-		const DX12::ShaderModule* dxShaderModule = static_cast<const DX12::ShaderModule*>(shaderModule);
-
-		if (dxShaderModule->blob != nullptr) {
-			dxShaderModule->blob->Release();
-		}
-	}
+	void DX12::destroyShaderModule(const Trident::Device* device, const Trident::ShaderModule* shaderModule) {}
 }

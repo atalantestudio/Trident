@@ -119,7 +119,7 @@ namespace Trident {
 	typedef ref<Sampler> (*CreateSamplerImplementation)(const Device* device, const SamplerDescriptor& descriptor);
 	typedef ref<Semaphore> (*CreateSemaphoreImplementation)(const Device* device);
 	typedef ref<ShaderModule> (*CreateShaderModuleFromAssetImplementation)(const Device* device, const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset);
-	typedef ref<ShaderModule> (*CreateShaderModuleFromCodeImplementation)(const Device* device, const ShaderModuleDescriptor& descriptor, view<char8> code);
+	typedef ref<ShaderModule> (*CreateShaderModuleFromCodeImplementation)(const Device* device, const ShaderModuleDescriptor& descriptor, const sequence<uint8>& code);
 	typedef ref<Surface> (*CreateSurfaceImplementation)(const Instance* instance, ref<PhysicalDevice> physicalDevice, const Window* window);
 	typedef ref<Swapchain> (*CreateSwapchainImplementation)(const Device* device, const SwapchainDescriptor& descriptor);
 	typedef void (*DestroyBufferImplementation)(const Device* device, const Buffer* buffer);

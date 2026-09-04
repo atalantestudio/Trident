@@ -73,7 +73,7 @@ namespace Trident {
 		return shaderModule;
 	}
 
-	ref<Trident::ShaderModule> GL::createShaderModule(const Trident::Device* device, const ShaderModuleDescriptor& descriptor, view<char8> code) {
+	ref<Trident::ShaderModule> GL::createShaderModule(const Trident::Device* device, const ShaderModuleDescriptor& descriptor, const sequence<uint8>& code) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		ref<GL::ShaderModule> shaderModule = allocateRef<GL::ShaderModule>(device, descriptor);

@@ -607,7 +607,7 @@ namespace Trident {
 		return adapter->createShaderModuleFromAssetImplementation(this, descriptor, asset);
 	}
 
-	ref<ShaderModule> Device::createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) const {
+	ref<ShaderModule> Device::createShaderModule(const ShaderModuleDescriptor& descriptor, const sequence<uint8>& code) const {
 		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			validateShaderModuleDescriptor(descriptor);
 		#endif

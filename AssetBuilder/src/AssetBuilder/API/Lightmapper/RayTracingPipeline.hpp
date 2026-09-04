@@ -8,7 +8,7 @@
 namespace Trident {
 	ref<RayTracingPipeline> Lightmapper::createRayTracingPipeline() const {
 		const ref<ShaderModule> shaderModules[] = {
-			loadCompiledShaderModule(
+			loadShaderModule(
 				{
 					.stage = ShaderStage::RAY_GENERATION,
 					.entryPoint = "main",
@@ -18,7 +18,7 @@ namespace Trident {
 				},
 				"Lightmapper/Lightmap.rgen"
 			),
-			loadCompiledShaderModule(
+			loadShaderModule(
 				{
 					.stage = ShaderStage::RAY_CLOSEST_HIT,
 					.entryPoint = "main",
@@ -28,7 +28,7 @@ namespace Trident {
 				},
 				"Lightmapper/Lightmap.rchit"
 			),
-			loadCompiledShaderModule(
+			loadShaderModule(
 				{
 					.stage = ShaderStage::RAY_MISS,
 					.entryPoint = "main",

@@ -17,7 +17,7 @@ namespace Trident {
 
 	namespace GL {
 		ref<Trident::ShaderModule> createShaderModule(const Trident::Device* device, const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> shaderModuleAsset);
-		ref<Trident::ShaderModule> createShaderModule(const Trident::Device* device, const ShaderModuleDescriptor& descriptor, view<char8> code);
+		ref<Trident::ShaderModule> createShaderModule(const Trident::Device* device, const ShaderModuleDescriptor& descriptor, const sequence<uint8>& code);
 
 		void destroyShaderModule(const Trident::Device* device, const Trident::ShaderModule* shaderModule);
 	}

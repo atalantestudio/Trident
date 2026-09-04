@@ -63,7 +63,7 @@ namespace Trident {
 			ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) const;
 
 			// TODO: Deprecate (replace with the asset overload above).
-			ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) const;
+			ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, const sequence<uint8>& code) const;
 
 			ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) const;
 
