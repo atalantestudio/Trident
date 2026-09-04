@@ -24,6 +24,7 @@ namespace Trident {
 			PFN_vkAllocateMemory vkAllocateMemory;
 			PFN_vkBindBufferMemory vkBindBufferMemory;
 			PFN_vkBindImageMemory vkBindImageMemory;
+			PFN_vkCmdBindPipeline vkCmdBindPipeline;
 			PFN_vkCreateBuffer vkCreateBuffer;
 			PFN_vkCreateCommandPool vkCreateCommandPool;
 			PFN_vkCreateComputePipelines vkCreateComputePipelines;
@@ -75,6 +76,7 @@ namespace Trident {
 
 			// EXT_hardware_ray_tracing
 			PFN_vkCmdBuildAccelerationStructuresKHR vkCmdBuildAccelerationStructuresKHR;
+			PFN_vkCmdTraceRaysKHR vkCmdTraceRaysKHR;
 			PFN_vkCreateAccelerationStructureKHR vkCreateAccelerationStructureKHR;
 			PFN_vkCreateRayTracingPipelinesKHR vkCreateRayTracingPipelinesKHR;
 			PFN_vkDestroyAccelerationStructureKHR vkDestroyAccelerationStructureKHR;

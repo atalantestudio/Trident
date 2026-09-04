@@ -178,8 +178,6 @@ namespace Trident {
 
 		encodeOneTimeCommands(descriptor);
 
-		ENGINE_ERROR_UNIMPLEMENTED();
-
 		generateLightmaps(static_cast<uint32>(indexCount));
 
 		const BufferView<uint8> lightmapAtlasView = context.lightmapAtlasStagingBuffer->createView<uint8>(0, context.lightmapAtlasStagingBuffer->getSize());
@@ -504,8 +502,9 @@ namespace Trident {
 		const float32 height = static_cast<float32>(imageAssetDescriptor.extent.height);
 		const uint32 workGroupX = ceil(imageAssetDescriptor.extent.width / 16, 16u);
 		const uint32 workGroupY = ceil(imageAssetDescriptor.extent.height / 16, 16u);
+
 		const ref<Queue> queue = device->getQueue(QueueFamilyCapability::GRAPHICS);
-		const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
+		const ref<ExtendedCommandEncoder<EXT_hardware_ray_tracing>> commandEncoder = queue->createCommandEncoder<EXT_hardware_ray_tracing>({
 			.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Generate lightmaps",
@@ -563,10 +562,9 @@ namespace Trident {
 			commandEncoder->insertMemoryBarriers({}, view<ImageMemoryBarrier>(imageMemoryBarriers, 5));
 		}
 
-		// TODO(asset-builder/lightmapper): Connect to the ray tracing pipeline.
-		/* commandEncoder->bindComputePipeline(rayTracingPipeline);
+		commandEncoder->bindPipeline(rayTracingPipeline);
 		commandEncoder->bindDescriptorSets(rayTracingPipelineLayout, 0, descriptorSets[1]);
-		commandEncoder->dispatch(workGroupX, workGroupY, 1); */
+		commandEncoder->traceRays(rayGenerationShaderBindingTable, rayMissShaderBindingTable, rayHitShaderBindingTable, rayCallableShaderBindingTable, imageAssetDescriptor.extent);
 
 		ImageMemoryBarrier imageMemoryBarrier = {
 			.image = context.intermediateLightmapAtlasImage,

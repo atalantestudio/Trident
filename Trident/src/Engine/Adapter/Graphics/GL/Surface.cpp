@@ -366,12 +366,12 @@ namespace Trident {
 
 		_physicalDevice->limits.maxBoundDescriptorSetCount = max<uint32>();
 
-		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, pointer_cast<GLint*>(&_physicalDevice->limits.maxComputeWorkgroupCount[0]));
-		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1, pointer_cast<GLint*>(&_physicalDevice->limits.maxComputeWorkgroupCount[1]));
-		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2, pointer_cast<GLint*>(&_physicalDevice->limits.maxComputeWorkgroupCount[2]));
-		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, pointer_cast<GLint*>(&_physicalDevice->limits.maxComputeWorkgroupSize[0]));
-		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, pointer_cast<GLint*>(&_physicalDevice->limits.maxComputeWorkgroupSize[1]));
-		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, pointer_cast<GLint*>(&_physicalDevice->limits.maxComputeWorkgroupSize[2]));
+		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, pointer_cast<GLint*>(&_physicalDevice->limits.maxComputeWorkGroupCount[0]));
+		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1, pointer_cast<GLint*>(&_physicalDevice->limits.maxComputeWorkGroupCount[1]));
+		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2, pointer_cast<GLint*>(&_physicalDevice->limits.maxComputeWorkGroupCount[2]));
+		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, pointer_cast<GLint*>(&_physicalDevice->limits.maxComputeWorkGroupSize[0]));
+		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, pointer_cast<GLint*>(&_physicalDevice->limits.maxComputeWorkGroupSize[1]));
+		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, pointer_cast<GLint*>(&_physicalDevice->limits.maxComputeWorkGroupSize[2]));
 		glGetIntegerv(GL_MAX_FRAMEBUFFER_WIDTH, pointer_cast<GLint*>(&_physicalDevice->limits.maxFramebufferSize[0]));
 		glGetIntegerv(GL_MAX_FRAMEBUFFER_HEIGHT, pointer_cast<GLint*>(&_physicalDevice->limits.maxFramebufferSize[1]));
 		glGetIntegerv(GL_MAX_FRAMEBUFFER_LAYERS, pointer_cast<GLint*>(&_physicalDevice->limits.maxFramebufferLayerCount));

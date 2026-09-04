@@ -13,10 +13,10 @@ namespace Trident {
 
 		const uint32 shaderSize = ceil(limits->shaderGroupHandleSize, limits->shaderGroupHandleAlignment);
 		const uint32 rayGenerationShaderOffset = 0;
-		const uint32 rayClosestHitShaderOffset = ceil(rayGenerationShaderOffset + shaderSize, limits->shaderGroupBaseAlignment);
-		const uint32 rayMissShaderOffset = ceil(rayClosestHitShaderOffset + shaderSize, limits->shaderGroupBaseAlignment);
-		const uint32 callableShaderOffset = rayMissShaderOffset;
-		const uint64 size = callableShaderOffset + shaderSize;
+		const uint32 rayHitShaderOffset = ceil(rayGenerationShaderOffset + shaderSize, limits->shaderGroupBaseAlignment);
+		const uint32 rayMissShaderOffset = ceil(rayHitShaderOffset + shaderSize, limits->shaderGroupBaseAlignment);
+		const uint32 rayCallableShaderOffset = rayMissShaderOffset;
+		const uint64 size = rayCallableShaderOffset + shaderSize;
 
 		// TODO(asset-builder/lightmapper): Create in a static allocation.
 		shaderBindingTableBuffer = device->createDynamicBuffer({
@@ -33,13 +33,32 @@ namespace Trident {
 		uint8* shaderBindingTableMappedRange = shaderBindingTableView.map();
 
 		std::copy_n(&shaderGroupHandleData[shaderSize * 0], shaderSize, shaderBindingTableMappedRange + rayGenerationShaderOffset);
-		std::copy_n(&shaderGroupHandleData[shaderSize * 1], shaderSize, shaderBindingTableMappedRange + rayClosestHitShaderOffset);
+		std::copy_n(&shaderGroupHandleData[shaderSize * 1], shaderSize, shaderBindingTableMappedRange + rayHitShaderOffset);
 		std::copy_n(&shaderGroupHandleData[shaderSize * 2], shaderSize, shaderBindingTableMappedRange + rayMissShaderOffset);
 
 		shaderBindingTableBuffer->unmap();
 
-		// TODO(asset-builder/lightmapper): Update device address regions.
+		const uint64 deviceAddress = device->getBufferDeviceAddress(shaderBindingTableBuffer);
 
-		ENGINE_ERROR_UNIMPLEMENTED();
+		rayGenerationShaderBindingTable = {
+			.deviceAddress = deviceAddress + rayGenerationShaderOffset,
+			.stride = shaderSize,
+			.size = shaderSize,
+		};
+		rayMissShaderBindingTable = {
+			.deviceAddress = deviceAddress + rayMissShaderOffset,
+			.stride = shaderSize,
+			.size = shaderSize,
+		};
+		rayHitShaderBindingTable = {
+			.deviceAddress = deviceAddress + rayHitShaderOffset,
+			.stride = shaderSize,
+			.size = shaderSize,
+		};
+		rayCallableShaderBindingTable = {
+			.deviceAddress = 0,
+			.stride = 0,
+			.size = 0,
+		};
 	}
 }

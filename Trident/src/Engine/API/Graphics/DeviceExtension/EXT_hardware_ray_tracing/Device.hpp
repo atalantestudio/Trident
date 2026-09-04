@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Engine/API/Graphics/Buffer.hpp"
 #include "Engine/API/Graphics/DeviceExtension/DeviceExtension.hpp"
 #include "Engine/API/Graphics/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructure.hpp"
 #include "Engine/API/Graphics/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructureBuildGeometry.hpp"
@@ -34,6 +35,9 @@ namespace Trident {
 			/// - Scratch buffer (build size)
 			/// - Scratch buffer (update size)
 			AccelerationStructureBuildSizes getAccelerationStructureBuildSizes(ref<AccelerationStructureBuildGeometry> buildGeometry) const;
+
+			/// Returns the device address of the provided buffer.
+			uint64 getBufferDeviceAddress(ref<Buffer> buffer) const;
 	};
 }
 

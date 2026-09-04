@@ -108,4 +108,10 @@ namespace Trident::DX12 {
 
 		return buildSizes;
 	}
+
+	uint64 getBufferDeviceAddress(const Trident::Device* device, ref<Trident::Buffer> buffer) {
+		const ref<DX12::Buffer> dxBuffer = ref_cast<DX12::Buffer>(buffer);
+
+		return dxBuffer->resource->GetGPUVirtualAddress();
+	}
 }

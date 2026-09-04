@@ -3,5 +3,7 @@
 
 #pragma once
 
+#include "Engine/API/Graphics/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructure.hpp"
 #include "Engine/API/Graphics/DeviceExtension/EXT_hardware_ray_tracing/CommandEncoder.hpp"
 #include "Engine/API/Graphics/DeviceExtension/EXT_hardware_ray_tracing/Device.hpp"
+#include "Engine/API/Graphics/DeviceExtension/EXT_hardware_ray_tracing/RayTracingPipeline.hpp"

@@ -106,4 +106,21 @@ namespace Trident {
 
 		return device->adapter->getAccelerationStructureBuildSizesImplementation(device, buildGeometry);
 	}
+
+	template<typename Device>
+	uint64 DeviceExtension<EXT_hardware_ray_tracing, Device>::getBufferDeviceAddress(ref<Buffer> buffer) const {
+		const Device* device = static_cast<const Device*>(this);
+
+		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
+			{
+				Validator validator;
+
+				if (buffer == nullptr) {
+					VALIDATION_ERROR("buffer must be a valid Buffer object.");
+				}
+			}
+		#endif
+
+		return device->adapter->getBufferDeviceAddressImplementation(device, buffer);
+	}
 }

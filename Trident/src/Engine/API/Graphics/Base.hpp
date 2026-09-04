@@ -183,12 +183,14 @@ namespace Trident {
 	struct AccelerationStructureBuildSizes;
 	struct AccelerationStructureBuildTriangleGeometryDescriptor;
 	struct AccelerationStructureDescriptor;
+	struct DeviceAddressRegion;
 	struct RayTracingPipelineDescriptor;
 
 	class AccelerationStructure;
 	class AccelerationStructureBuildGeometry;
 	class RayTracingPipeline;
 
+	typedef void (*BindRayTracingPipelineImplementation)(CommandEncoder* commandEncoder, ref<RayTracingPipeline> pipeline);
 	typedef void (*BuildAccelerationStructuresImplementation)(CommandEncoder* commandEncoder, view<ref<AccelerationStructure>> accelerationStructures, view<BaseBufferView> accelerationStructureViews, view<BaseBufferView> scratchViews);
 	typedef ref<AccelerationStructureBuildGeometry> (*CreateAccelerationStructureBuildInstanceGeometryImplementation)(const Device* device, const AccelerationStructureBuildInstanceGeometryDescriptor& descriptor);
 	typedef ref<AccelerationStructureBuildGeometry> (*CreateAccelerationStructureBuildTriangleGeometryImplementation)(const Device* device, const AccelerationStructureBuildTriangleGeometryDescriptor& descriptor);
@@ -198,5 +200,7 @@ namespace Trident {
 	typedef void (*DestroyRayTracingPipelineImplementation)(const Device* device, const RayTracingPipeline* rayTracingPipeline);
 	typedef AccelerationStructureBuildSizes (*GetAccelerationStructureBuildSizesImplementation)(const Device* device, ref<AccelerationStructureBuildGeometry> buildGeometry);
 	typedef uint64 (*GetAccelerationStructureDeviceAddressImplementation)(const Device* device, const AccelerationStructure* accelerationStructure);
+	typedef uint64 (*GetBufferDeviceAddressImplementation)(const Device* device, ref<Buffer> buffer);
 	typedef void (*GetRayTracingShaderGroupHandlesImplementation)(const Device* device, const RayTracingPipeline* pipeline, range<uint32, uint32> groupRange, void* mappedRange);
+	typedef void (*TraceRaysImplementation)(CommandEncoder* commandEncoder, const DeviceAddressRegion& generationShaderBindingTable, const DeviceAddressRegion& missShaderBindingTable, const DeviceAddressRegion& hitShaderBindingTable, const DeviceAddressRegion& callableShaderBindingTable, Extent3D extent);
 }

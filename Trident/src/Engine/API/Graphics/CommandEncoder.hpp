@@ -69,6 +69,7 @@ namespace Trident {
 
 			void copyImageToBuffer(ref<Image> sourceImage, ref<Buffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions);
 
+			// TODO(graphics/command-encoder/dispatch): Replace the parameters with Extend3D.
 			void dispatch(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ);
 
 			void dispatchIndirect(ref<Buffer> buffer, uint64 bufferOffset);

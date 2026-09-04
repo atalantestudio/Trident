@@ -126,18 +126,18 @@ namespace Trident {
 		_commandEncoder->commandCount += 1;
 	}
 
-	void VK::bindComputePipeline(Trident::CommandEncoder* commandEncoder, ref<Trident::ComputePipeline> computePipeline) {
+	void VK::bindComputePipeline(Trident::CommandEncoder* commandEncoder, ref<Trident::ComputePipeline> pipeline) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		static PFN_vkCmdBindPipeline vkCmdBindPipeline = loadDeviceProcedure<PFN_vkCmdBindPipeline>(static_cast<const VK::Device*>(commandEncoder->device)->device, "vkCmdBindPipeline");
+		const VK::Device* vkDevice = static_cast<const VK::Device*>(commandEncoder->device);
+		const ref<VK::ComputePipeline> vkPipeline = ref_cast<VK::ComputePipeline>(pipeline);
 
-		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
-		const ref<VK::ComputePipeline> _computePipeline = ref_cast<VK::ComputePipeline>(computePipeline);
+		VK::CommandEncoder* vkCommandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
 
-		vkCmdBindPipeline(_commandEncoder->commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _computePipeline->pipeline);
+		vkDevice->vkCmdBindPipeline(vkCommandEncoder->commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vkPipeline->pipeline);
 
-		_commandEncoder->pipelineBindPoint = VK_PIPELINE_BIND_POINT_COMPUTE;
-		_commandEncoder->commandCount += 1;
+		vkCommandEncoder->pipelineBindPoint = VK_PIPELINE_BIND_POINT_COMPUTE;
+		vkCommandEncoder->commandCount += 1;
 	}
 
 	void VK::bindDescriptorSets(Trident::CommandEncoder* commandEncoder, ref<Trident::PipelineLayout> pipelineLayout, uint32 descriptorSetIndexOffset, view<ref<Trident::DescriptorSet>> descriptorSets) {
@@ -169,18 +169,18 @@ namespace Trident {
 		_commandEncoder->commandCount += 1;
 	}
 
-	void VK::bindGraphicsPipeline(Trident::CommandEncoder* commandEncoder, ref<Trident::GraphicsPipeline> graphicsPipeline) {
+	void VK::bindGraphicsPipeline(Trident::CommandEncoder* commandEncoder, ref<Trident::GraphicsPipeline> pipeline) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		static PFN_vkCmdBindPipeline vkCmdBindPipeline = loadDeviceProcedure<PFN_vkCmdBindPipeline>(static_cast<const VK::Device*>(commandEncoder->device)->device, "vkCmdBindPipeline");
+		const VK::Device* vkDevice = static_cast<const VK::Device*>(commandEncoder->device);
+		const ref<VK::GraphicsPipeline> vkPipeline = ref_cast<VK::GraphicsPipeline>(pipeline);
 
-		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
-		const ref<VK::GraphicsPipeline> _graphicsPipeline = ref_cast<VK::GraphicsPipeline>(graphicsPipeline);
+		VK::CommandEncoder* vkCommandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
 
-		vkCmdBindPipeline(_commandEncoder->commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipeline->pipeline);
+		vkDevice->vkCmdBindPipeline(vkCommandEncoder->commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipeline->pipeline);
 
-		_commandEncoder->pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-		_commandEncoder->commandCount += 1;
+		vkCommandEncoder->pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+		vkCommandEncoder->commandCount += 1;
 	}
 
 	void VK::bindIndexBuffer(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {

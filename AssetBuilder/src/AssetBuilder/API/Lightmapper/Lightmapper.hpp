@@ -171,5 +171,10 @@ namespace Trident {
 			ref<AccelerationStructure> bottomLevelAccelerationStructure;
 			ref<AccelerationStructure> topLevelAccelerationStructure;
 			ref<Sampler> intermediateLightmapAtlasSampler;
+
+			DeviceAddressRegion rayGenerationShaderBindingTable;
+			DeviceAddressRegion rayMissShaderBindingTable;
+			DeviceAddressRegion rayHitShaderBindingTable;
+			DeviceAddressRegion rayCallableShaderBindingTable;
 	};
 }

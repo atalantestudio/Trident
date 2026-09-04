@@ -426,20 +426,20 @@ namespace Trident {
 	void CommandEncoder::dispatch(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) {
 		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
-				const vec3<uint32> maxComputeWorkgroupCount = device->getPhysicalDevice()->getLimits().maxComputeWorkgroupCount;
+				const vec3<uint32> maxComputeWorkGroupCount = device->getPhysicalDevice()->getLimits().maxComputeWorkGroupCount;
 
 				Validator validator;
 
-				if (groupCountX > maxComputeWorkgroupCount[0]) {
-					VALIDATION_ERROR("The group count in the X axis must not exceed [].", maxComputeWorkgroupCount[0]);
+				if (groupCountX > maxComputeWorkGroupCount[0]) {
+					VALIDATION_ERROR("groupCountX must not exceed [].", maxComputeWorkGroupCount[0]);
 				}
 
-				if (groupCountX > maxComputeWorkgroupCount[1]) {
-					VALIDATION_ERROR("The group count in the Y axis must not exceed [].", maxComputeWorkgroupCount[1]);
+				if (groupCountX > maxComputeWorkGroupCount[1]) {
+					VALIDATION_ERROR("groupCountY must not exceed [].", maxComputeWorkGroupCount[1]);
 				}
 
-				if (groupCountX > maxComputeWorkgroupCount[2]) {
-					VALIDATION_ERROR("The group count in the Z axis must not exceed [].", maxComputeWorkgroupCount[2]);
+				if (groupCountX > maxComputeWorkGroupCount[2]) {
+					VALIDATION_ERROR("groupCountZ must not exceed [].", maxComputeWorkGroupCount[2]);
 				}
 			}
 		#endif

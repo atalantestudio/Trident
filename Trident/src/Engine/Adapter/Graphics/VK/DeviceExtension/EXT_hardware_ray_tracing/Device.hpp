@@ -16,4 +16,6 @@ namespace Trident::VK {
 	ref<Trident::RayTracingPipeline> createRayTracingPipeline(const Trident::Device* device, const RayTracingPipelineDescriptor& descriptor);
 
 	AccelerationStructureBuildSizes getAccelerationStructureBuildSizes(const Trident::Device* device, ref<Trident::AccelerationStructureBuildGeometry> buildGeometry);
+
+	uint64 getBufferDeviceAddress(const Trident::Device* device, ref<Trident::Buffer> buffer);
 }

@@ -10,7 +10,15 @@
 #include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/CommandEncoder.hpp"
 
 namespace Trident::DX12 {
+	void bindRayTracingPipeline(Trident::CommandEncoder* commandEncoder, ref<Trident::RayTracingPipeline> pipeline) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		ENGINE_ERROR_UNIMPLEMENTED();
+	}
+
 	void buildAccelerationStructures(Trident::CommandEncoder* commandEncoder, view<ref<Trident::AccelerationStructure>> accelerationStructures, view<BaseBufferView> accelerationStructureViews, view<BaseBufferView> scratchViews) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
 		const DX12::Device* dxDevice = static_cast<const DX12::Device*>(commandEncoder->device);
 		const UINT AccelerationStructureCount = static_cast<UINT>(accelerationStructures.count());
 
@@ -31,5 +39,11 @@ namespace Trident::DX12 {
 		}
 
 		dxCommandEncoder->commandCount += 1;
+	}
+
+	void traceRays(Trident::CommandEncoder* commandEncoder, const DeviceAddressRegion& generationShaderBindingTable, const DeviceAddressRegion& missShaderBindingTable, const DeviceAddressRegion& hitShaderBindingTable, const DeviceAddressRegion& callableShaderBindingTable, Extent3D extent) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		ENGINE_ERROR_UNIMPLEMENTED();
 	}
 }

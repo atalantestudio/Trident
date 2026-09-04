@@ -37,14 +37,20 @@ namespace Trident {
 		factory(factory),
 		name(ConvertUTF16ToUTF8(adapterDescriptor.Description))
 	{
-		static constexpr uint32 D3D11_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION = 65535;
-
-		limits.maxComputeWorkgroupCount[0] = D3D11_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION;
-		limits.maxComputeWorkgroupCount[1] = D3D11_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION;
-		limits.maxComputeWorkgroupCount[2] = D3D11_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION;
-		limits.minAccelerationStructureScratchOffsetAlignment = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BYTE_ALIGNMENT;
+		limits.maxComputeWorkGroupCount[0] = D3D12_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION;
+		limits.maxComputeWorkGroupCount[1] = D3D12_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION;
+		limits.maxComputeWorkGroupCount[2] = D3D12_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION;
+		limits.maxComputeWorkGroupSize[0] = D3D12_CS_THREAD_GROUP_MAX_THREADS_PER_GROUP;
+		limits.maxComputeWorkGroupSize[1] = D3D12_CS_THREAD_GROUP_MAX_THREADS_PER_GROUP;
+		limits.maxComputeWorkGroupSize[2] = D3D12_CS_THREAD_GROUP_MAX_THREADS_PER_GROUP;
 		limits.minStorageBufferOffsetAlignment = D3D12_RAW_UAV_SRV_BYTE_ALIGNMENT;
 		limits.minUniformBufferOffsetAlignment = D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT;
+		limits.minAccelerationStructureScratchOffsetAlignment = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BYTE_ALIGNMENT;
+		limits.shaderGroupBaseAlignment = D3D12_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT;
+		limits.shaderGroupHandleAlignment = D3D12_RAYTRACING_SHADER_RECORD_BYTE_ALIGNMENT;
+		limits.shaderGroupHandleSize = D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+		limits.maxRayRecursionDepth = D3D12_RAYTRACING_MAX_DECLARABLE_TRACE_RECURSION_DEPTH;
+		limits.maxRayDispatchInvocationCount = D3D12_RAYTRACING_MAX_RAY_GENERATION_SHADER_THREADS;
 	}
 
 	ref<Trident::PhysicalDevice> DX12::selectPhysicalDevice(const Trident::Instance* instance, bool preferIntegratedGpu) {

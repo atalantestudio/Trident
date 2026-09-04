@@ -302,4 +302,16 @@ namespace Trident::VK {
 
 		return buildSizes;
 	}
+
+	uint64 getBufferDeviceAddress(const Trident::Device* device, ref<Trident::Buffer> buffer) {
+		const VK::Device* vkDevice = static_cast<const VK::Device*>(device);
+		const ref<VK::Buffer> vkBuffer = ref_cast<VK::Buffer>(buffer);
+
+		VkBufferDeviceAddressInfo info{};
+		info.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+		info.pNext = nullptr;
+		info.buffer = vkBuffer->buffer;
+
+		return vkDevice->vkGetBufferDeviceAddress(vkDevice->device, &info);
+	}
 }

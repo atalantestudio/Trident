@@ -38,6 +38,7 @@ namespace Trident {
 		LOAD_DEVICE_PROCEDURE(vkAllocateMemory);
 		LOAD_DEVICE_PROCEDURE(vkBindBufferMemory);
 		LOAD_DEVICE_PROCEDURE(vkBindImageMemory);
+		LOAD_DEVICE_PROCEDURE(vkCmdBindPipeline);
 		LOAD_DEVICE_PROCEDURE(vkCreateBuffer);
 		LOAD_DEVICE_PROCEDURE(vkCreateCommandPool);
 		LOAD_DEVICE_PROCEDURE(vkCreateComputePipelines);
@@ -91,6 +92,7 @@ namespace Trident {
 			switch (extension) {
 				case EXT_hardware_ray_tracing: {
 					LOAD_DEVICE_PROCEDURE(vkCmdBuildAccelerationStructuresKHR);
+					LOAD_DEVICE_PROCEDURE(vkCmdTraceRaysKHR);
 					LOAD_DEVICE_PROCEDURE(vkCreateAccelerationStructureKHR);
 					LOAD_DEVICE_PROCEDURE(vkCreateRayTracingPipelinesKHR);
 					LOAD_DEVICE_PROCEDURE(vkDestroyAccelerationStructureKHR);
@@ -339,6 +341,7 @@ namespace Trident {
 			limits.shaderGroupHandleAlignment = rayTracingPipelineProperties.shaderGroupHandleAlignment;
 			limits.shaderGroupHandleSize = rayTracingPipelineProperties.shaderGroupHandleSize;
 			limits.maxRayRecursionDepth = rayTracingPipelineProperties.maxRayRecursionDepth;
+			limits.maxRayDispatchInvocationCount = rayTracingPipelineProperties.maxRayDispatchInvocationCount;
 		}
 
 		return device;

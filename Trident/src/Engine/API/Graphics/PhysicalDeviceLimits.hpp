@@ -21,11 +21,11 @@ namespace Trident {
 		/// Only relevant when using the Vulkan adapter.
 		uint32 maxBoundDescriptorSetCount;
 
-		/// Maximum number of local workgroups that can be dispatched by a single dispatching command.
-		vec3<uint32> maxComputeWorkgroupCount;
+		/// Maximum number of local work groups that can be dispatched by a single dispatching command.
+		vec3<uint32> maxComputeWorkGroupCount;
 
-		/// Maximum size of a local compute workgroup, per dimension.
-		vec3<uint32> maxComputeWorkgroupSize;
+		/// Maximum size of a local compute work group, per dimension.
+		vec3<uint32> maxComputeWorkGroupSize;
 
 		/// Maximum size for a framebuffer.
 		vec2<uint32> maxFramebufferSize;
@@ -86,5 +86,6 @@ namespace Trident {
 		uint32 shaderGroupHandleAlignment;
 		uint32 shaderGroupHandleSize;
 		uint32 maxRayRecursionDepth;
+		uint32 maxRayDispatchInvocationCount;
 	};
 }

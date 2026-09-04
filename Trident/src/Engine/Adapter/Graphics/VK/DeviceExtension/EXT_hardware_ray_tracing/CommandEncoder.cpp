@@ -8,9 +8,26 @@
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/Adapter/Graphics/VK/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructure.hpp"
 #include "Engine/Adapter/Graphics/VK/DeviceExtension/EXT_hardware_ray_tracing/CommandEncoder.hpp"
+#include "Engine/Adapter/Graphics/VK/DeviceExtension/EXT_hardware_ray_tracing/RayTracingPipeline.hpp"
 
 namespace Trident::VK {
+	void bindRayTracingPipeline(Trident::CommandEncoder* commandEncoder, ref<Trident::RayTracingPipeline> pipeline) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const VK::Device* vkDevice = static_cast<const VK::Device*>(commandEncoder->device);
+		const ref<VK::RayTracingPipeline> vkPipeline = ref_cast<VK::RayTracingPipeline>(pipeline);
+
+		VK::CommandEncoder* vkCommandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
+
+		vkDevice->vkCmdBindPipeline(vkCommandEncoder->commandBuffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, vkPipeline->pipeline);
+
+		vkCommandEncoder->pipelineBindPoint = VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR;
+		vkCommandEncoder->commandCount += 1;
+	}
+
 	void buildAccelerationStructures(Trident::CommandEncoder* commandEncoder, view<ref<Trident::AccelerationStructure>> accelerationStructures, view<BaseBufferView> accelerationStructureViews, view<BaseBufferView> scratchViews) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
 		const VK::Device* vkDevice = static_cast<const VK::Device*>(commandEncoder->device);
 		const uint32 accelerationStructureCount = static_cast<uint32>(accelerationStructures.count());
 
@@ -42,6 +59,27 @@ namespace Trident::VK {
 		}
 
 		vkDevice->vkCmdBuildAccelerationStructuresKHR(vkCommandEncoder->commandBuffer, accelerationStructureCount, &buildGeometryInfos[0], &buildRangeInfos[0]);
+
+		vkCommandEncoder->commandCount += 1;
+	}
+
+	void traceRays(Trident::CommandEncoder* commandEncoder, const DeviceAddressRegion& generationShaderBindingTable, const DeviceAddressRegion& missShaderBindingTable, const DeviceAddressRegion& hitShaderBindingTable, const DeviceAddressRegion& callableShaderBindingTable, Extent3D extent) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const VK::Device* vkDevice = static_cast<const VK::Device*>(commandEncoder->device);
+
+		VK::CommandEncoder* vkCommandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
+
+		vkDevice->vkCmdTraceRaysKHR(
+			vkCommandEncoder->commandBuffer,
+			pointer_cast<const VkStridedDeviceAddressRegionKHR*>(&generationShaderBindingTable),
+			pointer_cast<const VkStridedDeviceAddressRegionKHR*>(&missShaderBindingTable),
+			pointer_cast<const VkStridedDeviceAddressRegionKHR*>(&hitShaderBindingTable),
+			pointer_cast<const VkStridedDeviceAddressRegionKHR*>(&callableShaderBindingTable),
+			extent.width,
+			extent.height,
+			extent.depth
+		);
 
 		vkCommandEncoder->commandCount += 1;
 	}

@@ -147,6 +147,7 @@ namespace Trident::DX12 {
 		adapter->waitForFenceImplementation = DX12::waitForFence;
 
 		// EXT_hardware_ray_tracing
+		adapter->bindRayTracingPipelineImplementation = DX12::bindRayTracingPipeline;
 		adapter->buildAccelerationStructuresImplementation = DX12::buildAccelerationStructures;
 		adapter->createAccelerationStructureBuildInstanceGeometryImplementation = DX12::createAccelerationStructureBuildInstanceGeometry;
 		adapter->createAccelerationStructureBuildTriangleGeometryImplementation = DX12::createAccelerationStructureBuildTriangleGeometry;
@@ -156,6 +157,8 @@ namespace Trident::DX12 {
 		adapter->destroyRayTracingPipelineImplementation = DX12::destroyRayTracingPipeline;
 		adapter->getAccelerationStructureBuildSizesImplementation = DX12::getAccelerationStructureBuildSizes;
 		adapter->getAccelerationStructureDeviceAddressImplementation = DX12::getAccelerationStructureDeviceAddress;
+		adapter->getBufferDeviceAddressImplementation = DX12::getBufferDeviceAddress;
 		adapter->getRayTracingShaderGroupHandlesImplementation = DX12::getRayTracingShaderGroupHandles;
+		adapter->traceRaysImplementation = DX12::traceRays;
 	}
 }

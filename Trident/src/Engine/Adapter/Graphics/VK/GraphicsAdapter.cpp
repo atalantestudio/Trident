@@ -126,6 +126,7 @@ namespace Trident::VK {
 		adapter->waitForFenceImplementation = VK::waitForFence;
 
 		// EXT_hardware_ray_tracing
+		adapter->bindRayTracingPipelineImplementation = VK::bindRayTracingPipeline;
 		adapter->buildAccelerationStructuresImplementation = VK::buildAccelerationStructures;
 		adapter->createAccelerationStructureBuildInstanceGeometryImplementation = VK::createAccelerationStructureBuildInstanceGeometry;
 		adapter->createAccelerationStructureBuildTriangleGeometryImplementation = VK::createAccelerationStructureBuildTriangleGeometry;
@@ -135,6 +136,8 @@ namespace Trident::VK {
 		adapter->destroyRayTracingPipelineImplementation = VK::destroyRayTracingPipeline;
 		adapter->getAccelerationStructureBuildSizesImplementation = VK::getAccelerationStructureBuildSizes;
 		adapter->getAccelerationStructureDeviceAddressImplementation = VK::getAccelerationStructureDeviceAddress;
+		adapter->getBufferDeviceAddressImplementation = VK::getBufferDeviceAddress;
 		adapter->getRayTracingShaderGroupHandlesImplementation = VK::getRayTracingShaderGroupHandles;
+		adapter->traceRaysImplementation = VK::traceRays;
 	}
 }

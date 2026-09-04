@@ -109,6 +109,7 @@ namespace Trident {
 			WaitForFenceImplementation waitForFenceImplementation;
 
 			// EXT_hardware_ray_tracing
+			BindRayTracingPipelineImplementation bindRayTracingPipelineImplementation;
 			BuildAccelerationStructuresImplementation buildAccelerationStructuresImplementation;
 			CreateAccelerationStructureBuildInstanceGeometryImplementation createAccelerationStructureBuildInstanceGeometryImplementation;
 			CreateAccelerationStructureBuildTriangleGeometryImplementation createAccelerationStructureBuildTriangleGeometryImplementation;
@@ -118,7 +119,9 @@ namespace Trident {
 			DestroyRayTracingPipelineImplementation destroyRayTracingPipelineImplementation;
 			GetAccelerationStructureBuildSizesImplementation getAccelerationStructureBuildSizesImplementation;
 			GetAccelerationStructureDeviceAddressImplementation getAccelerationStructureDeviceAddressImplementation;
+			GetBufferDeviceAddressImplementation getBufferDeviceAddressImplementation;
 			GetRayTracingShaderGroupHandlesImplementation getRayTracingShaderGroupHandlesImplementation;
+			TraceRaysImplementation traceRaysImplementation;
 
 		private:
 			GraphicsAPI api;
