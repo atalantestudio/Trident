@@ -132,6 +132,8 @@ namespace Trident {
 			ref<PhysicalDevice> physicalDevice;
 			const PhysicalDeviceLimits* limits;
 			ref<ExtendedDevice<EXT_hardware_ray_tracing>> device;
+			ref<Queue> queue;
+			ref<ExtendedCommandEncoder<EXT_hardware_ray_tracing>> commandEncoder;
 
 			ref<RenderPass> gBufferRenderPass;
 			ref<RenderPass> dilationRenderPass;

@@ -44,6 +44,13 @@ namespace Trident {
 		physicalDevice = instance->selectPhysicalDevice(false);
 		limits = &physicalDevice->getLimits();
 		device = physicalDevice->createDevice<EXT_hardware_ray_tracing>();
+		queue = device->getQueue(QueueFamilyCapability::GRAPHICS);
+		commandEncoder = queue->createCommandEncoder<EXT_hardware_ray_tracing>({
+			.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "One-time commands",
+			#endif
+		});
 
 		gBufferRenderPass = createGBufferRenderPass();
 		dilationRenderPass = createDilationRenderPass();
@@ -299,14 +306,7 @@ namespace Trident {
 
 		stagingBuffer->unmap();
 
-		const ref<Queue> queue = device->getQueue(QueueFamilyCapability::TRANSFER);
-		const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
-			.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "One-time commands",
-			#endif
-		});
-
+		commandEncoder->reset();
 		commandEncoder->begin();
 
 		const BufferCopyRegion bufferCopyRegions[] = {
@@ -466,15 +466,7 @@ namespace Trident {
 		const uint32 workGroupX = ceil(imageAssetDescriptor.extent.width / 16, 16u);
 		const uint32 workGroupY = ceil(imageAssetDescriptor.extent.height / 16, 16u);
 
-		const ref<Queue> queue = device->getQueue(QueueFamilyCapability::GRAPHICS);
-		const ref<ExtendedCommandEncoder<EXT_hardware_ray_tracing>> commandEncoder = queue->createCommandEncoder<EXT_hardware_ray_tracing>({
-			.usage = CommandBufferUsage::ONE_TIME_SUBMIT,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Generate lightmaps",
-			#endif
-		});
-
-		// TODO(graphics/command-encoder/bind-resources): Ensure that descriptor sets and vertex buffers, if any, are always bound after the pipeline.
+		commandEncoder->reset();
 		commandEncoder->begin();
 		commandEncoder->beginRenderPass({
 			.framebuffer = context.gBufferFramebuffer,
@@ -488,7 +480,10 @@ namespace Trident {
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, context.gBufferFramebuffer->getExtent());
 		commandEncoder->bindGraphicsPipeline(gBufferPipeline);
+
+		// TODO(graphics/command-encoder/bind-resources): Ensure that descriptor sets and vertex buffers, if any, are always bound after the pipeline.
 		commandEncoder->bindDescriptorSets(gBufferPipelineLayout, 0, descriptorSets[0]);
+
 		commandEncoder->draw(indexCount, 25, 0, 0);
 		commandEncoder->endRenderPass();
 

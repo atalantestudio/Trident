@@ -19,6 +19,8 @@ namespace Trident::DX12 {
 		DX12::CommandEncoder* dxCommandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 
 		dxCommandEncoder->commandList->SetPipelineState1(dxPipeline->stateObject);
+		dxCommandEncoder->commandList->SetComputeRootSignature(dxPipeline->rootSignature);
+		dxCommandEncoder->computePipelineBound = true;
 		dxCommandEncoder->commandCount += 1;
 	}
 

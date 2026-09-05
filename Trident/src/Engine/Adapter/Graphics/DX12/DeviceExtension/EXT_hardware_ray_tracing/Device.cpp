@@ -98,6 +98,7 @@ namespace Trident::DX12 {
 		ref<DX12::RayTracingPipeline> rayTracingPipeline = allocateRef<DX12::RayTracingPipeline>();
 		rayTracingPipeline->device = device;
 		rayTracingPipeline->exportNames = sequence<const WCHAR*>(descriptor.shaderModules.count());
+		rayTracingPipeline->rootSignature = dxPipelineLayout->rootSignature;
 
 		D3D12_GLOBAL_ROOT_SIGNATURE GlobalRootSignature{};
 		GlobalRootSignature.pGlobalRootSignature = dxPipelineLayout->rootSignature;

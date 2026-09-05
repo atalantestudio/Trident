@@ -11,6 +11,7 @@ namespace Trident::DX12 {
 			sequence<LPCWSTR> exportNames;
 			ID3D12StateObject* stateObject;
 			ID3D12StateObjectProperties* stateObjectProperties;
+			ID3D12RootSignature* rootSignature;
 	};
 
 	void destroyRayTracingPipeline(const Trident::Device* device, const Trident::RayTracingPipeline* pipeline);
