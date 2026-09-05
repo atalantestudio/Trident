@@ -2,7 +2,7 @@
 // Distributed under the GNU GPL v3 License.
 
 struct Attributes {
-	float3 barycentrics;
+	float2 barycentrics;
 };
 
 struct Payload {
@@ -11,7 +11,7 @@ struct Payload {
 
 [shader("closesthit")]
 void main(inout Payload payload, in Attributes attributes) {
-	const float3 barycentricCoordinates = float3(1.0 - attributes.barycentrics.x - attributes.barycentrics.y, attributes.barycentrics.x, attributes.barycentrics.y);
+	float3 barycentricCoordinates = float3(1.0 - attributes.barycentrics.x - attributes.barycentrics.y, attributes.barycentrics.x, attributes.barycentrics.y);
 
 	payload.hitValue = barycentricCoordinates;
 }

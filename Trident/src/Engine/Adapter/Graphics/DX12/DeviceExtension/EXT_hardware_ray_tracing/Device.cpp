@@ -10,7 +10,10 @@
 #include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructureBuildGeometry.hpp"
 #include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/Device.hpp"
 #include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/GeometryFlags.hpp"
+#include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/RayTracingPipeline.hpp"
+#include "Engine/Adapter/Graphics/DX12/PipelineLayout.hpp"
 #include "Engine/Adapter/Graphics/DX12/Format.hpp"
+#include "Engine/Adapter/Graphics/DX12/ShaderModule.hpp"
 #include "Engine/Adapter/Graphics/DX12/VertexInputAttributeFormat.hpp"
 
 namespace Trident::DX12 {
@@ -87,10 +90,145 @@ namespace Trident::DX12 {
 	}
 
 	ref<Trident::RayTracingPipeline> createRayTracingPipeline(const Trident::Device* device, const RayTracingPipelineDescriptor& descriptor) {
-		// TODO(graphics/dx12/ext_hardware_ray_tracing/ray-tracing-pipeline)
-		ENGINE_ERROR_UNIMPLEMENTED();
+		static constexpr UINT BaseSubobjectCount = 4;
 
-		return nullptr;
+		const DX12::Device* dxDevice = static_cast<const DX12::Device*>(device);
+		const ref<DX12::PipelineLayout> dxPipelineLayout = ref_cast<DX12::PipelineLayout>(descriptor.layout);
+
+		ref<DX12::RayTracingPipeline> rayTracingPipeline = allocateRef<DX12::RayTracingPipeline>();
+		rayTracingPipeline->device = device;
+		rayTracingPipeline->exportNames = sequence<const WCHAR*>(descriptor.shaderModules.count());
+
+		D3D12_GLOBAL_ROOT_SIGNATURE GlobalRootSignature{};
+		GlobalRootSignature.pGlobalRootSignature = dxPipelineLayout->rootSignature;
+
+		// TODO(graphics/dx12/ext_hardware_ray_tracing/shader-config): Set proper values.
+		D3D12_RAYTRACING_SHADER_CONFIG RaytracingShaderConfig{};
+		RaytracingShaderConfig.MaxPayloadSizeInBytes = 20;
+		RaytracingShaderConfig.MaxAttributeSizeInBytes = 8;
+
+		D3D12_RAYTRACING_PIPELINE_CONFIG RaytracingPipelineConfig{};
+		RaytracingPipelineConfig.MaxTraceRecursionDepth = descriptor.maxRecursionDepth;
+
+		D3D12_HIT_GROUP_DESC HitGroupDesc{};
+		HitGroupDesc.HitGroupExport = L"HitGroup";
+		HitGroupDesc.Type = D3D12_HIT_GROUP_TYPE_TRIANGLES;
+		HitGroupDesc.AnyHitShaderImport = nullptr;
+		HitGroupDesc.ClosestHitShaderImport = nullptr;
+		HitGroupDesc.IntersectionShaderImport = nullptr;
+
+		sequence<LPWSTR> RenamedExportNames(descriptor.shaderModules.count());
+		sequence<D3D12_EXPORT_DESC> ExportDescs(descriptor.shaderModules.count());
+		sequence<D3D12_DXIL_LIBRARY_DESC> DXILLibraryDescs(descriptor.shaderModules.count());
+		sequence<D3D12_STATE_SUBOBJECT> Subobjects(BaseSubobjectCount + descriptor.shaderModules.count());
+
+		D3D12_STATE_SUBOBJECT& GlobalRootSignatureSubobject = Subobjects[0];
+		GlobalRootSignatureSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE_GLOBAL_ROOT_SIGNATURE;
+		GlobalRootSignatureSubobject.pDesc = &GlobalRootSignature;
+
+		D3D12_STATE_SUBOBJECT& RaytracingShaderConfigSubobject = Subobjects[1];
+		RaytracingShaderConfigSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE_RAYTRACING_SHADER_CONFIG;
+		RaytracingShaderConfigSubobject.pDesc = &RaytracingShaderConfig;
+
+		D3D12_STATE_SUBOBJECT& RaytracingPipelineConfigSubobject = Subobjects[2];
+		RaytracingPipelineConfigSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE_RAYTRACING_PIPELINE_CONFIG;
+		RaytracingPipelineConfigSubobject.pDesc = &RaytracingPipelineConfig;
+
+		D3D12_STATE_SUBOBJECT& HitGroupDescSubobject = Subobjects[3];
+		HitGroupDescSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE_HIT_GROUP;
+		HitGroupDescSubobject.pDesc = &HitGroupDesc;
+
+		UINT ShaderModuleIndex = 0;
+
+		while (ShaderModuleIndex < descriptor.shaderModules.count()) {
+			const ref<DX12::ShaderModule> ShaderModule = ref_cast<DX12::ShaderModule>(descriptor.shaderModules[ShaderModuleIndex]);
+
+			RenamedExportNames[ShaderModuleIndex] = ConvertUTF8ToUTF16(&ShaderModule->entryPoint[0]);
+
+			LPCWSTR* ExportName = &rayTracingPipeline->exportNames[ShaderModuleIndex];
+
+			D3D12_EXPORT_DESC& ExportDesc = ExportDescs[ShaderModuleIndex];
+			ExportDesc.ExportToRename = RenamedExportNames[ShaderModuleIndex];
+			ExportDesc.Flags = D3D12_EXPORT_FLAG_NONE;
+
+			switch (ShaderModule->stage) {
+				case ShaderStage::RAY_GENERATION: {
+					*ExportName = L"Generation";
+
+					ExportDesc.Name = L"Generation";
+
+					break;
+				}
+				case ShaderStage::RAY_CLOSEST_HIT: {
+					*ExportName = L"HitGroup";
+
+					ExportDesc.Name = L"ClosestHit";
+					HitGroupDesc.ClosestHitShaderImport = ExportDesc.Name;
+
+					break;
+				}
+				case ShaderStage::RAY_MISS: {
+					*ExportName = L"Miss";
+
+					ExportDesc.Name = L"Miss";
+
+					break;
+				}
+				case ShaderStage::RAY_ANY_HIT: {
+					*ExportName = L"HitGroup";
+
+					ExportDesc.Name = L"AnyHit";
+					HitGroupDesc.AnyHitShaderImport = ExportDesc.Name;
+
+					break;
+				}
+				case ShaderStage::RAY_INTERSECTION: {
+					*ExportName = L"HitGroup";
+
+					ExportDesc.Name = L"Intersection";
+					HitGroupDesc.IntersectionShaderImport = ExportDesc.Name;
+
+					break;
+				}
+				default: {
+					ADAPTER_ASSERT(false, "Unsupported shader stage.");
+
+					break;
+				}
+			}
+
+			D3D12_DXIL_LIBRARY_DESC& DXILLibraryDesc = DXILLibraryDescs[ShaderModuleIndex];
+			DXILLibraryDesc.DXILLibrary = ShaderModule->bytecode;
+			DXILLibraryDesc.NumExports = 1;
+			DXILLibraryDesc.pExports = &ExportDesc;
+
+			D3D12_STATE_SUBOBJECT& Subobject = Subobjects[BaseSubobjectCount + ShaderModuleIndex];
+			Subobject.Type = D3D12_STATE_SUBOBJECT_TYPE_DXIL_LIBRARY;
+			Subobject.pDesc = &DXILLibraryDesc;
+
+			ShaderModuleIndex += 1;
+		}
+
+		D3D12_STATE_OBJECT_DESC Desc{};
+		Desc.Type = D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE;
+		Desc.NumSubobjects = static_cast<UINT>(Subobjects.count());
+		Desc.pSubobjects = &Subobjects[0];
+
+		HRESULT result;
+
+		result = dxDevice->device5->CreateStateObject(&Desc, IID_PPV_ARGS(&rayTracingPipeline->stateObject));
+
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create state object.");
+
+		result = rayTracingPipeline->stateObject->QueryInterface(&rayTracingPipeline->stateObjectProperties);
+
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to query state object properties interface.");
+
+		for (LPWSTR ExportName : RenamedExportNames) {
+			free(ExportName);
+		}
+
+		return rayTracingPipeline;
 	}
 
 	AccelerationStructureBuildSizes getAccelerationStructureBuildSizes(const Trident::Device* device, ref<Trident::AccelerationStructureBuildGeometry> buildGeometry) {

@@ -11,7 +11,7 @@ namespace Trident::VK {
 			VkPipeline pipeline;
 	};
 
-	void destroyRayTracingPipeline(const Trident::Device* device, const Trident::RayTracingPipeline* rayTracingPipeline);
+	void destroyRayTracingPipeline(const Trident::Device* device, const Trident::RayTracingPipeline* pipeline);
 
 	void getRayTracingShaderGroupHandles(const Trident::Device* device, const Trident::RayTracingPipeline* pipeline, range<uint32, uint32> groupRange, void* mappedRange);
 }

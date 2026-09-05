@@ -24,6 +24,8 @@ namespace Trident {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		ref<DX12::ShaderModule> shaderModule = allocateRef<DX12::ShaderModule>(device);
+		shaderModule->entryPoint = descriptor.entryPoint;
+		shaderModule->stage = descriptor.stage;
 		shaderModule->code = code;
 		shaderModule->bytecode.pShaderBytecode = &shaderModule->code[0];
 		shaderModule->bytecode.BytecodeLength = shaderModule->code.count();

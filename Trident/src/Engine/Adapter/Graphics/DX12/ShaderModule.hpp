@@ -11,6 +11,8 @@ namespace Trident {
 			explicit ShaderModule(const Trident::Device* device);
 
 		public:
+			ShaderStage stage;
+			sequence<char8> entryPoint;
 			sequence<uint8> code;
 			D3D12_SHADER_BYTECODE bytecode;
 	};

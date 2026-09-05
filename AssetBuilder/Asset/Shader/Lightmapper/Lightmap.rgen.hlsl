@@ -22,7 +22,7 @@ struct Material {
 RaytracingAccelerationStructure tlas : register(t0);
 StructuredBuffer<Arguments> argumentBuffer : register(t1);
 StructuredBuffer<Material> materialBuffer : register(t2);
-StructuredBuffer<uint> emissiveTriangleBuffer : register(t3);
+StructuredBuffer<uint> emissiveTriangleIndexBuffer : register(t3);
 Texture2D<float4> gBufferPositionImage : register(t4);
 Texture2D<float4> gBufferSmoothPositionImage : register(t5);
 Texture2D<float4> gBufferTriangleNormalImage : register(t6);

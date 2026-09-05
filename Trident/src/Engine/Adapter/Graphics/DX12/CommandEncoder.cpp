@@ -881,6 +881,7 @@ namespace Trident {
 
 					break;
 				}
+				case ImageLayout::GENERAL:
 				case ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
 				case ImageLayout::PRESENT_SRC: {
 					break;

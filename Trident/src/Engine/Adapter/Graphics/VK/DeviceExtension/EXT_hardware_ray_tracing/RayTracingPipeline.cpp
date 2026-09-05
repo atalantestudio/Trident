@@ -8,9 +8,9 @@
 #include "Engine/API/Graphics/PhysicalDevice.hpp"
 
 namespace Trident::VK {
-	void destroyRayTracingPipeline(const Trident::Device* device, const Trident::RayTracingPipeline* rayTracingPipeline) {
+	void destroyRayTracingPipeline(const Trident::Device* device, const Trident::RayTracingPipeline* pipeline) {
 		const VK::Device* vkDevice = static_cast<const VK::Device*>(device);
-		const VK::RayTracingPipeline* vkPipeline = static_cast<const VK::RayTracingPipeline*>(rayTracingPipeline);
+		const VK::RayTracingPipeline* vkPipeline = static_cast<const VK::RayTracingPipeline*>(pipeline);
 
 		vkDevice->vkDestroyPipeline(vkDevice->device, vkPipeline->pipeline, nullptr);
 	}
