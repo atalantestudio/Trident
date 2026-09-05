@@ -2,7 +2,7 @@
 // Distributed under the GNU GPL v3 License.
 
 struct Payload {
-	/* [[vk::location(0)]] */ float3 hitValue;
+	float3 hitValue;
 };
 
 [shader("miss")]

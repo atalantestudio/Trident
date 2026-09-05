@@ -25,11 +25,11 @@ namespace Trident {
 				stream.write<float32>(scene.skyColor.z);
 				stream.write<uint32>(scene.skyboxAssetIdentifier);
 				stream.write<uint8>(sizeof(uint32));
-				stream.write<uint32>(scene.vertexCount);
-				stream.write<uint32>(scene.staticGeometry.vertexCount);
-				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.bakedVertices.count()));
-				stream.write<uint32>(scene.triangleCount);
-				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.bakedIndices.count() / 3));
+				stream.write<uint32>(static_cast<uint32>(scene.vertices.count()));
+				stream.write<uint32>(scene.staticGeometry.bakedVertexCount + scene.staticGeometry.externalVertexCount);
+				stream.write<uint32>(scene.staticGeometry.bakedVertexCount);
+				stream.write<uint32>(static_cast<uint32>(scene.indices.count()) / 3);
+				stream.write<uint32>(scene.staticGeometry.bakedIndexCount / 3);
 				stream.write<uint32>(scene.staticGeometry.lineIndexCount);
 				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.lightmapCoordinates.count()));
 				stream.write<uint32>(static_cast<uint32>(scene.staticGeometry.instances.count()));
@@ -54,17 +54,27 @@ namespace Trident {
 				stream.write<float32>(scene.spawn.direction.y);
 				stream.write<float32>(scene.spawn.direction.z);
 
-				for (const BuildVertex3D& vertex : scene.staticGeometry.bakedVertices) {
+				uint32 vertexIndex = 0;
+
+				while (vertexIndex < scene.staticGeometry.bakedVertexCount) {
+					const BuildVertex3D& vertex = scene.vertices[vertexIndex];
+
 					stream.write<float32>(vertex.position.x);
 					stream.write<float32>(vertex.position.y);
 					stream.write<float32>(vertex.position.z);
 					stream.write<uint32>(pack<VertexInputAttributeFormat::R10G10B10A2_UNORM, uint32>(vertex.normal));
 					stream.write<uint32>(pack<VertexInputAttributeFormat::R10G10B10A2_UNORM, uint32>(vertex.tangent));
 					stream.write<uint32>(pack<VertexInputAttributeFormat::R16G16_FLOAT, uint32>(vertex.textureCoordinate));
+
+					vertexIndex += 1;
 				}
 
-				for (const uint32 index : scene.staticGeometry.bakedIndices) {
-					stream.write<uint32>(index);
+				uint32 indexOffset = 0;
+
+				while (indexOffset < scene.staticGeometry.bakedIndexCount) {
+					stream.write<uint32>(scene.indices[indexOffset]);
+
+					indexOffset += 1;
 				}
 
 				for (const uint32 index : scene.staticGeometry.lineIndices) {
@@ -176,12 +186,12 @@ namespace Trident {
 					sizeof(uint8) +
 					sizeof(uint32) * 17 +
 					sizeof(svec3<float32>) * 5 +
-					scene.staticGeometry.bakedVertices.count() * sizeof(Vertex3D) +
-					scene.staticGeometry.bakedIndices.count() * sizeof(uint32) +
+					scene.staticGeometry.bakedVertexCount * sizeof(Vertex3D) +
+					scene.staticGeometry.bakedIndexCount * sizeof(uint32) +
 					scene.staticGeometry.lineIndices.count() * sizeof(uint32) +
 					scene.staticGeometry.lightmapCoordinates.count() * sizeof(uint32) +
 					scene.staticGeometry.instances.count() * sizeof(BuildTransform3D) +
-					scene.geometries.count() * sizeof(BuildGeometry) +
+					scene.geometries.count() * (sizeof(range<uint32, uint32>) + sizeof(uint32)) +
 					scene.materialGeometries.count() * sizeof(MaterialGeometry) +
 					scene.materials.count() * sizeof(BuildMaterial) +
 					scene.dynamicGeometry.pointLights.count() * (sizeof(svec3<float32>) * 2 + sizeof(float32)) +

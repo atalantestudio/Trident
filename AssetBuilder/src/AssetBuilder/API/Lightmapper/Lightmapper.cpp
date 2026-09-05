@@ -113,7 +113,7 @@ namespace Trident {
 			initialize();
 		}
 
-		buildAccelerationStructures(*descriptor.scene);
+		buildAccelerationStructures(*descriptor.scene, descriptor.vertices.count(), descriptor.indices.count());
 
 		const uint64 indexCount = descriptor.indices.count();
 		const uint64 materialCount = descriptor.materials.count();

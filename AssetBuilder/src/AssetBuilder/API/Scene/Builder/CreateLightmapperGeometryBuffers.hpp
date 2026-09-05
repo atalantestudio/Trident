@@ -11,11 +11,11 @@ namespace Trident {
 		indices = sequence<uint32>(lightmapIndexCount);
 		materials = sequence<LightmapMaterial>(lightmapMaterials.size());
 
-		std::copy(scene.staticGeometry.bakedVertices.begin(), scene.staticGeometry.bakedVertices.end(), &vertices[0]);
-		std::copy(scene.staticGeometry.bakedIndices.begin(), scene.staticGeometry.bakedIndices.end(), &indices[0]);
+		std::copy_n(&scene.vertices[0], scene.staticGeometry.bakedVertexCount, &vertices[0]);
+		std::copy_n(&scene.indices[0], scene.staticGeometry.bakedIndexCount, &indices[0]);
 
-		uint32 vertexOffset = static_cast<uint32>(bakedVertexCount);
-		uint32 indexOffset = static_cast<uint32>(bakedIndexCount);
+		uint32 vertexOffset = scene.staticGeometry.bakedVertexCount;
+		uint32 indexOffset = scene.staticGeometry.bakedIndexCount;
 		uint32 materialShaderIndex = 0;
 
 		while (materialShaderIndex < materialShaders.size()) {

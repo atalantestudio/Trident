@@ -57,18 +57,13 @@ namespace Trident {
 
 	struct BuildStaticSceneGeometry3D {
 		uint32 geometryCount;
-
-		/// Baked and external vertices.
-		uint32 vertexCount;
-
-		/// Baked and external indices for TRIANGLE_LIST primitives.
-		uint32 indexCount;
+		uint32 bakedVertexCount;
+		uint32 externalVertexCount;
+		uint32 bakedIndexCount;
+		uint32 externalIndexCount;
 
 		/// Baked and external indices for LINE_LIST primitives.
 		uint32 lineIndexCount;
-
-		sequence<BuildVertex3D> bakedVertices;
-		sequence<uint32> bakedIndices;
 
 		/// Used to visualize face wireframes.
 		sequence<uint32> lineIndices;
@@ -96,6 +91,9 @@ namespace Trident {
 		/// Pre-multiplied by the sun intensity.
 		svec3<float32> sunColor;
 
+		sequence<BuildVertex3D> vertices;
+		sequence<uint32> indices;
+
 		sequence<BuildGeometry> geometries;
 
 		/// Static and dynamic material shaders.
@@ -107,8 +105,6 @@ namespace Trident {
 		/// Grouped by material.
 		sequence<MaterialGeometry> materialGeometries;
 
-		uint32 vertexCount;
-		uint32 triangleCount;
 		BuildStaticSceneGeometry3D staticGeometry;
 		BuildDynamicSceneGeometry3D dynamicGeometry;
 

@@ -34,11 +34,8 @@ layout(set = 0, binding = 3) buffer readonly EmissiveTriangleIndexBuffer {
 };
 
 layout(set = 0, binding = 4, rgba32f) uniform readonly image2D gBufferPositionImage;
-
 layout(set = 0, binding = 5, rgba32f) uniform readonly image2D gBufferSmoothPositionImage;
-
 layout(set = 0, binding = 6, rgba32f) uniform readonly image2D gBufferTriangleNormalImage;
-
 layout(set = 0, binding = 7, rgba32f) uniform readonly image2D gBufferVertexNormalImage;
 
 layout(set = 0, binding = 8, rgba8) uniform writeonly image2D intermediateLightmapAtlas;
@@ -48,5 +45,10 @@ layout(location = 0) rayPayloadEXT vec3 hitValue;
 void main() {
 	ivec2 coordinate = ivec2(gl_LaunchIDEXT.xy);
 
-	imageStore(intermediateLightmapAtlas, ivec2(gl_LaunchIDEXT.xy), vec4(1.0, 0.2, 0.0, 1.0));
+	vec4 gBufferPosition = imageLoad(gBufferPositionImage, coordinate);
+	vec4 gBufferSmoothPosition = imageLoad(gBufferSmoothPositionImage, coordinate);
+	vec4 gBufferTriangleNormal = imageLoad(gBufferTriangleNormalImage, coordinate);
+	vec4 gBufferVertexNormal = imageLoad(gBufferVertexNormalImage, coordinate);
+
+	imageStore(intermediateLightmapAtlas, coordinate, vec4(abs(gBufferTriangleNormal.xyz), 1.0));
 }

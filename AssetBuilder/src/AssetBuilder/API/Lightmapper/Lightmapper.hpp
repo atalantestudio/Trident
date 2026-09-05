@@ -115,7 +115,7 @@ namespace Trident {
 
 			ref<Sampler> createIntermediateLightmapAtlasSampler() const;
 
-			void buildAccelerationStructures(const BuildScene3D& scene);
+			void buildAccelerationStructures(const BuildScene3D& scene, uint64 vertexCount, uint64 indexCount);
 
 			void encodeOneTimeCommands(const LightmapperDescriptor& descriptor) const;
 

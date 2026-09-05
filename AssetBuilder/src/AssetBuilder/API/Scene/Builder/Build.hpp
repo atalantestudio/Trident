@@ -98,13 +98,13 @@ namespace Trident {
 
 		scene.sunDirection = descriptor.sunDirection;
 		scene.sunColor = descriptor.sunColor * descriptor.sunIntensity;
-		scene.vertexCount = vertexCounts[0] + vertexCounts[1] + vertexCounts[2];
+		scene.vertices = sequence<BuildVertex3D>(vertexCounts[0] + vertexCounts[1] + vertexCounts[2]);
+		scene.indices = sequence<uint32>(indexCounts[0] + indexCounts[1] + indexCounts[2]);
 		scene.staticGeometry.geometryCount = geometryCounts[0];
-		scene.staticGeometry.vertexCount = vertexCounts[0] + vertexCounts[1];
-		scene.staticGeometry.indexCount = indexCounts[0] + indexCounts[1];
-		scene.staticGeometry.bakedVertices = sequence<BuildVertex3D>(vertexCounts[0]);
-		scene.staticGeometry.bakedIndices = sequence<uint32>(indexCounts[0]);
-		scene.triangleCount = static_cast<uint32>((indexCounts[0] + indexCounts[1] + indexCounts[2]) / 3);
+		scene.staticGeometry.bakedVertexCount = vertexCounts[0];
+		scene.staticGeometry.externalVertexCount = vertexCounts[1];
+		scene.staticGeometry.bakedIndexCount = indexCounts[0];
+		scene.staticGeometry.externalIndexCount = indexCounts[1];
 		scene.staticGeometry.lightmapAtlasImageAssetDescriptor.identifier = max<uint32>();
 		scene.dynamicGeometry.entityCount = entityCount;
 		scene.spawn = descriptor.spawn;
@@ -112,8 +112,8 @@ namespace Trident {
 
 		uint32 intermediateGeometryIndex = 0;
 		uint32 buildGeometryOffsets[] = {0, geometryCounts[0]};
-		uint32 vertexOffsets[] = {0, vertexCounts[0], vertexCounts[1]};
-		uint32 indexOffsets[] = {0, indexCounts[0], indexCounts[1]};
+		uint32 vertexOffsets[] = {0, vertexCounts[0], vertexCounts[0] + vertexCounts[1]};
+		uint32 indexOffsets[] = {0, indexCounts[0], indexCounts[0] + indexCounts[1]};
 
 		while (intermediateGeometryIndex < geometries.size()) {
 			IntermediateGeometry& intermediateGeometry = geometries[intermediateGeometryIndex];
@@ -140,16 +140,14 @@ namespace Trident {
 
 			intermediateGeometry.filteredIndex = buildGeometryOffset;
 
-			if (geometry.assetIdentifier == max<uint32>()) {
-				std::copy(intermediateGeometry.vertices.begin(), intermediateGeometry.vertices.end(), &scene.staticGeometry.bakedVertices[geometry.vertexRange.offset]);
+			std::copy(intermediateGeometry.vertices.begin(), intermediateGeometry.vertices.end(), &scene.vertices[geometry.vertexRange.offset]);
 
-				uint32 indexIndex = 0;
+			uint32 indexIndex = 0;
 
-				while (indexIndex < geometry.indexRange.count) {
-					scene.staticGeometry.bakedIndices[geometry.indexRange.offset + indexIndex] = geometry.vertexRange.offset + intermediateGeometry.indices[indexIndex];
+			while (indexIndex < geometry.indexRange.count) {
+				scene.indices[geometry.indexRange.offset + indexIndex] = geometry.vertexRange.offset + intermediateGeometry.indices[indexIndex];
 
-					indexIndex += 1;
-				}
+				indexIndex += 1;
 			}
 
 			vertexOffset += geometry.vertexRange.count;

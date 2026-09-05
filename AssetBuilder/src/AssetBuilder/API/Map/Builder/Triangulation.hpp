@@ -37,7 +37,7 @@ namespace Trident {
 			uint32 vertexIndex = 0;
 
 			while (vertexIndex < face.vertexCount) {
-				BuildVertex3D& vertex = scene.staticGeometry.bakedVertices[vertexOffset + vertexIndex];
+				BuildVertex3D& vertex = scene.vertices[vertexOffset + vertexIndex];
 				vertex.position = facePositions[indices[face.indexRange.offset + vertexIndex]];
 				vertex.normal = face.normal;
 
@@ -115,9 +115,9 @@ namespace Trident {
 
 					// TODO(asset-builder/map): Handle holes.
 
-					scene.staticGeometry.bakedIndices[triangleIndexOffset + 0] = vertexOffset + indexBuffer[indexOffsetA];
-					scene.staticGeometry.bakedIndices[triangleIndexOffset + 1] = vertexOffset + indexBuffer[indexOffsetB];
-					scene.staticGeometry.bakedIndices[triangleIndexOffset + 2] = vertexOffset + indexBuffer[indexOffsetC];
+					scene.indices[triangleIndexOffset + 0] = vertexOffset + indexBuffer[indexOffsetA];
+					scene.indices[triangleIndexOffset + 1] = vertexOffset + indexBuffer[indexOffsetB];
+					scene.indices[triangleIndexOffset + 2] = vertexOffset + indexBuffer[indexOffsetC];
 
 					indicesCopy.erase(indicesCopy.begin() + indexOffsetB);
 					indexBuffer.erase(indexBuffer.begin() + indexOffsetB);
