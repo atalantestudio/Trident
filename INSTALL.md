@@ -73,11 +73,18 @@ Type `Ctrl` + `Shift` + `B` to build the project, then type `F5` to start debugg
 
 ## Building the shaders
 
-Vulkan and OpenGL 4.6 (if `GL_SOURCE_FROM_SPIRV` is enabled) require SPIR-V binaries.
+| API | File extension |
+| - | - |
+| DirectX12 | .dxil |
+| OpenGL without `GL_SOURCE_FROM_SPIRV` | .glsl |
+| OpenGL 4.6 with `GL_SOURCE_FROM_SPIRV` | .spv |
+| Vulkan | .spv |
 
-Run [scripts/BuildShaders.bat](https://github.com/atalantestudio/Trident/tree/main/scripts/BuildShaders.bat) to compile the GLSL shaders to SPIR-V. This will generate the binaries inside the current asset directory.
+Before building all shaders, make sure dxc.exe and glslc.exe are in your PATH. For convenience, the engine provides a copy of the executables (extracted from Vulkan SDK 1.4.335.0) in [vendor/dxc](https://github.com/atalantestudio/Trident/blob/main/vendor/dxc) and [vendor/glslc](https://github.com/atalantestudio/Trident/blob/main/vendor/glslc) respectively.
 
-Once a build is done, the Asset/Shader directory will be copied to the output directory next to the executable.
+Run [scripts/BuildAllShaders.bat](https://github.com/atalantestudio/Trident/tree/main/scripts/BuildAllShaders.bat) to produce the DXIL and SPIR-V binaries.
+
+Once the build is done, the Asset/Shader directory will be copied to the output directory next to the executable.
 
 
 
