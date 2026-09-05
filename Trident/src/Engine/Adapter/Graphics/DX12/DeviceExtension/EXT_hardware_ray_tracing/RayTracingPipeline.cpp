@@ -24,7 +24,7 @@ namespace Trident::DX12 {
 		UINT ExportIndex = 0;
 
 		while (ExportIndex < groupRange.count) {
-			const WCHAR* ExportName = dxPipeline->exportNames[groupRange.offset + ExportIndex];
+			LPCWSTR ExportName = dxPipeline->exportNames[groupRange.offset + ExportIndex];
 			const PBYTE ShaderIdentifier = static_cast<PBYTE>(dxPipeline->stateObjectProperties->GetShaderIdentifier(ExportName));
 
 			std::copy_n(ShaderIdentifier, limits.shaderGroupHandleSize, &MappedRange[MappedRangeOffset]);
