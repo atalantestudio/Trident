@@ -540,6 +540,7 @@ namespace Trident {
 		const ref<DX12::Buffer> dstBuffer = ref_cast<DX12::Buffer>(destinationBuffer);
 		const D3D12_RESOURCE_DESC srcImageResourceDescriptor = srcImage->resource->GetDesc();
 		const UINT channelCount = getChannelCount(srcImage->getFormat());
+		const UINT channelByteSize = getByteSize(srcImage->getFormat());
 
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
 
@@ -558,7 +559,7 @@ namespace Trident {
 			destinationBufferCopyLocation.PlacedFootprint.Footprint.Width = copyRegion.imageExtent.width;
 			destinationBufferCopyLocation.PlacedFootprint.Footprint.Height = copyRegion.imageExtent.height;
 			destinationBufferCopyLocation.PlacedFootprint.Footprint.Depth = copyRegion.imageExtent.depth;
-			destinationBufferCopyLocation.PlacedFootprint.Footprint.RowPitch = copyRegion.imageExtent.width * channelCount;
+			destinationBufferCopyLocation.PlacedFootprint.Footprint.RowPitch = copyRegion.imageExtent.width * channelByteSize;
 
 			UINT layerIndex = 0;
 
