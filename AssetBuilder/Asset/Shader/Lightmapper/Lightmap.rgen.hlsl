@@ -44,5 +44,5 @@ void main() {
 	float4 gBufferTriangleNormal = gBufferTriangleNormalImage[coordinate];
 	float4 gBufferVertexNormal = gBufferVertexNormalImage[coordinate];
 
-	intermediateLightmapAtlas[coordinate] = float4(gBufferTriangleNormal.xyz, 1.0);
+	intermediateLightmapAtlas[coordinate] = float4(abs(gBufferTriangleNormal.xyz), 1.0);
 }

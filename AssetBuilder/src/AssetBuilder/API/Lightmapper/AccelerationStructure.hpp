@@ -10,12 +10,11 @@
 
 namespace Trident {
 	void Lightmapper::buildAccelerationStructures(const BuildScene3D& scene, uint64 vertexCount, uint64 indexCount) {
-		const uint64 scratchAlignment = physicalDevice->getLimits().minAccelerationStructureScratchOffsetAlignment;
-		const uint64 storageBufferAlignment = physicalDevice->getLimits().minStorageBufferOffsetAlignment;
+		const uint64 scratchAlignment = limits->minAccelerationStructureScratchOffsetAlignment;
 		const uint32 instanceCount = static_cast<uint32>(scene.staticGeometry.instances.count());
 
 		vertexBuffer = device->createDynamicBuffer({
-			.size = ceil(vertexCount * sizeof(BuildVertex3D), storageBufferAlignment),
+			.size = ceil(vertexCount * sizeof(BuildVertex3D), limits->minStorageBufferOffsetAlignment),
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE | BufferUsage::SHADER_DEVICE_ADDRESS | BufferUsage::READ_ONLY_ACCELERATION_STRUCTURE_INPUT,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
@@ -25,7 +24,7 @@ namespace Trident {
 		});
 
 		indexBuffer = device->createDynamicBuffer({
-			.size = ceil(indexCount * sizeof(uint32), storageBufferAlignment),
+			.size = ceil(indexCount * sizeof(uint32), limits->minStorageBufferOffsetAlignment),
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE | BufferUsage::SHADER_DEVICE_ADDRESS | BufferUsage::READ_ONLY_ACCELERATION_STRUCTURE_INPUT,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,

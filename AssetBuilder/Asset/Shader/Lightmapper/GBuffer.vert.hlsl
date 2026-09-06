@@ -24,7 +24,9 @@ struct Interstage {
 
 struct Vertex {
 	float3 position;
+	uint _0;
 	float3 normal;
+	uint _1;
 	float4 tangent;
 	float2 lightmapCoordinate;
 };

@@ -11,7 +11,16 @@ namespace Trident {
 		indices = sequence<uint32>(lightmapIndexCount);
 		materials = sequence<LightmapMaterial>(lightmapMaterials.size());
 
-		std::copy_n(&scene.vertices[0], scene.staticGeometry.bakedVertexCount, &vertices[0]);
+		uint32 vertexIndex = 0;
+
+		while (vertexIndex < scene.staticGeometry.bakedVertexCount) {
+			BuildVertex3D& vertex = vertices[vertexIndex];
+			vertex = scene.vertices[vertexIndex];
+			vertex.textureCoordinate = scene.staticGeometry.lightmapCoordinates[vertexIndex];
+
+			vertexIndex += 1;
+		}
+
 		std::copy_n(&scene.indices[0], scene.staticGeometry.bakedIndexCount, &indices[0]);
 
 		uint32 vertexOffset = scene.staticGeometry.bakedVertexCount;
@@ -59,7 +68,10 @@ namespace Trident {
 							BuildVertex3D& vertex = vertices[vertexOffset + vertexIndex];
 							vertex.position = svec3<float32>(multiplyTransform(vec3<float32>(geometryVertex.position), worldTransform));
 							vertex.normal = svec3<float32>(normalized(vec3<float32>(geometryVertex.normal) * inverseOrientation));
-							vertex.textureCoordinate = unpack<VertexInputAttributeFormat::R16G16_FLOAT, svec2<float32>>(*pointer_cast<const uint32*>(&textureCoordinate));
+
+							// TODO(asset-builder/lightmapper)
+							// vertex.textureCoordinate = unpack<VertexInputAttributeFormat::R16G16_FLOAT, svec2<float32>>(*pointer_cast<const uint32*>(&textureCoordinate));
+							vertex.textureCoordinate = scene.staticGeometry.lightmapCoordinates[vertexOffset + vertexIndex];
 
 							vertexIndex += 1;
 						}

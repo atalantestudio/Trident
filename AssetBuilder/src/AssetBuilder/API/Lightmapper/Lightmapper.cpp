@@ -290,16 +290,7 @@ namespace Trident {
 			arguments->sunIntensity = descriptor.sceneDescriptor.sunIntensity;
 		}
 
-		BuildVertex3D* vertexMappedRange = vertexStagingView.map();
-		uint32 vertexIndex = 0;
-
-		while (vertexIndex < descriptor.vertices.count()) {
-			vertexMappedRange[vertexIndex] = descriptor.vertices[vertexIndex];
-			vertexMappedRange[vertexIndex].textureCoordinate = descriptor.lightmapCoordinates[vertexIndex];
-
-			vertexIndex += 1;
-		}
-
+		std::copy(descriptor.vertices.begin(), descriptor.vertices.end(), vertexStagingView.map());
 		std::copy(descriptor.indices.begin(), descriptor.indices.end(), indexStagingView.map());
 		std::copy(descriptor.materials.begin(), descriptor.materials.end(), materialStagingView.map());
 		std::copy(descriptor.emissiveTriangleIndices.begin(), descriptor.emissiveTriangleIndices.end(), emissiveTriangleIndexStagingView.map());
@@ -463,8 +454,6 @@ namespace Trident {
 	void Lightmapper::generateLightmaps(uint32 indexCount) const {
 		const float32 width = static_cast<float32>(imageAssetDescriptor.extent.width);
 		const float32 height = static_cast<float32>(imageAssetDescriptor.extent.height);
-		const uint32 workGroupX = ceil(imageAssetDescriptor.extent.width / 16, 16u);
-		const uint32 workGroupY = ceil(imageAssetDescriptor.extent.height / 16, 16u);
 
 		commandEncoder->reset();
 		commandEncoder->begin();
@@ -484,7 +473,10 @@ namespace Trident {
 		// TODO(graphics/command-encoder/bind-resources): Ensure that descriptor sets and vertex buffers, if any, are always bound after the pipeline.
 		commandEncoder->bindDescriptorSets(gBufferPipelineLayout, 0, descriptorSets[0]);
 
-		commandEncoder->draw(indexCount, 25, 0, 0);
+		// TODO(asset-builder/lightmapper): Compare conservative rasterization methods.
+		// commandEncoder->draw(indexCount, 25, 0, 0);
+		commandEncoder->draw(indexCount, 1, 0, 0);
+
 		commandEncoder->endRenderPass();
 
 		// TODO(graphics/render-pass/subpass): Add support for subpass dependencies.
@@ -531,6 +523,9 @@ namespace Trident {
 		};
 
 		commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
+
+		const uint32 workGroupX = ceil(imageAssetDescriptor.extent.width / 16, 16u);
+		const uint32 workGroupY = ceil(imageAssetDescriptor.extent.height / 16, 16u);
 
 		commandEncoder->bindComputePipeline(intermediateDilationPipeline);
 		commandEncoder->bindDescriptorSets(postProcessingPipelineLayout, 0, descriptorSets[2]);
