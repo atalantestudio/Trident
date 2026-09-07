@@ -18,10 +18,9 @@ namespace Trident {
 		const uint32 rayCallableShaderOffset = rayMissShaderOffset;
 		const uint64 size = rayCallableShaderOffset + shaderSize;
 
-		// TODO(asset-builder/lightmapper): Create in a static allocation.
 		shaderBindingTableBuffer = device->createDynamicBuffer({
 			.size = size,
-			.usage = BufferUsage::SHADER_BINDING_TABLE,
+			.usage = BufferUsage::SHADER_DEVICE_ADDRESS | BufferUsage::SHADER_BINDING_TABLE,
 			.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
 			.persistent = false,
 			#if defined(DEBUG_OBJECT_NAME)
