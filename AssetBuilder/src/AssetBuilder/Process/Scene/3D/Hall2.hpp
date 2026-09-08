@@ -15,7 +15,7 @@ namespace Trident {
 
 			BuildScene3D createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				LinearMapBuilder builder({
-					.skyboxImageAsset = assetLibrary->getAsset<ImageAsset>("evening_road_01_2k"),
+					.skyboxImageAsset = assetLibrary->getAsset<ImageAsset>("evening_road_01_512p"),
 					.geometryAssets = {},
 					.staticMaterialAssets = {
 						assetLibrary->getAsset<MaterialAsset>("lm_default"),
