@@ -31,6 +31,8 @@ struct Vertex {
 };
 
 struct Instance {
+	float3x4 transform;
+
 	uint geometryTriangleOffset;
 
 	// TODO: Remove?
@@ -73,10 +75,10 @@ static const float2 LIGHTMAP_COORDINATE_OFFSETS[25] = {
 };
 
 Interstage main(VertexInput input) {
-	uint instanceIndex = input.instanceIndex - input.instanceOffset;
-
 	Instance instance = instanceBuffer[input.instanceOffset + input.instanceIndex];
+	// Instance instance = instanceBuffer[input.instanceIndex];
 
+	float3x3 transform = (float3x3) instance.transform;
 	uint indexOffset = instance.geometryTriangleOffset * 3;
 
 	// TODO: Fix.
@@ -84,10 +86,10 @@ Interstage main(VertexInput input) {
 	Vertex b = vertexBuffer[0];
 	Vertex c = vertexBuffer[0];
 
-	Vertex vertex = vertexBuffer[instance.geometryVertexOffset + indexBuffer[instance.geometryTriangleOffset * 3 + input.indexOffset]];
-	// Vertex vertex = vertexBuffer[instance.geometryVertexOffset + indexBuffer[indexOffset + input.indexOffset]];
+	Vertex vertex = vertexBuffer[instance.geometryVertexOffset + indexBuffer[indexOffset + input.indexOffset]];
 
 	float2 coordinate = lightmapCoordinateBuffer[instance.lightmapCoordinateOffset + indexBuffer[indexOffset + input.indexOffset]];
+	// float2 coordinate = lightmapCoordinateBuffer[instance.lightmapCoordinateOffset + indexBuffer[input.indexOffset]];
 
 	// TODO(asset-builder/lightmapper): Get the atlas size.
 	// TODO(asset-builder/lightmapper): This fixes thin geometry receiving no light but adds leaks in larger geometry (e.g. floors and walls).
@@ -95,18 +97,21 @@ Interstage main(VertexInput input) {
 
 	coordinate.y = 1.0 - coordinate.y;
 
+	// float3 normal = mul(vertex.normal, transform);
+	float3 normal = vertex.normal;
+
 	Interstage interstage;
 	interstage.coordinate = float4(coordinate * 2.0 - 1.0, 0.0, 1.0);
 	interstage.position = vertex.position;
 	interstage.triangleIndex = (indexOffset + input.indexOffset) / 3 + 1;
-	interstage.triangleNormal = vertex.normal;
-	interstage.vertexNormal = vertex.normal;
+	interstage.triangleNormal = normal;
+	interstage.vertexNormal = normal;
 	interstage.positionA = a.position;
 	interstage.positionB = b.position;
 	interstage.positionC = c.position;
-	interstage.normalA = a.normal;
-	interstage.normalB = b.normal;
-	interstage.normalC = c.normal;
+	interstage.normalA = mul(transform, a.normal);
+	interstage.normalB = mul(transform, b.normal);
+	interstage.normalC = mul(transform, c.normal);
 	interstage.barycentricCoordinate = float3(0.0, 0.0, 0.0);
 
 	switch (input.indexOffset % 3) {

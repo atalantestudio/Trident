@@ -326,6 +326,7 @@ namespace Trident {
 		{
 			AccelerationStructureInstance* tlasInstanceMappedRange = tlasInstanceStagingView.map();
 			LightmapInstance* instanceMappedRange = instanceStagingView.map();
+			uint32 lightmapCoordinateOffset = 0;
 			uint32 materialShaderIndex = 0;
 
 			while (materialShaderIndex < scene.dynamicGeometry.materialShaderOffset) {
@@ -374,11 +375,17 @@ namespace Trident {
 							};
 
 							instanceMappedRange[instanceIndex] = {
+								.transform = {
+									{world[0][0], world[0][1], world[0][2], world[0][3]},
+									{world[1][0], world[1][1], world[1][2], world[1][3]},
+									{world[2][0], world[2][1], world[2][2], world[2][3]},
+								},
 								.geometryTriangleOffset = geometry.indexRange.offset / 3,
 								.geometryVertexOffset = geometry.vertexRange.offset,
-								.lightmapCoordinateOffset = geometry.vertexRange.offset + instanceOffset * geometry.vertexRange.count,
+								.lightmapCoordinateOffset = lightmapCoordinateOffset,
 							};
 
+							lightmapCoordinateOffset += geometry.vertexRange.count;
 							instanceOffset += 1;
 						}
 
@@ -768,7 +775,7 @@ namespace Trident {
 					const MaterialGeometry materialGeometry = scene.materialGeometries[material.materialGeometryRange.offset + materialGeometryIndex];
 					const BuildGeometry& geometry = scene.geometries[materialGeometry.geometryIndex];
 
-					commandEncoder->draw(geometry.indexRange.count, materialGeometry.instanceRange.count, 0, materialGeometry.instanceRange.offset);
+					commandEncoder->draw(geometry.indexRange.count, materialGeometry.instanceRange.count, geometry.indexRange.offset, materialGeometry.instanceRange.offset);
 
 					materialGeometryIndex += 1;
 				}

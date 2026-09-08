@@ -135,7 +135,7 @@ void main() {
 	float diagonalLuxelSize = gBufferTriangleNormal.a;
 
 	// TODO
-	intermediateLightmapAtlas[coordinate] = float4(triangleNormal * 0.5 + 0.5, 1.0);
+	intermediateLightmapAtlas[coordinate] = float4(triangleNormal, 1.0);
 	return;
 
 	adjustSamplePosition(position, triangleNormal, diagonalLuxelSize);
