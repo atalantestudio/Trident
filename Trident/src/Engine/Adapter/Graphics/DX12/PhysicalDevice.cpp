@@ -50,6 +50,7 @@ namespace Trident {
 		limits.shaderGroupHandleAlignment = D3D12_RAYTRACING_SHADER_RECORD_BYTE_ALIGNMENT;
 		limits.shaderGroupHandleSize = D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
 		limits.maxRayRecursionDepth = D3D12_RAYTRACING_MAX_DECLARABLE_TRACE_RECURSION_DEPTH;
+		limits.maxRayAttributeSize = D3D12_RAYTRACING_MAX_ATTRIBUTE_SIZE_IN_BYTES;
 		limits.maxRayDispatchInvocationCount = D3D12_RAYTRACING_MAX_RAY_GENERATION_SHADER_THREADS;
 	}
 

@@ -86,6 +86,7 @@ namespace Trident {
 		uint32 shaderGroupHandleAlignment;
 		uint32 shaderGroupHandleSize;
 		uint32 maxRayRecursionDepth;
+		uint32 maxRayAttributeSize;
 		uint32 maxRayDispatchInvocationCount;
 	};
 }

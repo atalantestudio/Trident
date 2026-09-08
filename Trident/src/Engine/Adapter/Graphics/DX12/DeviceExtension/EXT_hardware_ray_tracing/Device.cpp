@@ -103,13 +103,12 @@ namespace Trident::DX12 {
 		D3D12_GLOBAL_ROOT_SIGNATURE GlobalRootSignature{};
 		GlobalRootSignature.pGlobalRootSignature = dxPipelineLayout->rootSignature;
 
-		// TODO(graphics/dx12/ext_hardware_ray_tracing/shader-config): Set proper values.
 		D3D12_RAYTRACING_SHADER_CONFIG RaytracingShaderConfig{};
-		RaytracingShaderConfig.MaxPayloadSizeInBytes = 20;
-		RaytracingShaderConfig.MaxAttributeSizeInBytes = 8;
+		RaytracingShaderConfig.MaxPayloadSizeInBytes = descriptor.maxRayPayloadSize;
+		RaytracingShaderConfig.MaxAttributeSizeInBytes = descriptor.maxRayAttributeSize;
 
 		D3D12_RAYTRACING_PIPELINE_CONFIG RaytracingPipelineConfig{};
-		RaytracingPipelineConfig.MaxTraceRecursionDepth = descriptor.maxRecursionDepth;
+		RaytracingPipelineConfig.MaxTraceRecursionDepth = descriptor.maxRayRecursionDepth;
 
 		D3D12_HIT_GROUP_DESC HitGroupDesc{};
 		HitGroupDesc.HitGroupExport = L"HitGroup";

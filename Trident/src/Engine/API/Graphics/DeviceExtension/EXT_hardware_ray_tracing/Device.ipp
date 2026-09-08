@@ -78,6 +78,7 @@ namespace Trident {
 	template<typename Device>
 	ref<RayTracingPipeline> DeviceExtension<EXT_hardware_ray_tracing, Device>::createPipeline(const RayTracingPipelineDescriptor& descriptor) const {
 		const Device* device = static_cast<const Device*>(this);
+		const PhysicalDeviceLimits& limits = device->getPhysicalDevice()->getLimits();
 
 		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
@@ -87,8 +88,12 @@ namespace Trident {
 					VALIDATION_ERROR("descriptor.layout must be a valid PipelineLayout object.");
 				}
 
-				if (descriptor.maxRecursionDepth > device->getPhysicalDevice()->getLimits().maxRayRecursionDepth) {
-					VALIDATION_ERROR("descriptor.maxRecursionDepth must be less than or equal to the maximum ray recursion depth.");
+				if (descriptor.maxRayRecursionDepth > limits.maxRayRecursionDepth) {
+					VALIDATION_ERROR("descriptor.maxRayRecursionDepth must be less than or equal to the maximum ray recursion depth ([]).", limits.maxRayRecursionDepth);
+				}
+
+				if (descriptor.maxRayAttributeSize > limits.maxRayAttributeSize) {
+					VALIDATION_ERROR("descriptor.maxRayAttributeSize must be less than or equal to the maximum ray attribute size ([]).", limits.maxRayAttributeSize);
 				}
 
 				if (descriptor.name.count() == 0) {

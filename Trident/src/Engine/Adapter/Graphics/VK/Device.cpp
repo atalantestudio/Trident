@@ -341,6 +341,7 @@ namespace Trident {
 			limits.shaderGroupHandleAlignment = rayTracingPipelineProperties.shaderGroupHandleAlignment;
 			limits.shaderGroupHandleSize = rayTracingPipelineProperties.shaderGroupHandleSize;
 			limits.maxRayRecursionDepth = rayTracingPipelineProperties.maxRayRecursionDepth;
+			limits.maxRayAttributeSize = rayTracingPipelineProperties.maxRayHitAttributeSize;
 			limits.maxRayDispatchInvocationCount = rayTracingPipelineProperties.maxRayDispatchInvocationCount;
 		}
 

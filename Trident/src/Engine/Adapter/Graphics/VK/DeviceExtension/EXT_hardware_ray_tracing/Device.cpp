@@ -254,18 +254,21 @@ namespace Trident::VK {
 			shaderModuleIndex += 1;
 		}
 
-		// TODO(graphics/ext_hardware_ray_tracing): Create shader binding table buffer in client
-		// TODO(graphics/ext_hardware_ray_tracing): Add push constant in pipeline layout
+		VkRayTracingPipelineInterfaceCreateInfoKHR interfaceCreateInfo{};
+		interfaceCreateInfo.sType = VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_INTERFACE_CREATE_INFO_KHR;
+		interfaceCreateInfo.pNext = nullptr;
+		interfaceCreateInfo.maxPipelineRayPayloadSize = descriptor.maxRayPayloadSize;
+		interfaceCreateInfo.maxPipelineRayHitAttributeSize = descriptor.maxRayAttributeSize;
 
 		VkRayTracingPipelineCreateInfoKHR createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_KHR;
-		createInfo.pNext = nullptr;
+		createInfo.pNext = &interfaceCreateInfo;
 		createInfo.flags = 0;
 		createInfo.stageCount = static_cast<uint32>(shaderStageCreateInfos.count());
 		createInfo.pStages = &shaderStageCreateInfos[0];
 		createInfo.groupCount = static_cast<uint32>(shaderGroupCreateInfos.count());
 		createInfo.pGroups = &shaderGroupCreateInfos[0];
-		createInfo.maxPipelineRayRecursionDepth = descriptor.maxRecursionDepth;
+		createInfo.maxPipelineRayRecursionDepth = descriptor.maxRayRecursionDepth;
 		createInfo.pLibraryInfo = nullptr;
 		createInfo.pLibraryInterface = nullptr;
 		createInfo.pDynamicState = nullptr;

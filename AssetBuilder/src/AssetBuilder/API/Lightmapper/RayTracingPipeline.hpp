@@ -43,7 +43,9 @@ namespace Trident {
 		return device->createPipeline({
 			.layout = rayTracingPipelineLayout,
 			.shaderModules = shaderModules,
-			.maxRecursionDepth = 3,
+			.maxRayRecursionDepth = 3,
+			.maxRayPayloadSize = 48,
+			.maxRayAttributeSize = 8,
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Ray tracing",
 			#endif
