@@ -77,7 +77,7 @@ Interstage main(VertexInput input) {
 	coordinate.y = 1.0 - coordinate.y;
 
 	Interstage interstage;
-	interstage.coordinate = float4(coordinate * 2.0 - 1.0, 1.0, 1.0);
+	interstage.coordinate = float4(coordinate * 2.0 - 1.0, 0.0, 1.0);
 	interstage.position = vertex.position;
 	interstage.triangleIndex = input.vertexIndex / 3 + 1;
 	interstage.triangleNormal = vertex.normal;

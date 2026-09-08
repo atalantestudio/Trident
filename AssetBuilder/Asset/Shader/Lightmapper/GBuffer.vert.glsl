@@ -20,7 +20,9 @@ out Interstage {
 
 struct Vertex {
 	vec3 position;
+	uint _0;
 	vec3 normal;
+	uint _1;
 	vec4 tangent;
 	vec2 lightmapCoordinate;
 };
@@ -75,7 +77,7 @@ void main() {
 
 	coordinate.y = 1.0 - coordinate.y;
 
-	gl_Position = vec4(coordinate * 2.0 - 1.0, 1.0, 1.0);
+	gl_Position = vec4(coordinate * 2.0 - 1.0, 0.0, 1.0);
 
 	interstage.position = vertex.position;
 	interstage.triangleIndex = uint(gl_VertexIndex / 3 + 1);

@@ -16,14 +16,14 @@ SamplerState intermediateLightmapAtlasSampler : register(s0);
 FragmentOutput main(Interstage interstage) {
 	float4 color = intermediateLightmapAtlas.Sample(intermediateLightmapAtlasSampler, interstage.textureCoordinate);
 
-	if (color.a == 0.0) color = intermediateLightmapAtlas.Sample(intermediateLightmapAtlasSampler, interstage.textureCoordinate, int2(-1, -1));
+	/* if (color.a == 0.0) color = intermediateLightmapAtlas.Sample(intermediateLightmapAtlasSampler, interstage.textureCoordinate, int2(-1, -1));
 	if (color.a == 0.0) color = intermediateLightmapAtlas.Sample(intermediateLightmapAtlasSampler, interstage.textureCoordinate, int2( 0, -1));
 	if (color.a == 0.0) color = intermediateLightmapAtlas.Sample(intermediateLightmapAtlasSampler, interstage.textureCoordinate, int2( 1, -1));
 	if (color.a == 0.0) color = intermediateLightmapAtlas.Sample(intermediateLightmapAtlasSampler, interstage.textureCoordinate, int2(-1,  0));
 	if (color.a == 0.0) color = intermediateLightmapAtlas.Sample(intermediateLightmapAtlasSampler, interstage.textureCoordinate, int2( 1,  0));
 	if (color.a == 0.0) color = intermediateLightmapAtlas.Sample(intermediateLightmapAtlasSampler, interstage.textureCoordinate, int2(-1,  1));
 	if (color.a == 0.0) color = intermediateLightmapAtlas.Sample(intermediateLightmapAtlasSampler, interstage.textureCoordinate, int2( 0,  1));
-	if (color.a == 0.0) color = intermediateLightmapAtlas.Sample(intermediateLightmapAtlasSampler, interstage.textureCoordinate, int2( 1,  1));
+	if (color.a == 0.0) color = intermediateLightmapAtlas.Sample(intermediateLightmapAtlasSampler, interstage.textureCoordinate, int2( 1,  1)); */
 
 	FragmentOutput output;
 	output.color = color;
