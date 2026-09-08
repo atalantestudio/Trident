@@ -43,8 +43,8 @@ namespace Trident {
 		// TODO(filesystem/asset/material): Material assets are too small and could be merged with other materials or even baked into the scene.
 		uint32 assetIdentifier;
 
-		/// Affected range in the geometry array.
-		uint32 geometryCount;
+		/// Affected range in the material geometry array.
+		range<uint32, uint32> materialGeometryRange;
 	};
 
 	struct BuildMaterialShader {
@@ -85,7 +85,7 @@ namespace Trident {
 
 	struct BuildScene3D {
 		svec3<float32> skyColor;
-		uint32 skyboxAssetIdentifier;
+		ref<ImageAsset> environmentMapImageAsset;
 		svec3<float32> sunDirection;
 
 		/// Pre-multiplied by the sun intensity.

@@ -23,7 +23,14 @@ namespace Trident {
 				stream.write<float32>(scene.skyColor.x);
 				stream.write<float32>(scene.skyColor.y);
 				stream.write<float32>(scene.skyColor.z);
-				stream.write<uint32>(scene.skyboxAssetIdentifier);
+
+				if (scene.environmentMapImageAsset != nullptr) {
+					stream.write<uint32>(scene.environmentMapImageAsset->identifier);
+				}
+				else {
+					stream.write<uint32>(max<uint32>());
+				}
+
 				stream.write<uint8>(sizeof(uint32));
 				stream.write<uint32>(static_cast<uint32>(scene.vertices.count()));
 				stream.write<uint32>(scene.staticGeometry.bakedVertexCount + scene.staticGeometry.externalVertexCount);
@@ -107,7 +114,7 @@ namespace Trident {
 
 				for (const BuildMaterial material : scene.materials) {
 					stream.write<uint32>(material.assetIdentifier);
-					stream.write<uint32>(material.geometryCount);
+					stream.write<uint32>(material.materialGeometryRange.count);
 				}
 
 				for (const BuildMaterialShader& materialShader : scene.materialShaders) {
@@ -193,7 +200,7 @@ namespace Trident {
 					scene.staticGeometry.instances.count() * sizeof(BuildTransform3D) +
 					scene.geometries.count() * (sizeof(range<uint32, uint32>) + sizeof(uint32)) +
 					scene.materialGeometries.count() * sizeof(MaterialGeometry) +
-					scene.materials.count() * sizeof(BuildMaterial) +
+					scene.materials.count() * (sizeof(uint32) * 2) +
 					scene.dynamicGeometry.pointLights.count() * (sizeof(svec3<float32>) * 2 + sizeof(float32)) +
 					scene.dynamicGeometry.geometryMappings.count() * sizeof(EntityComponentMapping<GeometryComponent>) +
 					scene.dynamicGeometry.rigidBodyMappings.count() * (sizeof(Entity) + sizeof(svec3<float32>) * 7 + sizeof(float32) * 4)

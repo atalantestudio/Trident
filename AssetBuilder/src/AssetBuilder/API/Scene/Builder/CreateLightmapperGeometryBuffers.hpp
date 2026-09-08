@@ -36,7 +36,6 @@ namespace Trident {
 				continue;
 			}
 
-
 			for (const IntermediateMaterial& material : materialShader.materials) {
 				for (const IntermediateMaterialGeometry& materialGeometry : material.geometries) {
 					const IntermediateGeometry& geometry = geometries[materialGeometry.geometryIndex];

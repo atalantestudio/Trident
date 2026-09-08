@@ -88,14 +88,7 @@ namespace Trident {
 
 		BuildScene3D scene{};
 		scene.skyColor = descriptor.skyColor;
-
-		if (descriptor.skyboxImageAsset != nullptr) {
-			scene.skyboxAssetIdentifier = descriptor.skyboxImageAsset->identifier;
-		}
-		else {
-			scene.skyboxAssetIdentifier = max<uint32>();
-		}
-
+		scene.environmentMapImageAsset = descriptor.skyboxImageAsset;
 		scene.sunDirection = descriptor.sunDirection;
 		scene.sunColor = descriptor.sunColor * descriptor.sunIntensity;
 		scene.vertices = sequence<BuildVertex3D>(vertexCounts[0] + vertexCounts[1] + vertexCounts[2]);
@@ -213,7 +206,8 @@ namespace Trident {
 
 				BuildMaterial& material = scene.materials[buildMaterialOffset];
 				material.assetIdentifier = intermediateMaterial.assetIdentifier;
-				material.geometryCount = static_cast<uint32>(intermediateMaterial.geometries.size());
+				material.materialGeometryRange.offset = currentMaterialGeometryOffset;
+				material.materialGeometryRange.count = buildMaterialGeometryOffset - currentMaterialGeometryOffset;
 
 				intermediateMaterialIndex += 1;
 				buildMaterialOffset += 1;

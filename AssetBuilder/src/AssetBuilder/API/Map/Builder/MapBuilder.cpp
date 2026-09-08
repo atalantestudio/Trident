@@ -103,14 +103,7 @@ namespace Trident {
 	BuildScene3D MapBuilder::build() {
 		BuildScene3D scene{};
 		scene.skyColor = {0.0f, 0.0f, 0.0f};
-
-		if (descriptor.skyboxImageAsset != nullptr) {
-			scene.skyboxAssetIdentifier = descriptor.skyboxImageAsset->identifier;
-		}
-		else {
-			scene.skyboxAssetIdentifier = max<uint32>();
-		}
-
+		scene.environmentMapImageAsset = descriptor.skyboxImageAsset;
 		scene.sunDirection = {0.0f, 0.0f, 0.0f};
 		scene.sunColor = {0.0f, 0.0f, 0.0f};
 		scene.geometries = {};
@@ -134,6 +127,7 @@ namespace Trident {
 		scene.staticGeometry.lightmapAtlasImageAssetDescriptor.mipLevelCount = 1;
 		scene.staticGeometry.lightmapAtlasImageAssetDescriptor.layerCount = 1;
 		scene.staticGeometry.lightmapAtlasImageAssetDescriptor.data = {0, 0, 0, 1};
+		scene.dynamicGeometry.materialShaderOffset = 0;
 		scene.dynamicGeometry.pointLights = {};
 		scene.dynamicGeometry.entityCount = 0;
 		scene.dynamicGeometry.geometryMappings = {};

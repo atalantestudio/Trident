@@ -391,18 +391,6 @@ void DirectLightSampling(inout uint emissiveTriangleIndex, inout vec3 p, inout f
 	pdf = 1.0 / emissiveTriangleCount / abc;
 }
 
-float PDFLight(uint triangleIndex) {
-	Triangle triangle_ = loadTriangle(triangleIndex);
-
-	vec3 a = triangle_.vertices[0].position;
-	vec3 b = triangle_.vertices[1].position;
-	vec3 c = triangle_.vertices[2].position;
-
-	float abc = length(cross(b - a, c - a)) * 0.5;
-
-	return 1.0 / emissiveTriangleCount / abc;
-}
-
 vec3 evaluatePhongMaterial(Material material) {
 	return material.albedo / PI;
 }
@@ -473,8 +461,6 @@ vec3 rgen(Hit primaryHit, inout uint seed) {
 		Ray primaryRay;
 		primaryRay.origin = o;
 		primaryRay.direction = normalize(primaryHit.vertexNormal + randomUnitDirection(seed));
-
-		float cosTheta = max(0.001, dot(primaryHit.vertexNormal, primaryRay.direction));
 
 		primaryHit = rintFrontFacing(primaryRay);
 
