@@ -15,6 +15,7 @@
 #include "AssetBuilder/Process/Geometry/3D/UnitSphere.hpp"
 #include "AssetBuilder/Process/Image/EveningRoad01.hpp"
 #include "AssetBuilder/Process/Image/LemonARMMap.hpp"
+#include "AssetBuilder/Process/Image/OvercastSoil.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/Default.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/PlasterCeiling.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/PlasterWall.hpp"
@@ -88,7 +89,7 @@ namespace Trident {
 
 		private:
 			void registerProcesses() {
-				allocateProcesses(53);
+				allocateProcesses(54);
 
 				registerProcess<BuildGeometryAssetProcess>(&assetLibrary);
 
@@ -106,6 +107,7 @@ namespace Trident {
 				registerProcess<CopyImageProcess>(&assetLibrary);
 				registerProcess<EveningRoad01Process>(&assetLibrary);
 				registerProcess<LemonARMMapProcess>(&assetLibrary);
+				registerProcess<OvercastSoilProcess>(&assetLibrary);
 
 				registerProcess<DebugMaterial>(&assetLibrary);
 				registerProcess<FoldingWoodenStoolMaterial>(&assetLibrary);
