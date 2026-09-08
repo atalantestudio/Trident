@@ -94,17 +94,15 @@ Interstage main(VertexInput input) {
 
 	coordinate.y = 1.0 - coordinate.y;
 
-	float3 normal = mul(vertex.normal, transform);
-
 	Interstage interstage;
 	interstage.coordinate = float4(coordinate * 2.0 - 1.0, 0.0, 1.0);
-	interstage.position = vertex.position;
+	interstage.position = mul(float4(vertex.position, 1.0), instance.transform);
 	interstage.triangleIndex = triangleIndex + 1;
-	interstage.triangleNormal = normal;
-	interstage.vertexNormal = normal;
-	interstage.positionA = a.position;
-	interstage.positionB = b.position;
-	interstage.positionC = c.position;
+	interstage.triangleNormal = mul(vertex.normal, transform);
+	interstage.vertexNormal = interstage.triangleNormal;
+	interstage.positionA = mul(float4(a.position, 1.0), instance.transform);
+	interstage.positionB = mul(float4(b.position, 1.0), instance.transform);
+	interstage.positionC = mul(float4(c.position, 1.0), instance.transform);
 	interstage.normalA = mul(transform, a.normal);
 	interstage.normalB = mul(transform, b.normal);
 	interstage.normalC = mul(transform, c.normal);
