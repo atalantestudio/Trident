@@ -114,6 +114,11 @@ namespace Trident {
 			ref<DescriptorSetLayout> createPostProcessingDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createDilationDescriptorSetLayout() const;
 
+			ref<PipelineLayout> createGBufferPipelineLayout() const;
+			ref<PipelineLayout> createRayTracingPipelineLayout() const;
+			ref<PipelineLayout> createPostProcessingPipelineLayout() const;
+			ref<PipelineLayout> createDilationPipelineLayout() const;
+
 			ref<GraphicsPipeline> createGBufferPipeline() const;
 			ref<RayTracingPipeline> createRayTracingPipeline() const;
 			ref<ComputePipeline> createIntermediateDilationPipeline() const;

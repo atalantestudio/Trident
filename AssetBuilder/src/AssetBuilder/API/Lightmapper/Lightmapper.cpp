@@ -9,12 +9,14 @@
 #include "AssetBuilder/API/Lightmapper/BilateralFilterPipelines.hpp"
 #include "AssetBuilder/API/Lightmapper/BLAS.hpp"
 #include "AssetBuilder/API/Lightmapper/Dilation.hpp"
+#include "AssetBuilder/API/Lightmapper/DilationPipelineLayout.hpp"
 #include "AssetBuilder/API/Lightmapper/EmissiveTriangleIndexBuffer.hpp"
 #include "AssetBuilder/API/Lightmapper/EnvironmentMap.hpp"
 #include "AssetBuilder/API/Lightmapper/GBuffer.hpp"
 #include "AssetBuilder/API/Lightmapper/GBufferDescriptorSetLayout.hpp"
 #include "AssetBuilder/API/Lightmapper/GBufferFramebuffer.hpp"
 #include "AssetBuilder/API/Lightmapper/GBufferPipeline.hpp"
+#include "AssetBuilder/API/Lightmapper/GBufferPipelineLayout.hpp"
 #include "AssetBuilder/API/Lightmapper/GBufferRenderPass.hpp"
 #include "AssetBuilder/API/Lightmapper/IntermediateDilationPipeline.hpp"
 #include "AssetBuilder/API/Lightmapper/IntermediateLightmapAtlasImage.hpp"
@@ -23,8 +25,10 @@
 #include "AssetBuilder/API/Lightmapper/Lightmapper.hpp"
 #include "AssetBuilder/API/Lightmapper/MaterialBuffer.hpp"
 #include "AssetBuilder/API/Lightmapper/PostProcessingDescriptorSetLayout.hpp"
+#include "AssetBuilder/API/Lightmapper/PostProcessingPipelineLayout.hpp"
 #include "AssetBuilder/API/Lightmapper/RayTracingDescriptorSetLayout.hpp"
 #include "AssetBuilder/API/Lightmapper/RayTracingPipeline.hpp"
+#include "AssetBuilder/API/Lightmapper/RayTracingPipelineLayout.hpp"
 #include "AssetBuilder/API/Lightmapper/ShaderBindingTableBuffer.hpp"
 #include "AssetBuilder/API/Lightmapper/ShaderModule.hpp"
 #include "AssetBuilder/API/Lightmapper/TLAS.hpp"
@@ -63,30 +67,10 @@ namespace Trident {
 		postProcessingDescriptorSetLayout = createPostProcessingDescriptorSetLayout();
 		dilationDescriptorSetLayout = createDilationDescriptorSetLayout();
 
-		gBufferPipelineLayout = device->createPipelineLayout({
-			.descriptorSetLayouts = {descriptorSetLayouts[0]},
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "G-Buffer",
-			#endif
-		});
-		rayTracingPipelineLayout = device->createPipelineLayout({
-			.descriptorSetLayouts = {descriptorSetLayouts[1]},
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Ray tracing",
-			#endif
-		});
-		postProcessingPipelineLayout = device->createPipelineLayout({
-			.descriptorSetLayouts = {descriptorSetLayouts[2]},
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Post processing",
-			#endif
-		});
-		dilationPipelineLayout = device->createPipelineLayout({
-			.descriptorSetLayouts = {descriptorSetLayouts[3]},
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Dilation",
-			#endif
-		});
+		gBufferPipelineLayout = createGBufferPipelineLayout();
+		rayTracingPipelineLayout = createRayTracingPipelineLayout();
+		postProcessingPipelineLayout = createPostProcessingPipelineLayout();
+		dilationPipelineLayout = createDilationPipelineLayout();
 
 		gBufferPipeline = createGBufferPipeline();
 		rayTracingPipeline = createRayTracingPipeline();
