@@ -50,15 +50,8 @@ namespace Trident {
 	class Lightmapper {
 		private:
 			struct Arguments {
-				Extent2D atlasExtent;
-				uint32 triangleCount;
+				Extent2D atlasSize;
 				uint32 emissiveTriangleCount;
-				svec3<float32> skyColor;
-				uint32 _1;
-				svec3<float32> sunDirection;
-				uint32 _2;
-				svec3<float32> sunColor;
-				float32 sunIntensity;
 			};
 
 			struct LightmapVertex {
@@ -134,6 +127,7 @@ namespace Trident {
 			ref<Buffer> createEmissiveTriangleIndexBuffer(uint64 emissiveTriangleIndexCount) const;
 
 			ref<Sampler> createIntermediateLightmapAtlasSampler() const;
+			ref<Sampler> createEnvironmentMapSampler() const;
 
 			void encodeOneTimeCommands(const LightmapperDescriptor& descriptor) const;
 			void createBottomLevelAccelerationStructures(const BuildScene3D& scene);
@@ -187,12 +181,12 @@ namespace Trident {
 
 			LightmapperContext context;
 
+			ref<Buffer> argumentBuffer;
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> lightmapCoordinateBuffer;
 			ref<Buffer> indexBuffer;
 			ref<Buffer> tlasInstanceBuffer;
 			ref<Buffer> instanceBuffer;
-			ref<Buffer> argumentBuffer;
 			ref<Buffer> blasBuffer;
 			ref<Buffer> tlasBuffer;
 			ref<Buffer> blasScratchBuffer;

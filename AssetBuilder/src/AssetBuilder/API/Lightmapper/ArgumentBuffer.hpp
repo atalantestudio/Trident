@@ -10,7 +10,7 @@ namespace Trident {
 		return device->createDynamicBuffer({
 			.size = ceil(sizeof(Arguments), limits->minUniformBufferOffsetAlignment),
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::UNIFORM,
-			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = false,
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Argument",

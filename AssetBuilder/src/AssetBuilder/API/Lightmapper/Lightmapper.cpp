@@ -3,15 +3,15 @@
 
 #include "pch.hpp"
 
-#include "Engine/Filesystem/Filesystem.hpp"
-
 #include "AssetBuilder/API/Lightmapper/ArgumentBuffer.hpp"
 #include "AssetBuilder/API/Lightmapper/BilateralFilterPipelines.hpp"
 #include "AssetBuilder/API/Lightmapper/BLAS.hpp"
 #include "AssetBuilder/API/Lightmapper/Dilation.hpp"
+#include "AssetBuilder/API/Lightmapper/DilationDescriptorSetLayout.hpp"
 #include "AssetBuilder/API/Lightmapper/DilationPipelineLayout.hpp"
 #include "AssetBuilder/API/Lightmapper/EmissiveTriangleIndexBuffer.hpp"
 #include "AssetBuilder/API/Lightmapper/EnvironmentMap.hpp"
+#include "AssetBuilder/API/Lightmapper/EnvironmentMapSampler.hpp"
 #include "AssetBuilder/API/Lightmapper/GBuffer.hpp"
 #include "AssetBuilder/API/Lightmapper/GBufferDescriptorSetLayout.hpp"
 #include "AssetBuilder/API/Lightmapper/GBufferFramebuffer.hpp"
@@ -194,17 +194,7 @@ namespace Trident {
 		}
 
 		environmentMapImageView = createEnvironmentMapImageView();
-
-		environmentMapSampler = device->createSampler({
-			.magFilter = Filter::LINEAR,
-			.minFilter = Filter::LINEAR,
-			.addressModeU = AddressMode::CLAMP_TO_EDGE,
-			.addressModeV = AddressMode::CLAMP_TO_EDGE,
-			.addressModeW = AddressMode::CLAMP_TO_EDGE,
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Environment map",
-			#endif
-		});
+		environmentMapSampler = createEnvironmentMapSampler();
 
 		createBottomLevelAccelerationStructures(scene);
 		createTopLevelAccelerationStructure(scene);
@@ -383,16 +373,8 @@ namespace Trident {
 		}
 
 		Arguments* arguments = argumentStagingView.map();
-		arguments->atlasExtent = {imageAssetDescriptor.extent.width, imageAssetDescriptor.extent.height};
-		arguments->triangleCount = static_cast<uint32>(descriptor.indices.count() / 3);
+		arguments->atlasSize = {imageAssetDescriptor.extent.width, imageAssetDescriptor.extent.height};
 		arguments->emissiveTriangleCount = static_cast<uint32>(descriptor.emissiveTriangleIndices.count());
-		arguments->skyColor = descriptor.sceneDescriptor.skyColor;
-
-		if (descriptor.sceneDescriptor.flags & Scene3DBuildFlags::LIGHTMAP_SUN_CONTRIBUTION) {
-			arguments->sunDirection = descriptor.sceneDescriptor.sunDirection;
-			arguments->sunColor = descriptor.sceneDescriptor.sunColor;
-			arguments->sunIntensity = descriptor.sceneDescriptor.sunIntensity;
-		}
 
 		std::copy(descriptor.materials.begin(), descriptor.materials.end(), materialStagingView.map());
 		std::copy(descriptor.emissiveTriangleIndices.begin(), descriptor.emissiveTriangleIndices.end(), emissiveTriangleIndexStagingView.map());

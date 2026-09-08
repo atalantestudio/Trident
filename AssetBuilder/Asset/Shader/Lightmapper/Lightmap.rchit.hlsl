@@ -21,8 +21,6 @@ uint2 interpolateLightmapCoordinate(Instance instance, uint triangleIndex, float
 
 [shader("closesthit")]
 void main(inout Hit hit, BuiltInTriangleIntersectionAttributes attributes) {
-	const Arguments arguments = argumentBuffer[0];
-
 	Instance instance = instanceBuffer[InstanceIndex()];
 
 	uint triangleIndex = PrimitiveIndex();

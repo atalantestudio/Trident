@@ -20,10 +20,9 @@ namespace Trident {
 
 			// Argument
 			{
-				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorType = DescriptorType::UNIFORM_BUFFER,
 				.descriptorCount = 1,
-				// .stageFlags = ShaderStage::RAY_GENERATION | ShaderStage::RAY_CLOSEST_HIT,
-				.stageFlags = stageFlags,
+				.stageFlags = ShaderStage::RAY_GENERATION | ShaderStage::RAY_CLOSEST_HIT,
 			},
 
 			// Vertex

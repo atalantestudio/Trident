@@ -3,9 +3,24 @@
 
 #include "Lightmap.hlsl"
 
-void traceSecondaryRay(inout uint seed) {
-	const Arguments arguments = argumentBuffer[0];
+void pcgHash(inout uint seed) {
+	uint state = seed * 747796405 + 2891336453;
+	uint word = ((state >> ((state >> 28) + 4)) ^ state) * 277803737;
 
+	seed = (word >> 22) ^ word;
+}
+
+float randomScalar(inout uint seed) {
+	pcgHash(seed);
+
+	return seed / FLOAT_MAX;
+}
+
+float3 randomUnitDirection(inout uint seed) {
+	return normalize(float3(randomScalar(seed), randomScalar(seed), randomScalar(seed)) * 2.0 - 1.0);
+}
+
+void traceSecondaryRay(inout uint seed) {
 	if (arguments.emissiveTriangleCount == 0) {
 		return;
 	}
@@ -24,8 +39,6 @@ void traceSecondaryRay(inout uint seed) {
 }
 
 float3 traceRay(Hit primaryHit, inout uint seed) {
-	const Arguments arguments = argumentBuffer[0];
-
 	float3 light = float3(0.0, 0.0, 0.0);
 	float3 throughput = float3(1.0, 1.0, 1.0);
 	uint bounceIndex = 0;
@@ -125,8 +138,6 @@ void main() {
 	if (triangleIndex == 0) {
 		return;
 	}
-
-	const Arguments arguments = argumentBuffer[0];
 
 	float3 position = gBufferPosition.rgb;
 	float4 gBufferTriangleNormal = gBufferTriangleNormalImage[coordinate];

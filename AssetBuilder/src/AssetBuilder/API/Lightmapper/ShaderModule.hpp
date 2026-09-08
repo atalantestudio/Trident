@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Engine/Filesystem/Filesystem.hpp"
+
 #include "AssetBuilder/API/Lightmapper/Lightmapper.hpp"
 
 namespace Trident {
