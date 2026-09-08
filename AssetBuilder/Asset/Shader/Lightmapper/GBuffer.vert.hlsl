@@ -3,6 +3,7 @@
 
 struct VertexInput {
 	uint indexOffset : SV_VertexID;
+	uint indexOffsetOffset : SV_StartVertexLocation;
 	uint instanceIndex : SV_InstanceID;
 	uint instanceOffset : SV_StartInstanceLocation;
 };
@@ -27,17 +28,12 @@ struct Vertex {
 	float3 position;
 	uint materialIndex;
 	float3 normal;
-	uint _0;
 };
 
 struct Instance {
-	float3x4 transform;
-
+	float4x3 transform;
 	uint geometryTriangleOffset;
-
-	// TODO: Remove?
 	uint geometryVertexOffset;
-
 	uint lightmapCoordinateOffset;
 };
 
@@ -75,21 +71,22 @@ static const float2 LIGHTMAP_COORDINATE_OFFSETS[25] = {
 };
 
 Interstage main(VertexInput input) {
+	uint triangleIndex = (input.indexOffsetOffset + input.indexOffset) / 3;
+
 	Instance instance = instanceBuffer[input.instanceOffset + input.instanceIndex];
-	// Instance instance = instanceBuffer[input.instanceIndex];
 
 	float3x3 transform = (float3x3) instance.transform;
 	uint indexOffset = instance.geometryTriangleOffset * 3;
 
-	// TODO: Fix.
+	// TODO(asset-builder/lightmapper): Fix smooth position.
 	Vertex a = vertexBuffer[0];
 	Vertex b = vertexBuffer[0];
 	Vertex c = vertexBuffer[0];
 
-	Vertex vertex = vertexBuffer[instance.geometryVertexOffset + indexBuffer[indexOffset + input.indexOffset]];
+	uint index = indexBuffer[input.indexOffsetOffset + input.indexOffset];
 
-	float2 coordinate = lightmapCoordinateBuffer[instance.lightmapCoordinateOffset + indexBuffer[indexOffset + input.indexOffset]];
-	// float2 coordinate = lightmapCoordinateBuffer[instance.lightmapCoordinateOffset + indexBuffer[input.indexOffset]];
+	Vertex vertex = vertexBuffer[instance.geometryVertexOffset + index];
+	float2 coordinate = lightmapCoordinateBuffer[instance.lightmapCoordinateOffset + index];
 
 	// TODO(asset-builder/lightmapper): Get the atlas size.
 	// TODO(asset-builder/lightmapper): This fixes thin geometry receiving no light but adds leaks in larger geometry (e.g. floors and walls).
@@ -97,13 +94,12 @@ Interstage main(VertexInput input) {
 
 	coordinate.y = 1.0 - coordinate.y;
 
-	// float3 normal = mul(vertex.normal, transform);
-	float3 normal = vertex.normal;
+	float3 normal = mul(vertex.normal, transform);
 
 	Interstage interstage;
 	interstage.coordinate = float4(coordinate * 2.0 - 1.0, 0.0, 1.0);
 	interstage.position = vertex.position;
-	interstage.triangleIndex = (indexOffset + input.indexOffset) / 3 + 1;
+	interstage.triangleIndex = triangleIndex + 1;
 	interstage.triangleNormal = normal;
 	interstage.vertexNormal = normal;
 	interstage.positionA = a.position;
@@ -114,7 +110,7 @@ Interstage main(VertexInput input) {
 	interstage.normalC = mul(transform, c.normal);
 	interstage.barycentricCoordinate = float3(0.0, 0.0, 0.0);
 
-	switch (input.indexOffset % 3) {
+	switch ((input.indexOffsetOffset + input.indexOffset) % 3) {
 		case 0: {
 			interstage.barycentricCoordinate[0] = 1.0;
 

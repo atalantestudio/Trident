@@ -117,7 +117,6 @@ namespace Trident {
 		}
 
 		const BuildScene3D& scene = *descriptor.scene;
-
 		const uint64 indexCount = descriptor.indices.count();
 		const uint64 materialCount = descriptor.materials.count();
 		const uint64 emissiveTriangleIndexCount = descriptor.emissiveTriangleIndices.count();
@@ -151,7 +150,7 @@ namespace Trident {
 
 		vertexBuffer = device->createDynamicBuffer({
 			// TODO(wip): Remove alignment constraint.
-			.size = ceil((scene.staticGeometry.bakedVertexCount + scene.staticGeometry.externalVertexCount) * sizeof(BuildVertex3D), limits->minStorageBufferOffsetAlignment),
+			.size = ceil((scene.staticGeometry.bakedVertexCount + scene.staticGeometry.externalVertexCount) * sizeof(LightmapVertex), limits->minStorageBufferOffsetAlignment),
 
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::SHADER_DEVICE_ADDRESS | BufferUsage::READ_ONLY_ACCELERATION_STRUCTURE_INPUT,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
@@ -243,7 +242,7 @@ namespace Trident {
 		const uint64 lightmapCoordinateStagingViewSize = descriptor.lightmapCoordinates.count() * sizeof(svec2<float32>);
 		const uint64 indexStagingViewSize = (scene.staticGeometry.bakedIndexCount + scene.staticGeometry.externalIndexCount) * sizeof(uint32);
 		const uint64 tlasInstanceStagingViewSize = scene.staticGeometry.instances.count() * sizeof(AccelerationStructureInstance);
-		const uint64 instanceStagingViewSize = scene.staticGeometry.geometryCount * sizeof(LightmapInstance);
+		const uint64 instanceStagingViewSize = scene.staticGeometry.instances.count() * sizeof(LightmapInstance);
 		const uint64 argumentStagingViewSize = sizeof(Arguments);
 		const uint64 materialStagingViewSize = context.materialBuffer->getSize();
 		const uint64 emissiveTriangleIndexStagingViewSize = context.emissiveTriangleIndexBuffer->getSize();
@@ -547,7 +546,7 @@ namespace Trident {
 
 	void Lightmapper::updateDescriptorSets() const {
 		const BaseBufferView bufferViews[] = {
-			vertexBuffer->createView<BuildVertex3D>(0, vertexBuffer->getSize()),
+			vertexBuffer->createView<LightmapVertex>(0, vertexBuffer->getSize()),
 			lightmapCoordinateBuffer->createView<svec2<float32>>(0, lightmapCoordinateBuffer->getSize()),
 			indexBuffer->createView<uint32>(0, indexBuffer->getSize()),
 			instanceBuffer->createView<LightmapInstance>(0, instanceBuffer->getSize()),

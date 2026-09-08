@@ -47,7 +47,6 @@ float3 traceRay(Hit primaryHit, inout uint seed) {
 		TraceRay(accelerationStructure, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_BACK_FACING_TRIANGLES, 0xff, 0, 0, 0, primaryRay, primaryHit);
 
 		if (primaryHit.t < 0.0) {
-			// light += arguments.skyColor * throughput;
 			light += environmentMapTexture.SampleLevel(environmentMapSamplerState, primaryRay.Direction, 0.0).rgb * throughput;
 
 			break;
@@ -133,10 +132,6 @@ void main() {
 	float4 gBufferTriangleNormal = gBufferTriangleNormalImage[coordinate];
 	float3 triangleNormal = gBufferTriangleNormal.rgb;
 	float diagonalLuxelSize = gBufferTriangleNormal.a;
-
-	// TODO
-	intermediateLightmapAtlas[coordinate] = float4(triangleNormal, 1.0);
-	return;
 
 	adjustSamplePosition(position, triangleNormal, diagonalLuxelSize);
 

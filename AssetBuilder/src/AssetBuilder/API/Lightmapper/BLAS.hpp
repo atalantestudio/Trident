@@ -31,7 +31,7 @@ namespace Trident {
 
 			const AccelerationStructureTriangleGeometryDescriptor triangleGeometryDescriptor = {
 				.flags = GeometryFlags::OPAQUE | GeometryFlags::NO_DUPLICATE_ANY_HIT_INVOCATION,
-				.vertexView = vertexBuffer->createView<BuildVertex3D>(geometry.vertexRange.offset * sizeof(BuildVertex3D), geometry.vertexRange.count * sizeof(BuildVertex3D)),
+				.vertexView = vertexBuffer->createView<LightmapVertex>(geometry.vertexRange.offset * sizeof(LightmapVertex), geometry.vertexRange.count * sizeof(LightmapVertex)),
 				.vertexFormat = VertexInputAttributeFormat::R32G32B32_FLOAT,
 				.indexView = indexBuffer->createView<uint32>(geometry.indexRange.offset * sizeof(uint32), geometry.indexRange.count * sizeof(uint32)),
 			};

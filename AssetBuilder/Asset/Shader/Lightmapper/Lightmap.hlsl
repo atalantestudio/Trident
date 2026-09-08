@@ -20,19 +20,14 @@ struct Arguments {
 
 struct Vertex {
 	float3 position;
-	uint _0;
+	uint materialIndex;
 	float3 normal;
-	uint _1;
-	float4 tangent;
-	float2 lightmapCoordinate;
 };
 
 struct Instance {
+	float4x3 transform;
 	uint geometryTriangleOffset;
-
-	// TODO: Remove?
 	uint geometryVertexOffset;
-
 	uint lightmapCoordinateOffset;
 };
 
@@ -53,7 +48,7 @@ struct Hit {
 static const float PI = radians(180.0);
 static const float FLOAT_MAX = 4294967295.0;
 static const uint SAMPLE_COUNT = 1024;
-static const uint BOUNCE_COUNT = 1;
+static const uint BOUNCE_COUNT = 4;
 static const float ADAPTIVE_BIAS = 0.0000002;
 
 RaytracingAccelerationStructure accelerationStructure : register(t0);
