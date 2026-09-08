@@ -8,7 +8,6 @@
 namespace Trident::VK {
 	class AccelerationStructure final : public Trident::AccelerationStructure {
 		public:
-			VkAccelerationStructureKHR accelerationStructure;
 			VkAccelerationStructureBuildGeometryInfoKHR buildGeometryInfo;
 			const VkAccelerationStructureBuildRangeInfoKHR* buildRangeInfos;
 	};

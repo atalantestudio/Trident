@@ -11,7 +11,7 @@ namespace Trident::VK {
 		const VK::Device* vkDevice = static_cast<const VK::Device*>(device);
 		const VK::AccelerationStructure* vkAccelerationStructure = static_cast<const VK::AccelerationStructure*>(accelerationStructure);
 
-		vkDevice->vkDestroyAccelerationStructureKHR(vkDevice->device, vkAccelerationStructure->accelerationStructure, nullptr);
+		vkDevice->vkDestroyAccelerationStructureKHR(vkDevice->device, vkAccelerationStructure->buildGeometryInfo.dstAccelerationStructure, nullptr);
 	}
 
 	uint64 getAccelerationStructureDeviceAddress(const Trident::Device* device, const Trident::AccelerationStructure* accelerationStructure) {
@@ -21,7 +21,7 @@ namespace Trident::VK {
 		VkAccelerationStructureDeviceAddressInfoKHR deviceAddressInfo{};
 		deviceAddressInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
 		deviceAddressInfo.pNext = nullptr;
-		deviceAddressInfo.accelerationStructure = vkAccelerationStructure->accelerationStructure;
+		deviceAddressInfo.accelerationStructure = vkAccelerationStructure->buildGeometryInfo.dstAccelerationStructure;
 
 		return vkDevice->vkGetAccelerationStructureDeviceAddressKHR(vkDevice->device, &deviceAddressInfo);
 	}

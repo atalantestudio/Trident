@@ -191,7 +191,7 @@ namespace Trident {
 	class RayTracingPipeline;
 
 	typedef void (*BindRayTracingPipelineImplementation)(CommandEncoder* commandEncoder, ref<RayTracingPipeline> pipeline);
-	typedef void (*BuildAccelerationStructuresImplementation)(CommandEncoder* commandEncoder, view<ref<AccelerationStructure>> accelerationStructures, view<BaseBufferView> accelerationStructureViews, view<BaseBufferView> scratchViews);
+	typedef void (*BuildAccelerationStructuresImplementation)(CommandEncoder* commandEncoder, view<ref<AccelerationStructure>> accelerationStructures, view<BaseBufferView> scratchViews);
 	typedef ref<AccelerationStructureBuildGeometry> (*CreateAccelerationStructureBuildInstanceGeometryImplementation)(const Device* device, const AccelerationStructureBuildInstanceGeometryDescriptor& descriptor);
 	typedef ref<AccelerationStructureBuildGeometry> (*CreateAccelerationStructureBuildTriangleGeometryImplementation)(const Device* device, const AccelerationStructureBuildTriangleGeometryDescriptor& descriptor);
 	typedef ref<AccelerationStructure> (*CreateAccelerationStructureImplementation)(const Device* device, const AccelerationStructureDescriptor& descriptor);

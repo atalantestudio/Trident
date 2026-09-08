@@ -25,7 +25,7 @@ namespace Trident::VK {
 		vkCommandEncoder->commandCount += 1;
 	}
 
-	void buildAccelerationStructures(Trident::CommandEncoder* commandEncoder, view<ref<Trident::AccelerationStructure>> accelerationStructures, view<BaseBufferView> accelerationStructureViews, view<BaseBufferView> scratchViews) {
+	void buildAccelerationStructures(Trident::CommandEncoder* commandEncoder, view<ref<Trident::AccelerationStructure>> accelerationStructures, view<BaseBufferView> scratchViews) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VK::Device* vkDevice = static_cast<const VK::Device*>(commandEncoder->device);
@@ -50,8 +50,7 @@ namespace Trident::VK {
 
 			VkAccelerationStructureBuildGeometryInfoKHR& buildGeometryInfo = buildGeometryInfos[accelerationStructureIndex];
 			buildGeometryInfo = accelerationStructure->buildGeometryInfo;
-			buildGeometryInfo.dstAccelerationStructure = accelerationStructure->accelerationStructure;
-			buildGeometryInfo.scratchData.deviceAddress = vkDevice->vkGetBufferDeviceAddress(vkDevice->device, &bufferDeviceAddressInfo);
+			buildGeometryInfo.scratchData.deviceAddress = vkDevice->vkGetBufferDeviceAddress(vkDevice->device, &bufferDeviceAddressInfo) + scratchView.getOffset();
 
 			buildRangeInfos[accelerationStructureIndex] = accelerationStructure->buildRangeInfos;
 

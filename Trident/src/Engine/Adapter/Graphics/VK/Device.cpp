@@ -513,7 +513,7 @@ namespace Trident {
 					while (accelerationStructureIndex < binding.descriptorCount) {
 						const ref<Trident::AccelerationStructure> accelerationStructure = writeDescriptorSet.accelerationStructures[accelerationStructureIndex];
 
-						accelerationStructures[accelerationStructureOffset + accelerationStructureIndex] = ref_cast<VK::AccelerationStructure>(accelerationStructure)->accelerationStructure;
+						accelerationStructures[accelerationStructureOffset + accelerationStructureIndex] = ref_cast<VK::AccelerationStructure>(accelerationStructure)->buildGeometryInfo.dstAccelerationStructure;
 
 						accelerationStructureIndex += 1;
 					}

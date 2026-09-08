@@ -15,7 +15,7 @@ namespace Trident {
 		public:
 			void bindPipeline(ref<RayTracingPipeline> pipeline);
 
-			void buildAccelerationStructures(view<ref<AccelerationStructure>> accelerationStructures, view<BaseBufferView> accelerationStructureViews, view<BaseBufferView> scratchViews);
+			void buildAccelerationStructures(view<ref<AccelerationStructure>> accelerationStructures, view<BaseBufferView> scratchViews);
 
 			/// Initializes a ray tracing dispatch.
 			void traceRays(

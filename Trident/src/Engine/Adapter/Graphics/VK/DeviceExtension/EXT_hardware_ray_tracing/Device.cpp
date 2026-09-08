@@ -42,7 +42,7 @@ namespace Trident::VK {
 		accelerationStructureCreateInfo.type = buildGeometry->buildGeometryInfo.type;
 		accelerationStructureCreateInfo.deviceAddress = 0;
 
-		const VkResult result = vkDevice->vkCreateAccelerationStructureKHR(vkDevice->device, &accelerationStructureCreateInfo, nullptr, &accelerationStructure->accelerationStructure);
+		const VkResult result = vkDevice->vkCreateAccelerationStructureKHR(vkDevice->device, &accelerationStructureCreateInfo, nullptr, &accelerationStructure->buildGeometryInfo.dstAccelerationStructure);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create acceleration structure.");
 
@@ -63,20 +63,19 @@ namespace Trident::VK {
 		sequence<uint32>& maxPrimitiveCounts = accelerationStructureBuildGeometry->maxPrimitiveCounts;
 		maxPrimitiveCounts = sequence<uint32>(1);
 
+		const BaseBufferView& instanceView = descriptor.instanceView;
+		const uint32 instanceStride = instanceView.getStride();
+
 		VkBufferDeviceAddressInfo bufferDeviceAddressInfo{};
 		bufferDeviceAddressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
 		bufferDeviceAddressInfo.pNext = nullptr;
-
-		const BaseBufferView& instanceView = descriptor.instanceView;
-		const uint32 instanceStride = instanceView.getStride();
+		bufferDeviceAddressInfo.buffer = pointer_cast<const VK::Buffer*>(instanceView.getBuffer())->buffer;
 
 		VkAccelerationStructureGeometryKHR& geometry = geometries[0];
 		geometry.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
 		geometry.pNext = nullptr;
 		geometry.geometryType = VK_GEOMETRY_TYPE_INSTANCES_KHR;
 		geometry.flags = translateGeometryFlags(descriptor.geometryFlags);
-
-		bufferDeviceAddressInfo.buffer = pointer_cast<const VK::Buffer*>(instanceView.getBuffer())->buffer;
 
 		VkAccelerationStructureGeometryInstancesDataKHR& instancesData = geometry.geometry.instances;
 		instancesData.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR;

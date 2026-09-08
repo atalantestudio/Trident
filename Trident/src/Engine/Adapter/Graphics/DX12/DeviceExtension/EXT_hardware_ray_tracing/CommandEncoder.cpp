@@ -24,7 +24,7 @@ namespace Trident::DX12 {
 		dxCommandEncoder->commandCount += 1;
 	}
 
-	void buildAccelerationStructures(Trident::CommandEncoder* commandEncoder, view<ref<Trident::AccelerationStructure>> accelerationStructures, view<BaseBufferView> accelerationStructureViews, view<BaseBufferView> scratchViews) {
+	void buildAccelerationStructures(Trident::CommandEncoder* commandEncoder, view<ref<Trident::AccelerationStructure>> accelerationStructures, view<BaseBufferView> scratchViews) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const DX12::Device* dxDevice = static_cast<const DX12::Device*>(commandEncoder->device);
@@ -34,11 +34,9 @@ namespace Trident::DX12 {
 		UINT AccelerationStructureIndex = 0;
 
 		while (AccelerationStructureIndex < AccelerationStructureCount) {
-			const BaseBufferView& AccelerationStructureView = accelerationStructureViews[AccelerationStructureIndex];
 			const BaseBufferView& ScratchView = scratchViews[AccelerationStructureIndex];
 
 			ref<DX12::AccelerationStructure> accelerationStructure = ref_cast<DX12::AccelerationStructure>(accelerationStructures[AccelerationStructureIndex]);
-			accelerationStructure->BuildDesc.DestAccelerationStructureData = pointer_cast<const DX12::Buffer*>(AccelerationStructureView.getBuffer())->resource->GetGPUVirtualAddress() + AccelerationStructureView.getOffset();
 			accelerationStructure->BuildDesc.ScratchAccelerationStructureData = pointer_cast<const DX12::Buffer*>(ScratchView.getBuffer())->resource->GetGPUVirtualAddress() + ScratchView.getOffset();
 
 			dxCommandEncoder->commandList->BuildRaytracingAccelerationStructure(&accelerationStructure->BuildDesc, 0, nullptr);
