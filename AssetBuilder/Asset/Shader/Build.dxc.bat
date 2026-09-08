@@ -2,7 +2,7 @@
 
 set inputpath=%~dp0
 
-dxc "%inputpath%/Lightmapper/GBuffer.vert.hlsl" -T vs_6_0 -Fo "%inputpath%/Lightmapper/GBuffer.vert.dxil"
+dxc "%inputpath%/Lightmapper/GBuffer.vert.hlsl" -T vs_6_8 -Fo "%inputpath%/Lightmapper/GBuffer.vert.dxil"
 dxc "%inputpath%/Lightmapper/GBuffer.frag.hlsl" -T ps_6_0 -Fo "%inputpath%/Lightmapper/GBuffer.frag.dxil"
 dxc "%inputpath%/Lightmapper/Lightmap.rgen.hlsl" -T lib_6_3 -Fo "%inputpath%/Lightmapper/Lightmap.rgen.dxil"
 dxc "%inputpath%/Lightmapper/Lightmap.rchit.hlsl" -T lib_6_3 -Fo "%inputpath%/Lightmapper/Lightmap.rchit.dxil"

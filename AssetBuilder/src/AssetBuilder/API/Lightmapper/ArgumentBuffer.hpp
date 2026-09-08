@@ -7,11 +7,9 @@
 
 namespace Trident {
 	ref<Buffer> Lightmapper::createArgumentBuffer() const {
-		const uint64 alignment = physicalDevice->getLimits().minStorageBufferOffsetAlignment;
-
 		return device->createDynamicBuffer({
-			.size = ceil(sizeof(Arguments), alignment),
-			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_WRITE_STORAGE,
+			.size = ceil(sizeof(Arguments), limits->minUniformBufferOffsetAlignment),
+			.usage = BufferUsage::TRANSFER_DST | BufferUsage::UNIFORM,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
 			#if defined(DEBUG_OBJECT_NAME)

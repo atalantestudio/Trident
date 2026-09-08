@@ -105,12 +105,14 @@ void main() {
 	float inShadow = calculateShadow(interstage.lightSpacePosition);
 
 	vec3 directDiffuse = texture(diffuseMap, interstage.textureCoordinate).rgb;
-	vec3 indirectDiffuse = sampleBicubic(lightmapAtlasMap, interstage.lightmapCoordinate).rgb;
+	// vec3 indirectDiffuse = sampleBicubic(lightmapAtlasMap, interstage.lightmapCoordinate).rgb;
+	vec3 indirectDiffuse = texture(lightmapAtlasMap, interstage.lightmapCoordinate).rgb;
 	vec3 normal = normalize(interstage.tbn * (texture(normalMap, interstage.textureCoordinate).rgb * 2.0 - 1.0));
 	float surfaceToSunLight = dot(normal, SUN_DIRECTION);
 
 	directDiffuse = pow(directDiffuse, vec3(1.0 / 2.2));
 
-	fragment.rgb = mix(indirectDiffuse * directDiffuse, directDiffuse * camera.sunColor, max(0.0, max(0.0, surfaceToSunLight) - inShadow));
+	// fragment.rgb = mix(indirectDiffuse * directDiffuse, directDiffuse * camera.sunColor, max(0.0, max(0.0, surfaceToSunLight) - inShadow));
+	fragment.rgb = indirectDiffuse;
 	fragment.a = 1.0;
 }

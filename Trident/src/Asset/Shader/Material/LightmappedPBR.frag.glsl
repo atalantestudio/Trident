@@ -193,6 +193,7 @@ void main() {
 
 	vec3 Lo = Le + Lr;
 
-	fragment.rgb = mix(indirectDiffuse * c * ao, c * camera.sunColor, max(0.0, max(0.0, surfaceToSunLight) - inShadow)) + Lo;
+	// fragment.rgb = mix(indirectDiffuse * c * ao, c * camera.sunColor, max(0.0, max(0.0, surfaceToSunLight) - inShadow)) + Lo;
+	fragment.rgb = indirectDiffuse;
 	fragment.a = 1.0;
 }

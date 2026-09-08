@@ -61,6 +61,18 @@ namespace Trident {
 				float32 sunIntensity;
 			};
 
+			struct LightmapVertex {
+				svec3<float32> position;
+				uint32 materialIndex;
+				alignas(16) svec3<float32> normal;
+			};
+
+			struct LightmapInstance {
+				uint32 geometryTriangleOffset;
+				uint32 geometryVertexOffset;
+				uint32 lightmapCoordinateOffset;
+			};
+
 		public:
 			static const GraphicsAdapter* adapter;
 
@@ -80,6 +92,7 @@ namespace Trident {
 			ref<RenderPass> createGBufferRenderPass() const;
 			ref<RenderPass> createDilationRenderPass() const;
 
+			ref<Image> createEnvironmentMapImage(Extent3D extent) const;
 			ref<Image> createGBufferPositionImage() const;
 			ref<Image> createGBufferSmoothPositionImage() const;
 			ref<Image> createGBufferTriangleNormalImage() const;
@@ -87,6 +100,7 @@ namespace Trident {
 			ref<Image> createIntermediateLightmapAtlasImage() const;
 			ref<Image> createLightmapAtlasImage() const;
 
+			ref<ImageView> createEnvironmentMapImageView() const;
 			ref<ImageView> createGBufferImageView(ref<Image> image, view<char8> name) const;
 			ref<ImageView> createIntermediateLightmapAtlasImageView();
 			ref<ImageView> createLightmapAtlasImageView();
@@ -115,11 +129,13 @@ namespace Trident {
 
 			ref<Sampler> createIntermediateLightmapAtlasSampler() const;
 
-			void buildAccelerationStructures(const BuildScene3D& scene, uint64 vertexCount, uint64 indexCount);
-
 			void encodeOneTimeCommands(const LightmapperDescriptor& descriptor) const;
+			void createBottomLevelAccelerationStructures(const BuildScene3D& scene);
+			void createTopLevelAccelerationStructure(const BuildScene3D& scene);
+			void updateDescriptorSets() const;
+			void generateLightmaps(const BuildScene3D& scene, uint32 vertexCount) const;
 
-			void generateLightmaps(uint32 vertexCount) const;
+			void encodeGBufferCommands(const BuildScene3D& scene) const;
 
 		private:
 			bool initialized = false;
@@ -165,13 +181,29 @@ namespace Trident {
 
 			LightmapperContext context;
 
-			ref<Buffer> argumentBuffer;
 			ref<Buffer> vertexBuffer;
+			ref<Buffer> lightmapCoordinateBuffer;
 			ref<Buffer> indexBuffer;
-			ref<Buffer> accelerationStructureBuffer;
+			ref<Buffer> tlasInstanceBuffer;
+			ref<Buffer> instanceBuffer;
+			ref<Buffer> argumentBuffer;
+			ref<Buffer> blasBuffer;
+			ref<Buffer> tlasBuffer;
+			ref<Buffer> blasScratchBuffer;
+			ref<Buffer> tlasScratchBuffer;
 			ref<Buffer> shaderBindingTableBuffer;
-			ref<AccelerationStructure> bottomLevelAccelerationStructure;
-			ref<AccelerationStructure> topLevelAccelerationStructure;
+
+			sequence<ref<AccelerationStructure>> blas;
+			ref<AccelerationStructure> tlas;
+
+			sequence<BaseBufferView> blasScratchViews;
+			BaseBufferView tlasScratchView;
+
+			ref<Image> environmentMapImage;
+
+			ref<ImageView> environmentMapImageView;
+
+			ref<Sampler> environmentMapSampler;
 			ref<Sampler> intermediateLightmapAtlasSampler;
 
 			DeviceAddressRegion rayGenerationShaderBindingTable;

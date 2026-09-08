@@ -65,7 +65,7 @@ namespace Trident {
 						.material = lightmappedDefaultMaterial,
 						.transform = {
 							.translation = {(static_cast<sint32>(boxIndex) - 2) * spacing + positionBias, 16.0f, 128.0f},
-							.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
+							.rotation = {0.0_rad, 0.3_rad, 0.0_rad},
 							.scale = 32.0f,
 						},
 						.lightmap = {

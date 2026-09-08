@@ -2,8 +2,9 @@
 // Distributed under the GNU GPL v3 License.
 
 struct VertexInput {
-	uint vertexIndex : SV_VertexID;
+	uint indexOffset : SV_VertexID;
 	uint instanceIndex : SV_InstanceID;
+	uint instanceOffset : SV_StartInstanceLocation;
 };
 
 struct Interstage {
@@ -24,15 +25,24 @@ struct Interstage {
 
 struct Vertex {
 	float3 position;
-	uint _0;
+	uint materialIndex;
 	float3 normal;
-	uint _1;
-	float4 tangent;
-	float2 lightmapCoordinate;
+	uint _0;
+};
+
+struct Instance {
+	uint geometryTriangleOffset;
+
+	// TODO: Remove?
+	uint geometryVertexOffset;
+
+	uint lightmapCoordinateOffset;
 };
 
 StructuredBuffer<Vertex> vertexBuffer : register(t0);
-StructuredBuffer<uint> indexBuffer : register(t1);
+StructuredBuffer<float2> lightmapCoordinateBuffer : register(t1);
+StructuredBuffer<uint> indexBuffer : register(t2);
+StructuredBuffer<Instance> instanceBuffer : register(t3);
 
 static const float2 LIGHTMAP_COORDINATE_OFFSETS[25] = {
 	float2(-2.0, -2.0),
@@ -63,12 +73,21 @@ static const float2 LIGHTMAP_COORDINATE_OFFSETS[25] = {
 };
 
 Interstage main(VertexInput input) {
-	Vertex a = vertexBuffer[indexBuffer[input.vertexIndex % 3 + 0]];
-	Vertex b = vertexBuffer[indexBuffer[input.vertexIndex % 3 + 1]];
-	Vertex c = vertexBuffer[indexBuffer[input.vertexIndex % 3 + 2]];
-	Vertex vertex = vertexBuffer[indexBuffer[input.vertexIndex]];
+	uint instanceIndex = input.instanceIndex - input.instanceOffset;
 
-	float2 coordinate = vertex.lightmapCoordinate;
+	Instance instance = instanceBuffer[input.instanceOffset + input.instanceIndex];
+
+	uint indexOffset = instance.geometryTriangleOffset * 3;
+
+	// TODO: Fix.
+	Vertex a = vertexBuffer[0];
+	Vertex b = vertexBuffer[0];
+	Vertex c = vertexBuffer[0];
+
+	Vertex vertex = vertexBuffer[instance.geometryVertexOffset + indexBuffer[instance.geometryTriangleOffset * 3 + input.indexOffset]];
+	// Vertex vertex = vertexBuffer[instance.geometryVertexOffset + indexBuffer[indexOffset + input.indexOffset]];
+
+	float2 coordinate = lightmapCoordinateBuffer[instance.lightmapCoordinateOffset + indexBuffer[indexOffset + input.indexOffset]];
 
 	// TODO(asset-builder/lightmapper): Get the atlas size.
 	// TODO(asset-builder/lightmapper): This fixes thin geometry receiving no light but adds leaks in larger geometry (e.g. floors and walls).
@@ -79,7 +98,7 @@ Interstage main(VertexInput input) {
 	Interstage interstage;
 	interstage.coordinate = float4(coordinate * 2.0 - 1.0, 0.0, 1.0);
 	interstage.position = vertex.position;
-	interstage.triangleIndex = input.vertexIndex / 3 + 1;
+	interstage.triangleIndex = (indexOffset + input.indexOffset) / 3 + 1;
 	interstage.triangleNormal = vertex.normal;
 	interstage.vertexNormal = vertex.normal;
 	interstage.positionA = a.position;
@@ -90,7 +109,7 @@ Interstage main(VertexInput input) {
 	interstage.normalC = c.normal;
 	interstage.barycentricCoordinate = float3(0.0, 0.0, 0.0);
 
-	switch (input.vertexIndex % 3) {
+	switch (input.indexOffset % 3) {
 		case 0: {
 			interstage.barycentricCoordinate[0] = 1.0;
 
@@ -108,7 +127,7 @@ Interstage main(VertexInput input) {
 		}
 	}
 
-	interstage.materialIndex = uint(vertex.tangent.w);
+	interstage.materialIndex = vertex.materialIndex;
 
 	return interstage;
 }

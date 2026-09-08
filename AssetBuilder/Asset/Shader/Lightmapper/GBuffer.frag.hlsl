@@ -31,7 +31,7 @@ float3 planeProjection(float3 p, float3 offset, float3 normal) {
 FragmentOutput main(Interstage interstage) {
 	float3 b = interstage.barycentricCoordinate;
 	float3 p = interstage.position;
-	float3 luxelSize = max(abs(ddx(interstage.position)), abs(ddy(interstage.position)));
+	float3 luxelSize = max(abs(ddx(p)), abs(ddy(p)));
 	float diagonalLuxelSize = max(max(luxelSize.x, luxelSize.y), luxelSize.z) * sqrt(2.0);
 
 	FragmentOutput output;

@@ -15,7 +15,21 @@ namespace Trident {
 				.stageFlags = ShaderStage::VERTEX,
 			},
 
+			// Lightmap coordinate
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.stageFlags = ShaderStage::VERTEX,
+			},
+
 			// Index
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.stageFlags = ShaderStage::VERTEX,
+			},
+
+			// Instance
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,

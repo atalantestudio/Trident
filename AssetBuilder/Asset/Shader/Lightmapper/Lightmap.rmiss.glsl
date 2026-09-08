@@ -3,10 +3,10 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-#extension GL_EXT_ray_tracing : enable
+#include "Lightmap.glsl"
 
-layout(location = 0) rayPayloadEXT vec3 hitValue;
+layout(location = 0) rayPayloadInEXT Hit hit;
 
 void main() {
-	hitValue = vec3(1.0, 0.2, 0.0);
+	hit.distance = -1.0;
 }
