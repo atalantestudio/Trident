@@ -87,8 +87,6 @@ namespace Trident {
 				// TODO(lyah/scalar)
 				svec2<float32>& coordinate = staticGeometry.lightmapCoordinates[lightmap.coordinateOffset + coordinateIndex];
 				coordinate = (textureCoordinate - lightmap.minCoordinate) * lightmap.scale / lightmap.luxelScale;
-				coordinate.x = round(coordinate.x);
-				coordinate.y = round(coordinate.y);
 
 				coordinateIndex += 1;
 			}
