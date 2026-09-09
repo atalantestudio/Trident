@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Engine/API/Graphics/Base.hpp"
+
 namespace Trident {
 	class Semaphore {
 		public:
