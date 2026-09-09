@@ -14,6 +14,7 @@ namespace Trident {
 
 		const uint32 geometryCount = scene.staticGeometry.geometryCount;
 		const uint64 scratchAlignment = limits->minAccelerationStructureScratchOffsetAlignment;
+		const BufferView<LightmapVertex> vertexView = vertexBuffer->createView<LightmapVertex>(0, vertexBuffer->getSize());
 
 		blas = sequence<ref<AccelerationStructure>>(geometryCount);
 		blasScratchViews = sequence<BaseBufferView>(geometryCount);
@@ -31,7 +32,7 @@ namespace Trident {
 
 			const AccelerationStructureTriangleGeometryDescriptor triangleGeometryDescriptor = {
 				.flags = GeometryFlags::OPAQUE | GeometryFlags::NO_DUPLICATE_ANY_HIT_INVOCATION,
-				.vertexView = vertexBuffer->createView<LightmapVertex>(geometry.vertexRange.offset * sizeof(LightmapVertex), geometry.vertexRange.count * sizeof(LightmapVertex)),
+				.vertexView = vertexView,
 				.vertexFormat = VertexInputAttributeFormat::R32G32B32_FLOAT,
 				.indexView = indexBuffer->createView<uint32>(geometry.indexRange.offset * sizeof(uint32), geometry.indexRange.count * sizeof(uint32)),
 			};

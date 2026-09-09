@@ -279,32 +279,13 @@ namespace Trident {
 		}
 
 		std::copy(scene.staticGeometry.lightmapCoordinates.begin(), scene.staticGeometry.lightmapCoordinates.end(), lightmapCoordinateStagingView.map());
-
-		uint32* indexMappedRange = indexStagingView.map();
-		uint32 geometryIndex = 0;
-
-		while (geometryIndex < scene.staticGeometry.geometryCount) {
-			const BuildGeometry& geometry = scene.geometries[geometryIndex];
-
-			uint32 indexOffset = 0;
-
-			while (indexOffset < geometry.indexRange.count) {
-				// TODO(asset-builder/lightmapper): Don't alter the indices?
-				indexMappedRange[geometry.indexRange.offset + indexOffset] = scene.indices[geometry.indexRange.offset + indexOffset] - geometry.vertexRange.offset;
-
-				indexOffset += 1;
-			}
-
-			geometryIndex += 1;
-		}
-
+		std::copy_n(&scene.indices[0], scene.staticGeometry.bakedIndexCount + scene.staticGeometry.externalIndexCount, indexStagingView.map());
 		std::copy(descriptor.triangles.begin(), descriptor.triangles.end(), triangleStagingView.map());
 
 		// Copy instances.
 		{
 			AccelerationStructureInstance* tlasInstanceMappedRange = tlasInstanceStagingView.map();
 			LightmapInstance* instanceMappedRange = instanceStagingView.map();
-			uint32 lightmapCoordinateOffset = 0;
 			uint32 materialShaderIndex = 0;
 
 			while (materialShaderIndex < scene.dynamicGeometry.materialShaderOffset) {
@@ -322,6 +303,7 @@ namespace Trident {
 						const BuildGeometry& geometry = scene.geometries[materialGeometry.geometryIndex];
 						const uint64 blasAddress = blas[materialGeometry.geometryIndex]->getDeviceAddress();
 
+						uint32 lightmapCoordinateOffset = 0;
 						uint32 instanceOffset = 0;
 
 						while (instanceOffset < materialGeometry.instanceRange.count) {

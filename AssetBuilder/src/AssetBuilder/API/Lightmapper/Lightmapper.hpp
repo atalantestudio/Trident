@@ -53,7 +53,7 @@ namespace Trident {
 
 			struct LightmapVertex {
 				alignas(16) svec3<float32> position;
-				svec3<float32> normal;
+				alignas(16) svec3<float32> normal;
 			};
 
 			struct LightmapInstance {

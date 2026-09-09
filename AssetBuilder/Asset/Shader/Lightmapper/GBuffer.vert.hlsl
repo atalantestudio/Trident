@@ -28,6 +28,7 @@ struct Vertex {
 	float3 position;
 	uint _0;
 	float3 normal;
+	uint _1;
 };
 
 struct Instance {
@@ -76,7 +77,6 @@ Interstage main(VertexInput input) {
 	Instance instance = instanceBuffer[input.instanceOffset + input.instanceIndex];
 
 	float3x3 transform = (float3x3) instance.transform;
-	uint indexOffset = instance.geometryTriangleOffset * 3;
 
 	// TODO(asset-builder/lightmapper): Fix smooth position.
 	Vertex a = vertexBuffer[0];
@@ -85,7 +85,7 @@ Interstage main(VertexInput input) {
 
 	uint index = indexBuffer[input.indexOffsetOffset + input.indexOffset];
 
-	Vertex vertex = vertexBuffer[instance.geometryVertexOffset + index];
+	Vertex vertex = vertexBuffer[index];
 	float2 coordinate = lightmapCoordinateBuffer[instance.lightmapCoordinateOffset + index];
 
 	// TODO(asset-builder/lightmapper): Get the atlas size.
@@ -126,8 +126,8 @@ Interstage main(VertexInput input) {
 		}
 	}
 
-	// TODO
-	// interstage.materialIndex = 0;
+	// TODO(asset-builder/lightmapper): Restore materials.
+	interstage.materialIndex = 0;
 
 	return interstage;
 }

@@ -10,6 +10,7 @@ struct Vertex {
 	float3 position;
 	uint _0;
 	float3 normal;
+	uint _1;
 };
 
 struct Triangle {
