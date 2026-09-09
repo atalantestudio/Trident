@@ -196,6 +196,10 @@ namespace Trident {
 							VALIDATION_ERROR("copyRegions[[]].destinationOffset must be less than the size of destinationBuffer.", copyRegionIndex);
 						}
 
+						if (copyRegion.size == 0) {
+							VALIDATION_ERROR("copyRegions[[]].size must be greater than 0.", copyRegionIndex);
+						}
+
 						if (copyRegion.size > sourceBuffer->getSize() - copyRegion.sourceOffset) {
 							VALIDATION_ERROR("copyRegions[[]].size must be less than or equal to the size of sourceBuffer - copyRegions[[]].sourceOffset.", copyRegionIndex, copyRegionIndex);
 						}
