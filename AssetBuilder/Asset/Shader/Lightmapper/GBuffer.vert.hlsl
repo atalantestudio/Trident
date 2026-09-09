@@ -26,7 +26,7 @@ struct Interstage {
 
 struct Vertex {
 	float3 position;
-	uint materialIndex;
+	uint _0;
 	float3 normal;
 };
 
@@ -126,7 +126,8 @@ Interstage main(VertexInput input) {
 		}
 	}
 
-	interstage.materialIndex = vertex.materialIndex;
+	// TODO
+	// interstage.materialIndex = 0;
 
 	return interstage;
 }

@@ -273,7 +273,6 @@ namespace Trident {
 
 			LightmapVertex& lightmapVertex = vertexMappedRange[vertexIndex];
 			lightmapVertex.position = vertex.position;
-			lightmapVertex.materialIndex = static_cast<uint32>(vertex.tangent[3]);
 			lightmapVertex.normal = vertex.normal;
 
 			vertexIndex += 1;
