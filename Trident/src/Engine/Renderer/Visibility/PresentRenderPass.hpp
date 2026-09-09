@@ -29,7 +29,6 @@ namespace Trident {
 					},
 				},
 
-				// TODO(visibility/debug): Restore.
 				// Debug present
 				/* {
 					.colorAttachmentReferences = {

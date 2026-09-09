@@ -101,7 +101,7 @@ namespace Trident {
 						}
 
 						while (instanceIndex < materialGeometry.instanceRange.count) {
-							// TODO(forward) Don't rebind the lightmap coordinate buffer every time an instance is drawn.
+							// TODO(renderer/forward) Don't rebind the lightmap coordinate buffer every time an instance is drawn.
 							commandEncoder->bindVertexBuffer(1, lightmapCoordinateBuffer, instanceIndex * vertexCount * sizeof(uint32));
 
 							commandEncoder->drawIndexed(indexRange.count, 1, indexRange.offset, 0, materialGeometry.instanceRange.offset + instanceIndex);
@@ -153,7 +153,7 @@ namespace Trident {
 		}
 
 		if (visualizationMode & VisualizationMode::HULL_WIREFRAMES && debugHullWireframeBuffer != nullptr) {
-			// TODO(forward): Restore debug modes.
+			// TODO(renderer/forward): Restore debug modes.
 			/* commandEncoder->bindGraphicsPipeline(debugHullWireframePipeline);
 			commandEncoder->bindDescriptorSets(debugHullWireframePipelineLayout, 0, dynamicDescriptorSet);
 			commandEncoder->bindVertexBuffer(0, instanceBuffer, 0);
@@ -174,7 +174,7 @@ namespace Trident {
 					while (materialGeometryIndex < material.geometryRange.count) {
 						const MaterialGeometry& materialGeometry = sceneAsset->materialGeometries[material.geometryRange.offset + materialGeometryIndex];
 
-						// TODO(forward)
+						// TODO(renderer/forward)
 						const Geometry3D& geometry = scene->geometries[0];
 
 						if (geometry.hullIndex >= scene->hulls.count()) {
@@ -199,7 +199,7 @@ namespace Trident {
 		}
 
 		if (visualizationMode & VisualizationMode::CONTACT_MANIFOLDS) {
-			// TODO(forward): Restore debug modes.
+			// TODO(renderer/forward): Restore debug visualization modes.
 			/* commandEncoder->bindGraphicsPipeline(debugContactManifoldPipeline);
 			commandEncoder->bindDescriptorSets(debugContactManifoldPipelineLayout, 0, dynamicDescriptorSet);
 			commandEncoder->bindVertexBuffer(0, debugContactManifoldBuffer, 0);
@@ -293,7 +293,7 @@ namespace Trident {
 
 		const vec3<float32> position = normalized(vec3<float32>(scene->getAsset()->sunDirection)) * 512.0f;
 
-		// TODO(lyah): orthoLH_ZO
+		// TODO(lyah): Add helper similar to orthoLH_ZO.
 		const mat4x4<float32> projection = {
 				2.0f / width,  0.0f,           0.0f,          0.0f,
 				0.0f,          2.0f / height,  0.0f,          0.0f,

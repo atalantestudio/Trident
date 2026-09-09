@@ -429,7 +429,7 @@ namespace Trident {
 
 	void VisibilityRenderer::transitionOutputImage() const {
 		if (getGraphicsApi() != GraphicsAPI::DX12) {
-			// TODO: Avoid creating a command encoder for a single image transition?
+			// TODO(renderer/visibility): Avoid creating a command encoder for a single image transition?
 			const ref<Queue> graphicsQueue = getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
 			const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder({
 				.usage = CommandBufferUsage::ONE_TIME_SUBMIT,

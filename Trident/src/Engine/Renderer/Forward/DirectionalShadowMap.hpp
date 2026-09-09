@@ -114,7 +114,7 @@ namespace Trident {
 			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
 			.polygonMode = PolygonMode::FILL,
 
-			// TODO(forward/directional-shadow-map): Cull front faces.
+			// TODO(renderer/forward/directional-shadow-map): Cull front faces.
 			.cullMode = CullMode::NONE,
 
 			.frontFace = FrontFace::CLOCKWISE,

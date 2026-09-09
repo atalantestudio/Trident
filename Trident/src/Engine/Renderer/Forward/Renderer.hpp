@@ -64,7 +64,7 @@ namespace Trident {
 				directionalShadowMapImage = createDirectionalShadowMapImage();
 				directionalShadowMapImageView = createDirectionalShadowMapImageView();
 
-				// TODO(forward): Restore debug modes.
+				// TODO(renderer/forward): Restore debug visualization modes.
 				/* debugHullWireframePipelineLayout = createDebugHullWireframePipelineLayout();
 				debugHullWireframePipeline = createDebugHullWireframePipeline();
 

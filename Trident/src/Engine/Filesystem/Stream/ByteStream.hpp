@@ -39,8 +39,9 @@ namespace Trident {
 				return value;
 			}
 
-			// TODO: Allow entire structs to be read using ByteStream,
-			//       e.g. const MyStruct myStruct = stream.read<MyStruct>().
+			// TODO(filesystem/stream/byte-stream)
+			// Allow entire structs to be read using ByteStream:
+			// const MyStruct myStruct = stream.read<MyStruct>();
 			// 
 			// Casts to T and returns the next bytes from the stream.
 			// The byte size of T must be <= the remaining bytes in the stream.

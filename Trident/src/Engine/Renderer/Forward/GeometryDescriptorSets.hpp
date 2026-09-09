@@ -68,7 +68,7 @@ namespace Trident {
 				.imageView = skyboxImageView,
 				.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
 
-				// TODO(forward/skybox): Use a different sampler?
+				// TODO(renderer/forward/skybox): Use a different sampler?
 				.sampler = directionalShadowMapSampler,
 			};
 

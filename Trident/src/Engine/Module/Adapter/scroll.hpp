@@ -6,7 +6,7 @@
 namespace Trident {
 	using scroll::toString;
 
-	// TODO: Only used by TSL.
+	// TODO(scroll): Only used by TSL.
 	using scroll::ConsoleEscapeCode;
 
 	using scroll::ConsoleLogger;

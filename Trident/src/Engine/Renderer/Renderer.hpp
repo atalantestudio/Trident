@@ -79,10 +79,10 @@ namespace Trident {
 
 			static ref<ShaderModule> loadShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset);
 
-			// TODO: Deprecate.
+			// TODO(renderer/load-shader-module): Deprecate.
 			static ref<ShaderModule> loadShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> path);
 
-			// TODO: Deprecate.
+			// TODO(renderer/load-shader-module): Deprecate.
 			static ref<ShaderModule> loadInternalShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> path);
 
 		public:

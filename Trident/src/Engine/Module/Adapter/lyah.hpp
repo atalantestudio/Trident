@@ -4,7 +4,7 @@
 #pragma once
 
 namespace lyah {
-	// TODO(lyah): See https://github.com/orgs/atalantestudio/projects/4/views/1?pane=issue&itemId=210334400&issue=atalantestudio%7Clyah%7C27.
+	// TODO(lyah/sum): See https://github.com/orgs/atalantestudio/projects/4/views/1?pane=issue&itemId=210334400&issue=atalantestudio%7Clyah%7C27.
 	inline std::float_t sum(vec<3, std::float_t> a) {
 		return a[0] + a[1] + a[2];
 	}
@@ -154,7 +154,7 @@ namespace Trident {
 			x(x), y(y)
 		{}
 
-		// TODO(lyah): Remove once Lyah supports scalar vector math.
+		// TODO(lyah/scalar): Remove once Lyah supports scalar vector math.
 		constexpr explicit svec(vec<2, T> a) :
 			x(a[0]),
 			y(a[1])
@@ -172,7 +172,7 @@ namespace Trident {
 			return pointer_cast<T*>(this)[index];
 		}
 
-		// TODO(lyah): Add scalar vectors and replace SIMD vectors by general-purpose registers.
+		// TODO(lyah/scalar): Add scalar vectors and replace SIMD vectors by general-purpose registers.
 		inline operator vec<2, T>() const {
 			return {x, y};
 		}
@@ -192,7 +192,7 @@ namespace Trident {
 			x(x), y(y), z(z)
 		{}
 
-		// TODO(lyah): Remove once Lyah supports scalar vector math.
+		// TODO(lyah/scalar): Remove once Lyah supports scalar vector math.
 		constexpr explicit svec(vec<3, T> a) :
 			x(a[0]), y(a[1]), z(a[2])
 		{}
@@ -209,7 +209,7 @@ namespace Trident {
 			return pointer_cast<T*>(this)[index];
 		}
 
-		// TODO(lyah): Add scalar vectors and replace SIMD vectors by general-purpose registers.
+		// TODO(lyah/scalar): Add scalar vectors and replace SIMD vectors by general-purpose registers.
 		inline operator vec<3, T>() const {
 			return {x, y, z};
 		}
@@ -487,7 +487,7 @@ namespace Trident {
 		return round(a * p) / p;
 	}
 
-	// TODO
+	// TODO(lyah/scaled-area)
 	// Access the vertices using the indices provided by the geometry.
 	// Returns the absolute area of a 2D polygon defined by a sequence of vertices.
 	// See https://stackoverflow.com/a/717367/17136841.

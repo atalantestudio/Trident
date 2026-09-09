@@ -26,7 +26,7 @@ namespace Trident {
 				endianness(endianness)
 			{}
 
-			// TODO: Move to a new parent class.
+			// TODO(filesystem/stream/bit-stream): Move to a new parent class.
 			uint64 getByteOffset() const {
 				return byteOffset;
 			}
@@ -121,7 +121,7 @@ namespace Trident {
 				return value;
 			}
 
-			// TODO: Implement seek<T>(uint8 bitCount).
+			// TODO(filesystem/stream/bit-stream): Implement seek<T>(uint8 bitCount).
 
 			// Uncompresses data using the DEFLATE decompression algorithm.
 			// `uncompressedSize` is multiplied by the size of T.
@@ -212,7 +212,7 @@ namespace Trident {
 				sequence<T> data(uncompressedSize);
 				uint64 dataOffset = 0;
 
-				// TODO: Compute theoretical max. number of blocks.
+				// TODO(filesystem/stream/bit-stream): Compute theoretical max. number of blocks.
 				static constexpr uint32 MAX_BLOCK_COUNT = 1834;
 
 				for (uint32 blockIndex = 0; blockIndex < MAX_BLOCK_COUNT; blockIndex += 1) {
@@ -241,7 +241,7 @@ namespace Trident {
 					}
 
 					if (BFINAL) {
-						// TODO: Check Adler32.
+						// TODO(filesystem/stream/bit-stream): Check Adler32.
 						return data;
 					}
 				}
@@ -257,7 +257,7 @@ namespace Trident {
 			void parseCompressedZlibBlock(uint8* data, uint64& dataOffset, uint8 BTYPE);
 
 		private:
-			// TODO: Should stream be BitStreamSize* instead?
+			// TODO(filesystem/stream/bit-stream): Should stream be BitStreamSize* instead?
 			const uint8* data;
 
 			// Bit accumulator.
@@ -276,7 +276,7 @@ namespace Trident {
 			Endianness endianness;
 	};
 
-	// TODO: Remove duplicated methods.
+	// TODO(filesystem/stream/bit-stream): Remove duplicated methods.
 	template<>
 	class BitStream<StreamOperation::WRITE> {
 		private:
@@ -293,7 +293,7 @@ namespace Trident {
 				endianness(endianness)
 			{}
 
-			// TODO: Move to a new parent class.
+			// TODO(filesystem/stream/bit-stream): Move to a new parent class.
 			uint64 getByteOffset() const {
 				return byteOffset;
 			}
@@ -338,7 +338,7 @@ namespace Trident {
 				bitOffset += jumpBitCount;
 			}
 
-			// TODO: Implement seek<T>(uint8 bitCount).
+			// TODO(filesystem/stream/bit-stream): Implement seek<T>(uint8 bitCount).
 
 			// Writes `bitCount` bits of `value` to the stream.
 			template<typename T>
@@ -368,7 +368,7 @@ namespace Trident {
 			}
 
 		private:
-			// TODO: Should stream be BitStreamSize* instead?
+			// TODO(filesystem/stream/bit-stream): Should stream be BitStreamSize* instead?
 			uint8* data;
 
 			// Size of the stream in bytes.

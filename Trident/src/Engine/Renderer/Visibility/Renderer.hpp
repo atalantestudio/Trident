@@ -205,7 +205,7 @@ namespace Trident {
 			// Indirect arguments for material shader pipelines.
 			ref<Buffer> materialShaderIndirectBuffer;
 
-			// TODO: Use a 1D image instead.
+			// TODO(renderer/visibility): Use a 1D image instead.
 			// Screen pixels sorted by material index.
 			ref<Buffer> materialCoordinateBuffer;
 

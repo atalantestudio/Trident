@@ -16,7 +16,7 @@ namespace Trident {
 			},
 
 			// Directional light
-			// TODO(forward): Merge with ForwardCamera.
+			// TODO(renderer/forward): Merge with ForwardCamera?
 			{
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
 				.descriptorCount = 1,

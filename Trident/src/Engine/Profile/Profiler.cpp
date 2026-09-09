@@ -10,7 +10,7 @@ namespace Trident {
 	bool Profiler::firstEvent = true;
 
 	void Profiler::writeEvent(const ProfileEvent& event) {
-		// TODO: Reproduce and fix crash that happens when closing the window instead of the console.
+		// TODO(profiler): Reproduce and fix crash that happens when closing the window instead of the console.
 		ENGINE_ASSERT(stream.is_open(), "Could not write to the profiler output stream.");
 
 		if (!firstEvent) {

@@ -237,7 +237,7 @@ namespace Trident {
 	/// - The first descriptor set (MaterialBase) is automatically set by the renderer. It contains everything needed to access the visibility of a pixel,
 	/// as well as additional buffers to extract the triangle, cluster, geometry and instance data from this visibility.
 	/// - The second ("user") descriptor is authored by the user. It contains the necessary data for the shader to produce the desired output.
-	/// As of now, the bindings in this descriptor must be of type COMBINED_IMAGE_SAMPLER (TODO).
+	/// As of now, the bindings in this descriptor must be of type COMBINED_IMAGE_SAMPLER.
 	/// For example, a PBR shader will likely require AO, roughness, metallic, diffuse and normal textures.
 	/// This user descriptor set also contains the material offset buffer, which describes the range of coordinate indices referencing this particular material shader.
 	/// 
@@ -266,7 +266,7 @@ namespace Trident {
 		materialShaderUserDescriptorSets = device->allocateDescriptorSets(materialShaderUserDescriptorSetLayouts);
 
 		if (imageCount == 0) {
-			// TODO: Material offset write descriptor sets must still be created.
+			// TODO(renderer/visibility): Material offset write descriptor sets must still be created.
 			ENGINE_ERROR_UNIMPLEMENTED();
 
 			return;
