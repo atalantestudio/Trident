@@ -34,7 +34,6 @@ struct Vertex {
 struct Instance {
 	float4x3 transform;
 	uint geometryTriangleOffset;
-	uint geometryVertexOffset;
 	uint lightmapCoordinateOffset;
 };
 

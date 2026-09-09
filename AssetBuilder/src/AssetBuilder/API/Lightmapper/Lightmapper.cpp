@@ -341,7 +341,6 @@ namespace Trident {
 									{world[2][0], world[2][1], world[2][2], world[2][3]},
 								},
 								.geometryTriangleOffset = geometry.indexRange.offset / 3,
-								.geometryVertexOffset = geometry.vertexRange.offset,
 								.lightmapCoordinateOffset = lightmapCoordinateOffset,
 							};
 
@@ -721,10 +720,6 @@ namespace Trident {
 		// TODO(graphics/command-encoder/bind-resources): Ensure that descriptor sets and vertex buffers, if any, are always bound after the pipeline.
 		commandEncoder->bindDescriptorSets(gBufferPipelineLayout, 0, descriptorSets[0]);
 
-		// TODO(asset-builder/lightmapper): Compare conservative rasterization methods.
-		// commandEncoder->draw(indexCount, 25, 0, 0);
-		// commandEncoder->draw(indexCount, 1, 0, 0);
-
 		uint32 materialShaderIndex = 0;
 
 		while (materialShaderIndex < scene.dynamicGeometry.materialShaderOffset) {
@@ -753,19 +748,9 @@ namespace Trident {
 		}
 
 		commandEncoder->endRenderPass();
-	}
 
-	void Lightmapper::generateLightmaps(const BuildScene3D& scene) const {
-		const float32 width = static_cast<float32>(imageAssetDescriptor.extent.width);
-		const float32 height = static_cast<float32>(imageAssetDescriptor.extent.height);
-
-		commandEncoder->reset();
-		commandEncoder->begin();
-
-		encodeGBufferCommands(scene);
-
-		// TODO(graphics/render-pass/subpass): Add support for subpass dependencies.
-		{
+		// TODO(graphics/dx12/render-pass/final-layout): Automatically transition render pass attachments to their final layout.
+		if (adapter->getApi() == GraphicsAPI::DX12) {
 			const ImageMemoryBarrier imageMemoryBarriers[] = {
 				{
 					.image = context.gBufferPositionImage,
@@ -787,6 +772,8 @@ namespace Trident {
 					.newLayout = ImageLayout::GENERAL,
 					.newAccess = Access::SHADER_READ,
 				},
+
+				// TODO(asset-builder/lightmapper/intermediate-lightmap-atlas): This image should have been transitioned earlier.
 				{
 					.image = context.intermediateLightmapAtlasImage,
 					.newLayout = ImageLayout::GENERAL,
@@ -796,6 +783,16 @@ namespace Trident {
 
 			commandEncoder->insertMemoryBarriers({}, imageMemoryBarriers);
 		}
+	}
+
+	void Lightmapper::generateLightmaps(const BuildScene3D& scene) const {
+		const float32 width = static_cast<float32>(imageAssetDescriptor.extent.width);
+		const float32 height = static_cast<float32>(imageAssetDescriptor.extent.height);
+
+		commandEncoder->reset();
+		commandEncoder->begin();
+
+		encodeGBufferCommands(scene);
 
 		queue->submit(commandEncoder->end());
 		queue->waitIdle();
@@ -854,7 +851,7 @@ namespace Trident {
 		commandEncoder->draw(3, 1, 0, 0);
 		commandEncoder->endRenderPass();
 
-		// TODO(graphics/render-pass/subpass): Add support for subpass dependencies.
+		// TODO(graphics/dx12/render-pass/final-layout): Automatically transition render pass attachments to their final layout.
 		if (adapter->getApi() == GraphicsAPI::DX12) {
 			imageMemoryBarrier = {
 				.image = context.lightmapAtlasImage,

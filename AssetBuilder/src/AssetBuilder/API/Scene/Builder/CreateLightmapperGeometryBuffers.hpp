@@ -25,10 +25,11 @@ namespace Trident {
 			uint32 triangleIndex = 0;
 
 			while (triangleIndex < lightmap.triangleRange.count) {
-				triangles[geometryTriangleOffset + lightmap.triangleRange.offset + triangleIndex] = {
+				// TODO(asset-builder/lightmapper): Fix lightmap pointing to wrong geometry.
+				/* triangles[geometryTriangleOffset + lightmap.triangleRange.offset + triangleIndex] = {
 					.geometryOffset = lightmap.triangleRange.offset,
 					.materialIndex = lightmapIndex,
-				};
+				}; */
 
 				triangleIndex += 1;
 			}
