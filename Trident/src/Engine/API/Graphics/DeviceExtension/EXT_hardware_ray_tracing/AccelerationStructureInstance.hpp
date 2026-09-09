@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Graphics/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructure.hpp"
+#include "Engine/API/Graphics/DeviceExtension/EXT_hardware_ray_tracing/InstanceFlags.hpp"
 
 namespace Trident {
 	struct AccelerationStructureInstance {
@@ -11,10 +12,7 @@ namespace Trident {
 		uint32 index : 24;
 		uint32 mask : 8;
 		uint32 shaderBindingTableRecordOffset : 24;
-
-		// TODO(graphics/ext_hardware_ray_tracing/tlas-instance): Add instance flag enum.
-		uint32 flags : 8;
-
+		InstanceFlags flags;
 		uint64 accelerationStructureAddress;
 	};
 }

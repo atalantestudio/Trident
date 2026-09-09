@@ -330,7 +330,7 @@ namespace Trident {
 								.index = instanceIndex,
 								.mask = 1,
 								.shaderBindingTableRecordOffset = 0,
-								.flags = 0,
+								.flags = FORCE_OPAQUE,
 								.accelerationStructureAddress = blasAddress,
 							};
 

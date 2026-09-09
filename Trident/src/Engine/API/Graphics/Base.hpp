@@ -179,6 +179,10 @@ namespace Trident {
 
 	// EXT_hardware_ray_tracing
 
+	enum class AccelerationStructureBuildFlags : uint8;
+	enum class GeometryFlags : uint8;
+	enum InstanceFlags : uint8;
+
 	struct AccelerationStructureBuildInstanceGeometryDescriptor;
 	struct AccelerationStructureBuildSizes;
 	struct AccelerationStructureBuildTriangleGeometryDescriptor;
