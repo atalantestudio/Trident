@@ -14,13 +14,10 @@
 
 namespace Trident {
 	struct LightmapperDescriptor {
-		view<BuildVertex3D> vertices;
-		view<svec2<float32>> lightmapCoordinates;
-		view<uint32> indices;
-		view<LightmapMaterial> materials;
-		view<uint32> emissiveTriangleIndices;
 		const BuildScene3D* scene;
-		Scene3DDescriptor sceneDescriptor;
+		view<BuildTriangle3D> triangles;
+		view<uint32> emissiveTriangleIndices;
+		view<LightmapMaterial> materials;
 	};
 
 	struct LightmapperContext {
@@ -55,8 +52,7 @@ namespace Trident {
 			};
 
 			struct LightmapVertex {
-				svec3<float32> position;
-				uint32 materialIndex;
+				alignas(16) svec3<float32> position;
 				svec3<float32> normal;
 			};
 
@@ -133,7 +129,7 @@ namespace Trident {
 			void createBottomLevelAccelerationStructures(const BuildScene3D& scene);
 			void createTopLevelAccelerationStructure(const BuildScene3D& scene);
 			void updateDescriptorSets() const;
-			void generateLightmaps(const BuildScene3D& scene, uint32 vertexCount) const;
+			void generateLightmaps(const BuildScene3D& scene) const;
 
 			void encodeGBufferCommands(const BuildScene3D& scene) const;
 
@@ -185,6 +181,7 @@ namespace Trident {
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> lightmapCoordinateBuffer;
 			ref<Buffer> indexBuffer;
+			ref<Buffer> triangleBuffer;
 			ref<Buffer> tlasInstanceBuffer;
 			ref<Buffer> instanceBuffer;
 			ref<Buffer> blasBuffer;

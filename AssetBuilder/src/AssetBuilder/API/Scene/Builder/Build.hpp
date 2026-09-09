@@ -33,7 +33,7 @@ namespace Trident {
 		}
 	}
 
-	inline void countMaterialRelatedObjects(view<IntermediateMaterialShader> materialShaders, uint32 materialShaderCounts[2], uint32& materialCount, uint32& materialGeometryCount, uint32& staticInstanceCount) {
+	inline void countMaterialRelatedObjects(view<IntermediateGeometry> geometries, view<IntermediateMaterialShader> materialShaders, uint32 materialShaderCounts[2], uint32& materialCount, uint32& materialGeometryCount, uint32& staticInstanceCount, uint32& staticUnwrappedTriangleCount) {
 		for (const IntermediateMaterialShader& materialShader : materialShaders) {
 			const uint32 previousMaterialCount = materialCount;
 
@@ -46,7 +46,10 @@ namespace Trident {
 					}
 
 					if (materialShader.asset.geometryType == GeometryType::STATIC) {
+						const IntermediateGeometry& geometry = geometries[materialGeometry.geometryIndex];
+
 						staticInstanceCount += static_cast<uint32>(materialGeometry.instances.size());
+						staticUnwrappedTriangleCount += static_cast<uint32>(geometry.indices.count() / 3 * materialGeometry.instances.size());
 					}
 
 					materialGeometryCount += 1;
@@ -83,8 +86,9 @@ namespace Trident {
 		uint32 materialCount = 0;
 		uint32 materialGeometryCount = 0;
 		uint32 staticInstanceCount = 0;
+		uint32 staticUnwrappedTriangleCount = 0;
 
-		countMaterialRelatedObjects(preFilteredMaterialShaders, materialShaderCounts, materialCount, materialGeometryCount, staticInstanceCount);
+		countMaterialRelatedObjects(preFilteredGeometries, preFilteredMaterialShaders, materialShaderCounts, materialCount, materialGeometryCount, staticInstanceCount, staticUnwrappedTriangleCount);
 
 		BuildScene3D scene{};
 		scene.skyColor = descriptor.skyColor;
@@ -98,6 +102,7 @@ namespace Trident {
 		scene.staticGeometry.externalVertexCount = vertexCounts[1];
 		scene.staticGeometry.bakedIndexCount = indexCounts[0];
 		scene.staticGeometry.externalIndexCount = indexCounts[1];
+		scene.staticGeometry.unwrappedTriangleCount = staticUnwrappedTriangleCount;
 		scene.staticGeometry.lightmapAtlasImageAssetDescriptor.identifier = max<uint32>();
 		scene.dynamicGeometry.entityCount = entityCount;
 		scene.spawn = descriptor.spawn;
@@ -257,12 +262,11 @@ namespace Trident {
 			createLightmaps(scene.staticGeometry);
 			updateLightmapCoordinates(scene.staticGeometry);
 
-			sequence<BuildVertex3D> vertices;
-			sequence<uint32> indices;
-			sequence<LightmapMaterial> materials;
+			sequence<BuildTriangle3D> triangles;
 			sequence<uint32> emissiveTriangleIndices;
+			sequence<LightmapMaterial> materials;
 
-			createLightmapperGeometryBuffers(scene, vertices, indices, materials, emissiveTriangleIndices);
+			createLightmapperGeometryBuffers(scene, triangles, emissiveTriangleIndices, materials);
 
 			scene.staticGeometry.lightmapAtlasImageAssetDescriptor = {
 				.format = ImageFormat::R8G8B8A8_UNORM,
@@ -274,13 +278,10 @@ namespace Trident {
 			scene.staticGeometry.lightmapAtlasImageAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
 
 			lightmapper.generateAtlas(scene.staticGeometry.lightmapAtlasImageAssetDescriptor, {
-				.vertices = vertices,
-				.lightmapCoordinates = scene.staticGeometry.lightmapCoordinates,
-				.indices = indices,
-				.materials = materials,
-				.emissiveTriangleIndices = emissiveTriangleIndices,
 				.scene = &scene,
-				.sceneDescriptor = descriptor,
+				.triangles = triangles,
+				.emissiveTriangleIndices = emissiveTriangleIndices,
+				.materials = materials,
 			});
 		}
 	}

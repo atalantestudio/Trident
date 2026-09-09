@@ -91,17 +91,13 @@ namespace Trident {
 	}
 
 	void Lightmapper::generateAtlas(ImageAssetDescriptor& imageAssetDescriptor, const LightmapperDescriptor& descriptor) {
-		DEBUG_ASSERT(descriptor.lightmapCoordinates.count() == descriptor.vertices.count());
-
 		this->imageAssetDescriptor = imageAssetDescriptor;
-		sceneDescriptor = descriptor.sceneDescriptor;
 
 		if (!initialized) {
 			initialize();
 		}
 
 		const BuildScene3D& scene = *descriptor.scene;
-		const uint64 indexCount = descriptor.indices.count();
 		const uint64 materialCount = descriptor.materials.count();
 		const uint64 emissiveTriangleIndexCount = descriptor.emissiveTriangleIndices.count();
 
@@ -131,7 +127,6 @@ namespace Trident {
 				.name = "Lightmap atlas staging",
 			#endif
 		});
-
 		vertexBuffer = device->createDynamicBuffer({
 			// TODO(wip): Remove alignment constraint.
 			.size = ceil((scene.staticGeometry.bakedVertexCount + scene.staticGeometry.externalVertexCount) * sizeof(LightmapVertex), limits->minStorageBufferOffsetAlignment),
@@ -143,9 +138,8 @@ namespace Trident {
 				.name = "Vertex",
 			#endif
 		});
-
 		lightmapCoordinateBuffer = device->createDynamicBuffer({
-			.size = ceil(descriptor.lightmapCoordinates.count() * sizeof(svec2<float32>), limits->minStorageBufferOffsetAlignment),
+			.size = ceil(scene.staticGeometry.lightmapCoordinates.count() * sizeof(svec2<float32>), limits->minStorageBufferOffsetAlignment),
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
@@ -153,7 +147,6 @@ namespace Trident {
 				.name = "Lightmap coordinate",
 			#endif
 		});
-
 		indexBuffer = device->createDynamicBuffer({
 			// TODO(wip): Remove alignment constraint.
 			.size = ceil((scene.staticGeometry.bakedIndexCount + scene.staticGeometry.externalIndexCount) * sizeof(uint32), limits->minStorageBufferOffsetAlignment),
@@ -165,7 +158,15 @@ namespace Trident {
 				.name = "Index",
 			#endif
 		});
-
+		triangleBuffer = device->createDynamicBuffer({
+			.size = ceil(descriptor.triangles.count() * sizeof(BuildTriangle3D), limits->minStorageBufferOffsetAlignment),
+			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
+			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
+			.persistent = false,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = "Triangle",
+			#endif
+		});
 		tlasInstanceBuffer = device->createDynamicBuffer({
 			.size = ceil(scene.staticGeometry.instances.count() * sizeof(AccelerationStructureInstance), 256ull),
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::SHADER_DEVICE_ADDRESS | BufferUsage::READ_ONLY_ACCELERATION_STRUCTURE_INPUT,
@@ -175,7 +176,6 @@ namespace Trident {
 				.name = "TLAS instance",
 			#endif
 		});
-
 		instanceBuffer = device->createDynamicBuffer({
 			.size = ceil(scene.staticGeometry.instances.count() * sizeof(LightmapInstance), limits->minStorageBufferOffsetAlignment),
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
@@ -201,7 +201,7 @@ namespace Trident {
 
 		encodeOneTimeCommands(descriptor);
 		updateDescriptorSets();
-		generateLightmaps(scene, static_cast<uint32>(indexCount));
+		generateLightmaps(scene);
 
 		const BufferView<uint8> lightmapAtlasView = context.lightmapAtlasStagingBuffer->createView<uint8>(0, context.lightmapAtlasStagingBuffer->getSize());
 
@@ -213,8 +213,9 @@ namespace Trident {
 	void Lightmapper::encodeOneTimeCommands(const LightmapperDescriptor& descriptor) const {
 		const BuildScene3D& scene = *descriptor.scene;
 		const uint64 vertexStagingViewSize = (scene.staticGeometry.bakedVertexCount + scene.staticGeometry.externalVertexCount) * sizeof(LightmapVertex);
-		const uint64 lightmapCoordinateStagingViewSize = descriptor.lightmapCoordinates.count() * sizeof(svec2<float32>);
+		const uint64 lightmapCoordinateStagingViewSize = scene.staticGeometry.lightmapCoordinates.count() * sizeof(svec2<float32>);
 		const uint64 indexStagingViewSize = (scene.staticGeometry.bakedIndexCount + scene.staticGeometry.externalIndexCount) * sizeof(uint32);
+		const uint64 triangleStagingViewSize = descriptor.triangles.count() * sizeof(BuildTriangle3D);
 		const uint64 tlasInstanceStagingViewSize = scene.staticGeometry.instances.count() * sizeof(AccelerationStructureInstance);
 		const uint64 instanceStagingViewSize = scene.staticGeometry.instances.count() * sizeof(LightmapInstance);
 		const uint64 argumentStagingViewSize = sizeof(Arguments);
@@ -223,7 +224,7 @@ namespace Trident {
 		const uint64 environmentMapStagingViewSize = environmentMapImage->getSize();
 
 		const ref<Buffer> stagingBuffer = device->createDynamicBuffer({
-			.size = vertexStagingViewSize + lightmapCoordinateStagingViewSize + indexStagingViewSize + tlasInstanceStagingViewSize + instanceStagingViewSize + argumentStagingViewSize + materialStagingViewSize + emissiveTriangleIndexStagingViewSize + environmentMapStagingViewSize,
+			.size = vertexStagingViewSize + lightmapCoordinateStagingViewSize + indexStagingViewSize + triangleStagingViewSize + tlasInstanceStagingViewSize + instanceStagingViewSize + argumentStagingViewSize + materialStagingViewSize + emissiveTriangleIndexStagingViewSize + environmentMapStagingViewSize,
 			.usage = BufferUsage::TRANSFER_SRC,
 			.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
 			.persistent = false,
@@ -242,6 +243,9 @@ namespace Trident {
 
 		const BufferView<uint32> indexStagingView = stagingBuffer->createView<uint32>(viewOffset, indexStagingViewSize);
 		viewOffset += indexStagingViewSize;
+
+		const BufferView<BuildTriangle3D> triangleStagingView = stagingBuffer->createView<BuildTriangle3D>(viewOffset, triangleStagingViewSize);
+		viewOffset += triangleStagingViewSize;
 
 		const BufferView<AccelerationStructureInstance> tlasInstanceStagingView = stagingBuffer->createView<AccelerationStructureInstance>(viewOffset, tlasInstanceStagingViewSize);
 		viewOffset += tlasInstanceStagingViewSize;
@@ -275,7 +279,7 @@ namespace Trident {
 			vertexIndex += 1;
 		}
 
-		std::copy(descriptor.lightmapCoordinates.begin(), descriptor.lightmapCoordinates.end(), lightmapCoordinateStagingView.map());
+		std::copy(scene.staticGeometry.lightmapCoordinates.begin(), scene.staticGeometry.lightmapCoordinates.end(), lightmapCoordinateStagingView.map());
 
 		uint32* indexMappedRange = indexStagingView.map();
 		uint32 geometryIndex = 0;
@@ -294,6 +298,8 @@ namespace Trident {
 
 			geometryIndex += 1;
 		}
+
+		std::copy(descriptor.triangles.begin(), descriptor.triangles.end(), triangleStagingView.map());
 
 		// Copy instances.
 		{
@@ -391,9 +397,9 @@ namespace Trident {
 		}
 		else {
 			const uint32 color = (
-				static_cast<uint32>(descriptor.sceneDescriptor.skyColor.x * 255.0f) |
-				(static_cast<uint32>(descriptor.sceneDescriptor.skyColor.y * 255.0f) << 8) |
-				(static_cast<uint32>(descriptor.sceneDescriptor.skyColor.z * 255.0f) << 16) |
+				static_cast<uint32>(scene.skyColor.x * 255.0f) |
+				(static_cast<uint32>(scene.skyColor.y * 255.0f) << 8) |
+				(static_cast<uint32>(scene.skyColor.z * 255.0f) << 16) |
 				(255 << 24)
 			);
 
@@ -420,6 +426,11 @@ namespace Trident {
 				.sourceOffset = indexStagingView.getOffset(),
 				.destinationOffset = 0,
 				.size = indexStagingView.getSize(),
+			},
+			{
+				.sourceOffset = triangleStagingView.getOffset(),
+				.destinationOffset = 0,
+				.size = triangleStagingView.getSize(),
 			},
 			{
 				.sourceOffset = tlasInstanceStagingView.getOffset(),
@@ -451,11 +462,12 @@ namespace Trident {
 		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegions[0]);
 		commandEncoder->copyBufferToBuffer(stagingBuffer, lightmapCoordinateBuffer, bufferCopyRegions[1]);
 		commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, bufferCopyRegions[2]);
-		commandEncoder->copyBufferToBuffer(stagingBuffer, tlasInstanceBuffer, bufferCopyRegions[3]);
-		commandEncoder->copyBufferToBuffer(stagingBuffer, instanceBuffer, bufferCopyRegions[4]);
-		commandEncoder->copyBufferToBuffer(stagingBuffer, argumentBuffer, bufferCopyRegions[5]);
-		commandEncoder->copyBufferToBuffer(stagingBuffer, context.materialBuffer, bufferCopyRegions[6]);
-		commandEncoder->copyBufferToBuffer(stagingBuffer, context.emissiveTriangleIndexBuffer, bufferCopyRegions[7]);
+		commandEncoder->copyBufferToBuffer(stagingBuffer, triangleBuffer, bufferCopyRegions[3]);
+		commandEncoder->copyBufferToBuffer(stagingBuffer, tlasInstanceBuffer, bufferCopyRegions[4]);
+		commandEncoder->copyBufferToBuffer(stagingBuffer, instanceBuffer, bufferCopyRegions[5]);
+		commandEncoder->copyBufferToBuffer(stagingBuffer, argumentBuffer, bufferCopyRegions[6]);
+		commandEncoder->copyBufferToBuffer(stagingBuffer, context.materialBuffer, bufferCopyRegions[7]);
+		commandEncoder->copyBufferToBuffer(stagingBuffer, context.emissiveTriangleIndexBuffer, bufferCopyRegions[8]);
 
 		ImageMemoryBarrier imageMemoryBarriers[] = {
 			// Environment map
@@ -515,6 +527,7 @@ namespace Trident {
 			vertexBuffer->createView<LightmapVertex>(0, vertexBuffer->getSize()),
 			lightmapCoordinateBuffer->createView<svec2<float32>>(0, lightmapCoordinateBuffer->getSize()),
 			indexBuffer->createView<uint32>(0, indexBuffer->getSize()),
+			triangleBuffer->createView<BuildTriangle3D>(0, triangleBuffer->getSize()),
 			instanceBuffer->createView<LightmapInstance>(0, instanceBuffer->getSize()),
 			argumentBuffer->createView<Arguments>(0, argumentBuffer->getSize()),
 			context.materialBuffer->createView<LightmapMaterial>(0, context.materialBuffer->getSize()),
@@ -579,7 +592,7 @@ namespace Trident {
 			{
 				.descriptorSet = descriptorSets[0],
 				.bindingIndex = 3,
-				.descriptorBufferViews = bufferViews[3],
+				.descriptorBufferViews = bufferViews[4],
 			},
 
 			// Ray tracing
@@ -595,7 +608,7 @@ namespace Trident {
 			{
 				.descriptorSet = descriptorSets[1],
 				.bindingIndex = 1,
-				.descriptorBufferViews = bufferViews[4],
+				.descriptorBufferViews = bufferViews[5],
 			},
 
 			// Vertex
@@ -619,66 +632,73 @@ namespace Trident {
 				.descriptorBufferViews = bufferViews[2],
 			},
 
-			// Instance
+			// Triangle
 			{
 				.descriptorSet = descriptorSets[1],
 				.bindingIndex = 5,
 				.descriptorBufferViews = bufferViews[3],
 			},
 
-			// Material
+			// Instance
 			{
 				.descriptorSet = descriptorSets[1],
 				.bindingIndex = 6,
-				.descriptorBufferViews = bufferViews[5],
+				.descriptorBufferViews = bufferViews[4],
 			},
 
-			// Emissive triangle index
+			// Material
 			{
 				.descriptorSet = descriptorSets[1],
 				.bindingIndex = 7,
 				.descriptorBufferViews = bufferViews[6],
 			},
 
-			// Environment map
+			// Emissive triangle index
 			{
 				.descriptorSet = descriptorSets[1],
 				.bindingIndex = 8,
+				.descriptorBufferViews = bufferViews[7],
+			},
+
+			// Environment map
+			{
+				.descriptorSet = descriptorSets[1],
+				.bindingIndex = 9,
 				.descriptorImages = descriptorImages[0],
 			},
 
 			// G-Buffer position
 			{
 				.descriptorSet = descriptorSets[1],
-				.bindingIndex = 9,
+				.bindingIndex = 10,
 				.descriptorImages = descriptorImages[1],
 			},
 
 			// G-Buffer smooth position
 			{
 				.descriptorSet = descriptorSets[1],
-				.bindingIndex = 10,
+				.bindingIndex = 11,
 				.descriptorImages = descriptorImages[2],
 			},
 
 			// G-Buffer triangle normal
 			{
 				.descriptorSet = descriptorSets[1],
-				.bindingIndex = 11,
+				.bindingIndex = 12,
 				.descriptorImages = descriptorImages[3],
 			},
 
 			// G-Buffer vertex normal
 			{
 				.descriptorSet = descriptorSets[1],
-				.bindingIndex = 12,
+				.bindingIndex = 13,
 				.descriptorImages = descriptorImages[4],
 			},
 
 			// Intermediate lightmap atlas
 			{
 				.descriptorSet = descriptorSets[1],
-				.bindingIndex = 13,
+				.bindingIndex = 14,
 				.descriptorImages = descriptorImages[5],
 			},
 
@@ -754,7 +774,7 @@ namespace Trident {
 		commandEncoder->endRenderPass();
 	}
 
-	void Lightmapper::generateLightmaps(const BuildScene3D& scene, uint32 indexCount) const {
+	void Lightmapper::generateLightmaps(const BuildScene3D& scene) const {
 		const float32 width = static_cast<float32>(imageAssetDescriptor.extent.width);
 		const float32 height = static_cast<float32>(imageAssetDescriptor.extent.height);
 

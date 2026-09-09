@@ -8,8 +8,13 @@ struct Arguments {
 
 struct Vertex {
 	float3 position;
-	uint materialIndex;
+	uint _0;
 	float3 normal;
+};
+
+struct Triangle {
+	uint geometryOffset;
+	uint materialIndex;
 };
 
 struct Instance {
@@ -48,16 +53,17 @@ cbuffer Arguments : register(b0) {
 StructuredBuffer<Vertex> vertexBuffer : register(t1);
 StructuredBuffer<float2> lightmapCoordinateBuffer : register(t2);
 StructuredBuffer<uint> indexBuffer : register(t3);
-StructuredBuffer<Instance> instanceBuffer : register(t4);
-StructuredBuffer<Material> materialBuffer : register(t5);
-StructuredBuffer<uint> emissiveTriangleIndexBuffer : register(t6);
+StructuredBuffer<Triangle> triangleBuffer : register(t4);
+StructuredBuffer<Instance> instanceBuffer : register(t5);
+StructuredBuffer<Material> materialBuffer : register(t6);
+StructuredBuffer<uint> emissiveTriangleIndexBuffer : register(t7);
 
-TextureCube<float4> environmentMapTexture : register(t7);
+TextureCube<float4> environmentMapTexture : register(t8);
 SamplerState environmentMapSamplerState : register(s0);
 
-Texture2D<float4> gBufferPositionImage : register(t8);
-Texture2D<float4> gBufferSmoothPositionImage : register(t9);
-Texture2D<float4> gBufferTriangleNormalImage : register(t10);
-Texture2D<float4> gBufferVertexNormalImage : register(t11);
+Texture2D<float4> gBufferPositionImage : register(t9);
+Texture2D<float4> gBufferSmoothPositionImage : register(t10);
+Texture2D<float4> gBufferTriangleNormalImage : register(t11);
+Texture2D<float4> gBufferVertexNormalImage : register(t12);
 
 RWTexture2D<float4> intermediateLightmapAtlas : register(u0);

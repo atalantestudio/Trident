@@ -70,7 +70,7 @@ namespace Trident {
 
 			void createLightmaps(BuildStaticSceneGeometry3D& staticGeometry);
 			void updateLightmapCoordinates(BuildStaticSceneGeometry3D& staticGeometry);
-			void createLightmapperGeometryBuffers(const BuildScene3D& scene, sequence<BuildVertex3D>& vertices, sequence<uint32>& indices, sequence<LightmapMaterial>& materials, sequence<uint32>& emissiveTriangleIndices);
+			void createLightmapperGeometryBuffers(const BuildScene3D& scene, sequence<BuildTriangle3D>& triangles, sequence<uint32>& emissiveTriangleIndices, sequence<LightmapMaterial>& materials);
 
 		protected:
 			uint64 bakedVertexCount = 0;
