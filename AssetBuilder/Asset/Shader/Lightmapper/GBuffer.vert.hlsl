@@ -31,16 +31,26 @@ struct Vertex {
 	uint _1;
 };
 
+struct Triangle {
+	uint index;
+	uint lightmapCoordinateIndexA;
+	uint lightmapCoordinateIndexB;
+	uint lightmapCoordinateIndexC;
+	uint materialIndex;
+};
+
 struct Instance {
 	float4x3 transform;
 	uint geometryTriangleOffset;
+	uint deduplicatedTriangleOffset;
 	uint lightmapCoordinateOffset;
 };
 
 StructuredBuffer<Vertex> vertexBuffer : register(t0);
 StructuredBuffer<float2> lightmapCoordinateBuffer : register(t1);
 StructuredBuffer<uint> indexBuffer : register(t2);
-StructuredBuffer<Instance> instanceBuffer : register(t3);
+StructuredBuffer<Triangle> triangleBuffer : register(t3);
+StructuredBuffer<Instance> instanceBuffer : register(t4);
 
 static const float2 LIGHTMAP_COORDINATE_OFFSETS[25] = {
 	float2(-2.0, -2.0),
@@ -74,6 +84,7 @@ Interstage main(VertexInput input) {
 	uint triangleIndex = (input.indexOffsetOffset + input.indexOffset) / 3;
 
 	Instance instance = instanceBuffer[input.instanceOffset + input.instanceIndex];
+	Triangle triangle_ = triangleBuffer[instance.deduplicatedTriangleOffset + triangleIndex];
 
 	float3x3 transform = (float3x3) instance.transform;
 
@@ -96,7 +107,7 @@ Interstage main(VertexInput input) {
 	Interstage interstage;
 	interstage.coordinate = float4(coordinate * 2.0 - 1.0, 0.0, 1.0);
 	interstage.position = mul(float4(vertex.position, 1.0), instance.transform);
-	interstage.triangleIndex = triangleIndex + 1;
+	interstage.triangleIndex = instance.deduplicatedTriangleOffset + triangleIndex + 1;
 	interstage.triangleNormal = mul(vertex.normal, transform);
 	interstage.vertexNormal = interstage.triangleNormal;
 	interstage.positionA = mul(float4(a.position, 1.0), instance.transform);
@@ -125,8 +136,7 @@ Interstage main(VertexInput input) {
 		}
 	}
 
-	// TODO(asset-builder/lightmapper): Restore materials.
-	interstage.materialIndex = 0;
+	interstage.materialIndex = triangle_.materialIndex;
 
 	return interstage;
 }

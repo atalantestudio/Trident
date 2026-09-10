@@ -5,7 +5,7 @@
 
 #define FORWARD_USE_NOCLIP_CAMERA
 // #define FORWARD_ENABLE_PHYSICS
-// #define FORWARD_TEST_CORNELL_BOX
+#define FORWARD_TEST_CORNELL_BOX
 
 #if !defined(FORWARD_USE_NOCLIP_CAMERA)
 	#include "Engine/API/Camera/Controller/PlayerCameraController.hpp"
@@ -81,13 +81,14 @@ namespace Trident {
 				renderer.visualizationMode = VisualizationMode::DEFAULT;
 
 				PerspectiveCamera3D& camera = cameraController.getCamera();
-				camera.position = sceneAsset->spawnPosition + CAMERA_OFFSET;
+				camera.position = sceneAsset->spawnPosition;
 				camera.nearPlane = 0.01f;
 				camera.farPlane = 2048.0f;
 
 				#if defined(FORWARD_USE_NOCLIP_CAMERA) and defined(FORWARD_TEST_CORNELL_BOX)
 					camera.fieldOfView = radians(40.0_deg);
 				#else
+					camera.position += CAMERA_OFFSET;
 					camera.fieldOfView = radians(70.0_deg);
 				#endif
 

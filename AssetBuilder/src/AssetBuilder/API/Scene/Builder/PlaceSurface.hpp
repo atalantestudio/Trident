@@ -106,6 +106,7 @@ namespace Trident {
 
 		Lightmap lightmap{};
 		lightmap.geometryIndex = materialGeometry.geometryIndex;
+		lightmap.materialIndex = static_cast<uint32>(lightmapMaterials.size());
 		lightmap.triangleRange = {static_cast<uint32>(indexOffset / 3), 2};
 		lightmap.vertexRange = {vertexOffset, surfaceVertexCount};
 		lightmap.scale = descriptor.geometry.scale;

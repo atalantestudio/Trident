@@ -6,7 +6,7 @@
 #include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
 
 namespace Trident {
-	sequence<BuildTriangle3D> SceneBuilder::createEmissiveTriangleBuffer(const BuildScene3D& scene) const {
+	sequence<uint32> SceneBuilder::createEmissiveTriangleIndexBuffer(const BuildScene3D& scene) const {
 		uint64 emissiveTriangleCount = 0;
 		uint32 lightmapIndex = 0;
 
@@ -23,9 +23,9 @@ namespace Trident {
 			lightmapIndex += 1;
 		}
 
-		sequence<BuildTriangle3D> emissiveTriangles(emissiveTriangleCount + 1);
-		uint64 emissiveTriangleOffset = 0;
+		sequence<uint32> emissiveTriangleIndices(emissiveTriangleCount + 1);
 
+		emissiveTriangleCount = 0;
 		lightmapIndex = 0;
 
 		while (lightmapIndex < lightmaps.size()) {
@@ -36,25 +36,19 @@ namespace Trident {
 			}
 
 			const Lightmap& lightmap = lightmaps[lightmapIndex];
-			const BuildGeometry& geometry = scene.geometries[geometries[lightmap.geometryIndex].filteredIndex];
 
 			uint32 triangleIndex = 0;
 
 			while (triangleIndex < lightmap.triangleRange.count) {
-				// TODO(wip)
-				/* emissiveTriangles[emissiveTriangleOffset + lightmap.triangleRange.offset + triangleIndex] = {
-					.indexOffset = geometry.indexRange.offset + lightmap.triangleRange.offset * 3,
-					.instanceIndex = 0,
-					.materialIndex = lightmapIndex,
-				}; */
+				emissiveTriangleIndices[emissiveTriangleCount + triangleIndex] = lightmap.triangleRange.offset + triangleIndex;
 
 				triangleIndex += 1;
 			}
 
-			emissiveTriangleOffset += 1;
+			emissiveTriangleCount += lightmap.triangleRange.count;
 			lightmapIndex += 1;
 		}
 
-		return emissiveTriangles;
+		return emissiveTriangleIndices;
 	}
 }

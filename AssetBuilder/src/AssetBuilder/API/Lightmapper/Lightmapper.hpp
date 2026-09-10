@@ -15,7 +15,8 @@
 namespace Trident {
 	struct LightmapperDescriptor {
 		BuildScene3D* scene;
-		view<BuildTriangle3D> emissiveTriangles;
+		view<uint32> emissiveTriangleIndices;
+		view<BuildTriangle3D> triangles;
 		view<LightmapMaterial> materials;
 	};
 
@@ -54,6 +55,7 @@ namespace Trident {
 			struct LightmapInstance {
 				float32 transform[3][4];
 				uint32 geometryTriangleOffset;
+				uint32 deduplicatedTriangleOffset;
 				uint32 lightmapCoordinateOffset;
 			};
 
@@ -174,8 +176,9 @@ namespace Trident {
 			ref<Buffer> argumentBuffer;
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> lightmapCoordinateBuffer;
-			ref<Buffer> emissiveTriangleBuffer;
 			ref<Buffer> indexBuffer;
+			ref<Buffer> emissiveTriangleIndexBuffer;
+			ref<Buffer> triangleBuffer;
 			ref<Buffer> instanceBuffer;
 			ref<Buffer> materialBuffer;
 

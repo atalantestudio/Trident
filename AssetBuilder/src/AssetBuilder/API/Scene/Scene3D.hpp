@@ -34,8 +34,10 @@ namespace Trident {
 	};
 
 	struct BuildTriangle3D {
-		uint32 indexOffset;
-		uint32 instanceIndex;
+		uint32 index;
+		uint32 lightmapCoordinateIndexA;
+		uint32 lightmapCoordinateIndexB;
+		uint32 lightmapCoordinateIndexC;
 		uint32 materialIndex;
 	};
 

@@ -268,7 +268,8 @@ namespace Trident {
 
 			lightmapper.generateLightmapAtlas({
 				.scene = &scene,
-				.emissiveTriangles = createEmissiveTriangleBuffer(scene),
+				.emissiveTriangleIndices = createEmissiveTriangleIndexBuffer(scene),
+				.triangles = createTriangleBuffer(scene),
 				.materials = view<LightmapMaterial>(lightmapMaterials.data(), lightmapMaterials.size()),
 			});
 		}

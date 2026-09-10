@@ -41,18 +41,25 @@ namespace Trident {
 				.stageFlags = ShaderStage::RAY_CLOSEST_HIT,
 			},
 
-			// Emissive triangle
+			// Index
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.stageFlags = ShaderStage::RAY_CLOSEST_HIT,
+			},
+
+			// Emissive triangle index
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
 				.stageFlags = ShaderStage::RAY_GENERATION,
 			},
 
-			// Index
+			// Emissive triangle
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
-				.stageFlags = ShaderStage::RAY_CLOSEST_HIT,
+				.stageFlags = ShaderStage::RAY_GENERATION,
 			},
 
 			// Instance

@@ -71,7 +71,8 @@ namespace Trident {
 			void createLightmaps(BuildStaticSceneGeometry3D& staticGeometry);
 			void updateLightmapCoordinates(BuildStaticSceneGeometry3D& staticGeometry);
 
-			sequence<BuildTriangle3D> createEmissiveTriangleBuffer(const BuildScene3D& scene) const;
+			sequence<BuildTriangle3D> createTriangleBuffer(const BuildScene3D& scene) const;
+			sequence<uint32> createEmissiveTriangleIndexBuffer(const BuildScene3D& scene) const;
 
 		protected:
 			uint64 bakedVertexCount = 0;

@@ -31,12 +31,14 @@ void main(inout Hit hit, BuiltInTriangleIntersectionAttributes attributes) {
 
 	uint2 coordinate = interpolateLightmapCoordinate(instance, triangleIndex, u, v, w, arguments.atlasSize);
 
+	float4 gBufferPosition = gBufferPositionImage[coordinate];
 	float4 gBufferTriangleNormal = gBufferTriangleNormalImage[coordinate];
 	float4 gBufferVertexNormal = gBufferVertexNormalImage[coordinate];
 
 	hit.t = RayTCurrent();
 	hit.position = WorldRayOrigin() + WorldRayDirection() * hit.t;
 	hit.triangleNormal = gBufferTriangleNormal.rgb;
-	hit.materialIndex = gBufferVertexNormal.a;
+	hit.triangleIndex = gBufferPosition.a - 1;
 	hit.vertexNormal = gBufferVertexNormal.rgb;
+	hit.materialIndex = gBufferVertexNormal.a;
 }

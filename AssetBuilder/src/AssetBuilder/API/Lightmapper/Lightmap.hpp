@@ -13,8 +13,9 @@ namespace Trident {
 
 	struct Lightmap {
 		uint32 geometryIndex;
+		uint32 materialIndex;
 
-		/// The offset is relative to the geometry.
+		/// The offset is relative to the start of the geometry.
 		range<uint32, uint32> triangleRange;
 
 		range<uint64, uint64> vertexRange;

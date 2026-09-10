@@ -14,14 +14,17 @@ struct Vertex {
 };
 
 struct Triangle {
-	uint geometryOffset;
-	uint instanceIndex;
+	uint index;
+	uint lightmapCoordinateIndexA;
+	uint lightmapCoordinateIndexB;
+	uint lightmapCoordinateIndexC;
 	uint materialIndex;
 };
 
 struct Instance {
 	float4x3 transform;
 	uint geometryTriangleOffset;
+	uint deduplicatedTriangleOffset;
 	uint lightmapCoordinateOffset;
 };
 
@@ -29,14 +32,16 @@ struct Material {
 	float3 emissiveColor;
 	float emissiveIntensity;
 	float3 albedo;
+	uint _0;
 };
 
 struct Hit {
 	float3 position;
 	float t;
 	float3 triangleNormal;
-	uint materialIndex;
+	uint triangleIndex;
 	float3 vertexNormal;
+	uint materialIndex;
 };
 
 static const float PI = radians(180.0);
@@ -53,17 +58,18 @@ cbuffer Arguments : register(b0) {
 
 StructuredBuffer<Vertex> vertexBuffer : register(t1);
 StructuredBuffer<float2> lightmapCoordinateBuffer : register(t2);
-StructuredBuffer<Triangle> emissiveTriangleBuffer : register(t3);
-StructuredBuffer<uint> indexBuffer : register(t4);
-StructuredBuffer<Instance> instanceBuffer : register(t5);
-StructuredBuffer<Material> materialBuffer : register(t6);
+StructuredBuffer<uint> indexBuffer : register(t3);
+StructuredBuffer<uint> emissiveTriangleIndexBuffer : register(t4);
+StructuredBuffer<Triangle> triangleBuffer : register(t5);
+StructuredBuffer<Instance> instanceBuffer : register(t6);
+StructuredBuffer<Material> materialBuffer : register(t7);
 
-TextureCube<float4> environmentMapTexture : register(t7);
+TextureCube<float4> environmentMapTexture : register(t8);
 SamplerState environmentMapSamplerState : register(s0);
 
-Texture2D<float4> gBufferPositionImage : register(t8);
-Texture2D<float4> gBufferSmoothPositionImage : register(t9);
-Texture2D<float4> gBufferTriangleNormalImage : register(t10);
-Texture2D<float4> gBufferVertexNormalImage : register(t11);
+Texture2D<float4> gBufferPositionImage : register(t9);
+Texture2D<float4> gBufferSmoothPositionImage : register(t10);
+Texture2D<float4> gBufferTriangleNormalImage : register(t11);
+Texture2D<float4> gBufferVertexNormalImage : register(t12);
 
 RWTexture2D<float4> intermediateLightmapAtlas : register(u0);

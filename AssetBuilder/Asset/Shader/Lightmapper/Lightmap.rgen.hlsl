@@ -20,26 +20,36 @@ float3 randomUnitDirection(inout uint seed) {
 	return normalize(float3(randomScalar(seed), randomScalar(seed), randomScalar(seed)) * 2.0 - 1.0);
 }
 
-/* void traceSecondaryRay(inout uint seed) {
-	if (arguments.emissiveTriangleCount == 0) {
-		return;
-	}
+float lengthSquared(float3 a) {
+	return dot(a, a);
+}
 
-	uint triangleIndex = randomScalar(seed) * arguments.emissiveTriangleCount;
+float parallelogramArea(float2 a, float2 b) {
+	return a.x * b.y - a.y * b.x;
+}
 
-	Triangle triangle_ = emissiveTriangleBuffer[triangleIndex];
-	Instance instance = instanceBuffer[triangle_.instanceIndex];
+float balanceHeuristic(float pdf1, float pdf2) {
+	return pdf1 / (pdf1 + pdf2);
+}
 
-	uint indexA = indexBuffer[instance.geometryTriangleOffset * 3 + triangle_.indexOffset + 0];
-	uint indexB = indexBuffer[instance.geometryTriangleOffset * 3 + triangle_.indexOffset + 1];
-	uint indexC = indexBuffer[instance.geometryTriangleOffset * 3 + triangle_.indexOffset + 2];
+void initializeSecondaryRay(RayDesc primaryRay, inout uint triangleIndex, inout float3 p, inout float pdf, inout uint seed) {
+	uint emissiveTriangleIndexOffset = uint(randomScalar(seed) * arguments.emissiveTriangleCount);
+	uint emissiveTriangleIndex = emissiveTriangleIndexBuffer[emissiveTriangleIndexOffset];
 
-	float3 a = mul(float4(vertexBuffer[indexA].position, 1.0), instance.transform);
-	float3 b = mul(float4(vertexBuffer[indexB].position, 1.0), instance.transform);
-	float3 c = mul(float4(vertexBuffer[indexC].position, 1.0), instance.transform);
+	Triangle triangle_ = triangleBuffer[emissiveTriangleIndex];
 
-	float abc = length(cross(b - a, c - a)) * 0.5;
-	float pdf = 1.0 / (abc * arguments.emissiveTriangleCount);
+	triangleIndex = triangle_.index;
+
+	float2 a = lightmapCoordinateBuffer[triangle_.lightmapCoordinateIndexA];
+	float2 b = lightmapCoordinateBuffer[triangle_.lightmapCoordinateIndexB];
+	float2 c = lightmapCoordinateBuffer[triangle_.lightmapCoordinateIndexC];
+
+	float abc = length(parallelogramArea(b - a, c - a)) * 0.5;
+
+	// TODO(asset-builder/lightmapper/is)
+	// pdf = 1.0 / (abc * arguments.emissiveTriangleCount);
+	// pdf = abc / arguments.emissiveTriangleCount;
+	pdf = 1.0 / arguments.emissiveTriangleCount / abc;
 
 	float u = randomScalar(seed);
 	float v = randomScalar(seed);
@@ -50,12 +60,14 @@ float3 randomUnitDirection(inout uint seed) {
 	}
 
 	float w = 1.0 - u - v;
-	float3 p = a * u + b * v + c * w;
+	uint2 coordinate = a * u + b * v + c * w * arguments.atlasSize;
 
-	// TODO
-*/
+	p = gBufferPositionImage[coordinate].rgb;
+}
 
 float3 traceRay(Hit primaryHit, inout uint seed) {
+	const float pdfDiffuse = 1.0 / (4.0 * PI);
+
 	float3 light = float3(0.0, 0.0, 0.0);
 	float3 throughput = float3(1.0, 1.0, 1.0);
 	uint bounceIndex = 0;
@@ -63,8 +75,7 @@ float3 traceRay(Hit primaryHit, inout uint seed) {
 	while (bounceIndex < BOUNCE_COUNT) {
 		Material material = materialBuffer[primaryHit.materialIndex];
 
-		// TODO(asset-builder/lightmapper): Trace secondary ray.
-		// traceSecondaryRay(seed);
+		float3 directLight = float3(0.0, 0.0, 0.0);
 
 		RayDesc primaryRay;
 		primaryRay.Origin = primaryHit.position + sign(primaryHit.vertexNormal) * abs(primaryHit.position * ADAPTIVE_BIAS);
@@ -76,12 +87,44 @@ float3 traceRay(Hit primaryHit, inout uint seed) {
 
 		TraceRay(accelerationStructure, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_BACK_FACING_TRIANGLES, 0xff, 0, 0, 0, primaryRay, primaryHit);
 
+		if (arguments.emissiveTriangleCount > 0) {
+			uint triangleIndex;
+			float3 p;
+			float pdf;
+
+			initializeSecondaryRay(primaryRay, triangleIndex, p, pdf, seed);
+
+			RayDesc secondaryRay = primaryRay;
+			secondaryRay.Direction = normalize(p - primaryRay.Origin);
+
+			if (dot(primaryHit.vertexNormal, secondaryRay.Direction) > 0.0) {
+				Hit secondaryHit;
+
+				TraceRay(accelerationStructure, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_BACK_FACING_TRIANGLES, 0xff, 0, 0, 0, secondaryRay, secondaryHit);
+
+				if (secondaryHit.triangleIndex == triangleIndex) {
+					Material material = materialBuffer[secondaryHit.materialIndex];
+
+					float angleA = dot(secondaryRay.Direction, primaryHit.vertexNormal);
+					float angleB = dot(secondaryRay.Direction, secondaryHit.vertexNormal);
+					float G = 1.0 / lengthSquared(p - primaryRay.Origin) * angleA * max(0.001, abs(angleB));
+					float w = balanceHeuristic(pdf, pdfDiffuse * G);
+
+					// directLight += material.emissiveColor * material.emissiveIntensity * G / pdf * w;
+					directLight += material.emissiveColor * material.emissiveIntensity;
+				}
+			}
+		}
+
 		if (primaryHit.t < 0.0) {
 			light += environmentMapTexture.SampleLevel(environmentMapSamplerState, primaryRay.Direction, 0.0).rgb * throughput;
 
 			break;
 		}
 
+		float3 brdf = material.albedo / PI;
+
+		light += directLight * throughput * brdf;
 		throughput *= material.albedo;
 
 		bounceIndex += 1;
@@ -155,6 +198,10 @@ void main() {
 	if (triangleIndex == 0) {
 		return;
 	}
+
+	/* Material material = materialBuffer[gBufferVertexNormalImage[coordinate].a];
+	intermediateLightmapAtlas[coordinate] = float4(material.albedo + material.emissiveColor * material.emissiveIntensity, 1.0);
+	return; */
 
 	float3 position = gBufferPosition.rgb;
 	float4 gBufferTriangleNormal = gBufferTriangleNormalImage[coordinate];
