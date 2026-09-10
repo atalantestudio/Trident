@@ -53,6 +53,7 @@
 #include "AssetBuilder/Process/Scene/3D/Sliding.hpp"
 #include "AssetBuilder/Process/Scene/3D/Stacking.hpp"
 #include "AssetBuilder/Process/Scene/3D/Suzanne.hpp"
+#include "AssetBuilder/Process/Scene/3D/TestGI.hpp"
 #include "Process/BuildAssetMapProcess.hpp"
 #include "Process/BuildFontAssetProcess.hpp"
 #include "Process/BuildGeometryAssetProcess.hpp"
@@ -89,7 +90,7 @@ namespace Trident {
 
 		private:
 			void registerProcesses() {
-				allocateProcesses(54);
+				allocateProcesses(55);
 
 				registerProcess<BuildGeometryAssetProcess>(&assetLibrary);
 
@@ -148,6 +149,7 @@ namespace Trident {
 				registerProcess<SlidingScene3D>(&assetLibrary);
 				registerProcess<StackingScene3D>(&assetLibrary);
 				registerProcess<SuzanneScene3D>(&assetLibrary);
+				registerProcess<TestGIScene3D>(&assetLibrary);
 
 				registerProcess<BuildShaderModuleAssetProcess>(&assetLibrary);
 

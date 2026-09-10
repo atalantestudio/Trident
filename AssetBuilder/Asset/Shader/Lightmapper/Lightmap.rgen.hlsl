@@ -48,8 +48,7 @@ void initializeSecondaryRay(RayDesc primaryRay, inout uint triangleIndex, inout 
 
 	// TODO(asset-builder/lightmapper/is)
 	// pdf = 1.0 / (abc * arguments.emissiveTriangleCount);
-	pdf = abc / arguments.emissiveTriangleCount;
-	// pdf = 1.0 / (arguments.emissiveTriangleCount * abc);
+	pdf = (abc * arguments.atlasSize.x) / arguments.emissiveTriangleCount;
 
 	float u = randomScalar(seed);
 	float v = randomScalar(seed);
@@ -197,10 +196,6 @@ void main() {
 	if (triangleIndex == 0) {
 		return;
 	}
-
-	/* Material material = materialBuffer[gBufferVertexNormalImage[coordinate].a];
-	intermediateLightmapAtlas[coordinate] = float4(material.albedo + material.emissiveColor * material.emissiveIntensity, 1.0);
-	return; */
 
 	float3 position = gBufferPosition.rgb;
 	float4 gBufferTriangleNormal = gBufferTriangleNormalImage[coordinate];

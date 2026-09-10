@@ -5,7 +5,7 @@
 
 #define FORWARD_USE_NOCLIP_CAMERA
 // #define FORWARD_ENABLE_PHYSICS
-#define FORWARD_TEST_CORNELL_BOX
+// #define FORWARD_TEST_CORNELL_BOX
 
 #if !defined(FORWARD_USE_NOCLIP_CAMERA)
 	#include "Engine/API/Camera/Controller/PlayerCameraController.hpp"
@@ -88,7 +88,9 @@ namespace Trident {
 				#if defined(FORWARD_USE_NOCLIP_CAMERA) and defined(FORWARD_TEST_CORNELL_BOX)
 					camera.fieldOfView = radians(40.0_deg);
 				#else
-					camera.position += CAMERA_OFFSET;
+					// TODO(lyah/scalar)
+					camera.position += vec3<float32>(CAMERA_OFFSET);
+
 					camera.fieldOfView = radians(70.0_deg);
 				#endif
 
