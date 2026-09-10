@@ -15,7 +15,7 @@ namespace Trident {
 				context.gBufferTriangleNormalImageView,
 				context.gBufferVertexNormalImageView,
 			},
-			.extent = {imageAssetDescriptor.extent.width, imageAssetDescriptor.extent.height},
+			.extent = {imageAssetDescriptor->extent.width, imageAssetDescriptor->extent.height},
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "G-Buffer",
 			#endif

@@ -34,9 +34,8 @@ namespace Trident {
 	};
 
 	struct BuildTriangle3D {
-		/// Triangle offset in the index buffer, relative to the parent geometry.
-		uint32 geometryOffset;
-
+		uint32 indexOffset;
+		uint32 instanceIndex;
 		uint32 materialIndex;
 	};
 
@@ -68,9 +67,6 @@ namespace Trident {
 		uint32 externalVertexCount;
 		uint32 bakedIndexCount;
 		uint32 externalIndexCount;
-
-		/// Total scene triangle count (deduplicated for instances).
-		uint32 unwrappedTriangleCount;
 
 		/// Baked and external indices for LINE_LIST primitives.
 		uint32 lineIndexCount;

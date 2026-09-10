@@ -11,7 +11,7 @@ namespace Trident {
 			.attachments = {
 				// Lightmap atlas
 				{
-					.format = imageAssetDescriptor.format,
+					.format = imageAssetDescriptor->format,
 					.sampleCount = 1,
 					.loadOperation = LoadOperation::CLEAR,
 					.storeOperation = StoreOperation::STORE,
@@ -35,7 +35,7 @@ namespace Trident {
 		return device->createFramebuffer({
 			.renderPass = dilationRenderPass,
 			.imageViews = {context.lightmapAtlasImageView},
-			.extent = {imageAssetDescriptor.extent.width, imageAssetDescriptor.extent.height},
+			.extent = {imageAssetDescriptor->extent.width, imageAssetDescriptor->extent.height},
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Dilation",
 			#endif

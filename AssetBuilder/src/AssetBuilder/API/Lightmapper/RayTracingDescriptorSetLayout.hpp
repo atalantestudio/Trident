@@ -7,7 +7,7 @@
 
 namespace Trident {
 	ref<DescriptorSetLayout> Lightmapper::createRayTracingDescriptorSetLayout() const {
-		// TODO
+		// TODO(wip)
 		const ShaderStage allStageFlags = ShaderStage::RAY_GENERATION | ShaderStage::RAY_CLOSEST_HIT;
 
 		const DescriptorSetLayoutBinding bindings[] = {
@@ -29,8 +29,8 @@ namespace Trident {
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
-				// TODO
-				// .stageFlags = ShaderStage::RAY_CLOSEST_HIT,
+
+				// TODO(wip)
 				.stageFlags = allStageFlags,
 			},
 
@@ -41,22 +41,18 @@ namespace Trident {
 				.stageFlags = ShaderStage::RAY_CLOSEST_HIT,
 			},
 
+			// Emissive triangle
+			{
+				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
+				.descriptorCount = 1,
+				.stageFlags = ShaderStage::RAY_GENERATION,
+			},
+
 			// Index
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
-				// TODO
-				// .stageFlags = ShaderStage::RAY_GENERATION | ShaderStage::RAY_CLOSEST_HIT,
-				.stageFlags = allStageFlags,
-			},
-
-			// Triangle
-			{
-				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
-				.descriptorCount = 1,
-				// TODO
-				// .stageFlags = ShaderStage::RAY_CLOSEST_HIT,
-				.stageFlags = allStageFlags,
+				.stageFlags = ShaderStage::RAY_CLOSEST_HIT,
 			},
 
 			// Instance
@@ -70,18 +66,7 @@ namespace Trident {
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
-				// TODO
-				// .stageFlags = ShaderStage::RAY_GENERATION,
-				.stageFlags = allStageFlags,
-			},
-
-			// Emissive triangle index
-			{
-				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
-				.descriptorCount = 1,
-				// TODO
-				// .stageFlags = ShaderStage::RAY_GENERATION,
-				.stageFlags = allStageFlags,
+				.stageFlags = ShaderStage::RAY_GENERATION,
 			},
 
 			// Environment map

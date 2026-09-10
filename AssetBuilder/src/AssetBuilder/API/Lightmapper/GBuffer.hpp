@@ -10,7 +10,7 @@ namespace Trident {
 		return gBufferRenderPass->createColorAttachmentImage(
 			{
 				.type = ImageType::TYPE_2D,
-				.extent = imageAssetDescriptor.extent,
+				.extent = imageAssetDescriptor->extent,
 				.mipLevelCount = 1,
 				.layerCount = 1,
 				.additionalUsage = ImageUsage::STORAGE,
@@ -26,7 +26,7 @@ namespace Trident {
 		return gBufferRenderPass->createColorAttachmentImage(
 			{
 				.type = ImageType::TYPE_2D,
-				.extent = imageAssetDescriptor.extent,
+				.extent = imageAssetDescriptor->extent,
 				.mipLevelCount = 1,
 				.layerCount = 1,
 				.additionalUsage = ImageUsage::STORAGE,
@@ -42,7 +42,7 @@ namespace Trident {
 		return gBufferRenderPass->createColorAttachmentImage(
 			{
 				.type = ImageType::TYPE_2D,
-				.extent = imageAssetDescriptor.extent,
+				.extent = imageAssetDescriptor->extent,
 				.mipLevelCount = 1,
 				.layerCount = 1,
 				.additionalUsage = ImageUsage::STORAGE,
@@ -58,7 +58,7 @@ namespace Trident {
 		return gBufferRenderPass->createColorAttachmentImage(
 			{
 				.type = ImageType::TYPE_2D,
-				.extent = imageAssetDescriptor.extent,
+				.extent = imageAssetDescriptor->extent,
 				.mipLevelCount = 1,
 				.layerCount = 1,
 				.additionalUsage = ImageUsage::STORAGE,

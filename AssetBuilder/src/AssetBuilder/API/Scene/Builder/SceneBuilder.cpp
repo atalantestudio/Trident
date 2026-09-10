@@ -4,7 +4,7 @@
 #include "pch.hpp"
 
 #include "AssetBuilder/API/Scene/Builder/Build.hpp"
-#include "AssetBuilder/API/Scene/Builder/CreateLightmapperGeometryBuffers.hpp"
+#include "AssetBuilder/API/Scene/Builder/EmissiveTriangle.hpp"
 #include "AssetBuilder/API/Scene/Builder/GenerateLightmaps.hpp"
 #include "AssetBuilder/API/Scene/Builder/PlaceRigidBody.hpp"
 #include "AssetBuilder/API/Scene/Builder/PlaceStaticProp.hpp"

@@ -10,9 +10,9 @@ namespace Trident {
 		return dilationRenderPass->createColorAttachmentImage(
 			{
 				.type = ImageType::TYPE_2D,
-				.extent = imageAssetDescriptor.extent,
-				.mipLevelCount = imageAssetDescriptor.mipLevelCount,
-				.layerCount = imageAssetDescriptor.layerCount,
+				.extent = imageAssetDescriptor->extent,
+				.mipLevelCount = imageAssetDescriptor->mipLevelCount,
+				.layerCount = imageAssetDescriptor->layerCount,
 				.additionalUsage = ImageUsage::TRANSFER_SRC,
 				#if defined(DEBUG_OBJECT_NAME)
 					.name = "Lightmap atlas",
@@ -25,9 +25,9 @@ namespace Trident {
 	ref<ImageView> Lightmapper::createLightmapAtlasImageView() {
 		return context.lightmapAtlasImage->createView({
 			.mipLevelOffset = 0,
-			.mipLevelCount = imageAssetDescriptor.mipLevelCount,
+			.mipLevelCount = imageAssetDescriptor->mipLevelCount,
 			.layerOffset = 0,
-			.layerCount = imageAssetDescriptor.layerCount,
+			.layerCount = imageAssetDescriptor->layerCount,
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Lightmap atlas view",
 			#endif

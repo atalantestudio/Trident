@@ -20,23 +20,40 @@ float3 randomUnitDirection(inout uint seed) {
 	return normalize(float3(randomScalar(seed), randomScalar(seed), randomScalar(seed)) * 2.0 - 1.0);
 }
 
-void traceSecondaryRay(inout uint seed) {
+/* void traceSecondaryRay(inout uint seed) {
 	if (arguments.emissiveTriangleCount == 0) {
 		return;
 	}
 
 	uint triangleIndex = randomScalar(seed) * arguments.emissiveTriangleCount;
 
-	// TODO
-	// 1. Load positions for A, B, C
-	// 2. Generate random triangle barycentrics
-	// 3. Interpolate to get final point
-	// 4. Calculate PDF with triangle area
+	Triangle triangle_ = emissiveTriangleBuffer[triangleIndex];
+	Instance instance = instanceBuffer[triangle_.instanceIndex];
 
-	// Can precompute:
-	// - Positions A, B, C
-	// - Triangle area
-}
+	uint indexA = indexBuffer[instance.geometryTriangleOffset * 3 + triangle_.indexOffset + 0];
+	uint indexB = indexBuffer[instance.geometryTriangleOffset * 3 + triangle_.indexOffset + 1];
+	uint indexC = indexBuffer[instance.geometryTriangleOffset * 3 + triangle_.indexOffset + 2];
+
+	float3 a = mul(float4(vertexBuffer[indexA].position, 1.0), instance.transform);
+	float3 b = mul(float4(vertexBuffer[indexB].position, 1.0), instance.transform);
+	float3 c = mul(float4(vertexBuffer[indexC].position, 1.0), instance.transform);
+
+	float abc = length(cross(b - a, c - a)) * 0.5;
+	float pdf = 1.0 / (abc * arguments.emissiveTriangleCount);
+
+	float u = randomScalar(seed);
+	float v = randomScalar(seed);
+
+	if (u + v > 1.0) {
+		u = 1.0 - u;
+		v = 1.0 - v;
+	}
+
+	float w = 1.0 - u - v;
+	float3 p = a * u + b * v + c * w;
+
+	// TODO
+*/
 
 float3 traceRay(Hit primaryHit, inout uint seed) {
 	float3 light = float3(0.0, 0.0, 0.0);
@@ -46,7 +63,7 @@ float3 traceRay(Hit primaryHit, inout uint seed) {
 	while (bounceIndex < BOUNCE_COUNT) {
 		Material material = materialBuffer[primaryHit.materialIndex];
 
-		// TODO
+		// TODO(asset-builder/lightmapper): Trace secondary ray.
 		// traceSecondaryRay(seed);
 
 		RayDesc primaryRay;

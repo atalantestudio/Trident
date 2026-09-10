@@ -14,9 +14,8 @@
 
 namespace Trident {
 	struct LightmapperDescriptor {
-		const BuildScene3D* scene;
-		view<BuildTriangle3D> triangles;
-		view<uint32> emissiveTriangleIndices;
+		BuildScene3D* scene;
+		view<BuildTriangle3D> emissiveTriangles;
 		view<LightmapMaterial> materials;
 	};
 
@@ -37,10 +36,6 @@ namespace Trident {
 
 		ref<Framebuffer> gBufferFramebuffer;
 		ref<Framebuffer> dilationFramebuffer;
-
-		ref<Buffer> materialBuffer;
-		ref<Buffer> emissiveTriangleIndexBuffer;
-		ref<Buffer> lightmapAtlasStagingBuffer;
 	};
 
 	// TODO(application/destruction-leaks)
@@ -70,7 +65,7 @@ namespace Trident {
 
 			~Lightmapper();
 
-			void generateAtlas(ImageAssetDescriptor& imageAssetDescriptor, const LightmapperDescriptor& descriptor);
+			void generateLightmapAtlas(const LightmapperDescriptor& descriptor);
 
 		private:
 			void initialize();
@@ -136,7 +131,7 @@ namespace Trident {
 			bool initialized = false;
 			ImageFormat atlasFormat;
 			Extent3D atlasExtent;
-			ImageAssetDescriptor imageAssetDescriptor;
+			ImageAssetDescriptor* imageAssetDescriptor;
 			Scene3DDescriptor sceneDescriptor;
 
 			ref<Instance> instance;
@@ -179,15 +174,19 @@ namespace Trident {
 			ref<Buffer> argumentBuffer;
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> lightmapCoordinateBuffer;
+			ref<Buffer> emissiveTriangleBuffer;
 			ref<Buffer> indexBuffer;
-			ref<Buffer> triangleBuffer;
-			ref<Buffer> tlasInstanceBuffer;
 			ref<Buffer> instanceBuffer;
+			ref<Buffer> materialBuffer;
+
+			ref<Buffer> tlasInstanceBuffer;
 			ref<Buffer> blasBuffer;
 			ref<Buffer> tlasBuffer;
 			ref<Buffer> blasScratchBuffer;
 			ref<Buffer> tlasScratchBuffer;
 			ref<Buffer> shaderBindingTableBuffer;
+
+			ref<Buffer> lightmapAtlasStagingBuffer;
 
 			sequence<ref<AccelerationStructure>> blas;
 			ref<AccelerationStructure> tlas;

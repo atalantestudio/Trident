@@ -9,10 +9,10 @@ namespace Trident {
 	ref<Image> Lightmapper::createIntermediateLightmapAtlasImage() const {
 		return device->createDynamicImage({
 			.type = ImageType::TYPE_2D,
-			.format = imageAssetDescriptor.format,
-			.extent = imageAssetDescriptor.extent,
-			.mipLevelCount = imageAssetDescriptor.mipLevelCount,
-			.layerCount = imageAssetDescriptor.layerCount,
+			.format = imageAssetDescriptor->format,
+			.extent = imageAssetDescriptor->extent,
+			.mipLevelCount = imageAssetDescriptor->mipLevelCount,
+			.layerCount = imageAssetDescriptor->layerCount,
 			.sampleCount = 1,
 			.usage = ImageUsage::SAMPLED | ImageUsage::STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
@@ -25,9 +25,9 @@ namespace Trident {
 	ref<ImageView> Lightmapper::createIntermediateLightmapAtlasImageView() {
 		return context.intermediateLightmapAtlasImage->createView({
 			.mipLevelOffset = 0,
-			.mipLevelCount = imageAssetDescriptor.mipLevelCount,
+			.mipLevelCount = imageAssetDescriptor->mipLevelCount,
 			.layerOffset = 0,
-			.layerCount = imageAssetDescriptor.layerCount,
+			.layerCount = imageAssetDescriptor->layerCount,
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Intermediate lightmap atlas view",
 			#endif
