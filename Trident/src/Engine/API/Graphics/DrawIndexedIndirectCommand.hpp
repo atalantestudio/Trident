@@ -20,4 +20,6 @@ namespace Trident {
 		/// The index of the first instance to draw.
 		uint32 instanceOffset;
 	};
+
+	ENGINE_STATIC_ASSERT(sizeof(DrawIndexedIndirectCommand) == 20);
 }

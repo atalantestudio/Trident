@@ -14,4 +14,6 @@ namespace Trident {
 		/// The number of local work groups to dispatch in the Z dimension.
 		uint32 z;
 	};
+
+	ENGINE_STATIC_ASSERT(sizeof(DispatchIndirectCommand) == 12);
 }

@@ -15,4 +15,6 @@ namespace Trident {
 		InstanceFlags flags : 8;
 		uint64 accelerationStructureAddress;
 	};
+
+	ENGINE_STATIC_ASSERT(sizeof(AccelerationStructureInstance) == 64);
 }
