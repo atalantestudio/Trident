@@ -398,12 +398,20 @@ vec3 evaluatePhongMaterial(Material material) {
 vec3 rgen(Hit primaryHit, inout uint seed) {
 	const float pdfDiffuse = 1.0 / (4.0 * PI);
 
-	vec3 incomingLight = vec3(0.0, 0.0, 0.0);
+	vec3 light = vec3(0.0, 0.0, 0.0);
 	vec3 throughput = vec3(1.0, 1.0, 1.0);
 	uint bounceIndex = 0;
 
 	while (bounceIndex < BOUNCE_COUNT) {
 		Material material = materialBuffer[primaryHit.materialIndex];
+
+		if (material.emissiveIntensity > 0.0) {
+			if (bounceIndex == 0) {
+				light += material.emissiveColor * material.emissiveIntensity;
+			}
+
+			break;
+		}
 
 		vec3 directLight = vec3(0.0, 0.0, 0.0);
 		vec3 o = primaryHit.position + sign(primaryHit.vertexNormal) * abs(primaryHit.position * ADAPTIVE_BIAS);
@@ -450,14 +458,6 @@ vec3 rgen(Hit primaryHit, inout uint seed) {
 			}
 		}
 
-		if (material.emissiveIntensity > 0.0) {
-			if (bounceIndex == 0) {
-				incomingLight += material.emissiveColor * material.emissiveIntensity * throughput;
-			}
-
-			break;
-		}
-
 		Ray primaryRay;
 		primaryRay.origin = o;
 		primaryRay.direction = normalize(primaryHit.vertexNormal + randomUnitDirection(seed));
@@ -465,14 +465,14 @@ vec3 rgen(Hit primaryHit, inout uint seed) {
 		primaryHit = rintFrontFacing(primaryRay);
 
 		if (primaryHit.distance < 0.0) {
-			incomingLight += skyColor * throughput;
+			light += skyColor * throughput;
 
 			break;
 		}
 
 		vec3 brdf = evaluatePhongMaterial(material);
 
-		incomingLight += directLight * throughput * brdf;
+		light += directLight * throughput * brdf;
 		throughput *= material.albedo;
 
 		bounceIndex += 1;

@@ -48,8 +48,8 @@ void initializeSecondaryRay(RayDesc primaryRay, inout uint triangleIndex, inout 
 
 	// TODO(asset-builder/lightmapper/is)
 	// pdf = 1.0 / (abc * arguments.emissiveTriangleCount);
-	// pdf = abc / arguments.emissiveTriangleCount;
-	pdf = 1.0 / arguments.emissiveTriangleCount / abc;
+	pdf = abc / arguments.emissiveTriangleCount;
+	// pdf = 1.0 / (arguments.emissiveTriangleCount * abc);
 
 	float u = randomScalar(seed);
 	float v = randomScalar(seed);
@@ -60,7 +60,7 @@ void initializeSecondaryRay(RayDesc primaryRay, inout uint triangleIndex, inout 
 	}
 
 	float w = 1.0 - u - v;
-	uint2 coordinate = a * u + b * v + c * w * arguments.atlasSize;
+	uint2 coordinate = (a * u + b * v + c * w) * arguments.atlasSize;
 
 	p = gBufferPositionImage[coordinate].rgb;
 }
@@ -85,8 +85,6 @@ float3 traceRay(Hit primaryHit, inout uint seed) {
 		// TODO(asset-builder/lightmapper): Use the scene bounds.
 		primaryRay.TMax = 2048.0;
 
-		TraceRay(accelerationStructure, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_BACK_FACING_TRIANGLES, 0xff, 0, 0, 0, primaryRay, primaryHit);
-
 		if (arguments.emissiveTriangleCount > 0) {
 			uint triangleIndex;
 			float3 p;
@@ -97,7 +95,7 @@ float3 traceRay(Hit primaryHit, inout uint seed) {
 			RayDesc secondaryRay = primaryRay;
 			secondaryRay.Direction = normalize(p - primaryRay.Origin);
 
-			if (dot(primaryHit.vertexNormal, secondaryRay.Direction) > 0.0) {
+			if (dot(primaryHit.vertexNormal, secondaryRay.Direction) > 1e-4) {
 				Hit secondaryHit;
 
 				TraceRay(accelerationStructure, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_BACK_FACING_TRIANGLES, 0xff, 0, 0, 0, secondaryRay, secondaryHit);
@@ -110,11 +108,12 @@ float3 traceRay(Hit primaryHit, inout uint seed) {
 					float G = 1.0 / lengthSquared(p - primaryRay.Origin) * angleA * max(0.001, abs(angleB));
 					float w = balanceHeuristic(pdf, pdfDiffuse * G);
 
-					// directLight += material.emissiveColor * material.emissiveIntensity * G / pdf * w;
-					directLight += material.emissiveColor * material.emissiveIntensity;
+					directLight += material.emissiveColor * material.emissiveIntensity * G / pdf * w;
 				}
 			}
 		}
+
+		TraceRay(accelerationStructure, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_BACK_FACING_TRIANGLES, 0xff, 0, 0, 0, primaryRay, primaryHit);
 
 		if (primaryHit.t < 0.0) {
 			light += environmentMapTexture.SampleLevel(environmentMapSamplerState, primaryRay.Direction, 0.0).rgb * throughput;
@@ -215,6 +214,15 @@ void main() {
 	float4 gBufferVertexNormal = gBufferVertexNormalImage[coordinate];
 	float3 vertexNormal = gBufferVertexNormal.rgb;
 	uint materialIndex = gBufferVertexNormal.a;
+
+	Material material = materialBuffer[materialIndex];
+
+	if (material.emissiveIntensity > 0.0) {
+		intermediateLightmapAtlas[coordinate] = float4(material.emissiveColor * material.emissiveIntensity, 1.0);
+
+		return;
+	}
+
 	uint seed = coordinate.y * arguments.atlasSize.x + coordinate.x;
 
 	Hit hit;
