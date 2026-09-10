@@ -181,7 +181,7 @@ namespace Trident {
 
 	enum class AccelerationStructureBuildFlags : uint8;
 	enum class GeometryFlags : uint8;
-	enum InstanceFlags : uint8;
+	enum InstanceFlags;
 
 	struct AccelerationStructureBuildInstanceGeometryDescriptor;
 	struct AccelerationStructureBuildSizes;

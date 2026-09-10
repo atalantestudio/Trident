@@ -12,7 +12,7 @@ namespace Trident {
 		uint32 index : 24;
 		uint32 mask : 8;
 		uint32 shaderBindingTableRecordOffset : 24;
-		InstanceFlags flags;
+		InstanceFlags flags : 8;
 		uint64 accelerationStructureAddress;
 	};
 }

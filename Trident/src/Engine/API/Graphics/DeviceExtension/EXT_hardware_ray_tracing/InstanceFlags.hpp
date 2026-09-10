@@ -4,7 +4,7 @@
 #pragma once
 
 namespace Trident {
-	enum InstanceFlags : uint8 {
+	enum InstanceFlags {
 		/// Disables triangle face culling for this instance.
 		TRIANGLE_DISABLE_FACE_CULLING = BIT(0),
 
