@@ -90,7 +90,7 @@ namespace Trident {
 
 		BuildScene3D scene{};
 		scene.skyColor = descriptor.skyColor;
-		scene.environmentMapImageAsset = descriptor.skyboxImageAsset;
+		scene.environmentMapImageAsset = descriptor.environmentMapImageAsset;
 		scene.sunDirection = descriptor.sunDirection;
 		scene.sunColor = descriptor.sunColor * descriptor.sunIntensity;
 		scene.vertices = sequence<BuildVertex3D>(vertexCounts[0] + vertexCounts[1] + vertexCounts[2]);

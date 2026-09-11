@@ -17,7 +17,7 @@ namespace Trident {
 				SceneBuilder builder({
 					.flags = {},
 					.skyColor = {0.0f, 0.0f, 0.0f},
-					.skyboxImageAsset = assetLibrary->getAsset<ImageAsset>("evening_road_01_512p"),
+					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("evening_road_01_512p"),
 					.sunDirection = {1.0f, 1.0f, 1.0f},
 					.sunColor = {1.0f, 1.0f, 1.0f},
 					.sunIntensity = 0.0f,

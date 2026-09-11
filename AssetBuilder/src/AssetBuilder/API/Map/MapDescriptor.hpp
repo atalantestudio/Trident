@@ -13,7 +13,7 @@ namespace Trident {
 	};
 
 	struct MapDescriptor {
-		ref<ImageAsset> skyboxImageAsset;
+		ref<ImageAsset> environmentMapImageAsset;
 
 		sequence<ref<Geometry3DAsset>> geometryAssets;
 

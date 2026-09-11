@@ -103,7 +103,7 @@ namespace Trident {
 	BuildScene3D MapBuilder::build() {
 		BuildScene3D scene{};
 		scene.skyColor = {0.0f, 0.0f, 0.0f};
-		scene.environmentMapImageAsset = descriptor.skyboxImageAsset;
+		scene.environmentMapImageAsset = descriptor.environmentMapImageAsset;
 		scene.sunDirection = {0.0f, 0.0f, 0.0f};
 		scene.sunColor = {0.0f, 0.0f, 0.0f};
 		scene.geometries = {};
