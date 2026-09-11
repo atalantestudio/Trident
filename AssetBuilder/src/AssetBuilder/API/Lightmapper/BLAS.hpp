@@ -35,6 +35,7 @@ namespace Trident {
 				.vertexView = vertexView,
 				.vertexFormat = VertexInputAttributeFormat::R32G32B32_FLOAT,
 				.indexView = indexBuffer->createView<uint32>(geometry.indexRange.offset * sizeof(uint32), geometry.indexRange.count * sizeof(uint32)),
+				.indexFormat = IndexFormat::R32_UINT,
 			};
 
 			buildGeometries[geometryIndex] = device->createAccelerationStructureBuildGeometry({
