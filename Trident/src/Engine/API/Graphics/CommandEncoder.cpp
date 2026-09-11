@@ -91,7 +91,7 @@ namespace Trident {
 		device->adapter->bindGraphicsPipelineImplementation(this, graphicsPipeline);
 	}
 
-	void CommandEncoder::bindIndexBuffer(ref<Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
+	void CommandEncoder::bindIndexBuffer(ref<Buffer> indexBuffer, uint64 offset, IndexFormat format) {
 		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				Validator validator;
@@ -100,7 +100,9 @@ namespace Trident {
 					VALIDATION_ERROR("indexBuffer must be a valid Buffer object.");
 				}
 				else {
-					if (indexBuffer->getMemorySuballocation().allocationIndex == max<uint32>()) {
+					const MemorySuballocation& memorySuballocation = indexBuffer->getMemorySuballocation();
+
+					if (memorySuballocation.allocationIndex == max<uint32>()) {
 						VALIDATION_ERROR("indexBuffer is not allocated.");
 					}
 
@@ -109,17 +111,19 @@ namespace Trident {
 					}
 
 					if (offset >= indexBuffer->getSize()) {
-						VALIDATION_ERROR("bufferOffset must be less than the size of indexBuffer.");
+						VALIDATION_ERROR("offset must be less than the size of indexBuffer.");
 					}
-				}
 
-				if (indexTypeSize == 0) {
-					VALIDATION_ERROR("The index size must not be 0.");
+					const uint32 indexSize = getIndexSize(format);
+
+					if ((memorySuballocation.offset + offset) % indexSize > 0) {
+						VALIDATION_ERROR("The sum of offset and the indexBuffer memory suballocation offset must be a multiple of the index size ([]).", indexSize);
+					}
 				}
 			}
 		#endif
 
-		device->adapter->bindIndexBufferImplementation(this, indexBuffer, offset, indexTypeSize);
+		device->adapter->bindIndexBufferImplementation(this, indexBuffer, offset, format);
 	}
 
 	void CommandEncoder::bindVertexBuffer(uint32 bindingIndex, ref<Buffer> vertexBuffer, uint64 offset) {
@@ -142,7 +146,7 @@ namespace Trident {
 					}
 
 					if (offset >= vertexBuffer->getSize()) {
-						VALIDATION_ERROR("bufferOffset must be less than the size of vertexBuffer.");
+						VALIDATION_ERROR("offset must be less than the size of vertexBuffer.");
 					}
 				}
 			}

@@ -151,7 +151,6 @@ namespace Trident::VK {
 			const BaseBufferView& vertexView = triangleGeometryDescriptor.vertexView;
 			const BaseBufferView& indexView = triangleGeometryDescriptor.indexView;
 			const uint32 vertexStride = vertexView.getStride();
-			const uint32 indexStride = indexView.getStride();
 
 			VkAccelerationStructureGeometryKHR& geometry = geometries[geometryIndex];
 			geometry.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
@@ -169,7 +168,7 @@ namespace Trident::VK {
 			trianglesData.vertexData.deviceAddress = vkDevice->vkGetBufferDeviceAddress(vkDevice->device, &bufferDeviceAddressInfo);
 			trianglesData.vertexStride = vertexStride;
 			trianglesData.maxVertex = static_cast<uint32>(vertexView.getSize()) / vertexStride - 1;
-			trianglesData.indexType = getIndexType(indexStride);
+			trianglesData.indexType = translateIndexFormat(triangleGeometryDescriptor.indexFormat);
 
 			bufferDeviceAddressInfo.buffer = pointer_cast<const VK::Buffer*>(indexView.getBuffer())->buffer;
 
@@ -177,7 +176,7 @@ namespace Trident::VK {
 			trianglesData.transformData.deviceAddress = 0;
 
 			VkAccelerationStructureBuildRangeInfoKHR& buildRangeInfo = buildRangeInfos[geometryIndex];
-			buildRangeInfo.primitiveCount = static_cast<uint32>(indexView.getSize()) / (indexStride * 3);
+			buildRangeInfo.primitiveCount = static_cast<uint32>(indexView.getSize()) / (getIndexSize(triangleGeometryDescriptor.indexFormat) * 3);
 			buildRangeInfo.primitiveOffset = static_cast<uint32>(indexView.getOffset());
 			buildRangeInfo.firstVertex = static_cast<uint32>(vertexView.getOffset()) / vertexStride;
 			buildRangeInfo.transformOffset = 0;

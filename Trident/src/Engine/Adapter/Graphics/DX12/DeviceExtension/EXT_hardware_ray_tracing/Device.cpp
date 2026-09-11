@@ -11,8 +11,8 @@
 #include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/Device.hpp"
 #include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/GeometryFlags.hpp"
 #include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/RayTracingPipeline.hpp"
+#include "Engine/Adapter/Graphics/DX12/IndexFormat.hpp"
 #include "Engine/Adapter/Graphics/DX12/PipelineLayout.hpp"
-#include "Engine/Adapter/Graphics/DX12/Format.hpp"
 #include "Engine/Adapter/Graphics/DX12/ShaderModule.hpp"
 #include "Engine/Adapter/Graphics/DX12/VertexInputAttributeFormat.hpp"
 
@@ -67,7 +67,6 @@ namespace Trident::DX12 {
 			const BaseBufferView& VertexView = geometry.vertexView;
 			const BaseBufferView& IndexView = geometry.indexView;
 			const UINT VertexStride = VertexView.getStride();
-			const UINT IndexStride = IndexView.getStride();
 
 			D3D12_RAYTRACING_GEOMETRY_DESC& GeometryDesc = GeometryDescs[GeometryIndex];
 			GeometryDesc.Type = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
@@ -75,9 +74,9 @@ namespace Trident::DX12 {
 
 			D3D12_RAYTRACING_GEOMETRY_TRIANGLES_DESC& Triangles = GeometryDesc.Triangles;
 			Triangles.Transform3x4 = 0;
-			Triangles.IndexFormat = getIndexBufferFormat(IndexStride);
+			Triangles.IndexFormat = translateIndexFormat(geometry.indexFormat);
 			Triangles.VertexFormat = getVertexInputAttributeFormat(geometry.vertexFormat);
-			Triangles.IndexCount = static_cast<UINT>(IndexView.getSize()) / IndexStride;
+			Triangles.IndexCount = static_cast<UINT>(IndexView.getSize()) / getIndexSize(geometry.indexFormat);
 			Triangles.VertexCount = static_cast<UINT>(VertexView.getSize()) / VertexStride;
 			Triangles.IndexBuffer = pointer_cast<const DX12::Buffer*>(IndexView.getBuffer())->resource->GetGPUVirtualAddress() + IndexView.getOffset();
 			Triangles.VertexBuffer.StartAddress = pointer_cast<const DX12::Buffer*>(VertexView.getBuffer())->resource->GetGPUVirtualAddress() + VertexView.getOffset();

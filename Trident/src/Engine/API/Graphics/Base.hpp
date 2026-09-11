@@ -12,6 +12,7 @@ namespace Trident {
 	enum class ImageLayout : uint8;
 	enum class ImageType : uint8;
 	enum class ImageViewType : uint8;
+	enum IndexFormat;
 	enum class MemoryProperty : uint8;
 	enum class PipelineStage : uint8;
 	enum class PresentStatus : uint8;
@@ -96,7 +97,7 @@ namespace Trident {
 	typedef void (*BindComputePipelineImplementation)(CommandEncoder* commandEncoder, ref<ComputePipeline> computePipeline);
 	typedef void (*BindDescriptorSetsImplementation)(CommandEncoder* commandEncoder, ref<PipelineLayout> pipelineLayout, uint32 descriptorSetIndexOffset, view<ref<DescriptorSet>> descriptorSets);
 	typedef void (*BindGraphicsPipelineImplementation)(CommandEncoder* commandEncoder, ref<GraphicsPipeline> graphicsPipeline);
-	typedef void (*BindIndexBufferImplementation)(CommandEncoder* commandEncoder, ref<Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize);
+	typedef void (*BindIndexBufferImplementation)(CommandEncoder* commandEncoder, ref<Buffer> indexBuffer, uint64 offset, IndexFormat format);
 	typedef void (*BindVertexBufferImplementation)(CommandEncoder* commandEncoder, uint32 bindingIndex, ref<Buffer> vertexBuffer, uint64 offset);
 	typedef void (*CopyBufferToBufferImplementation)(CommandEncoder* commandEncoder, ref<Buffer> sourceBuffer, ref<Buffer> destinationBuffer, view<BufferCopyRegion> copyRegions);
 	typedef void (*CopyBufferToImageImplementation)(CommandEncoder* commandEncoder, ref<Buffer> sourceBuffer, ref<Image> destinationImage, view<BufferImageCopyRegion> copyRegions);

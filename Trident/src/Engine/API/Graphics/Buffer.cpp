@@ -34,7 +34,7 @@ namespace Trident {
 		return usage;
 	}
 
-	MemorySuballocation Buffer::getMemorySuballocation() const {
+	const MemorySuballocation& Buffer::getMemorySuballocation() const {
 		return memorySuballocation;
 	}
 

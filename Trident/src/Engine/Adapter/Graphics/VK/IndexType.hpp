@@ -6,18 +6,18 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident::VK {
-	inline VkIndexType getIndexType(uint8 indexTypeSize) {
-		switch (indexTypeSize) {
-			case sizeof(uint16): {
+	inline VkIndexType translateIndexFormat(IndexFormat format) {
+		switch (format) {
+			case R16_UINT: {
 				return VK_INDEX_TYPE_UINT16;
 			}
-			case sizeof(uint32): {
+			case R32_UINT: {
 				return VK_INDEX_TYPE_UINT32;
 			}
 			default: {
-				ADAPTER_ASSERT(false, "Unsupported index type size.");
+				ADAPTER_ASSERT(false, "Unsupported index format.");
 
-				return static_cast<VkIndexType>(0);
+				return VK_INDEX_TYPE_MAX_ENUM;
 			}
 		}
 	}

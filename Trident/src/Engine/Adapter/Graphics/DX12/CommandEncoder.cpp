@@ -14,6 +14,7 @@
 #include "Engine/Adapter/Graphics/DX12/Format.hpp"
 #include "Engine/Adapter/Graphics/DX12/GraphicsPipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/ImageView.hpp"
+#include "Engine/Adapter/Graphics/DX12/IndexFormat.hpp"
 #include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/API/Graphics/DispatchIndirectCommand.hpp"
@@ -424,7 +425,7 @@ namespace Trident {
 		_commandEncoder->commandCount += 1;
 	}
 
-	void DX12::bindIndexBuffer(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
+	void DX12::bindIndexBuffer(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> indexBuffer, uint64 offset, IndexFormat format) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		DX12::CommandEncoder* _commandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
@@ -432,7 +433,7 @@ namespace Trident {
 		D3D12_INDEX_BUFFER_VIEW indexBufferView{};
 		indexBufferView.BufferLocation = ref_cast<DX12::Buffer>(indexBuffer)->resource->GetGPUVirtualAddress() + offset;
 		indexBufferView.SizeInBytes = static_cast<UINT>(indexBuffer->getSize() - offset);
-		indexBufferView.Format = getIndexBufferFormat(indexTypeSize);
+		indexBufferView.Format = translateIndexFormat(format);
 
 		_commandEncoder->commandList->IASetIndexBuffer(&indexBufferView);
 		_commandEncoder->commandCount += 1;

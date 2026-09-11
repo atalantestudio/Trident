@@ -88,13 +88,13 @@ namespace Trident {
 		_commandEncoder->addCommand(allocateRef<GL::BindGraphicsPipelineCommand>(_commandEncoder->graphicsPipeline));
 	}
 
-	void GL::bindIndexBuffer(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
+	void GL::bindIndexBuffer(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> indexBuffer, uint64 offset, IndexFormat format) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		GL::CommandEncoder* _commandEncoder = static_cast<GL::CommandEncoder*>(commandEncoder);
 		_commandEncoder->indexOffset = static_cast<uint32>(offset);
-		_commandEncoder->indexType = getIndexType(indexTypeSize);
-		_commandEncoder->indexTypeSize = indexTypeSize;
+		_commandEncoder->indexType = translateIndexFormat(format);
+		_commandEncoder->indexTypeSize = getIndexSize(format);
 		_commandEncoder->addCommand(allocateRef<GL::BindIndexBufferCommand>(
 			_commandEncoder->graphicsPipeline->vertexArray,
 			ref_cast<GL::Buffer>(indexBuffer)->buffer

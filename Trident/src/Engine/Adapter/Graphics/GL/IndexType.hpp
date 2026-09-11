@@ -6,16 +6,16 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident::GL {
-	inline GLenum getIndexType(uint8 indexTypeSize) {
-		switch (indexTypeSize) {
-			case sizeof(uint16): {
+	inline GLenum translateIndexFormat(IndexFormat format) {
+		switch (format) {
+			case R16_UINT: {
 				return GL_UNSIGNED_SHORT;
 			}
-			case sizeof(uint32): {
+			case R32_UINT: {
 				return GL_UNSIGNED_INT;
 			}
 			default: {
-				ADAPTER_ASSERT(false, "Unsupported index type size.");
+				ADAPTER_ASSERT(false, "Unsupported index format.");
 
 				return 0;
 			}

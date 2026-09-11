@@ -24,7 +24,7 @@ namespace Trident {
 			BufferUsage getUsage() const;
 
 			/// Returns the memory suballocation occupied by the buffer.
-			MemorySuballocation getMemorySuballocation() const;
+			const MemorySuballocation& getMemorySuballocation() const;
 
 			/// Returns the current access flags for the buffer.
 			Access getAccess() const;

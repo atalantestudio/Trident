@@ -183,19 +183,14 @@ namespace Trident {
 		vkCommandEncoder->commandCount += 1;
 	}
 
-	void VK::bindIndexBuffer(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
+	void VK::bindIndexBuffer(Trident::CommandEncoder* commandEncoder, ref<Trident::Buffer> indexBuffer, uint64 offset, IndexFormat format) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		static PFN_vkCmdBindIndexBuffer vkCmdBindIndexBuffer = loadDeviceProcedure<PFN_vkCmdBindIndexBuffer>(static_cast<const VK::Device*>(commandEncoder->device)->device, "vkCmdBindIndexBuffer");
 
 		VK::CommandEncoder* _commandEncoder = static_cast<VK::CommandEncoder*>(commandEncoder);
 
-		vkCmdBindIndexBuffer(
-			_commandEncoder->commandBuffer,
-			ref_cast<VK::Buffer>(indexBuffer)->buffer,
-			offset,
-			getIndexType(indexTypeSize)
-		);
+		vkCmdBindIndexBuffer(_commandEncoder->commandBuffer, ref_cast<VK::Buffer>(indexBuffer)->buffer, offset, translateIndexFormat(format));
 
 		_commandEncoder->commandCount += 1;
 	}

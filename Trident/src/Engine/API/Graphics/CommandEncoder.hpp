@@ -16,6 +16,7 @@
 #include "Engine/API/Graphics/Image.hpp"
 #include "Engine/API/Graphics/ImageLayout.hpp"
 #include "Engine/API/Graphics/ImageMemoryBarrier.hpp"
+#include "Engine/API/Graphics/IndexFormat.hpp"
 
 namespace Trident {
 	class CommandEncoder {
@@ -40,25 +41,25 @@ namespace Trident {
 			void bindGraphicsPipeline(ref<GraphicsPipeline> graphicsPipeline);
 
 			/// Binds an index buffer.
-			template<typename IndexType>
+			template<IndexFormat Format>
 			inline void bindIndexBuffer(
 				/// The index buffer to bind.
 				ref<Buffer> indexBuffer,
 
-				/// The offset in bytes in the buffer. It must be a multiple of IndexType.
+				/// The offset in bytes in the buffer. It must be a multiple of Format.
 				uint64 offset
 			) {
 				#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 					{
 						Validator validator;
 
-						if (offset % sizeof(IndexType) > 0) {
-							VALIDATION_ERROR("The offset must be a multiple of [].", sizeof(IndexType));
+						if (Format >= IndexFormat::count) {
+							VALIDATION_ERROR("Format must be a valid IndexFormat value.");
 						}
 					}
 				#endif
 
-				bindIndexBuffer(indexBuffer, offset, sizeof(IndexType));
+				bindIndexBuffer(indexBuffer, offset, Format);
 			}
 
 			void bindVertexBuffer(uint32 bindingIndex, ref<Buffer> vertexBuffer, uint64 offset);
@@ -165,7 +166,7 @@ namespace Trident {
 			explicit CommandEncoder(const Device* device, const CommandPool* commandPool);
 
 		private:
-			void bindIndexBuffer(ref<Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize);
+			void bindIndexBuffer(ref<Buffer> indexBuffer, uint64 offset, IndexFormat format);
 
 		public:
 			const Device* device;
@@ -174,7 +175,4 @@ namespace Trident {
 		private:
 			const Framebuffer* currentFramebuffer = nullptr;
 	};
-
-	template void CommandEncoder::bindIndexBuffer<uint16>(ref<Buffer> indexBuffer, uint64 offset);
-	template void CommandEncoder::bindIndexBuffer<uint32>(ref<Buffer> indexBuffer, uint64 offset);
 }

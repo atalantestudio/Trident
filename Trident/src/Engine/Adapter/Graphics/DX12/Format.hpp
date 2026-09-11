@@ -30,20 +30,4 @@ namespace Trident::DX12 {
 
 		return FORMATS[static_cast<uint32>(imageFormat)];
 	}
-
-	inline DXGI_FORMAT getIndexBufferFormat(uint8 indexTypeSize) {
-		switch (indexTypeSize) {
-			case sizeof(uint16): {
-				return DXGI_FORMAT_R16_UINT;
-			}
-			case sizeof(uint32): {
-				return DXGI_FORMAT_R32_UINT;
-			}
-			default: {
-				ADAPTER_ASSERT(false, "Unsupported index type size.");
-
-				return DXGI_FORMAT_UNKNOWN;
-			}
-		}
-	}
 }
