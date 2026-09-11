@@ -3,11 +3,6 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-// TODO(forward/pbr)
-// Decouple GLSL/GLSL for Vulkan shaders. Reasons:
-// - Multiple descriptor sets
-// - No shadow map Y flipping in GLSL
-
 precision highp float;
 
 struct PointLight {

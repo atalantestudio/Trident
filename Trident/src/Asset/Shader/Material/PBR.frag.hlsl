@@ -25,11 +25,14 @@ struct Interstage {
 	nointerpolation uint instanceIndex : VERTEX_OUTPUT_ATTRIBUTE7;
 };
 
-cbuffer Camera {
+static const float PI = radians(180.0);
+static const float3 SUN_DIRECTION = normalize(float3(1.0, 1.0, 1.0));
+
+cbuffer Camera : register(b0) {
 	Camera camera;
 }
 
-StructuredBuffer<PointLight> pointLights;
+StructuredBuffer<PointLight> pointLights : register(t0);
 
 Texture2D<float> directionalShadowMapTexture : register(t1);
 SamplerState directionalShadowMapSamplerState : register(s0);
@@ -42,9 +45,6 @@ SamplerState diffuseSamplerState : register(s2);
 
 Texture2D<float4> normalTexture : register(t4);
 SamplerState normalSamplerState : register(s3);
-
-static const float PI = radians(180.0);
-static const float3 SUN_DIRECTION = normalize(float3(1.0, 1.0, 1.0));
 
 float TrowbridgeReitzGGX(float3 normal, float3 halfway, float roughness) {
 	float a = roughness * roughness;
