@@ -27,8 +27,6 @@ namespace Trident {
 	}
 
 	void DX12::destroyCommandPool(const Trident::Device* device, const Trident::CommandPool* commandPool) {
-		const DX12::CommandPool* _commandPool = static_cast<const DX12::CommandPool*>(commandPool);
-
-		_commandPool->commandAllocator->Release();
+		// The queue's command pool is destroyed by the device.
 	}
 }

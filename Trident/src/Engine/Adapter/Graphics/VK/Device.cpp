@@ -364,7 +364,7 @@ namespace Trident {
 		}
 
 		for (const ref<Trident::Queue> queue : _device->queues) {
-			const VK::CommandPool* commandPool = static_cast<const VK::CommandPool*>(static_cast<const Trident::CommandPool*>(queue->commandPool));
+			const ref<VK::CommandPool> commandPool = ref_cast<VK::CommandPool>(queue->commandPool);
 
 			_device->vkDestroyCommandPool(_device->device, commandPool->commandPool, nullptr);
 		}

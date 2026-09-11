@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/DX12/Buffer.hpp"
+#include "Engine/Adapter/Graphics/DX12/CommandPool.hpp"
 #include "Engine/Adapter/Graphics/DX12/DescriptorSet.hpp"
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
 #include "Engine/Adapter/Graphics/DX12/DeviceExtension.hpp"
@@ -194,7 +195,7 @@ namespace Trident {
 	}
 
 	void DX12::destroyDevice(const Trident::Device* device) {
-		const DX12::Device* _device = static_cast<const DX12::Device*>(device);
+		const DX12::Device* dxDevice = static_cast<const DX12::Device*>(device);
 		const ref<DX12::PhysicalDevice> physicalDevice = ref_cast<DX12::PhysicalDevice>(device->physicalDevice);
 		const ref<DX12::MemoryAllocator> memoryAllocator = ref_cast<DX12::MemoryAllocator>(device->memoryAllocator);
 
@@ -203,20 +204,31 @@ namespace Trident {
 		memoryAllocator->destroyDescriptorHeaps();
 		memoryAllocator->destroyMemoryHeaps();
 
-		result = CloseHandle(_device->waitEvent);
+		for (const ref<Trident::Queue> queue : dxDevice->queues) {
+			const ref<DX12::CommandPool> commandPool = ref_cast<DX12::CommandPool>(queue->commandPool);
+
+			commandPool->commandAllocator->Release();
+		}
+
+		result = CloseHandle(dxDevice->waitEvent);
 
 		WIN32_ASSERT(result != 0);
 
 		#if defined(DEBUG_ENABLE_MESSENGER)
-			result = _device->infoQueue->UnregisterMessageCallback(_device->messageCallbackCookie);
+			result = dxDevice->infoQueue->UnregisterMessageCallback(dxDevice->messageCallbackCookie);
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to unregister message callback.");
 
-			_device->infoQueue->Release();
+			dxDevice->infoQueue->Release();
 		#endif
 
 		physicalDevice->adapter->Release();
-		_device->device->Release();
+
+		dxDevice->device->Release();
+
+		if (dxDevice->device5 != nullptr) {
+			dxDevice->device5->Release();
+		}
 	}
 
 	void DX12::resetFence(const Trident::Device* device, const Trident::Fence* fence) {

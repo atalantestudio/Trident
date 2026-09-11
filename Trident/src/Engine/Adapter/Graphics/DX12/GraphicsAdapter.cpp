@@ -5,6 +5,7 @@
 
 #include "Engine/Adapter/Graphics/DX12/Buffer.hpp"
 #include "Engine/Adapter/Graphics/DX12/CommandEncoder.hpp"
+#include "Engine/Adapter/Graphics/DX12/CommandPool.hpp"
 #include "Engine/Adapter/Graphics/DX12/ComputePipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
 #include "Engine/Adapter/Graphics/DX12/DeviceExtension/EXT_hardware_ray_tracing/AccelerationStructure.hpp"

@@ -309,7 +309,7 @@ namespace Trident {
 			ref<Instance> instance;
 			ref<PhysicalDevice> physicalDevice;
 			ref<Surface> surface;
-			ref<ExtendedDevice<>> device;
+			ref<Device> device;
 			ref<Queue> graphicsQueue;
 			ref<Swapchain> swapchain;
 
