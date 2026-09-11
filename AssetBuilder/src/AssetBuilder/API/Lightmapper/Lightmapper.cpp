@@ -362,7 +362,7 @@ namespace Trident {
 								.index = instanceIndex,
 								.mask = 1,
 								.shaderBindingTableRecordOffset = 0,
-								.flags = FORCE_OPAQUE,
+								.flags = InstanceFlags::FORCE_OPAQUE,
 								.accelerationStructureAddress = blasAddress,
 							};
 

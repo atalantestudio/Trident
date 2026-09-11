@@ -278,7 +278,7 @@ namespace Trident {
 	void DebugRenderer::encodeGeometryFillPass(ref<CommandEncoder> commandEncoder) const {
 		commandEncoder->bindGraphicsPipeline(geometryFillPipeline);
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
-		commandEncoder->bindIndexBuffer<R32_UINT>(indexBuffer, 0);
+		commandEncoder->bindIndexBuffer<IndexFormat::R32_UINT>(indexBuffer, 0);
 		commandEncoder->bindDescriptorSets(geometryPipelineLayout, 0, descriptorSets[1]);
 
 		const uint32 indexCount = static_cast<uint32>(scene->indexRange.count / sizeof(uint32));
@@ -289,7 +289,7 @@ namespace Trident {
 	void DebugRenderer::encodeGeometryLinePass(ref<CommandEncoder> commandEncoder) const {
 		commandEncoder->bindGraphicsPipeline(geometryLinePipeline);
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
-		commandEncoder->bindIndexBuffer<R32_UINT>(indexBuffer, scene->indexRange.count);
+		commandEncoder->bindIndexBuffer<IndexFormat::R32_UINT>(indexBuffer, scene->indexRange.count);
 		commandEncoder->bindDescriptorSets(geometryPipelineLayout, 0, descriptorSets[1]);
 
 		const uint32 indexCount = static_cast<uint32>(scene->faceLineIndexRange.count / sizeof(uint32));

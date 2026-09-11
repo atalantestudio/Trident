@@ -12,7 +12,7 @@ namespace Trident {
 	enum class ImageLayout : uint8;
 	enum class ImageType : uint8;
 	enum class ImageViewType : uint8;
-	enum IndexFormat;
+	enum class IndexFormat;
 	enum class MemoryProperty : uint8;
 	enum class PipelineStage : uint8;
 	enum class PresentStatus : uint8;
@@ -182,7 +182,7 @@ namespace Trident {
 
 	enum class AccelerationStructureBuildFlags : uint8;
 	enum class GeometryFlags : uint8;
-	enum InstanceFlags;
+	enum class InstanceFlags;
 
 	struct AccelerationStructureBuildInstanceGeometryDescriptor;
 	struct AccelerationStructureBuildSizes;

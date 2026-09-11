@@ -96,7 +96,7 @@ namespace Trident {
 				commandEncoder->setScissor(0, 0, extent);
 				commandEncoder->bindGraphicsPipeline(pipeline);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
-				commandEncoder->bindIndexBuffer<R16_UINT>(indexBuffer, 0);
+				commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(indexBuffer, 0);
 				commandEncoder->drawIndexed(3, 1, 0, 0, 0);
 			}
 

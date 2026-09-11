@@ -125,7 +125,7 @@ namespace Trident {
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
 
 			commandEncoder->bindVertexBuffer(1, subcomponentBuffer, 0);
-			commandEncoder->bindIndexBuffer<R16_UINT>(indexBuffer, 0);
+			commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(indexBuffer, 0);
 			commandEncoder->drawIndexed(6, subcomponentCount, 0, 0, 0);
 		}
 
@@ -137,7 +137,7 @@ namespace Trident {
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
 
 			commandEncoder->bindVertexBuffer(1, glyphSubcomponentBuffer, 0);
-			commandEncoder->bindIndexBuffer<R16_UINT>(indexBuffer, 0);
+			commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(indexBuffer, 0);
 			commandEncoder->drawIndexed(6, glyphSubcomponentCount, 0, 0, 0);
 		}
 	}

@@ -5,7 +5,7 @@
 
 namespace Trident {
 	/// Formats of index buffer indices.
-	enum IndexFormat {
+	enum class IndexFormat {
 		/// Specifies that indices are 16-bit unsigned integers.
 		R16_UINT,
 
@@ -21,6 +21,6 @@ namespace Trident {
 			sizeof(uint32),
 		};
 
-		return INDEX_SIZES[format];
+		return INDEX_SIZES[static_cast<uint32>(format)];
 	}
 }

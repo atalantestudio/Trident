@@ -4,7 +4,7 @@
 #pragma once
 
 namespace Trident {
-	enum ImageFlags : uint8 {
+	enum class ImageFlags : uint8 {
 		/// Specifies that the image can be used to create image views of type CUBE.
 		CUBE_COMPATIBLE = BIT(0),
 	};

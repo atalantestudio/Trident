@@ -700,7 +700,7 @@ namespace Trident {
 			commandEncoder->bindGraphicsPipeline(rigidBodyFillPipeline);
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
 			commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0);
-			commandEncoder->bindIndexBuffer<R32_UINT>(indexBuffer, 0);
+			commandEncoder->bindIndexBuffer<IndexFormat::R32_UINT>(indexBuffer, 0);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
 
 			while (componentIndex < geometryComponentPool.componentCount) {
@@ -722,7 +722,7 @@ namespace Trident {
 			commandEncoder->bindGraphicsPipeline(rigidBodyStrokePipeline);
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
 			commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0);
-			commandEncoder->bindIndexBuffer<R32_UINT>(indexBuffer, 0);
+			commandEncoder->bindIndexBuffer<IndexFormat::R32_UINT>(indexBuffer, 0);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, cameraViewDescriptorSet);
 
 			while (componentIndex < geometryComponentPool.componentCount) {
@@ -777,7 +777,7 @@ namespace Trident {
 				commandEncoder->bindGraphicsPipeline(rigidBodyPlaceholderFillPipeline);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
 				commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0);
-				commandEncoder->bindIndexBuffer<R32_UINT>(indexBuffer, 0);
+				commandEncoder->bindIndexBuffer<IndexFormat::R32_UINT>(indexBuffer, 0);
 				commandEncoder->bindDescriptorSets(placeholderPipelineLayout, 0, descriptorSets);
 				commandEncoder->drawIndexed(geometry.getIndexRange().count, 1, geometry.getIndexRange().offset, geometry.getVertexPositionComponentRange().offset / 2, selectedEntity);
 			}
@@ -787,7 +787,7 @@ namespace Trident {
 				commandEncoder->bindGraphicsPipeline(rigidBodyPlaceholderStrokePipeline);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
 				commandEncoder->bindVertexBuffer(1, rigidBodyBuffer, 0);
-				commandEncoder->bindIndexBuffer<R32_UINT>(indexBuffer, 0);
+				commandEncoder->bindIndexBuffer<IndexFormat::R32_UINT>(indexBuffer, 0);
 				commandEncoder->bindDescriptorSets(placeholderPipelineLayout, 0, descriptorSets);
 				commandEncoder->drawIndexed(hull.lineIndexRange.count, 1, hull.lineIndexRange.offset, geometry.getVertexPositionComponentRange().offset / 2, selectedEntity);
 			}

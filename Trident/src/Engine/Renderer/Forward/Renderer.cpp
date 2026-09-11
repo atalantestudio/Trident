@@ -76,7 +76,7 @@ namespace Trident {
 				commandEncoder->bindGraphicsPipeline(materialPipelines[materialShaderIndex]);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
 				commandEncoder->bindVertexBuffer(2, instanceBuffer, 0);
-				commandEncoder->bindIndexBuffer<R32_UINT>(indexBuffer, 0);
+				commandEncoder->bindIndexBuffer<IndexFormat::R32_UINT>(indexBuffer, 0);
 				commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialShaderIndex], 0, descriptorSets);
 
 				uint32 materialIndex = 0;
@@ -124,7 +124,7 @@ namespace Trident {
 				commandEncoder->bindGraphicsPipeline(materialPipelines[materialShaderIndex]);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
 				commandEncoder->bindVertexBuffer(1, instanceBuffer, 0);
-				commandEncoder->bindIndexBuffer<R32_UINT>(indexBuffer, 0);
+				commandEncoder->bindIndexBuffer<IndexFormat::R32_UINT>(indexBuffer, 0);
 				commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialShaderIndex], 0, sceneDescriptorSet);
 
 				uint32 materialIndex = 0;
@@ -157,7 +157,7 @@ namespace Trident {
 			/* commandEncoder->bindGraphicsPipeline(debugHullWireframePipeline);
 			commandEncoder->bindDescriptorSets(debugHullWireframePipelineLayout, 0, dynamicDescriptorSet);
 			commandEncoder->bindVertexBuffer(0, instanceBuffer, 0);
-			commandEncoder->bindIndexBuffer<R16_UINT>(debugHullWireframeBuffer, 0);
+			commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(debugHullWireframeBuffer, 0);
 
 			uint32 materialShaderIndex = sceneAsset->dynamicMaterialShaderOffset;
 
@@ -230,7 +230,7 @@ namespace Trident {
 		commandEncoder->bindGraphicsPipeline(directionalShadowMapPipeline);
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
 		commandEncoder->bindVertexBuffer(1, instanceBuffer, 0);
-		commandEncoder->bindIndexBuffer<R32_UINT>(indexBuffer, 0);
+		commandEncoder->bindIndexBuffer<IndexFormat::R32_UINT>(indexBuffer, 0);
 		commandEncoder->bindDescriptorSets(directionalShadowMapPipelineLayout, 0, directionalShadowMapDescriptorSet);
 
 		for (const MaterialShader& materialShader : sceneAsset->materialShaders) {

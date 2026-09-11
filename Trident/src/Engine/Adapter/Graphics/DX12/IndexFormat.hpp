@@ -8,18 +8,13 @@
 
 namespace Trident::DX12 {
 	inline DXGI_FORMAT translateIndexFormat(IndexFormat format) {
-		switch (format) {
-			case R16_UINT: {
-				return DXGI_FORMAT_R16_UINT;
-			}
-			case R32_UINT: {
-				return DXGI_FORMAT_R32_UINT;
-			}
-			default: {
-				ADAPTER_ASSERT(false, "Unsupported index format.");
+		static constexpr DXGI_FORMAT INDEX_FORMATS[] = {
+			DXGI_FORMAT_R16_UINT,
+			DXGI_FORMAT_R32_UINT,
+		};
 
-				return DXGI_FORMAT_UNKNOWN;
-			}
-		}
+		ADAPTER_ASSERT(format < IndexFormat::count, "Unsupported index format.");
+
+		return INDEX_FORMATS[static_cast<uint32>(format)];
 	}
 }

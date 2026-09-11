@@ -7,18 +7,13 @@
 
 namespace Trident::GL {
 	inline GLenum translateIndexFormat(IndexFormat format) {
-		switch (format) {
-			case R16_UINT: {
-				return GL_UNSIGNED_SHORT;
-			}
-			case R32_UINT: {
-				return GL_UNSIGNED_INT;
-			}
-			default: {
-				ADAPTER_ASSERT(false, "Unsupported index format.");
+		static constexpr GLenum INDEX_TYPES[] = {
+			GL_UNSIGNED_SHORT,
+			GL_UNSIGNED_INT,
+		};
 
-				return 0;
-			}
-		}
+		ADAPTER_ASSERT(format < IndexFormat::count, "Unsupported index format.");
+
+		return INDEX_TYPES[static_cast<uint32>(format)];
 	}
 }

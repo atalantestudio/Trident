@@ -7,18 +7,13 @@
 
 namespace Trident::VK {
 	inline VkIndexType translateIndexFormat(IndexFormat format) {
-		switch (format) {
-			case R16_UINT: {
-				return VK_INDEX_TYPE_UINT16;
-			}
-			case R32_UINT: {
-				return VK_INDEX_TYPE_UINT32;
-			}
-			default: {
-				ADAPTER_ASSERT(false, "Unsupported index format.");
+		static constexpr VkIndexType INDEX_TYPES[] = {
+			VK_INDEX_TYPE_UINT16,
+			VK_INDEX_TYPE_UINT32,
+		};
 
-				return VK_INDEX_TYPE_MAX_ENUM;
-			}
-		}
+		ADAPTER_ASSERT(format < IndexFormat::count, "Unsupported index format.");
+
+		return INDEX_TYPES[static_cast<uint32>(format)];
 	}
 }
