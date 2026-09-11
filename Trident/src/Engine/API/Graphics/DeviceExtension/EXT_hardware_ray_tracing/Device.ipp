@@ -63,8 +63,16 @@ namespace Trident {
 						VALIDATION_ERROR("descriptor.geometries[[]].vertexView doesn't belong to an allocated buffer.", geometryIndex);
 					}
 
+					if (geometry.vertexFormat >= VertexInputAttributeFormat::count) {
+						VALIDATION_ERROR("descriptor.geometries[[]].vertexFormat must be a valid VertexInputAttributeFormat value.", geometryIndex);
+					}
+
 					if (geometry.indexView.getBuffer()->getMemorySuballocation().allocationIndex == max<uint32>()) {
 						VALIDATION_ERROR("descriptor.geometries[[]].indexView doesn't belong to an allocated buffer.", geometryIndex);
+					}
+
+					if (geometry.indexFormat >= IndexFormat::count) {
+						VALIDATION_ERROR("descriptor.geometries[[]].indexFormat must be a valid IndexFormat value.", geometryIndex);
 					}
 
 					geometryIndex += 1;

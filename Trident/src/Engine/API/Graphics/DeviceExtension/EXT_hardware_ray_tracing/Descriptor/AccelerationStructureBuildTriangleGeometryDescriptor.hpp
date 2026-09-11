@@ -13,9 +13,9 @@ namespace Trident {
 	struct AccelerationStructureTriangleGeometryDescriptor {
 		GeometryFlags flags;
 		BaseBufferView vertexView;
-		VertexInputAttributeFormat vertexFormat;
+		VertexInputAttributeFormat vertexFormat = VertexInputAttributeFormat::count;
 		BaseBufferView indexView;
-		IndexFormat indexFormat;
+		IndexFormat indexFormat = IndexFormat::count;
 	};
 
 	struct AccelerationStructureBuildTriangleGeometryDescriptor {
