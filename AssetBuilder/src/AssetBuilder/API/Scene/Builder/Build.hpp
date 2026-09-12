@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "AssetBuilder/API/Lightmapper/Lightmapper.hpp"
 #include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
 #include "AssetBuilder/API/Utilities/Utilities.hpp"
 
@@ -69,7 +70,7 @@ namespace Trident {
 		}
 	}
 
-	BuildScene3D SceneBuilder::build() {
+	BuildScene3D SceneBuilder::build(Lightmapper* lightmapper) {
 		const view<IntermediateGeometry> preFilteredGeometries(geometries.data(), geometries.size());
 		const view<IntermediateMaterialShader> preFilteredMaterialShaders(materialShaders.data(), materialShaders.size());
 
@@ -252,12 +253,12 @@ namespace Trident {
 
 		buildLights(scene.dynamicGeometry);
 		buildEntityComponentMappings(scene.dynamicGeometry);
-		buildLightmaps(scene);
+		buildLightmaps(scene, lightmapper);
 
 		return scene;
 	}
 
-	void SceneBuilder::buildLightmaps(BuildScene3D& scene) {
+	void SceneBuilder::buildLightmaps(BuildScene3D& scene, Lightmapper* lightmapper) {
 		scene.staticGeometry.lightmapCoordinates = sequence<svec2<float32>>(lightmapVertexCount);
 
 		lightmapLookups.reserve(lightmaps.size());
@@ -266,7 +267,7 @@ namespace Trident {
 			createLightmaps(scene.staticGeometry);
 			updateLightmapCoordinates(scene.staticGeometry);
 
-			lightmapper.generateLightmapAtlas({
+			lightmapper->generateLightmapAtlas({
 				.scene = &scene,
 				.emissiveTriangleIndices = createEmissiveTriangleIndexBuffer(scene),
 				.triangles = createTriangleBuffer(scene),

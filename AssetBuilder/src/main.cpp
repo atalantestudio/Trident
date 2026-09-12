@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "AssetBuilder/API/AssetBuilderLibrary.hpp"
+#include "AssetBuilder/API/Lightmapper/Lightmapper.hpp"
 #include "AssetBuilder/Process/Geometry/2D/Polygon.hpp"
 #include "AssetBuilder/Process/Geometry/2D/Triangle.hpp"
 #include "AssetBuilder/Process/Geometry/2D/UnitCircle.hpp"
@@ -43,10 +44,10 @@
 #include "AssetBuilder/Process/Scene/3D/CornellBox.hpp"
 #include "AssetBuilder/Process/Scene/3D/Cubes.hpp"
 #include "AssetBuilder/Process/Scene/3D/EdgeContact.hpp"
-#include "AssetBuilder/Process/Scene/3D/FaceTest.hpp"
+// #include "AssetBuilder/Process/Scene/3D/FaceTest.hpp"
 #include "AssetBuilder/Process/Scene/3D/GallineraTable.hpp"
 #include "AssetBuilder/Process/Scene/3D/Hall.hpp"
-#include "AssetBuilder/Process/Scene/3D/Hall2.hpp"
+// #include "AssetBuilder/Process/Scene/3D/Hall2.hpp"
 #include "AssetBuilder/Process/Scene/3D/Lemons.hpp"
 #include "AssetBuilder/Process/Scene/3D/LightmapTest.hpp"
 #include "AssetBuilder/Process/Scene/3D/PBRTest.hpp"
@@ -84,14 +85,15 @@ namespace Trident {
 				}
 
 				GenerateSDFGlyphMapProcess::adapter = graphicsAdapter;
-				Lightmapper::adapter = graphicsAdapter;
+
+				lightmapper.initialize(graphicsAdapter);
 
 				registerProcesses();
 			}
 
 		private:
 			void registerProcesses() {
-				allocateProcesses(56);
+				allocateProcesses(54);
 
 				registerProcess<BuildGeometryAssetProcess>(&assetLibrary);
 
@@ -110,6 +112,10 @@ namespace Trident {
 				registerProcess<EveningRoad01Process>(&assetLibrary);
 				registerProcess<LemonARMMapProcess>(&assetLibrary);
 				registerProcess<OvercastSoilProcess>(&assetLibrary);
+
+				registerProcess<BuildFontAssetProcess>(&assetLibrary);
+
+				registerProcess<BuildShaderModuleAssetProcess>(&assetLibrary);
 
 				registerProcess<DebugMaterial>(&assetLibrary);
 				registerProcess<FoldingWoodenStoolMaterial>(&assetLibrary);
@@ -137,31 +143,28 @@ namespace Trident {
 				registerProcess<StackingScene2D>(&assetLibrary);
 				registerProcess<SwingScene2D>(&assetLibrary);
 
-				registerProcess<CornellBoxScene3D>(&assetLibrary);
-				registerProcess<CubesScene3D>(&assetLibrary);
-				registerProcess<EdgeContactScene3D>(&assetLibrary);
-				registerProcess<FaceTestScene3D>(&assetLibrary);
-				registerProcess<GallineraTableScene3D>(&assetLibrary);
-				registerProcess<HallScene3D>(&assetLibrary);
-				registerProcess<Hall2Scene3D>(&assetLibrary);
-				registerProcess<LemonsScene3D>(&assetLibrary);
-				registerProcess<LightmapTestScene3D>(&assetLibrary);
-				registerProcess<PBRTestScene3D>(&assetLibrary);
-				registerProcess<PlayerMovementScene3D>(&assetLibrary);
-				registerProcess<SlidingScene3D>(&assetLibrary);
-				registerProcess<StackingScene3D>(&assetLibrary);
-				registerProcess<SuzanneScene3D>(&assetLibrary);
-				registerProcess<TestGIScene3D>(&assetLibrary);
-
-				registerProcess<BuildShaderModuleAssetProcess>(&assetLibrary);
-
-				registerProcess<BuildFontAssetProcess>(&assetLibrary);
+				registerProcess<CornellBoxScene3D>(&assetLibrary, &lightmapper);
+				registerProcess<CubesScene3D>(&assetLibrary, &lightmapper);
+				registerProcess<EdgeContactScene3D>(&assetLibrary, &lightmapper);
+				// registerProcess<FaceTestScene3D>(&assetLibrary, &lightmapper);
+				registerProcess<GallineraTableScene3D>(&assetLibrary, &lightmapper);
+				registerProcess<HallScene3D>(&assetLibrary, &lightmapper);
+				// registerProcess<Hall2Scene3D>(&assetLibrary, &lightmapper);
+				registerProcess<LemonsScene3D>(&assetLibrary, &lightmapper);
+				registerProcess<LightmapTestScene3D>(&assetLibrary, &lightmapper);
+				registerProcess<PBRTestScene3D>(&assetLibrary, &lightmapper);
+				registerProcess<PlayerMovementScene3D>(&assetLibrary, &lightmapper);
+				registerProcess<SlidingScene3D>(&assetLibrary, &lightmapper);
+				registerProcess<StackingScene3D>(&assetLibrary, &lightmapper);
+				registerProcess<SuzanneScene3D>(&assetLibrary, &lightmapper);
+				registerProcess<TestGIScene3D>(&assetLibrary, &lightmapper);
 
 				registerProcess<BuildAssetMapProcess>(&assetLibrary);
 			}
 
 		private:
 			AssetBuilderLibrary assetLibrary;
+			Lightmapper lightmapper;
 	};
 
 	Application* createApplication(uint32 argumentCount, char8** argumentValues) {

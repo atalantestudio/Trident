@@ -46,6 +46,8 @@ extern Trident::Application* createApplication(Trident::uint32 argumentCount, Tr
 		{
 			PROFILER("Trace/ApplicationEnd.json");
 
+			application->release();
+
 			delete application;
 		}
 

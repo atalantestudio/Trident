@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
 #include "AssetBuilder/Process/Scene/Scene3DProcess.hpp"
 
 namespace Trident {
@@ -13,7 +12,7 @@ namespace Trident {
 				return "3d_hall";
 			}
 
-			BuildScene3D createScene(AssetBuilderLibrary* assetLibrary) const final override {
+			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				static constexpr svec2<float32> luxelScale = {1.0f, 1.0f};
 
 				// Texture scale multipliers
@@ -838,12 +837,10 @@ namespace Trident {
 					}
 				);
 
-				return builder.build();
+				return builder;
 			}
 
 		public:
-			explicit HallScene3D(AssetBuilderLibrary* assetLibrary) :
-				Scene3DProcess(assetLibrary)
-			{}
+			using Scene3DProcess::Scene3DProcess;
 	};
 }

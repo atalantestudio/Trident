@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
 #include "AssetBuilder/Process/Scene/Scene3DProcess.hpp"
 
 namespace Trident {
@@ -217,7 +216,7 @@ namespace Trident {
 				return "3d_cornell_box";
 			}
 
-			BuildScene3D createScene(AssetBuilderLibrary* assetLibrary) const final override {
+			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				static constexpr svec2<float32> luxelScale = {4.0f, 4.0f};
 				static constexpr svec3<float32> emissive = {17.0f, 12.0f, 4.0f};
 				static constexpr svec3<float32> green = {0.14f, 0.45f, 0.091f};
@@ -445,12 +444,10 @@ namespace Trident {
 					transform
 				);
 
-				return builder.build();
+				return builder;
 			}
 
 		public:
-			explicit CornellBoxScene3D(AssetBuilderLibrary* assetLibrary) :
-				Scene3DProcess(assetLibrary)
-			{}
+			using Scene3DProcess::Scene3DProcess;
 	};
 }

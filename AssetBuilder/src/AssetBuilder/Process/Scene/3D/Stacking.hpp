@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
 #include "AssetBuilder/Process/Scene/Scene3DProcess.hpp"
 
 namespace Trident {
@@ -13,7 +12,7 @@ namespace Trident {
 				return "3d_stacking";
 			}
 
-			BuildScene3D createScene(AssetBuilderLibrary* assetLibrary) const final override {
+			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				SceneBuilder builder({
 					.flags = {},
 					.skyColor = {0.6f, 0.7f, 0.9f},
@@ -88,12 +87,10 @@ namespace Trident {
 					.restitution = 0.0f,
 				});
 
-				return builder.build();
+				return builder;
 			}
 
 		public:
-			explicit StackingScene3D(AssetBuilderLibrary* assetLibrary) :
-				Scene3DProcess(assetLibrary)
-			{}
+			using Scene3DProcess::Scene3DProcess;
 	};
 }

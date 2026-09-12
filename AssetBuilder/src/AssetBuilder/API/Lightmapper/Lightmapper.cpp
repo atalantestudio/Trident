@@ -34,16 +34,9 @@
 #include "AssetBuilder/API/Lightmapper/UpdateDescriptorSets.hpp"
 
 namespace Trident {
-	const GraphicsAdapter* Lightmapper::adapter;
+	void Lightmapper::initialize(const GraphicsAdapter* adapter) {
+		this->adapter = adapter;
 
-	Lightmapper::~Lightmapper() {
-		gBufferDescriptorSetLayout.~ref();
-		rayTracingDescriptorSetLayout.~ref();
-		postProcessingDescriptorSetLayout.~ref();
-		dilationDescriptorSetLayout.~ref();
-	}
-
-	void Lightmapper::initialize() {
 		instance = adapter->createInstance({
 			.projectName = "Lightmapper",
 			.projectVersion = {0, 0, 1},
@@ -60,35 +53,33 @@ namespace Trident {
 		});
 
 		gBufferRenderPass = createGBufferRenderPass();
-		dilationRenderPass = createDilationRenderPass();
-
 		gBufferDescriptorSetLayout = createGBufferDescriptorSetLayout();
 		rayTracingDescriptorSetLayout = createRayTracingDescriptorSetLayout();
 		postProcessingDescriptorSetLayout = createPostProcessingDescriptorSetLayout();
 		dilationDescriptorSetLayout = createDilationDescriptorSetLayout();
-
 		gBufferPipelineLayout = createGBufferPipelineLayout();
 		rayTracingPipelineLayout = createRayTracingPipelineLayout();
 		postProcessingPipelineLayout = createPostProcessingPipelineLayout();
 		dilationPipelineLayout = createDilationPipelineLayout();
-
 		gBufferPipelines[0] = createGBufferPipeline(PolygonMode::FILL);
 		gBufferPipelines[1] = createGBufferPipeline(PolygonMode::LINE);
 		rayTracingPipeline = createRayTracingPipeline();
 		intermediateDilationPipeline = createIntermediateDilationPipeline();
 		horizontalBilateralFilterPipeline = createHorizontalBilateralFilterPipeline();
 		verticalBilateralFilterPipeline = createVerticalBilateralFilterPipeline();
-		dilationPipeline = createDilationPipeline();
+		argumentBuffer = createArgumentBuffer();
+		intermediateLightmapAtlasSampler = createIntermediateLightmapAtlasSampler();
 
 		descriptorSets = device->allocateDescriptorSets(descriptorSetLayouts);
 
-		intermediateLightmapAtlasSampler = createIntermediateLightmapAtlasSampler();
-
-		argumentBuffer = createArgumentBuffer();
-
 		createShaderBindingTableBuffer();
+	}
 
-		initialized = true;
+	Lightmapper::~Lightmapper() {
+		gBufferDescriptorSetLayout.~ref();
+		rayTracingDescriptorSetLayout.~ref();
+		postProcessingDescriptorSetLayout.~ref();
+		dilationDescriptorSetLayout.~ref();
 	}
 
 	void Lightmapper::generateLightmapAtlas(const LightmapperDescriptor& descriptor) {
@@ -96,7 +87,10 @@ namespace Trident {
 		imageAssetDescriptor = &descriptor.scene->staticGeometry.lightmapAtlasImageAssetDescriptor;
 
 		if (!initialized) {
-			initialize();
+			dilationRenderPass = createDilationRenderPass();
+			dilationPipeline = createDilationPipeline();
+
+			initialized = true;
 		}
 
 		context = {};

@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
 #include "AssetBuilder/Process/Scene/Scene3DProcess.hpp"
 
 namespace Trident {
@@ -227,7 +226,7 @@ namespace Trident {
 				return "3d_test_gi";
 			}
 
-			BuildScene3D createScene(AssetBuilderLibrary* assetLibrary) const final override {
+			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				SceneBuilder builder({
 					.flags = {},
 					.skyColor = {0.0f, 0.0f, 0.0f},
@@ -247,12 +246,10 @@ namespace Trident {
 				createRoom(builder, { 0.0f,    64.0f,  384.0f}, 0.1f, material);
 				createRoom(builder, { 192.0f,  64.0f,  384.0f}, 0.2f, material);
 
-				return builder.build();
+				return builder;
 			}
 
 		public:
-			explicit TestGIScene3D(AssetBuilderLibrary* assetLibrary) :
-				Scene3DProcess(assetLibrary)
-			{}
+			using Scene3DProcess::Scene3DProcess;
 	};
 }

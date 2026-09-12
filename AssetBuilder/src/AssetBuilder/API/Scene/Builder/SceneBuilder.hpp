@@ -5,7 +5,6 @@
 
 #include "AssetBuilder/API/Entity/EntityDescriptor.hpp"
 #include "AssetBuilder/API/Lightmapper/Lightmap.hpp"
-#include "AssetBuilder/API/Lightmapper/Lightmapper.hpp"
 #include "AssetBuilder/API/Material/MaterialReference.hpp"
 #include "AssetBuilder/API/Mesh/MeshDescriptor.hpp"
 #include "AssetBuilder/API/Scene/Builder/Intermediate.hpp"
@@ -19,10 +18,8 @@
 
 namespace Trident {
 	class SceneBuilder {
-		private:
+		public:
 			static constexpr Extent2D LIGHTMAP_ATLAS_EXTENT = {1024, 1024};
-
-			static Lightmapper lightmapper;
 
 		public:
 			static BuildStaticGeometry3D createWallGeometry(svec2<float32> scale);
@@ -58,7 +55,7 @@ namespace Trident {
 
 			void placePointLight(const PointLight& pointLight);
 
-			BuildScene3D build();
+			BuildScene3D build(Lightmapper* lightmapper);
 
 		private:
 			uint32 findMaterialShaderIndex(uint32 assetIdentifier) const;
@@ -66,7 +63,7 @@ namespace Trident {
 
 			void buildEntityComponentMappings(BuildDynamicSceneGeometry3D& dynamicGeometry);
 			void buildLights(BuildDynamicSceneGeometry3D& dynamicGeometry);
-			void buildLightmaps(BuildScene3D& scene);
+			void buildLightmaps(BuildScene3D& scene, Lightmapper* lightmapper);
 
 			void createLightmaps(BuildStaticSceneGeometry3D& staticGeometry);
 			void updateLightmapCoordinates(BuildStaticSceneGeometry3D& staticGeometry);

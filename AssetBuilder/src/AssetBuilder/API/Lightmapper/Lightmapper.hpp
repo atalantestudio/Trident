@@ -60,18 +60,15 @@ namespace Trident {
 			};
 
 		public:
-			static const GraphicsAdapter* adapter;
-
-		public:
 			explicit Lightmapper() {}
 
 			~Lightmapper();
 
+			void initialize(const GraphicsAdapter* adapter);
+
 			void generateLightmapAtlas(const LightmapperDescriptor& descriptor);
 
 		private:
-			void initialize();
-
 			// TODO(asset-builder/scene/lightmapper): Move inside the engine.
 			ref<ShaderModule> loadShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> path) const;
 
@@ -130,6 +127,7 @@ namespace Trident {
 			void encodeGBufferCommands(const BuildScene3D& scene) const;
 
 		private:
+			const GraphicsAdapter* adapter;
 			bool initialized = false;
 			ImageFormat atlasFormat;
 			Extent3D atlasExtent;
@@ -154,7 +152,8 @@ namespace Trident {
 					ref<DescriptorSetLayout> dilationDescriptorSetLayout;
 				};
 
-				ref<DescriptorSetLayout> descriptorSetLayouts[4];
+				// TODO(asset-builder/lightmapper): Why these need to be default-initialized when the buffer unions in the graphics samples don't need to be?
+				ref<DescriptorSetLayout> descriptorSetLayouts[4]{};
 			};
 
 			sequence<ref<DescriptorSet>> descriptorSets;

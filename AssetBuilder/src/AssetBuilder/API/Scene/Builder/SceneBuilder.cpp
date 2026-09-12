@@ -17,8 +17,6 @@
 #include "AssetBuilder/Process/MaterialShader/PBRDebug.hpp"
 
 namespace Trident {
-	Lightmapper SceneBuilder::lightmapper;
-
 	ShaderModuleAsset SceneBuilder::getMaterialShaderModuleAsset(uint32 identifier) {
 		switch (identifier) {
 			case 400: {

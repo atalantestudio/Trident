@@ -7,6 +7,7 @@
 #include "AssetBuilder/Process/Scene/Scene3DProcess.hpp"
 
 namespace Trident {
+	// TODO(asset-builder/map): Restore.
 	class FaceTestScene3D final : public Scene3DProcess {
 		protected:
 			view<char8> getAssetName() const final override {
@@ -88,8 +89,6 @@ namespace Trident {
 			}
 
 		public:
-			explicit FaceTestScene3D(AssetBuilderLibrary* assetLibrary) :
-				Scene3DProcess(assetLibrary)
-			{}
+			using Scene3DProcess::Scene3DProcess;
 	};
 }
