@@ -332,6 +332,11 @@ namespace Trident {
 	}
 
 	template<typename T>
+	constexpr svec<2, T> operator/(T b, svec<2, T> a) {
+		return svec<2, T>(b, b) / a;
+	}
+
+	template<typename T>
 	constexpr svec<2, T> operator/(svec<2, T> a, svec<2, T> b) {
 		return a /= b;
 	}

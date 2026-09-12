@@ -74,6 +74,7 @@ namespace Trident {
 			Lightmap& lightmap = lightmaps[lightmapIndex];
 			lightmap.coordinateOffset = lightmapCoordinateOffset;
 
+			const svec2<float32> scale = lightmap.scale / lightmap.luxelScale;
 			const IntermediateGeometry& geometry = geometries[lightmap.geometryIndex];
 			const view<BuildVertex3D> vertices(&geometry.vertices[lightmap.vertexRange.offset], lightmap.vertexRange.count);
 
@@ -86,20 +87,21 @@ namespace Trident {
 
 				// TODO(lyah/scalar)
 				svec2<float32>& coordinate = staticGeometry.lightmapCoordinates[lightmap.coordinateOffset + coordinateIndex];
-				coordinate = (textureCoordinate - lightmap.minCoordinate) * lightmap.scale / lightmap.luxelScale;
+				coordinate = (textureCoordinate - lightmap.minCoordinate) * scale;
 
 				coordinateIndex += 1;
 			}
 
 			// TODO(lyah/scalar)
-			vec2<float32> size = (lightmap.maxCoordinate - lightmap.minCoordinate) * lightmap.scale / lightmap.luxelScale;
-			size = {ceil(size[0] / 4.0f) * 4.0f, ceil(size[1] / 4.0f) * 4.0f};
+			svec2<float32> size = (lightmap.maxCoordinate - lightmap.minCoordinate) * scale;
+			size.x = floor(size.x);
+			size.y = floor(size.y);
 
 			lightmap.size = {static_cast<uint32>(size[0]), static_cast<uint32>(size[1])};
 
 			DEBUG_ASSERT(lightmap.size.width > 0 && lightmap.size.height > 0);
 
-			// Dilation needs 1px padding on all sides, bicubic filtering needs 2.
+			// Pad for bicubic filtering.
 			lightmap.size.width += 4;
 			lightmap.size.height += 4;
 

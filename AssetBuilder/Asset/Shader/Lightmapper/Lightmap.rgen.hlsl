@@ -47,8 +47,8 @@ void initializeSecondaryRay(RayDesc primaryRay, inout uint triangleIndex, inout 
 	float abc = length(parallelogramArea(b - a, c - a)) * 0.5;
 
 	// TODO(asset-builder/lightmapper/is)
-	// pdf = 1.0 / (abc * arguments.emissiveTriangleCount);
-	pdf = (abc * arguments.atlasSize.x) / arguments.emissiveTriangleCount;
+	pdf = (abc * arguments.emissiveTriangleCount);
+	// pdf = (abc * arguments.atlasSize.x) / arguments.emissiveTriangleCount;
 
 	float u = randomScalar(seed);
 	float v = randomScalar(seed);

@@ -72,7 +72,8 @@ namespace Trident {
 		postProcessingPipelineLayout = createPostProcessingPipelineLayout();
 		dilationPipelineLayout = createDilationPipelineLayout();
 
-		gBufferPipeline = createGBufferPipeline();
+		gBufferPipelines[0] = createGBufferPipeline(PolygonMode::FILL);
+		gBufferPipelines[1] = createGBufferPipeline(PolygonMode::LINE);
 		rayTracingPipeline = createRayTracingPipeline();
 		intermediateDilationPipeline = createIntermediateDilationPipeline();
 		horizontalBilateralFilterPipeline = createHorizontalBilateralFilterPipeline();
@@ -521,23 +522,6 @@ namespace Trident {
 	}
 
 	void Lightmapper::encodeGBufferCommands(const BuildScene3D& scene) const {
-		const float32 width = static_cast<float32>(imageAssetDescriptor->extent.width);
-		const float32 height = static_cast<float32>(imageAssetDescriptor->extent.height);
-
-		commandEncoder->beginRenderPass({
-			.framebuffer = context.gBufferFramebuffer,
-			.clearValues = {
-				{0.0f, 0.0f, 0.0f, 0.0f},
-				{0.0f, 0.0f, 0.0f, 0.0f},
-				{0.0f, 0.0f, 0.0f, 0.0f},
-				{0.0f, 0.0f, 0.0f, 0.0f},
-			},
-		});
-		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-		commandEncoder->setScissor(0, 0, context.gBufferFramebuffer->getExtent());
-		commandEncoder->bindGraphicsPipeline(gBufferPipeline);
-
-		// TODO(graphics/command-encoder/bind-resources): Ensure that descriptor sets and vertex buffers, if any, are always bound after the pipeline.
 		commandEncoder->bindDescriptorSets(gBufferPipelineLayout, 0, descriptorSets[0]);
 
 		uint32 materialShaderIndex = 0;
@@ -566,8 +550,33 @@ namespace Trident {
 
 			materialShaderIndex += 1;
 		}
+	}
 
-		commandEncoder->endRenderPass();
+	void Lightmapper::generateLightmaps(const BuildScene3D& scene) const {
+		const float32 width = static_cast<float32>(imageAssetDescriptor->extent.width);
+		const float32 height = static_cast<float32>(imageAssetDescriptor->extent.height);
+
+		commandEncoder->reset();
+		commandEncoder->begin();
+
+		commandEncoder->beginRenderPass({
+			.framebuffer = context.gBufferFramebuffer,
+			.clearValues = {
+				{0.0f, 0.0f, 0.0f, 0.0f},
+				{0.0f, 0.0f, 0.0f, 0.0f},
+				{0.0f, 0.0f, 0.0f, 0.0f},
+				{0.0f, 0.0f, 0.0f, 0.0f},
+			},
+		});
+		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
+		commandEncoder->setScissor(0, 0, context.gBufferFramebuffer->getExtent());
+		commandEncoder->bindGraphicsPipeline(gBufferPipelines[0]);
+
+		encodeGBufferCommands(scene);
+
+		commandEncoder->bindGraphicsPipeline(gBufferPipelines[1]);
+
+		encodeGBufferCommands(scene);
 
 		// TODO(graphics/dx12/render-pass/final-layout): Automatically transition render pass attachments to their final layout.
 		if (adapter->getApi() == GraphicsAPI::DX12) {
@@ -603,16 +612,8 @@ namespace Trident {
 
 			commandEncoder->insertMemoryBarriers({}, imageMemoryBarriers);
 		}
-	}
 
-	void Lightmapper::generateLightmaps(const BuildScene3D& scene) const {
-		const float32 width = static_cast<float32>(imageAssetDescriptor->extent.width);
-		const float32 height = static_cast<float32>(imageAssetDescriptor->extent.height);
-
-		commandEncoder->reset();
-		commandEncoder->begin();
-
-		encodeGBufferCommands(scene);
+		commandEncoder->endRenderPass();
 
 		queue->submit(commandEncoder->end());
 		queue->waitIdle();
@@ -635,7 +636,7 @@ namespace Trident {
 			.newAccess = Access::SHADER_READ | Access::SHADER_WRITE,
 		};
 
-		/* commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
+		commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
 
 		const uint32 workGroupX = ceil(imageAssetDescriptor->extent.width / 16, 16u);
 		const uint32 workGroupY = ceil(imageAssetDescriptor->extent.height / 16, 16u);
@@ -654,7 +655,7 @@ namespace Trident {
 
 		commandEncoder->bindComputePipeline(verticalBilateralFilterPipeline);
 		commandEncoder->bindDescriptorSets(postProcessingPipelineLayout, 0, descriptorSets[2]);
-		commandEncoder->dispatch(workGroupX, workGroupY, 1); */
+		commandEncoder->dispatch(workGroupX, workGroupY, 1);
 
 		imageMemoryBarrier.newLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
 

@@ -8,8 +8,8 @@
 namespace Trident {
 	ref<Sampler> ForwardRenderer::createLightmapAtlasSampler() const {
 		return createSampler({
-			.magFilter = Filter::NEAREST,
-			.minFilter = Filter::NEAREST,
+			.magFilter = Filter::LINEAR,
+			.minFilter = Filter::LINEAR,
 			.addressModeU = AddressMode::CLAMP_TO_EDGE,
 			.addressModeV = AddressMode::CLAMP_TO_EDGE,
 			.addressModeW = AddressMode::CLAMP_TO_EDGE,
