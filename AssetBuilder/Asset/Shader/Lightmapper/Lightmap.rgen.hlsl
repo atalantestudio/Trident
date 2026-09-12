@@ -112,6 +112,10 @@ float3 traceRay(Hit primaryHit, inout uint seed) {
 			}
 		}
 
+		float3 brdf = material.albedo / PI;
+
+		light += directLight * throughput * brdf;
+
 		TraceRay(accelerationStructure, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_BACK_FACING_TRIANGLES, 0xff, 0, 0, 0, primaryRay, primaryHit);
 
 		if (primaryHit.t < 0.0) {
@@ -120,9 +124,6 @@ float3 traceRay(Hit primaryHit, inout uint seed) {
 			break;
 		}
 
-		float3 brdf = material.albedo / PI;
-
-		light += directLight * throughput * brdf;
 		throughput *= material.albedo;
 
 		bounceIndex += 1;
