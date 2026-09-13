@@ -101,14 +101,7 @@ namespace Trident {
 		scene.staticGeometry.externalVertexCount = vertexCounts[1];
 		scene.staticGeometry.bakedIndexCount = indexCounts[0];
 		scene.staticGeometry.externalIndexCount = indexCounts[1];
-		scene.staticGeometry.lightmapAtlasImageAssetDescriptor = {
-			.format = ImageFormat::R8G8B8A8_UNORM,
-			.extent = {LIGHTMAP_ATLAS_EXTENT.width, LIGHTMAP_ATLAS_EXTENT.height, 1},
-			.mipLevelCount = 1,
-			.layerCount = 1,
-			.data = sequence<uint8>(LIGHTMAP_ATLAS_EXTENT.width * LIGHTMAP_ATLAS_EXTENT.height * getByteSize(ImageFormat::R8G8B8A8_UNORM)),
-		};
-		scene.staticGeometry.lightmapAtlasImageAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
+		scene.staticGeometry.lightmapAtlasImageAssetDescriptor.identifier = max<uint32>();
 		scene.dynamicGeometry.entityCount = entityCount;
 		scene.spawn = descriptor.spawn;
 		scene.geometries = sequence<BuildGeometry>(geometryCounts[0] + geometryCounts[1]);
@@ -264,6 +257,15 @@ namespace Trident {
 		lightmapLookups.reserve(lightmaps.size());
 
 		if (lightmapVertexCount > 0) {
+			scene.staticGeometry.lightmapAtlasImageAssetDescriptor = {
+				.format = ImageFormat::R8G8B8A8_UNORM,
+				.extent = {LIGHTMAP_ATLAS_EXTENT.width, LIGHTMAP_ATLAS_EXTENT.height, 1},
+				.mipLevelCount = 1,
+				.layerCount = 1,
+				.data = sequence<uint8>(LIGHTMAP_ATLAS_EXTENT.width * LIGHTMAP_ATLAS_EXTENT.height * getByteSize(ImageFormat::R8G8B8A8_UNORM)),
+			};
+			scene.staticGeometry.lightmapAtlasImageAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
+
 			createLightmaps(scene.staticGeometry);
 			updateLightmapCoordinates(scene.staticGeometry);
 
