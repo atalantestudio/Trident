@@ -2,6 +2,7 @@
 
 set inputpath=%~dp0
 
+glslc -fshader-stage=frag "%inputpath%/DDGI.frag.glsl" -o "%inputpath%/DDGI.frag.spv"
 glslc -fshader-stage=frag "%inputpath%/Lightmapped.frag.glsl" -o "%inputpath%/Lightmapped.frag.spv"
 glslc -fshader-stage=frag "%inputpath%/LightmappedPBR.frag.glsl" -o "%inputpath%/LightmappedPBR.frag.spv"
 glslc -fshader-stage=frag "%inputpath%/PBR.frag.glsl" -o "%inputpath%/PBR.frag.spv"

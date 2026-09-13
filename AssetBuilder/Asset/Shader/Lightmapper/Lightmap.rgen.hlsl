@@ -1,6 +1,8 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
+#define CUSTOM_SCENE_DDGI_REF_0
+
 #include "Lightmap.hlsl"
 
 void pcgHash(inout uint seed) {
@@ -23,6 +25,33 @@ float3 randomUnitDirection(inout uint seed) {
 float3 sampleDirectLight(RayDesc primaryRay, Hit primaryHit, inout uint seed) {
 	const float pdfDiffuse = 1.0 / (4.0 * PI);
 
+#if defined(CUSTOM_SCENE_DDGI_REF_0)
+	float3 p = float3(0.0, 64.0, 164.0);
+	float3 op = p - primaryRay.Origin;
+	float pdfLight = 1.0;
+
+	RayDesc secondaryRay = primaryRay;
+	secondaryRay.Direction = normalize(op);
+
+	if (dot(primaryHit.vertexNormal, secondaryRay.Direction) < 0.0) {
+		return float3(0.0, 0.0, 0.0);
+	}
+
+	Hit secondaryHit;
+
+	TraceRay(accelerationStructure, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_BACK_FACING_TRIANGLES, 0xff, 0, 0, 0, secondaryRay, secondaryHit);
+
+	if (secondaryHit.t < length(op)) {
+		return float3(0.0, 0.0, 0.0);
+	}
+
+	float angleA = dot(secondaryRay.Direction, primaryHit.vertexNormal);
+	float angleB = -1.0;
+	float G = 1.0 / dot(op, op) * angleA * max(0.001, abs(angleB));
+	float h = pdfLight / (pdfLight + pdfDiffuse * G);
+
+	return 256.0 * G / pdfLight * h;
+#else
 	if (arguments.emissiveTriangleCount == 0) {
 		return float3(0.0, 0.0, 0.0);
 	}
@@ -75,6 +104,7 @@ float3 sampleDirectLight(RayDesc primaryRay, Hit primaryHit, inout uint seed) {
 	float h = pdfLight / (pdfLight + pdfDiffuse * G);
 
 	return material.emissiveColor * material.emissiveIntensity * G / pdfLight * h;
+#endif
 }
 
 float3 traceRay(Hit primaryHit, inout uint seed) {

@@ -20,6 +20,7 @@
 #include "AssetBuilder/Process/Image/LemonARMMap.hpp"
 #include "AssetBuilder/Process/Image/OvercastSoil.hpp"
 #include "AssetBuilder/Process/Image/Quiver.hpp"
+#include "AssetBuilder/Process/Material/DDGI/DDGI.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/Default.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/PlasterCeiling.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/PlasterWall.hpp"
@@ -46,6 +47,7 @@
 #include "AssetBuilder/Process/Scene/2D/Swing.hpp"
 #include "AssetBuilder/Process/Scene/3D/CornellBox.hpp"
 #include "AssetBuilder/Process/Scene/3D/Cubes.hpp"
+#include "AssetBuilder/Process/Scene/3D/DDGIRef0.hpp"
 #include "AssetBuilder/Process/Scene/3D/DDGITest.hpp"
 #include "AssetBuilder/Process/Scene/3D/EdgeContact.hpp"
 // #include "AssetBuilder/Process/Scene/3D/FaceTest.hpp"
@@ -95,7 +97,7 @@ namespace Trident {
 
 		private:
 			void registerProcesses() {
-				allocateProcesses(56);
+				allocateProcesses(58);
 
 				registerProcess<BuildGeometryAssetProcess>(&assetLibrary);
 
@@ -121,6 +123,7 @@ namespace Trident {
 
 				registerProcess<BuildShaderModuleAssetProcess>(&assetLibrary);
 
+				registerProcess<DDGIMaterial>(&assetLibrary);
 				registerProcess<DebugMaterial>(&assetLibrary);
 				registerProcess<FoldingWoodenStoolMaterial>(&assetLibrary);
 				registerProcess<GallineraTableMaterial>(&assetLibrary);
@@ -149,6 +152,7 @@ namespace Trident {
 
 				registerProcess<CornellBoxScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<CubesScene3D>(&assetLibrary, &lightmapper);
+				registerProcess<DDGIRef0Scene3D>(&assetLibrary, &lightmapper);
 				registerProcess<DDGITestScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<EdgeContactScene3D>(&assetLibrary, &lightmapper);
 				// registerProcess<FaceTestScene3D>(&assetLibrary, &lightmapper);

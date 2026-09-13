@@ -11,6 +11,7 @@
 #include "AssetBuilder/API/Scene/Builder/PlaceSurface.hpp"
 #include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
 #include "AssetBuilder/API/Scene/Builder/Triangle.hpp"
+#include "AssetBuilder/Process/MaterialShader/DDGI.hpp"
 #include "AssetBuilder/Process/MaterialShader/Lightmapped.hpp"
 #include "AssetBuilder/Process/MaterialShader/LightmappedPBR.hpp"
 #include "AssetBuilder/Process/MaterialShader/PBR.hpp"
@@ -30,6 +31,9 @@ namespace Trident {
 			}
 			case 403: {
 				return PBRDebugShaderModuleAsset();
+			}
+			case 404: {
+				return DDGIShaderModuleAsset();
 			}
 			default: {
 				DEBUG_ASSERT(false);
