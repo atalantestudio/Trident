@@ -37,40 +37,20 @@ namespace Trident {
 			glyph.maxCoordinate.x = stream.read<float32>();
 			glyph.maxCoordinate.y = stream.read<float32>();
 			glyph.whitespace = glyph.minCoordinate.x == glyph.maxCoordinate.x && glyph.minCoordinate.y == glyph.maxCoordinate.y;
-		}
-
-		for (Glyph& glyph : asset.glyphs) {
 			glyph.width = stream.read<uint16>();
-		}
-
-		for (Glyph& glyph : asset.glyphs) {
 			glyph.height = stream.read<uint16>();
-		}
-
-		for (Glyph& glyph : asset.glyphs) {
 			glyph.yMax = stream.read<sint16>();
-		}
-
-		for (Glyph& glyph : asset.glyphs) {
 			glyph.advanceWidth = stream.read<uint16>();
-		}
-
-		for (Glyph& glyph : asset.glyphs) {
 			glyph.leftSideBearing = stream.read<sint16>();
 		}
-
-		ByteStream<StreamOperation::READ> keyStream(stream.getBytePosition(), stream.getRemainingSize(), stream.getEndianness());
-		ByteStream<StreamOperation::READ> valueStream(stream.getBytePosition(), stream.getRemainingSize(), stream.getEndianness());
-
-		valueStream.jump(unicodeEntryCount * sizeof(uint16));
 
 		asset.unicodeMap.reserve(unicodeEntryCount);
 
 		uint16 entryIndex = 0;
 
 		while (entryIndex < unicodeEntryCount) {
-			const uint16 codePoint = keyStream.read<uint16>();
-			const uint32 glyphIndex = valueStream.read<uint32>();
+			const uint16 codePoint = stream.read<uint16>();
+			const uint32 glyphIndex = stream.read<uint32>();
 
 			asset.unicodeMap.insert({codePoint, glyphIndex});
 
@@ -82,10 +62,8 @@ namespace Trident {
 		entryIndex = 0;
 
 		while (entryIndex < kerningPairCount) {
-			const uint16 firstGlyphIndex = keyStream.read<uint16>();
-			const uint16 secondGlyphIndex = keyStream.read<uint16>();
-			const GlyphPair glyphPair = {firstGlyphIndex, secondGlyphIndex};
-			const uint32 firstGlyphXAdvance = valueStream.read<sint16>();
+			const GlyphPair glyphPair = stream.read<GlyphPair>();
+			const uint32 firstGlyphXAdvance = stream.read<sint16>();
 
 			asset.kerningPairs.insert({glyphPair, firstGlyphXAdvance});
 

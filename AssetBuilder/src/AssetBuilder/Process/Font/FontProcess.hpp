@@ -28,47 +28,23 @@ namespace Trident {
 				stream.write<uint32>(static_cast<uint32>(font.unicodeMap.size()));
 				stream.write<uint32>(static_cast<uint32>(font.kerningPairs.size()));
 
-				// TODO(asset-builder/font): Refactor.
 				for (const Glyph& glyph : font.glyphs) {
-					stream.write<float32>(glyph.minCoordinate.x);
-					stream.write<float32>(glyph.minCoordinate.y);
-					stream.write<float32>(glyph.maxCoordinate.x);
-					stream.write<float32>(glyph.maxCoordinate.y);
-				}
-
-				for (const Glyph& glyph : font.glyphs) {
+					stream.write<svec2<float32>>(glyph.minCoordinate);
+					stream.write<svec2<float32>>(glyph.maxCoordinate);
 					stream.write<uint16>(glyph.width);
-				}
-
-				for (const Glyph& glyph : font.glyphs) {
 					stream.write<uint16>(glyph.height);
-				}
-
-				for (const Glyph& glyph : font.glyphs) {
 					stream.write<sint16>(glyph.yMax);
-				}
-
-				for (const Glyph& glyph : font.glyphs) {
 					stream.write<uint16>(glyph.advanceWidth);
-				}
-
-				for (const Glyph& glyph : font.glyphs) {
 					stream.write<sint16>(glyph.leftSideBearing);
 				}
 
 				for (const std::pair<uint16, uint32> unicodeEntry : font.unicodeMap) {
 					stream.write<uint16>(unicodeEntry.first);
-				}
-
-				for (const std::pair<uint16, uint32> unicodeEntry : font.unicodeMap) {
 					stream.write<uint32>(unicodeEntry.second);
 				}
 
 				for (const std::pair<GlyphPair, sint16> kerningPair : font.kerningPairs) {
 					stream.write<GlyphPair>(kerningPair.first);
-				}
-
-				for (const std::pair<GlyphPair, sint16> kerningPair : font.kerningPairs) {
 					stream.write<sint16>(kerningPair.second);
 				}
 
