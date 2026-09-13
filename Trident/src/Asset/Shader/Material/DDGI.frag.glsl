@@ -3,6 +3,8 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
+// #define CUSTOM_SCENE_DDGI_REF_0
+
 precision highp float;
 
 in Interstage {
@@ -19,16 +21,12 @@ layout(set = 0, binding = 0) uniform readonly Camera {
 	uint pointLightCount;
 } camera;
 
-layout(set = 0, binding = 3) uniform sampler2D directionalShadowMap;
-
 layout(set = 1, binding = 0) uniform sampler2D lightmapAtlasMap;
 
 layout(set = 2, binding = 0) uniform sampler2D diffuseMap;
 layout(set = 2, binding = 1) uniform sampler2D normalMap;
 
 layout(location = 0) out vec4 fragment;
-
-const vec3 SUN_DIRECTION = normalize(vec3(1.0, 1.0, 1.0));
 
 vec4 cubic(float v) {
 	vec4 n = vec4(1.0, 2.0, 3.0, 4.0) - v;
@@ -76,13 +74,20 @@ vec4 sampleBicubic(sampler2D textureSampler, vec2 coordinate) {
 }
 
 void main() {
-	vec3 directDiffuse = texture(diffuseMap, interstage.textureCoordinate).rgb;
-	vec3 indirectDiffuse = sampleBicubic(lightmapAtlasMap, interstage.lightmapCoordinate).rgb;
+#if defined(CUSTOM_SCENE_DDGI_REF_0)
+	fragment.rgb = sampleBicubic(lightmapAtlasMap, interstage.lightmapCoordinate).rgb;
+#else
+	const vec3 lightPosition = vec3(0.0, 64.0, 164.0);
+	const float lightIntensity = 256.0;
 
-	directDiffuse = pow(directDiffuse, vec3(1.0 / 2.2));
+	vec3 surfaceToLight = lightPosition - interstage.surface;
 
-	// TODO(renderer/forward/ddgi)
+	float attenuation = dot(surfaceToLight, surfaceToLight);
+	float light = lightIntensity / attenuation;
 
-	fragment.rgb = indirectDiffuse * directDiffuse;
+	fragment.rgb = vec3(light);
+	fragment.rgb = pow(fragment.rgb, vec3(1.0 / 2.2));
+#endif
+
 	fragment.a = 1.0;
 }
