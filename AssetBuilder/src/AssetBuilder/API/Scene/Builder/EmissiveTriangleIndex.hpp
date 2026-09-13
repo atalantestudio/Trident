@@ -36,11 +36,13 @@ namespace Trident {
 			}
 
 			const Lightmap& lightmap = lightmaps[lightmapIndex];
+			const BuildGeometry& geometry = scene.geometries[geometries[lightmap.geometryIndex].filteredIndex];
+			const uint32 triangleOffset = geometry.indexRange.offset / 3;
 
 			uint32 triangleIndex = 0;
 
 			while (triangleIndex < lightmap.triangleRange.count) {
-				emissiveTriangleIndices[emissiveTriangleCount + triangleIndex] = lightmap.triangleRange.offset + triangleIndex;
+				emissiveTriangleIndices[emissiveTriangleCount + triangleIndex] = triangleOffset + lightmap.triangleRange.offset + triangleIndex;
 
 				triangleIndex += 1;
 			}
