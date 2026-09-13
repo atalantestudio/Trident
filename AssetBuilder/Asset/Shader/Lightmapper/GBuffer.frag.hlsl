@@ -15,6 +15,7 @@ struct Interstage {
 	nointerpolation float3 normalC : VERTEX_OUTPUT_ATTRIBUTE10;
 	float3 barycentricCoordinate : VERTEX_OUTPUT_ATTRIBUTE11;
 	nointerpolation uint materialIndex : VERTEX_OUTPUT_ATTRIBUTE12;
+	nointerpolation float triangleArea : VERTEX_OUTPUT_ATTRIBUTE13;
 };
 
 struct FragmentOutput {
@@ -43,7 +44,7 @@ FragmentOutput main(Interstage interstage) {
 	float3 p2 = b.x * projectA + b.y * projectB + b.z * projectC;
 
 	// TODO(asset-builder/lightmapper): Find a good interpolant.
-	output.smoothPosition = float4(lerp(p2, p, 0.0001), 0.0);
+	output.smoothPosition = float4(lerp(p2, p, 0.0001), interstage.triangleArea);
 
 	output.triangleNormal = float4(normalize(interstage.triangleNormal), diagonalLuxelSize);
 	output.vertexNormal = float4(normalize(interstage.vertexNormal), interstage.materialIndex);

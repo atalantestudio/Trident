@@ -20,35 +20,21 @@ float3 randomUnitDirection(inout uint seed) {
 	return normalize(float3(randomScalar(seed), randomScalar(seed), randomScalar(seed)) * 2.0 - 1.0);
 }
 
-float lengthSquared(float3 a) {
-	return dot(a, a);
-}
+float3 sampleDirectLight(RayDesc primaryRay, Hit primaryHit, inout uint seed) {
+	const float pdfDiffuse = 1.0 / (4.0 * PI);
 
-float parallelogramArea(float2 a, float2 b) {
-	return a.x * b.y - a.y * b.x;
-}
+	if (arguments.emissiveTriangleCount == 0) {
+		return float3(0.0, 0.0, 0.0);
+	}
 
-float balanceHeuristic(float pdf1, float pdf2) {
-	return pdf1 / (pdf1 + pdf2);
-}
-
-void initializeSecondaryRay(RayDesc primaryRay, inout uint triangleIndex, inout float3 p, inout float pdf, inout uint seed) {
-	uint emissiveTriangleIndexOffset = uint(randomScalar(seed) * arguments.emissiveTriangleCount);
-	uint emissiveTriangleIndex = emissiveTriangleIndexBuffer[emissiveTriangleIndexOffset];
+	uint emissiveTriangleIndexIndex = uint(randomScalar(seed) * arguments.emissiveTriangleCount);
+	uint emissiveTriangleIndex = emissiveTriangleIndexBuffer[emissiveTriangleIndexIndex];
 
 	Triangle triangle_ = triangleBuffer[emissiveTriangleIndex];
-
-	triangleIndex = triangle_.index;
 
 	float2 a = lightmapCoordinateBuffer[triangle_.lightmapCoordinateIndexA];
 	float2 b = lightmapCoordinateBuffer[triangle_.lightmapCoordinateIndexB];
 	float2 c = lightmapCoordinateBuffer[triangle_.lightmapCoordinateIndexC];
-
-	float abc = length(parallelogramArea(b - a, c - a)) * 0.5;
-
-	// TODO(asset-builder/lightmapper/is)
-	pdf = (abc * arguments.emissiveTriangleCount);
-	// pdf = (abc * arguments.atlasSize.x) / arguments.emissiveTriangleCount;
 
 	float u = randomScalar(seed);
 	float v = randomScalar(seed);
@@ -61,12 +47,37 @@ void initializeSecondaryRay(RayDesc primaryRay, inout uint triangleIndex, inout 
 	float w = 1.0 - u - v;
 	uint2 coordinate = (a * u + b * v + c * w) * arguments.atlasSize;
 
-	p = gBufferPositionImage[coordinate].rgb;
+	float3 p = gBufferPositionImage[coordinate].rgb;
+	float3 op = p - primaryRay.Origin;
+	float area = gBufferSmoothPositionImage[coordinate].a;
+	float pdfLight = 1.0 / (area * arguments.emissiveTriangleCount);
+
+	RayDesc secondaryRay = primaryRay;
+	secondaryRay.Direction = normalize(op);
+
+	if (dot(primaryHit.vertexNormal, secondaryRay.Direction) < 0.0) {
+		return float3(0.0, 0.0, 0.0);
+	}
+
+	Hit secondaryHit;
+
+	TraceRay(accelerationStructure, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_BACK_FACING_TRIANGLES, 0xff, 0, 0, 0, secondaryRay, secondaryHit);
+
+	if (secondaryHit.triangleIndex != triangle_.index) {
+		return float3(0.0, 0.0, 0.0);
+	}
+
+	Material material = materialBuffer[secondaryHit.materialIndex];
+
+	float angleA = dot(secondaryRay.Direction, primaryHit.vertexNormal);
+	float angleB = dot(secondaryRay.Direction, secondaryHit.vertexNormal);
+	float G = 1.0 / dot(op, op) * angleA * max(0.001, abs(angleB));
+	float h = pdfLight / (pdfLight + pdfDiffuse * G);
+
+	return material.emissiveColor * material.emissiveIntensity * G / pdfLight * h;
 }
 
 float3 traceRay(Hit primaryHit, inout uint seed) {
-	const float pdfDiffuse = 1.0 / (4.0 * PI);
-
 	float3 light = float3(0.0, 0.0, 0.0);
 	float3 throughput = float3(1.0, 1.0, 1.0);
 	uint bounceIndex = 0;
@@ -74,44 +85,17 @@ float3 traceRay(Hit primaryHit, inout uint seed) {
 	while (bounceIndex < BOUNCE_COUNT) {
 		Material material = materialBuffer[primaryHit.materialIndex];
 
-		float3 directLight = float3(0.0, 0.0, 0.0);
+		throughput *= material.albedo;
 
 		RayDesc primaryRay;
 		primaryRay.Origin = primaryHit.position + sign(primaryHit.vertexNormal) * abs(primaryHit.position * ADAPTIVE_BIAS);
-		primaryRay.TMin = 0.001;
+		primaryRay.TMin = 0.0;
 		primaryRay.Direction = normalize(primaryHit.vertexNormal + randomUnitDirection(seed));
 
 		// TODO(asset-builder/lightmapper): Use the scene bounds.
 		primaryRay.TMax = 2048.0;
 
-		if (arguments.emissiveTriangleCount > 0) {
-			uint triangleIndex;
-			float3 p;
-			float pdf;
-
-			initializeSecondaryRay(primaryRay, triangleIndex, p, pdf, seed);
-
-			RayDesc secondaryRay = primaryRay;
-			secondaryRay.Direction = normalize(p - primaryRay.Origin);
-
-			if (dot(primaryHit.vertexNormal, secondaryRay.Direction) > 1e-4) {
-				Hit secondaryHit;
-
-				TraceRay(accelerationStructure, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_BACK_FACING_TRIANGLES, 0xff, 0, 0, 0, secondaryRay, secondaryHit);
-
-				if (secondaryHit.triangleIndex == triangleIndex) {
-					Material material = materialBuffer[secondaryHit.materialIndex];
-
-					float angleA = dot(secondaryRay.Direction, primaryHit.vertexNormal);
-					float angleB = dot(secondaryRay.Direction, secondaryHit.vertexNormal);
-					float G = 1.0 / lengthSquared(p - primaryRay.Origin) * angleA * max(0.001, abs(angleB));
-					float w = balanceHeuristic(pdf, pdfDiffuse * G);
-
-					directLight += material.emissiveColor * material.emissiveIntensity * G / pdf * w;
-				}
-			}
-		}
-
+		float3 directLight = sampleDirectLight(primaryRay, primaryHit, seed);
 		float3 brdf = material.albedo / PI;
 
 		light += directLight * throughput * brdf;
@@ -124,8 +108,6 @@ float3 traceRay(Hit primaryHit, inout uint seed) {
 			break;
 		}
 
-		throughput *= material.albedo;
-
 		bounceIndex += 1;
 	}
 
@@ -133,14 +115,12 @@ float3 traceRay(Hit primaryHit, inout uint seed) {
 }
 
 bool adjustSamplePosition(inout float3 position, float3 triangleNormal, float diagonalLuxelSize) {
-	const float bias = 1e-4;
-
 	float3 a = normalize(cross(position, triangleNormal));
 	float3 b = normalize(cross(a, triangleNormal));
 
 	RayDesc ray;
-	ray.Origin = position + sign(triangleNormal) * abs(position * bias);
-	ray.TMin = 0.001;
+	ray.Origin = position + sign(triangleNormal) * abs(position * ADAPTIVE_BIAS);
+	ray.TMin = 0.0;
 	ray.Direction = a;
 	ray.TMax = diagonalLuxelSize * 0.5;
 
@@ -149,7 +129,7 @@ bool adjustSamplePosition(inout float3 position, float3 triangleNormal, float di
 	TraceRay(accelerationStructure, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_FRONT_FACING_TRIANGLES, 0xff, 0, 0, 0, ray, hit);
 
 	if (hit.t > 0.0) {
-		position = hit.position + sign(hit.triangleNormal) * abs(hit.position * bias);
+		position = hit.position + sign(hit.triangleNormal) * abs(hit.position * ADAPTIVE_BIAS);
 
 		return true;
 	}
@@ -159,7 +139,7 @@ bool adjustSamplePosition(inout float3 position, float3 triangleNormal, float di
 	TraceRay(accelerationStructure, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_FRONT_FACING_TRIANGLES, 0xff, 0, 0, 0, ray, hit);
 
 	if (hit.t > 0.0) {
-		position = hit.position + sign(hit.triangleNormal) * abs(hit.position * bias);
+		position = hit.position + sign(hit.triangleNormal) * abs(hit.position * ADAPTIVE_BIAS);
 
 		return true;
 	}
@@ -169,7 +149,7 @@ bool adjustSamplePosition(inout float3 position, float3 triangleNormal, float di
 	TraceRay(accelerationStructure, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_FRONT_FACING_TRIANGLES, 0xff, 0, 0, 0, ray, hit);
 
 	if (hit.t > 0.0) {
-		position = hit.position + sign(hit.triangleNormal) * abs(hit.position * bias);
+		position = hit.position + sign(hit.triangleNormal) * abs(hit.position * ADAPTIVE_BIAS);
 
 		return true;
 	}
@@ -179,7 +159,7 @@ bool adjustSamplePosition(inout float3 position, float3 triangleNormal, float di
 	TraceRay(accelerationStructure, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_FRONT_FACING_TRIANGLES, 0xff, 0, 0, 0, ray, hit);
 
 	if (hit.t > 0.0) {
-		position = hit.position + sign(hit.triangleNormal) * abs(hit.position * bias);
+		position = hit.position + sign(hit.triangleNormal) * abs(hit.position * ADAPTIVE_BIAS);
 
 		return true;
 	}

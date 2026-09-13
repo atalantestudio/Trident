@@ -22,6 +22,7 @@ struct Interstage {
 	nointerpolation float3 normalC : VERTEX_OUTPUT_ATTRIBUTE10;
 	float3 barycentricCoordinate : VERTEX_OUTPUT_ATTRIBUTE11;
 	nointerpolation uint materialIndex : VERTEX_OUTPUT_ATTRIBUTE12;
+	nointerpolation float triangleArea : VERTEX_OUTPUT_ATTRIBUTE13;
 };
 
 struct Vertex {
@@ -80,6 +81,10 @@ static const float2 LIGHTMAP_COORDINATE_OFFSETS[25] = {
 	float2( 0.0,  0.0),
 };
 
+float calculateArea(float3 a, float3 b, float3 c) {
+	return length(cross(b - a, c - a)) * 0.5;
+}
+
 Interstage main(VertexInput input) {
 	uint triangleIndex = (input.indexOffsetOffset + input.indexOffset) / 3;
 
@@ -88,10 +93,9 @@ Interstage main(VertexInput input) {
 
 	float3x3 transform = (float3x3) instance.transform;
 
-	// TODO(asset-builder/lightmapper): Fix smooth position.
-	Vertex a = vertexBuffer[0];
-	Vertex b = vertexBuffer[0];
-	Vertex c = vertexBuffer[0];
+	Vertex a = vertexBuffer[indexBuffer[triangleIndex * 3 + 0]];
+	Vertex b = vertexBuffer[indexBuffer[triangleIndex * 3 + 1]];
+	Vertex c = vertexBuffer[indexBuffer[triangleIndex * 3 + 2]];
 
 	uint index = indexBuffer[input.indexOffsetOffset + input.indexOffset];
 
@@ -137,6 +141,7 @@ Interstage main(VertexInput input) {
 	}
 
 	interstage.materialIndex = triangle_.materialIndex;
+	interstage.triangleArea = calculateArea(interstage.positionA, interstage.positionB, interstage.positionC);
 
 	return interstage;
 }
