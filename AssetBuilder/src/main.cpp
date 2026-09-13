@@ -46,6 +46,7 @@
 #include "AssetBuilder/Process/Scene/2D/Swing.hpp"
 #include "AssetBuilder/Process/Scene/3D/CornellBox.hpp"
 #include "AssetBuilder/Process/Scene/3D/Cubes.hpp"
+#include "AssetBuilder/Process/Scene/3D/DDGITest.hpp"
 #include "AssetBuilder/Process/Scene/3D/EdgeContact.hpp"
 // #include "AssetBuilder/Process/Scene/3D/FaceTest.hpp"
 #include "AssetBuilder/Process/Scene/3D/GallineraTable.hpp"
@@ -58,7 +59,6 @@
 #include "AssetBuilder/Process/Scene/3D/Sliding.hpp"
 #include "AssetBuilder/Process/Scene/3D/Stacking.hpp"
 #include "AssetBuilder/Process/Scene/3D/Suzanne.hpp"
-#include "AssetBuilder/Process/Scene/3D/TestGI.hpp"
 #include "Process/BuildAssetMapProcess.hpp"
 #include "Process/BuildFontAssetProcess.hpp"
 #include "Process/BuildGeometryAssetProcess.hpp"
@@ -149,6 +149,7 @@ namespace Trident {
 
 				registerProcess<CornellBoxScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<CubesScene3D>(&assetLibrary, &lightmapper);
+				registerProcess<DDGITestScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<EdgeContactScene3D>(&assetLibrary, &lightmapper);
 				// registerProcess<FaceTestScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<GallineraTableScene3D>(&assetLibrary, &lightmapper);
@@ -161,7 +162,6 @@ namespace Trident {
 				registerProcess<SlidingScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<StackingScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<SuzanneScene3D>(&assetLibrary, &lightmapper);
-				registerProcess<TestGIScene3D>(&assetLibrary, &lightmapper);
 
 				registerProcess<BuildAssetMapProcess>(&assetLibrary);
 			}

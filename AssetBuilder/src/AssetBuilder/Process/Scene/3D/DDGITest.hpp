@@ -6,7 +6,7 @@
 #include "AssetBuilder/Process/Scene/Scene3DProcess.hpp"
 
 namespace Trident {
-	class TestGIScene3D final : public Scene3DProcess {
+	class DDGITestScene3D final : public Scene3DProcess {
 		private:
 			static BuildStaticGeometry3D createGeometry(view<svec3<float32>> positions) {
 				const vec3<float32> ab = positions[1] - positions[0];
@@ -89,35 +89,37 @@ namespace Trident {
 				return createGeometry(positions);
 			}
 
-			static BuildStaticGeometry3D createCeilingGeometry(svec3<float32> origin) {
+			static BuildStaticGeometry3D createCeilingGeometry(svec3<float32> origin, float32 leftOffsetPercent, float32 rightOffsetPercent) {
+				const float32 leftOffset = -128.0f * leftOffsetPercent + 64.0f;
+				const float32 rightOffset = 128.0f * rightOffsetPercent - 64.0f;
+
 				const svec3<float32> positions[] = {
-					origin + svec3<float32>{-64.0f, 64.0f, -64.0f},
-					origin + svec3<float32>{ 64.0f, 64.0f, -64.0f},
-					origin + svec3<float32>{-64.0f, 64.0f,  64.0f},
-					origin + svec3<float32>{ 64.0f, 64.0f,  64.0f},
+					origin + svec3<float32>{leftOffset, 64.0f, -64.0f},
+					origin + svec3<float32>{rightOffset, 64.0f, -64.0f},
+					origin + svec3<float32>{leftOffset, 64.0f,  64.0f},
+					origin + svec3<float32>{rightOffset, 64.0f,  64.0f},
 				};
 
 				return createGeometry(positions);
 			}
 
 			static BuildStaticGeometry3D createCeilingAreaLightGeometry(svec3<float32> origin, float32 rightOffsetPercent, float32 widthPercent) {
-				static constexpr float32 ceilingBias = 0.01f;
-
 				const float32 rightOffset = 128.0f * rightOffsetPercent - 64.0f;
 				const float32 leftOffset = rightOffset - widthPercent * 128.0f;
 
 				const svec3<float32> positions[] = {
-					origin + svec3<float32>{leftOffset,   64.0f - ceilingBias, -64.0f},
-					origin + svec3<float32>{rightOffset,  64.0f - ceilingBias, -64.0f},
-					origin + svec3<float32>{leftOffset,   64.0f - ceilingBias,  64.0f},
-					origin + svec3<float32>{rightOffset,  64.0f - ceilingBias,  64.0f},
+					origin + svec3<float32>{leftOffset,   64.0f, -64.0f},
+					origin + svec3<float32>{rightOffset,  64.0f, -64.0f},
+					origin + svec3<float32>{leftOffset,   64.0f,  64.0f},
+					origin + svec3<float32>{rightOffset,  64.0f,  64.0f},
 				};
 
 				return createGeometry(positions);
 			}
 
-			static void createRoom(SceneBuilder& builder, svec3<float32> origin, float32 lightCeilingPercent, MaterialReference material) {
+			static void createRoom(SceneBuilder& builder, svec3<float32> origin, MaterialReference material, float32 lightCeilingPercent, bool open) {
 				static constexpr float32 lightRightOffsetPercent = 0.95f;
+				static constexpr svec3<float32> ceilingBias = {0.0f, 0.01f, 0.0f};
 				static constexpr svec2<float32> luxelScale = {4.0f, 4.0f};
 				static constexpr svec3<float32> emissive = {4.0f, 4.0f, 4.0f};
 				static constexpr svec3<float32> white = {1.0f, 1.0f, 1.0f};
@@ -193,43 +195,72 @@ namespace Trident {
 					},
 					transform
 				);
-				builder.placeSurface(
-					{
-						.geometry = createCeilingGeometry(origin),
-						.material = material,
-						.textureFiltering = textureFiltering,
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = white,
+
+				if (open) {
+					builder.placeSurface(
+						{
+							.geometry = createCeilingGeometry(origin, 1.0f, lightRightOffsetPercent - lightCeilingPercent),
+							.material = material,
+							.textureFiltering = textureFiltering,
+							.lightmap = {
+								.luxelScale = luxelScale,
+								.albedo = white,
+							},
 						},
-					},
-					transform
-				);
-				builder.placeSurface(
-					{
-						.geometry = createCeilingAreaLightGeometry(origin, lightRightOffsetPercent, lightCeilingPercent),
-						.material = material,
-						.textureFiltering = textureFiltering,
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.emissiveColor = emissive,
-							.emissiveIntensity = 1.0f,
-							.albedo = white,
+						transform
+					);
+					builder.placeSurface(
+						{
+							.geometry = createCeilingGeometry(origin, 1.0f - lightRightOffsetPercent, 1.0f),
+							.material = material,
+							.textureFiltering = textureFiltering,
+							.lightmap = {
+								.luxelScale = luxelScale,
+								.albedo = white,
+							},
 						},
-					},
-					transform
-				);
+						transform
+					);
+				}
+				else {
+					builder.placeSurface(
+						{
+							.geometry = createCeilingGeometry(origin, 1.0f, 1.0f),
+							.material = material,
+							.textureFiltering = textureFiltering,
+							.lightmap = {
+								.luxelScale = luxelScale,
+								.albedo = white,
+							},
+						},
+						transform
+					);
+					builder.placeSurface(
+						{
+							.geometry = createCeilingAreaLightGeometry(origin - ceilingBias, lightRightOffsetPercent, lightCeilingPercent),
+							.material = material,
+							.textureFiltering = textureFiltering,
+							.lightmap = {
+								.luxelScale = luxelScale,
+								.emissiveColor = emissive,
+								.emissiveIntensity = 1.0f,
+								.albedo = white,
+							},
+						},
+						transform
+					);
+				}
 			}
 
 		protected:
 			view<char8> getAssetName() const final override {
-				return "3d_test_gi";
+				return "3d_ddgi_test";
 			}
 
 			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				SceneBuilder builder({
 					.flags = {},
-					.skyColor = {0.0f, 0.0f, 0.0f},
+					.skyColor = {1.0f, 1.0f, 1.0f},
 					.environmentMapImageAsset = nullptr,
 					.sunDirection = {1.0f, 1.0f, 1.0f},
 					.sunColor = {0.0f, 0.0f, 0.0f},
@@ -242,9 +273,9 @@ namespace Trident {
 
 				const MaterialReference material = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
 
-				createRoom(builder, {-192.0f,  64.0f,  384.0f}, 0.05f, material);
-				createRoom(builder, { 0.0f,    64.0f,  384.0f}, 0.1f, material);
-				createRoom(builder, { 192.0f,  64.0f,  384.0f}, 0.2f, material);
+				createRoom(builder, {-192.0f,  64.0f,  384.0f}, material, 0.05f, true);
+				createRoom(builder, { 0.0f,    64.0f,  384.0f}, material, 0.1f, true);
+				createRoom(builder, { 192.0f,  64.0f,  384.0f}, material, 0.2f, true);
 
 				return builder;
 			}
