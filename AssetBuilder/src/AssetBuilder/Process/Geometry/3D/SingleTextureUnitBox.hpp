@@ -145,8 +145,6 @@ namespace Trident {
 			}
 
 		public:
-			explicit SingleTextureUnitBoxGeometry3D(AssetBuilderLibrary* assetLibrary) :
-				Geometry3DProcess(assetLibrary)
-			{}
+			using Geometry3DProcess::Geometry3DProcess;
 	};
 }

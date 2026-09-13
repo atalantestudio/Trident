@@ -8,11 +8,7 @@
 
 namespace Trident {
 	class CubeMapProcess : public ImageProcess {
-		public:
-			explicit CubeMapProcess(AssetBuilderLibrary* assetLibrary) :
-				ImageProcess(assetLibrary)
-			{}
-
+		protected:
 			ImageAssetDescriptor createImage(std::filesystem::path rootInputPath) const final override {
 				const view<char8> assetName = getAssetName();
 				const view<view<char8>> facePaths = getFacePaths();
@@ -58,20 +54,19 @@ namespace Trident {
 				return cubeMapImage;
 			}
 
-		protected:
 			/// Returns the 6 faces composing the cube map, in the following order:
-			/// - Front
-			/// - Back
-			/// - Up
-			/// - Down
-			/// - Right
-			/// - Left
+			/// 1. Front
+			/// 2. Back
+			/// 3. Up (might need to be rotated left 3 times)
+			/// 4. Down (might need to be rotated left 1 times)
+			/// 5. Right
+			/// 6. Left
 			/// 
 			/// The paths are relative to the Asset/External directory.
 			/// The up and down faces must be vertically flipped.
 			virtual view<view<char8>> getFacePaths() const = 0;
 
-		private:
-			AssetBuilderLibrary* assetLibrary;
+		public:
+			using ImageProcess::ImageProcess;
 	};
 }

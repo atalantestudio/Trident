@@ -127,7 +127,7 @@ namespace Trident {
 		const uint32 dpi = getApplication()->getWindow()->getDpi();
 		const float32 fontSizePt = fontAsset.pxToPt(component.fontSize, dpi);
 		const float32 scale = fontAsset.calculateScale(fontSizePt, dpi);
-		const float32 lineHeight = fontAsset.getLineHeight() * scale;
+		const float32 lineHeight = fontAsset.lineHeight * scale;
 
 		FlushWordData flushWordData{};
 		flushWordData.fontAsset = &fontAsset;
@@ -239,7 +239,7 @@ namespace Trident {
 			horizontalHinting = 0.5f;
 		}
 
-		float32 baseline = characterOffset.y + data.fontAsset->getAscent() * scale;
+		float32 baseline = characterOffset.y + data.fontAsset->ascent * scale;
 
 		if (fract(baseline) > 0.5f) {
 			baseline = floor(baseline);

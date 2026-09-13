@@ -50,13 +50,13 @@ namespace Trident {
 
 		const ref<FontAsset> fontAsset = getApplication()->getAssetLibrary()->getAsset<FontAsset>(assetName);
 
-		ENGINE_ASSERT(fontAsset->getGlyphMapImage()->getFormat() == ImageFormat::R8_UNORM, "Glyph map images must have the R8_UNORM format.");
+		ENGINE_ASSERT(fontAsset->glyphMapImage->getFormat() == ImageFormat::R8_UNORM, "Glyph map images must have the R8_UNORM format.");
 
 		fonts[fontCount].fontAsset = fontAsset;
 
 		const FontID fontId = fontCount;
 
-		fonts[fontCount].glyphMapImageId = renderer.registerUserImage(fontAsset->getGlyphMapImage());
+		fonts[fontCount].glyphMapImageId = renderer.registerUserImage(fontAsset->glyphMapImage);
 		fontCount += 1;
 
 		return fontId;

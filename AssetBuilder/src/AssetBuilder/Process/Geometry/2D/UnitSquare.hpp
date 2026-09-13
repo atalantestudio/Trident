@@ -59,8 +59,6 @@ namespace Trident {
 			}
 
 		public:
-			explicit UnitSquareGeometry2D(AssetBuilderLibrary* assetLibrary) :
-				Geometry2DProcess(assetLibrary)
-			{}
+			using Geometry2DProcess::Geometry2DProcess;
 	};
 }

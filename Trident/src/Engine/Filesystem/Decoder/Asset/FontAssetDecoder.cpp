@@ -9,29 +9,29 @@
 namespace Trident {
 	template<>
 	FontAsset Filesystem::decodeAsset(ByteStream<StreamOperation::READ>& stream, AssetLibrary* assetLibrary) {
-		FontAssetDescriptor descriptor{};
-		descriptor.identifier = stream.read<uint32>();
-		descriptor.version = stream.read<VersionNumber>();
+		FontAsset asset{};
+		asset.identifier = stream.read<uint32>();
+		asset.version = stream.read<VersionNumber>();
 
 		const uint32 glyphMapImageAssetIdentifier = stream.read<uint32>();
 
-		descriptor.glyphMapImage = assetLibrary->getAsset<ImageAsset>(glyphMapImageAssetIdentifier);
+		asset.glyphMapImage = assetLibrary->getAsset<ImageAsset>(glyphMapImageAssetIdentifier);
 
 		const sint16 ascent = stream.read<sint16>();
 		const sint16 descent = stream.read<sint16>();
 		const sint16 lineGap = stream.read<sint16>();
 
-		descriptor.ascent = ascent;
-		descriptor.lineHeight = ascent - descent + lineGap;
-		descriptor.unitsPerEm = stream.read<uint16>();
+		asset.ascent = ascent;
+		asset.lineHeight = ascent - descent + lineGap;
+		asset.unitsPerEm = stream.read<uint16>();
 
 		const uint32 glyphCount = stream.read<uint32>();
 		const uint32 unicodeEntryCount = stream.read<uint32>();
 		const uint32 kerningPairCount = stream.read<uint32>();
 
-		descriptor.glyphs = sequence<Glyph>(glyphCount);
+		asset.glyphs = sequence<Glyph>(glyphCount);
 
-		for (Glyph& glyph : descriptor.glyphs) {
+		for (Glyph& glyph : asset.glyphs) {
 			glyph.minCoordinate.x = stream.read<float32>();
 			glyph.minCoordinate.y = stream.read<float32>();
 			glyph.maxCoordinate.x = stream.read<float32>();
@@ -39,23 +39,23 @@ namespace Trident {
 			glyph.whitespace = glyph.minCoordinate.x == glyph.maxCoordinate.x && glyph.minCoordinate.y == glyph.maxCoordinate.y;
 		}
 
-		for (Glyph& glyph : descriptor.glyphs) {
+		for (Glyph& glyph : asset.glyphs) {
 			glyph.width = stream.read<uint16>();
 		}
 
-		for (Glyph& glyph : descriptor.glyphs) {
+		for (Glyph& glyph : asset.glyphs) {
 			glyph.height = stream.read<uint16>();
 		}
 
-		for (Glyph& glyph : descriptor.glyphs) {
+		for (Glyph& glyph : asset.glyphs) {
 			glyph.yMax = stream.read<sint16>();
 		}
 
-		for (Glyph& glyph : descriptor.glyphs) {
+		for (Glyph& glyph : asset.glyphs) {
 			glyph.advanceWidth = stream.read<uint16>();
 		}
 
-		for (Glyph& glyph : descriptor.glyphs) {
+		for (Glyph& glyph : asset.glyphs) {
 			glyph.leftSideBearing = stream.read<sint16>();
 		}
 
@@ -64,7 +64,7 @@ namespace Trident {
 
 		valueStream.jump(unicodeEntryCount * sizeof(uint16));
 
-		descriptor.unicodeMap.reserve(unicodeEntryCount);
+		asset.unicodeMap.reserve(unicodeEntryCount);
 
 		uint16 entryIndex = 0;
 
@@ -72,12 +72,12 @@ namespace Trident {
 			const uint16 codePoint = keyStream.read<uint16>();
 			const uint32 glyphIndex = valueStream.read<uint32>();
 
-			descriptor.unicodeMap.insert({codePoint, glyphIndex});
+			asset.unicodeMap.insert({codePoint, glyphIndex});
 
 			entryIndex += 1;
 		}
 
-		descriptor.kerningPairs.reserve(kerningPairCount);
+		asset.kerningPairs.reserve(kerningPairCount);
 
 		entryIndex = 0;
 
@@ -87,11 +87,11 @@ namespace Trident {
 			const GlyphPair glyphPair = {firstGlyphIndex, secondGlyphIndex};
 			const uint32 firstGlyphXAdvance = valueStream.read<sint16>();
 
-			descriptor.kerningPairs.insert({glyphPair, firstGlyphXAdvance});
+			asset.kerningPairs.insert({glyphPair, firstGlyphXAdvance});
 
 			entryIndex += 1;
 		}
 
-		return FontAsset(descriptor);
+		return asset;
 	}
 }

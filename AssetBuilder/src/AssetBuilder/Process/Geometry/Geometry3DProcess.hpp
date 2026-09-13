@@ -80,6 +80,20 @@ namespace Trident {
 				return stream;
 			}
 
+			static void createGeometryAsset(uint32 identifier, const ByteStream<StreamOperation::WRITE>& stream, view<char8> assetName, std::filesystem::path assetOutputPath, AssetBuilderLibrary* assetLibrary) {
+				const std::string assetOutputPathString = assetOutputPath.string();
+
+				sequence<char8> outputPath(assetOutputPathString.size() + assetName.count() + 5);
+				std::copy(assetOutputPathString.begin(), assetOutputPathString.end(), &outputPath[0]);
+				std::copy(assetName.begin(), assetName.end(), &outputPath[assetOutputPathString.size()]);
+				std::copy_n(".tga", 4, &outputPath[assetOutputPathString.size() + assetName.count()]);
+
+				Writer writer = Filesystem::openWriter(outputPath);
+				writer.write(stream.data, stream.getByteOffset());
+
+				assetLibrary->registerAsset(identifier, assetName);
+			}
+
 		private:
 			static uint64 calculateStreamSize(const BuildGeometry3D& geometry) {
 				uint64 streamSize = (
@@ -108,6 +122,10 @@ namespace Trident {
 			}
 
 		public:
+			explicit Geometry3DProcess(AssetBuilderLibrary* assetLibrary) :
+				assetLibrary(assetLibrary)
+			{}
+
 			sint32 main(view<void*> arguments) override {
 				const std::filesystem::path rootOutputPath = static_cast<const char8*>(arguments[2]);
 				const std::filesystem::path assetOutputPath = rootOutputPath / "Asset/Geometry/";
@@ -124,7 +142,7 @@ namespace Trident {
 				const BuildGeometry3D geometry = createGeometry();
 				const ByteStream<StreamOperation::WRITE> stream = encodeGeometryAsset(assetIdentifier, geometry);
 
-				createGeometryAsset(assetIdentifier, stream, assetName, assetOutputPath);
+				createGeometryAsset(assetIdentifier, stream, assetName, assetOutputPath, assetLibrary);
 
 				ENGINE_INFO("Generated geometry asset \"[]\" (ID: []).", assetName, assetIdentifier);
 
@@ -132,28 +150,9 @@ namespace Trident {
 			}
 
 		protected:
-			explicit Geometry3DProcess(AssetBuilderLibrary* assetLibrary) :
-				assetLibrary(assetLibrary)
-			{}
-
 			virtual view<char8> getAssetName() const = 0;
 
 			virtual BuildGeometry3D createGeometry() const = 0;
-
-		private:
-			void createGeometryAsset(uint32 identifier, const ByteStream<StreamOperation::WRITE>& stream, view<char8> assetName, const std::filesystem::path& assetOutputPath) {
-				const std::string assetOutputPathString = assetOutputPath.string();
-
-				sequence<char8> outputPath(assetOutputPathString.size() + assetName.count() + 5);
-				std::copy(assetOutputPathString.begin(), assetOutputPathString.end(), &outputPath[0]);
-				std::copy(assetName.begin(), assetName.end(), &outputPath[assetOutputPathString.size()]);
-				std::copy_n(".tga", 4, &outputPath[assetOutputPathString.size() + assetName.count()]);
-
-				Writer writer = Filesystem::openWriter(outputPath);
-				writer.write(stream.data, stream.getByteOffset());
-
-				assetLibrary->registerAsset(identifier, assetName);
-			}
 
 		private:
 			AssetBuilderLibrary* assetLibrary;

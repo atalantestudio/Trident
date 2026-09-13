@@ -91,8 +91,6 @@ namespace Trident {
 			}
 
 		public:
-			explicit PyramidScene2D(AssetBuilderLibrary* assetLibrary) :
-				Scene2DProcess(assetLibrary)
-			{}
+			using Scene2DProcess::Scene2DProcess;
 	};
 }

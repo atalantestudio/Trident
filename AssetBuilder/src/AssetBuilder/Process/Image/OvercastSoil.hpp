@@ -6,7 +6,7 @@
 #include "AssetBuilder/Process/Image/CubeMapProcess.hpp"
 
 namespace Trident {
-	class OvercastSoilProcess final : public CubeMapProcess {
+	class OvercastSoilCubeMap final : public CubeMapProcess {
 		protected:
 			view<char8> getAssetName() const final override {
 				return "overcast_soil_512p";
@@ -26,8 +26,6 @@ namespace Trident {
 			}
 
 		public:
-			explicit OvercastSoilProcess(AssetBuilderLibrary* assetLibrary) :
-				CubeMapProcess(assetLibrary)
-			{}
+			using CubeMapProcess::CubeMapProcess;
 	};
 }

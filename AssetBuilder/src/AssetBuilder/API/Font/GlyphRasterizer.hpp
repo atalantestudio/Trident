@@ -1,21 +1,19 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
 
 #include "Engine/API/Graphics/Descriptor/ShaderModuleDescriptor.hpp"
+#include "Engine/API/Graphics/Fence.hpp"
 #include "Engine/API/Graphics/PhysicalDevice.hpp"
-#include "Engine/Filesystem/File.hpp"
+#include "Engine/API/Graphics/Queue.hpp"
 #include "Engine/Font/Glyph.hpp"
 
-namespace Trident {
-	struct SDFGlyphMap {
-		sequence<uint8> data;
-		Extent2D extent;
-		sequence<Glyph> glyphs;
-	};
+#include "AssetBuilder/API/Font/SDFGlyphMap.hpp"
+#include "../../../File/TTF.hpp"
 
-	class GenerateSDFGlyphMapProcess {
+namespace Trident {
+	class GlyphRasterizer {
 		public:
 			struct FontStorage {
 				uint32 spreadFactor;
@@ -38,14 +36,11 @@ namespace Trident {
 			};
 
 		public:
-			static const GraphicsAdapter* adapter;
+			void initialize(const GraphicsAdapter* adapter);
 
-		public:
 			void generateGlyphAtlas(const File<FileFormat::TTF>& file, SDFGlyphMap& sdfGlyphMap);
 
 		private:
-			void initialize();
-
 			// TODO(asset-builder/font/sdf): Move inside the engine.
 			ref<ShaderModule> loadShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> path) const;
 
@@ -71,11 +66,11 @@ namespace Trident {
 			void updateDescriptorSets() const;
 
 		private:
-			bool initialized = false;
+			const GraphicsAdapter* adapter = nullptr;
 
 			ref<Instance> instance;
 			ref<PhysicalDevice> physicalDevice;
-			ref<ExtendedDevice<>> device;
+			ref<Device> device;
 
 			ref<Buffer> fontBuffer;
 			ref<Buffer> glyphBuffer;
@@ -102,7 +97,7 @@ namespace Trident {
 			ref<ComputePipeline> glyphImageComputePipeline;
 			ref<ComputePipeline> glyphSdfComputePipeline;
 
-			GlyphBuffer* glyphMappedRange;
-			uint32* glyphOffsetMappedRange;
+			GlyphBuffer* glyphMappedRange = nullptr;
+			uint32* glyphOffsetMappedRange = nullptr;
 	};
 }

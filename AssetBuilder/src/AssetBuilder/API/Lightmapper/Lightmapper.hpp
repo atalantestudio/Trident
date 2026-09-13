@@ -127,11 +127,11 @@ namespace Trident {
 			void encodeGBufferCommands(const BuildScene3D& scene) const;
 
 		private:
-			const GraphicsAdapter* adapter;
+			const GraphicsAdapter* adapter = nullptr;
 			bool initialized = false;
 			ImageFormat atlasFormat;
 			Extent3D atlasExtent;
-			ImageAssetDescriptor* imageAssetDescriptor;
+			ImageAssetDescriptor* imageAssetDescriptor = nullptr;
 			Scene3DDescriptor sceneDescriptor;
 
 			ref<Instance> instance;

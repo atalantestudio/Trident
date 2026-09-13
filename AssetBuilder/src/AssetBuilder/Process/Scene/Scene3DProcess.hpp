@@ -229,6 +229,11 @@ namespace Trident {
 			}
 
 		public:
+			explicit Scene3DProcess(AssetBuilderLibrary* assetLibrary, Lightmapper* lightmapper) :
+				assetLibrary(assetLibrary),
+				lightmapper(lightmapper)
+			{}
+
 			sint32 main(view<void*> arguments) final override {
 				const std::filesystem::path rootOutputPath = static_cast<const char8*>(arguments[2]);
 				const std::filesystem::path assetOutputPath = rootOutputPath / "Asset/Scene/";
@@ -254,12 +259,6 @@ namespace Trident {
 
 				return 0;
 			}
-
-		public:
-			explicit Scene3DProcess(AssetBuilderLibrary* assetLibrary, Lightmapper* lightmapper) :
-				assetLibrary(assetLibrary),
-				lightmapper(lightmapper)
-			{}
 
 		protected:
 			virtual view<char8> getAssetName() const = 0;

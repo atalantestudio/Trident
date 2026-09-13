@@ -33,7 +33,7 @@ namespace Trident {
 				return stream;
 			}
 
-			void createMaterialAsset(uint32 identifier, const ByteStream<StreamOperation::WRITE>& stream, view<char8> assetName, const std::filesystem::path& assetOutputPath) {
+			void createMaterialAsset(uint32 identifier, const ByteStream<StreamOperation::WRITE>& stream, view<char8> assetName, std::filesystem::path assetOutputPath) {
 				const std::string assetOutputPathString = assetOutputPath.string();
 
 				sequence<char8> outputPath(assetOutputPathString.size() + assetName.count() + 5);

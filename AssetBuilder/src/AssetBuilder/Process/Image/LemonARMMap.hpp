@@ -6,7 +6,7 @@
 #include "AssetBuilder/Process/Image/ARMMapFromAORoughnessProcess.hpp"
 
 namespace Trident {
-	class LemonARMMapProcess final : public ARMMapFromAORoughnessProcess {
+	class LemonARMMap final : public ARMMapFromAORoughnessProcess {
 		protected:
 			view<char8> getAssetName() const final override {
 				return "lemon_arm_1k";
@@ -20,8 +20,6 @@ namespace Trident {
 			}
 
 		public:
-			explicit LemonARMMapProcess(AssetBuilderLibrary* assetLibrary) :
-				ARMMapFromAORoughnessProcess(assetLibrary)
-			{}
+			using ARMMapFromAORoughnessProcess::ARMMapFromAORoughnessProcess;
 	};
 }

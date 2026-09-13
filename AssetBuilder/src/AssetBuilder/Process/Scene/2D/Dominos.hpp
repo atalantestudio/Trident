@@ -133,8 +133,6 @@ namespace Trident {
 			}
 
 		public:
-			explicit DominosScene2D(AssetBuilderLibrary* assetLibrary) :
-				Scene2DProcess(assetLibrary)
-			{}
+			using Scene2DProcess::Scene2DProcess;
 	};
 }

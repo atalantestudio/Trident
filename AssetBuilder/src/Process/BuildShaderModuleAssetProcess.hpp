@@ -14,7 +14,7 @@
 namespace Trident {
 	class BuildShaderModuleAssetProcess final : public Process {
 		private:
-			sint32 processFile(const std::filesystem::directory_entry& directoryEntry, const std::filesystem::path& assetOutputPath) {
+			sint32 processFile(const std::filesystem::directory_entry& directoryEntry, std::filesystem::path assetOutputPath) {
 				std::filesystem::path outputPath = assetOutputPath / "Shader" / directoryEntry.path().filename();
 				outputPath.replace_extension("tsm");
 

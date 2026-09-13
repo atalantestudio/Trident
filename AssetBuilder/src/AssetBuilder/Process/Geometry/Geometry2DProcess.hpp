@@ -103,6 +103,10 @@ namespace Trident {
 			}
 
 		public:
+			explicit Geometry2DProcess(AssetBuilderLibrary* assetLibrary) :
+				assetLibrary(assetLibrary)
+			{}
+
 			sint32 main(view<void*> arguments) override {
 				const std::filesystem::path rootOutputPath = static_cast<const char8*>(arguments[2]);
 				const std::filesystem::path assetOutputPath = rootOutputPath / "Asset/Geometry/";
@@ -127,16 +131,12 @@ namespace Trident {
 			}
 
 		protected:
-			explicit Geometry2DProcess(AssetBuilderLibrary* assetLibrary) :
-				assetLibrary(assetLibrary)
-			{}
-
 			virtual view<char8> getAssetName() const = 0;
 
 			virtual BuildGeometry2D createGeometry() const = 0;
 
 		private:
-			void createGeometryAsset(uint32 identifier, const ByteStream<StreamOperation::WRITE>& stream, view<char8> assetName, const std::filesystem::path& assetOutputPath) {
+			void createGeometryAsset(uint32 identifier, const ByteStream<StreamOperation::WRITE>& stream, view<char8> assetName, std::filesystem::path assetOutputPath) {
 				const std::string assetOutputPathString = assetOutputPath.string();
 
 				sequence<char8> outputPath(assetOutputPathString.size() + assetName.count() + 5);

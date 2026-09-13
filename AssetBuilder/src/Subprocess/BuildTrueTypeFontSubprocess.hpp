@@ -5,17 +5,14 @@
 
 #include "Engine/Filesystem/Decoder/Decoder.hpp"
 
+#include "AssetBuilder/API/Font/GlyphRasterizer.hpp"
 #include "AssetBuilder/Process/Image/ImageProcess.hpp"
-#include "../Process/GenerateSDFGlyphMapProcess.hpp"
 #include "../File/TTF.hpp"
 
 namespace Trident {
 	class BuildTrueTypeFontSubprocess {
-		private:
-			static GenerateSDFGlyphMapProcess glyphRasterizer;
-
 		public:
-			explicit BuildTrueTypeFontSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::filesystem::path& assetOutputPath, AssetBuilderLibrary* assetLibrary) {
+			explicit BuildTrueTypeFontSubprocess(const std::filesystem::directory_entry& directoryEntry, std::filesystem::path assetOutputPath, AssetBuilderLibrary* assetLibrary, GlyphRasterizer* glyphRasterizer) {
 				std::filesystem::path outputPath = assetOutputPath / "Font" / directoryEntry.path().filename();
 				outputPath.replace_extension("tfo");
 
@@ -39,7 +36,7 @@ namespace Trident {
 
 				SDFGlyphMap sdfGlyphMap;
 
-				glyphRasterizer.generateGlyphAtlas(file, sdfGlyphMap);
+				glyphRasterizer->generateGlyphAtlas(file, sdfGlyphMap);
 
 				ImageAssetDescriptor imageAssetDescriptor{};
 				imageAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();

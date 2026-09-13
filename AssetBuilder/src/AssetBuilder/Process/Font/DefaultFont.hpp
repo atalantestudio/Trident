@@ -1,17 +1,16 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
 
-#include "Engine/API/Process/Process.hpp"
-#include "Engine/Filesystem/Decoder/Decoder.hpp"
+#include "Engine/Filesystem/Asset/ImageAsset.hpp"
 #include "Engine/Filesystem/Stream/UTF8Stream.hpp"
 
-#include "AssetBuilder/Process/Image/ImageProcess.hpp"
-#include "../File/PNG.hpp"
+#include "AssetBuilder/Process/Font/FontProcess.hpp"
+#include "../../../File/PNG.hpp"
 
 namespace Trident {
-	class BuildDefaultFontSubprocess {
+	class DefaultFont : public FontProcess {
 		private:
 			struct BitmapGlyph {
 				const char8* codePoint;
@@ -22,8 +21,6 @@ namespace Trident {
 			};
 
 		private:
-			static constexpr const char8* DEFAULT_FONT_NAME = "DefaultFont";
-
 			static constexpr sint16 ASCENT = 9;
 			static constexpr sint16 DESCENT = -3;
 			static constexpr sint16 LINE_GAP = 0;
@@ -176,47 +173,39 @@ namespace Trident {
 				{" ", {29.0f, 72.0f}, 4, 0, 0},
 			};
 
-		public:
-			explicit BuildDefaultFontSubprocess(const std::filesystem::path& assetOutputPath, AssetBuilderLibrary* assetLibrary) {
-				const sequence<uint8> buffer = Filesystem::openByteBuffer("../Trident/src/Asset/Image/quiver.png");
-				const File<FileFormat::PNG> file = Decoder<FileFormat::PNG>::decode(buffer);
+		protected:
+			view<char8> getAssetName() const final override {
+				return "default";
+			}
 
-				ENGINE_ASSERT(file.format == ImageFormat::R8G8B8A8_UNORM, "The default font bitmap must have RGBA format.");
-				ENGINE_ASSERT(file.extent.depth == 1, "The default font bitmap must have a depth of 1.");
+			BuildFont createFont(AssetBuilderLibrary* assetLibrary) const final override {
+				const ref<ImageAsset> glyphMapImage = assetLibrary->getAsset<ImageAsset>("Quiver");
 
-				ImageAssetDescriptor imageAssetDescriptor{};
-				imageAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
-				imageAssetDescriptor.format = ImageFormat::R8_UNORM;
-				imageAssetDescriptor.extent = file.extent;
-				imageAssetDescriptor.mipLevelCount = 1;
-				imageAssetDescriptor.layerCount = 1;
-				imageAssetDescriptor.data = sequence<uint8>(file.data.count() / 4);
+				DEBUG_ASSERT(glyphMapImage->format == ImageFormat::R8_UNORM);
 
-				convert<ImageFormat::R8G8B8A8_UNORM, ImageFormat::R8_UNORM>(file.data, &imageAssetDescriptor.data[0], imageAssetDescriptor.data.count());
-
-				const ByteStream<StreamOperation::WRITE> stream = ImageProcess::encodeImageAsset(imageAssetDescriptor);
-
-				ImageProcess::createImageAsset(imageAssetDescriptor, stream, DEFAULT_FONT_NAME, assetOutputPath / "Image/", assetLibrary);
-
-				FontAssetDescriptor fontAssetDescriptor{};
-				fontAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
-				fontAssetDescriptor.version = {1, 0, 0};
-				fontAssetDescriptor.glyphMapImage = nullptr;
-				fontAssetDescriptor.lineHeight = ASCENT - DESCENT + LINE_GAP;
-				fontAssetDescriptor.glyphs = sequence<Glyph>(BITMAP_GLYPH_COUNT);
+				BuildFont font = {
+					.glyphMapImage = glyphMapImage,
+					.ascent = ASCENT,
+					.descent = DESCENT,
+					.lineGap = LINE_GAP,
+					.unitsPerEm = UNITS_PER_EM,
+					.glyphs = sequence<Glyph>(BITMAP_GLYPH_COUNT),
+					.unicodeMap = {},
+					.kerningPairs = {},
+				};
 
 				uint32 glyphIndex = 0;
 
-				while (glyphIndex < fontAssetDescriptor.glyphs.count()) {
+				while (glyphIndex < font.glyphs.count()) {
 					const BitmapGlyph& bitmapGlyph = BITMAP_GLYPHS[glyphIndex];
 					const UTF8Stream stream = UTF8Stream(bitmapGlyph.codePoint);
 					const uint32 codePoint = stream.peek();
 
-					Glyph& glyph = fontAssetDescriptor.glyphs[glyphIndex];
-					glyph.minCoordinate.x = bitmapGlyph.minCoordinate.x / file.extent.width;
-					glyph.minCoordinate.y = (bitmapGlyph.minCoordinate.y + bitmapGlyph.topSideBearing) / file.extent.height;
-					glyph.maxCoordinate.x = (bitmapGlyph.minCoordinate.x + bitmapGlyph.width) / file.extent.width;
-					glyph.maxCoordinate.y = (bitmapGlyph.minCoordinate.y + bitmapGlyph.height + bitmapGlyph.topSideBearing) / file.extent.height;
+					Glyph& glyph = font.glyphs[glyphIndex];
+					glyph.minCoordinate.x = bitmapGlyph.minCoordinate.x / glyphMapImage->extent.width;
+					glyph.minCoordinate.y = (bitmapGlyph.minCoordinate.y + bitmapGlyph.topSideBearing) / glyphMapImage->extent.height;
+					glyph.maxCoordinate.x = (bitmapGlyph.minCoordinate.x + bitmapGlyph.width) / glyphMapImage->extent.width;
+					glyph.maxCoordinate.y = (bitmapGlyph.minCoordinate.y + bitmapGlyph.height + bitmapGlyph.topSideBearing) / glyphMapImage->extent.height;
 					glyph.width = bitmapGlyph.width;
 					glyph.advanceWidth = bitmapGlyph.width + 1;
 					glyph.height = bitmapGlyph.height;
@@ -224,83 +213,15 @@ namespace Trident {
 					glyph.yMax = ASCENT - bitmapGlyph.topSideBearing;
 					glyph.whitespace = codePoint == ' ';
 
-					fontAssetDescriptor.unicodeMap.insert({static_cast<uint16>(codePoint), glyphIndex});
+					font.unicodeMap.insert({static_cast<uint16>(codePoint), glyphIndex});
 
 					glyphIndex += 1;
 				}
 
-				const uint32 glyphCount = static_cast<uint32>(fontAssetDescriptor.glyphs.count());
-				const uint32 unicodeEntryCount = static_cast<uint32>(fontAssetDescriptor.unicodeMap.size());
-				const uint32 kerningPairCount = static_cast<uint32>(fontAssetDescriptor.kerningPairs.size());
-				const uint64 outputSize =
-					sizeof(AssetSignature) + sizeof(VersionNumber) + sizeof(uint32) * 5 + sizeof(sint16) * 3 + sizeof(uint16) +
-					(sizeof(svec2<float32>) * 2 + sizeof(uint16) * 3 + sizeof(sint16) * 2) * glyphCount +
-					(sizeof(uint16) + sizeof(uint32)) * fontAssetDescriptor.unicodeMap.size() +
-					(sizeof(GlyphPair) + sizeof(sint16)) * fontAssetDescriptor.kerningPairs.size();
-
-				ByteStream<StreamOperation::WRITE> outputByteStream(outputSize, Endianness::LITTLE_ENDIAN);
-				outputByteStream.write<AssetSignature>(AssetSignature::FONT);
-				outputByteStream.write<uint32>(fontAssetDescriptor.identifier);
-				outputByteStream.write<VersionNumber>({0, 0, 0});
-				outputByteStream.write<uint32>(imageAssetDescriptor.identifier);
-				outputByteStream.write<sint16>(ASCENT);
-				outputByteStream.write<sint16>(DESCENT);
-				outputByteStream.write<sint16>(LINE_GAP);
-				outputByteStream.write<uint16>(UNITS_PER_EM);
-				outputByteStream.write<uint32>(glyphCount);
-				outputByteStream.write<uint32>(unicodeEntryCount);
-				outputByteStream.write<uint32>(kerningPairCount);
-
-				for (const Glyph& glyph : fontAssetDescriptor.glyphs) {
-					outputByteStream.write<float32>(glyph.minCoordinate.x);
-					outputByteStream.write<float32>(glyph.minCoordinate.y);
-					outputByteStream.write<float32>(glyph.maxCoordinate.x);
-					outputByteStream.write<float32>(glyph.maxCoordinate.y);
-				}
-
-				for (const Glyph& glyph : fontAssetDescriptor.glyphs) {
-					outputByteStream.write<uint16>(glyph.width);
-				}
-
-				for (const Glyph& glyph : fontAssetDescriptor.glyphs) {
-					outputByteStream.write<uint16>(glyph.height);
-				}
-
-				for (const Glyph& glyph : fontAssetDescriptor.glyphs) {
-					outputByteStream.write<sint16>(glyph.yMax);
-				}
-
-				for (const Glyph& glyph : fontAssetDescriptor.glyphs) {
-					outputByteStream.write<uint16>(glyph.advanceWidth);
-				}
-
-				for (const Glyph& glyph : fontAssetDescriptor.glyphs) {
-					outputByteStream.write<sint16>(glyph.leftSideBearing);
-				}
-
-				for (const std::pair<uint16, uint32> unicodeEntry : fontAssetDescriptor.unicodeMap) {
-					outputByteStream.write<uint16>(unicodeEntry.first);
-				}
-
-				for (const std::pair<uint16, uint32> unicodeEntry : fontAssetDescriptor.unicodeMap) {
-					outputByteStream.write<uint32>(unicodeEntry.second);
-				}
-
-				const std::string assetOutputPathString = assetOutputPath.string();
-
-				// Count '\0'.
-				sequence<char8> outputPath(assetOutputPathString.size() + std::strlen(DEFAULT_FONT_NAME) + 11);
-				std::copy(assetOutputPathString.begin(), assetOutputPathString.end(), &outputPath[0]);
-				std::copy_n("/Font/", 6, &outputPath[assetOutputPathString.size()]);
-				std::copy_n(DEFAULT_FONT_NAME, std::strlen(DEFAULT_FONT_NAME), &outputPath[assetOutputPathString.size() + 6]);
-				std::copy_n(".tfo", 4, &outputPath[assetOutputPathString.size() + std::strlen(DEFAULT_FONT_NAME) + 6]);
-
-				Writer writer = Filesystem::openWriter(outputPath);
-				writer.write(outputByteStream.data, outputByteStream.size);
-
-				ENGINE_INFO("Generated default (bitmap) font asset \"[]\" (ID: []).", outputPath, fontAssetDescriptor.identifier);
-
-				assetLibrary->registerAsset(fontAssetDescriptor.identifier, DEFAULT_FONT_NAME);
+				return font;
 			}
+
+		public:
+			using FontProcess::FontProcess;
 	};
 }

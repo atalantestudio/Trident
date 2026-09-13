@@ -6,7 +6,7 @@
 #include "AssetBuilder/Process/Image/CubeMapProcess.hpp"
 
 namespace Trident {
-	class EveningRoad01Process final : public CubeMapProcess {
+	class EveningRoad01CubeMap final : public CubeMapProcess {
 		protected:
 			view<char8> getAssetName() const final override {
 				return "evening_road_01_512p";
@@ -26,8 +26,6 @@ namespace Trident {
 			}
 
 		public:
-			explicit EveningRoad01Process(AssetBuilderLibrary* assetLibrary) :
-				CubeMapProcess(assetLibrary)
-			{}
+			using CubeMapProcess::CubeMapProcess;
 	};
 }

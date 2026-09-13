@@ -3,11 +3,11 @@
 
 #pragma once
 
+#include "Engine/API/Process/Process.hpp"
+
 #include "AssetBuilder/API/AssetBuilderLibrary.hpp"
 #include "AssetBuilder/API/Utilities/Utilities.hpp"
 #include "AssetBuilder/Process/Geometry/Geometry3DProcess.hpp"
-
-#include "Engine/API/Process/Process.hpp"
 
 namespace Trident {
 	class BuildGeometryAssetProcess final : public Process {
@@ -50,27 +50,12 @@ namespace Trident {
 
 					const ByteStream<StreamOperation::WRITE> stream = Geometry3DProcess::encodeGeometryAsset(identifier, geometry);
 
-					createGeometryAsset(identifier, stream, view<char8>(&assetName[0], assetName.size()), assetOutputPath);
+					Geometry3DProcess::createGeometryAsset(identifier, stream, view<char8>(&assetName[0], assetName.size()), assetOutputPath, assetLibrary);
+
+					ENGINE_INFO("Generated geometry asset \"[]\" (ID: []).", assetName, identifier);
 				}
 
-				ENGINE_INFO("Generated FBX geometry assets.");
-
 				return 0;
-			}
-
-		private:
-			void createGeometryAsset(uint32 identifier, const ByteStream<StreamOperation::WRITE>& stream, view<char8> assetName, const std::filesystem::path& assetOutputPath) {
-				const std::string assetOutputPathString = assetOutputPath.string();
-
-				sequence<char8> outputPath(assetOutputPathString.size() + assetName.count() + 5);
-				std::copy(assetOutputPathString.begin(), assetOutputPathString.end(), &outputPath[0]);
-				std::copy(assetName.begin(), assetName.end(), &outputPath[assetOutputPathString.size()]);
-				std::copy_n(".tga", 4, &outputPath[assetOutputPathString.size() + assetName.count()]);
-
-				Writer writer = Filesystem::openWriter(outputPath);
-				writer.write(stream.data, stream.getByteOffset());
-
-				assetLibrary->registerAsset(identifier, assetName);
 			}
 
 		private:

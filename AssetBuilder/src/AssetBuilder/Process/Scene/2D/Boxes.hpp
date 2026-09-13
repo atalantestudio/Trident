@@ -59,8 +59,6 @@ namespace Trident {
 			}
 
 		public:
-			explicit BoxesScene2D(AssetBuilderLibrary* assetLibrary) :
-				Scene2DProcess(assetLibrary)
-			{}
+			using Scene2DProcess::Scene2DProcess;
 	};
 }

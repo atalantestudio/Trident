@@ -46,8 +46,6 @@ namespace Trident {
 			}
 
 		public:
-			explicit TriangleGeometry2D(AssetBuilderLibrary* assetLibrary) :
-				Geometry2DProcess(assetLibrary)
-			{}
+			using Geometry2DProcess::Geometry2DProcess;
 	};
 }

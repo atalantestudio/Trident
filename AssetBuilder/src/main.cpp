@@ -4,7 +4,9 @@
 #include "pch.hpp"
 
 #include "AssetBuilder/API/AssetBuilderLibrary.hpp"
+#include "AssetBuilder/API/Font/GlyphRasterizer.hpp"
 #include "AssetBuilder/API/Lightmapper/Lightmapper.hpp"
+#include "AssetBuilder/Process/Font/DefaultFont.hpp"
 #include "AssetBuilder/Process/Geometry/2D/Polygon.hpp"
 #include "AssetBuilder/Process/Geometry/2D/Triangle.hpp"
 #include "AssetBuilder/Process/Geometry/2D/UnitCircle.hpp"
@@ -17,6 +19,7 @@
 #include "AssetBuilder/Process/Image/EveningRoad01.hpp"
 #include "AssetBuilder/Process/Image/LemonARMMap.hpp"
 #include "AssetBuilder/Process/Image/OvercastSoil.hpp"
+#include "AssetBuilder/Process/Image/Quiver.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/Default.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/PlasterCeiling.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/PlasterWall.hpp"
@@ -84,8 +87,7 @@ namespace Trident {
 					}
 				}
 
-				GenerateSDFGlyphMapProcess::adapter = graphicsAdapter;
-
+				glyphRasterizer.initialize(graphicsAdapter);
 				lightmapper.initialize(graphicsAdapter);
 
 				registerProcesses();
@@ -93,7 +95,7 @@ namespace Trident {
 
 		private:
 			void registerProcesses() {
-				allocateProcesses(54);
+				allocateProcesses(56);
 
 				registerProcess<BuildGeometryAssetProcess>(&assetLibrary);
 
@@ -109,11 +111,13 @@ namespace Trident {
 				registerProcess<UnitSphereGeometry3D>(&assetLibrary);
 
 				registerProcess<CopyImageProcess>(&assetLibrary);
-				registerProcess<EveningRoad01Process>(&assetLibrary);
-				registerProcess<LemonARMMapProcess>(&assetLibrary);
-				registerProcess<OvercastSoilProcess>(&assetLibrary);
+				registerProcess<EveningRoad01CubeMap>(&assetLibrary);
+				registerProcess<LemonARMMap>(&assetLibrary);
+				registerProcess<OvercastSoilCubeMap>(&assetLibrary);
+				registerProcess<QuiverImage>(&assetLibrary);
 
-				registerProcess<BuildFontAssetProcess>(&assetLibrary);
+				registerProcess<DefaultFont>(&assetLibrary);
+				registerProcess<BuildFontAssetProcess>(&assetLibrary, &glyphRasterizer);
 
 				registerProcess<BuildShaderModuleAssetProcess>(&assetLibrary);
 
@@ -164,6 +168,7 @@ namespace Trident {
 
 		private:
 			AssetBuilderLibrary assetLibrary;
+			GlyphRasterizer glyphRasterizer;
 			Lightmapper lightmapper;
 	};
 

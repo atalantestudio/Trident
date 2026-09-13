@@ -4,14 +4,10 @@
 #include "pch.hpp"
 
 #include "Engine/Filesystem/Filesystem.hpp"
-#include "Engine/Renderer/Renderer.hpp"
 
-#include "../File/TTF.hpp"
-#include "GenerateSDFGlyphMapProcess.hpp"
+#include "AssetBuilder/API/Font/GlyphRasterizer.hpp"
 
 namespace Trident {
-	const GraphicsAdapter* GenerateSDFGlyphMapProcess::adapter;
-
 	static uint64 calculateGlyphMapLayout(Extent2D glyphMapExtent, const File<FileFormat::TTF>& file, view<TrueTypeFont::Glyph> glyphView, uint32 spreadFactor) {
 		const sint16 lineHeight = file.ascent - file.descent;
 		const float32 inverseLineHeight = static_cast<float32>(1.0 / lineHeight * 64.0);
@@ -70,16 +66,23 @@ namespace Trident {
 			maxGlyphEdgeCount = max(maxGlyphEdgeCount, glyph.edges.count());
 		}
 
-		return sizeof(GenerateSDFGlyphMapProcess::GlyphBuffer) + maxGlyphEdgeCount * sizeof(GenerateSDFGlyphMapProcess::GlyphEdge);
+		return sizeof(GlyphRasterizer::GlyphBuffer) + maxGlyphEdgeCount * sizeof(GlyphRasterizer::GlyphEdge);
 	}
 
-	void GenerateSDFGlyphMapProcess::generateGlyphAtlas(const File<FileFormat::TTF>& file, SDFGlyphMap& output) {
+	void GlyphRasterizer::initialize(const GraphicsAdapter* adapter) {
+		this->adapter = adapter;
+
+		instance = adapter->createInstance({
+			.projectName = "Glyph rasterizer",
+			.projectVersion = {0, 0, 1},
+		});
+		physicalDevice = instance->selectPhysicalDevice(false);
+		device = physicalDevice->createDevice<>();
+	}
+
+	void GlyphRasterizer::generateGlyphAtlas(const File<FileFormat::TTF>& file, SDFGlyphMap& output) {
 		static constexpr uint32 GLYPH_SUBIMAGE_DIMENSION = 64;
 		static constexpr uint32 spreadFactor = 7;
-
-		if (!initialized) {
-			initialize();
-		}
 
 		output.extent = {2048, 2048};
 
@@ -283,6 +286,16 @@ namespace Trident {
 			// TODO(asset-builder/font/sdf): Dispatch less groups depending on the size of the area occupied by the glyph.
 			commandEncoder->dispatch(128, 128, 1);
 
+			if (adapter->getApi() == GraphicsAPI::DX12) {
+				const ImageMemoryBarrier glyphImageMemoryBarrier = {
+					.image = glyphImage,
+					.newLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+					.newAccess = Access::SHADER_READ,
+				};
+
+				commandEncoder->insertMemoryBarriers({}, glyphImageMemoryBarrier);
+			}
+
 			commandEncoder->bindComputePipeline(glyphSdfComputePipeline);
 			commandEncoder->bindDescriptorSets(glyphSdfPipelineLayout, 0, glyphSdfDescriptorSet);
 			commandEncoder->dispatch(8, 8, 1);
@@ -358,18 +371,7 @@ namespace Trident {
 		glyphMapStagingBuffer->unmap();
 	}
 
-	void GenerateSDFGlyphMapProcess::initialize() {
-		instance = adapter->createInstance({
-			.projectName = "Glyph rasterizer",
-			.projectVersion = {0, 0, 1},
-		});
-		physicalDevice = instance->selectPhysicalDevice(false);
-		device = physicalDevice->createDevice<>();
-
-		initialized = true;
-	}
-
-	ref<ShaderModule> GenerateSDFGlyphMapProcess::loadShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> path) const {
+	ref<ShaderModule> GlyphRasterizer::loadShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> path) const {
 		std::string pathString = "Asset/Shader/";
 		pathString += path;
 
@@ -407,7 +409,7 @@ namespace Trident {
 		return device->createShaderModule(descriptor, code);
 	}
 
-	ref<Buffer> GenerateSDFGlyphMapProcess::createFontBuffer() const {
+	ref<Buffer> GlyphRasterizer::createFontBuffer() const {
 		const uint64 alignment = physicalDevice->getLimits().minStorageBufferOffsetAlignment;
 
 		return device->createDynamicBuffer({
@@ -421,7 +423,7 @@ namespace Trident {
 		});
 	}
 
-	ref<Buffer> GenerateSDFGlyphMapProcess::createGlyphBuffer(uint64 size) const {
+	ref<Buffer> GlyphRasterizer::createGlyphBuffer(uint64 size) const {
 		const uint64 alignment = physicalDevice->getLimits().minStorageBufferOffsetAlignment;
 
 		return device->createDynamicBuffer({
@@ -435,7 +437,7 @@ namespace Trident {
 		});
 	}
 
-	ref<Buffer> GenerateSDFGlyphMapProcess::createGlyphOffsetBuffer() const {
+	ref<Buffer> GlyphRasterizer::createGlyphOffsetBuffer() const {
 		const uint64 alignment = physicalDevice->getLimits().minStorageBufferOffsetAlignment;
 
 		return device->createDynamicBuffer({
@@ -449,7 +451,7 @@ namespace Trident {
 		});
 	}
 
-	ref<Image> GenerateSDFGlyphMapProcess::createGlyphImage() const {
+	ref<Image> GlyphRasterizer::createGlyphImage() const {
 		return device->createDynamicImage({
 			.type = ImageType::TYPE_2D,
 			.format = ImageFormat::R8_UNORM,
@@ -457,7 +459,7 @@ namespace Trident {
 			.mipLevelCount = 1,
 			.layerCount = 1,
 			.sampleCount = 1,
-			.usage = ImageUsage::STORAGE | ImageUsage::TRANSFER_SRC,
+			.usage = ImageUsage::TRANSFER_SRC | ImageUsage::STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED,
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Glyph",
@@ -465,7 +467,7 @@ namespace Trident {
 		});
 	}
 
-	ref<Image> GenerateSDFGlyphMapProcess::createGlyphMapImage(Extent2D extent) const {
+	ref<Image> GlyphRasterizer::createGlyphMapImage(Extent2D extent) const {
 		return device->createDynamicImage({
 			.type = ImageType::TYPE_2D,
 			.format = ImageFormat::R8_UNORM,
@@ -473,7 +475,7 @@ namespace Trident {
 			.mipLevelCount = 1,
 			.layerCount = 1,
 			.sampleCount = 1,
-			.usage = ImageUsage::STORAGE | ImageUsage::TRANSFER_SRC,
+			.usage = ImageUsage::TRANSFER_SRC | ImageUsage::STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED,
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Glyph map",
@@ -481,19 +483,19 @@ namespace Trident {
 		});
 	}
 
-	ref<ImageView> GenerateSDFGlyphMapProcess::createGlyphImageView() const {
+	ref<ImageView> GlyphRasterizer::createGlyphImageView() const {
 		return glyphImage->createView({
 			.mipLevelOffset = 0,
 			.mipLevelCount = 1,
 			.layerOffset = 0,
 			.layerCount = 1,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Glyph",
+				.name = "Glyph view",
 			#endif
 		});
 	}
 
-	ref<ImageView> GenerateSDFGlyphMapProcess::createGlyphMapImageView() const {
+	ref<ImageView> GlyphRasterizer::createGlyphMapImageView() const {
 		return glyphMapImage->createView({
 			.mipLevelOffset = 0,
 			.mipLevelCount = 1,
@@ -505,7 +507,7 @@ namespace Trident {
 		});
 	}
 
-	ref<DescriptorSetLayout> GenerateSDFGlyphMapProcess::createGlyphImageDescriptorSetLayout() const {
+	ref<DescriptorSetLayout> GlyphRasterizer::createGlyphImageDescriptorSetLayout() const {
 		const DescriptorSetLayoutBinding bindings[] = {
 			// Font
 			{
@@ -537,7 +539,7 @@ namespace Trident {
 		});
 	}
 
-	ref<DescriptorSetLayout> GenerateSDFGlyphMapProcess::createGlyphSdfDescriptorSetLayout() const {
+	ref<DescriptorSetLayout> GlyphRasterizer::createGlyphSdfDescriptorSetLayout() const {
 		const DescriptorSetLayoutBinding bindings[] = {
 			// Read-only glyph
 			{
@@ -576,7 +578,7 @@ namespace Trident {
 		});
 	}
 
-	ref<PipelineLayout> GenerateSDFGlyphMapProcess::createGlyphImagePipelineLayout() const {
+	ref<PipelineLayout> GlyphRasterizer::createGlyphImagePipelineLayout() const {
 		return device->createPipelineLayout({
 			.descriptorSetLayouts = {glyphImageDescriptorSetLayout},
 			#if defined(DEBUG_OBJECT_NAME)
@@ -585,7 +587,7 @@ namespace Trident {
 		});
 	}
 
-	ref<PipelineLayout> GenerateSDFGlyphMapProcess::createGlyphSdfPipelineLayout() const {
+	ref<PipelineLayout> GlyphRasterizer::createGlyphSdfPipelineLayout() const {
 		return device->createPipelineLayout({
 			.descriptorSetLayouts = {glyphSdfDescriptorSetLayout},
 			#if defined(DEBUG_OBJECT_NAME)
@@ -594,7 +596,7 @@ namespace Trident {
 		});
 	}
 
-	ref<ComputePipeline> GenerateSDFGlyphMapProcess::createGlyphImageComputePipeline() const {
+	ref<ComputePipeline> GlyphRasterizer::createGlyphImageComputePipeline() const {
 		return device->createComputePipeline({
 			.pipelineLayout = glyphImagePipelineLayout,
 			.computeShaderModule = loadShaderModule(
@@ -613,7 +615,7 @@ namespace Trident {
 		});
 	}
 
-	ref<ComputePipeline> GenerateSDFGlyphMapProcess::createGlyphSdfComputePipeline() const {
+	ref<ComputePipeline> GlyphRasterizer::createGlyphSdfComputePipeline() const {
 		return device->createComputePipeline({
 			.pipelineLayout = glyphSdfPipelineLayout,
 			.computeShaderModule = loadShaderModule(
@@ -632,7 +634,7 @@ namespace Trident {
 		});
 	}
 
-	void GenerateSDFGlyphMapProcess::updateDescriptorSets() const {
+	void GlyphRasterizer::updateDescriptorSets() const {
 		const BufferView<FontStorage> fontView = fontBuffer->createView<FontStorage>(0, fontBuffer->getSize());
 		const BufferView<uint8> glyphView = glyphBuffer->createView<uint8>(0, glyphBuffer->getSize());
 		const BufferView<uint32> glyphOffsetView = glyphOffsetBuffer->createView<uint32>(0, glyphOffsetBuffer->getSize());

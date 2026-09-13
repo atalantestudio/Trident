@@ -101,8 +101,6 @@ namespace Trident {
 				processCount += 1;
 			}
 
-			virtual void release() {}
-
 		private:
 			void loop();
 

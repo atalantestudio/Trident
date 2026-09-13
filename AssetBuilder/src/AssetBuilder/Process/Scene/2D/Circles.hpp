@@ -74,8 +74,6 @@ namespace Trident {
 			}
 
 		public:
-			explicit CirclesScene2D(AssetBuilderLibrary* assetLibrary) :
-				Scene2DProcess(assetLibrary)
-			{}
+			using Scene2DProcess::Scene2DProcess;
 	};
 }

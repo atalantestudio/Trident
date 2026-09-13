@@ -83,6 +83,10 @@ namespace Trident {
 			}
 
 		public:
+			explicit Scene2DProcess(AssetBuilderLibrary* assetLibrary) :
+				assetLibrary(assetLibrary)
+			{}
+
 			sint32 main(view<void*> arguments) final override {
 				const std::filesystem::path rootOutputPath = static_cast<const char8*>(arguments[2]);
 				const std::filesystem::path assetOutputPath = rootOutputPath / "Asset/Scene/";
@@ -107,16 +111,12 @@ namespace Trident {
 			}
 
 		protected:
-			explicit Scene2DProcess(AssetBuilderLibrary* assetLibrary) :
-				assetLibrary(assetLibrary)
-			{}
-
 			virtual view<char8> getAssetName() const = 0;
 
 			virtual BuildScene2D createScene(AssetBuilderLibrary* assetLibrary) const = 0;
 
 		private:
-			void createSceneAsset(uint32 identifier, const ByteStream<StreamOperation::WRITE>& stream, view<char8> assetName, const std::filesystem::path& assetOutputPath) {
+			void createSceneAsset(uint32 identifier, const ByteStream<StreamOperation::WRITE>& stream, view<char8> assetName, std::filesystem::path assetOutputPath) {
 				const std::string assetOutputPathString = assetOutputPath.string();
 
 				sequence<char8> outputPath(assetOutputPathString.size() + assetName.count() + 5);
