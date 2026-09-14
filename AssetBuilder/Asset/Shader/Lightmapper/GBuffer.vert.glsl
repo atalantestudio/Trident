@@ -16,6 +16,7 @@ out Interstage {
 	layout(location = 9) flat vec3 normalC;
 	layout(location = 10) vec3 barycentricCoordinate;
 	layout(location = 11) flat uint materialIndex;
+	layout(location = 12) flat float triangleArea;
 } interstage;
 
 struct Vertex {
@@ -23,19 +24,24 @@ struct Vertex {
 	uint _0;
 	vec3 normal;
 	uint _1;
-	vec4 tangent;
-	vec2 lightmapCoordinate;
 };
 
-layout(set = 0, binding = 0) buffer readonly VertexBuffer {
-	Vertex vertexBuffer[];
+struct Triangle {
+	uint index;
+	uint lightmapCoordinateIndexA;
+	uint lightmapCoordinateIndexB;
+	uint lightmapCoordinateIndexC;
+	uint materialIndex;
 };
 
-layout(set = 0, binding = 1) buffer readonly IndexBuffer {
-	uint indexBuffer[];
+struct Instance {
+	mat4x3 transform;
+	uint geometryTriangleOffset;
+	uint deduplicatedTriangleOffset;
+	uint lightmapCoordinateOffset;
 };
 
-const vec2 LIGHTMAP_COORDINATE_OFFSETS[25] = vec2[](
+/* const vec2 LIGHTMAP_COORDINATE_OFFSETS[25] = vec2[](
 	vec2(-2.0, -2.0),
 	vec2( 2.0, -2.0),
 	vec2(-2.0,  2.0),
@@ -61,15 +67,48 @@ const vec2 LIGHTMAP_COORDINATE_OFFSETS[25] = vec2[](
 	vec2( 0.0, -1.0),
 	vec2( 0.0,  1.0),
 	vec2( 0.0,  0.0)
-);
+); */
+
+layout(set = 0, binding = 0) buffer readonly VertexBuffer {
+	Vertex vertexBuffer[];
+};
+
+layout(set = 0, binding = 1) buffer readonly LightmapCoordinateBuffer {
+	vec2 lightmapCoordinateBuffer[];
+};
+
+layout(set = 0, binding = 2) buffer readonly IndexBuffer {
+	uint indexBuffer[];
+};
+
+layout(set = 0, binding = 3) buffer readonly TriangleBuffer {
+	Triangle triangleBuffer[];
+};
+
+layout(set = 0, binding = 4) buffer readonly InstanceBuffer {
+	Instance instanceBuffer[];
+};
+
+float calculateArea(vec3 a, vec3 b, vec3 c) {
+	return length(cross(b - a, c - a)) * 0.5;
+}
 
 void main() {
-	Vertex a = vertexBuffer[indexBuffer[gl_VertexIndex % 3 + 0]];
-	Vertex b = vertexBuffer[indexBuffer[gl_VertexIndex % 3 + 1]];
-	Vertex c = vertexBuffer[indexBuffer[gl_VertexIndex % 3 + 2]];
-	Vertex vertex = vertexBuffer[indexBuffer[gl_VertexIndex]];
+	uint triangleIndex = uint(gl_VertexIndex / 3);
 
-	vec2 coordinate = vertex.lightmapCoordinate;
+	Instance instance = instanceBuffer[gl_InstanceIndex];
+	Triangle triangle = triangleBuffer[instance.deduplicatedTriangleOffset + triangleIndex];
+
+	mat3x3 transform = mat3x3(instance.transform);
+
+	Vertex a = vertexBuffer[indexBuffer[triangleIndex * 3u + 0u]];
+	Vertex b = vertexBuffer[indexBuffer[triangleIndex * 3u + 1u]];
+	Vertex c = vertexBuffer[indexBuffer[triangleIndex * 3u + 2u]];
+
+	uint index = indexBuffer[gl_VertexIndex];
+
+	Vertex vertex = vertexBuffer[index];
+	vec2 coordinate = lightmapCoordinateBuffer[instance.lightmapCoordinateOffset + index];
 
 	// TODO(asset-builder/lightmapper): Get the atlas size.
 	// TODO(asset-builder/lightmapper): This fixes thin geometry receiving no light but adds leaks in larger geometry (e.g. floors and walls).
@@ -79,17 +118,18 @@ void main() {
 
 	gl_Position = vec4(coordinate * 2.0 - 1.0, 0.0, 1.0);
 
-	interstage.position = vertex.position;
-	interstage.triangleIndex = uint(gl_VertexIndex / 3 + 1);
-	interstage.triangleNormal = vertex.normal;
-	interstage.vertexNormal = vertex.normal;
-	interstage.positionA = a.position;
-	interstage.positionB = b.position;
-	interstage.positionC = c.position;
-	interstage.normalA = a.normal;
-	interstage.normalB = b.normal;
-	interstage.normalC = c.normal;
+	interstage.position = instance.transform * vec4(vertex.position, 1.0);
+	interstage.triangleIndex = instance.deduplicatedTriangleOffset + triangleIndex + 1u;
+	interstage.triangleNormal = vertex.normal * transform;
+	interstage.vertexNormal = interstage.triangleNormal;
+	interstage.positionA = instance.transform * vec4(a.position, 1.0);
+	interstage.positionB = instance.transform * vec4(b.position, 1.0);
+	interstage.positionC = instance.transform * vec4(c.position, 1.0);
+	interstage.normalA = a.normal * transform;
+	interstage.normalB = b.normal * transform;
+	interstage.normalC = c.normal * transform;
 	interstage.barycentricCoordinate = vec3(0.0, 0.0, 0.0);
 	interstage.barycentricCoordinate[gl_VertexIndex % 3] = 1.0;
-	interstage.materialIndex = uint(vertex.tangent.w);
+	interstage.materialIndex = triangle.materialIndex;
+	interstage.triangleArea = calculateArea(interstage.positionA, interstage.positionB, interstage.positionC);
 }

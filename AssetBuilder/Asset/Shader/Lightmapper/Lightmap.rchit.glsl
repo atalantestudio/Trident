@@ -9,26 +9,41 @@ hitAttributeEXT vec2 attributes;
 
 layout(location = 0) rayPayloadInEXT Hit hit;
 
+ivec2 interpolateLightmapCoordinate(Instance instance, uint triangleIndex, float u, float v, float w, uvec2 atlasSize) {
+	uint indexOffset = (instance.geometryTriangleOffset + triangleIndex) * 3u;
+
+	uint indexA = instance.lightmapCoordinateOffset + indexBuffer[indexOffset + 0u];
+	uint indexB = instance.lightmapCoordinateOffset + indexBuffer[indexOffset + 1u];
+	uint indexC = instance.lightmapCoordinateOffset + indexBuffer[indexOffset + 2u];
+
+	vec2 a = lightmapCoordinateBuffer[indexA];
+	vec2 b = lightmapCoordinateBuffer[indexB];
+	vec2 c = lightmapCoordinateBuffer[indexC];
+
+	vec2 coordinate = a * u + b * v + c * w;
+
+	return ivec2(coordinate * atlasSize);
+}
+
 void main() {
-	float u = 1.0 - attributes.x - attributes.y;
+	Instance instance = instanceBuffer[gl_InstanceID];
+
+	uint triangleIndex = gl_PrimitiveID;
+
 	float v = attributes.x;
 	float w = attributes.y;
+	float u = 1.0 - v - w;
 
-	// TODO: triangle offset?
-	Triangle triangle_ = loadTriangle(gl_PrimitiveID);
+	ivec2 coordinate = interpolateLightmapCoordinate(instance, triangleIndex, u, v, w, arguments.atlasSize);
 
-	ivec2 lightmapCoordinate = ivec2((
-		triangle_.vertices[0].lightmapCoordinate * u +
-		triangle_.vertices[1].lightmapCoordinate * v +
-		triangle_.vertices[2].lightmapCoordinate * w
-	) * arguments.atlasSize);
+	vec4 gBufferPosition = imageLoad(gBufferPositionImage, coordinate);
+	vec4 gBufferTriangleNormal = imageLoad(gBufferTriangleNormalImage, coordinate);
+	vec4 gBufferVertexNormal = imageLoad(gBufferVertexNormalImage, coordinate);
 
-	vec4 triangleNormalData = imageLoad(gBufferTriangleNormalImage, lightmapCoordinate);
-	vec4 vertexNormalData = imageLoad(gBufferVertexNormalImage, lightmapCoordinate);
-
-	hit.distance = gl_HitTEXT;
-	hit.position = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * hit.distance;
-	hit.triangleNormal = triangleNormalData.rgb;
-	hit.materialIndex = uint(vertexNormalData.a);
-	hit.vertexNormal = vertexNormalData.rgb;
+	hit.t = gl_HitTEXT;
+	hit.position = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * hit.t;
+	hit.triangleNormal = gBufferTriangleNormal.rgb;
+	hit.triangleIndex = uint(gBufferPosition.a - 1);
+	hit.vertexNormal = gBufferVertexNormal.rgb;
+	hit.materialIndex = uint(gBufferVertexNormal.a);
 }

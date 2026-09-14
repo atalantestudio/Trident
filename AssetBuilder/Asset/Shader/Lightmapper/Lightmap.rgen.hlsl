@@ -1,7 +1,7 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-#define CUSTOM_SCENE_DDGI_REF_0
+// #define CUSTOM_SCENE_DDGI_REF_0
 
 #include "Lightmap.hlsl"
 
@@ -234,8 +234,9 @@ void main() {
 	Hit hit;
 	hit.position = position;
 	hit.triangleNormal = triangleNormal;
-	hit.materialIndex = materialIndex;
+	hit.triangleIndex = triangleIndex - 1;
 	hit.vertexNormal = vertexNormal;
+	hit.materialIndex = materialIndex;
 
 	float3 light = float3(0.0, 0.0, 0.0);
 	uint sampleIndex = 0;

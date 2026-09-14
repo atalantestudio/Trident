@@ -47,13 +47,7 @@ struct Instance {
 	uint lightmapCoordinateOffset;
 };
 
-StructuredBuffer<Vertex> vertexBuffer : register(t0);
-StructuredBuffer<float2> lightmapCoordinateBuffer : register(t1);
-StructuredBuffer<uint> indexBuffer : register(t2);
-StructuredBuffer<Triangle> triangleBuffer : register(t3);
-StructuredBuffer<Instance> instanceBuffer : register(t4);
-
-static const float2 LIGHTMAP_COORDINATE_OFFSETS[25] = {
+/* static const float2 LIGHTMAP_COORDINATE_OFFSETS[25] = {
 	float2(-2.0, -2.0),
 	float2( 2.0, -2.0),
 	float2(-2.0,  2.0),
@@ -79,7 +73,13 @@ static const float2 LIGHTMAP_COORDINATE_OFFSETS[25] = {
 	float2( 0.0, -1.0),
 	float2( 0.0,  1.0),
 	float2( 0.0,  0.0),
-};
+}; */
+
+StructuredBuffer<Vertex> vertexBuffer : register(t0);
+StructuredBuffer<float2> lightmapCoordinateBuffer : register(t1);
+StructuredBuffer<uint> indexBuffer : register(t2);
+StructuredBuffer<Triangle> triangleBuffer : register(t3);
+StructuredBuffer<Instance> instanceBuffer : register(t4);
 
 float calculateArea(float3 a, float3 b, float3 c) {
 	return length(cross(b - a, c - a)) * 0.5;

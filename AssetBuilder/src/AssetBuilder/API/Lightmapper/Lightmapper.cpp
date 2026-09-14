@@ -469,6 +469,13 @@ namespace Trident {
 				.newLayout = ImageLayout::TRANSFER_DST_OPTIMAL,
 				.newAccess = Access::TRANSFER_WRITE,
 			},
+
+			// Intermediate lightmap atlas
+			{
+				.image = context.intermediateLightmapAtlasImage,
+				.newLayout = ImageLayout::GENERAL,
+				.newAccess = Access::SHADER_WRITE,
+			},
 		};
 
 		commandEncoder->insertMemoryBarriers({}, imageMemoryBarriers);
@@ -489,13 +496,10 @@ namespace Trident {
 
 		commandEncoder->copyBufferToImage(stagingBuffer, environmentMapImage, bufferImageCopyRegions[0]);
 
-		imageMemoryBarriers[0] = {
-			.image = environmentMapImage,
-			.newLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-			.newAccess = Access::SHADER_READ,
-		};
+		imageMemoryBarriers[0].newLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
+		imageMemoryBarriers[0].newAccess = Access::SHADER_READ;
 
-		commandEncoder->insertMemoryBarriers({}, imageMemoryBarriers);
+		commandEncoder->insertMemoryBarriers({}, imageMemoryBarriers[0]);
 
 		queue->submit(commandEncoder->end());
 		queue->waitIdle();
@@ -594,13 +598,6 @@ namespace Trident {
 					.image = context.gBufferVertexNormalImage,
 					.newLayout = ImageLayout::GENERAL,
 					.newAccess = Access::SHADER_READ,
-				},
-
-				// TODO(asset-builder/lightmapper/intermediate-lightmap-atlas): This image should have been transitioned earlier.
-				{
-					.image = context.intermediateLightmapAtlasImage,
-					.newLayout = ImageLayout::GENERAL,
-					.newAccess = Access::SHADER_WRITE,
 				},
 			};
 

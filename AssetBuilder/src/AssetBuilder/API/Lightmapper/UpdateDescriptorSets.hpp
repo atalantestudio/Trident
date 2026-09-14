@@ -110,94 +110,87 @@ namespace Trident {
 				.descriptorBufferViews = bufferViews[0],
 			},
 
-			// Vertex
-			{
-				.descriptorSet = descriptorSets[1],
-				.bindingIndex = 2,
-				.descriptorBufferViews = bufferViews[1],
-			},
-
 			// Lightmap coordinate
 			{
 				.descriptorSet = descriptorSets[1],
-				.bindingIndex = 3,
+				.bindingIndex = 2,
 				.descriptorBufferViews = bufferViews[2],
 			},
 
 			// Index
 			{
 				.descriptorSet = descriptorSets[1],
-				.bindingIndex = 4,
+				.bindingIndex = 3,
 				.descriptorBufferViews = bufferViews[3],
 			},
 
 			// Emissive triangle index
 			{
 				.descriptorSet = descriptorSets[1],
-				.bindingIndex = 5,
+				.bindingIndex = 4,
 				.descriptorBufferViews = bufferViews[4],
 			},
 
 			// Emissive triangle
 			{
 				.descriptorSet = descriptorSets[1],
-				.bindingIndex = 6,
+				.bindingIndex = 5,
 				.descriptorBufferViews = bufferViews[5],
 			},
 
 			// Instance
 			{
 				.descriptorSet = descriptorSets[1],
-				.bindingIndex = 7,
+				.bindingIndex = 6,
 				.descriptorBufferViews = bufferViews[6],
 			},
 
 			// Material
 			{
 				.descriptorSet = descriptorSets[1],
-				.bindingIndex = 8,
+				.bindingIndex = 7,
 				.descriptorBufferViews = bufferViews[7],
 			},
 
 			// Environment map
 			{
 				.descriptorSet = descriptorSets[1],
-				.bindingIndex = 9,
+				.bindingIndex = 8,
 				.descriptorImages = descriptorImages[0],
 			},
 
 			// G-Buffer position
 			{
 				.descriptorSet = descriptorSets[1],
-				.bindingIndex = 10,
+				.bindingIndex = 9,
 				.descriptorImages = descriptorImages[1],
 			},
 
 			// G-Buffer smooth position
 			{
 				.descriptorSet = descriptorSets[1],
-				.bindingIndex = 11,
+				.bindingIndex = 10,
 				.descriptorImages = descriptorImages[2],
 			},
 
 			// G-Buffer triangle normal
 			{
 				.descriptorSet = descriptorSets[1],
-				.bindingIndex = 12,
+				.bindingIndex = 11,
 				.descriptorImages = descriptorImages[3],
 			},
 
 			// G-Buffer vertex normal
 			{
 				.descriptorSet = descriptorSets[1],
-				.bindingIndex = 13,
+				.bindingIndex = 12,
 				.descriptorImages = descriptorImages[4],
 			},
 
 			// Intermediate lightmap atlas
 			{
 				.descriptorSet = descriptorSets[1],
-				.bindingIndex = 14,
+				.bindingIndex = 13,
 				.descriptorImages = descriptorImages[5],
 			},
 

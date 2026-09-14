@@ -8,5 +8,5 @@
 layout(location = 0) rayPayloadInEXT Hit hit;
 
 void main() {
-	hit.distance = -1.0;
+	hit.t = -1.0;
 }

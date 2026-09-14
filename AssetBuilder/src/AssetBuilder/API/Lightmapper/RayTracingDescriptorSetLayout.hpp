@@ -7,9 +7,6 @@
 
 namespace Trident {
 	ref<DescriptorSetLayout> Lightmapper::createRayTracingDescriptorSetLayout() const {
-		// TODO(wip)
-		const ShaderStage allStageFlags = ShaderStage::RAY_GENERATION | ShaderStage::RAY_CLOSEST_HIT;
-
 		const DescriptorSetLayoutBinding bindings[] = {
 			// TLAS
 			{
@@ -25,20 +22,11 @@ namespace Trident {
 				.stageFlags = ShaderStage::RAY_GENERATION | ShaderStage::RAY_CLOSEST_HIT,
 			},
 
-			// Vertex
-			{
-				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
-				.descriptorCount = 1,
-
-				// TODO(wip)
-				.stageFlags = allStageFlags,
-			},
-
 			// Lightmap coordinate
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
 				.descriptorCount = 1,
-				.stageFlags = ShaderStage::RAY_CLOSEST_HIT,
+				.stageFlags = ShaderStage::RAY_GENERATION | ShaderStage::RAY_CLOSEST_HIT,
 			},
 
 			// Index
@@ -87,7 +75,7 @@ namespace Trident {
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE,
 				.descriptorCount = 1,
-				.stageFlags = ShaderStage::RAY_GENERATION,
+				.stageFlags = ShaderStage::RAY_GENERATION | ShaderStage::RAY_CLOSEST_HIT,
 			},
 
 			// G-Buffer smooth position

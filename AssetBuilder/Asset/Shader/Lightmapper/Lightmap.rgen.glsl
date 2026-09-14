@@ -3,149 +3,199 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
+// #define CUSTOM_SCENE_DDGI_REF_0
+
 #include "Lightmap.glsl"
 
-bool rayTriangleIntersectionFrontFacing(Ray ray, Triangle triangle_, inout float t, inout vec3 barycentricCoordinate) {
-	const float E = 1e-8;
+// TODO(asset-builder/lightmapper/vk): Use rayPayloadInEXT?
+layout(location = 0) rayPayloadEXT Hit hit;
+layout(location = 1) rayPayloadEXT Hit primaryHit;
+layout(location = 2) rayPayloadEXT Hit secondaryHit;
 
-	vec3 a = triangle_.vertices[0].position;
-	vec3 b = triangle_.vertices[1].position;
-	vec3 c = triangle_.vertices[2].position;
-	vec3 ab = b - a;
-	vec3 ac = c - a;
-	vec3 normal = cross(ab, ac);
-	float d = -dot(normal, ray.direction);
+void pcgHash(inout uint seed) {
+	uint state = seed * 747796405 + 2891336453;
+	uint word = ((state >> ((state >> 28) + 4)) ^ state) * 277803737;
 
-	if (d < E) {
-		return false;
-	}
-
-	vec3 ao = ray.origin - a;
-	float inverseD = 1.0 / d;
-
-	t = dot(ao, normal) * inverseD;
-
-	if (t < 0.0) {
-		return false;
-	}
-
-	vec3 dao = cross(ao, ray.direction);
-	float u = dot(ac, dao) * inverseD;
-
-	if (u < 0.0) {
-		return false;
-	}
-
-	float v = -dot(ab, dao) * inverseD;
-
-	if (v < 0.0) {
-		return false;
-	}
-
-	float w = 1 - u - v;
-
-	if (w < 0.0) {
-		return false;
-	}
-
-	barycentricCoordinate = vec3(w, u, v);
-
-	return true;
+	seed = (word >> 22) ^ word;
 }
 
-// TODO: Use rayPayloadInEXT?
-layout(location = 0) rayPayloadEXT Hit _primaryHit;
+float randomScalar(inout uint seed) {
+	pcgHash(seed);
 
-/* Hit rchit(Ray ray, uint triangleIndex, Triangle triangle_, float distance, vec3 barycentricCoordinate) {
-	ivec2 lightmapCoordinate = ivec2((
-		triangle_.vertices[0].lightmapCoordinate * barycentricCoordinate.x +
-		triangle_.vertices[1].lightmapCoordinate * barycentricCoordinate.y +
-		triangle_.vertices[2].lightmapCoordinate * barycentricCoordinate.z
-	) * arguments.atlasSize);
-
-	vec4 triangleNormalData = imageLoad(gBufferTriangleNormalImage, lightmapCoordinate);
-	vec4 vertexNormalData = imageLoad(gBufferVertexNormalImage, lightmapCoordinate);
-
-	Hit hit;
-	hit.position = ray.origin + ray.direction * distance;
-	hit.distance = distance;
-	hit.triangleNormal = triangleNormalData.rgb;
-	hit.materialIndex = uint(vertexNormalData.a);
-	hit.vertexNormal = vertexNormalData.rgb;
-
-	return hit;
-} */
-
-/* Hit rmiss() {
-	Hit hit;
-	hit.distance = -1.0;
-
-	return hit;
-} */
-
-Hit rintFrontFacing(Ray ray) {
-	traceRayEXT(tlas, gl_RayFlagsNoneEXT, 0xff, 0, 0, 0, ray.origin, 0.001, ray.direction, 2048.0, 0);
-
-	return _primaryHit;
-
-	/* float closestDistance = FLOAT_MAX;
-	uint intersectingTriangleIndex = arguments.triangleCount;
-	Triangle intersectingTriangle;
-	vec3 intersectingBarycentricCoordinate;
-	uint triangleIndex = 0;
-
-	while (triangleIndex < arguments.triangleCount) {
-		Triangle triangle_ = loadTriangle(triangleIndex);
-		float distance;
-		vec3 barycentricCoordinate;
-
-		if (rayTriangleIntersectionFrontFacing(ray, triangle_, distance, barycentricCoordinate)) {
-			if (distance < closestDistance) {
-				closestDistance = distance;
-				intersectingTriangleIndex = triangleIndex;
-				intersectingTriangle = triangle_;
-				intersectingBarycentricCoordinate = barycentricCoordinate;
-			}
-		}
-
-		triangleIndex += 1;
-	}
-
-	if (intersectingTriangleIndex < arguments.triangleCount) {
-		return rchit(ray, intersectingTriangleIndex, intersectingTriangle, closestDistance, intersectingBarycentricCoordinate);
-	}
-
-	return rmiss(); */
+	return seed / FLOAT_MAX;
 }
 
-vec3 rgen(Hit primaryHit, inout uint seed) {
-	vec3 incomingLight = vec3(0.0, 0.0, 0.0);
+vec3 randomUnitDirection(inout uint seed) {
+	return normalize(vec3(randomScalar(seed), randomScalar(seed), randomScalar(seed)) * 2.0 - 1.0);
+}
+
+vec3 sampleDirectLight(Ray primaryRay, inout uint seed) {
+	const float pdfDiffuse = 1.0 / (4.0 * PI);
+
+#if defined(CUSTOM_SCENE_DDGI_REF_0)
+	vec3 p = vec3(0.0, 64.0, 164.0);
+	vec3 op = p - primaryRay.origin;
+	float pdfLight = 1.0;
+
+	Ray secondaryRay = primaryRay;
+	secondaryRay.direction = normalize(op);
+
+	if (dot(primaryHit.vertexNormal, secondaryRay.direction) < 0.0) {
+		return vec3(0.0, 0.0, 0.0);
+	}
+
+	traceRayEXT(accelerationStructure, gl_RayFlagsOpaqueEXT | gl_RayFlagsCullBackFacingTrianglesEXT, 0xff, 0, 0, 0, secondaryRay.origin, secondaryRay.tMin, secondaryRay.direction, secondaryRay.tMax, 2);
+
+	if (secondaryHit.t < length(op)) {
+		return vec3(0.0, 0.0, 0.0);
+	}
+
+	float angleA = dot(secondaryRay.direction, primaryHit.vertexNormal);
+	float angleB = -1.0;
+	float G = 1.0 / dot(op, op) * angleA * max(0.001, abs(angleB));
+	float h = pdfLight / (pdfLight + pdfDiffuse * G);
+
+	return vec3(256.0) * G / pdfLight * h;
+#else
+	if (arguments.emissiveTriangleCount == 0) {
+		return vec3(0.0, 0.0, 0.0);
+	}
+
+	uint emissiveTriangleIndexIndex = uint(randomScalar(seed) * arguments.emissiveTriangleCount);
+	uint emissiveTriangleIndex = emissiveTriangleIndexBuffer[emissiveTriangleIndexIndex];
+
+	Triangle triangle_ = triangleBuffer[emissiveTriangleIndex];
+
+	vec2 a = lightmapCoordinateBuffer[triangle_.lightmapCoordinateIndexA];
+	vec2 b = lightmapCoordinateBuffer[triangle_.lightmapCoordinateIndexB];
+	vec2 c = lightmapCoordinateBuffer[triangle_.lightmapCoordinateIndexC];
+
+	float u = randomScalar(seed);
+	float v = randomScalar(seed);
+
+	if (u + v > 1.0) {
+		u = 1.0 - u;
+		v = 1.0 - v;
+	}
+
+	float w = 1.0 - u - v;
+	ivec2 coordinate = ivec2((a * u + b * v + c * w) * arguments.atlasSize);
+
+	vec3 p = imageLoad(gBufferPositionImage, coordinate).rgb;
+	vec3 op = p - primaryRay.origin;
+	float area = imageLoad(gBufferSmoothPositionImage, coordinate).a;
+	float pdfLight = 1.0 / (area * arguments.emissiveTriangleCount);
+
+	Ray secondaryRay = primaryRay;
+	secondaryRay.direction = normalize(op);
+
+	if (dot(primaryHit.vertexNormal, secondaryRay.direction) < 0.0) {
+		return vec3(0.0, 0.0, 0.0);
+	}
+
+	traceRayEXT(accelerationStructure, gl_RayFlagsOpaqueEXT | gl_RayFlagsCullBackFacingTrianglesEXT, 0xff, 0, 0, 0, secondaryRay.origin, secondaryRay.tMin, secondaryRay.direction, secondaryRay.tMax, 2);
+
+	if (secondaryHit.triangleIndex != triangle_.index) {
+		return vec3(0.0, 0.0, 0.0);
+	}
+
+	Material material = materialBuffer[secondaryHit.materialIndex];
+
+	float angleA = dot(secondaryRay.direction, primaryHit.vertexNormal);
+	float angleB = dot(secondaryRay.direction, secondaryHit.vertexNormal);
+	float G = 1.0 / dot(op, op) * angleA * max(0.001, abs(angleB));
+	float h = pdfLight / (pdfLight + pdfDiffuse * G);
+
+	return material.emissiveColor * material.emissiveIntensity * G / pdfLight * h;
+#endif
+}
+
+vec3 traceRay(inout uint seed) {
+	vec3 light = vec3(0.0, 0.0, 0.0);
 	vec3 throughput = vec3(1.0, 1.0, 1.0);
 	uint bounceIndex = 0;
 
 	while (bounceIndex < BOUNCE_COUNT) {
 		Material material = materialBuffer[primaryHit.materialIndex];
 
-		vec3 o = primaryHit.position + sign(primaryHit.vertexNormal) * abs(primaryHit.position * ADAPTIVE_BIAS);
+		throughput *= material.albedo;
 
 		Ray primaryRay;
-		primaryRay.origin = o;
+		primaryRay.origin = primaryHit.position + sign(primaryHit.vertexNormal) * abs(primaryHit.position * ADAPTIVE_BIAS);
+		primaryRay.tMin = 0.0;
 		primaryRay.direction = normalize(primaryHit.vertexNormal + randomUnitDirection(seed));
 
-		primaryHit = rintFrontFacing(primaryRay);
+		// TODO(asset-builder/lightmapper): Use the scene bounds.
+		primaryRay.tMax = 2048.0;
 
-		if (primaryHit.distance < 0.0) {
-			incomingLight += arguments.skyColor * throughput;
+		vec3 directLight = sampleDirectLight(primaryRay, seed);
+		vec3 brdf = material.albedo / PI;
+
+		light += directLight * throughput * brdf;
+
+		traceRayEXT(accelerationStructure, gl_RayFlagsOpaqueEXT | gl_RayFlagsCullBackFacingTrianglesEXT, 0xff, 0, 0, 0, primaryRay.origin, primaryRay.tMin, primaryRay.direction, primaryRay.tMax, 1);
+
+		if (primaryHit.t < 0.0) {
+			light += texture(environmentMap, primaryRay.direction).rgb * throughput;
 
 			break;
 		}
 
-		throughput *= material.albedo;
-
 		bounceIndex += 1;
 	}
 
-	return incomingLight;
+	return light;
+}
+
+bool adjustSamplePosition(inout vec3 position, vec3 triangleNormal, float diagonalLuxelSize) {
+	vec3 a = normalize(cross(position, triangleNormal));
+	vec3 b = normalize(cross(a, triangleNormal));
+
+	Ray ray;
+	ray.origin = position + sign(triangleNormal) * abs(position * ADAPTIVE_BIAS);
+	ray.tMin = 0.0;
+	ray.direction = a;
+	ray.tMax = diagonalLuxelSize * 0.5;
+
+	traceRayEXT(accelerationStructure, gl_RayFlagsOpaqueEXT | gl_RayFlagsCullFrontFacingTrianglesEXT, 0xff, 0, 0, 0, ray.origin, ray.tMin, ray.direction, ray.tMax, 0);
+
+	if (hit.t > 0.0) {
+		position = hit.position + sign(hit.triangleNormal) * abs(hit.position * ADAPTIVE_BIAS);
+
+		return true;
+	}
+
+	ray.direction = b;
+
+	traceRayEXT(accelerationStructure, gl_RayFlagsOpaqueEXT | gl_RayFlagsCullFrontFacingTrianglesEXT, 0xff, 0, 0, 0, ray.origin, ray.tMin, ray.direction, ray.tMax, 0);
+
+	if (hit.t > 0.0) {
+		position = hit.position + sign(hit.triangleNormal) * abs(hit.position * ADAPTIVE_BIAS);
+
+		return true;
+	}
+
+	ray.direction = -a;
+
+	traceRayEXT(accelerationStructure, gl_RayFlagsOpaqueEXT | gl_RayFlagsCullFrontFacingTrianglesEXT, 0xff, 0, 0, 0, ray.origin, ray.tMin, ray.direction, ray.tMax, 0);
+
+	if (hit.t > 0.0) {
+		position = hit.position + sign(hit.triangleNormal) * abs(hit.position * ADAPTIVE_BIAS);
+
+		return true;
+	}
+
+	ray.direction = -b;
+
+	traceRayEXT(accelerationStructure, gl_RayFlagsOpaqueEXT | gl_RayFlagsCullFrontFacingTrianglesEXT, 0xff, 0, 0, 0, ray.origin, ray.tMin, ray.direction, ray.tMax, 0);
+
+	if (hit.t > 0.0) {
+		position = hit.position + sign(hit.triangleNormal) * abs(hit.position * ADAPTIVE_BIAS);
+
+		return true;
+	}
+
+	return false;
 }
 
 void main() {
@@ -158,34 +208,48 @@ void main() {
 		return;
 	}
 
-	uint seed = coordinate.y * arguments.atlasSize.x + coordinate.x;
-	vec4 positionData = imageLoad(gBufferPositionImage, coordinate);
-	vec4 smoothPositionData = imageLoad(gBufferSmoothPositionImage, coordinate);
-	vec4 triangleNormalData = imageLoad(gBufferTriangleNormalImage, coordinate);
-	vec4 vertexNormalData = imageLoad(gBufferVertexNormalImage, coordinate);
+	vec3 position = gBufferPosition.rgb;
+	vec4 gBufferTriangleNormal = imageLoad(gBufferTriangleNormalImage, coordinate);
+	vec3 triangleNormal = gBufferTriangleNormal.rgb;
+	float diagonalLuxelSize = uint(gBufferTriangleNormal.a);
 
-	vec3 position = positionData.rgb;
-	vec3 smoothPosition = smoothPositionData.rgb;
-	vec3 triangleNormal = triangleNormalData.rgb;
-	float diagonalLuxelSize = triangleNormalData.a;
-	vec3 vertexNormal = vertexNormalData.rgb;
+	adjustSamplePosition(position, triangleNormal, diagonalLuxelSize);
+
+	vec4 gBufferSmoothPosition = imageLoad(gBufferSmoothPositionImage, coordinate);
+	vec3 smoothPosition = gBufferSmoothPosition.rgb;
+	vec4 gBufferVertexNormal = imageLoad(gBufferVertexNormalImage, coordinate);
+	vec3 vertexNormal = gBufferVertexNormal.rgb;
+	uint materialIndex = uint(gBufferVertexNormal.a);
+
+	Material material = materialBuffer[materialIndex];
+
+	if (material.emissiveIntensity > 0.0) {
+		imageStore(intermediateLightmapAtlas, coordinate, vec4(material.emissiveColor * material.emissiveIntensity, 1.0));
+
+		return;
+	}
+
+	uint seed = coordinate.y * arguments.atlasSize.x + coordinate.x;
 
 	Hit hit;
 	hit.position = position;
 	hit.triangleNormal = triangleNormal;
-	hit.materialIndex = uint(vertexNormalData.w);
+	hit.triangleIndex = triangleIndex - 1;
 	hit.vertexNormal = vertexNormal;
+	hit.materialIndex = materialIndex;
 
-	vec3 radiance = vec3(0.0, 0.0, 0.0);
+	vec3 light = vec3(0.0, 0.0, 0.0);
 	uint sampleIndex = 0;
 
 	while (sampleIndex < SAMPLE_COUNT) {
-		radiance += rgen(hit, seed);
+		primaryHit = hit;
+
+		light += traceRay(seed);
 
 		sampleIndex += 1;
 	}
 
-	vec3 light = radiance / SAMPLE_COUNT;
+	light /= SAMPLE_COUNT;
 	light = pow(light, vec3(1.0 / 2.2));
 
 	imageStore(intermediateLightmapAtlas, coordinate, vec4(light, 1.0));
