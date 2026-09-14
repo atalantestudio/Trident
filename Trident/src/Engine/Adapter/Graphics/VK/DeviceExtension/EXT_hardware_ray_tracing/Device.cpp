@@ -253,15 +253,20 @@ namespace Trident::VK {
 			shaderModuleIndex += 1;
 		}
 
-		VkRayTracingPipelineInterfaceCreateInfoKHR interfaceCreateInfo{};
+		// TODO(graphics/vk/ext_hardware_ray_tracing/attribute-and-payload-sizes)
+		/* VkRayTracingPipelineInterfaceCreateInfoKHR interfaceCreateInfo{};
 		interfaceCreateInfo.sType = VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_INTERFACE_CREATE_INFO_KHR;
 		interfaceCreateInfo.pNext = nullptr;
 		interfaceCreateInfo.maxPipelineRayPayloadSize = descriptor.maxRayPayloadSize;
-		interfaceCreateInfo.maxPipelineRayHitAttributeSize = descriptor.maxRayAttributeSize;
+		interfaceCreateInfo.maxPipelineRayHitAttributeSize = descriptor.maxRayAttributeSize; */
 
 		VkRayTracingPipelineCreateInfoKHR createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_KHR;
-		createInfo.pNext = &interfaceCreateInfo;
+
+		// TODO(graphics/vk/ext_hardware_ray_tracing/attribute-and-payload-sizes)
+		// createInfo.pNext = &interfaceCreateInfo;
+		createInfo.pNext = nullptr;
+
 		createInfo.flags = 0;
 		createInfo.stageCount = static_cast<uint32>(shaderStageCreateInfos.count());
 		createInfo.pStages = &shaderStageCreateInfos[0];
