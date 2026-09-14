@@ -73,12 +73,35 @@ vec4 sampleBicubic(sampler2D textureSampler, vec2 coordinate) {
 	return mix(mix(sample3, sample2, sx), mix(sample1, sample0, sx), sy);
 }
 
+float sdSphere(vec3 position, float radius) {
+	return length(position) - radius;
+}
+
+float sdBox(vec3 position, vec3 size) {
+	vec3 q = abs(position) - size / 2.0;
+
+	return length(max(vec3(0.0, 0.0, 0.0), q)) + min(0.0, max(q.x, max(q.y, q.z)));
+}
+
 void main() {
 #if defined(CUSTOM_SCENE_DDGI_REF_0)
 	fragment.rgb = sampleBicubic(lightmapAtlasMap, interstage.lightmapCoordinate).rgb;
 #else
 	const vec3 lightPosition = vec3(0.0, 64.0, 164.0);
 	const float lightIntensity = 256.0;
+
+	const vec3 boxPosition = vec3(32.0, 32.0, 196.0);
+	const vec3 boxSize = vec3(32.0, 32.0, 32.0);
+
+	vec3 p = boxPosition - interstage.surface;
+
+	float d = sdBox(p, boxSize);
+
+	if (d <= 0.0) {
+		fragment.rgb = vec3(1.0);
+
+		return;
+	}
 
 	vec3 surfaceToLight = lightPosition - interstage.surface;
 

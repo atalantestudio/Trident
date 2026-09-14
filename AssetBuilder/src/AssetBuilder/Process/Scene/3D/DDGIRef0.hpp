@@ -134,6 +134,8 @@ namespace Trident {
 					},
 				});
 
+				const uint32 boxGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("3d_unit_box"));
+
 				const MaterialReference material = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("ddgi"));
 
 				builder.placeSurface(
@@ -208,6 +210,21 @@ namespace Trident {
 					},
 					transform
 				);
+
+				builder.placeStaticProp({
+					.geometryIndex = boxGeometry,
+					.material = material,
+					.transform = {
+						.translation = {32.0f, 32.0f, 196.0f},
+						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
+						.scale = 32.0f,
+					},
+					.lightmap = {
+						.luxelScale = {1.0f, 1.0f},
+						.albedo = {1.0f, 1.0f, 1.0f},
+					},
+					.lightmapScale = {32.0f, 32.0f},
+				});
 
 				return builder;
 			}
