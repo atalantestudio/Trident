@@ -3,31 +3,38 @@
 
 #pragma once
 
+#include "Engine/Filesystem/Filesystem.hpp"
+
 #include "AssetBuilder/API/Utilities/Utilities.hpp"
 #include "../../../File/FBX.hpp"
-
-#include "Engine/Filesystem/Decoder/Decoder.hpp"
-#include "Engine/Filesystem/Filesystem.hpp"
 
 namespace Trident {
 	BuildGeometry3D decodeFBXGeometry(view<uint8> inputData, uint32 identifier) {
 		const File<FileFormat::FBX> file = Decoder<FileFormat::FBX>::decode(inputData);
+		const FBX::Node* ObjectsNode = FBX::findNode(file, "Objects");
 
-		// TODO: Ensure that FBX nodes exist before using them.
-		const FBXNode* ObjectsNode = file.searchNodeRecursive(file.NodeList, "Objects");
-		const FBXNode* GeometryNode = file.searchNodeRecursive(ObjectsNode->NestedList, "Geometry");
-		const FBXNode* VerticesNode = file.searchNodeRecursive(GeometryNode->NestedList, "Vertices");
-		const FBXNode* PolygonVertexIndexNode = file.searchNodeRecursive(GeometryNode->NestedList, "PolygonVertexIndex");
+		ENGINE_ASSERT(ObjectsNode != nullptr, "Failed to find 'Objects' node.");
 
-		DEBUG_ASSERT(VerticesNode->PropertyList[0]->TypeCode == FBXPropertyTypeCode::d);
-		DEBUG_ASSERT(PolygonVertexIndexNode->PropertyList[0]->TypeCode == FBXPropertyTypeCode::i);
+		const FBX::Node* GeometryNode = FBX::findNode(file, ObjectsNode, "Geometry");
 
-		const std::shared_ptr<FBXArrayProperty<float64>> VerticesProperty = std::static_pointer_cast<FBXArrayProperty<float64>>(VerticesNode->PropertyList[0]);
-		const std::shared_ptr<FBXArrayProperty<sint32>> PolygonVertexIndexProperty = std::static_pointer_cast<FBXArrayProperty<sint32>>(PolygonVertexIndexNode->PropertyList[0]);
-		const view<float64> vertexPositionComponents = VerticesProperty->Contents;
+		ENGINE_ASSERT(GeometryNode != nullptr, "Failed to find 'Geometry' node.");
+
+		const FBX::Node* VerticesNode = FBX::findNode(file, GeometryNode, "Vertices");
+
+		ENGINE_ASSERT(VerticesNode != nullptr, "Failed to find 'Vertices' node.");
+
+		const FBX::Node* PolygonVertexIndexNode = FBX::findNode(file, GeometryNode, "PolygonVertexIndex");
+
+		ENGINE_ASSERT(PolygonVertexIndexNode != nullptr, "Failed to find 'PolygonVertexIndex' node.");
+		DEBUG_ASSERT(file.properties[VerticesNode->propertyRange.offset]->typeCode == FBX::PropertyTypeCode::d);
+		DEBUG_ASSERT(file.properties[PolygonVertexIndexNode->propertyRange.offset]->typeCode == FBX::PropertyTypeCode::i);
+
+		const ref<FBX::ArrayProperty<float64>> VerticesProperty = ref_cast<FBX::ArrayProperty<float64>>(file.properties[VerticesNode->propertyRange.offset]);
+		const ref<FBX::ArrayProperty<sint32>> PolygonVertexIndexProperty = ref_cast<FBX::ArrayProperty<sint32>>(file.properties[PolygonVertexIndexNode->propertyRange.offset]);
+		const view<float64> vertexPositionComponents = VerticesProperty->contents;
 
 		ENGINE_ASSERT(vertexPositionComponents.count() >= 3, "Invalid vertex position component buffer length.");
-		ENGINE_ASSERT(PolygonVertexIndexProperty->Contents.count() >= 3, "Invalid vertex position index buffer length.");
+		ENGINE_ASSERT(PolygonVertexIndexProperty->contents.count() >= 3, "Invalid vertex position index buffer length.");
 
 		uint32 indexCount = 0;
 
@@ -36,9 +43,9 @@ namespace Trident {
 			uint32 polygonOffset = 0;
 			uint32 triangleOffset = 0;
 
-			while (polygonOffset < PolygonVertexIndexProperty->Contents.count()) {
-				while (triangleOffset < PolygonVertexIndexProperty->Contents.count() - polygonOffset) {
-					const sint32 thirdIndex = PolygonVertexIndexProperty->Contents[polygonOffset + triangleOffset + 2];
+			while (polygonOffset < PolygonVertexIndexProperty->contents.count()) {
+				while (triangleOffset < PolygonVertexIndexProperty->contents.count() - polygonOffset) {
+					const sint32 thirdIndex = PolygonVertexIndexProperty->contents[polygonOffset + triangleOffset + 2];
 
 					indexCount += 3;
 
@@ -62,13 +69,13 @@ namespace Trident {
 		uint32 indexOffset = 0;
 
 		// Parse vertex position indices.
-		while (polygonOffset < PolygonVertexIndexProperty->Contents.count()) {
+		while (polygonOffset < PolygonVertexIndexProperty->contents.count()) {
 			uint32 triangleOffset = 0;
 
-			while (triangleOffset < PolygonVertexIndexProperty->Contents.count() - polygonOffset) {
-				const sint32 indexA = PolygonVertexIndexProperty->Contents[polygonOffset];
-				const sint32 indexB = PolygonVertexIndexProperty->Contents[polygonOffset + triangleOffset + 1];
-				const sint32 indexC = PolygonVertexIndexProperty->Contents[polygonOffset + triangleOffset + 2];
+			while (triangleOffset < PolygonVertexIndexProperty->contents.count() - polygonOffset) {
+				const sint32 indexA = PolygonVertexIndexProperty->contents[polygonOffset];
+				const sint32 indexB = PolygonVertexIndexProperty->contents[polygonOffset + triangleOffset + 1];
+				const sint32 indexC = PolygonVertexIndexProperty->contents[polygonOffset + triangleOffset + 2];
 
 				vertexPositionIndices[indexOffset + 0] = indexA;
 				vertexPositionIndices[indexOffset + 1] = indexB;
@@ -96,21 +103,31 @@ namespace Trident {
 
 		// Parse vertex normal components and indices.
 		{
-			const FBXNode* LayerElementNormalNode = file.searchNodeRecursive(GeometryNode->NestedList, "LayerElementNormal");
-			const FBXNode* MappingInformationTypeNode = file.searchNodeRecursive(LayerElementNormalNode->NestedList, "MappingInformationType");
-			const FBXNode* ReferenceInformationTypeNode = file.searchNodeRecursive(LayerElementNormalNode->NestedList, "ReferenceInformationType");
-			const FBXNode* NormalsNode = file.searchNodeRecursive(LayerElementNormalNode->NestedList, "Normals");
+			const FBX::Node* LayerElementNormalNode = FBX::findNode(file, GeometryNode, "LayerElementNormal");
 
-			DEBUG_ASSERT(MappingInformationTypeNode->PropertyList[0]->TypeCode == FBXPropertyTypeCode::S);
-			DEBUG_ASSERT(ReferenceInformationTypeNode->PropertyList[0]->TypeCode == FBXPropertyTypeCode::S);
-			DEBUG_ASSERT(NormalsNode->PropertyList[0]->TypeCode == FBXPropertyTypeCode::d);
+			ENGINE_ASSERT(LayerElementNormalNode != nullptr, "Failed to find 'LayerElementNormal' node.");
 
-			const std::shared_ptr<FBXSpecialProperty> MappingInformationTypeProperty = std::static_pointer_cast<FBXSpecialProperty>(MappingInformationTypeNode->PropertyList[0]);
-			const std::shared_ptr<FBXSpecialProperty> ReferenceInformationTypeProperty = std::static_pointer_cast<FBXSpecialProperty>(ReferenceInformationTypeNode->PropertyList[0]);
-			const std::shared_ptr<FBXArrayProperty<float64>> NormalsProperty = std::static_pointer_cast<FBXArrayProperty<float64>>(NormalsNode->PropertyList[0]);
+			const FBX::Node* MappingInformationTypeNode = FBX::findNode(file, LayerElementNormalNode, "MappingInformationType");
 
-			const view<char8> MappingInformationType(pointer_cast<const char8*>(MappingInformationTypeProperty->Data.begin()), MappingInformationTypeProperty->Data.count());
-			const view<char8> ReferenceInformationType(pointer_cast<const char8*>(ReferenceInformationTypeProperty->Data.begin()), ReferenceInformationTypeProperty->Data.count());
+			ENGINE_ASSERT(MappingInformationTypeNode != nullptr, "Failed to find 'MappingInformationType' node.");
+
+			const FBX::Node* ReferenceInformationTypeNode = FBX::findNode(file, LayerElementNormalNode, "ReferenceInformationType");
+
+			ENGINE_ASSERT(ReferenceInformationTypeNode != nullptr, "Failed to find 'ReferenceInformationType' node.");
+
+			const FBX::Node* NormalsNode = FBX::findNode(file, LayerElementNormalNode, "Normals");
+
+			ENGINE_ASSERT(NormalsNode != nullptr, "Failed to find 'Normals' node.");
+			DEBUG_ASSERT(file.properties[MappingInformationTypeNode->propertyRange.offset]->typeCode == FBX::PropertyTypeCode::S);
+			DEBUG_ASSERT(file.properties[ReferenceInformationTypeNode->propertyRange.offset]->typeCode == FBX::PropertyTypeCode::S);
+			DEBUG_ASSERT(file.properties[NormalsNode->propertyRange.offset]->typeCode == FBX::PropertyTypeCode::d);
+
+			const ref<FBX::SpecialProperty> MappingInformationTypeProperty = ref_cast<FBX::SpecialProperty>(file.properties[MappingInformationTypeNode->propertyRange.offset]);
+			const ref<FBX::SpecialProperty> ReferenceInformationTypeProperty = ref_cast<FBX::SpecialProperty>(file.properties[ReferenceInformationTypeNode->propertyRange.offset]);
+			const ref<FBX::ArrayProperty<float64>> NormalsProperty = ref_cast<FBX::ArrayProperty<float64>>(file.properties[NormalsNode->propertyRange.offset]);
+
+			const view<char8> MappingInformationType(pointer_cast<const char8*>(MappingInformationTypeProperty->data.begin()), MappingInformationTypeProperty->data.count());
+			const view<char8> ReferenceInformationType(pointer_cast<const char8*>(ReferenceInformationTypeProperty->data.begin()), ReferenceInformationTypeProperty->data.count());
 
 			if (MappingInformationType == "ByPolygonVertex") {
 				if (ReferenceInformationType == "Direct") {
@@ -118,12 +135,12 @@ namespace Trident {
 					vertexNormalIndices = vertexPositionIndices;
 
 					// Sum normals for each individual vertex.
-					for (uint32 vertexNormalIndexOffset = 0; vertexNormalIndexOffset < PolygonVertexIndexProperty->Contents.count(); vertexNormalIndexOffset += 1) {
-						const uint32 vertexNormalIndex = PolygonVertexIndexProperty->Contents[vertexNormalIndexOffset] < 0 ? ~PolygonVertexIndexProperty->Contents[vertexNormalIndexOffset] : PolygonVertexIndexProperty->Contents[vertexNormalIndexOffset];
+					for (uint32 vertexNormalIndexOffset = 0; vertexNormalIndexOffset < PolygonVertexIndexProperty->contents.count(); vertexNormalIndexOffset += 1) {
+						const uint32 vertexNormalIndex = PolygonVertexIndexProperty->contents[vertexNormalIndexOffset] < 0 ? ~PolygonVertexIndexProperty->contents[vertexNormalIndexOffset] : PolygonVertexIndexProperty->contents[vertexNormalIndexOffset];
 
-						vertexNormalComponents[vertexNormalIndex * 3 + 0] += NormalsProperty->Contents[vertexNormalIndexOffset * 3 + 0];
-						vertexNormalComponents[vertexNormalIndex * 3 + 1] += NormalsProperty->Contents[vertexNormalIndexOffset * 3 + 1];
-						vertexNormalComponents[vertexNormalIndex * 3 + 2] += NormalsProperty->Contents[vertexNormalIndexOffset * 3 + 2];
+						vertexNormalComponents[vertexNormalIndex * 3 + 0] += NormalsProperty->contents[vertexNormalIndexOffset * 3 + 0];
+						vertexNormalComponents[vertexNormalIndex * 3 + 1] += NormalsProperty->contents[vertexNormalIndexOffset * 3 + 1];
+						vertexNormalComponents[vertexNormalIndex * 3 + 2] += NormalsProperty->contents[vertexNormalIndexOffset * 3 + 2];
 					}
 
 					// Normalize the sum and overwrite.
@@ -140,28 +157,29 @@ namespace Trident {
 					}
 				}
 				else if (ReferenceInformationType == "IndexToDirect") {
-					const FBXNode* NormalsIndexNode = file.searchNodeRecursive(LayerElementNormalNode->NestedList, "NormalsIndex");
+					const FBX::Node* NormalsIndexNode = FBX::findNode(file, LayerElementNormalNode, "NormalsIndex");
 
-					DEBUG_ASSERT(NormalsIndexNode->PropertyList[0]->TypeCode == FBXPropertyTypeCode::i);
+					ENGINE_ASSERT(NormalsIndexNode != nullptr, "Failed to find 'NormalsIndex' node.");
+					DEBUG_ASSERT(file.properties[NormalsIndexNode->propertyRange.offset]->typeCode == FBX::PropertyTypeCode::i);
 
-					const std::shared_ptr<FBXArrayProperty<sint32>> NormalsIndexProperty = std::static_pointer_cast<FBXArrayProperty<sint32>>(NormalsIndexNode->PropertyList[0]);
+					const ref<FBX::ArrayProperty<sint32>> NormalsIndexProperty = ref_cast<FBX::ArrayProperty<sint32>>(file.properties[NormalsIndexNode->propertyRange.offset]);
 
-					vertexNormalComponents = NormalsProperty->Contents;
+					vertexNormalComponents = NormalsProperty->contents;
 					vertexNormalIndices = sequence<uint32>(vertexPositionIndices.count());
 
 					uint32 polygonOffset = 0;
 					uint32 indexOffset = 0;
 
 					// TODO: This section is similar to the index count section above; maybe try merging the two.
-					while (polygonOffset < NormalsIndexProperty->Contents.count()) {
+					while (polygonOffset < NormalsIndexProperty->contents.count()) {
 						uint32 triangleOffset = 0;
 
-						while (triangleOffset < NormalsIndexProperty->Contents.count() - polygonOffset) {
-							const sint32 indexC = PolygonVertexIndexProperty->Contents[polygonOffset + triangleOffset + 2];
+						while (triangleOffset < NormalsIndexProperty->contents.count() - polygonOffset) {
+							const sint32 indexC = PolygonVertexIndexProperty->contents[polygonOffset + triangleOffset + 2];
 
-							vertexNormalIndices[indexOffset + 0] = NormalsIndexProperty->Contents[polygonOffset];
-							vertexNormalIndices[indexOffset + 1] = NormalsIndexProperty->Contents[polygonOffset + triangleOffset + 1];
-							vertexNormalIndices[indexOffset + 2] = NormalsIndexProperty->Contents[polygonOffset + triangleOffset + 2];
+							vertexNormalIndices[indexOffset + 0] = NormalsIndexProperty->contents[polygonOffset];
+							vertexNormalIndices[indexOffset + 1] = NormalsIndexProperty->contents[polygonOffset + triangleOffset + 1];
+							vertexNormalIndices[indexOffset + 2] = NormalsIndexProperty->contents[polygonOffset + triangleOffset + 2];
 
 							indexOffset += 3;
 
@@ -188,25 +206,26 @@ namespace Trident {
 				vertexNormalIndices = vertexPositionIndices;
 
 				if (ReferenceInformationType == "Direct") {
-					vertexNormalComponents = NormalsProperty->Contents;
+					vertexNormalComponents = NormalsProperty->contents;
 				}
 				else if (ReferenceInformationType == "IndexToDirect") {
-					const FBXNode* NormalsIndexNode = file.searchNodeRecursive(LayerElementNormalNode->NestedList, "NormalsIndex");
+					const FBX::Node* NormalsIndexNode = FBX::findNode(file, LayerElementNormalNode, "NormalsIndex");
 
-					DEBUG_ASSERT(NormalsIndexNode->PropertyList[0]->TypeCode == FBXPropertyTypeCode::i);
+					ENGINE_ASSERT(NormalsIndexNode != nullptr, "Failed to find 'NormalsIndex' node.");
+					DEBUG_ASSERT(file.properties[NormalsIndexNode->propertyRange.offset]->typeCode == FBX::PropertyTypeCode::i);
 
-					const std::shared_ptr<FBXArrayProperty<sint32>> NormalsIndexProperty = std::static_pointer_cast<FBXArrayProperty<sint32>>(NormalsIndexNode->PropertyList[0]);
+					const ref<FBX::ArrayProperty<sint32>> NormalsIndexProperty = ref_cast<FBX::ArrayProperty<sint32>>(file.properties[NormalsIndexNode->propertyRange.offset]);
 
-					vertexNormalComponents = sequence<float64>(NormalsProperty->Contents.count());
+					vertexNormalComponents = sequence<float64>(NormalsProperty->contents.count());
 
-					for (uint32 index = 0; index < NormalsIndexProperty->Contents.count(); index += 1) {
-						const sint32 normalIndex = NormalsIndexProperty->Contents[index];
+					for (uint32 index = 0; index < NormalsIndexProperty->contents.count(); index += 1) {
+						const sint32 normalIndex = NormalsIndexProperty->contents[index];
 
 						ENGINE_ASSERT(normalIndex >= 0, "Invalid normal index.");
 
 						// TODO: Use std::copy here?
 						for (uint32 componentIndex = 0; componentIndex < 3; componentIndex += 1) {
-							vertexNormalComponents[index * 3 + componentIndex] = NormalsProperty->Contents[normalIndex * 3 + componentIndex];
+							vertexNormalComponents[index * 3 + componentIndex] = NormalsProperty->contents[normalIndex * 3 + componentIndex];
 						}
 					}
 				}
@@ -232,49 +251,60 @@ namespace Trident {
 
 		// Parse vertex texture coordinates.
 		{
-			const FBXNode* LayerElementUVNode = file.searchNodeRecursive(GeometryNode->NestedList, "LayerElementUV");
-			const FBXNode* MappingInformationTypeNode = file.searchNodeRecursive(LayerElementUVNode->NestedList, "MappingInformationType");
-			const FBXNode* ReferenceInformationTypeNode = file.searchNodeRecursive(LayerElementUVNode->NestedList, "ReferenceInformationType");
-			const FBXNode* UVNode = file.searchNodeRecursive(LayerElementUVNode->NestedList, "UV");
+			const FBX::Node* LayerElementUVNode = FBX::findNode(file, GeometryNode, "LayerElementUV");
 
-			DEBUG_ASSERT(MappingInformationTypeNode->PropertyList[0]->TypeCode == FBXPropertyTypeCode::S);
-			DEBUG_ASSERT(ReferenceInformationTypeNode->PropertyList[0]->TypeCode == FBXPropertyTypeCode::S);
-			DEBUG_ASSERT(UVNode->PropertyList[0]->TypeCode == FBXPropertyTypeCode::d);
+			ENGINE_ASSERT(LayerElementUVNode != nullptr, "Failed to find 'LayerElementUV' node.");
 
-			const std::shared_ptr<FBXSpecialProperty> MappingInformationTypeProperty = std::static_pointer_cast<FBXSpecialProperty>(MappingInformationTypeNode->PropertyList[0]);
-			const std::shared_ptr<FBXSpecialProperty> ReferenceInformationTypeProperty = std::static_pointer_cast<FBXSpecialProperty>(ReferenceInformationTypeNode->PropertyList[0]);
-			const std::shared_ptr<FBXArrayProperty<float64>> UVProperty = std::static_pointer_cast<FBXArrayProperty<float64>>(UVNode->PropertyList[0]);
+			const FBX::Node* MappingInformationTypeNode = FBX::findNode(file, LayerElementUVNode, "MappingInformationType");
 
-			const view<char8> MappingInformationType(pointer_cast<const char8*>(MappingInformationTypeProperty->Data.begin()), MappingInformationTypeProperty->Data.count());
-			const view<char8> ReferenceInformationType(pointer_cast<const char8*>(ReferenceInformationTypeProperty->Data.begin()), ReferenceInformationTypeProperty->Data.count());
+			ENGINE_ASSERT(MappingInformationTypeNode != nullptr, "Failed to find 'MappingInformationType' node.");
+
+			const FBX::Node* ReferenceInformationTypeNode = FBX::findNode(file, LayerElementUVNode, "ReferenceInformationType");
+
+			ENGINE_ASSERT(ReferenceInformationTypeNode != nullptr, "Failed to find 'ReferenceInformationType' node.");
+
+			const FBX::Node* UVNode = FBX::findNode(file, LayerElementUVNode, "UV");
+
+			ENGINE_ASSERT(UVNode != nullptr, "Failed to find 'UV' node.");
+			DEBUG_ASSERT(file.properties[MappingInformationTypeNode->propertyRange.offset]->typeCode == FBX::PropertyTypeCode::S);
+			DEBUG_ASSERT(file.properties[ReferenceInformationTypeNode->propertyRange.offset]->typeCode == FBX::PropertyTypeCode::S);
+			DEBUG_ASSERT(file.properties[UVNode->propertyRange.offset]->typeCode == FBX::PropertyTypeCode::d);
+
+			const ref<FBX::SpecialProperty> MappingInformationTypeProperty = ref_cast<FBX::SpecialProperty>(file.properties[MappingInformationTypeNode->propertyRange.offset]);
+			const ref<FBX::SpecialProperty> ReferenceInformationTypeProperty = ref_cast<FBX::SpecialProperty>(file.properties[ReferenceInformationTypeNode->propertyRange.offset]);
+			const ref<FBX::ArrayProperty<float64>> UVProperty = ref_cast<FBX::ArrayProperty<float64>>(file.properties[UVNode->propertyRange.offset]);
+
+			const view<char8> MappingInformationType(pointer_cast<const char8*>(MappingInformationTypeProperty->data.begin()), MappingInformationTypeProperty->data.count());
+			const view<char8> ReferenceInformationType(pointer_cast<const char8*>(ReferenceInformationTypeProperty->data.begin()), ReferenceInformationTypeProperty->data.count());
 
 			if (MappingInformationType == "ByPolygonVertex") {
 				if (ReferenceInformationType == "Direct") {
 					ENGINE_ERROR_UNIMPLEMENTED();
 				}
 				else if (ReferenceInformationType == "IndexToDirect") {
-					const FBXNode* UVIndexNode = file.searchNodeRecursive(LayerElementUVNode->NestedList, "UVIndex");
+					const FBX::Node* UVIndexNode = FBX::findNode(file, LayerElementUVNode, "UVIndex");
 
-					DEBUG_ASSERT(UVIndexNode->PropertyList[0]->TypeCode == FBXPropertyTypeCode::i);
+					ENGINE_ASSERT(UVIndexNode != nullptr, "Failed to find 'UVIndex' node.");
+					DEBUG_ASSERT(file.properties[UVIndexNode->propertyRange.offset]->typeCode == FBX::PropertyTypeCode::i);
 
-					const std::shared_ptr<FBXArrayProperty<sint32>> UVIndexProperty = std::static_pointer_cast<FBXArrayProperty<sint32>>(UVIndexNode->PropertyList[0]);
+					const ref<FBX::ArrayProperty<sint32>> UVIndexProperty = ref_cast<FBX::ArrayProperty<sint32>>(file.properties[UVIndexNode->propertyRange.offset]);
 
-					vertexTextureCoordinateComponents = UVProperty->Contents;
+					vertexTextureCoordinateComponents = UVProperty->contents;
 					vertexTextureCoordinateIndices = sequence<uint32>(vertexPositionIndices.count());
 
 					uint32 polygonOffset = 0;
 					uint32 indexOffset = 0;
 
 					// TODO: This section is similar to the index count section above; maybe try merging the two.
-					while (polygonOffset < UVIndexProperty->Contents.count()) {
+					while (polygonOffset < UVIndexProperty->contents.count()) {
 						uint32 triangleOffset = 0;
 
-						while (triangleOffset < UVIndexProperty->Contents.count() - polygonOffset) {
-							const sint32 indexC = PolygonVertexIndexProperty->Contents[polygonOffset + triangleOffset + 2];
+						while (triangleOffset < UVIndexProperty->contents.count() - polygonOffset) {
+							const sint32 indexC = PolygonVertexIndexProperty->contents[polygonOffset + triangleOffset + 2];
 
-							vertexTextureCoordinateIndices[indexOffset + 0] = UVIndexProperty->Contents[polygonOffset];
-							vertexTextureCoordinateIndices[indexOffset + 1] = UVIndexProperty->Contents[polygonOffset + triangleOffset + 1];
-							vertexTextureCoordinateIndices[indexOffset + 2] = UVIndexProperty->Contents[polygonOffset + triangleOffset + 2];
+							vertexTextureCoordinateIndices[indexOffset + 0] = UVIndexProperty->contents[polygonOffset];
+							vertexTextureCoordinateIndices[indexOffset + 1] = UVIndexProperty->contents[polygonOffset + triangleOffset + 1];
+							vertexTextureCoordinateIndices[indexOffset + 2] = UVIndexProperty->contents[polygonOffset + triangleOffset + 2];
 
 							indexOffset += 3;
 
@@ -301,7 +331,7 @@ namespace Trident {
 				vertexTextureCoordinateIndices = sequence<uint32>(vertexPositionIndices);
 
 				if (ReferenceInformationType == "Direct") {
-					vertexTextureCoordinateComponents = UVProperty->Contents;
+					vertexTextureCoordinateComponents = UVProperty->contents;
 				}
 				else if (ReferenceInformationType == "IndexToDirect") {
 					ENGINE_ERROR_UNIMPLEMENTED();

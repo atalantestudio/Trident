@@ -9,131 +9,277 @@
 #include "../File/FBX.hpp"
 
 namespace Trident {
-	static constexpr uint32 MAX_ROOT_NODE_ITERATIONS = 11;
-	static constexpr uint32 MAX_CHILD_NODE_ITERATIONS = 11002;
+	namespace FBX {
+		template<typename DataType>
+		static ref<Property> readPrimitiveProperty(ByteStream<StreamOperation::READ>& stream) {
+			ref<FBX::PrimitiveProperty<DataType>> property = allocateRef<FBX::PrimitiveProperty<DataType>>();
+			property->data = stream.read<DataType>();
 
-	template<typename DataType>
-	static std::shared_ptr<FBXProperty> readPrimitiveProperty(ByteStream<StreamOperation::READ>& stream) {
-		std::shared_ptr<FBXPrimitiveProperty<DataType>> Property = std::make_shared<FBXPrimitiveProperty<DataType>>();
-		Property->Data = stream.read<DataType>();
+			return property;
+		}
 
-		return Property;
+		template<typename DataType>
+		static ref<Property> readArrayProperty(ByteStream<StreamOperation::READ>& stream) {
+			const uint32 arrayLength = stream.read<uint32>();
+			const uint32 encoding = stream.read<uint32>();
+			const bool compressed = static_cast<bool>(encoding);
+			const uint32 compressedLength = stream.read<uint32>();
+
+			ref<FBX::ArrayProperty<DataType>> property = allocateRef<FBX::ArrayProperty<DataType>>();
+
+			if (compressed) {
+				BitStream<StreamOperation::READ> bitStream(stream.getBytePosition(), compressedLength, Endianness::LITTLE_ENDIAN);
+
+				property->contents = bitStream.inflate<DataType>(arrayLength);
+
+				stream.jump(compressedLength);
+			}
+			else {
+				property->contents = sequence<DataType>(arrayLength);
+
+				std::copy_n(stream.getBytePosition(), arrayLength, &property->contents[0]);
+
+				stream.jump(arrayLength * sizeof(DataType));
+			}
+
+			return property;
+		}
+
+		static ref<Property> readSpecialProperty(ByteStream<StreamOperation::READ>& stream) {
+			const uint32 length = stream.read<uint32>();
+
+			ref<FBX::SpecialProperty> property = allocateRef<FBX::SpecialProperty>();
+			property->data = sequence<uint8>(length);
+
+			std::copy_n(stream.getBytePosition(), length, &property->data[0]);
+
+			stream.jump(property->data.count());
+
+			return property;
+		}
+
+		inline static const std::unordered_map<PropertyTypeCode, std::function<ref<Property>(ByteStream<StreamOperation::READ>&)>> readPropertyMap = {
+			{PropertyTypeCode::Y, readPrimitiveProperty<sint16>},
+			{PropertyTypeCode::C, readPrimitiveProperty<bool>},
+			{PropertyTypeCode::I, readPrimitiveProperty<sint32>},
+			{PropertyTypeCode::F, readPrimitiveProperty<float32>},
+			{PropertyTypeCode::D, readPrimitiveProperty<float64>},
+			{PropertyTypeCode::L, readPrimitiveProperty<sint64>},
+			{PropertyTypeCode::f, readArrayProperty<float32>},
+			{PropertyTypeCode::d, readArrayProperty<float64>},
+			{PropertyTypeCode::l, readArrayProperty<sint64>},
+			{PropertyTypeCode::i, readArrayProperty<sint32>},
+			{PropertyTypeCode::b, readArrayProperty<bool>},
+			{PropertyTypeCode::S, readSpecialProperty},
+			{PropertyTypeCode::R, readSpecialProperty},
+		};
 	}
 
-	template<typename DataType>
-	static std::shared_ptr<FBXProperty> readArrayProperty(ByteStream<StreamOperation::READ>& stream) {
-		const uint32 ArrayLength = stream.read<uint32>();
-		const uint32 Encoding = stream.read<uint32>();
-		const bool Compressed = static_cast<bool>(Encoding);
-		const uint32 CompressedLength = stream.read<uint32>();
+	uint64 FBX::countNodesAndProperties(ByteStream<StreamOperation::READ>& stream, uint32 fileVersion, uint64& nodeCount, uint64& propertyCount) {
+		uint64 endOffset;
+		uint64 propertyByteSize;
 
-		std::shared_ptr<FBXArrayProperty<DataType>> Property = std::make_shared<FBXArrayProperty<DataType>>();
-
-		if (Compressed) {
-			BitStream<StreamOperation::READ> bitStream(stream.getBytePosition(), CompressedLength, Endianness::LITTLE_ENDIAN);
-
-			Property->Contents = bitStream.inflate<DataType>(ArrayLength);
-
-			stream.jump(CompressedLength);
+		if (fileVersion >= 7500) {
+			endOffset = stream.read<uint64>();
+			propertyCount += stream.read<uint64>();
+			propertyByteSize = stream.read<uint64>();
 		}
 		else {
-			Property->Contents = sequence<DataType>(ArrayLength);
-
-			std::copy_n(stream.getBytePosition(), ArrayLength, &Property->Contents[0]);
-
-			stream.jump(ArrayLength * sizeof(DataType));
+			endOffset = stream.read<uint32>();
+			propertyCount += stream.read<uint32>();
+			propertyByteSize = stream.read<uint32>();
 		}
 
-		return Property;
-	}
+		const uint8 nameByteSize = stream.read<uint8>();
 
-	static std::shared_ptr<FBXProperty> readSpecialProperty(ByteStream<StreamOperation::READ>& stream) {
-		const uint32 Length = stream.read<uint32>();
-
-		std::shared_ptr<FBXSpecialProperty> Property = std::make_shared<FBXSpecialProperty>();
-		Property->Data = sequence<uint8>(Length);
-
-		// TODO(asset-builder/parser/fbx): Add null terminator for the string case?
-		std::copy_n(stream.getBytePosition(), Length, &Property->Data[0]);
-
-		stream.jump(Property->Data.count());
-
-		return Property;
-	}
-
-	inline static const std::unordered_map<FBXPropertyTypeCode, std::function<std::shared_ptr<FBXProperty>(ByteStream<StreamOperation::READ>&)>> readProperty = {
-		{FBXPropertyTypeCode::Y, readPrimitiveProperty<sint16>},
-		{FBXPropertyTypeCode::C, readPrimitiveProperty<bool>},
-		{FBXPropertyTypeCode::I, readPrimitiveProperty<sint32>},
-		{FBXPropertyTypeCode::F, readPrimitiveProperty<float32>},
-		{FBXPropertyTypeCode::D, readPrimitiveProperty<float64>},
-		{FBXPropertyTypeCode::L, readPrimitiveProperty<sint64>},
-		{FBXPropertyTypeCode::f, readArrayProperty<float32>},
-		{FBXPropertyTypeCode::d, readArrayProperty<float64>},
-		{FBXPropertyTypeCode::l, readArrayProperty<sint64>},
-		{FBXPropertyTypeCode::i, readArrayProperty<sint32>},
-		{FBXPropertyTypeCode::b, readArrayProperty<bool>},
-		{FBXPropertyTypeCode::S, readSpecialProperty},
-		{FBXPropertyTypeCode::R, readSpecialProperty},
-	};
-
-	static FBXNode readNode(ByteStream<StreamOperation::READ>& stream, bool pre7500) {
-		FBXNode Node;
-		uint64 NumProperties;
-
-		if (pre7500) {
-			Node.EndOffset = stream.read<uint32>();
-			NumProperties = stream.read<uint32>();
-
-			stream.jump(sizeof(uint32));
+		if (endOffset == 0) {
+			return endOffset;
 		}
-		else {
-			Node.EndOffset = stream.read<uint64>();
-			NumProperties = stream.read<uint64>();
+
+		stream.jump(nameByteSize + propertyByteSize);
+
+		nodeCount += 1;
+
+		while (stream.getByteOffset() < endOffset) {
+			countNodesAndProperties(stream, fileVersion, nodeCount, propertyCount);
+		}
+
+		return endOffset;
+	}
+
+	uint64 FBX::readNode(ByteStream<StreamOperation::READ>& stream, File<FileFormat::FBX>& file, uint64& nodeOffset, uint64& propertyOffset) {
+		uint64 endOffset;
+		uint64 propertyCount;
+
+		if (file.version >= 7500) {
+			endOffset = stream.read<uint64>();
+			propertyCount = stream.read<uint64>();
 
 			stream.jump(sizeof(uint64));
 		}
+		else {
+			endOffset = stream.read<uint32>();
+			propertyCount = stream.read<uint32>();
 
-		const uint8 NameLen = stream.read<uint8>();
-
-		// Skip null node.
-		if (Node.EndOffset == 0) {
-			return Node;
+			stream.jump(sizeof(uint32));
 		}
 
-		Node.Name = sequence<char8>(pointer_cast<const char8*>(stream.getBytePosition()), NameLen);
+		const uint8 nameByteSize = stream.read<uint8>();
 
-		stream.jump(NameLen);
-
-		Node.PropertyList = sequence<std::shared_ptr<FBXProperty>>(NumProperties);
-
-		for (uint32 propertyIndex = 0; propertyIndex < NumProperties; propertyIndex += 1) {
-			const FBXPropertyTypeCode TypeCode = stream.read<FBXPropertyTypeCode>();
-
-			Node.PropertyList[propertyIndex] = readProperty.at(TypeCode)(stream);
-			Node.PropertyList[propertyIndex]->TypeCode = TypeCode;
+		if (endOffset == 0) {
+			return endOffset;
 		}
 
-		if (stream.getByteOffset() == Node.EndOffset) {
-			return Node;
+		Node& node = file.nodes[nodeOffset];
+		node.name = sequence<char8>(pointer_cast<const char8*>(stream.getBytePosition()), nameByteSize);
+		node.propertyRange.offset = propertyOffset;
+		node.propertyRange.count = propertyCount;
+		node.nodeRange.offset = nodeOffset + 1;
+
+		stream.jump(nameByteSize);
+
+		uint64 propertyIndex = 0;
+
+		while (propertyIndex < propertyCount) {
+			file.properties[propertyOffset + propertyIndex] = readProperty(stream);
+
+			propertyIndex += 1;
 		}
 
-		for (uint32 childNodeIndex = 0; childNodeIndex < MAX_CHILD_NODE_ITERATIONS; childNodeIndex += 1) {
-			const FBXNode ChildNode = readNode(stream, pre7500);
+		propertyOffset += propertyCount;
+		nodeOffset += 1;
 
-			if (ChildNode.EndOffset == 0) {
+		uint64 nodeIndex = 0;
+
+		while (stream.getByteOffset() < endOffset) {
+			const uint64 nodeEndOffset = readNode(stream, file, nodeOffset, propertyOffset);
+
+			if (nodeEndOffset == 0) {
 				break;
 			}
 
-			Node.NestedList.emplace_back(ChildNode);
+			nodeIndex += 1;
 		}
 
-		if (Node.NestedList.size() >= MAX_CHILD_NODE_ITERATIONS) {
-			ENGINE_WARNING("Recursion limit reached for node \"[]\" ([]).", &Node.Name[0], MAX_CHILD_NODE_ITERATIONS);
-		}
+		node.nodeRange.count = nodeOffset - node.nodeRange.offset;
 
-		return Node;
+		return endOffset;
 	}
+
+	ref<FBX::Property> FBX::readProperty(ByteStream<StreamOperation::READ>& stream) {
+		const PropertyTypeCode typeCode = stream.read<PropertyTypeCode>();
+
+		ref<Property> property = readPropertyMap.at(typeCode)(stream);
+		property->typeCode = typeCode;
+
+		return property;
+	}
+
+	#if defined(BUILD_MODE_DEBUG)
+		void FBX::debugFile(const File<FileFormat::FBX>& file, ConsoleLogger& logger) {
+			ENGINE_DEBUG("Debugging FBX [] file.", file.version);
+
+			for (const uint64 rootNodeIndex : file.rootNodeIndices) {
+				debugNode(file, &file.nodes[rootNodeIndex], logger, 0);
+			}
+
+			ENGINE_DEBUG("Debugging stopped.");
+		}
+
+		void FBX::debugNode(const File<FileFormat::FBX>& file, const Node* node, ConsoleLogger& logger, uint8 indentSize) {
+			const std::string indent(indentSize * 4, ' ');
+
+			std::ostream& stream = logger.getOutputStream();
+			stream << indent << '"' << node->name << '"' << '\n';
+
+			if (node->propertyRange.count > 0) {
+				stream << indent << "  Properties:\n";
+
+				uint64 propertyIndex = 0;
+
+				while (propertyIndex < node->propertyRange.count) {
+					debugProperty(file.properties[node->propertyRange.offset + propertyIndex], logger, indentSize + 1);
+
+					propertyIndex += 1;
+				}
+			}
+
+			if (node->nodeRange.count > 0) {
+				stream << indent << "  Nodes:" << '\n';
+
+				uint64 nodeIndex = 0;
+
+				while (nodeIndex < node->nodeRange.count) {
+					debugNode(file, &file.nodes[node->nodeRange.offset + nodeIndex], logger, indentSize + 1);
+
+					nodeIndex += 1;
+				}
+			}
+		}
+
+		void FBX::debugProperty(ref<Property> property, ConsoleLogger& logger, uint8 indentSize) {
+			const std::string indent(indentSize * 4, ' ');
+
+			std::ostream& stream = logger.getOutputStream();
+			stream << indent << '[' << static_cast<char8>(property->typeCode) << ']';
+
+			switch (property->typeCode) {
+				case PropertyTypeCode::Y: {
+					stream << ' ' << ref_cast<PrimitiveProperty<sint16>>(property)->data << '\n';
+
+					break;
+				}
+				case PropertyTypeCode::C: {
+					stream << ' ' << ref_cast<PrimitiveProperty<bool>>(property)->data << '\n';
+
+					break;
+				}
+				case PropertyTypeCode::I: {
+					stream << ' ' << ref_cast<PrimitiveProperty<sint32>>(property)->data << '\n';
+
+					break;
+				}
+				case PropertyTypeCode::F: {
+					stream << ' ' << ref_cast<PrimitiveProperty<float32>>(property)->data << '\n';
+
+					break;
+				}
+				case PropertyTypeCode::D: {
+					stream << ' ' << ref_cast<PrimitiveProperty<float64>>(property)->data << '\n';
+
+					break;
+				}
+				case PropertyTypeCode::L: {
+					stream << ' ' << ref_cast<PrimitiveProperty<sint64>>(property)->data << '\n';
+
+					break;
+				}
+				case PropertyTypeCode::S: {
+					const ref<SpecialProperty> specialProperty = ref_cast<SpecialProperty>(property);
+					const view<char8> data(pointer_cast<const char8*>(&specialProperty->data[0]), specialProperty->data.count());
+
+					stream << " \"" << data << "\"\n";
+
+					break;
+				}
+				case PropertyTypeCode::R: {
+					const ref<SpecialProperty> specialProperty = ref_cast<SpecialProperty>(property);
+
+					stream << '[' << specialProperty->data.count() << "]\n";
+
+					break;
+				}
+				default: {
+					// We only care about the count here, not the type.
+					const ref<ArrayProperty<bool>> arrayProperty = ref_cast<ArrayProperty<bool>>(property);
+
+					stream << '[' << arrayProperty->contents.count() << "]\n";
+
+					break;
+				}
+			}
+		}
+	#endif
 
 	template<>
 	bool Decoder<FileFormat::FBX>::validateSignature(const ByteStream<StreamOperation::READ>& stream) {
@@ -148,29 +294,56 @@ namespace Trident {
 		return magic == MAGIC;
 	}
 
-	// https://code.blender.org/2013/08/fbx-binary-file-format-specification
-	// https://banexdevblog.wordpress.com/2014/06/23/a-quick-tutorial-about-the-fbx-ascii-format
 	template<>
 	File<FileFormat::FBX> Decoder<FileFormat::FBX>::decode(view<uint8> data) {
 		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
 		ENGINE_ASSERT(Decoder<FileFormat::FBX>::validateSignature(stream), "Invalid FBX file signature.");
 
-		// The last 2 bytes [0x1a, 0x00] are unknown but appear in all observed files.
-		// See https://code.blender.org/2013/08/fbx-binary-file-format-specification/#binary-file-structure.
+		/// The last 2 bytes [0x1a, 0x00] are unknown but appear in all observed files.
+		/// See https://code.blender.org/2013/08/fbx-binary-file-format-specification/#binary-file-structure.
 		stream.jump(23);
 
+		uint64 nodeCount = 0;
+		uint64 propertyCount = 0;
+		uint64 rootNodeCount = 0;
+
 		File<FileFormat::FBX> file{};
-		file.Version = stream.read<uint32>();
+		file.version = stream.read<uint32>();
 
-		for (uint32 rootNodeIndex = 0; rootNodeIndex < MAX_ROOT_NODE_ITERATIONS; rootNodeIndex += 1) {
-			const FBXNode Node = readNode(stream, file.Version < 7500);
+		const uint64 firstNodeOffset = stream.getByteOffset();
 
-			if (Node.EndOffset == 0) {
+		while (true) {
+			const uint64 endOffset = FBX::countNodesAndProperties(stream, file.version, nodeCount, propertyCount);
+
+			if (endOffset == 0) {
 				break;
 			}
 
-			file.NodeList.emplace_back(Node);
+			rootNodeCount += 1;
+		}
+
+		file.nodes = sequence<FBX::Node>(nodeCount);
+		file.properties = sequence<ref<FBX::Property>>(propertyCount);
+		file.rootNodeIndices = sequence<uint64>(rootNodeCount);
+
+		stream.seek(firstNodeOffset);
+
+		nodeCount = 0;
+		propertyCount = 0;
+		rootNodeCount = 0;
+
+		while (true) {
+			const uint64 rootNodeIndex = nodeCount;
+			const uint64 endOffset = FBX::readNode(stream, file, nodeCount, propertyCount);
+
+			if (endOffset == 0) {
+				break;
+			}
+
+			file.rootNodeIndices[rootNodeCount] = rootNodeIndex;
+
+			rootNodeCount += 1;
 		}
 
 		return file;

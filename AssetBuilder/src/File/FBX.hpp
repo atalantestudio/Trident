@@ -1,95 +1,121 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
 
+#include "Engine/Filesystem/Decoder/Decoder.hpp"
 #include "Engine/Filesystem/File.hpp"
 
 namespace Trident {
-	enum class FBXPropertyTypeCode : char8 {
-		/// 2-byte signed integer.
-		Y = 'Y',
+	template<>
+	struct File<FileFormat::FBX>;
 
-		/// 1-bit boolean (encoded as the LSB of a 1èbyte value).
-		C = 'C',
+	namespace FBX {
+		struct Node {
+			sequence<char8> name;
+			range<uint64, uint64> propertyRange;
+			range<uint64, uint64> nodeRange;
+		};
 
-		/// 4-byte signed integer.
-		I = 'I',
+		enum class PropertyTypeCode : char8 {
+			/// 2-byte signed integer.
+			Y = 'Y',
 
-		/// 4-byte single-precision IEEE 754 number.
-		F = 'F',
+			/// 1-bit boolean (encoded as the LSB of a 1èbyte value).
+			C = 'C',
 
-		/// 8-byte double-precision IEEE 754 number.
-		D = 'D',
+			/// 4-byte signed integer.
+			I = 'I',
 
-		/// 8-byte signed integer.
-		L = 'L',
+			/// 4-byte single-precision IEEE 754 number.
+			F = 'F',
 
-		/// Array of 4-byte single-precision IEEE 754 numbers.
-		f = 'f',
+			/// 8-byte double-precision IEEE 754 number.
+			D = 'D',
 
-		/// Array of 8-byte double-precision IEEE 754 numbers.
-		d = 'd',
+			/// 8-byte signed integer.
+			L = 'L',
 
-		/// Array of 8-byte signed integers.
-		l = 'l',
+			/// Array of 4-byte single-precision IEEE 754 numbers.
+			f = 'f',
 
-		/// Array of 4-byte signed integers.
-		i = 'i',
+			/// Array of 8-byte double-precision IEEE 754 numbers.
+			d = 'd',
 
-		/// Array of 1-byte booleans.
-		b = 'b',
+			/// Array of 8-byte signed integers.
+			l = 'l',
 
-		/// String.
-		S = 'S',
+			/// Array of 4-byte signed integers.
+			i = 'i',
 
-		/// Raw binary data.
-		R = 'R',
-	};
+			/// Array of 1-byte booleans.
+			b = 'b',
 
-	struct FBXProperty {
-		FBXPropertyTypeCode TypeCode;
-	};
+			/// String.
+			S = 'S',
 
-	template<typename DataType>
-	struct FBXPrimitiveProperty : public FBXProperty {
-		DataType Data;
-	};
+			/// Raw binary data.
+			R = 'R',
+		};
 
-	template struct FBXPrimitiveProperty<bool>;
-	template struct FBXPrimitiveProperty<sint16>;
-	template struct FBXPrimitiveProperty<sint32>;
-	template struct FBXPrimitiveProperty<float32>;
-	template struct FBXPrimitiveProperty<sint64>;
-	template struct FBXPrimitiveProperty<float64>;
+		struct Property {
+			PropertyTypeCode typeCode;
+		};
 
-	template<typename DataType>
-	struct FBXArrayProperty : public FBXProperty {
-		sequence<DataType> Contents;
-	};
+		template<typename DataType>
+		struct PrimitiveProperty : public Property {
+			DataType data;
+		};
 
-	template struct FBXArrayProperty<bool>;
-	template struct FBXArrayProperty<sint32>;
-	template struct FBXArrayProperty<float32>;
-	template struct FBXArrayProperty<sint64>;
-	template struct FBXArrayProperty<float64>;
+		template struct PrimitiveProperty<bool>;
+		template struct PrimitiveProperty<sint16>;
+		template struct PrimitiveProperty<sint32>;
+		template struct PrimitiveProperty<float32>;
+		template struct PrimitiveProperty<sint64>;
+		template struct PrimitiveProperty<float64>;
 
-	struct FBXSpecialProperty : public FBXProperty {
-		sequence<uint8> Data;
-	};
+		template<typename DataType>
+		struct ArrayProperty : public Property {
+			sequence<DataType> contents;
+		};
 
-	struct FBXNode {
-		uint64 EndOffset;
-		sequence<char8> Name;
-		sequence<std::shared_ptr<FBXProperty>> PropertyList;
-		std::vector<FBXNode> NestedList;
-	};
+		template struct ArrayProperty<bool>;
+		template struct ArrayProperty<sint32>;
+		template struct ArrayProperty<float32>;
+		template struct ArrayProperty<sint64>;
+		template struct ArrayProperty<float64>;
+
+		struct SpecialProperty : public Property {
+			sequence<uint8> data;
+		};
+
+		/// Recursively jumps over the node and its children.
+		/// Returns the node's end offset.
+		uint64 countNodesAndProperties(ByteStream<StreamOperation::READ>& stream, uint32 fileVersion, uint64& nodeCount, uint64& propertyCount);
+
+		/// Recursively parses the node and its children and writes the decoded data in the file.
+		/// Returns the node's end offset.
+		uint64 readNode(ByteStream<StreamOperation::READ>& stream, File<FileFormat::FBX>& file, uint64& nodeOffset, uint64& propertyOffset);
+
+		ref<FBX::Property> readProperty(ByteStream<StreamOperation::READ>& stream);
+
+		#if defined(BUILD_MODE_DEBUG)
+			void debugFile(const File<FileFormat::FBX>& file, ConsoleLogger& logger);
+
+			void debugNode(const File<FileFormat::FBX>& file, const Node* node, ConsoleLogger& logger, uint8 indentSize = 0);
+
+			void debugProperty(ref<Property> property, ConsoleLogger& logger, uint8 indentSize = 0);
+		#endif
+
+		const Node* findNode(const File<FileFormat::FBX>& file, view<char8> name);
+		const Node* findNode(const File<FileFormat::FBX>& file, const Node* node, view<char8> name);
+	}
 
 	template<>
 	struct File<FileFormat::FBX> {
-		static const FBXNode* searchNodeRecursive(const std::vector<FBXNode>& NestedList, view<char8> Name, const FBXNode* ResultNode = nullptr) {
-			for (const FBXNode& Node : NestedList) {
-				if (Name == Node.Name) {
+		/* static const FBX::Node* searchNodeRecursive(const File<Filr, view<char8> Name, const FBX::Node* ResultNode = nullptr) {
+			for (const FBX::Node& Node : NestedList) {
+				if (Name == Node.name) {
 					ResultNode = &Node;
 
 					break;
@@ -99,9 +125,45 @@ namespace Trident {
 			}
 
 			return ResultNode;
-		}
+		} */
 
-		uint32 Version;
-		std::vector<FBXNode> NodeList;
+		/* static auto findStringProperty(const Node* Node, view<char8> PropertyName) {
+			if (Node == nullptr) {
+				return;
+			}
+
+			uint32 PropertyIndex = 0;
+
+			while (PropertyIndex < Node->PropertyList.count()) {
+				const std::shared_ptr<FBXProperty> Property = Node->PropertyList[PropertyIndex];
+
+				if (Property->TypeCode == FBXPropertyTypeCode::S) {
+					const std::shared_ptr<FBXSpecialProperty> StringProperty = std::static_pointer_cast<FBXSpecialProperty>(Property);
+					const view<char8> Data(pointer_cast<const char8*>(&StringProperty->Data[0]), StringProperty->Data.count());
+
+					if (Data == PropertyName) {
+						return;
+					}
+				}
+
+				PropertyIndex += 1;
+			}
+
+			return;
+		} */
+
+		uint32 version;
+		sequence<FBX::Node> nodes;
+		sequence<ref<FBX::Property>> properties;
+		sequence<uint64> rootNodeIndices;
 	};
+
+	template<>
+	bool Decoder<FileFormat::FBX>::validateSignature(const ByteStream<StreamOperation::READ>& stream);
+
+	/// References:
+	/// - https://code.blender.org/2013/08/fbx-binary-file-format-specification
+	/// - https://banexdevblog.wordpress.com/2014/06/23/a-quick-tutorial-about-the-fbx-ascii-format
+	template<>
+	File<FileFormat::FBX> Decoder<FileFormat::FBX>::decode(view<uint8> data);
 }
