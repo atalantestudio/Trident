@@ -7,7 +7,6 @@
 
 #include "Lightmap.glsl"
 
-// TODO(asset-builder/lightmapper/vk): Use rayPayloadInEXT?
 layout(location = 0) rayPayloadEXT Hit hit;
 layout(location = 1) rayPayloadEXT Hit primaryHit;
 layout(location = 2) rayPayloadEXT Hit secondaryHit;
