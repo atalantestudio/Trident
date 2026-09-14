@@ -27,6 +27,10 @@
 #include "AssetBuilder/Process/Material/Lightmapped/TileFloor.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/WoodDoor.hpp"
 #include "AssetBuilder/Process/Material/LightmappedPBR/GallineraTable.hpp"
+#include "AssetBuilder/Process/Material/LightmappedPBR/PowerBox01.hpp"
+#include "AssetBuilder/Process/Material/LightmappedPBR/UtilityBox01.hpp"
+#include "AssetBuilder/Process/Material/LightmappedPBR/UtilityBox02.hpp"
+#include "AssetBuilder/Process/Material/LightmappedPBR/WetFloorSign01.hpp"
 #include "AssetBuilder/Process/Material/PBR/BlueMetalPlate.hpp"
 #include "AssetBuilder/Process/Material/PBR/Debug.hpp"
 #include "AssetBuilder/Process/Material/PBR/DebugDefault.hpp"
@@ -58,9 +62,11 @@
 #include "AssetBuilder/Process/Scene/3D/LightmapTest.hpp"
 #include "AssetBuilder/Process/Scene/3D/PBRTest.hpp"
 #include "AssetBuilder/Process/Scene/3D/PlayerMovement.hpp"
+#include "AssetBuilder/Process/Scene/3D/PropGallery.hpp"
 #include "AssetBuilder/Process/Scene/3D/Sliding.hpp"
 #include "AssetBuilder/Process/Scene/3D/Stacking.hpp"
 #include "AssetBuilder/Process/Scene/3D/Suzanne.hpp"
+#include "AssetBuilder/Process/Scene/3D/WetFloorSign.hpp"
 #include "Process/BuildAssetMapProcess.hpp"
 #include "Process/BuildFontAssetProcess.hpp"
 #include "Process/BuildGeometryAssetProcess.hpp"
@@ -97,7 +103,7 @@ namespace Trident {
 
 		private:
 			void registerProcesses() {
-				allocateProcesses(58);
+				allocateProcesses(64);
 
 				registerProcess<BuildGeometryAssetProcess>(&assetLibrary);
 
@@ -135,9 +141,13 @@ namespace Trident {
 				registerProcess<PBRDefaultMaterial>(&assetLibrary);
 				registerProcess<PlasterCeilingMaterial>(&assetLibrary);
 				registerProcess<PlasterWallMaterial>(&assetLibrary);
+				registerProcess<PowerBox01Material>(&assetLibrary);
 				registerProcess<RoundWoodenTable01Material>(&assetLibrary);
 				registerProcess<RubberDuckToyMaterial>(&assetLibrary);
 				registerProcess<TileFloorMaterial>(&assetLibrary);
+				registerProcess<UtilityBox01Material>(&assetLibrary);
+				registerProcess<UtilityBox02Material>(&assetLibrary);
+				registerProcess<WetFloorSign01Material>(&assetLibrary);
 				registerProcess<WoodDoorMaterial>(&assetLibrary);
 
 				registerProcess<BoxesScene2D>(&assetLibrary);
@@ -163,9 +173,11 @@ namespace Trident {
 				registerProcess<LightmapTestScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<PBRTestScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<PlayerMovementScene3D>(&assetLibrary, &lightmapper);
+				registerProcess<PropGalleryScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<SlidingScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<StackingScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<SuzanneScene3D>(&assetLibrary, &lightmapper);
+				registerProcess<WetFloorSignScene3D>(&assetLibrary, &lightmapper);
 
 				registerProcess<BuildAssetMapProcess>(&assetLibrary);
 			}
