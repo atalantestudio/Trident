@@ -40,9 +40,9 @@ namespace Trident {
 					.geometryIndex = powerBox01Geometry,
 					.material = powerBox01Material,
 					.transform = {
-						.translation = {-64.0f, 0.0f, 128.0f},
+						.translation = {-128.0f, 0.0f, 128.0f},
 						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
-						.scale = 64.0f,
+						.scale = 1.0f,
 					},
 					.lightmap = {
 						.luxelScale = {1.0f, 1.0f},
@@ -55,9 +55,9 @@ namespace Trident {
 					.geometryIndex = utilityBox01Geometry,
 					.material = utilityBox01Material,
 					.transform = {
-						.translation = {0.0f, 0.0f, 128.0f},
+						.translation = {-64.0f, 0.0f, 128.0f},
 						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
-						.scale = 64.0f,
+						.scale = 1.0f,
 					},
 					.lightmap = {
 						.luxelScale = {1.0f, 1.0f},
@@ -72,7 +72,7 @@ namespace Trident {
 					.transform = {
 						.translation = {64.0f, 0.0f, 128.0f},
 						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
-						.scale = 64.0f,
+						.scale = 1.0f,
 					},
 					.lightmap = {
 						.luxelScale = {1.0f, 1.0f},
@@ -87,7 +87,7 @@ namespace Trident {
 					.transform = {
 						.translation = {128.0f, 0.0f, 128.0f},
 						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
-						.scale = 64.0f,
+						.scale = 1.0f,
 					},
 					.lightmap = {
 						.luxelScale = {1.0f, 1.0f},

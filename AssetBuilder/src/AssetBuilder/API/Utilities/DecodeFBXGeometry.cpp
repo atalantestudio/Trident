@@ -23,6 +23,36 @@ namespace Trident {
 		return FBX::resolvePrimitiveProperty<sint32>(file, Properties70, "CoordAxisSign");
 	}
 
+	static void parseTransform(const File<FileFormat::FBX>& file, const FBX::Node* Objects, quat<float32>& orientation, svec3<float32>& scaling) {
+		const FBX::Node* Model = FBX::findNode(file, Objects, "Model");
+		const FBX::Node* Properties70 = FBX::findNode(file, Model, "Properties70");
+		const svec3<float64> Lcl_Rotation = FBX::resolveVec3Property<float64>(file, Properties70, "Lcl Rotation");
+
+		orientation = normalized(
+			quat<float32>::axisAngle(UP, radians(static_cast<float32>(Lcl_Rotation.y))) *
+			quat<float32>::axisAngle(RIGHT, radians(static_cast<float32>(Lcl_Rotation.x))) *
+			quat<float32>::axisAngle(FORWARD, radians(static_cast<float32>(Lcl_Rotation.z)))
+		);
+
+		svec3<float64> Lcl_Scaling = FBX::resolveVec3Property<float64>(file, Properties70, "Lcl Scaling");
+
+		if (
+			abs(Lcl_Scaling.x - Lcl_Scaling.y) >= 0.001 ||
+			abs(Lcl_Scaling.x - Lcl_Scaling.z) >= 0.001
+		) {
+			ENGINE_WARNING("Non-uniform scaling is not supported for the Lcl Scaling property. Broadcasting X scaling to Y and Z.");
+
+			Lcl_Scaling.y = Lcl_Scaling.x;
+			Lcl_Scaling.z = Lcl_Scaling.x;
+		}
+
+		scaling = {
+			static_cast<float32>(Lcl_Scaling.x),
+			static_cast<float32>(Lcl_Scaling.y),
+			static_cast<float32>(Lcl_Scaling.z),
+		};
+	}
+
 	static sequence<uint32> parseVertexPositionIndices(ref<FBX::ArrayProperty<sint32>> PolygonVertexIndexProperty, sint32 CoordAxisSign) {
 		uint32 indexCount = 0;
 
@@ -365,12 +395,15 @@ namespace Trident {
 
 		ENGINE_ASSERT(VerticesProperty->contents.count() >= 3, "Invalid vertex position component buffer length.");
 
-		const mat4x4<float32> transform = {
-			static_cast<float32>(-CoordAxisSign), 0.0f, 0.0f, 0.0f,
-			0.0f, 1.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 1.0f,
-		};
+		quat<float32> orientation;
+		svec3<float32> scaling;
+
+		parseTransform(file, ObjectsNode, orientation, scaling);
+
+		const mat4x4<float32> transform = (
+			mat4x4<float32>::scaling(scaling) *
+			mat4x4<float32>(orientation)
+		);
 
 		sequence<svec3<float32>> positions(VerticesProperty->contents.count() / 3);
 		uint32 positionIndex = 0;
@@ -381,6 +414,10 @@ namespace Trident {
 				static_cast<float32>(VerticesProperty->contents[positionIndex * 3 + 1]),
 				static_cast<float32>(VerticesProperty->contents[positionIndex * 3 + 2]),
 			};
+
+			if (CoordAxisSign == 1) {
+				positions[positionIndex] *= -1.0f;
+			}
 
 			// TODO(lyah/scalar)
 			positions[positionIndex] = svec3<float32>(multiplyTransform(vec3<float32>(positions[positionIndex]), transform));
@@ -412,6 +449,8 @@ namespace Trident {
 				static_cast<float32>(vertexNormalComponents[index * 3 + 1]),
 				static_cast<float32>(vertexNormalComponents[index * 3 + 2]),
 			};
+
+			normals[index] = svec3<float32>(vec3<float32>(normals[index]) * orientation);
 
 			index += 1;
 		}

@@ -110,15 +110,19 @@ namespace Trident {
 		const Node* findNode(const File<FileFormat::FBX>& file, view<char8> name);
 		const Node* findNode(const File<FileFormat::FBX>& file, const Node* parentNode, view<char8> name);
 
-		/// `node` must be a 'Properties70' node.
 		template<typename DataType>
-		DataType resolvePrimitiveProperty(const File<FileFormat::FBX>& file, const Node* node, view<char8> name);
+		DataType resolvePrimitiveProperty(const File<FileFormat::FBX>& file, const Node* parentNode, view<char8> name);
 
-		template bool resolvePrimitiveProperty(const File<FileFormat::FBX>& file, const Node* node, view<char8> name);
-		template sint32 resolvePrimitiveProperty(const File<FileFormat::FBX>& file, const Node* node, view<char8> name);
-		template float32 resolvePrimitiveProperty(const File<FileFormat::FBX>& file, const Node* node, view<char8> name);
-		template sint64 resolvePrimitiveProperty(const File<FileFormat::FBX>& file, const Node* node, view<char8> name);
-		template float64 resolvePrimitiveProperty(const File<FileFormat::FBX>& file, const Node* node, view<char8> name);
+		template bool resolvePrimitiveProperty(const File<FileFormat::FBX>& file, const Node* parentNode, view<char8> name);
+		template sint32 resolvePrimitiveProperty(const File<FileFormat::FBX>& file, const Node* parentNode, view<char8> name);
+		template float32 resolvePrimitiveProperty(const File<FileFormat::FBX>& file, const Node* parentNode, view<char8> name);
+		template sint64 resolvePrimitiveProperty(const File<FileFormat::FBX>& file, const Node* parentNode, view<char8> name);
+		template float64 resolvePrimitiveProperty(const File<FileFormat::FBX>& file, const Node* parentNode, view<char8> name);
+
+		template<typename DataType>
+		svec3<DataType> resolveVec3Property(const File<FileFormat::FBX>& file, const Node* parentNode, view<char8> name);
+
+		template svec3<float64> resolveVec3Property(const File<FileFormat::FBX>& file, const Node* parentNode, view<char8> name);
 	}
 
 	template<>
