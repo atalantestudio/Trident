@@ -22,11 +22,11 @@ namespace Trident {
 		const FBX::Node* VerticesNode = FBX::findNode(file, GeometryNode, "Vertices");
 
 		ENGINE_ASSERT(VerticesNode != nullptr, "Failed to find 'Vertices' node.");
+		DEBUG_ASSERT(file.properties[VerticesNode->propertyRange.offset]->typeCode == FBX::PropertyTypeCode::d);
 
 		const FBX::Node* PolygonVertexIndexNode = FBX::findNode(file, GeometryNode, "PolygonVertexIndex");
 
 		ENGINE_ASSERT(PolygonVertexIndexNode != nullptr, "Failed to find 'PolygonVertexIndex' node.");
-		DEBUG_ASSERT(file.properties[VerticesNode->propertyRange.offset]->typeCode == FBX::PropertyTypeCode::d);
 		DEBUG_ASSERT(file.properties[PolygonVertexIndexNode->propertyRange.offset]->typeCode == FBX::PropertyTypeCode::i);
 
 		const ref<FBX::ArrayProperty<float64>> VerticesProperty = ref_cast<FBX::ArrayProperty<float64>>(file.properties[VerticesNode->propertyRange.offset]);

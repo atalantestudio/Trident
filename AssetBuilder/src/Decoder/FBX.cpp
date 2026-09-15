@@ -75,7 +75,7 @@ namespace Trident {
 		};
 	}
 
-	uint64 FBX::countNodesAndProperties(ByteStream<StreamOperation::READ>& stream, uint32 fileVersion, uint64& nodeCount, uint64& propertyCount) {
+	uint64 FBX::countNodesAndProperties(ByteStream<StreamOperation::READ>& stream, uint32 fileVersion, std::vector<uint64>& childNodeCounts, uint64& propertyCount) {
 		uint64 endOffset;
 		uint64 propertyByteSize;
 
@@ -98,16 +98,24 @@ namespace Trident {
 
 		stream.jump(nameByteSize + propertyByteSize);
 
-		nodeCount += 1;
+		const uint64 nodeOffset = childNodeCounts.size();
+
+		childNodeCounts.emplace_back(0);
 
 		while (stream.getByteOffset() < endOffset) {
-			countNodesAndProperties(stream, fileVersion, nodeCount, propertyCount);
+			const uint64 nodeEndOffset = countNodesAndProperties(stream, fileVersion, childNodeCounts, propertyCount);
+
+			if (nodeEndOffset == 0) {
+				break;
+			}
+
+			childNodeCounts[nodeOffset] += 1;
 		}
 
 		return endOffset;
 	}
 
-	uint64 FBX::readNode(ByteStream<StreamOperation::READ>& stream, File<FileFormat::FBX>& file, uint64& nodeOffset, uint64& propertyOffset) {
+	uint64 FBX::readNode(ByteStream<StreamOperation::READ>& stream, File<FileFormat::FBX>& file, uint64 nodeOffset, uint64& childNodeOffset, const uint64*& childNodeCount, uint64& propertyOffset) {
 		uint64 endOffset;
 		uint64 propertyCount;
 
@@ -134,7 +142,11 @@ namespace Trident {
 		node.name = sequence<char8>(pointer_cast<const char8*>(stream.getBytePosition()), nameByteSize);
 		node.propertyRange.offset = propertyOffset;
 		node.propertyRange.count = propertyCount;
-		node.nodeRange.offset = nodeOffset + 1;
+		node.nodeRange.offset = childNodeOffset;
+		node.nodeRange.count = *childNodeCount;
+
+		childNodeOffset += node.nodeRange.count;
+		childNodeCount += 1;
 
 		stream.jump(nameByteSize);
 
@@ -147,12 +159,11 @@ namespace Trident {
 		}
 
 		propertyOffset += propertyCount;
-		nodeOffset += 1;
 
 		uint64 nodeIndex = 0;
 
 		while (stream.getByteOffset() < endOffset) {
-			const uint64 nodeEndOffset = readNode(stream, file, nodeOffset, propertyOffset);
+			const uint64 nodeEndOffset = readNode(stream, file, node.nodeRange.offset + nodeIndex, childNodeOffset, childNodeCount, propertyOffset);
 
 			if (nodeEndOffset == 0) {
 				break;
@@ -160,8 +171,6 @@ namespace Trident {
 
 			nodeIndex += 1;
 		}
-
-		node.nodeRange.count = nodeOffset - node.nodeRange.offset;
 
 		return endOffset;
 	}
@@ -174,112 +183,6 @@ namespace Trident {
 
 		return property;
 	}
-
-	#if defined(BUILD_MODE_DEBUG)
-		void FBX::debugFile(const File<FileFormat::FBX>& file, ConsoleLogger& logger) {
-			ENGINE_DEBUG("Debugging FBX [] file.", file.version);
-
-			for (const uint64 rootNodeIndex : file.rootNodeIndices) {
-				debugNode(file, &file.nodes[rootNodeIndex], logger, 0);
-			}
-
-			ENGINE_DEBUG("Debugging stopped.");
-		}
-
-		void FBX::debugNode(const File<FileFormat::FBX>& file, const Node* node, ConsoleLogger& logger, uint8 indentSize) {
-			const std::string indent(indentSize * 4, ' ');
-
-			std::ostream& stream = logger.getOutputStream();
-			stream << indent << '"' << node->name << '"' << '\n';
-
-			if (node->propertyRange.count > 0) {
-				stream << indent << "  Properties:\n";
-
-				uint64 propertyIndex = 0;
-
-				while (propertyIndex < node->propertyRange.count) {
-					debugProperty(file.properties[node->propertyRange.offset + propertyIndex], logger, indentSize + 1);
-
-					propertyIndex += 1;
-				}
-			}
-
-			if (node->nodeRange.count > 0) {
-				stream << indent << "  Nodes:" << '\n';
-
-				uint64 nodeIndex = 0;
-
-				while (nodeIndex < node->nodeRange.count) {
-					debugNode(file, &file.nodes[node->nodeRange.offset + nodeIndex], logger, indentSize + 1);
-
-					nodeIndex += 1;
-				}
-			}
-		}
-
-		void FBX::debugProperty(ref<Property> property, ConsoleLogger& logger, uint8 indentSize) {
-			const std::string indent(indentSize * 4, ' ');
-
-			std::ostream& stream = logger.getOutputStream();
-			stream << indent << '[' << static_cast<char8>(property->typeCode) << ']';
-
-			switch (property->typeCode) {
-				case PropertyTypeCode::Y: {
-					stream << ' ' << ref_cast<PrimitiveProperty<sint16>>(property)->data << '\n';
-
-					break;
-				}
-				case PropertyTypeCode::C: {
-					stream << ' ' << ref_cast<PrimitiveProperty<bool>>(property)->data << '\n';
-
-					break;
-				}
-				case PropertyTypeCode::I: {
-					stream << ' ' << ref_cast<PrimitiveProperty<sint32>>(property)->data << '\n';
-
-					break;
-				}
-				case PropertyTypeCode::F: {
-					stream << ' ' << ref_cast<PrimitiveProperty<float32>>(property)->data << '\n';
-
-					break;
-				}
-				case PropertyTypeCode::D: {
-					stream << ' ' << ref_cast<PrimitiveProperty<float64>>(property)->data << '\n';
-
-					break;
-				}
-				case PropertyTypeCode::L: {
-					stream << ' ' << ref_cast<PrimitiveProperty<sint64>>(property)->data << '\n';
-
-					break;
-				}
-				case PropertyTypeCode::S: {
-					const ref<SpecialProperty> specialProperty = ref_cast<SpecialProperty>(property);
-					const view<char8> data(pointer_cast<const char8*>(&specialProperty->data[0]), specialProperty->data.count());
-
-					stream << " \"" << data << "\"\n";
-
-					break;
-				}
-				case PropertyTypeCode::R: {
-					const ref<SpecialProperty> specialProperty = ref_cast<SpecialProperty>(property);
-
-					stream << '[' << specialProperty->data.count() << "]\n";
-
-					break;
-				}
-				default: {
-					// We only care about the count here, not the type.
-					const ref<ArrayProperty<bool>> arrayProperty = ref_cast<ArrayProperty<bool>>(property);
-
-					stream << '[' << arrayProperty->contents.count() << "]\n";
-
-					break;
-				}
-			}
-		}
-	#endif
 
 	template<>
 	bool Decoder<FileFormat::FBX>::validateSignature(const ByteStream<StreamOperation::READ>& stream) {
@@ -304,7 +207,7 @@ namespace Trident {
 		/// See https://code.blender.org/2013/08/fbx-binary-file-format-specification/#binary-file-structure.
 		stream.jump(23);
 
-		uint64 nodeCount = 0;
+		std::vector<uint64> childNodeCounts;
 		uint64 propertyCount = 0;
 		uint64 rootNodeCount = 0;
 
@@ -314,7 +217,7 @@ namespace Trident {
 		const uint64 firstNodeOffset = stream.getByteOffset();
 
 		while (true) {
-			const uint64 endOffset = FBX::countNodesAndProperties(stream, file.version, nodeCount, propertyCount);
+			const uint64 endOffset = FBX::countNodesAndProperties(stream, file.version, childNodeCounts, propertyCount);
 
 			if (endOffset == 0) {
 				break;
@@ -323,25 +226,21 @@ namespace Trident {
 			rootNodeCount += 1;
 		}
 
-		file.nodes = sequence<FBX::Node>(nodeCount);
+		file.nodes = sequence<FBX::Node>(childNodeCounts.size());
 		file.properties = sequence<ref<FBX::Property>>(propertyCount);
-		file.rootNodeIndices = sequence<uint64>(rootNodeCount);
+		file.rootNodeCount = rootNodeCount;
 
 		stream.seek(firstNodeOffset);
 
-		nodeCount = 0;
+		const uint64* childNodeCount = &childNodeCounts[0];
+
+		uint64 childNodeOffset = file.rootNodeCount;
+
 		propertyCount = 0;
 		rootNodeCount = 0;
 
-		while (true) {
-			const uint64 rootNodeIndex = nodeCount;
-			const uint64 endOffset = FBX::readNode(stream, file, nodeCount, propertyCount);
-
-			if (endOffset == 0) {
-				break;
-			}
-
-			file.rootNodeIndices[rootNodeCount] = rootNodeIndex;
+		while (rootNodeCount < file.rootNodeCount) {
+			FBX::readNode(stream, file, rootNodeCount, childNodeOffset, childNodeCount, propertyCount);
 
 			rootNodeCount += 1;
 		}

@@ -91,11 +91,11 @@ namespace Trident {
 
 		/// Recursively jumps over the node and its children.
 		/// Returns the node's end offset.
-		uint64 countNodesAndProperties(ByteStream<StreamOperation::READ>& stream, uint32 fileVersion, uint64& nodeCount, uint64& propertyCount);
+		uint64 countNodesAndProperties(ByteStream<StreamOperation::READ>& stream, uint32 fileVersion, std::vector<uint64>& childNodeCounts, uint64& propertyCount);
 
 		/// Recursively parses the node and its children and writes the decoded data in the file.
 		/// Returns the node's end offset.
-		uint64 readNode(ByteStream<StreamOperation::READ>& stream, File<FileFormat::FBX>& file, uint64& nodeOffset, uint64& propertyOffset);
+		uint64 readNode(ByteStream<StreamOperation::READ>& stream, File<FileFormat::FBX>& file, uint64 nodeOffset, uint64& childNodeOffset, const uint64*& childNodeCount, uint64& propertyOffset);
 
 		ref<FBX::Property> readProperty(ByteStream<StreamOperation::READ>& stream);
 
@@ -113,6 +113,7 @@ namespace Trident {
 
 	template<>
 	struct File<FileFormat::FBX> {
+		// TODO(asset-builder/geometry/fbx): Deprecate.
 		/* static const FBX::Node* searchNodeRecursive(const File<Filr, view<char8> Name, const FBX::Node* ResultNode = nullptr) {
 			for (const FBX::Node& Node : NestedList) {
 				if (Name == Node.name) {
@@ -127,6 +128,7 @@ namespace Trident {
 			return ResultNode;
 		} */
 
+		// TODO(asset-builder/geometry/fbx): Deprecate.
 		/* static auto findStringProperty(const Node* Node, view<char8> PropertyName) {
 			if (Node == nullptr) {
 				return;
@@ -154,8 +156,8 @@ namespace Trident {
 
 		uint32 version;
 		sequence<FBX::Node> nodes;
+		uint64 rootNodeCount;
 		sequence<ref<FBX::Property>> properties;
-		sequence<uint64> rootNodeIndices;
 	};
 
 	template<>

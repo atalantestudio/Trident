@@ -7,39 +7,144 @@
 
 namespace Trident::FBX {
 	const Node* findNode(const File<FileFormat::FBX>& file, view<char8> name) {
-		for (const uint64 rootNodeIndex : file.rootNodeIndices) {
-			const Node* node = &file.nodes[rootNodeIndex];
+		uint64 rootNodeIndex = 0;
 
-			if (node->name == name) {
-				return node;
+		while (rootNodeIndex < file.rootNodeCount) {
+			const Node* rootNode = &file.nodes[rootNodeIndex];
+
+			if (rootNode->name == name) {
+				return rootNode;
 			}
+
+			rootNodeIndex += 1;
 		}
 
 		return nullptr;
 	}
 
 	const Node* findNode(const File<FileFormat::FBX>& file, const Node* node, view<char8> name) {
-		const Node* searchNode = nullptr;
 		uint64 nodeIndex = 0;
 
 		while (nodeIndex < node->nodeRange.count) {
 			const Node* childNode = &file.nodes[node->nodeRange.offset + nodeIndex];
 
 			if (childNode->name == name) {
-				searchNode = childNode;
-
-				break;
-			}
-
-			searchNode = findNode(file, childNode, name);
-
-			if (searchNode != nullptr) {
-				break;
+				return childNode;
 			}
 
 			nodeIndex += 1;
 		}
 
-		return searchNode;
+		return nullptr;
 	}
+
+	#if defined(BUILD_MODE_DEBUG)
+		void FBX::debugFile(const File<FileFormat::FBX>& file, ConsoleLogger& logger) {
+			ENGINE_DEBUG("Debugging FBX [] file.", file.version);
+
+			uint64 rootNodeIndex = 0;
+
+			while (rootNodeIndex < file.rootNodeCount) {
+				debugNode(file, &file.nodes[rootNodeIndex], logger, 0);
+
+				rootNodeIndex += 1;
+			}
+
+			ENGINE_DEBUG("Debugging stopped.");
+		}
+
+		void FBX::debugNode(const File<FileFormat::FBX>& file, const Node* node, ConsoleLogger& logger, uint8 indentSize) {
+			const std::string indent(indentSize * 4, ' ');
+
+			std::ostream& stream = logger.getOutputStream();
+			stream << indent << '"' << node->name << '"' << '\n';
+
+			if (node->propertyRange.count > 0) {
+				stream << indent << "  Properties:\n";
+
+				uint64 propertyIndex = 0;
+
+				while (propertyIndex < node->propertyRange.count) {
+					debugProperty(file.properties[node->propertyRange.offset + propertyIndex], logger, indentSize + 1);
+
+					propertyIndex += 1;
+				}
+			}
+
+			if (node->nodeRange.count > 0) {
+				stream << indent << "  Nodes:" << '\n';
+
+				uint64 nodeIndex = 0;
+
+				while (nodeIndex < node->nodeRange.count) {
+					debugNode(file, &file.nodes[node->nodeRange.offset + nodeIndex], logger, indentSize + 1);
+
+					nodeIndex += 1;
+				}
+			}
+		}
+
+		void FBX::debugProperty(ref<Property> property, ConsoleLogger& logger, uint8 indentSize) {
+			const std::string indent(indentSize * 4, ' ');
+
+			std::ostream& stream = logger.getOutputStream();
+			stream << indent << '[' << static_cast<char8>(property->typeCode) << ']';
+
+			switch (property->typeCode) {
+				case PropertyTypeCode::Y: {
+					stream << ' ' << ref_cast<PrimitiveProperty<sint16>>(property)->data << '\n';
+
+					break;
+				}
+				case PropertyTypeCode::C: {
+					stream << ' ' << ref_cast<PrimitiveProperty<bool>>(property)->data << '\n';
+
+					break;
+				}
+				case PropertyTypeCode::I: {
+					stream << ' ' << ref_cast<PrimitiveProperty<sint32>>(property)->data << '\n';
+
+					break;
+				}
+				case PropertyTypeCode::F: {
+					stream << ' ' << ref_cast<PrimitiveProperty<float32>>(property)->data << '\n';
+
+					break;
+				}
+				case PropertyTypeCode::D: {
+					stream << ' ' << ref_cast<PrimitiveProperty<float64>>(property)->data << '\n';
+
+					break;
+				}
+				case PropertyTypeCode::L: {
+					stream << ' ' << ref_cast<PrimitiveProperty<sint64>>(property)->data << '\n';
+
+					break;
+				}
+				case PropertyTypeCode::S: {
+					const ref<SpecialProperty> specialProperty = ref_cast<SpecialProperty>(property);
+					const view<char8> data(pointer_cast<const char8*>(&specialProperty->data[0]), specialProperty->data.count());
+
+					stream << " \"" << data << "\"\n";
+
+					break;
+				}
+				case PropertyTypeCode::R: {
+					const ref<SpecialProperty> specialProperty = ref_cast<SpecialProperty>(property);
+
+					stream << '[' << specialProperty->data.count() << "]\n";
+
+					break;
+				}
+				default: {
+					// We only care about the count here, not the type.
+					const ref<ArrayProperty<bool>> arrayProperty = ref_cast<ArrayProperty<bool>>(property);
+
+					stream << '[' << arrayProperty->contents.count() << "]\n";
+
+					break;
+				}
+			}
+		}
+	#endif
 }
