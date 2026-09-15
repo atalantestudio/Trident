@@ -108,52 +108,20 @@ namespace Trident {
 		#endif
 
 		const Node* findNode(const File<FileFormat::FBX>& file, view<char8> name);
-		const Node* findNode(const File<FileFormat::FBX>& file, const Node* node, view<char8> name);
+		const Node* findNode(const File<FileFormat::FBX>& file, const Node* parentNode, view<char8> name);
+
+		template<typename DataType>
+		DataType resolvePrimitiveProperty(const File<FileFormat::FBX>& file, const Node* node, view<char8> name);
+
+		template bool resolvePrimitiveProperty(const File<FileFormat::FBX>& file, const Node* node, view<char8> name);
+		template sint32 resolvePrimitiveProperty(const File<FileFormat::FBX>& file, const Node* node, view<char8> name);
+		template float32 resolvePrimitiveProperty(const File<FileFormat::FBX>& file, const Node* node, view<char8> name);
+		template sint64 resolvePrimitiveProperty(const File<FileFormat::FBX>& file, const Node* node, view<char8> name);
+		template float64 resolvePrimitiveProperty(const File<FileFormat::FBX>& file, const Node* node, view<char8> name);
 	}
 
 	template<>
 	struct File<FileFormat::FBX> {
-		// TODO(asset-builder/geometry/fbx): Deprecate.
-		/* static const FBX::Node* searchNodeRecursive(const File<Filr, view<char8> Name, const FBX::Node* ResultNode = nullptr) {
-			for (const FBX::Node& Node : NestedList) {
-				if (Name == Node.name) {
-					ResultNode = &Node;
-
-					break;
-				}
-
-				ResultNode = searchNodeRecursive(Node.NestedList, Name, ResultNode);
-			}
-
-			return ResultNode;
-		} */
-
-		// TODO(asset-builder/geometry/fbx): Deprecate.
-		/* static auto findStringProperty(const Node* Node, view<char8> PropertyName) {
-			if (Node == nullptr) {
-				return;
-			}
-
-			uint32 PropertyIndex = 0;
-
-			while (PropertyIndex < Node->PropertyList.count()) {
-				const std::shared_ptr<FBXProperty> Property = Node->PropertyList[PropertyIndex];
-
-				if (Property->TypeCode == FBXPropertyTypeCode::S) {
-					const std::shared_ptr<FBXSpecialProperty> StringProperty = std::static_pointer_cast<FBXSpecialProperty>(Property);
-					const view<char8> Data(pointer_cast<const char8*>(&StringProperty->Data[0]), StringProperty->Data.count());
-
-					if (Data == PropertyName) {
-						return;
-					}
-				}
-
-				PropertyIndex += 1;
-			}
-
-			return;
-		} */
-
 		uint32 version;
 		sequence<FBX::Node> nodes;
 		uint64 rootNodeCount;
