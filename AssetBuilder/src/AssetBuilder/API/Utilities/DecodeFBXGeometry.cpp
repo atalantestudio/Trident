@@ -26,7 +26,7 @@ namespace Trident {
 	static void parseTransform(const File<FileFormat::FBX>& file, const FBX::Node* Objects, quat<float32>& orientation, svec3<float32>& scaling) {
 		const FBX::Node* Model = FBX::findNode(file, Objects, "Model");
 		const FBX::Node* Properties70 = FBX::findNode(file, Model, "Properties70");
-		const svec3<float64> Lcl_Rotation = FBX::resolveVec3Property<float64>(file, Properties70, "Lcl Rotation");
+		const svec3<float64> Lcl_Rotation = FBX::resolveVec3Property<float64>(file, Properties70, "Lcl Rotation", {0.0, 0.0, 0.0});
 
 		orientation = normalized(
 			quat<float32>::axisAngle(UP, radians(static_cast<float32>(Lcl_Rotation.y))) *
@@ -34,7 +34,7 @@ namespace Trident {
 			quat<float32>::axisAngle(FORWARD, radians(static_cast<float32>(Lcl_Rotation.z)))
 		);
 
-		svec3<float64> Lcl_Scaling = FBX::resolveVec3Property<float64>(file, Properties70, "Lcl Scaling");
+		svec3<float64> Lcl_Scaling = FBX::resolveVec3Property<float64>(file, Properties70, "Lcl Scaling", {1.0, 1.0, 1.0});
 
 		if (
 			abs(Lcl_Scaling.x - Lcl_Scaling.y) >= 0.001 ||

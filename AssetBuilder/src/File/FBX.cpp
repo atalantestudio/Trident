@@ -83,7 +83,7 @@ namespace Trident::FBX {
 	}
 
 	template<typename DataType>
-	svec3<DataType> resolveVec3Property(const File<FileFormat::FBX>& file, const Node* parentNode, view<char8> name) {
+	svec3<DataType> resolveVec3Property(const File<FileFormat::FBX>& file, const Node* parentNode, view<char8> name, svec3<DataType> defaultValue) {
 		uint64 nodeIndex = 0;
 
 		while (nodeIndex < parentNode->nodeRange.count) {
@@ -119,9 +119,7 @@ namespace Trident::FBX {
 			return {xProperty->data, yProperty->data, zProperty->data};
 		}
 
-		DEBUG_ASSERT(false);
-
-		return {static_cast<DataType>(0), static_cast<DataType>(0), static_cast<DataType>(0)};
+		return defaultValue;
 	}
 
 	#if defined(BUILD_MODE_DEBUG)

@@ -120,9 +120,9 @@ namespace Trident {
 		template float64 resolvePrimitiveProperty(const File<FileFormat::FBX>& file, const Node* parentNode, view<char8> name);
 
 		template<typename DataType>
-		svec3<DataType> resolveVec3Property(const File<FileFormat::FBX>& file, const Node* parentNode, view<char8> name);
+		svec3<DataType> resolveVec3Property(const File<FileFormat::FBX>& file, const Node* parentNode, view<char8> name, svec3<DataType> defaultValue);
 
-		template svec3<float64> resolveVec3Property(const File<FileFormat::FBX>& file, const Node* parentNode, view<char8> name);
+		template svec3<float64> resolveVec3Property(const File<FileFormat::FBX>& file, const Node* parentNode, view<char8> name, svec3<float64> defaultValue);
 	}
 
 	template<>
