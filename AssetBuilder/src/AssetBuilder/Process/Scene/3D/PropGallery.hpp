@@ -26,37 +26,22 @@ namespace Trident {
 					},
 				});
 
-				// const uint32 powerBox01Geometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("power_box_01"));
+				const uint32 powerBox01Geometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("power_box_01"));
 				const uint32 utilityBox01Geometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("utility_box_01"));
-				// const uint32 utilityBox02Geometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("utility_box_02"));
-				// const uint32 wetFloorSign01Geometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("wet_floor_sign_01"));
+				const uint32 utilityBox02Geometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("utility_box_02"));
+				const uint32 wetFloorSign01Geometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("wet_floor_sign_01"));
 
-				// const MaterialReference powerBox01Material = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lpbr_power_box_01_1k"));
+				const MaterialReference powerBox01Material = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lpbr_power_box_01_1k"));
 				const MaterialReference utilityBox01Material = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lpbr_utility_box_01_1k"));
-				// const MaterialReference utilityBox02Material = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lpbr_utility_box_02_1k"));
-				// const MaterialReference wetFloorSign01Material = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lpbr_wet_floor_sign_01_1k"));
+				const MaterialReference utilityBox02Material = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lpbr_utility_box_02_1k"));
+				const MaterialReference wetFloorSign01Material = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lpbr_wet_floor_sign_01_1k"));
 
-				/* builder.placeStaticProp({
+				builder.placeStaticProp({
 					.geometryIndex = powerBox01Geometry,
 					.material = powerBox01Material,
 					.transform = {
 						.translation = {-64.0f, 0.0f, 128.0f},
-						.rotation = {radians(90.0_deg), 0.0_rad, 0.0_rad},
-						.scale = 64.0f,
-					},
-					.lightmap = {
-						.luxelScale = {1.0f, 1.0f},
-						.albedo = {1.0f, 1.0f, 1.0f},
-					},
-					.lightmapScale = {64.0f, 64.0f},
-				}); */
-
-				builder.placeStaticProp({
-					.geometryIndex = utilityBox01Geometry,
-					.material = utilityBox01Material,
-					.transform = {
-						.translation = {0.0f, 0.0f, 128.0f},
-						// .rotation = {radians(90.0_deg), 0.0_rad, 0.0_rad},
+						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
 						.scale = 64.0f,
 					},
 					.lightmap = {
@@ -66,12 +51,27 @@ namespace Trident {
 					.lightmapScale = {64.0f, 64.0f},
 				});
 
-				/* builder.placeStaticProp({
+				builder.placeStaticProp({
+					.geometryIndex = utilityBox01Geometry,
+					.material = utilityBox01Material,
+					.transform = {
+						.translation = {0.0f, 0.0f, 128.0f},
+						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
+						.scale = 64.0f,
+					},
+					.lightmap = {
+						.luxelScale = {1.0f, 1.0f},
+						.albedo = {1.0f, 1.0f, 1.0f},
+					},
+					.lightmapScale = {64.0f, 64.0f},
+				});
+
+				builder.placeStaticProp({
 					.geometryIndex = utilityBox02Geometry,
 					.material = utilityBox02Material,
 					.transform = {
 						.translation = {64.0f, 0.0f, 128.0f},
-						.rotation = {radians(90.0_deg), 0.0_rad, 0.0_rad},
+						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
 						.scale = 64.0f,
 					},
 					.lightmap = {
@@ -86,7 +86,7 @@ namespace Trident {
 					.material = wetFloorSign01Material,
 					.transform = {
 						.translation = {128.0f, 0.0f, 128.0f},
-						.rotation = {radians(90.0_deg), 0.0_rad, 0.0_rad},
+						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
 						.scale = 64.0f,
 					},
 					.lightmap = {
@@ -94,7 +94,7 @@ namespace Trident {
 						.albedo = {1.0f, 1.0f, 1.0f},
 					},
 					.lightmapScale = {64.0f, 64.0f},
-				}); */
+				});
 
 				return builder;
 			}
