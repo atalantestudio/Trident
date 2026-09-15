@@ -100,8 +100,8 @@ namespace Trident {
 					.material = lightmappedDefaultMaterial,
 					.transform = {
 						.translation = {0.0f, 32.0f, 0.0f},
-						.rotation = {radians(-90.0_deg), radians(180.0_deg), 0.0_rad},
-						.scale = 256.0f,
+						.rotation = {0.0_rad, radians(180.0_deg), 0.0_rad},
+						.scale = 12.0f,
 					},
 					.lightmap = {
 						.luxelScale = {1.0f, 1.0f},

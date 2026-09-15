@@ -36,8 +36,8 @@ namespace Trident {
 					.material = lpbrMaterial,
 					.transform = {
 						.translation = {-32.0f, 32.0f, 64.0f},
-						.rotation = {radians(90.0_deg), 0.0_rad, 0.0_rad},
-						.scale = 64.0f,
+						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
+						.scale = 1.0f,
 					},
 					.lightmap = {
 						.luxelScale = {1.0f, 1.0f},
@@ -50,8 +50,8 @@ namespace Trident {
 					.geometryIndex = geometry,
 					.material = pbrMaterial,
 					.position = {32.0f, 32.0f, 64.0f},
-					.rotation = {radians(90.0_deg), 0.0_rad, 0.0_rad},
-					.uniformScale = 64.0f,
+					.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
+					.uniformScale = 1.0f,
 					.mass = max<float32>(),
 					.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
 					.inertiaScale = {1.0f, 1.0f, 1.0f},

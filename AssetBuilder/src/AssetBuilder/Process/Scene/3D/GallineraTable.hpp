@@ -101,8 +101,8 @@ namespace Trident {
 					.material = gallineraTableMaterial,
 					.transform = {
 						.translation = {0.0f, 0.0f, 0.0f},
-						.rotation = {radians(90.0_deg), 0.0_rad, 0.0_rad},
-						.scale = 64.0f,
+						.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
+						.scale = 1.0f,
 					},
 					.lightmap = {
 						.luxelScale = {1.0f, 1.0f},
