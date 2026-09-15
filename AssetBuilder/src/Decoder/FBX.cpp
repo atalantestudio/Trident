@@ -22,12 +22,11 @@ namespace Trident {
 		static ref<Property> readArrayProperty(ByteStream<StreamOperation::READ>& stream) {
 			const uint32 arrayLength = stream.read<uint32>();
 			const uint32 encoding = stream.read<uint32>();
-			const bool compressed = static_cast<bool>(encoding);
 			const uint32 compressedLength = stream.read<uint32>();
 
 			ref<FBX::ArrayProperty<DataType>> property = allocateRef<FBX::ArrayProperty<DataType>>();
 
-			if (compressed) {
+			if (encoding == 1) {
 				BitStream<StreamOperation::READ> bitStream(stream.getBytePosition(), compressedLength, Endianness::LITTLE_ENDIAN);
 
 				property->contents = bitStream.inflate<DataType>(arrayLength);
@@ -57,22 +56,6 @@ namespace Trident {
 
 			return property;
 		}
-
-		inline static const std::unordered_map<PropertyTypeCode, std::function<ref<Property>(ByteStream<StreamOperation::READ>&)>> readPropertyMap = {
-			{PropertyTypeCode::Y, readPrimitiveProperty<sint16>},
-			{PropertyTypeCode::C, readPrimitiveProperty<bool>},
-			{PropertyTypeCode::I, readPrimitiveProperty<sint32>},
-			{PropertyTypeCode::F, readPrimitiveProperty<float32>},
-			{PropertyTypeCode::D, readPrimitiveProperty<float64>},
-			{PropertyTypeCode::L, readPrimitiveProperty<sint64>},
-			{PropertyTypeCode::f, readArrayProperty<float32>},
-			{PropertyTypeCode::d, readArrayProperty<float64>},
-			{PropertyTypeCode::l, readArrayProperty<sint64>},
-			{PropertyTypeCode::i, readArrayProperty<sint32>},
-			{PropertyTypeCode::b, readArrayProperty<bool>},
-			{PropertyTypeCode::S, readSpecialProperty},
-			{PropertyTypeCode::R, readSpecialProperty},
-		};
 	}
 
 	uint64 FBX::countNodesAndProperties(ByteStream<StreamOperation::READ>& stream, uint32 fileVersion, std::vector<uint64>& childNodeCounts, uint64& propertyCount) {
@@ -178,7 +161,76 @@ namespace Trident {
 	ref<FBX::Property> FBX::readProperty(ByteStream<StreamOperation::READ>& stream) {
 		const PropertyTypeCode typeCode = stream.read<PropertyTypeCode>();
 
-		ref<Property> property = readPropertyMap.at(typeCode)(stream);
+		ref<Property> property;
+
+		switch (typeCode) {
+			case PropertyTypeCode::Y: {
+				property = readPrimitiveProperty<sint16>(stream);
+
+				break;
+			}
+			case PropertyTypeCode::C: {
+				property = readPrimitiveProperty<bool>(stream);
+
+				break;
+			}
+			case PropertyTypeCode::I: {
+				property = readPrimitiveProperty<sint32>(stream);
+
+				break;
+			}
+			case PropertyTypeCode::F: {
+				property = readPrimitiveProperty<float32>(stream);
+
+				break;
+			}
+			case PropertyTypeCode::D: {
+				property = readPrimitiveProperty<float64>(stream);
+
+				break;
+			}
+			case PropertyTypeCode::L: {
+				property = readPrimitiveProperty<sint64>(stream);
+
+				break;
+			}
+			case PropertyTypeCode::f: {
+				property = readArrayProperty<float32>(stream);
+
+				break;
+			}
+			case PropertyTypeCode::d: {
+				property = readArrayProperty<float64>(stream);
+
+				break;
+			}
+			case PropertyTypeCode::l: {
+				property = readArrayProperty<sint64>(stream);
+
+				break;
+			}
+			case PropertyTypeCode::i: {
+				property = readArrayProperty<sint32>(stream);
+
+				break;
+			}
+			case PropertyTypeCode::b: {
+				property = readArrayProperty<bool>(stream);
+
+				break;
+			}
+			case PropertyTypeCode::S: {
+				property = readSpecialProperty(stream);
+
+				break;
+			}
+			case PropertyTypeCode::R: {
+				property = readSpecialProperty(stream);
+
+				break;
+			}
+		}
+
 		property->typeCode = typeCode;
 
 		return property;

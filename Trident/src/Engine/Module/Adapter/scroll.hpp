@@ -10,6 +10,7 @@ namespace Trident {
 	using scroll::ConsoleEscapeCode;
 
 	using scroll::ConsoleLogger;
+	using scroll::FileLogger;
 	using scroll::Logger;
 	using scroll::LogLevel;
 	using scroll::TextBuffer;
