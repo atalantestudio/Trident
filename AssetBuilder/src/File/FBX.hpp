@@ -110,6 +110,7 @@ namespace Trident {
 		const Node* findNode(const File<FileFormat::FBX>& file, view<char8> name);
 		const Node* findNode(const File<FileFormat::FBX>& file, const Node* parentNode, view<char8> name);
 
+		/// `node` must be a 'Properties70' node.
 		template<typename DataType>
 		DataType resolvePrimitiveProperty(const File<FileFormat::FBX>& file, const Node* node, view<char8> name);
 

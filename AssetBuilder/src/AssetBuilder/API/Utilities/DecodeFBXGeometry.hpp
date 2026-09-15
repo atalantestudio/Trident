@@ -11,29 +11,64 @@
 namespace Trident {
 	BuildGeometry3D decodeFBXGeometry(view<uint8> inputData, uint32 identifier) {
 		const File<FileFormat::FBX> file = Decoder<FileFormat::FBX>::decode(inputData);
+
+		const FBX::Node* GlobalSettings = FBX::findNode(file, "GlobalSettings");
+		const FBX::Node* Properties70 = FBX::findNode(file, GlobalSettings, "Properties70");
+		const sint32 UpAxis = FBX::resolvePrimitiveProperty<sint32>(file, Properties70, "UpAxis");
+		const sint32 FrontAxis = FBX::resolvePrimitiveProperty<sint32>(file, Properties70, "FrontAxis");
+		const sint32 CoordAxis = FBX::resolvePrimitiveProperty<sint32>(file, Properties70, "CoordAxis");
+		const sint32 CoordAxisSign = FBX::resolvePrimitiveProperty<sint32>(file, Properties70, "CoordAxisSign");
 		const FBX::Node* ObjectsNode = FBX::findNode(file, "Objects");
-
-		ENGINE_ASSERT(ObjectsNode != nullptr, "Failed to find 'Objects' node.");
-
 		const FBX::Node* GeometryNode = FBX::findNode(file, ObjectsNode, "Geometry");
-
-		ENGINE_ASSERT(GeometryNode != nullptr, "Failed to find 'Geometry' node.");
-
 		const FBX::Node* VerticesNode = FBX::findNode(file, GeometryNode, "Vertices");
 
-		ENGINE_ASSERT(VerticesNode != nullptr, "Failed to find 'Vertices' node.");
 		DEBUG_ASSERT(file.properties[VerticesNode->propertyRange.offset]->typeCode == FBX::PropertyTypeCode::d);
 
 		const FBX::Node* PolygonVertexIndexNode = FBX::findNode(file, GeometryNode, "PolygonVertexIndex");
 
-		ENGINE_ASSERT(PolygonVertexIndexNode != nullptr, "Failed to find 'PolygonVertexIndex' node.");
 		DEBUG_ASSERT(file.properties[PolygonVertexIndexNode->propertyRange.offset]->typeCode == FBX::PropertyTypeCode::i);
 
 		const ref<FBX::ArrayProperty<float64>> VerticesProperty = ref_cast<FBX::ArrayProperty<float64>>(file.properties[VerticesNode->propertyRange.offset]);
-		const ref<FBX::ArrayProperty<sint32>> PolygonVertexIndexProperty = ref_cast<FBX::ArrayProperty<sint32>>(file.properties[PolygonVertexIndexNode->propertyRange.offset]);
-		const view<float64> vertexPositionComponents = VerticesProperty->contents;
 
-		ENGINE_ASSERT(vertexPositionComponents.count() >= 3, "Invalid vertex position component buffer length.");
+		ENGINE_ASSERT(VerticesProperty->contents.count() >= 3, "Invalid vertex position component buffer length.");
+
+		mat4x4<float32> transform = mat4x4<float32>::identity();
+		sequence<svec3<float32>> positions(VerticesProperty->contents.count() / 3);
+		uint32 positionIndex = 0;
+
+		switch (CoordAxis) {
+			case 0: {
+				transform[0] = {static_cast<float32>(-CoordAxisSign), 0.0f, 0.0f, 0.0f};
+
+				break;
+			}
+			case 1: {
+				transform[1] = {0.0f, static_cast<float32>(-CoordAxisSign), 0.0f, 0.0f};
+
+				break;
+			}
+			case 2: {
+				transform[2] = {0.0f, 0.0f, static_cast<float32>(-CoordAxisSign), 0.0f};
+
+				break;
+			}
+		}
+
+		while (positionIndex < positions.count()) {
+			positions[positionIndex] = {
+				static_cast<float32>(VerticesProperty->contents[positionIndex * 3 + 0]),
+				static_cast<float32>(VerticesProperty->contents[positionIndex * 3 + 1]),
+				static_cast<float32>(VerticesProperty->contents[positionIndex * 3 + 2]),
+			};
+
+			// TODO(lyah/scalar)
+			positions[positionIndex] = svec3<float32>(multiplyTransform(vec3<float32>(positions[positionIndex]), transform));
+
+			positionIndex += 1;
+		}
+
+		const ref<FBX::ArrayProperty<sint32>> PolygonVertexIndexProperty = ref_cast<FBX::ArrayProperty<sint32>>(file.properties[PolygonVertexIndexNode->propertyRange.offset]);
+
 		ENGINE_ASSERT(PolygonVertexIndexProperty->contents.count() >= 3, "Invalid vertex position index buffer length.");
 
 		uint32 indexCount = 0;
@@ -77,8 +112,14 @@ namespace Trident {
 				const sint32 indexB = PolygonVertexIndexProperty->contents[polygonOffset + triangleOffset + 1];
 				const sint32 indexC = PolygonVertexIndexProperty->contents[polygonOffset + triangleOffset + 2];
 
-				vertexPositionIndices[indexOffset + 0] = indexA;
-				vertexPositionIndices[indexOffset + 1] = indexB;
+				if (CoordAxisSign == 1) {
+					vertexPositionIndices[indexOffset + 0] = indexB;
+					vertexPositionIndices[indexOffset + 1] = indexA;
+				}
+				else {
+					vertexPositionIndices[indexOffset + 0] = indexA;
+					vertexPositionIndices[indexOffset + 1] = indexB;
+				}
 
 				indexOffset += 3;
 
@@ -104,20 +145,10 @@ namespace Trident {
 		// Parse vertex normal components and indices.
 		{
 			const FBX::Node* LayerElementNormalNode = FBX::findNode(file, GeometryNode, "LayerElementNormal");
-
-			ENGINE_ASSERT(LayerElementNormalNode != nullptr, "Failed to find 'LayerElementNormal' node.");
-
 			const FBX::Node* MappingInformationTypeNode = FBX::findNode(file, LayerElementNormalNode, "MappingInformationType");
-
-			ENGINE_ASSERT(MappingInformationTypeNode != nullptr, "Failed to find 'MappingInformationType' node.");
-
 			const FBX::Node* ReferenceInformationTypeNode = FBX::findNode(file, LayerElementNormalNode, "ReferenceInformationType");
-
-			ENGINE_ASSERT(ReferenceInformationTypeNode != nullptr, "Failed to find 'ReferenceInformationType' node.");
-
 			const FBX::Node* NormalsNode = FBX::findNode(file, LayerElementNormalNode, "Normals");
 
-			ENGINE_ASSERT(NormalsNode != nullptr, "Failed to find 'Normals' node.");
 			DEBUG_ASSERT(file.properties[MappingInformationTypeNode->propertyRange.offset]->typeCode == FBX::PropertyTypeCode::S);
 			DEBUG_ASSERT(file.properties[ReferenceInformationTypeNode->propertyRange.offset]->typeCode == FBX::PropertyTypeCode::S);
 			DEBUG_ASSERT(file.properties[NormalsNode->propertyRange.offset]->typeCode == FBX::PropertyTypeCode::d);
@@ -131,7 +162,7 @@ namespace Trident {
 
 			if (MappingInformationType == "ByPolygonVertex") {
 				if (ReferenceInformationType == "Direct") {
-					vertexNormalComponents = sequence<float64>(vertexPositionComponents.count());
+					vertexNormalComponents = sequence<float64>(VerticesProperty->contents.count());
 					vertexNormalIndices = vertexPositionIndices;
 
 					// Sum normals for each individual vertex.
@@ -159,7 +190,6 @@ namespace Trident {
 				else if (ReferenceInformationType == "IndexToDirect") {
 					const FBX::Node* NormalsIndexNode = FBX::findNode(file, LayerElementNormalNode, "NormalsIndex");
 
-					ENGINE_ASSERT(NormalsIndexNode != nullptr, "Failed to find 'NormalsIndex' node.");
 					DEBUG_ASSERT(file.properties[NormalsIndexNode->propertyRange.offset]->typeCode == FBX::PropertyTypeCode::i);
 
 					const ref<FBX::ArrayProperty<sint32>> NormalsIndexProperty = ref_cast<FBX::ArrayProperty<sint32>>(file.properties[NormalsIndexNode->propertyRange.offset]);
@@ -170,7 +200,7 @@ namespace Trident {
 					uint32 polygonOffset = 0;
 					uint32 indexOffset = 0;
 
-					// TODO: This section is similar to the index count section above; maybe try merging the two.
+					// TODO(asset-builder/geometry/fbx): This section is similar to the index count section above; maybe try merging the two.
 					while (polygonOffset < NormalsIndexProperty->contents.count()) {
 						uint32 triangleOffset = 0;
 
@@ -211,7 +241,6 @@ namespace Trident {
 				else if (ReferenceInformationType == "IndexToDirect") {
 					const FBX::Node* NormalsIndexNode = FBX::findNode(file, LayerElementNormalNode, "NormalsIndex");
 
-					ENGINE_ASSERT(NormalsIndexNode != nullptr, "Failed to find 'NormalsIndex' node.");
 					DEBUG_ASSERT(file.properties[NormalsIndexNode->propertyRange.offset]->typeCode == FBX::PropertyTypeCode::i);
 
 					const ref<FBX::ArrayProperty<sint32>> NormalsIndexProperty = ref_cast<FBX::ArrayProperty<sint32>>(file.properties[NormalsIndexNode->propertyRange.offset]);
@@ -223,7 +252,7 @@ namespace Trident {
 
 						ENGINE_ASSERT(normalIndex >= 0, "Invalid normal index.");
 
-						// TODO: Use std::copy here?
+						// TODO(asset-builder/geometry/fbx): Use std::copy here?
 						for (uint32 componentIndex = 0; componentIndex < 3; componentIndex += 1) {
 							vertexNormalComponents[index * 3 + componentIndex] = NormalsProperty->contents[normalIndex * 3 + componentIndex];
 						}
@@ -252,20 +281,10 @@ namespace Trident {
 		// Parse vertex texture coordinates.
 		{
 			const FBX::Node* LayerElementUVNode = FBX::findNode(file, GeometryNode, "LayerElementUV");
-
-			ENGINE_ASSERT(LayerElementUVNode != nullptr, "Failed to find 'LayerElementUV' node.");
-
 			const FBX::Node* MappingInformationTypeNode = FBX::findNode(file, LayerElementUVNode, "MappingInformationType");
-
-			ENGINE_ASSERT(MappingInformationTypeNode != nullptr, "Failed to find 'MappingInformationType' node.");
-
 			const FBX::Node* ReferenceInformationTypeNode = FBX::findNode(file, LayerElementUVNode, "ReferenceInformationType");
-
-			ENGINE_ASSERT(ReferenceInformationTypeNode != nullptr, "Failed to find 'ReferenceInformationType' node.");
-
 			const FBX::Node* UVNode = FBX::findNode(file, LayerElementUVNode, "UV");
 
-			ENGINE_ASSERT(UVNode != nullptr, "Failed to find 'UV' node.");
 			DEBUG_ASSERT(file.properties[MappingInformationTypeNode->propertyRange.offset]->typeCode == FBX::PropertyTypeCode::S);
 			DEBUG_ASSERT(file.properties[ReferenceInformationTypeNode->propertyRange.offset]->typeCode == FBX::PropertyTypeCode::S);
 			DEBUG_ASSERT(file.properties[UVNode->propertyRange.offset]->typeCode == FBX::PropertyTypeCode::d);
@@ -284,7 +303,6 @@ namespace Trident {
 				else if (ReferenceInformationType == "IndexToDirect") {
 					const FBX::Node* UVIndexNode = FBX::findNode(file, LayerElementUVNode, "UVIndex");
 
-					ENGINE_ASSERT(UVIndexNode != nullptr, "Failed to find 'UVIndex' node.");
 					DEBUG_ASSERT(file.properties[UVIndexNode->propertyRange.offset]->typeCode == FBX::PropertyTypeCode::i);
 
 					const ref<FBX::ArrayProperty<sint32>> UVIndexProperty = ref_cast<FBX::ArrayProperty<sint32>>(file.properties[UVIndexNode->propertyRange.offset]);
@@ -295,7 +313,7 @@ namespace Trident {
 					uint32 polygonOffset = 0;
 					uint32 indexOffset = 0;
 
-					// TODO: This section is similar to the index count section above; maybe try merging the two.
+					// TODO(asset-builder/geometry/fbx): This section is similar to the index count section above; maybe try merging the two.
 					while (polygonOffset < UVIndexProperty->contents.count()) {
 						uint32 triangleOffset = 0;
 
@@ -305,6 +323,11 @@ namespace Trident {
 							vertexTextureCoordinateIndices[indexOffset + 0] = UVIndexProperty->contents[polygonOffset];
 							vertexTextureCoordinateIndices[indexOffset + 1] = UVIndexProperty->contents[polygonOffset + triangleOffset + 1];
 							vertexTextureCoordinateIndices[indexOffset + 2] = UVIndexProperty->contents[polygonOffset + triangleOffset + 2];
+
+							if (CoordAxisSign == 1) {
+								vertexTextureCoordinateIndices[indexOffset + 0] = UVIndexProperty->contents[polygonOffset + triangleOffset + 1];
+								vertexTextureCoordinateIndices[indexOffset + 1] = UVIndexProperty->contents[polygonOffset];
+							}
 
 							indexOffset += 3;
 
@@ -356,20 +379,8 @@ namespace Trident {
 
 		ENGINE_ASSERT(vertexTextureCoordinateIndices.count() == vertexPositionIndices.count(), "Vertex texture coordinate index count is inconsistent with vertex position index count.");
 
-		sequence<svec3<float32>> positions(vertexPositionComponents.count() / 3);
 		sequence<svec3<float32>> normals(vertexNormalComponents.count() / 3);
 		sequence<svec2<float32>> textureCoordinates(vertexTextureCoordinateComponents.count() / 2);
-		uint32 positionIndex = 0;
-
-		while (positionIndex < positions.count()) {
-			positions[positionIndex] = {
-				static_cast<float32>(vertexPositionComponents[positionIndex * 3 + 0]),
-				static_cast<float32>(vertexPositionComponents[positionIndex * 3 + 1]),
-				static_cast<float32>(vertexPositionComponents[positionIndex * 3 + 2]),
-			};
-
-			positionIndex += 1;
-		}
 
 		uint32 normalIndex = 0;
 
