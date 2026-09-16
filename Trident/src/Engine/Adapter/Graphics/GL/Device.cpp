@@ -70,6 +70,10 @@ namespace Trident {
 
 	void GL::destroyDevice(const Trident::Device* device) {}
 
+	void GL::flushMappedMemoryRanges(const Trident::Device* device, view<BaseBufferView> mappedMemoryRanges) {
+		// TODO(graphics/gl/device/flush-mapped-memory-ranges)
+		ENGINE_ERROR_UNIMPLEMENTED();
+	}
 
 	void GL::resetFence(const Trident::Device* device, const Trident::Fence* fence) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);

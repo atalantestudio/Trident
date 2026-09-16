@@ -67,6 +67,8 @@ namespace Trident {
 
 			ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) const;
 
+			void flushMappedMemoryRanges(view<BaseBufferView> mappedMemoryRanges) const;
+
 			ref<MemoryAllocator> getMemoryAllocator() const;
 
 			ref<PhysicalDevice> getPhysicalDevice() const;

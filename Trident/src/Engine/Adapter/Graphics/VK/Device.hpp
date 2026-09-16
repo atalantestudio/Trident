@@ -57,6 +57,7 @@ namespace Trident {
 			PFN_vkDestroyShaderModule vkDestroyShaderModule;
 			PFN_vkDestroySwapchainKHR vkDestroySwapchainKHR;
 			PFN_vkDeviceWaitIdle vkDeviceWaitIdle;
+			PFN_vkFlushMappedMemoryRanges vkFlushMappedMemoryRanges;
 			PFN_vkFreeCommandBuffers vkFreeCommandBuffers;
 			PFN_vkFreeMemory vkFreeMemory;
 			PFN_vkGetDeviceQueue vkGetDeviceQueue;
@@ -94,6 +95,8 @@ namespace Trident {
 		ref<Trident::Device> createDevice(const Trident::GraphicsAdapter* adapter, const Trident::PhysicalDevice* physicalDevice, view<DeviceExtensionName> enabledExtensions);
 
 		void destroyDevice(const Trident::Device* device);
+
+		void flushMappedMemoryRanges(const Trident::Device* device, view<BaseBufferView> mappedMemoryRanges);
 
 		void resetFence(const Trident::Device* device, const Trident::Fence* fence);
 

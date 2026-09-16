@@ -71,6 +71,7 @@ namespace Trident {
 		LOAD_DEVICE_PROCEDURE(vkDestroyShaderModule);
 		LOAD_DEVICE_PROCEDURE(vkDestroySwapchainKHR);
 		LOAD_DEVICE_PROCEDURE(vkDeviceWaitIdle);
+		LOAD_DEVICE_PROCEDURE(vkFlushMappedMemoryRanges);
 		LOAD_DEVICE_PROCEDURE(vkFreeCommandBuffers);
 		LOAD_DEVICE_PROCEDURE(vkFreeMemory);
 		LOAD_DEVICE_PROCEDURE(vkGetDeviceQueue);
@@ -380,6 +381,35 @@ namespace Trident {
 		const VkResult result = _device->vkResetFences(_device->device, 1, &_fence->fence);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to reset fence ([]).", string_VkResult(result));
+	}
+
+	void VK::flushMappedMemoryRanges(const Trident::Device* device, view<BaseBufferView> mappedMemoryRanges) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const VK::Device* vkDevice = static_cast<const VK::Device*>(device);
+		const ref<Trident::MemoryAllocator> memoryAllocator = device->getMemoryAllocator();
+
+		sequence<VkMappedMemoryRange> memoryRanges(mappedMemoryRanges.count());
+		uint32 memoryRangeIndex = 0;
+
+		while (memoryRangeIndex < memoryRanges.count()) {
+			const BaseBufferView& bufferView = mappedMemoryRanges[memoryRangeIndex];
+			const MemorySuballocation& memorySuballocation = bufferView.getBuffer()->getMemorySuballocation();
+			const MemoryAllocation& allocation = memoryAllocator->allocations[memorySuballocation.allocationIndex];
+
+			VkMappedMemoryRange& memoryRange = memoryRanges[memoryRangeIndex];
+			memoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+			memoryRange.pNext = nullptr;
+			memoryRange.memory = *pointer_cast<const VkDeviceMemory*>(&allocation.memory);
+			memoryRange.offset = memorySuballocation.offset + bufferView.getOffset();
+			memoryRange.size = bufferView.getSize();
+
+			memoryRangeIndex += 1;
+		}
+
+		const VkResult result = vkDevice->vkFlushMappedMemoryRanges(vkDevice->device, memoryRangeIndex, &memoryRanges[0]);
+
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to flush mapped memory ranges.");
 	}
 
 	void VK::updateDescriptorSets(const Trident::Device* device, view<WriteDescriptorSet> writeDescriptorSets) {

@@ -231,6 +231,11 @@ namespace Trident {
 		}
 	}
 
+	void DX12::flushMappedMemoryRanges(const Trident::Device* device, view<BaseBufferView> mappedMemoryRanges) {
+		// TODO(graphics/dx12/device/flush-mapped-memory-ranges)
+		ENGINE_ERROR_UNIMPLEMENTED();
+	}
+
 	void DX12::resetFence(const Trident::Device* device, const Trident::Fence* fence) {
 		const DX12::Fence* _fence = static_cast<const DX12::Fence*>(fence);
 		HRESULT result;

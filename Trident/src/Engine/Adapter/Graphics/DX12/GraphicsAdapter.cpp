@@ -122,6 +122,7 @@ namespace Trident::DX12 {
 		adapter->drawIndexedIndirectImplementation = DX12::drawIndexedIndirect;
 		adapter->endImplementation = DX12::end;
 		adapter->endRenderPassImplementation = DX12::endRenderPass;
+		adapter->flushMappedMemoryRangesImplementation = DX12::flushMappedMemoryRanges;
 		adapter->findMemoryTypeIndexImplementation = DX12::findMemoryTypeIndex;
 		adapter->getBufferMemoryRequirementsImplementation = DX12::getBufferMemoryRequirements;
 		adapter->getImageMemoryRequirementsImplementation = DX12::getImageMemoryRequirements;

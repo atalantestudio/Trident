@@ -100,6 +100,7 @@ namespace Trident::VK {
 		adapter->drawIndexedIndirectImplementation = VK::drawIndexedIndirect;
 		adapter->endImplementation = VK::end;
 		adapter->endRenderPassImplementation = VK::endRenderPass;
+		adapter->flushMappedMemoryRangesImplementation = VK::flushMappedMemoryRanges;
 		adapter->findMemoryTypeIndexImplementation = VK::findMemoryTypeIndex;
 		adapter->getBufferMemoryRequirementsImplementation = VK::getBufferMemoryRequirements;
 		adapter->getImageMemoryRequirementsImplementation = VK::getImageMemoryRequirements;

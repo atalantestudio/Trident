@@ -619,6 +619,10 @@ namespace Trident {
 		return adapter->createSwapchainImplementation(this, descriptor);
 	}
 
+	void Device::flushMappedMemoryRanges(view<BaseBufferView> mappedMemoryRanges) const {
+		return adapter->flushMappedMemoryRangesImplementation(this, mappedMemoryRanges);
+	}
+
 	ref<MemoryAllocator> Device::getMemoryAllocator() const {
 		return memoryAllocator;
 	}

@@ -34,6 +34,8 @@ namespace Trident {
 
 		void destroyDevice(const Trident::Device* device);
 
+		void flushMappedMemoryRanges(const Trident::Device* device, view<BaseBufferView> mappedMemoryRanges);
+
 		void resetFence(const Trident::Device* device, const Trident::Fence* fence);
 
 		void updateDescriptorSets(const Trident::Device* device, view<WriteDescriptorSet> writeDescriptorSets);

@@ -83,6 +83,7 @@ namespace Trident {
 			DrawIndexedIndirectImplementation drawIndexedIndirectImplementation;
 			EndImplementation endImplementation;
 			EndRenderPassImplementation endRenderPassImplementation;
+			FlushMappedMemoryRangesImplementation flushMappedMemoryRangesImplementation;
 			FindMemoryTypeIndexImplementation findMemoryTypeIndexImplementation;
 			GetBufferMemoryRequirementsImplementation getBufferMemoryRequirementsImplementation;
 			GetImageMemoryRequirementsImplementation getImageMemoryRequirementsImplementation;

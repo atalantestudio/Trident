@@ -116,6 +116,7 @@ namespace Trident::GL {
 		adapter->drawIndexedIndirectImplementation = GL::drawIndexedIndirect;
 		adapter->endImplementation = GL::end;
 		adapter->endRenderPassImplementation = GL::endRenderPass;
+		adapter->flushMappedMemoryRangesImplementation = GL::flushMappedMemoryRanges;
 		adapter->findMemoryTypeIndexImplementation = GL::findMemoryTypeIndex;
 		adapter->getBufferMemoryRequirementsImplementation = GL::getBufferMemoryRequirements;
 		adapter->getImageMemoryRequirementsImplementation = GL::getImageMemoryRequirements;
