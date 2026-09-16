@@ -8,8 +8,6 @@
 #include "Lightmap.glsl"
 
 layout(location = 0) rayPayloadEXT Hit hit;
-layout(location = 1) rayPayloadEXT Hit primaryHit;
-layout(location = 2) rayPayloadEXT Hit secondaryHit;
 
 void pcgHash(inout uint seed) {
 	uint state = seed * 747796405 + 2891336453;
@@ -28,7 +26,60 @@ vec3 randomUnitDirection(inout uint seed) {
 	return normalize(vec3(randomScalar(seed), randomScalar(seed), randomScalar(seed)) * 2.0 - 1.0);
 }
 
-vec3 sampleDirectLight(Ray primaryRay, inout uint seed) {
+bool adjustSamplePosition(inout vec3 p, vec3 triangleNormal, float halfDiagonalLuxelSize) {
+	const float E = 1e-4;
+
+	vec3 a = normalize(cross(p, triangleNormal));
+	vec3 b = normalize(cross(a, triangleNormal));
+
+	Ray ray;
+	ray.origin = p + triangleNormal * E;
+	ray.tMin = 0.0;
+	ray.direction = a;
+	ray.tMax = halfDiagonalLuxelSize;
+
+	traceRayEXT(accelerationStructure, gl_RayFlagsOpaqueEXT | gl_RayFlagsCullFrontFacingTrianglesEXT, 0xff, 0, 0, 0, ray.origin, ray.tMin, ray.direction, ray.tMax, 0);
+
+	if (hit.t > 0.0) {
+		p += hit.triangleNormal * (hit.t + E);
+
+		return true;
+	}
+
+	ray.direction = b;
+
+	traceRayEXT(accelerationStructure, gl_RayFlagsOpaqueEXT | gl_RayFlagsCullFrontFacingTrianglesEXT, 0xff, 0, 0, 0, ray.origin, ray.tMin, ray.direction, ray.tMax, 0);
+
+	if (hit.t > 0.0) {
+		p += hit.triangleNormal * (hit.t + E);
+
+		return true;
+	}
+
+	ray.direction = -a;
+
+	traceRayEXT(accelerationStructure, gl_RayFlagsOpaqueEXT | gl_RayFlagsCullFrontFacingTrianglesEXT, 0xff, 0, 0, 0, ray.origin, ray.tMin, ray.direction, ray.tMax, 0);
+
+	if (hit.t > 0.0) {
+		p += hit.triangleNormal * (hit.t + E);
+
+		return true;
+	}
+
+	ray.direction = -b;
+
+	traceRayEXT(accelerationStructure, gl_RayFlagsOpaqueEXT | gl_RayFlagsCullFrontFacingTrianglesEXT, 0xff, 0, 0, 0, ray.origin, ray.tMin, ray.direction, ray.tMax, 0);
+
+	if (hit.t > 0.0) {
+		p += hit.triangleNormal * (hit.t + E);
+
+		return true;
+	}
+
+	return false;
+}
+
+vec3 sampleDirectLight(Hit primaryHit, Ray primaryRay, inout uint seed) {
 	const float pdfDiffuse = 1.0 / (4.0 * PI);
 
 #if defined(CUSTOM_SCENE_DDGI_REF_0)
@@ -43,7 +94,11 @@ vec3 sampleDirectLight(Ray primaryRay, inout uint seed) {
 		return vec3(0.0, 0.0, 0.0);
 	}
 
-	traceRayEXT(accelerationStructure, gl_RayFlagsOpaqueEXT | gl_RayFlagsCullBackFacingTrianglesEXT, 0xff, 0, 0, 0, secondaryRay.origin, secondaryRay.tMin, secondaryRay.direction, secondaryRay.tMax, 2);
+	hit = primaryHit;
+
+	traceRayEXT(accelerationStructure, gl_RayFlagsOpaqueEXT | gl_RayFlagsCullBackFacingTrianglesEXT, 0xff, 0, 0, 0, secondaryRay.origin, secondaryRay.tMin, secondaryRay.direction, secondaryRay.tMax, 0);
+
+	Hit secondaryHit = hit;
 
 	if (secondaryHit.t < length(op)) {
 		return vec3(0.0, 0.0, 0.0);
@@ -92,7 +147,11 @@ vec3 sampleDirectLight(Ray primaryRay, inout uint seed) {
 		return vec3(0.0, 0.0, 0.0);
 	}
 
-	traceRayEXT(accelerationStructure, gl_RayFlagsOpaqueEXT | gl_RayFlagsCullBackFacingTrianglesEXT, 0xff, 0, 0, 0, secondaryRay.origin, secondaryRay.tMin, secondaryRay.direction, secondaryRay.tMax, 2);
+	hit = primaryHit;
+
+	traceRayEXT(accelerationStructure, gl_RayFlagsOpaqueEXT | gl_RayFlagsCullBackFacingTrianglesEXT, 0xff, 0, 0, 0, secondaryRay.origin, secondaryRay.tMin, secondaryRay.direction, secondaryRay.tMax, 0);
+
+	Hit secondaryHit = hit;
 
 	if (secondaryHit.triangleIndex != triangle_.index) {
 		return vec3(0.0, 0.0, 0.0);
@@ -109,7 +168,7 @@ vec3 sampleDirectLight(Ray primaryRay, inout uint seed) {
 #endif
 }
 
-vec3 traceRay(inout uint seed) {
+vec3 traceRay(Hit primaryHit, inout uint seed) {
 	vec3 light = vec3(0.0, 0.0, 0.0);
 	vec3 throughput = vec3(1.0, 1.0, 1.0);
 	uint bounceIndex = 0;
@@ -127,12 +186,16 @@ vec3 traceRay(inout uint seed) {
 		// TODO(asset-builder/lightmapper): Use the scene bounds.
 		primaryRay.tMax = 2048.0;
 
-		vec3 directLight = sampleDirectLight(primaryRay, seed);
+		vec3 directLight = sampleDirectLight(primaryHit, primaryRay, seed);
 		vec3 brdf = material.albedo / PI;
 
 		light += directLight * throughput * brdf;
 
-		traceRayEXT(accelerationStructure, gl_RayFlagsOpaqueEXT | gl_RayFlagsCullBackFacingTrianglesEXT, 0xff, 0, 0, 0, primaryRay.origin, primaryRay.tMin, primaryRay.direction, primaryRay.tMax, 1);
+		hit = primaryHit;
+
+		traceRayEXT(accelerationStructure, gl_RayFlagsOpaqueEXT | gl_RayFlagsCullBackFacingTrianglesEXT, 0xff, 0, 0, 0, primaryRay.origin, primaryRay.tMin, primaryRay.direction, primaryRay.tMax, 0);
+
+		primaryHit = hit;
 
 		if (primaryHit.t < 0.0) {
 			light += texture(environmentMap, primaryRay.direction).rgb * throughput;
@@ -144,57 +207,6 @@ vec3 traceRay(inout uint seed) {
 	}
 
 	return light;
-}
-
-bool adjustSamplePosition(inout vec3 position, vec3 triangleNormal, float diagonalLuxelSize) {
-	vec3 a = normalize(cross(position, triangleNormal));
-	vec3 b = normalize(cross(a, triangleNormal));
-
-	Ray ray;
-	ray.origin = position + sign(triangleNormal) * abs(position * ADAPTIVE_BIAS);
-	ray.tMin = 0.0;
-	ray.direction = a;
-	ray.tMax = diagonalLuxelSize * 0.5;
-
-	traceRayEXT(accelerationStructure, gl_RayFlagsOpaqueEXT | gl_RayFlagsCullFrontFacingTrianglesEXT, 0xff, 0, 0, 0, ray.origin, ray.tMin, ray.direction, ray.tMax, 0);
-
-	if (hit.t > 0.0) {
-		position = hit.position + sign(hit.triangleNormal) * abs(hit.position * ADAPTIVE_BIAS);
-
-		return true;
-	}
-
-	ray.direction = b;
-
-	traceRayEXT(accelerationStructure, gl_RayFlagsOpaqueEXT | gl_RayFlagsCullFrontFacingTrianglesEXT, 0xff, 0, 0, 0, ray.origin, ray.tMin, ray.direction, ray.tMax, 0);
-
-	if (hit.t > 0.0) {
-		position = hit.position + sign(hit.triangleNormal) * abs(hit.position * ADAPTIVE_BIAS);
-
-		return true;
-	}
-
-	ray.direction = -a;
-
-	traceRayEXT(accelerationStructure, gl_RayFlagsOpaqueEXT | gl_RayFlagsCullFrontFacingTrianglesEXT, 0xff, 0, 0, 0, ray.origin, ray.tMin, ray.direction, ray.tMax, 0);
-
-	if (hit.t > 0.0) {
-		position = hit.position + sign(hit.triangleNormal) * abs(hit.position * ADAPTIVE_BIAS);
-
-		return true;
-	}
-
-	ray.direction = -b;
-
-	traceRayEXT(accelerationStructure, gl_RayFlagsOpaqueEXT | gl_RayFlagsCullFrontFacingTrianglesEXT, 0xff, 0, 0, 0, ray.origin, ray.tMin, ray.direction, ray.tMax, 0);
-
-	if (hit.t > 0.0) {
-		position = hit.position + sign(hit.triangleNormal) * abs(hit.position * ADAPTIVE_BIAS);
-
-		return true;
-	}
-
-	return false;
 }
 
 void main() {
@@ -210,9 +222,9 @@ void main() {
 	vec3 position = gBufferPosition.rgb;
 	vec4 gBufferTriangleNormal = imageLoad(gBufferTriangleNormalImage, coordinate);
 	vec3 triangleNormal = gBufferTriangleNormal.rgb;
-	float diagonalLuxelSize = uint(gBufferTriangleNormal.a);
+	float halfDiagonalLuxelSize = uint(gBufferTriangleNormal.a);
 
-	adjustSamplePosition(position, triangleNormal, diagonalLuxelSize);
+	adjustSamplePosition(position, triangleNormal, halfDiagonalLuxelSize);
 
 	vec4 gBufferSmoothPosition = imageLoad(gBufferSmoothPositionImage, coordinate);
 	vec3 smoothPosition = gBufferSmoothPosition.rgb;
@@ -241,9 +253,7 @@ void main() {
 	uint sampleIndex = 0;
 
 	while (sampleIndex < SAMPLE_COUNT) {
-		primaryHit = hit;
-
-		light += traceRay(seed);
+		light += traceRay(hit, seed);
 
 		sampleIndex += 1;
 	}

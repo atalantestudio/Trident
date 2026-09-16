@@ -5,9 +5,9 @@
 
 #include "Lightmap.glsl"
 
-hitAttributeEXT vec2 attributes;
-
 layout(location = 0) rayPayloadInEXT Hit hit;
+
+hitAttributeEXT vec2 attributes;
 
 ivec2 interpolateLightmapCoordinate(Instance instance, uint triangleIndex, float u, float v, float w, uvec2 atlasSize) {
 	uint indexOffset = (instance.geometryTriangleOffset + triangleIndex) * 3u;

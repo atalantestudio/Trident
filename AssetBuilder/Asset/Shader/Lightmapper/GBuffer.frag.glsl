@@ -34,7 +34,7 @@ void main() {
 	vec3 b = interstage.barycentricCoordinate;
 	vec3 p = interstage.position;
 	vec3 luxelSize = max(abs(dFdx(p)), abs(dFdy(p)));
-	float diagonalLuxelSize = max(max(luxelSize.x, luxelSize.y), luxelSize.z) * sqrt(2.0);
+	float halfDiagonalLuxelSize = max(max(luxelSize.x, luxelSize.y), luxelSize.z) * sqrt(2.0) * 0.5;
 
 	position = vec4(p, interstage.triangleIndex);
 
@@ -46,6 +46,6 @@ void main() {
 	// TODO(asset-builder/lightmapper): Find a good interpolant.
 	smoothPosition = vec4(mix(p2, p, 0.0001), interstage.triangleArea);
 
-	triangleNormal = vec4(normalize(interstage.triangleNormal), diagonalLuxelSize);
+	triangleNormal = vec4(normalize(interstage.triangleNormal), halfDiagonalLuxelSize);
 	vertexNormal = vec4(normalize(interstage.vertexNormal), float(interstage.materialIndex));
 }
