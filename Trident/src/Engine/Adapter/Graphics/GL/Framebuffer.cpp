@@ -52,7 +52,7 @@ namespace Trident {
 			const GL::Image* glImage = static_cast<const GL::Image*>(imageView->getImage());
 
 			if (resolve && imageView->getImage()->getSampleCount() == 1) {
-				glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + resolveAttachmentIndex, glImage->target, glImageView->texture, imageView->getMipLevelOffset());
+				glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + resolveAttachmentIndex, glImageView->target, glImageView->texture, imageView->getMipLevelOffset());
 
 				imageViewIndex += 1;
 				resolveAttachmentIndex += 1;
@@ -85,7 +85,7 @@ namespace Trident {
 			}
 
 			// TODO(graphics/gl/texture): Move that switch out of the loop. The function to call should be known beforehand (maybe even before creating the image).
-			switch (glImage->target) {
+			switch (glImageView->target) {
 				case GL_TEXTURE_2D:
 				case GL_TEXTURE_2D_MULTISAMPLE:
 				case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
@@ -95,7 +95,7 @@ namespace Trident {
 				case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
 				case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
 				case GL_TEXTURE_RECTANGLE: {
-					glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, attachment, glImage->target, glImageView->texture, imageView->getMipLevelOffset());
+					glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, attachment, glImageView->target, glImageView->texture, imageView->getMipLevelOffset());
 
 					break;
 				}
