@@ -33,7 +33,7 @@ FragmentOutput main(Interstage interstage) {
 	float3 b = interstage.barycentricCoordinate;
 	float3 p = interstage.position;
 	float3 luxelSize = max(abs(ddx(p)), abs(ddy(p)));
-	float diagonalLuxelSize = max(max(luxelSize.x, luxelSize.y), luxelSize.z) * sqrt(2.0);
+	float halfDiagonalLuxelSize = max(max(luxelSize.x, luxelSize.y), luxelSize.z) * sqrt(2.0) * 0.5;
 
 	FragmentOutput output;
 	output.position = float4(p, interstage.triangleIndex);
@@ -46,7 +46,7 @@ FragmentOutput main(Interstage interstage) {
 	// TODO(asset-builder/lightmapper): Find a good interpolant.
 	output.smoothPosition = float4(lerp(p2, p, 0.0001), interstage.triangleArea);
 
-	output.triangleNormal = float4(normalize(interstage.triangleNormal), diagonalLuxelSize);
+	output.triangleNormal = float4(normalize(interstage.triangleNormal), halfDiagonalLuxelSize);
 	output.vertexNormal = float4(normalize(interstage.vertexNormal), interstage.materialIndex);
 
 	return output;

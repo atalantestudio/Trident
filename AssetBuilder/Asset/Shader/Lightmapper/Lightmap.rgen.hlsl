@@ -22,6 +22,61 @@ float3 randomUnitDirection(inout uint seed) {
 	return normalize(float3(randomScalar(seed), randomScalar(seed), randomScalar(seed)) * 2.0 - 1.0);
 }
 
+bool adjustSamplePosition(inout float3 p, float3 triangleNormal, float halfDiagonalLuxelSize) {
+	const float E = 1e-4;
+
+	float3 a = normalize(cross(p, triangleNormal));
+	float3 b = normalize(cross(a, triangleNormal));
+
+	RayDesc ray;
+	ray.Origin = p + triangleNormal * E;
+	ray.TMin = 0.0;
+	ray.Direction = a;
+	ray.TMax = halfDiagonalLuxelSize;
+
+	Hit hit;
+
+	TraceRay(accelerationStructure, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_FRONT_FACING_TRIANGLES, 0xff, 0, 0, 0, ray, hit);
+
+	if (hit.t > 0.0) {
+		p += hit.triangleNormal * (hit.t + E);
+
+		return true;
+	}
+
+	ray.Direction = b;
+
+	TraceRay(accelerationStructure, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_FRONT_FACING_TRIANGLES, 0xff, 0, 0, 0, ray, hit);
+
+	if (hit.t > 0.0) {
+		p += hit.triangleNormal * (hit.t + E);
+
+		return true;
+	}
+
+	ray.Direction = -a;
+
+	TraceRay(accelerationStructure, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_FRONT_FACING_TRIANGLES, 0xff, 0, 0, 0, ray, hit);
+
+	if (hit.t > 0.0) {
+		p += hit.triangleNormal * (hit.t + E);
+
+		return true;
+	}
+
+	ray.Direction = -b;
+
+	TraceRay(accelerationStructure, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_FRONT_FACING_TRIANGLES, 0xff, 0, 0, 0, ray, hit);
+
+	if (hit.t > 0.0) {
+		p += hit.triangleNormal * (hit.t + E);
+
+		return true;
+	}
+
+	return false;
+}
+
 float3 sampleDirectLight(RayDesc primaryRay, Hit primaryHit, inout uint seed) {
 	const float pdfDiffuse = 1.0 / (4.0 * PI);
 
@@ -144,59 +199,6 @@ float3 traceRay(Hit primaryHit, inout uint seed) {
 	return light;
 }
 
-bool adjustSamplePosition(inout float3 position, float3 triangleNormal, float diagonalLuxelSize) {
-	float3 a = normalize(cross(position, triangleNormal));
-	float3 b = normalize(cross(a, triangleNormal));
-
-	RayDesc ray;
-	ray.Origin = position + sign(triangleNormal) * abs(position * ADAPTIVE_BIAS);
-	ray.TMin = 0.0;
-	ray.Direction = a;
-	ray.TMax = diagonalLuxelSize * 0.5;
-
-	Hit hit;
-
-	TraceRay(accelerationStructure, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_FRONT_FACING_TRIANGLES, 0xff, 0, 0, 0, ray, hit);
-
-	if (hit.t > 0.0) {
-		position = hit.position + sign(hit.triangleNormal) * abs(hit.position * ADAPTIVE_BIAS);
-
-		return true;
-	}
-
-	ray.Direction = b;
-
-	TraceRay(accelerationStructure, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_FRONT_FACING_TRIANGLES, 0xff, 0, 0, 0, ray, hit);
-
-	if (hit.t > 0.0) {
-		position = hit.position + sign(hit.triangleNormal) * abs(hit.position * ADAPTIVE_BIAS);
-
-		return true;
-	}
-
-	ray.Direction = -a;
-
-	TraceRay(accelerationStructure, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_FRONT_FACING_TRIANGLES, 0xff, 0, 0, 0, ray, hit);
-
-	if (hit.t > 0.0) {
-		position = hit.position + sign(hit.triangleNormal) * abs(hit.position * ADAPTIVE_BIAS);
-
-		return true;
-	}
-
-	ray.Direction = -b;
-
-	TraceRay(accelerationStructure, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_FRONT_FACING_TRIANGLES, 0xff, 0, 0, 0, ray, hit);
-
-	if (hit.t > 0.0) {
-		position = hit.position + sign(hit.triangleNormal) * abs(hit.position * ADAPTIVE_BIAS);
-
-		return true;
-	}
-
-	return false;
-}
-
 [shader("raygeneration")]
 void main() {
 	uint2 coordinate = DispatchRaysIndex().xy;
@@ -211,9 +213,9 @@ void main() {
 	float3 position = gBufferPosition.rgb;
 	float4 gBufferTriangleNormal = gBufferTriangleNormalImage[coordinate];
 	float3 triangleNormal = gBufferTriangleNormal.rgb;
-	float diagonalLuxelSize = gBufferTriangleNormal.a;
+	float halfDiagonalLuxelSize = gBufferTriangleNormal.a;
 
-	adjustSamplePosition(position, triangleNormal, diagonalLuxelSize);
+	adjustSamplePosition(position, triangleNormal, halfDiagonalLuxelSize);
 
 	float4 gBufferSmoothPosition = gBufferSmoothPositionImage[coordinate];
 	float3 smoothPosition = gBufferSmoothPosition.rgb;
