@@ -28,13 +28,12 @@ namespace Trident {
 
 				const uint32 dragonGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("stanford_dragon_low"));
 
-				const MaterialReference lightmappedMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
-				const MaterialReference pbrMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("pbr_default"));
+				const MaterialReference material = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
 
 				builder.placeSurface(
 					{
-						.geometry = builder.createWallGeometry({256.0f, 256.0f}),
-						.material = lightmappedMaterial,
+						.geometry = builder.createWallGeometry({512.0f, 512.0f}),
+						.material = material,
 						.textureFiltering = {
 							.translation = {0.0f, 0.0f},
 							.rotation = 0.0f,
@@ -52,23 +51,19 @@ namespace Trident {
 					}
 				);
 
-				builder.placeRigidBody({
+				builder.placeStaticProp({
 					.geometryIndex = dragonGeometry,
-					.material = pbrMaterial,
-					.position = {0.0f, 45.5f, 128.0f},
-					.rotation = {0.0_rad, radians(-90.0_deg), radians(90.0_deg)},
-					.uniformScale = 0.5f,
-					.mass = max<float32>(),
-					.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
-					.inertiaScale = {1.0f, 1.0f, 1.0f},
-					.friction = 0.0f,
-					.restitution = 0.0f,
-				});
-
-				builder.placePointLight({
-					.color = {1.0f, 1.0f, 1.0f},
-					.intensity = 30000.0f,
-					.position = {256.0f, 256.0f, 256.0f},
+					.material = material,
+					.transform = {
+						.translation = {0.0f, 45.5f, 128.0f},
+						.rotation = {0.0_rad, radians(-90.0_deg), radians(90.0_deg)},
+						.scale = 0.5f,
+					},
+					.lightmap = {
+						.luxelScale = {1.0f, 1.0f},
+						.albedo = {1.0f, 1.0f, 1.0f},
+					},
+					.lightmapScale = {128.0f, 128.0f},
 				});
 
 				return builder;

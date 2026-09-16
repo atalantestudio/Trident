@@ -444,13 +444,19 @@ namespace Trident {
 		uint32 index = 0;
 
 		while (index < normals.count()) {
-			normals[index] = {
-				static_cast<float32>(vertexNormalComponents[index * 3 + 0]),
+			float32 x = static_cast<float32>(vertexNormalComponents[index * 3 + 0]);
+
+			if (CoordAxisSign == 1) {
+				x *= -1.0f;
+			}
+
+			vec3<float32> normal = {
+				x,
 				static_cast<float32>(vertexNormalComponents[index * 3 + 1]),
 				static_cast<float32>(vertexNormalComponents[index * 3 + 2]),
 			};
 
-			normals[index] = svec3<float32>(vec3<float32>(normals[index]) * orientation);
+			normals[index] = svec3<float32>(normalized(normal * orientation));
 
 			index += 1;
 		}
