@@ -35,7 +35,7 @@ namespace Trident {
 
 				builder.placeSurface(
 					{
-						.geometry = builder.createWallGeometry({128.0f, 128.0f}),
+						.geometry = builder.createWallGeometry({256.0f, 256.0f}),
 						.material = lightmappedDefaultMaterial,
 						.textureFiltering = {
 							.translation = {0.0f, 0.0f},
@@ -50,48 +50,6 @@ namespace Trident {
 					{
 						.translation = {0.0f, 0.0f, 0.0f},
 						.axis = {1.0f, 0.0f, 0.0f},
-						.angle = radians(-90.0_deg),
-					}
-				);
-
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({128.0f, 64.0f}),
-						.material = lightmappedDefaultMaterial,
-						.textureFiltering = {
-							.translation = {0.0f, 0.0f},
-							.rotation = 0.0f,
-							.scale = {1.0f, 1.0f},
-						},
-						.lightmap = {
-							.luxelScale = {1.0f, 1.0f},
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
-					},
-					{
-						.translation = {0.0f, 32.0f, 64.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = 0.0_rad,
-					}
-				);
-
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({128.0f, 64.0f}),
-						.material = lightmappedDefaultMaterial,
-						.textureFiltering = {
-							.translation = {0.0f, 0.0f},
-							.rotation = 0.0f,
-							.scale = {1.0f, 1.0f},
-						},
-						.lightmap = {
-							.luxelScale = {1.0f, 1.0f},
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
-					},
-					{
-						.translation = {64.0f, 32.0f, 0.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
 						.angle = radians(-90.0_deg),
 					}
 				);
