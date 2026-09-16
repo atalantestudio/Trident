@@ -52,12 +52,6 @@ layout(set = 0, binding = 0) buffer readonly TraceRaysArgumentBuffer {
 	uvec2 atlasSize;
 	uint triangleCount;
 	uint emissiveTriangleCount;
-	vec3 skyColor;
-	uint _1;
-	vec3 sunDirection;
-	uint _2;
-	vec3 sunColor;
-	float sunIntensity;
 };
 
 layout(set = 0, binding = 1) buffer readonly VertexBuffer {
@@ -121,16 +115,11 @@ float lengthSquared(vec3 a) {
 	return dot(a, a);
 }
 
-vec3 interpolate3x3(BarycentricCoordinate coordinate, vec3 a, vec3 b, vec3 c) {
-	return a * coordinate.u + b * coordinate.v + c * coordinate.w;
-}
-
 float balanceHeuristic(float pdf1, float pdf2) {
 	return pdf1 / (pdf1 + pdf2);
 }
 
-// TODO(asset-builder/lightmapper): Compare with previous ray-triangle intersection.
-bool rayTriangleTest(Ray ray, Triangle triangle_, inout float t, inout vec3 barycentricCoordinate) {
+bool rayTriangleIntersectionFrontFacing(Ray ray, Triangle triangle_, inout float t, inout vec3 barycentricCoordinate) {
 	const float E = 1e-8;
 
 	vec3 a = triangle_.vertices[0].position;
@@ -176,54 +165,6 @@ bool rayTriangleTest(Ray ray, Triangle triangle_, inout float t, inout vec3 bary
 	barycentricCoordinate = vec3(w, u, v);
 
 	return true;
-}
-
-bool rayTriangleIntersectionFrontFacing(Ray ray, Triangle triangle_, inout float t, inout vec3 barycentricCoordinate) {
-	/* const float E = 1e-6;
-	const float F = 1e-6;
-
-	vec3 a = triangle_.vertices[0].position;
-	vec3 b = triangle_.vertices[1].position;
-	vec3 c = triangle_.vertices[2].position;
-	vec3 ab = b - a;
-	vec3 ac = c - a;
-	vec3 p = cross(ray.direction, ac);
-	float d = dot(ab, p);
-
-	if (d <= E) {
-		return false;
-	}
-
-	float inverseD = 1.0 / d;
-	vec3 s = ray.origin - a;
-	float u = dot(s, p) * inverseD;
-
-	if (u < -F || u > 1.0 + F) {
-		return false;
-	}
-
-	vec3 q = cross(s, ab);
-	float v = dot(ray.direction, q) * inverseD;
-
-	if (v < -F || u + v > 1.0 + F) {
-		return false;
-	}
-
-	t = dot(ac, q) * inverseD;
-
-	if (t > E) {
-		float w = 1.0 - v - u;
-
-		barycentricCoordinate = vec3(u, w, v);
-
-		// TODO(asset-builder/lightmapper): This order also seems to work?
-		// barycentricCoordinate = vec3(v, w, u);
-
-		return true;
-	}
-
-	return false; */
-	return rayTriangleTest(ray, triangle_, t, barycentricCoordinate);
 }
 
 bool rayTriangleIntersectionBackFacing(Ray ray, Triangle triangle_, inout float t, inout vec3 barycentricCoordinate) {
@@ -363,10 +304,13 @@ Hit rintBackFacing(Ray ray) {
 	return rmiss();
 }
 
-void DirectLightSampling(inout uint emissiveTriangleIndex, inout vec3 p, inout float pdf, inout uint seed) {
-	uint emissiveTriangleIndexIndex = uint(randomScalar(seed) * emissiveTriangleCount);
+vec3 sampleDirectLight(Hit primaryHit, Ray primaryRay, inout uint seed) {
+	if (emissiveTriangleCount == 0) {
+		return vec3(0.0, 0.0, 0.0);
+	}
 
-	emissiveTriangleIndex = emissiveTriangleIndexBuffer[emissiveTriangleIndexIndex];
+	uint emissiveTriangleIndexIndex = uint(randomScalar(seed) * emissiveTriangleCount);
+	uint emissiveTriangleIndex = emissiveTriangleIndexBuffer[emissiveTriangleIndexIndex];
 
 	Triangle emissiveTriangle = loadTriangle(emissiveTriangleIndex);
 
@@ -384,15 +328,34 @@ void DirectLightSampling(inout uint emissiveTriangleIndex, inout vec3 p, inout f
 
 	BarycentricCoordinate coordinate = {u, v, 1.0 - u - v};
 
-	p = interpolate3x3(coordinate, a, b, c);
+	vec3 p = a * coordinate.u + b * coordinate.v + c * coordinate.w;
+	vec3 op = p - primaryRay.origin;
 
 	float abc = length(cross(b - a, c - a)) * 0.5;
+	float pdfLight = 1.0 / (abc * emissiveTriangleCount);
 
-	pdf = 1.0 / emissiveTriangleCount / abc;
-}
+	Ray secondaryRay;
+	secondaryRay.origin = primaryRay.origin;
+	secondaryRay.direction = normalize(op);
 
-vec3 evaluatePhongMaterial(Material material) {
-	return material.albedo / PI;
+	if (dot(primaryHit.vertexNormal, secondaryRay.direction) < 0.0) {
+		return vec3(0.0, 0.0, 0.0);
+	}
+
+	Hit secondaryHit = rintFrontFacing(secondaryRay);
+
+	if (secondaryHit.triangleIndex != emissiveTriangleIndex) {
+		return vec3(0.0, 0.0, 0.0);
+	}
+
+	Material material = materialBuffer[secondaryHit.materialIndex];
+
+	float angleA = dot(secondaryRay.direction, primaryHit.vertexNormal);
+	float angleB = dot(secondaryRay.direction, secondaryHit.vertexNormal);
+	float G = 1.0 / lengthSquared(op) * angleA * max(0.001, abs(angleB));
+	float w = balanceHeuristic(pdfLight, pdfDiffuse * G);
+
+	return material.emissiveColor * material.emissiveIntensity * G / pdfLight * w;
 }
 
 vec3 rgen(Hit primaryHit, inout uint seed) {
@@ -405,75 +368,23 @@ vec3 rgen(Hit primaryHit, inout uint seed) {
 	while (bounceIndex < BOUNCE_COUNT) {
 		Material material = materialBuffer[primaryHit.materialIndex];
 
-		if (material.emissiveIntensity > 0.0) {
-			if (bounceIndex == 0) {
-				light += material.emissiveColor * material.emissiveIntensity;
-			}
-
-			break;
-		}
-
-		vec3 directLight = vec3(0.0, 0.0, 0.0);
-		vec3 o = primaryHit.position + sign(primaryHit.vertexNormal) * abs(primaryHit.position * ADAPTIVE_BIAS);
-
-		Ray secondaryRay;
-		secondaryRay.origin = o;
-
-		if (emissiveTriangleCount > 0) {
-			uint emissiveTriangleIndex;
-			vec3 p;
-			float pdfLight;
-
-			DirectLightSampling(emissiveTriangleIndex, p, pdfLight, seed);
-
-			vec3 op = p - o;
-
-			secondaryRay.direction = normalize(op);
-
-			if (dot(primaryHit.vertexNormal, secondaryRay.direction) > 0.001) {
-				Hit secondaryHit = rintFrontFacing(secondaryRay);
-
-				if (secondaryHit.triangleIndex == emissiveTriangleIndex) {
-					Material material = materialBuffer[secondaryHit.materialIndex];
-
-					float angleA = dot(secondaryRay.direction, primaryHit.vertexNormal);
-					float angleB = dot(secondaryRay.direction, secondaryHit.vertexNormal);
-					float G = 1.0 / lengthSquared(op) * angleA * max(0.001, abs(angleB));
-					float w = balanceHeuristic(pdfLight, pdfDiffuse * G);
-
-					directLight += material.emissiveColor * material.emissiveIntensity * G / pdfLight * w;
-				}
-			}
-		}
-
-		if (sunIntensity > 0.0) {
-			secondaryRay.direction = normalize(sunDirection);
-
-			if (dot(primaryHit.vertexNormal, secondaryRay.direction) > 0.001) {
-				Hit secondaryHit = rintFrontFacing(secondaryRay);
-
-				if (secondaryHit.distance < 0.0) {
-					directLight += sunColor * sunIntensity;
-				}
-			}
-		}
+		throughput *= material.albedo;
 
 		Ray primaryRay;
-		primaryRay.origin = o;
+		primaryRay.origin = primaryHit.position + sign(primaryHit.vertexNormal) * abs(primaryHit.position * ADAPTIVE_BIAS);
 		primaryRay.direction = normalize(primaryHit.vertexNormal + randomUnitDirection(seed));
+
+		vec3 directLight = sampleDirectLight(primaryHit, primaryRay, seed);
+
+		light += directLight * throughput * (material.albedo / PI);
 
 		primaryHit = rintFrontFacing(primaryRay);
 
 		if (primaryHit.distance < 0.0) {
-			light += skyColor * throughput;
+			light += throughput;
 
 			break;
 		}
-
-		vec3 brdf = evaluatePhongMaterial(material);
-
-		light += directLight * throughput * brdf;
-		throughput *= material.albedo;
 
 		bounceIndex += 1;
 	}
@@ -566,6 +477,7 @@ void main() {
 	vec3 triangleNormal = triangleNormalData.rgb;
 	float diagonalLuxelSize = triangleNormalData.a;
 	vec3 vertexNormal = vertexNormalData.rgb;
+	uint materialIndex = uint(vertexNormalData.w);
 
 	if (triangleIndex == 0) {
 		return;
@@ -575,10 +487,18 @@ void main() {
 		return;
 	}
 
+	Material material = materialBuffer[materialIndex];
+
+	if (material.emissiveIntensity > 0.0) {
+		imageStore(intermediateLightmapAtlas, coordinate, vec4(material.emissiveColor * material.emissiveIntensity, 1.0));
+
+		return;
+	}
+
 	Hit hit;
 	hit.position = position;
 	hit.triangleNormal = triangleNormal;
-	hit.materialIndex = uint(vertexNormalData.w);
+	hit.materialIndex = materialIndex;
 	hit.vertexNormal = vertexNormal;
 
 	vec3 radiance = vec3(0.0, 0.0, 0.0);
