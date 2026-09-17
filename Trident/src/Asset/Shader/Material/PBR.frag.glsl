@@ -9,12 +9,28 @@
 // - No shadow map Y flipping in GLSL
 
 precision highp float;
+precision highp sampler2DArray;
+
+struct Camera {
+	mat4x4 projectionView;
+	vec3 position;
+	uint pointLightCount;
+	vec3 ambientColor;
+	float farPlane;
+	vec3 sunColor;
+	uint _0;
+	mat4x4 skyboxProjectionView;
+	mat4x4 view;
+};
 
 struct PointLight {
 	vec3 color;
 	float intensity;
 	vec3 position;
 };
+
+const float PI = radians(180.0);
+const vec3 SUN_DIRECTION = normalize(vec3(1.0, 1.0, 1.0));
 
 in Interstage {
 	layout(location = 0) vec3 surface;
@@ -23,29 +39,21 @@ in Interstage {
 	layout(location = 5) flat uint instanceIndex;
 } interstage;
 
-layout(set = 0, binding = 0) uniform readonly Camera {
-	mat4x4 projectionView;
-	vec3 position;
-	uint pointLightCount;
-	vec3 ambientColor;
-	uint _0;
-	vec3 sunColor;
-} camera;
+layout(set = 0, binding = 0) uniform readonly CameraBuffer {
+	Camera camera;
+};
 
 layout(set = 0, binding = 2) buffer readonly PointLightBuffer {
 	PointLight pointLights[];
 };
 
-layout(set = 0, binding = 3) uniform sampler2D directionalShadowMap;
-
 layout(set = 1, binding = 0) uniform sampler2D armMap;
 layout(set = 1, binding = 1) uniform sampler2D diffuseMap;
 layout(set = 1, binding = 2) uniform sampler2D normalMap;
 
-layout(location = 0) out vec4 fragment;
+#include "DirectionalShadowMap.glsl"
 
-const float PI = radians(180.0);
-const vec3 SUN_DIRECTION = normalize(vec3(1.0, 1.0, 1.0));
+layout(location = 0) out vec4 fragment;
 
 float TrowbridgeReitzGGX(vec3 normal, vec3 halfway, float roughness) {
 	float a = roughness * roughness;
@@ -84,28 +92,9 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0) {
 	return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
-float calculateShadow() {
-	return 0.0;
-	// TODO(renderer/forward): Restore.
-	/* vec3 projectedPosition = lightSpacePosition.xyz / lightSpacePosition.w;
-
-	if (projectedPosition.z < 0.0) {
-		return 0.0;
-	}
-
-	vec2 coordinate = projectedPosition.xy * 0.5 + 0.5;
-	float depthBias = 0.0005 * dot(interstage.tbn[2], SUN_DIRECTION);
-	float depth = projectedPosition.z;
-
-	coordinate.y = 1.0 - coordinate.y;
-
-	float closestDepth = texture(directionalShadowMap, coordinate).r;
-
-	return float(depth + depthBias <= closestDepth); */
-}
-
 void main() {
-	float inShadow = calculateShadow();
+	uint cascadeIndex = findCascadeIndex(interstage.surface);
+	float inShadow = calculateShadow(interstage.surface, interstage.tbn[2], cascadeIndex);
 
 	vec3 x = camera.position;
 	vec3 wo = normalize(camera.position - interstage.surface);

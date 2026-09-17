@@ -15,9 +15,9 @@ namespace Trident {
 		svec3<float32> position;
 		uint32 pointLightCount;
 		svec3<float32> ambientColor;
-		uint32 _0;
+		float32 farPlane;
 		svec3<float32> sunColor;
-		uint32 _1;
+		uint32 _0;
 		mat4x4<float32> skyboxProjectionView;
 		mat4x4<float32> view;
 	};
@@ -36,9 +36,9 @@ namespace Trident {
 			};
 
 		public:
-			static constexpr Extent2D DIRECTIONAL_SHADOW_MAP_EXTENT = {1024, 1024};
+			static constexpr Extent2D DIRECTIONAL_SHADOW_MAP_EXTENT = {4096, 4096};
 			static constexpr uint32 DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT = 3;
-			static constexpr float32 DIRECTIONAL_SHADOW_MAP_CASCADE_FAR_PLANES[DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT] = {0.333f, 0.666f, 1.0f};
+			static constexpr float32 DIRECTIONAL_SHADOW_MAP_CASCADE_FAR_PLANES[DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT] = {0.2f, 0.5f, 1.0f};
 
 			static constexpr index DEBUG_MAX_CONTACTS = 16;
 

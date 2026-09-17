@@ -6,7 +6,7 @@ struct Camera {
 	float3 position;
 	uint pointLightCount;
 	float3 ambientColor;
-	uint _0;
+	float farPlane;
 	float3 sunColor;
 };
 

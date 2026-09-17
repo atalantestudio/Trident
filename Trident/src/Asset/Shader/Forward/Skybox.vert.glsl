@@ -8,9 +8,9 @@ layout(set = 0, binding = 0) uniform readonly Camera {
 	vec3 position;
 	uint pointLightCount;
 	vec3 ambientColor;
-	uint _0;
+	float farPlane;
 	vec3 sunColor;
-	uint _1;
+	uint _0;
 	mat4x4 skyboxProjectionView;
 } camera;
 

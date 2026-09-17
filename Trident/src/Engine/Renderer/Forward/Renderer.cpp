@@ -297,6 +297,7 @@ namespace Trident {
 
 		cameraMappedRange->projectionView = camera.getProjectionView();
 		cameraMappedRange->position = svec3<float32>(camera.position);
+		cameraMappedRange->farPlane = camera.farPlane;
 		cameraMappedRange->skyboxProjectionView = view * camera.getProjection();
 		cameraMappedRange->view = camera.getView();
 
