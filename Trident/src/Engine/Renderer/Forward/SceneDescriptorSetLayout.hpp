@@ -16,11 +16,10 @@ namespace Trident {
 			},
 
 			// Directional light
-			// TODO(renderer/forward): Merge with ForwardCamera?
 			{
 				.descriptorType = DescriptorType::UNIFORM_BUFFER,
 				.descriptorCount = 1,
-				.stageFlags = ShaderStage::VERTEX,
+				.stageFlags = ShaderStage::FRAGMENT,
 			},
 
 			// Point light
