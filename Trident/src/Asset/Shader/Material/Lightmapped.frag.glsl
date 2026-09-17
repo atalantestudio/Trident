@@ -8,6 +8,8 @@
 // - Multiple descriptor sets
 // - No shadow map Y flipping in GLSL
 
+// #define DEBUG_VISUALIZE_DIRECTIONAL_SHADOW_MAP_CASCADES
+
 precision highp float;
 precision highp sampler2DArray;
 
@@ -44,6 +46,9 @@ layout(set = 2, binding = 1) uniform sampler2D normalMap;
 layout(location = 0) out vec4 fragment;
 
 const vec3 SUN_DIRECTION = normalize(vec3(1.0, 1.0, 1.0));
+const uint CASCADE_COUNT = 3u;
+const float CASCADE_FAR_PLANES[CASCADE_COUNT] = float[](0.333, 0.666, 1.0);
+const float CAMERA_FAR_PLANE = 2048.0;
 
 vec4 cubic(float v) {
 	vec4 n = vec4(1.0, 2.0, 3.0, 4.0) - v;
@@ -90,22 +95,23 @@ vec4 sampleBicubic(sampler2D textureSampler, vec2 coordinate) {
 	return mix(mix(sample3, sample2, sx), mix(sample1, sample0, sx), sy);
 }
 
-float calculateShadow(vec3 surface, vec3 normal) {
-	const uint CASCADE_COUNT = 3u;
-	const float CASCADE_FAR_PLANES[CASCADE_COUNT] = float[](682.0, 1364.0, 2048.0);
-
+uint findCascadeIndex(vec3 surface) {
 	vec4 viewSpaceSurface = camera.view * vec4(surface, 1.0);
 	float surfaceViewDepth = abs(viewSpaceSurface.z);
 	uint cascadeIndex = 0u;
 
 	while (cascadeIndex < CASCADE_COUNT) {
-		if (surfaceViewDepth < CASCADE_FAR_PLANES[cascadeIndex]) {
+		if (surfaceViewDepth < CAMERA_FAR_PLANE * CASCADE_FAR_PLANES[cascadeIndex]) {
 			break;
 		}
 
 		cascadeIndex += 1u;
 	}
 
+	return cascadeIndex;
+}
+
+float calculateShadow(vec3 surface, vec3 normal, uint cascadeIndex) {
 	if (cascadeIndex >= CASCADE_COUNT) {
 		return 0.0;
 	}
@@ -113,15 +119,16 @@ float calculateShadow(vec3 surface, vec3 normal) {
 	vec4 lightSpaceSurface = directionalLight.projectionViews[cascadeIndex] * vec4(surface, 1.0);
 	vec3 projectedPosition = lightSpaceSurface.xyz / lightSpaceSurface.w;
 
-	if (projectedPosition.z < 0.0) {
+	if (projectedPosition.z > 1.0) {
 		return 0.0;
 	}
 
 	vec2 coordinate = projectedPosition.xy * 0.5 + 0.5;
 
-	float depthBias = max(0.005, 0.05 * (1.0 - dot(normalize(normal), SUN_DIRECTION)));
-	// float depthBias = 0.0005 * dot(interstage.tbn[2], SUN_DIRECTION);
-	depthBias *= 1.0 / (CASCADE_FAR_PLANES[cascadeIndex] * 0.5);
+	// float depthBias = max(0.005, 0.05 * (1.0 - dot(normalize(normal), SUN_DIRECTION)));
+	float depthBias = max(0.05 * (1.0 - dot(normal, SUN_DIRECTION)), 0.005);
+	// float depthBias = 0.0005 * dot(normal, SUN_DIRECTION);
+	depthBias *= 1.0 / (CAMERA_FAR_PLANE * CASCADE_FAR_PLANES[cascadeIndex] * 0.5);
 
 	float depth = projectedPosition.z;
 
@@ -129,11 +136,12 @@ float calculateShadow(vec3 surface, vec3 normal) {
 
 	float closestDepth = texture(directionalShadowMap, vec3(coordinate, float(cascadeIndex))).r;
 
-	return float(depth + depthBias < closestDepth);
+	return float(depth - depthBias > closestDepth);
 }
 
 void main() {
-	float inShadow = calculateShadow(interstage.surface, interstage.tbn[2]);
+	uint cascadeIndex = findCascadeIndex(interstage.surface);
+	float inShadow = calculateShadow(interstage.surface, interstage.tbn[2], cascadeIndex);
 
 	vec3 directDiffuse = texture(diffuseMap, interstage.textureCoordinate).rgb;
 	vec3 indirectDiffuse = sampleBicubic(lightmapAtlasMap, interstage.lightmapCoordinate).rgb;
@@ -142,6 +150,24 @@ void main() {
 
 	directDiffuse = pow(directDiffuse, vec3(1.0 / 2.2));
 
-	fragment.rgb = mix(indirectDiffuse * directDiffuse, directDiffuse * camera.sunColor, max(0.0, max(0.0, surfaceToSunLight) - inShadow));
+	vec3 shadow = indirectDiffuse * directDiffuse;
+
+	#if defined(DEBUG_VISUALIZE_DIRECTIONAL_SHADOW_MAP_CASCADES)
+		vec3 directionalShadowMapCascadeColor = vec3(0.0, 0.0, 0.0);
+
+		if (cascadeIndex == 0u) {
+			directionalShadowMapCascadeColor.r = 1.0;
+		}
+		else if (cascadeIndex == 1u) {
+			directionalShadowMapCascadeColor.g = 1.0;
+		}
+		else if (cascadeIndex == 2u) {
+			directionalShadowMapCascadeColor.b = 1.0;
+		}
+
+		shadow *= directionalShadowMapCascadeColor;
+	#endif
+
+	fragment.rgb = mix(shadow, directDiffuse * camera.sunColor, max(0.0, max(0.0, surfaceToSunLight) - inShadow));
 	fragment.a = 1.0;
 }

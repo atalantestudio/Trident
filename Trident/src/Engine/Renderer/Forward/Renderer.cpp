@@ -305,7 +305,6 @@ namespace Trident {
 
 	void ForwardRenderer::initializeLightProjectionViews() const {
 		const PerspectiveCamera3D& camera = getCameraController<PerspectiveCamera3D>().getCamera();
-		const float32 cameraZLength = camera.farPlane - camera.nearPlane;
 		const vec3<float32> lightDirection = normalized(vec3<float32>(scene->getAsset()->sunDirection));
 
 		vec4<float32> frustumVertices[8];
@@ -313,7 +312,7 @@ namespace Trident {
 		uint32 cascadeIndex = 0;
 
 		while (cascadeIndex < DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT) {
-			const float32 farPlane = camera.nearPlane + cameraZLength * DIRECTIONAL_SHADOW_MAP_CASCADE_FAR_PLANES[cascadeIndex];
+			const float32 farPlane = camera.farPlane * DIRECTIONAL_SHADOW_MAP_CASCADE_FAR_PLANES[cascadeIndex];
 			const mat4x4<float32> cameraProjection = perspective(camera.fieldOfView, camera.aspectRatio, nearPlane, farPlane, 1.0f);
 			const mat4x4<float32> cameraProjectionView = camera.getView() * cameraProjection;
 
