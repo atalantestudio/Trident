@@ -63,7 +63,7 @@ namespace Trident {
 						.luxelScale = {1.0f, 1.0f},
 						.albedo = {1.0f, 1.0f, 1.0f},
 					},
-					.lightmapScale = {128.0f, 128.0f},
+					.lightmapScale = {500.0f, 500.0f},
 				});
 
 				return builder;

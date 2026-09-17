@@ -13,7 +13,7 @@
 #include "Engine/Renderer/Forward/DepthStencilImage.hpp"
 #include "Engine/Renderer/Forward/DirectionalLightBuffer.hpp"
 #include "Engine/Renderer/Forward/DirectionalShadowMap/DescriptorSetLayout.hpp"
-#include "Engine/Renderer/Forward/DirectionalShadowMap/Framebuffers.hpp"
+#include "Engine/Renderer/Forward/DirectionalShadowMap/Framebuffer.hpp"
 #include "Engine/Renderer/Forward/DirectionalShadowMap/Image.hpp"
 #include "Engine/Renderer/Forward/DirectionalShadowMap/ImageView.hpp"
 #include "Engine/Renderer/Forward/DirectionalShadowMap/Pipeline.hpp"
@@ -216,51 +216,59 @@ namespace Trident {
 	}
 
 	void ForwardRenderer::encodeDirectionalShadowMapPass(ref<CommandEncoder> commandEncoder) const {
-		const ref<Framebuffer> framebuffer = directionalShadowMapFramebuffers[getSwapchainImageIndex()];
-		const Extent2D extent = framebuffer->getExtent();
-		const float32 width = static_cast<float32>(extent.width);
-		const float32 height = static_cast<float32>(extent.height);
 		const ref<Scene3DAsset> sceneAsset = scene->getAsset();
+		const uint32 swapchainImageCount = getSwapchain()->getImageCount();
 
-		commandEncoder->beginRenderPass({
-			.framebuffer = framebuffer,
-			.clearValues = {
-				{
-					.depth = 0.0f,
-					.stencil = 0,
+		uint32 cascadeIndex = 0;
+
+		while (cascadeIndex < DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT) {
+			const ref<Framebuffer> framebuffer = directionalShadowMapFramebuffers[getSwapchainImageIndex() * swapchainImageCount + cascadeIndex];
+			const Extent2D extent = framebuffer->getExtent();
+			const float32 width = static_cast<float32>(extent.width);
+			const float32 height = static_cast<float32>(extent.height);
+
+			commandEncoder->beginRenderPass({
+				.framebuffer = framebuffer,
+				.clearValues = {
+					{
+						.depth = 0.0f,
+						.stencil = 0,
+					},
 				},
-			},
-		});
-		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-		commandEncoder->setScissor(0, 0, extent);
-		commandEncoder->bindGraphicsPipeline(directionalShadowMapPipeline);
-		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
-		commandEncoder->bindVertexBuffer(1, instanceBuffer, 0);
-		commandEncoder->bindIndexBuffer<IndexFormat::R32_UINT>(indexBuffer, 0);
-		commandEncoder->bindDescriptorSets(directionalShadowMapPipelineLayout, 0, directionalShadowMapDescriptorSet);
+			});
+			commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
+			commandEncoder->setScissor(0, 0, extent);
+			commandEncoder->bindGraphicsPipeline(directionalShadowMapPipeline);
+			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
+			commandEncoder->bindVertexBuffer(1, instanceBuffer, 0);
+			commandEncoder->bindIndexBuffer<IndexFormat::R32_UINT>(indexBuffer, 0);
+			commandEncoder->bindDescriptorSets(directionalShadowMapPipelineLayout, 0, directionalShadowMapCascadeDescriptorSets[cascadeIndex]);
 
-		for (const MaterialShader& materialShader : sceneAsset->materialShaders) {
-			uint32 materialIndex = 0;
+			for (const MaterialShader& materialShader : sceneAsset->materialShaders) {
+				uint32 materialIndex = 0;
 
-			while (materialIndex < materialShader.materialRange.count) {
-				const Material material = sceneAsset->materials[materialShader.materialRange.offset + materialIndex];
+				while (materialIndex < materialShader.materialRange.count) {
+					const Material material = sceneAsset->materials[materialShader.materialRange.offset + materialIndex];
 
-				uint32 materialGeometryIndex = 0;
+					uint32 materialGeometryIndex = 0;
 
-				while (materialGeometryIndex < material.geometryRange.count) {
-					const MaterialGeometry materialGeometry = sceneAsset->materialGeometries[material.geometryRange.offset + materialGeometryIndex];
-					const range<uint32, uint32> indexRange = sceneAsset->geometryIndexRanges[materialGeometry.geometryIndex];
+					while (materialGeometryIndex < material.geometryRange.count) {
+						const MaterialGeometry materialGeometry = sceneAsset->materialGeometries[material.geometryRange.offset + materialGeometryIndex];
+						const range<uint32, uint32> indexRange = sceneAsset->geometryIndexRanges[materialGeometry.geometryIndex];
 
-					commandEncoder->drawIndexed(indexRange.count, materialGeometry.instanceRange.count, indexRange.offset, 0, materialGeometry.instanceRange.offset);
+						commandEncoder->drawIndexed(indexRange.count, materialGeometry.instanceRange.count, indexRange.offset, 0, materialGeometry.instanceRange.offset);
 
-					materialGeometryIndex += 1;
+						materialGeometryIndex += 1;
+					}
+
+					materialIndex += 1;
 				}
-
-				materialIndex += 1;
 			}
-		}
 
-		commandEncoder->endRenderPass();
+			commandEncoder->endRenderPass();
+
+			cascadeIndex += 1;
+		}
 	}
 
 	void ForwardRenderer::encodeSkyboxPass(ref<CommandEncoder> commandEncoder) const {
@@ -290,25 +298,97 @@ namespace Trident {
 		cameraMappedRange->projectionView = camera.getProjectionView();
 		cameraMappedRange->position = svec3<float32>(camera.position);
 		cameraMappedRange->skyboxProjectionView = view * camera.getProjection();
+		cameraMappedRange->view = camera.getView();
+
+		initializeLightProjectionViews();
 	}
 
-	void ForwardRenderer::initializeLightProjectionView() const {
-		static constexpr float32 width = 512.0f;
-		static constexpr float32 height = 512.0f;
-		static constexpr float32 depth = 1024.0f;
+	void ForwardRenderer::initializeLightProjectionViews() const {
+		const PerspectiveCamera3D& camera = getCameraController<PerspectiveCamera3D>().getCamera();
+		const float32 cameraZLength = camera.farPlane - camera.nearPlane;
+		const vec3<float32> lightDirection = normalized(vec3<float32>(scene->getAsset()->sunDirection));
 
-		const vec3<float32> position = normalized(vec3<float32>(scene->getAsset()->sunDirection)) * 512.0f;
+		vec4<float32> frustumVertices[8];
+		float32 nearPlane = camera.nearPlane;
+		uint32 cascadeIndex = 0;
 
-		// TODO(lyah): Add helper similar to orthoLH_ZO.
-		const mat4x4<float32> projection = {
-				2.0f / width,  0.0f,           0.0f,          0.0f,
-				0.0f,          2.0f / height,  0.0f,          0.0f,
-				0.0f,          0.0f,          -1.0f / depth,  0.0f,
-				0.0f,          0.0f,           1.0f,          1.0f,
-		};
+		while (cascadeIndex < DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT) {
+			const float32 farPlane = camera.nearPlane + cameraZLength * DIRECTIONAL_SHADOW_MAP_CASCADE_FAR_PLANES[cascadeIndex];
+			const mat4x4<float32> cameraProjection = perspective(camera.fieldOfView, camera.aspectRatio, nearPlane, farPlane, 1.0f);
+			const mat4x4<float32> cameraProjectionView = camera.getView() * cameraProjection;
 
-		const mat4x4<float32> view = mat4x4<float32>::lookAt(position, {0.0f, 0.0f, 0.0f}, UP);
+			calculateFrustum(frustumVertices, inverseFix(cameraProjectionView));
 
-		directionalLightMappedRange->projectionView = view * projection;
+			vec3<float32> frustumCenter = {0.0f, 0.0f, 0.0f};
+
+			for (const vec4<float32> vertex : frustumVertices) {
+				frustumCenter += vec3<float32>(vertex.m);
+			}
+
+			frustumCenter /= 8.0f;
+
+			// TODO(renderer/forward/directional-shadow-map): Fix.
+			const mat4x4<float32> lightView = mat4x4<float32>::lookAt(frustumCenter - lightDirection, frustumCenter, UP);
+
+			float32 minX = max<float32>();
+			float32 maxX = min<float32>();
+			float32 minY = max<float32>();
+			float32 maxY = min<float32>();
+			float32 minZ = max<float32>();
+			float32 maxZ = min<float32>();
+
+			for (const vec4<float32> vertex : frustumVertices) {
+				const vec4<float32> lightViewVertex = vertex * lightView;
+
+				minX = min(minX, lightViewVertex[0]);
+				maxX = max(maxX, lightViewVertex[0]);
+				minY = min(minY, lightViewVertex[1]);
+				maxY = max(maxY, lightViewVertex[1]);
+				minZ = min(minZ, lightViewVertex[2]);
+				maxZ = max(maxZ, lightViewVertex[2]);
+			}
+
+			// TODO(renderer/forward/directional-shadow-map): Use the scene bounds.
+			constexpr float32 Z_SCALE = 10.0f;
+
+			if (minZ < 0.0f) {
+				minZ *= Z_SCALE;
+			}
+			else {
+				minZ /= Z_SCALE;
+			}
+
+			if (maxZ < 0.0f) {
+				maxZ /= Z_SCALE;
+			}
+			else {
+				maxZ *= Z_SCALE;
+			}
+
+			// TODO(lyah/mat4x4/orthographic): Add helper similar to orthoLH_ZO.
+			const mat4x4<float32> lightProjection = {
+				 2.0f / (maxX - minX),           0.0f,                           0.0f,                  0.0f,
+				 0.0f,                           2.0f / (maxY - minY),           0.0f,                  0.0f,
+				 0.0f,                           0.0f,                           1.0f / (maxZ - minZ),  0.0f,
+				-(minX + maxX) / (maxX - minX), -(minY + maxY) / (maxY - minY), -minZ / (maxZ - minZ),  1.0f,
+			};
+
+			directionalLightMappedRange->projectionViews[cascadeIndex] = lightView * lightProjection;
+
+			nearPlane = farPlane;
+			cascadeIndex += 1;
+		}
+	}
+
+	void ForwardRenderer::calculateFrustum(vec4<float32>* vertices, const mat4x4<float32>& inverseProjectionView) const {
+		uint32 vertexIndex = 0;
+
+		while (vertexIndex < 8) {
+			const vec4<float32> vertex = FRUSTUM_VERTICES[vertexIndex] * inverseProjectionView;
+
+			vertices[vertexIndex] = vertex / vertex[3];
+
+			vertexIndex += 1;
+		}
 	}
 }

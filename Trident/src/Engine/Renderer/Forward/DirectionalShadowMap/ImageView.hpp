@@ -8,12 +8,30 @@
 namespace Trident {
 	ref<ImageView> ForwardRenderer::createDirectionalShadowMapImageView() const {
 		return directionalShadowMapImage->createView({
+			.type = ImageViewType::TYPE_2D,
 			.mipLevelOffset = 0,
 			.mipLevelCount = 1,
 			.layerOffset = 0,
-			.layerCount = 1,
+			.layerCount = directionalShadowMapImage->getLayerCount(),
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Directional shadow map view",
+			#endif
+		});
+	}
+
+	ref<ImageView> ForwardRenderer::createDirectionalShadowMapCascadeImageView(uint32 cascadeIndex) const {
+		#if defined(DEBUG_OBJECT_NAME)
+			sequence<char8> name = Logger::format("Directional shadow map view (cascade [])", cascadeIndex);
+		#endif
+
+		return directionalShadowMapImage->createView({
+			.type = ImageViewType::TYPE_2D,
+			.mipLevelOffset = 0,
+			.mipLevelCount = 1,
+			.layerOffset = cascadeIndex,
+			.layerCount = 1,
+			#if defined(DEBUG_OBJECT_NAME)
+				.name = name,
 			#endif
 		});
 	}

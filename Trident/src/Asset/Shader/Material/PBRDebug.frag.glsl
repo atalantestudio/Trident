@@ -15,8 +15,7 @@ in Interstage {
 	layout(location = 0) vec3 surface;
 	layout(location = 1) mat3x3 tbn;
 	layout(location = 4) vec2 textureCoordinate;
-	layout(location = 5) vec4 lightSpacePosition;
-	layout(location = 6) flat uint instanceIndex;
+	layout(location = 5) flat uint instanceIndex;
 } interstage;
 
 const float PI = radians(180.0);
@@ -80,8 +79,11 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0) {
 	return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
-float calculateShadow(vec4 lightSpacePosition) {
-	vec3 projectedPosition = lightSpacePosition.xyz / lightSpacePosition.w;
+float calculateShadow() {
+	return 0.0;
+
+	// TODO(renderer/forward): Restore.
+	/* vec3 projectedPosition = lightSpacePosition.xyz / lightSpacePosition.w;
 
 	if (projectedPosition.z < 0.0) {
 		return 0.0;
@@ -95,11 +97,11 @@ float calculateShadow(vec4 lightSpacePosition) {
 
 	float closestDepth = texture(directionalShadowMap, coordinate).r;
 
-	return float(depth + depthBias <= closestDepth);
+	return float(depth + depthBias <= closestDepth); */
 }
 
 void main() {
-	float inShadow = calculateShadow(interstage.lightSpacePosition);
+	float inShadow = calculateShadow();
 
 	vec3 x = camera.position;
 	vec3 wo = normalize(camera.position - interstage.surface);

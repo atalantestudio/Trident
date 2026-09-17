@@ -1,13 +1,13 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
+struct DirectionalLight {
+	float4x4 projectionView;
+};
+
 struct VertexInput {
 	float3 position : VERTEX_INPUT_ATTRIBUTE0;
 	float4x4 worldTransform : VERTEX_INPUT_ATTRIBUTE1;
-};
-
-struct DirectionalLight {
-	float4x4 projectionView;
 };
 
 cbuffer DirectionalLight : register(b0) {

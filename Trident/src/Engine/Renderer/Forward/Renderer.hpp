@@ -19,17 +19,33 @@ namespace Trident {
 		svec3<float32> sunColor;
 		uint32 _1;
 		mat4x4<float32> skyboxProjectionView;
+		mat4x4<float32> view;
 	};
 
 	class ForwardRenderer : public BaseSceneRenderer<ForwardCamera> {
 		private:
-			struct DirectionalLight {
-				mat4x4<float32> projectionView;
+			static inline const vec4<float32> FRUSTUM_VERTICES[8] = {
+				{-1.0f, -1.0f, -1.0f,  1.0f},
+				{-1.0f, -1.0f,  1.0f,  1.0f},
+				{-1.0f,  1.0f, -1.0f,  1.0f},
+				{-1.0f,  1.0f,  1.0f,  1.0f},
+				{ 1.0f, -1.0f, -1.0f,  1.0f},
+				{ 1.0f, -1.0f,  1.0f,  1.0f},
+				{ 1.0f,  1.0f, -1.0f,  1.0f},
+				{ 1.0f,  1.0f,  1.0f,  1.0f},
 			};
 
 		public:
-			static constexpr Extent2D DIRECTIONAL_SHADOW_MAP_EXTENT = {1024, 1024};
+			static constexpr Extent2D DIRECTIONAL_SHADOW_MAP_EXTENT = {4096, 4096};
+			static constexpr uint32 DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT = 3;
+			static constexpr float32 DIRECTIONAL_SHADOW_MAP_CASCADE_FAR_PLANES[DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT] = {0.333f, 0.666f, 1.0f};
+
 			static constexpr index DEBUG_MAX_CONTACTS = 16;
+
+		private:
+			struct DirectionalLight {
+				mat4x4<float32> projectionViews[DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT];
+			};
 
 		public:
 			void postBuild() override {
@@ -45,6 +61,8 @@ namespace Trident {
 					sceneDescriptorSetLayout,
 					lightmapAtlasDescriptorSetLayout,
 					directionalShadowMapDescriptorSetLayout,
+					directionalShadowMapDescriptorSetLayout,
+					directionalShadowMapDescriptorSetLayout,
 				};
 
 				// TODO(base/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
@@ -53,7 +71,9 @@ namespace Trident {
 				skyboxDescriptorSet = descriptorSets[0];
 				sceneDescriptorSet = descriptorSets[1];
 				lightmapAtlasDescriptorSet = descriptorSets[2];
-				directionalShadowMapDescriptorSet = descriptorSets[3];
+				directionalShadowMapCascadeDescriptorSets[0] = descriptorSets[3];
+				directionalShadowMapCascadeDescriptorSets[1] = descriptorSets[4];
+				directionalShadowMapCascadeDescriptorSets[2] = descriptorSets[5];
 
 				skyboxPipelineLayout = createSkyboxPipelineLayout();
 				skyboxPipeline = createSkyboxPipeline();
@@ -63,6 +83,14 @@ namespace Trident {
 				directionalLightBuffer = createDirectionalLightBuffer();
 				directionalShadowMapImage = createDirectionalShadowMapImage();
 				directionalShadowMapImageView = createDirectionalShadowMapImageView();
+
+				uint32 cascadeIndex = 0;
+
+				while (cascadeIndex < DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT) {
+					directionalShadowMapCascadeImageViews[cascadeIndex] = createDirectionalShadowMapCascadeImageView(cascadeIndex);
+
+					cascadeIndex += 1;
+				}
 
 				// TODO(renderer/forward): Restore debug visualization modes.
 				/* debugHullWireframePipelineLayout = createDebugHullWireframePipelineLayout();
@@ -333,8 +361,6 @@ namespace Trident {
 				cameraMappedRange->pointLightCount = static_cast<uint32>(sceneAsset->pointLights.count());
 				cameraMappedRange->ambientColor = sceneAsset->skyColor;
 				cameraMappedRange->sunColor = sceneAsset->sunColor;
-
-				initializeLightProjectionView();
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override;
@@ -390,6 +416,7 @@ namespace Trident {
 			ref<ImageView> createDepthStencilImageView() const;
 			ref<ImageView> createLightmapAtlasImageView() const;
 			ref<ImageView> createDirectionalShadowMapImageView() const;
+			ref<ImageView> createDirectionalShadowMapCascadeImageView(uint32 layerOffset) const;
 
 			ref<Buffer> createVertexBuffer() const;
 			ref<Buffer> createIndexBuffer() const;
@@ -423,10 +450,13 @@ namespace Trident {
 
 			void createMaterials();
 
-			void initializeLightProjectionView() const;
+			void initializeLightProjectionViews() const;
 
 			void encodeDirectionalShadowMapPass(ref<CommandEncoder> commandEncoder) const;
 			void encodeSkyboxPass(ref<CommandEncoder> commandEncoder) const;
+
+			/// Calculates world-space frustum vertices for the shadow map cascades.
+			void calculateFrustum(vec4<float32>* vertices, const mat4x4<float32>& inverseProjectionView) const;
 
 		private:
 			ref<RenderPass> renderPass;
@@ -444,7 +474,7 @@ namespace Trident {
 			ref<DescriptorSet> sceneDescriptorSet;
 			ref<DescriptorSet> lightmapAtlasDescriptorSet;
 			sequence<ref<DescriptorSet>> materialDescriptorSets;
-			ref<DescriptorSet> directionalShadowMapDescriptorSet;
+			ref<DescriptorSet> directionalShadowMapCascadeDescriptorSets[DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT];
 
 			ref<PipelineLayout> skyboxPipelineLayout;
 			sequence<ref<PipelineLayout>> materialPipelineLayouts;
@@ -494,6 +524,7 @@ namespace Trident {
 			ref<ImageView> lightmapAtlasImageView;
 			sequence<ref<ImageView>> materialImageViews;
 			ref<ImageView> directionalShadowMapImageView;
+			ref<ImageView> directionalShadowMapCascadeImageViews[DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT];
 
 			ref<Sampler> lightmapAtlasSampler;
 			ref<Sampler> materialSampler;

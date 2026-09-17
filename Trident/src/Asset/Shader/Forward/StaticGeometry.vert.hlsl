@@ -5,10 +5,6 @@ struct Camera {
 	float4x4 projectionView;
 };
 
-struct DirectionalLight {
-	float4x4 projectionView;
-};
-
 struct VertexInput {
 	float3 position : VERTEX_INPUT_ATTRIBUTE0;
 	float3 normal : VERTEX_INPUT_ATTRIBUTE1;
@@ -28,12 +24,8 @@ struct Interstage {
 	float2 lightmapCoordinate : VERTEX_OUTPUT_ATTRIBUTE7;
 };
 
-cbuffer Camera {
+cbuffer Camera : register(b0) {
 	Camera camera;
-}
-
-cbuffer DirectionalLight {
-	DirectionalLight directionalLight;
 }
 
 Interstage main(VertexInput input) {
@@ -47,7 +39,6 @@ Interstage main(VertexInput input) {
 	interstage.surface = surface.xyz;
 	interstage.tbn = float3x3(t, b, n);
 	interstage.textureCoordinate = input.textureCoordinate;
-	interstage.lightSpacePosition = mul(directionalLight.projectionView, surface);
 	interstage.lightmapCoordinate = input.lightmapCoordinate;
 
 	return interstage;

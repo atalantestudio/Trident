@@ -20,8 +20,7 @@ in Interstage {
 	layout(location = 0) vec3 surface;
 	layout(location = 1) mat3x3 tbn;
 	layout(location = 4) vec2 textureCoordinate;
-	layout(location = 5) vec4 lightSpacePosition;
-	layout(location = 6) vec2 lightmapCoordinate;
+	layout(location = 5) vec2 lightmapCoordinate;
 } interstage;
 
 layout(set = 0, binding = 0) uniform readonly Camera {
@@ -132,8 +131,11 @@ vec4 sampleBicubic(sampler2D textureSampler, vec2 coordinate) {
 	return mix(mix(sample3, sample2, sx), mix(sample1, sample0, sx), sy);
 }
 
-float calculateShadow(vec4 lightSpacePosition) {
-	vec3 projectedPosition = lightSpacePosition.xyz / lightSpacePosition.w;
+float calculateShadow() {
+	return 0.0;
+
+	// TODO(renderer/forward): Restore.
+	/* vec3 projectedPosition = lightSpacePosition.xyz / lightSpacePosition.w;
 
 	if (projectedPosition.z < 0.0) {
 		return 0.0;
@@ -147,11 +149,11 @@ float calculateShadow(vec4 lightSpacePosition) {
 
 	float closestDepth = texture(directionalShadowMap, coordinate).r;
 
-	return float(depth + depthBias <= closestDepth);
+	return float(depth + depthBias <= closestDepth); */
 }
 
 void main() {
-	float inShadow = calculateShadow(interstage.lightSpacePosition);
+	float inShadow = calculateShadow();
 
 	vec3 x = camera.position;
 	vec3 wo = normalize(camera.position - interstage.surface);

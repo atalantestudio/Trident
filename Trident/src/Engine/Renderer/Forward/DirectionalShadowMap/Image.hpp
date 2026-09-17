@@ -12,7 +12,7 @@ namespace Trident {
 				.type = ImageType::TYPE_2D,
 				.extent = {DIRECTIONAL_SHADOW_MAP_EXTENT.width, DIRECTIONAL_SHADOW_MAP_EXTENT.height, 1},
 				.mipLevelCount = 1,
-				.layerCount = 1,
+				.layerCount = DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT,
 				.additionalUsage = ImageUsage::SAMPLED,
 				#if defined(DEBUG_OBJECT_NAME)
 					.name = "Directional shadow map",

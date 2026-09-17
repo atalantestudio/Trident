@@ -12,8 +12,11 @@ namespace Trident {
 
 		const BaseBufferView descriptorBufferViews[] = {
 			cameraBuffer->createView<ForwardCamera>(0, cameraBuffer->getSize()),
-			directionalLightBuffer->createView<DirectionalLight>(0, directionalLightBuffer->getSize()),
 			pointLightBuffer->createView<PointLight>(0, pointLightBuffer->getSize()),
+			directionalLightBuffer->createView<DirectionalLight>(0, directionalLightBuffer->getSize()),
+			directionalLightBuffer->createView<mat4x4<float32>>(0, sizeof(mat4x4<float32>)),
+			directionalLightBuffer->createView<mat4x4<float32>>(sizeof(mat4x4<float32>), sizeof(mat4x4<float32>)),
+			directionalLightBuffer->createView<mat4x4<float32>>(sizeof(mat4x4<float32>) * 2, sizeof(mat4x4<float32>)),
 		};
 
 		const DescriptorImage descriptorImages[] = {
@@ -36,14 +39,14 @@ namespace Trident {
 			{
 				.descriptorSet = sceneDescriptorSet,
 				.bindingIndex = 1,
-				.descriptorBufferViews = descriptorBufferViews[1],
+				.descriptorBufferViews = descriptorBufferViews[2],
 			},
 
 			// Point light
 			{
 				.descriptorSet = sceneDescriptorSet,
 				.bindingIndex = 2,
-				.descriptorBufferViews = descriptorBufferViews[2],
+				.descriptorBufferViews = descriptorBufferViews[1],
 			},
 
 			// Directional shadow map
@@ -55,9 +58,19 @@ namespace Trident {
 
 			// Point light
 			{
-				.descriptorSet = directionalShadowMapDescriptorSet,
+				.descriptorSet = directionalShadowMapCascadeDescriptorSets[0],
 				.bindingIndex = 0,
-				.descriptorBufferViews = descriptorBufferViews[1],
+				.descriptorBufferViews = descriptorBufferViews[3],
+			},
+			{
+				.descriptorSet = directionalShadowMapCascadeDescriptorSets[1],
+				.bindingIndex = 0,
+				.descriptorBufferViews = descriptorBufferViews[4],
+			},
+			{
+				.descriptorSet = directionalShadowMapCascadeDescriptorSets[2],
+				.bindingIndex = 0,
+				.descriptorBufferViews = descriptorBufferViews[5],
 			},
 		};
 

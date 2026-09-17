@@ -10,6 +10,10 @@ struct Camera {
 	float3 sunColor;
 };
 
+struct DirectionalLight {
+	float4x4 projectionViews[3];
+};
+
 struct Interstage {
 	float4 position : SV_Position;
 	float3 surface : VERTEX_OUTPUT_ATTRIBUTE1;
@@ -19,8 +23,12 @@ struct Interstage {
 	float2 lightmapCoordinate : VERTEX_OUTPUT_ATTRIBUTE7;
 };
 
-cbuffer Camera {
+cbuffer Camera : register(b0) {
 	Camera camera;
+}
+
+cbuffer DirectionalLight : register(b1) {
+	DirectionalLight directionalLight;
 }
 
 Texture2D<float> directionalShadowMapTexture : register(t1);
@@ -37,8 +45,11 @@ SamplerState normalSamplerState : register(s3);
 
 static const float3 SUN_DIRECTION = normalize(float3(1.0, 1.0, 1.0));
 
-float calculateShadow(float4 lightSpacePosition, float3 normal) {
-	float3 projectedPosition = lightSpacePosition.xyz / lightSpacePosition.w;
+float calculateShadow(float3 normal) {
+	return 0.0;
+
+	// TODO(renderer/forward): Restore.
+	/* float3 projectedPosition = lightSpacePosition.xyz / lightSpacePosition.w;
 
 	if (projectedPosition.z < 0.0) {
 		return 0.0;
@@ -52,11 +63,11 @@ float calculateShadow(float4 lightSpacePosition, float3 normal) {
 		float closestDepth = directionalShadowMapTexture.Sample(directionalShadowMapSamplerState, coordinate);
 
 		return depth + depthBias <= closestDepth;
-	}
+	} */
 }
 
 float4 main(Interstage interstage) : SV_Target0 {
-	float inShadow = calculateShadow(interstage.lightSpacePosition, interstage.tbn[2]);
+	float inShadow = calculateShadow(interstage.tbn[2]);
 
 	// TODO(graphics/dx12/sampler-descriptor-heap): Fix wrong sampler being used.
 	float3 directDiffuse = diffuseTexture.Sample(diffuseSamplerState, interstage.textureCoordinate).rgb;

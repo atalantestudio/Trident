@@ -3,19 +3,19 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-// TODO(forward/pbr)
+// TODO(renderer/forward)
 // Decouple GLSL/GLSL for Vulkan shaders. Reasons:
 // - Multiple descriptor sets
 // - No shadow map Y flipping in GLSL
 
 precision highp float;
+precision highp sampler2DArray;
 
 in Interstage {
 	layout(location = 0) vec3 surface;
 	layout(location = 1) mat3x3 tbn;
 	layout(location = 4) vec2 textureCoordinate;
-	layout(location = 5) vec4 lightSpacePosition;
-	layout(location = 6) vec2 lightmapCoordinate;
+	layout(location = 5) vec2 lightmapCoordinate;
 } interstage;
 
 layout(set = 0, binding = 0) uniform readonly Camera {
@@ -25,9 +25,16 @@ layout(set = 0, binding = 0) uniform readonly Camera {
 	vec3 ambientColor;
 	uint _0;
 	vec3 sunColor;
+	uint _1;
+	mat4x4 skyboxProjectionView;
+	mat4x4 view;
 } camera;
 
-layout(set = 0, binding = 3) uniform sampler2D directionalShadowMap;
+layout(set = 0, binding = 1) uniform readonly DirectionalLight {
+	mat4x4 projectionViews[3];
+} directionalLight;
+
+layout(set = 0, binding = 3) uniform sampler2DArray directionalShadowMap;
 
 layout(set = 1, binding = 0) uniform sampler2D lightmapAtlasMap;
 
@@ -83,26 +90,50 @@ vec4 sampleBicubic(sampler2D textureSampler, vec2 coordinate) {
 	return mix(mix(sample3, sample2, sx), mix(sample1, sample0, sx), sy);
 }
 
-float calculateShadow(vec4 lightSpacePosition) {
-	vec3 projectedPosition = lightSpacePosition.xyz / lightSpacePosition.w;
+float calculateShadow(vec3 surface, vec3 normal) {
+	const uint CASCADE_COUNT = 3u;
+	const float CASCADE_FAR_PLANES[CASCADE_COUNT] = float[](682.0, 1364.0, 2048.0);
+
+	vec4 viewSpaceSurface = camera.view * vec4(surface, 1.0);
+	float surfaceViewDepth = abs(viewSpaceSurface.z);
+	uint cascadeIndex = 0u;
+
+	while (cascadeIndex < CASCADE_COUNT) {
+		if (surfaceViewDepth < CASCADE_FAR_PLANES[cascadeIndex]) {
+			break;
+		}
+
+		cascadeIndex += 1u;
+	}
+
+	if (cascadeIndex >= CASCADE_COUNT) {
+		return 0.0;
+	}
+
+	vec4 lightSpaceSurface = directionalLight.projectionViews[cascadeIndex] * vec4(surface, 1.0);
+	vec3 projectedPosition = lightSpaceSurface.xyz / lightSpaceSurface.w;
 
 	if (projectedPosition.z < 0.0) {
 		return 0.0;
 	}
 
 	vec2 coordinate = projectedPosition.xy * 0.5 + 0.5;
-	float depthBias = 0.0005 * dot(interstage.tbn[2], SUN_DIRECTION);
+
+	float depthBias = max(0.005, 0.05 * (1.0 - dot(normalize(normal), SUN_DIRECTION)));
+	// float depthBias = 0.0005 * dot(interstage.tbn[2], SUN_DIRECTION);
+	depthBias *= 1.0 / (CASCADE_FAR_PLANES[cascadeIndex] * 0.5);
+
 	float depth = projectedPosition.z;
 
 	coordinate.y = 1.0 - coordinate.y;
 
-	float closestDepth = texture(directionalShadowMap, coordinate).r;
+	float closestDepth = texture(directionalShadowMap, vec3(coordinate, float(cascadeIndex))).r;
 
 	return float(depth + depthBias < closestDepth);
 }
 
 void main() {
-	float inShadow = calculateShadow(interstage.lightSpacePosition);
+	float inShadow = calculateShadow(interstage.surface, interstage.tbn[2]);
 
 	vec3 directDiffuse = texture(diffuseMap, interstage.textureCoordinate).rgb;
 	vec3 indirectDiffuse = sampleBicubic(lightmapAtlasMap, interstage.lightmapCoordinate).rgb;
