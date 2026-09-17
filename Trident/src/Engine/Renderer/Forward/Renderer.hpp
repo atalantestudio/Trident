@@ -36,7 +36,7 @@ namespace Trident {
 			};
 
 		public:
-			static constexpr Extent2D DIRECTIONAL_SHADOW_MAP_EXTENT = {4096, 4096};
+			static constexpr Extent2D DIRECTIONAL_SHADOW_MAP_EXTENT = {1024, 1024};
 			static constexpr uint32 DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT = 3;
 			static constexpr float32 DIRECTIONAL_SHADOW_MAP_CASCADE_FAR_PLANES[DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT] = {0.333f, 0.666f, 1.0f};
 

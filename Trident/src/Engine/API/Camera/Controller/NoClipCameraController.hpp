@@ -19,7 +19,7 @@ namespace Trident {
 			}
 
 			void updateProjection() {
-				camera.updateProjectionReversedZ();
+				camera.updateProjection();
 			}
 
 			void update(float32 deltaTime) override {

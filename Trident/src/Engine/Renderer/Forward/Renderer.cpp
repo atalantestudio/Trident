@@ -56,7 +56,7 @@ namespace Trident {
 			.clearValues = {
 				{skyColor.x, skyColor.y, skyColor.z, 1.0f},
 				{
-					.depth = 0.0f,
+					.depth = 1.0f,
 					.stencil = 0,
 				},
 				#if FORWARD_SAMPLE_COUNT > 1
@@ -231,7 +231,7 @@ namespace Trident {
 				.framebuffer = framebuffer,
 				.clearValues = {
 					{
-						.depth = 0.0f,
+						.depth = 1.0f,
 						.stencil = 0,
 					},
 				},
@@ -327,8 +327,7 @@ namespace Trident {
 
 			frustumCenter /= 8.0f;
 
-			// TODO(renderer/forward/directional-shadow-map): Fix.
-			const mat4x4<float32> lightView = mat4x4<float32>::lookAt(frustumCenter - lightDirection, frustumCenter, UP);
+			const mat4x4<float32> lightView = mat4x4<float32>::lookAt(frustumCenter + lightDirection, frustumCenter, UP);
 
 			float32 minX = max<float32>();
 			float32 maxX = min<float32>();
