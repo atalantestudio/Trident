@@ -46,7 +46,7 @@ float calculateShadow(vec3 surface, vec3 normal, uint cascadeIndex) {
 	float depthBias = max(0.05 * (1.0 - dot(normal, SUN_DIRECTION)), 0.005);
 	depthBias *= 1.0 / (camera.farPlane * CASCADE_FAR_PLANES[cascadeIndex] * 0.5);
 
-	float closestDepth = texture(directionalShadowMap, vec3(coordinate, float(cascadeIndex))).r;
+	float closestDepth = texture(directionalShadowMap, vec3(coordinate, cascadeIndex)).r;
 
 	return float(depth - depthBias > closestDepth);
 }
