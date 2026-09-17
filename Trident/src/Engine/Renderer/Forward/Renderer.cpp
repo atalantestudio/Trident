@@ -350,19 +350,21 @@ namespace Trident {
 			// TODO(renderer/forward/directional-shadow-map): Use the scene bounds.
 			constexpr float32 Z_SCALE = 10.0f;
 
-			if (minZ < 0.0f) {
-				minZ *= Z_SCALE;
-			}
-			else {
-				minZ /= Z_SCALE;
-			}
+			const float32 width = maxX - minX;
+			const float32 height = maxY - minY;
+			const float32 depth = maxZ - minZ;
+			const float32 centerX = (minX + maxX) * 0.5f;
+			const float32 centerY = (minY + maxY) * 0.5f;
+			const float32 centerZ = (minZ + maxZ) * 0.5f;
+			const float32 texelSizeX = width / DIRECTIONAL_SHADOW_MAP_EXTENT.width;
+			const float32 texelSizeY = height / DIRECTIONAL_SHADOW_MAP_EXTENT.height;
 
-			if (maxZ < 0.0f) {
-				maxZ /= Z_SCALE;
-			}
-			else {
-				maxZ *= Z_SCALE;
-			}
+			minX = centerX - width * 0.5f;
+			maxX = centerX + width * 0.5f;
+			minY = centerY - height * 0.5f;
+			maxY = centerY + height * 0.5f;
+			minZ = centerZ - depth * 0.5f * Z_SCALE;
+			maxZ = centerZ + depth * 0.5f * Z_SCALE;
 
 			// TODO(lyah/mat4x4/orthographic): Add helper similar to orthoLH_ZO.
 			const mat4x4<float32> lightProjection = {
