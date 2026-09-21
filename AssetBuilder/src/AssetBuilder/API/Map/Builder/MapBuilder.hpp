@@ -6,10 +6,11 @@
 #include "AssetBuilder/API/Map/Face.hpp"
 #include "AssetBuilder/API/Map/FaceVertex.hpp"
 #include "AssetBuilder/API/Map/MapDescriptor.hpp"
+#include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
 #include "AssetBuilder/API/Scene/Scene3D.hpp"
 
 namespace Trident {
-	class MapBuilder {
+	class MapBuilder : public SceneBuilder {
 		friend Face;
 
 		private:

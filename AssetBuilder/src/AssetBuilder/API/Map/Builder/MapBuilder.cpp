@@ -10,6 +10,18 @@
 
 namespace Trident {
 	MapBuilder::MapBuilder(const MapDescriptor& descriptor) :
+		SceneBuilder({
+			.flags = {},
+			.skyColor = {0.0f, 0.0f, 0.0f},
+			.environmentMapImageAsset = descriptor.environmentMapImageAsset,
+			.sunDirection = {1.0f, 1.0f, 1.0f},
+			.sunColor = {1.0f, 1.0f, 1.0f},
+			.sunIntensity = 1.0f,
+			.spawn = {
+				.position = {0.0f, 0.0f, 0.0f},
+				.direction = {0.0f, 0.0f, 1.0f},
+			},
+		}),
 		descriptor(descriptor),
 		facePositions(MAX_FACE_POSITIONS),
 		indices(MAX_INDICES),

@@ -5,6 +5,7 @@
 
 #include "AssetBuilder/API/Entity/EntityDescriptor.hpp"
 #include "AssetBuilder/API/Lightmapper/Lightmap.hpp"
+#include "AssetBuilder/API/Lightmapper/Lightmapper.hpp"
 #include "AssetBuilder/API/Material/MaterialReference.hpp"
 #include "AssetBuilder/API/Mesh/MeshDescriptor.hpp"
 #include "AssetBuilder/API/Scene/Builder/Intermediate.hpp"

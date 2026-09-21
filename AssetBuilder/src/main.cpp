@@ -55,10 +55,10 @@
 #include "AssetBuilder/Process/Scene/3D/DDGITest.hpp"
 #include "AssetBuilder/Process/Scene/3D/Dragon.hpp"
 #include "AssetBuilder/Process/Scene/3D/EdgeContact.hpp"
-// #include "AssetBuilder/Process/Scene/3D/FaceTest.hpp"
+#include "AssetBuilder/Process/Scene/3D/FaceTest.hpp"
 #include "AssetBuilder/Process/Scene/3D/GallineraTable.hpp"
 #include "AssetBuilder/Process/Scene/3D/Hall.hpp"
-// #include "AssetBuilder/Process/Scene/3D/Hall2.hpp"
+#include "AssetBuilder/Process/Scene/3D/Hall2.hpp"
 #include "AssetBuilder/Process/Scene/3D/Lemons.hpp"
 #include "AssetBuilder/Process/Scene/3D/LightmapTest.hpp"
 #include "AssetBuilder/Process/Scene/3D/PBRTest.hpp"
@@ -104,7 +104,7 @@ namespace Trident {
 
 		private:
 			void registerProcesses() {
-				allocateProcesses(65);
+				allocateProcesses(67);
 
 				registerProcess<BuildGeometryAssetProcess>(&assetLibrary);
 
@@ -167,10 +167,10 @@ namespace Trident {
 				registerProcess<DDGITestScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<DragonScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<EdgeContactScene3D>(&assetLibrary, &lightmapper);
-				// registerProcess<FaceTestScene3D>(&assetLibrary, &lightmapper);
+				registerProcess<FaceTestScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<GallineraTableScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<HallScene3D>(&assetLibrary, &lightmapper);
-				// registerProcess<Hall2Scene3D>(&assetLibrary, &lightmapper);
+				registerProcess<Hall2Scene3D>(&assetLibrary, &lightmapper);
 				registerProcess<LemonsScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<LightmapTestScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<PBRTestScene3D>(&assetLibrary, &lightmapper);

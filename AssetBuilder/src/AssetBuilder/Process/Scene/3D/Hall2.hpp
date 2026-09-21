@@ -7,14 +7,13 @@
 #include "AssetBuilder/Process/Scene/Scene3DProcess.hpp"
 
 namespace Trident {
-	// TODO(asset-builder/map): Restore.
 	class Hall2Scene3D final : public Scene3DProcess {
 		protected:
 			view<char8> getAssetName() const final override {
 				return "3d_hall2";
 			}
 
-			BuildScene3D createScene(AssetBuilderLibrary* assetLibrary) const final override {
+			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				LinearMapBuilder builder({
 					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("evening_road_01_512p"),
 					.geometryAssets = {},
@@ -88,7 +87,7 @@ namespace Trident {
 				builder.addFrame(bikeRoomDoorFrame);
 				builder.addFrame(mainRoomDoorFrame); */
 
-				return builder.build();
+				return builder;
 			}
 
 		public:

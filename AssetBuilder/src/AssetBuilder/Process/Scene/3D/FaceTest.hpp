@@ -7,14 +7,13 @@
 #include "AssetBuilder/Process/Scene/Scene3DProcess.hpp"
 
 namespace Trident {
-	// TODO(asset-builder/map): Restore.
 	class FaceTestScene3D final : public Scene3DProcess {
 		protected:
 			view<char8> getAssetName() const final override {
 				return "3d_face_test";
 			}
 
-			BuildScene3D createScene(AssetBuilderLibrary* assetLibrary) const final override {
+			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				MapBuilder builder({
 					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("evening_road_01_512p"),
 					.geometryAssets = {},
@@ -85,7 +84,7 @@ namespace Trident {
 
 				builder.createFace(concaveFace2Vertices, {0.0f, 0.0f, -1.0f});
 
-				return builder.build();
+				return builder;
 			}
 
 		public:
