@@ -9,6 +9,8 @@
 
 #include "Compute/PrefixSum.hpp"
 
+#include "Experimental/TestGI2D.hpp"
+
 #include "GUI/Article.hpp"
 #include "GUI/Card.hpp"
 #include "GUI/Demo1.hpp"
@@ -77,6 +79,16 @@ namespace Trident {
 			else {
 				ENGINE_ASSERT(false, "Unknown sample \"[]\" in group [].", SampleNameProperty, SampleGroupNameProperty);
 			}
+		}
+		else if (SampleGroupNameProperty == "Experimental") {
+			if (SampleNameProperty == "TestGI2D") {
+				registerLayer<TestGI2DSampleLayer>();
+			}
+			else {
+				ENGINE_ASSERT(false, "Unknown sample \"[]\" in group [].", SampleNameProperty, SampleGroupNameProperty);
+			}
+
+			registerLayerGroup<SampleLayerGroup>(range<uint32, uint32>(0, 1));
 		}
 		else if (SampleGroupNameProperty == "GUI") {
 			if (SampleNameProperty == "Article") {

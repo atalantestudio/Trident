@@ -37,6 +37,10 @@ echo Building shaders in Samples/Asset/Shader/Compute.
 call "Samples/Asset/Shader/Compute/Build.dxc"
 call "Samples/Asset/Shader/Compute/Build.glslc"
 
+echo Building shaders in Samples/Asset/Shader/Experimental.
+
+call "Samples/Asset/Shader/Experimental/Build.glslc"
+
 echo Building shaders in Samples/Asset/Shader/Physics2D.
 
 call "Samples/Asset/Shader/Physics2D/Build.dxc"
