@@ -38,7 +38,7 @@ layout(set = 0, binding = 0) uniform readonly CameraBuffer {
 	Camera camera;
 };
 
-layout(set = 1, binding = 0) uniform sampler2D lightmapAtlasMap;
+layout(set = 1, binding = 0) uniform sampler2D lightmapAtlas;
 
 layout(set = 2, binding = 0) uniform sampler2D diffuseMap;
 layout(set = 2, binding = 1) uniform sampler2D normalMap;
@@ -97,7 +97,7 @@ void main() {
 	float inShadow = calculateShadow(interstage.surface, interstage.tbn[2], cascadeIndex);
 
 	vec3 directDiffuse = texture(diffuseMap, interstage.textureCoordinate).rgb;
-	vec3 indirectDiffuse = sampleBicubic(lightmapAtlasMap, interstage.lightmapCoordinate).rgb;
+	vec3 indirectDiffuse = sampleBicubic(lightmapAtlas, interstage.lightmapCoordinate).rgb;
 	vec3 normal = normalize(interstage.tbn * (texture(normalMap, interstage.textureCoordinate).rgb * 2.0 - 1.0));
 	float surfaceToSunLight = dot(normal, SUN_DIRECTION);
 

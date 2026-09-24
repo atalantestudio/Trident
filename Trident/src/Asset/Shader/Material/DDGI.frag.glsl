@@ -20,7 +20,7 @@ layout(set = 0, binding = 0) uniform readonly Camera {
 	uint pointLightCount;
 } camera;
 
-layout(set = 1, binding = 0) uniform sampler2D lightmapAtlasMap;
+layout(set = 1, binding = 0) uniform sampler2D lightmapAtlas;
 
 layout(set = 2, binding = 0) uniform sampler2D diffuseMap;
 layout(set = 2, binding = 1) uniform sampler2D normalMap;
@@ -84,7 +84,7 @@ float sdBox(vec3 position, vec3 size) {
 
 void main() {
 #if defined(CUSTOM_SCENE_DDGI_REF_0)
-	fragment.rgb = sampleBicubic(lightmapAtlasMap, interstage.lightmapCoordinate).rgb;
+	fragment.rgb = sampleBicubic(lightmapAtlas, interstage.lightmapCoordinate).rgb;
 #else
 	const vec3 lightPosition = vec3(0.0, 64.0, 164.0);
 	const float lightIntensity = 256.0;

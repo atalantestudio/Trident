@@ -47,7 +47,7 @@ layout(set = 0, binding = 2) buffer readonly PointLightBuffer {
 	PointLight pointLights[];
 };
 
-layout(set = 1, binding = 0) uniform sampler2D lightmapAtlasMap;
+layout(set = 1, binding = 0) uniform sampler2D lightmapAtlas;
 
 layout(set = 2, binding = 0) uniform sampler2D armMap;
 layout(set = 2, binding = 1) uniform sampler2D diffuseMap;
@@ -146,7 +146,7 @@ void main() {
 	vec3 x = camera.position;
 	vec3 wo = normalize(camera.position - interstage.surface);
 
-	vec3 indirectDiffuse = sampleBicubic(lightmapAtlasMap, interstage.lightmapCoordinate).rgb;
+	vec3 indirectDiffuse = sampleBicubic(lightmapAtlas, interstage.lightmapCoordinate).rgb;
 
 	vec3 arm = texture(armMap, interstage.textureCoordinate).rgb;
 	float ao = arm.r;
