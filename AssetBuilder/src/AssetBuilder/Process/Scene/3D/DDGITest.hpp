@@ -8,247 +8,84 @@
 namespace Trident {
 	class DDGITestScene3D final : public Scene3DProcess {
 		private:
-			static BuildStaticGeometry3D createGeometry(view<svec3<float32>> positions) {
-				const vec3<float32> ab = positions[1] - positions[0];
-				const vec3<float32> ac = positions[2] - positions[0];
-				const svec3<float32> normal = svec3<float32>(normalized(cross(ab, ac)));
-				const svec2<float32> scale = {
-					length(ab),
-					length(ac),
-				};
-
-				return {
-					.vertices = {
-						{positions[0], normal, { 0.0f,  0.0f,  0.0f,  0.0f}, {0.0f, 0.0f}},
-						{positions[1], normal, { 0.0f,  0.0f,  0.0f,  0.0f}, {1.0f, 0.0f}},
-						{positions[2], normal, { 0.0f,  0.0f,  0.0f,  0.0f}, {0.0f, 1.0f}},
-						{positions[3], normal, { 0.0f,  0.0f,  0.0f,  0.0f}, {1.0f, 1.0f}},
-					},
-					.indices = {
-						0, 1, 2,
-						1, 3, 2,
-					},
-					.edgeOriginVertexIndices = {0, 1, 3, 2},
-					.normal = normal,
-					.scale = scale,
-				};
-			}
-
-			static BuildStaticGeometry3D createFloorGeometry(svec3<float32> origin) {
-				const svec3<float32> positions[] = {
-					origin + svec3<float32>{-64.0f, -64.0f,  64.0f},
-					origin + svec3<float32>{ 64.0f, -64.0f,  64.0f},
-					origin + svec3<float32>{-64.0f, -64.0f, -64.0f},
-					origin + svec3<float32>{ 64.0f, -64.0f, -64.0f},
-				};
-
-				return createGeometry(positions);
-			}
-
-			static BuildStaticGeometry3D createFrontWallGeometry(svec3<float32> origin) {
-				const svec3<float32> positions[] = {
-					origin + svec3<float32>{-64.0f,  64.0f,  64.0f},
-					origin + svec3<float32>{ 64.0f,  64.0f,  64.0f},
-					origin + svec3<float32>{-64.0f, -64.0f,  64.0f},
-					origin + svec3<float32>{ 64.0f, -64.0f,  64.0f},
-				};
-
-				return createGeometry(positions);
-			}
-
-			static BuildStaticGeometry3D createRightWallGeometry(svec3<float32> origin) {
-				const svec3<float32> positions[] = {
-					origin + svec3<float32>{ 64.0f,  64.0f,  64.0f},
-					origin + svec3<float32>{ 64.0f,  64.0f, -64.0f},
-					origin + svec3<float32>{ 64.0f, -64.0f,  64.0f},
-					origin + svec3<float32>{ 64.0f, -64.0f, -64.0f},
-				};
-
-				return createGeometry(positions);
-			}
-
-			static BuildStaticGeometry3D createBackWallGeometry(svec3<float32> origin) {
-				const svec3<float32> positions[] = {
-					origin + svec3<float32>{ 64.0f,  64.0f, -64.0f},
-					origin + svec3<float32>{-64.0f,  64.0f, -64.0f},
-					origin + svec3<float32>{ 64.0f, -64.0f, -64.0f},
-					origin + svec3<float32>{-64.0f, -64.0f, -64.0f},
-				};
-
-				return createGeometry(positions);
-			}
-
-			static BuildStaticGeometry3D createLeftWallGeometry(svec3<float32> origin) {
-				const svec3<float32> positions[] = {
-					origin + svec3<float32>{-64.0f,  64.0f, -64.0f},
-					origin + svec3<float32>{-64.0f,  64.0f,  64.0f},
-					origin + svec3<float32>{-64.0f, -64.0f, -64.0f},
-					origin + svec3<float32>{-64.0f, -64.0f,  64.0f},
-				};
-
-				return createGeometry(positions);
-			}
-
-			static BuildStaticGeometry3D createCeilingGeometry(svec3<float32> origin, float32 leftOffsetPercent, float32 rightOffsetPercent) {
-				const float32 leftOffset = -128.0f * leftOffsetPercent + 64.0f;
-				const float32 rightOffset = 128.0f * rightOffsetPercent - 64.0f;
-
-				const svec3<float32> positions[] = {
-					origin + svec3<float32>{leftOffset, 64.0f, -64.0f},
-					origin + svec3<float32>{rightOffset, 64.0f, -64.0f},
-					origin + svec3<float32>{leftOffset, 64.0f,  64.0f},
-					origin + svec3<float32>{rightOffset, 64.0f,  64.0f},
-				};
-
-				return createGeometry(positions);
-			}
-
-			static BuildStaticGeometry3D createCeilingAreaLightGeometry(svec3<float32> origin, float32 rightOffsetPercent, float32 widthPercent) {
-				const float32 rightOffset = 128.0f * rightOffsetPercent - 64.0f;
-				const float32 leftOffset = rightOffset - widthPercent * 128.0f;
-
-				const svec3<float32> positions[] = {
-					origin + svec3<float32>{leftOffset,   64.0f, -64.0f},
-					origin + svec3<float32>{rightOffset,  64.0f, -64.0f},
-					origin + svec3<float32>{leftOffset,   64.0f,  64.0f},
-					origin + svec3<float32>{rightOffset,  64.0f,  64.0f},
-				};
-
-				return createGeometry(positions);
-			}
-
 			static void createRoom(SceneBuilder& builder, svec3<float32> origin, MaterialReference material, float32 lightCeilingPercent, bool open) {
-				static constexpr float32 lightRightOffsetPercent = 0.95f;
-				static constexpr svec3<float32> ceilingBias = {0.0f, 0.01f, 0.0f};
-				static constexpr svec2<float32> luxelScale = {4.0f, 4.0f};
-				static constexpr svec3<float32> emissive = {4.0f, 4.0f, 4.0f};
-				static constexpr svec3<float32> white = {1.0f, 1.0f, 1.0f};
-				static constexpr TextureFilteringDescriptor textureFiltering = {
-					.translation = {0.0f, 0.0f},
-					.rotation = 0.0f,
-					.scale = {1.0f, 1.0f},
+				static constexpr svec2<float32> LUXEL_SCALE = {4.0f, 4.0f};
+				static constexpr svec3<float32> LIGHT_EMISSIVE_COLOR = {4.0f, 4.0f, 4.0f};
+				static constexpr svec3<float32> ROOM_COLOR = {1.0f, 1.0f, 1.0f};
+				static constexpr float32 LIGHT_RIGHT_OFFSET_PERCENT = 0.95f;
+
+				const float32 lightLeftOffset = 128.0f * (LIGHT_RIGHT_OFFSET_PERCENT - lightCeilingPercent) - 64.0f;
+				const float32 lightRightOffset = 128.0f * LIGHT_RIGHT_OFFSET_PERCENT - 64.0f;
+
+				const svec3<float32> ceilingVertices[] = {
+					origin + svec3<float32>{-64.0f,  64.0f,  64.0f},
+					origin + svec3<float32>{ 64.0f,  64.0f,  64.0f},
+					origin + svec3<float32>{ 64.0f,  64.0f, -64.0f},
+					origin + svec3<float32>{-64.0f,  64.0f, -64.0f},
+				};
+				const svec3<float32> ceilingLeftVertices[] = {
+					origin + svec3<float32>{-64.0f,           64.0f, -64.0f},
+					origin + svec3<float32>{lightLeftOffset,  64.0f, -64.0f},
+					origin + svec3<float32>{lightLeftOffset,  64.0f,  64.0f},
+					origin + svec3<float32>{-64.0f,           64.0f,  64.0f},
+				};
+				const svec3<float32> ceilingRightVertices[] = {
+					origin + svec3<float32>{lightRightOffset,  64.0f, -64.0f},
+					origin + svec3<float32>{ 64.0f,            64.0f, -64.0f},
+					origin + svec3<float32>{ 64.0f,            64.0f,  64.0f},
+					origin + svec3<float32>{lightRightOffset,  64.0f,  64.0f},
 				};
 
-				static const TransformAngleAxis3D transform = {
-					.translation = {0.0f, 0.0f, 0.0f},
-					.axis = {0.0f, 0.0f, 0.0f},
-					.angle = 0.0_rad,
-				};
+				Face& floorFace = builder.createFace({
+					.vertices = ceilingVertices,
+					.normal = {0.0f, 1.0f, 0.0f},
+					.material = material,
+					.lightmap = {
+						.luxelScale = LUXEL_SCALE,
+						.albedo = ROOM_COLOR,
+					},
+				});
 
-				builder.placeSurface(
-					{
-						.geometry = createFloorGeometry(origin),
-						.material = material,
-						.textureFiltering = textureFiltering,
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = white,
-						},
-					},
-					transform
-				);
-				builder.placeSurface(
-					{
-						.geometry = createFrontWallGeometry(origin),
-						.material = material,
-						.textureFiltering = textureFiltering,
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = white,
-						},
-					},
-					transform
-				);
-				builder.placeSurface(
-					{
-						.geometry = createRightWallGeometry(origin),
-						.material = material,
-						.textureFiltering = textureFiltering,
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = white,
-						},
-					},
-					transform
-				);
-				builder.placeSurface(
-					{
-						.geometry = createBackWallGeometry(origin),
-						.material = material,
-						.textureFiltering = textureFiltering,
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = white,
-						},
-					},
-					transform
-				);
-				builder.placeSurface(
-					{
-						.geometry = createLeftWallGeometry(origin),
-						.material = material,
-						.textureFiltering = textureFiltering,
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = white,
-						},
-					},
-					transform
-				);
+				builder.extrudeFace(floorFace, -128.0f);
 
-				if (open) {
-					builder.placeSurface(
-						{
-							.geometry = createCeilingGeometry(origin, 1.0f, lightRightOffsetPercent - lightCeilingPercent),
-							.material = material,
-							.textureFiltering = textureFiltering,
-							.lightmap = {
-								.luxelScale = luxelScale,
-								.albedo = white,
-							},
+				builder.createFace({
+					.vertices = ceilingLeftVertices,
+					.normal = {0.0f, -1.0f, 0.0f},
+					.material = material,
+					.lightmap = {
+						.luxelScale = LUXEL_SCALE,
+						.albedo = ROOM_COLOR,
+					},
+				});
+				builder.createFace({
+					.vertices = ceilingRightVertices,
+					.normal = {0.0f, -1.0f, 0.0f},
+					.material = material,
+					.lightmap = {
+						.luxelScale = LUXEL_SCALE,
+						.albedo = ROOM_COLOR,
+					},
+				});
+
+				if (!open) {
+					const svec3<float32> lightVertices[] = {
+						origin + svec3<float32>{lightLeftOffset,   64.0f, -64.0f},
+						origin + svec3<float32>{lightRightOffset,  64.0f, -64.0f},
+						origin + svec3<float32>{lightRightOffset,  64.0f,  64.0f},
+						origin + svec3<float32>{lightLeftOffset,   64.0f,  64.0f},
+					};
+
+					builder.createFace({
+						.vertices = lightVertices,
+						.normal = {0.0f, -1.0f, 0.0f},
+						.material = material,
+						.lightmap = {
+							.luxelScale = LUXEL_SCALE,
+							.emissiveColor = LIGHT_EMISSIVE_COLOR,
+							.emissiveIntensity = 1.0f,
+							.albedo = ROOM_COLOR,
 						},
-						transform
-					);
-					builder.placeSurface(
-						{
-							.geometry = createCeilingGeometry(origin, 1.0f - lightRightOffsetPercent, 1.0f),
-							.material = material,
-							.textureFiltering = textureFiltering,
-							.lightmap = {
-								.luxelScale = luxelScale,
-								.albedo = white,
-							},
-						},
-						transform
-					);
-				}
-				else {
-					builder.placeSurface(
-						{
-							.geometry = createCeilingGeometry(origin, 1.0f, 1.0f),
-							.material = material,
-							.textureFiltering = textureFiltering,
-							.lightmap = {
-								.luxelScale = luxelScale,
-								.albedo = white,
-							},
-						},
-						transform
-					);
-					builder.placeSurface(
-						{
-							.geometry = createCeilingAreaLightGeometry(origin - ceilingBias, lightRightOffsetPercent, lightCeilingPercent),
-							.material = material,
-							.textureFiltering = textureFiltering,
-							.lightmap = {
-								.luxelScale = luxelScale,
-								.emissiveColor = emissive,
-								.emissiveIntensity = 1.0f,
-								.albedo = white,
-							},
-						},
-						transform
-					);
+					});
 				}
 			}
 
@@ -260,7 +97,7 @@ namespace Trident {
 			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				SceneBuilder builder({
 					.flags = {},
-					.skyColor = {1.0f, 1.0f, 1.0f},
+					.skyColor = {0.0f, 0.0f, 0.0f},
 					.environmentMapImageAsset = nullptr,
 					.sunDirection = {1.0f, 1.0f, 1.0f},
 					.sunColor = {0.0f, 0.0f, 0.0f},
@@ -273,9 +110,9 @@ namespace Trident {
 
 				const MaterialReference material = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
 
-				createRoom(builder, {-192.0f,  64.0f,  384.0f}, material, 0.05f, true);
-				createRoom(builder, { 0.0f,    64.0f,  384.0f}, material, 0.1f, true);
-				createRoom(builder, { 192.0f,  64.0f,  384.0f}, material, 0.2f, true);
+				createRoom(builder, {-192.0f,  64.0f,  384.0f}, material, 0.05f, false);
+				createRoom(builder, { 0.0f,    64.0f,  384.0f}, material, 0.1f, false);
+				createRoom(builder, { 192.0f,  64.0f,  384.0f}, material, 0.2f, false);
 
 				return builder;
 			}

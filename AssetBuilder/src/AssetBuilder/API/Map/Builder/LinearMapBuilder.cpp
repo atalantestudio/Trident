@@ -36,11 +36,11 @@ namespace Trident {
 			.lightmap = descriptor.lightmap,
 		});
 
-		// TODO(test): Restore the ceiling face.
-		/* Face ceilingFace{};
+		Face ceilingFace{};
 		ceilingFace.vertexCount = 4;
 		ceilingFace.indexRange.offset = staticGeometryFaceVertexCount;
 		ceilingFace.normal = {0.0f, -1.0f, 0.0f};
+		ceilingFace.triangleOffset = staticGeometryFaceTriangleCount;
 		ceilingFace.geometryIndex = floorFace.geometryIndex;
 		ceilingFace.material = descriptor.material;
 		ceilingFace.lightmap = descriptor.lightmap;
@@ -61,7 +61,7 @@ namespace Trident {
 		staticGeometryFaceTriangleCount += 2;
 		staticGeometryFaceCount += 1;
 		lightmapCoordinateCount += 4;
-		lightmapCount += 1; */
+		lightmapCount += 1;
 
 		extrudeFace(floorFace, -height);
 

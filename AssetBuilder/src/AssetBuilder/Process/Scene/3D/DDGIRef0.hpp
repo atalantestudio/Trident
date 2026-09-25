@@ -21,49 +21,44 @@ namespace Trident {
 			}
 
 			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
-				static constexpr svec3<float32> FLOOR_VERTICES[] = {
-					{-64.0f,  0.0f,    228.0f},
-					{ 64.0f,  0.0f,    228.0f},
-					{ 64.0f,  0.0f,    100.0f},
-					{-64.0f,  0.0f,    100.0f},
-				};
-				static constexpr svec3<float32> CEILING_VERTICES[] = {
-					{-64.0f,  128.0f,  100.0f},
-					{ 64.0f,  128.0f,  100.0f},
-					{ 64.0f,  128.0f,  228.0f},
-					{-64.0f,  128.0f,  228.0f},
-				};
-				static constexpr svec3<float32> FRONT_WALL_VERTICES[] = {
-					{ 64.0f,  128.0f,  100.0f},
-					{-64.0f,  128.0f,  100.0f},
-					{-64.0f,  0.0f,    100.0f},
-					{ 64.0f,  0.0f,    100.0f},
-				};
-				static constexpr svec3<float32> BACK_WALL_VERTICES[] = {
-					{-64.0f,  128.0f,  228.0f},
-					{ 64.0f,  128.0f,  228.0f},
-					{ 64.0f,  0.0f,    228.0f},
-					{-64.0f,  0.0f,    228.0f},
-				};
-				static constexpr svec3<float32> LEFT_WALL_VERTICES[] = {
-					{-64.0f,  128.0f,  100.0f},
-					{-64.0f,  128.0f,  228.0f},
-					{-64.0f,  0.0f,    228.0f},
-					{-64.0f,  0.0f,    100.0f},
-				};
-				static constexpr svec3<float32> RIGHT_WALL_VERTICES[] = {
-					{ 64.0f,  128.0f,  228.0f},
-					{ 64.0f,  128.0f,  100.0f},
-					{ 64.0f,  0.0f,    100.0f},
-					{ 64.0f,  0.0f,    228.0f},
-				};
-
 				static constexpr svec2<float32> LUXEL_SCALE = {4.0f, 4.0f};
-				static constexpr svec3<float32> WALL_COLOR = {1.0f, 1.0f, 1.0f};
+				static constexpr svec3<float32> ROOM_COLOR = {1.0f, 1.0f, 1.0f};
+				static constexpr svec3<float32> VERTICES[] = {
+					{-64.0f,  0.0f,    228.0f},
+					{ 64.0f,  0.0f,    228.0f},
+					{ 64.0f,  0.0f,    100.0f},
+					{-64.0f,  0.0f,    100.0f},
+					{-64.0f,  128.0f,  100.0f},
+					{ 64.0f,  128.0f,  100.0f},
+					{ 64.0f,  128.0f,  228.0f},
+					{-64.0f,  128.0f,  228.0f},
+					{ 64.0f,  128.0f,  100.0f},
+					{-64.0f,  128.0f,  100.0f},
+					{-64.0f,  0.0f,    100.0f},
+					{ 64.0f,  0.0f,    100.0f},
+					{-64.0f,  128.0f,  228.0f},
+					{ 64.0f,  128.0f,  228.0f},
+					{ 64.0f,  0.0f,    228.0f},
+					{-64.0f,  0.0f,    228.0f},
+					{-64.0f,  128.0f,  100.0f},
+					{-64.0f,  128.0f,  228.0f},
+					{-64.0f,  0.0f,    228.0f},
+					{-64.0f,  0.0f,    100.0f},
+					{ 64.0f,  128.0f,  228.0f},
+					{ 64.0f,  128.0f,  100.0f},
+					{ 64.0f,  0.0f,    100.0f},
+					{ 64.0f,  0.0f,    228.0f},
+				};
+				static constexpr view<svec3<float32>> FLOOR_VERTICES(&VERTICES[0], 4);
+				static constexpr view<svec3<float32>> CEILING_VERTICES(&VERTICES[4], 4);
+				static constexpr view<svec3<float32>> FRONT_WALL_VERTICES(&VERTICES[8], 4);
+				static constexpr view<svec3<float32>> BACK_WALL_VERTICES(&VERTICES[12], 4);
+				static constexpr view<svec3<float32>> LEFT_WALL_VERTICES(&VERTICES[16], 4);
+				static constexpr view<svec3<float32>> RIGHT_WALL_VERTICES(&VERTICES[20], 4);
 
 				SceneBuilder builder({
 					.flags = {},
-					.skyColor = {1.0f, 1.0f, 1.0f},
+					.skyColor = {0.0f, 0.0f, 0.0f},
 					.environmentMapImageAsset = nullptr,
 					.sunDirection = {1.0f, 1.0f, 1.0f},
 					.sunColor = {0.0f, 0.0f, 0.0f},
@@ -84,7 +79,7 @@ namespace Trident {
 					.material = material,
 					.lightmap = {
 						.luxelScale = LUXEL_SCALE,
-						.albedo = WALL_COLOR,
+						.albedo = ROOM_COLOR,
 					},
 				});
 				builder.createFace({
@@ -93,7 +88,7 @@ namespace Trident {
 					.material = material,
 					.lightmap = {
 						.luxelScale = LUXEL_SCALE,
-						.albedo = WALL_COLOR,
+						.albedo = ROOM_COLOR,
 					},
 				});
 				builder.createFace({
@@ -102,7 +97,7 @@ namespace Trident {
 					.material = material,
 					.lightmap = {
 						.luxelScale = LUXEL_SCALE,
-						.albedo = WALL_COLOR,
+						.albedo = ROOM_COLOR,
 					},
 				});
 				builder.createFace({
@@ -111,7 +106,7 @@ namespace Trident {
 					.material = material,
 					.lightmap = {
 						.luxelScale = LUXEL_SCALE,
-						.albedo = WALL_COLOR,
+						.albedo = ROOM_COLOR,
 					},
 				});
 				builder.createFace({
@@ -120,7 +115,7 @@ namespace Trident {
 					.material = material,
 					.lightmap = {
 						.luxelScale = LUXEL_SCALE,
-						.albedo = WALL_COLOR,
+						.albedo = ROOM_COLOR,
 					},
 				});
 				builder.createFace({
@@ -129,7 +124,7 @@ namespace Trident {
 					.material = material,
 					.lightmap = {
 						.luxelScale = LUXEL_SCALE,
-						.albedo = WALL_COLOR,
+						.albedo = ROOM_COLOR,
 					},
 				});
 

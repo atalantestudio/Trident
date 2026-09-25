@@ -41,6 +41,7 @@ namespace Trident {
 			// TODO(lyah/scalar)
 			extrudedFace.normal = svec3<float32>(normalized(cross(b - a, face.normal * scale)));
 
+			extrudedFace.triangleOffset = staticGeometryFaceTriangleCount;
 			extrudedFace.geometryIndex = face.geometryIndex;
 			extrudedFace.material = face.material;
 			extrudedFace.lightmap = face.lightmap;
@@ -59,6 +60,8 @@ namespace Trident {
 			a = b;
 
 			staticGeometryFaceCount += 1;
+			staticGeometryFaceTriangleCount += 2;
+			lightmapCoordinateCount += face.vertexCount;
 			indexA += 1;
 		}
 
@@ -72,8 +75,6 @@ namespace Trident {
 
 		facePositionCount += face.vertexCount;
 		staticGeometryFaceVertexCount += face.vertexCount * 4;
-		staticGeometryFaceTriangleCount += face.vertexCount * 2;
-		lightmapCoordinateCount += face.vertexCount;
 		lightmapCount += face.vertexCount;
 	}
 }

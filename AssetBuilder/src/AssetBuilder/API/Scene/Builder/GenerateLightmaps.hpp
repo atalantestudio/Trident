@@ -81,12 +81,7 @@ namespace Trident {
 			Lightmap& lightmap = lightmaps[lightmapIndex];
 			lightmap.geometryIndex = face.geometryIndex;
 			lightmap.materialIndex = lightmapIndex;
-			lightmap.triangleRange.offset = face.indexRange.offset;
-
-			if (face.indexRange.offset > 2) {
-				lightmap.triangleRange.offset -= 2;
-			}
-
+			lightmap.triangleRange.offset = face.triangleOffset;
 			lightmap.triangleRange.count = face.vertexCount - 2;
 			lightmap.vertexRange.offset = 0;
 			lightmap.coordinateOffset = lightmapCoordinateOffset;

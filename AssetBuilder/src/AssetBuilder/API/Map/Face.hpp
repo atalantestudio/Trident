@@ -26,6 +26,7 @@ namespace Trident {
 		// Remove the unused range's count (it's currently equal to the vertex count).
 		range<uint32, uint32> indexRange;
 
+		uint32 triangleOffset;
 		svec3<float32> normal;
 		uint32 geometryIndex;
 		MaterialReference material;

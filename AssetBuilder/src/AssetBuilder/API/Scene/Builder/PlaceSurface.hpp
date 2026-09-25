@@ -58,6 +58,7 @@ namespace Trident {
 		Face face{};
 		face.vertexCount = static_cast<uint32>(descriptor.vertices.count());
 		face.indexRange.offset = staticGeometryFaceVertexCount;
+		face.triangleOffset = staticGeometryFaceTriangleCount;
 		face.normal = descriptor.normal;
 		face.geometryIndex = materialGeometry.geometryIndex;
 		face.material = descriptor.material;
