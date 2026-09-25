@@ -66,34 +66,117 @@ namespace Trident {
 		return insertLightmapNode(lightmap, node->children[0]);
 	}
 
-	void SceneBuilder::createLightmaps(BuildStaticSceneGeometry3D& staticGeometry) {
+	void SceneBuilder::createLightmaps(const BuildScene3D& scene, BuildStaticSceneGeometry3D& staticGeometry) {
+		lightmaps = sequence<Lightmap>(lightmapCount);
+		lightmapMaterials = sequence<LightmapMaterial>(lightmapCount);
+
+		lightmapLookups.reserve(lightmapCount);
+
 		uint32 lightmapCoordinateOffset = 0;
 		uint32 lightmapIndex = 0;
 
-		while (lightmapIndex < lightmaps.size()) {
+		while (lightmapIndex < staticGeometryFaceCount) {
+			const Face& face = faces[lightmapIndex];
+
 			Lightmap& lightmap = lightmaps[lightmapIndex];
+			lightmap.geometryIndex = face.geometryIndex;
+			lightmap.materialIndex = lightmapIndex;
+			lightmap.triangleRange.offset = face.indexRange.offset * 3;
+			lightmap.triangleRange.count = face.vertexCount - 2;
+			lightmap.vertexRange.offset = 0;
 			lightmap.coordinateOffset = lightmapCoordinateOffset;
+			lightmap.coordinateCount = face.vertexCount;
+			lightmap.minCoordinate = face.boundingBox.min;
+			lightmap.maxCoordinate = face.boundingBox.max;
+			lightmap.vertexRange.count = lightmap.coordinateCount;
+			lightmap.scale = lightmap.maxCoordinate - lightmap.minCoordinate;
+			lightmap.luxelScale = face.lightmap.luxelScale;
 
-			const svec2<float32> scale = lightmap.scale / lightmap.luxelScale;
-			const IntermediateGeometry& geometry = geometries[lightmap.geometryIndex];
-			const view<BuildVertex3D> vertices(&geometry.vertices[lightmap.vertexRange.offset], lightmap.vertexRange.count);
+			LightmapMaterial& lightmapMaterial = lightmapMaterials[lightmapIndex];
+			lightmapMaterial.emissiveColor = face.lightmap.emissiveColor;
+			lightmapMaterial.emissiveIntensity = face.lightmap.emissiveIntensity;
+			lightmapMaterial.albedo = face.lightmap.albedo;
 
-			uint32 coordinateIndex = 0;
+			lightmapCoordinateOffset += lightmap.coordinateCount;
+			lightmapIndex += 1;
+		}
 
-			while (coordinateIndex < lightmap.vertexRange.count) {
-				const BuildVertex3D& vertex = vertices[coordinateIndex];
-				const float32 packedTextureCoordinate = vertex.tangent[3];
-				const svec2<float32> textureCoordinate = unpack<VertexInputAttributeFormat::R16G16_FLOAT, svec2<float32>>(*pointer_cast<const uint32*>(&packedTextureCoordinate));
+		uint32 materialShaderIndex = 0;
 
-				// TODO(lyah/scalar)
-				svec2<float32>& coordinate = staticGeometry.lightmapCoordinates[lightmap.coordinateOffset + coordinateIndex];
-				coordinate = (textureCoordinate - lightmap.minCoordinate) * scale;
+		while (materialShaderIndex < materialShaders.size()) {
+			const IntermediateMaterialShader& materialShader = materialShaders[materialShaderIndex];
 
-				coordinateIndex += 1;
+			if (materialShader.asset.geometryType == GeometryType::DYNAMIC) {
+				materialShaderIndex += 1;
+
+				continue;
 			}
 
+			uint32 materialIndex = 0;
+
+			while (materialIndex < materialShader.materials.size()) {
+				const IntermediateMaterial& material = materialShader.materials[materialIndex];
+
+				uint32 materialGeometryIndex = 0;
+
+				while (materialGeometryIndex < material.geometries.size()) {
+					if (materialGeometryIndex == material.bakedGeometryIndex) {
+						materialGeometryIndex += 1;
+
+						continue;
+					}
+
+					const IntermediateMaterialGeometry& materialGeometry = material.geometries[materialGeometryIndex];
+					const IntermediateGeometry& geometry = geometries[materialGeometry.geometryIndex];
+
+					uint32 instanceIndex = 0;
+
+					while (instanceIndex < materialGeometry.instances.size()) {
+						const BuildInstance& instance = materialGeometry.instances[instanceIndex];
+
+						Lightmap& lightmap = lightmaps[lightmapIndex];
+						lightmap.geometryIndex = materialGeometry.geometryIndex;
+						lightmap.materialIndex = lightmapIndex;
+						lightmap.triangleRange.offset = 0;
+						lightmap.triangleRange.count = static_cast<uint32>(geometry.indices.count() / 3);
+						lightmap.vertexRange.offset = 0;
+						lightmap.coordinateOffset = lightmapCoordinateOffset;
+						lightmap.coordinateCount = static_cast<uint32>(geometry.vertices.count());
+						lightmap.minCoordinate = geometry.boundingBox.min;
+						lightmap.maxCoordinate = geometry.boundingBox.max;
+						lightmap.vertexRange.count = lightmap.coordinateCount;
+
+						// TODO(asset-builder/lightmap): Get the correct scale from the first material image.
+						lightmap.scale = {4096.0f, 4096.0f};
+
+						lightmap.luxelScale = instance.lightmap.luxelScale;
+
+						LightmapMaterial& lightmapMaterial = lightmapMaterials[lightmapIndex];
+						lightmapMaterial.emissiveColor = instance.lightmap.emissiveColor;
+						lightmapMaterial.emissiveIntensity = instance.lightmap.emissiveIntensity;
+						lightmapMaterial.albedo = instance.lightmap.albedo;
+
+						lightmapCoordinateOffset += lightmap.coordinateCount;
+						lightmapIndex += 1;
+						instanceIndex += 1;
+					}
+
+					materialGeometryIndex += 1;
+				}
+
+				materialIndex += 1;
+			}
+
+			materialShaderIndex += 1;
+		}
+
+		lightmapIndex = 0;
+
+		while (lightmapIndex < lightmaps.count()) {
+			Lightmap& lightmap = lightmaps[lightmapIndex];
+
 			// TODO(lyah/scalar)
-			svec2<float32> size = (lightmap.maxCoordinate - lightmap.minCoordinate) * scale;
+			svec2<float32> size = lightmap.scale / lightmap.luxelScale;
 			size.x = floor(size.x);
 			size.y = floor(size.y);
 
@@ -105,10 +188,26 @@ namespace Trident {
 			lightmap.size.width += 4;
 			lightmap.size.height += 4;
 
-			const LightmapLookup lightmapLookup = {
-				.index = lightmapIndex,
-				.area = lightmap.size.width * lightmap.size.height,
-			};
+			const IntermediateGeometry& intermediateGeometry = geometries[lightmap.geometryIndex];
+			const BuildGeometry& geometry = scene.geometries[intermediateGeometry.filteredIndex];
+			const view<BuildVertex3D> vertices(&scene.vertices[geometry.vertexRange.offset + lightmap.vertexRange.offset], lightmap.coordinateCount);
+
+			uint32 coordinateIndex = 0;
+
+			while (coordinateIndex < lightmap.coordinateCount) {
+				const BuildVertex3D& vertex = vertices[coordinateIndex];
+				const float32 packedTextureCoordinate = vertex.tangent[3];
+				const svec2<float32> textureCoordinate = unpack<VertexInputAttributeFormat::R16G16_FLOAT, svec2<float32>>(*pointer_cast<const uint32*>(&packedTextureCoordinate));
+
+				// TODO(lyah/scalar)
+				staticGeometry.lightmapCoordinates[lightmap.coordinateOffset + coordinateIndex] = textureCoordinate * size;
+
+				coordinateIndex += 1;
+			}
+
+			LightmapLookup lightmapLookup{};
+			lightmapLookup.index = lightmapIndex;
+			lightmapLookup.area = lightmap.size.width * lightmap.size.height;
 
 			uint32 lightmapInsertionIndex = 0;
 
@@ -122,12 +221,16 @@ namespace Trident {
 
 			lightmapLookups.insert(lightmapLookups.begin() + lightmapInsertionIndex, lightmapLookup);
 
-			lightmapCoordinateOffset += static_cast<uint32>(vertices.count());
 			lightmapIndex += 1;
 		}
 	}
 
 	void SceneBuilder::updateLightmapCoordinates(BuildStaticSceneGeometry3D& staticGeometry) {
+		static constexpr svec2<float32> inverseAtlasExtent = {
+			1.0f / static_cast<float32>(LIGHTMAP_ATLAS_EXTENT.width),
+			1.0f / static_cast<float32>(LIGHTMAP_ATLAS_EXTENT.height),
+		};
+
 		LightmapNode rootNode{};
 		rootNode.rectangle = {0, 0, LIGHTMAP_ATLAS_EXTENT.width, LIGHTMAP_ATLAS_EXTENT.height};
 
@@ -136,18 +239,18 @@ namespace Trident {
 
 			LightmapNode* node = insertLightmapNode(lightmap, &rootNode);
 
-			ENGINE_ASSERT(node != nullptr, "There isn't enough remaining space in the lightmap atlas to insert the node.");
+			ENGINE_ASSERT(node != nullptr, "There's not enough remaining space in the lightmap atlas to insert the node.");
 
 			node->index = lightmapLookup.index;
 
 			uint32 coordinateIndex = 0;
 
-			while (coordinateIndex < lightmap.vertexRange.count) {
+			while (coordinateIndex < lightmap.coordinateCount) {
 				// TODO(lyah/scalar)
 				svec2<float32>& coordinate = staticGeometry.lightmapCoordinates[lightmap.coordinateOffset + coordinateIndex];
 				coordinate.x += node->rectangle.x;
 				coordinate.y += node->rectangle.y;
-				coordinate /= svec2<float32>{static_cast<float32>(LIGHTMAP_ATLAS_EXTENT.width), static_cast<float32>(LIGHTMAP_ATLAS_EXTENT.height)};
+				coordinate *= inverseAtlasExtent;
 
 				coordinateIndex += 1;
 			}

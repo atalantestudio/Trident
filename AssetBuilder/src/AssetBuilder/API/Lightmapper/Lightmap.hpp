@@ -20,9 +20,15 @@ namespace Trident {
 
 		range<uint64, uint64> vertexRange;
 		uint32 coordinateOffset;
-		svec2<float32> scale;
-		svec2<float32> maxCoordinate;
+
+		/// Lightmaps typically use 4 coordinates but the static geometry faces
+		/// might have more vertices and/or carved holes.
+		uint32 coordinateCount;
+
 		svec2<float32> minCoordinate;
+		svec2<float32> maxCoordinate;
+
+		svec2<float32> scale;
 		svec2<float32> luxelScale;
 		Extent2D size;
 	};

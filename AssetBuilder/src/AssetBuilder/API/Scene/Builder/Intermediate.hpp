@@ -6,6 +6,7 @@
 #include "Engine/Filesystem/Asset/ShaderModuleAsset.hpp"
 
 #include "AssetBuilder/API/Geometry/Geometry3D.hpp"
+#include "AssetBuilder/API/Scene/Scene3D.hpp"
 #include "AssetBuilder/API/Transform.hpp"
 
 namespace Trident {
@@ -23,11 +24,18 @@ namespace Trident {
 
 		/// Index obtained after filtering the intermediate geometries.
 		uint32 filteredIndex = max<uint32>();
+
+		/// Used if the geometry describes an array of static faces.
+		std::vector<uint32> faceIndices;
+
+		/// Only used for static props.
+		/// The bounds are computed on the texture coordinates. This usually results them being between [0, 1[.
+		AABB2D boundingBox;
 	};
 
 	struct IntermediateMaterialGeometry {
 		uint32 geometryIndex;
-		std::vector<BuildTransform3D> instances;
+		std::vector<BuildInstance> instances;
 	};
 
 	struct IntermediateMaterial {

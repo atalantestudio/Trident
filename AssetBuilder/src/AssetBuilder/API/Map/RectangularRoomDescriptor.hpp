@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "AssetBuilder/API/LightmapDescriptor.hpp"
 #include "AssetBuilder/API/Material/MaterialReference.hpp"
 
 namespace Trident {
@@ -10,5 +11,6 @@ namespace Trident {
 		svec3<float32> origin;
 		svec3<float32> size;
 		MaterialReference materialReference;
+		LightmapDescriptor lightmap;
 	};
 }

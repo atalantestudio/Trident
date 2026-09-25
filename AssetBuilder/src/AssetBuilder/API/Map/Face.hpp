@@ -4,7 +4,6 @@
 #pragma once
 
 #include "AssetBuilder/API/LightmapDescriptor.hpp"
-#include "AssetBuilder/API/Map/FaceVertex.hpp"
 #include "AssetBuilder/API/Material/MaterialReference.hpp"
 
 namespace Trident {
@@ -14,7 +13,7 @@ namespace Trident {
 	};
 
 	struct FaceDescriptor {
-		view<FaceVertex> vertices;
+		view<svec3<float32>> vertices;
 		svec3<float32> normal;
 		MaterialReference materialReference;
 		LightmapDescriptor lightmap;

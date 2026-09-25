@@ -356,8 +356,6 @@ namespace Trident {
 			const float32 centerX = (minX + maxX) * 0.5f;
 			const float32 centerY = (minY + maxY) * 0.5f;
 			const float32 centerZ = (minZ + maxZ) * 0.5f;
-			const float32 texelSizeX = width / DIRECTIONAL_SHADOW_MAP_EXTENT.width;
-			const float32 texelSizeY = height / DIRECTIONAL_SHADOW_MAP_EXTENT.height;
 
 			minX = centerX - width * 0.5f;
 			maxX = centerX + width * 0.5f;

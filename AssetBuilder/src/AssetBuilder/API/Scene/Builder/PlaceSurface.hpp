@@ -6,7 +6,105 @@
 #include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
 
 namespace Trident {
+	Face& SceneBuilder::createFace(const FaceDescriptor& descriptor) {
+		ENGINE_ASSERT(descriptor.vertices.count() >= 3, "Not enough vertices.");
+
+		const uint32 materialShaderIndex = descriptor.materialReference >> 16;
+		const uint32 materialIndex = descriptor.materialReference & 0xff;
+
+		IntermediateMaterialShader& materialShader = materialShaders[materialShaderIndex];
+
+		ENGINE_ASSERT(materialShader.asset.geometryType == GeometryType::STATIC, "Cannot bind a static geometry face to a dynamic material shader.");
+
+		IntermediateMaterial& material = materialShader.materials[materialIndex];
+
+		if (material.bakedGeometryIndex >= material.geometries.size()) {
+			const uint32 geometryIndex = static_cast<uint32>(geometries.size());
+
+			IntermediateGeometry geometry{};
+			geometry.assetIdentifier = max<uint32>();
+			geometry.sharedInstanceCount = 1;
+			geometry.staticUsage = true;
+
+			geometries.emplace_back(geometry);
+
+			const BuildTransform3D instance = {
+				.translation = {0.0f, 0.0f, 0.0f},
+				.rotation = {0.0f, 0.0f, 0.0f},
+				.scale = 1.0f,
+			};
+
+			IntermediateMaterialGeometry materialGeometry{};
+			materialGeometry.geometryIndex = geometryIndex;
+			materialGeometry.instances.emplace_back(instance);
+
+			material.bakedGeometryIndex = static_cast<uint32>(material.geometries.size());
+			material.geometries.emplace_back(materialGeometry);
+
+			materialGeometryCount += 1;
+			staticInstanceCount += 1;
+		}
+
+		const IntermediateMaterialGeometry& materialGeometry = material.geometries[material.bakedGeometryIndex];
+
+		IntermediateGeometry& geometry = geometries[materialGeometry.geometryIndex];
+
+		// TODO(asset-builder/map/geometry/face): Calculate texture transform.
+		/* const mat3x3<float32> textureTransform = (
+			mat3x3<float32>::scaling(descriptor.geometry.scale / descriptor.textureFiltering.scale) *
+			mat3x3<float32>::rotation(descriptor.textureFiltering.rotation * pi<float32>()) *
+			mat3x3<float32>::translation(descriptor.textureFiltering.translation)
+		); */
+
+		Face face{};
+		face.vertexCount = static_cast<uint32>(descriptor.vertices.count());
+		face.indexRange.offset = staticGeometryFaceVertexCount;
+		face.normal = descriptor.normal;
+		face.geometryIndex = materialGeometry.geometryIndex;
+		face.materialReference = descriptor.materialReference;
+		face.boundingBox.min = {max<float32>(), max<float32>()};
+		face.boundingBox.max = {min<float32>(), min<float32>()};
+		face.lightmap = descriptor.lightmap;
+
+		uint32 vertexIndex = 0;
+
+		while (vertexIndex < face.vertexCount) {
+			const svec3<float32> vertex = descriptor.vertices[vertexIndex];
+
+			/* const BuildVertex3D& surfaceVertex = descriptor.geometry.vertices[vertexIndex];
+			const svec3<float32> tangent = svec3<float32>(normalized(vec3<float32>(surfaceVertex.tangent[0], surfaceVertex.tangent[1], surfaceVertex.tangent[2]) * inverseOrientation));
+			const uint32 initialTextureCoordinate = pack<VertexInputAttributeFormat::R16G16_FLOAT, uint32>(surfaceVertex.textureCoordinate);
+
+			// TODO(lyah/scalar)
+			BuildVertex3D& vertex = geometry.vertices[vertexOffset + vertexIndex];
+			vertex.position = svec3<float32>(multiplyTransform(vec3<float32>(surfaceVertex.position), worldTransform));
+			vertex.normal = svec3<float32>(normalized(vec3<float32>(surfaceVertex.normal) * inverseOrientation));
+			vertex.tangent = {tangent.x, tangent.y, tangent.z, *pointer_cast<const float32*>(&initialTextureCoordinate)};
+			vertex.textureCoordinate = svec2<float32>(multiplyTransform(vec2<float32>(surfaceVertex.textureCoordinate), textureTransform)); */
+
+			facePositions[facePositionCount + vertexIndex] = vertex;
+			indices[staticGeometryFaceVertexCount + vertexIndex] = facePositionCount + vertexIndex;
+
+			vertexIndex += 1;
+		}
+
+		faces[staticGeometryFaceCount] = face;
+
+		geometry.faceIndices.emplace_back(staticGeometryFaceCount);
+
+		staticGeometryFaceVertexCount += face.vertexCount;
+		staticGeometryFaceTriangleCount += face.vertexCount - 2;
+		staticGeometryFaceCount += 1;
+		facePositionCount += face.vertexCount;
+		lightmapCount += 1;
+
+		return faces[staticGeometryFaceCount - 1];
+	}
+
 	void SceneBuilder::placeSurface(const SurfaceDescriptor& descriptor, const TransformAngleAxis3D& transform) {
+		// TODO(asset-builder/map/surface): Deprecate surfaces in favor of static geometry faces.
+		ENGINE_ERROR_UNSUPPORTED();
+
 		const uint32 materialShaderIndex = descriptor.material >> 16;
 		const uint32 materialIndex = descriptor.material & 0xff;
 
@@ -39,10 +137,13 @@ namespace Trident {
 		IntermediateGeometry& geometry = geometries[materialGeometry.geometryIndex];
 
 		if (geometry.sharedInstanceCount == 0) {
-			const BuildTransform3D instance = {
-				.translation = {0.0f, 0.0f, 0.0f},
-				.rotation = {0.0f, 0.0f, 0.0f},
-				.scale = 1.0f,
+			const BuildInstance instance = {
+				.transform = {
+					.translation = {0.0f, 0.0f, 0.0f},
+					.rotation = {0.0f, 0.0f, 0.0f},
+					.scale = 1.0f,
+				},
+				.lightmap = descriptor.lightmap,
 			};
 
 			materialGeometry.instances.emplace_back(instance);
@@ -104,29 +205,7 @@ namespace Trident {
 			indexIndex += 1;
 		}
 
-		Lightmap lightmap{};
-		lightmap.geometryIndex = materialGeometry.geometryIndex;
-		lightmap.materialIndex = static_cast<uint32>(lightmapMaterials.size());
-		lightmap.triangleRange = {static_cast<uint32>(indexOffset / 3), 2};
-		lightmap.vertexRange = {vertexOffset, surfaceVertexCount};
-		lightmap.scale = descriptor.geometry.scale;
-		lightmap.maxCoordinate = maxCoordinate;
-		lightmap.minCoordinate = minCoordinate;
-		lightmap.luxelScale = descriptor.lightmap.luxelScale;
-
-		LightmapMaterial lightmapMaterial{};
-		lightmapMaterial.emissiveColor = descriptor.lightmap.emissiveColor;
-		lightmapMaterial.emissiveIntensity = descriptor.lightmap.emissiveIntensity;
-		lightmapMaterial.albedo = descriptor.lightmap.albedo;
-
-		lightmaps.emplace_back(lightmap);
-		lightmapMaterials.emplace_back(lightmapMaterial);
-
 		bakedVertexCount += surfaceVertexCount;
 		bakedIndexCount += surfaceIndexCount;
-		staticVertexCount += surfaceVertexCount;
-		staticIndexCount += surfaceIndexCount;
-		lightmapVertexCount += surfaceVertexCount;
-		lightmapIndexCount += surfaceIndexCount;
 	}
 }

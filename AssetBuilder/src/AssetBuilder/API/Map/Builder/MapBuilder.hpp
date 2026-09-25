@@ -3,67 +3,76 @@
 
 #pragma once
 
-#include "AssetBuilder/API/Map/Face.hpp"
-#include "AssetBuilder/API/Map/FaceVertex.hpp"
-#include "AssetBuilder/API/Map/MapDescriptor.hpp"
 #include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
-#include "AssetBuilder/API/Scene/Scene3D.hpp"
 
 namespace Trident {
-	class MapBuilder : public SceneBuilder {
-		friend Face;
+	Face& SceneBuilder::getFace(uint32 index) {
+		return faces[index];
+	}
 
-		private:
-			static constexpr uint32 MAX_FACE_POSITIONS = 65535;
-			static constexpr uint32 MAX_INDICES = 65535;
-			static constexpr uint32 MAX_FACES = 256;
+	void SceneBuilder::extrudeFace(Face& face, float32 scale) {
+		if (abs(scale) < 1e-4) {
+			return;
+		}
 
-		public:
-			explicit MapBuilder(const MapDescriptor& descriptor);
+		const uint32 materialShaderIndex = face.materialReference >> 16;
+		const uint32 materialIndex = face.materialReference & 0xff;
 
-			Face& getFace(uint32 index);
+		const IntermediateMaterialShader& materialShader = materialShaders[materialShaderIndex];
+		const IntermediateMaterial& material = materialShader.materials[materialIndex];
+		const IntermediateMaterialGeometry& materialGeometry = material.geometries[material.bakedGeometryIndex];
 
-			/// Creates and returns a new face.
-			/// The face must have at least 3 vertices laid out in clockwise order.
-			/// Degenerate vertices and edge-crossing vertices are not allowed.
-			Face& createFace(view<FaceVertex> vertices, svec3<float32> normal);
+		IntermediateGeometry& geometry = geometries[materialGeometry.geometryIndex];
 
-			/// Extrudes the face `scale` units towards its normal.
-			/// This operation moves the current face and creates additional faces on the extruded sides.
-			/// 
-			/// If `scale` is 0, the operation is ignored.
-			void extrudeFace(Face& face, float32 scale);
+		vec3<float32> a = facePositions[indices[face.indexRange.offset]];
+		uint32 indexA = 0;
 
-			// TODO(asset-builder/map/carve-face): Implement face carving.
-			/// Carves a new face inside an existing face.
-			/// This operation modifies the vertices of the current face.
-			// Face& carve(view<svec3<float32>> vertices);
+		while (indexA < face.vertexCount) {
+			// TODO(lyah/scalar)
+			facePositions[facePositionCount + indexA] = svec3<float32>(a) + face.normal * scale;
 
-			BuildScene3D build();
+			const uint32 indexB = (indexA + 1) % face.vertexCount;
+			const vec3<float32> b = facePositions[indices[face.indexRange.offset + indexB]];
 
-		private:
-			void triangulateFaces(BuildScene3D& scene) const;
+			Face extrudedFace{};
+			extrudedFace.vertexCount = 4;
+			extrudedFace.indexRange.offset = staticGeometryFaceVertexCount + indexA * 4;
 
-		protected:
-			sequence<svec3<float32>> facePositions;
-			sequence<uint32> indices;
-			sequence<Face> faces;
+			// TODO(lyah/scalar)
+			extrudedFace.normal = svec3<float32>(normalized(cross(b - a, face.normal * scale)));
 
-			/// Total unique position count.
-			uint32 facePositionCount = 0;
+			extrudedFace.geometryIndex = face.geometryIndex;
+			extrudedFace.materialReference = face.materialReference;
+			extrudedFace.lightmap = face.lightmap;
+			extrudedFace.boundingBox.min = {max<float32>(), max<float32>()};
+			extrudedFace.boundingBox.max = {min<float32>(), min<float32>()};
 
-			uint32 faceIndexCount = 0;
+			indices[extrudedFace.indexRange.offset + 0] = facePositionCount + indexB;
+			indices[extrudedFace.indexRange.offset + 1] = facePositionCount + indexA;
+			indices[extrudedFace.indexRange.offset + 2] = indices[face.indexRange.offset + indexA];
+			indices[extrudedFace.indexRange.offset + 3] = indices[face.indexRange.offset + indexB];
 
-			/// Total face vertex count.
-			uint32 vertexCount = 0;
+			faces[staticGeometryFaceCount] = extrudedFace;
 
-			/// Total face triangle count.
-			uint32 triangleCount = 0;
+			geometry.faceIndices.emplace_back(staticGeometryFaceCount);
 
-			/// Total face count.
-			uint32 faceCount = 0;
+			a = b;
 
-		private:
-			MapDescriptor descriptor;
-	};
+			staticGeometryFaceCount += 1;
+			indexA += 1;
+		}
+
+		indexA = 0;
+
+		while (indexA < face.vertexCount) {
+			indices[face.indexRange.offset + indexA] = facePositionCount + indexA;
+
+			indexA += 1;
+		}
+
+		facePositionCount += face.vertexCount;
+		staticGeometryFaceVertexCount += face.vertexCount * 4;
+		staticGeometryFaceTriangleCount += face.vertexCount * 2;
+		lightmapCount += face.vertexCount;
+	}
 }

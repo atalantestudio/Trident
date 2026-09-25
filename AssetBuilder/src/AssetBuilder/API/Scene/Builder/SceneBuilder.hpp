@@ -6,6 +6,7 @@
 #include "AssetBuilder/API/Entity/EntityDescriptor.hpp"
 #include "AssetBuilder/API/Lightmapper/Lightmap.hpp"
 #include "AssetBuilder/API/Lightmapper/Lightmapper.hpp"
+#include "AssetBuilder/API/Map/Face.hpp"
 #include "AssetBuilder/API/Material/MaterialReference.hpp"
 #include "AssetBuilder/API/Mesh/MeshDescriptor.hpp"
 #include "AssetBuilder/API/Scene/Builder/Intermediate.hpp"
@@ -51,6 +52,25 @@ namespace Trident {
 
 			MaterialReference loadMaterial(ref<MaterialAsset> asset);
 
+			Face& getFace(uint32 index);
+
+			/// Creates and returns a new face.
+			/// The face must have at least 3 vertices laid out in clockwise order.
+			/// Degenerate vertices and edge-crossing vertices are not allowed.
+			Face& createFace(const FaceDescriptor& descriptor);
+
+			/// Extrudes the face `scale` units towards its normal.
+			/// This operation moves the current face and creates additional faces on the extruded sides.
+			/// 
+			/// If `scale` is 0, the operation is ignored.
+			void extrudeFace(Face& face, float32 scale);
+
+			// TODO(asset-builder/map/carve-face): Implement face carving.
+			/// Carves a new face inside an existing face.
+			/// This operation modifies the vertices of the current face.
+			// Face& carve(view<svec3<float32>> vertices);
+
+			// TODO(asset-builder/scene): Deprecate (use createFace instead).
 			void placeSurface(const SurfaceDescriptor& descriptor, const TransformAngleAxis3D& transform);
 
 			void placeStaticProp(const MeshDescriptor& descriptor);
@@ -65,11 +85,15 @@ namespace Trident {
 			uint32 findMaterialShaderIndex(uint32 assetIdentifier) const;
 			uint32 findMaterialGeometryIndex(const IntermediateMaterial& material, uint32 geometryIndex) const;
 
+			void calculateFaceBoundingBoxes(const IntermediateGeometry& intermediateGeometry);
+
+			void triangulateFaces(BuildScene3D& scene, const IntermediateGeometry& intermediateGeometry, BuildGeometry& geometry, uint32 lineIndexOffset) const;
+
 			void buildEntityComponentMappings(BuildDynamicSceneGeometry3D& dynamicGeometry);
 			void buildLights(BuildDynamicSceneGeometry3D& dynamicGeometry);
 			void buildLightmaps(BuildScene3D& scene, Lightmapper* lightmapper);
 
-			void createLightmaps(BuildStaticSceneGeometry3D& staticGeometry);
+			void createLightmaps(const BuildScene3D& scene, BuildStaticSceneGeometry3D& staticGeometry);
 			void updateLightmapCoordinates(BuildStaticSceneGeometry3D& staticGeometry);
 
 			sequence<BuildTriangle3D> createTriangleBuffer(const BuildScene3D& scene) const;
@@ -78,22 +102,32 @@ namespace Trident {
 		protected:
 			uint64 bakedVertexCount = 0;
 			uint64 bakedIndexCount = 0;
-			uint64 staticVertexCount = 0;
-			uint64 staticIndexCount = 0;
+			uint64 staticGeometryPropVertexCount = 0;
+			uint64 staticGeometryPropIndexCount = 0;
 			uint64 staticInstanceCount = 0;
 			uint64 dynamicVertexCount = 0;
 			uint64 dynamicIndexCount = 0;
-			uint64 lightmapVertexCount = 0;
-			uint64 lightmapIndexCount = 0;
 			uint64 materialGeometryCount = 0;
 			uint64 materialCount = 0;
+			uint64 lightmapCount = 0;
 			uint32 entityCount = 0;
+
+			sequence<svec3<float32>> facePositions;
+			sequence<uint32> indices;
+			sequence<Face> faces;
+
+			/// Total unique position count.
+			uint32 facePositionCount = 0;
+
+			uint32 staticGeometryFaceVertexCount = 0;
+			uint32 staticGeometryFaceTriangleCount = 0;
+			uint32 staticGeometryFaceCount = 0;
 
 			std::vector<IntermediateGeometry> geometries;
 			std::vector<IntermediateMaterialShader> materialShaders;
 
-			std::vector<Lightmap> lightmaps;
-			std::vector<LightmapMaterial> lightmapMaterials;
+			sequence<Lightmap> lightmaps;
+			sequence<LightmapMaterial> lightmapMaterials;
 
 			/// Sorted by ascending area.
 			std::vector<LightmapLookup> lightmapLookups;

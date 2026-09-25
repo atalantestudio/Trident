@@ -4,6 +4,7 @@
 #pragma once
 
 #include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
+#include "AssetBuilder/API/Utilities/Utilities.hpp"
 
 namespace Trident {
 	static bool pointInsideTriangle(vec3<float32> a, vec3<float32> b, vec3<float32> c, vec3<float32> p) {
@@ -25,6 +26,35 @@ namespace Trident {
 		return v > 0.0f && w > 0.0f;
 	}
 
+	void SceneBuilder::calculateFaceBoundingBoxes(const IntermediateGeometry& intermediateGeometry) {
+		uint32 faceIndex = 0;
+
+		while (faceIndex < intermediateGeometry.faceIndices.size()) {
+			Face& face = faces[intermediateGeometry.faceIndices[faceIndex]];
+
+			const quat<float32> R = lookAt(face.normal, {0.0f, 0.0f, -1.0f}, UP);
+
+			uint32 vertexIndex = 0;
+
+			while (vertexIndex < face.vertexCount) {
+				svec3<float32> vertex = facePositions[indices[face.indexRange.offset + vertexIndex]];
+
+				const quat<float32> q = {0.0f, vertex.x, vertex.y, vertex.z};
+
+				vertex = svec3<float32>((R * q * inverse(R)).xyz());
+
+				face.boundingBox.min.x = min(face.boundingBox.min.x, vertex.x);
+				face.boundingBox.min.y = min(face.boundingBox.min.y, vertex.y);
+				face.boundingBox.max.x = max(face.boundingBox.max.x, vertex.x);
+				face.boundingBox.max.y = max(face.boundingBox.max.y, vertex.y);
+
+				vertexIndex += 1;
+			}
+
+			faceIndex += 1;
+		}
+	}
+
 	void SceneBuilder::triangulateFaces(BuildScene3D& scene, const IntermediateGeometry& intermediateGeometry, BuildGeometry& geometry, uint32 lineIndexOffset) const {
 		uint32 vertexOffset = geometry.vertexRange.offset;
 		uint32 triangleIndexOffset = geometry.indexRange.offset;
@@ -32,20 +62,30 @@ namespace Trident {
 
 		while (faceIndex < intermediateGeometry.faceIndices.size()) {
 			const Face& face = faces[intermediateGeometry.faceIndices[faceIndex]];
+			const quat<float32> R = lookAt(face.normal, {0.0f, 0.0f, -1.0f}, UP);
+			const svec2<float32> faceSize = face.boundingBox.max - face.boundingBox.min;
 
 			geometry.vertexRange.count += face.vertexCount;
-			geometry.indexRange.count += (face.vertexCount - 2) / 3;
+			geometry.indexRange.count += (face.vertexCount - 2) * 3;
 
 			uint32 vertexIndex = 0;
 
 			while (vertexIndex < face.vertexCount) {
 				BuildVertex3D& vertex = scene.vertices[vertexOffset + vertexIndex];
 				vertex.position = facePositions[indices[face.indexRange.offset + vertexIndex]];
-				vertex.normal = face.normal;
 
-				// TODO(asset-builder/map): Calculate face tangent and vertex texture coordinates.
-				vertex.tangent = {0.0f, 0.0f, 0.0f, 0.0f};
-				vertex.textureCoordinate = {0.0f, 0.0f};
+				const quat<float32> q = {0.0f, vertex.position.x, vertex.position.y, vertex.position.z};
+				const svec3<float32> coordinate = svec3<float32>((R * q * inverse(R)).xyz());
+
+				vertex.normal = face.normal;
+				vertex.textureCoordinate = {coordinate.x, coordinate.y};
+				vertex.textureCoordinate -= face.boundingBox.min;
+				vertex.textureCoordinate /= faceSize;
+				vertex.textureCoordinate.y = 1.0f - vertex.textureCoordinate.y;
+
+				const uint32 initialTextureCoordinate = pack<VertexInputAttributeFormat::R16G16_FLOAT, uint32>(vertex.textureCoordinate);
+
+				vertex.tangent = {0.0f, 0.0f, 0.0f, *pointer_cast<const float32*>(&initialTextureCoordinate)};
 
 				// TODO(asset-builder/map/static-geometry): Restore face wireframe?
 				// scene.staticGeometry.lineIndices[lineIndexOffset + vertexIndex * 2 + 0] = face.indexRange.offset + vertexIndex;

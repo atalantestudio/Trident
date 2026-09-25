@@ -22,31 +22,45 @@ namespace Trident {
 		const float32 height = descriptor.size.y;
 		const float32 halfDepth = descriptor.size.z * 0.5f;
 
-		const FaceVertex vertices[] = {
-			{origin + svec3<float32>{-halfWidth,  height,  halfDepth}, {0.0f, 0.0f}},
-			{origin + svec3<float32>{ halfWidth,  height,  halfDepth}, {0.0f, 0.0f}},
-			{origin + svec3<float32>{ halfWidth,  height, -halfDepth}, {0.0f, 0.0f}},
-			{origin + svec3<float32>{-halfWidth,  height, -halfDepth}, {0.0f, 0.0f}},
+		const svec3<float32> vertices[] = {
+			origin + svec3<float32>{-halfWidth,  height,  halfDepth},
+			origin + svec3<float32>{ halfWidth,  height,  halfDepth},
+			origin + svec3<float32>{ halfWidth,  height, -halfDepth},
+			origin + svec3<float32>{-halfWidth,  height, -halfDepth},
 		};
 
-		Face& floorFace = createFace(vertices, {0.0f, 1.0f, 0.0f});
+		Face& floorFace = createFace({
+			.vertices = vertices,
+			.normal = {0.0f, 1.0f, 0.0f},
+			.materialReference = descriptor.materialReference,
+			.lightmap = descriptor.lightmap,
+		});
 
-		Face ceilingFace{};
+		// TODO(test): Restore the ceiling face.
+		/* Face ceilingFace{};
 		ceilingFace.vertexCount = 4;
-		ceilingFace.indexRange.offset = faceIndexCount;
+		ceilingFace.indexRange.offset = staticGeometryFaceVertexCount;
 		ceilingFace.normal = {0.0f, -1.0f, 0.0f};
+		ceilingFace.geometryIndex = floorFace.geometryIndex;
+		ceilingFace.materialReference = descriptor.materialReference;
+		ceilingFace.lightmap = descriptor.lightmap;
+		ceilingFace.boundingBox.min = {max<float32>(), max<float32>()};
+		ceilingFace.boundingBox.max = {min<float32>(), min<float32>()};
 
-		indices[faceIndexCount + 0] = indices[floorFace.indexRange.offset + 3];
-		indices[faceIndexCount + 1] = indices[floorFace.indexRange.offset + 2];
-		indices[faceIndexCount + 2] = indices[floorFace.indexRange.offset + 1];
-		indices[faceIndexCount + 3] = indices[floorFace.indexRange.offset + 0];
+		indices[staticGeometryFaceVertexCount + 0] = indices[floorFace.indexRange.offset + 3];
+		indices[staticGeometryFaceVertexCount + 1] = indices[floorFace.indexRange.offset + 2];
+		indices[staticGeometryFaceVertexCount + 2] = indices[floorFace.indexRange.offset + 1];
+		indices[staticGeometryFaceVertexCount + 3] = indices[floorFace.indexRange.offset + 0];
 
-		faces[faceCount] = ceilingFace;
+		faces[staticGeometryFaceCount] = ceilingFace;
 
-		faceIndexCount += 4;
-		vertexCount += 4;
-		triangleCount += 2;
-		faceCount += 1;
+		IntermediateGeometry& geometry = geometries[floorFace.geometryIndex];
+		geometry.faceIndices.emplace_back(staticGeometryFaceCount);
+
+		staticGeometryFaceVertexCount += 4;
+		staticGeometryFaceTriangleCount += 2;
+		staticGeometryFaceCount += 1;
+		lightmapCount += 1; */
 
 		extrudeFace(floorFace, -height);
 
