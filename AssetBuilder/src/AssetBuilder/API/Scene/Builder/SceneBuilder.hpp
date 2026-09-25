@@ -20,6 +20,9 @@
 namespace Trident {
 	class SceneBuilder {
 		public:
+			static constexpr uint32 MAX_FACE_POSITIONS = 65535;
+			static constexpr uint32 MAX_INDICES = 65535;
+			static constexpr uint32 MAX_FACES = 256;
 			static constexpr Extent2D LIGHTMAP_ATLAS_EXTENT = {1024, 1024};
 
 		public:
@@ -38,7 +41,7 @@ namespace Trident {
 			// TODO(asset-builder/scene): Remove once TSL is ready.
 			static ShaderModuleAsset getMaterialShaderModuleAsset(uint32 identifier);
 
-			static LightmapNode* insertLightmapNode(Lightmap& lightmap, LightmapNode* node);
+			static LightmapNode* insertLightmapNode(const Lightmap& lightmap, LightmapNode* node);
 
 		public:
 			explicit SceneBuilder(const Scene3DDescriptor& descriptor);

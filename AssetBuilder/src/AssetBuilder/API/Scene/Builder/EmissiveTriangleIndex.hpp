@@ -10,7 +10,7 @@ namespace Trident {
 		uint64 emissiveTriangleCount = 0;
 		uint32 lightmapIndex = 0;
 
-		while (lightmapIndex < lightmaps.size()) {
+		while (lightmapIndex < lightmaps.count()) {
 			if (lightmapMaterials[lightmapIndex].emissiveIntensity == 0.0f) {
 				lightmapIndex += 1;
 
@@ -28,7 +28,7 @@ namespace Trident {
 		emissiveTriangleCount = 0;
 		lightmapIndex = 0;
 
-		while (lightmapIndex < lightmaps.size()) {
+		while (lightmapIndex < lightmaps.count()) {
 			if (lightmapMaterials[lightmapIndex].emissiveIntensity == 0.0f) {
 				lightmapIndex += 1;
 

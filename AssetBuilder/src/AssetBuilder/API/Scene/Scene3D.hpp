@@ -12,6 +12,7 @@
 #include "Engine/Filesystem/Asset/ShaderModuleAsset.hpp"
 
 #include "AssetBuilder/API/Geometry/Geometry3D.hpp"
+#include "AssetBuilder/API/LightmapDescriptor.hpp"
 #include "AssetBuilder/API/Scene/Scene3DBuildFlags.hpp"
 #include "AssetBuilder/API/Transform.hpp"
 
@@ -39,6 +40,11 @@ namespace Trident {
 		uint32 lightmapCoordinateIndexB;
 		uint32 lightmapCoordinateIndexC;
 		uint32 materialIndex;
+	};
+
+	struct BuildInstance {
+		BuildTransform3D transform;
+		LightmapDescriptor lightmap;
 	};
 
 	struct BuildGeometry {
@@ -79,7 +85,7 @@ namespace Trident {
 		/// Baked coordinates, then coordinates from external assets.
 		sequence<svec2<float32>> lightmapCoordinates;
 
-		sequence<BuildTransform3D> instances;
+		sequence<BuildInstance> instances;
 		ImageAssetDescriptor lightmapAtlasImageAssetDescriptor;
 	};
 

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "AssetBuilder/API/Map/Builder/MapBuilder.hpp"
+#include "AssetBuilder/API/Map/Builder/LinearMapBuilder.hpp"
 #include "AssetBuilder/Process/Scene/Scene3DProcess.hpp"
 
 namespace Trident {
@@ -14,14 +14,20 @@ namespace Trident {
 			}
 
 			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
-				MapBuilder builder({
+				LinearMapBuilder builder({
+					.flags = {},
+					.skyColor = {0.6f, 0.7f, 0.9f},
 					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("evening_road_01_512p"),
-					.geometryAssets = {},
-					.staticMaterialAssets = {
-						assetLibrary->getAsset<MaterialAsset>("lm_default"),
+					.sunDirection = {1.0f, 1.0f, 1.0f},
+					.sunColor = {1.0f, 1.0f, 1.0f},
+					.sunIntensity = 1.0f,
+					.spawn = {
+						.position = {100.0f, 0.0f, 32.0f},
+						.direction = svec3<float32>(normalized(vec3<float32>{radians(-40.0_deg), 0.0f, radians(50.0_deg)})),
 					},
-					.dynamicMaterialAssets = {},
 				});
+
+				const MaterialReference material = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
 
 				/* const FaceVertex pentagonVertices[] = {
 					{{-32.0f,  32.0f,  92.0f }, {0.0f, 0.0f}},
@@ -82,7 +88,17 @@ namespace Trident {
 					{{ 384.0f,  249.0f,  128.0f}, {0.0f, 0.0f}},
 				};
 
-				builder.createFace(concaveFace2Vertices, {0.0f, 0.0f, -1.0f});
+				builder.createFace({
+					.vertices = concaveFace2Vertices,
+					.normal = {0.0f, 0.0f, -1.0f},
+					.materialReference = material,
+					.lightmap = {
+						.luxelScale = {4.0f, 4.0f},
+						.emissiveColor = {0.0f, 0.0f, 0.0f},
+						.emissiveIntensity = 0.0f,
+						.albedo = {1.0f, 0.2f, 0.0f},
+					},
+				});
 
 				return builder;
 			}

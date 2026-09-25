@@ -94,14 +94,16 @@ namespace Trident {
 					stream.write<uint32>(pack<VertexInputAttributeFormat::R16G16_UNORM, uint32>(lightmapCoordinate));
 				}
 
-				for (const BuildTransform3D& instance : scene.staticGeometry.instances) {
-					stream.write<float32>(instance.translation.x);
-					stream.write<float32>(instance.translation.y);
-					stream.write<float32>(instance.translation.z);
-					stream.write<float32>(instance.rotation.x);
-					stream.write<float32>(instance.rotation.y);
-					stream.write<float32>(instance.rotation.z);
-					stream.write<float32>(instance.scale);
+				for (const BuildInstance& instance : scene.staticGeometry.instances) {
+					const BuildTransform3D& transform = instance.transform;
+
+					stream.write<float32>(transform.translation.x);
+					stream.write<float32>(transform.translation.y);
+					stream.write<float32>(transform.translation.z);
+					stream.write<float32>(transform.rotation.x);
+					stream.write<float32>(transform.rotation.y);
+					stream.write<float32>(transform.rotation.z);
+					stream.write<float32>(transform.scale);
 				}
 
 				for (const BuildGeometry geometry : scene.geometries) {

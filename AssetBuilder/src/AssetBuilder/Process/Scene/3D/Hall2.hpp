@@ -15,17 +15,24 @@ namespace Trident {
 
 			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				LinearMapBuilder builder({
+					.flags = {},
+					.skyColor = {0.6f, 0.7f, 0.9f},
 					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("evening_road_01_512p"),
-					.geometryAssets = {},
-					.staticMaterialAssets = {
-						assetLibrary->getAsset<MaterialAsset>("lm_default"),
+					.sunDirection = {1.0f, 1.0f, 1.0f},
+					.sunColor = {1.0f, 1.0f, 1.0f},
+					.sunIntensity = 1.0f,
+					.spawn = {
+						.position = {100.0f, 0.0f, 32.0f},
+						.direction = svec3<float32>(normalized(vec3<float32>{radians(-40.0_deg), 0.0f, radians(50.0_deg)})),
 					},
-					.dynamicMaterialAssets = {},
 				});
+
+				const MaterialReference material = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
 
 				const uint32 hallRoomIndex = builder.createRectangularRoom({
 					.origin = {56.0f, 0.0f, 84.0f},
 					.size = {144.0f, 240.0f, 200.0f},
+					.materialReference = material,
 					/* .luxelScale = {4.0f, 4.0f},
 					.floorMaterialIndex = tileFloorMaterialIndex,
 					.wallMaterialIndex = plasterWallMateralIndex,
@@ -40,6 +47,7 @@ namespace Trident {
 				const uint32 bikeRoomIndex = builder.createRectangularRoom({
 					.origin = {-60.0f, 0.0f, 116.0f},
 					.size = {72.0f, 128.0f, 136.0f},
+					.materialReference = material,
 					/* .luxelScale = {4.0f, 4.0f},
 					.floorMaterialIndex = tileFloorMaterialIndex,
 					.wallMaterialIndex = plasterWallMaterialIndex,

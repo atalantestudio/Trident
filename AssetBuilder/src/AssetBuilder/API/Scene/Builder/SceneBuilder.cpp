@@ -3,6 +3,8 @@
 
 #include "pch.hpp"
 
+#include "AssetBuilder/API/Map/Builder/MapBuilder.hpp"
+#include "AssetBuilder/API/Map/Builder/TriangulateFaces.hpp"
 #include "AssetBuilder/API/Scene/Builder/Build.hpp"
 #include "AssetBuilder/API/Scene/Builder/EmissiveTriangleIndex.hpp"
 #include "AssetBuilder/API/Scene/Builder/GenerateLightmaps.hpp"
@@ -20,21 +22,11 @@
 namespace Trident {
 	ShaderModuleAsset SceneBuilder::getMaterialShaderModuleAsset(uint32 identifier) {
 		switch (identifier) {
-			case 400: {
-				return LightmappedShaderModuleAsset();
-			}
-			case 401: {
-				return LightmappedPBRShaderModuleAsset();
-			}
-			case 402: {
-				return PBRShaderModuleAsset();
-			}
-			case 403: {
-				return PBRDebugShaderModuleAsset();
-			}
-			case 404: {
-				return DDGIShaderModuleAsset();
-			}
+			case 400: return LightmappedShaderModuleAsset();
+			case 401: return LightmappedPBRShaderModuleAsset();
+			case 402: return PBRShaderModuleAsset();
+			case 403: return PBRDebugShaderModuleAsset();
+			case 404: return DDGIShaderModuleAsset();
 			default: {
 				DEBUG_ASSERT(false);
 
@@ -65,7 +57,10 @@ namespace Trident {
 	}
 
 	SceneBuilder::SceneBuilder(const Scene3DDescriptor& descriptor) :
-		descriptor(descriptor)
+		descriptor(descriptor),
+		facePositions(MAX_FACE_POSITIONS),
+		indices(MAX_INDICES),
+		faces(MAX_FACES)
 	{
 		if (descriptor.environmentMapImageAsset != nullptr) {
 			ENGINE_ASSERT(descriptor.environmentMapImageAsset->isEligibleForCubeMap(), "The environment map is not eligible for a cube map.");

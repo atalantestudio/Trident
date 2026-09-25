@@ -9,7 +9,7 @@
 
 namespace Trident {
 	// See https://blackpawn.com/texts/lightmaps.
-	LightmapNode* SceneBuilder::insertLightmapNode(Lightmap& lightmap, LightmapNode* node) {
+	LightmapNode* SceneBuilder::insertLightmapNode(const Lightmap& lightmap, LightmapNode* node) {
 		if (!node->leaf()) {
 			LightmapNode* newNode = insertLightmapNode(lightmap, node->children[0]);
 
@@ -132,7 +132,7 @@ namespace Trident {
 		rootNode.rectangle = {0, 0, LIGHTMAP_ATLAS_EXTENT.width, LIGHTMAP_ATLAS_EXTENT.height};
 
 		for (const LightmapLookup lightmapLookup : lightmapLookups) {
-			Lightmap& lightmap = lightmaps[lightmapLookup.index];
+			const Lightmap& lightmap = lightmaps[lightmapLookup.index];
 
 			LightmapNode* node = insertLightmapNode(lightmap, &rootNode);
 

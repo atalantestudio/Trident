@@ -3,9 +3,12 @@
 
 #pragma once
 
+#include "AssetBuilder/API/Material/MaterialReference.hpp"
+
 namespace Trident {
 	struct RectangularRoomDescriptor {
 		svec3<float32> origin;
 		svec3<float32> size;
+		MaterialReference materialReference;
 	};
 }

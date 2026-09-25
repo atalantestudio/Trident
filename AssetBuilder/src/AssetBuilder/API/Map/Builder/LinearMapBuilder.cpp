@@ -6,13 +6,16 @@
 #include "AssetBuilder/API/Map/Builder/LinearMapBuilder.hpp"
 
 namespace Trident {
-	LinearMapBuilder::LinearMapBuilder(const MapDescriptor& descriptor) :
-		MapBuilder(descriptor)
-	{}
-
 	uint32 LinearMapBuilder::createRectangularRoom(const RectangularRoomDescriptor& descriptor) {
 		Room room{};
-		room.faceIndices = {faceCount + 0, faceCount + 1, faceCount + 2, faceCount + 3, faceCount + 4, faceCount + 5};
+		room.faceIndices = {
+			staticGeometryFaceCount + 0,
+			staticGeometryFaceCount + 1,
+			staticGeometryFaceCount + 2,
+			staticGeometryFaceCount + 3,
+			staticGeometryFaceCount + 4,
+			staticGeometryFaceCount + 5,
+		};
 
 		const svec3<float32> origin = descriptor.origin;
 		const float32 halfWidth = descriptor.size.x * 0.5f;

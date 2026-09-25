@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "AssetBuilder/API/Map/Builder/MapBuilder.hpp"
+#include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
 
 namespace Trident {
 	static bool pointInsideTriangle(vec3<float32> a, vec3<float32> b, vec3<float32> c, vec3<float32> p) {
@@ -25,14 +25,16 @@ namespace Trident {
 		return v > 0.0f && w > 0.0f;
 	}
 
-	void MapBuilder::triangulateFaces(BuildScene3D& scene) const {
+	void SceneBuilder::triangulateFaces(BuildScene3D& scene, const IntermediateGeometry& intermediateGeometry, BuildGeometry& geometry, uint32 lineIndexOffset) const {
+		uint32 vertexOffset = geometry.vertexRange.offset;
+		uint32 triangleIndexOffset = geometry.indexRange.offset;
 		uint32 faceIndex = 0;
-		uint32 vertexOffset = 0;
-		uint32 triangleIndexOffset = 0;
-		uint32 lineIndexOffset = 0;
 
-		while (faceIndex < faceCount) {
-			const Face& face = faces[faceIndex];
+		while (faceIndex < intermediateGeometry.faceIndices.size()) {
+			const Face& face = faces[intermediateGeometry.faceIndices[faceIndex]];
+
+			geometry.vertexRange.count += face.vertexCount;
+			geometry.indexRange.count += (face.vertexCount - 2) / 3;
 
 			uint32 vertexIndex = 0;
 
@@ -45,8 +47,9 @@ namespace Trident {
 				vertex.tangent = {0.0f, 0.0f, 0.0f, 0.0f};
 				vertex.textureCoordinate = {0.0f, 0.0f};
 
-				scene.staticGeometry.lineIndices[lineIndexOffset + vertexIndex * 2 + 0] = face.indexRange.offset + vertexIndex;
-				scene.staticGeometry.lineIndices[lineIndexOffset + vertexIndex * 2 + 1] = face.indexRange.offset + (vertexIndex + 1) % face.vertexCount;
+				// TODO(asset-builder/map/static-geometry): Restore face wireframe?
+				// scene.staticGeometry.lineIndices[lineIndexOffset + vertexIndex * 2 + 0] = face.indexRange.offset + vertexIndex;
+				// scene.staticGeometry.lineIndices[lineIndexOffset + vertexIndex * 2 + 1] = face.indexRange.offset + (vertexIndex + 1) % face.vertexCount;
 
 				vertexIndex += 1;
 			}
@@ -84,7 +87,7 @@ namespace Trident {
 
 					const float32 abc = dot(cross(b - a, face.normal), c - b);
 
-					ENGINE_TRACE("[]/[]/[], angle = []", indexA, indexB, indexC, abc);
+					// ENGINE_TRACE("[]/[]/[], angle = []", indexA, indexB, indexC, abc);
 
 					if (abc >= 0.0f) {
 						indexOffset += 1;

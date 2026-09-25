@@ -3,14 +3,14 @@
 
 #pragma once
 
-#include "AssetBuilder/API/Map/Builder/MapBuilder.hpp"
 #include "AssetBuilder/API/Map/RectangularRoomDescriptor.hpp"
 #include "AssetBuilder/API/Map/Room.hpp"
+#include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
 
 namespace Trident {
-	class LinearMapBuilder : public MapBuilder {
+	class LinearMapBuilder : public SceneBuilder {
 		public:
-			explicit LinearMapBuilder(const MapDescriptor& descriptor);
+			using SceneBuilder::SceneBuilder;
 
 			/// Creates a rectangular room and returns its index.
 			uint32 createRectangularRoom(const RectangularRoomDescriptor& descriptor);

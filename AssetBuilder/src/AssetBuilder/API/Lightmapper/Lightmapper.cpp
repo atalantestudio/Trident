@@ -325,7 +325,7 @@ namespace Trident {
 						while (instanceOffset < materialGeometry.instanceRange.count) {
 							const uint32 instanceIndex = materialGeometry.instanceRange.offset + instanceOffset;
 
-							const BuildTransform3D& transform = scene.staticGeometry.instances[instanceIndex];
+							const BuildTransform3D& transform = scene.staticGeometry.instances[instanceIndex].transform;
 							const quat<float32> orientation = normalized(
 								quat<float32>::axisAngle(UP, transform.rotation[1]) *
 								quat<float32>::axisAngle(RIGHT, transform.rotation[0]) *

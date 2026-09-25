@@ -10,7 +10,7 @@ namespace Trident {
 		uint64 triangleCount = 0;
 		uint32 lightmapIndex = 0;
 
-		while (lightmapIndex < lightmaps.size()) {
+		while (lightmapIndex < lightmaps.count()) {
 			const Lightmap& lightmap = lightmaps[lightmapIndex];
 
 			triangleCount += lightmap.triangleRange.count;
@@ -22,7 +22,7 @@ namespace Trident {
 
 		lightmapIndex = 0;
 
-		while (lightmapIndex < lightmaps.size()) {
+		while (lightmapIndex < lightmaps.count()) {
 			const Lightmap& lightmap = lightmaps[lightmapIndex];
 			const BuildGeometry& geometry = scene.geometries[geometries[lightmap.geometryIndex].filteredIndex];
 
