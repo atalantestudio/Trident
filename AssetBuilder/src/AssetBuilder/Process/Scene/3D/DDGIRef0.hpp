@@ -8,96 +8,11 @@
 namespace Trident {
 	class DDGIRef0Scene3D final : public Scene3DProcess {
 		private:
-			static BuildStaticGeometry3D createGeometry(view<svec3<float32>> positions) {
-				const vec3<float32> ab = positions[1] - positions[0];
-				const vec3<float32> ac = positions[2] - positions[0];
-				const svec3<float32> normal = svec3<float32>(normalized(cross(ab, ac)));
-				const svec2<float32> scale = {
-					length(ab),
-					length(ac),
-				};
+			static svec3<float32> calculateNormal(view<svec3<float32>> vertices) {
+				const vec3<float32> ab = vertices[1] - vertices[0];
+				const vec3<float32> ac = vertices[2] - vertices[0];
 
-				return {
-					.vertices = {
-						{positions[0], normal, { 0.0f,  0.0f,  0.0f,  0.0f}, {0.0f, 0.0f}},
-						{positions[1], normal, { 0.0f,  0.0f,  0.0f,  0.0f}, {1.0f, 0.0f}},
-						{positions[2], normal, { 0.0f,  0.0f,  0.0f,  0.0f}, {0.0f, 1.0f}},
-						{positions[3], normal, { 0.0f,  0.0f,  0.0f,  0.0f}, {1.0f, 1.0f}},
-					},
-					.indices = {
-						0, 1, 2,
-						1, 3, 2,
-					},
-					.edgeOriginVertexIndices = {0, 1, 3, 2},
-					.normal = normal,
-					.scale = scale,
-				};
-			}
-
-			static BuildStaticGeometry3D createFloorGeometry(svec3<float32> origin) {
-				const svec3<float32> positions[] = {
-					origin + svec3<float32>{-64.0f, -64.0f,  64.0f},
-					origin + svec3<float32>{ 64.0f, -64.0f,  64.0f},
-					origin + svec3<float32>{-64.0f, -64.0f, -64.0f},
-					origin + svec3<float32>{ 64.0f, -64.0f, -64.0f},
-				};
-
-				return createGeometry(positions);
-			}
-
-			static BuildStaticGeometry3D createFrontWallGeometry(svec3<float32> origin) {
-				const svec3<float32> positions[] = {
-					origin + svec3<float32>{-64.0f,  64.0f,  64.0f},
-					origin + svec3<float32>{ 64.0f,  64.0f,  64.0f},
-					origin + svec3<float32>{-64.0f, -64.0f,  64.0f},
-					origin + svec3<float32>{ 64.0f, -64.0f,  64.0f},
-				};
-
-				return createGeometry(positions);
-			}
-
-			static BuildStaticGeometry3D createRightWallGeometry(svec3<float32> origin) {
-				const svec3<float32> positions[] = {
-					origin + svec3<float32>{ 64.0f,  64.0f,  64.0f},
-					origin + svec3<float32>{ 64.0f,  64.0f, -64.0f},
-					origin + svec3<float32>{ 64.0f, -64.0f,  64.0f},
-					origin + svec3<float32>{ 64.0f, -64.0f, -64.0f},
-				};
-
-				return createGeometry(positions);
-			}
-
-			static BuildStaticGeometry3D createBackWallGeometry(svec3<float32> origin) {
-				const svec3<float32> positions[] = {
-					origin + svec3<float32>{ 64.0f,  64.0f, -64.0f},
-					origin + svec3<float32>{-64.0f,  64.0f, -64.0f},
-					origin + svec3<float32>{ 64.0f, -64.0f, -64.0f},
-					origin + svec3<float32>{-64.0f, -64.0f, -64.0f},
-				};
-
-				return createGeometry(positions);
-			}
-
-			static BuildStaticGeometry3D createLeftWallGeometry(svec3<float32> origin) {
-				const svec3<float32> positions[] = {
-					origin + svec3<float32>{-64.0f,  64.0f, -64.0f},
-					origin + svec3<float32>{-64.0f,  64.0f,  64.0f},
-					origin + svec3<float32>{-64.0f, -64.0f, -64.0f},
-					origin + svec3<float32>{-64.0f, -64.0f,  64.0f},
-				};
-
-				return createGeometry(positions);
-			}
-
-			static BuildStaticGeometry3D createCeilingGeometry(svec3<float32> origin) {
-				const svec3<float32> positions[] = {
-					origin + svec3<float32>{-64.0f, 64.0f, -64.0f},
-					origin + svec3<float32>{ 64.0f, 64.0f, -64.0f},
-					origin + svec3<float32>{-64.0f, 64.0f,  64.0f},
-					origin + svec3<float32>{ 64.0f, 64.0f,  64.0f},
-				};
-
-				return createGeometry(positions);
+				return svec3<float32>(normalized(cross(ab, ac)));
 			}
 
 		protected:
@@ -106,24 +21,49 @@ namespace Trident {
 			}
 
 			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
-				static constexpr svec3<float32> origin = {0.0f, 64.0f, 164.0f};
-				static constexpr svec2<float32> luxelScale = {4.0f, 4.0f};
-				static constexpr svec3<float32> white = {1.0f, 1.0f, 1.0f};
-				static constexpr TextureFilteringDescriptor textureFiltering = {
-					.translation = {0.0f, 0.0f},
-					.rotation = 0.0f,
-					.scale = {1.0f, 1.0f},
+				static constexpr svec3<float32> FLOOR_VERTICES[] = {
+					{-64.0f,  0.0f,    228.0f},
+					{ 64.0f,  0.0f,    228.0f},
+					{ 64.0f,  0.0f,    100.0f},
+					{-64.0f,  0.0f,    100.0f},
+				};
+				static constexpr svec3<float32> CEILING_VERTICES[] = {
+					{-64.0f,  128.0f,  100.0f},
+					{ 64.0f,  128.0f,  100.0f},
+					{ 64.0f,  128.0f,  228.0f},
+					{-64.0f,  128.0f,  228.0f},
+				};
+				static constexpr svec3<float32> FRONT_WALL_VERTICES[] = {
+					{ 64.0f,  128.0f,  100.0f},
+					{-64.0f,  128.0f,  100.0f},
+					{-64.0f,  0.0f,    100.0f},
+					{ 64.0f,  0.0f,    100.0f},
+				};
+				static constexpr svec3<float32> BACK_WALL_VERTICES[] = {
+					{-64.0f,  128.0f,  228.0f},
+					{ 64.0f,  128.0f,  228.0f},
+					{ 64.0f,  0.0f,    228.0f},
+					{-64.0f,  0.0f,    228.0f},
+				};
+				static constexpr svec3<float32> LEFT_WALL_VERTICES[] = {
+					{-64.0f,  128.0f,  100.0f},
+					{-64.0f,  128.0f,  228.0f},
+					{-64.0f,  0.0f,    228.0f},
+					{-64.0f,  0.0f,    100.0f},
+				};
+				static constexpr svec3<float32> RIGHT_WALL_VERTICES[] = {
+					{ 64.0f,  128.0f,  228.0f},
+					{ 64.0f,  128.0f,  100.0f},
+					{ 64.0f,  0.0f,    100.0f},
+					{ 64.0f,  0.0f,    228.0f},
 				};
 
-				static const TransformAngleAxis3D transform = {
-					.translation = {0.0f, 0.0f, 0.0f},
-					.axis = {0.0f, 0.0f, 0.0f},
-					.angle = 0.0_rad,
-				};
+				static constexpr svec2<float32> LUXEL_SCALE = {4.0f, 4.0f};
+				static constexpr svec3<float32> WALL_COLOR = {1.0f, 1.0f, 1.0f};
 
 				SceneBuilder builder({
 					.flags = {},
-					.skyColor = {0.0f, 0.0f, 0.0f},
+					.skyColor = {1.0f, 1.0f, 1.0f},
 					.environmentMapImageAsset = nullptr,
 					.sunDirection = {1.0f, 1.0f, 1.0f},
 					.sunColor = {0.0f, 0.0f, 0.0f},
@@ -138,78 +78,60 @@ namespace Trident {
 
 				const MaterialReference material = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("ddgi"));
 
-				builder.placeSurface(
-					{
-						.geometry = createFloorGeometry(origin),
-						.material = material,
-						.textureFiltering = textureFiltering,
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = white,
-						},
+				builder.createFace({
+					.vertices = FLOOR_VERTICES,
+					.normal = calculateNormal(FLOOR_VERTICES),
+					.material = material,
+					.lightmap = {
+						.luxelScale = LUXEL_SCALE,
+						.albedo = WALL_COLOR,
 					},
-					transform
-				);
-				builder.placeSurface(
-					{
-						.geometry = createFrontWallGeometry(origin),
-						.material = material,
-						.textureFiltering = textureFiltering,
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = white,
-						},
+				});
+				builder.createFace({
+					.vertices = CEILING_VERTICES,
+					.normal = calculateNormal(CEILING_VERTICES),
+					.material = material,
+					.lightmap = {
+						.luxelScale = LUXEL_SCALE,
+						.albedo = WALL_COLOR,
 					},
-					transform
-				);
-				builder.placeSurface(
-					{
-						.geometry = createRightWallGeometry(origin),
-						.material = material,
-						.textureFiltering = textureFiltering,
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = white,
-						},
+				});
+				builder.createFace({
+					.vertices = FRONT_WALL_VERTICES,
+					.normal = calculateNormal(FRONT_WALL_VERTICES),
+					.material = material,
+					.lightmap = {
+						.luxelScale = LUXEL_SCALE,
+						.albedo = WALL_COLOR,
 					},
-					transform
-				);
-				builder.placeSurface(
-					{
-						.geometry = createBackWallGeometry(origin),
-						.material = material,
-						.textureFiltering = textureFiltering,
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = white,
-						},
+				});
+				builder.createFace({
+					.vertices = BACK_WALL_VERTICES,
+					.normal = calculateNormal(BACK_WALL_VERTICES),
+					.material = material,
+					.lightmap = {
+						.luxelScale = LUXEL_SCALE,
+						.albedo = WALL_COLOR,
 					},
-					transform
-				);
-				builder.placeSurface(
-					{
-						.geometry = createLeftWallGeometry(origin),
-						.material = material,
-						.textureFiltering = textureFiltering,
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = white,
-						},
+				});
+				builder.createFace({
+					.vertices = LEFT_WALL_VERTICES,
+					.normal = calculateNormal(LEFT_WALL_VERTICES),
+					.material = material,
+					.lightmap = {
+						.luxelScale = LUXEL_SCALE,
+						.albedo = WALL_COLOR,
 					},
-					transform
-				);
-				builder.placeSurface(
-					{
-						.geometry = createCeilingGeometry(origin),
-						.material = material,
-						.textureFiltering = textureFiltering,
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = white,
-						},
+				});
+				builder.createFace({
+					.vertices = RIGHT_WALL_VERTICES,
+					.normal = calculateNormal(RIGHT_WALL_VERTICES),
+					.material = material,
+					.lightmap = {
+						.luxelScale = LUXEL_SCALE,
+						.albedo = WALL_COLOR,
 					},
-					transform
-				);
+				});
 
 				builder.placeStaticProp({
 					.geometryIndex = boxGeometry,
