@@ -13,6 +13,13 @@ namespace Trident {
 			}
 
 			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
+				static constexpr svec3<float32> FLOOR_VERTICES[] = {
+					{-256.0f,  0.0f,  384.0f},
+					{ 256.0f,  0.0f,  384.0f},
+					{ 256.0f,  0.0f, -128.0f},
+					{-256.0f,  0.0f, -128.0f},
+				};
+
 				SceneBuilder builder({
 					.flags = {},
 					.skyColor = {0.6f, 0.7f, 0.9f},
@@ -30,26 +37,15 @@ namespace Trident {
 
 				const MaterialReference material = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
 
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({512.0f, 512.0f}),
-						.material = material,
-						.textureFiltering = {
-							.translation = {0.0f, 0.0f},
-							.rotation = 0.0f,
-							.scale = {1.0f, 1.0f},
-						},
-						.lightmap = {
-							.luxelScale = {1.0f, 1.0f},
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+				builder.createFace({
+					.vertices = FLOOR_VERTICES,
+					.normal = {0.0f, 1.0f, 0.0f},
+					.material = material,
+					.lightmap = {
+						.luxelScale = {1.0f, 1.0f},
+						.albedo = {1.0f, 1.0f, 1.0f},
 					},
-					{
-						.translation = {0.0f, 0.0f, 128.0f},
-						.axis = {1.0f, 0.0f, 0.0f},
-						.angle = radians(-90.0_deg),
-					}
-				);
+				});
 
 				builder.placeStaticProp({
 					.geometryIndex = dragonGeometry,
