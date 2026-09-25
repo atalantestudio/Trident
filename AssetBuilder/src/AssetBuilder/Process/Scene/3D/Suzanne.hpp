@@ -13,6 +13,25 @@ namespace Trident {
 			}
 
 			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
+				static constexpr svec3<float32> FLOOR_VERTICES[] = {
+					{-64.0f,  0.0f,  64.0f},
+					{ 64.0f,  0.0f,  64.0f},
+					{ 64.0f,  0.0f, -64.0f},
+					{-64.0f,  0.0f, -64.0f},
+				};
+				static constexpr svec3<float32> BACK_WALL_VERTICES[] = {
+					{-64.0f,  64.0f,  64.0f},
+					{ 64.0f,  64.0f,  64.0f},
+					{ 64.0f,  0.0f,   64.0f},
+					{-64.0f,  0.0f,   64.0f},
+				};
+				static constexpr svec3<float32> RIGHT_WALL_VERTICES[] = {
+					{ 64.0f,  64.0f,  64.0f},
+					{ 64.0f,  64.0f, -64.0f},
+					{ 64.0f,  0.0f,  -64.0f},
+					{ 64.0f,  0.0f,   64.0f},
+				};
+
 				SceneBuilder builder({
 					.flags = {},
 					.skyColor = {0.6f, 0.7f, 0.9f},
@@ -32,68 +51,33 @@ namespace Trident {
 				const MaterialReference lightmappedDefaultMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
 				const MaterialReference debugMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("debug"));
 
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({128.0f, 128.0f}),
-						.material = lightmappedDefaultMaterial,
-						.textureFiltering = {
-							.translation = {0.0f, 0.0f},
-							.rotation = 0.0f,
-							.scale = {1.0f, 1.0f},
-						},
-						.lightmap = {
-							.luxelScale = {4.0f, 4.0f},
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+				builder.createFace({
+					.vertices = FLOOR_VERTICES,
+					.normal = {0.0f, 1.0f, 0.0f},
+					.material = lightmappedDefaultMaterial,
+					.lightmap = {
+						.luxelScale = {1.0f, 1.0f},
+						.albedo = {1.0f, 1.0f, 1.0f},
 					},
-					{
-						.translation = {0.0f, 0.0f, 0.0f},
-						.axis = {1.0f, 0.0f, 0.0f},
-						.angle = radians(-90.0_deg),
-					}
-				);
-
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({128.0f, 64.0f}),
-						.material = lightmappedDefaultMaterial,
-						.textureFiltering = {
-							.translation = {0.0f, 0.0f},
-							.rotation = 0.0f,
-							.scale = {1.0f, 1.0f},
-						},
-						.lightmap = {
-							.luxelScale = {4.0f, 4.0f},
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+				});
+				builder.createFace({
+					.vertices = BACK_WALL_VERTICES,
+					.normal = {0.0f, 0.0f, -1.0f},
+					.material = lightmappedDefaultMaterial,
+					.lightmap = {
+						.luxelScale = {1.0f, 1.0f},
+						.albedo = {1.0f, 1.0f, 1.0f},
 					},
-					{
-						.translation = {0.0f, 32.0f, 64.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = 0.0_rad,
-					}
-				);
-
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({128.0f, 64.0f}),
-						.material = lightmappedDefaultMaterial,
-						.textureFiltering = {
-							.translation = {0.0f, 0.0f},
-							.rotation = 0.0f,
-							.scale = {1.0f, 1.0f},
-						},
-						.lightmap = {
-							.luxelScale = {4.0f, 4.0f},
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+				});
+				builder.createFace({
+					.vertices = RIGHT_WALL_VERTICES,
+					.normal = {-1.0f, 0.0f, 0.0f},
+					.material = lightmappedDefaultMaterial,
+					.lightmap = {
+						.luxelScale = {1.0f, 1.0f},
+						.albedo = {1.0f, 1.0f, 1.0f},
 					},
-					{
-						.translation = {64.0f, 32.0f, 0.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = radians(-90.0_deg),
-					}
-				);
+				});
 
 				builder.placeStaticProp({
 					.geometryIndex = suzanneGeometry,
