@@ -15,7 +15,7 @@ namespace Trident {
 	struct FaceDescriptor {
 		view<svec3<float32>> vertices;
 		svec3<float32> normal;
-		MaterialReference materialReference;
+		MaterialReference material;
 		LightmapDescriptor lightmap;
 	};
 
@@ -28,7 +28,7 @@ namespace Trident {
 
 		svec3<float32> normal;
 		uint32 geometryIndex;
-		MaterialReference materialReference;
+		MaterialReference material;
 		LightmapDescriptor lightmap;
 		AABB2D boundingBox;
 	};

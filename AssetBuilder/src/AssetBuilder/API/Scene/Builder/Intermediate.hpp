@@ -19,6 +19,7 @@ namespace Trident {
 
 		bool staticUsage = false;
 
+		/// Only used for static props.
 		sequence<BuildVertex3D> vertices;
 		sequence<uint32> indices;
 

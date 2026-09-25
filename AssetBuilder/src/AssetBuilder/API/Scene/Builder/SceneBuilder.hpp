@@ -30,15 +30,6 @@ namespace Trident {
 			static BuildStaticGeometry3D createWallGeometry(svec2<float32> scale);
 
 		private:
-			template<typename T>
-			static void resizeBuffer(sequence<T>& buffer, uint64 additionalCount) {
-				sequence<T> resizedBuffer(buffer.count() + additionalCount);
-
-				std::copy(buffer.begin(), buffer.end(), &resizedBuffer[0]);
-
-				buffer = resizedBuffer;
-			}
-
 			// TODO(asset-builder/scene): Remove once TSL is ready.
 			static ShaderModuleAsset getMaterialShaderModuleAsset(uint32 identifier);
 

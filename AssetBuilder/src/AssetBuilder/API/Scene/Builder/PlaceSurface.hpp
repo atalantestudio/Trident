@@ -9,8 +9,8 @@ namespace Trident {
 	Face& SceneBuilder::createFace(const FaceDescriptor& descriptor) {
 		ENGINE_ASSERT(descriptor.vertices.count() >= 3, "Not enough vertices.");
 
-		const uint32 materialShaderIndex = descriptor.materialReference >> 16;
-		const uint32 materialIndex = descriptor.materialReference & 0xff;
+		const uint32 materialShaderIndex = descriptor.material >> 16;
+		const uint32 materialIndex = descriptor.material & 0xff;
 
 		IntermediateMaterialShader& materialShader = materialShaders[materialShaderIndex];
 
@@ -61,7 +61,7 @@ namespace Trident {
 		face.indexRange.offset = staticGeometryFaceVertexCount;
 		face.normal = descriptor.normal;
 		face.geometryIndex = materialGeometry.geometryIndex;
-		face.materialReference = descriptor.materialReference;
+		face.material = descriptor.material;
 		face.boundingBox.min = {max<float32>(), max<float32>()};
 		face.boundingBox.max = {min<float32>(), min<float32>()};
 		face.lightmap = descriptor.lightmap;
@@ -156,9 +156,6 @@ namespace Trident {
 		const uint64 surfaceIndexCount = descriptor.geometry.indices.count();
 		const uint32 vertexOffset = static_cast<uint32>(geometry.vertices.count());
 		const uint64 indexOffset = geometry.indices.count();
-
-		resizeBuffer(geometry.vertices, surfaceVertexCount);
-		resizeBuffer(geometry.indices, surfaceIndexCount);
 
 		const quat<float32> orientation = quat<float32>::axisAngle(transform.axis, transform.angle);
 		const quat<float32> inverseOrientation = inverse(orientation);

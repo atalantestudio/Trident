@@ -10,7 +10,7 @@ namespace Trident {
 	struct RectangularRoomDescriptor {
 		svec3<float32> origin;
 		svec3<float32> size;
-		MaterialReference materialReference;
+		MaterialReference material;
 		LightmapDescriptor lightmap;
 	};
 }

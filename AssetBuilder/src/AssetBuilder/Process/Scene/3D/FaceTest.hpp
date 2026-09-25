@@ -91,7 +91,7 @@ namespace Trident {
 				builder.createFace({
 					.vertices = concaveFace2Vertices,
 					.normal = {0.0f, 0.0f, -1.0f},
-					.materialReference = material,
+					.material = material,
 					.lightmap = {
 						.luxelScale = {4.0f, 4.0f},
 						.emissiveColor = {0.0f, 0.0f, 0.0f},

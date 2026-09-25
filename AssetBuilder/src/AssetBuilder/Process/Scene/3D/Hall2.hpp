@@ -32,7 +32,7 @@ namespace Trident {
 				const uint32 hallRoomIndex = builder.createRectangularRoom({
 					.origin = {56.0f, 0.0f, 84.0f},
 					.size = {144.0f, 240.0f, 200.0f},
-					.materialReference = material,
+					.material = material,
 					/* .luxelScale = {4.0f, 4.0f},
 					.floorMaterialIndex = tileFloorMaterialIndex,
 					.wallMaterialIndex = plasterWallMateralIndex,
@@ -47,7 +47,7 @@ namespace Trident {
 				const uint32 bikeRoomIndex = builder.createRectangularRoom({
 					.origin = {-60.0f, 0.0f, 116.0f},
 					.size = {72.0f, 128.0f, 136.0f},
-					.materialReference = material,
+					.material = material,
 					/* .luxelScale = {4.0f, 4.0f},
 					.floorMaterialIndex = tileFloorMaterialIndex,
 					.wallMaterialIndex = plasterWallMaterialIndex,

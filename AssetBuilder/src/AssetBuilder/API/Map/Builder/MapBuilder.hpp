@@ -15,8 +15,8 @@ namespace Trident {
 			return;
 		}
 
-		const uint32 materialShaderIndex = face.materialReference >> 16;
-		const uint32 materialIndex = face.materialReference & 0xff;
+		const uint32 materialShaderIndex = face.material >> 16;
+		const uint32 materialIndex = face.material & 0xff;
 
 		const IntermediateMaterialShader& materialShader = materialShaders[materialShaderIndex];
 		const IntermediateMaterial& material = materialShader.materials[materialIndex];
@@ -42,7 +42,7 @@ namespace Trident {
 			extrudedFace.normal = svec3<float32>(normalized(cross(b - a, face.normal * scale)));
 
 			extrudedFace.geometryIndex = face.geometryIndex;
-			extrudedFace.materialReference = face.materialReference;
+			extrudedFace.material = face.material;
 			extrudedFace.lightmap = face.lightmap;
 			extrudedFace.boundingBox.min = {max<float32>(), max<float32>()};
 			extrudedFace.boundingBox.max = {min<float32>(), min<float32>()};

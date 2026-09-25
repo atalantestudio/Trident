@@ -32,7 +32,7 @@ namespace Trident {
 		Face& floorFace = createFace({
 			.vertices = vertices,
 			.normal = {0.0f, 1.0f, 0.0f},
-			.materialReference = descriptor.materialReference,
+			.material = descriptor.material,
 			.lightmap = descriptor.lightmap,
 		});
 
@@ -42,7 +42,7 @@ namespace Trident {
 		ceilingFace.indexRange.offset = staticGeometryFaceVertexCount;
 		ceilingFace.normal = {0.0f, -1.0f, 0.0f};
 		ceilingFace.geometryIndex = floorFace.geometryIndex;
-		ceilingFace.materialReference = descriptor.materialReference;
+		ceilingFace.material = descriptor.material;
 		ceilingFace.lightmap = descriptor.lightmap;
 		ceilingFace.boundingBox.min = {max<float32>(), max<float32>()};
 		ceilingFace.boundingBox.max = {min<float32>(), min<float32>()};
