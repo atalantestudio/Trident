@@ -95,7 +95,7 @@ namespace Trident {
 				#endif
 
 				camera.aspectRatio = getApplication()->getWindow()->getAspectRatio();
-				camera.setOrientation(camera.lookAt(sceneAsset->spawnDirection));
+				camera.setOrientation(lookAt(FORWARD, sceneAsset->spawnDirection, UP));
 
 				cameraController.updateProjection();
 

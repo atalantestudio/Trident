@@ -652,6 +652,31 @@ namespace Trident {
 		};
 	}
 
+	/// See https://stackoverflow.com/a/17654730/17136841.
+	inline quat<float32> lookAt(vec3<float32> previousDirection, vec3<float32> direction, vec3<float32> up) {
+		static constexpr float32 e = 1e-5f;
+
+		const float32 angle = dot(previousDirection, direction);
+
+		if (abs(angle + 1.0f) < e) {
+			return {pi<float32>(), up[0], up[1], up[2]};
+		}
+
+		if (abs(angle - 1.0f) < e) {
+			return quat<float32>::identity();
+		}
+
+		const float32 rotationAngle = acos(angle);
+
+		vec3<float32> rotationAxis = cross(previousDirection, direction);
+
+		if (lengthSquared(rotationAxis) > e) {
+			rotationAxis = normalized(rotationAxis);
+		}
+
+		return quat<float32>::axisAngle(rotationAxis, rotationAngle);
+	}
+
 	inline float32 avg(float32 a, float32 b) {
 		return (a + b) * 0.5f;
 	}
