@@ -28,11 +28,10 @@ namespace Trident {
 
 			geometries.emplace_back(geometry);
 
-			const BuildTransform3D instance = {
-				.translation = {0.0f, 0.0f, 0.0f},
-				.rotation = {0.0f, 0.0f, 0.0f},
-				.scale = 1.0f,
-			};
+			BuildTransform3D instance{};
+			instance.translation = {0.0f, 0.0f, 0.0f};
+			instance.rotation = {0.0f, 0.0f, 0.0f};
+			instance.scale = 1.0f;
 
 			IntermediateMaterialGeometry materialGeometry{};
 			materialGeometry.geometryIndex = geometryIndex;
@@ -96,6 +95,7 @@ namespace Trident {
 		staticGeometryFaceTriangleCount += face.vertexCount - 2;
 		staticGeometryFaceCount += 1;
 		facePositionCount += face.vertexCount;
+		lightmapCoordinateCount += face.vertexCount;
 		lightmapCount += 1;
 
 		return faces[staticGeometryFaceCount - 1];

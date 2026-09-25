@@ -150,10 +150,7 @@ namespace Trident {
 						lightmap.minCoordinate = geometry.boundingBox.min;
 						lightmap.maxCoordinate = geometry.boundingBox.max;
 						lightmap.vertexRange.count = lightmap.coordinateCount;
-
-						// TODO(asset-builder/lightmap): Get the correct scale from the first material image.
-						lightmap.scale = {4096.0f, 4096.0f};
-
+						lightmap.scale = instance.lightmapScale;
 						lightmap.luxelScale = instance.lightmap.luxelScale;
 
 						LightmapMaterial& lightmapMaterial = lightmapMaterials[lightmapIndex];

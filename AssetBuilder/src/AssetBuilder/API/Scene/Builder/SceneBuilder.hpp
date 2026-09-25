@@ -93,8 +93,7 @@ namespace Trident {
 		protected:
 			uint64 bakedVertexCount = 0;
 			uint64 bakedIndexCount = 0;
-			uint64 staticGeometryPropVertexCount = 0;
-			uint64 staticGeometryPropIndexCount = 0;
+			uint64 lightmapCoordinateCount = 0;
 			uint64 staticInstanceCount = 0;
 			uint64 dynamicVertexCount = 0;
 			uint64 dynamicIndexCount = 0;

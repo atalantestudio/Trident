@@ -60,6 +60,7 @@ namespace Trident {
 		staticGeometryFaceVertexCount += 4;
 		staticGeometryFaceTriangleCount += 2;
 		staticGeometryFaceCount += 1;
+		lightmapCoordinateCount += 4;
 		lightmapCount += 1; */
 
 		extrudeFace(floorFace, -height);

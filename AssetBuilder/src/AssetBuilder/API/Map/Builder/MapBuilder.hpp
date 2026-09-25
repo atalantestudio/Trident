@@ -73,6 +73,7 @@ namespace Trident {
 		facePositionCount += face.vertexCount;
 		staticGeometryFaceVertexCount += face.vertexCount * 4;
 		staticGeometryFaceTriangleCount += face.vertexCount * 2;
+		lightmapCoordinateCount += face.vertexCount;
 		lightmapCount += face.vertexCount;
 	}
 }

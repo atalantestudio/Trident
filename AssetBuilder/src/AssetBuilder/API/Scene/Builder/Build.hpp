@@ -265,13 +265,11 @@ namespace Trident {
 	}
 
 	void SceneBuilder::buildLightmaps(BuildScene3D& scene, Lightmapper* lightmapper) {
-		const uint32 lightmapVertexCount = staticGeometryFaceVertexCount + static_cast<uint32>(staticGeometryPropVertexCount);
-
-		if (lightmapVertexCount == 0) {
+		if (lightmapCoordinateCount == 0) {
 			return;
 		}
 
-		scene.staticGeometry.lightmapCoordinates = sequence<svec2<float32>>(lightmapVertexCount);
+		scene.staticGeometry.lightmapCoordinates = sequence<svec2<float32>>(lightmapCoordinateCount);
 		scene.staticGeometry.lightmapAtlasImageAssetDescriptor = {
 			.format = ImageFormat::R8G8B8A8_UNORM,
 			.extent = {LIGHTMAP_ATLAS_EXTENT.width, LIGHTMAP_ATLAS_EXTENT.height, 1},

@@ -13,6 +13,13 @@ namespace Trident {
 			}
 
 			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
+				static constexpr svec3<float32> FLOOR_VERTICES[] = {
+					{-256.0f,  0.0f,  256.0f},
+					{ 256.0f,  0.0f,  256.0f},
+					{ 256.0f,  0.0f, -256.0f},
+					{-256.0f,  0.0f, -256.0f},
+				};
+
 				SceneBuilder builder({
 					.flags = {},
 					.skyColor = {0.6f, 0.7f, 0.9f},
@@ -32,38 +39,27 @@ namespace Trident {
 				const MaterialReference lightmappedDefaultMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
 				const MaterialReference pbrDefaultMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("pbr_default"));
 
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({512.0f, 512.0f}),
-						.material = lightmappedDefaultMaterial,
-						.textureFiltering = {
-							.translation = {0.0f, 0.0f},
-							.rotation = 0.0f,
-							.scale = {1.0f, 1.0f},
-						},
-						.lightmap = {
-							.luxelScale = {1.0f, 1.0f},
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+				builder.createFace({
+					.vertices = FLOOR_VERTICES,
+					.normal = {0.0f, 1.0f, 0.0f},
+					.material = lightmappedDefaultMaterial,
+					.lightmap = {
+						.luxelScale = {1.0f, 1.0f},
+						.albedo = {1.0f, 1.0f, 1.0f},
 					},
-					{
-						.translation = {0.0f, 0.0f, 0.0f},
-						.axis = {1.0f, 0.0f, 0.0f},
-						.angle = radians(-90.0_deg),
-					}
-				);
+				});
 
-				static constexpr float32 positionBias = 2.37f;
-				static constexpr float32 spacing = 48.0f;
+				static constexpr float32 CUBE_BIAS = 2.37f;
+				static constexpr float32 CUBE_SPACING = 48.0f;
 
-				uint32 boxIndex = 0;
+				sint32 boxIndex = 0;
 
 				while (boxIndex < 4) {
 					builder.placeStaticProp({
 						.geometryIndex = boxGeometry,
 						.material = lightmappedDefaultMaterial,
 						.transform = {
-							.translation = {(static_cast<sint32>(boxIndex) - 2) * spacing + positionBias, 16.0f, 128.0f},
+							.translation = {(boxIndex - 2) * CUBE_SPACING + CUBE_BIAS, 16.0f, 128.0f},
 							.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
 							.scale = 32.0f,
 						},
@@ -80,7 +76,7 @@ namespace Trident {
 				builder.placeRigidBody({
 					.geometryIndex = boxGeometry2,
 					.material = pbrDefaultMaterial,
-					.position = {(static_cast<sint32>(boxIndex) - 2) * spacing + positionBias, 16.0f, 128.0f},
+					.position = {(boxIndex - 2) * CUBE_SPACING + CUBE_BIAS, 16.0f, 128.0f},
 					.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
 					.uniformScale = 32.0f,
 					.mass = max<float32>(),

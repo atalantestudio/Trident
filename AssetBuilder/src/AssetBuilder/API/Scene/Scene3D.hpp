@@ -45,6 +45,9 @@ namespace Trident {
 	struct BuildInstance {
 		BuildTransform3D transform;
 		LightmapDescriptor lightmap;
+
+		/// Only used for static props.
+		svec2<float32> lightmapScale;
 	};
 
 	struct BuildGeometry {

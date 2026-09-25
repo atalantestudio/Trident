@@ -27,8 +27,6 @@ namespace Trident {
 
 			material.geometries.emplace_back(materialGeometry);
 
-			staticGeometryPropVertexCount += geometry.vertices.count();
-			staticGeometryPropIndexCount += geometry.indices.count();
 			materialGeometryCount += 1;
 		}
 
@@ -37,10 +35,10 @@ namespace Trident {
 		geometry.boundingBox.max = {min<float32>(), min<float32>()};
 		geometry.boundingBox.min = {max<float32>(), max<float32>()};
 
-		const BuildInstance instance = {
-			.transform = descriptor.transform,
-			.lightmap = descriptor.lightmap,
-		};
+		BuildInstance instance{};
+		instance.transform = descriptor.transform;
+		instance.lightmap = descriptor.lightmap;
+		instance.lightmapScale = descriptor.lightmapScale;
 
 		IntermediateMaterialGeometry& materialGeometry = material.geometries[materialGeometryIndex];
 		materialGeometry.instances.emplace_back(instance);
@@ -62,6 +60,7 @@ namespace Trident {
 			vertexIndex += 1;
 		}
 
+		lightmapCoordinateCount += geometry.vertices.count();
 		staticInstanceCount += 1;
 		lightmapCount += 1;
 	}
