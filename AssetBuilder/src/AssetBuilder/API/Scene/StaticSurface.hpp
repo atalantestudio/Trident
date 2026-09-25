@@ -29,13 +29,6 @@ namespace Trident {
 		std::vector<Carving> carvings;
 	};
 
-	struct DualSnapSurfaceDescriptor {
-		TextureFilteringDescriptor textureFiltering;
-		uint32 materialIndex;
-		LightmapDescriptor lightmap;
-		std::vector<Carving> carvings;
-	};
-
 	struct StaticEdge {
 		/// Vertices in world space.
 		vec3<float32> a;
