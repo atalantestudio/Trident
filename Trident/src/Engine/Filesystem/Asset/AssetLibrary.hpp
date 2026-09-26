@@ -5,10 +5,12 @@
 
 #include "Engine/Filesystem/Asset/AssetMap.hpp"
 #include "Engine/Filesystem/Asset/FontAsset.hpp"
-#include "Engine/Filesystem/Asset/GeometryAsset.hpp"
+#include "Engine/Filesystem/Asset/Geometry2DAsset.hpp"
+#include "Engine/Filesystem/Asset/Geometry3DAsset.hpp"
 #include "Engine/Filesystem/Asset/ImageAsset.hpp"
 #include "Engine/Filesystem/Asset/MaterialAsset.hpp"
-#include "Engine/Filesystem/Asset/SceneAsset.hpp"
+#include "Engine/Filesystem/Asset/Scene2DAsset.hpp"
+#include "Engine/Filesystem/Asset/Scene3DAsset.hpp"
 #include "Engine/Filesystem/Asset/ShaderModuleAsset.hpp"
 #include "Engine/Filesystem/Stream/ByteStream.hpp"
 

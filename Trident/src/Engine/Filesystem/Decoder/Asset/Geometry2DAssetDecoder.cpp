@@ -3,7 +3,7 @@
 
 #include "pch.hpp"
 
-#include "Engine/Filesystem/Asset/GeometryAsset.hpp"
+#include "Engine/Filesystem/Asset/Geometry2DAsset.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 
 namespace Trident {

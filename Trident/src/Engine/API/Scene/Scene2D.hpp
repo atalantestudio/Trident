@@ -6,7 +6,7 @@
 #include "Engine/API/Geometry/Geometry2D.hpp"
 #include "Engine/API/Geometry/Hull2D.hpp"
 #include "Engine/API/Scene/Scene.hpp"
-#include "Engine/Filesystem/Asset/SceneAsset.hpp"
+#include "Engine/Filesystem/Asset/Scene2DAsset.hpp"
 
 namespace Trident {
 	class Scene2D : public Scene {

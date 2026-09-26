@@ -7,35 +7,14 @@
 #include "Engine/API/Light/PointLight.hpp"
 #include "Engine/API/Material/Material.hpp"
 #include "Engine/API/Material/MaterialShader.hpp"
-#include "Engine/API/Scene/StaticTriangle2D.hpp"
 #include "Engine/ECS/Component/GeometryComponent.hpp"
-#include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 #include "Engine/ECS/Component/RigidBody3DComponent.hpp"
 #include "Engine/ECS/EntityComponentMapping.hpp"
 #include "Engine/Filesystem/Asset/Asset.hpp"
-#include "Engine/Filesystem/Asset/GeometryAsset.hpp"
+#include "Engine/Filesystem/Asset/Geometry3DAsset.hpp"
 #include "Engine/Filesystem/Asset/ImageAsset.hpp"
 
 namespace Trident {
-	struct Scene2DAsset : public Asset {
-		sequence<uint8> staticGeometryBuffer;
-		sequence<ref<Geometry2DAsset>> geometryAssets;
-		sequence<StaticTriangle2D> staticTriangles;
-		sequence<svec2<float32>> staticVertices;
-		sequence<svec2<float32>> staticTextureCoordinates;
-
-		/// Also contains the line indices of the hulls.
-		uint64 dynamicVertexPositionCount;
-
-		uint64 dynamicVertexTextureCoordinateCount;
-		uint64 dynamicVertexPositionIndexCount;
-		uint64 dynamicVertexTextureCoordinateIndexCount;
-		uint32 entityCount;
-		uint32 hullCount;
-		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
-		sequence<EntityComponentMapping<RigidBody2DComponent>> rigidBodyMappings;
-	};
-
 	struct Scene3DAsset : public Asset {
 		svec3<float32> skyColor;
 		ref<ImageAsset> skyboxImageAsset;

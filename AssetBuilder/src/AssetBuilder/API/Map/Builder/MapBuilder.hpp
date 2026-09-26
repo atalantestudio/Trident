@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Light/PointLight.hpp"
-#include "Engine/Filesystem/Asset/GeometryAsset.hpp"
+#include "Engine/Filesystem/Asset/Geometry3DAsset.hpp"
 #include "Engine/Filesystem/Asset/MaterialAsset.hpp"
 #include "Engine/Filesystem/Asset/ShaderModuleAsset.hpp"
 

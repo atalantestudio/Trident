@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/Filesystem/Asset/SceneAsset.hpp"
+#include "Engine/Filesystem/Asset/Scene3DAsset.hpp"
 #include "Engine/Renderer/3D/SceneRenderer.hpp"
 
 namespace Trident {

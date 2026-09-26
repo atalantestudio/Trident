@@ -7,7 +7,7 @@
 #include "Engine/API/Geometry/Hull3D.hpp"
 #include "Engine/API/Scene/Scene.hpp"
 #include "Engine/Filesystem/Asset/MaterialAsset.hpp"
-#include "Engine/Filesystem/Asset/SceneAsset.hpp"
+#include "Engine/Filesystem/Asset/Scene3DAsset.hpp"
 
 namespace Trident {
 	class Scene3D : public Scene {

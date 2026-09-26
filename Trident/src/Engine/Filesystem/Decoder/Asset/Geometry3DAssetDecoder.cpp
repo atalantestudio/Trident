@@ -3,7 +3,7 @@
 
 #include "pch.hpp"
 
-#include "Engine/Filesystem/Asset/GeometryAsset.hpp"
+#include "Engine/Filesystem/Asset/Geometry3DAsset.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Filesystem/Stream/BitStream.hpp"
 

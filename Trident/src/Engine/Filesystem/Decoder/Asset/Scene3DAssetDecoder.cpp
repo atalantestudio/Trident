@@ -5,7 +5,7 @@
 
 #include "Engine/API/Geometry/Index.hpp"
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
-#include "Engine/Filesystem/Asset/SceneAsset.hpp"
+#include "Engine/Filesystem/Asset/Scene3DAsset.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Filesystem/Stream/ByteStream.hpp"
 
