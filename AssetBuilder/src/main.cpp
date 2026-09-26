@@ -58,7 +58,7 @@
 #include "AssetBuilder/Process/Scene/3D/FaceTest.hpp"
 #include "AssetBuilder/Process/Scene/3D/GallineraTable.hpp"
 #include "AssetBuilder/Process/Scene/3D/Hall.hpp"
-#include "AssetBuilder/Process/Scene/3D/Hall2.hpp"
+#include "AssetBuilder/Process/Scene/3D/HallReference.hpp"
 #include "AssetBuilder/Process/Scene/3D/Lemons.hpp"
 #include "AssetBuilder/Process/Scene/3D/LightmapTest.hpp"
 #include "AssetBuilder/Process/Scene/3D/PBRTest.hpp"
@@ -169,8 +169,8 @@ namespace Trident {
 				registerProcess<EdgeContactScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<FaceTestScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<GallineraTableScene3D>(&assetLibrary, &lightmapper);
-				registerProcess<HallScene3D>(&assetLibrary, &lightmapper);
-				registerProcess<Hall2Scene3D>(&assetLibrary, &lightmapper);
+				registerProcess<HallMap>(&assetLibrary, &lightmapper);
+				registerProcess<HallReferenceMap>(&assetLibrary, &lightmapper);
 				registerProcess<LemonsScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<LightmapTestScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<PBRTestScene3D>(&assetLibrary, &lightmapper);
