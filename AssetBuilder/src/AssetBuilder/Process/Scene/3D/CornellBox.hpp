@@ -23,7 +23,6 @@ namespace Trident {
 			}
 
 			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
-				static constexpr float32 LIGHT_BIAS = 0.01f;
 				static constexpr float32 SHORT_BLOCK_HEIGHT = 165.0f;
 				static constexpr float32 TALL_BLOCK_HEIGHT = 330.0f;
 				static constexpr svec2<float32> LUXEL_SCALE = {4.0f, 4.0f};
@@ -32,38 +31,38 @@ namespace Trident {
 				static constexpr svec3<float32> RIGHT_WALL_COLOR = {0.14f, 0.45f, 0.091f};
 				static constexpr svec3<float32> ROOM_COLOR = {0.725f, 0.71f, 0.68f};
 				static constexpr svec3<float32> VERTICES[] = {
-					{-549.6f,  0.0f,  559.2f},
-					{ 0.0f,    0.0f,  559.2f},
-					{ 0.0f,    0.0f,  0.0f  },
-					{-552.8f,  0.0f,  0.0f  },
-					{-343.0f,  548.8f - LIGHT_BIAS,  227.0f},
-					{-213.0f,  548.8f - LIGHT_BIAS,  227.0f},
-					{-213.0f,  548.8f - LIGHT_BIAS,  332.0f},
-					{-343.0f,  548.8f - LIGHT_BIAS,  332.0f},
-					{-556.0f,  548.8f,  0.0f  },
-					{ 0.0f,    548.8f,  0.0f  },
-					{ 0.0f,    548.8f,  559.2f},
-					{-556.0f,  548.8f,  559.2f},
-					{-556.0f,  548.8f,  559.2f},
-					{ 0.0f,    548.8f,  559.2f},
-					{ 0.0f,    0.0f,    559.2f},
-					{-549.6f,  0.0f,    559.2f},
-					{-556.0f,  548.8f,  0.0f  },
-					{-556.0f,  548.8f,  559.2f},
-					{-549.6f,  0.0f,    559.2f},
-					{-552.8f,  0.0f,    0.0f  },
-					{ 0.0f,  548.8f,  559.2f},
-					{ 0.0f,  548.8f,  0.0f  },
-					{ 0.0f,  0.0f,    0.0f  },
-					{ 0.0f,  0.0f,    559.2f},
-					{-240.0f,  0.0f,  272.0f},
-					{-82.0f,   0.0f,  225.0f},
-					{-130.0f,  0.0f,  65.0f },
-					{-290.0f,  0.0f,  114.0f},
-					{-472.0f,  0.0f,  406.0f},
-					{-314.0f,  0.0f,  456.0f},
-					{-265.0f,  0.0f,  296.0f},
-					{-423.0f,  0.0f,  247.0f},
+					{-549.6f,  0.0f,     559.2f},
+					{ 0.0f,    0.0f,     559.2f},
+					{ 0.0f,    0.0f,     0.0f  },
+					{-552.8f,  0.0f,     0.0f  },
+					{-343.0f,  548.79f,  227.0f},
+					{-213.0f,  548.79f,  227.0f},
+					{-213.0f,  548.79f,  332.0f},
+					{-343.0f,  548.79f,  332.0f},
+					{-556.0f,  548.8f,   0.0f  },
+					{ 0.0f,    548.8f,   0.0f  },
+					{ 0.0f,    548.8f,   559.2f},
+					{-556.0f,  548.8f,   559.2f},
+					{-556.0f,  548.8f,   559.2f},
+					{ 0.0f,    548.8f,   559.2f},
+					{ 0.0f,    0.0f,     559.2f},
+					{-549.6f,  0.0f,     559.2f},
+					{-556.0f,  548.8f,   0.0f  },
+					{-556.0f,  548.8f,   559.2f},
+					{-549.6f,  0.0f,     559.2f},
+					{-552.8f,  0.0f,     0.0f  },
+					{ 0.0f,    548.8f,   559.2f},
+					{ 0.0f,    548.8f,   0.0f  },
+					{ 0.0f,    0.0f,     0.0f  },
+					{ 0.0f,    0.0f,     559.2f},
+					{-240.0f,  0.0f,     272.0f},
+					{-82.0f,   0.0f,     225.0f},
+					{-130.0f,  0.0f,     65.0f },
+					{-290.0f,  0.0f,     114.0f},
+					{-472.0f,  0.0f,     406.0f},
+					{-314.0f,  0.0f,     456.0f},
+					{-265.0f,  0.0f,     296.0f},
+					{-423.0f,  0.0f,     247.0f},
 				};
 				static constexpr view<svec3<float32>> FLOOR_VERTICES(&VERTICES[0], 4);
 				static constexpr view<svec3<float32>> LIGHT_VERTICES(&VERTICES[4], 4);

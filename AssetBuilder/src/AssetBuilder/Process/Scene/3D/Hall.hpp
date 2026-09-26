@@ -13,35 +13,119 @@ namespace Trident {
 			}
 
 			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
-				static constexpr svec2<float32> LUXEL_SCALE = {1.0f, 1.0f};
-				static constexpr svec3<float32> DEFAULT_ALBEDO = {1.0f, 1.0f, 1.0f};
+				static constexpr LightmapDescriptor LIGHTMAP = {
+					.luxelScale = {1.0f, 1.0f},
+					.emissiveColor = {0.0f, 0.0f, 0.0f},
+					.emissiveIntensity = 0.0f,
+					.albedo = {1.0f, 1.0f, 1.0f},
+				};
 				static constexpr svec3<float32> VERTICES[] = {
-					{-16.0f,   0.0f,  184.0f},
-					{ 128.0f,  0.0f,  184.0f},
-					{ 128.0f,  0.0f, -16.0f},
-					{-16.0f,   0.0f, -16.0f},
-					{-24.0f,  0.0f,  152.0f},
-					{-16.0f,  0.0f,  152.0f},
-					{-16.0f,  0.0f,  104.0f},
-					{-24.0f,  0.0f,  104.0f},
-					{-96.0f,  0.0f,  184.0f},
-					{-24.0f,  0.0f,  184.0f},
-					{-24.0f,  0.0f,  48.0f},
-					{-96.0f,  0.0f,  48.0f},
-					{ 24.0f,  0.0f,  192.0f},
-					{ 84.0f,  0.0f,  192.0f},
-					{ 84.0f,  0.0f,  184.0f},
-					{ 24.0f,  0.0f,  184.0f},
-					{-168.0f,  0.0f,  320.0f},
-					{ 128.0f,  0.0f,  320.0f},
-					{ 128.0f,  0.0f,  192.0f},
-					{-168.0f,  0.0f,  192.0f},
+					{-16.0f,   0.0f,    184.0f},
+					{ 128.0f,  0.0f,    184.0f},
+					{ 128.0f,  0.0f,   -16.0f },
+					{-16.0f,   0.0f,   -16.0f },
+					{-24.0f,   0.0f,    152.0f},
+					{-16.0f,   0.0f,    152.0f},
+					{-16.0f,   0.0f,    104.0f},
+					{-24.0f,   0.0f,    104.0f},
+					{-96.0f,   0.0f,    184.0f},
+					{-24.0f,   0.0f,    184.0f},
+					{-24.0f,   0.0f,    48.0f },
+					{-96.0f,   0.0f,    48.0f },
+					{ 24.0f,   0.0f,    192.0f},
+					{ 84.0f,   0.0f,    192.0f},
+					{ 84.0f,   0.0f,    184.0f},
+					{ 24.0f,   0.0f,    184.0f},
+					{-168.0f,  0.0f,    320.0f},
+					{ 128.0f,  0.0f,    320.0f},
+					{ 128.0f,  0.0f,    192.0f},
+					{-168.0f,  0.0f,    192.0f},
+					{ 128.0f,  128.0f, -16.0f },
+					{ 92.0f,   128.0f, -16.0f },
+					{ 92.0f,   0.0f,   -16.0f },
+					{ 128.0f,  0.0f,   -16.0f },
+					{ 36.0f,   128.0f, -16.0f },
+					{-16.0f,   128.0f, -16.0f },
+					{-16.0f,   0.0f,   -16.0f },
+					{ 36.0f,   0.0f,   -16.0f },
+					{-16.0f,   128.0f, -16.0f },
+					{-16.0f,   128.0f,  100.0f},
+					{-16.0f,   0.0f,    100.0f},
+					{-16.0f,   0.0f,   -16.0f },
+					{-16.0f,   128.0f,  156.0f},
+					{-16.0f,   128.0f,  184.0f},
+					{-16.0f,   0.0f,    184.0f},
+					{-16.0f,   0.0f,    156.0f},
+					{-16.0f,   128.0f,  184.0f},
+					{ 20.0f,   128.0f,  184.0f},
+					{ 20.0f,   0.0f,    184.0f},
+					{-16.0f,   0.0f,    184.0f},
+					{ 88.0f,   128.0f,  184.0f},
+					{ 128.0f,  128.0f,  184.0f},
+					{ 128.0f,  0.0f,    184.0f},
+					{ 88.0f,   0.0f,    184.0f},
+					{ 128.0f,  128.0f,  184.0f},
+					{ 128.0f,  128.0f, -16.0f },
+					{ 128.0f,  0.0f,   -16.0f },
+					{ 128.0f,  0.0f,    184.0f},
+					{-24.0f,   128.0f,  48.0f },
+					{-96.0f,   128.0f,  48.0f },
+					{-96.0f,   0.0f,    48.0f },
+					{-24.0f,   0.0f,    48.0f },
+					{-96.0f,   128.0f,  48.0f },
+					{-96.0f,   128.0f,  184.0f},
+					{-96.0f,   0.0f,    184.0f},
+					{-96.0f,   0.0f,    48.0f },
+					{-96.0f,   128.0f,  184.0f},
+					{-24.0f,   128.0f,  184.0f},
+					{-24.0f,   0.0f,    184.0f},
+					{-96.0f,   0.0f,    184.0f},
+					{-24.0f,   128.0f,  184.0f},
+					{-24.0f,   128.0f,  156.0f},
+					{-24.0f,   0.0f,    156.0f},
+					{-24.0f,   0.0f,    184.0f},
+					{-24.0f,   128.0f,  100.0f},
+					{-24.0f,   128.0f,  48.0f },
+					{-24.0f,   0.0f,    48.0f },
+					{-24.0f,   0.0f,    100.0f},
+					{ 92.0f,   128.0f, -16.0f },
+					{ 36.0f,   128.0f, -16.0f },
+					{ 36.0f,   112.0f, -16.0f },
+					{ 92.0f,   112.0f, -16.0f },
+					{-16.0f,   128.0f,  100.0f},
+					{-16.0f,   128.0f,  156.0f},
+					{-16.0f,   112.0f,  156.0f},
+					{-16.0f,   112.0f,  100.0f},
+					{ 20.0f,   128.0f,  184.0f},
+					{ 88.0f,   128.0f,  184.0f},
+					{ 88.0f,   112.0f,  184.0f},
+					{ 20.0f,   112.0f,  184.0f},
+					{-24.0f,   128.0f,  156.0f},
+					{-24.0f,   128.0f,  100.0f},
+					{-24.0f,   112.0f,  100.0f},
+					{-24.0f,   112.0f,  156.0f},
 				};
 				static constexpr view<svec3<float32>> HALL_FLOOR_VERTICES(&VERTICES[0], 4);
 				static constexpr view<svec3<float32>> HALL_TO_BIKE_ROOM_FLOOR_CONNECTOR_VERTICES(&VERTICES[4], 4);
 				static constexpr view<svec3<float32>> BIKE_ROOM_FLOOR_VERTICES(&VERTICES[8], 4);
 				static constexpr view<svec3<float32>> HALL_TO_MAIN_FLOOR_CONNECTOR_VERTICES(&VERTICES[12], 4);
 				static constexpr view<svec3<float32>> MAIN_FLOOR_VERTICES(&VERTICES[16], 4);
+				static constexpr view<svec3<float32>> HALL_ENTRANCE_LEFT_WALL_VERTICES(&VERTICES[20], 4);
+				static constexpr view<svec3<float32>> HALL_ENTRANCE_RIGHT_WALL_VERTICES(&VERTICES[24], 4);
+				static constexpr view<svec3<float32>> BIKE_ROOM_ENTRANCE_LEFT_WALL_VERTICES(&VERTICES[28], 4);
+				static constexpr view<svec3<float32>> BIKE_ROOM_ENTRANCE_RIGHT_WALL_VERTICES(&VERTICES[32], 4);
+				static constexpr view<svec3<float32>> MAIN_ENTRANCE_LEFT_WALL_VERTICES(&VERTICES[36], 4);
+				static constexpr view<svec3<float32>> MAIN_ENTRANCE_RIGHT_WALL_VERTICES(&VERTICES[40], 4);
+				static constexpr view<svec3<float32>> MAILBOX_WALL_VERTICES(&VERTICES[44], 4);
+				static constexpr view<svec3<float32>> BIKE_ROOM_BACK_WALL_VERTICES(&VERTICES[48], 4);
+				static constexpr view<svec3<float32>> BIKE_ROOM_LEFT_WALL_VERTICES(&VERTICES[52], 4);
+				static constexpr view<svec3<float32>> BIKE_ROOM_FRONT_WALL_VERTICES(&VERTICES[56], 4);
+				static constexpr view<svec3<float32>> BIKE_ROOM_RIGHT_WALL_LEFT_VERTICES(&VERTICES[60], 4);
+				static constexpr view<svec3<float32>> BIKE_ROOM_RIGHT_WALL_RIGHT_VERTICES(&VERTICES[64], 4);
+				static constexpr view<svec3<float32>> HALL_BACK_DOOR_WALL_VERTICES(&VERTICES[68], 4);
+				static constexpr view<svec3<float32>> HALL_LEFT_DOOR_WALL_VERTICES(&VERTICES[72], 4);
+				static constexpr view<svec3<float32>> HALL_FRONT_DOOR_WALL_VERTICES(&VERTICES[76], 4);
+				static constexpr view<svec3<float32>> BIKE_ROOM_RIGHT_DOOR_WALL_VERTICES(&VERTICES[80], 4);
 
 				// Texture scale multipliers
 				static constexpr float32 m1 = 256.0f;
@@ -49,8 +133,9 @@ namespace Trident {
 
 				SceneBuilder builder({
 					.flags = {},
-					.skyColor = {0.6f, 0.7f, 0.9f},
-					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("overcast_soil_512p"),
+					.skyColor = {0.0f, 0.0f, 0.0f},
+					// .environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("overcast_soil_512p"),
+					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("evening_road_01_512p"),
 					.sunDirection = {1.0f, 1.0f, 1.0f},
 					.sunColor = {1.0f, 1.0f, 1.0f},
 					.sunIntensity = 1.0f,
@@ -76,10 +161,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m1 * -0.25f, m1 * 0.25f},
 					},
-					.lightmap = {
-						.luxelScale = LUXEL_SCALE,
-						.albedo = DEFAULT_ALBEDO,
-					},
+					.lightmap = LIGHTMAP,
 				});
 				builder.createFace({
 					.vertices = HALL_TO_BIKE_ROOM_FLOOR_CONNECTOR_VERTICES,
@@ -90,10 +172,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m1 * -0.25f, m1 * 0.25f},
 					},
-					.lightmap = {
-						.luxelScale = LUXEL_SCALE,
-						.albedo = DEFAULT_ALBEDO,
-					},
+					.lightmap = LIGHTMAP,
 				});
 				builder.createFace({
 					.vertices = BIKE_ROOM_FLOOR_VERTICES,
@@ -104,10 +183,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m1 * -0.25f, m1 * 0.25f},
 					},
-					.lightmap = {
-						.luxelScale = LUXEL_SCALE,
-						.albedo = DEFAULT_ALBEDO,
-					},
+					.lightmap = LIGHTMAP,
 				});
 				builder.createFace({
 					.vertices = HALL_TO_MAIN_FLOOR_CONNECTOR_VERTICES,
@@ -118,10 +194,7 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m1 * -0.25f, m1 * 0.25f},
 					},
-					.lightmap = {
-						.luxelScale = LUXEL_SCALE,
-						.albedo = DEFAULT_ALBEDO,
-					},
+					.lightmap = LIGHTMAP,
 				});
 				builder.createFace({
 					.vertices = MAIN_FLOOR_VERTICES,
@@ -132,370 +205,192 @@ namespace Trident {
 						.rotation = 0.0f,
 						.scale = {m1 * -0.25f, m1 * 0.25f},
 					},
-					.lightmap = {
-						.luxelScale = LUXEL_SCALE,
-						.albedo = DEFAULT_ALBEDO,
-					},
+					.lightmap = LIGHTMAP,
 				});
 
 				/// Walls
 
-				// Hall entrance left wall
-				/* builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({52.0f, 128.0f}),
-						.material = plasterWallMaterial,
-						.textureFiltering = {
-							.translation = {0.281f, 0.0f},
-							.rotation = 0.0f,
-							.scale = {m2 * -0.25f, m2 * 0.25f},
-						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+				builder.createFace({
+					.vertices = HALL_ENTRANCE_LEFT_WALL_VERTICES,
+					.normal = {0.0f, 0.0f, 1.0f},
+					.material = plasterWallMaterial,
+					.textureFiltering = {
+						.translation = {0.281f, 0.0f},
+						.rotation = 0.0f,
+						.scale = {m2 * -0.25f, m2 * 0.25f},
 					},
-					{
-						.translation = {10.0f, 64.0f, -16.0f},
-						.axis = {0.0f, 1.0f, 0.0},
-						.angle = radians(180.0_deg),
-					}
-				);
-
-				// Hall entrance right wall
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({36.0f, 128.0f}),
-						.material = plasterWallMaterial,
-						.textureFiltering = {
-							.translation = {0.0f, 0.0f},
-							.rotation = 0.0f,
-							.scale = {m2 * -0.25f, m2 * 0.25f},
-						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = HALL_ENTRANCE_RIGHT_WALL_VERTICES,
+					.normal = {0.0f, 0.0f, 1.0f},
+					.material = plasterWallMaterial,
+					.textureFiltering = {
+						.translation = {0.281f, 0.0f},
+						.rotation = 0.0f,
+						.scale = {m2 * -0.25f, m2 * 0.25f},
 					},
-					{
-						.translation = {110.0f, 64.0f, -16.0f},
-						.axis = {0.0f, 1.0f, 0.0},
-						.angle = radians(180.0_deg),
-					}
-				);
-
-				// Bike room entrance left wall
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({116.0f, 128.0f}),
-						.material = plasterWallMaterial,
-						.textureFiltering = {
-							.translation = {0.39f, 0.0f},
-							.rotation = 0.0f,
-							.scale = {m2 * 0.25f, m2 * 0.25f},
-						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = BIKE_ROOM_ENTRANCE_LEFT_WALL_VERTICES,
+					.normal = {1.0f, 0.0f, 0.0f},
+					.material = plasterWallMaterial,
+					.textureFiltering = {
+						.translation = {0.39f, 0.0f},
+						.rotation = 0.0f,
+						.scale = {m2 * 0.25f, m2 * 0.25f},
 					},
-					{
-						.translation = {-16.0f, 64.0f, 42.0f},
-						.axis =  {0.0f, 1.0f, 0.0},
-						.angle = radians(90.0_deg),
-					}
-				);
-
-				// Bike room entrance right wall
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({28.0f, 128.0f}),
-						.material = plasterWallMaterial,
-						.textureFiltering = {
-							.translation = {0.36f, 0.0f},
-							.rotation = 0.0f,
-							.scale = {m2 * 0.25f, m2 * 0.25f},
-						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = BIKE_ROOM_ENTRANCE_RIGHT_WALL_VERTICES,
+					.normal = {1.0f, 0.0f, 0.0f},
+					.material = plasterWallMaterial,
+					.textureFiltering = {
+						.translation = {0.36f, 0.0f},
+						.rotation = 0.0f,
+						.scale = {m2 * 0.25f, m2 * 0.25f},
 					},
-					{
-						.translation = {-16.0f, 64.0f, 170.0f},
-						.axis =  {0.0f, 1.0f, 0.0},
-						.angle = radians(90.0_deg),
-					}
-				);
-
-				// Main entrance left wall
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({36.0f, 128.0f}),
-						.material = plasterWallMaterial,
-						.textureFiltering = {
-							.translation = {0.125f, 0.0f},
-							.rotation = 0.0f,
-							.scale = {m2 * -0.25f, m2 * 0.25f},
-						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = MAIN_ENTRANCE_LEFT_WALL_VERTICES,
+					.normal = {0.0f, 0.0f, -1.0f},
+					.material = plasterWallMaterial,
+					.textureFiltering = {
+						.translation = {0.125f, 0.0f},
+						.rotation = 0.0f,
+						.scale = {m2 * -0.25f, m2 * 0.25f},
 					},
-					{
-						.translation = {2.0f, 64.0f, 184.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = 0.0_rad,
-					}
-				);
-
-				// Main entrance right wall
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({40.0f, 128.0f}),
-						.material = plasterWallMaterial,
-						.textureFiltering = {
-							.translation = {0.312f, 0.0f},
-							.rotation = 0.0f,
-							.scale = {m2 * -0.25f, m2 * 0.25f},
-						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = MAIN_ENTRANCE_RIGHT_WALL_VERTICES,
+					.normal = {0.0f, 0.0f, -1.0f},
+					.material = plasterWallMaterial,
+					.textureFiltering = {
+						.translation = {0.312f, 0.0f},
+						.rotation = 0.0f,
+						.scale = {m2 * -0.25f, m2 * 0.25f},
 					},
-					{
-						.translation = {108.0f, 64.0f, 184.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = 0.0_rad,
-					}
-				);
-
-				// Mailbox wall
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({200.0f, 128.0f}),
-						.material = plasterWallMaterial,
-						.textureFiltering = {
-							.translation = {0.262f, 0.0f},
-							.rotation = 0.0f,
-							.scale = {m2 * -0.25f, m2 * 0.25f},
-						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = MAILBOX_WALL_VERTICES,
+					.normal = {-1.0f, 0.0f, 0.0f},
+					.material = plasterWallMaterial,
+					.textureFiltering = {
+						.translation = {0.262f, 0.0f},
+						.rotation = 0.0f,
+						.scale = {m2 * -0.25f, m2 * 0.25f},
 					},
-					{
-						.translation = {128.0f, 64.0f, 84.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = radians(-90.0_deg),
-					}
-				);
-
-				// Bike room inside left wall
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({72.0f, 128.0f}),
-						.material = plasterWallMaterial,
-						.textureFiltering = {
-							.translation = {0.812f, 0.0f},
-							.rotation = 0.0f,
-							.scale = {m2 * -0.25f, m2 * 0.25f},
-						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = BIKE_ROOM_BACK_WALL_VERTICES,
+					.normal = {0.0f, 0.0f, 1.0f},
+					.material = plasterWallMaterial,
+					.textureFiltering = {
+						.translation = {0.812f, 0.0f},
+						.rotation = 0.0f,
+						.scale = {m2 * -0.25f, m2 * 0.25f},
 					},
-					{
-						.translation = {-60.0f, 64.0f, 48.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = radians(180.0_deg),
-					}
-				);
-
-				// Bike room inside back wall
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({136.0f, 128.0f}),
-						.material = plasterWallMaterial,
-						.textureFiltering = {
-							.translation = {0.625f, 0.0f},
-							.rotation = 0.0f,
-							.scale = {m2 * 0.25f, m2 * 0.25f},
-						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = BIKE_ROOM_LEFT_WALL_VERTICES,
+					.normal = {1.0f, 0.0f, 0.0f},
+					.material = plasterWallMaterial,
+					.textureFiltering = {
+						.translation = {0.625f, 0.0f},
+						.rotation = 0.0f,
+						.scale = {m2 * 0.25f, m2 * 0.25f},
 					},
-					{
-						.translation = {-96.0f, 64.0f, 116.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = radians(90.0_deg),
-					}
-				);
-
-				// Bike room inside right wall
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({72.0f, 128.0f}),
-						.material = plasterWallMaterial,
-						.textureFiltering = {
-							.translation = {0.75f, 0.0f},
-							.rotation = 0.0f,
-							.scale = {m2 * -0.25f, m2 * 0.25f},
-						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = BIKE_ROOM_FRONT_WALL_VERTICES,
+					.normal = {0.0f, 0.0f, -1.0f},
+					.material = plasterWallMaterial,
+					.textureFiltering = {
+						.translation = {0.75f, 0.0f},
+						.rotation = 0.0f,
+						.scale = {m2 * -0.25f, m2 * 0.25f},
 					},
-					{
-						.translation = {-60.0f, 64.0f, 184.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = 0.0_rad,
-					}
-				);
-
-				// Bike room inside entrance left wall
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({28.0f, 128.0f}),
-						.material = plasterWallMaterial,
-						.textureFiltering = {
-							.translation = {0.58f, 0.0f},
-							.rotation = 0.0f,
-							.scale = {m2 * -0.25f, m2 * 0.25f},
-						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = BIKE_ROOM_RIGHT_WALL_LEFT_VERTICES,
+					.normal = {-1.0f, 0.0f, 0.0f},
+					.material = plasterWallMaterial,
+					.textureFiltering = {
+						.translation = {0.58f, 0.0f},
+						.rotation = 0.0f,
+						.scale = {m2 * -0.25f, m2 * 0.25f},
 					},
-					{
-						.translation = {-24.0f, 64.0f, 170.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = radians(-90.0_deg),
-					}
-				);
-
-				// Bike room inside entrance right wall
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({52.0f, 128.0f}),
-						.material = plasterWallMaterial,
-						.textureFiltering = {
-							.translation = {0.295f, 0.0f},
-							.rotation = 0.0f,
-							.scale = {m2 * -0.25f, m2 * 0.25f},
-						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = BIKE_ROOM_RIGHT_WALL_RIGHT_VERTICES,
+					.normal = {-1.0f, 0.0f, 0.0f},
+					.material = plasterWallMaterial,
+					.textureFiltering = {
+						.translation = {0.295f, 0.0f},
+						.rotation = 0.0f,
+						.scale = {m2 * -0.25f, m2 * 0.25f},
 					},
-					{
-						.translation = {-24.0f, 64.0f, 74.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = radians(-90.0_deg),
-					}
-				);
-
-				// Hall entrance door wall
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({56.0f, 16.0f}),
-						.material = plasterWallMaterial,
-						.textureFiltering = {
-							.translation = {0.71f, 0.0f},
-							.rotation = 0.0f,
-							.scale = {m2 * -0.25f, m2 * 0.25f},
-						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = HALL_BACK_DOOR_WALL_VERTICES,
+					.normal = {0.0f, 0.0f, 1.0f},
+					.material = plasterWallMaterial,
+					.textureFiltering = {
+						.translation = {0.71f, 0.0f},
+						.rotation = 0.0f,
+						.scale = {m2 * -0.25f, m2 * 0.25f},
 					},
-					{
-						.translation = {64.0f, 120.0f, -16.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = radians(180.0_deg),
-					}
-				);
-
-				// Bike room entrance door wall
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({56.0f, 16.0f}),
-						.material = plasterWallMaterial,
-						.textureFiltering = {
-							.translation = {0.36f, 0.0f},
-							.rotation = 0.0f,
-							.scale = {m2 * 0.25f, m2 * 0.25f},
-						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = HALL_LEFT_DOOR_WALL_VERTICES,
+					.normal = {1.0f, 0.0f, 0.0f},
+					.material = plasterWallMaterial,
+					.textureFiltering = {
+						.translation = {0.36f, 0.0f},
+						.rotation = 0.0f,
+						.scale = {m2 * 0.25f, m2 * 0.25f},
 					},
-					{
-						.translation = {-16.0f, 120.0f, 128.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = radians(90.0_deg),
-					}
-				);
-
-				// Main entrance door wall
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({68.0f, 16.0f}),
-						.material = plasterWallMaterial,
-						.textureFiltering = {
-							.translation = {0.53f, 0.0f},
-							.rotation = 0.0f,
-							.scale = {m2 * -0.25f, m2 * 0.25f},
-						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = HALL_FRONT_DOOR_WALL_VERTICES,
+					.normal = {0.0f, 0.0f, -1.0f},
+					.material = plasterWallMaterial,
+					.textureFiltering = {
+						.translation = {0.53f, 0.0f},
+						.rotation = 0.0f,
+						.scale = {m2 * -0.25f, m2 * 0.25f},
 					},
-					{
-						.translation = {54.0f, 120.0f, 184.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = 0.0_rad,
-					}
-				);
-
-				// Bike room inside entrance door wall
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({56.0f, 16.0f}),
-						.material = plasterWallMaterial,
-						.textureFiltering = {
-							.translation = {0.797f, 0.0f},
-							.rotation = 0.0f,
-							.scale = {m2 * -0.25f, m2 * 0.25f},
-						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = BIKE_ROOM_RIGHT_DOOR_WALL_VERTICES,
+					.normal = {-1.0f, 0.0f, 0.0f},
+					.material = plasterWallMaterial,
+					.textureFiltering = {
+						.translation = {0.797f, 0.0f},
+						.rotation = 0.0f,
+						.scale = {m2 * -0.25f, m2 * 0.25f},
 					},
-					{
-						.translation = {-24.0f, 120.0f, 128.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = radians(-90.0_deg),
-					}
-				);
+					.lightmap = LIGHTMAP,
+				});
 
 				/// Door frames
 
 				// Bike room entrance door frame left
-				builder.placeSurface(
+				/* builder.placeSurface(
 					{
 						.geometry = builder.createWallGeometry({4.0f, 108.0f}),
 						.material = woodDoorMaterial,
@@ -504,10 +399,7 @@ namespace Trident {
 							.rotation = 0.0f,
 							.scale = {m1 * -0.25f, m2 * 0.25f},
 						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+						.lightmap = LIGHTMAP,
 					},
 					{
 						.translation = {-16.0f, 54.0f, 102.0f},
@@ -526,10 +418,7 @@ namespace Trident {
 							.rotation = 0.0f,
 							.scale = {m1 * -0.25f, m2 * 0.25f},
 						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+						.lightmap = LIGHTMAP,
 					},
 					{
 						.translation = {-16.0f, 54.0f, 154.0f},
@@ -548,10 +437,7 @@ namespace Trident {
 							.rotation = 0.0f,
 							.scale = {m1 * -0.25f, m2 * 0.25f},
 						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+						.lightmap = LIGHTMAP,
 					},
 					{
 						.translation = {-16.0f, 110.0f, 128.0f},
@@ -570,10 +456,7 @@ namespace Trident {
 							.rotation = 0.0f,
 							.scale = {m1 * -0.25f, m2 * 0.25f},
 						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+						.lightmap = LIGHTMAP,
 					},
 					{
 						.translation = {-20.0f, 54.0f, 104.0f},
@@ -592,10 +475,7 @@ namespace Trident {
 							.rotation = 0.0f,
 							.scale = {m1 * 0.25f, m2 * 0.25f},
 						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+						.lightmap = LIGHTMAP,
 					},
 					{
 						.translation = {-20.0f, 54.0f, 152.0f},
@@ -614,10 +494,7 @@ namespace Trident {
 							.rotation = 1.0f,
 							.scale = {m1 * 0.25f, m2 * 0.25f},
 						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+						.lightmap = LIGHTMAP,
 					},
 					{
 						.translation = {-20.0f, 108.0f, 128.0f},
@@ -636,10 +513,7 @@ namespace Trident {
 							.rotation = 0.0f,
 							.scale = {m1 * 0.25f, m2 * 0.25f},
 						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+						.lightmap = LIGHTMAP,
 					},
 					{
 						.translation = {-24.0f, 54.0f, 154.0f},
@@ -658,10 +532,7 @@ namespace Trident {
 							.rotation = 0.0f,
 							.scale = {m1 * 0.25f, m2 * 0.25f},
 						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+						.lightmap = LIGHTMAP,
 					},
 					{
 						.translation = {-24.0f, 54.0f, 102.0f},
@@ -680,10 +551,7 @@ namespace Trident {
 							.rotation = 0.0f,
 							.scale = {m1 * 0.25f, m2 * 0.25f},
 						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+						.lightmap = LIGHTMAP,
 					},
 					{
 						.translation = {-24.0f, 110.0f, 128.0f},
@@ -704,10 +572,7 @@ namespace Trident {
 							.rotation = 0.0f,
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+						.lightmap = LIGHTMAP,
 					},
 					{
 						.translation = {56.0f, 184.0f, -16.0f},
@@ -726,10 +591,7 @@ namespace Trident {
 							.rotation = 0.0f,
 							.scale = {m2 * 0.25f, m2 * 0.25f},
 						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+						.lightmap = LIGHTMAP,
 					},
 					{
 						.translation = {-16.0f, 184.0f, 84.0f},
@@ -748,10 +610,7 @@ namespace Trident {
 							.rotation = 0.0f,
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+						.lightmap = LIGHTMAP,
 					},
 					{
 						.translation = {56.0f, 184.0f, 184.0f},
@@ -770,10 +629,7 @@ namespace Trident {
 							.rotation = 0.0f,
 							.scale = {m2 * -0.25f, m2 * 0.25f},
 						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+						.lightmap = LIGHTMAP,
 					},
 					{
 						.translation = {128.0f, 184.0f, 84.0f},
@@ -792,10 +648,7 @@ namespace Trident {
 							.rotation = 0.5f,
 							.scale = {m2 * 0.25f, m2 * -0.25f},
 						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+						.lightmap = LIGHTMAP,
 					},
 					{
 						.translation = {56.0f, 240.0f, 84.0f},
@@ -814,10 +667,7 @@ namespace Trident {
 							.rotation = 0.5f,
 							.scale = {m2 * 0.25f, m2 * -0.25f},
 						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+						.lightmap = LIGHTMAP,
 					},
 					{
 						.translation = {-60.0f, 128.0f, 116.0f},

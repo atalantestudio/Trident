@@ -85,13 +85,13 @@ namespace Trident {
 				svec2<float32> textureCoordinate = {coordinate.x, coordinate.y};
 				textureCoordinate -= face.boundingBox.min;
 				textureCoordinate /= faceSize;
+				textureCoordinate.y = 1.0f - textureCoordinate.y;
 
 				const uint32 initialTextureCoordinate = pack<VertexInputAttributeFormat::R16G16_FLOAT, uint32>(textureCoordinate);
 
 				vertex.normal = face.normal;
 				vertex.tangent = {0.0f, 0.0f, 0.0f, *pointer_cast<const float32*>(&initialTextureCoordinate)};
 				vertex.textureCoordinate = svec2<float32>(multiplyTransform(vec2<float32>(textureCoordinate), textureTransform));
-				vertex.textureCoordinate.y = 1.0f - vertex.textureCoordinate.y;
 
 				// TODO(asset-builder/map/static-geometry): Restore face wireframe?
 				// scene.staticGeometry.lineIndices[lineIndexOffset + vertexIndex * 2 + 0] = face.indexRange.offset + vertexIndex;
