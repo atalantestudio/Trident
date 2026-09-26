@@ -5,7 +5,7 @@
 
 #include "AssetBuilder/API/Geometry/Geometry3D.hpp"
 #include "AssetBuilder/API/Lightmapper/Lightmap.hpp"
-#include "AssetBuilder/API/Scene/Scene3D.hpp"
+#include "AssetBuilder/API/Map/Scene3D.hpp"
 
 #include "Engine/API/Graphics/Descriptor/ShaderModuleDescriptor.hpp"
 #include "Engine/API/Graphics/DeviceExtension/EXT_hardware_ray_tracing/EXT_hardware_ray_tracing.hpp"
@@ -132,7 +132,7 @@ namespace Trident {
 			ImageFormat atlasFormat;
 			Extent3D atlasExtent;
 			ImageAssetDescriptor* imageAssetDescriptor = nullptr;
-			Scene3DDescriptor sceneDescriptor;
+			MapDescriptor mapDescriptor;
 
 			ref<Instance> instance;
 			ref<PhysicalDevice> physicalDevice;

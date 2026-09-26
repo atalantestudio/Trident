@@ -12,9 +12,8 @@ namespace Trident {
 				return "3d_wet_floor_sign";
 			}
 
-			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
-				SceneBuilder builder({
-					.flags = {},
+			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
+				MapBuilder builder({
 					.skyColor = {0.0f, 0.0f, 0.0f},
 					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("overcast_soil_512p"),
 					.sunDirection = {1.0f, 1.0f, 1.0f},
@@ -31,7 +30,7 @@ namespace Trident {
 				const MaterialReference lpbrMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lpbr_wet_floor_sign_01_1k"));
 				const MaterialReference pbrMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("pbr_default"));
 
-				builder.placeStaticProp({
+				builder.createStaticProp({
 					.geometryIndex = geometry,
 					.material = lpbrMaterial,
 					.transform = {
@@ -46,7 +45,7 @@ namespace Trident {
 					.lightmapScale = {64.0f, 64.0f},
 				});
 
-				builder.placeRigidBody({
+				builder.createRigidBody({
 					.geometryIndex = geometry,
 					.material = pbrMaterial,
 					.position = {32.0f, 32.0f, 64.0f},

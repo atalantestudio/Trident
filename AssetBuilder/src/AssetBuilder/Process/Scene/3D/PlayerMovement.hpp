@@ -12,9 +12,8 @@ namespace Trident {
 				return "3d_player_movement";
 			}
 
-			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
-				SceneBuilder builder({
-					.flags = {},
+			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
+				MapBuilder builder({
 					.skyColor = {0.6f, 0.7f, 0.9f},
 					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("evening_road_01_512p"),
 					.sunDirection = {1.0f, 1.0f, 1.0f},
@@ -31,7 +30,7 @@ namespace Trident {
 				const MaterialReference debugMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("debug"));
 
 				/* // Floor
-				builder.placeRigidBody({
+				builder.createRigidBody({
 					.geometryIndex = boxGeometry,
 					.material = debugMaterial,
 					.position = {0.0_m, -0.05_m, 0.0_m},
@@ -45,7 +44,7 @@ namespace Trident {
 				});
 
 				// Box
-				builder.placeRigidBody({
+				builder.createRigidBody({
 					.geometryIndex = boxGeometry,
 					.material = debugMaterial,
 					.position = {1.0_m, 0.5_m, 3.0_m},
@@ -59,7 +58,7 @@ namespace Trident {
 				});
 
 				// Player
-				builder.placeRigidBody({
+				builder.createRigidBody({
 					.geometryIndex = boxGeometry,
 					.material = debugMaterial,
 					.position = {0.0_m, 2.0_m, 0.0_m},
@@ -73,7 +72,7 @@ namespace Trident {
 				}); */
 
 				// Floor
-				builder.placeRigidBody({
+				builder.createRigidBody({
 					.geometryIndex = boxGeometry,
 					.material = debugMaterial,
 					.position = {0.0f, -8.0f, 0.0f},
@@ -87,7 +86,7 @@ namespace Trident {
 				});
 
 				// Box
-				builder.placeRigidBody({
+				builder.createRigidBody({
 					.geometryIndex = boxGeometry,
 					.material = debugMaterial,
 					.position = {128.0f, 8.0f, 128.0f},
@@ -102,7 +101,7 @@ namespace Trident {
 				});
 
 				// Player
-				builder.placeRigidBody({
+				builder.createRigidBody({
 					.geometryIndex = boxGeometry,
 					.material = debugMaterial,
 					.position = {0.0f, 128.0f, 0.0f},

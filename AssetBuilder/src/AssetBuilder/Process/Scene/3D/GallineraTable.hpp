@@ -12,7 +12,7 @@ namespace Trident {
 				return "3d_gallinera_table";
 			}
 
-			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
+			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				static constexpr svec3<float32> FLOOR_VERTICES[] = {
 					{-128.0f,  0.0f,  128.0f},
 					{ 128.0f,  0.0f,  128.0f},
@@ -20,8 +20,7 @@ namespace Trident {
 					{-128.0f,  0.0f, -128.0f},
 				};
 
-				SceneBuilder builder({
-					.flags = {},
+				MapBuilder builder({
 					.skyColor = {0.6f, 0.7f, 0.9f},
 					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("evening_road_01_512p"),
 					.sunDirection = {1.0f, 1.0f, 1.0f},
@@ -55,7 +54,7 @@ namespace Trident {
 					},
 				});
 
-				builder.placeStaticProp({
+				builder.createStaticProp({
 					.geometryIndex = gallineraTableGeometry,
 					.material = gallineraTableMaterial,
 					.transform = {
@@ -70,7 +69,7 @@ namespace Trident {
 					.lightmapScale = {512.0f, 512.0f},
 				});
 
-				builder.placeRigidBody({
+				builder.createRigidBody({
 					.geometryIndex = boxGeometry,
 					.material = debugMaterial,
 					.position = {0.0f, 32.0f, -128.0f},

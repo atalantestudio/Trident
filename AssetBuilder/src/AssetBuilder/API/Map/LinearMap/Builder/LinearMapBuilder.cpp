@@ -3,7 +3,7 @@
 
 #include "pch.hpp"
 
-#include "AssetBuilder/API/Map/Builder/LinearMapBuilder.hpp"
+#include "AssetBuilder/API/Map/LinearMap/Builder/LinearMapBuilder.hpp"
 
 namespace Trident {
 	uint32 LinearMapBuilder::createRectangularRoom(const RectangularRoomDescriptor& descriptor) {

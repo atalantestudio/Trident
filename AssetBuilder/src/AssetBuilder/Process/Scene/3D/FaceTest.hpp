@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "AssetBuilder/API/Map/Builder/LinearMapBuilder.hpp"
+#include "AssetBuilder/API/Map/LinearMap/Builder/LinearMapBuilder.hpp"
 #include "AssetBuilder/Process/Scene/Scene3DProcess.hpp"
 
 namespace Trident {
@@ -13,9 +13,8 @@ namespace Trident {
 				return "3d_face_test";
 			}
 
-			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
+			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				LinearMapBuilder builder({
-					.flags = {},
 					.skyColor = {0.6f, 0.7f, 0.9f},
 					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("evening_road_01_512p"),
 					.sunDirection = {1.0f, 1.0f, 1.0f},

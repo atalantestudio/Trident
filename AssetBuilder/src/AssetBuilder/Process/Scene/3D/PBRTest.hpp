@@ -12,9 +12,8 @@ namespace Trident {
 				return "3d_pbr_test";
 			}
 
-			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
-				SceneBuilder builder({
-					.flags = {},
+			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
+				MapBuilder builder({
 					.skyColor = {0.0f, 0.0f, 0.0f},
 					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("evening_road_01_512p"),
 					.sunDirection = {1.0f, 1.0f, 1.0f},
@@ -40,7 +39,7 @@ namespace Trident {
 
 					while (rowIndex < rowCount) {
 						// TODO(renderer/forward/pbr): Fix tangent artifact at the poles.
-						builder.placeRigidBody({
+						builder.createRigidBody({
 							.geometryIndex = geometry,
 							.material = material,
 							.position = {(columnIndex - (columnCount / 2)) * 32.0f, (rowIndex - (rowCount / 2)) * 32.0f + 64.0f, 192.0f},
@@ -70,7 +69,7 @@ namespace Trident {
 				uint32 pointLightIndex = 0;
 
 				while (pointLightIndex < pointLightCount) {
-					builder.placePointLight({
+					builder.createPointLight({
 						.color = {1.0f, 1.0f, 1.0f},
 						.intensity = 30000.0f,
 						.position = pointLightPositions[pointLightIndex],

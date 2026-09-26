@@ -12,9 +12,8 @@ namespace Trident {
 				return "3d_sliding";
 			}
 
-			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
-				SceneBuilder builder({
-					.flags = {},
+			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
+				MapBuilder builder({
 					.skyColor = {0.6f, 0.7f, 0.9f},
 					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("evening_road_01_512p"),
 					.sunDirection = {1.0f, 1.0f, 1.0f},
@@ -32,7 +31,7 @@ namespace Trident {
 				const MaterialReference debugMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("debug"));
 
 				// Flat floor
-				/* builder.placeRigidBody({
+				/* builder.createRigidBody({
 					.geometryIndex = rectangularCuboidGeometry,
 					.material = debugMaterial,
 					.position = {0.0_m, 0.0_m, 0.0_m},
@@ -46,7 +45,7 @@ namespace Trident {
 				}); */
 
 				// Inclined floor
-				builder.placeRigidBody({
+				builder.createRigidBody({
 					.geometryIndex = rectangularCuboidGeometry,
 					.material = debugMaterial,
 					.position = {0.0f, 0.0f, 0.2f},
@@ -60,7 +59,7 @@ namespace Trident {
 				});
 
 				// Box 2
-				builder.placeRigidBody({
+				builder.createRigidBody({
 					.geometryIndex = unitBoxGeometry,
 					.material = debugMaterial,
 					.position = {0.0_m, 2.2_m, 0.0_m},

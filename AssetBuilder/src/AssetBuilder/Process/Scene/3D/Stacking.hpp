@@ -12,9 +12,8 @@ namespace Trident {
 				return "3d_stacking";
 			}
 
-			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
-				SceneBuilder builder({
-					.flags = {},
+			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
+				MapBuilder builder({
 					.skyColor = {0.6f, 0.7f, 0.9f},
 					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("evening_road_01_512p"),
 					.sunDirection = {1.0f, 1.0f, 1.0f},
@@ -31,7 +30,7 @@ namespace Trident {
 				const MaterialReference debugMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("debug"));
 
 				// Floor
-				builder.placeRigidBody({
+				builder.createRigidBody({
 					.geometryIndex = rectangularCuboidGeometry,
 					.material = debugMaterial,
 					.position = {0.0f, -0.05f, 0.0f},
@@ -45,7 +44,7 @@ namespace Trident {
 				});
 
 				// Box 1
-				builder.placeRigidBody({
+				builder.createRigidBody({
 					.geometryIndex = rectangularCuboidGeometry,
 					.material = debugMaterial,
 					.position = {0.0_m, 1.5_m, 0.0_m},
@@ -59,7 +58,7 @@ namespace Trident {
 				});
 
 				// Box 2
-				builder.placeRigidBody({
+				builder.createRigidBody({
 					.geometryIndex = rectangularCuboidGeometry,
 					.material = debugMaterial,
 					.position = {0.1_m, 3.0_m, -0.1_m},
@@ -73,7 +72,7 @@ namespace Trident {
 				});
 
 				// Box 3
-				builder.placeRigidBody({
+				builder.createRigidBody({
 					.geometryIndex = rectangularCuboidGeometry,
 					.material = debugMaterial,
 					.position = {0.0_m, 4.5_m, 0.05_m},

@@ -12,9 +12,8 @@ namespace Trident {
 				return "3d_prop_gallery";
 			}
 
-			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
-				SceneBuilder builder({
-					.flags = {},
+			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
+				MapBuilder builder({
 					.skyColor = {0.0f, 0.0f, 0.0f},
 					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("overcast_soil_512p"),
 					.sunDirection = {1.0f, 1.0f, 1.0f},
@@ -36,7 +35,7 @@ namespace Trident {
 				const MaterialReference utilityBox02Material = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lpbr_utility_box_02_1k"));
 				const MaterialReference wetFloorSign01Material = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lpbr_wet_floor_sign_01_1k"));
 
-				builder.placeStaticProp({
+				builder.createStaticProp({
 					.geometryIndex = powerBox01Geometry,
 					.material = powerBox01Material,
 					.transform = {
@@ -51,7 +50,7 @@ namespace Trident {
 					.lightmapScale = {64.0f, 64.0f},
 				});
 
-				builder.placeStaticProp({
+				builder.createStaticProp({
 					.geometryIndex = utilityBox01Geometry,
 					.material = utilityBox01Material,
 					.transform = {
@@ -66,7 +65,7 @@ namespace Trident {
 					.lightmapScale = {64.0f, 64.0f},
 				});
 
-				builder.placeStaticProp({
+				builder.createStaticProp({
 					.geometryIndex = utilityBox02Geometry,
 					.material = utilityBox02Material,
 					.transform = {
@@ -81,7 +80,7 @@ namespace Trident {
 					.lightmapScale = {64.0f, 64.0f},
 				});
 
-				builder.placeStaticProp({
+				builder.createStaticProp({
 					.geometryIndex = wetFloorSign01Geometry,
 					.material = wetFloorSign01Material,
 					.transform = {

@@ -6,7 +6,7 @@
 #include "Engine/Filesystem/Asset/ShaderModuleAsset.hpp"
 
 #include "AssetBuilder/API/Geometry/Geometry3D.hpp"
-#include "AssetBuilder/API/Scene/Scene3D.hpp"
+#include "AssetBuilder/API/Map/Scene3D.hpp"
 #include "AssetBuilder/API/Transform.hpp"
 
 namespace Trident {

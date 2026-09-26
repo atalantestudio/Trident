@@ -12,9 +12,8 @@ namespace Trident {
 				return "3d_edge_contact";
 			}
 
-			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
-				SceneBuilder builder({
-					.flags = Scene3DBuildFlags::LIGHTMAP_SUN_CONTRIBUTION,
+			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
+				MapBuilder builder({
 					.skyColor = {0.6f, 0.7f, 0.9f},
 					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("evening_road_01_512p"),
 					.sunDirection = {1.0f, 1.0f, 1.0f},
@@ -31,7 +30,7 @@ namespace Trident {
 				const MaterialReference debugMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("debug"));
 
 				// Box 1
-				builder.placeRigidBody({
+				builder.createRigidBody({
 					.geometryIndex = unitBoxGeometry,
 					.material = debugMaterial,
 					.position = {0.0_m, 0.0_m, 0.0_m},
@@ -45,7 +44,7 @@ namespace Trident {
 				});
 
 				// Box 2
-				builder.placeRigidBody({
+				builder.createRigidBody({
 					.geometryIndex = unitBoxGeometry,
 					.material = debugMaterial,
 					.position = {1.0_m, 2.0_m, 0.0_m},

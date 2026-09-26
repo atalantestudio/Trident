@@ -12,7 +12,7 @@ namespace Trident {
 				return "3d_lightmap_test";
 			}
 
-			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
+			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				static constexpr svec3<float32> WALL_VERTICES[] = {
 					{-64.0f,  64.0f,  128.0f},
 					{ 66.0f,  64.0f,  128.0f},
@@ -31,8 +31,7 @@ namespace Trident {
 					.scale = {1.0f, 1.0f},
 				};
 
-				SceneBuilder builder({
-					.flags = {},
+				MapBuilder builder({
 					.skyColor = {0.05f, 0.05f, 0.05f},
 					.environmentMapImageAsset = nullptr,
 					.sunDirection = {1.0f, 1.0f, 1.0f},

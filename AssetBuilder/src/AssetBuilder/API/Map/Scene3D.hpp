@@ -13,7 +13,6 @@
 
 #include "AssetBuilder/API/Geometry/Geometry3D.hpp"
 #include "AssetBuilder/API/LightmapDescriptor.hpp"
-#include "AssetBuilder/API/Scene/Scene3DBuildFlags.hpp"
 #include "AssetBuilder/API/Transform.hpp"
 
 namespace Trident {
@@ -24,8 +23,7 @@ namespace Trident {
 		svec3<float32> direction;
 	};
 
-	struct Scene3DDescriptor {
-		Scene3DBuildFlags flags;
+	struct MapDescriptor {
 		svec3<float32> skyColor;
 		ref<ImageAsset> environmentMapImageAsset;
 		svec3<float32> sunDirection;

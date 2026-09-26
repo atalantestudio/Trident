@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
+#include "AssetBuilder/API/Map/Builder/MapBuilder.hpp"
 #include "AssetBuilder/API/Utilities/Utilities.hpp"
 
 namespace Trident {
@@ -26,7 +26,7 @@ namespace Trident {
 		return v > 0.0f && w > 0.0f;
 	}
 
-	void SceneBuilder::calculateFaceBoundingBoxes(const IntermediateGeometry& intermediateGeometry) {
+	void MapBuilder::calculateFaceBoundingBoxes(const IntermediateGeometry& intermediateGeometry) {
 		uint32 faceIndex = 0;
 
 		while (faceIndex < intermediateGeometry.faceIndices.size()) {
@@ -55,7 +55,7 @@ namespace Trident {
 		}
 	}
 
-	void SceneBuilder::triangulateFaces(BuildScene3D& scene, const IntermediateGeometry& intermediateGeometry, BuildGeometry& geometry, uint32 lineIndexOffset) const {
+	void MapBuilder::triangulateFaces(BuildScene3D& scene, const IntermediateGeometry& intermediateGeometry, BuildGeometry& geometry, uint32 lineIndexOffset) const {
 		uint32 vertexOffset = geometry.vertexRange.offset;
 		uint32 triangleIndexOffset = geometry.indexRange.offset;
 		uint32 faceIndex = 0;

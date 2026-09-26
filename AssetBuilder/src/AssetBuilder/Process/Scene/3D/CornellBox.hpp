@@ -22,7 +22,7 @@ namespace Trident {
 				return "3d_cornell_box";
 			}
 
-			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
+			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				static constexpr float32 SHORT_BLOCK_HEIGHT = 165.0f;
 				static constexpr float32 TALL_BLOCK_HEIGHT = 330.0f;
 				static constexpr svec2<float32> LUXEL_SCALE = {4.0f, 4.0f};
@@ -78,8 +78,7 @@ namespace Trident {
 					.scale = {1.0f, 1.0f},
 				};
 
-				SceneBuilder builder({
-					.flags = {},
+				MapBuilder builder({
 					.skyColor = {0.0f, 0.0f, 0.0f},
 					.environmentMapImageAsset = nullptr,
 					.sunDirection = {1.0f, 1.0f, 1.0f},

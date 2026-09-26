@@ -20,7 +20,7 @@ namespace Trident {
 				return "3d_ddgi_ref_0";
 			}
 
-			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
+			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				static constexpr svec2<float32> LUXEL_SCALE = {4.0f, 4.0f};
 				static constexpr svec3<float32> ROOM_COLOR = {1.0f, 1.0f, 1.0f};
 				static constexpr svec3<float32> VERTICES[] = {
@@ -61,8 +61,7 @@ namespace Trident {
 					.scale = {1.0f, 1.0f},
 				};
 
-				SceneBuilder builder({
-					.flags = {},
+				MapBuilder builder({
 					.skyColor = {0.0f, 0.0f, 0.0f},
 					.environmentMapImageAsset = nullptr,
 					.sunDirection = {1.0f, 1.0f, 1.0f},
@@ -139,7 +138,7 @@ namespace Trident {
 					},
 				});
 
-				builder.placeStaticProp({
+				builder.createStaticProp({
 					.geometryIndex = boxGeometry,
 					.material = material,
 					.transform = {

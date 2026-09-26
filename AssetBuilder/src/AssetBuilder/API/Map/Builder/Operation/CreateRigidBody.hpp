@@ -4,10 +4,10 @@
 #pragma once
 
 #include "AssetBuilder/API/Utilities/Utilities.hpp"
-#include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
+#include "AssetBuilder/API/Map/Builder/MapBuilder.hpp"
 
 namespace Trident {
-	void SceneBuilder::placeRigidBody(const EntityDescriptor& descriptor) {
+	void MapBuilder::createRigidBody(const EntityDescriptor& descriptor) {
 		const uint32 materialShaderIndex = descriptor.material >> 16;
 		const uint32 materialIndex = descriptor.material & 0xff;
 
@@ -47,7 +47,7 @@ namespace Trident {
 
 		EntityComponentMapping<RigidBody3DComponent> rigidBodyMapping{};
 		rigidBodyMapping.entity = entityCount;
-		rigidBodyMapping.component = createRigidBody({
+		rigidBodyMapping.component = Trident::createRigidBody({
 			.position = descriptor.position,
 			.rotation = descriptor.rotation,
 			.uniformScale = descriptor.uniformScale,

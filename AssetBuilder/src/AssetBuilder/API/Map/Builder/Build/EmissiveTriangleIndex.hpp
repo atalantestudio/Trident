@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
+#include "AssetBuilder/API/Map/Builder/MapBuilder.hpp"
 
 namespace Trident {
-	sequence<uint32> SceneBuilder::createEmissiveTriangleIndexBuffer(const BuildScene3D& scene) const {
+	sequence<uint32> MapBuilder::createEmissiveTriangleIndexBuffer(const BuildScene3D& scene) const {
 		uint64 emissiveTriangleCount = 0;
 		uint32 lightmapIndex = 0;
 

@@ -8,7 +8,7 @@
 namespace Trident {
 	class DDGITestScene3D final : public Scene3DProcess {
 		private:
-			static void createRoom(SceneBuilder& builder, svec3<float32> origin, MaterialReference material, float32 lightCeilingPercent, bool open) {
+			static void createRoom(MapBuilder& builder, svec3<float32> origin, MaterialReference material, float32 lightCeilingPercent, bool open) {
 				static constexpr svec2<float32> LUXEL_SCALE = {4.0f, 4.0f};
 				static constexpr svec3<float32> LIGHT_EMISSIVE_COLOR = {4.0f, 4.0f, 4.0f};
 				static constexpr svec3<float32> ROOM_COLOR = {1.0f, 1.0f, 1.0f};
@@ -103,9 +103,8 @@ namespace Trident {
 				return "3d_ddgi_test";
 			}
 
-			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
-				SceneBuilder builder({
-					.flags = {},
+			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
+				MapBuilder builder({
 					.skyColor = {0.0f, 0.0f, 0.0f},
 					.environmentMapImageAsset = nullptr,
 					.sunDirection = {1.0f, 1.0f, 1.0f},

@@ -12,7 +12,7 @@ namespace Trident {
 				return "3d_cubes";
 			}
 
-			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
+			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				static constexpr svec3<float32> FLOOR_VERTICES[] = {
 					{-256.0f,  0.0f,  256.0f},
 					{ 256.0f,  0.0f,  256.0f},
@@ -20,8 +20,7 @@ namespace Trident {
 					{-256.0f,  0.0f, -256.0f},
 				};
 
-				SceneBuilder builder({
-					.flags = {},
+				MapBuilder builder({
 					.skyColor = {0.6f, 0.7f, 0.9f},
 					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("evening_road_01_512p"),
 					.sunDirection = {1.0f, 1.0f, 1.0f},
@@ -60,7 +59,7 @@ namespace Trident {
 				sint32 boxIndex = 0;
 
 				while (boxIndex < 4) {
-					builder.placeStaticProp({
+					builder.createStaticProp({
 						.geometryIndex = boxGeometry,
 						.material = lightmappedDefaultMaterial,
 						.transform = {
@@ -78,7 +77,7 @@ namespace Trident {
 					boxIndex += 1;
 				}
 
-				builder.placeRigidBody({
+				builder.createRigidBody({
 					.geometryIndex = boxGeometry2,
 					.material = pbrDefaultMaterial,
 					.position = {(boxIndex - 2) * CUBE_SPACING + CUBE_BIAS, 16.0f, 128.0f},
@@ -91,7 +90,7 @@ namespace Trident {
 					.restitution = 0.0f,
 				});
 
-				builder.placePointLight({
+				builder.createPointLight({
 					.color = {1.0f, 1.0f, 1.0f},
 					.intensity = 300.0f,
 					.position = {0.0f, 256.0f, 0.0f},

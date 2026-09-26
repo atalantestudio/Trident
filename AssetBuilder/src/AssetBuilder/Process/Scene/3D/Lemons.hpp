@@ -12,9 +12,8 @@ namespace Trident {
 				return "3d_lemons";
 			}
 
-			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
-				SceneBuilder builder({
-					.flags = {},
+			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
+				MapBuilder builder({
 					.skyColor = {0.6f, 0.7f, 0.9f},
 					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("evening_road_01_512p"),
 					.sunDirection = {1.0f, 1.0f, 1.0f},
@@ -30,7 +29,7 @@ namespace Trident {
 
 				const MaterialReference lemonMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lemon_1k"));
 
-				builder.placeRigidBody({
+				builder.createRigidBody({
 					.geometryIndex = lemonGeometry,
 					.material = lemonMaterial,
 					.position = {0.0f, 64.0f, 128.0f},
@@ -43,13 +42,13 @@ namespace Trident {
 					.restitution = 0.0f,
 				});
 
-				builder.placePointLight({
+				builder.createPointLight({
 					.color = {1.0f, 1.0f, 1.0f},
 					.intensity = 300000.0f,
 					.position = {-256.0f, 320.0f, 0.0f},
 				});
 
-				builder.placePointLight({
+				builder.createPointLight({
 					.color = {1.0f, 1.0f, 1.0f},
 					.intensity = 300000.0f,
 					.position = {256.0f, -192.0f, 0.0f},

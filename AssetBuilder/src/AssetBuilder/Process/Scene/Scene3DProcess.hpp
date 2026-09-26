@@ -8,8 +8,8 @@
 
 #include "AssetBuilder/API/AssetBuilderLibrary.hpp"
 #include "AssetBuilder/API/Lightmapper/Lightmapper.hpp"
-#include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
-#include "AssetBuilder/API/Scene/Scene3D.hpp"
+#include "AssetBuilder/API/Map/Builder/MapBuilder.hpp"
+#include "AssetBuilder/API/Map/Scene3D.hpp"
 #include "AssetBuilder/Process/Image/ImageProcess.hpp"
 
 namespace Trident {
@@ -250,7 +250,7 @@ namespace Trident {
 
 				const uint32 assetIdentifier = AssetLibrary::createAssetIdentifier();
 
-				SceneBuilder builder = createScene(assetLibrary);
+				MapBuilder builder = createScene(assetLibrary);
 
 				const BuildScene3D scene = builder.build(lightmapper);
 				const ByteStream<StreamOperation::WRITE> stream = encodeSceneAsset(scene, assetIdentifier);
@@ -265,7 +265,7 @@ namespace Trident {
 		protected:
 			virtual view<char8> getAssetName() const = 0;
 
-			virtual SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const = 0;
+			virtual MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const = 0;
 
 		private:
 			void createSceneAsset(const BuildScene3D& scene, uint32 identifier, const ByteStream<StreamOperation::WRITE>& stream, view<char8> assetName, const std::filesystem::path& rootOutputPath) {

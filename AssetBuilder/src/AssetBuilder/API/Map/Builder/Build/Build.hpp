@@ -3,11 +3,9 @@
 
 #pragma once
 
-#include "AssetBuilder/API/Lightmapper/Lightmapper.hpp"
-#include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
-#include "AssetBuilder/API/Utilities/Utilities.hpp"
-
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
+
+#include "AssetBuilder/API/Map/Builder/MapBuilder.hpp"
 
 namespace Trident {
 	inline void countGeometries(view<IntermediateGeometry> geometries, uint32 geometryCounts[2], uint32 vertexCounts[2], uint32 indexCounts[2]) {
@@ -65,7 +63,7 @@ namespace Trident {
 		}
 	}
 
-	BuildScene3D SceneBuilder::build(Lightmapper* lightmapper) {
+	BuildScene3D MapBuilder::build(Lightmapper* lightmapper) {
 		const view<IntermediateGeometry> preFilteredGeometries(geometries.data(), geometries.size());
 		const view<IntermediateMaterialShader> preFilteredMaterialShaders(materialShaders.data(), materialShaders.size());
 
@@ -264,7 +262,7 @@ namespace Trident {
 		return scene;
 	}
 
-	void SceneBuilder::buildLightmaps(BuildScene3D& scene, Lightmapper* lightmapper) {
+	void MapBuilder::buildLightmaps(BuildScene3D& scene, Lightmapper* lightmapper) {
 		if (lightmapCoordinateCount == 0) {
 			return;
 		}
@@ -290,13 +288,13 @@ namespace Trident {
 		});
 	}
 
-	void SceneBuilder::buildLights(BuildDynamicSceneGeometry3D& dynamicGeometry) {
+	void MapBuilder::buildLights(BuildDynamicSceneGeometry3D& dynamicGeometry) {
 		dynamicGeometry.pointLights = sequence<PointLight>(pointLights.size());
 
 		std::copy(pointLights.begin(), pointLights.end(), &dynamicGeometry.pointLights[0]);
 	}
 
-	void SceneBuilder::buildEntityComponentMappings(BuildDynamicSceneGeometry3D& dynamicGeometry) {
+	void MapBuilder::buildEntityComponentMappings(BuildDynamicSceneGeometry3D& dynamicGeometry) {
 		dynamicGeometry.geometryMappings = sequence<EntityComponentMapping<GeometryComponent>>(geometryMappings.size());
 		dynamicGeometry.rigidBodyMappings = sequence<EntityComponentMapping<RigidBody3DComponent>>(rigidBodyMappings.size());
 

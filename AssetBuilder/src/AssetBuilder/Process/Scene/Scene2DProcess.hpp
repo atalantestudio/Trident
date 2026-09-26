@@ -4,7 +4,7 @@
 #pragma once
 
 #include "AssetBuilder/API/AssetBuilderLibrary.hpp"
-#include "AssetBuilder/API/Scene/Scene2D.hpp"
+#include "AssetBuilder/API/Map/Scene2D.hpp"
 
 #include "Engine/API/Process/Process.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"

@@ -12,7 +12,7 @@ namespace Trident {
 				return "3d_dragon";
 			}
 
-			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
+			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				static constexpr svec3<float32> FLOOR_VERTICES[] = {
 					{-256.0f,  0.0f,  384.0f},
 					{ 256.0f,  0.0f,  384.0f},
@@ -20,8 +20,7 @@ namespace Trident {
 					{-256.0f,  0.0f, -128.0f},
 				};
 
-				SceneBuilder builder({
-					.flags = {},
+				MapBuilder builder({
 					.skyColor = {0.6f, 0.7f, 0.9f},
 					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("overcast_soil_512p"),
 					.sunDirection = {1.0f, 1.0f, 1.0f},
@@ -52,7 +51,7 @@ namespace Trident {
 					},
 				});
 
-				builder.placeStaticProp({
+				builder.createStaticProp({
 					.geometryIndex = dragonGeometry,
 					.material = material,
 					.transform = {

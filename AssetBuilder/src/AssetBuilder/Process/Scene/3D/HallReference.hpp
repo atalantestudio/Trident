@@ -12,7 +12,7 @@ namespace Trident {
 				return "3d_hall_ref";
 			}
 
-			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
+			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				static constexpr LightmapDescriptor LIGHTMAP = {
 					.luxelScale = {1.0f, 1.0f},
 					.emissiveColor = {0.0f, 0.0f, 0.0f},
@@ -206,8 +206,7 @@ namespace Trident {
 				static constexpr float32 m1 = 256.0f;
 				static constexpr float32 m2 = 512.0f;
 
-				SceneBuilder builder({
-					.flags = {},
+				MapBuilder builder({
 					.skyColor = {0.0f, 0.0f, 0.0f},
 					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("overcast_soil_512p"),
 					.sunDirection = {1.0f, 1.0f, 1.0f},

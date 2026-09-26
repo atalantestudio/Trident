@@ -3,79 +3,123 @@
 
 #pragma once
 
-#include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
+#include "Engine/API/Light/PointLight.hpp"
+#include "Engine/Filesystem/Asset/GeometryAsset.hpp"
+#include "Engine/Filesystem/Asset/MaterialAsset.hpp"
+#include "Engine/Filesystem/Asset/ShaderModuleAsset.hpp"
+
+#include "AssetBuilder/API/Entity/EntityDescriptor.hpp"
+#include "AssetBuilder/API/Lightmapper/Lightmap.hpp"
+#include "AssetBuilder/API/Lightmapper/Lightmapper.hpp"
+#include "AssetBuilder/API/Map/Face.hpp"
+#include "AssetBuilder/API/Map/Intermediate.hpp"
+#include "AssetBuilder/API/Map/Scene3D.hpp"
+#include "AssetBuilder/API/Material/MaterialReference.hpp"
+#include "AssetBuilder/API/Mesh/MeshDescriptor.hpp"
 
 namespace Trident {
-	Face& SceneBuilder::getFace(uint32 index) {
-		return faces[index];
-	}
+	class MapBuilder {
+		public:
+			static constexpr uint32 MAX_FACE_POSITIONS = 65535;
+			static constexpr uint32 MAX_INDICES = 65535;
+			static constexpr uint32 MAX_FACES = 256;
+			static constexpr Extent2D LIGHTMAP_ATLAS_EXTENT = {1024, 1024};
 
-	void SceneBuilder::extrudeFace(Face& face, float32 scale) {
-		if (abs(scale) < 1e-4) {
-			return;
-		}
+		private:
+			// TODO(asset-builder/scene): Remove once TSL is ready.
+			static ShaderModuleAsset getMaterialShaderModuleAsset(uint32 identifier);
 
-		const uint32 materialShaderIndex = face.material >> 16;
-		const uint32 materialIndex = face.material & 0xff;
+			static LightmapNode* insertLightmapNode(const Lightmap& lightmap, LightmapNode* node);
 
-		const IntermediateMaterialShader& materialShader = materialShaders[materialShaderIndex];
-		const IntermediateMaterial& material = materialShader.materials[materialIndex];
-		const IntermediateMaterialGeometry& materialGeometry = material.geometries[material.bakedGeometryIndex];
+		public:
+			explicit MapBuilder(const MapDescriptor& descriptor);
 
-		IntermediateGeometry& geometry = geometries[materialGeometry.geometryIndex];
+			/// Loads a geometry asset and returns its index.
+			uint32 loadGeometry(ref<Geometry3DAsset> asset);
 
-		vec3<float32> a = facePositions[indices[face.indexRange.offset]];
-		uint32 indexA = 0;
+			MaterialReference loadMaterial(ref<MaterialAsset> asset);
 
-		while (indexA < face.vertexCount) {
-			// TODO(lyah/scalar)
-			facePositions[facePositionCount + indexA] = svec3<float32>(a) + face.normal * scale;
+			Face& getFace(uint32 index);
 
-			const uint32 indexB = (indexA + 1) % face.vertexCount;
-			const vec3<float32> b = facePositions[indices[face.indexRange.offset + indexB]];
+			/// Creates and returns a new face.
+			/// The face must have at least 3 vertices laid out in clockwise order.
+			/// Degenerate vertices and edge-crossing vertices are not allowed.
+			Face& createFace(const FaceDescriptor& descriptor);
 
-			Face extrudedFace{};
-			extrudedFace.vertexCount = 4;
-			extrudedFace.indexRange.offset = staticGeometryFaceVertexCount + indexA * 4;
+			/// Extrudes the face `scale` units towards its normal.
+			/// This operation moves the current face and creates additional faces on the extruded sides.
+			/// 
+			/// If `scale` is 0, the operation is ignored.
+			void extrudeFace(Face& face, float32 scale);
 
-			// TODO(lyah/scalar)
-			extrudedFace.normal = svec3<float32>(normalized(cross(b - a, face.normal * scale)));
+			// TODO(asset-builder/map/carve-face): Implement face carving.
+			/// Carves a new face inside an existing face.
+			/// This operation modifies the vertices of the current face.
+			// Face& carve(view<svec3<float32>> vertices);
 
-			extrudedFace.triangleOffset = staticGeometryFaceTriangleCount;
-			extrudedFace.geometryIndex = face.geometryIndex;
-			extrudedFace.material = face.material;
-			extrudedFace.textureFiltering = face.textureFiltering;
-			extrudedFace.lightmap = face.lightmap;
-			extrudedFace.boundingBox.min = {max<float32>(), max<float32>()};
-			extrudedFace.boundingBox.max = {min<float32>(), min<float32>()};
+			void createStaticProp(const MeshDescriptor& descriptor);
 
-			indices[extrudedFace.indexRange.offset + 0] = facePositionCount + indexB;
-			indices[extrudedFace.indexRange.offset + 1] = facePositionCount + indexA;
-			indices[extrudedFace.indexRange.offset + 2] = indices[face.indexRange.offset + indexA];
-			indices[extrudedFace.indexRange.offset + 3] = indices[face.indexRange.offset + indexB];
+			void createRigidBody(const EntityDescriptor& descriptor);
 
-			faces[staticGeometryFaceCount] = extrudedFace;
+			void createPointLight(const PointLight& pointLight);
 
-			geometry.faceIndices.emplace_back(staticGeometryFaceCount);
+			BuildScene3D build(Lightmapper* lightmapper);
 
-			a = b;
+		private:
+			uint32 findMaterialShaderIndex(uint32 assetIdentifier) const;
+			uint32 findMaterialGeometryIndex(const IntermediateMaterial& material, uint32 geometryIndex) const;
 
-			staticGeometryFaceCount += 1;
-			staticGeometryFaceTriangleCount += 2;
-			lightmapCoordinateCount += face.vertexCount;
-			indexA += 1;
-		}
+			void calculateFaceBoundingBoxes(const IntermediateGeometry& intermediateGeometry);
 
-		indexA = 0;
+			void triangulateFaces(BuildScene3D& scene, const IntermediateGeometry& intermediateGeometry, BuildGeometry& geometry, uint32 lineIndexOffset) const;
 
-		while (indexA < face.vertexCount) {
-			indices[face.indexRange.offset + indexA] = facePositionCount + indexA;
+			void buildEntityComponentMappings(BuildDynamicSceneGeometry3D& dynamicGeometry);
+			void buildLights(BuildDynamicSceneGeometry3D& dynamicGeometry);
+			void buildLightmaps(BuildScene3D& scene, Lightmapper* lightmapper);
 
-			indexA += 1;
-		}
+			void createLightmaps(const BuildScene3D& scene, BuildStaticSceneGeometry3D& staticGeometry);
+			void updateLightmapCoordinates(BuildStaticSceneGeometry3D& staticGeometry);
 
-		facePositionCount += face.vertexCount;
-		staticGeometryFaceVertexCount += face.vertexCount * 4;
-		lightmapCount += face.vertexCount;
-	}
+			sequence<BuildTriangle3D> createTriangleBuffer(const BuildScene3D& scene) const;
+			sequence<uint32> createEmissiveTriangleIndexBuffer(const BuildScene3D& scene) const;
+
+		protected:
+			uint64 bakedVertexCount = 0;
+			uint64 bakedIndexCount = 0;
+			uint64 lightmapCoordinateCount = 0;
+			uint64 staticInstanceCount = 0;
+			uint64 dynamicVertexCount = 0;
+			uint64 dynamicIndexCount = 0;
+			uint64 materialGeometryCount = 0;
+			uint64 materialCount = 0;
+			uint64 lightmapCount = 0;
+			uint32 entityCount = 0;
+
+			sequence<svec3<float32>> facePositions;
+			sequence<uint32> indices;
+			sequence<Face> faces;
+
+			/// Total unique position count.
+			uint32 facePositionCount = 0;
+
+			uint32 staticGeometryFaceVertexCount = 0;
+			uint32 staticGeometryFaceTriangleCount = 0;
+			uint32 staticGeometryFaceCount = 0;
+
+			std::vector<IntermediateGeometry> geometries;
+			std::vector<IntermediateMaterialShader> materialShaders;
+
+			sequence<Lightmap> lightmaps;
+			sequence<LightmapMaterial> lightmapMaterials;
+
+			/// Sorted by ascending area.
+			std::vector<LightmapLookup> lightmapLookups;
+
+			MapDescriptor descriptor;
+
+			std::vector<EntityComponentMapping<GeometryComponent>> geometryMappings;
+			std::vector<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;
+
+			std::vector<PointLight> pointLights;
+	};
 }

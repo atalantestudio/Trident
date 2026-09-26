@@ -3,13 +3,12 @@
 
 #pragma once
 
-#include "AssetBuilder/API/Lightmapper/Lightmap.hpp"
-#include "AssetBuilder/API/Lightmapper/Lightmapper.hpp"
-#include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
+#include "AssetBuilder/API/Map/Builder/MapBuilder.hpp"
+#include "AssetBuilder/API/Utilities/Utilities.hpp"
 
 namespace Trident {
 	// See https://blackpawn.com/texts/lightmaps.
-	LightmapNode* SceneBuilder::insertLightmapNode(const Lightmap& lightmap, LightmapNode* node) {
+	LightmapNode* MapBuilder::insertLightmapNode(const Lightmap& lightmap, LightmapNode* node) {
 		if (!node->leaf()) {
 			LightmapNode* newNode = insertLightmapNode(lightmap, node->children[0]);
 
@@ -66,7 +65,7 @@ namespace Trident {
 		return insertLightmapNode(lightmap, node->children[0]);
 	}
 
-	void SceneBuilder::createLightmaps(const BuildScene3D& scene, BuildStaticSceneGeometry3D& staticGeometry) {
+	void MapBuilder::createLightmaps(const BuildScene3D& scene, BuildStaticSceneGeometry3D& staticGeometry) {
 		lightmaps = sequence<Lightmap>(lightmapCount);
 		lightmapMaterials = sequence<LightmapMaterial>(lightmapCount);
 
@@ -222,7 +221,7 @@ namespace Trident {
 		}
 	}
 
-	void SceneBuilder::updateLightmapCoordinates(BuildStaticSceneGeometry3D& staticGeometry) {
+	void MapBuilder::updateLightmapCoordinates(BuildStaticSceneGeometry3D& staticGeometry) {
 		static constexpr svec2<float32> inverseAtlasExtent = {
 			1.0f / static_cast<float32>(LIGHTMAP_ATLAS_EXTENT.width),
 			1.0f / static_cast<float32>(LIGHTMAP_ATLAS_EXTENT.height),

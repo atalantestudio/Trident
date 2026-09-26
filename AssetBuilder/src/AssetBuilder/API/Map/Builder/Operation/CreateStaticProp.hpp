@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include "AssetBuilder/API/Scene/Builder/SceneBuilder.hpp"
+#include "AssetBuilder/API/Map/Builder/MapBuilder.hpp"
 
 namespace Trident {
-	void SceneBuilder::placeStaticProp(const MeshDescriptor& descriptor) {
+	void MapBuilder::createStaticProp(const MeshDescriptor& descriptor) {
 		const uint32 materialShaderIndex = descriptor.material >> 16;
 		const uint32 materialIndex = descriptor.material & 0xff;
 
