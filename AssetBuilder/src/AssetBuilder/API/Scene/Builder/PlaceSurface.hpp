@@ -28,10 +28,15 @@ namespace Trident {
 
 			geometries.emplace_back(geometry);
 
-			BuildTransform3D instance{};
-			instance.translation = {0.0f, 0.0f, 0.0f};
-			instance.rotation = {0.0f, 0.0f, 0.0f};
-			instance.scale = 1.0f;
+			BuildInstance instance{};
+			instance.transform.translation = {0.0f, 0.0f, 0.0f};
+			instance.transform.rotation = {0.0f, 0.0f, 0.0f};
+			instance.transform.scale = 1.0f;
+			instance.lightmap.luxelScale = {1.0f, 1.0f};
+			instance.lightmap.emissiveColor = {0.0f, 0.0f, 0.0f};
+			instance.lightmap.emissiveIntensity = 0.0f;
+			instance.lightmap.albedo = {1.0f, 1.0f, 1.0f};
+			instance.lightmapScale = {1.0f, 1.0f};
 
 			IntermediateMaterialGeometry materialGeometry{};
 			materialGeometry.geometryIndex = geometryIndex;
