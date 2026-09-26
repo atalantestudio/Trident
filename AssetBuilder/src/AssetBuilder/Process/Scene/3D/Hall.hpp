@@ -104,6 +104,32 @@ namespace Trident {
 					{-24.0f,   128.0f,  100.0f},
 					{-24.0f,   112.0f,  100.0f},
 					{-24.0f,   112.0f,  156.0f},
+					{ 128.0f,  240.0f, -16.0f },
+					{-16.0f,   240.0f, -16.0f },
+					{-16.0f,   128.0f, -16.0f },
+					{ 128.0f,  128.0f, -16.0f },
+					{-16.0f,   240.0f, -16.0f },
+					{-16.0f,   240.0f,  184.0f},
+					{-16.0f,   128.0f,  184.0f},
+					{-16.0f,   128.0f, -16.0f },
+					{-16.0f,   240.0f,  184.0f},
+					{ 128.0f,  240.0f,  184.0f},
+					{ 128.0f,  128.0f,  184.0f},
+					{-16.0f,   128.0f,  184.0f},
+					{ 128.0f,  240.0f,  184.0f},
+					{ 128.0f,  240.0f, -16.0f },
+					{ 128.0f,  128.0f, -16.0f },
+					{ 128.0f,  128.0f,  184.0f},
+
+					{-16.0f,   240.0f, -16.0f },
+					{ 128.0f,  240.0f, -16.0f },
+					{ 128.0f,  240.0f,  184.0f},
+					{-16.0f,   240.0f,  184.0f},
+
+					{-96.0f,   128.0f,  48.0f },
+					{-24.0f,   128.0f,  48.0f },
+					{-24.0f,   128.0f,  184.0f},
+					{-96.0f,   128.0f,  184.0f},
 				};
 				static constexpr view<svec3<float32>> HALL_FLOOR_VERTICES(&VERTICES[0], 4);
 				static constexpr view<svec3<float32>> HALL_TO_BIKE_ROOM_FLOOR_CONNECTOR_VERTICES(&VERTICES[4], 4);
@@ -126,6 +152,12 @@ namespace Trident {
 				static constexpr view<svec3<float32>> HALL_LEFT_DOOR_WALL_VERTICES(&VERTICES[72], 4);
 				static constexpr view<svec3<float32>> HALL_FRONT_DOOR_WALL_VERTICES(&VERTICES[76], 4);
 				static constexpr view<svec3<float32>> BIKE_ROOM_RIGHT_DOOR_WALL_VERTICES(&VERTICES[80], 4);
+				static constexpr view<svec3<float32>> HALL_BACK_WALL_TOP_VERTICES(&VERTICES[84], 4);
+				static constexpr view<svec3<float32>> HALL_LEFT_WALL_TOP_VERTICES(&VERTICES[88], 4);
+				static constexpr view<svec3<float32>> HALL_FRONT_WALL_TOP_VERTICES(&VERTICES[92], 4);
+				static constexpr view<svec3<float32>> HALL_RIGHT_WALL_TOP_VERTICES(&VERTICES[96], 4);
+				static constexpr view<svec3<float32>> HALL_ROOM_CEILING_VERTICES(&VERTICES[100], 4);
+				static constexpr view<svec3<float32>> BIKE_ROOM_CEILING_VERTICES(&VERTICES[104], 4);
 
 				// Texture scale multipliers
 				static constexpr float32 m1 = 256.0f;
@@ -150,8 +182,7 @@ namespace Trident {
 				const MaterialReference woodDoorMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("wood_door"));
 				const MaterialReference plasterCeilingMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("plaster_ceiling"));
 
-				/// Floors
-
+				// Floor
 				builder.createFace({
 					.vertices = HALL_FLOOR_VERTICES,
 					.normal = {0.0f, 1.0f, 0.0f},
@@ -208,8 +239,7 @@ namespace Trident {
 					.lightmap = LIGHTMAP,
 				});
 
-				/// Walls
-
+				// Walls
 				builder.createFace({
 					.vertices = HALL_ENTRANCE_LEFT_WALL_VERTICES,
 					.normal = {0.0f, 0.0f, 1.0f},
@@ -386,9 +416,76 @@ namespace Trident {
 					},
 					.lightmap = LIGHTMAP,
 				});
+				builder.createFace({
+					.vertices = HALL_BACK_WALL_TOP_VERTICES,
+					.normal = {0.0f, 0.0f, 1.0f},
+					.material = plasterCeilingMaterial,
+					.textureFiltering = {
+						.translation = {0.0f, 0.125f},
+						.rotation = 0.0f,
+						.scale = {m2 * -0.25f, m2 * 0.25f},
+					},
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = HALL_LEFT_WALL_TOP_VERTICES,
+					.normal = {1.0f, 0.0f, 0.0f},
+					.material = plasterCeilingMaterial,
+					.textureFiltering = {
+						.translation = {0.125f, 0.125f},
+						.rotation = 0.0f,
+						.scale = {m2 * 0.25f, m2 * 0.25f},
+					},
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = HALL_FRONT_WALL_TOP_VERTICES,
+					.normal = {0.0f, 0.0f, -1.0f},
+					.material = plasterCeilingMaterial,
+					.textureFiltering = {
+						.translation = {0.125f, 0.125f},
+						.rotation = 0.0f,
+						.scale = {m2 * -0.25f, m2 * 0.25f},
+					},
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = HALL_RIGHT_WALL_TOP_VERTICES,
+					.normal = {-1.0f, 0.0f, 0.0f},
+					.material = plasterCeilingMaterial,
+					.textureFiltering = {
+						.translation = {0.686f, 0.125f},
+						.rotation = 0.0f,
+						.scale = {m2 * -0.25f, m2 * 0.25f},
+					},
+					.lightmap = LIGHTMAP,
+				});
 
-				/// Door frames
+				// Ceiling
+				builder.createFace({
+					.vertices = HALL_ROOM_CEILING_VERTICES,
+					.normal = {0.0f, -1.0f, 0.0f},
+					.material = plasterCeilingMaterial,
+					.textureFiltering = {
+						.translation = {0.498f, 0.875f},
+						.rotation = 0.5f,
+						.scale = {m2 * 0.25f, m2 * -0.25f},
+					},
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = BIKE_ROOM_CEILING_VERTICES,
+					.normal = {0.0f, -1.0f, 0.0f},
+					.material = plasterCeilingMaterial,
+					.textureFiltering = {
+						.translation = {0.69f, 0.258f},
+						.rotation = 0.5f,
+						.scale = {m2 * 0.25f, m2 * -0.25f},
+					},
+					.lightmap = LIGHTMAP,
+				});
 
+				// Door frames
 				// Bike room entrance door frame left
 				/* builder.placeSurface(
 					{
@@ -406,10 +503,10 @@ namespace Trident {
 						.axis = {0.0f, 1.0f, 0.0f},
 						.angle = radians(90.0_deg),
 					}
-				);
+				); */
 
 				// Bike room entrance door frame right
-				builder.placeSurface(
+				/* builder.placeSurface(
 					{
 						.geometry = builder.createWallGeometry({4.0f, 108.0f}),
 						.material = woodDoorMaterial,
@@ -425,10 +522,10 @@ namespace Trident {
 						.axis = {0.0f, 1.0f, 0.0f},
 						.angle = radians(90.0_deg),
 					}
-				);
+				); */
 
 				// Bike room entrance door frame top
-				builder.placeSurface(
+				/* builder.placeSurface(
 					{
 						.geometry = builder.createWallGeometry({56.0f, 4.0f}),
 						.material = woodDoorMaterial,
@@ -444,10 +541,10 @@ namespace Trident {
 						.axis = {0.0f, 1.0f, 0.0f},
 						.angle = radians(90.0_deg),
 					}
-				);
+				); */
 
 				// Bike room entrance door frame left inside
-				builder.placeSurface(
+				/* builder.placeSurface(
 					{
 						.geometry = builder.createWallGeometry({8.0f, 108.0f}),
 						.material = woodDoorMaterial,
@@ -463,10 +560,10 @@ namespace Trident {
 						.axis = {0.0f, 1.0f, 0.0f},
 						.angle = radians(180.0_deg),
 					}
-				);
+				); */
 
 				// Bike room entrance door frame right inside
-				builder.placeSurface(
+				/* builder.placeSurface(
 					{
 						.geometry = builder.createWallGeometry({8.0f, 108.0f}),
 						.material = woodDoorMaterial,
@@ -482,10 +579,10 @@ namespace Trident {
 						.axis = {0.0f, 1.0f, 0.0f},
 						.angle = 0.0_rad,
 					}
-				);
+				); */
 
 				// Bike room entrance door frame top inside
-				builder.placeSurface(
+				/* builder.placeSurface(
 					{
 						.geometry = builder.createWallGeometry({8.0f, 48.0f}),
 						.material = woodDoorMaterial,
@@ -501,10 +598,10 @@ namespace Trident {
 						.axis = {1.0f, 0.0f, 0.0f},
 						.angle = radians(90.0_deg),
 					}
-				);
+				); */
 
 				// Bike room inside entrance door frame left
-				builder.placeSurface(
+				/* builder.placeSurface(
 					{
 						.geometry = builder.createWallGeometry({4.0f, 108.0f}),
 						.material = woodDoorMaterial,
@@ -520,10 +617,10 @@ namespace Trident {
 						.axis = {0.0f, 1.0f, 0.0f},
 						.angle = radians(-90.0_deg),
 					}
-				);
+				); */
 
 				// Bike room inside entrance door frame right
-				builder.placeSurface(
+				/* builder.placeSurface(
 					{
 						.geometry = builder.createWallGeometry({4.0f, 108.0f}),
 						.material = woodDoorMaterial,
@@ -539,10 +636,10 @@ namespace Trident {
 						.axis = {0.0f, 1.0f, 0.0f},
 						.angle = radians(-90.0_deg),
 					}
-				);
+				); */
 
 				// Bike room inside entrance door frame top
-				builder.placeSurface(
+				/* builder.placeSurface(
 					{
 						.geometry = builder.createWallGeometry({56.0f, 4.0f}),
 						.material = woodDoorMaterial,
@@ -557,122 +654,6 @@ namespace Trident {
 						.translation = {-24.0f, 110.0f, 128.0f},
 						.axis = {0.0f, 1.0f, 0.0f},
 						.angle = radians(-90.0_deg),
-					}
-				);
-
-				/// Ceiling
-
-				// Hall entrance top wall
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({144.0f, 112.0f}),
-						.material = plasterCeilingMaterial,
-						.textureFiltering = {
-							.translation = {0.0f, 0.125f},
-							.rotation = 0.0f,
-							.scale = {m2 * -0.25f, m2 * 0.25f},
-						},
-						.lightmap = LIGHTMAP,
-					},
-					{
-						.translation = {56.0f, 184.0f, -16.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = radians(180.0_deg),
-					}
-				);
-
-				// Bike room entrance top wall
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({200.0f, 112.0f}),
-						.material = plasterCeilingMaterial,
-						.textureFiltering = {
-							.translation = {0.125f, 0.125f},
-							.rotation = 0.0f,
-							.scale = {m2 * 0.25f, m2 * 0.25f},
-						},
-						.lightmap = LIGHTMAP,
-					},
-					{
-						.translation = {-16.0f, 184.0f, 84.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = radians(90.0_deg),
-					}
-				);
-
-				// Main entrance top wall
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({144.0f, 112.0f}),
-						.material = plasterCeilingMaterial,
-						.textureFiltering = {
-							.translation = {0.125f, 0.125f},
-							.rotation = 0.0f,
-							.scale = {m2 * -0.25f, m2 * 0.25f},
-						},
-						.lightmap = LIGHTMAP,
-					},
-					{
-						.translation = {56.0f, 184.0f, 184.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = 0.0_rad,
-					}
-				);
-
-				// Mailbox top wall
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({200.0f, 112.0f}),
-						.material = plasterCeilingMaterial,
-						.textureFiltering = {
-							.translation = {0.686f, 0.125f},
-							.rotation = 0.0f,
-							.scale = {m2 * -0.25f, m2 * 0.25f},
-						},
-						.lightmap = LIGHTMAP,
-					},
-					{
-						.translation = {128.0f, 184.0f, 84.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = radians(-90.0_deg),
-					}
-				);
-
-				// Hall ceiling
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({144.0f, 200.0f}),
-						.material = plasterCeilingMaterial,
-						.textureFiltering = {
-							.translation = {0.498f, 0.875f},
-							.rotation = 0.5f,
-							.scale = {m2 * 0.25f, m2 * -0.25f},
-						},
-						.lightmap = LIGHTMAP,
-					},
-					{
-						.translation = {56.0f, 240.0f, 84.0f},
-						.axis = {1.0f, 0.0f, 0.0f},
-						.angle = radians(90.0_deg),
-					}
-				);
-
-				// Bike room ceiling
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({72.0f, 136.0f}),
-						.material = plasterCeilingMaterial,
-						.textureFiltering = {
-							.translation = {0.69f, 0.258f},
-							.rotation = 0.5f,
-							.scale = {m2 * 0.25f, m2 * -0.25f},
-						},
-						.lightmap = LIGHTMAP,
-					},
-					{
-						.translation = {-60.0f, 128.0f, 116.0f},
-						.axis = {1.0f, 0.0f, 0.0f},
-						.angle = radians(90.0_deg),
 					}
 				); */
 
