@@ -120,16 +120,50 @@ namespace Trident {
 					{ 128.0f,  240.0f, -16.0f },
 					{ 128.0f,  128.0f, -16.0f },
 					{ 128.0f,  128.0f,  184.0f},
-
 					{-16.0f,   240.0f, -16.0f },
 					{ 128.0f,  240.0f, -16.0f },
 					{ 128.0f,  240.0f,  184.0f},
 					{-16.0f,   240.0f,  184.0f},
-
 					{-96.0f,   128.0f,  48.0f },
 					{-24.0f,   128.0f,  48.0f },
 					{-24.0f,   128.0f,  184.0f},
 					{-96.0f,   128.0f,  184.0f},
+					{-16.0f,   108.0f,  100.0f},
+					{-16.0f,   108.0f,  104.0f},
+					{-16.0f,   0.0f,    104.0f},
+					{-16.0f,   0.0f,    100.0f},
+					{-16.0f,   108.0f,  152.0f},
+					{-16.0f,   108.0f,  156.0f},
+					{-16.0f,   0.0f,    156.0f},
+					{-16.0f,   0.0f,    152.0f},
+					{-16.0f,   112.0f,  100.0f},
+					{-16.0f,   112.0f,  156.0f},
+					{-16.0f,   108.0f,  156.0f},
+					{-16.0f,   108.0f,  100.0f},
+					{-24.0f,   108.0f,  104.0f},
+					{-24.0f,   108.0f,  100.0f},
+					{-24.0f,   0.0f,    100.0f},
+					{-24.0f,   0.0f,    104.0f},
+					{-24.0f,   108.0f,  156.0f},
+					{-24.0f,   108.0f,  152.0f},
+					{-24.0f,   0.0f,    152.0f},
+					{-24.0f,   0.0f,    156.0f},
+					{-24.0f,   112.0f,  156.0f},
+					{-24.0f,   112.0f,  100.0f},
+					{-24.0f,   108.0f,  100.0f},
+					{-24.0f,   108.0f,  156.0f},
+					{-16.0f,   108.0f,  104.0f},
+					{-24.0f,   108.0f,  104.0f},
+					{-24.0f,   0.0f,    104.0f},
+					{-16.0f,   0.0f,    104.0f},
+					{-24.0f,   108.0f,  152.0f},
+					{-16.0f,   108.0f,  152.0f},
+					{-16.0f,   0.0f,    152.0f},
+					{-24.0f,   0.0f,    152.0f},
+					{-24.0f,   108.0f,  100.0f},
+					{-16.0f,   108.0f,  100.0f},
+					{-16.0f,   108.0f,  152.0f},
+					{-24.0f,   108.0f,  152.0f},
 				};
 				static constexpr view<svec3<float32>> HALL_FLOOR_VERTICES(&VERTICES[0], 4);
 				static constexpr view<svec3<float32>> HALL_TO_BIKE_ROOM_FLOOR_CONNECTOR_VERTICES(&VERTICES[4], 4);
@@ -158,6 +192,15 @@ namespace Trident {
 				static constexpr view<svec3<float32>> HALL_RIGHT_WALL_TOP_VERTICES(&VERTICES[96], 4);
 				static constexpr view<svec3<float32>> HALL_ROOM_CEILING_VERTICES(&VERTICES[100], 4);
 				static constexpr view<svec3<float32>> BIKE_ROOM_CEILING_VERTICES(&VERTICES[104], 4);
+				static constexpr view<svec3<float32>> HALL_ROOM_TO_BIKE_ROOM_LEFT_DOOR_FRAME_VERTICES(&VERTICES[108], 4);
+				static constexpr view<svec3<float32>> HALL_ROOM_TO_BIKE_ROOM_RIGHT_DOOR_FRAME_VERTICES(&VERTICES[112], 4);
+				static constexpr view<svec3<float32>> HALL_ROOM_TO_BIKE_ROOM_TOP_DOOR_FRAME_VERTICES(&VERTICES[116], 4);
+				static constexpr view<svec3<float32>> BIKE_ROOM_TO_HALL_ROOM_LEFT_DOOR_FRAME_VERTICES(&VERTICES[120], 4);
+				static constexpr view<svec3<float32>> BIKE_ROOM_TO_HALL_ROOM_RIGHT_DOOR_FRAME_VERTICES(&VERTICES[124], 4);
+				static constexpr view<svec3<float32>> BIKE_ROOM_TO_HALL_ROOM_TOP_DOOR_FRAME_VERTICES(&VERTICES[128], 4);
+				static constexpr view<svec3<float32>> BIKE_ENTRANCE_LEFT_DOOR_FRAME_VERTICES(&VERTICES[132], 4);
+				static constexpr view<svec3<float32>> BIKE_ENTRANCE_RIGHT_DOOR_FRAME_VERTICES(&VERTICES[136], 4);
+				static constexpr view<svec3<float32>> BIKE_ENTRANCE_TOP_DOOR_FRAME_VERTICES(&VERTICES[140], 4);
 
 				// Texture scale multipliers
 				static constexpr float32 m1 = 256.0f;
@@ -166,8 +209,7 @@ namespace Trident {
 				SceneBuilder builder({
 					.flags = {},
 					.skyColor = {0.0f, 0.0f, 0.0f},
-					// .environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("overcast_soil_512p"),
-					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("evening_road_01_512p"),
+					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("overcast_soil_512p"),
 					.sunDirection = {1.0f, 1.0f, 1.0f},
 					.sunColor = {1.0f, 1.0f, 1.0f},
 					.sunIntensity = 1.0f,
@@ -486,176 +528,105 @@ namespace Trident {
 				});
 
 				// Door frames
-				// Bike room entrance door frame left
-				/* builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({4.0f, 108.0f}),
-						.material = woodDoorMaterial,
-						.textureFiltering = {
-							.translation = {0.875f, 0.155f},
-							.rotation = 0.0f,
-							.scale = {m1 * -0.25f, m2 * 0.25f},
-						},
-						.lightmap = LIGHTMAP,
+				builder.createFace({
+					.vertices = HALL_ROOM_TO_BIKE_ROOM_LEFT_DOOR_FRAME_VERTICES,
+					.normal = {1.0f, 0.0f, 0.0f},
+					.material = woodDoorMaterial,
+					.textureFiltering = {
+						.translation = {0.875f, 0.155f},
+						.rotation = 0.0f,
+						.scale = {m1 * -0.25f, m2 * 0.25f},
 					},
-					{
-						.translation = {-16.0f, 54.0f, 102.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = radians(90.0_deg),
-					}
-				); */
-
-				// Bike room entrance door frame right
-				/* builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({4.0f, 108.0f}),
-						.material = woodDoorMaterial,
-						.textureFiltering = {
-							.translation = {0.0625f, 0.155f},
-							.rotation = 0.0f,
-							.scale = {m1 * -0.25f, m2 * 0.25f},
-						},
-						.lightmap = LIGHTMAP,
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = HALL_ROOM_TO_BIKE_ROOM_RIGHT_DOOR_FRAME_VERTICES,
+					.normal = {1.0f, 0.0f, 0.0f},
+					.material = woodDoorMaterial,
+					.textureFiltering = {
+						.translation = {0.0625f, 0.155f},
+						.rotation = 0.0f,
+						.scale = {m1 * -0.25f, m2 * 0.25f},
 					},
-					{
-						.translation = {-16.0f, 54.0f, 154.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = radians(90.0_deg),
-					}
-				); */
-
-				// Bike room entrance door frame top
-				/* builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({56.0f, 4.0f}),
-						.material = woodDoorMaterial,
-						.textureFiltering = {
-							.translation = {-0.125f, 0.125f},
-							.rotation = 0.0f,
-							.scale = {m1 * -0.25f, m2 * 0.25f},
-						},
-						.lightmap = LIGHTMAP,
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = HALL_ROOM_TO_BIKE_ROOM_TOP_DOOR_FRAME_VERTICES,
+					.normal = {1.0f, 0.0f, 0.0f},
+					.material = woodDoorMaterial,
+					.textureFiltering = {
+						.translation = {-0.125f, 0.125f},
+						.rotation = 0.0f,
+						.scale = {m1 * -0.25f, m2 * 0.25f},
 					},
-					{
-						.translation = {-16.0f, 110.0f, 128.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = radians(90.0_deg),
-					}
-				); */
-
-				// Bike room entrance door frame left inside
-				/* builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({8.0f, 108.0f}),
-						.material = woodDoorMaterial,
-						.textureFiltering = {
-							.translation = {0.195f, 0.1575f},
-							.rotation = 0.0f,
-							.scale = {m1 * -0.25f, m2 * 0.25f},
-						},
-						.lightmap = LIGHTMAP,
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = BIKE_ROOM_TO_HALL_ROOM_LEFT_DOOR_FRAME_VERTICES,
+					.normal = {-1.0f, 0.0f, 0.0f},
+					.material = woodDoorMaterial,
+					.textureFiltering = {
+						.translation = {0.0f, 0.155f},
+						.rotation = 0.0f,
+						.scale = {m1 * 0.25f, m2 * 0.25f},
 					},
-					{
-						.translation = {-20.0f, 54.0f, 104.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = radians(180.0_deg),
-					}
-				); */
-
-				// Bike room entrance door frame right inside
-				/* builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({8.0f, 108.0f}),
-						.material = woodDoorMaterial,
-						.textureFiltering = {
-							.translation = {0.0625f, 0.1575f},
-							.rotation = 0.0f,
-							.scale = {m1 * 0.25f, m2 * 0.25f},
-						},
-						.lightmap = LIGHTMAP,
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = BIKE_ROOM_TO_HALL_ROOM_RIGHT_DOOR_FRAME_VERTICES,
+					.normal = {-1.0f, 0.0f, 0.0f},
+					.material = woodDoorMaterial,
+					.textureFiltering = {
+						.translation = {0.8125f, 0.155f},
+						.rotation = 0.0f,
+						.scale = {m1 * 0.25f, m2 * 0.25f},
 					},
-					{
-						.translation = {-20.0f, 54.0f, 152.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = 0.0_rad,
-					}
-				); */
-
-				// Bike room entrance door frame top inside
-				/* builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({8.0f, 48.0f}),
-						.material = woodDoorMaterial,
-						.textureFiltering = {
-							.translation = {0.19f, -0.017f},
-							.rotation = 1.0f,
-							.scale = {m1 * 0.25f, m2 * 0.25f},
-						},
-						.lightmap = LIGHTMAP,
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = BIKE_ROOM_TO_HALL_ROOM_TOP_DOOR_FRAME_VERTICES,
+					.normal = {-1.0f, 0.0f, 0.0f},
+					.material = woodDoorMaterial,
+					.textureFiltering = {
+						.translation = {0.0f, 0.125f},
+						.rotation = 0.0f,
+						.scale = {m1 * 0.25f, m2 * 0.25f},
 					},
-					{
-						.translation = {-20.0f, 108.0f, 128.0f},
-						.axis = {1.0f, 0.0f, 0.0f},
-						.angle = radians(90.0_deg),
-					}
-				); */
-
-				// Bike room inside entrance door frame left
-				/* builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({4.0f, 108.0f}),
-						.material = woodDoorMaterial,
-						.textureFiltering = {
-							.translation = {0.0f, 0.155f},
-							.rotation = 0.0f,
-							.scale = {m1 * 0.25f, m2 * 0.25f},
-						},
-						.lightmap = LIGHTMAP,
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = BIKE_ENTRANCE_LEFT_DOOR_FRAME_VERTICES,
+					.normal = {0.0f, 0.0f, 1.0f},
+					.material = woodDoorMaterial,
+					.textureFiltering = {
+						.translation = {0.195f, 0.1575f},
+						.rotation = 0.0f,
+						.scale = {m1 * -0.25f, m2 * 0.25f},
 					},
-					{
-						.translation = {-24.0f, 54.0f, 154.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = radians(-90.0_deg),
-					}
-				); */
-
-				// Bike room inside entrance door frame right
-				/* builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({4.0f, 108.0f}),
-						.material = woodDoorMaterial,
-						.textureFiltering = {
-							.translation = {0.8125f, 0.155f},
-							.rotation = 0.0f,
-							.scale = {m1 * 0.25f, m2 * 0.25f},
-						},
-						.lightmap = LIGHTMAP,
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = BIKE_ENTRANCE_RIGHT_DOOR_FRAME_VERTICES,
+					.normal = {0.0f, 0.0f, -1.0f},
+					.material = woodDoorMaterial,
+					.textureFiltering = {
+						.translation = {0.0625f, 0.1575f},
+						.rotation = 0.0f,
+						.scale = {m1 * 0.25f, m2 * 0.25f},
 					},
-					{
-						.translation = {-24.0f, 54.0f, 102.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = radians(-90.0_deg),
-					}
-				); */
-
-				// Bike room inside entrance door frame top
-				/* builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({56.0f, 4.0f}),
-						.material = woodDoorMaterial,
-						.textureFiltering = {
-							.translation = {0.0f, 0.125f},
-							.rotation = 0.0f,
-							.scale = {m1 * 0.25f, m2 * 0.25f},
-						},
-						.lightmap = LIGHTMAP,
+					.lightmap = LIGHTMAP,
+				});
+				builder.createFace({
+					.vertices = BIKE_ENTRANCE_TOP_DOOR_FRAME_VERTICES,
+					.normal = {0.0f, -1.0f, 0.0f},
+					.material = woodDoorMaterial,
+					.textureFiltering = {
+						.translation = {0.19f, -0.017f},
+						.rotation = 1.0f,
+						.scale = {m1 * 0.25f, m2 * 0.25f},
 					},
-					{
-						.translation = {-24.0f, 110.0f, 128.0f},
-						.axis = {0.0f, 1.0f, 0.0f},
-						.angle = radians(-90.0_deg),
-					}
-				); */
+					.lightmap = LIGHTMAP,
+				});
 
 				return builder;
 			}
