@@ -13,7 +13,35 @@ namespace Trident {
 			}
 
 			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
-				static constexpr svec2<float32> luxelScale = {1.0f, 1.0f};
+				static constexpr svec2<float32> LUXEL_SCALE = {1.0f, 1.0f};
+				static constexpr svec3<float32> DEFAULT_ALBEDO = {1.0f, 1.0f, 1.0f};
+				static constexpr svec3<float32> VERTICES[] = {
+					{-16.0f,   0.0f,  184.0f},
+					{ 128.0f,  0.0f,  184.0f},
+					{ 128.0f,  0.0f, -16.0f},
+					{-16.0f,   0.0f, -16.0f},
+					{-24.0f,  0.0f,  152.0f},
+					{-16.0f,  0.0f,  152.0f},
+					{-16.0f,  0.0f,  104.0f},
+					{-24.0f,  0.0f,  104.0f},
+					{-96.0f,  0.0f,  184.0f},
+					{-24.0f,  0.0f,  184.0f},
+					{-24.0f,  0.0f,  48.0f},
+					{-96.0f,  0.0f,  48.0f},
+					{ 24.0f,  0.0f,  192.0f},
+					{ 84.0f,  0.0f,  192.0f},
+					{ 84.0f,  0.0f,  184.0f},
+					{ 24.0f,  0.0f,  184.0f},
+					{-168.0f,  0.0f,  320.0f},
+					{ 128.0f,  0.0f,  320.0f},
+					{ 128.0f,  0.0f,  192.0f},
+					{-168.0f,  0.0f,  192.0f},
+				};
+				static constexpr view<svec3<float32>> HALL_FLOOR_VERTICES(&VERTICES[0], 4);
+				static constexpr view<svec3<float32>> HALL_TO_BIKE_ROOM_FLOOR_CONNECTOR_VERTICES(&VERTICES[4], 4);
+				static constexpr view<svec3<float32>> BIKE_ROOM_FLOOR_VERTICES(&VERTICES[8], 4);
+				static constexpr view<svec3<float32>> HALL_TO_MAIN_FLOOR_CONNECTOR_VERTICES(&VERTICES[12], 4);
+				static constexpr view<svec3<float32>> MAIN_FLOOR_VERTICES(&VERTICES[16], 4);
 
 				// Texture scale multipliers
 				static constexpr float32 m1 = 256.0f;
@@ -39,120 +67,81 @@ namespace Trident {
 
 				/// Floors
 
-				// Hall floor
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({144.0f, 200.0f}),
-						.material = tileFloorMaterial,
-						.textureFiltering = {
-							.translation = {0.25f, 0.625f},
-							.rotation = 0.0f,
-							.scale = {m1 * -0.25f, m1 * 0.25f},
-						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+				builder.createFace({
+					.vertices = HALL_FLOOR_VERTICES,
+					.normal = {0.0f, 1.0f, 0.0f},
+					.material = tileFloorMaterial,
+					.textureFiltering = {
+						.translation = {0.25f, 0.25f},
+						.rotation = 0.0f,
+						.scale = {m1 * -0.25f, m1 * 0.25f},
 					},
-					{
-						.translation = {56.0f, 0.0f, 84.0f},
-						.axis = {1.0f, 0.0f, 0.0f},
-						.angle = radians(-90.0_deg),
-					}
-				);
-
-				// Hall to bike room floor connector
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({8.0f, 48.0f}),
-						.material = tileFloorMaterial,
-						.textureFiltering = {
-							.translation = {0.375f, 0.125f},
-							.rotation = 0.0f,
-							.scale = {m1 * -0.25f, m1 * 0.25f},
-						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+					.lightmap = {
+						.luxelScale = LUXEL_SCALE,
+						.albedo = DEFAULT_ALBEDO,
 					},
-					{
-						.translation = {-20.0f, 0.0f, 128.0f},
-						.axis = {1.0f, 0.0f, 0.0f},
-						.angle = radians(-90.0_deg),
-					}
-				);
-
-				// Bike room floor
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({72.0f, 136.0f}),
-						.material = tileFloorMaterial,
-						.textureFiltering = {
-							.translation = {0.5f, 0.625f},
-							.rotation = 0.0f,
-							.scale = {m1 * -0.25f, m1 * 0.25f},
-						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+				});
+				builder.createFace({
+					.vertices = HALL_TO_BIKE_ROOM_FLOOR_CONNECTOR_VERTICES,
+					.normal = {0.0f, 1.0f, 0.0f},
+					.material = tileFloorMaterial,
+					.textureFiltering = {
+						.translation = {0.375f, 0.125f},
+						.rotation = 0.0f,
+						.scale = {m1 * -0.25f, m1 * 0.25f},
 					},
-					{
-						.translation = {-60.0f, 0.0f, 116.0f},
-						.axis = {1.0f, 0.0f, 0.0f},
-						.angle = radians(-90.0_deg),
-					}
-				);
-
-				// Hall to main floor connector
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({60.0f, 8.0f}),
-						.material = tileFloorMaterial,
-						.textureFiltering = {
-							.translation = {0.625f, 0.5f},
-							.rotation = 0.0f,
-							.scale = {m1 * -0.25f, m1 * 0.25f},
-						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+					.lightmap = {
+						.luxelScale = LUXEL_SCALE,
+						.albedo = DEFAULT_ALBEDO,
 					},
-					{
-						.translation = {54.0f, 0.0f, 188.0f},
-						.axis = {1.0f, 0.0f, 0.0f},
-						.angle = radians(-90.0_deg),
-					}
-				);
-
-				// Main floor
-				builder.placeSurface(
-					{
-						.geometry = builder.createWallGeometry({296.0f, 128.0f}),
-						.material = tileFloorMaterial,
-						.textureFiltering = {
-							.translation = {0.625f, 0.5f},
-							.rotation = 0.0f,
-							.scale = {m1 * -0.25f, m1 * 0.25f},
-						},
-						.lightmap = {
-							.luxelScale = luxelScale,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+				});
+				builder.createFace({
+					.vertices = BIKE_ROOM_FLOOR_VERTICES,
+					.normal = {0.0f, 1.0f, 0.0f},
+					.material = tileFloorMaterial,
+					.textureFiltering = {
+						.translation = {0.5f, 0.25f},
+						.rotation = 0.0f,
+						.scale = {m1 * -0.25f, m1 * 0.25f},
 					},
-					{
-						.translation = {-20.0f, 0.0f, 256.0f},
-						.axis = {1.0f, 0.0f, 0.0f},
-						.angle = radians(-90.0_deg),
-					}
-				);
+					.lightmap = {
+						.luxelScale = LUXEL_SCALE,
+						.albedo = DEFAULT_ALBEDO,
+					},
+				});
+				builder.createFace({
+					.vertices = HALL_TO_MAIN_FLOOR_CONNECTOR_VERTICES,
+					.normal = {0.0f, 1.0f, 0.0f},
+					.material = tileFloorMaterial,
+					.textureFiltering = {
+						.translation = {0.625f, 0.375f},
+						.rotation = 0.0f,
+						.scale = {m1 * -0.25f, m1 * 0.25f},
+					},
+					.lightmap = {
+						.luxelScale = LUXEL_SCALE,
+						.albedo = DEFAULT_ALBEDO,
+					},
+				});
+				builder.createFace({
+					.vertices = MAIN_FLOOR_VERTICES,
+					.normal = {0.0f, 1.0f, 0.0f},
+					.material = tileFloorMaterial,
+					.textureFiltering = {
+						.translation = {0.625f, 0.5f},
+						.rotation = 0.0f,
+						.scale = {m1 * -0.25f, m1 * 0.25f},
+					},
+					.lightmap = {
+						.luxelScale = LUXEL_SCALE,
+						.albedo = DEFAULT_ALBEDO,
+					},
+				});
 
 				/// Walls
 
 				// Hall entrance left wall
-				builder.placeSurface(
+				/* builder.placeSurface(
 					{
 						.geometry = builder.createWallGeometry({52.0f, 128.0f}),
 						.material = plasterWallMaterial,
@@ -835,7 +824,7 @@ namespace Trident {
 						.axis = {1.0f, 0.0f, 0.0f},
 						.angle = radians(90.0_deg),
 					}
-				);
+				); */
 
 				return builder;
 			}

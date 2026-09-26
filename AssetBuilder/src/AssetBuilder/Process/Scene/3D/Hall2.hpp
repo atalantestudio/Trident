@@ -14,6 +14,8 @@ namespace Trident {
 			}
 
 			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
+				static constexpr svec2<float32> LUXEL_SCALE = {4.0f, 4.0f};
+
 				LinearMapBuilder builder({
 					.flags = {},
 					.skyColor = {0.6f, 0.7f, 0.9f},
@@ -33,30 +35,37 @@ namespace Trident {
 					.origin = {56.0f, 0.0f, 84.0f},
 					.size = {144.0f, 240.0f, 200.0f},
 					.material = material,
-					/* .luxelScale = {4.0f, 4.0f},
-					.floorMaterialIndex = tileFloorMaterialIndex,
-					.wallMaterialIndex = plasterWallMateralIndex,
-					.ceilingMaterialIndex = plasterCeilingMaterialIndex,
-					.floorTextureFiltering = {
+					.textureFiltering = {
 						.translation = {0.25f, 0.625f},
 						.rotation = 0.0f,
 						.scale = {-0.25f * 256.0f, 0.25f * 256.0f},
-					}, */
+					},
+					.lightmap = {
+						.luxelScale = LUXEL_SCALE,
+						.albedo = {1.0f, 1.0f, 1.0f},
+					},
+					/* .luxelScale = {4.0f, 4.0f},
+					.floorMaterialIndex = tileFloorMaterialIndex,
+					.wallMaterialIndex = plasterWallMateralIndex,
+					.ceilingMaterialIndex = plasterCeilingMaterialIndex, */
 				});
 
 				const uint32 bikeRoomIndex = builder.createRectangularRoom({
 					.origin = {-60.0f, 0.0f, 116.0f},
 					.size = {72.0f, 128.0f, 136.0f},
 					.material = material,
-					/* .luxelScale = {4.0f, 4.0f},
-					.floorMaterialIndex = tileFloorMaterialIndex,
-					.wallMaterialIndex = plasterWallMaterialIndex,
-					.ceilingMaterialIndex = plasterCeilingMaterialIndex,
-					.floorTextureFiltering = {
+					.textureFiltering = {
 						.translation = {0.5f, 0.624f},
 						.rotation = 0.0f,
 						.scale = {-0.25f * 256.0f, 0.25f * 256.0f},
-					}, */
+					},
+					.lightmap = {
+						.luxelScale = LUXEL_SCALE,
+						.albedo = {1.0f, 1.0f, 1.0f},
+					},
+					/* .floorMaterialIndex = tileFloorMaterialIndex,
+					.wallMaterialIndex = plasterWallMaterialIndex,
+					.ceilingMaterialIndex = plasterCeilingMaterialIndex, */
 				});
 
 				// TODO(asset-builder/map): Implement.

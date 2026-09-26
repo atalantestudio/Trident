@@ -43,6 +43,7 @@ namespace Trident {
 		ceilingFace.triangleOffset = staticGeometryFaceTriangleCount;
 		ceilingFace.geometryIndex = floorFace.geometryIndex;
 		ceilingFace.material = descriptor.material;
+		ceilingFace.textureFiltering = descriptor.textureFiltering;
 		ceilingFace.lightmap = descriptor.lightmap;
 		ceilingFace.boundingBox.min = {max<float32>(), max<float32>()};
 		ceilingFace.boundingBox.max = {min<float32>(), min<float32>()};

@@ -62,8 +62,13 @@ namespace Trident {
 
 		while (faceIndex < intermediateGeometry.faceIndices.size()) {
 			const Face& face = faces[intermediateGeometry.faceIndices[faceIndex]];
-			const quat<float32> R = lookAt(face.normal, {0.0f, 0.0f, -1.0f}, UP);
 			const svec2<float32> faceSize = face.boundingBox.max - face.boundingBox.min;
+			const mat3x3<float32> textureTransform = (
+				mat3x3<float32>::scaling(faceSize / face.textureFiltering.scale) *
+				mat3x3<float32>::rotation(face.textureFiltering.rotation * pi<float32>()) *
+				mat3x3<float32>::translation(face.textureFiltering.translation)
+			);
+			const quat<float32> R = lookAt(face.normal, {0.0f, 0.0f, -1.0f}, UP);
 
 			geometry.vertexRange.count += face.vertexCount;
 			geometry.indexRange.count += (face.vertexCount - 2) * 3;
@@ -77,15 +82,16 @@ namespace Trident {
 				const quat<float32> q = {0.0f, vertex.position.x, vertex.position.y, vertex.position.z};
 				const svec3<float32> coordinate = svec3<float32>((R * q * inverse(R)).xyz());
 
+				svec2<float32> textureCoordinate = {coordinate.x, coordinate.y};
+				textureCoordinate -= face.boundingBox.min;
+				textureCoordinate /= faceSize;
+
+				const uint32 initialTextureCoordinate = pack<VertexInputAttributeFormat::R16G16_FLOAT, uint32>(textureCoordinate);
+
 				vertex.normal = face.normal;
-				vertex.textureCoordinate = {coordinate.x, coordinate.y};
-				vertex.textureCoordinate -= face.boundingBox.min;
-				vertex.textureCoordinate /= faceSize;
-				vertex.textureCoordinate.y = 1.0f - vertex.textureCoordinate.y;
-
-				const uint32 initialTextureCoordinate = pack<VertexInputAttributeFormat::R16G16_FLOAT, uint32>(vertex.textureCoordinate);
-
 				vertex.tangent = {0.0f, 0.0f, 0.0f, *pointer_cast<const float32*>(&initialTextureCoordinate)};
+				vertex.textureCoordinate = svec2<float32>(multiplyTransform(vec2<float32>(textureCoordinate), textureTransform));
+				vertex.textureCoordinate.y = 1.0f - vertex.textureCoordinate.y;
 
 				// TODO(asset-builder/map/static-geometry): Restore face wireframe?
 				// scene.staticGeometry.lineIndices[lineIndexOffset + vertexIndex * 2 + 0] = face.indexRange.offset + vertexIndex;

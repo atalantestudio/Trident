@@ -73,6 +73,11 @@ namespace Trident {
 				static constexpr view<svec3<float32>> RIGHT_WALL_VERTICES(&VERTICES[20], 4);
 				static constexpr view<svec3<float32>> SHORT_BLOCK_BOTTOM_VERTICES(&VERTICES[24], 4);
 				static constexpr view<svec3<float32>> TALL_BLOCK_BOTTOM_VERTICES(&VERTICES[28], 4);
+				static constexpr TextureFilteringDescriptor TEXTURE_FILTERING = {
+					.translation = {0.0f, 0.0f},
+					.rotation = 0.0f,
+					.scale = {1.0f, 1.0f},
+				};
 
 				SceneBuilder builder({
 					.flags = {},
@@ -93,6 +98,7 @@ namespace Trident {
 					.vertices = FLOOR_VERTICES,
 					.normal = calculateNormal(FLOOR_VERTICES),
 					.material = material,
+					.textureFiltering = TEXTURE_FILTERING,
 					.lightmap = {
 						.luxelScale = LUXEL_SCALE,
 						.albedo = ROOM_COLOR,
@@ -102,6 +108,7 @@ namespace Trident {
 					.vertices = LIGHT_VERTICES,
 					.normal = calculateNormal(LIGHT_VERTICES),
 					.material = material,
+					.textureFiltering = TEXTURE_FILTERING,
 					.lightmap = {
 						.luxelScale = LUXEL_SCALE,
 						.emissiveColor = LIGHT_EMISSIVE_COLOR,
@@ -113,6 +120,7 @@ namespace Trident {
 					.vertices = CEILING_VERTICES,
 					.normal = calculateNormal(CEILING_VERTICES),
 					.material = material,
+					.textureFiltering = TEXTURE_FILTERING,
 					.lightmap = {
 						.luxelScale = LUXEL_SCALE,
 						.albedo = ROOM_COLOR,
@@ -122,6 +130,7 @@ namespace Trident {
 					.vertices = BACK_WALL_VERTICES,
 					.normal = calculateNormal(BACK_WALL_VERTICES),
 					.material = material,
+					.textureFiltering = TEXTURE_FILTERING,
 					.lightmap = {
 						.luxelScale = LUXEL_SCALE,
 						.albedo = ROOM_COLOR,
@@ -131,6 +140,7 @@ namespace Trident {
 					.vertices = LEFT_WALL_VERTICES,
 					.normal = calculateNormal(LEFT_WALL_VERTICES),
 					.material = material,
+					.textureFiltering = TEXTURE_FILTERING,
 					.lightmap = {
 						.luxelScale = LUXEL_SCALE,
 						.albedo = LEFT_WALL_COLOR,
@@ -140,6 +150,7 @@ namespace Trident {
 					.vertices = RIGHT_WALL_VERTICES,
 					.normal = calculateNormal(RIGHT_WALL_VERTICES),
 					.material = material,
+					.textureFiltering = TEXTURE_FILTERING,
 					.lightmap = {
 						.luxelScale = LUXEL_SCALE,
 						.albedo = RIGHT_WALL_COLOR,
@@ -150,6 +161,7 @@ namespace Trident {
 					.vertices = SHORT_BLOCK_BOTTOM_VERTICES,
 					.normal = calculateNormal(SHORT_BLOCK_BOTTOM_VERTICES),
 					.material = material,
+					.textureFiltering = TEXTURE_FILTERING,
 					.lightmap = {
 						.luxelScale = LUXEL_SCALE,
 						.albedo = ROOM_COLOR,
@@ -162,6 +174,7 @@ namespace Trident {
 					.vertices = TALL_BLOCK_BOTTOM_VERTICES,
 					.normal = calculateNormal(TALL_BLOCK_BOTTOM_VERTICES),
 					.material = material,
+					.textureFiltering = TEXTURE_FILTERING,
 					.lightmap = {
 						.luxelScale = LUXEL_SCALE,
 						.albedo = ROOM_COLOR,

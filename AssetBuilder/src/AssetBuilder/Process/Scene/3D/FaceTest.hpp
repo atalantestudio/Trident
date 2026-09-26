@@ -76,7 +76,7 @@ namespace Trident {
 
 				Face& concaveFace = builder.createFace(concaveFaceVertices, {0.0f, 1.0f, 0.0f}); */
 
-				const svec3<float32> concaveFace2Vertices[] = {
+				static constexpr svec3<float32> concaveFace2Vertices[] = {
 					{ 62.0f,   536.0f,  128.0f},
 					{ 334.0f,  787.0f,  128.0f},
 					{ 577.0f,  826.0f,  128.0f},
@@ -92,6 +92,11 @@ namespace Trident {
 					.vertices = concaveFace2Vertices,
 					.normal = {0.0f, 0.0f, -1.0f},
 					.material = material,
+					.textureFiltering = {
+						.translation = {0.0f, 0.0f},
+						.rotation = 0.0f,
+						.scale = {1.0f, 1.0f},
+					},
 					.lightmap = {
 						.luxelScale = {4.0f, 4.0f},
 						.emissiveColor = {0.0f, 0.0f, 0.0f},

@@ -44,6 +44,7 @@ namespace Trident {
 			extrudedFace.triangleOffset = staticGeometryFaceTriangleCount;
 			extrudedFace.geometryIndex = face.geometryIndex;
 			extrudedFace.material = face.material;
+			extrudedFace.textureFiltering = face.textureFiltering;
 			extrudedFace.lightmap = face.lightmap;
 			extrudedFace.boundingBox.min = {max<float32>(), max<float32>()};
 			extrudedFace.boundingBox.max = {min<float32>(), min<float32>()};

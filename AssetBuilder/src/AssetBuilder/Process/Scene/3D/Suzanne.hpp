@@ -31,6 +31,11 @@ namespace Trident {
 					{ 64.0f,  0.0f,  -64.0f},
 					{ 64.0f,  0.0f,   64.0f},
 				};
+				static constexpr TextureFilteringDescriptor TEXTURE_FILTERING = {
+					.translation = {0.0f, 0.0f},
+					.rotation = 0.0f,
+					.scale = {1.0f, 1.0f},
+				};
 
 				SceneBuilder builder({
 					.flags = {},
@@ -55,6 +60,7 @@ namespace Trident {
 					.vertices = FLOOR_VERTICES,
 					.normal = {0.0f, 1.0f, 0.0f},
 					.material = lightmappedDefaultMaterial,
+					.textureFiltering = TEXTURE_FILTERING,
 					.lightmap = {
 						.luxelScale = {1.0f, 1.0f},
 						.albedo = {1.0f, 1.0f, 1.0f},
@@ -64,6 +70,7 @@ namespace Trident {
 					.vertices = BACK_WALL_VERTICES,
 					.normal = {0.0f, 0.0f, -1.0f},
 					.material = lightmappedDefaultMaterial,
+					.textureFiltering = TEXTURE_FILTERING,
 					.lightmap = {
 						.luxelScale = {1.0f, 1.0f},
 						.albedo = {1.0f, 1.0f, 1.0f},
@@ -73,6 +80,7 @@ namespace Trident {
 					.vertices = RIGHT_WALL_VERTICES,
 					.normal = {-1.0f, 0.0f, 0.0f},
 					.material = lightmappedDefaultMaterial,
+					.textureFiltering = TEXTURE_FILTERING,
 					.lightmap = {
 						.luxelScale = {1.0f, 1.0f},
 						.albedo = {1.0f, 1.0f, 1.0f},

@@ -48,13 +48,6 @@ namespace Trident {
 
 		IntermediateGeometry& geometry = geometries[materialGeometry.geometryIndex];
 
-		// TODO(asset-builder/map/geometry/face): Calculate texture transform.
-		/* const mat3x3<float32> textureTransform = (
-			mat3x3<float32>::scaling(descriptor.geometry.scale / descriptor.textureFiltering.scale) *
-			mat3x3<float32>::rotation(descriptor.textureFiltering.rotation * pi<float32>()) *
-			mat3x3<float32>::translation(descriptor.textureFiltering.translation)
-		); */
-
 		Face face{};
 		face.vertexCount = static_cast<uint32>(descriptor.vertices.count());
 		face.indexRange.offset = staticGeometryFaceVertexCount;
@@ -62,6 +55,7 @@ namespace Trident {
 		face.normal = descriptor.normal;
 		face.geometryIndex = materialGeometry.geometryIndex;
 		face.material = descriptor.material;
+		face.textureFiltering = descriptor.textureFiltering;
 		face.boundingBox.min = {max<float32>(), max<float32>()};
 		face.boundingBox.max = {min<float32>(), min<float32>()};
 		face.lightmap = descriptor.lightmap;
@@ -70,17 +64,6 @@ namespace Trident {
 
 		while (vertexIndex < face.vertexCount) {
 			const svec3<float32> vertex = descriptor.vertices[vertexIndex];
-
-			/* const BuildVertex3D& surfaceVertex = descriptor.geometry.vertices[vertexIndex];
-			const svec3<float32> tangent = svec3<float32>(normalized(vec3<float32>(surfaceVertex.tangent[0], surfaceVertex.tangent[1], surfaceVertex.tangent[2]) * inverseOrientation));
-			const uint32 initialTextureCoordinate = pack<VertexInputAttributeFormat::R16G16_FLOAT, uint32>(surfaceVertex.textureCoordinate);
-
-			// TODO(lyah/scalar)
-			BuildVertex3D& vertex = geometry.vertices[vertexOffset + vertexIndex];
-			vertex.position = svec3<float32>(multiplyTransform(vec3<float32>(surfaceVertex.position), worldTransform));
-			vertex.normal = svec3<float32>(normalized(vec3<float32>(surfaceVertex.normal) * inverseOrientation));
-			vertex.tangent = {tangent.x, tangent.y, tangent.z, *pointer_cast<const float32*>(&initialTextureCoordinate)};
-			vertex.textureCoordinate = svec2<float32>(multiplyTransform(vec2<float32>(surfaceVertex.textureCoordinate), textureTransform)); */
 
 			facePositions[facePositionCount + vertexIndex] = vertex;
 			indices[staticGeometryFaceVertexCount + vertexIndex] = facePositionCount + vertexIndex;

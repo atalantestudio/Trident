@@ -5,6 +5,7 @@
 
 #include "AssetBuilder/API/LightmapDescriptor.hpp"
 #include "AssetBuilder/API/Material/MaterialReference.hpp"
+#include "AssetBuilder/API/TextureFilteringDescriptor.hpp"
 
 namespace Trident {
 	struct AABB2D {
@@ -16,6 +17,7 @@ namespace Trident {
 		view<svec3<float32>> vertices;
 		svec3<float32> normal;
 		MaterialReference material;
+		TextureFilteringDescriptor textureFiltering;
 		LightmapDescriptor lightmap;
 	};
 
@@ -30,6 +32,7 @@ namespace Trident {
 		svec3<float32> normal;
 		uint32 geometryIndex;
 		MaterialReference material;
+		TextureFilteringDescriptor textureFiltering;
 		LightmapDescriptor lightmap;
 		AABB2D boundingBox;
 	};

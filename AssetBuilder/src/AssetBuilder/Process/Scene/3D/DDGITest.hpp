@@ -13,6 +13,11 @@ namespace Trident {
 				static constexpr svec3<float32> LIGHT_EMISSIVE_COLOR = {4.0f, 4.0f, 4.0f};
 				static constexpr svec3<float32> ROOM_COLOR = {1.0f, 1.0f, 1.0f};
 				static constexpr float32 LIGHT_RIGHT_OFFSET_PERCENT = 0.95f;
+				static constexpr TextureFilteringDescriptor TEXTURE_FILTERING = {
+					.translation = {0.0f, 0.0f},
+					.rotation = 0.0f,
+					.scale = {1.0f, 1.0f},
+				};
 
 				const float32 lightLeftOffset = 128.0f * (LIGHT_RIGHT_OFFSET_PERCENT - lightCeilingPercent) - 64.0f;
 				const float32 lightRightOffset = 128.0f * LIGHT_RIGHT_OFFSET_PERCENT - 64.0f;
@@ -40,6 +45,7 @@ namespace Trident {
 					.vertices = ceilingVertices,
 					.normal = {0.0f, 1.0f, 0.0f},
 					.material = material,
+					.textureFiltering = TEXTURE_FILTERING,
 					.lightmap = {
 						.luxelScale = LUXEL_SCALE,
 						.albedo = ROOM_COLOR,
@@ -52,6 +58,7 @@ namespace Trident {
 					.vertices = ceilingLeftVertices,
 					.normal = {0.0f, -1.0f, 0.0f},
 					.material = material,
+					.textureFiltering = TEXTURE_FILTERING,
 					.lightmap = {
 						.luxelScale = LUXEL_SCALE,
 						.albedo = ROOM_COLOR,
@@ -61,6 +68,7 @@ namespace Trident {
 					.vertices = ceilingRightVertices,
 					.normal = {0.0f, -1.0f, 0.0f},
 					.material = material,
+					.textureFiltering = TEXTURE_FILTERING,
 					.lightmap = {
 						.luxelScale = LUXEL_SCALE,
 						.albedo = ROOM_COLOR,
@@ -79,6 +87,7 @@ namespace Trident {
 						.vertices = lightVertices,
 						.normal = {0.0f, -1.0f, 0.0f},
 						.material = material,
+						.textureFiltering = TEXTURE_FILTERING,
 						.lightmap = {
 							.luxelScale = LUXEL_SCALE,
 							.emissiveColor = LIGHT_EMISSIVE_COLOR,

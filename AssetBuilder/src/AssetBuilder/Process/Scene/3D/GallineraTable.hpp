@@ -44,6 +44,11 @@ namespace Trident {
 					.vertices = FLOOR_VERTICES,
 					.normal = {0.0f, 1.0f, 0.0f},
 					.material = lightmappedDefaultMaterial,
+					.textureFiltering = {
+						.translation = {0.0f, 0.0f},
+						.rotation = 0.0f,
+						.scale = {1.0f, 1.0f},
+					},
 					.lightmap = {
 						.luxelScale = {1.0f, 1.0f},
 						.albedo = {1.0f, 1.0f, 1.0f},
