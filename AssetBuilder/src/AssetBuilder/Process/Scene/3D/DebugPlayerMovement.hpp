@@ -6,15 +6,32 @@
 #include "AssetBuilder/Process/Scene/Scene3DProcess.hpp"
 
 namespace Trident {
-	class PlayerMovementScene3D final : public Scene3DProcess {
+	class DebugPlayerMovementMap final : public Scene3DProcess {
 		protected:
 			view<char8> getAssetName() const final override {
-				return "3d_player_movement";
+				return "3d_debug_player_movement";
 			}
 
 			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
+				static constexpr svec3<float32> FLOOR_VERTICES[] = {
+					{-256.0f,  0.0f,  256.0f},
+					{ 256.0f,  0.0f,  256.0f},
+					{ 256.0f,  0.0f, -256.0f},
+					{-256.0f,  0.0f, -256.0f},
+				};
+				static constexpr svec3<float32> CEILING_VERTICES[] = {
+					{-256.0f,  128.0f,  256.0f},
+					{ 256.0f,  128.0f,  256.0f},
+					{ 256.0f,  128.0f, -256.0f},
+					{-256.0f,  128.0f, -256.0f},
+				};
+
+				// Texture scale multipliers
+				static constexpr float32 m1 = 128.0f;
+				static constexpr float32 m2 = 512.0f;
+
 				MapBuilder builder({
-					.skyColor = {0.6f, 0.7f, 0.9f},
+					.skyColor = {0.0f, 0.0f, 0.0f},
 					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("evening_road_01_512p"),
 					.sunDirection = {1.0f, 1.0f, 1.0f},
 					.sunColor = {1.0f, 1.0f, 1.0f},
@@ -27,23 +44,43 @@ namespace Trident {
 
 				const uint32 boxGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("3d_unit_box_st"));
 
+				const MaterialReference lightmappedGrayMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_debug_gray"));
+				const MaterialReference lightmappedWallMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_debug_wall"));
 				const MaterialReference debugMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("debug"));
 
-				/* // Floor
-				builder.createRigidBody({
-					.geometryIndex = boxGeometry,
-					.material = debugMaterial,
-					.position = {0.0_m, -0.05_m, 0.0_m},
-					.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
-					.uniformScale = 1.0f,
-					.mass = max<float32>(),
-					.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
-					.inertiaScale = {10.0f, 0.1f, 10.0f},
-					.friction = 0.2f,
-					.restitution = 0.0f,
+				Face& ceilingFace = builder.createFace({
+					.vertices = CEILING_VERTICES,
+					.normal = {0.0f, 1.0f, 0.0f},
+					.material = lightmappedWallMaterial,
+					.textureFiltering = {
+						.translation = {0.0f, 0.0f},
+						.rotation = 0.0f,
+						.scale = {m2 * 0.25f, m2 * 0.25f},
+					},
+					.lightmap = {
+						.luxelScale = {4.0f, 4.0f},
+						.albedo = {1.0f, 1.0f, 1.0f},
+					},
 				});
 
-				// Box
+				builder.extrudeFace(ceilingFace, -256.0f);
+
+				builder.createFace({
+					.vertices = FLOOR_VERTICES,
+					.normal = {0.0f, 1.0f, 0.0f},
+					.material = lightmappedGrayMaterial,
+					.textureFiltering = {
+						.translation = {0.0f, 0.0f},
+						.rotation = 0.0f,
+						.scale = {m1 * 0.25f, m1 * 0.25f},
+					},
+					.lightmap = {
+						.luxelScale = {4.0f, 4.0f},
+						.albedo = {1.0f, 1.0f, 1.0f},
+					},
+				});
+
+				/* // Box
 				builder.createRigidBody({
 					.geometryIndex = boxGeometry,
 					.material = debugMaterial,
@@ -71,21 +108,7 @@ namespace Trident {
 					.restitution = 0.0f,
 				}); */
 
-				// Floor
-				builder.createRigidBody({
-					.geometryIndex = boxGeometry,
-					.material = debugMaterial,
-					.position = {0.0f, -8.0f, 0.0f},
-					.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
-					.uniformScale = 1.0f,
-					.mass = max<float32>(),
-					.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
-					.inertiaScale = {512.0f, 16.0f, 512.0f},
-					.friction = 0.2f,
-					.restitution = 0.0f,
-				});
-
-				// Box
+				/* // Box
 				builder.createRigidBody({
 					.geometryIndex = boxGeometry,
 					.material = debugMaterial,
@@ -112,7 +135,7 @@ namespace Trident {
 					.inertiaScale = {33.0f, 77.0f, 33.0f},
 					.friction = 0.2f,
 					.restitution = 0.0f,
-				});
+				}); */
 
 				return builder;
 			}

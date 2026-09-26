@@ -21,6 +21,9 @@
 #include "AssetBuilder/Process/Image/OvercastSoil.hpp"
 #include "AssetBuilder/Process/Image/Quiver.hpp"
 #include "AssetBuilder/Process/Material/DDGI/DDGI.hpp"
+#include "AssetBuilder/Process/Material/Lightmapped/DebugGray.hpp"
+#include "AssetBuilder/Process/Material/Lightmapped/DebugOrange.hpp"
+#include "AssetBuilder/Process/Material/Lightmapped/DebugWall.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/Default.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/PlasterCeiling.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/PlasterWall.hpp"
@@ -53,6 +56,7 @@
 #include "AssetBuilder/Process/Scene/3D/Cubes.hpp"
 #include "AssetBuilder/Process/Scene/3D/DDGIRef0.hpp"
 #include "AssetBuilder/Process/Scene/3D/DDGITest.hpp"
+#include "AssetBuilder/Process/Scene/3D/DebugPlayerMovement.hpp"
 #include "AssetBuilder/Process/Scene/3D/Dragon.hpp"
 #include "AssetBuilder/Process/Scene/3D/EdgeContact.hpp"
 #include "AssetBuilder/Process/Scene/3D/FaceTest.hpp"
@@ -62,7 +66,6 @@
 #include "AssetBuilder/Process/Scene/3D/Lemons.hpp"
 #include "AssetBuilder/Process/Scene/3D/LightmapTest.hpp"
 #include "AssetBuilder/Process/Scene/3D/PBRTest.hpp"
-#include "AssetBuilder/Process/Scene/3D/PlayerMovement.hpp"
 #include "AssetBuilder/Process/Scene/3D/PropGallery.hpp"
 #include "AssetBuilder/Process/Scene/3D/Sliding.hpp"
 #include "AssetBuilder/Process/Scene/3D/Stacking.hpp"
@@ -104,7 +107,7 @@ namespace Trident {
 
 		private:
 			void registerProcesses() {
-				allocateProcesses(67);
+				allocateProcesses(70);
 
 				registerProcess<BuildGeometryAssetProcess>(&assetLibrary);
 
@@ -136,20 +139,23 @@ namespace Trident {
 				registerProcess<GallineraTableMaterial>(&assetLibrary);
 				registerProcess<LemonMaterial>(&assetLibrary);
 				registerProcess<LMDefaultMaterial>(&assetLibrary);
+				registerProcess<LMDebugGrayMaterial>(&assetLibrary);
+				registerProcess<LMDebugOrangeMaterial>(&assetLibrary);
+				registerProcess<LMDebugWallMaterial>(&assetLibrary);
+				registerProcess<LMPlasterCeilingMaterial>(&assetLibrary);
+				registerProcess<LMPlasterWallMaterial>(&assetLibrary);
+				registerProcess<LMTileFloorMaterial>(&assetLibrary);
+				registerProcess<LMWoodDoorMaterial>(&assetLibrary);
 				registerProcess<LPBRGallineraTableMaterial>(&assetLibrary);
 				registerProcess<PBRBlueMetalPlateMaterial>(&assetLibrary);
 				registerProcess<PBRDebugDefaultMaterial>(&assetLibrary);
 				registerProcess<PBRDefaultMaterial>(&assetLibrary);
-				registerProcess<PlasterCeilingMaterial>(&assetLibrary);
-				registerProcess<PlasterWallMaterial>(&assetLibrary);
 				registerProcess<PowerBox01Material>(&assetLibrary);
 				registerProcess<RoundWoodenTable01Material>(&assetLibrary);
 				registerProcess<RubberDuckToyMaterial>(&assetLibrary);
-				registerProcess<TileFloorMaterial>(&assetLibrary);
 				registerProcess<UtilityBox01Material>(&assetLibrary);
 				registerProcess<UtilityBox02Material>(&assetLibrary);
 				registerProcess<WetFloorSign01Material>(&assetLibrary);
-				registerProcess<WoodDoorMaterial>(&assetLibrary);
 
 				registerProcess<BoxesScene2D>(&assetLibrary);
 				registerProcess<CirclesScene2D>(&assetLibrary);
@@ -165,6 +171,7 @@ namespace Trident {
 				registerProcess<CubesScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<DDGIRef0Scene3D>(&assetLibrary, &lightmapper);
 				registerProcess<DDGITestScene3D>(&assetLibrary, &lightmapper);
+				registerProcess<DebugPlayerMovementMap>(&assetLibrary, &lightmapper);
 				registerProcess<DragonScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<EdgeContactScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<FaceTestScene3D>(&assetLibrary, &lightmapper);
@@ -174,7 +181,6 @@ namespace Trident {
 				registerProcess<LemonsScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<LightmapTestScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<PBRTestScene3D>(&assetLibrary, &lightmapper);
-				registerProcess<PlayerMovementScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<PropGalleryScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<SlidingScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<StackingScene3D>(&assetLibrary, &lightmapper);

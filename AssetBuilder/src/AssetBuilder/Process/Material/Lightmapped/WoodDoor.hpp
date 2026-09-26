@@ -6,14 +6,14 @@
 #include "AssetBuilder/Process/Material/MaterialShader/LightmappedMaterialShaderProcess.hpp"
 
 namespace Trident {
-	class WoodDoorMaterial final : public LightmappedMaterialShaderProcess {
+	class LMWoodDoorMaterial final : public LightmappedMaterialShaderProcess {
 		protected:
 			view<char8> getAssetName() const final override {
-				return "wood_door";
+				return "lm_wood_door";
 			}
 
 		public:
-			explicit WoodDoorMaterial(AssetBuilderLibrary* assetLibrary) :
+			explicit LMWoodDoorMaterial(AssetBuilderLibrary* assetLibrary) :
 				LightmappedMaterialShaderProcess(assetLibrary, {
 					.diffuseMapPath = "wooddoor048a",
 					.normalMapPath = "wooddoor048a_normal",

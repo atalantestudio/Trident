@@ -218,10 +218,10 @@ namespace Trident {
 					},
 				});
 
-				const MaterialReference tileFloorMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("tile_floor"));
-				const MaterialReference plasterWallMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("plaster_wall"));
-				const MaterialReference woodDoorMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("wood_door"));
-				const MaterialReference plasterCeilingMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("plaster_ceiling"));
+				const MaterialReference tileFloorMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_tile_floor"));
+				const MaterialReference plasterWallMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_plaster_wall"));
+				const MaterialReference woodDoorMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_wood_door"));
+				const MaterialReference plasterCeilingMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_plaster_ceiling"));
 
 				// Floor
 				builder.createFace({
