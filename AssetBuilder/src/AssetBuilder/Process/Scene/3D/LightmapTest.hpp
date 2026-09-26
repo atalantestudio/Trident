@@ -13,6 +13,19 @@ namespace Trident {
 			}
 
 			SceneBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
+				static constexpr svec3<float32> WALL_VERTICES[] = {
+					{-64.0f,  64.0f,  128.0f},
+					{ 66.0f,  64.0f,  128.0f},
+					{ 66.0f, -64.0f,  128.0f},
+					{-64.0f, -64.0f,  128.0f},
+				};
+				static constexpr svec3<float32> LIGHT_VERTICES[] = {
+					{ 8.0f,  8.0f, -16.0f},
+					{-8.0f,  8.0f, -16.0f},
+					{-8.0f, -8.0f, -16.0f},
+					{ 8.0f, -8.0f, -16.0f},
+				};
+
 				SceneBuilder builder({
 					.flags = {},
 					.skyColor = {0.05f, 0.05f, 0.05f},
@@ -28,79 +41,26 @@ namespace Trident {
 
 				const MaterialReference material = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
 
-				// Wall
-				builder.placeSurface(
-					{
-						.geometry = {
-							.vertices = {
-								{{-64.0f,  64.0f,  128.0f}, { 0.0f,  0.0f, -1.0f}, { 0.0f,  0.0f,  0.0f,  0.0f}, {0.0f, 0.0f}},
-								{{ 66.0f,  64.0f,  128.0f}, { 0.0f,  0.0f, -1.0f}, { 0.0f,  0.0f,  0.0f,  0.0f}, {1.0f, 0.0f}},
-								{{-64.0f, -64.0f,  128.0f}, { 0.0f,  0.0f, -1.0f}, { 0.0f,  0.0f,  0.0f,  0.0f}, {0.0f, 1.0f}},
-								{{ 66.0f, -64.0f,  128.0f}, { 0.0f,  0.0f, -1.0f}, { 0.0f,  0.0f,  0.0f,  0.0f}, {1.0f, 1.0f}},
-							},
-							.indices = {
-								0, 1, 2,
-								1, 3, 2,
-							},
-							.edgeOriginVertexIndices = {0, 1, 3, 2},
-							.normal = { 0.0f,  0.0f, -1.0f},
-							.scale = {130.0f, 128.0f},
-						},
-						.material = material,
-						.textureFiltering = {
-							.translation = {0.0f, 0.0f},
-							.rotation = 0.0f,
-							.scale = {1.0f, 1.0f},
-						},
-						.lightmap = {
-							.luxelScale = {16.0f, 16.0f},
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+				builder.createFace({
+					.vertices = WALL_VERTICES,
+					.normal = {0.0f, 0.0f, -1.0f},
+					.material = material,
+					.lightmap = {
+						.luxelScale = {16.0f, 16.0f},
+						.albedo = {1.0f, 1.0f, 1.0f},
 					},
-					{
-						.translation = {0.0f, 0.0f, 0.0f},
-						.axis = {0.0f, 0.0f, 0.0f},
-						.angle = 0.0_rad,
-					}
-				);
-
-				// Small light
-				builder.placeSurface(
-					{
-						.geometry = {
-							.vertices = {
-								{{ 8.0f,  8.0f, -16.0f}, { 0.0f,  0.0f,  1.0f}, { 0.0f,  0.0f,  0.0f,  0.0f}, {1.0f, 0.0f}},
-								{{-8.0f,  8.0f, -16.0f}, { 0.0f,  0.0f,  1.0f}, { 0.0f,  0.0f,  0.0f,  0.0f}, {0.0f, 0.0f}},
-								{{ 8.0f, -8.0f, -16.0f}, { 0.0f,  0.0f,  1.0f}, { 0.0f,  0.0f,  0.0f,  0.0f}, {1.0f, 1.0f}},
-								{{-8.0f, -8.0f, -16.0f}, { 0.0f,  0.0f,  1.0f}, { 0.0f,  0.0f,  0.0f,  0.0f}, {0.0f, 1.0f}},
-							},
-							.indices = {
-								0, 1, 2,
-								1, 3, 2,
-							},
-							.edgeOriginVertexIndices = {0, 1, 3, 2},
-							.normal = { 0.0f,  0.0f,  1.0f},
-							.scale = {16.0f, 16.0f},
-						},
-						.material = material,
-						.textureFiltering = {
-							.translation = {0.0f, 0.0f},
-							.rotation = 0.0f,
-							.scale = {1.0f, 1.0f},
-						},
-						.lightmap = {
-							.luxelScale = {16.0f, 16.0f},
-							.emissiveColor = {4.0f, 4.0f, 4.0f},
-							.emissiveIntensity = 1.0f,
-							.albedo = {1.0f, 1.0f, 1.0f},
-						},
+				});
+				builder.createFace({
+					.vertices = LIGHT_VERTICES,
+					.normal = {0.0f, 0.0f, 1.0f},
+					.material = material,
+					.lightmap = {
+						.luxelScale = {16.0f, 16.0f},
+						.emissiveColor = {4.0f, 4.0f, 4.0f},
+						.emissiveIntensity = 1.0f,
+						.albedo = {1.0f, 1.0f, 1.0f},
 					},
-					{
-						.translation = {0.0f, 0.0f, 0.0f},
-						.axis = {0.0f, 0.0f, 0.0f},
-						.angle = 0.0_rad,
-					}
-				);
+				});
 
 				return builder;
 			}

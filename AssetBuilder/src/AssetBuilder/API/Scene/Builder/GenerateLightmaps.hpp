@@ -174,8 +174,8 @@ namespace Trident {
 
 			// TODO(lyah/scalar)
 			svec2<float32> size = lightmap.scale / lightmap.luxelScale;
-			size.x = floor(size.x);
-			size.y = floor(size.y);
+			size.x = ceil(size.x);
+			size.y = ceil(size.y);
 
 			lightmap.size = {static_cast<uint32>(size[0]), static_cast<uint32>(size[1])};
 
