@@ -24,7 +24,7 @@ namespace Trident {
 			}
 
 		private:
-			static constexpr uint64 ASSET_COUNT_PER_TYPE = 16;
+			static constexpr uint64 ASSET_COUNT_PER_TYPE = 64;
 
 		public:
 			explicit AssetLibrary(std::filesystem::path basePath);
