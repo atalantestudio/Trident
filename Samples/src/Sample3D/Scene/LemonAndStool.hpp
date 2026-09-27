@@ -8,11 +8,11 @@
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 
 namespace Trident::LemonAndStool {
-	Scene3D initializeScene(Application* application, GraphicsAPI graphicsApi, uint64 minStorageBufferOffsetAlignment) {
+	ref<Scene3D> initializeScene(Application* application, GraphicsAPI graphicsApi) {
 		const view<char8> sceneAssetName = application->getPropertyFile()->getProperty<view<char8>>("AssetName");
 		const ref<Scene3DAsset> sceneAsset = application->getAssetLibrary()->getAsset<Scene3DAsset>(sceneAssetName);
 
-		Scene3D scene(sceneAsset, minStorageBufferOffsetAlignment);
+		ref<Scene3D> scene = allocateRef<Scene3D>(sceneAsset);
 
 		// TODO: Restore materials in this scene.
 		/* const uint32 defaultMaterialShaderIndex = scene.registerMaterialShader();

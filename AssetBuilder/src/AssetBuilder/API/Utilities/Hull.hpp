@@ -99,7 +99,7 @@ namespace Trident {
 		return {
 			.centroid = centroid,
 			.radius = radius,
-			.vertexPositions = {},
+			.vertices = {},
 			.edges = {},
 			.faces = {},
 			.lineIndexRange = {},

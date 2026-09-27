@@ -4,7 +4,7 @@
 #pragma once
 
 #define FORWARD_USE_NOCLIP_CAMERA
-// #define FORWARD_ENABLE_PHYSICS
+#define FORWARD_ENABLE_PHYSICS
 // #define FORWARD_TEST_CORNELL_BOX
 
 #if !defined(FORWARD_USE_NOCLIP_CAMERA)
@@ -48,7 +48,6 @@ namespace Trident {
 
 		public:
 			~Sample3DForwardLayer() {
-				delete scene;
 				delete physicsSimulation;
 			}
 
@@ -62,10 +61,7 @@ namespace Trident {
 				const view<char8> sceneAssetName = application->getPropertyFile()->getProperty<view<char8>>("AssetName");
 				const ref<Scene3DAsset> sceneAsset = application->getAssetLibrary()->getAsset<Scene3DAsset>(sceneAssetName);
 
-				// TODO(forward): Don't use alignment outside of the renderer.
-				const uint64 alignment = renderer.getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
-
-				scene = new Scene3D(sceneAsset, alignment);
+				scene = allocateRef<Scene3D>(sceneAsset);
 
 				physicsSimulation = new PhysicsSimulation3D({
 					.scene = scene,
@@ -295,7 +291,7 @@ namespace Trident {
 
 		private:
 			ForwardRenderer renderer;
-			Scene3D* scene;
+			ref<Scene3D> scene;
 			PhysicsSimulation3D* physicsSimulation;
 
 			#if !defined(FORWARD_USE_NOCLIP_CAMERA)

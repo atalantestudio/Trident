@@ -60,6 +60,8 @@ namespace Trident {
 	}
 
 	void PhysicsSimulation3D::narrowPhase() {
+		const ref<Scene3DAsset> asset = scene->getAsset();
+
 		ContactPair3D contactPair;
 
 		for (const EntityPair entityPair : entityPairs) {
@@ -69,11 +71,11 @@ namespace Trident {
 			const GeometryComponent geometryComponentA = scene->ecs.getComponent<GeometryComponent>(entityPair.A);
 			const GeometryComponent geometryComponentB = scene->ecs.getComponent<GeometryComponent>(entityPair.B);
 
-			const Geometry3D& geometryA = scene->geometries[geometryComponentA.geometryIndex];
-			const Geometry3D& geometryB = scene->geometries[geometryComponentB.geometryIndex];
+			const uint32 hullIndexA = asset->geometryIndexToHullIndex[geometryComponentA.geometryIndex];
+			const uint32 hullIndexB = asset->geometryIndexToHullIndex[geometryComponentB.geometryIndex];
 
-			const Hull3D& hullA = scene->hulls[geometryA.hullIndex];
-			const Hull3D& hullB = scene->hulls[geometryB.hullIndex];
+			const Hull3D& hullA = asset->hulls[hullIndexA];
+			const Hull3D& hullB = asset->hulls[hullIndexB];
 
 			Hull3DType typeA = hullA.type;
 			Hull3DType typeB = hullB.type;
@@ -134,17 +136,19 @@ namespace Trident {
 	}
 
 	void PhysicsSimulation3D::updateContactManifolds() {
+		const ref<Scene3DAsset> asset = scene->getAsset();
+
 		for (std::pair<const EntityPair, ContactPair3D>& pair : contactPairs) {
 			ContactPair3D& contactPair = pair.second;
 
 			const GeometryComponent geometryComponentA = scene->ecs.getComponent<GeometryComponent>(contactPair.A);
 			const GeometryComponent geometryComponentB = scene->ecs.getComponent<GeometryComponent>(contactPair.B);
 
-			const Geometry3D& geometryA = scene->geometries[geometryComponentA.geometryIndex];
-			const Geometry3D& geometryB = scene->geometries[geometryComponentB.geometryIndex];
+			const uint32 hullIndexA = asset->geometryIndexToHullIndex[geometryComponentA.geometryIndex];
+			const uint32 hullIndexB = asset->geometryIndexToHullIndex[geometryComponentB.geometryIndex];
 
-			const Hull3D& hullA = scene->hulls[geometryA.hullIndex];
-			const Hull3D& hullB = scene->hulls[geometryB.hullIndex];
+			const Hull3D& hullA = asset->hulls[hullIndexA];
+			const Hull3D& hullB = asset->hulls[hullIndexB];
 
 			RigidBody3DComponent& rigidBodyA = scene->ecs.getComponent<RigidBody3DComponent>(contactPair.A);
 			RigidBody3DComponent& rigidBodyB = scene->ecs.getComponent<RigidBody3DComponent>(contactPair.B);
@@ -330,6 +334,8 @@ namespace Trident {
 	}
 
 	void PhysicsSimulation3D::integrate() {
+		const ref<Scene3DAsset> asset = scene->getAsset();
+
 		ComponentPool<RigidBody3DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody3DComponent>();
 		uint32 componentIndex = 0;
 
@@ -344,8 +350,8 @@ namespace Trident {
 
 			const Entity entity = rigidBodyComponentPool.componentIndexToEntity[componentIndex];
 			const GeometryComponent geometryComponent = scene->ecs.getComponent<GeometryComponent>(entity);
-			const Geometry3D& geometry = scene->geometries[geometryComponent.geometryIndex];
-			const Hull3D& hull = scene->hulls[geometry.hullIndex];
+			const uint32 hullIndex = asset->geometryIndexToHullIndex[geometryComponent.geometryIndex];
+			const Hull3D& hull = asset->hulls[hullIndex];
 
 			rigidBodyComponent.position += rigidBodyComponent.linearVelocity * deltaTime;
 			rigidBodyComponent.rotation += rigidBodyComponent.angularVelocity * deltaTime;

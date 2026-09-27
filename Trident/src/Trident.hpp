@@ -52,7 +52,6 @@
 
 // Geometry
 #include "Engine/API/Geometry/Geometry2D.hpp"
-#include "Engine/API/Geometry/Geometry3D.hpp"
 #include "Engine/API/Geometry/Hull2D.hpp"
 #include "Engine/API/Geometry/Hull3D.hpp"
 

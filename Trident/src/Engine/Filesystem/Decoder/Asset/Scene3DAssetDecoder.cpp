@@ -168,7 +168,6 @@ namespace Trident {
 			vertexOffset += static_cast<uint32>(geometryAsset->vertices.count());
 
 			if (geometryAsset->flags & GeometryAssetFlags::HAS_HULL) {
-				asset.hullCount += 1;
 				asset.hullEdgeCount += static_cast<uint32>(geometryAsset->hullEdges.count());
 				asset.hullFaceCount += static_cast<uint32>(geometryAsset->hullFaces.count());
 				asset.hullFaceEdgeIndexCount += static_cast<uint16>(geometryAsset->hullFaceEdgeIndices.count());
@@ -208,10 +207,21 @@ namespace Trident {
 			pointLight.position = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
 		}
 
+		asset.geometryIndexToHullIndex = sequence<uint32>(asset.geometryMappings.count());
+		asset.hulls = sequence<Hull3D>(asset.geometryMappings.count());
+
+		Entity entity = 0;
+
 		for (EntityComponentMapping<GeometryComponent>& geometryMapping : asset.geometryMappings) {
 			geometryMapping.entity = stream.read<Entity>();
 			geometryMapping.component = stream.read<GeometryComponent>();
+
+			asset.geometryIndexToHullIndex[entity] = entity;
+
+			entity += 1;
 		}
+
+		uint32 hullIndex = 0;
 
 		for (EntityComponentMapping<RigidBody3DComponent>& rigidBodyMapping : asset.rigidBodyMappings) {
 			rigidBodyMapping.entity = stream.read<Entity>();
@@ -246,6 +256,24 @@ namespace Trident {
 				}
 
 				asset.rigidBodyFacePlaneCount += static_cast<uint32>(geometryAsset->hullFaces.count());
+
+				Hull3D& hull = asset.hulls[hullIndex];
+				hull.centroid = geometryAsset->hullCentroid;
+				hull.radius = geometryAsset->hullRadius;
+				hull.vertices = geometryAsset->vertices;
+				hull.edges = geometryAsset->hullEdges;
+				hull.faces = geometryAsset->hullFaces;
+				hull.faceEdgeIndices = geometryAsset->hullFaceEdgeIndices;
+
+				// TODO(physics/hull/line-indices): Restore hull wireframe rendering.
+				hull.lineIndexRange.offset = 0;
+				hull.lineIndexRange.count = 0;
+
+				hull.type = geometryAsset->hullType;
+
+				hullIndex += 1;
+
+				break;
 			}
 
 			Instance3D& instance = asset.instances[instanceIndex + rigidBodyMapping.entity];

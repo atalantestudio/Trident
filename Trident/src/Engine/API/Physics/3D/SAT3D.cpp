@@ -68,8 +68,8 @@ namespace Trident {
 			const Edge3D edgeA = hullA.edges[edgeIndexA + 0];
 			const Edge3D twinA = hullA.edges[edgeIndexA + 1];
 
-			const vec3<float32> a = vec3<float32>(hullA.vertexPositions[edgeA.originVertexIndex]) + transform.position;
-			const vec3<float32> b = vec3<float32>(hullA.vertexPositions[twinA.originVertexIndex]) + transform.position;
+			const vec3<float32> a = vec3<float32>(hullA.vertices[edgeA.originVertexIndex].position) + transform.position;
+			const vec3<float32> b = vec3<float32>(hullA.vertices[twinA.originVertexIndex].position) + transform.position;
 			const vec3<float32> ab = b - a;
 
 			// Face normals are vertices on the Gauss map.
@@ -82,8 +82,8 @@ namespace Trident {
 				const Edge3D edgeB = hullB.edges[edgeIndexB + 0];
 				const Edge3D twinB = hullB.edges[edgeIndexB + 1];
 
-				const vec3<float32> c = hullB.vertexPositions[edgeB.originVertexIndex];
-				const vec3<float32> d = hullB.vertexPositions[twinB.originVertexIndex];
+				const vec3<float32> c = hullB.vertices[edgeB.originVertexIndex].position;
+				const vec3<float32> d = hullB.vertices[twinB.originVertexIndex].position;
 				const vec3<float32> cd = d - c;
 
 				// Face normals are vertices on the Gauss map.

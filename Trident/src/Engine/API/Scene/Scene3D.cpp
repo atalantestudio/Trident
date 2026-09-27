@@ -10,7 +10,7 @@
 #include "Engine/ECS/Component/RigidBody3DComponent.hpp"
 
 namespace Trident {
-	Scene3D::Scene3D(ref<Scene3DAsset> sceneAsset, uint64 alignment) :
+	Scene3D::Scene3D(ref<Scene3DAsset> sceneAsset) :
 		Scene({
 			// TODO(scene/3d): Remove these constructor parameters.
 			.dynamicVertexCount = 0,
@@ -18,76 +18,16 @@ namespace Trident {
 		}),
 		asset(sceneAsset)
 	{
-		loadGeometries(alignment);
+		loadGeometries();
 		loadEntityComponentMappings();
 		updateRigidBodyFacePlanes();
 	}
 
-	void Scene3D::loadGeometries(uint64 alignment) {
-		hulls = sequence<Hull3D>(asset->hullCount);
+	void Scene3D::loadGeometries() {
 		hullEdges = sequence<Edge3D>(asset->hullEdgeCount);
 		hullFaces = sequence<Plane3D>(asset->hullFaceCount);
 		hullFaceEdgeIndices = sequence<uint16>(asset->hullFaceEdgeIndexCount);
 		rigidBodyFacePlanes = sequence<Plane3D>(asset->rigidBodyFacePlaneCount);
-
-		// TODO(scene/3d): Restore.
-		/* uint32 geometryIndex = 0;
-		uint32 hullIndex = 0;
-		uint32 hullEdgeOffset = 0;
-		uint32 hullFaceOffset = 0;
-		uint16 hullFaceEdgeIndexOffset = 0;
-		uint32 hullLineIndexOffset = 0;
-
-		while (geometryIndex < geometries.count()) {
-			const ref<Geometry3DAsset> geometryAsset = geometryAssets[geometryIndex];
-
-			geometryTriangleTangentComponentRange.count = static_cast<uint32>(geometryAsset->tangents.count());
-
-			geometries[geometryIndex] = Geometry3D({
-				.triangleCount = geometryIndexRange.count / 3,
-				.vertexPositionComponentRange = geometryVertexPositionComponentRange,
-				.vertexNormalComponentRange = geometryVertexNormalComponentRange,
-				.vertexTextureCoordinateComponentRange = geometryVertexTextureCoordinateComponentRange,
-				.triangleTangentComponentOffset = geometryTriangleTangentComponentRange.offset,
-				.indexOffset = geometryIndexRange.offset,
-			});
-
-			if (geometryAsset->getFlags() & GeometryAssetFlags::HAS_HULL) {
-				geometries[geometryIndex].hullIndex = hullIndex;
-
-				std::copy(geometryAsset->getHull3DEdges().begin(), geometryAsset->getHull3DEdges().end(), &hullEdges[hullEdgeOffset]);
-				std::copy(geometryAsset->getHull3DFaces().begin(), geometryAsset->getHull3DFaces().end(), &hullFaces[hullFaceOffset]);
-				std::copy(geometryAsset->getHull3DFaceEdgeIndices().begin(), geometryAsset->getHull3DFaceEdgeIndices().end(), &hullFaceEdgeIndices[hullFaceEdgeIndexOffset]);
-				std::copy(geometryAsset->getHull3DLineIndices().begin(), geometryAsset->getHull3DLineIndices().end(), pointer_cast<uint16*>(&dataBuffer[hullLineIndexByteOffset + hullLineIndexOffset * sizeof(uint16)]));
-
-				const view<svec3<float32>> vertexPositions(pointer_cast<const svec3<float32>*>(&dataBuffer[geometryVertexPositionComponentRange.offset * sizeof(float32)]), geometryVertexPositionComponentRange.count / 3);
-				const view<Edge3D> edges(&hullEdges[hullEdgeOffset], geometryAsset->getHull3DEdges().count());
-				const view<Plane3D> faces(&hullFaces[hullFaceOffset], geometryAsset->getHull3DFaces().count());
-				const view<uint16> faceEdgeIndices(&hullFaceEdgeIndices[hullFaceEdgeIndexOffset], geometryAsset->getHull3DFaceEdgeIndices().count());
-				const range<uint32, uint16> lineIndexRange = {hullLineIndexOffset, static_cast<uint16>(geometryAsset->getHull3DLineIndices().count())};
-
-				hulls[hullIndex] = {
-					.centroid = geometryAsset->getHullCentroid(),
-					.radius = geometryAsset->getHullRadius(),
-					.vertexPositions = vertexPositions,
-					.edges = edges,
-					.faces = faces,
-					.faceEdgeIndices = faceEdgeIndices,
-					.lineIndexRange = lineIndexRange,
-					.type = static_cast<Hull3DType>(geometryAsset->getHullType()),
-				};
-
-				hullIndex += 1;
-				hullEdgeOffset += static_cast<uint32>(geometryAsset->getHull3DEdges().count());
-				hullFaceOffset += static_cast<uint32>(geometryAsset->getHull3DFaces().count());
-				hullFaceEdgeIndexOffset += static_cast<uint16>(geometryAsset->getHull3DFaceEdgeIndices().count());
-				hullLineIndexOffset += lineIndexRange.count;
-			}
-
-			geometryTriangleTangentComponentRange.offset += geometryTriangleTangentComponentRange.count;
-
-			geometryIndex += 1;
-		} */
 	}
 
 	void Scene3D::loadEntityComponentMappings() {
@@ -108,8 +48,7 @@ namespace Trident {
 			ecs.setComponent<GeometryComponent>(geometryMapping.entity, geometryMapping.component);
 		}
 
-		// TODO(scene/3d): Restore.
-		/* index rigidBodyFacePlaneOffset = 0;
+		index rigidBodyFacePlaneOffset = 0;
 
 		for (const EntityComponentMapping<RigidBody3DComponent>& rigidBodyMapping : asset->rigidBodyMappings) {
 			ecs.setComponent<RigidBody3DComponent>(rigidBodyMapping.entity, rigidBodyMapping.component);
@@ -117,10 +56,10 @@ namespace Trident {
 			RigidBody3DComponent& rigidBodyComponent = ecs.getComponent<RigidBody3DComponent>(rigidBodyMapping.entity);
 
 			const GeometryComponent geometryComponent = ecs.getComponent<GeometryComponent>(rigidBodyMapping.entity);
-			const Geometry3D& geometry = geometries[geometryComponent.geometryIndex];
+			const uint32 hullIndex = asset->geometryIndexToHullIndex[geometryComponent.geometryIndex];
 
-			if (geometry.hullIndex != max<uint32>()) {
-				const Hull3D& hull = hulls[geometry.hullIndex];
+			if (hullIndex != max<uint32>()) {
+				const Hull3D& hull = asset->hulls[hullIndex];
 
 				rigidBodyComponent.facePlanes = view<Plane3D>(&rigidBodyFacePlanes[rigidBodyFacePlaneOffset], hull.faces.count());
 
@@ -129,7 +68,7 @@ namespace Trident {
 
 			rigidBodyComponent.updateOrientation();
 			rigidBodyComponent.updateWorld({0.0_m, 0.0_m, 0.0_m});
-		} */
+		}
 	}
 
 	void Scene3D::updateRigidBodyFacePlanes() {
@@ -140,18 +79,17 @@ namespace Trident {
 		while (componentIndex < componentPool.componentCount) {
 			const Entity entity = componentPool.componentIndexToEntity[componentIndex];
 			const GeometryComponent geometryComponent = ecs.getComponent<GeometryComponent>(entity);
-			const Geometry3D& geometry = geometries[geometryComponent.geometryIndex];
+			const uint32 hullIndex = asset->geometryIndexToHullIndex[geometryComponent.geometryIndex];
 
-			if (geometry.hullIndex == max<uint32>()) {
+			if (hullIndex == max<uint32>()) {
 				componentIndex += 1;
 
 				continue;
 			}
 
-			RigidBody3DComponent& rigidBodyComponent = componentPool.components[componentIndex];
-
-			const mat4x4<float32> transposeInverseWorld = transpose(inverse(rigidBodyComponent.world));
-			const Hull3D& hull = hulls[geometry.hullIndex];
+			const Hull3D& hull = asset->hulls[hullIndex];
+			const mat4x4<float32>& world = componentPool.components[componentIndex].world;
+			const mat4x4<float32> transposeInverseWorld = transpose(inverse(world));
 
 			index faceIndex = 0;
 
@@ -162,7 +100,7 @@ namespace Trident {
 
 				// TODO(rigid-body/uniform-scaling): Remove non-uniform scaling properties on the rigid bodies.
 				plane.normal = svec3<float32>(normalized(multiplyTransform(vec3<float32>(face.normal), transposeInverseWorld)));
-				plane.distance = dot(multiplyTransform(vec3<float32>(face.normal) * face.distance, rigidBodyComponent.world), vec3<float32>(plane.normal));
+				plane.distance = dot(multiplyTransform(vec3<float32>(face.normal) * face.distance, world), vec3<float32>(plane.normal));
 
 				faceIndex += 1;
 			}

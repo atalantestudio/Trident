@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "Engine/API/Geometry/Geometry3D.hpp"
 #include "Engine/API/Geometry/Hull3D.hpp"
 #include "Engine/API/Scene/Scene.hpp"
 #include "Engine/Filesystem/Asset/MaterialAsset.hpp"
@@ -12,7 +11,7 @@
 namespace Trident {
 	class Scene3D : public Scene {
 		public:
-			explicit Scene3D(ref<Scene3DAsset> sceneAsset, uint64 alignment);
+			explicit Scene3D(ref<Scene3DAsset> sceneAsset);
 
 			inline ref<Scene3DAsset> getAsset() const {
 				return asset;
@@ -88,7 +87,7 @@ namespace Trident {
 			void updateRigidBodyFacePlanes();
 
 		private:
-			void loadGeometries(uint64 alignment);
+			void loadGeometries();
 			void loadEntityComponentMappings();
 
 		private:
@@ -97,7 +96,6 @@ namespace Trident {
 			/// Total number of indices.
 			uint32 indexCount;
 
-			/// Ranges in bytes of the descriptor buffers, aligned to the `minStorageBufferOffsetAlignment` limit.
 			range<uint64, uint64> vertexPositionComponentRange;
 			range<uint64, uint64> vertexNormalComponentRange;
 			range<uint64, uint64> vertexTextureCoordinateComponentRange;
@@ -107,8 +105,6 @@ namespace Trident {
 			uint64 hullLineIndexByteOffset;
 
 		public:
-			sequence<Geometry3D> geometries;
-			sequence<Hull3D> hulls;
 			sequence<Edge3D> hullEdges;
 			sequence<Plane3D> hullFaces;
 			sequence<uint16> hullFaceEdgeIndices;

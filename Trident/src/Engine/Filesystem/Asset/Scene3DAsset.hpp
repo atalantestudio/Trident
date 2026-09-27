@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Engine/API/Geometry/Hull3D.hpp"
 #include "Engine/API/Geometry/Instance.hpp"
 #include "Engine/API/Light/PointLight.hpp"
 #include "Engine/API/Material/Material.hpp"
@@ -44,7 +45,8 @@ namespace Trident {
 		uint32 entityCount;
 		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
 		sequence<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;
-		uint32 hullCount = 0;
+		sequence<uint32> geometryIndexToHullIndex;
+		sequence<Hull3D> hulls;
 		uint32 hullEdgeCount = 0;
 		uint32 hullFaceCount = 0;
 		uint16 hullFaceEdgeIndexCount = 0;

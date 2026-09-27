@@ -14,15 +14,15 @@ namespace Trident {
 		const Edge3D edgeA = hullA.edges[edgeQuery.edgeIndexA + 0];
 		const Edge3D twinA = hullA.edges[edgeQuery.edgeIndexA + 1];
 
-		const vec3<float32> p1 = multiplyTransform(vec3<float32>(hullA.vertexPositions[edgeA.originVertexIndex]), rigidBodyA.world);
-		const vec3<float32> q1 = multiplyTransform(vec3<float32>(hullA.vertexPositions[twinA.originVertexIndex]), rigidBodyA.world);
+		const vec3<float32> p1 = multiplyTransform(vec3<float32>(hullA.vertices[edgeA.originVertexIndex].position), rigidBodyA.world);
+		const vec3<float32> q1 = multiplyTransform(vec3<float32>(hullA.vertices[twinA.originVertexIndex].position), rigidBodyA.world);
 		const vec3<float32> e1 = normalized(q1 - p1);
 
 		const Edge3D edgeB = hullB.edges[edgeQuery.edgeIndexB + 0];
 		const Edge3D twinB = hullB.edges[edgeQuery.edgeIndexB + 1];
 
-		const vec3<float32> p2 = multiplyTransform(vec3<float32>(hullB.vertexPositions[edgeB.originVertexIndex]), rigidBodyB.world);
-		const vec3<float32> q2 = multiplyTransform(vec3<float32>(hullB.vertexPositions[twinB.originVertexIndex]), rigidBodyB.world);
+		const vec3<float32> p2 = multiplyTransform(vec3<float32>(hullB.vertices[edgeB.originVertexIndex].position), rigidBodyB.world);
+		const vec3<float32> q2 = multiplyTransform(vec3<float32>(hullB.vertices[twinB.originVertexIndex].position), rigidBodyB.world);
 		const vec3<float32> e2 = normalized(q2 - p2);
 
 		vec3<float32> normal = normalized(cross(e1, e2));
@@ -119,7 +119,7 @@ namespace Trident {
 			const Edge3D edge = incidentHull.edges[incidentHull.faceEdgeIndices[incidentFace.edgeIndexRange.offset + edgeIndex]];
 
 			ClipVertex3D clipVertex{};
-			clipVertex.position = multiplyTransform(vec3<float32>(incidentHull.vertexPositions[edge.originVertexIndex]), incidentBody.world);
+			clipVertex.position = multiplyTransform(vec3<float32>(incidentHull.vertices[edge.originVertexIndex].position), incidentBody.world);
 			clipVertex.separation = 0.0f;
 			clipVertex.id.referenceEdgeAIndex = max<uint16>();
 			clipVertex.id.referenceEdgeBIndex = max<uint16>();

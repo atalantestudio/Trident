@@ -16,15 +16,11 @@ namespace Trident {
 			static constexpr float32 LOOK_SENSITIVITY = 0.075f;
 
 		public:
-			~Sample3DVisibilityLayer() {
-				delete scene;
-			}
-
 			void initialize() override {
 				renderer.setLayer(this);
 				renderer.build();
 
-				scene = new Scene3D(LemonAndStool::initializeScene(getApplication(), renderer.getGraphicsApi(), renderer.getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment));
+				scene = LemonAndStool::initializeScene(getApplication(), renderer.getGraphicsApi());
 				clusteredScene = clusterizeScene(scene);
 
 				renderer.setScene(&clusteredScene);
@@ -134,7 +130,7 @@ namespace Trident {
 
 		private:
 			VisibilityRenderer renderer;
-			Scene3D* scene;
+			ref<Scene3D> scene;
 			ClusteredScene clusteredScene;
 			NoClipCameraController cameraController;
 	};

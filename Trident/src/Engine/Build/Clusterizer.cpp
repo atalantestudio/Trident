@@ -3,7 +3,6 @@
 
 #include "pch.hpp"
 
-#include "Engine/API/Geometry/Geometry3D.hpp"
 #include "Engine/API/Scene/Scene3D.hpp"
 #include "Engine/Build/ClusteredGeometry.hpp"
 #include "Engine/Build/ClusteredInstance.hpp"
@@ -14,13 +13,14 @@
 
 namespace Trident {
 	ClusteredScene clusterizeScene(const Scene3D* scene) {
-		const ComponentPool<GeometryComponent>& geometryComponentPool = scene->ecs.getComponentPool<GeometryComponent>();
+		// TODO(renderer/visibility/clusterizer): Either reimplement or deprecate.
+		/* const ComponentPool<GeometryComponent>& geometryComponentPool = scene->ecs.getComponentPool<GeometryComponent>();
 		const ComponentPool<MaterialComponent>& materialComponentPool = scene->ecs.getComponentPool<MaterialComponent>();
 		const ComponentPool<RigidBody3DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody3DComponent>();
-		const view<uint8> dataBuffer = scene->getDataBuffer();
+		const view<uint8> dataBuffer = scene->getDataBuffer(); */
 
 		ClusteredScene clusteredScene{};
-		clusteredScene.geometries = sequence<ClusteredGeometry>(scene->geometries.count());
+		/* clusteredScene.geometries = sequence<ClusteredGeometry>(scene->geometries.count());
 		clusteredScene.materialShaders = scene->getAsset()->materialShaders;
 		clusteredScene.materialAssets = scene->getMaterialAssets();
 
@@ -41,7 +41,7 @@ namespace Trident {
 
 			uint32 instanceCount = 0;
 
-			// TODO: Optimize.
+			// TODO(renderer/visibility/clusterizer): Optimize.
 			// Count the number of instances using this geometry.
 			{
 				uint32 rigidBodyComponentIndex = 0;
@@ -185,7 +185,7 @@ namespace Trident {
 
 			clusterOffset += clusteredGeometry.clusterCount;
 			rigidBodyComponentIndex += 1;
-		}
+		} */
 
 		return clusteredScene;
 	}

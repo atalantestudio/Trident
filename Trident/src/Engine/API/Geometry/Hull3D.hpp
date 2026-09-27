@@ -6,6 +6,7 @@
 #include "Engine/API/Geometry/Edge.hpp"
 #include "Engine/API/Geometry/Hull3DType.hpp"
 #include "Engine/API/Geometry/Plane3D.hpp"
+#include "Engine/API/Geometry/Vertex.hpp"
 
 namespace Trident {
 	/// A convex hull wrapping a 3D geometry.
@@ -21,8 +22,8 @@ namespace Trident {
 			uint32 maxProjectionVertexIndex = max<uint32>();
 			uint32 vertexIndex = 0;
 
-			while (vertexIndex < vertexPositions.count()) {
-				const float32 projection = dot(vec3<float32>(vertexPositions[vertexIndex]), d);
+			while (vertexIndex < vertices.count()) {
+				const float32 projection = dot(vec3<float32>(vertices[vertexIndex].position), d);
 
 				if (projection > maxProjection) {
 					maxProjection = projection;
@@ -32,7 +33,7 @@ namespace Trident {
 				vertexIndex += 1;
 			}
 
-			return vec3<float32>(vertexPositions[maxProjectionVertexIndex]);
+			return vec3<float32>(vertices[maxProjectionVertexIndex].position);
 		}
 
 		/// The mean position of all vertices.
@@ -42,9 +43,9 @@ namespace Trident {
 		/// The distance between the centroid and the farthest vertex.
 		float32 radius;
 
-		view<svec3<float32>> vertexPositions;
+		view<Vertex3D> vertices;
 
-		/// The edges composing the hull, arranged in a sequence of half-edges objects.
+		/// The edges composing the hull, arranged in a sequence of half-edges.
 		/// Each even edge is followed by its twin edge.
 		view<Edge3D> edges;
 
