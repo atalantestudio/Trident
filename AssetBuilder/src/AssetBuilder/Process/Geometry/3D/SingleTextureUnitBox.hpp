@@ -81,6 +81,16 @@ namespace Trident {
 						20, 21, 22,
 						21, 23, 22,
 					},
+					.hullVertices = {
+						{ 0.5f * x,  0.5f * y,  0.5f * z},
+						{-0.5f * x,  0.5f * y,  0.5f * z},
+						{ 0.5f * x, -0.5f * y,  0.5f * z},
+						{-0.5f * x, -0.5f * y,  0.5f * z},
+						{-0.5f * x,  0.5f * y, -0.5f * z},
+						{ 0.5f * x,  0.5f * y, -0.5f * z},
+						{-0.5f * x, -0.5f * y, -0.5f * z},
+						{ 0.5f * x, -0.5f * y, -0.5f * z},
+					},
 					.hullEdges = {
 						{.originVertexIndex = 0, .faceIndex = 0}, // front
 						{.originVertexIndex = 1, .faceIndex = 4}, // top

@@ -221,8 +221,6 @@ namespace Trident {
 			entity += 1;
 		}
 
-		uint32 hullIndex = 0;
-
 		for (EntityComponentMapping<RigidBody3DComponent>& rigidBodyMapping : asset.rigidBodyMappings) {
 			rigidBodyMapping.entity = stream.read<Entity>();
 
@@ -257,10 +255,10 @@ namespace Trident {
 
 				asset.rigidBodyFacePlaneCount += static_cast<uint32>(geometryAsset->hullFaces.count());
 
-				Hull3D& hull = asset.hulls[hullIndex];
+				Hull3D& hull = asset.hulls[rigidBodyMapping.entity];
 				hull.centroid = geometryAsset->hullCentroid;
 				hull.radius = geometryAsset->hullRadius;
-				hull.vertices = geometryAsset->vertices;
+				hull.vertices = geometryAsset->hullVertices;
 				hull.edges = geometryAsset->hullEdges;
 				hull.faces = geometryAsset->hullFaces;
 				hull.faceEdgeIndices = geometryAsset->hullFaceEdgeIndices;
@@ -270,8 +268,6 @@ namespace Trident {
 				hull.lineIndexRange.count = 0;
 
 				hull.type = geometryAsset->hullType;
-
-				hullIndex += 1;
 
 				break;
 			}

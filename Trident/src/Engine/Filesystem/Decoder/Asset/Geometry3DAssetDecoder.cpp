@@ -35,6 +35,10 @@ namespace Trident {
 			asset.hullCentroid = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
 			asset.hullRadius = stream.read<float32>();
 
+			const uint16 hullVertexCount = stream.read<uint16>();
+
+			asset.hullVertices = sequence<svec3<float32>>(hullVertexCount);
+
 			const uint16 hullEdgeCount = stream.read<uint16>();
 
 			asset.hullEdges = sequence<Edge3D>(hullEdgeCount);
@@ -50,43 +54,49 @@ namespace Trident {
 			const uint16 hullLineIndexCount = stream.read<uint16>();
 
 			asset.hullLineIndices = sequence<uint16>(hullLineIndexCount);
-		}
 
-		for (Vertex3D& vertex : asset.vertices) {
-			vertex.position.x = stream.read<float32>();
-			vertex.position.y = stream.read<float32>();
-			vertex.position.z = stream.read<float32>();
-			vertex.normal = stream.read<uint32>();
-			vertex.tangent = stream.read<uint32>();
-			vertex.textureCoordinate = stream.read<uint32>();
-		}
+			for (Vertex3D& vertex : asset.vertices) {
+				vertex.position.x = stream.read<float32>();
+				vertex.position.y = stream.read<float32>();
+				vertex.position.z = stream.read<float32>();
+				vertex.normal = stream.read<uint32>();
+				vertex.tangent = stream.read<uint32>();
+				vertex.textureCoordinate = stream.read<uint32>();
+			}
 
-		for (svec3<float32>& normal : asset.vertexNormals) {
-			normal.x = stream.read<float32>();
-			normal.y = stream.read<float32>();
-			normal.z = stream.read<float32>();
-		}
+			for (svec3<float32>& normal : asset.vertexNormals) {
+				normal.x = stream.read<float32>();
+				normal.y = stream.read<float32>();
+				normal.z = stream.read<float32>();
+			}
 
-		for (uint32& index : asset.indices) {
-			index = stream.read<uint32>();
-		}
+			for (uint32& index : asset.indices) {
+				index = stream.read<uint32>();
+			}
 
-		for (Edge3D& edge : asset.hullEdges) {
-			edge = stream.read<Edge3D>();
-		}
+			for (svec3<float32>& vertex : asset.hullVertices) {
+				vertex.x = stream.read<float32>();
+				vertex.y = stream.read<float32>();
+				vertex.z = stream.read<float32>();
+			}
 
-		for (Plane3D& face : asset.hullFaces) {
-			face.normal = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
-			face.distance = stream.read<float32>();
-			face.edgeIndexRange = stream.read<range<uint16, uint16>>();
-		}
+			for (Edge3D& edge : asset.hullEdges) {
+				edge = stream.read<Edge3D>();
+			}
 
-		for (uint16& faceEdgeIndex : asset.hullFaceEdgeIndices) {
-			faceEdgeIndex = stream.read<uint16>();
-		}
+			for (Plane3D& face : asset.hullFaces) {
+				face.normal = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
+				face.distance = stream.read<float32>();
+				face.edgeIndexRange = stream.read<range<uint16, uint16>>();
+			}
 
-		for (uint16& lineIndex : asset.hullLineIndices) {
-			lineIndex = stream.read<uint16>();
+			for (uint16& faceEdgeIndex : asset.hullFaceEdgeIndices) {
+				faceEdgeIndex = stream.read<uint16>();
+			}
+
+			for (uint16& lineIndex : asset.hullLineIndices) {
+				lineIndex = stream.read<uint16>();
+			}
 		}
 
 		return asset;

@@ -23,7 +23,7 @@ namespace Trident {
 			uint32 vertexIndex = 0;
 
 			while (vertexIndex < vertices.count()) {
-				const float32 projection = dot(vec3<float32>(vertices[vertexIndex].position), d);
+				const float32 projection = dot(vec3<float32>(vertices[vertexIndex]), d);
 
 				if (projection > maxProjection) {
 					maxProjection = projection;
@@ -33,7 +33,7 @@ namespace Trident {
 				vertexIndex += 1;
 			}
 
-			return vec3<float32>(vertices[maxProjectionVertexIndex].position);
+			return vec3<float32>(vertices[maxProjectionVertexIndex]);
 		}
 
 		/// The mean position of all vertices.
@@ -43,7 +43,7 @@ namespace Trident {
 		/// The distance between the centroid and the farthest vertex.
 		float32 radius;
 
-		view<Vertex3D> vertices;
+		view<svec3<float32>> vertices;
 
 		/// The edges composing the hull, arranged in a sequence of half-edges.
 		/// Each even edge is followed by its twin edge.

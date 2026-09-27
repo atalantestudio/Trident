@@ -20,10 +20,10 @@ namespace Trident {
 		sequence<svec3<float32>> vertexNormals;
 
 		sequence<uint32> indices;
-
 		Hull3DType hullType;
 		float32 hullRadius;
 		svec3<float32> hullCentroid;
+		sequence<svec3<float32>> hullVertices;
 		sequence<Edge3D> hullEdges;
 		sequence<Plane3D> hullFaces;
 		sequence<uint16> hullFaceEdgeIndices;

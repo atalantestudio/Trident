@@ -30,6 +30,7 @@ namespace Trident {
 					stream.write<float32>(geometry.hull.centroid.y);
 					stream.write<float32>(geometry.hull.centroid.z);
 					stream.write<float32>(geometry.hull.radius);
+					stream.write<uint16>(static_cast<uint16>(geometry.hullVertices.count()));
 					stream.write<uint16>(static_cast<uint16>(geometry.hullEdges.count()));
 					stream.write<uint16>(static_cast<uint16>(geometry.hullFaces.count()));
 					stream.write<uint16>(static_cast<uint16>(geometry.hullFaceEdgeIndices.count()));
@@ -56,6 +57,12 @@ namespace Trident {
 				}
 
 				if (geometry.flags & GeometryAssetFlags::HAS_HULL) {
+					for (const svec3<float32> vertex : geometry.hullVertices) {
+						stream.write<float32>(vertex.x);
+						stream.write<float32>(vertex.y);
+						stream.write<float32>(vertex.z);
+					}
+
 					for (const Edge3D edge : geometry.hullEdges) {
 						stream.write<Edge3D>(edge);
 					}
@@ -110,7 +117,8 @@ namespace Trident {
 						sizeof(Hull3DType) +
 						sizeof(svec3<float32>) +
 						sizeof(float32) +
-						sizeof(uint16) * 4 +
+						sizeof(uint16) * 5 +
+						geometry.hullVertices.count() * sizeof(svec3<float32>) +
 						geometry.hullEdges.count() * sizeof(Edge3D) +
 						geometry.hullFaces.count() * sizeof(Plane3D) +
 						geometry.hullFaceEdgeIndices.count() * sizeof(uint16) +

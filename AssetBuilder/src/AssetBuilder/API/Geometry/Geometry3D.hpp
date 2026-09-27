@@ -20,6 +20,7 @@ namespace Trident {
 		sequence<uint32> indices;
 
 		Hull3D hull;
+		sequence<svec3<float32>> hullVertices;
 		sequence<Edge3D> hullEdges;
 		sequence<uint16> hullFaceEdgeIndices;
 		sequence<Plane3D> hullFaces;
