@@ -207,8 +207,8 @@ namespace Trident {
 			pointLight.position = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
 		}
 
-		asset.geometryIndexToHullIndex = sequence<uint32>(asset.geometryMappings.count());
-		asset.hulls = sequence<Hull3D>(asset.geometryMappings.count());
+		asset.geometryIndexToHullIndex = sequence<uint32>(asset.geometryIndexRanges.count());
+		asset.hulls = sequence<Hull3D>(asset.entityCount);
 
 		Entity entity = 0;
 
@@ -216,7 +216,7 @@ namespace Trident {
 			geometryMapping.entity = stream.read<Entity>();
 			geometryMapping.component = stream.read<GeometryComponent>();
 
-			asset.geometryIndexToHullIndex[entity] = entity;
+			asset.geometryIndexToHullIndex[entity] = max<uint32>();
 
 			entity += 1;
 		}
@@ -252,6 +252,8 @@ namespace Trident {
 				if (!(geometryAsset->flags & GeometryAssetFlags::HAS_HULL)) {
 					continue;
 				}
+
+				asset.geometryIndexToHullIndex[rigidBodyMapping.entity] = rigidBodyMapping.entity;
 
 				asset.rigidBodyFacePlaneCount += static_cast<uint32>(geometryAsset->hullFaces.count());
 
