@@ -61,7 +61,7 @@ namespace Trident {
 			.lightmap = descriptor.lightmap,
 		});
 
-		extrudeFace(floorFace, -height);
+		extrudeFace(floorFace, floorFace.normal, -height);
 
 		roomOffset += 1;
 
@@ -79,7 +79,7 @@ namespace Trident {
 		const uint32 carvingAIndex = getLastFaceIndex();
 		const float32 distance = dot(vec3<float32>(verticesB[0] - verticesA[0]), vec3<float32>(faceA.normal));
 
-		extrudeFace(carvingA, distance);
+		extrudeFace(carvingA, carvingA.normal, distance);
 		removeFace(carvingAIndex);
 		carveFace(faceB, verticesB);
 		removeFace(getLastFaceIndex());

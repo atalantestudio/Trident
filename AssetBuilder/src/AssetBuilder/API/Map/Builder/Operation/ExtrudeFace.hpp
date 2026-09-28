@@ -6,7 +6,7 @@
 #include "AssetBuilder/API/Map/Builder/MapBuilder.hpp"
 
 namespace Trident {
-	void MapBuilder::extrudeFace(Face& face, float32 scale) {
+	void MapBuilder::extrudeFace(Face& face, svec3<float32> direction, float32 scale) {
 		if (abs(scale) < 1e-4) {
 			return;
 		}
@@ -18,7 +18,7 @@ namespace Trident {
 
 		while (indexA < vertexCount) {
 			// TODO(lyah/scalar)
-			facePositions[facePositionCount + indexA] = svec3<float32>(a) + face.normal * scale;
+			facePositions[facePositionCount + indexA] = svec3<float32>(a) + direction * scale;
 
 			const uint32 indexB = (indexA + 1) % vertexCount;
 			const vec3<float32> b = facePositions[face.indices[indexB]];
@@ -32,7 +32,7 @@ namespace Trident {
 			};
 
 			// TODO(lyah/scalar)
-			extrudedFace.normal = svec3<float32>(normalized(cross(b - a, face.normal * scale)));
+			extrudedFace.normal = svec3<float32>(normalized(cross(b - a, direction * scale)));
 
 			extrudedFace.geometryIndex = max<uint32>();
 			extrudedFace.material = face.material;

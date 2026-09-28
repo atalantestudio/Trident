@@ -38,7 +38,7 @@ namespace Trident {
 
 				Face& pentagon = builder.createFace(pentagonVertices, {0.0f, 1.0f, 0.0f});
 
-				builder.extrudeFace(pentagon, 32.0f);
+				builder.extrudeFace(pentagon, pentagon.normal, 32.0f);
 
 				const svec3<float32> squareVertices[] = {
 					{ 64.0f,  48.0f,  128.0f},
@@ -49,31 +49,7 @@ namespace Trident {
 
 				Face& square = builder.createFace(squareVertices, {0.0f, 0.0f, -1.0f});
 
-				builder.extrudeFace(square, -32.0f);
-
-				const svec3<float32> roomVertices[] = {
-					{-64.0f,  128.0f,  128.0f},
-					{ 64.0f,  128.0f,  128.0f},
-					{ 64.0f,  128.0f, -128.0f},
-					{-64.0f,  128.0f, -128.0f},
-				};
-
-				Face& room = builder.createFace(roomVertices, {0.0f, 1.0f, 0.0f});
-
-				builder.extrudeFace(room, -128.0f);
-
-				const svec3<float32> concaveFaceVertices[] = {
-					{-48.0f,  24.0f,  128.0f},
-					{ 48.0f,  24.0f,  128.0f},
-					{ 48.0f,  24.0f,  112.0f},
-					{ 16.0f,  24.0f,  112.0f},
-					{ 16.0f,  24.0f,  92.0f },
-					{ 48.0f,  24.0f,  92.0f },
-					{ 48.0f,  24.0f,  64.0f },
-					{-48.0f,  24.0f,  64.0f },
-				};
-
-				Face& concaveFace = builder.createFace(concaveFaceVertices, {0.0f, 1.0f, 0.0f}); */
+				builder.extrudeFace(square, square.normal, -32.0f); */
 
 				static constexpr svec3<float32> concaveFace2Vertices[] = {
 					{ 62.0f,   536.0f,  128.0f},

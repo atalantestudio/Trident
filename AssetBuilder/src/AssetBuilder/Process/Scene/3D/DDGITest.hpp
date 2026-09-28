@@ -52,7 +52,7 @@ namespace Trident {
 					},
 				});
 
-				builder.extrudeFace(floorFace, -128.0f);
+				builder.extrudeFace(floorFace, floorFace.normal, -128.0f);
 
 				builder.createFace({
 					.vertices = ceilingLeftVertices,

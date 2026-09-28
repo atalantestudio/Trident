@@ -67,14 +67,14 @@ namespace Trident {
 					},
 				});
 
-				builder.extrudeFace(floorFace, -128.0f);
+				builder.extrudeFace(floorFace, floorFace.normal, -128.0f);
 
 				floorFace.material = lightmappedGrayMaterial;
 				floorFace.textureFiltering.scale = {m1 * 0.25f, m1 * 0.25f};
 
 				Face& tableFace = builder.carveFace(floorFace, TABLE_VERTICES);
 
-				builder.extrudeFace(tableFace, 48.0f);
+				builder.extrudeFace(tableFace, tableFace.normal, 48.0f);
 
 				builder.createFace({
 					.vertices = CEILING_VERTICES,

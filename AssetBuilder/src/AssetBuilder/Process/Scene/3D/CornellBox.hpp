@@ -159,11 +159,11 @@ namespace Trident {
 				// TODO(asset-builder/map): Fix invalid emissive triangles when only the short block is used.
 				// Face& shortBlockTopFace = builder.carveFace(floorFace, SHORT_BLOCK_BOTTOM_VERTICES);
 
-				// builder.extrudeFace(shortBlockTopFace, SHORT_BLOCK_HEIGHT);
+				// builder.extrudeFace(shortBlockTopFace, shortBlockTopFace.normal, SHORT_BLOCK_HEIGHT);
 
 				Face& tallBlockTopFace = builder.carveFace(floorFace, TALL_BLOCK_BOTTOM_VERTICES);
 
-				builder.extrudeFace(tallBlockTopFace, TALL_BLOCK_HEIGHT);
+				builder.extrudeFace(tallBlockTopFace, tallBlockTopFace.normal, TALL_BLOCK_HEIGHT);
 
 				return builder;
 			}

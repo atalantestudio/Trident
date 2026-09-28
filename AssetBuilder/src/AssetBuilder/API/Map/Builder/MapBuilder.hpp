@@ -55,11 +55,11 @@ namespace Trident {
 			Face& createFace(const FaceDescriptor& descriptor);
 			Face& createFace(const IndexedFaceDescriptor& descriptor);
 
-			/// Extrudes the face `scale` units towards its normal.
+			/// Extrudes the face `scale` units towards `direction`.
 			/// This operation moves the current face and creates additional faces on the extruded sides.
 			/// 
 			/// If `scale` is 0, the operation is ignored.
-			void extrudeFace(Face& face, float32 scale);
+			void extrudeFace(Face& face, svec3<float32> direction, float32 scale);
 
 			/// Carves a new face inside an existing face.
 			/// This operation modifies the vertices of the current face.
