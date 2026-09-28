@@ -54,26 +54,28 @@ namespace Trident {
 			const uint16 hullLineIndexCount = stream.read<uint16>();
 
 			asset.hullLineIndices = sequence<uint16>(hullLineIndexCount);
+		}
 
-			for (Vertex3D& vertex : asset.vertices) {
-				vertex.position.x = stream.read<float32>();
-				vertex.position.y = stream.read<float32>();
-				vertex.position.z = stream.read<float32>();
-				vertex.normal = stream.read<uint32>();
-				vertex.tangent = stream.read<uint32>();
-				vertex.textureCoordinate = stream.read<uint32>();
-			}
+		for (Vertex3D& vertex : asset.vertices) {
+			vertex.position.x = stream.read<float32>();
+			vertex.position.y = stream.read<float32>();
+			vertex.position.z = stream.read<float32>();
+			vertex.normal = stream.read<uint32>();
+			vertex.tangent = stream.read<uint32>();
+			vertex.textureCoordinate = stream.read<uint32>();
+		}
 
-			for (svec3<float32>& normal : asset.vertexNormals) {
-				normal.x = stream.read<float32>();
-				normal.y = stream.read<float32>();
-				normal.z = stream.read<float32>();
-			}
+		for (svec3<float32>& normal : asset.vertexNormals) {
+			normal.x = stream.read<float32>();
+			normal.y = stream.read<float32>();
+			normal.z = stream.read<float32>();
+		}
 
-			for (uint32& index : asset.indices) {
-				index = stream.read<uint32>();
-			}
+		for (uint32& index : asset.indices) {
+			index = stream.read<uint32>();
+		}
 
+		if (asset.flags & GeometryAssetFlags::HAS_HULL) {
 			for (svec3<float32>& vertex : asset.hullVertices) {
 				vertex.x = stream.read<float32>();
 				vertex.y = stream.read<float32>();
