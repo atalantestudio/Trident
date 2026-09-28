@@ -22,8 +22,9 @@ namespace Trident {
 
 		const float32 v = (ac_ac * ap_ab - ab_ac * ap_ac) * inverseD;
 		const float32 w = (ab_ab * ap_ac - ab_ac * ap_ab) * inverseD;
+		const float32 u = 1.0f - w - v;
 
-		return v > 0.0f && w > 0.0f;
+		return u > 0.0f && v > 0.0f && w > 0.0f;
 	}
 
 	void MapBuilder::calculateFaceBoundingBoxes(Face& face) const {
