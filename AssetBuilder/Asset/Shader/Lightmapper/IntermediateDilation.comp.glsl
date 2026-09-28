@@ -29,14 +29,15 @@ void main() {
 
 	vec4 color = imageLoad(intermediateLightmapAtlas, coordinate);
 
-	if (color.a == 0.0) loadLuxel(coordinate + ivec2(-1, -1), atlasSize, color);
-	if (color.a == 0.0) loadLuxel(coordinate + ivec2( 0, -1), atlasSize, color);
-	if (color.a == 0.0) loadLuxel(coordinate + ivec2( 1, -1), atlasSize, color);
-	if (color.a == 0.0) loadLuxel(coordinate + ivec2(-1,  0), atlasSize, color);
-	if (color.a == 0.0) loadLuxel(coordinate + ivec2( 1,  0), atlasSize, color);
-	if (color.a == 0.0) loadLuxel(coordinate + ivec2(-1,  1), atlasSize, color);
 	if (color.a == 0.0) loadLuxel(coordinate + ivec2( 0,  1), atlasSize, color);
+	if (color.a == 0.0) loadLuxel(coordinate + ivec2( 1,  0), atlasSize, color);
+	if (color.a == 0.0) loadLuxel(coordinate + ivec2( 0, -1), atlasSize, color);
+	if (color.a == 0.0) loadLuxel(coordinate + ivec2(-1,  0), atlasSize, color);
+
+	if (color.a == 0.0) loadLuxel(coordinate + ivec2(-1,  1), atlasSize, color);
 	if (color.a == 0.0) loadLuxel(coordinate + ivec2( 1,  1), atlasSize, color);
+	if (color.a == 0.0) loadLuxel(coordinate + ivec2( 1, -1), atlasSize, color);
+	if (color.a == 0.0) loadLuxel(coordinate + ivec2(-1, -1), atlasSize, color);
 
 	imageStore(intermediateLightmapAtlas, coordinate, color);
 }

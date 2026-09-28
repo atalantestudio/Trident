@@ -28,14 +28,15 @@ void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 
 	float4 color = intermediateLightmapAtlas[coordinate];
 
-	if (color.a == 0.0) loadLuxel(coordinate + int2(-1, -1), atlasSize, color);
-	if (color.a == 0.0) loadLuxel(coordinate + int2( 0, -1), atlasSize, color);
-	if (color.a == 0.0) loadLuxel(coordinate + int2( 1, -1), atlasSize, color);
-	if (color.a == 0.0) loadLuxel(coordinate + int2(-1,  0), atlasSize, color);
-	if (color.a == 0.0) loadLuxel(coordinate + int2( 1,  0), atlasSize, color);
-	if (color.a == 0.0) loadLuxel(coordinate + int2(-1,  1), atlasSize, color);
 	if (color.a == 0.0) loadLuxel(coordinate + int2( 0,  1), atlasSize, color);
+	if (color.a == 0.0) loadLuxel(coordinate + int2( 1,  0), atlasSize, color);
+	if (color.a == 0.0) loadLuxel(coordinate + int2( 0, -1), atlasSize, color);
+	if (color.a == 0.0) loadLuxel(coordinate + int2(-1,  0), atlasSize, color);
+
+	if (color.a == 0.0) loadLuxel(coordinate + int2(-1,  1), atlasSize, color);
 	if (color.a == 0.0) loadLuxel(coordinate + int2( 1,  1), atlasSize, color);
+	if (color.a == 0.0) loadLuxel(coordinate + int2( 1, -1), atlasSize, color);
+	if (color.a == 0.0) loadLuxel(coordinate + int2(-1, -1), atlasSize, color);
 
 	intermediateLightmapAtlas[coordinate] = color;
 }
