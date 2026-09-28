@@ -12,14 +12,6 @@ namespace Trident {
 		}
 
 		const uint32 vertexCount = face.getVertexCount();
-		const uint32 materialShaderIndex = face.material >> 16;
-		const uint32 materialIndex = face.material & 0xff;
-
-		const IntermediateMaterialShader& materialShader = materialShaders[materialShaderIndex];
-		const IntermediateMaterial& material = materialShader.materials[materialIndex];
-		const IntermediateMaterialGeometry& materialGeometry = material.geometries[material.bakedGeometryIndex];
-
-		IntermediateGeometry& geometry = geometries[materialGeometry.geometryIndex];
 
 		vec3<float32> a = facePositions[face.indices[0]];
 		uint32 indexA = 0;
@@ -42,7 +34,7 @@ namespace Trident {
 			// TODO(lyah/scalar)
 			extrudedFace.normal = svec3<float32>(normalized(cross(b - a, face.normal * scale)));
 
-			extrudedFace.geometryIndex = face.geometryIndex;
+			extrudedFace.geometryIndex = max<uint32>();
 			extrudedFace.material = face.material;
 			extrudedFace.textureFiltering = face.textureFiltering;
 			extrudedFace.lightmap = face.lightmap;
@@ -51,13 +43,9 @@ namespace Trident {
 
 			faces[staticGeometryFaceCount] = extrudedFace;
 
-			geometry.faceIndices.emplace_back(staticGeometryFaceCount);
-
 			a = b;
 
 			staticGeometryFaceCount += 1;
-			staticGeometryFaceTriangleCount += 2;
-			lightmapCoordinateCount += vertexCount;
 			indexA += 1;
 		}
 
@@ -70,7 +58,5 @@ namespace Trident {
 		}
 
 		facePositionCount += vertexCount;
-		staticGeometryFaceVertexCount += vertexCount * 4;
-		lightmapCount += vertexCount;
 	}
 }

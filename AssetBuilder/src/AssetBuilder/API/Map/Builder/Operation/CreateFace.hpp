@@ -38,55 +38,10 @@ namespace Trident {
 	Face& MapBuilder::createFace(const IndexedFaceDescriptor& descriptor) {
 		ENGINE_ASSERT(descriptor.indices.count() >= 3, "Not enough indices.");
 
-		const uint32 materialShaderIndex = descriptor.material >> 16;
-		const uint32 materialIndex = descriptor.material & 0xff;
-
-		IntermediateMaterialShader& materialShader = materialShaders[materialShaderIndex];
-
-		ENGINE_ASSERT(materialShader.asset.geometryType == GeometryType::STATIC, "Cannot bind a static geometry face to a dynamic material shader.");
-
-		IntermediateMaterial& material = materialShader.materials[materialIndex];
-
-		if (material.bakedGeometryIndex >= material.geometries.size()) {
-			const uint32 geometryIndex = static_cast<uint32>(geometries.size());
-
-			IntermediateGeometry geometry{};
-			geometry.assetIdentifier = max<uint32>();
-			geometry.sharedInstanceCount = 1;
-			geometry.staticUsage = true;
-
-			geometries.emplace_back(geometry);
-
-			BuildInstance instance{};
-			instance.transform.translation = {0.0f, 0.0f, 0.0f};
-			instance.transform.rotation = {0.0f, 0.0f, 0.0f};
-			instance.transform.scale = 1.0f;
-			instance.lightmap.luxelScale = {1.0f, 1.0f};
-			instance.lightmap.emissiveColor = {0.0f, 0.0f, 0.0f};
-			instance.lightmap.emissiveIntensity = 0.0f;
-			instance.lightmap.albedo = {1.0f, 1.0f, 1.0f};
-			instance.lightmapScale = {1.0f, 1.0f};
-
-			IntermediateMaterialGeometry materialGeometry{};
-			materialGeometry.geometryIndex = geometryIndex;
-			materialGeometry.instances.emplace_back(instance);
-
-			material.bakedGeometryIndex = static_cast<uint32>(material.geometries.size());
-			material.geometries.emplace_back(materialGeometry);
-
-			materialGeometryCount += 1;
-			staticInstanceCount += 1;
-		}
-
-		const uint32 vertexCount = static_cast<uint32>(descriptor.indices.count());
-		const IntermediateMaterialGeometry& materialGeometry = material.geometries[material.bakedGeometryIndex];
-
-		IntermediateGeometry& geometry = geometries[materialGeometry.geometryIndex];
-
 		Face face{};
 		face.indices.resize(descriptor.indices.count());
 		face.normal = descriptor.normal;
-		face.geometryIndex = materialGeometry.geometryIndex;
+		face.geometryIndex = max<uint32>();
 		face.material = descriptor.material;
 		face.textureFiltering = descriptor.textureFiltering;
 		face.boundingBox.min = {max<float32>(), max<float32>()};
@@ -97,13 +52,7 @@ namespace Trident {
 
 		faces[staticGeometryFaceCount] = face;
 
-		geometry.faceIndices.emplace_back(staticGeometryFaceCount);
-
-		staticGeometryFaceVertexCount += vertexCount;
-		staticGeometryFaceTriangleCount += face.getTriangleCount();
 		staticGeometryFaceCount += 1;
-		lightmapCoordinateCount += vertexCount;
-		lightmapCount += 1;
 
 		return faces[staticGeometryFaceCount - 1];
 	}

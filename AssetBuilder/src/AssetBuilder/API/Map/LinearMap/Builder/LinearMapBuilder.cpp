@@ -52,26 +52,6 @@ namespace Trident {
 			.textureFiltering = descriptor.textureFiltering,
 			.lightmap = descriptor.lightmap,
 		});
-		/* Face ceilingFace{};
-		ceilingFace.indices = floorFace.indices;
-		ceilingFace.normal = {0.0f, -1.0f, 0.0f};
-		ceilingFace.geometryIndex = floorFace.geometryIndex;
-		ceilingFace.material = descriptor.material;
-		ceilingFace.textureFiltering = descriptor.textureFiltering;
-		ceilingFace.lightmap = descriptor.lightmap;
-		ceilingFace.boundingBox.min = {max<float32>(), max<float32>()};
-		ceilingFace.boundingBox.max = {min<float32>(), min<float32>()};
-
-		faces[staticGeometryFaceCount] = ceilingFace;
-
-		IntermediateGeometry& geometry = geometries[floorFace.geometryIndex];
-		geometry.faceIndices.emplace_back(staticGeometryFaceCount);
-
-		staticGeometryFaceVertexCount += 4;
-		staticGeometryFaceTriangleCount += 2;
-		staticGeometryFaceCount += 1;
-		lightmapCoordinateCount += 4;
-		lightmapCount += 1; */
 
 		extrudeFace(floorFace, -height);
 

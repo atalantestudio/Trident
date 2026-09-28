@@ -7,7 +7,6 @@
 #include "AssetBuilder/API/Utilities/Utilities.hpp"
 
 namespace Trident {
-	// See https://blackpawn.com/texts/lightmaps.
 	LightmapNode* MapBuilder::insertLightmapNode(const Lightmap& lightmap, LightmapNode* node) {
 		if (!node->leaf()) {
 			LightmapNode* newNode = insertLightmapNode(lightmap, node->children[0]);
@@ -76,15 +75,13 @@ namespace Trident {
 
 		while (lightmapIndex < staticGeometryFaceCount) {
 			const Face& face = faces[lightmapIndex];
-			const IntermediateGeometry& intermediateGeometry = geometries[face.geometryIndex];
-			const BuildGeometry& geometry = scene.geometries[intermediateGeometry.filteredIndex];
 
 			Lightmap& lightmap = lightmaps[lightmapIndex];
 			lightmap.geometryIndex = face.geometryIndex;
 			lightmap.materialIndex = lightmapIndex;
 			lightmap.triangleRange.offset = face.triangleOffset;
 			lightmap.triangleRange.count = face.getTriangleCount();
-			lightmap.vertexRange.offset = face.vertexOffset - geometry.vertexRange.offset;
+			lightmap.vertexRange.offset = face.vertexOffset;
 			lightmap.coordinateOffset = lightmapCoordinateOffset;
 			lightmap.coordinateCount = face.getVertexCount();
 			lightmap.minCoordinate = face.boundingBox.min;
@@ -187,8 +184,7 @@ namespace Trident {
 			lightmap.size.height += 4;
 
 			const IntermediateGeometry& intermediateGeometry = geometries[lightmap.geometryIndex];
-			const BuildGeometry& geometry = scene.geometries[intermediateGeometry.filteredIndex];
-			const view<BuildVertex3D> vertices(&scene.vertices[geometry.vertexRange.offset + lightmap.vertexRange.offset], lightmap.coordinateCount);
+			const view<BuildVertex3D> vertices(&intermediateGeometry.vertices[lightmap.vertexRange.offset], lightmap.coordinateCount);
 
 			uint32 coordinateIndex = 0;
 

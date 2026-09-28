@@ -16,11 +16,11 @@ namespace Trident {
 
 			geometryCounts[!geometry.staticUsage] += 1;
 
-			if (geometry.assetIdentifier == max<uint32>()) {
-				continue;
-			}
+			uint32 offsetIndex = 0;
 
-			const uint32 offsetIndex = !geometry.staticUsage;
+			if (geometry.assetIdentifier != max<uint32>()) {
+				offsetIndex = 1 + !geometry.staticUsage;
+			}
 
 			vertexCounts[offsetIndex] += static_cast<uint32>(geometry.vertices.count());
 			indexCounts[offsetIndex] += static_cast<uint32>(geometry.indices.count());
@@ -40,8 +40,6 @@ namespace Trident {
 					}
 
 					if (materialShader.asset.geometryType == GeometryType::STATIC) {
-						const IntermediateGeometry& geometry = geometries[materialGeometry.geometryIndex];
-
 						staticInstanceCount += static_cast<uint32>(materialGeometry.instances.size());
 					}
 
@@ -64,6 +62,8 @@ namespace Trident {
 	}
 
 	BuildScene3D MapBuilder::build(Lightmapper* lightmapper) {
+		createFaceGeometries();
+
 		const view<IntermediateGeometry> preFilteredGeometries(geometries.data(), geometries.size());
 		const view<IntermediateMaterialShader> preFilteredMaterialShaders(materialShaders.data(), materialShaders.size());
 
@@ -133,28 +133,21 @@ namespace Trident {
 
 			BuildGeometry& geometry = scene.geometries[buildGeometryOffset];
 			geometry.vertexRange.offset = vertexOffset;
+			geometry.vertexRange.count = static_cast<uint32>(intermediateGeometry.vertices.count());
 			geometry.indexRange.offset = indexOffset;
+			geometry.indexRange.count = static_cast<uint32>(intermediateGeometry.indices.count());
 			geometry.assetIdentifier = intermediateGeometry.assetIdentifier;
 
 			intermediateGeometry.filteredIndex = buildGeometryOffset;
 
-			if (intermediateGeometry.assetIdentifier == max<uint32>()) {
-				calculateFaceBoundingBoxes(intermediateGeometry, geometry.vertexRange.offset, geometry.indexRange.offset / 3);
-				triangulateFaces(scene, intermediateGeometry, geometry, 0);
-			}
-			else {
-				geometry.vertexRange.count = static_cast<uint32>(intermediateGeometry.vertices.count());
-				geometry.indexRange.count = static_cast<uint32>(intermediateGeometry.indices.count());
+			std::copy(intermediateGeometry.vertices.begin(), intermediateGeometry.vertices.end(), &scene.vertices[geometry.vertexRange.offset]);
 
-				std::copy(intermediateGeometry.vertices.begin(), intermediateGeometry.vertices.end(), &scene.vertices[geometry.vertexRange.offset]);
+			uint32 indexIndex = 0;
 
-				uint32 indexIndex = 0;
+			while (indexIndex < geometry.indexRange.count) {
+				scene.indices[geometry.indexRange.offset + indexIndex] = geometry.vertexRange.offset + intermediateGeometry.indices[indexIndex];
 
-				while (indexIndex < geometry.indexRange.count) {
-					scene.indices[geometry.indexRange.offset + indexIndex] = geometry.vertexRange.offset + intermediateGeometry.indices[indexIndex];
-
-					indexIndex += 1;
-				}
+				indexIndex += 1;
 			}
 
 			vertexOffset += geometry.vertexRange.count;

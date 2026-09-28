@@ -29,6 +29,16 @@ namespace Trident {
 		LightmapDescriptor lightmap;
 	};
 
+	/// The following properties can be updated after a face has been created:
+	/// - Vertex positions (might affect other faces)
+	/// - Material index
+	/// - UV translation
+	/// - UV rotation
+	/// - UV scaling
+	/// - Lightmap luxel scale
+	/// - Lightmap albedo
+	/// - Lightmap emissive color
+	/// - Lightmap emissive intensity
 	struct Face {
 		uint32 getVertexCount() const {
 			return static_cast<uint32>(indices.size());

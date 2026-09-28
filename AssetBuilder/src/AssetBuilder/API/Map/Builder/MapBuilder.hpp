@@ -30,6 +30,7 @@ namespace Trident {
 			// TODO(asset-builder/scene): Remove once TSL is ready.
 			static ShaderModuleAsset getMaterialShaderModuleAsset(uint32 identifier);
 
+			/// See https://blackpawn.com/texts/lightmaps.
 			static LightmapNode* insertLightmapNode(const Lightmap& lightmap, LightmapNode* node);
 
 		public:
@@ -75,9 +76,11 @@ namespace Trident {
 			/// and B is the closest carving index to the face.
 			Edge2D findClosestFaceCarvingConnector(const Face& face, view<svec3<float32>> carvingVertices) const;
 
-			void calculateFaceBoundingBoxes(const IntermediateGeometry& intermediateGeometry, uint32 vertexOffset, uint32 triangleOffset);
+			void createFaceGeometries();
 
-			void triangulateFaces(BuildScene3D& scene, const IntermediateGeometry& intermediateGeometry, BuildGeometry& geometry, uint32 lineIndexOffset) const;
+			void calculateFaceBoundingBoxes(Face& face) const;
+
+			void triangulateFaces(IntermediateGeometry& geometry, uint32 lineIndexOffset);
 
 			void buildEntityComponentMappings(BuildDynamicSceneGeometry3D& dynamicGeometry);
 			void buildLights(BuildDynamicSceneGeometry3D& dynamicGeometry);

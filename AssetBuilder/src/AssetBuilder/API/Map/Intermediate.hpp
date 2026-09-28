@@ -30,7 +30,7 @@ namespace Trident {
 		std::vector<uint32> faceIndices;
 
 		/// Only used for static props.
-		/// The bounds are computed on the texture coordinates. This usually results them being between [0, 1[.
+		/// The bounds are computed on the texture coordinates so they usually are between [0, 1[.
 		AABB2D boundingBox;
 	};
 

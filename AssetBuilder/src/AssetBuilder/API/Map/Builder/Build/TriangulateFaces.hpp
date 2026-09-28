@@ -26,47 +26,36 @@ namespace Trident {
 		return v > 0.0f && w > 0.0f;
 	}
 
-	void MapBuilder::calculateFaceBoundingBoxes(const IntermediateGeometry& intermediateGeometry, uint32 vertexOffset, uint32 triangleOffset) {
-		uint32 faceIndex = 0;
+	void MapBuilder::calculateFaceBoundingBoxes(Face& face) const {
+		const uint32 vertexCount = face.getVertexCount();
+		const quat<float32> R = lookAt(face.normal, {0.0f, 0.0f, -1.0f}, UP);
 
-		while (faceIndex < intermediateGeometry.faceIndices.size()) {
-			Face& face = faces[intermediateGeometry.faceIndices[faceIndex]];
-			face.vertexOffset = vertexOffset;
-			face.triangleOffset = triangleOffset;
+		uint32 vertexIndex = 0;
 
-			const uint32 vertexCount = face.getVertexCount();
-			const quat<float32> R = lookAt(face.normal, {0.0f, 0.0f, -1.0f}, UP);
+		while (vertexIndex < vertexCount) {
+			svec3<float32> vertex = facePositions[face.indices[vertexIndex]];
 
-			uint32 vertexIndex = 0;
+			const quat<float32> q = {0.0f, vertex.x, vertex.y, vertex.z};
 
-			while (vertexIndex < vertexCount) {
-				svec3<float32> vertex = facePositions[face.indices[vertexIndex]];
+			vertex = svec3<float32>((R * q * inverse(R)).xyz());
 
-				const quat<float32> q = {0.0f, vertex.x, vertex.y, vertex.z};
+			face.boundingBox.min.x = min(face.boundingBox.min.x, vertex.x);
+			face.boundingBox.min.y = min(face.boundingBox.min.y, vertex.y);
+			face.boundingBox.max.x = max(face.boundingBox.max.x, vertex.x);
+			face.boundingBox.max.y = max(face.boundingBox.max.y, vertex.y);
 
-				vertex = svec3<float32>((R * q * inverse(R)).xyz());
-
-				face.boundingBox.min.x = min(face.boundingBox.min.x, vertex.x);
-				face.boundingBox.min.y = min(face.boundingBox.min.y, vertex.y);
-				face.boundingBox.max.x = max(face.boundingBox.max.x, vertex.x);
-				face.boundingBox.max.y = max(face.boundingBox.max.y, vertex.y);
-
-				vertexIndex += 1;
-			}
-
-			vertexOffset += face.getVertexCount();
-			triangleOffset += face.getTriangleCount();
-			faceIndex += 1;
+			vertexIndex += 1;
 		}
 	}
 
-	void MapBuilder::triangulateFaces(BuildScene3D& scene, const IntermediateGeometry& intermediateGeometry, BuildGeometry& geometry, uint32 lineIndexOffset) const {
-		uint32 vertexOffset = geometry.vertexRange.offset;
-		uint32 triangleIndexOffset = geometry.indexRange.offset;
+	void MapBuilder::triangulateFaces(IntermediateGeometry& geometry, uint32 lineIndexOffset) {
+		uint32 vertexOffset = 0;
+		uint32 triangleOffset = 0;
+		uint32 triangleIndexOffset = 0;
 		uint32 faceIndex = 0;
 
-		while (faceIndex < intermediateGeometry.faceIndices.size()) {
-			const Face& face = faces[intermediateGeometry.faceIndices[faceIndex]];
+		while (faceIndex < geometry.faceIndices.size()) {
+			Face& face = faces[geometry.faceIndices[faceIndex]];
 			const uint32 vertexCount = face.getVertexCount();
 			const svec2<float32> faceSize = face.boundingBox.max - face.boundingBox.min;
 			const mat3x3<float32> textureTransform = (
@@ -76,13 +65,13 @@ namespace Trident {
 			);
 			const quat<float32> R = lookAt(face.normal, {0.0f, 0.0f, -1.0f}, UP);
 
-			geometry.vertexRange.count += vertexCount;
-			geometry.indexRange.count += (vertexCount - 2) * 3;
+			face.vertexOffset = vertexOffset;
+			face.triangleOffset = triangleOffset;
 
 			uint32 vertexIndex = 0;
 
 			while (vertexIndex < vertexCount) {
-				BuildVertex3D& vertex = scene.vertices[vertexOffset + vertexIndex];
+				BuildVertex3D& vertex = geometry.vertices[vertexOffset + vertexIndex];
 				vertex.position = facePositions[face.indices[vertexIndex]];
 
 				const quat<float32> q = {0.0f, vertex.position.x, vertex.position.y, vertex.position.z};
@@ -108,7 +97,7 @@ namespace Trident {
 
 			std::vector<uint32> indicesCopy = face.indices;
 
-			// Final index buffer for the face, with indices in [0, vertexCount].
+			// Final index buffer for the face, with indices in [0, vertexCount[.
 			std::vector<uint32> indexBuffer(vertexCount);
 
 			uint32 i = 0;
@@ -168,9 +157,9 @@ namespace Trident {
 
 					// TODO(asset-builder/map): Handle holes.
 
-					scene.indices[triangleIndexOffset + 0] = vertexOffset + indexBuffer[indexOffsetA];
-					scene.indices[triangleIndexOffset + 1] = vertexOffset + indexBuffer[indexOffsetB];
-					scene.indices[triangleIndexOffset + 2] = vertexOffset + indexBuffer[indexOffsetC];
+					geometry.indices[triangleIndexOffset + 0] = vertexOffset + indexBuffer[indexOffsetA];
+					geometry.indices[triangleIndexOffset + 1] = vertexOffset + indexBuffer[indexOffsetB];
+					geometry.indices[triangleIndexOffset + 2] = vertexOffset + indexBuffer[indexOffsetC];
 
 					indicesCopy.erase(indicesCopy.begin() + indexOffsetB);
 					indexBuffer.erase(indexBuffer.begin() + indexOffsetB);
@@ -182,6 +171,7 @@ namespace Trident {
 			}
 
 			vertexOffset += vertexCount;
+			triangleOffset += face.getTriangleCount();
 			lineIndexOffset += vertexCount * 2;
 			faceIndex += 1;
 		}

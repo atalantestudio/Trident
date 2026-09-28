@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "AssetBuilder/API/Map/Builder/Build/Build.hpp"
+#include "AssetBuilder/API/Map/Builder/Build/CreateFaceGeometries.hpp"
 #include "AssetBuilder/API/Map/Builder/Build/EmissiveTriangleIndex.hpp"
 #include "AssetBuilder/API/Map/Builder/Build/GenerateLightmaps.hpp"
 #include "AssetBuilder/API/Map/Builder/Build/Triangle.hpp"
