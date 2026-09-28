@@ -65,9 +65,6 @@ namespace Trident {
 			geometry.indices = sequence<uint32>(geometry.indices.count() + face.getTriangleCount() * 3);
 			geometry.faceIndices.emplace_back(faceIndex);
 
-			staticGeometryFaceTriangleCount += face.getTriangleCount();
-			staticGeometryFaceVertexCount += face.getVertexCount();
-
 			lightmapCount += 1;
 			lightmapCoordinateCount += face.getVertexCount();
 

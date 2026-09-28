@@ -110,8 +110,6 @@ namespace Trident {
 			/// Total unique position count.
 			uint32 facePositionCount = 0;
 
-			uint32 staticGeometryFaceVertexCount = 0;
-			uint32 staticGeometryFaceTriangleCount = 0;
 			uint32 staticGeometryFaceCount = 0;
 
 			std::vector<IntermediateGeometry> geometries;

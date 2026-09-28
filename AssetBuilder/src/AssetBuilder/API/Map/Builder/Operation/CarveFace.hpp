@@ -54,8 +54,6 @@ namespace Trident {
 		const uint32 facePositionOffset = facePositionCount;
 
 		facePositionCount += static_cast<uint32>(carvingVertices.count());
-		staticGeometryFaceVertexCount -= vertexCount;
-		staticGeometryFaceTriangleCount -= vertexCount - 2;
 		lightmapCoordinateCount -= vertexCount;
 
 		vertexCount += static_cast<uint32>(carvingVertices.count()) + 2;
@@ -88,8 +86,6 @@ namespace Trident {
 			j += 1;
 		}
 
-		staticGeometryFaceVertexCount += vertexCount;
-		staticGeometryFaceTriangleCount += vertexCount - 2;
 		lightmapCoordinateCount += vertexCount;
 
 		IndexedFaceDescriptor descriptor{};

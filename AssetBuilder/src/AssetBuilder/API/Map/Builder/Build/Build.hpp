@@ -8,7 +8,7 @@
 #include "AssetBuilder/API/Map/Builder/MapBuilder.hpp"
 
 namespace Trident {
-	inline void countGeometries(view<IntermediateGeometry> geometries, uint32 geometryCounts[2], uint32 vertexCounts[2], uint32 indexCounts[2]) {
+	inline void countGeometries(view<IntermediateGeometry> geometries, uint32 geometryCounts[2], uint32 vertexCounts[3], uint32 indexCounts[3]) {
 		for (const IntermediateGeometry& geometry : geometries) {
 			if (geometry.sharedInstanceCount == 0) {
 				continue;
@@ -70,8 +70,8 @@ namespace Trident {
 		uint32 geometryCounts[static_cast<uint32>(GeometryType::count)] = {0, 0};
 
 		// Static external, dynamic external.
-		uint32 vertexCounts[] = {0, 0};
-		uint32 indexCounts[] = {0, 0};
+		uint32 vertexCounts[] = {0, 0, 0};
+		uint32 indexCounts[] = {0, 0, 0};
 
 		countGeometries(preFilteredGeometries, geometryCounts, vertexCounts, indexCounts);
 
@@ -82,20 +82,18 @@ namespace Trident {
 
 		countMaterialRelatedObjects(preFilteredGeometries, preFilteredMaterialShaders, materialShaderCounts, materialCount, materialGeometryCount, staticInstanceCount);
 
-		const uint32 staticGeometryFaceIndexCount = staticGeometryFaceTriangleCount * 3;
-
 		BuildScene3D scene{};
 		scene.skyColor = descriptor.skyColor;
 		scene.environmentMapImageAsset = descriptor.environmentMapImageAsset;
 		scene.sunDirection = descriptor.sunDirection;
 		scene.sunColor = descriptor.sunColor * descriptor.sunIntensity;
-		scene.vertices = sequence<BuildVertex3D>(staticGeometryFaceVertexCount + vertexCounts[0] + vertexCounts[1]);
-		scene.indices = sequence<uint32>(staticGeometryFaceIndexCount + indexCounts[0] + indexCounts[1]);
+		scene.vertices = sequence<BuildVertex3D>(vertexCounts[0] + vertexCounts[1] + vertexCounts[2]);
+		scene.indices = sequence<uint32>(indexCounts[0] + indexCounts[1] + indexCounts[2]);
 		scene.staticGeometry.geometryCount = geometryCounts[0];
-		scene.staticGeometry.bakedVertexCount = staticGeometryFaceVertexCount;
-		scene.staticGeometry.externalVertexCount = vertexCounts[0];
-		scene.staticGeometry.bakedIndexCount = staticGeometryFaceIndexCount;
-		scene.staticGeometry.externalIndexCount = indexCounts[0];
+		scene.staticGeometry.bakedVertexCount = vertexCounts[0];
+		scene.staticGeometry.externalVertexCount = vertexCounts[1];
+		scene.staticGeometry.bakedIndexCount = indexCounts[0];
+		scene.staticGeometry.externalIndexCount = indexCounts[1];
 
 		// TODO(asset-builder/map/static-geometry): Restore face wireframe?
 		// scene.staticGeometry.lineIndexCount = vertexCount * 2;
@@ -108,8 +106,8 @@ namespace Trident {
 
 		uint32 intermediateGeometryIndex = 0;
 		uint32 buildGeometryOffsets[] = {0, geometryCounts[0]};
-		uint32 vertexOffsets[] = {0, staticGeometryFaceVertexCount, staticGeometryFaceVertexCount + vertexCounts[0]};
-		uint32 indexOffsets[] = {0, staticGeometryFaceIndexCount, staticGeometryFaceIndexCount + indexCounts[0]};
+		uint32 vertexOffsets[] = {0, vertexCounts[0], vertexCounts[0] + vertexCounts[1]};
+		uint32 indexOffsets[] = {0, indexCounts[0], indexCounts[0] + indexCounts[1]};
 
 		while (intermediateGeometryIndex < geometries.size()) {
 			IntermediateGeometry& intermediateGeometry = geometries[intermediateGeometryIndex];
