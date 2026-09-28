@@ -60,8 +60,8 @@ namespace Trident {
 			vertexIndex += 1;
 		}
 
+		lightmapCount += 1;
 		lightmapCoordinateCount += geometry.vertices.count();
 		staticInstanceCount += 1;
-		lightmapCount += 1;
 	}
 }

@@ -11,6 +11,7 @@
 #include "AssetBuilder/API/Map/Builder/Build/TriangulateFaces.hpp"
 #include "AssetBuilder/API/Map/Builder/Operation/CarveFace.hpp"
 #include "AssetBuilder/API/Map/Builder/Operation/CreateFace.hpp"
+#include "AssetBuilder/API/Map/Builder/Operation/CreatePoint.hpp"
 #include "AssetBuilder/API/Map/Builder/Operation/CreatePointLight.hpp"
 #include "AssetBuilder/API/Map/Builder/Operation/CreateRigidBody.hpp"
 #include "AssetBuilder/API/Map/Builder/Operation/CreateStaticProp.hpp"

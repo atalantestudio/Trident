@@ -95,7 +95,7 @@ namespace Trident {
 		const GeometryComponent geometryComponent = scene->ecs.getComponent<GeometryComponent>(entity);
 		const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
 
-		ENGINE_ASSERT(geometry.hullIndex < scene->getHulls().count(), "Geometry doesn't have a hull.");
+		ENGINE_ASSERT(geometry.hullIndex < scene->getHulls().count(), "The geometry doesn't have a hull.");
 
 		return scene->getHulls()[geometry.hullIndex];
 	}
@@ -108,7 +108,7 @@ namespace Trident {
 		uint32 indexA = 0;
 		uint32 indexB;
 
-		// TODO(physics/broadphase): Only register potentially overlapping entities.
+		// TODO(physics/2d/broad-phase): Only register potentially overlapping entities.
 		while (indexA < dynamicPool.tagCount) {
 			entityPair.A = dynamicPool.tagIndexToEntity[indexA];
 

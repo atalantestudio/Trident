@@ -127,8 +127,6 @@ namespace Trident {
 
 					const float32 abc = dot(cross(b - a, face.normal), c - b);
 
-					// ENGINE_TRACE("[]/[]/[], angle = []", indexA, indexB, indexC, abc);
-
 					if (abc >= 0.0f) {
 						indexOffset += 1;
 
@@ -155,8 +153,6 @@ namespace Trident {
 
 						continue;
 					}
-
-					// TODO(asset-builder/map): Handle holes.
 
 					geometry.indices[triangleIndexOffset + 0] = vertexOffset + indexBuffer[indexOffsetA];
 					geometry.indices[triangleIndexOffset + 1] = vertexOffset + indexBuffer[indexOffsetB];

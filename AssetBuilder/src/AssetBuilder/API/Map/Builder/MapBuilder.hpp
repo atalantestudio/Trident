@@ -43,6 +43,9 @@ namespace Trident {
 
 			Face& getFace(uint32 index);
 
+			/// Creates a new point to be referenced by faces.
+			void createPoint(svec3<float32> position);
+
 			/// Creates and returns a new face.
 			/// The face must have at least 3 vertices laid out in clockwise order.
 			/// Degenerate vertices and edge-crossing vertices are not allowed.

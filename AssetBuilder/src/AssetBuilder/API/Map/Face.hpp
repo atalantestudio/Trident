@@ -51,7 +51,7 @@ namespace Trident {
 		/// Vertex indices in clockwise order.
 		std::vector<uint32> indices;
 
-		/// Offsets relative to the final scene.
+		/// Compiled offsets.
 		uint32 vertexOffset;
 		uint32 triangleOffset;
 
