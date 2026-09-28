@@ -18,6 +18,7 @@
 #include "AssetBuilder/API/Map/Builder/Operation/ExtrudeFace.hpp"
 #include "AssetBuilder/API/Map/Builder/Operation/LoadGeometry.hpp"
 #include "AssetBuilder/API/Map/Builder/Operation/LoadMaterial.hpp"
+#include "AssetBuilder/API/Map/Builder/Operation/RemoveFace.hpp"
 #include "AssetBuilder/API/Map/Builder/MapBuilder.hpp"
 #include "AssetBuilder/Process/MaterialShader/DDGI.hpp"
 #include "AssetBuilder/Process/MaterialShader/Lightmapped.hpp"

@@ -62,6 +62,10 @@ namespace Trident {
 			/// This operation modifies the vertices of the current face.
 			Face& carveFace(Face& face, view<svec3<float32>> carvingVertices);
 
+			// TODO(asset-builder/map/static-geometry): Removing a face will invalidate all of its references as well as the references to the last face.
+			/// Removes the provided face.
+			void removeFace(uint32 faceIndex);
+
 			void createStaticProp(const MeshDescriptor& descriptor);
 
 			void createRigidBody(const EntityDescriptor& descriptor);
