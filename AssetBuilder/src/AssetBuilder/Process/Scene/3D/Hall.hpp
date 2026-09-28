@@ -15,9 +15,33 @@ namespace Trident {
 
 			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				static constexpr svec2<float32> LUXEL_SCALE = {4.0f, 4.0f};
+				static constexpr svec3<float32> HALL_ENTRANCE_CARVING_VERTICES[] = {
+					{ 92.0f,  112.0f, -16.0f },
+					{ 36.0f,  112.0f, -16.0f },
+					{ 36.0f,  4.0f,   -16.0f },
+					{ 92.0f,  4.0f,   -16.0f },
+				};
+				static constexpr svec3<float32> MAIN_ENTRANCE_CARVING_VERTICES[] = {
+					{ 24.0f,  112.0f,  184.0f},
+					{ 84.0f,  112.0f,  184.0f},
+					{ 84.0f,  4.0f,    184.0f},
+					{ 24.0f,  4.0f,    184.0f},
+				};
+				static constexpr svec3<float32> HALL_ROOM_TO_BIKE_ROOM_CARVING_VERTICES[] = {
+					{-16.0f,  112.0f,  100.0f},
+					{-16.0f,  112.0f,  156.0f},
+					{-16.0f,  4.0f,    156.0f},
+					{-16.0f,  4.0f,    100.0f},
+				};
+				static constexpr svec3<float32> BIKE_ROOM_TO_HALL_ROOM_CARVING_VERTICES[] = {
+					{-24.0f,  112.0f,  156.0f},
+					{-24.0f,  112.0f,  100.0f},
+					{-24.0f,  4.0f,    100.0f},
+					{-24.0f,  4.0f,    156.0f},
+				};
 
 				LinearMapBuilder builder({
-					.skyColor = {0.6f, 0.7f, 0.9f},
+					.skyColor = {0.0f, 0.0f, 0.0f},
 					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("evening_road_01_512p"),
 					.sunDirection = {1.0f, 1.0f, 1.0f},
 					.sunColor = {1.0f, 1.0f, 1.0f},
@@ -30,7 +54,7 @@ namespace Trident {
 
 				const MaterialReference material = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
 
-				const uint32 hallRoomIndex = builder.createRectangularRoom({
+				Room& hallRoom = builder.createRectangularRoom({
 					.origin = {56.0f, 0.0f, 84.0f},
 					.size = {144.0f, 240.0f, 200.0f},
 					.material = material,
@@ -43,13 +67,12 @@ namespace Trident {
 						.luxelScale = LUXEL_SCALE,
 						.albedo = {1.0f, 1.0f, 1.0f},
 					},
-					/* .luxelScale = {4.0f, 4.0f},
-					.floorMaterialIndex = tileFloorMaterialIndex,
+					/* .floorMaterialIndex = tileFloorMaterialIndex,
 					.wallMaterialIndex = plasterWallMateralIndex,
 					.ceilingMaterialIndex = plasterCeilingMaterialIndex, */
 				});
 
-				const uint32 bikeRoomIndex = builder.createRectangularRoom({
+				Room& bikeRoom = builder.createRectangularRoom({
 					.origin = {-60.0f, 0.0f, 116.0f},
 					.size = {72.0f, 128.0f, 136.0f},
 					.material = material,
@@ -67,41 +90,50 @@ namespace Trident {
 					.ceilingMaterialIndex = plasterCeilingMaterialIndex, */
 				});
 
+				{
+					Face& hallRoomBackWallFace = builder.getFace(hallRoom.faceIndices[RectangularRoomDescriptor::BACK_WALL_FACE]);
+
+					builder.carveFace(hallRoomBackWallFace, HALL_ENTRANCE_CARVING_VERTICES);
+					builder.removeFace(builder.getLastFaceIndex());
+				}
+
+				{
+					Face& hallRoomFrontWallFace = builder.getFace(hallRoom.faceIndices[RectangularRoomDescriptor::FRONT_WALL_FACE]);
+
+					builder.carveFace(hallRoomFrontWallFace, MAIN_ENTRANCE_CARVING_VERTICES);
+					builder.removeFace(builder.getLastFaceIndex());
+				}
+
+				{
+					Face& hallRoomToBikeRoomFace = builder.getFace(hallRoom.faceIndices[RectangularRoomDescriptor::LEFT_WALL_FACE]);
+					Face& bikeRoomToHallRoomFace = builder.getFace(bikeRoom.faceIndices[RectangularRoomDescriptor::RIGHT_WALL_FACE]);
+
+					builder.connectFaces(hallRoomToBikeRoomFace, bikeRoomToHallRoomFace, HALL_ROOM_TO_BIKE_ROOM_CARVING_VERTICES, BIKE_ROOM_TO_HALL_ROOM_CARVING_VERTICES);
+				}
+
 				// TODO(asset-builder/map): Implement.
 				/* WindowFrame hallRoomDoorFrame({
 					.room = &hallRoom,
-					.surfaceIndex = 2,
 					.floorOffset = 0.0f,
 					.horizontalOffset = 52.0f,
 					.size = {56.0f, 112.0f},
 				});
-				DoorFrame bikeRoomDoorFrame({
-					.roomA = &hallRoom,
-					.surfaceIndexA = 3,
-					.horizontalOffsetA = 116.0f,
-
-					.roomB = &bikeRoom,
-					.surfaceIndexB = 1,
-					.horizontalOffsetB = 28.0f,
-
-					.doorSize = {48.0f, 108.0f},
-					.frameThickness = 4.0f,
-					.frameMaterialIndex = woodDoorMaterialIndex,
-					.frameLuxelScale = {4.0f, 4.0f},
-				});
 				WindowFrame mainRoomDoorFrame({
 					.room = &hallRoom,
-					.surfaceIndex = 0,
 					.floorOffset = 0.0f,
 					.horizontalOffset = 36.0f,
 					.size = {68.0f, 112.0f},
 				});
-
-				builder.addRoom(hallRoom);
-				builder.addRoom(bikeRoom);
-				builder.addFrame(hallRoomDoorFrame);
-				builder.addFrame(bikeRoomDoorFrame);
-				builder.addFrame(mainRoomDoorFrame); */
+				DoorFrame bikeRoomDoorFrame({
+					.roomA = &hallRoom,
+					.horizontalOffsetA = 116.0f,
+					.roomB = &bikeRoom,
+					.horizontalOffsetB = 28.0f,
+					.doorSize = {48.0f, 108.0f},
+					.frameThickness = 4.0f,
+					.frameMaterialIndex = woodDoorMaterialIndex,
+					.frameLuxelScale = {4.0f, 4.0f},
+				}); */
 
 				return builder;
 			}

@@ -44,16 +44,24 @@ namespace Trident {
 
 	MapBuilder::MapBuilder(const MapDescriptor& descriptor) :
 		descriptor(descriptor),
-		facePositions(MAX_FACE_POSITIONS),
-		faces(MAX_FACES)
+		facePositions(MAX_FACE_POSITION_COUNT),
+		faces(MAX_FACE_COUNT)
 	{
 		if (descriptor.environmentMapImageAsset != nullptr) {
 			ENGINE_ASSERT(descriptor.environmentMapImageAsset->isEligibleForCubeMap(), "The environment map is not eligible for a cube map.");
 		}
 	}
 
-	Face& MapBuilder::getFace(uint32 index) {
-		return faces[index];
+	Face& MapBuilder::getFace(uint32 faceIndex) {
+		DEBUG_ASSERT(faceIndex < staticGeometryFaceCount);
+
+		return faces[faceIndex];
+	}
+
+	uint32 MapBuilder::getLastFaceIndex() const {
+		ENGINE_ASSERT(staticGeometryFaceCount > 0, "No faces have been created yet.");
+
+		return staticGeometryFaceCount - 1;
 	}
 
 	uint32 MapBuilder::findMaterialShaderIndex(uint32 assetIdentifier) const {

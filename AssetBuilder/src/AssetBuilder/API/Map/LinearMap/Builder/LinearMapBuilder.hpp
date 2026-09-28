@@ -10,12 +10,18 @@
 namespace Trident {
 	class LinearMapBuilder : public MapBuilder {
 		public:
-			using MapBuilder::MapBuilder;
+			static constexpr uint32 MAX_ROOM_COUNT = 16;
 
-			/// Creates a rectangular room and returns its index.
-			uint32 createRectangularRoom(const RectangularRoomDescriptor& descriptor);
+		public:
+			explicit LinearMapBuilder(const MapDescriptor& descriptor);
+
+			/// Creates and returns a rectangular room.
+			Room& createRectangularRoom(const RectangularRoomDescriptor& descriptor);
+
+			void connectFaces(Face& faceA, Face& faceB, view<svec3<float32>> verticesA, view<svec3<float32>> verticesB);
 
 		private:
-			std::vector<Room> rooms;
+			sequence<Room> rooms;
+			uint32 roomOffset = 0;
 	};
 }

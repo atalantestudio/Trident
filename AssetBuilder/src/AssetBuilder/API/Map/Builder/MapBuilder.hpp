@@ -21,9 +21,8 @@
 namespace Trident {
 	class MapBuilder {
 		public:
-			static constexpr uint32 MAX_FACE_POSITIONS = 65535;
-			static constexpr uint32 MAX_INDICES = 65535;
-			static constexpr uint32 MAX_FACES = 256;
+			static constexpr uint32 MAX_FACE_POSITION_COUNT = 65535;
+			static constexpr uint32 MAX_FACE_COUNT = 256;
 			static constexpr Extent2D LIGHTMAP_ATLAS_EXTENT = {1024, 1024};
 
 		private:
@@ -41,7 +40,11 @@ namespace Trident {
 
 			MaterialReference loadMaterial(ref<MaterialAsset> asset);
 
-			Face& getFace(uint32 index);
+			/// Returns the face at the provided index.
+			Face& getFace(uint32 faceIndex);
+
+			/// Returns the index of the last face.
+			uint32 getLastFaceIndex() const;
 
 			/// Creates a new point to be referenced by faces.
 			void createPoint(svec3<float32> position);
