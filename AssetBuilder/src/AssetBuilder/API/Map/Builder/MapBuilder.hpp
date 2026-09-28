@@ -74,7 +74,7 @@ namespace Trident {
 			// TODO(asset-builder/map/static-geometry/face-carving): Ensure that the carving vertices are all inside or on the edge of the face.
 			/// Returns a pair of vertex indices where A is the closest face vertex to the carving
 			/// and B is the closest carving index to the face.
-			Edge2D findClosestFaceCarvingConnector(const Face& face, view<svec3<float32>> carvingVertices) const;
+			Edge2D findClosestFaceCarvingConnectorEdge(const Face& face, view<svec3<float32>> carvingVertices) const;
 
 			void createFaceGeometries();
 

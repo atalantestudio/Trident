@@ -6,11 +6,11 @@
 #include "AssetBuilder/API/Map/Builder/MapBuilder.hpp"
 
 namespace Trident {
-	Edge2D MapBuilder::findClosestFaceCarvingConnector(const Face& face, view<svec3<float32>> carvingVertices) const {
+	Edge2D MapBuilder::findClosestFaceCarvingConnectorEdge(const Face& face, view<svec3<float32>> carvingVertices) const {
 		const uint32 faceVertexCount = face.getVertexCount();
 
 		float32 minDistance = max<float32>();
-		Edge2D connector{};
+		Edge2D connectorEdge{};
 		uint32 carvingVertexIndex = 0;
 
 		while (carvingVertexIndex < carvingVertices.count()) {
@@ -24,8 +24,8 @@ namespace Trident {
 
 				if (distance < minDistance) {
 					minDistance = distance;
-					connector.indexA = faceVertexIndex;
-					connector.indexB = carvingVertexIndex;
+					connectorEdge.indexA = faceVertexIndex;
+					connectorEdge.indexB = carvingVertexIndex;
 				}
 
 				faceVertexIndex += 1;
@@ -34,59 +34,39 @@ namespace Trident {
 			carvingVertexIndex += 1;
 		}
 
-		return connector;
+		return connectorEdge;
 	}
 
 	Face& MapBuilder::carveFace(Face& face, view<svec3<float32>> carvingVertices) {
-		const Edge2D connector = findClosestFaceCarvingConnector(face, carvingVertices);
+		const uint32 previousVertexCount = face.getVertexCount();
+		const uint32 carvingVertexCount = static_cast<uint32>(carvingVertices.count());
+		const Edge2D connectorEdge = findClosestFaceCarvingConnectorEdge(face, carvingVertices);
 
-		sequence<uint32> carvingIndices(carvingVertices.count());
-		uint32 vertexCount = face.getVertexCount();
+		sequence<uint32> carvingIndices(carvingVertexCount);
 		uint32 carvingVertexIndex = 0;
 
-		while (carvingVertexIndex < carvingVertices.count()) {
+		while (carvingVertexIndex < carvingVertexCount) {
 			facePositions[facePositionCount + carvingVertexIndex] = carvingVertices[carvingVertexIndex];
 			carvingIndices[carvingVertexIndex] = facePositionCount + carvingVertexIndex;
 
 			carvingVertexIndex += 1;
 		}
 
-		const uint32 facePositionOffset = facePositionCount;
+		facePositionCount += static_cast<uint32>(carvingVertexCount);
 
-		facePositionCount += static_cast<uint32>(carvingVertices.count());
-		lightmapCoordinateCount -= vertexCount;
+		face.indices.resize(previousVertexCount + static_cast<uint32>(carvingVertexCount) + 2);
 
-		vertexCount += static_cast<uint32>(carvingVertices.count()) + 2;
+		std::copy_n(&face.indices[0], previousVertexCount, &face.indices[previousVertexCount + carvingVertexCount - 2]);
 
-		face.indices.resize(vertexCount);
+		uint32 index = 0;
+		sint32 reverseCarvingIndex = static_cast<sint32>(carvingVertexCount);
 
-		uint32 index = connector.indexA + static_cast<uint32>(carvingVertices.count()) + 2;
-		uint32 j = 0;
-
-		while (index < vertexCount) {
-			face.indices[index] = face.indices[j];
+		while (reverseCarvingIndex >= 0) {
+			face.indices[connectorEdge.indexA + 1 + index] = carvingIndices[(connectorEdge.indexB + reverseCarvingIndex) % carvingVertexCount];
 
 			index += 1;
-			j += 1;
+			reverseCarvingIndex -= 1;
 		}
-
-		index = connector.indexA + 1;
-
-		face.indices[index] = facePositionOffset + connector.indexB;
-
-		index += 1;
-		j = 0;
-
-		while (j < carvingVertices.count()) {
-			face.indices[index] = facePositionCount - 1 - j;
-
-			carvingIndices[j] = facePositionOffset + j;
-
-			index += 1;
-			j += 1;
-		}
-
-		lightmapCoordinateCount += vertexCount;
 
 		IndexedFaceDescriptor descriptor{};
 		descriptor.indices = carvingIndices;
