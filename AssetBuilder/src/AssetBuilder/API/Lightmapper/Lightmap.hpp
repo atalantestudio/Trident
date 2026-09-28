@@ -18,7 +18,9 @@ namespace Trident {
 		/// The offset is relative to the start of the geometry.
 		range<uint32, uint32> triangleRange;
 
+		/// The offset is relative to the start of the vertex buffer.
 		range<uint64, uint64> vertexRange;
+
 		uint32 coordinateOffset;
 
 		/// Lightmaps typically use 4 coordinates but the static geometry faces

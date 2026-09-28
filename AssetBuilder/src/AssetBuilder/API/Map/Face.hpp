@@ -21,14 +21,30 @@ namespace Trident {
 		LightmapDescriptor lightmap;
 	};
 
+	struct IndexedFaceDescriptor {
+		view<uint32> indices;
+		svec3<float32> normal;
+		MaterialReference material;
+		TextureFilteringDescriptor textureFiltering;
+		LightmapDescriptor lightmap;
+	};
+
 	struct Face {
-		uint32 vertexCount;
+		uint32 getVertexCount() const {
+			return static_cast<uint32>(indices.size());
+		}
 
-		// TODO(asset-builder/map/static-geometry)
-		// Remove the unused range's count (it's currently equal to the vertex count).
-		range<uint32, uint32> indexRange;
+		uint32 getTriangleCount() const {
+			return static_cast<uint32>(indices.size() - 2);
+		}
 
+		/// Vertex indices in clockwise order.
+		std::vector<uint32> indices;
+
+		/// Offsets relative to the final scene.
+		uint32 vertexOffset;
 		uint32 triangleOffset;
+
 		svec3<float32> normal;
 		uint32 geometryIndex;
 		MaterialReference material;

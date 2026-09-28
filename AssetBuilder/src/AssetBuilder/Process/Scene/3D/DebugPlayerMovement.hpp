@@ -51,23 +51,6 @@ namespace Trident {
 				Face& ceilingFace = builder.createFace({
 					.vertices = CEILING_VERTICES,
 					.normal = {0.0f, 1.0f, 0.0f},
-					.material = lightmappedWallMaterial,
-					.textureFiltering = {
-						.translation = {0.0f, 0.0f},
-						.rotation = 0.0f,
-						.scale = {m2 * 0.25f, m2 * 0.25f},
-					},
-					.lightmap = {
-						.luxelScale = {4.0f, 4.0f},
-						.albedo = {1.0f, 1.0f, 1.0f},
-					},
-				});
-
-				builder.extrudeFace(ceilingFace, -256.0f);
-
-				builder.createFace({
-					.vertices = FLOOR_VERTICES,
-					.normal = {0.0f, 1.0f, 0.0f},
 					.material = lightmappedGrayMaterial,
 					.textureFiltering = {
 						.translation = {0.0f, 0.0f},
@@ -79,6 +62,19 @@ namespace Trident {
 						.albedo = {1.0f, 1.0f, 1.0f},
 					},
 				});
+
+				builder.extrudeFace(ceilingFace, -128.0f);
+
+				const svec3<float32> carvingVertices[] = {
+					{-192.0f,  0.0f,  192.0f},
+					{ 192.0f,  0.0f,  192.0f},
+					{ 192.0f,  0.0f,  144.0f},
+					{-192.0f,  0.0f,  144.0f},
+				};
+
+				Face& tableFace = builder.carveFace(ceilingFace, carvingVertices);
+
+				builder.extrudeFace(tableFace, 48.0f);
 
 				/* // Box
 				builder.createRigidBody({

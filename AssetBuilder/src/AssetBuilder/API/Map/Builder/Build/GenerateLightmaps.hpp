@@ -76,15 +76,17 @@ namespace Trident {
 
 		while (lightmapIndex < staticGeometryFaceCount) {
 			const Face& face = faces[lightmapIndex];
+			const IntermediateGeometry& intermediateGeometry = geometries[face.geometryIndex];
+			const BuildGeometry& geometry = scene.geometries[intermediateGeometry.filteredIndex];
 
 			Lightmap& lightmap = lightmaps[lightmapIndex];
 			lightmap.geometryIndex = face.geometryIndex;
 			lightmap.materialIndex = lightmapIndex;
 			lightmap.triangleRange.offset = face.triangleOffset;
-			lightmap.triangleRange.count = face.vertexCount - 2;
-			lightmap.vertexRange.offset = 0;
+			lightmap.triangleRange.count = face.getTriangleCount();
+			lightmap.vertexRange.offset = face.vertexOffset - geometry.vertexRange.offset;
 			lightmap.coordinateOffset = lightmapCoordinateOffset;
-			lightmap.coordinateCount = face.vertexCount;
+			lightmap.coordinateCount = face.getVertexCount();
 			lightmap.minCoordinate = face.boundingBox.min;
 			lightmap.maxCoordinate = face.boundingBox.max;
 			lightmap.vertexRange.count = lightmap.coordinateCount;

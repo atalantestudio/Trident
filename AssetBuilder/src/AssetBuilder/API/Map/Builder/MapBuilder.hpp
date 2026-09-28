@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Engine/API/Geometry/Edge.hpp"
 #include "Engine/API/Light/PointLight.hpp"
 #include "Engine/Filesystem/Asset/Geometry3DAsset.hpp"
 #include "Engine/Filesystem/Asset/MaterialAsset.hpp"
@@ -45,6 +46,7 @@ namespace Trident {
 			/// The face must have at least 3 vertices laid out in clockwise order.
 			/// Degenerate vertices and edge-crossing vertices are not allowed.
 			Face& createFace(const FaceDescriptor& descriptor);
+			Face& createFace(const IndexedFaceDescriptor& descriptor);
 
 			/// Extrudes the face `scale` units towards its normal.
 			/// This operation moves the current face and creates additional faces on the extruded sides.
@@ -52,10 +54,9 @@ namespace Trident {
 			/// If `scale` is 0, the operation is ignored.
 			void extrudeFace(Face& face, float32 scale);
 
-			// TODO(asset-builder/map/carve-face): Implement face carving.
 			/// Carves a new face inside an existing face.
 			/// This operation modifies the vertices of the current face.
-			// Face& carve(view<svec3<float32>> vertices);
+			Face& carveFace(Face& face, view<svec3<float32>> carvingVertices);
 
 			void createStaticProp(const MeshDescriptor& descriptor);
 
@@ -69,7 +70,12 @@ namespace Trident {
 			uint32 findMaterialShaderIndex(uint32 assetIdentifier) const;
 			uint32 findMaterialGeometryIndex(const IntermediateMaterial& material, uint32 geometryIndex) const;
 
-			void calculateFaceBoundingBoxes(const IntermediateGeometry& intermediateGeometry);
+			// TODO(asset-builder/map/static-geometry/face-carving): Ensure that the carving vertices are all inside or on the edge of the face.
+			/// Returns a pair of vertex indices where A is the closest face vertex to the carving
+			/// and B is the closest carving index to the face.
+			Edge2D findClosestFaceCarvingConnector(const Face& face, view<svec3<float32>> carvingVertices) const;
+
+			void calculateFaceBoundingBoxes(const IntermediateGeometry& intermediateGeometry, uint32 vertexOffset, uint32 triangleOffset);
 
 			void triangulateFaces(BuildScene3D& scene, const IntermediateGeometry& intermediateGeometry, BuildGeometry& geometry, uint32 lineIndexOffset) const;
 
@@ -96,7 +102,6 @@ namespace Trident {
 			uint32 entityCount = 0;
 
 			sequence<svec3<float32>> facePositions;
-			sequence<uint32> indices;
 			sequence<Face> faces;
 
 			/// Total unique position count.

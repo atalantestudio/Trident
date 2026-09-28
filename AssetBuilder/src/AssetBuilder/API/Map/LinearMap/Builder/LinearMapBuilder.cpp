@@ -17,6 +17,7 @@ namespace Trident {
 			staticGeometryFaceCount + 5,
 		};
 
+		const uint32 facePositionOffset = facePositionCount;
 		const svec3<float32> origin = descriptor.origin;
 		const float32 halfWidth = descriptor.size.x * 0.5f;
 		const float32 height = descriptor.size.y;
@@ -33,25 +34,33 @@ namespace Trident {
 			.vertices = vertices,
 			.normal = {0.0f, 1.0f, 0.0f},
 			.material = descriptor.material,
+			.textureFiltering = descriptor.textureFiltering,
 			.lightmap = descriptor.lightmap,
 		});
 
-		Face ceilingFace{};
-		ceilingFace.vertexCount = 4;
-		ceilingFace.indexRange.offset = staticGeometryFaceVertexCount;
+		const uint32 ceilingFaceIndices[] = {
+			facePositionOffset + 3,
+			facePositionOffset + 2,
+			facePositionOffset + 1,
+			facePositionOffset + 0,
+		};
+
+		createFace({
+			.indices = ceilingFaceIndices,
+			.normal = {0.0f, -1.0f, 0.0f},
+			.material = descriptor.material,
+			.textureFiltering = descriptor.textureFiltering,
+			.lightmap = descriptor.lightmap,
+		});
+		/* Face ceilingFace{};
+		ceilingFace.indices = floorFace.indices;
 		ceilingFace.normal = {0.0f, -1.0f, 0.0f};
-		ceilingFace.triangleOffset = staticGeometryFaceTriangleCount;
 		ceilingFace.geometryIndex = floorFace.geometryIndex;
 		ceilingFace.material = descriptor.material;
 		ceilingFace.textureFiltering = descriptor.textureFiltering;
 		ceilingFace.lightmap = descriptor.lightmap;
 		ceilingFace.boundingBox.min = {max<float32>(), max<float32>()};
 		ceilingFace.boundingBox.max = {min<float32>(), min<float32>()};
-
-		indices[staticGeometryFaceVertexCount + 0] = indices[floorFace.indexRange.offset + 3];
-		indices[staticGeometryFaceVertexCount + 1] = indices[floorFace.indexRange.offset + 2];
-		indices[staticGeometryFaceVertexCount + 2] = indices[floorFace.indexRange.offset + 1];
-		indices[staticGeometryFaceVertexCount + 3] = indices[floorFace.indexRange.offset + 0];
 
 		faces[staticGeometryFaceCount] = ceilingFace;
 
@@ -62,7 +71,7 @@ namespace Trident {
 		staticGeometryFaceTriangleCount += 2;
 		staticGeometryFaceCount += 1;
 		lightmapCoordinateCount += 4;
-		lightmapCount += 1;
+		lightmapCount += 1; */
 
 		extrudeFace(floorFace, -height);
 

@@ -26,18 +26,21 @@ namespace Trident {
 		return v > 0.0f && w > 0.0f;
 	}
 
-	void MapBuilder::calculateFaceBoundingBoxes(const IntermediateGeometry& intermediateGeometry) {
+	void MapBuilder::calculateFaceBoundingBoxes(const IntermediateGeometry& intermediateGeometry, uint32 vertexOffset, uint32 triangleOffset) {
 		uint32 faceIndex = 0;
 
 		while (faceIndex < intermediateGeometry.faceIndices.size()) {
 			Face& face = faces[intermediateGeometry.faceIndices[faceIndex]];
+			face.vertexOffset = vertexOffset;
+			face.triangleOffset = triangleOffset;
 
+			const uint32 vertexCount = face.getVertexCount();
 			const quat<float32> R = lookAt(face.normal, {0.0f, 0.0f, -1.0f}, UP);
 
 			uint32 vertexIndex = 0;
 
-			while (vertexIndex < face.vertexCount) {
-				svec3<float32> vertex = facePositions[indices[face.indexRange.offset + vertexIndex]];
+			while (vertexIndex < vertexCount) {
+				svec3<float32> vertex = facePositions[face.indices[vertexIndex]];
 
 				const quat<float32> q = {0.0f, vertex.x, vertex.y, vertex.z};
 
@@ -51,6 +54,8 @@ namespace Trident {
 				vertexIndex += 1;
 			}
 
+			vertexOffset += face.getVertexCount();
+			triangleOffset += face.getTriangleCount();
 			faceIndex += 1;
 		}
 	}
@@ -62,6 +67,7 @@ namespace Trident {
 
 		while (faceIndex < intermediateGeometry.faceIndices.size()) {
 			const Face& face = faces[intermediateGeometry.faceIndices[faceIndex]];
+			const uint32 vertexCount = face.getVertexCount();
 			const svec2<float32> faceSize = face.boundingBox.max - face.boundingBox.min;
 			const mat3x3<float32> textureTransform = (
 				mat3x3<float32>::scaling(faceSize / face.textureFiltering.scale) *
@@ -70,14 +76,14 @@ namespace Trident {
 			);
 			const quat<float32> R = lookAt(face.normal, {0.0f, 0.0f, -1.0f}, UP);
 
-			geometry.vertexRange.count += face.vertexCount;
-			geometry.indexRange.count += (face.vertexCount - 2) * 3;
+			geometry.vertexRange.count += vertexCount;
+			geometry.indexRange.count += (vertexCount - 2) * 3;
 
 			uint32 vertexIndex = 0;
 
-			while (vertexIndex < face.vertexCount) {
+			while (vertexIndex < vertexCount) {
 				BuildVertex3D& vertex = scene.vertices[vertexOffset + vertexIndex];
-				vertex.position = facePositions[indices[face.indexRange.offset + vertexIndex]];
+				vertex.position = facePositions[face.indices[vertexIndex]];
 
 				const quat<float32> q = {0.0f, vertex.position.x, vertex.position.y, vertex.position.z};
 				const svec3<float32> coordinate = svec3<float32>((R * q * inverse(R)).xyz());
@@ -95,21 +101,19 @@ namespace Trident {
 
 				// TODO(asset-builder/map/static-geometry): Restore face wireframe?
 				// scene.staticGeometry.lineIndices[lineIndexOffset + vertexIndex * 2 + 0] = face.indexRange.offset + vertexIndex;
-				// scene.staticGeometry.lineIndices[lineIndexOffset + vertexIndex * 2 + 1] = face.indexRange.offset + (vertexIndex + 1) % face.vertexCount;
+				// scene.staticGeometry.lineIndices[lineIndexOffset + vertexIndex * 2 + 1] = face.indexRange.offset + (vertexIndex + 1) % vertexCount;
 
 				vertexIndex += 1;
 			}
 
-			std::vector<uint32> indicesCopy(face.vertexCount);
+			std::vector<uint32> indicesCopy = face.indices;
 
-			// Final index buffer for the face, with indices in [0, face.vertexCount].
-			std::vector<uint32> indexBuffer(face.vertexCount);
-
-			std::copy_n(&indices[face.indexRange.offset], face.vertexCount, &indicesCopy[0]);
+			// Final index buffer for the face, with indices in [0, vertexCount].
+			std::vector<uint32> indexBuffer(vertexCount);
 
 			uint32 i = 0;
 
-			while (i < face.vertexCount) {
+			while (i < vertexCount) {
 				indexBuffer[i] = i;
 
 				i += 1;
@@ -177,8 +181,8 @@ namespace Trident {
 				}
 			}
 
-			vertexOffset += face.vertexCount;
-			lineIndexOffset += face.vertexCount * 2;
+			vertexOffset += vertexCount;
+			lineIndexOffset += vertexCount * 2;
 			faceIndex += 1;
 		}
 	}

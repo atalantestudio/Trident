@@ -8,6 +8,7 @@
 #include "AssetBuilder/API/Map/Builder/Build/GenerateLightmaps.hpp"
 #include "AssetBuilder/API/Map/Builder/Build/Triangle.hpp"
 #include "AssetBuilder/API/Map/Builder/Build/TriangulateFaces.hpp"
+#include "AssetBuilder/API/Map/Builder/Operation/CarveFace.hpp"
 #include "AssetBuilder/API/Map/Builder/Operation/CreateFace.hpp"
 #include "AssetBuilder/API/Map/Builder/Operation/CreatePointLight.hpp"
 #include "AssetBuilder/API/Map/Builder/Operation/CreateRigidBody.hpp"
@@ -41,7 +42,6 @@ namespace Trident {
 	MapBuilder::MapBuilder(const MapDescriptor& descriptor) :
 		descriptor(descriptor),
 		facePositions(MAX_FACE_POSITIONS),
-		indices(MAX_INDICES),
 		faces(MAX_FACES)
 	{
 		if (descriptor.environmentMapImageAsset != nullptr) {

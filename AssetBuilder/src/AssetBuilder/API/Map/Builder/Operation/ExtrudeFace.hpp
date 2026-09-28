@@ -11,6 +11,7 @@ namespace Trident {
 			return;
 		}
 
+		const uint32 vertexCount = face.getVertexCount();
 		const uint32 materialShaderIndex = face.material >> 16;
 		const uint32 materialIndex = face.material & 0xff;
 
@@ -20,35 +21,33 @@ namespace Trident {
 
 		IntermediateGeometry& geometry = geometries[materialGeometry.geometryIndex];
 
-		vec3<float32> a = facePositions[indices[face.indexRange.offset]];
+		vec3<float32> a = facePositions[face.indices[0]];
 		uint32 indexA = 0;
 
-		while (indexA < face.vertexCount) {
+		while (indexA < vertexCount) {
 			// TODO(lyah/scalar)
 			facePositions[facePositionCount + indexA] = svec3<float32>(a) + face.normal * scale;
 
-			const uint32 indexB = (indexA + 1) % face.vertexCount;
-			const vec3<float32> b = facePositions[indices[face.indexRange.offset + indexB]];
+			const uint32 indexB = (indexA + 1) % vertexCount;
+			const vec3<float32> b = facePositions[face.indices[indexB]];
 
 			Face extrudedFace{};
-			extrudedFace.vertexCount = 4;
-			extrudedFace.indexRange.offset = staticGeometryFaceVertexCount + indexA * 4;
+			extrudedFace.indices = {
+				facePositionCount + indexB,
+				facePositionCount + indexA,
+				face.indices[indexA],
+				face.indices[indexB],
+			};
 
 			// TODO(lyah/scalar)
 			extrudedFace.normal = svec3<float32>(normalized(cross(b - a, face.normal * scale)));
 
-			extrudedFace.triangleOffset = staticGeometryFaceTriangleCount;
 			extrudedFace.geometryIndex = face.geometryIndex;
 			extrudedFace.material = face.material;
 			extrudedFace.textureFiltering = face.textureFiltering;
 			extrudedFace.lightmap = face.lightmap;
 			extrudedFace.boundingBox.min = {max<float32>(), max<float32>()};
 			extrudedFace.boundingBox.max = {min<float32>(), min<float32>()};
-
-			indices[extrudedFace.indexRange.offset + 0] = facePositionCount + indexB;
-			indices[extrudedFace.indexRange.offset + 1] = facePositionCount + indexA;
-			indices[extrudedFace.indexRange.offset + 2] = indices[face.indexRange.offset + indexA];
-			indices[extrudedFace.indexRange.offset + 3] = indices[face.indexRange.offset + indexB];
 
 			faces[staticGeometryFaceCount] = extrudedFace;
 
@@ -58,20 +57,20 @@ namespace Trident {
 
 			staticGeometryFaceCount += 1;
 			staticGeometryFaceTriangleCount += 2;
-			lightmapCoordinateCount += face.vertexCount;
+			lightmapCoordinateCount += vertexCount;
 			indexA += 1;
 		}
 
 		indexA = 0;
 
-		while (indexA < face.vertexCount) {
-			indices[face.indexRange.offset + indexA] = facePositionCount + indexA;
+		while (indexA < vertexCount) {
+			face.indices[indexA] = facePositionCount + indexA;
 
 			indexA += 1;
 		}
 
-		facePositionCount += face.vertexCount;
-		staticGeometryFaceVertexCount += face.vertexCount * 4;
-		lightmapCount += face.vertexCount;
+		facePositionCount += vertexCount;
+		staticGeometryFaceVertexCount += vertexCount * 4;
+		lightmapCount += vertexCount;
 	}
 }

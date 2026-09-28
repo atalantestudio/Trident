@@ -139,7 +139,7 @@ namespace Trident {
 			intermediateGeometry.filteredIndex = buildGeometryOffset;
 
 			if (intermediateGeometry.assetIdentifier == max<uint32>()) {
-				calculateFaceBoundingBoxes(intermediateGeometry);
+				calculateFaceBoundingBoxes(intermediateGeometry, geometry.vertexRange.offset, geometry.indexRange.offset / 3);
 				triangulateFaces(scene, intermediateGeometry, geometry, 0);
 			}
 			else {
