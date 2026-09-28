@@ -30,6 +30,11 @@ namespace Trident {
 				static constexpr svec3<float32> LEFT_WALL_COLOR = {0.63f, 0.065f, 0.05f};
 				static constexpr svec3<float32> RIGHT_WALL_COLOR = {0.14f, 0.45f, 0.091f};
 				static constexpr svec3<float32> ROOM_COLOR = {0.725f, 0.71f, 0.68f};
+				static constexpr TextureFilteringDescriptor TEXTURE_FILTERING = {
+					.translation = {0.0f, 0.0f},
+					.rotation = 0.0f,
+					.scale = {1.0f, 1.0f},
+				};
 				static constexpr svec3<float32> VERTICES[] = {
 					{-549.6f,  0.0f,     559.2f},
 					{ 0.0f,    0.0f,     559.2f},
@@ -72,11 +77,6 @@ namespace Trident {
 				static constexpr view<svec3<float32>> RIGHT_WALL_VERTICES(&VERTICES[20], 4);
 				static constexpr view<svec3<float32>> SHORT_BLOCK_BOTTOM_VERTICES(&VERTICES[24], 4);
 				static constexpr view<svec3<float32>> TALL_BLOCK_BOTTOM_VERTICES(&VERTICES[28], 4);
-				static constexpr TextureFilteringDescriptor TEXTURE_FILTERING = {
-					.translation = {0.0f, 0.0f},
-					.rotation = 0.0f,
-					.scale = {1.0f, 1.0f},
-				};
 
 				MapBuilder builder({
 					.skyColor = {0.0f, 0.0f, 0.0f},
@@ -92,7 +92,7 @@ namespace Trident {
 
 				const MaterialReference material = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
 
-				builder.createFace({
+				Face& floorFace = builder.createFace({
 					.vertices = FLOOR_VERTICES,
 					.normal = calculateNormal(FLOOR_VERTICES),
 					.material = material,
@@ -155,31 +155,15 @@ namespace Trident {
 					},
 				});
 
-				Face& shortBlockFace = builder.createFace({
-					.vertices = SHORT_BLOCK_BOTTOM_VERTICES,
-					.normal = calculateNormal(SHORT_BLOCK_BOTTOM_VERTICES),
-					.material = material,
-					.textureFiltering = TEXTURE_FILTERING,
-					.lightmap = {
-						.luxelScale = LUXEL_SCALE,
-						.albedo = ROOM_COLOR,
-					},
-				});
+				// TODO(asset-builder/map): Allow multiple carvings in the same face.
+				// TODO(asset-builder/map): Fix invalid emissive triangles when only the short block is used.
+				// Face& shortBlockTopFace = builder.carveFace(floorFace, SHORT_BLOCK_BOTTOM_VERTICES);
 
-				builder.extrudeFace(shortBlockFace, SHORT_BLOCK_HEIGHT);
+				// builder.extrudeFace(shortBlockTopFace, SHORT_BLOCK_HEIGHT);
 
-				Face& tallBlockFace = builder.createFace({
-					.vertices = TALL_BLOCK_BOTTOM_VERTICES,
-					.normal = calculateNormal(TALL_BLOCK_BOTTOM_VERTICES),
-					.material = material,
-					.textureFiltering = TEXTURE_FILTERING,
-					.lightmap = {
-						.luxelScale = LUXEL_SCALE,
-						.albedo = ROOM_COLOR,
-					},
-				});
+				Face& tallBlockTopFace = builder.carveFace(floorFace, TALL_BLOCK_BOTTOM_VERTICES);
 
-				builder.extrudeFace(tallBlockFace, TALL_BLOCK_HEIGHT);
+				builder.extrudeFace(tallBlockTopFace, TALL_BLOCK_HEIGHT);
 
 				return builder;
 			}
