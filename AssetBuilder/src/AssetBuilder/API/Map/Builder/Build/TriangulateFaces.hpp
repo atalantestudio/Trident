@@ -57,6 +57,9 @@ namespace Trident {
 
 		while (faceIndex < geometry.faceIndices.size()) {
 			Face& face = faces[geometry.faceIndices[faceIndex]];
+			face.vertexOffset = vertexOffset;
+			face.triangleOffset = triangleOffset;
+
 			const uint32 vertexCount = face.getVertexCount();
 			const svec2<float32> faceSize = face.boundingBox.max - face.boundingBox.min;
 			const mat3x3<float32> textureTransform = (
@@ -65,9 +68,6 @@ namespace Trident {
 				mat3x3<float32>::translation(face.textureFiltering.translation)
 			);
 			const quat<float32> R = lookAt(face.normal, {0.0f, 0.0f, -1.0f}, UP);
-
-			face.vertexOffset = vertexOffset;
-			face.triangleOffset = triangleOffset;
 
 			uint32 vertexIndex = 0;
 

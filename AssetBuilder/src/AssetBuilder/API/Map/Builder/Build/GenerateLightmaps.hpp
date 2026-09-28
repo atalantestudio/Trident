@@ -72,31 +72,47 @@ namespace Trident {
 
 		uint32 lightmapCoordinateOffset = 0;
 		uint32 lightmapIndex = 0;
+		uint32 geometryIndex = 0;
 
-		while (lightmapIndex < staticGeometryFaceCount) {
-			const Face& face = faces[lightmapIndex];
+		while (geometryIndex < geometries.size()) {
+			const IntermediateGeometry& geometry = geometries[geometryIndex];
 
-			Lightmap& lightmap = lightmaps[lightmapIndex];
-			lightmap.geometryIndex = face.geometryIndex;
-			lightmap.materialIndex = lightmapIndex;
-			lightmap.triangleRange.offset = face.triangleOffset;
-			lightmap.triangleRange.count = face.getTriangleCount();
-			lightmap.vertexRange.offset = face.vertexOffset;
-			lightmap.coordinateOffset = lightmapCoordinateOffset;
-			lightmap.coordinateCount = face.getVertexCount();
-			lightmap.minCoordinate = face.boundingBox.min;
-			lightmap.maxCoordinate = face.boundingBox.max;
-			lightmap.vertexRange.count = lightmap.coordinateCount;
-			lightmap.scale = lightmap.maxCoordinate - lightmap.minCoordinate;
-			lightmap.luxelScale = face.lightmap.luxelScale;
+			if (geometry.assetIdentifier != max<uint32>() || !geometry.staticUsage) {
+				geometryIndex += 1;
 
-			LightmapMaterial& lightmapMaterial = lightmapMaterials[lightmapIndex];
-			lightmapMaterial.emissiveColor = face.lightmap.emissiveColor;
-			lightmapMaterial.emissiveIntensity = face.lightmap.emissiveIntensity;
-			lightmapMaterial.albedo = face.lightmap.albedo;
+				continue;
+			}
 
-			lightmapCoordinateOffset += lightmap.coordinateCount;
-			lightmapIndex += 1;
+			uint32 faceIndex = 0;
+
+			while (faceIndex < geometry.faceIndices.size()) {
+				const Face& face = faces[geometry.faceIndices[faceIndex]];
+
+				Lightmap& lightmap = lightmaps[lightmapIndex];
+				lightmap.geometryIndex = face.geometryIndex;
+				lightmap.materialIndex = lightmapIndex;
+				lightmap.triangleRange.offset = face.triangleOffset;
+				lightmap.triangleRange.count = face.getTriangleCount();
+				lightmap.vertexRange.offset = face.vertexOffset;
+				lightmap.coordinateOffset = lightmapCoordinateOffset;
+				lightmap.coordinateCount = face.getVertexCount();
+				lightmap.minCoordinate = face.boundingBox.min;
+				lightmap.maxCoordinate = face.boundingBox.max;
+				lightmap.vertexRange.count = lightmap.coordinateCount;
+				lightmap.scale = lightmap.maxCoordinate - lightmap.minCoordinate;
+				lightmap.luxelScale = face.lightmap.luxelScale;
+
+				LightmapMaterial& lightmapMaterial = lightmapMaterials[lightmapIndex];
+				lightmapMaterial.emissiveColor = face.lightmap.emissiveColor;
+				lightmapMaterial.emissiveIntensity = face.lightmap.emissiveIntensity;
+				lightmapMaterial.albedo = face.lightmap.albedo;
+
+				lightmapCoordinateOffset += lightmap.coordinateCount;
+				lightmapIndex += 1;
+				faceIndex += 1;
+			}
+
+			geometryIndex += 1;
 		}
 
 		uint32 materialShaderIndex = 0;
@@ -193,7 +209,6 @@ namespace Trident {
 				const float32 packedTextureCoordinate = vertex.tangent[3];
 				const svec2<float32> textureCoordinate = unpack<VertexInputAttributeFormat::R16G16_FLOAT, svec2<float32>>(*pointer_cast<const uint32*>(&packedTextureCoordinate));
 
-				// TODO(lyah/scalar)
 				staticGeometry.lightmapCoordinates[lightmap.coordinateOffset + coordinateIndex] = textureCoordinate * size;
 
 				coordinateIndex += 1;
@@ -237,14 +252,17 @@ namespace Trident {
 
 			node->index = lightmapLookup.index;
 
+			const svec2<float32> lightmapOffset = {
+				static_cast<float32>(node->rectangle.x),
+				static_cast<float32>(node->rectangle.y),
+			};
+
 			uint32 coordinateIndex = 0;
 
 			while (coordinateIndex < lightmap.coordinateCount) {
 				// TODO(lyah/scalar)
 				svec2<float32>& coordinate = staticGeometry.lightmapCoordinates[lightmap.coordinateOffset + coordinateIndex];
-				coordinate.x += node->rectangle.x;
-				coordinate.y += node->rectangle.y;
-				coordinate *= inverseAtlasExtent;
+				coordinate = (coordinate + lightmapOffset) * inverseAtlasExtent;
 
 				coordinateIndex += 1;
 			}

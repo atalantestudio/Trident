@@ -632,21 +632,25 @@ namespace Trident {
 		const uint32 workGroupX = ceil(imageAssetDescriptor->extent.width / 16, 16u);
 		const uint32 workGroupY = ceil(imageAssetDescriptor->extent.height / 16, 16u);
 
-		commandEncoder->bindComputePipeline(intermediateDilationPipeline);
-		commandEncoder->bindDescriptorSets(postProcessingPipelineLayout, 0, descriptorSets[2]);
-		commandEncoder->dispatch(workGroupX, workGroupY, 1);
+		#if defined(DEBUG_LIGHTMAPPER_ENABLE_DILATION)
+			commandEncoder->bindComputePipeline(intermediateDilationPipeline);
+			commandEncoder->bindDescriptorSets(postProcessingPipelineLayout, 0, descriptorSets[2]);
+			commandEncoder->dispatch(workGroupX, workGroupY, 1);
 
-		commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
+			commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
+		#endif
 
-		commandEncoder->bindComputePipeline(horizontalBilateralFilterPipeline);
-		commandEncoder->bindDescriptorSets(postProcessingPipelineLayout, 0, descriptorSets[2]);
-		commandEncoder->dispatch(workGroupX, workGroupY, 1);
+		#if defined(DEBUG_LIGHTMAPPER_ENABLE_BILATERAL_FILTER)
+			commandEncoder->bindComputePipeline(horizontalBilateralFilterPipeline);
+			commandEncoder->bindDescriptorSets(postProcessingPipelineLayout, 0, descriptorSets[2]);
+			commandEncoder->dispatch(workGroupX, workGroupY, 1);
 
-		commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
+			commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
 
-		commandEncoder->bindComputePipeline(verticalBilateralFilterPipeline);
-		commandEncoder->bindDescriptorSets(postProcessingPipelineLayout, 0, descriptorSets[2]);
-		commandEncoder->dispatch(workGroupX, workGroupY, 1);
+			commandEncoder->bindComputePipeline(verticalBilateralFilterPipeline);
+			commandEncoder->bindDescriptorSets(postProcessingPipelineLayout, 0, descriptorSets[2]);
+			commandEncoder->dispatch(workGroupX, workGroupY, 1);
+		#endif
 
 		imageMemoryBarrier.newLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
 

@@ -13,6 +13,9 @@
 #include "Engine/Filesystem/Asset/ImageAsset.hpp"
 
 namespace Trident {
+	#define DEBUG_LIGHTMAPPER_ENABLE_DILATION
+	#define DEBUG_LIGHTMAPPER_ENABLE_BILATERAL_FILTER
+
 	struct LightmapperDescriptor {
 		BuildScene3D* scene;
 		view<uint32> emissiveTriangleIndices;

@@ -13,6 +13,7 @@ namespace Trident {
 			}
 
 			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
+				static constexpr svec2<float32> LUXEL_SCALE = {16.0f, 16.0f};
 				static constexpr svec3<float32> EXTRUDED_FLOOR_VERTICES[] = {
 					{-256.0f,  128.0f,  256.0f},
 					{ 256.0f,  128.0f,  256.0f},
@@ -61,7 +62,7 @@ namespace Trident {
 						.scale = {m2 * 0.25f, m2 * 0.25f},
 					},
 					.lightmap = {
-						.luxelScale = {4.0f, 4.0f},
+						.luxelScale = LUXEL_SCALE,
 						.albedo = {1.0f, 1.0f, 1.0f},
 					},
 				});
@@ -75,7 +76,7 @@ namespace Trident {
 
 				builder.extrudeFace(tableFace, 48.0f);
 
-				Face& ceilingFace = builder.createFace({
+				builder.createFace({
 					.vertices = CEILING_VERTICES,
 					.normal = {0.0f, -1.0f, 0.0f},
 					.material = lightmappedGrayMaterial,
@@ -85,7 +86,7 @@ namespace Trident {
 						.scale = {m1 * 0.25f, m1 * 0.25f},
 					},
 					.lightmap = {
-						.luxelScale = {4.0f, 4.0f},
+						.luxelScale = LUXEL_SCALE,
 						.albedo = {1.0f, 1.0f, 1.0f},
 					},
 				});
