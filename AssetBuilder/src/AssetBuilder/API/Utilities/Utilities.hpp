@@ -44,6 +44,8 @@ namespace Trident {
 
 	ImageAssetDescriptor openImage(view<char8> path);
 
+	bool pointTriangleIntersection(vec3<float32> a, vec3<float32> b, vec3<float32> c, vec3<float32> p);
+
 	template<VertexInputAttributeFormat Format, typename Output, typename Input>
 	Output pack(Input value);
 

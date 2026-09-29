@@ -98,7 +98,7 @@ namespace Trident {
 				lightmap.triangleRange.count = face.getTriangleCount();
 				lightmap.vertexRange.offset = face.vertexOffset;
 				lightmap.coordinateOffset = lightmapCoordinateOffset;
-				lightmap.coordinateCount = face.getVertexCount();
+				lightmap.coordinateCount = face.getUniqueIndexCount();
 				lightmap.minCoordinate = face.boundingBox.min;
 				lightmap.maxCoordinate = face.boundingBox.max;
 				lightmap.vertexRange.count = lightmap.coordinateCount;

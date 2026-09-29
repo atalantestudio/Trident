@@ -69,7 +69,7 @@ namespace Trident {
 	}
 
 	void LinearMapBuilder::connectFaces(Face& faceA, Face& faceB, view<svec3<float32>> verticesA, view<svec3<float32>> verticesB) {
-		DEBUG_ASSERT(faceA.getVertexCount() == faceB.getVertexCount());
+		DEBUG_ASSERT(faceA.getUniqueIndexCount() == faceB.getUniqueIndexCount());
 
 		// TODO(lyah/scalar)
 		DEBUG_ASSERT(abs(dot(vec3<float32>(faceA.normal), vec3<float32>(faceB.normal)) + 1.0f) < 1e-4f);

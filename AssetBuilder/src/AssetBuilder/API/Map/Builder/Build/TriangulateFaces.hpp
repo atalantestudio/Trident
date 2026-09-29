@@ -7,48 +7,6 @@
 #include "AssetBuilder/API/Utilities/Utilities.hpp"
 
 namespace Trident {
-	static bool pointInsideTriangle(vec3<float32> a, vec3<float32> b, vec3<float32> c, vec3<float32> p) {
-		const vec3<float32> ab = b - a;
-		const vec3<float32> ac = c - a;
-		const vec3<float32> ap = p - a;
-
-		const float32 ab_ab = dot(ab, ab);
-		const float32 ab_ac = dot(ab, ac);
-		const float32 ac_ac = dot(ac, ac);
-		const float32 ap_ab = dot(ap, ab);
-		const float32 ap_ac = dot(ap, ac);
-
-		const float32 inverseD = 1.0f / (ab_ab * ac_ac - ab_ac * ab_ac);
-
-		const float32 v = (ac_ac * ap_ab - ab_ac * ap_ac) * inverseD;
-		const float32 w = (ab_ab * ap_ac - ab_ac * ap_ab) * inverseD;
-		const float32 u = 1.0f - w - v;
-
-		return u > 0.0f && v > 0.0f && w > 0.0f;
-	}
-
-	void MapBuilder::calculateFaceBoundingBoxes(Face& face) const {
-		const uint32 vertexCount = face.getVertexCount();
-		const quat<float32> R = lookAt(face.normal, {0.0f, 0.0f, -1.0f}, UP);
-
-		uint32 vertexIndex = 0;
-
-		while (vertexIndex < vertexCount) {
-			svec3<float32> vertex = facePositions[face.indices[vertexIndex]];
-
-			const quat<float32> q = {0.0f, vertex.x, vertex.y, vertex.z};
-
-			vertex = svec3<float32>((R * q * inverse(R)).xyz());
-
-			face.boundingBox.min.x = min(face.boundingBox.min.x, vertex.x);
-			face.boundingBox.min.y = min(face.boundingBox.min.y, vertex.y);
-			face.boundingBox.max.x = max(face.boundingBox.max.x, vertex.x);
-			face.boundingBox.max.y = max(face.boundingBox.max.y, vertex.y);
-
-			vertexIndex += 1;
-		}
-	}
-
 	void MapBuilder::triangulateFaces(IntermediateGeometry& geometry, uint32 lineIndexOffset) {
 		uint32 vertexOffset = 0;
 		uint32 triangleOffset = 0;
@@ -60,7 +18,7 @@ namespace Trident {
 			face.vertexOffset = vertexOffset;
 			face.triangleOffset = triangleOffset;
 
-			const uint32 vertexCount = face.getVertexCount();
+			const uint32 indexCount = face.getIndexCount();
 			const svec2<float32> faceSize = face.boundingBox.max - face.boundingBox.min;
 			const mat3x3<float32> textureTransform = (
 				mat3x3<float32>::scaling(faceSize / face.textureFiltering.scale) *
@@ -69,11 +27,50 @@ namespace Trident {
 			);
 			const quat<float32> R = lookAt(face.normal, {0.0f, 0.0f, -1.0f}, UP);
 
+			std::vector<uint32> faceIndices2(face.getUniqueIndexCount());
+
+			// Final index buffer for the face, with indices in [0, indexCount[.
+			std::vector<uint32> indexBuffer(indexCount);
+
+			// TODO(asset-builder/map/face-triangulation): Refactor.
+			{
+				uint32 i = 0;
+				uint32 indexCount2 = 0;
+
+				while (i < indexCount) {
+					const uint32 index = face.indices[i];
+
+					bool duplicate = false;
+					uint32 j = 0;
+
+					while (j < indexCount2) {
+						const uint32 index2 = faceIndices2[j];
+
+						if (index == index2) {
+							duplicate = true;
+
+							break;
+						}
+
+						j += 1;
+					}
+
+					if (!duplicate) {
+						faceIndices2[indexCount2] = index;
+						indexCount2 += 1;
+					}
+
+					indexBuffer[i] = j;
+
+					i += 1;
+				}
+			}
+
 			uint32 vertexIndex = 0;
 
-			while (vertexIndex < vertexCount) {
+			while (vertexIndex < face.getUniqueIndexCount()) {
 				BuildVertex3D& vertex = geometry.vertices[vertexOffset + vertexIndex];
-				vertex.position = facePositions[face.indices[vertexIndex]];
+				vertex.position = facePositions[faceIndices2[vertexIndex]];
 
 				const quat<float32> q = {0.0f, vertex.position.x, vertex.position.y, vertex.position.z};
 				const svec3<float32> coordinate = svec3<float32>((R * q * inverse(R)).xyz());
@@ -91,23 +88,12 @@ namespace Trident {
 
 				// TODO(asset-builder/map/static-geometry): Restore face wireframe?
 				// scene.staticGeometry.lineIndices[lineIndexOffset + vertexIndex * 2 + 0] = face.indexRange.offset + vertexIndex;
-				// scene.staticGeometry.lineIndices[lineIndexOffset + vertexIndex * 2 + 1] = face.indexRange.offset + (vertexIndex + 1) % vertexCount;
+				// scene.staticGeometry.lineIndices[lineIndexOffset + vertexIndex * 2 + 1] = face.indexRange.offset + (vertexIndex + 1) % indexCount;
 
 				vertexIndex += 1;
 			}
 
 			std::vector<uint32> indicesCopy = face.indices;
-
-			// Final index buffer for the face, with indices in [0, vertexCount[.
-			std::vector<uint32> indexBuffer(vertexCount);
-
-			uint32 i = 0;
-
-			while (i < vertexCount) {
-				indexBuffer[i] = i;
-
-				i += 1;
-			}
 
 			while (indicesCopy.size() > 2) {
 				uint32 indexOffset = 0;
@@ -139,7 +125,7 @@ namespace Trident {
 					while (i < indicesCopy.size()) {
 						const vec3<float32> p = facePositions[indicesCopy[i]];
 
-						if (pointInsideTriangle(a, b, c, p)) {
+						if (pointTriangleIntersection(a, b, c, p)) {
 							pointInside = true;
 
 							break;
@@ -167,9 +153,9 @@ namespace Trident {
 				}
 			}
 
-			vertexOffset += vertexCount;
+			vertexOffset += face.getUniqueIndexCount();
 			triangleOffset += face.getTriangleCount();
-			lineIndexOffset += vertexCount * 2;
+			// lineIndexOffset += indexCount * 2;
 			faceIndex += 1;
 		}
 	}

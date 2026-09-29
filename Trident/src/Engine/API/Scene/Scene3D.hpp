@@ -17,10 +17,6 @@ namespace Trident {
 				return asset;
 			}
 
-			inline uint32 getIndexCount() const {
-				return indexCount;
-			}
-
 			inline range<uint64, uint64> getVertexPositionComponentRange() const {
 				return vertexPositionComponentRange;
 			}

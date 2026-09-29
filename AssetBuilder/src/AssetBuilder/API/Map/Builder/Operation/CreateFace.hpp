@@ -36,10 +36,16 @@ namespace Trident {
 	}
 
 	Face& MapBuilder::createFace(const IndexedFaceDescriptor& descriptor) {
-		ENGINE_ASSERT(descriptor.indices.count() >= 3, "Not enough indices.");
+		const uint32 indexCount = static_cast<uint32>(descriptor.indices.count());
+
+		ENGINE_ASSERT(indexCount >= 3, "Not enough indices.");
 
 		Face face{};
-		face.indices.resize(descriptor.indices.count());
+		face.uniqueIndices.resize(indexCount);
+
+		std::copy(descriptor.indices.begin(), descriptor.indices.end(), &face.uniqueIndices[0]);
+
+		face.indices = face.uniqueIndices;
 		face.normal = descriptor.normal;
 		face.geometryIndex = max<uint32>();
 		face.material = descriptor.material;
@@ -47,8 +53,6 @@ namespace Trident {
 		face.boundingBox.min = {max<float32>(), max<float32>()};
 		face.boundingBox.max = {min<float32>(), min<float32>()};
 		face.lightmap = descriptor.lightmap;
-
-		std::copy(descriptor.indices.begin(), descriptor.indices.end(), &face.indices[0]);
 
 		faces[staticGeometryFaceCount] = face;
 

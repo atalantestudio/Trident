@@ -7,7 +7,7 @@
 
 namespace Trident {
 	Edge2D MapBuilder::findClosestFaceCarvingConnectorEdge(const Face& face, view<svec3<float32>> carvingVertices) const {
-		const uint32 faceVertexCount = face.getVertexCount();
+		const uint32 faceIndexCount = face.getIndexCount();
 
 		float32 minDistance = max<float32>();
 		Edge2D connectorEdge{};
@@ -16,19 +16,19 @@ namespace Trident {
 		while (carvingVertexIndex < carvingVertices.count()) {
 			const vec3<float32> carvingVertex = carvingVertices[carvingVertexIndex];
 
-			uint32 faceVertexIndex = 0;
+			uint32 faceIndexOffset = 0;
 
-			while (faceVertexIndex < faceVertexCount) {
-				const vec3<float32> faceVertex = facePositions[face.indices[faceVertexIndex]];
+			while (faceIndexOffset < faceIndexCount) {
+				const vec3<float32> faceVertex = facePositions[face.indices[faceIndexOffset]];
 				const float32 distance = distanceSquared(carvingVertex, faceVertex);
 
 				if (distance < minDistance) {
 					minDistance = distance;
-					connectorEdge.indexA = faceVertexIndex;
+					connectorEdge.indexA = faceIndexOffset;
 					connectorEdge.indexB = carvingVertexIndex;
 				}
 
-				faceVertexIndex += 1;
+				faceIndexOffset += 1;
 			}
 
 			carvingVertexIndex += 1;
@@ -38,7 +38,7 @@ namespace Trident {
 	}
 
 	Face& MapBuilder::carveFace(Face& face, view<svec3<float32>> carvingVertices) {
-		const uint32 previousVertexCount = face.getVertexCount();
+		const uint32 previousIndexCount = face.getIndexCount();
 		const uint32 carvingVertexCount = static_cast<uint32>(carvingVertices.count());
 		const Edge2D connectorEdge = findClosestFaceCarvingConnectorEdge(face, carvingVertices);
 
@@ -49,14 +49,16 @@ namespace Trident {
 			facePositions[facePositionCount + carvingVertexIndex] = carvingVertices[carvingVertexIndex];
 			carvingIndices[carvingVertexIndex] = facePositionCount + carvingVertexIndex;
 
+			face.uniqueIndices.emplace_back(facePositionCount + carvingVertexIndex);
+
 			carvingVertexIndex += 1;
 		}
 
 		facePositionCount += static_cast<uint32>(carvingVertexCount);
 
-		face.indices.resize(previousVertexCount + static_cast<uint32>(carvingVertexCount) + 2);
+		face.indices.resize(previousIndexCount + static_cast<uint32>(carvingVertexCount) + 2);
 
-		std::copy_n(&face.indices[0], previousVertexCount, &face.indices[previousVertexCount + carvingVertexCount - 2]);
+		std::copy_n(&face.indices[0], previousIndexCount, &face.indices[previousIndexCount + carvingVertexCount - 2]);
 
 		uint32 index = 0;
 		sint32 reverseCarvingIndex = static_cast<sint32>(carvingVertexCount);

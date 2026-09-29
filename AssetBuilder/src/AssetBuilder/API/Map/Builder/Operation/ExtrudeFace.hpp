@@ -11,52 +11,47 @@ namespace Trident {
 			return;
 		}
 
-		const uint32 vertexCount = face.getVertexCount();
+		const uint32 indexCount = face.getIndexCount();
 
 		vec3<float32> a = facePositions[face.indices[0]];
 		uint32 indexA = 0;
 
-		while (indexA < vertexCount) {
+		while (indexA < indexCount) {
 			// TODO(lyah/scalar)
 			facePositions[facePositionCount + indexA] = svec3<float32>(a) + direction * scale;
 
-			const uint32 indexB = (indexA + 1) % vertexCount;
+			const uint32 indexB = (indexA + 1) % indexCount;
 			const vec3<float32> b = facePositions[face.indices[indexB]];
-
-			Face extrudedFace{};
-			extrudedFace.indices = {
+			const uint32 extrudedFaceIndices[] = {
 				facePositionCount + indexB,
 				facePositionCount + indexA,
 				face.indices[indexA],
 				face.indices[indexB],
 			};
 
-			// TODO(lyah/scalar)
-			extrudedFace.normal = svec3<float32>(normalized(cross(b - a, direction * scale)));
+			createFace({
+				.indices = extrudedFaceIndices,
 
-			extrudedFace.geometryIndex = max<uint32>();
-			extrudedFace.material = face.material;
-			extrudedFace.textureFiltering = face.textureFiltering;
-			extrudedFace.lightmap = face.lightmap;
-			extrudedFace.boundingBox.min = {max<float32>(), max<float32>()};
-			extrudedFace.boundingBox.max = {min<float32>(), min<float32>()};
+				// TODO(lyah/scalar)
+				.normal = svec3<float32>(normalized(cross(b - a, direction * scale))),
 
-			faces[staticGeometryFaceCount] = extrudedFace;
+				.material = face.material,
+				.textureFiltering = face.textureFiltering,
+				.lightmap = face.lightmap,
+			});
 
 			a = b;
-
-			staticGeometryFaceCount += 1;
 			indexA += 1;
 		}
 
 		indexA = 0;
 
-		while (indexA < vertexCount) {
+		while (indexA < indexCount) {
 			face.indices[indexA] = facePositionCount + indexA;
 
 			indexA += 1;
 		}
 
-		facePositionCount += vertexCount;
+		facePositionCount += face.getUniqueIndexCount();
 	}
 }

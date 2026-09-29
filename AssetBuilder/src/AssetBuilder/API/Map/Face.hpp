@@ -31,6 +31,7 @@ namespace Trident {
 
 	/// The following properties can be updated after a face has been created:
 	/// - Vertex positions (might affect other faces)
+	/// - Vertex indices
 	/// - Material index
 	/// - UV translation
 	/// - UV rotation
@@ -40,13 +41,22 @@ namespace Trident {
 	/// - Lightmap emissive color
 	/// - Lightmap emissive intensity
 	struct Face {
-		uint32 getVertexCount() const {
+		uint32 getUniqueIndexCount() const {
+			return static_cast<uint32>(uniqueIndices.size());
+		}
+
+		uint32 getIndexCount() const {
 			return static_cast<uint32>(indices.size());
 		}
 
 		uint32 getTriangleCount() const {
+			DEBUG_ASSERT(indices.size() > 0);
+
 			return static_cast<uint32>(indices.size() - 2);
 		}
+
+		// TODO(asset-builder/map/face): Try to remove.
+		std::vector<uint32> uniqueIndices;
 
 		/// Vertex indices in clockwise order.
 		std::vector<uint32> indices;

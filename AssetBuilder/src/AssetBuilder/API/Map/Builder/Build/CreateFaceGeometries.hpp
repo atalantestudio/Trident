@@ -61,12 +61,12 @@ namespace Trident {
 			calculateFaceBoundingBoxes(face);
 
 			IntermediateGeometry& geometry = geometries[materialGeometry.geometryIndex];
-			geometry.vertices = sequence<BuildVertex3D>(geometry.vertices.count() + face.getVertexCount());
+			geometry.vertices = sequence<BuildVertex3D>(geometry.vertices.count() + face.getUniqueIndexCount());
 			geometry.indices = sequence<uint32>(geometry.indices.count() + face.getTriangleCount() * 3);
 			geometry.faceIndices.emplace_back(faceIndex);
 
 			lightmapCount += 1;
-			lightmapCoordinateCount += face.getVertexCount();
+			lightmapCoordinateCount += face.getUniqueIndexCount();
 
 			faceIndex += 1;
 		}
@@ -81,6 +81,28 @@ namespace Trident {
 			triangulateFaces(geometry, 0);
 
 			geometryIndex += 1;
+		}
+	}
+
+	void MapBuilder::calculateFaceBoundingBoxes(Face& face) const {
+		const uint32 indexCount = face.getUniqueIndexCount();
+		const quat<float32> R = lookAt(face.normal, {0.0f, 0.0f, -1.0f}, UP);
+
+		uint32 indexOffset = 0;
+
+		while (indexOffset < indexCount) {
+			svec3<float32> vertex = facePositions[face.uniqueIndices[indexOffset]];
+
+			const quat<float32> q = {0.0f, vertex.x, vertex.y, vertex.z};
+
+			vertex = svec3<float32>((R * q * inverse(R)).xyz());
+
+			face.boundingBox.min.x = min(face.boundingBox.min.x, vertex.x);
+			face.boundingBox.min.y = min(face.boundingBox.min.y, vertex.y);
+			face.boundingBox.max.x = max(face.boundingBox.max.x, vertex.x);
+			face.boundingBox.max.y = max(face.boundingBox.max.y, vertex.y);
+
+			indexOffset += 1;
 		}
 	}
 }

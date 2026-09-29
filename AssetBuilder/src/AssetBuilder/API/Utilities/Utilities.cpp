@@ -7,6 +7,7 @@
 #include "AssetBuilder/API/Utilities/Hull.hpp"
 #include "AssetBuilder/API/Utilities/Image.hpp"
 #include "AssetBuilder/API/Utilities/InflateFBXStreams.hpp"
+#include "AssetBuilder/API/Utilities/Intersection.hpp"
 #include "AssetBuilder/API/Utilities/Pack.hpp"
 #include "AssetBuilder/API/Utilities/RigidBody.hpp"
 #include "AssetBuilder/API/Utilities/Unpack.hpp"
