@@ -210,13 +210,13 @@ namespace Trident {
 		asset.geometryIndexToHullIndex = sequence<uint32>(asset.geometryIndexRanges.count());
 		asset.hulls = sequence<Hull3D>(asset.entityCount);
 
+		std::fill(asset.geometryIndexToHullIndex.begin(), asset.geometryIndexToHullIndex.end(), max<uint32>());
+
 		Entity entity = 0;
 
 		for (EntityComponentMapping<GeometryComponent>& geometryMapping : asset.geometryMappings) {
 			geometryMapping.entity = stream.read<Entity>();
 			geometryMapping.component = stream.read<GeometryComponent>();
-
-			asset.geometryIndexToHullIndex[entity] = max<uint32>();
 
 			entity += 1;
 		}
