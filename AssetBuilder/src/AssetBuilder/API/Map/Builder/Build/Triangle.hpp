@@ -24,18 +24,17 @@ namespace Trident {
 
 		while (lightmapIndex < lightmaps.count()) {
 			const Lightmap& lightmap = lightmaps[lightmapIndex];
-			const BuildGeometry& geometry = scene.geometries[geometries[lightmap.geometryIndex].filteredIndex];
 
 			uint32 triangleIndex = 0;
 
 			while (triangleIndex < lightmap.triangleRange.count) {
-				const uint32 indexOffset = triangleIndex * 3;
+				const uint32 indexOffset = (lightmap.triangleRange.offset + triangleIndex) * 3;
 
 				triangles[triangleOffset + triangleIndex] = {
-					.index = geometry.indexRange.offset / 3 + lightmap.triangleRange.offset + triangleIndex,
-					.lightmapCoordinateIndexA = lightmap.coordinateOffset + scene.indices[indexOffset + 0],
-					.lightmapCoordinateIndexB = lightmap.coordinateOffset + scene.indices[indexOffset + 1],
-					.lightmapCoordinateIndexC = lightmap.coordinateOffset + scene.indices[indexOffset + 2],
+					.index = lightmap.triangleRange.offset + triangleIndex,
+					.lightmapCoordinateIndexA = scene.indices[indexOffset + 0],
+					.lightmapCoordinateIndexB = scene.indices[indexOffset + 1],
+					.lightmapCoordinateIndexC = scene.indices[indexOffset + 2],
 					.materialIndex = lightmap.materialIndex,
 				};
 

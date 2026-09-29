@@ -25,7 +25,7 @@ namespace Trident {
 			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				static constexpr float32 SHORT_BLOCK_HEIGHT = 165.0f;
 				static constexpr float32 TALL_BLOCK_HEIGHT = 330.0f;
-				static constexpr svec2<float32> LUXEL_SCALE = {4.0f, 4.0f};
+				static constexpr svec2<float32> LUXEL_SCALE = {2.0f, 2.0f};
 				static constexpr svec3<float32> LIGHT_EMISSIVE_COLOR = {17.0f, 12.0f, 4.0f};
 				static constexpr svec3<float32> LEFT_WALL_COLOR = {0.63f, 0.065f, 0.05f};
 				static constexpr svec3<float32> RIGHT_WALL_COLOR = {0.14f, 0.45f, 0.091f};
@@ -156,7 +156,6 @@ namespace Trident {
 				});
 
 				// TODO(asset-builder/map): Allow multiple carvings in the same face.
-				// TODO(asset-builder/map): Fix invalid emissive triangles when only the short block is used.
 				// Face& shortBlockTopFace = builder.carveFace(floorFace, SHORT_BLOCK_BOTTOM_VERTICES);
 
 				// builder.extrudeFace(shortBlockTopFace, shortBlockTopFace.normal, SHORT_BLOCK_HEIGHT);

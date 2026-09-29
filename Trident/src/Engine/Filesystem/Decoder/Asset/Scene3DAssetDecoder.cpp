@@ -254,7 +254,6 @@ namespace Trident {
 				}
 
 				asset.geometryIndexToHullIndex[rigidBodyMapping.entity] = rigidBodyMapping.entity;
-
 				asset.rigidBodyFacePlaneCount += static_cast<uint32>(geometryAsset->hullFaces.count());
 
 				Hull3D& hull = asset.hulls[rigidBodyMapping.entity];
