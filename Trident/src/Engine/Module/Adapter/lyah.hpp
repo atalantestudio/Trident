@@ -659,7 +659,7 @@ namespace Trident {
 		const float32 angle = dot(previousDirection, direction);
 
 		if (abs(angle + 1.0f) < e) {
-			return -quat<float32>::identity();
+			return quat<float32>::axisAngle(up, pi<float32>());
 		}
 
 		if (abs(angle - 1.0f) < e) {
