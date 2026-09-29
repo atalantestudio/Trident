@@ -75,23 +75,26 @@ namespace Trident {
 		uint32 geometryIndex = 0;
 
 		while (geometryIndex < geometries.size()) {
-			const IntermediateGeometry& geometry = geometries[geometryIndex];
+			const IntermediateGeometry& intermediateGeometry = geometries[geometryIndex];
 
-			if (geometry.assetIdentifier != max<uint32>() || !geometry.staticUsage) {
+			if (intermediateGeometry.assetIdentifier != max<uint32>() || !intermediateGeometry.staticUsage) {
 				geometryIndex += 1;
 
 				continue;
 			}
 
+			const BuildGeometry& geometry = scene.geometries[intermediateGeometry.filteredIndex];
+			const uint32 geometryTriangleOffset = geometry.indexRange.offset / 3;
+
 			uint32 faceIndex = 0;
 
-			while (faceIndex < geometry.faceIndices.size()) {
-				const Face& face = faces[geometry.faceIndices[faceIndex]];
+			while (faceIndex < intermediateGeometry.faceIndices.size()) {
+				const Face& face = faces[intermediateGeometry.faceIndices[faceIndex]];
 
 				Lightmap& lightmap = lightmaps[lightmapIndex];
-				lightmap.geometryIndex = face.geometryIndex;
+				lightmap.geometryIndex = geometryIndex;
 				lightmap.materialIndex = lightmapIndex;
-				lightmap.triangleRange.offset = face.triangleOffset;
+				lightmap.triangleRange.offset = geometryTriangleOffset + face.triangleOffset;
 				lightmap.triangleRange.count = face.getTriangleCount();
 				lightmap.vertexRange.offset = face.vertexOffset;
 				lightmap.coordinateOffset = lightmapCoordinateOffset;
@@ -199,8 +202,8 @@ namespace Trident {
 			lightmap.size.width += 4;
 			lightmap.size.height += 4;
 
-			const IntermediateGeometry& intermediateGeometry = geometries[lightmap.geometryIndex];
-			const view<BuildVertex3D> vertices(&intermediateGeometry.vertices[lightmap.vertexRange.offset], lightmap.coordinateCount);
+			const IntermediateGeometry& geometry = geometries[lightmap.geometryIndex];
+			const view<BuildVertex3D> vertices(&geometry.vertices[lightmap.vertexRange.offset], lightmap.coordinateCount);
 
 			uint32 coordinateIndex = 0;
 
