@@ -530,7 +530,7 @@ namespace Trident {
 	}
 
 	template<typename T>
-	inline lyah::vec<2, T> multiplyTransform(const lyah::vec<2, T>& a, const lyah::mat<3, 3, T>& t) {
+	inline lyah::vec<2, T> multiplyTransform(lyah::vec<2, T> a, const lyah::mat<3, 3, T>& t) {
 		return {
 			t[0][0] * a[0] + t[1][0] * a[1] + t[2][0],
 			t[0][1] * a[0] + t[1][1] * a[1] + t[2][1],
@@ -575,7 +575,7 @@ namespace Trident {
 		return dot(normal, point) - offset;
 	}
 
-	inline vec2<float32> edgeNormalClockwise(const vec2<float32>& a, const vec2<float32>& b) {
+	inline vec2<float32> edgeNormalClockwise(vec2<float32> a, vec2<float32> b) {
 		return perpendicularLeft(normalized(b - a));
 	}
 

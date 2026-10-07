@@ -11,7 +11,7 @@ namespace Trident {
 				static constexpr uint32 TILE_COUNT = 15;
 				static constexpr float32 TILE_MASS = 50.0_kg;
 				static constexpr float32 FREQUENCY = 2.0f;
-				static constexpr float32 OMEGA = 2.0f * pi<float32>() * FREQUENCY;
+				static constexpr float32 OMEGA = tau<float32>() * FREQUENCY;
 				static constexpr float32 DAMPING_RATIO = 0.7f;
 				static constexpr float32 DAMPING_COEFFICIENT = 2.0f * TILE_MASS * DAMPING_RATIO * OMEGA;
 				static constexpr float32 SPRING_STIFFNESS = TILE_MASS * OMEGA * OMEGA;

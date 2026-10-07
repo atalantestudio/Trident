@@ -33,9 +33,9 @@ namespace Trident {
 
 					while (y <= Y_SEGMENTS) {
 						const float32 ySegment = static_cast<float32>(y) / Y_SEGMENTS;
-						const float32 xPos = cos(xSegment * pi<float32>() * 2.0f) * sin(ySegment * pi<float32>());
+						const float32 xPos = cos(xSegment * tau<float32>()) * sin(ySegment * pi<float32>());
 						const float32 yPos = cos(ySegment * pi<float32>());
-						const float32 zPos = sin(xSegment * pi<float32>() * 2.0f) * sin(ySegment * pi<float32>());
+						const float32 zPos = sin(xSegment * tau<float32>()) * sin(ySegment * pi<float32>());
 
 						geometry.vertices[vertexIndex] = {
 							.position = svec3<float32>(xPos, yPos, zPos) * 0.5f,

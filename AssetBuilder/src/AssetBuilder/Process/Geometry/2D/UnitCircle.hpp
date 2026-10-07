@@ -16,7 +16,7 @@ namespace Trident {
 
 				const uint32 vertexComponentOffset = static_cast<uint32>(vertexComponentBuffer.size());
 				const uint32 indexOffset = static_cast<uint32>(indexBuffer.size());
-				const float32 theta = pi<float32>() * 2.0f / resolution;
+				const float32 theta = tau<float32>() / resolution;
 
 				vertexComponentBuffer.resize(vertexComponentBuffer.size() + resolution * 4);
 				indexBuffer.resize(indexBuffer.size() + resolution * 3);

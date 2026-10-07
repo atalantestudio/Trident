@@ -636,7 +636,7 @@ namespace Trident {
 		const float32 h = static_cast<float32>(swapchainExtent.height);
 		const vec2<float32> O = -cameraPosition / (vec2<float32>(w, h) * 0.5f);
 
-		// TODO: lyah::mat<3, 3, float32>::orthographic
+		// TODO(lyah/mat3x3/orthographic)
 		cameraMappedRange->projection = {
 			2.0f / w,  0.0f,      0.0f,
 			0.0f,      2.0f / h,  0.0f,
