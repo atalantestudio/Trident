@@ -10,11 +10,11 @@
 namespace Trident {
 	template<>
 	struct Descriptor<RigidBody2DComponent> {
-		svec2<float32> position;
+		vec2<float32> position;
 		float32 rotation;
-		svec2<float32> scale;
+		vec2<float32> scale;
 
-		svec2<float32> linearVelocity = {0.0_m_s, 0.0_m_s};
+		vec2<float32> linearVelocity = {0.0_m_s, 0.0_m_s};
 		float32 angularVelocity = 0.0_w;
 
 		/// Uniform mass distribution is assumed.

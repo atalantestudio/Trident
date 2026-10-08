@@ -90,7 +90,7 @@ namespace Trident {
 					stream.write<uint32>(index);
 				}
 
-				for (const svec2<float32> lightmapCoordinate : scene.staticGeometry.lightmapCoordinates) {
+				for (const vec2<float32> lightmapCoordinate : scene.staticGeometry.lightmapCoordinates) {
 					stream.write<uint32>(pack<VertexInputAttributeFormat::R16G16_UNORM, uint32>(lightmapCoordinate));
 				}
 
@@ -144,15 +144,15 @@ namespace Trident {
 					const RigidBody3DComponent& component = rigidBodyMapping.component;
 
 					stream.write<Entity>(rigidBodyMapping.entity);
-					stream.write<svec3<float32>>(svec3<float32>(component.position));
-					stream.write<svec3<float32>>(svec3<float32>(component.rotation));
-					stream.write<svec3<float32>>(svec3<float32>(component.linearVelocity));
-					stream.write<svec3<float32>>(svec3<float32>(component.angularVelocity));
+					stream.write<vec3<float32>>(component.position);
+					stream.write<vec3<float32>>(component.rotation);
+					stream.write<vec3<float32>>(component.linearVelocity);
+					stream.write<vec3<float32>>(component.angularVelocity);
 					stream.write<float32>(component.scale);
 					stream.write<float32>(component.inverseMass);
-					stream.write<svec3<float32>>(svec3<float32>(component.inverseInertia[0]));
-					stream.write<svec3<float32>>(svec3<float32>(component.inverseInertia[1]));
-					stream.write<svec3<float32>>(svec3<float32>(component.inverseInertia[2]));
+					stream.write<vec3<float32>>(component.inverseInertia[0]);
+					stream.write<vec3<float32>>(component.inverseInertia[1]);
+					stream.write<vec3<float32>>(component.inverseInertia[2]);
 					stream.write<float32>(component.friction);
 					stream.write<float32>(component.restitution);
 				}
@@ -196,7 +196,7 @@ namespace Trident {
 					sizeof(AssetHeader) +
 					sizeof(uint8) +
 					sizeof(uint32) * 17 +
-					sizeof(svec3<float32>) * 5 +
+					sizeof(vec3<float32>) * 5 +
 					scene.staticGeometry.bakedVertexCount * sizeof(Vertex3D) +
 					scene.staticGeometry.bakedIndexCount * sizeof(uint32) +
 					scene.staticGeometry.lineIndices.count() * sizeof(uint32) +
@@ -205,9 +205,9 @@ namespace Trident {
 					scene.geometries.count() * (sizeof(range<uint32, uint32>) + sizeof(uint32)) +
 					scene.materialGeometries.count() * sizeof(MaterialGeometry) +
 					scene.materials.count() * (sizeof(uint32) * 2) +
-					scene.dynamicGeometry.pointLights.count() * (sizeof(svec3<float32>) * 2 + sizeof(float32)) +
+					scene.dynamicGeometry.pointLights.count() * (sizeof(vec3<float32>) * 2 + sizeof(float32)) +
 					scene.dynamicGeometry.geometryMappings.count() * sizeof(EntityComponentMapping<GeometryComponent>) +
-					scene.dynamicGeometry.rigidBodyMappings.count() * (sizeof(Entity) + sizeof(svec3<float32>) * 7 + sizeof(float32) * 4)
+					scene.dynamicGeometry.rigidBodyMappings.count() * (sizeof(Entity) + sizeof(vec3<float32>) * 7 + sizeof(float32) * 4)
 				);
 
 				for (const BuildMaterialShader& materialShader : scene.materialShaders) {

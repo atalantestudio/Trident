@@ -29,8 +29,8 @@ namespace Trident {
 				stream.write<uint32>(static_cast<uint32>(font.kerningPairs.size()));
 
 				for (const Glyph& glyph : font.glyphs) {
-					stream.write<svec2<float32>>(glyph.minCoordinate);
-					stream.write<svec2<float32>>(glyph.maxCoordinate);
+					stream.write<vec2<float32>>(glyph.minCoordinate);
+					stream.write<vec2<float32>>(glyph.maxCoordinate);
 					stream.write<uint16>(glyph.width);
 					stream.write<uint16>(glyph.height);
 					stream.write<sint16>(glyph.yMax);
@@ -96,7 +96,7 @@ namespace Trident {
 					sizeof(uint32) * 4 +
 					sizeof(sint16) * 3 +
 					sizeof(uint16) +
-					font.glyphs.count() * (sizeof(svec2<float32>) * 2 + sizeof(uint16) * 3 + sizeof(sint16) * 2) +
+					font.glyphs.count() * (sizeof(vec2<float32>) * 2 + sizeof(uint16) * 3 + sizeof(sint16) * 2) +
 					font.unicodeMap.size() * (sizeof(uint16) + sizeof(uint32)) +
 					font.kerningPairs.size() * (sizeof(GlyphPair) + sizeof(sint16))
 				);

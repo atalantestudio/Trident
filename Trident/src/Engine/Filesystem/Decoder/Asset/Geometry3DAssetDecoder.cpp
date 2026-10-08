@@ -20,7 +20,7 @@ namespace Trident {
 		const uint32 vertexCount = stream.read<uint32>();
 
 		asset.vertices = sequence<Vertex3D>(vertexCount);
-		asset.vertexNormals = sequence<svec3<float32>>(vertexCount);
+		asset.vertexNormals = sequence<vec3<float32>>(vertexCount);
 
 		const uint8 indexByteSize = stream.read<uint8>();
 
@@ -37,7 +37,7 @@ namespace Trident {
 
 			const uint16 hullVertexCount = stream.read<uint16>();
 
-			asset.hullVertices = sequence<svec3<float32>>(hullVertexCount);
+			asset.hullVertices = sequence<vec3<float32>>(hullVertexCount);
 
 			const uint16 hullEdgeCount = stream.read<uint16>();
 
@@ -65,7 +65,7 @@ namespace Trident {
 			vertex.textureCoordinate = stream.read<uint32>();
 		}
 
-		for (svec3<float32>& normal : asset.vertexNormals) {
+		for (vec3<float32>& normal : asset.vertexNormals) {
 			normal.x = stream.read<float32>();
 			normal.y = stream.read<float32>();
 			normal.z = stream.read<float32>();
@@ -76,7 +76,7 @@ namespace Trident {
 		}
 
 		if (asset.flags & GeometryAssetFlags::HAS_HULL) {
-			for (svec3<float32>& vertex : asset.hullVertices) {
+			for (vec3<float32>& vertex : asset.hullVertices) {
 				vertex.x = stream.read<float32>();
 				vertex.y = stream.read<float32>();
 				vertex.z = stream.read<float32>();

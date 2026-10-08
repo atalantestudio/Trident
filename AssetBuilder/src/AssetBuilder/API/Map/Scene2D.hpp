@@ -11,8 +11,8 @@
 namespace Trident {
 	struct BuildStaticSceneGeometry2D {
 		sequence<StaticTriangle2D> triangles;
-		sequence<svec2<float32>> vertices;
-		sequence<svec2<float32>> textureCoordinates;
+		sequence<vec2<float32>> vertices;
+		sequence<vec2<float32>> textureCoordinates;
 	};
 
 	struct BuildDynamicSceneGeometry2D {

@@ -26,8 +26,8 @@ namespace Trident {
 		asset.entityCount = stream.read<uint32>();
 		asset.hullCount = 0;
 		asset.staticTriangles = sequence<StaticTriangle2D>(staticTriangleCount);
-		asset.staticVertices = sequence<svec2<float32>>(staticVertexCount);
-		asset.staticTextureCoordinates = sequence<svec2<float32>>(staticTextureCoordinateCount);
+		asset.staticVertices = sequence<vec2<float32>>(staticVertexCount);
+		asset.staticTextureCoordinates = sequence<vec2<float32>>(staticTextureCoordinateCount);
 
 		const uint32 geometryAssetCount = stream.read<uint32>();
 		const uint32 geometryMappingCount = stream.read<uint32>();
@@ -46,12 +46,12 @@ namespace Trident {
 			triangle.cUvIndex = stream.read<uint32>();
 		}
 
-		for (svec2<float32>& vertex : asset.staticVertices) {
-			vertex = stream.read<svec2<float32>>();
+		for (vec2<float32>& vertex : asset.staticVertices) {
+			vertex = stream.read<vec2<float32>>();
 		}
 
-		for (svec2<float32>& textureCoordinate : asset.staticTextureCoordinates) {
-			textureCoordinate = stream.read<svec2<float32>>();
+		for (vec2<float32>& textureCoordinate : asset.staticTextureCoordinates) {
+			textureCoordinate = stream.read<vec2<float32>>();
 		}
 
 		for (ref<Geometry2DAsset>& geometryAsset : asset.geometryAssets) {
@@ -78,10 +78,10 @@ namespace Trident {
 
 		for (EntityComponentMapping<RigidBody2DComponent>& rigidBodyMapping : asset.rigidBodyMappings) {
 			rigidBodyMapping.entity = stream.read<Entity>();
-			rigidBodyMapping.component.position = stream.read<svec2<float32>>();
+			rigidBodyMapping.component.position = stream.read<vec2<float32>>();
 			rigidBodyMapping.component.rotation = stream.read<float32>();
-			rigidBodyMapping.component.scale = stream.read<svec2<float32>>();
-			rigidBodyMapping.component.linearVelocity = stream.read<svec2<float32>>();
+			rigidBodyMapping.component.scale = stream.read<vec2<float32>>();
+			rigidBodyMapping.component.linearVelocity = stream.read<vec2<float32>>();
 			rigidBodyMapping.component.angularVelocity = stream.read<float32>();
 			rigidBodyMapping.component.inverseMass = stream.read<float32>();
 			rigidBodyMapping.component.inverseInertia = stream.read<float32>();

@@ -47,7 +47,7 @@ namespace Trident {
 			uint32 getLastFaceIndex() const;
 
 			/// Creates a new point to be referenced by faces.
-			void createPoint(svec3<float32> position);
+			void createPoint(vec3<float32> position);
 
 			/// Creates and returns a new face.
 			/// The face must have at least 3 vertices laid out in clockwise order.
@@ -59,11 +59,11 @@ namespace Trident {
 			/// This operation moves the current face and creates additional faces on the extruded sides.
 			/// 
 			/// If `scale` is 0, the operation is ignored.
-			void extrudeFace(Face& face, svec3<float32> direction, float32 scale);
+			void extrudeFace(Face& face, vec3<float32> direction, float32 scale);
 
 			/// Carves a new face inside an existing face.
 			/// This operation modifies the vertices of the current face.
-			Face& carveFace(Face& face, view<svec3<float32>> carvingVertices);
+			Face& carveFace(Face& face, view<vec3<float32>> carvingVertices);
 
 			// TODO(asset-builder/map/static-geometry): Removing a face will invalidate all of its references as well as the references to the last face.
 			/// Removes the provided face.
@@ -84,7 +84,7 @@ namespace Trident {
 			// TODO(asset-builder/map/static-geometry/face-carving): Ensure that the carving vertices are all inside or on the edge of the face.
 			/// Returns a pair of vertex indices where A is the closest face vertex to the carving
 			/// and B is the closest carving index to the face.
-			Edge2D findClosestFaceCarvingConnectorEdge(const Face& face, view<svec3<float32>> carvingVertices) const;
+			Edge2D findClosestFaceCarvingConnectorEdge(const Face& face, view<vec3<float32>> carvingVertices) const;
 
 			void createFaceGeometries();
 
@@ -114,7 +114,7 @@ namespace Trident {
 			uint64 lightmapCount = 0;
 			uint32 entityCount = 0;
 
-			sequence<svec3<float32>> facePositions;
+			sequence<vec3<float32>> facePositions;
 			sequence<Face> faces;
 
 			/// Total unique position count.

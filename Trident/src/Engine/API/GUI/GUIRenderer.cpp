@@ -58,10 +58,10 @@ namespace Trident {
 		const BufferView<uint16> indexView = stagingBuffer->createView<uint16>(vertexBuffer->getSize(), indexBuffer->getSize());
 
 		Vertex* vertexMappedRange = vertexView.map();
-		vertexMappedRange[0] = {{0.0f, 0.0f}, {0.0f, 0.0f}};
-		vertexMappedRange[1] = {{1.0f, 0.0f}, {1.0f, 0.0f}};
-		vertexMappedRange[2] = {{1.0f, 1.0f}, {1.0f, 1.0f}};
-		vertexMappedRange[3] = {{0.0f, 1.0f}, {0.0f, 1.0f}};
+		vertexMappedRange[0] = {{0.0f, 0.0f, 0.0f, 0.0f}};
+		vertexMappedRange[1] = {{1.0f, 0.0f, 1.0f, 0.0f}};
+		vertexMappedRange[2] = {{1.0f, 1.0f, 1.0f, 1.0f}};
+		vertexMappedRange[3] = {{0.0f, 1.0f, 0.0f, 1.0f}};
 
 		uint16* indexMappedRange = indexView.map();
 		indexMappedRange[0] = 0;
@@ -383,9 +383,7 @@ namespace Trident {
 			VertexInputBinding(InputRate::INSTANCE),
 		};
 
-		// Vertex position and texture coordinate
-		vertexInputBindings[0].registerAttribute<vec4<float32>>();
-
+		vertexInputBindings[0].registerAttribute<decltype(Vertex::positionAndTextureCoordinate)>();
 		vertexInputBindings[1].registerAttribute<decltype(GUISubcomponent::worldTransform)>();
 		vertexInputBindings[1].registerAttribute<decltype(GUISubcomponent::textureTransform)>();
 		vertexInputBindings[1].registerAttribute<decltype(GUISubcomponent::color)>();
@@ -454,9 +452,7 @@ namespace Trident {
 			VertexInputBinding(InputRate::INSTANCE),
 		};
 
-		// Vertex position and texture coordinate
-		vertexInputBindings[0].registerAttribute<vec4<float32>>();
-
+		vertexInputBindings[0].registerAttribute<decltype(Vertex::positionAndTextureCoordinate)>();
 		vertexInputBindings[1].registerAttribute<decltype(GUIGlyphSubcomponent::world)>();
 		vertexInputBindings[1].registerAttribute<decltype(GUIGlyphSubcomponent::textureWorld)>();
 		vertexInputBindings[1].registerAttribute<decltype(GUIGlyphSubcomponent::color)>();

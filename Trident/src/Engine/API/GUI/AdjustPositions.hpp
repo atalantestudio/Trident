@@ -6,7 +6,7 @@
 #include "Engine/API/GUI/GUILayer.hpp"
 
 namespace Trident {
-	void GUILayer::PositionsAndAlignment(GUIContainer& component, svec2<float32> origin, bool registerSubcomponents) {
+	void GUILayer::PositionsAndAlignment(GUIContainer& component, vec2<float32> origin, bool registerSubcomponents) {
 		if (component.parentIndex != max<uint32>()) {
 			const GUIContainer& parent = components[component.parentIndex];
 
@@ -39,7 +39,7 @@ namespace Trident {
 			origin.x += component.padding[0];
 			origin.y += component.padding[2];
 
-			svec2<float32> remainingSize = {component.size.width.value - horizontalPadding, component.size.height.value - verticalPadding};
+			vec2<float32> remainingSize = {component.size.width.value - horizontalPadding, component.size.height.value - verticalPadding};
 			float32 remainingAcross = 0.0f;
 
 			for (const uint32 childIndex : component.childIndices) {

@@ -11,7 +11,7 @@ namespace Trident {
 			VertexInputBinding(InputRate::VERTEX),
 		};
 
-		vertexInputBindings[0].registerAttribute<svec2<float32>>();
+		vertexInputBindings[0].registerAttribute<vec2<float32>>();
 		vertexInputBindings[0].stride = sizeof(CenterOfMass);
 
 		const ShaderModuleDescriptor vertexShaderModuleDescriptor = {

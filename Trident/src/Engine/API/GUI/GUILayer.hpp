@@ -99,7 +99,7 @@ namespace Trident {
 			vec2<float32> getMousePosition() const;
 
 		private:
-			void setComponentSize(GUIContainer& component, svec2<float32> minimumSize, svec2<float32> maximumSize) const;
+			void setComponentSize(GUIContainer& component, vec2<float32> minimumSize, vec2<float32> maximumSize) const;
 
 			bool registerSubcomponent(const GUIContainer& component);
 
@@ -116,9 +116,9 @@ namespace Trident {
 
 			void WrapTextChildrenRecursive(uint32 parentIndex);
 			void WrapText(GUIContainer& component);
-			void FlushCurrentWord(FlushWordData& flushWordData, GUIContainer& component, const UTF8Stream& stream, svec2<float32>& characterOffset, range<uint64, uint64>& wordByteRange) const;
-			void FlushWord(FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset) const;
-			void PositionsAndAlignment(GUIContainer& component, svec2<float32> origin, bool registerSubcomponents);
+			void FlushCurrentWord(FlushWordData& flushWordData, GUIContainer& component, const UTF8Stream& stream, vec2<float32>& characterOffset, range<uint64, uint64>& wordByteRange) const;
+			void FlushWord(FlushWordData& data, std::vector<TextCharacter>& textCharacters, vec2<float32>& characterOffset) const;
+			void PositionsAndAlignment(GUIContainer& component, vec2<float32> origin, bool registerSubcomponents);
 
 			bool onKeyDown(KeyDownEvent& event);
 			bool onMouseDown(MouseDownEvent& event);

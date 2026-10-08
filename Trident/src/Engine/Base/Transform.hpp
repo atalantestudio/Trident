@@ -27,8 +27,8 @@ namespace Trident {
 	} */
 
 	inline Plane3D operator*(Plane3D plane, const Transform3D& A) {
-		plane.normal = svec3<float32>(vec3<float32>(plane.normal) * A.orientation);
-		plane.distance = dot(vec3<float32>(plane.normal), A.position) + plane.distance;
+		plane.normal *= A.orientation;
+		plane.distance = dot(plane.normal, A.position) + plane.distance;
 
 		return plane;
 	}

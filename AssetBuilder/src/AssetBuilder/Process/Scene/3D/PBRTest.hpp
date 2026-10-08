@@ -59,7 +59,7 @@ namespace Trident {
 				}
 
 				static constexpr uint32 pointLightCount = 4;
-				static const svec3<float32> pointLightPositions[] = {
+				static constexpr vec3<float32> pointLightPositions[] = {
 					{-256.0f,  320.0f, 0.0f},
 					{ 256.0f,  320.0f, 0.0f},
 					{-256.0f, -192.0f, 0.0f},

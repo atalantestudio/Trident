@@ -6,7 +6,7 @@
 #include "AssetBuilder/API/Map/Builder/MapBuilder.hpp"
 
 namespace Trident {
-	Edge2D MapBuilder::findClosestFaceCarvingConnectorEdge(const Face& face, view<svec3<float32>> carvingVertices) const {
+	Edge2D MapBuilder::findClosestFaceCarvingConnectorEdge(const Face& face, view<vec3<float32>> carvingVertices) const {
 		const uint32 faceIndexCount = face.getIndexCount();
 
 		float32 minDistance = max<float32>();
@@ -37,7 +37,7 @@ namespace Trident {
 		return connectorEdge;
 	}
 
-	Face& MapBuilder::carveFace(Face& face, view<svec3<float32>> carvingVertices) {
+	Face& MapBuilder::carveFace(Face& face, view<vec3<float32>> carvingVertices) {
 		const uint32 previousIndexCount = face.getIndexCount();
 		const uint32 carvingVertexCount = static_cast<uint32>(carvingVertices.count());
 		const Edge2D connectorEdge = findClosestFaceCarvingConnectorEdge(face, carvingVertices);

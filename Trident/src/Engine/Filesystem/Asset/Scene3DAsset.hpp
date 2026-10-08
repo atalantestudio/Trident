@@ -17,10 +17,10 @@
 
 namespace Trident {
 	struct Scene3DAsset : public Asset {
-		svec3<float32> skyColor;
+		vec3<float32> skyColor;
 		ref<ImageAsset> skyboxImageAsset;
-		svec3<float32> sunDirection;
-		svec3<float32> sunColor;
+		vec3<float32> sunDirection;
+		vec3<float32> sunColor;
 
 		sequence<uint8> geometryData;
 
@@ -53,7 +53,7 @@ namespace Trident {
 		uint32 hullLineIndexCount = 0;
 		uint32 rigidBodyFacePlaneCount = 0;
 
-		svec3<float32> spawnPosition;
-		svec3<float32> spawnDirection;
+		vec3<float32> spawnPosition;
+		vec3<float32> spawnDirection;
 	};
 }

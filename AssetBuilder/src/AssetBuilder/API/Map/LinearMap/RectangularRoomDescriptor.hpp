@@ -16,8 +16,8 @@ namespace Trident {
 		static constexpr uint32 BACK_WALL_FACE = 4;
 		static constexpr uint32 LEFT_WALL_FACE = 5;
 
-		svec3<float32> origin;
-		svec3<float32> size;
+		vec3<float32> origin;
+		vec3<float32> size;
 		MaterialReference material;
 		TextureFilteringDescriptor textureFiltering;
 		LightmapDescriptor lightmap;

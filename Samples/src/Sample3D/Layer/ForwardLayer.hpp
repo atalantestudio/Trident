@@ -29,12 +29,12 @@ namespace Trident {
 
 			static constexpr Entity PLAYER_ENTITY = 0;
 			static constexpr float32 LOOK_SENSITIVITY = 0.075f;
-			inline static const vec3<float32> PLAYER_CAMERA_OFFSET = {0.0f, 0.3f, 0.0f};
-			static constexpr svec3<float32> CAMERA_OFFSET = {0.0f, 64.0f, 0.0f};
+			static constexpr vec3<float32> PLAYER_CAMERA_OFFSET = {0.0f, 0.3f, 0.0f};
+			static constexpr vec3<float32> CAMERA_OFFSET = {0.0f, 64.0f, 0.0f};
 
 			// Values taken from HL1.
 			// See https://github.com/valvesoftware/halflife.
-			inline static const vec3<float32> PLAYER_GRAVITY = {0.0f, -800.0f, 0.0f};
+			static constexpr vec3<float32> PLAYER_GRAVITY = {0.0f, -800.0f, 0.0f};
 			static constexpr float32 PLAYER_SPEED = 400.0f;
 			static constexpr float32 PLAYER_MAX_SPEED = 270.0f;
 			static constexpr float32 PLAYER_STOP_SPEED = 100.0f;
@@ -84,9 +84,7 @@ namespace Trident {
 				#if defined(FORWARD_USE_NOCLIP_CAMERA) and defined(FORWARD_TEST_CORNELL_BOX)
 					camera.fieldOfView = radians(40.0_deg);
 				#else
-					// TODO(lyah/scalar)
-					camera.position += vec3<float32>(CAMERA_OFFSET);
-
+					camera.position += CAMERA_OFFSET;
 					camera.fieldOfView = radians(70.0_deg);
 				#endif
 
@@ -173,13 +171,13 @@ namespace Trident {
 							uint8 contactIndex = 0;
 
 							while (contactIndex < pair.second.manifold.contactCount) {
-								renderer.debugContactRange[renderer.contactCount] = svec3<float32>(pair.second.manifold.contacts[contactIndex].position);
+								renderer.debugContactRange[renderer.contactCount] = pair.second.manifold.contacts[contactIndex].position;
 								renderer.contactCount += 1;
 
 								contactIndex += 1;
 							}
 
-							renderer.debugContactRange[renderer.contactCount] = svec3<float32>(pair.second.manifold.contacts[0].position);
+							renderer.debugContactRange[renderer.contactCount] = pair.second.manifold.contacts[0].position;
 							renderer.contactCount += 1;
 
 							break;

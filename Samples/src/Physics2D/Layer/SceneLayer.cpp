@@ -177,7 +177,7 @@ namespace Trident {
 		const Hull2D mouseHull = Hull2D::point();
 
 		RigidBody2DComponent mouseRigidBodyComponent{};
-		mouseRigidBodyComponent.position = svec2<float32>(renderer.cameraPosition + mousePosition);
+		mouseRigidBodyComponent.position = renderer.cameraPosition + mousePosition;
 		mouseRigidBodyComponent.updateWorld(mouseHull.centroid);
 
 		sint32 componentIndex = static_cast<sint32>(rigidBodyComponentPool.componentCount) - 1;

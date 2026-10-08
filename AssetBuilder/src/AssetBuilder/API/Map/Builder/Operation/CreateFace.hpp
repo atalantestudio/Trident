@@ -15,7 +15,7 @@ namespace Trident {
 		uint32 vertexIndex = 0;
 
 		while (vertexIndex < vertexCount) {
-			const svec3<float32> vertex = descriptor.vertices[vertexIndex];
+			const vec3<float32> vertex = descriptor.vertices[vertexIndex];
 
 			facePositions[facePositionCount + vertexIndex] = vertex;
 			indices[vertexIndex] = facePositionCount + vertexIndex;

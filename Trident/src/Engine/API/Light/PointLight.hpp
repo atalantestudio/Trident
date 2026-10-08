@@ -5,9 +5,8 @@
 
 namespace Trident {
 	struct PointLight {
-		svec3<float32> color;
+		vec3<float32> color;
 		float32 intensity;
-		svec3<float32> position;
-		uint32 _;
+		alignas(16) vec3<float32> position;
 	};
 }

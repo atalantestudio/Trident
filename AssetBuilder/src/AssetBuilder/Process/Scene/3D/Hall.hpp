@@ -14,26 +14,26 @@ namespace Trident {
 			}
 
 			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
-				static constexpr svec2<float32> LUXEL_SCALE = {4.0f, 4.0f};
-				static constexpr svec3<float32> HALL_ENTRANCE_CARVING_VERTICES[] = {
+				static constexpr vec2<float32> LUXEL_SCALE = {4.0f, 4.0f};
+				static constexpr vec3<float32> HALL_ENTRANCE_CARVING_VERTICES[] = {
 					{ 92.0f,  112.0f, -16.0f },
 					{ 36.0f,  112.0f, -16.0f },
 					{ 36.0f,  4.0f,   -16.0f },
 					{ 92.0f,  4.0f,   -16.0f },
 				};
-				static constexpr svec3<float32> MAIN_ENTRANCE_CARVING_VERTICES[] = {
+				static constexpr vec3<float32> MAIN_ENTRANCE_CARVING_VERTICES[] = {
 					{ 24.0f,  112.0f,  184.0f},
 					{ 84.0f,  112.0f,  184.0f},
 					{ 84.0f,  4.0f,    184.0f},
 					{ 24.0f,  4.0f,    184.0f},
 				};
-				static constexpr svec3<float32> HALL_ROOM_TO_BIKE_ROOM_CARVING_VERTICES[] = {
+				static constexpr vec3<float32> HALL_ROOM_TO_BIKE_ROOM_CARVING_VERTICES[] = {
 					{-16.0f,  112.0f,  100.0f},
 					{-16.0f,  112.0f,  156.0f},
 					{-16.0f,  4.0f,    156.0f},
 					{-16.0f,  4.0f,    100.0f},
 				};
-				static constexpr svec3<float32> BIKE_ROOM_TO_HALL_ROOM_CARVING_VERTICES[] = {
+				static constexpr vec3<float32> BIKE_ROOM_TO_HALL_ROOM_CARVING_VERTICES[] = {
 					{-24.0f,  112.0f,  156.0f},
 					{-24.0f,  112.0f,  100.0f},
 					{-24.0f,  4.0f,    100.0f},
@@ -48,7 +48,7 @@ namespace Trident {
 					.sunIntensity = 1.0f,
 					.spawn = {
 						.position = {100.0f, 0.0f, 32.0f},
-						.direction = svec3<float32>(normalized(vec3<float32>{radians(-40.0_deg), 0.0f, radians(50.0_deg)})),
+						.direction = normalized(vec3<float32>{radians(-40.0_deg), 0.0f, radians(50.0_deg)}),
 					},
 				});
 

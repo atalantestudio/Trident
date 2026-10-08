@@ -14,8 +14,7 @@ namespace Trident {
 	class GUIRenderer : public Renderer {
 		private:
 			struct Vertex {
-				svec2<float32> position;
-				svec2<float32> textureCoordinate;
+				vec4<float32> positionAndTextureCoordinate;
 			};
 
 			struct Camera {

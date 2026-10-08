@@ -15,6 +15,6 @@ namespace Trident {
 		LightmapDescriptor lightmap;
 
 		// TODO(asset-builder/mesh): Artificial scale multiplier in case the geometry is too small.
-		svec2<float32> lightmapScale = {1.0f, 1.0f};
+		vec2<float32> lightmapScale = {1.0f, 1.0f};
 	};
 }

@@ -112,7 +112,7 @@ namespace Trident {
 		const PerspectiveCamera3D& camera = getCameraController<PerspectiveCamera3D>().getCamera();
 
 		cameraMappedRange->projectionView = camera.getProjectionView();
-		cameraMappedRange->position = svec3<float32>(camera.position);
+		cameraMappedRange->position = camera.position;
 
 		mat4x4<float32> skyboxView = camera.getView();
 		skyboxView[3] = {0.0f, 0.0f, 0.0f, 1.0f};

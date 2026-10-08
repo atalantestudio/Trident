@@ -220,7 +220,7 @@ namespace Trident {
 		openComponent(component, style.focusable);
 	}
 
-	void GUILayer::setComponentSize(GUIContainer& component, svec2<float32> minimumSize, svec2<float32> maximumSize) const {
+	void GUILayer::setComponentSize(GUIContainer& component, vec2<float32> minimumSize, vec2<float32> maximumSize) const {
 		if (component.size.width.fillMode == FillMode::FIXED) {
 			component.maximumSize.x = component.size.width.value;
 			component.minimumSize.x = component.size.width.value;

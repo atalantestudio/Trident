@@ -90,7 +90,7 @@ namespace Trident {
 
 			switch (descriptor.momentOfInertia) {
 				case MomentOfInertia3D::SOLID_CUBOID: {
-					// NOTE: The object is assumed to have a unit square geometry. The axis of rotation is at the center.
+					// The object is assumed to have a unit square geometry with the axis of rotation at the center.
 
 					// TODO(physics/3d/inertia): Calculate the size without using the scale.
 					const float32 w = descriptor.inertiaScale[0] * component.scale;

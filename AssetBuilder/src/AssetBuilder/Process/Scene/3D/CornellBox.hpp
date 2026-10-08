@@ -10,11 +10,11 @@ namespace Trident {
 	// See https://bowers.cornell.edu/computer-graphics/data for more info.
 	class CornellBoxScene3D final : public Scene3DProcess {
 		private:
-			static svec3<float32> calculateNormal(view<svec3<float32>> vertices) {
+			static vec3<float32> calculateNormal(view<vec3<float32>> vertices) {
 				const vec3<float32> ab = vertices[1] - vertices[0];
 				const vec3<float32> ac = vertices[2] - vertices[0];
 
-				return svec3<float32>(normalized(cross(ab, ac)));
+				return normalized(cross(ab, ac));
 			}
 
 		protected:
@@ -25,17 +25,17 @@ namespace Trident {
 			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				static constexpr float32 SHORT_BLOCK_HEIGHT = 165.0f;
 				static constexpr float32 TALL_BLOCK_HEIGHT = 330.0f;
-				static constexpr svec2<float32> LUXEL_SCALE = {2.0f, 2.0f};
-				static constexpr svec3<float32> LIGHT_EMISSIVE_COLOR = {17.0f, 12.0f, 4.0f};
-				static constexpr svec3<float32> LEFT_WALL_COLOR = {0.63f, 0.065f, 0.05f};
-				static constexpr svec3<float32> RIGHT_WALL_COLOR = {0.14f, 0.45f, 0.091f};
-				static constexpr svec3<float32> ROOM_COLOR = {0.725f, 0.71f, 0.68f};
+				static constexpr vec2<float32> LUXEL_SCALE = {2.0f, 2.0f};
+				static constexpr vec3<float32> LIGHT_EMISSIVE_COLOR = {17.0f, 12.0f, 4.0f};
+				static constexpr vec3<float32> LEFT_WALL_COLOR = {0.63f, 0.065f, 0.05f};
+				static constexpr vec3<float32> RIGHT_WALL_COLOR = {0.14f, 0.45f, 0.091f};
+				static constexpr vec3<float32> ROOM_COLOR = {0.725f, 0.71f, 0.68f};
 				static constexpr TextureFilteringDescriptor TEXTURE_FILTERING = {
 					.translation = {0.0f, 0.0f},
 					.rotation = 0.0f,
 					.scale = {1.0f, 1.0f},
 				};
-				static constexpr svec3<float32> VERTICES[] = {
+				static constexpr vec3<float32> VERTICES[] = {
 					{-549.6f,  0.0f,     559.2f},
 					{ 0.0f,    0.0f,     559.2f},
 					{ 0.0f,    0.0f,     0.0f  },
@@ -69,14 +69,14 @@ namespace Trident {
 					{-265.0f,  0.0f,     296.0f},
 					{-423.0f,  0.0f,     247.0f},
 				};
-				static constexpr view<svec3<float32>> FLOOR_VERTICES(&VERTICES[0], 4);
-				static constexpr view<svec3<float32>> LIGHT_VERTICES(&VERTICES[4], 4);
-				static constexpr view<svec3<float32>> CEILING_VERTICES(&VERTICES[8], 4);
-				static constexpr view<svec3<float32>> BACK_WALL_VERTICES(&VERTICES[12], 4);
-				static constexpr view<svec3<float32>> LEFT_WALL_VERTICES(&VERTICES[16], 4);
-				static constexpr view<svec3<float32>> RIGHT_WALL_VERTICES(&VERTICES[20], 4);
-				static constexpr view<svec3<float32>> SHORT_BLOCK_BOTTOM_VERTICES(&VERTICES[24], 4);
-				static constexpr view<svec3<float32>> TALL_BLOCK_BOTTOM_VERTICES(&VERTICES[28], 4);
+				static constexpr view<vec3<float32>> FLOOR_VERTICES(&VERTICES[0], 4);
+				static constexpr view<vec3<float32>> LIGHT_VERTICES(&VERTICES[4], 4);
+				static constexpr view<vec3<float32>> CEILING_VERTICES(&VERTICES[8], 4);
+				static constexpr view<vec3<float32>> BACK_WALL_VERTICES(&VERTICES[12], 4);
+				static constexpr view<vec3<float32>> LEFT_WALL_VERTICES(&VERTICES[16], 4);
+				static constexpr view<vec3<float32>> RIGHT_WALL_VERTICES(&VERTICES[20], 4);
+				static constexpr view<vec3<float32>> SHORT_BLOCK_BOTTOM_VERTICES(&VERTICES[24], 4);
+				static constexpr view<vec3<float32>> TALL_BLOCK_BOTTOM_VERTICES(&VERTICES[28], 4);
 
 				MapBuilder builder({
 					.skyColor = {0.0f, 0.0f, 0.0f},

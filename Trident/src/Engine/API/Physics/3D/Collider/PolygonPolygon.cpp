@@ -9,20 +9,20 @@
 
 namespace Trident {
 	static void createEdgeContact(const EdgeQuery& edgeQuery, const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, const Hull3D& hullA, const Hull3D& hullB, ContactManifold3D* contactManifold) {
-		const vec3<float32> centroidA = multiplyTransform(vec3<float32>(hullA.centroid), rigidBodyA.world);
+		const vec3<float32> centroidA = multiplyTransform(hullA.centroid, rigidBodyA.world);
 
 		const Edge3D edgeA = hullA.edges[edgeQuery.edgeIndexA + 0];
 		const Edge3D twinA = hullA.edges[edgeQuery.edgeIndexA + 1];
 
-		const vec3<float32> p1 = multiplyTransform(vec3<float32>(hullA.vertices[edgeA.originVertexIndex]), rigidBodyA.world);
-		const vec3<float32> q1 = multiplyTransform(vec3<float32>(hullA.vertices[twinA.originVertexIndex]), rigidBodyA.world);
+		const vec3<float32> p1 = multiplyTransform(hullA.vertices[edgeA.originVertexIndex], rigidBodyA.world);
+		const vec3<float32> q1 = multiplyTransform(hullA.vertices[twinA.originVertexIndex], rigidBodyA.world);
 		const vec3<float32> e1 = normalized(q1 - p1);
 
 		const Edge3D edgeB = hullB.edges[edgeQuery.edgeIndexB + 0];
 		const Edge3D twinB = hullB.edges[edgeQuery.edgeIndexB + 1];
 
-		const vec3<float32> p2 = multiplyTransform(vec3<float32>(hullB.vertices[edgeB.originVertexIndex]), rigidBodyB.world);
-		const vec3<float32> q2 = multiplyTransform(vec3<float32>(hullB.vertices[twinB.originVertexIndex]), rigidBodyB.world);
+		const vec3<float32> p2 = multiplyTransform(hullB.vertices[edgeB.originVertexIndex], rigidBodyB.world);
+		const vec3<float32> q2 = multiplyTransform(hullB.vertices[twinB.originVertexIndex], rigidBodyB.world);
 		const vec3<float32> e2 = normalized(q2 - p2);
 
 		vec3<float32> normal = normalized(cross(e1, e2));
@@ -87,7 +87,7 @@ namespace Trident {
 
 		// Rotate by the inverse of the incident body's orientation to get a normal that can be used as a support direction.
 		// TODO: Invert the orientation before multiplying?
-		const vec3<float32> referenceFaceDirection = vec3<float32>(referencePlane.normal) * incidentBody.orientation;
+		const vec3<float32> referenceFaceDirection = referencePlane.normal * incidentBody.orientation;
 
 		index incidentFaceIndex = max<index>();
 
@@ -98,7 +98,7 @@ namespace Trident {
 			index faceIndex = 0;
 
 			while (faceIndex < incidentHull.faces.count()) {
-				angle = dot(vec3<float32>(incidentHull.faces[faceIndex].normal), referenceFaceDirection);
+				angle = dot(incidentHull.faces[faceIndex].normal, referenceFaceDirection);
 
 				if (angle < minAngle) {
 					minAngle = angle;
@@ -119,7 +119,7 @@ namespace Trident {
 			const Edge3D edge = incidentHull.edges[incidentHull.faceEdgeIndices[incidentFace.edgeIndexRange.offset + edgeIndex]];
 
 			ClipVertex3D clipVertex{};
-			clipVertex.position = multiplyTransform(vec3<float32>(incidentHull.vertices[edge.originVertexIndex]), incidentBody.world);
+			clipVertex.position = multiplyTransform(incidentHull.vertices[edge.originVertexIndex], incidentBody.world);
 			clipVertex.separation = 0.0f;
 			clipVertex.id.referenceEdgeAIndex = max<uint16>();
 			clipVertex.id.referenceEdgeBIndex = max<uint16>();
@@ -187,8 +187,7 @@ namespace Trident {
 
 		// Select the first contact as the support point towards a fixed direction to avoid jitter.
 		{
-			// TODO(constexpr)
-			static const vec3<float32> n = {1.0f, 1.0f, 1.0f};
+			static constexpr vec3<float32> n = {1.0f, 1.0f, 1.0f};
 
 			index contactIndex = 0;
 			index maxAngleContactIndex = max<index>();

@@ -9,13 +9,13 @@
 
 namespace Trident {
 	struct AABB2D {
-		svec2<float32> min;
-		svec2<float32> max;
+		vec2<float32> min;
+		vec2<float32> max;
 	};
 
 	struct FaceDescriptor {
-		view<svec3<float32>> vertices;
-		svec3<float32> normal;
+		view<vec3<float32>> vertices;
+		vec3<float32> normal;
 		MaterialReference material;
 		TextureFilteringDescriptor textureFiltering;
 		LightmapDescriptor lightmap;
@@ -23,7 +23,7 @@ namespace Trident {
 
 	struct IndexedFaceDescriptor {
 		view<uint32> indices;
-		svec3<float32> normal;
+		vec3<float32> normal;
 		MaterialReference material;
 		TextureFilteringDescriptor textureFiltering;
 		LightmapDescriptor lightmap;
@@ -65,7 +65,7 @@ namespace Trident {
 		uint32 vertexOffset;
 		uint32 triangleOffset;
 
-		svec3<float32> normal;
+		vec3<float32> normal;
 		uint32 geometryIndex;
 		MaterialReference material;
 		TextureFilteringDescriptor textureFiltering;

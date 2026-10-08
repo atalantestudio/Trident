@@ -8,11 +8,11 @@
 namespace Trident {
 	class DDGIRef0Scene3D final : public Scene3DProcess {
 		private:
-			static svec3<float32> calculateNormal(view<svec3<float32>> vertices) {
+			static vec3<float32> calculateNormal(view<vec3<float32>> vertices) {
 				const vec3<float32> ab = vertices[1] - vertices[0];
 				const vec3<float32> ac = vertices[2] - vertices[0];
 
-				return svec3<float32>(normalized(cross(ab, ac)));
+				return normalized(cross(ab, ac));
 			}
 
 		protected:
@@ -21,9 +21,9 @@ namespace Trident {
 			}
 
 			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
-				static constexpr svec2<float32> LUXEL_SCALE = {4.0f, 4.0f};
-				static constexpr svec3<float32> ROOM_COLOR = {1.0f, 1.0f, 1.0f};
-				static constexpr svec3<float32> VERTICES[] = {
+				static constexpr vec2<float32> LUXEL_SCALE = {4.0f, 4.0f};
+				static constexpr vec3<float32> ROOM_COLOR = {1.0f, 1.0f, 1.0f};
+				static constexpr vec3<float32> VERTICES[] = {
 					{-64.0f,  0.0f,    228.0f},
 					{ 64.0f,  0.0f,    228.0f},
 					{ 64.0f,  0.0f,    100.0f},
@@ -49,12 +49,12 @@ namespace Trident {
 					{ 64.0f,  0.0f,    100.0f},
 					{ 64.0f,  0.0f,    228.0f},
 				};
-				static constexpr view<svec3<float32>> FLOOR_VERTICES(&VERTICES[0], 4);
-				static constexpr view<svec3<float32>> CEILING_VERTICES(&VERTICES[4], 4);
-				static constexpr view<svec3<float32>> FRONT_WALL_VERTICES(&VERTICES[8], 4);
-				static constexpr view<svec3<float32>> BACK_WALL_VERTICES(&VERTICES[12], 4);
-				static constexpr view<svec3<float32>> LEFT_WALL_VERTICES(&VERTICES[16], 4);
-				static constexpr view<svec3<float32>> RIGHT_WALL_VERTICES(&VERTICES[20], 4);
+				static constexpr view<vec3<float32>> FLOOR_VERTICES(&VERTICES[0], 4);
+				static constexpr view<vec3<float32>> CEILING_VERTICES(&VERTICES[4], 4);
+				static constexpr view<vec3<float32>> FRONT_WALL_VERTICES(&VERTICES[8], 4);
+				static constexpr view<vec3<float32>> BACK_WALL_VERTICES(&VERTICES[12], 4);
+				static constexpr view<vec3<float32>> LEFT_WALL_VERTICES(&VERTICES[16], 4);
+				static constexpr view<vec3<float32>> RIGHT_WALL_VERTICES(&VERTICES[20], 4);
 				static constexpr TextureFilteringDescriptor TEXTURE_FILTERING = {
 					.translation = {0.0f, 0.0f},
 					.rotation = 0.0f,

@@ -13,11 +13,11 @@ namespace Trident {
 
 	struct ForwardCamera {
 		mat4x4<float32> projectionView;
-		svec3<float32> position;
+		vec3<float32> position;
 		uint32 pointLightCount;
-		svec3<float32> ambientColor;
+		vec3<float32> ambientColor;
 		float32 farPlane;
-		svec3<float32> sunColor;
+		vec3<float32> sunColor;
 		uint32 _0;
 		mat4x4<float32> skyboxProjectionView;
 		mat4x4<float32> view;

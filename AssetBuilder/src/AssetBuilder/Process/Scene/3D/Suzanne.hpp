@@ -13,19 +13,19 @@ namespace Trident {
 			}
 
 			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
-				static constexpr svec3<float32> FLOOR_VERTICES[] = {
+				static constexpr vec3<float32> FLOOR_VERTICES[] = {
 					{-64.0f,  0.0f,  64.0f},
 					{ 64.0f,  0.0f,  64.0f},
 					{ 64.0f,  0.0f, -64.0f},
 					{-64.0f,  0.0f, -64.0f},
 				};
-				static constexpr svec3<float32> BACK_WALL_VERTICES[] = {
+				static constexpr vec3<float32> BACK_WALL_VERTICES[] = {
 					{-64.0f,  64.0f,  64.0f},
 					{ 64.0f,  64.0f,  64.0f},
 					{ 64.0f,  0.0f,   64.0f},
 					{-64.0f,  0.0f,   64.0f},
 				};
-				static constexpr svec3<float32> RIGHT_WALL_VERTICES[] = {
+				static constexpr vec3<float32> RIGHT_WALL_VERTICES[] = {
 					{ 64.0f,  64.0f,  64.0f},
 					{ 64.0f,  64.0f, -64.0f},
 					{ 64.0f,  0.0f,  -64.0f},

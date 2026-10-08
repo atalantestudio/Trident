@@ -121,7 +121,7 @@ namespace Trident {
 			#endif
 		});
 		lightmapCoordinateBuffer = device->createDynamicBuffer({
-			.size = ceilPowerOf2(scene.staticGeometry.lightmapCoordinates.count() * sizeof(svec2<float32>), limits->minStorageBufferOffsetAlignment),
+			.size = ceilPowerOf2(scene.staticGeometry.lightmapCoordinates.count() * sizeof(vec2<float32>), limits->minStorageBufferOffsetAlignment),
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
@@ -213,7 +213,7 @@ namespace Trident {
 		const BuildScene3D& scene = *descriptor.scene;
 		const uint64 argumentStagingViewSize = sizeof(Arguments);
 		const uint64 vertexStagingViewSize = (scene.staticGeometry.bakedVertexCount + scene.staticGeometry.externalVertexCount) * sizeof(LightmapVertex);
-		const uint64 lightmapCoordinateStagingViewSize = scene.staticGeometry.lightmapCoordinates.count() * sizeof(svec2<float32>);
+		const uint64 lightmapCoordinateStagingViewSize = scene.staticGeometry.lightmapCoordinates.count() * sizeof(vec2<float32>);
 		const uint64 indexStagingViewSize = (scene.staticGeometry.bakedIndexCount + scene.staticGeometry.externalIndexCount) * sizeof(uint32);
 		const uint64 emissiveTriangleIndexStagingViewSize = descriptor.emissiveTriangleIndices.count() * sizeof(uint32);
 		const uint64 triangleStagingViewSize = descriptor.triangles.count() * sizeof(BuildTriangle3D);
@@ -251,7 +251,7 @@ namespace Trident {
 		const BufferView<LightmapVertex> vertexStagingView = stagingBuffer->createView<LightmapVertex>(viewOffset, vertexStagingViewSize);
 		viewOffset += vertexStagingViewSize;
 
-		const BufferView<svec2<float32>> lightmapCoordinateStagingView = stagingBuffer->createView<svec2<float32>>(viewOffset, lightmapCoordinateStagingViewSize);
+		const BufferView<vec2<float32>> lightmapCoordinateStagingView = stagingBuffer->createView<vec2<float32>>(viewOffset, lightmapCoordinateStagingViewSize);
 		viewOffset += lightmapCoordinateStagingViewSize;
 
 		const BufferView<uint32> indexStagingView = stagingBuffer->createView<uint32>(viewOffset, indexStagingViewSize);

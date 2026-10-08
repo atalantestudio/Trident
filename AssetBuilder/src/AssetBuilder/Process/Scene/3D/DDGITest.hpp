@@ -8,10 +8,10 @@
 namespace Trident {
 	class DDGITestScene3D final : public Scene3DProcess {
 		private:
-			static void createRoom(MapBuilder& builder, svec3<float32> origin, MaterialReference material, float32 lightCeilingPercent, bool open) {
-				static constexpr svec2<float32> LUXEL_SCALE = {4.0f, 4.0f};
-				static constexpr svec3<float32> LIGHT_EMISSIVE_COLOR = {4.0f, 4.0f, 4.0f};
-				static constexpr svec3<float32> ROOM_COLOR = {1.0f, 1.0f, 1.0f};
+			static void createRoom(MapBuilder& builder, vec3<float32> origin, MaterialReference material, float32 lightCeilingPercent, bool open) {
+				static constexpr vec2<float32> LUXEL_SCALE = {4.0f, 4.0f};
+				static constexpr vec3<float32> LIGHT_EMISSIVE_COLOR = {4.0f, 4.0f, 4.0f};
+				static constexpr vec3<float32> ROOM_COLOR = {1.0f, 1.0f, 1.0f};
 				static constexpr float32 LIGHT_RIGHT_OFFSET_PERCENT = 0.95f;
 				static constexpr TextureFilteringDescriptor TEXTURE_FILTERING = {
 					.translation = {0.0f, 0.0f},
@@ -22,23 +22,23 @@ namespace Trident {
 				const float32 lightLeftOffset = 128.0f * (LIGHT_RIGHT_OFFSET_PERCENT - lightCeilingPercent) - 64.0f;
 				const float32 lightRightOffset = 128.0f * LIGHT_RIGHT_OFFSET_PERCENT - 64.0f;
 
-				const svec3<float32> ceilingVertices[] = {
-					origin + svec3<float32>{-64.0f,  64.0f,  64.0f},
-					origin + svec3<float32>{ 64.0f,  64.0f,  64.0f},
-					origin + svec3<float32>{ 64.0f,  64.0f, -64.0f},
-					origin + svec3<float32>{-64.0f,  64.0f, -64.0f},
+				const vec3<float32> ceilingVertices[] = {
+					origin + vec3<float32>{-64.0f,  64.0f,  64.0f},
+					origin + vec3<float32>{ 64.0f,  64.0f,  64.0f},
+					origin + vec3<float32>{ 64.0f,  64.0f, -64.0f},
+					origin + vec3<float32>{-64.0f,  64.0f, -64.0f},
 				};
-				const svec3<float32> ceilingLeftVertices[] = {
-					origin + svec3<float32>{-64.0f,           64.0f, -64.0f},
-					origin + svec3<float32>{lightLeftOffset,  64.0f, -64.0f},
-					origin + svec3<float32>{lightLeftOffset,  64.0f,  64.0f},
-					origin + svec3<float32>{-64.0f,           64.0f,  64.0f},
+				const vec3<float32> ceilingLeftVertices[] = {
+					origin + vec3<float32>{-64.0f,           64.0f, -64.0f},
+					origin + vec3<float32>{lightLeftOffset,  64.0f, -64.0f},
+					origin + vec3<float32>{lightLeftOffset,  64.0f,  64.0f},
+					origin + vec3<float32>{-64.0f,           64.0f,  64.0f},
 				};
-				const svec3<float32> ceilingRightVertices[] = {
-					origin + svec3<float32>{lightRightOffset,  64.0f, -64.0f},
-					origin + svec3<float32>{ 64.0f,            64.0f, -64.0f},
-					origin + svec3<float32>{ 64.0f,            64.0f,  64.0f},
-					origin + svec3<float32>{lightRightOffset,  64.0f,  64.0f},
+				const vec3<float32> ceilingRightVertices[] = {
+					origin + vec3<float32>{lightRightOffset,  64.0f, -64.0f},
+					origin + vec3<float32>{ 64.0f,            64.0f, -64.0f},
+					origin + vec3<float32>{ 64.0f,            64.0f,  64.0f},
+					origin + vec3<float32>{lightRightOffset,  64.0f,  64.0f},
 				};
 
 				Face& floorFace = builder.createFace({
@@ -76,11 +76,11 @@ namespace Trident {
 				});
 
 				if (!open) {
-					const svec3<float32> lightVertices[] = {
-						origin + svec3<float32>{lightLeftOffset,   64.0f, -64.0f},
-						origin + svec3<float32>{lightRightOffset,  64.0f, -64.0f},
-						origin + svec3<float32>{lightRightOffset,  64.0f,  64.0f},
-						origin + svec3<float32>{lightLeftOffset,   64.0f,  64.0f},
+					const vec3<float32> lightVertices[] = {
+						origin + vec3<float32>{lightLeftOffset,   64.0f, -64.0f},
+						origin + vec3<float32>{lightRightOffset,  64.0f, -64.0f},
+						origin + vec3<float32>{lightRightOffset,  64.0f,  64.0f},
+						origin + vec3<float32>{lightLeftOffset,   64.0f,  64.0f},
 					};
 
 					builder.createFace({

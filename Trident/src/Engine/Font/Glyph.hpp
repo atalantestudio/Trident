@@ -7,10 +7,10 @@ namespace Trident {
 	// A glyph from a bitmap or TrueType font.
 	struct Glyph {
 		// Top-left coordinate on the glyph map.
-		svec2<float32> minCoordinate;
+		vec2<float32> minCoordinate;
 
 		// Bottom-right coordinate on the glyph map.
-		svec2<float32> maxCoordinate;
+		vec2<float32> maxCoordinate;
 
 		/// In FUnits.
 		uint16 width;

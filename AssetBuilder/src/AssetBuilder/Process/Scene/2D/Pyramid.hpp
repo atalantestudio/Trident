@@ -63,7 +63,7 @@ namespace Trident {
 					j = i;
 
 					while (j < 12) {
-						boxDescriptor.position = svec2<float32>(y);
+						boxDescriptor.position = y;
 
 						rigidBodyMappings[entity] = {entity, createRigidBody(boxDescriptor)};
 

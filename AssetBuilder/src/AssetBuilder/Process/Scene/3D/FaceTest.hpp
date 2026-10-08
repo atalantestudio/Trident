@@ -22,13 +22,13 @@ namespace Trident {
 					.sunIntensity = 1.0f,
 					.spawn = {
 						.position = {100.0f, 0.0f, 32.0f},
-						.direction = svec3<float32>(normalized(vec3<float32>{radians(-40.0_deg), 0.0f, radians(50.0_deg)})),
+						.direction = normalized(vec3<float32>{radians(-40.0_deg), 0.0f, radians(50.0_deg)}),
 					},
 				});
 
 				const MaterialReference material = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
 
-				/* const svec3<float32> pentagonVertices[] = {
+				/* const vec3<float32> pentagonVertices[] = {
 					{-32.0f,  32.0f,  92.0f },
 					{ 0.0f,   32.0f,  112.0f},
 					{ 32.0f,  32.0f,  92.0f },
@@ -40,7 +40,7 @@ namespace Trident {
 
 				builder.extrudeFace(pentagon, pentagon.normal, 32.0f);
 
-				const svec3<float32> squareVertices[] = {
+				const vec3<float32> squareVertices[] = {
 					{ 64.0f,  48.0f,  128.0f},
 					{ 96.0f,  48.0f,  128.0f},
 					{ 96.0f,  24.0f,  128.0f},
@@ -51,7 +51,7 @@ namespace Trident {
 
 				builder.extrudeFace(square, square.normal, -32.0f); */
 
-				static constexpr svec3<float32> concaveFace2Vertices[] = {
+				static constexpr vec3<float32> concaveFace2Vertices[] = {
 					{ 62.0f,   536.0f,  128.0f},
 					{ 334.0f,  787.0f,  128.0f},
 					{ 577.0f,  826.0f,  128.0f},

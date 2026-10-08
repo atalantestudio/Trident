@@ -5,8 +5,8 @@
 
 namespace Trident {
 	struct TextureFilteringDescriptor {
-		svec2<float32> translation;
+		vec2<float32> translation;
 		float32 rotation;
-		svec2<float32> scale;
+		vec2<float32> scale;
 	};
 }

@@ -23,7 +23,7 @@ namespace Trident {
 		};
 
 		const uint32 facePositionOffset = facePositionCount;
-		const svec3<float32> origin = descriptor.origin;
+		const vec3<float32> origin = descriptor.origin;
 		const float32 halfWidth = descriptor.size.x * 0.5f;
 		const float32 height = descriptor.size.y;
 		const float32 halfDepth = descriptor.size.z * 0.5f;
@@ -40,10 +40,10 @@ namespace Trident {
 			facePositionOffset + 0,
 		};
 
-		createPoint(origin + svec3<float32>{-halfWidth,  height,  halfDepth});
-		createPoint(origin + svec3<float32>{ halfWidth,  height,  halfDepth});
-		createPoint(origin + svec3<float32>{ halfWidth,  height, -halfDepth});
-		createPoint(origin + svec3<float32>{-halfWidth,  height, -halfDepth});
+		createPoint(origin + vec3<float32>{-halfWidth,  height,  halfDepth});
+		createPoint(origin + vec3<float32>{ halfWidth,  height,  halfDepth});
+		createPoint(origin + vec3<float32>{ halfWidth,  height, -halfDepth});
+		createPoint(origin + vec3<float32>{-halfWidth,  height, -halfDepth});
 
 		Face& floorFace = createFace({
 			.indices = floorFaceIndices,
@@ -68,16 +68,16 @@ namespace Trident {
 		return room;
 	}
 
-	void LinearMapBuilder::connectFaces(Face& faceA, Face& faceB, view<svec3<float32>> verticesA, view<svec3<float32>> verticesB) {
+	void LinearMapBuilder::connectFaces(Face& faceA, Face& faceB, view<vec3<float32>> verticesA, view<vec3<float32>> verticesB) {
 		DEBUG_ASSERT(faceA.getUniqueIndexCount() == faceB.getUniqueIndexCount());
 
 		// TODO(lyah/scalar)
-		DEBUG_ASSERT(abs(dot(vec3<float32>(faceA.normal), vec3<float32>(faceB.normal)) + 1.0f) < 1e-4f);
+		DEBUG_ASSERT(abs(dot(faceA.normal, faceB.normal) + 1.0f) < 1e-4f);
 
 		Face& carvingA = carveFace(faceA, verticesA);
 
 		const uint32 carvingAIndex = getLastFaceIndex();
-		const float32 distance = dot(vec3<float32>(verticesB[0] - verticesA[0]), vec3<float32>(faceA.normal));
+		const float32 distance = dot(verticesB[0] - verticesA[0], faceA.normal);
 
 		extrudeFace(carvingA, carvingA.normal, distance);
 		removeFace(carvingAIndex);

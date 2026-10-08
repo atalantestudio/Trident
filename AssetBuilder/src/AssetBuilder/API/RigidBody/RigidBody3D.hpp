@@ -10,11 +10,11 @@
 namespace Trident {
 	template<>
 	struct Descriptor<RigidBody3DComponent> {
-		svec3<float32> position;
-		svec3<float32> rotation;
+		vec3<float32> position;
+		vec3<float32> rotation;
 		float32 uniformScale = 1.0f;
-		svec3<float32> linearVelocity = {0.0_m_s, 0.0_m_s, 0.0_m_s};
-		svec3<float32> angularVelocity = {0.0_w, 0.0_w, 0.0_w};
+		vec3<float32> linearVelocity = {0.0_m_s, 0.0_m_s, 0.0_m_s};
+		vec3<float32> angularVelocity = {0.0_w, 0.0_w, 0.0_w};
 
 		/// Uniform mass distribution is assumed.
 		float32 mass;
@@ -22,7 +22,7 @@ namespace Trident {
 		MomentOfInertia3D momentOfInertia;
 
 		// TODO(physics/3d/uniform-scaling): Deprecate.
-		svec3<float32> inertiaScale;
+		vec3<float32> inertiaScale;
 
 		float32 friction;
 		float32 restitution;

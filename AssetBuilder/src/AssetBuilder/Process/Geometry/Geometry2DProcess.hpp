@@ -28,7 +28,7 @@ namespace Trident {
 				stream.write<uint32>(indexRange.count);
 
 				if (geometry.flags & GeometryAssetFlags::HAS_HULL) {
-					stream.write<svec2<float32>>(geometry.hull.centroid);
+					stream.write<vec2<float32>>(geometry.hull.centroid);
 					stream.write<float32>(geometry.hull.radius);
 					stream.write<uint32>(geometry.hull.lineIndexRange.count);
 					stream.write<Hull2DType>(geometry.hull.type);
@@ -91,7 +91,7 @@ namespace Trident {
 
 				if (geometry.flags & GeometryAssetFlags::HAS_HULL) {
 					streamSize += (
-						sizeof(svec2<float32>) +
+						sizeof(vec2<float32>) +
 						sizeof(float32) +
 						sizeof(uint32) +
 						sizeof(Hull2DType) +

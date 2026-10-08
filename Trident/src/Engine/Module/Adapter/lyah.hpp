@@ -13,12 +13,12 @@ namespace Trident {
 	using lyah::quat;
 
 	// TODO(lyah): Remove.
-	template<typename T>
-	using svec2 = lyah::vec<2, T>;
+	// template<typename T>
+	// using svec2 = lyah::vec<2, T>;
 
 	// TODO(lyah): Remove.
-	template<typename T>
-	using svec3 = lyah::vec<3, T>;
+	// template<typename T>
+	// using svec3 = lyah::vec<3, T>;
 
 	using lyah::abs;
 	using lyah::axisAngle;

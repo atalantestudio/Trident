@@ -123,7 +123,6 @@ namespace Trident {
 	void GUILayer::WrapText(GUIContainer& component) {
 		const FontData& fontData = fonts[component.font];
 		const FontAsset& fontAsset = *fontData.fontAsset;
-		const Extent3D imageExtent = renderer.getUserImage(fontData.glyphMapImageId)->getExtent();
 		const uint32 dpi = getApplication()->getWindow()->getDpi();
 		const float32 fontSizePt = fontAsset.pxToPt(component.fontSize, dpi);
 		const float32 scale = fontAsset.calculateScale(fontSizePt, dpi);
@@ -133,7 +132,7 @@ namespace Trident {
 		flushWordData.fontAsset = &fontAsset;
 		flushWordData.scale = scale;
 
-		svec2<float32> characterOffset = component.origin;
+		vec2<float32> characterOffset = component.origin;
 		uint32 lineCount = 1;
 		range<uint64, uint64> wordByteRange = {0, 0};
 		float32 wordCharacterOffsetX = 0.0f;
@@ -218,7 +217,7 @@ namespace Trident {
 		FlushWordData& flushWordData,
 		GUIContainer& component,
 		const UTF8Stream& stream,
-		svec2<float32>& characterOffset,
+		vec2<float32>& characterOffset,
 		range<uint64, uint64>& wordByteRange
 	) const {
 		flushWordData.stream = UTF8Stream(view<char8>(&stream.getData()[wordByteRange.offset], wordByteRange.count));
@@ -229,12 +228,12 @@ namespace Trident {
 		wordByteRange.count = 0;
 	}
 
-	void GUILayer::FlushWord(FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset) const {
+	void GUILayer::FlushWord(FlushWordData& data, std::vector<TextCharacter>& textCharacters, vec2<float32>& characterOffset) const {
 		const float32 scale = data.scale;
 
 		float32 horizontalHinting = 0.0f;
 
-		// TODO
+		// TODO(gui/text/flush-word)
 		if (true) {
 			horizontalHinting = 0.5f;
 		}

@@ -9,12 +9,6 @@
 
 namespace Trident {
 	class TestGI2DSampleRenderer : public Renderer {
-		private:
-			struct Vertex {
-				svec2<float32> position;
-				vec3<float32> color;
-			};
-
 		public:
 			void build() override {
 				pipelineLayout = createPipelineLayout();

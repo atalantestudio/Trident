@@ -5,10 +5,9 @@
 
 namespace Trident {
 	struct LightmapMaterial {
-		svec3<float32> emissiveColor;
+		vec3<float32> emissiveColor;
 		float32 emissiveIntensity;
-		svec3<float32> albedo;
-		uint32 _;
+		alignas(16) vec3<float32> albedo;
 	};
 
 	struct Lightmap {
@@ -27,11 +26,10 @@ namespace Trident {
 		/// might have more vertices and/or carved holes.
 		uint32 coordinateCount;
 
-		svec2<float32> minCoordinate;
-		svec2<float32> maxCoordinate;
-
-		svec2<float32> scale;
-		svec2<float32> luxelScale;
+		vec2<float32> minCoordinate;
+		vec2<float32> maxCoordinate;
+		vec2<float32> scale;
+		vec2<float32> luxelScale;
 		Extent2D size;
 	};
 

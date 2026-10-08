@@ -18,7 +18,7 @@ namespace Trident {
 			/// Creates and returns a rectangular room.
 			Room& createRectangularRoom(const RectangularRoomDescriptor& descriptor);
 
-			void connectFaces(Face& faceA, Face& faceB, view<svec3<float32>> verticesA, view<svec3<float32>> verticesB);
+			void connectFaces(Face& faceA, Face& faceB, view<vec3<float32>> verticesA, view<vec3<float32>> verticesB);
 
 		private:
 			sequence<Room> rooms;

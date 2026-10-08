@@ -10,8 +10,8 @@ namespace Trident {
 		/// The default sizing mode is FIT in both directions.
 		Size2D size = {-2.0f, -2.0f};
 
-		svec2<float32> maximumSize = {max<float32>(), max<float32>()};
-		svec2<float32> minimumSize = {0_px, 0_px};
+		vec2<float32> maximumSize = {max<float32>(), max<float32>()};
+		vec2<float32> minimumSize = {0_px, 0_px};
 		uint32 zIndex = 0;
 
 		/// Order: left, right, top, bottom.

@@ -24,7 +24,7 @@ namespace Trident {
 
 	void Scene2D::loadGeometries() {
 		const uint32 vertexComponentCount = static_cast<uint32>(asset->staticVertices.count() + dynamicVertexCount * 2);
-		const uint64 vertexByteCount = asset->staticVertices.count() + dynamicVertexCount * sizeof(svec2<float32>);
+		const uint64 vertexByteCount = asset->staticVertices.count() + dynamicVertexCount * sizeof(vec2<float32>);
 		const uint64 indexByteCount = asset->staticTriangles.count() * 3 + dynamicIndexCount * sizeof(uint32);
 
 		dataBuffer = sequence<uint8>(vertexByteCount + indexByteCount);
@@ -79,12 +79,11 @@ namespace Trident {
 			if (geometryAsset->flags & GeometryAssetFlags::HAS_HULL) {
 				std::copy(geometryAsset->hullLineIndices.begin(), geometryAsset->hullLineIndices.end(), &pointer_cast<uint32*>(dynamicDataBuffer)[offset]);
 
-				const view<svec2<float32>> vertices(pointer_cast<const svec2<float32>*>(&dynamicDataBuffer[vertexPositionComponentRange.offset * sizeof(float32)]), vertexPositionComponentRange.count / 2);
+				const view<vec2<float32>> vertices(pointer_cast<const vec2<float32>*>(&dynamicDataBuffer[vertexPositionComponentRange.offset * sizeof(float32)]), vertexPositionComponentRange.count / 2);
 
 				geometries[geometryIndex].hullIndex = hullIndex;
 
 				Hull2D& hull = hulls[hullIndex];
-
 				hull = {
 					.type = geometryAsset->hullType,
 					.centroid = geometryAsset->hullCentroid,

@@ -11,7 +11,7 @@ namespace Trident {
 	struct Hull2D {
 		private:
 			// Point hulls need to have 1 vertex for GJK to work.
-			inline static const sequence<svec2<float32>> pointHullVertices = {{0.0f, 0.0f}};
+			inline static const sequence<vec2<float32>> pointHullVertices = {{0.0f, 0.0f}};
 
 		public:
 			/// Creates and returns a point hull.
@@ -51,9 +51,7 @@ namespace Trident {
 						return {0.0_m, 0.0_m};
 					}
 					case Hull2DType::POLYGON: {
-						const svec2<float32> vertex = vertices[supportIndex(d)];
-
-						return {vertex[0], vertex[1]};
+						return vertices[supportIndex(d)];
 					}
 					default: {
 						DEBUG_ASSERT(false);
@@ -63,7 +61,7 @@ namespace Trident {
 				}
 			}
 
-			// NOTE: Some geometries like CircleGeometry2D return more precise support points. In these cases, `support` must be used.
+			// Some geometries like CircleGeometry2D return more precise support points. In these cases `support` must be used.
 			/// Returns the index of the farthest point on the hull along `d`.
 			inline uint32 supportIndex(vec2<float32> d) const {
 				// TODO: Replace with LUT.
@@ -77,12 +75,12 @@ namespace Trident {
 						return 0;
 					}
 					case Hull2DType::POLYGON: {
-						float32 maxValue = dot(vec2<float32>(vertices[0]), d);
+						float32 maxValue = dot(vertices[0], d);
 						uint32 maxVertexIndex = 0;
 						uint32 vertexIndex = 1;
 
 						while (vertexIndex < vertices.count()) {
-							const float32 value = dot(vec2<float32>(vertices[vertexIndex]), d);
+							const float32 value = dot(vertices[vertexIndex], d);
 
 							if (value > maxValue) {
 								maxValue = value;
@@ -106,13 +104,13 @@ namespace Trident {
 			Hull2DType type;
 
 			/// Average of all vertices.
-			svec2<float32> centroid;
+			vec2<float32> centroid;
 
 			/// The distance between the centroid and the farthest vertex.
 			float32 radius;
 
 			// Vertex positions on the parent geometry.
-			view<svec2<float32>> vertices;
+			view<vec2<float32>> vertices;
 
 			// TODO: Use 16-bit indices.
 			range<uint32, uint32> lineIndexRange;

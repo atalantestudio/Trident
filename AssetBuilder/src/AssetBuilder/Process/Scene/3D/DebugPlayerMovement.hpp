@@ -13,20 +13,20 @@ namespace Trident {
 			}
 
 			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
-				static constexpr svec2<float32> LUXEL_SCALE = {4.0f, 4.0f};
-				static constexpr svec3<float32> EXTRUDED_FLOOR_VERTICES[] = {
+				static constexpr vec2<float32> LUXEL_SCALE = {4.0f, 4.0f};
+				static constexpr vec3<float32> EXTRUDED_FLOOR_VERTICES[] = {
 					{-256.0f,  128.0f,  256.0f},
 					{ 256.0f,  128.0f,  256.0f},
 					{ 256.0f,  128.0f, -256.0f},
 					{-256.0f,  128.0f, -256.0f},
 				};
-				static constexpr svec3<float32> CEILING_VERTICES[] = {
+				static constexpr vec3<float32> CEILING_VERTICES[] = {
 					{-256.0f,  128.0f, -256.0f},
 					{ 256.0f,  128.0f, -256.0f},
 					{ 256.0f,  128.0f,  64.0f},
 					{-256.0f,  128.0f,  64.0f},
 				};
-				static constexpr svec3<float32> TABLE_VERTICES[] = {
+				static constexpr vec3<float32> TABLE_VERTICES[] = {
 					{-192.0f,  0.0f,  192.0f},
 					{ 192.0f,  0.0f,  192.0f},
 					{ 192.0f,  0.0f,  144.0f},

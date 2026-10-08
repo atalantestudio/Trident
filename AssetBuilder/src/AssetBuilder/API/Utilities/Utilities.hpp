@@ -21,9 +21,9 @@ namespace Trident {
 	/// The index streams must have the same size.
 	/// The resulting geometry has no hull.
 	BuildGeometry3D inflateFBXStreams(
-		view<svec3<float32>> positions,
-		view<svec3<float32>> normals,
-		view<svec2<float32>> textureCoordinates,
+		view<vec3<float32>> positions,
+		view<vec3<float32>> normals,
+		view<vec2<float32>> textureCoordinates,
 		view<uint32> positionIndices,
 		view<uint32> normalIndices,
 		view<uint32> textureCoordinateIndices

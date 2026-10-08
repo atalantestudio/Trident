@@ -29,7 +29,7 @@ namespace Trident {
 		asset.vertexPositionIndices = sequence<uint32>(indexCount);
 
 		if (asset.flags & GeometryAssetFlags::HAS_HULL) {
-			asset.hullCentroid = stream.read<svec2<float32>>();
+			asset.hullCentroid = stream.read<vec2<float32>>();
 			asset.hullRadius = stream.read<float32>();
 
 			const uint32 hullLineIndexCount = stream.read<uint32>();

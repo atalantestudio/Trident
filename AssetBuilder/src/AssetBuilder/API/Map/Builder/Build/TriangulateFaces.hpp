@@ -19,7 +19,7 @@ namespace Trident {
 			face.triangleOffset = triangleOffset;
 
 			const uint32 indexCount = face.getIndexCount();
-			const svec2<float32> faceSize = face.boundingBox.max - face.boundingBox.min;
+			const vec2<float32> faceSize = face.boundingBox.max - face.boundingBox.min;
 			const mat3x3<float32> textureTransform = (
 				scaling<mat3x3<float32>>(faceSize / face.textureFiltering.scale) *
 				rotationAngle<mat3x3<float32>>(face.textureFiltering.rotation * pi<float32>()) *
@@ -74,7 +74,7 @@ namespace Trident {
 
 				const quat<float32> q = R * quat<float32>(0.0f, vertex.position.x, vertex.position.y, vertex.position.z) * inverse(R);
 
-				svec2<float32> textureCoordinate = {q.x, q.y};
+				vec2<float32> textureCoordinate = {q.x, q.y};
 				textureCoordinate -= face.boundingBox.min;
 				textureCoordinate /= faceSize;
 				textureCoordinate.y = 1.0f - textureCoordinate.y;
@@ -83,7 +83,7 @@ namespace Trident {
 
 				vertex.normal = face.normal;
 				vertex.tangent = {0.0f, 0.0f, 0.0f, *pointer_cast<const float32*>(&initialTextureCoordinate)};
-				vertex.textureCoordinate = svec2<float32>(multiplyTransform(vec2<float32>(textureCoordinate), textureTransform));
+				vertex.textureCoordinate = multiplyTransform(textureCoordinate, textureTransform);
 
 				// TODO(asset-builder/map/static-geometry): Restore face wireframe?
 				// scene.staticGeometry.lineIndices[lineIndexOffset + vertexIndex * 2 + 0] = face.indexRange.offset + vertexIndex;

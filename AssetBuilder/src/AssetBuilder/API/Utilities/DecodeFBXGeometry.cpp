@@ -405,22 +405,21 @@ namespace Trident {
 			mat4x4<float32>(orientation)
 		);
 
-		sequence<svec3<float32>> positions(VerticesProperty->contents.count() / 3);
+		sequence<vec3<float32>> positions(VerticesProperty->contents.count() / 3);
 		uint32 positionIndex = 0;
 
 		while (positionIndex < positions.count()) {
-			positions[positionIndex] = {
-				static_cast<float32>(VerticesProperty->contents[positionIndex * 3 + 0]),
-				static_cast<float32>(VerticesProperty->contents[positionIndex * 3 + 1]),
-				static_cast<float32>(VerticesProperty->contents[positionIndex * 3 + 2]),
-			};
+			positions[positionIndex] = vec3<float32>(vec3<float64>{
+				VerticesProperty->contents[positionIndex * 3 + 0],
+				VerticesProperty->contents[positionIndex * 3 + 1],
+				VerticesProperty->contents[positionIndex * 3 + 2],
+			});
 
 			if (CoordAxisSign == 1) {
 				positions[positionIndex] *= -1.0f;
 			}
 
-			// TODO(lyah/scalar)
-			positions[positionIndex] = svec3<float32>(multiplyTransform(vec3<float32>(positions[positionIndex]), transform));
+			positions[positionIndex] = multiplyTransform(positions[positionIndex], transform);
 
 			positionIndex += 1;
 		}
@@ -439,8 +438,8 @@ namespace Trident {
 		parseVertexNormals(vertexNormalComponents, vertexNormalIndices, vertexPositionIndices, file, GeometryNode, VerticesProperty, PolygonVertexIndexProperty);
 		parseVertexTextureCoordinates(vertexTextureCoordinateComponents, vertexTextureCoordinateIndices, vertexPositionIndices, file, GeometryNode, PolygonVertexIndexProperty, CoordAxisSign);
 
-		sequence<svec3<float32>> normals(vertexNormalComponents.count() / 3);
-		sequence<svec2<float32>> textureCoordinates(vertexTextureCoordinateComponents.count() / 2);
+		sequence<vec3<float32>> normals(vertexNormalComponents.count() / 3);
+		sequence<vec2<float32>> textureCoordinates(vertexTextureCoordinateComponents.count() / 2);
 		uint32 index = 0;
 
 		while (index < normals.count()) {
@@ -450,13 +449,13 @@ namespace Trident {
 				x *= -1.0f;
 			}
 
-			vec3<float32> normal = {
+			const vec3<float32> normal = {
 				x,
 				static_cast<float32>(vertexNormalComponents[index * 3 + 1]),
 				static_cast<float32>(vertexNormalComponents[index * 3 + 2]),
 			};
 
-			normals[index] = svec3<float32>(normalized(normal * orientation));
+			normals[index] = normalized(normal * orientation);
 
 			index += 1;
 		}

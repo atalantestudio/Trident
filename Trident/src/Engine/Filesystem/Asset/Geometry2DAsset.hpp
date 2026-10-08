@@ -24,7 +24,7 @@ namespace Trident {
 
 		Hull2DType hullType;
 		float32 hullRadius;
-		svec2<float32> hullCentroid;
+		vec2<float32> hullCentroid;
 		sequence<uint32> hullLineIndices;
 	};
 }

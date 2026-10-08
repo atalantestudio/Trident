@@ -57,7 +57,7 @@ namespace Trident {
 				}
 
 				if (geometry.flags & GeometryAssetFlags::HAS_HULL) {
-					for (const svec3<float32> vertex : geometry.hullVertices) {
+					for (const vec3<float32> vertex : geometry.hullVertices) {
 						stream.write<float32>(vertex.x);
 						stream.write<float32>(vertex.y);
 						stream.write<float32>(vertex.z);
@@ -108,17 +108,17 @@ namespace Trident {
 					sizeof(GeometryAssetFlags) +
 					sizeof(uint8) +
 					sizeof(uint32) * 2 +
-					geometry.vertices.count() * (sizeof(Vertex3D) + sizeof(svec3<float32>)) +
+					geometry.vertices.count() * (sizeof(Vertex3D) + sizeof(vec3<float32>)) +
 					geometry.indices.count() * sizeof(uint32)
 				);
 
 				if (geometry.flags & GeometryAssetFlags::HAS_HULL) {
 					streamSize += (
 						sizeof(Hull3DType) +
-						sizeof(svec3<float32>) +
+						sizeof(vec3<float32>) +
 						sizeof(float32) +
 						sizeof(uint16) * 5 +
-						geometry.hullVertices.count() * sizeof(svec3<float32>) +
+						geometry.hullVertices.count() * sizeof(vec3<float32>) +
 						geometry.hullEdges.count() * sizeof(Edge3D) +
 						geometry.hullFaces.count() * sizeof(Plane3D) +
 						geometry.hullFaceEdgeIndices.count() * sizeof(uint16) +

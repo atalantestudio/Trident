@@ -49,7 +49,7 @@ namespace Trident {
 		const Extent2D extent = framebuffer->getExtent();
 		const float32 width = static_cast<float32>(extent.width);
 		const float32 height = static_cast<float32>(extent.height);
-		const svec3<float32> skyColor = scene->getAsset()->skyColor;
+		const vec3<float32> skyColor = scene->getAsset()->skyColor;
 
 		commandEncoder->beginRenderPass({
 			.framebuffer = framebuffer,
@@ -296,7 +296,7 @@ namespace Trident {
 		view[3] = {0.0f, 0.0f, 0.0f, 1.0f};
 
 		cameraMappedRange->projectionView = camera.getProjectionView();
-		cameraMappedRange->position = svec3<float32>(camera.position);
+		cameraMappedRange->position = camera.position;
 		cameraMappedRange->farPlane = camera.farPlane;
 		cameraMappedRange->skyboxProjectionView = view * camera.getProjection();
 		cameraMappedRange->view = camera.getView();

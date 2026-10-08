@@ -9,7 +9,7 @@
 
 namespace Trident {
 	template<>
-	svec3<float32> unpack<VertexInputAttributeFormat::R10G10B10A2_UNORM>(uint32 value) {
+	vec3<float32> unpack<VertexInputAttributeFormat::R10G10B10A2_UNORM>(uint32 value) {
 		static constexpr float32 scale = 1.0f / (0x3ff * 0.5f);
 
 		return {
@@ -32,17 +32,17 @@ namespace Trident {
 	}
 
 	template<>
-	svec2<float32> unpack<VertexInputAttributeFormat::R16G16_UNORM>(uint32 value) {
+	vec2<float32> unpack<VertexInputAttributeFormat::R16G16_UNORM>(uint32 value) {
 		static constexpr float32 scale = 1.0f / 0xffff;
 
-		const float32 x = (value & 0xffff) * scale;
-		const float32 y = ((value >> 16) & 0xffff) * scale;
-
-		return {x, y};
+		return {
+			(value & 0xffff) * scale,
+			((value >> 16) & 0xffff) * scale,
+		};
 	}
 
 	template<>
-	svec2<float32> unpack<VertexInputAttributeFormat::R16G16_FLOAT>(uint32 value) {
+	vec2<float32> unpack<VertexInputAttributeFormat::R16G16_FLOAT>(uint32 value) {
 		return {
 			float16(static_cast<uint16>(value & 0xffff)),
 			float16(static_cast<uint16>((value >> 16) & 0xffff)),

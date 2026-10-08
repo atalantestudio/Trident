@@ -29,18 +29,18 @@ namespace Trident {
 		/// Floating components don't add to the size of their parent.
 		bool floating;
 
-		svec2<float32> origin;
+		vec2<float32> origin;
 
 		/// Offset to the origin (floating components only).
-		svec2<float32> offset;
+		vec2<float32> offset;
 
 		Size2D size;
 
 		/// The Z-index is relative to the parent's Z index.
 		uint32 zIndex;
 
-		svec2<float32> maximumSize;
-		svec2<float32> minimumSize;
+		vec2<float32> maximumSize;
+		vec2<float32> minimumSize;
 
 		/// Order: left, right, top, bottom.
 		vec4<float32> padding;

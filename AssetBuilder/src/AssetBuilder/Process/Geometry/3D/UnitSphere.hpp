@@ -33,13 +33,15 @@ namespace Trident {
 
 					while (y <= Y_SEGMENTS) {
 						const float32 ySegment = static_cast<float32>(y) / Y_SEGMENTS;
-						const float32 xPos = cos(xSegment * tau<float32>()) * sin(ySegment * pi<float32>());
-						const float32 yPos = cos(ySegment * pi<float32>());
-						const float32 zPos = sin(xSegment * tau<float32>()) * sin(ySegment * pi<float32>());
+						const vec3<float32> normal = {
+							cos(xSegment * tau<float32>()) * sin(ySegment * pi<float32>()),
+							cos(ySegment * pi<float32>()),
+							sin(xSegment * tau<float32>()) * sin(ySegment * pi<float32>()),
+						};
 
 						geometry.vertices[vertexIndex] = {
-							.position = svec3<float32>(xPos, yPos, zPos) * 0.5f,
-							.normal = {xPos, yPos, zPos},
+							.position = normal * 0.5f,
+							.normal = normal,
 							.textureCoordinate = {xSegment, ySegment},
 						};
 

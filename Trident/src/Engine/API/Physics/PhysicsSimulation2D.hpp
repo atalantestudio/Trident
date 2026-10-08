@@ -25,8 +25,7 @@ namespace Trident {
 		private:
 			static constexpr uint32 SEQUENTIAL_IMPULSE_ITERATION_COUNT = 10;
 			static constexpr float32 ALLOWED_PENETRATION = 0.01f;
-
-			inline static const vec2<float32> G = {0.0f, -9.80665f};
+			static constexpr vec2<float32> G = {0.0f, -9.80665f};
 
 		private:
 			static void mergeContactManifolds(ContactPair2D& contactPair, const ContactManifold2D& newContactManifold);

@@ -17,17 +17,17 @@
 
 namespace Trident {
 	struct SpawnDescriptor {
-		svec3<float32> position;
+		vec3<float32> position;
 
 		/// In Euler angles.
-		svec3<float32> direction;
+		vec3<float32> direction;
 	};
 
 	struct MapDescriptor {
-		svec3<float32> skyColor;
+		vec3<float32> skyColor;
 		ref<ImageAsset> environmentMapImageAsset;
-		svec3<float32> sunDirection;
-		svec3<float32> sunColor;
+		vec3<float32> sunDirection;
+		vec3<float32> sunColor;
 		float32 sunIntensity;
 		SpawnDescriptor spawn;
 	};
@@ -45,7 +45,7 @@ namespace Trident {
 		LightmapDescriptor lightmap;
 
 		/// Only used for static props.
-		svec2<float32> lightmapScale;
+		vec2<float32> lightmapScale;
 	};
 
 	struct BuildGeometry {
@@ -84,7 +84,7 @@ namespace Trident {
 		sequence<uint32> lineIndices;
 
 		/// Baked coordinates, then coordinates from external assets.
-		sequence<svec2<float32>> lightmapCoordinates;
+		sequence<vec2<float32>> lightmapCoordinates;
 
 		sequence<BuildInstance> instances;
 		ImageAssetDescriptor lightmapAtlasImageAssetDescriptor;
@@ -99,12 +99,12 @@ namespace Trident {
 	};
 
 	struct BuildScene3D {
-		svec3<float32> skyColor;
+		vec3<float32> skyColor;
 		ref<ImageAsset> environmentMapImageAsset;
-		svec3<float32> sunDirection;
+		vec3<float32> sunDirection;
 
 		/// Pre-multiplied by the sun intensity.
-		svec3<float32> sunColor;
+		vec3<float32> sunColor;
 
 		sequence<BuildVertex3D> vertices;
 		sequence<uint32> indices;

@@ -15,8 +15,8 @@ namespace Trident {
 		sequence<uint8> staticGeometryBuffer;
 		sequence<ref<Geometry2DAsset>> geometryAssets;
 		sequence<StaticTriangle2D> staticTriangles;
-		sequence<svec2<float32>> staticVertices;
-		sequence<svec2<float32>> staticTextureCoordinates;
+		sequence<vec2<float32>> staticVertices;
+		sequence<vec2<float32>> staticTextureCoordinates;
 
 		/// Also contains the line indices of the hulls.
 		uint64 dynamicVertexPositionCount;

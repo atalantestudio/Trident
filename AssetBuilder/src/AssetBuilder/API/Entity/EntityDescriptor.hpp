@@ -11,12 +11,12 @@ namespace Trident {
 	struct EntityDescriptor {
 		uint32 geometryIndex;
 		MaterialReference material;
-		svec3<float32> position;
-		svec3<float32> rotation;
+		vec3<float32> position;
+		vec3<float32> rotation;
 		float32 uniformScale;
 		float32 mass;
 		MomentOfInertia3D momentOfInertia;
-		svec3<float32> inertiaScale;
+		vec3<float32> inertiaScale;
 		float32 friction;
 		float32 restitution;
 	};

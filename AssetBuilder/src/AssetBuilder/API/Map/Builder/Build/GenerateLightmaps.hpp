@@ -189,10 +189,7 @@ namespace Trident {
 		while (lightmapIndex < lightmaps.count()) {
 			Lightmap& lightmap = lightmaps[lightmapIndex];
 
-			// TODO(lyah/scalar)
-			svec2<float32> size = lightmap.scale / lightmap.luxelScale;
-			size.x = ceil(size.x);
-			size.y = ceil(size.y);
+			const vec2<float32> size = ceil(lightmap.scale / lightmap.luxelScale);
 
 			lightmap.size = {static_cast<uint32>(size[0]), static_cast<uint32>(size[1])};
 
@@ -210,7 +207,7 @@ namespace Trident {
 			while (coordinateIndex < lightmap.coordinateCount) {
 				const BuildVertex3D& vertex = vertices[coordinateIndex];
 				const float32 packedTextureCoordinate = vertex.tangent[3];
-				const svec2<float32> textureCoordinate = unpack<VertexInputAttributeFormat::R16G16_FLOAT, svec2<float32>>(*pointer_cast<const uint32*>(&packedTextureCoordinate));
+				const vec2<float32> textureCoordinate = unpack<VertexInputAttributeFormat::R16G16_FLOAT, vec2<float32>>(*pointer_cast<const uint32*>(&packedTextureCoordinate));
 
 				staticGeometry.lightmapCoordinates[lightmap.coordinateOffset + coordinateIndex] = textureCoordinate * size;
 
@@ -238,7 +235,8 @@ namespace Trident {
 	}
 
 	void MapBuilder::updateLightmapCoordinates(BuildStaticSceneGeometry3D& staticGeometry) {
-		static constexpr svec2<float32> inverseAtlasExtent = {
+		// TODO(lyah/scalar)
+		static constexpr vec2<float32> inverseAtlasExtent = {
 			1.0f / static_cast<float32>(LIGHTMAP_ATLAS_EXTENT.width),
 			1.0f / static_cast<float32>(LIGHTMAP_ATLAS_EXTENT.height),
 		};
@@ -255,7 +253,8 @@ namespace Trident {
 
 			node->index = lightmapLookup.index;
 
-			const svec2<float32> lightmapOffset = {
+			// TODO(lyah/scalar)
+			const vec2<float32> lightmapOffset = {
 				static_cast<float32>(node->rectangle.x),
 				static_cast<float32>(node->rectangle.y),
 			};
@@ -263,8 +262,7 @@ namespace Trident {
 			uint32 coordinateIndex = 0;
 
 			while (coordinateIndex < lightmap.coordinateCount) {
-				// TODO(lyah/scalar)
-				svec2<float32>& coordinate = staticGeometry.lightmapCoordinates[lightmap.coordinateOffset + coordinateIndex];
+				vec2<float32>& coordinate = staticGeometry.lightmapCoordinates[lightmap.coordinateOffset + coordinateIndex];
 				coordinate = (coordinate + lightmapOffset) * inverseAtlasExtent;
 
 				coordinateIndex += 1;

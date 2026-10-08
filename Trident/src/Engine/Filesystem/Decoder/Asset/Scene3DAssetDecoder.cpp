@@ -108,8 +108,8 @@ namespace Trident {
 		uint32 instanceIndex = 0;
 
 		while (instanceIndex < staticInstanceCount) {
-			const svec3<float32> position = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
-			const svec3<float32> rotation = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
+			const vec3<float32> position = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
+			const vec3<float32> rotation = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
 			const float32 scale = stream.read<float32>();
 			const quat<float32> orientation = normalized(
 				axisAngle<float32>(UP, rotation[1]) *
@@ -125,11 +125,11 @@ namespace Trident {
 			);
 
 			// TODO(asset/scene/3d/instance): See https://marti.works/posts/post-normal-matrix-optimization/post.
-			instance.normalTransform = transpose(inverse(mat3x3<float32>(
+			instance.normalTransform = transpose(inverse(mat3x3<float32>{
 				instance.worldTransform[0][0], instance.worldTransform[0][1], instance.worldTransform[0][2],
 				instance.worldTransform[1][0], instance.worldTransform[1][1], instance.worldTransform[1][2],
 				instance.worldTransform[2][0], instance.worldTransform[2][1], instance.worldTransform[2][2]
-			)));
+			}));
 
 			instanceIndex += 1;
 		}

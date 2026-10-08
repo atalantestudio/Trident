@@ -10,7 +10,7 @@ namespace Trident {
 		const BaseBufferView bufferViews[] = {
 			argumentBuffer->createView<Arguments>(0, argumentBuffer->getSize()),
 			vertexBuffer->createView<LightmapVertex>(0, vertexBuffer->getSize()),
-			lightmapCoordinateBuffer->createView<svec2<float32>>(0, lightmapCoordinateBuffer->getSize()),
+			lightmapCoordinateBuffer->createView<vec2<float32>>(0, lightmapCoordinateBuffer->getSize()),
 			indexBuffer->createView<uint32>(0, indexBuffer->getSize()),
 			emissiveTriangleIndexBuffer->createView<uint32>(0, emissiveTriangleIndexBuffer->getSize()),
 			triangleBuffer->createView<BuildTriangle3D>(0, triangleBuffer->getSize()),

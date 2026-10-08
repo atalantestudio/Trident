@@ -24,7 +24,7 @@ namespace Trident {
 
 			void update(float32 deltaTime) override {
 				// camera.updatePosition(linearMotionOffset * deltaTime);
-				camera.updateOrientation(svec3<float32>(angularMotionOffset /* * deltaTime */));
+				camera.updateOrientation(angularMotionOffset /* * deltaTime */);
 				camera.updateView();
 				camera.updateProjectionView();
 
@@ -36,7 +36,7 @@ namespace Trident {
 				linearMotionOffset += motion;
 			} */
 
-			// NOTE: `motion` must be given in radians.
+			// `motion` must be given in radians.
 			void accumulateAngularMotion(vec3<float32> motion) {
 				angularMotionOffset += motion; // * ROTATION_SPEED;
 			}

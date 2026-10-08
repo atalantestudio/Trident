@@ -7,7 +7,7 @@
 
 namespace Trident {
 	void generateTangents(BuildGeometry3D& geometry) {
-		sequence<svec3<float32>> bitangents(geometry.indices.count());
+		sequence<vec3<float32>> bitangents(geometry.indices.count());
 
 		uint64 indexOffset = 0;
 
@@ -16,16 +16,16 @@ namespace Trident {
 			BuildVertex3D& b = geometry.vertices[geometry.indices[indexOffset + 1]];
 			BuildVertex3D& c = geometry.vertices[geometry.indices[indexOffset + 2]];
 
-			const svec3<float32> ab = b.position - a.position;
-			const svec3<float32> ac = c.position - a.position;
+			const vec3<float32> ab = b.position - a.position;
+			const vec3<float32> ac = c.position - a.position;
 
-			const svec2<float32> uv = b.textureCoordinate - a.textureCoordinate;
-			const svec2<float32> uw = c.textureCoordinate - a.textureCoordinate;
+			const vec2<float32> uv = b.textureCoordinate - a.textureCoordinate;
+			const vec2<float32> uw = c.textureCoordinate - a.textureCoordinate;
 
 			const float32 f = 1.0f / (uv.x * uw.y - uv.y * uw.x);
 
-			const svec3<float32> tangent = f * (ab * uw.y - ac * uv.y);
-			const svec3<float32> bitangent = f * (ab * uw.x - ac * uv.x);
+			const vec3<float32> tangent = f * (ab * uw.y - ac * uv.y);
+			const vec3<float32> bitangent = f * (ab * uw.x - ac * uv.x);
 			const vec4<float32> t = {tangent.x, tangent.y, tangent.z, 0.0f};
 
 			a.tangent += t;
@@ -45,7 +45,7 @@ namespace Trident {
 			BuildVertex3D& vertex = geometry.vertices[vertexIndex];
 
 			const vec3<float32> normal = vertex.normal;
-			const vec3<float32> tangent = {vertex.tangent[0], vertex.tangent[1], vertex.tangent[2]};
+			const vec3<float32> tangent = {vertex.tangent.x, vertex.tangent.y, vertex.tangent.z};
 			const vec3<float32> bitangent = bitangents[vertexIndex];
 			const vec3<float32> t = normalized(tangent - (normal * dot(normal, tangent)));
 
@@ -56,7 +56,7 @@ namespace Trident {
 				w = -1.0f;
 			}
 
-			vertex.tangent = vec4<float32>(t[0], t[1], t[2], w);
+			vertex.tangent = {t.x, t.y, t.z, w};
 
 			vertexIndex += 1;
 		}

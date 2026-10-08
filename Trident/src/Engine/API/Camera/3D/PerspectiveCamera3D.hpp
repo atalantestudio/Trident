@@ -9,10 +9,6 @@
 namespace Trident {
 	class PerspectiveCamera3D : public Camera {
 		public:
-			const quat<float32>& getOrientation() const {
-				return orientation;
-			}
-
 			// NOTE: This requires recomputing the view and projection-view matrices.
 			void setOrientation(quat<float32> orientation) {
 				this->orientation = normalized(orientation);
@@ -38,10 +34,10 @@ namespace Trident {
 				position += right + forward + up;
 			} */
 
-			void updateOrientation(svec3<float32> offset) {
-				const quat<float32> pitch = axisAngle<float32>(RIGHT, offset[0]);
-				const quat<float32> yaw = axisAngle<float32>(UP, offset[1]);
-				const quat<float32> roll = axisAngle<float32>(FORWARD, offset[2]);
+			void updateOrientation(vec3<float32> offset) {
+				const quat<float32> pitch = axisAngle<float32>(RIGHT, offset.x);
+				const quat<float32> yaw = axisAngle<float32>(UP, offset.y);
+				const quat<float32> roll = axisAngle<float32>(FORWARD, offset.z);
 
 				orientation = normalized((yaw * (orientation * pitch)) * roll);
 			}
@@ -58,7 +54,7 @@ namespace Trident {
 				const vec3<float32> eye = position - getForward() * distance;
 
 				// TODO: Use forward rotation with this formula: -position * conjugate(orientation)
-				const quat<float32> translation = -(conjugate(orientation) * quat<float32>(0.0f, eye.x, eye.y, eye.z) * orientation);
+				const quat<float32> translation = -(conjugate(orientation) * quat<float32>{0.0f, eye.x, eye.y, eye.z} * orientation);
 
 				view = mat4x4<float32>(orientation);
 				view[3] = {translation.x, translation.y, translation.z, 1.0f};

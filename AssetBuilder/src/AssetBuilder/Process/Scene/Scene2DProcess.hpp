@@ -36,12 +36,12 @@ namespace Trident {
 					stream.write<uint32>(triangle.cUvIndex);
 				}
 
-				for (const svec2<float32> vertex : scene.staticGeometry.vertices) {
-					stream.write<svec2<float32>>(vertex);
+				for (const vec2<float32> vertex : scene.staticGeometry.vertices) {
+					stream.write<vec2<float32>>(vertex);
 				}
 
-				for (const svec2<float32> textureCoordinate : scene.staticGeometry.textureCoordinates) {
-					stream.write<svec2<float32>>(textureCoordinate);
+				for (const vec2<float32> textureCoordinate : scene.staticGeometry.textureCoordinates) {
+					stream.write<vec2<float32>>(textureCoordinate);
 				}
 
 				for (const uint32 geometryAssetIdentifier : scene.dynamicGeometry.geometryAssetIdentifiers) {
@@ -55,10 +55,10 @@ namespace Trident {
 
 				for (const EntityComponentMapping<RigidBody2DComponent>& rigidBodyMapping : scene.dynamicGeometry.rigidBodyMappings) {
 					stream.write<Entity>(rigidBodyMapping.entity);
-					stream.write<svec2<float32>>(svec2<float32>(rigidBodyMapping.component.position));
+					stream.write<vec2<float32>>(rigidBodyMapping.component.position);
 					stream.write<float32>(rigidBodyMapping.component.rotation);
-					stream.write<svec2<float32>>(svec2<float32>(rigidBodyMapping.component.scale));
-					stream.write<svec2<float32>>(svec2<float32>(rigidBodyMapping.component.linearVelocity));
+					stream.write<vec2<float32>>(rigidBodyMapping.component.scale);
+					stream.write<vec2<float32>>(rigidBodyMapping.component.linearVelocity);
 					stream.write<float32>(rigidBodyMapping.component.angularVelocity);
 					stream.write<float32>(rigidBodyMapping.component.inverseMass);
 					stream.write<float32>(rigidBodyMapping.component.inverseInertia);
@@ -74,11 +74,11 @@ namespace Trident {
 					sizeof(AssetHeader) +
 					sizeof(uint32) * 7 +
 					scene.staticGeometry.triangles.count() * sizeof(StaticTriangle2D) +
-					scene.staticGeometry.vertices.count() * sizeof(svec2<float32>) +
-					scene.staticGeometry.textureCoordinates.count() * sizeof(svec2<float32>) +
+					scene.staticGeometry.vertices.count() * sizeof(vec2<float32>) +
+					scene.staticGeometry.textureCoordinates.count() * sizeof(vec2<float32>) +
 					scene.dynamicGeometry.geometryAssetIdentifiers.count() * sizeof(uint32) +
 					scene.dynamicGeometry.geometryMappings.count() * sizeof(EntityComponentMapping<GeometryComponent>) +
-					scene.dynamicGeometry.rigidBodyMappings.count() * (sizeof(Entity) + sizeof(svec2<float32>) * 3 + sizeof(float32) * 6)
+					scene.dynamicGeometry.rigidBodyMappings.count() * (sizeof(Entity) + sizeof(vec2<float32>) * 3 + sizeof(float32) * 6)
 				);
 			}
 
