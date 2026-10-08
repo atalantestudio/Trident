@@ -11,10 +11,10 @@ namespace Trident {
 
 		rayTracingPipeline->getShaderGroupHandles({0, 3}, &shaderGroupHandleData[0]);
 
-		const uint32 shaderSize = ceil(limits->shaderGroupHandleSize, limits->shaderGroupHandleAlignment);
+		const uint32 shaderSize = ceilPowerOf2(limits->shaderGroupHandleSize, limits->shaderGroupHandleAlignment);
 		const uint32 rayGenerationShaderOffset = 0;
-		const uint32 rayHitShaderOffset = ceil(rayGenerationShaderOffset + shaderSize, limits->shaderGroupBaseAlignment);
-		const uint32 rayMissShaderOffset = ceil(rayHitShaderOffset + shaderSize, limits->shaderGroupBaseAlignment);
+		const uint32 rayHitShaderOffset = ceilPowerOf2(rayGenerationShaderOffset + shaderSize, limits->shaderGroupBaseAlignment);
+		const uint32 rayMissShaderOffset = ceilPowerOf2(rayHitShaderOffset + shaderSize, limits->shaderGroupBaseAlignment);
 		const uint32 rayCallableShaderOffset = rayMissShaderOffset;
 		const uint64 size = rayCallableShaderOffset + shaderSize;
 

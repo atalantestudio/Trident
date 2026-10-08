@@ -10,7 +10,7 @@ namespace Trident {
 		const uint64 minStorageBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
 
 		return createDynamicBuffer({
-			.size = ceil(scene->materialShaders.count() * sizeof(uint32), minStorageBufferOffsetAlignment),
+			.size = ceilPowerOf2(scene->materialShaders.count() * sizeof(uint32), minStorageBufferOffsetAlignment),
 			.usage = BufferUsage::READ_WRITE_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,

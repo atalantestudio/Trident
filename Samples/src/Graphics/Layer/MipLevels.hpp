@@ -227,7 +227,7 @@ namespace Trident {
 				const uint64 minUniformBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
 
 				const ref<Buffer> atomicCounterBuffer = createDynamicBuffer({
-					.size = ceil(sizeof(uint32), minStorageBufferOffsetAlignment),
+					.size = ceilPowerOf2(sizeof(uint32), minStorageBufferOffsetAlignment),
 					.usage = BufferUsage::READ_WRITE_STORAGE,
 					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 					.persistent = false,
@@ -236,7 +236,7 @@ namespace Trident {
 					#endif
 				});
 				const ref<Buffer> argumentBuffer = createDynamicBuffer({
-					.size = ceil(sizeof(MipLevelArguments), minUniformBufferOffsetAlignment),
+					.size = ceilPowerOf2(sizeof(MipLevelArguments), minUniformBufferOffsetAlignment),
 					.usage = BufferUsage::UNIFORM,
 					.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 					.persistent = false,
@@ -425,7 +425,7 @@ namespace Trident {
 				const uint64 minUniformBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
 
 				return createDynamicBuffer({
-					.size = ceil(sizeof(uint32), minUniformBufferOffsetAlignment),
+					.size = ceilPowerOf2(sizeof(uint32), minUniformBufferOffsetAlignment),
 					.usage = BufferUsage::UNIFORM,
 					.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 					.persistent = true,

@@ -44,11 +44,11 @@ namespace Trident {
 			});
 
 			buildSizes[geometryIndex] = device->getAccelerationStructureBuildSizes(buildGeometries[geometryIndex]);
-			viewOffsets[geometryIndex] = ceil(blasBufferSize, blasBufferAlignment);
-			scratchOffsets[geometryIndex] = ceil(scratchBufferSize, scratchAlignment);
+			viewOffsets[geometryIndex] = ceilPowerOf2(blasBufferSize, blasBufferAlignment);
+			scratchOffsets[geometryIndex] = ceilPowerOf2(scratchBufferSize, scratchAlignment);
 
-			blasBufferSize = viewOffsets[geometryIndex] + ceil(buildSizes[geometryIndex].accelerationStructureSize, blasBufferAlignment);
-			scratchBufferSize += scratchOffsets[geometryIndex] + ceil(buildSizes[geometryIndex].scratchBuildSize, scratchAlignment);
+			blasBufferSize = viewOffsets[geometryIndex] + ceilPowerOf2(buildSizes[geometryIndex].accelerationStructureSize, blasBufferAlignment);
+			scratchBufferSize += scratchOffsets[geometryIndex] + ceilPowerOf2(buildSizes[geometryIndex].scratchBuildSize, scratchAlignment);
 
 			geometryIndex += 1;
 		}
@@ -64,7 +64,7 @@ namespace Trident {
 		});
 
 		blasScratchBuffer = device->createDynamicBuffer({
-			.size = ceil(scratchBufferSize, limits->minAccelerationStructureScratchOffsetAlignment),
+			.size = ceilPowerOf2(scratchBufferSize, limits->minAccelerationStructureScratchOffsetAlignment),
 			.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::SHADER_DEVICE_ADDRESS,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
@@ -76,7 +76,7 @@ namespace Trident {
 		geometryIndex = 0;
 
 		while (geometryIndex < geometryCount) {
-			const BufferView<uint8> view = blasBuffer->createView<uint8>(viewOffsets[geometryIndex], ceil(buildSizes[geometryIndex].accelerationStructureSize, blasBufferAlignment));
+			const BufferView<uint8> view = blasBuffer->createView<uint8>(viewOffsets[geometryIndex], ceilPowerOf2(buildSizes[geometryIndex].accelerationStructureSize, blasBufferAlignment));
 
 			blas[geometryIndex] = device->createAccelerationStructure({
 				.view = view,

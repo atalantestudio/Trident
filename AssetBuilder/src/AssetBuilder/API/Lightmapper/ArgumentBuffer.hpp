@@ -8,7 +8,7 @@
 namespace Trident {
 	ref<Buffer> Lightmapper::createArgumentBuffer() const {
 		return device->createDynamicBuffer({
-			.size = ceil(sizeof(Arguments), limits->minUniformBufferOffsetAlignment),
+			.size = ceilPowerOf2(sizeof(Arguments), limits->minUniformBufferOffsetAlignment),
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::UNIFORM,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = false,

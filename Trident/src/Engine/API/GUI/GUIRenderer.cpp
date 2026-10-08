@@ -524,7 +524,7 @@ namespace Trident {
 		const uint64 alignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
 
 		return createDynamicBuffer({
-			.size = ceil(sizeof(Camera), alignment),
+			.size = ceilPowerOf2(sizeof(Camera), alignment),
 			.usage = BufferUsage::UNIFORM,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = true,

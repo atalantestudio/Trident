@@ -112,7 +112,7 @@ namespace Trident {
 		const BuildScene3D& scene = *descriptor.scene;
 
 		vertexBuffer = device->createDynamicBuffer({
-			.size = ceil((scene.staticGeometry.bakedVertexCount + scene.staticGeometry.externalVertexCount) * sizeof(LightmapVertex), limits->minStorageBufferOffsetAlignment),
+			.size = ceilPowerOf2((scene.staticGeometry.bakedVertexCount + scene.staticGeometry.externalVertexCount) * sizeof(LightmapVertex), limits->minStorageBufferOffsetAlignment),
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE | BufferUsage::SHADER_DEVICE_ADDRESS | BufferUsage::READ_ONLY_ACCELERATION_STRUCTURE_BUILD_INPUT,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
@@ -121,7 +121,7 @@ namespace Trident {
 			#endif
 		});
 		lightmapCoordinateBuffer = device->createDynamicBuffer({
-			.size = ceil(scene.staticGeometry.lightmapCoordinates.count() * sizeof(svec2<float32>), limits->minStorageBufferOffsetAlignment),
+			.size = ceilPowerOf2(scene.staticGeometry.lightmapCoordinates.count() * sizeof(svec2<float32>), limits->minStorageBufferOffsetAlignment),
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
@@ -130,7 +130,7 @@ namespace Trident {
 			#endif
 		});
 		triangleBuffer = device->createDynamicBuffer({
-			.size = ceil(descriptor.triangles.count() * sizeof(BuildTriangle3D), limits->minStorageBufferOffsetAlignment),
+			.size = ceilPowerOf2(descriptor.triangles.count() * sizeof(BuildTriangle3D), limits->minStorageBufferOffsetAlignment),
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
@@ -139,7 +139,7 @@ namespace Trident {
 			#endif
 		});
 		emissiveTriangleIndexBuffer = device->createDynamicBuffer({
-			.size = ceil(descriptor.emissiveTriangleIndices.count() * sizeof(uint32), limits->minStorageBufferOffsetAlignment),
+			.size = ceilPowerOf2(descriptor.emissiveTriangleIndices.count() * sizeof(uint32), limits->minStorageBufferOffsetAlignment),
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
@@ -148,7 +148,7 @@ namespace Trident {
 			#endif
 		});
 		indexBuffer = device->createDynamicBuffer({
-			.size = ceil((scene.staticGeometry.bakedIndexCount + scene.staticGeometry.externalIndexCount) * sizeof(uint32), limits->minStorageBufferOffsetAlignment),
+			.size = ceilPowerOf2((scene.staticGeometry.bakedIndexCount + scene.staticGeometry.externalIndexCount) * sizeof(uint32), limits->minStorageBufferOffsetAlignment),
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE | BufferUsage::SHADER_DEVICE_ADDRESS | BufferUsage::READ_ONLY_ACCELERATION_STRUCTURE_BUILD_INPUT,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
@@ -157,7 +157,7 @@ namespace Trident {
 			#endif
 		});
 		instanceBuffer = device->createDynamicBuffer({
-			.size = ceil(scene.staticGeometry.instances.count() * sizeof(LightmapInstance), limits->minStorageBufferOffsetAlignment),
+			.size = ceilPowerOf2(scene.staticGeometry.instances.count() * sizeof(LightmapInstance), limits->minStorageBufferOffsetAlignment),
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
@@ -167,7 +167,7 @@ namespace Trident {
 		});
 		materialBuffer = createMaterialBuffer(descriptor.materials.count());
 		tlasInstanceBuffer = device->createDynamicBuffer({
-			.size = ceil(scene.staticGeometry.instances.count() * sizeof(AccelerationStructureInstance), 256ull),
+			.size = ceilPowerOf2(scene.staticGeometry.instances.count() * sizeof(AccelerationStructureInstance), 256ull),
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::SHADER_DEVICE_ADDRESS | BufferUsage::READ_ONLY_ACCELERATION_STRUCTURE_BUILD_INPUT,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
@@ -629,8 +629,8 @@ namespace Trident {
 
 		commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
 
-		const uint32 workGroupX = ceil(imageAssetDescriptor->extent.width / 16, 16u);
-		const uint32 workGroupY = ceil(imageAssetDescriptor->extent.height / 16, 16u);
+		const uint32 workGroupX = ceilPowerOf2(imageAssetDescriptor->extent.width / 16, 16u);
+		const uint32 workGroupY = ceilPowerOf2(imageAssetDescriptor->extent.height / 16, 16u);
 
 		#if defined(DEBUG_LIGHTMAPPER_ENABLE_DILATION)
 			commandEncoder->bindComputePipeline(intermediateDilationPipeline);

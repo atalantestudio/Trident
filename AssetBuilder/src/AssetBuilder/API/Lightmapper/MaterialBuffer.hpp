@@ -10,7 +10,7 @@ namespace Trident {
 		const uint64 alignment = physicalDevice->getLimits().minStorageBufferOffsetAlignment;
 
 		return device->createDynamicBuffer({
-			.size = ceil(materialCount * sizeof(LightmapMaterial), alignment),
+			.size = ceilPowerOf2(materialCount * sizeof(LightmapMaterial), alignment),
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,

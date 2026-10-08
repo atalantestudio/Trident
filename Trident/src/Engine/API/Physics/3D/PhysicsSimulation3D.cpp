@@ -218,7 +218,7 @@ namespace Trident {
 					}
 				}
 
-				const float32 penetrationBias = avg(hullA.getPenetrationBias(), hullB.getPenetrationBias());
+				const float32 penetrationBias = (hullA.getPenetrationBias() + hullB.getPenetrationBias()) * 0.5f;
 
 				contact.bias = -penetrationBias * inverseDeltaTime * min(0.0f, contact.separation + ALLOWED_PENETRATION);
 

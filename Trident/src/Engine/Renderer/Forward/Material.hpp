@@ -225,7 +225,7 @@ namespace Trident {
 				.newAccess = Access::TRANSFER_WRITE,
 			};
 
-			imageStagingBufferSize = ceil(imageStagingBufferSize, static_cast<uint64>(getByteSize(image->getFormat())));
+			imageStagingBufferSize = ceilPowerOf2(imageStagingBufferSize, static_cast<uint64>(getByteSize(image->getFormat())));
 			imageStagingBufferSize += image->getSize();
 			imageIndex += 1;
 		}
@@ -294,7 +294,7 @@ namespace Trident {
 			imageMemoryBarrier.newLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
 			imageMemoryBarrier.newAccess = Access::SHADER_READ;
 
-			imageStagingBufferSize = ceil(imageStagingBufferSize, static_cast<uint64>(getByteSize(image->getFormat())));
+			imageStagingBufferSize = ceilPowerOf2(imageStagingBufferSize, static_cast<uint64>(getByteSize(image->getFormat())));
 			imageMappedRangeOffset += image->getSize();
 
 			imageIndex += 1;

@@ -24,7 +24,7 @@ namespace Trident {
 		const AccelerationStructureBuildSizes topLevelAccelerationStructureBuildSizes = device->getAccelerationStructureBuildSizes(buildInstanceGeometry);
 
 		tlasBuffer = device->createDynamicBuffer({
-			.size = ceil(topLevelAccelerationStructureBuildSizes.accelerationStructureSize, 256ull),
+			.size = ceilPowerOf2(topLevelAccelerationStructureBuildSizes.accelerationStructureSize, 256ull),
 			.usage = BufferUsage::SHADER_DEVICE_ADDRESS | BufferUsage::ACCELERATION_STRUCTURE_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
@@ -34,7 +34,7 @@ namespace Trident {
 		});
 
 		tlasScratchBuffer = device->createDynamicBuffer({
-			.size = ceil(topLevelAccelerationStructureBuildSizes.scratchBuildSize, scratchAlignment),
+			.size = ceilPowerOf2(topLevelAccelerationStructureBuildSizes.scratchBuildSize, scratchAlignment),
 			.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::SHADER_DEVICE_ADDRESS,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
@@ -43,9 +43,9 @@ namespace Trident {
 			#endif
 		});
 
-		const BufferView<uint8> view = tlasBuffer->createView<uint8>(0, ceil(topLevelAccelerationStructureBuildSizes.accelerationStructureSize, 256ull));
+		const BufferView<uint8> view = tlasBuffer->createView<uint8>(0, ceilPowerOf2(topLevelAccelerationStructureBuildSizes.accelerationStructureSize, 256ull));
 
-		tlasScratchView = tlasScratchBuffer->createView<uint8>(0, ceil(topLevelAccelerationStructureBuildSizes.scratchBuildSize, scratchAlignment));
+		tlasScratchView = tlasScratchBuffer->createView<uint8>(0, ceilPowerOf2(topLevelAccelerationStructureBuildSizes.scratchBuildSize, scratchAlignment));
 
 		tlas = device->createAccelerationStructure({
 			.view = view,

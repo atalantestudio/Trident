@@ -10,7 +10,7 @@ namespace Trident {
 		const uint64 minUniformBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
 
 		return createDynamicBuffer({
-			.size = ceil(sizeof(Camera), minUniformBufferOffsetAlignment),
+			.size = ceilPowerOf2(sizeof(Camera), minUniformBufferOffsetAlignment),
 			.usage = BufferUsage::UNIFORM,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = true,

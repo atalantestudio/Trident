@@ -248,7 +248,7 @@ namespace Trident {
 					contact.massTangent = 1.0f / ((rArA - rtA * rtA) * rigidBodyA.inverseInertia + (rBrB - rtB * rtB) * rigidBodyB.inverseInertia + inverseMassSum);
 				}
 
-				const float32 penetrationBias = avg(hullA.getPenetrationBias(), hullB.getPenetrationBias());
+				const float32 penetrationBias = (hullA.getPenetrationBias() + hullB.getPenetrationBias()) * 0.5f;
 
 				contact.bias = -penetrationBias * inverseDeltaTime * min(0.0f, contact.separation + ALLOWED_PENETRATION);
 

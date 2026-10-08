@@ -10,7 +10,7 @@ namespace Trident {
 		const uint64 alignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
 
 		return createDynamicBuffer({
-			.size = ceil(sizeof(DirectionalLight), alignment),
+			.size = ceilPowerOf2(sizeof(DirectionalLight), alignment),
 			.usage = BufferUsage::UNIFORM,
 			.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
 			.persistent = true,

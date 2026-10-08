@@ -413,7 +413,7 @@ namespace Trident {
 		const uint64 alignment = physicalDevice->getLimits().minStorageBufferOffsetAlignment;
 
 		return device->createDynamicBuffer({
-			.size = ceil(sizeof(FontStorage), alignment),
+			.size = ceilPowerOf2(sizeof(FontStorage), alignment),
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
@@ -427,7 +427,7 @@ namespace Trident {
 		const uint64 alignment = physicalDevice->getLimits().minStorageBufferOffsetAlignment;
 
 		return device->createDynamicBuffer({
-			.size = ceil(size, alignment),
+			.size = ceilPowerOf2(size, alignment),
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = true,
@@ -441,7 +441,7 @@ namespace Trident {
 		const uint64 alignment = physicalDevice->getLimits().minStorageBufferOffsetAlignment;
 
 		return device->createDynamicBuffer({
-			.size = ceil(3 * sizeof(float32), alignment),
+			.size = ceilPowerOf2(3 * sizeof(float32), alignment),
 			.usage = BufferUsage::TRANSFER_DST | BufferUsage::READ_ONLY_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = true,

@@ -104,14 +104,14 @@ namespace Trident {
 
 	void VisibilityRenderer::postSetScene() {
 		const uint64 minStorageBufferOffsetAlignment = getDevice()->getPhysicalDevice()->getLimits().minStorageBufferOffsetAlignment;
-		const uint64 vertexPositionComponentRegionSize = ceil(scene->vertexPositionComponents.count() * sizeof(float32), minStorageBufferOffsetAlignment);
-		const uint64 vertexNormalComponentRegionSize = ceil(scene->vertexNormalComponents.count() * sizeof(float32), minStorageBufferOffsetAlignment);
-		const uint64 vertexTextureCoordinateComponentRegionSize = ceil(scene->vertexTextureCoordinateComponents.count() * sizeof(float32), minStorageBufferOffsetAlignment);
-		const uint64 vertexPositionIndexRegionSize = ceil(scene->vertexPositionIndices.count() * sizeof(uint32), minStorageBufferOffsetAlignment);
-		const uint64 vertexNormalIndexRegionSize = ceil(scene->vertexNormalIndices.count() * sizeof(uint32), minStorageBufferOffsetAlignment);
-		const uint64 vertexTextureCoordinateIndexRegionSize = ceil(scene->vertexTextureCoordinateIndices.count() * sizeof(uint32), minStorageBufferOffsetAlignment);
-		const uint64 clusterRegionSize = ceil(scene->clusters.count() * sizeof(Cluster), minStorageBufferOffsetAlignment);
-		const uint64 geometryRegionSize = ceil(scene->geometries.count() * sizeof(Geometry), minStorageBufferOffsetAlignment);
+		const uint64 vertexPositionComponentRegionSize = ceilPowerOf2(scene->vertexPositionComponents.count() * sizeof(float32), minStorageBufferOffsetAlignment);
+		const uint64 vertexNormalComponentRegionSize = ceilPowerOf2(scene->vertexNormalComponents.count() * sizeof(float32), minStorageBufferOffsetAlignment);
+		const uint64 vertexTextureCoordinateComponentRegionSize = ceilPowerOf2(scene->vertexTextureCoordinateComponents.count() * sizeof(float32), minStorageBufferOffsetAlignment);
+		const uint64 vertexPositionIndexRegionSize = ceilPowerOf2(scene->vertexPositionIndices.count() * sizeof(uint32), minStorageBufferOffsetAlignment);
+		const uint64 vertexNormalIndexRegionSize = ceilPowerOf2(scene->vertexNormalIndices.count() * sizeof(uint32), minStorageBufferOffsetAlignment);
+		const uint64 vertexTextureCoordinateIndexRegionSize = ceilPowerOf2(scene->vertexTextureCoordinateIndices.count() * sizeof(uint32), minStorageBufferOffsetAlignment);
+		const uint64 clusterRegionSize = ceilPowerOf2(scene->clusters.count() * sizeof(Cluster), minStorageBufferOffsetAlignment);
+		const uint64 geometryRegionSize = ceilPowerOf2(scene->geometries.count() * sizeof(Geometry), minStorageBufferOffsetAlignment);
 
 		dataBuffer = createDataBuffer(vertexPositionComponentRegionSize + vertexNormalComponentRegionSize + vertexTextureCoordinateComponentRegionSize + vertexPositionIndexRegionSize + vertexNormalIndexRegionSize + vertexTextureCoordinateIndexRegionSize + clusterRegionSize + geometryRegionSize);
 		instanceBuffer = createInstanceBuffer();

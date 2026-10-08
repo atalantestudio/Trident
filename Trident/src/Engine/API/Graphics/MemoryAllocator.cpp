@@ -87,7 +87,7 @@ namespace Trident {
 
 				if (allocationIndex < allocations.size()) {
 					const MemoryAllocation& allocation = allocations[allocationIndex];
-					const uint64 offset = min(allocation.size, ceil(allocation.usedOffset, alignment));
+					const uint64 offset = min(allocation.size, ceilPowerOf2(allocation.usedOffset, alignment));
 
 					if (allocation.size - offset < size) {
 						VALIDATION_ERROR("The suballocation requires [] bytes, but there are only [] bytes remaining in the allocation.", size, allocation.size - offset);
@@ -103,7 +103,7 @@ namespace Trident {
 
 		MemorySuballocation memorySuballocation{};
 		memorySuballocation.allocationIndex = allocationIndex;
-		memorySuballocation.offset = ceil(allocation.usedOffset, alignment);
+		memorySuballocation.offset = ceilPowerOf2(allocation.usedOffset, alignment);
 		memorySuballocation.size = size;
 
 		ENGINE_INFO("Created suballocation ([]) inside allocation [].", allocation.suballocationCount, memorySuballocation.allocationIndex);
@@ -210,7 +210,7 @@ namespace Trident {
 				continue;
 			}
 
-			const uint64 offset = min(allocation.size, ceil(allocation.usedOffset, memoryRequirements.alignment));
+			const uint64 offset = min(allocation.size, ceilPowerOf2(allocation.usedOffset, memoryRequirements.alignment));
 
 			if (allocation.size - offset < memoryRequirements.size) {
 				allocationIndex += 1;

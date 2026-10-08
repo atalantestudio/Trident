@@ -171,7 +171,7 @@ namespace Trident {
 						alignment = max(alignment, memoryRequirements.alignment);
 
 						allocationSizesPerMemoryType[memoryTypeIndex] = max(allocationSizesPerMemoryType[memoryTypeIndex], alignment);
-						allocationSizesPerMemoryType[memoryTypeIndex] += ceil(memoryRequirements.size, alignment);
+						allocationSizesPerMemoryType[memoryTypeIndex] += ceilPowerOf2(memoryRequirements.size, alignment);
 					}
 
 					for (ref<Image> image : images) {
@@ -186,7 +186,7 @@ namespace Trident {
 						alignment = max(alignment, memoryRequirements.alignment);
 
 						allocationSizesPerMemoryType[memoryTypeIndex] = max(allocationSizesPerMemoryType[memoryTypeIndex], alignment);
-						allocationSizesPerMemoryType[memoryTypeIndex] += ceil(memoryRequirements.size, alignment);
+						allocationSizesPerMemoryType[memoryTypeIndex] += ceilPowerOf2(memoryRequirements.size, alignment);
 					}
 				}
 

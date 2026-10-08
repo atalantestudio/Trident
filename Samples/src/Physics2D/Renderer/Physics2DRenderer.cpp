@@ -219,7 +219,7 @@ namespace Trident {
 		const uint64 alignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
 
 		cameraBuffer = createDynamicBuffer({
-			.size = ceil(sizeof(Camera), alignment),
+			.size = ceilPowerOf2(sizeof(Camera), alignment),
 			.usage = BufferUsage::UNIFORM,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = true,
@@ -238,7 +238,7 @@ namespace Trident {
 		const uint64 alignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
 
 		viewBuffer = createDynamicBuffer({
-			.size = ceil(sizeof(View), alignment),
+			.size = ceilPowerOf2(sizeof(View), alignment),
 			.usage = BufferUsage::UNIFORM,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = true,
@@ -256,7 +256,7 @@ namespace Trident {
 		const uint64 alignment = getDevice()->getPhysicalDevice()->getLimits().minUniformBufferOffsetAlignment;
 
 		placeholderBuffer = createDynamicBuffer({
-			.size = ceil(sizeof(Placeholder), alignment),
+			.size = ceilPowerOf2(sizeof(Placeholder), alignment),
 			.usage = BufferUsage::UNIFORM,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE,
 			.persistent = true,

@@ -1,93 +1,29 @@
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 #pragma once
 
 namespace Trident {
-	template<std::size_t C, typename T>
-	using vec = lyah::vec<C, T>;
-
-	template<typename T>
-	using vec2 = lyah::vec2<T>;
-
-	template<typename T>
-	using vec3 = lyah::vec3<T>;
-
-	template<typename T>
-	using vec4 = lyah::vec4<T>;
-
-	template<std::size_t M, std::size_t N, typename T>
-	using mat = lyah::mat<M, N, T>;
-
-	template<typename T>
-	using mat2x2 = lyah::mat2x2<T>;
-
-	template<typename T>
-	using mat3x3 = lyah::mat3x3<T>;
-
-	template<typename T>
-	using mat4x4 = lyah::mat4x4<T>;
-
-	template<typename T>
-	using quat = lyah::quat<T>;
+	using lyah::vec2;
+	using lyah::vec3;
+	using lyah::vec4;
+	using lyah::mat2x2;
+	using lyah::mat3x3;
+	using lyah::mat4x4;
+	using lyah::quat;
 
 	// TODO(lyah): Remove.
 	template<typename T>
-	using svec2 = vec<2, T>;
+	using svec2 = lyah::vec<2, T>;
 
 	// TODO(lyah): Remove.
 	template<typename T>
-	using svec3 = vec<3, T>;
-
-	struct Plane2D {
-		vec2<float32> normal;
-		float32 offset;
-	};
-
-	// K-th dimensional simplex.
-	template<std::size_t K, typename T>
-	struct sim;
-
-	template<typename T>
-	struct sim<2, T> {
-		public:
-			sim() :
-				count(0)
-			{}
-
-			sim(const lyah::vec<2, T>& a) :
-				m{a},
-				count(1)
-			{}
-
-			sim(const lyah::vec<2, T>& a, const lyah::vec<2, T>& b) :
-				m{a, b},
-				count(2)
-			{}
-
-			inline const lyah::vec<2, T>& operator[](std::uint8_t index) const {
-				DEBUG_ASSERT(index < count);
-
-				return m[index];
-			}
-
-			inline lyah::vec<2, T>& operator[](std::uint8_t index) {
-				DEBUG_ASSERT(index < 3);
-
-				return m[index];
-			}
-
-		public:
-			lyah::vec<2, T> m[3];
-			std::uint8_t count : 2;
-	};
-
-	template<typename T>
-	using sim2 = sim<2, T>;
+	using svec3 = lyah::vec<3, T>;
 
 	using lyah::abs;
 	using lyah::axisAngle;
 	using lyah::ceil;
+	using lyah::ceilPowerOf2;
 	using lyah::clamp;
 	using lyah::cos;
 	using lyah::epsilon;
@@ -114,16 +50,60 @@ namespace Trident {
 	using lyah::translation;
 	using lyah::transpose;
 
+	struct Plane2D {
+		vec2<float32> normal;
+		float32 offset;
+	};
+
+	// K-th dimensional simplex.
+	template<std::size_t K, typename T>
+	struct sim;
+
+	template<typename T>
+	struct sim<2, T> {
+		public:
+			sim() :
+				count(0)
+			{}
+
+			sim(vec2<T> a) :
+				m{a},
+				count(1)
+			{}
+
+			sim(vec2<T> a, vec2<T> b) :
+				m{a, b},
+				count(2)
+			{}
+
+			inline vec2<T> operator[](std::uint8_t index) const {
+				DEBUG_ASSERT(index < count);
+
+				return m[index];
+			}
+
+			inline vec2<T>& operator[](std::uint8_t index) {
+				DEBUG_ASSERT(index < 3);
+
+				return m[index];
+			}
+
+		public:
+			vec2<T> m[3];
+			std::uint8_t count : 2;
+	};
+
+	template<typename T>
+	using sim2 = sim<2, T>;
+
 	// TODO(lyah/scaled-area)
 	// Access the vertices using the indices provided by the geometry.
 	// Returns the absolute area of a 2D polygon defined by a sequence of vertices.
 	// See https://stackoverflow.com/a/717367/17136841.
 	template<typename T>
-	T scaledArea(view<vec<2, T>> unclosedVertices, vec2<float32> scale) {
+	T scaledArea(view<vec2<T>> unclosedVertices, vec2<float32> scale) {
+		sequence<vec2<T>> closedVertices(unclosedVertices.count() + 2);
 		T area = static_cast<T>(0);
-
-		// Close vertex array.
-		sequence<vec<2, T>> closedVertices(unclosedVertices.count() + 2);
 
 		std::copy(unclosedVertices.begin(), unclosedVertices.end(), &closedVertices[0]);
 
@@ -142,13 +122,10 @@ namespace Trident {
 	}
 
 	template<typename T>
-	inline lyah::vec<2, T> cross2d(const lyah::vec<2, T>& a, const lyah::vec<2, T>& b, const lyah::vec<2, T>& c) {
-		const lyah::vec<2, T> b_c = {b[0] * c[1], b[1] * c[0]};
+	inline vec2<T> cross2d(vec2<T> a, vec2<T> b, vec2<T> c) {
+		const vec2<T> b_c = {b.x * c.y, b.y * c.x};
 
-		return {
-			a[1] * (b_c[0] - b_c[1]),
-			a[0] * (b_c[1] - b_c[0]),
-		};
+		return {a.y * (b_c.x - b_c.y), a.x * (b_c.y - b_c.x)};
 	}
 
 	// TODO(lyah): Add to Lyah as `cross` or `determinant`.
@@ -158,7 +135,7 @@ namespace Trident {
 	}
 
 	template<typename T>
-	inline lyah::vec<2, T> multiplyTransform(lyah::vec<2, T> a, const lyah::mat<3, 3, T>& t) {
+	inline vec2<T> multiplyTransform(vec2<T> a, const mat3x3<T>& t) {
 		return {
 			t[0][0] * a[0] + t[1][0] * a[1] + t[2][0],
 			t[0][1] * a[0] + t[1][1] * a[1] + t[2][1],
@@ -166,18 +143,10 @@ namespace Trident {
 	}
 
 	template<typename T>
-	inline vec<3, T> multiplyTransform(vec<3, T> a, const mat<4, 4, T>& M) {
-		const vec<4, T> r = vec<4, T>(a[0], a[1], a[2], 1.0f) * M;
+	inline vec3<T> multiplyTransform(vec3<T> a, const mat4x4<T>& M) {
+		const vec4<T> r = vec4<T>(a.x, a.y, a.z, 1.0f) * M;
 
-		return {r[0], r[1], r[2]};
-	}
-
-	template<typename T>
-	inline svec2<T> abs(svec2<T> a) {
-		return {
-			abs(a.x),
-			abs(a.y),
-		};
+		return {r.x, r.y, r.z};
 	}
 
 	/// Calculates the signed distance between a point and an infinite line represented by two points.
@@ -303,15 +272,6 @@ namespace Trident {
 		}
 
 		return axisAngle<float32>(rotationAxis, rotationAngle);
-	}
-
-	inline float32 avg(float32 a, float32 b) {
-		return (a + b) * 0.5f;
-	}
-
-	template<typename T>
-	inline T ceil(T value, T multiplier) {
-		return (value + multiplier - 1) & ~(multiplier - 1);
 	}
 
 	inline float32 fract(float32 a) {
