@@ -25,11 +25,11 @@ namespace Trident {
 			};
 
 			struct View {
-				svec2<float32> viewport;
+				vec2<float32> viewport;
 			};
 
 			struct Vertex {
-				svec2<float32> position;
+				vec2<float32> position;
 			};
 
 			struct RigidBody {
@@ -45,7 +45,7 @@ namespace Trident {
 			};
 
 			struct Placeholder {
-				svec2<float32> offset;
+				vec2<float32> offset;
 			};
 
 		private:
@@ -65,7 +65,7 @@ namespace Trident {
 			void setPlaceholderOffset(vec2<float32> offset) const;
 
 			#if defined(SHOW_DISTANCE)
-				void setClosestPoints(const vec2<float32>& closestPointA, const vec2<float32>& closestPointB) const;
+				void setClosestPoints(vec2<float32> closestPointA, vec2<float32> closestPointB) const;
 			#endif
 
 			#if defined(SHOW_FEATURES)

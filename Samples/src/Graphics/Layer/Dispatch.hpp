@@ -11,7 +11,7 @@ namespace Trident {
 	class DispatchSampleRenderer : public Renderer {
 		private:
 			struct Vertex {
-				svec2<float32> position;
+				vec2<float32> position;
 			};
 
 		public:

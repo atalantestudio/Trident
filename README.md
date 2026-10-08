@@ -47,7 +47,7 @@ On Windows, Premake and `glslc` are embedded as executables and used during the 
 
 - [Premake 5.0.0 beta 8](https://github.com/premake/premake-core/releases/tag/v5.0.0-beta8)
 - [Module base](https://github.com/atalantestudio/ModuleBase)
-- [Lyah 1.2.0+dev](https://github.com/atalantestudio/lyah)
+- [Lyah 1.2.1+dev](https://github.com/atalantestudio/lyah)
 - [Scroll 1.0.5+dev](https://github.com/atalantestudio/scroll)
 
 The engine also uses an [asset archive](https://github.com/atalantestudio/SampleAssetPack) for geometries, fonts (not in the repository), images and shaders.

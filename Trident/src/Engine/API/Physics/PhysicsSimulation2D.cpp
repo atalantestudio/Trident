@@ -13,7 +13,7 @@
 
 namespace Trident {
 	inline vec2<float32> calculateRelativeVelocity(const RigidBody2DComponent& A, const RigidBody2DComponent& B, vec2<float32> rA, vec2<float32> rB) {
-		return B.linearVelocity + cross(rB, B.angularVelocity) - A.linearVelocity - cross(rA, A.angularVelocity);
+		return B.linearVelocity + crossVec2Scalar(rB, B.angularVelocity) - A.linearVelocity - crossVec2Scalar(rA, A.angularVelocity);
 	}
 
 	void PhysicsSimulation2D::mergeContactManifolds(ContactPair2D& contactPair, const ContactManifold2D& newContactManifold) {
@@ -276,8 +276,8 @@ namespace Trident {
 			RigidBody2DComponent& rigidBodyB = scene->ecs.getComponent<RigidBody2DComponent>(joint.B);
 
 			// TODO: Why is the transpose needed?
-			const mat2x2<float32> RAT = transpose(mat2x2<float32>::rotation(rigidBodyA.rotation));
-			const mat2x2<float32> RBT = transpose(mat2x2<float32>::rotation(rigidBodyB.rotation));
+			const mat2x2<float32> RAT = transpose(rotationAngle<mat2x2<float32>>(rigidBodyA.rotation));
+			const mat2x2<float32> RBT = transpose(rotationAngle<mat2x2<float32>>(rigidBodyB.rotation));
 
 			joint.rA = joint.localAnchorA * RAT;
 			joint.rB = joint.localAnchorB * RBT;

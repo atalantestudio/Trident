@@ -29,14 +29,15 @@ namespace Trident {
 
 			template<typename AttributeType>
 			constexpr void registerAttribute(VertexInputAttributeFormat format) {
-				constexpr uint32 alignment = getAlignment<AttributeType>();
+				constexpr uint32 alignment = sizeof(AttributeType);
 
-				uint32 remainder = offset % alignment;
+				// TODO(graphics/vertex-input-attribute): Remove?
+				/* uint32 remainder = offset % alignment;
 
 				if (remainder != 0 && pad) {
 					// Pad so that the offset is a multiple of the alignment.
 					offset += alignment - remainder;
-				}
+				} */
 
 				const VertexInputAttribute vertexInputAttribute = {
 					.format = format,
@@ -45,17 +46,19 @@ namespace Trident {
 
 				attributes.emplace_back(vertexInputAttribute);
 
-				const uint32 size = static_cast<uint32>(sizeof(AttributeType));
+				constexpr uint32 size = sizeof(AttributeType);
 
 				offset += size;
 				stride = offset;
 				maxAlignment = max(maxAlignment, alignment);
-				remainder = stride % maxAlignment;
+
+				// TODO(graphics/vertex-input-attribute): Remove?
+				/* remainder = stride % maxAlignment;
 
 				if (remainder != 0 && pad) {
 					// Pad so that the stride is a multiple of the alignment.
 					stride += maxAlignment - remainder;
-				}
+				} */
 			}
 
 			template<typename AttributeType>

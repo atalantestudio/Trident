@@ -3,113 +3,6 @@
 
 #pragma once
 
-namespace lyah {
-	// TODO(lyah/sum): See https://github.com/orgs/atalantestudio/projects/4/views/1?pane=issue&itemId=210334400&issue=atalantestudio%7Clyah%7C27.
-	inline std::float_t sum(vec<3, std::float_t> a) {
-		return a[0] + a[1] + a[2];
-	}
-
-	// vec<2, sint32> polyfill.
-	template<>
-	struct vec<2, std::int32_t> {
-		public:
-			inline std::int32_t operator[](std::size_t index) const noexcept {
-				DEBUG_ASSERT(index < 2);
-
-				return m[index];
-			}
-
-			inline std::int32_t& operator[](std::size_t index) noexcept {
-				DEBUG_ASSERT(index < 2);
-
-				return m[index];
-			}
-
-		private:
-			std::int32_t m[2];
-	};
-
-	// vec<3, sint32> polyfill.
-	template<>
-	struct vec<3, std::int32_t> {
-		public:
-			inline std::int32_t operator[](std::size_t index) const noexcept {
-				DEBUG_ASSERT(index < 3);
-
-				return m[index];
-			}
-
-			inline std::int32_t& operator[](std::size_t index) noexcept {
-				DEBUG_ASSERT(index < 3);
-
-				return m[index];
-			}
-
-		private:
-			std::int32_t m[3];
-	};
-
-	// vec<2, uint32> polyfill.
-	template<>
-	struct vec<2, std::uint32_t> {
-		public:
-			inline std::uint32_t operator[](std::size_t index) const noexcept {
-				DEBUG_ASSERT(index < 2);
-
-				return m[index];
-			}
-
-			inline std::uint32_t& operator[](std::size_t index) noexcept {
-				DEBUG_ASSERT(index < 2);
-
-				return m[index];
-			}
-
-		private:
-			std::uint32_t m[2];
-	};
-
-	// vec<3, uint32> polyfill.
-	template<>
-	struct vec<3, std::uint32_t> {
-		public:
-			inline std::uint32_t operator[](std::size_t index) const noexcept {
-				DEBUG_ASSERT(index < 3);
-
-				return m[index];
-			}
-
-			inline std::uint32_t& operator[](std::size_t index) noexcept {
-				DEBUG_ASSERT(index < 3);
-
-				return m[index];
-			}
-
-		private:
-			std::uint32_t m[3];
-	};
-
-	// vec<4, uint32> polyfill.
-	template<>
-	struct vec<4, std::uint32_t> {
-		public:
-			inline std::uint32_t operator[](std::size_t index) const noexcept {
-				DEBUG_ASSERT(index < 4);
-
-				return m[index];
-			}
-
-			inline std::uint32_t& operator[](std::size_t index) noexcept {
-				DEBUG_ASSERT(index < 4);
-
-				return m[index];
-			}
-
-		private:
-			std::uint32_t m[4];
-	};
-}
-
 namespace Trident {
 	template<std::size_t C, typename T>
 	using vec = lyah::vec<C, T>;
@@ -138,247 +31,13 @@ namespace Trident {
 	template<typename T>
 	using quat = lyah::quat<T>;
 
-	template<std::size_t C, typename T>
-	struct svec;
-
+	// TODO(lyah): Remove.
 	template<typename T>
-	struct alignas(2 * sizeof(T)) svec<2, T> {
-		T x;
-		T y;
+	using svec2 = vec<2, T>;
 
-		constexpr svec() :
-			x(static_cast<T>(0)), y(static_cast<T>(0))
-		{}
-
-		constexpr svec(T x, T y) :
-			x(x), y(y)
-		{}
-
-		// TODO(lyah/scalar): Remove once Lyah supports scalar vector math.
-		constexpr explicit svec(vec<2, T> a) :
-			x(a[0]),
-			y(a[1])
-		{}
-
-		inline T operator[](std::size_t index) const {
-			DEBUG_ASSERT(index < 2);
-
-			return pointer_cast<const T*>(this)[index];
-		}
-
-		inline T& operator[](std::size_t index) {
-			DEBUG_ASSERT(index < 2);
-
-			return pointer_cast<T*>(this)[index];
-		}
-
-		// TODO(lyah/scalar): Add scalar vectors and replace SIMD vectors by general-purpose registers.
-		inline operator vec<2, T>() const {
-			return {x, y};
-		}
-	};
-
+	// TODO(lyah): Remove.
 	template<typename T>
-	struct svec<3, T> {
-		T x;
-		T y;
-		T z;
-
-		constexpr svec() :
-			x(static_cast<T>(0)), y(static_cast<T>(0)), z(static_cast<T>(0))
-		{}
-
-		constexpr svec(T x, T y, T z) :
-			x(x), y(y), z(z)
-		{}
-
-		// TODO(lyah/scalar): Remove once Lyah supports scalar vector math.
-		constexpr explicit svec(vec<3, T> a) :
-			x(a[0]), y(a[1]), z(a[2])
-		{}
-
-		inline T operator[](std::size_t index) const {
-			DEBUG_ASSERT(index < 3);
-
-			return pointer_cast<const T*>(this)[index];
-		}
-
-		inline T& operator[](std::size_t index) {
-			DEBUG_ASSERT(index < 3);
-
-			return pointer_cast<T*>(this)[index];
-		}
-
-		// TODO(lyah/scalar): Add scalar vectors and replace SIMD vectors by general-purpose registers.
-		inline operator vec<3, T>() const {
-			return {x, y, z};
-		}
-	};
-
-	template<typename T>
-	constexpr svec<2, T> operator-(svec<2, T> a) {
-		return {
-			-a.x,
-			-a.y,
-		};
-	}
-
-	template<std::size_t C, typename T>
-	constexpr svec<C, T>& operator+=(svec<C, T>& a, const svec<C, T>& b);
-
-	template<typename T>
-	constexpr svec<2, T>& operator+=(svec<2, T>& a, const svec<2, T>& b) {
-		a.x += b.x;
-		a.y += b.y;
-
-		return a;
-	}
-
-	template<typename T>
-	constexpr bool operator==(svec<2, T> a, svec<2, T> b) {
-		return a.x == b.x && a.y == b.y;
-	}
-
-	template<typename T>
-	constexpr bool operator!=(svec<2, T> a, svec<2, T> b) {
-		return a.x != b.x || a.y != b.y;
-	}
-
-	template<typename T>
-	constexpr svec<2, T>& operator-=(svec<2, T>& a, const svec<2, T>& b) {
-		a.x -= b.x;
-		a.y -= b.y;
-
-		return a;
-	}
-
-	template<typename T>
-	constexpr svec<3, T>& operator+=(svec<3, T>& a, const svec<3, T>& b) {
-		a.x += b.x;
-		a.y += b.y;
-		a.z += b.z;
-
-		return a;
-	}
-
-	template<typename T>
-	constexpr svec<2, T>& operator*=(svec<2, T>& a, T b) {
-		a.x *= b;
-		a.y *= b;
-
-		return a;
-	}
-
-	template<typename T>
-	constexpr svec<3, T>& operator*=(svec<3, T>& a, T b) {
-		a.x *= b;
-		a.y *= b;
-		a.z *= b;
-
-		return a;
-	}
-
-	template<typename T>
-	constexpr svec<3, T> operator*(T b, svec<3, T> a) {
-		return a *= b;
-	}
-
-	template<std::size_t C, typename T>
-	constexpr svec<C, T>& operator*=(svec<C, T>& a, const svec<C, T>& b);
-
-	template<typename T>
-	constexpr svec<2, T>& operator*=(svec<2, T>& a, const svec<2, T>& b) {
-		a.x *= b.x;
-		a.y *= b.y;
-
-		return a;
-	}
-
-	template<typename T>
-	constexpr svec<3, T>& operator*=(svec<3, T>& a, const svec<3, T>& b) {
-		a.x *= b.x;
-		a.y *= b.y;
-		a.z *= b.z;
-
-		return a;
-	}
-
-	template<typename T>
-	constexpr svec<2, T>& operator/=(svec<2, T>& a, svec<2, T> b) {
-		a.x /= b.x;
-		a.y /= b.y;
-
-		return a;
-	}
-
-	template<std::size_t C, typename T>
-	constexpr svec<C, T>& operator/=(svec<C, T>& a, T b);
-
-	template<typename T>
-	constexpr svec<2, T>& operator/=(svec<2, T>& a, T b) {
-		a.x /= b;
-		a.y /= b;
-
-		return a;
-	}
-
-	template<typename T>
-	constexpr svec<3, T>& operator/=(svec<3, T>& a, T b) {
-		a.x /= b;
-		a.y /= b;
-		a.z /= b;
-
-		return a;
-	}
-
-	template<typename T>
-	constexpr svec<2, T> operator/(T b, svec<2, T> a) {
-		return svec<2, T>(b, b) / a;
-	}
-
-	template<typename T>
-	constexpr svec<2, T> operator/(svec<2, T> a, svec<2, T> b) {
-		return a /= b;
-	}
-
-	template<std::size_t C, typename T>
-	constexpr svec<C, T> operator+(svec<C, T> a, svec<C, T> b) {
-		return a += b;
-	}
-
-	template<std::size_t C, typename T>
-	constexpr svec<C, T> operator*(svec<C, T> a, svec<C, T> b) {
-		return a *= b;
-	}
-
-	template<std::size_t C, typename T>
-	constexpr svec<C, T> operator*(svec<C, T> a, T b) {
-		return a *= b;
-	}
-
-	template<std::size_t C, typename T>
-	constexpr svec<C, T> operator*(T b, svec<C, T> a) {
-		return a *= b;
-	}
-
-	template<std::size_t C, typename T>
-	constexpr svec<C, T> operator-(const svec<C, T>& a, const svec<C, T>& b);
-
-	template<typename T>
-	constexpr svec<2, T> operator-(const svec<2, T>& a, const svec<2, T>& b) {
-		return {a.x - b.x, a.y - b.y};
-	}
-
-	template<typename T>
-	constexpr svec<3, T> operator-(const svec<3, T>& a, const svec<3, T>& b) {
-		return {a.x - b.x, a.y - b.y, a.z - b.z};
-	}
-
-	template<typename T>
-	using svec2 = svec<2, T>;
-
-	template<typename T>
-	using svec3 = svec<3, T>;
+	using svec3 = vec<3, T>;
 
 	struct Plane2D {
 		vec2<float32> normal;
@@ -426,71 +85,34 @@ namespace Trident {
 	template<typename T>
 	using sim2 = sim<2, T>;
 
-	// Returns the area of the parallelogram formed by `a` and `b`.
-	template<typename T>
-	inline T parallelogramArea(vec<2, T> a, vec<2, T> b) {
-		return a[0] * b[1] - a[1] * b[0];
-	}
-
-	template<typename T>
-	inline vec<2, T> perpendicularLeft(vec<2, T> a) {
-		return {-a[1], a[0]};
-	}
-
-	template<typename T>
-	inline vec<2, T> perpendicularRight(vec<2, T> a) {
-		return {a[1], -a[0]};
-	}
-
 	using lyah::abs;
+	using lyah::axisAngle;
 	using lyah::ceil;
 	using lyah::clamp;
 	using lyah::cos;
 	using lyah::epsilon;
-	using lyah::infinity;
+	using lyah::floor;
+	using lyah::identity;
 	using lyah::inverse;
 	using lyah::lerp;
+	using lyah::lookAt;
 	using lyah::max;
 	using lyah::min;
+	using lyah::parallelogramArea;
+	using lyah::perpendicularLeft;
+	using lyah::perpendicularRight;
 	using lyah::pi;
 	using lyah::pow;
 	using lyah::radians;
-	using std::round;
+	using lyah::rotationAngle;
+	using lyah::rotationAxisAngle;
+	using lyah::round;
+	using lyah::scaling;
 	using lyah::sin;
 	using lyah::sqrt;
 	using lyah::tau;
+	using lyah::translation;
 	using lyah::transpose;
-
-	template<typename T>
-	inline constexpr T pow_constexpr(T base, std::size_t exp) {
-		DEBUG_ASSERT(exp < 8);
-
-		if (exp == 0) {
-			return static_cast<T>(1);
-		}
-
-		return base * pow_constexpr(base, exp - 1);
-	}
-
-	template<std::size_t C, typename T>
-	inline vec<C, T> round(vec<C, T> a);
-
-	template<typename T>
-	inline vec<2, T> round(vec<2, T> a) {
-		return {round(a[0]), round(a[1])};
-	}
-
-	template<typename T>
-	inline vec<3, T> round(vec<3, T> a) {
-		return {round(a[0]), round(a[1]), round(a[2])};
-	}
-
-	template<std::size_t E, std::size_t C, typename T>
-	inline vec<C, T> round(vec<C, T> a) {
-		constexpr T p = pow_constexpr(static_cast<T>(10), E);
-
-		return round(a * p) / p;
-	}
 
 	// TODO(lyah/scaled-area)
 	// Access the vertices using the indices provided by the geometry.
@@ -527,6 +149,12 @@ namespace Trident {
 			a[1] * (b_c[0] - b_c[1]),
 			a[0] * (b_c[1] - b_c[0]),
 		};
+	}
+
+	// TODO(lyah): Add to Lyah as `cross` or `determinant`.
+	template<typename T>
+	inline vec2<T> crossVec2Scalar(vec2<T> a, T b) {
+		return {a.y * b, a.x * -b};
 	}
 
 	template<typename T>
@@ -659,11 +287,11 @@ namespace Trident {
 		const float32 angle = dot(previousDirection, direction);
 
 		if (abs(angle + 1.0f) < e) {
-			return quat<float32>::axisAngle(up, pi<float32>());
+			return axisAngle<float32>(up, pi<float32>());
 		}
 
 		if (abs(angle - 1.0f) < e) {
-			return quat<float32>::identity();
+			return identity<quat<float32>>();
 		}
 
 		const float32 rotationAngle = acos(angle);
@@ -674,7 +302,7 @@ namespace Trident {
 			rotationAxis = normalized(rotationAxis);
 		}
 
-		return quat<float32>::axisAngle(rotationAxis, rotationAngle);
+		return axisAngle<float32>(rotationAxis, rotationAngle);
 	}
 
 	inline float32 avg(float32 a, float32 b) {
@@ -688,67 +316,5 @@ namespace Trident {
 
 	inline float32 fract(float32 a) {
 		return a - static_cast<sint32>(a);
-	}
-
-	// TODO(lyah): Fix crash when inverting the matrix below.
-	// {
-	//    -1.19209290e-07f,  0.197657436f,     0.980271161f,     0.00000000f,
-	//     7.45058060e-09f,  0.980271161f,    -0.197657421f,     0.00000000f,
-	//    -1.00000000f,     -2.98023224e-08f, -1.19209290e-07f,  0.00000000f,
-	//    -4.00000000f,     -0.882244110f,     0.177891061f,     1.00000000f,
-	// }
-	inline mat4x4<float32> inverseFix(mat4x4<float32> m) {
-		float32 Coef00 = m[2][2] * m[3][3] - m[3][2] * m[2][3];
-		float32 Coef02 = m[1][2] * m[3][3] - m[3][2] * m[1][3];
-		float32 Coef03 = m[1][2] * m[2][3] - m[2][2] * m[1][3];
-
-		float32 Coef04 = m[2][1] * m[3][3] - m[3][1] * m[2][3];
-		float32 Coef06 = m[1][1] * m[3][3] - m[3][1] * m[1][3];
-		float32 Coef07 = m[1][1] * m[2][3] - m[2][1] * m[1][3];
-
-		float32 Coef08 = m[2][1] * m[3][2] - m[3][1] * m[2][2];
-		float32 Coef10 = m[1][1] * m[3][2] - m[3][1] * m[1][2];
-		float32 Coef11 = m[1][1] * m[2][2] - m[2][1] * m[1][2];
-
-		float32 Coef12 = m[2][0] * m[3][3] - m[3][0] * m[2][3];
-		float32 Coef14 = m[1][0] * m[3][3] - m[3][0] * m[1][3];
-		float32 Coef15 = m[1][0] * m[2][3] - m[2][0] * m[1][3];
-
-		float32 Coef16 = m[2][0] * m[3][2] - m[3][0] * m[2][2];
-		float32 Coef18 = m[1][0] * m[3][2] - m[3][0] * m[1][2];
-		float32 Coef19 = m[1][0] * m[2][2] - m[2][0] * m[1][2];
-
-		float32 Coef20 = m[2][0] * m[3][1] - m[3][0] * m[2][1];
-		float32 Coef22 = m[1][0] * m[3][1] - m[3][0] * m[1][1];
-		float32 Coef23 = m[1][0] * m[2][1] - m[2][0] * m[1][1];
-
-		vec<4, float32> Fac0(Coef00, Coef00, Coef02, Coef03);
-		vec<4, float32> Fac1(Coef04, Coef04, Coef06, Coef07);
-		vec<4, float32> Fac2(Coef08, Coef08, Coef10, Coef11);
-		vec<4, float32> Fac3(Coef12, Coef12, Coef14, Coef15);
-		vec<4, float32> Fac4(Coef16, Coef16, Coef18, Coef19);
-		vec<4, float32> Fac5(Coef20, Coef20, Coef22, Coef23);
-
-		vec<4, float32> Vec0(m[1][0], m[0][0], m[0][0], m[0][0]);
-		vec<4, float32> Vec1(m[1][1], m[0][1], m[0][1], m[0][1]);
-		vec<4, float32> Vec2(m[1][2], m[0][2], m[0][2], m[0][2]);
-		vec<4, float32> Vec3(m[1][3], m[0][3], m[0][3], m[0][3]);
-
-		vec<4, float32> Inv0(Vec1 * Fac0 - Vec2 * Fac1 + Vec3 * Fac2);
-		vec<4, float32> Inv1(Vec0 * Fac0 - Vec2 * Fac3 + Vec3 * Fac4);
-		vec<4, float32> Inv2(Vec0 * Fac1 - Vec1 * Fac3 + Vec3 * Fac5);
-		vec<4, float32> Inv3(Vec0 * Fac2 - Vec1 * Fac4 + Vec2 * Fac5);
-
-		vec<4, float32> SignA(+1, -1, +1, -1);
-		vec<4, float32> SignB(-1, +1, -1, +1);
-		mat<4, 4, float32> Inverse(Inv0 * SignA, Inv1 * SignB, Inv2 * SignA, Inv3 * SignB);
-
-		vec<4, float32> Row0(Inverse[0][0], Inverse[1][0], Inverse[2][0], Inverse[3][0]);
-
-		vec<4, float32> Dot0(m[0] * Row0);
-		float32 Dot1 = (Dot0[0] + Dot0[1]) + (Dot0[2] + Dot0[3]);
-		float32 OneOverDeterminant = 1.0f / Dot1;
-
-		return Inverse * OneOverDeterminant;
 	}
 }

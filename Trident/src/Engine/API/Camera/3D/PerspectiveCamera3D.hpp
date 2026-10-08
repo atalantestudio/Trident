@@ -39,9 +39,9 @@ namespace Trident {
 			} */
 
 			void updateOrientation(svec3<float32> offset) {
-				const quat<float32> pitch = quat<float32>::axisAngle(RIGHT, offset[0]);
-				const quat<float32> yaw = quat<float32>::axisAngle(UP, offset[1]);
-				const quat<float32> roll = quat<float32>::axisAngle(FORWARD, offset[2]);
+				const quat<float32> pitch = axisAngle<float32>(RIGHT, offset[0]);
+				const quat<float32> yaw = axisAngle<float32>(UP, offset[1]);
+				const quat<float32> roll = axisAngle<float32>(FORWARD, offset[2]);
 
 				orientation = normalized((yaw * (orientation * pitch)) * roll);
 			}
@@ -58,10 +58,10 @@ namespace Trident {
 				const vec3<float32> eye = position - getForward() * distance;
 
 				// TODO: Use forward rotation with this formula: -position * conjugate(orientation)
-				const vec3<float32> translation = -(conjugate(orientation) * quat<float32>(0.0f, eye[0], eye[1], eye[2]) * orientation).xyz();
+				const quat<float32> translation = -(conjugate(orientation) * quat<float32>(0.0f, eye.x, eye.y, eye.z) * orientation);
 
 				view = mat4x4<float32>(orientation);
-				view[3] = {translation[0], translation[1], translation[2], 1.0f};
+				view[3] = {translation.x, translation.y, translation.z, 1.0f};
 			}
 
 		public:
@@ -86,6 +86,6 @@ namespace Trident {
 			float32 farPlane = 1.0f;
 
 		private:
-			quat<float32> orientation = quat<float32>::axisAngle(FORWARD, 0.0_rad);
+			quat<float32> orientation = axisAngle<float32>(FORWARD, 0.0_rad);
 	};
 }

@@ -6,11 +6,12 @@
 namespace Trident {
 	struct RigidBody2DComponent {
 		void updateWorld(vec2<float32> centroid) {
-			world =
-				mat3x3<float32>::translation(-centroid) *
-				mat3x3<float32>::scaling(scale) *
-				mat3x3<float32>::rotation(rotation) *
-				mat3x3<float32>::translation(position);
+			world = (
+				translation<mat3x3<float32>>(-centroid) *
+				scaling<mat3x3<float32>>(scale) *
+				rotationAngle<mat3x3<float32>>(rotation) *
+				translation<mat3x3<float32>>(position)
+			);
 		}
 
 		/// Applies a linear force to the body.
@@ -32,19 +33,19 @@ namespace Trident {
 			angularVelocity -= parallelogramArea(r, j) * inverseInertia;
 		}
 
-		// TODO: Use svec2<float32> instead.
+		// TODO(lyah/scalar): Use svec2<float32> instead.
 		/// Position of the center of mass in world-space.
 		vec2<float32> position;
 
 		float32 rotation;
 
-		// TODO: Use svec2<float32> instead.
+		// TODO(lyah/scalar): Use svec2<float32> instead.
 		// NOTE: This isn't meant to be dynamically updated.
 		vec2<float32> scale = {1.0f, 1.0f};
 
-		mat3x3<float32> world = mat3x3<float32>::identity();
+		mat3x3<float32> world = identity<mat3x3<float32>>();
 
-		// TODO: Use svec2<float32> instead.
+		// TODO(lyah/scalar): Use svec2<float32> instead.
 		vec2<float32> linearVelocity;
 
 		float32 angularVelocity;
@@ -58,7 +59,7 @@ namespace Trident {
 
 		float32 restitution;
 
-		// TODO: Use svec2<float32> instead.
+		// TODO(lyah/scalar): Use svec2<float32> instead.
 		// TODO: Keep inside the rigid body?
 		vec2<float32> force;
 	};

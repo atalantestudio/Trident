@@ -11,11 +11,11 @@ namespace Trident {
 	class SampleArrayTextureRenderer : public Renderer {
 		private:
 			struct Vertex {
-				svec2<float32> position;
+				vec2<float32> position;
 			};
 
 			struct Instance {
-				svec2<float32> translation;
+				vec2<float32> translation;
 				uint32 textureIndex;
 			};
 
@@ -233,9 +233,9 @@ namespace Trident {
 					VertexInputBinding(InputRate::INSTANCE),
 				};
 
-				vertexInputBindings[0].registerAttribute<svec2<float32>>();
-				vertexInputBindings[1].registerAttribute<svec2<float32>>();
-				vertexInputBindings[1].registerAttribute<uint32>();
+				vertexInputBindings[0].registerAttribute<decltype(Vertex::position)>();
+				vertexInputBindings[1].registerAttribute<decltype(Instance::translation)>();
+				vertexInputBindings[1].registerAttribute<decltype(Instance::textureIndex)>();
 
 				const ColorBlendAttachment colorBlendAttachments[] = {
 					{

@@ -11,8 +11,8 @@ namespace Trident {
 			VertexInputBinding(InputRate::VERTEX),
 		};
 
-		vertexInputBindings[0].registerAttribute<svec3<float32>>(VertexInputAttributeFormat::R32G32B32_FLOAT);
-		vertexInputBindings[0].registerAttribute<uint32>(VertexInputAttributeFormat::R10G10B10A2_UNORM);
+		vertexInputBindings[0].registerAttribute<decltype(Vertex3D::position)>(VertexInputAttributeFormat::R32G32B32_FLOAT);
+		vertexInputBindings[0].registerAttribute<decltype(Vertex3D::normal)>(VertexInputAttributeFormat::R10G10B10A2_UNORM);
 		vertexInputBindings[0].stride = sizeof(Vertex3D);
 
 		const ColorBlendAttachment colorBlendAttachments[] = {

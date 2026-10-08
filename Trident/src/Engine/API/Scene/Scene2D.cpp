@@ -169,8 +169,8 @@ namespace Trident {
 		const Entity entity = ecs.createEntity();
 		const RigidBody2DComponent& rigidBodyA = ecs.getComponent<RigidBody2DComponent>(descriptor.A);
 		const RigidBody2DComponent& rigidBodyB = ecs.getComponent<RigidBody2DComponent>(descriptor.B);
-		const mat2x2<float32> RA = transpose(mat2x2<float32>::rotation(rigidBodyA.rotation));
-		const mat2x2<float32> RB = transpose(mat2x2<float32>::rotation(rigidBodyB.rotation));
+		const mat2x2<float32> RA = transpose(rotationAngle<mat2x2<float32>>(rigidBodyA.rotation));
+		const mat2x2<float32> RB = transpose(rotationAngle<mat2x2<float32>>(rigidBodyB.rotation));
 
 		Joint2D joint{};
 		joint.A = descriptor.A;

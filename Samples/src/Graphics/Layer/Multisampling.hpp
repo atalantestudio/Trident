@@ -53,7 +53,7 @@ namespace Trident {
 	class MultisamplingSampleRenderer : public Renderer {
 		private:
 			struct Vertex {
-				svec2<float32> position;
+				vec2<float32> position;
 				vec3<float32> color;
 			};
 
@@ -143,8 +143,8 @@ namespace Trident {
 					VertexInputBinding(InputRate::VERTEX),
 				};
 
-				vertexInputBindings[0].registerAttribute<svec2<float32>>();
-				vertexInputBindings[0].registerAttribute<vec3<float32>>();
+				vertexInputBindings[0].registerAttribute<decltype(Vertex::position)>();
+				vertexInputBindings[0].registerAttribute<decltype(Vertex::color)>();
 
 				const ColorBlendAttachment colorBlendAttachments[] = {
 					{

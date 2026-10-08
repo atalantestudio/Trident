@@ -317,17 +317,17 @@ namespace Trident {
 			const mat4x4<float32> cameraProjection = perspective(camera.fieldOfView, camera.aspectRatio, nearPlane, farPlane, 1.0f);
 			const mat4x4<float32> cameraProjectionView = camera.getView() * cameraProjection;
 
-			calculateFrustum(frustumVertices, inverseFix(cameraProjectionView));
+			calculateFrustum(frustumVertices, inverse(cameraProjectionView));
 
 			vec3<float32> frustumCenter = {0.0f, 0.0f, 0.0f};
 
 			for (const vec4<float32> vertex : frustumVertices) {
-				frustumCenter += vec3<float32>(vertex.m);
+				frustumCenter += {vertex.x, vertex.y, vertex.z};
 			}
 
 			frustumCenter /= 8.0f;
 
-			const mat4x4<float32> lightView = mat4x4<float32>::lookAt(frustumCenter + lightDirection, frustumCenter, UP);
+			const mat4x4<float32> lightView = lookAt<float32>(frustumCenter + lightDirection, frustumCenter, UP);
 
 			float32 minX = max<float32>();
 			float32 maxX = min<float32>();

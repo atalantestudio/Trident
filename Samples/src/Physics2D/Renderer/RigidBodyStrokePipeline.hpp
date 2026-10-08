@@ -12,12 +12,12 @@ namespace Trident {
 			VertexInputBinding(InputRate::INSTANCE),
 		};
 
-		vertexInputBindings[0].registerAttribute<svec2<float32>>();
-		vertexInputBindings[1].registerAttribute<mat3x3<float32>>();
-		vertexInputBindings[1].registerAttribute<vec4<float32>>();
-		vertexInputBindings[1].registerAttribute<vec4<float32>>();
-		vertexInputBindings[1].registerAttribute<float32>();
-		vertexInputBindings[1].registerAttribute<uint32>();
+		vertexInputBindings[0].registerAttribute<decltype(Vertex::position)>();
+		vertexInputBindings[1].registerAttribute<decltype(RigidBody::world)>();
+		vertexInputBindings[1].registerAttribute<decltype(RigidBody::fillColor)>();
+		vertexInputBindings[1].registerAttribute<decltype(RigidBody::strokeColor)>();
+		vertexInputBindings[1].registerAttribute<decltype(RigidBody::depth)>();
+		vertexInputBindings[1].registerAttribute<decltype(RigidBody::selected)>();
 
 		const ColorBlendAttachment colorBlendAttachments[] = {
 			{

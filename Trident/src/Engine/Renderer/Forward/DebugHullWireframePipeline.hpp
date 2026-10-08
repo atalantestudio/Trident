@@ -11,8 +11,8 @@ namespace Trident {
 			VertexInputBinding(InputRate::INSTANCE),
 		};
 
-		vertexInputBindings[0].registerAttribute<mat4x4<float32>>();
-		vertexInputBindings[0].registerAttribute<mat3x3<float32>>();
+		vertexInputBindings[0].registerAttribute<decltype(Instance3D::worldTransform)>();
+		vertexInputBindings[0].registerAttribute<decltype(Instance3D::normalTransform)>();
 
 		const ColorBlendAttachment colorBlendAttachments[] = {
 			{

@@ -5,7 +5,6 @@
 
 namespace Trident {
 	// TSL only supports 32-bit and 64-bit floating-point formats.
-	// TODO(graphics/vertex-input-attribute): Implement remaining formats using scalar vectors.
 	enum class VertexInputAttributeFormat : uint8 {
 		R8_SINT,
 		R8_UINT,
@@ -80,34 +79,31 @@ namespace Trident {
 		return VertexInputAttributeFormat::R32_FLOAT;
 	}
 
+	// TODO(graphics/vertex-input-attribute): Implement remaining formats when Lyah supports scalar math.
 	/* template<>
 	constexpr VertexInputAttributeFormat getVertexInputAttributeFormat<vec2<sint32>>() {
 		return VertexInputAttributeFormat::R32G32_SINT;
 	} */
 
 	template<>
-	constexpr VertexInputAttributeFormat getVertexInputAttributeFormat<svec2<uint32>>() {
+	constexpr VertexInputAttributeFormat getVertexInputAttributeFormat<vec2<uint32>>() {
 		return VertexInputAttributeFormat::R32G32_UINT;
 	}
 
 	template<>
-	constexpr VertexInputAttributeFormat getVertexInputAttributeFormat<svec2<float32>>() {
+	constexpr VertexInputAttributeFormat getVertexInputAttributeFormat<vec2<float32>>() {
 		return VertexInputAttributeFormat::R32G32_FLOAT;
 	}
 
+	// TODO(graphics/vertex-input-attribute): Implement remaining formats when Lyah supports scalar math.
 	/* template<>
 	constexpr VertexInputAttributeFormat getVertexInputAttributeFormat<vec3<sint32>>() {
 		return VertexInputAttributeFormat::R32G32B32_SINT;
 	} */
 
 	template<>
-	constexpr VertexInputAttributeFormat getVertexInputAttributeFormat<svec3<uint32>>() {
+	constexpr VertexInputAttributeFormat getVertexInputAttributeFormat<vec3<uint32>>() {
 		return VertexInputAttributeFormat::R32G32B32_UINT;
-	}
-
-	template<>
-	constexpr VertexInputAttributeFormat getVertexInputAttributeFormat<svec3<float32>>() {
-		return VertexInputAttributeFormat::R32G32B32_FLOAT;
 	}
 
 	template<>
@@ -115,6 +111,7 @@ namespace Trident {
 		return VertexInputAttributeFormat::R32G32B32_FLOAT;
 	}
 
+	// TODO(graphics/vertex-input-attribute): Implement remaining formats when Lyah supports scalar math.
 	/* template<>
 	constexpr VertexInputAttributeFormat getVertexInputAttributeFormat<vec4<sint32>>() {
 		return VertexInputAttributeFormat::R32G32B32A32_SINT;
@@ -145,11 +142,13 @@ namespace Trident {
 		return VertexInputAttributeFormat::R64_FLOAT;
 	}
 
+	// TODO(graphics/vertex-input-attribute): Implement remaining formats when Lyah supports scalar math.
 	/* template<>
 	constexpr VertexInputAttributeFormat getVertexInputAttributeFormat<vec2<sint64>>() {
 		return VertexInputAttributeFormat::R64G64_SINT;
 	} */
 
+	// TODO(graphics/vertex-input-attribute): Implement remaining formats when Lyah supports scalar math.
 	/* template<>
 	constexpr VertexInputAttributeFormat getVertexInputAttributeFormat<vec2<uint64>>() {
 		return VertexInputAttributeFormat::R64G64_UINT;
@@ -160,11 +159,13 @@ namespace Trident {
 		return VertexInputAttributeFormat::R64G64_FLOAT;
 	}
 
+	// TODO(graphics/vertex-input-attribute): Implement remaining formats when Lyah supports scalar math.
 	/* template<>
 	constexpr VertexInputAttributeFormat getVertexInputAttributeFormat<vec3<sint64>>() {
 		return VertexInputAttributeFormat::R64G64B64_SINT;
 	} */
 
+	// TODO(graphics/vertex-input-attribute): Implement remaining formats when Lyah supports scalar math.
 	/* template<>
 	constexpr VertexInputAttributeFormat getVertexInputAttributeFormat<vec3<uint64>>() {
 		return VertexInputAttributeFormat::R64G64B64_UINT;
@@ -175,11 +176,13 @@ namespace Trident {
 		return VertexInputAttributeFormat::R64G64B64_FLOAT;
 	}
 
+	// TODO(graphics/vertex-input-attribute): Implement remaining formats when Lyah supports scalar math.
 	/* template<>
 	constexpr VertexInputAttributeFormat getVertexInputAttributeFormat<vec4<sint64>>() {
 		return VertexInputAttributeFormat::R64G64B64A64_SINT;
 	} */
 
+	// TODO(graphics/vertex-input-attribute): Implement remaining formats when Lyah supports scalar math.
 	/* template<>
 	constexpr VertexInputAttributeFormat getVertexInputAttributeFormat<vec4<uint64>>() {
 		return VertexInputAttributeFormat::R64G64B64A64_UINT;

@@ -327,14 +327,14 @@ namespace Trident {
 
 							const BuildTransform3D& transform = scene.staticGeometry.instances[instanceIndex].transform;
 							const quat<float32> orientation = normalized(
-								quat<float32>::axisAngle(UP, transform.rotation[1]) *
-								quat<float32>::axisAngle(RIGHT, transform.rotation[0]) *
-								quat<float32>::axisAngle(FORWARD, transform.rotation[2])
+								axisAngle<float32>(UP, transform.rotation[1]) *
+								axisAngle<float32>(RIGHT, transform.rotation[0]) *
+								axisAngle<float32>(FORWARD, transform.rotation[2])
 							);
 							const mat4x4<float32> world = transpose(
-								mat4x4<float32>::scaling({transform.scale, transform.scale, transform.scale}) *
+								scaling<mat4x4<float32>>(vec3<float32>(transform.scale)) *
 								mat4x4<float32>(orientation) *
-								mat4x4<float32>::translation(transform.translation)
+								translation<mat4x4<float32>>(transform.translation)
 							);
 
 							instanceMappedRange[instanceIndex] = {

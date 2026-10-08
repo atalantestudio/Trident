@@ -21,9 +21,9 @@ namespace Trident {
 			const uint32 indexCount = face.getIndexCount();
 			const svec2<float32> faceSize = face.boundingBox.max - face.boundingBox.min;
 			const mat3x3<float32> textureTransform = (
-				mat3x3<float32>::scaling(faceSize / face.textureFiltering.scale) *
-				mat3x3<float32>::rotation(face.textureFiltering.rotation * pi<float32>()) *
-				mat3x3<float32>::translation(face.textureFiltering.translation)
+				scaling<mat3x3<float32>>(faceSize / face.textureFiltering.scale) *
+				rotationAngle<mat3x3<float32>>(face.textureFiltering.rotation * pi<float32>()) *
+				translation<mat3x3<float32>>(face.textureFiltering.translation)
 			);
 			const quat<float32> R = lookAt(face.normal, {0.0f, 0.0f, -1.0f}, UP);
 
@@ -72,10 +72,9 @@ namespace Trident {
 				BuildVertex3D& vertex = geometry.vertices[vertexOffset + vertexIndex];
 				vertex.position = facePositions[faceIndices2[vertexIndex]];
 
-				const quat<float32> q = {0.0f, vertex.position.x, vertex.position.y, vertex.position.z};
-				const svec3<float32> coordinate = svec3<float32>((R * q * inverse(R)).xyz());
+				const quat<float32> q = R * quat<float32>(0.0f, vertex.position.x, vertex.position.y, vertex.position.z) * inverse(R);
 
-				svec2<float32> textureCoordinate = {coordinate.x, coordinate.y};
+				svec2<float32> textureCoordinate = {q.x, q.y};
 				textureCoordinate -= face.boundingBox.min;
 				textureCoordinate /= faceSize;
 				textureCoordinate.y = 1.0f - textureCoordinate.y;

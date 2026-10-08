@@ -9,7 +9,7 @@ namespace Trident {
 	struct Vertex3D {
 		// TODO(geometry/vertex-compression): Replace with R16G16B16_SNORM?
 		/// Stored as R32G32B32_SFLOAT.
-		svec3<float32> position;
+		vec3<float32> position;
 
 		/// Stored as R10G10B10A2_UNORM.
 		/// R10G10B10A2_SNORM would be better but it's not supported on DX12.

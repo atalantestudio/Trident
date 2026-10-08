@@ -11,7 +11,7 @@ namespace Trident {
 	class SampleInputAttachmentRenderer : public Renderer {
 		private:
 			struct Vertex {
-				svec2<float32> vertex;
+				vec2<float32> vertex;
 				vec3<float32> color;
 			};
 
@@ -295,8 +295,8 @@ namespace Trident {
 
 			ref<GraphicsPipeline> createTrianglePipeline() const {
 				VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-				vertexInputBinding.registerAttribute<svec2<float32>>();
-				vertexInputBinding.registerAttribute<vec3<float32>>();
+				vertexInputBinding.registerAttribute<decltype(Vertex::vertex)>();
+				vertexInputBinding.registerAttribute<decltype(Vertex::color)>();
 
 				const ColorBlendAttachment colorBlendAttachments[] = {
 					{

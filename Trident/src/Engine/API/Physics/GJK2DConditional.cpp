@@ -8,7 +8,7 @@
 namespace Trident {
 	// Returns the farthest point on `A` along `d`, in world-space.
 	inline static vec2<float32> support(const RigidBody2DComponent& A, const Hull2D& hull, vec2<float32> d) {
-		const mat2x2<float32> inverseRotation = mat2x2<float32>::rotation(-A.rotation);
+		const mat2x2<float32> inverseRotation = rotationAngle<mat2x2<float32>>(-A.rotation);
 		const vec2<float32> s = hull.support(d * inverseRotation);
 
 		return multiplyTransform(s, A.world);

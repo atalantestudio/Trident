@@ -48,12 +48,12 @@ namespace Trident {
 	class ColorBlendSampleRenderer : public Renderer {
 		private:
 			struct Vertex {
-				svec2<float32> position;
+				vec2<float32> position;
 			};
 
 			struct Instance {
 				vec4<float32> color;
-				svec2<float32> translation;
+				vec2<float32> translation;
 			};
 
 		private:

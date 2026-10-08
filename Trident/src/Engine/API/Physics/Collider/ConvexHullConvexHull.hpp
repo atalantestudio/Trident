@@ -16,8 +16,8 @@ namespace Trident {
 		}
 
 		const vec2<float32> referenceCentroid = sat.referenceHull->centroid;
-		const mat2x2<float32> referenceRotation = mat2x2<float32>::rotation(sat.referenceBody->rotation);
-		const mat2x2<float32> inverseIncidentRotation = mat2x2<float32>::rotation(-sat.incidentBody->rotation);
+		const mat2x2<float32> referenceRotation = rotationAngle<mat2x2<float32>>(sat.referenceBody->rotation);
+		const mat2x2<float32> inverseIncidentRotation = rotationAngle<mat2x2<float32>>(-sat.incidentBody->rotation);
 
 		const uint32 referenceLeftEdgeIndex = (static_cast<sint32>(sat.referenceEdgeIndex) - 1) % sat.referenceHull->edges.count();
 		const uint32 referenceRightEdgeIndex = (sat.referenceEdgeIndex + 1) % sat.referenceHull->edges.count();

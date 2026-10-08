@@ -9,7 +9,7 @@ namespace Trident {
 	// TODO: Some geometries (e.g. CircleGeometry2D) don't implement `supportIndex`. Use `supportVertex` instead.
 	// Returns the index of the farthest point on `A` along `d`, in local space.
 	inline static uint32 supportIndex(const RigidBody2DComponent& A, const Hull2D& hull, vec2<float32> d) {
-		const mat2x2<float32> inverseRotation = mat2x2<float32>::rotation(-A.rotation);
+		const mat2x2<float32> inverseRotation = rotationAngle<mat2x2<float32>>(-A.rotation);
 
 		return hull.supportIndex(d * inverseRotation);
 	}

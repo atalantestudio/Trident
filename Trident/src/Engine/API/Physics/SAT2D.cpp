@@ -7,8 +7,8 @@
 
 namespace Trident {
 	static void queryEdgeDirections(const RigidBody2DComponent& referenceBody, const RigidBody2DComponent& incidentBody, const Hull2D& referenceHull, const Hull2D& incidentHull, SAT2DOutput& output) {
-		const mat2x2<float32> RBA = mat2x2<float32>::rotation(referenceBody.rotation - incidentBody.rotation);
-		const mat2x2<float32> RA = mat2x2<float32>::rotation(referenceBody.rotation);
+		const mat2x2<float32> RBA = rotationAngle<mat2x2<float32>>(referenceBody.rotation - incidentBody.rotation);
+		const mat2x2<float32> RA = rotationAngle<mat2x2<float32>>(referenceBody.rotation);
 
 		uint32 edgeIndex = 0;
 
@@ -20,9 +20,7 @@ namespace Trident {
 			const vec2<float32> s = incidentHull.support(-d * RBA);
 			const vec2<float32> sT = multiplyTransform(s, incidentBody.world);
 
-			// NOTE
-			// The centroid is not involved in calculating the edge distance
-			// because it is applied when multiplying by the world matrix.
+			// The centroid is not involved when calculating the edge distance because it is applied when multiplying by the world matrix.
 			const float32 edgeDistance = abs(signedDistanceLPAB(a, b, {0.0f, 0.0f}));
 			const vec2<float32> offset = multiplyTransform(edgeDistance * d, referenceBody.world);
 
@@ -63,7 +61,7 @@ namespace Trident {
 			return output;
 		}
 
-		output.axis *= mat2x2<float32>::rotation(output.referenceBody->rotation);
+		output.axis *= rotationAngle<mat2x2<float32>>(output.referenceBody->rotation);
 
 		return output;
 	}
@@ -78,8 +76,8 @@ namespace Trident {
 			return output;
 		}
 
-		// TODO: Since the incident body is always the circle, does the axis need to be corrected?
-		output.axis *= mat2x2<float32>::rotation(output.referenceBody->rotation);
+		// TODO(physics/2d/sat-circle-convex-hull): Since the incident body is always the circle, does the axis need to be corrected?
+		output.axis *= rotationAngle<mat2x2<float32>>(output.referenceBody->rotation);
 
 		return output;
 	}

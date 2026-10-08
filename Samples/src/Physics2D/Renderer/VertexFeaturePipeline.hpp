@@ -12,7 +12,7 @@ namespace Trident {
 				VertexInputBinding(InputRate::VERTEX),
 			};
 
-			vertexInputBindings[0].registerAttribute<svec2<float32>>();
+			vertexInputBindings[0].registerAttribute<decltype(Vertex::position)>();
 
 			const ColorBlendAttachment colorBlendAttachments[] = {
 				{

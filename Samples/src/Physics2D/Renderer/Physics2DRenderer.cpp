@@ -529,9 +529,9 @@ namespace Trident {
 	}
 
 	#if defined(SHOW_DISTANCE)
-		void Physics2DRenderer::setClosestPoints(const vec2<float32>& closestPointA, const vec2<float32>& closestPointB) const {
-			closestPointMappedRange[0].position = {closestPointA[0], closestPointA[1]};
-			closestPointMappedRange[1].position = {closestPointB[0], closestPointB[1]};
+		void Physics2DRenderer::setClosestPoints(vec2<float32> closestPointA, vec2<float32> closestPointB) const {
+			closestPointMappedRange[0].position = closestPointA;
+			closestPointMappedRange[1].position = closestPointB;
 		}
 	#endif
 
@@ -540,7 +540,7 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::setPlaceholderOffset(vec2<float32> offset) const {
-		placeholderMappedRange->offset = {offset[0], offset[1]};
+		placeholderMappedRange->offset = offset;
 	}
 
 	#if defined(SHOW_FEATURES)

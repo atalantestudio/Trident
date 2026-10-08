@@ -23,9 +23,9 @@ namespace Trident {
 		}
 
 		void updateOrientation() {
-			const quat<float32> pitch = quat<float32>::axisAngle(RIGHT, rotation[0]);
-			const quat<float32> yaw = quat<float32>::axisAngle(UP, rotation[1]);
-			const quat<float32> roll = quat<float32>::axisAngle(FORWARD, rotation[2]);
+			const quat<float32> pitch = axisAngle<float32>(RIGHT, rotation[0]);
+			const quat<float32> yaw = axisAngle<float32>(UP, rotation[1]);
+			const quat<float32> roll = axisAngle<float32>(FORWARD, rotation[2]);
 
 			orientation = normalized(yaw * pitch * roll);
 		}
@@ -33,13 +33,13 @@ namespace Trident {
 		void updateWorld(vec3<float32> centroid) {
 			world =
 				// TODO(rigid-body/3d/centroid): Include the centroid in the world matrix?
-				mat4x4<float32>::translation(-centroid) *
+				translation<mat4x4<float32>>(-centroid) *
 
 				// TODO(rigid-body/3d/uniform-scaling)
-				mat4x4<float32>::scaling({scale, scale, scale}) *
+				scaling<mat4x4<float32>>(vec3<float32>(scale)) *
 
 				mat4x4<float32>(orientation) *
-				mat4x4<float32>::translation(position);
+				translation<mat4x4<float32>>(position);
 		}
 
 		/// Applies linear and angular impulses to the body.
@@ -59,23 +59,23 @@ namespace Trident {
 		/// The planes composing the body.
 		view<Plane3D> facePlanes;
 
-		// TODO: Use svec3<float32> instead.
+		// TODO(lyah/scalar): Use svec3<float32> instead.
 		/// Position of the center of mass in world-space.
 		vec3<float32> position;
 
-		// TODO: Use svec3<float32> instead.
+		// TODO(lyah/scalar): Use svec3<float32> instead.
 		vec3<float32> rotation;
 
 		/// Uniform scaling across all directions.
 		float32 scale = 1.0f;
 
-		mat4x4<float32> world = mat4x4<float32>::identity();
-		quat<float32> orientation = quat<float32>::identity();
+		mat4x4<float32> world = identity<mat4x4<float32>>();
+		quat<float32> orientation = identity<quat<float32>>();
 
-		// TODO: Use svec3<float32> instead.
+		// TODO(lyah/scalar): Use svec3<float32> instead.
 		vec3<float32> linearVelocity = {0.0_m_s, 0.0_m_s, 0.0_m_s};
 
-		// TODO: Use svec3<float32> instead.
+		// TODO(lyah/scalar): Use svec3<float32> instead.
 		vec3<float32> angularVelocity = {0.0_rad, 0.0_rad, 0.0_rad};
 
 		float32 inverseMass;
@@ -84,7 +84,7 @@ namespace Trident {
 		float32 friction;
 		float32 restitution;
 
-		// TODO: Use svec3<float32> instead.
+		// TODO(lyah/scalar): Use svec3<float32> instead.
 		vec3<float32> force = {0.0_N, 0.0_N, 0.0_N};
 
 		/// The entity owning the rigid body this body is currently resting on.

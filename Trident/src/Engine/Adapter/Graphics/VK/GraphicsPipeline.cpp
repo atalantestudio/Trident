@@ -45,9 +45,8 @@ namespace Trident {
 		};
 
 		if (descriptor.fragmentShaderModule != nullptr) {
-			shaderStageCount += 1;
-
 			shaderStageCreateInfos[1] = ref_cast<VK::ShaderModule>(descriptor.fragmentShaderModule)->createInfo;
+			shaderStageCount += 1;
 		}
 
 		const view<VkPipelineShaderStageCreateInfo> shaderStageCreateInfoView = view<VkPipelineShaderStageCreateInfo>(shaderStageCreateInfos, shaderStageCount);

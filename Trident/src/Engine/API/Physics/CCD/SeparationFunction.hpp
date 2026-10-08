@@ -55,10 +55,10 @@ namespace Trident {
 		copy.angularVelocity += copy.torque * t;
 
 		copy.transform =
-			mat3x3<float32>::translation(-copy.geometry->centroid) *
-			mat3x3<float32>::scaling(copy.scale) *
-			mat3x3<float32>::rotation(-copy.rotation) *
-			mat3x3<float32>::translation(copy.position);
+			translation<mat3x3<float32>>(-copy.geometry->centroid) *
+			scaling<mat3x3<float32>>(copy.scale) *
+			rotationAngle<mat3x3<float32>>(-copy.rotation) *
+			translation<mat3x3<float32>>(copy.position);
 
 		return copy;
 	}
@@ -123,7 +123,7 @@ namespace Trident {
 				const vec2<float32> edgePoint = multiplyTransform(localPoint, edgeObject.transform);
 				const vec2<float32> vertexPoint = multiplyTransform(vertexObject.geometry->vertices[vertexFeature->vertexIndex], vertexObject.transform);
 
-				const mat3x3<float32> edgeRotation = mat3x3<float32>::rotation(edgeObject.rotation);
+				const mat3x3<float32> edgeRotation = rotationAngle<mat3x3<float32>>(edgeObject.rotation);
 				const vec2<float32> normal = multiplyTransform(separatingAxis, edgeRotation);
 
 				if (dot(vertexPoint - edgePoint, normal) < 0.0f) {
@@ -180,7 +180,7 @@ namespace Trident {
 		const PhysicalObjectCopy2D* objects[2] = {&A, &B};
 		const PhysicalObjectCopy2D& edgeObject = *objects[edgeObjectIndex];
 		const PhysicalObjectCopy2D& vertexObject = *objects[vertexObjectIndex];
-		const vec2<float32> axis = multiplyTransform(separationFunction.separatingAxis, mat3x3<float32>::rotation(edgeObject.rotation));
+		const vec2<float32> axis = multiplyTransform(separationFunction.separatingAxis, rotationAngle<mat3x3<float32>>(edgeObject.rotation));
 		const uint32 i = supportIndex(vertexObject, -axis);
 
 		output.iA = i;
@@ -209,7 +209,7 @@ namespace Trident {
 		const uint32 vertexObjectVertexIndex = *(&minSeparationOutput.iA + vertexObjectIndex);
 		const vec2<float32> a = multiplyTransform(separationFunction.localPoint, edgeObject.transform);
 		const vec2<float32> b = multiplyTransform(vertexObject.geometry->vertices[vertexObjectVertexIndex], vertexObject.transform);
-		const vec2<float32> separatingAxis = multiplyTransform(separationFunction.separatingAxis, mat3x3<float32>::rotation(edgeObject.rotation));
+		const vec2<float32> separatingAxis = multiplyTransform(separationFunction.separatingAxis, rotationAngle<mat3x3<float32>>(edgeObject.rotation));
 
 		return dot(b - a, separatingAxis);
 	} */

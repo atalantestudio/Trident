@@ -128,11 +128,11 @@ namespace Trident {
 
 				for (const TextCharacter& textCharacter : component.characters) {
 					glyphSubcomponent.world =
-						mat3x3<float32>::scaling(textCharacter.size) *
-						mat3x3<float32>::translation(origin + textCharacter.offset);
+						scaling<mat3x3<float32>>(textCharacter.size) *
+						translation<mat3x3<float32>>(origin + textCharacter.offset);
 					glyphSubcomponent.textureWorld =
-						mat3x3<float32>::scaling((textCharacter.endTextureCoordinate - textCharacter.startTextureCoordinate)) *
-						mat3x3<float32>::translation(textCharacter.startTextureCoordinate);
+						scaling<mat3x3<float32>>((textCharacter.endTextureCoordinate - textCharacter.startTextureCoordinate)) *
+						translation<mat3x3<float32>>(textCharacter.startTextureCoordinate);
 
 					renderer.registerGlyphSubcomponent(glyphSubcomponent);
 				}
@@ -171,8 +171,8 @@ namespace Trident {
 		const vec2<float32> decimalSize = {width, height};
 
 		GUISubcomponent subcomponent{};
-		subcomponent.worldTransform = mat3x3<float32>::scaling(decimalSize) * mat3x3<float32>::translation(decimalOrigin);
-		subcomponent.textureTransform = mat3x3<float32>::identity();
+		subcomponent.worldTransform = scaling<mat3x3<float32>>(decimalSize) * translation<mat3x3<float32>>(decimalOrigin);
+		subcomponent.textureTransform = identity<mat3x3<float32>>();
 		subcomponent.color = component.color.value;
 		subcomponent.zIndex = component.zIndex;
 		subcomponent.textureArrayLayerIndex = component.image;

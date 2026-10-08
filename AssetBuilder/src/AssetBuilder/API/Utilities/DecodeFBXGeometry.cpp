@@ -23,18 +23,18 @@ namespace Trident {
 		return FBX::resolvePrimitiveProperty<sint32>(file, Properties70, "CoordAxisSign");
 	}
 
-	static void parseTransform(const File<FileFormat::FBX>& file, const FBX::Node* Objects, quat<float32>& orientation, svec3<float32>& scaling) {
+	static void parseTransform(const File<FileFormat::FBX>& file, const FBX::Node* Objects, quat<float32>& orientation, vec3<float32>& scaling) {
 		const FBX::Node* Model = FBX::findNode(file, Objects, "Model");
 		const FBX::Node* Properties70 = FBX::findNode(file, Model, "Properties70");
-		const svec3<float64> Lcl_Rotation = FBX::resolveVec3Property<float64>(file, Properties70, "Lcl Rotation", {0.0, 0.0, 0.0});
+		const vec3<float64> Lcl_Rotation = FBX::resolveVec3Property<float64>(file, Properties70, "Lcl Rotation", {0.0, 0.0, 0.0});
 
 		orientation = normalized(
-			quat<float32>::axisAngle(UP, radians(static_cast<float32>(Lcl_Rotation.y))) *
-			quat<float32>::axisAngle(RIGHT, radians(static_cast<float32>(Lcl_Rotation.x))) *
-			quat<float32>::axisAngle(FORWARD, radians(static_cast<float32>(Lcl_Rotation.z)))
+			axisAngle<float32>(UP, radians(static_cast<float32>(Lcl_Rotation.y))) *
+			axisAngle<float32>(RIGHT, radians(static_cast<float32>(Lcl_Rotation.x))) *
+			axisAngle<float32>(FORWARD, radians(static_cast<float32>(Lcl_Rotation.z)))
 		);
 
-		svec3<float64> Lcl_Scaling = FBX::resolveVec3Property<float64>(file, Properties70, "Lcl Scaling", {1.0, 1.0, 1.0});
+		vec3<float64> Lcl_Scaling = FBX::resolveVec3Property<float64>(file, Properties70, "Lcl Scaling", {1.0, 1.0, 1.0});
 
 		if (
 			abs(Lcl_Scaling.x - Lcl_Scaling.y) >= 0.001 ||
@@ -396,12 +396,12 @@ namespace Trident {
 		ENGINE_ASSERT(VerticesProperty->contents.count() >= 3, "Invalid vertex position component buffer length.");
 
 		quat<float32> orientation;
-		svec3<float32> scaling;
+		vec3<float32> scale;
 
-		parseTransform(file, ObjectsNode, orientation, scaling);
+		parseTransform(file, ObjectsNode, orientation, scale);
 
 		const mat4x4<float32> transform = (
-			mat4x4<float32>::scaling(scaling) *
+			scaling<mat4x4<float32>>(scale) *
 			mat4x4<float32>(orientation)
 		);
 

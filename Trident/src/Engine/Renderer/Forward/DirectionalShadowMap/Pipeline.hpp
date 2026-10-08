@@ -12,9 +12,9 @@ namespace Trident {
 			VertexInputBinding(InputRate::INSTANCE),
 		};
 
-		vertexInputBindings[0].registerAttribute<svec3<float32>>(VertexInputAttributeFormat::R32G32B32_FLOAT);
+		vertexInputBindings[0].registerAttribute<decltype(Vertex3D::position)>(VertexInputAttributeFormat::R32G32B32_FLOAT);
 		vertexInputBindings[0].stride = sizeof(Vertex3D);
-		vertexInputBindings[1].registerAttribute<mat4x4<float32>>();
+		vertexInputBindings[1].registerAttribute<decltype(Instance3D::worldTransform)>();
 		vertexInputBindings[1].stride = sizeof(Instance3D);
 
 		return createGraphicsPipeline({

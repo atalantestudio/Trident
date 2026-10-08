@@ -383,12 +383,14 @@ namespace Trident {
 			VertexInputBinding(InputRate::INSTANCE),
 		};
 
-		vertexInputBindings[0].registerAttribute<vec4<float32>>(); // Vertex position and texture coordinate
-		vertexInputBindings[1].registerAttribute<mat3x3<float32>>(); // World transform
-		vertexInputBindings[1].registerAttribute<mat3x3<float32>>(); // Texture transform
-		vertexInputBindings[1].registerAttribute<vec4<float32>>(); // Color
-		vertexInputBindings[1].registerAttribute<uint32>(); // Z-index
-		vertexInputBindings[1].registerAttribute<uint32>(); // Texture array layer index
+		// Vertex position and texture coordinate
+		vertexInputBindings[0].registerAttribute<vec4<float32>>();
+
+		vertexInputBindings[1].registerAttribute<decltype(GUISubcomponent::worldTransform)>();
+		vertexInputBindings[1].registerAttribute<decltype(GUISubcomponent::textureTransform)>();
+		vertexInputBindings[1].registerAttribute<decltype(GUISubcomponent::color)>();
+		vertexInputBindings[1].registerAttribute<decltype(GUISubcomponent::zIndex)>();
+		vertexInputBindings[1].registerAttribute<decltype(GUISubcomponent::textureArrayLayerIndex)>();
 
 		const ColorBlendAttachment colorBlendAttachments[] = {
 			{
@@ -452,13 +454,15 @@ namespace Trident {
 			VertexInputBinding(InputRate::INSTANCE),
 		};
 
-		vertexInputBindings[0].registerAttribute<vec4<float32>>(); // Vertex position and texture coordinate
-		vertexInputBindings[1].registerAttribute<mat3x3<float32>>(); // World transform
-		vertexInputBindings[1].registerAttribute<mat3x3<float32>>(); // Texture transform
-		vertexInputBindings[1].registerAttribute<vec4<float32>>(); // Color
-		vertexInputBindings[1].registerAttribute<uint32>(); // Z-index
-		vertexInputBindings[1].registerAttribute<uint32>(); // Layer index
-		vertexInputBindings[1].registerAttribute<float32>(); // Font size
+		// Vertex position and texture coordinate
+		vertexInputBindings[0].registerAttribute<vec4<float32>>();
+
+		vertexInputBindings[1].registerAttribute<decltype(GUIGlyphSubcomponent::world)>();
+		vertexInputBindings[1].registerAttribute<decltype(GUIGlyphSubcomponent::textureWorld)>();
+		vertexInputBindings[1].registerAttribute<decltype(GUIGlyphSubcomponent::color)>();
+		vertexInputBindings[1].registerAttribute<decltype(GUIGlyphSubcomponent::zIndex)>();
+		vertexInputBindings[1].registerAttribute<decltype(GUIGlyphSubcomponent::textureArrayLayerIndex)>();
+		vertexInputBindings[1].registerAttribute<decltype(GUIGlyphSubcomponent::fontSize)>();
 
 		const ColorBlendAttachment colorBlendAttachments[] = {
 			{

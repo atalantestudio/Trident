@@ -11,11 +11,11 @@ namespace Trident {
 	class SampleTextureArrayRenderer : public Renderer {
 		private:
 			struct Vertex {
-				svec2<float32> position;
+				vec2<float32> position;
 			};
 
 			struct Instance {
-				svec2<float32> vertexOffset;
+				vec2<float32> vertexOffset;
 				uint32 textureArrayIndex;
 			};
 
@@ -314,10 +314,10 @@ namespace Trident {
 					VertexInputBinding(InputRate::INSTANCE),
 				};
 
-				vertexInputBindings[0].registerAttribute<svec2<float32>>();
+				vertexInputBindings[0].registerAttribute<decltype(Vertex::position)>();
 
-				vertexInputBindings[1].registerAttribute<svec2<float32>>();
-				vertexInputBindings[1].registerAttribute<uint32>();
+				vertexInputBindings[1].registerAttribute<decltype(Instance::vertexOffset)>();
+				vertexInputBindings[1].registerAttribute<decltype(Instance::textureArrayIndex)>();
 
 				ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;

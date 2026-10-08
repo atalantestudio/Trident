@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Camera/3D/PerspectiveCamera3D.hpp"
+#include "Engine/API/Geometry/Instance.hpp"
 #include "Engine/Renderer/Scene/BaseSceneRenderer.hpp"
 #include "Engine/Renderer/VisualizationMode.hpp"
 
@@ -534,7 +535,7 @@ namespace Trident {
 			Instance3D* instanceMappedRange = nullptr;
 
 		public:
-			svec3<float32>* debugContactRange = nullptr;
+			vec3<float32>* debugContactRange = nullptr;
 			uint32 contactCount = 0;
 
 			VisualizationMode visualizationMode;

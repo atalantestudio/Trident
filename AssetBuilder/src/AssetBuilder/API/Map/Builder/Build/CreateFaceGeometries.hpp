@@ -91,16 +91,13 @@ namespace Trident {
 		uint32 indexOffset = 0;
 
 		while (indexOffset < indexCount) {
-			svec3<float32> vertex = facePositions[face.uniqueIndices[indexOffset]];
+			const vec3<float32> vertex = facePositions[face.uniqueIndices[indexOffset]];
+			const quat<float32> q = R * quat<float32>(0.0f, vertex.x, vertex.y, vertex.z) * inverse(R);
 
-			const quat<float32> q = {0.0f, vertex.x, vertex.y, vertex.z};
-
-			vertex = svec3<float32>((R * q * inverse(R)).xyz());
-
-			face.boundingBox.min.x = min(face.boundingBox.min.x, vertex.x);
-			face.boundingBox.min.y = min(face.boundingBox.min.y, vertex.y);
-			face.boundingBox.max.x = max(face.boundingBox.max.x, vertex.x);
-			face.boundingBox.max.y = max(face.boundingBox.max.y, vertex.y);
+			face.boundingBox.min.x = min(face.boundingBox.min.x, q.x);
+			face.boundingBox.min.y = min(face.boundingBox.min.y, q.y);
+			face.boundingBox.max.x = max(face.boundingBox.max.x, q.x);
+			face.boundingBox.max.y = max(face.boundingBox.max.y, q.y);
 
 			indexOffset += 1;
 		}

@@ -112,16 +112,16 @@ namespace Trident {
 			const svec3<float32> rotation = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
 			const float32 scale = stream.read<float32>();
 			const quat<float32> orientation = normalized(
-				quat<float32>::axisAngle(UP, rotation[1]) *
-				quat<float32>::axisAngle(RIGHT, rotation[0]) *
-				quat<float32>::axisAngle(FORWARD, rotation[2])
+				axisAngle<float32>(UP, rotation[1]) *
+				axisAngle<float32>(RIGHT, rotation[0]) *
+				axisAngle<float32>(FORWARD, rotation[2])
 			);
 
 			Instance3D& instance = asset.instances[instanceIndex];
 			instance.worldTransform = (
-				mat4x4<float32>::scaling({scale, scale, scale}) *
+				scaling<mat4x4<float32>>(vec3<float32>(scale)) *
 				mat4x4<float32>(orientation) *
-				mat4x4<float32>::translation(position)
+				translation<mat4x4<float32>>(position)
 			);
 
 			// TODO(asset/scene/3d/instance): See https://marti.works/posts/post-normal-matrix-optimization/post.

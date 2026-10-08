@@ -8,17 +8,17 @@
 namespace Trident {
 	GraphicsPipelineDescriptor ForwardRenderer::getStaticPipelineDescriptor(VertexInputBinding* vertexInputBindings) const {
 		vertexInputBindings[0] = VertexInputBinding(InputRate::VERTEX);
-		vertexInputBindings[0].registerAttribute<svec3<float32>>(VertexInputAttributeFormat::R32G32B32_FLOAT);
-		vertexInputBindings[0].registerAttribute<uint32>(VertexInputAttributeFormat::R10G10B10A2_UNORM);
-		vertexInputBindings[0].registerAttribute<uint32>(VertexInputAttributeFormat::R10G10B10A2_UNORM);
-		vertexInputBindings[0].registerAttribute<uint32>(VertexInputAttributeFormat::R16G16_FLOAT);
+		vertexInputBindings[0].registerAttribute<decltype(Vertex3D::position)>(VertexInputAttributeFormat::R32G32B32_FLOAT);
+		vertexInputBindings[0].registerAttribute<decltype(Vertex3D::normal)>(VertexInputAttributeFormat::R10G10B10A2_UNORM);
+		vertexInputBindings[0].registerAttribute<decltype(Vertex3D::tangent)>(VertexInputAttributeFormat::R10G10B10A2_UNORM);
+		vertexInputBindings[0].registerAttribute<decltype(Vertex3D::textureCoordinate)>(VertexInputAttributeFormat::R16G16_FLOAT);
 
 		vertexInputBindings[1] = VertexInputBinding(InputRate::VERTEX);
 		vertexInputBindings[1].registerAttribute<uint32>(VertexInputAttributeFormat::R16G16_UNORM);
 
 		vertexInputBindings[2] = VertexInputBinding(InputRate::INSTANCE);
-		vertexInputBindings[2].registerAttribute<mat4x4<float32>>();
-		vertexInputBindings[2].registerAttribute<mat3x3<float32>>();
+		vertexInputBindings[2].registerAttribute<decltype(Instance3D::worldTransform)>();
+		vertexInputBindings[2].registerAttribute<decltype(Instance3D::normalTransform)>();
 
 		const ColorBlendAttachment colorBlendAttachments[] = {
 			{
