@@ -45,8 +45,8 @@ namespace Trident {
 				// TODO(lyah/vec3-uint32/operator*)
 				vec3<uint32> size;
 				size[0] = limits.maxComputeWorkGroupSize[0] * limits.maxComputeWorkGroupCount[0];
-				size[0] = limits.maxComputeWorkGroupSize[1] * limits.maxComputeWorkGroupCount[1];
-				size[0] = limits.maxComputeWorkGroupSize[2] * limits.maxComputeWorkGroupCount[2];
+				size[1] = limits.maxComputeWorkGroupSize[1] * limits.maxComputeWorkGroupCount[1];
+				size[2] = limits.maxComputeWorkGroupSize[2] * limits.maxComputeWorkGroupCount[2];
 
 				Validator validator;
 
