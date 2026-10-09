@@ -15,7 +15,7 @@ namespace Trident {
 				value(a)
 			{}
 
-			#if defined(COMPILER_CLANG)
+			#if COMPILER == COMPILER_CLANG
 				__attribute__((target("f16c")))
 			#endif
 			float16(float32 a) {
@@ -122,7 +122,7 @@ namespace Trident {
 				return value;
 			}
 
-			#if defined(COMPILER_CLANG)
+			#if COMPILER == COMPILER_CLANG
 				__attribute__((target("f16c")))
 			#endif
 			operator float32() const {
