@@ -50,47 +50,6 @@ namespace Trident {
 		float32 offset;
 	};
 
-	// K-th dimensional simplex.
-	template<std::size_t K, typename T>
-	struct sim;
-
-	template<typename T>
-	struct sim<2, T> {
-		public:
-			sim() :
-				count(0)
-			{}
-
-			sim(vec2<T> a) :
-				m{a},
-				count(1)
-			{}
-
-			sim(vec2<T> a, vec2<T> b) :
-				m{a, b},
-				count(2)
-			{}
-
-			inline vec2<T> operator[](std::uint8_t index) const {
-				DEBUG_ASSERT(index < count);
-
-				return m[index];
-			}
-
-			inline vec2<T>& operator[](std::uint8_t index) {
-				DEBUG_ASSERT(index < 3);
-
-				return m[index];
-			}
-
-		public:
-			vec2<T> m[3];
-			std::uint8_t count : 2;
-	};
-
-	template<typename T>
-	using sim2 = sim<2, T>;
-
 	template<typename T>
 	inline vec2<T> cross2d(vec2<T> a, vec2<T> b, vec2<T> c) {
 		const vec2<T> b_c = {b.x * c.y, b.y * c.x};

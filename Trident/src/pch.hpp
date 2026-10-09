@@ -94,6 +94,7 @@
 #include "Engine/Base/KeyCode.hpp"
 #include "Engine/Base/pool.hpp"
 #include "Engine/Base/Serialization.hpp"
+#include "Engine/Base/sim.hpp"
 #include "Engine/Base/Transform.hpp"
 
 #include "Engine/Manifest.hpp"
