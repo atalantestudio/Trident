@@ -80,8 +80,8 @@
 // Include adapters.
 #include "Engine/Module/Adapter/scroll.hpp"
 #include "Engine/Base/Log.hpp"
-#include "Engine/Base/String.hpp"
 #include "Engine/Module/Adapter/lyah.hpp"
+#include "Engine/Base/String.hpp"
 #include "Engine/Module/Adapter/tsl.hpp"
 
 #include "Engine/Base/Color.hpp"

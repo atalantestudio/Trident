@@ -4,6 +4,55 @@
 #pragma once
 
 namespace Trident {
+	template<typename T>
+	inline std::ostringstream& operator<<(std::ostringstream& stream, vec2<T> x) {
+		stream << x.x << "  " << x.y;
+
+		return stream;
+	}
+
+	template<typename T>
+	inline std::ostringstream& operator<<(std::ostringstream& stream, vec3<T> x) {
+		stream << x.x << "  " << x.y << "  " << x.z;
+
+		return stream;
+	}
+
+	template<typename T>
+	inline std::ostringstream& operator<<(std::ostringstream& stream, vec4<T> x) {
+		stream << x.x << "  " << x.y << "  " << x.z << "  " << x.w;
+
+		return stream;
+	}
+
+	template<typename T>
+	inline std::ostringstream& operator<<(std::ostringstream& stream, const mat2x2<T>& x) {
+		stream << x[0] << '\n' << x[1];
+
+		return stream;
+	}
+
+	template<typename T>
+	inline std::ostringstream& operator<<(std::ostringstream& stream, const mat3x3<T>& x) {
+		stream << x[0] << '\n' << x[1] << '\n' << x[2];
+
+		return stream;
+	}
+
+	template<typename T>
+	inline std::ostringstream& operator<<(std::ostringstream& stream, const mat4x4<T>& x) {
+		stream << x[0] << '\n' << x[1] << '\n' << x[2] << '\n' << x[3];
+
+		return stream;
+	}
+
+	template<typename T>
+	inline std::ostringstream& operator<<(std::ostringstream& stream, quat<T> x) {
+		stream << x.w << "  " << x.x << "  " << x.y << "  " << x.z;
+
+		return stream;
+	}
+
 	inline std::ostringstream& operator<<(std::ostringstream& stream, __m128 m) {
 		#if COMPILER == COMPILER_MSVC
 			const std::float_t* buffer = m.m128_f32;
@@ -45,52 +94,23 @@ namespace Trident {
 
 		return stream;
 	}
-
-	template<std::size_t C, typename T>
-	inline std::ostringstream& operator<<(std::ostringstream& stream, lyah::vec<C, T> a) {
-		for (std::size_t index = 0; index < C - 1; index += 1) {
-			stream << a[index] << "  ";
-		}
-
-		stream << a[C - 1];
-
-		return stream;
-	}
-
-	template<std::size_t R, std::size_t C, typename T>
-	inline std::ostringstream& operator<<(std::ostringstream& stream, const lyah::mat<R, C, T>& a) {
-		for (std::size_t index = 0; index < R - 1; index += 1) {
-			stream << a[index] << '\n';
-		}
-
-		stream << a[R - 1];
-
-		return stream;
-	}
-
-	template<typename T>
-	inline std::ostringstream& operator<<(std::ostringstream& stream, lyah::quat<T> a) {
-		stream << a[0] << "  " << a[1] << "  " << a[2] << "  " << a[3];
-
-		return stream;
-	}
 }
 
 namespace scroll {
 	using Trident::operator<<;
 
 	template<>
-	inline std::string toString(lyah::vec<2, std::float_t> a) {
+	inline std::string toString(Trident::vec2<std::float_t> x) {
 		std::ostringstream stream;
-		stream << a;
+		stream << x;
 
 		return stream.str();
 	}
 
 	template<>
-	inline std::string toString(lyah::vec<3, std::float_t> a) {
+	inline std::string toString(Trident::vec3<std::float_t> x) {
 		std::ostringstream stream;
-		stream << a;
+		stream << x;
 
 		return stream.str();
 	}

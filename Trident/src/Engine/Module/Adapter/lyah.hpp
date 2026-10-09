@@ -80,10 +80,9 @@ namespace Trident {
 		};
 	}
 
-	// TODO(lyah/scaled-area)
-	// Access the vertices using the indices provided by the geometry.
-	// Returns the absolute area of a 2D polygon defined by a sequence of vertices.
-	// See https://stackoverflow.com/a/717367/17136841.
+	// TODO(lyah/scaled-area): Access the vertices using the indices provided by the geometry.
+	/// Returns the absolute area of a 2D polygon defined by a sequence of vertices.
+	/// See https://stackoverflow.com/a/717367/17136841.
 	template<typename T>
 	T scaledArea(view<vec2<T>> unclosedVertices, vec2<float32> scale) {
 		sequence<vec2<T>> closedVertices(unclosedVertices.count() + 2);
