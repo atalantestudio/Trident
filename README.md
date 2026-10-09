@@ -42,7 +42,8 @@ Trident is a 2D/3D game engine developed by Atalante Studio, intended for techni
 
 ## Dependencies
 
-Apart from the C++ 20 standard, Trident only uses libraries managed by Atalante. This is mainly for fast iterations and bug fixing on isolated parts of the engine.
+Apart from the C++ 20 standard, Trident only uses libraries managed by Atalante. This allows fast iterations and bug fixing on isolated parts of the engine.
+
 On Windows, Premake and `glslc` are embedded as executables and used during the build steps.
 
 - [Premake 5.0.0 beta 8](https://github.com/premake/premake-core/releases/tag/v5.0.0-beta8)
@@ -50,7 +51,7 @@ On Windows, Premake and `glslc` are embedded as executables and used during the 
 - [Lyah 1.2.1+dev](https://github.com/atalantestudio/lyah)
 - [Scroll 1.0.5+dev](https://github.com/atalantestudio/scroll)
 
-The engine also uses an [asset archive](https://github.com/atalantestudio/SampleAssetPack) for geometries, fonts (not in the repository), images and shaders.
+The engine also uses an [asset archive](https://github.com/atalantestudio/SampleAssetPack).
 
 
 
