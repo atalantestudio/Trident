@@ -29,6 +29,11 @@ namespace Trident {
 
 				break;
 			}
+			default: {
+				ENGINE_ERROR_UNSUPPORTED();
+
+				break;
+			}
 		}
 
 		const ref<ShaderModule> fragmentShaderModule = loadInternalShaderModule(

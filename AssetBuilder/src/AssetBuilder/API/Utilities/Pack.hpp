@@ -41,6 +41,9 @@ namespace Trident {
 
 	template<>
 	uint32 pack<VertexInputAttributeFormat::R16G16_FLOAT>(vec2<float32> value) {
-		return (float16(value.y) << 16) | float16(value.x);
+		const float16 r = value.x;
+		const float16 g = value.y;
+
+		return (static_cast<uint16>(g) << 16) | static_cast<uint16>(r);
 	}
 }

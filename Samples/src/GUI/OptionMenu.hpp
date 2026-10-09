@@ -61,6 +61,9 @@ namespace Trident {
 
 								break;
 							}
+							default: {
+								break;
+							}
 						}
 					}
 				}

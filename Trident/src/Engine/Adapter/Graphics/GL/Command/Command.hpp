@@ -7,6 +7,8 @@ namespace Trident {
 	// Used for queuing graphics and compute operations to the GPU.
 	class GL::Command {
 		public:
+			virtual ~Command() = default;
+
 			virtual void execute() const = 0;
 	};
 }

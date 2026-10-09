@@ -31,6 +31,9 @@ namespace Trident {
 
 					break;
 				}
+				default: {
+					break;
+				}
 			}
 
 			return VK_FALSE;

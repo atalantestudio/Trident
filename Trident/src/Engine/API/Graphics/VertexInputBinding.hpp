@@ -93,25 +93,10 @@ namespace Trident {
 	}
 
 	template<>
-	inline constexpr void VertexInputBinding::registerAttribute<mat3x3<float64>>() {
-		registerAttribute<vec3<float64>>();
-		registerAttribute<vec3<float64>>();
-		registerAttribute<vec3<float64>>();
-	}
-
-	template<>
 	inline constexpr void VertexInputBinding::registerAttribute<mat4x4<float32>>() {
 		registerAttribute<vec4<float32>>();
 		registerAttribute<vec4<float32>>();
 		registerAttribute<vec4<float32>>();
 		registerAttribute<vec4<float32>>();
-	}
-
-	template<>
-	inline constexpr void VertexInputBinding::registerAttribute<mat4x4<float64>>() {
-		registerAttribute<vec4<float64>>();
-		registerAttribute<vec4<float64>>();
-		registerAttribute<vec4<float64>>();
-		registerAttribute<vec4<float64>>();
 	}
 }

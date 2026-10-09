@@ -8,11 +8,18 @@
 namespace Trident {
 	inline LPWSTR getWin32CursorName(PointerType pointerType) {
 		switch (pointerType) {
-			case PointerType::DEFAULT: return IDC_ARROW;
-			case PointerType::INTERACTIVE: return IDC_HAND;
-		}
+			case PointerType::DEFAULT: {
+				return IDC_ARROW;
+			}
+			case PointerType::INTERACTIVE: {
+				return IDC_HAND;
+			}
+			case PointerType::INHERIT: {
+				ENGINE_ERROR_UNSUPPORTED();
 
-		DEBUG_ASSERT(false);
+				break;
+			}
+		}
 
 		return nullptr;
 	}

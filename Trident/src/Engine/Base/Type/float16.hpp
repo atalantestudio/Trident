@@ -15,6 +15,9 @@ namespace Trident {
 				value(a)
 			{}
 
+			#if defined(COMPILER_CLANG)
+				__attribute__((target("f16c")))
+			#endif
 			float16(float32 a) {
 				// TODO(base/float16): Fix scalar conversion.
 				const __m128 m = _mm_set1_ps(a);
@@ -119,6 +122,9 @@ namespace Trident {
 				return value;
 			}
 
+			#if defined(COMPILER_CLANG)
+				__attribute__((target("f16c")))
+			#endif
 			operator float32() const {
 				// TODO(base/float16): Replace with a scalar conversion.
 				const __m128i mi = _mm_set1_epi16(value);

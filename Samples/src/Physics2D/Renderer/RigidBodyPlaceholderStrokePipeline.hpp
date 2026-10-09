@@ -38,6 +38,11 @@ namespace Trident {
 
 				break;
 			}
+			default: {
+				ENGINE_ERROR_UNSUPPORTED();
+
+				break;
+			}
 		}
 
 		const ColorBlendAttachment colorBlendAttachments[] = {

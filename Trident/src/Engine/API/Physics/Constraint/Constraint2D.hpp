@@ -6,9 +6,11 @@
 #include "Engine/ECS/ECS.hpp"
 
 namespace Trident {
-	// TODO: Replace virtual properties by LUT.
+	// TODO(physics/2d/constraint): Replace virtual properties by LUT.
 	class Constraint2D {
 		public:
+			virtual ~Constraint2D() = default;
+
 			virtual void update(ECS* ecs, float32 deltaTime) const = 0;
 	};
 }

@@ -37,12 +37,29 @@ namespace Trident {
 		factory(factory),
 		name(ConvertUTF16ToUTF8(adapterDescriptor.Description))
 	{
-		limits.maxComputeWorkGroupCount[0] = D3D12_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION;
-		limits.maxComputeWorkGroupCount[1] = D3D12_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION;
-		limits.maxComputeWorkGroupCount[2] = D3D12_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION;
-		limits.maxComputeWorkGroupSize[0] = D3D12_CS_THREAD_GROUP_MAX_THREADS_PER_GROUP;
-		limits.maxComputeWorkGroupSize[1] = D3D12_CS_THREAD_GROUP_MAX_THREADS_PER_GROUP;
-		limits.maxComputeWorkGroupSize[2] = D3D12_CS_THREAD_GROUP_MAX_THREADS_PER_GROUP;
+		limits.bufferImageGranularity = 0;
+		limits.lineWidthGranularity = D3D12_MULTISAMPLE_ANTIALIAS_LINE_WIDTH;
+		limits.maxColorAttachmentCount = max<uint32>();
+		limits.maxBoundDescriptorSetCount = max<uint32>();
+		limits.maxComputeWorkGroupCount.x = D3D12_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION;
+		limits.maxComputeWorkGroupCount.y = D3D12_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION;
+		limits.maxComputeWorkGroupCount.z = D3D12_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION;
+		limits.maxComputeWorkGroupSize.x = D3D12_CS_THREAD_GROUP_MAX_THREADS_PER_GROUP;
+		limits.maxComputeWorkGroupSize.y = D3D12_CS_THREAD_GROUP_MAX_THREADS_PER_GROUP;
+		limits.maxComputeWorkGroupSize.z = D3D12_CS_THREAD_GROUP_MAX_THREADS_PER_GROUP;
+		limits.maxFramebufferSize.x = max<uint32>();
+		limits.maxFramebufferSize.y = max<uint32>();
+		limits.maxFramebufferLayerCount = max<uint32>();
+		limits.maxImageDimension1D = D3D12_REQ_TEXTURE1D_U_DIMENSION;
+		limits.maxImageDimension2D = D3D12_REQ_TEXTURE2D_U_OR_V_DIMENSION;
+		limits.maxImageDimension3D = D3D12_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
+		limits.maxImageLayerCount = D3D12_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION;
+		limits.maxMemoryAllocationCount = max<uint32>();
+		limits.maxVertexInputAttributeCount = D3D12_IA_VERTEX_INPUT_STRUCTURE_ELEMENT_COUNT;
+		limits.maxVertexInputAttributeOffset = max<uint32>();
+		limits.maxVertexInputBindingCount = D3D12_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT;
+		limits.maxVertexInputBindingStride = max<uint32>();
+		limits.pointSizeGranularity = 1.0f;
 		limits.minStorageBufferOffsetAlignment = D3D12_RAW_UAV_SRV_BYTE_ALIGNMENT;
 		limits.minUniformBufferOffsetAlignment = D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT;
 		limits.minAccelerationStructureScratchOffsetAlignment = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BYTE_ALIGNMENT;

@@ -29,6 +29,11 @@ namespace Trident {
 
 				break;
 			}
+			default: {
+				ENGINE_ERROR_UNSUPPORTED();
+
+				break;
+			}
 		}
 
 		return createComputePipeline({

@@ -45,6 +45,11 @@ namespace Trident {
 
 				break;
 			}
+			default: {
+				ENGINE_ERROR_UNSUPPORTED();
+
+				break;
+			}
 		}
 
 		imageView->descriptorHandle = memoryAllocator->allocateRenderTargetView(image->resource, &renderTargetViewDescriptor);
@@ -79,6 +84,11 @@ namespace Trident {
 						depthStencilViewDescriptor.Texture2D.MipSlice = imageView->mipLevelOffset;
 					}
 				}
+
+				break;
+			}
+			default: {
+				ENGINE_ERROR_UNSUPPORTED();
 
 				break;
 			}

@@ -29,7 +29,7 @@ namespace Trident {
 
 			void render(ref<CommandEncoder> commandEncoder) const override;
 
-			void resize(WindowResizeEvent& event);
+			void resize(WindowResizeEvent& event) override;
 
 			void updateCamera() const;
 

@@ -4,9 +4,11 @@
 #pragma once
 
 namespace Trident {
-	// Generic one-time computations.
+	/// Generic one-time computations.
 	class Process {
 		public:
+			virtual ~Process() = default;
+
 			uint32 getId() const {
 				return id;
 			}
@@ -15,11 +17,11 @@ namespace Trident {
 				this->id = id;
 			}
 
-			// NOTE: Implement to run a process computation.
+			/// Implement to run a process computation.
 			virtual sint32 main(view<void*> arguments) = 0;
 
 		private:
-			// Index of this process in the application process list.
+			/// Index in the application process list.
 			uint32 id;
 	};
 }
