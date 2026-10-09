@@ -12,7 +12,7 @@ namespace Trident::FBX {
 		while (rootNodeIndex < file.rootNodeCount) {
 			const Node* rootNode = &file.nodes[rootNodeIndex];
 
-			if (rootNode->name == name) {
+			if (view<char8>(rootNode->name) == name) {
 				return rootNode;
 			}
 
@@ -30,7 +30,7 @@ namespace Trident::FBX {
 		while (nodeIndex < node->nodeRange.count) {
 			const Node* childNode = &file.nodes[node->nodeRange.offset + nodeIndex];
 
-			if (childNode->name == name) {
+			if (view<char8>(childNode->name) == name) {
 				return childNode;
 			}
 
