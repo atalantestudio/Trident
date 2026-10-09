@@ -8,26 +8,18 @@
 namespace Trident {
 	class WindowResizeEvent : public Event {
 		public:
-			// TODO(lyah/integer-vector)
-			explicit WindowResizeEvent(sint32 width, sint32 height) :
-				width(width),
-				height(height)
+			explicit WindowResizeEvent(vec2<sint32> extent) :
+				extent(extent)
 			{}
 
 			EVENT_TYPE(EventType::WINDOW_RESIZE)
 			EVENT_CATEGORY(EventCategory::WINDOW)
 
-			sint32 getWidth() const {
-				return width;
-			}
-
-			sint32 getHeight() const {
-				return height;
+			vec2<sint32> getExtent() const {
+				return extent;
 			}
 
 		private:
-			// TODO(lyah/integer-vector): Use vec2<sint32>.
-			sint32 width;
-			sint32 height;
+			vec2<sint32> extent;
 	};
 }

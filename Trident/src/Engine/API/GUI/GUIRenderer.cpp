@@ -260,9 +260,7 @@ namespace Trident {
 		view<ImageMemoryBarrier> imageMemoryBarriers(userImageMemoryBarriers, userImageCount);
 		BufferImageCopyRegion userImageCopyRegion = {
 			.bufferOffset = 0,
-			.imageOffsetX = 0,
-			.imageOffsetY = 0,
-			.imageOffsetZ = 0,
+			.imageOffset = {0, 0, 0},
 			.imageMipLevel = 0,
 			.imageLayerOffset = 0,
 			.imageLayerCount = 1,

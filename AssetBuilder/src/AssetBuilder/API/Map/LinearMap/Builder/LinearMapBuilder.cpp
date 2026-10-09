@@ -70,8 +70,6 @@ namespace Trident {
 
 	void LinearMapBuilder::connectFaces(Face& faceA, Face& faceB, view<vec3<float32>> verticesA, view<vec3<float32>> verticesB) {
 		DEBUG_ASSERT(faceA.getUniqueIndexCount() == faceB.getUniqueIndexCount());
-
-		// TODO(lyah/scalar)
 		DEBUG_ASSERT(abs(dot(faceA.normal, faceB.normal) + 1.0f) < 1e-4f);
 
 		Face& carvingA = carveFace(faceA, verticesA);

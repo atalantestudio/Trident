@@ -36,12 +36,10 @@ namespace Trident {
 			// The glyph size on the glyph map, in pixels. Including the spread of the distance field.
 			const vec2<float32> spreadGlyphTexelSize = rawGlyphTexelSize + spread;
 
-			// TODO(lyah): Add vec<C, T> ceil(vec<C, T>, vec<C, T>).
-			const uint32 glyphWidth = static_cast<uint32>(ceil(spreadGlyphTexelSize[0]));
-			const uint32 glyphHeight = static_cast<uint32>(ceil(spreadGlyphTexelSize[1]));
+			const vec2<uint32> glyphSize = vec2<uint32>(ceil(spreadGlyphTexelSize));
 
-			x += glyphWidth;
-			rowHeight = max(rowHeight, glyphHeight);
+			x += glyphSize.x;
+			rowHeight = max(rowHeight, glyphSize.y);
 
 			if (x >= glyphMapExtent.x) {
 				x = 0;
@@ -202,10 +200,7 @@ namespace Trident {
 		const Extent3D& glyphMapExtent = glyphMapImage->getExtent();
 		const float32 inverseLineHeight = static_cast<float32>(1.0 / lineHeight);
 		const float32 scale = inverseLineHeight * static_cast<float32>(GLYPH_SUBIMAGE_DIMENSION);
-
-		// TODO(lyah/integer-vector)
-		const float32 inverseGlyphMapWidth = static_cast<float32>(1.0 / glyphMapExtent.x);
-		const float32 inverseGlyphMapHeight = static_cast<float32>(1.0 / glyphMapExtent.y);
+		const vec2<float32> inverseGlyphMapSize = 1.0f / vec2<float32>(vec2<uint32>{glyphMapExtent.x, glyphMapExtent.y});
 
 		uint32 x = 0;
 		uint32 y = 0;
@@ -244,11 +239,9 @@ namespace Trident {
 			// The glyph size on the glyph map, in pixels. Including the spread of the distance field.
 			const vec2<float32> spreadGlyphTexelSize = rawGlyphTexelSize + vec2<float32>{spreadFactor * 2.0f, spreadFactor * 2.0f};
 
-			// TODO(lyah/integer-vector)
-			const uint32 glyphWidth = static_cast<uint32>(ceil(spreadGlyphTexelSize.x));
-			const uint32 glyphHeight = static_cast<uint32>(ceil(spreadGlyphTexelSize.y));
+			const vec2<uint32> glyphSize = vec2<uint32>(ceil(spreadGlyphTexelSize));
 
-			if (x + glyphWidth >= glyphMapExtent.x) {
+			if (x + glyphSize.x >= glyphMapExtent.x) {
 				x = 0;
 				y += rowHeight;
 				rowHeight = 0;
@@ -307,13 +300,13 @@ namespace Trident {
 			queue->submit(commandBuffer, nullptr, nullptr, writeBufferFence);
 			queue->waitIdle();
 
-			outputGlyph.minCoordinate.x = (x + spreadFactor) * inverseGlyphMapWidth;
-			outputGlyph.minCoordinate.y = (y + spreadFactor) * inverseGlyphMapHeight;
-			outputGlyph.maxCoordinate.x = (x + spreadFactor + rawGlyphTexelSize[0] + 1) * inverseGlyphMapWidth;
-			outputGlyph.maxCoordinate.y = (y + spreadFactor + rawGlyphTexelSize[1] + 1) * inverseGlyphMapHeight;
+			outputGlyph.minCoordinate.x = (x + spreadFactor) * inverseGlyphMapSize.x;
+			outputGlyph.minCoordinate.y = (y + spreadFactor) * inverseGlyphMapSize.y;
+			outputGlyph.maxCoordinate.x = (x + spreadFactor + rawGlyphTexelSize[0] + 1) * inverseGlyphMapSize.x;
+			outputGlyph.maxCoordinate.y = (y + spreadFactor + rawGlyphTexelSize[1] + 1) * inverseGlyphMapSize.y;
 
-			x += glyphWidth;
-			rowHeight = max(rowHeight, glyphHeight);
+			x += glyphSize.x;
+			rowHeight = max(rowHeight, glyphSize.y);
 			glyphIndex += 1;
 		}
 
@@ -348,9 +341,7 @@ namespace Trident {
 
 		const BufferImageCopyRegion glyphMapBufferImageCopyRegion = {
 			.bufferOffset = 0,
-			.imageOffsetX = 0,
-			.imageOffsetY = 0,
-			.imageOffsetZ = 0,
+			.imageOffset = {0, 0, 0},
 			.imageExtent = glyphMapImage->getExtent(),
 			.imageMipLevel = glyphMapImageView->getMipLevelOffset(),
 			.imageLayerOffset = glyphMapImageView->getLayerOffset(),

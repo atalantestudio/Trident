@@ -44,9 +44,7 @@ namespace Trident {
 			bufferImageCopy.imageSubresource.mipLevel = copyRegion.imageMipLevel;
 			bufferImageCopy.imageSubresource.baseArrayLayer = copyRegion.imageLayerOffset;
 			bufferImageCopy.imageSubresource.layerCount = copyRegion.imageLayerCount;
-			bufferImageCopy.imageOffset.x = copyRegion.imageOffsetX;
-			bufferImageCopy.imageOffset.y = copyRegion.imageOffsetY;
-			bufferImageCopy.imageOffset.z = copyRegion.imageOffsetZ;
+			bufferImageCopy.imageOffset = *pointer_cast<const VkOffset3D*>(&copyRegion.imageOffset);
 			bufferImageCopy.imageExtent = *pointer_cast<const VkExtent3D*>(&copyRegion.imageExtent);
 
 			bufferImageCopyIndex += 1;

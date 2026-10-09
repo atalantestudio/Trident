@@ -53,7 +53,7 @@ namespace Trident {
 							glTexSubImage1D(
 								destinationImage->target,
 								copyRegion.imageMipLevel,
-								copyRegion.imageOffsetX,
+								copyRegion.imageOffset.x,
 								copyRegion.imageExtent.x,
 								destinationImage->format,
 								type,
@@ -73,8 +73,8 @@ namespace Trident {
 							glTexSubImage2D(
 								destinationImage->target,
 								copyRegion.imageMipLevel,
-								copyRegion.imageOffsetX,
-								copyRegion.imageOffsetY + copyRegion.imageLayerOffset * extent.x * extent.y,
+								copyRegion.imageOffset.x,
+								copyRegion.imageOffset.y + copyRegion.imageLayerOffset * extent.x * extent.y,
 								copyRegion.imageExtent.x,
 								copyRegion.imageExtent.y * copyRegion.imageLayerCount,
 								destinationImage->format,
@@ -89,9 +89,9 @@ namespace Trident {
 							glTexSubImage3D(
 								destinationImage->target,
 								copyRegion.imageMipLevel,
-								copyRegion.imageOffsetX,
-								copyRegion.imageOffsetY,
-								copyRegion.imageOffsetZ + copyRegion.imageLayerOffset * extent.x * extent.y * extent.z,
+								copyRegion.imageOffset.x,
+								copyRegion.imageOffset.y,
+								copyRegion.imageOffset.z + copyRegion.imageLayerOffset * extent.x * extent.y * extent.z,
 								copyRegion.imageExtent.x,
 								copyRegion.imageExtent.y,
 								copyRegion.imageExtent.z * copyRegion.imageLayerCount,

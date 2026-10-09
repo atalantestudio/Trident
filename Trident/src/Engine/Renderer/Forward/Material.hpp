@@ -279,9 +279,7 @@ namespace Trident {
 
 			const BufferImageCopyRegion imageCopyRegion = {
 				.bufferOffset = imageMappedRangeOffset,
-				.imageOffsetX = 0,
-				.imageOffsetY = 0,
-				.imageOffsetZ = 0,
+				.imageOffset = {0, 0, 0},
 				.imageExtent = imageAsset->getExtent(),
 				.imageMipLevel = imageView->getMipLevelOffset(),
 				.imageLayerOffset = imageView->getLayerOffset(),

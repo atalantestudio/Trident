@@ -486,9 +486,7 @@ namespace Trident {
 			// Environment map
 			{
 				.bufferOffset = environmentMapStagingView.getOffset(),
-				.imageOffsetX = 0,
-				.imageOffsetY = 0,
-				.imageOffsetZ = 0,
+				.imageOffset = {0, 0, 0},
 				.imageExtent = environmentMapImage->getExtent(),
 				.imageMipLevel = environmentMapImageView->getMipLevelOffset(),
 				.imageLayerOffset = environmentMapImageView->getLayerOffset(),
@@ -682,9 +680,7 @@ namespace Trident {
 
 		const BufferImageCopyRegion imageCopyRegion = {
 			.bufferOffset = 0,
-			.imageOffsetX = 0,
-			.imageOffsetY = 0,
-			.imageOffsetZ = 0,
+			.imageOffset = {0, 0, 0},
 			.imageExtent = context.lightmapAtlasImage->getExtent(),
 			.imageMipLevel = context.lightmapAtlasImageView->getMipLevelOffset(),
 			.imageLayerOffset = context.lightmapAtlasImageView->getLayerOffset(),

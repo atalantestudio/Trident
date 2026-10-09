@@ -525,7 +525,7 @@ namespace Trident {
 
 				destinationTextureCopyLocation.SubresourceIndex = copyRegion.imageLayerOffset + layerIndex;
 
-				_commandEncoder->commandList->CopyTextureRegion(&destinationTextureCopyLocation, copyRegion.imageOffsetX, copyRegion.imageOffsetY, copyRegion.imageOffsetZ, &sourceBufferCopyLocation, nullptr);
+				_commandEncoder->commandList->CopyTextureRegion(&destinationTextureCopyLocation, copyRegion.imageOffset.x, copyRegion.imageOffset.y, copyRegion.imageOffset.z, &sourceBufferCopyLocation, nullptr);
 
 				layerIndex += 1;
 			}
@@ -570,12 +570,12 @@ namespace Trident {
 				destinationBufferCopyLocation.PlacedFootprint.Offset = copyRegion.bufferOffset + layerSize * layerIndex;
 
 				D3D12_BOX sourceBox{};
-				sourceBox.left = copyRegion.imageOffsetX;
-				sourceBox.top = copyRegion.imageOffsetY;
-				sourceBox.front = copyRegion.imageOffsetZ;
-				sourceBox.right = copyRegion.imageOffsetX + copyRegion.imageExtent.x;
-				sourceBox.bottom = copyRegion.imageOffsetY + copyRegion.imageExtent.y;
-				sourceBox.back = copyRegion.imageOffsetZ + copyRegion.imageExtent.z;
+				sourceBox.left = copyRegion.imageOffset.x;
+				sourceBox.top = copyRegion.imageOffset.y;
+				sourceBox.front = copyRegion.imageOffset.z;
+				sourceBox.right = copyRegion.imageOffset.x + copyRegion.imageExtent.x;
+				sourceBox.bottom = copyRegion.imageOffset.y + copyRegion.imageExtent.y;
+				sourceBox.back = copyRegion.imageOffset.z + copyRegion.imageExtent.z;
 
 				_commandEncoder->commandList->CopyTextureRegion(&destinationBufferCopyLocation, 0, 0, 0, &sourceTextureCopyLocation, &sourceBox);
 

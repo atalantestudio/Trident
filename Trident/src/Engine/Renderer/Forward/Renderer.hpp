@@ -281,9 +281,7 @@ namespace Trident {
 
 					const BufferImageCopyRegion bufferImageCopyRegion = {
 						.bufferOffset = skyboxView.getOffset(),
-						.imageOffsetX = 0,
-						.imageOffsetY = 0,
-						.imageOffsetZ = 0,
+						.imageOffset = {0, 0, 0},
 						.imageExtent = skyboxImage->getExtent(),
 						.imageMipLevel = skyboxImageView->getMipLevelOffset(),
 						.imageLayerOffset = skyboxImageView->getLayerOffset(),
@@ -314,9 +312,7 @@ namespace Trident {
 
 					const BufferImageCopyRegion bufferImageCopyRegion = {
 						.bufferOffset = lightmapAtlasView.getOffset(),
-						.imageOffsetX = 0,
-						.imageOffsetY = 0,
-						.imageOffsetZ = 0,
+						.imageOffset = {0, 0, 0},
 						.imageExtent = lightmapAtlasImage->getExtent(),
 						.imageMipLevel = lightmapAtlasImageView->getMipLevelOffset(),
 						.imageLayerOffset = lightmapAtlasImageView->getLayerOffset(),

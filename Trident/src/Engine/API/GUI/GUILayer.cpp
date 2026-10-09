@@ -172,8 +172,7 @@ namespace Trident {
 		if (previousComponentCount >= componentCount) {
 			const GUIContainer& component = previousComponents[componentCount - 1];
 			const Window* window = getApplication()->getWindow();
-			const sint32* mousePositionInteger = window->getMousePosition();
-			const vec2<float32> mousePosition = {static_cast<float32>(mousePositionInteger[0]), static_cast<float32>(mousePositionInteger[1])};
+			const vec2<float32> mousePosition = vec2<float32>(window->getMousePosition());
 
 			if (IsIntersecting(component, mousePosition)) {
 				window->updatePointerType(component.pointerType);
@@ -470,9 +469,6 @@ namespace Trident {
 	}
 
 	vec2<float32> GUILayer::getMousePosition() const {
-		const Window* window = getApplication()->getWindow();
-		const sint32* mousePositionInteger = window->getMousePosition();
-
-		return {static_cast<float32>(mousePositionInteger[0]), static_cast<float32>(mousePositionInteger[1])};
+		return vec2<float32>(getApplication()->getWindow()->getMousePosition());
 	}
 }

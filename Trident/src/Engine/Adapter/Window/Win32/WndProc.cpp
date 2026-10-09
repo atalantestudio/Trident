@@ -25,16 +25,16 @@ namespace Trident {
 				return 0;
 			}
 			case WM_SIZE: {
-				const uint32 width = GET_X_LPARAM(lParam);
-				const uint32 height = GET_Y_LPARAM(lParam);
+				const vec2<sint32> size = {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
+				const Extent2D extent = Extent2D(size);
 
-				if (windowData->extent.x != width || windowData->extent.y != height) {
-					WindowResizeEvent windowResizeEvent(width, height);
+				if (windowData->extent != extent) {
+					WindowResizeEvent windowResizeEvent(size);
 
 					windowData->windowResizeEventListener(windowResizeEvent);
 				}
 
-				windowData->extent = {width, height};
+				windowData->extent = extent;
 				windowData->minimized = wParam == SIZE_MINIMIZED;
 				windowData->maximized = wParam == SIZE_MAXIMIZED;
 
@@ -98,8 +98,8 @@ namespace Trident {
 				sint32 eventY;
 
 				if (windowData->pointerLocked) {
-					const sint32 deltaX = x - windowData->cursorX;
-					const sint32 deltaY = y - windowData->cursorY;
+					const sint32 deltaX = x - windowData->cursor.x;
+					const sint32 deltaY = y - windowData->cursor.y;
 
 					eventX = windowData->virtualCursorPositionX + deltaX;
 					eventY = windowData->virtualCursorPositionY + deltaY;
@@ -119,8 +119,8 @@ namespace Trident {
 
 				windowData->mouseMoveEventListener(mouseMoveEvent);
 
-				windowData->cursorX = x;
-				windowData->cursorY = y;
+				windowData->cursor.x = x;
+				windowData->cursor.y = y;
 
 				return 0;
 			}

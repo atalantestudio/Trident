@@ -97,4 +97,11 @@ namespace Trident {
 		public:
 			uint8* data;
 	};
+
+	template<>
+	inline void ByteStream<StreamOperation::WRITE>::write(vec3<uint32> value, bool swapEndianness) {
+		write<uint32>(value.x, swapEndianness);
+		write<uint32>(value.y, swapEndianness);
+		write<uint32>(value.z, swapEndianness);
+	}
 }

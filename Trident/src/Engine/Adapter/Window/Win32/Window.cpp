@@ -218,10 +218,10 @@ namespace Trident {
 		return windowData.minimized;
 	}
 
-	const sint32* Window::getMousePosition() const {
+	vec2<sint32> Window::getMousePosition() const {
 		const Win32WindowData& windowData = *static_cast<const Win32WindowData*>(data);
 
-		return &windowData.cursorX;
+		return windowData.cursor;
 	}
 
 	bool Window::isPointerLocked() const {
@@ -307,16 +307,13 @@ namespace Trident {
 		}
 
 		// TODO(window): Verify that the condition is correct.
-		// windowData->cursorX != windowData->extent.width / 2 || windowData->cursorY != windowData->sizeY / 2
+		// windowData->cursorX != windowData->extent.x / 2 || windowData->cursorY != windowData->sizeY / 2
 		if (windowData->pointerLocked) {
-			// TODO(lyah/integer-vector)
-			POINT point{};
-			point.x = windowData->extent.x / 2;
-			point.y = windowData->extent.y / 2;
+			windowData->cursor = vec2<sint32>(windowData->extent) / 2;
 
-			// TODO(lyah/integer-vector)
-			windowData->cursorX = point.x;
-			windowData->cursorY = point.y;
+			POINT point{};
+			point.x = windowData->cursor.x;
+			point.y = windowData->cursor.y;
 
 			result = ClientToScreen(windowData->hWnd, &point);
 

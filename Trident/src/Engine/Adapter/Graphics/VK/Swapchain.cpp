@@ -66,13 +66,15 @@ namespace Trident {
 
 		ADAPTER_INFO("Swapchain image count is [].", _swapchain->imageCount);
 
-		if (surface->capabilities.currentExtent.width == max<uint32>() && surface->capabilities.currentExtent.height == max<uint32>()) {
-			_swapchain->extent = *pointer_cast<const Extent2D*>(&surface->capabilities.currentExtent);
+		const Extent2D currentExtent = *pointer_cast<const Extent2D*>(&surface->capabilities.currentExtent);
+		const Extent2D minImageExtent = *pointer_cast<const Extent2D*>(&surface->capabilities.minImageExtent);
+		const Extent2D maxImageExtent = *pointer_cast<const Extent2D*>(&surface->capabilities.maxImageExtent);
+
+		if (currentExtent.x == max<uint32>() && currentExtent.y == max<uint32>()) {
+			_swapchain->extent = currentExtent;
 		}
 		else {
-			// TODO(lyah/scalar)
-			_swapchain->extent.x = clamp(descriptor.extent.x, surface->capabilities.minImageExtent.width, surface->capabilities.maxImageExtent.width);
-			_swapchain->extent.y = clamp(descriptor.extent.y, surface->capabilities.minImageExtent.height, surface->capabilities.maxImageExtent.height);
+			_swapchain->extent = clamp(descriptor.extent, minImageExtent, maxImageExtent);
 		}
 
 		ADAPTER_INFO("Swapchain image extent is ([], []).", _swapchain->extent.x, _swapchain->extent.y);

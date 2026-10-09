@@ -51,10 +51,7 @@ namespace Trident {
 	}
 
 	static void createFaceContact(const FaceQuery& faceQuery, const RigidBody3DComponent& referenceBody, const RigidBody3DComponent& incidentBody, const Hull3D& referenceHull, const Hull3D& incidentHull, ContactManifold3D* contactManifold) {
-		// TODO(lyah/scalar-math)
-		// Last component of the SIMD register is not 0, which causes issues when solving.
-		// Replace with scalar math.
-		contactManifold->normal = {faceQuery.axis[0], faceQuery.axis[1], faceQuery.axis[2]};
+		contactManifold->normal = faceQuery.axis;
 
 		const Plane3D referencePlane = referenceBody.facePlanes[faceQuery.referenceFaceIndex];
 

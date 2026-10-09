@@ -202,9 +202,7 @@ namespace Trident {
 
 				BufferImageCopyRegion bufferImageCopyRegion{};
 				bufferImageCopyRegion.bufferOffset = 0;
-				bufferImageCopyRegion.imageOffsetX = 0;
-				bufferImageCopyRegion.imageOffsetY = 0;
-				bufferImageCopyRegion.imageOffsetZ = 0;
+				bufferImageCopyRegion.imageOffset = {0, 0, 0};
 				bufferImageCopyRegion.imageExtent = textureArrayImage->getExtent();
 				bufferImageCopyRegion.imageMipLevel = 0;
 				bufferImageCopyRegion.imageLayerOffset = 0;

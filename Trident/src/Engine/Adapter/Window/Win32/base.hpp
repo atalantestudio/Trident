@@ -36,10 +36,7 @@ namespace Trident {
 		bool minimized;
 		bool maximized;
 		bool pointerLocked;
-
-		// TODO: Use vec2<sint32> (no SIMD).
-		sint32 cursorX;
-		sint32 cursorY;
+		vec2<sint32> cursor;
 
 		// TODO: Check if that is really needed.
 		// TODO: Use vec2<sint32> (no SIMD).

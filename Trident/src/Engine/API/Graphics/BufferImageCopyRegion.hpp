@@ -6,12 +6,7 @@
 namespace Trident {
 	struct BufferImageCopyRegion {
 		uint64 bufferOffset;
-
-		// TODO(lyah/integer-vector): Use vec3<sint32> instead.
-		sint32 imageOffsetX;
-		sint32 imageOffsetY;
-		sint32 imageOffsetZ;
-
+		vec3<sint32> imageOffset;
 		Extent3D imageExtent;
 		uint32 imageMipLevel;
 		uint32 imageLayerOffset;

@@ -34,17 +34,14 @@ namespace Trident {
 			bool isMinimized() const;
 
 			/// Returns the position of the mouse relative to the top-left corner of the client area.
-			const sint32* getMousePosition() const;
+			vec2<sint32> getMousePosition() const;
 
 			inline vec2<float32> getNdcMousePosition() const {
 				const Extent2D extent = getExtent();
-				const sint32* mousePosition = getMousePosition();
+				const vec2<float32> mousePosition = vec2<float32>(getMousePosition());
+				const vec2<float32> ndcMousePosition = mousePosition / (vec2<float32>(extent) * 0.5f);
 
-				// TODO(lyah/integer-vector)
-				return {
-					-1.0f + static_cast<float32>(mousePosition[0]) / (extent.x * 0.5f),
-					 1.0f - static_cast<float32>(mousePosition[1]) / (extent.y * 0.5f),
-				};
+				return {ndcMousePosition.x - 1.0f, -ndcMousePosition.y + 1.0f};
 			}
 
 			bool isPointerLocked() const;

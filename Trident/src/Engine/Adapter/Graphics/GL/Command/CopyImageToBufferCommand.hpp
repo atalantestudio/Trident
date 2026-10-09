@@ -38,9 +38,9 @@ namespace Trident {
 								glGetTextureSubImage(
 									sourceImage->texture,
 									copyRegion.imageMipLevel,
-									copyRegion.imageOffsetX,
-									copyRegion.imageOffsetY,
-									copyRegion.imageOffsetZ + copyRegion.imageLayerOffset,
+									copyRegion.imageOffset.x,
+									copyRegion.imageOffset.y,
+									copyRegion.imageOffset.z + copyRegion.imageLayerOffset,
 									copyRegion.imageExtent.x,
 									copyRegion.imageExtent.y,
 									copyRegion.imageExtent.z * copyRegion.imageLayerCount,

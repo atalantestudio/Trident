@@ -18,7 +18,7 @@ namespace Trident {
 
 				uint64 regOffset = 0;
 
-				// TODO(lyah/register)
+				// TODO(lyah/simd)
 				/* while (regOffset < regCount * 8) {
 					const reg<8, uint16> current(&glyphOffsets[regOffset]);
 					const reg<8, uint16> next(&glyphOffsets[regOffset + 1]);

@@ -20,12 +20,7 @@ namespace Trident {
 				stream.write<uint32>(image.identifier);
 				stream.write<VersionNumber>({0, 0, 0});
 				stream.write<ImageFormat>(image.format);
-
-				// TODO(lyah/integer-vector)
-				stream.write<uint32>(image.extent.x);
-				stream.write<uint32>(image.extent.y);
-				stream.write<uint32>(image.extent.z);
-
+				stream.write<Extent3D>(image.extent);
 				stream.write<uint32>(image.mipLevelCount);
 				stream.write<uint32>(image.layerCount);
 

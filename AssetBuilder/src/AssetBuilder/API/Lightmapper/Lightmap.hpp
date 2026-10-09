@@ -39,11 +39,8 @@ namespace Trident {
 	};
 
 	struct Rectangle {
-		// TODO(lyah/integer-vector): Replace with 2 Extent2D.
-		uint32 x;
-		uint32 y;
-		uint32 width;
-		uint32 height;
+		Extent2D offset;
+		Extent2D size;
 	};
 
 	struct LightmapNode {

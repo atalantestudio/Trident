@@ -253,6 +253,8 @@ namespace Trident {
 				}
 
 				if (sourceBuffer != nullptr && destinationImage != nullptr) {
+					const Extent3D destinationImageExtent = destinationImage->getExtent();
+
 					uint32 copyRegionIndex = 0;
 
 					while (copyRegionIndex < copyRegions.count()) {
@@ -267,16 +269,16 @@ namespace Trident {
 							VALIDATION_ERROR("The area formed by copyRegions[[]] must be less than or equal to the size of sourceBuffer - copyRegions[[]].bufferOffset.", copyRegionIndex, copyRegionIndex);
 						}
 
-						if (copyRegion.imageOffsetX >= static_cast<sint32>(destinationImage->getExtent().x)) {
-							VALIDATION_ERROR("copyRegions[[]].imageOffsetX must be less than the width of destinationImage.", copyRegionIndex);
+						if (copyRegion.imageOffset.x >= static_cast<sint32>(destinationImageExtent.x)) {
+							VALIDATION_ERROR("copyRegions[[]].imageOffset.x must be less than the width of destinationImage.", copyRegionIndex);
 						}
 
-						if (copyRegion.imageOffsetY >= static_cast<sint32>(destinationImage->getExtent().y)) {
-							VALIDATION_ERROR("copyRegions[[]].imageOffsetY must be less than the height of destinationImage.", copyRegionIndex);
+						if (copyRegion.imageOffset.y >= static_cast<sint32>(destinationImageExtent.y)) {
+							VALIDATION_ERROR("copyRegions[[]].imageOffset.y must be less than the height of destinationImage.", copyRegionIndex);
 						}
 
-						if (copyRegion.imageOffsetZ >= static_cast<sint32>(destinationImage->getExtent().z)) {
-							VALIDATION_ERROR("copyRegions[[]].imageOffsetZ must be less than the depth of destinationImage.", copyRegionIndex);
+						if (copyRegion.imageOffset.z >= static_cast<sint32>(destinationImageExtent.z)) {
+							VALIDATION_ERROR("copyRegions[[]].imageOffset.z must be less than the depth of destinationImage.", copyRegionIndex);
 						}
 
 						if (copyRegion.imageExtent.x == 0) {
@@ -291,15 +293,15 @@ namespace Trident {
 							VALIDATION_ERROR("copyRegions[[]].imageExtent.z must be greater than 0.", copyRegionIndex);
 						}
 
-						if (copyRegion.imageOffsetX + copyRegion.imageExtent.x > destinationImage->getExtent().x) {
+						if (copyRegion.imageOffset.x + copyRegion.imageExtent.x > destinationImageExtent.x) {
 							VALIDATION_ERROR("The width formed by copyRegions[[]] must be less than or equal to the width of destinationImage.", copyRegionIndex);
 						}
 
-						if (copyRegion.imageOffsetY + copyRegion.imageExtent.y > destinationImage->getExtent().y) {
+						if (copyRegion.imageOffset.y + copyRegion.imageExtent.y > destinationImageExtent.y) {
 							VALIDATION_ERROR("The height formed by copyRegions[[]] must be less than or equal to the height of destinationImage.", copyRegionIndex);
 						}
 
-						if (copyRegion.imageOffsetZ + copyRegion.imageExtent.z > destinationImage->getExtent().z) {
+						if (copyRegion.imageOffset.z + copyRegion.imageExtent.z > destinationImageExtent.z) {
 							VALIDATION_ERROR("The depth formed by copyRegions[[]] must be less than or equal to the depth of destinationImage.", copyRegionIndex);
 						}
 
@@ -356,6 +358,8 @@ namespace Trident {
 				}
 
 				if (sourceImage != nullptr && destinationBuffer != nullptr) {
+					const Extent3D sourceImageExtent = sourceImage->getExtent();
+
 					uint32 copyRegionIndex = 0;
 
 					while (copyRegionIndex < copyRegions.count()) {
@@ -370,16 +374,16 @@ namespace Trident {
 							VALIDATION_ERROR("The area formed by copyRegions[[]] must be less than or equal to the size of destinationBuffer - copyRegions[[]].bufferOffset.", copyRegionIndex, copyRegionIndex);
 						}
 
-						if (copyRegion.imageOffsetX >= static_cast<sint32>(sourceImage->getExtent().x)) {
-							VALIDATION_ERROR("copyRegions[[]].imageOffsetX must be less than the width of sourceImage.", copyRegionIndex);
+						if (copyRegion.imageOffset.x >= static_cast<sint32>(sourceImageExtent.x)) {
+							VALIDATION_ERROR("copyRegions[[]].imageOffset.x must be less than the width of sourceImage.", copyRegionIndex);
 						}
 
-						if (copyRegion.imageOffsetY >= static_cast<sint32>(sourceImage->getExtent().y)) {
-							VALIDATION_ERROR("copyRegions[[]].imageOffsetY must be less than the height of sourceImage.", copyRegionIndex);
+						if (copyRegion.imageOffset.y >= static_cast<sint32>(sourceImageExtent.y)) {
+							VALIDATION_ERROR("copyRegions[[]].imageOffset.y must be less than the height of sourceImage.", copyRegionIndex);
 						}
 
-						if (copyRegion.imageOffsetZ >= static_cast<sint32>(sourceImage->getExtent().z)) {
-							VALIDATION_ERROR("copyRegions[[]].imageOffsetZ must be less than the depth of sourceImage.", copyRegionIndex);
+						if (copyRegion.imageOffset.z >= static_cast<sint32>(sourceImageExtent.z)) {
+							VALIDATION_ERROR("copyRegions[[]].imageOffset.z must be less than the depth of sourceImage.", copyRegionIndex);
 						}
 
 						if (copyRegion.imageExtent.x == 0) {
@@ -394,15 +398,15 @@ namespace Trident {
 							VALIDATION_ERROR("copyRegions[[]].imageExtent.z must be greater than 0.", copyRegionIndex);
 						}
 
-						if (copyRegion.imageOffsetX + copyRegion.imageExtent.x > sourceImage->getExtent().x) {
+						if (copyRegion.imageOffset.x + copyRegion.imageExtent.x > sourceImageExtent.x) {
 							VALIDATION_ERROR("The width formed by copyRegions[[]] must be less than or equal to the width of sourceImage.", copyRegionIndex);
 						}
 
-						if (copyRegion.imageOffsetY + copyRegion.imageExtent.y > sourceImage->getExtent().y) {
+						if (copyRegion.imageOffset.y + copyRegion.imageExtent.y > sourceImageExtent.y) {
 							VALIDATION_ERROR("The height formed by copyRegions[[]] must be less than or equal to the height of sourceImage.", copyRegionIndex);
 						}
 
-						if (copyRegion.imageOffsetZ + copyRegion.imageExtent.z > sourceImage->getExtent().z) {
+						if (copyRegion.imageOffset.z + copyRegion.imageExtent.z > sourceImageExtent.z) {
 							VALIDATION_ERROR("The depth formed by copyRegions[[]] must be less than or equal to the depth of sourceImage.", copyRegionIndex);
 						}
 

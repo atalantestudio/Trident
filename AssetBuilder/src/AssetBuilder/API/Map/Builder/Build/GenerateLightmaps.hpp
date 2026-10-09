@@ -23,15 +23,15 @@ namespace Trident {
 		}
 
 		if (
-			node->rectangle.width < lightmap.size.x ||
-			node->rectangle.height < lightmap.size.y
+			node->rectangle.size.x < lightmap.size.x ||
+			node->rectangle.size.y < lightmap.size.y
 		) {
 			return nullptr;
 		}
 
 		if (
-			node->rectangle.width == lightmap.size.x &&
-			node->rectangle.height == lightmap.size.y
+			node->rectangle.size.x == lightmap.size.x &&
+			node->rectangle.size.y == lightmap.size.y
 		) {
 			return node;
 		}
@@ -43,22 +43,22 @@ namespace Trident {
 		node->children[1]->rectangle = node->rectangle;
 
 		const Extent2D remainingSize = {
-			node->rectangle.width - lightmap.size.x,
-			node->rectangle.height - lightmap.size.y,
+			node->rectangle.size.x - lightmap.size.x,
+			node->rectangle.size.y - lightmap.size.y,
 		};
 
 		// Split towards the axis with the largest available space.
 		if (remainingSize.x > remainingSize.y) {
-			node->children[0]->rectangle.width = lightmap.size.x;
+			node->children[0]->rectangle.size.x = lightmap.size.x;
 
-			node->children[1]->rectangle.x += lightmap.size.x;
-			node->children[1]->rectangle.width = remainingSize.x;
+			node->children[1]->rectangle.offset.x += lightmap.size.x;
+			node->children[1]->rectangle.size.x = remainingSize.x;
 		}
 		else {
-			node->children[0]->rectangle.height = lightmap.size.y;
+			node->children[0]->rectangle.size.y = lightmap.size.y;
 
-			node->children[1]->rectangle.y += lightmap.size.y;
-			node->children[1]->rectangle.height = remainingSize.y;
+			node->children[1]->rectangle.offset.y += lightmap.size.y;
+			node->children[1]->rectangle.size.y = remainingSize.y;
 		}
 
 		return insertLightmapNode(lightmap, node->children[0]);
@@ -238,7 +238,8 @@ namespace Trident {
 		static constexpr vec2<float32> inverseAtlasExtent = 1.0f / vec2<float32>(LIGHTMAP_ATLAS_EXTENT);
 
 		LightmapNode rootNode{};
-		rootNode.rectangle = {0, 0, LIGHTMAP_ATLAS_EXTENT.x, LIGHTMAP_ATLAS_EXTENT.y};
+		rootNode.rectangle.offset = {0, 0};
+		rootNode.rectangle.size = LIGHTMAP_ATLAS_EXTENT;
 
 		for (const LightmapLookup lightmapLookup : lightmapLookups) {
 			const Lightmap& lightmap = lightmaps[lightmapLookup.index];
@@ -249,11 +250,7 @@ namespace Trident {
 
 			node->index = lightmapLookup.index;
 
-			// TODO(lyah/scalar)
-			const vec2<float32> lightmapOffset = {
-				static_cast<float32>(node->rectangle.x),
-				static_cast<float32>(node->rectangle.y),
-			};
+			const vec2<float32> lightmapOffset = vec2<float32>(node->rectangle.offset);
 
 			uint32 coordinateIndex = 0;
 
