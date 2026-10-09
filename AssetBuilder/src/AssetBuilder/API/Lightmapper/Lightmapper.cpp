@@ -332,7 +332,9 @@ namespace Trident {
 								axisAngle<float32>(FORWARD, transform.rotation[2])
 							);
 							const mat4x4<float32> world = transpose(
+								// TODO(lyah/uniform-scaling)
 								scaling<mat4x4<float32>>(vec3<float32>(transform.scale)) *
+
 								mat4x4<float32>(orientation) *
 								translation<mat4x4<float32>>(transform.translation)
 							);

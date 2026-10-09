@@ -119,7 +119,9 @@ namespace Trident {
 
 			Instance3D& instance = asset.instances[instanceIndex];
 			instance.worldTransform = (
+				// TODO(lyah/uniform-scaling)
 				scaling<mat4x4<float32>>(vec3<float32>(scale)) *
+
 				mat4x4<float32>(orientation) *
 				translation<mat4x4<float32>>(position)
 			);

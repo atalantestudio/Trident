@@ -38,7 +38,8 @@ namespace Trident {
 
 		float32 rotation;
 
-		// NOTE: This isn't meant to be dynamically updated.
+		// This isn't meant to be dynamically updated.
+		// TODO(physics/2d/rigid-body/uniform-scaling): Replace with uniform scaling?
 		vec2<float32> scale = {1.0f, 1.0f};
 
 		mat3x3<float32> world = identity<mat3x3<float32>>();

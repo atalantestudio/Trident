@@ -60,7 +60,7 @@ namespace Trident {
 		// All computations are done in the local space of B.
 		const Transform3D transform = transformA * inverse(transformB);
 
-		const vec3<float32> centroidA = vec3<float32>(hullA.centroid) + transform.position;
+		const vec3<float32> centroidA = hullA.centroid + transform.position;
 
 		uint16 edgeIndexA = 0;
 
@@ -68,13 +68,13 @@ namespace Trident {
 			const Edge3D edgeA = hullA.edges[edgeIndexA + 0];
 			const Edge3D twinA = hullA.edges[edgeIndexA + 1];
 
-			const vec3<float32> a = vec3<float32>(hullA.vertices[edgeA.originVertexIndex]) + transform.position;
-			const vec3<float32> b = vec3<float32>(hullA.vertices[twinA.originVertexIndex]) + transform.position;
+			const vec3<float32> a = hullA.vertices[edgeA.originVertexIndex] + transform.position;
+			const vec3<float32> b = hullA.vertices[twinA.originVertexIndex] + transform.position;
 			const vec3<float32> ab = b - a;
 
 			// Face normals are vertices on the Gauss map.
-			const vec3<float32> gmA = vec3<float32>(hullA.faces[edgeA.faceIndex].normal) * transform.orientation;
-			const vec3<float32> gmB = vec3<float32>(hullA.faces[twinA.faceIndex].normal) * transform.orientation;
+			const vec3<float32> gmA = hullA.faces[edgeA.faceIndex].normal * transform.orientation;
+			const vec3<float32> gmB = hullA.faces[twinA.faceIndex].normal * transform.orientation;
 
 			uint16 edgeIndexB = 0;
 

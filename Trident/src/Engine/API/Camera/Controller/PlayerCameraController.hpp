@@ -16,7 +16,7 @@ namespace Trident {
 			}
 
 			void update(float32 deltaTime) override {
-				camera.updateOrientation(svec3<float32>(angularMotionAccumulator));
+				camera.updateOrientation(angularMotionAccumulator);
 				camera.updateView();
 				camera.updateProjectionView();
 

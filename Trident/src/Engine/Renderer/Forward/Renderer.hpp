@@ -102,7 +102,7 @@ namespace Trident {
 
 				debugContactManifoldBuffer = createDebugContactManifoldBuffer();
 
-				const BufferView<svec3<float32>> debugContactManifoldView = debugContactManifoldBuffer->createView<svec3<float32>>(0, debugContactManifoldBuffer->getSize());
+				const BufferView<vec3<float32>> debugContactManifoldView = debugContactManifoldBuffer->createView<vec3<float32>>(0, debugContactManifoldBuffer->getSize());
 
 				debugContactRange = debugContactManifoldView->map(); */
 

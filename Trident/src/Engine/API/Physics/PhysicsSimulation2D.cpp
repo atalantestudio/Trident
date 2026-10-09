@@ -75,7 +75,7 @@ namespace Trident {
 		deltaTime(static_cast<float32>(descriptor.deltaTime)),
 		inverseDeltaTime(static_cast<float32>(1.0 / descriptor.deltaTime))
 
-		// TODO: Use.
+		// TODO(physics/2d/delta-time): Use half delta-time.
 		// halfDeltaTime(static_cast<float32>(descriptor.deltaTime * 0.5))
 	{}
 
@@ -180,24 +180,24 @@ namespace Trident {
 	}
 
 	void PhysicsSimulation2D::applyForces() {
-		// TODO: Implement torque.
+		// TODO(physics/2d/apply-forces): Implement torque.
 		constexpr float32 torque = 0.0_Nm;
 
 		ComponentPool<RigidBody2DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
 		uint32 componentIndex = 0;
 
-		// TODO: Integrate velocities on dynamic resting entities (e.g. an object on a moving platform may move due to inertia).
+		// TODO(physics/2d/apply-forces): Integrate velocities on dynamic resting entities (e.g. an object on a moving platform may move due to inertia).
 		while (componentIndex < rigidBodyComponentPool.componentCount) {
 			RigidBody2DComponent& rigidBodyComponent = rigidBodyComponentPool.components[componentIndex];
 
-			// TODO: Exclude dynamic entities with an inverse mass of 0 from the loop.
+			// TODO(physics/2d/apply-forces): Exclude dynamic entities with an inverse mass of 0 from the loop.
 			if (rigidBodyComponent.inverseMass == 0.0_kg) {
 				componentIndex += 1;
 
 				continue;
 			}
 
-			// TODO
+			// TODO(physics/2d/apply-forces)
 			// Integrate gravity like in https://web.archive.org/web/20161201054257/https://www.niksula.hut.fi/~hkankaan/Homepages/gravity.html.
 			// This looks like Velocity Verlet for gravity to me?
 			// rigidBodyComponent.linearVelocity += (rigidBodyComponent.force * rigidBodyComponent.inverseMass + G) * halfDeltaTime;
@@ -275,7 +275,7 @@ namespace Trident {
 			RigidBody2DComponent& rigidBodyA = scene->ecs.getComponent<RigidBody2DComponent>(joint.A);
 			RigidBody2DComponent& rigidBodyB = scene->ecs.getComponent<RigidBody2DComponent>(joint.B);
 
-			// TODO: Why is the transpose needed?
+			// TODO(physics/2d/update-joints): Why is the transpose needed?
 			const mat2x2<float32> RAT = transpose(rotationAngle<mat2x2<float32>>(rigidBodyA.rotation));
 			const mat2x2<float32> RBT = transpose(rotationAngle<mat2x2<float32>>(rigidBodyB.rotation));
 
@@ -434,13 +434,13 @@ namespace Trident {
 		ComponentPool<RigidBody2DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody2DComponent>();
 		uint32 componentIndex = 0;
 
-		// TODO: Integration for static entities (e.g. a moving platform that isn't affected by other forces)?
-		// TODO: Integration for dynamic entities with infinite mass?
-		// TODO: Integration for dynamic resting entities (e.g. an object on a moving platform may move due to inertia)?
+		// TODO(physics/2d/integration): Integration for static entities (e.g. a moving platform that isn't affected by other forces)?
+		// TODO(physics/2d/integration): Integration for dynamic entities with infinite mass?
+		// TODO(physics/2d/integration): Integration for dynamic resting entities (e.g. an object on a moving platform may move due to inertia)?
 		while (componentIndex < rigidBodyComponentPool.componentCount) {
 			RigidBody2DComponent& rigidBodyComponent = rigidBodyComponentPool.components[componentIndex];
 
-			// TODO: Exclude dynamic entities with an inverse mass of 0 from the loop.
+			// TODO(physics/2d/integration): Exclude dynamic entities with an inverse mass of 0 from the loop.
 			if (rigidBodyComponent.inverseMass == 0.0_kg) {
 				componentIndex += 1;
 
@@ -453,7 +453,7 @@ namespace Trident {
 			rigidBodyComponent.rotation += rigidBodyComponent.angularVelocity * deltaTime;
 			rigidBodyComponent.updateWorld(hull.centroid);
 
-			// TODO
+			// TODO(physics/2d/integration)
 			// rigidBodyComponent.linearVelocity += (rigidBodyComponent.force * rigidBodyComponent.inverseMass + vec2<float32>(0.0f, G)) * halfDeltaTime;
 			// rigidBodyComponent.angularVelocity += rigidBodyComponent.inverseInertia * halfDeltaTime;
 

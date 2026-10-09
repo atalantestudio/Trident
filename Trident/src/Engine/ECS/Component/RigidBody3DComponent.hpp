@@ -35,7 +35,7 @@ namespace Trident {
 				// TODO(rigid-body/3d/centroid): Include the centroid in the world matrix?
 				translation<mat4x4<float32>>(-centroid) *
 
-				// TODO(rigid-body/3d/uniform-scaling)
+				// TODO(lyah/uniform-scaling)
 				scaling<mat4x4<float32>>(vec3<float32>(scale)) *
 
 				mat4x4<float32>(orientation) *
@@ -59,23 +59,19 @@ namespace Trident {
 		/// The planes composing the body.
 		view<Plane3D> facePlanes;
 
-		// TODO(lyah/scalar): Use svec3<float32> instead.
 		/// Position of the center of mass in world-space.
 		vec3<float32> position;
 
-		// TODO(lyah/scalar): Use svec3<float32> instead.
 		vec3<float32> rotation;
 
-		/// Uniform scaling across all directions.
+		/// Uniform scaling multiplier.
 		float32 scale = 1.0f;
 
 		mat4x4<float32> world = identity<mat4x4<float32>>();
 		quat<float32> orientation = identity<quat<float32>>();
 
-		// TODO(lyah/scalar): Use svec3<float32> instead.
 		vec3<float32> linearVelocity = {0.0_m_s, 0.0_m_s, 0.0_m_s};
 
-		// TODO(lyah/scalar): Use svec3<float32> instead.
 		vec3<float32> angularVelocity = {0.0_rad, 0.0_rad, 0.0_rad};
 
 		float32 inverseMass;
@@ -84,7 +80,6 @@ namespace Trident {
 		float32 friction;
 		float32 restitution;
 
-		// TODO(lyah/scalar): Use svec3<float32> instead.
 		vec3<float32> force = {0.0_N, 0.0_N, 0.0_N};
 
 		/// The entity owning the rigid body this body is currently resting on.

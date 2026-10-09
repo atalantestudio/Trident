@@ -306,7 +306,7 @@ namespace Trident {
 
 	void ForwardRenderer::initializeLightProjectionViews() const {
 		const PerspectiveCamera3D& camera = getCameraController<PerspectiveCamera3D>().getCamera();
-		const vec3<float32> lightDirection = normalized(vec3<float32>(scene->getAsset()->sunDirection));
+		const vec3<float32> lightDirection = normalized(scene->getAsset()->sunDirection);
 
 		vec4<float32> frustumVertices[8];
 		float32 nearPlane = camera.nearPlane;

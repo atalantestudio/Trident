@@ -32,10 +32,6 @@ namespace Trident {
 		Size1D width;
 		Size1D height;
 
-		inline operator vec2<float32>() const {
-			return {width.value, height.value};
-		}
-
 		inline Size1D operator[](std::size_t index) const {
 			ENGINE_ASSERT(index < 2, "Index overflow.");
 
