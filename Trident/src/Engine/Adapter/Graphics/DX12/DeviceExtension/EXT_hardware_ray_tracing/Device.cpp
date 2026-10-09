@@ -27,7 +27,7 @@ namespace Trident::DX12 {
 		D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC& BuildDesc = accelerationStructure->BuildDesc;
 		BuildDesc.DestAccelerationStructureData = pointer_cast<const DX12::Buffer*>(view.getBuffer())->resource->GetGPUVirtualAddress() + view.getOffset();
 		BuildDesc.Inputs = ref_cast<DX12::AccelerationStructureBuildGeometry>(descriptor.buildGeometry)->BuildInputs;
-		BuildDesc.SourceAccelerationStructureData = NULL;
+		BuildDesc.SourceAccelerationStructureData = 0;
 
 		return accelerationStructure;
 	}

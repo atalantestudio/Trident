@@ -324,7 +324,6 @@ namespace Trident {
 
 						while (instanceOffset < materialGeometry.instanceRange.count) {
 							const uint32 instanceIndex = materialGeometry.instanceRange.offset + instanceOffset;
-
 							const BuildTransform3D& transform = scene.staticGeometry.instances[instanceIndex].transform;
 							const quat<float32> orientation = normalized(
 								axisAngle<float32>(UP, transform.rotation[1]) *
@@ -339,29 +338,29 @@ namespace Trident {
 								translation<mat4x4<float32>>(transform.translation)
 							);
 
-							instanceMappedRange[instanceIndex] = {
-								.transform = {
-									{world[0][0], world[0][1], world[0][2], world[0][3]},
-									{world[1][0], world[1][1], world[1][2], world[1][3]},
-									{world[2][0], world[2][1], world[2][2], world[2][3]},
-								},
-								.geometryTriangleOffset = geometry.indexRange.offset / 3,
-								.deduplicatedTriangleOffset = triangleOffset,
-								.lightmapCoordinateOffset = lightmapCoordinateOffset,
+							const vec4<float32> transform3x4[3] = {
+								world[0],
+								world[1],
+								world[2],
 							};
 
-							tlasInstanceMappedRange[instanceIndex] = {
-								.transform = {
-									{world[0][0], world[0][1], world[0][2], world[0][3]},
-									{world[1][0], world[1][1], world[1][2], world[1][3]},
-									{world[2][0], world[2][1], world[2][2], world[2][3]},
-								},
-								.index = instanceIndex,
-								.mask = 1,
-								.shaderBindingTableRecordOffset = 0,
-								.flags = InstanceFlags::FORCE_OPAQUE,
-								.accelerationStructureAddress = blasAddress,
-							};
+							LightmapInstance& lightmapInstance = instanceMappedRange[instanceIndex];
+
+							std::copy_n(transform3x4, 3, lightmapInstance.transform);
+
+							lightmapInstance.geometryTriangleOffset = geometry.indexRange.offset / 3;
+							lightmapInstance.deduplicatedTriangleOffset = triangleOffset;
+							lightmapInstance.lightmapCoordinateOffset = lightmapCoordinateOffset;
+
+							AccelerationStructureInstance& accelerationStructureInstance = tlasInstanceMappedRange[instanceIndex];
+
+							std::copy_n(transform3x4, 3, accelerationStructureInstance.transform);
+
+							accelerationStructureInstance.index = instanceIndex;
+							accelerationStructureInstance.mask = 1;
+							accelerationStructureInstance.shaderBindingTableRecordOffset = 0;
+							accelerationStructureInstance.flags = InstanceFlags::FORCE_OPAQUE;
+							accelerationStructureInstance.accelerationStructureAddress = blasAddress;
 
 							triangleOffset += geometry.indexRange.count / 3;
 							lightmapCoordinateOffset += geometry.vertexRange.count;

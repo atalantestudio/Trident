@@ -56,7 +56,7 @@ namespace Trident {
 			};
 
 			struct LightmapInstance {
-				float32 transform[3][4];
+				vec4<float32> transform[3];
 				uint32 geometryTriangleOffset;
 				uint32 deduplicatedTriangleOffset;
 				uint32 lightmapCoordinateOffset;

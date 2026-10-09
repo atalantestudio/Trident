@@ -8,7 +8,7 @@
 
 namespace Trident {
 	struct AccelerationStructureInstance {
-		float32 transform[3][4];
+		vec4<float32> transform[3];
 		uint32 index : 24;
 		uint32 mask : 8;
 		uint32 shaderBindingTableRecordOffset : 24;
