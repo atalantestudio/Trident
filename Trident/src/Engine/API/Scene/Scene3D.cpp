@@ -99,8 +99,8 @@ namespace Trident {
 				Plane3D& plane = rigidBodyFacePlanes[rigidBodyFaceOffset + faceIndex];
 
 				// TODO(rigid-body/uniform-scaling): Remove non-uniform scaling properties on the rigid bodies.
-				plane.normal = normalized(multiplyTransform(face.normal, transposeInverseWorld));
-				plane.distance = dot(multiplyTransform(face.normal * face.distance, world), plane.normal);
+				plane.normal = normalized(face.normal * transposeInverseWorld);
+				plane.distance = dot(face.normal * face.distance * world, plane.normal);
 
 				faceIndex += 1;
 			}

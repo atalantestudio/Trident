@@ -9,20 +9,20 @@
 
 namespace Trident {
 	static void createEdgeContact(const EdgeQuery& edgeQuery, const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, const Hull3D& hullA, const Hull3D& hullB, ContactManifold3D* contactManifold) {
-		const vec3<float32> centroidA = multiplyTransform(hullA.centroid, rigidBodyA.world);
+		const vec3<float32> centroidA = hullA.centroid * rigidBodyA.world;
 
 		const Edge3D edgeA = hullA.edges[edgeQuery.edgeIndexA + 0];
 		const Edge3D twinA = hullA.edges[edgeQuery.edgeIndexA + 1];
 
-		const vec3<float32> p1 = multiplyTransform(hullA.vertices[edgeA.originVertexIndex], rigidBodyA.world);
-		const vec3<float32> q1 = multiplyTransform(hullA.vertices[twinA.originVertexIndex], rigidBodyA.world);
+		const vec3<float32> p1 = hullA.vertices[edgeA.originVertexIndex] * rigidBodyA.world;
+		const vec3<float32> q1 = hullA.vertices[twinA.originVertexIndex] * rigidBodyA.world;
 		const vec3<float32> e1 = normalized(q1 - p1);
 
 		const Edge3D edgeB = hullB.edges[edgeQuery.edgeIndexB + 0];
 		const Edge3D twinB = hullB.edges[edgeQuery.edgeIndexB + 1];
 
-		const vec3<float32> p2 = multiplyTransform(hullB.vertices[edgeB.originVertexIndex], rigidBodyB.world);
-		const vec3<float32> q2 = multiplyTransform(hullB.vertices[twinB.originVertexIndex], rigidBodyB.world);
+		const vec3<float32> p2 = hullB.vertices[edgeB.originVertexIndex] * rigidBodyB.world;
+		const vec3<float32> q2 = hullB.vertices[twinB.originVertexIndex] * rigidBodyB.world;
 		const vec3<float32> e2 = normalized(q2 - p2);
 
 		vec3<float32> normal = normalized(cross(e1, e2));
@@ -119,7 +119,7 @@ namespace Trident {
 			const Edge3D edge = incidentHull.edges[incidentHull.faceEdgeIndices[incidentFace.edgeIndexRange.offset + edgeIndex]];
 
 			ClipVertex3D clipVertex{};
-			clipVertex.position = multiplyTransform(incidentHull.vertices[edge.originVertexIndex], incidentBody.world);
+			clipVertex.position = incidentHull.vertices[edge.originVertexIndex] * incidentBody.world;
 			clipVertex.separation = 0.0f;
 			clipVertex.id.referenceEdgeAIndex = max<uint16>();
 			clipVertex.id.referenceEdgeBIndex = max<uint16>();

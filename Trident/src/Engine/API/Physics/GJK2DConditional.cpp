@@ -11,7 +11,7 @@ namespace Trident {
 		const mat2x2<float32> inverseRotation = rotationAngle<mat2x2<float32>>(-A.rotation);
 		const vec2<float32> s = hull.support(d * inverseRotation);
 
-		return multiplyTransform(s, A.world);
+		return s * A.world;
 	}
 
 	static void handleSimplex1(sim2<float32>& s, vec2<float32>& d) {

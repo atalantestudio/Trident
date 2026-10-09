@@ -91,6 +91,36 @@ namespace Trident {
 	template<typename T>
 	using sim2 = sim<2, T>;
 
+	template<typename T>
+	inline vec2<T> cross2d(vec2<T> a, vec2<T> b, vec2<T> c) {
+		const vec2<T> b_c = {b.x * c.y, b.y * c.x};
+
+		return {a.y * (b_c.x - b_c.y), a.x * (b_c.y - b_c.x)};
+	}
+
+	// TODO(lyah): Add to Lyah as `cross` or `determinant`.
+	template<typename T>
+	inline vec2<T> crossVec2Scalar(vec2<T> a, T b) {
+		return {a.y * b, a.x * -b};
+	}
+
+	template<typename T>
+	inline vec2<T> operator*(vec2<T> a, const mat3x3<T>& b) {
+		return {
+			a.x * b[0].x + a.y * b[1].x + b[2].x,
+			a.x * b[0].y + a.y * b[1].y + b[2].y,
+		};
+	}
+
+	template<typename T>
+	inline vec3<T> operator*(vec3<T> a, const mat4x4<T>& b) {
+		return {
+			a.x * b[0].x + a.y * b[1].x + a.z * b[2].x + b[3].x,
+			a.x * b[0].y + a.y * b[1].y + a.z * b[2].y + b[3].y,
+			a.x * b[0].z + a.y * b[1].z + a.z * b[2].z + b[3].z,
+		};
+	}
+
 	// TODO(lyah/scaled-area)
 	// Access the vertices using the indices provided by the geometry.
 	// Returns the absolute area of a 2D polygon defined by a sequence of vertices.
@@ -114,34 +144,6 @@ namespace Trident {
 		}
 
 		return abs(area) * static_cast<T>(0.5);
-	}
-
-	template<typename T>
-	inline vec2<T> cross2d(vec2<T> a, vec2<T> b, vec2<T> c) {
-		const vec2<T> b_c = {b.x * c.y, b.y * c.x};
-
-		return {a.y * (b_c.x - b_c.y), a.x * (b_c.y - b_c.x)};
-	}
-
-	// TODO(lyah): Add to Lyah as `cross` or `determinant`.
-	template<typename T>
-	inline vec2<T> crossVec2Scalar(vec2<T> a, T b) {
-		return {a.y * b, a.x * -b};
-	}
-
-	template<typename T>
-	inline vec2<T> multiplyTransform(vec2<T> a, const mat3x3<T>& t) {
-		return {
-			t[0][0] * a[0] + t[1][0] * a[1] + t[2][0],
-			t[0][1] * a[0] + t[1][1] * a[1] + t[2][1],
-		};
-	}
-
-	template<typename T>
-	inline vec3<T> multiplyTransform(vec3<T> a, const mat4x4<T>& M) {
-		const vec4<T> r = vec4<T>(a.x, a.y, a.z, 1.0f) * M;
-
-		return {r.x, r.y, r.z};
 	}
 
 	/// Calculates the signed distance between a point and an infinite line represented by two points.

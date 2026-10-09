@@ -83,7 +83,7 @@ namespace Trident {
 
 				vertex.normal = face.normal;
 				vertex.tangent = {0.0f, 0.0f, 0.0f, *pointer_cast<const float32*>(&initialTextureCoordinate)};
-				vertex.textureCoordinate = multiplyTransform(textureCoordinate, textureTransform);
+				vertex.textureCoordinate = textureCoordinate * textureTransform;
 
 				// TODO(asset-builder/map/static-geometry): Restore face wireframe?
 				// scene.staticGeometry.lineIndices[lineIndexOffset + vertexIndex * 2 + 0] = face.indexRange.offset + vertexIndex;

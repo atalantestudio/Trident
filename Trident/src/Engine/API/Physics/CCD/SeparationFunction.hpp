@@ -80,7 +80,7 @@ namespace Trident {
 					const vec2<float32> a = closestFeatureA.vertex;
 					const vec2<float32> b = closestFeatureB.vertex;
 
-					// TODO: Does it need to be normalized?
+					// TODO(physics/2d/ccd): Does it need to be normalized?
 					separatingAxis = normalized(b - a);
 
 					localPoint = {0.0f, 0.0f};
@@ -120,11 +120,11 @@ namespace Trident {
 				separatingAxis = perpendicularRight(edgeLocalPoint1 - edgeLocalPoint0);
 				localPoint = lerp(edgeLocalPoint0, edgeLocalPoint1, 0.5f);
 
-				const vec2<float32> edgePoint = multiplyTransform(localPoint, edgeObject.transform);
-				const vec2<float32> vertexPoint = multiplyTransform(vertexObject.geometry->vertices[vertexFeature->vertexIndex], vertexObject.transform);
+				const vec2<float32> edgePoint = localPoint * edgeObject.transform;
+				const vec2<float32> vertexPoint = vertexObject.geometry->vertices[vertexFeature->vertexIndex] * vertexObject.transform;
 
 				const mat3x3<float32> edgeRotation = rotationAngle<mat3x3<float32>>(edgeObject.rotation);
-				const vec2<float32> normal = multiplyTransform(separatingAxis, edgeRotation);
+				const vec2<float32> normal = separatingAxis * edgeRotation;
 
 				if (dot(vertexPoint - edgePoint, normal) < 0.0f) {
 					// If vertexPoint - edgePoint is facing away from the normal, invert the separating axis.
@@ -152,7 +152,7 @@ namespace Trident {
 			vec2<float32> localPoint;
 
 		private:
-			// NOTE: Not used with vertex-vertex separations.
+			// Not used with vertex-vertex separations.
 			uint32 _edgeObjectIndex;
 			uint32 _vertexObjectIndex;
 
@@ -165,9 +165,9 @@ namespace Trident {
 
 		const vec2<float32> axis = separationFunction.separatingAxis;
 
-		// TODO: The support with canceled rotation doesn't seem to be necessary here.
-		const vec2<float32> a = multiplyTransform(A.geometry->vertices[0], A.transform);
-		const vec2<float32> b = multiplyTransform(B.geometry->vertices[0], B.transform);
+		// TODO(physics/2d/ccd): The support with canceled rotation doesn't seem to be necessary here.
+		const vec2<float32> a = A.geometry->vertices[0] * A.transform;
+		const vec2<float32> b = B.geometry->vertices[0] * B.transform;
 
 		output.separationValue = dot(b - a, axis);
 
@@ -180,14 +180,14 @@ namespace Trident {
 		const PhysicalObjectCopy2D* objects[2] = {&A, &B};
 		const PhysicalObjectCopy2D& edgeObject = *objects[edgeObjectIndex];
 		const PhysicalObjectCopy2D& vertexObject = *objects[vertexObjectIndex];
-		const vec2<float32> axis = multiplyTransform(separationFunction.separatingAxis, rotationAngle<mat3x3<float32>>(edgeObject.rotation));
+		const vec2<float32> axis = separationFunction.separatingAxis * rotationAngle<mat3x3<float32>>(edgeObject.rotation);
 		const uint32 i = supportIndex(vertexObject, -axis);
 
 		output.iA = i;
 		output.iB = i;
 
-		const vec2<float32> a = multiplyTransform(separationFunction.localPoint, edgeObject.transform);
-		const vec2<float32> b = multiplyTransform(vertexObject.geometry->vertices[i], vertexObject.transform);
+		const vec2<float32> a = separationFunction.localPoint * edgeObject.transform;
+		const vec2<float32> b = vertexObject.geometry->vertices[i] * vertexObject.transform;
 
 		output.separationValue = dot(b - a, axis);
 
@@ -195,9 +195,9 @@ namespace Trident {
 	}
 
 	float32 evaluateVertexVertexSeparation(const SeparationFunction& separationFunction, const MinSeparationOutput& minSeparationOutput, const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, uint32 edgeObjectIndex, uint32 vertexObjectIndex) {
-		// TODO: Don't select an arbitraty vertex from the geometry.
-		const vec2<float32> a = multiplyTransform(A.geometry->vertices[0], A.transform);
-		const vec2<float32> b = multiplyTransform(B.geometry->vertices[0], B.transform);
+		// TODO(physics/2d/ccd): Don't select an arbitraty vertex from the geometry.
+		const vec2<float32> a = A.geometry->vertices[0] * A.transform;
+		const vec2<float32> b = B.geometry->vertices[0] * B.transform;
 
 		return dot(b - a, separationFunction.separatingAxis);
 	}
@@ -207,9 +207,9 @@ namespace Trident {
 		const PhysicalObjectCopy2D& edgeObject = *objects[edgeObjectIndex];
 		const PhysicalObjectCopy2D& vertexObject = *objects[vertexObjectIndex];
 		const uint32 vertexObjectVertexIndex = *(&minSeparationOutput.iA + vertexObjectIndex);
-		const vec2<float32> a = multiplyTransform(separationFunction.localPoint, edgeObject.transform);
-		const vec2<float32> b = multiplyTransform(vertexObject.geometry->vertices[vertexObjectVertexIndex], vertexObject.transform);
-		const vec2<float32> separatingAxis = multiplyTransform(separationFunction.separatingAxis, rotationAngle<mat3x3<float32>>(edgeObject.rotation));
+		const vec2<float32> a = separationFunction.localPoint * edgeObject.transform;
+		const vec2<float32> b = vertexObject.geometry->vertices[vertexObjectVertexIndex] * vertexObject.transform;
+		const vec2<float32> separatingAxis = separationFunction.separatingAxis * rotationAngle<mat3x3<float32>>(edgeObject.rotation);
 
 		return dot(b - a, separatingAxis);
 	} */

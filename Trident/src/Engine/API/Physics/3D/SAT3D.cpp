@@ -129,7 +129,7 @@ namespace Trident {
 
 			// TODO(physics/3d/sat): Move computations in the local space of B.
 			const Plane3D plane = rigidBodyA.facePlanes[faceIndex];
-			const vec3<float32> support = multiplyTransform(hullB.support(-vec3<float32>(face.normal) * R), rigidBodyB.world);
+			const vec3<float32> support = hullB.support(-face.normal * R) * rigidBodyB.world;
 
 			/* Plane3D plane = face * transform;
 
@@ -137,7 +137,7 @@ namespace Trident {
 				plane.offset = abs(plane.offset);
 			}
 
-			const vec3<float32> support = hullB.support(-vec3<float32>(plane.normal)); */
+			const vec3<float32> support = hullB.support(-plane.normal); */
 
 			const float32 separation = signedDistance(plane, support);
 

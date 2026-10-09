@@ -47,14 +47,14 @@ namespace Trident {
 		}
 
 		ClipVertex2D& a = incidentEdge.edge[0];
-		a.position = multiplyTransform(a.position, incidentBody.world);
+		a.position = a.position * incidentBody.world;
 		a.id.referenceEdgeAIndex = Contact2DID::NULL_EDGE_INDEX;
 		a.id.referenceEdgeBIndex = Contact2DID::NULL_EDGE_INDEX;
 		a.id.incidentEdgeAIndex = (incidentEdgeIndex + 1) % edgeCount;
 		a.id.incidentEdgeBIndex = incidentEdgeIndex;
 
 		ClipVertex2D& b = incidentEdge.edge[1];
-		b.position = multiplyTransform(b.position, incidentBody.world);
+		b.position = b.position * incidentBody.world;
 		b.id.referenceEdgeAIndex = Contact2DID::NULL_EDGE_INDEX;
 		b.id.referenceEdgeBIndex = Contact2DID::NULL_EDGE_INDEX;
 		b.id.incidentEdgeAIndex = incidentEdgeIndex;

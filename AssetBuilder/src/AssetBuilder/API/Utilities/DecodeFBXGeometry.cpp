@@ -419,7 +419,7 @@ namespace Trident {
 				positions[positionIndex] *= -1.0f;
 			}
 
-			positions[positionIndex] = multiplyTransform(positions[positionIndex], transform);
+			positions[positionIndex] = positions[positionIndex] * transform;
 
 			positionIndex += 1;
 		}
