@@ -25,24 +25,19 @@ namespace Trident::GL {
 			{1, GL_FLOAT, GL_FALSE}, // R32_FLOAT
 			{2, GL_UNSIGNED_SHORT, GL_TRUE}, // R16G16_UNORM
 			{2, GL_HALF_FLOAT, GL_FALSE}, // R16G16_FLOAT
+			{2, GL_INT, GL_FALSE}, // R32G32_SINT
 			{2, GL_UNSIGNED_INT, GL_FALSE}, // R32G32_UINT
 			{2, GL_FLOAT, GL_FALSE}, // R32G32_FLOAT
+			{3, GL_INT, GL_FALSE}, // R32G32B32_SINT
 			{3, GL_UNSIGNED_INT, GL_FALSE}, // R32G32B32_UINT
 			{3, GL_FLOAT, GL_FALSE}, // R32G32B32_FLOAT
+			{4, GL_INT, GL_FALSE}, // R32G32B32A32_SINT
 			{4, GL_UNSIGNED_INT, GL_FALSE}, // R32G32B32A32_UINT
 			{4, GL_FLOAT, GL_FALSE}, // R32G32B32A32_FLOAT
-			{0, 0, 0}, // R64_SINT
-			{0, 0, 0}, // R64_UINT
-			{1, GL_DOUBLE, GL_FALSE}, // R64_FLOAT
-			{2, GL_DOUBLE, GL_FALSE}, // R64G64_FLOAT
-			{3, GL_DOUBLE, GL_FALSE}, // R64G64B64_FLOAT
-			{4, GL_DOUBLE, GL_FALSE}, // R64G64B64A64_FLOAT
 		};
 
-		const VertexInputAttribute attribute = ATTRIBUTES[static_cast<uint32>(format)];
+		ADAPTER_ASSERT(format < VertexInputAttributeFormat::count, "Invalid format.");
 
-		ADAPTER_ASSERT(attribute.type != 0, "64-bit unsigned/signed vertex input attributes aren't supported.");
-
-		return attribute;
+		return ATTRIBUTES[static_cast<uint32>(format)];
 	}
 }
