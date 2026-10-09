@@ -12,14 +12,6 @@ namespace Trident {
 	using lyah::mat4x4;
 	using lyah::quat;
 
-	// TODO(lyah): Remove.
-	// template<typename T>
-	// using svec2 = lyah::vec<2, T>;
-
-	// TODO(lyah): Remove.
-	// template<typename T>
-	// using svec3 = lyah::vec<3, T>;
-
 	using lyah::abs;
 	using lyah::axisAngle;
 	using lyah::ceil;
@@ -49,6 +41,9 @@ namespace Trident {
 	using lyah::tau;
 	using lyah::translation;
 	using lyah::transpose;
+
+	typedef vec2<uint32> Extent2D;
+	typedef vec3<uint32> Extent3D;
 
 	struct Plane2D {
 		vec2<float32> normal;

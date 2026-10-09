@@ -18,9 +18,9 @@
 namespace Trident {
 	static ImageDescriptor createSwapchainImageDescriptor(Extent2D extent) {
 		ImageDescriptor imageDescriptor{};
-		imageDescriptor.extent.width = extent.width;
-		imageDescriptor.extent.height = extent.height;
-		imageDescriptor.extent.depth = 1;
+		imageDescriptor.extent.x = extent.x;
+		imageDescriptor.extent.y = extent.y;
+		imageDescriptor.extent.z = 1;
 		imageDescriptor.mipLevelCount = 1;
 		imageDescriptor.layerCount = 1;
 
@@ -62,9 +62,9 @@ namespace Trident {
 
 		imageCreateInfo.imageType = image->type;
 		imageCreateInfo.format = image->format;
-		imageCreateInfo.extent.width = descriptor.extent.width;
-		imageCreateInfo.extent.height = descriptor.extent.height;
-		imageCreateInfo.extent.depth = descriptor.extent.depth;
+		imageCreateInfo.extent.width = descriptor.extent.x;
+		imageCreateInfo.extent.height = descriptor.extent.y;
+		imageCreateInfo.extent.depth = descriptor.extent.z;
 		imageCreateInfo.mipLevels = descriptor.mipLevelCount;
 		imageCreateInfo.arrayLayers = descriptor.layerCount;
 		imageCreateInfo.samples = static_cast<VkSampleCountFlagBits>(descriptor.sampleCount);

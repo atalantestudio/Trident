@@ -227,7 +227,7 @@ namespace Trident {
 		const Window* window = getApplication()->getWindow();
 		const Extent2D extent = window->getExtent();
 
-		mousePosition = window->getNdcMousePosition() * (vec2<float32>(static_cast<float32>(extent.width), static_cast<float32>(extent.height)) * 0.5f / renderer.getZoomLevel());
+		mousePosition = window->getNdcMousePosition() * (vec2<float32>(extent) * 0.5f / renderer.getZoomLevel());
 		mouseDelta = {0.0f, 0.0f};
 
 		if (event.getButton() == MouseButton::RIGHT && selectedEntity == max<Entity>()) {
@@ -247,7 +247,7 @@ namespace Trident {
 		const Extent2D extent = window->getExtent();
 		const vec2<float32> previousMousePosition = mousePosition;
 
-		mousePosition = window->getNdcMousePosition() * (vec2<float32>(static_cast<float32>(extent.width), static_cast<float32>(extent.height)) * 0.5f / renderer.getZoomLevel());
+		mousePosition = window->getNdcMousePosition() * (vec2<float32>(extent) * 0.5f / renderer.getZoomLevel());
 		mouseDelta = mousePosition - previousMousePosition;
 
 		if (draggingCamera) {

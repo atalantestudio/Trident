@@ -10,7 +10,7 @@
 namespace Trident {
 	uint32 calculateMaxMipLevelCount(Extent3D extent) {
 		// ⌊log2(max(width, height, depth))⌋ + 1
-		return static_cast<uint32>(floor(log2(max(extent.width, max(extent.height, extent.depth))))) + 1;
+		return static_cast<uint32>(floor(log2(max(extent.x, max(extent.y, extent.z))))) + 1;
 	}
 
 	Image::Image(const Device* device, const ImageDescriptor& descriptor) :
@@ -52,7 +52,7 @@ namespace Trident {
 	}
 
 	uint64 Image::getSize() const {
-		return getByteSize(format) * extent.width * extent.height * extent.depth * layerCount;
+		return getByteSize(format) * extent.x * extent.y * extent.z * layerCount;
 	}
 
 	uint32 Image::getMipLevelCount() const {

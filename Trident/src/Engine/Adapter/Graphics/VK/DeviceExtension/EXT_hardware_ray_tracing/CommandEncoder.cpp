@@ -75,9 +75,9 @@ namespace Trident::VK {
 			pointer_cast<const VkStridedDeviceAddressRegionKHR*>(&missShaderBindingTable),
 			pointer_cast<const VkStridedDeviceAddressRegionKHR*>(&hitShaderBindingTable),
 			pointer_cast<const VkStridedDeviceAddressRegionKHR*>(&callableShaderBindingTable),
-			extent.width,
-			extent.height,
-			extent.depth
+			extent.x,
+			extent.y,
+			extent.z
 		);
 
 		vkCommandEncoder->commandCount += 1;

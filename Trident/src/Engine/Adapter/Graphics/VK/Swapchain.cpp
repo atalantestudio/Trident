@@ -70,11 +70,12 @@ namespace Trident {
 			_swapchain->extent = *pointer_cast<const Extent2D*>(&surface->capabilities.currentExtent);
 		}
 		else {
-			_swapchain->extent.width = clamp(descriptor.extent.width, surface->capabilities.minImageExtent.width, surface->capabilities.maxImageExtent.width);
-			_swapchain->extent.height = clamp(descriptor.extent.height, surface->capabilities.minImageExtent.height, surface->capabilities.maxImageExtent.height);
+			// TODO(lyah/scalar)
+			_swapchain->extent.x = clamp(descriptor.extent.x, surface->capabilities.minImageExtent.width, surface->capabilities.maxImageExtent.width);
+			_swapchain->extent.y = clamp(descriptor.extent.y, surface->capabilities.minImageExtent.height, surface->capabilities.maxImageExtent.height);
 		}
 
-		ADAPTER_INFO("Swapchain image extent is ([], []).", _swapchain->extent.width, _swapchain->extent.height);
+		ADAPTER_INFO("Swapchain image extent is ([], []).", _swapchain->extent.x, _swapchain->extent.y);
 
 		const VkSwapchainKHR oldSwapchain = _swapchain->swapchain;
 

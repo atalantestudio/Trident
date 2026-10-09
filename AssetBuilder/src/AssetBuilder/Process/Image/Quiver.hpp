@@ -24,7 +24,7 @@ namespace Trident {
 				descriptor.extent = image.extent;
 				descriptor.mipLevelCount = 1;
 				descriptor.layerCount = 1;
-				descriptor.data = sequence<uint8>(image.extent.width * image.extent.height);
+				descriptor.data = sequence<uint8>(image.extent.x * image.extent.y);
 
 				convert<ImageFormat::R8G8B8A8_UNORM, ImageFormat::R8_UNORM>(image.data, &descriptor.data[0], descriptor.data.count());
 

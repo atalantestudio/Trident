@@ -16,16 +16,16 @@ namespace Trident {
 				VALIDATION_ERROR("descriptor.type must be a valid ImageType value.");
 			}
 
-			if (descriptor.extent.width == 0) {
-				VALIDATION_ERROR("descriptor.extent.width must be greater than 0.");
+			if (descriptor.extent.x == 0) {
+				VALIDATION_ERROR("descriptor.extent.x must be greater than 0.");
 			}
 
-			if (descriptor.extent.height == 0) {
-				VALIDATION_ERROR("descriptor.extent.height must be greater than 0.");
+			if (descriptor.extent.y == 0) {
+				VALIDATION_ERROR("descriptor.extent.y must be greater than 0.");
 			}
 
-			if (descriptor.extent.depth == 0) {
-				VALIDATION_ERROR("descriptor.extent.depth must be greater than 0.");
+			if (descriptor.extent.z == 0) {
+				VALIDATION_ERROR("descriptor.extent.z must be greater than 0.");
 			}
 
 			if (descriptor.mipLevelCount == 0) {

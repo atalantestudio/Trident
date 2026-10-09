@@ -47,8 +47,8 @@ namespace Trident {
 
 		const ref<Framebuffer> framebuffer = framebuffers[getSwapchainImageIndex()];
 		const Extent2D extent = framebuffer->getExtent();
-		const float32 width = static_cast<float32>(extent.width);
-		const float32 height = static_cast<float32>(extent.height);
+		const float32 width = static_cast<float32>(extent.x);
+		const float32 height = static_cast<float32>(extent.y);
 		const vec3<float32> skyColor = scene->getAsset()->skyColor;
 
 		commandEncoder->beginRenderPass({
@@ -224,8 +224,8 @@ namespace Trident {
 		while (cascadeIndex < DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT) {
 			const ref<Framebuffer> framebuffer = directionalShadowMapFramebuffers[getSwapchainImageIndex() * swapchainImageCount + cascadeIndex];
 			const Extent2D extent = framebuffer->getExtent();
-			const float32 width = static_cast<float32>(extent.width);
-			const float32 height = static_cast<float32>(extent.height);
+			const float32 width = static_cast<float32>(extent.x);
+			const float32 height = static_cast<float32>(extent.y);
 
 			commandEncoder->beginRenderPass({
 				.framebuffer = framebuffer,

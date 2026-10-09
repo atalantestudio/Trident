@@ -84,15 +84,15 @@ namespace Trident {
 
 			switch (type) {
 				case STRING_TO_LITTLE_ENDIAN_UINT32("IHDR"): {
-					file.extent.width = stream.read<uint32>();
+					file.extent.x = stream.read<uint32>();
 
-					ENGINE_ASSERT(file.extent.width > 0, "The width must not be 0.");
+					ENGINE_ASSERT(file.extent.x > 0, "The width must not be 0.");
 
-					file.extent.height = stream.read<uint32>();
+					file.extent.y = stream.read<uint32>();
 
-					ENGINE_ASSERT(file.extent.height > 0, "The height must not be 0.");
+					ENGINE_ASSERT(file.extent.y > 0, "The height must not be 0.");
 
-					file.extent.depth = 1;
+					file.extent.z = 1;
 
 					// NOTE: (= channel bit count)
 					// Number of bits per sample or per palette index, not the total number of bits per pixel.
@@ -197,8 +197,8 @@ namespace Trident {
 
 		BitStream<StreamOperation::READ> inflateBitStream(&compressedData[0], compressedDataSize, Endianness::LITTLE_ENDIAN);
 
-		const uint64 filteredDataSize = file.extent.width * file.extent.height * channelCount * (bitDepth / 8);
-		const uint64 unfilteredDataSize = filteredDataSize + file.extent.height * (bitDepth / 8);
+		const uint64 filteredDataSize = file.extent.x * file.extent.y * channelCount * (bitDepth / 8);
+		const uint64 unfilteredDataSize = filteredDataSize + file.extent.y * (bitDepth / 8);
 
 		const sequence<uint8> unfilteredData = inflateBitStream.inflate<uint8>(unfilteredDataSize);
 
@@ -220,7 +220,7 @@ namespace Trident {
 		const uint8* c;
 
 		// TODO: Optimize with SIMD when the image has 4 channels.
-		for (uint32 rowIndex = 0; rowIndex < file.extent.height; rowIndex += 1) {
+		for (uint32 rowIndex = 0; rowIndex < file.extent.y; rowIndex += 1) {
 			const uint8 filterType = *x;
 
 			ENGINE_ASSERT(filterType < 5, "Undefined filter type ([]).", static_cast<sint32>(filterType));
@@ -231,7 +231,7 @@ namespace Trident {
 
 			const uint8* row = destination;
 
-			for (uint32 columnIndex = 0; columnIndex < file.extent.width; columnIndex += 1) {
+			for (uint32 columnIndex = 0; columnIndex < file.extent.x; columnIndex += 1) {
 				for (uint8 channelIndex = 0; channelIndex < channelCount; channelIndex += 1) {
 					destination[channelIndex] = FILTERS[filterType](x[channelIndex], a[channelIndex], b[channelIndex], c[channelIndex]);
 				}

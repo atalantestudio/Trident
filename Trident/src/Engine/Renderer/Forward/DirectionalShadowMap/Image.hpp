@@ -10,7 +10,7 @@ namespace Trident {
 		return directionalShadowMapRenderPass->createDepthStencilAttachmentImage(
 			{
 				.type = ImageType::TYPE_2D,
-				.extent = {DIRECTIONAL_SHADOW_MAP_EXTENT.width, DIRECTIONAL_SHADOW_MAP_EXTENT.height, 1},
+				.extent = {DIRECTIONAL_SHADOW_MAP_EXTENT.x, DIRECTIONAL_SHADOW_MAP_EXTENT.y, 1},
 				.mipLevelCount = 1,
 				.layerCount = DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT,
 				.additionalUsage = ImageUsage::SAMPLED,

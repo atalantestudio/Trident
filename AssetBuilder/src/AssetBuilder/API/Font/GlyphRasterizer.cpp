@@ -43,13 +43,13 @@ namespace Trident {
 			x += glyphWidth;
 			rowHeight = max(rowHeight, glyphHeight);
 
-			if (x >= glyphMapExtent[0]) {
+			if (x >= glyphMapExtent.x) {
 				x = 0;
 				y += rowHeight;
 				rowHeight = 0;
 			}
 
-			if (y >= glyphMapExtent.height) {
+			if (y >= glyphMapExtent.y) {
 				break;
 			}
 
@@ -202,8 +202,10 @@ namespace Trident {
 		const Extent3D& glyphMapExtent = glyphMapImage->getExtent();
 		const float32 inverseLineHeight = static_cast<float32>(1.0 / lineHeight);
 		const float32 scale = inverseLineHeight * static_cast<float32>(GLYPH_SUBIMAGE_DIMENSION);
-		const float32 inverseGlyphMapWidth = static_cast<float32>(1.0 / glyphMapExtent.width);
-		const float32 inverseGlyphMapHeight = static_cast<float32>(1.0 / glyphMapExtent.height);
+
+		// TODO(lyah/integer-vector)
+		const float32 inverseGlyphMapWidth = static_cast<float32>(1.0 / glyphMapExtent.x);
+		const float32 inverseGlyphMapHeight = static_cast<float32>(1.0 / glyphMapExtent.y);
 
 		uint32 x = 0;
 		uint32 y = 0;
@@ -242,11 +244,11 @@ namespace Trident {
 			// The glyph size on the glyph map, in pixels. Including the spread of the distance field.
 			const vec2<float32> spreadGlyphTexelSize = rawGlyphTexelSize + vec2<float32>{spreadFactor * 2.0f, spreadFactor * 2.0f};
 
-			// TODO(lyah): Add vec<C, T> ceil(vec<C, T>, vec<C, T>).
-			const uint32 glyphWidth = static_cast<uint32>(ceil(spreadGlyphTexelSize[0]));
-			const uint32 glyphHeight = static_cast<uint32>(ceil(spreadGlyphTexelSize[1]));
+			// TODO(lyah/integer-vector)
+			const uint32 glyphWidth = static_cast<uint32>(ceil(spreadGlyphTexelSize.x));
+			const uint32 glyphHeight = static_cast<uint32>(ceil(spreadGlyphTexelSize.y));
 
-			if (x + glyphWidth >= glyphMapExtent.width) {
+			if (x + glyphWidth >= glyphMapExtent.x) {
 				x = 0;
 				y += rowHeight;
 				rowHeight = 0;
@@ -319,7 +321,7 @@ namespace Trident {
 		glyphOffsetBuffer->unmap();
 
 		const ref<Buffer> glyphMapStagingBuffer = device->createDynamicBuffer({
-			.size = output.extent.width * output.extent.height,
+			.size = output.extent.x * output.extent.y,
 			.usage = BufferUsage::TRANSFER_DST,
 			.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
 			.persistent = false,
@@ -364,7 +366,7 @@ namespace Trident {
 
 		const BufferView<uint8> glyphMapView = glyphMapStagingBuffer->createView<uint8>(0, glyphMapStagingBuffer->getSize());
 
-		output.data = sequence<uint8>(output.extent.width * output.extent.height);
+		output.data = sequence<uint8>(output.extent.x * output.extent.y);
 
 		std::copy_n(glyphMapView.map(), glyphMapStagingBuffer->getSize(), &output.data[0]);
 
@@ -471,7 +473,7 @@ namespace Trident {
 		return device->createDynamicImage({
 			.type = ImageType::TYPE_2D,
 			.format = ImageFormat::R8_UNORM,
-			.extent = {extent.width, extent.height, 1},
+			.extent = {extent.x, extent.y, 1},
 			.mipLevelCount = 1,
 			.layerCount = 1,
 			.sampleCount = 1,

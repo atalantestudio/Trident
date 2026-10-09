@@ -111,8 +111,8 @@ namespace Trident {
 		}
 
 		const Extent2D extent = getSwapchain()->getExtent();
-		const float32 width = static_cast<float32>(extent.width);
-		const float32 height = static_cast<float32>(extent.height);
+		const float32 width = static_cast<float32>(extent.x);
+		const float32 height = static_cast<float32>(extent.y);
 
 		commandEncoder->setScissor(0, 0, extent);
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
@@ -170,7 +170,7 @@ namespace Trident {
 		if (format == ImageFormat::R8G8B8_UNORM) {
 			format = ImageFormat::R8G8B8A8_UNORM;
 
-			const uint64 size = imageAsset->getExtent().width * imageAsset->getExtent().height * imageAsset->getExtent().depth * imageAsset->getLayerCount() * getByteSize(ImageFormat::R8G8B8A8_UNORM);
+			const uint64 size = imageAsset->getExtent().x * imageAsset->getExtent().y * imageAsset->getExtent().z * imageAsset->getLayerCount() * getByteSize(ImageFormat::R8G8B8A8_UNORM);
 
 			convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(imageAsset->getData(), userImageStagingMappedRange, size);
 
@@ -654,6 +654,6 @@ namespace Trident {
 		const Extent2D extent = getSwapchain()->getExtent();
 
 		// TODO(lyah): mat<3, 3, float32>::orthographic
-		cameraMappedRange->projection = orthographicTopLeftOrigin({static_cast<float32>(extent.width), static_cast<float32>(extent.height)});
+		cameraMappedRange->projection = orthographicTopLeftOrigin(vec2<float32>(extent));
 	}
 }

@@ -118,8 +118,8 @@ namespace Trident {
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
 				const Extent2D extent = getSwapchain()->getExtent();
-				const float32 width = static_cast<float32>(extent.width);
-				const float32 height = static_cast<float32>(extent.height);
+				const float32 width = static_cast<float32>(extent.x);
+				const float32 height = static_cast<float32>(extent.y);
 
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, extent);

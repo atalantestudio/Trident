@@ -18,7 +18,7 @@ namespace Trident {
 				const Extent2D extent = getApplication()->getWindow()->getExtent();
 
 				Container({
-					.size = {static_cast<float32>(extent.width - 24_px), static_cast<float32>(extent.height - 16_px)},
+					.size = {static_cast<float32>(extent.x - 24_px), static_cast<float32>(extent.y - 16_px)},
 					.padding = {8_px, 8_px, 8_px, 8_px},
 					.layoutDirection = HORIZONTAL,
 					.layoutSpacing = 8_px,

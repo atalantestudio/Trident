@@ -82,8 +82,8 @@ namespace Trident {
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
 				const Extent2D swapchainExtent = getSwapchain()->getExtent();
-				const float32 width = static_cast<float32>(swapchainExtent.width);
-				const float32 height = static_cast<float32>(swapchainExtent.height);
+				const float32 width = static_cast<float32>(swapchainExtent.x);
+				const float32 height = static_cast<float32>(swapchainExtent.y);
 
 				commandEncoder->beginRenderPass({
 					.framebuffer = framebuffers[getSwapchainImageIndex()],
@@ -186,7 +186,7 @@ namespace Trident {
 				return renderPass->createInputAttachmentImage(
 					{
 						.type = ImageType::TYPE_2D,
-						.extent = {swapchainExtent.width, swapchainExtent.height, 1},
+						.extent = {swapchainExtent.x, swapchainExtent.y, 1},
 						.mipLevelCount = 1,
 						.layerCount = 1,
 						#if defined(DEBUG_OBJECT_NAME)

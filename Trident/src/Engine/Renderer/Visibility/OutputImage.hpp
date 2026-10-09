@@ -12,7 +12,7 @@ namespace Trident {
 		return createDynamicImage({
 			.type = ImageType::TYPE_2D,
 			.format = ImageFormat::R8G8B8A8_UNORM,
-			.extent = {extent.width, extent.height, 1},
+			.extent = {extent.x, extent.y, 1},
 			.mipLevelCount = 1,
 			.layerCount = 1,
 			.sampleCount = 1,

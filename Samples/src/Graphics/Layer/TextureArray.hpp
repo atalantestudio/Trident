@@ -21,8 +21,7 @@ namespace Trident {
 
 		private:
 			static constexpr uint32 ASSET_COUNT = 4;
-			static constexpr uint32 TEXTURE_ARRAY_IMAGE_WIDTH = 512;
-			static constexpr uint32 TEXTURE_ARRAY_IMAGE_HEIGHT = 512;
+			static constexpr Extent2D TEXTURE_ARRAY_IMAGE_EXTENT = {512, 512};
 			static constexpr uint32 VERTEX_BUFFER_SIZE = 6 * sizeof(Vertex);
 			static constexpr uint32 INSTANCE_BUFFER_SIZE = 4 * sizeof(Instance);
 			static constexpr view<char8> IMAGE_ASSET_PATHS[] = {
@@ -111,8 +110,8 @@ namespace Trident {
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
 				const Extent2D extent = getSwapchain()->getExtent();
-				const float32 width = static_cast<float32>(extent.width);
-				const float32 height = static_cast<float32>(extent.height);
+				const float32 width = static_cast<float32>(extent.x);
+				const float32 height = static_cast<float32>(extent.y);
 
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, extent);
@@ -128,9 +127,9 @@ namespace Trident {
 				ImageDescriptor textureArrayImageDescriptor{};
 				textureArrayImageDescriptor.type = ImageType::TYPE_2D;
 				textureArrayImageDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
-				textureArrayImageDescriptor.extent.width = TEXTURE_ARRAY_IMAGE_WIDTH;
-				textureArrayImageDescriptor.extent.height = TEXTURE_ARRAY_IMAGE_HEIGHT;
-				textureArrayImageDescriptor.extent.depth = 1;
+				textureArrayImageDescriptor.extent.x = TEXTURE_ARRAY_IMAGE_EXTENT.x;
+				textureArrayImageDescriptor.extent.y = TEXTURE_ARRAY_IMAGE_EXTENT.y;
+				textureArrayImageDescriptor.extent.z = 1;
 				textureArrayImageDescriptor.mipLevelCount = 1;
 				textureArrayImageDescriptor.layerCount = 4;
 				textureArrayImageDescriptor.sampleCount = 1;

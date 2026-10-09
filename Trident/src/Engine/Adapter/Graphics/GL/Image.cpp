@@ -46,14 +46,14 @@ namespace Trident {
 				// TODO(graphics/gl/image): Decouple multisampled from non-multisampled images.
 				if (image->sampleCount > 1) {
 					#if OPENGL_VERSION >= OPENGL_VERSION_4_3
-						glTexStorage2DMultisample(image->target, image->sampleCount, image->internalFormat, image->extent.width, image->extent.height, GL_TRUE);
+						glTexStorage2DMultisample(image->target, image->sampleCount, image->internalFormat, image->extent.x, image->extent.y, GL_TRUE);
 					#else
 						ENGINE_ERROR_UNSUPPORTED();
 					#endif
 				}
 				else {
 					#if OPENGL_VERSION >= OPENGL_VERSION_4_2
-						glTexStorage2D(image->target, image->mipLevelCount, image->internalFormat, image->extent.width, image->extent.height);
+						glTexStorage2D(image->target, image->mipLevelCount, image->internalFormat, image->extent.x, image->extent.y);
 					#else
 						ENGINE_ERROR_UNSUPPORTED();
 					#endif
@@ -72,14 +72,14 @@ namespace Trident {
 				// TODO(graphics/gl/image): Decouple multisampled from non-multisampled images.
 				if (image->sampleCount > 1) {
 					#if OPENGL_VERSION >= OPENGL_VERSION_4_3
-						glTexStorage3DMultisample(image->target, image->sampleCount, image->internalFormat, image->extent.width, image->extent.height, image->extent.depth * image->layerCount, GL_TRUE);
+						glTexStorage3DMultisample(image->target, image->sampleCount, image->internalFormat, image->extent.x, image->extent.y, image->extent.z * image->layerCount, GL_TRUE);
 					#else
 						ENGINE_ERROR_UNSUPPORTED();
 					#endif
 				}
 				else {
 					#if OPENGL_VERSION >= OPENGL_VERSION_4_2
-						glTexStorage3D(image->target, image->mipLevelCount, image->internalFormat, image->extent.width, image->extent.height, image->extent.depth * image->layerCount);
+						glTexStorage3D(image->target, image->mipLevelCount, image->internalFormat, image->extent.x, image->extent.y, image->extent.z * image->layerCount);
 					#else
 						ENGINE_ERROR_UNSUPPORTED();
 					#endif

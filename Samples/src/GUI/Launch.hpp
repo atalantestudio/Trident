@@ -14,7 +14,7 @@ namespace Trident {
 				const Extent2D extent = getApplication()->getWindow()->getExtent();
 
 				Container({
-					.size = {static_cast<float32>(extent.width), static_cast<float32>(extent.height)},
+					.size = {static_cast<float32>(extent.x), static_cast<float32>(extent.y)},
 					.anchorPoint = AnchorPoint::HCENTER | AnchorPoint::VCENTER,
 				}) {
 					Container({

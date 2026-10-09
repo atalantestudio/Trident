@@ -55,7 +55,7 @@ namespace Trident {
 					ImageAssetDescriptor imageAssetDescriptor{};
 					imageAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
 					imageAssetDescriptor.format = ImageFormat::R8_UNORM;
-					imageAssetDescriptor.extent = {sdfGlyphMap.extent.width, sdfGlyphMap.extent.height, 1};
+					imageAssetDescriptor.extent = {sdfGlyphMap.extent.x, sdfGlyphMap.extent.y, 1};
 					imageAssetDescriptor.mipLevelCount = 1;
 					imageAssetDescriptor.layerCount = 1;
 					imageAssetDescriptor.data = sdfGlyphMap.data;

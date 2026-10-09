@@ -72,8 +72,8 @@ namespace Trident {
 		RECT rect{};
 		rect.left = 0;
 		rect.top = 0;
-		rect.right = descriptor.extent.width;
-		rect.bottom = descriptor.extent.height;
+		rect.right = descriptor.extent.x;
+		rect.bottom = descriptor.extent.y;
 
 		constexpr DWORD dwStyle = WS_CAPTION | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SYSMENU | WS_THICKFRAME;
 		constexpr BOOL bMenu = FALSE;
@@ -306,13 +306,15 @@ namespace Trident {
 			DispatchMessage(&msg);
 		}
 
-		// TODO: Verify that the condition is correct.
+		// TODO(window): Verify that the condition is correct.
 		// windowData->cursorX != windowData->extent.width / 2 || windowData->cursorY != windowData->sizeY / 2
 		if (windowData->pointerLocked) {
+			// TODO(lyah/integer-vector)
 			POINT point{};
-			point.x = windowData->extent.width / 2;
-			point.y = windowData->extent.height / 2;
+			point.x = windowData->extent.x / 2;
+			point.y = windowData->extent.y / 2;
 
+			// TODO(lyah/integer-vector)
 			windowData->cursorX = point.x;
 			windowData->cursorY = point.y;
 

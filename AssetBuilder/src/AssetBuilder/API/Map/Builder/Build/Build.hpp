@@ -261,10 +261,10 @@ namespace Trident {
 		scene.staticGeometry.lightmapCoordinates = sequence<vec2<float32>>(lightmapCoordinateCount);
 		scene.staticGeometry.lightmapAtlasImageAssetDescriptor = {
 			.format = ImageFormat::R8G8B8A8_UNORM,
-			.extent = {LIGHTMAP_ATLAS_EXTENT.width, LIGHTMAP_ATLAS_EXTENT.height, 1},
+			.extent = {LIGHTMAP_ATLAS_EXTENT.x, LIGHTMAP_ATLAS_EXTENT.y, 1},
 			.mipLevelCount = 1,
 			.layerCount = 1,
-			.data = sequence<uint8>(LIGHTMAP_ATLAS_EXTENT.width * LIGHTMAP_ATLAS_EXTENT.height * getByteSize(ImageFormat::R8G8B8A8_UNORM)),
+			.data = sequence<uint8>(LIGHTMAP_ATLAS_EXTENT.x * LIGHTMAP_ATLAS_EXTENT.y * getByteSize(ImageFormat::R8G8B8A8_UNORM)),
 		};
 		scene.staticGeometry.lightmapAtlasImageAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
 

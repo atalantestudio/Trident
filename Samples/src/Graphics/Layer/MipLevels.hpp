@@ -53,8 +53,8 @@ namespace Trident {
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
 				const Extent2D extent = getSwapchain()->getExtent();
-				const float32 width = static_cast<float32>(extent.width);
-				const float32 height = static_cast<float32>(extent.height);
+				const float32 width = static_cast<float32>(extent.x);
+				const float32 height = static_cast<float32>(extent.y);
 
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, extent);
@@ -95,7 +95,7 @@ namespace Trident {
 				const ref<ImageAsset> imageAsset = getLayer()->getApplication()->getAssetLibrary()->getAsset<ImageAsset>(assetName);
 				const Extent3D imageExtent = imageAsset->getExtent();
 				const ref<Buffer> imageStagingBuffer = createDynamicBuffer({
-					.size = imageExtent.width * imageExtent.height * imageExtent.depth * imageAsset->getLayerCount() * getByteSize(ImageFormat::R8G8B8A8_UNORM),
+					.size = imageExtent.x * imageExtent.y * imageExtent.z * imageAsset->getLayerCount() * getByteSize(ImageFormat::R8G8B8A8_UNORM),
 					.usage = BufferUsage::TRANSFER_SRC,
 					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
 					.persistent = false,
@@ -194,8 +194,8 @@ namespace Trident {
 				ENGINE_ASSERT(mipLevelCount < image->getMipLevelCount(), "The number of mip levels to generate must be less than the maximum number of mip levels in the image ([]).", image->getMipLevelCount());
 
 				const Extent3D extent = image->getExtent();
-				const uint32 groupCountX = (extent.width + 0b111111) >> 6;
-				const uint32 groupCountY = (extent.height + 0b111111) >> 6;
+				const uint32 groupCountX = (extent.x + 0b111111) >> 6;
+				const uint32 groupCountY = (extent.y + 0b111111) >> 6;
 				const uint32 groupCountZ = 1;
 
 				sequence<ref<ImageView>> imageViews(mipLevelCount + 1);

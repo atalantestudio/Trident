@@ -35,7 +35,7 @@ namespace Trident {
 		return device->createFramebuffer({
 			.renderPass = dilationRenderPass,
 			.imageViews = {context.lightmapAtlasImageView},
-			.extent = {imageAssetDescriptor->extent.width, imageAssetDescriptor->extent.height},
+			.extent = {imageAssetDescriptor->extent.x, imageAssetDescriptor->extent.y},
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Dilation",
 			#endif

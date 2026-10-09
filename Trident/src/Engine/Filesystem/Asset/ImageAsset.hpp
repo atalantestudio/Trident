@@ -36,7 +36,7 @@ namespace Trident {
 
 		/// Returns the byte size of the image data.
 		inline uint64 getSize() const {
-			return getByteSize(format) * extent.width * extent.height * extent.depth * layerCount;
+			return getByteSize(format) * extent.x * extent.y * extent.z * layerCount;
 		}
 
 		inline uint32 getMipLevelCount() const {
@@ -54,8 +54,8 @@ namespace Trident {
 		inline bool isEligibleForCubeMap() const {
 			return (
 				(format == ImageFormat::R8G8B8_UNORM || format == ImageFormat::R8G8B8A8_UNORM) &&
-				extent.width == extent.height &&
-				extent.depth == 1 &&
+				extent.x == extent.y &&
+				extent.z == 1 &&
 				mipLevelCount == 1 &&
 				layerCount == 6
 			);

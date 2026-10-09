@@ -276,7 +276,7 @@ namespace Trident {
 		viewOffset += environmentMapStagingViewSize;
 
 		Arguments* arguments = argumentStagingView.map();
-		arguments->atlasSize = {imageAssetDescriptor->extent.width, imageAssetDescriptor->extent.height};
+		arguments->atlasSize = {imageAssetDescriptor->extent.x, imageAssetDescriptor->extent.y};
 		arguments->emissiveTriangleCount = static_cast<uint32>(descriptor.emissiveTriangleIndices.count() - 1);
 
 		LightmapVertex* vertexMappedRange = vertexStagingView.map();
@@ -551,8 +551,8 @@ namespace Trident {
 	}
 
 	void Lightmapper::generateLightmaps(const BuildScene3D& scene) const {
-		const float32 width = static_cast<float32>(imageAssetDescriptor->extent.width);
-		const float32 height = static_cast<float32>(imageAssetDescriptor->extent.height);
+		const float32 width = static_cast<float32>(imageAssetDescriptor->extent.x);
+		const float32 height = static_cast<float32>(imageAssetDescriptor->extent.y);
 
 		commandEncoder->reset();
 		commandEncoder->begin();
@@ -629,8 +629,8 @@ namespace Trident {
 
 		commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
 
-		const uint32 workGroupX = ceilPowerOf2(imageAssetDescriptor->extent.width / 16, 16u);
-		const uint32 workGroupY = ceilPowerOf2(imageAssetDescriptor->extent.height / 16, 16u);
+		const uint32 workGroupX = ceilPowerOf2(imageAssetDescriptor->extent.x / 16, 16u);
+		const uint32 workGroupY = ceilPowerOf2(imageAssetDescriptor->extent.y / 16, 16u);
 
 		#if defined(DEBUG_LIGHTMAPPER_ENABLE_DILATION)
 			commandEncoder->bindComputePipeline(intermediateDilationPipeline);

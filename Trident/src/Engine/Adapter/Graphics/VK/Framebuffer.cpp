@@ -41,8 +41,8 @@ namespace Trident {
 		framebufferCreateInfo.renderPass = ref_cast<VK::RenderPass>(descriptor.renderPass)->renderPass;
 		framebufferCreateInfo.attachmentCount = static_cast<uint32>(imageViews.count());
 		framebufferCreateInfo.pAttachments = &imageViews[0];
-		framebufferCreateInfo.width = descriptor.extent.width;
-		framebufferCreateInfo.height = descriptor.extent.height;
+		framebufferCreateInfo.width = descriptor.extent.x;
+		framebufferCreateInfo.height = descriptor.extent.y;
 		framebufferCreateInfo.layers = 1;
 
 		result = _device->vkCreateFramebuffer(_device->device, &framebufferCreateInfo, nullptr, &framebuffer->framebuffer);

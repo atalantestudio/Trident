@@ -196,21 +196,21 @@ namespace Trident {
 						VALIDATION_ERROR("descriptor.imageViews[[]] must be a valid ImageView object.", imageViewIndex);
 					}
 
-					if (descriptor.extent.width > imageView->getImage()->getExtent().width) {
-						VALIDATION_ERROR("descriptor.imageViews[[]] must have been created with a width greater than or equal to descriptor.extent.width.", imageViewIndex);
+					if (descriptor.extent.x > imageView->getImage()->getExtent().x) {
+						VALIDATION_ERROR("descriptor.imageViews[[]] must have been created with a width greater than or equal to descriptor.extent.x.", imageViewIndex);
 					}
 
-					if (descriptor.extent.height > imageView->getImage()->getExtent().height) {
-						VALIDATION_ERROR("descriptor.imageViews[[]] must have been created with a height greater than or equal to descriptor.extent.height.", imageViewIndex);
+					if (descriptor.extent.y > imageView->getImage()->getExtent().y) {
+						VALIDATION_ERROR("descriptor.imageViews[[]] must have been created with a height greater than or equal to descriptor.extent.y.", imageViewIndex);
 					}
 				}
 
-				if (descriptor.extent.width == 0) {
-					VALIDATION_ERROR("descriptor.extent.width must be greater than 0.");
+				if (descriptor.extent.x == 0) {
+					VALIDATION_ERROR("descriptor.extent.x must be greater than 0.");
 				}
 
-				if (descriptor.extent.height == 0) {
-					VALIDATION_ERROR("descriptor.extent.height must be greater than 0.");
+				if (descriptor.extent.y == 0) {
+					VALIDATION_ERROR("descriptor.extent.y must be greater than 0.");
 				}
 
 				if (descriptor.name.count() == 0) {
@@ -381,30 +381,30 @@ namespace Trident {
 					VALIDATION_ERROR("descriptor.format must not be R8G8B8_UNORM. This format only exists for asset storage.");
 				}
 
-				if (descriptor.extent.width == 0) {
-					VALIDATION_ERROR("descriptor.extent.width must not be 0.");
+				if (descriptor.extent.x == 0) {
+					VALIDATION_ERROR("descriptor.extent.x must not be 0.");
 				}
 
 				const PhysicalDeviceLimits& limits = physicalDevice->getLimits();
 
-				if (descriptor.extent.width > max(limits.maxImageDimension1D, max(limits.maxImageDimension2D, limits.maxImageDimension3D))) {
-					VALIDATION_ERROR("descriptor.extent.width must be less than or equal to the maximum dimension for 1D, 2D or 3D images.");
+				if (descriptor.extent.x > max(limits.maxImageDimension1D, max(limits.maxImageDimension2D, limits.maxImageDimension3D))) {
+					VALIDATION_ERROR("descriptor.extent.x must be less than or equal to the maximum dimension for 1D, 2D or 3D images.");
 				}
 
-				if (descriptor.extent.height == 0) {
-					VALIDATION_ERROR("descriptor.extent.height must not be 0.");
+				if (descriptor.extent.y == 0) {
+					VALIDATION_ERROR("descriptor.extent.y must not be 0.");
 				}
 
-				if (descriptor.extent.height > max(limits.maxImageDimension2D, limits.maxImageDimension3D)) {
-					VALIDATION_ERROR("descriptor.extent.height must be less than or equal to the maximum dimension for 2D or 3D images.");
+				if (descriptor.extent.y > max(limits.maxImageDimension2D, limits.maxImageDimension3D)) {
+					VALIDATION_ERROR("descriptor.extent.y must be less than or equal to the maximum dimension for 2D or 3D images.");
 				}
 
-				if (descriptor.extent.depth == 0) {
-					VALIDATION_ERROR("descriptor.extent.depth must not be 0.");
+				if (descriptor.extent.z == 0) {
+					VALIDATION_ERROR("descriptor.extent.z must not be 0.");
 				}
 
-				if (descriptor.extent.depth > limits.maxImageDimension3D) {
-					VALIDATION_ERROR("descriptor.extent.depth must be less than or equal to the maximum dimension for 3D images.");
+				if (descriptor.extent.z > limits.maxImageDimension3D) {
+					VALIDATION_ERROR("descriptor.extent.z must be less than or equal to the maximum dimension for 3D images.");
 				}
 
 				if (descriptor.mipLevelCount == 0) {

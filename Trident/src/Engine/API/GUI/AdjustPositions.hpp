@@ -164,7 +164,7 @@ namespace Trident {
 			}
 		}
 		else {
-			height = static_cast<float32>(getApplication()->getWindow()->getExtent().height);
+			height = static_cast<float32>(getApplication()->getWindow()->getExtent().y);
 		}
 
 		const vec2<float32> decimalOrigin = {x, round(y)};

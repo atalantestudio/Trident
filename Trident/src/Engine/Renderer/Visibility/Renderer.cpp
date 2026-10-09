@@ -215,8 +215,8 @@ namespace Trident {
 
 	void VisibilityRenderer::render(ref<CommandEncoder> commandEncoder) const {
 		const Extent2D extent = getSwapchain()->getExtent();
-		const float32 width = static_cast<float32>(extent.width);
-		const float32 height = static_cast<float32>(extent.height);
+		const float32 width = static_cast<float32>(extent.x);
+		const float32 height = static_cast<float32>(extent.y);
 
 		BufferMemoryBarrier bufferMemoryBarrier;
 

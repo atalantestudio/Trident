@@ -19,7 +19,7 @@ namespace Trident {
 
 		const uint8 channelCount = getChannelCount(asset.format);
 
-		asset.data = sequence<uint8>(getByteSize(asset.format) * asset.extent.width * asset.extent.height * asset.extent.depth * asset.layerCount);
+		asset.data = sequence<uint8>(getByteSize(asset.format) * asset.extent.x * asset.extent.y * asset.extent.z * asset.layerCount);
 
 		switch (asset.format) {
 			case ImageFormat::R8_UNORM: {

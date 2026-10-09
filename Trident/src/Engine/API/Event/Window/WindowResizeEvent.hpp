@@ -8,6 +8,7 @@
 namespace Trident {
 	class WindowResizeEvent : public Event {
 		public:
+			// TODO(lyah/integer-vector)
 			explicit WindowResizeEvent(sint32 width, sint32 height) :
 				width(width),
 				height(height)
@@ -25,7 +26,7 @@ namespace Trident {
 			}
 
 		private:
-			// TODO: Use vec2<sint32>.
+			// TODO(lyah/integer-vector): Use vec2<sint32>.
 			sint32 width;
 			sint32 height;
 	};

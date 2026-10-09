@@ -28,7 +28,7 @@ namespace Trident {
 				const uint32 width = GET_X_LPARAM(lParam);
 				const uint32 height = GET_Y_LPARAM(lParam);
 
-				if (windowData->extent.width != width || windowData->extent.height != height) {
+				if (windowData->extent.x != width || windowData->extent.y != height) {
 					WindowResizeEvent windowResizeEvent(width, height);
 
 					windowData->windowResizeEventListener(windowResizeEvent);

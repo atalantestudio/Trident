@@ -343,7 +343,7 @@ namespace Trident {
 
 		const Extent2D extent = window->getExtent();
 
-		WindowResizeEvent event(extent.width, extent.height);
+		WindowResizeEvent event(extent.x, extent.y);
 
 		layerCompositor->propagateEventBackToFront(event);
 	}

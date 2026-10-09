@@ -30,9 +30,9 @@ namespace Trident {
 		stream.jump(sizeof(uint32));
 
 		File<FileFormat::QOI> file{};
-		file.extent.width = stream.read<uint32>(true);
-		file.extent.height = stream.read<uint32>(true);
-		file.extent.depth = 1;
+		file.extent.x = stream.read<uint32>(true);
+		file.extent.y = stream.read<uint32>(true);
+		file.extent.z = 1;
 
 		const uint8 channelCount = stream.read<uint8>();
 
@@ -58,7 +58,7 @@ namespace Trident {
 
 		ENGINE_ASSERT(colorSpace == 0, "Unhandled color space ([]).", static_cast<sint32>(colorSpace));
 
-		file.data = sequence<uint8>(file.extent.width * file.extent.height * channelCount);
+		file.data = sequence<uint8>(file.extent.x * file.extent.y * channelCount);
 
 		Filesystem::decodeQoiContent(stream, file.data, channelCount, 8);
 

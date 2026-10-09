@@ -83,7 +83,6 @@
 #include "Engine/Module/Adapter/scroll.hpp"
 
 #include "Engine/Base/Log.hpp"
-#include "Engine/Base/Extent.hpp"
 #include "Engine/Base/String.hpp"
 
 // Register module adapters.

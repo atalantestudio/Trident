@@ -21,7 +21,7 @@ namespace Trident {
 			inline float32 getAspectRatio() const {
 				const Extent2D extent = getExtent();
 
-				return static_cast<float32>(extent.width) / extent.height;
+				return static_cast<float32>(extent.x) / extent.y;
 			}
 
 			/// Returns the dots per inch value for the window.
@@ -40,9 +40,10 @@ namespace Trident {
 				const Extent2D extent = getExtent();
 				const sint32* mousePosition = getMousePosition();
 
+				// TODO(lyah/integer-vector)
 				return {
-					-1.0f + static_cast<float32>(mousePosition[0]) / (extent.width * 0.5f),
-					 1.0f - static_cast<float32>(mousePosition[1]) / (extent.height * 0.5f),
+					-1.0f + static_cast<float32>(mousePosition[0]) / (extent.x * 0.5f),
+					 1.0f - static_cast<float32>(mousePosition[1]) / (extent.y * 0.5f),
 				};
 			}
 

@@ -41,29 +41,24 @@ namespace Trident {
 		#if defined(DEBUG_ENABLE_GRAPHICS_ADAPTER_VALIDATION_LAYER)
 			{
 				const PhysicalDeviceLimits& limits = commandEncoder->device->getPhysicalDevice()->getLimits();
-
-				// TODO(lyah/vec3-uint32/operator*)
-				vec3<uint32> size;
-				size[0] = limits.maxComputeWorkGroupSize[0] * limits.maxComputeWorkGroupCount[0];
-				size[1] = limits.maxComputeWorkGroupSize[1] * limits.maxComputeWorkGroupCount[1];
-				size[2] = limits.maxComputeWorkGroupSize[2] * limits.maxComputeWorkGroupCount[2];
+				const Extent3D maxExtent = limits.maxComputeWorkGroupSize * limits.maxComputeWorkGroupCount;
 
 				Validator validator;
 
-				if (extent.width > size[0]) {
-					VALIDATION_ERROR("descriptor.extent.width must not exceed maxComputeWorkGroupSize[0] * maxComputeWorkGroupCount[0] ([]).", size[0]);
+				if (extent.x > maxExtent.x) {
+					VALIDATION_ERROR("descriptor.extent.x must not exceed maxComputeWorkGroupSize.x * maxComputeWorkGroupCount.x ([]).", maxExtent.x);
 				}
 
-				if (extent.height > size[1]) {
-					VALIDATION_ERROR("descriptor.extent.height must not exceed maxComputeWorkGroupSize[1] * maxComputeWorkGroupCount[1] ([]).", size[1]);
+				if (extent.y > maxExtent.y) {
+					VALIDATION_ERROR("descriptor.extent.y must not exceed maxComputeWorkGroupSize.y * maxComputeWorkGroupCount.y ([]).", maxExtent.y);
 				}
 
-				if (extent.depth > size[2]) {
-					VALIDATION_ERROR("descriptor.extent.depth must not exceed maxComputeWorkGroupSize[2] * maxComputeWorkGroupCount[2] ([]).", size[2]);
+				if (extent.z > maxExtent.z) {
+					VALIDATION_ERROR("descriptor.extent.z must not exceed maxComputeWorkGroupSize.z * maxComputeWorkGroupCount.z ([]).", maxExtent.z);
 				}
 
-				if (extent.width * extent.height * extent.depth > limits.maxRayDispatchInvocationCount) {
-					VALIDATION_ERROR("descriptor.extent.width * descriptor.extent.height * descriptor.extent.depth must not exceed maxRayDispatchInvocationCount ([]).", limits.maxRayDispatchInvocationCount);
+				if (extent.x * extent.y * extent.z > limits.maxRayDispatchInvocationCount) {
+					VALIDATION_ERROR("descriptor.extent.x * descriptor.extent.y * descriptor.extent.z must not exceed maxRayDispatchInvocationCount ([]).", limits.maxRayDispatchInvocationCount);
 				}
 			}
 		#endif

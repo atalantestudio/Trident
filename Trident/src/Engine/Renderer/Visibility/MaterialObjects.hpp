@@ -107,7 +107,7 @@ namespace Trident {
 							const Extent3D extent = imageAsset->getExtent();
 
 							// TODO(material-graph/formats): Add support for other image formats (mainly R8_UNORM and R8G8B8_UNORM).
-							imageStagingBufferSize += extent.width * extent.height * extent.depth * imageAsset->getLayerCount() * getByteSize(ImageFormat::R8G8B8A8_UNORM);
+							imageStagingBufferSize += extent.x * extent.y * extent.z * imageAsset->getLayerCount() * getByteSize(ImageFormat::R8G8B8A8_UNORM);
 
 							materialIndex += 1;
 						}
@@ -334,7 +334,7 @@ namespace Trident {
 							const ref<MaterialAsset> materialAsset = materialAssets[materialIndex];
 							const ref<ImageAsset> imageAsset = assetLibrary->getAsset<ImageAsset>(materialAsset->descriptorImageAssetIdentifiers[descriptorSetLayoutBindingIndex]);
 							const Extent3D extent = imageAsset->getExtent();
-							const uint64 imageAssetSize = extent.width * extent.height * extent.depth * imageAsset->getLayerCount() * getByteSize(ImageFormat::R8G8B8A8_UNORM);
+							const uint64 imageAssetSize = extent.x * extent.y * extent.z * imageAsset->getLayerCount() * getByteSize(ImageFormat::R8G8B8A8_UNORM);
 
 							switch (imageAsset->getFormat()) {
 								case ImageFormat::R8G8B8_UNORM: {

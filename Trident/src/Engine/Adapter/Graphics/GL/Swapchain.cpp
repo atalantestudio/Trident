@@ -58,9 +58,9 @@ namespace Trident {
 		ImageDescriptor imageDescriptor{};
 		imageDescriptor.type = ImageType::TYPE_2D;
 		imageDescriptor.format = descriptor.surface->getFormat();
-		imageDescriptor.extent.width = swapchain->extent.width;
-		imageDescriptor.extent.height = swapchain->extent.height;
-		imageDescriptor.extent.depth = 1;
+		imageDescriptor.extent.x = swapchain->extent.x;
+		imageDescriptor.extent.y = swapchain->extent.y;
+		imageDescriptor.extent.z = 1;
 		imageDescriptor.mipLevelCount = 1;
 		imageDescriptor.layerCount = 1;
 		imageDescriptor.sampleCount = 1;

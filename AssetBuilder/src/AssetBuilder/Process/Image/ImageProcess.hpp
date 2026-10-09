@@ -20,9 +20,12 @@ namespace Trident {
 				stream.write<uint32>(image.identifier);
 				stream.write<VersionNumber>({0, 0, 0});
 				stream.write<ImageFormat>(image.format);
-				stream.write<uint32>(image.extent.width);
-				stream.write<uint32>(image.extent.height);
-				stream.write<uint32>(image.extent.depth);
+
+				// TODO(lyah/integer-vector)
+				stream.write<uint32>(image.extent.x);
+				stream.write<uint32>(image.extent.y);
+				stream.write<uint32>(image.extent.z);
+
 				stream.write<uint32>(image.mipLevelCount);
 				stream.write<uint32>(image.layerCount);
 
@@ -48,13 +51,13 @@ namespace Trident {
 						while (layerIndex < image.layerCount) {
 							uint32 z = 0;
 
-							while (z < image.extent.depth) {
+							while (z < image.extent.z) {
 								uint32 y = 0;
 
-								while (y < image.extent.height) {
+								while (y < image.extent.y) {
 									uint32 x = 0;
 
-									while (x < image.extent.width) {
+									while (x < image.extent.x) {
 										qoi_rgba texel = *pointer_cast<const qoi_rgba*>(&image.data[texelIndex * channelCount]);
 
 										if (image.format == ImageFormat::R8G8B8_UNORM) {
@@ -199,7 +202,7 @@ namespace Trident {
 		private:
 			static uint64 calculateMaxStreamSize(const ImageAssetDescriptor& image) {
 				// TODO(asset-builder/image): Include mip levels.
-				uint64 maxDataSize = image.extent.width * image.extent.height * image.extent.depth * image.layerCount;
+				uint64 maxDataSize = image.extent.x * image.extent.y * image.extent.z * image.layerCount;
 
 				switch (image.format) {
 					case ImageFormat::R8_UNORM: {

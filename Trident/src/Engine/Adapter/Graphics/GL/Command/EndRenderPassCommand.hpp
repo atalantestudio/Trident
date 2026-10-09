@@ -26,7 +26,7 @@ namespace Trident {
 						glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer->resolveFramebuffer);
 						glReadBuffer(GL_COLOR_ATTACHMENT0);
 						glDrawBuffer(GL_FRONT_LEFT);
-						glBlitFramebuffer(0, 0, extent.width, extent.height, 0, 0, extent.width, extent.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+						glBlitFramebuffer(0, 0, extent.x, extent.y, 0, 0, extent.x, extent.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 					}
 
 					return;
@@ -37,7 +37,7 @@ namespace Trident {
 				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 				glReadBuffer(readBuffer);
 				glDrawBuffer(GL_FRONT_LEFT);
-				glBlitFramebuffer(0, 0, extent.width, extent.height, 0, 0, extent.width, extent.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+				glBlitFramebuffer(0, 0, extent.x, extent.y, 0, 0, extent.x, extent.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 			}
 
 		private:

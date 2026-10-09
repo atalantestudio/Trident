@@ -81,7 +81,7 @@ namespace Trident {
 		rootComponent.type = GUIComponentType::DEFAULT;
 		rootComponent.parentIndex = max<uint32>();
 		rootComponent.origin = {0_px, 0_px};
-		rootComponent.size = {static_cast<float32>(extent.width), FIT};
+		rootComponent.size = {static_cast<float32>(extent.x), FIT};
 		rootComponent.zIndex = 0;
 		rootComponent.maximumSize = {max<float32>(), max<float32>()};
 		rootComponent.minimumSize = {0_px, 0_px};

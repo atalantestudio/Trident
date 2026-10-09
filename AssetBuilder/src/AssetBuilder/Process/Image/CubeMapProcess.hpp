@@ -32,7 +32,7 @@ namespace Trident {
 
 					ENGINE_ASSERT(faceImage.format == cubeMapImage.format, "Unsupported cube map face format.");
 					ENGINE_ASSERT(faceImage.extent == cubeMapImage.extent || cubeMapImage.extent == Extent3D(0, 0, 0), "Unsupported cube map face depth.");
-					ENGINE_ASSERT(faceImage.extent.depth == 1, "Unsupported cube map face depth.");
+					ENGINE_ASSERT(faceImage.extent.z == 1, "Unsupported cube map face depth.");
 					ENGINE_ASSERT(faceImage.mipLevelCount == 1, "Unsupported cube map face mip level count.");
 					ENGINE_ASSERT(faceImage.layerCount == 1, "Unsupported cube map face layer count.");
 

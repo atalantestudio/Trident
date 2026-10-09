@@ -97,7 +97,7 @@ namespace Trident {
 				framebufferImages[imageIndex] = renderPass->createColorAttachmentImage(
 					{
 						.type = ImageType::TYPE_2D,
-						.extent = {extent.width, extent.height, 1},
+						.extent = {extent.x, extent.y, 1},
 						.mipLevelCount = 1,
 						.layerCount = 1,
 
@@ -125,7 +125,7 @@ namespace Trident {
 				framebufferImages[imageIndex] = renderPass->createDepthStencilAttachmentImage(
 					{
 						.type = ImageType::TYPE_2D,
-						.extent = {extent.width, extent.height, 1},
+						.extent = {extent.x, extent.y, 1},
 						.mipLevelCount = 1,
 						.layerCount = 1,
 

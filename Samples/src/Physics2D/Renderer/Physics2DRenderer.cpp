@@ -122,7 +122,7 @@ namespace Trident {
 		layerInput->swapchainImage = renderPass->createColorAttachmentImage(
 			{
 				.type = ImageType::TYPE_2D,
-				.extent = {swapchainExtent.width, swapchainExtent.height, 1},
+				.extent = {swapchainExtent.x, swapchainExtent.y, 1},
 				.mipLevelCount = 1,
 				.layerCount = 1,
 				#if defined(DEBUG_OBJECT_NAME)
@@ -151,7 +151,7 @@ namespace Trident {
 		depthStencilImage = renderPass->createDepthStencilAttachmentImage(
 			{
 				.type = ImageType::TYPE_2D,
-				.extent = {swapchainExtent.width, swapchainExtent.height, 1},
+				.extent = {swapchainExtent.x, swapchainExtent.y, 1},
 				.mipLevelCount = 1,
 				.layerCount = 1,
 				#if defined(DEBUG_OBJECT_NAME)
@@ -632,8 +632,10 @@ namespace Trident {
 
 	void Physics2DRenderer::updateCameraProjection() const {
 		const Extent2D swapchainExtent = getSwapchain()->getExtent();
-		const float32 w = static_cast<float32>(swapchainExtent.width);
-		const float32 h = static_cast<float32>(swapchainExtent.height);
+		const float32 w = static_cast<float32>(swapchainExtent.x);
+		const float32 h = static_cast<float32>(swapchainExtent.y);
+
+		// TODO(lyah/integer-vector)
 		const vec2<float32> O = -cameraPosition / (vec2<float32>(w, h) * 0.5f);
 
 		// TODO(lyah/mat3x3/orthographic)
@@ -647,8 +649,8 @@ namespace Trident {
 	void Physics2DRenderer::updateViewport() const {
 		const Extent2D swapchainExtent = getSwapchain()->getExtent();
 
-		viewMappedRange->viewport.x = static_cast<float32>(swapchainExtent.width);
-		viewMappedRange->viewport.y = static_cast<float32>(swapchainExtent.height);
+		viewMappedRange->viewport.x = static_cast<float32>(swapchainExtent.x);
+		viewMappedRange->viewport.y = static_cast<float32>(swapchainExtent.y);
 	}
 
 	void Physics2DRenderer::zoom(float32 delta) {
@@ -663,8 +665,8 @@ namespace Trident {
 
 	void Physics2DRenderer::render(ref<CommandEncoder> commandEncoder) const {
 		const Extent2D swapchainExtent = getSwapchain()->getExtent();
-		const float32 width = static_cast<float32>(swapchainExtent.width);
-		const float32 height = static_cast<float32>(swapchainExtent.height);
+		const float32 width = static_cast<float32>(swapchainExtent.x);
+		const float32 height = static_cast<float32>(swapchainExtent.y);
 
 		commandEncoder->beginRenderPass({
 			.framebuffer = framebuffers[getSwapchainImageIndex()],

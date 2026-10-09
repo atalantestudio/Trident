@@ -27,7 +27,6 @@ namespace Trident::DX12 {
 	void buildAccelerationStructures(Trident::CommandEncoder* commandEncoder, view<ref<Trident::AccelerationStructure>> accelerationStructures, view<BaseBufferView> scratchViews) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		const DX12::Device* dxDevice = static_cast<const DX12::Device*>(commandEncoder->device);
 		const UINT AccelerationStructureCount = static_cast<UINT>(accelerationStructures.count());
 
 		DX12::CommandEncoder* dxCommandEncoder = static_cast<DX12::CommandEncoder*>(commandEncoder);
@@ -67,9 +66,9 @@ namespace Trident::DX12 {
 		Desc.CallableShaderTable.StartAddress = callableShaderBindingTable.deviceAddress;
 		Desc.CallableShaderTable.SizeInBytes = callableShaderBindingTable.size;
 		Desc.CallableShaderTable.StrideInBytes = callableShaderBindingTable.stride;
-		Desc.Width = extent.width;
-		Desc.Height = extent.height;
-		Desc.Depth = extent.depth;
+		Desc.Width = extent.x;
+		Desc.Height = extent.y;
+		Desc.Depth = extent.z;
 
 		dxCommandEncoder->commandList->DispatchRays(&Desc);
 		dxCommandEncoder->commandCount += 1;

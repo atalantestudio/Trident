@@ -15,7 +15,7 @@ namespace Trident {
 			{}
 
 			void execute() const final override {
-				glScissor(xOffset, yOffset, extent.width, extent.height);
+				glScissor(xOffset, yOffset, extent.x, extent.y);
 			}
 
 		private:

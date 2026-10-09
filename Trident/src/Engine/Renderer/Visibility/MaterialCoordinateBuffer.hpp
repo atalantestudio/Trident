@@ -10,7 +10,7 @@ namespace Trident {
 		const Extent2D extent = getSwapchain()->getExtent();
 
 		return createDynamicBuffer({
-			.size = extent.width * extent.height * sizeof(uint32),
+			.size = extent.x * extent.y * sizeof(uint32),
 			.usage = BufferUsage::READ_WRITE_STORAGE,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,

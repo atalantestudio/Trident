@@ -78,8 +78,8 @@ namespace Trident {
 	void DebugRenderer::render(ref<CommandEncoder> commandEncoder) const {
 		const ref<Framebuffer> framebuffer = framebuffers[getSwapchainImageIndex()];
 		const Extent2D extent = framebuffer->getExtent();
-		const float32 width = static_cast<float32>(extent.width);
-		const float32 height = static_cast<float32>(extent.height);
+		const float32 width = static_cast<float32>(extent.x);
+		const float32 height = static_cast<float32>(extent.y);
 
 		commandEncoder->beginRenderPass({
 			.framebuffer = framebuffer,

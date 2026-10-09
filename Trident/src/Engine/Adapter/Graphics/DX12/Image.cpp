@@ -16,9 +16,9 @@
 namespace Trident {
 	static ImageDescriptor createSwapchainImageDescriptor(Extent2D extent, UINT index) {
 		ImageDescriptor imageDescriptor{};
-		imageDescriptor.extent.width = extent.width;
-		imageDescriptor.extent.height = extent.height;
-		imageDescriptor.extent.depth = 1;
+		imageDescriptor.extent.x = extent.x;
+		imageDescriptor.extent.y = extent.y;
+		imageDescriptor.extent.z = 1;
 		imageDescriptor.mipLevelCount = 1;
 		imageDescriptor.layerCount = 1;
 

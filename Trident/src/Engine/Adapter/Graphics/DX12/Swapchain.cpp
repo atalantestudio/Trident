@@ -55,8 +55,8 @@ namespace Trident {
 		swapchain->imageViews = sequence<ref<Trident::ImageView>>(swapchain->imageCount);
 
 		DXGI_SWAP_CHAIN_DESC1 swapchainDescriptor{};
-		swapchainDescriptor.Width = descriptor.extent.width;
-		swapchainDescriptor.Height = descriptor.extent.height;
+		swapchainDescriptor.Width = descriptor.extent.x;
+		swapchainDescriptor.Height = descriptor.extent.y;
 		swapchainDescriptor.Format = getImageFormat(surface->getFormat());
 		swapchainDescriptor.Stereo = false;
 		swapchainDescriptor.SampleDesc.Count = 1;

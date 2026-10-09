@@ -13,12 +13,12 @@ namespace Trident {
 			{
 				Validator validator;
 
-				if (descriptor.extent.width == 0) {
-					VALIDATION_ERROR("descriptor.extent.width must not be 0.");
+				if (descriptor.extent.x == 0) {
+					VALIDATION_ERROR("descriptor.extent.x must not be 0.");
 				}
 
-				if (descriptor.extent.height == 0) {
-					VALIDATION_ERROR("descriptor.extent.height must not be 0.");
+				if (descriptor.extent.y == 0) {
+					VALIDATION_ERROR("descriptor.extent.y must not be 0.");
 				}
 			}
 		}

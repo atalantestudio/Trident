@@ -201,10 +201,10 @@ namespace Trident {
 					const uint32 codePoint = stream.peek();
 
 					Glyph& glyph = font.glyphs[glyphIndex];
-					glyph.minCoordinate.x = bitmapGlyph.minCoordinate.x / glyphMapImage->extent.width;
-					glyph.minCoordinate.y = (bitmapGlyph.minCoordinate.y + bitmapGlyph.topSideBearing) / glyphMapImage->extent.height;
-					glyph.maxCoordinate.x = (bitmapGlyph.minCoordinate.x + bitmapGlyph.size.x) / glyphMapImage->extent.width;
-					glyph.maxCoordinate.y = (bitmapGlyph.minCoordinate.y + bitmapGlyph.size.y + bitmapGlyph.topSideBearing) / glyphMapImage->extent.height;
+					glyph.minCoordinate.x = bitmapGlyph.minCoordinate.x / glyphMapImage->extent.x;
+					glyph.minCoordinate.y = (bitmapGlyph.minCoordinate.y + bitmapGlyph.topSideBearing) / glyphMapImage->extent.y;
+					glyph.maxCoordinate.x = (bitmapGlyph.minCoordinate.x + bitmapGlyph.size.x) / glyphMapImage->extent.x;
+					glyph.maxCoordinate.y = (bitmapGlyph.minCoordinate.y + bitmapGlyph.size.y + bitmapGlyph.topSideBearing) / glyphMapImage->extent.y;
 					glyph.width = bitmapGlyph.size.x;
 					glyph.advanceWidth = bitmapGlyph.size.x + 1;
 					glyph.height = bitmapGlyph.size.y;

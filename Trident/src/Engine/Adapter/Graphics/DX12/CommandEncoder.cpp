@@ -247,8 +247,8 @@ namespace Trident {
 		D3D12_RECT rectangle{};
 		rectangle.left = 0;
 		rectangle.top = 0;
-		rectangle.right = _commandEncoder->framebuffer->getExtent().width;
-		rectangle.bottom = _commandEncoder->framebuffer->getExtent().height;
+		rectangle.right = _commandEncoder->framebuffer->getExtent().x;
+		rectangle.bottom = _commandEncoder->framebuffer->getExtent().y;
 
 		// TODO: Use a sequence instead.
 		std::vector<D3D12_TEXTURE_BARRIER> textureBarriers;
@@ -511,12 +511,12 @@ namespace Trident {
 		destinationTextureCopyLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
 
 		for (const BufferImageCopyRegion& copyRegion : copyRegions) {
-			const UINT64 layerSize = copyRegion.imageExtent.width * copyRegion.imageExtent.height * copyRegion.imageExtent.depth * channelCount;
+			const UINT64 layerSize = copyRegion.imageExtent.x * copyRegion.imageExtent.y * copyRegion.imageExtent.z * channelCount;
 
-			sourceBufferCopyLocation.PlacedFootprint.Footprint.Width = copyRegion.imageExtent.width;
-			sourceBufferCopyLocation.PlacedFootprint.Footprint.Height = copyRegion.imageExtent.height;
-			sourceBufferCopyLocation.PlacedFootprint.Footprint.Depth = copyRegion.imageExtent.depth;
-			sourceBufferCopyLocation.PlacedFootprint.Footprint.RowPitch = copyRegion.imageExtent.width * channelCount;
+			sourceBufferCopyLocation.PlacedFootprint.Footprint.Width = copyRegion.imageExtent.x;
+			sourceBufferCopyLocation.PlacedFootprint.Footprint.Height = copyRegion.imageExtent.y;
+			sourceBufferCopyLocation.PlacedFootprint.Footprint.Depth = copyRegion.imageExtent.z;
+			sourceBufferCopyLocation.PlacedFootprint.Footprint.RowPitch = copyRegion.imageExtent.x * channelCount;
 
 			UINT layerIndex = 0;
 
@@ -555,12 +555,12 @@ namespace Trident {
 		destinationBufferCopyLocation.PlacedFootprint.Footprint.Format = srcImageResourceDescriptor.Format;
 
 		for (const BufferImageCopyRegion& copyRegion : copyRegions) {
-			const UINT64 layerSize = copyRegion.imageExtent.width * copyRegion.imageExtent.height * copyRegion.imageExtent.depth * channelCount;
+			const UINT64 layerSize = copyRegion.imageExtent.x * copyRegion.imageExtent.y * copyRegion.imageExtent.z * channelCount;
 
-			destinationBufferCopyLocation.PlacedFootprint.Footprint.Width = copyRegion.imageExtent.width;
-			destinationBufferCopyLocation.PlacedFootprint.Footprint.Height = copyRegion.imageExtent.height;
-			destinationBufferCopyLocation.PlacedFootprint.Footprint.Depth = copyRegion.imageExtent.depth;
-			destinationBufferCopyLocation.PlacedFootprint.Footprint.RowPitch = copyRegion.imageExtent.width * channelByteSize;
+			destinationBufferCopyLocation.PlacedFootprint.Footprint.Width = copyRegion.imageExtent.x;
+			destinationBufferCopyLocation.PlacedFootprint.Footprint.Height = copyRegion.imageExtent.y;
+			destinationBufferCopyLocation.PlacedFootprint.Footprint.Depth = copyRegion.imageExtent.z;
+			destinationBufferCopyLocation.PlacedFootprint.Footprint.RowPitch = copyRegion.imageExtent.x * channelByteSize;
 
 			UINT layerIndex = 0;
 
@@ -573,9 +573,9 @@ namespace Trident {
 				sourceBox.left = copyRegion.imageOffsetX;
 				sourceBox.top = copyRegion.imageOffsetY;
 				sourceBox.front = copyRegion.imageOffsetZ;
-				sourceBox.right = copyRegion.imageOffsetX + copyRegion.imageExtent.width;
-				sourceBox.bottom = copyRegion.imageOffsetY + copyRegion.imageExtent.height;
-				sourceBox.back = copyRegion.imageOffsetZ + copyRegion.imageExtent.depth;
+				sourceBox.right = copyRegion.imageOffsetX + copyRegion.imageExtent.x;
+				sourceBox.bottom = copyRegion.imageOffsetY + copyRegion.imageExtent.y;
+				sourceBox.back = copyRegion.imageOffsetZ + copyRegion.imageExtent.z;
 
 				_commandEncoder->commandList->CopyTextureRegion(&destinationBufferCopyLocation, 0, 0, 0, &sourceTextureCopyLocation, &sourceBox);
 
@@ -1069,8 +1069,8 @@ namespace Trident {
 		D3D12_RECT rectangle{};
 		rectangle.left = xOffset;
 		rectangle.top = yOffset;
-		rectangle.right = xOffset + extent.width;
-		rectangle.bottom = yOffset + extent.height;
+		rectangle.right = xOffset + extent.x;
+		rectangle.bottom = yOffset + extent.y;
 
 		_commandEncoder->commandList->RSSetScissorRects(1, &rectangle);
 		_commandEncoder->commandCount += 1;
