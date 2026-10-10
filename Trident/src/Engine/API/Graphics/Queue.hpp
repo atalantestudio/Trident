@@ -4,9 +4,12 @@
 #pragma once
 
 #include "Engine/API/Graphics/Base.hpp"
+#include "Engine/API/Graphics/CommandPool.hpp"
 #include "Engine/API/Graphics/Descriptor/CommandBufferDescriptor.hpp"
 #include "Engine/API/Graphics/Device.hpp"
+#include "Engine/API/Graphics/Fence.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
+#include "Engine/API/Graphics/Semaphore.hpp"
 
 namespace Trident {
 	class Queue {
