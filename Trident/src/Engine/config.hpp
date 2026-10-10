@@ -40,7 +40,7 @@ namespace Trident {
 	#define DEBUG_GL_ENABLE_COMMAND_QUEUE
 
 	/// The maximum number of commands that can simultaneously be stored in a queue.
-	#define DEBUG_GL_COMMAND_QUEUE_SIZE 64
+	#define DEBUG_GL_COMMAND_QUEUE_SIZE 1024
 
 	/// Toggles the Vulkan graphics adapter.
 	#define ENABLE_VK_ADAPTER
