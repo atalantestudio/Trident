@@ -53,10 +53,10 @@ namespace Trident {
 		});
 
 		gBufferRenderPass = createGBufferRenderPass();
-		gBufferDescriptorSetLayout = createGBufferDescriptorSetLayout();
-		rayTracingDescriptorSetLayout = createRayTracingDescriptorSetLayout();
-		postProcessingDescriptorSetLayout = createPostProcessingDescriptorSetLayout();
-		dilationDescriptorSetLayout = createDilationDescriptorSetLayout();
+		descriptorSetLayouts[0] = createGBufferDescriptorSetLayout();
+		descriptorSetLayouts[1] = createRayTracingDescriptorSetLayout();
+		descriptorSetLayouts[2] = createPostProcessingDescriptorSetLayout();
+		descriptorSetLayouts[3] = createDilationDescriptorSetLayout();
 		gBufferPipelineLayout = createGBufferPipelineLayout();
 		rayTracingPipelineLayout = createRayTracingPipelineLayout();
 		postProcessingPipelineLayout = createPostProcessingPipelineLayout();
@@ -73,13 +73,6 @@ namespace Trident {
 		descriptorSets = device->allocateDescriptorSets(descriptorSetLayouts);
 
 		createShaderBindingTableBuffer();
-	}
-
-	Lightmapper::~Lightmapper() {
-		gBufferDescriptorSetLayout.~ref();
-		rayTracingDescriptorSetLayout.~ref();
-		postProcessingDescriptorSetLayout.~ref();
-		dilationDescriptorSetLayout.~ref();
 	}
 
 	void Lightmapper::generateLightmapAtlas(const LightmapperDescriptor& descriptor) {

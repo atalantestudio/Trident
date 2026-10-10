@@ -32,13 +32,6 @@ namespace Trident {
 			static constexpr uint64 INSTANCE_SIZE = sizeof(Instance) * 4;
 
 		public:
-			explicit SampleArrayTextureRenderer() {}
-
-			~SampleArrayTextureRenderer() {
-				vertexBuffer.~ref();
-				stagingBuffer.~ref();
-			}
-
 			void build() override {
 				descriptorSetLayout = createDescriptorSetLayout();
 
@@ -48,7 +41,7 @@ namespace Trident {
 				descriptorSet = descriptorSets[0];
 				pipelineLayout = createPipelineLayout();
 				pipeline = createPipeline();
-				vertexBuffer = createVertexBuffer();
+				staticBuffers[0] = createVertexBuffer();
 
 				AssetLibrary* assetLibrary = getLayer()->getApplication()->getAssetLibrary();
 				uint32 imageIndex = 0;
@@ -65,7 +58,7 @@ namespace Trident {
 					imageIndex += 1;
 				}
 
-				stagingBuffer = createStagingBuffer(stagingSize);
+				staticBuffers[1] = createStagingBuffer(stagingSize);
 				sampler = createSampler();
 			}
 
@@ -89,9 +82,9 @@ namespace Trident {
 			}
 
 			void encodeOneTimeCommands() const override {
-				const BufferView<Vertex> vertexView = stagingBuffer->createView<Vertex>(0, VERTEX_SIZE);
-				const BufferView<Instance> instanceView = stagingBuffer->createView<Instance>(vertexView.getOffset() + vertexView.getSize(), INSTANCE_SIZE);
-				const BufferView<uint8> imageView = stagingBuffer->createView<uint8>(vertexBuffer->getSize(), stagingBuffer->getSize() - vertexBuffer->getSize());
+				const BufferView<Vertex> vertexView = staticBuffers[1]->createView<Vertex>(0, VERTEX_SIZE);
+				const BufferView<Instance> instanceView = staticBuffers[1]->createView<Instance>(vertexView.getOffset() + vertexView.getSize(), INSTANCE_SIZE);
+				const BufferView<uint8> imageView = staticBuffers[1]->createView<uint8>(staticBuffers[0]->getSize(), staticBuffers[1]->getSize() - staticBuffers[0]->getSize());
 
 				Vertex* vertexMappedRange = vertexView.map();
 				vertexMappedRange[0] = {{-0.5f,  0.5f}};
@@ -127,7 +120,7 @@ namespace Trident {
 					imageIndex += 1;
 				}
 
-				stagingBuffer->unmap();
+				staticBuffers[1]->unmap();
 
 				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
 				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
@@ -145,7 +138,7 @@ namespace Trident {
 					.size = vertexView.getSize() + instanceView.getSize(),
 				};
 
-				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegion);
+				commandEncoder->copyBufferToBuffer(staticBuffers[1], staticBuffers[0], bufferCopyRegion);
 				commandEncoder->insertMemoryBarriers({}, imageMemoryBarriers);
 
 				BufferImageCopyRegion bufferImageCopyRegion = {
@@ -163,7 +156,7 @@ namespace Trident {
 
 					bufferImageCopyRegion.imageExtent = image->getExtent();
 
-					commandEncoder->copyBufferToImage(stagingBuffer, image, bufferImageCopyRegion);
+					commandEncoder->copyBufferToImage(staticBuffers[1], image, bufferImageCopyRegion);
 
 					bufferImageCopyRegion.bufferOffset += image->getSize();
 
@@ -193,8 +186,8 @@ namespace Trident {
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, extent);
 				commandEncoder->bindDescriptorSets(pipelineLayout, 0, descriptorSet);
-				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
-				commandEncoder->bindVertexBuffer(1, vertexBuffer, VERTEX_SIZE);
+				commandEncoder->bindVertexBuffer(0, staticBuffers[0], 0);
+				commandEncoder->bindVertexBuffer(1, staticBuffers[0], VERTEX_SIZE);
 				commandEncoder->draw(6, 4, 0, 0);
 			}
 
@@ -299,7 +292,7 @@ namespace Trident {
 
 			ref<Buffer> createStagingBuffer(uint64 stagingSize) const {
 				return createStaticBuffer({
-					.size = vertexBuffer->getSize() + stagingSize,
+					.size = staticBuffers[0]->getSize() + stagingSize,
 					.usage = BufferUsage::TRANSFER_SRC,
 					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
 					.persistent = false,
@@ -388,16 +381,7 @@ namespace Trident {
 			ref<DescriptorSet> descriptorSet;
 			ref<PipelineLayout> pipelineLayout;
 			ref<GraphicsPipeline> pipeline;
-
-			union {
-				struct {
-					ref<Buffer> vertexBuffer;
-					ref<Buffer> stagingBuffer;
-				};
-
-				ref<Buffer> staticBuffers[2];
-			};
-
+			ref<Buffer> staticBuffers[2];
 			ref<ImageAsset> imageAssets[IMAGE_COUNT];
 			ref<Image> images[IMAGE_COUNT];
 			ref<ImageView> imageViews[IMAGE_COUNT];

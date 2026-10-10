@@ -16,22 +16,13 @@ namespace Trident {
 			};
 
 		public:
-			explicit TriangleIndexedIndirectSampleRenderer() {}
-
-			~TriangleIndexedIndirectSampleRenderer() {
-				vertexBuffer.~ref();
-				indexBuffer.~ref();
-				indirectBuffer.~ref();
-				stagingBuffer.~ref();
-			}
-
 			void build() override {
 				pipelineLayout = createPipelineLayout();
 				pipeline = createPipeline();
-				vertexBuffer = createVertexBuffer();
-				indexBuffer = createIndexBuffer();
-				indirectBuffer = createIndirectBuffer();
-				stagingBuffer = createStagingBuffer();
+				staticBuffers[0] = createVertexBuffer();
+				staticBuffers[1] = createIndexBuffer();
+				staticBuffers[2] = createIndirectBuffer();
+				staticBuffers[3] = createStagingBuffer();
 			}
 
 			StaticMemoryDescriptor getStaticMemoryDescriptor() const override {
@@ -42,9 +33,9 @@ namespace Trident {
 			}
 
 			void encodeOneTimeCommands() const override {
-				const BufferView<Vertex> vertexView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
-				const BufferView<uint16> indexView = stagingBuffer->createView<uint16>(vertexView.getOffset() + vertexView.getSize(), indexBuffer->getSize());
-				const BufferView<DrawIndexedIndirectCommand> indirectView = stagingBuffer->createView<DrawIndexedIndirectCommand>(indexView.getOffset() + indexView.getSize(), indirectBuffer->getSize());
+				const BufferView<Vertex> vertexView = staticBuffers[3]->createView<Vertex>(0, staticBuffers[0]->getSize());
+				const BufferView<uint16> indexView = staticBuffers[3]->createView<uint16>(vertexView.getOffset() + vertexView.getSize(), staticBuffers[1]->getSize());
+				const BufferView<DrawIndexedIndirectCommand> indirectView = staticBuffers[3]->createView<DrawIndexedIndirectCommand>(indexView.getOffset() + indexView.getSize(), staticBuffers[2]->getSize());
 
 				Vertex* vertexMappedRange = vertexView.map();
 				vertexMappedRange[0] = {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}};
@@ -63,7 +54,7 @@ namespace Trident {
 				indirectMappedRange[0].vertexBias = 0;
 				indirectMappedRange[0].instanceOffset = 0;
 
-				stagingBuffer->unmap();
+				staticBuffers[3]->unmap();
 
 				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
 				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
@@ -93,9 +84,9 @@ namespace Trident {
 					},
 				};
 
-				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegions[0]);
-				commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, bufferCopyRegions[1]);
-				commandEncoder->copyBufferToBuffer(stagingBuffer, indirectBuffer, bufferCopyRegions[2]);
+				commandEncoder->copyBufferToBuffer(staticBuffers[3], staticBuffers[0], bufferCopyRegions[0]);
+				commandEncoder->copyBufferToBuffer(staticBuffers[3], staticBuffers[1], bufferCopyRegions[1]);
+				commandEncoder->copyBufferToBuffer(staticBuffers[3], staticBuffers[2], bufferCopyRegions[2]);
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -111,9 +102,9 @@ namespace Trident {
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, extent);
 				commandEncoder->bindGraphicsPipeline(pipeline);
-				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
-				commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(indexBuffer, 0);
-				commandEncoder->drawIndexedIndirect(indirectBuffer, 0, 1, 0);
+				commandEncoder->bindVertexBuffer(0, staticBuffers[0], 0);
+				commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(staticBuffers[1], 0);
+				commandEncoder->drawIndexedIndirect(staticBuffers[2], 0, 1, 0);
 			}
 
 		private:
@@ -222,7 +213,7 @@ namespace Trident {
 
 			ref<Buffer> createStagingBuffer() const {
 				return createStaticBuffer({
-					.size = vertexBuffer->getSize() + indexBuffer->getSize() + indirectBuffer->getSize(),
+					.size = staticBuffers[0]->getSize() + staticBuffers[1]->getSize() + staticBuffers[2]->getSize(),
 					.usage = BufferUsage::TRANSFER_SRC,
 					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
 					.persistent = false,
@@ -235,17 +226,7 @@ namespace Trident {
 		private:
 			ref<PipelineLayout> pipelineLayout;
 			ref<GraphicsPipeline> pipeline;
-
-			union {
-				struct {
-					ref<Buffer> vertexBuffer;
-					ref<Buffer> indexBuffer;
-					ref<Buffer> indirectBuffer;
-					ref<Buffer> stagingBuffer;
-				};
-
-				ref<Buffer> staticBuffers[4];
-			};
+			ref<Buffer> staticBuffers[4];
 	};
 
 	DEFINE_SAMPLE_LAYER(TriangleIndexedIndirectSample);

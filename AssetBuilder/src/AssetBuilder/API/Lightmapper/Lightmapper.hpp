@@ -63,10 +63,6 @@ namespace Trident {
 			};
 
 		public:
-			explicit Lightmapper() {}
-
-			~Lightmapper();
-
 			void initialize(const GraphicsAdapter* adapter);
 
 			void generateLightmapAtlas(const LightmapperDescriptor& descriptor);
@@ -147,17 +143,7 @@ namespace Trident {
 			ref<RenderPass> gBufferRenderPass;
 			ref<RenderPass> dilationRenderPass;
 
-			union {
-				struct {
-					ref<DescriptorSetLayout> gBufferDescriptorSetLayout;
-					ref<DescriptorSetLayout> rayTracingDescriptorSetLayout;
-					ref<DescriptorSetLayout> postProcessingDescriptorSetLayout;
-					ref<DescriptorSetLayout> dilationDescriptorSetLayout;
-				};
-
-				// TODO(asset-builder/lightmapper): Why these need to be default-initialized when the buffer unions in the graphics samples don't need to be?
-				ref<DescriptorSetLayout> descriptorSetLayouts[4]{};
-			};
+			ref<DescriptorSetLayout> descriptorSetLayouts[4];
 
 			sequence<ref<DescriptorSet>> descriptorSets;
 

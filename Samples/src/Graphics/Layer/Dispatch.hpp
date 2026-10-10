@@ -15,13 +15,6 @@ namespace Trident {
 			};
 
 		public:
-			explicit DispatchSampleRenderer() {}
-
-			~DispatchSampleRenderer() {
-				vertexBuffer.~ref();
-				stagingBuffer.~ref();
-			}
-
 			void build() override {
 				outputDescriptorSetLayout = createOutputDescriptorSetLayout();
 
@@ -31,8 +24,8 @@ namespace Trident {
 				outputDescriptorSet = descriptorSets[0];
 				pipelineLayout = createPipelineLayout();
 				pipeline = createPipeline();
-				vertexBuffer = createVertexBuffer();
-				stagingBuffer = createStagingBuffer();
+				staticBuffers[0] = createVertexBuffer();
+				staticBuffers[1] = createStagingBuffer();
 				outputImage = createOutputImage();
 				sampler = createSampler();
 			}
@@ -53,14 +46,14 @@ namespace Trident {
 			void encodeOneTimeCommands() const override {
 				computeOutputImage();
 
-				const BufferView<Vertex> vertexView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
+				const BufferView<Vertex> vertexView = staticBuffers[1]->createView<Vertex>(0, staticBuffers[0]->getSize());
 
 				Vertex* vertexMappedRange = vertexView.map();
 				vertexMappedRange[0] = {{-1.0f,  1.0f}};
 				vertexMappedRange[1] = {{ 3.0f,  1.0f}};
 				vertexMappedRange[2] = {{-1.0f, -3.0f}};
 
-				stagingBuffer->unmap();
+				staticBuffers[1]->unmap();
 
 				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
 				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
@@ -78,7 +71,7 @@ namespace Trident {
 					.size = vertexView.getSize(),
 				};
 
-				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegion);
+				commandEncoder->copyBufferToBuffer(staticBuffers[1], staticBuffers[0], bufferCopyRegion);
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -95,7 +88,7 @@ namespace Trident {
 				commandEncoder->setScissor(0, 0, extent);
 				commandEncoder->bindGraphicsPipeline(pipeline);
 				commandEncoder->bindDescriptorSets(pipelineLayout, 0, outputDescriptorSet);
-				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
+				commandEncoder->bindVertexBuffer(0, staticBuffers[0], 0);
 				commandEncoder->draw(3, 1, 0, 0);
 			}
 
@@ -197,7 +190,7 @@ namespace Trident {
 
 			ref<Buffer> createStagingBuffer() const {
 				return createStaticBuffer({
-					.size = vertexBuffer->getSize(),
+					.size = staticBuffers[0]->getSize(),
 					.usage = BufferUsage::TRANSFER_SRC,
 					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
 					.persistent = false,
@@ -364,16 +357,7 @@ namespace Trident {
 			ref<DescriptorSet> outputDescriptorSet;
 			ref<PipelineLayout> pipelineLayout;
 			ref<GraphicsPipeline> pipeline;
-
-			union {
-				struct {
-					ref<Buffer> vertexBuffer;
-					ref<Buffer> stagingBuffer;
-				};
-
-				ref<Buffer> staticBuffers[2];
-			};
-
+			ref<Buffer> staticBuffers[2];
 			ref<Image> outputImage;
 			ref<ImageView> outputImageView;
 			ref<Sampler> sampler;

@@ -15,14 +15,6 @@ namespace Trident {
 			};
 
 		public:
-			explicit DispatchIndirectSampleRenderer() {}
-
-			~DispatchIndirectSampleRenderer() {
-				vertexBuffer.~ref();
-				indirectBuffer.~ref();
-				stagingBuffer.~ref();
-			}
-
 			void build() override {
 				outputDescriptorSetLayout = createOutputDescriptorSetLayout();
 
@@ -32,9 +24,9 @@ namespace Trident {
 				outputDescriptorSet = descriptorSets[0];
 				pipelineLayout = createPipelineLayout();
 				pipeline = createPipeline();
-				vertexBuffer = createVertexBuffer();
-				indirectBuffer = createIndirectBuffer();
-				stagingBuffer = createStagingBuffer();
+				staticBuffers[0] = createVertexBuffer();
+				staticBuffers[1] = createIndirectBuffer();
+				staticBuffers[2] = createStagingBuffer();
 				outputImage = createOutputImage();
 				sampler = createSampler();
 			}
@@ -53,8 +45,8 @@ namespace Trident {
 			}
 
 			void encodeOneTimeCommands() const override {
-				const BufferView<Vertex> vertexView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
-				const BufferView<DispatchIndirectCommand> indirectView = stagingBuffer->createView<DispatchIndirectCommand>(vertexView.getOffset() + vertexView.getSize(), sizeof(DispatchIndirectCommand));
+				const BufferView<Vertex> vertexView = staticBuffers[2]->createView<Vertex>(0, staticBuffers[0]->getSize());
+				const BufferView<DispatchIndirectCommand> indirectView = staticBuffers[2]->createView<DispatchIndirectCommand>(vertexView.getOffset() + vertexView.getSize(), sizeof(DispatchIndirectCommand));
 
 				Vertex* vertexMappedRange = vertexView.map();
 				vertexMappedRange[0] = {{-1.0f,  1.0f}};
@@ -66,7 +58,7 @@ namespace Trident {
 				indirectMappedRange->y = 2;
 				indirectMappedRange->z = 1;
 
-				stagingBuffer->unmap();
+				staticBuffers[2]->unmap();
 
 				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
 				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
@@ -91,8 +83,8 @@ namespace Trident {
 					},
 				};
 
-				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegions[0]);
-				commandEncoder->copyBufferToBuffer(stagingBuffer, indirectBuffer, bufferCopyRegions[1]);
+				commandEncoder->copyBufferToBuffer(staticBuffers[2], staticBuffers[0], bufferCopyRegions[0]);
+				commandEncoder->copyBufferToBuffer(staticBuffers[2], staticBuffers[1], bufferCopyRegions[1]);
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -111,7 +103,7 @@ namespace Trident {
 				commandEncoder->setScissor(0, 0, extent);
 				commandEncoder->bindGraphicsPipeline(pipeline);
 				commandEncoder->bindDescriptorSets(pipelineLayout, 0, outputDescriptorSet);
-				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
+				commandEncoder->bindVertexBuffer(0, staticBuffers[0], 0);
 				commandEncoder->draw(3, 1, 0, 0);
 			}
 
@@ -225,7 +217,7 @@ namespace Trident {
 
 			ref<Buffer> createStagingBuffer() const {
 				return createStaticBuffer({
-					.size = vertexBuffer->getSize() + indirectBuffer->getSize(),
+					.size = staticBuffers[0]->getSize() + staticBuffers[1]->getSize(),
 					.usage = BufferUsage::TRANSFER_SRC,
 					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
 					.persistent = false,
@@ -371,7 +363,7 @@ namespace Trident {
 				commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
 				commandEncoder->bindComputePipeline(computePipeline);
 				commandEncoder->bindDescriptorSets(pipelineLayout, 0, descriptorSet);
-				commandEncoder->dispatchIndirect(indirectBuffer, 0);
+				commandEncoder->dispatchIndirect(staticBuffers[1], 0);
 
 				imageMemoryBarrier = {
 					.image = outputImage,
@@ -392,17 +384,7 @@ namespace Trident {
 			ref<DescriptorSet> outputDescriptorSet;
 			ref<PipelineLayout> pipelineLayout;
 			ref<GraphicsPipeline> pipeline;
-
-			union {
-				struct {
-					ref<Buffer> vertexBuffer;
-					ref<Buffer> indirectBuffer;
-					ref<Buffer> stagingBuffer;
-				};
-
-				ref<Buffer> staticBuffers[3];
-			};
-
+			ref<Buffer> staticBuffers[3];
 			ref<Image> outputImage;
 			ref<ImageView> outputImageView;
 			ref<Sampler> sampler;

@@ -61,18 +61,11 @@ namespace Trident {
 			static constexpr uint64 INSTANCE_SIZE = sizeof(Instance) * 3;
 
 		public:
-			explicit ColorBlendSampleRenderer() {}
-
-			~ColorBlendSampleRenderer() {
-				vertexBuffer.~ref();
-				stagingBuffer.~ref();
-			}
-
 			void build() override {
 				pipelineLayout = createPipelineLayout();
 				pipeline = createPipeline();
-				vertexBuffer = createVertexBuffer();
-				stagingBuffer = createStagingBuffer();
+				staticBuffers[0] = createVertexBuffer();
+				staticBuffers[1] = createStagingBuffer();
 			}
 
 			StaticMemoryDescriptor getStaticMemoryDescriptor() const override {
@@ -83,8 +76,8 @@ namespace Trident {
 			}
 
 			void encodeOneTimeCommands() const override {
-				const BufferView<Vertex> vertexView = stagingBuffer->createView<Vertex>(0, VERTEX_SIZE);
-				const BufferView<Instance> instanceView = stagingBuffer->createView<Instance>(vertexView.getOffset() + vertexView.getSize(), INSTANCE_SIZE);
+				const BufferView<Vertex> vertexView = staticBuffers[1]->createView<Vertex>(0, VERTEX_SIZE);
+				const BufferView<Instance> instanceView = staticBuffers[1]->createView<Instance>(vertexView.getOffset() + vertexView.getSize(), INSTANCE_SIZE);
 
 				Vertex* vertexMappedRange = vertexView.map();
 				vertexMappedRange[0] = {{-0.5f, -0.5f}};
@@ -96,7 +89,7 @@ namespace Trident {
 				instanceMappedRange[1] = {Color(0x80b5e77f).value, { 0.0f,  0.0f}};
 				instanceMappedRange[2] = {Color(0xeda0417f).value, { 0.1f,  0.1f}};
 
-				stagingBuffer->unmap();
+				staticBuffers[1]->unmap();
 
 				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
 				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
@@ -111,10 +104,10 @@ namespace Trident {
 				const BufferCopyRegion bufferCopyRegion = {
 					.sourceOffset = 0,
 					.destinationOffset = 0,
-					.size = vertexBuffer->getSize(),
+					.size = staticBuffers[0]->getSize(),
 				};
 
-				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegion);
+				commandEncoder->copyBufferToBuffer(staticBuffers[1], staticBuffers[0], bufferCopyRegion);
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -130,8 +123,8 @@ namespace Trident {
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, extent);
 				commandEncoder->bindGraphicsPipeline(pipeline);
-				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
-				commandEncoder->bindVertexBuffer(1, vertexBuffer, VERTEX_SIZE);
+				commandEncoder->bindVertexBuffer(0, staticBuffers[0], 0);
+				commandEncoder->bindVertexBuffer(1, staticBuffers[0], VERTEX_SIZE);
 				commandEncoder->draw(3, 3, 0, 0);
 			}
 
@@ -221,7 +214,7 @@ namespace Trident {
 
 			ref<Buffer> createStagingBuffer() const {
 				return createStaticBuffer({
-					.size = vertexBuffer->getSize(),
+					.size = staticBuffers[0]->getSize(),
 					.usage = BufferUsage::TRANSFER_SRC,
 					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
 					.persistent = false,
@@ -234,15 +227,7 @@ namespace Trident {
 		private:
 			ref<PipelineLayout> pipelineLayout;
 			ref<GraphicsPipeline> pipeline;
-
-			union {
-				struct {
-					ref<Buffer> vertexBuffer;
-					ref<Buffer> stagingBuffer;
-				};
-
-				ref<Buffer> staticBuffers[2];
-			};
+			ref<Buffer> staticBuffers[2];
 	};
 
 	DEFINE_SAMPLE_LAYER(ColorBlendSample);

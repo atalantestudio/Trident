@@ -16,20 +16,12 @@ namespace Trident {
 			};
 
 		public:
-			explicit TriangleIndexedSampleRenderer() {}
-
-			~TriangleIndexedSampleRenderer() {
-				vertexBuffer.~ref();
-				indexBuffer.~ref();
-				stagingBuffer.~ref();
-			}
-
 			void build() override {
 				pipelineLayout = createPipelineLayout();
 				pipeline = createPipeline();
-				vertexBuffer = createVertexBuffer();
-				indexBuffer = createIndexBuffer();
-				stagingBuffer = createStagingBuffer();
+				staticBuffers[0] = createVertexBuffer();
+				staticBuffers[1] = createIndexBuffer();
+				staticBuffers[2] = createStagingBuffer();
 			}
 
 			StaticMemoryDescriptor getStaticMemoryDescriptor() const override {
@@ -40,8 +32,8 @@ namespace Trident {
 			}
 
 			void encodeOneTimeCommands() const override {
-				const BufferView<Vertex> vertexView = stagingBuffer->createView<Vertex>(0, vertexBuffer->getSize());
-				const BufferView<uint16> indexView = stagingBuffer->createView<uint16>(vertexView.getOffset() + vertexView.getSize(), indexBuffer->getSize());
+				const BufferView<Vertex> vertexView = staticBuffers[2]->createView<Vertex>(0, staticBuffers[0]->getSize());
+				const BufferView<uint16> indexView = staticBuffers[2]->createView<uint16>(vertexView.getOffset() + vertexView.getSize(), staticBuffers[1]->getSize());
 
 				Vertex* vertexMappedRange = vertexView.map();
 				vertexMappedRange[0] = {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}};
@@ -53,7 +45,7 @@ namespace Trident {
 				indexMappedRange[1] = 1;
 				indexMappedRange[2] = 2;
 
-				stagingBuffer->unmap();
+				staticBuffers[2]->unmap();
 
 				const ref<Queue> queue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
 				const ref<CommandEncoder> commandEncoder = queue->createCommandEncoder({
@@ -78,8 +70,8 @@ namespace Trident {
 					},
 				};
 
-				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegions[0]);
-				commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, bufferCopyRegions[1]);
+				commandEncoder->copyBufferToBuffer(staticBuffers[2], staticBuffers[0], bufferCopyRegions[0]);
+				commandEncoder->copyBufferToBuffer(staticBuffers[2], staticBuffers[1], bufferCopyRegions[1]);
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -95,8 +87,8 @@ namespace Trident {
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, extent);
 				commandEncoder->bindGraphicsPipeline(pipeline);
-				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0);
-				commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(indexBuffer, 0);
+				commandEncoder->bindVertexBuffer(0, staticBuffers[0], 0);
+				commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(staticBuffers[1], 0);
 				commandEncoder->drawIndexed(3, 1, 0, 0, 0);
 			}
 
@@ -194,7 +186,7 @@ namespace Trident {
 
 			ref<Buffer> createStagingBuffer() const {
 				return createStaticBuffer({
-					.size = vertexBuffer->getSize() + indexBuffer->getSize(),
+					.size = staticBuffers[0]->getSize() + staticBuffers[1]->getSize(),
 					.usage = BufferUsage::TRANSFER_SRC,
 					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
 					.persistent = false,
@@ -207,16 +199,7 @@ namespace Trident {
 		private:
 			ref<PipelineLayout> pipelineLayout;
 			ref<GraphicsPipeline> pipeline;
-
-			union {
-				struct {
-					ref<Buffer> vertexBuffer;
-					ref<Buffer> indexBuffer;
-					ref<Buffer> stagingBuffer;
-				};
-
-				ref<Buffer> staticBuffers[3];
-			};
+			ref<Buffer> staticBuffers[3];
 	};
 
 	DEFINE_SAMPLE_LAYER(TriangleIndexedSample);
