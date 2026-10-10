@@ -17,6 +17,7 @@ namespace Trident {
 		vertexInputBindings[1].registerAttribute<decltype(RigidBody::fillColor)>();
 		vertexInputBindings[1].registerAttribute<decltype(RigidBody::strokeColor)>();
 		vertexInputBindings[1].registerAttribute<decltype(RigidBody::depth)>();
+		vertexInputBindings[1].stride = sizeof(RigidBody);
 
 		const ColorBlendAttachment colorBlendAttachments[] = {
 			{

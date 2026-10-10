@@ -635,10 +635,16 @@ namespace Trident {
 		const vec2<float32> O = -cameraPosition / (size * 0.5f);
 
 		// TODO(lyah/mat3x3/orthographic)
-		cameraMappedRange->projection = {
+		const mat3x3<float32> projection = {
 			2.0f / size.x,  0.0f,           0.0f,
 			0.0f,           2.0f / size.y,  0.0f,
 			O[0],           O[1],           1.0f,
+		};
+
+		cameraMappedRange->projection = {
+			{projection[0].x, projection[0].y, projection[0].z, 1.0f},
+			{projection[1].x, projection[1].y, projection[1].z, 1.0f},
+			{projection[2].x, projection[2].y, projection[2].z, 1.0f},
 		};
 	}
 
@@ -706,7 +712,7 @@ namespace Trident {
 				const GeometryComponent geometryComponent = geometryComponentPool.components[componentIndex];
 				const Geometry2D& geometry = geometries[geometryComponent.geometryIndex];
 
-				// TODO: Restore materials (test colors were 0xf4fedbff and 0xe6ddffff).
+				// TODO(physics/2d/materials): Restore materials (test colors were 0xf4fedbff and 0xe6ddffff).
 				commandEncoder->drawIndexed(geometry.getIndexRange().count, 1, geometry.getIndexRange().offset, geometry.getVertexPositionComponentRange().offset / 2, entity);
 
 				componentIndex += 1;
@@ -729,7 +735,7 @@ namespace Trident {
 				const Geometry2D& geometry = geometries[geometryComponent.geometryIndex];
 				const Hull2D& hull = hulls[geometry.hullIndex];
 
-				// TODO: Restore materials (test colors were 0xf4fedbff and 0xe6ddffff).
+				// TODO(physics/2d/materials): Restore materials (test colors were 0xf4fedbff and 0xe6ddffff).
 				commandEncoder->drawIndexed(hull.lineIndexRange.count, 1, hull.lineIndexRange.offset, geometry.getVertexPositionComponentRange().offset / 2, entity);
 
 				componentIndex += 1;
