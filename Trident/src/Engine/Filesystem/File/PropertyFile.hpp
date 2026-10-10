@@ -24,10 +24,10 @@ namespace Trident {
 		public:
 			static view<char8> getDefaultFileData() {
 				return (
-					"GraphicsAPI: OpenGL\n"
+					"GraphicsAPI: Vulkan\n"
 					"PreferIntegratedGPU: 0\n"
-					"Window.Width: 1280\n"
-					"Window.Height: 720\n"
+					"Window.Width: 968\n"
+					"Window.Height: 968\n"
 					"Window.Maximized: 1\n"
 					"VerticalSync: 1\n"
 
