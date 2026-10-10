@@ -73,7 +73,7 @@ namespace Trident {
 					.buffers = staticBuffers,
 					.images = {},
 				};
-			};
+			}
 
 			void encodeOneTimeCommands() const override {
 				const BufferView<Vertex> vertexView = staticBuffers[1]->createView<Vertex>(0, staticBuffers[0]->getSize());

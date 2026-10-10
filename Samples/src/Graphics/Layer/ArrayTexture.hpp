@@ -45,7 +45,7 @@ namespace Trident {
 
 				AssetLibrary* assetLibrary = getLayer()->getApplication()->getAssetLibrary();
 				uint32 imageIndex = 0;
-				uint64 stagingSize = 0;
+				uint64 imageStagingSize = 0;
 
 				while (imageIndex < IMAGE_COUNT) {
 					const view<char8> assetPath = ASSET_PATHS[imageIndex];
@@ -54,11 +54,11 @@ namespace Trident {
 					imageAssets[imageIndex] = imageAsset;
 					images[imageIndex] = createImage(imageAsset, imageIndex);
 
-					stagingSize += imageAsset->getSize();
+					imageStagingSize += imageAsset->getSize();
 					imageIndex += 1;
 				}
 
-				staticBuffers[1] = createStagingBuffer(stagingSize);
+				staticBuffers[1] = createStagingBuffer(imageStagingSize);
 				sampler = createSampler();
 			}
 
@@ -67,7 +67,7 @@ namespace Trident {
 					.buffers = staticBuffers,
 					.images = images,
 				};
-			};
+			}
 
 			void postBuild() override {
 				uint32 imageIndex = 0;
@@ -290,9 +290,9 @@ namespace Trident {
 				});
 			}
 
-			ref<Buffer> createStagingBuffer(uint64 stagingSize) const {
+			ref<Buffer> createStagingBuffer(uint64 imageStagingSize) const {
 				return createStaticBuffer({
-					.size = staticBuffers[0]->getSize() + stagingSize,
+					.size = staticBuffers[0]->getSize() + imageStagingSize,
 					.usage = BufferUsage::TRANSFER_SRC,
 					.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT,
 					.persistent = false,
