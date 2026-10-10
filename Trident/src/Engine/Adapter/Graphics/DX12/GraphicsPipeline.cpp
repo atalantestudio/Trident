@@ -110,7 +110,7 @@ namespace Trident {
 		UINT inputElementDescriptorIndex = 0;
 
 		for (const VertexInputBinding& vertexInputBinding : descriptor.vertexInputBindings) {
-			inputElementDescriptorIndex += static_cast<UINT>(vertexInputBinding.getAttributes().size());
+			inputElementDescriptorIndex += static_cast<UINT>(vertexInputBinding.getAttributes().count());
 		}
 
 		sequence<D3D12_INPUT_ELEMENT_DESC> inputElementDescriptors(inputElementDescriptorIndex);
@@ -120,7 +120,7 @@ namespace Trident {
 
 		while (vertexInputBindingIndex < descriptor.vertexInputBindings.count()) {
 			const VertexInputBinding& vertexInputBinding = descriptor.vertexInputBindings[vertexInputBindingIndex];
-			const std::vector<VertexInputAttribute>& vertexInputAttributes = vertexInputBinding.getAttributes();
+			const view<VertexInputAttribute> vertexInputAttributes = vertexInputBinding.getAttributes();
 
 			// TODO(graphics/dx12/vertex-input-binding/stride): Unlike with OpenGL or Vulkan, it is not possible to provide a custom stride for a binding.
 			for (const VertexInputAttribute& vertexInputAttribute : vertexInputAttributes) {

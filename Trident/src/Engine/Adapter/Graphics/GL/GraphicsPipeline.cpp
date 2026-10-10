@@ -86,7 +86,7 @@ namespace Trident {
 
 		while (bindingindex < descriptor.vertexInputBindings.count()) {
 			const VertexInputBinding& vertexInputBinding = descriptor.vertexInputBindings[bindingindex];
-			const std::vector<Trident::VertexInputAttribute>& attributes = vertexInputBinding.getAttributes();
+			const view<Trident::VertexInputAttribute> attributes = vertexInputBinding.getAttributes();
 
 			for (const Trident::VertexInputAttribute& attribute : attributes) {
 				const GL::VertexInputAttribute _attribute = getAttribute(attribute.format);

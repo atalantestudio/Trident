@@ -45,6 +45,20 @@ namespace Trident {
 	typedef vec2<uint32> Extent2D;
 	typedef vec3<uint32> Extent3D;
 
+	// TODO(lyah/mat4x3)
+	template<typename T>
+	struct mat4x3 {
+		inline constexpr mat4x3(vec4<T> m0, vec4<T> m1, vec4<T> m2) :
+			m{
+				m0,
+				m1,
+				m2,
+			}
+		{}
+
+		vec4<T> m[3];
+	};
+
 	struct Plane2D {
 		vec2<float32> normal;
 		float32 offset;

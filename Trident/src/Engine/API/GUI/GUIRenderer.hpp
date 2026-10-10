@@ -18,7 +18,7 @@ namespace Trident {
 			};
 
 			struct Camera {
-				mat3x3<float32> projection;
+				mat4x3<float32> projection;
 			};
 
 		public:

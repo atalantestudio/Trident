@@ -240,11 +240,11 @@ namespace Trident {
 						VALIDATION_ERROR("descriptor.vertexInputBindings[[]].inputRate must be a valid InputRate value.", vertexInputBindingIndex);
 					}
 
-					const std::vector<VertexInputAttribute>& vertexInputAttributes = vertexInputBinding.getAttributes();
+					const view<VertexInputAttribute> vertexInputAttributes = vertexInputBinding.getAttributes();
 
 					uint32 vertexInputAttributeIndex = 0;
 
-					while (vertexInputAttributeIndex < vertexInputAttributes.size()) {
+					while (vertexInputAttributeIndex < vertexInputAttributes.count()) {
 						const VertexInputAttribute& vertexInputAttribute = vertexInputAttributes[vertexInputAttributeIndex];
 
 						if (vertexInputAttribute.format >= VertexInputAttributeFormat::count) {
