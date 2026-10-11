@@ -23,23 +23,20 @@ namespace Trident {
 		}
 
 		void updateOrientation() {
-			const quat<float32> pitch = axisAngle<float32>(RIGHT, rotation[0]);
-			const quat<float32> yaw = axisAngle<float32>(UP, rotation[1]);
-			const quat<float32> roll = axisAngle<float32>(FORWARD, rotation[2]);
+			const quat<float32> pitch = rotationAxisAngle<quat<float32>>(RIGHT, rotation[0]);
+			const quat<float32> yaw = rotationAxisAngle<quat<float32>>(UP, rotation[1]);
+			const quat<float32> roll = rotationAxisAngle<quat<float32>>(FORWARD, rotation[2]);
 
 			orientation = normalized(yaw * pitch * roll);
 		}
 
 		void updateWorld(vec3<float32> centroid) {
-			world =
-				// TODO(rigid-body/3d/centroid): Include the centroid in the world matrix?
+			world = (
 				translation<mat4x4<float32>>(-centroid) *
-
-				// TODO(lyah/uniform-scaling)
-				scaling<mat4x4<float32>>(vec3<float32>(scale)) *
-
+				uniformScaling<mat4x4<float32>>(scale) *
 				mat4x4<float32>(orientation) *
-				translation<mat4x4<float32>>(position);
+				translation<mat4x4<float32>>(position)
+			);
 		}
 
 		/// Applies linear and angular impulses to the body.

@@ -364,7 +364,7 @@ namespace Trident {
 			minZ = centerZ - depth * 0.5f * Z_SCALE;
 			maxZ = centerZ + depth * 0.5f * Z_SCALE;
 
-			// TODO(lyah/mat4x4/orthographic): Add helper similar to orthoLH_ZO.
+			// TODO(lyah/projection/orthographic-4x4): Add helper similar to orthoLH_ZO.
 			const mat4x4<float32> lightProjection = {
 				 2.0f / (maxX - minX),           0.0f,                           0.0f,                  0.0f,
 				 0.0f,                           2.0f / (maxY - minY),           0.0f,                  0.0f,

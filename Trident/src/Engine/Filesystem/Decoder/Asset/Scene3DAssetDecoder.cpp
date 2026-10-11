@@ -112,16 +112,14 @@ namespace Trident {
 			const vec3<float32> rotation = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
 			const float32 scale = stream.read<float32>();
 			const quat<float32> orientation = normalized(
-				axisAngle<float32>(UP, rotation[1]) *
-				axisAngle<float32>(RIGHT, rotation[0]) *
-				axisAngle<float32>(FORWARD, rotation[2])
+				rotationAxisAngle<quat<float32>>(UP, rotation[1]) *
+				rotationAxisAngle<quat<float32>>(RIGHT, rotation[0]) *
+				rotationAxisAngle<quat<float32>>(FORWARD, rotation[2])
 			);
 
 			Instance3D& instance = asset.instances[instanceIndex];
 			instance.worldTransform = (
-				// TODO(lyah/uniform-scaling)
-				scaling<mat4x4<float32>>(vec3<float32>(scale)) *
-
+				uniformScaling<mat4x4<float32>>(scale) *
 				mat4x4<float32>(orientation) *
 				translation<mat4x4<float32>>(position)
 			);

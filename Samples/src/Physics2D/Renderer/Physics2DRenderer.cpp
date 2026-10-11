@@ -634,7 +634,7 @@ namespace Trident {
 		const vec2<float32> size = vec2<float32>(getSwapchain()->getExtent());
 		const vec2<float32> O = -cameraPosition / (size * 0.5f);
 
-		// TODO(lyah/mat3x3/orthographic)
+		// TODO(lyah/projection/orthographic-3x3)
 		const mat3x3<float32> projection = {
 			2.0f / size.x,  0.0f,           0.0f,
 			0.0f,           2.0f / size.y,  0.0f,

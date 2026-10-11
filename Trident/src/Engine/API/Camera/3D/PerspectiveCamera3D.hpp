@@ -35,9 +35,9 @@ namespace Trident {
 			} */
 
 			void updateOrientation(vec3<float32> offset) {
-				const quat<float32> pitch = axisAngle<float32>(RIGHT, offset.x);
-				const quat<float32> yaw = axisAngle<float32>(UP, offset.y);
-				const quat<float32> roll = axisAngle<float32>(FORWARD, offset.z);
+				const quat<float32> pitch = rotationAxisAngle<quat<float32>>(RIGHT, offset.x);
+				const quat<float32> yaw = rotationAxisAngle<quat<float32>>(UP, offset.y);
+				const quat<float32> roll = rotationAxisAngle<quat<float32>>(FORWARD, offset.z);
 
 				orientation = normalized((yaw * (orientation * pitch)) * roll);
 			}
@@ -82,6 +82,6 @@ namespace Trident {
 			float32 farPlane = 1.0f;
 
 		private:
-			quat<float32> orientation = axisAngle<float32>(FORWARD, 0.0_rad);
+			quat<float32> orientation = rotationAxisAngle<quat<float32>>(FORWARD, 0.0_rad);
 	};
 }

@@ -29,9 +29,9 @@ namespace Trident {
 		const vec3<float64> Lcl_Rotation = FBX::resolveVec3Property<float64>(file, Properties70, "Lcl Rotation", {0.0, 0.0, 0.0});
 
 		orientation = normalized(
-			axisAngle<float32>(UP, radians(static_cast<float32>(Lcl_Rotation.y))) *
-			axisAngle<float32>(RIGHT, radians(static_cast<float32>(Lcl_Rotation.x))) *
-			axisAngle<float32>(FORWARD, radians(static_cast<float32>(Lcl_Rotation.z)))
+			rotationAxisAngle<quat<float32>>(UP, radians(static_cast<float32>(Lcl_Rotation.y))) *
+			rotationAxisAngle<quat<float32>>(RIGHT, radians(static_cast<float32>(Lcl_Rotation.x))) *
+			rotationAxisAngle<quat<float32>>(FORWARD, radians(static_cast<float32>(Lcl_Rotation.z)))
 		);
 
 		vec3<float64> Lcl_Scaling = FBX::resolveVec3Property<float64>(file, Properties70, "Lcl Scaling", {1.0, 1.0, 1.0});

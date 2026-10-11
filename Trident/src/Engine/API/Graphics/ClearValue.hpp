@@ -4,7 +4,6 @@
 #pragma once
 
 namespace Trident {
-	// TODO(graphics/clear-value): Restore union.
 	struct ClearValue {
 		/// The color image clear values to use when clearing a color image or attachment.
 		union {

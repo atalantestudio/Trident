@@ -319,14 +319,12 @@ namespace Trident {
 							const uint32 instanceIndex = materialGeometry.instanceRange.offset + instanceOffset;
 							const BuildTransform3D& transform = scene.staticGeometry.instances[instanceIndex].transform;
 							const quat<float32> orientation = normalized(
-								axisAngle<float32>(UP, transform.rotation[1]) *
-								axisAngle<float32>(RIGHT, transform.rotation[0]) *
-								axisAngle<float32>(FORWARD, transform.rotation[2])
+								rotationAxisAngle<quat<float32>>(UP, transform.rotation[1]) *
+								rotationAxisAngle<quat<float32>>(RIGHT, transform.rotation[0]) *
+								rotationAxisAngle<quat<float32>>(FORWARD, transform.rotation[2])
 							);
 							const mat4x4<float32> world = transpose(
-								// TODO(lyah/uniform-scaling)
-								scaling<mat4x4<float32>>(vec3<float32>(transform.scale)) *
-
+								uniformScaling<mat4x4<float32>>(transform.scale) *
 								mat4x4<float32>(orientation) *
 								translation<mat4x4<float32>>(transform.translation)
 							);

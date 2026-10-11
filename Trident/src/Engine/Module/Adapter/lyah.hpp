@@ -13,7 +13,6 @@ namespace Trident {
 	using lyah::quat;
 
 	using lyah::abs;
-	using lyah::axisAngle;
 	using lyah::ceil;
 	using lyah::ceilPowerOf2;
 	using lyah::clamp;
@@ -41,6 +40,7 @@ namespace Trident {
 	using lyah::tau;
 	using lyah::translation;
 	using lyah::transpose;
+	using lyah::uniformScaling;
 
 	typedef vec2<uint32> Extent2D;
 	typedef vec3<uint32> Extent3D;
@@ -71,7 +71,7 @@ namespace Trident {
 		return {a.y * (b_c.x - b_c.y), a.x * (b_c.y - b_c.x)};
 	}
 
-	// TODO(lyah): Add to Lyah as `cross` or `determinant`.
+	// TODO(lyah/cross-vec2-scalar): Add to Lyah as `cross` or `determinant`.
 	template<typename T>
 	inline vec2<T> crossVec2Scalar(vec2<T> a, T b) {
 		return {a.y * b, a.x * -b};
@@ -92,30 +92,6 @@ namespace Trident {
 			a.x * b[0].y + a.y * b[1].y + a.z * b[2].y + b[3].y,
 			a.x * b[0].z + a.y * b[1].z + a.z * b[2].z + b[3].z,
 		};
-	}
-
-	// TODO(lyah/scaled-area): Access the vertices using the indices provided by the geometry.
-	/// Returns the absolute area of a 2D polygon defined by a sequence of vertices.
-	/// See https://stackoverflow.com/a/717367/17136841.
-	template<typename T>
-	T scaledArea(view<vec2<T>> unclosedVertices, vec2<float32> scale) {
-		sequence<vec2<T>> closedVertices(unclosedVertices.count() + 2);
-		T area = static_cast<T>(0);
-
-		std::copy(unclosedVertices.begin(), unclosedVertices.end(), &closedVertices[0]);
-
-		closedVertices[unclosedVertices.count() + 0] = unclosedVertices[0];
-		closedVertices[unclosedVertices.count() + 1] = unclosedVertices[1];
-
-		uint32 vertexIndex = 1;
-
-		while (vertexIndex <= unclosedVertices.count()) {
-			area += closedVertices[vertexIndex][0] * scale[0] * (closedVertices[vertexIndex + 1][1] * scale[1] - closedVertices[vertexIndex - 1][1] * scale[1]);
-
-			vertexIndex += 1;
-		}
-
-		return abs(area) * static_cast<T>(0.5);
 	}
 
 	/// Calculates the signed distance between a point and an infinite line represented by two points.
@@ -225,7 +201,7 @@ namespace Trident {
 		const float32 angle = dot(previousDirection, direction);
 
 		if (abs(angle + 1.0f) < e) {
-			return axisAngle<float32>(up, pi<float32>());
+			return rotationAxisAngle<quat<float32>>(up, pi<float32>());
 		}
 
 		if (abs(angle - 1.0f) < e) {
@@ -240,7 +216,7 @@ namespace Trident {
 			rotationAxis = normalized(rotationAxis);
 		}
 
-		return axisAngle<float32>(rotationAxis, rotationAngle);
+		return rotationAxisAngle<quat<float32>>(rotationAxis, rotationAngle);
 	}
 
 	inline float32 fract(float32 a) {
