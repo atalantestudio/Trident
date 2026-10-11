@@ -9,7 +9,7 @@
 
 #include "Compute/PrefixSum.hpp"
 
-#include "Experimental/GI2D.hpp"
+#include "Experimental/GI2D/Renderer.hpp"
 
 #include "GUI/Article.hpp"
 #include "GUI/Card.hpp"

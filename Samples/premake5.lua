@@ -19,6 +19,7 @@ project "Samples"
 	}
 
 	includedirs {
+		"src",
 		VULKAN_SDK .. "/Include",
 		"../Trident/src",
 		"../Trident/vendor/API",

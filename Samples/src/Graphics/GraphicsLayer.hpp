@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Engine/API/Event/EventDispatcher.hpp"
 #include "Engine/API/Window/Layer/RenderPassLayer.hpp"
 
 #define DEFINE_SAMPLE_LAYER(name) \
