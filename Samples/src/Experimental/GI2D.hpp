@@ -8,11 +8,12 @@
 #include "../Graphics/GraphicsLayer.hpp"
 
 namespace Trident {
-	class TestGI2DSampleRenderer : public Renderer {
+	class GI2DExperimentalRenderer : public Renderer {
 		public:
 			void build() override {
 				pipelineLayout = createPipelineLayout();
-				pipeline = createPipeline();
+				vertexGenerationPipeline = createVertexGenerationPipeline();
+				globalIlluminationPipeline = createGlobalIlluminationPipeline();
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
@@ -22,7 +23,8 @@ namespace Trident {
 
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, extent);
-				commandEncoder->bindGraphicsPipeline(pipeline);
+
+				commandEncoder->bindGraphicsPipeline(globalIlluminationPipeline);
 				commandEncoder->draw(36, 1, 0, 0);
 			}
 
@@ -36,7 +38,26 @@ namespace Trident {
 				});
 			}
 
-			ref<GraphicsPipeline> createPipeline() const {
+			ref<ComputePipeline> createVertexGenerationPipeline() const {
+				return createComputePipeline({
+					.pipelineLayout = pipelineLayout,
+					.computeShaderModule = loadShaderModule(
+						{
+							.stage = ShaderStage::COMPUTE,
+							.entryPoint = "main",
+							#if defined(DEBUG_OBJECT_NAME)
+								.name = "Vertex generation compute",
+							#endif
+						},
+						"Experimental/GI2D/VertexGeneration.comp"
+					),
+					#if defined(DEBUG_OBJECT_NAME)
+						.name = "Vertex generation",
+					#endif
+				});
+			}
+
+			ref<GraphicsPipeline> createGlobalIlluminationPipeline() const {
 				const ColorBlendAttachment colorBlendAttachments[] = {
 					{
 						.blend = false,
@@ -51,20 +72,20 @@ namespace Trident {
 							.stage = ShaderStage::VERTEX,
 							.entryPoint = "main",
 							#if defined(DEBUG_OBJECT_NAME)
-								.name = "Test GI 2D vertex",
+								.name = "Global illumination vertex",
 							#endif
 						},
-						"Experimental/TestGI2D.vert"
+						"Experimental/GI2D/GlobalIllumination.vert"
 					),
 					.fragmentShaderModule = loadShaderModule(
 						{
 							.stage = ShaderStage::FRAGMENT,
 							.entryPoint = "main",
 							#if defined(DEBUG_OBJECT_NAME)
-								.name = "Test GI 2D fragment",
+								.name = "Global illumination fragment",
 							#endif
 						},
-						"Experimental/TestGI2D.frag"
+						"Experimental/GI2D/GlobalIllumination.frag"
 					),
 					.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
 					.polygonMode = PolygonMode::FILL,
@@ -82,15 +103,16 @@ namespace Trident {
 					.renderPass = pointer_cast<const RenderPassLayer*>(getLayer())->renderPass,
 					.subpassIndex = 0,
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Pipeline",
+						.name = "Global illumination",
 					#endif
 				});
 			}
 
 		private:
 			ref<PipelineLayout> pipelineLayout;
-			ref<GraphicsPipeline> pipeline;
+			ref<ComputePipeline> vertexGenerationPipeline;
+			ref<GraphicsPipeline> globalIlluminationPipeline;
 	};
 
-	DEFINE_SAMPLE_LAYER(TestGI2DSample);
+	DEFINE_SAMPLE_LAYER(GI2DExperimental);
 }
