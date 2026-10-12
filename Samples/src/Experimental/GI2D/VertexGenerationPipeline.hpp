@@ -8,7 +8,7 @@
 namespace Trident {
 	ref<ComputePipeline> GI2DExperimentalRenderer::createVertexGenerationPipeline() const {
 		return createComputePipeline({
-			.pipelineLayout = pipelineLayout,
+			.pipelineLayout = vertexGenerationPipelineLayout,
 			.computeShaderModule = loadShaderModule(
 				{
 					.stage = ShaderStage::COMPUTE,

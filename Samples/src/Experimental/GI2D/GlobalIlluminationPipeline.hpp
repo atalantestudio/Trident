@@ -7,6 +7,14 @@
 
 namespace Trident {
 	ref<GraphicsPipeline> GI2DExperimentalRenderer::createGlobalIlluminationPipeline() const {
+		VertexInputBinding vertexInputBindings[] = {
+			VertexInputBinding(InputRate::VERTEX),
+		};
+
+		vertexInputBindings[0].registerAttribute<decltype(Vertex::position)>();
+		vertexInputBindings[0].registerAttribute<decltype(Vertex::distanceA)>();
+		vertexInputBindings[0].registerAttribute<decltype(Vertex::distanceB)>();
+
 		const ColorBlendAttachment colorBlendAttachments[] = {
 			{
 				.blend = false,
@@ -14,8 +22,8 @@ namespace Trident {
 		};
 
 		return createGraphicsPipeline({
-			.pipelineLayout = pipelineLayout,
-			.vertexInputBindings = {},
+			.pipelineLayout = globalIlluminationPipelineLayout,
+			.vertexInputBindings = vertexInputBindings,
 			.vertexShaderModule = loadShaderModule(
 				{
 					.stage = ShaderStage::VERTEX,
@@ -49,7 +57,7 @@ namespace Trident {
 				.depthTest = false,
 			},
 			.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR,
-			.renderPass = pointer_cast<const RenderPassLayer*>(getLayer())->renderPass,
+			.renderPass = renderPass,
 			.subpassIndex = 0,
 			#if defined(DEBUG_OBJECT_NAME)
 				.name = "Global illumination",

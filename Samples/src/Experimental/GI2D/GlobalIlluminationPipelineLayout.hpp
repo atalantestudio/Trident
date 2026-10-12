@@ -6,11 +6,11 @@
 #include "Experimental/GI2D/Renderer.hpp"
 
 namespace Trident {
-	ref<PipelineLayout> GI2DExperimentalRenderer::createPipelineLayout() const {
+	ref<PipelineLayout> GI2DExperimentalRenderer::createGlobalIlluminationPipelineLayout() const {
 		return Renderer::createPipelineLayout({
-			.descriptorSetLayouts = {},
+			.descriptorSetLayouts = {descriptorSetLayouts[1]},
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Pipeline layout",
+				.name = "Global illumination",
 			#endif
 		});
 	}

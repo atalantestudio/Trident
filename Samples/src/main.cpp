@@ -88,7 +88,7 @@ namespace Trident {
 				ENGINE_ASSERT(false, "Unknown sample \"[]\" in group [].", SampleNameProperty, SampleGroupNameProperty);
 			}
 
-			registerLayerGroup<SampleLayerGroup>(range<uint32, uint32>(0, 1));
+			registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
 		}
 		else if (SampleGroupNameProperty == "GUI") {
 			if (SampleNameProperty == "Article") {
