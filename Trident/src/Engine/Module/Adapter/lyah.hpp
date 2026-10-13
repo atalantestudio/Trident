@@ -9,6 +9,7 @@ namespace Trident {
 	using lyah::vec4;
 	using lyah::mat2x2;
 	using lyah::mat3x3;
+	using lyah::mat4x3;
 	using lyah::mat4x4;
 	using lyah::quat;
 
@@ -45,20 +46,6 @@ namespace Trident {
 	typedef vec2<uint32> Extent2D;
 	typedef vec3<uint32> Extent3D;
 
-	// TODO(lyah/mat4x3)
-	template<typename T>
-	struct mat4x3 {
-		inline constexpr mat4x3(vec4<T> m0, vec4<T> m1, vec4<T> m2) :
-			m{
-				m0,
-				m1,
-				m2,
-			}
-		{}
-
-		vec4<T> m[3];
-	};
-
 	struct Plane2D {
 		vec2<float32> normal;
 		float32 offset;
@@ -71,7 +58,7 @@ namespace Trident {
 		return {a.y * (b_c.x - b_c.y), a.x * (b_c.y - b_c.x)};
 	}
 
-	// TODO(lyah/cross-vec2-scalar): Add to Lyah as `cross` or `determinant`.
+	// TODO(lyah/cross-vec2-scalar): Add to Lyah as `cross`, `determinant` or `crossLength`.
 	template<typename T>
 	inline vec2<T> crossVec2Scalar(vec2<T> a, T b) {
 		return {a.y * b, a.x * -b};

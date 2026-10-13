@@ -641,11 +641,11 @@ namespace Trident {
 			O[0],           O[1],           1.0f,
 		};
 
-		cameraMappedRange->projection = {
+		cameraMappedRange->projection = {{
 			{projection[0].x, projection[0].y, projection[0].z, 1.0f},
 			{projection[1].x, projection[1].y, projection[1].z, 1.0f},
 			{projection[2].x, projection[2].y, projection[2].z, 1.0f},
-		};
+		}};
 	}
 
 	void Physics2DRenderer::updateViewport() const {

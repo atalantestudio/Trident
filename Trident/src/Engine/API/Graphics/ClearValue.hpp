@@ -7,7 +7,7 @@ namespace Trident {
 	struct ClearValue {
 		/// The color image clear values to use when clearing a color image or attachment.
 		union {
-			// TODO(lyah/scalar): Use vectors instead.
+			// TODO(lyah/vector-union): Use vectors instead.
 			float32 color[4];
 			sint32 colorSigned[4];
 			uint32 colorUnsigned[4];

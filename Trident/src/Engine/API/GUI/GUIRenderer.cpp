@@ -654,10 +654,10 @@ namespace Trident {
 		// TODO(lyah/projection/orthographic-3x3)
 		const mat3x3<float32> projection = orthographicTopLeftOrigin(vec2<float32>(extent));
 
-		cameraMappedRange->projection = {
+		cameraMappedRange->projection = {{
 			{projection[0].x, projection[0].y, projection[0].z, 1.0f},
 			{projection[1].x, projection[1].y, projection[1].z, 1.0f},
 			{projection[2].x, projection[2].y, projection[2].z, 1.0f},
-		};
+		}};
 	}
 }

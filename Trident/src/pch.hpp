@@ -11,9 +11,6 @@
 #include <functional>
 #include <iostream>
 
-// TODO(lyah/include): Let Lyah import SIMD headers.
-#include <immintrin.h>
-
 // Used by the physics engine.
 #include <map>
 
