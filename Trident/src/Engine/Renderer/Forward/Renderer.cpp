@@ -143,7 +143,7 @@ namespace Trident {
 				while (materialIndex < materialShader.materialRange.count) {
 					const Material material = sceneAsset->materials[materialShader.materialRange.offset + materialIndex];
 
-					commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialShaderIndex], 2, materialDescriptorSets[materialShader.materialRange.offset + materialIndex]);
+					commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialShaderIndex], 1, materialDescriptorSets[materialShader.materialRange.offset + materialIndex]);
 
 					uint32 materialGeometryIndex = 0;
 

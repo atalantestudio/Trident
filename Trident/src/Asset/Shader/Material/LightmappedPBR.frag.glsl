@@ -53,7 +53,9 @@ layout(set = 2, binding = 0) uniform sampler2D armMap;
 layout(set = 2, binding = 1) uniform sampler2D diffuseMap;
 layout(set = 2, binding = 2) uniform sampler2D normalMap;
 
-#include "DirectionalShadowMap.glsl"
+#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+	#include "DirectionalShadowMap.glsl"
+#endif
 
 layout(location = 0) out vec4 fragment;
 
@@ -140,8 +142,12 @@ vec4 sampleBicubic(sampler2D textureSampler, vec2 coordinate) {
 }
 
 void main() {
-	uint cascadeIndex = findCascadeIndex(interstage.surface);
-	float inShadow = calculateShadow(interstage.surface, interstage.tbn[2], cascadeIndex);
+	#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+		uint cascadeIndex = findCascadeIndex(interstage.surface);
+		float inShadow = calculateShadow(interstage.surface, interstage.tbn[2], cascadeIndex);
+	#else
+		float inShadow = 1.0;
+	#endif
 
 	vec3 x = camera.position;
 	vec3 wo = normalize(camera.position - interstage.surface);
