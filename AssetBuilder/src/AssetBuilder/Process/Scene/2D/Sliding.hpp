@@ -17,7 +17,7 @@ namespace Trident {
 				static constexpr uint32 entityCount = 11;
 				static constexpr float32 frictions[] = {0.75f, 0.5f, 0.35f, 0.1f, 0.0f};
 
-				sequence<EntityComponentMapping<GeometryComponent>> geometryMappings(entityCount);
+				sequence<EntityComponentMapping<Geometry2DComponent>> geometryMappings(entityCount);
 
 				Entity entity = 0;
 

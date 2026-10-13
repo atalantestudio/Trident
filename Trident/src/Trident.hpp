@@ -22,7 +22,10 @@
 #include "Engine/API/Event/Window/WindowResizeEvent.hpp"
 
 // ECS
-#include "Engine/ECS/Component/GeometryComponent.hpp"
+#include "Engine/ECS/Component/Geometry2DComponent.hpp"
+#include "Engine/ECS/Component/Geometry3DComponent.hpp"
+#include "Engine/ECS/Component/RigidBody2DComponent.hpp"
+#include "Engine/ECS/Component/RigidBody3DComponent.hpp"
 #include "Engine/ECS/Component/ScriptComponent.hpp"
 #include "Engine/ECS/ECS.hpp"
 

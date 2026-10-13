@@ -286,13 +286,13 @@ namespace Trident {
 	}
 
 	void MapBuilder::buildEntityComponentMappings(BuildDynamicSceneGeometry3D& dynamicGeometry) {
-		dynamicGeometry.geometryMappings = sequence<EntityComponentMapping<GeometryComponent>>(geometryMappings.size());
+		dynamicGeometry.geometryMappings = sequence<EntityComponentMapping<Geometry3DComponent>>(geometryMappings.size());
 		dynamicGeometry.rigidBodyMappings = sequence<EntityComponentMapping<RigidBody3DComponent>>(rigidBodyMappings.size());
 
 		std::copy(geometryMappings.begin(), geometryMappings.end(), &dynamicGeometry.geometryMappings[0]);
 		std::copy(rigidBodyMappings.begin(), rigidBodyMappings.end(), &dynamicGeometry.rigidBodyMappings[0]);
 
-		for (EntityComponentMapping<GeometryComponent>& geometryMapping : dynamicGeometry.geometryMappings) {
+		for (EntityComponentMapping<Geometry3DComponent>& geometryMapping : dynamicGeometry.geometryMappings) {
 			geometryMapping.component.geometryIndex = geometries[geometryMapping.component.geometryIndex].filteredIndex;
 		}
 	}

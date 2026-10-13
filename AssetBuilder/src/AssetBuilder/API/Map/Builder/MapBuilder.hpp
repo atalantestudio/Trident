@@ -133,7 +133,7 @@ namespace Trident {
 
 			MapDescriptor descriptor;
 
-			std::vector<EntityComponentMapping<GeometryComponent>> geometryMappings;
+			std::vector<EntityComponentMapping<Geometry3DComponent>> geometryMappings;
 			std::vector<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;
 
 			std::vector<PointLight> pointLights;

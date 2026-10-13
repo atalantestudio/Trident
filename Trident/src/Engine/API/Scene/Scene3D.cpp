@@ -6,7 +6,7 @@
 #include "Engine/API/Axis.hpp"
 #include "Engine/API/Geometry/Index.hpp"
 #include "Engine/API/Scene/Scene3D.hpp"
-#include "Engine/ECS/Component/GeometryComponent.hpp"
+#include "Engine/ECS/Component/Geometry3DComponent.hpp"
 #include "Engine/ECS/Component/RigidBody3DComponent.hpp"
 
 namespace Trident {
@@ -24,14 +24,11 @@ namespace Trident {
 	}
 
 	void Scene3D::loadGeometries() {
-		hullEdges = sequence<Edge3D>(asset->hullEdgeCount);
-		hullFaces = sequence<Plane3D>(asset->hullFaceCount);
-		hullFaceEdgeIndices = sequence<uint16>(asset->hullFaceEdgeIndexCount);
 		rigidBodyFacePlanes = sequence<Plane3D>(asset->rigidBodyFacePlaneCount);
 	}
 
 	void Scene3D::loadEntityComponentMappings() {
-		ecs.registerComponentPool<GeometryComponent>();
+		ecs.registerComponentPool<Geometry3DComponent>();
 
 		// TODO(ecs/scene-components): Use Transform3DComponent for entities that are fixed in place?
 		ecs.registerComponentPool<RigidBody3DComponent>();
@@ -44,8 +41,8 @@ namespace Trident {
 			entity += 1;
 		}
 
-		for (const EntityComponentMapping<GeometryComponent> geometryMapping : asset->geometryMappings) {
-			ecs.setComponent<GeometryComponent>(geometryMapping.entity, geometryMapping.component);
+		for (const EntityComponentMapping<Geometry3DComponent>& geometryMapping : asset->geometryMappings) {
+			ecs.setComponent<Geometry3DComponent>(geometryMapping.entity, geometryMapping.component);
 		}
 
 		index rigidBodyFacePlaneOffset = 0;
@@ -55,14 +52,10 @@ namespace Trident {
 
 			RigidBody3DComponent& rigidBodyComponent = ecs.getComponent<RigidBody3DComponent>(rigidBodyMapping.entity);
 
-			const GeometryComponent geometryComponent = ecs.getComponent<GeometryComponent>(rigidBodyMapping.entity);
-			const uint32 hullIndex = asset->geometryIndexToHullIndex[geometryComponent.geometryIndex];
+			const Geometry3DComponent& geometryComponent = ecs.getComponent<Geometry3DComponent>(rigidBodyMapping.entity);
 
-			if (hullIndex != max<uint32>()) {
-				const Hull3D& hull = asset->hulls[hullIndex];
-
-				rigidBodyComponent.facePlanes = view<Plane3D>(&rigidBodyFacePlanes[rigidBodyFacePlaneOffset], hull.faces.count());
-
+			if (geometryComponent.hasHull) {
+				rigidBodyComponent.facePlanes = view<Plane3D>(&rigidBodyFacePlanes[rigidBodyFacePlaneOffset], geometryComponent.hull.faces.count());
 				rigidBodyFacePlaneOffset += rigidBodyComponent.facePlanes.count();
 			}
 
@@ -78,16 +71,15 @@ namespace Trident {
 
 		while (componentIndex < componentPool.componentCount) {
 			const Entity entity = componentPool.componentIndexToEntity[componentIndex];
-			const GeometryComponent geometryComponent = ecs.getComponent<GeometryComponent>(entity);
-			const uint32 hullIndex = asset->geometryIndexToHullIndex[geometryComponent.geometryIndex];
+			const Geometry3DComponent& geometryComponent = ecs.getComponent<Geometry3DComponent>(entity);
 
-			if (hullIndex == max<uint32>()) {
+			if (!geometryComponent.hasHull) {
 				componentIndex += 1;
 
 				continue;
 			}
 
-			const Hull3D& hull = asset->hulls[hullIndex];
+			const Hull3D& hull = geometryComponent.hull;
 			const mat4x4<float32>& world = componentPool.components[componentIndex].world;
 			const mat4x4<float32> transposeInverseWorld = transpose(inverse(world));
 

@@ -184,7 +184,7 @@ namespace Trident {
 
 		while (componentIndex >= 0) {
 			const Entity entity = rigidBodyComponentPool.componentIndexToEntity[componentIndex];
-			const GeometryComponent geometryComponent = scene->ecs.getComponent<GeometryComponent>(entity);
+			const Geometry2DComponent geometryComponent = scene->ecs.getComponent<Geometry2DComponent>(entity);
 			const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
 			const Hull2D& hull = scene->getHulls()[geometry.hullIndex];
 			const RigidBody2DComponent& rigidBodyComponent = scene->ecs.getComponent<RigidBody2DComponent>(entity);
@@ -267,7 +267,7 @@ namespace Trident {
 		}
 
 		if (event.getButton() == MouseButton::LEFT && selectedEntity != max<Entity>()) {
-			const GeometryComponent geometryComponent = scene->ecs.getComponent<GeometryComponent>(selectedEntity);
+			const Geometry2DComponent geometryComponent = scene->ecs.getComponent<Geometry2DComponent>(selectedEntity);
 			const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
 			const Hull2D& hull = scene->getHulls()[geometry.hullIndex];
 

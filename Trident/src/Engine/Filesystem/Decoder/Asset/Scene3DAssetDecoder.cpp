@@ -67,7 +67,7 @@ namespace Trident {
 		asset.materials = sequence<Material>(materialCount);
 		asset.entityCount = stream.read<uint32>();
 		asset.instances = sequence<Instance3D>(staticInstanceCount + asset.entityCount);
-		asset.geometryMappings = sequence<EntityComponentMapping<GeometryComponent>>(asset.entityCount);
+		asset.geometryMappings = sequence<EntityComponentMapping<Geometry3DComponent>>(asset.entityCount);
 		asset.rigidBodyMappings = sequence<EntityComponentMapping<RigidBody3DComponent>>(asset.entityCount);
 		asset.sunDirection = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
 		asset.sunColor = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
@@ -166,14 +166,6 @@ namespace Trident {
 
 			indexOffset += indexIndex;
 			vertexOffset += static_cast<uint32>(geometryAsset->vertices.count());
-
-			if (geometryAsset->flags & GeometryAssetFlags::HAS_HULL) {
-				asset.hullEdgeCount += static_cast<uint32>(geometryAsset->hullEdges.count());
-				asset.hullFaceCount += static_cast<uint32>(geometryAsset->hullFaces.count());
-				asset.hullFaceEdgeIndexCount += static_cast<uint16>(geometryAsset->hullFaceEdgeIndices.count());
-				asset.hullLineIndexCount += static_cast<uint32>(geometryAsset->hullLineIndices.count());
-			}
-
 			geometryIndex += 1;
 		}
 
@@ -207,19 +199,36 @@ namespace Trident {
 			pointLight.position = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
 		}
 
-		asset.geometryIndexToHullIndex = sequence<uint32>(asset.geometryIndexRanges.count());
-		asset.hulls = sequence<Hull3D>(asset.entityCount);
-
-		std::fill(asset.geometryIndexToHullIndex.begin(), asset.geometryIndexToHullIndex.end(), max<uint32>());
-
-		Entity entity = 0;
-
-		for (EntityComponentMapping<GeometryComponent>& geometryMapping : asset.geometryMappings) {
+		for (EntityComponentMapping<Geometry3DComponent>& geometryMapping : asset.geometryMappings) {
 			geometryMapping.entity = stream.read<Entity>();
-			geometryMapping.component = stream.read<GeometryComponent>();
 
-			entity += 1;
+			Geometry3DComponent& component = geometryMapping.component;
+			component.geometryIndex = stream.read<uint32>();
+
+			const ref<Geometry3DAsset> geometryAsset = asset.geometryAssets[component.geometryIndex];
+
+			component.hasHull = geometryAsset->flags & GeometryAssetFlags::HAS_HULL;
+
+			if (!component.hasHull) {
+				continue;
+			}
+
+			Hull3D& hull = component.hull;
+			hull.centroid = geometryAsset->hullCentroid;
+			hull.radius = geometryAsset->hullRadius;
+			hull.vertices = geometryAsset->hullVertices;
+			hull.edges = geometryAsset->hullEdges;
+			hull.faces = geometryAsset->hullFaces;
+			hull.faceEdgeIndices = geometryAsset->hullFaceEdgeIndices;
+
+			// TODO(physics/3d/hull/line-indices): Restore hull wireframe rendering.
+			hull.lineIndexRange.offset = 0;
+			hull.lineIndexRange.count = 0;
+
+			hull.type = geometryAsset->hullType;
 		}
+
+		asset.rigidBodyFacePlaneCount = 0;
 
 		for (EntityComponentMapping<RigidBody3DComponent>& rigidBodyMapping : asset.rigidBodyMappings) {
 			rigidBodyMapping.entity = stream.read<Entity>();
@@ -242,36 +251,10 @@ namespace Trident {
 			component.updateOrientation();
 			component.updateWorld({0.0_m, 0.0_m, 0.0_m});
 
-			for (const EntityComponentMapping<GeometryComponent>& geometryMapping : asset.geometryMappings) {
-				if (geometryMapping.entity != rigidBodyMapping.entity) {
-					continue;
-				}
+			const EntityComponentMapping<Geometry3DComponent>& geometryMapping = asset.geometryMappings[rigidBodyMapping.entity];
+			const ref<Geometry3DAsset> geometryAsset = asset.geometryAssets[geometryMapping.component.geometryIndex];
 
-				const ref<Geometry3DAsset> geometryAsset = asset.geometryAssets[geometryMapping.component.geometryIndex];
-
-				if (!(geometryAsset->flags & GeometryAssetFlags::HAS_HULL)) {
-					continue;
-				}
-
-				asset.geometryIndexToHullIndex[rigidBodyMapping.entity] = rigidBodyMapping.entity;
-				asset.rigidBodyFacePlaneCount += static_cast<uint32>(geometryAsset->hullFaces.count());
-
-				Hull3D& hull = asset.hulls[rigidBodyMapping.entity];
-				hull.centroid = geometryAsset->hullCentroid;
-				hull.radius = geometryAsset->hullRadius;
-				hull.vertices = geometryAsset->hullVertices;
-				hull.edges = geometryAsset->hullEdges;
-				hull.faces = geometryAsset->hullFaces;
-				hull.faceEdgeIndices = geometryAsset->hullFaceEdgeIndices;
-
-				// TODO(physics/hull/line-indices): Restore hull wireframe rendering.
-				hull.lineIndexRange.offset = 0;
-				hull.lineIndexRange.count = 0;
-
-				hull.type = geometryAsset->hullType;
-
-				break;
-			}
+			asset.rigidBodyFacePlaneCount += static_cast<uint32>(geometryAsset->hullFaces.count());
 
 			Instance3D& instance = asset.instances[instanceIndex + rigidBodyMapping.entity];
 			instance.worldTransform = component.world;

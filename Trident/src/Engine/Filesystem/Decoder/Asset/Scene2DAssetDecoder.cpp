@@ -34,7 +34,7 @@ namespace Trident {
 		const uint32 rigidBodyMappingCount = stream.read<uint32>();
 
 		asset.geometryAssets = sequence<ref<Geometry2DAsset>>(geometryAssetCount);
-		asset.geometryMappings = sequence<EntityComponentMapping<GeometryComponent>>(geometryMappingCount);
+		asset.geometryMappings = sequence<EntityComponentMapping<Geometry2DComponent>>(geometryMappingCount);
 		asset.rigidBodyMappings = sequence<EntityComponentMapping<RigidBody2DComponent>>(rigidBodyMappingCount);
 
 		for (StaticTriangle2D& triangle : asset.staticTriangles) {
@@ -71,9 +71,9 @@ namespace Trident {
 			}
 		}
 
-		for (EntityComponentMapping<GeometryComponent>& geometryMapping : asset.geometryMappings) {
+		for (EntityComponentMapping<Geometry2DComponent>& geometryMapping : asset.geometryMappings) {
 			geometryMapping.entity = stream.read<Entity>();
-			geometryMapping.component.geometryIndex = stream.read<uint32>();
+			geometryMapping.component = stream.read<Geometry2DComponent>();
 		}
 
 		for (EntityComponentMapping<RigidBody2DComponent>& rigidBodyMapping : asset.rigidBodyMappings) {

@@ -37,7 +37,7 @@ namespace Trident {
 
 		IntermediateMaterialGeometry& materialGeometry = material.geometries[materialGeometryIndex];
 
-		EntityComponentMapping<GeometryComponent> geometryMapping{};
+		EntityComponentMapping<Geometry3DComponent> geometryMapping{};
 		geometryMapping.entity = entityCount;
 		geometryMapping.component.geometryIndex = descriptor.geometryIndex;
 

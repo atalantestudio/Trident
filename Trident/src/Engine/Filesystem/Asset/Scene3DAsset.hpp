@@ -8,7 +8,7 @@
 #include "Engine/API/Light/PointLight.hpp"
 #include "Engine/API/Material/Material.hpp"
 #include "Engine/API/Material/MaterialShader.hpp"
-#include "Engine/ECS/Component/GeometryComponent.hpp"
+#include "Engine/ECS/Component/Geometry3DComponent.hpp"
 #include "Engine/ECS/Component/RigidBody3DComponent.hpp"
 #include "Engine/ECS/EntityComponentMapping.hpp"
 #include "Engine/Filesystem/Asset/Asset.hpp"
@@ -43,14 +43,8 @@ namespace Trident {
 		uint32 dynamicMaterialShaderOffset;
 		ref<ImageAsset> lightmapAtlasImageAsset;
 		uint32 entityCount;
-		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
+		sequence<EntityComponentMapping<Geometry3DComponent>> geometryMappings;
 		sequence<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;
-		sequence<uint32> geometryIndexToHullIndex;
-		sequence<Hull3D> hulls;
-		uint32 hullEdgeCount = 0;
-		uint32 hullFaceCount = 0;
-		uint16 hullFaceEdgeIndexCount = 0;
-		uint32 hullLineIndexCount = 0;
 		uint32 rigidBodyFacePlaneCount = 0;
 
 		vec3<float32> spawnPosition;

@@ -6,7 +6,7 @@
 #include "Engine/API/Physics/Constraint/Constraint2D.hpp"
 #include "Engine/API/Physics/Joint2D.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
-#include "Engine/ECS/Component/GeometryComponent.hpp"
+#include "Engine/ECS/Component/Geometry2DComponent.hpp"
 #include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 #include "Engine/ECS/Tag.hpp"
 
@@ -122,7 +122,7 @@ namespace Trident {
 	}
 
 	void Scene2D::loadEntityComponentMappings() {
-		ecs.registerComponentPool<GeometryComponent>();
+		ecs.registerComponentPool<Geometry2DComponent>();
 
 		// TODO(ecs/scene-components): Transform2DComponent for static meshes?
 		ecs.registerComponentPool<RigidBody2DComponent>();
@@ -140,14 +140,14 @@ namespace Trident {
 			entity += 1;
 		}
 
-		for (const EntityComponentMapping<GeometryComponent> geometryMapping : asset->geometryMappings) {
-			ecs.setComponent<GeometryComponent>(geometryMapping.entity, geometryMapping.component);
+		for (const EntityComponentMapping<Geometry2DComponent>& geometryMapping : asset->geometryMappings) {
+			ecs.setComponent<Geometry2DComponent>(geometryMapping.entity, geometryMapping.component);
 		}
 
 		for (const EntityComponentMapping<RigidBody2DComponent>& rigidBodyMapping : asset->rigidBodyMappings) {
 			ecs.setComponent<RigidBody2DComponent>(rigidBodyMapping.entity, rigidBodyMapping.component);
 
-			const GeometryComponent geometryComponent = ecs.getComponent<GeometryComponent>(rigidBodyMapping.entity);
+			const Geometry2DComponent geometryComponent = ecs.getComponent<Geometry2DComponent>(rigidBodyMapping.entity);
 			const Geometry2D& geometry = geometries[geometryComponent.geometryIndex];
 			const Hull2D& hull = hulls[geometry.hullIndex];
 

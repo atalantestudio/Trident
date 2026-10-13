@@ -5,7 +5,7 @@
 
 #include "Engine/API/Light/PointLight.hpp"
 #include "Engine/API/Material/Material.hpp"
-#include "Engine/ECS/Component/GeometryComponent.hpp"
+#include "Engine/ECS/Component/Geometry3DComponent.hpp"
 #include "Engine/ECS/Component/RigidBody3DComponent.hpp"
 #include "Engine/ECS/EntityComponentMapping.hpp"
 #include "Engine/Filesystem/Asset/ImageAsset.hpp"
@@ -94,7 +94,7 @@ namespace Trident {
 		uint32 materialShaderOffset;
 		sequence<PointLight> pointLights;
 		uint32 entityCount;
-		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
+		sequence<EntityComponentMapping<Geometry3DComponent>> geometryMappings;
 		sequence<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;
 	};
 

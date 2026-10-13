@@ -7,14 +7,14 @@
 #include "Engine/Build/ClusteredGeometry.hpp"
 #include "Engine/Build/ClusteredInstance.hpp"
 #include "Engine/Build/Clusterizer.hpp"
-#include "Engine/ECS/Component/GeometryComponent.hpp"
+#include "Engine/ECS/Component/Geometry3DComponent.hpp"
 #include "Engine/ECS/Component/MaterialComponent.hpp"
 #include "Engine/ECS/Component/RigidBody3DComponent.hpp"
 
 namespace Trident {
 	ClusteredScene clusterizeScene(const Scene3D* scene) {
 		// TODO(renderer/visibility/clusterizer): Either reimplement or deprecate.
-		/* const ComponentPool<GeometryComponent>& geometryComponentPool = scene->ecs.getComponentPool<GeometryComponent>();
+		/* const ComponentPool<Geometry3DComponent>& geometryComponentPool = scene->ecs.getComponentPool<Geometry3DComponent>();
 		const ComponentPool<MaterialComponent>& materialComponentPool = scene->ecs.getComponentPool<MaterialComponent>();
 		const ComponentPool<RigidBody3DComponent>& rigidBodyComponentPool = scene->ecs.getComponentPool<RigidBody3DComponent>();
 		const view<uint8> dataBuffer = scene->getDataBuffer(); */
@@ -48,7 +48,7 @@ namespace Trident {
 
 				while (rigidBodyComponentIndex < rigidBodyComponentPool.componentCount) {
 					const Entity entity = rigidBodyComponentPool.componentIndexToEntity[rigidBodyComponentIndex];
-					const GeometryComponent geometryComponent = geometryComponentPool.components[geometryComponentPool.entityToComponentIndex[entity]];
+					const Geometry3DComponent& geometryComponent = geometryComponentPool.components[geometryComponentPool.entityToComponentIndex[entity]];
 
 					if (geometryComponent.geometryIndex == geometryIndex) {
 						instanceCount += 1;
@@ -161,7 +161,7 @@ namespace Trident {
 		while (rigidBodyComponentIndex < rigidBodyComponentPool.componentCount) {
 			const Entity entity = rigidBodyComponentPool.componentIndexToEntity[rigidBodyComponentIndex];
 			const RigidBody3DComponent& rigidBodyComponent = rigidBodyComponentPool.components[rigidBodyComponentIndex];
-			const GeometryComponent geometryComponent = geometryComponentPool.components[geometryComponentPool.entityToComponentIndex[entity]];
+			const Geometry3DComponent& geometryComponent = geometryComponentPool.components[geometryComponentPool.entityToComponentIndex[entity]];
 			const MaterialComponent materialComponent = materialComponentPool.components[materialComponentPool.entityToComponentIndex[entity]];
 
 			const ClusteredGeometry& clusteredGeometry = clusteredScene.geometries[geometryComponent.geometryIndex];

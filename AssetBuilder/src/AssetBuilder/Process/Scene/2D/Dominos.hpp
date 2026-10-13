@@ -16,7 +16,7 @@ namespace Trident {
 			BuildScene2D createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				static constexpr uint32 entityCount = 15;
 
-				sequence<EntityComponentMapping<GeometryComponent>> geometryMappings(entityCount);
+				sequence<EntityComponentMapping<Geometry2DComponent>> geometryMappings(entityCount);
 
 				Entity entity = 0;
 

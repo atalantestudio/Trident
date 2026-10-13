@@ -135,9 +135,9 @@ namespace Trident {
 					stream.write<float32>(pointLight.position.z);
 				}
 
-				for (const EntityComponentMapping<GeometryComponent> geometryMapping : scene.dynamicGeometry.geometryMappings) {
+				for (const EntityComponentMapping<Geometry3DComponent>& geometryMapping : scene.dynamicGeometry.geometryMappings) {
 					stream.write<Entity>(geometryMapping.entity);
-					stream.write<GeometryComponent>(geometryMapping.component);
+					stream.write<uint32>(geometryMapping.component.geometryIndex);
 				}
 
 				for (const EntityComponentMapping<RigidBody3DComponent>& rigidBodyMapping : scene.dynamicGeometry.rigidBodyMappings) {
@@ -206,7 +206,7 @@ namespace Trident {
 					scene.materialGeometries.count() * sizeof(MaterialGeometry) +
 					scene.materials.count() * (sizeof(uint32) * 2) +
 					scene.dynamicGeometry.pointLights.count() * (sizeof(vec3<float32>) * 2 + sizeof(float32)) +
-					scene.dynamicGeometry.geometryMappings.count() * sizeof(EntityComponentMapping<GeometryComponent>) +
+					scene.dynamicGeometry.geometryMappings.count() * (sizeof(Entity) + sizeof(uint32)) +
 					scene.dynamicGeometry.rigidBodyMappings.count() * (sizeof(Entity) + sizeof(vec3<float32>) * 7 + sizeof(float32) * 4)
 				);
 

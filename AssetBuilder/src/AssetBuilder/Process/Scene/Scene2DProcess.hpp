@@ -48,9 +48,9 @@ namespace Trident {
 					stream.write<uint32>(geometryAssetIdentifier);
 				}
 
-				for (const EntityComponentMapping<GeometryComponent> geometryMapping : scene.dynamicGeometry.geometryMappings) {
+				for (const EntityComponentMapping<Geometry2DComponent>& geometryMapping : scene.dynamicGeometry.geometryMappings) {
 					stream.write<Entity>(geometryMapping.entity);
-					stream.write<GeometryComponent>(geometryMapping.component);
+					stream.write<uint32>(geometryMapping.component.geometryIndex);
 				}
 
 				for (const EntityComponentMapping<RigidBody2DComponent>& rigidBodyMapping : scene.dynamicGeometry.rigidBodyMappings) {
@@ -77,7 +77,7 @@ namespace Trident {
 					scene.staticGeometry.vertices.count() * sizeof(vec2<float32>) +
 					scene.staticGeometry.textureCoordinates.count() * sizeof(vec2<float32>) +
 					scene.dynamicGeometry.geometryAssetIdentifiers.count() * sizeof(uint32) +
-					scene.dynamicGeometry.geometryMappings.count() * sizeof(EntityComponentMapping<GeometryComponent>) +
+					scene.dynamicGeometry.geometryMappings.count() * (sizeof(Entity) + sizeof(uint32)) +
 					scene.dynamicGeometry.rigidBodyMappings.count() * (sizeof(Entity) + sizeof(vec2<float32>) * 3 + sizeof(float32) * 6)
 				);
 			}

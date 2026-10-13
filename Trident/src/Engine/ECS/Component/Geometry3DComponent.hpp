@@ -3,9 +3,14 @@
 
 #pragma once
 
+#include "Engine/API/Geometry/Hull3D.hpp"
+
 namespace Trident {
-	struct GeometryComponent {
+	struct Geometry3DComponent {
 		/// References a geometry in a contiguous buffer.
 		uint32 geometryIndex;
+
+		bool hasHull = false;
+		Hull3D hull;
 	};
 }

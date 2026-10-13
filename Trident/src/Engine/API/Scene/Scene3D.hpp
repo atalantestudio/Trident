@@ -101,9 +101,6 @@ namespace Trident {
 			uint64 hullLineIndexByteOffset;
 
 		public:
-			sequence<Edge3D> hullEdges;
-			sequence<Plane3D> hullFaces;
-			sequence<uint16> hullFaceEdgeIndices;
 			sequence<Plane3D> rigidBodyFacePlanes;
 
 		private:

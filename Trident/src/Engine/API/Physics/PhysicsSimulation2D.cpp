@@ -7,7 +7,7 @@
 #include "Engine/API/Physics/Constraint/Constraint2D.hpp"
 #include "Engine/API/Physics/Joint2D.hpp"
 #include "Engine/API/Physics/PhysicsSimulation2D.hpp"
-#include "Engine/ECS/Component/GeometryComponent.hpp"
+#include "Engine/ECS/Component/Geometry2DComponent.hpp"
 #include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 #include "Engine/ECS/Tag.hpp"
 
@@ -92,7 +92,7 @@ namespace Trident {
 	}
 
 	const Hull2D& PhysicsSimulation2D::getHull(Entity entity) const {
-		const GeometryComponent geometryComponent = scene->ecs.getComponent<GeometryComponent>(entity);
+		const Geometry2DComponent geometryComponent = scene->ecs.getComponent<Geometry2DComponent>(entity);
 		const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
 
 		ENGINE_ASSERT(geometry.hullIndex < scene->getHulls().count(), "The geometry doesn't have a hull.");

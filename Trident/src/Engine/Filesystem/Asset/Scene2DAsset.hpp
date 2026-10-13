@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Engine/API/Scene/StaticTriangle2D.hpp"
-#include "Engine/ECS/Component/GeometryComponent.hpp"
+#include "Engine/ECS/Component/Geometry2DComponent.hpp"
 #include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 #include "Engine/ECS/EntityComponentMapping.hpp"
 #include "Engine/Filesystem/Asset/Asset.hpp"
@@ -26,7 +26,7 @@ namespace Trident {
 		uint64 dynamicVertexTextureCoordinateIndexCount;
 		uint32 entityCount;
 		uint32 hullCount;
-		sequence<EntityComponentMapping<GeometryComponent>> geometryMappings;
+		sequence<EntityComponentMapping<Geometry2DComponent>> geometryMappings;
 		sequence<EntityComponentMapping<RigidBody2DComponent>> rigidBodyMappings;
 	};
 }

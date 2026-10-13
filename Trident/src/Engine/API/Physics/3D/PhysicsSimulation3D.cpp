@@ -68,14 +68,11 @@ namespace Trident {
 			const RigidBody3DComponent& rigidBodyA = scene->ecs.getComponent<RigidBody3DComponent>(entityPair.A);
 			const RigidBody3DComponent& rigidBodyB = scene->ecs.getComponent<RigidBody3DComponent>(entityPair.B);
 
-			const GeometryComponent geometryComponentA = scene->ecs.getComponent<GeometryComponent>(entityPair.A);
-			const GeometryComponent geometryComponentB = scene->ecs.getComponent<GeometryComponent>(entityPair.B);
+			const Geometry3DComponent& geometryComponentA = scene->ecs.getComponent<Geometry3DComponent>(entityPair.A);
+			const Geometry3DComponent& geometryComponentB = scene->ecs.getComponent<Geometry3DComponent>(entityPair.B);
 
-			const uint32 hullIndexA = asset->geometryIndexToHullIndex[geometryComponentA.geometryIndex];
-			const uint32 hullIndexB = asset->geometryIndexToHullIndex[geometryComponentB.geometryIndex];
-
-			const Hull3D& hullA = asset->hulls[hullIndexA];
-			const Hull3D& hullB = asset->hulls[hullIndexB];
+			const Hull3D& hullA = geometryComponentA.hull;
+			const Hull3D& hullB = geometryComponentB.hull;
 
 			Hull3DType typeA = hullA.type;
 			Hull3DType typeB = hullB.type;
@@ -141,14 +138,11 @@ namespace Trident {
 		for (std::pair<const EntityPair, ContactPair3D>& pair : contactPairs) {
 			ContactPair3D& contactPair = pair.second;
 
-			const GeometryComponent geometryComponentA = scene->ecs.getComponent<GeometryComponent>(contactPair.A);
-			const GeometryComponent geometryComponentB = scene->ecs.getComponent<GeometryComponent>(contactPair.B);
+			const Geometry3DComponent& geometryComponentA = scene->ecs.getComponent<Geometry3DComponent>(contactPair.A);
+			const Geometry3DComponent& geometryComponentB = scene->ecs.getComponent<Geometry3DComponent>(contactPair.B);
 
-			const uint32 hullIndexA = asset->geometryIndexToHullIndex[geometryComponentA.geometryIndex];
-			const uint32 hullIndexB = asset->geometryIndexToHullIndex[geometryComponentB.geometryIndex];
-
-			const Hull3D& hullA = asset->hulls[hullIndexA];
-			const Hull3D& hullB = asset->hulls[hullIndexB];
+			const Hull3D& hullA = geometryComponentA.hull;
+			const Hull3D& hullB = geometryComponentB.hull;
 
 			RigidBody3DComponent& rigidBodyA = scene->ecs.getComponent<RigidBody3DComponent>(contactPair.A);
 			RigidBody3DComponent& rigidBodyB = scene->ecs.getComponent<RigidBody3DComponent>(contactPair.B);
@@ -349,14 +343,12 @@ namespace Trident {
 			}
 
 			const Entity entity = rigidBodyComponentPool.componentIndexToEntity[componentIndex];
-			const GeometryComponent geometryComponent = scene->ecs.getComponent<GeometryComponent>(entity);
-			const uint32 hullIndex = asset->geometryIndexToHullIndex[geometryComponent.geometryIndex];
-			const Hull3D& hull = asset->hulls[hullIndex];
+			const Geometry3DComponent& geometryComponent = scene->ecs.getComponent<Geometry3DComponent>(entity);
 
 			rigidBodyComponent.position += rigidBodyComponent.linearVelocity * deltaTime;
 			rigidBodyComponent.rotation += rigidBodyComponent.angularVelocity * deltaTime;
 			rigidBodyComponent.updateOrientation();
-			rigidBodyComponent.updateWorld(hull.centroid);
+			rigidBodyComponent.updateWorld(geometryComponent.hull.centroid);
 			rigidBodyComponent.force = {0.0_N, 0.0_N, 0.0_N};
 
 			componentIndex += 1;
