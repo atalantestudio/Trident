@@ -206,8 +206,4 @@ namespace Trident {
 
 		return rotationAxisAngle<quat<float32>>(rotationAxis, rotationAngle);
 	}
-
-	inline float32 fract(float32 a) {
-		return a - static_cast<sint32>(a);
-	}
 }

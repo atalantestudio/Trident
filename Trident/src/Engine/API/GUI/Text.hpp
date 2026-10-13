@@ -240,7 +240,9 @@ namespace Trident {
 
 		float32 baseline = characterOffset.y + data.fontAsset->ascent * scale;
 
-		if (fract(baseline) > 0.5f) {
+		const float32 baselineFraction = baseline - static_cast<sint32>(baseline);
+
+		if (baselineFraction > 0.5f) {
 			baseline = floor(baseline);
 		}
 
