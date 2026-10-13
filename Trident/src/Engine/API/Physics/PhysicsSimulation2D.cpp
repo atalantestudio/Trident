@@ -13,7 +13,7 @@
 
 namespace Trident {
 	inline vec2<float32> calculateRelativeVelocity(const RigidBody2DComponent& A, const RigidBody2DComponent& B, vec2<float32> rA, vec2<float32> rB) {
-		return B.linearVelocity + crossVec2Scalar(rB, B.angularVelocity) - A.linearVelocity - crossVec2Scalar(rA, A.angularVelocity);
+		return B.linearVelocity + crossLength(rB, B.angularVelocity) - A.linearVelocity - crossLength(rA, A.angularVelocity);
 	}
 
 	void PhysicsSimulation2D::mergeContactManifolds(ContactPair2D& contactPair, const ContactManifold2D& newContactManifold) {

@@ -51,16 +51,17 @@ namespace Trident {
 		float32 offset;
 	};
 
+	// TODO(lyah/vec2/cross-operations): Add to Lyah as `triple`.
 	template<typename T>
-	inline vec2<T> cross2d(vec2<T> a, vec2<T> b, vec2<T> c) {
+	inline vec2<T> triple(vec2<T> a, vec2<T> b, vec2<T> c) {
 		const vec2<T> b_c = {b.x * c.y, b.y * c.x};
 
 		return {a.y * (b_c.x - b_c.y), a.x * (b_c.y - b_c.x)};
 	}
 
-	// TODO(lyah/cross-vec2-scalar): Add to Lyah as `cross`, `determinant` or `crossLength`.
+	// TODO(lyah/vec2/cross-operations): Add to Lyah as `crossLength`.
 	template<typename T>
-	inline vec2<T> crossVec2Scalar(vec2<T> a, T b) {
+	inline vec2<T> crossLength(vec2<T> a, T b) {
 		return {a.y * b, a.x * -b};
 	}
 

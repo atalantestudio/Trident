@@ -20,7 +20,7 @@ namespace Trident {
 		const vec2<float32> ab = b - a;
 		const vec2<float32> ao = -a;
 
-		d = cross2d(ab, ao, ab);
+		d = triple(ab, ao, ab);
 	}
 
 	static bool handleSimplex2(sim2<float32>& s, vec2<float32>& d) {
@@ -30,8 +30,8 @@ namespace Trident {
 		const vec2<float32> ab = b - a;
 		const vec2<float32> ac = c - a;
 		const vec2<float32> ao = -a;
-		const vec2<float32> abPerp = cross2d(ac, ab, ab);
-		const vec2<float32> acPerp = cross2d(ab, ac, ac);
+		const vec2<float32> abPerp = triple(ac, ab, ab);
+		const vec2<float32> acPerp = triple(ab, ac, ac);
 
 		if (dot(ao, abPerp) > 0.0f) {
 			s = {a, b};
