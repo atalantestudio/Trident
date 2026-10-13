@@ -20,17 +20,6 @@ workspace "Trident"
 		system "windows"
 		systemversion "latest"
 
-		links {
-			"d3d12",
-			"dxgi",
-
-			-- TODO(graphics/dx12/report-live-objects): Don't include when DEBUG_DX12_REPORT_LIVE_OBJECTS is not defined.
-			"dxguid",
-
-			"Gdi32",
-			"User32",
-		}
-
 	filter "toolset:clang or toolset:gcc"
 		buildoptions {
 			-- "-Wextra",
@@ -51,6 +40,12 @@ workspace "Trident"
 				"-Wno-missing-field-initializers",
 				"-Wno-init-list-lifetime",
 			}
+
+	filter "configurations:Debug"
+		links {
+			-- TODO(graphics/dx12/report-live-objects): Don't include when DEBUG_DX12_REPORT_LIVE_OBJECTS is not defined.
+			"dxguid",
+		}
 
 include "Trident"
 include "AssetBuilder"

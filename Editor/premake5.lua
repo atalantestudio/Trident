@@ -37,6 +37,14 @@ project "Editor"
 		"PROJECT_NAME=\"%{prj.name}\"",
 	}
 
+	filter "system:windows"
+		links {
+			"d3d12",
+			"dxgi",
+			"Gdi32",
+			"User32",
+		}
+
 	filter "toolset:msc-v142 or toolset:msc-v143 or toolset:msc-v145"
 		postbuildcommands {
 			-- If a .tpr file exists, use it as the default configuration file.

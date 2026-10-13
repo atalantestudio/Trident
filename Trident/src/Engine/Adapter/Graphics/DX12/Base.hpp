@@ -4,7 +4,7 @@
 #pragma once
 
 #include <d3d12.h>
-#include <dxgi1_6.h>
+#include <dxgi1_4.h>
 
 #if defined(DEBUG_DX12_REPORT_LIVE_OBJECTS)
 	#include <dxgidebug.h>
