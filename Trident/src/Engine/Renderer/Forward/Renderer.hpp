@@ -10,6 +10,7 @@
 
 namespace Trident {
 	#define FORWARD_SAMPLE_COUNT 4
+	// #define FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP
 
 	struct ForwardCamera {
 		mat4x4<float32> projectionView;
@@ -25,45 +26,61 @@ namespace Trident {
 
 	class ForwardRenderer : public BaseSceneRenderer<ForwardCamera> {
 		private:
-			static inline const vec4<float32> FRUSTUM_VERTICES[8] = {
-				{-1.0f, -1.0f, -1.0f,  1.0f},
-				{-1.0f, -1.0f,  1.0f,  1.0f},
-				{-1.0f,  1.0f, -1.0f,  1.0f},
-				{-1.0f,  1.0f,  1.0f,  1.0f},
-				{ 1.0f, -1.0f, -1.0f,  1.0f},
-				{ 1.0f, -1.0f,  1.0f,  1.0f},
-				{ 1.0f,  1.0f, -1.0f,  1.0f},
-				{ 1.0f,  1.0f,  1.0f,  1.0f},
-			};
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				static inline const vec4<float32> FRUSTUM_VERTICES[8] = {
+					{-1.0f, -1.0f, -1.0f,  1.0f},
+					{-1.0f, -1.0f,  1.0f,  1.0f},
+					{-1.0f,  1.0f, -1.0f,  1.0f},
+					{-1.0f,  1.0f,  1.0f,  1.0f},
+					{ 1.0f, -1.0f, -1.0f,  1.0f},
+					{ 1.0f, -1.0f,  1.0f,  1.0f},
+					{ 1.0f,  1.0f, -1.0f,  1.0f},
+					{ 1.0f,  1.0f,  1.0f,  1.0f},
+				};
+			#endif
 
 		public:
-			static constexpr Extent2D DIRECTIONAL_SHADOW_MAP_EXTENT = {4096, 4096};
-			static constexpr uint32 DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT = 3;
-			static constexpr float32 DIRECTIONAL_SHADOW_MAP_CASCADE_FAR_PLANES[DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT] = {0.2f, 0.5f, 1.0f};
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				static constexpr Extent2D DIRECTIONAL_SHADOW_MAP_EXTENT = {4096, 4096};
+				static constexpr uint32 DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT = 3;
+				static constexpr float32 DIRECTIONAL_SHADOW_MAP_CASCADE_FAR_PLANES[DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT] = {0.2f, 0.5f, 1.0f};
+			#endif
 
 			static constexpr index DEBUG_MAX_CONTACTS = 16;
 
 		private:
-			struct DirectionalLight {
-				mat4x4<float32> projectionViews[DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT];
-			};
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				struct DirectionalLight {
+					mat4x4<float32> projectionViews[DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT];
+				};
+			#endif
 
 		public:
 			void postBuild() override {
 				renderPass = createRenderPass();
-				directionalShadowMapRenderPass = createDirectionalShadowMapRenderPass();
+
+				#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+					directionalShadowMapRenderPass = createDirectionalShadowMapRenderPass();
+				#endif
+
 				skyboxDescriptorSetLayout = createSkyboxDescriptorSetLayout();
 				sceneDescriptorSetLayout = createSceneDescriptorSetLayout();
 				lightmapAtlasDescriptorSetLayout = createLightmapAtlasDescriptorSetLayout();
-				directionalShadowMapDescriptorSetLayout = createDirectionalShadowMapDescriptorSetLayout();
+
+				#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+					directionalShadowMapDescriptorSetLayout = createDirectionalShadowMapDescriptorSetLayout();
+				#endif
 
 				const ref<DescriptorSetLayout> descriptorSetLayouts[] = {
 					skyboxDescriptorSetLayout,
 					sceneDescriptorSetLayout,
 					lightmapAtlasDescriptorSetLayout,
-					directionalShadowMapDescriptorSetLayout,
-					directionalShadowMapDescriptorSetLayout,
-					directionalShadowMapDescriptorSetLayout,
+
+					#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+						directionalShadowMapDescriptorSetLayout,
+						directionalShadowMapDescriptorSetLayout,
+						directionalShadowMapDescriptorSetLayout,
+					#endif
 				};
 
 				// TODO(base/ref): The ownership doesn't change if the sequence is constant (no operator= are called).
@@ -72,26 +89,31 @@ namespace Trident {
 				skyboxDescriptorSet = descriptorSets[0];
 				sceneDescriptorSet = descriptorSets[1];
 				lightmapAtlasDescriptorSet = descriptorSets[2];
-				directionalShadowMapCascadeDescriptorSets[0] = descriptorSets[3];
-				directionalShadowMapCascadeDescriptorSets[1] = descriptorSets[4];
-				directionalShadowMapCascadeDescriptorSets[2] = descriptorSets[5];
+
+				#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+					directionalShadowMapCascadeDescriptorSets[0] = descriptorSets[3];
+					directionalShadowMapCascadeDescriptorSets[1] = descriptorSets[4];
+					directionalShadowMapCascadeDescriptorSets[2] = descriptorSets[5];
+				#endif
 
 				skyboxPipelineLayout = createSkyboxPipelineLayout();
 				skyboxPipeline = createSkyboxPipeline();
 
-				directionalShadowMapPipelineLayout = createDirectionalShadowMapPipelineLayout();
-				directionalShadowMapPipeline = createDirectionalShadowMapPipeline();
-				directionalLightBuffer = createDirectionalLightBuffer();
-				directionalShadowMapImage = createDirectionalShadowMapImage();
-				directionalShadowMapImageView = createDirectionalShadowMapImageView();
+				#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+					directionalShadowMapPipelineLayout = createDirectionalShadowMapPipelineLayout();
+					directionalShadowMapPipeline = createDirectionalShadowMapPipeline();
+					directionalLightBuffer = createDirectionalLightBuffer();
+					directionalShadowMapImage = createDirectionalShadowMapImage();
+					directionalShadowMapImageView = createDirectionalShadowMapImageView();
 
-				uint32 cascadeIndex = 0;
+					uint32 cascadeIndex = 0;
 
-				while (cascadeIndex < DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT) {
-					directionalShadowMapCascadeImageViews[cascadeIndex] = createDirectionalShadowMapCascadeImageView(cascadeIndex);
+					while (cascadeIndex < DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT) {
+						directionalShadowMapCascadeImageViews[cascadeIndex] = createDirectionalShadowMapCascadeImageView(cascadeIndex);
 
-					cascadeIndex += 1;
-				}
+						cascadeIndex += 1;
+					}
+				#endif
 
 				// TODO(renderer/forward): Restore debug visualization modes.
 				/* debugHullWireframePipelineLayout = createDebugHullWireframePipelineLayout();
@@ -106,16 +128,21 @@ namespace Trident {
 
 				debugContactRange = debugContactManifoldView->map(); */
 
+				defaultSampler = createDefaultSampler();
 				lightmapAtlasSampler = createLightmapAtlasSampler();
 				materialSampler = createMaterialSampler();
-				directionalShadowMapSampler = createDirectionalShadowMapSampler();
 
 				createFrameObjects();
-				createDirectionalShadowMapFramebuffers();
 
-				const BufferView<DirectionalLight> directionalLightView = directionalLightBuffer->createView<DirectionalLight>(0, sizeof(DirectionalLight));
+				#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+					createDirectionalShadowMapFramebuffers();
+				#endif
 
-				directionalLightMappedRange = directionalLightView.map();
+				#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+					const BufferView<DirectionalLight> directionalLightView = directionalLightBuffer->createView<DirectionalLight>(0, sizeof(DirectionalLight));
+
+					directionalLightMappedRange = directionalLightView.map();
+				#endif
 			}
 
 			void encodeSceneOneTimeCommands() override {
@@ -376,25 +403,40 @@ namespace Trident {
 
 		private:
 			ref<RenderPass> createRenderPass() const;
-			ref<RenderPass> createDirectionalShadowMapRenderPass() const;
+
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				ref<RenderPass> createDirectionalShadowMapRenderPass() const;
+			#endif
 
 			void createFramebuffers();
-			void createDirectionalShadowMapFramebuffers();
+
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				void createDirectionalShadowMapFramebuffers();
+			#endif
 
 			ref<DescriptorSetLayout> createSkyboxDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createSceneDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createLightmapAtlasDescriptorSetLayout() const;
-			ref<DescriptorSetLayout> createDirectionalShadowMapDescriptorSetLayout() const;
+
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				ref<DescriptorSetLayout> createDirectionalShadowMapDescriptorSetLayout() const;
+			#endif
 
 			ref<PipelineLayout> createSkyboxPipelineLayout() const;
 			ref<PipelineLayout> createDebugHullWireframePipelineLayout() const;
 			ref<PipelineLayout> createDebugContactManifoldPipelineLayout() const;
-			ref<PipelineLayout> createDirectionalShadowMapPipelineLayout() const;
+
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				ref<PipelineLayout> createDirectionalShadowMapPipelineLayout() const;
+			#endif
 
 			ref<GraphicsPipeline> createSkyboxPipeline() const;
 			ref<GraphicsPipeline> createDebugHullWireframePipeline() const;
 			ref<GraphicsPipeline> createDebugContactManifoldPipeline() const;
-			ref<GraphicsPipeline> createDirectionalShadowMapPipeline() const;
+
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				ref<GraphicsPipeline> createDirectionalShadowMapPipeline() const;
+			#endif
 
 			#if FORWARD_SAMPLE_COUNT > 1
 				ref<Image> createColorImage() const;
@@ -403,7 +445,10 @@ namespace Trident {
 			ref<Image> createSkyboxImage(ref<ImageAsset> imageAsset) const;
 			ref<Image> createDepthStencilImage() const;
 			ref<Image> createLightmapAtlasImage(ref<ImageAsset> imageAsset) const;
-			ref<Image> createDirectionalShadowMapImage() const;
+
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				ref<Image> createDirectionalShadowMapImage() const;
+			#endif
 
 			#if FORWARD_SAMPLE_COUNT > 1
 				ref<ImageView> createColorImageView() const;
@@ -412,21 +457,28 @@ namespace Trident {
 			ref<ImageView> createSkyboxImageView() const;
 			ref<ImageView> createDepthStencilImageView() const;
 			ref<ImageView> createLightmapAtlasImageView() const;
-			ref<ImageView> createDirectionalShadowMapImageView() const;
-			ref<ImageView> createDirectionalShadowMapCascadeImageView(uint32 layerOffset) const;
+
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				ref<ImageView> createDirectionalShadowMapImageView() const;
+				ref<ImageView> createDirectionalShadowMapCascadeImageView(uint32 layerOffset) const;
+			#endif
 
 			ref<Buffer> createVertexBuffer() const;
 			ref<Buffer> createIndexBuffer() const;
 			ref<Buffer> createLightmapCoordinateBuffer() const;
 			ref<Buffer> createInstanceBuffer() const;
 			ref<Buffer> createPointLightBuffer() const;
-			ref<Buffer> createDirectionalLightBuffer() const;
+
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				ref<Buffer> createDirectionalLightBuffer() const;
+			#endif
+
 			ref<Buffer> createDebugHullWireframeBuffer(uint64 size) const;
 			ref<Buffer> createDebugContactManifoldBuffer() const;
 
+			ref<Sampler> createDefaultSampler() const;
 			ref<Sampler> createMaterialSampler() const;
 			ref<Sampler> createLightmapAtlasSampler() const;
-			ref<Sampler> createDirectionalShadowMapSampler() const;
 
 			GraphicsPipelineDescriptor getStaticPipelineDescriptor(VertexInputBinding* vertexInputBindings) const;
 			GraphicsPipelineDescriptor getDynamicPipelineDescriptor(VertexInputBinding* vertexInputBindings) const;
@@ -447,43 +499,68 @@ namespace Trident {
 
 			void createMaterials();
 
-			void initializeLightProjectionViews() const;
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				void initializeLightProjectionViews() const;
+			#endif
 
-			void encodeDirectionalShadowMapPass(ref<CommandEncoder> commandEncoder) const;
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				void encodeDirectionalShadowMapPass(ref<CommandEncoder> commandEncoder) const;
+			#endif
+
 			void encodeSkyboxPass(ref<CommandEncoder> commandEncoder) const;
 
-			/// Calculates world-space frustum vertices for the shadow map cascades.
-			void calculateFrustum(vec4<float32>* vertices, const mat4x4<float32>& inverseProjectionView) const;
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				/// Calculates world-space frustum vertices for the shadow map cascades.
+				void calculateFrustum(vec4<float32>* vertices, const mat4x4<float32>& inverseProjectionView) const;
+			#endif
 
 		private:
 			ref<RenderPass> renderPass;
-			ref<RenderPass> directionalShadowMapRenderPass;
+
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				ref<RenderPass> directionalShadowMapRenderPass;
+			#endif
 
 			sequence<ref<Framebuffer>> framebuffers;
-			sequence<ref<Framebuffer>> directionalShadowMapFramebuffers;
+
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				sequence<ref<Framebuffer>> directionalShadowMapFramebuffers;
+			#endif
 
 			ref<DescriptorSetLayout> skyboxDescriptorSetLayout;
 			ref<DescriptorSetLayout> sceneDescriptorSetLayout;
 			ref<DescriptorSetLayout> lightmapAtlasDescriptorSetLayout;
-			ref<DescriptorSetLayout> directionalShadowMapDescriptorSetLayout;
+
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				ref<DescriptorSetLayout> directionalShadowMapDescriptorSetLayout;
+			#endif
 
 			ref<DescriptorSet> skyboxDescriptorSet;
 			ref<DescriptorSet> sceneDescriptorSet;
 			ref<DescriptorSet> lightmapAtlasDescriptorSet;
 			sequence<ref<DescriptorSet>> materialDescriptorSets;
-			ref<DescriptorSet> directionalShadowMapCascadeDescriptorSets[DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT];
+
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				ref<DescriptorSet> directionalShadowMapCascadeDescriptorSets[DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT];
+			#endif
 
 			ref<PipelineLayout> skyboxPipelineLayout;
 			sequence<ref<PipelineLayout>> materialPipelineLayouts;
 			ref<PipelineLayout> debugHullWireframePipelineLayout;
 			ref<PipelineLayout> debugContactManifoldPipelineLayout;
-			ref<PipelineLayout> directionalShadowMapPipelineLayout;
+
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				ref<PipelineLayout> directionalShadowMapPipelineLayout;
+			#endif
 
 			ref<GraphicsPipeline> skyboxPipeline;
 			sequence<ref<GraphicsPipeline>> materialPipelines;
 			ref<GraphicsPipeline> debugHullWireframePipeline;
 			ref<GraphicsPipeline> debugContactManifoldPipeline;
-			ref<GraphicsPipeline> directionalShadowMapPipeline;
+
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				ref<GraphicsPipeline> directionalShadowMapPipeline;
+			#endif
 
 			/// Contains vertices for static and dynamic geometry.
 			ref<Buffer> vertexBuffer;
@@ -498,7 +575,11 @@ namespace Trident {
 			ref<Buffer> instanceBuffer;
 
 			ref<Buffer> pointLightBuffer;
-			ref<Buffer> directionalLightBuffer;
+
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				ref<Buffer> directionalLightBuffer;
+			#endif
+
 			ref<Buffer> debugHullWireframeBuffer;
 			ref<Buffer> debugContactManifoldBuffer;
 
@@ -510,7 +591,10 @@ namespace Trident {
 			ref<Image> depthStencilImage;
 			ref<Image> lightmapAtlasImage;
 			sequence<ref<Image>> materialImages;
-			ref<Image> directionalShadowMapImage;
+
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				ref<Image> directionalShadowMapImage;
+			#endif
 
 			#if FORWARD_SAMPLE_COUNT > 1
 				ref<ImageView> colorImageView;
@@ -520,20 +604,25 @@ namespace Trident {
 			ref<ImageView> depthStencilImageView;
 			ref<ImageView> lightmapAtlasImageView;
 			sequence<ref<ImageView>> materialImageViews;
-			ref<ImageView> directionalShadowMapImageView;
-			ref<ImageView> directionalShadowMapCascadeImageViews[DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT];
 
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				ref<ImageView> directionalShadowMapImageView;
+				ref<ImageView> directionalShadowMapCascadeImageViews[DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT];
+			#endif
+
+			ref<Sampler> defaultSampler;
 			ref<Sampler> lightmapAtlasSampler;
 			ref<Sampler> materialSampler;
-			ref<Sampler> directionalShadowMapSampler;
 
-			DirectionalLight* directionalLightMappedRange = nullptr;
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				DirectionalLight* directionalLightMappedRange = nullptr;
+			#endif
+
 			Instance3D* instanceMappedRange = nullptr;
 
 		public:
 			vec3<float32>* debugContactRange = nullptr;
 			uint32 contactCount = 0;
-
 			VisualizationMode visualizationMode;
 	};
 }

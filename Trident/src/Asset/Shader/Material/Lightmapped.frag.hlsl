@@ -10,9 +10,11 @@ struct Camera {
 	float3 sunColor;
 };
 
-struct DirectionalLight {
-	float4x4 projectionViews[3];
-};
+#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+	struct DirectionalLight {
+		float4x4 projectionViews[3];
+	};
+#endif
 
 struct Interstage {
 	float4 position : SV_Position;
@@ -27,12 +29,16 @@ cbuffer Camera : register(b0) {
 	Camera camera;
 }
 
-cbuffer DirectionalLight : register(b1) {
-	DirectionalLight directionalLight;
-}
+#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+	cbuffer DirectionalLight : register(b2) {
+		DirectionalLight directionalLight;
+	}
+#endif
 
-Texture2D<float> directionalShadowMapTexture : register(t1);
-SamplerState directionalShadowMapSamplerState : register(s0);
+#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+	Texture2D<float> directionalShadowMapTexture : register(t1);
+	SamplerState directionalShadowMapSamplerState : register(s0);
+#endif
 
 Texture2D<float4> lightmapAtlasTexture : register(t2);
 SamplerState lightmapAtlasSamplerState : register(s1);
@@ -45,29 +51,35 @@ SamplerState normalSamplerState : register(s3);
 
 static const float3 SUN_DIRECTION = normalize(float3(1.0, 1.0, 1.0));
 
-float calculateShadow(float3 normal) {
-	return 0.0;
-
-	// TODO(renderer/forward): Restore.
-	/* float3 projectedPosition = lightSpacePosition.xyz / lightSpacePosition.w;
-
-	if (projectedPosition.z < 0.0) {
+#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+	float calculateShadow(float3 normal) {
 		return 0.0;
+
+		// TODO(renderer/forward): Restore.
+		/* float3 projectedPosition = lightSpacePosition.xyz / lightSpacePosition.w;
+
+		if (projectedPosition.z < 0.0) {
+			return 0.0;
+		}
+		else {
+			float2 coordinate = projectedPosition.xy * 0.5 + 0.5;
+			coordinate.y = 1.0 - coordinate.y;
+
+			float depthBias = 0.0005 * dot(normal, SUN_DIRECTION);
+			float depth = projectedPosition.z;
+			float closestDepth = directionalShadowMapTexture.Sample(directionalShadowMapSamplerState, coordinate);
+
+			return depth + depthBias <= closestDepth;
+		} */
 	}
-	else {
-		float2 coordinate = projectedPosition.xy * 0.5 + 0.5;
-		coordinate.y = 1.0 - coordinate.y;
-
-		float depthBias = 0.0005 * dot(normal, SUN_DIRECTION);
-		float depth = projectedPosition.z;
-		float closestDepth = directionalShadowMapTexture.Sample(directionalShadowMapSamplerState, coordinate);
-
-		return depth + depthBias <= closestDepth;
-	} */
-}
+#endif
 
 float4 main(Interstage interstage) : SV_Target0 {
-	float inShadow = calculateShadow(interstage.tbn[2]);
+	#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+		float inShadow = calculateShadow(interstage.tbn[2]);
+	#else
+		float inShadow = 1.0;
+	#endif
 
 	// TODO(graphics/dx12/sampler-descriptor-heap): Fix wrong sampler being used.
 	float3 directDiffuse = diffuseTexture.Sample(diffuseSamplerState, interstage.textureCoordinate).rgb;

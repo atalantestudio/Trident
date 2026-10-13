@@ -15,13 +15,6 @@ namespace Trident {
 				.stageFlags = ShaderStage::VERTEX | ShaderStage::FRAGMENT,
 			},
 
-			// Directional light
-			{
-				.descriptorType = DescriptorType::UNIFORM_BUFFER,
-				.descriptorCount = 1,
-				.stageFlags = ShaderStage::FRAGMENT,
-			},
-
 			// Point light
 			{
 				.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER,
@@ -29,12 +22,21 @@ namespace Trident {
 				.stageFlags = ShaderStage::FRAGMENT,
 			},
 
-			// Directional shadow map
-			{
-				.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
-				.descriptorCount = 1,
-				.stageFlags = ShaderStage::FRAGMENT,
-			},
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				// Directional light
+				{
+					.descriptorType = DescriptorType::UNIFORM_BUFFER,
+					.descriptorCount = 1,
+					.stageFlags = ShaderStage::FRAGMENT,
+				},
+
+				// Directional shadow map
+				{
+					.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER,
+					.descriptorCount = 1,
+					.stageFlags = ShaderStage::FRAGMENT,
+				},
+			#endif
 		};
 
 		return createDescriptorSetLayout({

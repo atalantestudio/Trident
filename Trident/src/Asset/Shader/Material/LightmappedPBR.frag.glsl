@@ -43,7 +43,7 @@ layout(set = 0, binding = 0) uniform readonly CameraBuffer {
 	Camera camera;
 };
 
-layout(set = 0, binding = 2) buffer readonly PointLightBuffer {
+layout(set = 0, binding = 1) buffer readonly PointLightBuffer {
 	PointLight pointLights[];
 };
 

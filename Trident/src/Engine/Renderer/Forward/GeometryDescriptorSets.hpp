@@ -13,18 +13,24 @@ namespace Trident {
 		const BaseBufferView descriptorBufferViews[] = {
 			cameraBuffer->createView<ForwardCamera>(0, cameraBuffer->getSize()),
 			pointLightBuffer->createView<PointLight>(0, pointLightBuffer->getSize()),
-			directionalLightBuffer->createView<DirectionalLight>(0, directionalLightBuffer->getSize()),
-			directionalLightBuffer->createView<mat4x4<float32>>(0, sizeof(mat4x4<float32>)),
-			directionalLightBuffer->createView<mat4x4<float32>>(sizeof(mat4x4<float32>), sizeof(mat4x4<float32>)),
-			directionalLightBuffer->createView<mat4x4<float32>>(sizeof(mat4x4<float32>) * 2, sizeof(mat4x4<float32>)),
+
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				directionalLightBuffer->createView<DirectionalLight>(0, directionalLightBuffer->getSize()),
+				directionalLightBuffer->createView<mat4x4<float32>>(0, sizeof(mat4x4<float32>)),
+				directionalLightBuffer->createView<mat4x4<float32>>(sizeof(mat4x4<float32>), sizeof(mat4x4<float32>)),
+				directionalLightBuffer->createView<mat4x4<float32>>(sizeof(mat4x4<float32>) * 2, sizeof(mat4x4<float32>)),
+			#endif
 		};
 
 		const DescriptorImage descriptorImages[] = {
-			{
-				.imageView = directionalShadowMapImageView,
-				.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-				.sampler = directionalShadowMapSampler,
-			},
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				{
+					.imageView = directionalShadowMapImageView,
+					.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
+					.sampler = defaultSampler,
+				},
+			#endif
+			{},
 		};
 
 		const WriteDescriptorSet writeDescriptorSets[] = {
@@ -35,43 +41,47 @@ namespace Trident {
 				.descriptorBufferViews = descriptorBufferViews[0],
 			},
 
-			// Directional light
+			// Point light
 			{
 				.descriptorSet = sceneDescriptorSet,
 				.bindingIndex = 1,
-				.descriptorBufferViews = descriptorBufferViews[2],
-			},
-
-			// Point light
-			{
-				.descriptorSet = sceneDescriptorSet,
-				.bindingIndex = 2,
 				.descriptorBufferViews = descriptorBufferViews[1],
 			},
 
-			// Directional shadow map
-			{
-				.descriptorSet = sceneDescriptorSet,
-				.bindingIndex = 3,
-				.descriptorImages = descriptorImages[0],
-			},
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				// Directional light
+				{
+					.descriptorSet = sceneDescriptorSet,
+					.bindingIndex = 2,
+					.descriptorBufferViews = descriptorBufferViews[2],
+				},
 
-			// Point light
-			{
-				.descriptorSet = directionalShadowMapCascadeDescriptorSets[0],
-				.bindingIndex = 0,
-				.descriptorBufferViews = descriptorBufferViews[3],
-			},
-			{
-				.descriptorSet = directionalShadowMapCascadeDescriptorSets[1],
-				.bindingIndex = 0,
-				.descriptorBufferViews = descriptorBufferViews[4],
-			},
-			{
-				.descriptorSet = directionalShadowMapCascadeDescriptorSets[2],
-				.bindingIndex = 0,
-				.descriptorBufferViews = descriptorBufferViews[5],
-			},
+				// Directional shadow map
+				{
+					.descriptorSet = sceneDescriptorSet,
+					.bindingIndex = 3,
+					.descriptorImages = descriptorImages[0],
+				},
+			#endif
+
+			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+				// Point light
+				{
+					.descriptorSet = directionalShadowMapCascadeDescriptorSets[0],
+					.bindingIndex = 0,
+					.descriptorBufferViews = descriptorBufferViews[3],
+				},
+				{
+					.descriptorSet = directionalShadowMapCascadeDescriptorSets[1],
+					.bindingIndex = 0,
+					.descriptorBufferViews = descriptorBufferViews[4],
+				},
+				{
+					.descriptorSet = directionalShadowMapCascadeDescriptorSets[2],
+					.bindingIndex = 0,
+					.descriptorBufferViews = descriptorBufferViews[5],
+				},
+			#endif
 		};
 
 		device->updateDescriptorSets(writeDescriptorSets);
@@ -80,9 +90,7 @@ namespace Trident {
 			const DescriptorImage skyboxDescriptorImage = {
 				.imageView = skyboxImageView,
 				.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL,
-
-				// TODO(renderer/forward/skybox): Use a different sampler?
-				.sampler = directionalShadowMapSampler,
+				.sampler = defaultSampler,
 			};
 
 			const WriteDescriptorSet writeDescriptorSets[] = {

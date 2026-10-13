@@ -6,7 +6,7 @@
 #include "Engine/Renderer/Forward/Renderer.hpp"
 
 namespace Trident {
-	ref<Sampler> ForwardRenderer::createDirectionalShadowMapSampler() const {
+	ref<Sampler> ForwardRenderer::createDefaultSampler() const {
 		return createSampler({
 			.magFilter = Filter::NEAREST,
 			.minFilter = Filter::NEAREST,
@@ -14,7 +14,7 @@ namespace Trident {
 			.addressModeV = AddressMode::CLAMP_TO_EDGE,
 			.addressModeW = AddressMode::CLAMP_TO_EDGE,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Directional shadow map",
+				.name = "Default (skybox/directional shadow map)",
 			#endif
 		});
 	}

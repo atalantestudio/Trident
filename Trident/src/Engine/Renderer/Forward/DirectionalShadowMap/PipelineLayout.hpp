@@ -6,12 +6,14 @@
 #include "Engine/Renderer/Forward/Renderer.hpp"
 
 namespace Trident {
-	ref<PipelineLayout> ForwardRenderer::createDirectionalShadowMapPipelineLayout() const {
-		return createPipelineLayout({
-			.descriptorSetLayouts = {directionalShadowMapDescriptorSetLayout},
-			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Directional shadow map",
-			#endif
-		});
-	}
+	#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+		ref<PipelineLayout> ForwardRenderer::createDirectionalShadowMapPipelineLayout() const {
+			return createPipelineLayout({
+				.descriptorSetLayouts = {directionalShadowMapDescriptorSetLayout},
+				#if defined(DEBUG_OBJECT_NAME)
+					.name = "Directional shadow map",
+				#endif
+			});
+		}
+	#endif
 }

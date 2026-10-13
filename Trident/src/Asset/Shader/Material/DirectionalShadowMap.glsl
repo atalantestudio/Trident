@@ -4,7 +4,7 @@
 const uint CASCADE_COUNT = 3u;
 const float CASCADE_FAR_PLANES[CASCADE_COUNT] = float[](0.2, 0.5, 1.0);
 
-layout(set = 0, binding = 1) uniform readonly DirectionalLight {
+layout(set = 0, binding = 2) uniform readonly DirectionalLight {
 	mat4x4 projectionViews[CASCADE_COUNT];
 } directionalLight;
 

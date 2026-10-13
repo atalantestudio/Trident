@@ -31,8 +31,10 @@ cbuffer Camera {
 
 StructuredBuffer<PointLight> pointLights;
 
-Texture2D<float> directionalShadowMapTexture : register(t1);
-SamplerState directionalShadowMapSamplerState : register(s0);
+#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+	Texture2D<float> directionalShadowMapTexture : register(t1);
+	SamplerState directionalShadowMapSamplerState : register(s0);
+#endif
 
 Texture2D<float4> lightmapAtlasTexture : register(t2);
 SamplerState lightmapAtlasSamplerState : register(s1);
@@ -86,26 +88,32 @@ float3 FresnelSchlick(float cosTheta, float3 F0) {
 	return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
-float calculateShadow(float4 lightSpacePosition, float3 normal) {
-	float3 projectedPosition = lightSpacePosition.xyz / lightSpacePosition.w;
+#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+	float calculateShadow(float4 lightSpacePosition, float3 normal) {
+		float3 projectedPosition = lightSpacePosition.xyz / lightSpacePosition.w;
 
-	if (projectedPosition.z < 0.0) {
-		return 0.0;
+		if (projectedPosition.z < 0.0) {
+			return 0.0;
+		}
+		else {
+			float2 coordinate = projectedPosition.xy * 0.5 + 0.5;
+			coordinate.y = 1.0 - coordinate.y;
+
+			float depthBias = 0.0005 * dot(normal, SUN_DIRECTION);
+			float depth = projectedPosition.z;
+			float closestDepth = directionalShadowMapTexture.Sample(directionalShadowMapSamplerState, coordinate);
+
+			return depth + depthBias <= closestDepth;
+		}
 	}
-	else {
-		float2 coordinate = projectedPosition.xy * 0.5 + 0.5;
-		coordinate.y = 1.0 - coordinate.y;
-
-		float depthBias = 0.0005 * dot(normal, SUN_DIRECTION);
-		float depth = projectedPosition.z;
-		float closestDepth = directionalShadowMapTexture.Sample(directionalShadowMapSamplerState, coordinate);
-
-		return depth + depthBias <= closestDepth;
-	}
-}
+#endif
 
 float4 main(Interstage interstage) : SV_Target0 {
-	float inShadow = calculateShadow(interstage.lightSpacePosition, interstage.tbn[2]);
+	#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+		float inShadow = calculateShadow(interstage.lightSpacePosition, interstage.tbn[2]);
+	#else
+		float inShadow = 1.0;
+	#endif
 
 	float3 x = camera.position;
 	float3 wo = normalize(camera.position - interstage.surface);

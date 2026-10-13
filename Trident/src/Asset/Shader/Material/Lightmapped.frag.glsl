@@ -43,7 +43,9 @@ layout(set = 1, binding = 0) uniform sampler2D lightmapAtlas;
 layout(set = 2, binding = 0) uniform sampler2D diffuseMap;
 layout(set = 2, binding = 1) uniform sampler2D normalMap;
 
-#include "DirectionalShadowMap.glsl"
+#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+	#include "DirectionalShadowMap.glsl"
+#endif
 
 layout(location = 0) out vec4 fragment;
 
@@ -93,8 +95,12 @@ vec4 sampleBicubic(sampler2D textureSampler, vec2 coordinate) {
 }
 
 void main() {
-	uint cascadeIndex = findCascadeIndex(interstage.surface);
-	float inShadow = calculateShadow(interstage.surface, interstage.tbn[2], cascadeIndex);
+	#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+		uint cascadeIndex = findCascadeIndex(interstage.surface);
+		float inShadow = calculateShadow(interstage.surface, interstage.tbn[2], cascadeIndex);
+	#else
+		float inShadow = 1.0;
+	#endif
 
 	vec3 directDiffuse = texture(diffuseMap, interstage.textureCoordinate).rgb;
 	vec3 indirectDiffuse = sampleBicubic(lightmapAtlas, interstage.lightmapCoordinate).rgb;
@@ -105,20 +111,22 @@ void main() {
 
 	vec3 shadow = indirectDiffuse * directDiffuse;
 
-	#if defined(DEBUG_VISUALIZE_DIRECTIONAL_SHADOW_MAP_CASCADES)
-		vec3 directionalShadowMapCascadeColor = vec3(0.0, 0.0, 0.0);
+	#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
+		#if defined(DEBUG_VISUALIZE_DIRECTIONAL_SHADOW_MAP_CASCADES)
+			vec3 directionalShadowMapCascadeColor = vec3(0.0, 0.0, 0.0);
 
-		if (cascadeIndex == 0u) {
-			directionalShadowMapCascadeColor.r = 1.0;
-		}
-		else if (cascadeIndex == 1u) {
-			directionalShadowMapCascadeColor.g = 1.0;
-		}
-		else if (cascadeIndex == 2u) {
-			directionalShadowMapCascadeColor.b = 1.0;
-		}
+			if (cascadeIndex == 0u) {
+				directionalShadowMapCascadeColor.r = 1.0;
+			}
+			else if (cascadeIndex == 1u) {
+				directionalShadowMapCascadeColor.g = 1.0;
+			}
+			else if (cascadeIndex == 2u) {
+				directionalShadowMapCascadeColor.b = 1.0;
+			}
 
-		shadow *= directionalShadowMapCascadeColor;
+			shadow *= directionalShadowMapCascadeColor;
+		#endif
 	#endif
 
 	fragment.rgb = mix(shadow, directDiffuse * camera.sunColor, max(0.0, max(0.0, surfaceToSunLight) - inShadow));
