@@ -45,10 +45,26 @@ namespace Trident {
 		while (componentIndexA < rigidBodyComponentPool.componentCount) {
 			entityPair.A = rigidBodyComponentPool.componentIndexToEntity[componentIndexA];
 
+			const Geometry3DComponent& geometryComponentA = scene->ecs.getComponent<Geometry3DComponent>(entityPair.A);
+
+			if (!geometryComponentA.hasHull) {
+				componentIndexA += 1;
+
+				continue;
+			}
+
 			uint32 componentIndexB = componentIndexA + 1;
 
 			while (componentIndexB < rigidBodyComponentPool.componentCount) {
 				entityPair.B = rigidBodyComponentPool.componentIndexToEntity[componentIndexB];
+
+				const Geometry3DComponent& geometryComponentB = scene->ecs.getComponent<Geometry3DComponent>(entityPair.B);
+
+				if (!geometryComponentB.hasHull) {
+					componentIndexB += 1;
+
+					continue;
+				}
 
 				entityPairs.emplace_back(entityPair);
 
