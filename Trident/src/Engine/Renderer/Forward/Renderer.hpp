@@ -11,6 +11,7 @@
 namespace Trident {
 	#define FORWARD_SAMPLE_COUNT 4
 	// #define FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP
+	#define FORWARD_ENABLE_VERTEX_COLOR_GI
 
 	struct ForwardCamera {
 		mat4x4<float32> projectionView;
@@ -25,6 +26,14 @@ namespace Trident {
 	};
 
 	class ForwardRenderer : public BaseSceneRenderer<ForwardCamera> {
+		private:
+			#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
+				struct GIVertex {
+					vec3<float32> position;
+					uint32 _;
+				};
+			#endif
+
 		private:
 			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
 				static inline const vec4<float32> FRUSTUM_VERTICES[8] = {
@@ -44,6 +53,10 @@ namespace Trident {
 				static constexpr Extent2D DIRECTIONAL_SHADOW_MAP_EXTENT = {4096, 4096};
 				static constexpr uint32 DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT = 3;
 				static constexpr float32 DIRECTIONAL_SHADOW_MAP_CASCADE_FAR_PLANES[DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT] = {0.2f, 0.5f, 1.0f};
+			#endif
+
+			#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
+				static constexpr uint32 MAX_GI_VERTEX_COUNT = 32;
 			#endif
 
 			static constexpr index DEBUG_MAX_CONTACTS = 16;
@@ -71,6 +84,10 @@ namespace Trident {
 					directionalShadowMapDescriptorSetLayout = createDirectionalShadowMapDescriptorSetLayout();
 				#endif
 
+				#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
+					giVertexGenerationDescriptorSetLayout = createGIVertexGenerationDescriptorSetLayout();
+				#endif
+
 				const ref<DescriptorSetLayout> descriptorSetLayouts[] = {
 					skyboxDescriptorSetLayout,
 					sceneDescriptorSetLayout,
@@ -80,6 +97,10 @@ namespace Trident {
 						directionalShadowMapDescriptorSetLayout,
 						directionalShadowMapDescriptorSetLayout,
 						directionalShadowMapDescriptorSetLayout,
+					#endif
+
+					#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
+						giVertexGenerationDescriptorSetLayout,
 					#endif
 				};
 
@@ -94,6 +115,10 @@ namespace Trident {
 					directionalShadowMapCascadeDescriptorSets[0] = descriptorSets[3];
 					directionalShadowMapCascadeDescriptorSets[1] = descriptorSets[4];
 					directionalShadowMapCascadeDescriptorSets[2] = descriptorSets[5];
+				#endif
+
+				#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
+					giVertexGenerationDescriptorSet = descriptorSets[3];
 				#endif
 
 				skyboxPipelineLayout = createSkyboxPipelineLayout();
@@ -113,6 +138,15 @@ namespace Trident {
 
 						cascadeIndex += 1;
 					}
+				#endif
+
+				#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
+					giVertexGenerationPipelineLayout = createGIVertexGenerationPipelineLayout();
+					giVertexGenerationPipeline = createGIVertexGenerationPipeline();
+					giVertexBuffer = createGIVertexBuffer();
+
+					giShadingPipelineLayout = createGIShadingPipelineLayout();
+					giShadingPipeline = createGIShadingPipeline();
 				#endif
 
 				// TODO(renderer/forward): Restore debug visualization modes.
@@ -154,6 +188,8 @@ namespace Trident {
 				indexBuffer = createIndexBuffer();
 				instanceBuffer = createInstanceBuffer();
 				pointLightBuffer = createPointLightBuffer();
+
+				pointLightBufferView = pointLightBuffer->createView<PointLight>(0, pointLightBuffer->getSize());
 
 				// TODO(geometry/3d/vertex-position-indices): Separate hull line indices and vertex position indices for TRIANGLE_LIST.
 				/* if (sceneAsset->hullLineIndexCount > 0) {
@@ -382,6 +418,10 @@ namespace Trident {
 
 				updateGeometryDescriptorSets();
 
+				#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
+					updateGIDescriptorSets();
+				#endif
+
 				cameraMappedRange->pointLightCount = static_cast<uint32>(sceneAsset->pointLights.count());
 				cameraMappedRange->ambientColor = sceneAsset->skyColor;
 				cameraMappedRange->sunColor = sceneAsset->sunColor;
@@ -422,6 +462,10 @@ namespace Trident {
 				ref<DescriptorSetLayout> createDirectionalShadowMapDescriptorSetLayout() const;
 			#endif
 
+			#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
+				ref<DescriptorSetLayout> createGIVertexGenerationDescriptorSetLayout() const;
+			#endif
+
 			ref<PipelineLayout> createSkyboxPipelineLayout() const;
 			ref<PipelineLayout> createDebugHullWireframePipelineLayout() const;
 			ref<PipelineLayout> createDebugContactManifoldPipelineLayout() const;
@@ -430,12 +474,22 @@ namespace Trident {
 				ref<PipelineLayout> createDirectionalShadowMapPipelineLayout() const;
 			#endif
 
+			#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
+				ref<PipelineLayout> createGIVertexGenerationPipelineLayout() const;
+				ref<PipelineLayout> createGIShadingPipelineLayout() const;
+			#endif
+
 			ref<GraphicsPipeline> createSkyboxPipeline() const;
 			ref<GraphicsPipeline> createDebugHullWireframePipeline() const;
 			ref<GraphicsPipeline> createDebugContactManifoldPipeline() const;
 
 			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
 				ref<GraphicsPipeline> createDirectionalShadowMapPipeline() const;
+			#endif
+
+			#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
+				ref<ComputePipeline> createGIVertexGenerationPipeline() const;
+				ref<GraphicsPipeline> createGIShadingPipeline() const;
 			#endif
 
 			#if FORWARD_SAMPLE_COUNT > 1
@@ -473,6 +527,10 @@ namespace Trident {
 				ref<Buffer> createDirectionalLightBuffer() const;
 			#endif
 
+			#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
+				ref<Buffer> createGIVertexBuffer() const;
+			#endif
+
 			ref<Buffer> createDebugHullWireframeBuffer(uint64 size) const;
 			ref<Buffer> createDebugContactManifoldBuffer() const;
 
@@ -484,6 +542,10 @@ namespace Trident {
 			GraphicsPipelineDescriptor getDynamicPipelineDescriptor(VertexInputBinding* vertexInputBindings) const;
 
 			void updateGeometryDescriptorSets() const;
+
+			#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
+				void updateGIDescriptorSets() const;
+			#endif
 
 			void createMaterialObjects(
 				uint32 materialShaderIndex,
@@ -508,6 +570,11 @@ namespace Trident {
 			#endif
 
 			void encodeSkyboxPass(ref<CommandEncoder> commandEncoder) const;
+
+			#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
+				void encodeGIVertexGenerationPass(ref<CommandEncoder> commandEncoder) const;
+				void encodeGIShadingPass(ref<CommandEncoder> commandEncoder) const;
+			#endif
 
 			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
 				/// Calculates world-space frustum vertices for the shadow map cascades.
@@ -535,6 +602,10 @@ namespace Trident {
 				ref<DescriptorSetLayout> directionalShadowMapDescriptorSetLayout;
 			#endif
 
+			#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
+				ref<DescriptorSetLayout> giVertexGenerationDescriptorSetLayout;
+			#endif
+
 			ref<DescriptorSet> skyboxDescriptorSet;
 			ref<DescriptorSet> sceneDescriptorSet;
 			ref<DescriptorSet> lightmapAtlasDescriptorSet;
@@ -542,6 +613,10 @@ namespace Trident {
 
 			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
 				ref<DescriptorSet> directionalShadowMapCascadeDescriptorSets[DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT];
+			#endif
+
+			#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
+				ref<DescriptorSet> giVertexGenerationDescriptorSet;
 			#endif
 
 			ref<PipelineLayout> skyboxPipelineLayout;
@@ -553,6 +628,11 @@ namespace Trident {
 				ref<PipelineLayout> directionalShadowMapPipelineLayout;
 			#endif
 
+			#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
+				ref<PipelineLayout> giVertexGenerationPipelineLayout;
+				ref<PipelineLayout> giShadingPipelineLayout;
+			#endif
+
 			ref<GraphicsPipeline> skyboxPipeline;
 			sequence<ref<GraphicsPipeline>> materialPipelines;
 			ref<GraphicsPipeline> debugHullWireframePipeline;
@@ -560,6 +640,11 @@ namespace Trident {
 
 			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
 				ref<GraphicsPipeline> directionalShadowMapPipeline;
+			#endif
+
+			#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
+				ref<ComputePipeline> giVertexGenerationPipeline;
+				ref<GraphicsPipeline> giShadingPipeline;
 			#endif
 
 			/// Contains vertices for static and dynamic geometry.
@@ -578,6 +663,10 @@ namespace Trident {
 
 			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
 				ref<Buffer> directionalLightBuffer;
+			#endif
+
+			#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
+				ref<Buffer> giVertexBuffer;
 			#endif
 
 			ref<Buffer> debugHullWireframeBuffer;
@@ -617,6 +706,8 @@ namespace Trident {
 			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
 				DirectionalLight* directionalLightMappedRange = nullptr;
 			#endif
+
+			BufferView<PointLight> pointLightBufferView;
 
 			Instance3D* instanceMappedRange = nullptr;
 

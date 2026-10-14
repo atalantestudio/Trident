@@ -27,6 +27,19 @@
 #include "Engine/Renderer/Forward/DynamicPipeline.hpp"
 #include "Engine/Renderer/Forward/Framebuffers.hpp"
 #include "Engine/Renderer/Forward/GeometryDescriptorSets.hpp"
+
+#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
+	#include "Engine/Renderer/Forward/GI/DescriptorSet.hpp"
+	#include "Engine/Renderer/Forward/GI/ShadingPass.hpp"
+	#include "Engine/Renderer/Forward/GI/ShadingPipeline.hpp"
+	#include "Engine/Renderer/Forward/GI/ShadingPipelineLayout.hpp"
+	#include "Engine/Renderer/Forward/GI/VertexBuffer.hpp"
+	#include "Engine/Renderer/Forward/GI/VertexGenerationDescriptorSetLayout.hpp"
+	#include "Engine/Renderer/Forward/GI/VertexGenerationPass.hpp"
+	#include "Engine/Renderer/Forward/GI/VertexGenerationPipelineLayout.hpp"
+	#include "Engine/Renderer/Forward/GI/VertexGenerationPipeline.hpp"
+#endif
+
 #include "Engine/Renderer/Forward/IndexBuffer.hpp"
 #include "Engine/Renderer/Forward/InstanceBuffer.hpp"
 #include "Engine/Renderer/Forward/LightmapAtlasDescriptorSetLayout.hpp"
@@ -55,6 +68,10 @@ namespace Trident {
 		const float32 width = static_cast<float32>(extent.x);
 		const float32 height = static_cast<float32>(extent.y);
 		const vec3<float32> skyColor = scene->getAsset()->skyColor;
+
+		#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
+			encodeGIVertexGenerationPass(commandEncoder);
+		#endif
 
 		commandEncoder->beginRenderPass({
 			.framebuffer = framebuffer,
@@ -162,6 +179,10 @@ namespace Trident {
 				materialShaderIndex += 1;
 			}
 		}
+
+		#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
+			encodeGIShadingPass(commandEncoder);
+		#endif
 
 		if (visualizationMode & VisualizationMode::HULL_WIREFRAMES && debugHullWireframeBuffer != nullptr) {
 			// TODO(renderer/forward): Restore debug modes.

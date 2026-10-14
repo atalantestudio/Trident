@@ -9,7 +9,12 @@ namespace Trident {
 	ref<Buffer> ForwardRenderer::createIndexBuffer() const {
 		return createDynamicBuffer({
 			.size = scene->getAsset()->indexRange.count,
-			.usage = BufferUsage::TRANSFER_DST | BufferUsage::INDEX,
+			.usage = (
+				#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
+					BufferUsage::READ_ONLY_STORAGE |
+				#endif
+				BufferUsage::TRANSFER_DST | BufferUsage::INDEX
+			),
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
 			#if defined(DEBUG_OBJECT_NAME)
