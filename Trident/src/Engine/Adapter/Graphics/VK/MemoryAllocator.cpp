@@ -107,7 +107,7 @@ namespace Trident {
 		if (memoryAllocation.mappedSuballocationCount == 0) {
 			const VkResult result = _device->vkMapMemory(_device->device, *pointer_cast<const VkDeviceMemory*>(&memoryAllocation.memory), 0, memoryAllocation.size, 0, &memoryAllocation.mappedRange);
 
-			ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to map memory allocation. ([])", string_VkResult(result));
+			ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to map memory allocation. ([])", static_cast<sint32>(result));
 
 			ADAPTER_INFO(
 				"Mapped range ([], []) of memory allocation [].",
@@ -146,7 +146,7 @@ namespace Trident {
 
 				const VkResult result = _device->vkFlushMappedMemoryRanges(_device->device, 1, &mappedMemoryRange);
 
-				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to flush mapped memory allocation range ([]).", string_VkResult(result)); */
+				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to flush mapped memory allocation range ([]).", static_cast<sint32>(result)); */
 			}
 
 			_device->vkUnmapMemory(_device->device, *pointer_cast<const VkDeviceMemory*>(&memoryAllocation.memory));
@@ -208,7 +208,7 @@ namespace Trident {
 
 		const VkResult result = _device->vkAllocateMemory(_device->device, &memoryAllocateInfo, nullptr, &memory);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to allocate memory ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to allocate memory ([]).", static_cast<sint32>(result));
 
 		MemoryAllocation memoryAllocation{};
 		memoryAllocation.dynamic = dynamic;
@@ -273,7 +273,7 @@ namespace Trident {
 
 		const VkResult result = _device->vkBindBufferMemory(_device->device, _buffer->buffer, *pointer_cast<const VkDeviceMemory*>(&memoryAllocation.memory), memorySuballocation.offset);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to bind buffer memory ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to bind buffer memory ([]).", static_cast<sint32>(result));
 
 		return memorySuballocation;
 	}
@@ -288,7 +288,7 @@ namespace Trident {
 
 		const VkResult result = _device->vkBindImageMemory(_device->device, _image->image, *pointer_cast<const VkDeviceMemory*>(&memoryAllocation.memory), memorySuballocation.offset);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to bind image memory ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to bind image memory ([]).", static_cast<sint32>(result));
 
 		return memorySuballocation;
 	}

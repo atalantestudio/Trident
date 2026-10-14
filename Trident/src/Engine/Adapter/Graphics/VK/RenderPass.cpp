@@ -228,7 +228,7 @@ namespace Trident {
 
 		result = _device->vkCreateRenderPass(_device->device, &renderPassCreateInfo, nullptr, &renderPass->renderPass);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create render pass ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create render pass ([]).", static_cast<sint32>(result));
 
 		return renderPass;
 	}

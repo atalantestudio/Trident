@@ -44,7 +44,7 @@ namespace Trident {
 			result = _device->vkCreateBuffer(_device->device, &bufferCreateInfo, nullptr, &buffer->buffer);
 		}
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create buffer ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create buffer ([]).", static_cast<sint32>(result));
 
 		_device->vkGetBufferMemoryRequirements(_device->device, buffer->buffer, &buffer->memoryRequirements);
 
@@ -52,22 +52,14 @@ namespace Trident {
 		uint32 memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(buffer->memoryRequirements.memoryTypeBits, memoryPropertyFlags);
 
 		if (memoryPropertyFlags == (VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) && memoryTypeIndex == max<uint32>()) {
-			#if defined(BUILD_MODE_DEBUG)
-				ADAPTER_WARNING("Failed to find [] memory for buffer. Falling back to HOST_VISIBLE|HOST_COHERENT memory.", string_VkMemoryPropertyFlags(memoryPropertyFlags));
-			#else
-				ADAPTER_WARNING("Failed to find adequate memory for buffer. Falling back to HOST_VISIBLE|HOST_COHERENT memory.");
-			#endif
+			ADAPTER_WARNING("Failed to find DEVICE_LOCAL|HOST_VISIBLE memory for buffer. Falling back to HOST_VISIBLE|HOST_COHERENT memory.");
 
 			memoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 			memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(buffer->memoryRequirements.memoryTypeBits, memoryPropertyFlags);
 		}
 
 		if (memoryPropertyFlags == (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) && memoryTypeIndex == max<uint32>()) {
-			#if defined(BUILD_MODE_DEBUG)
-				ADAPTER_WARNING("Failed to find [] memory for buffer. Falling back to DEVICE_LOCAL memory.", string_VkMemoryPropertyFlags(memoryPropertyFlags));
-			#else
-				ADAPTER_WARNING("Failed to find adequate memory for buffer. Falling back to DEVICE_LOCAL memory.");
-			#endif
+			ADAPTER_WARNING("Failed to find HOST_VISIBLE|HOST_COHERENT memory for buffer. Falling back to DEVICE_LOCAL memory.");
 
 			memoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 			memoryTypeIndex = memoryAllocator->findMemoryTypeIndex(buffer->memoryRequirements.memoryTypeBits, memoryPropertyFlags);

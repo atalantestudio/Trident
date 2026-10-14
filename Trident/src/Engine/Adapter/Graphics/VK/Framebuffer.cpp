@@ -47,7 +47,7 @@ namespace Trident {
 
 		result = _device->vkCreateFramebuffer(_device->device, &framebufferCreateInfo, nullptr, &framebuffer->framebuffer);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create framebuffer ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create framebuffer ([]).", static_cast<sint32>(result));
 
 		#if defined(DEBUG_OBJECT_NAME)
 			setObjectName(_device, (uint64) framebuffer->framebuffer, VK_OBJECT_TYPE_FRAMEBUFFER, descriptor.name);

@@ -46,7 +46,7 @@ namespace Trident {
 
 		result = _device->vkCreateImageView(_device->device, &imageViewCreateInfo, nullptr, &imageView->imageView);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create image view ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create image view ([]).", static_cast<sint32>(result));
 
 		#if defined(DEBUG_OBJECT_NAME)
 			setObjectName(_device, (uint64) imageView->imageView, VK_OBJECT_TYPE_IMAGE_VIEW, descriptor.name);

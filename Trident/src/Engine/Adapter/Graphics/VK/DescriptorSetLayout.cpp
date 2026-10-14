@@ -51,7 +51,7 @@ namespace Trident {
 
 		result = _device->vkCreateDescriptorSetLayout(_device->device, &descriptorSetLayoutCreateInfo, nullptr, &descriptorSetLayout->descriptorSetLayout);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create descriptor set layout ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create descriptor set layout ([]).", static_cast<sint32>(result));
 
 		#if defined(DEBUG_OBJECT_NAME)
 			setObjectName(_device, (uint64) descriptorSetLayout->descriptorSetLayout, VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT, descriptor.name);

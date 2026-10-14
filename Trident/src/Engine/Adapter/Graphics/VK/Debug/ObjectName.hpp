@@ -17,6 +17,6 @@ namespace Trident::VK {
 
 		const VkResult result = device->vkSetDebugUtilsObjectNameEXT(device->device, &debugUtilsObjectNameInfo);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to set object name ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to set object name ([]).", static_cast<sint32>(result));
 	}
 }

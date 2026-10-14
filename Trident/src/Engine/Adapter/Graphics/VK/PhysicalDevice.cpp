@@ -122,14 +122,14 @@ namespace Trident {
 
 		result = _instance->vkEnumeratePhysicalDevices(_instance->instance, &physicalDeviceCount, nullptr);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to find the number of physical devices ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to find the number of physical devices ([]).", static_cast<sint32>(result));
 		DEBUG_ASSERT(physicalDeviceCount > 0);
 
 		sequence<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
 
 		result = _instance->vkEnumeratePhysicalDevices(_instance->instance, &physicalDeviceCount, &physicalDevices[0]);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to enumerate physical devices ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to enumerate physical devices ([]).", static_cast<sint32>(result));
 
 		uint32 maxPhysicalDeviceScore = 0;
 		uint32 bestPhysicalDeviceIndex = 0;
@@ -225,13 +225,13 @@ namespace Trident {
 
 		result = _instance->vkEnumerateDeviceExtensionProperties(_physicalDevice->physicalDevice, nullptr, &extensionPropertyCount, nullptr);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to find the number of device extension properties ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to find the number of device extension properties ([]).", static_cast<sint32>(result));
 
 		sequence<VkExtensionProperties> extensionProperties(extensionPropertyCount);
 
 		result = _instance->vkEnumerateDeviceExtensionProperties(_physicalDevice->physicalDevice, nullptr, &extensionPropertyCount, &extensionProperties[0]);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to enumerate device extension properties ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to enumerate device extension properties ([]).", static_cast<sint32>(result));
 
 		#if defined(DEBUG_ENUMERATE_DEVICE_EXTENSIONS)
 			ADAPTER_INFO("Enabled device extensions:");

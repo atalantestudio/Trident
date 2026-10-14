@@ -55,7 +55,7 @@ namespace Trident {
 		{
 			result = instance->vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice->physicalDevice, surface->surface, &surface->capabilities);
 
-			ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to get surface capabilities ([]).", string_VkResult(result));
+			ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to get surface capabilities ([]).", static_cast<sint32>(result));
 		}
 
 		_swapchain->imageCount = surface->capabilities.minImageCount + 1;
@@ -110,7 +110,7 @@ namespace Trident {
 
 		result = _device->vkCreateSwapchainKHR(_device->device, &swapchainCreateInfo, nullptr, &_swapchain->swapchain);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create swapchain ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create swapchain ([]).", static_cast<sint32>(result));
 
 		if (oldSwapchain != VK_NULL_HANDLE) {
 			_device->vkDestroySwapchainKHR(_device->device, oldSwapchain, nullptr);
@@ -118,13 +118,13 @@ namespace Trident {
 
 		result = _device->vkGetSwapchainImagesKHR(_device->device, _swapchain->swapchain, &_swapchain->imageCount, nullptr);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to get swapchain image count ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to get swapchain image count ([]).", static_cast<sint32>(result));
 
 		sequence<VkImage> images(_swapchain->imageCount);
 
 		result = _device->vkGetSwapchainImagesKHR(_device->device, _swapchain->swapchain, &_swapchain->imageCount, &images[0]);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to get swapchain images ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to get swapchain images ([]).", static_cast<sint32>(result));
 
 		_swapchain->images = sequence<ref<Trident::Image>>(_swapchain->imageCount);
 		_swapchain->imageViews = sequence<ref<Trident::ImageView>>(_swapchain->imageCount);

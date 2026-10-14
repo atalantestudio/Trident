@@ -238,7 +238,7 @@ namespace Trident {
 
 		result = _device->vkCreateGraphicsPipelines(_device->device, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &graphicsPipeline->pipeline);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create graphics pipeline ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create graphics pipeline ([]).", static_cast<sint32>(result));
 
 		#if defined(DEBUG_OBJECT_NAME)
 			setObjectName(_device, (uint64) graphicsPipeline->pipeline, VK_OBJECT_TYPE_PIPELINE, descriptor.name);

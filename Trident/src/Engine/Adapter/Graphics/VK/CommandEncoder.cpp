@@ -73,7 +73,7 @@ namespace Trident {
 
 		result = vkBeginCommandBuffer(_commandEncoder->commandBuffer, &commandBufferBeginInfo);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to begin command buffer ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to begin command buffer ([]).", static_cast<sint32>(result));
 	}
 
 	void VK::beginRenderPass(Trident::CommandEncoder* commandEncoder, const BeginRenderPassDescriptor& descriptor) {
@@ -290,7 +290,7 @@ namespace Trident {
 
 		result = _device->vkAllocateCommandBuffers(_device->device, &commandBufferAllocateInfo, &commandEncoder->commandBuffer);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create command buffer ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create command buffer ([]).", static_cast<sint32>(result));
 
 		#if defined(DEBUG_OBJECT_NAME)
 			setObjectName(_device, (uint64) commandEncoder->commandBuffer, VK_OBJECT_TYPE_COMMAND_BUFFER, descriptor.name);
@@ -391,7 +391,7 @@ namespace Trident {
 
 		result = vkEndCommandBuffer(_commandEncoder->commandBuffer);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to end command buffer ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to end command buffer ([]).", static_cast<sint32>(result));
 
 		VkPipelineStageFlags pipelineStageFlags = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 
@@ -514,7 +514,7 @@ namespace Trident {
 
 		result = vkResetCommandBuffer(_commandEncoder->commandBuffer, 0);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to reset command buffer ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to reset command buffer ([]).", static_cast<sint32>(result));
 
 		_commandEncoder->commandCount = 0;
 		_commandEncoder->pipelineBindPoint = VK_PIPELINE_BIND_POINT_MAX_ENUM;

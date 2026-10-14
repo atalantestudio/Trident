@@ -34,7 +34,7 @@ namespace Trident {
 
 		result = _device->vkCreateFence(_device->device, &fenceCreateInfo, nullptr, &fence->fence);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create fence ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create fence ([]).", static_cast<sint32>(result));
 
 		#if defined(DEBUG_OBJECT_NAME)
 			setObjectName(_device, (uint64) fence->fence, VK_OBJECT_TYPE_FENCE, descriptor.name);

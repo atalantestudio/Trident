@@ -12,16 +12,6 @@
 	#error "Unsupported operating system."
 #endif
 
-#if defined(BUILD_MODE_DEBUG)
-	#include <vulkan/vk_enum_string_helper.h>
-#else
-	namespace Trident::VK {
-		inline sint32 string_VkResult(VkResult result) {
-			return static_cast<sint32>(result);
-		}
-	}
-#endif
-
 #include "Engine/Adapter/Graphics/VK/DeviceExtension/EXT_hardware_ray_tracing/EXT_hardware_ray_tracing.hpp"
 
 namespace Trident::VK {

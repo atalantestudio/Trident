@@ -41,7 +41,7 @@ namespace Trident {
 
 		result = _device->vkCreateShaderModule(_device->device, &shaderModuleCreateInfo, nullptr, &shaderModule->createInfo.module);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create shader module ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create shader module ([]).", static_cast<sint32>(result));
 
 		#if defined(DEBUG_OBJECT_NAME)
 			setObjectName(_device, (uint64) shaderModule->createInfo.module, VK_OBJECT_TYPE_SHADER_MODULE, descriptor.name);

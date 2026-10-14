@@ -93,13 +93,13 @@ namespace Trident {
 
 				result = vkEnumerateInstanceLayerProperties(&layerPropertyCount, nullptr);
 
-				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to find the number of instance layer properties ([]).", string_VkResult(result));
+				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to find the number of instance layer properties ([]).", static_cast<sint32>(result));
 
 				sequence<VkLayerProperties> layerProperties(layerPropertyCount);
 
 				result = vkEnumerateInstanceLayerProperties(&layerPropertyCount, &layerProperties[0]);
 
-				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to enumerate instance layer properties ([]).", string_VkResult(result));
+				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to enumerate instance layer properties ([]).", static_cast<sint32>(result));
 				ADAPTER_INFO("Validation layers:");
 
 				for (const VkLayerProperties& layerProperties : layerProperties) {
@@ -165,14 +165,14 @@ namespace Trident {
 
 		result = vkCreateInstance(&instanceCreateInfo, nullptr, &instance->instance);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create instance ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create instance ([]).", static_cast<sint32>(result));
 
 		#if defined(DEBUG_ENABLE_MESSENGER)
 			const PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT = LOAD_PROCEDURE(instance->instance, vkCreateDebugUtilsMessengerEXT);
 
 			result = vkCreateDebugUtilsMessengerEXT(instance->instance, &debugUtilsMessengerCreateInfo, nullptr, &instance->debugUtilsMessenger);
 
-			ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create debug messenger ([]).", string_VkResult(result));
+			ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create debug messenger ([]).", static_cast<sint32>(result));
 		#endif
 
 		#undef LOAD_PROCEDURE

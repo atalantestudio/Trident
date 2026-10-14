@@ -33,7 +33,7 @@ namespace Trident {
 
 		result = _device->vkCreateCommandPool(_device->device, &commandPoolCreateInfo, nullptr, &commandPool->commandPool);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create command pool ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create command pool ([]).", static_cast<sint32>(result));
 
 		return commandPool;
 	}

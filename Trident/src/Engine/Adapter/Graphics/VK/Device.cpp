@@ -193,7 +193,7 @@ namespace Trident {
 
 		result = _device->vkCreateDescriptorPool(_device->device, &descriptorPoolCreateInfo, nullptr, &descriptorPool);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create descriptor pool ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create descriptor pool ([]).", static_cast<sint32>(result));
 
 		_device->descriptorPools.emplace_back(descriptorPool);
 
@@ -208,7 +208,7 @@ namespace Trident {
 
 		result = _device->vkAllocateDescriptorSets(_device->device, &descriptorSetAllocateInfo, &vkDescriptorSets[0]);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to allocate descriptor sets ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to allocate descriptor sets ([]).", static_cast<sint32>(result));
 
 		sequence<ref<Trident::DescriptorSet>> descriptorSets(descriptorSetLayouts.count());
 		uint32 descriptorSetIndex = 0;
@@ -311,7 +311,7 @@ namespace Trident {
 
 		result = _physicalDevice->instance->vkCreateDevice(_physicalDevice->physicalDevice, &deviceCreateInfo, nullptr, &device->device);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create device ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create device ([]).", static_cast<sint32>(result));
 
 		device->loadProcedures(enabledExtensions);
 		device->queues[0] = createQueue(device, _physicalDevice->graphicsQueueFamilyIndex, QueueFamilyCapability::GRAPHICS);
@@ -358,7 +358,7 @@ namespace Trident {
 		// TODO(graphics/device/free-descriptor-sets): Only if the pool has been created with the VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT flag.
 		/* result = _device->vkFreeDescriptorSets(_device->device, descriptorPool, static_cast<uint32>(descriptorSets.count()), &descriptorSets[0]);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to free descriptor sets ([]).", string_VkResult(result)); */
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to free descriptor sets ([]).", static_cast<sint32>(result)); */
 
 		for (const VkDescriptorPool descriptorPool : _device->descriptorPools) {
 			_device->vkDestroyDescriptorPool(_device->device, descriptorPool, nullptr);
@@ -380,7 +380,7 @@ namespace Trident {
 		const VK::Fence* _fence = static_cast<const VK::Fence*>(fence);
 		const VkResult result = _device->vkResetFences(_device->device, 1, &_fence->fence);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to reset fence ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to reset fence ([]).", static_cast<sint32>(result));
 	}
 
 	void VK::flushMappedMemoryRanges(const Trident::Device* device, view<BaseBufferView> mappedMemoryRanges) {
@@ -584,7 +584,7 @@ namespace Trident {
 
 		result = _device->vkWaitForFences(_device->device, 1, &_fence->fence, VK_TRUE, max<uint64>());
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to wait for fence ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to wait for fence ([]).", static_cast<sint32>(result));
 	}
 
 	void VK::waitIdle(const Trident::Device* device) {
@@ -595,6 +595,6 @@ namespace Trident {
 
 		result = _device->vkDeviceWaitIdle(_device->device);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to wait for device idle state ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to wait for device idle state ([]).", static_cast<sint32>(result));
 	}
 }

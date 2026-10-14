@@ -100,7 +100,7 @@ namespace Trident {
 
 		result = vkQueueSubmit(_queue->queue, 1, &submitInfo, VK_NULL_HANDLE);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to submit queue ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to submit queue ([]).", static_cast<sint32>(result));
 	}
 
 	void VK::submit(const Trident::Queue* queue, view<ref<Trident::CommandBuffer>> commandBuffers, ref<Trident::Semaphore> waitSemaphore, ref<Trident::Semaphore> signalSemaphore, ref<Trident::Fence> fence) {
@@ -154,7 +154,7 @@ namespace Trident {
 
 		result = vkQueueSubmit(_queue->queue, 1, &submitInfo, ref_cast<VK::Fence>(fence)->fence);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to submit queue ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to submit queue ([]).", static_cast<sint32>(result));
 	}
 
 	void VK::waitIdle(const Trident::Queue* queue) {
@@ -167,6 +167,6 @@ namespace Trident {
 
 		result = vkQueueWaitIdle(_queue->queue);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to wait for queue idle state ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to wait for queue idle state ([]).", static_cast<sint32>(result));
 	}
 }

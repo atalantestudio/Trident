@@ -44,7 +44,7 @@ namespace Trident {
 
 		result = _device->vkCreatePipelineLayout(_device->device, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout->pipelineLayout);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create pipeline layout ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create pipeline layout ([]).", static_cast<sint32>(result));
 
 		#if defined(DEBUG_OBJECT_NAME)
 			setObjectName(_device, (uint64) pipelineLayout->pipelineLayout, VK_OBJECT_TYPE_PIPELINE_LAYOUT, descriptor.name);

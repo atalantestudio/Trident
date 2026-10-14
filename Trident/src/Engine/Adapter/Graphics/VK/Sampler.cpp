@@ -48,7 +48,7 @@ namespace Trident {
 
 		result = _device->vkCreateSampler(_device->device, &samplerCreateInfo, nullptr, &sampler->sampler);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create sampler ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create sampler ([]).", static_cast<sint32>(result));
 
 		#if defined(DEBUG_OBJECT_NAME)
 			setObjectName(_device, (uint64) sampler->sampler, VK_OBJECT_TYPE_SAMPLER, descriptor.name);

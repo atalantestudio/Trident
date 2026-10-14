@@ -38,7 +38,7 @@ namespace Trident {
 
 		result = _device->vkCreateComputePipelines(_device->device, VK_NULL_HANDLE, 1, &computePipelineCreateInfo, nullptr, &computePipeline->pipeline);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create compute pipeline ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create compute pipeline ([]).", static_cast<sint32>(result));
 
 		#if defined(DEBUG_OBJECT_NAME)
 			setObjectName(_device, (uint64) computePipeline->pipeline, VK_OBJECT_TYPE_PIPELINE, descriptor.name);

@@ -27,7 +27,7 @@ namespace Trident {
 
 		result = _device->vkCreateSemaphore(_device->device, &semaphoreCreateInfo, nullptr, &semaphore->semaphore);
 
-		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create semaphore ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create semaphore ([]).", static_cast<sint32>(result));
 
 		return semaphore;
 	}
