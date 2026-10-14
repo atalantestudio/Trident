@@ -75,7 +75,7 @@ namespace Trident {
 					.position = {0.0f, 32.0f, -128.0f},
 					.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
 					.uniformScale = 33.0f,
-					.mass = 70.0_kg,
+					.mass = max<float32>(),
 					.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
 					.inertiaScale = {33.0f, 77.0f, 33.0f},
 					.friction = 0.2f,
