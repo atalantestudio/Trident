@@ -155,10 +155,9 @@ namespace Trident {
 					},
 				});
 
-				// TODO(asset-builder/map): Allow multiple carvings in the same face.
-				// Face& shortBlockTopFace = builder.carveFace(floorFace, SHORT_BLOCK_BOTTOM_VERTICES);
+				Face& shortBlockTopFace = builder.carveFace(floorFace, SHORT_BLOCK_BOTTOM_VERTICES);
 
-				// builder.extrudeFace(shortBlockTopFace, shortBlockTopFace.normal, SHORT_BLOCK_HEIGHT);
+				builder.extrudeFace(shortBlockTopFace, shortBlockTopFace.normal, SHORT_BLOCK_HEIGHT);
 
 				Face& tallBlockTopFace = builder.carveFace(floorFace, TALL_BLOCK_BOTTOM_VERTICES);
 

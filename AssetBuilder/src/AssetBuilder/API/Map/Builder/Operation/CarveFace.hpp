@@ -58,7 +58,7 @@ namespace Trident {
 
 		face.indices.resize(previousIndexCount + static_cast<uint32>(carvingVertexCount) + 2);
 
-		std::copy_n(&face.indices[0], previousIndexCount, &face.indices[previousIndexCount + carvingVertexCount - 2]);
+		std::copy_n(&face.indices[0], previousIndexCount, &face.indices[face.indices.size() - previousIndexCount]);
 
 		uint32 index = 0;
 		sint32 reverseCarvingIndex = static_cast<sint32>(carvingVertexCount);
