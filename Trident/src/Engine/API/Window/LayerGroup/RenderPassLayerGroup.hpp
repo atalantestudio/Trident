@@ -30,7 +30,13 @@ namespace Trident {
 		private:
 			uint32 getImageIndex(uint32 attachmentIndex) const;
 
-			void createFramebufferImageView(uint32 imageIndex, uint32 attachmentIndex, view<char8> name);
+			void createFramebufferImageView(
+				uint32 imageIndex,
+				uint32 attachmentIndex
+				#if defined(BUILD_MODE_DEBUG)
+					, view<char8> name
+				#endif
+			);
 
 		private:
 			ref<RenderPass> renderPass;

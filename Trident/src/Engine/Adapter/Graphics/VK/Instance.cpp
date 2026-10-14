@@ -74,6 +74,7 @@ namespace Trident {
 			#if defined(DEBUG_ENABLE_GRAPHICS_API_VALIDATION_LAYER)
 				"VK_LAYER_KHRONOS_validation",
 			#endif
+			nullptr,
 		};
 		static constexpr view<const char8*> ENABLED_LAYER_NAMES = ENABLED_LAYER_NAMES_;
 
@@ -145,7 +146,7 @@ namespace Trident {
 
 		instanceCreateInfo.flags = 0;
 		instanceCreateInfo.pApplicationInfo = &applicationInfo;
-		instanceCreateInfo.enabledLayerCount = static_cast<uint32>(ENABLED_LAYER_NAMES.count());
+		instanceCreateInfo.enabledLayerCount = static_cast<uint32>(ENABLED_LAYER_NAMES.count() - 1);
 		instanceCreateInfo.ppEnabledLayerNames = &ENABLED_LAYER_NAMES[0];
 
 		std::vector<const char8*> enabledExtensionNames;

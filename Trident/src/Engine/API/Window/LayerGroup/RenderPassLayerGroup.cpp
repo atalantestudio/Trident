@@ -114,7 +114,13 @@ namespace Trident {
 					name = Logger::format("Color attachment [] view", colorAttachmentReference.index);
 				#endif
 
-				createFramebufferImageView(imageIndex, colorAttachmentReference.index, name);
+				createFramebufferImageView(
+					imageIndex,
+					colorAttachmentReference.index
+					#if defined(DEBUG_OBJECT_NAME)
+						, name
+					#endif
+				);
 
 				colorAttachmentReferenceIndex += 1;
 			}
@@ -142,7 +148,13 @@ namespace Trident {
 					name = "Depth stencil view";
 				#endif
 
-				createFramebufferImageView(imageIndex, subpass.depthStencilAttachmentReference.index, name);
+				createFramebufferImageView(
+					imageIndex,
+					subpass.depthStencilAttachmentReference.index
+					#if defined(DEBUG_OBJECT_NAME)
+						, name
+					#endif
+				);
 			}
 
 			subpassIndex += 1;
@@ -214,7 +226,13 @@ namespace Trident {
 		return attachmentIndex;
 	}
 
-	void RenderPassLayerGroup::createFramebufferImageView(uint32 imageIndex, uint32 attachmentIndex, view<char8> name) {
+	void RenderPassLayerGroup::createFramebufferImageView(
+		uint32 imageIndex,
+		uint32 attachmentIndex
+		#if defined(DEBUG_OBJECT_NAME)
+			, view<char8> name
+		#endif
+	) {
 		framebufferImageViews[attachmentIndex] = framebufferImages[imageIndex]->createView({
 			.mipLevelOffset = 0,
 			.mipLevelCount = 1,
