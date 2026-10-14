@@ -61,8 +61,7 @@ namespace Trident {
 		rayTracingPipelineLayout = createRayTracingPipelineLayout();
 		postProcessingPipelineLayout = createPostProcessingPipelineLayout();
 		dilationPipelineLayout = createDilationPipelineLayout();
-		gBufferPipelines[0] = createGBufferPipeline(PolygonMode::FILL);
-		gBufferPipelines[1] = createGBufferPipeline(PolygonMode::LINE);
+		gBufferPipeline = createGBufferPipeline();
 		rayTracingPipeline = createRayTracingPipeline();
 		intermediateDilationPipeline = createIntermediateDilationPipeline();
 		horizontalBilateralFilterPipeline = createHorizontalBilateralFilterPipeline();
@@ -558,11 +557,7 @@ namespace Trident {
 		});
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, context.gBufferFramebuffer->getExtent());
-		commandEncoder->bindGraphicsPipeline(gBufferPipelines[0]);
-
-		encodeGBufferCommands(scene);
-
-		commandEncoder->bindGraphicsPipeline(gBufferPipelines[1]);
+		commandEncoder->bindGraphicsPipeline(gBufferPipeline);
 
 		encodeGBufferCommands(scene);
 

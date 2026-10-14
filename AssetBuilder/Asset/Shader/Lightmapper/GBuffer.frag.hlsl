@@ -43,7 +43,7 @@ FragmentOutput main(Interstage interstage) {
 	float3 projectC = planeProjection(p, interstage.positionC, interstage.normalC);
 	float3 p2 = b.x * projectA + b.y * projectB + b.z * projectC;
 
-	// TODO(asset-builder/lightmapper): Find a good interpolant.
+	// TODO(asset-builder/lightmapper/smooth-position): Find a good interpolant.
 	output.smoothPosition = float4(lerp(p2, p, 0.0001), interstage.triangleArea);
 
 	output.triangleNormal = float4(normalize(interstage.triangleNormal), halfDiagonalLuxelSize);

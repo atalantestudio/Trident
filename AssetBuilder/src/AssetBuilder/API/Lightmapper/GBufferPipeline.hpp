@@ -6,7 +6,7 @@
 #include "AssetBuilder/API/Lightmapper/Lightmapper.hpp"
 
 namespace Trident {
-	ref<GraphicsPipeline> Lightmapper::createGBufferPipeline(PolygonMode polygonMode) const {
+	ref<GraphicsPipeline> Lightmapper::createGBufferPipeline() const {
 		const ColorBlendAttachment colorBlendAttachments[] = {
 			{
 				.blend = false,
@@ -46,7 +46,7 @@ namespace Trident {
 				"Lightmapper/GBuffer.frag"
 			),
 			.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST,
-			.polygonMode = polygonMode,
+			.polygonMode = PolygonMode::FILL,
 			.cullMode = CullMode::NONE,
 			.frontFace = FrontFace::CLOCKWISE,
 			.lineWidth = 1.0f,

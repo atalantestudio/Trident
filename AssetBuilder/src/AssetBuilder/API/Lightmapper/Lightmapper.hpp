@@ -100,7 +100,7 @@ namespace Trident {
 			ref<PipelineLayout> createPostProcessingPipelineLayout() const;
 			ref<PipelineLayout> createDilationPipelineLayout() const;
 
-			ref<GraphicsPipeline> createGBufferPipeline(PolygonMode polygonMode) const;
+			ref<GraphicsPipeline> createGBufferPipeline() const;
 			ref<RayTracingPipeline> createRayTracingPipeline() const;
 			ref<ComputePipeline> createIntermediateDilationPipeline() const;
 			ref<ComputePipeline> createHorizontalBilateralFilterPipeline() const;
@@ -152,7 +152,7 @@ namespace Trident {
 			ref<PipelineLayout> postProcessingPipelineLayout;
 			ref<PipelineLayout> dilationPipelineLayout;
 
-			ref<GraphicsPipeline> gBufferPipelines[2];
+			ref<GraphicsPipeline> gBufferPipeline;
 			ref<RayTracingPipeline> rayTracingPipeline;
 			ref<ComputePipeline> intermediateDilationPipeline;
 			ref<ComputePipeline> horizontalBilateralFilterPipeline;

@@ -78,6 +78,7 @@ bool adjustSamplePosition(inout float3 p, float3 triangleNormal, float halfDiago
 }
 
 float3 sampleDirectLight(RayDesc primaryRay, Hit primaryHit, inout uint seed) {
+	const float EPSILON = 1e-4;
 	const float pdfDiffuse = 1.0 / (4.0 * PI);
 
 #if defined(CUSTOM_SCENE_DDGI_REF_0)
@@ -130,16 +131,16 @@ float3 sampleDirectLight(RayDesc primaryRay, Hit primaryHit, inout uint seed) {
 
 	float w = 1.0 - u - v;
 	uint2 coordinate = (a * u + b * v + c * w) * arguments.atlasSize;
-
 	float3 p = gBufferPositionImage[coordinate].rgb;
 	float3 op = p - primaryRay.Origin;
+	float t = length(op);
 	float area = gBufferSmoothPositionImage[coordinate].a;
 	float pdfLight = 1.0 / (area * arguments.emissiveTriangleCount);
 
 	RayDesc secondaryRay = primaryRay;
-	secondaryRay.Direction = normalize(op);
+	secondaryRay.Direction = op / t;
 
-	if (dot(primaryHit.vertexNormal, secondaryRay.Direction) < 0.0) {
+	if (dot(primaryHit.vertexNormal, secondaryRay.Direction) < EPSILON) {
 		return float3(0.0, 0.0, 0.0);
 	}
 
@@ -147,11 +148,11 @@ float3 sampleDirectLight(RayDesc primaryRay, Hit primaryHit, inout uint seed) {
 
 	TraceRay(accelerationStructure, RAY_FLAG_FORCE_OPAQUE | RAY_FLAG_CULL_BACK_FACING_TRIANGLES, 0xff, 0, 0, 0, secondaryRay, secondaryHit);
 
-	if (secondaryHit.triangleIndex != triangle_.index) {
+	if (secondaryHit.t > 0.0 && secondaryHit.t < t - EPSILON) {
 		return float3(0.0, 0.0, 0.0);
 	}
 
-	Material material = materialBuffer[secondaryHit.materialIndex];
+	Material material = materialBuffer[triangle_.materialIndex];
 
 	float angleA = dot(secondaryRay.Direction, primaryHit.vertexNormal);
 	float angleB = dot(secondaryRay.Direction, secondaryHit.vertexNormal);
