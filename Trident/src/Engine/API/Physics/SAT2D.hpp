@@ -21,7 +21,7 @@ namespace Trident {
 
 		// Support point on the incident body, in the direction opposite to the reference edge's normal.
 		// This is the closest point to the reference edge.
-		// TODO: This is only used in the Circle-ConvexHull implementation. Remove in ConvexHull-ConvexHull cases.
+		// TODO(physics/2d/sat): This is only used in the Circle-ConvexHull implementation. Remove in ConvexHull-ConvexHull cases.
 		vec2<float32> incidentSupportPoint;
 
 		const RigidBody2DComponent* referenceBody;
@@ -33,18 +33,18 @@ namespace Trident {
 
 	/// The Separating Axis Theorem algorithm in 2D.
 	/// See https://media.gdcvault.com/gdc2013/slides/822403Gregorius_Dirk_TheSeparatingAxisTest.pdf.
-	// TODO: Basic optimizations:
-	// - Don't test the same separating axis multiple times
-	// - Don't test parallel axes (https://dyn4j.org/2010/01/sat)
+	// TODO(physics/2d/sat): Optimize:
+	// - Don't test the same separating axis multiple times.
+	// - Don't test parallel axes (https://dyn4j.org/2010/01/sat).
 	// - Reuse the separation axis from the last run to make the algorithm O(1) in non-intersection cases.
 	//   But what if the separation axis changes e.g. due to rotation?
 	SAT2DOutput SAT2D(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB);
 
 	/// The Separating Axis Theorem algorithm in 2D.
 	// A has a circle geometry and B has a convex hull geometry.
-	// TODO: Basic optimizations:
-	// - Don't test the same separating axis multiple times
-	// - Don't test parallel axes (https://dyn4j.org/2010/01/sat)
+	// TODO(physics/2d/sat): Optimize:
+	// - Don't test the same separating axis multiple times.
+	// - Don't test parallel axes (https://dyn4j.org/2010/01/sat).
 	// - Reuse the separation axis from the last run to make the algorithm O(1) in non-intersection cases.
 	//   But what if the separation axis changes e.g. due to rotation?
 	SAT2DOutput SATCircleConvexHull2D(const RigidBody2DComponent& circleBody, const RigidBody2DComponent& convexHullBody, const Hull2D& circleHull, const Hull2D& convexHullGeometry);

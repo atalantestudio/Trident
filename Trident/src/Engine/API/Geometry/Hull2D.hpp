@@ -42,7 +42,7 @@ namespace Trident {
 
 			/// Returns the farthest point on the hull along `d`.
 			inline vec2<float32> support(vec2<float32> d) const {
-				// TODO: Replace with LUT.
+				// TODO(physics/2d/hull/support): Replace with LUT.
 				switch (type) {
 					case Hull2DType::CIRCLE: {
 						return normalized(d) * radius;
@@ -64,7 +64,7 @@ namespace Trident {
 			// Some geometries like CircleGeometry2D return more precise support points. In these cases `support` must be used.
 			/// Returns the index of the farthest point on the hull along `d`.
 			inline uint32 supportIndex(vec2<float32> d) const {
-				// TODO: Replace with LUT.
+				// TODO(physics/2d/hull/support): Replace with LUT.
 				switch (type) {
 					case Hull2DType::CIRCLE: {
 						ENGINE_ASSERT(false, "Use Geometry2D::support to get a support point on a circle geometry.");
@@ -112,10 +112,10 @@ namespace Trident {
 			// Vertex positions on the parent geometry.
 			view<vec2<float32>> vertices;
 
-			// TODO: Use 16-bit indices.
+			// TODO(physics/2d/hull): Use 16-bit indices.
 			range<uint32, uint32> lineIndexRange;
 
-			// TODO(physics/hull-edges): Replace with a view inside a contiguous buffer.
+			// TODO(physics/2d/hull): Replace with a view inside a contiguous buffer.
 			sequence<Edge2D> edges;
 	};
 }

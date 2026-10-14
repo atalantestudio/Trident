@@ -86,18 +86,22 @@ namespace Trident {
 		narrowPhase();
 		applyForces();
 		updateContactManifolds();
-		updateJoints();
+
+		// TODO(physics/2d/joint): Restore joints.
+		// updateJoints();
+
 		applyImpulses();
 		integrate();
 	}
 
 	const Hull2D& PhysicsSimulation2D::getHull(Entity entity) const {
+		const view<Hull2D>& hulls = scene->getHulls();
 		const Geometry2DComponent geometryComponent = scene->ecs.getComponent<Geometry2DComponent>(entity);
 		const Geometry2D& geometry = scene->getGeometries()[geometryComponent.geometryIndex];
 
-		ENGINE_ASSERT(geometry.hullIndex < scene->getHulls().count(), "The geometry doesn't have a hull.");
+		ENGINE_ASSERT(geometry.hullIndex < hulls.count(), "The geometry doesn't have a hull.");
 
-		return scene->getHulls()[geometry.hullIndex];
+		return hulls[geometry.hullIndex];
 	}
 
 	void PhysicsSimulation2D::broadPhase() {
@@ -319,12 +323,12 @@ namespace Trident {
 	}
 
 	void PhysicsSimulation2D::applyImpulses() {
-		const ComponentPool<ref<Constraint2D>>& constraintPool = scene->ecs.getComponentPool<ref<Constraint2D>>();
-		const ComponentPool<Joint2D>& jointPool = scene->ecs.getComponentPool<Joint2D>();
+		// const ComponentPool<ref<Constraint2D>>& constraintPool = scene->ecs.getComponentPool<ref<Constraint2D>>();
+		// const ComponentPool<Joint2D>& jointPool = scene->ecs.getComponentPool<Joint2D>();
 		vec2<float32> relativeVelocity;
 		uint32 iteration = 0;
-		uint32 constraintComponentIndex;
-		uint32 jointComponentIndex;
+		// uint32 constraintComponentIndex;
+		// uint32 jointComponentIndex;
 
 		while (iteration < SEQUENTIAL_IMPULSE_ITERATION_COUNT) {
 			for (std::pair<const EntityPair, ContactPair2D>& pair : contactPairs) {
@@ -394,7 +398,8 @@ namespace Trident {
 				}
 			}
 
-			constraintComponentIndex = 0;
+			// TODO(physics/2d/constraint): Restore constraints.
+			/* constraintComponentIndex = 0;
 
 			while (constraintComponentIndex < constraintPool.componentCount) {
 				const Entity entity = constraintPool.componentIndexToEntity[constraintComponentIndex];
@@ -403,9 +408,10 @@ namespace Trident {
 				constraint->update(&scene->ecs, deltaTime);
 
 				constraintComponentIndex += 1;
-			}
+			} */
 
-			jointComponentIndex = 0;
+			// TODO(physics/2d/joint): Restore joints.
+			/* jointComponentIndex = 0;
 
 			while (jointComponentIndex < jointPool.componentCount) {
 				const Entity entity = jointPool.componentIndexToEntity[jointComponentIndex];
@@ -424,7 +430,7 @@ namespace Trident {
 				rigidBodyB.applyImpulse(j, joint.rB);
 
 				jointComponentIndex += 1;
-			}
+			} */
 
 			iteration += 1;
 		}
