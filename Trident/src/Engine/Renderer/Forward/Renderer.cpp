@@ -78,7 +78,7 @@ namespace Trident {
 			.clearValues = {
 				{skyColor.x, skyColor.y, skyColor.z, 1.0f},
 				{
-					.depth = 1.0f,
+					.depth = 0.0f,
 					.stencil = 0,
 				},
 				#if FORWARD_SAMPLE_COUNT > 1

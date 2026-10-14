@@ -11,7 +11,7 @@
 namespace Trident {
 	#define FORWARD_SAMPLE_COUNT 4
 	// #define FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP
-	#define FORWARD_ENABLE_VERTEX_COLOR_GI
+	// #define FORWARD_ENABLE_VERTEX_COLOR_GI
 
 	struct ForwardCamera {
 		mat4x4<float32> projectionView;
