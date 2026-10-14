@@ -240,7 +240,7 @@ namespace Trident {
 					.normal = {0.0f, 1.0f, 0.0f},
 					.material = tileFloorMaterial,
 					.textureFiltering = {
-						.translation = {0.375f, 0.125f},
+						.translation = {0.375f, 0.75f},
 						.rotation = 0.0f,
 						.scale = {m1 * -0.25f, m1 * 0.25f},
 					},
@@ -262,7 +262,7 @@ namespace Trident {
 					.normal = {0.0f, 1.0f, 0.0f},
 					.material = tileFloorMaterial,
 					.textureFiltering = {
-						.translation = {0.625f, 0.375f},
+						.translation = {0.625f, 0.125f},
 						.rotation = 0.0f,
 						.scale = {m1 * -0.25f, m1 * 0.25f},
 					},
@@ -273,7 +273,7 @@ namespace Trident {
 					.normal = {0.0f, 1.0f, 0.0f},
 					.material = tileFloorMaterial,
 					.textureFiltering = {
-						.translation = {0.625f, 0.5f},
+						.translation = {0.625f, 0.125f},
 						.rotation = 0.0f,
 						.scale = {m1 * -0.25f, m1 * 0.25f},
 					},
