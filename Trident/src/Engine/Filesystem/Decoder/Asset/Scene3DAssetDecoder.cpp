@@ -28,7 +28,10 @@ namespace Trident {
 		ENGINE_ASSERT(indexByteSize == 4, "Only 32-bit indices are supported.");
 
 		const uint32 vertexCount = stream.read<uint32>();
+
+		// TODO(scene/3d): Remove static vertex count in the asset.
 		const uint32 staticVertexCount = stream.read<uint32>();
+
 		const uint32 bakedVertexCount = stream.read<uint32>();
 		const uint32 triangleCount = stream.read<uint32>();
 		const uint32 indexCount = triangleCount * 3;
@@ -105,9 +108,9 @@ namespace Trident {
 			stream.jump(asset.lightmapCoordinateRange.count);
 		}
 
-		uint32 instanceIndex = 0;
+		asset.entityInstanceOffset = 0;
 
-		while (instanceIndex < staticInstanceCount) {
+		while (asset.entityInstanceOffset < staticInstanceCount) {
 			const vec3<float32> position = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
 			const vec3<float32> rotation = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
 			const float32 scale = stream.read<float32>();
@@ -117,7 +120,7 @@ namespace Trident {
 				rotationAxisAngle<quat<float32>>(FORWARD, rotation[2])
 			);
 
-			Instance3D& instance = asset.instances[instanceIndex];
+			Instance3D& instance = asset.instances[asset.entityInstanceOffset];
 			instance.worldTransform = (
 				uniformScaling<mat4x4<float32>>(scale) *
 				mat4x4<float32>(orientation) *
@@ -131,7 +134,7 @@ namespace Trident {
 				instance.worldTransform[2][0], instance.worldTransform[2][1], instance.worldTransform[2][2]
 			}));
 
-			instanceIndex += 1;
+			asset.entityInstanceOffset += 1;
 		}
 
 		Vertex3D* vertices = pointer_cast<Vertex3D*>(&asset.geometryData[asset.vertexRange.offset]);
@@ -256,7 +259,7 @@ namespace Trident {
 
 			asset.rigidBodyFacePlaneCount += static_cast<uint32>(geometryAsset->hullFaces.count());
 
-			Instance3D& instance = asset.instances[instanceIndex + rigidBodyMapping.entity];
+			Instance3D& instance = asset.instances[asset.entityInstanceOffset + rigidBodyMapping.entity];
 			instance.worldTransform = component.world;
 			instance.normalTransform = component.calculateNormal();
 		}

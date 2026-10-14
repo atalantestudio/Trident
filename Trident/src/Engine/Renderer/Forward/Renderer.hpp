@@ -430,11 +430,15 @@ namespace Trident {
 			void render(ref<CommandEncoder> commandEncoder) const override;
 
 			void setInstanceWorldTransform(Entity entity, const mat4x4<float32>& worldTransform) const {
-				instanceMappedRange[entity].worldTransform = worldTransform;
+				const uint32 entityInstanceOffset = scene->getAsset()->entityInstanceOffset;
+
+				instanceMappedRange[entityInstanceOffset + entity].worldTransform = worldTransform;
 			}
 
 			void setInstanceNormalTransform(Entity entity, const mat3x3<float32>& normalTransform) const {
-				instanceMappedRange[entity].normalTransform = normalTransform;
+				const uint32 entityInstanceOffset = scene->getAsset()->entityInstanceOffset;
+
+				instanceMappedRange[entityInstanceOffset + entity].normalTransform = normalTransform;
 			}
 
 			void createFrameObjects() override;
