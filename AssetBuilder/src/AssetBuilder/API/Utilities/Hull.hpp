@@ -38,7 +38,10 @@ namespace Trident {
 	Hull2D createHull<Hull2DType::POLYGON>(const Geometry2D& geometry, std::vector<float32>& vertexComponentBuffer, std::vector<uint32>& indexBuffer) {
 		const uint32 indexOffset = static_cast<uint32>(indexBuffer.size());
 		const range<uint32, uint32> vertexPositionComponentRange = geometry.getVertexPositionComponentRange();
-		const view<vec2<float32>> vertices(pointer_cast<const vec2<float32>*>(&vertexComponentBuffer[vertexPositionComponentRange.offset]), vertexPositionComponentRange.count / 2);
+
+		vec2<float32>* vertices = pointer_cast<vec2<float32>*>(&vertexComponentBuffer[vertexPositionComponentRange.offset]);
+
+		const uint32 vertexCount = vertexPositionComponentRange.count / 2;
 		const uint32 lineIndexCount = vertexPositionComponentRange.count / 2 + 1;
 
 		indexBuffer.resize(indexBuffer.size() + lineIndexCount);
@@ -54,25 +57,33 @@ namespace Trident {
 		indexBuffer[indexOffset + lineIndexIndex] = 0;
 
 		vec2<float32> centroid = {0.0_m, 0.0_m};
-		float32 radius = 0.0_m;
+		uint32 vertexIndex = 0;
 
-		for (const vec2<float32> vertex : vertices) {
-			centroid += vertex;
+		while (vertexIndex < vertexCount) {
+			centroid += vertices[vertexIndex];
+
+			vertexIndex += 1;
 		}
 
-		centroid /= static_cast<float32>(vertices.count());
+		centroid /= static_cast<float32>(vertexCount);
 
-		for (const vec2<float32> vertex : vertices) {
-			radius = max(radius, distanceSquared(vertex, centroid));
+		float32 radius = 0.0_m;
+
+		vertexIndex = 0;
+
+		while (vertexIndex < vertexCount) {
+			radius = max(radius, distanceSquared(vertices[vertexIndex], centroid));
+
+			vertexIndex += 1;
 		}
 
 		radius = sqrt(radius);
 
 		return {
 			.type = Hull2DType::POLYGON,
-			.centroid = {centroid[0], centroid[1]},
+			.centroid = centroid,
 			.radius = radius,
-			.vertices = vertices,
+			.vertices = view<vec2<float32>>(vertices, vertexCount),
 			.lineIndexRange = {indexOffset, lineIndexCount},
 			.edges = {},
 		};

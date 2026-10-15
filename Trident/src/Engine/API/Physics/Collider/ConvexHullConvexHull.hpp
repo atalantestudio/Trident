@@ -21,28 +21,28 @@ namespace Trident {
 		const uint32 referenceLeftEdgeIndex = (static_cast<sint32>(sat.referenceEdgeIndex) - 1) % sat.referenceHull->edges.count();
 		const uint32 referenceRightEdgeIndex = (sat.referenceEdgeIndex + 1) % sat.referenceHull->edges.count();
 
-		const Edge2D referenceEdge = sat.referenceHull->edges[sat.referenceEdgeIndex];
 		const Edge2D referenceLeftEdge = sat.referenceHull->edges[referenceLeftEdgeIndex];
+		const Edge2D referenceEdge = sat.referenceHull->edges[sat.referenceEdgeIndex];
 		const Edge2D referenceRightEdge = sat.referenceHull->edges[referenceRightEdgeIndex];
 
+		const vec2<float32> referenceLeftEdgeA = sat.referenceHull->vertices[referenceLeftEdge.indexA];
 		const vec2<float32> referenceEdgeA = sat.referenceHull->vertices[referenceEdge.indexA];
 		const vec2<float32> referenceEdgeB = sat.referenceHull->vertices[referenceEdge.indexB];
-		const vec2<float32> referenceLeftEdgeA = sat.referenceHull->vertices[referenceLeftEdge.indexA];
 		const vec2<float32> referenceRightEdgeB = sat.referenceHull->vertices[referenceRightEdge.indexB];
 
 		const vec2<float32> referenceLeftEdgeNormal = edgeNormalClockwise(referenceLeftEdgeA, referenceEdgeA) * referenceRotation;
 		const vec2<float32> referenceRightEdgeNormal = edgeNormalClockwise(referenceEdgeB, referenceRightEdgeB) * referenceRotation;
 
-		const float32 referenceEdgeDistance = abs(signedDistanceLPAB(referenceEdgeA * sat.referenceBody->scale, referenceEdgeB * sat.referenceBody->scale, referenceCentroid));
-		const float32 referenceLeftEdgeDistance = abs(signedDistanceLPAB(referenceLeftEdgeA * sat.referenceBody->scale, referenceEdgeA * sat.referenceBody->scale, referenceCentroid));
-		const float32 referenceRightEdgeDistance = abs(signedDistanceLPAB(referenceEdgeB * sat.referenceBody->scale, referenceRightEdgeB * sat.referenceBody->scale, referenceCentroid));
+		const float32 referenceEdgeDistanceToCentroid = abs(signedDistanceLPAB(referenceEdgeA * sat.referenceBody->scale, referenceEdgeB * sat.referenceBody->scale, referenceCentroid));
+		const float32 referenceLeftEdgeDistanceToCentroid = abs(signedDistanceLPAB(referenceLeftEdgeA * sat.referenceBody->scale, referenceEdgeA * sat.referenceBody->scale, referenceCentroid));
+		const float32 referenceRightEdgeDistanceToCentroid = abs(signedDistanceLPAB(referenceEdgeB * sat.referenceBody->scale, referenceRightEdgeB * sat.referenceBody->scale, referenceCentroid));
 
 		ClipFeature2D incidentEdge = findIncidentEdge(*sat.incidentBody, *sat.incidentHull, sat.axis * rotationAngle<mat2x2<float32>>(-sat.incidentBody->rotation));
 		Plane2D plane;
 
 		// Clip against reference left edge.
 		plane.normal = referenceLeftEdgeNormal;
-		plane.offset = dot(sat.referenceBody->position, referenceLeftEdgeNormal) + referenceLeftEdgeDistance;
+		plane.offset = referenceLeftEdgeDistanceToCentroid + dot(sat.referenceBody->position, referenceLeftEdgeNormal);
 		incidentEdge = clipEdge(incidentEdge, plane, referenceLeftEdgeIndex);
 
 		if (incidentEdge.vertexCount < 2) {
@@ -51,7 +51,7 @@ namespace Trident {
 
 		// Clip against reference right edge.
 		plane.normal = referenceRightEdgeNormal;
-		plane.offset = dot(sat.referenceBody->position, referenceRightEdgeNormal) + referenceRightEdgeDistance;
+		plane.offset = referenceRightEdgeDistanceToCentroid + dot(sat.referenceBody->position, referenceRightEdgeNormal);
 		incidentEdge = clipEdge(incidentEdge, plane, referenceRightEdgeIndex);
 
 		if (incidentEdge.vertexCount < 2) {
@@ -61,14 +61,16 @@ namespace Trident {
 		contactManifold->normal = sat.axis;
 		contactManifold->contactCount = 0;
 
-		plane.normal = sat.axis;
-		plane.offset = dot(sat.referenceBody->position, sat.axis) + referenceEdgeDistance;
+		// Build a plane for the reference edge.
+		Plane2D referencePlane{};
+		referencePlane.normal = sat.axis;
+		referencePlane.offset = referenceEdgeDistanceToCentroid + dot(sat.referenceBody->position, sat.axis);
 
 		uint32 vertexIndex = 0;
 
 		while (vertexIndex < 2) {
 			const ClipVertex2D& clipVertex = incidentEdge.edge[vertexIndex];
-			const float32 separation = signedDistance(clipVertex.position, plane);
+			const float32 separation = signedDistance(clipVertex.position, referencePlane);
 
 			// Keep vertices that are below the reference plane.
 			if (separation <= 0.0f) {
