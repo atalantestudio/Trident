@@ -20,27 +20,24 @@ namespace Trident {
 
 		const uint16 edgeCount = static_cast<uint16>(incidentHull.edges.count());
 
-		float32 angle;
 		float32 minAngle = max<float32>();
 		uint32 incidentEdgeIndex = 0;
-		uint32 edgeIndex = 0;
+		uint16 edgeIndex = 0;
 
 		while (edgeIndex < edgeCount) {
 			const Edge2D edge = incidentHull.edges[edgeIndex];
 			const vec2<float32> a = incidentHull.vertices[edge.indexA];
 			const vec2<float32> b = incidentHull.vertices[edge.indexB];
 			const vec2<float32> d = perpendicularLeft(b - a);
-
-			angle = dot(d, referenceEdgeNormal);
+			const float32 angle = dot(d, referenceEdgeNormal);
 
 			if (angle < minAngle) {
 				minAngle = angle;
+				incidentEdgeIndex = edgeIndex;
 
 				// TODO(physics/2d/incident-edge-vertex-order): Why is the simulation unstable when a and b are inverted?
 				incidentEdge.edge[0].position = b;
 				incidentEdge.edge[1].position = a;
-
-				incidentEdgeIndex = edgeIndex;
 			}
 
 			edgeIndex += 1;

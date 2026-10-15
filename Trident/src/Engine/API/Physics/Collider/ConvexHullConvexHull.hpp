@@ -17,7 +17,6 @@ namespace Trident {
 
 		const vec2<float32> referenceCentroid = sat.referenceHull->centroid;
 		const mat2x2<float32> referenceRotation = rotationAngle<mat2x2<float32>>(sat.referenceBody->rotation);
-		const mat2x2<float32> inverseIncidentRotation = rotationAngle<mat2x2<float32>>(-sat.incidentBody->rotation);
 
 		const uint32 referenceLeftEdgeIndex = (static_cast<sint32>(sat.referenceEdgeIndex) - 1) % sat.referenceHull->edges.count();
 		const uint32 referenceRightEdgeIndex = (sat.referenceEdgeIndex + 1) % sat.referenceHull->edges.count();
@@ -29,18 +28,16 @@ namespace Trident {
 		const vec2<float32> referenceEdgeA = sat.referenceHull->vertices[referenceEdge.indexA];
 		const vec2<float32> referenceEdgeB = sat.referenceHull->vertices[referenceEdge.indexB];
 		const vec2<float32> referenceLeftEdgeA = sat.referenceHull->vertices[referenceLeftEdge.indexA];
-		const vec2<float32> referenceLeftEdgeB = sat.referenceHull->vertices[referenceLeftEdge.indexB];
-		const vec2<float32> referenceRightEdgeA = sat.referenceHull->vertices[referenceRightEdge.indexA];
 		const vec2<float32> referenceRightEdgeB = sat.referenceHull->vertices[referenceRightEdge.indexB];
 
-		const vec2<float32> referenceLeftEdgeNormal = edgeNormalClockwise(referenceLeftEdgeA, referenceLeftEdgeB) * referenceRotation;
-		const vec2<float32> referenceRightEdgeNormal = edgeNormalClockwise(referenceRightEdgeA, referenceRightEdgeB) * referenceRotation;
+		const vec2<float32> referenceLeftEdgeNormal = edgeNormalClockwise(referenceLeftEdgeA, referenceEdgeA) * referenceRotation;
+		const vec2<float32> referenceRightEdgeNormal = edgeNormalClockwise(referenceEdgeB, referenceRightEdgeB) * referenceRotation;
 
 		const float32 referenceEdgeDistance = abs(signedDistanceLPAB(referenceEdgeA * sat.referenceBody->scale, referenceEdgeB * sat.referenceBody->scale, referenceCentroid));
-		const float32 referenceLeftEdgeDistance = abs(signedDistanceLPAB(referenceLeftEdgeA * sat.referenceBody->scale, referenceLeftEdgeB * sat.referenceBody->scale, referenceCentroid));
-		const float32 referenceRightEdgeDistance = abs(signedDistanceLPAB(referenceRightEdgeA * sat.referenceBody->scale, referenceRightEdgeB * sat.referenceBody->scale, referenceCentroid));
+		const float32 referenceLeftEdgeDistance = abs(signedDistanceLPAB(referenceLeftEdgeA * sat.referenceBody->scale, referenceEdgeA * sat.referenceBody->scale, referenceCentroid));
+		const float32 referenceRightEdgeDistance = abs(signedDistanceLPAB(referenceEdgeB * sat.referenceBody->scale, referenceRightEdgeB * sat.referenceBody->scale, referenceCentroid));
 
-		ClipFeature2D incidentEdge = findIncidentEdge(*sat.incidentBody, *sat.incidentHull, sat.axis * inverseIncidentRotation);
+		ClipFeature2D incidentEdge = findIncidentEdge(*sat.incidentBody, *sat.incidentHull, sat.axis * rotationAngle<mat2x2<float32>>(-sat.incidentBody->rotation));
 		Plane2D plane;
 
 		// Clip against reference left edge.

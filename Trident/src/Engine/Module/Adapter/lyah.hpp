@@ -82,7 +82,7 @@ namespace Trident {
 		};
 	}
 
-	/// Calculates the signed distance between a point and an infinite line represented by two points.
+	/// Calculates the signed distance between a point `p` and an infinite line represented by `a` and `b`.
 	inline float32 signedDistanceLPAB(vec2<float32> a, vec2<float32> b, vec2<float32> p) {
 		const vec2<float32> ab = b - a;
 		const vec2<float32> ap = p - a;
