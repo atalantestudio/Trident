@@ -70,7 +70,7 @@ namespace Trident {
 		contactPair.manifold.normal = newContactManifold.normal;
 	}
 
-	PhysicsSimulation2D::PhysicsSimulation2D(const Descriptor<PhysicsSimulation2D>& descriptor) :
+	PhysicsSimulation2D::PhysicsSimulation2D(const PhysicsSimulation2DDescriptor& descriptor) :
 		scene(descriptor.scene),
 		deltaTime(static_cast<float32>(descriptor.deltaTime)),
 		inverseDeltaTime(static_cast<float32>(1.0 / descriptor.deltaTime))

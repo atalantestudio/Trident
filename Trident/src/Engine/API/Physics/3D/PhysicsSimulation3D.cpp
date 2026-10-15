@@ -16,7 +16,7 @@ namespace Trident {
 		return rigidBodyB.linearVelocity + cross(rB, rigidBodyB.angularVelocity) - rigidBodyA.linearVelocity - cross(rA, rigidBodyA.angularVelocity);
 	}
 
-	PhysicsSimulation3D::PhysicsSimulation3D(const Descriptor<PhysicsSimulation3D>& descriptor) :
+	PhysicsSimulation3D::PhysicsSimulation3D(const PhysicsSimulation3DDescriptor& descriptor) :
 		scene(descriptor.scene),
 		deltaTime(static_cast<float32>(descriptor.deltaTime)),
 		inverseDeltaTime(static_cast<float32>(1.0 / descriptor.deltaTime)),

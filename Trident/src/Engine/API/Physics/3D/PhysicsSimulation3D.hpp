@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "Engine/API/Descriptor.hpp"
 #include "Engine/API/Physics/3D/ContactPair3D.hpp"
 #include "Engine/API/Scene/Scene3D.hpp"
 #include "Engine/ECS/EntityPair.hpp"
@@ -12,10 +11,7 @@ namespace Trident {
 	#define ENABLE_PHYSICS_3D_IMPULSE_ACCUMULATION
 	// #define ENABLE_PHYSICS_3D_WARM_STARTING
 
-	class PhysicsSimulation3D;
-
-	template<>
-	struct Descriptor<PhysicsSimulation3D> {
+	struct PhysicsSimulation3DDescriptor {
 		Scene3D* scene;
 		float64 deltaTime;
 
@@ -32,7 +28,7 @@ namespace Trident {
 
 		public:
 			/// Constructs a physics simulation for the provided scene.
-			explicit PhysicsSimulation3D(const Descriptor<PhysicsSimulation3D>& descriptor);
+			explicit PhysicsSimulation3D(const PhysicsSimulation3DDescriptor& descriptor);
 
 			/// Advances the simulation by a single tick.
 			void tick();
