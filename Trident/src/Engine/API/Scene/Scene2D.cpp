@@ -124,11 +124,15 @@ namespace Trident {
 	void Scene2D::loadEntityComponentMappings() {
 		ecs.registerComponentPool<Geometry2DComponent>();
 
-		// TODO(ecs/scene-components): Transform2DComponent for static meshes?
+		// TODO(scene/2d/ecs/scene-components): Transform2DComponent for static meshes?
 		ecs.registerComponentPool<RigidBody2DComponent>();
 
-		ecs.registerComponentPool<Joint2D>();
-		ecs.registerComponentPool<ref<Constraint2D>>();
+		// TODO(physics/2d/joint): Restore joints.
+		// ecs.registerComponentPool<Joint2D>();
+
+		// TODO(physics/2d/constraint): Restore constraints.
+		// ecs.registerComponentPool<ref<Constraint2D>>();
+
 		ecs.registerTagPool<DynamicEntityTag>();
 		ecs.registerTagPool<StaticEntityTag>();
 
@@ -163,7 +167,7 @@ namespace Trident {
 		}
 	}
 
-	// TODO: Restore joint constraints.
+	// TODO(physics/2d/joint): Restore joint constraints.
 	/* void Scene2D::createJoint(const Joint2DDescriptor& descriptor) {
 		const Entity entity = ecs.createEntity();
 		const RigidBody2DComponent& rigidBodyA = ecs.getComponent<RigidBody2DComponent>(descriptor.A);

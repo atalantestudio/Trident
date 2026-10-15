@@ -29,6 +29,9 @@ namespace Trident {
 			void loadGeometries();
 			void loadEntityComponentMappings();
 
+			// TODO(physics/2d/joint): Restore joint constraints.
+			// void createJoint(const Joint2DDescriptor& descriptor);
+
 		private:
 			ref<Scene2DAsset> asset;
 			sequence<Geometry2D> geometries;
