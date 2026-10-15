@@ -17,7 +17,7 @@ namespace Trident {
 				static constexpr uint32 entityCount = 11;
 
 				sequence<EntityComponentMapping<Geometry2DComponent>> geometryMappings(entityCount);
-
+				sequence<EntityComponentMapping<RigidBody2DComponent>> rigidBodyMappings(entityCount);
 				Entity entity = 0;
 
 				while (entity < geometryMappings.count()) {
@@ -25,8 +25,6 @@ namespace Trident {
 
 					entity += 1;
 				}
-
-				sequence<EntityComponentMapping<RigidBody2DComponent>> rigidBodyMappings(entityCount);
 
 				// Floor
 				rigidBodyMappings[0] = {
@@ -45,7 +43,7 @@ namespace Trident {
 				Descriptor<RigidBody2DComponent> boxDescriptor = {
 					.rotation = 0.0_rad,
 					.scale = {1.0f, 1.0f},
-					.mass = 10.0_kg,
+					.mass = 1.0_kg,
 					.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
 					.friction = 0.2f,
 					.restitution = 0.0f,
@@ -54,7 +52,7 @@ namespace Trident {
 				uint32 boxIndex = 0;
 
 				while (boxIndex < 10) {
-					boxDescriptor.position = {0.0_m, 0.51_m + boxIndex * 1.05f};
+					boxDescriptor.position = {0.0_m, boxIndex * 1.05f + 0.51_m};
 
 					rigidBodyMappings[boxIndex + 1] = {boxIndex + 1, createRigidBody(boxDescriptor)};
 

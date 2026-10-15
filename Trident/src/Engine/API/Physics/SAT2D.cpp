@@ -45,6 +45,9 @@ namespace Trident {
 		}
 	}
 
+	// TODO(ci/debugger/undefined-identifier)
+	// `output` cannot be debugged because "an unspecified error occurs".
+	// See https://developercommunity.visualstudio.com/t/When-a-custom-function-returns-a-custom-/10422600.
 	SAT2DOutput SAT2D(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB) {
 		SAT2DOutput output{};
 		output.separation = min<float32>();

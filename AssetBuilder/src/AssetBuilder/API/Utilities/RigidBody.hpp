@@ -35,21 +35,20 @@ namespace Trident {
 					break;
 				}
 				case MomentOfInertia2D::THIN_SOLID_DISK: {
-					ENGINE_ASSERT(component.scale[0] == component.scale[1], "Ellipsoid shapes are not supported.");
+					ENGINE_ASSERT(component.scale.x == component.scale.y, "Ellipsoid shapes are not supported.");
 
-					const float32 r = component.scale[0];
+					const float32 r = component.scale.x;
 
-					// NOTE: The object is assumed to have a unit circle geometry. The same scaling must be applied to both axes.
+					// The object is assumed to have a unit circle geometry. The same scaling must be applied to both axes.
 					I = m * r * r / 2.0f;
 
 					break;
 				}
 				case MomentOfInertia2D::THIN_RECTANGULAR_PLATE: {
-					const float32 w = component.scale[0];
-					const float32 h = component.scale[1];
+					const float32 area = dot(component.scale, component.scale);
 
-					// NOTE: The object is assumed to have a unit square geometry. The axis of rotation is at the center.
-					I = m * (w * w + h * h) / 12.0f;
+					// The object is assumed to have a unit square geometry. The axis of rotation is at the center.
+					I = m * area / 12.0f;
 
 					break;
 				}

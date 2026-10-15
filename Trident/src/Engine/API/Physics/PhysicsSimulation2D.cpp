@@ -241,15 +241,17 @@ namespace Trident {
 				{
 					const float32 rnA = dot(contact.rA, contactPair.manifold.normal);
 					const float32 rnB = dot(contact.rB, contactPair.manifold.normal);
+					const float32 normal = inverseMassSum + rigidBodyA.inverseInertia * (rArA - rnA * rnA) + rigidBodyB.inverseInertia * (rBrB - rnB * rnB);
 
-					contact.massNormal = 1.0f / ((rArA - rnA * rnA) * rigidBodyA.inverseInertia + (rBrB - rnB * rnB) * rigidBodyB.inverseInertia + inverseMassSum);
+					contact.massNormal = 1.0f / normal;
 				}
 
 				{
 					const float32 rtA = dot(contact.rA, contactPair.manifold.tangent);
 					const float32 rtB = dot(contact.rB, contactPair.manifold.tangent);
+					const float32 tangent = inverseMassSum + rigidBodyA.inverseInertia * (rArA - rtA * rtA) + rigidBodyB.inverseInertia * (rBrB - rtB * rtB);
 
-					contact.massTangent = 1.0f / ((rArA - rtA * rtA) * rigidBodyA.inverseInertia + (rBrB - rtB * rtB) * rigidBodyB.inverseInertia + inverseMassSum);
+					contact.massTangent = 1.0f / tangent;
 				}
 
 				const float32 penetrationBias = (hullA.getPenetrationBias() + hullB.getPenetrationBias()) * 0.5f;

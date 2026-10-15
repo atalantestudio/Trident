@@ -148,14 +148,14 @@ namespace Trident {
 			ecs.setComponent<Geometry2DComponent>(geometryMapping.entity, geometryMapping.component);
 		}
 
-		for (const EntityComponentMapping<RigidBody2DComponent>& rigidBodyMapping : asset->rigidBodyMappings) {
-			ecs.setComponent<RigidBody2DComponent>(rigidBodyMapping.entity, rigidBodyMapping.component);
-
+		for (EntityComponentMapping<RigidBody2DComponent>& rigidBodyMapping : asset->rigidBodyMappings) {
 			const Geometry2DComponent geometryComponent = ecs.getComponent<Geometry2DComponent>(rigidBodyMapping.entity);
 			const Geometry2D& geometry = geometries[geometryComponent.geometryIndex];
 			const Hull2D& hull = hulls[geometry.hullIndex];
 
-			ecs.getComponent<RigidBody2DComponent>(rigidBodyMapping.entity).updateWorld(hull.centroid);
+			rigidBodyMapping.component.updateWorld(hull.centroid);
+
+			ecs.setComponent<RigidBody2DComponent>(rigidBodyMapping.entity, rigidBodyMapping.component);
 
 			// TODO(debug-only)
 			if (rigidBodyMapping.component.inverseMass == 0.0_kg) {
