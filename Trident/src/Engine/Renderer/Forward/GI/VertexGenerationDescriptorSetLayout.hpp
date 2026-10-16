@@ -43,6 +43,13 @@ namespace Trident {
 					.descriptorCount = 1,
 					.stageFlags = ShaderStage::COMPUTE,
 				},
+
+				// GI indirect
+				{
+					.descriptorType = DescriptorType::READ_WRITE_STORAGE_BUFFER,
+					.descriptorCount = 1,
+					.stageFlags = ShaderStage::COMPUTE,
+				},
 			};
 
 			return createDescriptorSetLayout({

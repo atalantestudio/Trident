@@ -13,8 +13,10 @@ struct Vertex {
 };
 
 struct GIVertex {
-	vec3 position;
-	uint _;
+	vec4 position;
+	vec4 a;
+	vec4 b;
+	vec4 c;
 };
 
 struct PointLight {
@@ -22,6 +24,21 @@ struct PointLight {
 	float intensity;
 	vec3 position;
 };
+
+struct Plane {
+	vec3 offset;
+	vec3 normal;
+};
+
+struct DrawIndirectCommand {
+	uint vertexCount;
+	uint instanceCount;
+	uint vertexOffset;
+	uint instanceOffset;
+};
+
+const vec3 LIGHT_NORMAL = vec3(0.0, -1.0, 0.0);
+const vec2 LIGHT_SIZE = vec2(16.0, 16.0);
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
@@ -41,6 +58,10 @@ layout(set = 0, binding = 4) buffer writeonly GIVertexBuffer {
 	GIVertex giVertices[];
 };
 
+layout(set = 0, binding = 5) buffer GIIndirectBuffer {
+	DrawIndirectCommand drawCommand;
+};
+
 vec3 loadVertexPosition(uint index) {
 	Vertex vertex = vertices[index];
 
@@ -48,75 +69,103 @@ vec3 loadVertexPosition(uint index) {
 }
 
 // See https://stackoverflow.com/a/23976134/17136841.
-bool rayPlaneIntersection(vec3 rayOrigin, vec3 rayDirection, vec3 planeNormal, vec3 planeCenter, inout vec3 i) {
-	float d = dot(planeNormal, rayDirection);
+vec3 rayPlaneIntersection(vec3 rayOrigin, vec3 rayDirection, Plane plane) {
+	float d = dot(plane.normal, rayDirection);
 
 	if (abs(d) > 0.0001) {
-		float t = dot(planeCenter - rayOrigin, planeNormal) / d;
+		float t = dot(plane.offset - rayOrigin, plane.normal) / d;
 
 		if (t >= 0.0001) {
-			i = rayOrigin + rayDirection * t;
-
-			return true;
+			return rayOrigin + rayDirection * t;
 		}
 	}
 
-	return false;
+	return rayOrigin;
 }
 
 void main() {
-	const uint CASTER_INDEX_OFFSET = 6;
-	const uint RECEIVER_INDEX_OFFSET = 0;
+	const uint triangleCount = 4;
+	const uint pointLightIndex = 0;
 
-	uint pointLightIndex = 0;
-	uint triangleIndex = gl_GlobalInvocationID.x;
-	uint indexOffset = triangleIndex * 3;
+	uint casterTriangleIndex = gl_GlobalInvocationID.x;
+
+	if (casterTriangleIndex >= triangleCount) {
+		return;
+	}
 
 	vec3 p = pointLights[pointLightIndex].position;
 
-	uint casterIndexOffset = CASTER_INDEX_OFFSET + indexOffset;
+	uint casterIndexOffset = casterTriangleIndex * 3;
 	uint casterIndexA = indices[casterIndexOffset + 0];
 	uint casterIndexB = indices[casterIndexOffset + 1];
 	uint casterIndexC = indices[casterIndexOffset + 2];
 
-	vec3 a = loadVertexPosition(casterIndexA);
-	vec3 b = loadVertexPosition(casterIndexB);
-	vec3 c = loadVertexPosition(casterIndexC);
+	vec3 aC = loadVertexPosition(casterIndexA);
+	vec3 bC = loadVertexPosition(casterIndexB);
+	vec3 cC = loadVertexPosition(casterIndexC);
 
-	if (dot(b - a, p - a) < 0.0) {
-		giVertices[indexOffset + 0].position = vec3(0.0, 0.0, 0.0);
-		giVertices[indexOffset + 1].position = vec3(0.0, 0.0, 0.0);
-		giVertices[indexOffset + 2].position = vec3(0.0, 0.0, 0.0);
+	vec3 normalC = normalize(cross(bC - aC, cC - aC));
 
+	// The caster can't have a shadow if it points towards the light.
+	if (dot(normalC, LIGHT_NORMAL) < 0.0) {
 		return;
 	}
 
-	uint receiverIndexOffset = RECEIVER_INDEX_OFFSET;// + indexOffset;
-	uint receiverIndexA = indices[receiverIndexOffset + 0];
-	uint receiverIndexB = indices[receiverIndexOffset + 1];
-	uint receiverIndexC = indices[receiverIndexOffset + 2];
+	vec3 paC = normalize(aC - p);
+	vec3 pbC = normalize(bC - p);
+	vec3 pcC = normalize(cC - p);
 
-	vec3 d = loadVertexPosition(receiverIndexA);
-	vec3 e = loadVertexPosition(receiverIndexB);
-	vec3 f = loadVertexPosition(receiverIndexC);
+	uint receiverTriangleIndex = 0;
 
-	// vec3 planeNormal = normalize(cross(normalize(e - d), normalize(f - d)));
-	vec3 planeNormal = vec3(0.0, 1.0, 0.0);
-	vec3 planeCenter = vec3(0.0, 0.0, 0.0);
+	while (receiverTriangleIndex < triangleCount) {
+		if (receiverTriangleIndex == casterTriangleIndex) {
+			receiverTriangleIndex += 1;
 
-	vec3 pa = normalize(a - p);
-	vec3 pb = normalize(b - p);
-	vec3 pc = normalize(c - p);
+			continue;
+		}
 
-	vec3 a2 = a;
-	vec3 b2 = b;
-	vec3 c2 = c;
+		uint receiverIndexOffset = receiverTriangleIndex * 3;
+		uint receiverIndexA = indices[receiverIndexOffset + 0];
+		uint receiverIndexB = indices[receiverIndexOffset + 1];
+		uint receiverIndexC = indices[receiverIndexOffset + 2];
 
-	rayPlaneIntersection(a, pa, planeNormal, planeCenter, a2);
-	rayPlaneIntersection(b, pb, planeNormal, planeCenter, b2);
-	rayPlaneIntersection(c, pc, planeNormal, planeCenter, c2);
+		vec3 aR = loadVertexPosition(receiverIndexA);
+		vec3 bR = loadVertexPosition(receiverIndexB);
+		vec3 cR = loadVertexPosition(receiverIndexC);
 
-	giVertices[indexOffset + 0].position = c2;
-	giVertices[indexOffset + 1].position = b2;
-	giVertices[indexOffset + 2].position = a2;
+		Plane receiver;
+		receiver.normal = normalize(cross(bR - aR, cR - aR));
+
+		// The receiver can't have a shadow cast on it if it points away from the caster.
+		if (dot(normalC, receiver.normal) > 0.0) {
+			receiverTriangleIndex += 1;
+
+			continue;
+		}
+
+		receiver.offset = (aR + bR + cR) / 3;
+
+		vec3 a = rayPlaneIntersection(aC, paC, receiver);
+		vec3 b = rayPlaneIntersection(bC, pbC, receiver);
+		vec3 c = rayPlaneIntersection(cC, pcC, receiver);
+
+		uint vertexIndex = atomicAdd(drawCommand.vertexCount, 3);
+
+		giVertices[vertexIndex + 0].position = vec4(c, 1.0);
+		giVertices[vertexIndex + 0].a = vec4(aC, 1.0);
+		giVertices[vertexIndex + 0].b = vec4(bC, 1.0);
+		giVertices[vertexIndex + 0].c = vec4(cC, 1.0);
+
+		giVertices[vertexIndex + 1].position = vec4(b, 1.0);
+		giVertices[vertexIndex + 1].a = vec4(aC, 1.0);
+		giVertices[vertexIndex + 1].b = vec4(bC, 1.0);
+		giVertices[vertexIndex + 1].c = vec4(cC, 1.0);
+
+		giVertices[vertexIndex + 2].position = vec4(a, 1.0);
+		giVertices[vertexIndex + 2].a = vec4(aC, 1.0);
+		giVertices[vertexIndex + 2].b = vec4(bC, 1.0);
+		giVertices[vertexIndex + 2].c = vec4(cC, 1.0);
+
+		receiverTriangleIndex += 1;
+	}
 }

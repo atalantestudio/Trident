@@ -10,7 +10,9 @@ namespace Trident {
 		ref<GraphicsPipeline> ForwardRenderer::createGIShadingPipeline() const {
 			VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 			vertexInputBinding.registerAttribute<decltype(GIVertex::position)>();
-			vertexInputBinding.stride = sizeof(GIVertex);
+			vertexInputBinding.registerAttribute<decltype(GIVertex::a)>();
+			vertexInputBinding.registerAttribute<decltype(GIVertex::b)>();
+			vertexInputBinding.registerAttribute<decltype(GIVertex::c)>();
 
 			const ColorBlendAttachment colorBlendAttachments[] = {
 				{

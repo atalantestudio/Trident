@@ -11,7 +11,10 @@ namespace Trident {
 			commandEncoder->bindGraphicsPipeline(giShadingPipeline);
 			commandEncoder->bindVertexBuffer(0, giVertexBuffer, 0);
 			commandEncoder->bindDescriptorSets(giShadingPipelineLayout, 0, giVertexGenerationDescriptorSet);
-			commandEncoder->draw(6, 1, 0, 0);
+			commandEncoder->drawIndirect(giIndirectBuffer, 0, 1, 0);
+
+			// TODO(forward/vcgi)
+			giDrawCommand->vertexCount = 0;
 		}
 	#endif
 }

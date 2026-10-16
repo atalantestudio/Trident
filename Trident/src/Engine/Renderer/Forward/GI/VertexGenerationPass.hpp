@@ -11,8 +11,8 @@ namespace Trident {
 			commandEncoder->bindComputePipeline(giVertexGenerationPipeline);
 			commandEncoder->bindDescriptorSets(giVertexGenerationPipelineLayout, 0, giVertexGenerationDescriptorSet);
 
-			// TODO: Assuming 1 point light for now, each thread works on a single triangle.
-			commandEncoder->dispatch(2, 1, 1);
+			// TODO: Assuming 1 point light for now, each thread projects a single triangle for each light.
+			commandEncoder->dispatch(4, 1, 1);
 		}
 	#endif
 }

@@ -30,6 +30,7 @@
 
 #if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
 	#include "Engine/Renderer/Forward/GI/DescriptorSet.hpp"
+	#include "Engine/Renderer/Forward/GI/IndirectBuffer.hpp"
 	#include "Engine/Renderer/Forward/GI/ShadingPass.hpp"
 	#include "Engine/Renderer/Forward/GI/ShadingPipeline.hpp"
 	#include "Engine/Renderer/Forward/GI/ShadingPipelineLayout.hpp"

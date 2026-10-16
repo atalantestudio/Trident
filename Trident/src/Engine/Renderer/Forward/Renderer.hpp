@@ -3,16 +3,20 @@
 
 #pragma once
 
-#include "Engine/API/Camera/3D/PerspectiveCamera3D.hpp"
+#define FORWARD_SAMPLE_COUNT 4
+// #define FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP
+// #define FORWARD_ENABLE_VERTEX_COLOR_GI
+
 #include "Engine/API/Geometry/Instance.hpp"
+
+#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
+	#include "Engine/API/Graphics/DrawIndirectCommand.hpp"
+#endif
+
 #include "Engine/Renderer/Scene/BaseSceneRenderer.hpp"
 #include "Engine/Renderer/VisualizationMode.hpp"
 
 namespace Trident {
-	#define FORWARD_SAMPLE_COUNT 4
-	// #define FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP
-	// #define FORWARD_ENABLE_VERTEX_COLOR_GI
-
 	struct ForwardCamera {
 		mat4x4<float32> projectionView;
 		vec3<float32> position;
@@ -29,8 +33,10 @@ namespace Trident {
 		private:
 			#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
 				struct GIVertex {
-					vec3<float32> position;
-					uint32 _;
+					vec4<float32> position;
+					vec4<float32> a;
+					vec4<float32> b;
+					vec4<float32> c;
 				};
 			#endif
 
@@ -141,10 +147,16 @@ namespace Trident {
 				#endif
 
 				#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
+					giVertexBuffer = createGIVertexBuffer();
+					giIndirectBuffer = createGIIndirectBuffer();
+
+					giIndirectBufferView = giIndirectBuffer->createView<DrawIndirectCommand>(0, giIndirectBuffer->getSize());
+
+					giDrawCommand = giIndirectBufferView.map();
+					giDrawCommand->instanceCount = 1;
+
 					giVertexGenerationPipelineLayout = createGIVertexGenerationPipelineLayout();
 					giVertexGenerationPipeline = createGIVertexGenerationPipeline();
-					giVertexBuffer = createGIVertexBuffer();
-
 					giShadingPipelineLayout = createGIShadingPipelineLayout();
 					giShadingPipeline = createGIShadingPipeline();
 				#endif
@@ -533,6 +545,7 @@ namespace Trident {
 
 			#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
 				ref<Buffer> createGIVertexBuffer() const;
+				ref<Buffer> createGIIndirectBuffer() const;
 			#endif
 
 			ref<Buffer> createDebugHullWireframeBuffer(uint64 size) const;
@@ -671,6 +684,7 @@ namespace Trident {
 
 			#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
 				ref<Buffer> giVertexBuffer;
+				ref<Buffer> giIndirectBuffer;
 			#endif
 
 			ref<Buffer> debugHullWireframeBuffer;
@@ -713,7 +727,15 @@ namespace Trident {
 
 			BufferView<PointLight> pointLightBufferView;
 
+			#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
+				BufferView<DrawIndirectCommand> giIndirectBufferView;
+			#endif
+
 			Instance3D* instanceMappedRange = nullptr;
+
+			#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
+				DrawIndirectCommand* giDrawCommand = nullptr;
+			#endif
 
 		public:
 			vec3<float32>* debugContactRange = nullptr;

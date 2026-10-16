@@ -48,6 +48,13 @@ namespace Trident {
 					.bindingIndex = 4,
 					.descriptorBufferViews = giVertexBufferView,
 				},
+
+				// GI indirect
+				{
+					.descriptorSet = giVertexGenerationDescriptorSet,
+					.bindingIndex = 5,
+					.descriptorBufferViews = giIndirectBufferView,
+				},
 			};
 
 			getDevice()->updateDescriptorSets(writeDescriptorSets);
