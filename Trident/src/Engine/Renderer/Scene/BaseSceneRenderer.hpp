@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "Engine/API/Camera/3D/PerspectiveCamera3D.hpp"
 #include "Engine/API/Scene/Scene3D.hpp"
 #include "Engine/Renderer/3D/SceneRenderer.hpp"
 

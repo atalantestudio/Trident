@@ -20,6 +20,7 @@ namespace ProjectB {
 				registerLayer<ViewModelLayer>();
 				registerLayer<DebugMenuLayer>();
 
+				registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 2));
 				registerLayerGroup<UILayerGroup>(range<uint32, uint32>(2, 1));
 			}
 	};

@@ -4,7 +4,6 @@
 #pragma once
 
 #include "Engine/API/Camera/Controller/CameraController.hpp"
-#include "Engine/API/Scene/Scene3D.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace Trident {

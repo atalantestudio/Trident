@@ -3,6 +3,7 @@
 
 #include "pch.hpp"
 
+#include "Engine/API/Camera/3D/PerspectiveCamera3D.hpp"
 #include "Engine/Renderer/Forward/ColorImage.hpp"
 // #include "Engine/Renderer/Forward/DebugContactManifoldBuffer.hpp"
 // #include "Engine/Renderer/Forward/DebugContactManifoldPipeline.hpp"
