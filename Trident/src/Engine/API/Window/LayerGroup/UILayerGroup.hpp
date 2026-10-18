@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Engine/Renderer/Renderer.hpp"
 #include "Engine/API/Window/LayerGroup/RenderPassLayerGroup.hpp"
 
 namespace Trident {

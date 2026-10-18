@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Theme/DefaultTheme.hpp"
+#include "GUI/Theme/DefaultTheme.hpp"
 
 namespace Trident {
 	class GUIArticleLayer : public GUIDefaultTheme {

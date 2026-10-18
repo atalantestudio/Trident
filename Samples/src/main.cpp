@@ -3,6 +3,7 @@
 
 #include "pch.hpp"
 
+#include "Engine/API/Window/LayerGroup/UILayerGroup.hpp"
 #include "Engine/entry_point.hpp"
 
 #include "SampleApplication.hpp"
@@ -29,7 +30,6 @@
 #include "GUI/TextDebug.hpp"
 #include "GUI/TextInput.hpp"
 #include "GUI/TextSmoothness.hpp"
-#include "GUI/UILayerGroup.hpp"
 #include "GUI/UTF8.hpp"
 
 #include "Physics2D/Layer/SceneLayer.hpp"
