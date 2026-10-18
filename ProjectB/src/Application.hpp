@@ -8,11 +8,11 @@
 #include "Layer/SceneLayer.hpp"
 #include "Layer/ViewModelLayer.hpp"
 
-namespace Trident {
-	class ProjectBApplication : public Application {
+namespace ProjectB {
+	class Application : public Trident::Application {
 		public:
-			explicit ProjectBApplication(const ProjectDescriptor& projectDescriptor, uint32 argumentCount, char8** argumentValues) :
-				Application(projectDescriptor)
+			explicit Application(const ProjectDescriptor& projectDescriptor, uint32 argumentCount, char8** argumentValues) :
+				Trident::Application(projectDescriptor)
 			{
 				setConsoleArguments(argumentCount, argumentValues);
 

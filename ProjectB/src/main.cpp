@@ -7,14 +7,12 @@
 
 #include "Application.hpp"
 
-namespace Trident {
-	Application* createApplication(uint32 argumentCount, char8** argumentValues) {
-		const ProjectDescriptor projectDescriptor = {
-			.type = ProjectType::MAIN,
-			.name = "ProjectB",
-			.version = {0, 0, 0},
-		};
+Trident::Application* Trident::createApplication(uint32 argumentCount, char8** argumentValues) {
+	const ProjectDescriptor projectDescriptor = {
+		.type = ProjectType::MAIN,
+		.name = "ProjectB",
+		.version = {0, 0, 0},
+	};
 
-		return new ProjectBApplication(projectDescriptor, argumentCount, argumentValues);
-	}
+	return new ProjectB::Application(projectDescriptor, argumentCount, argumentValues);
 }

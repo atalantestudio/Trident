@@ -3,9 +3,9 @@
 
 #include "Engine/Layer/Layer.hpp"
 
-namespace Trident {
+namespace ProjectB {
 	// TODO(project-b/layer/view-model)
-	class ViewModelLayer : public Layer {
+	class ViewModelLayer : public Trident::Layer {
 		public:
 			void initialize() final override {}
 	};

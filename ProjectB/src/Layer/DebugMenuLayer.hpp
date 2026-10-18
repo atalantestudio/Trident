@@ -5,7 +5,7 @@
 
 #include "UI/DefaultTheme.hpp"
 
-namespace Trident {
+namespace ProjectB {
 	class DebugMenuLayer : public UIDefaultTheme {
 		public:
 			void registerAssets() override {
@@ -16,6 +16,8 @@ namespace Trident {
 
 		public:
 			void render() final override {
+				using namespace Trident;
+
 				Container({
 					.size = {256_px, FIT},
 					.padding = {8_px, 8_px, 8_px, 8_px},

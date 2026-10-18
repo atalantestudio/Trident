@@ -3,9 +3,9 @@
 
 #include "Engine/Layer/Layer.hpp"
 
-namespace Trident {
+namespace ProjectB {
 	// TODO(project-b/layer/scene)
-	class SceneLayer : public Layer {
+	class SceneLayer : public Trident::Layer {
 		public:
 			void initialize() final override {}
 	};

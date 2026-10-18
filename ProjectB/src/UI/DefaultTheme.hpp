@@ -5,7 +5,9 @@
 
 #include "Engine/API/GUI/GUILayer.hpp"
 
-namespace Trident {
+namespace ProjectB {
+	using namespace Trident;
+
 	class UIDefaultTheme : public GUILayer {
 		public:
 			void registerAssets() override {
