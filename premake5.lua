@@ -49,7 +49,7 @@ workspace "Trident"
 
 include "Trident"
 include "AssetBuilder"
-include "Editor"
+include "ProjectB"
 include "Samples"
 
 project "tslc"

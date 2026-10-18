@@ -4,7 +4,7 @@
 			"name": "Debug",
 			"includePath": [
 				"AssetBuilder/src",
-				"Editor/src",
+				"ProjectB/src",
 				"Samples/src",
 				"Trident/src",
 				"Trident/vendor/API",
@@ -24,7 +24,7 @@
 			"name": "Profile",
 			"includePath": [
 				"AssetBuilder/src",
-				"Editor/src",
+				"ProjectB/src",
 				"Samples/src",
 				"Trident/src",
 				"Trident/vendor/API",
@@ -44,7 +44,7 @@
 			"name": "Release",
 			"includePath": [
 				"AssetBuilder/src",
-				"Editor/src",
+				"ProjectB/src",
 				"Samples/src",
 				"Trident/src",
 				"Trident/vendor/API",

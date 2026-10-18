@@ -14,11 +14,11 @@
 			"console": "integratedTerminal"
 		},
 		{
-			"name": "Run Editor",
+			"name": "Run ProjectB",
 			"type": "cppvsdbg",
 			"request": "launch",
-			"program": "${workspaceFolder}/bin/windows_x86_64_${command:cpptools.activeConfigName}/Editor/Editor.exe",
-			"cwd": "${workspaceFolder}/bin/windows_x86_64_${command:cpptools.activeConfigName}/Editor",
+			"program": "${workspaceFolder}/bin/windows_x86_64_${command:cpptools.activeConfigName}/ProjectB/ProjectB.exe",
+			"cwd": "${workspaceFolder}/bin/windows_x86_64_${command:cpptools.activeConfigName}/ProjectB",
 			"console": "integratedTerminal"
 		},
 		{

@@ -1,4 +1,4 @@
-project "Editor"
+project "ProjectB"
 	location "."
 	kind "ConsoleApp"
 	language "C++"
@@ -20,7 +20,7 @@ project "Editor"
 
 	includedirs {
 		VULKAN_SDK .. "/Include",
-		"../Editor/src",
+		"../ProjectB/src",
 		"../Trident/src",
 		"../Trident/vendor/API",
 		"../Trident/vendor/Base",

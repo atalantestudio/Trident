@@ -48,9 +48,9 @@
 - 3D scene assets
 - Shader modules assets
 
-## Editor
+## Project B
 
-<!-- TODO(editor) -->
+<!-- TODO(test/project-b) -->
 
 ## Samples
 
