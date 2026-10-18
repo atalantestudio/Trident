@@ -29,7 +29,7 @@ namespace Trident {
 			static float64 getInverseFixedDeltaTime();
 
 		public:
-			explicit Application(const ProjectDescriptor& projectDescriptor);
+			explicit Application(const ProjectDescriptor& projectDescriptor, uint32 argumentCount, char8** argumentValues);
 
 			~Application();
 

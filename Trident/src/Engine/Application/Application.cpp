@@ -3,13 +3,6 @@
 
 #include "pch.hpp"
 
-// TODO
-#include "Engine/Adapter/Graphics/DX12/GraphicsAdapter.hpp"
-
-#include "Engine/API/Event/Mouse/MouseDownEvent.hpp"
-#include "Engine/API/Event/Mouse/MouseMoveEvent.hpp"
-#include "Engine/API/Event/Mouse/MouseUpEvent.hpp"
-#include "Engine/API/Event/Mouse/MouseWheelEvent.hpp"
 #include "Engine/Application/Application.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Renderer/Renderer.hpp"
@@ -23,7 +16,7 @@ namespace Trident {
 		return INVERSE_FIXED_DELTA_TIME;
 	}
 
-	Application::Application(const ProjectDescriptor& projectDescriptor) :
+	Application::Application(const ProjectDescriptor& projectDescriptor, uint32 argumentCount, char8** argumentValues) :
 		projectType(projectDescriptor.type)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
@@ -59,6 +52,8 @@ namespace Trident {
 			assetLibrary = new AssetLibrary(Filesystem::getProjectRootDirectory());
 			assetLibrary->loadAssetMap();
 		}
+
+		setConsoleArguments(argumentCount, argumentValues);
 	}
 
 	void Application::initializePropertyFile() {

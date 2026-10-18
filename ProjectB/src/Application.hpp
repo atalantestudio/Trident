@@ -12,10 +12,8 @@ namespace ProjectB {
 	class Application : public Trident::Application {
 		public:
 			explicit Application(const ProjectDescriptor& projectDescriptor, uint32 argumentCount, char8** argumentValues) :
-				Trident::Application(projectDescriptor)
+				Trident::Application(projectDescriptor, argumentCount, argumentValues)
 			{
-				setConsoleArguments(argumentCount, argumentValues);
-
 				registerLayer<SceneLayer>();
 				registerLayer<ViewModelLayer>();
 				registerLayer<DebugMenuLayer>();

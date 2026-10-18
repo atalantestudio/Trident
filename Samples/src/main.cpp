@@ -64,8 +64,8 @@
 #include "Sample3D/Layer/VisibilityLayer.hpp"
 
 namespace Trident {
-	SampleApplication::SampleApplication(const ProjectDescriptor& projectDescriptor) :
-		Application(projectDescriptor)
+	SampleApplication::SampleApplication(const ProjectDescriptor& projectDescriptor, uint32 argumentCount, char8** argumentValues) :
+		Application(projectDescriptor, argumentCount, argumentValues)
 	{
 		const view<char8> SampleGroupNameProperty = propertyFile->getProperty<view<char8>>("SampleGroupName");
 		const view<char8> SampleNameProperty = propertyFile->getProperty<view<char8>>("SampleName");
@@ -269,11 +269,12 @@ namespace Trident {
 	}
 
 	Application* createApplication(uint32 argumentCount, char8** argumentValues) {
-		ProjectDescriptor projectDescriptor{};
-		projectDescriptor.type = ProjectType::MAIN;
-		projectDescriptor.name = "Trident";
-		projectDescriptor.version = {1, 0, 0};
+		const ProjectDescriptor projectDescriptor = {
+			.type = ProjectType::MAIN,
+			.name = "Sample",
+			.version = {1, 0, 0},
+		};
 
-		return new SampleApplication(projectDescriptor);
+		return new SampleApplication(projectDescriptor, argumentCount, argumentValues);
 	}
 }

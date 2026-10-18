@@ -85,11 +85,9 @@ namespace Trident {
 	class AssetBuilderApplication : public Application {
 		public:
 			explicit AssetBuilderApplication(const ProjectDescriptor& projectDescriptor, uint32 argumentCount, char8** argumentValues) :
-				Application(projectDescriptor),
+				Application(projectDescriptor, argumentCount, argumentValues),
 				assetLibrary(static_cast<const char8*>(argumentValues[2]))
 			{
-				setConsoleArguments(argumentCount, argumentValues);
-
 				const std::filesystem::path rootOutputPath = static_cast<const char8*>(argumentValues[2]);
 				const std::filesystem::path assetMapOutputPath = (rootOutputPath / "Asset" / rootOutputPath.filename()).replace_extension("tam");
 

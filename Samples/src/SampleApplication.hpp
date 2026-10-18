@@ -8,6 +8,6 @@
 namespace Trident {
 	class SampleApplication : public Application {
 		public:
-			explicit SampleApplication(const ProjectDescriptor& projectDescriptor);
+			explicit SampleApplication(const ProjectDescriptor& projectDescriptor, uint32 argumentCount, char8** argumentValues);
 	};
 }
