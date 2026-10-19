@@ -13,7 +13,9 @@ namespace Trident {
 
 				updateThemeColors(false);
 
-				image = loadImageAsset("Cameraman");
+				const ref<ImageAsset> imageAsset = getApplication()->getAssetLibrary()->getAsset<ImageAsset>("Cameraman");
+
+				image = registerImage(imageAsset);
 			}
 
 			void render() override {

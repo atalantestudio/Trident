@@ -6,6 +6,7 @@
 #include "Engine/API/Graphics/ImageFormat.hpp"
 
 namespace Trident {
+	// TODO(simd): Replace with SIMD math.
 	/// These utilities provide unoptimized image format conversion and are not meant to be used in production builds.
 	template<ImageFormat InputFormat, ImageFormat OutputFormat>
 	void convert(view<uint8> inputData, uint8* outputData, uint64 outputDataCount);
@@ -16,10 +17,10 @@ namespace Trident {
 		uint64 outputChannelOffset = 0;
 
 		while (outputChannelOffset < outputDataCount) {
-			outputData[outputChannelOffset + 0] = inputData[inputChannelOffset + 0];
-			outputData[outputChannelOffset + 1] = 0;
-			outputData[outputChannelOffset + 2] = 0;
-			outputData[outputChannelOffset + 3] = 255;
+			outputData[outputChannelOffset + 0] = 255;
+			outputData[outputChannelOffset + 1] = 255;
+			outputData[outputChannelOffset + 2] = 255;
+			outputData[outputChannelOffset + 3] = inputData[inputChannelOffset];
 
 			inputChannelOffset += 1;
 			outputChannelOffset += 4;

@@ -3,15 +3,11 @@
 
 #include "Engine/API/GUI/GUILayer.hpp"
 
-#include "UI/DefaultTheme.hpp"
-
 namespace ProjectB {
-	class DebugMenuLayer : public UIDefaultTheme {
+	class DebugMenuLayer : public Trident::GUILayer {
 		public:
 			void registerAssets() override {
-				UIDefaultTheme::registerAssets();
-
-				updateThemeColors(true);
+				clearColor = 0x00000000;
 			}
 
 		public:
@@ -19,10 +15,8 @@ namespace ProjectB {
 				using namespace Trident;
 
 				Container({
-					.size = {256_px, FIT},
-					.padding = {8_px, 8_px, 8_px, 8_px},
-					.layoutDirection = LayoutDirection::VERTICAL,
-					.layoutSpacing = 8_px,
+					.size = {512_px, 512_px},
+					.color = 0x00000050,
 				}) {
 					// TODO(project-b/layer/debug-menu)
 				}

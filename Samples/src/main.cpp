@@ -19,7 +19,6 @@
 #include "GUI/Demo3.hpp"
 #include "GUI/DropDownMenu.hpp"
 #include "GUI/FrameStatisticsLayer.hpp"
-#include "GUI/Launch.hpp"
 #include "GUI/MenuBar.hpp"
 #include "GUI/OptionMenu.hpp"
 #include "GUI/PageMenu.hpp"
@@ -108,9 +107,6 @@ namespace Trident {
 			}
 			else if (SampleNameProperty == "DropDownMenu") {
 				registerLayer<GUIDropDownMenuLayer>();
-			}
-			else if (SampleNameProperty == "Launch") {
-				registerLayer<GUILaunchLayer>();
 			}
 			else if (SampleNameProperty == "PropertyPanel") {
 				registerLayer<GUIPropertyPanelLayer>();

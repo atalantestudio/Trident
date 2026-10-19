@@ -56,9 +56,11 @@ namespace Trident {
 			virtual void onMouseUpClient(MouseUpEvent& event) {}
 
 		protected:
-			// TODO(gui/load-assets): Make these methods available only inside GUILayer::registerAssets.
+			// TODO(gui/asset-loading): Make available only inside registerAssets.
 			FontID loadFontAsset(view<char8> assetName);
-			ImageID loadImageAsset(view<char8> assetName);
+
+			// TODO(gui/asset-loading): Make available only inside registerAssets.
+			ImageID registerImage(ref<ImageAsset> imageAsset);
 
 			void openComponent(GUIContainer& component, bool focusable);
 			void openContainer(const ContainerStyle& style, bool floating);

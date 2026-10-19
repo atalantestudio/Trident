@@ -9,7 +9,10 @@ namespace Trident {
 			void registerAssets() override {
 				fontBold = loadFontAsset("test-bold");
 				fontRegular = loadFontAsset("test-regular");
-				image = loadImageAsset("Cameraman");
+
+				const ref<ImageAsset> cameramanImageAsset = getApplication()->getAssetLibrary()->getAsset<ImageAsset>("Cameraman");
+
+				image = registerImage(cameramanImageAsset);
 			}
 
 			void render() override {

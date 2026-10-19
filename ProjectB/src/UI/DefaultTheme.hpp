@@ -6,9 +6,7 @@
 #include "Engine/API/GUI/GUILayer.hpp"
 
 namespace ProjectB {
-	using namespace Trident;
-
-	class UIDefaultTheme : public GUILayer {
+	class UIDefaultTheme : public Trident::GUILayer {
 		public:
 			void registerAssets() override {
 				fontBold = loadFontAsset("test-bold");

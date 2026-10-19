@@ -62,10 +62,8 @@ namespace Trident {
 		return fontId;
 	}
 
-	ImageID GUILayer::loadImageAsset(view<char8> assetName) {
+	ImageID GUILayer::registerImage(ref<ImageAsset> imageAsset) {
 		ENGINE_ASSERT(!renderer.doneFlushing(), "New images cannot be registered after flushing the GUI texture array.");
-
-		const ref<ImageAsset> imageAsset = getApplication()->getAssetLibrary()->getAsset<ImageAsset>(assetName);
 
 		return renderer.registerUserImage(imageAsset);
 	}

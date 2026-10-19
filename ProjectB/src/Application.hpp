@@ -6,6 +6,7 @@
 
 #include "Layer/DebugMenuLayer.hpp"
 #include "Layer/SceneLayer.hpp"
+#include "Layer/UILayer.hpp"
 
 namespace ProjectB {
 	class Application : public Trident::Application {
@@ -14,10 +15,11 @@ namespace ProjectB {
 				Trident::Application(projectDescriptor, argumentCount, argumentValues)
 			{
 				registerLayer<SceneLayer>();
+				registerLayer<UILayer>();
 				registerLayer<DebugMenuLayer>();
 
 				registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
-				registerLayerGroup<UILayerGroup>(range<uint32, uint32>(1, 1));
+				registerLayerGroup<UILayerGroup>(range<uint32, uint32>(1, 2));
 			}
 	};
 }
