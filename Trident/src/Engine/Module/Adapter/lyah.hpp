@@ -26,9 +26,13 @@ namespace Trident {
 	using lyah::lookAt;
 	using lyah::max;
 	using lyah::min;
+	using lyah::orthographic;
+	using lyah::orthographicScreen;
 	using lyah::parallelogramArea;
 	using lyah::perpendicularLeft;
 	using lyah::perpendicularRight;
+	using lyah::perspective;
+	using lyah::perspectiveReversedZ;
 	using lyah::pi;
 	using lyah::pow;
 	using lyah::radians;
@@ -121,69 +125,7 @@ namespace Trident {
 		return false;
 	}
 
-	// TODO(lyah/projection/orthographic-3x3): Add to Lyah.
-	inline mat3x3<float32> orthographicTopLeftOrigin(vec2<float32> viewport) {
-		return {
-			 2.0f / viewport[0],  0.0f,                0.0f,
-			 0.0f,               -2.0f / viewport[1],  0.0f,
-			-1.0f,                1.0f,                1.0f,
-		};
-	}
-
-	// TODO(lyah/projection): Add to Lyah.
-	/// Calculates and returns a perspective projection matrix.
-	inline mat4x4<float32> perspective(
-		/// Vertical field of view in radians.
-		float32 fieldOfView,
-
-		float32 aspectRatio,
-		float32 nearPlane,
-		float32 farPlane,
-
-		/// Coordinate system sign. 1 for left-handed and -1 for right-handed.
-		float32 C
-
-		// float32 bias = pi<float32>() * 0.5f
-	) {
-		DEBUG_ASSERT(nearPlane > 0.0f);
-		DEBUG_ASSERT(farPlane >= nearPlane);
-
-		const float32 f = tan(/* bias - */ fieldOfView * 0.5f);
-
-		return {
-			 1.0f / (aspectRatio * f),  0.0f,         0.0f,                                               0.0f,
-			 0.0f,                      1.0f / f,     0.0f,                                               0.0f,
-			 0.0f,                      0.0f,         farPlane / (farPlane - nearPlane),                  C,
-			 0.0f,                      0.0f,        -C * nearPlane * farPlane / (farPlane - nearPlane),  0.0f,
-		};
-	}
-
-	// TODO(lyah/projection): Add to Lyah.
-	/// Calculates and returns a Reversed-Z perspective projection matrix (flips the depth and defines an infinite far plane).
-	/// See https://nlguillemot.wordpress.com/2016/12/07/reversed-z-in-opengl.
-	inline mat4x4<float32> reversedZ(
-		/// Vertical field of view in radians.
-		float32 fieldOfView,
-
-		float32 aspectRatio,
-		float32 nearPlane,
-
-		/// Coordinate system sign. 1 for left-handed and -1 for right-handed.
-		float32 C
-	) {
-		DEBUG_ASSERT(nearPlane > 0.0f);
-
-		const float32 f = 1.0f / tan(fieldOfView * 0.5f);
-
-		return {
-			f / aspectRatio, 0.0f, 0.0f,      0.0f,
-			0.0f,            f,    0.0f,      0.0f,
-			0.0f,            0.0f, 0.0f,      C,
-			0.0f,            0.0f, nearPlane, 0.0f,
-		};
-	}
-
-	// TODO(lyah/projection): Add to Lyah.
+	// TODO(lyah/quaternion): Add to Lyah as `rotation` or `rotationFromTo`.
 	/// See https://stackoverflow.com/a/17654730/17136841.
 	inline quat<float32> lookAt(vec3<float32> previousDirection, vec3<float32> direction, vec3<float32> up) {
 		static constexpr float32 e = 1e-5f;

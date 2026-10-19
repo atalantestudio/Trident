@@ -633,20 +633,14 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::updateCameraProjection() const {
-		const vec2<float32> size = vec2<float32>(getSwapchain()->getExtent());
-		const vec2<float32> O = -cameraPosition / (size * 0.5f);
-
-		// TODO(lyah/projection/orthographic-3x3)
-		const mat3x3<float32> projection = {
-			2.0f / size.x,  0.0f,           0.0f,
-			0.0f,           2.0f / size.y,  0.0f,
-			O[0],           O[1],           1.0f,
-		};
+		const vec2<float32> viewport = vec2<float32>(getSwapchain()->getExtent());
+		const vec2<float32> origin = -cameraPosition / (viewport * 0.5f);
+		const mat3x3<float32> P = orthographic(origin, viewport);
 
 		cameraMappedRange->projection = {{
-			{projection[0].x, projection[0].y, projection[0].z, 1.0f},
-			{projection[1].x, projection[1].y, projection[1].z, 1.0f},
-			{projection[2].x, projection[2].y, projection[2].z, 1.0f},
+			{P[0].x, P[0].y, P[0].z, 1.0f},
+			{P[1].x, P[1].y, P[1].z, 1.0f},
+			{P[2].x, P[2].y, P[2].z, 1.0f},
 		}};
 	}
 

@@ -43,11 +43,11 @@ namespace Trident {
 			}
 
 			void updateProjection() {
-				projection = perspective(fieldOfView, aspectRatio, nearPlane, farPlane, 1.0f);
+				projection = perspective(fieldOfView, aspectRatio, nearPlane, farPlane);
 			}
 
 			void updateProjectionReversedZ() {
-				projection = reversedZ(fieldOfView, aspectRatio, nearPlane, 1.0f);
+				projection = perspectiveReversedZ(fieldOfView, aspectRatio, nearPlane);
 			}
 
 			void updateView() {

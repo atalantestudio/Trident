@@ -365,48 +365,42 @@ namespace Trident {
 
 				const mat4x4<float32> lightView = lookAt<float32>(frustumCenter + lightDirection, frustumCenter, UP);
 
-				float32 minX = max<float32>();
-				float32 maxX = min<float32>();
-				float32 minY = max<float32>();
-				float32 maxY = min<float32>();
-				float32 minZ = max<float32>();
-				float32 maxZ = min<float32>();
+				float32 left = max<float32>();
+				float32 right = min<float32>();
+				float32 bottom = max<float32>();
+				float32 top = min<float32>();
+				float32 near = max<float32>();
+				float32 far = min<float32>();
 
 				for (const vec4<float32> vertex : frustumVertices) {
 					const vec4<float32> lightViewVertex = vertex * lightView;
 
-					minX = min(minX, lightViewVertex[0]);
-					maxX = max(maxX, lightViewVertex[0]);
-					minY = min(minY, lightViewVertex[1]);
-					maxY = max(maxY, lightViewVertex[1]);
-					minZ = min(minZ, lightViewVertex[2]);
-					maxZ = max(maxZ, lightViewVertex[2]);
+					left = min(left, lightViewVertex[0]);
+					right = max(right, lightViewVertex[0]);
+					bottom = min(bottom, lightViewVertex[1]);
+					top = max(top, lightViewVertex[1]);
+					near = min(near, lightViewVertex[2]);
+					far = max(far, lightViewVertex[2]);
 				}
 
 				// TODO(renderer/forward/directional-shadow-map): Use the scene bounds.
 				constexpr float32 Z_SCALE = 10.0f;
 
-				const float32 width = maxX - minX;
-				const float32 height = maxY - minY;
-				const float32 depth = maxZ - minZ;
-				const float32 centerX = (minX + maxX) * 0.5f;
-				const float32 centerY = (minY + maxY) * 0.5f;
-				const float32 centerZ = (minZ + maxZ) * 0.5f;
+				const float32 width = right - left;
+				const float32 height = top - bottom;
+				const float32 depth = far - near;
+				const float32 centerX = (left + right) * 0.5f;
+				const float32 centerY = (bottom + top) * 0.5f;
+				const float32 centerZ = (near + far) * 0.5f;
 
-				minX = centerX - width * 0.5f;
-				maxX = centerX + width * 0.5f;
-				minY = centerY - height * 0.5f;
-				maxY = centerY + height * 0.5f;
-				minZ = centerZ - depth * 0.5f * Z_SCALE;
-				maxZ = centerZ + depth * 0.5f * Z_SCALE;
+				left = centerX - width * 0.5f;
+				right = centerX + width * 0.5f;
+				bottom = centerY - height * 0.5f;
+				top = centerY + height * 0.5f;
+				near = centerZ - depth * 0.5f * Z_SCALE;
+				far = centerZ + depth * 0.5f * Z_SCALE;
 
-				// TODO(lyah/projection/orthographic-4x4): Add helper similar to orthoLH_ZO.
-				const mat4x4<float32> lightProjection = {
-					2.0f / (maxX - minX),           0.0f,                           0.0f,                  0.0f,
-					0.0f,                           2.0f / (maxY - minY),           0.0f,                  0.0f,
-					0.0f,                           0.0f,                           1.0f / (maxZ - minZ),  0.0f,
-					-(minX + maxX) / (maxX - minX), -(minY + maxY) / (maxY - minY), -minZ / (maxZ - minZ),  1.0f,
-				};
+				const mat4x4<float32> lightProjection = orthographic(left, right, bottom, top, near, far);
 
 				directionalLightMappedRange->projectionViews[cascadeIndex] = lightView * lightProjection;
 

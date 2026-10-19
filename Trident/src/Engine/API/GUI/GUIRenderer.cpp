@@ -649,15 +649,13 @@ namespace Trident {
 	}
 
 	void GUIRenderer::updateCameraProjection() const {
-		const Extent2D extent = getSwapchain()->getExtent();
-
-		// TODO(lyah/projection/orthographic-3x3)
-		const mat3x3<float32> projection = orthographicTopLeftOrigin(vec2<float32>(extent));
+		const vec2<float32> viewport = vec2<float32>(getSwapchain()->getExtent());
+		const mat3x3<float32> P = orthographicScreen(viewport);
 
 		cameraMappedRange->projection = {{
-			{projection[0].x, projection[0].y, projection[0].z, 1.0f},
-			{projection[1].x, projection[1].y, projection[1].z, 1.0f},
-			{projection[2].x, projection[2].y, projection[2].z, 1.0f},
+			{P[0].x, P[0].y, P[0].z, 1.0f},
+			{P[1].x, P[1].y, P[1].z, 1.0f},
+			{P[2].x, P[2].y, P[2].z, 1.0f},
 		}};
 	}
 }
