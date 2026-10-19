@@ -75,7 +75,7 @@ namespace Trident {
 			.projectVersion = {0, 0, 1},
 		});
 		physicalDevice = instance->selectPhysicalDevice(false);
-		device = physicalDevice->createDevice<>();
+		device = physicalDevice->createDevice();
 	}
 
 	void GlyphRasterizer::generateGlyphAtlas(const File<FileFormat::TTF>& file, SDFGlyphMap& output) {
