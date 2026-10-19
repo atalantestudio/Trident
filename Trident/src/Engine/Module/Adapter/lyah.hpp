@@ -59,12 +59,6 @@ namespace Trident {
 		return {a.y * (b_c.x - b_c.y), a.x * (b_c.y - b_c.x)};
 	}
 
-	// TODO(lyah/vec2/cross-operations): Add to Lyah as `crossLength`.
-	template<typename T>
-	inline vec2<T> crossLength(vec2<T> a, T b) {
-		return {a.y * b, a.x * -b};
-	}
-
 	template<typename T>
 	inline vec2<T> operator*(vec2<T> a, const mat3x3<T>& b) {
 		return {
@@ -82,6 +76,7 @@ namespace Trident {
 		};
 	}
 
+	// TODO(lyah/signed-distance): Add to Lyah.
 	/// Calculates the signed distance between a point `p` and an infinite line represented by `a` and `b`.
 	inline float32 signedDistanceLPAB(vec2<float32> a, vec2<float32> b, vec2<float32> p) {
 		const vec2<float32> ab = b - a;
@@ -90,16 +85,19 @@ namespace Trident {
 		return parallelogramArea(ab, ap) / length(ab);
 	}
 
+	// TODO(lyah/signed-distance): Add to Lyah.
 	/// Calculates the signed distance between a point and an infinite plane.
 	inline float32 signedDistance(vec2<float32> point, Plane2D plane) {
 		return dot(point, plane.normal) - plane.offset;
 	}
 
+	// TODO(lyah/signed-distance): Add to Lyah.
 	/// Calculates the signed distance between a point and an infinite line represented by a normal and a vector offset.
 	inline float32 signedDistanceLP(vec2<float32> normal, vec2<float32> offset, vec2<float32> point) {
 		return dot(normal, point - offset);
 	}
 
+	// TODO(lyah/signed-distance): Add to Lyah.
 	/// Calculates the signed distance between a point and an infinite plane represented by a normal and an offset.
 	inline float32 signedDistanceFP(vec3<float32> normal, float32 offset, vec3<float32> point) {
 		return dot(normal, point) - offset;
@@ -123,6 +121,7 @@ namespace Trident {
 		return false;
 	}
 
+	// TODO(lyah/projection/orthographic-3x3): Add to Lyah.
 	inline mat3x3<float32> orthographicTopLeftOrigin(vec2<float32> viewport) {
 		return {
 			 2.0f / viewport[0],  0.0f,                0.0f,
@@ -131,6 +130,7 @@ namespace Trident {
 		};
 	}
 
+	// TODO(lyah/projection): Add to Lyah.
 	/// Calculates and returns a perspective projection matrix.
 	inline mat4x4<float32> perspective(
 		/// Vertical field of view in radians.
@@ -158,6 +158,7 @@ namespace Trident {
 		};
 	}
 
+	// TODO(lyah/projection): Add to Lyah.
 	/// Calculates and returns a Reversed-Z perspective projection matrix (flips the depth and defines an infinite far plane).
 	/// See https://nlguillemot.wordpress.com/2016/12/07/reversed-z-in-opengl.
 	inline mat4x4<float32> reversedZ(
@@ -182,6 +183,7 @@ namespace Trident {
 		};
 	}
 
+	// TODO(lyah/projection): Add to Lyah.
 	/// See https://stackoverflow.com/a/17654730/17136841.
 	inline quat<float32> lookAt(vec3<float32> previousDirection, vec3<float32> direction, vec3<float32> up) {
 		static constexpr float32 e = 1e-5f;
