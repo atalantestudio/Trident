@@ -16,7 +16,6 @@ namespace Trident {
 	class ARMMapFromAORoughnessProcess : public ImageProcess {
 		protected:
 			ImageAssetDescriptor createImage(std::filesystem::path rootInputPath) const final override {
-				const view<char8> assetName = getAssetName();
 				const std::filesystem::path externalDirectoryPath = rootInputPath / "Asset/External";
 				const ARMMapDescriptor descriptor = getDescriptor();
 

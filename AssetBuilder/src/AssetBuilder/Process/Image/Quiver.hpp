@@ -13,20 +13,18 @@ namespace Trident {
 			}
 
 			virtual ImageAssetDescriptor createImage(std::filesystem::path rootInputPath) const final override {
-				const ImageAssetDescriptor image = openImage("../Trident/src/Asset/Image/Quiver.png");
+				ImageAssetDescriptor descriptor = openImage("../Trident/src/Asset/Image/Quiver.png");
 
-				DEBUG_ASSERT(image.format == ImageFormat::R8G8B8A8_UNORM);
+				DEBUG_ASSERT(descriptor.format == ImageFormat::R8G8B8A8_UNORM);
 
-				ImageAssetDescriptor descriptor{};
+				sequence<uint8> data(descriptor.extent.x * descriptor.extent.y);
+
+				convert<ImageFormat::R8G8B8A8_UNORM, ImageFormat::R8_UNORM>(descriptor.data, &data[0], data.count());
+
 				descriptor.identifier = AssetLibrary::createAssetIdentifier();
 				descriptor.version = {0, 0, 0};
 				descriptor.format = ImageFormat::R8_UNORM;
-				descriptor.extent = image.extent;
-				descriptor.mipLevelCount = 1;
-				descriptor.layerCount = 1;
-				descriptor.data = sequence<uint8>(image.extent.x * image.extent.y);
-
-				convert<ImageFormat::R8G8B8A8_UNORM, ImageFormat::R8_UNORM>(image.data, &descriptor.data[0], descriptor.data.count());
+				descriptor.data = data;
 
 				return descriptor;
 			}

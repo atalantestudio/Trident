@@ -20,6 +20,7 @@
 #include "AssetBuilder/Process/Image/LemonARMMap.hpp"
 #include "AssetBuilder/Process/Image/OvercastSoil.hpp"
 #include "AssetBuilder/Process/Image/Quiver.hpp"
+#include "AssetBuilder/Process/Image/StudioIcon.hpp"
 #include "AssetBuilder/Process/Material/DDGI/DDGI.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/DebugGray.hpp"
 #include "AssetBuilder/Process/Material/Lightmapped/DebugOrange.hpp"
@@ -107,7 +108,7 @@ namespace Trident {
 
 		private:
 			void registerProcesses() {
-				allocateProcesses(72);
+				allocateProcesses(73);
 
 				registerProcess<BuildGeometryAssetProcess>(&assetLibrary);
 
@@ -127,6 +128,7 @@ namespace Trident {
 				registerProcess<LemonARMMap>(&assetLibrary);
 				registerProcess<OvercastSoilCubeMap>(&assetLibrary);
 				registerProcess<QuiverImage>(&assetLibrary);
+				registerProcess<StudioIconImage>(&assetLibrary);
 
 				registerProcess<DefaultFont>(&assetLibrary);
 				registerProcess<BuildFontAssetProcess>(&assetLibrary, &glyphRasterizer);

@@ -39,7 +39,10 @@ namespace Trident {
 						uint32 texelIndex = 0;
 						qoi_rgba texelCache[64]{};
 						qoi_rgba previousTexel = {0, 0, 0, 255};
+
+						// TODO(asset-builder/image): Refactor.
 						qoi_index previousTexelHash = rgbaHash(previousTexel);
+
 						uint8 runLength = 0;
 						uint32 layerIndex = 0;
 
