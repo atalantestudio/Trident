@@ -241,6 +241,9 @@ namespace Trident {
 				{
 					const float32 rnA = dot(contact.rA, contactPair.manifold.normal);
 					const float32 rnB = dot(contact.rB, contactPair.manifold.normal);
+
+					// TODO(physics/2d): The 2d_stacking instability was accidentally fixed by removing the outer parentheses and moving `inverseMassSum` to the left. Why?
+					// const float32 normal = (rigidBodyA.inverseInertia * (rArA - rnA * rnA) + rigidBodyB.inverseInertia * (rBrB - rnB * rnB)) + inverseMassSum;
 					const float32 normal = inverseMassSum + rigidBodyA.inverseInertia * (rArA - rnA * rnA) + rigidBodyB.inverseInertia * (rBrB - rnB * rnB);
 
 					contact.massNormal = 1.0f / normal;
