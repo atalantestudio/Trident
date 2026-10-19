@@ -39,7 +39,7 @@ namespace Trident {
 			uint32 getLayerCount() const;
 
 			/// Returns the number of samples in the image.
-			uint8 getSampleCount() const;
+			ImageSampleCount getSampleCount() const;
 
 			/// Returns the image usage flags.
 			ImageUsage getUsage() const;
@@ -68,7 +68,7 @@ namespace Trident {
 			Extent3D extent;
 			uint32 mipLevelCount;
 			uint32 layerCount;
-			uint8 sampleCount;
+			ImageSampleCount sampleCount;
 			ImageUsage usage;
 			ImageLayout layout = ImageLayout::UNDEFINED;
 			Access access = Access::NONE;

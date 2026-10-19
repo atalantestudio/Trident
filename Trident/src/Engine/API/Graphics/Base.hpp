@@ -10,6 +10,7 @@ namespace Trident {
 	enum DeviceExtensionName : uint8;
 	enum class GraphicsAPI : uint8;
 	enum class ImageLayout : uint8;
+	enum class ImageSampleCount : uint8;
 	enum class ImageType : uint8;
 	enum class ImageViewType : uint8;
 	enum class IndexFormat;

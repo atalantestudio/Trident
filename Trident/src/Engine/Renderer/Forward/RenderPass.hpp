@@ -12,7 +12,7 @@ namespace Trident {
 				// Swapchain
 				{
 					.format = getSurface()->getFormat(),
-					.sampleCount = FORWARD_SAMPLE_COUNT,
+					.sampleCount = SAMPLE_COUNT,
 					.loadOperation = LoadOperation::CLEAR,
 					.storeOperation = StoreOperation::STORE,
 					.finalLayout = ImageLayout::PRESENT_SRC,
@@ -21,7 +21,7 @@ namespace Trident {
 				// Depth stencil
 				{
 					.format = ImageFormat::D32_SFLOAT,
-					.sampleCount = FORWARD_SAMPLE_COUNT,
+					.sampleCount = SAMPLE_COUNT,
 					.loadOperation = LoadOperation::CLEAR,
 					.storeOperation = StoreOperation::UNDEFINED,
 					.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,

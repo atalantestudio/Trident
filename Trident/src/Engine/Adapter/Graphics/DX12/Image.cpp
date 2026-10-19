@@ -25,7 +25,7 @@ namespace Trident {
 		// These properties aren't used when creating a swapchain image.
 		imageDescriptor.type = ImageType::TYPE_2D;
 		imageDescriptor.format = ImageFormat::B8G8R8A8_UNORM;
-		imageDescriptor.sampleCount = 1;
+		imageDescriptor.sampleCount = ImageSampleCount::x1;
 		imageDescriptor.usage = static_cast<ImageUsage>(0);
 		imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 

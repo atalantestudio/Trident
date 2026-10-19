@@ -188,7 +188,7 @@ namespace Trident {
 			.extent = imageAsset->getExtent(),
 			.mipLevelCount = 1,
 			.layerCount = 1,
-			.sampleCount = 1,
+			.sampleCount = ImageSampleCount::x1,
 			.usage = ImageUsage::TRANSFER_DST | ImageUsage::SAMPLED,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			#if defined(DEBUG_OBJECT_NAME)
@@ -225,7 +225,7 @@ namespace Trident {
 			.extent = {1, 1, 1},
 			.mipLevelCount = 1,
 			.layerCount = 1,
-			.sampleCount = 1,
+			.sampleCount = ImageSampleCount::x1,
 			.usage = ImageUsage::TRANSFER_DST | ImageUsage::SAMPLED,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			#if defined(DEBUG_OBJECT_NAME)

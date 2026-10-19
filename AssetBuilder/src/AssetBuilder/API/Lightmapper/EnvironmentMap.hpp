@@ -15,7 +15,7 @@ namespace Trident {
 			.extent = extent,
 			.mipLevelCount = 1,
 			.layerCount = 6,
-			.sampleCount = 1,
+			.sampleCount = ImageSampleCount::x1,
 			.usage = ImageUsage::TRANSFER_DST | ImageUsage::SAMPLED,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			#if defined(DEBUG_OBJECT_NAME)

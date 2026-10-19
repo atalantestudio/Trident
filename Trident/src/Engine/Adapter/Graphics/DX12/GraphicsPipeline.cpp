@@ -88,7 +88,7 @@ namespace Trident {
 		graphicsPipelineStateDescriptor.RasterizerState.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
 		graphicsPipelineStateDescriptor.RasterizerState.SlopeScaledDepthBias = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
 		graphicsPipelineStateDescriptor.RasterizerState.DepthClipEnable = TRUE;
-		graphicsPipelineStateDescriptor.RasterizerState.MultisampleEnable = subpass.rasterizationSampleCount > 1;
+		graphicsPipelineStateDescriptor.RasterizerState.MultisampleEnable = subpass.rasterizationSampleCount != ImageSampleCount::x1;
 		graphicsPipelineStateDescriptor.RasterizerState.AntialiasedLineEnable = FALSE;
 		graphicsPipelineStateDescriptor.RasterizerState.ForcedSampleCount = 0;
 		graphicsPipelineStateDescriptor.RasterizerState.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
@@ -176,7 +176,7 @@ namespace Trident {
 			graphicsPipelineStateDescriptor.DSVFormat = getImageFormat(depthStencilAttachment.format);
 		}
 
-		graphicsPipelineStateDescriptor.SampleDesc.Count = subpass.rasterizationSampleCount;
+		graphicsPipelineStateDescriptor.SampleDesc.Count = static_cast<UINT>(subpass.rasterizationSampleCount);
 		graphicsPipelineStateDescriptor.SampleDesc.Quality = 0;
 		graphicsPipelineStateDescriptor.NodeMask = 0;
 		graphicsPipelineStateDescriptor.CachedPSO.pCachedBlob = nullptr;

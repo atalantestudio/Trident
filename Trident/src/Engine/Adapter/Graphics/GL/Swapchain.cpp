@@ -63,7 +63,7 @@ namespace Trident {
 		imageDescriptor.extent.z = 1;
 		imageDescriptor.mipLevelCount = 1;
 		imageDescriptor.layerCount = 1;
-		imageDescriptor.sampleCount = 1;
+		imageDescriptor.sampleCount = ImageSampleCount::x1;
 		imageDescriptor.usage = static_cast<ImageUsage>(0);
 
 		#if defined(DEBUG_OBJECT_NAME)

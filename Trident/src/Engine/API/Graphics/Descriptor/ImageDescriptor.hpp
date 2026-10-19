@@ -5,6 +5,7 @@
 
 #include "Engine/API/Graphics/ImageFlags.hpp"
 #include "Engine/API/Graphics/ImageFormat.hpp"
+#include "Engine/API/Graphics/ImageSampleCount.hpp"
 #include "Engine/API/Graphics/ImageType.hpp"
 #include "Engine/API/Graphics/ImageUsage.hpp"
 #include "Engine/API/Graphics/MemoryProperty.hpp"
@@ -29,8 +30,7 @@ namespace Trident {
 		uint32 layerCount;
 
 		/// The number of samples per texel for the image.
-		/// Valid sample counts range from 1 to 64, as powers of 2.
-		uint8 sampleCount : 7;
+		ImageSampleCount sampleCount;
 
 		/// The intended usage of the image.
 		ImageUsage usage;

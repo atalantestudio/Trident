@@ -234,7 +234,7 @@ namespace Trident {
 					.extent = {64, 64, 1},
 					.mipLevelCount = 1,
 					.layerCount = 1,
-					.sampleCount = 1,
+					.sampleCount = ImageSampleCount::x1,
 					.usage = ImageUsage::STORAGE | ImageUsage::SAMPLED,
 					.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 					#if defined(DEBUG_OBJECT_NAME)

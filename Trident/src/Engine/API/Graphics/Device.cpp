@@ -425,8 +425,8 @@ namespace Trident {
 					VALIDATION_ERROR("descriptor.layerCount must be less than or equal to the maximum layer count.");
 				}
 
-				if (!validateSampleCount(descriptor.sampleCount)) {
-					VALIDATION_ERROR("descriptor.sampleCount must either be 1 or a power of 2 (up to 64).");
+				if (descriptor.sampleCount >= ImageSampleCount::count) {
+					VALIDATION_ERROR("descriptor.sampleCount must be a valid ImageSampleCount value.");
 				}
 
 				if (descriptor.name.count() == 0) {
@@ -493,8 +493,8 @@ namespace Trident {
 						VALIDATION_ERROR("descriptor.attachments[[]].format must be a valid ImageFormat value.", attachmentIndex);
 					}
 
-					if (!validateSampleCount(attachment.sampleCount)) {
-						VALIDATION_ERROR("descriptor.attachments[[]].sampleCount must either be 1 or a power of 2 (up to 64).", attachmentIndex);
+					if (attachment.sampleCount >= ImageSampleCount::count) {
+						VALIDATION_ERROR("descriptor.attachments[[]].sampleCount must be a valid ImageSampleCount value.", attachmentIndex);
 					}
 
 					if (attachment.loadOperation >= LoadOperation::count) {

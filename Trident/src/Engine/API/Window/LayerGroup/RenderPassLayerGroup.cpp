@@ -36,7 +36,7 @@ namespace Trident {
 				swapchainAttachmentIndex = attachmentIndex;
 				swapchainImageIndex = attachmentIndex;
 
-				if (attachment.sampleCount > 1) {
+				if (attachment.sampleCount != ImageSampleCount::x1) {
 					swapchainAttachmentIndex += renderPass->getAttachmentCount();
 					swapchainImageIndex += renderPass->getAttachmentCount();
 

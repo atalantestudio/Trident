@@ -5,6 +5,7 @@
 
 #include "Engine/API/Graphics/ImageFormat.hpp"
 #include "Engine/API/Graphics/ImageLayout.hpp"
+#include "Engine/API/Graphics/ImageSampleCount.hpp"
 #include "Engine/API/Graphics/LoadOperation.hpp"
 #include "Engine/API/Graphics/StoreOperation.hpp"
 
@@ -14,8 +15,7 @@ namespace Trident {
 		ImageFormat format;
 
 		/// The number of samples of the image.
-		/// The sample count must either be 1 or a power of 2 (up to 64).
-		uint8 sampleCount : 7;
+		ImageSampleCount sampleCount;
 
 		/// Specifies how the attachment's contents are treated at the beginning of the subpass where it is first used.
 		LoadOperation loadOperation;

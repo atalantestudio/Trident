@@ -49,7 +49,7 @@ namespace Trident {
 		ADAPTER_ASSERT(totalColorAttachmentCount < static_cast<uint32>(maxColorAttachmentCount), "A render pass cannot contain more than [] color attachments.", maxColorAttachmentCount);
 
 		for (const Attachment& attachment : descriptor.attachments) {
-			if (attachment.sampleCount > 1) {
+			if (attachment.sampleCount != ImageSampleCount::x1) {
 				renderPass->multisample = true;
 
 				break;

@@ -75,18 +75,21 @@ namespace Trident {
 			encodeGIVertexGenerationPass(commandEncoder);
 		#endif
 
+		// TODO(renderer/forward): Store the clear values inside the renderer.
+		sequence<ClearValue> clearValues(2 + (SAMPLE_COUNT != ImageSampleCount::x1));
+		clearValues[0] = {skyColor.x, skyColor.y, skyColor.z, 1.0f};
+		clearValues[1] = {
+			.depth = 0.0f,
+			.stencil = 0,
+		};
+
+		if (SAMPLE_COUNT != ImageSampleCount::x1) {
+			clearValues[2] = {0.0f, 0.0f, 0.0f, 1.0f};
+		}
+
 		commandEncoder->beginRenderPass({
 			.framebuffer = framebuffer,
-			.clearValues = {
-				{skyColor.x, skyColor.y, skyColor.z, 1.0f},
-				{
-					.depth = 0.0f,
-					.stencil = 0,
-				},
-				#if FORWARD_SAMPLE_COUNT > 1
-					{0.0f, 0.0f, 0.0f, 1.0f},
-				#endif
-			},
+			.clearValues = clearValues,
 		});
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, extent);
@@ -308,10 +311,10 @@ namespace Trident {
 	}
 
 	void ForwardRenderer::createFrameObjects() {
-		#if FORWARD_SAMPLE_COUNT > 1
+		if (SAMPLE_COUNT != ImageSampleCount::x1) {
 			colorImage = createColorImage();
 			colorImageView = createColorImageView();
-		#endif
+		}
 
 		depthStencilImage = createDepthStencilImage();
 		depthStencilImageView = createDepthStencilImageView();

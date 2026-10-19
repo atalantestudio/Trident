@@ -511,7 +511,7 @@ namespace Trident {
 		resourceDescriptor.DepthOrArraySize = extent.z * image->getLayerCount();
 		resourceDescriptor.MipLevels = image->getMipLevelCount();
 		resourceDescriptor.Format = getImageFormat(image->getFormat());
-		resourceDescriptor.SampleDesc.Count = image->getSampleCount();
+		resourceDescriptor.SampleDesc.Count = static_cast<UINT>(image->getSampleCount());
 		resourceDescriptor.SampleDesc.Quality = 0;
 		resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 		resourceDescriptor.Flags = getImageResourceFlags(usage);
@@ -599,7 +599,7 @@ namespace Trident {
 		resourceDescriptor.DepthOrArraySize = extent.z * image->getLayerCount();
 		resourceDescriptor.MipLevels = image->getMipLevelCount();
 		resourceDescriptor.Format = getImageFormat(image->getFormat());
-		resourceDescriptor.SampleDesc.Count = image->getSampleCount();
+		resourceDescriptor.SampleDesc.Count = static_cast<UINT>(image->getSampleCount());
 		resourceDescriptor.SampleDesc.Quality = 0;
 		resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 		resourceDescriptor.Flags = getImageResourceFlags(usage);

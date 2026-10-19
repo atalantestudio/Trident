@@ -135,7 +135,7 @@ namespace Trident {
 						// Swapchain
 						{
 							.format = getSurface()->getFormat(),
-							.sampleCount = 1,
+							.sampleCount = ImageSampleCount::x1,
 							.loadOperation = LoadOperation::CLEAR,
 							.storeOperation = StoreOperation::STORE,
 							.finalLayout = ImageLayout::PRESENT_SRC,
@@ -144,7 +144,7 @@ namespace Trident {
 						// Input
 						{
 							.format = getSurface()->getFormat(),
-							.sampleCount = 1,
+							.sampleCount = ImageSampleCount::x1,
 							.loadOperation = LoadOperation::CLEAR,
 							.storeOperation = StoreOperation::UNDEFINED,
 							.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,

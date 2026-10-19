@@ -3,7 +3,6 @@
 
 #pragma once
 
-#define FORWARD_SAMPLE_COUNT 4
 // #define FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP
 // #define FORWARD_ENABLE_VERTEX_COLOR_GI
 
@@ -55,6 +54,8 @@ namespace Trident {
 			#endif
 
 		public:
+			static constexpr ImageSampleCount SAMPLE_COUNT = ImageSampleCount::x4;
+
 			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
 				static constexpr Extent2D DIRECTIONAL_SHADOW_MAP_EXTENT = {4096, 4096};
 				static constexpr uint32 DIRECTIONAL_SHADOW_MAP_CASCADE_COUNT = 3;
@@ -508,9 +509,7 @@ namespace Trident {
 				ref<GraphicsPipeline> createGIShadingPipeline() const;
 			#endif
 
-			#if FORWARD_SAMPLE_COUNT > 1
-				ref<Image> createColorImage() const;
-			#endif
+			ref<Image> createColorImage() const;
 
 			ref<Image> createSkyboxImage(ref<ImageAsset> imageAsset) const;
 			ref<Image> createDepthStencilImage() const;
@@ -520,9 +519,7 @@ namespace Trident {
 				ref<Image> createDirectionalShadowMapImage() const;
 			#endif
 
-			#if FORWARD_SAMPLE_COUNT > 1
-				ref<ImageView> createColorImageView() const;
-			#endif
+			ref<ImageView> createColorImageView() const;
 
 			ref<ImageView> createSkyboxImageView() const;
 			ref<ImageView> createDepthStencilImageView() const;
@@ -690,10 +687,7 @@ namespace Trident {
 			ref<Buffer> debugHullWireframeBuffer;
 			ref<Buffer> debugContactManifoldBuffer;
 
-			#if FORWARD_SAMPLE_COUNT > 1
-				ref<Image> colorImage;
-			#endif
-
+			ref<Image> colorImage;
 			ref<Image> skyboxImage;
 			ref<Image> depthStencilImage;
 			ref<Image> lightmapAtlasImage;
@@ -703,10 +697,7 @@ namespace Trident {
 				ref<Image> directionalShadowMapImage;
 			#endif
 
-			#if FORWARD_SAMPLE_COUNT > 1
-				ref<ImageView> colorImageView;
-			#endif
-
+			ref<ImageView> colorImageView;
 			ref<ImageView> skyboxImageView;
 			ref<ImageView> depthStencilImageView;
 			ref<ImageView> lightmapAtlasImageView;

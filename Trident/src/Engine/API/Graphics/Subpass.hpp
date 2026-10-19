@@ -13,6 +13,6 @@ namespace Trident {
 		sequence<AttachmentReference> inputAttachmentReferences;
 
 		// Automatically set when creating the render pass.
-		uint8 rasterizationSampleCount = 0;
+		ImageSampleCount rasterizationSampleCount;
 	};
 }

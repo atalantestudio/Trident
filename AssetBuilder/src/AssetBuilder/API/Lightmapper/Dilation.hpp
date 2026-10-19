@@ -12,7 +12,7 @@ namespace Trident {
 				// Lightmap atlas
 				{
 					.format = imageAssetDescriptor->format,
-					.sampleCount = 1,
+					.sampleCount = ImageSampleCount::x1,
 					.loadOperation = LoadOperation::CLEAR,
 					.storeOperation = StoreOperation::STORE,
 					.finalLayout = ImageLayout::TRANSFER_SRC_OPTIMAL,

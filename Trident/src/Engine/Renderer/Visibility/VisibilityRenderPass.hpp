@@ -12,7 +12,7 @@ namespace Trident {
 				// Visibility
 				{
 					.format = ImageFormat::R32_UINT,
-					.sampleCount = 1,
+					.sampleCount = ImageSampleCount::x1,
 					.loadOperation = LoadOperation::CLEAR,
 					.storeOperation = StoreOperation::UNDEFINED,
 					.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
@@ -21,7 +21,7 @@ namespace Trident {
 				// Depth stencil
 				{
 					.format = ImageFormat::D32_SFLOAT,
-					.sampleCount = 1,
+					.sampleCount = ImageSampleCount::x1,
 					.loadOperation = LoadOperation::CLEAR,
 					.storeOperation = StoreOperation::UNDEFINED,
 					.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,

@@ -12,7 +12,7 @@ namespace Trident {
 				// Position
 				{
 					.format = ImageFormat::R32G32B32A32_SFLOAT,
-					.sampleCount = 1,
+					.sampleCount = ImageSampleCount::x1,
 					.loadOperation = LoadOperation::CLEAR,
 					.storeOperation = StoreOperation::STORE,
 					.finalLayout = ImageLayout::GENERAL,
@@ -21,7 +21,7 @@ namespace Trident {
 				// Smooth position
 				{
 					.format = ImageFormat::R32G32B32A32_SFLOAT,
-					.sampleCount = 1,
+					.sampleCount = ImageSampleCount::x1,
 					.loadOperation = LoadOperation::CLEAR,
 					.storeOperation = StoreOperation::STORE,
 					.finalLayout = ImageLayout::GENERAL,
@@ -30,7 +30,7 @@ namespace Trident {
 				// Triangle normal
 				{
 					.format = ImageFormat::R32G32B32A32_SFLOAT,
-					.sampleCount = 1,
+					.sampleCount = ImageSampleCount::x1,
 					.loadOperation = LoadOperation::CLEAR,
 					.storeOperation = StoreOperation::STORE,
 					.finalLayout = ImageLayout::GENERAL,
@@ -39,7 +39,7 @@ namespace Trident {
 				// Vertex normal
 				{
 					.format = ImageFormat::R32G32B32A32_SFLOAT,
-					.sampleCount = 1,
+					.sampleCount = ImageSampleCount::x1,
 					.loadOperation = LoadOperation::CLEAR,
 					.storeOperation = StoreOperation::STORE,
 					.finalLayout = ImageLayout::GENERAL,

@@ -36,7 +36,7 @@ namespace Trident {
 		CullMode cullMode;
 		FrontFace frontFace;
 
-		// NOTE: Not supported by the DX12 adapter.
+		// TODO(graphics/dx12): This is not supported by the DX12 adapter. Deprecate?
 		float32 lineWidth;
 
 		float32 minSampleShading;

@@ -33,13 +33,11 @@ namespace Trident {
 
 		const VK::Device* _device = static_cast<const VK::Device*>(device);
 		VkResult result;
-
 		ref<VK::RenderPass> renderPass = allocateRef<VK::RenderPass>(device, descriptor);
-
 		uint32 resolveAttachmentCount = 0;
 
 		for (const Subpass& subpass : renderPass->getSubpasses()) {
-			if (subpass.rasterizationSampleCount == 1) {
+			if (subpass.rasterizationSampleCount == ImageSampleCount::x1) {
 				continue;
 			}
 
@@ -63,7 +61,7 @@ namespace Trident {
 			attachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 			attachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 
-			// TODO: Allow custom initial layouts?
+			// TODO(graphics/render-pass/attachment): Allow custom initial layouts?
 			if (attachment.loadOperation == LoadOperation::LOAD) {
 				if (isDepthFormat(attachmentDescription.format)) {
 					attachmentDescription.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
@@ -78,7 +76,7 @@ namespace Trident {
 
 			attachmentDescription.finalLayout = getImageLayout(attachment.finalLayout);
 
-			if (isColorAttachment(renderPass->getSubpasses(), attachmentIndex) && attachment.sampleCount > 1) {
+			if (isColorAttachment(renderPass->getSubpasses(), attachmentIndex) && attachment.sampleCount != ImageSampleCount::x1) {
 				// Create resolve attachment description.
 				VkAttachmentDescription& resolveAttachmentDescription = attachmentDescriptions[renderPass->attachments.count() + resolveAttachmentIndex];
 				resolveAttachmentDescription.flags = 0;
@@ -126,7 +124,7 @@ namespace Trident {
 				relativeAttachmentReferenceOffset += 1;
 			}
 
-			if (subpass.rasterizationSampleCount > 1) {
+			if (subpass.rasterizationSampleCount != ImageSampleCount::x1) {
 				// Create resolve attachment references.
 				for (uint32 resolveAttachmentReferenceIndex = 0; resolveAttachmentReferenceIndex < subpass.colorAttachmentReferences.count(); resolveAttachmentReferenceIndex += 1) {
 					VkAttachmentReference& attachmentReference = attachmentReferences[relativeAttachmentReferenceOffset + resolveAttachmentReferenceIndex];
@@ -153,7 +151,7 @@ namespace Trident {
 			subpassDescription.inputAttachmentCount = static_cast<uint32>(subpass.inputAttachmentReferences.count());
 
 			if (subpass.inputAttachmentReferences.count() > 0) {
-				subpassDescription.pInputAttachments = &attachmentReferences[attachmentReferenceOffset + (subpass.colorAttachmentReferences.count() * (subpass.rasterizationSampleCount > 1 ? 2 : 1)) + depthStencilAttachmentCount];
+				subpassDescription.pInputAttachments = &attachmentReferences[attachmentReferenceOffset + (subpass.colorAttachmentReferences.count() * (subpass.rasterizationSampleCount != ImageSampleCount::x1 ? 2 : 1)) + depthStencilAttachmentCount];
 			}
 			else {
 				subpassDescription.pInputAttachments = nullptr;
@@ -162,7 +160,7 @@ namespace Trident {
 			subpassDescription.colorAttachmentCount = static_cast<uint32>(subpass.colorAttachmentReferences.count());
 			subpassDescription.pColorAttachments = &attachmentReferences[attachmentReferenceOffset];
 
-			if (subpass.rasterizationSampleCount > 1) {
+			if (subpass.rasterizationSampleCount != ImageSampleCount::x1) {
 				subpassDescription.pResolveAttachments = &attachmentReferences[attachmentReferenceOffset + subpass.colorAttachmentReferences.count() + depthStencilAttachmentCount];
 			}
 			else {

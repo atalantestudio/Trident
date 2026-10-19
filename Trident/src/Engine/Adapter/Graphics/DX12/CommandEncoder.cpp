@@ -783,7 +783,7 @@ namespace Trident {
 			ref<DX12::ImageView> presentImageView = ref_cast<DX12::ImageView>(_commandEncoder->framebuffer->imageViews[_commandEncoder->presentRenderTargetIndex]);
 			DX12::Image* presentImage = static_cast<DX12::Image*>(presentImageView->getImage());
 
-			if (presentImage->getSampleCount() > 1) {
+			if (presentImage->getSampleCount() != ImageSampleCount::x1) {
 				const Subpass& subpass = _commandEncoder->framebuffer->getRenderPass()->getSubpass(_commandEncoder->subpassIndex);
 				const ref<DX12::ImageView> resolveImageView = presentImageView;
 
@@ -857,7 +857,7 @@ namespace Trident {
 			const Attachment& attachment = renderPass->getAttachment(attachmentIndex);
 			ref<Trident::ImageView> imageView = imageViews[attachmentIndex];
 
-			if (attachmentIndex == _commandEncoder->presentRenderTargetIndex && attachment.sampleCount > 1) {
+			if (attachmentIndex == _commandEncoder->presentRenderTargetIndex && attachment.sampleCount != ImageSampleCount::x1) {
 				const Subpass& subpass = _commandEncoder->framebuffer->getRenderPass()->getSubpass(_commandEncoder->subpassIndex);
 
 				// TODO(graphics/subpass/resolve-attachment-count): Unused attachments shouldn't be included in the count.

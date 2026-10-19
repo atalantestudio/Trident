@@ -45,7 +45,7 @@ namespace Trident {
 		totalAttachmentCount(static_cast<uint32>(descriptor.attachments.count()))
 	{
 		for (const Attachment& attachment : attachments) {
-			if (attachment.sampleCount > 1 && attachment.finalLayout == ImageLayout::PRESENT_SRC) {
+			if (attachment.sampleCount != ImageSampleCount::x1 && attachment.finalLayout == ImageLayout::PRESENT_SRC) {
 				totalAttachmentCount += 1;
 
 				break;
@@ -53,7 +53,7 @@ namespace Trident {
 		}
 
 		for (Subpass& subpass : subpasses) {
-			uint8 rasterizationSampleCount = 0;
+			ImageSampleCount rasterizationSampleCount = ImageSampleCount::x1;
 
 			for (const AttachmentReference& colorAttachmentReference : subpass.colorAttachmentReferences) {
 				if (colorAttachmentReference.index == AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
@@ -62,11 +62,11 @@ namespace Trident {
 
 				const Attachment& attachment = attachments[colorAttachmentReference.index];
 
-				if (attachment.sampleCount > 1) {
+				if (attachment.sampleCount != ImageSampleCount::x1) {
 					attachmentReferenceCount += 1;
 				}
 
-				if (rasterizationSampleCount == 0) {
+				if (rasterizationSampleCount == ImageSampleCount::x1) {
 					rasterizationSampleCount = attachment.sampleCount;
 
 					continue;
@@ -77,7 +77,7 @@ namespace Trident {
 			}
 
 			if (subpass.depthStencilAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
-				if (rasterizationSampleCount == 0) {
+				if (rasterizationSampleCount == ImageSampleCount::x1) {
 					rasterizationSampleCount = attachments[subpass.depthStencilAttachmentReference.index].sampleCount;
 				}
 				else {
@@ -87,8 +87,6 @@ namespace Trident {
 
 				attachmentReferenceCount += 1;
 			}
-
-			DEBUG_ASSERT(rasterizationSampleCount > 0);
 
 			subpass.rasterizationSampleCount = rasterizationSampleCount;
 
@@ -147,7 +145,7 @@ namespace Trident {
 
 		const Attachment& attachment = attachments[attachmentIndex];
 
-		DEBUG_ASSERT(attachment.sampleCount > 1 || (attachment.sampleCount == 1 && attachment.finalLayout != ImageLayout::PRESENT_SRC));
+		DEBUG_ASSERT(attachment.sampleCount != ImageSampleCount::x1 || (attachment.sampleCount == ImageSampleCount::x1 && attachment.finalLayout != ImageLayout::PRESENT_SRC));
 
 		return device->createDynamicImage({
 			.type = descriptor.type,

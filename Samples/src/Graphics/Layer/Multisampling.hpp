@@ -11,7 +11,7 @@
 namespace Trident {
 	class MultisamplingLayerGroup : public RenderPassLayerGroup {
 		private:
-			static constexpr uint32 SAMPLE_COUNT = 4;
+			static constexpr ImageSampleCount SAMPLE_COUNT = ImageSampleCount::x4;
 
 		public:
 			explicit MultisamplingLayerGroup(range<uint32, uint32> layerRange) :

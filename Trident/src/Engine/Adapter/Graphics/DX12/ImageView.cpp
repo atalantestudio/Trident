@@ -18,7 +18,7 @@ namespace Trident {
 
 		switch (image->getType()) {
 			case ImageType::TYPE_2D: {
-				if (image->getSampleCount() > 1) {
+				if (image->getSampleCount() != ImageSampleCount::x1) {
 					if (imageView->layerCount > 1) {
 						renderTargetViewDescriptor.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMSARRAY;
 						renderTargetViewDescriptor.Texture2DMSArray.FirstArraySlice = imageView->layerOffset;
@@ -62,7 +62,7 @@ namespace Trident {
 
 		switch (image->getType()) {
 			case ImageType::TYPE_2D: {
-				if (image->getSampleCount() > 1) {
+				if (image->getSampleCount() != ImageSampleCount::x1) {
 					if (imageView->layerCount > 1) {
 						depthStencilViewDescriptor.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMSARRAY;
 						depthStencilViewDescriptor.Texture2DMSArray.FirstArraySlice = imageView->layerOffset;

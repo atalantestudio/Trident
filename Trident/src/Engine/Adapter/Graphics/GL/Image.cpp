@@ -44,9 +44,9 @@ namespace Trident {
 			case GL_TEXTURE_CUBE_MAP:
 			case GL_TEXTURE_RECTANGLE: {
 				// TODO(graphics/gl/image): Decouple multisampled from non-multisampled images.
-				if (image->sampleCount > 1) {
+				if (image->sampleCount != ImageSampleCount::x1) {
 					#if OPENGL_VERSION >= OPENGL_VERSION_4_3
-						glTexStorage2DMultisample(image->target, image->sampleCount, image->internalFormat, image->extent.x, image->extent.y, GL_TRUE);
+						glTexStorage2DMultisample(image->target, static_cast<GLsizei>(image->sampleCount), image->internalFormat, image->extent.x, image->extent.y, GL_TRUE);
 					#else
 						ENGINE_ERROR_UNSUPPORTED();
 					#endif
@@ -70,9 +70,9 @@ namespace Trident {
 			case GL_TEXTURE_3D:
 			case GL_TEXTURE_CUBE_MAP_ARRAY: {
 				// TODO(graphics/gl/image): Decouple multisampled from non-multisampled images.
-				if (image->sampleCount > 1) {
+				if (image->sampleCount != ImageSampleCount::x1) {
 					#if OPENGL_VERSION >= OPENGL_VERSION_4_3
-						glTexStorage3DMultisample(image->target, image->sampleCount, image->internalFormat, image->extent.x, image->extent.y, image->extent.z * image->layerCount, GL_TRUE);
+						glTexStorage3DMultisample(image->target, static_cast<GLsizei>(image->sampleCount), image->internalFormat, image->extent.x, image->extent.y, image->extent.z * image->layerCount, GL_TRUE);
 					#else
 						ENGINE_ERROR_UNSUPPORTED();
 					#endif
@@ -102,7 +102,7 @@ namespace Trident {
 			ADAPTER_ASSERT(immutableFormat != GL_FALSE, "Only immutable image formats are not supported.");
 		#endif
 
-		if (image->sampleCount == 1) {
+		if (image->sampleCount == ImageSampleCount::x1) {
 			glTexParameteri(image->target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 			glTexParameteri(image->target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 			glTexParameteri(image->target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

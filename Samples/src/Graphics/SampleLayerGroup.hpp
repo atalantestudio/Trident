@@ -17,7 +17,7 @@ namespace Trident {
 					.attachments = {
 						{
 							.format = Renderer::getSurface()->getFormat(),
-							.sampleCount = 1,
+							.sampleCount = ImageSampleCount::x1,
 							.loadOperation = LoadOperation::CLEAR,
 							.storeOperation = StoreOperation::STORE,
 							.finalLayout = ImageLayout::PRESENT_SRC,

@@ -13,13 +13,16 @@ namespace Trident {
 
 		FramebufferDescriptor framebufferDescriptor = {
 			.renderPass = renderPass,
-			#if FORWARD_SAMPLE_COUNT > 1
-				.imageViews = {colorImageView, depthStencilImageView, nullptr},
-			#else
-				.imageViews = {nullptr, depthStencilImageView},
-			#endif
+			.imageViews = {},
 			.extent = swapchain->getExtent(),
 		};
+
+		if (SAMPLE_COUNT != ImageSampleCount::x1) {
+			framebufferDescriptor.imageViews = {colorImageView, depthStencilImageView, nullptr};
+		}
+		else {
+			framebufferDescriptor.imageViews = {nullptr, depthStencilImageView};
+		}
 
 		#if defined(DEBUG_OBJECT_NAME)
 			sequence<char8> name;
@@ -34,11 +37,12 @@ namespace Trident {
 				framebufferDescriptor.name = name;
 			#endif
 
-			#if FORWARD_SAMPLE_COUNT > 1
+			if (SAMPLE_COUNT != ImageSampleCount::x1) {
 				framebufferDescriptor.imageViews[2] = swapchain->getImageView(framebufferIndex);
-			#else
+			}
+			else {
 				framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
-			#endif
+			}
 
 			framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
 

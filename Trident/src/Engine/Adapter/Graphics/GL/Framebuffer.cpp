@@ -14,7 +14,7 @@ namespace Trident {
 	// Use this information to find if the framebuffer contains multisampled attachments or not.
 	static bool needsResolving(view<ref<ImageView>> imageViews) {
 		for (ref<ImageView> imageView : imageViews) {
-			if (imageView->getImage()->getSampleCount() > 1) {
+			if (imageView->getImage()->getSampleCount() != ImageSampleCount::x1) {
 				return true;
 			}
 		}
@@ -51,7 +51,7 @@ namespace Trident {
 			const ref<GL::ImageView> glImageView = ref_cast<GL::ImageView>(imageView);
 			const GL::Image* glImage = static_cast<const GL::Image*>(imageView->getImage());
 
-			if (resolve && imageView->getImage()->getSampleCount() == 1) {
+			if (resolve && imageView->getImage()->getSampleCount() == ImageSampleCount::x1) {
 				glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + resolveAttachmentIndex, glImageView->target, glImageView->texture, imageView->getMipLevelOffset());
 
 				imageViewIndex += 1;

@@ -63,7 +63,7 @@ namespace Trident {
 		return layerCount;
 	}
 
-	uint8 Image::getSampleCount() const {
+	ImageSampleCount Image::getSampleCount() const {
 		return sampleCount;
 	}
 

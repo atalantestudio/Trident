@@ -22,12 +22,12 @@ namespace Trident {
 	void Physics2DRenderer::build() {
 		setupRenderPass();
 
-		#if PHYSICS_2D_RENDERER_SAMPLE_COUNT > 1
+		if (SAMPLE_COUNT != ImageSampleCount::x1) {
 			if (layerInput->swapchainImage == nullptr) {
 				recreateMultisampleImage();
 				recreateMultisampleImageView();
 			}
-		#endif
+		}
 
 		recreateDepthStencilImage();
 		recreateDepthStencilImageView();
@@ -84,7 +84,7 @@ namespace Trident {
 				// Color
 				{
 					.format = getSurface()->getFormat(),
-					.sampleCount = PHYSICS_2D_RENDERER_SAMPLE_COUNT,
+					.sampleCount = SAMPLE_COUNT,
 					.loadOperation = LoadOperation::CLEAR,
 					.storeOperation = StoreOperation::STORE,
 					.finalLayout = ImageLayout::PRESENT_SRC,
@@ -93,7 +93,7 @@ namespace Trident {
 				// Depth stencil
 				{
 					.format = ImageFormat::D32_SFLOAT,
-					.sampleCount = PHYSICS_2D_RENDERER_SAMPLE_COUNT,
+					.sampleCount = SAMPLE_COUNT,
 					.loadOperation = LoadOperation::CLEAR,
 					.storeOperation = StoreOperation::UNDEFINED,
 					.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
@@ -184,11 +184,12 @@ namespace Trident {
 			.extent = swapchain->getExtent(),
 		};
 
-		#if PHYSICS_2D_RENDERER_SAMPLE_COUNT > 1
+		if (SAMPLE_COUNT != ImageSampleCount::x1) {
 			framebufferDescriptor.imageViews = {layerInput->swapchainImageView, depthStencilImageView, nullptr};
-		#else
+		}
+		else {
 			framebufferDescriptor.imageViews = {nullptr, depthStencilImageView};
-		#endif
+		}
 
 		#if defined(DEBUG_OBJECT_NAME)
 			sequence<char8> name;
@@ -203,11 +204,12 @@ namespace Trident {
 				framebufferDescriptor.name = name;
 			#endif
 
-			#if PHYSICS_2D_RENDERER_SAMPLE_COUNT > 1
+			if (SAMPLE_COUNT != ImageSampleCount::x1) {
 				framebufferDescriptor.imageViews[2] = swapchain->getImageView(framebufferIndex);
-			#else
+			}
+			else {
 				framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
-			#endif
+			}
 
 			framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
 
@@ -670,18 +672,21 @@ namespace Trident {
 		const float32 width = static_cast<float32>(swapchainExtent.x);
 		const float32 height = static_cast<float32>(swapchainExtent.y);
 
+		// TODO(physics/2d/renderer): Store the clear values inside the renderer.
+		sequence<ClearValue> clearValues(2 + (SAMPLE_COUNT != ImageSampleCount::x1));
+		clearValues[0] = {1.0f, 1.0f, 1.0f, 1.0f};
+		clearValues[1] = {
+			.depth = 0.0f,
+			.stencil = 0,
+		};
+
+		if (SAMPLE_COUNT != ImageSampleCount::x1) {
+			clearValues[2] = {0.0f, 0.0f, 0.0f, 1.0f};
+		}
+
 		commandEncoder->beginRenderPass({
 			.framebuffer = framebuffers[getSwapchainImageIndex()],
-			.clearValues = {
-				{1.0f, 1.0f, 1.0f, 1.0f},
-				{
-					.depth = 0.0f,
-					.stencil = 0,
-				},
-				#if PHYSICS_2D_RENDERER_SAMPLE_COUNT > 1
-					{0.0f, 0.0f, 0.0f, 1.0f},
-				#endif
-			},
+			.clearValues = clearValues,
 		});
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, swapchainExtent);
@@ -828,12 +833,12 @@ namespace Trident {
 	#endif
 
 	void Physics2DRenderer::resize(WindowResizeEvent& event) {
-		#if PHYSICS_2D_RENDERER_SAMPLE_COUNT > 1
+		if (SAMPLE_COUNT != ImageSampleCount::x1) {
 			if (layerInput->swapchainImage == nullptr) {
 				recreateMultisampleImage();
 				recreateMultisampleImageView();
 			}
-		#endif
+		}
 
 		recreateDepthStencilImage();
 		recreateDepthStencilImageView();
