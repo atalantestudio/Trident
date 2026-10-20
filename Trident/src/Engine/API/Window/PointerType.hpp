@@ -9,6 +9,10 @@ namespace Trident {
 		/// Usually an arrow.
 		DEFAULT,
 
+		// TODO(window/pointer-type): Fix text cursor being white on the client area.
+		/// A cursor indicating selectable text.
+		TEXT,
+
 		/// Indicates that the hovered element can be interacted with.
 		/// Usually an image of a pointing hand.
 		INTERACTIVE,

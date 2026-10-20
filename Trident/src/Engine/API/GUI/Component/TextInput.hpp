@@ -28,10 +28,7 @@ namespace Trident {
 		component.layoutSpacing = style.layoutSpacing;
 		component.color = style.color;
 		component.image = style.image;
-
-		// TODO(gui/component/text-input): Change to TEXT.
-		component.pointerType = PointerType::INTERACTIVE;
-
+		component.pointerType = PointerType::TEXT;
 		component.inputText = style.text;
 		component.textComponent = false;
 		component.debugName = style.debugName;

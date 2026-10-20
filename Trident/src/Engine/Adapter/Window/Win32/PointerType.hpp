@@ -11,6 +11,9 @@ namespace Trident {
 			case PointerType::DEFAULT: {
 				return IDC_ARROW;
 			}
+			case PointerType::TEXT: {
+				return IDC_IBEAM;
+			}
 			case PointerType::INTERACTIVE: {
 				return IDC_HAND;
 			}
@@ -21,6 +24,6 @@ namespace Trident {
 			}
 		}
 
-		return nullptr;
+		return NULL;
 	}
 }
