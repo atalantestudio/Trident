@@ -13,6 +13,7 @@ namespace Trident {
 		MOUSE_UP,
 		MOUSE_MOVE,
 		MOUSE_WHEEL,
+		TEXT_INPUT,
 		WINDOW_CLOSE,
 		WINDOW_RESIZE,
 	};

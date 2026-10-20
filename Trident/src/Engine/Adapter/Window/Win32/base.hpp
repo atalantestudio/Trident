@@ -6,6 +6,7 @@
 #include "Engine/API/Event/EventListener.hpp"
 #include "Engine/API/Event/Keyboard/KeyDownEvent.hpp"
 #include "Engine/API/Event/Keyboard/KeyUpEvent.hpp"
+#include "Engine/API/Event/Keyboard/TextInputEvent.hpp"
 #include "Engine/API/Event/Mouse/MouseDownEvent.hpp"
 #include "Engine/API/Event/Mouse/MouseMoveEvent.hpp"
 #include "Engine/API/Event/Mouse/MouseUpEvent.hpp"
@@ -26,20 +27,18 @@ namespace Trident {
 		// Device context handle.
 		HDC hDC;
 
-		// TODO: Use vec2<sint32> (no SIMD).
+		// TODO(lyah): Use vec2<sint32>.
 		sint32 positionX;
 		sint32 positionY;
 
-		// TODO: Use vec2<sint32> (no SIMD).
 		Extent2D extent;
-
 		bool minimized;
 		bool maximized;
 		bool pointerLocked;
 		vec2<sint32> cursor;
 
-		// TODO: Check if that is really needed.
-		// TODO: Use vec2<sint32> (no SIMD).
+		// TODO(window/win32): Check if that is really needed.
+		// TODO(lyah): Use vec2<sint32>.
 		sint32 virtualCursorPositionX = 0;
 		sint32 virtualCursorPositionY = 0;
 
@@ -49,6 +48,7 @@ namespace Trident {
 		EventListener<MouseMoveEvent> mouseMoveEventListener;
 		EventListener<MouseUpEvent> mouseUpEventListener;
 		EventListener<MouseWheelEvent> mouseWheelEventListener;
+		EventListener<TextInputEvent> textInputEventListener;
 		EventListener<WindowResizeEvent> windowResizeEventListener;
 		EventListener<WindowCloseEvent> windowCloseEventListener;
 

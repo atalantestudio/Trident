@@ -6,7 +6,7 @@
 #include "Engine/Filesystem/Stream/Stream.hpp"
 
 namespace Trident {
-	// A read-only stream containing UTF-8 characters.
+	/// A read-only stream of UTF-8 characters.
 	class UTF8Stream {
 		public:
 			UTF8Stream() = default;
@@ -32,8 +32,8 @@ namespace Trident {
 				return byteSize - byteOffset;
 			}
 
-			// Advances the internal byte offset over the code point represented by the next byte(s).
-			// If this code point is invalid, the offset is increased by 1.
+			/// Advances the internal byte offset over the code point represented by the next byte(s).
+			/// If this code point is invalid, the offset is increased by 1.
 			inline void jump() {
 				const uint8 codePointByteSize = extractCodePointByteSize();
 
@@ -42,14 +42,14 @@ namespace Trident {
 				byteOffset += codePointByteSize;
 			}
 
-			// Advances the internal byte offset relatively to the start of the stream.
+			/// Advances the internal byte offset relatively to the start of the stream.
 			inline void seek(uint64 byteOffset) {
 				ENGINE_ASSERT(byteOffset <= byteSize, "Cannot seek more bytes than there is in the stream.", byteOffset, byteSize);
 
 				this->byteOffset = byteOffset;
 			}
 
-			// Returns the code point represented by the next byte(s) without advancing the internal offset.
+			/// Returns the code point represented by the next byte(s) without advancing the internal offset.
 			inline uint32 peek() const {
 				const uint8 codePointByteSize = extractCodePointByteSize();
 
@@ -62,8 +62,8 @@ namespace Trident {
 				return codePoint;
 			}
 
-			// See https://nullprogram.com/blog/2017/10/06.
-			// Returns the code point represented by the next byte(s), then advances the internal byte offset.
+			/// Returns the code point represented by the next byte(s), then advances the internal byte offset.
+			/// See https://nullprogram.com/blog/2017/10/06.
 			inline uint32 read() {
 				const uint8 codePointByteSize = extractCodePointByteSize();
 
@@ -129,7 +129,7 @@ namespace Trident {
 			// See https://nullprogram.com/blog/2017/10/06.
 			inline void accumulateError(uint32 codePoint, uint8 codePointByteSize) const {
 				// Minimum code point values per code point byte size.
-				// NOTE: 4194304 is 1 + the largest 22-bit number (a 4 byte code point can contain up to 22 bits of data). It is used to handle invalid code points.
+				// 4194304 is 1 + the largest 22-bit number (a 4 byte code point can contain up to 22 bits of data). It is used to handle invalid code points.
 				static constexpr uint32 MINIMUM_CODE_POINTS[] = {4194304, 0, 128, 2048, 65536};
 
 				// Shift values per code point byte size, used to discard the unneeded bits in the error value.

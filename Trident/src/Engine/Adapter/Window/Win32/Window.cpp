@@ -126,6 +126,7 @@ namespace Trident {
 		windowData->mouseMoveEventListener = descriptor.mouseMoveEventListener;
 		windowData->mouseUpEventListener = descriptor.mouseUpEventListener;
 		windowData->mouseWheelEventListener = descriptor.mouseWheelEventListener;
+		windowData->textInputEventListener = descriptor.textInputEventListener;
 		windowData->windowCloseEventListener = descriptor.windowCloseEventListener;
 		windowData->windowResizeEventListener = descriptor.windowResizeEventListener;
 

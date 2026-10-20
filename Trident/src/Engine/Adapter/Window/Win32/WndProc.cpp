@@ -59,34 +59,51 @@ namespace Trident {
 				break;
 			}
 			case WM_KEYDOWN: {
-				// TODO: Extended key and scan code.
-				// const uint16 lParamHi = HIWORD(lParam);
+				const UINT vkCode = static_cast<UINT>(wParam);
 
-				// const bool extendedKey = HIWORD(lParam) & KF_EXTENDED;
-				// ENGINE_DEBUG("Extended key = []", extendedKey);
+				if (vkCode >= 32 && vkCode != 127) {
+					break;
+				}
 
-				const uint32 code = static_cast<uint32>(wParam);
-				// const uint32 scanCode = MapVirtualKey(code, MAPVK_VK_TO_VSC);
+				windowData->keyMap[vkCode] = true;
 
-				windowData->keyMap[code] = true;
-
-				KeyDownEvent keyDownEvent(static_cast<KeyCode>(code));
+				KeyDownEvent keyDownEvent(static_cast<KeyCode>(vkCode));
 
 				windowData->keyDownEventListener(keyDownEvent);
 
 				return 0;
 			}
 			case WM_KEYUP: {
-				// TODO: Extended key and scan code.
-				// const uint16 lParamHi = HIWORD(lParam);
+				const UINT vkCode = static_cast<UINT>(wParam);
 
-				const uint32 code = static_cast<uint32>(wParam);
+				windowData->keyMap[vkCode] = false;
 
-				windowData->keyMap[code] = false;
-
-				KeyUpEvent keyUpEvent(static_cast<KeyCode>(code));
+				KeyUpEvent keyUpEvent(static_cast<KeyCode>(vkCode));
 
 				windowData->keyUpEventListener(keyUpEvent);
+
+				return 0;
+			}
+			case WM_CHAR: {
+				const UINT wideCharStr = static_cast<UINT>(wParam);
+
+				// See https://blog.keyman.com/2008/06/robust-key-mess.
+				if (wideCharStr < 32 || wideCharStr == 127) {
+					break;
+				}
+
+				UINT multiByteStr = 0;
+				INT cbMultiByte = WideCharToMultiByte(CP_UTF8, 0, pointer_cast<LPCWCH>(&wideCharStr), -1, NULL, 0, NULL, NULL);
+
+				WIN32_ASSERT(cbMultiByte >= 2 && cbMultiByte <= 5);
+
+				cbMultiByte = WideCharToMultiByte(CP_UTF8, 0, pointer_cast<LPCWCH>(&wideCharStr), -1, pointer_cast<LPSTR>(&multiByteStr), cbMultiByte, NULL, NULL);
+
+				WIN32_ASSERT(cbMultiByte >= 2 && cbMultiByte <= 5);
+
+				TextInputEvent textInputEvent(multiByteStr, cbMultiByte - 1);
+
+				windowData->textInputEventListener(textInputEvent);
 
 				return 0;
 			}

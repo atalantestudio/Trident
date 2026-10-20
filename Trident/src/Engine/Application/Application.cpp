@@ -133,6 +133,7 @@ namespace Trident {
 			.mouseMoveEventListener = BIND(layerCompositor->propagateEventFrontToBack),
 			.mouseUpEventListener = BIND(layerCompositor->propagateEventFrontToBack),
 			.mouseWheelEventListener = BIND(layerCompositor->propagateEventFrontToBack),
+			.textInputEventListener = BIND(layerCompositor->propagateEventFrontToBack),
 			.windowCloseEventListener = BIND(Application::onWindowClose),
 			.windowResizeEventListener = BIND(Application::onWindowResize),
 		});

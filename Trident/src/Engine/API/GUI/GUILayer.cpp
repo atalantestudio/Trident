@@ -142,6 +142,7 @@ namespace Trident {
 		eventDispatcher.dispatch<MouseMoveEvent>(BIND(onMouseMove));
 		eventDispatcher.dispatch<MouseUpEvent>(BIND(onMouseUp));
 		eventDispatcher.dispatch<MouseWheelEvent>(BIND(onMouseWheel));
+		eventDispatcher.dispatch<TextInputEvent>(BIND(onTextInput));
 		eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
 	}
 
@@ -276,6 +277,10 @@ namespace Trident {
 			return false;
 		}
 
+		return false;
+	}
+
+	bool GUILayer::onTextInput(TextInputEvent& event) {
 		if (focusedComponentIndex < previousFocusableComponentCount) {
 			GUIContainer& focusedComponent = components[focusableComponentIndexToComponentIndex[focusedComponentIndex]];
 

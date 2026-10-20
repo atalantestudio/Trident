@@ -17,10 +17,10 @@ namespace Trident {
 		component.origin = parent.origin;
 		component.offset = {0_px, 0_px};
 		component.size = style.size;
-		component.zIndex = parent.zIndex + style.zIndex;
 
 		setComponentSize(component, style.minimumSize, style.maximumSize);
 
+		component.zIndex = parent.zIndex + style.zIndex;
 		component.padding = style.padding;
 		component.anchorPoint = style.anchorPoint;
 		component.layoutDirection = style.layoutDirection;
@@ -39,21 +39,32 @@ namespace Trident {
 		openComponent(component, true);
 	}
 
-	void GUILayer::updateTextInput(KeyDownEvent& event, GUIContainer& focusedComponent) {
+	void GUILayer::updateTextInput(TextInputEvent& event, GUIContainer& focusedComponent) {
 		DEBUG_ASSERT(focusedComponent.inputText != nullptr);
 
 		std::string& text = *focusedComponent.inputText;
+		uint8 byteIndex = 0;
 
-		if (event.getKeyCode() >= KeyCode::A && event.getKeyCode() <= KeyCode::Z) {
-			const char8 character = static_cast<char8>(static_cast<uint16>(event.getKeyCode()));
+		while (byteIndex < event.byteSize) {
+			const uint8 byte = static_cast<uint8>((event.characterCode >> (8 * byteIndex)) & 0xff);
 
-			text += character;
+			text += byte;
+			byteIndex += 1;
 		}
 
-		if (event.getKeyCode() == KeyCode::BACKSPACE) {
-			if (text.size() > 0) {
-				text.pop_back();
+		// TODO(gui/text-input/backspace)
+		/* if (text.size() > 0) {
+			sint32 byteIndex = static_cast<sint32>(text.size()) - 1;
+
+			while (byteIndex >= 0) {
+				if (((text[byteIndex] >> 6) & 0b11) != 0b10) {
+					break;
+				}
+
+				byteIndex -= 1;
 			}
-		}
+
+			text.erase(byteIndex);
+		} */
 	}
 }

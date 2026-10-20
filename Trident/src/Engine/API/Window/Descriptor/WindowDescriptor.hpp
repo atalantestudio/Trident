@@ -6,6 +6,7 @@
 #include "Engine/API/Event/EventListener.hpp"
 #include "Engine/API/Event/Keyboard/KeyDownEvent.hpp"
 #include "Engine/API/Event/Keyboard/KeyUpEvent.hpp"
+#include "Engine/API/Event/Keyboard/TextInputEvent.hpp"
 #include "Engine/API/Event/Mouse/MouseDownEvent.hpp"
 #include "Engine/API/Event/Mouse/MouseMoveEvent.hpp"
 #include "Engine/API/Event/Mouse/MouseUpEvent.hpp"
@@ -24,6 +25,7 @@ namespace Trident {
 		EventListener<MouseMoveEvent> mouseMoveEventListener;
 		EventListener<MouseUpEvent> mouseUpEventListener;
 		EventListener<MouseWheelEvent> mouseWheelEventListener;
+		EventListener<TextInputEvent> textInputEventListener;
 		EventListener<WindowCloseEvent> windowCloseEventListener;
 		EventListener<WindowResizeEvent> windowResizeEventListener;
 	};
