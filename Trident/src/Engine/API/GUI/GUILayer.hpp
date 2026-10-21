@@ -118,7 +118,8 @@ namespace Trident {
 
 			void WrapTextChildrenRecursive(uint32 parentIndex);
 			void WrapText(GUIContainer& component);
-			void FlushCurrentWord(FlushWordData& flushWordData, GUIContainer& component, const UTF8Stream& stream, vec2<float32>& characterOffset, range<uint64, uint64>& wordByteRange) const;
+			void WrapInputText(GUIContainer& component, GUIContainer& selectionComponent);
+			void FlushCurrentWord(FlushWordData& flushWordData, std::vector<TextCharacter>& characters, const UTF8Stream& stream, vec2<float32>& characterOffset, range<uint64, uint64>& wordByteRange) const;
 			void FlushWord(FlushWordData& data, std::vector<TextCharacter>& textCharacters, vec2<float32>& characterOffset) const;
 			void PositionsAndAlignment(GUIContainer& component, vec2<float32> origin, bool registerSubcomponents);
 

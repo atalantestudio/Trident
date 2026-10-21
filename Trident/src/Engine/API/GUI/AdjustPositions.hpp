@@ -117,7 +117,7 @@ namespace Trident {
 		if (component.parentIndex != max<uint32>()) {
 			const GUIContainer& parent = components[component.parentIndex];
 
-			if (component.textComponent) {
+			if (component.textComponent || component.type == GUIComponentType::TEXT_INPUT) {
 				GUIGlyphSubcomponent glyphSubcomponent{};
 				glyphSubcomponent.color = component.color.value;
 				glyphSubcomponent.zIndex = component.zIndex;
@@ -127,17 +127,20 @@ namespace Trident {
 				const vec2<float32> origin = {component.origin.x + hintingX, component.origin.y + hintingY};
 
 				for (const TextCharacter& textCharacter : component.characters) {
-					glyphSubcomponent.world =
+					glyphSubcomponent.world = (
 						scaling<mat3x3<float32>>(textCharacter.size) *
-						translation<mat3x3<float32>>(origin + textCharacter.offset);
-					glyphSubcomponent.textureWorld =
+						translation<mat3x3<float32>>(origin + textCharacter.offset)
+					);
+					glyphSubcomponent.textureWorld = (
 						scaling<mat3x3<float32>>((textCharacter.endTextureCoordinate - textCharacter.startTextureCoordinate)) *
-						translation<mat3x3<float32>>(textCharacter.startTextureCoordinate);
+						translation<mat3x3<float32>>(textCharacter.startTextureCoordinate)
+					);
 
 					renderer.registerGlyphSubcomponent(glyphSubcomponent);
 				}
 
-				return false;
+				// TODO(gui/component/text-input): Text inputs have cursor and selection components to be rendered.
+				return component.type == GUIComponentType::TEXT_INPUT;
 			}
 
 			if (parent.type == GUIComponentType::VERTICAL_LIST) {

@@ -27,7 +27,7 @@ namespace Trident {
 				}
 
 				TextInput({
-					.size = {EXPAND, FIT},
+					.width = EXPAND,
 					.padding = {1_px, 1_px, 1_px, 1_px},
 					.color = color,
 					.text = &text,

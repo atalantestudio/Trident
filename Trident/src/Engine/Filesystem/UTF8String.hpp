@@ -12,6 +12,8 @@ namespace Trident {
 
 			uint64 getByteSize() const;
 
+			bool hasSelection() const;
+
 			void insert(const UTF8String& insertion);
 
 			void moveCursor(sint32 characterCount);

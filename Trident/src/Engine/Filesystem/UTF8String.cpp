@@ -16,6 +16,10 @@ namespace Trident {
 		return string.size();
 	}
 
+	bool UTF8String::hasSelection() const {
+		return selectionMarkerOffset != cursorOffset;
+	}
+
 	void UTF8String::insert(const UTF8String& insertion) {
 		string.insert(cursorOffset, insertion.string.data());
 
@@ -47,6 +51,7 @@ namespace Trident {
 	void UTF8String::removeSelection() {
 		string.erase(min(cursorOffset, selectionMarkerOffset), max(cursorOffset, selectionMarkerOffset));
 
+		cursorOffset = string.size();
 		selectionMarkerOffset = cursorOffset;
 	}
 

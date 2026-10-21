@@ -20,6 +20,7 @@ namespace ProjectB {
 				Container({
 					.size = {1280_px, 720_px},
 					.color = 0x30303050,
+					.debugName = "console-container",
 				}) {
 					ConsoleTextInput();
 				}
@@ -27,36 +28,14 @@ namespace ProjectB {
 
 		private:
 			void ConsoleTextInput() {
-				Color color = secondaryColor;
-
-				if (IsNextFocused()) {
-					color = borderFocusColor;
-				}
-
 				TextInput({
-					.size = {EXPAND, FIT},
-					.padding = {1_px, 1_px, 1_px, 1_px},
-					.color = color,
+					.width = EXPAND,
+					.color = 0xffffffff,
 					.text = &text,
-				}) {
-					Color color = primaryColor;
-
-					if (IsHovered()) {
-						color = backgroundHoverColor;
-					}
-
-					Container({
-						.size = {EXPAND, FIT},
-						.padding = {4_px, 4_px, 4_px, 4_px},
-						.color = color,
-					}) {
-						Text(text, {
-							.color = textColor,
-							.font = font,
-							.fontSize = 15_px,
-						});
-					}
-				}
+					.font = font,
+					.fontSize = 16_px,
+					.debugName = "console-text-input",
+				});
 			}
 
 		private:

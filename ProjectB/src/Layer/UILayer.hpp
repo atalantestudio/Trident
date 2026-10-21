@@ -25,11 +25,13 @@ namespace ProjectB {
 				Container({
 					.size = {static_cast<float32>(extent.x), static_cast<float32>(extent.y)},
 					.anchorPoint = AnchorPoint::HCENTER | AnchorPoint::VCENTER,
+					.debugName = "icon-container",
 				}) {
 					Container({
 						.size = {256_px, 256_px},
 						.color = 0xffffffff,
 						.image = studioIcon,
+						.debugName = "icon",
 					});
 				}
 			}

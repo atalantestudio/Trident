@@ -146,7 +146,7 @@ namespace Trident {
 			const uint64 codePointByteCount = stream.getByteOffset() - previousByteOffset;
 
 			if (codePoint == '\n') {
-				FlushCurrentWord(flushWordData, component, stream, characterOffset, wordByteRange);
+				FlushCurrentWord(flushWordData, component.characters, stream, characterOffset, wordByteRange);
 
 				characterOffset.x = 0.0f;
 				characterOffset.y += lineHeight;
@@ -159,7 +159,7 @@ namespace Trident {
 			const Glyph& glyph = fontAsset[codePoint];
 
 			if (glyph.whitespace) {
-				FlushCurrentWord(flushWordData, component, stream, characterOffset, wordByteRange);
+				FlushCurrentWord(flushWordData, component.characters, stream, characterOffset, wordByteRange);
 
 				characterOffset.x += glyph.advanceWidth * scale;
 				wordCharacterOffsetX = characterOffset.x;
@@ -191,7 +191,7 @@ namespace Trident {
 					wordByteRange.count += stream.getByteOffset() - previousByteOffset;
 				}
 
-				FlushCurrentWord(flushWordData, component, stream, characterOffset, wordByteRange);
+				FlushCurrentWord(flushWordData, component.characters, stream, characterOffset, wordByteRange);
 
 				wordCharacterOffsetX = characterOffset.x;
 
@@ -215,14 +215,14 @@ namespace Trident {
 
 	void GUILayer::FlushCurrentWord(
 		FlushWordData& flushWordData,
-		GUIContainer& component,
+		std::vector<TextCharacter>& characters,
 		const UTF8Stream& stream,
 		vec2<float32>& characterOffset,
 		range<uint64, uint64>& wordByteRange
 	) const {
 		flushWordData.stream = UTF8Stream(view<char8>(&stream.getData()[wordByteRange.offset], wordByteRange.count));
 
-		FlushWord(flushWordData, component.characters, characterOffset);
+		FlushWord(flushWordData, characters, characterOffset);
 
 		wordByteRange.offset = stream.getByteOffset();
 		wordByteRange.count = 0;
@@ -263,7 +263,6 @@ namespace Trident {
 
 			float32 width = glyph.width * scale;
 			float32 height = glyph.height * scale;
-
 			float32 startU = glyph.minCoordinate.x;
 			float32 startV = glyph.minCoordinate.y;
 			float32 endU = glyph.maxCoordinate.x;
@@ -282,18 +281,25 @@ namespace Trident {
 	}
 
 	void GUILayer::WrapTextChildrenRecursive(uint32 parentIndex) {
-		GUIContainer& parent = components[parentIndex];
+		GUIContainer& parentComponent = components[parentIndex];
 
-		for (const uint32 childIndex : parent.childIndices) {
-			GUIContainer& child = components[childIndex];
+		for (const uint32 childIndex : parentComponent.childIndices) {
+			GUIContainer& childComponent = components[childIndex];
 
-			if (!child.textComponent) {
+			if (!childComponent.textComponent && childComponent.type != GUIComponentType::TEXT_INPUT) {
 				WrapTextChildrenRecursive(childIndex);
 
 				continue;
 			}
 
-			WrapText(child);
+			if (childComponent.type == GUIComponentType::TEXT_INPUT) {
+				GUIContainer& selectionComponent = components[childIndex + 1];
+
+				WrapInputText(childComponent, selectionComponent);
+			}
+			else {
+				WrapText(childComponent);
+			}
 		}
 	}
 }

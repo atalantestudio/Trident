@@ -9,8 +9,9 @@
 
 namespace Trident {
 	struct TextInputStyle {
-		/// The default sizing mode is FIT in both directions.
-		Size2D size = {-2.0f, -2.0f};
+		/// The width of the text input.
+		/// The height is automatically set to the line height of the font.
+		Size1D width;
 
 		vec2<float32> maximumSize = {max<float32>(), max<float32>()};
 		vec2<float32> minimumSize = {0_px, 0_px};
@@ -28,6 +29,8 @@ namespace Trident {
 		ImageID image = 0;
 
 		UTF8String* text = nullptr;
+		FontID font;
+		float32 fontSize;
 
 		view<char8> debugName;
 	};
