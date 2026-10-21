@@ -173,6 +173,7 @@ namespace Trident {
 
 				break;
 			}
+			case KeyCode::HOME:
 			case KeyCode::ARROW_UP: {
 				string->seek(0);
 
@@ -185,6 +186,7 @@ namespace Trident {
 
 				break;
 			}
+			case KeyCode::END:
 			case KeyCode::ARROW_DOWN: {
 				string->seek(string->getByteSize());
 

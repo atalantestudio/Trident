@@ -15,6 +15,8 @@ namespace Trident {
 
 		ESCAPE			= 27,
 		SPACE			= 32,
+		END				= 35,
+		HOME			= 36,
 		ARROW_LEFT		= 37,
 		ARROW_UP		= 38,
 
@@ -86,8 +88,11 @@ namespace Trident {
 		UP				= 265,
 		PAGE_UP			= 266,
 		PAGE_DOWN		= 277,
-		HOME			= 268,
-		END				= 269,
+
+		// TODO(key-code)
+		// HOME			= 268,
+		// END				= 269,
+
 		CAPS_LOCK		= 280,
 		SCROLL_LOCK		= 281,
 		NUM_LOCK		= 282,
