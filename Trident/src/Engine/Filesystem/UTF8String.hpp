@@ -17,7 +17,10 @@ namespace Trident {
 			void insert(const UTF8String& insertion);
 
 			void moveCursor(sint32 characterCount);
-			void markCursorForSelection();
+
+			void seek(uint64 byteOffset);
+
+			void select();
 
 			void removeSelection();
 
@@ -25,6 +28,7 @@ namespace Trident {
 
 		private:
 			std::string string;
+			bool selected;
 
 		public:
 			/// Offset of the cursor in bytes.

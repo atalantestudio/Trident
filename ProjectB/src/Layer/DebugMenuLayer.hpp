@@ -30,6 +30,7 @@ namespace ProjectB {
 			void ConsoleTextInput() {
 				TextInput({
 					.width = EXPAND,
+					.padding = {16_px, 16_px, 16_px, 16_px},
 					.color = 0xffffffff,
 					.text = &text,
 					.font = font,

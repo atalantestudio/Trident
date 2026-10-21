@@ -61,10 +61,6 @@ namespace Trident {
 			case WM_KEYDOWN: {
 				const UINT vkCode = static_cast<UINT>(wParam);
 
-				if (vkCode >= 32 && vkCode != 127) {
-					break;
-				}
-
 				windowData->keyMap[vkCode] = true;
 
 				KeyDownEvent keyDownEvent(static_cast<KeyCode>(vkCode));

@@ -45,9 +45,7 @@ namespace Trident {
 			.offset = {0.0f, 0.0f},
 			.size = {0.0f, lineHeight},
 			.zIndex = component.zIndex,
-
-			// TODO(gui/component/text-input/selection): Selection color.
-			.color = 0xff9800ff,
+			.color = component.color,
 		});
 	}
 
@@ -69,10 +67,13 @@ namespace Trident {
 			baseline = floor(baseline);
 		}
 
+		uint64 byteOffset = 0;
+
 		while (stream.getRemainingByteSize() > 0) {
 			const uint64 previousByteOffset = stream.getByteOffset();
 			const uint32 codePoint = stream.read();
-			const uint64 byteOffset = stream.getByteOffset();
+
+			byteOffset = stream.getByteOffset();
 
 			DEBUG_ASSERT(codePoint != '\n');
 
@@ -84,8 +85,8 @@ namespace Trident {
 				continue;
 			}
 
-			const float32 x = horizontalHinting + ceil(characterOffsetX + glyph.leftSideBearing * scale);
-			const float32 y = baseline - glyph.yMax * scale;
+			const float32 x = component.padding.x + horizontalHinting + ceil(characterOffsetX + glyph.leftSideBearing * scale);
+			const float32 y = component.padding.y + baseline - glyph.yMax * scale;
 
 			// TODO(gui/text/kerning)
 			/* if (data.stream.getRemainingByteSize() > 0) {
@@ -111,15 +112,30 @@ namespace Trident {
 				const uint64 selectionEndByteOffset = max(component.inputText->cursorOffset, component.inputText->selectionMarkerOffset);
 
 				if (previousByteOffset == selectionStartByteOffset) {
-					selectionComponent.offset.x = textCharacter.offset.x;
+					selectionComponent.offset.x = x - component.padding.x;
 				}
 
 				if (byteOffset == selectionEndByteOffset) {
-					selectionComponent.size.width.value = textCharacter.offset.x + textCharacter.size.x - selectionComponent.offset.x;
+					selectionComponent.size.width.value = x - component.padding.x + width - selectionComponent.offset.x;
+				}
+			}
+			else {
+				if (previousByteOffset == component.inputText->cursorOffset) {
+					selectionComponent.offset.x = characterOffsetX;
+					selectionComponent.size.width.value = 2_px;
+					selectionComponent.color = 0x5cafe7ff;
 				}
 			}
 
 			characterOffsetX += glyph.advanceWidth * scale;
+		}
+
+		if (!component.inputText->hasSelection()) {
+			if (byteOffset == component.inputText->cursorOffset) {
+				selectionComponent.offset.x = characterOffsetX;
+				selectionComponent.size.width.value = 2_px;
+				selectionComponent.color = 0x5cafe7ff;
+			}
 		}
 	}
 
@@ -130,21 +146,59 @@ namespace Trident {
 	}
 
 	void GUILayer::updateTextInputAction(KeyDownEvent& event, GUIContainer& component) {
-		DEBUG_ASSERT(component.inputText != nullptr);
+		UTF8String* string = component.inputText;
+
+		DEBUG_ASSERT(string != nullptr);
 
 		// TODO(gui/text-input/enter): Implement Enter key (execute command).
 		// TODO(gui/text-input/tab): Implement Tab key for inline suggestions?
 		// TODO(gui/text-input/escape): Implement Escape key (unfocus)?
-		// TODO(gui/text-input/ctrl-backspace): Implement Ctrl + Backspace key combination (delete up to a blank character)?
+		// TODO(gui/text-input/ctrl-backspace): Implement Ctrl + Backspace key combination (delete up to a character not in [A-Za-z0-9_])?
 		switch (event.getKeyCode()) {
 			case KeyCode::BACKSPACE: {
-				if (component.inputText->getByteSize() == 0) {
+				if (string->getByteSize() == 0) {
 					break;
 				}
 
-				component.inputText->markCursorForSelection();
-				component.inputText->moveCursor(-1);
-				component.inputText->removeSelection();
+				string->select();
+				string->moveCursor(-1);
+				string->removeSelection();
+
+				break;
+			}
+			case KeyCode::ARROW_LEFT: {
+				if (string->cursorOffset > 0) {
+					string->moveCursor(-1);
+				}
+
+				break;
+			}
+			case KeyCode::ARROW_UP: {
+				string->seek(0);
+
+				break;
+			}
+			case KeyCode::ARROW_RIGHT: {
+				if (string->cursorOffset < string->getByteSize()) {
+					string->moveCursor(1);
+				}
+
+				break;
+			}
+			case KeyCode::ARROW_DOWN: {
+				string->seek(string->getByteSize());
+
+				break;
+			}
+			case KeyCode::DELETE: {
+				if (string->cursorOffset == string->getByteSize()) {
+					break;
+				}
+
+				string->moveCursor(1);
+				string->select();
+				string->moveCursor(-1);
+				string->removeSelection();
 
 				break;
 			}

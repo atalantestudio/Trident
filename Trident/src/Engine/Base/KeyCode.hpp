@@ -15,10 +15,21 @@ namespace Trident {
 
 		ESCAPE			= 27,
 		SPACE			= 32,
-		APOSTROPHE		= 39, // '
+		ARROW_LEFT		= 37,
+		ARROW_UP		= 38,
+
+		// TODO(key-code)
+		// APOSTROPHE		= 39, // '
+		ARROW_RIGHT		= 39,
+
+		ARROW_DOWN		= 40,
 		COMMA			= 44, // ,
 		MINUS			= 45, // -
-		PERIOD			= 46, // .
+
+		// TODO(key-code)
+		// PERIOD			= 46, // .
+		DELETE			= 46,
+
 		SLASH			= 47, // /
 		DIGIT_0			= 48,
 		DIGIT_1			= 49,
@@ -65,7 +76,10 @@ namespace Trident {
 		WORLD_1			= 161,
 		WORLD_2			= 162,
 		INSERT			= 260,
-		DELETE			= 261,
+
+		// TODO(key-code)
+		// DELETE			= 261,
+
 		RIGHT			= 262,
 		LEFT			= 263,
 		DOWN			= 264,
