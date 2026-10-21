@@ -133,6 +133,7 @@ namespace Trident {
 			void updateHoveredComponentIndex();
 
 			void updateTextInput(TextInputEvent& event, GUIContainer& component);
+			void updateTextInputAction(KeyDownEvent& event, GUIContainer& component);
 			void updateVerticalList(MouseWheelEvent& event, GUIContainer& component);
 
 			bool IsHovered(uint32 componentIndex) const;

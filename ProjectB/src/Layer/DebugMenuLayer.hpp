@@ -50,18 +50,16 @@ namespace ProjectB {
 						.padding = {4_px, 4_px, 4_px, 4_px},
 						.color = color,
 					}) {
-						const view<char8> textView(&text[0], text.size());
-
-						Text(textView, {
+						Text(text, {
 							.color = textColor,
-							.font = fontRegular,
-							.fontSize = 16_px,
+							.font = font,
+							.fontSize = 15_px,
 						});
 					}
 				}
 			}
 
 		private:
-			std::string text;
+			UTF8String text;
 	};
 }

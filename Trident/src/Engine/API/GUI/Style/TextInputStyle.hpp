@@ -5,6 +5,7 @@
 
 #include "Engine/API/GUI/LayoutDirection.hpp"
 #include "Engine/API/GUI/Size.hpp"
+#include "Engine/Filesystem/UTF8String.hpp"
 
 namespace Trident {
 	struct TextInputStyle {
@@ -26,7 +27,7 @@ namespace Trident {
 		Color color = 0x00000000;
 		ImageID image = 0;
 
-		std::string* text = nullptr;
+		UTF8String* text = nullptr;
 
 		view<char8> debugName;
 	};

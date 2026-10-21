@@ -36,32 +36,27 @@ namespace Trident {
 		openComponent(component, true);
 	}
 
-	void GUILayer::updateTextInput(TextInputEvent& event, GUIContainer& focusedComponent) {
-		DEBUG_ASSERT(focusedComponent.inputText != nullptr);
+	void GUILayer::updateTextInput(TextInputEvent& event, GUIContainer& component) {
+		DEBUG_ASSERT(component.inputText != nullptr);
 
-		std::string& text = *focusedComponent.inputText;
-		uint8 byteIndex = 0;
+		component.inputText->insert(event.characterCode);
+	}
 
-		while (byteIndex < event.byteSize) {
-			const uint8 byte = static_cast<uint8>((event.characterCode >> (8 * byteIndex)) & 0xff);
+	void GUILayer::updateTextInputAction(KeyDownEvent& event, GUIContainer& component) {
+		DEBUG_ASSERT(component.inputText != nullptr);
 
-			text += byte;
-			byteIndex += 1;
-		}
-
-		// TODO(gui/text-input/backspace)
-		/* if (text.size() > 0) {
-			sint32 byteIndex = static_cast<sint32>(text.size()) - 1;
-
-			while (byteIndex >= 0) {
-				if (((text[byteIndex] >> 6) & 0b11) != 0b10) {
+		switch (event.getKeyCode()) {
+			case KeyCode::BACKSPACE: {
+				if (component.inputText->getByteSize() == 0) {
 					break;
 				}
 
-				byteIndex -= 1;
-			}
+				component.inputText->markCursorForSelection();
+				component.inputText->moveCursor(-1);
+				component.inputText->removeSelection();
 
-			text.erase(byteIndex);
-		} */
+				break;
+			}
+		}
 	}
 }

@@ -5,21 +5,18 @@
 
 #include "Engine/API/Event/Event.hpp"
 #include "Engine/Base/KeyCode.hpp"
+#include "Engine/Filesystem/UTF8String.hpp"
 
 namespace Trident {
 	struct TextInputEvent : public Event {
 		explicit TextInputEvent(uint32 characterCode, uint8 byteSize) :
-			characterCode(characterCode),
-			byteSize(byteSize)
+			characterCode(characterCode, byteSize)
 		{}
 
 		EVENT_TYPE(EventType::TEXT_INPUT)
 		EVENT_CATEGORY(EventCategory::INPUT | EventCategory::KEYBOARD)
 
 		/// UTF-8 code bytes.
-		uint32 characterCode;
-
-		/// Number of occupied bytes in `characterCode`, in the [1, 4] range.
-		uint8 byteSize;
+		UTF8String characterCode;
 	};
 }

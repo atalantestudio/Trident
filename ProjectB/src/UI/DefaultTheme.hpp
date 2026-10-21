@@ -11,7 +11,7 @@ namespace ProjectB {
 	class UIDefaultTheme : public GUILayer {
 		public:
 			void registerAssets() override {
-				fontRegular = loadFontAsset("test-regular");
+				font = loadFontAsset("default");
 
 				clearColor = primaryColor;
 			}
@@ -45,7 +45,6 @@ namespace ProjectB {
 			Color borderFocusColor = 0x00000000;
 			Color textColor = 0x00000000;
 			Color textHoverColor = 0x00000000;
-
-			FontID fontRegular;
+			FontID font;
 	};
 }

@@ -277,6 +277,21 @@ namespace Trident {
 			return false;
 		}
 
+		if (focusedComponentIndex < previousFocusableComponentCount) {
+			GUIContainer& focusedComponent = components[focusableComponentIndexToComponentIndex[focusedComponentIndex]];
+
+			switch (focusedComponent.type) {
+				case GUIComponentType::TEXT_INPUT: {
+					updateTextInputAction(event, focusedComponent);
+
+					break;
+				}
+				default: {
+					break;
+				}
+			}
+		}
+
 		return false;
 	}
 

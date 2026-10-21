@@ -10,6 +10,7 @@
 #include "Engine/API/GUI/Size.hpp"
 #include "Engine/API/GUI/Subcomponent.hpp"
 #include "Engine/API/Window/PointerType.hpp"
+#include "Engine/Filesystem/UTF8String.hpp"
 
 namespace Trident {
 	struct TextCharacter {
@@ -64,15 +65,15 @@ namespace Trident {
 		// Exclusive to text components.
 		bool textComponent;
 
-		// TODO(gui/component/text-input): Merge this and GUIContainer::text.
-		std::string* inputText = nullptr;
+		// TODO(gui/component/text-input): Merge GUIContainer::text with this.
+		UTF8String* inputText = nullptr;
 
 		sequence<char8> text;
 		std::vector<TextCharacter> characters;
 		FontID font;
 		float32 fontSize;
 
-		// TODO (debug-only)
+		// TODO(gui/component/text-input): Debug-only.
 		view<char8> debugName;
 	};
 }

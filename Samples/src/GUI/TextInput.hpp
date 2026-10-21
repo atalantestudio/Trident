@@ -43,9 +43,7 @@ namespace Trident {
 						.padding = {4_px, 4_px, 4_px, 4_px},
 						.color = color,
 					}) {
-						const view<char8> textView(&text[0], text.size());
-
-						Text(textView, {
+						Text(text, {
 							.color = textColor,
 							.font = fontRegular,
 							.fontSize = 16_px,
@@ -55,6 +53,6 @@ namespace Trident {
 			}
 
 		private:
-			std::string text;
+			UTF8String text;
 	};
 }
