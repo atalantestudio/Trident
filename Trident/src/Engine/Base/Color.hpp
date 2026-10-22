@@ -7,7 +7,7 @@ namespace Trident {
 	class Color {
 		public:
 			// From an hexadecimal code (transparency included).
-			Color(uint32 code) :
+			constexpr Color(uint32 code) :
 				value(
 					static_cast<float32>((code >> 24) & 0xff) / 255.0f,
 					static_cast<float32>((code >> 16) & 0xff) / 255.0f,
@@ -17,7 +17,7 @@ namespace Trident {
 			{}
 
 			// From an RGB/RGBA color code.
-			Color(uint8 r, uint8 g, uint8 b, uint8 a = 255) :
+			constexpr Color(uint8 r, uint8 g, uint8 b, uint8 a = 255) :
 				value(
 					static_cast<float32>(r) / 255.0f,
 					static_cast<float32>(g) / 255.0f,

@@ -6,7 +6,7 @@
 #include "Engine/API/GUI/GUILayer.hpp"
 
 namespace Trident {
-	void GUILayer::PositionsAndAlignment(GUIContainer& component, vec2<float32> origin, bool registerSubcomponents) {
+	void GUILayer::PositionsAndAlignment(GUIContainer& component, uint32 componentIndex, vec2<float32> origin, bool registerSubcomponents) {
 		if (component.parentIndex != max<uint32>()) {
 			const GUIContainer& parent = components[component.parentIndex];
 
@@ -22,7 +22,7 @@ namespace Trident {
 		}
 
 		if (registerSubcomponents) {
-			registerSubcomponents = registerSubcomponent(component);
+			registerSubcomponents = registerComponent(component, componentIndex);
 		}
 
 		if (component.childIndices.size() == 0) {
@@ -71,7 +71,9 @@ namespace Trident {
 			index index = 0;
 
 			while (index < component.childIndices.size()) {
-				GUIContainer& child = components[component.childIndices[index]];
+				const uint32 childIndex = component.childIndices[index];
+
+				GUIContainer& child = components[childIndex];
 
 				if (!child.floating) {
 					const float32 remainingAcross = componentAcross - round(child.size[!component.layoutDirection].value);
@@ -79,7 +81,7 @@ namespace Trident {
 					origin[!component.layoutDirection] = originAcross + remainingAcross * fAcross;
 				}
 
-				PositionsAndAlignment(child, origin, registerSubcomponents);
+				PositionsAndAlignment(child, childIndex, origin, registerSubcomponents);
 
 				if (!child.floating) {
 					origin[component.layoutDirection] += round(child.size[component.layoutDirection].value);
@@ -101,87 +103,5 @@ namespace Trident {
 			// Remove padding across the layout direction.
 			origin[!component.layoutDirection] -= component.padding[!component.layoutDirection];
 		}
-	}
-
-	bool GUILayer::registerSubcomponent(const GUIContainer& component) {
-		if (component.color.value[3] == 0.0f) {
-			return true;
-		}
-
-		float32 x = component.origin.x;
-		float32 y = component.origin.y;
-
-		float32 width = component.size.width.value;
-		float32 height = component.size.height.value;
-
-		if (component.parentIndex != max<uint32>()) {
-			const GUIContainer& parent = components[component.parentIndex];
-
-			if (component.textComponent || component.type == GUIComponentType::TEXT_INPUT) {
-				GUIGlyphSubcomponent glyphSubcomponent{};
-				glyphSubcomponent.color = component.color.value;
-				glyphSubcomponent.zIndex = component.zIndex;
-				glyphSubcomponent.textureArrayLayerIndex = fonts[component.font].glyphMapImageId;
-				glyphSubcomponent.fontSize = component.fontSize;
-
-				const vec2<float32> origin = {component.origin.x + hintingX, component.origin.y + hintingY};
-
-				for (const TextCharacter& textCharacter : component.characters) {
-					glyphSubcomponent.world = (
-						scaling<mat3x3<float32>>(textCharacter.size) *
-						translation<mat3x3<float32>>(origin + textCharacter.offset)
-					);
-					glyphSubcomponent.textureWorld = (
-						scaling<mat3x3<float32>>((textCharacter.endTextureCoordinate - textCharacter.startTextureCoordinate)) *
-						translation<mat3x3<float32>>(textCharacter.startTextureCoordinate)
-					);
-
-					renderer.registerGlyphSubcomponent(glyphSubcomponent);
-				}
-
-				// TODO(gui/component/text-input): Text inputs have cursor and selection components to be rendered.
-				return component.type == GUIComponentType::TEXT_INPUT;
-			}
-
-			if (parent.type == GUIComponentType::VERTICAL_LIST) {
-				if (component.origin.y + component.size.height.value <= parent.origin.y) {
-					return false;
-				}
-
-				if (component.origin.y >= parent.origin.y + parent.size.height.value) {
-					return false;
-				}
-
-				const float32 topClip = (component.origin.y + component.size.height.value) - parent.origin.y;
-
-				// TODO(gui/scroll-container/clipping): Finish clipping.
-				/* if (topClip < component.origin.y) {
-					y = topClip;
-				} */
-
-				const float32 bottomClip = (parent.origin.y + parent.size.height.value) - component.origin.y;
-
-				if (bottomClip < height) {
-					height = bottomClip;
-				}
-			}
-		}
-		else {
-			height = static_cast<float32>(getApplication()->getWindow()->getExtent().y);
-		}
-
-		const vec2<float32> decimalOrigin = {x, round(y)};
-		const vec2<float32> decimalSize = {width, height};
-
-		GUISubcomponent subcomponent{};
-		subcomponent.worldTransform = scaling<mat3x3<float32>>(decimalSize) * translation<mat3x3<float32>>(decimalOrigin);
-		subcomponent.textureTransform = identity<mat3x3<float32>>();
-		subcomponent.color = component.color.value;
-		subcomponent.zIndex = component.zIndex;
-		subcomponent.textureArrayLayerIndex = component.image;
-
-		renderer.registerSubcomponent(subcomponent);
-
-		return true;
 	}
 }

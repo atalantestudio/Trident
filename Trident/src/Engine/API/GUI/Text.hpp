@@ -293,9 +293,7 @@ namespace Trident {
 			}
 
 			if (childComponent.type == GUIComponentType::TEXT_INPUT) {
-				GUIContainer& selectionComponent = components[childIndex + 1];
-
-				WrapInputText(childComponent, selectionComponent);
+				WrapInputText(childComponent, childIndex);
 			}
 			else {
 				WrapText(childComponent);

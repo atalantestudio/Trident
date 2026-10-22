@@ -9,6 +9,7 @@
 #include "Engine/API/GUI/Component/TextInput.hpp"
 #include "Engine/API/GUI/Component/VerticalList.hpp"
 #include "Engine/API/GUI/GUILayer.hpp"
+#include "Engine/API/GUI/RegisterSubcomponent.hpp"
 #include "Engine/API/GUI/Text.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 
@@ -119,7 +120,7 @@ namespace Trident {
 		}
 
 		expandAndFitComponent(0, 1);
-		PositionsAndAlignment(components[0], components[0].origin, true);
+		PositionsAndAlignment(components[0], 0, components[0].origin, true);
 
 		std::copy(&components[0], &components[componentCount], &previousComponents[0]);
 
@@ -264,6 +265,16 @@ namespace Trident {
 
 	bool GUILayer::onKeyDown(KeyDownEvent& event) {
 		if (event.getKeyCode() == KeyCode::TAB) {
+			if (focusedComponentIndex < focusableComponentCount) {
+				GUIContainer& focusedComponent = components[focusableComponentIndexToComponentIndex[focusedComponentIndex]];
+
+				if (focusedComponent.type == GUIComponentType::TEXT_INPUT) {
+					if (focusedComponent.inputText->hasSelection()) {
+						focusedComponent.inputText->unselect();
+					}
+				}
+			}
+
 			focusedComponentIndex = (focusedComponentIndex + 1) % (focusableComponentCount + 1);
 
 			return false;

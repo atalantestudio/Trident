@@ -62,6 +62,7 @@ namespace Trident {
 
 		std::vector<uint32> childIndices;
 
+		// TODO(gui/component/text): Move to GUIComponentType enum.
 		// Exclusive to text components.
 		bool textComponent;
 

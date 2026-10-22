@@ -10,7 +10,7 @@ namespace Trident {
 		string(pointer_cast<const char8*>(&code), byteSize),
 		selected(false),
 		cursorOffset(string.size()),
-		selectionMarkerOffset(cursorOffset)
+		selectionMarkerOffset(0)
 	{}
 
 	uint64 UTF8String::getByteSize() const {
@@ -21,11 +21,42 @@ namespace Trident {
 		return selected;
 	}
 
-	void UTF8String::insert(const UTF8String& insertion) {
-		string.insert(cursorOffset, insertion.string.data());
+	void UTF8String::seek(uint64 byteOffset) {
+		cursorOffset = byteOffset;
+	}
 
-		cursorOffset += insertion.getByteSize();
-		selected = false;
+	void UTF8String::jumpLeft(uint32 characterCount) {
+		uint32 characterIndex = 0;
+
+		while (characterIndex < characterCount) {
+			if (cursorOffset == 0) {
+				break;
+			}
+
+			const char8 character = string[cursorOffset - 1];
+
+			if (((character >> 6) & 0b11) != 0b10) {
+				characterIndex += 1;
+			}
+
+			cursorOffset -= 1;
+		}
+	}
+
+	void UTF8String::jumpRight(uint32 characterCount) {
+		uint32 characterIndex = 0;
+
+		while (characterIndex < characterCount) {
+			if (cursorOffset == getByteSize()) {
+				break;
+			}
+
+			if (((string[cursorOffset] >> 6) & 0b11) != 0b10) {
+				characterIndex += 1;
+			}
+
+			cursorOffset += 1;
+		}
 	}
 
 	void UTF8String::select() {
@@ -33,37 +64,47 @@ namespace Trident {
 		selected = true;
 	}
 
-	void UTF8String::seek(uint64 byteOffset) {
-		cursorOffset = byteOffset;
+	void UTF8String::unselect() {
 		selected = false;
 	}
 
-	void UTF8String::moveCursor(sint32 characterCount) {
-		sint32 i = 0;
+	void UTF8String::insert(const UTF8String& insertion) {
+		if (selected) {
+			uint64 startOffset = cursorOffset;
+			uint64 endOffset = selectionMarkerOffset;
 
-		while (i < abs(characterCount)) {
-			if (((string[cursorOffset] >> 6) & 0b11) != 0b10) {
-				i += 1;
+			if (cursorOffset > selectionMarkerOffset) {
+				startOffset = selectionMarkerOffset;
+				endOffset = cursorOffset;
 			}
 
-			if (characterCount < 0) {
-				cursorOffset -= 1;
-			}
-			else {
-				cursorOffset += 1;
-			}
+			string.replace(startOffset, endOffset - startOffset, insertion.string.data());
+
+			unselect();
+
+			cursorOffset = startOffset;
+		}
+		else {
+			string.insert(cursorOffset, insertion.string.data());
 		}
 
-		selected = false;
+		cursorOffset += insertion.getByteSize();
 	}
 
 	void UTF8String::removeSelection() {
-		const uint64 selectionStartOffset = min(cursorOffset, selectionMarkerOffset);
-		const uint64 selectionEndOffset = max(cursorOffset, selectionMarkerOffset);
+		uint64 startOffset = cursorOffset;
+		uint64 endOffset = selectionMarkerOffset;
 
-		string.erase(selectionStartOffset, selectionEndOffset - selectionStartOffset);
+		if (cursorOffset > selectionMarkerOffset) {
+			startOffset = selectionMarkerOffset;
+			endOffset = cursorOffset;
+		}
 
-		selected = false;
+		string.erase(startOffset, endOffset - startOffset);
+
+		unselect();
+
+		cursorOffset = startOffset;
 	}
 
 	UTF8String::operator view<char8>() const {

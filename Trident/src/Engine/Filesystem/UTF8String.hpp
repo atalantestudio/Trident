@@ -14,13 +14,15 @@ namespace Trident {
 
 			bool hasSelection() const;
 
-			void insert(const UTF8String& insertion);
-
-			void moveCursor(sint32 characterCount);
-
 			void seek(uint64 byteOffset);
 
+			void jumpLeft(uint32 characterCount);
+			void jumpRight(uint32 characterCount);
+
 			void select();
+			void unselect();
+
+			void insert(const UTF8String& insertion);
 
 			void removeSelection();
 
@@ -33,6 +35,8 @@ namespace Trident {
 		public:
 			/// Offset of the cursor in bytes.
 			uint64 cursorOffset;
+
+			/// Selection marker offset in bytes.
 			uint64 selectionMarkerOffset;
 	};
 }

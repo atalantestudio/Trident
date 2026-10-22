@@ -29,6 +29,16 @@ namespace Trident {
 			};
 
 		private:
+			/// Text cursor width in pixels.
+			static constexpr float32 TEXT_CURSOR_WIDTH = 4_px;
+
+			/// Text cursor color, usually opaque.
+			static constexpr Color TEXT_CURSOR_COLOR = 0x5cafe7ff;
+
+			/// Text selection box color, usually semi-transparent.
+			static constexpr Color TEXT_SELECTION_BOX_COLOR = 0x5cafe750;
+
+		private:
 			static bool IsIntersecting(const GUIContainer& component, vec2<float32> point);
 
 			static float32 calculateTextPreferredWidth(UTF8Stream& stream, const FontAsset& fontAsset, float32 scale);
@@ -103,7 +113,12 @@ namespace Trident {
 		private:
 			void setComponentSize(GUIContainer& component, vec2<float32> minimumSize, vec2<float32> maximumSize) const;
 
-			bool registerSubcomponent(const GUIContainer& component);
+			// Processes the current component for rendering and returns whether to process its children too.
+			bool registerComponent(const GUIContainer& component, uint32 componentIndex);
+
+			void renderText(const GUIContainer& component);
+			void renderTextCursor(const GUIContainer& component);
+			void renderTextSelectionBox(const GUIContainer& component);
 
 			std::vector<uint32> FilterChildren(const GUIContainer& parent, uint8 axis, FillMode fillMode) const;
 
@@ -112,16 +127,16 @@ namespace Trident {
 
 			float32 calculateRemainingSize(const GUIContainer& component, uint8 axis) const;
 
-			/// Width is represented by an axis of 0 and height is represented by an axis of 1.
-			/// This function recursively calls the component's children.
+			// Width is represented by an axis of 0 and height is represented by an axis of 1.
+			// This function recursively calls the component's children.
 			void expandAndFitComponent(uint32 componentIndex, uint8 axis);
 
 			void WrapTextChildrenRecursive(uint32 parentIndex);
 			void WrapText(GUIContainer& component);
-			void WrapInputText(GUIContainer& component, GUIContainer& selectionComponent);
+			void WrapInputText(GUIContainer& component, uint32 componentIndex);
 			void FlushCurrentWord(FlushWordData& flushWordData, std::vector<TextCharacter>& characters, const UTF8Stream& stream, vec2<float32>& characterOffset, range<uint64, uint64>& wordByteRange) const;
 			void FlushWord(FlushWordData& data, std::vector<TextCharacter>& textCharacters, vec2<float32>& characterOffset) const;
-			void PositionsAndAlignment(GUIContainer& component, vec2<float32> origin, bool registerSubcomponents);
+			void PositionsAndAlignment(GUIContainer& component, uint32 componentIndex, vec2<float32> origin, bool registerSubcomponents);
 
 			bool onKeyDown(KeyDownEvent& event);
 			bool onMouseDown(MouseDownEvent& event);
@@ -158,8 +173,7 @@ namespace Trident {
 			Color clearColor = 0x00000000;
 
 			// TODO(gui/text-smoothness)
-			float32 hintingX = 0.0f;
-			float32 hintingY = 0.0f;
+			vec2<float32> hinting = {0.0f, 0.0f};
 
 		private:
 			GUIRenderer renderer;
@@ -171,7 +185,7 @@ namespace Trident {
 			sequence<uint32> openContainerIndices;
 			sequence<uint32> focusableComponentIndexToComponentIndex;
 
-			/// Component tree from the previous frame.
+			// Component tree from the previous frame.
 			sequence<GUIContainer> previousComponents;
 
 			uint32 componentCount = 0;
@@ -183,15 +197,19 @@ namespace Trident {
 			uint32 hoveredComponentIndex = max<uint32>();
 			uint32 hoveredVerticalListIndex = max<uint32>();
 
-			/// Index of the currently focused component.
+			// Index of the currently focused component.
 			uint32 focusedComponentIndex = max<uint32>();
 
-			/// Index of a component that was focused and received an Enter signal.
+			// Index of a component that was focused and received an Enter signal.
 			uint32 enterComponentIndex = max<uint32>();
 
 			bool mouseUp = false;
 			vec2<float32> lastMouseDownPosition = {-1.0f, -1.0f};
 			vec2<float32> lastMouseUpPosition = {-1.0f, -1.0f};
+
+			// Text cursor and selection box options for the currently focused text input.
+			float32 textCursorHorizontalOffset = 0_px;
+			float32 textSelectionBoxHorizontalOffset = 0_px;
 	};
 
 	/// Opens a GUI container component.

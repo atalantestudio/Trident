@@ -40,23 +40,18 @@ namespace Trident {
 
 		setComponentSize(component, style.minimumSize, style.maximumSize);
 		openComponent(component, true);
-
-		Floating({
-			.offset = {0.0f, 0.0f},
-			.size = {0.0f, lineHeight},
-			.zIndex = component.zIndex,
-			.color = component.color,
-		});
 	}
 
-	void GUILayer::WrapInputText(GUIContainer& component, GUIContainer& selectionComponent) {
+	void GUILayer::WrapInputText(GUIContainer& component, uint32 componentIndex) {
 		const FontData& fontData = fonts[component.font];
 		const FontAsset& fontAsset = *fontData.fontAsset;
 		const uint32 dpi = getApplication()->getWindow()->getDpi();
 		const float32 fontSizePt = fontAsset.pxToPt(component.fontSize, dpi);
 		const float32 scale = fontAsset.calculateScale(fontSizePt, dpi);
 
-		UTF8Stream stream(view<char8>(*component.inputText));
+		const UTF8String* inputText = component.inputText;
+
+		UTF8Stream stream = UTF8Stream(view<char8>(*inputText));
 		float32 baseline = component.origin.y + fontAsset.ascent * scale;
 		constexpr float32 horizontalHinting = 0.0f;
 		float32 characterOffsetX = component.origin.x;
@@ -67,13 +62,16 @@ namespace Trident {
 			baseline = floor(baseline);
 		}
 
-		uint64 byteOffset = 0;
+		const bool focused = IsFocused(componentIndex);
+
+		if (focused) {
+			textCursorHorizontalOffset = 0_px;
+			textSelectionBoxHorizontalOffset = 0_px;
+		}
 
 		while (stream.getRemainingByteSize() > 0) {
-			const uint64 previousByteOffset = stream.getByteOffset();
 			const uint32 codePoint = stream.read();
-
-			byteOffset = stream.getByteOffset();
+			const uint64 byteOffset = stream.getByteOffset();
 
 			DEBUG_ASSERT(codePoint != '\n');
 
@@ -89,9 +87,9 @@ namespace Trident {
 			const float32 y = component.padding.y + baseline - glyph.yMax * scale;
 
 			// TODO(gui/text/kerning)
-			/* if (data.stream.getRemainingByteSize() > 0) {
-				const uint32 nextCodePoint = data.stream.peek();
-				const sint16 kerning = data.fontAsset->getKerning(codePoint, nextCodePoint);
+			/* if (stream.getRemainingByteSize() > 0) {
+				const uint32 nextCodePoint = stream.peek();
+				const sint16 kerning = fontAsset.getKerning(codePoint, nextCodePoint);
 
 				x += kerning * scale;
 			} */
@@ -99,107 +97,143 @@ namespace Trident {
 			const float32 width = glyph.width * scale;
 			const float32 height = glyph.height * scale;
 
-			TextCharacter textCharacter{};
-			textCharacter.offset = {x, y};
-			textCharacter.size = {width, height};
-			textCharacter.startTextureCoordinate = glyph.minCoordinate;
-			textCharacter.endTextureCoordinate = glyph.maxCoordinate;
+			TextCharacter character{};
+			character.offset = {x, y};
+			character.size = {width, height};
+			character.startTextureCoordinate = glyph.minCoordinate;
+			character.endTextureCoordinate = glyph.maxCoordinate;
 
-			component.characters.emplace_back(textCharacter);
-
-			if (component.inputText->hasSelection()) {
-				const uint64 selectionStartByteOffset = min(component.inputText->cursorOffset, component.inputText->selectionMarkerOffset);
-				const uint64 selectionEndByteOffset = max(component.inputText->cursorOffset, component.inputText->selectionMarkerOffset);
-
-				if (previousByteOffset == selectionStartByteOffset) {
-					selectionComponent.offset.x = x - component.padding.x;
-				}
-
-				if (byteOffset == selectionEndByteOffset) {
-					selectionComponent.size.width.value = x - component.padding.x + width - selectionComponent.offset.x;
-				}
-			}
-			else {
-				if (previousByteOffset == component.inputText->cursorOffset) {
-					selectionComponent.offset.x = characterOffsetX;
-					selectionComponent.size.width.value = 2_px;
-					selectionComponent.color = 0x5cafe7ff;
-				}
-			}
+			component.characters.emplace_back(character);
 
 			characterOffsetX += glyph.advanceWidth * scale;
-		}
 
-		if (!component.inputText->hasSelection()) {
-			if (byteOffset == component.inputText->cursorOffset) {
-				selectionComponent.offset.x = characterOffsetX;
-				selectionComponent.size.width.value = 2_px;
-				selectionComponent.color = 0x5cafe7ff;
+			if (focused) {
+				if (inputText->cursorOffset == byteOffset) {
+					textCursorHorizontalOffset = characterOffsetX;
+				}
+
+				if (inputText->hasSelection() && inputText->selectionMarkerOffset == byteOffset) {
+					textSelectionBoxHorizontalOffset = characterOffsetX;
+				}
 			}
 		}
 	}
 
 	void GUILayer::updateTextInput(TextInputEvent& event, GUIContainer& component) {
-		DEBUG_ASSERT(component.inputText != nullptr);
-
-		component.inputText->insert(event.characterCode);
-	}
-
-	void GUILayer::updateTextInputAction(KeyDownEvent& event, GUIContainer& component) {
 		UTF8String* string = component.inputText;
 
 		DEBUG_ASSERT(string != nullptr);
 
-		// TODO(gui/text-input/enter): Implement Enter key (execute command).
-		// TODO(gui/text-input/tab): Implement Tab key for inline suggestions?
-		// TODO(gui/text-input/escape): Implement Escape key (unfocus)?
-		// TODO(gui/text-input/ctrl-backspace): Implement Ctrl + Backspace key combination (delete up to a character not in [A-Za-z0-9_])?
+		string->insert(event.characterCode);
+	}
+
+	void GUILayer::updateTextInputAction(KeyDownEvent& event, GUIContainer& component) {
+		const Window* window = getApplication()->getWindow();
+
+		UTF8String* string = component.inputText;
+
+		DEBUG_ASSERT(string != nullptr);
+
+		// TODO(gui/component/text-input/cancel-selection-with-arrows): Fix cursor movement when canceling a selection with ArrowLeft/ArrowRight.
+		// TODO(gui/component/text-input/cancel-selection-at-start): Fix selection not canceled when ArrowLeft is pressed and the cursor is already at the start.
+		// TODO(gui/component/text-input/cancel-selection-at-end): Fix selection not canceled when ArrowRight is pressed and the cursor is already at the end.
+		// TODO(gui/component/text-input/seek-current-word-start): Seek the current word start when Ctrl + ArrowLeft is pressed.
+		// TODO(gui/component/text-input/seek-current-word-end): Seek the current word end when Ctrl + ArrowRight is pressed.
+		// TODO(gui/component/text-input/select-current-word): When Ctrl + Shift + ArrowLeft/ArrowRight is pressed, seek the current word start/end while selecting.
+		// TODO(gui/component/text-input/ctrl-backspace): Implement Ctrl + Backspace key combination (delete left until not in [A-Za-z0-9_]).
+		// TODO(gui/component/text-input/ctrl-delete): Implement Ctrl + Delete key combination (delete right until not in [A-Za-z0-9_]).
+		// TODO(gui/component/text-input/ctrl-a): Handle Ctrl + A.
+		// TODO(gui/component/text-input/ctrl-x): Handle Ctrl + C.
+		// TODO(gui/component/text-input/ctrl-c): Handle Ctrl + X.
+		// TODO(gui/component/text-input/ctrl-v): Handle Ctrl + V.
+		// TODO(gui/console/inline-suggestions): Implement Tab key to accept inline suggestions?
+		// TODO(gui/console/parse-command): Parse the command options when Enter is pressed, then trigger a ConsoleCommandEvent.
 		switch (event.getKeyCode()) {
 			case KeyCode::BACKSPACE: {
 				if (string->getByteSize() == 0) {
 					break;
 				}
 
-				string->select();
-				string->moveCursor(-1);
+				if (!string->hasSelection()) {
+					string->select();
+					string->jumpLeft(1);
+				}
+
 				string->removeSelection();
 
 				break;
 			}
-			case KeyCode::ARROW_LEFT: {
-				if (string->cursorOffset > 0) {
-					string->moveCursor(-1);
+			case KeyCode::SHIFT: {
+				if (!string->hasSelection()) {
+					string->select();
 				}
 
 				break;
 			}
-			case KeyCode::HOME:
-			case KeyCode::ARROW_UP: {
+			case KeyCode::ESCAPE: {
+				if (string->hasSelection()) {
+					string->unselect();
+				}
+
+				break;
+			}
+			case KeyCode::ARROW_LEFT: {
+				if (string->cursorOffset == 0) {
+					break;
+				}
+
+				if (!window->isKeyDown(KeyCode::SHIFT) && string->hasSelection()) {
+					string->unselect();
+				}
+				else {
+					string->jumpLeft(1);
+				}
+
+				break;
+			}
+			case KeyCode::HOME: {
+				if (!window->isKeyDown(KeyCode::SHIFT) && string->hasSelection()) {
+					string->unselect();
+				}
+
 				string->seek(0);
 
 				break;
 			}
 			case KeyCode::ARROW_RIGHT: {
-				if (string->cursorOffset < string->getByteSize()) {
-					string->moveCursor(1);
+				if (string->cursorOffset >= string->getByteSize()) {
+					break;
+				}
+
+				if (!window->isKeyDown(KeyCode::SHIFT) && string->hasSelection()) {
+					string->unselect();
+				}
+				else {
+					string->jumpRight(1);
 				}
 
 				break;
 			}
-			case KeyCode::END:
-			case KeyCode::ARROW_DOWN: {
+			case KeyCode::END: {
+				if (!window->isKeyDown(KeyCode::SHIFT) && string->hasSelection()) {
+					string->unselect();
+				}
+
 				string->seek(string->getByteSize());
 
 				break;
 			}
 			case KeyCode::DELETE: {
-				if (string->cursorOffset == string->getByteSize()) {
+				if (string->cursorOffset > string->getByteSize()) {
 					break;
 				}
 
-				string->moveCursor(1);
-				string->select();
-				string->moveCursor(-1);
+				if (!string->hasSelection() && string->cursorOffset < string->getByteSize()) {
+					string->jumpRight(1);
+					string->select();
+					string->jumpLeft(1);
+				}
+
 				string->removeSelection();
 
 				break;
