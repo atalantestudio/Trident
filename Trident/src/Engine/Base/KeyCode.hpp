@@ -13,6 +13,7 @@ namespace Trident {
 		TAB				= 9,
 		ENTER			= 13,
 		SHIFT			= 16,
+		CONTROL			= 17,
 		ESCAPE			= 27,
 		SPACE			= 32,
 		END				= 35,

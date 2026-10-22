@@ -239,6 +239,17 @@ namespace Trident {
 
 				break;
 			}
+			case KeyCode::A: {
+				if (!window->isKeyDown(KeyCode::CONTROL)) {
+					break;
+				}
+
+				string->seek(0);
+				string->select();
+				string->seek(string->getByteSize());
+
+				break;
+			}
 			default: {
 				break;
 			}
