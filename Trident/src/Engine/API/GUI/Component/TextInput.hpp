@@ -134,9 +134,6 @@ namespace Trident {
 
 		DEBUG_ASSERT(string != nullptr);
 
-		// TODO(gui/component/text-input/cancel-selection-with-arrows): Fix cursor movement when canceling a selection with ArrowLeft/ArrowRight.
-		// TODO(gui/component/text-input/cancel-selection-at-start): Fix selection not canceled when ArrowLeft is pressed and the cursor is already at the start.
-		// TODO(gui/component/text-input/cancel-selection-at-end): Fix selection not canceled when ArrowRight is pressed and the cursor is already at the end.
 		// TODO(gui/component/text-input/seek-current-word-start): Seek the current word start when Ctrl + ArrowLeft is pressed.
 		// TODO(gui/component/text-input/seek-current-word-end): Seek the current word end when Ctrl + ArrowRight is pressed.
 		// TODO(gui/component/text-input/select-current-word): When Ctrl + Shift + ArrowLeft/ArrowRight is pressed, seek the current word start/end while selecting.
@@ -178,16 +175,18 @@ namespace Trident {
 				break;
 			}
 			case KeyCode::ARROW_LEFT: {
+				if (!window->isKeyDown(KeyCode::SHIFT) && string->hasSelection()) {
+					string->unselect();
+					string->seek(min(string->cursorOffset, string->selectionMarkerOffset));
+
+					break;
+				}
+
 				if (string->cursorOffset == 0) {
 					break;
 				}
 
-				if (!window->isKeyDown(KeyCode::SHIFT) && string->hasSelection()) {
-					string->unselect();
-				}
-				else {
-					string->jumpLeft(1);
-				}
+				string->jumpLeft(1);
 
 				break;
 			}
@@ -201,16 +200,18 @@ namespace Trident {
 				break;
 			}
 			case KeyCode::ARROW_RIGHT: {
+				if (!window->isKeyDown(KeyCode::SHIFT) && string->hasSelection()) {
+					string->unselect();
+					string->seek(max(string->cursorOffset, string->selectionMarkerOffset));
+
+					break;
+				}
+
 				if (string->cursorOffset >= string->getByteSize()) {
 					break;
 				}
 
-				if (!window->isKeyDown(KeyCode::SHIFT) && string->hasSelection()) {
-					string->unselect();
-				}
-				else {
-					string->jumpRight(1);
-				}
+				string->jumpRight(1);
 
 				break;
 			}
