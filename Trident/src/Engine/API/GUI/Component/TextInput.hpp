@@ -221,11 +221,11 @@ namespace Trident {
 				break;
 			}
 			case KeyCode::DELETE: {
-				if (string->cursorOffset > string->getByteSize()) {
+				if (string->cursorOffset >= string->getByteSize()) {
 					break;
 				}
 
-				if (!string->hasSelection() && string->cursorOffset < string->getByteSize()) {
+				if (!string->hasSelection()) {
 					string->jumpRight(1);
 					string->select();
 					string->jumpLeft(1);
