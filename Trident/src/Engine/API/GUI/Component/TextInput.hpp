@@ -6,9 +6,14 @@
 #include "Engine/API/GUI/GUILayer.hpp"
 
 namespace Trident {
-	void GUILayer::openTextInput(const TextInputStyle& style) {
+	void GUILayer::TextInput(const TextInputStyle& style) {
+		const uint32 componentIndex = componentCount;
 		const uint32 parentIndex = openContainerIndices[openContainerIndexCount - 1];
-		const GUIContainer& parent = components[parentIndex];
+
+		GUIContainer& parent = components[parentIndex];
+
+		parent.childIndices.emplace_back(componentIndex);
+
 		const FontData& fontData = fonts[style.font];
 		const FontAsset& fontAsset = *fontData.fontAsset;
 		const uint32 dpi = getApplication()->getWindow()->getDpi();
@@ -39,7 +44,25 @@ namespace Trident {
 		component.debugName = style.debugName;
 
 		setComponentSize(component, style.minimumSize, style.maximumSize);
-		openComponent(component, true);
+
+		components[componentCount] = component;
+		focusableComponentIndexToComponentIndex[focusableComponentCount] = componentIndex;
+
+		componentCount += 1;
+		focusableComponentCount += 1;
+
+		// TODO(gui/component/text-input): Restore pointer type update?
+		/* if (previousComponentCount >= componentCount) {
+			const GUIContainer& component = previousComponents[componentCount - 1];
+			const Window* window = getApplication()->getWindow();
+			const vec2<float32> mousePosition = vec2<float32>(window->getMousePosition());
+
+			if (IsIntersecting(component, mousePosition)) {
+				window->updatePointerType(component.pointerType);
+			}
+		} */
+
+		AdjustWidth(componentIndex);
 	}
 
 	void GUILayer::WrapInputText(GUIContainer& component, uint32 componentIndex) {

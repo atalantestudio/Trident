@@ -75,11 +75,14 @@ namespace Trident {
 			void openComponent(GUIContainer& component, bool focusable);
 			void openContainer(const ContainerStyle& style, bool floating);
 			void openVerticalList(const VerticalListStyle& style);
-			void openTextInput(const TextInputStyle& style);
 
 			void closeContainer();
 
+			/// Registers a text component.
 			void Text(view<char8> text, const TextStyle& style);
+
+			/// Registers a text input component.
+			void TextInput(const TextInputStyle& style);
 
 			/// Returns the current component (computed on the previous frame).
 			const GUIContainer* CurrentComponent() const;
@@ -176,7 +179,7 @@ namespace Trident {
 			Color clearColor = 0x00000000;
 
 			// TODO(gui/text-smoothness)
-			vec2<float32> hinting = {0.0f, 0.0f};
+			vec2<float32> hinting = {0.5f, 0.0f};
 
 		private:
 			GUIRenderer renderer;
@@ -223,7 +226,4 @@ namespace Trident {
 
 	/// Opens a floating GUI container component.
 	#define Floating(...) for (bool _ = (openContainer(__VA_ARGS__, true), true); _; _ = (closeContainer(), false))
-
-	/// Opens a GUI text input component.
-	#define TextInput(...) for (bool _ = (openTextInput(__VA_ARGS__), true); _; _ = (closeContainer(), false))
 }

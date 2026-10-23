@@ -20,35 +20,17 @@ namespace Trident {
 
 		private:
 			void ExampleTextInput() {
-				Color color = secondaryColor;
-
-				if (IsNextFocused()) {
-					color = borderFocusColor;
-				}
-
-				TextInput({
-					.width = EXPAND,
-					.padding = {1_px, 1_px, 1_px, 1_px},
-					.color = color,
-					.text = &text,
+				Container({
+					.size = {512_px, FIT},
+					.color = backgroundHoverColor,
 				}) {
-					Color color = primaryColor;
-
-					if (IsHovered()) {
-						color = backgroundHoverColor;
-					}
-
-					Container({
-						.size = {EXPAND, FIT},
-						.padding = {4_px, 4_px, 4_px, 4_px},
-						.color = color,
-					}) {
-						Text(text, {
-							.color = textColor,
-							.font = fontRegular,
-							.fontSize = 16_px,
-						});
-					}
+					TextInput({
+						.width = EXPAND,
+						.color = textColor,
+						.text = &text,
+						.font = fontRegular,
+						.fontSize = 16_px,
+					});
 				}
 			}
 
