@@ -38,7 +38,7 @@ namespace Trident {
 		openComponent(component, false);
 	}
 
-	void GUILayer::updateVerticalList(MouseWheelEvent& event, GUIContainer& component) {
+	void GUILayer::updateVerticalList(MouseWheelEvent& event, GUIContainer& component) const {
 		*component.layoutOffset -= event.getDelta() * 0.25f;
 	}
 }

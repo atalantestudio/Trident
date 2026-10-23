@@ -146,11 +146,14 @@ namespace Trident {
 			bool onTextInput(TextInputEvent& event);
 			bool onWindowResize(WindowResizeEvent& event);
 
+			void focusComponent(uint32 componentIndex) const;
+			void unfocusComponent(uint32 componentIndex) const;
+
 			void updateHoveredComponentIndex();
 
-			void updateTextInput(TextInputEvent& event, GUIContainer& component);
-			void updateTextInputAction(KeyDownEvent& event, GUIContainer& component);
-			void updateVerticalList(MouseWheelEvent& event, GUIContainer& component);
+			void updateTextInput(TextInputEvent& event, const GUIContainer& component) const;
+			void updateTextInputAction(KeyDownEvent& event, const GUIContainer& component) const;
+			void updateVerticalList(MouseWheelEvent& event, GUIContainer& component) const;
 
 			bool IsHovered(uint32 componentIndex) const;
 			bool IsMouseDown(uint32 componentIndex) const;

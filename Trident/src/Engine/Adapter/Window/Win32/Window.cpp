@@ -341,6 +341,18 @@ namespace Trident {
 		WIN32_ASSERT(windowClass->hCursor != NULL);
 	}
 
+	void Window::updateTextCursor(vec2<sint32> position, vec2<sint32> size) const {
+		const Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
+
+		BOOL result = CreateCaret(windowData->hWnd, NULL, size.x, size.y);
+
+		WIN32_ASSERT(result != 0);
+
+		result = SetCaretPos(position.x, position.y);
+
+		WIN32_ASSERT(result != 0);
+	}
+
 	void Window::copyToClipboard(view<char8> text) const {
 		const INT cbMultiByte = static_cast<INT>(text.count());
 

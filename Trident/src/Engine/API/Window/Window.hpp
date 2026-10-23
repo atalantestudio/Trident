@@ -62,6 +62,8 @@ namespace Trident {
 
 			void updatePointerType(PointerType pointerType) const;
 
+			void updateTextCursor(vec2<sint32> position, vec2<sint32> size) const;
+
 			/// Copies `text` to the clipboard.
 			void copyToClipboard(
 				/// A non-terminated UTF-8 string.

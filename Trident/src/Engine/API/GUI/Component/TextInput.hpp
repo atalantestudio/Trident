@@ -119,7 +119,7 @@ namespace Trident {
 		}
 	}
 
-	void GUILayer::updateTextInput(TextInputEvent& event, GUIContainer& component) {
+	void GUILayer::updateTextInput(TextInputEvent& event, const GUIContainer& component) const {
 		UTF8String* string = component.inputText;
 
 		DEBUG_ASSERT(string != nullptr);
@@ -127,7 +127,7 @@ namespace Trident {
 		string->insert(event.characterCode);
 	}
 
-	void GUILayer::updateTextInputAction(KeyDownEvent& event, GUIContainer& component) {
+	void GUILayer::updateTextInputAction(KeyDownEvent& event, const GUIContainer& component) const {
 		const Window* window = getApplication()->getWindow();
 
 		UTF8String* string = component.inputText;

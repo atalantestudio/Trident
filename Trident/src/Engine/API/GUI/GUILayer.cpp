@@ -8,6 +8,7 @@
 #include "Engine/API/GUI/AdjustSizing.hpp"
 #include "Engine/API/GUI/Component/TextInput.hpp"
 #include "Engine/API/GUI/Component/VerticalList.hpp"
+#include "Engine/API/GUI/FocusComponent.hpp"
 #include "Engine/API/GUI/GUILayer.hpp"
 #include "Engine/API/GUI/RegisterSubcomponent.hpp"
 #include "Engine/API/GUI/Text.hpp"
@@ -266,16 +267,12 @@ namespace Trident {
 	bool GUILayer::onKeyDown(KeyDownEvent& event) {
 		if (event.getKeyCode() == KeyCode::TAB) {
 			if (focusedComponentIndex < focusableComponentCount) {
-				GUIContainer& focusedComponent = components[focusableComponentIndexToComponentIndex[focusedComponentIndex]];
-
-				if (focusedComponent.type == GUIComponentType::TEXT_INPUT) {
-					if (focusedComponent.inputText->hasSelection()) {
-						focusedComponent.inputText->unselect();
-					}
-				}
+				unfocusComponent(focusableComponentIndexToComponentIndex[focusedComponentIndex]);
 			}
 
 			focusedComponentIndex = (focusedComponentIndex + 1) % (focusableComponentCount + 1);
+
+			focusComponent(focusableComponentIndexToComponentIndex[focusedComponentIndex]);
 
 			return false;
 		}
@@ -289,7 +286,7 @@ namespace Trident {
 		}
 
 		if (focusedComponentIndex < previousFocusableComponentCount) {
-			GUIContainer& focusedComponent = components[focusableComponentIndexToComponentIndex[focusedComponentIndex]];
+			const GUIContainer& focusedComponent = components[focusableComponentIndexToComponentIndex[focusedComponentIndex]];
 
 			switch (focusedComponent.type) {
 				case GUIComponentType::TEXT_INPUT: {
@@ -307,20 +304,17 @@ namespace Trident {
 	}
 
 	bool GUILayer::onTextInput(TextInputEvent& event) {
-		if (focusedComponentIndex < previousFocusableComponentCount) {
-			GUIContainer& focusedComponent = components[focusableComponentIndexToComponentIndex[focusedComponentIndex]];
-
-			switch (focusedComponent.type) {
-				case GUIComponentType::TEXT_INPUT: {
-					updateTextInput(event, focusedComponent);
-
-					break;
-				}
-				default: {
-					break;
-				}
-			}
+		if (focusedComponentIndex >= previousFocusableComponentCount) {
+			return false;
 		}
+
+		const GUIContainer& component = components[focusableComponentIndexToComponentIndex[focusedComponentIndex]];
+
+		if (component.type != GUIComponentType::TEXT_INPUT) {
+			return false;
+		}
+
+		updateTextInput(event, component);
 
 		return false;
 	}
@@ -328,7 +322,6 @@ namespace Trident {
 	bool GUILayer::onMouseDown(MouseDownEvent& event) {
 		mouseUp = false;
 		lastMouseDownPosition = getMousePosition();
-
 		focusedComponentIndex = max<uint32>();
 
 		return false;
