@@ -84,10 +84,10 @@ namespace Trident {
 		WIN32_ASSERT(result != 0);
 
 		const LPCWSTR lpWindowName = ConvertUTF8ToUTF16(&descriptor.name[0]);
-		constexpr sint32 X = CW_USEDEFAULT;
-		constexpr sint32 Y = CW_USEDEFAULT;
-		const sint32 nWidth = rect.right - rect.left;
-		const sint32 nHeight = rect.bottom - rect.top;
+		constexpr INT X = CW_USEDEFAULT;
+		constexpr INT Y = CW_USEDEFAULT;
+		const INT nWidth = rect.right - rect.left;
+		const INT nHeight = rect.bottom - rect.top;
 		const HINSTANCE hInstance = GetInstance();
 
 		data = new Win32WindowData();
@@ -129,7 +129,6 @@ namespace Trident {
 		windowData->textInputEventListener = descriptor.textInputEventListener;
 		windowData->windowCloseEventListener = descriptor.windowCloseEventListener;
 		windowData->windowResizeEventListener = descriptor.windowResizeEventListener;
-
 		windowData->keyMap = sequence<bool>(static_cast<uint32>(KeyCode::count));
 
 		result = SetProp(windowData->hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING, windowClass);
@@ -380,14 +379,14 @@ namespace Trident {
 		WIN32_ASSERT(result != 0);
 	}
 
+	bool Window::textInClipboard() const {
+		return IsClipboardFormatAvailable(CF_UNICODETEXT);
+	}
+
 	sequence<char8> Window::getClipboardText() const {
 		const Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
 
 		BOOL result = OpenClipboard(windowData->hWnd);
-
-		WIN32_ASSERT(result != 0);
-
-		result = EmptyClipboard();
 
 		WIN32_ASSERT(result != 0);
 
@@ -401,7 +400,7 @@ namespace Trident {
 
 		WIN32_ASSERT(cbMultiByte > 0);
 
-		sequence<char8> text(cbMultiByte + 1);
+		sequence<char8> text(cbMultiByte);
 
 		cbMultiByte = WideCharToMultiByte(CP_UTF8, 0, lpWideCharStr, -1, &text[0], cbMultiByte, NULL, NULL);
 

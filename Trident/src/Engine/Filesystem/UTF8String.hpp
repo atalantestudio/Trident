@@ -8,6 +8,8 @@ namespace Trident {
 		public:
 			explicit UTF8String() = default;
 
+			UTF8String(view<char8> text);
+
 			explicit UTF8String(uint32 code, uint8 byteSize);
 
 			uint64 getByteSize() const;

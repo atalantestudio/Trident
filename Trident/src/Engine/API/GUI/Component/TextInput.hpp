@@ -139,10 +139,6 @@ namespace Trident {
 		// TODO(gui/component/text-input/select-current-word): When Ctrl + Shift + ArrowLeft/ArrowRight is pressed, seek the current word start/end while selecting.
 		// TODO(gui/component/text-input/ctrl-backspace): Implement Ctrl + Backspace key combination (delete left until not in [A-Za-z0-9_]).
 		// TODO(gui/component/text-input/ctrl-delete): Implement Ctrl + Delete key combination (delete right until not in [A-Za-z0-9_]).
-		// TODO(gui/component/text-input/ctrl-a): Handle Ctrl + A.
-		// TODO(gui/component/text-input/ctrl-x): Handle Ctrl + C.
-		// TODO(gui/component/text-input/ctrl-c): Handle Ctrl + X.
-		// TODO(gui/component/text-input/ctrl-v): Handle Ctrl + V.
 		// TODO(gui/console/inline-suggestions): Implement Tab key to accept inline suggestions?
 		// TODO(gui/console/parse-command): Parse the command options when Enter is pressed, then trigger a ConsoleCommandEvent.
 		switch (event.getKeyCode()) {
@@ -260,6 +256,22 @@ namespace Trident {
 				}
 
 				window->copyToClipboard(string->getSelection());
+
+				break;
+			}
+			case KeyCode::V: {
+				if (!window->isKeyDown(KeyCode::CONTROL)) {
+					break;
+				}
+
+				if (!window->textInClipboard()) {
+					break;
+				}
+
+				const sequence<char8> text = window->getClipboardText();
+				const view<char8> textView(&text[0], text.count() - 1);
+
+				string->insert(textView);
 
 				break;
 			}

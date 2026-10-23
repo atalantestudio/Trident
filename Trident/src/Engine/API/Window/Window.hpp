@@ -68,7 +68,11 @@ namespace Trident {
 				view<char8> text
 			) const;
 
-			/// Returns a copy of a UTF-8 string stored in the clipboard.
+			/// Returns whether the clipboard contains a Unicode string.
+			bool textInClipboard() const;
+
+			/// Returns a copy of a Unicode string stored in the clipboard.
+			/// The user must first ensure that the clipboard contains a Unicode string by calling textInClipboard().
 			sequence<char8> getClipboardText() const;
 
 		// TODO: Make private?

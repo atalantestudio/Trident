@@ -6,6 +6,13 @@
 #include "Engine/Filesystem/UTF8String.hpp"
 
 namespace Trident {
+	UTF8String::UTF8String(view<char8> text) :
+		string(pointer_cast<const char8*>(&text[0]), text.count()),
+		selected(false),
+		cursorOffset(string.size()),
+		selectionMarkerOffset(0)
+	{}
+
 	UTF8String::UTF8String(uint32 code, uint8 byteSize) :
 		string(pointer_cast<const char8*>(&code), byteSize),
 		selected(false),
