@@ -30,7 +30,7 @@ namespace Trident {
 
 		private:
 			/// Text cursor width in pixels.
-			static constexpr float32 TEXT_CURSOR_WIDTH = 4_px;
+			static constexpr float32 TEXT_CURSOR_WIDTH = 1_px;
 
 			/// Text cursor color, usually opaque.
 			static constexpr Color TEXT_CURSOR_COLOR = 0x5cafe7ff;
