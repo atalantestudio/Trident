@@ -379,4 +379,40 @@ namespace Trident {
 
 		WIN32_ASSERT(result != 0);
 	}
+
+	sequence<char8> Window::getClipboardText() const {
+		const Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
+
+		BOOL result = OpenClipboard(windowData->hWnd);
+
+		WIN32_ASSERT(result != 0);
+
+		result = EmptyClipboard();
+
+		WIN32_ASSERT(result != 0);
+
+		const HANDLE hMem = GetClipboardData(CF_UNICODETEXT);
+
+		WIN32_ASSERT(hMem != NULL);
+
+		const LPCWCH lpWideCharStr = static_cast<LPCWCH>(GlobalLock(hMem));
+
+		INT cbMultiByte = WideCharToMultiByte(CP_UTF8, 0, lpWideCharStr, -1, NULL, 0, NULL, NULL);
+
+		WIN32_ASSERT(cbMultiByte > 0);
+
+		sequence<char8> text(cbMultiByte + 1);
+
+		cbMultiByte = WideCharToMultiByte(CP_UTF8, 0, lpWideCharStr, -1, &text[0], cbMultiByte, NULL, NULL);
+
+		WIN32_ASSERT(cbMultiByte > 0);
+
+		GlobalUnlock(hMem);
+
+		result = CloseClipboard();
+
+		WIN32_ASSERT(result != 0);
+
+		return text;
+	}
 }

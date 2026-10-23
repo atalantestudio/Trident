@@ -68,6 +68,9 @@ namespace Trident {
 				view<char8> text
 			) const;
 
+			/// Returns a copy of a UTF-8 string stored in the clipboard.
+			sequence<char8> getClipboardText() const;
+
 		// TODO: Make private?
 		public:
 			void* data;
