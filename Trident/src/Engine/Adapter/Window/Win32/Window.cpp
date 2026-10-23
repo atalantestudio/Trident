@@ -337,8 +337,46 @@ namespace Trident {
 	void Window::updatePointerType(PointerType pointerType) const {
 		const LPWSTR lpCursorName = getWin32CursorName(pointerType);
 
-		windowClass->hCursor = LoadCursor(nullptr, lpCursorName);
+		windowClass->hCursor = LoadCursor(NULL, lpCursorName);
 
-		WIN32_ASSERT(windowClass->hCursor != nullptr);
+		WIN32_ASSERT(windowClass->hCursor != NULL);
+	}
+
+	void Window::copyToClipboard(view<char8> text) const {
+		const INT cbMultiByte = static_cast<INT>(text.count());
+
+		INT cchWideChar = MultiByteToWideChar(CP_UTF8, 0, &text[0], cbMultiByte, NULL, 0);
+
+		WIN32_ASSERT(cchWideChar > 0);
+
+		const HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, (cchWideChar + 1) * sizeof(WCHAR));
+
+		LPWSTR lpWideCharStr = static_cast<LPWSTR>(GlobalLock(hMem));
+
+		WIN32_ASSERT(lpWideCharStr != NULL);
+
+		cchWideChar = MultiByteToWideChar(CP_UTF8, 0, &text[0], cbMultiByte, lpWideCharStr, cchWideChar);
+
+		WIN32_ASSERT(cchWideChar > 0);
+
+		GlobalUnlock(hMem);
+
+		const Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
+
+		BOOL result = OpenClipboard(windowData->hWnd);
+
+		WIN32_ASSERT(result != 0);
+
+		result = EmptyClipboard();
+
+		WIN32_ASSERT(result != 0);
+
+		const HANDLE handle = SetClipboardData(CF_UNICODETEXT, hMem);
+
+		WIN32_ASSERT(handle != NULL);
+
+		result = CloseClipboard();
+
+		WIN32_ASSERT(result != 0);
 	}
 }

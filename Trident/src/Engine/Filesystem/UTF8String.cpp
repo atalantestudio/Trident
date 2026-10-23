@@ -21,6 +21,18 @@ namespace Trident {
 		return selected;
 	}
 
+	view<char8> UTF8String::getSelection() const {
+		uint64 startOffset = cursorOffset;
+		uint64 endOffset = selectionMarkerOffset;
+
+		if (cursorOffset > selectionMarkerOffset) {
+			startOffset = selectionMarkerOffset;
+			endOffset = cursorOffset;
+		}
+
+		return view<char8>(&string[startOffset], endOffset - startOffset);
+	}
+
 	void UTF8String::seek(uint64 byteOffset) {
 		cursorOffset = byteOffset;
 	}

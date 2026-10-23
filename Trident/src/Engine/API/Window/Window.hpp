@@ -62,6 +62,12 @@ namespace Trident {
 
 			void updatePointerType(PointerType pointerType) const;
 
+			/// Copies `text` to the clipboard.
+			void copyToClipboard(
+				/// A non-terminated UTF-8 string.
+				view<char8> text
+			) const;
+
 		// TODO: Make private?
 		public:
 			void* data;

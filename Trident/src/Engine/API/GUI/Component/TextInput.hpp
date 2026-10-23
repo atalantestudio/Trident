@@ -250,6 +250,34 @@ namespace Trident {
 
 				break;
 			}
+			case KeyCode::C: {
+				if (!window->isKeyDown(KeyCode::CONTROL)) {
+					break;
+				}
+
+				if (!string->hasSelection()) {
+					break;
+				}
+
+				window->copyToClipboard(string->getSelection());
+
+				break;
+			}
+			case KeyCode::X: {
+				if (!window->isKeyDown(KeyCode::CONTROL)) {
+					break;
+				}
+
+				if (!string->hasSelection()) {
+					break;
+				}
+
+				window->copyToClipboard(string->getSelection());
+
+				string->removeSelection();
+
+				break;
+			}
 			default: {
 				break;
 			}

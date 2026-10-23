@@ -17,7 +17,6 @@
 #define NORASTEROPS
 #define OEMRESOURCE
 #define NOATOM
-#define NOCLIPBOARD
 #define NODRAWTEXT
 #define NOKERNEL
 #define NOMEMMGR

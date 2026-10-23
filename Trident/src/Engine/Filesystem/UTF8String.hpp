@@ -14,6 +14,8 @@ namespace Trident {
 
 			bool hasSelection() const;
 
+			view<char8> getSelection() const;
+
 			void seek(uint64 byteOffset);
 
 			void jumpLeft(uint32 characterCount);
