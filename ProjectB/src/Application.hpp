@@ -4,7 +4,7 @@
 #include "Engine/API/Window/LayerGroup/UILayerGroup.hpp"
 #include "Engine/Application/Application.hpp"
 
-#include "Layer/DebugMenuLayer.hpp"
+#include "Layer/DebugConsoleLayer.hpp"
 #include "Layer/SceneLayer.hpp"
 #include "Layer/UILayer.hpp"
 
@@ -16,7 +16,7 @@ namespace ProjectB {
 			{
 				registerLayer<SceneLayer>();
 				registerLayer<UILayer>();
-				registerLayer<DebugMenuLayer>();
+				registerLayer<DebugConsoleLayer>();
 
 				registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
 				registerLayerGroup<UILayerGroup>(range<uint32, uint32>(1, 2));

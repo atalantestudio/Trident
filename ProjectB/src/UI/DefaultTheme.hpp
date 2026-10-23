@@ -11,7 +11,7 @@ namespace ProjectB {
 	class UIDefaultTheme : public GUILayer {
 		public:
 			void registerAssets() override {
-				font = loadFontAsset("default");
+				font = loadFontAsset("test-regular");
 
 				clearColor = primaryColor;
 			}
