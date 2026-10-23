@@ -79,33 +79,32 @@ namespace Trident {
 
 			if (glyph.whitespace) {
 				characterOffsetX += glyph.advanceWidth * scale;
-
-				continue;
 			}
+			else {
+				const float32 x = component.padding.x + horizontalHinting + ceil(characterOffsetX + glyph.leftSideBearing * scale);
+				const float32 y = component.padding.y + baseline - glyph.yMax * scale;
 
-			const float32 x = component.padding.x + horizontalHinting + ceil(characterOffsetX + glyph.leftSideBearing * scale);
-			const float32 y = component.padding.y + baseline - glyph.yMax * scale;
+				// TODO(gui/text/kerning)
+				/* if (stream.getRemainingByteSize() > 0) {
+					const uint32 nextCodePoint = stream.peek();
+					const sint16 kerning = fontAsset.getKerning(codePoint, nextCodePoint);
 
-			// TODO(gui/text/kerning)
-			/* if (stream.getRemainingByteSize() > 0) {
-				const uint32 nextCodePoint = stream.peek();
-				const sint16 kerning = fontAsset.getKerning(codePoint, nextCodePoint);
+					x += kerning * scale;
+				} */
 
-				x += kerning * scale;
-			} */
+				const float32 width = glyph.width * scale;
+				const float32 height = glyph.height * scale;
 
-			const float32 width = glyph.width * scale;
-			const float32 height = glyph.height * scale;
+				TextCharacter character{};
+				character.offset = {x, y};
+				character.size = {width, height};
+				character.startTextureCoordinate = glyph.minCoordinate;
+				character.endTextureCoordinate = glyph.maxCoordinate;
 
-			TextCharacter character{};
-			character.offset = {x, y};
-			character.size = {width, height};
-			character.startTextureCoordinate = glyph.minCoordinate;
-			character.endTextureCoordinate = glyph.maxCoordinate;
+				component.characters.emplace_back(character);
 
-			component.characters.emplace_back(character);
-
-			characterOffsetX += glyph.advanceWidth * scale;
+				characterOffsetX += glyph.advanceWidth * scale;
+			}
 
 			if (focused) {
 				if (inputText->cursorOffset == byteOffset) {
