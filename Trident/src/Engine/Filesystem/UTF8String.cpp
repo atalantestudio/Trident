@@ -28,11 +28,7 @@ namespace Trident {
 	void UTF8String::jumpLeft(uint32 characterCount) {
 		uint32 characterIndex = 0;
 
-		while (characterIndex < characterCount) {
-			if (cursorOffset == 0) {
-				break;
-			}
-
+		while (cursorOffset > 0) {
 			const char8 character = string[cursorOffset - 1];
 
 			if (((character >> 6) & 0b11) != 0b10) {
@@ -40,18 +36,24 @@ namespace Trident {
 			}
 
 			cursorOffset -= 1;
+
+			if (characterIndex == characterCount) {
+				break;
+			}
 		}
 	}
 
 	void UTF8String::jumpRight(uint32 characterCount) {
 		uint32 characterIndex = 0;
 
-		while (characterIndex < characterCount) {
-			if (cursorOffset == getByteSize()) {
-				break;
-			}
+		while (cursorOffset < getByteSize()) {
+			const char8 character = string[cursorOffset];
 
-			if (((string[cursorOffset] >> 6) & 0b11) != 0b10) {
+			if (((character >> 6) & 0b11) != 0b10) {
+				if (characterIndex == characterCount) {
+					break;
+				}
+
 				characterIndex += 1;
 			}
 
