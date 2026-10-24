@@ -518,6 +518,12 @@ namespace Trident {
 				scriptIndex += 1;
 			}
 
+			if (scriptIndex >= scriptList.scriptCount) {
+				ENGINE_WARNING("No 'DFLT' script record found.");
+
+				return;
+			}
+
 			const ScriptRecord& scriptRecord = scriptList.scriptRecords[scriptIndex];
 
 			stream.seek(tableOffset + gpos.scriptListOffset + scriptRecord.scriptOffset);
