@@ -6,6 +6,19 @@
 #include "Engine/Filesystem/UTF8String.hpp"
 
 namespace Trident {
+	static bool isWordCharacter(char8 character) {
+		return !(
+			character == ' ' ||
+			character == '"' ||
+			character == '\'' ||
+			character == ',' ||
+			character == '-' ||
+			character == '.' ||
+			character == '/' ||
+			character == '\\'
+		);
+	}
+
 	UTF8String::UTF8String(view<char8> text) :
 		string(pointer_cast<const char8*>(&text[0]), text.count()),
 		selected(false),
@@ -65,7 +78,7 @@ namespace Trident {
 	void UTF8String::jumpRight(uint32 characterCount) {
 		uint32 characterIndex = 0;
 
-		while (cursorOffset < getByteSize()) {
+		while (cursorOffset < string.size()) {
 			const char8 character = string[cursorOffset];
 
 			if (((character >> 6) & 0b11) != 0b10) {
@@ -76,6 +89,66 @@ namespace Trident {
 				characterIndex += 1;
 			}
 
+			cursorOffset += 1;
+		}
+	}
+
+	void UTF8String::jumpWordStart() {
+		char8 character = ' ';
+
+		if (cursorOffset > 0) {
+			character = string[cursorOffset - 1];
+		}
+
+		while (cursorOffset > 0) {
+			char8 previousCharacter = ' ';
+
+			if (cursorOffset > 1) {
+				previousCharacter = string[cursorOffset - 2];
+			}
+
+			if (((character >> 6) & 0b11) == 0b10) {
+				character = previousCharacter;
+				cursorOffset -= 1;
+
+				continue;
+			}
+
+			if (!isWordCharacter(previousCharacter) && isWordCharacter(character)) {
+				cursorOffset -= 1;
+
+				break;
+			}
+
+			character = previousCharacter;
+			cursorOffset -= 1;
+		}
+	}
+
+	void UTF8String::jumpWordEnd() {
+		char8 character = string[cursorOffset];
+		
+		while (cursorOffset < string.size()) {
+			char8 nextCharacter = ' ';
+
+			if (cursorOffset < string.size() - 1) {
+				nextCharacter = string[cursorOffset + 1];
+			}
+
+			if (((character >> 6) & 0b11) == 0b10) {
+				character = nextCharacter;
+				cursorOffset += 1;
+
+				continue;
+			}
+
+			if (isWordCharacter(character) && !isWordCharacter(nextCharacter)) {
+				cursorOffset += 1;
+
+				break;
+			}
+
+			character = nextCharacter;
 			cursorOffset += 1;
 		}
 	}

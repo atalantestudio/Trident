@@ -23,6 +23,9 @@ namespace Trident {
 			void jumpLeft(uint32 characterCount);
 			void jumpRight(uint32 characterCount);
 
+			void jumpWordStart();
+			void jumpWordEnd();
+
 			void select();
 			void unselect();
 

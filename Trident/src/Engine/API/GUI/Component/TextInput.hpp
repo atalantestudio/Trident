@@ -129,11 +129,6 @@ namespace Trident {
 
 		const Window* window = getApplication()->getWindow();
 
-		// TODO(gui/component/text-input/seek-current-word-start): Seek the current word start when Ctrl + ArrowLeft is pressed.
-		// TODO(gui/component/text-input/seek-current-word-end): Seek the current word end when Ctrl + ArrowRight is pressed.
-		// TODO(gui/component/text-input/select-current-word): When Ctrl + Shift + ArrowLeft/ArrowRight is pressed, seek the current word start/end while selecting.
-		// TODO(gui/component/text-input/ctrl-backspace): Implement Ctrl + Backspace key combination (delete left until not in [A-Za-z0-9_]).
-		// TODO(gui/component/text-input/ctrl-delete): Implement Ctrl + Delete key combination (delete right until not in [A-Za-z0-9_]).
 		// TODO(gui/console/parse-command): Parse the command options when Enter is pressed, then trigger a ConsoleCommandEvent.
 		// TODO(gui/console/inline-suggestions): Implement Tab key to accept inline suggestions?
 		switch (event.getKeyCode()) {
@@ -144,7 +139,13 @@ namespace Trident {
 
 				if (!inputText->hasSelection()) {
 					inputText->select();
-					inputText->jumpLeft(1);
+
+					if (window->isKeyDown(KeyCode::CONTROL)) {
+						inputText->jumpWordStart();
+					}
+					else {
+						inputText->jumpLeft(1);
+					}
 				}
 
 				inputText->removeSelection();
@@ -177,7 +178,12 @@ namespace Trident {
 					break;
 				}
 
-				inputText->jumpLeft(1);
+				if (window->isKeyDown(KeyCode::CONTROL)) {
+					inputText->jumpWordStart();
+				}
+				else {
+					inputText->jumpLeft(1);
+				}
 
 				break;
 			}
@@ -202,7 +208,12 @@ namespace Trident {
 					break;
 				}
 
-				inputText->jumpRight(1);
+				if (window->isKeyDown(KeyCode::CONTROL)) {
+					inputText->jumpWordEnd();
+				}
+				else {
+					inputText->jumpRight(1);
+				}
 
 				break;
 			}
@@ -221,9 +232,14 @@ namespace Trident {
 				}
 
 				if (!inputText->hasSelection()) {
-					inputText->jumpRight(1);
 					inputText->select();
-					inputText->jumpLeft(1);
+
+					if (window->isKeyDown(KeyCode::CONTROL)) {
+						inputText->jumpWordEnd();
+					}
+					else {
+						inputText->jumpRight(1);
+					}
 				}
 
 				inputText->removeSelection();
@@ -242,11 +258,7 @@ namespace Trident {
 				break;
 			}
 			case KeyCode::C: {
-				if (!window->isKeyDown(KeyCode::CONTROL)) {
-					break;
-				}
-
-				if (!inputText->hasSelection()) {
+				if (!window->isKeyDown(KeyCode::CONTROL) || !inputText->hasSelection()) {
 					break;
 				}
 
@@ -255,11 +267,7 @@ namespace Trident {
 				break;
 			}
 			case KeyCode::V: {
-				if (!window->isKeyDown(KeyCode::CONTROL)) {
-					break;
-				}
-
-				if (!window->textInClipboard()) {
+				if (!window->isKeyDown(KeyCode::CONTROL) || !window->textInClipboard()) {
 					break;
 				}
 
@@ -271,11 +279,7 @@ namespace Trident {
 				break;
 			}
 			case KeyCode::X: {
-				if (!window->isKeyDown(KeyCode::CONTROL)) {
-					break;
-				}
-
-				if (!inputText->hasSelection()) {
+				if (!window->isKeyDown(KeyCode::CONTROL) || !inputText->hasSelection()) {
 					break;
 				}
 
