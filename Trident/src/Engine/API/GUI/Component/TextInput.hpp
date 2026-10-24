@@ -65,30 +65,18 @@ namespace Trident {
 	}
 
 	void GUILayer::WrapInputText(GUIContainer& component, uint32 componentIndex) {
-		const FontData& fontData = fonts[component.font];
-		const FontAsset& fontAsset = *fontData.fontAsset;
-		const uint32 dpi = getApplication()->getWindow()->getDpi();
-		const float32 fontSizePt = fontAsset.pxToPt(component.fontSize, dpi);
-		const float32 scale = fontAsset.calculateScale(fontSizePt, dpi);
-		const UTF8String* inputText = component.inputText;
-
-		UTF8Stream stream = UTF8Stream(view<char8>(*inputText));
-		float32 baseline = component.origin.y + fontAsset.ascent * scale;
-		constexpr float32 horizontalHinting = 0.0f;
-		float32 x = component.origin.x + component.padding.x;
-
-		const float32 baselineFraction = baseline - static_cast<sint32>(baseline);
-
-		/* if (baselineFraction > 0.5f) {
-			baseline = floor(baseline);
-		} */
-
 		const bool focused = IsFocused(componentIndex);
+		const ref<FontAsset> fontAsset = fonts[component.font].fontAsset;
+		const float32 fontScale = calculateFontScale(fontAsset, component.fontSize);
+		const UTF8String* inputText = component.inputText;
 
 		if (focused) {
 			textCursorHorizontalOffset = 0_px;
 			textSelectionBoxHorizontalOffset = 0_px;
 		}
+
+		vec2<float32> offset = component.origin + vec2<float32>{component.padding.x, component.padding.y + fontAsset->ascent * fontScale};
+		UTF8Stream stream = UTF8Stream(view<char8>(*inputText));
 
 		while (stream.getRemainingByteSize() > 0) {
 			const uint32 codePoint = stream.read();
@@ -96,72 +84,50 @@ namespace Trident {
 			DEBUG_ASSERT(codePoint != '\n');
 
 			const uint64 byteOffset = stream.getByteOffset();
-			const Glyph& glyph = fontAsset[codePoint];
+			const Glyph& glyph = fontAsset->operator[](codePoint);
 
 			if (!glyph.whitespace) {
-				const float32 bearingX = glyph.leftSideBearing * scale;
-				const float32 y = component.padding.y + baseline - glyph.yMax * scale;
-
 				// TODO(gui/text/kerning)
 				/* if (stream.getRemainingByteSize() > 0) {
 					const uint32 nextCodePoint = stream.peek();
-					const sint16 kerning = fontAsset.getKerning(codePoint, nextCodePoint);
+					const sint16 kerning = fontAsset->getKerning(codePoint, nextCodePoint);
 
-					x += kerning * scale;
+					offset.x += kerning * fontScale;
 				} */
 
-				const float32 width = glyph.width * scale;
-				const float32 height = glyph.height * scale;
-
-				const float32 endX = x + bearingX + width;
-
-				const float32 startXAligned = floor(x + bearingX);
-				const float32 endXAligned = ceil(endX);
-
-				const float32 finalWidth = endXAligned - startXAligned;
-
-				const float32 pStartX = (x + bearingX - startXAligned) / finalWidth;
-				const float32 pEndX = (endX - startXAligned) / finalWidth;
-
-				TextCharacter character{};
-				character.offset = {startXAligned, y};
-				character.size = {finalWidth, height};
-				character.startTextureCoordinate.x = lerp(glyph.minCoordinate.x, glyph.maxCoordinate.x, -pStartX);
-				character.startTextureCoordinate.y = glyph.minCoordinate.y;
-				character.endTextureCoordinate.x = lerp(glyph.minCoordinate.x, glyph.maxCoordinate.x, 2.0f - pEndX);
-				character.endTextureCoordinate.y = glyph.maxCoordinate.y;
+				const TextCharacter character = createTextCharacter(glyph, offset, fontScale);
 
 				component.characters.emplace_back(character);
 			}
 
-			x += glyph.advanceWidth * scale;
+			offset.x += glyph.advanceWidth * fontScale;
 
 			if (focused) {
 				if (inputText->cursorOffset == byteOffset) {
-					textCursorHorizontalOffset = x;
+					textCursorHorizontalOffset = offset.x;
 				}
 
 				if (inputText->hasSelection() && inputText->selectionMarkerOffset == byteOffset) {
-					textSelectionBoxHorizontalOffset = x;
+					textSelectionBoxHorizontalOffset = offset.x;
 				}
 			}
 		}
 	}
 
 	void GUILayer::updateTextInput(TextInputEvent& event, const GUIContainer& component) const {
-		UTF8String* string = component.inputText;
+		UTF8String* inputText = component.inputText;
 
-		DEBUG_ASSERT(string != nullptr);
+		DEBUG_ASSERT(inputText != nullptr);
 
-		string->insert(event.characterCode);
+		inputText->insert(event.characterCode);
 	}
 
 	void GUILayer::updateTextInputAction(KeyDownEvent& event, const GUIContainer& component) const {
+		UTF8String* inputText = component.inputText;
+
+		DEBUG_ASSERT(inputText != nullptr);
+
 		const Window* window = getApplication()->getWindow();
-
-		UTF8String* string = component.inputText;
-
-		DEBUG_ASSERT(string != nullptr);
 
 		// TODO(gui/component/text-input/seek-current-word-start): Seek the current word start when Ctrl + ArrowLeft is pressed.
 		// TODO(gui/component/text-input/seek-current-word-end): Seek the current word end when Ctrl + ArrowRight is pressed.
@@ -172,95 +138,95 @@ namespace Trident {
 		// TODO(gui/console/inline-suggestions): Implement Tab key to accept inline suggestions?
 		switch (event.getKeyCode()) {
 			case KeyCode::BACKSPACE: {
-				if (string->getByteSize() == 0) {
+				if (inputText->getByteSize() == 0) {
 					break;
 				}
 
-				if (!string->hasSelection()) {
-					string->select();
-					string->jumpLeft(1);
+				if (!inputText->hasSelection()) {
+					inputText->select();
+					inputText->jumpLeft(1);
 				}
 
-				string->removeSelection();
+				inputText->removeSelection();
 
 				break;
 			}
 			case KeyCode::SHIFT: {
-				if (!string->hasSelection()) {
-					string->select();
+				if (!inputText->hasSelection()) {
+					inputText->select();
 				}
 
 				break;
 			}
 			case KeyCode::ESCAPE: {
-				if (string->hasSelection()) {
-					string->unselect();
+				if (inputText->hasSelection()) {
+					inputText->unselect();
 				}
 
 				break;
 			}
 			case KeyCode::ARROW_LEFT: {
-				if (!window->isKeyDown(KeyCode::SHIFT) && string->hasSelection()) {
-					string->unselect();
-					string->seek(min(string->cursorOffset, string->selectionMarkerOffset));
+				if (!window->isKeyDown(KeyCode::SHIFT) && inputText->hasSelection()) {
+					inputText->unselect();
+					inputText->seek(min(inputText->cursorOffset, inputText->selectionMarkerOffset));
 
 					break;
 				}
 
-				if (string->cursorOffset == 0) {
+				if (inputText->cursorOffset == 0) {
 					break;
 				}
 
-				string->jumpLeft(1);
+				inputText->jumpLeft(1);
 
 				break;
 			}
 			case KeyCode::HOME: {
-				if (!window->isKeyDown(KeyCode::SHIFT) && string->hasSelection()) {
-					string->unselect();
+				if (!window->isKeyDown(KeyCode::SHIFT) && inputText->hasSelection()) {
+					inputText->unselect();
 				}
 
-				string->seek(0);
+				inputText->seek(0);
 
 				break;
 			}
 			case KeyCode::ARROW_RIGHT: {
-				if (!window->isKeyDown(KeyCode::SHIFT) && string->hasSelection()) {
-					string->unselect();
-					string->seek(max(string->cursorOffset, string->selectionMarkerOffset));
+				if (!window->isKeyDown(KeyCode::SHIFT) && inputText->hasSelection()) {
+					inputText->unselect();
+					inputText->seek(max(inputText->cursorOffset, inputText->selectionMarkerOffset));
 
 					break;
 				}
 
-				if (string->cursorOffset >= string->getByteSize()) {
+				if (inputText->cursorOffset >= inputText->getByteSize()) {
 					break;
 				}
 
-				string->jumpRight(1);
+				inputText->jumpRight(1);
 
 				break;
 			}
 			case KeyCode::END: {
-				if (!window->isKeyDown(KeyCode::SHIFT) && string->hasSelection()) {
-					string->unselect();
+				if (!window->isKeyDown(KeyCode::SHIFT) && inputText->hasSelection()) {
+					inputText->unselect();
 				}
 
-				string->seek(string->getByteSize());
+				inputText->seek(inputText->getByteSize());
 
 				break;
 			}
 			case KeyCode::DELETE: {
-				if (string->cursorOffset >= string->getByteSize()) {
+				if (inputText->cursorOffset >= inputText->getByteSize()) {
 					break;
 				}
 
-				if (!string->hasSelection()) {
-					string->jumpRight(1);
-					string->select();
-					string->jumpLeft(1);
+				if (!inputText->hasSelection()) {
+					inputText->jumpRight(1);
+					inputText->select();
+					inputText->jumpLeft(1);
 				}
 
-				string->removeSelection();
+				inputText->removeSelection();
 
 				break;
 			}
@@ -269,9 +235,9 @@ namespace Trident {
 					break;
 				}
 
-				string->seek(0);
-				string->select();
-				string->seek(string->getByteSize());
+				inputText->seek(0);
+				inputText->select();
+				inputText->seek(inputText->getByteSize());
 
 				break;
 			}
@@ -280,11 +246,11 @@ namespace Trident {
 					break;
 				}
 
-				if (!string->hasSelection()) {
+				if (!inputText->hasSelection()) {
 					break;
 				}
 
-				window->copyToClipboard(string->getSelection());
+				window->copyToClipboard(inputText->getSelection());
 
 				break;
 			}
@@ -300,7 +266,7 @@ namespace Trident {
 				const sequence<char8> text = window->getClipboardText();
 				const view<char8> textView(&text[0], text.count() - 1);
 
-				string->insert(textView);
+				inputText->insert(textView);
 
 				break;
 			}
@@ -309,13 +275,13 @@ namespace Trident {
 					break;
 				}
 
-				if (!string->hasSelection()) {
+				if (!inputText->hasSelection()) {
 					break;
 				}
 
-				window->copyToClipboard(string->getSelection());
+				window->copyToClipboard(inputText->getSelection());
 
-				string->removeSelection();
+				inputText->removeSelection();
 
 				break;
 			}

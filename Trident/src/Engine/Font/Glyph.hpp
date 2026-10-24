@@ -13,10 +13,7 @@ namespace Trident {
 		vec2<float32> maxCoordinate;
 
 		/// In FUnits.
-		uint16 width;
-
-		/// In FUnits.
-		uint16 height;
+		vec2<uint16> size;
 
 		/// In FUnits.
 		sint16 yMax;

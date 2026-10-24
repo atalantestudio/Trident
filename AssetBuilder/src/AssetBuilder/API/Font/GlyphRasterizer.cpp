@@ -217,11 +217,11 @@ namespace Trident {
 			const TrueTypeFont::longHorMetric& horizontalMetric = file.hMetrics[min(glyphIndex, file.hMetrics.count() - 1)];
 
 			Glyph& outputGlyph = output.glyphs[glyphIndex];
-			outputGlyph.width = glyph.max.x - glyph.min.x;
-			outputGlyph.advanceWidth = horizontalMetric.advanceWidth;
-			outputGlyph.height = glyph.max.y - glyph.min.y;
-			outputGlyph.leftSideBearing = horizontalMetric.leftSideBearing;
+			outputGlyph.size.x = glyph.max.x - glyph.min.x;
+			outputGlyph.size.y = glyph.max.y - glyph.min.y;
 			outputGlyph.yMax = glyph.max.y;
+			outputGlyph.advanceWidth = horizontalMetric.advanceWidth;
+			outputGlyph.leftSideBearing = horizontalMetric.leftSideBearing;
 			outputGlyph.whitespace = glyph.emptyOrUnparsed();
 
 			if (outputGlyph.whitespace) {
@@ -231,7 +231,7 @@ namespace Trident {
 			}
 
 			// The glyph size in TTF units.
-			const vec2<float32> ttfUnitSize = {static_cast<float32>(outputGlyph.width), static_cast<float32>(outputGlyph.height)};
+			const vec2<float32> ttfUnitSize = vec2<float32>(outputGlyph.size);
 
 			// The glyph size on the glyph map, in pixels.
 			const vec2<float32> rawGlyphTexelSize = ttfUnitSize * scale;

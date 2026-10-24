@@ -205,11 +205,10 @@ namespace Trident {
 					glyph.minCoordinate.y = (bitmapGlyph.minCoordinate.y + bitmapGlyph.topSideBearing) / glyphMapImage->extent.y;
 					glyph.maxCoordinate.x = (bitmapGlyph.minCoordinate.x + bitmapGlyph.size.x) / glyphMapImage->extent.x;
 					glyph.maxCoordinate.y = (bitmapGlyph.minCoordinate.y + bitmapGlyph.size.y + bitmapGlyph.topSideBearing) / glyphMapImage->extent.y;
-					glyph.width = bitmapGlyph.size.x;
-					glyph.advanceWidth = bitmapGlyph.size.x + 1;
-					glyph.height = bitmapGlyph.size.y;
-					glyph.leftSideBearing = 0;
+					glyph.size = bitmapGlyph.size;
 					glyph.yMax = ASCENT - bitmapGlyph.topSideBearing;
+					glyph.advanceWidth = bitmapGlyph.size.x + 1;
+					glyph.leftSideBearing = 0;
 					glyph.whitespace = codePoint == ' ';
 
 					font.unicodeMap.insert({static_cast<uint16>(codePoint), glyphIndex});

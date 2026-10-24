@@ -37,8 +37,7 @@ namespace Trident {
 			glyph.maxCoordinate.x = stream.read<float32>();
 			glyph.maxCoordinate.y = stream.read<float32>();
 			glyph.whitespace = glyph.minCoordinate.x == glyph.maxCoordinate.x && glyph.minCoordinate.y == glyph.maxCoordinate.y;
-			glyph.width = stream.read<uint16>();
-			glyph.height = stream.read<uint16>();
+			glyph.size = {stream.read<uint16>(), stream.read<uint16>()};
 			glyph.yMax = stream.read<sint16>();
 			glyph.advanceWidth = stream.read<uint16>();
 			glyph.leftSideBearing = stream.read<sint16>();

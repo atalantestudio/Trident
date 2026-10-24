@@ -125,14 +125,10 @@ namespace Trident {
 		const FontAsset& fontAsset = *fontData.fontAsset;
 		const uint32 dpi = getApplication()->getWindow()->getDpi();
 		const float32 fontSizePt = fontAsset.pxToPt(component.fontSize, dpi);
-		const float32 scale = fontAsset.calculateScale(fontSizePt, dpi);
-		const float32 lineHeight = fontAsset.lineHeight * scale;
+		const float32 fontScale = fontAsset.calculateScale(fontSizePt, dpi);
+		const float32 lineHeight = fontAsset.lineHeight * fontScale;
 
-		FlushWordData flushWordData{};
-		flushWordData.fontAsset = &fontAsset;
-		flushWordData.scale = scale;
-
-		vec2<float32> characterOffset = component.origin;
+		vec2<float32> characterOffset = component.origin + vec2<float32>{component.padding.x, component.padding.y + fontAsset.ascent * fontScale};
 		uint32 lineCount = 1;
 		range<uint64, uint64> wordByteRange = {0, 0};
 		float32 wordCharacterOffsetX = 0.0f;
@@ -146,7 +142,7 @@ namespace Trident {
 			const uint64 codePointByteCount = stream.getByteOffset() - previousByteOffset;
 
 			if (codePoint == '\n') {
-				FlushCurrentWord(flushWordData, component.characters, stream, characterOffset, wordByteRange);
+				FlushCurrentWord(stream, fontAsset, fontScale, characterOffset, component.characters, wordByteRange);
 
 				characterOffset.x = 0.0f;
 				characterOffset.y += lineHeight;
@@ -159,17 +155,17 @@ namespace Trident {
 			const Glyph& glyph = fontAsset[codePoint];
 
 			if (glyph.whitespace) {
-				FlushCurrentWord(flushWordData, component.characters, stream, characterOffset, wordByteRange);
+				FlushCurrentWord(stream, fontAsset, fontScale, characterOffset, component.characters, wordByteRange);
 
-				characterOffset.x += glyph.advanceWidth * scale;
+				characterOffset.x += glyph.advanceWidth * fontScale;
 				wordCharacterOffsetX = characterOffset.x;
 
 				continue;
 			}
 
-			const float32 previousWordCharacterOffsetX = wordCharacterOffsetX + glyph.width * scale;
+			const float32 previousWordCharacterOffsetX = wordCharacterOffsetX + glyph.size.x * fontScale;
 
-			wordCharacterOffsetX += glyph.advanceWidth * scale;
+			wordCharacterOffsetX += glyph.advanceWidth * fontScale;
 
 			if (previousWordCharacterOffsetX > component.size.width.value) {
 				characterOffset.x = 0.0f;
@@ -191,7 +187,7 @@ namespace Trident {
 					wordByteRange.count += stream.getByteOffset() - previousByteOffset;
 				}
 
-				FlushCurrentWord(flushWordData, component.characters, stream, characterOffset, wordByteRange);
+				FlushCurrentWord(stream, fontAsset, fontScale, characterOffset, component.characters, wordByteRange);
 
 				wordCharacterOffsetX = characterOffset.x;
 
@@ -202,81 +198,41 @@ namespace Trident {
 		}
 
 		if (wordByteRange.count > 0 && wordByteRange.offset + wordByteRange.count == stream.getByteSize()) {
-			FlushWordData flushWordData{};
-			flushWordData.stream = UTF8Stream(view<char8>(&stream.getData()[wordByteRange.offset], wordByteRange.count));
-			flushWordData.fontAsset = &fontAsset;
-			flushWordData.scale = scale;
+			UTF8Stream wordStream(view<char8>(&stream.getData()[wordByteRange.offset], wordByteRange.count));
 
-			FlushWord(flushWordData, component.characters, characterOffset);
+			FlushWord(wordStream, fontAsset, fontScale, characterOffset, component.characters);
 		}
 
 		component.size.height.value = lineHeight * lineCount;
 	}
 
-	void GUILayer::FlushCurrentWord(
-		FlushWordData& flushWordData,
-		std::vector<TextCharacter>& characters,
-		const UTF8Stream& stream,
-		vec2<float32>& characterOffset,
-		range<uint64, uint64>& wordByteRange
-	) const {
-		flushWordData.stream = UTF8Stream(view<char8>(&stream.getData()[wordByteRange.offset], wordByteRange.count));
+	void GUILayer::FlushCurrentWord(const UTF8Stream& stream, const FontAsset& fontAsset, float32 fontScale, vec2<float32>& characterOffset, std::vector<TextCharacter>& characters, range<uint64, uint64>& wordByteRange) const {
+		UTF8Stream wordStream(view<char8>(&stream.getData()[wordByteRange.offset], wordByteRange.count));
 
-		FlushWord(flushWordData, characters, characterOffset);
+		FlushWord(wordStream, fontAsset, fontScale, characterOffset, characters);
 
 		wordByteRange.offset = stream.getByteOffset();
 		wordByteRange.count = 0;
 	}
 
-	void GUILayer::FlushWord(FlushWordData& data, std::vector<TextCharacter>& textCharacters, vec2<float32>& characterOffset) const {
-		const float32 scale = data.scale;
-
-		float32 horizontalHinting = 0.0f;
-
-		// TODO(gui/text/flush-word)
-		if (true) {
-			horizontalHinting = 0.5f;
-		}
-
-		float32 baseline = characterOffset.y + data.fontAsset->ascent * scale;
-
-		const float32 baselineFraction = baseline - static_cast<sint32>(baseline);
-
-		if (baselineFraction > 0.5f) {
-			baseline = floor(baseline);
-		}
-
-		while (data.stream.getRemainingByteSize() > 0) {
-			const uint32 codePoint = data.stream.read();
-			const Glyph& glyph = (*data.fontAsset)[codePoint];
-
-			float32 x = ceil(characterOffset.x + glyph.leftSideBearing * scale) + horizontalHinting;
-			float32 y = baseline - glyph.yMax * scale;
+	void GUILayer::FlushWord(UTF8Stream& stream, const FontAsset& fontAsset, float32 fontScale, vec2<float32>& characterOffset, std::vector<TextCharacter>& characters) const {
+		while (stream.getRemainingByteSize() > 0) {
+			const uint32 codePoint = stream.read();
+			const Glyph& glyph = fontAsset[codePoint];
 
 			// TODO(gui/text/kerning)
-			/* if (data.stream.getRemainingByteSize() > 0) {
-				const uint32 nextCodePoint = data.stream.peek();
-				const sint16 kerning = data.fontAsset->getKerning(codePoint, nextCodePoint);
+			/* if (stream.getRemainingByteSize() > 0) {
+				const uint32 nextCodePoint = stream.peek();
+				const sint16 kerning = fontAsset.getKerning(codePoint, nextCodePoint);
 
-				x += kerning * scale;
+				offset.x += kerning * fontScale;
 			} */
 
-			float32 width = glyph.width * scale;
-			float32 height = glyph.height * scale;
-			float32 startU = glyph.minCoordinate.x;
-			float32 startV = glyph.minCoordinate.y;
-			float32 endU = glyph.maxCoordinate.x;
-			float32 endV = glyph.maxCoordinate.y;
+			const TextCharacter character = createTextCharacter(glyph, characterOffset, fontScale);
 
-			TextCharacter textCharacter{};
-			textCharacter.offset = {x, y};
-			textCharacter.size = {width, height};
-			textCharacter.startTextureCoordinate = vec2<float32>{startU, startV};
-			textCharacter.endTextureCoordinate = vec2<float32>{endU, endV};
+			characters.emplace_back(character);
 
-			textCharacters.emplace_back(textCharacter);
-
-			characterOffset.x += glyph.advanceWidth * scale;
+			characterOffset.x += glyph.advanceWidth * fontScale;
 		}
 	}
 
@@ -299,5 +255,36 @@ namespace Trident {
 				WrapText(childComponent);
 			}
 		}
+	}
+
+	TextCharacter GUILayer::createTextCharacter(const Glyph& glyph, vec2<float32> offset, float32 fontScale) {
+		offset.x += glyph.leftSideBearing * fontScale;
+		offset.y -= glyph.yMax * fontScale;
+
+		const vec2<float32> size = vec2<float32>(glyph.size) * fontScale;
+		const vec2<float32> startOffset = offset;
+		const vec2<float32> endOffset = startOffset + size;
+
+		const vec2<float32> alignedStartOffset = floor(startOffset);
+		const vec2<float32> alignedEndOffset = ceil(endOffset);
+		const vec2<float32> alignedSize = alignedEndOffset - alignedStartOffset;
+
+		const vec2<float32> startOffsetPercent = -(startOffset - alignedStartOffset) / alignedSize;
+		const vec2<float32> endOffsetPercent = vec2<float32>{2.0f, 2.0f} - ((endOffset - alignedStartOffset) / alignedSize);
+
+		TextCharacter character{};
+		character.offset = alignedStartOffset;
+		character.size = alignedSize;
+		character.startTextureCoordinate = lerp(glyph.minCoordinate, glyph.maxCoordinate, startOffsetPercent);
+		character.endTextureCoordinate = lerp(glyph.minCoordinate, glyph.maxCoordinate, endOffsetPercent);
+
+		return character;
+	}
+
+	float32 GUILayer::calculateFontScale(ref<FontAsset> fontAsset, float32 fontSize) const {
+		const uint32 dpi = getApplication()->getWindow()->getDpi();
+		const float32 fontSizePt = fontAsset->pxToPt(fontSize, dpi);
+
+		return fontAsset->calculateScale(fontSizePt, dpi);
 	}
 }

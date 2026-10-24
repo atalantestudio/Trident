@@ -22,12 +22,6 @@ namespace Trident {
 				ImageID glyphMapImageId;
 			};
 
-			struct FlushWordData {
-				UTF8Stream stream;
-				const FontAsset* fontAsset;
-				float32 scale;
-			};
-
 		private:
 			/// Text cursor width in pixels.
 			static constexpr float32 TEXT_CURSOR_WIDTH = 1_px;
@@ -43,6 +37,8 @@ namespace Trident {
 
 			static float32 calculateTextPreferredWidth(UTF8Stream& stream, const FontAsset& fontAsset, float32 scale);
 			static float32 calculateTextMinimumWidth(UTF8Stream& stream, const FontAsset& fontAsset, float32 scale);
+
+			static TextCharacter createTextCharacter(const Glyph& glyph, vec2<float32> offset, float32 fontScale);
 
 		public:
 			void initialize() final override;
@@ -129,6 +125,7 @@ namespace Trident {
 			void AdjustHeight(uint32 componentIndex);
 
 			float32 calculateRemainingSize(const GUIContainer& component, uint8 axis) const;
+			float32 calculateFontScale(ref<FontAsset> fontAsset, float32 fontSize) const;
 
 			// Width is represented by an axis of 0 and height is represented by an axis of 1.
 			// This function recursively calls the component's children.
@@ -137,8 +134,8 @@ namespace Trident {
 			void WrapTextChildrenRecursive(uint32 parentIndex);
 			void WrapText(GUIContainer& component);
 			void WrapInputText(GUIContainer& component, uint32 componentIndex);
-			void FlushCurrentWord(FlushWordData& flushWordData, std::vector<TextCharacter>& characters, const UTF8Stream& stream, vec2<float32>& characterOffset, range<uint64, uint64>& wordByteRange) const;
-			void FlushWord(FlushWordData& data, std::vector<TextCharacter>& textCharacters, vec2<float32>& characterOffset) const;
+			void FlushCurrentWord(const UTF8Stream& stream, const FontAsset& fontAsset, float32 fontScale, vec2<float32>& characterOffset, std::vector<TextCharacter>& characters, range<uint64, uint64>& wordByteRange) const;
+			void FlushWord(UTF8Stream& stream, const FontAsset& fontAsset, float32 fontScale, vec2<float32>& characterOffset, std::vector<TextCharacter>& characters) const;
 			void PositionsAndAlignment(GUIContainer& component, uint32 componentIndex, vec2<float32> origin, bool registerSubcomponents);
 
 			bool onKeyDown(KeyDownEvent& event);
