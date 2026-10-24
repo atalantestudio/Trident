@@ -15,23 +15,13 @@ namespace Trident {
 			}
 
 			void render() override {
-				ExampleTextInput();
-			}
-
-		private:
-			void ExampleTextInput() {
-				Container({
-					.size = {512_px, FIT},
-					.color = backgroundHoverColor,
-				}) {
-					TextInput({
-						.width = EXPAND,
-						.color = textColor,
-						.text = &text,
-						.font = fontRegular,
-						.fontSize = 16_px,
-					});
-				}
+				TextInput({
+					.width = EXPAND,
+					.color = textColor,
+					.text = &text,
+					.font = fontRegular,
+					.fontSize = 16_px,
+				});
 			}
 
 		private:

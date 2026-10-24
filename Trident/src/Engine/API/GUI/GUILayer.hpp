@@ -179,7 +179,7 @@ namespace Trident {
 			Color clearColor = 0x00000000;
 
 			// TODO(gui/text-smoothness)
-			vec2<float32> hinting = {0.5f, 0.0f};
+			vec2<float32> hinting = {0.0f, 0.0f};
 
 		private:
 			GUIRenderer renderer;

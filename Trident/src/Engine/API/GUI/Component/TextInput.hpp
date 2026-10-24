@@ -71,19 +71,18 @@ namespace Trident {
 		const uint32 dpi = getApplication()->getWindow()->getDpi();
 		const float32 fontSizePt = fontAsset.pxToPt(component.fontSize, dpi);
 		const float32 scale = fontAsset.calculateScale(fontSizePt, dpi);
-
 		const UTF8String* inputText = component.inputText;
 
 		UTF8Stream stream = UTF8Stream(view<char8>(*inputText));
 		float32 baseline = component.origin.y + fontAsset.ascent * scale;
 		constexpr float32 horizontalHinting = 0.0f;
-		float32 characterOffsetX = component.origin.x;
+		float32 x = component.origin.x + component.padding.x;
 
 		const float32 baselineFraction = baseline - static_cast<sint32>(baseline);
 
-		if (baselineFraction > 0.5f) {
+		/* if (baselineFraction > 0.5f) {
 			baseline = floor(baseline);
-		}
+		} */
 
 		const bool focused = IsFocused(componentIndex);
 
@@ -94,17 +93,14 @@ namespace Trident {
 
 		while (stream.getRemainingByteSize() > 0) {
 			const uint32 codePoint = stream.read();
-			const uint64 byteOffset = stream.getByteOffset();
 
 			DEBUG_ASSERT(codePoint != '\n');
 
+			const uint64 byteOffset = stream.getByteOffset();
 			const Glyph& glyph = fontAsset[codePoint];
 
-			if (glyph.whitespace) {
-				characterOffsetX += glyph.advanceWidth * scale;
-			}
-			else {
-				const float32 x = component.padding.x + horizontalHinting + ceil(characterOffsetX + glyph.leftSideBearing * scale);
+			if (!glyph.whitespace) {
+				const float32 bearingX = glyph.leftSideBearing * scale;
 				const float32 y = component.padding.y + baseline - glyph.yMax * scale;
 
 				// TODO(gui/text/kerning)
@@ -118,24 +114,36 @@ namespace Trident {
 				const float32 width = glyph.width * scale;
 				const float32 height = glyph.height * scale;
 
+				const float32 endX = x + bearingX + width;
+
+				const float32 startXAligned = floor(x + bearingX);
+				const float32 endXAligned = ceil(endX);
+
+				const float32 finalWidth = endXAligned - startXAligned;
+
+				const float32 pStartX = (x + bearingX - startXAligned) / finalWidth;
+				const float32 pEndX = (endX - startXAligned) / finalWidth;
+
 				TextCharacter character{};
-				character.offset = {x, y};
-				character.size = {width, height};
-				character.startTextureCoordinate = glyph.minCoordinate;
-				character.endTextureCoordinate = glyph.maxCoordinate;
+				character.offset = {startXAligned, y};
+				character.size = {finalWidth, height};
+				character.startTextureCoordinate.x = lerp(glyph.minCoordinate.x, glyph.maxCoordinate.x, -pStartX);
+				character.startTextureCoordinate.y = glyph.minCoordinate.y;
+				character.endTextureCoordinate.x = lerp(glyph.minCoordinate.x, glyph.maxCoordinate.x, 2.0f - pEndX);
+				character.endTextureCoordinate.y = glyph.maxCoordinate.y;
 
 				component.characters.emplace_back(character);
-
-				characterOffsetX += glyph.advanceWidth * scale;
 			}
+
+			x += glyph.advanceWidth * scale;
 
 			if (focused) {
 				if (inputText->cursorOffset == byteOffset) {
-					textCursorHorizontalOffset = characterOffsetX;
+					textCursorHorizontalOffset = x;
 				}
 
 				if (inputText->hasSelection() && inputText->selectionMarkerOffset == byteOffset) {
-					textSelectionBoxHorizontalOffset = characterOffsetX;
+					textSelectionBoxHorizontalOffset = x;
 				}
 			}
 		}
@@ -161,8 +169,8 @@ namespace Trident {
 		// TODO(gui/component/text-input/select-current-word): When Ctrl + Shift + ArrowLeft/ArrowRight is pressed, seek the current word start/end while selecting.
 		// TODO(gui/component/text-input/ctrl-backspace): Implement Ctrl + Backspace key combination (delete left until not in [A-Za-z0-9_]).
 		// TODO(gui/component/text-input/ctrl-delete): Implement Ctrl + Delete key combination (delete right until not in [A-Za-z0-9_]).
-		// TODO(gui/console/inline-suggestions): Implement Tab key to accept inline suggestions?
 		// TODO(gui/console/parse-command): Parse the command options when Enter is pressed, then trigger a ConsoleCommandEvent.
+		// TODO(gui/console/inline-suggestions): Implement Tab key to accept inline suggestions?
 		switch (event.getKeyCode()) {
 			case KeyCode::BACKSPACE: {
 				if (string->getByteSize() == 0) {

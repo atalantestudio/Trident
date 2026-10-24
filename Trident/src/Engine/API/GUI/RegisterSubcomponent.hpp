@@ -102,13 +102,13 @@ namespace Trident {
 	}
 
 	void GUILayer::renderTextCursor(const GUIContainer& component) {
-		const vec2<float32> offset = component.origin + component.offset + vec2<float32>{component.padding.x + textCursorHorizontalOffset, component.padding.y};
+		const vec2<float32> offset = {component.padding.x + textCursorHorizontalOffset, component.padding.y};
 		const vec2<float32> size = {TEXT_CURSOR_WIDTH, component.size.height.value - component.padding.y - component.padding.w};
 
 		GUISubcomponent subcomponent{};
 		subcomponent.worldTransform = (
 			scaling<mat3x3<float32>>(size) *
-			translation<mat3x3<float32>>(component.offset + offset)
+			translation<mat3x3<float32>>(component.origin + offset)
 		);
 		subcomponent.textureTransform = identity<mat3x3<float32>>();
 		subcomponent.color = TEXT_CURSOR_COLOR.value;
@@ -127,13 +127,13 @@ namespace Trident {
 			endOffset = textSelectionBoxHorizontalOffset;
 		}
 
-		const vec2<float32> offset = component.origin + component.offset + vec2<float32>{component.padding.x + startOffset, component.padding.y};
+		const vec2<float32> offset = {component.padding.x + startOffset, component.padding.y};
 		const vec2<float32> size = {endOffset - startOffset, component.size.height.value - component.padding.y - component.padding.w};
 
 		GUISubcomponent subcomponent{};
 		subcomponent.worldTransform = (
 			scaling<mat3x3<float32>>(size) *
-			translation<mat3x3<float32>>(component.offset + offset)
+			translation<mat3x3<float32>>(component.origin + offset)
 		);
 		subcomponent.textureTransform = identity<mat3x3<float32>>();
 		subcomponent.color = TEXT_SELECTION_BOX_COLOR.value;
