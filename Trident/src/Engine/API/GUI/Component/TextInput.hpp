@@ -51,8 +51,7 @@ namespace Trident {
 		componentCount += 1;
 		focusableComponentCount += 1;
 
-		// TODO(gui/component/text-input): Restore pointer type update?
-		/* if (previousComponentCount >= componentCount) {
+		if (previousComponentCount >= componentCount) {
 			const GUIContainer& component = previousComponents[componentCount - 1];
 			const Window* window = getApplication()->getWindow();
 			const vec2<float32> mousePosition = vec2<float32>(window->getMousePosition());
@@ -60,7 +59,7 @@ namespace Trident {
 			if (IsIntersecting(component, mousePosition)) {
 				window->updatePointerType(component.pointerType);
 			}
-		} */
+		}
 
 		AdjustWidth(componentIndex);
 	}
