@@ -11,7 +11,7 @@ namespace Trident {
 			void registerAssets() override {
 				GUIDefaultTheme::registerAssets();
 
-				updateThemeColors(false);
+				updateThemeColors(darkTheme);
 			}
 
 			void render() override {
@@ -21,7 +21,11 @@ namespace Trident {
 					.layoutDirection = LayoutDirection::VERTICAL,
 					.layoutSpacing = 8_px,
 				}) {
-					Button("Light");
+					if (Button(darkTheme ? "Dark" : "Light")) {
+						darkTheme = !darkTheme;
+
+						updateThemeColors(darkTheme);
+					}
 
 					Slider(value);
 				}
@@ -69,6 +73,7 @@ namespace Trident {
 			}
 
 		private:
+			bool darkTheme = false;
 			float32 value = 0.0f;
 	};
 }
