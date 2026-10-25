@@ -32,6 +32,8 @@ namespace Trident {
 		FontID font;
 		float32 fontSize;
 
-		view<char8> debugName;
+		#if defined(BUILD_MODE_DEBUG)
+			view<char8> debugName;
+		#endif
 	};
 }

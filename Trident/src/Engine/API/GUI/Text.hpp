@@ -89,32 +89,35 @@ namespace Trident {
 
 		GUIContainer& parent = components[parentIndex];
 
-		GUIContainer textComponent{};
-		textComponent.parentIndex = parentIndex;
-		textComponent.origin = parent.origin;
-		textComponent.size.width.fillMode = FillMode::FIT;
-		textComponent.size.width.value = preferredWidth;
-		textComponent.size.height.fillMode = FillMode::FIT;
-		textComponent.size.height.value = style.fontSize;
-		textComponent.maximumSize = {preferredWidth, style.fontSize};
-		textComponent.minimumSize = {minimumWidth, style.fontSize};
-		textComponent.zIndex = parent.zIndex;
-		textComponent.padding = {0_px, 0_px, 0_px, 0_px};
-		textComponent.layoutDirection = HORIZONTAL;
-		textComponent.layoutSpacing = 0_px;
-		textComponent.color = style.color;
-		textComponent.image = fonts[style.font].glyphMapImageId;
-		textComponent.pointerType = PointerType::DEFAULT;
-		textComponent.textComponent = true;
-		textComponent.text = text;
-		textComponent.font = style.font;
-		textComponent.fontSize = style.fontSize;
-		textComponent.debugName = style.debugName;
+		GUIContainer component{};
+		component.type = GUIComponentType::TEXT;
+		component.parentIndex = parentIndex;
+		component.origin = parent.origin;
+		component.size.width.fillMode = FillMode::FIT;
+		component.size.width.value = preferredWidth;
+		component.size.height.fillMode = FillMode::FIT;
+		component.size.height.value = style.fontSize;
+		component.maximumSize = {preferredWidth, style.fontSize};
+		component.minimumSize = {minimumWidth, style.fontSize};
+		component.zIndex = parent.zIndex;
+		component.padding = {0_px, 0_px, 0_px, 0_px};
+		component.layoutDirection = HORIZONTAL;
+		component.layoutSpacing = 0_px;
+		component.color = style.color;
+		component.image = fonts[style.font].glyphMapImageId;
+		component.pointerType = PointerType::DEFAULT;
+		component.text = text;
+		component.font = style.font;
+		component.fontSize = style.fontSize;
+
+		#if defined(BUILD_MODE_DEBUG)
+			component.debugName = style.debugName;
+		#endif
 
 		// Pushing the component to the vector might invalidate the parent reference, so we update the parent's children indices before.
 		parent.childIndices.emplace_back(componentIndex);
 
-		components[componentCount] = textComponent;
+		components[componentCount] = component;
 		componentCount += 1;
 
 		AdjustWidth(componentIndex);
@@ -242,7 +245,7 @@ namespace Trident {
 		for (const uint32 childIndex : parentComponent.childIndices) {
 			GUIContainer& childComponent = components[childIndex];
 
-			if (!childComponent.textComponent && childComponent.type != GUIComponentType::TEXT_INPUT) {
+			if (childComponent.type != GUIComponentType::TEXT && childComponent.type != GUIComponentType::TEXT_INPUT) {
 				WrapTextChildrenRecursive(childIndex);
 
 				continue;

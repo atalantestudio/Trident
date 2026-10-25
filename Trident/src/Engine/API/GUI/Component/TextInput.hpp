@@ -38,10 +38,12 @@ namespace Trident {
 		component.image = style.image;
 		component.pointerType = PointerType::TEXT;
 		component.inputText = style.text;
-		component.textComponent = false;
 		component.font = style.font;
 		component.fontSize = style.fontSize;
-		component.debugName = style.debugName;
+
+		#if defined(BUILD_MODE_DEBUG)
+			component.debugName = style.debugName;
+		#endif
 
 		setComponentSize(component, style.minimumSize, style.maximumSize);
 

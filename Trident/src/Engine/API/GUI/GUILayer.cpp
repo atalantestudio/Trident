@@ -93,8 +93,10 @@ namespace Trident {
 		rootComponent.color = clearColor;
 		rootComponent.image = 0;
 		rootComponent.pointerType = PointerType::DEFAULT;
-		rootComponent.textComponent = false;
-		rootComponent.debugName = "__root";
+
+		#if defined(BUILD_MODE_DEBUG)
+			rootComponent.debugName = "__root";
+		#endif
 
 		components[componentCount] = rootComponent;
 		componentCount += 1;
@@ -214,8 +216,9 @@ namespace Trident {
 			component.pointerType = style.pointerType;
 		}
 
-		component.textComponent = false;
-		component.debugName = style.debugName;
+		#if defined(BUILD_MODE_DEBUG)
+			component.debugName = style.debugName;
+		#endif
 
 		openComponent(component, style.focusable);
 	}
@@ -366,7 +369,7 @@ namespace Trident {
 		while (componentIndex < previousComponentCount) {
 			const GUIContainer& component = previousComponents[componentIndex];
 
-			if (component.textComponent) {
+			if (component.type == GUIComponentType::TEXT) {
 				componentIndex += 1;
 
 				continue;

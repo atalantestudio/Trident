@@ -31,8 +31,10 @@ namespace Trident {
 		component.color = style.color;
 		component.image = style.image;
 		component.pointerType = parent.pointerType;
-		component.textComponent = false;
-		component.debugName = style.debugName;
+
+		#if defined(BUILD_MODE_DEBUG)
+			component.debugName = style.debugName;
+		#endif
 
 		// TODO(gui/component/vertical-list): Make focusable?
 		openComponent(component, false);

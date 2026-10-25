@@ -22,6 +22,7 @@ namespace Trident {
 		vec2<float32> endTextureCoordinate;
 	};
 
+	// TODO(gui/component): Rename to GUIComponent.
 	struct GUIContainer {
 		GUIComponentType type;
 
@@ -60,21 +61,16 @@ namespace Trident {
 		// The type of the pointer to display when hovering over the component.
 		PointerType pointerType;
 
-		std::vector<uint32> childIndices;
-
-		// TODO(gui/component/text): Move to GUIComponentType enum.
-		// Exclusive to text components.
-		bool textComponent;
-
-		// TODO(gui/component/text-input): Merge GUIContainer::text with this.
 		UTF8String* inputText = nullptr;
-
 		sequence<char8> text;
-		std::vector<TextCharacter> characters;
 		FontID font;
 		float32 fontSize;
 
-		// TODO(gui/component/text-input): Debug-only.
-		view<char8> debugName;
+		std::vector<uint32> childIndices;
+		std::vector<TextCharacter> characters;
+
+		#if defined(BUILD_MODE_DEBUG)
+			view<char8> debugName;
+		#endif
 	};
 }

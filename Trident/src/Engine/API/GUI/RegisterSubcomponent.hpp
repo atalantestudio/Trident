@@ -11,19 +11,22 @@ namespace Trident {
 			return true;
 		}
 
-		float32 x = component.origin.x;
-		float32 y = component.origin.y;
+		const float32 x = component.origin.x;
+		const float32 y = component.origin.y;
+		const float32 width = component.size.width.value;
 
-		float32 width = component.size.width.value;
 		float32 height = component.size.height.value;
 
 		if (component.parentIndex != max<uint32>()) {
-			const GUIContainer& parent = components[component.parentIndex];
+			switch (component.type) {
+				case GUIComponentType::TEXT: {
+					renderText(component);
 
-			if (component.textComponent || component.type == GUIComponentType::TEXT_INPUT) {
-				renderText(component);
+					return false;
+				}
+				case GUIComponentType::TEXT_INPUT: {
+					renderText(component);
 
-				if (component.type == GUIComponentType::TEXT_INPUT) {
 					if (IsFocused(componentIndex)) {
 						renderTextCursor(component);
 
@@ -31,31 +34,36 @@ namespace Trident {
 							renderTextSelectionBox(component);
 						}
 					}
-				}
 
-				return false;
-			}
-
-			if (parent.type == GUIComponentType::VERTICAL_LIST) {
-				if (component.origin.y + component.size.height.value <= parent.origin.y) {
 					return false;
 				}
+				default: {
+					const GUIContainer& parent = components[component.parentIndex];
 
-				if (component.origin.y >= parent.origin.y + parent.size.height.value) {
-					return false;
-				}
+					if (parent.type == GUIComponentType::VERTICAL_LIST) {
+						if (component.origin.y + component.size.height.value <= parent.origin.y) {
+							return false;
+						}
 
-				const float32 topClip = (component.origin.y + component.size.height.value) - parent.origin.y;
+						if (component.origin.y >= parent.origin.y + parent.size.height.value) {
+							return false;
+						}
 
-				// TODO(gui/scroll-container/clipping): Finish clipping.
-				/* if (topClip < component.origin.y) {
-					y = topClip;
-				} */
+						const float32 topClip = (component.origin.y + component.size.height.value) - parent.origin.y;
 
-				const float32 bottomClip = (parent.origin.y + parent.size.height.value) - component.origin.y;
+						// TODO(gui/scroll-container/clipping): Finish clipping.
+						/* if (topClip < component.origin.y) {
+							y = topClip;
+						} */
 
-				if (bottomClip < height) {
-					height = bottomClip;
+						const float32 bottomClip = (parent.origin.y + parent.size.height.value) - component.origin.y;
+
+						if (bottomClip < height) {
+							height = bottomClip;
+						}
+					}
+
+					break;
 				}
 			}
 		}
@@ -63,11 +71,14 @@ namespace Trident {
 			height = static_cast<float32>(getApplication()->getWindow()->getExtent().y);
 		}
 
-		const vec2<float32> decimalOrigin = {x, round(y)};
-		const vec2<float32> decimalSize = {width, height};
+		const vec2<float32> offset = {x, round(y)};
+		const vec2<float32> size = {width, height};
 
 		GUISubcomponent subcomponent{};
-		subcomponent.worldTransform = scaling<mat3x3<float32>>(decimalSize) * translation<mat3x3<float32>>(decimalOrigin);
+		subcomponent.worldTransform = (
+			scaling<mat3x3<float32>>(size) *
+			translation<mat3x3<float32>>(offset)
+		);
 		subcomponent.textureTransform = identity<mat3x3<float32>>();
 		subcomponent.color = component.color.value;
 		subcomponent.zIndex = component.zIndex;
@@ -103,7 +114,7 @@ namespace Trident {
 
 	void GUILayer::renderTextCursor(const GUIContainer& component) {
 		const vec2<float32> offset = {component.padding.x + textCursorHorizontalOffset, component.padding.y};
-		const vec2<float32> size = {TEXT_CURSOR_WIDTH, component.size.height.value - component.padding.y - component.padding.w};
+		const vec2<float32> size = {TEXT_CURSOR_WIDTH, component.size.height.value - component.padding.w - component.padding.y};
 
 		GUISubcomponent subcomponent{};
 		subcomponent.worldTransform = (
@@ -128,7 +139,7 @@ namespace Trident {
 		}
 
 		const vec2<float32> offset = {component.padding.x + startOffset, component.padding.y};
-		const vec2<float32> size = {endOffset - startOffset, component.size.height.value - component.padding.y - component.padding.w};
+		const vec2<float32> size = {endOffset - startOffset, component.size.height.value - component.padding.w - component.padding.y};
 
 		GUISubcomponent subcomponent{};
 		subcomponent.worldTransform = (

@@ -27,6 +27,8 @@ namespace Trident {
 		Color color = 0x00000000;
 		ImageID image = 0;
 
-		view<char8> debugName;
+		#if defined(BUILD_MODE_DEBUG)
+			view<char8> debugName;
+		#endif
 	};
 }

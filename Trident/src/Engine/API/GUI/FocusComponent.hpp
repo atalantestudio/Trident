@@ -14,7 +14,7 @@ namespace Trident {
 			case GUIComponentType::TEXT_INPUT: {
 				// TODO(gui/component/text-input): Fix text cursor positioning only working when hitting a breakpoint.
 				/* const vec2<sint32> position = vec2<sint32>(round(component.origin + vec2<float32>{component.padding.x, component.padding.y}));
-				const vec2<sint32> size = vec2<sint32>(round(vec2<float32>{TEXT_CURSOR_WIDTH, component.size.height.value - component.padding.y - component.padding.w}));
+				const vec2<sint32> size = vec2<sint32>(round(vec2<float32>{TEXT_CURSOR_WIDTH, component.size.height.value - component.padding.w - component.padding.y}));
 
 				window->updateTextCursor(position, size); */
 

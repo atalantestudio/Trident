@@ -43,6 +43,8 @@ namespace Trident {
 		bool focusable = false;
 		PointerType pointerType = PointerType::INHERIT;
 
-		view<char8> debugName;
+		#if defined(BUILD_MODE_DEBUG)
+			view<char8> debugName;
+		#endif
 	};
 }

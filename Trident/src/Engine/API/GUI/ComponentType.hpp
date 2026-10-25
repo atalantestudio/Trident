@@ -5,12 +5,17 @@
 
 namespace Trident {
 	enum class GUIComponentType : uint8 {
+		/// Container components.
 		DEFAULT,
 
-		// TODO(gui/component/text-input)
+		/// Single-line and multi-line static text components.
+		TEXT,
+
+		/// Single-line text input components.
 		TEXT_INPUT,
 
-		// TODO(gui/component/vertical-list)
+		// TODO(gui/component/vertical-list): Finish implementation.
+		/// Vertical list components.
 		VERTICAL_LIST,
 	};
 }

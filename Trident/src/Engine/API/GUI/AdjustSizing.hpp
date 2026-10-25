@@ -245,7 +245,7 @@ namespace Trident {
 		}
 
 		for (const uint32 childIndex : component.childIndices) {
-			if (components[childIndex].textComponent) {
+			if (components[childIndex].type == GUIComponentType::TEXT) {
 				continue;
 			}
 
