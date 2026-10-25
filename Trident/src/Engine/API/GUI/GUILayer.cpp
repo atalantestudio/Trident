@@ -15,7 +15,7 @@
 #include "Engine/Filesystem/Filesystem.hpp"
 
 namespace Trident {
-	bool GUILayer::IsIntersecting(const GUIContainer& component, vec2<float32> point) {
+	bool GUILayer::IsIntersecting(const GUIComponent& component, vec2<float32> point) {
 		return (
 			point[0] >= component.origin.x &&
 			point[0] < component.origin.x + component.size.width.value &&
@@ -40,8 +40,8 @@ namespace Trident {
 
 		renderer.flushUserImageStagingBuffer();
 
-		components = sequence<GUIContainer>(MAX_COMPONENT_COUNT);
-		previousComponents = sequence<GUIContainer>(MAX_COMPONENT_COUNT);
+		components = sequence<GUIComponent>(MAX_COMPONENT_COUNT);
+		previousComponents = sequence<GUIComponent>(MAX_COMPONENT_COUNT);
 		openContainerIndices = sequence<uint32>(MAX_COMPONENT_COUNT);
 		focusableComponentIndexToComponentIndex = sequence<uint32>(MAX_COMPONENT_COUNT);
 	}
@@ -77,7 +77,7 @@ namespace Trident {
 
 		const Extent2D extent = getApplication()->getWindow()->getExtent();
 
-		GUIContainer rootComponent{};
+		GUIComponent rootComponent{};
 		rootComponent.type = GUIComponentType::DEFAULT;
 		rootComponent.parentIndex = max<uint32>();
 		rootComponent.origin = {0_px, 0_px};
@@ -150,11 +150,11 @@ namespace Trident {
 		eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
 	}
 
-	void GUILayer::openComponent(GUIContainer& component, bool focusable) {
+	void GUILayer::openComponent(GUIComponent& component, bool focusable) {
 		const uint32 componentIndex = componentCount;
 		const uint32 parentIndex = openContainerIndices[openContainerIndexCount - 1];
 
-		GUIContainer& parent = components[parentIndex];
+		GUIComponent& parent = components[parentIndex];
 		parent.childIndices.emplace_back(componentIndex);
 
 		component.parentIndex = parentIndex;
@@ -173,7 +173,7 @@ namespace Trident {
 		}
 
 		if (previousComponentCount >= componentCount) {
-			const GUIContainer& component = previousComponents[componentCount - 1];
+			const GUIComponent& component = previousComponents[componentCount - 1];
 			const Window* window = getApplication()->getWindow();
 			const vec2<float32> mousePosition = vec2<float32>(window->getMousePosition());
 
@@ -185,9 +185,9 @@ namespace Trident {
 
 	void GUILayer::openContainer(const ContainerStyle& style, bool floating) {
 		const uint32 parentIndex = openContainerIndices[openContainerIndexCount - 1];
-		const GUIContainer& parent = components[parentIndex];
+		const GUIComponent& parent = components[parentIndex];
 
-		GUIContainer component{};
+		GUIComponent component{};
 		component.type = style.componentType;
 		component.parentIndex = parentIndex;
 		component.floating = floating;
@@ -223,7 +223,7 @@ namespace Trident {
 		openComponent(component, style.focusable);
 	}
 
-	void GUILayer::setComponentSize(GUIContainer& component, vec2<float32> minimumSize, vec2<float32> maximumSize) const {
+	void GUILayer::setComponentSize(GUIComponent& component, vec2<float32> minimumSize, vec2<float32> maximumSize) const {
 		if (component.size.width.fillMode == FillMode::FIXED) {
 			component.maximumSize.x = component.size.width.value;
 			component.minimumSize.x = component.size.width.value;
@@ -289,7 +289,7 @@ namespace Trident {
 		}
 
 		if (focusedComponentIndex < previousFocusableComponentCount) {
-			const GUIContainer& focusedComponent = components[focusableComponentIndexToComponentIndex[focusedComponentIndex]];
+			const GUIComponent& focusedComponent = components[focusableComponentIndexToComponentIndex[focusedComponentIndex]];
 
 			switch (focusedComponent.type) {
 				case GUIComponentType::TEXT_INPUT: {
@@ -311,7 +311,7 @@ namespace Trident {
 			return false;
 		}
 
-		const GUIContainer& component = components[focusableComponentIndexToComponentIndex[focusedComponentIndex]];
+		const GUIComponent& component = components[focusableComponentIndexToComponentIndex[focusedComponentIndex]];
 
 		if (component.type != GUIComponentType::TEXT_INPUT) {
 			return false;
@@ -347,7 +347,7 @@ namespace Trident {
 
 	bool GUILayer::onMouseWheel(MouseWheelEvent& event) {
 		if (hoveredVerticalListIndex != max<uint32>()) {
-			GUIContainer& component = previousComponents[hoveredVerticalListIndex];
+			GUIComponent& component = previousComponents[hoveredVerticalListIndex];
 
 			updateVerticalList(event, component);
 		}
@@ -367,7 +367,7 @@ namespace Trident {
 		uint32 componentIndex = 0;
 
 		while (componentIndex < previousComponentCount) {
-			const GUIContainer& component = previousComponents[componentIndex];
+			const GUIComponent& component = previousComponents[componentIndex];
 
 			if (component.type == GUIComponentType::TEXT) {
 				componentIndex += 1;
@@ -390,7 +390,7 @@ namespace Trident {
 		hoveredVerticalListIndex = newHoveredVerticalListIndex;
 	}
 
-	const GUIContainer* GUILayer::CurrentComponent() const {
+	const GUIComponent* GUILayer::CurrentComponent() const {
 		if (previousComponentCount < componentCount) {
 			return nullptr;
 		}
@@ -429,7 +429,7 @@ namespace Trident {
 			return true;
 		}
 
-		const GUIContainer& component = previousComponents[componentCount - 1];
+		const GUIComponent& component = previousComponents[componentCount - 1];
 		const bool intersecting = IsIntersecting(component, lastMouseDownPosition) && IsIntersecting(component, lastMouseUpPosition);
 
 		if (intersecting) {
@@ -457,7 +457,7 @@ namespace Trident {
 			return false;
 		}
 
-		const GUIContainer& component = previousComponents[componentIndex];
+		const GUIComponent& component = previousComponents[componentIndex];
 		const vec2<float32> mousePosition = getMousePosition();
 
 		return IsIntersecting(component, mousePosition);
@@ -468,7 +468,7 @@ namespace Trident {
 			return false;
 		}
 
-		const GUIContainer& component = previousComponents[componentIndex];
+		const GUIComponent& component = previousComponents[componentIndex];
 
 		return IsIntersecting(component, lastMouseDownPosition);
 	}
@@ -478,7 +478,7 @@ namespace Trident {
 			return false;
 		}
 
-		const GUIContainer& component = previousComponents[componentIndex];
+		const GUIComponent& component = previousComponents[componentIndex];
 
 		return IsIntersecting(component, lastMouseUpPosition);
 	}

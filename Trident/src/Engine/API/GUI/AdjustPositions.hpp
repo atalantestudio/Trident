@@ -6,9 +6,9 @@
 #include "Engine/API/GUI/GUILayer.hpp"
 
 namespace Trident {
-	void GUILayer::PositionsAndAlignment(GUIContainer& component, uint32 componentIndex, vec2<float32> origin, bool registerSubcomponents) {
+	void GUILayer::PositionsAndAlignment(GUIComponent& component, uint32 componentIndex, vec2<float32> origin, bool registerSubcomponents) {
 		if (component.parentIndex != max<uint32>()) {
-			const GUIContainer& parent = components[component.parentIndex];
+			const GUIComponent& parent = components[component.parentIndex];
 
 			if (parent.type == GUIComponentType::VERTICAL_LIST && parent.layoutOffset != nullptr) {
 				origin.y -= *(parent.layoutOffset);
@@ -26,7 +26,7 @@ namespace Trident {
 		}
 
 		if (component.childIndices.size() == 0) {
-			const GUIContainer& parent = components[component.parentIndex];
+			const GUIComponent& parent = components[component.parentIndex];
 
 			// Skip over the component towards the layout direction (this includes the padding).
 			origin[parent.layoutDirection] += component.size[parent.layoutDirection].value;
@@ -43,7 +43,7 @@ namespace Trident {
 			float32 remainingAcross = 0.0f;
 
 			for (const uint32 childIndex : component.childIndices) {
-				const GUIContainer& child = components[childIndex];
+				const GUIComponent& child = components[childIndex];
 
 				remainingSize[component.layoutDirection] -= child.size[component.layoutDirection].value;
 				remainingAcross = max(remainingAcross, child.size[!component.layoutDirection].value);
@@ -73,7 +73,7 @@ namespace Trident {
 			while (index < component.childIndices.size()) {
 				const uint32 childIndex = component.childIndices[index];
 
-				GUIContainer& child = components[childIndex];
+				GUIComponent& child = components[childIndex];
 
 				if (!child.floating) {
 					const float32 remainingAcross = componentAcross - round(child.size[!component.layoutDirection].value);

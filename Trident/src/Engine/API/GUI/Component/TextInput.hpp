@@ -10,7 +10,7 @@ namespace Trident {
 		const uint32 componentIndex = componentCount;
 		const uint32 parentIndex = openContainerIndices[openContainerIndexCount - 1];
 
-		GUIContainer& parent = components[parentIndex];
+		GUIComponent& parent = components[parentIndex];
 
 		parent.childIndices.emplace_back(componentIndex);
 
@@ -21,7 +21,7 @@ namespace Trident {
 		const float32 scale = fontAsset.calculateScale(fontSizePt, dpi);
 		const float32 lineHeight = fontAsset.lineHeight * scale;
 
-		GUIContainer component{};
+		GUIComponent component{};
 		component.type = GUIComponentType::TEXT_INPUT;
 		component.parentIndex = parentIndex;
 		component.floating = false;
@@ -54,7 +54,7 @@ namespace Trident {
 		focusableComponentCount += 1;
 
 		if (previousComponentCount >= componentCount) {
-			const GUIContainer& component = previousComponents[componentCount - 1];
+			const GUIComponent& component = previousComponents[componentCount - 1];
 			const Window* window = getApplication()->getWindow();
 			const vec2<float32> mousePosition = vec2<float32>(window->getMousePosition());
 
@@ -66,7 +66,7 @@ namespace Trident {
 		AdjustWidth(componentIndex);
 	}
 
-	void GUILayer::WrapInputText(GUIContainer& component, uint32 componentIndex) {
+	void GUILayer::WrapInputText(GUIComponent& component, uint32 componentIndex) {
 		const bool focused = IsFocused(componentIndex);
 		const ref<FontAsset> fontAsset = fonts[component.font].fontAsset;
 		const float32 fontScale = calculateFontScale(fontAsset, component.fontSize);
@@ -116,7 +116,7 @@ namespace Trident {
 		}
 	}
 
-	void GUILayer::updateTextInput(TextInputEvent& event, const GUIContainer& component) const {
+	void GUILayer::updateTextInput(TextInputEvent& event, const GUIComponent& component) const {
 		UTF8String* inputText = component.inputText;
 
 		DEBUG_ASSERT(inputText != nullptr);
@@ -124,7 +124,7 @@ namespace Trident {
 		inputText->insert(event.characterCode);
 	}
 
-	void GUILayer::updateTextInputAction(KeyDownEvent& event, const GUIContainer& component) const {
+	void GUILayer::updateTextInputAction(KeyDownEvent& event, const GUIComponent& component) const {
 		UTF8String* inputText = component.inputText;
 
 		DEBUG_ASSERT(inputText != nullptr);

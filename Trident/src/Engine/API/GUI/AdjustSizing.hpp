@@ -6,11 +6,11 @@
 #include "Engine/API/GUI/GUILayer.hpp"
 
 namespace Trident {
-	std::vector<uint32> GUILayer::FilterChildren(const GUIContainer& parent, uint8 axis, FillMode fillMode) const {
+	std::vector<uint32> GUILayer::FilterChildren(const GUIComponent& parent, uint8 axis, FillMode fillMode) const {
 		std::vector<uint32> childIndices;
 
 		for (const uint32 childIndex : parent.childIndices) {
-			const GUIContainer& component = components[childIndex];
+			const GUIComponent& component = components[childIndex];
 
 			if (component.size[axis].fillMode == fillMode) {
 				childIndices.emplace_back(childIndex);
@@ -20,11 +20,11 @@ namespace Trident {
 		return childIndices;
 	}
 
-	float32 GUILayer::calculateRemainingSize(const GUIContainer& component, uint8 axis) const {
+	float32 GUILayer::calculateRemainingSize(const GUIComponent& component, uint8 axis) const {
 		float32 remainingSize = component.size[axis].value - component.padding[axis * 2 + 0] - component.padding[axis * 2 + 1];
 
 		for (const uint32 childIndex : component.childIndices) {
-			const GUIContainer& child = components[childIndex];
+			const GUIComponent& child = components[childIndex];
 
 			if (child.floating) {
 				continue;
@@ -39,7 +39,7 @@ namespace Trident {
 	}
 
 	void GUILayer::AdjustWidth(uint32 componentIndex) {
-		GUIContainer& component = components[componentIndex];
+		GUIComponent& component = components[componentIndex];
 
 		const float32 horizontalPadding = component.padding[0] + component.padding[1];
 
@@ -59,7 +59,7 @@ namespace Trident {
 			return;
 		}
 
-		GUIContainer& parent = components[component.parentIndex];
+		GUIComponent& parent = components[component.parentIndex];
 
 		if (parent.size.width.fillMode != FillMode::FIXED) {
 			if (parent.layoutDirection == LayoutDirection::HORIZONTAL) {
@@ -79,7 +79,7 @@ namespace Trident {
 	}
 
 	void GUILayer::AdjustHeight(uint32 componentIndex) {
-		GUIContainer& component = components[componentIndex];
+		GUIComponent& component = components[componentIndex];
 
 		const float32 verticalPadding = component.padding[2] + component.padding[3];
 
@@ -97,7 +97,7 @@ namespace Trident {
 			return;
 		}
 
-		GUIContainer& parent = components[component.parentIndex];
+		GUIComponent& parent = components[component.parentIndex];
 
 		if (parent.size.height.fillMode != FillMode::FIXED) {
 			if (parent.layoutDirection == LayoutDirection::VERTICAL) {
@@ -115,7 +115,7 @@ namespace Trident {
 	}
 
 	void GUILayer::expandAndFitComponent(uint32 componentIndex, uint8 axis) {
-		GUIContainer& component = components[componentIndex];
+		GUIComponent& component = components[componentIndex];
 
 		// TODO(gui/expand-and-fit): Merge expand and fit passes.
 		if (component.layoutDirection == static_cast<LayoutDirection>(axis)) {
@@ -129,7 +129,7 @@ namespace Trident {
 				float32 sizeToAdd = remainingSize;
 
 				for (const uint32 childIndex : expandableChildIndices) {
-					const GUIContainer& child = components[childIndex];
+					const GUIComponent& child = components[childIndex];
 					const float32 size = child.size[axis].value;
 
 					if (size > smallestSize) {
@@ -155,7 +155,7 @@ namespace Trident {
 				while (index >= 0) {
 					const uint32 childIndex = expandableChildIndices[index];
 
-					GUIContainer& child = components[childIndex];
+					GUIComponent& child = components[childIndex];
 
 					if (child.size[axis].value == smallestSize) {
 						const float32 previousSize = child.size[axis].value;
@@ -181,7 +181,7 @@ namespace Trident {
 				float32 sizeToRemove = remainingSize;
 
 				for (const uint32 childIndex : fittableChildIndices) {
-					const GUIContainer& child = components[childIndex];
+					const GUIComponent& child = components[childIndex];
 					const float32 size = child.size[axis].value;
 
 					if (size > largestSize) {
@@ -207,7 +207,7 @@ namespace Trident {
 				while (index >= 0) {
 					const uint32 childIndex = fittableChildIndices[index];
 
-					GUIContainer& child = components[childIndex];
+					GUIComponent& child = components[childIndex];
 
 					if (child.size[axis].value == largestSize) {
 						const float32 previousSize = child.size[axis].value;
@@ -234,7 +234,7 @@ namespace Trident {
 		}
 		else {
 			for (const uint32 childIndex : component.childIndices) {
-				GUIContainer& child = components[childIndex];
+				GUIComponent& child = components[childIndex];
 
 				if (child.size[axis].fillMode != FillMode::EXPAND) {
 					continue;

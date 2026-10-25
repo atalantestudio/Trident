@@ -33,7 +33,7 @@ namespace Trident {
 			static constexpr Color TEXT_SELECTION_BOX_COLOR = 0x5cafe750;
 
 		private:
-			static bool IsIntersecting(const GUIContainer& component, vec2<float32> point);
+			static bool IsIntersecting(const GUIComponent& component, vec2<float32> point);
 
 			static float32 calculateTextPreferredWidth(UTF8Stream& stream, const FontAsset& fontAsset, float32 scale);
 			static float32 calculateTextMinimumWidth(UTF8Stream& stream, const FontAsset& fontAsset, float32 scale);
@@ -68,7 +68,7 @@ namespace Trident {
 			// TODO(gui/asset-loading): Make available only inside registerAssets.
 			ImageID registerImage(ref<ImageAsset> imageAsset);
 
-			void openComponent(GUIContainer& component, bool focusable);
+			void openComponent(GUIComponent& component, bool focusable);
 			void openContainer(const ContainerStyle& style, bool floating);
 			void openVerticalList(const VerticalListStyle& style);
 
@@ -81,7 +81,7 @@ namespace Trident {
 			void TextInput(const TextInputStyle& style);
 
 			/// Returns the current component (computed on the previous frame).
-			const GUIContainer* CurrentComponent() const;
+			const GUIComponent* CurrentComponent() const;
 
 			/// Returns whether the mouse pointer is hovering over the current component.
 			bool IsHovered() const;
@@ -110,21 +110,21 @@ namespace Trident {
 			vec2<float32> getMousePosition() const;
 
 		private:
-			void setComponentSize(GUIContainer& component, vec2<float32> minimumSize, vec2<float32> maximumSize) const;
+			void setComponentSize(GUIComponent& component, vec2<float32> minimumSize, vec2<float32> maximumSize) const;
 
 			// Processes the current component for rendering and returns whether to process its children too.
-			bool registerComponent(const GUIContainer& component, uint32 componentIndex);
+			bool registerComponent(const GUIComponent& component, uint32 componentIndex);
 
-			void renderText(const GUIContainer& component);
-			void renderTextCursor(const GUIContainer& component);
-			void renderTextSelectionBox(const GUIContainer& component);
+			void renderText(const GUIComponent& component);
+			void renderTextCursor(const GUIComponent& component);
+			void renderTextSelectionBox(const GUIComponent& component);
 
-			std::vector<uint32> FilterChildren(const GUIContainer& parent, uint8 axis, FillMode fillMode) const;
+			std::vector<uint32> FilterChildren(const GUIComponent& parent, uint8 axis, FillMode fillMode) const;
 
 			void AdjustWidth(uint32 componentIndex);
 			void AdjustHeight(uint32 componentIndex);
 
-			float32 calculateRemainingSize(const GUIContainer& component, uint8 axis) const;
+			float32 calculateRemainingSize(const GUIComponent& component, uint8 axis) const;
 			float32 calculateFontScale(ref<FontAsset> fontAsset, float32 fontSize) const;
 
 			// Width is represented by an axis of 0 and height is represented by an axis of 1.
@@ -132,11 +132,11 @@ namespace Trident {
 			void expandAndFitComponent(uint32 componentIndex, uint8 axis);
 
 			void WrapTextChildrenRecursive(uint32 parentIndex);
-			void WrapText(GUIContainer& component);
-			void WrapInputText(GUIContainer& component, uint32 componentIndex);
+			void WrapText(GUIComponent& component);
+			void WrapInputText(GUIComponent& component, uint32 componentIndex);
 			void FlushCurrentWord(const UTF8Stream& stream, const FontAsset& fontAsset, float32 fontScale, vec2<float32>& characterOffset, std::vector<TextCharacter>& characters, range<uint64, uint64>& wordByteRange) const;
 			void FlushWord(UTF8Stream& stream, const FontAsset& fontAsset, float32 fontScale, vec2<float32>& characterOffset, std::vector<TextCharacter>& characters) const;
-			void PositionsAndAlignment(GUIContainer& component, uint32 componentIndex, vec2<float32> origin, bool registerSubcomponents);
+			void PositionsAndAlignment(GUIComponent& component, uint32 componentIndex, vec2<float32> origin, bool registerSubcomponents);
 
 			bool onKeyDown(KeyDownEvent& event);
 			bool onMouseDown(MouseDownEvent& event);
@@ -151,9 +151,9 @@ namespace Trident {
 
 			void updateHoveredComponentIndex();
 
-			void updateTextInput(TextInputEvent& event, const GUIContainer& component) const;
-			void updateTextInputAction(KeyDownEvent& event, const GUIContainer& component) const;
-			void updateVerticalList(MouseWheelEvent& event, GUIContainer& component) const;
+			void updateTextInput(TextInputEvent& event, const GUIComponent& component) const;
+			void updateTextInputAction(KeyDownEvent& event, const GUIComponent& component) const;
+			void updateVerticalList(MouseWheelEvent& event, GUIComponent& component) const;
 
 			bool IsHovered(uint32 componentIndex) const;
 			bool IsMouseDown(uint32 componentIndex) const;
@@ -184,12 +184,12 @@ namespace Trident {
 			std::array<FontData, MAX_FONT_COUNT> fonts;
 			uint32 fontCount = 0;
 
-			sequence<GUIContainer> components;
+			sequence<GUIComponent> components;
 			sequence<uint32> openContainerIndices;
 			sequence<uint32> focusableComponentIndexToComponentIndex;
 
 			// Component tree from the previous frame.
-			sequence<GUIContainer> previousComponents;
+			sequence<GUIComponent> previousComponents;
 
 			uint32 componentCount = 0;
 			uint32 previousComponentCount = 0;

@@ -10,9 +10,9 @@ namespace Trident {
 		ENGINE_ASSERT(style.size.height.fillMode != FillMode::FIT, "FillMode::FIT cannot be used on the height of a vertical list.");
 
 		const uint32 parentIndex = openContainerIndices[openContainerIndexCount - 1];
-		const GUIContainer& parent = components[parentIndex];
+		const GUIComponent& parent = components[parentIndex];
 
-		GUIContainer component{};
+		GUIComponent component{};
 		component.type = GUIComponentType::VERTICAL_LIST;
 		component.parentIndex = parentIndex;
 		component.floating = false;
@@ -40,7 +40,7 @@ namespace Trident {
 		openComponent(component, false);
 	}
 
-	void GUILayer::updateVerticalList(MouseWheelEvent& event, GUIContainer& component) const {
+	void GUILayer::updateVerticalList(MouseWheelEvent& event, GUIComponent& component) const {
 		*component.layoutOffset -= event.getDelta() * 0.25f;
 	}
 }

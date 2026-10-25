@@ -87,9 +87,9 @@ namespace Trident {
 		const float32 preferredWidth = calculateTextPreferredWidth(stream, fontAsset, scale);
 		const float32 minimumWidth = calculateTextMinimumWidth(stream, fontAsset, scale);
 
-		GUIContainer& parent = components[parentIndex];
+		GUIComponent& parent = components[parentIndex];
 
-		GUIContainer component{};
+		GUIComponent component{};
 		component.type = GUIComponentType::TEXT;
 		component.parentIndex = parentIndex;
 		component.origin = parent.origin;
@@ -123,7 +123,7 @@ namespace Trident {
 		AdjustWidth(componentIndex);
 	}
 
-	void GUILayer::WrapText(GUIContainer& component) {
+	void GUILayer::WrapText(GUIComponent& component) {
 		const FontData& fontData = fonts[component.font];
 		const FontAsset& fontAsset = *fontData.fontAsset;
 		const uint32 dpi = getApplication()->getWindow()->getDpi();
@@ -240,10 +240,10 @@ namespace Trident {
 	}
 
 	void GUILayer::WrapTextChildrenRecursive(uint32 parentIndex) {
-		GUIContainer& parentComponent = components[parentIndex];
+		GUIComponent& parentComponent = components[parentIndex];
 
 		for (const uint32 childIndex : parentComponent.childIndices) {
-			GUIContainer& childComponent = components[childIndex];
+			GUIComponent& childComponent = components[childIndex];
 
 			if (childComponent.type != GUIComponentType::TEXT && childComponent.type != GUIComponentType::TEXT_INPUT) {
 				WrapTextChildrenRecursive(childIndex);

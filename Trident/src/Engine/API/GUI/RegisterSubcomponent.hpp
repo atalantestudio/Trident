@@ -6,7 +6,7 @@
 #include "Engine/API/GUI/GUILayer.hpp"
 
 namespace Trident {
-	bool GUILayer::registerComponent(const GUIContainer& component, uint32 componentIndex) {
+	bool GUILayer::registerComponent(const GUIComponent& component, uint32 componentIndex) {
 		if (component.color.value.w == 0.0f) {
 			return true;
 		}
@@ -38,7 +38,7 @@ namespace Trident {
 					return false;
 				}
 				default: {
-					const GUIContainer& parent = components[component.parentIndex];
+					const GUIComponent& parent = components[component.parentIndex];
 
 					if (parent.type == GUIComponentType::VERTICAL_LIST) {
 						if (component.origin.y + component.size.height.value <= parent.origin.y) {
@@ -89,7 +89,7 @@ namespace Trident {
 		return true;
 	}
 
-	void GUILayer::renderText(const GUIContainer& component) {
+	void GUILayer::renderText(const GUIComponent& component) {
 		const FontData& fontData = fonts[component.font];
 
 		GUIGlyphSubcomponent glyphSubcomponent{};
@@ -112,7 +112,7 @@ namespace Trident {
 		}
 	}
 
-	void GUILayer::renderTextCursor(const GUIContainer& component) {
+	void GUILayer::renderTextCursor(const GUIComponent& component) {
 		const vec2<float32> offset = {component.padding.x + textCursorHorizontalOffset, component.padding.y};
 		const vec2<float32> size = {TEXT_CURSOR_WIDTH, component.size.height.value - component.padding.w - component.padding.y};
 
@@ -129,7 +129,7 @@ namespace Trident {
 		renderer.registerSubcomponent(subcomponent);
 	}
 
-	void GUILayer::renderTextSelectionBox(const GUIContainer& component) {
+	void GUILayer::renderTextSelectionBox(const GUIComponent& component) {
 		float32 startOffset = textSelectionBoxHorizontalOffset;
 		float32 endOffset = textCursorHorizontalOffset;
 

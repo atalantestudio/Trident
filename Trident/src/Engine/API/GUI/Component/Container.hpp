@@ -22,8 +22,7 @@ namespace Trident {
 		vec2<float32> endTextureCoordinate;
 	};
 
-	// TODO(gui/component): Rename to GUIComponent.
-	struct GUIContainer {
+	struct GUIComponent {
 		GUIComponentType type;
 
 		uint32 parentIndex;

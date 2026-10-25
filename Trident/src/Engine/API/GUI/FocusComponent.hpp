@@ -7,7 +7,7 @@
 
 namespace Trident {
 	void GUILayer::focusComponent(uint32 componentIndex) const {
-		const GUIContainer& component = components[componentIndex];
+		const GUIComponent& component = components[componentIndex];
 		const Window* window = getApplication()->getWindow();
 
 		switch (component.type) {
@@ -27,7 +27,7 @@ namespace Trident {
 	}
 
 	void GUILayer::unfocusComponent(uint32 componentIndex) const {
-		const GUIContainer& component = components[componentIndex];
+		const GUIComponent& component = components[componentIndex];
 
 		switch (component.type) {
 			case GUIComponentType::TEXT_INPUT: {
