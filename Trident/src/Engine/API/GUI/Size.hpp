@@ -19,10 +19,6 @@ namespace Trident {
 				}
 			}
 
-			inline operator float32() const {
-				return value;
-			}
-
 		public:
 			FillMode fillMode = FillMode::FIXED;
 			float32 value = 0.0f;

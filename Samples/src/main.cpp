@@ -22,13 +22,13 @@
 #include "GUI/MenuBar.hpp"
 #include "GUI/OptionMenu.hpp"
 #include "GUI/PageMenu.hpp"
-#include "GUI/PropertyPanel.hpp"
 #include "GUI/SliderWidget.hpp"
 #include "GUI/Test.hpp"
 #include "GUI/Text.hpp"
 #include "GUI/TextDebug.hpp"
 #include "GUI/TextInput.hpp"
 #include "GUI/UTF8.hpp"
+#include "GUI/VerticalList.hpp"
 
 #include "Physics2D/Layer/SceneLayer.hpp"
 
@@ -107,9 +107,6 @@ namespace Trident {
 			else if (SampleNameProperty == "DropDownMenu") {
 				registerLayer<GUIDropDownMenuLayer>();
 			}
-			else if (SampleNameProperty == "PropertyPanel") {
-				registerLayer<GUIPropertyPanelLayer>();
-			}
 			else if (SampleNameProperty == "MenuBar") {
 				registerLayer<GUIMenuBarLayer>();
 			}
@@ -136,6 +133,9 @@ namespace Trident {
 			}
 			else if (SampleNameProperty == "UTF8") {
 				registerLayer<GUIUTF8Layer>();
+			}
+			else if (SampleNameProperty == "VerticalList") {
+				registerLayer<VerticalListSample>();
 			}
 			else {
 				ENGINE_ASSERT(false, "Unknown sample \"[]\" in group [].", SampleNameProperty, SampleGroupNameProperty);

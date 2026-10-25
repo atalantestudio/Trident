@@ -25,6 +25,9 @@ namespace Trident {
 
 		float32 layoutSpacing = 0_px;
 
+		// TODO(gui/component/text-input): Use as scroll offset.
+		float32* layoutOffset = nullptr;
+
 		Color color = 0x00000000;
 		ImageID image = 0;
 

@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Engine/API/Geometry/AABB.hpp"
 #include "Engine/API/GUI/Component/Container.hpp"
 #include "Engine/API/GUI/FillMode.hpp"
 #include "Engine/API/GUI/GUIRenderer.hpp"
@@ -39,6 +40,9 @@ namespace Trident {
 			static float32 calculateTextMinimumWidth(UTF8Stream& stream, const FontAsset& fontAsset, float32 scale);
 
 			static TextCharacter createTextCharacter(const Glyph& glyph, vec2<float32> offset, float32 fontScale);
+
+			/// Clips an AABB against another AABB and returns a new AABB where each vector represents the axis percents for coordinate interpolation.
+			static AABB2D clipAabb(AABB2D a, AABB2D b);
 
 		public:
 			void initialize() final override;
@@ -115,7 +119,7 @@ namespace Trident {
 			// Processes the current component for rendering and returns whether to process its children too.
 			bool registerComponent(const GUIComponent& component, uint32 componentIndex);
 
-			void renderText(const GUIComponent& component);
+			void renderText(const GUIComponent& component, AABB2D parentAabb);
 			void renderTextCursor(const GUIComponent& component);
 			void renderTextSelectionBox(const GUIComponent& component);
 
@@ -174,9 +178,6 @@ namespace Trident {
 		protected:
 			/// Color of the root component.
 			Color clearColor = 0x00000000;
-
-			// TODO(gui/text-smoothness)
-			vec2<float32> hinting = {0.0f, 0.0f};
 
 		private:
 			GUIRenderer renderer;

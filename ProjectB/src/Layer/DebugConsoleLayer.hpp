@@ -47,6 +47,7 @@ namespace ProjectB {
 					}) {
 						TextInput({
 							.width = EXPAND,
+							.layoutOffset = &layoutOffset,
 							.color = 0xffffffff,
 							.text = &text,
 							.font = font,
@@ -59,5 +60,6 @@ namespace ProjectB {
 
 		private:
 			UTF8String text;
+			float32 layoutOffset;
 	};
 }

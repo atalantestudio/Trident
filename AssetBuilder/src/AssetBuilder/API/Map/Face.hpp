@@ -3,16 +3,13 @@
 
 #pragma once
 
+#include "Engine/API/Geometry/AABB.hpp"
+
 #include "AssetBuilder/API/LightmapDescriptor.hpp"
 #include "AssetBuilder/API/Material/MaterialReference.hpp"
 #include "AssetBuilder/API/TextureFilteringDescriptor.hpp"
 
 namespace Trident {
-	struct AABB2D {
-		vec2<float32> min;
-		vec2<float32> max;
-	};
-
 	struct FaceDescriptor {
 		view<vec3<float32>> vertices;
 		vec3<float32> normal;

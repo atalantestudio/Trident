@@ -32,7 +32,7 @@ namespace Trident {
 		component.padding = style.padding;
 		component.anchorPoint = style.anchorPoint;
 		component.layoutDirection = style.layoutDirection;
-		component.layoutOffset = nullptr;
+		component.layoutOffset = style.layoutOffset;
 		component.layoutSpacing = style.layoutSpacing;
 		component.color = style.color;
 		component.image = style.image;

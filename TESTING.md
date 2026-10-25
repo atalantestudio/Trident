@@ -82,18 +82,16 @@
 	- Demo3
 	- DropDownMenu
 	- FrameStatisticsLayer
-	- Launch
 	- MenuBar
 	- OptionMenu
 	- PageMenu
-	- PropertyPanel
 	- SliderWidget
 	- Test
 	- Text
 	- TextDebug
 	- TextInput
-	- TextSmoothness
 	- UTF8
+	- VerticalList
 - Physics2D
 	- Scene
 - Process

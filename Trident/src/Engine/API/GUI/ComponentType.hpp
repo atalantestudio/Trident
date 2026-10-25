@@ -14,7 +14,6 @@ namespace Trident {
 		/// Single-line text input components.
 		TEXT_INPUT,
 
-		// TODO(gui/component/vertical-list): Finish implementation.
 		/// Vertical list components.
 		VERTICAL_LIST,
 	};

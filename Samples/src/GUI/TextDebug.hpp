@@ -79,8 +79,6 @@ namespace Trident {
 				}
 
 				RangeControlFormField("Font Size Multiplier", fontSizeMultiplier, draggingFSM, previousOffsetFSM);
-				RangeControlFormField("Hinting X", hinting.x, draggingHX, previousOffsetHX);
-				RangeControlFormField("Hinting Y", hinting.y, draggingHY, previousOffsetHY);
 			}
 
 			void RangeControlFormField(view<char8> label, float32& value, bool& dragging, float32& previousOffset) {

@@ -42,5 +42,10 @@ namespace Trident {
 
 	void GUILayer::updateVerticalList(MouseWheelEvent& event, GUIComponent& component) const {
 		*component.layoutOffset -= event.getDelta() * 0.25f;
+
+		// TODO(gui/component/vertical-list/clamp-scroll-offset)
+		// const GUIComponent& lastChild = components[component.childIndices.back()];
+
+		*component.layoutOffset = clamp(*component.layoutOffset, 0.0f, /* lastChild.origin.y + lastChild.size.height.value */ max<float32>());
 	}
 }
