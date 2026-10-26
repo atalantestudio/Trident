@@ -40,6 +40,34 @@ Trident is a 2D/3D game engine developed by Atalante Studio, intended for techni
 
 
 
+## Screenshots
+
+###### Debug map with static lighting and real-time sun shadows.
+
+<img alt="Image" src="docs/debug_map.png" />
+
+###### Debug map with static lighting only.
+
+<img alt="Image" src="docs/debug_map_lighting.png" />
+
+###### Lightmapped scene (HL2 textures).
+
+<img alt="Image" src="docs/hall.png" />
+
+###### Lightmapped scene (HL2 textures).
+
+<img alt="Image" src="docs/snap_test.png" />
+
+###### Text rendering for UI components.
+
+<img alt="Image" src="docs/text.png" />
+
+###### Glyph map atlas preview.
+
+<img alt="Image" src="docs/glyph_atlas.png" />
+
+
+
 ## Dependencies
 
 ### Libraries
