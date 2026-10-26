@@ -25,18 +25,23 @@ namespace Trident {
 				}) {
 					Container({
 						.size = {FIT, FIT},
-						.padding = {4_px, 4_px, 4_px, 4_px},
-						.layoutDirection = LayoutDirection::VERTICAL,
-						.color = 0x22222275,
+						.color = 0xffffffa0,
 					}) {
-						PhysicalDeviceName();
-
 						Container({
 							.size = {FIT, FIT},
-							.layoutSpacing = 16_px,
+							.padding = {4_px, 4_px, 4_px, 4_px},
+							.layoutDirection = LayoutDirection::VERTICAL,
+							.color = 0x00000075,
 						}) {
-							GraphicsAPIName();
-							FramesPerSecond();
+							PhysicalDeviceName();
+
+							Container({
+								.size = {FIT, FIT},
+								.layoutSpacing = 16_px,
+							}) {
+								GraphicsAPIName();
+								FramesPerSecond();
+							}
 						}
 					}
 				}
