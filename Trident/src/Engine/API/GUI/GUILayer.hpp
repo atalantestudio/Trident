@@ -117,7 +117,7 @@ namespace Trident {
 			void setComponentSize(GUIComponent& component, vec2<float32> minimumSize, vec2<float32> maximumSize) const;
 
 			// Processes the current component for rendering and returns whether to process its children too.
-			bool registerComponent(const GUIComponent& component, uint32 componentIndex);
+			bool registerComponent(const GUIComponent& component, uint32 componentIndex, AABB2D parentAabb);
 
 			void renderText(const GUIComponent& component, AABB2D parentAabb);
 			void renderTextCursor(const GUIComponent& component);
@@ -140,7 +140,7 @@ namespace Trident {
 			void WrapInputText(GUIComponent& component, uint32 componentIndex);
 			void FlushCurrentWord(const UTF8Stream& stream, const FontAsset& fontAsset, float32 fontScale, vec2<float32>& characterOffset, std::vector<TextCharacter>& characters, range<uint64, uint64>& wordByteRange) const;
 			void FlushWord(UTF8Stream& stream, const FontAsset& fontAsset, float32 fontScale, vec2<float32>& characterOffset, std::vector<TextCharacter>& characters) const;
-			void PositionsAndAlignment(GUIComponent& component, uint32 componentIndex, vec2<float32> origin, bool registerSubcomponents);
+			void PositionsAndAlignment(GUIComponent& component, uint32 componentIndex, vec2<float32> origin, AABB2D parentAabb, bool registerSubcomponents);
 
 			bool onKeyDown(KeyDownEvent& event);
 			bool onMouseDown(MouseDownEvent& event);

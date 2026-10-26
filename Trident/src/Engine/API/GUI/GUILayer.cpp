@@ -123,7 +123,12 @@ namespace Trident {
 		}
 
 		expandAndFitComponent(0, 1);
-		PositionsAndAlignment(components[0], 0, components[0].origin, true);
+
+		AABB2D aabb{};
+		aabb.min = {0.0f, 0.0f};
+		aabb.max = vec2<float32>(extent);
+
+		PositionsAndAlignment(components[0], 0, components[0].origin, aabb, true);
 
 		std::copy(&components[0], &components[componentCount], &previousComponents[0]);
 

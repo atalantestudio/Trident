@@ -6,12 +6,14 @@
 #include "Engine/API/GUI/GUILayer.hpp"
 
 namespace Trident {
-	void GUILayer::PositionsAndAlignment(GUIComponent& component, uint32 componentIndex, vec2<float32> origin, bool registerSubcomponents) {
+	void GUILayer::PositionsAndAlignment(GUIComponent& component, uint32 componentIndex, vec2<float32> origin, AABB2D parentAabb, bool registerSubcomponents) {
 		if (component.parentIndex != max<uint32>()) {
 			const GUIComponent& parent = components[component.parentIndex];
 
-			if (parent.type == GUIComponentType::VERTICAL_LIST && parent.layoutOffset != nullptr) {
-				origin.y -= *(parent.layoutOffset);
+			if (parent.type == GUIComponentType::VERTICAL_LIST) {
+				DEBUG_ASSERT(parent.layoutOffset != nullptr);
+
+				origin.y -= *parent.layoutOffset;
 			}
 		}
 
@@ -21,8 +23,13 @@ namespace Trident {
 			component.origin += component.offset;
 		}
 
+		if (component.type == GUIComponentType::VERTICAL_LIST) {
+			parentAabb.min = component.origin;
+			parentAabb.max = component.origin + vec2<float32>{component.size.width.value, component.size.height.value};
+		}
+
 		if (registerSubcomponents) {
-			registerSubcomponents = registerComponent(component, componentIndex);
+			registerSubcomponents = registerComponent(component, componentIndex, parentAabb);
 		}
 
 		if (component.childIndices.size() == 0) {
@@ -81,7 +88,7 @@ namespace Trident {
 					origin[!component.layoutDirection] = originAcross + remainingAcross * fAcross;
 				}
 
-				PositionsAndAlignment(child, childIndex, origin, registerSubcomponents);
+				PositionsAndAlignment(child, childIndex, origin, parentAabb, registerSubcomponents);
 
 				if (!child.floating) {
 					origin[component.layoutDirection] += round(child.size[component.layoutDirection].value);

@@ -32,57 +32,44 @@ namespace Trident {
 		return t;
 	}
 
-	bool GUILayer::registerComponent(const GUIComponent& component, uint32 componentIndex) {
+	bool GUILayer::registerComponent(const GUIComponent& component, uint32 componentIndex, AABB2D parentAabb) {
 		if (component.color.value.w == 0.0f) {
 			return true;
 		}
 
 		AABB2D aabb{};
 		aabb.min = component.origin;
-		aabb.max = aabb.min + vec2<float32>{component.size.width.value, component.size.height.value};
-
-		AABB2D t{};
-		t.min = {0.0f, 0.0f};
-		t.max = {1.0f, 1.0f};
+		aabb.max = component.origin + vec2<float32>{component.size.width.value, component.size.height.value};
 
 		if (component.parentIndex == max<uint32>()) {
 			aabb.max.y = static_cast<float32>(getApplication()->getWindow()->getExtent().y);
 		}
-		else {
-			const GUIComponent& parent = components[component.parentIndex];
 
-			AABB2D parentAabb{};
-			parentAabb.min = parent.origin;
-			parentAabb.max = parentAabb.min + vec2<float32>{parent.size.width.value, parent.size.height.value};
+		switch (component.type) {
+			case GUIComponentType::TEXT: {
+				renderText(component, parentAabb);
 
-			switch (component.type) {
-				case GUIComponentType::TEXT: {
-					renderText(component, parentAabb);
-
-					return false;
-				}
-				case GUIComponentType::TEXT_INPUT: {
-					renderText(component, parentAabb);
-
-					if (IsFocused(componentIndex)) {
-						renderTextCursor(component);
-
-						if (component.inputText->hasSelection()) {
-							renderTextSelectionBox(component);
-						}
-					}
-
-					return false;
-				}
-				default: {
-					break;
-				}
+				return false;
 			}
+			case GUIComponentType::TEXT_INPUT: {
+				renderText(component, aabb);
 
-			if (parent.type == GUIComponentType::VERTICAL_LIST) {
-				t = clipAabb(aabb, parentAabb);
+				if (IsFocused(componentIndex)) {
+					renderTextCursor(component);
+
+					if (component.inputText->hasSelection()) {
+						renderTextSelectionBox(component);
+					}
+				}
+
+				return false;
+			}
+			default: {
+				break;
 			}
 		}
+
+		const AABB2D t = clipAabb(aabb, parentAabb);
 
 		if (t.min.x > 1.0f || t.min.y > 1.0f || t.max.x < 0.0f || t.max.y < 0.0f) {
 			return false;
