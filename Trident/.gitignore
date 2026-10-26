@@ -1,3 +1,2 @@
-src/Asset/Font/**
 src/Asset/Shader/**/*.dxil
 src/Asset/Shader/**/*.spv
