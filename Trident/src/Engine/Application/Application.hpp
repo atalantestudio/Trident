@@ -20,6 +20,8 @@
 int main(int argc, char** argv);
 
 namespace Trident {
+	class Renderer;
+
 	class Application {
 		friend int ::main(int argc, char** argv);
 
@@ -67,6 +69,8 @@ namespace Trident {
 			void postConstruct();
 
 			sint32 runProcesses() const;
+
+			virtual Renderer* getMainRenderer() const = 0;
 
 		protected:
 			template<typename LayerType, typename... Argument>

@@ -13,8 +13,9 @@
 #include "Engine/API/Graphics/Descriptor/PipelineLayoutDescriptor.hpp"
 #include "Engine/API/Graphics/Descriptor/ShaderModuleDescriptor.hpp"
 #include "Engine/API/Graphics/Descriptor/StaticMemoryDescriptor.hpp"
+#include "Engine/API/Map/Map.hpp"
 #include "Engine/API/Window/Window.hpp"
-#include "Engine/Application/Application.hpp"
+#include "Engine/Application/LayerCompositor.hpp"
 
 namespace Trident {
 	class Renderer {
@@ -41,6 +42,9 @@ namespace Trident {
 			virtual void resize(WindowResizeEvent& event);
 
 			virtual void onEvent(Event& event);
+
+			/// Loads a map into GPU memory.
+			virtual void loadMap(const Map& map) {}
 
 		public:
 			static ref<Buffer> createDynamicBuffer(const BufferDescriptor& descriptor);

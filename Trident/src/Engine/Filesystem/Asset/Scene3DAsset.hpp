@@ -29,10 +29,6 @@ namespace Trident {
 		range<uint64, uint64> faceLineIndexRange;
 		range<uint64, uint64> lightmapCoordinateRange;
 
-		uint64 staticVertexSize;
-		uint64 staticPositionSize;
-		uint64 staticNormalSize;
-		uint64 staticTextureCoordinateSize;
 		sequence<Instance3D> instances;
 		sequence<ref<Geometry3DAsset>> geometryAssets;
 		sequence<range<uint32, uint32>> geometryIndexRanges;

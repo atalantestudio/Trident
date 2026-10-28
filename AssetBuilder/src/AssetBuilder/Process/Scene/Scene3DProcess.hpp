@@ -22,9 +22,7 @@ namespace Trident {
 				stream.write<AssetSignature>(AssetSignature::SCENE);
 				stream.write<uint32>(identifier);
 				stream.write<VersionNumber>({0, 0, 0});
-				stream.write<float32>(scene.skyColor.x);
-				stream.write<float32>(scene.skyColor.y);
-				stream.write<float32>(scene.skyColor.z);
+				stream.write<vec3<float32>>(scene.skyColor);
 
 				if (scene.environmentMapImageAsset != nullptr) {
 					stream.write<uint32>(scene.environmentMapImageAsset->identifier);
@@ -48,29 +46,19 @@ namespace Trident {
 				stream.write<uint32>(static_cast<uint32>(scene.materialGeometries.count()));
 				stream.write<uint32>(static_cast<uint32>(scene.materials.count()));
 				stream.write<uint32>(scene.dynamicGeometry.entityCount);
-				stream.write<float32>(scene.sunDirection.x);
-				stream.write<float32>(scene.sunDirection.y);
-				stream.write<float32>(scene.sunDirection.z);
-				stream.write<float32>(scene.sunColor.x);
-				stream.write<float32>(scene.sunColor.y);
-				stream.write<float32>(scene.sunColor.z);
+				stream.write<vec3<float32>>(scene.sunDirection);
+				stream.write<vec3<float32>>(scene.sunColor);
 				stream.write<uint32>(static_cast<uint32>(scene.dynamicGeometry.pointLights.count()));
 				stream.write<uint32>(scene.staticGeometry.lightmapAtlasImageAssetDescriptor.identifier);
-				stream.write<float32>(scene.spawn.position.x);
-				stream.write<float32>(scene.spawn.position.y);
-				stream.write<float32>(scene.spawn.position.z);
-				stream.write<float32>(scene.spawn.direction.x);
-				stream.write<float32>(scene.spawn.direction.y);
-				stream.write<float32>(scene.spawn.direction.z);
+				stream.write<vec3<float32>>(scene.spawn.position);
+				stream.write<vec3<float32>>(scene.spawn.viewDirection);
 
 				uint32 vertexIndex = 0;
 
 				while (vertexIndex < scene.staticGeometry.bakedVertexCount) {
 					const BuildVertex3D& vertex = scene.vertices[vertexIndex];
 
-					stream.write<float32>(vertex.position.x);
-					stream.write<float32>(vertex.position.y);
-					stream.write<float32>(vertex.position.z);
+					stream.write<vec3<float32>>(vertex.position);
 					stream.write<uint32>(pack<VertexInputAttributeFormat::R10G10B10A2_UNORM, uint32>(vertex.normal));
 					stream.write<uint32>(pack<VertexInputAttributeFormat::R10G10B10A2_UNORM, uint32>(vertex.tangent));
 					stream.write<uint32>(pack<VertexInputAttributeFormat::R16G16_FLOAT, uint32>(vertex.textureCoordinate));
@@ -97,12 +85,8 @@ namespace Trident {
 				for (const BuildInstance& instance : scene.staticGeometry.instances) {
 					const BuildTransform3D& transform = instance.transform;
 
-					stream.write<float32>(transform.translation.x);
-					stream.write<float32>(transform.translation.y);
-					stream.write<float32>(transform.translation.z);
-					stream.write<float32>(transform.rotation.x);
-					stream.write<float32>(transform.rotation.y);
-					stream.write<float32>(transform.rotation.z);
+					stream.write<vec3<float32>>(transform.translation);
+					stream.write<vec3<float32>>(transform.rotation);
 					stream.write<float32>(transform.scale);
 				}
 
@@ -126,13 +110,9 @@ namespace Trident {
 				}
 
 				for (const PointLight& pointLight : scene.dynamicGeometry.pointLights) {
-					stream.write<float32>(pointLight.color.x);
-					stream.write<float32>(pointLight.color.y);
-					stream.write<float32>(pointLight.color.z);
+					stream.write<vec3<float32>>(pointLight.color);
 					stream.write<float32>(pointLight.intensity);
-					stream.write<float32>(pointLight.position.x);
-					stream.write<float32>(pointLight.position.y);
-					stream.write<float32>(pointLight.position.z);
+					stream.write<vec3<float32>>(pointLight.position);
 				}
 
 				for (const EntityComponentMapping<Geometry3DComponent>& geometryMapping : scene.dynamicGeometry.geometryMappings) {

@@ -6,17 +6,18 @@
 #include "Engine/API/Command/loadmap.hpp"
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
+#include "Engine/Renderer/Renderer.hpp"
 
 namespace Trident {
-	void loadmap(view<char8> path) {
+	void loadmap(view<char8> path, Application* application) {
+		Renderer* renderer = application->getMainRenderer();
+
+		ENGINE_ASSERT(renderer != nullptr, "No main renderer defined.");
+
 		AssetLibrary assetLibrary(Filesystem::getProjectRootDirectory());
 
-		// TODO(console/command/loadmap)
-		ENGINE_ERROR_UNIMPLEMENTED();
+		const Map map = assetLibrary.loadMap(path);
 
-		/* const ref<Scene3DAsset> sceneAsset = assetLibrary.getAsset<Scene3DAsset>(path);
-		const ref<Scene3D> scene = allocateRef<Scene3D>(sceneAsset);
-
-		renderer->setScene(scene); */
+		renderer->loadMap(map);
 	}
 }

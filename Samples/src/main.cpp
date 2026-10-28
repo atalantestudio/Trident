@@ -147,7 +147,6 @@ namespace Trident {
 		}
 		else if (SampleGroupNameProperty == "Physics2D") {
 			registerLayer<Physics2DSceneLayer>();
-			// registerLayer<FrameStatisticsLayer>();
 
 			// TODO(window/layer-group): Multisampled UI layer group.
 			registerLayerGroup<LayerGroup>(range<uint32, uint32>(0, 1));
@@ -258,6 +257,10 @@ namespace Trident {
 		else {
 			ENGINE_ASSERT(false, "Unknown sample group \"[]\".", SampleGroupNameProperty);
 		}
+	}
+
+	Renderer* SampleApplication::getMainRenderer() const {
+		return nullptr;
 	}
 
 	Application* createApplication(uint32 argumentCount, char8** argumentValues) {

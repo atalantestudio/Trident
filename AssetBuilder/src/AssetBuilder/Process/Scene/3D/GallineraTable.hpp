@@ -28,7 +28,7 @@ namespace Trident {
 					.sunIntensity = 1.0f,
 					.spawn = {
 						.position = {0.0f, -32.0f, -128.0f},
-						.direction = {0.0f, 0.0f, 1.0f},
+						.viewDirection = {0.0f, 0.0f, 1.0f},
 					},
 				});
 

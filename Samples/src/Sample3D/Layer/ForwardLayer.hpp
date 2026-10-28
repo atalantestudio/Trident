@@ -15,6 +15,7 @@
 
 #include "Engine/API/Event/EventDispatcher.hpp"
 #include "Engine/API/Physics/3D/PhysicsSimulation3D.hpp"
+#include "Engine/Application/Application.hpp"
 #include "Engine/Layer/Layer.hpp"
 #include "Engine/Renderer/Forward/Renderer.hpp"
 

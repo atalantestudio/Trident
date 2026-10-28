@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Engine/API/Map/Map.hpp"
 #include "Engine/Filesystem/Asset/AssetMap.hpp"
 #include "Engine/Filesystem/Asset/FontAsset.hpp"
 #include "Engine/Filesystem/Asset/Geometry2DAsset.hpp"
@@ -76,6 +77,8 @@ namespace Trident {
 
 			template<typename AssetType>
 			view<AssetType> getLoadedAssets() const;
+
+			Map loadMap(view<char8> path);
 
 		private:
 			std::filesystem::path getAbsolutePath(view<char8> base, view<char8> relativePath, view<char8> extension) const;

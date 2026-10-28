@@ -5,11 +5,10 @@
 
 #include "Engine/Layer/Layer.hpp"
 
-#include "Renderer/SceneRenderer/SceneRenderer.hpp"
+#include "Renderer/MapRenderer/MapRenderer.hpp"
 
 namespace ProjectB {
-	// TODO(project-b/layer/scene)
-	class SceneLayer : public Trident::Layer {
+	class MapLayer : public Layer {
 		public:
 			void initialize() final override {
 				renderer.setLayer(this);
@@ -21,7 +20,7 @@ namespace ProjectB {
 				renderer.render(commandEncoder);
 			}
 
-		private:
-			SceneRenderer renderer;
+		public:
+			MapRenderer renderer;
 	};
 }

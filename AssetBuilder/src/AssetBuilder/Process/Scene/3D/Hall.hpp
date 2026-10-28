@@ -48,7 +48,7 @@ namespace Trident {
 					.sunIntensity = 1.0f,
 					.spawn = {
 						.position = {100.0f, 0.0f, 32.0f},
-						.direction = normalized(vec3<float32>{radians(-40.0_deg), 0.0f, radians(50.0_deg)}),
+						.viewDirection = normalized(vec3<float32>{radians(-40.0_deg), 0.0f, radians(50.0_deg)}),
 					},
 				});
 

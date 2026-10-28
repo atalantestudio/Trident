@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Light/PointLight.hpp"
+#include "Engine/API/Map/PlayerSpawn.hpp"
 #include "Engine/API/Material/Material.hpp"
 #include "Engine/ECS/Component/Geometry3DComponent.hpp"
 #include "Engine/ECS/Component/RigidBody3DComponent.hpp"
@@ -16,20 +17,13 @@
 #include "AssetBuilder/API/Transform.hpp"
 
 namespace Trident {
-	struct SpawnDescriptor {
-		vec3<float32> position;
-
-		/// In Euler angles.
-		vec3<float32> direction;
-	};
-
 	struct MapDescriptor {
 		vec3<float32> skyColor;
 		ref<ImageAsset> environmentMapImageAsset;
 		vec3<float32> sunDirection;
 		vec3<float32> sunColor;
 		float32 sunIntensity;
-		SpawnDescriptor spawn;
+		PlayerSpawn spawn;
 	};
 
 	struct BuildTriangle3D {
@@ -123,6 +117,6 @@ namespace Trident {
 		BuildStaticSceneGeometry3D staticGeometry;
 		BuildDynamicSceneGeometry3D dynamicGeometry;
 
-		SpawnDescriptor spawn;
+		PlayerSpawn spawn;
 	};
 }

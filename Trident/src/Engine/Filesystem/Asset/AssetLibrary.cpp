@@ -165,6 +165,21 @@ namespace Trident {
 		return view<ShaderModuleAsset>(&shaderModuleAssets[0], shaderModuleAssetCount);
 	}
 
+	Map AssetLibrary::loadMap(view<char8> path) {
+		const std::filesystem::path absolutePath = getAbsolutePath("Asset/Scene", path, ".tsa");
+		const sequence<char8> assetPath = absolutePath.string();
+		const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
+
+		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
+
+		ENGINE_ASSERT(stream.getRemainingSize() >= sizeof(AssetSignature), "The file is corrupted.");
+		ENGINE_ASSERT(stream.peek<AssetSignature>() == AssetSignature::SCENE, "The file format is invalid.");
+
+		stream.jump(sizeof(AssetSignature));
+
+		return Filesystem::decodeAsset<Map>(stream, this);
+	}
+
 	template<>
 	void AssetLibrary::loadCachedAsset<FontAsset>(view<char8> path) {
 		const std::filesystem::path absolutePath = getAbsolutePath("Asset/Font", path, ".tfo");

@@ -8,6 +8,7 @@
 #include "Engine/API/GUI/TextureArrayLayer.hpp"
 #include "Engine/API/GUI/Subcomponent.hpp"
 #include "Engine/ECS/ECS.hpp"
+#include "Engine/Filesystem/Asset/ImageAsset.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace Trident {

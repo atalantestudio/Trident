@@ -106,6 +106,10 @@ namespace Trident {
 				registerProcesses();
 			}
 
+			Renderer* getMainRenderer() const override {
+				return nullptr;
+			}
+
 		private:
 			void registerProcesses() {
 				allocateProcesses(73);

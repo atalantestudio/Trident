@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Engine/API/Window/LayerGroup/LayerGroup.hpp"
+#include "Engine/Application/Application.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace Trident {

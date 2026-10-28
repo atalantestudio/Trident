@@ -86,7 +86,7 @@ namespace Trident {
 					.sunIntensity = 0.0f,
 					.spawn = {
 						.position = {-278.0f, 273.0f, -800.0f},
-						.direction = {0.0f, 0.0f, 1.0f},
+						.viewDirection = {0.0f, 0.0f, 1.0f},
 					},
 				});
 

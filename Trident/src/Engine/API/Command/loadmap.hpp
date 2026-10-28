@@ -3,8 +3,9 @@
 
 #pragma once
 
+#include "Engine/Application/Application.hpp"
 #include "Engine/API/Command/Command.hpp"
 
 namespace Trident {
-	void loadmap(view<char8> path);
+	void loadmap(view<char8> path, Application* application);
 }

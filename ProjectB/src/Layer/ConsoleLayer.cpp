@@ -5,10 +5,10 @@
 
 #include "Engine/API/Command/loadmap.hpp"
 
-#include "Layer/DebugConsoleLayer.hpp"
+#include "Layer/ConsoleLayer.hpp"
 
 namespace ProjectB {
-	void DebugConsoleLayer::registerAssets() {
+	void ConsoleLayer::registerAssets() {
 		updateThemeColors(true);
 
 		UIDefaultTheme::registerAssets();
@@ -16,7 +16,7 @@ namespace ProjectB {
 		clearColor = 0x00000000;
 	}
 
-	void DebugConsoleLayer::render() {
+	void ConsoleLayer::render() {
 		const Extent2D screenSize = getApplication()->getWindow()->getExtent();
 		const Extent2D consoleSize = min({968 + 4, 768 + 4}, screenSize);
 
@@ -67,7 +67,7 @@ namespace ProjectB {
 		}
 	}
 
-	void DebugConsoleLayer::onKeyDownClient(KeyDownEvent& event) {
+	void ConsoleLayer::onKeyDownClient(KeyDownEvent& event) {
 		switch (event.getKeyCode()) {
 			case KeyCode::ENTER: {
 				if (!textInputFocused) {
@@ -99,7 +99,7 @@ namespace ProjectB {
 		}
 	}
 
-	void DebugConsoleLayer::ConsoleTextInput() {
+	void ConsoleLayer::ConsoleTextInput() {
 		Container({
 			.size = {EXPAND, FIT},
 			.padding = {4_px, 4_px, 4_px, 4_px},
@@ -118,9 +118,9 @@ namespace ProjectB {
 		}
 	}
 
-	void DebugConsoleLayer::processCommand(const Command& command) {
+	void ConsoleLayer::processCommand(const Command& command) {
 		if (command.name == "loadmap") {
-			loadmap(command.arguments[0]);
+			loadmap(command.arguments[0], getApplication());
 		}
 		else {
 			Log commandNotFound{};

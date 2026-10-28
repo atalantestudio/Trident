@@ -12,6 +12,7 @@
 	#include "Engine/API/Graphics/DrawIndirectCommand.hpp"
 #endif
 
+#include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 #include "Engine/Renderer/Scene/BaseSceneRenderer.hpp"
 #include "Engine/Renderer/VisualizationMode.hpp"
 

@@ -8,6 +8,8 @@
 #include "Engine/Layer/Layer.hpp"
 
 namespace Trident {
+	class Application;
+
 	class LayerGroup {
 		public:
 			explicit LayerGroup(range<uint32, uint32> layerRange);

@@ -13,6 +13,8 @@
 #include "Engine/API/GUI/Style/TextStyle.hpp"
 #include "Engine/API/GUI/Style/VerticalListStyle.hpp"
 #include "Engine/API/Window/Layer/RenderPassLayer.hpp"
+#include "Engine/Application/Application.hpp"
+#include "Engine/Filesystem/Asset/FontAsset.hpp"
 #include "Engine/Filesystem/Stream/UTF8Stream.hpp"
 
 namespace Trident {

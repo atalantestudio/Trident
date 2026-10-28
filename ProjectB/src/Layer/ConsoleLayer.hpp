@@ -8,7 +8,7 @@
 #include "UI/DefaultTheme.hpp"
 
 namespace ProjectB {
-	class DebugConsoleLayer : public UIDefaultTheme {
+	class ConsoleLayer : public UIDefaultTheme {
 		private:
 			struct Log {
 				sequence<char8> text;
