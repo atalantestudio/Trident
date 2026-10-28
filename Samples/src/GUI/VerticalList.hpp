@@ -8,7 +8,7 @@
 namespace Trident {
 	class VerticalListSample : public GUIDefaultTheme {
 		private:
-			static constexpr Color COLORS[] = {
+			static constexpr Color COLOR_ARRAY[] = {
 				0x5d8aa8ff,
 				0xf0f8ffff,
 				0xe32636ff,
@@ -24,7 +24,7 @@ namespace Trident {
 				0x008000ff,
 			};
 
-			static constexpr view<Color> COLOR_VIEW = COLORS;
+			static constexpr view<Color> COLORS = COLOR_ARRAY;
 
 		public:
 			void registerAssets() override {
@@ -40,25 +40,26 @@ namespace Trident {
 					.layoutSpacing = 8_px,
 				}) {
 					Container({
-						.size = {FIT, 300_px},
+						.size = {200_px, 300_px},
 						.padding = {1_px, 1_px, 1_px, 1_px},
+						.layoutDirection = VERTICAL,
 						.color = secondaryColor,
 					}) {
 						VerticalList({
-							.size = {FIT, EXPAND},
+							.size = {200_px, EXPAND},
 							.scrollOffset = &scrollOffset,
 							.color = primaryColor,
 						}) {
 							uint32 colorIndex = 0;
 
-							while (colorIndex < COLOR_VIEW.count()) {
-								const Color& color = COLOR_VIEW[colorIndex];
+							while (colorIndex < COLORS.count() * 10) {
+								const Color& color = COLORS[colorIndex % 10];
 
 								Container({
-									.size = {200_px, 32_px},
+									.size = {EXPAND, FIT},
 									.color = color,
 								}) {
-									const sequence<char8> text = Logger::format("Element []", colorIndex);
+									const sequence<char8> text = Logger::format("[]. Lorem ipsum dolor sit amet, consectetur adipiscing elit.", colorIndex);
 
 									Text(text, {
 										.color = textColor,

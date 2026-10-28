@@ -18,76 +18,11 @@ namespace Trident {
 	}
 
 	void Physics2DSceneLayer::loadScene() {
-		const view<char8> sceneAssetName = getApplication()->getPropertyFile()->getProperty<view<char8>>("AssetName");
-		const ref<Scene2DAsset> sceneAsset = getApplication()->getAssetLibrary()->getAsset<Scene2DAsset>(sceneAssetName);
+		const Application* application = getApplication();
+		const view<char8> sceneAssetName = application->getPropertyFile()->getProperty<view<char8>>("AssetName");
+		const ref<Scene2DAsset> sceneAsset = application->getAssetLibrary()->getAsset<Scene2DAsset>(sceneAssetName);
 
 		scene = new Scene2D(sceneAsset);
-
-		// TODO(physics/samples): Restore sample.
-		/* const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
-
-		// Floor
-		scene.createStaticRigidBody({
-			.position = {0_m, -0.5_m},
-			.scale = {16.0f, 1.0f},
-			.friction = 1.0f,
-			.geometry = squareGeometry,
-			.fillColor = 0xf4fedbff,
-		});
-
-		// Left wall
-		scene.createStaticRigidBody({
-			.position = {-7.75_m, 0.6_m},
-			.scale = {0.5f, 1.2f},
-			.friction = 1.0f,
-			.geometry = squareGeometry,
-			.fillColor = 0xf4fedbff,
-		});
-
-		// Right wall
-		scene.createStaticRigidBody({
-			.position = {7.75_m, 2_m},
-			.scale = {0.5f, 4.0f},
-			.friction = 1.0f,
-			.geometry = squareGeometry,
-			.fillColor = 0xf4fedbff,
-		});
-
-		// Heightened floor
-		scene.createStaticRigidBody({
-			.position = {7_m, 0.1_m},
-			.scale = {1.0f, 0.2f},
-			.friction = 1.0f,
-			.geometry = squareGeometry,
-			.fillColor = 0xf4fedbff,
-		});
-
-		// Player
-		scene.createDynamicRigidBody({
-			.position = {0_m, 1.8_m * 0.5f},
-			.scale = {1_m, 1.8_m},
-			.mass = 1_kg,
-			.friction = 1.0f,
-			.geometry = squareGeometry,
-			.fillColor = 0xe6ddffff,
-		});
-
-		playerEntity = scene.ecs.nextEntity - 1;
-
-		// Prop box
-		scene.createDynamicRigidBody({
-			.position = {4_m, 1_m},
-			.scale = {2.5f, 0.5f},
-			.mass = 1_kg,
-			.friction = 1.0f,
-			.geometry = squareGeometry,
-			.fillColor = 0xe6ddffff,
-		});
-
-		RotationConstraint2DDescriptor constraintDescriptor{};
-		constraintDescriptor.A = playerEntity;
-
-		scene.createConstraint<RotationConstraint2D>(constraintDescriptor); */
 	}
 
 	void Physics2DSceneLayer::postConstruct() {
@@ -102,32 +37,6 @@ namespace Trident {
 		renderer.setLayer(this);
 		renderer.build();
 		renderer.setScene(scene);
-	}
-
-	void Physics2DSceneLayer::update(float32 deltaTime, float32 inverseDeltaTime) {
-		/* constexpr float32 SPEED = 3.0f;
-
-		RigidBody2DComponent& playerRigidBody = ecs.getComponent<RigidBody2DComponent>(playerEntity);
-
-		if (keyMap[KeyCode::Q]) {
-			playerRigidBody.linearVelocity += {-SPEED, playerRigidBody.linearVelocity[1]};
-		}
-
-		if (keyMap[KeyCode::D]) {
-			playerRigidBody.linearVelocity += {SPEED, playerRigidBody.linearVelocity[1]};
-		}
-
-		if (keyMap[KeyCode::SPACE] && !jumping) {
-			const float32 jumpForce = sqrt(2.0f * 800.0f * 45.0f);
-
-			playerRigidBody.linearVelocity = {playerRigidBody.linearVelocity[0], jumpForce * deltaTime};
-
-			jumping = true;
-		}
-
-		if (abs(playerRigidBody.linearVelocity[1]) < 0.001f) {
-			jumping = false;
-		} */
 	}
 
 	void Physics2DSceneLayer::preRender() {

@@ -63,6 +63,7 @@ namespace Trident {
 
 			virtual void onEvent(Event& event) final override;
 
+			virtual void onKeyDownClient(KeyDownEvent& event) {}
 			virtual void onMouseUpClient(MouseUpEvent& event) {}
 
 		protected:
@@ -172,7 +173,7 @@ namespace Trident {
 			static constexpr float32 EXPAND = -1.0f;
 
 		private:
-			static constexpr uint32 MAX_COMPONENT_COUNT = 128;
+			static constexpr uint32 MAX_COMPONENT_COUNT = 1024;
 			static constexpr uint32 MAX_FONT_COUNT = 4;
 
 		protected:

@@ -273,6 +273,8 @@ namespace Trident {
 	}
 
 	bool GUILayer::onKeyDown(KeyDownEvent& event) {
+		onKeyDownClient(event);
+
 		if (event.getKeyCode() == KeyCode::TAB) {
 			if (focusedComponentIndex < focusableComponentCount) {
 				unfocusComponent(focusableComponentIndexToComponentIndex[focusedComponentIndex]);

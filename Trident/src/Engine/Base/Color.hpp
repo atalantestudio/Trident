@@ -6,6 +6,8 @@
 namespace Trident {
 	class Color {
 		public:
+			constexpr Color() = default;
+
 			// From an hexadecimal code (transparency included).
 			constexpr Color(uint32 code) :
 				value(

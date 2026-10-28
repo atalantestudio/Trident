@@ -99,7 +99,7 @@ namespace Trident {
 
 		GUIComponent& parent = components[component.parentIndex];
 
-		if (parent.size.height.fillMode != FillMode::FIXED) {
+		if (parent.type != GUIComponentType::VERTICAL_LIST && parent.size.height.fillMode != FillMode::FIXED) {
 			if (parent.layoutDirection == LayoutDirection::VERTICAL) {
 				parent.size.height.value += component.size.height.value;
 				parent.minimumSize.y += component.minimumSize.y;
@@ -117,12 +117,12 @@ namespace Trident {
 	void GUILayer::expandAndFitComponent(uint32 componentIndex, uint8 axis) {
 		GUIComponent& component = components[componentIndex];
 
-		// TODO(gui/expand-and-fit): Merge expand and fit passes.
-		if (component.layoutDirection == static_cast<LayoutDirection>(axis)) {
+		if (component.type != GUIComponentType::VERTICAL_LIST && component.layoutDirection == static_cast<LayoutDirection>(axis)) {
 			std::vector<uint32> expandableChildIndices = FilterChildren(component, axis, FillMode::EXPAND);
 			std::vector<uint32> fittableChildIndices = FilterChildren(component, axis, FillMode::FIT);
 			float32 remainingSize = calculateRemainingSize(component, axis);
 
+			// TODO(gui/expand-and-fit): Merge expand and fit passes.
 			while (remainingSize > 0.0f && expandableChildIndices.size() > 0) {
 				float32 smallestSize = components[expandableChildIndices[0]].size[axis].value;
 				float32 secondSmallestSize = max<float32>();
@@ -175,6 +175,7 @@ namespace Trident {
 				}
 			}
 
+			// TODO(gui/expand-and-fit): Merge expand and fit passes.
 			while (remainingSize < 0.0f && fittableChildIndices.size() > 0) {
 				float32 largestSize = components[fittableChildIndices[0]].size[axis].value;
 				float32 secondLargestSize = 0.0f;
@@ -224,11 +225,6 @@ namespace Trident {
 					}
 
 					index -= 1;
-				}
-
-				// TODO(gui/adjust-sizing): Hack to fix infinite loop when sizing text components due to small negative remaining size.
-				if (remainingSize > -0.0001f && remainingSize < 0.0f) {
-					break;
 				}
 			}
 		}

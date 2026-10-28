@@ -16,8 +16,6 @@ namespace Trident {
 
 			void postConstruct() override;
 
-			void update(float32 deltaTime, float32 inverseDeltaTime) override;
-
 			void preRender() override;
 
 			void render(ref<CommandEncoder> commandEncoder, float64 remainingFrameTime) const override;

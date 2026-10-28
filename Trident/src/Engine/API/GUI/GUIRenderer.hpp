@@ -24,7 +24,7 @@ namespace Trident {
 		public:
 			static constexpr uint32 MAX_USER_IMAGE_COUNT = 8;
 			static constexpr uint32 MAX_SUBCOMPONENT_COUNT = 2048;
-			static constexpr uint32 MAX_GLYPH_SUBCOMPONENT_COUNT = 2048;
+			static constexpr uint32 MAX_GLYPH_SUBCOMPONENT_COUNT = 65535;
 
 		public:
 			void build() final override;
