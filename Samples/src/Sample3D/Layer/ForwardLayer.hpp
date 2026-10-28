@@ -65,7 +65,7 @@ namespace Trident {
 
 				physicsSimulation = new PhysicsSimulation3D({
 					.scene = scene,
-					.deltaTime = getApplication()->getFixedDeltaTime(),
+					.deltaTime = application->getFixedDeltaTime(),
 					#if !defined(FORWARD_USE_NOCLIP_CAMERA)
 						.playerEntity = PLAYER_ENTITY,
 					#else
@@ -88,7 +88,7 @@ namespace Trident {
 					camera.fieldOfView = radians(70.0_deg);
 				#endif
 
-				camera.aspectRatio = getApplication()->getWindow()->getAspectRatio();
+				camera.aspectRatio = application->getWindow()->getAspectRatio();
 				camera.setOrientation(lookAt(FORWARD, sceneAsset->spawnDirection, UP));
 
 				cameraController.updateProjection();

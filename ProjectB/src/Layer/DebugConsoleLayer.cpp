@@ -3,6 +3,8 @@
 
 #include "pch.hpp"
 
+#include "Engine/API/Command/loadmap.hpp"
+
 #include "Layer/DebugConsoleLayer.hpp"
 
 namespace ProjectB {
@@ -118,7 +120,7 @@ namespace ProjectB {
 
 	void DebugConsoleLayer::processCommand(const Command& command) {
 		if (command.name == "loadmap") {
-			// TODO(command/loadmap)
+			loadmap(command.arguments[0]);
 		}
 		else {
 			Log commandNotFound{};
