@@ -76,6 +76,7 @@ namespace Trident {
 		BACKSLASH		= 92, // '\'
 		RIGHT_BRACKET	= 93, // ]
 		GRAVE_ACCENT	= 96, // `
+		F1				= 112,
 		WORLD_1			= 161,
 		WORLD_2			= 162,
 		INSERT			= 260,
@@ -99,7 +100,10 @@ namespace Trident {
 		NUM_LOCK		= 282,
 		PRINT_SCREEN	= 283,
 		PAUSE			= 284,
-		F1				= 290,
+
+		// TODO(key-code)
+		// F1				= 290,
+
 		F2				= 291,
 		F3				= 292,
 		F4				= 293,

@@ -5,6 +5,7 @@
 
 #include "Engine/API/Command/loadmap.hpp"
 
+#include "Application.hpp"
 #include "Layer/ConsoleLayer.hpp"
 
 namespace ProjectB {
@@ -17,6 +18,12 @@ namespace ProjectB {
 	}
 
 	void ConsoleLayer::render() {
+		const ProjectB::Application* application = pointer_cast<const ProjectB::Application*>(getApplication());
+
+		if (!application->showConsole) {
+			return;
+		}
+
 		const Extent2D screenSize = getApplication()->getWindow()->getExtent();
 		const Extent2D consoleSize = min({968 + 4, 768 + 4}, screenSize);
 
@@ -67,7 +74,7 @@ namespace ProjectB {
 		}
 	}
 
-	void ConsoleLayer::onKeyDownClient(KeyDownEvent& event) {
+	bool ConsoleLayer::onKeyDownClient(KeyDownEvent& event) {
 		switch (event.getKeyCode()) {
 			case KeyCode::ENTER: {
 				if (!textInputFocused) {
@@ -93,10 +100,22 @@ namespace ProjectB {
 
 				break;
 			}
+			case KeyCode::F1: {
+				ProjectB::Application* application = pointer_cast<ProjectB::Application*>(getApplication());
+				application->showConsole = !application->showConsole;
+
+				if (application->showConsole && application->getWindow()->isPointerLocked()) {
+					application->getWindow()->unlockPointer();
+				}
+
+				break;
+			}
 			default: {
 				break;
 			}
 		}
+
+		return true;
 	}
 
 	void ConsoleLayer::ConsoleTextInput() {

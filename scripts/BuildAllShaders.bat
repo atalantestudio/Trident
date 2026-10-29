@@ -51,6 +51,11 @@ echo Building shaders in Samples/Asset/Shader/Sample.
 call "Samples/Asset/Shader/Sample/Build.dxc"
 call "Samples/Asset/Shader/Sample/Build.glslc"
 
+echo Building shaders in ProjectB/Asset/Shader/Map.
+
+call "ProjectB/Asset/Shader/Map/Build.dxc"
+call "ProjectB/Asset/Shader/Map/Build.glslc"
+
 echo Done.
 
 popd

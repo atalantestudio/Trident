@@ -146,17 +146,27 @@ namespace Trident {
 
 				for (ref<Layer> layer : layerView) {
 					const StaticMemoryDescriptor staticMemoryDescriptor = layer->getStaticMemoryDescriptor();
-					const view<ref<Buffer>> buffers(&staticBuffers[staticBufferCount], staticMemoryDescriptor.buffers.count());
-					const view<ref<Image>> images(&staticImages[staticImageCount], staticMemoryDescriptor.images.count());
 
-					for (ref<Buffer> buffer : staticMemoryDescriptor.buffers) {
-						staticBuffers[staticBufferCount] = buffer;
-						staticBufferCount += 1;
+					view<ref<Buffer>> buffers = {};
+
+					if (staticMemoryDescriptor.buffers.count() > 0) {
+						buffers = view<ref<Buffer>>(&staticBuffers[staticBufferCount], staticMemoryDescriptor.buffers.count());
+
+						for (ref<Buffer> buffer : staticMemoryDescriptor.buffers) {
+							staticBuffers[staticBufferCount] = buffer;
+							staticBufferCount += 1;
+						}
 					}
 
-					for (ref<Image> image : staticMemoryDescriptor.images) {
-						staticImages[staticImageCount] = image;
-						staticImageCount += 1;
+					view<ref<Image>> images = {};
+
+					if (staticMemoryDescriptor.images.count() > 0) {
+						images = view<ref<Image>>(&staticImages[staticImageCount], staticMemoryDescriptor.images.count());
+
+						for (ref<Image> image : staticMemoryDescriptor.images) {
+							staticImages[staticImageCount] = image;
+							staticImageCount += 1;
+						}
 					}
 
 					for (ref<Buffer> buffer : buffers) {

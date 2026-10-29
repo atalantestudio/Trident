@@ -1,3 +1,5 @@
 Log
 Trace
 *.tpr
+Asset/Shader/**/*.dxil
+Asset/Shader/**/*.spv

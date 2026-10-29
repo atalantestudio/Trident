@@ -23,7 +23,7 @@ namespace ProjectB {
 			void render() final override;
 
 		protected:
-			void onKeyDownClient(KeyDownEvent& event) final override;
+			bool onKeyDownClient(KeyDownEvent& event) final override;
 
 		private:
 			void ConsoleTextInput();

@@ -3,12 +3,13 @@
 
 #pragma once
 
-#include "Engine/API/Window/LayerGroup/UILayerGroup.hpp"
 #include "Engine/Application/Application.hpp"
 
 #include "Layer/ConsoleLayer.hpp"
 #include "Layer/MapLayer.hpp"
 #include "Layer/UILayer.hpp"
+#include "LayerGroup/FinalUILayerGroup.hpp"
+#include "LayerGroup/UILayerGroup.hpp"
 #include "Renderer/MapRenderer/MapRenderer.hpp"
 
 namespace ProjectB {
@@ -23,7 +24,7 @@ namespace ProjectB {
 
 				registerLayerGroup<UILayerGroup>(range<uint32, uint32>(0, 1));
 				registerLayerGroup<LayerGroup>(range<uint32, uint32>(1, 1));
-				registerLayerGroup<UILayerGroup>(range<uint32, uint32>(2, 1));
+				registerLayerGroup<FinalUILayerGroup>(range<uint32, uint32>(2, 1));
 			}
 
 			Renderer* getMainRenderer() const override {
@@ -31,5 +32,8 @@ namespace ProjectB {
 
 				return &mapLayer->renderer;
 			}
+
+		public:
+			bool showConsole = false;
 	};
 }

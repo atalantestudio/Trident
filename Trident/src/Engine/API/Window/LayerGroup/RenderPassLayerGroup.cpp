@@ -52,7 +52,13 @@ namespace Trident {
 			attachmentIndex += 1;
 		}
 
-		ENGINE_ASSERT(swapchainAttachmentIndex != max<uint32>(), "The render pass must have a presentable attachment.");
+		// TODO(window/layer-group/render-pass-layer-group): This is a hack. Let the user specify which attachment uses the swapchain image.
+		if (swapchainAttachmentIndex == max<uint32>()) {
+			ENGINE_WARNING("No presentable attachment found. Binding the swapchain image to the first attachment.");
+
+			swapchainAttachmentIndex = 0;
+			swapchainImageIndex = 0;
+		}
 
 		framebufferImages = sequence<ref<Image>>(imageCount);
 		framebufferImageViews = sequence<ref<ImageView>>(imageViewCount);

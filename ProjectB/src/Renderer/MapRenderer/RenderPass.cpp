@@ -15,7 +15,7 @@ namespace ProjectB {
 					.sampleCount = SAMPLE_COUNT,
 					.loadOperation = LoadOperation::CLEAR,
 					.storeOperation = StoreOperation::STORE,
-					.finalLayout = ImageLayout::PRESENT_SRC,
+					.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL,
 				},
 
 				// Depth stencil

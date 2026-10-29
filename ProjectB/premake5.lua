@@ -47,6 +47,19 @@ project "ProjectB"
 
 	filter "toolset:msc-v142 or toolset:msc-v143 or toolset:msc-v145"
 		postbuildcommands {
+			-- Create asset directories.
+			"{MKDIR} %[../bin/" .. OUTPUT_DIR .. "/%{prj.name}/Asset]",
+			"{MKDIR} %[../bin/" .. OUTPUT_DIR .. "/%{prj.name}/Asset/Font]",
+			"{MKDIR} %[../bin/" .. OUTPUT_DIR .. "/%{prj.name}/Asset/Geometry]",
+			"{MKDIR} %[../bin/" .. OUTPUT_DIR .. "/%{prj.name}/Asset/Image]",
+			"{MKDIR} %[../bin/" .. OUTPUT_DIR .. "/%{prj.name}/Asset/Material]",
+			"{MKDIR} %[../bin/" .. OUTPUT_DIR .. "/%{prj.name}/Asset/Scene]",
+			"{MKDIR} %[../bin/" .. OUTPUT_DIR .. "/%{prj.name}/Asset/Shader]",
+
+			-- Copy shaders.
+			-- NOTE: IF EXIST required on cmd.exe. See https://premake.github.io/docs/Tokens#command-tokens.
+			"IF EXIST Asset/Shader {COPYDIR} Asset/Shader %[../bin/" .. OUTPUT_DIR .. "/%{prj.name}/Asset/Shader]",
+
 			-- If a .tpr file exists, use it as the default configuration file.
 			"IF EXIST %[%{prj.name}.tpr] {COPYFILE} %[%{prj.name}.tpr] %[../bin/" .. OUTPUT_DIR .. "/%{prj.name}/%{prj.name}.tpr]",
 		}

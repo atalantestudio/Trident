@@ -65,7 +65,10 @@ namespace Trident {
 
 			virtual void onEvent(Event& event) final override;
 
-			virtual void onKeyDownClient(KeyDownEvent& event) {}
+			virtual bool onKeyDownClient(KeyDownEvent& event) {
+				return false;
+			}
+
 			virtual void onMouseUpClient(MouseUpEvent& event) {}
 
 		protected:

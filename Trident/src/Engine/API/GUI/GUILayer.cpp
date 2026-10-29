@@ -273,7 +273,7 @@ namespace Trident {
 	}
 
 	bool GUILayer::onKeyDown(KeyDownEvent& event) {
-		onKeyDownClient(event);
+		const bool clientResponse = onKeyDownClient(event);
 
 		if (event.getKeyCode() == KeyCode::TAB) {
 			if (focusedComponentIndex < focusableComponentCount) {
@@ -284,7 +284,7 @@ namespace Trident {
 
 			focusComponent(focusableComponentIndexToComponentIndex[focusedComponentIndex]);
 
-			return false;
+			return clientResponse;
 		}
 
 		if (event.getKeyCode() == KeyCode::ENTER) {
@@ -292,7 +292,7 @@ namespace Trident {
 				enterComponentIndex = focusableComponentIndexToComponentIndex[focusedComponentIndex];
 			}
 
-			return false;
+			return clientResponse;
 		}
 
 		if (focusedComponentIndex < previousFocusableComponentCount) {
@@ -310,7 +310,7 @@ namespace Trident {
 			}
 		}
 
-		return false;
+		return clientResponse;
 	}
 
 	bool GUILayer::onTextInput(TextInputEvent& event) {
