@@ -35,7 +35,7 @@ void main() {
 
 	vec3 L = vec3(angle);
 
-	// fragment.rgb = (L / (PI * 2.0);
+	// fragment.rgb = L / (PI * 2.0;
 	fragment.rgb = vec3(0.0, 0.0, 0.0);
 	fragment.a = angle / (PI * 2.0);
 }
