@@ -83,7 +83,7 @@ namespace Trident {
 		}
 
 		// Rotate by the inverse of the incident body's orientation to get a normal that can be used as a support direction.
-		// TODO: Invert the orientation before multiplying?
+		// TODO(physics/3d): Invert the orientation before multiplying?
 		const vec3<float32> referenceFaceDirection = referencePlane.normal * incidentBody.orientation;
 
 		index incidentFaceIndex = max<index>();
@@ -317,32 +317,32 @@ namespace Trident {
 		std::swap(contactManifold->contacts[1], contactManifold->contacts[2]);
 	}
 
-	bool PolygonPolygon(const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, const Hull3D& hullA, const Hull3D& hullB, ContactManifold3D* contactManifold) {
-		SATOutput3D sat = SAT3D(rigidBodyA, rigidBodyB, hullA, hullB);
+	bool PolygonPolygon(const RigidBodyPair3D& pair, ContactManifold3D* contactManifold) {
+		SATOutput3D sat = SAT3D(*pair.rigidBodyA, *pair.rigidBodyB, *pair.hullA, *pair.hullB);
 
 		if (!sat.overlap) {
 			return false;
 		}
 
 		if (sat.edgeQuery.separation >= sat.faceQueryA.separation && sat.edgeQuery.separation >= sat.faceQueryB.separation) {
-			createEdgeContact(sat.edgeQuery, rigidBodyA, rigidBodyB, hullA, hullB, contactManifold);
+			createEdgeContact(sat.edgeQuery, *pair.rigidBodyA, *pair.rigidBodyB, *pair.hullA, *pair.hullB, contactManifold);
 
 			return true;
 		}
 
 		if (sat.faceQueryA.separation >= sat.faceQueryB.separation) {
 			// TODO(physics/3d/separating-axis-orientation): The axis should be rotated by the base orientation. Why is the inverse needed?
-			sat.faceQueryA.axis *= inverse(rigidBodyA.orientation);
+			sat.faceQueryA.axis *= inverse(pair.rigidBodyA->orientation);
 
-			createFaceContact(sat.faceQueryA, rigidBodyA, rigidBodyB, hullA, hullB, contactManifold);
+			createFaceContact(sat.faceQueryA, *pair.rigidBodyA, *pair.rigidBodyB, *pair.hullA, *pair.hullB, contactManifold);
 
 			return true;
 		}
 
 		// TODO(physics/3d/separating-axis-orientation): The axis should be rotated by the base orientation. Why is the inverse needed?
-		sat.faceQueryB.axis *= inverse(rigidBodyB.orientation);
+		sat.faceQueryB.axis *= inverse(pair.rigidBodyB->orientation);
 
-		createFaceContact(sat.faceQueryB, rigidBodyB, rigidBodyA, hullB, hullA, contactManifold);
+		createFaceContact(sat.faceQueryB, *pair.rigidBodyB, *pair.rigidBodyA, *pair.hullB, *pair.hullA, contactManifold);
 
 		contactManifold->normal *= -1.0f;
 

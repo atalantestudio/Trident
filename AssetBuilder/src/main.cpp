@@ -11,6 +11,7 @@
 #include "AssetBuilder/Process/Geometry/2D/Triangle.hpp"
 #include "AssetBuilder/Process/Geometry/2D/UnitCircle.hpp"
 #include "AssetBuilder/Process/Geometry/2D/UnitSquare.hpp"
+#include "AssetBuilder/Process/Geometry/3D/PlayerHull.hpp"
 #include "AssetBuilder/Process/Geometry/3D/RectangularCuboid.hpp"
 #include "AssetBuilder/Process/Geometry/3D/SingleTextureUnitBox.hpp"
 #include "AssetBuilder/Process/Geometry/3D/UnitBox.hpp"
@@ -112,7 +113,7 @@ namespace Trident {
 
 		private:
 			void registerProcesses() {
-				allocateProcesses(73);
+				allocateProcesses(74);
 
 				registerProcess<BuildGeometryAssetProcess>(&assetLibrary);
 
@@ -121,6 +122,7 @@ namespace Trident {
 				registerProcess<UnitCircleGeometry2D>(&assetLibrary);
 				registerProcess<UnitSquareGeometry2D>(&assetLibrary);
 
+				registerProcess<PlayerHullGeometry3D>(&assetLibrary);
 				registerProcess<RectangularCuboidGeometry3D>(&assetLibrary);
 				registerProcess<SingleTextureUnitBoxGeometry3D>(&assetLibrary);
 				registerProcess<UnitBoxGeometry3D>(&assetLibrary);

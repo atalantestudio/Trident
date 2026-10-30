@@ -7,15 +7,11 @@
 
 namespace Trident {
 	class UnitBoxGeometry3D final : public Geometry3DProcess {
-		protected:
-			view<char8> getAssetName() const final override {
-				return "3d_unit_box";
-			}
-
-			BuildGeometry3D createGeometry() const final override {
-				const float32 x = 1.0f;
-				const float32 y = 1.0f;
-				const float32 z = 1.0f;
+		public:
+			static BuildGeometry3D createGeometry(vec3<float32> scale) {
+				const float32 x = scale.x;
+				const float32 y = scale.y;
+				const float32 z = scale.z;
 
 				BuildGeometry3D geometry = {
 					.flags = GeometryAssetFlags::IS_3D | GeometryAssetFlags::HAS_HULL,
@@ -152,6 +148,15 @@ namespace Trident {
 				geometry.hull = createHull<Hull3DType::POLYGON>(geometry.vertices);
 
 				return geometry;
+			}
+
+		protected:
+			view<char8> getAssetName() const final override {
+				return "3d_unit_box";
+			}
+
+			BuildGeometry3D createGeometry() const final override {
+				return createGeometry({1.0f, 1.0f, 1.0f});
 			}
 
 		public:

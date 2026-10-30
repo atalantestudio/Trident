@@ -79,7 +79,7 @@ namespace Trident {
 
 		vec3<float32> force = {0.0_N, 0.0_N, 0.0_N};
 
-		/// The entity owning the rigid body this body is currently resting on.
+		/// The entity on which this body is currently resting.
 		Entity groundEntity = max<Entity>();
 	};
 }

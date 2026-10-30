@@ -161,10 +161,10 @@ namespace Trident {
 						componentIndex += 1;
 					}
 
-					if (renderer.visualizationMode & VisualizationMode::CONTACT_MANIFOLDS) {
+					/* if (renderer.visualizationMode & VisualizationMode::CONTACT_MANIFOLDS) {
 						renderer.contactCount = 0;
 
-						for (const std::pair<EntityPair, ContactPair3D>& pair : physicsSimulation->contactPairs) {
+						for (const std::pair<RigidBodyPair3D, ContactPair3D>& pair : physicsSimulation->contactPairs) {
 							if (pair.first.A != PLAYER_ENTITY && pair.first.B != PLAYER_ENTITY) {
 								continue;
 							}
@@ -183,7 +183,7 @@ namespace Trident {
 
 							break;
 						}
-					}
+					} */
 				#endif
 
 				renderer.updateCamera();

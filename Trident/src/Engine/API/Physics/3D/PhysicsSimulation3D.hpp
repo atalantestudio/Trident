@@ -4,8 +4,8 @@
 #pragma once
 
 #include "Engine/API/Physics/3D/ContactPair3D.hpp"
+#include "Engine/API/Physics/3D/RigidBodyPair.hpp"
 #include "Engine/API/Scene/Scene3D.hpp"
-#include "Engine/ECS/EntityPair.hpp"
 
 namespace Trident {
 	#define ENABLE_PHYSICS_3D_IMPULSE_ACCUMULATION
@@ -47,13 +47,13 @@ namespace Trident {
 			void mergeContactManifolds(ContactPair3D& contactPair, const ContactManifold3D& newContactManifold);
 
 		public:
-			std::map<EntityPair, ContactPair3D> contactPairs;
+			std::map<RigidBodyPair3D, ContactPair3D> contactPairs;
 
 		private:
 			Scene3D* scene;
 			float32 deltaTime;
 			float32 inverseDeltaTime;
 			Entity playerEntity;
-			std::vector<EntityPair> entityPairs;
+			std::vector<RigidBodyPair3D> rigidBodyPairs;
 	};
 }

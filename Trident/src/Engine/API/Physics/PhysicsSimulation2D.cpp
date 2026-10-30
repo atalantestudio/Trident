@@ -148,18 +148,12 @@ namespace Trident {
 		for (const EntityPair entityPair : entityPairs) {
 			const RigidBody2DComponent& rigidBodyA = scene->ecs.getComponent<RigidBody2DComponent>(entityPair.A);
 			const RigidBody2DComponent& rigidBodyB = scene->ecs.getComponent<RigidBody2DComponent>(entityPair.B);
+
 			const Hull2D& hullA = getHull(entityPair.A);
 			const Hull2D& hullB = getHull(entityPair.B);
 
-			Hull2DType typeA = hullA.type;
-			Hull2DType typeB = hullB.type;
-
-			if (typeA > typeB) {
-				typeA = hullB.type;
-				typeB = hullA.type;
-			}
-
-			const Collider2D collider = COLLIDER_2D_TABLE[static_cast<uint32>(typeA)][static_cast<uint32>(typeB)];
+			// The broad phase must ensure that A hull type < B hull type.
+			const Collider2D collider = COLLIDER_2D_TABLE[static_cast<uint32>(hullA.type)][static_cast<uint32>(hullB.type)];
 
 			if (!collider(rigidBodyA, rigidBodyB, hullA, hullB, &contactPair.manifold)) {
 				// Either a degenerate case, or the entities are not overlapping.

@@ -4,7 +4,7 @@
 #pragma once
 
 namespace Trident {
-	enum class Hull3DType : uint8 {
+	enum Hull3DType : uint8 {
 		POLYGON,
 
 		count,
