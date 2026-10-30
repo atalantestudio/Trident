@@ -29,6 +29,9 @@ namespace Trident {
 		range<uint64, uint64> faceLineIndexRange;
 		range<uint64, uint64> lightmapCoordinateRange;
 
+		uint32 bakedVertexCount;
+		uint32 bakedTriangleCount;
+
 		sequence<Instance3D> instances;
 		sequence<ref<Geometry3DAsset>> geometryAssets;
 		sequence<range<uint32, uint32>> geometryIndexRanges;

@@ -19,6 +19,15 @@ namespace Trident {
 		Entity playerEntity;
 	};
 
+	struct PhysicsSimulationStaticGeometry {
+		sequence<vec3<float32>> vertices;
+		sequence<Edge3D> edges;
+		sequence<Plane3D> faces;
+		sequence<uint16> faceEdgeIndices;
+		sequence<Hull3D> hulls;
+		sequence<RigidBody3DComponent> rigidBodies;
+	};
+
 	class PhysicsSimulation3D {
 		private:
 			static constexpr uint32 SEQUENTIAL_IMPULSE_ITERATION_COUNT = 10;
@@ -44,6 +53,8 @@ namespace Trident {
 			void integrate();
 
 		private:
+			void generateStaticGeometryHulls();
+
 			void mergeContactManifolds(ContactPair3D& contactPair, const ContactManifold3D& newContactManifold);
 
 		public:
@@ -51,6 +62,7 @@ namespace Trident {
 
 		private:
 			Scene3D* scene;
+			PhysicsSimulationStaticGeometry staticGeometry;
 			float32 deltaTime;
 			float32 inverseDeltaTime;
 			Entity playerEntity;

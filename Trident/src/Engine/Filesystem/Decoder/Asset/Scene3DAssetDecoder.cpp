@@ -32,11 +32,14 @@ namespace Trident {
 		// TODO(scene/3d): Remove static vertex count in the asset.
 		const uint32 staticVertexCount = stream.read<uint32>();
 
-		const uint32 bakedVertexCount = stream.read<uint32>();
+		asset.bakedVertexCount = stream.read<uint32>();
+
 		const uint32 triangleCount = stream.read<uint32>();
 		const uint32 indexCount = triangleCount * 3;
-		const uint32 bakedTriangleCount = stream.read<uint32>();
-		const uint32 bakedIndexCount = bakedTriangleCount * 3;
+
+		asset.bakedTriangleCount = stream.read<uint32>();
+
+		const uint32 bakedIndexCount = asset.bakedTriangleCount * 3;
 		const uint32 faceLineIndexCount = stream.read<uint32>();
 		const uint32 lightmapCoordinateCount = stream.read<uint32>();
 
@@ -88,9 +91,9 @@ namespace Trident {
 		asset.spawnPosition = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
 		asset.spawnDirection = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
 
-		std::copy_n(stream.getBytePosition(), bakedVertexCount * sizeof(Vertex3D), &asset.geometryData[asset.vertexRange.offset]);
+		std::copy_n(stream.getBytePosition(), asset.bakedVertexCount * sizeof(Vertex3D), &asset.geometryData[asset.vertexRange.offset]);
 
-		stream.jump(bakedVertexCount * sizeof(Vertex3D));
+		stream.jump(asset.bakedVertexCount * sizeof(Vertex3D));
 
 		std::copy_n(stream.getBytePosition(), bakedIndexCount * sizeof(uint32), &asset.geometryData[asset.indexRange.offset]);
 
@@ -139,7 +142,7 @@ namespace Trident {
 
 		Vertex3D* vertices = pointer_cast<Vertex3D*>(&asset.geometryData[asset.vertexRange.offset]);
 		uint32* indices = pointer_cast<uint32*>(&asset.geometryData[asset.indexRange.offset]);
-		uint32 vertexOffset = bakedVertexCount;
+		uint32 vertexOffset = asset.bakedVertexCount;
 		uint32 indexOffset = bakedIndexCount;
 		uint32 geometryIndex = 0;
 

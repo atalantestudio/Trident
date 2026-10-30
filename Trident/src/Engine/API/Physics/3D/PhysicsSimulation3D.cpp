@@ -17,7 +17,9 @@ namespace Trident {
 		deltaTime(static_cast<float32>(descriptor.deltaTime)),
 		inverseDeltaTime(static_cast<float32>(1.0 / descriptor.deltaTime)),
 		playerEntity(descriptor.playerEntity)
-	{}
+	{
+		generateStaticGeometryHulls();
+	}
 
 	void PhysicsSimulation3D::tick() {
 		rigidBodyPairs.clear();
@@ -69,6 +71,17 @@ namespace Trident {
 				rigidBodyPairs.emplace_back(pair);
 
 				componentIndexB += 1;
+			}
+
+			uint32 staticGeometryHullIndex = 0;
+
+			while (staticGeometryHullIndex < staticGeometry.hulls.count()) {
+				pair.hullB = &staticGeometry.hulls[staticGeometryHullIndex];
+				pair.rigidBodyB = &staticGeometry.rigidBodies[staticGeometryHullIndex];
+
+				rigidBodyPairs.emplace_back(pair);
+
+				staticGeometryHullIndex += 1;
 			}
 
 			componentIndexA += 1;
@@ -406,5 +419,118 @@ namespace Trident {
 
 		contactPair.manifold.contactCount = newContactManifold.contactCount;
 		contactPair.manifold.normal = newContactManifold.normal;
+	}
+
+	void PhysicsSimulation3D::generateStaticGeometryHulls() {
+		const ref<Scene3DAsset> sceneAsset = scene->getAsset();
+		const view<Vertex3D> vertices(pointer_cast<const Vertex3D*>(&sceneAsset->geometryData[sceneAsset->vertexRange.offset]), sceneAsset->bakedVertexCount);
+		const view<uint32> indices(pointer_cast<const uint32*>(&sceneAsset->geometryData[sceneAsset->indexRange.offset]), sceneAsset->bakedTriangleCount * 3);
+
+		staticGeometry.vertices = sequence<vec3<float32>>(sceneAsset->bakedVertexCount);
+		staticGeometry.edges = sequence<Edge3D>(sceneAsset->bakedTriangleCount * 6);
+		staticGeometry.faces = sequence<Plane3D>(sceneAsset->bakedTriangleCount * 2);
+		staticGeometry.faceEdgeIndices = sequence<uint16>(sceneAsset->bakedTriangleCount * 6);
+		staticGeometry.hulls = sequence<Hull3D>(sceneAsset->bakedTriangleCount);
+		staticGeometry.rigidBodies = sequence<RigidBody3DComponent>(sceneAsset->bakedTriangleCount);
+
+		uint32 vertexIndex = 0;
+
+		while (vertexIndex < staticGeometry.vertices.count()) {
+			staticGeometry.vertices[vertexIndex] = vertices[vertexIndex].position;
+
+			vertexIndex += 1;
+		}
+
+		uint32 edgeOffset = 0;
+		uint32 faceOffset = 0;
+		uint32 faceEdgeIndexOffset = 0;
+		uint32 hullIndex = 0;
+
+		while (hullIndex < staticGeometry.hulls.count()) {
+			const uint32 indexA = indices[hullIndex * 3 + 0];
+			const uint32 indexB = indices[hullIndex * 3 + 1];
+			const uint32 indexC = indices[hullIndex * 3 + 2];
+
+			const vec3<float32> a = staticGeometry.vertices[indexA];
+			const vec3<float32> b = staticGeometry.vertices[indexB];
+			const vec3<float32> c = staticGeometry.vertices[indexC];
+
+			const vec3<float32> normal = normalized(cross(b - a, c - a));
+
+			Edge3D* edge = &staticGeometry.edges[edgeOffset];
+			edge->originVertexIndex = indexA;
+			edge->faceIndex = 0;
+
+			edge += 1;
+			edge->originVertexIndex = indexB;
+			edge->faceIndex = 1;
+
+			edge += 1;
+			edge->originVertexIndex = indexB;
+			edge->faceIndex = 0;
+
+			edge += 1;
+			edge->originVertexIndex = indexC;
+			edge->faceIndex = 1;
+
+			edge += 1;
+			edge->originVertexIndex = indexC;
+			edge->faceIndex = 0;
+
+			edge += 1;
+			edge->originVertexIndex = indexA;
+			edge->faceIndex = 1;
+
+			Plane3D* face = &staticGeometry.faces[faceOffset];
+			face->normal = normal;
+			face->distance = 0.0f;
+			face->edgeIndexRange.offset = edgeOffset;
+			face->edgeIndexRange.count = 3;
+
+			face += 1;
+			face->normal = -normal;
+			face->distance = 0.0f;
+			face->edgeIndexRange.offset = edgeOffset + 3;
+			face->edgeIndexRange.count = 3;
+
+			staticGeometry.faceEdgeIndices[faceEdgeIndexOffset + 0] = edgeOffset + 0;
+			staticGeometry.faceEdgeIndices[faceEdgeIndexOffset + 1] = edgeOffset + 2;
+			staticGeometry.faceEdgeIndices[faceEdgeIndexOffset + 2] = edgeOffset + 4;
+			staticGeometry.faceEdgeIndices[faceEdgeIndexOffset + 3] = edgeOffset + 1;
+			staticGeometry.faceEdgeIndices[faceEdgeIndexOffset + 4] = edgeOffset + 3;
+			staticGeometry.faceEdgeIndices[faceEdgeIndexOffset + 5] = edgeOffset + 5;
+
+			Hull3D& hull = staticGeometry.hulls[hullIndex];
+			hull.centroid = (a + b + c) / 3.0f;
+			hull.radius = sqrt(max(lengthSquared(a - hull.centroid), max(lengthSquared(b - hull.centroid), lengthSquared(c - hull.centroid))));
+			hull.vertices = staticGeometry.vertices;
+			hull.edges = view<Edge3D>(&staticGeometry.edges[edgeOffset], 6);
+			hull.faces = view<Plane3D>(&staticGeometry.faces[faceOffset], 2);
+			hull.faceEdgeIndices = view<uint16>(&staticGeometry.faceEdgeIndices[faceEdgeIndexOffset], 6);
+			hull.lineIndexRange.offset = 0;
+			hull.lineIndexRange.count = 0;
+			hull.type = Hull3DType::POLYGON;
+
+			RigidBody3DComponent& rigidBody = staticGeometry.rigidBodies[hullIndex];
+			rigidBody.facePlanes = hull.faces;
+			rigidBody.position = {0.0f, 0.0f, 0.0f};
+			rigidBody.rotation = {0.0f, 0.0f, 0.0f};
+			rigidBody.scale = 1.0f;
+			rigidBody.world = identity<mat4x4<float32>>();
+			rigidBody.orientation = identity<quat<float32>>();
+			rigidBody.linearVelocity = {0.0f, 0.0f, 0.0f};
+			rigidBody.angularVelocity = {0.0f, 0.0f, 0.0f};
+			rigidBody.inverseMass = 0.0f;
+			rigidBody.inverseInertia = identity<mat3x3<float32>>();
+			rigidBody.friction = 0.0f;
+			rigidBody.restitution = 0.0f;
+			rigidBody.force = {0.0f, 0.0f, 0.0f};
+			rigidBody.groundEntity = max<Entity>();
+
+			edgeOffset += 6;
+			faceOffset += 2;
+			faceEdgeIndexOffset += 6;
+			hullIndex += 1;
+		}
 	}
 }
