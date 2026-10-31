@@ -6,10 +6,14 @@
 #include "Engine/API/Descriptor.hpp"
 #include "Engine/API/Physics/MomentOfInertia.hpp"
 #include "Engine/ECS/Component/RigidBody2DComponent.hpp"
+#include "Engine/Filesystem/Asset/Geometry2DAsset.hpp"
 
 namespace Trident {
 	template<>
 	struct Descriptor<RigidBody2DComponent> {
+		/// Required when the moment of inertia is POLYGON.
+		ref<Geometry2DAsset> geometry = nullptr;
+
 		vec2<float32> position;
 		float32 rotation;
 		vec2<float32> scale;

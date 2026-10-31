@@ -18,6 +18,8 @@ namespace Trident {
 		}
 
 		GeometryAssetFlags flags;
+
+		// TODO(asset/geometry/2d): Refactor into something closer to 3D geometries.
 		sequence<float32> vertexPositionComponents;
 		sequence<float32> vertexTextureCoordinateComponents;
 		sequence<uint32> vertexPositionIndices;

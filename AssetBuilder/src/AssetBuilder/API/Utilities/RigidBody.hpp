@@ -52,6 +52,33 @@ namespace Trident {
 
 					break;
 				}
+				case MomentOfInertia2D::POLYGON: {
+					float32 area = 0.0f;
+					index i = 0;
+
+					while (i < descriptor.geometry->getPositionCount()) {
+						const index j = (i + 1) % descriptor.geometry->getPositionCount();
+						const vec2<float32> Pi = vec2<float32>{
+							descriptor.geometry->vertexPositionComponents[i * 2 + 0],
+							descriptor.geometry->vertexPositionComponents[i * 2 + 1],
+						} - descriptor.geometry->hullCentroid;
+						const vec2<float32> Pj = vec2<float32>{
+							descriptor.geometry->vertexPositionComponents[j * 2 + 0],
+							descriptor.geometry->vertexPositionComponents[j * 2 + 1],
+						} - descriptor.geometry->hullCentroid;
+
+						const float32 Qi = lengthSquared(Pi) + dot(Pi, Pj) + lengthSquared(Pj);
+						const float32 a = parallelogramArea(Pj, Pi);
+
+						I += Qi * a;
+						area += a;
+						i += 1;
+					}
+
+					I = m * (I / (6.0f * area));
+
+					break;
+				}
 				default: {
 					DEBUG_ASSERT(false);
 

@@ -15,6 +15,9 @@ namespace Trident {
 		/// A thin rectangular plate of width w, height h and mass m.
 		/// The axis of rotation is at the center.
 		THIN_RECTANGULAR_PLATE,
+
+		/// A convex polygon with uniformly distributed mass, rotating about an axis perpendicular to the XY plane.
+		POLYGON,
 	};
 
 	/// See https://en.wikipedia.org/wiki/List_of_moments_of_inertia#List_of_3D_inertia_tensors

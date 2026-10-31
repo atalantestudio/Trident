@@ -14,6 +14,8 @@ namespace Trident {
 			}
 
 			BuildScene2D createScene(AssetBuilderLibrary* assetLibrary) const final override {
+				const ref<Geometry2DAsset> triangleGeometry = assetLibrary->getAsset<Geometry2DAsset>("2d_triangle");
+
 				return {
 					.staticGeometry = {},
 					.dynamicGeometry = {
@@ -21,7 +23,7 @@ namespace Trident {
 						.geometryAssetIdentifiers = {
 							assetLibrary->getAsset<Geometry2DAsset>("2d_unit_square")->identifier,
 							assetLibrary->getAsset<Geometry2DAsset>("2d_polygon")->identifier,
-							assetLibrary->getAsset<Geometry2DAsset>("2d_triangle")->identifier,
+							triangleGeometry->identifier,
 						},
 						.geometryMappings = {
 							{0, {0}},
@@ -51,7 +53,7 @@ namespace Trident {
 									.rotation = 0.0_rad,
 									.scale = {1.0f, 1.0f},
 									.mass = max<float32>(),
-									.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
+									.momentOfInertia = MomentOfInertia2D::POLYGON,
 									.friction = 0.2f,
 									.restitution = 0.0f,
 								}),
@@ -61,12 +63,13 @@ namespace Trident {
 							{
 								2,
 								createRigidBody({
+									.geometry = triangleGeometry,
 									.position = {0.0_m, 12.0_m},
 									// .rotation = 0.0_rad,
 									.rotation = radians(-165.0_deg),
 									.scale = {1.0f, 1.0f},
 									.mass = 1.0_kg,
-									.momentOfInertia = MomentOfInertia2D::THIN_RECTANGULAR_PLATE,
+									.momentOfInertia = MomentOfInertia2D::POLYGON,
 									.friction = 0.2f,
 									.restitution = 0.0f,
 								}),
