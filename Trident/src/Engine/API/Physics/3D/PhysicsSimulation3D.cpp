@@ -73,11 +73,14 @@ namespace Trident {
 				componentIndexB += 1;
 			}
 
+			pair.hullB = pair.hullA;
+			pair.rigidBodyB = pair.rigidBodyA;
+
 			uint32 staticGeometryHullIndex = 0;
 
 			while (staticGeometryHullIndex < staticGeometry.hulls.count()) {
-				pair.hullB = &staticGeometry.hulls[staticGeometryHullIndex];
-				pair.rigidBodyB = &staticGeometry.rigidBodies[staticGeometryHullIndex];
+				pair.hullA = &staticGeometry.hulls[staticGeometryHullIndex];
+				pair.rigidBodyA = &staticGeometry.rigidBodies[staticGeometryHullIndex];
 
 				rigidBodyPairs.emplace_back(pair);
 
@@ -132,11 +135,11 @@ namespace Trident {
 			}
 
 			// TODO(physics/3d/apply-forces): Remove debug code.
-			if (rigidBodyComponentPool.componentIndexToEntity[componentIndex] == playerEntity) {
+			/* if (rigidBodyComponentPool.componentIndexToEntity[componentIndex] == playerEntity) {
 				componentIndex += 1;
 
 				continue;
-			}
+			} */
 
 			rigidBodyComponent.linearVelocity += (rigidBodyComponent.force * rigidBodyComponent.inverseMass + G) * deltaTime;
 
@@ -164,13 +167,13 @@ namespace Trident {
 				rigidBodyA.groundEntity = contactPair.B;
 			} */
 
-			vec3<float32> normalAntiParallel = RIGHT;
+			vec3<float32> antiParallelNormal = RIGHT;
 
 			if (abs(contactPair.manifold.normal.x) > 0.9f) {
-				normalAntiParallel = UP;
+				antiParallelNormal = UP;
 			}
 
-			contactPair.manifold.tangent0 = normalized(cross(contactPair.manifold.normal, normalAntiParallel));
+			contactPair.manifold.tangent0 = normalized(cross(contactPair.manifold.normal, antiParallelNormal));
 			contactPair.manifold.tangent1 = cross(contactPair.manifold.normal, contactPair.manifold.tangent0);
 			contactPair.combinedFriction = sqrt(rigidBodyA.friction * rigidBodyB.friction);
 
@@ -227,10 +230,11 @@ namespace Trident {
 				contact.bias = -penetrationBias * inverseDeltaTime * min(0.0f, contact.separation + ALLOWED_PENETRATION);
 
 				#if defined(ENABLE_PHYSICS_3D_IMPULSE_ACCUMULATION)
-					const vec3<float32> j =
+					const vec3<float32> j = (
 						contactPair.manifold.normal * contact.accumulatedNormalImpulse +
 						contactPair.manifold.tangent0 * contact.accumulatedTangent0Impulse +
-						contactPair.manifold.tangent1 * contact.accumulatedTangent1Impulse;
+						contactPair.manifold.tangent1 * contact.accumulatedTangent1Impulse
+					);
 
 					rigidBodyA.applyImpulse(-j, contact.rA);
 					rigidBodyB.applyImpulse(j, contact.rB);
@@ -429,7 +433,6 @@ namespace Trident {
 		staticGeometry.vertices = sequence<vec3<float32>>(sceneAsset->bakedVertexCount);
 		staticGeometry.edges = sequence<Edge3D>(sceneAsset->bakedTriangleCount * 6);
 		staticGeometry.faces = sequence<Plane3D>(sceneAsset->bakedTriangleCount * 2);
-		staticGeometry.faceEdgeIndices = sequence<uint16>(sceneAsset->bakedTriangleCount * 6);
 		staticGeometry.hulls = sequence<Hull3D>(sceneAsset->bakedTriangleCount);
 		staticGeometry.rigidBodies = sequence<RigidBody3DComponent>(sceneAsset->bakedTriangleCount);
 
@@ -443,7 +446,6 @@ namespace Trident {
 
 		uint32 edgeOffset = 0;
 		uint32 faceOffset = 0;
-		uint32 faceEdgeIndexOffset = 0;
 		uint32 hullIndex = 0;
 
 		while (hullIndex < staticGeometry.hulls.count()) {
@@ -484,29 +486,22 @@ namespace Trident {
 			Plane3D* face = &staticGeometry.faces[faceOffset];
 			face->normal = normal;
 			face->distance = 0.0f;
-			face->edgeIndexRange.offset = edgeOffset;
+			face->edgeIndexRange.offset = 0;
 			face->edgeIndexRange.count = 3;
 
 			face += 1;
 			face->normal = -normal;
 			face->distance = 0.0f;
-			face->edgeIndexRange.offset = edgeOffset + 3;
+			face->edgeIndexRange.offset = 3;
 			face->edgeIndexRange.count = 3;
-
-			staticGeometry.faceEdgeIndices[faceEdgeIndexOffset + 0] = edgeOffset + 0;
-			staticGeometry.faceEdgeIndices[faceEdgeIndexOffset + 1] = edgeOffset + 2;
-			staticGeometry.faceEdgeIndices[faceEdgeIndexOffset + 2] = edgeOffset + 4;
-			staticGeometry.faceEdgeIndices[faceEdgeIndexOffset + 3] = edgeOffset + 1;
-			staticGeometry.faceEdgeIndices[faceEdgeIndexOffset + 4] = edgeOffset + 3;
-			staticGeometry.faceEdgeIndices[faceEdgeIndexOffset + 5] = edgeOffset + 5;
 
 			Hull3D& hull = staticGeometry.hulls[hullIndex];
 			hull.centroid = (a + b + c) / 3.0f;
-			hull.radius = sqrt(max(lengthSquared(a - hull.centroid), max(lengthSquared(b - hull.centroid), lengthSquared(c - hull.centroid))));
+			hull.radius = sqrt(max(distanceSquared(a, hull.centroid), max(distanceSquared(b, hull.centroid), distanceSquared(c, hull.centroid))));
 			hull.vertices = staticGeometry.vertices;
 			hull.edges = view<Edge3D>(&staticGeometry.edges[edgeOffset], 6);
 			hull.faces = view<Plane3D>(&staticGeometry.faces[faceOffset], 2);
-			hull.faceEdgeIndices = view<uint16>(&staticGeometry.faceEdgeIndices[faceEdgeIndexOffset], 6);
+			hull.faceEdgeIndices = staticGeometry.TRIANGLE_FACE_EDGE_INDICES;
 			hull.lineIndexRange.offset = 0;
 			hull.lineIndexRange.count = 0;
 			hull.type = Hull3DType::POLYGON;
@@ -529,7 +524,6 @@ namespace Trident {
 
 			edgeOffset += 6;
 			faceOffset += 2;
-			faceEdgeIndexOffset += 6;
 			hullIndex += 1;
 		}
 	}

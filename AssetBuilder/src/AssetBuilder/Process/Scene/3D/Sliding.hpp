@@ -20,7 +20,7 @@ namespace Trident {
 					.sunColor = {1.0f, 1.0f, 1.0f},
 					.sunIntensity = 1.0f,
 					.spawn = {
-						.position = {0.0f, -62.0f, -6.0f},
+						.position = {0.0f, -63.0f, -6.0f},
 						.viewDirection = {0.0f, 0.0f, 1.0f},
 					},
 				});
@@ -48,9 +48,9 @@ namespace Trident {
 				builder.createRigidBody({
 					.geometryIndex = rectangularCuboidGeometry,
 					.material = debugMaterial,
-					.position = {0.0f, 0.0f, 0.2f},
+					.position = {0.0f, -1.0f, 0.2f},
 					.rotation = {0.0f, 0.0f, 0.15f},
-					.uniformScale = 1.0f,
+					.uniformScale = 2.0f,
 					.mass = max<float32>(),
 					.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
 					.inertiaScale = {5.0f, 0.1f, 1.0f},

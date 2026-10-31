@@ -42,8 +42,8 @@ namespace Trident {
 				},
 				"Forward/DebugContactManifold.frag"
 			),
-			.primitiveTopology = PrimitiveTopology::LINE_STRIP,
-			.polygonMode = PolygonMode::LINE,
+			.primitiveTopology = PrimitiveTopology::POINT_LIST,
+			.polygonMode = PolygonMode::POINT,
 			.cullMode = CullMode::BACK,
 			.frontFace = FrontFace::CLOCKWISE,
 			.lineWidth = 1.0f,

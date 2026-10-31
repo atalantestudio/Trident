@@ -80,8 +80,7 @@ namespace Trident {
 			}
 
 			const Hull3D& hull = geometryComponent.hull;
-			const mat4x4<float32>& world = componentPool.components[componentIndex].world;
-			const mat4x4<float32> transposeInverseWorld = transpose(inverse(world));
+			const RigidBody3DComponent& component = componentPool.components[componentIndex];
 
 			index faceIndex = 0;
 
@@ -89,10 +88,9 @@ namespace Trident {
 				const Plane3D face = hull.faces[faceIndex];
 
 				Plane3D& plane = rigidBodyFacePlanes[rigidBodyFaceOffset + faceIndex];
-
-				// TODO(rigid-body/uniform-scaling): Remove non-uniform scaling properties on the rigid bodies.
-				plane.normal = normalized(face.normal * transposeInverseWorld);
-				plane.distance = dot(face.normal * face.distance * world, plane.normal);
+				plane.normal = normalized(face.normal * inverse(component.orientation));
+				plane.distance = dot(face.normal * face.distance * component.world, plane.normal);
+				plane.edgeIndexRange = face.edgeIndexRange;
 
 				faceIndex += 1;
 			}

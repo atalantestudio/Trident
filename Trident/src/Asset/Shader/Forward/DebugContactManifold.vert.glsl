@@ -10,5 +10,6 @@ layout(set = 0, binding = 0) uniform readonly Camera {
 } camera;
 
 void main() {
+	gl_PointSize = 8.0;
 	gl_Position = camera.projectionView * vec4(contact, 1.0);
 }

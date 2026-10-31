@@ -53,7 +53,7 @@ namespace Trident {
 	static void createFaceContact(const FaceQuery& faceQuery, const RigidBody3DComponent& referenceBody, const RigidBody3DComponent& incidentBody, const Hull3D& referenceHull, const Hull3D& incidentHull, ContactManifold3D* contactManifold) {
 		contactManifold->normal = faceQuery.axis;
 
-		const Plane3D referencePlane = referenceBody.facePlanes[faceQuery.referenceFaceIndex];
+		const Plane3D& referencePlane = referenceBody.facePlanes[faceQuery.referenceFaceIndex];
 
 		pool<uint16, 8> referenceSidePlaneIndices;
 
@@ -90,12 +90,11 @@ namespace Trident {
 
 		// Find the index of the incident face.
 		{
-			float32 angle;
 			float32 minAngle = max<float32>();
 			index faceIndex = 0;
 
 			while (faceIndex < incidentHull.faces.count()) {
-				angle = dot(incidentHull.faces[faceIndex].normal, referenceFaceDirection);
+				const float32 angle = dot(incidentHull.faces[faceIndex].normal, referenceFaceDirection);
 
 				if (angle < minAngle) {
 					minAngle = angle;
@@ -109,7 +108,6 @@ namespace Trident {
 		const Plane3D& incidentFace = incidentHull.faces[incidentFaceIndex];
 
 		pool<ClipVertex3D, MAX_FACE_VERTEX_COUNT> incidentFaceVertices{};
-
 		uint16 edgeIndex = 0;
 
 		while (edgeIndex < incidentFace.edgeIndexRange.count) {
@@ -132,7 +130,7 @@ namespace Trident {
 			edgeIndex += 1;
 		}
 
-		pool<ClipVertex3D, 8> contactPool = SutherlandHodgman3D(referenceBody, faceQuery.referenceFaceIndex, incidentFaceVertices, referenceSidePlaneIndices);
+		pool<ClipVertex3D, 8> contactPool = SutherlandHodgman3D(referenceBody, referenceHull, faceQuery.referenceFaceIndex, incidentFaceVertices, referenceSidePlaneIndices);
 
 		// Discard contacts that are above the reference plane, and move the rest onto the plane.
 		// This helps with coherence when reducing the number of contacts.
@@ -188,11 +186,10 @@ namespace Trident {
 
 			index contactIndex = 0;
 			index maxAngleContactIndex = max<index>();
-			float32 angle;
 			float32 maxAngle = min<float32>();
 
 			while (contactIndex < contactPool.count()) {
-				angle = dot(contactPool[contactIndex].position, n);
+				const float32 angle = dot(contactPool[contactIndex].position, n);
 
 				if (angle > maxAngle) {
 					maxAngle = angle;
@@ -215,11 +212,10 @@ namespace Trident {
 
 			index contactIndex = 0;
 			index maxDistanceContactIndex = max<index>();
-			float32 distance;
 			float32 maxDistance = min<float32>();
 
 			while (contactIndex < contactPool.count()) {
-				distance = distanceSquared(a, contactPool[contactIndex].position);
+				const float32 distance = distanceSquared(a, contactPool[contactIndex].position);
 
 				if (distance > maxDistance) {
 					maxDistance = distance;
@@ -243,14 +239,11 @@ namespace Trident {
 
 			index contactIndex = 0;
 			index maxAreaContactIndex = max<index>();
-			float32 area;
 			float32 maxArea = min<float32>();
-			vec3<float32> c;
 
 			while (contactIndex < contactPool.count()) {
-				c = contactPool[contactIndex].position;
-
-				area = dot(cross(a - c, b - c) * 0.5f, contactManifold->normal);
+				const vec3<float32> c = contactPool[contactIndex].position;
+				const float32 area = dot(cross(a - c, b - c) * 0.5f, contactManifold->normal);
 
 				if (area > maxArea) {
 					maxArea = area;
@@ -275,14 +268,12 @@ namespace Trident {
 
 			index contactIndex = 0;
 			index minAreaContactIndex = max<index>();
-			float32 area;
 			float32 minArea = max<float32>();
-			vec3<float32> d;
 
 			while (contactIndex < contactPool.count()) {
-				d = contactPool[contactIndex].position;
+				const vec3<float32> d = contactPool[contactIndex].position;
 
-				area = dot(cross(a - d, b - d) * 0.5f, contactManifold->normal);
+				float32 area = dot(cross(a - d, b - d) * 0.5f, contactManifold->normal);
 
 				if (area < minArea) {
 					minArea = area;

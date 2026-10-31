@@ -89,6 +89,24 @@ namespace Trident {
 		return parallelogramArea(ab, ap) / length(ab);
 	}
 
+	// See https://stackoverflow.com/a/36425155/17136841.
+	inline float32 signedDistanceLPAB(vec3<float32> a, vec3<float32> b, vec3<float32> p) {
+		const vec3<float32> ab = b - a;
+		const vec3<float32> ap = p - a;
+
+		if (dot(ab, ap) < 0.0f) {
+			return length(ap);
+		}
+
+		const vec3<float32> bp = p - b;
+
+		if (dot(bp, ab) > 0.0f) {
+			return length(bp);
+		}
+
+		return length(cross(ab, ap)) / length(ab);
+	}
+
 	// TODO(lyah/signed-distance): Add to Lyah.
 	/// Calculates the signed distance between a point and an infinite plane.
 	inline float32 signedDistance(vec2<float32> point, Plane2D plane) {
@@ -109,6 +127,10 @@ namespace Trident {
 
 	inline vec2<float32> edgeNormalClockwise(vec2<float32> a, vec2<float32> b) {
 		return perpendicularLeft(normalized(b - a));
+	}
+
+	inline vec3<float32> edgeNormalClockwise(vec3<float32> a, vec3<float32> b, vec3<float32> up) {
+		return normalized(cross(b - a, up));
 	}
 
 	inline bool parallelOrOpposite(vec3<float32> a, vec3<float32> b) {

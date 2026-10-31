@@ -6,7 +6,7 @@
 #include "Engine/API/Physics/3D/SutherlandHodgman3D.hpp"
 
 namespace Trident {
-	pool<ClipVertex3D, 8> SutherlandHodgman3D(const RigidBody3DComponent& referenceBody, uint16 faceIndex, pool<ClipVertex3D, MAX_FACE_VERTEX_COUNT> inputVertices, const pool<uint16, 8>& referenceSidePlaneIndices) {
+	pool<ClipVertex3D, 8> SutherlandHodgman3D(const RigidBody3DComponent& referenceBody, const Hull3D& referenceHull, uint16 referenceFaceIndex, pool<ClipVertex3D, MAX_FACE_VERTEX_COUNT> inputVertices, const pool<uint16, 8>& referenceSidePlaneIndices) {
 		index planeIndex = 0;
 
 		while (planeIndex < referenceSidePlaneIndices.count()) {
@@ -26,18 +26,19 @@ namespace Trident {
 				if (distanceA * distanceB < 0.0f) {
 					const float32 t = distanceA / (distanceA - distanceB);
 
-					ClipVertex3D c{};
+					ClipVertex3D c;
 					c.position = lerp(a.position, b.position, t);
+					c.separation = 0.0f;
 
 					if (distanceA > 0.0f) {
 						c.id = a.id;
 						c.id.referenceFaceAIndex = max<uint16>();
-						c.id.referenceFaceBIndex = faceIndex;
+						c.id.referenceFaceBIndex = referenceFaceIndex;
 					}
 					else {
 						c.id = b.id;
 						c.id.incidentFaceAIndex = max<uint16>();
-						c.id.incidentFaceBIndex = faceIndex;
+						c.id.incidentFaceBIndex = referenceFaceIndex;
 					}
 
 					outputVertices.add(c);

@@ -164,17 +164,19 @@ namespace Trident {
 				#endif
 
 				// TODO(renderer/forward): Restore debug visualization modes.
-				/* debugHullWireframePipelineLayout = createDebugHullWireframePipelineLayout();
-				debugHullWireframePipeline = createDebugHullWireframePipeline();
+				// debugHullWireframePipelineLayout = createDebugHullWireframePipelineLayout();
+				// debugHullWireframePipeline = createDebugHullWireframePipeline();
 
-				debugContactManifoldPipelineLayout = createDebugContactManifoldPipelineLayout();
-				debugContactManifoldPipeline = createDebugContactManifoldPipeline();
+				if (visualizationMode & VisualizationMode::CONTACT_MANIFOLDS) {
+					debugContactManifoldPipelineLayout = createDebugContactManifoldPipelineLayout();
+					debugContactManifoldPipeline = createDebugContactManifoldPipeline();
 
-				debugContactManifoldBuffer = createDebugContactManifoldBuffer();
+					debugContactManifoldBuffer = createDebugContactManifoldBuffer();
 
-				const BufferView<vec3<float32>> debugContactManifoldView = debugContactManifoldBuffer->createView<vec3<float32>>(0, debugContactManifoldBuffer->getSize());
+					const BufferView<vec3<float32>> debugContactManifoldView = debugContactManifoldBuffer->createView<vec3<float32>>(0, debugContactManifoldBuffer->getSize());
 
-				debugContactRange = debugContactManifoldView->map(); */
+					debugContactRange = debugContactManifoldView.map();
+				}
 
 				defaultSampler = createDefaultSampler();
 				lightmapAtlasSampler = createLightmapAtlasSampler();

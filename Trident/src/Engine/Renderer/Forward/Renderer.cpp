@@ -5,9 +5,9 @@
 
 #include "Engine/API/Camera/3D/PerspectiveCamera3D.hpp"
 #include "Engine/Renderer/Forward/ColorImage.hpp"
-// #include "Engine/Renderer/Forward/DebugContactManifoldBuffer.hpp"
-// #include "Engine/Renderer/Forward/DebugContactManifoldPipeline.hpp"
-// #include "Engine/Renderer/Forward/DebugContactManifoldPipelineLayout.hpp"
+#include "Engine/Renderer/Forward/DebugContactManifoldBuffer.hpp"
+#include "Engine/Renderer/Forward/DebugContactManifoldPipeline.hpp"
+#include "Engine/Renderer/Forward/DebugContactManifoldPipelineLayout.hpp"
 // #include "Engine/Renderer/Forward/DebugHullWireframeBuffer.hpp"
 // #include "Engine/Renderer/Forward/DebugHullWireframePipeline.hpp"
 // #include "Engine/Renderer/Forward/DebugHullWireframePipelineLayout.hpp"
@@ -235,12 +235,11 @@ namespace Trident {
 			} */
 		}
 
-		if (visualizationMode & VisualizationMode::CONTACT_MANIFOLDS) {
-			// TODO(renderer/forward): Restore debug visualization modes.
-			/* commandEncoder->bindGraphicsPipeline(debugContactManifoldPipeline);
-			commandEncoder->bindDescriptorSets(debugContactManifoldPipelineLayout, 0, dynamicDescriptorSet);
+		if (visualizationMode & VisualizationMode::CONTACT_MANIFOLDS && contactCount > 0) {
+			commandEncoder->bindGraphicsPipeline(debugContactManifoldPipeline);
+			commandEncoder->bindDescriptorSets(debugContactManifoldPipelineLayout, 0, sceneDescriptorSet);
 			commandEncoder->bindVertexBuffer(0, debugContactManifoldBuffer, 0);
-			commandEncoder->draw(contactCount, 1, 0, 0); */
+			commandEncoder->draw(contactCount, 1, 0, 0);
 		}
 
 		commandEncoder->endRenderPass();

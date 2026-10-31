@@ -20,10 +20,11 @@ namespace Trident {
 	};
 
 	struct PhysicsSimulationStaticGeometry {
+		static constexpr uint16 TRIANGLE_FACE_EDGE_INDICES[] = {0, 2, 4, 1, 3, 5};
+
 		sequence<vec3<float32>> vertices;
 		sequence<Edge3D> edges;
 		sequence<Plane3D> faces;
-		sequence<uint16> faceEdgeIndices;
 		sequence<Hull3D> hulls;
 		sequence<RigidBody3DComponent> rigidBodies;
 	};

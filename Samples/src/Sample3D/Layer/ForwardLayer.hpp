@@ -53,6 +53,7 @@ namespace Trident {
 			}
 
 			void initialize() override {
+				renderer.visualizationMode = VisualizationMode::DEFAULT | VisualizationMode::CONTACT_MANIFOLDS;
 				renderer.setLayer(this);
 				renderer.build();
 				renderer.postBuild();
@@ -75,7 +76,6 @@ namespace Trident {
 				});
 
 				renderer.setScene(scene);
-				renderer.visualizationMode = VisualizationMode::DEFAULT;
 
 				PerspectiveCamera3D& camera = cameraController.getCamera();
 				camera.position = sceneAsset->spawnPosition;
@@ -161,14 +161,10 @@ namespace Trident {
 						componentIndex += 1;
 					}
 
-					/* if (renderer.visualizationMode & VisualizationMode::CONTACT_MANIFOLDS) {
+					if (renderer.visualizationMode & VisualizationMode::CONTACT_MANIFOLDS) {
 						renderer.contactCount = 0;
 
 						for (const std::pair<RigidBodyPair3D, ContactPair3D>& pair : physicsSimulation->contactPairs) {
-							if (pair.first.A != PLAYER_ENTITY && pair.first.B != PLAYER_ENTITY) {
-								continue;
-							}
-
 							uint8 contactIndex = 0;
 
 							while (contactIndex < pair.second.manifold.contactCount) {
@@ -183,7 +179,7 @@ namespace Trident {
 
 							break;
 						}
-					} */
+					}
 				#endif
 
 				renderer.updateCamera();
