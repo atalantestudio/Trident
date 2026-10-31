@@ -55,33 +55,6 @@ namespace Trident {
 
 		const Plane3D& referencePlane = referenceBody.facePlanes[faceQuery.referenceFaceIndex];
 
-		pool<uint16, 8> referenceSidePlaneIndices;
-
-		{
-			uint32 edgeIndex = 0;
-
-			while (edgeIndex < referenceHull.edges.count()) {
-				const Edge3D edge = referenceHull.edges[edgeIndex];
-
-				if (edge.faceIndex == faceQuery.referenceFaceIndex) {
-					uint32 otherEdgeIndex = edgeIndex;
-
-					if (edgeIndex & 1) {
-						// If it's a twin edge, add the edge preceeding it (base).
-						otherEdgeIndex -= 1;
-					}
-					else {
-						// If it's a base edge, add the edge following it (twin).
-						otherEdgeIndex += 1;
-					}
-
-					referenceSidePlaneIndices.add(referenceHull.edges[otherEdgeIndex].faceIndex);
-				}
-
-				edgeIndex += 1;
-			}
-		}
-
 		// Rotate by the inverse of the incident body's orientation to get a normal that can be used as a support direction.
 		// TODO(physics/3d): Invert the orientation before multiplying?
 		const vec3<float32> referenceFaceDirection = referencePlane.normal * incidentBody.orientation;
@@ -130,7 +103,7 @@ namespace Trident {
 			edgeIndex += 1;
 		}
 
-		pool<ClipVertex3D, 8> contactPool = SutherlandHodgman3D(referenceBody, referenceHull, faceQuery.referenceFaceIndex, incidentFaceVertices, referenceSidePlaneIndices);
+		pool<ClipVertex3D, 8> contactPool = SutherlandHodgman3D(referenceBody, referenceHull, faceQuery.referenceFaceIndex, incidentFaceVertices);
 
 		// Discard contacts that are above the reference plane, and move the rest onto the plane.
 		// This helps with coherence when reducing the number of contacts.

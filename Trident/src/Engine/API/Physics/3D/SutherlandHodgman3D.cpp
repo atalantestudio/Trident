@@ -6,11 +6,30 @@
 #include "Engine/API/Physics/3D/SutherlandHodgman3D.hpp"
 
 namespace Trident {
-	pool<ClipVertex3D, 8> SutherlandHodgman3D(const RigidBody3DComponent& referenceBody, const Hull3D& referenceHull, uint16 referenceFaceIndex, pool<ClipVertex3D, MAX_FACE_VERTEX_COUNT> inputVertices, const pool<uint16, 8>& referenceSidePlaneIndices) {
+	static Plane3D getSidePlane(const RigidBody3DComponent& body, const Hull3D& hull, Plane3D plane, index edgeOffset) {
+		const uint16 edgeIndexA = hull.faceEdgeIndices[plane.edgeIndexRange.offset + edgeOffset];
+		const uint16 edgeIndexB = hull.faceEdgeIndices[plane.edgeIndexRange.offset + (edgeOffset + 1) % plane.edgeIndexRange.count];
+		const Edge3D edgeA = hull.edges[edgeIndexA];
+		const Edge3D edgeB = hull.edges[edgeIndexB];
+		const vec3<float32> a = hull.vertices[edgeA.originVertexIndex] * body.world;
+		const vec3<float32> b = hull.vertices[edgeB.originVertexIndex] * body.world;
+
+		Plane3D sidePlane;
+		sidePlane.normal = normalized(cross(normalized(b - a), plane.normal));
+		sidePlane.distance = dot(sidePlane.normal, a);
+		sidePlane.edgeIndexRange.offset = 0;
+		sidePlane.edgeIndexRange.count = 0;
+
+		return *pointer_cast<const Plane3D*>(&sidePlane);
+	}
+
+	pool<ClipVertex3D, 8> SutherlandHodgman3D(const RigidBody3DComponent& referenceBody, const Hull3D& referenceHull, uint16 referenceFaceIndex, pool<ClipVertex3D, MAX_FACE_VERTEX_COUNT> inputVertices) {
+		const Plane3D referenceFace = referenceBody.facePlanes[referenceFaceIndex];
+
 		index planeIndex = 0;
 
-		while (planeIndex < referenceSidePlaneIndices.count()) {
-			const Plane3D plane = referenceBody.facePlanes[referenceSidePlaneIndices[planeIndex]];
+		while (planeIndex < referenceFace.edgeIndexRange.count) {
+			const Plane3D plane = getSidePlane(referenceBody, referenceHull, referenceFace, planeIndex);
 
 			pool<ClipVertex3D, MAX_FACE_VERTEX_COUNT> outputVertices;
 			index vertexOffset = 0;

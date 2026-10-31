@@ -18,7 +18,7 @@ namespace Trident {
 					{-2.0f,  0.0f,  2.0f},
 					{ 2.0f,  0.0f,  2.0f},
 					{ 2.0f,  0.0f, -2.0f},
-					// {-2.0f,  0.0f, -2.0f},
+					{-2.0f,  0.0f, -2.0f},
 				};
 
 				// Texture scale multipliers
@@ -38,7 +38,6 @@ namespace Trident {
 				});
 
 				const uint32 playerHullGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("3d_unit_box_st"));
-				const uint32 unitPlaneGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("3d_unit_plane"));
 
 				const MaterialReference lightmappedGrayMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_debug_gray"));
 				const MaterialReference lightmappedWallMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_debug_wall"));
