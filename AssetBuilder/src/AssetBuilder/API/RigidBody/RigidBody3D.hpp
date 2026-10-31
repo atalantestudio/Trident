@@ -6,10 +6,14 @@
 #include "Engine/API/Descriptor.hpp"
 #include "Engine/API/Physics/MomentOfInertia.hpp"
 #include "Engine/ECS/Component/RigidBody3DComponent.hpp"
+#include "Engine/Filesystem/Asset/Geometry3DAsset.hpp"
 
 namespace Trident {
 	template<>
 	struct Descriptor<RigidBody3DComponent> {
+		/// Used to calculate the moment of inertia.
+		ref<Geometry3DAsset> geometryAsset = nullptr;
+
 		vec3<float32> position;
 		vec3<float32> rotation;
 		float32 uniformScale = 1.0f;

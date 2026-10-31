@@ -11,7 +11,7 @@
 namespace Trident {
 	template<>
 	struct Descriptor<RigidBody2DComponent> {
-		/// Required when the moment of inertia is POLYGON.
+		/// Used to calculate the moment of inertia.
 		ref<Geometry2DAsset> geometry = nullptr;
 
 		vec2<float32> position;

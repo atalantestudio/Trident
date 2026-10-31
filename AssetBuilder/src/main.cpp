@@ -70,6 +70,7 @@
 #include "AssetBuilder/Process/Scene/3D/LightmapTest.hpp"
 #include "AssetBuilder/Process/Scene/3D/PBRTest.hpp"
 #include "AssetBuilder/Process/Scene/3D/PropGallery.hpp"
+#include "AssetBuilder/Process/Scene/3D/PSphereSphere.hpp"
 #include "AssetBuilder/Process/Scene/3D/Sliding.hpp"
 #include "AssetBuilder/Process/Scene/3D/Stacking.hpp"
 #include "AssetBuilder/Process/Scene/3D/Suzanne.hpp"
@@ -114,7 +115,7 @@ namespace Trident {
 
 		private:
 			void registerProcesses() {
-				allocateProcesses(75);
+				allocateProcesses(76);
 
 				registerProcess<BuildGeometryAssetProcess>(&assetLibrary);
 
@@ -192,6 +193,7 @@ namespace Trident {
 				registerProcess<LightmapTestScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<PBRTestScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<PropGalleryScene3D>(&assetLibrary, &lightmapper);
+				registerProcess<PSphereSphereScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<SlidingScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<StackingScene3D>(&assetLibrary, &lightmapper);
 				registerProcess<SuzanneScene3D>(&assetLibrary, &lightmapper);

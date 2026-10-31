@@ -49,11 +49,8 @@ namespace Trident {
 					},
 				});
 
-				const uint32 playerHullGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("playerhull"));
-
 				const MaterialReference lightmappedGrayMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_debug_gray"));
 				const MaterialReference lightmappedWallMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_debug_wall"));
-				const MaterialReference debugMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("debug"));
 
 				Face& floorFace = builder.createFace({
 					.vertices = EXTRUDED_FLOOR_VERTICES,
@@ -94,36 +91,19 @@ namespace Trident {
 					},
 				});
 
-				/* // Box
-				builder.createRigidBody({
-					.geometryIndex = boxGeometry,
-					.material = debugMaterial,
-					.position = {128.0f, 8.0f, 128.0f},
-					.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
-					.uniformScale = 1.0f,
-					.mass = 20.0_kg,
-					.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
-					.inertiaScale = {64.0f, 16.0f, 64.0f},
-					.friction = 0.2f,
-					.restitution = 0.0f,
-				}); */
-
-				// Player
-				builder.createRigidBody({
+				// TODO(test): Remove.
+				/* builder.createRigidBody({
 					.geometryIndex = playerHullGeometry,
 					.material = debugMaterial,
-
-					// TODO(physics/3d/center-of-mass): Position the player at (0 0 0).
-					.position = {0.0f, 64.0f, 0.0f},
-
+					.position = {0.0f, 72.0f, 0.0f},
 					.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
 					.uniformScale = 1.0f,
-					.mass = 70.0_kg,
+					.mass = 700.0_kg,
 					.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
 					.inertiaScale = {1.0f, 1.0f, 1.0f},
 					.friction = 0.2f,
 					.restitution = 0.0f,
-				});
+				}); */
 
 				return builder;
 			}

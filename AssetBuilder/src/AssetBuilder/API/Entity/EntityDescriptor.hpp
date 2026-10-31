@@ -9,6 +9,9 @@
 
 namespace Trident {
 	struct EntityDescriptor {
+		/// Used to calculate the inertia tensor.
+		ref<Geometry3DAsset> geometryAsset;
+
 		uint32 geometryIndex;
 		MaterialReference material;
 		vec3<float32> position;

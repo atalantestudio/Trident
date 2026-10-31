@@ -5,6 +5,7 @@
 
 namespace Trident {
 	enum Hull3DType : uint8 {
+		SPHERE,
 		POLYGON,
 
 		count,

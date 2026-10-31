@@ -161,7 +161,7 @@ namespace Trident {
 						componentIndex += 1;
 					}
 
-					if (physicsSimulation->contactPairs.size() > 0 && renderer.visualizationMode & VisualizationMode::CONTACT_MANIFOLDS) {
+					if (renderer.visualizationMode & VisualizationMode::CONTACT_MANIFOLDS) {
 						renderer.contactCount = 0;
 
 						for (const std::pair<RigidBodyPair3D, ContactPair3D>& pair : physicsSimulation->contactPairs) {

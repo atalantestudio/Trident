@@ -20,9 +20,9 @@ namespace Trident {
 		POLYGON,
 	};
 
-	/// See https://en.wikipedia.org/wiki/List_of_moments_of_inertia#List_of_3D_inertia_tensors
+	/// See https://en.wikipedia.org/wiki/List_of_moments_of_inertia#List_of_3D_inertia_tensors.
 	enum class MomentOfInertia3D : uint8 {
-		/// A solid cuboid of width w (X), height h (Y), depth d (Z) and mass m.
+		SOLID_SPHERE,
 		SOLID_CUBOID,
 	};
 }

@@ -282,6 +282,9 @@ namespace Trident {
 	}
 
 	bool PolygonPolygon(const RigidBodyPair3D& pair, ContactManifold3D* contactManifold) {
+		DEBUG_ASSERT(pair.hullA->type == Hull3DType::POLYGON);
+		DEBUG_ASSERT(pair.hullB->type == Hull3DType::POLYGON);
+
 		SATOutput3D sat = SAT3D(*pair.rigidBodyA, *pair.rigidBodyB, *pair.hullA, *pair.hullB);
 
 		if (!sat.overlap) {

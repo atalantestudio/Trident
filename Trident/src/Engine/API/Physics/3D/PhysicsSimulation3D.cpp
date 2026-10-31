@@ -96,11 +96,14 @@ namespace Trident {
 
 		for (const RigidBodyPair3D& pair : rigidBodyPairs) {
 			static constexpr Collider3D COLLISION_TABLE[Hull3DType::count][Hull3DType::count] = {
-				{PolygonPolygon},
+				{SphereSphere, SpherePolygon },
+				{nullptr,      PolygonPolygon},
 			};
 
 			// The broad phase must ensure that A hull type < B hull type.
 			const Collider3D collider = COLLISION_TABLE[pair.hullA->type][pair.hullB->type];
+
+			DEBUG_ASSERT(collider != nullptr);
 
 			if (!collider(pair, &contactPair.manifold)) {
 				// Either a degenerate case, or the entities are not overlapping.

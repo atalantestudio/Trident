@@ -26,7 +26,7 @@ namespace Trident {
 				static constexpr float32 m2 = 512.0f;
 
 				MapBuilder builder({
-					.skyColor = {0.0f, 0.0f, 0.0f},
+					.skyColor = {1.0f, 1.0f, 1.0f},
 					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("evening_road_01_512p"),
 					.sunDirection = {1.0f, 1.0f, 1.0f},
 					.sunColor = {1.0f, 1.0f, 1.0f},
@@ -58,14 +58,10 @@ namespace Trident {
 					},
 				});
 
-				// Player
 				builder.createRigidBody({
 					.geometryIndex = playerHullGeometry,
 					.material = debugMaterial,
-
-					// TODO(physics/3d/center-of-mass): Position the player at (0 0 0).
-					.position = {-0.1f, 3.0f, -0.1f},
-
+					.position = { 0.0f, 3.0f,  0.0f},
 					.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
 					.uniformScale = 1.0f,
 					.mass = 70.0_kg,

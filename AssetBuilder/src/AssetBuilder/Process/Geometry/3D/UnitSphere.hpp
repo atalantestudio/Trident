@@ -17,11 +17,24 @@ namespace Trident {
 				static constexpr uint32 Y_SEGMENTS = 64;
 				static constexpr uint32 s = X_SEGMENTS + 1;
 
-				BuildGeometry3D geometry = {
-					.flags = GeometryAssetFlags::IS_3D,
-					.vertices = sequence<BuildVertex3D>((X_SEGMENTS + 1) * (X_SEGMENTS + 1)),
-					.indices = sequence<uint32>((X_SEGMENTS + 1) * Y_SEGMENTS * 6),
-				};
+				BuildGeometry3D geometry;
+				geometry.flags = GeometryAssetFlags::IS_3D | GeometryAssetFlags::HAS_HULL;
+				geometry.vertices = sequence<BuildVertex3D>((X_SEGMENTS + 1) * (X_SEGMENTS + 1));
+				geometry.indices = sequence<uint32>((X_SEGMENTS + 1) * Y_SEGMENTS * 6);
+				geometry.hull.centroid = {0.0f, 0.0f, 0.0f};
+				geometry.hull.radius = 0.5f;
+				geometry.hull.vertices = {};
+				geometry.hull.edges = {};
+				geometry.hull.faces = {};
+				geometry.hull.faceEdgeIndices = {};
+				geometry.hull.lineIndexRange.offset = 0;
+				geometry.hull.lineIndexRange.count = 0;
+				geometry.hull.type = Hull3DType::SPHERE;
+				geometry.hullVertices = {};
+				geometry.hullEdges = {};
+				geometry.hullFaceEdgeIndices = {};
+				geometry.hullFaces = {};
+				geometry.hullLineIndices = {};
 
 				uint64 vertexIndex = 0;
 				uint32 x = 0;

@@ -155,6 +155,8 @@ namespace Trident {
 			// The broad phase must ensure that A hull type < B hull type.
 			const Collider2D collider = COLLIDER_2D_TABLE[static_cast<uint32>(hullA.type)][static_cast<uint32>(hullB.type)];
 
+			DEBUG_ASSERT(collider != nullptr);
+
 			if (!collider(rigidBodyA, rigidBodyB, hullA, hullB, &contactPair.manifold)) {
 				// Either a degenerate case, or the entities are not overlapping.
 				contactPairs.erase(entityPair);

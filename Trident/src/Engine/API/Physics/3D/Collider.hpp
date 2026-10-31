@@ -9,5 +9,7 @@
 namespace Trident {
 	typedef bool (*Collider3D)(const RigidBodyPair3D& pair, ContactManifold3D* contactManifold);
 
+	bool SphereSphere(const RigidBodyPair3D& pair, ContactManifold3D* contactManifold);
+	bool SpherePolygon(const RigidBodyPair3D& pair, ContactManifold3D* contactManifold);
 	bool PolygonPolygon(const RigidBodyPair3D& pair, ContactManifold3D* contactManifold);
 }

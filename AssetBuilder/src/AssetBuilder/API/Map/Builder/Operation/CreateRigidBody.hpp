@@ -48,6 +48,7 @@ namespace Trident {
 		EntityComponentMapping<RigidBody3DComponent> rigidBodyMapping{};
 		rigidBodyMapping.entity = entityCount;
 		rigidBodyMapping.component = Trident::createRigidBody({
+			.geometryAsset = descriptor.geometryAsset,
 			.position = descriptor.position,
 			.rotation = descriptor.rotation,
 			.uniformScale = descriptor.uniformScale,

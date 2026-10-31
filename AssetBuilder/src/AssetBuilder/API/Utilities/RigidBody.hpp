@@ -115,20 +115,32 @@ namespace Trident {
 			mat3x3<float32> I;
 
 			switch (descriptor.momentOfInertia) {
-				case MomentOfInertia3D::SOLID_CUBOID: {
-					// The object is assumed to have a unit square geometry with the axis of rotation at the center.
+				case MomentOfInertia3D::SOLID_SPHERE: {
+					const float32 r = descriptor.geometryAsset->hullRadius;
+					const float32 x = (2.0f / 5.0f) * m * r * r;
 
+					I = {
+						x,    0.0f, 0.0f,
+						0.0f, x,    0.0f,
+						0.0f, 0.0f, x,
+					};
+
+					break;
+				}
+				case MomentOfInertia3D::SOLID_CUBOID: {
 					// TODO(physics/3d/inertia): Calculate the size without using the scale.
 					const vec3<float32> inertia = descriptor.inertiaScale * component.scale;
 
-					const float32 w = inertia.x;
-					const float32 h = inertia.y;
-					const float32 d = inertia.z;
+					const float32 ww = inertia.x * inertia.x;
+					const float32 hh = inertia.y * inertia.y;
+					const float32 dd = inertia.z * inertia.z;
+
+					const float32 m_12 = (1.0f / 12.0f) * m;
 
 					I = {
-						m / 12.0f * (h * h + d * d), 0.0f, 0.0f,
-						0.0f, m / 12.0f * (w * w + d * d), 0.0f,
-						0.0f, 0.0f, m / 12.0f * (w * w + h * h),
+						m_12 * (hh + dd), 0.0f,             0.0f,
+						0.0f,             m_12 * (ww + dd), 0.0f,
+						0.0f,             0.0f,             m_12 * (ww + hh),
 					};
 
 					break;
