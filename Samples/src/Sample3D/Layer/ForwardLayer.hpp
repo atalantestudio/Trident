@@ -161,23 +161,27 @@ namespace Trident {
 						componentIndex += 1;
 					}
 
-					if (renderer.visualizationMode & VisualizationMode::CONTACT_MANIFOLDS) {
+					if (physicsSimulation->contactPairs.size() > 0 && renderer.visualizationMode & VisualizationMode::CONTACT_MANIFOLDS) {
 						renderer.contactCount = 0;
 
 						for (const std::pair<RigidBodyPair3D, ContactPair3D>& pair : physicsSimulation->contactPairs) {
+							const ContactManifold3D& contactManifold = pair.second.manifold;
+
+							if (renderer.contactCount + contactManifold.contactCount > 16) {
+								break;
+							}
+
 							uint8 contactIndex = 0;
 
-							while (contactIndex < pair.second.manifold.contactCount) {
-								renderer.debugContactRange[renderer.contactCount] = pair.second.manifold.contacts[contactIndex].position;
+							while (contactIndex < contactManifold.contactCount) {
+								renderer.debugContactRange[renderer.contactCount] = contactManifold.contacts[contactIndex].position;
 								renderer.contactCount += 1;
 
 								contactIndex += 1;
 							}
 
-							renderer.debugContactRange[renderer.contactCount] = pair.second.manifold.contacts[0].position;
+							renderer.debugContactRange[renderer.contactCount] = contactManifold.contacts[0].position;
 							renderer.contactCount += 1;
-
-							break;
 						}
 					}
 				#endif
