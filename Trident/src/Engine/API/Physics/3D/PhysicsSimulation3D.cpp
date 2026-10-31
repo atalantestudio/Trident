@@ -516,7 +516,11 @@ namespace Trident {
 			rigidBody.linearVelocity = {0.0f, 0.0f, 0.0f};
 			rigidBody.angularVelocity = {0.0f, 0.0f, 0.0f};
 			rigidBody.inverseMass = 0.0f;
-			rigidBody.inverseInertia = identity<mat3x3<float32>>();
+			rigidBody.inverseInertia = {
+				0.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.0f,
+			};
 			rigidBody.friction = 0.0f;
 			rigidBody.restitution = 0.0f;
 			rigidBody.force = {0.0f, 0.0f, 0.0f};
