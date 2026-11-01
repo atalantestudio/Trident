@@ -11,7 +11,7 @@ namespace Trident {
 		quat<float32> orientation;
 	};
 
-	/// Returns the product of the transforms `A` and `B`.
+	/// Returns the product of `A` and `B`.
 	inline Transform3D operator*(const Transform3D& A, Transform3D B) {
 		B.position = B.position * A.orientation + A.position;
 
@@ -21,7 +21,7 @@ namespace Trident {
 		return B;
 	}
 
-	/// Returns the product of `p` by the transform `A`.
+	/// Returns the product of `p` by `A`.
 	/* inline vec3<float32> operator*(vec3<float32> p, const Transform3D& A) {
 		return p * A.orientation + A.position;
 	} */
@@ -33,7 +33,7 @@ namespace Trident {
 		return plane;
 	}
 
-	/// Returns the inverse transform of `A`.
+	/// Returns the inverse of `A`.
 	inline Transform3D inverse(Transform3D A) {
 		A.position = -A.position;
 		A.orientation = conjugate(A.orientation);

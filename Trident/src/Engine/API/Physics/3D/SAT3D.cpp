@@ -113,36 +113,24 @@ namespace Trident {
 		return query;
 	}
 
-	static FaceQuery queryFaceDirections(const Transform3D& transformA, const Transform3D& transformB, const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, const Hull3D& hullA, const Hull3D& hullB) {
+	static FaceQuery queryFaceDirections(const Transform3D& transformA, const Transform3D& transformB, const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, const Hull3D& hullA, const Hull3D& hullB, bool bToA) {
 		FaceQuery query{};
 
-		// TODO(physics/3d/sat): Move computations in the local space of B.
-		// // All computations are done in the local space of B.
-		// const Transform3D transform = transformA * inverse(transformB);
+		// All computations are done in the local space of B.
+		const Transform3D transform = transformA * inverse(transformB);
 
-		const quat<float32> R = rigidBodyB.orientation * inverse(rigidBodyA.orientation);
+		// TODO(physics/3d/sat): Find a way to replace this matrix with the transform above.
+		const mat4x4<float32> T = rigidBodyA.world * inverse(rigidBodyB.world);
 
 		uint16 faceIndex = 0;
 
 		while (faceIndex < hullA.faces.count()) {
 			const Plane3D face = hullA.faces[faceIndex];
 
-			// TODO(physics/3d/sat): Move computations in the local space of B.
-			Plane3D plane;
-			plane.normal = normalized(face.normal * inverse(rigidBodyA.orientation));
-			plane.distance = dot(face.normal * face.distance * rigidBodyA.world, plane.normal);
-			plane.edgeIndexRange = face.edgeIndexRange;
+			Plane3D plane = face * inverse(transform);
+			plane.distance = dot(face.normal * face.distance * T, plane.normal);
 
-			const vec3<float32> support = hullB.support(-face.normal * R) * rigidBodyB.world;
-
-			/* Plane3D plane = face * transform;
-
-			if (bToA) {
-				plane.offset = abs(plane.offset);
-			}
-
-			const vec3<float32> support = hullB.support(-plane.normal); */
-
+			const vec3<float32> support = hullB.support(-plane.normal);
 			const float32 separation = signedDistance(plane, support);
 
 			if (separation > query.separation) {
@@ -164,13 +152,13 @@ namespace Trident {
 	SATOutput3D SAT3D(const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, const Hull3D& hullA, const Hull3D& hullB) {
 		SATOutput3D output;
 		output.overlap = false;
-		output.faceQueryA = queryFaceDirections(rigidBodyA.getTransform(), rigidBodyB.getTransform(), rigidBodyA, rigidBodyB, hullA, hullB);
+		output.faceQueryA = queryFaceDirections(rigidBodyA.getTransform(), rigidBodyB.getTransform(), rigidBodyA, rigidBodyB, hullA, hullB, false);
 
 		if (output.faceQueryA.separation > 0.0f) {
 			return output;
 		}
 
-		output.faceQueryB = queryFaceDirections(rigidBodyB.getTransform(), rigidBodyA.getTransform(), rigidBodyB, rigidBodyA, hullB, hullA);
+		output.faceQueryB = queryFaceDirections(rigidBodyB.getTransform(), rigidBodyA.getTransform(), rigidBodyB, rigidBodyA, hullB, hullA, true);
 
 		if (output.faceQueryB.separation > 0.0f) {
 			return output;
