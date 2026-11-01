@@ -369,8 +369,6 @@ namespace Trident {
 
 			componentIndex += 1;
 		}
-
-		scene->updateRigidBodyFacePlanes();
 	}
 
 	void PhysicsSimulation3D::mergeContactManifolds(ContactPair3D& contactPair, const ContactManifold3D& newContactManifold) {
@@ -510,7 +508,6 @@ namespace Trident {
 			hull.type = Hull3DType::POLYGON;
 
 			RigidBody3DComponent& rigidBody = staticGeometry.rigidBodies[hullIndex];
-			rigidBody.facePlanes = hull.faces;
 			rigidBody.position = {0.0f, 0.0f, 0.0f};
 			rigidBody.rotation = {0.0f, 0.0f, 0.0f};
 			rigidBody.scale = 1.0f;

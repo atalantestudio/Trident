@@ -24,7 +24,12 @@ namespace Trident {
 	}
 
 	pool<ClipVertex3D, 8> SutherlandHodgman3D(const RigidBody3DComponent& referenceBody, const Hull3D& referenceHull, uint16 referenceFaceIndex, pool<ClipVertex3D, MAX_FACE_VERTEX_COUNT> inputVertices) {
-		const Plane3D referenceFace = referenceBody.facePlanes[referenceFaceIndex];
+		const Plane3D& hullReferenceFace = referenceHull.faces[referenceFaceIndex];
+
+		Plane3D referenceFace;
+		referenceFace.normal = normalized(hullReferenceFace.normal * inverse(referenceBody.orientation));
+		referenceFace.distance = dot(hullReferenceFace.normal * hullReferenceFace.distance * referenceBody.world, referenceFace.normal);
+		referenceFace.edgeIndexRange = hullReferenceFace.edgeIndexRange;
 
 		index planeIndex = 0;
 

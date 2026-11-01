@@ -128,7 +128,11 @@ namespace Trident {
 			const Plane3D face = hullA.faces[faceIndex];
 
 			// TODO(physics/3d/sat): Move computations in the local space of B.
-			const Plane3D plane = rigidBodyA.facePlanes[faceIndex];
+			Plane3D plane;
+			plane.normal = normalized(face.normal * inverse(rigidBodyA.orientation));
+			plane.distance = dot(face.normal * face.distance * rigidBodyA.world, plane.normal);
+			plane.edgeIndexRange = face.edgeIndexRange;
+
 			const vec3<float32> support = hullB.support(-face.normal * R) * rigidBodyB.world;
 
 			/* Plane3D plane = face * transform;

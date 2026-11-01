@@ -18,13 +18,7 @@ namespace Trident {
 		}),
 		asset(sceneAsset)
 	{
-		loadGeometries();
 		loadEntityComponentMappings();
-		updateRigidBodyFacePlanes();
-	}
-
-	void Scene3D::loadGeometries() {
-		rigidBodyFacePlanes = sequence<Plane3D>(asset->rigidBodyFacePlaneCount);
 	}
 
 	void Scene3D::loadEntityComponentMappings() {
@@ -47,56 +41,11 @@ namespace Trident {
 
 		index rigidBodyFacePlaneOffset = 0;
 
-		for (const EntityComponentMapping<RigidBody3DComponent>& rigidBodyMapping : asset->rigidBodyMappings) {
+		for (EntityComponentMapping<RigidBody3DComponent>& rigidBodyMapping : asset->rigidBodyMappings) {
+			rigidBodyMapping.component.updateOrientation();
+			rigidBodyMapping.component.updateWorld({0.0f, 0.0f, 0.0f});
+
 			ecs.setComponent<RigidBody3DComponent>(rigidBodyMapping.entity, rigidBodyMapping.component);
-
-			RigidBody3DComponent& rigidBodyComponent = ecs.getComponent<RigidBody3DComponent>(rigidBodyMapping.entity);
-
-			const Geometry3DComponent& geometryComponent = ecs.getComponent<Geometry3DComponent>(rigidBodyMapping.entity);
-
-			if (geometryComponent.hasHull) {
-				rigidBodyComponent.facePlanes = view<Plane3D>(&rigidBodyFacePlanes[rigidBodyFacePlaneOffset], geometryComponent.hull.faces.count());
-				rigidBodyFacePlaneOffset += rigidBodyComponent.facePlanes.count();
-			}
-
-			rigidBodyComponent.updateOrientation();
-			rigidBodyComponent.updateWorld({0.0_m, 0.0_m, 0.0_m});
-		}
-	}
-
-	void Scene3D::updateRigidBodyFacePlanes() {
-		ComponentPool<RigidBody3DComponent>& componentPool = ecs.getComponentPool<RigidBody3DComponent>();
-		index componentIndex = 0;
-		index rigidBodyFaceOffset = 0;
-
-		while (componentIndex < componentPool.componentCount) {
-			const Entity entity = componentPool.componentIndexToEntity[componentIndex];
-			const Geometry3DComponent& geometryComponent = ecs.getComponent<Geometry3DComponent>(entity);
-
-			if (!geometryComponent.hasHull) {
-				componentIndex += 1;
-
-				continue;
-			}
-
-			const Hull3D& hull = geometryComponent.hull;
-			const RigidBody3DComponent& component = componentPool.components[componentIndex];
-
-			index faceIndex = 0;
-
-			while (faceIndex < hull.faces.count()) {
-				const Plane3D face = hull.faces[faceIndex];
-
-				Plane3D& plane = rigidBodyFacePlanes[rigidBodyFaceOffset + faceIndex];
-				plane.normal = normalized(face.normal * inverse(component.orientation));
-				plane.distance = dot(face.normal * face.distance * component.world, plane.normal);
-				plane.edgeIndexRange = face.edgeIndexRange;
-
-				faceIndex += 1;
-			}
-
-			rigidBodyFaceOffset += hull.faces.count();
-			componentIndex += 1;
 		}
 	}
 }

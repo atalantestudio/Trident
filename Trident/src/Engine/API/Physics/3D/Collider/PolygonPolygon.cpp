@@ -53,7 +53,12 @@ namespace Trident {
 	static void createFaceContact(const FaceQuery& faceQuery, const RigidBody3DComponent& referenceBody, const RigidBody3DComponent& incidentBody, const Hull3D& referenceHull, const Hull3D& incidentHull, ContactManifold3D* contactManifold) {
 		contactManifold->normal = faceQuery.axis;
 
-		const Plane3D& referencePlane = referenceBody.facePlanes[faceQuery.referenceFaceIndex];
+		const Plane3D& hullReferenceFace = referenceHull.faces[faceQuery.referenceFaceIndex];
+
+		Plane3D referencePlane;
+		referencePlane.normal = normalized(hullReferenceFace.normal * inverse(referenceBody.orientation));
+		referencePlane.distance = dot(hullReferenceFace.normal * hullReferenceFace.distance * referenceBody.world, referencePlane.normal);
+		referencePlane.edgeIndexRange = hullReferenceFace.edgeIndexRange;
 
 		// Rotate by the inverse of the incident body's orientation to get a normal that can be used as a support direction.
 		// TODO(physics/3d): Invert the orientation before multiplying?

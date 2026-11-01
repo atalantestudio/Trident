@@ -80,10 +80,7 @@ namespace Trident {
 				return materialIndex;
 			}
 
-			void updateRigidBodyFacePlanes();
-
 		private:
-			void loadGeometries();
 			void loadEntityComponentMappings();
 
 		private:
@@ -99,9 +96,6 @@ namespace Trident {
 			range<uint64, uint64> indexRange;
 
 			uint64 hullLineIndexByteOffset;
-
-		public:
-			sequence<Plane3D> rigidBodyFacePlanes;
 
 		private:
 			uint32 materialShaderCount = 0;
