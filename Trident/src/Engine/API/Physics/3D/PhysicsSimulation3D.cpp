@@ -94,11 +94,16 @@ namespace Trident {
 	void PhysicsSimulation3D::narrowPhase() {
 		ContactPair3D contactPair;
 
-		for (const RigidBodyPair3D& pair : rigidBodyPairs) {
+		for (RigidBodyPair3D pair : rigidBodyPairs) {
 			static constexpr Collider3D COLLISION_TABLE[Hull3DType::count][Hull3DType::count] = {
 				{SphereSphere, SpherePolygon },
 				{nullptr,      PolygonPolygon},
 			};
+
+			if (pair.hullA->type > pair.hullB->type) {
+				std::swap(pair.hullA, pair.hullB);
+				std::swap(pair.rigidBodyA, pair.rigidBodyB);
+			}
 
 			// The broad phase must ensure that A hull type < B hull type.
 			const Collider3D collider = COLLISION_TABLE[pair.hullA->type][pair.hullB->type];

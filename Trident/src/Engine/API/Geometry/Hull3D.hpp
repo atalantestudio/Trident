@@ -18,6 +18,10 @@ namespace Trident {
 		}
 
 		inline vec3<float32> support(vec3<float32> d) const {
+			return vertices[supportIndex(d)];
+		}
+
+		inline uint32 supportIndex(vec3<float32> d) const {
 			float32 maxProjection = min<float32>();
 			uint32 maxProjectionVertexIndex = max<uint32>();
 			uint32 vertexIndex = 0;
@@ -33,7 +37,7 @@ namespace Trident {
 				vertexIndex += 1;
 			}
 
-			return vertices[maxProjectionVertexIndex];
+			return maxProjectionVertexIndex;
 		}
 
 		/// The mean position of all vertices.
