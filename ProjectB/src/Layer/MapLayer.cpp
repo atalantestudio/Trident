@@ -26,8 +26,7 @@ namespace ProjectB {
 		// TODO(project-b/map/player-spawn)
 		// camera.setOrientation(lookAt(FORWARD, sceneAsset->spawnDirection, UP));
 
-		cameraController.updateProjection();
-
+		camera.updateProjectionReversedZ();
 		camera.updateView();
 		camera.updateProjectionView();
 	}
@@ -100,8 +99,9 @@ namespace ProjectB {
 	}
 
 	bool MapLayer::onWindowResize(WindowResizeEvent& event) {
-		cameraController.getCamera().aspectRatio = getApplication()->getWindow()->getAspectRatio();
-		cameraController.updateProjection();
+		PerspectiveCamera3D& camera = cameraController.getCamera();
+		camera.aspectRatio = getApplication()->getWindow()->getAspectRatio();
+		camera.updateProjectionReversedZ();
 
 		renderer.resize(event);
 

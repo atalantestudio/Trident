@@ -3,7 +3,7 @@
 
 #pragma once
 
-#define FORWARD_USE_NOCLIP_CAMERA
+// #define FORWARD_USE_NOCLIP_CAMERA
 #define FORWARD_ENABLE_PHYSICS
 // #define FORWARD_TEST_CORNELL_BOX
 
@@ -25,13 +25,14 @@ namespace Trident {
 			#if defined(FORWARD_TEST_CORNELL_BOX)
 				static constexpr float32 MOVEMENT_SPEED = 800.0f;
 			#else
-				static constexpr float32 MOVEMENT_SPEED = 120.0f;
+				static constexpr float32 MOVEMENT_SPEED = 2.0f;
 			#endif
 
-			static constexpr Entity PLAYER_ENTITY = 0;
 			static constexpr float32 LOOK_SENSITIVITY = 0.075f;
 			static constexpr vec3<float32> PLAYER_CAMERA_OFFSET = {0.0f, 0.3f, 0.0f};
 			static constexpr vec3<float32> CAMERA_OFFSET = {0.0f, 64.0f, 0.0f};
+
+			static constexpr vec3<float32> PLAYER_SCALE = {1.0f, 1.0f, 1.0f};
 
 			// Values taken from HL1.
 			// See https://github.com/valvesoftware/halflife.
@@ -53,7 +54,7 @@ namespace Trident {
 			}
 
 			void initialize() override {
-				renderer.visualizationMode = VisualizationMode::DEFAULT | VisualizationMode::HULL_WIREFRAMES | VisualizationMode::CONTACT_MANIFOLDS;
+				renderer.visualizationMode = VisualizationMode::DEFAULT | /* VisualizationMode::HULL_WIREFRAMES | */ VisualizationMode::CONTACT_MANIFOLDS;
 				renderer.setLayer(this);
 				renderer.build();
 				renderer.postBuild();
@@ -65,14 +66,18 @@ namespace Trident {
 
 				scene = allocateRef<Scene3D>(sceneAsset);
 
+				createPlayerHullData();
+				createPlayerEntity();
+
 				physicsSimulation = new PhysicsSimulation3D({
 					.scene = scene,
 					.deltaTime = application->getFixedDeltaTime(),
-					#if !defined(FORWARD_USE_NOCLIP_CAMERA)
-						.playerEntity = PLAYER_ENTITY,
+					.playerEntity = max<Entity>(),
+					/* #if !defined(FORWARD_USE_NOCLIP_CAMERA)
+						.playerEntity = playerEntity,
 					#else
 						.playerEntity = max<Entity>(),
-					#endif
+					#endif */
 				});
 
 				renderer.setScene(scene);
@@ -91,9 +96,7 @@ namespace Trident {
 
 				camera.aspectRatio = application->getWindow()->getAspectRatio();
 				camera.setOrientation(lookAt(FORWARD, sceneAsset->spawnDirection, UP));
-
-				cameraController.updateProjection();
-
+				camera.updateProjectionReversedZ();
 				camera.updateView();
 				camera.updateProjectionView();
 
@@ -105,9 +108,13 @@ namespace Trident {
 			}
 
 			void update(float32 deltaTime, float32 inverseDeltaTime) override {
-				#if !defined(FORWARD_USE_NOCLIP_CAMERA)
-					RigidBody3DComponent& playerRigidBody = scene->ecs.getComponent<RigidBody3DComponent>(PLAYER_ENTITY);
-				#endif
+				// TODO(physics/3d/sphere-polygon)
+				/* {
+					auto& c = scene->ecs.getComponent<RigidBody3DComponent>(0);
+					c.rotation.z -= 0.005f;
+					c.updateOrientation();
+					c.updateWorld({0.0f, 0.0f, 0.0f});
+				} */
 
 				#if !defined(FORWARD_USE_NOCLIP_CAMERA)
 					handleInputs();
@@ -115,32 +122,35 @@ namespace Trident {
 
 				#if defined(FORWARD_ENABLE_PHYSICS)
 					physicsSimulation->tick();
-
 					physicsSimulation->broadPhase();
 					physicsSimulation->narrowPhase();
 					physicsSimulation->applyForces();
 				#endif
 
 				#if !defined(FORWARD_USE_NOCLIP_CAMERA)
-					playerMove(deltaTime);
+					// playerMove(deltaTime);
 				#else
-					noclipMove(deltaTime);
+					// noclipMove(deltaTime);
 				#endif
+
+				ENGINE_DEBUG(scene->ecs.getComponent<RigidBody3DComponent>(playerEntity).position);
 
 				#if defined(FORWARD_ENABLE_PHYSICS)
 					physicsSimulation->updateContactManifolds();
 					physicsSimulation->applyImpulses();
 
 					// TODO(debug): Apply a rotational constraint to the player entity.
-					// scene->ecs.getComponent<RigidBody3DComponent>(PLAYER_ENTITY).angularVelocity = {0.0f, 0.0f, 0.0f};
+					// scene->ecs.getComponent<RigidBody3DComponent>(playerEntity).angularVelocity = {0.0f, 0.0f, 0.0f};
 
 					physicsSimulation->integrate();
 				#endif
 
-				#if !defined(FORWARD_USE_NOCLIP_CAMERA)
+				/* #if !defined(FORWARD_USE_NOCLIP_CAMERA)
+					const RigidBody3DComponent& playerRigidBody = scene->ecs.getComponent<RigidBody3DComponent>(playerEntity);
+
 					PerspectiveCamera3D& camera = cameraController.getCamera();
 					camera.position = playerRigidBody.position + PLAYER_CAMERA_OFFSET;
-				#endif
+				#endif */
 
 				cameraController.update(deltaTime);
 			}
@@ -204,6 +214,9 @@ namespace Trident {
 			}
 
 		private:
+			void createPlayerHullData();
+			void createPlayerEntity();
+
 			bool onKeyDown(KeyDownEvent& event) {
 				const Window* window = getApplication()->getWindow();
 
@@ -300,5 +313,11 @@ namespace Trident {
 			#endif
 
 			vec3<float32> desiredVelocity = {0.0f, 0.0f, 0.0f};
+
+			sequence<vec3<float32>> playerHullVertices;
+			sequence<Edge3D> playerHullEdges;
+			sequence<uint16> playerHullFaceEdgeIndices;
+			sequence<Plane3D> playerHullFaces;
+			Entity playerEntity;
 	};
 }

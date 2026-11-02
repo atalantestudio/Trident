@@ -58,7 +58,7 @@ namespace Trident {
 					},
 				});
 
-				builder.createRigidBody({
+				/* builder.createRigidBody({
 					.geometryIndex = playerHullGeometry,
 					.material = debugMaterial,
 					.position = { 0.0f, 3.0f,  0.0f},
@@ -69,7 +69,7 @@ namespace Trident {
 					.inertiaScale = {1.0f, 1.0f, 1.0f},
 					.friction = 0.2f,
 					.restitution = 0.0f,
-				});
+				}); */
 
 				return builder;
 			}

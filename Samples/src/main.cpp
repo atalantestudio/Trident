@@ -58,7 +58,7 @@
 #include "Graphics/SampleLayerGroup.hpp"
 
 #include "Sample3D/Layer/DebugLayer.hpp"
-#include "Sample3D/Layer/ForwardLayer.hpp"
+#include "Sample3D/Layer/Forward/ForwardLayer.hpp"
 #include "Sample3D/Layer/VisibilityLayer.hpp"
 
 namespace Trident {

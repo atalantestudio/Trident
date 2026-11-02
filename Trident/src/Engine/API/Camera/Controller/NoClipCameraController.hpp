@@ -18,10 +18,6 @@ namespace Trident {
 				camera.nearPlane = 0.01_m;
 			}
 
-			void updateProjection() {
-				camera.updateProjectionReversedZ();
-			}
-
 			void update(float32 deltaTime) override {
 				// camera.updatePosition(linearMotionOffset * deltaTime);
 				camera.updateOrientation(angularMotionOffset /* * deltaTime */);

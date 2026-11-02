@@ -102,8 +102,9 @@ namespace Trident {
 			}
 
 			bool onWindowResize(WindowResizeEvent& event) {
-				cameraController.getCamera().aspectRatio = getApplication()->getWindow()->getAspectRatio();
-				cameraController.updateProjection();
+				PerspectiveCamera3D& camera = cameraController.getCamera();
+				camera.aspectRatio = getApplication()->getWindow()->getAspectRatio();
+				camera.updateProjectionReversedZ();
 
 				renderer.resize(event);
 

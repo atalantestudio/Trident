@@ -3,28 +3,13 @@
 
 #include "pch.hpp"
 
-#include "ForwardLayer.hpp"
+#include "Sample3D/Layer/Forward/ForwardLayer.hpp"
 
 namespace Trident {
-	void Sample3DForwardLayer::handleInputs() {
-		const Window* window = getApplication()->getWindow();
-		const PerspectiveCamera3D& camera = cameraController.getCamera();
-
-		const float32 forwardKey = static_cast<float32>(window->isKeyDown(KeyCode::Z));
-		const float32 backKey = static_cast<float32>(window->isKeyDown(KeyCode::S));
-		const float32 rightKey = static_cast<float32>(window->isKeyDown(KeyCode::D));
-		const float32 leftKey = static_cast<float32>(window->isKeyDown(KeyCode::Q));
-
-		const vec3<float32> forward = normalized(camera.getForward() * vec3<float32>{1.0f, 0.0f, 1.0f});
-		const vec3<float32> right = normalized(camera.getRight() * vec3<float32>{1.0f, 0.0f, 1.0f});
-
-		desiredVelocity = forward * (PLAYER_SPEED * (forwardKey - backKey)) + right * (PLAYER_SPEED * (rightKey - leftKey));
-	}
-
 	void Sample3DForwardLayer::playerMove(float32 deltaTime) {
 		const Window* window = getApplication()->getWindow();
 
-		RigidBody3DComponent& playerRigidBody = scene->ecs.getComponent<RigidBody3DComponent>(PLAYER_ENTITY);
+		RigidBody3DComponent& playerRigidBody = scene->ecs.getComponent<RigidBody3DComponent>(playerEntity);
 
 		playerRigidBody.linearVelocity += PLAYER_GRAVITY * deltaTime * 0.5f;
 
@@ -48,7 +33,7 @@ namespace Trident {
 	}
 
 	void Sample3DForwardLayer::jump(float32 deltaTime) {
-		RigidBody3DComponent& playerRigidBody = scene->ecs.getComponent<RigidBody3DComponent>(PLAYER_ENTITY);
+		RigidBody3DComponent& playerRigidBody = scene->ecs.getComponent<RigidBody3DComponent>(playerEntity);
 
 		if (playerRigidBody.groundEntity == max<Entity>()) {
 			return;
@@ -61,7 +46,7 @@ namespace Trident {
 	}
 
 	void Sample3DForwardLayer::applyFriction(float32 deltaTime) {
-		RigidBody3DComponent& playerRigidBody = scene->ecs.getComponent<RigidBody3DComponent>(PLAYER_ENTITY);
+		RigidBody3DComponent& playerRigidBody = scene->ecs.getComponent<RigidBody3DComponent>(playerEntity);
 
 		const float32 speed = length(playerRigidBody.linearVelocity);
 
@@ -82,7 +67,7 @@ namespace Trident {
 	}
 
 	void Sample3DForwardLayer::groundAccelerate(vec3<float32> direction, float32 wishspeed, float32 acceleration, float32 deltaTime) {
-		RigidBody3DComponent& playerRigidBody = scene->ecs.getComponent<RigidBody3DComponent>(PLAYER_ENTITY);
+		RigidBody3DComponent& playerRigidBody = scene->ecs.getComponent<RigidBody3DComponent>(playerEntity);
 
 		// See if we are changing direction a bit.
 		const float32 speedTowardsDirection = dot(playerRigidBody.linearVelocity, direction);
@@ -100,7 +85,7 @@ namespace Trident {
 	}
 
 	void Sample3DForwardLayer::airAccelerate(vec3<float32> direction, float32 wishspeed, float32 acceleration, float32 deltaTime) {
-		RigidBody3DComponent& playerRigidBody = scene->ecs.getComponent<RigidBody3DComponent>(PLAYER_ENTITY);
+		RigidBody3DComponent& playerRigidBody = scene->ecs.getComponent<RigidBody3DComponent>(playerEntity);
 
 		// See if we are changing direction a bit.
 		const float32 speedTowardsDirection = dot(playerRigidBody.linearVelocity, direction);
@@ -118,7 +103,7 @@ namespace Trident {
 	}
 
 	void Sample3DForwardLayer::groundMove(float32 deltaTime) {
-		RigidBody3DComponent& playerRigidBody = scene->ecs.getComponent<RigidBody3DComponent>(PLAYER_ENTITY);
+		RigidBody3DComponent& playerRigidBody = scene->ecs.getComponent<RigidBody3DComponent>(playerEntity);
 
 		float32 wishspeed = length(desiredVelocity);
 
@@ -161,26 +146,5 @@ namespace Trident {
 		}
 
 		airAccelerate(wishdir, wishspeed, AIR_ACCELERATE, deltaTime);
-	}
-
-	void Sample3DForwardLayer::noclipMove(float32 deltaTime) {
-		const Window& window = *getApplication()->getWindow();
-
-		PerspectiveCamera3D& camera = cameraController.getCamera();
-
-		const float32 forward = static_cast<float32>(window.isKeyDown(KeyCode::Z));
-		const float32 back = static_cast<float32>(window.isKeyDown(KeyCode::S));
-		const float32 right = static_cast<float32>(window.isKeyDown(KeyCode::D));
-		const float32 left = static_cast<float32>(window.isKeyDown(KeyCode::Q));
-
-		const vec3<float32> wishvel = camera.getForward() * (forward - back) + camera.getRight() * (right - left);
-
-		if (lengthSquared(wishvel) == 0.0f) {
-			return;
-		}
-
-		const vec3<float32> wishdir = normalized(wishvel) * MOVEMENT_SPEED * deltaTime;
-
-		camera.position += wishdir;
 	}
 }
