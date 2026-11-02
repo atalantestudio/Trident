@@ -190,48 +190,54 @@ namespace Trident {
 			const uint8 countCopy = s.count;
 
 			switch (s.count) {
-				case 1:
+				case 1: {
 					break;
-				case 2:
+				}
+				case 2: {
 					ClosestPointLineOrigin(s);
 
 					break;
-				case 3:
+				}
+				case 3: {
 					ClosestPointTriangleOrigin(s);
 
 					break;
-				default:
+				}
+				default: {
 					DEBUG_ASSERT(false);
 
 					break;
+				}
 			}
 
 			if (s.count == 3) {
 				break;
 			}
 
+			const vec2<float32> ao = -s[0].v;
+
 			switch (s.count) {
-				case 1:
-					d = -s[0].v;
+				case 1: {
+					d = ao;
 
 					break;
+				}
 				case 2: {
-					const vec2<float32> ab = s[1].v - s[0].v;
-					const float32 sign = parallelogramArea(ab, -s[0].v);
+					const vec2<float32> ab = s[1].v + ao;
 
-					if (sign > 0.0f) {
-						d = {-ab[1], ab[0]};
-					}
-					else {
-						d = {ab[1], -ab[0]};
+					d = perpendicularLeft(ab);
+
+					if (parallelogramArea(ab, ao) < 0.0f) {
+						d *= -1.0f;
 					}
 
 					break;
 				}
-				default:
+				default: {
 					DEBUG_ASSERT(false);
 
 					break;
+				}
 			}
 
 			if (lengthSquared(d) < epsilon<float32>()) {
@@ -279,28 +285,32 @@ namespace Trident {
 
 		GJK2DOutput output{};
 
-		const float32 div = 1.0f / s.divisor;
+		const float32 divisor = 1.0f / s.divisor;
 
 		switch (s.count) {
-			case 1:
+			case 1: {
 				output.closestA = s[0].vA;
 				output.closestB = s[0].vB;
 
 				break;
-			case 2:
-				output.closestA = (s[0].vA * s[0].u + s[1].vA * s[1].u) * div;
-				output.closestB = (s[0].vB * s[0].u + s[1].vB * s[1].u) * div;
+			}
+			case 2: {
+				output.closestA = (s[0].vA * s[0].u + s[1].vA * s[1].u) * divisor;
+				output.closestB = (s[0].vB * s[0].u + s[1].vB * s[1].u) * divisor;
 
 				break;
-			case 3:
-				output.closestA = (s[0].vA * s[0].u + s[1].vA * s[1].u + s[2].vA * s[2].u) * div;
+			}
+			case 3: {
+				output.closestA = (s[0].vA * s[0].u + s[1].vA * s[1].u + s[2].vA * s[2].u) * divisor;
 				output.closestB = output.closestA;
 
 				break;
-			default:
+			}
+			default: {
 				DEBUG_ASSERT(false);
 
 				break;
+			}
 		}
 
 		output.closestFeatureA.vertex = s[0].vA;
