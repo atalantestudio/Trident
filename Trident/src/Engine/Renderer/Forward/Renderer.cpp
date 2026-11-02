@@ -5,12 +5,13 @@
 
 #include "Engine/API/Camera/3D/PerspectiveCamera3D.hpp"
 #include "Engine/Renderer/Forward/ColorImage.hpp"
-#include "Engine/Renderer/Forward/DebugContactManifoldBuffer.hpp"
-#include "Engine/Renderer/Forward/DebugContactManifoldPipeline.hpp"
-#include "Engine/Renderer/Forward/DebugContactManifoldPipelineLayout.hpp"
-// #include "Engine/Renderer/Forward/DebugHullWireframeBuffer.hpp"
-// #include "Engine/Renderer/Forward/DebugHullWireframePipeline.hpp"
-// #include "Engine/Renderer/Forward/DebugHullWireframePipelineLayout.hpp"
+#include "Engine/Renderer/Forward/Debug/ContactManifoldBuffer.hpp"
+#include "Engine/Renderer/Forward/Debug/ContactManifoldPipeline.hpp"
+#include "Engine/Renderer/Forward/Debug/ContactManifoldPipelineLayout.hpp"
+#include "Engine/Renderer/Forward/Debug/HullLineIndexBuffer.hpp"
+#include "Engine/Renderer/Forward/Debug/HullLineVertexBuffer.hpp"
+#include "Engine/Renderer/Forward/Debug/HullWireframePipeline.hpp"
+#include "Engine/Renderer/Forward/Debug/HullWireframePipelineLayout.hpp"
 #include "Engine/Renderer/Forward/DefaultSampler.hpp"
 #include "Engine/Renderer/Forward/DepthStencilImage.hpp"
 
@@ -189,12 +190,12 @@ namespace Trident {
 			encodeGIShadingPass(commandEncoder);
 		#endif
 
-		if (visualizationMode & VisualizationMode::HULL_WIREFRAMES && debugHullWireframeBuffer != nullptr) {
-			// TODO(renderer/forward): Restore debug modes.
-			/* commandEncoder->bindGraphicsPipeline(debugHullWireframePipeline);
-			commandEncoder->bindDescriptorSets(debugHullWireframePipelineLayout, 0, dynamicDescriptorSet);
-			commandEncoder->bindVertexBuffer(0, instanceBuffer, 0);
-			commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(debugHullWireframeBuffer, 0);
+		if (visualizationMode & VisualizationMode::HULL_WIREFRAMES && hullLineVertexBuffer != nullptr) {
+			commandEncoder->bindGraphicsPipeline(hullWireframePipeline);
+			commandEncoder->bindDescriptorSets(hullWireframePipelineLayout, 0, sceneDescriptorSet);
+			commandEncoder->bindVertexBuffer(0, hullLineVertexBuffer, 0);
+			commandEncoder->bindVertexBuffer(1, instanceBuffer, 0);
+			commandEncoder->bindIndexBuffer<IndexFormat::R16_UINT>(hullLineIndexBuffer, 0);
 
 			uint32 materialShaderIndex = sceneAsset->dynamicMaterialShaderOffset;
 
@@ -211,19 +212,24 @@ namespace Trident {
 					while (materialGeometryIndex < material.geometryRange.count) {
 						const MaterialGeometry& materialGeometry = sceneAsset->materialGeometries[material.geometryRange.offset + materialGeometryIndex];
 
-						// TODO(renderer/forward)
-						const Geometry3D& geometry = scene->geometries[0];
-
-						if (geometry.hullIndex >= scene->hulls.count()) {
+						if (materialGeometry.geometryIndex >= scene->ecs.nextEntity) {
 							materialGeometryIndex += 1;
 
 							continue;
 						}
 
-						const Hull3D& hull = scene->hulls[geometry.hullIndex];
+						const ref<Geometry3DAsset> geometryAsset = sceneAsset->geometryAssets[materialGeometry.geometryIndex];
+
+						if (!(geometryAsset->flags & GeometryAssetFlags::HAS_HULL)) {
+							materialGeometryIndex += 1;
+
+							continue;
+						}
+
+						const Hull3D& hull = scene->ecs.getComponent<Geometry3DComponent>(materialGeometry.geometryIndex).hull;
 
 						// TODO(graphics/dx12/draw-indexed): DX12 doesn't pass BaseVertexOffset to the shader so indexing the vertex buffer doesn't return the same values as OpenGL/Vulkan.
-						commandEncoder->drawIndexed(hull.lineIndexRange.count, 1, hull.lineIndexRange.offset, geometry.getVertexPositionComponentRange().offset / 3, materialGeometry.instanceRange.offset);
+						commandEncoder->drawIndexed(hull.lineIndexRange.count, materialGeometry.instanceRange.count, hull.lineIndexRange.offset, 0, materialGeometry.instanceRange.offset);
 
 						materialGeometryIndex += 1;
 					}
@@ -232,13 +238,13 @@ namespace Trident {
 				}
 
 				materialShaderIndex += 1;
-			} */
+			}
 		}
 
 		if (visualizationMode & VisualizationMode::CONTACT_MANIFOLDS && contactCount > 0) {
-			commandEncoder->bindGraphicsPipeline(debugContactManifoldPipeline);
-			commandEncoder->bindDescriptorSets(debugContactManifoldPipelineLayout, 0, sceneDescriptorSet);
-			commandEncoder->bindVertexBuffer(0, debugContactManifoldBuffer, 0);
+			commandEncoder->bindGraphicsPipeline(contactManifoldPipeline);
+			commandEncoder->bindDescriptorSets(contactManifoldPipelineLayout, 0, sceneDescriptorSet);
+			commandEncoder->bindVertexBuffer(0, contactManifoldBuffer, 0);
 			commandEncoder->draw(contactCount, 1, 0, 0);
 		}
 

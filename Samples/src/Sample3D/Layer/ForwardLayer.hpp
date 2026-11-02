@@ -53,7 +53,7 @@ namespace Trident {
 			}
 
 			void initialize() override {
-				renderer.visualizationMode = VisualizationMode::DEFAULT | VisualizationMode::CONTACT_MANIFOLDS;
+				renderer.visualizationMode = VisualizationMode::DEFAULT | VisualizationMode::HULL_WIREFRAMES | VisualizationMode::CONTACT_MANIFOLDS;
 				renderer.setLayer(this);
 				renderer.build();
 				renderer.postBuild();
@@ -174,13 +174,13 @@ namespace Trident {
 							uint8 contactIndex = 0;
 
 							while (contactIndex < contactManifold.contactCount) {
-								renderer.debugContactRange[renderer.contactCount] = contactManifold.contacts[contactIndex].position;
+								renderer.contactRange[renderer.contactCount] = contactManifold.contacts[contactIndex].position;
 								renderer.contactCount += 1;
 
 								contactIndex += 1;
 							}
 
-							renderer.debugContactRange[renderer.contactCount] = contactManifold.contacts[0].position;
+							renderer.contactRange[renderer.contactCount] = contactManifold.contacts[0].position;
 							renderer.contactCount += 1;
 						}
 					}

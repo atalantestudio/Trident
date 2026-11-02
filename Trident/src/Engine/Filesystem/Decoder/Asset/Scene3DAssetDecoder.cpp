@@ -205,6 +205,59 @@ namespace Trident {
 			pointLight.position = {stream.read<float32>(), stream.read<float32>(), stream.read<float32>()};
 		}
 
+		sequence<uint64> hullLineVertexOffsets(asset.geometryAssets.count());
+		sequence<uint64> hullLineIndexOffsets(asset.geometryAssets.count());
+		uint64 hullLineVertexCount = 0;
+		uint64 hullLineIndexCount = 0;
+		uint32 geometryAssetIndex = 0;
+
+		while (geometryAssetIndex < asset.geometryAssets.count()) {
+			const ref<Geometry3DAsset> geometryAsset = asset.geometryAssets[geometryAssetIndex];
+
+			if (geometryAsset == nullptr) {
+				geometryAssetIndex += 1;
+
+				continue;
+			}
+
+			hullLineVertexOffsets[geometryAssetIndex] = hullLineVertexCount;
+			hullLineVertexCount += geometryAsset->hullVertices.count();
+
+			hullLineIndexOffsets[geometryAssetIndex] = hullLineIndexCount;
+			hullLineIndexCount += geometryAsset->hullLineIndices.count();
+
+			geometryAssetIndex += 1;
+		}
+
+		asset.hullLineVertices = sequence<vec3<float32>>(hullLineVertexCount);
+		asset.hullLineIndices = sequence<uint16>(hullLineIndexCount);
+		hullLineVertexCount = 0;
+		hullLineIndexCount = 0;
+		geometryAssetIndex = 0;
+
+		while (geometryAssetIndex < asset.geometryAssets.count()) {
+			const ref<Geometry3DAsset> geometryAsset = asset.geometryAssets[geometryAssetIndex];
+
+			if (geometryAsset == nullptr) {
+				geometryAssetIndex += 1;
+
+				continue;
+			}
+
+			if (geometryAsset->hullLineIndices.count() == 0) {
+				geometryAssetIndex += 1;
+
+				continue;
+			}
+
+			std::copy(geometryAsset->hullVertices.begin(), geometryAsset->hullVertices.end(), &asset.hullLineVertices[hullLineVertexCount]);
+			std::copy(geometryAsset->hullLineIndices.begin(), geometryAsset->hullLineIndices.end(), &asset.hullLineIndices[hullLineIndexCount]);
+
+			hullLineVertexCount += geometryAsset->hullVertices.count();
+			hullLineIndexCount += geometryAsset->hullLineIndices.count();
+			geometryAssetIndex += 1;
+		}
+
 		for (EntityComponentMapping<Geometry3DComponent>& geometryMapping : asset.geometryMappings) {
 			geometryMapping.entity = stream.read<Entity>();
 
@@ -226,11 +279,8 @@ namespace Trident {
 			hull.edges = geometryAsset->hullEdges;
 			hull.faces = geometryAsset->hullFaces;
 			hull.faceEdgeIndices = geometryAsset->hullFaceEdgeIndices;
-
-			// TODO(physics/3d/hull/line-indices): Restore hull wireframe rendering.
-			hull.lineIndexRange.offset = 0;
-			hull.lineIndexRange.count = 0;
-
+			hull.lineIndexRange.offset = static_cast<uint16>(hullLineIndexOffsets[component.geometryIndex]);
+			hull.lineIndexRange.count = static_cast<uint16>(geometryAsset->hullLineIndices.count());
 			hull.type = geometryAsset->hullType;
 		}
 

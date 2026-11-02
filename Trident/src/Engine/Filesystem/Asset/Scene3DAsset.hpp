@@ -46,6 +46,8 @@ namespace Trident {
 		sequence<EntityComponentMapping<RigidBody3DComponent>> rigidBodyMappings;
 		uint32 rigidBodyFacePlaneCount;
 		uint32 entityInstanceOffset;
+		sequence<vec3<float32>> hullLineVertices;
+		sequence<uint16> hullLineIndices;
 
 		vec3<float32> spawnPosition;
 		vec3<float32> spawnDirection;

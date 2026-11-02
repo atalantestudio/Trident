@@ -6,7 +6,7 @@
 #include "Engine/Renderer/Forward/Renderer.hpp"
 
 namespace Trident {
-	ref<GraphicsPipeline> ForwardRenderer::createDebugContactManifoldPipeline() const {
+	ref<GraphicsPipeline> ForwardRenderer::createContactManifoldPipeline() const {
 		VertexInputBinding vertexInputBindings[] = {
 			VertexInputBinding(InputRate::VERTEX),
 		};
@@ -20,14 +20,14 @@ namespace Trident {
 		};
 
 		return createGraphicsPipeline({
-			.pipelineLayout = debugContactManifoldPipelineLayout,
+			.pipelineLayout = contactManifoldPipelineLayout,
 			.vertexInputBindings = vertexInputBindings,
 			.vertexShaderModule = loadInternalShaderModule(
 				{
 					.stage = ShaderStage::VERTEX,
 					.entryPoint = "main",
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Debug contact manifold vertex",
+						.name = "Contact manifold vertex",
 					#endif
 				},
 				"Forward/DebugContactManifold.vert"
@@ -37,7 +37,7 @@ namespace Trident {
 					.stage = ShaderStage::FRAGMENT,
 					.entryPoint = "main",
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Debug contact manifold fragment",
+						.name = "Contact manifold fragment",
 					#endif
 				},
 				"Forward/DebugContactManifold.frag"
@@ -58,7 +58,7 @@ namespace Trident {
 			.renderPass = renderPass,
 			.subpassIndex = 0,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Debug contact manifold",
+				.name = "Contact manifold",
 			#endif
 		});
 	}

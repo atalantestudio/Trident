@@ -163,19 +163,20 @@ namespace Trident {
 					giShadingPipeline = createGIShadingPipeline();
 				#endif
 
-				// TODO(renderer/forward): Restore debug visualization modes.
-				// debugHullWireframePipelineLayout = createDebugHullWireframePipelineLayout();
-				// debugHullWireframePipeline = createDebugHullWireframePipeline();
+				if (visualizationMode & VisualizationMode::HULL_WIREFRAMES) {
+					hullWireframePipelineLayout = createHullWireframePipelineLayout();
+					hullWireframePipeline = createHullWireframePipeline();
+				}
 
 				if (visualizationMode & VisualizationMode::CONTACT_MANIFOLDS) {
-					debugContactManifoldPipelineLayout = createDebugContactManifoldPipelineLayout();
-					debugContactManifoldPipeline = createDebugContactManifoldPipeline();
+					contactManifoldPipelineLayout = createContactManifoldPipelineLayout();
+					contactManifoldPipeline = createContactManifoldPipeline();
 
-					debugContactManifoldBuffer = createDebugContactManifoldBuffer();
+					contactManifoldBuffer = createContactManifoldBuffer();
 
-					const BufferView<vec3<float32>> debugContactManifoldView = debugContactManifoldBuffer->createView<vec3<float32>>(0, debugContactManifoldBuffer->getSize());
+					const BufferView<vec3<float32>> contactManifoldView = contactManifoldBuffer->createView<vec3<float32>>(0, contactManifoldBuffer->getSize());
 
-					debugContactRange = debugContactManifoldView.map();
+					contactRange = contactManifoldView.map();
 				}
 
 				defaultSampler = createDefaultSampler();
@@ -205,18 +206,20 @@ namespace Trident {
 				instanceBuffer = createInstanceBuffer();
 				pointLightBuffer = createPointLightBuffer();
 
-				pointLightBufferView = pointLightBuffer->createView<PointLight>(0, pointLightBuffer->getSize());
+				if (sceneAsset->hullLineIndices.count() > 0) {
+					hullLineVertexBuffer = createHullLineVertexBuffer();
+					hullLineIndexBuffer = createHullLineIndexBuffer();
+				}
 
-				// TODO(geometry/3d/vertex-position-indices): Separate hull line indices and vertex position indices for TRIANGLE_LIST.
-				/* if (sceneAsset->hullLineIndexCount > 0) {
-					debugHullWireframeBuffer = createDebugHullWireframeBuffer(sceneAsset->hullLineIndexCount * sizeof(uint16));
-				} */
+				pointLightBufferView = pointLightBuffer->createView<PointLight>(0, pointLightBuffer->getSize());
 
 				uint64 stagingBufferSize = (
 					sceneAsset->vertexRange.count +
 					sceneAsset->indexRange.count +
 					sceneAsset->lightmapCoordinateRange.count +
-					sceneAsset->pointLights.count() * sizeof(PointLight)
+					sceneAsset->pointLights.count() * sizeof(PointLight) +
+					sceneAsset->hullLineVertices.count() * sizeof(vec3<float32>) +
+					sceneAsset->hullLineIndices.count() * sizeof(uint16)
 				);
 
 				if (sceneAsset->skyboxImageAsset != nullptr) {
@@ -247,29 +250,29 @@ namespace Trident {
 				uint64 offset = 0;
 
 				const BufferView<uint8> vertexView = stagingBuffer->createView<uint8>(offset, sceneAsset->vertexRange.count);
+				offset = vertexView.getOffset() + vertexView.getSize();
 
 				std::copy_n(&sceneAsset->geometryData[sceneAsset->vertexRange.offset], vertexView.getSize(), vertexView.map());
 
-				const BufferView<uint8> indexView = stagingBuffer->createView<uint8>(vertexView.getOffset() + vertexView.getSize(), sceneAsset->indexRange.count);
+				const BufferView<uint8> indexView = stagingBuffer->createView<uint8>(offset, sceneAsset->indexRange.count);
+				offset = indexView.getOffset() + indexView.getSize();
 
 				std::copy_n(&sceneAsset->geometryData[sceneAsset->indexRange.offset], indexView.getSize(), indexView.map());
-
-				offset = indexView.getOffset() + indexView.getSize();
 
 				BufferView<PointLight> pointLightView;
 
 				if (sceneAsset->pointLights.count() > 0) {
 					pointLightView = stagingBuffer->createView<PointLight>(offset, sceneAsset->pointLights.count() * sizeof(PointLight));
+					offset = pointLightView.getOffset() + pointLightView.getSize();
 
 					std::copy(sceneAsset->pointLights.begin(), sceneAsset->pointLights.end(), pointLightView.map());
-
-					offset = pointLightView.getOffset() + pointLightView.getSize();
 				}
 
 				BufferView<uint8> skyboxView;
 
 				if (sceneAsset->skyboxImageAsset != nullptr) {
 					skyboxView = stagingBuffer->createView<uint8>(offset, skyboxImage->getSize());
+					offset = skyboxView.getOffset() + skyboxView.getSize();
 
 					const view<uint8> data = sceneAsset->skyboxImageAsset->getData();
 
@@ -279,8 +282,6 @@ namespace Trident {
 					else {
 						std::copy(data.begin(), data.end(), skyboxView.map());
 					}
-
-					offset = skyboxView.getOffset() + skyboxView.getSize();
 				}
 
 				BufferView<uint8> lightmapCoordinateView;
@@ -288,24 +289,32 @@ namespace Trident {
 
 				if (sceneAsset->lightmapAtlasImageAsset != nullptr) {
 					lightmapCoordinateView = stagingBuffer->createView<uint8>(offset, sceneAsset->lightmapCoordinateRange.count);
+					offset = lightmapCoordinateView.getOffset() + lightmapCoordinateView.getSize();
 
 					std::copy_n(&sceneAsset->geometryData[sceneAsset->lightmapCoordinateRange.offset], lightmapCoordinateView.getSize(), lightmapCoordinateView.map());
 
-					lightmapAtlasView = stagingBuffer->createView<uint8>(lightmapCoordinateView.getOffset() + lightmapCoordinateView.getSize(), lightmapAtlasImage->getSize());
+					lightmapAtlasView = stagingBuffer->createView<uint8>(offset, lightmapAtlasImage->getSize());
+					offset = lightmapAtlasView.getOffset() + lightmapAtlasView.getSize();
 
 					const view<uint8> data = sceneAsset->lightmapAtlasImageAsset->getData();
 
 					std::copy(data.begin(), data.end(), lightmapAtlasView.map());
 				}
 
-				/* BufferView<uint8> hullLineIndexView;
+				BufferView<vec3<float32>> hullLineVertexView;
+				BufferView<uint16> hullLineIndexView;
 
-				if (sceneAsset->hullLineIndexCount > 0) {
-					hullLineIndexView = stagingBuffer->createView<uint8>(viewOffset, sceneAsset->hullLineIndexCount * sizeof(uint16));
-					viewOffset += hullLineIndexView->getSize();
+				if (sceneAsset->hullLineIndices.count() > 0) {
+					hullLineVertexView = stagingBuffer->createView<vec3<float32>>(offset, sceneAsset->hullLineVertices.count() * sizeof(vec3<float32>));
+					offset = hullLineVertexView.getOffset() + hullLineVertexView.getSize();
 
-					std::copy_n(&sourceDataBuffer[scene->getHullLineIndexByteOffset()], hullLineIndexView->getSize(), hullLineIndexView->map());
-				} */
+					std::copy(sceneAsset->hullLineVertices.begin(), sceneAsset->hullLineVertices.end(), hullLineVertexView.map());
+
+					hullLineIndexView = stagingBuffer->createView<uint16>(offset, sceneAsset->hullLineIndices.count() * sizeof(uint16));
+					offset = hullLineIndexView.getOffset() + hullLineIndexView.getSize();
+
+					std::copy(sceneAsset->hullLineIndices.begin(), sceneAsset->hullLineIndices.end(), hullLineIndexView.map());
+				}
 
 				stagingBuffer->unmap();
 
@@ -409,15 +418,23 @@ namespace Trident {
 					commandEncoder->insertMemoryBarriers({}, imageMemoryBarrier);
 				}
 
-				/* if (sceneAsset->hullLineIndexCount > 0) {
-					bufferCopyRegion = {
-						.sourceOffset = hullLineIndexView->getOffset(),
-						.destinationOffset = 0,
-						.size = hullLineIndexView->getSize(),
+				if (sceneAsset->hullLineIndices.count() > 0) {
+					const BufferCopyRegion bufferCopyRegions[] = {
+						{
+							.sourceOffset = hullLineVertexView.getOffset(),
+							.destinationOffset = 0,
+							.size = hullLineVertexView.getSize(),
+						},
+						{
+							.sourceOffset = hullLineIndexView.getOffset(),
+							.destinationOffset = 0,
+							.size = hullLineIndexView.getSize(),
+						},
 					};
 
-					commandEncoder->copyBufferToBuffer(stagingBuffer, debugHullWireframeBuffer, bufferCopyRegion);
-				} */
+					commandEncoder->copyBufferToBuffer(stagingBuffer, hullLineVertexBuffer, bufferCopyRegions[0]);
+					commandEncoder->copyBufferToBuffer(stagingBuffer, hullLineIndexBuffer, bufferCopyRegions[1]);
+				}
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -487,8 +504,8 @@ namespace Trident {
 			#endif
 
 			ref<PipelineLayout> createSkyboxPipelineLayout() const;
-			ref<PipelineLayout> createDebugHullWireframePipelineLayout() const;
-			ref<PipelineLayout> createDebugContactManifoldPipelineLayout() const;
+			ref<PipelineLayout> createHullWireframePipelineLayout() const;
+			ref<PipelineLayout> createContactManifoldPipelineLayout() const;
 
 			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
 				ref<PipelineLayout> createDirectionalShadowMapPipelineLayout() const;
@@ -500,8 +517,8 @@ namespace Trident {
 			#endif
 
 			ref<GraphicsPipeline> createSkyboxPipeline() const;
-			ref<GraphicsPipeline> createDebugHullWireframePipeline() const;
-			ref<GraphicsPipeline> createDebugContactManifoldPipeline() const;
+			ref<GraphicsPipeline> createHullWireframePipeline() const;
+			ref<GraphicsPipeline> createContactManifoldPipeline() const;
 
 			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
 				ref<GraphicsPipeline> createDirectionalShadowMapPipeline() const;
@@ -548,8 +565,9 @@ namespace Trident {
 				ref<Buffer> createGIIndirectBuffer() const;
 			#endif
 
-			ref<Buffer> createDebugHullWireframeBuffer(uint64 size) const;
-			ref<Buffer> createDebugContactManifoldBuffer() const;
+			ref<Buffer> createHullLineVertexBuffer() const;
+			ref<Buffer> createHullLineIndexBuffer() const;
+			ref<Buffer> createContactManifoldBuffer() const;
 
 			ref<Sampler> createDefaultSampler() const;
 			ref<Sampler> createMaterialSampler() const;
@@ -638,8 +656,8 @@ namespace Trident {
 
 			ref<PipelineLayout> skyboxPipelineLayout;
 			sequence<ref<PipelineLayout>> materialPipelineLayouts;
-			ref<PipelineLayout> debugHullWireframePipelineLayout;
-			ref<PipelineLayout> debugContactManifoldPipelineLayout;
+			ref<PipelineLayout> hullWireframePipelineLayout;
+			ref<PipelineLayout> contactManifoldPipelineLayout;
 
 			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
 				ref<PipelineLayout> directionalShadowMapPipelineLayout;
@@ -652,8 +670,8 @@ namespace Trident {
 
 			ref<GraphicsPipeline> skyboxPipeline;
 			sequence<ref<GraphicsPipeline>> materialPipelines;
-			ref<GraphicsPipeline> debugHullWireframePipeline;
-			ref<GraphicsPipeline> debugContactManifoldPipeline;
+			ref<GraphicsPipeline> hullWireframePipeline;
+			ref<GraphicsPipeline> contactManifoldPipeline;
 
 			#if defined(FORWARD_ENABLE_DIRECTIONAL_SHADOW_MAP)
 				ref<GraphicsPipeline> directionalShadowMapPipeline;
@@ -687,8 +705,9 @@ namespace Trident {
 				ref<Buffer> giIndirectBuffer;
 			#endif
 
-			ref<Buffer> debugHullWireframeBuffer;
-			ref<Buffer> debugContactManifoldBuffer;
+			ref<Buffer> hullLineVertexBuffer;
+			ref<Buffer> hullLineIndexBuffer;
+			ref<Buffer> contactManifoldBuffer;
 
 			ref<Image> colorImage;
 			ref<Image> skyboxImage;
@@ -732,7 +751,7 @@ namespace Trident {
 			#endif
 
 		public:
-			vec3<float32>* debugContactRange = nullptr;
+			vec3<float32>* contactRange = nullptr;
 			uint32 contactCount = 0;
 			VisualizationMode visualizationMode;
 	};

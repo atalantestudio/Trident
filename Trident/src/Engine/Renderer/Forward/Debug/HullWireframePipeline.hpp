@@ -6,13 +6,15 @@
 #include "Engine/Renderer/Forward/Renderer.hpp"
 
 namespace Trident {
-	ref<GraphicsPipeline> ForwardRenderer::createDebugHullWireframePipeline() const {
+	ref<GraphicsPipeline> ForwardRenderer::createHullWireframePipeline() const {
 		VertexInputBinding vertexInputBindings[] = {
+			VertexInputBinding(InputRate::VERTEX),
 			VertexInputBinding(InputRate::INSTANCE),
 		};
 
-		vertexInputBindings[0].registerAttribute<decltype(Instance3D::worldTransform)>();
-		vertexInputBindings[0].registerAttribute<decltype(Instance3D::normalTransform)>();
+		vertexInputBindings[0].registerAttribute<vec3<float32>>();
+		vertexInputBindings[1].registerAttribute<decltype(Instance3D::worldTransform)>();
+		vertexInputBindings[1].registerAttribute<decltype(Instance3D::normalTransform)>();
 
 		const ColorBlendAttachment colorBlendAttachments[] = {
 			{
@@ -21,14 +23,14 @@ namespace Trident {
 		};
 
 		return createGraphicsPipeline({
-			.pipelineLayout = debugHullWireframePipelineLayout,
+			.pipelineLayout = hullWireframePipelineLayout,
 			.vertexInputBindings = vertexInputBindings,
 			.vertexShaderModule = loadInternalShaderModule(
 				{
 					.stage = ShaderStage::VERTEX,
 					.entryPoint = "main",
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Debug hull wireframe vertex",
+						.name = "Hull wireframe vertex",
 					#endif
 				},
 				"Forward/DebugHullWireframe.vert"
@@ -38,13 +40,13 @@ namespace Trident {
 					.stage = ShaderStage::FRAGMENT,
 					.entryPoint = "main",
 					#if defined(DEBUG_OBJECT_NAME)
-						.name = "Debug hull wireframe fragment",
+						.name = "Hull wireframe fragment",
 					#endif
 				},
 				"Forward/DebugHullWireframe.frag"
 			),
 			.primitiveTopology = PrimitiveTopology::LINE_LIST,
-			.polygonMode = PolygonMode::FILL,
+			.polygonMode = PolygonMode::LINE,
 			.cullMode = CullMode::BACK,
 			.frontFace = FrontFace::CLOCKWISE,
 			.lineWidth = 1.0f,
@@ -55,13 +57,13 @@ namespace Trident {
 			.depthStencilState = {
 				.depthTest = true,
 				.depthWrite = true,
-				.compareOperation = CompareOperation::LESS,
+				.compareOperation = CompareOperation::GREATER,
 			},
 			.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT,
 			.renderPass = renderPass,
 			.subpassIndex = 0,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Debug hull wireframe",
+				.name = "Hull wireframe",
 			#endif
 		});
 	}

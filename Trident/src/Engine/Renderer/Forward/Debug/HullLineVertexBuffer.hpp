@@ -6,14 +6,14 @@
 #include "Engine/Renderer/Forward/Renderer.hpp"
 
 namespace Trident {
-	ref<Buffer> ForwardRenderer::createDebugHullWireframeBuffer(uint64 size) const {
+	ref<Buffer> ForwardRenderer::createHullLineVertexBuffer() const {
 		return createDynamicBuffer({
-			.size = size,
-			.usage = BufferUsage::TRANSFER_DST | BufferUsage::INDEX,
+			.size = scene->getAsset()->hullLineVertices.count() * sizeof(vec3<float32>),
+			.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX,
 			.memoryProperties = MemoryProperty::DEVICE_LOCAL,
 			.persistent = false,
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Debug hull wireframe",
+				.name = "Hull line vertex",
 			#endif
 		});
 	}

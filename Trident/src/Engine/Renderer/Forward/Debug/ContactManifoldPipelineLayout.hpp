@@ -6,11 +6,11 @@
 #include "Engine/Renderer/Forward/Renderer.hpp"
 
 namespace Trident {
-	ref<PipelineLayout> ForwardRenderer::createDebugHullWireframePipelineLayout() const {
+	ref<PipelineLayout> ForwardRenderer::createContactManifoldPipelineLayout() const {
 		return createPipelineLayout({
 			.descriptorSetLayouts = {sceneDescriptorSetLayout},
 			#if defined(DEBUG_OBJECT_NAME)
-				.name = "Debug hull wireframe",
+				.name = "Contact manifold",
 			#endif
 		});
 	}
