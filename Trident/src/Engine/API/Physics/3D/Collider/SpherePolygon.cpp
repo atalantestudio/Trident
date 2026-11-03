@@ -11,12 +11,12 @@ namespace Trident {
 		DEBUG_ASSERT(pair.hullA->type == Hull3DType::SPHERE);
 		DEBUG_ASSERT(pair.hullB->type == Hull3DType::POLYGON);
 
-		const float32 r = pair.hullA->radius;
+		const float32 rA = pair.hullA->radius;
 		const GJK3DOutput gjkOutput = GJKPointPolygon3D(*pair.rigidBodyA, *pair.rigidBodyB, *pair.hullA, *pair.hullB);
 
-		ENGINE_DEBUG(gjkOutput.distance - r);
+		ENGINE_DEBUG(gjkOutput.distance - rA);
 
-		if (gjkOutput.distance > r) {
+		if (gjkOutput.distance > rA) {
 			return false;
 		}
 
@@ -26,7 +26,7 @@ namespace Trident {
 
 			Contact3D& contact = contactManifold->contacts[0];
 			contact.position = gjkOutput.closestB;
-			contact.separation = gjkOutput.distance - r;
+			contact.separation = gjkOutput.distance - rA;
 
 			return true;
 		}

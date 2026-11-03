@@ -387,11 +387,13 @@ namespace Trident {
 		DEBUG_ASSERT(hullA.type == Hull3DType::SPHERE);
 		DEBUG_ASSERT(hullB.type == Hull3DType::POLYGON);
 
+		const quat<float32> RB = inverse(B.orientation);
+
 		vec3<float32> d = B.position - A.position;
 
 		Simplex3Vertex vertex;
 		vertex.iA = 0;
-		vertex.iB = 0;
+		vertex.iB = hullB.supportIndex(d * RB);
 		vertex.vA = A.position;
 		vertex.vB = hullB.vertices[vertex.iB] * B.world;
 		vertex.v = vertex.vB - vertex.vA;
@@ -482,14 +484,14 @@ namespace Trident {
 
 			Simplex3Vertex vertex;
 			vertex.iA = 0;
-			vertex.iB = hullB.supportIndex(d);
+			vertex.iB = hullB.supportIndex(d * RB);
 
-			bool duplicateVertex = false;
+			bool duplicateIndex = false;
 			uint8 j = 0;
 
 			while (j < countCopy) {
 				if (vertex.iB == saveB[j]) {
-					duplicateVertex = true;
+					duplicateIndex = true;
 
 					break;
 				}
@@ -497,7 +499,7 @@ namespace Trident {
 				j += 1;
 			}
 
-			if (duplicateVertex) {
+			if (duplicateIndex) {
 				break;
 			}
 
@@ -519,35 +521,26 @@ namespace Trident {
 
 		GJK3DOutput output;
 		output.simplex = s;
+		output.closestA = A.position;
 
 		switch (s.count) {
 			case 1: {
-				output.closestA = A.position;
 				output.closestB = s[0].vB;
 
 				break;
 			}
 			case 2: {
-				const float32 divisor = 1.0f / s.divisor;
-
-				output.closestA = A.position;
-				output.closestB = (s[0].vB * s[0].u + s[1].vB * s[1].u) * divisor;
+				output.closestB = (s[0].vB * s[0].u + s[1].vB * s[1].u) / s.divisor;
 
 				break;
 			}
 			case 3: {
-				const float32 divisor = 1.0f / s.divisor;
-
-				output.closestA = A.position;
-				output.closestB = (s[0].vB * s[0].u + s[1].vB * s[1].u + s[2].vB * s[2].u) * divisor;
+				output.closestB = (s[0].vB * s[0].u + s[1].vB * s[1].u + s[2].vB * s[2].u) / s.divisor;
 
 				break;
 			}
 			case 4: {
-				const float32 divisor = 1.0f / s.divisor;
-
-				output.closestA = A.position;
-				output.closestB = (s[0].vB * s[0].u + s[1].vB * s[1].u + s[2].vB * s[2].u + s[3].vB * s[3].u) * divisor;
+				output.closestB = (s[0].vB * s[0].u + s[1].vB * s[1].u + s[2].vB * s[2].u + s[3].vB * s[3].u) / s.divisor;
 
 				break;
 			}
@@ -558,7 +551,7 @@ namespace Trident {
 			}
 		}
 
-		output.distance = distance(output.closestA, output.closestB);
+		output.distance = length(output.closestB - output.closestA);
 
 		return output;
 	}
