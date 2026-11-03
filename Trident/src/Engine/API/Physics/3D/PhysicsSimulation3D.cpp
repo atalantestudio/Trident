@@ -471,7 +471,7 @@ namespace Trident {
 			edge->faceIndex = 0;
 
 			edge += 1;
-			edge->originVertexIndex = indexC;
+			edge->originVertexIndex = indexB;
 			edge->faceIndex = 1;
 
 			edge += 1;
@@ -479,7 +479,7 @@ namespace Trident {
 			edge->faceIndex = 0;
 
 			edge += 1;
-			edge->originVertexIndex = indexB;
+			edge->originVertexIndex = indexC;
 			edge->faceIndex = 1;
 
 			edge += 1;

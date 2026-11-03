@@ -8,7 +8,15 @@
 namespace Trident {
 	static Plane3D getSidePlane(const RigidBody3DComponent& body, const Hull3D& hull, Plane3D plane, index edgeOffset) {
 		const uint16 edgeIndexA = hull.faceEdgeIndices[plane.edgeIndexRange.offset + edgeOffset];
-		const uint16 edgeIndexB = hull.faceEdgeIndices[plane.edgeIndexRange.offset + (edgeOffset + 1) % plane.edgeIndexRange.count];
+
+		uint16 edgeIndexB = edgeIndexA + 1;
+
+		if (edgeIndexA & 1) {
+			edgeIndexB -= 2;
+		}
+
+		edgeIndexB %= hull.faceEdgeIndices.count();
+
 		const Edge3D edgeA = hull.edges[edgeIndexA];
 		const Edge3D edgeB = hull.edges[edgeIndexB];
 		const vec3<float32> a = hull.vertices[edgeA.originVertexIndex] * body.world;
@@ -20,21 +28,14 @@ namespace Trident {
 		sidePlane.edgeIndexRange.offset = 0;
 		sidePlane.edgeIndexRange.count = 0;
 
-		return *pointer_cast<const Plane3D*>(&sidePlane);
+		return sidePlane;
 	}
 
-	pool<ClipVertex3D, 8> SutherlandHodgman3D(const RigidBody3DComponent& referenceBody, const Hull3D& referenceHull, uint16 referenceFaceIndex, pool<ClipVertex3D, MAX_FACE_VERTEX_COUNT> inputVertices) {
-		const Plane3D& hullReferenceFace = referenceHull.faces[referenceFaceIndex];
-
-		Plane3D referenceFace;
-		referenceFace.normal = normalized(hullReferenceFace.normal * inverse(referenceBody.orientation));
-		referenceFace.distance = dot(hullReferenceFace.normal * hullReferenceFace.distance * referenceBody.world, referenceFace.normal);
-		referenceFace.edgeIndexRange = hullReferenceFace.edgeIndexRange;
-
+	pool<ClipVertex3D, 8> SutherlandHodgman3D(const RigidBody3DComponent& referenceBody, const Hull3D& referenceHull, const Plane3D& referencePlane, uint16 referenceFaceIndex, pool<ClipVertex3D, MAX_FACE_VERTEX_COUNT> inputVertices) {
 		index planeIndex = 0;
 
-		while (planeIndex < referenceFace.edgeIndexRange.count) {
-			const Plane3D plane = getSidePlane(referenceBody, referenceHull, referenceFace, planeIndex);
+		while (planeIndex < referencePlane.edgeIndexRange.count) {
+			const Plane3D plane = getSidePlane(referenceBody, referenceHull, referencePlane, planeIndex);
 
 			pool<ClipVertex3D, MAX_FACE_VERTEX_COUNT> outputVertices;
 			index vertexOffset = 0;

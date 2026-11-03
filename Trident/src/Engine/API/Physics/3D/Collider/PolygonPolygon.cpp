@@ -106,7 +106,7 @@ namespace Trident {
 			edgeIndex += 1;
 		}
 
-		pool<ClipVertex3D, 8> contactPool = SutherlandHodgman3D(referenceBody, referenceHull, faceQuery.referenceFaceIndex, incidentFaceVertices);
+		pool<ClipVertex3D, 8> contactPool = SutherlandHodgman3D(referenceBody, referenceHull, referencePlane, faceQuery.referenceFaceIndex, incidentFaceVertices);
 
 		// Discard contacts that are above the reference plane, and move the rest onto the plane.
 		// This helps with coherence when reducing the number of contacts.
