@@ -14,8 +14,6 @@ namespace Trident {
 		const float32 rA = pair.hullA->radius;
 		const GJK3DOutput gjkOutput = GJKPointPolygon3D(*pair.rigidBodyA, *pair.rigidBodyB, *pair.hullA, *pair.hullB);
 
-		ENGINE_DEBUG(gjkOutput.distance - rA);
-
 		if (gjkOutput.distance > rA) {
 			return false;
 		}

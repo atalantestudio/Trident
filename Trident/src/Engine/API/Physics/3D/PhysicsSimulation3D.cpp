@@ -15,6 +15,7 @@ namespace Trident {
 	PhysicsSimulation3D::PhysicsSimulation3D(const PhysicsSimulation3DDescriptor& descriptor) :
 		scene(descriptor.scene),
 		deltaTime(static_cast<float32>(descriptor.deltaTime)),
+		gravity(descriptor.gravity),
 		inverseDeltaTime(static_cast<float32>(1.0 / descriptor.deltaTime)),
 		playerEntity(descriptor.playerEntity)
 	{
@@ -149,7 +150,7 @@ namespace Trident {
 				continue;
 			} */
 
-			rigidBodyComponent.linearVelocity += (rigidBodyComponent.force * rigidBodyComponent.inverseMass + G) * deltaTime;
+			rigidBodyComponent.linearVelocity += (rigidBodyComponent.force * rigidBodyComponent.inverseMass + gravity) * deltaTime;
 
 			componentIndex += 1;
 		}
@@ -168,12 +169,12 @@ namespace Trident {
 			ContactPair3D& contactPair = pair.second;
 
 			// TODO(physics/3d/ground): Restore ground entity.
-			/* if (dot(contactPair.manifold.normal, UP) > 0.0f) {
-				rigidBodyB.groundEntity = contactPair.A;
+			if (dot(contactPair.manifold.normal, UP) > 0.0f) {
+				rigidBodyB.hasGroundEntity = true;
 			}
 			else if (dot(contactPair.manifold.normal, -UP) > 0.0f) {
-				rigidBodyA.groundEntity = contactPair.B;
-			} */
+				rigidBodyA.hasGroundEntity = true;
+			}
 
 			vec3<float32> antiParallelNormal = RIGHT;
 
@@ -529,7 +530,7 @@ namespace Trident {
 			rigidBody.friction = 0.0f;
 			rigidBody.restitution = 0.0f;
 			rigidBody.force = {0.0f, 0.0f, 0.0f};
-			rigidBody.groundEntity = max<Entity>();
+			rigidBody.hasGroundEntity = false;
 
 			edgeOffset += 6;
 			faceOffset += 2;

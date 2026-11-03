@@ -15,8 +15,8 @@ namespace Trident {
 		const float32 rightKey = static_cast<float32>(window->isKeyDown(KeyCode::D));
 		const float32 leftKey = static_cast<float32>(window->isKeyDown(KeyCode::Q));
 
-		const vec3<float32> forward = normalized(camera.getForward() * vec3<float32>{1.0f, 0.0f, 1.0f});
-		const vec3<float32> right = normalized(camera.getRight() * vec3<float32>{1.0f, 0.0f, 1.0f});
+		const vec3<float32> right = camera.getRight();
+		const vec3<float32> forward = cross(right, UP);
 
 		desiredVelocity = forward * (PLAYER_SPEED * (forwardKey - backKey)) + right * (PLAYER_SPEED * (rightKey - leftKey));
 	}

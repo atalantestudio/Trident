@@ -24,6 +24,8 @@ namespace Trident {
 
 		const vec3<float32> wishdir = normalized(wishvel) * MOVEMENT_SPEED * deltaTime;
 
-		camera.position += wishdir;
+		RigidBody3DComponent& player = scene->ecs.getComponent<RigidBody3DComponent>(playerEntity);
+		player.position += wishdir * 40.0f;
+		player.updateWorld({0.0f, 0.0f, 0.0f});
 	}
 }

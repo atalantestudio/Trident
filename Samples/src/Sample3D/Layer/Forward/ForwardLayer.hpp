@@ -3,7 +3,7 @@
 
 #pragma once
 
-// #define FORWARD_USE_NOCLIP_CAMERA
+#define FORWARD_USE_NOCLIP_CAMERA
 #define FORWARD_ENABLE_PHYSICS
 // #define FORWARD_TEST_CORNELL_BOX
 
@@ -19,6 +19,8 @@
 #include "Engine/Layer/Layer.hpp"
 #include "Engine/Renderer/Forward/Renderer.hpp"
 
+#include "Sample3D/Layer/Forward/PlayerMovement.hpp"
+
 namespace Trident {
 	class Sample3DForwardLayer : public Layer {
 		private:
@@ -29,13 +31,14 @@ namespace Trident {
 			#endif
 
 			static constexpr float32 LOOK_SENSITIVITY = 0.075f;
-			static constexpr vec3<float32> PLAYER_CAMERA_OFFSET = {0.0f, 0.3f, 0.0f};
-			static constexpr vec3<float32> CAMERA_OFFSET = {0.0f, 64.0f, 0.0f};
+			static constexpr vec3<float32> PLAYER_EYE_LEVEL = {0.0f, 8.0f, 0.0f};
 
-			static constexpr vec3<float32> PLAYER_SCALE = {1.0f, 1.0f, 1.0f};
+			// static constexpr vec3<float32> PLAYER_SCALE = {0.25f, 0.6f, 0.25f};
+			static constexpr vec3<float32> PLAYER_SCALE = {33.0f, 77.0f, 33.0f};
 
 			// Values taken from HL1.
 			// See https://github.com/valvesoftware/halflife.
+			// static constexpr vec3<float32> GRAVITY = {0.0f, -9.80665f, 0.0f};
 			static constexpr vec3<float32> PLAYER_GRAVITY = {0.0f, -800.0f, 0.0f};
 			static constexpr float32 PLAYER_SPEED = 400.0f;
 			static constexpr float32 PLAYER_MAX_SPEED = 270.0f;
@@ -54,7 +57,7 @@ namespace Trident {
 			}
 
 			void initialize() override {
-				renderer.visualizationMode = VisualizationMode::DEFAULT | /* VisualizationMode::HULL_WIREFRAMES | */ VisualizationMode::CONTACT_MANIFOLDS;
+				renderer.visualizationMode = VisualizationMode::DEFAULT | VisualizationMode::HULL_WIREFRAMES | VisualizationMode::CONTACT_MANIFOLDS;
 				renderer.setLayer(this);
 				renderer.build();
 				renderer.postBuild();
@@ -62,16 +65,21 @@ namespace Trident {
 				Application* application = getApplication();
 
 				const view<char8> sceneAssetName = application->getPropertyFile()->getProperty<view<char8>>("AssetName");
-				const ref<Scene3DAsset> sceneAsset = application->getAssetLibrary()->getAsset<Scene3DAsset>(sceneAssetName);
+
+				ref<Scene3DAsset> sceneAsset = application->getAssetLibrary()->getAsset<Scene3DAsset>(sceneAssetName);
 
 				scene = allocateRef<Scene3D>(sceneAsset);
 
-				createPlayerHullData();
-				createPlayerEntity();
+				// createPlayerHullData(sceneAsset);
+				// createPlayerEntity();
+				playerEntity = scene->ecs.nextEntity - 1;
+
+				playerMovement.state = PlayerMovementState::AIR;
 
 				physicsSimulation = new PhysicsSimulation3D({
 					.scene = scene,
 					.deltaTime = application->getFixedDeltaTime(),
+					.gravity = PLAYER_GRAVITY,
 					.playerEntity = max<Entity>(),
 					/* #if !defined(FORWARD_USE_NOCLIP_CAMERA)
 						.playerEntity = playerEntity,
@@ -87,13 +95,14 @@ namespace Trident {
 				camera.nearPlane = 0.01f;
 				camera.farPlane = 2048.0f;
 
-				#if defined(FORWARD_USE_NOCLIP_CAMERA) and defined(FORWARD_TEST_CORNELL_BOX)
+				#if defined(FORWARD_USE_NOCLIP_CAMERA) && defined(FORWARD_TEST_CORNELL_BOX)
 					camera.fieldOfView = radians(40.0_deg);
 				#else
-					camera.position += CAMERA_OFFSET;
+					// camera.position += CAMERA_OFFSET;
 					camera.fieldOfView = radians(70.0_deg);
 				#endif
 
+				camera.distance = 128.0f;
 				camera.aspectRatio = application->getWindow()->getAspectRatio();
 				camera.setOrientation(lookAt(FORWARD, sceneAsset->spawnDirection, UP));
 				camera.updateProjectionReversedZ();
@@ -111,7 +120,7 @@ namespace Trident {
 				// TODO(physics/3d/sphere-polygon)
 				/* {
 					auto& c = scene->ecs.getComponent<RigidBody3DComponent>(0);
-					c.rotation.z -= 0.005f;
+					c.rotation.z += 0.005f;
 					c.updateOrientation();
 					c.updateWorld({0.0f, 0.0f, 0.0f});
 				} */
@@ -128,15 +137,16 @@ namespace Trident {
 				#endif
 
 				#if !defined(FORWARD_USE_NOCLIP_CAMERA)
-					// playerMove(deltaTime);
+					playerMove(deltaTime);
 				#else
-					// noclipMove(deltaTime);
+					noclipMove(deltaTime);
 				#endif
-
-				ENGINE_DEBUG(scene->ecs.getComponent<RigidBody3DComponent>(playerEntity).position);
 
 				#if defined(FORWARD_ENABLE_PHYSICS)
 					physicsSimulation->updateContactManifolds();
+
+					playerMovement.state = scene->ecs.getComponent<RigidBody3DComponent>(playerEntity).hasGroundEntity ? PlayerMovementState::GROUND : PlayerMovementState::AIR;
+
 					physicsSimulation->applyImpulses();
 
 					// TODO(debug): Apply a rotational constraint to the player entity.
@@ -145,13 +155,9 @@ namespace Trident {
 					physicsSimulation->integrate();
 				#endif
 
-				/* #if !defined(FORWARD_USE_NOCLIP_CAMERA)
-					const RigidBody3DComponent& playerRigidBody = scene->ecs.getComponent<RigidBody3DComponent>(playerEntity);
+				const RigidBody3DComponent& player = scene->ecs.getComponent<RigidBody3DComponent>(playerEntity);
 
-					PerspectiveCamera3D& camera = cameraController.getCamera();
-					camera.position = playerRigidBody.position + PLAYER_CAMERA_OFFSET;
-				#endif */
-
+				cameraController.getCamera().position = player.position + PLAYER_EYE_LEVEL;
 				cameraController.update(deltaTime);
 			}
 
@@ -189,9 +195,6 @@ namespace Trident {
 
 								contactIndex += 1;
 							}
-
-							renderer.contactRange[renderer.contactCount] = contactManifold.contacts[0].position;
-							renderer.contactCount += 1;
 						}
 					}
 				#endif
@@ -214,7 +217,7 @@ namespace Trident {
 			}
 
 		private:
-			void createPlayerHullData();
+			void createPlayerHullData(ref<Scene3DAsset> sceneAsset);
 			void createPlayerEntity();
 
 			bool onKeyDown(KeyDownEvent& event) {
@@ -251,13 +254,9 @@ namespace Trident {
 			}
 
 			bool onWindowResize(WindowResizeEvent& event) {
-				cameraController.getCamera().aspectRatio = getApplication()->getWindow()->getAspectRatio();
-
-				#if !defined(FORWARD_USE_NOCLIP_CAMERA)
-					cameraController.getCamera().updateProjection();
-				#else
-					cameraController.updateProjection();
-				#endif
+				PerspectiveCamera3D& camera = cameraController.getCamera();
+				camera.aspectRatio = getApplication()->getWindow()->getAspectRatio();
+				camera.updateProjectionReversedZ();
 
 				renderer.resize(event);
 
@@ -319,5 +318,6 @@ namespace Trident {
 			sequence<uint16> playerHullFaceEdgeIndices;
 			sequence<Plane3D> playerHullFaces;
 			Entity playerEntity;
+			PlayerMovement playerMovement;
 	};
 }

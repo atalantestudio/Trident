@@ -171,10 +171,8 @@ namespace Trident {
 				if (visualizationMode & VisualizationMode::CONTACT_MANIFOLDS) {
 					contactManifoldPipelineLayout = createContactManifoldPipelineLayout();
 					contactManifoldPipeline = createContactManifoldPipeline();
-
 					contactManifoldBuffer = createContactManifoldBuffer();
-
-					const BufferView<vec3<float32>> contactManifoldView = contactManifoldBuffer->createView<vec3<float32>>(0, contactManifoldBuffer->getSize());
+					contactManifoldView = contactManifoldBuffer->createView<vec3<float32>>(0, contactManifoldBuffer->getSize());
 
 					contactRange = contactManifoldView.map();
 				}
@@ -739,6 +737,7 @@ namespace Trident {
 			#endif
 
 			BufferView<PointLight> pointLightBufferView;
+			BufferView<vec3<float32>> contactManifoldView;
 
 			#if defined(FORWARD_ENABLE_VERTEX_COLOR_GI)
 				BufferView<DrawIndirectCommand> giIndirectBufferView;

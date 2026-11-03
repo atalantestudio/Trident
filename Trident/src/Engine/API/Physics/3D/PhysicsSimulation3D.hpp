@@ -14,6 +14,7 @@ namespace Trident {
 	struct PhysicsSimulation3DDescriptor {
 		Scene3D* scene;
 		float64 deltaTime;
+		vec3<float32> gravity;
 
 		// TODO(debug)
 		Entity playerEntity;
@@ -33,8 +34,6 @@ namespace Trident {
 		private:
 			static constexpr uint32 SEQUENTIAL_IMPULSE_ITERATION_COUNT = 10;
 			static constexpr float32 ALLOWED_PENETRATION = 0.01f;
-
-			inline static constexpr vec3<float32> G = {0.0f, -9.80665f, 0.0f};
 
 		public:
 			/// Constructs a physics simulation for the provided scene.
@@ -66,6 +65,7 @@ namespace Trident {
 			PhysicsSimulationStaticGeometry staticGeometry;
 			float32 deltaTime;
 			float32 inverseDeltaTime;
+			vec3<float32> gravity;
 			Entity playerEntity;
 			std::vector<RigidBodyPair3D> rigidBodyPairs;
 	};

@@ -7,42 +7,37 @@
 
 namespace Trident {
 	void Sample3DForwardLayer::playerMove(float32 deltaTime) {
+		constexpr vec3<float32> PLAYER_GRAVITY = {0.0f, 1.0f, 0.0f};
+
 		const Window* window = getApplication()->getWindow();
 
 		RigidBody3DComponent& playerRigidBody = scene->ecs.getComponent<RigidBody3DComponent>(playerEntity);
+		// playerRigidBody.linearVelocity += PLAYER_GRAVITY * deltaTime * 0.5f;
 
-		playerRigidBody.linearVelocity += PLAYER_GRAVITY * deltaTime * 0.5f;
-
-		if (window->isKeyDown(KeyCode::SPACE)) {
+		if (window->isKeyDown(KeyCode::SPACE) && playerRigidBody.hasGroundEntity) {
 			jump(deltaTime);
 		}
 
-		if (playerRigidBody.groundEntity != max<Entity>()) {
-			playerRigidBody.linearVelocity *= {1.0f, 0.0f, 1.0f};
+		if (playerRigidBody.hasGroundEntity) {
+			// playerRigidBody.linearVelocity *= {1.0f, 0.0f, 1.0f};
 
 			applyFriction(deltaTime);
 		}
 
-		if (playerRigidBody.groundEntity != max<Entity>()) {
+		if (playerRigidBody.hasGroundEntity) {
 			groundMove(deltaTime);
 		} else {
 			airMove(deltaTime);
 		}
 
-		playerRigidBody.linearVelocity += PLAYER_GRAVITY * deltaTime * 0.5f;
+		// playerRigidBody.linearVelocity += PLAYER_GRAVITY * deltaTime * 0.5f;
 	}
 
 	void Sample3DForwardLayer::jump(float32 deltaTime) {
 		RigidBody3DComponent& playerRigidBody = scene->ecs.getComponent<RigidBody3DComponent>(playerEntity);
-
-		if (playerRigidBody.groundEntity == max<Entity>()) {
-			return;
-		}
-
-		playerRigidBody.groundEntity = max<Entity>();
-
 		playerRigidBody.linearVelocity += {0.0f, PLAYER_JUMP_FORCE, 0.0f};
 		playerRigidBody.linearVelocity += PLAYER_GRAVITY * deltaTime * 0.5f;
+		playerRigidBody.hasGroundEntity = false;
 	}
 
 	void Sample3DForwardLayer::applyFriction(float32 deltaTime) {
@@ -129,7 +124,7 @@ namespace Trident {
 			return;
 		}
 
-		playerRigidBody.groundEntity = max<Entity>();
+		playerRigidBody.hasGroundEntity = false;
 	}
 
 	void Sample3DForwardLayer::airMove(float32 deltaTime) {

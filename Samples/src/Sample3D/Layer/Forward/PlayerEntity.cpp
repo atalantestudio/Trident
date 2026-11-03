@@ -30,22 +30,31 @@ namespace Trident {
 		geometryComponent.hull.edges = playerHullEdges;
 		geometryComponent.hull.faces = playerHullFaces;
 		geometryComponent.hull.faceEdgeIndices = playerHullFaceEdgeIndices;
-		geometryComponent.hull.lineIndexRange.offset = 0;
-		geometryComponent.hull.lineIndexRange.count = 0;
+		geometryComponent.hull.lineIndexRange.offset = static_cast<uint16>(scene->getAsset()->hullLineIndices.count()) - 24;
+		geometryComponent.hull.lineIndexRange.count = 24;
 		geometryComponent.hull.type = Hull3DType::POLYGON;
 
 		RigidBody3DComponent rigidBodyComponent;
-		rigidBodyComponent.position = {0.0f, 3.0f, 0.0f};
+		rigidBodyComponent.position = {0.0f, 64.0f, 0.0f};
 		rigidBodyComponent.rotation = {0.0f, 0.0f, 0.0f};
 		rigidBodyComponent.scale = 1.0f;
 		rigidBodyComponent.linearVelocity = {0.0f, 0.0f, 0.0f};
 		rigidBodyComponent.angularVelocity = {0.0f, 0.0f, 0.0f};
-		rigidBodyComponent.inverseMass = 1.0f / m;
-		rigidBodyComponent.inverseInertia = inverse(I);
+
+		// TODO(physics/3d/test)
+		// rigidBodyComponent.inverseMass = 1.0f / m;
+		rigidBodyComponent.inverseMass = 0.0f;
+		// rigidBodyComponent.inverseInertia = inverse(I);
+		rigidBodyComponent.inverseInertia = {
+			0.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 0.0f,
+		};
+
 		rigidBodyComponent.friction = 0.2f;
 		rigidBodyComponent.restitution = 0.0f;
 		rigidBodyComponent.force = {0.0f, 0.0f, 0.0f};
-		rigidBodyComponent.groundEntity = max<Entity>();
+		rigidBodyComponent.hasGroundEntity = false;
 		rigidBodyComponent.updateOrientation();
 		rigidBodyComponent.updateWorld(geometryComponent.hull.centroid);
 
