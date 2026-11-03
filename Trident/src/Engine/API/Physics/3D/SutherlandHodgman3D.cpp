@@ -15,7 +15,7 @@ namespace Trident {
 		const vec3<float32> b = hull.vertices[edgeB.originVertexIndex] * body.world;
 
 		Plane3D sidePlane;
-		sidePlane.normal = normalized(cross(normalized(b - a), plane.normal));
+		sidePlane.normal = normalized(cross(b - a, plane.normal));
 		sidePlane.distance = dot(sidePlane.normal, a);
 		sidePlane.edgeIndexRange.offset = 0;
 		sidePlane.edgeIndexRange.count = 0;

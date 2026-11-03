@@ -471,7 +471,7 @@ namespace Trident {
 			edge->faceIndex = 0;
 
 			edge += 1;
-			edge->originVertexIndex = indexB;
+			edge->originVertexIndex = indexC;
 			edge->faceIndex = 1;
 
 			edge += 1;
@@ -479,7 +479,7 @@ namespace Trident {
 			edge->faceIndex = 0;
 
 			edge += 1;
-			edge->originVertexIndex = indexC;
+			edge->originVertexIndex = indexB;
 			edge->faceIndex = 1;
 
 			edge += 1;
@@ -532,7 +532,7 @@ namespace Trident {
 			rigidBody.force = {0.0f, 0.0f, 0.0f};
 			rigidBody.hasGroundEntity = false;
 			rigidBody.updateOrientation();
-			rigidBody.updateWorld(hull.centroid);
+			rigidBody.updateWorld({0.0f, 0.0f, 0.0f});
 
 			edgeOffset += 6;
 			faceOffset += 2;

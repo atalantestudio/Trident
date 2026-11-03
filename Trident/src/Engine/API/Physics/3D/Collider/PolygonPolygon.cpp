@@ -8,46 +8,65 @@
 #include "Engine/API/Physics/3D/SutherlandHodgman3D.hpp"
 
 namespace Trident {
+	// See https://math.stackexchange.com/a/2217845.
 	static void createEdgeContact(const EdgeQuery& edgeQuery, const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, const Hull3D& hullA, const Hull3D& hullB, ContactManifold3D* contactManifold) {
 		const vec3<float32> centroidA = hullA.centroid * rigidBodyA.world;
 
-		const Edge3D edgeA = hullA.edges[edgeQuery.edgeIndexA + 0];
-		const Edge3D twinA = hullA.edges[edgeQuery.edgeIndexA + 1];
+		const Edge3D edgeA = hullA.edges[edgeQuery.edgeIndexA];
+		const Edge3D twinA = hullA.edges[(edgeQuery.edgeIndexA + 1) % hullA.edges.count()];
 
-		const vec3<float32> p1 = hullA.vertices[edgeA.originVertexIndex] * rigidBodyA.world;
-		const vec3<float32> q1 = hullA.vertices[twinA.originVertexIndex] * rigidBodyA.world;
-		const vec3<float32> e1 = normalized(q1 - p1);
+		const vec3<float32> a = hullA.vertices[edgeA.originVertexIndex] * rigidBodyA.world;
+		const vec3<float32> ab = hullA.vertices[twinA.originVertexIndex] * rigidBodyA.world - a;
 
-		const Edge3D edgeB = hullB.edges[edgeQuery.edgeIndexB + 0];
-		const Edge3D twinB = hullB.edges[edgeQuery.edgeIndexB + 1];
+		const Edge3D edgeB = hullB.edges[edgeQuery.edgeIndexB];
+		const Edge3D twinB = hullB.edges[(edgeQuery.edgeIndexB + 1) % hullB.edges.count()];
 
-		const vec3<float32> p2 = hullB.vertices[edgeB.originVertexIndex] * rigidBodyB.world;
-		const vec3<float32> q2 = hullB.vertices[twinB.originVertexIndex] * rigidBodyB.world;
-		const vec3<float32> e2 = normalized(q2 - p2);
+		const vec3<float32> c = hullB.vertices[edgeB.originVertexIndex] * rigidBodyB.world;
+		const vec3<float32> cd = hullB.vertices[twinB.originVertexIndex] * rigidBodyB.world - c;
 
-		vec3<float32> normal = normalized(cross(e1, e2));
+		const vec3<float32> ac = c - a;
+		const vec3<float32> normal = cross(ab, cd);
+		const float32 normalSquaredLength = lengthSquared(normal);
 
-		if (dot(normal, p1 - centroidA) < 0.0f) {
-			// Ensure the normal points towards B.
-			normal = -normal;
-		}
+		const float32 tA = dot(cross(cd, normal), ac) / normalSquaredLength;
+		const float32 tB = dot(cross(ab, normal), ac) / normalSquaredLength;
 
-		// See https://math.stackexchange.com/a/2217845.
-		const vec3<float32> ab = p2 - p1;
-
-		const float32 nn = dot(normal, normal);
-		const float32 tA = dot(cross(p2, normal), ab) / nn;
-		const float32 tB = dot(cross(p1, normal), ab) / nn;
-
-		const vec3<float32> closestA = p1 + e1 * tA;
-		const vec3<float32> closestB = p2 + e2 * tB;
+		const vec3<float32> closestA = a + ab * tA;
+		const vec3<float32> closestB = c + cd * tB;
 
 		contactManifold->normal = normal;
+
+		// Ensure the normal points towards B.
+		if (dot(contactManifold->normal, a - centroidA) < 0.0f) {
+			contactManifold->normal *= -1.0f;
+		}
+
 		contactManifold->contactCount = 1;
-		contactManifold->contacts[0].position = lerp(closestA, closestB, 0.5f);
-		contactManifold->contacts[0].separation = edgeQuery.separation;
+
+		Contact3D& contact = contactManifold->contacts[0];
+		contact.position = lerp(closestA, closestB, 0.5f);
+		contact.separation = edgeQuery.separation;
 
 		// TODO(physics/3d/edge-contact-id)
+	}
+
+	static Plane3D findIncidentFace(const Hull3D& incidentHull, vec3<float32> d) {
+		float32 minAngle = max<float32>();
+		index incidentFaceIndex = 0;
+		index faceIndex = 0;
+
+		while (faceIndex < incidentHull.faces.count()) {
+			const float32 angle = dot(incidentHull.faces[faceIndex].normal, d);
+
+			if (angle < minAngle) {
+				minAngle = angle;
+				incidentFaceIndex = faceIndex;
+			}
+
+			faceIndex += 1;
+		}
+
+		return incidentHull.faces[incidentFaceIndex];
 	}
 
 	static void createFaceContact(const FaceQuery& faceQuery, const RigidBody3DComponent& referenceBody, const RigidBody3DComponent& incidentBody, const Hull3D& referenceHull, const Hull3D& incidentHull, ContactManifold3D* contactManifold) {
@@ -62,28 +81,7 @@ namespace Trident {
 
 		// Rotate by the inverse of the incident body's orientation to get a normal that can be used as a support direction.
 		// TODO(physics/3d): Invert the orientation before multiplying?
-		const vec3<float32> referenceFaceDirection = referencePlane.normal * incidentBody.orientation;
-
-		index incidentFaceIndex = max<index>();
-
-		// Find the index of the incident face.
-		{
-			float32 minAngle = max<float32>();
-			index faceIndex = 0;
-
-			while (faceIndex < incidentHull.faces.count()) {
-				const float32 angle = dot(incidentHull.faces[faceIndex].normal, referenceFaceDirection);
-
-				if (angle < minAngle) {
-					minAngle = angle;
-					incidentFaceIndex = faceIndex;
-				}
-
-				faceIndex += 1;
-			}
-		}
-
-		const Plane3D& incidentFace = incidentHull.faces[incidentFaceIndex];
+		const Plane3D& incidentFace = findIncidentFace(incidentHull, referencePlane.normal * incidentBody.orientation);
 
 		pool<ClipVertex3D, MAX_FACE_VERTEX_COUNT> incidentFaceVertices{};
 		uint16 edgeIndex = 0;
@@ -91,7 +89,7 @@ namespace Trident {
 		while (edgeIndex < incidentFace.edgeIndexRange.count) {
 			const Edge3D edge = incidentHull.edges[incidentHull.faceEdgeIndices[incidentFace.edgeIndexRange.offset + edgeIndex]];
 
-			ClipVertex3D clipVertex{};
+			ClipVertex3D clipVertex;
 			clipVertex.position = incidentHull.vertices[edge.originVertexIndex] * incidentBody.world;
 			clipVertex.separation = 0.0f;
 			clipVertex.id.referenceEdgeAIndex = max<uint16>();
