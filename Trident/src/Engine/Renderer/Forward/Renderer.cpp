@@ -99,11 +99,11 @@ namespace Trident {
 			encodeSkyboxPass(commandEncoder);
 		}
 
-		if (visualizationMode & VisualizationMode::DEFAULT) {
-			const ref<DescriptorSet> descriptorSets[] = {sceneDescriptorSet, lightmapAtlasDescriptorSet};
+		const ref<DescriptorSet> descriptorSets[] = {sceneDescriptorSet, lightmapAtlasDescriptorSet};
 
-			uint32 materialShaderIndex = 0;
+		uint32 materialShaderIndex = 0;
 
+		if (visualizationMode & VisualizationMode::STATIC_GEOMETRY_MATERIALS) {
 			while (materialShaderIndex < sceneAsset->dynamicMaterialShaderOffset) {
 				const MaterialShader& materialShader = sceneAsset->materialShaders[materialShaderIndex];
 
@@ -151,7 +151,9 @@ namespace Trident {
 
 				materialShaderIndex += 1;
 			}
+		}
 
+		if (visualizationMode & VisualizationMode::DYNAMIC_GEOMETRY_MATERIALS) {
 			while (materialShaderIndex < sceneAsset->materialShaders.count()) {
 				const MaterialShader& materialShader = sceneAsset->materialShaders[materialShaderIndex];
 
@@ -211,13 +213,6 @@ namespace Trident {
 
 					while (materialGeometryIndex < material.geometryRange.count) {
 						const MaterialGeometry& materialGeometry = sceneAsset->materialGeometries[material.geometryRange.offset + materialGeometryIndex];
-
-						if (materialGeometry.geometryIndex >= scene->ecs.nextEntity) {
-							materialGeometryIndex += 1;
-
-							continue;
-						}
-
 						const ref<Geometry3DAsset> geometryAsset = sceneAsset->geometryAssets[materialGeometry.geometryIndex];
 
 						if (!(geometryAsset->flags & GeometryAssetFlags::HAS_HULL)) {
@@ -226,7 +221,7 @@ namespace Trident {
 							continue;
 						}
 
-						const Hull3D& hull = scene->ecs.getComponent<Geometry3DComponent>(materialGeometry.geometryIndex).hull;
+						const Hull3D& hull = scene->ecs.getComponent<Geometry3DComponent>(min(scene->ecs.nextEntity - 1, materialGeometry.geometryIndex)).hull;
 
 						// TODO(graphics/dx12/draw-indexed): DX12 doesn't pass BaseVertexOffset to the shader so indexing the vertex buffer doesn't return the same values as OpenGL/Vulkan.
 						commandEncoder->drawIndexed(hull.lineIndexRange.count, materialGeometry.instanceRange.count, hull.lineIndexRange.offset, 0, materialGeometry.instanceRange.offset);

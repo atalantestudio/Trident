@@ -531,6 +531,8 @@ namespace Trident {
 			rigidBody.restitution = 0.0f;
 			rigidBody.force = {0.0f, 0.0f, 0.0f};
 			rigidBody.hasGroundEntity = false;
+			rigidBody.updateOrientation();
+			rigidBody.updateWorld(hull.centroid);
 
 			edgeOffset += 6;
 			faceOffset += 2;

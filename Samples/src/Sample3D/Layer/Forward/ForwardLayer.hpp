@@ -57,7 +57,7 @@ namespace Trident {
 			}
 
 			void initialize() override {
-				renderer.visualizationMode = VisualizationMode::DEFAULT | VisualizationMode::HULL_WIREFRAMES | VisualizationMode::CONTACT_MANIFOLDS;
+				renderer.visualizationMode = VisualizationMode::STATIC_GEOMETRY_MATERIALS | VisualizationMode::HULL_WIREFRAMES | VisualizationMode::CONTACT_MANIFOLDS;
 				renderer.setLayer(this);
 				renderer.build();
 				renderer.postBuild();
@@ -73,6 +73,13 @@ namespace Trident {
 				// createPlayerHullData(sceneAsset);
 				// createPlayerEntity();
 				playerEntity = scene->ecs.nextEntity - 1;
+
+				// TODO(physics/3d/debug)
+				{
+					auto& player = scene->ecs.getComponent<RigidBody3DComponent>(playerEntity);
+					player.position = {64.0f, -1.0f, 64.0f};
+					player.updateWorld({0.0f, 0.0f, 0.0f});
+				}
 
 				playerMovement.state = PlayerMovementState::AIR;
 

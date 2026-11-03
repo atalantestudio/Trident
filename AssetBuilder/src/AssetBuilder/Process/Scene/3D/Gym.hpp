@@ -26,7 +26,7 @@ namespace Trident {
 
 				MapBuilder builder({
 					.skyColor = {1.0f, 1.0f, 1.0f},
-					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("overcast_soil_512p"),
+					.environmentMapImageAsset = assetLibrary->getAsset<ImageAsset>("evening_road_01_512p"),
 					.sunDirection = {1.0f, 1.0f, 1.0f},
 					.sunColor = {1.0f, 1.0f, 1.0f},
 					.sunIntensity = 1.0f,
@@ -38,13 +38,13 @@ namespace Trident {
 
 				const uint32 playerHullGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("playerhull"));
 
-				const MaterialReference lightmappedGrayMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_debug_gray"));
-				const MaterialReference debugMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("debug"));
+				const MaterialReference floorMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
+				const MaterialReference playerMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("pbr_default"));
 
 				builder.createFace({
 					.vertices = EXTRUDED_FLOOR_VERTICES,
 					.normal = {0.0f, 1.0f, 0.0f},
-					.material = lightmappedGrayMaterial,
+					.material = floorMaterial,
 					.textureFiltering = {
 						.translation = {0.0f, 0.0f},
 						.rotation = 0.0f,
@@ -58,7 +58,7 @@ namespace Trident {
 
 				builder.createRigidBody({
 					.geometryIndex = playerHullGeometry,
-					.material = debugMaterial,
+					.material = playerMaterial,
 					.position = { 0.0f, 64.0f,  0.0f},
 					.rotation = {0.0_rad, 0.0_rad, 0.0_rad},
 					.uniformScale = 1.0f,

@@ -15,6 +15,5 @@ void main() {
 	}
 
 	// #ff474c
-	// fragment = vec4(1.0, 0.278, 0.298, 1.0);
-	fragment = vec4(1.0, 1.0, 1.0, 1.0);
+	fragment = vec4(1.0, 0.278, 0.298, 1.0);
 }
