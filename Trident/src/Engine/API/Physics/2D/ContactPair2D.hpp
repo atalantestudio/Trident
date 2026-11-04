@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Physics/Contact/ContactManifold.hpp"
+#include "Engine/API/Physics/2D/Contact/ContactManifold.hpp"
 #include "Engine/ECS/Entity.hpp"
 
 namespace Trident {

@@ -1,15 +1,15 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-#pragma once
+#include "pch.hpp"
 
-#include "Engine/API/Physics/Collider/Collider2D.hpp"
-#include "Engine/API/Physics/Contact/ContactManifold.hpp"
-#include "Engine/API/Physics/GJK2D.hpp"
-#include "Engine/API/Physics/SAT2D.hpp"
+#include "Engine/API/Physics/2D/Collider/Collider2D.hpp"
+#include "Engine/API/Physics/2D/Contact/ContactManifold.hpp"
+#include "Engine/API/Physics/2D/GJK2D.hpp"
+#include "Engine/API/Physics/2D/SAT2D.hpp"
 
 namespace Trident {
-	static bool CircleConvexHullCollider(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB, ContactManifold2D* contactManifold) {
+	bool CircleConvexHullCollider(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB, ContactManifold2D* contactManifold) {
 		const Hull2D pointHull = Hull2D::point();
 
 		// The scaling factor is assumed to be the same in both axes.

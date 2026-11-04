@@ -59,10 +59,10 @@
 #include "Engine/API/Geometry/Hull3D.hpp"
 
 // 2D physics
-#include "Engine/API/Physics/GJK2D.hpp"
-#include "Engine/API/Physics/GJK2DConditional.hpp"
-#include "Engine/API/Physics/PhysicsSimulation2D.hpp"
-#include "Engine/API/Physics/SAT2D.hpp"
+#include "Engine/API/Physics/2D/GJK2D.hpp"
+#include "Engine/API/Physics/2D/GJK2DConditional.hpp"
+#include "Engine/API/Physics/2D/SAT2D.hpp"
+#include "Engine/API/Physics/2D/Simulation.hpp"
 
 // 3D physics
 #include "Engine/API/Physics/3D/PhysicsSimulation3D.hpp"

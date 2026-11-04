@@ -1,14 +1,120 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-#pragma once
+#include "pch.hpp"
 
-#include "Engine/API/Physics/Collider/clipEdge.hpp"
-#include "Engine/API/Physics/Collider/findIncidentEdge.hpp"
-#include "Engine/API/Physics/Collider/Collider2D.hpp"
+#include "Engine/API/Physics/2D/Collider/Collider2D.hpp"
+#include "Engine/API/Physics/2D/SAT2D.hpp"
 
 namespace Trident {
-	static bool ConvexHullConvexHullCollider(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB, ContactManifold2D* contactManifold) {
+	/// Finds and returns the incident edge on the provided rigid body.
+	static ClipFeature2D findIncidentEdge(
+		/// The rigid body owning the incident edge.
+		const RigidBody2DComponent& incidentBody,
+
+		/// The hull used by the rigid body.
+		const Hull2D& incidentHull,
+
+		/// The reference edge normal, rotated by (Reference - Incident).
+		vec2<float32> referenceEdgeNormal
+	) {
+		ClipFeature2D incidentEdge{};
+		incidentEdge.vertexCount = 2;
+
+		const uint16 edgeCount = static_cast<uint16>(incidentHull.edges.count());
+
+		float32 minAngle = max<float32>();
+		uint32 incidentEdgeIndex = 0;
+		uint16 edgeIndex = 0;
+
+		while (edgeIndex < edgeCount) {
+			const Edge2D edge = incidentHull.edges[edgeIndex];
+			const vec2<float32> a = incidentHull.vertices[edge.indexA];
+			const vec2<float32> b = incidentHull.vertices[edge.indexB];
+			const vec2<float32> d = perpendicularLeft(b - a);
+			const float32 angle = dot(d, referenceEdgeNormal);
+
+			if (angle < minAngle) {
+				minAngle = angle;
+				incidentEdgeIndex = edgeIndex;
+
+				// TODO(physics/2d/incident-edge-vertex-order): Why is the simulation unstable when a and b are inverted?
+				incidentEdge.edge[0].position = b;
+				incidentEdge.edge[1].position = a;
+			}
+
+			edgeIndex += 1;
+		}
+
+		ClipVertex2D& a = incidentEdge.edge[0];
+		a.position = a.position * incidentBody.world;
+		a.id.referenceEdgeAIndex = Contact2DID::NULL_EDGE_INDEX;
+		a.id.referenceEdgeBIndex = Contact2DID::NULL_EDGE_INDEX;
+		a.id.incidentEdgeAIndex = (incidentEdgeIndex + 1) % edgeCount;
+		a.id.incidentEdgeBIndex = incidentEdgeIndex;
+
+		ClipVertex2D& b = incidentEdge.edge[1];
+		b.position = b.position * incidentBody.world;
+		b.id.referenceEdgeAIndex = Contact2DID::NULL_EDGE_INDEX;
+		b.id.referenceEdgeBIndex = Contact2DID::NULL_EDGE_INDEX;
+		b.id.incidentEdgeAIndex = incidentEdgeIndex;
+		b.id.incidentEdgeBIndex = (static_cast<sint16>(incidentEdgeIndex) - 1) % edgeCount;
+
+		return incidentEdge;
+	}
+
+	/// Clips an edge against a 2D plane.
+	/// Returns a new edge containing the clipped vertices.
+	static ClipFeature2D clipEdge(const ClipFeature2D& edge, Plane2D plane, uint32 edgeIndex) {
+		const ClipVertex2D a = edge.edge[0];
+		const ClipVertex2D b = edge.edge[1];
+
+		const float32 distanceA = signedDistance(a.position, plane);
+		const float32 distanceB = signedDistance(b.position, plane);
+
+		ClipFeature2D clippedEdge{};
+
+		if (distanceA <= 0.0f) {
+			// Keep vertices that are below the line.
+			clippedEdge.edge[clippedEdge.vertexCount] = a;
+			clippedEdge.vertexCount += 1;
+		}
+
+		if (distanceB <= 0.0f) {
+			// Keep vertices that are below the line.
+			clippedEdge.edge[clippedEdge.vertexCount] = b;
+			clippedEdge.vertexCount += 1;
+		}
+
+		if (distanceA * distanceB < 0.0f) {
+			// If the vertices are on different sides of the plane, insert the intersection point.
+			DEBUG_ASSERT(clippedEdge.vertexCount < 2);
+
+			const float32 t = distanceA / (distanceA - distanceB);
+
+			ClipVertex2D& c = clippedEdge.edge[clippedEdge.vertexCount];
+			c.position = lerp(a.position, b.position, t);
+
+			if (distanceA > 0.0f) {
+				c.id = a.id;
+				c.id.referenceEdgeAIndex = edgeIndex;
+				c.id.referenceEdgeBIndex = Contact2DID::NULL_EDGE_INDEX;
+			}
+			else {
+				c.id = b.id;
+				c.id.incidentEdgeAIndex = edgeIndex;
+				c.id.incidentEdgeBIndex = Contact2DID::NULL_EDGE_INDEX;
+			}
+
+			clippedEdge.vertexCount += 1;
+		}
+
+		DEBUG_ASSERT(clippedEdge.vertexCount <= 2);
+
+		return clippedEdge;
+	}
+
+	bool ConvexHullConvexHullCollider(const RigidBody2DComponent& A, const RigidBody2DComponent& B, const Hull2D& hullA, const Hull2D& hullB, ContactManifold2D* contactManifold) {
 		const SAT2DOutput sat = SAT2D(A, B, hullA, hullB);
 
 		if (sat.separation > 0.0f) {

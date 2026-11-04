@@ -39,7 +39,7 @@ namespace Trident {
 
 		private:
 			Scene2D* scene;
-			PhysicsSimulation2D* physicsSimulation;
+			PhysicsSimulation2D simulation;
 			Physics2DRenderer renderer;
 
 			Input keyMap;

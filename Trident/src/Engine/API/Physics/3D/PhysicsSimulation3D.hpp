@@ -14,6 +14,8 @@ namespace Trident {
 	struct PhysicsSimulation3DDescriptor {
 		Scene3D* scene;
 		float64 deltaTime;
+
+		/// Left-handed.
 		vec3<float32> gravity;
 
 		// TODO(debug)

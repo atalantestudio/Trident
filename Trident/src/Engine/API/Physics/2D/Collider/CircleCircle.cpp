@@ -1,12 +1,12 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-#pragma once
+#include "pch.hpp"
 
-#include "Engine/API/Physics/Collider/Collider2D.hpp"
+#include "Engine/API/Physics/2D/Collider/Collider2D.hpp"
 
 namespace Trident {
-	static bool CircleCircleCollider(
+	bool CircleCircleCollider(
 		const RigidBody2DComponent& A,
 		const RigidBody2DComponent& B,
 		const Hull2D& hullA,

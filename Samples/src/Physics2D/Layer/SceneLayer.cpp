@@ -3,10 +3,9 @@
 
 #include "pch.hpp"
 
-#include "Engine/API/Physics/Constraint/RotationConstraint2D.hpp"
-#include "Engine/API/Physics/Joint2D.hpp"
+#include "Engine/API/Physics/2D/Constraint/RotationConstraint2D.hpp"
+#include "Engine/API/Physics/2D/Joint2D.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
-#include "Engine/ECS/Tag.hpp"
 
 #include "../../SampleApplication.hpp"
 #include "SceneLayer.hpp"
@@ -14,7 +13,6 @@
 namespace Trident {
 	Physics2DSceneLayer::~Physics2DSceneLayer() {
 		delete scene;
-		delete physicsSimulation;
 	}
 
 	void Physics2DSceneLayer::loadScene() {
@@ -28,10 +26,12 @@ namespace Trident {
 	void Physics2DSceneLayer::postConstruct() {
 		loadScene();
 
-		physicsSimulation = new PhysicsSimulation2D({
-			.scene = scene,
-			.deltaTime = getApplication()->getFixedDeltaTime(),
-		});
+		PhysicsSimulation2DDescriptor descriptor;
+		descriptor.scene = scene;
+		descriptor.deltaTime = getApplication()->getFixedDeltaTime();
+		descriptor.gravity = {0.0f, -9.80665f};
+
+		simulation = createSimulation(descriptor);
 
 		renderer.layerInput = input;
 		renderer.setLayer(this);
@@ -40,7 +40,14 @@ namespace Trident {
 	}
 
 	void Physics2DSceneLayer::preRender() {
-		physicsSimulation->tick();
+		clearPairs(simulation);
+		broadPhase(simulation);
+		narrowPhase(simulation);
+		applyForces(simulation);
+		updateContactManifolds(simulation);
+		// updateJoints(simulation);
+		applyImpulses(simulation);
+		integrate(simulation);
 
 		checkHover();
 
