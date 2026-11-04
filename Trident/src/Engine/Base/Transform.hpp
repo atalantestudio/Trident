@@ -11,20 +11,22 @@ namespace Trident {
 		quat<float32> orientation;
 	};
 
-	/// Returns the product of `A` and `B`.
-	inline Transform3D operator*(const Transform3D& A, Transform3D B) {
-		B.position = B.position * A.orientation + A.position;
+	/// Returns the product of `TA` and `TB`.
+	inline Transform3D operator*(const Transform3D& TA, Transform3D TB) {
+		TB.orientation = TA.orientation * TB.orientation;
+		TB.position = TB.position * TA.orientation + TA.position;
 
-		// NOTE: Both orders work.
-		B.orientation = A.orientation * B.orientation;
-
-		return B;
+		return TB;
 	}
 
 	/// Returns the product of `p` by `A`.
-	/* inline vec3<float32> operator*(vec3<float32> p, const Transform3D& A) {
-		return p * A.orientation + A.position;
-	} */
+	inline vec3<float32> operator*(vec3<float32> p, const Transform3D& T) {
+		return p * T.orientation + T.position;
+	}
+
+	inline vec3<float32>& operator*=(vec3<float32>& p, const Transform3D& T) {
+		return p = p * T;
+	}
 
 	inline Plane3D operator*(Plane3D plane, const Transform3D& A) {
 		plane.normal *= A.orientation;

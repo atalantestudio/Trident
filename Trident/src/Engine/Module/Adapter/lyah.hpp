@@ -72,12 +72,22 @@ namespace Trident {
 	}
 
 	template<typename T>
+	inline vec2<T>& operator*=(vec2<T>& a, const mat3x3<T>& b) {
+		return a = a * b;
+	}
+
+	template<typename T>
 	inline vec3<T> operator*(vec3<T> a, const mat4x4<T>& b) {
 		return {
 			a.x * b[0].x + a.y * b[1].x + a.z * b[2].x + b[3].x,
 			a.x * b[0].y + a.y * b[1].y + a.z * b[2].y + b[3].y,
 			a.x * b[0].z + a.y * b[1].z + a.z * b[2].z + b[3].z,
 		};
+	}
+
+	template<typename T>
+	inline vec3<T>& operator*=(vec3<T>& a, const mat4x4<T>& b) {
+		return a = a * b;
 	}
 
 	// TODO(lyah/signed-distance): Add to Lyah.

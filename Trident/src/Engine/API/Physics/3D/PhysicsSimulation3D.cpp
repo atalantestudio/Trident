@@ -437,57 +437,52 @@ namespace Trident {
 		const view<Vertex3D> vertices(pointer_cast<const Vertex3D*>(&sceneAsset->geometryData[sceneAsset->vertexRange.offset]), sceneAsset->bakedVertexCount);
 		const view<uint32> indices(pointer_cast<const uint32*>(&sceneAsset->geometryData[sceneAsset->indexRange.offset]), sceneAsset->bakedTriangleCount * 3);
 
-		staticGeometry.vertices = sequence<vec3<float32>>(sceneAsset->bakedVertexCount);
+		staticGeometry.vertices = sequence<vec3<float32>>(sceneAsset->bakedTriangleCount * 3);
 		staticGeometry.edges = sequence<Edge3D>(sceneAsset->bakedTriangleCount * 6);
 		staticGeometry.faces = sequence<Plane3D>(sceneAsset->bakedTriangleCount * 2);
 		staticGeometry.hulls = sequence<Hull3D>(sceneAsset->bakedTriangleCount);
 		staticGeometry.rigidBodies = sequence<RigidBody3DComponent>(sceneAsset->bakedTriangleCount);
 
-		uint32 vertexIndex = 0;
-
-		while (vertexIndex < staticGeometry.vertices.count()) {
-			staticGeometry.vertices[vertexIndex] = vertices[vertexIndex].position;
-
-			vertexIndex += 1;
-		}
-
+		uint32 vertexOffset = 0;
 		uint32 edgeOffset = 0;
 		uint32 faceOffset = 0;
 		uint32 hullIndex = 0;
 
 		while (hullIndex < staticGeometry.hulls.count()) {
-			const uint32 indexA = indices[hullIndex * 3 + 0];
-			const uint32 indexB = indices[hullIndex * 3 + 1];
-			const uint32 indexC = indices[hullIndex * 3 + 2];
+			const vec3<float32> a = vertices[indices[hullIndex * 3 + 0]].position;
+			const vec3<float32> b = vertices[indices[hullIndex * 3 + 1]].position;
+			const vec3<float32> c = vertices[indices[hullIndex * 3 + 2]].position;
 
-			const vec3<float32> a = staticGeometry.vertices[indexA];
-			const vec3<float32> b = staticGeometry.vertices[indexB];
-			const vec3<float32> c = staticGeometry.vertices[indexC];
-
+			const vec3<float32> centroid = (a + b + c) / 3.0f;
+			const float32 radius = sqrt(max(distanceSquared(a, centroid), max(distanceSquared(b, centroid), distanceSquared(c, centroid))));
 			const vec3<float32> normal = normalized(cross(b - a, c - a));
 
+			staticGeometry.vertices[vertexOffset + 0] = a - centroid;
+			staticGeometry.vertices[vertexOffset + 1] = b - centroid;
+			staticGeometry.vertices[vertexOffset + 2] = c - centroid;
+
 			Edge3D* edge = &staticGeometry.edges[edgeOffset];
-			edge->originVertexIndex = indexA;
+			edge->originVertexIndex = 0;
 			edge->faceIndex = 0;
 
 			edge += 1;
-			edge->originVertexIndex = indexB;
+			edge->originVertexIndex = 1;
 			edge->faceIndex = 1;
 
 			edge += 1;
-			edge->originVertexIndex = indexB;
+			edge->originVertexIndex = 1;
 			edge->faceIndex = 0;
 
 			edge += 1;
-			edge->originVertexIndex = indexC;
+			edge->originVertexIndex = 2;
 			edge->faceIndex = 1;
 
 			edge += 1;
-			edge->originVertexIndex = indexC;
+			edge->originVertexIndex = 2;
 			edge->faceIndex = 0;
 
 			edge += 1;
-			edge->originVertexIndex = indexA;
+			edge->originVertexIndex = 0;
 			edge->faceIndex = 1;
 
 			Plane3D* face = &staticGeometry.faces[faceOffset];
@@ -503,9 +498,9 @@ namespace Trident {
 			face->edgeIndexRange.count = 3;
 
 			Hull3D& hull = staticGeometry.hulls[hullIndex];
-			hull.centroid = (a + b + c) / 3.0f;
-			hull.radius = sqrt(max(distanceSquared(a, hull.centroid), max(distanceSquared(b, hull.centroid), distanceSquared(c, hull.centroid))));
-			hull.vertices = staticGeometry.vertices;
+			hull.centroid = centroid;
+			hull.radius = radius;
+			hull.vertices = view<vec3<float32>>(&staticGeometry.vertices[vertexOffset], 3);
 			hull.edges = view<Edge3D>(&staticGeometry.edges[edgeOffset], 6);
 			hull.faces = view<Plane3D>(&staticGeometry.faces[faceOffset], 2);
 			hull.faceEdgeIndices = staticGeometry.TRIANGLE_FACE_EDGE_INDICES;
@@ -534,6 +529,7 @@ namespace Trident {
 			rigidBody.updateOrientation();
 			rigidBody.updateWorld({0.0f, 0.0f, 0.0f});
 
+			vertexOffset += 3;
 			edgeOffset += 6;
 			faceOffset += 2;
 			hullIndex += 1;

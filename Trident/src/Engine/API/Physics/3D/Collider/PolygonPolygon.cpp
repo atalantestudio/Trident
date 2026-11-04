@@ -10,19 +10,25 @@
 namespace Trident {
 	// See https://math.stackexchange.com/a/2217845.
 	static void createEdgeContact(const EdgeQuery& edgeQuery, const RigidBody3DComponent& rigidBodyA, const RigidBody3DComponent& rigidBodyB, const Hull3D& hullA, const Hull3D& hullB, ContactManifold3D* contactManifold) {
+		Transform3D transformA = rigidBodyA.getTransform();
+		transformA.position += hullA.centroid;
+
+		Transform3D transformB = rigidBodyB.getTransform();
+		transformB.position += hullB.centroid;
+
 		const vec3<float32> centroidA = hullA.centroid * rigidBodyA.world;
 
 		const Edge3D edgeA = hullA.edges[edgeQuery.edgeIndexA];
 		const Edge3D twinA = hullA.edges[(edgeQuery.edgeIndexA + 1) % hullA.edges.count()];
 
-		const vec3<float32> a = hullA.vertices[edgeA.originVertexIndex] * rigidBodyA.world;
-		const vec3<float32> ab = hullA.vertices[twinA.originVertexIndex] * rigidBodyA.world - a;
+		const vec3<float32> a = hullA.vertices[edgeA.originVertexIndex] * transformA;
+		const vec3<float32> ab = hullA.vertices[twinA.originVertexIndex] * transformA - a;
 
 		const Edge3D edgeB = hullB.edges[edgeQuery.edgeIndexB];
 		const Edge3D twinB = hullB.edges[(edgeQuery.edgeIndexB + 1) % hullB.edges.count()];
 
-		const vec3<float32> c = hullB.vertices[edgeB.originVertexIndex] * rigidBodyB.world;
-		const vec3<float32> cd = hullB.vertices[twinB.originVertexIndex] * rigidBodyB.world - c;
+		const vec3<float32> c = hullB.vertices[edgeB.originVertexIndex] * transformB;
+		const vec3<float32> cd = hullB.vertices[twinB.originVertexIndex] * transformB - c;
 
 		const vec3<float32> ac = c - a;
 		const vec3<float32> normal = cross(ab, cd);
@@ -70,18 +76,13 @@ namespace Trident {
 	}
 
 	static void createFaceContact(const FaceQuery& faceQuery, const RigidBody3DComponent& referenceBody, const RigidBody3DComponent& incidentBody, const Hull3D& referenceHull, const Hull3D& incidentHull, ContactManifold3D* contactManifold) {
-		contactManifold->normal = faceQuery.axis;
+		contactManifold->normal = faceQuery.referenceFace.normal;
 
-		const Plane3D& hullReferenceFace = referenceHull.faces[faceQuery.referenceFaceIndex];
-
-		Plane3D referencePlane;
-		referencePlane.normal = normalized(hullReferenceFace.normal * inverse(referenceBody.orientation));
-		referencePlane.distance = dot(hullReferenceFace.normal * hullReferenceFace.distance * referenceBody.world, referencePlane.normal);
-		referencePlane.edgeIndexRange = hullReferenceFace.edgeIndexRange;
+		Transform3D incidentTransform = incidentBody.getTransform();
+		incidentTransform.position += incidentHull.centroid;
 
 		// Rotate by the inverse of the incident body's orientation to get a normal that can be used as a support direction.
-		// TODO(physics/3d): Invert the orientation before multiplying?
-		const Plane3D& incidentFace = findIncidentFace(incidentHull, referencePlane.normal * incidentBody.orientation);
+		const Plane3D& incidentFace = findIncidentFace(incidentHull, faceQuery.referenceFace.normal);
 
 		pool<ClipVertex3D, MAX_FACE_VERTEX_COUNT> incidentFaceVertices{};
 		uint16 edgeIndex = 0;
@@ -90,7 +91,7 @@ namespace Trident {
 			const Edge3D edge = incidentHull.edges[incidentHull.faceEdgeIndices[incidentFace.edgeIndexRange.offset + edgeIndex]];
 
 			ClipVertex3D clipVertex;
-			clipVertex.position = incidentHull.vertices[edge.originVertexIndex] * incidentBody.world;
+			clipVertex.position = incidentHull.vertices[edge.originVertexIndex];
 			clipVertex.separation = 0.0f;
 			clipVertex.id.referenceEdgeAIndex = max<uint16>();
 			clipVertex.id.referenceEdgeBIndex = max<uint16>();
@@ -106,7 +107,7 @@ namespace Trident {
 			edgeIndex += 1;
 		}
 
-		pool<ClipVertex3D, 8> contactPool = SutherlandHodgman3D(referenceBody, referenceHull, referencePlane, faceQuery.referenceFaceIndex, incidentFaceVertices);
+		pool<ClipVertex3D, 8> contactPool = SutherlandHodgman3D(faceQuery.transform, referenceHull, faceQuery.referenceFace, faceQuery.referenceFaceIndex, incidentFaceVertices);
 
 		// Discard contacts that are above the reference plane, and move the rest onto the plane.
 		// This helps with coherence when reducing the number of contacts.
@@ -116,7 +117,7 @@ namespace Trident {
 			while (contactIndex >= 0) {
 				ClipVertex3D& contact = contactPool[contactIndex];
 
-				const float32 separation = signedDistance(referencePlane, contact.position);
+				const float32 separation = signedDistance(faceQuery.referenceFace, contact.position);
 
 				if (separation > 0.0f) {
 					contactPool.remove(contactIndex);
@@ -142,11 +143,12 @@ namespace Trident {
 			index contactIndex = 0;
 
 			while (contactIndex < contactPool.count()) {
-				const ClipVertex3D& contact = contactPool[contactIndex];
+				const ClipVertex3D& vertex = contactPool[contactIndex];
 
-				contactManifold->contacts[contactIndex].position = contact.position;
-				contactManifold->contacts[contactIndex].separation = contact.separation;
-				contactManifold->contacts[contactIndex].id = contact.id;
+				Contact3D& contact = contactManifold->contacts[contactIndex];
+				contact.position = vertex.position * incidentTransform;
+				contact.separation = vertex.separation;
+				contact.id = vertex.id;
 
 				contactIndex += 1;
 			}
@@ -156,16 +158,17 @@ namespace Trident {
 
 		contactManifold->contactCount = 4;
 
+		index contactIndex = 0;
+
 		// Select the first contact as the support point towards a fixed direction to avoid jitter.
 		{
-			static constexpr vec3<float32> n = {1.0f, 1.0f, 1.0f};
+			static constexpr vec3<float32> d = {1.0f, 1.0f, 1.0f};
 
-			index contactIndex = 0;
 			index maxAngleContactIndex = max<index>();
 			float32 maxAngle = min<float32>();
 
 			while (contactIndex < contactPool.count()) {
-				const float32 angle = dot(contactPool[contactIndex].position, n);
+				const float32 angle = dot(contactPool[contactIndex].position, d);
 
 				if (angle > maxAngle) {
 					maxAngle = angle;
@@ -175,9 +178,12 @@ namespace Trident {
 				contactIndex += 1;
 			}
 
-			contactManifold->contacts[0].position = contactPool[maxAngleContactIndex].position;
-			contactManifold->contacts[0].separation = contactPool[maxAngleContactIndex].separation;
-			contactManifold->contacts[0].id = contactPool[maxAngleContactIndex].id;
+			const ClipVertex3D& vertex = contactPool[maxAngleContactIndex];
+
+			Contact3D& contact = contactManifold->contacts[0];
+			contact.position = vertex.position;
+			contact.separation = vertex.separation;
+			contact.id = vertex.id;
 
 			contactPool.remove(maxAngleContactIndex);
 		}
@@ -186,9 +192,10 @@ namespace Trident {
 		{
 			const vec3<float32> a = contactManifold->contacts[0].position;
 
-			index contactIndex = 0;
 			index maxDistanceContactIndex = max<index>();
 			float32 maxDistance = min<float32>();
+
+			contactIndex = 0;
 
 			while (contactIndex < contactPool.count()) {
 				const float32 distance = distanceSquared(a, contactPool[contactIndex].position);
@@ -201,9 +208,12 @@ namespace Trident {
 				contactIndex += 1;
 			}
 
-			contactManifold->contacts[1].position = contactPool[maxDistanceContactIndex].position;
-			contactManifold->contacts[1].separation = contactPool[maxDistanceContactIndex].separation;
-			contactManifold->contacts[1].id = contactPool[maxDistanceContactIndex].id;
+			const ClipVertex3D& vertex = contactPool[maxDistanceContactIndex];
+
+			Contact3D& contact = contactManifold->contacts[1];
+			contact.position = vertex.position;
+			contact.separation = vertex.separation;
+			contact.id = vertex.id;
 
 			contactPool.remove(maxDistanceContactIndex);
 		}
@@ -213,9 +223,10 @@ namespace Trident {
 			const vec3<float32> a = contactManifold->contacts[0].position;
 			const vec3<float32> b = contactManifold->contacts[1].position;
 
-			index contactIndex = 0;
 			index maxAreaContactIndex = max<index>();
 			float32 maxArea = min<float32>();
+
+			contactIndex = 0;
 
 			while (contactIndex < contactPool.count()) {
 				const vec3<float32> c = contactPool[contactIndex].position;
@@ -229,9 +240,12 @@ namespace Trident {
 				contactIndex += 1;
 			}
 
-			contactManifold->contacts[2].position = contactPool[maxAreaContactIndex].position;
-			contactManifold->contacts[2].separation = contactPool[maxAreaContactIndex].separation;
-			contactManifold->contacts[2].id = contactPool[maxAreaContactIndex].id;
+			const ClipVertex3D& vertex = contactPool[maxAreaContactIndex];
+
+			Contact3D& contact = contactManifold->contacts[2];
+			contact.position = vertex.position;
+			contact.separation = vertex.separation;
+			contact.id = vertex.id;
 
 			contactPool.remove(maxAreaContactIndex);
 		}
@@ -242,9 +256,10 @@ namespace Trident {
 			const vec3<float32> b = contactManifold->contacts[1].position;
 			const vec3<float32> c = contactManifold->contacts[2].position;
 
-			index contactIndex = 0;
 			index minAreaContactIndex = max<index>();
 			float32 minArea = max<float32>();
+
+			contactIndex = 0;
 
 			while (contactIndex < contactPool.count()) {
 				const vec3<float32> d = contactPool[contactIndex].position;
@@ -273,22 +288,30 @@ namespace Trident {
 				contactIndex += 1;
 			}
 
-			contactManifold->contacts[3].position = contactPool[minAreaContactIndex].position;
-			contactManifold->contacts[3].separation = contactPool[minAreaContactIndex].separation;
-			contactManifold->contacts[3].id = contactPool[minAreaContactIndex].id;
+			const ClipVertex3D& vertex = contactPool[minAreaContactIndex];
+
+			Contact3D& contact = contactManifold->contacts[3];
+			contact.position = vertex.position;
+			contact.separation = vertex.separation;
+			contact.id = vertex.id;
 
 			contactPool.remove(minAreaContactIndex);
 		}
 
-		// TODO(debug): Swap contacts for LINE_STRIP visualization.
-		std::swap(contactManifold->contacts[1], contactManifold->contacts[2]);
+		contactIndex = 0;
+
+		while (contactIndex < contactManifold->contactCount) {
+			contactManifold->contacts[contactIndex].position *= incidentTransform;
+
+			contactIndex += 1;
+		}
 	}
 
 	bool PolygonPolygon(const RigidBodyPair3D& pair, ContactManifold3D* contactManifold) {
 		DEBUG_ASSERT(pair.hullA->type == Hull3DType::POLYGON);
 		DEBUG_ASSERT(pair.hullB->type == Hull3DType::POLYGON);
 
-		SATOutput3D sat = SAT3D(*pair.rigidBodyA, *pair.rigidBodyB, *pair.hullA, *pair.hullB);
+		const SATOutput3D sat = SAT3D(*pair.rigidBodyA, *pair.rigidBodyB, *pair.hullA, *pair.hullB);
 
 		if (!sat.overlap) {
 			return false;
@@ -301,19 +324,14 @@ namespace Trident {
 		}
 
 		if (sat.faceQueryA.separation >= sat.faceQueryB.separation) {
-			// TODO(physics/3d/separating-axis-orientation): The axis should be rotated by the base orientation. Why is the inverse needed?
-			sat.faceQueryA.axis *= inverse(pair.rigidBodyA->orientation);
-
 			createFaceContact(sat.faceQueryA, *pair.rigidBodyA, *pair.rigidBodyB, *pair.hullA, *pair.hullB, contactManifold);
 
 			return true;
 		}
 
-		// TODO(physics/3d/separating-axis-orientation): The axis should be rotated by the base orientation. Why is the inverse needed?
-		sat.faceQueryB.axis *= inverse(pair.rigidBodyB->orientation);
-
 		createFaceContact(sat.faceQueryB, *pair.rigidBodyB, *pair.rigidBodyA, *pair.hullB, *pair.hullA, contactManifold);
 
+		// TODO(physics/3d/polygon-polygon): Keep normal inversion?
 		contactManifold->normal *= -1.0f;
 
 		index contactIndex = 0;

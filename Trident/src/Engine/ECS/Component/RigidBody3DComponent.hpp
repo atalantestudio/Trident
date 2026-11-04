@@ -4,7 +4,6 @@
 #pragma once
 
 #include "Engine/API/Axis.hpp"
-#include "Engine/ECS/Entity.hpp"
 
 namespace Trident {
 	struct RigidBody3DComponent {

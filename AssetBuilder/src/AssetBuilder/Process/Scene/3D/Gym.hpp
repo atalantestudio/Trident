@@ -14,11 +14,17 @@ namespace Trident {
 
 			MapBuilder createScene(AssetBuilderLibrary* assetLibrary) const final override {
 				static constexpr vec2<float32> LUXEL_SCALE = {4.0f, 4.0f};
-				static constexpr vec3<float32> EXTRUDED_FLOOR_VERTICES[] = {
+				static constexpr vec3<float32> FLOOR_VERTICES[] = {
 					{-128.0f,  0.0f,  128.0f},
 					{ 128.0f,  0.0f,  128.0f},
 					{ 128.0f,  0.0f, -128.0f},
 					// {-128.0f,  0.0f, -128.0f},
+				};
+				static constexpr vec3<float32> WALL_VERTICES[] = {
+					{-128.0f,  128.0f,  128.0f},
+					{ 128.0f,  128.0f,  128.0f},
+					{-128.0f,  -128.0f, 128.0f},
+					// { 128.0f,  -128.0f, 128.0f},
 				};
 
 				// Texture scale multipliers
@@ -36,13 +42,14 @@ namespace Trident {
 					},
 				});
 
+				const uint32 rectangularCuboidGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("3d_rectangular_cuboid"));
 				const uint32 playerHullGeometry = builder.loadGeometry(assetLibrary->getAsset<Geometry3DAsset>("playerhull"));
 
 				const MaterialReference floorMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("lm_default"));
 				const MaterialReference playerMaterial = builder.loadMaterial(assetLibrary->getAsset<MaterialAsset>("pbr_default"));
 
 				builder.createFace({
-					.vertices = EXTRUDED_FLOOR_VERTICES,
+					.vertices = FLOOR_VERTICES,
 					.normal = {0.0f, 1.0f, 0.0f},
 					.material = floorMaterial,
 					.textureFiltering = {
@@ -55,6 +62,34 @@ namespace Trident {
 						.albedo = {1.0f, 1.0f, 1.0f},
 					},
 				});
+				/* builder.createFace({
+					.vertices = WALL_VERTICES,
+					.normal = {0.0f, 0.0f, -1.0f},
+					.material = floorMaterial,
+					.textureFiltering = {
+						.translation = {0.0f, 0.0f},
+						.rotation = 0.0f,
+						.scale = {m1 * 0.25f, m1 * 0.25f},
+					},
+					.lightmap = {
+						.luxelScale = LUXEL_SCALE,
+						.albedo = {1.0f, 1.0f, 1.0f},
+					},
+				}); */
+
+				/* builder.createRigidBody({
+					.geometryIndex = playerHullGeometry,
+					.material = playerMaterial,
+					.position = {0.0f, -1.0f, 0.2f},
+					// .rotation = {0.0f, 0.0f, 0.15f},
+					.rotation = {0.0f, 0.0f, 0.0f},
+					.uniformScale = 1.0f,
+					.mass = max<float32>(),
+					.momentOfInertia = MomentOfInertia3D::SOLID_CUBOID,
+					.inertiaScale = {5.0f, 0.1f, 1.0f},
+					.friction = 0.0f,
+					.restitution = 0.0f,
+				}); */
 
 				builder.createRigidBody({
 					.geometryIndex = playerHullGeometry,

@@ -551,7 +551,7 @@ namespace Trident {
 			}
 		}
 
-		output.distance = length(output.closestB - output.closestA);
+		output.distance = distance(output.closestA, output.closestB);
 
 		return output;
 	}

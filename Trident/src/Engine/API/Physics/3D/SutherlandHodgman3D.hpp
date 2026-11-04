@@ -7,7 +7,7 @@
 #include "Engine/API/Geometry/Plane3D.hpp"
 #include "Engine/API/Physics/3D/Base.hpp"
 #include "Engine/API/Physics/3D/ClipVertex3D.hpp"
-#include "Engine/ECS/Component/RigidBody3DComponent.hpp"
+#include "Engine/Base/Transform.hpp"
 
 namespace Trident {
 	/// The Sutherland-Hodgman algorithm in 3D.
@@ -16,5 +16,5 @@ namespace Trident {
 	/// - https://en.wikipedia.org/wiki/Sutherland%E2%80%93Hodgman_algorithm
 	/// - https://alamot.github.io/sutherland_hodgman_algorithm
 	/// - https://www.flipcode.com/archives/Real-time_3D_Clipping_Sutherland-Hodgeman.shtml
-	pool<ClipVertex3D, 8> SutherlandHodgman3D(const RigidBody3DComponent& referenceBody, const Hull3D& referenceHull, const Plane3D& referencePlane, uint16 referenceFaceIndex, pool<ClipVertex3D, MAX_FACE_VERTEX_COUNT> incidentFaceVertices);
+	pool<ClipVertex3D, 8> SutherlandHodgman3D(const Transform3D& transform, const Hull3D& referenceHull, const Plane3D& referencePlane, uint16 referenceFaceIndex, pool<ClipVertex3D, MAX_FACE_VERTEX_COUNT> incidentFaceVertices);
 }

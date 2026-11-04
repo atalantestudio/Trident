@@ -8,12 +8,12 @@ namespace Trident {
 		vec3<float32> normal;
 		float32 distance;
 
-		// TODO: The count should be 8-bits, as a face cannot be referred to by more than 255 edges.
+		// TODO(base/plane): The count should be 8-bits, as a face cannot be referred to by more than 255 edges.
 		range<uint16, uint16> edgeIndexRange;
 	};
 
-	/// Calculates and returns the signed distance between a point and a plane in world space.
-	inline float32 signedDistance(Plane3D plane, vec3<float32> p) {
-		return dot(plane.normal, p) - plane.distance;
+	/// Calculates and returns the 3D signed distance between a plane `P` and a point `p`.
+	inline float32 signedDistance(const Plane3D& P, vec3<float32> p) {
+		return dot(P.normal, p) - P.distance;
 	}
 }

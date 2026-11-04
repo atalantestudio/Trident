@@ -77,7 +77,9 @@ namespace Trident {
 				// TODO(physics/3d/debug)
 				{
 					auto& player = scene->ecs.getComponent<RigidBody3DComponent>(playerEntity);
-					player.position = {64.0f, -1.0f, 64.0f};
+					// player.position = {-64.0f, 64.0f, 128.0f};
+					// player.position = {64.0f, 30.0f, 64.0f};
+					player.position = {-130.0f, 0.0f, 130.0f};
 					player.updateWorld({0.0f, 0.0f, 0.0f});
 				}
 
