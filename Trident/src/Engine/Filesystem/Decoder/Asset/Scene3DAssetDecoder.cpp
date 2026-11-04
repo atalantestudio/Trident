@@ -251,7 +251,14 @@ namespace Trident {
 			}
 
 			std::copy(geometryAsset->hullVertices.begin(), geometryAsset->hullVertices.end(), &asset.hullLineVertices[hullLineVertexCount]);
-			std::copy(geometryAsset->hullLineIndices.begin(), geometryAsset->hullLineIndices.end(), &asset.hullLineIndices[hullLineIndexCount]);
+
+			uint32 indexOffset = 0;
+
+			while (indexOffset < geometryAsset->hullLineIndices.count()) {
+				asset.hullLineIndices[hullLineIndexCount + indexOffset] = static_cast<uint16>(hullLineVertexCount) + geometryAsset->hullLineIndices[indexOffset];
+
+				indexOffset += 1;
+			}
 
 			hullLineVertexCount += geometryAsset->hullVertices.count();
 			hullLineIndexCount += geometryAsset->hullLineIndices.count();

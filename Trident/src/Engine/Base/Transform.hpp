@@ -30,15 +30,16 @@ namespace Trident {
 
 	inline Plane3D operator*(Plane3D plane, const Transform3D& A) {
 		plane.normal *= A.orientation;
-		plane.distance = dot(plane.normal, A.position) + plane.distance;
+		plane.distance += dot(plane.normal, A.position);
+		plane.edgeIndexRange = plane.edgeIndexRange;
 
 		return plane;
 	}
 
 	/// Returns the inverse of `A`.
 	inline Transform3D inverse(Transform3D A) {
-		A.position = -A.position;
 		A.orientation = conjugate(A.orientation);
+		A.position = -A.position * A.orientation;
 
 		return A;
 	}

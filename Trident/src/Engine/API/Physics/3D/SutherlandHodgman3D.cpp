@@ -8,25 +8,17 @@
 namespace Trident {
 	static Plane3D getSidePlane(const Transform3D& transform, const Hull3D& hull, Plane3D plane, index edgeOffset) {
 		const uint16 edgeIndexA = hull.faceEdgeIndices[plane.edgeIndexRange.offset + edgeOffset];
-
-		uint16 edgeIndexB = edgeIndexA + 1;
-
-		if (edgeIndexA & 1) {
-			edgeIndexB -= 2;
-		}
-
-		edgeIndexB %= hull.faceEdgeIndices.count();
+		const uint16 edgeIndexB = (edgeIndexA + 1 - (edgeIndexA & 1) * 2) % hull.faceEdgeIndices.count();
 
 		const Edge3D edgeA = hull.edges[edgeIndexA];
 		const Edge3D edgeB = hull.edges[edgeIndexB];
+
 		const vec3<float32> a = hull.vertices[edgeA.originVertexIndex] * transform;
 		const vec3<float32> b = hull.vertices[edgeB.originVertexIndex] * transform;
 
-		Plane3D sidePlane;
+		Plane3D sidePlane{};
 		sidePlane.normal = normalized(cross(b - a, plane.normal));
 		sidePlane.distance = dot(sidePlane.normal, a);
-		sidePlane.edgeIndexRange.offset = 0;
-		sidePlane.edgeIndexRange.count = 0;
 
 		return sidePlane;
 	}

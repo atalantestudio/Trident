@@ -15,9 +15,9 @@ namespace Trident {
 		/// Returns a 3x3 normal matrix calculated from the world matrix of this component.
 		inline mat3x3<float32> calculateNormal() const {
 			return transpose(inverse(mat3x3<float32>{
-				world[0][0], world[0][1], world[0][2],
-				world[1][0], world[1][1], world[1][2],
-				world[2][0], world[2][1], world[2][2],
+				world[0].x, world[0].y, world[0].z,
+				world[1].x, world[1].y, world[1].z,
+				world[2].x, world[2].y, world[2].z,
 			}));
 		}
 
