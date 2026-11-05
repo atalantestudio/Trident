@@ -4,44 +4,103 @@
 #include "pch.hpp"
 
 #include "Engine/API/Physics/2D/Simulation.hpp"
-#include "Engine/ECS/Tag.hpp"
 
 namespace Trident {
+	// TODO(physics/2d/broad-phase): Improve broad-phase.
 	void broadPhase(PhysicsSimulation2D& simulation) {
-		const TagPool<DynamicEntityTag>& dynamicPool = simulation.scene->ecs.getTagPool<DynamicEntityTag>();
-		const TagPool<StaticEntityTag>& staticPool = simulation.scene->ecs.getTagPool<StaticEntityTag>();
+		CollisionPair2D pair;
+		pair.shapeIdA = 0;
 
-		EntityPair entityPair;
-		uint32 indexA = 0;
-		uint32 indexB;
+		while (pair.shapeIdA < simulation.broadPhase.staticShapeIndices.count()) {
+			const Shape2D& shape = simulation.shapes[simulation.broadPhase.staticShapeIndices[pair.shapeIdA]];
+			const RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
 
-		// TODO(physics/2d/broad-phase): Only register potentially overlapping entities.
-		while (indexA < dynamicPool.tagCount) {
-			entityPair.A = dynamicPool.tagIndexToEntity[indexA];
+			if (rigidBody.flags & RigidBodyFlags2D::DISABLE_SIMULATION) {
+				pair.shapeIdA += 1;
 
-			indexB = indexA + 1;
-
-			// Register all dynamic-dynamic entity pairs.
-			while (indexB < dynamicPool.tagCount) {
-				entityPair.B = dynamicPool.tagIndexToEntity[indexB];
-
-				simulation.entityPairs.emplace_back(entityPair);
-
-				indexB += 1;
+				continue;
 			}
 
-			indexB = 0;
+			pair.shapeIdB = 0;
 
-			// Register all dynamic-static entity pairs.
-			while (indexB < staticPool.tagCount) {
-				entityPair.B = staticPool.tagIndexToEntity[indexB];
+			while (pair.shapeIdB < simulation.broadPhase.dynamicShapeIndices.count()) {
+				const Shape2D& shape = simulation.shapes[simulation.broadPhase.dynamicShapeIndices[pair.shapeIdB]];
+				const RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
 
-				simulation.entityPairs.emplace_back(entityPair);
+				if (rigidBody.flags & RigidBodyFlags2D::DISABLE_SIMULATION) {
+					pair.shapeIdB += 1;
 
-				indexB += 1;
+					continue;
+				}
+
+				simulation.collisionPairs.emplace_back(pair);
+
+				pair.shapeIdB += 1;
 			}
 
-			indexA += 1;
+			pair.shapeIdA += 1;
+		}
+
+		pair.shapeIdA = 0;
+
+		while (pair.shapeIdA < simulation.broadPhase.kinematicShapeIndices.count()) {
+			const Shape2D& shape = simulation.shapes[simulation.broadPhase.kinematicShapeIndices[pair.shapeIdA]];
+			const RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
+
+			if (rigidBody.flags & RigidBodyFlags2D::DISABLE_SIMULATION) {
+				pair.shapeIdA += 1;
+
+				continue;
+			}
+
+			while (pair.shapeIdB < simulation.broadPhase.dynamicShapeIndices.count()) {
+				const Shape2D& shape = simulation.shapes[simulation.broadPhase.dynamicShapeIndices[pair.shapeIdB]];
+				const RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
+
+				if (rigidBody.flags & RigidBodyFlags2D::DISABLE_SIMULATION) {
+					pair.shapeIdB += 1;
+
+					continue;
+				}
+
+				simulation.collisionPairs.emplace_back(pair);
+
+				pair.shapeIdB += 1;
+			}
+
+			pair.shapeIdA += 1;
+		}
+
+		pair.shapeIdA = 0;
+
+		while (pair.shapeIdA < simulation.broadPhase.dynamicShapeIndices.count()) {
+			const Shape2D& shape = simulation.shapes[simulation.broadPhase.dynamicShapeIndices[pair.shapeIdA]];
+			const RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
+
+			if (rigidBody.flags & RigidBodyFlags2D::DISABLE_SIMULATION) {
+				pair.shapeIdA += 1;
+
+				continue;
+			}
+
+			pair.shapeIdB = pair.shapeIdA + 1;
+
+			while (pair.shapeIdB < simulation.broadPhase.dynamicShapeIndices.count()) {
+				const Shape2D& shape = simulation.shapes[simulation.broadPhase.dynamicShapeIndices[pair.shapeIdB]];
+				const RigidBody2D& rigidBody = simulation.rigidBodies[shape.rigidBodyId];
+
+				if (rigidBody.flags & RigidBodyFlags2D::DISABLE_SIMULATION) {
+					pair.shapeIdB += 1;
+
+					continue;
+				}
+
+				simulation.collisionPairs.emplace_back(pair);
+
+				pair.shapeIdB += 1;
+			}
+
+			pair.shapeIdA += 1;
 		}
 	}
 }

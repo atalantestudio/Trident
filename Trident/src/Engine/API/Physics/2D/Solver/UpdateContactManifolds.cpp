@@ -11,16 +11,20 @@ namespace Trident {
 	void updateContactManifolds(PhysicsSimulation2D& simulation) {
 		// Calculate combined values in each pair (static/dynamic friction, restitution, etc.).
 		// For each contact, calculate mass normal, mass tangent and bias value.
-		for (std::pair<const EntityPair, ContactPair2D>& pair : simulation.contactPairs) {
+		for (std::pair<const CollisionPair2D, ContactPair2D>& pair : simulation.contactPairs) {
 			ContactPair2D& contactPair = pair.second;
-			RigidBody2DComponent& rigidBodyA = simulation.scene->ecs.getComponent<RigidBody2DComponent>(contactPair.A);
-			RigidBody2DComponent& rigidBodyB = simulation.scene->ecs.getComponent<RigidBody2DComponent>(contactPair.B);
 
-			const Hull2D& hullA = getHull(simulation, contactPair.A);
-			const Hull2D& hullB = getHull(simulation, contactPair.B);
+			const Shape2D& shapeA = simulation.shapes[pair.first.shapeIdA];
+			const Shape2D& shapeB = simulation.shapes[pair.first.shapeIdB];
+
+			RigidBody2D& rigidBodyA = simulation.rigidBodies[shapeA.rigidBodyId];
+			RigidBody2D& rigidBodyB = simulation.rigidBodies[shapeB.rigidBodyId];
+
+			const Hull2D& hullA = getHull(simulation, pair.first.shapeIdA);
+			const Hull2D& hullB = getHull(simulation, pair.first.shapeIdB);
 
 			contactPair.manifold.tangent = perpendicularRight(contactPair.manifold.normal);
-			contactPair.combinedFriction = sqrt(rigidBodyA.friction * rigidBodyB.friction);
+			contactPair.combinedFriction = sqrt(shapeA.material.friction * shapeB.material.friction);
 
 			uint8 contactIndex = 0;
 
@@ -59,8 +63,8 @@ namespace Trident {
 				#if defined(ENABLE_PHYSICS_2D_IMPULSE_ACCUMULATION)
 					const vec2<float32> j = contactPair.manifold.normal * contact.accumulatedNormalImpulse + contactPair.manifold.tangent * contact.accumulatedTangentImpulse;
 
-					rigidBodyA.applyImpulse(-j, contact.rA);
-					rigidBodyB.applyImpulse(j, contact.rB);
+					applyImpulse(rigidBodyA, -j, contact.rA);
+					applyImpulse(rigidBodyB, j, contact.rB);
 				#endif
 
 				contactIndex += 1;

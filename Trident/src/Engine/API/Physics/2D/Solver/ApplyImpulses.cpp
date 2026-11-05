@@ -4,11 +4,10 @@
 #include "pch.hpp"
 
 #include "Engine/API/Physics/2D/Simulation.hpp"
-#include "Engine/ECS/Component/RigidBody2DComponent.hpp"
 
 namespace Trident {
-	inline static vec2<float32> calculateRelativeVelocity(const RigidBody2DComponent& A, const RigidBody2DComponent& B, vec2<float32> rA, vec2<float32> rB) {
-		return B.linearVelocity + perpendicularRight(rB) * B.angularVelocity - A.linearVelocity - perpendicularRight(rA) * A.angularVelocity;
+	inline static vec2<float32> calculateRelativeVelocity(const RigidBody2D& A, const RigidBody2D& B, vec2<float32> rA, vec2<float32> rB) {
+		return B.state.linearVelocity + perpendicularRight(rB) * B.state.angularVelocity - A.state.linearVelocity - perpendicularRight(rA) * A.state.angularVelocity;
 	}
 
 	void applyImpulses(PhysicsSimulation2D& simulation) {
@@ -28,10 +27,14 @@ namespace Trident {
 		// uint32 jointComponentIndex;
 
 		while (iteration < SEQUENTIAL_IMPULSE_ITERATION_COUNT) {
-			for (std::pair<const EntityPair, ContactPair2D>& pair : simulation.contactPairs) {
+			for (std::pair<const CollisionPair2D, ContactPair2D>& pair : simulation.contactPairs) {
 				ContactPair2D& contactPair = pair.second;
-				RigidBody2DComponent& rigidBodyA = simulation.scene->ecs.getComponent<RigidBody2DComponent>(contactPair.A);
-				RigidBody2DComponent& rigidBodyB = simulation.scene->ecs.getComponent<RigidBody2DComponent>(contactPair.B);
+
+				const Shape2D& shapeA = simulation.shapes[pair.first.shapeIdA];
+				const Shape2D& shapeB = simulation.shapes[pair.first.shapeIdB];
+
+				RigidBody2D& rigidBodyA = simulation.rigidBodies[shapeA.rigidBodyId];
+				RigidBody2D& rigidBodyB = simulation.rigidBodies[shapeB.rigidBodyId];
 
 				uint8 contactIndex = 0;
 
@@ -60,8 +63,8 @@ namespace Trident {
 
 						const vec2<float32> j = contactPair.manifold.normal * normalImpulseLength;
 
-						rigidBodyA.applyImpulse(-j, contact.rA);
-						rigidBodyB.applyImpulse(j, contact.rB);
+						applyImpulse(rigidBodyA, -j, contact.rA);
+						applyImpulse(rigidBodyB, j, contact.rB);
 					}
 
 					relativeVelocity = calculateRelativeVelocity(rigidBodyA, rigidBodyB, contact.rA, contact.rB);
@@ -87,8 +90,8 @@ namespace Trident {
 
 						const vec2<float32> j = contactPair.manifold.tangent * tangentImpulseLength;
 
-						rigidBodyA.applyImpulse(-j, contact.rA);
-						rigidBodyB.applyImpulse(j, contact.rB);
+						applyImpulse(rigidBodyA, -j, contact.rA);
+						applyImpulse(rigidBodyB, j, contact.rB);
 					}
 
 					contactIndex += 1;
@@ -123,8 +126,8 @@ namespace Trident {
 
 				joint.accumulatedImpulse += j;
 
-				rigidBodyA.applyImpulse(-j, joint.rA);
-				rigidBodyB.applyImpulse(j, joint.rB);
+				applyImpulse(rigidBodyA, -j, joint.rA);
+				applyImpulse(rigidBodyB, j, joint.rB);
 
 				jointComponentIndex += 1;
 			} */

@@ -30,6 +30,10 @@ namespace Trident {
 		descriptor.scene = scene;
 		descriptor.deltaTime = getApplication()->getFixedDeltaTime();
 		descriptor.gravity = {0.0f, -9.80665f};
+		descriptor.maxStaticRigidBodyCount = 128;
+		descriptor.maxKinematicAndDynamicRigidBodyCount = 128;
+		descriptor.maxStaticShapeCount = 16;
+		descriptor.maxKinematicAndDynamicShapeCount = 16;
 
 		simulation = createSimulation(descriptor);
 

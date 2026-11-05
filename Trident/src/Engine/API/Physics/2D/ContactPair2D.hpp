@@ -4,12 +4,9 @@
 #pragma once
 
 #include "Engine/API/Physics/2D/Contact/ContactManifold.hpp"
-#include "Engine/ECS/Entity.hpp"
 
 namespace Trident {
 	struct ContactPair2D {
-		Entity A;
-		Entity B;
 		ContactManifold2D manifold;
 
 		// TODO: Differentiate static and dynamic friction.

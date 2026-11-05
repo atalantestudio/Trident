@@ -73,12 +73,12 @@ namespace Trident {
 
 		ContactPair2D contactPair;
 
-		for (const EntityPair entityPair : simulation.entityPairs) {
-			const RigidBody2DComponent& rigidBodyA = simulation.scene->ecs.getComponent<RigidBody2DComponent>(entityPair.A);
-			const RigidBody2DComponent& rigidBodyB = simulation.scene->ecs.getComponent<RigidBody2DComponent>(entityPair.B);
+		for (const CollisionPair2D collisionPair : simulation.collisionPairs) {
+			const Hull2D& hullA = getHull(simulation, collisionPair.shapeIdA);
+			const Hull2D& hullB = getHull(simulation, collisionPair.shapeIdB);
 
-			const Hull2D& hullA = getHull(simulation, entityPair.A);
-			const Hull2D& hullB = getHull(simulation, entityPair.B);
+			const RigidBody2DComponent& rigidBodyA = simulation.scene->ecs.getComponent<RigidBody2DComponent>(collisionPair.shapeIdA);
+			const RigidBody2DComponent& rigidBodyB = simulation.scene->ecs.getComponent<RigidBody2DComponent>(collisionPair.shapeIdB);
 
 			// The broad phase must ensure that A hull type < B hull type.
 			const Collider2D collider = COLLIDER_2D_TABLE[static_cast<uint32>(hullA.type)][static_cast<uint32>(hullB.type)];
@@ -87,18 +87,15 @@ namespace Trident {
 
 			if (!collider(rigidBodyA, rigidBodyB, hullA, hullB, &contactPair.manifold)) {
 				// Either a degenerate case, or the entities are not overlapping.
-				simulation.contactPairs.erase(entityPair);
+				simulation.contactPairs.erase(collisionPair);
 
 				continue;
 			}
 
-			const std::map<const EntityPair, ContactPair2D>::iterator contactPairIterator = simulation.contactPairs.find(entityPair);
+			const std::map<const CollisionPair2D, ContactPair2D>::iterator contactPairIterator = simulation.contactPairs.find(collisionPair);
 
 			if (contactPairIterator == simulation.contactPairs.end()) {
-				contactPair.A = entityPair.A;
-				contactPair.B = entityPair.B;
-
-				simulation.contactPairs.insert({entityPair, contactPair});
+				simulation.contactPairs.insert({collisionPair, contactPair});
 
 				continue;
 			}
