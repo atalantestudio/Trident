@@ -3,8 +3,8 @@
 
 #include "pch.hpp"
 
-#include "Engine/API/Physics/Constraint/Constraint2D.hpp"
-#include "Engine/API/Physics/Joint2D.hpp"
+#include "Engine/API/Physics/2D/Constraint/Constraint2D.hpp"
+#include "Engine/API/Physics/2D/Joint2D.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 #include "Engine/ECS/Component/Geometry2DComponent.hpp"
 #include "Engine/ECS/Component/RigidBody2DComponent.hpp"

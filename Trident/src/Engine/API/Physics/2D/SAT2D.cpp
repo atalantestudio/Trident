@@ -3,7 +3,7 @@
 
 #include "pch.hpp"
 
-#include "Engine/API/Physics/SAT2D.hpp"
+#include "Engine/API/Physics/2D/SAT2D.hpp"
 
 namespace Trident {
 	static void queryEdgeDirections(const RigidBody2DComponent& referenceBody, const RigidBody2DComponent& incidentBody, const Hull2D& referenceHull, const Hull2D& incidentHull, SAT2DOutput& output) {
